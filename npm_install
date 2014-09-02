@@ -1,0 +1,3 @@
+npm install js/external/node-static
+npm install js/external/node-mongodb-native
+
