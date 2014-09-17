@@ -1,6 +1,3 @@
-[submodule "js/external/node-mongodb-native"]
-	path = js/external/node-mongodb-native
-	url = https://github.com/mongodb/node-mongodb-native.git
-[submodule "js/external/node-static"]
-	path = js/external/node-static
-	url = https://github.com/cloudhead/node-static.git
+[submodule "public/x3dom"]
+	path = public/x3dom
+	url = https://github.com/x3dom/x3dom.git
