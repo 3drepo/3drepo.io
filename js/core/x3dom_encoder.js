@@ -25,6 +25,8 @@ var xml_dom = require('xmldom');
 var dom_imp = xml_dom.DOMImplementation;
 var xml_serial = xml_dom.XMLSerializer;
 
+var config = require('app-config').config;
+
 var logger = require('./logger.js');
 
 var sem = require('semaphore')(10);
@@ -586,7 +588,9 @@ exports.render = function(db_interface, db_name, format, sub_format, level, uuid
             }
 
             res.render('index', {
-                xml: new xml_serial().serializeToString(xml_doc)
+                xml: new xml_serial().serializeToString(xml_doc),
+                x3domjs: config.external.x3domjs,
+                x3domcss: config.external.x3domcss
             });
 
             break;

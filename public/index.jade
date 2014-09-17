@@ -1,9 +1,9 @@
 html
     head
         title 3DRepo basic test
-        link(rel='stylesheet' type='text/css' href='../x3dom.css')
+        link(rel='stylesheet' type='text/css' href='#{x3domcss}')
         script(type="text/javascript"
-                src='../x3dom.js')
+                src='#{x3domjs}')
     body(style='width:100%; height:100%; border: 0px; padding:0px; margin:0px;')
             !{xml}
             table(style='position:absolute; top=0; left=0;')
@@ -15,5 +15,3 @@ html
                         button(onclick!="document.getElementById('model').runtime.resetView();"
                                 style='z-index:1000000;')
                             Reset View
-
-                    td

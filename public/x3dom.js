@@ -1,1 +1,0 @@
-x3dom/dist/x3dom.js
