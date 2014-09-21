@@ -590,7 +590,8 @@ exports.render = function(db_interface, db_name, format, sub_format, level, uuid
             res.render('index', {
                 xml: new xml_serial().serializeToString(xml_doc),
                 x3domjs: config.external.x3domjs,
-                x3domcss: config.external.x3domcss
+                x3domcss: config.external.x3domcss,
+		repouicss : config.external.repouicss    
             });
 
             break;

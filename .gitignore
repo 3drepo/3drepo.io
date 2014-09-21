@@ -1,7 +1,9 @@
 node_modules
 auth.json
-config/
 fetch_latest
 public/x3dom.css
 public/x3dom.debug.js
 
+/public/css/*.css~
+/*.log
+config.js
