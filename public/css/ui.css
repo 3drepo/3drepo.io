@@ -1,2 +1,15 @@
 body {
+    height : 100%;
+    margin : 0;     
+    padding : 0;
+    width : 100%;    
+}
+
+div#x3dom_logdiv.x3dom-logcontainer {
+    background-color: rgba(50, 50, 50, 0.9);
+    border : 0;
+    bottom : 0;
+    padding : 0;    
+    position : absolute;
+    width : 100%;
 }
