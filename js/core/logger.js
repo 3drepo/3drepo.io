@@ -22,7 +22,7 @@ var config = require('app-config').config;
 
 var logger = new(winston.Logger)({
     transports: [
-        new(winston.transports.Console)(), new(winston.transports.File)
+        new(winston.transports.Console)(config.logfile.level), new(winston.transports.File)
         ({
             filename: config.logfile.filename
         })

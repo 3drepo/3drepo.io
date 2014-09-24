@@ -47,25 +47,25 @@ app.get('/', function(req, res, next) {
     res.end();
 });
 
-app.get('/xml3drepo/:db_name', function(req, res, next) {
+app.get('/3drepoio/:db_name', function(req, res, next) {
     console.log('Opening scene ' + req.param('db_name'));
-    x3dom_encoder.render(db_interface, req.param('db_name'), 'xml', 'src', null, null, null, res);
+    x3dom_encoder.render(db_interface, req.param('db_name'), 'xml', 'pbf', null, null, null, res);
 });
 
-app.get('/xml3drepo/src_bin/:db_name/:uuid/level:lvl.pbf', function(req, res, next) {
+app.get('/3drepoio/src_bin/:db_name/:uuid/level:lvl.pbf', function(req, res, next) {
     x3dom_encoder.render(db_interface, req.param('db_name'), 'pbf', null, req.param('lvl'), req.param('uuid'), null, res);
 });
 
-app.get('/xml3drepo/:db_name/textures/:uuid.:format', function(req, res, next) {
+app.get('/3drepoio/:db_name/textures/:uuid.:format', function(req, res, next) {
     x3dom_encoder.get_texture(db_interface, req.param('db_name'), req.param('uuid'), res);
 });
 
-app.get('/xml3drepo/:db_name/:type/:uuid.bin', function(req, res, next) {
+app.get('/3drepoio/:db_name/:type/:uuid.bin', function(req, res, next) {
     x3dom_encoder.get_mesh_bin(db_interface, req.param('db_name'), req.param('uuid'), req.param('type'), res);
 });
 
-app.get('/xml3drepo/src_bin/:db_name/:uuid.:format/:texture?', function(req, res, next) {
-    console.log('Requesting mesh ' + req.param('uuid') + ' ' + req.param('texture'));
+app.get('/3drepoio/src_bin/:db_name/:uuid.:format/:texture?', function(req, res, next) {
+    logger.log('debug', 'Requesting mesh ' + req.param('uuid') + ' ' + req.param('texture'));
     x3dom_encoder.render(db_interface, req.param('db_name'), req.param('format'), null, null, req.param('uuid'), req.param('texture'), res);
 });
 

@@ -41,6 +41,7 @@ MongoDB.prototype.db_callback = function(dbname, callback) {
     }
 
     logger.log('info', 'Opening server ' + self.host + ' : ' + self.port);
+
     self.serv = new mongo.Server(self.host, self.port, {
         auto_reconnect: true,
     });
@@ -49,7 +50,7 @@ MongoDB.prototype.db_callback = function(dbname, callback) {
     logger.log('info', 'Opening database ' + dbname);
     var db = new mongo.Db(dbname, self.serv, {safe:false});
     db.open(function(err, db_conn) {
-        if (err) throw err;
+        logger.log('debug', err);
 
         self.db_conns[dbname] = db_conn;
 
@@ -83,7 +84,7 @@ MongoDB.prototype.aggregate = function(dbname, coll_name, query) {
 }
 
 MongoDB.prototype.coll_callback = function(dbname, coll_name, callback) {
-    logger.log('info', 'Collection ' + coll_name);
+    logger.log('debug', 'Collection ' + coll_name);
 
     this.db_callback(dbname, function(err, db_conn) {
         if (err) throw err;

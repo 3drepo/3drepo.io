@@ -37,7 +37,7 @@ var pbf_levels = 10;
 function genPopCache(mesh) {
     if (!('pbf_cache' in GLOBAL)) {
         GLOBAL.pbf_cache = {};
-        console.log('Created cache');
+        logger.log('debug', 'Created cache');
     }
 
     if (!(mesh['id'] in GLOBAL.pbf_cache)) {
@@ -51,7 +51,7 @@ function genPopCache(mesh) {
 
         var vertex_values = new Array(mesh.vertices_count);
         var tri = new Array(mesh.faces_count);
-        var normal_values = new Array(mesh.vertices.count);
+        var normal_values = new Array(mesh.vertices_count);
 
         var vert_num = 0;
         var vert_idx = 0;
@@ -81,38 +81,42 @@ function genPopCache(mesh) {
 
         GLOBAL.pbf_cache[mesh['id']] = {};
 
-        var lvl = 1;
+        var lod = 0;
         var buf_offset = 0;
 
-        while (new_vertex_id < mesh.vertices_count) {
-            console.log('Mesh ' + mesh['id'] + ' - Generating Level ' + lvl);
+        var added_verts = 0;
+        var prev_added_verts = 0;
+        var max_bits = 16;
+        var max_quant = Math.pow(2, max_bits) - 1;
+
+        while ((new_vertex_id < mesh.vertices_count) && (lod < 16)) {
+            logger.log('debug', 'Mesh ' + mesh['id'] + ' - Generating LOD ' + lod);
             var idx_buf = new Buffer(2 * 3 * mesh.faces_count);
             var vert_buf = new Buffer(12 * mesh.vertices_count);
 
             var vert_buf_ptr = 0;
             var idx_buf_ptr = 0;
-
-            var dim = Math.pow(2, lvl) - 1;
-            var added_verts = 0;
+            var dim = Math.pow(2, (max_bits - lod));
 
             // For all non mapped vertices compute quantization
             for (vert_num = 0; vert_num < mesh.vertices_count; vert_num++) {
                 if (vertex_map[vert_num] == -1) {
-                    var vert_x = Math.floor((dim / (bbox.max[0] - bbox.min[0])) * (vertex_values[vert_num][0] - bbox.min[0]) + 0.5);
-                    var vert_y = Math.floor((dim / (bbox.max[1] - bbox.min[1])) * (vertex_values[vert_num][1] - bbox.min[1]) + 0.5);
-                    var vert_z = Math.floor((dim / (bbox.max[2] - bbox.min[2])) * (vertex_values[vert_num][2] - bbox.min[2]) + 0.5);
-                    /*
-                    console.log('--- VERTEX ---');
-                    console.log(vertex_values[vert_num]);
-                    console.log([vert_x, vert_y, vert_z]);
-                    console.log('--------------');
-*/
+                    var vert_x_normal = Math.floor(((vertex_values[vert_num][0] - bbox.min[0]) / bbox.size[0]) * max_quant + 0.5);
+                    var vert_y_normal = Math.floor(((vertex_values[vert_num][1] - bbox.min[1]) / bbox.size[1]) * max_quant + 0.5);
+                    var vert_z_normal = Math.floor(((vertex_values[vert_num][2] - bbox.min[2]) / bbox.size[2]) * max_quant + 0.5);
+
+                    var vert_x = Math.floor(vert_x_normal / dim) * dim;
+                    var vert_y = Math.floor(vert_y_normal / dim) * dim;
+                    var vert_z = Math.floor(vert_z_normal / dim) * dim;
+
                     var quant_idx = vert_x + vert_y * dim + vert_z * dim * dim;
 
                     vertex_quant_idx[vert_num] = quant_idx;
-                    vertex_quant[vert_num] = [vert_x, vert_y, vert_z];
+                    vertex_quant[vert_num] = [vert_x_normal, vert_y_normal, vert_z_normal];
                 }
             }
+
+            var num_indices = 0;
 
             for (tri_num = 0; tri_num < mesh.faces_count; tri_num++) {
                 if (!valid_tri[tri_num]) {
@@ -136,30 +140,28 @@ function genPopCache(mesh) {
 
                         for (vert_idx = 0; vert_idx < 3; vert_idx++) {
                             vert_num = tri[tri_num][vert_idx];
-                            // console.log(vert_num);
-                            // console.log(vertex_map[vert_num]);
+
                             if (vertex_map[vert_num] == -1) {
+
+                                // Store quantized coordinates 
                                 for (comp_idx = 0; comp_idx < 3; comp_idx++) {
-                                    var comp = Math.floor(vertex_quant[vert_num][comp_idx] * (65535 / dim));
-                                    // console.log('COMP ' + comp);
-                                    // console.log([vertex_quant[vert_num][comp_idx], (65535 / dim)]);
-                                    vert_buf.writeUInt16LE(comp, vert_buf_ptr);
+                                    vert_buf.writeUInt16LE(vertex_quant[vert_num][comp_idx], vert_buf_ptr);
                                     vert_buf_ptr += 2;
                                 }
-
+                                
                                 vert_buf.writeUInt16LE(0, vert_buf_ptr);
                                 vert_buf_ptr += 2;
 
+                                // Write normals in 8-bit
                                 for (comp_idx = 0; comp_idx < 3; comp_idx++) {
-                                    var comp = Math.floor((normal_values[vert_num][comp_idx] + 1) * 128);
+                                    var comp = Math.floor((normal_values[vert_num][comp_idx] + 1) * 127 + 0.5);
                                     vert_buf.writeUInt8(comp, vert_buf_ptr);
-                                    vert_buf_ptr++;
+                                    vert_buf_ptr ++;
                                 }
 
                                 vert_buf.writeUInt8(0, vert_buf_ptr);
                                 vert_buf_ptr++;
 
-                                // console.log('Mapping ' + vert_num + ' to ' + new_vertex_id);
                                 vertex_map[vert_num] = new_vertex_id;
                                 new_vertex_id += 1;
                                 added_verts += 1;
@@ -169,43 +171,31 @@ function genPopCache(mesh) {
                         for (vert_idx = 0; vert_idx < 3; vert_idx++) {
                             var vert_num = tri[tri_num][vert_idx];
 
-                            // console.log(vertex_map[vert_num]);
                             idx_buf.writeUInt16LE(vertex_map[vert_num], idx_buf_ptr);
                             idx_buf_ptr += 2;
                         }
+
+                        num_indices += 3;
                     }
                 }
             }
 
-            GLOBAL.pbf_cache[mesh['id']][lvl] = {};
-            GLOBAL.pbf_cache[mesh['id']][lvl].idx_buf = idx_buf.slice(0, idx_buf_ptr);
-            GLOBAL.pbf_cache[mesh['id']][lvl].vert_buf = vert_buf.slice(0, vert_buf_ptr);
-            GLOBAL.pbf_cache[mesh['id']][lvl].vert_buf_offset = buf_offset;
-            GLOBAL.pbf_cache[mesh['id']][lvl].num_vertices = added_verts;
-            buf_offset += GLOBAL.pbf_cache[mesh['id']][lvl].vert_buf.length;
-
-            lvl += 1;
+            GLOBAL.pbf_cache[mesh['id']][lod]                 = {};
+            GLOBAL.pbf_cache[mesh['id']][lod].num_idx         = num_indices;
+            GLOBAL.pbf_cache[mesh['id']][lod].idx_buf         = idx_buf.slice(0, idx_buf_ptr);
+            GLOBAL.pbf_cache[mesh['id']][lod].vert_buf        = vert_buf.slice(0, vert_buf_ptr);
+            GLOBAL.pbf_cache[mesh['id']][lod].vert_buf_offset = buf_offset;
+            GLOBAL.pbf_cache[mesh['id']][lod].num_vertices    = prev_added_verts;
+            prev_added_verts = added_verts;
+            buf_offset += GLOBAL.pbf_cache[mesh['id']][lod].vert_buf.length;
+            
+            lod += 1;
 
         }
 
-        GLOBAL.pbf_cache[mesh['id']].num_levels = lvl;
-        console.log('#LEVELS : ' + GLOBAL.pbf_cache[mesh['id']].num_levels);
+        GLOBAL.pbf_cache[mesh['id']].num_levels = lod;
+        logger.log('debug', '#LEVELS : ' + GLOBAL.pbf_cache[mesh['id']].num_levels);
     }
-}
-
-function pack(bytes) {
-    var str = "";
-    console.log("BYTES: " + bytes.length);
-
-    for (var i = 0; i < bytes.length; i++) {
-        str += String.fromCharCode(bytes[i]);
-    }
-    return str;
-}
-
-function toBytesInt32(num) {
-    arr = new Uint8Array([(num & 0x000000ff), (num & 0x0000ff00) >>> 8, (num & 0x00ff0000) >>> 16, (num & 0xff000000) >>> 24]);
-    return arr;
 }
 
 function getChild(parent, type, n) {
@@ -257,10 +247,9 @@ function X3D_Header() {
     xml_doc.firstChild.setAttribute('showStat', 'true');
     xml_doc.firstChild.setAttribute('showLog', 'false');
     xml_doc.firstChild.setAttribute('style', "width:100%; height:100%; border:0px;");
-    //xml_doc.firstChild.setAttribute('width', '1337px');
-    //xml_doc.firstChild.setAttribute('height', '400px');
+    
 
-      return xml_doc;
+    return xml_doc;
 }
 
 function X3D_CreateScene(xml_doc) {
@@ -316,22 +305,17 @@ function X3D_CreateScene(xml_doc) {
 function X3D_AddShape(xml_doc, db_name, mesh, mat, mode) {
     var mesh_id = mesh['id'];
 
-    logger.log('info', 'Loading mesh ' + mesh_id);
+    logger.log('debug', 'Loading mesh ' + mesh_id);
 
     var scene = xml_doc.getElementsByTagName('Scene')[0];
-
-    //var mat_trans = xml_doc.createElement('MatrixTransform');
-    //mat_trans.setAttribute('matrix', '1 0 0 0 0 0 1 0 0 -1 0 0 0 0 0 1');
-    //scene.appendChild(mat_t);
-    //var trans = xml_doc.createElement('Transform');
-    //trans.setAttribute('translation', '4 0 0');
     var shape = xml_doc.createElement('Shape');
+
     scene.appendChild(shape);
     shape.setAttribute('DEF', mesh['id']);
-    //shape.setAttribute('repo_id', mesh['id']);
+
     var bbox = extractBoundingBox(mesh);
 
-    logger.log('info', 'Loading material ' + mesh['mMaterialIndex']);
+    logger.log('debug', 'Loading material ' + mesh['mMaterialIndex']);
 
     var appearance = xml_doc.createElement('Appearance');
 
@@ -343,25 +327,35 @@ function X3D_AddShape(xml_doc, db_name, mesh, mat, mode) {
         }
         var ambient_intensity = 1;
 
-        for (var i = 0; i < 3; i++) {
-            if (mat['diffuse'][i] != 0) {
-                ambient_intensity = mat['ambient'][i] / mat['diffuse'][i];
-                break;
+        if(('ambient' in mat) && ('diffuse' in mat))
+        {
+            for (var i = 0; i < 3; i++) {
+                if (mat['diffuse'][i] != 0) {
+                    ambient_intensity = mat['ambient'][i] / mat['diffuse'][i];
+                    break;
+                }
             }
         }
 
-        //material.setAttribute('DEF', mesh['mMaterialIndex']);
-        material.setAttribute('diffuseColor', mat['diffuse'].join(' '));
-        //material.setAttribute('shininess', mat['shininess'] / 512);
-        material.setAttribute('specularColor', mat['specular'].join(' '));
+        material.setAttribute('DEF', mesh['mMaterialIndex']);
 
-        if (mat['opacity'] != 1)
+        if ('diffuseColor' in mat)
+            material.setAttribute('diffuseColor', mat['diffuse'].join(' '));
+
+        if ('shininess' in mat)
+            material.setAttribute('shininess', mat['shininess'] / 512);
+
+        if ('specularColor' in mat)
+            material.setAttribute('specularColor', mat['specular'].join(' '));
+
+        if ('opacity' in mat)
         {
-            material.setAttribute('transparency', 1.0 - mat['opacity']);
+         if (mat['opacity'] != 1) {
+                material.setAttribute('transparency', 1.0 - mat['opacity']);
+            }
         }
 
-        if ('children' in mat)
-        {
+        if ('children' in mat) {
             var texture = xml_doc.createElement('ImageTexture');
             var tex = mat.children[0];
             texture.setAttribute('url', db_name + '/textures/' + tex['id'] + '.' + tex['extension']);
@@ -406,9 +400,8 @@ function X3D_AddShape(xml_doc, db_name, mesh, mat, mode) {
         indexedfaces.setAttribute('creaseAngle', '3.14');
 
         var face_arr = '';
-
         var idx = 0;
-        //console.log(mesh.mFaces);
+
         for (var face_idx = 0; face_idx < mesh.mFaces.length; face_idx++) {
             for (var vert_idx = 0; vert_idx < mesh.mFaces[face_idx].length; vert_idx++) {
                 face_arr += mesh.mFaces[face_idx][vert_idx] + ' ';
@@ -474,22 +467,27 @@ function X3D_AddShape(xml_doc, db_name, mesh, mat, mode) {
     case "pbf":
         var pop_geometry = xml_doc.createElement('PopGeometry');
 
-        pop_geometry.setAttribute('vertexCount', mesh.vertices_count);
+        pop_geometry.setAttribute('vertexCount', mesh.faces_count * 3);
+        pop_geometry.setAttribute('vertexBufferSize', mesh.vertices_count);
         pop_geometry.setAttribute('primType', "TRIANGLES");
         pop_geometry.setAttribute('attributeStride', 12);
         pop_geometry.setAttribute('normalOffset', 8);
         pop_geometry.setAttribute('bbMin', bbox.min.join(' '));
-        pop_geometry.setAttribute('tightSize', bbox.size.join(' '));
+
+        pop_geometry.setAttribute('maxBBSize', bbox.size.join(' '));
+        pop_geometry.setAttribute('size', bbox.size.join(' '));
+
 
         genPopCache(mesh);
 
-        //console.log('#LEVELS : ' + GLOBAL.pbf_cache[mesh['id']].num_levels);
-        for (var lvl = 1; lvl < GLOBAL.pbf_cache[mesh['id']].num_levels; lvl++) {
+        for (var lvl = 0; lvl < GLOBAL.pbf_cache[mesh['id']].num_levels; lvl++) {
             var pop_geometry_level = xml_doc.createElement('PopGeometryLevel');
 
             pop_geometry_level.setAttribute('src', 'src_bin/' + db_name + '/' + mesh_id + '/level' + lvl + '.pbf');
-            pop_geometry_level.setAttribute('numIndices', GLOBAL.pbf_cache[mesh['id']][lvl].num_vertices);
-            pop_geometry_level.setAttribute('vertexDataBufferOffset', GLOBAL.pbf_cache[mesh['id']][lvl].vert_buf_offset);
+            pop_geometry_level.setAttribute('numIndices', GLOBAL.pbf_cache[mesh['id']][lvl].num_idx);
+            pop_geometry_level.setAttribute('vertexDataBufferOffset', GLOBAL.pbf_cache[mesh['id']][lvl].num_vertices);
+
+            pop_geometry_level.textContent = ' ';
 
             pop_geometry.appendChild(pop_geometry_level);
         }
@@ -497,12 +495,11 @@ function X3D_AddShape(xml_doc, db_name, mesh, mat, mode) {
         shape.appendChild(pop_geometry);
 
         break;
-
     }
 };
 
 exports.get_texture = function(db_interface, db_name, uuid, res) {
-    console.log('Reading texture ' + uuid);
+    logger.log('debug', 'Reading texture ' + uuid);
     db_interface.get_texture(db_name, uuid, function(err, doc) {
         res.write(doc.textures[uuid].data.buffer, 'binary');
         res.end();
@@ -510,7 +507,7 @@ exports.get_texture = function(db_interface, db_name, uuid, res) {
 };
 
 exports.get_mesh_bin = function(db_interface, db_name, uuid, type, res) {
-    console.log('Requesting binary ' + type + ' for ' + uuid);
+    logger.log('debug', 'Requesting binary ' + type + ' for ' + uuid);
     db_interface.get_texture(db_name, uuid, function(err, doc) {
         var mesh = doc.meshes[uuid];
 
@@ -552,28 +549,22 @@ exports.get_mesh_bin = function(db_interface, db_name, uuid, type, res) {
 
 exports.render = function(db_interface, db_name, format, sub_format, level, uuid, tex_uuid, res) {
 
-    console.log('Rendering ' + format + ' (' + sub_format + ') - UUID : ' + uuid);
+    logger.log('debug', 'Rendering ' + format + ' (' + sub_format + ') - UUID : ' + uuid);
 
-    db_interface.get_mesh(db_name, uuid, tex_uuid, function(err, doc) {
+    var is_pbf = (sub_format == 'pbf');
+
+    db_interface.get_mesh(db_name, uuid, is_pbf, tex_uuid, function(err, doc) {
         if (err) throw err;
         switch (format) {
-            // POP Buffer
-        case "bin":
-            sem.take(function() {
-                console.log(".");
-
-                setTimeout(sem.leave, 500);
-            });
-            break;
         case "pbf":
             if (!(uuid in GLOBAL.pbf_cache)) {
-                console.log('Not in cache ' + uuid);
-                console.log(GLOBAL.pbf_cache);
+                logger.log('error', 'Not in cache ' + uuid);
                 res.end("Shouldn't be here. Missing from cache");
             } else {
+                logger.log('info', 'Outputting level ' + level);
                 res.write(GLOBAL.pbf_cache[uuid][level].idx_buf, 'binary');
                 res.write(GLOBAL.pbf_cache[uuid][level].vert_buf, 'binary');
-                res.end("");
+                res.end();
             }
 
             break;
@@ -601,9 +592,9 @@ exports.render = function(db_interface, db_name, format, sub_format, level, uuid
             // Output SRC json
             var mesh = doc['meshes'][uuid];
 
-            logger.log('info', 'Creating SRC file for ' + uuid);
-            logger.log('info', 'Mesh #Verts: ' + mesh.vertices_count);
-            logger.log('info', 'Mesh #Faces: ' + mesh.faces_count);
+            logger.log('debug', 'Creating SRC file for ' + uuid);
+            logger.log('debug', 'Mesh #Verts: ' + mesh.vertices_count);
+            logger.log('debug', 'Mesh #Faces: ' + mesh.faces_count);
 
             //mesh.faces_count /= 4;
             var src_json = {};
@@ -640,18 +631,6 @@ exports.render = function(db_interface, db_name, format, sub_format, level, uuid
             src_json.accessors.attributeViews.attributeView1.count = mesh.vertices_count;
             src_json.accessors.attributeViews.attributeView1.decodeOffset = [0, 0, 0];
             src_json.accessors.attributeViews.attributeView1.decodeScale = [1, 1, 1];
-
-            // Textures 
-            var mat = getMaterial(mesh, 0);
-            var texture = getTexture(mat, 0);
-
-            if (mat != null) {
-                console.log(mat);
-            }
-
-            if (texture != null) {
-                console.log(texture);
-            }
 
             // Buffer Chunking
             src_json.bufferChunks = {};
@@ -700,8 +679,13 @@ exports.render = function(db_interface, db_name, format, sub_format, level, uuid
             var copy_idx = 0;
 
             for (var face_idx = 0; face_idx < mesh.faces_count; face_idx++) {
+                if (orig_idx.readUInt16LE(face_idx * 16) != 3) {
+                    logger.log('error', 'Non triangulated face');
+                }
                 for (var vert_comp = 0; vert_comp < 3; vert_comp++) {
+
                     var byte_position = (16 * face_idx) + (vert_comp + 1) * 4;
+
                     var idx_val = orig_idx.readUInt16LE(byte_position);
 
                     buf.writeUInt16LE(idx_val, copy_idx);
@@ -709,7 +693,6 @@ exports.render = function(db_interface, db_name, format, sub_format, level, uuid
                 }
             }
 
-            //console.log(mesh.mFaces);
             src_json.meta = {};
             src_json.meta.generator = "Generated by 3DRepo";
             src_json.textureViews = {};

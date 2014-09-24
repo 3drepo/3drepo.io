@@ -63,7 +63,7 @@ exports.get_texture = function(db_name, uuid, callback) {
     });
 };
 
-exports.get_mesh = function(db_name, uuid, tex_uuid, callback) {
+exports.get_mesh = function(db_name, uuid, pbf, tex_uuid, callback) {
 
     if (uuid == null) {
 
@@ -75,6 +75,11 @@ exports.get_mesh = function(db_name, uuid, tex_uuid, callback) {
             uv_channels: 0
         };
         var query = {};
+
+        if (pbf)
+        {   
+            projection = null;
+        }
     } else {
        /* 
         // First get latest revision for object
@@ -105,6 +110,11 @@ exports.get_mesh = function(db_name, uuid, tex_uuid, callback) {
         ];
         console.log(db_conn.aggregate(db_name, 'history', query));
 */
+        if(pbf)
+        {
+            callback(err, null);
+        }
+
         var projection = null;
 
         if (tex_uuid != null)
