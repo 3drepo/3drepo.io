@@ -35,6 +35,9 @@ var auth = express.basicAuth(function(user, password) {
 
 app.set('view engine', 'jade');
 app.set('views', './public');
+app.use(express.favicon());
+app.use(express.bodyParser());
+app.use(express.methodOverride());
 
 app.use(auth);
 

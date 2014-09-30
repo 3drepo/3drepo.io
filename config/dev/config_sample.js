@@ -29,7 +29,7 @@ module.exports = {
     external: {
         x3domjs  : '../js/x3dom.js',
         x3domcss : '../css/x3dom.css',
-	repouicss : '../css/ui.css'
+    	repouicss : '../css/ui.css'
     }
 }
 

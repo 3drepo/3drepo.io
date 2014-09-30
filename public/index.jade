@@ -1,18 +1,50 @@
-html
-    head
-        title 3drepo.io 
-        link(rel='stylesheet' type='text/css' href='#{x3domcss}')
-        script(type="text/javascript"
-                src='#{x3domjs}')
-        link(rel='stylesheet' type='text/css' href='#{repouicss}')
-    body
-            !{xml}
-            table(style='position:absolute; top=0; left=0;')
-                tr
-                    td
-                        button(onclick!="document.getElementById('model').runtime.showAll();"
-                                style='z-index:1000000;')
-                            Show Everything
-                        button(onclick!="document.getElementById('model').runtime.resetView();"
-                                style='z-index:1000000;')
-                            Reset View
+extends layout
+
+block content
+    script.
+        document.onload = function(e) {
+            jQuery("#view-everything").click(function(e) {
+                    document.getElementById("model").runtime.showAll();
+                    });
+            
+            jQuery("#view-def-viewpoint").click(function(e) {
+                    document.getElementById("model").runtime.resetView();
+                    });
+
+            jQuery("#show-about").click(function(e) {
+                    BootstrapDialog.show({
+                        title: '3D Repo Viewer',
+                        message: 'About 3D Repo Here\n<a \
+                        href="http://3drepo.org">Homepage</a>'
+                       });
+                    });
+        };
+    nav.navbar.transparent.navbar-inverse.navbar-fixed-top(role='navigation')
+        div.container-fluid
+            div.navbar-header
+                button.navbar-toggle.collapsed(type="button" data-toggle="collapse" data-target=".navbar-collapse")
+                    span.glyphicon.glyphicon-th
+                    span.icon-bar
+                    span.icon-bar
+                a.navbar-brand(href='#' id='show-about')
+                    img.img_responsive(style='margin:-7px' src='../3drepo_logo_white.png') 
+            div.collapse.navbar-collapse
+                ul.nav.navbar-nav
+                    li.dropdown
+                        a.dropdown-toggle(data-toggle="dropdown" href='#') View
+                            span.caret
+                        ul.dropdown-menu(role='menu')
+                            li
+                                a(href='#' id="view-everything") Everything
+                            li
+                                a(href='#' id="view-def-viewpoint") Default Viewpoint
+                    li.dropdown
+                        a.dropdown-toggle(data-toggle="dropdown"
+                                href="#") Mesh
+                            span.caret
+                        ul.dropdown-menu.scrollable-menu(role='menu')
+                            each mesh in repo
+                                li
+                                    a(href='/3drepoio/' + mesh)= mesh
+    !{xml}
+

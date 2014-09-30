@@ -28,6 +28,7 @@ function stringToUUID(id) {
     return db_conn.Binary(buf, 3);
 }
 
+/*
 exports.get_db_list = function(func) {
     async.waterfall([
 
@@ -44,7 +45,26 @@ exports.get_db_list = function(func) {
     });
 
 }
+*/
 
+exports.get_db_list = function(callback) {
+    db_conn.db_callback('admin', function(err, db) {
+        var admin_db = db.admin();
+
+        admin_db.listDatabases(function(err, dbs) {
+            if (err) throw err;
+
+            var db_list = [];
+
+            for (var i in dbs.databases)
+                db_list.push(dbs.databases[i].name);
+
+            db_list.sort();
+
+            callback(db_list);
+        });
+    });
+}
 exports.console_print_name = function(dbs) {
     for (var i = 0; i < dbs.length; i++) {
         console.log(attr[i]['name']);
@@ -53,7 +73,7 @@ exports.console_print_name = function(dbs) {
 
 exports.get_texture = function(db_name, uuid, callback) {
     var query = {
-        _id : stringToUUID(uuid)
+        _id: stringToUUID(uuid)
     };
 
     db_conn.filter_coll(db_name, 'scene', query, null, function(err, coll) {
@@ -76,12 +96,11 @@ exports.get_mesh = function(db_name, uuid, pbf, tex_uuid, callback) {
         };
         var query = {};
 
-        if (pbf)
-        {   
+        if (pbf) {
             projection = null;
         }
     } else {
-       /* 
+        /* 
         // First get latest revision for object
         var revision = {};
 
@@ -110,15 +129,13 @@ exports.get_mesh = function(db_name, uuid, pbf, tex_uuid, callback) {
         ];
         console.log(db_conn.aggregate(db_name, 'history', query));
 */
-        if(pbf)
-        {
+        if (pbf) {
             callback(err, null);
         }
 
         var projection = null;
 
-        if (tex_uuid != null)
-        {
+        if (tex_uuid != null) {
             var query = {
                 $or: [{
                     _id: stringToUUID(uuid)

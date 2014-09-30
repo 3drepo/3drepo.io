@@ -52,20 +52,64 @@ function genPopCache(mesh) {
         var vertex_values = new Array(mesh.vertices_count);
         var tri = new Array(mesh.faces_count);
         var normal_values = new Array(mesh.vertices_count);
+        var tex_coords = new Array(mesh.vertices_count);
 
         var vert_num = 0;
         var vert_idx = 0;
         var comp_idx = 0;
+
+        var has_tex = false;
+
+        if ('uv_channels' in mesh) {
+            if (mesh['uv_channels_count'] == 2) {
+                logging.log('error', 'Only support two channels texture coordinates');
+                return null;
+            } else {
+                has_tex = true;
+            }
+        }
+
+        var min_texcoordu = 0;
+        var max_texcoordu = 0;
+        var min_texcoordv = 0;
+        var max_texcoordv = 0;
 
         for (vert_num = 0; vert_num < mesh.vertices_count; vert_num++) {
             vertex_map[vert_num] = -1;
 
             vertex_values[vert_num] = [];
             normal_values[vert_num] = [];
+            tex_coords[vert_num] = [];
 
             for (comp_idx = 0; comp_idx < 3; comp_idx++) {
                 vertex_values[vert_num][comp_idx] = mesh.vertices.buffer.readFloatLE(12 * vert_num + 4 * comp_idx);
                 normal_values[vert_num][comp_idx] = mesh.normals.buffer.readFloatLE(12 * vert_num + 4 * comp_idx);
+            }
+
+            if (has_tex) {
+                for (comp_idx = 0; comp_idx < 2; comp_idx++) {
+                    tex_coords[vert_num][comp_idx] = mesh.uv_channels.buffer.readFloatLE(8 * vert_num + 4 * comp_idx);
+
+                    if (comp_idx == 0) {
+                        if (vert_num == 0) {
+                            min_texcoordu = tex_coords[vert_num][comp_idx];
+                            max_texcoordu = tex_coords[vert_num][comp_idx];
+                        } else {
+                            if (tex_coords[vert_num][comp_idx] < min_texcoordu) min_texcoordu = tex_coords[vert_num][comp_idx];
+                            if (tex_coords[vert_num][comp_idx] > max_texcoordu) max_texcoordu = tex_coords[vert_num][comp_idx];
+                        }
+                    }
+
+                    if (comp_idx == 1) {
+                        if (vert_num == 0) {
+                            min_texcoordv = tex_coords[vert_num][comp_idx];
+                            max_texcoordv = tex_coords[vert_num][comp_idx];
+                        } else {
+                            if (tex_coords[vert_num][comp_idx] < min_texcoordv) min_texcoordv = tex_coords[vert_num][comp_idx];
+                            if (tex_coords[vert_num][comp_idx] > max_texcoordv) max_texcoordv = tex_coords[vert_num][comp_idx];
+                        }
+                    }
+                }
             }
         }
 
@@ -89,10 +133,20 @@ function genPopCache(mesh) {
         var max_bits = 16;
         var max_quant = Math.pow(2, max_bits) - 1;
 
+        var stride = has_tex ? 16 : 12;
+        GLOBAL.pbf_cache[mesh['id']].stride = stride;
+
+        GLOBAL.pbf_cache[mesh['id']].min_texcoordu = min_texcoordu;
+        GLOBAL.pbf_cache[mesh['id']].max_texcoordu = max_texcoordu;
+        GLOBAL.pbf_cache[mesh['id']].min_texcoordv = min_texcoordv;
+        GLOBAL.pbf_cache[mesh['id']].max_texcoordv = max_texcoordv;
+
+        if (has_tex) GLOBAL.pbf_cache[mesh['id']].has_tex = has_tex;
+
         while ((new_vertex_id < mesh.vertices_count) && (lod < 16)) {
             logger.log('debug', 'Mesh ' + mesh['id'] + ' - Generating LOD ' + lod);
             var idx_buf = new Buffer(2 * 3 * mesh.faces_count);
-            var vert_buf = new Buffer(12 * mesh.vertices_count);
+            var vert_buf = new Buffer(stride * mesh.vertices_count);
 
             var vert_buf_ptr = 0;
             var idx_buf_ptr = 0;
@@ -148,7 +202,8 @@ function genPopCache(mesh) {
                                     vert_buf.writeUInt16LE(vertex_quant[vert_num][comp_idx], vert_buf_ptr);
                                     vert_buf_ptr += 2;
                                 }
-                                
+
+                                // Padding to align with 4 bytes
                                 vert_buf.writeUInt16LE(0, vert_buf_ptr);
                                 vert_buf_ptr += 2;
 
@@ -156,11 +211,40 @@ function genPopCache(mesh) {
                                 for (comp_idx = 0; comp_idx < 3; comp_idx++) {
                                     var comp = Math.floor((normal_values[vert_num][comp_idx] + 1) * 127 + 0.5);
                                     vert_buf.writeUInt8(comp, vert_buf_ptr);
-                                    vert_buf_ptr ++;
+                                    vert_buf_ptr++;
                                 }
 
+                                // Padding to align with 4 bytes
                                 vert_buf.writeUInt8(0, vert_buf_ptr);
                                 vert_buf_ptr++;
+
+                                if (has_tex) {
+                                    /*
+                                    var u_coord = tex_coords[vert_num][0];
+                                    var v_coord = tex_coords[vert_num][1];
+
+                                    if ((u_coord - (u_coord % 1)) % 2 == 0)
+                                    {
+                                        u_coord = ((u_coord % 1.0) + 1.0) % 1.0
+                                    */
+
+                                    for (comp_idx = 0; comp_idx < 2; comp_idx++) {
+                                        var wrap_tex = tex_coords[vert_num][comp_idx];
+                                      
+                                        if (comp_idx == 0)
+                                            wrap_tex = (wrap_tex - min_texcoordu) / (max_texcoordu - min_texcoordu);
+                                        else
+                                            wrap_tex = (wrap_tex - min_texcoordv) / (max_texcoordv - min_texcoordv);
+
+                                        if (isNaN(wrap_tex))
+                                            wrap_tex = 0;
+
+                                        var comp = Math.floor((wrap_tex * 65535) + 0.5);
+
+                                        vert_buf.writeUInt16LE(comp, vert_buf_ptr);
+                                        vert_buf_ptr += 2;
+                                    }
+                                }
 
                                 vertex_map[vert_num] = new_vertex_id;
                                 new_vertex_id += 1;
@@ -180,15 +264,15 @@ function genPopCache(mesh) {
                 }
             }
 
-            GLOBAL.pbf_cache[mesh['id']][lod]                 = {};
-            GLOBAL.pbf_cache[mesh['id']][lod].num_idx         = num_indices;
-            GLOBAL.pbf_cache[mesh['id']][lod].idx_buf         = idx_buf.slice(0, idx_buf_ptr);
-            GLOBAL.pbf_cache[mesh['id']][lod].vert_buf        = vert_buf.slice(0, vert_buf_ptr);
+            GLOBAL.pbf_cache[mesh['id']][lod] = {};
+            GLOBAL.pbf_cache[mesh['id']][lod].num_idx = num_indices;
+            GLOBAL.pbf_cache[mesh['id']][lod].idx_buf = idx_buf.slice(0, idx_buf_ptr);
+            GLOBAL.pbf_cache[mesh['id']][lod].vert_buf = vert_buf.slice(0, vert_buf_ptr);
             GLOBAL.pbf_cache[mesh['id']][lod].vert_buf_offset = buf_offset;
-            GLOBAL.pbf_cache[mesh['id']][lod].num_vertices    = prev_added_verts;
+            GLOBAL.pbf_cache[mesh['id']][lod].num_vertices = prev_added_verts;
             prev_added_verts = added_verts;
             buf_offset += GLOBAL.pbf_cache[mesh['id']][lod].vert_buf.length;
-            
+
             lod += 1;
 
         }
@@ -247,7 +331,7 @@ function X3D_Header() {
     xml_doc.firstChild.setAttribute('showStat', 'true');
     xml_doc.firstChild.setAttribute('showLog', 'false');
     xml_doc.firstChild.setAttribute('style', "width:100%; height:100%; border:0px;");
-    
+
 
     return xml_doc;
 }
@@ -286,12 +370,13 @@ function X3D_CreateScene(xml_doc) {
 
     environ.setAttribute('frustumCulling', 'true');
     environ.setAttribute('smallFeatureCulling', 'true');
+    environ.setAttribute('smallFeatureThreshold', 5);
     environ.setAttribute('occlusionCulling', 'true');
     environ.textContent = ' ';
 
-    xml_doc.firstChild.appendChild(environ);
     xml_doc.firstChild.appendChild(scene);
 
+    scene.appendChild(environ);
 
     /*
     var trans = xml_doc.createElement('Transform');
@@ -327,8 +412,7 @@ function X3D_AddShape(xml_doc, db_name, mesh, mat, mode) {
         }
         var ambient_intensity = 1;
 
-        if(('ambient' in mat) && ('diffuse' in mat))
-        {
+        if (('ambient' in mat) && ('diffuse' in mat)) {
             for (var i = 0; i < 3; i++) {
                 if (mat['diffuse'][i] != 0) {
                     ambient_intensity = mat['ambient'][i] / mat['diffuse'][i];
@@ -339,30 +423,28 @@ function X3D_AddShape(xml_doc, db_name, mesh, mat, mode) {
 
         material.setAttribute('DEF', mesh['mMaterialIndex']);
 
-        if ('diffuseColor' in mat)
-            material.setAttribute('diffuseColor', mat['diffuse'].join(' '));
+        if ('diffuse' in mat) material.setAttribute('diffuseColor', mat['diffuse'].join(' '));
 
-        if ('shininess' in mat)
-            material.setAttribute('shininess', mat['shininess'] / 512);
+        if ('shininess' in mat) material.setAttribute('shininess', mat['shininess'] / 512);
 
-        if ('specularColor' in mat)
-            material.setAttribute('specularColor', mat['specular'].join(' '));
+        if ('specular' in mat) material.setAttribute('specularColor', mat['specular'].join(' '));
 
-        if ('opacity' in mat)
-        {
-         if (mat['opacity'] != 1) {
+        if ('opacity' in mat) {
+            if (mat['opacity'] != 1) {
                 material.setAttribute('transparency', 1.0 - mat['opacity']);
             }
         }
+
+        material.textContent = ' ';
+        appearance.appendChild(material);
 
         if ('children' in mat) {
             var texture = xml_doc.createElement('ImageTexture');
             var tex = mat.children[0];
             texture.setAttribute('url', db_name + '/textures/' + tex['id'] + '.' + tex['extension']);
+            texture.textContent = ' ';
             appearance.appendChild(texture);
         }
-
-        appearance.appendChild(material);
 
     } else {
         var shader = xml_doc.createElement('ComposedShader');
@@ -467,32 +549,47 @@ function X3D_AddShape(xml_doc, db_name, mesh, mat, mode) {
     case "pbf":
         var pop_geometry = xml_doc.createElement('PopGeometry');
 
+        genPopCache(mesh);
+
+        var cache_mesh = GLOBAL.pbf_cache[mesh['id']];
+
         pop_geometry.setAttribute('vertexCount', mesh.faces_count * 3);
         pop_geometry.setAttribute('vertexBufferSize', mesh.vertices_count);
         pop_geometry.setAttribute('primType', "TRIANGLES");
-        pop_geometry.setAttribute('attributeStride', 12);
+        pop_geometry.setAttribute('attributeStride', cache_mesh.stride);
         pop_geometry.setAttribute('normalOffset', 8);
         pop_geometry.setAttribute('bbMin', bbox.min.join(' '));
 
-        pop_geometry.setAttribute('maxBBSize', bbox.size.join(' '));
+        if (cache_mesh.has_tex) {
+            pop_geometry.setAttribute('texcoordOffset', 12);
+        }
+
         pop_geometry.setAttribute('size', bbox.size.join(' '));
+        pop_geometry.setAttribute('tightSize', bbox.size.join(' '));
+        pop_geometry.setAttribute('maxBBSize', bbox.size.join(' '));
+
+        pop_geometry.setAttribute('texcoordMinU', cache_mesh.min_texcoordu);
+        pop_geometry.setAttribute('texcoordScaleU', (cache_mesh.max_texcoordu - cache_mesh.min_texcoordu));
+        pop_geometry.setAttribute('texcoordMinV', cache_mesh.min_texcoordv);
+        pop_geometry.setAttribute('texcoordScaleV', (cache_mesh.max_texcoordv - cache_mesh.min_texcoordv));
 
 
-        genPopCache(mesh);
-
-        for (var lvl = 0; lvl < GLOBAL.pbf_cache[mesh['id']].num_levels; lvl++) {
+        for (var lvl = 0; lvl < cache_mesh.num_levels; lvl++) {
             var pop_geometry_level = xml_doc.createElement('PopGeometryLevel');
 
             pop_geometry_level.setAttribute('src', 'src_bin/' + db_name + '/' + mesh_id + '/level' + lvl + '.pbf');
-            pop_geometry_level.setAttribute('numIndices', GLOBAL.pbf_cache[mesh['id']][lvl].num_idx);
-            pop_geometry_level.setAttribute('vertexDataBufferOffset', GLOBAL.pbf_cache[mesh['id']][lvl].num_vertices);
+            pop_geometry_level.setAttribute('numIndices', cache_mesh[lvl].num_idx);
+            pop_geometry_level.setAttribute('vertexDataBufferOffset', cache_mesh[lvl].num_vertices);
 
             pop_geometry_level.textContent = ' ';
-
             pop_geometry.appendChild(pop_geometry_level);
         }
 
         shape.appendChild(pop_geometry);
+
+        shape.setAttribute('bboxCenter', bbox.center.join(' '));
+        shape.setAttribute('bboxSize', bbox.size.join(' '));
+
 
         break;
     }
@@ -578,11 +675,14 @@ exports.render = function(db_interface, db_name, format, sub_format, level, uuid
                 X3D_AddShape(xml_doc, db_name, mesh, mat, sub_format);
             }
 
-            res.render('index', {
-                xml: new xml_serial().serializeToString(xml_doc),
-                x3domjs: config.external.x3domjs,
-                x3domcss: config.external.x3domcss,
-		repouicss : config.external.repouicss    
+            db_interface.get_db_list(function(db_list) {
+                res.render('index', {
+                    xml: new xml_serial().serializeToString(xml_doc),
+                    x3domjs: config.external.x3domjs,
+                    x3domcss: config.external.x3domcss,
+                    repouicss: config.external.repouicss,
+                    repo: db_list
+                });
             });
 
             break;

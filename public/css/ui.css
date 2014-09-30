@@ -30,3 +30,17 @@ div#x3dom_logdiv.x3dom-logcontainer {
     position : absolute;
     width : 100%;
 }
+
+.navbar.transparent.navbar-inverse .navbar-inner {
+    background: rgba(0,0,0,0.4);
+}
+
+.scrollable-menu {
+    height: auto;
+    max-height: 200px;
+    overflow-x: hidden;
+}
+
+.navbar-brand {
+    max-width: 63%;
+}
