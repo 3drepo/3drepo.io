@@ -1,1 +1,1 @@
-NODE_ENV=prod NODE_CONFIG_DIR='./config' node app.js
+NODE_ENV=$1 NODE_CONFIG_DIR='./config' node $2 app.js

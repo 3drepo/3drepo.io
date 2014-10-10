@@ -22,7 +22,10 @@
 var async = require('async');
 var config = require('app-config').config;
 var mongo = require('mongodb');
-var logger = require('./logger.js');
+
+var log_iface = require('./logger.js');
+var logger = log_iface.logger;
+onError = log_iface.onError;
 
 function MongoDB() {
     this.host = config.db.host;
@@ -33,10 +36,13 @@ function MongoDB() {
     this.db_conns = {};
 }
 
-MongoDB.prototype.db_callback = function(dbname, callback) {
+MongoDB.prototype.db_callback = function(err, dbname, callback) {
+	if (err) return onError(err);
+
     var self = this;
 
     if (self.db_conns[dbname]) {
+		//logger.log('debug', 'Database Connection: ' + JSON.stringify(self.db_conns[dbname]));
         return callback(null, self.db_conns[dbname]);
     }
 
@@ -48,13 +54,18 @@ MongoDB.prototype.db_callback = function(dbname, callback) {
 
 
     logger.log('info', 'Opening database ' + dbname);
-    var db = new mongo.Db(dbname, self.serv, {safe:false});
+    var db = new mongo.Db(dbname, self.serv, {
+        safe: false
+    });
     db.open(function(err, db_conn) {
+		if (err) return onError(err);
+
         logger.log('debug', err);
 
         self.db_conns[dbname] = db_conn;
 
-        db_conn.on('close', function() {
+        db_conn.on('close', function(err) {
+			logger.log('debug', 'Closing connection to ' + dbname + '. REASON: ' + err);
             delete(self.db_conns[dbname]);
         })
 
@@ -68,54 +79,63 @@ MongoDB.prototype.aggregate = function(dbname, coll_name, query) {
     var self = this;
 
     async.waterfall([
-            function(callback) {
-                self.coll_callback(dbname, coll_name, callback);
-            },
-            function(err, coll) {
-                coll.aggregate(query, callback)
-            }],
-            function(err, result) {
-                setTimeout(function() {
-                    return result;
-                },0);
-            }
-            );
-  
+
+    function(callback) {
+        self.coll_callback(dbname, coll_name, callback);
+    }, function(err, coll) {
+        coll.aggregate(query, callback)
+    }], function(err, result) {
+        setTimeout(function() {
+            return result;
+        }, 0);
+    });
+
 }
 
-MongoDB.prototype.coll_callback = function(dbname, coll_name, callback) {
-    logger.log('debug', 'Collection ' + coll_name);
+MongoDB.prototype.coll_callback = function(err, dbname, coll_name, callback) {
+	if (err) return onError(err);
 
-    this.db_callback(dbname, function(err, db_conn) {
-        if (err) throw err;
+    logger.log('debug', 'Loading collection ' + coll_name);
+
+    this.db_callback(null, dbname, function(err, db_conn) {
+        if (err) return onError(err);
 
         db_conn.collection(coll_name, function(err, coll) {
-            if (err) throw err;
+            if (err) return onError(err);
 
             callback(err, coll);
         })
     })
 }
 
-MongoDB.prototype.filter_coll = function(dbname, coll_name, filter, projection, callback) {
+MongoDB.prototype.filter_coll = function(err, dbname, coll_name, filter, projection, callback) {
+	if (err) return onError(err);
 
-    this.coll_callback(dbname, coll_name, function(err, coll) {
-        if (err) throw err;
+    this.coll_callback(null, dbname, coll_name, function(err, coll) {
+        if (err) return onError(err);
 
-        if (projection != null)
-        {
+		proj_str = JSON.stringify(projection);
+		filt_str = JSON.stringify(filter);
+
+		logger.log('debug', 'Filter collection:\nFILTER: ' + filt_str + '\nPROJECTION: ' + proj_str + '\n');
+
+        if (projection != null) {
             coll.find(filter, projection).toArray(function(err, docs) {
-                if(err) throw err;
+                if (err) return onError(err);
+
+				logger.log('debug', 'Result: ' + JSON.stringify(docs) + '\n');
 
                 callback(err, docs);
             })
         } else {
-             coll.find(filter).toArray(function(err, docs) {
-                if(err) throw err;
+            coll.find(filter).toArray(function(err, docs) {
+                if (err) return onError(err);
+
+				logger.log('debug', 'Result: ' + JSON.stringify(docs) + '\n');
 
                 callback(err, docs);
             })
-           
+
         }
     })
 }

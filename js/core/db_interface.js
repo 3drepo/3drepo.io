@@ -47,12 +47,16 @@ exports.get_db_list = function(func) {
 }
 */
 
-exports.get_db_list = function(callback) {
-    db_conn.db_callback('admin', function(err, db) {
+exports.get_db_list = function(err, callback) {
+	if (err) return onError(err);
+
+    db_conn.db_callback(null, 'admin', function(err, db) {
+		if (err) return onError(err);
+
         var admin_db = db.admin();
 
         admin_db.listDatabases(function(err, dbs) {
-            if (err) throw err;
+            if (err) return onError(err);
 
             var db_list = [];
 
@@ -61,29 +65,27 @@ exports.get_db_list = function(callback) {
 
             db_list.sort();
 
-            callback(db_list);
+            callback(err, db_list);
         });
     });
 }
-exports.console_print_name = function(dbs) {
-    for (var i = 0; i < dbs.length; i++) {
-        console.log(attr[i]['name']);
-    }
-}
 
-exports.get_texture = function(db_name, uuid, callback) {
+exports.get_texture = function(err, db_name, uuid, callback) {
+	if(err) return onError(err);
+
     var query = {
         _id: stringToUUID(uuid)
     };
 
-    db_conn.filter_coll(db_name, 'scene', query, null, function(err, coll) {
-        if (err) throw err;
+    db_conn.filter_coll(err, db_name, 'scene', query, null, function(err, coll) {
+        if (err) return onError(err);
 
         callback(err, repoGraphScene.decode(coll));
     });
 };
 
-exports.get_mesh = function(db_name, uuid, pbf, tex_uuid, callback) {
+exports.get_mesh = function(err, db_name, uuid, pbf, tex_uuid, callback) {
+	if (err) return onError(err);
 
     if (uuid == null) {
 
@@ -95,10 +97,6 @@ exports.get_mesh = function(db_name, uuid, pbf, tex_uuid, callback) {
             uv_channels: 0
         };
         var query = {};
-
-        if (pbf) {
-            projection = null;
-        }
     } else {
         /* 
         // First get latest revision for object
@@ -127,7 +125,6 @@ exports.get_mesh = function(db_name, uuid, pbf, tex_uuid, callback) {
                }
            }
         ];
-        console.log(db_conn.aggregate(db_name, 'history', query));
 */
         if (pbf) {
             callback(err, null);
@@ -151,10 +148,36 @@ exports.get_mesh = function(db_name, uuid, pbf, tex_uuid, callback) {
         }
     }
 
-    db_conn.filter_coll(db_name, 'scene', query, projection, function(err, coll) {
-        if (err) throw err;
+    db_conn.filter_coll(err, db_name, 'scene', query, projection, function(err, coll) {
+        if (err) return onError(err);
 
         callback(err, repoGraphScene.decode(coll));
+    });
+
+};
+
+exports.get_cache = function(err, db_name, m_id, get_data, level, callback) {
+	if(err) return onError(err);
+
+	var projection = null;
+
+	if (!get_data)
+	{
+		projection = {
+			idx_buf : 0,
+			vert_buf : 0
+		};
+	}
+
+	var filter = {mesh_id : stringToUUID(m_id)};
+
+	if (level)
+		filter['level'] = parseInt(level);
+
+    db_conn.filter_coll(err, db_name, "repo.cache", filter, projection, function(err, coll) {
+        if (err) return onError(err);
+
+        callback(err, coll);
     });
 
 };

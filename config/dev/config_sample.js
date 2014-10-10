@@ -20,7 +20,9 @@ module.exports = {
         http_port: 8080
     },
     logfile: {
-        filename: '3drepo.log'
+        filename: '/var/log/3drepo.log',
+		console_level: 'debug',
+		file_level: 'debug'
     },
     db: {
         host: 'localhost',

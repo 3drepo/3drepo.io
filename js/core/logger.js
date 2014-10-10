@@ -20,14 +20,36 @@
 var winston = require('winston');
 var config = require('app-config').config;
 
+var myCustomLevels = {
+    levels: {
+        debug: 0,
+        info: 1,
+        warn: 2,
+        error: 3
+    },
+    colors: {
+        debug: 'white',
+        info: 'yellow',
+        warn: 'orange',
+        error: 'red'
+    }
+};
+
 var logger = new(winston.Logger)({
+    levels: myCustomLevels.levels,
     transports: [
-        new(winston.transports.Console)(config.logfile.level), new(winston.transports.File)
-        ({
-            filename: config.logfile.filename
-        })
-    ]
+    new(winston.transports.Console)({
+        level: config.logfile.console_level,
+    }), new(winston.transports.File)
+    ({
+        level: config.logfile.file_level,
+        filename: config.logfile.filename
+    })]
 });
 
-module.exports = logger;
+module.exports.logger = logger;
+module.exports.onError = function(err) {
+    logger.log('error', err);
+	console.trace();
+}
 

@@ -27,7 +27,9 @@ var xml_serial = xml_dom.XMLSerializer;
 
 var config = require('app-config').config;
 
-var logger = require('./logger.js');
+var log_iface = require('./logger.js');
+var logger = log_iface.logger;
+onError = log_iface.onError;
 
 var sem = require('semaphore')(10);
 
@@ -210,6 +212,8 @@ function genPopCache(mesh) {
                                 // Write normals in 8-bit
                                 for (comp_idx = 0; comp_idx < 3; comp_idx++) {
                                     var comp = Math.floor((normal_values[vert_num][comp_idx] + 1) * 127 + 0.5);
+                                    if (isNaN(comp)) comp = 0;
+
                                     vert_buf.writeUInt8(comp, vert_buf_ptr);
                                     vert_buf_ptr++;
                                 }
@@ -230,14 +234,11 @@ function genPopCache(mesh) {
 
                                     for (comp_idx = 0; comp_idx < 2; comp_idx++) {
                                         var wrap_tex = tex_coords[vert_num][comp_idx];
-                                      
-                                        if (comp_idx == 0)
-                                            wrap_tex = (wrap_tex - min_texcoordu) / (max_texcoordu - min_texcoordu);
-                                        else
-                                            wrap_tex = (wrap_tex - min_texcoordv) / (max_texcoordv - min_texcoordv);
 
-                                        if (isNaN(wrap_tex))
-                                            wrap_tex = 0;
+                                        if (comp_idx == 0) wrap_tex = (wrap_tex - min_texcoordu) / (max_texcoordu - min_texcoordu);
+                                        else wrap_tex = (wrap_tex - min_texcoordv) / (max_texcoordv - min_texcoordv);
+
+                                        if (isNaN(wrap_tex)) wrap_tex = 0;
 
                                         var comp = Math.floor((wrap_tex * 65535) + 0.5);
 
@@ -282,6 +283,84 @@ function genPopCache(mesh) {
     }
 }
 
+function getPopCache(err, db, dbname, get_data, level, mesh_id, callback) {
+    if (!('pbf_cache' in GLOBAL)) {
+        GLOBAL.pbf_cache = {};
+        logger.log('debug', 'Created cache');
+    }
+
+    var already_have = true;
+
+    if (mesh_id in GLOBAL.pbf_cache) {
+        // TODO: Lazy, if a level is not passed in when getting data
+        // should only get necessary levels, rather than everything again.
+        if (!level && get_data) already_have = false;
+        else if (level) {
+            if (!(level in GLOBAL.pbf_cache[mesh_id])) already_have = false;
+            else already_have = (GLOBAL.pbf_cache[mesh_id][level].has_data == get_data);
+        }
+
+        // Do we have an empty object
+        if (!Object.keys(GLOBAL.pbf_cache[mesh_id]).length) {
+            already_have = false;
+        }
+
+    } else {
+        GLOBAL.pbf_cache[mesh_id] = {};
+
+        // If we don't have the skeleton, load the skeleton
+        if (level) getPopCache(err, db, dbname, false, null, mesh_id, function(err) {});
+
+        already_have = false;
+    }
+
+    if (!already_have) {
+        db.get_cache(err, dbname, mesh_id, get_data, level, function(err, coll) {
+            if (err) throw onError(err);
+
+            var max_lod = 0;
+
+            for (var idx = 0; idx < coll.length; idx++) {
+
+                var cache_obj = coll[idx];
+                if (cache_obj['type'] == 'PopGeometry') {
+                    if ('stride' in cache_obj) GLOBAL.pbf_cache[mesh_id].stride = cache_obj['stride'];
+
+                    if ('min_texcoordu' in cache_obj) {
+                        GLOBAL.pbf_cache[mesh_id].min_texcoordu = cache_obj['min_texcoordu'];
+                        GLOBAL.pbf_cache[mesh_id].max_texcoordu = cache_obj['max_texcoordu'];
+                        GLOBAL.pbf_cache[mesh_id].min_texcoordv = cache_obj['min_texcoordv'];
+                        GLOBAL.pbf_cache[mesh_id].max_texcoordv = cache_obj['max_texcoordv'];
+                        GLOBAL.pbf_cache[mesh_id].has_tex = true;
+                    }
+                } else if (cache_obj['type'] == 'PopGeometryLevel') {
+                    var lod = cache_obj['level'];
+                    GLOBAL.pbf_cache[mesh_id][lod] = {};
+                    GLOBAL.pbf_cache[mesh_id][lod].num_idx = cache_obj['num_idx'];
+                    GLOBAL.pbf_cache[mesh_id][lod].vert_buf_offset = cache_obj['vert_buf_offset'];
+                    GLOBAL.pbf_cache[mesh_id][lod].num_vertices = cache_obj['num_vertices'];
+
+                    GLOBAL.pbf_cache[mesh_id][lod].has_data = get_data;
+
+                    if (get_data) {
+                        GLOBAL.pbf_cache[mesh_id][lod].idx_buf = cache_obj['idx_buf'];
+                        GLOBAL.pbf_cache[mesh_id][lod].vert_buf = cache_obj['vert_buf'];
+                    }
+
+                    if (lod > max_lod) max_lod = lod;
+                }
+            }
+
+			if (!level) 
+				GLOBAL.pbf_cache[mesh_id].num_levels = max_lod + 1;
+
+			callback(null);
+        });
+    } else {
+		callback(null);
+	}
+}
+
 function getChild(parent, type, n) {
     if ((parent == null) || !('children' in parent)) {
         return null;
@@ -302,6 +381,7 @@ function getChild(parent, type, n) {
     }
 
     return null;
+
 }
 
 function getMaterial(mesh, n) {
@@ -387,7 +467,7 @@ function X3D_CreateScene(xml_doc) {
 }
 
 
-function X3D_AddShape(xml_doc, db_name, mesh, mat, mode) {
+function X3D_AddShape(xml_doc, db_interface, db_name, mesh, mat, mode) {
     var mesh_id = mesh['id'];
 
     logger.log('debug', 'Loading mesh ' + mesh_id);
@@ -549,63 +629,72 @@ function X3D_AddShape(xml_doc, db_name, mesh, mat, mode) {
     case "pbf":
         var pop_geometry = xml_doc.createElement('PopGeometry');
 
-        genPopCache(mesh);
+        //genPopCache(mesh);
+		
+        getPopCache(null, db_interface, db_name, false, null, mesh['id'], function(err) {
+            if (mesh['id'] in GLOBAL.pbf_cache) {
+                var cache_mesh = GLOBAL.pbf_cache[mesh['id']];
 
-        var cache_mesh = GLOBAL.pbf_cache[mesh['id']];
+                pop_geometry.setAttribute('vertexCount', mesh.faces_count * 3);
+                pop_geometry.setAttribute('vertexBufferSize', mesh.vertices_count);
+                pop_geometry.setAttribute('primType', "TRIANGLES");
+                pop_geometry.setAttribute('attributeStride', cache_mesh.stride);
+                pop_geometry.setAttribute('normalOffset', 8);
+                pop_geometry.setAttribute('bbMin', bbox.min.join(' '));
 
-        pop_geometry.setAttribute('vertexCount', mesh.faces_count * 3);
-        pop_geometry.setAttribute('vertexBufferSize', mesh.vertices_count);
-        pop_geometry.setAttribute('primType', "TRIANGLES");
-        pop_geometry.setAttribute('attributeStride', cache_mesh.stride);
-        pop_geometry.setAttribute('normalOffset', 8);
-        pop_geometry.setAttribute('bbMin', bbox.min.join(' '));
+                if (cache_mesh.has_tex) {
+                    pop_geometry.setAttribute('texcoordOffset', 12);
+                }
 
-        if (cache_mesh.has_tex) {
-            pop_geometry.setAttribute('texcoordOffset', 12);
-        }
+                pop_geometry.setAttribute('size', bbox.size.join(' '));
+                pop_geometry.setAttribute('tightSize', bbox.size.join(' '));
+                pop_geometry.setAttribute('maxBBSize', bbox.size.join(' '));
 
-        pop_geometry.setAttribute('size', bbox.size.join(' '));
-        pop_geometry.setAttribute('tightSize', bbox.size.join(' '));
-        pop_geometry.setAttribute('maxBBSize', bbox.size.join(' '));
+                if ('min_texcoordu' in cache_mesh) {
+                    pop_geometry.setAttribute('texcoordMinU', cache_mesh.min_texcoordu);
+                    pop_geometry.setAttribute('texcoordScaleU', (cache_mesh.max_texcoordu - cache_mesh.min_texcoordu));
+                    pop_geometry.setAttribute('texcoordMinV', cache_mesh.min_texcoordv);
+                    pop_geometry.setAttribute('texcoordScaleV', (cache_mesh.max_texcoordv - cache_mesh.min_texcoordv));
+                }
 
-        pop_geometry.setAttribute('texcoordMinU', cache_mesh.min_texcoordu);
-        pop_geometry.setAttribute('texcoordScaleU', (cache_mesh.max_texcoordu - cache_mesh.min_texcoordu));
-        pop_geometry.setAttribute('texcoordMinV', cache_mesh.min_texcoordv);
-        pop_geometry.setAttribute('texcoordScaleV', (cache_mesh.max_texcoordv - cache_mesh.min_texcoordv));
+                for (var lvl = 0; lvl < cache_mesh.num_levels; lvl++) {
+                    var pop_geometry_level = xml_doc.createElement('PopGeometryLevel');
 
+                    pop_geometry_level.setAttribute('src', 'src_bin/' + db_name + '/' + mesh_id + '/level' + lvl + '.pbf');
+                    pop_geometry_level.setAttribute('numIndices', cache_mesh[lvl].num_idx);
+                    pop_geometry_level.setAttribute('vertexDataBufferOffset', cache_mesh[lvl].num_vertices);
 
-        for (var lvl = 0; lvl < cache_mesh.num_levels; lvl++) {
-            var pop_geometry_level = xml_doc.createElement('PopGeometryLevel');
+                    pop_geometry_level.textContent = ' ';
+                    pop_geometry.appendChild(pop_geometry_level);
+                }
 
-            pop_geometry_level.setAttribute('src', 'src_bin/' + db_name + '/' + mesh_id + '/level' + lvl + '.pbf');
-            pop_geometry_level.setAttribute('numIndices', cache_mesh[lvl].num_idx);
-            pop_geometry_level.setAttribute('vertexDataBufferOffset', cache_mesh[lvl].num_vertices);
+                shape.appendChild(pop_geometry);
 
-            pop_geometry_level.textContent = ' ';
-            pop_geometry.appendChild(pop_geometry_level);
-        }
-
-        shape.appendChild(pop_geometry);
-
-        shape.setAttribute('bboxCenter', bbox.center.join(' '));
-        shape.setAttribute('bboxSize', bbox.size.join(' '));
-
+                shape.setAttribute('bboxCenter', bbox.center.join(' '));
+                shape.setAttribute('bboxSize', bbox.size.join(' '));
+            }
+        });
 
         break;
     }
 };
 
-exports.get_texture = function(db_interface, db_name, uuid, res) {
+exports.get_texture = function(db_interface, db_name, uuid, res, err_callback) {
     logger.log('debug', 'Reading texture ' + uuid);
-    db_interface.get_texture(db_name, uuid, function(err, doc) {
+    db_interface.get_texture(null, db_name, uuid, function(err, doc) {
+        if (err) return onError(err);
+
         res.write(doc.textures[uuid].data.buffer, 'binary');
         res.end();
     });
 };
 
-exports.get_mesh_bin = function(db_interface, db_name, uuid, type, res) {
+exports.get_mesh_bin = function(db_interface, db_name, uuid, type, res, err_callback) {
+
     logger.log('debug', 'Requesting binary ' + type + ' for ' + uuid);
-    db_interface.get_texture(db_name, uuid, function(err, doc) {
+    db_interface.get_texture(null, db_name, uuid, function(err, doc) {
+        if (err) return onError(err);
+
         var mesh = doc.meshes[uuid];
 
         switch (type) {
@@ -644,25 +733,23 @@ exports.get_mesh_bin = function(db_interface, db_name, uuid, type, res) {
 };
 
 
-exports.render = function(db_interface, db_name, format, sub_format, level, uuid, tex_uuid, res) {
-
+exports.render = function(db_interface, db_name, format, sub_format, level, uuid, tex_uuid, res, err_callback) {
     logger.log('debug', 'Rendering ' + format + ' (' + sub_format + ') - UUID : ' + uuid);
 
     var is_pbf = (sub_format == 'pbf');
 
-    db_interface.get_mesh(db_name, uuid, is_pbf, tex_uuid, function(err, doc) {
-        if (err) throw err;
+    db_interface.get_mesh(null, db_name, uuid, is_pbf, tex_uuid, function(err, doc) {
+        if (err) return onError(err);
+
         switch (format) {
         case "pbf":
-            if (!(uuid in GLOBAL.pbf_cache)) {
-                logger.log('error', 'Not in cache ' + uuid);
-                res.end("Shouldn't be here. Missing from cache");
-            } else {
+            getPopCache(null, db_interface, db_name, true, level, uuid, function(err) {
                 logger.log('info', 'Outputting level ' + level);
-                res.write(GLOBAL.pbf_cache[uuid][level].idx_buf, 'binary');
-                res.write(GLOBAL.pbf_cache[uuid][level].vert_buf, 'binary');
+
+                res.write(GLOBAL.pbf_cache[uuid][level].idx_buf.buffer, 'binary');
+                res.write(GLOBAL.pbf_cache[uuid][level].vert_buf.buffer, 'binary');
                 res.end();
-            }
+            });
 
             break;
         case "xml":
@@ -672,12 +759,19 @@ exports.render = function(db_interface, db_name, format, sub_format, level, uuid
             for (var mesh_id in doc['meshes']) {
                 var mesh = doc['meshes'][mesh_id];
                 var mat = getMaterial(mesh, 0);
-                X3D_AddShape(xml_doc, db_name, mesh, mat, sub_format);
+                logger.log('info', 'Adding Shapes for mesh ' + mesh_id);
+                X3D_AddShape(xml_doc, db_interface, db_name, mesh, mat, sub_format);
             }
 
-            db_interface.get_db_list(function(db_list) {
+            db_interface.get_db_list(null, function(err, db_list) {
+                if (err) return onError(err);
+
+                var xml_str = new xml_serial().serializeToString(xml_doc);
+
+                logger.log('debug', 'Generated XML: ' + xml_str);
+
                 res.render('index', {
-                    xml: new xml_serial().serializeToString(xml_doc),
+                    xml: xml_str,
                     x3domjs: config.external.x3domjs,
                     x3domcss: config.external.x3domcss,
                     repouicss: config.external.repouicss,
@@ -877,7 +971,8 @@ exports.render = function(db_interface, db_name, format, sub_format, level, uuid
             break;
 
         default:
-            throw "Format Not Supported";
+            err = "Format Not Supported";
+            err_callback(err);
         };
     });
 }
