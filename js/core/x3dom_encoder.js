@@ -443,20 +443,38 @@ function X3D_CreateScene(xml_doc) {
     scene.appendChild(vpoint);
   */
 
-    //var bground = xml_doc.createElement('background');
-    //bground.setAttribute('skycolor', '1 1 1');
-    //scene.appendChild(bground);
-    var environ = xml_doc.createElement('environment');
+    xml_doc.firstChild.appendChild(scene);
 
+    // Background color (ie skybox)
+    var bground = xml_doc.createElement('background');
+    bground.setAttribute('skyangle', '0.9 1.5 1.57');
+    bground.setAttribute('skycolor', '0.21 0.18 0.66 0.2 0.44 0.85 0.51 0.81 0.95 0.83 0.93 1');
+    bground.setAttribute('groundangle', '0.9 1.5 1.57');
+    bground.setAttribute('groundcolor', '0.65 0.65 0.65 0.73 0.73 0.73 0.81 0.81 0.81 0.91 0.91 0.91'); 
+    bground.textContent = ' ';
+    scene.appendChild(bground);
+
+
+    var fog = xml_doc.createElement('fog');
+    fog.setAttribute('visibilityRange', '300');
+    fog.setAttribute('color', '1,1,1');
+    fog.setAttribute('fogType', 'LINEAR');
+    fog.textContent = ' ';
+    scene.appendChild(fog);
+  
+
+    // Environmental variables
+    var environ = xml_doc.createElement('environment');
     environ.setAttribute('frustumCulling', 'true');
     environ.setAttribute('smallFeatureCulling', 'true');
     environ.setAttribute('smallFeatureThreshold', 5);
     environ.setAttribute('occlusionCulling', 'true');
     environ.textContent = ' ';
 
-    xml_doc.firstChild.appendChild(scene);
-
     scene.appendChild(environ);
+
+    
+
 
     /*
     var trans = xml_doc.createElement('Transform');

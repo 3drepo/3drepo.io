@@ -18,9 +18,12 @@
         "xmldom": "latest",
         "semaphore": "latest",
         "jquery": "latest",
-	    "basic-auth": "latest",
-		"serve-favicon": "latest",
-		"json": "latest",
-		"body-parser": "latest"
+        "basic-auth": "latest",
+	"serve-favicon": "latest",
+	"json": "latest",
+	"body-parser": "latest",
+	"method-override" : "latest",
+	"compression" : "latest"
+
     }
 }
