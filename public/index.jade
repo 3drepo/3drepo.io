@@ -2,7 +2,126 @@ extends layout
 
 block content
 	script.
+		var Measurer = function() {
+			this.v1 = {x:0, y:0, z:0};
+			this.v2 = {x:0, y:0, z:0};
+
+			this.currentPoint = this.v1;
+
+			this.updatePoint = function(x,y,z) 
+			{
+				this.currentPoint.x = x;
+				this.currentPoint.y = y;
+				this.currentPoint.z = z;
+
+				document.getElementById("line").setAttribute("point", this.v1.x + " " + this.v1.y + " " + this.v1.z + "," + this.v2.x + " " + this.v2.y + " " + this.v2.z);
+			}
+
+			this.togglePoint = function()
+			{
+				if (this.currentPoint == this.v1)
+				{
+					this.currentPoint = this.v2;
+					document.getElementById("lineTrafo").setAttribute("render", "true");
+				} else {
+					this.currentPoint = this.v1;
+					document.getElementById("lineTrafo").setAttribute("render", "false");
+				}
+			};
+
+			this.distance = function()
+			{
+				var vec = {x: (this.v1.x - this.v2.x),
+					y: (this.v1.y - this.v2.y),
+					z: (this.v1.z - this.v2.z)};
+
+				return Math.sqrt ( Math.pow(vec.x, 2) + 
+						Math.pow(vec.y, 2) + 
+						Math.pow(vec.z, 2) );
+			};
+		}
+
+
+		$(document).ready(function() {
+			window.measurer = new Measurer();
+			var shapes = document.getElementsByTagName("shape");
+
+			for (var i = 0; i < shapes.length; i++) {
+				shapes[i].onclick = function (event)
+				{
+					if (window.old_object)
+						window.old_object.attr('emissiveColor', "0 0 0");
+
+					document.getElementById('popup').style.visibility = "visible";
+
+					window.old_object = $(this).children('appearance').children('material');
+					$(this).children('appearance').children('material').attr('emissiveColor', '1.0 0.5 0');
+					$('#mesh_name').text($(this).attr('def'));
+
+					$('#price_val').text('£' + (Math.random() * 1000).toFixed(2));
+
+					if (window.toggleMeasure)
+					{
+						window.measurer.togglePoint();	
+					}
+				};
+
+				shapes[i].onmouseover = function (event)
+				{
+					if (window.toggleMeasure)
+					{
+						window.measurer.updatePoint(event.worldX, event.worldY, event.worldZ);			
+					}
+				};
+	
+				shapes[i].onmousemove = function (event)
+				{
+					if (window.toggleMeasure)
+					{
+						window.measurer.updatePoint(event.worldX, event.worldY, event.worldZ);
+						$('#distance').text(measurer.distance().toFixed(2) + ' m');
+					}	
+				};
+			}
+
+			var scene = document.getElementsByTagName("scene")[0];
+
+			var trans = document.createElement("Transform");
+			trans.setAttribute("id", "lineTrafo");
+			trans.setAttribute("render", "false");
+
+			scene.appendChild(trans);
+
+			var shape = document.createElement("Shape");
+			shape.setAttribute("isPickable","false");
+
+			trans.appendChild(shape);
+
+			var app = document.createElement("Appearance");
+			shape.appendChild(app);
+
+			var mat = document.createElement("Material");
+			mat.setAttribute("emissiveColor", "1 0 0");
+			app.appendChild(mat);
+
+			var dep = document.createElement("DepthMode");
+			dep.setAttribute("enableDepthTest","false");
+			app.appendChild(dep);
+
+			var idls = document.createElement("IndexedLineSet");
+			idls.setAttribute("coordIndex", "0 1 0 -1");
+			shape.appendChild(idls);
+
+			var coord = document.createElement("Coordinate");
+			coord.setAttribute("id","line");
+			coord.setAttribute("point"," 0.0 0.0 0.0, 1.0 1.0 1.0");
+			idls.appendChild(coord);
+
+		});
+
 		document.onload = function(e) {
+			window.toggleMeasure = false;
+
 			jQuery("#view-everything").click(function(e) {
 				document.getElementById("model").runtime.showAll();
 			});
@@ -11,52 +130,27 @@ block content
 				document.getElementById("model").runtime.resetView();
 			});
 
-			jQuery("#show-about").click(function(e) {
-				BootstrapDialog.show({
-					title: '3D Repo Viewer',
-					message: 'About 3D Repo Here\n<a \
-					href="http://3drepo.org">Homepage</a>'
-				});
+			jQuery("#examine").click(function(e) {
+				document.getElementById("model").runtime.showAll();
 			});
 
-			x3dom.nodeTypes.PopGeometry.PrecisionFactorOnMove = 1.0;
-			x3dom.nodeTypes.PopGeometry.ErrorToleranceFactor = 1.0;
-
-			GlobalSettings = function()
-			{
-				this.minPrecBits = 16;
-				this.maxPrecBits = 0;
-				this.getPrecBitsString = function()
+			jQuery("#measure").click(function(e) {
+				if (window.toggleMeasure)
 				{
-					return (this.minPrecBits + " - " + this.maxPrecBits);
+					$("#x3dom-model-canvas").css("cursor", "default");
+					$("#distance").css("visibility", "hidden");
+					$("#dist_name").css("visibility", "hidden");
 				}
-				this.precisionBitsString = this.getPrecBitsString();
-			}
-
-			globalSetting = new GlobalSettings();
-
-			var onExitFrame = function()
-			{
-				//update the current value of the progressbar, computed during rendering
-				var popGeos = document.getElementsByTagName("popGeometry");
-				globalSetting.minPrecBits = 16;
-				globalSetting.maxPrecBits = 0;
-
-				var numRenderedSubs = popGeos.length;
-				for (var i = 0; i < popGeos.length; ++i)
+				else
 				{
-					var lod = popGeos[i]._x3domNode._mesh.currentLOD;
-					globalSetting.minPrecBits = lod < globalSetting.minPrecBits ? lod : globalSetting.minPrecBits;
-					globalSetting.maxPrecBits = lod > globalSetting.maxPrecBits ? lod : globalSetting.maxPrecBits;
+					$("#x3dom-model-canvas").css("cursor", "crosshair");
+					$("#lineTrafo").prop("render", false);
+					$("#distance").css("visibility", "visible");
+					$("#dist_name").css("visibility", "visible");
 				}
 
-				console.log('MIN: ' + globalSetting.minPrecBits);
-				console.log('MAX: ' + globalSetting.maxPrecBits);
-
-				this.canvas.doc.needRender = true;
-			}
-
-			document.getElementById('model').runtime.exitFrame = onExitFrame;
+				window.toggleMeasure = !window.toggleMeasure;
+			});
 
 		};
 	h1#logo 3D Repo
@@ -66,17 +160,22 @@ block content
 				button.navbar-toggle.collapsed(type="button" data-toggle="collapse" data-target=".navbar-collapse")
 					span.glyphicon.glyphicon-th
 					span.icon-bar
-					span.icon-bar	
 			div.collapse.navbar-collapse
 				ul.nav.navbar-nav
+					li.dropdown
+						a.dropdown-toggle(data-toggle="dropdown" href='#') Tools
+							span.caret
+						ul.dropdown-menu(role='menu')
+							li
+								a#measure(href='#') Measure
 					li.dropdown
 						a.dropdown-toggle(data-toggle="dropdown" href='#') View
 							span.caret
 						ul.dropdown-menu(role='menu')
 							li
-								a(href='#' id="view-everything") Everything
+								a#view-everything(href='#') Everything
 							li
-								a(href='#' id="view-def-viewpoint") Default Viewpoint
+								a#view-def-viewpoint(href='#') Default Viewpoint
 					li.dropdown
 						a.dropdown-toggle(data-toggle="dropdown"
 								href="#") Mesh
@@ -85,5 +184,14 @@ block content
 							each mesh in repo
 								li
 									a(href='/3drepoio/' + mesh)= mesh
+	div.container#popup
+		strong#mesh_name(style='color:blue;') Mesh Name
+		br
+		strong Price:
+		strong#price_val
+		br
+		strong#dist_name Distance:
+		strong#distance 0.00 m
 	!{xml}
+
 

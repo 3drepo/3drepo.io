@@ -43,6 +43,26 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#579ce4', end
   
 }
 
+#popup {
+	position: absolute;
+	bottom: 10px;
+	left: 10px;
+	z-index: 1000;
+	background-color: rgba(255, 255, 255, 0.2);
+	width: 400px;
+	padding: 10px;
+	visibility: hidden;
+}
+
+#dist_name {
+	visibility: hidden;
+}
+
+#distance {
+	visibility: hidden;
+	color: red;
+}
+
 
 h1#logo { 
     font-family: '3drepo-font', sans-serif;
