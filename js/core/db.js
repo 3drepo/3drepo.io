@@ -52,25 +52,37 @@ MongoDB.prototype.db_callback = function(err, dbname, callback) {
         auto_reconnect: true,
     });
 
-
     logger.log('info', 'Opening database ' + dbname);
     var db = new mongo.Db(dbname, self.serv, {
         safe: false
     });
+
     db.open(function(err, db_conn) {
-		if (err) return onError(err);
 
-        logger.log('debug', err);
+        if (err) return onError(err);
 
-        self.db_conns[dbname] = db_conn;
+        var adminDb = db.admin();
 
-        db_conn.on('close', function(err) {
-			logger.log('debug', 'Closing connection to ' + dbname + '. REASON: ' + err);
-            delete(self.db_conns[dbname]);
-        })
+        adminDb.authenticate(config.db.username, config.db.password, function(err) {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            console.log('Database user authenticated');
 
-        return callback(err, db_conn);
-    })
+            logger.log('debug', err);
+
+            self.db_conns[dbname] = db_conn;
+
+            db_conn.on('close', function(err) {
+                logger.log('debug', 'Closing connection to ' + dbname + '. REASON: ' + err);
+                delete(self.db_conns[dbname]);
+            })
+
+            return callback(err, db_conn);
+        });
+    });
+
 }
 
 MongoDB.prototype.Binary = mongo.Binary;
