@@ -65,12 +65,10 @@ MongoDB.prototype.db_callback = function(err, dbname, callback) {
 
         adminDb.authenticate(config.db.username, config.db.password, function(err) {
             if (err) {
-                console.log(err);
+                logger.log('debug', err);
                 return;
             }
-            logger.log('Database user authenticated', err);
-
-            logger.log('debug', err);
+            logger.log('debug', 'Authentication successful');
 
             self.db_conns[dbname] = db_conn;
 
