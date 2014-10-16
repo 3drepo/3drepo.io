@@ -68,7 +68,7 @@ MongoDB.prototype.db_callback = function(err, dbname, callback) {
                 console.log(err);
                 return;
             }
-            console.log('Database user authenticated');
+            logger.log('Database user authenticated', err);
 
             logger.log('debug', err);
 
