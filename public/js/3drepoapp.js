@@ -4,62 +4,62 @@ angular.module('3drepoapp', ['ui.event'])
   var o = {
     tree : [
       { 
-        name: "Body", bid: 12, linked: true, selected: true, expanded: true, nodes:[
+        name: "Body", bid: 12, linked: true, expanded: true, nodes:[
           {
-            name: "Left Leg", bid: 18, selected: false, expanded: false
+            name: "Left Leg", bid: 18, expanded: false
           },
           {
-            name: "Right Leg", bid: 18, selected: false, expanded: false
+            name: "Right Leg", bid: 18, expanded: false
           },
           {
-            name: "Left Arm", bid: 14,  linked: true, selected: false, expanded: true, nodes:[
+            name: "Left Arm", bid: 14,  linked: true, expanded: true, nodes:[
               {
-                name: "Left Hand", bid: 17, linked: true, selected: false, expanded: false, nodes:[
+                name: "Left Hand", bid: 17, linked: true, expanded: false, nodes:[
                   {
-                    name: "Left Finger 1", bid: 1, selected: false, expanded: false
+                    name: "Left Finger 1", bid: 1, expanded: false
                   },
                   {
-                    name: "Left Finger 2", bid: 2, selected: false, expanded: false
+                    name: "Left Finger 2", bid: 2, expanded: false
                   },
                   {
-                    name: "Left Finger 3", bid: 1, selected: false, expanded: false
+                    name: "Left Finger 3", bid: 1, expanded: false
                   },
                   {
-                    name: "Left Finger 4", bid: 3, selected: false, expanded: false
+                    name: "Left Finger 4", bid: 3, expanded: false
                   },
                   {
-                    name: "Left Finger 5", bid: 5, selected: false, expanded: false
+                    name: "Left Finger 5", bid: 5, expanded: false
                   },
                 ]
               },
               {
-                name: "Left Forearm", bid: 5, selected: false, expanded: false
+                name: "Left Forearm", bid: 5, expanded: false
               },
             ]
           },
           {
-            name: "Right Arm", bid: 14,  linked: true, selected: false, expanded: true, nodes:[
+            name: "Right Arm", bid: 14,  linked: true, expanded: true, nodes:[
               {
-                name: "Right Hand", bid: 17, linked: true, selected: false, expanded: false, nodes:[
+                name: "Right Hand", bid: 17, linked: true, expanded: false, nodes:[
                   {
-                    name: "Right Finger 1", bid: 3, selected: false, expanded: false
+                    name: "Right Finger 1", bid: 3, expanded: false
                   },
                   {
-                    name: "Right Finger 2", bid: 4, selected: false, expanded: false
+                    name: "Right Finger 2", bid: 4, expanded: false
                   },
                   {
-                    name: "Right Finger 3", bid: 10, selected: false, expanded: false
+                    name: "Right Finger 3", bid: 10, expanded: false
                   },
                   {
-                    name: "Right Finger 4", bid: 0, selected: false, expanded: false
+                    name: "Right Finger 4", bid: 0, expanded: false
                   },
                   {
-                    name: "Right Finger 5", bid: 1, selected: false, expanded: false
+                    name: "Right Finger 5", bid: 1, expanded: false
                   },
                 ]
               },
               {
-                name: "Right Forearm", bid: 7, selected: false, expanded: false
+                name: "Right Forearm", bid: 7, expanded: false
               },
             ]
           },
@@ -78,6 +78,7 @@ angular.module('3drepoapp', ['ui.event'])
   $scope.total_bid = 0;
 
   $scope.objs = objs;
+  $scope.selected_node = "";
 
   Behaviour.picked = function(item){
     console.log('Picked item: ');
@@ -90,7 +91,6 @@ angular.module('3drepoapp', ['ui.event'])
     for (var i = 0; i < arrayLength; i++) {
         // Add needed fields
         o[i]['bid'] = 0;
-        o[i]['selected'] = false;
         o[i]['expanded'] = false;
       }
   }
@@ -164,13 +164,7 @@ angular.module('3drepoapp', ['ui.event'])
   }
 
   $scope.select_item = function(item){
-
-    var arrayLength = $scope.tree.length;
-    for (var i = 0; i < arrayLength; i++) {
-      $scope.deselect_all($scope.tree[i]);
-    }
-
-    item.selected = !item.selected;
+    $scope.selected = item.name;
   }
 
   $scope.toggle_expand = function(item){

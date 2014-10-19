@@ -194,7 +194,7 @@ block content
 
 		//- Recurse on chilren
 		ul(ng-show="data.expanded" class="nav nav-pills nav-stacked treerow")
-			li(ng-repeat="data in data.nodes | orderBy:name" class="{{data.selected ? 'active' : ''}}" ng-include="'tree_element.html'")
+			li(ng-repeat="data in data.nodes | orderBy:name" class="{{selected === data.name ? 'active' : ''}}" ng-include="'tree_element.html'")
 
 	//- Hack for the demo, render the list of objects
 	script.
@@ -238,7 +238,7 @@ block content
 			div.treeview-header
 				h3 Total Bid: £{{compute_total()}}
 			ul(class="nav nav-pills nav-stacked treerow")
-				li(ng-repeat="data in tree" class="{{data.selected ? 'active' : ''}}" ng-include="'tree_element.html'")
+				li(ng-repeat="data in tree" class="{{selected === data.name ? 'active' : ''}}" ng-include="'tree_element.html'")
 		div.viewport
 			//- POPUP is missing for the moment
 			!{xml}
