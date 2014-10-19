@@ -190,7 +190,7 @@ block content
 					i(ng-class="iconLink" class="icon")
 				//- Bid input - make sure to defocus on enter, only allow numbers for the moment, bind to the current data.bid						
 				div(class="itemprice")
-					input(ui-event="{keypress:'blurOnEnter($event)'}" class="priceinput" type="tel" onkeypress='return event.charCode >= 48 && event.charCode <= 57' min="0" ng-model="data.bid" size="20")
+					input(ui-event="{keypress:'blur_on_enter($event)'}" class="priceinput" type="tel" onkeypress='return event.charCode >= 48 && event.charCode <= 57' min="0" ng-model="data.bid" size="20")
 
 		//- Recurse on chilren
 		ul(ng-show="data.expanded" class="nav nav-pills nav-stacked treerow")

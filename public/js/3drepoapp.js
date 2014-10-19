@@ -67,10 +67,6 @@ angular.module('3drepoapp', ['ui.event'])
     ]
   }
 
-  o.totalPrice = function(node){
-
-  }
-
   return o;
 }])
 .controller('TreeviewCtrl', ['$scope', 'tree', function($scope, tree){
@@ -103,7 +99,7 @@ angular.module('3drepoapp', ['ui.event'])
   //$scope.tree = $scope.objs;
   $scope.tree = tree.tree;
 
-  $scope.blurOnEnter = function($event){
+  $scope.blur_on_enter = function($event){
     if($event.keyCode == 13){
       $event.target.blur();
     }
