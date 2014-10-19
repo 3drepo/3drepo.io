@@ -539,7 +539,7 @@ function X3D_AddShape(xml_doc, db_interface, db_name, mesh, mat, mode) {
         if ('children' in mat) {
             var texture = xml_doc.createElement('ImageTexture');
             var tex = mat.children[0];
-            texture.setAttribute('url', db_name + '/textures/' + tex['id'] + '.' + tex['extension']);
+            texture.setAttribute('url', '/data/' + db_name + '/textures/' + tex['id'] + '.' + tex['extension']);
             texture.textContent = ' ';
             appearance.appendChild(texture);
         }
@@ -614,9 +614,9 @@ function X3D_AddShape(xml_doc, db_interface, db_name, mesh, mat, mode) {
 
         if ('children' in mat) {
             var tex_id = mat['children'][0]['id'];
-            externalGeometry.setAttribute('url', 'src_bin/' + db_name + '/' + mesh_id + '.src/' + tex_id);
+            externalGeometry.setAttribute('url', '/data/src_bin/' + db_name + '/' + mesh_id + '.src/' + tex_id);
         } else {
-            externalGeometry.setAttribute('url', 'src_bin/' + db_name + '/' + mesh_id + '.src');
+            externalGeometry.setAttribute('url', '/data/src_bin/' + db_name + '/' + mesh_id + '.src');
         }
 
         //externalGeometry.setAttribute('url', '../x3dom_example/src0.src');
@@ -678,7 +678,7 @@ function X3D_AddShape(xml_doc, db_interface, db_name, mesh, mat, mode) {
                 for (var lvl = 0; lvl < cache_mesh.num_levels; lvl++) {
                     var pop_geometry_level = xml_doc.createElement('PopGeometryLevel');
 
-                    pop_geometry_level.setAttribute('src', 'src_bin/' + db_name + '/' + mesh_id + '/level' + lvl + '.pbf');
+                    pop_geometry_level.setAttribute('src', '/data/src_bin/' + db_name + '/' + mesh_id + '/level' + lvl + '.pbf');
                     pop_geometry_level.setAttribute('numIndices', cache_mesh[lvl].num_idx);
                     pop_geometry_level.setAttribute('vertexDataBufferOffset', cache_mesh[lvl].num_vertices);
 
@@ -751,7 +751,7 @@ exports.get_mesh_bin = function(db_interface, db_name, uuid, type, res, err_call
 };
 
 
-exports.render = function(db_interface, db_name, format, sub_format, level, uuid, tex_uuid, res, err_callback) {
+exports.render = function(db_interface, db_name, format, sub_format, level, uuid, tex_uuid, xmltemplate, res, err_callback) {
     logger.log('debug', 'Rendering ' + format + ' (' + sub_format + ') - UUID : ' + uuid);
 
     var is_pbf = (sub_format == 'pbf');
@@ -774,11 +774,24 @@ exports.render = function(db_interface, db_name, format, sub_format, level, uuid
             var xml_doc = X3D_Header();
             X3D_CreateScene(xml_doc);
 
+            // Hack for the demo, generate objects server side
+            json_objs = [];
+
             for (var mesh_id in doc['meshes']) {
                 var mesh = doc['meshes'][mesh_id];
                 var mat = getMaterial(mesh, 0);
                 logger.log('info', 'Adding Shapes for mesh ' + mesh_id);
                 X3D_AddShape(xml_doc, db_interface, db_name, mesh, mat, sub_format);
+
+                // TODO: This needs to make a tree structure
+                json_obj = {};
+                if(mesh['name']){
+                    json_obj['name'] = mesh.name;
+                }
+                else{
+                    json_obj['name'] = 'undefined';   
+                }
+                json_objs.push(json_obj);
             }
 
             db_interface.get_db_list(null, function(err, db_list) {
@@ -788,12 +801,13 @@ exports.render = function(db_interface, db_name, format, sub_format, level, uuid
 
                 logger.log('debug', 'Generated XML: ' + xml_str);
 
-                res.render('index', {
+                res.render(xmltemplate, {
                     xml: xml_str,
                     x3domjs: config.external.x3domjs,
                     x3domcss: config.external.x3domcss,
                     repouicss: config.external.repouicss,
-                    repo: db_list
+                    repo: db_list,
+                    objs: JSON.stringify(json_objs)
                 });
             });
 

@@ -105,6 +105,10 @@ div#x3dom_logdiv.x3dom-logcontainer {
     background: rgba(0,0,0,0.4);
 }
 
+.whitenavbar {
+    background-color: #FFF !important;
+}
+
 .scrollable-menu {
     height: auto;
     max-height: 200px;
@@ -121,3 +125,103 @@ nav.navbar.transparent.navbar-inverse.navbar-fixed-top {
     border-color: transparent !important; 
 }
 
+.fill {
+    background-color: #EEE;
+    display:block;
+    position:absolute;
+    height:auto;
+    bottom:0;
+    top:0;
+    left:0;
+    right:0;
+    margin-top:50px; /* Set margin to your navbar height */
+}
+
+/* Tree view stuff */
+
+.treeview {
+    background-color: #EEE;
+    width: 490px;
+    height: 100%;
+    position: absolute;
+    overflow: scroll;
+}
+
+.treeview-header{
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.viewport {
+    background-color: #00F;
+    margin-left: 500px;
+    height: 100%;
+}
+
+.treerow{
+    margin-left: 10px;
+    text-align: left !important;
+}
+
+.itemlabel{
+    text-align: left !important;
+    float: left;
+    width: 400px !important;
+    margin-left: 10px;
+}
+
+.itempricegroup{
+    float: right;
+    text-align: right !important;
+    min-width: 200px;
+    height: 20px;
+    margin: 0px !important;
+}
+
+.itemprice{
+    float: right;
+    text-align: right !important;
+    min-width: 20px;
+    height: 20px !important;
+    position: relative;
+}
+
+.priceinput{
+    width: 200px;
+    border: none; 
+    text-align: right;
+    background: transparent;
+    height: 20px !important;
+    padding: 0px !important;
+}
+
+.icon{
+    margin-right: 10px;
+}
+
+.linkicon{
+    float: right;
+    width: 10px;
+    min-width: 10px;
+    margin-left: 5px;
+    position: relative;
+    top: 2px;
+}
+
+.linkicon-disabled{
+    float: right;
+    width: 10px;
+    min-width: 10px;
+    margin-left: 5px;
+    position: relative;
+    top: 2px;
+    opacity: 0.25;
+}
+
+.linkicon-hidden{
+    float: right;
+    width: 10px;
+    min-width: 10px;
+    margin-left: 5px;
+    visibility: hidden;
+}

@@ -4,11 +4,15 @@ html
 		title 3drepo.io 
 		link(rel='stylesheet' type='text/css' href='#{x3domcss}')
 		script(type="text/javascript" src='#{x3domjs}')
+		script(type="text/javascript" src='https:////cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular.min.js')
+		script(type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-utils/0.1.1/angular-ui-utils.min.js')
+		script(type="text/javascript" src='../js/3drepoapp.js')
+
 		link(rel='stylesheet', href='../bootstrap/dist/css/bootstrap.min.css')
 		script(type="text/javascript" src="../jquery/dist/jquery.min.js")
 		script(type="text/javascript" src="../bootstrap/dist/js/bootstrap.min.js")
 		script(type="text/javascript" src="../bootstrap3-dialog/dist/js/bootstrap-dialog.min.js")
 		link(rel='stylesheet' type='text/css' href='#{repouicss}')
 
-		body
+		body(ng-app='3drepoapp')
 			block content

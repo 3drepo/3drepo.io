@@ -70,33 +70,38 @@ app.get('/', auth, function(req, res, next) {
 });
 
 app.get('/3drepoio/:db_name', function(req, res, next) {
-    console.log('Opening scene ' + req.param('db_name'));
-    x3dom_encoder.render(db_interface, req.param('db_name'), 'xml', 'pbf', null, null, null, res, function(err) {
+    x3dom_encoder.render(db_interface, req.param('db_name'), 'xml', 'pbf', null, null, null, 'index', res, function(err) {
         onError(err);
     });
 });
 
-app.get('/3drepoio/src_bin/:db_name/:uuid/level:lvl.pbf', function(req, res, next) {
-    x3dom_encoder.render(db_interface, req.param('db_name'), 'pbf', null, req.param('lvl'), req.param('uuid'), null, res, function(err) {
+app.get('/bid4free/:db_name', function(req, res, next) {
+    x3dom_encoder.render(db_interface, req.param('db_name'), 'xml', 'pbf', null, null, null, 'bid4free', res, function(err) {
         onError(err);
     });
 });
 
-app.get('/3drepoio/:db_name/textures/:uuid.:format', function(req, res, next) {
+app.get('/data/src_bin/:db_name/:uuid/level:lvl.pbf', function(req, res, next) {
+    x3dom_encoder.render(db_interface, req.param('db_name'), 'pbf', null, req.param('lvl'), req.param('uuid'), null, null, res, function(err) {
+        onError(err);
+    });
+});
+
+app.get('/data/:db_name/textures/:uuid.:format', function(req, res, next) {
     x3dom_encoder.get_texture(db_interface, req.param('db_name'), req.param('uuid'), res, function(err) {
         onError(err);
     });
 });
 
-app.get('/3drepoio/:db_name/:type/:uuid.bin', function(req, res, next) {
+app.get('/data/:db_name/:type/:uuid.bin', function(req, res, next) {
     x3dom_encoder.get_mesh_bin(db_interface, req.param('db_name'), req.param('uuid'), req.param('type'), res, function(err) {
         onError(err);
     });
 });
 
-app.get('/3drepoio/src_bin/:db_name/:uuid.:format/:texture?', function(req, res, next) {
+app.get('/data/src_bin/:db_name/:uuid.:format/:texture?', function(req, res, next) {
     logger.log('debug', 'Requesting mesh ' + req.param('uuid') + ' ' + req.param('texture'));
-    x3dom_encoder.render(db_interface, req.param('db_name'), req.param('format'), null, null, req.param('uuid'), req.param('texture'), res, function(err) {
+    x3dom_encoder.render(db_interface, req.param('db_name'), req.param('format'), null, null, req.param('uuid'), req.param('texture'), null, res, function(err) {
         onError(err);
     });
 });
