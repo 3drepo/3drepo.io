@@ -19,11 +19,16 @@
         "semaphore": "latest",
         "jquery": "latest",
         "basic-auth": "latest",
-	"serve-favicon": "latest",
-	"json": "latest",
-	"body-parser": "latest",
-	"method-override" : "latest",
-	"compression" : "latest"
-
+		"serve-favicon": "latest",
+		"json": "latest",
+		"body-parser": "latest",
+		"method-override" : "latest",
+		"compression" : "latest",
+		"passport": "latest",
+		"passport-local": "latest",
+		"mongoose": "latest",
+		"express-session": "latest",
+		"bcrypt-nodejs": "latest",
+		"connect-flash": "latest"
     }
 }

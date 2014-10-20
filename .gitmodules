@@ -13,3 +13,7 @@
 [submodule "public/bootstrap3-dialog"]
 	path = public/bootstrap3-dialog
 	url = https://github.com/nakupanda/bootstrap3-dialog.git
+[submodule "x3dom"]
+	path = public/x3dom
+	url = git://github.com/3drepo/x3dom.git
+	ignore=dirty

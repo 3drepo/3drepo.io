@@ -7,3 +7,7 @@ public/x3dom.debug.js
 /public/css/*.css~
 /*.log
 config.js
+config/live
+config/local
+public/x3dom
+

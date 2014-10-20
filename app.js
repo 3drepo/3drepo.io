@@ -38,6 +38,24 @@ var app = express();
 app.set('view engine', 'jade');
 app.set('views', './public');
 
+var mongoose = require('mongoose');
+var connect_url = 'mongodb://' + config.db.username + ":" + config.db.password + '@' + config.db.host + ':' + config.db.port;
+
+mongoose.connect(connect_url);
+
+var passport = require('passport');
+var expressSession = require('express-session');
+
+var initPassport = require('./passport/init');
+initPassport(passport);
+
+var flash = require('connect-flash');
+app.use(flash());
+
+app.use(expressSession({secret: 'secretKey', saveUninitialized: true, resave: true}));
+app.use(passport.initialize());
+app.use(passport.session());
+
 //var favicon = require('serve-favicon');
 //app.use(favicon(options.favicon));
 
@@ -50,61 +68,9 @@ app.use(compress({
 app.use(methodOverride());
 
 app.use(express.static('./public'));
-app.locals.pretty = true;
 
-var basicAuth = require('basic-auth');
-
-var auth = function (req, res, next) {
-	var user = basicAuth(req);
-
-	return authArray.some(function(entry) {
-		if (!user || !(user.name = entry.user) || !(user.pass == entry.pass)) {
-			res.set('WWW-Authenticate', 'Basic realm=Authorization Required.');
-			return res.send(401);
-		}
-	});
-};
-
-app.get('/', auth, function(req, res, next) {
-    res.end();
-});
-
-app.get('/3drepoio/:db_name', function(req, res, next) {
-    x3dom_encoder.render(db_interface, req.param('db_name'), 'xml', 'pbf', null, null, null, 'index', res, function(err) {
-        onError(err);
-    });
-});
-
-app.get('/bid4free/:db_name', function(req, res, next) {
-    x3dom_encoder.render(db_interface, req.param('db_name'), 'xml', 'pbf', null, null, null, 'bid4free', res, function(err) {
-        onError(err);
-    });
-});
-
-app.get('/data/src_bin/:db_name/:uuid/level:lvl.pbf', function(req, res, next) {
-    x3dom_encoder.render(db_interface, req.param('db_name'), 'pbf', null, req.param('lvl'), req.param('uuid'), null, null, res, function(err) {
-        onError(err);
-    });
-});
-
-app.get('/data/:db_name/textures/:uuid.:format', function(req, res, next) {
-    x3dom_encoder.get_texture(db_interface, req.param('db_name'), req.param('uuid'), res, function(err) {
-        onError(err);
-    });
-});
-
-app.get('/data/:db_name/:type/:uuid.bin', function(req, res, next) {
-    x3dom_encoder.get_mesh_bin(db_interface, req.param('db_name'), req.param('uuid'), req.param('type'), res, function(err) {
-        onError(err);
-    });
-});
-
-app.get('/data/src_bin/:db_name/:uuid.:format/:texture?', function(req, res, next) {
-    logger.log('debug', 'Requesting mesh ' + req.param('uuid') + ' ' + req.param('texture'));
-    x3dom_encoder.render(db_interface, req.param('db_name'), req.param('format'), null, null, req.param('uuid'), req.param('texture'), null, res, function(err) {
-        onError(err);
-    });
-});
+var routes = require('./routes.js')(passport);
+app.use('/', routes);
 
 http.createServer(app).listen(config.server.http_port, function() {
     logger.log('info', 'Application Started');

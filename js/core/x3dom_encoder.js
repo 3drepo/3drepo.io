@@ -418,8 +418,7 @@ function X3D_Header() {
 
 function X3D_CreateScene(xml_doc) {
     var scene = xml_doc.createElement('Scene');
-    scene.setAttribute('DEF', 'scene');
-
+	scene.setAttribute('DEF', 'scene');
 
     var head = xml_doc.createElement('navigationInfo');
 
@@ -430,19 +429,6 @@ function X3D_CreateScene(xml_doc) {
     head.textContent = ' ';
 
     //scene.appendChild(head);
-    /*    
-    var vpoint = xml_doc.createElement('Viewpoint');
-    vpoint.setAttribute('DEF', 'vpoint');
-    vpoint.setAttribute('position', '0 0 10');
-    vpoint.setAttribute('orientation', '-1 0 0 0');
-    vpoint.setAttribute('zNear', 0.01);
-    vpoint.setAttribute('zFar', 10000);
-
-    vpoint.textContent = ' ';
-
-    scene.appendChild(vpoint);
-  */
-
     xml_doc.firstChild.appendChild(scene);
 
     // Background color (ie skybox)
@@ -454,14 +440,14 @@ function X3D_CreateScene(xml_doc) {
     bground.textContent = ' ';
     scene.appendChild(bground);
 
-
+/*
     var fog = xml_doc.createElement('fog');
     fog.setAttribute('visibilityRange', '300');
     fog.setAttribute('color', '1,1,1');
     fog.setAttribute('fogType', 'LINEAR');
     fog.textContent = ' ';
     scene.appendChild(fog);
-  
+  */
 
     // Environmental variables
     var environ = xml_doc.createElement('environment');
@@ -473,17 +459,42 @@ function X3D_CreateScene(xml_doc) {
 
     scene.appendChild(environ);
 
-    
-
-
-    /*
     var trans = xml_doc.createElement('Transform');
-    trans.setAttribute('scale', '100 100 100');
     scene.appendChild(trans);
-    */
-
 }
 
+function X3D_AddViewpoint(xml_doc, bbox)
+{
+    var scene = xml_doc.getElementsByTagName('Scene')[0];
+	var vpos = [0,0,0];
+	
+	vpos[0] = bbox.center[0];
+	vpos[1] = bbox.center[1];
+	vpos[2] = bbox.center[2];
+
+	var max_dim = Math.max(bbox.size[0], bbox.size[1]) * 0.5;
+
+	var fov = 40 * (Math.PI / 180); // Field of view in radians
+
+	vpos[2] += bbox.size[2] * 0.5 + max_dim / Math.tan(0.5 * fov);
+
+	logger.log('debug', 'VPOS: ' + vpos.join(' '));
+	logger.log('debug', 'MAXDIM: ' + max_dim);	
+
+    var vpoint = xml_doc.createElement('Viewpoint');
+    vpoint.setAttribute('DEF', 'vpoint');
+    vpoint.setAttribute('position', vpos.join(' '));
+    vpoint.setAttribute('orientation', '0 0 -1 0');
+    vpoint.setAttribute('zNear', 0.01);
+
+	var zfar = (max_dim / Math.tan(0.5 * fov)) + bbox.size[2] * 3;
+    vpoint.setAttribute('zFar', zfar);
+	vpoint.setAttribute('fieldOfView', fov);
+
+    vpoint.textContent = ' ';
+
+    scene.appendChild(vpoint);
+}
 
 function X3D_AddShape(xml_doc, db_interface, db_name, mesh, mat, mode) {
     var mesh_id = mesh['id'];
@@ -777,9 +788,27 @@ exports.render = function(db_interface, db_name, format, sub_format, level, uuid
             // Hack for the demo, generate objects server side
             json_objs = [];
 
+			var scene_bbox_min = [];
+			var scene_bbox_max = [];
+
             for (var mesh_id in doc['meshes']) {
                 var mesh = doc['meshes'][mesh_id];
                 var mat = getMaterial(mesh, 0);
+	            var bbox = extractBoundingBox(mesh);
+
+
+				if (scene_bbox_min.length)
+				{
+					for(var idx = 0; idx < 3; idx++)
+					{
+						scene_bbox_min[idx] = Math.min(scene_bbox_min[idx], bbox.min[idx]);
+						scene_bbox_max[idx] = Math.max(scene_bbox_max[idx], bbox.max[idx]);
+					}
+				} else {
+					scene_bbox_min = bbox.min.slice(0);
+					scene_bbox_max = bbox.max.slice(0);
+				}
+
                 logger.log('info', 'Adding Shapes for mesh ' + mesh_id);
                 X3D_AddShape(xml_doc, db_interface, db_name, mesh, mat, sub_format);
 
@@ -793,6 +822,14 @@ exports.render = function(db_interface, db_name, format, sub_format, level, uuid
                 }
                 json_objs.push(json_obj);
             }
+
+			var bbox = {};
+			bbox.min = scene_bbox_min;
+			bbox.max = scene_bbox_max;
+			bbox.center = [0.5 * (bbox.min[0] + bbox.max[0]), 0.5 * (bbox.min[1] + bbox.max[1]), 0.5 * (bbox.min[2] + bbox.max[2])]; 
+			bbox.size = [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])]; 
+
+			X3D_AddViewpoint(xml_doc, bbox);
 
             db_interface.get_db_list(null, function(err, db_list) {
                 if (err) return onError(err);
