@@ -17,7 +17,8 @@
 
 module.exports = {
     server:  {
-        http_port: 8080
+        http_port: 8080,
+		https_port: 3000
     },
     logfile: {
         filename: '/var/log/3drepo.log',
@@ -26,8 +27,14 @@ module.exports = {
     },
     db: {
         host: 'localhost',
-        port: 27017
+        port: 27017,
+        username: 'username',
+        password: 'password'
     },
+	ssl: {
+		key: 'my_key.pem',
+		cert:'my_server.crt'
+	},
     external: {
         x3domjs  : '../js/x3dom.js',
         x3domcss : '../css/x3dom.css',

@@ -79,7 +79,6 @@ module.exports = function(passport)
 
 	router.get('/3drepoio/:db_name/:revision?', isAuth, function(req, res, next) {
 		logger.log('debug', 'Opening scene ' + req.param('db_name'));
-		console.log('DBNAME: ' + req.param('db_name') + ' [' + req.param('revision') + ']');	
 		interface.index('index', req.param('db_name'), 'src', req.param('revision'), res, function(err)
 		{
 			onError(err);
@@ -97,7 +96,7 @@ module.exports = function(passport)
 
 
 	router.get('*', function(req, res) {
-		logging.log('debug', 'Un-routed URL : ' + console.log(req.url));
+		logger.log('debug', 'Un-routed URL : ' + req.url);
 		res.redirect('/');
 	});
 

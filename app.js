@@ -17,7 +17,8 @@
 
 /*global require*/
 
-var http = require("http");
+var https = require("https");
+var fs = require('fs');
 var express = require('express');
 
 var log_iface = require('./js/core/logger.js');
@@ -70,7 +71,21 @@ app.use(methodOverride());
 var routes = require('./routes.js')(passport);
 app.use('/', routes);
 
-http.createServer(app).listen(config.server.http_port, function() {
-    logger.log('info', 'Application Started');
+var http = require('http');
+var http_app = express();
+
+http_app.get('*', function(req, res) {
+	res.redirect('https://' + req.headers.host + req.url);
+});
+
+http.createServer(http_app).listen(config.server.http_port);
+
+var ssl_options = {
+	key: fs.readFileSync(config.ssl.key),
+	cert: fs.readFileSync(config.ssl.cert)
+};
+
+https.createServer(ssl_options, app).listen(config.server.https_port, function() {
+    logger.log('info', 'HTTPS App Started');
 });
 

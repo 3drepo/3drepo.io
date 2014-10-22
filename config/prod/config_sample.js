@@ -17,7 +17,8 @@
 
 module.exports = {
     server:  {
-        http_port: 80
+        http_port: 80,
+        http_port: 443
     },
     logfile: {
         filename: '3drepo.log',
@@ -26,12 +27,17 @@ module.exports = {
     },
     db: {
         host: 'localhost',
-        port: 27017
+        port: 27017,
+        username: 'username',
+        password: 'password'
     },
+	ssl: {
+		key: 'my_key.pem',
+		cert:'my_server.crt'
+	},
     external: {
         x3domjs: 'http://x3dom.org/download/dev/x3dom.js',
         x3domcss : 'http://x3dom.org/download/dev/x3dom.css',
 		repouicss : 'http://3drepo.io/css/ui.css'
     }
 }
-
