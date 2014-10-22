@@ -38,6 +38,6 @@ module.exports = {
     external: {
         x3domjs: 'http://x3dom.org/download/dev/x3dom.js',
         x3domcss : 'http://x3dom.org/download/dev/x3dom.css',
-		repouicss : 'http://3drepo.io/css/ui.css'
+        repouicss : '../css/ui.css'
     }
 }

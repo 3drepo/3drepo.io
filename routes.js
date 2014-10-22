@@ -89,6 +89,24 @@ module.exports = function(passport)
 		}
 	});
 
+	router.get('/bid4free/:db_name.:subformat.:format.:options?/:revision?', isAuth, function(req, res, next) {
+		logger.log('debug', 'Opening scene ' + req.param('db_name'));
+
+		if (req.param('format') == 'x3d')
+		{
+			x3dom_encoder.render(db_interface, req.param('db_name'), req.param('format'), req.param('subformat'), null, req.param('revision'), null, null, res, function(err) {
+				onError(err);
+			});
+		} else if (req.param('format') == 'json') {
+			json_encoder.render(db_interface, req.param('db_name'), req.param('format'), req.param('subformat'), req.param('revision'), res, function(err) {
+				onError(err);
+			});
+		} else {
+			res.writeHead(501, {'Content-Type': 'application/json' });
+			res.end(JSON.stringify({ message: 'Not implemented' }));
+		}
+	});
+
 	router.get('/data/src_bin/:db_name/:uuid/level:lvl.pbf', isAuth, function(req, res, next) {
 		x3dom_encoder.render(db_interface, req.param('db_name'), 'pbf', null, req.param('lvl'), null, req.param('uuid'), null, res, function(err) {
 			onError(err);
@@ -130,7 +148,6 @@ module.exports = function(passport)
 			onError(err);
 		});
 	});
-
 
 	router.get('*', function(req, res) {
 		logger.log('debug', 'Un-routed URL : ' + req.url);

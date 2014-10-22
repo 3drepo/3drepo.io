@@ -80,11 +80,11 @@ angular.module('3drepoapp', ['ui.event'])
   $scope.objs = objs;
   $scope.selected_node = "";
 
-  Behaviour.picked = function(item){
-    console.log('Picked item: ');
-    console.log(item);
-    console.log('Need to extract def field and highlight');
-  }
+  // Behaviour.picked = function(item){
+  //   console.log('Picked item: ');
+  //   console.log(item);
+  //   console.log('Need to extract def field and highlight');
+  // }
 
   $scope.initialise_tree = function(o){
     var arrayLength = o.length;

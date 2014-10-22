@@ -36,9 +36,9 @@ module.exports = {
 		cert:'my_server.crt'
 	},
     external: {
-        x3domjs  : '../js/x3dom.js',
-        x3domcss : '../css/x3dom.css',
-    	repouicss : '../css/ui.css'
+        x3domjs: 'http://x3dom.org/download/dev/x3dom.js',
+        x3domcss : 'http://x3dom.org/download/dev/x3dom.css',
+        repouicss : '../css/ui.css'
     }
 }
 
