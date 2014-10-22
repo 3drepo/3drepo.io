@@ -1,19 +1,39 @@
-angular.module('3drepoapp', ['ui.event', 'ui.router'])
+angular.module('prototype', ['ui.event', 'ui.router'])
 .config(['$stateProvider', '$urlRouterProvider',  function($stateProvider, $urlRouterProvider) {
 
   $stateProvider
-  .state('scene', {
-    url: '/scene',
-    templateUrl: 'treeview.html',
-    controller: 'TreeviewCtrl',
+  .state('home', {
+    url: '/home',
+    templateUrl: 'home.html',
+    controller: 'HomeCtrl',
     resolve: {
-      treePromise: ['$stateParams', 'tree', function($stateParams, tree) {
-        return tree.initialise("sphere");
+      dbPromise: ['$stateParams', 'databases', function($stateParams, databases) {
+        return databases.getAll();
       }]
     }
+  })
+  .state('view', {
+    url: '/view/{id}',
+    templateUrl: 'view.html',
+    controller: 'ViewCtrl',
   });
 
-  $urlRouterProvider.otherwise('scene');
+  $urlRouterProvider.otherwise('home');
+}])
+.factory('databases', ['$http', function($http){
+
+  var o = {
+    databases:[
+    ]
+  };
+
+  o.getAll = function() {
+    return $http.get('/dblist').success(function(data){
+      angular.copy(data, o.databases);
+    });
+  };
+
+  return o;
 }])
 .factory('tree', ['$http', function($http){
 
@@ -86,14 +106,14 @@ angular.module('3drepoapp', ['ui.event', 'ui.router'])
   }
 
   o.populateNode = function(node, data){
-    console.log(data);
+    // console.log(data);
   }
 
   o.populate = function(data){
     o.tree = [];
     var obj = {name: data.mRootNode.name, id: data.mRootNode.id, bid: 0, expanded: false, nodes: []};
     o.tree.push(obj);
-    console.log(o.tree);
+    // console.log(o.tree);
     var l = data.mRootNode.children.length;
     for(var i = 0; i < l; i++){
       o.populateNode(obj, data.mRootNode.children[i]);
@@ -101,18 +121,22 @@ angular.module('3drepoapp', ['ui.event', 'ui.router'])
   }
 
   o.initialise = function(name){
-    console.log("Populating with " + name);
-    return $http.get("/data/" + name + ".price.json").success(function(data){
-      console.log(data);
-      o.populate(data);
-    });
+    // console.log("Populating with " + name);
+    // return $http.get("/data/" + name + ".price.json").success(function(data){
+    //   console.log(data);
+    //   o.populate(data);
+    // });
   }
 
   return o;
 }])
-.controller('TreeviewCtrl', ['$scope', '$timeout', 'tree', function($scope, $timeout, tree){
+.controller('HomeCtrl', ['$scope', 'databases', function($scope, databases){
+  $scope.databases = databases.databases;
+}])
+.controller('ViewCtrl', ['$scope', function($scope){
 
-  console.log(" IN CONTROLLER ");
+}])
+.controller('TreeviewCtrl', ['$scope', '$timeout', 'tree', function($scope, $timeout, tree){
 
   $scope.iconExpand = 'icon-plus  glyphicon glyphicon-plus  fa fa-plus';
   $scope.iconCollapse = 'icon-minus glyphicon glyphicon-minus fa fa-minus';
@@ -144,9 +168,6 @@ angular.module('3drepoapp', ['ui.event', 'ui.router'])
 
   $scope.tree = tree.tree;
 
-  console.log('tree promise is');
-  console.log($scope.tree);
-
   $scope.blur_on_enter = function($event){
     if($event.keyCode == 13){
       $event.target.blur();
@@ -161,8 +182,6 @@ angular.module('3drepoapp', ['ui.event', 'ui.router'])
     console.log('Here add navigation to the XML element named ' + item.name)
     //$scope.model.runtime.showObject("519829fc-faf3-4a81-a3ab-65089644578c");
     $scope.model.runtime.showAll();
-    console.log('zooming on ' + item.id);
-
   }
 
   $scope.compute_bid = function(node){

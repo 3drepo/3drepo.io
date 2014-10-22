@@ -71,25 +71,7 @@ module.exports = function(passport)
 	}));
 	*/
 
-	router.get('/3drepoio/:db_name.:subformat.:format.:options?/:revision?', isAuth, function(req, res, next) {
-		logger.log('debug', 'Opening scene ' + req.param('db_name'));
-
-		if (req.param('format') == 'x3d')
-		{
-			x3dom_encoder.render(db_interface, req.param('db_name'), req.param('format'), req.param('subformat'), null, req.param('revision'), null, null, res, function(err) {
-				onError(err);
-			});
-		} else if (req.param('format') == 'json') {
-			json_encoder.render(db_interface, req.param('db_name'), req.param('format'), req.param('subformat'), req.param('revision'), res, function(err) {
-				onError(err);
-			});
-		} else {
-			res.writeHead(501, {'Content-Type': 'application/json' });
-			res.end(JSON.stringify({ message: 'Not implemented' }));
-		}
-	});
-
-	router.get('/bid4free/:db_name.:subformat.:format.:options?/:revision?', isAuth, function(req, res, next) {
+	router.get('/data/:db_name.:subformat.:format.:options?/:revision?', isAuth, function(req, res, next) {
 		logger.log('debug', 'Opening scene ' + req.param('db_name'));
 
 		if (req.param('format') == 'x3d')
@@ -132,6 +114,16 @@ module.exports = function(passport)
 		});
 	});
 
+	router.get('/dblist', isAuth, function(req, res, next) {
+		db_interface.get_db_list(null, function(err, db_list) {
+	        if (err) err_callback(err);
+			
+			db_list.sort(function(a,b) { return a['name'].localeCompare(b['name']); });
+
+	        res.json(db_list);
+    	});
+	});
+
 	router.get('/3drepoio/:db_name/:revision?', isAuth, function(req, res, next) {
 		logger.log('debug', 'Opening scene ' + req.param('db_name'));
 		interface.index('index', req.param('db_name'), 'src', req.param('revision'), res, function(err)
@@ -144,6 +136,13 @@ module.exports = function(passport)
 		logger.log('debug', 'Opening scene ' + req.param('db_name'));
 
 		interface.index('bid4free', req.param('db_name'), 'src', req.param('revision'), res, function(err)
+		{
+			onError(err);
+		});
+	});
+
+	router.get('/prototype', isAuth, function(req, res) {
+		interface.proto(req, res, function(err)
 		{
 			onError(err);
 		});

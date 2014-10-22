@@ -19,7 +19,7 @@ var config = require('app-config').config;
 
 exports.index = function(xmltemplate, db_name, format, revision, res, err_callback) {
     if (revision != null) xml_str = '<inline url="' + db_name + '.' + format + '.x3d/' + revision + '"/> </inline>';
-    else xml_str = '<inline url="' + db_name + '.' + format + '.x3d"/> </inline>';
+    else xml_str = '<inline url="/data/' + db_name + '.' + format + '.x3d"/> </inline>';
 
     res.render(xmltemplate, {
         xml: xml_str,
@@ -29,6 +29,14 @@ exports.index = function(xmltemplate, db_name, format, revision, res, err_callba
         objs: JSON.stringify({}) // json
     });
 };
+
+exports.proto = function(req, res, err_callback){
+    res.render('prototype', { 
+        repouicss: config.external.repouicss, 
+        x3domjs: config.external.x3domjs, 
+        x3domcss: config.external.x3domcss 
+    });
+}
 
 exports.dblist = function(db_interface, res, err_callback) {
     db_interface.get_db_list(null, function(err, db_list) {
@@ -41,4 +49,5 @@ exports.dblist = function(db_interface, res, err_callback) {
         });
     });
 };
+
 

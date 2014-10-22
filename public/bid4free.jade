@@ -35,6 +35,14 @@ block content
 		ul(ng-show="data.expanded" class="nav nav-pills nav-stacked treerow")
 			li(ng-repeat="data in data.nodes | orderBy:name" class="{{selected === data.name ? 'active' : ''}}" ng-include="'tree_element.html'")
 
+	script(type="text/ng-template" id="treeview.html")
+		div.treeview
+				div(ng-init="param")
+				div.treeview-header
+					h3 Total Bid: £{{compute_total()}}
+				ul(class="nav nav-pills nav-stacked treerow")
+					li(ng-repeat="data in tree" class="{{selected === data.name ? 'active' : ''}}" ng-include="'tree_element.html'")
+
 	//- Hack for the demo, render the list of objects
 	script.
 		var objs = !{objs};
@@ -66,12 +74,7 @@ block content
 								a#view-def-viewpoint(href='#') Default Viewpoint
 
 	div.fill
-		div.treeview(ng-controller="TreeviewCtrl")
-			div(ng-init="param")
-			div.treeview-header
-				h3 Total Bid: £{{compute_total()}}
-			ul(class="nav nav-pills nav-stacked treerow")
-				li(ng-repeat="data in tree" class="{{selected === data.name ? 'active' : ''}}" ng-include="'tree_element.html'")
+		ui-view
 		div.viewport
 			x3d(xmlns="http://www.web3d.org/specification/x3d-namespace" id="model" showStat="true" showLog="false" style="width:100%; height:100%; border:0px;")
 				scene
