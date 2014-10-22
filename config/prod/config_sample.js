@@ -18,7 +18,7 @@
 module.exports = {
     server:  {
         http_port: 80,
-        http_port: 443
+        https_port: 443
     },
     logfile: {
         filename: '3drepo.log',
