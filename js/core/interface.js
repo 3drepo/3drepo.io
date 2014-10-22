@@ -17,21 +17,28 @@
 
 var config = require('app-config').config;
 
-exports.index  = function(xmltemplate, db_name, format, revision, res, err_callback) {
-	if (revision != null)
-		xml_str = '<inline url="' + db_name +'.' + format + '.x3d/' + revision + '"/> </inline>';
-	else
-		xml_str = '<inline url="' + db_name +'.' + format + '.x3d"/> </inline>';
+exports.index = function(xmltemplate, db_name, format, revision, res, err_callback) {
+    if (revision != null) xml_str = '<inline url="' + db_name + '.' + format + '.x3d/' + revision + '"/> </inline>';
+    else xml_str = '<inline url="' + db_name + '.' + format + '.x3d"/> </inline>';
 
-	res.render(xmltemplate, {
-		xml: xml_str,
-		x3domjs: config.external.x3domjs,
-		x3domcss: config.external.x3domcss,
-		repouicss: config.external.repouicss,
-        repo: [], // db_list,
+    res.render(xmltemplate, {
+        xml: xml_str,
+        x3domjs: config.external.x3domjs,
+        x3domcss: config.external.x3domcss,
+        repouicss: config.external.repouicss,
         objs: JSON.stringify({}) // json
     });
 };
 
+exports.dblist = function(db_interface, res, err_callback) {
+    db_interface.get_db_list(null, function(err, db_list) {
+        if (err) err_callback(err);
+		
+		db_list.sort(function(a,b) { return a['name'].localeCompare(b['name']); });
 
+        res.render("dblist", {
+            dblist: JSON.stringify(db_list)
+        });
+    });
+};
 

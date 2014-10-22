@@ -45,10 +45,18 @@ module.exports = function(passport)
 	});
 
 	router.post('/login', passport.authenticate('login', {
-		successRedirect: '/3drepoio/sphere',
+		successRedirect: '/home',
 		failureRedirect: '/',
 		failureFlash: true
 	}));
+
+	router.get('/home', isAuth, function(req, res, next) {
+		interface.dblist(db_interface, res, function(err)
+				{
+					onError(err);
+				});
+		}
+	);
 
 	/*
 	   TODO: Fix change password
@@ -63,7 +71,7 @@ module.exports = function(passport)
 	}));
 	*/
 
-	router.get('/3drepoio/:db_name.:subformat.:format/:revision?', isAuth, function(req, res, next) {
+	router.get('/3drepoio/:db_name.:subformat.:format.:options?/:revision?', isAuth, function(req, res, next) {
 		logger.log('debug', 'Opening scene ' + req.param('db_name'));
 
 		if (req.param('format') == 'x3d')

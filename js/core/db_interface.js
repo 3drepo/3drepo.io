@@ -61,7 +61,7 @@ exports.get_db_list = function(err, callback) {
             var db_list = [];
 
             for (var i in dbs.databases)
-                db_list.push(dbs.databases[i].name);
+                db_list.push({ name: dbs.databases[i].name});
 
             db_list.sort();
 
