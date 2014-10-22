@@ -53,18 +53,23 @@ initPassport(passport);
 var flash = require('connect-flash');
 app.use(flash());
 
-app.use(expressSession({secret: 'secretKey', saveUninitialized: true, resave: true}));
+app.use(expressSession({
+    secret: 'secretKey',
+    saveUninitialized: true,
+    resave: true
+}));
 app.use(passport.initialize());
 app.use(passport.session());
 
 //var favicon = require('serve-favicon');
 //app.use(favicon(options.favicon));
-
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({
+    extended: false
+}));
 app.use(bodyParser.json());
 
 app.use(compress({
-	threshold: 512
+    threshold: 512
 }));
 app.use(methodOverride());
 
@@ -72,20 +77,29 @@ var routes = require('./routes.js')(passport);
 app.use('/', routes);
 
 var http = require('http');
-var http_app = express();
 
-http_app.get('*', function(req, res) {
-	res.redirect('https://' + req.headers.host + req.url);
-});
+if ('ssl' in config) {
+    var ssl_options = {
+        key: fs.readFileSync(config.ssl.key),
+        cert: fs.readFileSync(config.ssl.cert)
+    };
 
-http.createServer(http_app).listen(config.server.http_port);
+    var http_app = express();
 
-var ssl_options = {
-	key: fs.readFileSync(config.ssl.key),
-	cert: fs.readFileSync(config.ssl.cert)
-};
+    http_app.get('*', function(req, res) {
+        res.redirect('https://' + req.headers.host + req.url);
+    });
 
-https.createServer(ssl_options, app).listen(config.server.https_port, function() {
-    logger.log('info', 'HTTPS App Started');
-});
+    http.createServer(http_app).listen(config.server.http_port, function() {
+        logger.log('info', 'Starting HTTP service on port ' + config.server.http_port);
+    });
+
+    https.createServer(ssl_options, app).listen(config.server.https_port, function() {
+        logger.log('info', 'Starting HTTPS service on port ' + config.server.https_port);
+    });
+} else {
+    http.createServer(app).listen(config.server.http_port, function() {
+        logger.log('info', 'Starting HTTP service on port ' + config.server.http_port);
+    });
+}
 
