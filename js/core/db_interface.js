@@ -84,75 +84,61 @@ exports.get_texture = function(err, db_name, uuid, callback) {
     });
 };
 
-exports.get_mesh = function(err, db_name, uuid, pbf, tex_uuid, callback) {
+exports.get_mesh = function(err, db_name, revision, uuid, pbf, tex_uuid, callback) {
 	if (err) return onError(err);
 
-    if (uuid == null) {
+	var history_query = null;
 
-        var projection = {
-            vertices: 0,
-            normals: 0,
-            faces: 0,
-            data: 0,
-            uv_channels: 0
-        };
-        var query = {};
-    } else {
-        /* 
-        // First get latest revision for object
-        var revision = {};
+	if (revision != null)
+	{
+		history_query = {
+			_id: stringToUUID(revision)
+		};
+	}
 
-        var rev_query = [
-           {
-               $match: {
-                   current: uuid
-               }
-           }, {
-               $sort: {
-                   timestamp: -1
-               }
-           }, {
-               $group: {
-                   _id: {
-                       $first: "$_id"
-                   },
-                   timestamp: {
-                       $first: "$timestamp"
-                   },
-                   current: {
-                       $first: "$current"
-                   }
-               }
-           }
-        ];
-*/
-        if (pbf) {
-            callback(err, null);
-        }
+	db_conn.get_latest(null, db_name, 'history', history_query, null, function(err, docs)
+    {
+		if (uuid == null) {
 
-        var projection = null;
+			var projection = {
+				vertices: 0,
+				normals: 0,
+				faces: 0,
+				data: 0,
+				uv_channels: 0
+			};
 
-        if (tex_uuid != null) {
-            var query = {
-                $or: [{
-                    _id: stringToUUID(uuid)
-                }, {
-                    _id: stringToUUID(tex_uuid)
-                }]
-            };
-        } else {
-            var query = {
-                _id: stringToUUID(uuid)
-            };
+			var query = {
+				_id: { $in: docs[0]['current'] }
+			};
+		} else {
+			if (pbf) {
+				callback(err, null);
+			}
 
-        }
-    }
+			var projection = null;
 
-    db_conn.filter_coll(err, db_name, 'scene', query, projection, function(err, coll) {
-        if (err) return onError(err);
+			if (tex_uuid != null) {
+				var query = {
+					$or: [{
+						_id: stringToUUID(uuid)
+					}, {
+						_id: stringToUUID(tex_uuid)
+					}]
+				};
+			} else {
+				var query = {
+					_id: stringToUUID(uuid)
+				};
+			}
+		}
 
-        callback(err, repoGraphScene.decode(coll));
-    });
+		db_conn.filter_coll(err, db_name, 'scene', query, projection, function(err, coll) {
+			if (err) return onError(err);
+
+			callback(err, repoGraphScene.decode(coll));
+		});
+	});
 
 };
 

@@ -18,7 +18,6 @@
 /* global module */
 
 var C = require("./constants.js");
-var repoGraphScene = require('./repoGraphScene.js');
 var fs = require('fs');
 
 var xml_dom = require('xmldom');
@@ -408,10 +407,6 @@ function X3D_Header() {
 
     xml_doc.firstChild.setAttribute('xmlns', 'http://www.web3d.org/specification/x3d-namespace');
     xml_doc.firstChild.setAttribute('id', 'model');
-    xml_doc.firstChild.setAttribute('showStat', 'true');
-    xml_doc.firstChild.setAttribute('showLog', 'false');
-    xml_doc.firstChild.setAttribute('style', "width:100%; height:100%; border:0px;");
-
 
     return xml_doc;
 }
@@ -459,128 +454,119 @@ function X3D_CreateScene(xml_doc) {
 
     scene.appendChild(environ);
 
-    var trans = xml_doc.createElement('Transform');
-    scene.appendChild(trans);
+	return scene;
 }
 
-function X3D_AddViewpoint(xml_doc, bbox)
+function X3D_AddChildren(xml_doc, xml_node, node, db_interface, db_name, mode)
 {
-    var scene = xml_doc.getElementsByTagName('Scene')[0];
-	var vpos = [0,0,0];
-	
-	vpos[0] = bbox.center[0];
-	vpos[1] = bbox.center[1];
-	vpos[2] = bbox.center[2];
+	if (!('children' in node))
+		return;
 
-	var max_dim = Math.max(bbox.size[0], bbox.size[1]) * 0.5;
+	for(var ch_idx = 0; ch_idx < node['children'].length; ch_idx++)
+	{
+		var child = node['children'][ch_idx];
+		var new_node = null;
 
-	var fov = 40 * (Math.PI / 180); // Field of view in radians
+		if (child['type'] == 'ref')
+		{
+			new_node = xml_doc.createElement('Inline');
+			
+			var url_str = child['project'] + "." + mode + ".x3d";
 
-	vpos[2] += bbox.size[2] * 0.5 + max_dim / Math.tan(0.5 * fov);
+			if ('revision' in child)
+				url_str += '/' + child['revision'];
 
-	logger.log('debug', 'VPOS: ' + vpos.join(' '));
-	logger.log('debug', 'MAXDIM: ' + max_dim);	
+			new_node.setAttribute('url', url_str);
 
-    var vpoint = xml_doc.createElement('Viewpoint');
-    vpoint.setAttribute('DEF', 'vpoint');
-    vpoint.setAttribute('position', vpos.join(' '));
-    vpoint.setAttribute('orientation', '0 0 -1 0');
-    vpoint.setAttribute('zNear', 0.01);
+			xml_node.appendChild(new_node);
+			X3D_AddChildren(xml_doc, new_node, child, db_interface, db_name, mode);
+		}
+		else if (child['type'] == 'transformation')
+		{
+			new_node = xml_doc.createElement('MatrixTransform');
+			var mat_str = "";
+			for(var mat_col = 0; mat_col < 4; mat_col++)
+			{
+				for(var mat_row = 0; mat_row < 4; mat_row++)
+				{
+					mat_str += child['matrix'][mat_row][mat_col];
+					
+					if (!((mat_row == 3) && (mat_col == 3)))
+						mat_str += ',';
+				}
+			}
 
-	var zfar = (max_dim / Math.tan(0.5 * fov)) + bbox.size[2] * 3;
-    vpoint.setAttribute('zFar', zfar);
-	vpoint.setAttribute('fieldOfView', fov);
+			new_node.setAttribute('matrix', mat_str);
+			xml_node.appendChild(new_node);
+			X3D_AddChildren(xml_doc, new_node, child, db_interface, db_name, mode);
+		} else if(child['type'] == 'material') {
+			 var appearance = xml_doc.createElement('Appearance');
 
-    vpoint.textContent = ' ';
+			 /*
+				if (!child['two_sided']) {
+					new_node = xml_doc.createElement('Material');
+				} else {
+					new_node = xml_doc.createElement('TwoSidedMaterial');
+				}
+				*/
+				new_node = xml_doc.createElement('TwoSidedMaterial');
 
-    scene.appendChild(vpoint);
+				var ambient_intensity = 1;
+
+				if (('ambient' in child) && ('diffuse' in child)) {
+					for (var i = 0; i < 3; i++) {
+						if (child['diffuse'][i] != 0) {
+							ambient_intensity = child['ambient'][i] / child['diffuse'][i];
+							break;
+						}
+					}
+				}
+
+				//new_node.setAttribute('DEF', child['_id']);
+
+				if ('diffuse' in child) new_node.setAttribute('diffuseColor', child['diffuse'].join(' '));
+
+				if ('shininess' in child) new_node.setAttribute('shininess',  child['shininess'] / 512);
+
+				if ('specular' in child) new_node.setAttribute('specularColor', child['specular'].join(' '));
+
+				if ('opacity' in child) {
+					if (child['opacity'] != 1) {
+						new_node.setAttribute('transparency', 1.0 - child['opacity']);
+					}
+				}
+
+				new_node.textContent = ' ';
+				appearance.appendChild(new_node);
+				xml_node.appendChild(appearance);
+				X3D_AddChildren(xml_doc, appearance, child, db_interface, db_name, mode);
+		} else if (child['type'] == 'texture') {
+            new_node = xml_doc.createElement('ImageTexture');
+            new_node.setAttribute('url', '/data/' + db_name + '/textures/' + child['id'] + '.' + child['extension']);
+            new_node.textContent = ' ';
+			xml_node.appendChild(new_node);
+			X3D_AddChildren(xml_doc, new_node, child, db_interface, db_name, mode);
+		} else if (child['type'] == 'mesh') {
+			var shape = xml_doc.createElement('Shape');
+			shape.setAttribute('DEF', child['id']);
+			X3D_AddChildren(xml_doc, shape, child, db_interface, db_name, mode);
+
+			X3D_AddToShape(xml_doc, shape, db_interface, db_name, child, mode);
+			xml_node.appendChild(shape);
+		}
+	}
 }
 
-function X3D_AddShape(xml_doc, db_interface, db_name, mesh, mat, mode) {
+function X3D_AddToShape(xml_doc, shape, db_interface, db_name, mesh, mode) {
     var mesh_id = mesh['id'];
+    var mat = getMaterial(mesh, 0);
 
     logger.log('debug', 'Loading mesh ' + mesh_id);
 
-    var scene = xml_doc.getElementsByTagName('Scene')[0];
-    var shape = xml_doc.createElement('Shape');
-
-    scene.appendChild(shape);
-    shape.setAttribute('DEF', mesh['id']);
-
     var bbox = extractBoundingBox(mesh);
 
-    logger.log('debug', 'Loading material ' + mesh['mMaterialIndex']);
-
-    var appearance = xml_doc.createElement('Appearance');
-
-    if (1) {
-        if (!mat['two_sided']) {
-            var material = xml_doc.createElement('Material');
-        } else {
-            var material = xml_doc.createElement('TwoSidedMaterial');
-        }
-        var ambient_intensity = 1;
-
-        if (('ambient' in mat) && ('diffuse' in mat)) {
-            for (var i = 0; i < 3; i++) {
-                if (mat['diffuse'][i] != 0) {
-                    ambient_intensity = mat['ambient'][i] / mat['diffuse'][i];
-                    break;
-                }
-            }
-        }
-
-        material.setAttribute('DEF', mesh['mMaterialIndex']);
-
-        if ('diffuse' in mat) material.setAttribute('diffuseColor', mat['diffuse'].join(' '));
-
-        if ('shininess' in mat) material.setAttribute('shininess', mat['shininess'] / 512);
-
-        if ('specular' in mat) material.setAttribute('specularColor', mat['specular'].join(' '));
-
-        if ('opacity' in mat) {
-            if (mat['opacity'] != 1) {
-                material.setAttribute('transparency', 1.0 - mat['opacity']);
-            }
-        }
-
-        material.textContent = ' ';
-        appearance.appendChild(material);
-
-        if ('children' in mat) {
-            var texture = xml_doc.createElement('ImageTexture');
-            var tex = mat.children[0];
-            texture.setAttribute('url', '/data/' + db_name + '/textures/' + tex['id'] + '.' + tex['extension']);
-            texture.textContent = ' ';
-            appearance.appendChild(texture);
-        }
-
-    } else {
-        var shader = xml_doc.createElement('ComposedShader');
-        appearance.appendChild(shader);
-
-        var vert_shader = xml_doc.createElement('ShaderPart');
-
-        vert_shader.textContent = fs.readFileSync('public/custom.vert');
-        vert_shader.setAttribute('type', 'VERTEX');
-        vert_shader.setAttribute('style', 'display:none;');
-
-        shader.appendChild(vert_shader);
-
-        var frag_shader = xml_doc.createElement('ShaderPart');
-
-        frag_shader.textContent = fs.readFileSync('public/custom.frag');
-        frag_shader.setAttribute('type', 'FRAGMENT');
-        frag_shader.setAttribute('style', 'display:none;');
-
-        shader.appendChild(frag_shader);
-    }
-
-
-    shape.appendChild(appearance);
-
     switch (mode) {
-    case "xml":
+    case "x3d":
         shape.setAttribute('bboxCenter', bbox.center.join(' '));
         shape.setAttribute('bboxSize', bbox.size.join(' '));
 
@@ -708,6 +694,40 @@ function X3D_AddShape(xml_doc, db_interface, db_name, mesh, mat, mode) {
     }
 };
 
+
+function X3D_AddViewpoint(xml_doc, bbox)
+{
+    var scene = xml_doc.getElementsByTagName('Scene')[0];
+	var vpos = [0,0,0];
+	
+	vpos[0] = bbox.center[0];
+	vpos[1] = bbox.center[1];
+	vpos[2] = bbox.center[2];
+
+	var max_dim = Math.max(bbox.size[0], bbox.size[1]) * 0.5;
+
+	var fov = 40 * (Math.PI / 180); // Field of view in radians
+
+	vpos[2] += bbox.size[2] * 0.5 + max_dim / Math.tan(0.5 * fov);
+
+	logger.log('debug', 'VPOS: ' + vpos.join(' '));
+	logger.log('debug', 'MAXDIM: ' + max_dim);	
+
+    var vpoint = xml_doc.createElement('Viewpoint');
+    vpoint.setAttribute('DEF', 'vpoint');
+    vpoint.setAttribute('position', vpos.join(' '));
+    vpoint.setAttribute('orientation', '0 0 -1 0');
+    vpoint.setAttribute('zNear', 0.01);
+
+	var zfar = (max_dim / Math.tan(0.5 * fov)) + bbox.size[2] * 3;
+    vpoint.setAttribute('zFar', zfar);
+	vpoint.setAttribute('fieldOfView', fov);
+
+    vpoint.textContent = ' ';
+
+    scene.appendChild(vpoint);
+}
+
 exports.get_texture = function(db_interface, db_name, uuid, res, err_callback) {
     logger.log('debug', 'Reading texture ' + uuid);
     db_interface.get_texture(null, db_name, uuid, function(err, doc) {
@@ -762,12 +782,12 @@ exports.get_mesh_bin = function(db_interface, db_name, uuid, type, res, err_call
 };
 
 
-exports.render = function(db_interface, db_name, format, sub_format, level, uuid, tex_uuid, xmltemplate, res, err_callback) {
+exports.render = function(db_interface, db_name, format, sub_format, level, revision, uuid, tex_uuid, res, err_callback) {
     logger.log('debug', 'Rendering ' + format + ' (' + sub_format + ') - UUID : ' + uuid);
 
     var is_pbf = (sub_format == 'pbf');
 
-    db_interface.get_mesh(null, db_name, uuid, is_pbf, tex_uuid, function(err, doc) {
+    db_interface.get_mesh(null, db_name, revision, uuid, is_pbf, tex_uuid, function(err, doc) {
         if (err) return onError(err);
 
         switch (format) {
@@ -781,9 +801,9 @@ exports.render = function(db_interface, db_name, format, sub_format, level, uuid
             });
 
             break;
-        case "xml":
+        case "x3d":
             var xml_doc = X3D_Header();
-            X3D_CreateScene(xml_doc);
+            var scene = X3D_CreateScene(xml_doc);
 
             // Hack for the demo, generate objects server side
             json_objs = [];
@@ -791,6 +811,11 @@ exports.render = function(db_interface, db_name, format, sub_format, level, uuid
 			var scene_bbox_min = [];
 			var scene_bbox_max = [];
 
+			var dummyRoot = { children: [doc.mRootNode] };
+
+			X3D_AddChildren(xml_doc, scene, dummyRoot, db_interface, db_name, sub_format);
+
+			/*
             for (var mesh_id in doc['meshes']) {
                 var mesh = doc['meshes'][mesh_id];
                 var mat = getMaterial(mesh, 0);
@@ -822,7 +847,9 @@ exports.render = function(db_interface, db_name, format, sub_format, level, uuid
                 }
                 json_objs.push(json_obj);
             }
+			*/
 
+			/*
 			var bbox = {};
 			bbox.min = scene_bbox_min;
 			bbox.max = scene_bbox_max;
@@ -830,7 +857,8 @@ exports.render = function(db_interface, db_name, format, sub_format, level, uuid
 			bbox.size = [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])]; 
 
 			X3D_AddViewpoint(xml_doc, bbox);
-
+*/
+				
             db_interface.get_db_list(null, function(err, db_list) {
                 if (err) return onError(err);
 
@@ -838,14 +866,8 @@ exports.render = function(db_interface, db_name, format, sub_format, level, uuid
 
                 logger.log('debug', 'Generated XML: ' + xml_str);
 
-                res.render(xmltemplate, {
-                    xml: xml_str,
-                    x3domjs: config.external.x3domjs,
-                    x3domcss: config.external.x3domcss,
-                    repouicss: config.external.repouicss,
-                    repo: db_list,
-                    objs: JSON.stringify(json_objs)
-                });
+				res.write(xml_str);
+				res.end();
             });
 
             break;
@@ -896,15 +918,19 @@ exports.render = function(db_interface, db_name, format, sub_format, level, uuid
             src_json.accessors.attributeViews.attributeView1.decodeScale = [1, 1, 1];
 
             // Buffer Chunking
+			
+			// Vertex Chunk
             src_json.bufferChunks = {};
             src_json.bufferChunks.chunk0 = {};
             src_json.bufferChunks.chunk0.byteOffset = 0;
             src_json.bufferChunks.chunk0.byteLength = mesh.vertices_count * 3 * 4;
 
+			// Faces Indices
             src_json.bufferChunks.chunk1 = {};
             src_json.bufferChunks.chunk1.byteOffset = mesh.vertices_count * 3 * 4;
             src_json.bufferChunks.chunk1.byteLength = mesh.faces_count * 3 * 2;
 
+			// Normals
             src_json.bufferChunks.chunk2 = {};
             src_json.bufferChunks.chunk2.byteOffset = src_json.bufferChunks.chunk1.byteOffset + mesh.faces_count * 2 * 3;
             src_json.bufferChunks.chunk2.byteLength = mesh.vertices_count * 3 * 4;
@@ -941,19 +967,23 @@ exports.render = function(db_interface, db_name, format, sub_format, level, uuid
             var buf = new Buffer(mesh.faces_count * 2 * 3);
             var copy_idx = 0;
 
+			var orig_idx_ptr = 0;
+
             for (var face_idx = 0; face_idx < mesh.faces_count; face_idx++) {
-                if (orig_idx.readUInt16LE(face_idx * 16) != 3) {
-                    logger.log('error', 'Non triangulated face');
-                }
-                for (var vert_comp = 0; vert_comp < 3; vert_comp++) {
+				var num_comp = orig_idx.readUInt16LE(orig_idx_ptr);
 
-                    var byte_position = (16 * face_idx) + (vert_comp + 1) * 4;
+                if (num_comp != 3) {
+                    logger.log('error', 'Non triangulated face with ' + num_comp + ' vertices.');
+                } else {
+					for (var vert_comp = 0; vert_comp < num_comp; vert_comp++) {
+						var byte_position = orig_idx_ptr + (vert_comp + 1) * 4;
+						var idx_val = orig_idx.readUInt16LE(byte_position);
 
-                    var idx_val = orig_idx.readUInt16LE(byte_position);
-
-                    buf.writeUInt16LE(idx_val, copy_idx);
-                    copy_idx += 2;
-                }
+						buf.writeUInt16LE(idx_val, copy_idx);
+						copy_idx += 2;
+					}
+				}
+				orig_idx_ptr += (num_comp + 1) * 4;
             }
 
             src_json.meta = {};

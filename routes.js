@@ -1,10 +1,11 @@
 var express = require('express');
-var router = express.Router();
 var bCrypt = require('bcrypt-nodejs');
 var log_iface = require('./js/core/logger.js');
 var logger = log_iface.logger;
 var db_interface = require('./js/core/db_interface.js');
 var x3dom_encoder = require('./js/core/x3dom_encoder.js');
+var router = express.Router();
+var interface = require('./js/core/interface.js');
 
 var isAuth = function(req, res, next) {
 	logger.log('debug', 'Authenticated: ' + req.isAuthenticated());
@@ -17,6 +18,9 @@ var isAuth = function(req, res, next) {
 
 module.exports = function(passport)
 {
+	router.use(express.static('./submodules'));
+	router.use(express.static('./public'));
+
 	// Login routes
 	router.get('/', function(req, res) {
 		res.render('login', { message: req.flash('message') });
@@ -41,23 +45,15 @@ module.exports = function(passport)
 	}));
 	*/
 
-	router.get('/3drepoio/:db_name', isAuth, function(req, res, next) {
+	router.get('/3drepoio/:db_name.:subformat.:format/:revision?', isAuth, function(req, res, next) {
 		logger.log('debug', 'Opening scene ' + req.param('db_name'));
-		x3dom_encoder.render(db_interface, req.param('db_name'), 'xml', 'pbf', null, null, null, 'index', res, function(err) {
+		x3dom_encoder.render(db_interface, req.param('db_name'), req.param('format'), req.param('subformat'), null, req.param('revision'), null, null, res, function(err) {
 			onError(err);
 		});
 	});
-
-	router.get('/bid4free/:db_name', isAuth, function(req, res, next) {
-		logger.log('debug', 'Opening scene ' + req.param('db_name'));
-		x3dom_encoder.render(db_interface, req.param('db_name'), 'xml', 'pbf', null, null, null, 'bid4free', res, function(err) {
-			onError(err);
-		});
-	});
-
 
 	router.get('/data/src_bin/:db_name/:uuid/level:lvl.pbf', isAuth, function(req, res, next) {
-		x3dom_encoder.render(db_interface, req.param('db_name'), 'pbf', null, req.param('lvl'), req.param('uuid'), null, null, res, function(err) {
+		x3dom_encoder.render(db_interface, req.param('db_name'), 'pbf', null, req.param('lvl'), null, req.param('uuid'), null, res, function(err) {
 			onError(err);
 		});
 	});
@@ -76,12 +72,32 @@ module.exports = function(passport)
 
 	router.get('/data/src_bin/:db_name/:uuid.:format/:texture?', isAuth, function(req, res, next) {
 		logger.log('debug', 'Requesting mesh ' + req.param('uuid') + ' ' + req.param('texture'));
-		x3dom_encoder.render(db_interface, req.param('db_name'), req.param('format'), null, null, req.param('uuid'), req.param('texture'), null, res, function(err) {
+		x3dom_encoder.render(db_interface, req.param('db_name'), req.param('format'), null, null, null, req.param('uuid'), req.param('texture'), res, function(err) {
 			onError(err);
 		});
 	});
 
+	router.get('/3drepoio/:db_name/:revision?', isAuth, function(req, res, next) {
+		logger.log('debug', 'Opening scene ' + req.param('db_name'));
+		console.log('DBNAME: ' + req.param('db_name') + ' [' + req.param('revision') + ']');	
+		interface.index('index', req.param('db_name'), 'src', req.param('revision'), res, function(err)
+		{
+			onError(err);
+		});
+	});
+
+	router.get('/bid4free/:db_name', isAuth, function(req, res, next) {
+		logger.log('debug', 'Opening scene ' + req.param('db_name'));
+
+		interface.index('bid4free', db_name, 'src', revision, res, function(err)
+		{
+			onError(err);
+		});
+	});
+
+
 	router.get('*', function(req, res) {
+		logging.log('debug', 'Un-routed URL : ' + console.log(req.url));
 		res.redirect('/');
 	});
 

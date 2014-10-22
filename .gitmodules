@@ -1,19 +1,16 @@
-[submodule "public/bootstrap"]
-	path = public/bootstrap
+[submodule "submodules/bootstrap"]
+	path = submodules/bootstrap
 	url = https://github.com/twbs/bootstrap.git
-[submodule "public/bootstrap-autohidingnavbar"]
-	path = public/bootstrap-autohidingnavbar
+[submodule "submodules/bootstrap-autohidingnavbar"]
+	path = submodules/bootstrap-autohidingnavbar
 	url = https://github.com/istvan-ujjmeszaros/bootstrap-autohidingnavbar.git
-[submodule "public/jquery"]
-	path = public/jquery
+[submodule "submodules/jquery"]
+	path = submodules/jquery
 	url = https://github.com/jquery/jquery.git
-[submodule "public/typeahead.js"]
-	path = public/typeahead.js
-	url = https://github.com/twitter/typeahead.js.git
-[submodule "public/bootstrap3-dialog"]
-	path = public/bootstrap3-dialog
+[submodule "submodules/bootstrap3-dialog"]
+	path = submodules/bootstrap3-dialog
 	url = https://github.com/nakupanda/bootstrap3-dialog.git
 [submodule "x3dom"]
-	path = public/x3dom
+	path = submodules/x3dom
 	url = git://github.com/3drepo/x3dom.git
 	ignore=dirty

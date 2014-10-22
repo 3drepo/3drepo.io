@@ -40,6 +40,7 @@ define('REPO_NODE_TYPE_MATERIAL', 'material');
 define('REPO_NODE_TYPE_TEXTURE', 'texture');
 define('REPO_NODE_TYPE_CAMERA', 'camera');
 define('REPO_NODE_TYPE_REVISION', 'revision');
+define('REPO_NODE_TYPE_REF', 'ref');
 
 //-----------------------------------------------------------------------------
 // Shared fields
@@ -108,7 +109,7 @@ define('REPO_SCENE_LABEL_MESHES_COUNT', 'meshes_count');
 define('REPO_SCENE_LABEL_TEXTURES_COUNT', 'textures_count');
 define('REPO_SCENE_LABEL_CAMERAS_COUNT', 'cameras_count');
 define('REPO_HISTORY_LABEL_REVISIONS_COUNT', 'revisions_count');
-
+define('REPO_SCENE_LABEL_REF_COUNT', 'ref_count');
 
 
 //-----------------------------------------------------------------------------

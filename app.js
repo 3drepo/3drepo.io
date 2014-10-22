@@ -67,8 +67,6 @@ app.use(compress({
 }));
 app.use(methodOverride());
 
-app.use(express.static('./public'));
-
 var routes = require('./routes.js')(passport);
 app.use('/', routes);
 

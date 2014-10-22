@@ -118,6 +118,29 @@ MongoDB.prototype.coll_callback = function(err, dbname, coll_name, callback) {
     })
 }
 
+MongoDB.prototype.get_latest = function(err, dbname, coll_name, filter, projection, callback) {
+	if (err) return onError(err);
+
+	this.coll_callback(null, dbname, coll_name, function(err, coll) {
+		if (err) return onError(err);
+
+		if (projection != null)
+		{
+			coll.find(filter, projection).limit(1).sort({timestamp:-1}).toArray(function(err, docs) {
+				if (err) return onError(err);
+
+				callback(err, docs);
+			})
+		} else {
+			coll.find(filter).limit(1).sort({timestamp:-1}).toArray(function(err, docs) {
+				if (err) return onError(err);
+
+				callback(err, docs);
+			})
+		}
+	})
+};
+
 MongoDB.prototype.filter_coll = function(err, dbname, coll_name, filter, projection, callback) {
 	if (err) return onError(err);
 
