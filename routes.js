@@ -1,10 +1,28 @@
+/**
+ *  Copyright (C) 2014 3D Repo Ltd 
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 var express = require('express');
 var bCrypt = require('bcrypt-nodejs');
 var log_iface = require('./js/core/logger.js');
 var logger = log_iface.logger;
 var db_interface = require('./js/core/db_interface.js');
-var x3dom_encoder = require('./js/core/x3dom_encoder.js');
 var router = express.Router();
+var x3dom_encoder = require('./js/core/x3dom_encoder.js');
+var json_encoder = require('./js/core/json_encoder.js');
 var interface = require('./js/core/interface.js');
 
 var isAuth = function(req, res, next) {
@@ -47,9 +65,20 @@ module.exports = function(passport)
 
 	router.get('/3drepoio/:db_name.:subformat.:format/:revision?', isAuth, function(req, res, next) {
 		logger.log('debug', 'Opening scene ' + req.param('db_name'));
-		x3dom_encoder.render(db_interface, req.param('db_name'), req.param('format'), req.param('subformat'), null, req.param('revision'), null, null, res, function(err) {
-			onError(err);
-		});
+
+		if (req.param('format') == 'x3d')
+		{
+			x3dom_encoder.render(db_interface, req.param('db_name'), req.param('format'), req.param('subformat'), null, req.param('revision'), null, null, res, function(err) {
+				onError(err);
+			});
+		} else if (req.param('format') == 'json') {
+			json_encoder.render(db_interface, req.param('db_name'), req.param('format'), req.param('subformat'), req.param('revision'), res, function(err) {
+				onError(err);
+			});
+		} else {
+			res.writeHead(501, {'Content-Type': 'application/json' });
+			res.end(JSON.stringify({ message: 'Not implemented' }));
+		}
 	});
 
 	router.get('/data/src_bin/:db_name/:uuid/level:lvl.pbf', isAuth, function(req, res, next) {
@@ -88,7 +117,7 @@ module.exports = function(passport)
 	router.get('/bid4free/:db_name', isAuth, function(req, res, next) {
 		logger.log('debug', 'Opening scene ' + req.param('db_name'));
 
-		interface.index('bid4free', db_name, 'src', revision, res, function(err)
+		interface.index('bid4free', req.param('db_name'), 'src', req.param('revision'), res, function(err)
 		{
 			onError(err);
 		});
