@@ -7,8 +7,11 @@ angular.module('3drepoapp', ['ui.event', 'ui.router'])
     templateUrl: 'treeview.html',
     controller: 'TreeviewCtrl',
     resolve: {
-      treePromise: ['$stateParams', 'tree', function($stateParams, tree) {
-        return tree.initialise("sphere");
+      treePromise: ['$stateParams', '$location', 'tree', function($stateParams, $location, tree) {
+        // Dirty way of retrieving the current scene
+        var url = $location.absUrl().split('#')[0];
+        var scene =  /[^/]*$/.exec(url)[0];
+        return tree.initialise(scene);
       }]
     }
   });
@@ -81,38 +84,43 @@ angular.module('3drepoapp', ['ui.event', 'ui.router'])
           },
       ]}
     ]
-    // tree : [
-    // ]
   }
 
-  o.populateNode = function(node, data){
-    console.log(data);
-  }
-
-  o.populate = function(data){
-    o.tree = [];
-    var obj = {name: data.mRootNode.name, id: data.mRootNode.id, bid: 0, expanded: false, nodes: []};
-    o.tree.push(obj);
-    console.log(o.tree);
-    var l = data.mRootNode.children.length;
-    for(var i = 0; i < l; i++){
-      o.populateNode(obj, data.mRootNode.children[i]);
+  o.populate = function(node){
+    obj = {};
+    obj['id'] = node['uuid']
+    obj['bid'] = node['bid'];
+    if(node.hasOwnProperty('name')){
+      obj['name'] = node['name'];
     }
+    else{
+      obj['name'] = node['uuid'].substring(0, 8) + "...";
+    }
+    if(node['nodes'] && node['nodes'].length > 0){
+      obj['linked'] = true;
+      var l = node['nodes'].length
+      for(var i = 0; i < l; i++){
+        obj['nodes'].push(o.populate(node['nodes'][i]));
+      }
+    }
+
+    return obj;
   }
 
   o.initialise = function(name){
     console.log("Populating with " + name);
     return $http.get("/data/" + name + ".price.json").success(function(data){
-      console.log(data);
-      o.populate(data);
+      o.tree = [];
+      var l = data.nodes.length;
+      for(var i = 0; i < l; i++){
+        o.tree.push(o.populate(data.nodes[i]));
+      }
     });
   }
 
   return o;
 }])
 .controller('TreeviewCtrl', ['$scope', '$timeout', 'tree', function($scope, $timeout, tree){
-
-  console.log(" IN CONTROLLER ");
 
   $scope.iconExpand = 'icon-plus  glyphicon glyphicon-plus  fa fa-plus';
   $scope.iconCollapse = 'icon-minus glyphicon glyphicon-minus fa fa-minus';
@@ -123,29 +131,11 @@ angular.module('3drepoapp', ['ui.event', 'ui.router'])
   $scope.objs = objs;
   $scope.selected_node = "";
 
-  // Behaviour.picked = function(item){
-  //   console.log('Picked item: ');
-  //   console.log(item);
-  //   console.log('Need to extract def field and highlight');
-  // }
-
   $timeout(function(){
     $scope.model = document.getElementById("model");
   });
 
-  $scope.initialise_tree = function(o){
-    var arrayLength = o.length;
-    for (var i = 0; i < arrayLength; i++) {
-        // Add needed fields
-        o[i]['bid'] = 0;
-        o[i]['expanded'] = false;
-      }
-  }
-
   $scope.tree = tree.tree;
-
-  console.log('tree promise is');
-  console.log($scope.tree);
 
   $scope.blur_on_enter = function($event){
     if($event.keyCode == 13){
@@ -158,11 +148,16 @@ angular.module('3drepoapp', ['ui.event', 'ui.router'])
   $scope.initialise_navigation();
 
   $scope.navigate_to = function(item){
-    console.log('Here add navigation to the XML element named ' + item.name)
-    //$scope.model.runtime.showObject("519829fc-faf3-4a81-a3ab-65089644578c");
-    $scope.model.runtime.showAll();
-    console.log('zooming on ' + item.id);
+    console.log('Zooming on ' + item.id);
 
+    // Here need to zoom on object like so
+    // $scope.model.runtime.showObject(obj);
+
+    // But for that it seems that we need the dom element...
+    // and it seems that the following jquery doesnt work to show all objects with attribute DEF ?
+    // console.log($('[DEF]').get());
+
+    //$scope.model.runtime.showAll();
   }
 
   $scope.compute_bid = function(node){
