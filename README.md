@@ -28,25 +28,29 @@ In general, to configure a new configuration enviroment called <config_name>:
 Configuration descriptions
 --------------------------
 
-**server** : settings for the server to run with
-  **http_port**: port to run the http service on
-  **https_port**: port to run the https service on
+**server**: settings for the server to run with
+* **http_port**: port to run the http service on
+*  **https_port**: port to run the https service on
+
 **logfile**: settings for logging
-  **filname**: output name of the log file
-  **console_level**: logging level to output to the console
-  **file_level**: logging level to output to the log file
+*  **filname**: output name of the log file
+*  **console_level**: logging level to output to the console
+*  **file_level**: logging level to output to the log file
+
 **db**: settings to connect to the mongo database
-  **host**: host on which the mongodb runs
-  **port**: port on which to connect to the mongodb
-  **username**: username to use for mongodb authentication
-  **password**: password to use for mongodb authentication
+*  **host**: host on which the mongodb runs
+*  **port**: port on which to connect to the mongodb
+*  **username**: username to use for mongodb authentication
+*  **password**: password to use for mongodb authentication
+
 **ssl**: **(Optional)** settings for ssl encryption, leave this out to disable it.
-  **key**: filename of ssl encryption key
-  **cert**: filename of ssl encryption certificate
+*  **key**: filename of ssl encryption key
+*  **cert**: filename of ssl encryption certificate
+
 **external**: settings for external resources
-  **x3domjs**: x3dom javascript URL
-  **x3domcss**: x3dom css URL
-  **repouicss**: 3drepo.io CSS location
+*  **x3domjs**: x3dom javascript URL
+*  **x3domcss**: x3dom css URL
+*  **repouicss**: 3drepo.io CSS location
 
 Running the application
 -----------------------
@@ -74,5 +78,5 @@ Contact
 If you need any help or want to contribute please contact: `support@3drepo.org`
 We look forward to hearing from you.
 
-[3DRepoCore] https://github.com/3drepo/3drepocore
-[3DRepoGUI] https://github.com/3drepo/3drepogui
+[3DRepoCore]: https://github.com/3drepo/3drepocore
+[3DRepoGUI]: https://github.com/3drepo/3drepogui
