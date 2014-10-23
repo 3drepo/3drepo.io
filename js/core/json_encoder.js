@@ -48,8 +48,7 @@ exports.render = function(db_interface, db_name, format, sub_format, revision, r
 		var output_json = {name:db_name, nodes: []};
 		
 		JSON_AddChildren(output_json, dummyRoot);
-		//res.write(JSON.stringify(output_json));
-		res.write(JSON.stringify(doc));
+		res.write(JSON.stringify(output_json));
 		res.end();
 	});
 }

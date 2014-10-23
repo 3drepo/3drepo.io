@@ -37,7 +37,7 @@ var compress = require('compression');
 var app = express();
 
 app.set('view engine', 'jade');
-app.set('views', './public');
+app.set('views', './views');
 
 var mongoose = require('mongoose');
 var connect_url = 'mongodb://' + config.db.username + ":" + config.db.password + '@' + config.db.host + ':' + config.db.port;
