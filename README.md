@@ -22,7 +22,7 @@ In general, to configure a new configuration enviroment called <config_name>:
  
 1. Change to the configuration directory: `cd config`
 2. First create a new directory under config: `mkdir <config_name>`
-3. Copy config\_sample.js from dev to the directory as config.js: `cp dev/config\_sample.js <config_name>\config.js`
+3. Copy config\_sample.js from dev to the directory as config.js: `cp dev/config_sample.js <config_name>/config.js`
 4. Edit config.js using the description below.
  
 Configuration descriptions
@@ -57,14 +57,14 @@ Running the application
 
 The repository includes a script `run_app` to run the server. It has two arguments:
 
-**run_app <config> <debug>**
-  **config** This is the directory under config that the configuration resides in
-  **debug** Type debug here for node.js debugging, or leave it out for none.
+**./run_app \<config\> \<debug\>**
+* **config** This is the directory under config that the configuration resides in
+* **debug** Type debug here for node.js debugging, or leave it out for none.
   
 Typically you will want to run the server using forever (install with `npm -g install forever` under the superuser account):
 
-**forever_app <config>**
-  **config** This is the directory under config that the configuration resides in
+**./forever_app \<config\>**
+* **config** This is the directory under config that the configuration resides in
 
 The script may complain that you don't have access to the ports (EACCESS), in which case you need to set-up ip-routing under the `su` account.
 
