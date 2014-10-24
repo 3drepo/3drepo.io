@@ -549,6 +549,10 @@ function X3D_AddChildren(xml_doc, xml_node, node, db_interface, db_name, mode)
 		} else if (child['type'] == 'mesh') {
 			var shape = xml_doc.createElement('Shape');
 			shape.setAttribute('DEF', child['id']);
+			shape.setAttribute('id', child['id']);
+
+			shape.setAttribute('onclick', 'jqonclick(event)');
+			
 			X3D_AddChildren(xml_doc, shape, child, db_interface, db_name, mode);
 
 			X3D_AddToShape(xml_doc, shape, db_interface, db_name, child, mode);

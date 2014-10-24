@@ -35,8 +35,15 @@ block content
 		br
 		strong#dist_name Distance:
 		strong#distance 0.00 m
-	x3d(xmlns="http://www.web3d.org/specification/x3d-namespace" id="model" showStat="true" showLog="false" style="width:100%; height:100%; border:0px;")
-		scene.
-			!{xml}
+	div(id="x3dRef" ng-controller="x3dBasicController")
+		script.
+			$(document).ready(function() {
+				jqonclick = function(event) {
+					angular.element(document.getElementById('x3dRef')).scope().x3donclick(event);
+				};
+			});
+		x3d(xmlns="http://www.web3d.org/specification/x3d-namespace" id="model" showStat="true" showLog="false" style="width:100%; height:100%; border:0px;")
+			scene.
+				!{xml}
 
 

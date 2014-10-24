@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-angular.module('3drepoapp', ['ui.event', 'ui.router'])
+angular.module('3drepoapp')
 .config(['$stateProvider', '$urlRouterProvider',  function($stateProvider, $urlRouterProvider) {
 
   $stateProvider
@@ -137,7 +137,7 @@ angular.module('3drepoapp', ['ui.event', 'ui.router'])
 
   return o;
 }])
-.controller('TreeviewCtrl', ['$scope', '$timeout', 'tree', function($scope, $timeout, tree){
+.controller('TreeviewCtrl', ['$scope', '$timeout', 'tree', 'X3DController', function($scope, $timeout, tree, X3DController){
 
   $scope.iconExpand = 'icon-plus  glyphicon glyphicon-plus  fa fa-plus';
   $scope.iconCollapse = 'icon-minus glyphicon glyphicon-minus fa fa-minus';
@@ -163,6 +163,11 @@ angular.module('3drepoapp', ['ui.event', 'ui.router'])
   $scope.initialise_navigation = function(){
   }
   $scope.initialise_navigation();
+
+  $scope.$on('x3donclick', function()
+	{
+		console.log('Clicked on item' + x3dmessage.id);
+	});
 
   $scope.navigate_to = function(item){
     console.log('Zooming on ' + item.id);
