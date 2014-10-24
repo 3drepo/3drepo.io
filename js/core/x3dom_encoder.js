@@ -694,6 +694,18 @@ function X3D_AddToShape(xml_doc, shape, db_interface, db_name, mesh, mode) {
     }
 };
 
+function X3D_AddLights(xml_doc, bbox)
+{
+	var scene = xml_doc.getElementsByTagName('Scene')[0];
+	
+	var p_light = xml_doc.createElement('PointLight');
+	p_light.setAttribute('ambientIntensity', '0.8');
+	p_light.setAttribute('location', bbox.max.join(' '));
+	p_light.setAttribute('shadowIntensity', 0.7);
+	p_light.textContent = ' ';
+
+	scene.appendChild(p_light);
+};
 
 function X3D_AddViewpoint(xml_doc, bbox)
 {
@@ -815,12 +827,11 @@ exports.render = function(db_interface, db_name, format, sub_format, level, revi
 
 			X3D_AddChildren(xml_doc, scene, dummyRoot, db_interface, db_name, sub_format);
 
-			/*
+			// Compute the scene bounding box.
+			// Should be a better way of doing this.
             for (var mesh_id in doc['meshes']) {
-                var mesh = doc['meshes'][mesh_id];
-                var mat = getMaterial(mesh, 0);
+				var mesh = doc['meshes'][mesh_id];
 	            var bbox = extractBoundingBox(mesh);
-
 
 				if (scene_bbox_min.length)
 				{
@@ -833,23 +844,8 @@ exports.render = function(db_interface, db_name, format, sub_format, level, revi
 					scene_bbox_min = bbox.min.slice(0);
 					scene_bbox_max = bbox.max.slice(0);
 				}
-
-                logger.log('info', 'Adding Shapes for mesh ' + mesh_id);
-                X3D_AddShape(xml_doc, db_interface, db_name, mesh, mat, sub_format);
-
-                // TODO: This needs to make a tree structure
-                json_obj = {};
-                if(mesh['name']){
-                    json_obj['name'] = mesh.name;
-                }
-                else{
-                    json_obj['name'] = 'undefined';   
-                }
-                json_objs.push(json_obj);
             }
-			*/
 
-			/*
 			var bbox = {};
 			bbox.min = scene_bbox_min;
 			bbox.max = scene_bbox_max;
@@ -857,22 +853,14 @@ exports.render = function(db_interface, db_name, format, sub_format, level, revi
 			bbox.size = [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])]; 
 
 			X3D_AddViewpoint(xml_doc, bbox);
-*/
-				
-            db_interface.get_db_list(null, function(err, db_list) {
-                if (err) return onError(err);
+			//X3D_AddLights(xml_doc, bbox);		
 
-                var xml_str = new xml_serial().serializeToString(xml_doc);
-
-                logger.log('debug', 'Generated XML: ' + xml_str);
-
-				res.write(xml_str);
-				res.end();
-            });
+            var xml_str = new xml_serial().serializeToString(xml_doc);
+			res.write(xml_str);
+			res.end();
 
             break;
 
-        case "json":
         case "src":
             // Output SRC json
             var mesh = doc['meshes'][uuid];

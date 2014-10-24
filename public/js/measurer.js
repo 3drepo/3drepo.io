@@ -97,7 +97,6 @@ $(document).ready(function() {
 	}
 
 	var scene = document.getElementsByTagName("scene")[0];
-	u 
 
 	var trans = document.createElement("Transform");
 	trans.setAttribute("id", "lineTrafo");
