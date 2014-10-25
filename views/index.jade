@@ -3,7 +3,7 @@ extends layout
 block content
 	script(src="/js/measurer.js")
 		h1#logo 3D Repo
-	nav.navbar.transparent.navbar-inverse.navbar-fixed-top(role='navigation')
+	nav.navbar.transparent.navbar-inverse.navbar-fixed-top(role='navigation', ng-controller='BaseNavigationCtrl')
 		div.container-fluid
 			div.navbar-header
 				button.navbar-toggle.collapsed(type="button" data-toggle="collapse" data-target=".navbar-collapse")
@@ -24,9 +24,9 @@ block content
 							span.caret
 						ul.dropdown-menu(role='menu')
 							li
-								a#view-everything(href='#') Everything
+								a#view-everything(href='#' ng-click="view_all()") Everything
 							li
-								a#view-def-viewpoint(href='#') Default Viewpoint
+								a#view-def-viewpoint(href='#' ng-click="default_viewpoint()") Default Viewpoint
 	div.container#popup
 		strong#mesh_name(style='color:blue;') Mesh Name
 		br
@@ -35,13 +35,7 @@ block content
 		br
 		strong#dist_name Distance:
 		strong#distance 0.00 m
-	div(id="x3dRef" ng-controller="x3dBasicController")
-		script.
-			$(document).ready(function() {
-				jqonclick = function(event) {
-					angular.element(document.getElementById('x3dRef')).scope().x3donclick(event);
-				};
-			});
+	div(id="x3dRef")
 		x3d(xmlns="http://www.web3d.org/specification/x3d-namespace" id="model" showStat="true" showLog="false" style="width:100%; height:100%; border:0px;")
 			scene.
 				!{xml}

@@ -38,71 +38,10 @@ angular.module('3drepoapp')
 .factory('tree', ['$http', function($http){
 
   var o = {
-    tree : [
-      { 
-        name: "Body", bid: 12, linked: true, expanded: true, nodes:[
-          {
-            name: "Left Leg", bid: 18, expanded: false
-          },
-          {
-            name: "Right Leg", bid: 18, expanded: false
-          },
-          {
-            name: "Left Arm", bid: 14,  linked: true, expanded: true, nodes:[
-              {
-                name: "Left Hand", bid: 17, linked: true, expanded: false, nodes:[
-                  {
-                    name: "Left Finger 1", bid: 1, expanded: false
-                  },
-                  {
-                    name: "Left Finger 2", bid: 2, expanded: false
-                  },
-                  {
-                    name: "Left Finger 3", bid: 1, expanded: false
-                  },
-                  {
-                    name: "Left Finger 4", bid: 3, expanded: false
-                  },
-                  {
-                    name: "Left Finger 5", bid: 5, expanded: false
-                  },
-                ]
-              },
-              {
-                name: "Left Forearm", bid: 5, expanded: false
-              },
-            ]
-          },
-          {
-            name: "Right Arm", bid: 14,  linked: true, expanded: true, nodes:[
-              {
-                name: "Right Hand", bid: 17, linked: true, expanded: false, nodes:[
-                  {
-                    name: "Right Finger 1", bid: 3, expanded: false
-                  },
-                  {
-                    name: "Right Finger 2", bid: 4, expanded: false
-                  },
-                  {
-                    name: "Right Finger 3", bid: 10, expanded: false
-                  },
-                  {
-                    name: "Right Finger 4", bid: 0, expanded: false
-                  },
-                  {
-                    name: "Right Finger 5", bid: 1, expanded: false
-                  },
-                ]
-              },
-              {
-                name: "Right Forearm", bid: 7, expanded: false
-              },
-            ]
-          },
-      ]}
-    ]
+    tree : []
   }
 
+  // Recursively build the tree from the received json
   o.populate = function(node){
     obj = {};
     obj['id'] = node['uuid']
@@ -124,8 +63,8 @@ angular.module('3drepoapp')
     return obj;
   }
 
+  // Trigger the tree building instructions
   o.initialise = function(name){
-    console.log("Populating with " + name);
     return $http.get("/data/" + name + ".price.json").success(function(data){
       o.tree = [];
       var l = data.nodes.length;
@@ -137,51 +76,42 @@ angular.module('3drepoapp')
 
   return o;
 }])
-.controller('TreeviewCtrl', ['$scope', '$timeout', 'tree', 'X3DController', function($scope, $timeout, tree, X3DController){
+.controller('TreeviewCtrl', ['$scope', 'tree', 'x3dlink', 'navigation', function($scope, tree, x3dlink, navigation){
+
+  // Controller that defines the treeview
 
   $scope.iconExpand = 'icon-plus  glyphicon glyphicon-plus  fa fa-plus';
   $scope.iconCollapse = 'icon-minus glyphicon glyphicon-minus fa fa-minus';
   $scope.iconLeaf = 'icon-file  glyphicon glyphicon-file  fa fa-file';
   $scope.iconLink = 'icon-file  glyphicon glyphicon-link  fa fa-link';
-  $scope.total_bid = 0;
-
-  $scope.objs = objs;
-  $scope.selected_node = "";
-
-  $timeout(function(){
-    $scope.model = document.getElementById("model");
-  });
 
   $scope.tree = tree.tree;
+  $scope.selected_node = "";
 
+  // Register as a listener so that we pick up the 
+  // object click events
+  x3dlink.add_listener($scope);
+
+  // This is called when an object is clicked on
+  $scope.clicked_callback = function(id){
+    $scope.$apply(function () {
+      $scope.selected = id;
+    });
+  }
+
+  // Makes the input fields lose focus on Enter keypress
   $scope.blur_on_enter = function($event){
     if($event.keyCode == 13){
       $event.target.blur();
     }
   }
 
-  $scope.initialise_navigation = function(){
-  }
-  $scope.initialise_navigation();
-
-  $scope.$on('x3donclick', function()
-	{
-		console.log('Clicked on item' + x3dmessage.id);
-	});
-
+  // Instructs the x3dom runtime to zoom on an object
   $scope.navigate_to = function(item){
-    console.log('Zooming on ' + item.id);
-
-    // Here need to zoom on object like so
-    // $scope.model.runtime.showObject(obj);
-
-    // But for that it seems that we need the dom element...
-    // and it seems that the following jquery doesnt work to show all objects with attribute DEF ?
-    // console.log($('[DEF]').get());
-
-    //$scope.model.runtime.showAll();
+    navigation.show_object(x3dlink.links[item.id]);
   }
 
+  // Recursively computes the bids
   $scope.compute_bid = function(node){
     var bid = 0;
     if(node['nodes'] && node.linked){
@@ -197,6 +127,7 @@ angular.module('3drepoapp')
     return bid;
   } 
 
+  // Return total bid
   $scope.compute_total = function(){
     var total = 0;
 
@@ -209,21 +140,10 @@ angular.module('3drepoapp')
     return total;
   }
 
-  $scope.update_total = function(){
-    $scope.total_bid = $scope.compute_total();
-  }
-
-  $scope.deselect_all = function(node){
-    node.selected = false;
-
-    if(node['nodes']){
-      var arrayLength = node.nodes.length;
-      for (var i = 0; i < arrayLength; i++) {
-        $scope.deselect_all(node.nodes[i]);
-      }
-    }
-  }
-
+  // Toggle the link capabilities for non-leaf nodes
+  // Ie. when activated the bid will be equal to the sum
+  // of the bid of the children
+  // When disabled, the user can manually override the value
   $scope.toggle_link = function(item){
     var current = $scope.compute_bid(item);
     item.linked = !item.linked;
@@ -233,13 +153,10 @@ angular.module('3drepoapp')
   }
 
   $scope.select_item = function(item){
-    $scope.selected = item.name;
+    $scope.selected = item.id;
   }
 
   $scope.toggle_expand = function(item){
     item.expanded = !item.expanded;
   }
-
-  $scope.update_total();
-
 }]);

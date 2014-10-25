@@ -17,46 +17,100 @@
 
 var app = angular.module('3drepoapp', ['ui.event', 'ui.router']);
 
-app.factory('X3DController', ['$rootScope', function($rootScope) {
-    var x3dmessage = {};
+// This directive replaces the inline from the x3dom library and allows the file to be parsed by angular
+app.directive("include", ["$compile", '$http', '$templateCache', 'navigation', function ($compile, $http, $templateCache, navigation) {
+  return {
+    restrict: 'E',
+    link: function(scope , element, attrs) {
 
-    x3dmessage.id = '';
-    x3dmessage.obj = {};
+      scope.$watch(attrs.url, function (value) {
+        if (value) {
+          loadTemplate(value);
+        }
+      });
 
-    x3dmessage.setBroadcast = function(id, obj, msg) {
-        this.id = id;
-        this.obj = obj;
-        this.msg = msg;
-        this.broadcast();
-    };
-
-    x3dmessage.broadcast = function() {
-        $scope.$broadcast('x3dbroadcast');
-    };
-
-    return x3dmessage;
+      function loadTemplate(template) {
+        $http.get(template, { cache: $templateCache })
+          .success(function(templateContent) {
+            element.replaceWith($compile(templateContent)(scope));                
+            navigation.view_all();
+          });    
+      }
+    } 
+  }
 }]);
 
-app.controller("x3dBasicController", ['$scope', 'X3DController', function($scope, X3DController) {
-	$scope.obj_object = null;
-	
-	$scope.pickObject = function(obj)
-	{
-		if ($scope.old_object)
-			$($scope.old_object).attr('emissiveColor', "0 0 0");
-
-		$(obj).children('appearance').children('material').attr('emissiveColor', '1.0 0.5 0');
-		$scope.old_object = obj;
-	}
-	
-	$scope.x3donclick = function(event) {
-        var id = event.target.id;
-        var obj = event.target;
-        var msg = "onclick";
-
-		$scope.pickObject(obj);
-		
-        X3DController.setBroadcast(id, obj, msg);
+// This directive allows us to link directly with the shapes in the dom and setup links and callbacks
+app.directive('link', [ 'x3dlink', function(x3dlink) {
+  return {
+    restrict: 'AE',
+    link: function(scope, elem, attrs) {
+      // Get the id of the element
+      var id = attrs["id"];
+      // Link the id with the element
+      x3dlink.links[id] = elem[0];
+      // Callback is set on the element
+      elem[0].onclick = x3dlink.clicked_callback(id);
     }
+  };
+}]);
+
+// This makes the link between controllers and the x3dom elements
+// A controller that wished to be notified of a click
+// needs to be registered as a listener.
+app.factory('x3dlink', [function(){
+
+  listeners = [];
+
+  var o = {
+    links : {},
+    add_listener : function(controller){
+      listeners.push(controller);
+    },
+    clicked_callback : function(id){
+      function fn(){
+        var length = listeners.length;
+        for(var i = 0; i<length; i++){
+          listeners[i].clicked_callback(id);
+        }
+      }
+      return fn;
+    }
+  };
+
+  return o;
+}]);
+
+// This allows controller to poke the x3d runtime
+app.factory('navigation', [function(){
+
+  var model = document.getElementById("model");
+
+  var o = {
+    view_all : function(){
+      model.runtime.showAll();
+    },
+    default_viewpoint : function(){
+      model.runtime.resetView();
+    },
+    show_object : function(item){
+      model.runtime.showObject(item);
+    },
+  };
+
+  return o;
+}]);
+
+// Base navigation controller for the menus
+app.controller('BaseNavigationCtrl', ['$scope', 'navigation', function($scope, navigation){
+
+  $scope.view_all = function(){
+    navigation.view_all();
+  }
+
+  $scope.default_viewpoint = function(){
+    navigation.default_viewpoint();
+  }
+
 }]);
 

@@ -548,10 +548,12 @@ function X3D_AddChildren(xml_doc, xml_node, node, db_interface, db_name, mode)
 			X3D_AddChildren(xml_doc, new_node, child, db_interface, db_name, mode);
 		} else if (child['type'] == 'mesh') {
 			var shape = xml_doc.createElement('Shape');
+
+            // Sets the link attribute to link with angular
+            shape.setAttribute('link', 'true');
+
 			shape.setAttribute('DEF', child['id']);
 			shape.setAttribute('id', child['id']);
-
-			shape.setAttribute('onclick', 'jqonclick(event)');
 			
 			X3D_AddChildren(xml_doc, shape, child, db_interface, db_name, mode);
 
@@ -859,8 +861,20 @@ exports.render = function(db_interface, db_name, format, sub_format, level, revi
 			X3D_AddViewpoint(xml_doc, bbox);
 			//X3D_AddLights(xml_doc, bbox);		
 
-            var xml_str = new xml_serial().serializeToString(xml_doc);
-			res.write(xml_str);
+            // This is temporary
+            // Only write the content of x3d/scene
+            // This should be changed so that the <x3d> and the <scene> elements are not output in the first place
+            // If generated dynamically, they should be directly written in the jade, but not in the .x3d
+
+            var children = xml_doc.firstChild.firstChild.childNodes;
+            var length = children.length;
+
+            for(var i = 0; i<length; i++){
+                var child = children[i];  
+                var xml_str = new xml_serial().serializeToString(child);
+                res.write(xml_str);  
+            }
+
 			res.end();
 
             break;

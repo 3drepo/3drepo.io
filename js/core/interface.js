@@ -18,8 +18,9 @@
 var config = require('app-config').config;
 
 exports.index = function(xmltemplate, db_name, format, revision, res, err_callback) {
-    if (revision != null) xml_str = '<inline url="' + db_name + '.' + format + '.x3d/' + revision + '"/> </inline>';
-    else xml_str = '<inline url="/data/' + db_name + '.' + format + '.x3d"/> </inline>';
+
+    if (revision != null) xml_str = '<include url="\'' + db_name + '.' + format + '.x3d/' + revision + '\'"/> </inline>';
+    else xml_str = '<include url="\'/data/' + db_name + '.' + format + '.x3d\'"/> </inline>';
 
     res.render(xmltemplate, {
         xml: xml_str,
