@@ -84,15 +84,20 @@ app.factory('x3dlink', [function(){
 // This allows controller to poke the x3d runtime
 app.factory('navigation', [function(){
 
-  var model = document.getElementById("model");
   var previous_obj = null;
 
   var o = {
     view_all : function(){
-      model.runtime.showAll();
+      var model = document.getElementById("model");
+      if(model){
+        model.runtime.showAll();
+      }
     },
     default_viewpoint : function(){
-      model.runtime.resetView();
+      var model = document.getElementById("model");
+      if(model){
+        model.runtime.resetView();
+      }
     },
     show_object : function(item){
       if(previous_obj){

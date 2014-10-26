@@ -101,6 +101,9 @@ angular.module('3drepoapp')
     $scope.$apply(function () {
       $scope.selected = id;
     });
+    // Navigate
+    navigation.show_object(x3dlink.links[id]);
+    $scope.in_focus = id;
   }
 
   // Makes the input fields lose focus on Enter keypress
