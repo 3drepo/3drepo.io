@@ -46,6 +46,7 @@ angular.module('3drepoapp')
     obj = {};
     obj['id'] = node['uuid']
     obj['bid'] = node['bid'];
+    obj['visible'] = true;
     if(node.hasOwnProperty('name')){
       obj['name'] = node['name'];
     }
@@ -84,9 +85,12 @@ angular.module('3drepoapp')
   $scope.iconCollapse = 'icon-minus glyphicon glyphicon-minus fa fa-minus';
   $scope.iconLeaf = 'icon-file  glyphicon glyphicon-file  fa fa-file';
   $scope.iconLink = 'icon-file  glyphicon glyphicon-link  fa fa-link';
+  $scope.iconVisible = 'icon-file  glyphicon glyphicon-eye-open  fa fa-link';
+  $scope.iconHidden = 'icon-file  glyphicon glyphicon-eye-close  fa fa-link';
 
   $scope.tree = tree.tree;
   $scope.selected_node = "";
+  $scope.in_focus = "";
 
   // Register as a listener so that we pick up the 
   // object click events
@@ -108,7 +112,10 @@ angular.module('3drepoapp')
 
   // Instructs the x3dom runtime to zoom on an object
   $scope.navigate_to = function(item){
-    navigation.show_object(x3dlink.links[item.id]);
+    if($scope.in_focus != item.id && item.visible){
+      navigation.show_object(x3dlink.links[item.id]);
+      $scope.in_focus = item.id;
+    }
   }
 
   // Recursively computes the bids
@@ -158,5 +165,17 @@ angular.module('3drepoapp')
 
   $scope.toggle_expand = function(item){
     item.expanded = !item.expanded;
+  }
+
+  $scope.toggle_visible = function(item){
+    item.visible = !item.visible;
+    navigation.set_visible(x3dlink.links[item.id], item.visible);
+    // Recurse on children
+    if(item['nodes']){
+      var length = item.nodes.length;
+      for(var i = 0; i<length; i++){
+        $scope.toggle_visible(item.nodes[i]);
+      }
+    }
   }
 }]);

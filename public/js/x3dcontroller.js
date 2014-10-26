@@ -48,7 +48,7 @@ app.directive('shape', [ 'x3dlink', function(x3dlink) {
       // Get the id of the element
       var id = attrs["id"];
       // Link the id with the element
-      x3dlink.links[id] = elem[0];
+      x3dlink.links[id] = elem;
       // Callback is set on the element
       elem[0].onclick = x3dlink.clicked_callback(id);
     }
@@ -85,6 +85,7 @@ app.factory('x3dlink', [function(){
 app.factory('navigation', [function(){
 
   var model = document.getElementById("model");
+  var previous_obj = null;
 
   var o = {
     view_all : function(){
@@ -94,7 +95,16 @@ app.factory('navigation', [function(){
       model.runtime.resetView();
     },
     show_object : function(item){
-      model.runtime.showObject(item);
+      if(previous_obj){
+        previous_obj.children('appearance').children('material').attr('emissiveColor', '0 0 0');
+      }
+      item.children('appearance').children('material').attr('emissiveColor', '1.0 0.5 0');
+      previous_obj = item;
+      model.runtime.showObject(item[0]);
+    },
+    set_visible : function(item, visible){
+        console.log(item[0]);
+      item.attr('render', visible);
     },
   };
 

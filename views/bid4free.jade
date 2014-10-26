@@ -8,6 +8,8 @@ block content
 			i(ng-if="!data.nodes" ng-class="iconLeaf" class="icon" ng-click="toggle_expand(data)")
 			i(ng-if="data.nodes && !data.expanded" ng-class="iconExpand" class="icon" ng-click="toggle_expand(data)")
 			i(ng-if="data.nodes && data.expanded" ng-class="iconCollapse" class="icon" ng-click="toggle_expand(data)")
+			i(ng-if="data.visible" ng-class="iconVisible" class="icon" ng-click="toggle_visible(data)")
+			i(ng-if="!data.visible" ng-class="iconHidden" class="icon" ng-click="toggle_visible(data)")
 			span {{data.name}}
 
 			//- If this is not a leaf node and linked, we just display the total of its children
