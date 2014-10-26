@@ -39,11 +39,7 @@ block content
 				div.treeview-header
 					h3 Total Bid: £{{compute_total()}}
 				ul(class="nav nav-pills nav-stacked treerow")
-					li(ng-repeat="data in tree" class="{{selected === data.id ? 'active' : ''}}" id="{{data.id}}" ng-include="'tree_element.html'")
-
-	//- Hack for the demo, render the list of objects
-	script.
-		var objs = !{objs};
+					li(ng-repeat="data in tree " class="{{selected === data.id ? 'active' : ''}}" id="{{data.id}}" ng-include="'tree_element.html'")
 
 	h1#logo 3D Repo
 	nav.navbar.whitenavbar.navbar-fixed-top(role='navigation', ng-controller='BaseNavigationCtrl')

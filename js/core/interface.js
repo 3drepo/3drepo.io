@@ -26,8 +26,7 @@ exports.index = function(xmltemplate, db_name, format, revision, res, err_callba
         xml: xml_str,
         x3domjs: config.external.x3domjs,
         x3domcss: config.external.x3domcss,
-        repouicss: config.external.repouicss,
-        objs: JSON.stringify({}) // json
+        repouicss: config.external.repouicss
     });
 };
 
