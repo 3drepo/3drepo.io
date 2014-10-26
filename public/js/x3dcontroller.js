@@ -103,7 +103,6 @@ app.factory('navigation', [function(){
       model.runtime.showObject(item[0]);
     },
     set_visible : function(item, visible){
-        console.log(item[0]);
       item.attr('render', visible);
     },
   };
