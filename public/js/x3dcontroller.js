@@ -41,9 +41,9 @@ app.directive("include", ["$compile", '$http', '$templateCache', 'navigation', f
 }]);
 
 // This directive allows us to link directly with the shapes in the dom and setup links and callbacks
-app.directive('link', [ 'x3dlink', function(x3dlink) {
+app.directive('shape', [ 'x3dlink', function(x3dlink) {
   return {
-    restrict: 'AE',
+    restrict: 'E',
     link: function(scope, elem, attrs) {
       // Get the id of the element
       var id = attrs["id"];

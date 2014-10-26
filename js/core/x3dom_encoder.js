@@ -548,10 +548,6 @@ function X3D_AddChildren(xml_doc, xml_node, node, db_interface, db_name, mode)
 			X3D_AddChildren(xml_doc, new_node, child, db_interface, db_name, mode);
 		} else if (child['type'] == 'mesh') {
 			var shape = xml_doc.createElement('Shape');
-
-            // Sets the link attribute to link with angular
-            shape.setAttribute('link', 'true');
-
 			shape.setAttribute('DEF', child['id']);
 			shape.setAttribute('id', child['id']);
 			
