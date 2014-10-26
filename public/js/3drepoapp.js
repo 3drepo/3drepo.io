@@ -77,7 +77,7 @@ angular.module('3drepoapp')
 
   return o;
 }])
-.controller('TreeviewCtrl', ['$scope', 'tree', 'x3dlink', 'navigation', function($scope, tree, x3dlink, navigation){
+.controller('TreeviewCtrl', ['$scope', 'tree', 'x3dlink', 'navigation', '$location', '$anchorScroll', function($scope, tree, x3dlink, navigation, $location, $anchorScroll){
 
   // Controller that defines the treeview
 
@@ -104,6 +104,9 @@ angular.module('3drepoapp')
     // Navigate
     navigation.show_object(x3dlink.links[id]);
     $scope.in_focus = id;
+
+    $location.hash(id);
+    $anchorScroll();
   }
 
   // Makes the input fields lose focus on Enter keypress

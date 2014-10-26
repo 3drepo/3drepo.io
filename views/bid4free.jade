@@ -36,11 +36,10 @@ block content
 
 	script(type="text/ng-template" id="treeview.html")
 		div.treeview
-				div(ng-init="param")
 				div.treeview-header
 					h3 Total Bid: £{{compute_total()}}
 				ul(class="nav nav-pills nav-stacked treerow")
-					li(ng-repeat="data in tree" class="{{selected === data.id ? 'active' : ''}}" ng-include="'tree_element.html'")
+					li(ng-repeat="data in tree" class="{{selected === data.id ? 'active' : ''}}" id="{{data.id}}" ng-include="'tree_element.html'")
 
 	//- Hack for the demo, render the list of objects
 	script.
