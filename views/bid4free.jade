@@ -39,7 +39,7 @@ block content
 				div.treeview-header
 					h3 Total Bid: £{{compute_total()}}
 				ul(class="nav nav-pills nav-stacked treerow")
-					li(ng-repeat="data in tree " class="{{selected === data.id ? 'active' : ''}}" id="{{data.id}}" ng-include="'tree_element.html'")
+					li(ng-repeat="data in tree.nodes " class="{{selected === data.id ? 'active' : ''}}" id="{{data.id}}" ng-include="'tree_element.html'")
 
 	//- Column view of the tree
 	script(type="text/ng-template" id="columnview.html")

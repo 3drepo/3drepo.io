@@ -19,8 +19,8 @@ angular.module('3drepoapp')
 .config(['$stateProvider', '$urlRouterProvider',  function($stateProvider, $urlRouterProvider) {
 
   $stateProvider
-  .state('scene', {
-    url: '/scene',
+  .state('columnview', {
+    url: '/columnview',
     templateUrl: 'columnview.html',
     controller: 'ColumnviewCtrl',
     resolve: {
@@ -31,9 +31,22 @@ angular.module('3drepoapp')
         return tree.initialise(scene);
       }]
     }
+  })
+  .state('treeview', {
+    url: '/treeview',
+    templateUrl: 'treeview.html',
+    controller: 'TreeviewCtrl',
+    resolve: {
+      treePromise: ['$stateParams', '$location', 'tree', function($stateParams, $location, tree) {
+        // Dirty way of retrieving the current scene
+        var url = $location.absUrl().split('#')[0];
+        var scene =  /[^/]*$/.exec(url)[0];
+        return tree.initialise(scene);
+      }]
+    }
   });
 
-  $urlRouterProvider.otherwise('scene');
+  $urlRouterProvider.otherwise('treeview');
 }])
 .factory('tree', ['$http', function($http){
 
@@ -181,12 +194,14 @@ angular.module('3drepoapp')
     if(item['nodes']){
       $scope.stack.push($scope.element);
       $scope.element = item;
+      $scope.clear_search();
     }
   }
 
   $scope.go_outside = function(){
     $scope.element = $scope.stack[$scope.stack.length-1];
     $scope.stack.pop();
+    $scope.clear_search();
   }
 
   // This is called when an object is clicked on
