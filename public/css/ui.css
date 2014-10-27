@@ -217,14 +217,3 @@ nav.navbar.transparent.navbar-inverse.navbar-fixed-top {
     top: 2px;
     opacity: 0.25;
 }
-
-.linkicon-hidden{
-    float: right;
-    width: 10px;
-    min-width: 10px;
-    margin-left: 5px;
-    visibility: hidden;
-
-h1.error {
-	color: red;
-}
