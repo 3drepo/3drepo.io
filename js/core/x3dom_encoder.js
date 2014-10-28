@@ -733,8 +733,7 @@ function X3D_AddViewpoint(xml_doc, bbox)
     vpoint.setAttribute('orientation', '0 0 -1 0');
     vpoint.setAttribute('zNear', 0.01);
 
-	var zfar = (max_dim / Math.tan(0.5 * fov)) + bbox.size[2] * 3;
-    vpoint.setAttribute('zFar', zfar);
+    vpoint.setAttribute('zFar', 10000);
 	vpoint.setAttribute('fieldOfView', fov);
 
     vpoint.textContent = ' ';
