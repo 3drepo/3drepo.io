@@ -60,7 +60,6 @@ angular.module('3drepoapp')
     obj['id'] = node['uuid']
     obj['bid'] = node['bid'];
     obj['visible'] = true;
-	obj['nodes'] = [];
 
     if(node.hasOwnProperty('name')){
       obj['name'] = node['name'];
@@ -71,6 +70,7 @@ angular.module('3drepoapp')
 
     if(node['nodes'] && (node['nodes'].length > 0)){
       obj['linked'] = true;
+	  obj['nodes'] = [];
       var l = node['nodes'].length
       for(var i = 0; i < l; i++){
         obj['nodes'].push(o.populate(node['nodes'][i]));
@@ -87,74 +87,6 @@ angular.module('3drepoapp')
 	  o.tree.nodes.push(o.populate(data));
     });
   }
-
-  // // Example tree
-  // var o = {
-  //   tree : {
-  //   nodes: [
-  //     { 
-  //       name: "Body", id: "Body", visible: true, bid: 12, linked: true, expanded: true, nodes:[
-  //         {
-  //           name: "Left Leg", id: "Left Leg", visible: true, bid: 18, expanded: false
-  //         },
-  //         {
-  //           name: "Right Leg", id: "Right Leg", visible: true, bid: 18, expanded: false
-  //         },
-  //         {
-  //           name: "Left Arm", id: "Left Arm", visible: true, bid: 14,  linked: true, expanded: true, nodes:[
-  //             {
-  //               name: "Left Hand", id: "Left Hand", visible: true, bid: 17, linked: true, expanded: false, nodes:[
-  //                 {
-  //                   name: "Left Finger 1", id: "Left Finger 1", visible: true, bid: 1, expanded: false
-  //                 },
-  //                 {
-  //                   name: "Left Finger 2", id: "Left Finger 2", visible: true, bid: 2, expanded: false
-  //                 },
-  //                 {
-  //                   name: "Left Finger 3", id: "Left Finger 3", visible: true, bid: 1, expanded: false
-  //                 },
-  //                 {
-  //                   name: "Left Finger 4", id: "Left Finger 4", visible: true, bid: 3, expanded: false
-  //                 },
-  //                 {
-  //                   name: "Left Finger 5", id: "Left Finger 5", visible: true, bid: 5, expanded: false
-  //                 },
-  //               ]
-  //             },
-  //             {
-  //               name: "Left Forearm", id: "Left Forearm", visible: true, bid: 5, expanded: false
-  //             },
-  //           ]
-  //         },
-  //         {
-  //           name: "Right Arm", id: "Right Arm", visible: true, bid: 14,  linked: true, expanded: true, nodes:[
-  //             {
-  //               name: "Right Hand", id: "Right Hand", visible: true, bid: 17, linked: true, expanded: false, nodes:[
-  //                 {
-  //                   name: "Right Finger 1", id: "Right Finger 1", visible: true, bid: 3, expanded: false
-  //                 },
-  //                 {
-  //                   name: "Right Finger 2", id: "Right Finger 2", visible: true, bid: 4, expanded: false
-  //                 },
-  //                 {
-  //                   name: "Right Finger 3", id: "Right Finger 3", visible: true, bid: 10, expanded: false
-  //                 },
-  //                 {
-  //                   name: "Right Finger 4", id: "Right Finger 4", visible: true, bid: 0, expanded: false
-  //                 },
-  //                 {
-  //                   name: "Right Finger 5", id: "Right Finger 5", visible: true, bid: 1, expanded: false
-  //                 },
-  //               ]
-  //             },
-  //             {
-  //               name: "Right Forearm", id: "Right Forearm", visible: true, bid: 7, expanded: false
-  //             },
-  //           ]
-  //       }]
-  //     }
-  //   ]}
-  // }
 
   return o;
 }])
@@ -303,6 +235,7 @@ angular.module('3drepoapp')
   $scope.tree = tree.tree;
   $scope.selected_node = "";
   $scope.in_focus = "";
+  $scope.search = "";
 
   // Register as a listener so that we pick up the 
   // object click events
@@ -383,7 +316,7 @@ angular.module('3drepoapp')
 
   $scope.toggle_expand = function(item){
     item.expanded = !item.expanded;
-  }
+  } 
 
   $scope.toggle_visible = function(item){
     item.visible = !item.visible;
@@ -396,4 +329,28 @@ angular.module('3drepoapp')
       }
     }
   }
-}]);
+  }]);
+/*
+ * Broken code
+.filter('collapseTree', function() {
+	return function(input, search) {
+		var new_list = [];
+
+		if (!input)
+			return [];
+
+		for(var i = 0; i < input.length; i++)
+		{
+			if (input[i]['name'].indexOf(search) > -1)
+			{
+				new_list.push(input[i]);
+			} else {
+				new_list.push(new_list, arguments.callee(input[i].nodes, search));	
+			}
+		}
+
+		return new_list;
+	}
+});
+*/
+

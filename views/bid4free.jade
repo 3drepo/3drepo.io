@@ -5,44 +5,27 @@ block content
 	script(type="text/ng-template" id="tree_element.html")
 		a(href="#" ng-click="select_item(data); navigate_to(data)")
 			//- Pick the correct icon
-			i(ng-if="!data.nodes" ng-class="iconLeaf" class="icon" ng-click="toggle_expand(data)")
+			i(ng-if="!data.nodes.length" ng-class="iconLeaf" class="icon" ng-click="toggle_expand(data)")
 			i(ng-if="data.nodes && !data.expanded" ng-class="iconExpand" class="icon" ng-click="toggle_expand(data)")
 			i(ng-if="data.nodes && data.expanded" ng-class="iconCollapse" class="icon" ng-click="toggle_expand(data)")
 			i(ng-if="data.visible" ng-class="iconVisible" class="icon" ng-click="toggle_visible(data)")
 			i(ng-if="!data.visible" ng-class="iconHidden" class="icon" ng-click="toggle_visible(data)")
 			span {{data.name}}
 
-			//- If this is not a leaf node and linked, we just display the total of its children
-			div(class="itempricegroup" ng-if="data.nodes && data.linked") 
-				div(class="linkicon") 
-					i(ng-class="iconLink" class="icon"  ng-click="toggle_link(data)")
+			div(class="itempricegroup" ng-if="data.nodes") 
 				div(class="itemprice" style="font-weight: bold;") {{compute_bid(data)}}
 
 			//- Otherwise we allow an input field to set the bid
-			form(class="itempricegroup" ng-if="!data.nodes || !data.linked")
+			form(class="itempricegroup" ng-if="!data.nodes")
 				//- For leaf nodes use hidden icon to keep the same margin
-				div(class="linkicon" style="visibility: hidden;" ng-if="!data.nodes") 
-					i(ng-class="iconLink" class="icon")
-				//- For non-leaf nodes, disable the link icon by making it semi transparent
-				div(class="linkicon-disabled" ng-if="data.nodes" ng-click="toggle_link(data)") 
-					i(ng-class="iconLink" class="icon")
-				//- Bid input - make sure to defocus on enter, only allow numbers for the moment, bind to the current data.bid						
 				div(class="itemprice")
 					input(ui-event="{keypress:'blur_on_enter($event)'}" class="priceinput" type="tel" onkeypress='return event.charCode >= 48 && event.charCode <= 57' min="0" ng-model="data.bid" size="20")
 
 		//- Recurse on chilren
 		ul(ng-show="data.expanded" class="nav nav-pills nav-stacked treerow")
+			
 			li(ng-repeat="data in data.nodes | orderBy:name" class="{{selected === data.id ? 'active' : ''}}" ng-include="'tree_element.html'")
-
 	script(type="text/ng-template" id="treeview.html")
-		div.treeview
-				div.treeview-header
-					h3 Total Bid: £{{compute_total()}}
-				ul(class="nav nav-pills nav-stacked treerow")
-					li(ng-repeat="data in tree.nodes " class="{{selected === data.id ? 'active' : ''}}" id="{{data.id}}" ng-include="'tree_element.html'")
-
-	//- Column view of the tree
-	script(type="text/ng-template" id="columnview.html")
 		div.treeview
 			div.treeview-header
 				h3 Total Bid: £{{compute_total()}}
@@ -52,64 +35,8 @@ block content
 						i(ng-class="iconSearch" class="icon" style="visibility: hidden;")
 						i(ng-class="iconSearch" class="icon")
 						input(ui-event="{keypress:'blur_on_enter($event)'}" style="background: transparent; border: none; " placeholder="Filter" ng-model="search" size="20")
-						div(ng-if="search" class="linkicon") 
-							i(ng-class="iconRemove" class="icon"  ng-click="clear_search()")
-			ul(class="nav nav-pills nav-stacked treerow" ng-if="stack.length > 0")
-				li(class="{{selected === element.id ? 'active' : ''}}" id="{{element.id}}")
-					a(href="#" ng-click="select_item(element); navigate_to(element)")
-						i(ng-class="iconBack" class="icon" ng-click="go_outside()")
-						i(ng-if="element.visible" ng-class="iconVisible" class="icon" ng-click="toggle_visible(element)")
-						i(ng-if="!element.visible" ng-class="iconHidden" class="icon" ng-click="toggle_visible(element)")
-						span(style="font-weight: bold;") {{element.name}}
-
-						//- If this is not a leaf node and linked, we just display the total of its children
-						div(class="itempricegroup" ng-if="element.nodes && element.linked") 
-							div(class="linkicon") 
-								i(ng-class="iconLink" class="icon"  ng-click="toggle_link(element)")
-							div(class="itemprice" style="font-weight: bold;") {{compute_bid(element)}}
-
-						//- Otherwise we allow an input field to set the bid
-						form(class="itempricegroup" ng-if="!element.nodes || !element.linked")
-							//- For leaf nodes use hidden icon to keep the same margin
-							div(class="linkicon" style="visibility: hidden;" ng-if="!element.nodes") 
-								i(ng-class="iconLink" class="icon")
-							//- For non-leaf nodes, disable the link icon by making it semi transparent
-							div(class="linkicon-disabled" ng-if="element.nodes" ng-click="toggle_link(element)") 
-								i(ng-class="iconLink" class="icon")
-							//- Bid input - make sure to defocus on enter, only allow numbers for the moment, bind to the current data.bid						
-							div(class="itemprice")
-								input(ui-event="{keypress:'blur_on_enter($event)'}" class="priceinput" type="tel" onkeypress='return event.charCode >= 48 && event.charCode <= 57' min="0" ng-model="element.bid" size="20")
-
-
 			ul(class="nav nav-pills nav-stacked treerow")
-				li(ng-repeat="data in element.nodes |  filter:{name:search}" class="{{selected === data.id ? 'active' : ''}}" id="{{data.id}}")
-					a(href="#" ng-click="select_item(data); navigate_to(data)" ng-dblclick="go_inside(data)")
-						//- Pick the correct icon
-						i(ng-if="!data.nodes" ng-class="iconLeaf" class="icon")
-						i(ng-if="data.nodes" ng-class="iconNode" class="icon" ng-click="go_inside(data)")
-						//- i(ng-if="data.nodes && !data.expanded" ng-class="iconExpand" class="icon" ng-click="toggle_expand(data)")
-						//- i(ng-if="data.nodes && data.expanded" ng-class="iconCollapse" class="icon" ng-click="toggle_expand(data)")
-						i(ng-if="data.visible" ng-class="iconVisible" class="icon" ng-click="toggle_visible(data)")
-						i(ng-if="!data.visible" ng-class="iconHidden" class="icon" ng-click="toggle_visible(data)")
-						span {{data.name}}
-
-						//- If this is not a leaf node and linked, we just display the total of its children
-						div(class="itempricegroup" ng-if="data.nodes && data.linked") 
-							div(class="linkicon") 
-								i(ng-class="iconLink" class="icon"  ng-click="toggle_link(data)")
-							div(class="itemprice" style="font-weight: bold;") {{compute_bid(data)}}
-
-						//- Otherwise we allow an input field to set the bid
-						form(class="itempricegroup" ng-if="!data.nodes || !data.linked")
-							//- For leaf nodes use hidden icon to keep the same margin
-							div(class="linkicon" style="visibility: hidden;" ng-if="!data.nodes") 
-								i(ng-class="iconLink" class="icon")
-							//- For non-leaf nodes, disable the link icon by making it semi transparent
-							div(class="linkicon-disabled" ng-if="data.nodes" ng-click="toggle_link(data)") 
-								i(ng-class="iconLink" class="icon")
-							//- Bid input - make sure to defocus on enter, only allow numbers for the moment, bind to the current data.bid						
-							div(class="itemprice")
-								input(ui-event="{keypress:'blur_on_enter($event)'}" class="priceinput" type="tel" onkeypress='return event.charCode >= 48 && event.charCode <= 57' min="0" ng-model="data.bid" size="20")
+					li(ng-repeat="data in tree.nodes " class="{{selected === data.id ? 'active' : ''}}" id="{{data.id}}" ng-include="'tree_element.html'")
 
 	h1#logo 3D Repo
 	nav.navbar.whitenavbar.navbar-fixed-top(role='navigation', ng-controller='BaseNavigationCtrl')
