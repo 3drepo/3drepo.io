@@ -309,7 +309,7 @@ angular.module('3drepoapp')
   x3dlink.add_listener($scope);
 
   // This is called when an object is clicked on
-  $scope.clicked_callback = function(id){
+  $scope.clicked_callback = function(id, event){
     $scope.$apply(function () {
       $scope.selected = id;
     });

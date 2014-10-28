@@ -60,49 +60,58 @@ app.directive('shape', [ 'x3dlink', 'x3dmouselink', function(x3dlink, x3dmouseli
 // needs to be registered as a listener.
 app.factory('x3dlink', [function(){
 
-  listeners = [];
-
   var o = {
-    links : {},
-    add_listener : function(controller){
-      listeners.push(controller);
-    },
-    clicked_callback : function(id){
-      function fn(){
-        var length = listeners.length;
-        for(var i = 0; i<length; i++){
-          listeners[i].clicked_callback(id);
-        }
-      }
-      return fn;
-    }
+      listeners : [],
+      links : {},
   }
+
+  o.add_listener = function(controller){
+    o.listeners.push(controller);
+  };
+
+  o.clicked_callback = function(id){
+    function fn(event){
+      var length = o.listeners.length;
+      for(var i = 0; i<length; i++){
+        o.listeners[i].clicked_callback(id, event);
+      }
+    }
+    return fn;
+  };
+
+  return o;
 }]);
 
 app.factory('x3dmouselink', [function(){
-  listeners = [];
-
+  
   var o = {
-	links : {},
-	add_listener: function(controller){
-		listeners.push(controller);
-	},
-	mouseover_callback : function(event) {
-	  function fn() {
-		var length = listeners.length;
-		for(var i = 0; i<length; i++){
-		  listeners[i].mouseover_callback(event);
-		}
-	  }
-	},
-	mousemove_callback : function(event) {
-	  function fn() {
-		var length = listeners.length;
-		for(var i = 0; i<length; i++){
-		  listeners[i].mouseover_callback(event);
-		}
-	  }
-	}
+    listeners: [],
+  	links : {},
+  };
+
+
+  o.add_listener = function(controller){
+    o.listeners.push(controller);
+  };
+
+  o.mouseover_callback = function() {
+    function fn(event) {
+      var length = o.listeners.length;
+      for(var i = 0; i<length; i++){
+        o.listeners[i].mouseover_callback(event);
+      }
+    }
+    return fn;
+  };
+
+  o.mousemove_callback = function() {
+    function fn(event) {
+      var length = o.listeners.length;
+      for(var i = 0; i<length; i++){
+        o.listeners[i].mouseover_callback(event);
+      }
+    }
+    return fn;
   };
 
   return o;
@@ -116,34 +125,39 @@ app.factory('navigation', [function(){
   var o = {
     view_all : function(){
       var model = document.getElementById("model");
-      if(model){
+      if(model && model.runtime){
         model.runtime.showAll();
       }
     },
     default_viewpoint : function(){
       var model = document.getElementById("model");
-      if(model){
+      if(model && model.runtime){
         model.runtime.resetView();
       }
     },
     show_object : function(item){
       if(previous_obj){
         previous_obj.children('appearance').children('material').attr('emissiveColor', '0 0 0');
+        previous_obj.children('appearance').children('material').attr('transparency', '1.0');
       }
       item.children('appearance').children('material').attr('emissiveColor', '1.0 0.5 0');
+      // For the time being make the selected object transparent to be able to see the measuring line
+      item.children('appearance').children('material').attr('transparency', '0.1');
 	 
-	  if (!(previous_obj == item))
-		model.runtime.canvas.doc._viewarea.onDoubleClick();
+	   if (!(previous_obj == item))
+		    model.runtime.canvas.doc._viewarea.onDoubleClick();
 
       previous_obj = item;
     },
     set_visible : function(item, visible){
       item.attr('render', visible);
     },
-	change_cursor: function (cursor_type) {
-		var model = document.getElementById("model");
-		model.runtime.canvas.canvas.style.setProperty("cursor", cursor_type);
-	}
+  	change_cursor: function (cursor_type) {
+  		var model = document.getElementById("model");
+      if(model && model.runtime){
+  		  model.runtime.canvas.canvas.style.setProperty("cursor", cursor_type);
+      }
+  	},
   };
 
   return o;
@@ -159,8 +173,8 @@ app.controller('BaseNavigationCtrl', ['$scope', '$rootScope', 'navigation', func
     navigation.default_viewpoint();
   }
 
-  $rootScope.toggleMeasure = function(){
-	$rootScope.$broadcast('toggleMeasure');
+  $rootScope.toggle_measure = function(){
+	  $rootScope.$broadcast('toggleMeasure');
   }
 }]);
 

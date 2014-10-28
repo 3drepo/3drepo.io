@@ -137,6 +137,14 @@ nav.navbar.transparent.navbar-inverse.navbar-fixed-top {
     margin-top:50px; /* Set margin to your navbar height */
 }
 
+
+.measure-info {
+    position: absolute;
+    background-color: transparent;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
 /* Tree view stuff */
 
 .treeview {
