@@ -138,7 +138,7 @@ app.factory('navigation', [function(){
     show_object : function(item){
       if(previous_obj){
         previous_obj.children('appearance').children('material').attr('emissiveColor', '0 0 0');
-        previous_obj.children('appearance').children('material').attr('transparency', '1.0');
+        previous_obj.children('appearance').children('material').attr('transparency', '0.0');
       }
       item.children('appearance').children('material').attr('emissiveColor', '1.0 0.5 0');
       // For the time being make the selected object transparent to be able to see the measuring line
