@@ -41,7 +41,7 @@ app.directive("include", ["$compile", '$http', '$templateCache', 'navigation', f
 }]);
 
 // This directive allows us to link directly with the shapes in the dom and setup links and callbacks
-app.directive('shape', [ 'x3dlink', function(x3dlink) {
+app.directive('shape', [ 'x3dlink', 'x3dmouselink', function(x3dlink, x3dmouselink) {
   return {
     restrict: 'E',
     link: function(scope, elem, attrs) {
@@ -76,6 +76,33 @@ app.factory('x3dlink', [function(){
       }
       return fn;
     }
+  }
+}]);
+
+app.factory('x3dmouselink', [function(){
+  listeners = [];
+
+  var o = {
+	links : {},
+	add_listener: function(controller){
+		listeners.push(controller);
+	},
+	mouseover_callback : function(event) {
+	  function fn() {
+		var length = listeners.length;
+		for(var i = 0; i<length; i++){
+		  listeners[i].mouseover_callback(event);
+		}
+	  }
+	},
+	mousemove_callback : function(event) {
+	  function fn() {
+		var length = listeners.length;
+		for(var i = 0; i<length; i++){
+		  listeners[i].mouseover_callback(event);
+		}
+	  }
+	}
   };
 
   return o;
@@ -113,14 +140,17 @@ app.factory('navigation', [function(){
     set_visible : function(item, visible){
       item.attr('render', visible);
     },
+	change_cursor: function (cursor_type) {
+		var model = document.getElementById("model");
+		model.runtime.canvas.canvas.style.setProperty("cursor", cursor_type);
+	}
   };
 
   return o;
 }]);
 
 // Base navigation controller for the menus
-app.controller('BaseNavigationCtrl', ['$scope', 'navigation', function($scope, navigation){
-
+app.controller('BaseNavigationCtrl', ['$scope', '$rootScope', 'navigation', function($scope, $rootScope, navigation){
   $scope.view_all = function(){
     navigation.view_all();
   }
@@ -129,5 +159,8 @@ app.controller('BaseNavigationCtrl', ['$scope', 'navigation', function($scope, n
     navigation.default_viewpoint();
   }
 
+  $rootScope.toggleMeasure = function(){
+	$rootScope.$broadcast('toggleMeasure');
+  }
 }]);
 
