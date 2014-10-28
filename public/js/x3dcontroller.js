@@ -104,8 +104,11 @@ app.factory('navigation', [function(){
         previous_obj.children('appearance').children('material').attr('emissiveColor', '0 0 0');
       }
       item.children('appearance').children('material').attr('emissiveColor', '1.0 0.5 0');
+	 
+	  if (!(previous_obj == item))
+		model.runtime.canvas.doc._viewarea.onDoubleClick();
+
       previous_obj = item;
-      model.runtime.showObject(item[0]);
     },
     set_visible : function(item, visible){
       item.attr('render', visible);

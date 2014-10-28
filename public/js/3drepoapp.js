@@ -56,17 +56,20 @@ angular.module('3drepoapp')
 
   // Recursively build the tree from the received json
   o.populate = function(node){
-    obj = {};
+    var obj = {};
     obj['id'] = node['uuid']
     obj['bid'] = node['bid'];
     obj['visible'] = true;
+	obj['nodes'] = [];
+
     if(node.hasOwnProperty('name')){
       obj['name'] = node['name'];
     }
     else{
       obj['name'] = node['uuid'].substring(0, 8) + "...";
     }
-    if(node['nodes'] && node['nodes'].length > 0){
+
+    if(node['nodes'] && (node['nodes'].length > 0)){
       obj['linked'] = true;
       var l = node['nodes'].length
       for(var i = 0; i < l; i++){
@@ -81,10 +84,7 @@ angular.module('3drepoapp')
   o.initialise = function(name){
     return $http.get("/data/" + name + ".price.json").success(function(data){
       o.tree.nodes = [];
-      var l = data.nodes.length;
-      for(var i = 0; i < l; i++){
-        o.tree.nodes.push(o.populate(data.nodes[i]));
-      }
+	  o.tree.nodes.push(o.populate(data));
     });
   }
 

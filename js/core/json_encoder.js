@@ -34,6 +34,15 @@ function JSON_AddChildren(json_node, node)
 		
 			JSON_AddChildren(new_json_node, child);
 			json_node['nodes'].push(new_json_node);
+		} else if(child['type'] == 'transformation') {
+			var new_json_node = {};
+			new_json_node['uuid'] = child['id'];
+			new_json_node['name'] = child['name'];
+			new_json_node['bid'] = 0;
+			new_json_node['nodes'] = [];
+
+			JSON_AddChildren(new_json_node, child);
+			json_node['nodes'].push(new_json_node);
 		} else {
 			JSON_AddChildren(json_node, child);
 		}
