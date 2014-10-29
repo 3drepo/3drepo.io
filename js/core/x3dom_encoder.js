@@ -741,6 +741,43 @@ function X3D_AddViewpoint(xml_doc, bbox)
     scene.appendChild(vpoint);
 }
 
+function X3D_AddGroundPlane(xml_doc, bbox)
+{
+	var scene = xml_doc.getElementsByTagName('Scene')[0];
+
+	var flipMat = xml_doc.createElement('Transform');
+
+	flipMat.setAttribute("rotation", "1,0,0,4.7124");
+	flipMat.setAttribute("center", bbox.center.join(','));
+
+	var planeShape = xml_doc.createElement('Shape');
+	planeShape.setAttribute("id", "dontBother");
+	var groundPlane = xml_doc.createElement('Plane');
+	
+	groundPlane.setAttribute('center', bbox.center.join(','));
+
+	var bboxsz = [0,0];
+	bboxsz[0] = bbox.size[0] * 20;
+	bboxsz[1] = bbox.size[1] * 20;
+
+	groundPlane.setAttribute('size', bboxsz.join(','));
+	
+	var mat = xml_doc.createElement('Material');
+
+	mat.setAttribute('diffuseColor', '0.486 0.988 0');
+	mat.textContent = ' ';
+
+	var appearance = xml_doc.createElement('Appearance');
+	appearance.appendChild(mat);
+
+	groundPlane.textContent = " ";
+
+	planeShape.appendChild(appearance);
+	planeShape.appendChild(groundPlane);
+	flipMat.appendChild(planeShape);
+	scene.appendChild(flipMat);
+}
+
 exports.get_texture = function(db_interface, db_name, uuid, res, err_callback) {
     logger.log('debug', 'Reading texture ' + uuid);
     db_interface.get_texture(null, db_name, uuid, function(err, doc) {
@@ -853,6 +890,7 @@ exports.render = function(db_interface, db_name, format, sub_format, level, revi
 			bbox.center = [0.5 * (bbox.min[0] + bbox.max[0]), 0.5 * (bbox.min[1] + bbox.max[1]), 0.5 * (bbox.min[2] + bbox.max[2])]; 
 			bbox.size = [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])]; 
 
+			X3D_AddGroundPlane(xml_doc, bbox);
 			X3D_AddViewpoint(xml_doc, bbox);
 			//X3D_AddLights(xml_doc, bbox);		
 
