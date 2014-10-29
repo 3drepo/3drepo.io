@@ -15,7 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var app = angular.module('3drepoapp', ['ui.event', 'ui.router']);
+var app = angular.module('3drepoapp', ['ui.event', 'ui.router'], function($rootScopeProvider) {
+  $rootScopeProvider.digestTtl(15);
+});
 
 // This directive replaces the inline from the x3dom library and allows the file to be parsed by angular
 app.directive("include", ["$compile", '$http', '$templateCache', 'navigation', function ($compile, $http, $templateCache, navigation) {
