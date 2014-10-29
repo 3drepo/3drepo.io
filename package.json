@@ -1,5 +1,5 @@
 {
-    "name": "3drepo",
+    "name": "3drepo.io",
     "version": "0.0.1",
     "private": true,
     "scripts": {
@@ -19,16 +19,16 @@
         "semaphore": "latest",
         "jquery": "latest",
         "basic-auth": "latest",
-		"serve-favicon": "latest",
-		"json": "latest",
-		"body-parser": "latest",
-		"method-override" : "latest",
-		"compression" : "latest",
-		"passport": "latest",
-		"passport-local": "latest",
-		"mongoose": "latest",
-		"express-session": "latest",
-		"bcrypt-nodejs": "latest",
-		"connect-flash": "latest"
+	"serve-favicon": "latest",
+	"json": "latest",
+	"body-parser": "latest",
+	"method-override" : "latest",
+	"compression" : "latest",
+	"passport": "latest",
+	"passport-local": "latest",
+	"mongoose": "latest",
+	"express-session": "latest",
+	"bcrypt-nodejs": "latest",
+	"connect-flash": "latest"
     }
 }

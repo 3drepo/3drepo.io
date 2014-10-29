@@ -24,6 +24,8 @@ var router = express.Router();
 var x3dom_encoder = require('./js/core/x3dom_encoder.js');
 var json_encoder = require('./js/core/json_encoder.js');
 var interface = require('./js/core/interface.js');
+var config = require('app-config').config;
+var package_json = require('./package.json');
 
 var isAuth = function(req, res, next) {
 	logger.log('debug', 'Authenticated: ' + req.isAuthenticated());
@@ -41,7 +43,11 @@ module.exports = function(passport)
 
 	// Login routes
 	router.get('/', function(req, res) {
-		res.render('login', { message: req.flash('message') });
+		res.render('login', { 
+			message: req.flash('message'), 
+			repouicss: config.external.repobasecss,
+			version: package_json.version
+		});
 	});
 
 	router.post('/login', passport.authenticate('login', {

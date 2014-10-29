@@ -1,17 +1,17 @@
 extends layout
 
 block content
-	div.container
+	div.container-fluid
 		div.row
-			div.col-sm-6.col-md4.col-md-offset-4
-				center
-					img(src='3drepo_logo.png')
-					div
-						form(class='form-signup', action='/login', method='POST')
-							input(type='text', name='username', class='form-control', placeholder='Username', required, autofocus)
-							input(type='password', name='password', class='form-control', placeholder='Password', required)
-							button(class='btn btn-lg btn-primary btn-block', type='submit') Sign In
-							span.clearfix
+			div.col-md-4.col-md-offset-4
+				div#credentials-box
+					img#logo(src='svg/3drepo_logo.svg')
+					h5.version.top-gap Version: #{version}
+					form(class='form-signup', action='/login', method='POST')
+						input(type='text', name='username', class='form-control top-gap', placeholder='Username', required, autofocus)
+						input(type='password', name='password', class='form-control top-gap', placeholder='Password', required)
+						button(class='btn btn-warning btn-block top-gap', type='submit') Sign In
+						span.clearfix
 					//a(href='/password', class='text-center change-password') Change Password
 					#message
 					if message
