@@ -15,30 +15,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-module.exports = {
-    server:  {
-        http_port: 80,
-        https_port: 443
-    },
-    logfile: {
-        filename: '3drepo.log',
-		console_level: 'error',
-		file_level:    'info'
-    },
-    db: {
-        host: 'localhost',
-        port: 27017,
-        username: 'username',
-        password: 'password'
-    },
-	ssl: {
-		key: 'my_key.pem',
-		cert:'my_server.crt'
-	},
-    external: {
-        x3domjs: 'http://x3dom.org/download/dev/x3dom.js',
-        x3domcss : 'http://x3dom.org/download/dev/x3dom.css',
-        repouicss : '../css/ui.css',
-	repobasecss: '../css/base.css'
-    }
+
+/* BEGIN login screen */
+
+* {
+    border-radius: 0 !important;
 }
+body {
+    background-color: #004594;
+}
+
+img#logo {
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+.top-gap {
+    margin-top: 0.5em;
+}
+
+#credentials-box {
+    padding: 20% 0 0;	
+    width: 320px;
+    margin: auto;
+}
+
+.version {
+    display: block;
+    color: #ccc;
+}
+/* END login screen */
