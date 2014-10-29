@@ -87,6 +87,14 @@ app.factory('navigation', [function(){
   var previous_objs = [];
 
   var o = {
+	look_at : function(x,y,z) {
+		var model = document.getElementById("model");
+		if(model && model.runtime){
+			var pickVec = new x3dom.fields.SFVec3f(x,y,z);
+			model.runtime.canvas.doc._viewarea._pick = pickVec;
+			model.runtime.canvas.doc._viewarea.onDoubleClick();
+		}
+	},
     view_all : function(){
       var model = document.getElementById("model");
       if(model && model.runtime){
@@ -104,29 +112,49 @@ app.factory('navigation', [function(){
       var prev_length = previous_objs.length;
       for(var i=0; i<prev_length; i++){
         var obj = previous_objs[i];
-        if(obj && obj.children){
-          obj.children('appearance').children('material').attr('emissiveColor', '0 0 0');
-          obj.children('appearance').children('material').attr('transparency', '0.0');
-        }
+        
+		if(obj && obj.children){
+		  var app = obj.getElementsByTagName('appearance')[0];
+		  var mat = app.getElementsByTagName('material')[0];
+
+		  mat.setAttribute('emissiveColor', '0 0 0');
+		  mat.setAttribute('transparency', '0.0');
+		}
       }
 
       previous_objs = [];
-
       var length = items.length;
+
       for(var i=0; i<length; i++){
-        var obj = items[i];
-        if(obj && obj.children){
-          obj.children('appearance').children('material').attr('emissiveColor', '1.0 0.5 0');
-          // For the time being make the selected object transparent to be able to see the measuring line
-          obj.children('appearance').children('material').attr('transparency', '0.1');
-        }
+        var obj = items[i][0];
+	    if(obj && obj.children){
+		  var app = obj.getElementsByTagName('appearance')[0];
+		  var mat = app.getElementsByTagName('material')[0];
+
+		  mat.setAttribute('emissiveColor', '1.0 0.5 0');
+		  mat.setAttribute('transparency', '0.1');
+		}
         previous_objs.push(obj);
-      }
+	 }
     },
     navigate_to_object : function(item){
       var model = document.getElementById("model");
       if(item && model && model.runtime){
-        model.runtime.showObject(item[0]);
+		var mat = item[0]._x3domNode.getCurrentTransform();                                                                                                                                                                      
+		var min = x3dom.fields.SFVec3f.MAX();                                                                 
+		var max = x3dom.fields.SFVec3f.MIN();                                                                                                                                                                          
+		item[0]._x3domNode.getVolume().getBounds(min, max);                    
+			
+		min = mat.multMatrixPnt(min);                                                                         
+		max = mat.multMatrixPnt(max);            
+
+		var bboxcenter = [0,0,0];
+
+		bboxcenter[0] = (min.x + max.x) / 2;
+		bboxcenter[1] = (min.y + max.y) / 2;
+		bboxcenter[2] = (min.z + max.z) / 2;
+
+		this.look_at(bboxcenter[0], bboxcenter[1], bboxcenter[2]);
       }
     },
     set_visible : function(item, visible){
