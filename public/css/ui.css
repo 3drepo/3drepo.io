@@ -126,7 +126,6 @@ nav.navbar.transparent.navbar-inverse.navbar-fixed-top {
 }
 
 .fill {
-    background-color: #EEE;
     display:block;
     position:absolute;
     height:auto;
@@ -148,20 +147,36 @@ nav.navbar.transparent.navbar-inverse.navbar-fixed-top {
 /* Tree view stuff */
 
 .treeview {
-    background-color: #EEE;
-    width: 490px;
+    background-color: #fff;
+    width: 500px;
     height: 100%;
     position: absolute;
-    overflow: scroll;
 }
 
 .treeview-header{
     text-align: center;
-    margin-bottom: 20px;
+    height: 80px;
+}
+
+.treeview-body {
+    overflow-x: hidden;
+    overflow-y: auto;    
+    /* Firefox */
+    height: -moz-calc(100% - 100px);
+    /* WebKit */
+    height: -webkit-calc(100% - 100px);
+    /* Opera */
+    height: -o-calc(100% - 100px);
+    /* Standard */
+    height: calc(100% - 100px);    
+}
+
+#filter {
+    width: 100%;
+    margin: 0;
 }
 
 .viewport {
-    background-color: #00F;
     margin-left: 500px;
     height: 100%;
 }
@@ -225,3 +240,5 @@ nav.navbar.transparent.navbar-inverse.navbar-fixed-top {
     top: 2px;
     opacity: 0.25;
 }
+
+

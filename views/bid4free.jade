@@ -29,13 +29,14 @@ block content
 		div.treeview
 			div.treeview-header
 				h3 Total Bid: £{{compute_total()}}
-			ul(class="nav nav-pills nav-stacked treerow")
-				li
-					a(href="#")
-						i(ng-class="iconSearch" class="icon" style="visibility: hidden;")
-						i(ng-class="iconSearch" class="icon")
-						input(ui-event="{keypress:'blur_on_enter($event)'}" style="background: transparent; border: none; " placeholder="Filter" ng-model="search" size="20")
-			ul(class="nav nav-pills nav-stacked treerow")
+				ul(class="nav nav-pills nav-stacked treerow")
+					li
+						a(href="#")
+							i(ng-class="iconSearch" class="icon" style="visibility: hidden;")
+							i(ng-class="iconSearch" class="icon")
+							input#filter(ui-event="{keypress:'blur_on_enter($event)'}" placeholder="Filter" ng-model="search" size="20")
+			div.treeview-body
+				ul(class="nav nav-pills nav-stacked treerow")
 					li(ng-repeat="data in tree.nodes " class="{{selected === data.id ? 'active' : ''}}" id="{{data.id}}" ng-include="'tree_element.html'")
 
 	h1#logo 3D Repo
