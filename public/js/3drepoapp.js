@@ -218,18 +218,22 @@ angular.module('3drepoapp')
     item.expanded = !item.expanded;
   } 
 
-  $scope.toggle_visible = function(item){
-    item.visible = !item.visible;
+  $scope.set_visible = function(item, visible){
+    item.visible = visible;
     navigation.set_visible(x3dlink.links[item.id], item.visible);
     // Recurse on children
     if(item['nodes']){
       var length = item.nodes.length;
       for(var i = 0; i<length; i++){
-        $scope.toggle_visible(item.nodes[i]);
+        $scope.set_visible(item.nodes[i], visible);
       }
     }
   }
-  }])
+
+  $scope.toggle_visible = function(item){
+    $scope.set_visible(item, !item.visible);
+  }
+}])
 .filter('collapseTree', function(){
 
   matches_recursive = function(item, search){
