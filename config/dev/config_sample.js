@@ -39,7 +39,8 @@ module.exports = {
         x3domjs: 'http://x3dom.org/download/dev/x3dom.js',
         x3domcss : 'http://x3dom.org/download/dev/x3dom.css',
         repouicss : '../css/ui.css',
-	repobasecss: '../css/base.css'
+		repobasecss: '../css/base.css',
+		jqueryjs : 'http://code.jquery.com/jquery.min.js'
     }
 }
 

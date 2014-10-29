@@ -26,7 +26,9 @@ exports.index = function(xmltemplate, db_name, format, revision, res, err_callba
         xml: xml_str,
         x3domjs: config.external.x3domjs,
         x3domcss: config.external.x3domcss,
-        repouicss: config.external.repouicss
+        repouicss: config.external.repouicss,
+		jqueryjs: config.external.jqueryjs
+
     });
 };
 
@@ -34,7 +36,8 @@ exports.proto = function(req, res, err_callback){
     res.render('prototype', { 
         repouicss: config.external.repouicss, 
         x3domjs: config.external.x3domjs, 
-        x3domcss: config.external.x3domcss 
+        x3domcss: config.external.x3domcss,
+		jqueryjs: config.external.jqueryjs
     });
 }
 
@@ -45,7 +48,11 @@ exports.dblist = function(db_interface, res, err_callback) {
 		db_list.sort(function(a,b) { return a['name'].localeCompare(b['name']); });
 
         res.render("dblist", {
-            dblist: JSON.stringify(db_list)
+            dblist: JSON.stringify(db_list),
+	        repouicss: config.external.repouicss, 
+	        x3domjs: config.external.x3domjs, 
+	        x3domcss: config.external.x3domcss,
+			jqueryjs: config.external.jqueryjs
         });
     });
 };

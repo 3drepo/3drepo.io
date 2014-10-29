@@ -55,7 +55,7 @@ Configuration descriptions
 Running the application
 -----------------------
 
-The repository includes a script `run_app` to run the server. It has two arguments:
+The repository includes a script `run_app` and `run_app.cmd` specifically for Windows to run the server. It has two arguments:
 
 **./run_app \<config\> \<debug\>**
 * **config** This is the directory under config that the configuration resides in
