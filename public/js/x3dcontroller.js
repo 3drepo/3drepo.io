@@ -120,7 +120,7 @@ app.factory('x3dmouselink', [function(){
 // This allows controller to poke the x3d runtime
 app.factory('navigation', [function(){
 
-  var previous_obj = null;
+  var previous_objs = [];
 
   var o = {
     view_all : function(){
@@ -135,22 +135,41 @@ app.factory('navigation', [function(){
         model.runtime.resetView();
       }
     },
-    show_object : function(item){
-      if(previous_obj){
-        previous_obj.children('appearance').children('material').attr('emissiveColor', '0 0 0');
-        previous_obj.children('appearance').children('material').attr('transparency', '0.0');
-      }
-      item.children('appearance').children('material').attr('emissiveColor', '1.0 0.5 0');
-      // For the time being make the selected object transparent to be able to see the measuring line
-      item.children('appearance').children('material').attr('transparency', '0.1');
-	 
-	   if (!(previous_obj == item))
-		    model.runtime.canvas.doc._viewarea.onDoubleClick();
 
-      previous_obj = item;
+    show_objects : function(items){
+
+      var prev_length = previous_objs.length;
+      for(var i=0; i<prev_length; i++){
+        var obj = previous_objs[i];
+        if(obj && obj.children){
+          obj.children('appearance').children('material').attr('emissiveColor', '0 0 0');
+          obj.children('appearance').children('material').attr('transparency', '0.0');
+        }
+      }
+
+      previous_objs = [];
+
+      var length = items.length;
+      for(var i=0; i<length; i++){
+        var obj = items[i];
+        if(obj && obj.children){
+          obj.children('appearance').children('material').attr('emissiveColor', '1.0 0.5 0');
+          // For the time being make the selected object transparent to be able to see the measuring line
+          obj.children('appearance').children('material').attr('transparency', '0.1');
+        }
+        previous_objs.push(obj);
+      }
+    },
+    navigate_to_object : function(item){
+      var model = document.getElementById("model");
+      if(item && model && model.runtime){
+        model.runtime.showObject(item[0]);
+      }
     },
     set_visible : function(item, visible){
-      item.attr('render', visible);
+      if(item && item.attr){
+        item.attr('render', visible);
+      }
     },
   	change_cursor: function (cursor_type) {
   		var model = document.getElementById("model");
