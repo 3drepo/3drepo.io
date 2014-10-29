@@ -3,7 +3,7 @@ extends layout
 block content
 	//- Recursive Tree View
 	script(type="text/ng-template" id="tree_element.html")
-		a(href="#" ng-click="select_item(data); navigate_to(data)")
+		a(href="#" ng-click="select_item(data); navigate_to(data); show_object(data)")
 			//- Pick the correct icon
 			i(ng-if="!data.nodes.length" ng-class="iconLeaf" class="icon" ng-click="toggle_expand(data)")
 			i(ng-if="data.nodes && !data.expanded" ng-class="iconExpand" class="icon" ng-click="toggle_expand(data)")
@@ -23,8 +23,8 @@ block content
 
 		//- Recurse on chilren
 		ul(ng-show="data.expanded" class="nav nav-pills nav-stacked treerow")
-			
-			li(ng-repeat="data in data.nodes | orderBy:name" class="{{selected === data.id ? 'active' : ''}}" ng-include="'tree_element.html'")
+			li(ng-repeat="data in data.nodes | orderBy:name | collapseTree:search " class="{{selected === data.id ? 'active' : ''}}" ng-include="'tree_element.html'")
+				
 	script(type="text/ng-template" id="treeview.html")
 		div.treeview
 			div.treeview-header
