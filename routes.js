@@ -44,8 +44,11 @@ module.exports = function(passport)
 	// Login routes
 	router.get('/', function(req, res) {
 		res.render('login', { 
-			message: req.flash('message'), 
+			message: req.flash('message'),
+			x3domcss: config.external.x3domcss,
+			x3domjs: config.external.x3domjs,
 			repouicss: config.external.repobasecss,
+			jqueryjs: config.external.jqueryjs,
 			version: package_json.version
 		});
 	});
