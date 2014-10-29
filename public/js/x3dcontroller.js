@@ -47,11 +47,15 @@ app.directive('shape', [ 'x3dlink', 'x3dmouselink', function(x3dlink, x3dmouseli
     link: function(scope, elem, attrs) {
       // Get the id of the element
       var id = attrs["id"];
-      // Link the id with the element
-      x3dlink.links[id] = elem;
-      // Callback is set on the element
-      elem[0].onclick = x3dlink.clicked_callback(id);
-    }
+
+	  if (!(id == "dontBother"))
+	  {
+      	// Link the id with the element
+      	x3dlink.links[id] = elem;
+      	// Callback is set on the element
+      	elem[0].onclick = x3dlink.clicked_callback(id);
+	  }    
+	}
   };
 }]);
 
