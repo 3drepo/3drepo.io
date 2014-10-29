@@ -151,11 +151,54 @@ angular.module('3drepoapp')
     container = [];
     $scope.gather(container, item);
 
+	// TODO: Don't do this here
+	var bboxmin = [0,0,0];
+	var bboxmax = [0,0,0];
+	var firstObject = true;
+
     objects = [];
     var length = container.length;
     for(var i=0; i<length; i++){
-      objects.push(x3dlink.links[container[i].id]);
-    }
+	  if (container[i].id in x3dlink.links)
+	  {
+		var domobj = x3dlink.links[container[i].id];
+		objects.push(x3dlink.links[container[i].id]);
+
+		if (domobj[0].hasAttribute("bboxcenter"))
+		{
+			var mat = domobj[0]._x3domNode.getCurrentTransform();                                                                                                                                                                      
+			var min = x3dom.fields.SFVec3f.MAX();                                                                 
+			var max = x3dom.fields.SFVec3f.MIN();                                                                                                                                                                          
+			domobj[0]._x3domNode.getVolume().getBounds(min, max);                    
+			
+			min = mat.multMatrixPnt(min);                                                                         
+			max = mat.multMatrixPnt(max);            
+
+			if (firstObject) {
+				bboxmin = [min.x, min.y, min.z];
+				bboxmax = [max.x, max.y, max.z];
+			} else {
+				bboxmin[0] = Math.min(min.x, bboxmin[0]);
+				bboxmin[1] = Math.min(min.y, bboxmin[1]);
+				bboxmin[2] = Math.min(min.z, bboxmin[2]);
+			
+				bboxmax[0] = Math.max(max.x, bboxmax[0]);
+				bboxmax[1] = Math.max(max.y, bboxmax[1]);
+				bboxmax[2] = Math.max(max.z, bboxmax[2]);
+
+				firstObject = false;
+			}
+		}
+	  }
+	}
+
+	var bboxcenter = [0,0,0];
+
+	bboxcenter[0] = (bboxmax[0] + bboxmin[0]) / 2;
+	bboxcenter[1] = (bboxmax[1] + bboxmin[1]) / 2;
+	bboxcenter[2] = (bboxmax[2] + bboxmin[2]) / 2;
+
+	navigation.look_at(bboxcenter[0], bboxcenter[1], bboxcenter[2]);
 
     // navigation.show_object(x3dlink.links[item.id]); 
     navigation.show_objects(objects); 
