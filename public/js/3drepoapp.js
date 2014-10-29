@@ -232,10 +232,10 @@ angular.module('3drepoapp')
   $scope.compute_total = function(){
     var total = 0;
 
-    var arrayLength = $scope.tree.length;
+    var arrayLength = $scope.tree.nodes.length;
     for (var i = 0; i < arrayLength; i++) {
       // Use subtraction to avoid concatenting strings
-      total -= -$scope.compute_bid($scope.tree[i]);
+      total -= -$scope.compute_bid($scope.tree.nodes[i]);
     }
 
     return total;

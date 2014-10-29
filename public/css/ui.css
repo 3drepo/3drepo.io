@@ -196,7 +196,6 @@ nav.navbar.transparent.navbar-inverse.navbar-fixed-top {
 .itempricegroup{
     float: right;
     text-align: right !important;
-    min-width: 200px;
     height: 20px;
     margin: 0px !important;
 }
@@ -210,8 +209,7 @@ nav.navbar.transparent.navbar-inverse.navbar-fixed-top {
 }
 
 .priceinput{
-    width: 200px;
-    border: none; 
+    border: 1px solid #ccc;
     text-align: right;
     background: transparent;
     height: 20px !important;
