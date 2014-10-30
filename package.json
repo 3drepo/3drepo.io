@@ -29,6 +29,7 @@
 	"mongoose": "latest",
 	"express-session": "latest",
 	"bcrypt-nodejs": "latest",
-	"connect-flash": "latest"
+	"connect-flash": "latest",
+	"connect-ensure-login": "latest"
     }
 }
