@@ -10,7 +10,6 @@ config.js
 config/live
 config/local
 public/x3dom
-public/jquery.min.js
 
 certs
 upgrade
