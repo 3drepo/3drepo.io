@@ -43,9 +43,6 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#579ce4', end
   
 }
 
-.ng-scope {
-	background-color: #fff !important;
-       }	
 
 #popup {
 	position: absolute;
@@ -159,20 +156,20 @@ nav.navbar.transparent.navbar-inverse.navbar-fixed-top {
 
 .treeview-header{
     text-align: center;
-    height: 80px;
+    height: 100px;
 }
 
 .treeview-body {
     overflow-x: hidden;
     overflow-y: auto;    
     /* Firefox */
-    height: -moz-calc(100% - 100px);
+    height: -moz-calc(100% - 120px);
     /* WebKit */
-    height: -webkit-calc(100% - 100px);
+    height: -webkit-calc(100% - 120px);
     /* Opera */
-    height: -o-calc(100% - 100px);
+    height: -o-calc(100% - 120px);
     /* Standard */
-    height: calc(100% - 100px);    
+    height: calc(100% - 120px);    
 }
 
 #filter {
