@@ -120,7 +120,16 @@ angular.module('3drepoapp')
 
     // Navigate
     objects = [];
-    objects.push(x3dlink.links[id]);
+
+	for(var key in x3dlink.links)
+	{
+		if(!(key == id))
+		{
+			objects.push(x3dlink.links[key]);
+		}
+	}
+
+    //objects.push(x3dlink.links[id]);
     navigation.show_objects(objects); 
 
     navigation.navigate_to_object(x3dlink.links[id]);
@@ -148,6 +157,8 @@ angular.module('3drepoapp')
   }
 
   $scope.show_object = function(item){
+	var containerids = [];
+
     container = [];
     $scope.gather(container, item);
 
@@ -161,6 +172,7 @@ angular.module('3drepoapp')
     for(var i=0; i<length; i++){
 	  if (container[i].id in x3dlink.links)
 	  {
+	    containerids.push(container[i].id);
 		var domobj = x3dlink.links[container[i].id];
 		objects.push(x3dlink.links[container[i].id]);
 
@@ -201,7 +213,23 @@ angular.module('3drepoapp')
 	navigation.look_at(bboxcenter[0], bboxcenter[1], bboxcenter[2]);
 
     // navigation.show_object(x3dlink.links[item.id]); 
-    navigation.show_objects(objects); 
+    //navigation.show_objects(objects);
+	
+	// Inverse showing hack
+	var invobjects = [];
+
+	for(var key in x3dlink.links)
+	{
+		if (key != undefined)
+		{
+			if(containerids.indexOf(key))
+			{
+				invobjects.push(x3dlink.links[key]);
+			}
+		}
+	}
+
+	navigation.show_objects(invobjects);
   }
 
   // Instructs the x3dom runtime to zoom on an object

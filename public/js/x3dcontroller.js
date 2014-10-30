@@ -158,10 +158,13 @@ app.factory('navigation', [function(){
         
 		if(obj && obj.children){
 		  var app = obj.getElementsByTagName('appearance')[0];
-		  var mat = app.getElementsByTagName('material')[0];
+		  var mat = app.getElementsByTagName('twosidedmaterial')[0];
 
-		  mat.setAttribute('emissiveColor', '0 0 0');
-		  mat.setAttribute('transparency', '0.0');
+		  if (mat != undefined)
+		  {
+			mat.setAttribute('emissiveColor', '0 0 0');
+			mat.setAttribute('transparency', '0.0');
+		  }
 		}
       }
 
@@ -172,10 +175,13 @@ app.factory('navigation', [function(){
         var obj = items[i][0];
 	    if(obj && obj.children){
 		  var app = obj.getElementsByTagName('appearance')[0];
-		  var mat = app.getElementsByTagName('material')[0];
+		  var mat = app.getElementsByTagName('twosidedmaterial')[0];
 
-		  mat.setAttribute('emissiveColor', '1.0 0.5 0');
-		  mat.setAttribute('transparency', '0.1');
+		  if (mat != undefined)
+		  {
+			mat.setAttribute('emissiveColor', '1.0 0.5 0');
+			mat.setAttribute('transparency', '0.8');
+		  }
 		}
         previous_objs.push(obj);
 	 }

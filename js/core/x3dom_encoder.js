@@ -502,14 +502,15 @@ function X3D_AddChildren(xml_doc, xml_node, node, db_interface, db_name, mode)
 		} else if(child['type'] == 'material') {
 			 var appearance = xml_doc.createElement('Appearance');
 
-			 
+				/*
 				if (!child['two_sided']) {
 					new_node = xml_doc.createElement('Material');
 				} else {
 					new_node = xml_doc.createElement('TwoSidedMaterial');
 				}
-				
-				//new_node = xml_doc.createElement('TwoSidedMaterial');
+				*/
+
+				new_node = xml_doc.createElement('TwoSidedMaterial');
 
 				var ambient_intensity = 1;
 
