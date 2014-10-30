@@ -612,6 +612,8 @@ function X3D_AddToShape(xml_doc, shape, db_interface, db_name, mesh, mode) {
 
         var externalGeometry = xml_doc.createElement('ExternalGeometry');
 
+		externalGeometry.setAttribute('solid', 'true');
+
         if ('children' in mat) {
             var tex_id = mat['children'][0]['id'];
             externalGeometry.setAttribute('url', '/data/src_bin/' + db_name + '/' + mesh_id + '.src/' + tex_id);
@@ -798,16 +800,16 @@ function X3D_AddGroundPlane(xml_doc, bbox)
 	var groundPlane = xml_doc.createElement('Plane');
 	
 	groundPlane.setAttribute('center', bbox.center.join(','));
-
+	groundPlane.setAttribute("lit", "false");
 	var bboxsz = [0,0];
-	bboxsz[0] = bbox.size[0] * 20;
-	bboxsz[1] = bbox.size[1] * 20;
+	bboxsz[0] = bbox.size[0] * 5;
+	bboxsz[1] = bbox.size[1] * 5;
 
 	groundPlane.setAttribute('size', bboxsz.join(','));
 	
 	var mat = xml_doc.createElement('Material');
 
-	mat.setAttribute('diffuseColor', '0.486 0.988 0');
+	mat.setAttribute('emissiveColor', '0.3333 0.7373 0.3137');
 	mat.textContent = ' ';
 
 	var appearance = xml_doc.createElement('Appearance');
