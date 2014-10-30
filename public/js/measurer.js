@@ -74,8 +74,7 @@ app.controller('MeasurerCtrl', ['$scope', 'navigation', 'x3dlink', 'x3dmouselink
 	}
 
 	$scope.pointString = function(){
-		var s = "";
-		s += $scope.startPoint.x + " " + $scope.startPoint.y + " " + $scope.startPoint.z + ",";
+		var s = $scope.startPoint.x + " " + $scope.startPoint.y + " " + $scope.startPoint.z + ",";
 		s += $scope.endPoint.x + " " + $scope.endPoint.y + " " + $scope.endPoint.z;
 		return s;
 	}

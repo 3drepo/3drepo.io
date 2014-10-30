@@ -709,6 +709,48 @@ function X3D_AddLights(xml_doc, bbox)
 	scene.appendChild(p_light);
 };
 
+function X3D_AddMeasurer(xml_doc) {
+	var scene = xml_doc.getElementsByTagName('Scene')[0];
+
+	var trans = xml_doc.createElement('Transform');
+	trans.setAttribute('id', 'lineTrans');
+	trans.setAttribute('ng-controller', "MeasurerCtrl");
+	trans.setAttribute('render', '{{render()}}');
+
+	var shape = xml_doc.createElement('Shape');
+	shape.setAttribute('isPickable', 'false');
+
+	var app = xml_doc.createElement('Appearance');
+	var mat = xml_doc.createElement('Material');
+	mat.setAttribute('emissiveColor', '1 0 0');
+
+	var dm = xml_doc.createElement('DepthMode');
+	dm.setAttribute('enableDepthTest', 'false');
+
+	var lp = xml_doc.createElement('LineProperties');
+	lp.setAttribute('linewidthScaleFactor', 10);
+
+	app.appendChild(mat);
+	app.appendChild(dm);
+	app.appendChild(lp);
+
+	var ils = xml_doc.createElement('IndexedLineSet');
+	ils.setAttribute('coordIndex', '0 1 0 -1');
+
+	var coord = xml_doc.createElement('Coordinate');
+	coord.setAttribute('id', 'line');
+	coord.setAttribute('point', '{{pointString()}}');
+
+	ils.appendChild(coord);
+
+	shape.appendChild(app);
+	shape.appendChild(ils);
+
+	trans.appendChild(shape);
+
+	scene.appendChild(trans);
+};
+
 function X3D_AddViewpoint(xml_doc, bbox)
 {
     var scene = xml_doc.getElementsByTagName('Scene')[0];
@@ -893,6 +935,8 @@ exports.render = function(db_interface, db_name, format, sub_format, level, revi
 			X3D_AddGroundPlane(xml_doc, bbox);
 			X3D_AddViewpoint(xml_doc, bbox);
 			//X3D_AddLights(xml_doc, bbox);		
+
+			X3D_AddMeasurer(xml_doc);
 
             // This is temporary
             // Only write the content of x3d/scene
