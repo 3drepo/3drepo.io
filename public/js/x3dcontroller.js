@@ -35,7 +35,7 @@ app.directive("include", ["$compile", '$http', '$templateCache', 'navigation', f
         $http.get(template, { cache: $templateCache })
           .success(function(templateContent) {
             element.replaceWith($compile(templateContent)(scope));                
-            navigation.view_all();
+            navigation.default_viewpoint();
           });    
       }
     } 
