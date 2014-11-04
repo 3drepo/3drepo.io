@@ -20,6 +20,3 @@
 [submodule "submodules/fancytree"]
 	path = submodules/fancytree
 	url = https://github.com/mar10/fancytree.git
-[submodule "submodules/jquery-ui"]
-	path = submodules/jquery-ui
-	url = https://github.com/jquery/jquery-ui.git
