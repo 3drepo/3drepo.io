@@ -28,6 +28,10 @@ function stringToUUID(id) {
     return db_conn.Binary(buf, 3);
 }
 
+function uuidToString(uuidIn) {
+	return uuid.unparse(uuidIn.buffer);
+}
+
 /*
 exports.get_db_list = function(func) {
     async.waterfall([
@@ -82,6 +86,18 @@ exports.get_texture = function(err, db_name, uuid, callback) {
 
         callback(err, repoGraphScene.decode(coll));
     });
+};
+
+exports.get_children = function(err, db_name, uuid, callback) {
+	if (err) return onError(err);
+
+	var filter = {
+		parents : stringToUUID(uuid)
+	}
+
+	db_conn.filter_coll(err, db_name, 'scene', filter, null, function(err, doc) {
+		callback(err, doc)	
+	});
 };
 
 exports.get_mesh = function(err, db_name, revision, uuid, pbf, tex_uuid, callback) {
@@ -168,3 +184,4 @@ exports.get_cache = function(err, db_name, m_id, get_data, level, callback) {
 
 };
 
+exports.uuidToString = uuidToString;

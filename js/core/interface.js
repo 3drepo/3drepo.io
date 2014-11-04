@@ -19,26 +19,28 @@ var config = require('app-config').config;
 
 exports.index = function(xmltemplate, db_name, format, revision, res, err_callback) {
 
-    if (revision != null) xml_str = '<include url="\'' + db_name + '.' + format + '.x3d/' + revision + '\'"/> </include>';
-    else xml_str = '<include url="\'/data/' + db_name + '.' + format + '.x3d\'"/> </include>';
+    if (revision != null) xml_str = '<inline nameSpaceName=\"model\" url="' + db_name + '.' + format + '.x3d/' + revision + '"/>';
+    else xml_str = '<inline nameSpaceName=\"model\" url="/data/' + db_name + '.' + format + '.x3d"/>';
 
     res.render(xmltemplate, {
         xml: xml_str,
+		dbname: db_name,
         x3domjs: config.external.x3domjs,
         x3domcss: config.external.x3domcss,
         repouicss: config.external.repouicss,
-		jqueryjs: config.external.jqueryjs
-
+		jqueryjs:   config.external.jqueryjs,
+		jqueryuijs: config.external.jqueryuijs,
     });
 };
 
 exports.proto = function(req, res, err_callback){
-    res.render('prototype', { 
-        repouicss: config.external.repouicss, 
+    res.render('prototype', {  
         x3domjs: config.external.x3domjs, 
         x3domcss: config.external.x3domcss,
-		jqueryjs: config.external.jqueryjs
-    });
+        repouicss: config.external.repouicss,
+		jqueryjs: config.external.jqueryjs,
+		jqueryuijs: config.external.jqueryuijs,
+	});
 }
 
 exports.dblist = function(db_interface, res, err_callback) {
@@ -49,10 +51,11 @@ exports.dblist = function(db_interface, res, err_callback) {
 
         res.render("dblist", {
             dblist: JSON.stringify(db_list),
-	        repouicss: config.external.repouicss, 
 	        x3domjs: config.external.x3domjs, 
 	        x3domcss: config.external.x3domcss,
-			jqueryjs: config.external.jqueryjs
+        	repouicss: config.external.repouicss,
+			jqueryjs: config.external.jqueryjs,
+			jqueryuijs: config.external.jqueryuijs,
         });
     });
 };

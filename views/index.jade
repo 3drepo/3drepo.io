@@ -1,43 +1,12 @@
 extends layout
 
+block menu
+	div.treeview
+		include ./tree.jade
+	include ./menu.jade
+
 block content
-	script(src="/js/measurer.js")
-		h1#logo 3D Repo
-	nav.navbar.transparent.navbar-inverse.navbar-fixed-top(role='navigation', ng-controller='BaseNavigationCtrl')
-		div.container-fluid
-			div.navbar-header
-				button.navbar-toggle.collapsed(type="button" data-toggle="collapse" data-target=".navbar-collapse")
-					span.glyphicon.glyphicon-th
-					span.icon-bar
-			div.collapse.navbar-collapse
-				ul.nav.navbar-nav
-					li.dropdown
-						a(href='/home') Home
-					li.dropdown
-						a.dropdown-toggle(data-toggle="dropdown" href='#') Tools
-							span.caret
-						ul.dropdown-menu(role='menu')
-							li
-								a#measure(href='#') Measure
-					li.dropdown
-						a.dropdown-toggle(data-toggle="dropdown" href='#') View
-							span.caret
-						ul.dropdown-menu(role='menu')
-							li
-								a#view-everything(href='#' ng-click="view_all()") Everything
-							li
-								a#view-def-viewpoint(href='#' ng-click="default_viewpoint()") Default Viewpoint
-	div.container#popup
-		strong#mesh_name(style='color:blue;') Mesh Name
-		br
-		strong Price:
-		strong#price_val
-		br
-		strong#dist_name Distance:
-		strong#distance 0.00 m
-	div(id="x3dRef")
-		x3d(xmlns="http://www.web3d.org/specification/x3d-namespace" id="model" showStat="true" showLog="false" style="width:100%; height:100%; border:0px;")
-			scene.
-				!{xml}
-
-
+	div.fill
+		div.viewport
+			include ./viewer.jade
+			include ./measurer.jade

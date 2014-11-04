@@ -107,7 +107,6 @@ div#x3dom_logdiv.x3dom-logcontainer {
 }
 
 .whitenavbar {
-    background-color: #FFF !important;
 }
 
 .scrollable-menu {
@@ -134,7 +133,7 @@ nav.navbar.transparent.navbar-inverse.navbar-fixed-top {
     top:0;
     left:0;
     right:0;
-    margin-top:50px; /* Set margin to your navbar height */
+    //margin-top:50px; /* Set margin to your navbar height */
 }
 
 
@@ -148,12 +147,10 @@ nav.navbar.transparent.navbar-inverse.navbar-fixed-top {
 /* Tree view stuff */
 
 .treeview {
-    background-color: #fff;
-    width: 500px;
-    height: 100%;
+	top: 50px;
     position: absolute;
+	z-index: 10000;
 }
-
 .treeview-header{
     text-align: center;
     height: 100px;
@@ -178,7 +175,6 @@ nav.navbar.transparent.navbar-inverse.navbar-fixed-top {
 }
 
 .viewport {
-    margin-left: 500px;
     height: 100%;
 }
 
@@ -240,4 +236,14 @@ nav.navbar.transparent.navbar-inverse.navbar-fixed-top {
     opacity: 0.25;
 }
 
-
+ul.fancytree-container {
+	background-color: transparent;
+    /* Firefox */
+    max-height: -moz-calc(100% - 50px);
+    /* WebKit */
+    max-height: -webkit-calc(100% - 100px);
+    /* Opera */
+    max-height: -o-calc(100% - 50px);
+    /* Standard */
+    max-height: calc(100% - 50px);
+}	

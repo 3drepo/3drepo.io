@@ -406,14 +406,13 @@ function X3D_Header() {
     var xml_doc = new dom_imp().createDocument('http://www.web3d.org/specification/x3d-namespace', 'X3D');
 
     xml_doc.firstChild.setAttribute('xmlns', 'http://www.web3d.org/specification/x3d-namespace');
-    xml_doc.firstChild.setAttribute('id', 'model');
 
     return xml_doc;
 }
 
 function X3D_CreateScene(xml_doc) {
     var scene = xml_doc.createElement('Scene');
-	scene.setAttribute('DEF', 'scene');
+	scene.setAttribute('id', 'scene');
 
     var head = xml_doc.createElement('navigationInfo');
 
@@ -477,13 +476,18 @@ function X3D_AddChildren(xml_doc, xml_node, node, db_interface, db_name, mode)
 				url_str += '/' + child['revision'];
 
 			new_node.setAttribute('url', url_str);
-
+			new_node.setAttribute('id', child['id']);
+			new_node.setAttribute('DEF', db_interface.uuidToString(child["shared_id"]));
+			new_node.setAttribute('nameSpaceName', child['project']);
+		
 			xml_node.appendChild(new_node);
+
 			X3D_AddChildren(xml_doc, new_node, child, db_interface, db_name, mode);
 		}
 		else if (child['type'] == 'transformation')
 		{
 			new_node = xml_doc.createElement('MatrixTransform');
+			new_node.setAttribute("id", "mat");
 			var mat_str = "";
 			for(var mat_col = 0; mat_col < 4; mat_col++)
 			{
@@ -497,6 +501,8 @@ function X3D_AddChildren(xml_doc, xml_node, node, db_interface, db_name, mode)
 			}
 
 			new_node.setAttribute('matrix', mat_str);
+			new_node.setAttribute("id", child['id']);
+			new_node.setAttribute('DEF', db_interface.uuidToString(child["shared_id"]));
 			xml_node.appendChild(new_node);
 			X3D_AddChildren(xml_doc, new_node, child, db_interface, db_name, mode);
 		} else if(child['type'] == 'material') {
@@ -538,6 +544,8 @@ function X3D_AddChildren(xml_doc, xml_node, node, db_interface, db_name, mode)
 				}
 
 				new_node.textContent = ' ';
+				new_node.setAttribute("id", child['id']);
+				new_node.setAttribute('DEF', db_interface.uuidToString(child["shared_id"]));
 				appearance.appendChild(new_node);
 				xml_node.appendChild(appearance);
 				X3D_AddChildren(xml_doc, appearance, child, db_interface, db_name, mode);
@@ -545,13 +553,15 @@ function X3D_AddChildren(xml_doc, xml_node, node, db_interface, db_name, mode)
             new_node = xml_doc.createElement('ImageTexture');
             new_node.setAttribute('url', '/data/' + db_name + '/textures/' + child['id'] + '.' + child['extension']);
             new_node.textContent = ' ';
+			new_node.setAttribute("id", child['id']);
+			new_node.setAttribute('DEF', db_interface.uuidToString(child["shared_id"]));
 			xml_node.appendChild(new_node);
 			X3D_AddChildren(xml_doc, new_node, child, db_interface, db_name, mode);
 		} else if (child['type'] == 'mesh') {
 			var shape = xml_doc.createElement('Shape');
-			shape.setAttribute('DEF', child['id']);
 			shape.setAttribute('id', child['id']);
-			
+			shape.setAttribute('DEF', db_interface.uuidToString(child["shared_id"]));
+			shape.setAttribute('onclick', 'clickObject(event);');	
 			X3D_AddChildren(xml_doc, shape, child, db_interface, db_name, mode);
 
 			X3D_AddToShape(xml_doc, shape, db_interface, db_name, child, mode);
@@ -612,7 +622,7 @@ function X3D_AddToShape(xml_doc, shape, db_interface, db_name, mesh, mode) {
 
         var externalGeometry = xml_doc.createElement('ExternalGeometry');
 
-		externalGeometry.setAttribute('solid', 'true');
+		//externalGeometry.setAttribute('solid', 'true');
 
         if ('children' in mat) {
             var tex_id = mat['children'][0]['id'];
@@ -655,6 +665,7 @@ function X3D_AddToShape(xml_doc, shape, db_interface, db_name, mesh, mode) {
             if (mesh['id'] in GLOBAL.pbf_cache) {
                 var cache_mesh = GLOBAL.pbf_cache[mesh['id']];
 
+				pop_geometry.setAttribute('id', 'tst');
                 pop_geometry.setAttribute('vertexCount', mesh.faces_count * 3);
                 pop_geometry.setAttribute('vertexBufferSize', mesh.vertices_count);
                 pop_geometry.setAttribute('primType', "TRIANGLES");
@@ -935,7 +946,7 @@ exports.render = function(db_interface, db_name, format, sub_format, level, revi
 			bbox.center = [0.5 * (bbox.min[0] + bbox.max[0]), 0.5 * (bbox.min[1] + bbox.max[1]), 0.5 * (bbox.min[2] + bbox.max[2])]; 
 			bbox.size = [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])]; 
 
-			X3D_AddGroundPlane(xml_doc, bbox);
+			//X3D_AddGroundPlane(xml_doc, bbox);
 			X3D_AddViewpoint(xml_doc, bbox);
 			//X3D_AddLights(xml_doc, bbox);		
 
@@ -946,14 +957,8 @@ exports.render = function(db_interface, db_name, format, sub_format, level, revi
             // This should be changed so that the <x3d> and the <scene> elements are not output in the first place
             // If generated dynamically, they should be directly written in the jade, but not in the .x3d
 
-            var children = xml_doc.firstChild.firstChild.childNodes;
-            var length = children.length;
-
-            for(var i = 0; i<length; i++){
-                var child = children[i];  
-                var xml_str = new xml_serial().serializeToString(child);
-                res.write(xml_str);  
-            }
+			var xml_str = new xml_serial().serializeToString(xml_doc);
+            res.write(xml_str);  
 
 			res.end();
 

@@ -50,6 +50,7 @@ module.exports = function(passport)
 			x3domjs: config.external.x3domjs,
 			repouicss: config.external.repobasecss,
 			jqueryjs: config.external.jqueryjs,
+			jqueryuijs: config.external.jqueryuijs,
 			version: package_json.version
 		});
 	});
@@ -94,12 +95,16 @@ module.exports = function(passport)
 				onError(err);
 			});
 		} else if (req.param('format') == 'json') {
-			json_encoder.render(db_interface, req.param('db_name'), req.param('format'), req.param('subformat'), req.param('revision'), res, function(err) {
+			var uuid = null;
+
+			if ("parent" in req.query)
+				uuid = req.query["parent"];
+
+			json_encoder.render(db_interface, req.param('db_name'), req.param('format'), req.param('subformat'), req.param('revision'), uuid, req.query["selected"], req.query["namespace"], res, function(err) {
 				onError(err);
 			});
 		} else {
-			res.writeHead(501, {'Content-Type': 'application/json' });
-			res.end(JSON.stringify({ message: 'Not implemented' }));
+			res.json({message: 'Not implemented'});
 		}
 	});
 

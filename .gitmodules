@@ -14,3 +14,12 @@
 	path = submodules/x3dom
 	url = git://github.com/3drepo/x3dom.git
 	ignore=dirty
+[submodule "submodules/jstree"]
+	path = submodules/jstree
+	url = https://github.com/vakata/jstree.git
+[submodule "submodules/fancytree"]
+	path = submodules/fancytree
+	url = https://github.com/mar10/fancytree.git
+[submodule "submodules/jquery-ui"]
+	path = submodules/jquery-ui
+	url = https://github.com/jquery/jquery-ui.git
