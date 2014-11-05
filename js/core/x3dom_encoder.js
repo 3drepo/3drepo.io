@@ -431,7 +431,7 @@ function X3D_CreateScene(xml_doc) {
     bground.setAttribute('skycolor', '0.21 0.18 0.66 0.2 0.44 0.85 0.51 0.81 0.95 0.83 0.93 1');
     bground.setAttribute('groundangle', '0.9 1.5 1.57');
     bground.setAttribute('groundcolor', '0.65 0.65 0.65 0.73 0.73 0.73 0.81 0.81 0.81 0.91 0.91 0.91'); 
-    bground.textContent = ' ';
+	bground.textContent = ' ';
     scene.appendChild(bground);
 
 /*

@@ -4,6 +4,35 @@ append menu
 				window.namespaces = [];
 				});
 
+		function onlyThis(node)
+		{
+			var parent = node.getParent();
+
+			if(parent == null)
+				return;
+
+			var siblings = parent.getChildren();
+
+			for(var s_idx = 0; s_idx < siblings.length; s_idx++)
+				if (!(siblings[s_idx] == node))
+					siblings[s_idx].setExpanded(false);
+
+			onlyThis(parent);
+		}
+
+		function bgroundClick(event){
+			var rootNode = $("#scenetree").fancytree("getRootNode");
+			rootNode.setExpanded(false);
+
+			var mat_nodes = document.getElementsByTagName("TwoSidedMaterial")
+		
+			for(var m_idx = 0; m_idx < mat_nodes.length; m_idx++)
+			{
+				mat_nodes[m_idx].setAttribute("emissiveColor", "0 0 0");
+				mat_nodes[m_idx].setAttribute("transparency", "0.0");
+			}
+		}
+
 		function getKeyPath(obj) {
 			if (obj.hasAttribute("namespacename"))
 				if (obj.getAttribute("namespacename") == "model")
@@ -16,14 +45,16 @@ append menu
 			lookAtObject(event.target);
 			setApp(event.target);
 			var tree = $("#scenetree").fancytree("getTree");
+			console.log(getKeyPath(event.target));
 			tree.loadKeyPath(getKeyPath(event.target), function(node, status) {
 			  if(status === "loaded") {
-				node.setActive();
+				if (!(node.hasChildren() == undefined))
+					node.setExpanded(true);
 			  }else if(status === "ok") {
 			    node.setActive();
+				onlyThis(node);
 			  }
 			});
-			//tree.activateKey(event.target.getAttribute("DEF"));
 		};
 
 		function lookAtPoint(x,y,z) {
@@ -119,7 +150,7 @@ append menu
 						}
 						*/
 						},
-					click: function(event, data) {
+					activate: function(event, data) {
 						if ("uuid" in data.node.data)
 						{
 							var rootObj = $('#' + data.node.data.namespace + data.node.data.uuid)[0];
