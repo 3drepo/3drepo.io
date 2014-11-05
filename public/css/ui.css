@@ -185,6 +185,7 @@ nav.navbar.transparent.navbar-inverse.navbar-fixed-top {
     position: absolute;
     z-index: 1;
     overflow: auto;
+    height: calc(100% - 50px);  
     max-height: calc(100% - 50px);  
     max-width: 30%;
 }
@@ -193,10 +194,9 @@ nav.navbar.transparent.navbar-inverse.navbar-fixed-top {
     height: 100px;
 }
 
-
 ul.fancytree-container {
     background-color: transparent;
-    max-height: 100% !important;
+    height: 100%;
     overflow: auto !important;
     border: none !important;
     outline:none !important;
@@ -212,8 +212,6 @@ span.fancytree-title:hover {
 
 
 .treeview-body {
-    overflow-x: hidden;
-    overflow-y: auto;    
     /* Firefox */
     height: -moz-calc(100% - 120px);
     /* WebKit */
