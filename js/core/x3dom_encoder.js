@@ -486,8 +486,6 @@ function X3D_AddChildren(xml_doc, xml_node, node, db_interface, db_name, mode)
 		}
 		else if (child['type'] == 'transformation')
 		{
-			new_node = xml_doc.createElement('MatrixTransform');
-			new_node.setAttribute("id", "mat");
 			var mat_str = "";
 			for(var mat_col = 0; mat_col < 4; mat_col++)
 			{
@@ -500,7 +498,14 @@ function X3D_AddChildren(xml_doc, xml_node, node, db_interface, db_name, mode)
 				}
 			}
 
-			new_node.setAttribute('matrix', mat_str);
+			if (mat_str == "1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1")
+			{	
+				new_node = xml_doc.createElement('Group');
+			} else {
+				new_node = xml_doc.createElement('MatrixTransform');
+				new_node.setAttribute('matrix', mat_str);
+			}
+
 			new_node.setAttribute("id", child['id']);
 			new_node.setAttribute('DEF', db_interface.uuidToString(child["shared_id"]));
 			xml_node.appendChild(new_node);
