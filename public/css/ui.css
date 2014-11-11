@@ -288,4 +288,7 @@ span.fancytree-title:hover {
     top: 2px;
     opacity: 0.25;
 }
-	
+
+#popup{
+	visibility: hidden;
+}
