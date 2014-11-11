@@ -1,10 +1,10 @@
-append scene
-	Transform#lineTrnas(ng-controller="MeasurerCtrl", render='{{render()}}')
+block scene
+	Transform#lineTrans(render='false')
 		Shape(isPickable='false')
 			Appearance
 				Material(emissiveColor='1 0 0')
 				DepthMode(enableDepthTest='false')
 				LineProperties(lineWidthScaleFactor=10)
 			IndexedLineSet(coordIndex='0 1 0 -1')
-				Coordinate#line(point='{{pointString()}}')
-		
+				Coordinate#line(point='0 0 0, 0 0 0')
+				

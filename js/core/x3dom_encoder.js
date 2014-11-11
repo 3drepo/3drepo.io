@@ -566,7 +566,9 @@ function X3D_AddChildren(xml_doc, xml_node, node, db_interface, db_name, mode)
 			var shape = xml_doc.createElement('Shape');
 			shape.setAttribute('id', child['id']);
 			shape.setAttribute('DEF', db_interface.uuidToString(child["shared_id"]));
-			shape.setAttribute('onclick', 'clickObject(event);');	
+			shape.setAttribute('onclick', 'clickObject(event);');
+			shape.setAttribute('onmouseover', 'onMouseOver(event);');
+			shape.setAttribute('onmousemove', 'onMouseMove(event);');
 			X3D_AddChildren(xml_doc, shape, child, db_interface, db_name, mode);
 
 			X3D_AddToShape(xml_doc, shape, db_interface, db_name, child, mode);
@@ -954,13 +956,6 @@ exports.render = function(db_interface, db_name, format, sub_format, level, revi
 			//X3D_AddGroundPlane(xml_doc, bbox);
 			X3D_AddViewpoint(xml_doc, bbox);
 			//X3D_AddLights(xml_doc, bbox);		
-
-			X3D_AddMeasurer(xml_doc);
-
-            // This is temporary
-            // Only write the content of x3d/scene
-            // This should be changed so that the <x3d> and the <scene> elements are not output in the first place
-            // If generated dynamically, they should be directly written in the jade, but not in the .x3d
 
 			var xml_str = new xml_serial().serializeToString(xml_doc);
             res.write(xml_str);  

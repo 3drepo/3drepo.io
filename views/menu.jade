@@ -1,6 +1,6 @@
 append menu
 	h1#logo 3D Repo
-	nav.navbar.whitenavbar.navbar-fixed-top(role='navigation', ng-controller='BaseNavigationCtrl')
+	nav.navbar.whitenavbar.navbar-fixed-top(role='navigation')
 		div.container-fluid
 			div.navbar-header
 				button.navbar-toggle.collapsed(type="button" data-toggle="collapse" data-target=".navbar-collapse")
@@ -15,14 +15,14 @@ append menu
 							span.caret
 						ul.dropdown-menu(role='menu')
 							li
-								a#measure(href='#' ng-click="toggle_measure()") Measure
+								a#measure(href='#') Measure
 					li.dropdown
 						a.dropdown-toggle(data-toggle="dropdown" href='#') View
 							span.caret
 						ul.dropdown-menu(role='menu')
 							li
-								a#view-everything(href='#' ng-click="view_all()") Everything
+								a#view-everything(href='#') Everything
 							li
-								a#view-def-viewpoint(href='#'  ng-click="default_viewpoint()") Default Viewpoint
+								a#view-def-viewpoint(href='#') Default Viewpoint
 
 

@@ -38,6 +38,7 @@ var app = express();
 
 app.set('view engine', 'jade');
 app.set('views', './views');
+app.locals.pretty = true;
 
 var mongoose = require('mongoose');
 var connect_url = 'mongodb://' + config.db.username + ":" + config.db.password + '@' + config.db.host + ':' + config.db.port;
