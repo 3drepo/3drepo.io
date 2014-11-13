@@ -1,20 +1,26 @@
-extends layout
-
-block content
-	div.container-fluid
-		div.row
-			div.col-md-4.col-md-offset-4
-				div#credentials-box
-					img#logo(src='svg/3drepo_logo.svg')
-					h5.version.top-gap Version: #{version}
-					form(class='form-signup', action='/login', method='POST')
-						input(type='text', name='username', class='form-control top-gap', placeholder='Username', required, autofocus)
-						input(type='password', name='password', class='form-control top-gap', placeholder='Password', required)
-						button(class='btn btn-warning btn-block top-gap', type='submit') Sign In
-						span.clearfix
-					//a(href='/password', class='text-center change-password') Change Password
-					#message
-					if message
-						h1.text-center.error #{message}
+doctype xhtml
+html
+	head
+		title 3drepo.io
+		link(rel='stylesheet', href='#{bootstrapcss}')
+		script(type="text/javascript" src="#{bootstrapjs}")
+		script(type="text/javascript" src="#{bootstrapdialog}")
+		link(rel='stylesheet' type='text/css' href='#{repobasecss}')
+		body
+			div.container-fluid
+				div.row
+					div.col-md-4.col-md-offset-4
+						div#credentials-box
+							img#logo(src='svg/3drepo_logo.svg')
+							h5.version.top-gap Version: #{version}
+							form(class='form-signup', action='/login', method='POST')
+								input(type='text', name='username', class='form-control top-gap', placeholder='Username', required, autofocus)
+								input(type='password', name='password', class='form-control top-gap', placeholder='Password', required)
+								button(class='btn btn-warning btn-block top-gap', type='submit') Sign In
+								span.clearfix
+							//a(href='/password', class='text-center change-password') Change Password
+							#message
+							if message
+								h1.text-center.error #{message}
 
 
