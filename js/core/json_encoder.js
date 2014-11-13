@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 var repoGraphScene = require('./repoGraphScene.js');
+var async = require('async');
+var uuidToString = require('./db_interface.js').uuidToString;
 
 function JSON_AddChildren(json_node, node)
 {
@@ -48,6 +50,55 @@ function JSON_AddChildren(json_node, node)
 	}
 }
 
+function treeChildMetadata(db_interface, db_name, childNode, callback)  
+{
+	var shared_id = childNode["key"];
+
+	db_interface.get_metadata(null, db_name, shared_id, function(err, meta) {
+		childNode["meta"] = meta;
+		
+		callback(null, childNode);
+	});
+}
+
+function processChild(child, db_name, selected, namespace)
+{
+	var childNode = {};
+
+	if ((child['type'] == 'mesh') || (child['type'] == 'transformation'))
+	{
+		var uuid = uuidToString(child["_id"]);
+		var shared_id = uuidToString(child["shared_id"]);
+		var name = "";
+
+		if("name" in child)
+			name = child["name"];
+		else
+			name = uuid;
+
+		childNode["key"] = shared_id;
+		childNode["title"] = name;
+		childNode["uuid"] = uuid;
+		childNode["folder"] = ("children" in child);
+		childNode["lazy"] = true;
+		childNode["selected"] = (selected == "true");
+		childNode["namespace"] = namespace;
+		childNode["dbname"] = db_name;
+	} else if (child['type'] == 'ref') {
+		childNode["project"] = child["project"];
+		childNode["title"] = child["project"];
+		childNode["namespace"] = child["project"] + "__";
+		childNode["uuid"] = uuid;
+		childNode["folder"] = true;
+		childNode["lazy"] = true;
+		childNode["selected"] = (selected == "true");
+		childNode["dbname"] = child["project"];
+		childNode["key"] = uuidToString(child["shared_id"]);
+	}
+
+	return childNode;
+}
+
 exports.render = function(db_interface, db_name, format, sub_format, revision, uuid, selected, namespace, res, err_callback)
 {
 	if (uuid == null)
@@ -57,7 +108,7 @@ exports.render = function(db_interface, db_name, format, sub_format, revision, u
 			var node = doc['mRootNode'];
 
 			head[0]["title"]  = node["name"];
-			head[0]["key"]    = db_interface.uuidToString(node["shared_id"]);
+			head[0]["key"]    = uuidToString(node["shared_id"]);
 			head[0]["folder"] = true;
 			head[0]["lazy"]   = true;
 			head[0]["selected"] = true;
@@ -72,50 +123,17 @@ exports.render = function(db_interface, db_name, format, sub_format, revision, u
 		});
 	} else {
 		db_interface.get_children(null, db_name, uuid, function(err, doc) {
-			var children = [];
-
-			for(var ch_idx = 0; ch_idx < doc.length; ch_idx++)
-			{
-				var child = doc[ch_idx];
-				var child_node = {};
-
-				if ((child['type'] == 'mesh') || (child['type'] == 'transformation'))
+			async.map(doc, function(child, callback) 
+				{ 
+					callback(err, processChild(child, db_name, selected, namespace));
+				}, function(err, children) {
+				async.map(children, function(id, callback) {
+					treeChildMetadata(db_interface, db_name, id, callback)
+				}, function(err, childWithMeta)
 				{
-					var uuid = db_interface.uuidToString(child["_id"]);
-					var shared_id = db_interface.uuidToString(child["shared_id"]);
-					var name = "";
-
-					if("name" in child)
-						name = child["name"];
-					else
-						name = uuid;
-
-					child_node["key"] = shared_id;
-					child_node["title"] = name;
-					child_node["uuid"] = uuid;
-					child_node["folder"] = ("children" in child);
-					child_node["lazy"] = true;
-					child_node["selected"] = (selected == "true");
-					child_node["namespace"] = namespace;
-					child_node["dbname"] = db_name;
-
-				} else if (child['type'] == 'ref') {
-					child_node["key"] = child["project"];
-					child_node["project"] = child["project"];
-					child_node["title"] = child["project"];
-					child_node["namespace"] = child["project"] + "__";
-					child_node["uuid"] = uuid;
-					child_node["folder"] = true;
-					child_node["lazy"] = true;
-					child_node["selected"] = (selected == "true");
-					child_node["dbname"] = child["project"];
-					child_node["key"] = db_interface.uuidToString(child["shared_id"]);
-				}
-
-				children.push(child_node);
-			}
-
-			res.json(children);
+					res.json(childWithMeta);
+				});
+			});
 		});
 	}
 }

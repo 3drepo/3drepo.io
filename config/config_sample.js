@@ -39,9 +39,18 @@ module.exports = {
         x3domjs: 'http://x3dom.org/download/dev/x3dom.js',
         x3domcss : 'http://x3dom.org/download/dev/x3dom.css',
         repouicss : '../css/ui.css',
-	repobasecss: '../css/base.css',
-	jqueryjs : '../jquery.min.js',
-	jqueryuijs : '../jquery-ui.min.js'
-    }
+		repobasecss: '../css/base.css',
+		jqueryjs : '../jquery.min.js',
+		jqueryuijs : '../jquery-ui.min.js',
+		jqueryuicss: '//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css',
+		angularjs: '//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular.min.js',
+		angularutilsjs: '//cdnjs.cloudflare.com/ajax/libs/angular-ui-utils/0.1.1/angular-ui-utils.min.js',
+		angularrouterjs: '//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.10/angular-ui-router.js',
+		bootstrapcss: '../bootstrap/dist/css/bootstrap.min.css',
+		bootstrapjs: '../bootstrap/dist/js/bootstrap.min.js',
+		bootstrapdialog: '../bootstrap3-dialog/dist/js/bootstrap-dialog.min.js',
+		fancytreecss: '../fancytree/dist/skin-xp/ui.fancytree.min.css',
+		jqueryfancytree: '../fancytree/dist/jquery.fancytree-all.js'
+	}
 }
 

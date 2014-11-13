@@ -28,6 +28,10 @@
 }
 
 body {
+	position: fixed;
+	width : 100%;
+	height: 100%;
+	overflow: hidden;
     margin : 0;     
     padding : 0;
           -webkit-touch-callout: none;
@@ -89,6 +93,7 @@ h1#logo,
 .dropdown-menu>li>a,
 .dropdown-menu>li>a:hover,
 .fancytree-selected span.fancytree-title,
+.metadata-title,
 span.fancytree-title{
     color: white;
     font-weight: 100;
@@ -292,3 +297,40 @@ span.fancytree-title:hover {
 #popup{
 	visibility: hidden;
 }
+
+.ui-widget-content{
+    background: rgba(0,0,0,0.5);
+	visibility: hidden;
+	z-index: 2500;
+	top: 50px;
+	width: 300px;
+	padding: 5px;
+	right: 0px;
+	position: absolute;
+}
+
+.viewport,
+#viewer{
+	width:100%;
+	height:100%;
+	border:0px;
+}
+
+.metadata-title{
+	border-bottom: 2px solid white;
+	font-size: 110%;
+	text-align: center;
+}
+
+.metadata-row {
+	color: white;
+	font-weight: 100;
+	text-align: center;
+}
+
+#metadata {
+	width: 100%;
+	height: 100%;
+}
+
+

@@ -44,15 +44,16 @@ module.exports = function(passport)
 
 	// Login routes
 	router.get('/', function(req, res) {
-		res.render('login', { 
-			message: req.flash('message'),
-			x3domcss: config.external.x3domcss,
-			x3domjs: config.external.x3domjs,
-			repouicss: config.external.repobasecss,
-			jqueryjs: config.external.jqueryjs,
-			jqueryuijs: config.external.jqueryuijs,
-			version: package_json.version
+		
+		var paramJson = {
+			message: req.flash('message')
+		};
+
+		Object.keys(config.external).forEach(function(key) {
+			paramJson[key] = config.external[key];
 		});
+		
+		res.render('login', paramJson);
 	});
 
 	router.post('/login', passport.authenticate('login', {

@@ -92,11 +92,34 @@ exports.get_children = function(err, db_name, uuid, callback) {
 	if (err) return onError(err);
 
 	var filter = {
-		parents : stringToUUID(uuid)
-	}
+		parents : stringToUUID(uuid),
+		type: {$in : ['mesh', 'transformation', 'ref']}
+	};
 
 	db_conn.filter_coll(err, db_name, 'scene', filter, null, function(err, doc) {
-		callback(err, doc)	
+		callback(err, doc);	
+	});
+};
+
+exports.get_metadata = function(err, db_name, uuid, callback) {
+	if (err) return onError(err);
+
+	var filter = {
+		parents: stringToUUID(uuid),
+		type: 'meta'
+	};
+
+	var projection = {
+		_id: 0,
+		shared_id: 0,
+		paths: 0,
+		type: 0,
+		api: 0,
+		parents: 0
+	};
+
+	db_conn.filter_coll(err, db_name, 'scene', filter, projection, function(err, doc) {
+		callback(err, doc);
 	});
 };
 

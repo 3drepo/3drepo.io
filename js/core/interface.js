@@ -22,15 +22,16 @@ exports.index = function(xmltemplate, db_name, format, revision, res, err_callba
     if (revision != null) xml_str = '<inline nameSpaceName=\"model\" url="' + db_name + '.' + format + '.x3d/' + revision + '"> </inline>';
     else xml_str = '<inline nameSpaceName=\"model\" url="/data/' + db_name + '.' + format + '.x3d"> </inline>';
 
-    res.render(xmltemplate, {
-        xml: xml_str,
-		dbname: db_name,
-        x3domjs: config.external.x3domjs,
-        x3domcss: config.external.x3domcss,
-        repouicss: config.external.repouicss,
-		jqueryjs:   config.external.jqueryjs,
-		jqueryuijs: config.external.jqueryuijs,
-    });
+	var paramJson = {
+		xml: xml_str,
+		dbname: db_name
+	};
+
+	Object.keys(config.external).forEach(function(key) {
+		paramJson[key] = config.external[key];
+	});
+
+    res.render(xmltemplate, paramJson);
 };
 
 exports.proto = function(req, res, err_callback){
@@ -49,14 +50,15 @@ exports.dblist = function(db_interface, res, err_callback) {
 		
 		db_list.sort(function(a,b) { return a['name'].localeCompare(b['name']); });
 
-        res.render("dblist", {
-            dblist: JSON.stringify(db_list),
-	        x3domjs: config.external.x3domjs, 
-	        x3domcss: config.external.x3domcss,
-        	repouicss: config.external.repouicss,
-			jqueryjs: config.external.jqueryjs,
-			jqueryuijs: config.external.jqueryuijs,
-        });
+		var paramJson = {
+			dblist: JSON.stringify(db_list)
+		};
+
+		Object.keys(config.external).forEach(function(key) {
+			paramJson[key] = config.external[key];
+		});
+
+		res.render("dblist", paramJson);
     });
 };
 

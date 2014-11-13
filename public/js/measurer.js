@@ -65,7 +65,6 @@ $(document).on("onMouseOver", function(event, objEvent) {
 });
 
 $(document).on("clickObject", function(event, objEvent) {
-	document.getElementById('popup').style.visibility = "visible";
 	if(window.toggleMeasure)
 		window.measurer.togglePoint();
 });	

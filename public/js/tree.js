@@ -44,16 +44,14 @@ var TreeControl = function() {
 $(document).on("clickObject", function(event, objEvent) {
 	var tree = $("#scenetree").fancytree("getTree");
 	
-	tree.loadKeyPath(treeCtrl.getKeyPath(objEvent.target), function(node, status) {
-		if(status === "loaded") {
-			if (!(node.hasChildren() == undefined)) {
-				node.setExpanded(true);
-			} else if(status === "ok") {
-				node.setActive();
+	tree.loadKeyPath(treeCtrl.getKeyPath(objEvent.target), 
+		function(node, status) {
+			if(status === "ok") {
 				treeCtrl.onlyThis(node);
+				node.setActive();
 			}
 		}
-	});
+	);
 });
 
 $(document).ready( function() {
@@ -106,6 +104,25 @@ $(function () {
 				var rootObj = $('#' + data.node.data.namespace + data.node.data.uuid)[0];
 				viewer.lookAtObject(rootObj);
 				viewer.setApp(rootObj);
+			}
+
+			if (("meta" in data.node.data) && (data.node.data["meta"].length))
+			{
+				$("#meta-popup").css("visibility", "visible");
+				$("#metadata").remove();
+
+				$("#meta-popup").append("<table id=\"metadata\"></div>");
+
+				$("#metadata").append("<tr><th c class=\"metadata-title\" colspan=\"2\">" + data.node["title"] + "</th></tr>");
+
+				var meta = data.node.data["meta"][0];
+
+				Object.keys(meta).forEach(function(key)
+				{
+					$("#metadata").append("<tr><td class=\"metadata-row\">" + key + "</td><td class=\"metadata-row\">" + meta[key] + "</td></tr>")
+				});
+			} else {
+				$("#meta-popup").css("visibility", "hidden");
 			}
 		},
 		checkbox: true,
