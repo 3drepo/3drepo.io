@@ -1,0 +1,262 @@
+html, body {
+	height: 100%;
+	background-color: #FFF;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+/* header, footer stuff */
+
+/* Wrapper for page content to push down footer */
+#wrap {
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+  /* Negative indent footer by it's height */
+  margin: 0 auto -62px;
+}
+
+/* Set the fixed height of the footer here */
+#push,
+#footer {
+		height: 62px;
+}
+#footer {
+  background-color: #FFF;
+  font-size: 12px;
+  color: #BBB;
+  margin-top: 20px;
+  line-height: 60px
+}
+
+.v-expand {
+	position: relative;
+	height: 100%;
+}
+
+.tight {
+	margin: 0;
+	padding: 0;
+}
+
+.logo-pad {
+	padding: 10px;
+}
+
+.header {
+	background: #EEE;
+	height: 50px;
+}
+
+#search-box {
+	border: none;
+	height: 28px;
+	margin-top: 11px;
+	min-width: 300px;
+}
+
+
+/* general */
+
+.container-fluid {
+	margin-right: auto;
+	margin-left: auto;
+	max-width: 960px; /* or 950px */
+}
+
+.padded-box{
+	padding: 10px 20px;
+}
+
+.shadow{
+	box-shadow: 2px 2px 2px #CCCCCC;
+}
+
+.gutter-right{
+	padding-right: 20px !important;
+}
+
+.rounded{
+	border-radius: 5px;
+}
+
+.solid{
+	background-color: #FFF;
+}
+
+.rounded-border{
+	border-radius: 5px;
+    border: 1px solid;
+    border-color: #DDD;
+}
+
+.block{
+	background-color: #FFF;
+	float: left;
+	padding-left: 0px;
+	width: 100%;
+	padding-bottom: 20px;
+	margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid;
+    border-color: #DDD;
+}
+
+.block h3{
+	font-size: 15pt;
+	height: 100%;
+	font-weight: normal;
+	color: #555;
+	margin: 0px;
+	padding: 10px;
+}
+
+.block p{
+	height: 100%;
+	font-weight: normal;
+	color: #555;
+	margin: 0px;
+	padding: 20px;
+}
+
+.block-header{
+	background-color: #EEE;
+	float: left;
+	padding-left: 15px;
+	width: 100%;
+}
+
+hr {
+	padding: 0px;
+	margin: 10px 0px;
+}
+
+/* Home profile */
+
+.profile-box{
+	padding: 0px 20px;
+	padding-bottom: 0px;
+	width: 100%;
+	padding-bottom: 20px;
+}
+
+.profile-box h1{
+	font-size: 18pt;
+	font-weight: bold;
+	color: #555;
+	margin: 0px;
+	text-align: center;
+	padding: 10px;
+}
+
+.profile-box p{
+	font-size: 12pt;
+	font-weight: normal;
+	color: #333;
+	margin: 0px;
+	text-align: center;
+}
+
+.profile-pic{
+	margin: 0 auto;
+	background-image: url('../images/photo.png');
+	background-size: 200px 200px;
+	background-repeat: no-repeat;
+	min-height: 200px;
+	min-width: 200px;
+	background-position: center;
+}
+
+/*Project items*/
+
+.project-title{
+	position: relative;
+	background-color: #FFF;
+	margin-bottom: 10px;
+	border-radius: 5px;
+    border: 1px solid;
+    border-color: #DDD;
+    min-height: 100px;
+}
+
+.project-title h2{
+	color: #4183c4 !important;
+	font-size: 15pt;
+	font-weight: normal;
+	color: #555;
+	margin: 0px;
+	padding: 10px;
+	padding-bottom: 5px;
+}
+
+.project-title p{
+	color: #333;
+	margin: 0px;
+	padding: 10px;
+	padding-top: 0px;
+}
+
+.project-menu-section{
+	position: relative;
+	color: #666;
+	background-color: #FFF;
+	margin-bottom: 10px;
+	border-radius: 5px;
+    border: 1px solid;
+    border-color: #DDD;
+}
+
+.project-menu-section h3{
+	font-size: 15pt;
+	height: 100%;
+	font-weight: normal;
+	color: #555;
+	margin: 0px;
+	padding: 10px;
+}
+
+.project-title-updated p{
+	color: #AAA;
+	position: absolute; 
+  bottom: 0;
+  margin-bottom: 0px;
+}
+
+/* Place holders */
+
+.placeholder-screenshot-large{
+	background-color: #004594 !important;
+	min-height: 600px;
+}
+
+.placeholder-screenshot{
+	background-color: #004594 !important;
+	min-height: 300px;
+}
+
+/* Form */
+
+.standardform{
+	padding: 20px 10px;
+}
+
+.margined{
+	margin-bottom: 10px;
+}
+
+.permission{
+	padding-left: 0px;
+}
+
+.radio-pad{
+	padding-left: 20px;
+	margin-bottom: 0px !important;
+}
+
+.radio-pad p{
+	margin: 0px;
+	padding: 0px;
+	color:#AAA;
+}
