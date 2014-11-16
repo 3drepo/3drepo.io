@@ -79,7 +79,7 @@ a:hover {
 }
 
 .rounded{
-	border-radius: 5px;
+	border-radius: 3px;
 }
 
 .solid{
@@ -87,7 +87,7 @@ a:hover {
 }
 
 .rounded-border{
-	border-radius: 5px;
+	border-radius: 3px;
     border: 1px solid;
     border-color: #DDD;
 }
@@ -99,7 +99,7 @@ a:hover {
 	width: 100%;
 	padding-bottom: 20px;
 	margin-bottom: 10px;
-    border-radius: 5px;
+    border-radius: 3px;
     border: 1px solid;
     border-color: #DDD;
 }
@@ -175,7 +175,7 @@ hr {
 	position: relative;
 	background-color: #FFF;
 	margin-bottom: 10px;
-	border-radius: 5px;
+	border-radius: 3px;
     border: 1px solid;
     border-color: #DDD;
     min-height: 100px;
@@ -203,7 +203,7 @@ hr {
 	color: #666;
 	background-color: #FFF;
 	margin-bottom: 10px;
-	border-radius: 5px;
+	border-radius: 3px;
     border: 1px solid;
     border-color: #DDD;
 }
