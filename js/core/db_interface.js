@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*global module*/
 var db_conn_js = require('./db.js');
 var async = require('async');
 var db_conn = new db_conn_js();
@@ -32,35 +31,47 @@ function uuidToString(uuidIn) {
 	return uuid.unparse(uuidIn.buffer);
 }
 
-/*
-exports.get_db_list = function(func) {
-    async.waterfall([
-
-    function(callback) {
-        db_conn.run_db_func("admin", callback);
-    }, function(db, callback) {
-        db.admin(callback);
-    }, function(admin_db, callback) {
-        admin_db.listDatabases(callback);
-    }, function(dbs, callback) {
-        callback(null, dbs);
-    }], function(err, results) {
-        func(results);
-    });
-
+exports.authenticate = function(err, username, password, callback) {
+	db_conn.authenticateUser(null, username, password, function(err)
+	{
+		if(err) 
+			return callback(new Error("Authentication Error"), null);
+		
+		callback(null, {username: username});
+	});
 }
-*/
+
+exports.getUserDBList = function(err, username, callback) {
+	if (err) return callback(err, null);
+	if (!username) return callback(new Error("Username is not defined"), null);
+
+	var filter = {
+		user: username
+	};
+
+	var projection = {
+		customData : 1
+	};
+
+	db_conn.filter_coll(err, "admin", "system.users", filter, projection, function(err, coll) {
+		if(err) return callback(err, null);
+	
+		callback(null, coll[0]["customData"]["projects"].map(
+				function(nm){
+					return {name:nm};
+				}
+		));
+	});
+}
 
 exports.get_db_list = function(err, callback) {
-	if (err) return onError(err);
+	if (err) return callback(err, null);
 
     db_conn.db_callback(null, 'admin', function(err, db) {
-		if (err) return onError(err);
+		if (err) return callback(err, null);
 
-        var admin_db = db.admin();
-
-        admin_db.listDatabases(function(err, dbs) {
-            if (err) return onError(err);
+        db.admin().listDatabases(function(err, dbs) {
+            if (err) return callback(err, null);
 
             var db_list = [];
 
@@ -69,27 +80,27 @@ exports.get_db_list = function(err, callback) {
 
             db_list.sort();
 
-            callback(err, db_list);
+            callback(null, db_list);
         });
     });
 }
 
 exports.get_texture = function(err, db_name, uuid, callback) {
-	if(err) return onError(err);
+	if(err) return callback(err, null);
 
     var query = {
         _id: stringToUUID(uuid)
     };
 
     db_conn.filter_coll(err, db_name, 'scene', query, null, function(err, coll) {
-        if (err) return onError(err);
+        if (err) return callback(err, null);
 
-        callback(err, repoGraphScene.decode(coll));
+        callback(null, repoGraphScene.decode(coll));
     });
 };
 
 exports.get_children = function(err, db_name, uuid, callback) {
-	if (err) return onError(err);
+	if (err) return callback(err, null);
 
 	var filter = {
 		parents : stringToUUID(uuid),
@@ -97,12 +108,14 @@ exports.get_children = function(err, db_name, uuid, callback) {
 	};
 
 	db_conn.filter_coll(err, db_name, 'scene', filter, null, function(err, doc) {
-		callback(err, doc);	
+		if (err) return callback(err, null);
+
+		callback(null, doc);	
 	});
 };
 
 exports.get_metadata = function(err, db_name, uuid, callback) {
-	if (err) return onError(err);
+	if (err) return callback(err, null);
 
 	var filter = {
 		parents: stringToUUID(uuid),
@@ -119,12 +132,14 @@ exports.get_metadata = function(err, db_name, uuid, callback) {
 	};
 
 	db_conn.filter_coll(err, db_name, 'scene', filter, projection, function(err, doc) {
-		callback(err, doc);
+		if(err) return callback(err, null);
+		
+		callback(null, doc);
 	});
 };
 
 exports.get_mesh = function(err, db_name, revision, uuid, pbf, tex_uuid, callback) {
-	if (err) return onError(err);
+	if (err) return callback(err, null);
 
 	var history_query = null;
 
@@ -137,6 +152,8 @@ exports.get_mesh = function(err, db_name, revision, uuid, pbf, tex_uuid, callbac
 
 	db_conn.get_latest(null, db_name, 'history', history_query, null, function(err, docs)
     {
+		if(err) return callback(err, null);
+
 		if (uuid == null) {
 
 			var projection = {
@@ -151,9 +168,7 @@ exports.get_mesh = function(err, db_name, revision, uuid, pbf, tex_uuid, callbac
 				_id: { $in: docs[0]['current'] }
 			};
 		} else {
-			if (pbf) {
-				callback(err, null);
-			}
+			if (pbf) return callback(new Error("PBF currently unsupported"), null);
 
 			var projection = null;
 
@@ -173,16 +188,16 @@ exports.get_mesh = function(err, db_name, revision, uuid, pbf, tex_uuid, callbac
 		}
 
 		db_conn.filter_coll(err, db_name, 'scene', query, projection, function(err, coll) {
-			if (err) return onError(err);
+			if (err) return callback(err, null);
 
-			callback(err, repoGraphScene.decode(coll));
+			callback(null, repoGraphScene.decode(coll));
 		});
 	});
 
 };
 
 exports.get_cache = function(err, db_name, m_id, get_data, level, callback) {
-	if(err) return onError(err);
+	if(err) return callback(err, null);
 
 	var projection = null;
 
@@ -200,9 +215,9 @@ exports.get_cache = function(err, db_name, m_id, get_data, level, callback) {
 		filter['level'] = parseInt(level);
 
     db_conn.filter_coll(err, db_name, "repo.cache", filter, projection, function(err, coll) {
-        if (err) return onError(err);
+        if (err) return callback(err, null);
 
-        callback(err, coll);
+        callback(null, coll);
     });
 
 };

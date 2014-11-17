@@ -63,12 +63,11 @@ module.exports = function(passport)
 	}));
 
 	router.get('/home', login.ensureLoggedIn('/login'), function(req, res, next) {
-		interface.dblist(db_interface, res, function(err)
-				{
-					onError(err);
-				});
-		}
-	);
+		interface.dblist(db_interface, req, res, function(err)
+		{
+			throw onError(err);
+		});
+	});
 
 	router.get('/demo', login.ensureLoggedIn('/login'), function(req, res, next) {
 		res.redirect('/bid4free/Duplex_A_20110907');
@@ -93,7 +92,7 @@ module.exports = function(passport)
 		if (req.param('format') == 'x3d')
 		{
 			x3dom_encoder.render(db_interface, req.param('db_name'), req.param('format'), req.param('subformat'), null, req.param('revision'), null, null, res, function(err) {
-				onError(err);
+				throw onError(err);
 			});
 		} else if (req.param('format') == 'json') {
 			var uuid = null;
@@ -102,7 +101,7 @@ module.exports = function(passport)
 				uuid = req.query["parent"];
 
 			json_encoder.render(db_interface, req.param('db_name'), req.param('format'), req.param('subformat'), req.param('revision'), uuid, req.query["selected"], req.query["namespace"], res, function(err) {
-				onError(err);
+				throw onError(err);
 			});
 		} else {
 			res.json({message: 'Not implemented'});
@@ -111,32 +110,32 @@ module.exports = function(passport)
 
 	router.get('/data/src_bin/:db_name/:uuid/level:lvl.pbf', login.ensureLoggedIn('/login'), function(req, res, next) {
 		x3dom_encoder.render(db_interface, req.param('db_name'), 'pbf', null, req.param('lvl'), null, req.param('uuid'), null, res, function(err) {
-			onError(err);
+			throw onError(err);
 		});
 	});
 
 	router.get('/data/:db_name/textures/:uuid.:format', login.ensureLoggedIn('/login'), function(req, res, next) {
 		x3dom_encoder.get_texture(db_interface, req.param('db_name'), req.param('uuid'), res, function(err) {
-			onError(err);
+			throw onError(err);
 		});
 	});
 
 	router.get('/data/:db_name/:type/:uuid.bin', login.ensureLoggedIn('/login'), function(req, res, next) {
 		x3dom_encoder.get_mesh_bin(db_interface, req.param('db_name'), req.param('uuid'), req.param('type'), res, function(err) {
-			onError(err);
+			throw onError(err);
 		});
 	});
 
 	router.get('/data/src_bin/:db_name/:uuid.:format/:texture?', login.ensureLoggedIn('/login'), function(req, res, next) {
 		logger.log('debug', 'Requesting mesh ' + req.param('uuid') + ' ' + req.param('texture'));
 		x3dom_encoder.render(db_interface, req.param('db_name'), req.param('format'), null, null, null, req.param('uuid'), req.param('texture'), res, function(err) {
-			onError(err);
+			throw onError(err);
 		});
 	});
 
 	router.get('/dblist', login.ensureLoggedIn('/login'), function(req, res, next) {
 		db_interface.get_db_list(null, function(err, db_list) {
-	        if (err) err_callback(err);
+	        if (err) throw onError(err);
 			
 			db_list.sort(function(a,b) { return a['name'].localeCompare(b['name']); });
 
@@ -148,7 +147,7 @@ module.exports = function(passport)
 		logger.log('debug', 'Opening scene ' + req.param('db_name'));
 		interface.index('index', req.param('db_name'), 'src', req.param('revision'), res, function(err)
 		{
-			onError(err);
+			throw onError(err);
 		});
 	});
 
@@ -157,14 +156,14 @@ module.exports = function(passport)
 
 		interface.index('bid4free', req.param('db_name'), 'src', req.param('revision'), res, function(err)
 		{
-			onError(err);
+			throw onError(err);
 		});
 	});
 
 	router.get('/prototype', login.ensureLoggedIn('/login'), function(req, res) {
 		interface.proto(req, res, function(err)
 		{
-			onError(err);
+			throw onError(err);
 		});
 	});
 

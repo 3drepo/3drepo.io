@@ -30,6 +30,8 @@ var x3dom_encoder = require('./js/core/x3dom_encoder.js');
 var auth = require('./js/core/auth.js');
 var config = require('app-config').config;
 
+var log = require('./js/core/login.js');
+
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var compress = require('compression');
@@ -48,19 +50,17 @@ mongoose.connect(connect_url);
 var passport = require('passport');
 var expressSession = require('express-session');
 
-var initPassport = require('./passport/init');
-initPassport(passport);
-
 var flash = require('connect-flash');
 app.use(flash());
 
-app.use(expressSession({
-    secret: 'secretKey',
+app.use(expressSession({ secret: 'secretKey',
     saveUninitialized: true,
-    resave: true
+    resave: true,
+	cookie: "secure"
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+log(passport);
 
 //var favicon = require('serve-favicon');
 //app.use(favicon(options.favicon));

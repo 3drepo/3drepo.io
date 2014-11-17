@@ -44,8 +44,8 @@ exports.proto = function(req, res, err_callback){
 	});
 }
 
-exports.dblist = function(db_interface, res, err_callback) {
-    db_interface.get_db_list(null, function(err, db_list) {
+exports.dblist = function(db_interface, req, res, err_callback) {
+    db_interface.getUserDBList(null, req.user.username, function(err, db_list) {
         if (err) err_callback(err);
 		
 		db_list.sort(function(a,b) { return a['name'].localeCompare(b['name']); });
