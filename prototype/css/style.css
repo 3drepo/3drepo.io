@@ -339,6 +339,33 @@ hr {
 	color: #888;
 }
 
+.history-author{
+	font-weight: bold;
+	font-size: 10pt;
+	line-height: 40px;
+	padding-top: 0px;
+	padding-bottom: 0px;	
+	padding-left: 10px;
+	color: #555;
+}
+
+.history-action{
+	font-weight: normal;
+	font-size: 10pt;
+	line-height: 40px;
+	padding-top: 0px;
+	padding-bottom: 0px;	
+	color: #555;
+}
+
+.history-keyword{
+	font-weight: bold;
+	font-size: 10pt;
+	line-height: 40px;
+	padding-top: 0px;
+	padding-bottom: 0px;	
+	color: #4183c4;
+}
 
 hr.fancy-line { 
 	float: left;
