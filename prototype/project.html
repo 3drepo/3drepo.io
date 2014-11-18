@@ -9,9 +9,11 @@
 
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular.min.js"></script>
+    <script src="js/project.js"></script>
 
   </head>
-  <body>
+  <body ng-app="3drepo">
     
     <div id="wrap">
 
@@ -50,10 +52,10 @@
         </div>
       </div> -->
 
-      <div class="row placeholder-screenshot-large">
+      <div class="placeholder-screenshot-large">
       </div>
 
-      <div class="container-fluid">
+      <div class="container-fluid" ng-controller="MenuCtrl">
         <div class="row">
           <div class="col-md-12 padded-box">
             <div class="row tight">
@@ -66,43 +68,43 @@
                   </div>
                 </div>
                 <div class="project-menu-section">
-                  <a href="#" class="tight">
+                  <a href="#/" class="tight" ng-click="setView('readme')">
                     <h3>Readme</h3>
                   </a>
                 </div>
-                <div class="project-menu-section">
-                  <a href="#" class="tight">
+                <div class="project-menu-section" ng-click="setView('revisions')">
+                  <a href="#/" class="tight">
                     <h3>Revisions</h3>
                   </a>
                 </div>
                 <div class="project-menu-section">
-                  <a href="#" class="tight">
+                  <a href="#/" class="tight">
                     <h3>History</h3>
                   </a>
                 </div>
                 <div class="project-menu-section">
-                  <a href="#" class="tight">
+                  <a href="#/" class="tight">
                     <h3>Users</h3>
                   </a>
                 </div>
                 <div class="project-menu-section">
-                  <a href="#" class="tight">
+                  <a href="#/" class="tight">
                     <h3>Settings</h3>
                   </a>
                 </div>
                 <div class="project-menu-section">
-                  <a href="#" class="tight">
+                  <a href="#/" class="tight">
                     <h3>Statistics</h3>
                   </a>
                 </div>
                 <div class="project-menu-section">
-                  <a href="#" class="tight">
+                  <a href="#/" class="tight">
                     <h3>Download</h3>
                   </a>
                 </div>
               </div>
               <div class="col-md-8 tight">
-                <div class="block">
+                <div class="block" ng-if="view=='readme'">
                   <div class= "col-sm-12 margined block-header">
                     <h3>Readme</h3>
                   </div>
@@ -115,6 +117,64 @@
                   Mauris et tincidunt sapien. Morbi vel imperdiet enim, vel molestie mi. Fusce lectus sapien, viverra sed nisi vel, tincidunt rhoncus leo. Curabitur sit amet orci tortor. Nullam et leo quis odio fringilla ornare a nec libero. Nunc eu fringilla tortor. Praesent non lacus ultrices, fringilla odio nec, pellentesque dui. Aliquam ornare vestibulum commodo. Sed facilisis pellentesque purus sit amet scelerisque. Donec vel ultrices purus. Suspendisse purus ante, cursus in libero a, imperdiet faucibus elit. Quisque viverra odio at enim sollicitudin sollicitudin.
                   </p>
                 </div>
+                <div class="block" ng-if="view=='revisions'">
+                  <div class= "col-sm-12 margined block-header">
+                    <h3>Revisions</h3>
+                  </div>
+ 
+                  
+                    <div class="col-sm-12 month-block">
+                    <hr class="fancy-line"><h3>14 October 2014</h3>
+                    <div class="commit-block">
+                      <span class="commit-revision">Revision</span> <a href="#/"><span class="commit-number">1fd32</span></a> <span class="commit-by"> by </span> <span class="commit-author">Jozef</span><span class="commit-date">14:23</span>
+                      <p>Updated the floor.</p>
+                    </div>
+                    <div class="commit-block">
+                      <span class="commit-revision">Revision</span> <a href="#/"><span class="commit-number">3jdf0</span></a> <span class="commit-by"> by </span> <span class="commit-author">Tim</span><span class="commit-date">11:46</span>
+                      <p>Updated the walls.</p>
+                    </div>
+                    </div>
+
+                    <div class="col-sm-12 month-block">
+                    <hr class="fancy-line"><h3>13 October 2014</h3>
+                    <div class="commit-block">
+                      <span class="commit-revision">Revision</span> <a href="#/"><span class="commit-number">2ndjf</span></a> <span class="commit-by"> by </span> <span class="commit-author">Frederic</span><span class="commit-date">18:36</span>
+                      <p>Removed the pipe.</p>
+                    </div>
+                    <div class="commit-block">
+                      <span class="commit-revision">Revision</span> <a href="#/"><span class="commit-number">12ks0</span></a> <span class="commit-by"> by </span> <span class="commit-author">Jozef</span><span class="commit-date">18:25</span>
+                      <p>Widened the pipe.</p>
+                    </div>
+                    <div class="commit-block">
+                      <span class="commit-revision">Revision</span> <a href="#/"><span class="commit-number">2nd8r</span></a> <span class="commit-by"> by </span> <span class="commit-author">Frederic</span><span class="commit-date">18:00</span>
+                      <p>Added the pipe.</p>
+                    </div>
+                    <div class="commit-block">
+                      <span class="commit-revision">Revision</span> <a href="#/"><span class="commit-number">1ldo9</span></a> <span class="commit-by"> by </span> <span class="commit-author">Frederic</span><span class="commit-date">14:12</span>
+                      <p>Moved the house.</p>
+                    </div>
+                    </div>
+
+                    <div class="col-sm-12 month-block">
+                    <hr class="fancy-line"><h3>12 October 2014</h3>
+                    <div class="commit-block">
+                      <span class="commit-revision">Revision</span> <a href="#/"><span class="commit-number">2j3fa</span></a> <span class="commit-by"> by </span> <span class="commit-author">Tim</span><span class="commit-date">9:29</span>
+                      <p>Changed color of the window.</p>
+                    </div>
+                    <div class="commit-block">
+                      <span class="commit-revision">Revision</span> <a href="#/"><span class="commit-number">1awe8</span></a> <span class="commit-by"> by </span> <span class="commit-author">Tim</span><span class="commit-date">9:23</span>
+                      <p>Updated style of window.</p>
+                    </div>
+                    <div class="commit-block">
+                      <span class="commit-revision">Revision</span> <a href="#/"><span class="commit-number">1fd32</span></a> <span class="commit-by"> by </span> <span class="commit-author">Jozef</span><span class="commit-date">9:01</span>
+                      <p>Created window.</p>
+                    </div>
+                    </div>
+                    
+
+                
+
+                
               </div>
             </div>
           </div>

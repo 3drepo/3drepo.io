@@ -260,3 +260,93 @@ hr {
 	padding: 0px;
 	color:#AAA;
 }
+
+/* Revisions */
+
+.month-block{
+	margin-left: 20px;
+	padding-right: 40px;
+	padding-left: 0px;
+	border-left: 3px solid #444;
+}
+
+.month-block h3{
+	font-weight: normal;
+	font-size: 10pt;
+}
+
+.commit-block{
+
+	background-color: #FFF;
+	width: 100%;
+	min-height: 40px;
+	margin: 10px;
+	border: 1px solid #EEE;
+}
+
+.commit-block p{
+	padding:0px;
+	padding-left: 10px;
+	padding-bottom: 10px;
+	font-size: 9pt;
+}
+
+.commit-revision{
+	font-weight: bold;
+	font-size: 10pt;
+	line-height: 40px;
+	padding-top: 0px;
+	padding-bottom: 0px;
+	padding-left: 10px;
+	color: #555;
+}
+
+.commit-number{
+	font-weight: bold;
+	font-size: 10pt;
+	line-height: 40px;
+	padding-top: 0px;
+	padding-bottom: 0px;
+	color: #4183c4;
+}
+
+.commit-by{
+	font-weight: normal;
+	font-size: 10pt;
+	line-height: 40px;
+	padding-top: 0px;
+	padding-bottom: 0px;
+	color: #DDD;
+}
+
+.commit-author{
+	font-weight: normal;
+	font-size: 10pt;
+	line-height: 40px;
+	padding-top: 0px;
+	padding-bottom: 0px;	
+	color: #555;
+}
+
+.commit-date{
+	float: right;
+	font-weight: normal;
+	font-size: 10pt;
+	line-height: 40px;
+	padding-top: 0px;
+	padding-bottom: 0px;	
+	padding-right: 10px;
+	color: #888;
+}
+
+
+hr.fancy-line { 
+	float: left;
+  border: 0; 
+  height: 3px;
+  min-width: 10px;
+  color: #111;
+	background-color: #444;
+	margin-right: 5px;
+	margin-top: 17px;
+ }
