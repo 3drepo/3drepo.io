@@ -20,31 +20,65 @@ var bCrypt = require('bcrypt-nodejs');
 var log_iface = require('./js/core/logger.js');
 var logger = log_iface.logger;
 var login = require('connect-ensure-login');
-var db_interface = require('./js/core/db_interface.js');
-var router = express.Router();
-var x3dom_encoder = require('./js/core/x3dom_encoder.js');
-var json_encoder = require('./js/core/json_encoder.js');
-var interface = require('./js/core/interface.js');
 var config = require('app-config').config;
 var package_json = require('./package.json');
 
-var isAuth = function(req, res, next) {
-	logger.log('debug', 'Authenticated: ' + req.isAuthenticated());
-
-	if (req.isAuthenticated())
-		return next();
-
-	res.redirect('/');
-}
-
-module.exports = function(passport)
-{
-	router.use(express.static('./submodules'));
-	router.use(express.static('./public'));
-
-	// Login routes
-	router.get('/', function(req, res) {
+module.exports = function(passport){
+	this.router = express.Router();
+	this.getMap = {}
 		
+	this.get = function (format, regex, callback)
+	{
+		if (!(format in this.getMap))
+		{
+			this.getMap[format] = {};
+		}
+
+		this.getMap[format][regex] = callback;
+	}
+
+	this.defaultFormat = ("format" in config.server) ? config.server.format : "html"; 
+		
+	this.db_interface = require('./js/core/db_interface.js');
+
+	this.getRouter = function()
+	{
+		return this.router;
+	}
+
+	this.getTransRouter = function(format, regex, res, params)
+	{
+		var account = params["account"];
+		var project = params["project"];
+
+		if (!format)
+			format = this.defaultFormat;
+
+		db_interface.hasAccessToDB(null, account, project, function(err)
+		{
+			if(err) throw onError(err);
+
+			if (account != req.user.username)
+			{
+				res.status(403);
+				res.redirect('/');
+			} else if (!(format in this.getMap)) {
+				res.status(416);
+				res.redirect('/');
+			} else if (!(regex in this.getMap[format])) {
+				res.status(416);
+				res.redirect('/');
+			} else {
+				this.getMap[format][regex + '.' + format](req, res, next);
+			}
+		});
+	}
+
+	this.router.use(express.static('./submodules'));
+	this.router.use(express.static('./public'));
+
+	// Login pages
+	router.get('/login', function(req, res) {
 		var paramJson = {
 			message: req.flash('message')
 		};
@@ -62,114 +96,207 @@ module.exports = function(passport)
 		failureFlash: true
 	}));
 
+	// Login routes
+	router.get('/', function(req, res) {
+		res.redirect('/login');	
+	});
+
+	// Account information
+	this.router.get('/:account.:format?.:subformat?', login.ensureLoggedIn(), function(req, res, next) {
+		var format = req.param("format");
+
+		var params = {
+			subformat: req.param("subformat"),
+			account: req.param("account")
+		};
+		
+		this.transRouter(format, '/:account', res, params); 
+	});
+
+	// Home simply points to the user's home page.
 	router.get('/home', login.ensureLoggedIn('/login'), function(req, res, next) {
-		interface.dblist(db_interface, req, res, function(err)
-		{
-			throw onError(err);
-		});
+		var username = req.user.username;
+		res.redirect('/' + username);
+	});
+	
+	// Project information
+	this.router.get('/:account/:project.:format?.:subformat?', login.ensureLoggedIn(), function(req, res, next) {
+		var format = req.param("format");
+		
+		var params = {
+				account:    req.param("account"),
+				project:    req.param("project"),
+				subformat:  req.param("subformat")
+		};
+
+		this.transRouter(format, '/:account/:project', req, params);
 	});
 
-	router.get('/demo', login.ensureLoggedIn('/login'), function(req, res, next) {
-		res.redirect('/bid4free/Duplex_A_20110907');
+	// Project revision list
+	this.router.get('/:account/:project/revisions.:format?.:subformat?', login.ensureLoggedIn(), function(req, res, next) {
+		var format = req.param("format");
+		
+		var params = {
+			account:    req.param("account"),
+			project:    req.param("project"),
+			subformat:  req.param("subformat")
+		};
+
+		this.transRouter(format, '/:account/:project/revisions', req, params);
 	});
 
-	/*
-	   TODO: Fix change password
-	router.get('/password', function(req, res) {
-		res.render('password', {message: req.flash('message')});
+	// Revision rid for master branch
+	this.router.get('/:account/:project/revision/:rid.:format?.:subformat?', login.ensureLoggedIn(), function(req, res, next) {
+		var format = req.param("format");
+		
+		var params = {
+			account:    req.param("account"),
+			project:    req.param("project"),
+			rid:        req.param("rid"),
+			subformat:  req.param("subformat")
+		};
+
+		this.transRouter(format, '/:account/:project/revision/:rid', req, params);	
 	});
 
-	router.post('/password', passport.authenticate('password', {
-		successRedirect: '/3drepoio/sphere',
-		failureRedirect: '/login',
-		failureFlash: true
-	}));
-	*/
+	// Get the head of a specific branch
+	this.router.get('/:account/:project/revision/:branch/head.:format?.:subformat?', login.ensureLoggedIn(), function(req, res, next) {
+		var format = req.param("format");
 
-	router.get('/data/:db_name.:subformat.:format.:options?/:revision?', login.ensureLoggedIn('/login'), function(req, res, next) {
-		logger.log('debug', 'Opening scene ' + req.param('db_name'));
+		var params = { 
+			account:   req.param("account"),
+			project:   req.param("project"),
+			branch:    req.param("branch"),
+			subformat: req.param("subformat")
+		};
 
-		if (req.param('format') == 'x3d')
-		{
-			x3dom_encoder.render(db_interface, req.param('db_name'), req.param('format'), req.param('subformat'), null, req.param('revision'), null, null, res, function(err) {
-				throw onError(err);
-			});
-		} else if (req.param('format') == 'json') {
-			var uuid = null;
+		this.transRouter(format, '/:account/:project/revision/:branch/head', req, params);
+	});
 
-			if ("parent" in req.query)
-				uuid = req.query["parent"];
+	// Get specific object via shared_id sid
+	this.router.get('/:account/:project/revision/:rid/:sid.:format?.:subformat?', login.ensureLoggedIn(), function(req, res, next) {
+		var format = req.param("format");
 
-			json_encoder.render(db_interface, req.param('db_name'), req.param('format'), req.param('subformat'), req.param('revision'), uuid, req.query["selected"], req.query["namespace"], res, function(err) {
-				throw onError(err);
-			});
-		} else {
-			res.json({message: 'Not implemented'});
+		var params = {
+			account:    req.param("account"),
+			project:    req.param("project"),
+			branch:     req.param("branch"),
+			subformat:  req.param("subformat")
 		}
+
+		this.transRouter(format, '/:account/:project/revision/:rid/:sid', req, params);
 	});
 
-	router.get('/data/src_bin/:db_name/:uuid/level:lvl.pbf', login.ensureLoggedIn('/login'), function(req, res, next) {
-		x3dom_encoder.render(db_interface, req.param('db_name'), 'pbf', null, req.param('lvl'), null, req.param('uuid'), null, res, function(err) {
-			throw onError(err);
-		});
+	// Get specific object via shared_id sid for particular branch
+	this.router.get('/:account/:project/revision/:branch/head/:sid.:format?.:subformat?', login.ensureLoggedIn(), function(req, res, next) {
+		var format = req.param("format");
+
+		var params = {
+			account:    req.param("account"),
+			project:    req.param("project"),
+			branch:     req.param("branch"),
+			subformat:  req.param("subformat")
+		};
+
+		this.transRouter(format, '/:account/:project/revision/:branch/head/:sid', res, params);
 	});
 
-	router.get('/data/:db_name/textures/:uuid.:format', login.ensureLoggedIn('/login'), function(req, res, next) {
-		x3dom_encoder.get_texture(db_interface, req.param('db_name'), req.param('uuid'), res, function(err) {
-			throw onError(err);
-		});
+	// Get list of revision in a branch
+	this.router.get('/:account/:project/revision/:branch.:format?.:subformat?', login.ensureLoggedIn(), function(req, res, next) {
+		var format = req.param("format");
+		
+		var params = {
+			account:   req.param("account"),
+			project:   req.param("project"),
+			subformat: req.param("subformat");
+		};
+
+		this.transRouter(format, '/:account/:project/revision/:branch', res, params);
 	});
 
-	router.get('/data/:db_name/:type/:uuid.bin', login.ensureLoggedIn('/login'), function(req, res, next) {
-		x3dom_encoder.get_mesh_bin(db_interface, req.param('db_name'), req.param('uuid'), req.param('type'), res, function(err) {
-			throw onError(err);
-		});
+	// List branches for project
+	this.router.get('/:account/:project/branches.:format?.:subformat?', login.ensureLoggedIn(), function(req, res, next) {
+		var format = req.param("format");
+		
+		var params = {
+			account:   req.param("account"),
+			project:   req.param("project"),
+			subformat: req.param("subformat")
+		};
+
+		this.transRouter(format, '/:account/:project/branches', res, params);
 	});
 
-	router.get('/data/src_bin/:db_name/:uuid.:format/:texture?', login.ensureLoggedIn('/login'), function(req, res, next) {
-		logger.log('debug', 'Requesting mesh ' + req.param('uuid') + ' ' + req.param('texture'));
-		x3dom_encoder.render(db_interface, req.param('db_name'), req.param('format'), null, null, null, req.param('uuid'), req.param('texture'), res, function(err) {
-			throw onError(err);
-		});
+	// Get object with specific uid in a specific format
+	this.router.get('/:account/:project/:uid.:format?.:subformat?', login.ensureLoggedIn(), function(req, res, next) {
+		var format = req.param("format");
+		
+		var params = {
+			account: req.param("account"),
+			project: req.param("project"),
+			subformat: req.param("subformat")
+		};
+
+		this.transRouter(format, '/:account/:project/:uid', res, params);
 	});
 
-	router.get('/dblist', login.ensureLoggedIn('/login'), function(req, res, next) {
-		db_interface.get_db_list(null, function(err, db_list) {
-	        if (err) throw onError(err);
-			
-			db_list.sort(function(a,b) { return a['name'].localeCompare(b['name']); });
+	// Get list of objects that match a specific type
+	this.router.get('/:account/:project/:rid/:type.:format?.:subformat?', login.ensureLoggedIn(), function(req, res, next) {
+		var format = req.param("format");
 
-	        res.json(db_list);
-    	});
+		var params = {
+			account: req.param("account"),
+			project: req.param("project"),
+			rid:     req.param("rid"),
+			type:    req.param("type"),
+			subformat: req.param("subformat")
+
+		};
+		
+		this.transRouter(format, '/:account/:project/:rid/:type.:format?.:subformat?', res, params);
 	});
 
-	router.get('/3drepoio/:db_name/:revision?', login.ensureLoggedIn('/login'), function(req, res, next) {
-		logger.log('debug', 'Opening scene ' + req.param('db_name'));
-		interface.index('index', req.param('db_name'), 'src', req.param('revision'), res, function(err)
-		{
-			throw onError(err);
-		});
+	// Get subtree for sid in revision rid, with (optional) depth query string paramter
+	this.router.get('/:account/:project/revision/:rid/tree/:sid.:format?.:subformat?', login.ensureLoggedIn(), function(req, res, next) {
+		var format = req.param("format");
+
+		var params = {
+			account:    req.param("account"),
+			project:    req.param("project"),
+			rid:	    req.param("rid"),
+			subformat:  req.param("subformat"),
+			sid:        req.param("sid")
+		};
+
+		if ("depth" in req.query)
+			params.depth = req.query.depth;
+
+		this.transRouter(format, '/:account/:project/revision/:rid/tree/:sid.:format?.:subformat?', res, params);
 	});
 
-	router.get('/bid4free/:db_name', login.ensureLoggedIn('/login'), function(req, res, next) {
-		logger.log('debug', 'Opening scene ' + req.param('db_name'));
+	// Get audit log for account
+	this.router.get('/:account/log', login.ensureLoggedIn(), function(req, res, next) {
+		var params = {
+			account: req.param("account")
+		};
 
-		interface.index('bid4free', req.param('db_name'), 'src', req.param('revision'), res, function(err)
-		{
-			throw onError(err);
-		});
-	});
+		this.transRouter(format, '/:account/log', res, params);
+	}
 
-	router.get('/prototype', login.ensureLoggedIn('/login'), function(req, res) {
-		interface.proto(req, res, function(err)
-		{
-			throw onError(err);
-		});
-	});
+	// Get audit log for project
+	this.router.get('/:account/:project/log', login.ensureLoggedIn(), function(req, res, next) {
+		var params = {
+			account: req.params("account"),
+			project: req.params("project")
+		};
 
+		this.transRouter(format, '/:account/:project/log', res, params);
+	}
+	
+	// Everything else
 	router.get('*', function(req, res) {
 		logger.log('debug', 'Un-routed URL : ' + req.url);
-		res.redirect('/');
+		res.redirect('/home');
 	});
 
 	return router;

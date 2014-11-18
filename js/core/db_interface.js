@@ -49,19 +49,52 @@ exports.getUserDBList = function(err, username, callback) {
 		user: username
 	};
 
+	this.getUserInfo(err, username, function(err, user) {
+		if (err) return callback(err, null);
+
+		callback(null, user["projects"].map(
+				function(nm){
+					return {name:nm};
+				}
+			)
+		);
+	});
+}
+
+exports.getUserInfo = function(err, username, callback) {
+	if (err) return callback(err, null);
+	if(!username) return callback(new Error("Unspecified username"), null);
+
+	var filter = {
+		user: username
+	};
+
 	var projection = {
 		customData : 1
 	};
 
-	db_conn.filter_coll(err, "admin", "system.users", filter, projection, function(err, coll) {
+	db_conn.filter_coll(err, "admin", "system.users", filter, {}, function(err, coll) {
 		if(err) return callback(err, null);
-	
-		callback(null, coll[0]["customData"]["projects"].map(
-				function(nm){
-					return {name:nm};
-				}
-		));
+
+		callback(null, coll[0]["customData"]);
 	});
+}
+
+exports.hasAccessToDB = function(err, username, dbName, callback) {
+	if (err) return callback(err);
+
+	if (dbName == null)
+		return callback(null);
+
+	this.getUserDBList(null, username, function(err, dbList) {
+		var dbNameList = dbList.map(function(elem) { return elem.name; });
+	
+		if(dbNameList.inArray(dbName) > -1)
+			callback(null);
+		else
+			callback(new Error("Not Authorized to access database"));
+	});
+
 }
 
 exports.get_db_list = function(err, callback) {
@@ -138,7 +171,7 @@ exports.get_metadata = function(err, db_name, uuid, callback) {
 	});
 };
 
-exports.get_mesh = function(err, db_name, revision, uuid, pbf, tex_uuid, callback) {
+exports.get_mesh = function(err, db_name, revision, sid, pbf, tex_uuid, callback) {
 	if (err) return callback(err, null);
 
 	var history_query = null;
@@ -154,7 +187,7 @@ exports.get_mesh = function(err, db_name, revision, uuid, pbf, tex_uuid, callbac
     {
 		if(err) return callback(err, null);
 
-		if (uuid == null) {
+		if (sid == null) {
 
 			var projection = {
 				vertices: 0,
@@ -175,14 +208,14 @@ exports.get_mesh = function(err, db_name, revision, uuid, pbf, tex_uuid, callbac
 			if (tex_uuid != null) {
 				var query = {
 					$or: [{
-						_id: stringToUUID(uuid)
+						shared_id: stringToUUID(sid)
 					}, {
 						_id: stringToUUID(tex_uuid)
 					}]
 				};
 			} else {
 				var query = {
-					_id: stringToUUID(uuid)
+					shared_id: stringToUUID(sid)
 				};
 			}
 		}

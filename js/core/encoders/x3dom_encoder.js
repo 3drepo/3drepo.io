@@ -28,7 +28,6 @@ var config = require('app-config').config;
 
 var log_iface = require('./logger.js');
 var logger = log_iface.logger;
-onError = log_iface.onError;
 
 var sem = require('semaphore')(10);
 
@@ -283,7 +282,9 @@ function genPopCache(mesh) {
 }
 
 function getPopCache(err, db, dbname, get_data, level, mesh_id, callback) {
-    if (!('pbf_cache' in GLOBAL)) {
+    if (err) return callback(err, null);
+	
+	if (!('pbf_cache' in GLOBAL)) {
         GLOBAL.pbf_cache = {};
         logger.log('debug', 'Created cache');
     }
@@ -315,7 +316,7 @@ function getPopCache(err, db, dbname, get_data, level, mesh_id, callback) {
 
     if (!already_have) {
         db.get_cache(err, dbname, mesh_id, get_data, level, function(err, coll) {
-            if (err) throw onError(err);
+            if (err) return callback(err, null);
 
             var max_lod = 0;
 
@@ -844,7 +845,7 @@ function X3D_AddGroundPlane(xml_doc, bbox)
 exports.get_texture = function(db_interface, db_name, uuid, res, err_callback) {
     logger.log('debug', 'Reading texture ' + uuid);
     db_interface.get_texture(null, db_name, uuid, function(err, doc) {
-        if (err) return onError(err);
+        if (err) err_callback(err);
 
         res.write(doc.textures[uuid].data.buffer, 'binary');
         res.end();
@@ -855,7 +856,7 @@ exports.get_mesh_bin = function(db_interface, db_name, uuid, type, res, err_call
 
     logger.log('debug', 'Requesting binary ' + type + ' for ' + uuid);
     db_interface.get_texture(null, db_name, uuid, function(err, doc) {
-        if (err) return onError(err);
+        if (err) return err_callback(err);
 
         var mesh = doc.meshes[uuid];
 
@@ -895,13 +896,13 @@ exports.get_mesh_bin = function(db_interface, db_name, uuid, type, res, err_call
 };
 
 
-exports.render = function(db_interface, db_name, format, sub_format, level, revision, uuid, tex_uuid, res, err_callback) {
+exports.render = function(db_interface, db_name, format, sub_format, level, revision, sid, tex_uuid, res, err_callback) {
     logger.log('debug', 'Rendering ' + format + ' (' + sub_format + ') - UUID : ' + uuid);
 
     var is_pbf = (sub_format == 'pbf');
 
-    db_interface.get_mesh(null, db_name, revision, uuid, is_pbf, tex_uuid, function(err, doc) {
-        if (err) return onError(err);
+    db_interface.get_mesh(null, db_name, revision, sid, is_pbf, tex_uuid, function(err, doc) {
+        if (err) return callback(err);
 
         switch (format) {
         case "pbf":
@@ -1165,5 +1166,40 @@ exports.render = function(db_interface, db_name, format, sub_format, level, revi
             err_callback(err);
         };
     });
+}
+
+exports.route = function(router)
+{
+	router.get('x3d', '/:account/:project/revision/:rid', function(res, params)
+	{
+		this.render(this.db_interface, params.project, 'x3d', 'src', null, params.rid, null, null, res,
+			function(err) {
+				throw err;
+			});
+	});
+
+	router.get('x3d', '/:account/:project/revision/master/head', function(res, params)
+	{
+		this.render(this.db_interface, params.project, 'x3d', 'src', null, null, null, null, res,
+			function(err) {
+				throw err;
+			});
+	});
+
+	router.get('x3d', '/:account/:project/revision/:rid/:sid', function(res, params)
+	{
+		this.render(this.db_interface, params.project, 'x3d', 'src', null, params.rid, params.sid, null, res,
+			function(err) {
+				throw err;
+		});
+	});
+
+	router.get('x3d', '/:account/:project/revision/master/head/:sid', function(res, params)
+	{
+		this.render(this.db_interface, params.projects, 'x3d', 'src', null, null, params.sid, null, res,
+			function(err) {
+				throw err;
+		});
+	});
 }
 

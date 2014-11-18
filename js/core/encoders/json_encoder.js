@@ -137,3 +137,31 @@ exports.render = function(db_interface, db_name, format, sub_format, revision, u
 		});
 	}
 }
+
+exports.route = function(router)
+{
+	router.get('json', '/:account', function(req, res, next) {
+		db_interface.getUserInfo(err, req.user.username, function(err, user)
+		{
+			if(err) throw err;
+			res.json(user);
+		}
+	});
+
+	router.get('json', '/:account/:project', function(req, res, next) {
+		// FIXME: Fill in
+		res.status(415).send("Not supported");
+	});
+
+	router.get('json', '/:account/:project/revisions', function(req, res, next) {
+		// FIXME: Fill in.
+		res.status(415).send("Not supported");
+	});
+
+	router.get('json', '/:account/:project/revision/:rid', function(req, res, next) {
+		// FIXME: Fill in.
+		
+	});
+};
+
+

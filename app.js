@@ -77,6 +77,11 @@ app.use(methodOverride());
 var routes = require('./routes.js')(passport);
 app.use('/', routes);
 
+// Attach the encoders to the router
+var x3dom_encoder = require('./js/core/encoders/x3dom_encoder.js')(routes);
+var json_encoder = require('./js/core/encoders/json_encoder.js')(routes);
+var html_encoder = require('./js/core/encoders/html_encoder.js')(routes);
+
 var http = require('http');
 
 if ('ssl' in config) {
