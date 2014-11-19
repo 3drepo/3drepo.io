@@ -1,7 +1,7 @@
 angular.module('3drepo', [])
-.controller('ProjectCtrl', ['$scope', '$http', function($scope, $http){
+.controller('DashboardCtrl', ['$scope', '$http', function($scope, $http){
 
-  $scope.view = "info";
+  $scope.view = "home";
 
   $scope.setView = function(view){
     $scope.view = view;

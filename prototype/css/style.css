@@ -46,14 +46,31 @@ a:hover {
 }
 
 .header {
-	background: #EEE;
-	height: 50px;
+	background: #fafafa;
+	height: 60px;
+	min-height: 60px;
+}
+
+.header-logo {
+	background: #fafafa;
+	height: 60px;
+}
+
+.header ul li{
+	height: 60px;
+	min-height: 60px;
+}
+
+.header ul li a{
+	height: 60px;
+	min-height: 60px;
+	vertical-align: middle;
+	line-height: 30px;
 }
 
 #search-box {
-	border: none;
-	height: 28px;
-	margin-top: 11px;
+	height: 34px;
+	margin-top: 13px;
 	min-width: 300px;
 }
 
@@ -88,8 +105,8 @@ a:hover {
 
 .rounded-border{
 	border-radius: 3px;
-    border: 1px solid;
-    border-color: #DDD;
+  border: 1px solid;
+  border-color: #DDD;
 }
 
 .block{
@@ -97,17 +114,17 @@ a:hover {
 	float: left;
 	padding-left: 0px;
 	width: 100%;
-	padding-bottom: 20px;
+	padding-bottom: 0px;
 	margin-bottom: 20px;
-    border-radius: 3px;
-    border: 1px solid;
-    border-color: #DDD;
+  border-radius: 3px;
+  border: 1px solid;
+  border-color: #DDD;
 }
 
 .block h3{
-	font-size: 13pt;
+	font-size: 11pt;
 	height: 100%;
-	font-weight: normal;
+	font-weight: bold;
 	color: #555;
 	margin: 0px;
 	padding: 10px;
@@ -118,19 +135,38 @@ a:hover {
 	font-weight: normal;
 	color: #555;
 	margin: 0px;
-	padding: 20px;
+	padding: 10px;
 }
 
 .block-header{
-	background-color: #EEE;
+	background-color: #fafafa;
 	float: left;
-	padding-left: 15px;
+	padding-left: 0px;
+	padding-right: 0px;
 	width: 100%;
+	border-radius: 3px 3px 0px 0px;
+	border-bottom: 1px solid;
+	border-color: #DDD;
 }
 
 hr {
 	padding: 0px;
 	margin: 10px 0px;
+}
+
+.block-header-project-name{
+	font-weight: bold;
+	color: #4183c4;
+}
+
+.block-header-by{
+	font-weight: normal;
+	color: #DDD;
+}
+
+.block-header-author{
+	font-weight: normal;
+	color: #555;
 }
 
 /* Home profile */
@@ -176,15 +212,15 @@ hr {
 	background-color: #FFF;
 	margin-bottom: 10px;
 	border-radius: 3px;
-    border: 1px solid;
-    border-color: #DDD;
-    min-height: 100px;
+  border: 1px solid;
+  border-color: #DDD;
+  min-height: 100px;
 }
 
 .project-title h2{
 	color: #4183c4 !important;
 	font-size: 13pt;
-	font-weight: normal;
+	font-weight: bold;
 	color: #555;
 	margin: 0px;
 	padding: 10px;
@@ -198,14 +234,54 @@ hr {
 	padding-top: 0px;
 }
 
-.project-menu-section{
+.menu-icon{
+	min-width: 17px;
+	width: 17px;
+	margin-right: 5px;
+	opacity: 0.75;
+}
+
+.project-menu{
 	position: relative;
 	color: #666;
 	background-color: #FFF;
 	margin-bottom: 10px;
 	border-radius: 3px;
-    border: 1px solid;
-    border-color: #DDD;
+  border: 1px solid;
+  border-color: #DDD;
+}
+
+.project-menu-section{
+	position: relative;
+	color: #666;
+	background-color: #FFF;
+  border-top: 1px solid;
+  border-color: #EEE;
+}
+
+.project-menu-section h3{
+	font-size: 11pt !important;
+}
+
+.project-menu-section-selected{
+	background-color: #FAFAFA !important;
+}
+
+.project-menu-section:hover{
+	position: relative;
+	color: #666;
+	background-color: #FAFAFA;
+  border-top: 1px solid;
+  border-color: #EEE;
+}
+
+.project-menu-section:first-child, .project-menu-section:hover:first-child{
+	border-top: 0px solid;
+	border-radius: 3px 3px 0px 0px;
+}
+
+.project-menu-section:last-child, .project-menu-section:hover:last-child{
+	border-radius: 0px 0px 3px 3px;
 }
 
 .project-menu-section h3{
@@ -288,7 +364,7 @@ hr {
 	padding:0px;
 	padding-left: 10px;
 	padding-bottom: 10px;
-	font-size: 9pt;
+	font-size: 10pt;
 }
 
 .commit-revision{
@@ -336,6 +412,15 @@ hr {
 	padding-top: 0px;
 	padding-bottom: 0px;	
 	padding-right: 10px;
+	color: #888;
+}
+
+.commit-date-title{
+	float: right;
+	font-weight: normal;
+	font-size: 10pt;;
+	padding-top: 0px;
+	padding-bottom: 0px;	
 	color: #888;
 }
 

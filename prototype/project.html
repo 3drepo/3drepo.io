@@ -9,6 +9,7 @@
 
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular.min.js"></script>
     <script src="js/project.js"></script>
 
@@ -26,7 +27,7 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a href="../" class="navbar-brand logo-pad"><img class="v-expand" src="images/logo.png" /></a>
+            <a href="../" class="navbar-brand logo-pad header-logo"><img class="v-expand" src="images/logo.png" /></a>
           </div>
           <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
            <form class="navbar-left tight v-expand" role="search">
@@ -44,18 +45,10 @@
         </div>
       </div>
 
-<!-- 
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-md-12 anouncement">
-          </div>
-        </div>
-      </div> -->
-
       <div class="placeholder-screenshot-large">
       </div>
 
-      <div class="container-fluid" ng-controller="MenuCtrl">
+      <div class="container-fluid" ng-controller="ProjectCtrl">
         <div class="row">
           <div class="col-md-12 padded-box">
             <div class="row tight">
@@ -67,61 +60,59 @@
                     <p>4 days ago</p>
                   </div>
                 </div>
-                <div class="project-menu-section">
-                  <a href="#/" class="tight" ng-click="setView('readme')">
-                    <h3>Readme</h3>
-                  </a>
-                </div>
-                <div class="project-menu-section" ng-click="setView('revisions')">
-                  <a href="#/" class="tight">
-                    <h3>Revisions</h3>
-                  </a>
-                </div>
-                <div class="project-menu-section" ng-click="setView('history')">
-                  <a href="#/" class="tight">
-                    <h3>History</h3>
-                  </a>
-                </div>
-                <div class="project-menu-section">
-                  <a href="#/" class="tight">
-                    <h3>Users</h3>
-                  </a>
-                </div>
-                <div class="project-menu-section">
-                  <a href="#/" class="tight">
-                    <h3>Settings</h3>
-                  </a>
-                </div>
-                <div class="project-menu-section">
-                  <a href="#/" class="tight">
-                    <h3>Statistics</h3>
-                  </a>
-                </div>
-                <div class="project-menu-section">
-                  <a href="#/" class="tight">
-                    <h3>Download</h3>
-                  </a>
+
+                <div class="project-menu">
+                  <div class="project-menu-section" ng-class="{'project-menu-section-selected': isView('info')}">
+                    <a href="#/" class="tight" ng-click="setView('info')">
+                      <h3><i class="fa fa-info-circle menu-icon"></i> Info</h3>
+                    </a>
+                  </div>
+                  <div class="project-menu-section" ng-class="{'project-menu-section-selected': isView('revisions')}">
+                    <a href="#/" class="tight" ng-click="setView('revisions')">
+                      <h3><i class="fa fa-random menu-icon"></i> Revisions</h3>
+                    </a>
+                  </div>
+                  <div class="project-menu-section" ng-class="{'project-menu-section-selected': isView('log')}">
+                    <a href="#/" class="tight" ng-click="setView('log')" >
+                      <h3><i class="fa fa-save menu-icon"></i> Log</h3>
+                    </a>
+                  </div>
+                  <div class="project-menu-section" ng-class="{'project-menu-section-selected': isView('settings')}">
+                    <a href="#/" class="tight" ng-click="setView('settings')">
+                      <h3><i class="fa fa-gear menu-icon"></i> Settings</h3>
+                    </a>
+                  </div>
                 </div>
               </div>
               <div class="col-md-8 tight">
-
-                <div class="block" ng-if="view=='readme'">
-                  <div class= "col-sm-12 margined block-header">
-                    <h3>Readme</h3>
+                
+                <div ng-if="view=='info'">
+                  <div class="block">
+                    <div class= "col-sm-12 margined block-header">
+                      <h3 >Revision <span class="block-header-project-name">2ndjf</span> <span class="block-header-by">by</span> <span class="block-header-author">Jozef</span> <span class="commit-date-title">15 October 1024, 18:25</span></h3>
+                    </div>
+                    <p>Changed width of pipe.
+                    </p>
                   </div>
-                  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sit amet semper ante. In arcu augue, auctor et bibendum in, aliquet at nunc. Sed nisl orci, dictum id suscipit sed, pretium at eros. Vivamus ut dolor vel sapien molestie tempus. Donec mauris sapien, malesuada nec metus quis, eleifend tristique ipsum. Suspendisse sagittis risus eget mollis suscipit. Sed a metus maximus, volutpat urna vitae, convallis nulla. Suspendisse pulvinar ultrices elementum. Suspendisse potenti. Morbi ac tellus efficitur mi ornare viverra non sit amet ipsum. Sed ullamcorper auctor ex, quis suscipit arcu commodo bibendum. Curabitur vel quam et neque tempus luctus id id magna. In blandit elit eget lacinia varius. Ut lectus nulla, euismod in sapien at, elementum ullamcorper massa. In condimentum, arcu eget aliquet commodo, nunc lacus semper ex, ac eleifend mauris ex vel augue. Vivamus convallis pulvinar nisl convallis efficitur.
-                  <br>
-                  <br>
-                  Donec congue justo sapien, vel auctor nisi euismod eget. Praesent efficitur libero est, laoreet convallis libero egestas quis. Nam sit amet elit quam. Ut a aliquet felis. Cras aliquam auctor purus, dictum vestibulum justo. Maecenas sed egestas dolor, a sodales dolor. Mauris sed dui aliquet, venenatis risus eu, blandit metus. Nunc egestas fringilla ante, non pulvinar libero gravida in. Donec placerat eros vel dui viverra, ut bibendum orci sagittis. Cras dignissim id ante id posuere. Pellentesque eros erat, consectetur quis metus in, aliquet sodales justo. Quisque elementum blandit sollicitudin. Nullam iaculis nunc sed lacinia consequat. Nunc hendrerit sollicitudin ex sit amet pretium. Interdum et malesuada fames ac ante ipsum primis in faucibus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
-                  <br>
-                  <br>
-                  Mauris et tincidunt sapien. Morbi vel imperdiet enim, vel molestie mi. Fusce lectus sapien, viverra sed nisi vel, tincidunt rhoncus leo. Curabitur sit amet orci tortor. Nullam et leo quis odio fringilla ornare a nec libero. Nunc eu fringilla tortor. Praesent non lacus ultrices, fringilla odio nec, pellentesque dui. Aliquam ornare vestibulum commodo. Sed facilisis pellentesque purus sit amet scelerisque. Donec vel ultrices purus. Suspendisse purus ante, cursus in libero a, imperdiet faucibus elit. Quisque viverra odio at enim sollicitudin sollicitudin.
-                  </p>
+
+                  <div class="block">
+                    <div class= "col-sm-12 margined block-header">
+                      <h3>Readme</h3>
+                    </div>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sit amet semper ante. In arcu augue, auctor et bibendum in, aliquet at nunc. Sed nisl orci, dictum id suscipit sed, pretium at eros. Vivamus ut dolor vel sapien molestie tempus. Donec mauris sapien, malesuada nec metus quis, eleifend tristique ipsum. Suspendisse sagittis risus eget mollis suscipit. Sed a metus maximus, volutpat urna vitae, convallis nulla. Suspendisse pulvinar ultrices elementum. Suspendisse potenti. Morbi ac tellus efficitur mi ornare viverra non sit amet ipsum. Sed ullamcorper auctor ex, quis suscipit arcu commodo bibendum. Curabitur vel quam et neque tempus luctus id id magna. In blandit elit eget lacinia varius. Ut lectus nulla, euismod in sapien at, elementum ullamcorper massa. In condimentum, arcu eget aliquet commodo, nunc lacus semper ex, ac eleifend mauris ex vel augue. Vivamus convallis pulvinar nisl convallis efficitur.
+                    <br>
+                    <br>
+                    Donec congue justo sapien, vel auctor nisi euismod eget. Praesent efficitur libero est, laoreet convallis libero egestas quis. Nam sit amet elit quam. Ut a aliquet felis. Cras aliquam auctor purus, dictum vestibulum justo. Maecenas sed egestas dolor, a sodales dolor. Mauris sed dui aliquet, venenatis risus eu, blandit metus. Nunc egestas fringilla ante, non pulvinar libero gravida in. Donec placerat eros vel dui viverra, ut bibendum orci sagittis. Cras dignissim id ante id posuere. Pellentesque eros erat, consectetur quis metus in, aliquet sodales justo. Quisque elementum blandit sollicitudin. Nullam iaculis nunc sed lacinia consequat. Nunc hendrerit sollicitudin ex sit amet pretium. Interdum et malesuada fames ac ante ipsum primis in faucibus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
+                    <br>
+                    <br>
+                    Mauris et tincidunt sapien. Morbi vel imperdiet enim, vel molestie mi. Fusce lectus sapien, viverra sed nisi vel, tincidunt rhoncus leo. Curabitur sit amet orci tortor. Nullam et leo quis odio fringilla ornare a nec libero. Nunc eu fringilla tortor. Praesent non lacus ultrices, fringilla odio nec, pellentesque dui. Aliquam ornare vestibulum commodo. Sed facilisis pellentesque purus sit amet scelerisque. Donec vel ultrices purus. Suspendisse purus ante, cursus in libero a, imperdiet faucibus elit. Quisque viverra odio at enim sollicitudin sollicitudin.
+                    </p>
+                  </div>
                 </div>
 
                 <div class="block" ng-if="view=='revisions'">
                   <div class= "col-sm-12 margined block-header">
-                    <h3>Revisions</h3>
+                    <h3>Timeline</h3>
                   </div>
  
                   <div class="col-sm-12 month-block">
@@ -175,7 +166,7 @@
 
 
 
-                <div class="block" ng-if="view=='history'">
+                <div class="block" ng-if="view=='log'">
                   <div class= "col-sm-12 margined block-header">
                     <h3>History</h3>
                   </div>
@@ -211,6 +202,292 @@
                   </div>
 
                 </div>
+                  
+                <div ng-if="view=='settings'">
+                  <div class="block">
+
+                    <div class= "col-sm-12 margined block-header">
+                      <h3>General</h3>
+                    </div>
+
+                    <form role="form" class="standardform">
+
+                      <div class="form-group">
+                        
+                        <div class= "col-sm-4 margined">
+                        <label for="project-name">Owner</label>
+                        <select class="form-control">
+                          <option value="one">Company 1</option>
+                          <option value="two">Company 2</option>
+                        </select>
+                        </div>
+                        <div class= "col-sm-8  margined">
+                        <label for="project-name">Project Name</label>
+                        <input type="email" class="form-control" id="project-name">
+                        </div>
+                      </div>
+                      
+                      <div class="form-group">
+                        <div class= "col-sm-4 margined">
+                        <label for="project-name">Type</label>
+                        <select class="form-control">
+                          <option value="one">Architectural</option>
+                          <option value="two">Aerospace</option>
+                          <option value="two">Automotive</option>
+                          <option value="two">Engineering</option>
+                          <option value="two">Other</option>
+                        </select>
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <div class= "col-sm-12 margined">
+                        <label for="project-name">Description</label><span> (optional)</span>
+                        <input type="email" class="form-control" id="project-name">
+                        </div>
+                      </div>   
+
+                    </form>
+                  </div>
+                  <div class="block">
+
+                    <div class= "col-sm-12 margined block-header">
+                      <h3>Visibility</h3>
+                    </div>
+
+                    <form role="form" class="standardform">
+
+                      <div class="form-group">
+                        <div class= "col-sm-12">
+                          <label class="radio radio-pad">
+                            <input type="radio" name="visibility" id="visibility" value="public" checked="checked"> 
+                            <span class="glyphicon glyphicon-eye-open"></span>
+                            Public
+                          </label>
+                          <div class="radio-pad">
+                          <p>Everybody can see this project.</p>
+                          </div>
+                        </div>
+
+                        <div class= "col-sm-12 margined">
+                          <label class="radio radio-pad">
+                            <input type="radio" name="visibility" id="visibility" value="private"> 
+                            <span class="glyphicon glyphicon-eye-close"></span>
+                            Private
+                          </label>
+                          <div class="radio-pad">
+                          <p>Only selected users can see this project.</p>
+                          </div>
+                        </div>
+                      </div> 
+
+                    </form>
+                  </div>
+                  <div class="block">
+
+                    <div class= "col-sm-12 margined block-header">
+                      <h3>Users</h3>
+                    </div>
+
+                    <form role="form" class="standardform">
+
+                      <div class="form-group">
+                        <div class="col-sm-6 margined">
+                          <div class="input-group"> 
+                          <input type="search" name="searchBy" id="searchBy" class="form-control" placeholder="Search user"/>
+                          <span class="input-group-btn">
+                              <button id="filter" class="btn btn-primary btn-block">
+                                  <span class="glyphicon glyphicon-plus"></span>
+                              </button>
+                          </span>
+                          </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="col-sm-6 margined">
+                          <div class="input-group"> 
+                            <span class="input-group-btn">
+                              <button id="filter" class="btn btn-primary btn-block">
+                                  <span class="glyphicon glyphicon-user"></span>
+                              </button>
+                            </span>
+                          <input type="search" name="searchBy" id="searchBy" class="form-control" readonly value="Tim Scully"/>
+                          <span class="input-group-btn">
+                            <button id="filter" class="btn btn-primary btn-block">
+                                <span class="glyphicon glyphicon-minus"></span>
+                            </button>
+                          </span>
+
+                          </div>
+
+                        </div>
+                        <div class="col-sm-4 permission">
+                          <select class="form-control">
+                          <option value="one">Admin</option>
+                          <option value="two">Member</option>
+                          <option value="two">Viewer</option>
+                          </select> 
+                        </div>
+
+                        <div class="clearfix"></div>
+                        <div class="col-sm-6 margined">
+                          <div class="input-group"> 
+                            <span class="input-group-btn">
+                              <button id="filter" class="btn btn-primary btn-block">
+                                  <span class="glyphicon glyphicon-user"></span>
+                              </button>
+                          </span>
+                          <input type="search" name="searchBy" id="searchBy" class="form-control" readonly value="Frederic Besse"/>
+                          <span class="input-group-btn">
+                            <button id="filter" class="btn btn-primary btn-block">
+                                <span class="glyphicon glyphicon-minus"></span>
+                            </button>
+                          </span>
+                          </div>
+
+                        </div>
+                        <div class="col-sm-4 permission">
+                          <select class="form-control">
+                          <option value="one">Admin</option>
+                          <option value="two">Member</option>
+                          <option value="two">Viewer</option>
+                          </select> 
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="col-sm-6 margined">
+                            <div class="input-group"> 
+                              <span class="input-group-btn">
+                                <button id="filter" class="btn btn-primary btn-block">
+                                    <span class="glyphicon glyphicon-user"></span>
+                                </button>
+                            </span>
+                            <input type="search" name="searchBy" id="searchBy" class="form-control" readonly value="Jozef Dobos"/>
+                            <span class="input-group-btn">
+                            <button id="filter" class="btn btn-primary btn-block">
+                                <span class="glyphicon glyphicon-minus"></span>
+                            </button>
+                          </span>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 permission">
+                          <select class="form-control">
+                          <option value="one">Admin</option>
+                          <option value="two">Member</option>
+                          <option value="two">Viewer</option>
+                          </select> 
+                        </div>
+
+                      </div>
+
+                    </form>   
+                  </div>
+
+                  <div class="block">
+                    <div class= "col-sm-12 margined block-header">
+                      <h3>Type</h3>
+                    </div>
+
+                    <form role="form" class="standardform">  
+
+                      <div class="form-group">
+                        <div class= "col-sm-12">
+                          <label class="radio radio-pad">
+                            <input type="radio" name="federated" id="federated" value="single"> 
+                            <span class="glyphicon glyphicon-file"></span>
+                            Single Project
+                          </label>
+                          <div class="radio-pad">
+                          <p>Consist of only one element.</p>
+                          </div>
+                        </div>
+
+                        <div class= "col-sm-12 margined">
+                          <label class="radio radio-pad">
+                            <input type="radio" name="federated" id="federated" value="federated"  checked="checked"> 
+                            <span class="glyphicon glyphicon-folder-open"></span>
+                            Federated Project
+                          </label>
+                          <div class="radio-pad">
+                          <p>Can have attached sub-projects.</p>
+                          </div>
+                        </div>
+                      </div>    
+
+                    </form>   
+                  </div>
+                
+                  <div class="block">
+                    <div class= "col-sm-12 margined block-header">
+                      <h3>Federation</h3>
+                    </div>
+                    <form role="form" class="standardform">  
+                      <div class="form-group">
+                        <div class="col-sm-6 margined">
+                          <div class="input-group"> 
+                          <input type="search" name="searchBy" id="searchBy" class="form-control" placeholder="Search project"/>
+                          <span class="input-group-btn">
+                              <button id="filter" class="btn btn-primary btn-block">
+                                  <span class="glyphicon glyphicon-plus"></span>
+                              </button>
+                          </span>
+                          </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="col-sm-6 margined">
+                          <div class="input-group"> 
+                            <span class="input-group-btn">
+                              <button id="filter" class="btn btn-primary btn-block">
+                                  <span class="glyphicon glyphicon-file"></span>
+                              </button>
+                          </span>
+                          <input type="search" name="searchBy" id="searchBy" class="form-control" readonly value="Car project 1"/>
+                          <span class="input-group-btn">
+                            <button id="filter" class="btn btn-primary btn-block">
+                                <span class="glyphicon glyphicon-minus"></span>
+                            </button>
+                          </span>
+                          </div>
+
+                        </div>
+                        <div class="col-sm-4 permission">
+                          <select class="form-control">
+                          <option value="one">HEAD</option>
+                          <option value="two">Rev 1</option>
+                          <option value="two">Rev 2</option>
+                          </select> 
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="col-sm-6 margined">
+                            <div class="input-group"> 
+                              <span class="input-group-btn">
+                                <button id="filter" class="btn btn-primary btn-block">
+                                    <span class="glyphicon glyphicon-file"></span>
+                                </button>
+                            </span>
+                            <input type="search" name="searchBy" id="searchBy" class="form-control" readonly value="Floor project 3"/>
+                            <span class="input-group-btn">
+                            <button id="filter" class="btn btn-primary btn-block">
+                                <span class="glyphicon glyphicon-minus"></span>
+                            </button>
+                          </span>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 permission">
+                          <select class="form-control">
+                          <option value="one">HEAD</option>
+                          <option value="two">Rev 1</option>
+                          <option value="two">Rev 2</option>
+                          </select> 
+                        </div>
+
+                      </div>
+
+                    </form>   
+                  </div>
+                  <form role="form">  
+                      <button type="submit" class="btn btn-success pull-right">Submit</button>
+                  </form>
+                </div>
+
             </div>
           </div>
         </div>
