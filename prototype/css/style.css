@@ -241,6 +241,10 @@ hr {
 	opacity: 0.75;
 }
 
+.centered-button{
+	margin:0px auto;
+}
+
 .project-menu{
 	position: relative;
 	color: #666;
