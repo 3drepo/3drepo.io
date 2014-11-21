@@ -1,0 +1,50 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
+<metadata>
+Created by FontForge 20141024 at Fri Nov 21 13:53:38 2014
+ By System Administrator
+2012 by Jason Mark Jones. All rights reserved.
+</metadata>
+<defs>
+<font id="Sullivan-Fill" horiz-adv-x="388" >
+  <font-face 
+    font-family="Sullivan Fill"
+    font-weight="700"
+    font-stretch="normal"
+    units-per-em="1000"
+    panose-1="0 0 8 0 0 0 0 0 0 0"
+    ascent="750"
+    descent="-250"
+    x-height="534"
+    bbox="30 0 365 700"
+    underline-thickness="50"
+    underline-position="-50"
+    unicode-range="U+002E-0070"
+  />
+<missing-glyph horiz-adv-x="364" 
+d="M33 0v666h265v-666h-265zM66 33h199v600h-199v-600z" />
+    <glyph glyph-name=".notdef" horiz-adv-x="364" 
+d="M33 0v666h265v-666h-265zM66 33h199v600h-199v-600z" />
+    <glyph glyph-name=".null" horiz-adv-x="0" 
+ />
+    <glyph glyph-name="nonmarkingreturn" horiz-adv-x="333" 
+ />
+    <glyph glyph-name="period" unicode="." horiz-adv-x="180" 
+d="M30 121h120v-121h-120v121z" />
+    <glyph glyph-name="three" unicode="3" horiz-adv-x="389" 
+d="M358 626l1 -206q-1 -35 -27 -57q27 -30 27 -60l-1 -229q0 -43 -37 -64q-18 -10 -37 -10h-180q-42 0 -64 38q-10 17 -10 36v144l121 28v-125h87v170h-83v120h83v169h-87v-124l-121 28v142q0 43 38 64q17 10 36 10h180q44 0 65 -39q9 -16 9 -35z" />
+    <glyph glyph-name="D" unicode="D" 
+d="M30 700h254q43 0 64 -37q10 -17 10 -37v-552q0 -42 -38 -64q-17 -10 -36 -10h-254v700zM237 121v459h-87v-459h87z" />
+    <glyph glyph-name="R" unicode="R" horiz-adv-x="396" 
+d="M365 0h-120l-49 291h-46v-291h-120v700h254q42 0 63 -37q10 -18 10 -37v-262q0 -43 -37 -64q-3 -1 -5 -2zM237 411v169h-87v-169h87z" />
+    <glyph glyph-name="e" unicode="e" 
+d="M150 120h208v-120h-328v534h328v-120h-208v-86h166v-121h-166v-87z" />
+    <glyph glyph-name="i" unicode="i" horiz-adv-x="181" 
+d="M30 0v534h120v-534h-120z" />
+    <glyph glyph-name="o" unicode="o" 
+d="M104 534h180q44 0 65 -39q9 -16 9 -35v-386q0 -43 -37 -64q-18 -10 -37 -10h-180q-43 0 -64 38q-10 17 -10 36v386q0 44 39 65q17 9 35 9zM237 121v293h-87v-293h87z" />
+    <glyph glyph-name="p" unicode="p" 
+d="M358 460v-178q0 -44 -39 -65q-17 -9 -35 -9h-134v-208h-120v534h254q44 0 65 -39q9 -16 9 -35zM237 328v86h-87v-86h87z" />
+  </font>
+</defs></svg>
