@@ -4,15 +4,10 @@ block content
 	div(ng-app="", ng-controller="dbListController")
 		table.table
 			tr
-				th Database
-				th X3D
-				th BID4FREE
+				th Project
 			tr(ng-repeat="database in data")
-				td {{database.name}}
-				td
-					a(href='/3drepoio/{{database.name}}') X3D
-				td
-					a(href='/bid4free/{{database.name}}') BID4FREE
+				td 
+					a(href='/' + account + '/{{database.name}}') {{database.name}}
 	script.
 		function dbListController($scope) {
 			$scope.data = !{dblist};

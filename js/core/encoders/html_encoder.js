@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd 
+ *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,49 +17,51 @@
 
 var config = require('app-config').config;
 
-exports.index = function(xmltemplate, db_name, format, revision, res, err_callback) {
+exports.route = function(router)
+{
+	router.get('html', '/:account', function(res, params) {
+        router.db_interface.getUserDBList(null, params.user, function(err, db_list) {
+            if (err) throw err;
 
-    if (revision != null) xml_str = '<inline nameSpaceName=\"model\" url="' + db_name + '.' + format + '.x3d/' + revision + '"> </inline>';
-    else xml_str = '<inline nameSpaceName=\"model\" url="/data/' + db_name + '.' + format + '.x3d"> </inline>';
+            db_list.sort(function(a,b) { return a['name'].localeCompare(b['name']); });
 
-	var paramJson = {
-		xml: xml_str,
-		dbname: db_name
-	};
+            params.dblist = JSON.stringify(db_list);
 
-	Object.keys(config.external).forEach(function(key) {
-		paramJson[key] = config.external[key];
-	});
+            Object.keys(config.external).forEach(function(key) {
+                params[key] = config.external[key];
+            });
 
-    res.render(xmltemplate, paramJson);
-};
-
-exports.proto = function(req, res, err_callback){
-    res.render('prototype', {  
-        x3domjs: config.external.x3domjs, 
-        x3domcss: config.external.x3domcss,
-        repouicss: config.external.repouicss,
-		jqueryjs: config.external.jqueryjs,
-		jqueryuijs: config.external.jqueryuijs,
-	});
-}
-
-exports.dblist = function(db_interface, req, res, err_callback) {
-    db_interface.getUserDBList(null, req.user.username, function(err, db_list) {
-        if (err) err_callback(err);
-		
-		db_list.sort(function(a,b) { return a['name'].localeCompare(b['name']); });
-
-		var paramJson = {
-			dblist: JSON.stringify(db_list)
-		};
-
-		Object.keys(config.external).forEach(function(key) {
-			paramJson[key] = config.external[key];
-		});
-
-		res.render("dblist", paramJson);
+            res.render("dblist", params);
+        });
     });
+
+    router.get('html', '/:account/:project', function(res, params) {
+        if (params.rid != null) xml_str = '<inline nameSpaceName=\"model\" url=\"/' + params.account + '/' + params.project + '/revision/' + params.rid + '.x3d.src\"> </inline>';
+        else xml_str = '<inline nameSpaceName=\"model\" url=\"/' + params.account + '/' + params.project + '/revision/master/head.x3d.src\"> </inline>';
+
+        params.xml    = xml_str;
+
+        Object.keys(config.external).forEach(function(key) {
+            params[key] = config.external[key];
+        });
+
+        res.render("index", params);
+    });
+
+    router.get('json', '/:account/:project', function(res, params) {
+		// FIXME: Fill in
+		res.status(415).send("Not supported");
+	});
+
+	router.get('json', '/:account/:project/revisions', function(res, params) {
+		// FIXME: Fill in.
+		res.status(415).send("Not supported");
+	});
+
+	router.get('json', '/:account/:project/revision/:rid', function(res, params) {
+		// FIXME: Fill in.
+
+	});
 };
 
 

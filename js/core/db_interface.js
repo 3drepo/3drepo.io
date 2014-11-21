@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd 
+ *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -20,6 +20,8 @@ var async = require('async');
 var db_conn = new db_conn_js();
 var repoGraphScene = require('./repoGraphScene.js');
 var uuid = require('node-uuid');
+var log_iface = require('./logger.js');
+var logger = log_iface.logger;
 
 function stringToUUID(id) {
     var bytes = uuid.parse(id);
@@ -34,9 +36,9 @@ function uuidToString(uuidIn) {
 exports.authenticate = function(err, username, password, callback) {
 	db_conn.authenticateUser(null, username, password, function(err)
 	{
-		if(err) 
+		if(err)
 			return callback(new Error("Authentication Error"), null);
-		
+
 		callback(null, {username: username});
 	});
 }
@@ -73,7 +75,7 @@ exports.getUserInfo = function(err, username, callback) {
 		customData : 1
 	};
 
-	db_conn.filter_coll(err, "admin", "system.users", filter, {}, function(err, coll) {
+	db_conn.filter_coll(err, "admin", "system.users", filter, projection, function(err, coll) {
 		if(err) return callback(err, null);
 
 		callback(null, coll[0]["customData"]);
@@ -88,8 +90,8 @@ exports.hasAccessToDB = function(err, username, dbName, callback) {
 
 	this.getUserDBList(null, username, function(err, dbList) {
 		var dbNameList = dbList.map(function(elem) { return elem.name; });
-	
-		if(dbNameList.inArray(dbName) > -1)
+
+		if(dbNameList.indexOf(dbName) > -1)
 			callback(null);
 		else
 			callback(new Error("Not Authorized to access database"));
@@ -118,20 +120,6 @@ exports.get_db_list = function(err, callback) {
     });
 }
 
-exports.get_texture = function(err, db_name, uuid, callback) {
-	if(err) return callback(err, null);
-
-    var query = {
-        _id: stringToUUID(uuid)
-    };
-
-    db_conn.filter_coll(err, db_name, 'scene', query, null, function(err, coll) {
-        if (err) return callback(err, null);
-
-        callback(null, repoGraphScene.decode(coll));
-    });
-};
-
 exports.get_children = function(err, db_name, uuid, callback) {
 	if (err) return callback(err, null);
 
@@ -143,7 +131,7 @@ exports.get_children = function(err, db_name, uuid, callback) {
 	db_conn.filter_coll(err, db_name, 'scene', filter, null, function(err, doc) {
 		if (err) return callback(err, null);
 
-		callback(null, doc);	
+		callback(null, doc);
 	});
 };
 
@@ -166,12 +154,52 @@ exports.get_metadata = function(err, db_name, uuid, callback) {
 
 	db_conn.filter_coll(err, db_name, 'scene', filter, projection, function(err, doc) {
 		if(err) return callback(err, null);
-		
+
 		callback(null, doc);
 	});
 };
 
-exports.get_mesh = function(err, db_name, revision, sid, pbf, tex_uuid, callback) {
+exports.getObject = function(err, project, uid, rid, sid, callback) {
+    logger.log('debug', 'Requesting object (U, R, S) (' + uid + ',' + rid + ',' + sid + ')');
+	if(err) return callback(err,  null, null);
+
+    if (uid)
+    {
+        var query = {
+            _id: stringToUUID(uid)
+        };
+
+        db_conn.filter_coll(null, project, 'scene', query, null, function(err,doc) {
+            if(err) return callback(err, null, null);
+
+            callback(null, doc[0]["type"], uid, repoGraphScene.decode(doc))
+        });
+
+    } else if (rid && sid) {
+        var historyQuery = {
+            _id : stringToUUID(rid)
+        };
+
+        db_conn.get_latest, null, project, 'history', historyQuery, null, function(err, doc)
+        {
+            var query = {
+                shared_id : stringToUUID(sid),
+                _id       : { $in : docs[0]['current']}
+            };
+
+            db_conn.filter_coll(null, project, 'scene', query, null, function(err, obj) {
+                if (err) return callback(err, null, null);
+
+                callback(null, obj[0]["type"], this.stringToUUID(obj[0]["_id"]), repoGraphScene.decode(obj));
+            });
+
+        };
+    } else {
+        return callback(new Error("Not enough information specified"), null, null);
+    }
+}
+
+exports.getScene = function(err, db_name, revision, callback) {
 	if (err) return callback(err, null);
 
 	var history_query = null;
@@ -187,41 +215,20 @@ exports.get_mesh = function(err, db_name, revision, sid, pbf, tex_uuid, callback
     {
 		if(err) return callback(err, null);
 
-		if (sid == null) {
+		var projection = {
+			vertices: 0,
+			normals: 0,
+			faces: 0,
+			data: 0,
+			uv_channels: 0
+		};
 
-			var projection = {
-				vertices: 0,
-				normals: 0,
-				faces: 0,
-				data: 0,
-				uv_channels: 0
-			};
-
-			var query = {
-				_id: { $in: docs[0]['current'] }
-			};
-		} else {
-			if (pbf) return callback(new Error("PBF currently unsupported"), null);
-
-			var projection = null;
-
-			if (tex_uuid != null) {
-				var query = {
-					$or: [{
-						shared_id: stringToUUID(sid)
-					}, {
-						_id: stringToUUID(tex_uuid)
-					}]
-				};
-			} else {
-				var query = {
-					shared_id: stringToUUID(sid)
-				};
-			}
-		}
+		var query = {
+			_id: { $in: docs[0]['current'] }
+		};
 
 		db_conn.filter_coll(err, db_name, 'scene', query, projection, function(err, coll) {
-			if (err) return callback(err, null);
+				if (err) return callback(err, null);
 
 			callback(null, repoGraphScene.decode(coll));
 		});

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd 
+ *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -26,7 +26,6 @@ var logger = log_iface.logger;
 onError = log_iface.onError;
 
 var db_interface = require('./js/core/db_interface.js');
-var x3dom_encoder = require('./js/core/x3dom_encoder.js');
 var auth = require('./js/core/auth.js');
 var config = require('app-config').config;
 
@@ -75,12 +74,14 @@ app.use(compress({
 app.use(methodOverride());
 
 var routes = require('./routes.js')(passport);
-app.use('/', routes);
+app.use('/', routes.router);
 
 // Attach the encoders to the router
-var x3dom_encoder = require('./js/core/encoders/x3dom_encoder.js')(routes);
-var json_encoder = require('./js/core/encoders/json_encoder.js')(routes);
-var html_encoder = require('./js/core/encoders/html_encoder.js')(routes);
+var x3dom_encoder = require('./js/core/encoders/x3dom_encoder.js').route(routes);
+var json_encoder = require('./js/core/encoders/json_encoder.js').route(routes);
+var html_encoder = require('./js/core/encoders/html_encoder.js').route(routes);
+var src_encoder = require('./js/core/encoders/src_encoder.js').route(routes);
+var jpg_encoder = require('./js/core/encoders/jpeg_encoder.js').route(routes);
 
 var http = require('http');
 

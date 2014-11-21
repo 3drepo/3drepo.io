@@ -18,11 +18,11 @@
 
 @font-face {
     font-family: '3drepo-font';
-    src: url('../fonts/logo-webfont.eot');
-    src: url('../fonts/logo-webfont.eot?#iefix'),
-    	 url('../fonts/logo-webfont.woff') format('woff'),
+    src: url('../fonts/3drepo.io.eot');
+    src: url('../fonts/3drepo.io.eot?#iefix'),
+    	 url('../fonts/3drepo.io.woff') format('woff'),
          url('../fonts/3drepo.io.ttf') format('truetype'),
-         url('../fonts/logo-webfont.svg#logo-webfont') format('svg');
+         url('../fonts/3drepo.io.svg#3drepo.io') format('svg');
     font-style: normal;
     font-weight: normal;
 }
