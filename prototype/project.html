@@ -7,6 +7,8 @@
 
     <title> 3D Repo </title>
 
+    <script src="https:////cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
@@ -56,12 +58,45 @@
                 <div class="project-title">
                   <h2>Car Project 1</h2>
                   <p>Owner: Jozef</p>
-                  <div class="project-title-updated">
-                    <p>4 days ago</p>
-                  </div>
+                </div>
+                <!-- Split button -->
+                <!-- Single button -->
+                <div class="row tight">
+                <div class="btn-group menu-button">
+                  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                    <i class="fa fa-code-fork menu-icon"></i><span class="button-title">Branch: </span><span class="button-keyword">master</span> <span class="caret "></span>
+                  </button>
+                  <ul class="dropdown-menu" role="menu">
+                    <li><a href="#/"><span class="button-keyword">branch 1</span></a></li>
+                    <li><a href="#/"><span class="button-keyword">branch 2</span></a></li>
+                    <li><a href="#/"><span class="button-keyword">branch 3</span></a></li>
+                  </ul>
+                </div>
                 </div>
 
-                <div class="project-menu">
+                <div class="row tight">
+                <div class="btn-group  menu-button">
+                  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                    <i class="fa fa-tag menu-icon"></i><span class="button-title">Revision: </span><span class="button-keyword">2ndjf (head)</span> <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" role="menu">
+                    <li><a href="#/"><span class="button-keyword">2ndjf (head)</span></a></li>
+                    <li class="divider"></li>
+                    <li><a href="#/"><span class="button-keyword">ne39d</span></a></li>
+                    <li><a href="#/"><span class="button-keyword">4kkdf</span></a></li>
+                    <li><a href="#/"><span class="button-keyword">g90sd</span></a></li>
+                  </ul>
+                </div>
+                </div>
+
+    <!--             <div class="block">
+                  <div class="block-title" >Branch: </div>
+                </div>
+                <div class="block">
+                  <h3 >Revision</h3>
+                </div> -->
+
+<!--                 <div class="project-menu">
                   <div class="project-menu-section" ng-class="{'project-menu-section-selected': isView('info')}">
                     <a href="#/" class="tight" ng-click="setView('info')">
                       <h3><i class="fa fa-info-circle menu-icon"></i> Info</h3>
@@ -82,18 +117,28 @@
                       <h3><i class="fa fa-gear menu-icon"></i> Settings</h3>
                     </a>
                   </div>
-                </div>
+                </div> -->
 
                 <form role="form">  
-                      <button type="submit" class="btn btn-success pull-left"><i class="fa fa-download menu-icon"></i>Download</button>
-                  </form>
+                  <button type="submit" class="btn btn-success pull-left"><i class="fa fa-download menu-icon"></i>Download</button>
+                </form>
               </div>
               <div class="col-md-8 tight">
+
+              <div class="col-md12 margin-bottom">
+                <ul class="nav nav-tabs nav" role="tablist">
+                <li ng-class="{'active': isView('info')}"><a class="dashboard-tab" href="#/" ng-click="setView('info')"><i class="fa fa-info-circle menu-icon"></i>Info</a></li>
+                <li ng-class="{'active': isView('comments')}"><a class="dashboard-tab" href="#/" ng-click="setView('comments')"><i class="fa fa-comments menu-icon"></i>Comments <span class="badge">3</span></a></li>
+                <li ng-class="{'active': isView('revisions')}"><a class="dashboard-tab" href="#/" ng-click="setView('revisions')"><i class="fa fa-tag menu-icon"></i>Revisions</a></li>
+                <li ng-class="{'active': isView('log')}"><a class="dashboard-tab" href="#/" ng-click="setView('log')"><i class="fa fa-save menu-icon"></i>Log</a></li>        
+                <li ng-class="{'active': isView('settings')}"><a class="dashboard-tab" href="#/" ng-click="setView('settings')"><i class="fa fa-gear menu-icon"></i>Settings</a></li> 
+              </ul>
+              </div>
                 
                 <div ng-if="view=='info'">
                   <div class="block">
                     <div class= "col-sm-12 margined block-header">
-                      <h3 >Revision <span class="block-header-project-name">2ndjf</span> <span class="block-header-by">by</span> <span class="block-header-author">Jozef</span> <span class="commit-date-title">15 October 1024, 18:25</span></h3>
+                      <h3 >Revision <span class="block-header-project-name">2ndjf</span> <span class="block-header-by">by</span> <span class="block-header-author">Jozef</span> <span class="commit-date-title">15 October 2014, 18:25</span></h3>
                     </div>
                     <p>Changed width of pipe.
                     </p>
@@ -112,6 +157,44 @@
                     Mauris et tincidunt sapien. Morbi vel imperdiet enim, vel molestie mi. Fusce lectus sapien, viverra sed nisi vel, tincidunt rhoncus leo. Curabitur sit amet orci tortor. Nullam et leo quis odio fringilla ornare a nec libero. Nunc eu fringilla tortor. Praesent non lacus ultrices, fringilla odio nec, pellentesque dui. Aliquam ornare vestibulum commodo. Sed facilisis pellentesque purus sit amet scelerisque. Donec vel ultrices purus. Suspendisse purus ante, cursus in libero a, imperdiet faucibus elit. Quisque viverra odio at enim sollicitudin sollicitudin.
                     </p>
                   </div>
+                </div>
+
+                <div ng-if="view=='comments'">
+                  <div class="block">
+                    <div class= "col-sm-12 margined block-header">
+                      <h3><i class="fa fa-comment menu-icon"></i>jozef <span class="comment-keyword-title">commented</span> <span class="comment-date-title">15 October 2014, 18:25</span></h3>
+                    </div>
+                    <p>The window should be bigger.
+                    </p>
+                  </div>
+                  <div class="block">
+                    <div class= "col-sm-12 margined block-header">
+                      <h3 ><i class="fa fa-comment menu-icon"></i>tim <span class="comment-keyword-title">commented</span> <span class="comment-date-title">14 October 2014, 12:55</span></h3>
+                    </div>
+                    <p>I don't like the floor texture.
+                    </p>
+                  </div>
+                  <div class="block">
+                    <div class= "col-sm-12 margined block-header">
+                      <h3 ><i class="fa fa-comment menu-icon"></i>frederic <span class="comment-keyword-title">commented</span> <span class="comment-date-title">13 October 2014, 9:25</span></h3>
+                    </div>
+                    <p>This is what the client requested.
+                    </p>
+                  </div>
+                  <div class="block">
+                    <div class= "col-sm-12 margined block-header">
+                      <h3 >Leave a comment</h3>
+                    </div>
+                    <form role="form">  
+                      <div class= "col-sm-12 margined">
+                        <textarea class="form-control" rows="3"></textarea>
+                      </div>
+                      <div class= "col-sm-12">
+                        <button type="submit" class="btn btn-success pull-right margined">Submit</button>
+                      </div>
+                    </form>
+                  </div>
+                  
                 </div>
 
                 <div class="block" ng-if="view=='revisions'">
@@ -175,33 +258,43 @@
                     <h3>History</h3>
                   </div>
  
-                  <div class="col-sm-12 month-block">
-                  <hr class="fancy-line"><h3>15 October 2014</h3>
-                  <div class="commit-block">
-                    <span class="history-author">Jozef</span> <span class="history-action">changed the project visibility to</span> <span class="history-keyword">Public</span>. <span class="commit-date">15:53</span>
-                  </div>
-                  <div class="commit-block">
-                    <span class="history-author">Jozef</span> <span class="history-action">created branch </span> <span class="history-keyword">Experimental</span>. <span class="commit-date">14:20</span>
+                  <div class="col-sm-12 log">
+                  <div class="log-icon-block"><i class="fa fa-cogs fa-2x log-icon"></i></div>
+                  <div class="log-block">
+                    <span class="history-author">Jozef</span> <span class="history-action">changed the project visibility to</span> <span class="history-keyword">Public</span>. <span class="commit-date">15 October 2014, 15:53</span>
                   </div>
                   </div>
 
-                  <div class="col-sm-12 month-block">
-                  <hr class="fancy-line"><h3>13 October 2014</h3>
-                  <div class="commit-block">
-                    <span class="history-author">Tim</span> <span class="history-action">changed the project type to</span> <span class="history-keyword">Aerospatial</span>. <span class="commit-date">17:00</span>
+                  <div class="col-sm-12 log">
+                  <div class="log-icon-block"><i class="fa fa-code-fork fa-2x log-icon"></i></div>
+                  <div class="log-block">
+                    <span class="history-author">Jozef</span> <span class="history-action">created branch </span> <span class="history-keyword">Experimental</span>. <span class="commit-date">15 October 2014, 14:20</span>
                   </div>
                   </div>
 
-                  <div class="col-sm-12 month-block">
-                  <hr class="fancy-line"><h3>11 October 2014</h3>
-                  <div class="commit-block">
-                    <span class="history-author">Jozef</span> <span class="history-action">added user</span> <span class="history-keyword">Tim</span> <span class="history-action"> to the project</span>. <span class="commit-date">14:23</span>
+                  <div class="col-sm-12 log">
+                  <div class="log-icon-block"><i class="fa fa-cogs fa-2x log-icon"></i></div>
+                  <div class="log-block">
+                    <span class="history-author">Tim</span> <span class="history-action">changed the project type to</span> <span class="history-keyword">Aerospatial</span>. <span class="commit-date">14 October 2014, 17:00</span>
                   </div>
-                  <div class="commit-block">
-                    <span class="history-author">Jozef</span> <span class="history-action">added user</span> <span class="history-keyword">Frederic</span> <span class="history-action"> to the project</span>. <span class="commit-date">11:56</span>
                   </div>
-                  <div class="commit-block">
-                    <span class="history-author">Jozef</span> <span class="history-action">created the project</span>. <span class="commit-date">11:51</span>
+
+                  <div class="col-sm-12 log">
+                  <div class="log-icon-block"><i class="fa fa-user fa-2x log-icon"></i></div>
+                  <div class="log-block">
+                    <span class="history-author">Jozef</span> <span class="history-action">added user</span> <span class="history-keyword">Tim</span> <span class="history-action"> to the project</span>. <span class="commit-date">14 October 2014, 14:23</span>
+                  </div>
+                  </div>
+                  <div class="col-sm-12 log">
+                  <div class="log-icon-block"><i class="fa fa-user fa-2x log-icon"></i></div>
+                  <div class="log-block">
+                    <span class="history-author">Jozef</span> <span class="history-action">added user</span> <span class="history-keyword">Frederic</span> <span class="history-action"> to the project</span>. <span class="commit-date">14 October 2014, 11:56</span>
+                  </div>
+                  </div>
+                  <div class="col-sm-12 log">
+                  <div class="log-icon-block"><i class="fa fa-cube fa-2x log-icon"></i></div>
+                  <div class="log-block">
+                    <span class="history-author">Jozef</span> <span class="history-action">created the project</span>. <span class="commit-date">13 October 2014, 11:51</span>
                   </div>
                   </div>
 
