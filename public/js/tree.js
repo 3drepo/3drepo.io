@@ -44,7 +44,7 @@ var TreeControl = function() {
 $(document).on("bgroundClicked", function(event) {
 	var rootNode = $("#scenetree").fancytree("getRootNode");
 	rootNode.setExpanded(false);
-};
+});
 
 $(document).on("clickObject", function(event, objEvent) {
 	var tree = $("#scenetree").fancytree("getTree");
