@@ -127,7 +127,7 @@ $(function () {
 		},
 		checkbox: true,
 		source: {
-			url: '/' + account + '/' + project '/revision/head/tree/root.json?depth=1'
+			url: '/' + account + '/' + project + '/revision/head/tree/root.json?depth=1'
 		},
 		lazyLoad: function(event, data) {
 			var node = data.node;
@@ -135,12 +135,16 @@ $(function () {
 			if ("project" in node.data)
 			{
 				var params = {selected: node.selected, namespace: node.data.namespace};
+				var json_key = "root";
 			} else {
-				var params = {mode: "children", parent: node.key, selected: node.selected, namespace: node.data.namespace};
+				var params = {mode: "children", selected: node.selected, namespace: node.data.namespace};
+				var json_key = node.key;
 			}
 
+			params.depth = 1;
+
 			data.result = $.ajax({
-				url:  '/' + account + '/' + project '/revision/' + rid + '/tree/' + sid + '.json?depth=1',
+				url:  '/' + account + '/' + node.data.dbname + '/revision/head/tree/' + json_key + '.json',
 				data: params,
 				cache: false
 			});

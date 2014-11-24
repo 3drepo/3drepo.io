@@ -1,9 +1,5 @@
 /**
-<<<<<<< Updated upstream
- *  Copyright (C) 2014 3D Repo Ltd 
-=======
  *  Copyright (C) 2014 3D Repo Ltd
->>>>>>> Stashed changes
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -79,11 +75,7 @@ exports.decode = function(bson, materials) {
     // There should be always only a single material with the mesh!
     // Takes the very first match if multiple materials attached as children.
     // Children are appended on the fly from other repository components.
-<<<<<<< Updated upstream
-    // If a single mesh is being decoded on it's own, it will not have the 
-=======
     // If a single mesh is being decoded on it's own, it will not have the
->>>>>>> Stashed changes
     // children array attached!
     if (bson[C.REPO_NODE_LABEL_CHILDREN]) {
         for (var i = 0; i < bson[C.REPO_NODE_LABEL_CHILDREN].length; ++i) {
@@ -100,8 +92,6 @@ exports.decode = function(bson, materials) {
     return bson;
 }
 
-<<<<<<< Updated upstream
-=======
 exports.extractBoundingBox = function(mesh) {
     var bbox = {};
 
@@ -113,7 +103,6 @@ exports.extractBoundingBox = function(mesh) {
     return bbox;
 }
 
->>>>>>> Stashed changes
 /**
  * Expects a byte array where each offset bytes are integers.
  * Faces are stored as [n_0, i_{0,0}, i_{0,2}... , n_1, i{1,0}, i{1,1}...]
@@ -167,15 +156,9 @@ function toFloat32Array(binaryObject, isLittleEndian) {
 
 /**
  * Returns an array of arrays of uv channels, where each channel
-<<<<<<< Updated upstream
- * has 2 floats per vertex (there is vertices count pairs) 
- *  
- * @param {Object} binaryObject 
-=======
  * has 2 floats per vertex (there is vertices count pairs)
  *
  * @param {Object} binaryObject
->>>>>>> Stashed changes
  * @param {number} channelsCount Number of channels, 1 for now
  * @param {boolean} isLittleEndian True or false
  * @return {Array.<Float32Array>}
@@ -212,13 +195,8 @@ function toDataView(binaryObject) {
 
 /**
  * Returns an ArrayBuffer from a binary buffer. This can
-<<<<<<< Updated upstream
- * be used to create a DataView from it. 
- * See: http://stackoverflow.com/questions/8609289/convert-a-binary-nodejs-buffer-to-javascript-arraybuffer 
-=======
  * be used to create a DataView from it.
  * See: http://stackoverflow.com/questions/8609289/convert-a-binary-nodejs-buffer-to-javascript-arraybuffer
->>>>>>> Stashed changes
  *
  * @param {Buffer} binary buffer
  */

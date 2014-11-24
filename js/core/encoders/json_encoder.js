@@ -163,6 +163,45 @@ exports.route = function(router)
 	});
 
 	router.get('json', '/:account/:project/revision/:rid/tree/:sid', function(res, params) {
+		var revision = (params.rid == "head") ? null : params.rid;
+		var namespace = params.query.namespace;
+		var selected  = params.query.selected;
+
+		if (params.sid == "root")
+		{
+			router.db_interface.getScene(null, params.project, revision, function(err, doc) {
+				var head = [{}];
+				var node = doc['mRootNode'];
+
+				head[0]["title"]     = node["name"];
+				head[0]["key"]       = uuidToString(node["shared_id"]);
+				head[0]["folder"]    = true;
+				head[0]["lazy"]      = true;
+				head[0]["selected"]  = true;
+				head[0]["uuid"]      = node["id"];
+				head[0]["namespace"] = ((namespace != null) ? namespace : "model__");
+				head[0]["dbname"]    = params.project;
+
+				if (!("children" in node))
+					head[0]["children"] = [];
+
+				res.json(head);
+			});
+		} else {
+			router.db_interface.get_children(null, params.project, params.sid, function(err, doc) {
+				async.map(doc, function(child, callback)
+					{
+						callback(err, processChild(child, params.project, selected, namespace));
+					}, function(err, children) {
+					async.map(children, function(id, callback) {
+						treeChildMetadata(router.db_interface, params.project, id, callback)
+					}, function(err, childWithMeta)
+					{
+						res.json(childWithMeta);
+					});
+				});
+			});
+		}
 
 	});
 };
