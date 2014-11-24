@@ -15,33 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-module.exports = {
-    server:  {
-        http_port: 8080,
-		https_port: 3000
-    },
-    logfile: {
-        filename: '/var/log/3drepo.log',
-		console_level: 'debug',
-		file_level: 'debug'
-    },
-    db: {
-        host: 'localhost',
-        port: 27017,
-        username: 'username',
-        password: 'password'
-    },
-	ssl: {
-		key: 'my_key.pem',
-		cert:'my_server.crt'
-	},
-    external: {
-        x3domjs: 'http://x3dom.org/download/dev/x3dom.js',
-        x3domcss : 'http://x3dom.org/download/dev/x3dom.css',
-        repouicss : '../css/ui.css',
-	repobasecss: '../css/base.css',
-	jqueryjs : '../jquery.min.js',
-	jqueryuijs : '../jquery-ui.min.js'
-    }
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
+var bCrypt = require('bcrypt-nodejs');
+var db_interface = require('./db_interface.js');
+
+module.exports = function(passport) {
+	passport.use('login', new LocalStrategy(
+		{
+			passReqToCallback: true
+		},
+		function(req, username, password, done) {
+			db_interface.authenticate(null, username, password, function(err, user)
+			{
+				if (err)
+					return done(null, false, req.flash('message', err));
+	
+				console.log("USER: " + JSON.stringify(user));
+				done(null, user);
+			});
+		}
+	));
+
+	passport.serializeUser(function(user, done) {
+		done(null, user);
+	});
+
+	passport.deserializeUser(function(obj, done) {
+		done(null, obj);
+	});
 }
 

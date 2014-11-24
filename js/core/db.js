@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd 
+ *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -33,16 +33,56 @@ function MongoDB() {
 
     this.serv = new mongo.Server(this.host, this.port, {});
 
+	this.userAuth = null;
     this.db_conns = {};
 }
 
+// Authenticate User against admin database
+MongoDB.prototype.authenticateUser = function(err, username, password, callback) {
+	var self = this;
+
+	if (err) return callback(err, null);
+
+	// Create a separate admin database connection to avoid
+	// constantly switching between auth user and NodeJS
+	// user
+	if (!self.userAuth)
+	{
+		var db = new mongo.Db('admin', this.serv, { safe: false });
+
+		// TODO: Merge with code below
+		db.open(function(err, db_conn) {
+			if (err) return callback(err);
+
+			self.userAuth = db_conn;
+
+			db_conn.on('close', function(err) {
+                self.userAuth = null;
+            });
+
+			return self.authenticateUser(null, username, password, callback);
+		});
+	} else {
+		logger.log('info', 'Authenticating user: ' + username);
+
+		self.userAuth.authenticate(username, password, function(err) {
+			if(err)
+				return callback(err);
+
+			callback(null);
+		});
+	}
+};
+
+// Open a database connection and pass it to the callback function
 MongoDB.prototype.db_callback = function(err, dbname, callback) {
-	if (err) return onError(err);
+	if (err) return callback(err, null);
 
     var self = this;
 
+	// If we already have a connection, return that rather than
+	// opening a new connection
     if (self.db_conns[dbname]) {
-		//logger.log('debug', 'Database Connection: ' + JSON.stringify(self.db_conns[dbname]));
         return callback(null, self.db_conns[dbname]);
     }
 
@@ -57,18 +97,21 @@ MongoDB.prototype.db_callback = function(err, dbname, callback) {
         safe: false
     });
 
+	// Attempt to open the database connection
     db.open(function(err, db_conn) {
 
-        if (err) return onError(err);
+        if (err) return callback(err, null);
 
+		// Authenticate against the NodeJS database user
         var adminDb = db.admin();
 
         adminDb.authenticate(config.db.username, config.db.password, function(err) {
-            if (err) {
-                logger.log('debug', err);
-                return;
-            }
-            logger.log('debug', 'Authentication successful');
+			if (err)
+				return callback(err, null);
+
+			logger.log('debug', 'Authentication successful');
+			logger.log('debug', 'Authorized as ' + config.db.username);
+			logger.log('debug', 'DB CONNECTION:' + JSON.stringify(db_conn.serverConfig.auth.toArray()));
 
             self.db_conns[dbname] = db_conn;
 
@@ -77,7 +120,7 @@ MongoDB.prototype.db_callback = function(err, dbname, callback) {
                 delete(self.db_conns[dbname]);
             })
 
-            return callback(err, db_conn);
+            callback(null, db_conn);
         });
     });
 
@@ -85,6 +128,7 @@ MongoDB.prototype.db_callback = function(err, dbname, callback) {
 
 MongoDB.prototype.Binary = mongo.Binary;
 
+// TODO: Fix this, if not currently working
 MongoDB.prototype.aggregate = function(dbname, coll_name, query) {
     var self = this;
 
@@ -103,74 +147,72 @@ MongoDB.prototype.aggregate = function(dbname, coll_name, query) {
 }
 
 MongoDB.prototype.coll_callback = function(err, dbname, coll_name, callback) {
-	if (err) return onError(err);
+	if (err) return callback(err, null);
 
     logger.log('debug', 'Loading collection ' + coll_name);
-
     this.db_callback(null, dbname, function(err, db_conn) {
-        if (err) return onError(err);
+        if (err) return callback(err, null);
 
-        db_conn.collection(coll_name, function(err, coll) {
-            if (err) return onError(err);
+        db_conn.collection(coll_name, {strict:true}, function(err, coll) {
+			if (err) {
+				return callback(err, null);
+			}
 
-            callback(err, coll);
-        })
-    })
+            callback(null, coll);
+        });
+    });
 }
 
 MongoDB.prototype.get_latest = function(err, dbname, coll_name, filter, projection, callback) {
-	if (err) return onError(err);
+	if (err) return callback(err, null);
 
 	this.coll_callback(null, dbname, coll_name, function(err, coll) {
-		if (err) return onError(err);
+		if (err) return callback(err, null);
 
 		if (projection != null)
 		{
 			coll.find(filter, projection).limit(1).sort({timestamp:-1}).toArray(function(err, docs) {
-				if (err) return onError(err);
+				if (err) return callback(err, null);
 
-				callback(err, docs);
-			})
+				callback(null, docs);
+			});
 		} else {
 			coll.find(filter).limit(1).sort({timestamp:-1}).toArray(function(err, docs) {
-				if (err) return onError(err);
+				if (err) return callback(err, null);
 
-				callback(err, docs);
-			})
+				callback(null, docs);
+			});
 		}
-	})
+	});
 };
 
 MongoDB.prototype.filter_coll = function(err, dbname, coll_name, filter, projection, callback) {
-	if (err) return onError(err);
+	if (err) return callback(err, null);
 
     this.coll_callback(null, dbname, coll_name, function(err, coll) {
-        if (err) return onError(err);
+        if (err) return callback(err, null);
 
 		proj_str = JSON.stringify(projection);
 		filt_str = JSON.stringify(filter);
 
-		logger.log('debug', 'Filter collection:\nFILTER: ' + filt_str + '\nPROJECTION: ' + proj_str + '\n');
+		logger.log('debug', 'Filter collection: ' + dbname + '/' + coll_name);
+		logger.log('debug', 'FILTER: \"' + filt_str + '\"');
+		logger.log('debug', 'PROJECTION: \"' + proj_str + '\"');
 
-        if (projection != null) {
+		if (projection != null) {
             coll.find(filter, projection).toArray(function(err, docs) {
-                if (err) return onError(err);
+                if (err) return callback(err, null);
 
-				logger.log('debug', 'Result: ' + JSON.stringify(docs) + '\n');
-
-                callback(err, docs);
-            })
+                callback(null, docs);
+            });
         } else {
             coll.find(filter).toArray(function(err, docs) {
-                if (err) return onError(err);
+                if (err) return callback(err, null);
 
-				logger.log('debug', 'Result: ' + JSON.stringify(docs) + '\n');
-
-                callback(err, docs);
-            })
-
+                callback(null, docs);
+            });
         }
-    })
+	});
 }
 
 module.exports = MongoDB;

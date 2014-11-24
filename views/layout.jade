@@ -3,22 +3,25 @@ html
 	head
 		title 3drepo.io
 		script.
-			var dbname = "#{dbname}";
+			var account = "#{account}";
+			var project = "#{project}";
+			var rid     = "#{rid}";
+			var sid     = "#{sid}";
 		link(rel='stylesheet' type='text/css' href='#{x3domcss}')
 		script(type="text/javascript" src='#{x3domjs}')
 		script(type="text/javascript" src="#{jqueryjs}")
+		link(rel='stylesheet', href="#{jqueryuicss}")
 		script(type="text/javascript" src="#{jqueryuijs}")
-		script(type="text/javascript" src='//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular.min.js')
-		script(type="text/javascript" src='//cdnjs.cloudflare.com/ajax/libs/angular-ui-utils/0.1.1/angular-ui-utils.min.js')
-		script(type="text/javascript" src='//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.10/angular-ui-router.js')
+		script(type="text/javascript" src='#{angularjs}')
+		script(type="text/javascript" src='#{angularutilsjs}')
+		script(type="text/javascript" src='#{angularrouterjs}')
 		script(type="text/javascript" src='../js/x3dcontroller.js')
 		script(type="text/javascript" src='../js/3drepoapp.js')
-		script(type="text/javascript" src='../js/measurer.js')
-		link(rel='stylesheet', href='../bootstrap/dist/css/bootstrap.min.css')
-		script(type="text/javascript" src="../bootstrap/dist/js/bootstrap.min.js")
-		script(type="text/javascript" src="../bootstrap3-dialog/dist/js/bootstrap-dialog.min.js")
-		link(rel='stylesheet', href="../fancytree/dist/skin-xp/ui.fancytree.min.css" type="text/css")
-		script(type="text/javascript" src="../fancytree/dist/jquery.fancytree-all.js")
+		link(rel='stylesheet', href='#{bootstrapcss}')
+		script(type="text/javascript" src="#{bootstrapjs}")
+		script(type="text/javascript" src="#{bootstrapdialog}")
+		link(rel='stylesheet', href="#{fancytreecss}" type="text/css")
+		script(type="text/javascript" src="#{jqueryfancytree}")
 		link(rel='stylesheet' type='text/css' href='#{repouicss}')
 		body(ng-app='3drepoapp')
 			block menu
