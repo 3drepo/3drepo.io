@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd 
+ *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -32,7 +32,7 @@ function MongoDB() {
     this.port = config.db.port;
 
     this.serv = new mongo.Server(this.host, this.port, {});
-	
+
 	this.userAuth = null;
     this.db_conns = {};
 }
@@ -42,13 +42,13 @@ MongoDB.prototype.authenticateUser = function(err, username, password, callback)
 	var self = this;
 
 	if (err) return callback(err, null);
-	
+
 	// Create a separate admin database connection to avoid
 	// constantly switching between auth user and NodeJS
-	// user 
+	// user
 	if (!self.userAuth)
 	{
-		var db = new mongo.Db('admin', this.serv, { safe: false });	
+		var db = new mongo.Db('admin', this.serv, { safe: false });
 
 		// TODO: Merge with code below
 		db.open(function(err, db_conn) {
@@ -111,7 +111,7 @@ MongoDB.prototype.db_callback = function(err, dbname, callback) {
 
 			logger.log('debug', 'Authentication successful');
 			logger.log('debug', 'Authorized as ' + config.db.username);
-			logger.log('debug', 'DB CONNECTION:' + util.inspect(db_conn.serverConfig.auth.toArray()));
+			logger.log('debug', 'DB CONNECTION:' + JSON.stringify(db_conn.serverConfig.auth.toArray()));
 
             self.db_conns[dbname] = db_conn;
 
@@ -173,7 +173,7 @@ MongoDB.prototype.get_latest = function(err, dbname, coll_name, filter, projecti
 		{
 			coll.find(filter, projection).limit(1).sort({timestamp:-1}).toArray(function(err, docs) {
 				if (err) return callback(err, null);
-				
+
 				callback(null, docs);
 			});
 		} else {
@@ -198,7 +198,7 @@ MongoDB.prototype.filter_coll = function(err, dbname, coll_name, filter, project
 		logger.log('debug', 'Filter collection: ' + dbname + '/' + coll_name);
 		logger.log('debug', 'FILTER: \"' + filt_str + '\"');
 		logger.log('debug', 'PROJECTION: \"' + proj_str + '\"');
-        
+
 		if (projection != null) {
             coll.find(filter, projection).toArray(function(err, docs) {
                 if (err) return callback(err, null);
