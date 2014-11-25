@@ -1,5 +1,5 @@
 /**
- **  Copyright (C) 2014 3D Repo Ltd 
+ **  Copyright (C) 2014 3D Repo Ltd
  **
  **  This program is free software: you can redistribute it and/or modify
  **  it under the terms of the GNU Affero General Public License as
@@ -15,18 +15,18 @@
  **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-var Viewer = function() {	
-	
+var Viewer = function() {
+
 	this.lookAtObject = function(obj)
 	{
 		var mat = obj._x3domNode.getCurrentTransform();
-		var min = x3dom.fields.SFVec3f.MAX();                                                                 
-		var max = x3dom.fields.SFVec3f.MIN();                                                                                                                                                                          
+		var min = x3dom.fields.SFVec3f.MAX();
+		var max = x3dom.fields.SFVec3f.MIN();
 		obj._x3domNode.getVolume().getBounds(min, max);
-		
-		min = mat.multMatrixPnt(min);                                                                         
-		max = mat.multMatrixPnt(max);            
-		
+
+		min = mat.multMatrixPnt(min);
+		max = mat.multMatrixPnt(max);
+
 		var bboxcenter = x3dom.fields.SFVec3f;
 
 		bboxcenter.x = (min.x + max.x) / 2;
@@ -35,31 +35,31 @@ var Viewer = function() {
 
 		this.lookAtPoint(bboxcenter.x, bboxcenter.y, bboxcenter.z);
 	};
-	
+
 	this.color_dict = {"Office_A_20110811" : "0.1 0.0 0.0", "Office_S_20110811" : "0.0 0.0 0.1", "Office_MEP_20110811" : "0.0 0.1 0.1"};
-	
+
 	this.setApp = function(group)
 	{
 		// Very bad hacky way of doing this, speak to Fraunhofer
 		var mat_nodes = document.getElementsByTagName("TwoSidedMaterial")
-	
+
 		for(var m_idx = 0; m_idx < mat_nodes.length; m_idx++)
 		{
 			var color = this.color_dict[mat_nodes[m_idx]._x3domNode._nameSpace.name];
 			mat_nodes[m_idx].setAttribute("emissiveColor", color);
 			mat_nodes[m_idx].setAttribute("transparency", "0.85");
 		}
-		
+
 		var grp_nodes = group.getElementsByTagName("TwoSidedMaterial")
-	
+
 		for(var m_idx = 0; m_idx < grp_nodes.length; m_idx++)
 		{
 			grp_nodes[m_idx].setAttribute("emissiveColor", "1.0 0.5 0.0");
 			grp_nodes[m_idx].setAttribute("transparency", "0.0");
 		}
 
-	}	
-	
+	}
+
 	this.lookAtPoint = function(x,y,z) {
 		var model = $("#viewer")[0];
 		if(model && model.runtime){
@@ -86,9 +86,6 @@ $(document).ready( function() {
 
 // When the user clicks on the background the select nothing.
 $(document).on("bgroundClicked", function(event) {
-	var rootNode = $("#scenetree").fancytree("getRootNode");
-	rootNode.setExpanded(false);
-
 	var mat_nodes = document.getElementsByTagName("TwoSidedMaterial")
 
 	for(var m_idx = 0; m_idx < mat_nodes.length; m_idx++)

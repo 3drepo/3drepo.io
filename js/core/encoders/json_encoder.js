@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd 
+ *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,9 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-var repoGraphScene = require('./repoGraphScene.js');
+var repoGraphScene = require('../repoGraphScene.js');
 var async = require('async');
-var uuidToString = require('./db_interface.js').uuidToString;
+var uuidToString = require('../db_interface.js').uuidToString;
 
 function JSON_AddChildren(json_node, node)
 {
@@ -50,13 +50,13 @@ function JSON_AddChildren(json_node, node)
 	}
 }
 
-function treeChildMetadata(db_interface, db_name, childNode, callback)  
+function treeChildMetadata(db_interface, db_name, childNode, callback)
 {
 	var shared_id = childNode["key"];
 
 	db_interface.get_metadata(null, db_name, shared_id, function(err, meta) {
 		childNode["meta"] = meta;
-		
+
 		callback(null, childNode);
 	});
 }
@@ -99,11 +99,11 @@ function processChild(child, db_name, selected, namespace)
 	return childNode;
 }
 
-exports.render = function(db_interface, db_name, format, sub_format, revision, uuid, selected, namespace, res, err_callback)
+function render(db_interface, project, revision, uuid, selected, namespace, res, err_callback)
 {
 	if (uuid == null)
 	{
-		db_interface.get_mesh(null, db_name, revision, null, false, null, function(err, doc) {
+		db_interface.getScene(null, db_name, revision, function(err, doc) {
 			var head = [{}];
 			var node = doc['mRootNode'];
 
@@ -114,7 +114,7 @@ exports.render = function(db_interface, db_name, format, sub_format, revision, u
 			head[0]["selected"] = true;
 			head[0]["uuid"] = node["id"];
 			head[0]["namespace"] = ((namespace != null) ? namespace : "model__");
-			head[0]["dbname"] = db_name;
+			head[0]["dbname"] = project;
 
 			if (!("children" in node))
 				head[0]["children"] = [];
@@ -122,13 +122,13 @@ exports.render = function(db_interface, db_name, format, sub_format, revision, u
 			res.json(head);
 		});
 	} else {
-		db_interface.get_children(null, db_name, uuid, function(err, doc) {
-			async.map(doc, function(child, callback) 
-				{ 
-					callback(err, processChild(child, db_name, selected, namespace));
+		db_interface.get_children(null, project, uuid, function(err, doc) {
+			async.map(doc, function(child, callback)
+				{
+					callback(err, processChild(child, project, selected, namespace));
 				}, function(err, children) {
 				async.map(children, function(id, callback) {
-					treeChildMetadata(db_interface, db_name, id, callback)
+					treeChildMetadata(db_interface, project, id, callback)
 				}, function(err, childWithMeta)
 				{
 					res.json(childWithMeta);
@@ -137,3 +137,73 @@ exports.render = function(db_interface, db_name, format, sub_format, revision, u
 		});
 	}
 }
+
+exports.route = function(router)
+{
+	router.get('json', '/:account', function(res, params) {
+		db_interface.getUserInfo(err, params.user, function(err, user)
+		{
+			if(err) throw err;
+			res.json(user);
+		});
+	});
+
+	router.get('json', '/:account/:project', function(res, params) {
+		// FIXME: Fill in
+		res.status(415).send("Not supported");
+	});
+
+	router.get('json', '/:account/:project/revisions', function(res, params) {
+		// FIXME: Fill in.
+		res.status(415).send("Not supported");
+	});
+
+	router.get('json', '/:account/:project/revision/:rid', function(res, params) {
+		// FIXME: Fill in.
+	});
+
+	router.get('json', '/:account/:project/revision/:rid/tree/:sid', function(res, params) {
+		var revision = (params.rid == "head") ? null : params.rid;
+		var namespace = params.query.namespace;
+		var selected  = params.query.selected;
+
+		if (params.sid == "root")
+		{
+			router.db_interface.getScene(null, params.project, revision, function(err, doc) {
+				var head = [{}];
+				var node = doc['mRootNode'];
+
+				head[0]["title"]     = node["name"];
+				head[0]["key"]       = uuidToString(node["shared_id"]);
+				head[0]["folder"]    = true;
+				head[0]["lazy"]      = true;
+				head[0]["selected"]  = true;
+				head[0]["uuid"]      = node["id"];
+				head[0]["namespace"] = ((namespace != null) ? namespace : "model__");
+				head[0]["dbname"]    = params.project;
+
+				if (!("children" in node))
+					head[0]["children"] = [];
+
+				res.json(head);
+			});
+		} else {
+			router.db_interface.get_children(null, params.project, params.sid, function(err, doc) {
+				async.map(doc, function(child, callback)
+					{
+						callback(err, processChild(child, params.project, selected, namespace));
+					}, function(err, children) {
+					async.map(children, function(id, callback) {
+						treeChildMetadata(router.db_interface, params.project, id, callback)
+					}, function(err, childWithMeta)
+					{
+						res.json(childWithMeta);
+					});
+				});
+			});
+		}
+
+	});
+};
+
+

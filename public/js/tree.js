@@ -1,5 +1,5 @@
 /**
- **  Copyright (C) 2014 3D Repo Ltd 
+ **  Copyright (C) 2014 3D Repo Ltd
  **
  **  This program is free software: you can redistribute it and/or modify
  **  it under the terms of the GNU Affero General Public License as
@@ -20,10 +20,10 @@ var TreeControl = function() {
 		if (obj.hasAttribute("namespacename"))
 			if (obj.getAttribute("namespacename") == "model")
 				return "";
-		
-		return this.getKeyPath(obj.parentElement) + "/" + obj.getAttribute("DEF");	
+
+		return this.getKeyPath(obj.parentElement) + "/" + obj.getAttribute("DEF");
 	};
-	
+
 	this.onlyThis = function(node)
 	{
 		var parent = node.getParent();
@@ -41,10 +41,15 @@ var TreeControl = function() {
 	};
 };
 
+$(document).on("bgroundClicked", function(event) {
+	var rootNode = $("#scenetree").fancytree("getRootNode");
+	rootNode.setExpanded(false);
+});
+
 $(document).on("clickObject", function(event, objEvent) {
 	var tree = $("#scenetree").fancytree("getTree");
-	
-	tree.loadKeyPath(treeCtrl.getKeyPath(objEvent.target), 
+
+	tree.loadKeyPath(treeCtrl.getKeyPath(objEvent.target),
 		function(node, status) {
 			if(status === "ok") {
 				treeCtrl.onlyThis(node);
@@ -66,7 +71,7 @@ $(function () {
 		},
 		select : function(event, data) {
 			$('#' + data.node.data.namespace + data.node.data.uuid)[0].setAttribute("render", data.node.selected);
-		
+
 			var parent = data.node.getParent();
 			if ((data.node.selected) && (data.node.selected != parent.selected))
 			{
@@ -127,7 +132,7 @@ $(function () {
 		},
 		checkbox: true,
 		source: {
-			url: "/data/" + dbname + ".src.json"
+			url: '/' + account + '/' + project + '/revision/head/tree/root.json?depth=1'
 		},
 		lazyLoad: function(event, data) {
 			var node = data.node;
@@ -135,15 +140,19 @@ $(function () {
 			if ("project" in node.data)
 			{
 				var params = {selected: node.selected, namespace: node.data.namespace};
+				var json_key = "root";
 			} else {
-				var params = {mode: "children", parent: node.key, selected: node.selected, namespace: node.data.namespace};
+				var params = {mode: "children", selected: node.selected, namespace: node.data.namespace};
+				var json_key = node.key;
 			}
 
+			params.depth = 1;
+
 			data.result = $.ajax({
-				url: "/data/" + node.data.dbname + ".src.json",
+				url:  '/' + account + '/' + node.data.dbname + '/revision/head/tree/' + json_key + '.json',
 				data: params,
 				cache: false
 			});
 		}
 	});
-});	
+});

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd 
+ *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -75,21 +75,32 @@ exports.decode = function(bson, materials) {
     // There should be always only a single material with the mesh!
     // Takes the very first match if multiple materials attached as children.
     // Children are appended on the fly from other repository components.
-    // If a single mesh is being decoded on it's own, it will not have the 
-    // children array attached!
-    if (bson[C.REPO_NODE_LABEL_CHILDREN]) {
-        for (var i = 0; i < bson[C.REPO_NODE_LABEL_CHILDREN].length; ++i) {
-            var childIDbytes = bson[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID].buffer;
-            var childID = UUID.unparse(childIDbytes);
-            var material = materials[childID];
-            if (material) {
-                // TODO: change mMaterialIndex to material
-                bson[C.M_MATERIAL_INDEX] = childID;
-                break;
-            }
-        }
-    }
-    return bson;
+    // If a single mesh is being decoded on it's own, it will not have the
+// children array attached!
+if (bson[C.REPO_NODE_LABEL_CHILDREN]) {
+	for (var i = 0; i < bson[C.REPO_NODE_LABEL_CHILDREN].length; ++i) {
+		var childIDbytes = bson[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID].buffer;
+		var childID = UUID.unparse(childIDbytes);
+		var material = materials[childID];
+		if (material) {
+			// TODO: change mMaterialIndex to material
+			bson[C.M_MATERIAL_INDEX] = childID;
+			break;
+		}
+	}
+}
+return bson;
+}
+
+exports.extractBoundingBox = function(mesh) {
+    var bbox = {};
+
+    bbox.min = mesh['bounding_box'][0];
+    bbox.max = mesh['bounding_box'][1];
+    bbox.center = [(bbox.min[0] + bbox.max[0]) / 2, (bbox.min[1] + bbox.max[1]) / 2, (bbox.min[2] + bbox.max[2]) / 2];
+    bbox.size = [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])];
+
+    return bbox;
 }
 
 /**
@@ -145,9 +156,9 @@ function toFloat32Array(binaryObject, isLittleEndian) {
 
 /**
  * Returns an array of arrays of uv channels, where each channel
- * has 2 floats per vertex (there is vertices count pairs) 
- *  
- * @param {Object} binaryObject 
+ * has 2 floats per vertex (there is vertices count pairs)
+ *
+ * @param {Object} binaryObject
  * @param {number} channelsCount Number of channels, 1 for now
  * @param {boolean} isLittleEndian True or false
  * @return {Array.<Float32Array>}
@@ -184,8 +195,8 @@ function toDataView(binaryObject) {
 
 /**
  * Returns an ArrayBuffer from a binary buffer. This can
- * be used to create a DataView from it. 
- * See: http://stackoverflow.com/questions/8609289/convert-a-binary-nodejs-buffer-to-javascript-arraybuffer 
+ * be used to create a DataView from it.
+ * See: http://stackoverflow.com/questions/8609289/convert-a-binary-nodejs-buffer-to-javascript-arraybuffer
  *
  * @param {Buffer} binary buffer
  */
