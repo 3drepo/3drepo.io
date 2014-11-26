@@ -1,5 +1,5 @@
 /**
- **  Copyright (C) 2014 3D Repo Ltd 
+ **  Copyright (C) 2014 3D Repo Ltd
  **
  **  This program is free software: you can redistribute it and/or modify
  **  it under the terms of the GNU Affero General Public License as
@@ -36,3 +36,18 @@ function onMouseMove(event){
 function onMouseOver(event){
 	$.event.trigger("onMouseOver", event);
 }
+
+function onViewpointChange(event){
+	$.event.trigger("onViewpointChange", event);
+}
+
+function onLoaded(event){
+	$.event.trigger("onLoaded", event);
+}
+
+/*
+document.onload = function () {
+	viewerLoaded();
+};
+*/
+

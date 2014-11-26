@@ -109,6 +109,7 @@ $(function () {
 				var rootObj = $('#' + data.node.data.namespace + data.node.data.uuid)[0];
 				viewer.lookAtObject(rootObj);
 				viewer.setApp(rootObj);
+				floating.addAllFloats(rootObj);
 			}
 
 			if (("meta" in data.node.data) && (data.node.data["meta"].length))

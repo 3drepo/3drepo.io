@@ -76,20 +76,20 @@ exports.decode = function(bson, materials) {
     // Takes the very first match if multiple materials attached as children.
     // Children are appended on the fly from other repository components.
     // If a single mesh is being decoded on it's own, it will not have the
-// children array attached!
-if (bson[C.REPO_NODE_LABEL_CHILDREN]) {
-	for (var i = 0; i < bson[C.REPO_NODE_LABEL_CHILDREN].length; ++i) {
-		var childIDbytes = bson[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID].buffer;
-		var childID = UUID.unparse(childIDbytes);
-		var material = materials[childID];
-		if (material) {
-			// TODO: change mMaterialIndex to material
-			bson[C.M_MATERIAL_INDEX] = childID;
-			break;
+	// children array attached!
+	if (bson[C.REPO_NODE_LABEL_CHILDREN]) {
+		for (var i = 0; i < bson[C.REPO_NODE_LABEL_CHILDREN].length; ++i) {
+			var childIDbytes = bson[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID].buffer;
+			var childID = UUID.unparse(childIDbytes);
+			var material = materials[childID];
+			if (material) {
+				// TODO: change mMaterialIndex to material
+				bson[C.M_MATERIAL_INDEX] = childID;
+				break;
+			}
 		}
 	}
-}
-return bson;
+	return bson;
 }
 
 exports.extractBoundingBox = function(mesh) {
@@ -156,9 +156,15 @@ function toFloat32Array(binaryObject, isLittleEndian) {
 
 /**
  * Returns an array of arrays of uv channels, where each channel
+<<<<<<< Updated upstream
  * has 2 floats per vertex (there is vertices count pairs)
  *
  * @param {Object} binaryObject
+=======
+ * has 2 floats per vertex (there is vertices count pairs)
+ *
+ * @param {Object} binaryObject
+>>>>>>> Stashed changes
  * @param {number} channelsCount Number of channels, 1 for now
  * @param {boolean} isLittleEndian True or false
  * @return {Array.<Float32Array>}
@@ -195,8 +201,13 @@ function toDataView(binaryObject) {
 
 /**
  * Returns an ArrayBuffer from a binary buffer. This can
+<<<<<<< Updated upstream
  * be used to create a DataView from it.
  * See: http://stackoverflow.com/questions/8609289/convert-a-binary-nodejs-buffer-to-javascript-arraybuffer
+=======
+ * be used to create a DataView from it.
+ * See: http://stackoverflow.com/questions/8609289/convert-a-binary-nodejs-buffer-to-javascript-arraybuffer
+>>>>>>> Stashed changes
  *
  * @param {Buffer} binary buffer
  */
