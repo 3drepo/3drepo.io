@@ -468,11 +468,18 @@ function X3D_AddChildren(xml_doc, xml_node, node, db_interface, account, project
 			else
 				var url_str = '/' + account + '/' + child['project'] + '/revision/master/head.x3d.' + mode;
 
+			new_node.setAttribute('onload', 'onLoaded(event);');
 			new_node.setAttribute('url', url_str);
 			new_node.setAttribute('id', child['id']);
 			new_node.setAttribute('DEF', db_interface.uuidToString(child["shared_id"]));
 			new_node.setAttribute('nameSpaceName', child['project']);
 
+			if ('bounding_box' in child)
+			{
+				var bbox = repoNodeMesh.extractBoundingBox(child);
+				new_node.setAttribute('bboxCenter', bbox.center);
+				new_node.setAttribute('bboxSize', bbox.size);
+			}
 			xml_node.appendChild(new_node);
 
 			X3D_AddChildren(xml_doc, new_node, child, db_interface, account, project, mode);
