@@ -40,6 +40,7 @@ module.exports = {
         x3domcss : 'http://x3dom.org/download/dev/x3dom.css',
         repouicss : '../css/ui.css',
 		repobasecss: '../css/base.css',
+		dblistbasecss: '../css/dblist_base.css',
 		jqueryjs : '../jquery.min.js',
 		jqueryuijs : '../jquery-ui.min.js',
 		jqueryuicss: '//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css',
