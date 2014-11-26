@@ -461,6 +461,8 @@ function X3D_AddChildren(xml_doc, xml_node, node, db_interface, account, project
 		{
 			new_node = xml_doc.createElement('Inline');
 
+			var url_str = child['project'] + "." + mode + ".x3d";
+
 			if ('revision' in child)
 				var url_str = '/' + account + '/' + child['project'] + '/revision/master/' + child['revision'] + '.x3d.' + mode;
 			else
@@ -782,7 +784,7 @@ function X3D_AddViewpoint(xml_doc, bbox)
 	logger.log('debug', 'MAXDIM: ' + max_dim);
 
     var vpoint = xml_doc.createElement('Viewpoint');
-    vpoint.setAttribute('DEF', 'vpoint');
+    vpoint.setAttribute('id', 'sceneVP');
     vpoint.setAttribute('position', vpos.join(' '));
     vpoint.setAttribute('orientation', '0 0 -1 0');
     vpoint.setAttribute('zNear', 0.01);
@@ -873,7 +875,7 @@ function render(db_interface, account, project, sub_format, revision, res, err_c
 		bbox.size = [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])];
 
 		//X3D_AddGroundPlane(xml_doc, bbox);
-		X3D_AddViewpoint(xml_doc, bbox);
+		//X3D_AddViewpoint(xml_doc, bbox);
 		//X3D_AddLights(xml_doc, bbox);
 
 		var xml_str = new xml_serial().serializeToString(xml_doc);
@@ -882,89 +884,6 @@ function render(db_interface, account, project, sub_format, revision, res, err_c
 		res.end();
     });
 };
-
-
-/*
-function render(db_interface, account, project, sub_format, level, revision, sid, tex_uuid, res, err_callback) {
-    logger.log('debug', 'Rendering x3d (' + sub_format + ')');
-
-    var is_pbf = (sub_format == 'pbf');
-
-    db_interface.get_mesh(null, project, revision, sid, is_pbf, tex_uuid, function(err, doc) {
-        if (err) return callback(err);
-
-        switch (format) {
-        case "pbf":
-            getPopCache(null, db_interface, project, true, level, uuid, function(err) {
-                logger.log('info', 'Outputting level ' + level);
-
-                res.write(GLOBAL.pbf_cache[uuid][level].idx_buf.buffer, 'binary');
-                res.write(GLOBAL.pbf_cache[uuid][level].vert_buf_offsetuf.buffer, 'binary');
-                res.end();
-            });
-
-            break;
-        case "x3d":
-            var xml_doc = X3D_Header();
-            var scene = X3D_CreateScene(xml_doc);
-
-            // Hack for the demo, generate objects server side
-            json_objs = [];
-
-			var scene_bbox_min = [];
-			var scene_bbox_max = [];
-
-			var dummyRoot = { children: [doc.mRootNode] };
-
-			X3D_AddChildren(xml_doc, scene, dummyRoot, db_interface, account, project, sub_format);
-
-			// Compute the scene bounding box.
-			// Should be a better way of doing this.
-            for (var mesh_id in doc['meshes']) {
-				var mesh = doc['meshes'][mesh_id];
-	            var bbox = extractBoundingBox(mesh);
-
-				if (scene_bbox_min.length)
-				{
-					for(var idx = 0; idx < 3; idx++)
-					{
-						scene_bbox_min[idx] = Math.min(scene_bbox_min[idx], bbox.min[idx]);
-						scene_bbox_max[idx] = Math.max(scene_bbox_max[idx], bbox.max[idx]);
-					}
-				} else {
-					scene_bbox_min = bbox.min.slice(0);
-					scene_bbox_max = bbox.max.slice(0);
-				}
-            }
-
-			var bbox = {};
-			bbox.min = scene_bbox_min;
-			bbox.max = scene_bbox_max;
-			bbox.center = [0.5 * (bbox.min[0] + bbox.max[0]), 0.5 * (bbox.min[1] + bbox.max[1]), 0.5 * (bbox.min[2] + bbox.max[2])];
-			bbox.size = [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])];
-
-			//X3D_AddGroundPlane(xml_doc, bbox);
-			X3D_AddViewpoint(xml_doc, bbox);
-			//X3D_AddLights(xml_doc, bbox);
-
-			var xml_str = new xml_serial().serializeToString(xml_doc);
-            res.write(xml_str);
-
-			res.end();
-
-            break;
-
-        case "src":
-               break;
-
-        default:
-            err = "Format Not Supported";
-            err_callback(err);
-        };
-    });
-}
-*/
-
 
 exports.route = function(router)
 {

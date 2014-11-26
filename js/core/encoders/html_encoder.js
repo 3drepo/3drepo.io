@@ -36,8 +36,8 @@ exports.route = function(router)
     });
 
     router.get('html', '/:account/:project', function(res, params) {
-        if (params.rid != null) xml_str = '<inline nameSpaceName=\"model\" url=\"/' + params.account + '/' + params.project + '/revision/' + params.rid + '.x3d.src\"> </inline>';
-        else xml_str = '<inline nameSpaceName=\"model\" url=\"/' + params.account + '/' + params.project + '/revision/master/head.x3d.src\"> </inline>';
+        if (params.rid != null) xml_str = '<inline nameSpaceName=\"model\" onload=\"onLoaded(event);\" url=\"/' + params.account + '/' + params.project + '/revision/' + params.rid + '.x3d.src\"> </inline>';
+        else xml_str = '<inline nameSpaceName=\"model\" onload=\"onLoaded(event);\" url=\"/' + params.account + '/' + params.project + '/revision/master/head.x3d.src\"> </inline>';
 
         params.xml    = xml_str;
 
