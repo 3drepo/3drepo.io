@@ -157,7 +157,7 @@ angular.module('3drepo', [])
 	    	date: "15 october 2014, 05:00"
 	    },
 	    {
-	    	type: "branch",
+	    	type: "branch-add",
 	    	author: "Fred",
 	    	keyword: "Experimental",
 	    	date: "15 october 2014, 04:00"

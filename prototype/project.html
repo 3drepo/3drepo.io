@@ -183,7 +183,7 @@
                     <div class="log-icon-block">
                     <i ng-if="item.type=='visibility'" class="fa fa-cogs fa-2x log-icon"></i>
                     <i ng-if="item.type=='project-type'" class="fa fa-cogs fa-2x log-icon"></i>
-                    <i ng-if="item.type=='branch'" class="fa fa-code-fork fa-2x log-icon"></i>
+                    <i ng-if="item.type=='branch-add'" class="fa fa-code-fork fa-2x log-icon"></i>
                     <i ng-if="item.type=='user-add'" class="fa fa-user fa-2x log-icon"></i>
                     <i ng-if="item.type=='creation'" class="fa fa-cube fa-2x log-icon"></i>
                     </div>
@@ -196,7 +196,7 @@
                       <span class="history-author">{{item.author}}</span> <span class="history-action">changed the project type to</span> <span class="history-keyword">{{item.keyword}}</span>. <span class="commit-date">{{item.date}}</span>
                     </div>
 
-                    <div ng-if="item.type=='branch'" class="log-block">
+                    <div ng-if="item.type=='branch-add'" class="log-block">
                       <span class="history-author">{{item.author}}</span> <span class="history-action">created branch </span> <span class="history-keyword">{{item.keyword}}</span>. <span class="commit-date">{{item.date}}</span>
                     </div>
 
