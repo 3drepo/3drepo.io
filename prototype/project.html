@@ -58,20 +58,18 @@
 
                 <!-- Project name and author -->
                 <div class="project-title">
-                  <h2>Car Project 1</h2>
-                  <p>Owner: Jozef</p>
+                  <h2>{{project.name}}</h2>
+                  <p>Owner: {{project.owner}}</p>
                 </div>
                 
                 <!-- Branch selector -->
                 <div class="row tight">
                 <div class="btn-group menu-button">
                   <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                    <i class="fa fa-code-fork menu-icon"></i><span class="button-title">Branch: </span><span class="button-keyword">master</span> <span class="caret "></span>
+                    <i class="fa fa-code-fork menu-icon"></i><span class="button-title">Branch: </span><span class="button-keyword">{{current_branch.name}}</span> <span class="caret "></span>
                   </button>
                   <ul class="dropdown-menu" role="menu">
-                    <li><a href="#/"><span class="button-keyword">branch 1</span></a></li>
-                    <li><a href="#/"><span class="button-keyword">branch 2</span></a></li>
-                    <li><a href="#/"><span class="button-keyword">branch 3</span></a></li>
+                    <li ng-repeat="branch in project.branches"><a href="#/" ng-click="setBranch(branch)"><span class="button-keyword">{{branch.name}}</span></a></li>
                   </ul>
                 </div>
                 </div>
@@ -80,14 +78,10 @@
                 <div class="row tight">
                 <div class="btn-group  menu-button">
                   <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                    <i class="fa fa-tag menu-icon"></i><span class="button-title">Revision: </span><span class="button-keyword">2ndjf (head)</span> <span class="caret"></span>
+                    <i class="fa fa-tag menu-icon"></i><span class="button-title">Revision: </span><span class="button-keyword">{{current_revision.name}}</span> <span class="caret"></span>
                   </button>
                   <ul class="dropdown-menu" role="menu">
-                    <li><a href="#/"><span class="button-keyword">2ndjf (head)</span></a></li>
-                    <li class="divider"></li>
-                    <li><a href="#/"><span class="button-keyword">ne39d</span></a></li>
-                    <li><a href="#/"><span class="button-keyword">4kkdf</span></a></li>
-                    <li><a href="#/"><span class="button-keyword">g90sd</span></a></li>
+                    <li ng-repeat="rev in current_branch.revisions"><a href="#/" ng-click="setRevision(rev)"><span class="button-keyword">{{rev.name}}</span></a></li>
                   </ul>
                 </div>
                 </div>
@@ -96,14 +90,12 @@
                 <div class="row tight">
                 <div class="btn-group  menu-button">
                   <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                    <i class="fa fa-copy menu-icon"></i><span class="button-title">Diff with: </span><span class="button-keyword">None</span> <span class="caret"></span>
+                    <i class="fa fa-copy menu-icon"></i><span class="button-title">Diff with: </span><span class="button-keyword">{{current_diff_name}}</span> <span class="caret"></span>
                   </button>
                   <ul class="dropdown-menu" role="menu">
                     <li><a href="#/"><span class="button-keyword">None</span></a></li>
                     <li class="divider"></li>
-                    <li><a href="#/"><span class="button-keyword">ne39d</span></a></li>
-                    <li><a href="#/"><span class="button-keyword">4kkdf</span></a></li>
-                    <li><a href="#/"><span class="button-keyword">g90sd</span></a></li>
+                    <li ng-repeat="rev in current_branch.revisions" ng-if="rev.name != current_revision.name"><a href="#/" ng-click="setDiffName(rev.name)"><span class="button-keyword">{{rev.name}}</span></a></li>
                   </ul>
                 </div>
                 </div>
@@ -117,7 +109,7 @@
               <div class="col-md12 margin-bottom">
                 <ul class="nav nav-tabs nav" role="tablist">
                 <li ng-class="{'active': isView('info')}"><a class="dashboard-tab" href="#/" ng-click="setView('info')"><i class="fa fa-info-circle menu-icon"></i>Info</a></li>
-                <li ng-class="{'active': isView('comments')}"><a class="dashboard-tab" href="#/" ng-click="setView('comments')"><i class="fa fa-comments menu-icon"></i>Comments <span class="badge">3</span></a></li>
+                <li ng-class="{'active': isView('comments')}"><a class="dashboard-tab" href="#/" ng-click="setView('comments')"><i class="fa fa-comments menu-icon"></i>Comments <span class="badge">{{current_revision.comments.length}}</span></a></li>
                 <li ng-class="{'active': isView('revisions')}"><a class="dashboard-tab" href="#/" ng-click="setView('revisions')"><i class="fa fa-tag menu-icon"></i>Revisions</a></li>
                 <li ng-class="{'active': isView('log')}"><a class="dashboard-tab" href="#/" ng-click="setView('log')"><i class="fa fa-save menu-icon"></i>Log</a></li>        
                 <li ng-class="{'active': isView('settings')}"><a class="dashboard-tab" href="#/" ng-click="setView('settings')"><i class="fa fa-gear menu-icon"></i>Settings</a></li> 
@@ -127,9 +119,9 @@
                 <div ng-if="view=='info'">
                   <div class="block">
                     <div class= "col-sm-12 margined block-header">
-                      <h3 >Revision <span class="block-header-project-name">2ndjf</span> <span class="block-header-by">by</span> <span class="block-header-author">Jozef</span> <span class="commit-date-title">15 October 2014, 18:25</span></h3>
+                      <h3 >Revision <span class="block-header-project-name">{{current_revision.name}}</span> <span class="block-header-by">by</span> <span class="block-header-author">{{current_revision.author}}</span> <span class="commit-date-title">{{current_revision.date}}</span></h3>
                     </div>
-                    <p>Changed width of pipe.
+                    <p>{{current_revision.message}}
                     </p>
                   </div>
 
@@ -137,39 +129,19 @@
                     <div class= "col-sm-12 margined block-header">
                       <h3>Readme</h3>
                     </div>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sit amet semper ante. In arcu augue, auctor et bibendum in, aliquet at nunc. Sed nisl orci, dictum id suscipit sed, pretium at eros. Vivamus ut dolor vel sapien molestie tempus. Donec mauris sapien, malesuada nec metus quis, eleifend tristique ipsum. Suspendisse sagittis risus eget mollis suscipit. Sed a metus maximus, volutpat urna vitae, convallis nulla. Suspendisse pulvinar ultrices elementum. Suspendisse potenti. Morbi ac tellus efficitur mi ornare viverra non sit amet ipsum. Sed ullamcorper auctor ex, quis suscipit arcu commodo bibendum. Curabitur vel quam et neque tempus luctus id id magna. In blandit elit eget lacinia varius. Ut lectus nulla, euismod in sapien at, elementum ullamcorper massa. In condimentum, arcu eget aliquet commodo, nunc lacus semper ex, ac eleifend mauris ex vel augue. Vivamus convallis pulvinar nisl convallis efficitur.
-                    <br>
-                    <br>
-                    Donec congue justo sapien, vel auctor nisi euismod eget. Praesent efficitur libero est, laoreet convallis libero egestas quis. Nam sit amet elit quam. Ut a aliquet felis. Cras aliquam auctor purus, dictum vestibulum justo. Maecenas sed egestas dolor, a sodales dolor. Mauris sed dui aliquet, venenatis risus eu, blandit metus. Nunc egestas fringilla ante, non pulvinar libero gravida in. Donec placerat eros vel dui viverra, ut bibendum orci sagittis. Cras dignissim id ante id posuere. Pellentesque eros erat, consectetur quis metus in, aliquet sodales justo. Quisque elementum blandit sollicitudin. Nullam iaculis nunc sed lacinia consequat. Nunc hendrerit sollicitudin ex sit amet pretium. Interdum et malesuada fames ac ante ipsum primis in faucibus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
-                    <br>
-                    <br>
-                    Mauris et tincidunt sapien. Morbi vel imperdiet enim, vel molestie mi. Fusce lectus sapien, viverra sed nisi vel, tincidunt rhoncus leo. Curabitur sit amet orci tortor. Nullam et leo quis odio fringilla ornare a nec libero. Nunc eu fringilla tortor. Praesent non lacus ultrices, fringilla odio nec, pellentesque dui. Aliquam ornare vestibulum commodo. Sed facilisis pellentesque purus sit amet scelerisque. Donec vel ultrices purus. Suspendisse purus ante, cursus in libero a, imperdiet faucibus elit. Quisque viverra odio at enim sollicitudin sollicitudin.
-                    </p>
+                    <p>{{project.readme}}</p>
                   </div>
                 </div>
 
                 <div ng-if="view=='comments'">
-                  <div class="block">
+                  <div class="block" ng-repeat="comment in current_revision.comments">
                     <div class= "col-sm-12 margined block-header">
-                      <h3><i class="fa fa-comment menu-icon"></i>jozef <span class="comment-keyword-title">commented</span> <span class="comment-date-title">15 October 2014, 18:25</span></h3>
+                      <h3><i class="fa fa-comment menu-icon"></i>{{comment.author}} <span class="comment-keyword-title">commented</span> <span class="comment-date-title">{{comment.date}}</span></h3>
                     </div>
-                    <p>The window should be bigger.
+                    <p>{{comment.message}}
                     </p>
                   </div>
-                  <div class="block">
-                    <div class= "col-sm-12 margined block-header">
-                      <h3 ><i class="fa fa-comment menu-icon"></i>tim <span class="comment-keyword-title">commented</span> <span class="comment-date-title">14 October 2014, 12:55</span></h3>
-                    </div>
-                    <p>I don't like the floor texture.
-                    </p>
-                  </div>
-                  <div class="block">
-                    <div class= "col-sm-12 margined block-header">
-                      <h3 ><i class="fa fa-comment menu-icon"></i>frederic <span class="comment-keyword-title">commented</span> <span class="comment-date-title">13 October 2014, 9:25</span></h3>
-                    </div>
-                    <p>This is what the client requested.
-                    </p>
-                  </div>
+
                   <div class="block">
                     <div class= "col-sm-12 margined block-header">
                       <h3 >Leave a comment</h3>
@@ -191,51 +163,11 @@
                     <h3>Timeline</h3>
                   </div>
  
-                  <div class="col-sm-12 month-block">
-                  <hr class="fancy-line"><h3>14 October 2014</h3>
-                  <div class="commit-block">
-                    <span class="commit-revision">Revision</span> <a href="#/"><span class="commit-number">1fd32</span></a> <span class="commit-by"> by </span> <span class="commit-author">Jozef</span><span class="commit-date">14:23</span>
-                    <p>Updated the floor.</p>
-                  </div>
-                  <div class="commit-block">
-                    <span class="commit-revision">Revision</span> <a href="#/"><span class="commit-number">3jdf0</span></a> <span class="commit-by"> by </span> <span class="commit-author">Tim</span><span class="commit-date">11:46</span>
-                    <p>Updated the walls.</p>
-                  </div>
-                  </div>
-
-                  <div class="col-sm-12 month-block">
-                  <hr class="fancy-line"><h3>13 October 2014</h3>
-                  <div class="commit-block">
-                    <span class="commit-revision">Revision</span> <a href="#/"><span class="commit-number">2ndjf</span></a> <span class="commit-by"> by </span> <span class="commit-author">Frederic</span><span class="commit-date">18:36</span>
-                    <p>Removed the pipe.</p>
-                  </div>
-                  <div class="commit-block">
-                    <span class="commit-revision">Revision</span> <a href="#/"><span class="commit-number">12ks0</span></a> <span class="commit-by"> by </span> <span class="commit-author">Jozef</span><span class="commit-date">18:25</span>
-                    <p>Widened the pipe.</p>
-                  </div>
-                  <div class="commit-block">
-                    <span class="commit-revision">Revision</span> <a href="#/"><span class="commit-number">2nd8r</span></a> <span class="commit-by"> by </span> <span class="commit-author">Frederic</span><span class="commit-date">18:00</span>
-                    <p>Added the pipe.</p>
-                  </div>
-                  <div class="commit-block">
-                    <span class="commit-revision">Revision</span> <a href="#/"><span class="commit-number">1ldo9</span></a> <span class="commit-by"> by </span> <span class="commit-author">Frederic</span><span class="commit-date">14:12</span>
-                    <p>Moved the house.</p>
-                  </div>
-                  </div>
-
-                  <div class="col-sm-12 month-block">
-                  <hr class="fancy-line"><h3>12 October 2014</h3>
-                  <div class="commit-block">
-                    <span class="commit-revision">Revision</span> <a href="#/"><span class="commit-number">2j3fa</span></a> <span class="commit-by"> by </span> <span class="commit-author">Tim</span><span class="commit-date">9:29</span>
-                    <p>Changed color of the window.</p>
-                  </div>
-                  <div class="commit-block">
-                    <span class="commit-revision">Revision</span> <a href="#/"><span class="commit-number">1awe8</span></a> <span class="commit-by"> by </span> <span class="commit-author">Tim</span><span class="commit-date">9:23</span>
-                    <p>Updated style of window.</p>
-                  </div>
-                  <div class="commit-block">
-                    <span class="commit-revision">Revision</span> <a href="#/"><span class="commit-number">1fd32</span></a> <span class="commit-by"> by </span> <span class="commit-author">Jozef</span><span class="commit-date">9:01</span>
-                    <p>Created window.</p>
+                  <div class="col-sm-12 month-block" ng-repeat="(date,revisions) in rev_by_day">
+                  <hr class="fancy-line"><h3>{{date}}</h3>
+                  <div class="commit-block" ng-repeat="revision in revisions">
+                    <span class="commit-revision">Revision</span> <a href="#/"><span class="commit-number">{{revision.name}}</span></a> <span class="commit-by"> by </span> <span class="commit-author">Jozef</span><span class="commit-date">{{revision.date.split(',')[1]}}</span>
+                    <p>{{revision.message}}</p>
                   </div>
                   </div>
                 </div>
@@ -246,47 +178,37 @@
                   <div class= "col-sm-12 margined block-header">
                     <h3>History</h3>
                   </div>
+                  
+                  <div class="col-sm-12 log" ng-repeat="item in project.log">
+                    <div class="log-icon-block">
+                    <i ng-if="item.type=='visibility'" class="fa fa-cogs fa-2x log-icon"></i>
+                    <i ng-if="item.type=='project-type'" class="fa fa-cogs fa-2x log-icon"></i>
+                    <i ng-if="item.type=='branch'" class="fa fa-code-fork fa-2x log-icon"></i>
+                    <i ng-if="item.type=='user-add'" class="fa fa-user fa-2x log-icon"></i>
+                    <i ng-if="item.type=='creation'" class="fa fa-cube fa-2x log-icon"></i>
+                    </div>
+
+                    <div ng-if="item.type=='visibility'" class="log-block">
+                      <span class="history-author">{{item.author}}</span> <span class="history-action">changed the project visibility to</span> <span class="history-keyword">{{item.keyword}}</span>. <span class="commit-date">{{item.date}}</span>
+                    </div>
+
+                    <div ng-if="item.type=='project-type'" class="log-block">
+                      <span class="history-author">{{item.author}}</span> <span class="history-action">changed the project type to</span> <span class="history-keyword">{{item.keyword}}</span>. <span class="commit-date">{{item.date}}</span>
+                    </div>
+
+                    <div ng-if="item.type=='branch'" class="log-block">
+                      <span class="history-author">{{item.author}}</span> <span class="history-action">created branch </span> <span class="history-keyword">{{item.keyword}}</span>. <span class="commit-date">{{item.date}}</span>
+                    </div>
+
+                    <div ng-if="item.type=='user-add'" class="log-block">
+                      <span class="history-author">{{item.author}}</span> <span class="history-action">added user</span> <span class="history-keyword">{{item.keyword}}</span> <span class="history-action"> to the project</span>. <span class="commit-date">{{item.date}}</span>
+                    </div>
+
+                    <div ng-if="item.type=='creation'" class="log-block">
+                      <span class="history-author">{{item.author}}</span> <span class="history-action">created the project</span>. <span class="commit-date">{{item.date}}</span>
+                    </div>
+                  </div>
  
-                  <div class="col-sm-12 log">
-                  <div class="log-icon-block"><i class="fa fa-cogs fa-2x log-icon"></i></div>
-                  <div class="log-block">
-                    <span class="history-author">Jozef</span> <span class="history-action">changed the project visibility to</span> <span class="history-keyword">Public</span>. <span class="commit-date">15 October 2014, 15:53</span>
-                  </div>
-                  </div>
-
-                  <div class="col-sm-12 log">
-                  <div class="log-icon-block"><i class="fa fa-code-fork fa-2x log-icon"></i></div>
-                  <div class="log-block">
-                    <span class="history-author">Jozef</span> <span class="history-action">created branch </span> <span class="history-keyword">Experimental</span>. <span class="commit-date">15 October 2014, 14:20</span>
-                  </div>
-                  </div>
-
-                  <div class="col-sm-12 log">
-                  <div class="log-icon-block"><i class="fa fa-cogs fa-2x log-icon"></i></div>
-                  <div class="log-block">
-                    <span class="history-author">Tim</span> <span class="history-action">changed the project type to</span> <span class="history-keyword">Aerospatial</span>. <span class="commit-date">14 October 2014, 17:00</span>
-                  </div>
-                  </div>
-
-                  <div class="col-sm-12 log">
-                  <div class="log-icon-block"><i class="fa fa-user fa-2x log-icon"></i></div>
-                  <div class="log-block">
-                    <span class="history-author">Jozef</span> <span class="history-action">added user</span> <span class="history-keyword">Tim</span> <span class="history-action"> to the project</span>. <span class="commit-date">14 October 2014, 14:23</span>
-                  </div>
-                  </div>
-                  <div class="col-sm-12 log">
-                  <div class="log-icon-block"><i class="fa fa-user fa-2x log-icon"></i></div>
-                  <div class="log-block">
-                    <span class="history-author">Jozef</span> <span class="history-action">added user</span> <span class="history-keyword">Frederic</span> <span class="history-action"> to the project</span>. <span class="commit-date">14 October 2014, 11:56</span>
-                  </div>
-                  </div>
-                  <div class="col-sm-12 log">
-                  <div class="log-icon-block"><i class="fa fa-cube fa-2x log-icon"></i></div>
-                  <div class="log-block">
-                    <span class="history-author">Jozef</span> <span class="history-action">created the project</span>. <span class="commit-date">13 October 2014, 11:51</span>
-                  </div>
-                  </div>
-
                 </div>
                   
                 <div ng-if="view=='settings'">
@@ -309,7 +231,7 @@
                         </div>
                         <div class= "col-sm-8  margined">
                         <label for="project-name">Project Name</label>
-                        <input type="email" class="form-control" id="project-name">
+                        <input type="email" class="form-control" id="project-name" ng-value="project.name">
                         </div>
                       </div>
                       
@@ -329,7 +251,7 @@
                       <div class="form-group">
                         <div class= "col-sm-12 margined">
                         <label for="project-name">Description</label><span> (optional)</span>
-                        <input type="email" class="form-control" id="project-name">
+                        <input type="email" class="form-control" id="project-description" ng-value="project.description">
                         </div>
                       </div>   
 
@@ -346,7 +268,7 @@
                       <div class="form-group">
                         <div class= "col-sm-12">
                           <label class="radio radio-pad">
-                            <input type="radio" name="visibility" id="visibility" value="public" checked="checked"> 
+                            <input type="radio" name="visibility" id="visibility" value="public" ng-model="project.visibility" ng-checked="project.visibility=='public'" ng-change="setVisibility('public')"> 
                             <span class="glyphicon glyphicon-eye-open"></span>
                             Public
                           </label>
@@ -357,7 +279,7 @@
 
                         <div class= "col-sm-12 margined">
                           <label class="radio radio-pad">
-                            <input type="radio" name="visibility" id="visibility" value="private"> 
+                            <input type="radio" name="visibility" id="visibility" value="private" ng-model="project.visibility" ng-checked="project.visibility=='private'" ng-change="setVisibility('private')"> 
                             <span class="glyphicon glyphicon-eye-close"></span>
                             Private
                           </label>
@@ -388,78 +310,36 @@
                           </span>
                           </div>
                         </div>
-                        <div class="clearfix"></div>
-                        <div class="col-sm-6 margined">
-                          <div class="input-group"> 
-                            <span class="input-group-btn">
-                              <button id="filter" class="btn btn-primary btn-block">
-                                  <span class="glyphicon glyphicon-user"></span>
-                              </button>
-                            </span>
-                          <input type="search" name="searchBy" id="searchBy" class="form-control" readonly value="Tim Scully"/>
-                          <span class="input-group-btn">
-                            <button id="filter" class="btn btn-primary btn-block">
-                                <span class="glyphicon glyphicon-minus"></span>
-                            </button>
-                          </span>
 
-                          </div>
-
-                        </div>
-                        <div class="col-sm-4 permission">
-                          <select class="form-control">
-                          <option value="one">Admin</option>
-                          <option value="two">Member</option>
-                          <option value="two">Viewer</option>
-                          </select> 
-                        </div>
-
-                        <div class="clearfix"></div>
-                        <div class="col-sm-6 margined">
-                          <div class="input-group"> 
-                            <span class="input-group-btn">
-                              <button id="filter" class="btn btn-primary btn-block">
-                                  <span class="glyphicon glyphicon-user"></span>
-                              </button>
-                          </span>
-                          <input type="search" name="searchBy" id="searchBy" class="form-control" readonly value="Frederic Besse"/>
-                          <span class="input-group-btn">
-                            <button id="filter" class="btn btn-primary btn-block">
-                                <span class="glyphicon glyphicon-minus"></span>
-                            </button>
-                          </span>
-                          </div>
-
-                        </div>
-                        <div class="col-sm-4 permission">
-                          <select class="form-control">
-                          <option value="one">Admin</option>
-                          <option value="two">Member</option>
-                          <option value="two">Viewer</option>
-                          </select> 
-                        </div>
-                        <div class="clearfix"></div>
-                        <div class="col-sm-6 margined">
+                        <div ng-repeat="user in project.users">
+                          <div class="clearfix"></div>
+                          <div class="col-sm-6 margined">
                             <div class="input-group"> 
                               <span class="input-group-btn">
                                 <button id="filter" class="btn btn-primary btn-block">
                                     <span class="glyphicon glyphicon-user"></span>
                                 </button>
-                            </span>
-                            <input type="search" name="searchBy" id="searchBy" class="form-control" readonly value="Jozef Dobos"/>
+                              </span>
+                            <input type="search" name="searchBy" id="searchBy" class="form-control" readonly ng-value="user.name"/>
                             <span class="input-group-btn">
-                            <button id="filter" class="btn btn-primary btn-block">
-                                <span class="glyphicon glyphicon-minus"></span>
-                            </button>
-                          </span>
+                              <button id="filter" class="btn btn-primary btn-block">
+                                  <span class="glyphicon glyphicon-minus"></span>
+                              </button>
+                            </span>
                             </div>
-                        </div>
-                        <div class="col-sm-4 permission">
-                          <select class="form-control">
-                          <option value="one">Admin</option>
-                          <option value="two">Member</option>
-                          <option value="two">Viewer</option>
-                          </select> 
+                          </div>
+                          <div class="col-sm-4 permission">
+                            <div class="btn-group">
+                              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                <span class="button-title">Role: </span><span class="button-keyword">{{user.role}}</span> <span class="caret "></span>
+                              </button>
+                              <ul class="dropdown-menu" role="menu">
+                                <li><a href="#/" ng-click="user.role='Admin'"><span class="button-keyword">Admin</span></a></li>
+                                <li><a href="#/" ng-click="user.role='Member'"><span class="button-keyword">Member</span></a></li>
+                                <li><a href="#/" ng-click="user.role='Viewer'"><span class="button-keyword">Viewer</span></a></li>
+                              </ul>
+                            </div>
+                          </div>
                         </div>
 
                       </div>
@@ -477,7 +357,7 @@
                       <div class="form-group">
                         <div class= "col-sm-12">
                           <label class="radio radio-pad">
-                            <input type="radio" name="federated" id="federated" value="single"> 
+                            <input type="radio" name="federated" id="federated" value="single" ng-model="project.type" ng-checked="project.type=='single'" ng-change="setType('single')"> 
                             <span class="glyphicon glyphicon-file"></span>
                             Single Project
                           </label>
@@ -488,7 +368,7 @@
 
                         <div class= "col-sm-12 margined">
                           <label class="radio radio-pad">
-                            <input type="radio" name="federated" id="federated" value="federated"  checked="checked"> 
+                            <input type="radio" name="federated" id="federated" value="federated" ng-model="project.type" ng-checked="project.type=='federated'"  ng-change="setType('federated')"> 
                             <span class="glyphicon glyphicon-folder-open"></span>
                             Federated Project
                           </label>
@@ -501,7 +381,7 @@
                     </form>   
                   </div>
                 
-                  <div class="block">
+                  <div class="block" ng-if="project.type=='federated'">
                     <div class= "col-sm-12 margined block-header">
                       <h3>Federation</h3>
                     </div>
@@ -517,52 +397,36 @@
                           </span>
                           </div>
                         </div>
-                        <div class="clearfix"></div>
-                        <div class="col-sm-6 margined">
-                          <div class="input-group"> 
-                            <span class="input-group-btn">
-                              <button id="filter" class="btn btn-primary btn-block">
-                                  <span class="glyphicon glyphicon-file"></span>
-                              </button>
-                          </span>
-                          <input type="search" name="searchBy" id="searchBy" class="form-control" readonly value="Car project 1"/>
-                          <span class="input-group-btn">
-                            <button id="filter" class="btn btn-primary btn-block">
-                                <span class="glyphicon glyphicon-minus"></span>
-                            </button>
-                          </span>
-                          </div>
 
-                        </div>
-                        <div class="col-sm-4 permission">
-                          <select class="form-control">
-                          <option value="one">HEAD</option>
-                          <option value="two">Rev 1</option>
-                          <option value="two">Rev 2</option>
-                          </select> 
-                        </div>
-                        <div class="clearfix"></div>
-                        <div class="col-sm-6 margined">
+                        <div ng-repeat="fed in project.federation">
+                          <div class="clearfix"></div>
+                          <div class="col-sm-6 margined">
                             <div class="input-group"> 
                               <span class="input-group-btn">
                                 <button id="filter" class="btn btn-primary btn-block">
                                     <span class="glyphicon glyphicon-file"></span>
                                 </button>
                             </span>
-                            <input type="search" name="searchBy" id="searchBy" class="form-control" readonly value="Floor project 3"/>
+                            <input type="search" name="searchBy" id="searchBy" class="form-control" readonly ng-value="fed.name"/>
                             <span class="input-group-btn">
-                            <button id="filter" class="btn btn-primary btn-block">
-                                <span class="glyphicon glyphicon-minus"></span>
-                            </button>
-                          </span>
+                              <button id="filter" class="btn btn-primary btn-block">
+                                  <span class="glyphicon glyphicon-minus"></span>
+                              </button>
+                            </span>
                             </div>
-                        </div>
-                        <div class="col-sm-4 permission">
-                          <select class="form-control">
-                          <option value="one">HEAD</option>
-                          <option value="two">Rev 1</option>
-                          <option value="two">Rev 2</option>
-                          </select> 
+
+                          </div>
+
+                          <div class="col-sm-4 permission">
+                            <div class="btn-group">
+                              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                <span class="button-title">Revision: </span><span class="button-keyword">{{fed.revselected}}</span> <span class="caret "></span>
+                              </button>
+                              <ul class="dropdown-menu" role="menu">
+                                <li ng-repeat="revision in fed.revisions"><a href="#/" ng-click="fed.revselected=revision"><span class="button-keyword">{{revision}}</span></a></li>
+                              </ul>
+                            </div>
+                          </div>
                         </div>
 
                       </div>
