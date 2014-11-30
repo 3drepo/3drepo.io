@@ -14,88 +14,80 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-var app = angular.module('3drepoapp'); 
 
-app.controller('MeasurerCtrl', ['$scope', 'navigation', 'x3dlink', 'x3dmouselink', function($scope, navigation, x3dlink, x3dmouselink) {
-	$scope.startPoint   = {x: 0.0, y: 0.0, z: 0.0};
-	$scope.endPoint     = {x: 0.0, y: 0.0, z: 0.0};
-	$scope.visible      = false;
-	$scope.toggleMeasure = false;
-	x3dmouselink.add_listener($scope);
-	x3dlink.add_listener($scope);
+var Measurer = function() {
+	this.v1 = [0,0,0];
+	this.v2 = [0,0,0];
 
-	$scope.clicked_callback = function(id, event) {
-		if ($scope.toggleMeasure)
-		{
-			// If invisible, then start a new line
-			if(!$scope.visible){
-				$scope.set_start_point(event.worldX, event.worldY, event.worldZ);
-				$scope.set_end_point(event.worldX, event.worldY, event.worldZ);
+	this.currentPoint = this.v1;
 
-				event.target.onmouseover = x3dmouselink.mouseover_callback();
-				event.target.onmousemove = x3dmouselink.mousemove_callback();
+	this.updatePoint = function(x, y, z) {
+		this.currentPoint[0] = x;
+		this.currentPoint[1] = y;
+		this.currentPoint[2] = z;
+	
+		document.getElementById("line").setAttribute("point", this.v1.join(" ") + "," + this.v2.join(" "));
+	}
 
-				$scope.visible = true;
-			}
-			else{
-				$scope.visible = false;
-			}
+	this.togglePoint = function() {
+		if (this.currentPoint == this.v1) {
+			this.currentPoint = this.v2;
+			this.updatePoint(this.v1[0], this.v1[1], this.v1[2]);
+			document.getElementById("lineTrans").setAttribute("render", "true");
+		} else {
+			this.currentPoint = this.v1;
+			document.getElementById("lineTrans").setAttribute("render", "false");
 		}
 	};
 
-	$scope.mouseover_callback = function(event) {
-		// That forces the scope to refresh with async events
-		// See http://jimhoskins.com/2012/12/17/angularjs-and-apply.html
-		$scope.$apply(
-			function(){
-				$scope.set_end_point(event.worldX, event.worldY, event.worldZ);
-			});
+	this.distance = function() {
+		
+		var dist = (this.v1[0] - this.v2[0]) * (this.v1[0] - this.v2[0]);
+		dist += (this.v1[1] - this.v2[1]) * (this.v1[1] - this.v2[1]);
+		dist += (this.v1[2] - this.v2[2]) * (this.v1[2] - this.v2[2]);
+		
+		return Math.sqrt(dist);
 	};
+};
 
-	$scope.mousemove_callback = function(event) {
-		// That forces the scope to refresh with async events
-		// See http://jimhoskins.com/2012/12/17/angularjs-and-apply.html
-		$scope.$apply(
-			function(){
-				$scope.set_end_point(event.worldX, event.worldY, event.worldZ);
-			});
-	};
-
-	$scope.set_start_point = function(x, y, z){
-		$scope.startPoint.x = x;
-		$scope.startPoint.y = y;
-		$scope.startPoint.z = z;
+$(document).on("onMouseMove", function(event, objEvent) {
+	if (window.toggleMeasure)
+	{
+		window.measurer.updatePoint(objEvent.worldX, objEvent.worldY, objEvent.worldZ);
+		$('#distance').text(measurer.distance().toFixed(2) + ' m');
 	}
+});
 
-	$scope.set_end_point = function(x, y, z){
-		$scope.endPoint.x = x;
-		$scope.endPoint.y = y;
-		$scope.endPoint.z = z;
+$(document).on("onMouseOver", function(event, objEvent) {
+	if(window.toggleMeasure) {
+		window.measurer.updatePoint(objEvent.worldX, objEvent.worldY, objEvent.worldZ);
 	}
+});
 
-	$scope.pointString = function(){
-		var s = $scope.startPoint.x + " " + $scope.startPoint.y + " " + $scope.startPoint.z + ",";
-		s += $scope.endPoint.x + " " + $scope.endPoint.y + " " + $scope.endPoint.z;
-		return s;
-	}
+$(document).on("clickObject", function(event, objEvent) {
+	if(window.toggleMeasure)
+		window.measurer.togglePoint();
+});	
+	
+$(document).ready( function() {
+	window.measurer = new Measurer();
+	window.toggleMeasure = false;
 
-	$scope.render = function(){
-		return $scope.toggleMeasure && $scope.visible;
-	}
+	$("#measure").click(function(e) {
+		if (window.toggleMeasure) {
+			$("#x3dom-viewer-canvas").css("cursor", "default");
+			$("#popup").css("visibility", "hidden");
+			$("#distance").css("visibility", "hidden");
+			$("#dist_name").css("visibility", "hidden");
+		} else {
+			$("#x3dom-viewer-canvas").css("cursor", "crosshair");
+			$("#popup").css("visibility", "visible");
+			$("#distance").css("visibility", "visible");
+			$("#dist_name").css("visibility", "visible");
+		}
 
-	$scope.distance = function(){
-		return Math.sqrt( Math.pow($scope.endPoint.x - $scope.startPoint.x, 2) + 	
-											Math.pow($scope.endPoint.y - $scope.startPoint.y, 2) + 
-											Math.pow($scope.endPoint.z - $scope.startPoint.z, 2) );
-	}
-
-	$scope.$on('toggleMeasure', function(e) {
-		$scope.toggleMeasure = !$scope.toggleMeasure;
-
-		if ($scope.toggleMeasure)
-			navigation.change_cursor("crosshair");
-		else
-			navigation.change_cursor("default");
+		window.toggleMeasure = !window.toggleMeasure;
 	});
-}]);
+
+});
 

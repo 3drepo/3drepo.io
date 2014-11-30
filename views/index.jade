@@ -1,12 +1,12 @@
 extends layout
 
-block menu
+append menu
 	div.treeview
-		include ./tree.jade
-	include ./menu.jade
+		include tree
+	include menu
+	include measurer-menu
 
-block content
-	div.fill
-		div.viewport
-			include ./viewer.jade
-			include ./measurer.jade
+append content
+		include viewer
+			include measurer
+

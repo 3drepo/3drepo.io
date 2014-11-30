@@ -44,6 +44,7 @@ exports.decode = function(bsonArray) {
 	scene[C.REPO_SCENE_LABEL_TEXTURES_COUNT] = 0;
 	scene[C.REPO_SCENE_LABEL_CAMERAS_COUNT] = 0;
 	scene[C.REPO_SCENE_LABEL_REF_COUNT] = 0;
+	scene[C.REPO_SCENE_LABEL_META_COUNT] = 0;
 
 	// Sort documents into categories (dictionaries of {id : bson} pairs)
 	// UUID is a binary object of subtype 3 (old) or 4 (new)
@@ -54,6 +55,7 @@ exports.decode = function(bsonArray) {
 	var textures = new Object();
 	var cameras = new Object();
 	var refs = new Object();
+	var metas = new Object();
 
 	// dictionary of {shared_id : bson}
 	var all = new Object();
@@ -95,6 +97,9 @@ exports.decode = function(bsonArray) {
 						refs[bson.id] = bson;
 						scene[C.REPO_SCENE_LABEL_REF_COUNT]++;
 						break;
+					case C.REPO_NODE_TYPE_META:
+						metas[bson.id] = bson;
+						scene[C.REPO_SCENE_LABEL_METAS_COUNT]++;
 					default :
 						console.log('Unsupported node type found: ' + bson[C.REPO_NODE_LABEL_TYPE]);
 				}
@@ -159,8 +164,14 @@ exports.decode = function(bsonArray) {
 		transformations[id] = repoNodeTransformation.decode(transformations[id], meshes, cameras);
 	}
 
+	//---------------------------------------------------------------------
+	// Federation references
 	scene.refs = refs;
 
+	//---------------------------------------------------------------------
+	// Metadata
+	scene.metas = metas;
+	
 	//---------------------------------------------------------------------
 	// Register root node
 	if (rootNode)

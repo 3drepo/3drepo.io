@@ -49,7 +49,6 @@ var logger = new(winston.Logger)({
 
 module.exports.logger = logger;
 module.exports.onError = function(err) {
-    logger.log('error', err);
-	console.trace();
+	logger.log('error', err.stack);
 }
 
