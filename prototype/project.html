@@ -11,7 +11,9 @@
     <link rel="stylesheet" href="../public/css/external/bootstrap.min.css"/>
     <link href="css/style.css" rel="stylesheet" />
     <link href="css/font-awesome.min.css" rel="stylesheet" />
+    <script type="text/javascript" src="../public/js/external/showdown.min.js"></script>
     <script type="text/javascript" src="../public/js/external/angular.min.js"></script>
+
      <script src="js/project.js"></script>
 
   </head>
@@ -129,7 +131,10 @@
                     <div class= "col-sm-12 margined block-header">
                       <h3>Readme</h3>
                     </div>
-                    <p>{{project.readme}}</p>
+
+                    <!-- Display the processed markdown from readme -->
+                    <div markdown="project.readme"></div>
+
                   </div>
                 </div>
 
