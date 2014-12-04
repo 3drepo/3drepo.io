@@ -39,7 +39,7 @@ module.exports = function(passport){
 
 	this.defaultFormat = ("format" in config.server) ? config.server.format : "html";
 
-	this.db_interface = require('./js/core/db_interface.js');
+	this.dbInterface = require('./js/core/db_interface.js');
 
     this.transRouter = function(format, regex, res, params)
 	{
@@ -49,7 +49,7 @@ module.exports = function(passport){
 		if (!format)
 			format = this.defaultFormat;
 
-		db_interface.hasAccessToDB(null, account, project, function(err)
+		dbInterface.hasAccessToProject(account, project, function(err)
 		{
 			if(err) throw onError(err);
 

@@ -25,8 +25,7 @@ var log_iface = require('./js/core/logger.js');
 var logger = log_iface.logger;
 onError = log_iface.onError;
 
-var db_interface = require('./js/core/db_interface.js');
-var auth = require('./js/core/auth.js');
+var dbInterface = require('./js/core/db_interface.js');
 var config = require('app-config').config;
 
 var log = require('./js/core/login.js');

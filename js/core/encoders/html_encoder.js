@@ -20,12 +20,12 @@ var config = require('app-config').config;
 exports.route = function(router)
 {
 	router.get('html', '/:account', function(res, params) {
-        router.db_interface.getUserDBList(null, params.user, function(err, db_list) {
+        router.dbInterface.getUserDBList(params.user, function(err, dbList) {
             if (err) throw err;
 
-            db_list.sort(function(a,b) { return a['name'].localeCompare(b['name']); });
+            dbList.sort(function(a,b) { return a['name'].localeCompare(b['name']); });
 
-            params.dblist = JSON.stringify(db_list);
+            params.dblist = JSON.stringify(dbList);
 
             Object.keys(config.external).forEach(function(key) {
                 params[key] = config.external[key];
