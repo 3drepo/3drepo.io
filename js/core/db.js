@@ -17,50 +17,57 @@
 
 // Inspired by
 // http://stackoverflow.com/questions/12037655/node-js-mongodb-native-driver-connection-sharing
-/*global require, module*/
 
-var async = require('async');
-var config = require('app-config').config;
-var mongo = require('mongodb');
+var async     = require('async');
+var config    = require('app-config').config;
+var mongo     = require('mongodb');
+var logIFace  = require('./logger.js');
+var logger    = logIFace.logger;
+onError       = logIFace.onError;
 
-var log_iface = require('./logger.js');
-var logger = log_iface.logger;
-onError = log_iface.onError;
-
+// Main DB Object constructor
 function MongoDB() {
-    this.host = config.db.host;
-    this.port = config.db.port;
-
-    this.serv = new mongo.Server(this.host, this.port, {});
+	this.host     = config.db.host;
+	this.port     = config.db.port;
 
 	this.userAuth = null;
-    this.db_conns = {};
+	this.dbConns  = {};
 }
 
-// Authenticate User against admin database
-MongoDB.prototype.authenticateUser = function(err, username, password, callback) {
+/*******************************************************************************
+ * Authenticate User against admin database
+ *
+ * @param {Error} err - err object
+ * @param {string} username - username logging in
+ * @param {string} password - corresponding password for username
+ * @param {function} callback - has parameters (err, user) where
+ *								user is the user object
+ ******************************************************************************/
+MongoDB.prototype.authenticateUser = function(username, password, callback) {
 	var self = this;
-
-	if (err) return callback(err, null);
 
 	// Create a separate admin database connection to avoid
 	// constantly switching between auth user and NodeJS
 	// user
 	if (!self.userAuth)
 	{
-		var db = new mongo.Db('admin', this.serv, { safe: false });
+		var serv = new mongo.Server(self.host, self.port, {
+			auto_reconnect: true,
+		});
+
+		var db = new mongo.Db('admin', serv, { safe: false });
 
 		// TODO: Merge with code below
-		db.open(function(err, db_conn) {
+		db.open(function(err, dbConn) {
 			if (err) return callback(err);
 
-			self.userAuth = db_conn;
+			self.userAuth = dbConn;
 
-			db_conn.on('close', function(err) {
+			dbConn.on('close', function(err) {
                 self.userAuth = null;
             });
 
-			return self.authenticateUser(null, username, password, callback);
+			return self.authenticateUser(username, password, callback);
 		});
 	} else {
 		logger.log('info', 'Authenticating user: ' + username);
@@ -74,53 +81,60 @@ MongoDB.prototype.authenticateUser = function(err, username, password, callback)
 	}
 };
 
-// Open a database connection and pass it to the callback function
-MongoDB.prototype.db_callback = function(err, dbname, callback) {
-	if (err) return callback(err, null);
-
+/*******************************************************************************
+ * Open a database connection and pass it to the callback function
+ *
+ * @param {Error} err - err object
+ * @param {string} dbName - Database name which to open
+ * @param {function} callback - has parameters (err, dbConn) where
+ *								dbConn is the returned database connection.
+ ******************************************************************************/
+MongoDB.prototype.dbCallback = function(dbName, callback) {
     var self = this;
 
 	// If we already have a connection, return that rather than
 	// opening a new connection
-    if (self.db_conns[dbname]) {
-        return callback(null, self.db_conns[dbname]);
+    if (self.dbConns[dbName]) {
+        return callback(null, self.dbConns[dbName]);
     }
 
-    logger.log('info', 'Opening server ' + self.host + ' : ' + self.port);
+	// Check if there is an open server connection
+	// if there isn't then open one
+	logger.log('info', 'Opening server ' + self.host + ' : ' + self.port);
 
-    self.serv = new mongo.Server(self.host, self.port, {
-        auto_reconnect: true,
-    });
+	var serv = new mongo.Server(self.host, self.port, {
+		auto_reconnect: true,
+	});
 
-    logger.log('info', 'Opening database ' + dbname);
-    var db = new mongo.Db(dbname, self.serv, {
-        safe: false
-    });
+	logger.log('info', 'Opening database ' + dbName);
+
+	var db = new mongo.Db(dbName, serv, {
+			safe: false
+		});
 
 	// Attempt to open the database connection
-    db.open(function(err, db_conn) {
-
-        if (err) return callback(err, null);
+    db.open(function(err, dbConn) {
+        if (err) return callback(err);
 
 		// Authenticate against the NodeJS database user
         var adminDb = db.admin();
 
         adminDb.authenticate(config.db.username, config.db.password, function(err) {
 			if (err)
-				return callback(err, null);
+				return callback(err);
 
 			logger.log('debug', 'Authentication successful');
 			logger.log('debug', 'Authorized as ' + config.db.username);
-			logger.log('debug', 'DB CONNECTION:' + JSON.stringify(db_conn.serverConfig.auth.toArray()));
+			logger.log('debug', 'DB CONNECTION:' + JSON.stringify(dbConn.serverConfig.auth.toArray()));
 
-            self.db_conns[dbname] = db_conn;
+            self.dbConns[dbName] = dbConn;
 
-            db_conn.on('close', function(err) {
-                logger.log('debug', 'Closing connection to ' + dbname + '. REASON: ' + err);
-                delete(self.db_conns[dbname]);
+            dbConn.on('close', function(err) {
+                logger.log('debug', 'Closing connection to ' + dbName + '. REASON: ' + err);
+                delete(self.dbConns[dbName]);
             })
 
-            callback(null, db_conn);
+            callback(null, dbConn);
         });
     });
 
@@ -128,14 +142,22 @@ MongoDB.prototype.db_callback = function(err, dbname, callback) {
 
 MongoDB.prototype.Binary = mongo.Binary;
 
-// TODO: Fix this, if not currently working
-MongoDB.prototype.aggregate = function(dbname, coll_name, query) {
+/*******************************************************************************
+ * Run an aggregation query
+ *
+ * @param {string} dbName - Database name to run the aggregation on
+ * @param {string} collName - Collection to run the aggregation on
+ * @param {string} query- aggregation query
+ *
+ * TODO: Fix this, if not currently working
+ ******************************************************************************/
+MongoDB.prototype.aggregate = function(dbName, collName, query) {
     var self = this;
 
     async.waterfall([
 
     function(callback) {
-        self.coll_callback(dbname, coll_name, callback);
+        self.collCallback(dbName, collName, callback);
     }, function(err, coll) {
         coll.aggregate(query, callback)
     }], function(err, result) {
@@ -146,16 +168,25 @@ MongoDB.prototype.aggregate = function(dbname, coll_name, query) {
 
 }
 
-MongoDB.prototype.coll_callback = function(err, dbname, coll_name, callback) {
-	if (err) return callback(err, null);
+/*******************************************************************************
+ * Run callback on collection from the database
+ *
+ * @param {string} dbName - Database name to run the aggregation on
+ * @param {string} collName - Collection to run the aggregation on
+ * @param {function} callback - get collection from database and pass to
+ *								callback as parameter
+ ******************************************************************************/
+MongoDB.prototype.collCallback = function(dbName, collName, callback) {
+    logger.log('debug', 'Loading collection ' + collName);
 
-    logger.log('debug', 'Loading collection ' + coll_name);
-    this.db_callback(null, dbname, function(err, db_conn) {
-        if (err) return callback(err, null);
+	// First get database connection
+    this.dbCallback(dbName, function(err, dbConn) {
+        if (err) return callback(err);
 
-        db_conn.collection(coll_name, {strict:true}, function(err, coll) {
+		// Get collection from database to act on
+        dbConn.collection(collName, {strict:true}, function(err, coll) {
 			if (err) {
-				return callback(err, null);
+				return callback(err);
 			}
 
             callback(null, coll);
@@ -163,22 +194,31 @@ MongoDB.prototype.coll_callback = function(err, dbname, coll_name, callback) {
     });
 }
 
-MongoDB.prototype.get_latest = function(err, dbname, coll_name, filter, projection, callback) {
-	if (err) return callback(err, null);
-
-	this.coll_callback(null, dbname, coll_name, function(err, coll) {
-		if (err) return callback(err, null);
+/*******************************************************************************
+ * Get top result from query with latest timestamp
+ *
+ * @param {string} dbName - Database containing the collection for query
+ * @param {string} collName - Collection to run the query on
+ * @param {string} projection - Projection to use on results
+ * @param {function} callback - get collection from database and pass to
+ *								callback as parameter
+ ******************************************************************************/
+MongoDB.prototype.getLatest = function(dbName, collName, filter, projection, callback) {
+	// Run collection callback that first sorts by timestamp
+	// and then gets the top row.
+	this.collCallback(dbName, collName, function(err, coll) {
+		if (err) return callback(err);
 
 		if (projection != null)
 		{
 			coll.find(filter, projection).limit(1).sort({timestamp:-1}).toArray(function(err, docs) {
-				if (err) return callback(err, null);
+				if (err) return callback(err);
 
 				callback(null, docs);
 			});
 		} else {
 			coll.find(filter).limit(1).sort({timestamp:-1}).toArray(function(err, docs) {
-				if (err) return callback(err, null);
+				if (err) return callback(err);
 
 				callback(null, docs);
 			});
@@ -186,28 +226,36 @@ MongoDB.prototype.get_latest = function(err, dbname, coll_name, filter, projecti
 	});
 };
 
-MongoDB.prototype.filter_coll = function(err, dbname, coll_name, filter, projection, callback) {
-	if (err) return callback(err, null);
+/*******************************************************************************
+ * Get filtered collection from the database
+ *
+ * @param {string} dbName - Database name containing the collection
+ * @param {string} collName - Collection to filter from the database
+ * @param {JSON} filter - JSON containing filter query to run on collection
+ * @param {JSON} projection - JSON containing projection for results
+ * @param {function} callback - get filtered collection from database
+ *								pass to callback as parameter
+ ******************************************************************************/
+MongoDB.prototype.filterColl = function(dbName, collName, filter, projection, callback) {
+    this.collCallback(dbName, collName, function(err, coll) {
+        if (err) return callback(err);
 
-    this.coll_callback(null, dbname, coll_name, function(err, coll) {
-        if (err) return callback(err, null);
+		projStr = JSON.stringify(projection);
+		filtStr = JSON.stringify(filter);
 
-		proj_str = JSON.stringify(projection);
-		filt_str = JSON.stringify(filter);
-
-		logger.log('debug', 'Filter collection: ' + dbname + '/' + coll_name);
-		logger.log('debug', 'FILTER: \"' + filt_str + '\"');
-		logger.log('debug', 'PROJECTION: \"' + proj_str + '\"');
+		logger.log('debug', 'Filter collection: ' + dbName + '/' + collName);
+		logger.log('debug', 'FILTER: \"' + filtStr + '\"');
+		logger.log('debug', 'PROJECTION: \"' + projStr + '\"');
 
 		if (projection != null) {
             coll.find(filter, projection).toArray(function(err, docs) {
-                if (err) return callback(err, null);
+                if (err) return callback(err);
 
                 callback(null, docs);
             });
         } else {
             coll.find(filter).toArray(function(err, docs) {
-                if (err) return callback(err, null);
+                if (err) return callback(err);
 
                 callback(null, docs);
             });

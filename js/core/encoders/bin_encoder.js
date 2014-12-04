@@ -14,56 +14,70 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+var logIface = require('../logger.js');
+var logger = logIface.logger;
+var repoNodeMesh = require('../repoNodeMesh.js');
 
-function render(db_interface, project, uuid, type, res, err_callback) {
+/*******************************************************************************
+ * Render Binary format data of parts of a mesh
+ *
+ * @param {dbInterface} dbInterface - Database interface object
+ * @param {string} project - The name of the project containing the mesh
+ * @param {string} uuid - UUID of the mesh to be rendered
+ * @param {string} type - Part of the mesh to be rendered (normals, texcoords, indices, coords)
+ * @param {Object} res - The http response object
+ * @param {function} callback - Callback function that takes an Error object
+ *******************************************************************************/
+function render(dbInterface, project, uuid, type, res, callback) {
+	logger.log('debug', 'Requesting b ' + type + ' for ' + uuid);
 
-	logger.log('debug', 'Requesting binary ' + type + ' for ' + uuid);
-	db_interface.getObject(null, project, uuid, function(err, doc) {
-		if (err) return err_callback(err);
+	dbInterface.getObject(project, uuid, function(err, doc) {
+		if (err) return callback(err);
 
 		var mesh = doc.meshes[uuid];
 
 		switch (type) {
-		case "normals":
-			res.write(mesh.normals.buffer, 'binary');
-			res.end();
-			break;
-		case "texcoords":
-			res.write(mesh.uv_channels.buffer, 'binary');
-			res.end();
-			break;
-		case "indices":
-			var buf = new Buffer(mesh.faces_count * 2 * 3);
-			var copy_idx = 0;
-			var orig_idx = mesh.faces.buffer;
+			case "normals":
+				res.write(mesh.normals.buffer, 'binary');
+				res.end();
+				break;
+			case "texcoords":
+				res.write(mesh.uv_channels.buffer, 'binary');
+				res.end();
+				break;
+			case "indices":
+				var buf = new Buffer(mesh.faces_count * 2 * 3);
+				var copy_idx = 0;
+				var orig_idx = mesh.faces.buffer;
 
-			for (var face_idx = 0; face_idx < mesh.faces_count; face_idx++) {
-				for (var vert_comp = 0; vert_comp < 3; vert_comp++) {
-					var byte_position = (16 * face_idx) + (vert_comp + 1) * 4;
-					var idx_val = orig_idx.readUInt16LE(byte_position);
+				for (var face_idx = 0; face_idx < mesh.faces_count; face_idx++) {
+					for (var vert_comp = 0; vert_comp < 3; vert_comp++) {
+						var byte_position = (16 * face_idx) + (vert_comp + 1) * 4;
+						var idx_val = orig_idx.readUInt16LE(byte_position);
 
-					buf.writeUInt16LE(idx_val, copy_idx);
-					copy_idx += 2;
+						buf.writeUInt16LE(idx_val, copy_idx);
+						copy_idx += 2;
+					}
 				}
-			}
 
-			res.write(buf, 'binary');
-			res.end();
-			break;
-		case "coords":
-			res.write(mesh.vertices.buffer, 'binary');
-			res.end();
-			break;
+				res.write(buf, 'binary');
+				res.end();
+				break;
+			case "coords":
+				res.write(mesh.vertices.buffer, 'binary');
+				res.end();
+				break;
 		}
 	});
 };
 
+// Set up REST routing calls
 exports.route = function(router)
 {
     router.get('bin', '/:account/:project/:uid', function(res, params) {
 		var type = params.query.type;
 
-        render(router.db_interface, params.project, params.uid, type, res, function(res)
+        render(router.dbInterface, params.project, params.uid, type, res, function(res)
         {
             if(err) throw err;
         });
