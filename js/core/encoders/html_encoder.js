@@ -23,9 +23,9 @@ exports.route = function(router)
         router.dbInterface.getUserDBList(params.user, function(err, dbList) {
             if (err) throw err;
 
-            dbList.sort(function(a,b) { return a['name'].localeCompare(b['name']); });
+            dbList.sort(function(a,b) { return a['project'].localeCompare(b['project']); });
 
-            params.dblist = JSON.stringify(dbList);
+            params.dblist = JSON.stringify(dbList.map(function(db) { return {name:db["project"]}}));
 
             Object.keys(config.external).forEach(function(key) {
                 params[key] = config.external[key];

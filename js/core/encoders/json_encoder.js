@@ -17,6 +17,7 @@
 var repoGraphScene = require('../repoGraphScene.js');
 var async = require('async');
 var uuidToString = require('../db_interface.js').uuidToString;
+var search = require('./helper/search.js').search;
 
 /*******************************************************************************
  * Recursively add JSON children
@@ -184,6 +185,15 @@ function render(dbInterface, project, revision, uuid, selected, namespace, res, 
 
 exports.route = function(router)
 {
+	router.get('json', '/search', function(res, params) {
+		search(router.dbInterface, params.query, function(err, json)
+		{
+			if(err) throw err;
+
+			res.json(json);
+		});
+	});
+
 	router.get('json', '/:account', function(res, params) {
 		dbInterface.getUserInfo( params.user, function(err, user)
 		{

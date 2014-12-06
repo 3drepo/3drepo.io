@@ -31,6 +31,7 @@
 	"bcrypt-nodejs": "latest",
 	"connect-flash": "latest",
 	"connect-ensure-login": "latest",
-	"async": "latest"
+	"async": "latest",
+	"node.extend" : "latest"
 	}
 }

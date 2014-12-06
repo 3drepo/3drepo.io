@@ -43,21 +43,20 @@ module.exports = function(passport){
 
     this.transRouter = function(format, regex, res, params)
 	{
-		var account = params["account"];
-		var project = params["project"];
+		var account = ("account" in params) ? params["account"] : null;
+		var project = ("project" in params) ? params["project"] : null;
+
+		console.log("ACCOUT: " + account);
 
 		if (!format)
 			format = this.defaultFormat;
 
-		dbInterface.hasAccessToProject(account, project, function(err)
+		dbInterface.hasAccessToProject(params.user, account, project, function(err)
 		{
 			if(err) throw onError(err);
 
-			if (account != params.user)
-			{
-				res.status(403);
-				res.redirect('/');
-			} else if (!(format in this.getMap)) {
+			// If there is no error then we have access
+			if (!(format in this.getMap)) {
 				res.status(416);
 				res.redirect('/');
 			} else if (!(regex in this.getMap[format])) {
@@ -106,6 +105,18 @@ module.exports = function(passport){
 	// Login routes
 	this.router.get('/', function(req, res) {
 		res.redirect('/login');
+	});
+
+	// Account information
+	this.router.get('/search.:format?', login.ensureLoggedIn(), function(req, res, next) {
+		var format = req.param("format");
+
+		var params = {
+			user: req.user.username,
+			query: req.query
+		};
+
+		this.transRouter(format, '/search', res, params);
 	});
 
 	// Account information

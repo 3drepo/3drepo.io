@@ -41,7 +41,6 @@ function uuidToString(uuidIn) {
  * @param {boolean} embedded_texture - Determines whether or not the texture data is embedded in the SRC.
  * @param {Object} res - The http response object
  *******************************************************************************/
-
 exports.authenticate = function(username, password, callback) {
 	dbConn.authenticateUser(username, password, function(err)
 	{
@@ -61,8 +60,8 @@ exports.getUserDBList = function(username, callback) {
 
 	this.getUserInfo(username, function(err, user) {
 		callback(null, user["projects"].map(
-				function(nm){
-					return {name:nm};
+				function(proj){
+					return proj;
 				}
 			)
 		);
@@ -87,14 +86,15 @@ exports.getUserInfo = function(username, callback) {
 	});
 }
 
-exports.hasAccessToProject = function(username, project, callback) {
+exports.hasAccessToProject = function(username, account, project, callback) {
 	if (project == null)
 		return callback(null);
 
 	this.getUserDBList(username, function(err, dbList) {
-		var dbNameList = dbList.map(function(elem) { return elem.name; });
-
-		if(dbNameList.indexOf(project) > -1)
+		if(dbList.map( function (db)
+		{
+			return db["account"] + "." + db["project"]
+		}).indexOf(account + "." + project) > -1)
 			callback(null);
 		else
 			callback(new Error("Not Authorized to access database"));
@@ -112,11 +112,11 @@ exports.getDBList = function(callback) {
             var dbList = [];
 
             for (var i in dbs.databases)
-                db_list.push({ name: dbs.databases[i].name});
+                dbList.push({ name: dbs.databases[i].name});
 
             dbList.sort();
 
-            callback(null, db_list);
+            callback(null, dbList);
         });
     });
 }
@@ -253,3 +253,4 @@ exports.getCache = function(project, uid, getData, level, callback) {
 };
 
 exports.uuidToString = uuidToString;
+exports.dbConn       = dbConn;
