@@ -121,7 +121,7 @@ $(function () {
 
 				$("#metadata").append("<tr><th c class=\"metadata-title\" colspan=\"2\">" + data.node["title"] + "</th></tr>");
 
-				var meta = data.node.data["meta"][0];
+				var meta = data.node.data["meta"][0]["metadata"];
 
 				Object.keys(meta).forEach(function(key)
 				{
