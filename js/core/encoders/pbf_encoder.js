@@ -14,23 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+var logIface     = require('../logger.js');
+var logger       = logIface.logger;
+var repoNodeMesh = require('../repoNodeMesh.js');
+var pbf_levels   = 10;
+var popCache     = require('../cache/pbf_cache.js');
+
+// TODO: Fix this file to use the cache function
 exports.route = function(router)
 {
-    router.get('jpg', '/:account/:project/:uid', function(res, params) {
-        router.dbInterface.getObject(params.project, params.uid, null, null, function(err, type, uid, obj)
-        {
-            if(err) throw err;
+    router.get('bin', '/:account/:project/:uid', function(res, params) {
+		var level = params.query.level;
 
-            if (type == "texture")
-            {
-              res.write(obj.textures[uid].data.buffer);
-			  res.end();
-            } else {
-                throw new Error("Type of object not supported");
-            }
-        });
-    });
-
+		res.status(415).send("Not supported");
+	});
 };
 
 

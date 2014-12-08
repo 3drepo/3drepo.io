@@ -44,7 +44,7 @@ var TreeControl = function() {
 $(document).on("bgroundClicked", function(event) {
 	var rootNode = $("#scenetree").fancytree("getRootNode");
 	rootNode.setExpanded(false);
-};
+});
 
 $(document).on("clickObject", function(event, objEvent) {
 	var tree = $("#scenetree").fancytree("getTree");
@@ -109,6 +109,7 @@ $(function () {
 				var rootObj = $('#' + data.node.data.namespace + data.node.data.uuid)[0];
 				viewer.lookAtObject(rootObj);
 				viewer.setApp(rootObj);
+				floating.addAllFloats(rootObj);
 			}
 
 			if (("meta" in data.node.data) && (data.node.data["meta"].length))
@@ -120,7 +121,7 @@ $(function () {
 
 				$("#metadata").append("<tr><th c class=\"metadata-title\" colspan=\"2\">" + data.node["title"] + "</th></tr>");
 
-				var meta = data.node.data["meta"][0];
+				var meta = data.node.data["meta"][0]["metadata"];
 
 				Object.keys(meta).forEach(function(key)
 				{

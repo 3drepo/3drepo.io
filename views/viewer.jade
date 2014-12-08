@@ -1,6 +1,7 @@
 append content
-	script(type="text/javascript" src='../js/viewer.js')
 	script(type="text/javascript" src='../js/controlinterface.js')
+	script(type="text/javascript" src='../js/viewer.js')
+	script(type="text/javascript" src='../js/floatingmeta.js')
 	script.
 		$(function() {
 			$("#meta-popup").draggable({ snap : ".viewport" });
@@ -10,6 +11,7 @@ append content
 			div#metadata
 		x3d(xmlns="http://www.web3d.org/specification/x3d-namespace" id="viewer")
 			scene(onbackgroundClicked="bgroundClick(event);")
+				viewpoint#sceneVP
 				!{xml}
 				block scene.
 

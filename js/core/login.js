@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd 
+ *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,7 @@
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var bCrypt = require('bcrypt-nodejs');
-var db_interface = require('./db_interface.js');
+var dbInterface = require('./db_interface.js');
 
 module.exports = function(passport) {
 	passport.use('login', new LocalStrategy(
@@ -26,11 +26,11 @@ module.exports = function(passport) {
 			passReqToCallback: true
 		},
 		function(req, username, password, done) {
-			db_interface.authenticate(null, username, password, function(err, user)
+			dbInterface.authenticate(username, password, function(err, user)
 			{
 				if (err)
 					return done(null, false, req.flash('message', err));
-	
+
 				console.log("USER: " + JSON.stringify(user));
 				done(null, user);
 			});

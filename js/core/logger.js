@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd 
+ *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,11 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*global require, module*/
-
 var winston = require('winston');
 var config = require('app-config').config;
 
+// Custom logging levels for logger
 var myCustomLevels = {
     levels: {
         debug: 0,
@@ -35,6 +34,9 @@ var myCustomLevels = {
     }
 };
 
+// Creates logger which outputs to both the console
+// and a log file simultaneously
+// Levels are set separately in the config.
 var logger = new(winston.Logger)({
     levels: myCustomLevels.levels,
     transports: [

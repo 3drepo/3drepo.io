@@ -41,7 +41,9 @@ var Viewer = function() {
 	this.setApp = function(group)
 	{
 		// Very bad hacky way of doing this, speak to Fraunhofer
-		var mat_nodes = document.getElementsByTagName("TwoSidedMaterial")
+		var twoMatNodes = document.getElementsByTagName("TwoSidedMaterial")
+		var oneMatNodes = document.getElementsByTagName("Material");
+		var mat_nodes = $.merge(oneMatNodes, twoMatNodes);
 
 		for(var m_idx = 0; m_idx < mat_nodes.length; m_idx++)
 		{
@@ -50,14 +52,15 @@ var Viewer = function() {
 			mat_nodes[m_idx].setAttribute("transparency", "0.85");
 		}
 
-		var grp_nodes = group.getElementsByTagName("TwoSidedMaterial")
+		var twoGrpNodes = group.getElementsByTagName("TwoSidedMaterial");
+		var oneGrpNodes = group.getElementsByTagName("Material");
+		var grp_nodes = $.merge(oneGrpNodes, twoGrpNodes);
 
 		for(var m_idx = 0; m_idx < grp_nodes.length; m_idx++)
 		{
 			grp_nodes[m_idx].setAttribute("emissiveColor", "1.0 0.5 0.0");
 			grp_nodes[m_idx].setAttribute("transparency", "0.0");
 		}
-
 	}
 
 	this.lookAtPoint = function(x,y,z) {
@@ -86,7 +89,10 @@ $(document).ready( function() {
 
 // When the user clicks on the background the select nothing.
 $(document).on("bgroundClicked", function(event) {
-	var mat_nodes = document.getElementsByTagName("TwoSidedMaterial")
+	// Very bad hacky way of doing this, speak to Fraunhofer
+	var twoMatNodes = document.getElementsByTagName("TwoSidedMaterial")
+	var oneMatNodes = document.getElementsByTagName("Material");
+	var mat_nodes = $.merge(oneMatNodes, twoMatNodes);
 
 	for(var m_idx = 0; m_idx < mat_nodes.length; m_idx++)
 	{
@@ -98,6 +104,10 @@ $(document).on("bgroundClicked", function(event) {
 $(document).on("clickObject", function(event, objEvent) {
 	viewer.lookAtObject(objEvent.target);
 	viewer.setApp(objEvent.target);
+});
+
+$(document).on("onLoaded", function(event, objEvent) {
+	$('#viewer')[0].runtime.showAll();
 });
 
 $(document).ready( function() {
