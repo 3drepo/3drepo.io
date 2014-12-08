@@ -303,9 +303,10 @@ span.fancytree-title:hover {
 	visibility: hidden;
 	z-index: 2500;
 	top: 50px;
-	width: 300px;
+	min-width: 300px;
+	max-width: 900px;
+	right: 1px;
 	padding: 5px;
-	right: 0px;
 	position: absolute;
 }
 
