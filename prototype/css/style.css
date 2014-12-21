@@ -7,6 +7,8 @@ a:hover {
     text-decoration: none;
 }
 
+.nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
+
 /* header, footer stuff */
 
 /* Wrapper for page content to push down footer */
@@ -108,6 +110,13 @@ a:hover {
 	border-radius: 3px;
   border: 1px solid;
   border-color: #DDD;
+}
+
+.pagination{
+	padding-left: 0px;
+	padding-bottom: 0px;
+	margin-bottom: 20px;
+	margin-top: 0px;
 }
 
 .block{
@@ -363,6 +372,10 @@ hr {
 	border-left: 3px solid #444;
 }
 
+.month-block:last-child{
+	margin-bottom: 10px;
+}
+
 .month-block h3{
 	font-weight: normal;
 	font-size: 10pt;
@@ -449,7 +462,6 @@ hr {
 }
 
 .commit-block{
-
 	background-color: #FFF;
 	min-height: 40px;
 	margin: 10px;
