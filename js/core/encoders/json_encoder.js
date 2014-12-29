@@ -207,13 +207,32 @@ exports.route = function(router)
 		res.status(415).send("Not supported");
 	});
 
-	router.get('json', '/:account/:project/revisions', function(res, params) {
-		// FIXME: Fill in.
-		res.status(415).send("Not supported");
-	});
-
 	router.get('json', '/:account/:project/revision/:rid', function(res, params) {
 		// FIXME: Fill in.
+	});
+
+	router.get('json', '/:account/:project/branches', function(res, params) {
+		router.dbInterface.getBranches(params.project, function(err, branchList) {
+			if(err) throw err;
+
+			res.json(branchList);
+		});
+	});
+
+	router.get('json', '/:account/:project/revisions', function(res, params) {
+		router.dbInterface.getRevisions(params.project, null, function(err, revisionList) {
+			if(err) throw err;
+
+			res.json(revisionList);
+		});
+	});
+
+	router.get('json', '/:account/:project/revisions/:branch', function(res, params) {
+		router.dbInterface.getRevisions(params.project, params.branch, function(err, revisionList) {
+			if(err) throw err;
+
+			res.json(revisionList);
+		});
 	});
 
 	router.get('json', '/:account/:project/revision/:rid/tree/:sid', function(res, params) {
