@@ -269,6 +269,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		angular.copy(res, o.info);
 	}
 
+	// Fetch info about the current branch given the name of the branch
 	o.fetchCurrentBranch = function(name){
 		var deferred = $q.defer();
 
@@ -290,6 +291,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		angular.copy(res, o.current_branch);
 	}
 
+	// Fetch info about the current revision given the name of the revision
 	o.fetchCurrentRevision = function(name){
 		var deferred = $q.defer();
 
@@ -345,9 +347,10 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		angular.copy(res, o.revisions);
 	}
 
+	// Fetch revisions grouped by day
 	o.fetchRevisionsByDay = function(first, last) {
 
-	var fetchFakeRevisions = function(branch, rev, first, last){
+		var fetchFakeRevisions = function(branch, rev, first, last){
 
 			console.log("Fetching revisions [" + first + "," + last + "] for branch " + branch + " and rev " + rev);
 
@@ -383,10 +386,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	}
 
 	o.initPromise = function(account, project, info){
-		return o.initialise(info);
-	}
-
-	o.initAllPromise = function(){
+		o.loading = true;
 		return o.fetchInfo()
 			.then(function(res){
 				o.setInfo(res);
@@ -403,6 +403,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			.then(function(res){
 				o.setCurrentRevision(res);
 				o.setCurrentDiff("None");
+				o.loading = false;
 			});
 	};
 
@@ -475,14 +476,6 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 	o.setLog = function(res){
 		angular.copy(res, o.log);
-	};
-
-	o.initialise = function(info){
-		o.loading = true;
-		return o.initAllPromise()
-		.then(function(res){
-			o.loading = false;
-		});	      	
 	};
 
 	return o;
