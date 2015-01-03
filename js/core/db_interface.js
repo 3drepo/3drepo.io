@@ -187,7 +187,7 @@ exports.getBranches = function(dbName, callback) {
 			{
 				var branchName = uuidToString(doc[i].shared_id);
 
-				if (branchList.indexOf(branchName) == -1)
+				if (branchList.map(function (e) { return e.name; }).indexOf(branchName) == -1)
 					branchList.push({ name: uuidToString(doc[i].shared_id)});
 			}
 
