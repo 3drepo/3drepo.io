@@ -171,23 +171,40 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		revisions: [
   		{
   			name: "rev1",
-  			author: "jozef",
-  			date: "15 october 2014, 01:00",
-  			message: "commit message 1",
   		},
   		{
   			name: "rev2",
-  			author: "jozef",
-  			date: "14 october 2014, 02:00",
-  			message: "commit message 2",
   		},
   		{
   			name: "rev23",
-  			author: "jozef",
-  			date: "14 october 2014, 03:00",
-  			message: "commit message 2",
   		},
   	],
+  	revisions_by_day:
+  		{
+  			"15 october 2014": [
+	  		{
+	  			name: "rev23",
+	  			author: "jozef",
+	  			date: "14 october 2014, 03:00",
+	  			message: "commit message 2",
+	  		}
+  			],
+  			"14 october 2014": [
+  			{
+	  			name: "rev1",
+	  			author: "jozef",
+	  			date: "15 october 2014, 01:00",
+	  			message: "commit message 1",
+	  		},
+	  		{
+	  			name: "rev2",
+	  			author: "jozef",
+	  			date: "14 october 2014, 02:00",
+	  			message: "commit message 2",
+	  		},
+  			]
+  		}
+  	,
 		log: [
 	    {
 	    	type: "visibility",
