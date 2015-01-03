@@ -208,7 +208,11 @@ exports.route = function(router)
 	});
 
 	router.get('json', '/:account/:project/revision/:rid', function(res, params) {
-		// FIXME: Fill in.
+		router.dbInterface.getRevisionInfo(params.project, params.rid, function(err, revisionObj) {
+			if(err) throw err;
+
+			res.json(revisionObj);
+		});
 	});
 
 	router.get('json', '/:account/:project/branches', function(res, params) {

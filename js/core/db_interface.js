@@ -137,6 +137,35 @@ exports.getChildren = function(dbName, uuid, callback) {
 	});
 };
 
+exports.getRevisionInfo = function(dbName, rid, callback) {
+	var filter = {
+		_id: stringToUUID(rid)
+	};
+
+	dbConn.filterColl(dbName, 'history', filter, null, function(err, doc) {
+		if (err) return callback(err);
+
+	doc = doc[0];
+
+		rev = {};
+
+		rev.author  = ("author" in doc) ? doc.author : "unnamed";
+		rev.message = ("message" in doc) ? doc.message : "";
+		rev.tag     = ("tag" in doc) ? doc.tag : "";
+
+		if ("timestamp" in doc)
+		{
+			var timestampDate = new Date(doc.timestamp);
+
+			rev.timestamp = timestampDate.toString();
+		} else {
+			rev.timestamp = "Unknown";
+		}
+
+		callback(null, rev);
+	});
+};
+
 exports.getRevisions = function(dbName, branch, callback) {
 
 	var filter = {
