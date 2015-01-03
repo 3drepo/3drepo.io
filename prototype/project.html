@@ -14,13 +14,17 @@
     <script type="text/javascript" src="../public/js/external/showdown.min.js"></script>
     <script type="text/javascript" src="../public/js/external/angular.min.js"></script>
     <script type="text/javascript" src="../public/js/external/angular-ui-router.js"></script>
-  
+
     <script type="text/javascript" src="../public/js/external/ui-bootstrap-tpls-0.12.0.min.js"></script>
 
      <script src="js/project.js"></script>
   </head>
 
   <body ng-app="3drepo">
+
+    <script type="text/ng-template" id="404.html">
+      <p> 404 NOT FOUND </p>
+    </script>
 
     <script type="text/ng-template" id="common.html">
       <div class="col-md-4 tight gutter-right">
@@ -78,11 +82,11 @@
     <script type="text/ng-template" id="menu.html">
       <div class="col-md12 margin-bottom">
         <ul class="nav nav-tabs nav" role="tablist">
-        <li ng-class="{'active': isView('info')}"><a class="dashboard-tab" href="#/info" ng-click="setView('info')"><i class="fa fa-info-circle menu-icon"></i>Info</a></li>
-        <li ng-class="{'active': isView('comments')}"><a class="dashboard-tab" href="#/comments" ng-click="setView('comments')"><i class="fa fa-comments menu-icon"></i>Comments <span class="badge">{{data.current_revision.n_comments}}</span></a></li>
-        <li ng-class="{'active': isView('revisions')}"><a class="dashboard-tab" href="#/revisions" ng-click="setView('revisions')"><i class="fa fa-tag menu-icon"></i>Revisions</a></li>
-        <li ng-class="{'active': isView('log')}"><a class="dashboard-tab" href="#/log" ng-click="setView('log')"><i class="fa fa-save menu-icon"></i>Log</a></li>        
-        <li ng-class="{'active': isView('settings')}"><a class="dashboard-tab" href="#/settings" ng-click="setView('settings')"><i class="fa fa-gear menu-icon"></i>Settings</a></li> 
+        <li ng-class="{'active': isView('info')}"><a class="dashboard-tab" ng-click="go('info')"><i class="fa fa-info-circle menu-icon"></i>Info</a></li>
+        <li ng-class="{'active': isView('comments')}"><a class="dashboard-tab" ng-click="go('comments')"><i class="fa fa-comments menu-icon"></i>Comments <span class="badge">{{data.current_revision.n_comments}}</span></a></li>
+        <li ng-class="{'active': isView('revisions')}"><a class="dashboard-tab" ng-click="go('revisions')"><i class="fa fa-tag menu-icon"></i>Revisions</a></li>
+        <li ng-class="{'active': isView('log')}"><a class="dashboard-tab" ng-click="go('log')"><i class="fa fa-save menu-icon"></i>Log</a></li>        
+        <li ng-class="{'active': isView('settings')}"><a class="dashboard-tab" ng-click="go('settings')"><i class="fa fa-gear menu-icon"></i>Settings</a></li> 
       </ul>
       </div>
     </script>
@@ -94,22 +98,28 @@
       <div class="col-md-8 tight">
         <ng-include src="'menu.html'"></ng-include>
 
-        <div class="block">
-          <div class= "col-sm-12 margined block-header">
-            <h3 >Revision <span class="block-header-project-name">{{data.current_revision.name}}</span> <span class="block-header-by">by</span> <span class="block-header-author">{{data.current_revision.author}}</span> <span class="commit-date-title">{{data.current_revision.date}}</span></h3>
-          </div>
-          <p>{{data.current_revision.message}}
-          </p>
+        <div ng-if="data.loading">
+          <img class="loading" src="http://www.nasa.gov/multimedia/videogallery/ajax-loader.gif" width="20" height="20" />
         </div>
 
-        <div class="block">
-          <div class= "col-sm-12 margined block-header">
-            <h3>Readme</h3>
+        <div ng-if="!data.loading">
+          <div class="block">
+            <div class= "col-sm-12 margined block-header">
+              <h3 >Revision <span class="block-header-project-name">{{data.current_revision.name}}</span> <span class="block-header-by">by</span> <span class="block-header-author">{{data.current_revision.author}}</span> <span class="commit-date-title">{{data.current_revision.date}}</span></h3>
+            </div>
+            <p>{{data.current_revision.message}}
+            </p>
           </div>
 
-          <!-- Display the processed markdown from readme -->
-          <div markdown="data.info.readme"></div>
+          <div class="block">
+            <div class= "col-sm-12 margined block-header">
+              <h3>Readme</h3>
+            </div>
 
+            <!-- Display the processed markdown from readme -->
+            <div markdown="data.info.readme"></div>
+
+          </div>
         </div>
       </div>
 
@@ -122,28 +132,34 @@
       <div class="col-md-8 tight">
         <ng-include src="'menu.html'"></ng-include>
 
-        <div class="block" ng-repeat="comment in data.comments">
-          <div class= "col-sm-12 margined block-header">
-            <h3><i class="fa fa-comment menu-icon"></i>{{comment.author}} <span class="comment-keyword-title">commented</span> <span class="comment-date-title">{{comment.date}}</span></h3>
-          </div>
-          <p>{{comment.message}}
-          </p>
+        <div ng-if="data.loading">
+          <img class="loading" src="http://www.nasa.gov/multimedia/videogallery/ajax-loader.gif" width="20" height="20" />
         </div>
 
-        <pagination class="pull-right" items-per-page="pagination.itemsperpage" total-items="pagination.totalItems" ng-model="pagination.currentPage" ng-change="pageChanged()" previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
-
-        <div class="block">
-          <div class= "col-sm-12 margined block-header">
-            <h3 >Leave a comment</h3>
+        <div ng-if="!data.loading">
+          <div class="block" ng-repeat="comment in data.comments">
+            <div class= "col-sm-12 margined block-header">
+              <h3><i class="fa fa-comment menu-icon"></i>{{comment.author}} <span class="comment-keyword-title">commented</span> <span class="comment-date-title">{{comment.date}}</span></h3>
+            </div>
+            <p>{{comment.message}}
+            </p>
           </div>
-          <form role="form">  
-            <div class= "col-sm-12 margined">
-              <textarea class="form-control" rows="3"></textarea>
+
+          <pagination class="pull-right" items-per-page="pagination.itemsperpage" total-items="pagination.totalItems" ng-model="pagination.currentPage" ng-change="pageChanged()" previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
+
+          <div class="block">
+            <div class= "col-sm-12 margined block-header">
+              <h3 >Leave a comment</h3>
             </div>
-            <div class= "col-sm-12">
-              <button type="submit" class="btn btn-success pull-right margined">Submit</button>
-            </div>
-          </form>
+            <form role="form">  
+              <div class= "col-sm-12 margined">
+                <textarea class="form-control" rows="3"></textarea>
+              </div>
+              <div class= "col-sm-12">
+                <button type="submit" class="btn btn-success pull-right margined">Submit</button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
 
@@ -156,18 +172,27 @@
       <div class="col-md-8 tight">
         <ng-include src="'menu.html'"></ng-include>
 
-        <div class="block">
-          <div class= "col-sm-12 margined block-header">
-            <h3>Timeline</h3>
-          </div>
 
-          <div class="col-sm-12 month-block" ng-repeat="(day,revisions) in data.revisions_by_day">
-            <hr class="fancy-line"><h3>{{day}}</h3>
-            <div class="commit-block" ng-repeat="revision in revisions">
-              <span class="commit-revision">Revision</span> <a href="#/"><span class="commit-number">{{revision.name}}</span></a> <span class="commit-by"> by </span> <span class="commit-author">Jozef</span><span class="commit-date">{{revision.date.split(',')[1]}}</span>
-              <p>{{revision.message}}</p>
+        <div ng-if="data.loading">
+          <img class="loading" src="http://www.nasa.gov/multimedia/videogallery/ajax-loader.gif" width="20" height="20" />
+        </div>
+
+        <div ng-if="!data.loading">
+          
+          <div class="block">
+            <div class= "col-sm-12 margined block-header">
+              <h3>Timeline</h3>
+            </div>
+
+            <div class="col-sm-12 month-block" ng-repeat="(day,revisions) in data.revisions_by_day">
+              <hr class="fancy-line"><h3>{{day}}</h3>
+              <div class="commit-block" ng-repeat="revision in revisions">
+                <span class="commit-revision">Revision</span> <a href="#/"><span class="commit-number">{{revision.name}}</span></a> <span class="commit-by"> by </span> <span class="commit-author">Jozef</span><span class="commit-date">{{revision.date.split(',')[1]}}</span>
+                <p>{{revision.message}}</p>
+              </div>
             </div>
           </div>
+
         </div>
       </div>
     </script>
@@ -178,41 +203,49 @@
       <div class="col-md-8 tight">
         <ng-include src="'menu.html'"></ng-include>
 
-        <div class="block">
-          <div class= "col-sm-12 margined block-header">
-            <h3>History</h3>
-          </div>
+        <div ng-if="data.loading">
+          <img class="loading" src="http://www.nasa.gov/multimedia/videogallery/ajax-loader.gif" width="20" height="20" />
+        </div>
+
+        <div ng-if="!data.loading">
           
-          <div class="col-sm-12 log" ng-repeat="item in data.log">
-            <div class="log-icon-block">
-            <i ng-if="item.type=='visibility'" class="fa fa-cogs fa-2x log-icon"></i>
-            <i ng-if="item.type=='project-type'" class="fa fa-cogs fa-2x log-icon"></i>
-            <i ng-if="item.type=='branch-add'" class="fa fa-code-fork fa-2x log-icon"></i>
-            <i ng-if="item.type=='user-add'" class="fa fa-user fa-2x log-icon"></i>
-            <i ng-if="item.type=='creation'" class="fa fa-cube fa-2x log-icon"></i>
+          <div class="block">
+            <div class= "col-sm-12 margined block-header">
+              <h3>History</h3>
             </div>
+            
+            <div class="col-sm-12 log" ng-repeat="item in data.log">
+              <div class="log-icon-block">
+              <i ng-if="item.type=='visibility'" class="fa fa-cogs fa-2x log-icon"></i>
+              <i ng-if="item.type=='project-type'" class="fa fa-cogs fa-2x log-icon"></i>
+              <i ng-if="item.type=='branch-add'" class="fa fa-code-fork fa-2x log-icon"></i>
+              <i ng-if="item.type=='user-add'" class="fa fa-user fa-2x log-icon"></i>
+              <i ng-if="item.type=='creation'" class="fa fa-cube fa-2x log-icon"></i>
+              </div>
 
-            <div ng-if="item.type=='visibility'" class="log-block">
-              <span class="history-author">{{item.author}}</span> <span class="history-action">changed the project visibility to</span> <span class="history-keyword">{{item.keyword}}</span>. <span class="commit-date">{{item.date}}</span>
-            </div>
+              <div ng-if="item.type=='visibility'" class="log-block">
+                <span class="history-author">{{item.author}}</span> <span class="history-action">changed the project visibility to</span> <span class="history-keyword">{{item.keyword}}</span>. <span class="commit-date">{{item.date}}</span>
+              </div>
 
-            <div ng-if="item.type=='project-type'" class="log-block">
-              <span class="history-author">{{item.author}}</span> <span class="history-action">changed the project type to</span> <span class="history-keyword">{{item.keyword}}</span>. <span class="commit-date">{{item.date}}</span>
-            </div>
+              <div ng-if="item.type=='project-type'" class="log-block">
+                <span class="history-author">{{item.author}}</span> <span class="history-action">changed the project type to</span> <span class="history-keyword">{{item.keyword}}</span>. <span class="commit-date">{{item.date}}</span>
+              </div>
 
-            <div ng-if="item.type=='branch-add'" class="log-block">
-              <span class="history-author">{{item.author}}</span> <span class="history-action">created branch </span> <span class="history-keyword">{{item.keyword}}</span>. <span class="commit-date">{{item.date}}</span>
-            </div>
+              <div ng-if="item.type=='branch-add'" class="log-block">
+                <span class="history-author">{{item.author}}</span> <span class="history-action">created branch </span> <span class="history-keyword">{{item.keyword}}</span>. <span class="commit-date">{{item.date}}</span>
+              </div>
 
-            <div ng-if="item.type=='user-add'" class="log-block">
-              <span class="history-author">{{item.author}}</span> <span class="history-action">added user</span> <span class="history-keyword">{{item.keyword}}</span> <span class="history-action"> to the project</span>. <span class="commit-date">{{item.date}}</span>
-            </div>
+              <div ng-if="item.type=='user-add'" class="log-block">
+                <span class="history-author">{{item.author}}</span> <span class="history-action">added user</span> <span class="history-keyword">{{item.keyword}}</span> <span class="history-action"> to the project</span>. <span class="commit-date">{{item.date}}</span>
+              </div>
 
-            <div ng-if="item.type=='creation'" class="log-block">
-              <span class="history-author">{{item.author}}</span> <span class="history-action">created the project</span>. <span class="commit-date">{{item.date}}</span>
+              <div ng-if="item.type=='creation'" class="log-block">
+                <span class="history-author">{{item.author}}</span> <span class="history-action">created the project</span>. <span class="commit-date">{{item.date}}</span>
+              </div>
             </div>
           </div>
         </div>
+
       </div>
     </script>
 
@@ -222,230 +255,238 @@
       <div class="col-md-8 tight">
         <ng-include src="'menu.html'"></ng-include>
 
-        <div class="block">
+        <div ng-if="data.loading">
+          <img class="loading" src="http://www.nasa.gov/multimedia/videogallery/ajax-loader.gif" width="20" height="20" />
+        </div>
 
-          <div class= "col-sm-12 margined block-header">
-            <h3>General</h3>
-          </div>
 
-          <form role="form" class="standardform">
+        <div ng-if="!data.loading">
 
-            <div class="form-group">
+          <div class="block">
+
+            <div class= "col-sm-12 margined block-header">
+              <h3>General</h3>
+            </div>
+
+            <form role="form" class="standardform">
+
+              <div class="form-group">
+                
+                <div class= "col-sm-4 margined">
+                <label for="project-name">Owner</label>
+                <select class="form-control">
+                  <option value="one">Company 1</option>
+                  <option value="two">Company 2</option>
+                </select>
+                </div>
+                <div class= "col-sm-8  margined">
+                <label for="project-name">Project Name</label>
+                <input type="email" class="form-control" id="project-name" ng-value="data.info.name">
+                </div>
+              </div>
               
-              <div class= "col-sm-4 margined">
-              <label for="project-name">Owner</label>
-              <select class="form-control">
-                <option value="one">Company 1</option>
-                <option value="two">Company 2</option>
-              </select>
+              <div class="form-group">
+                <div class= "col-sm-4 margined">
+                <label for="project-name">Type</label>
+                <select class="form-control">
+                  <option value="one">Architectural</option>
+                  <option value="two">Aerospace</option>
+                  <option value="two">Automotive</option>
+                  <option value="two">Engineering</option>
+                  <option value="two">Other</option>
+                </select>
+                </div>
               </div>
-              <div class= "col-sm-8  margined">
-              <label for="project-name">Project Name</label>
-              <input type="email" class="form-control" id="project-name" ng-value="data.info.name">
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <div class= "col-sm-4 margined">
-              <label for="project-name">Type</label>
-              <select class="form-control">
-                <option value="one">Architectural</option>
-                <option value="two">Aerospace</option>
-                <option value="two">Automotive</option>
-                <option value="two">Engineering</option>
-                <option value="two">Other</option>
-              </select>
-              </div>
-            </div>
 
-            <div class="form-group">
-              <div class= "col-sm-12 margined">
-              <label for="project-name">Description</label><span> (optional)</span>
-              <input type="email" class="form-control" id="project-description" ng-value="data.info.description">
-              </div>
-            </div>   
+              <div class="form-group">
+                <div class= "col-sm-12 margined">
+                <label for="project-name">Description</label><span> (optional)</span>
+                <input type="email" class="form-control" id="project-description" ng-value="data.info.description">
+                </div>
+              </div>   
 
-          </form>
-        </div>
-        <div class="block">
-
-          <div class= "col-sm-12 margined block-header">
-            <h3>Visibility</h3>
+            </form>
           </div>
+          <div class="block">
 
-          <form role="form" class="standardform">
+            <div class= "col-sm-12 margined block-header">
+              <h3>Visibility</h3>
+            </div>
 
-            <div class="form-group">
-              <div class= "col-sm-12">
-                <label class="radio radio-pad">
-                  <input type="radio" name="visibility" id="visibility" value="public" ng-model="data.info.visibility" ng-checked="data.info.visibility=='public'" ng-change="setVisibility('public')"> 
-                  <i class="fa fa-eye"></i>
-                  Public
-                </label>
-                <div class="radio-pad">
-                <p>Everybody can see this project.</p>
+            <form role="form" class="standardform">
+
+              <div class="form-group">
+                <div class= "col-sm-12">
+                  <label class="radio radio-pad">
+                    <input type="radio" name="visibility" id="visibility" value="public" ng-model="data.info.visibility" ng-checked="data.info.visibility=='public'" ng-change="setVisibility('public')"> 
+                    <i class="fa fa-eye"></i>
+                    Public
+                  </label>
+                  <div class="radio-pad">
+                  <p>Everybody can see this project.</p>
+                  </div>
                 </div>
-              </div>
 
-              <div class= "col-sm-12 margined">
-                <label class="radio radio-pad">
-                  <input type="radio" name="visibility" id="visibility" value="private" ng-model="data.info.visibility" ng-checked="data.info.visibility=='private'" ng-change="setVisibility('private')"> 
-                  <i class="fa fa-eye-slash"></i>
-                  Private
-                </label>
-                <div class="radio-pad">
-                <p>Only selected users can see this project.</p>
+                <div class= "col-sm-12 margined">
+                  <label class="radio radio-pad">
+                    <input type="radio" name="visibility" id="visibility" value="private" ng-model="data.info.visibility" ng-checked="data.info.visibility=='private'" ng-change="setVisibility('private')"> 
+                    <i class="fa fa-eye-slash"></i>
+                    Private
+                  </label>
+                  <div class="radio-pad">
+                  <p>Only selected users can see this project.</p>
+                  </div>
                 </div>
-              </div>
-            </div> 
+              </div> 
 
-          </form>
-        </div>
-        <div class="block">
-
-          <div class= "col-sm-12 margined block-header">
-            <h3>Users</h3>
+            </form>
           </div>
+          <div class="block">
 
-          <form role="form" class="standardform">
+            <div class= "col-sm-12 margined block-header">
+              <h3>Users</h3>
+            </div>
 
-            <div class="form-group">
-              <div class="col-sm-6 margined">
-                <div class="input-group"> 
-                <input type="search" autocomplete="off" name="searchBy" id="searchBy" ng-model="users.selected" typeahead="state for state in users.states | filter:$viewValue | limitTo:8" class="form-control" placeholder="Search user"/>
-                <span class="input-group-btn">
-                    <button id="filter" class="btn btn-primary btn-block">
-                        <i class="fa fa-plus"></i>
-                    </button>
-                </span>
-                </div>
-              </div>
+            <form role="form" class="standardform">
 
-              <div ng-repeat="user in data.info.users">
-                <div class="clearfix"></div>
+              <div class="form-group">
                 <div class="col-sm-6 margined">
                   <div class="input-group"> 
+                  <input type="search" autocomplete="off" name="searchBy" id="searchBy" ng-model="users.selected" typeahead="state for state in users.states | filter:$viewValue | limitTo:8" class="form-control" placeholder="Search user"/>
+                  <span class="input-group-btn">
+                      <button id="filter" class="btn btn-primary btn-block">
+                          <i class="fa fa-plus"></i>
+                      </button>
+                  </span>
+                  </div>
+                </div>
+
+                <div ng-repeat="user in data.info.users">
+                  <div class="clearfix"></div>
+                  <div class="col-sm-6 margined">
+                    <div class="input-group"> 
+                      <span class="input-group-btn">
+                        <button id="filter" class="btn btn-primary btn-block">
+                            <i class="fa fa-user"></i>
+                        </button>
+                      </span>
+                    <input type="search" name="searchBy" id="searchBy" class="form-control" readonly ng-value="user.name"/>
                     <span class="input-group-btn">
                       <button id="filter" class="btn btn-primary btn-block">
-                          <i class="fa fa-user"></i>
+                          <i class="fa fa-minus"></i>
                       </button>
                     </span>
-                  <input type="search" name="searchBy" id="searchBy" class="form-control" readonly ng-value="user.name"/>
-                  <span class="input-group-btn">
-                    <button id="filter" class="btn btn-primary btn-block">
-                        <i class="fa fa-minus"></i>
-                    </button>
-                  </span>
+                    </div>
+                  </div>
+                  <div class="col-sm-4 permission">
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                        <span class="button-title">Role: </span><span class="button-keyword">{{user.role}}</span> <span class="caret "></span>
+                      </button>
+                      <ul class="dropdown-menu" role="menu">
+                        <li><a href="#/" ng-click="user.role='Admin'"><span class="button-keyword">Admin</span></a></li>
+                        <li><a href="#/" ng-click="user.role='Member'"><span class="button-keyword">Member</span></a></li>
+                        <li><a href="#/" ng-click="user.role='Viewer'"><span class="button-keyword">Viewer</span></a></li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
-                <div class="col-sm-4 permission">
-                  <div class="btn-group">
-                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                      <span class="button-title">Role: </span><span class="button-keyword">{{user.role}}</span> <span class="caret "></span>
-                    </button>
-                    <ul class="dropdown-menu" role="menu">
-                      <li><a href="#/" ng-click="user.role='Admin'"><span class="button-keyword">Admin</span></a></li>
-                      <li><a href="#/" ng-click="user.role='Member'"><span class="button-keyword">Member</span></a></li>
-                      <li><a href="#/" ng-click="user.role='Viewer'"><span class="button-keyword">Viewer</span></a></li>
-                    </ul>
-                  </div>
-                </div>
+
               </div>
 
+            </form>   
+          </div>
+
+          <div class="block">
+            <div class= "col-sm-12 margined block-header">
+              <h3>Type</h3>
             </div>
 
-          </form>   
-        </div>
+            <form role="form" class="standardform">  
 
-        <div class="block">
-          <div class= "col-sm-12 margined block-header">
-            <h3>Type</h3>
+              <div class="form-group">
+                <div class= "col-sm-12">
+                  <label class="radio radio-pad">
+                    <input type="radio" name="federated" id="federated" value="single" ng-model="data.info.type" ng-checked="data.info.type=='single'" ng-change="setType('single')"> 
+                    <i class="fa fa-file"></i>
+                    Single Project
+                  </label>
+                  <div class="radio-pad">
+                  <p>Consist of only one element.</p>
+                  </div>
+                </div>
+
+                <div class= "col-sm-12 margined">
+                  <label class="radio radio-pad">
+                    <input type="radio" name="federated" id="federated" value="federated" ng-model="data.info.type" ng-checked="data.info.type=='federated'"  ng-change="setType('federated')"> 
+                    <i class="fa fa-folder-open"></i>
+                    Federated Project
+                  </label>
+                  <div class="radio-pad">
+                  <p>Can have attached sub-projects.</p>
+                  </div>
+                </div>
+              </div>    
+
+            </form>   
           </div>
-
-          <form role="form" class="standardform">  
-
-            <div class="form-group">
-              <div class= "col-sm-12">
-                <label class="radio radio-pad">
-                  <input type="radio" name="federated" id="federated" value="single" ng-model="data.info.type" ng-checked="data.info.type=='single'" ng-change="setType('single')"> 
-                  <i class="fa fa-file"></i>
-                  Single Project
-                </label>
-                <div class="radio-pad">
-                <p>Consist of only one element.</p>
-                </div>
-              </div>
-
-              <div class= "col-sm-12 margined">
-                <label class="radio radio-pad">
-                  <input type="radio" name="federated" id="federated" value="federated" ng-model="data.info.type" ng-checked="data.info.type=='federated'"  ng-change="setType('federated')"> 
-                  <i class="fa fa-folder-open"></i>
-                  Federated Project
-                </label>
-                <div class="radio-pad">
-                <p>Can have attached sub-projects.</p>
-                </div>
-              </div>
-            </div>    
-
-          </form>   
-        </div>
-      
-        <div class="block" ng-if="data.info.type=='federated'">
-          <div class= "col-sm-12 margined block-header">
-            <h3>Federation</h3>
-          </div>
-          <form role="form" class="standardform">  
-            <div class="form-group">
-              <div class="col-sm-6 margined">
-                <div class="input-group"> 
-                <input type="search" name="searchBy" id="searchBy" class="form-control" placeholder="Search project"/>
-                <span class="input-group-btn">
-                    <button id="filter" class="btn btn-primary btn-block">
-                        <i class="fa fa-plus"></i>
-                    </button>
-                </span>
-                </div>
-              </div>
-
-              <div ng-repeat="fed in data.info.federation">
-                <div class="clearfix"></div>
+        
+          <div class="block" ng-if="data.info.type=='federated'">
+            <div class= "col-sm-12 margined block-header">
+              <h3>Federation</h3>
+            </div>
+            <form role="form" class="standardform">  
+              <div class="form-group">
                 <div class="col-sm-6 margined">
                   <div class="input-group"> 
-                    <span class="input-group-btn">
+                  <input type="search" name="searchBy" id="searchBy" class="form-control" placeholder="Search project"/>
+                  <span class="input-group-btn">
                       <button id="filter" class="btn btn-primary btn-block">
-                          <i class="fa fa-file"></i>
+                          <i class="fa fa-plus"></i>
                       </button>
                   </span>
-                  <input type="search" name="searchBy" id="searchBy" class="form-control" readonly ng-value="fed.name"/>
-                  <span class="input-group-btn">
-                    <button id="filter" class="btn btn-primary btn-block">
-                        <i class="fa fa-minus"></i>
-                    </button>
-                  </span>
-                  </div>
-
-                </div>
-
-                <div class="col-sm-4 permission">
-                  <div class="btn-group">
-                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                      <span class="button-title">Revision: </span><span class="button-keyword">{{fed.revselected}}</span> <span class="caret "></span>
-                    </button>
-                    <ul class="dropdown-menu" role="menu">
-                      <li ng-repeat="revision in fed.revisions"><a href="#/" ng-click="fed.revselected=revision"><span class="button-keyword">{{revision}}</span></a></li>
-                    </ul>
                   </div>
                 </div>
+
+                <div ng-repeat="fed in data.info.federation">
+                  <div class="clearfix"></div>
+                  <div class="col-sm-6 margined">
+                    <div class="input-group"> 
+                      <span class="input-group-btn">
+                        <button id="filter" class="btn btn-primary btn-block">
+                            <i class="fa fa-file"></i>
+                        </button>
+                    </span>
+                    <input type="search" name="searchBy" id="searchBy" class="form-control" readonly ng-value="fed.name"/>
+                    <span class="input-group-btn">
+                      <button id="filter" class="btn btn-primary btn-block">
+                          <i class="fa fa-minus"></i>
+                      </button>
+                    </span>
+                    </div>
+
+                  </div>
+
+                  <div class="col-sm-4 permission">
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                        <span class="button-title">Revision: </span><span class="button-keyword">{{fed.revselected}}</span> <span class="caret "></span>
+                      </button>
+                      <ul class="dropdown-menu" role="menu">
+                        <li ng-repeat="revision in fed.revisions"><a href="#/" ng-click="fed.revselected=revision"><span class="button-keyword">{{revision}}</span></a></li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
               </div>
 
-            </div>
-
-          </form>   
+            </form>   
+          </div>
+          <form role="form">  
+              <button type="submit" class="btn btn-success pull-right">Submit</button>
+          </form>
         </div>
-        <form role="form">  
-            <button type="submit" class="btn btn-success pull-right">Submit</button>
-        </form>
       </div>
     </script>
     

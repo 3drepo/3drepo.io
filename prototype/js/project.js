@@ -6,72 +6,39 @@ angular.module('3drepo', ['ui.router', 'ui.bootstrap'])
 function($stateProvider, $urlRouterProvider, $locationProvider) {
   $stateProvider
     .state('info', {
-      url: '/info',
-      templateUrl: 'info.html',
+      url: '/:account/:project/:view',
+      templateUrl: function ($stateParams){
+      	var possible_views = ["info", "comments", "revisions", "log", "settings"];
+      	var view = $stateParams.view;
+
+      	if( possible_views.indexOf(view) == -1 ){
+      		view = "info";
+      	}
+
+     	return view + '.html';
+   	  },
       controller: 'MainCtrl',
 			resolve:{
-			  	view: function(){
-          			return "info";
+			  	view: function($stateParams){
+          			return $stateParams.view;
       			},
-      			initPromise: function(data){
-	  				return data.fakePromise();
+      			account : function($stateParams){
+          			return $stateParams.account;
+      			},
+      			project: function($stateParams){
+          			return $stateParams.project;
+      			},
+      			initPromise: function(data, $stateParams){
+	  				return data.initPromise($stateParams.account, $stateParams.project);
       			}
 			}
     })
-    .state('comments', {
-      url: '/comments',
-      templateUrl: 'comments.html',
-      controller: 'MainCtrl',
-			resolve:{
-			  	view: function(){
-          			return "comments";
-      			},
-      			initPromise: function(data){
-      				return data.fakePromise();
-      			}
-			}
-    })
-    .state('revisions', {
-      url: '/revisions',
-      templateUrl: 'revisions.html',
-      controller: 'MainCtrl',
-			resolve:{
-			  	view: function(){
-		      		return "revisions";
-		  		},
-      			initPromise: function(data){
-      				return data.fakePromise();
-      			}
-			}
-    })
-    .state('log', {
-      url: '/log',
-      templateUrl: 'log.html',
-      controller: 'MainCtrl',
-			resolve:{
-			  	view: function(){
-          			return "log";
-      			},
-      			initPromise: function(data){
-      				return data.fakePromise();
-      			}
-			}
-    })
-    .state('settings', {
-      url: '/settings',
-      templateUrl: 'settings.html',
-      controller: 'MainCtrl',
-			resolve:{
-			  	view: function(){
-          			return "settings";
-      			},
-      			initPromise: function(data){
-      				return data.fakePromise();
-      			}
-			}
+    .state('404', {
+      url: '/404',
+      templateUrl: '404.html',
     });
 
-  $urlRouterProvider.otherwise('info');
+  $urlRouterProvider.otherwise('404');
   // $locationProvider.html5Mode(true);
 
 }])
@@ -102,6 +69,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 })
 .factory('data', function($http, fakeserver, $q){
 	var o = {
+		loading: true,
 		info: {
 			name: "",
 		    owner: "",
@@ -255,15 +223,19 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
   		};
 	};
 
-	o.fakePromise = function(){
+	o.initPromise = function(account, project){
+		o.loading = true;
 		var deferred = $q.defer();
 
   		setTimeout(function() {
 		    deferred.resolve('Response from the server');
 
+		    console.log("Making promise for " + account + " / " + project);
+
 		    // Fake initialise, should be using server response instead
 			o.initialise();
-		  }, 250);
+			o.loading = false;
+		  }, 100);
 
 		return deferred.promise;
 	}
@@ -357,22 +329,60 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	return o;
 
 })
-.controller('MainCtrl', function($scope, $http, data, view, pagination, users){
+.controller('MainCtrl', function($scope, $http, data, view, account, project, pagination, users, $state){
 
 	$scope.data = data;
-
 	$scope.view = view;
+	$scope.account = account;
+	$scope.project = project;
+	$scope.possible_views = ["info", "comments", "revisions", "log", "settings"];
+
+	console.log("ACCOUNT => " + $scope.account);
+	console.log("VIEW => " + $scope.view);
+	console.log("PROJECT => " + $scope.project);	
+
 	$scope.pagination = pagination;
 	$scope.users = users;
+
+	$scope.loading = true;
 
   	$scope.pageChanged = function() {
     	$scope.pagination.fetch($scope.view);
   	};
 
 	$scope.isView = function(view){
-    return $scope.view == view;
-  }
+    	return $scope.view == view;
+  	};
 
-  $scope.pageChanged();
+  	$scope.go = function(v){
+  		var o = {account: $scope.account, project: $scope.project, view: v};
+  		$state.go("info", o);
+  	}
 
-});
+  	$scope.checkViewIsValid = function(){
+		if( $scope.possible_views.indexOf(view) == -1 ){
+      		$state.go("404");
+      	}
+  	}
+
+  	$scope.checkViewIsValid();
+
+  	$scope.pageChanged();
+
+})
+.directive('loading', function (data) {
+      return {
+        restrict: 'E',
+        replace:true,
+        template: '<div class="loading"><img src="http://www.nasa.gov/multimedia/videogallery/ajax-loader.gif" width="20" height="20" /></div>',
+        link: function (scope, element, attr) {
+        	console.log("loading = " + data.loading);
+              scope.$watch('loading', function (val) {
+                  if (val)
+                      $(element).show();
+                  else
+                      $(element).hide();
+              });
+        }
+      }
+ });

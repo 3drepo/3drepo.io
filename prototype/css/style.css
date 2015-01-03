@@ -606,3 +606,10 @@ hr.fancy-line {
 .project-line:last-child{
 	border-bottom: 0px solid;
 }
+
+/* Loading */
+img.loading{
+	margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
