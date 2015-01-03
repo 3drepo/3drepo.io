@@ -29,7 +29,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
           			return $stateParams.project;
       			},
       			initPromise: function(data, $stateParams){
-	  				return data.initPromise($stateParams.account, $stateParams.project);
+	  				return data.initPromise($stateParams.account, $stateParams.project, $stateParams.view);
       			}
 			}
     })
@@ -42,32 +42,131 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
   // $locationProvider.html5Mode(true);
 
 }])
-.factory('fakeserver', function(){
+.factory('fake', function(){
+
 	var o = {
 
 	};
 
-	o.fetchComments = function(branch, rev, first, last){
-		console.log("Fetching comments [" + first + "," + last + "] for branch " + branch + " and rev " + rev);
+	o.author = function(){
+		var authors = ["jozef", "tim", "fred"];
+		return o.entry(authors);
+	}
 
-		var fake_authors = ["jozef", "tim", "fred"];
+	o.text = function(n, space){
+	    var text = "";
+	    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-		var res = [];
-		for(var i=first; i<=last; i++){
-			var c = {
-				author: fake_authors[Math.floor((Math.random() * 3))],
-				date: "15 october 2014, 12:36",
-				message: "Comment " + i
-			}
-			res.push(c);
+	    if(space){
+	    	possible = possible + "            ";
+	    }
+
+	    for( var i=0; i < n; i++ )
+	        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+	    return text;
+	}
+
+	o.entry = function(array){
+		return array[Math.floor(Math.random() * array.length)];
+	}
+
+	o.branch = function(){
+		return "branch_" + o.text(8, false);
+	}
+
+	o.comment = function(){
+		return o.text(96, true);
+	}
+
+	o.number = function(n){
+		return Math.floor(Math.random() * n + 1);
+	}
+
+	o.day = function(){
+		// Only 5 possible days
+		return Math.floor(Math.random() * 5 + 1);
+	}
+
+	o.month = function(){
+		// Only 2 possible months
+		var months = ["January", "February"];
+		return o.entry(months);
+	}
+
+	o.time = function(){
+		return "" + Math.floor(Math.random() * 24) + ":" + Math.floor(Math.random() * 60);
+	}
+
+	o.date = function(){
+		// format: "15 october 2014, 01:00",
+		var date = "" + o.day() + " " + o.month() + " 2014, " + o.time();
+		return date;
+	}
+
+	o.log_type = function(){
+		var types = ["visibility", "branch-add", "project-type", "user-add", "creation"];
+		return o.entry(types);
+	}
+
+	o.log_keyword = function(type){
+		if(type == "visibility"){
+			return o.entry(["public", "private"]);
+		}
+		else if(type == "branch-add"){
+			return o.branch(8, false);
+		}
+		else if(type == "project-type"){
+			return o.entry(["Architectural", "Aerospatial", "Automotive", "Engineering", "Other"]);
+		}
+		else if(type == "user-add"){
+			return o.author();
 		}
 
-		return res;
-	};
+		return "";
+	}
+
+	o.log = function(){
+
+		var type = o.log_type();
+
+		var log = {
+			type: type,
+			author: o.author(),
+			keyword: o.log_keyword(type),
+			date: o.date()
+		};
+
+		return log;
+	}
+
+	o.comment = function(){
+		var c = {
+			author: o.author(),
+			date: o.date(),
+			message: o.text(92, true)
+		}
+
+		return c;
+	}
+
+	o.revision = function(date){
+
+		var c = {
+			name: "rev_" + o.text(8, false),
+			author: o.author(),
+			date: date,
+			message: o.text(92, true),
+			n_comments: o.number(24),
+		}
+
+		return c;
+	}
 
 	return o;
+
 })
-.factory('data', function($http, fakeserver, $q){
+.factory('data', function($http, $q, fake){
 	var o = {
 		loading: true,
 		info: {
@@ -80,9 +179,11 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		    federation: [],
 		    users: [],
 		    branches: [],
+		    n_log: 0
 		},
 		current_branch: {
-			name: ""
+			name: "",
+			n_revision: 0
 		},
 		current_revision: {
 			name: "",
@@ -107,74 +208,107 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	};
 
 	o.fetchInfo = function(){
-		o.info.name = "OfficeFed";
-	    o.info.owner = "Tim";
-	    o.info.readme = "## We are leading the transformation of the Queen Elizabeth Olympic Park Stadium into an all-round multi-use venue\n\n		  \nWe are using sustainable construction methods like incorporating recycled features of the existing facility into the new Stadium and re-using crushed demolition material. \n\nAt construction peak the project will employ up to 400 people, and we are working to ensure the employment of local people where possible. We have also committed to create apprenticeships which will amount to 7% of the total workforce.\n\nThe new venue will host five matches during the Rugby World Cup 2015 and will be the permanent home of West Ham United Football Club from 2016.\n                    \nBalfour Beatty, the international infrastructure group, today announces that it has been awarded a &pound;154 million contract to carry out the full transformation works to the London 2012 Olympic Stadium for its operator, E20 Stadium LLP, a joint venture between the London Legacy Development Corporation and Newham Council. This new contract encompasses the &pound;41 million Stadium roof contract Balfour Beatty was awarded in the summer.\n                    \nBalfour Beatty will lead the transformation of the Stadium into an all-round multi-use venue, delivering a lasting sporting, cultural and commercial legacy in East London.\n                    \nThe new venue will host five matches during the Rugby World Cup 2015 and will be the permanent home of West Ham United Football Club from 2016. The venue will also become the new national competition Stadium for athletics in the UK as well as hosting elite international athletics events and other sporting, cultural and community events. A new community athletics track will also be provided next to the main Stadium.\n\nSustainable construction methods will include features of the existing facility being recycled and incorporated into the new Stadium and the re-use of crushed demolition material, existing balustrades and sanitary ware.\n\n\nAt construction peak the project will employ up to 400 people. Balfour Beatty will work with WorkPlace, Newham Council's employment service, to ensure the employment of local people where possible. Balfour Beatty has also committed to create apprenticeships which will amount to 7% of the total workforce.\n\nOnce reconfigured the Stadium's cable net roof, 84 metres wide at its deepest point, will be the largest cantilevered roof in the world covering every Stadium seat, improving acoustics and spectator experience.\n\nBalfour Beatty Chief Executive, Andrew McNaughton said: \"We are delighted to be continuing our activity at the Queen Elizabeth Olympic Park supporting the legacy commitment made as part of the London 2012 Olympic and Paralympic Games.\n\nDuring construction, our firm commitment to the use of local labour and the creation of apprenticeships will continue to benefit the local community and the wider industry and, upon completion, the Stadium will provide a first-class sporting and cultural facility for many generations to come. Balfour Beatty is proud to be associated with this project.\"\n\nWorks commence on site early in 2014 and are due for completion in the spring of 2016.";
-		o.info.description = "Description of the project";
-		o.info.visibility = "public";
-		o.info.type = "federated";
-		o.info.federation = [
-	    	{
-	    		name: "Helicopter project 1",
-	    		revisions: [
-	    			"HEAD",
-	    			"Rev 1",
-	    			"Rev 2",
-	    		],
-	    		revselected: "HEAD"
-	    	},
-	    	{
-	    		name: "Boat project 1",
-	    		revisions: [
-	    			"HEAD",
-	    			"Rev 3",
-	    			"Rev 4",
-	    		],
-	    		revselected: "Rev 4"
-	    	}
-    	];
-    	o.info.users = [
-	    	{
-	    		name: "Tim Scully",
-	    		role: "Admin"
-	    	},
-	    	{
-	    		name: "Jozef Dobos",
-	    		role: "Admin"
-	    	},
-	    	{
-	    		name: "Frederid Besse",
-	    		role: "Admin"
-	    	}
-	    ];
-		o.info.branches = [
-		    {
-		    	name: "master",
-		    },
-		    {
-		    	name: "experimental",
-		    }
-    	];
+
+		var deferred = $q.defer();
+
+		setTimeout(function() {
+			var res = {};
+			res.name = "OfficeFed";
+		    res.owner = "Tim";
+		    res.readme = "## We are leading the transformation of the Queen Elizabeth Olympic Park Stadium into an all-round multi-use venue\n\n		  \nWe are using sustainable construction methods like incorporating recycled features of the existing facility into the new Stadium and re-using crushed demolition material. \n\nAt construction peak the project will employ up to 400 people, and we are working to ensure the employment of local people where possible. We have also committed to create apprenticeships which will amount to 7% of the total workforce.\n\nThe new venue will host five matches during the Rugby World Cup 2015 and will be the permanent home of West Ham United Football Club from 2016.\n                    \nBalfour Beatty, the international infrastructure group, today announces that it has been awarded a &pound;154 million contract to carry out the full transformation works to the London 2012 Olympic Stadium for its operator, E20 Stadium LLP, a joint venture between the London Legacy Development Corporation and Newham Council. This new contract encompasses the &pound;41 million Stadium roof contract Balfour Beatty was awarded in the summer.\n                    \nBalfour Beatty will lead the transformation of the Stadium into an all-round multi-use venue, delivering a lasting sporting, cultural and commercial legacy in East London.\n                    \nThe new venue will host five matches during the Rugby World Cup 2015 and will be the permanent home of West Ham United Football Club from 2016. The venue will also become the new national competition Stadium for athletics in the UK as well as hosting elite international athletics events and other sporting, cultural and community events. A new community athletics track will also be provided next to the main Stadium.\n\nSustainable construction methods will include features of the existing facility being recycled and incorporated into the new Stadium and the re-use of crushed demolition material, existing balustrades and sanitary ware.\n\n\nAt construction peak the project will employ up to 400 people. Balfour Beatty will work with WorkPlace, Newham Council's employment service, to ensure the employment of local people where possible. Balfour Beatty has also committed to create apprenticeships which will amount to 7% of the total workforce.\n\nOnce reconfigured the Stadium's cable net roof, 84 metres wide at its deepest point, will be the largest cantilevered roof in the world covering every Stadium seat, improving acoustics and spectator experience.\n\nBalfour Beatty Chief Executive, Andrew McNaughton said: \"We are delighted to be continuing our activity at the Queen Elizabeth Olympic Park supporting the legacy commitment made as part of the London 2012 Olympic and Paralympic Games.\n\nDuring construction, our firm commitment to the use of local labour and the creation of apprenticeships will continue to benefit the local community and the wider industry and, upon completion, the Stadium will provide a first-class sporting and cultural facility for many generations to come. Balfour Beatty is proud to be associated with this project.\"\n\nWorks commence on site early in 2014 and are due for completion in the spring of 2016.";
+			res.description = "Description of the project";
+			res.visibility = "public";
+			res.type = "federated";
+			res.federation = [
+		    	{
+		    		name: "Helicopter project 1",
+		    		revisions: [
+		    			"HEAD",
+		    			"Rev 1",
+		    			"Rev 2",
+		    		],
+		    		revselected: "HEAD"
+		    	},
+		    	{
+		    		name: "Boat project 1",
+		    		revisions: [
+		    			"HEAD",
+		    			"Rev 3",
+		    			"Rev 4",
+		    		],
+		    		revselected: "Rev 4"
+		    	}
+	    	];
+	    	res.users = [
+		    	{
+		    		name: "Tim Scully",
+		    		role: "Admin"
+		    	},
+		    	{
+		    		name: "Jozef Dobos",
+		    		role: "Admin"
+		    	},
+		    	{
+		    		name: "Frederic Besse",
+		    		role: "Admin"
+		    	}
+		    ];
+			res.branches = [ 
+				"master", 
+				"experimental"
+	    	];
+	    	res.n_log = 19;
+
+	    	deferred.resolve(res);
+	    }, 100);
+
+		return deferred.promise;
 	}
 
-	o.setCurrentBranch = function(branch){
-		o.current_branch = branch;
-		o.fetchRevisions(branch);
-		o.setCurrentRevision(o.revisions[0]);
-		o.setCurrentDiff("None");
-		o.fetchRevisionsByDay(branch);
+	o.setInfo = function(res){
+		angular.copy(res, o.info);
 	}
 
-	o.setCurrentRevision = function(rev){
+	o.fetchCurrentBranch = function(name){
+		var deferred = $q.defer();
 
-		o.current_revision = {
-			name: rev.name,
-			n_comments: 18,
-			author: "jozef",
-	    	date: "14 october 2014, 02:00",
-	    	message: "commit message 1",
-		};
+		setTimeout(function() {
+
+			var res = {
+				name: name,
+				n_revisions: fake.number(24),
+			};
+
+			deferred.resolve(res);
+
+		}, 100);
+
+		return deferred.promise;
 	};
+
+	o.setCurrentBranch = function(res){
+		angular.copy(res, o.current_branch);
+	}
+
+	o.fetchCurrentRevision = function(name){
+		var deferred = $q.defer();
+
+		setTimeout(function() {
+
+			var date = fake.date();
+
+			var res = fake.revision(date);
+
+			deferred.resolve(res);
+
+		}, 100);
+
+		return deferred.promise;
+	};
+
+	o.setCurrentRevision = function(res){
+		angular.copy(res, o.current_revision);
+	}
 
 	o.setCurrentDiff = function(rev_name){
 		o.current_diff = {
@@ -183,107 +317,173 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	};
 
 	o.fetchRevisions = function(branch){
-		o.revisions = [
-	  		{
-	  			name: "rev1",
-	  		},
-	  		{
-	  			name: "rev2",
-	  		},
-	  		{
-	  			name: "rev23",
-	  		},
-  		];
-	};
 
-	o.fetchRevisionsByDay = function(branch) {
-		o.revisions_by_day = {
-  			"15 october 2014": [
-	  		{
-	  			name: "rev23",
-	  			author: "jozef",
-	  			date: "14 october 2014, 03:00",
-	  			message: "commit message 2",
-	  		}
-  			],
-  			"14 october 2014": [
-  			{
-	  			name: "rev1",
-	  			author: "jozef",
-	  			date: "15 october 2014, 01:00",
-	  			message: "commit message 1",
-	  		},
-	  		{
-	  			name: "rev2",
-	  			author: "jozef",
-	  			date: "14 october 2014, 02:00",
-	  			message: "commit message 2",
-	  		},
-  			]
-  		};
-	};
-
-	o.initPromise = function(account, project){
-		o.loading = true;
 		var deferred = $q.defer();
 
-  		setTimeout(function() {
-		    deferred.resolve('Response from the server');
+		setTimeout(function() {
 
-		    console.log("Making promise for " + account + " / " + project);
+			var res = [
+		  		{
+		  			name: "rev1",
+		  		},
+		  		{
+		  			name: "rev2",
+		  		},
+		  		{
+		  			name: "rev23",
+		  		},
+	  		];
 
-		    // Fake initialise, should be using server response instead
-			o.initialise();
-			o.loading = false;
-		  }, 100);
+	  		deferred.resolve(res);
+
+  		}, 100);
 
 		return deferred.promise;
+	};
+
+	o.setRevisions = function(res){
+		angular.copy(res, o.revisions);
 	}
 
-	o.initialise = function(){
-		o.fetchInfo();
-      	o.setCurrentBranch(o.info.branches[0]);
-      	o.fetchLog();
+	o.fetchRevisionsByDay = function(first, last) {
+
+	var fetchFakeRevisions = function(branch, rev, first, last){
+
+			console.log("Fetching revisions [" + first + "," + last + "] for branch " + branch + " and rev " + rev);
+
+			var res = {};
+			for(var i=first; i<=last; i++){
+				var date = fake.date();
+				var day = date.split(",")[0];
+
+				if(!res.hasOwnProperty(day)){
+					res[day] = [];  			
+			  	}
+
+	  			res[day].push(fake.revision(date));
+			}
+
+			return res;
+
+		};
+
+		var deferred = $q.defer();
+
+		setTimeout(function() {
+			var res = fetchFakeRevisions(o.current_branch.name, o.current_revision.name, first, last);
+
+	  		deferred.resolve(res);
+  		}, 100);
+
+		return deferred.promise;
+	};
+
+	o.setRevisionsByDay = function(res){
+		angular.copy(res, o.revisions_by_day);
+	}
+
+	o.initPromise = function(account, project, info){
+		return o.initialise(info);
+	}
+
+	o.initAllPromise = function(){
+		return o.fetchInfo()
+			.then(function(res){
+				o.setInfo(res);
+				return o.fetchCurrentBranch(o.info.branches[0]);
+			})
+			.then(function(res){
+				o.setCurrentBranch(res);
+				return o.fetchRevisions(o.current_branch);
+			})
+			.then(function(res){
+				o.setRevisions(res);
+				return o.fetchCurrentRevision(o.revisions[0].name);
+			})
+			.then(function(res){
+				o.setCurrentRevision(res);
+				o.setCurrentDiff("None");
+			});
+	};
+
+	o.fetchCommentsPromise = function(){
+		return o.fetchComments()
+		.then(function(res){
+			o.setComments(res);
+			o.loading = false;
+		});
 	}
 
 	o.fetchComments = function(first, last){
-		var comments = fakeserver.fetchComments(o.current_branch.name, o.current_revision.name, first, last);
-		o.comments = comments;
+
+		var fetchFakeComments = function(branch, rev, first, last){
+
+			console.log("Fetching comments [" + first + "," + last + "] for branch " + branch + " and rev " + rev);
+
+			var res = [];
+			for(var i=first; i<=last; i++){
+				res.push(fake.comment());
+			}
+
+			return res;
+
+		};
+
+		var deferred = $q.defer();
+
+		setTimeout(function() {
+
+	    	var res = fetchFakeComments(o.current_branch.name, o.current_revision.name, first, last);
+
+			deferred.resolve(res);
+
+  		}, 100);
+
+		return deferred.promise;
 	};
 
-	o.fetchLog = function(){
-		o.log = [
-		    {
-		    	type: "visibility",
-		    	author: "Jozef",
-		    	keyword: "public",
-		    	date: "15 october 2014, 05:00"
-		    },
-		    {
-		    	type: "branch-add",
-		    	author: "Fred",
-		    	keyword: "Experimental",
-		    	date: "15 october 2014, 04:00"
-		    },
-		    {
-		    	type: "project-type",
-		    	author: "Tim",
-		    	keyword: "Aerospatial",
-		    	date: "15 october 2014, 03:00"
-		    },
-		    {
-		    	type: "user-add",
-		    	author: "Fred",
-		    	keyword: "Tim",
-		    	date: "15 october 2014, 02:00"
-		    },
-		    {
-		    	type: "creation",
-		    	author: "Jozef",
-		    	date: "15 october 2014, 01:00"
-		    },
-	    ];
+	o.setComments = function(res){
+		angular.copy(res, o.comments);
 	}
+
+	o.fetchLog = function(first, last){
+
+		var fetchFakeLog = function(branch, rev, first, last){
+
+			console.log("Fetching log [" + first + "," + last + "] for branch " + branch + " and rev " + rev);
+
+			var res = [];
+			for(var i=first; i<=last; i++){
+				res.push(fake.log());
+			}
+
+			return res;
+
+		};
+
+		var deferred = $q.defer();
+
+		setTimeout(function() {
+
+			var res = fetchFakeLog(o.current_branch.name, o.current_revision.name, first, last);
+
+		    deferred.resolve(res);
+  		}, 100);
+
+		return deferred.promise;
+	};
+
+	o.setLog = function(res){
+		angular.copy(res, o.log);
+	};
+
+	o.initialise = function(info){
+		o.loading = true;
+		return o.initAllPromise()
+		.then(function(res){
+			o.loading = false;
+		});	      	
+	};
 
 	return o;
 })
@@ -309,10 +509,43 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		itemsperpage: 5
 	};
 
+	o.init = function(view) {
+		if(view == "comments"){
+			o.totalItems = data.current_revision.n_comments;
+		}
+		else if(view == "log"){
+			o.totalItems = data.info.n_log;
+		}
+		else if(view == "revisions"){
+			o.totalItems = data.current_branch.n_revisions;
+		}
+	}
+
 	o.fetch = function(view){
 
 		if(view == "comments"){
-			data.fetchComments((o.currentPage-1)*o.itemsperpage, Math.min(o.totalItems-1, (o.currentPage)*o.itemsperpage-1));
+			data.loading = true;
+			data.fetchComments((o.currentPage-1)*o.itemsperpage, Math.min(o.totalItems-1, (o.currentPage)*o.itemsperpage-1))
+			.then(function(res){
+				data.setComments(res);
+				data.loading = false;
+			});
+		}
+		else if(view == "log"){
+			data.loading = true;
+			data.fetchLog((o.currentPage-1)*o.itemsperpage, Math.min(o.totalItems-1, (o.currentPage)*o.itemsperpage-1))
+			.then(function(res){
+				data.setLog(res);
+				data.loading = false;
+			});
+		}
+		else if(view == "revisions"){
+			data.loading = true;
+			data.fetchRevisionsByDay((o.currentPage-1)*o.itemsperpage, Math.min(o.totalItems-1, (o.currentPage)*o.itemsperpage-1))
+			.then(function(res){
+				data.setRevisionsByDay(res);
+				data.loading = false;
+			});
 		}
 	}
 
@@ -347,6 +580,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	$scope.loading = true;
 
   	$scope.pageChanged = function() {
+  		$scope.pagination.init($scope.view);
     	$scope.pagination.fetch($scope.view);
   	};
 
@@ -369,20 +603,4 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
   	$scope.pageChanged();
 
-})
-.directive('loading', function (data) {
-      return {
-        restrict: 'E',
-        replace:true,
-        template: '<div class="loading"><img src="http://www.nasa.gov/multimedia/videogallery/ajax-loader.gif" width="20" height="20" /></div>',
-        link: function (scope, element, attr) {
-        	console.log("loading = " + data.loading);
-              scope.$watch('loading', function (val) {
-                  if (val)
-                      $(element).show();
-                  else
-                      $(element).hide();
-              });
-        }
-      }
- });
+});
