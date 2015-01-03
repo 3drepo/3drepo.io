@@ -1,18 +1,18 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *	Copyright (C) 2014 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 var express = require('express');
@@ -34,6 +34,7 @@ module.exports = function(passport){
 			this.getMap[format] = {};
 		}
 
+		logger.log('debug', 'Adding route ' + regex + ' [' + format + ']');
 		this.getMap[format][regex] = callback;
 	}
 
@@ -41,12 +42,12 @@ module.exports = function(passport){
 
 	this.dbInterface = require('./js/core/db_interface.js');
 
-    this.transRouter = function(format, regex, res, params)
+	this.transRouter = function(format, regex, res, params)
 	{
 		var account = ("account" in params) ? params["account"] : null;
 		var project = ("project" in params) ? params["project"] : null;
 
-		console.log("ACCOUT: " + account);
+		logger.log('debug',"ACCOUNT: " + account + " PROJECT: " + project + " REGEX: " + regex + " [" + format + "]");
 
 		if (!format)
 			format = this.defaultFormat;
@@ -71,11 +72,11 @@ module.exports = function(passport){
 	this.router.use(express.static('./submodules'));
 	this.router.use(express.static('./public'));
 
-    this.router.use(function(req, res, next)
-    {
+	this.router.use(function(req, res, next)
+	{
 		logger.log('debug', req.originalUrl)
 		next();
-    });
+	});
 
 	// Login pages
 	this.router.get('/login', function(req, res) {
@@ -96,7 +97,7 @@ module.exports = function(passport){
 		failureFlash: true
 	}));
 
-    // Home simply points to the user's home page.
+	// Home simply points to the user's home page.
 	this.router.get('/home', login.ensureLoggedIn('/login'), function(req, res, next) {
 		var username = req.user.username;
 		res.redirect('/' + username);
@@ -138,9 +139,9 @@ module.exports = function(passport){
 		var format = req.param("format");
 
 		var params = {
-				account:    req.param("account"),
-				project:    req.param("project"),
-				subformat:  req.param("subformat"),
+				account:	req.param("account"),
+				project:	req.param("project"),
+				subformat:	req.param("subformat"),
 				user: req.user.username,
 				query: req.query
 		};
@@ -153,9 +154,9 @@ module.exports = function(passport){
 		var format = req.param("format");
 
 		var params = {
-			account:    req.param("account"),
-			project:    req.param("project"),
-			subformat:  req.param("subformat"),
+			account:	req.param("account"),
+			project:	req.param("project"),
+			subformat:	req.param("subformat"),
 			user: req.user.username,
 			query: req.query
 		};
@@ -163,15 +164,33 @@ module.exports = function(passport){
 		this.transRouter(format, '/:account/:project/revisions', res, params);
 	});
 
+	// Revision list for a particular branch
+	this.router.get('/:account/:project/revisions/:branch.:format?.:subformat?', login.ensureLoggedIn(), function(req, res, next) {
+		var format = req.param("format");
+
+		var params = {
+			account:	req.param("account"),
+			project:	req.param("project"),
+			branch:		req.param("branch"),
+			subformat:	req.param("subformat"),
+			user: req.user.username,
+			query: req.query
+		};
+
+		this.transRouter(format, '/:account/:project/revisions/:branch', res, params);
+	});
+
+
+
 	// Revision rid for master branch
 	this.router.get('/:account/:project/revision/:rid.:format?.:subformat?', login.ensureLoggedIn(), function(req, res, next) {
 		var format = req.param("format");
 
 		var params = {
-			account:    req.param("account"),
-			project:    req.param("project"),
-			rid:        req.param("rid"),
-			subformat:  req.param("subformat"),
+			account:	req.param("account"),
+			project:	req.param("project"),
+			rid:		req.param("rid"),
+			subformat:	req.param("subformat"),
 			user: req.user.username,
 			query: req.query
 		};
@@ -200,12 +219,12 @@ module.exports = function(passport){
 		var format = req.param("format");
 
 		var params = {
-			account:    req.param("account"),
-			project:    req.param("project"),
-			branch:     req.param("branch"),
-			subformat:  req.param("subformat"),
-			user:       req.user.username,
-			query:      req.query
+			account:	req.param("account"),
+			project:	req.param("project"),
+			branch:		req.param("branch"),
+			subformat:	req.param("subformat"),
+			user:		req.user.username,
+			query:		req.query
 		}
 
 		this.transRouter(format, '/:account/:project/revision/:rid/:sid', res, params);
@@ -216,12 +235,12 @@ module.exports = function(passport){
 		var format = req.param("format");
 
 		var params = {
-			account:    req.param("account"),
-			project:    req.param("project"),
-			branch:     req.param("branch"),
-			subformat:  req.param("subformat"),
-			user:       req.user.username,
-			query:      req.query
+			account:	req.param("account"),
+			project:	req.param("project"),
+			branch:		req.param("branch"),
+			subformat:	req.param("subformat"),
+			user:		req.user.username,
+			query:		req.query
 		};
 
 		this.transRouter(format, '/:account/:project/revision/:branch/head/:sid', res, params);
@@ -235,8 +254,8 @@ module.exports = function(passport){
 			account:   req.param("account"),
 			project:   req.param("project"),
 			subformat: req.param("subformat"),
-			user:      req.user.username,
-			query:     req.query
+			user:	   req.user.username,
+			query:	   req.query
 		};
 
 		this.transRouter(format, '/:account/:project/revision/:branch', res, params);
@@ -250,8 +269,8 @@ module.exports = function(passport){
 			account:   req.param("account"),
 			project:   req.param("project"),
 			subformat: req.param("subformat"),
-			user:      req.user.username,
-			query:     req.query
+			user:	   req.user.username,
+			query:	   req.query
 		};
 
 		this.transRouter(format, '/:account/:project/branches', res, params);
@@ -265,9 +284,9 @@ module.exports = function(passport){
 			account:   req.param("account"),
 			project:   req.param("project"),
 			subformat: req.param("subformat"),
-			uid:       req.param("uid"),
-			user:      req.user.username,
-			query:     req.query
+			uid:	   req.param("uid"),
+			user:	   req.user.username,
+			query:	   req.query
 		};
 
 		logger.log('debug', 'Retrieving object ' + params.uid);
@@ -282,11 +301,11 @@ module.exports = function(passport){
 		var params = {
 			account:   req.param("account"),
 			project:   req.param("project"),
-			rid:       req.param("rid"),
-			type:      req.param("type"),
+			rid:	   req.param("rid"),
+			type:	   req.param("type"),
 			subformat: req.param("subformat"),
-			user:      req.user.username,
-			query:     req.query
+			user:	   req.user.username,
+			query:	   req.query
 
 		};
 
@@ -298,13 +317,13 @@ module.exports = function(passport){
 		var format = req.param("format");
 
 		var params = {
-			account:    req.param("account"),
-			project:    req.param("project"),
-			rid:	    req.param("rid"),
-			subformat:  req.param("subformat"),
-			sid:        req.param("sid"),
-			user:       req.user.username,
-			query:      req.query
+			account:	req.param("account"),
+			project:	req.param("project"),
+			rid:		req.param("rid"),
+			subformat:	req.param("subformat"),
+			sid:		req.param("sid"),
+			user:		req.user.username,
+			query:		req.query
 		};
 
 		if ("depth" in req.query)
@@ -317,8 +336,8 @@ module.exports = function(passport){
 	this.router.get('/:account/log', login.ensureLoggedIn(), function(req, res, next) {
 		var params = {
 			account: req.param("account"),
-			user:    req.user.username,
-			query:   req.query
+			user:	 req.user.username,
+			query:	 req.query
 		};
 
 		this.transRouter(format, '/:account/log', res, params);
@@ -329,8 +348,8 @@ module.exports = function(passport){
 		var params = {
 			account: req.params("account"),
 			project: req.params("project"),
-			user:    req.user.username,
-			query:   req.query
+			user:	 req.user.username,
+			query:	 req.query
 		};
 
 		this.transRouter(format, '/:account/:project/log', res, params);
@@ -342,5 +361,5 @@ module.exports = function(passport){
 		res.redirect('/home');
 	});
 
-    return this;
+	return this;
 }
