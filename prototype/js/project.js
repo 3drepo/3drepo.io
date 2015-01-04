@@ -8,6 +8,9 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
     .state('info', {
       url: '/:account/:project/:view',
       templateUrl: function ($stateParams){
+      	// Each view is associated with a template
+      	// However only a few views are possible
+      	// Check that we have a view that exists otherwise redirects to info
       	var possible_views = ["info", "comments", "revisions", "log", "settings"];
       	var view = $stateParams.view;
 
@@ -38,15 +41,25 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
       templateUrl: '404.html',
     });
 
+  // Invalid URL redirect to 404 state
   $urlRouterProvider.otherwise('404');
+
+  // Empty view redirects to info view by default
+  $urlRouterProvider.when('/{account}/{project}', '/{account}/{project}/info');
+
+  // This will be needed to remove angular's #, but there is an error at the moment
+  // -> need ot investigage
   // $locationProvider.html5Mode(true);
 
 }])
 .factory('fake', function(){
 
-	var o = {
+	/**
+	 * This provider is used to generate random things
+	 * as placeholders until real-data fetching is implemented
+	 */
 
-	};
+	var o = {};
 
 	o.author = function(){
 		var authors = ["jozef", "tim", "fred"];
@@ -167,6 +180,12 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 })
 .factory('data', function($http, $q, fake){
+
+	/**
+	 * This provider is used to store the data about the project
+	 */
+
+	// Overview of the data structure
 	var o = {
 		loading: true,
 		info: {
@@ -201,12 +220,16 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
  	 	],
 	  	revisions_by_day:
   		{
-  		}
-	  	,
+  		},
 		log: [
 	    ]
 	};
 
+	/**
+	 * Ajax requests
+	 */
+
+	// Fetch general info about the project
 	o.fetchInfo = function(){
 
 		var deferred = $q.defer();
@@ -265,10 +288,6 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		return deferred.promise;
 	}
 
-	o.setInfo = function(res){
-		angular.copy(res, o.info);
-	}
-
 	// Fetch info about the current branch given the name of the branch
 	o.fetchCurrentBranch = function(name){
 		var deferred = $q.defer();
@@ -282,14 +301,10 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 			deferred.resolve(res);
 
-		}, 100);
+		}, 10);
 
 		return deferred.promise;
 	};
-
-	o.setCurrentBranch = function(res){
-		angular.copy(res, o.current_branch);
-	}
 
 	// Fetch info about the current revision given the name of the revision
 	o.fetchCurrentRevision = function(name){
@@ -303,51 +318,42 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 			deferred.resolve(res);
 
-		}, 100);
+		}, 10);
 
 		return deferred.promise;
 	};
 
-	o.setCurrentRevision = function(res){
-		angular.copy(res, o.current_revision);
-	}
-
-	o.setCurrentDiff = function(rev_name){
-		o.current_diff = {
-			name: rev_name,
-		};
-	};
-
 	o.fetchRevisions = function(branch){
+
+		var fetchFakeRevisionsNames = function(branch){
+
+			console.log("Fetching revisions names ");
+
+			var res = [];
+			for(var i=0; i<o.current_branch.n_revisions; i++){
+				var date = fake.date();
+	  			res.push({name: fake.revision(date).name});
+			}
+
+			return res;
+
+		};
 
 		var deferred = $q.defer();
 
 		setTimeout(function() {
 
-			var res = [
-		  		{
-		  			name: "rev1",
-		  		},
-		  		{
-		  			name: "rev2",
-		  		},
-		  		{
-		  			name: "rev23",
-		  		},
-	  		];
+			var res = fetchFakeRevisionsNames(branch);
+			console.log(res);
 
 	  		deferred.resolve(res);
 
-  		}, 100);
+  		}, 10);
 
 		return deferred.promise;
 	};
 
-	o.setRevisions = function(res){
-		angular.copy(res, o.revisions);
-	}
-
-	// Fetch revisions grouped by day
+	// Fetch some of the revisions grouped by day
 	o.fetchRevisionsByDay = function(first, last) {
 
 		var fetchFakeRevisions = function(branch, rev, first, last){
@@ -376,45 +382,12 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			var res = fetchFakeRevisions(o.current_branch.name, o.current_revision.name, first, last);
 
 	  		deferred.resolve(res);
-  		}, 100);
+  		}, 10);
 
 		return deferred.promise;
 	};
 
-	o.setRevisionsByDay = function(res){
-		angular.copy(res, o.revisions_by_day);
-	}
-
-	o.initPromise = function(account, project, info){
-		o.loading = true;
-		return o.fetchInfo()
-			.then(function(res){
-				o.setInfo(res);
-				return o.fetchCurrentBranch(o.info.branches[0]);
-			})
-			.then(function(res){
-				o.setCurrentBranch(res);
-				return o.fetchRevisions(o.current_branch);
-			})
-			.then(function(res){
-				o.setRevisions(res);
-				return o.fetchCurrentRevision(o.revisions[0].name);
-			})
-			.then(function(res){
-				o.setCurrentRevision(res);
-				o.setCurrentDiff("None");
-				o.loading = false;
-			});
-	};
-
-	o.fetchCommentsPromise = function(){
-		return o.fetchComments()
-		.then(function(res){
-			o.setComments(res);
-			o.loading = false;
-		});
-	}
-
+	// Fetch some of the comments for the current revision
 	o.fetchComments = function(first, last){
 
 		var fetchFakeComments = function(branch, rev, first, last){
@@ -438,15 +411,12 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 			deferred.resolve(res);
 
-  		}, 100);
+  		}, 10);
 
 		return deferred.promise;
 	};
 
-	o.setComments = function(res){
-		angular.copy(res, o.comments);
-	}
-
+	// Fetch some of the logs
 	o.fetchLog = function(first, last){
 
 		var fetchFakeLog = function(branch, rev, first, last){
@@ -469,35 +439,120 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			var res = fetchFakeLog(o.current_branch.name, o.current_revision.name, first, last);
 
 		    deferred.resolve(res);
-  		}, 100);
+  		}, 10);
 
 		return deferred.promise;
 	};
+
+	/**
+	 * Setters, copying from the res into the data structure
+	 */
+
+	o.setInfo = function(res){
+		angular.copy(res, o.info);
+	}
+
+	o.setCurrentBranch = function(res){
+		angular.copy(res, o.current_branch);
+	}
+
+	o.setCurrentRevision = function(res){
+		angular.copy(res, o.current_revision);
+	}
+
+	o.setCurrentDiff = function(rev_name){
+		o.current_diff = {
+			name: rev_name,
+		};
+	};
+
+	o.setRevisions = function(res){
+		angular.copy(res, o.revisions);
+	}
+
+	o.setRevisionsByDay = function(res){
+		angular.copy(res, o.revisions_by_day);
+	}
+
+	o.setComments = function(res){
+		angular.copy(res, o.comments);
+	}
 
 	o.setLog = function(res){
 		angular.copy(res, o.log);
 	};
 
+	/**
+	 * Promises, used in the resolve to fetch data
+	 */
+
+	o.initPromise = function(account, project, info){
+
+		// Enable loading animation
+		o.loading = true;
+
+		// Chain of promises
+		// - fetch the general info
+		// - fetch the current branch (selected by default)
+		// - fetch the revisions
+		// - set the current revision (selected by default)
+		// - set the current diff
+		return o.fetchInfo() 
+			.then(function(res){
+				o.setInfo(res);
+				return o.fetchCurrentBranch(o.info.branches[0]);
+			})
+			.then(function(res){
+				o.setCurrentBranch(res);
+				return o.fetchRevisions(o.current_branch);
+			})
+			.then(function(res){
+				o.setRevisions(res);
+				return o.fetchCurrentRevision(o.revisions[0].name);
+			})
+			.then(function(res){
+				o.setCurrentRevision(res);
+				o.setCurrentDiff("None");
+
+				// Disable loading animation
+				o.loading = false;
+			});
+	};
+
 	return o;
 })
 .directive('markdown', function () {
-  var converter = new Showdown.converter();
-  return {
-      restrict: 'A',
-      link: function (scope, element, attrs) {
-          function renderMarkdown() {
-              var htmlText = converter.makeHtml(scope.$eval(attrs.markdown)  || '');
-              element.html(htmlText);
-          }
-          scope.$watch(attrs.markdown, renderMarkdown);
-          renderMarkdown();
-      }
+
+	/**
+	 * This directive allows us to convert markdown syntax into
+	 * formatted text
+	 */
+
+	var converter = new Showdown.converter();
+	return {
+	  restrict: 'A',
+	  link: function (scope, element, attrs) {
+	      function renderMarkdown() {
+	          var htmlText = converter.makeHtml(scope.$eval(attrs.markdown)  || '');
+	          element.html(htmlText);
+	      }
+	      scope.$watch(attrs.markdown, renderMarkdown);
+	      renderMarkdown();
+	  }
   };
 })
 .factory('pagination', function(data){
 
+	/**
+	 * This provider deals with the pagination of the data
+	 * So far the paginated data is:
+	 * - comments
+	 * - log
+	 * - revision list
+	 */
+
 	var o = {
-		totalItems: 12,
+		totalItems: 0,
 		currentPage: 1,
 		itemsperpage: 5
 	};
