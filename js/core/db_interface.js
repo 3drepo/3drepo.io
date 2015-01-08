@@ -1,18 +1,18 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *	Copyright (C) 2014 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 var dbConn_js = require('./db.js');
@@ -24,17 +24,19 @@ var log_iface = require('./logger.js');
 var logger = log_iface.logger;
 
 function stringToUUID(id) {
-    var bytes = uuid.parse(id);
-    var buf = new Buffer(bytes);
-    return dbConn.Binary(buf, 3);
+	var bytes = uuid.parse(id);
+	var buf = new Buffer(bytes);
+	return dbConn.Binary(buf, 3);
 }
 
 function uuidToString(uuidIn) {
 	return uuid.unparse(uuidIn.buffer);
 }
 
+var rootUUID = stringToUUID("00000000-0000-0000-0000-000000000000");
+
 /*******************************************************************************
- * Authenticate user against the database
+ /* Authenticate user against the database
  * @param {Error} err - Error object
  * @param {RepoNodeMesh} mesh - The RepoNodeMesh object containing the mesh
  * @param {string} tex_uuid - A string representing the tex_uuid attached to the mesh
@@ -86,6 +88,7 @@ exports.getUserInfo = function(username, callback) {
 	});
 }
 
+
 exports.hasAccessToProject = function(username, account, project, callback) {
 	if (project == null)
 		return callback(null);
@@ -103,22 +106,22 @@ exports.hasAccessToProject = function(username, account, project, callback) {
 }
 
 exports.getDBList = function(callback) {
-    dbConn.dbCallback('admin', function(err, db) {
+	dbConn.dbCallback('admin', function(err, db) {
 		if (err) return callback(err);
 
-        db.admin().listDatabases(function(err, dbs) {
-            if (err) return callback(err);
+		db.admin().listDatabases(function(err, dbs) {
+			if (err) return callback(err);
 
-            var dbList = [];
+			var dbList = [];
 
-            for (var i in dbs.databases)
-                dbList.push({ name: dbs.databases[i].name});
+			for (var i in dbs.databases)
+				dbList.push({ name: dbs.databases[i].name});
 
-            dbList.sort();
+			dbList.sort();
 
-            callback(null, dbList);
-        });
-    });
+			callback(null, dbList);
+		});
+	});
 }
 
 exports.getChildren = function(dbName, uuid, callback) {
@@ -132,6 +135,94 @@ exports.getChildren = function(dbName, uuid, callback) {
 
 		callback(null, doc);
 	});
+};
+
+exports.getRevisionInfo = function(dbName, rid, callback) {
+	var filter = {
+		_id: stringToUUID(rid)
+	};
+
+	dbConn.filterColl(dbName, 'history', filter, null, function(err, doc) {
+		if (err) return callback(err);
+
+	doc = doc[0];
+
+		rev = {};
+
+		rev.author  = ("author" in doc) ? doc.author : "unnamed";
+		rev.message = ("message" in doc) ? doc.message : "";
+		rev.tag     = ("tag" in doc) ? doc.tag : "";
+
+		if ("timestamp" in doc)
+		{
+			var timestampDate = new Date(doc.timestamp);
+
+			rev.timestamp = timestampDate.toString();
+		} else {
+			rev.timestamp = "Unknown";
+		}
+
+		callback(null, rev);
+	});
+};
+
+exports.getRevisions = function(dbName, branch, callback) {
+
+	var filter = {
+		type: "revision"
+	};
+
+	if(branch)
+		if (branch == "root")
+			filter["shared_id"] = rootUUID;
+		else
+			filter["shared_id"] = stringToUUID(branch);
+
+	var projection = {
+		_id : 1
+	};
+
+	dbConn.filterColl(dbName, 'history', filter, projection, function(err, doc) {
+			if (err) return callback(err);
+
+			var revisionList = [];
+
+			for (var i in doc)
+			{
+				var revisionName = uuidToString(doc[i]._id);
+				revisionList.push({name : revisionName});
+			}
+
+			callback(null, revisionList);
+	});
+
+};
+
+exports.getBranches = function(dbName, callback) {
+	var filter = {
+		type: "revision"
+	};
+
+	var projection = {
+		shared_id : 1
+	};
+
+	dbConn.filterColl(dbName, 'history', filter, projection, function(err, doc) {
+			if (err) return callback(err);
+
+			var branchList = [];
+
+			for (var i in doc)
+			{
+				var branchName = uuidToString(doc[i].shared_id);
+
+				if (branchList.map(function (e) { return e.name; }).indexOf(branchName) == -1)
+					branchList.push({ name: uuidToString(doc[i].shared_id)});
+			}
+
+			callback(null, branchList);
+	});
+
 };
 
 exports.getMetadata = function(dbName, uuid, callback) {
@@ -155,42 +246,42 @@ exports.getMetadata = function(dbName, uuid, callback) {
 };
 
 exports.getObject = function(project, uid, rid, sid, callback) {
-    logger.log('debug', 'Requesting object (U, R, S) (' + uid + ',' + rid + ',' + sid + ')');
+	logger.log('debug', 'Requesting object (U, R, S) (' + uid + ',' + rid + ',' + sid + ')');
 
-    if (uid)
-    {
-        var query = {
-            _id: stringToUUID(uid)
-        };
+	if (uid)
+	{
+		var query = {
+			_id: stringToUUID(uid)
+		};
 
-        dbConn.filterColl(project, 'scene', query, null, function(err,doc) {
-            if(err) return callback(err);
+		dbConn.filterColl(project, 'scene', query, null, function(err,doc) {
+			if(err) return callback(err);
 
-            callback(null, doc[0]["type"], uid, repoGraphScene.decode(doc))
-        });
+			callback(null, doc[0]["type"], uid, repoGraphScene.decode(doc))
+		});
 
-    } else if (rid && sid) {
-        var historyQuery = {
-            _id : stringToUUID(rid)
-        };
+	} else if (rid && sid) {
+		var historyQuery = {
+			_id : stringToUUID(rid)
+		};
 
-        dbConn.getLatest(project, 'history', historyQuery, null, function(err, doc)
-        {
-            var query = {
-                shared_id : stringToUUID(sid),
-                _id       : { $in : docs[0]['current']}
-            };
+		dbConn.getLatest(project, 'history', historyQuery, null, function(err, doc)
+		{
+			var query = {
+				shared_id : stringToUUID(sid),
+				_id		  : { $in : docs[0]['current']}
+			};
 
-            dbConn.filterColl(project, 'scene', query, null, function(err, obj) {
-                if (err) return callback(err);
+			dbConn.filterColl(project, 'scene', query, null, function(err, obj) {
+				if (err) return callback(err);
 
-                callback(null, obj[0]["type"], this.stringToUUID(obj[0]["_id"]), repoGraphScene.decode(obj));
-            });
+				callback(null, obj[0]["type"], this.stringToUUID(obj[0]["_id"]), repoGraphScene.decode(obj));
+			});
 
-        });
-    } else {
-        return callback(new Error("Not enough information specified"), null, null);
-    }
+		});
+	} else {
+		return callback(new Error("Not enough information specified"), null, null);
+	}
 }
 
 exports.getScene = function(project, revision, callback) {
@@ -204,7 +295,7 @@ exports.getScene = function(project, revision, callback) {
 	}
 
 	dbConn.getLatest(project, 'history', historyQuery, null, function(err, docs)
-    {
+	{
 		if(err) return callback(err);
 
 		var projection = {
@@ -244,13 +335,13 @@ exports.getCache = function(project, uid, getData, level, callback) {
 	if (level)
 		filter['level'] = parseInt(level);
 
-    dbConn.filterColl(project, "repo.cache", filter, projection, function(err, coll) {
-        if (err) return callback(err);
+	dbConn.filterColl(project, "repo.cache", filter, projection, function(err, coll) {
+		if (err) return callback(err);
 
-        callback(null, coll);
-    });
+		callback(null, coll);
+	});
 
 };
 
 exports.uuidToString = uuidToString;
-exports.dbConn       = dbConn;
+exports.dbConn		 = dbConn;
