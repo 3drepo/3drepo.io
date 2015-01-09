@@ -48,11 +48,6 @@ exports.route = function(router)
 		res.render("index", params);
 	});
 
-	router.get('html', '/:account/:project', function(res, params) {
-		// FIXME: Fill in
-		res.status(415).send("Not supported");
-	});
-
 	router.get('html', '/:account/:project/revisions', function(res, params) {
 		// FIXME: Fill in.
 		res.status(415).send("Not supported");

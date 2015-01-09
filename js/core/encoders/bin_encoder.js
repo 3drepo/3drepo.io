@@ -22,16 +22,17 @@ var repoNodeMesh = require('../repoNodeMesh.js');
  * Render Binary format data of parts of a mesh
  *
  * @param {dbInterface} dbInterface - Database interface object
+ * @param {string} dbName - Database containing the project to get object from
  * @param {string} project - The name of the project containing the mesh
  * @param {string} uuid - UUID of the mesh to be rendered
  * @param {string} type - Part of the mesh to be rendered (normals, texcoords, indices, coords)
  * @param {Object} res - The http response object
  * @param {function} callback - Callback function that takes an Error object
  *******************************************************************************/
-function render(dbInterface, project, uuid, type, res, callback) {
+function render(dbInterface, dbName, project, uuid, type, res, callback) {
 	logger.log('debug', 'Requesting b ' + type + ' for ' + uuid);
 
-	dbInterface.getObject(project, uuid, function(err, doc) {
+	dbInterface.getObject(dbName, project, uuid, function(err, doc) {
 		if (err) return callback(err);
 
 		var mesh = doc.meshes[uuid];
@@ -77,7 +78,7 @@ exports.route = function(router)
     router.get('bin', '/:account/:project/:uid', function(res, params) {
 		var type = params.query.type;
 
-        render(router.dbInterface, params.project, params.uid, type, res, function(res)
+        render(router.dbInterface, params.account, params.project, params.uid, type, res, function(res)
         {
             if(err) throw err;
         });
