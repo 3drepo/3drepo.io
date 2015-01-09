@@ -67,11 +67,11 @@ function JSONAddChildren(jsonNode, node)
  * @param {string} project - name of project containing child
  * @param {JSON} childNode - Child node JSON
  *******************************************************************************/
-function treeChildMetadata(dbInterface, project, childNode, callback)
+function treeChildMetadata(dbInterface, dbName, project, childNode, callback)
 {
 	var sharedId = childNode["key"];
 
-	dbInterface.getMetadata(project, sharedId, function(err, meta) {
+	dbInterface.getMetadata(dbName, project, sharedId, function(err, meta) {
 		childNode["meta"] = meta;
 
 		callback(null, childNode);
@@ -134,6 +134,7 @@ function processChild(child, project, selected, namespace)
  * Render JSON tree
  *
  * @param {Object} dbInterface - Database interface object
+ * @param {string} dbName - Company or database name containing project
  * @param {string} project - name of project containing tree
  * @param {uuid} revision - the id of the revision
  * @param {uuid} uuid - the uuid of the parent in the tree
@@ -143,12 +144,12 @@ function processChild(child, project, selected, namespace)
  * @param {boolean} embedded_texture - Determines whether or not the texture data is embedded in the SRC.
  * @param {Object} res - The http response object
  *******************************************************************************/
-function render(dbInterface, project, revision, uuid, selected, namespace, res, err_callback)
+function render(dbInterface, dbName, project, revision, uuid, selected, namespace, res, err_callback)
 {
 
 	if (uuid == null)
 	{
-		dbInterface.getScene(project, revision, function(err, doc) {
+		dbInterface.getScene(dbName, project, revision, function(err, doc) {
 			var head = [{}];
 			var node = doc['mRootNode'];
 
@@ -167,13 +168,13 @@ function render(dbInterface, project, revision, uuid, selected, namespace, res, 
 			res.json(head);
 		});
 	} else {
-		dbInterface.getChildren(project, uuid, function(err, doc) {
+		dbInterface.getChildren(dbName, project, uuid, function(err, doc) {
 			async.map(doc, function(child, callback)
 				{
 					callback(err, processChild(child, project, selected, namespace));
 				}, function(err, children) {
 				async.map(children, function(id, callback) {
-					treeChildMetadata(dbInterface, project, id, callback)
+					treeChildMetadata(dbInterface, dbName, project, id, callback)
 				}, function(err, childWithMeta)
 				{
 					res.json(childWithMeta);
@@ -208,7 +209,7 @@ exports.route = function(router)
 	});
 
 	router.get('json', '/:account/:project/revision/:rid', function(res, params) {
-		router.dbInterface.getRevisionInfo(params.project, params.rid, function(err, revisionObj) {
+		router.dbInterface.getRevisionInfo(params.account, params.project, params.rid, function(err, revisionObj) {
 			if(err) throw err;
 
 			res.json(revisionObj);
@@ -216,7 +217,7 @@ exports.route = function(router)
 	});
 
 	router.get('json', '/:account/:project/branches', function(res, params) {
-		router.dbInterface.getBranches(params.project, function(err, branchList) {
+		router.dbInterface.getBranches(params.account, params.project, function(err, branchList) {
 			if(err) throw err;
 
 			res.json(branchList);
@@ -224,7 +225,7 @@ exports.route = function(router)
 	});
 
 	router.get('json', '/:account/:project/revisions', function(res, params) {
-		router.dbInterface.getRevisions(params.project, null, function(err, revisionList) {
+		router.dbInterface.getRevisions(params.account, params.project, null, function(err, revisionList) {
 			if(err) throw err;
 
 			res.json(revisionList);
@@ -232,7 +233,7 @@ exports.route = function(router)
 	});
 
 	router.get('json', '/:account/:project/revisions/:branch', function(res, params) {
-		router.dbInterface.getRevisions(params.project, params.branch, function(err, revisionList) {
+		router.dbInterface.getRevisions(params.account, params.project, params.branch, function(err, revisionList) {
 			if(err) throw err;
 
 			res.json(revisionList);
@@ -246,7 +247,7 @@ exports.route = function(router)
 
 		if (params.sid == "root")
 		{
-			router.dbInterface.getScene(params.project, revision, function(err, doc) {
+			router.dbInterface.getScene(params.account, params.project, revision, function(err, doc) {
 				var head = [{}];
 				var node = doc['mRootNode'];
 
@@ -265,13 +266,13 @@ exports.route = function(router)
 				res.json(head);
 			});
 		} else {
-			router.dbInterface.getChildren(params.project, params.sid, function(err, doc) {
+			router.dbInterface.getChildren(params.account, params.project, params.sid, function(err, doc) {
 				async.map(doc, function(child, callback)
 					{
 						callback(err, processChild(child, params.project, selected, namespace));
 					}, function(err, children) {
 					async.map(children, function(id, callback) {
-						treeChildMetadata(router.dbInterface, params.project, id, callback)
+						treeChildMetadata(router.dbInterface, params.account, params.project, id, callback)
 					}, function(err, childWithMeta)
 					{
 						res.json(childWithMeta);

@@ -124,25 +124,25 @@ exports.getDBList = function(callback) {
 	});
 }
 
-exports.getChildren = function(dbName, uuid, callback) {
+exports.getChildren = function(dbName, project, uuid, callback) {
 	var filter = {
 		parents : stringToUUID(uuid),
 		type: {$in : ['mesh', 'transformation', 'ref']}
 	};
 
-	dbConn.filterColl(dbName, 'scene', filter, null, function(err, doc) {
+	dbConn.filterColl(dbName, project + '.scene', filter, null, function(err, doc) {
 		if (err) return callback(err);
 
 		callback(null, doc);
 	});
 };
 
-exports.getRevisionInfo = function(dbName, rid, callback) {
+exports.getRevisionInfo = function(dbName, project, rid, callback) {
 	var filter = {
 		_id: stringToUUID(rid)
 	};
 
-	dbConn.filterColl(dbName, 'history', filter, null, function(err, doc) {
+	dbConn.filterColl(dbName, project + '.history', filter, null, function(err, doc) {
 		if (err) return callback(err);
 
 	doc = doc[0];
@@ -166,7 +166,7 @@ exports.getRevisionInfo = function(dbName, rid, callback) {
 	});
 };
 
-exports.getRevisions = function(dbName, branch, callback) {
+exports.getRevisions = function(dbName, project, branch, callback) {
 
 	var filter = {
 		type: "revision"
@@ -182,7 +182,7 @@ exports.getRevisions = function(dbName, branch, callback) {
 		_id : 1
 	};
 
-	dbConn.filterColl(dbName, 'history', filter, projection, function(err, doc) {
+	dbConn.filterColl(dbName, project + '.history', filter, projection, function(err, doc) {
 			if (err) return callback(err);
 
 			var revisionList = [];
@@ -198,7 +198,7 @@ exports.getRevisions = function(dbName, branch, callback) {
 
 };
 
-exports.getBranches = function(dbName, callback) {
+exports.getBranches = function(dbName, project, callback) {
 	var filter = {
 		type: "revision"
 	};
@@ -207,7 +207,7 @@ exports.getBranches = function(dbName, callback) {
 		shared_id : 1
 	};
 
-	dbConn.filterColl(dbName, 'history', filter, projection, function(err, doc) {
+	dbConn.filterColl(dbName, project + '.history', filter, projection, function(err, doc) {
 			if (err) return callback(err);
 
 			var branchList = [];
@@ -240,12 +240,12 @@ exports.getMetadata = function(dbName, uuid, callback) {
 		parents: 0
 	};
 
-	dbConn.filterColl(dbName, 'scene', filter, projection, function(err, doc) {
+	dbConn.filterColl(dbName, project + '.scene', filter, projection, function(err, doc) {
 		callback(null, doc);
 	});
 };
 
-exports.getObject = function(project, uid, rid, sid, callback) {
+exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 	logger.log('debug', 'Requesting object (U, R, S) (' + uid + ',' + rid + ',' + sid + ')');
 
 	if (uid)
@@ -254,7 +254,7 @@ exports.getObject = function(project, uid, rid, sid, callback) {
 			_id: stringToUUID(uid)
 		};
 
-		dbConn.filterColl(project, 'scene', query, null, function(err,doc) {
+		dbConn.filterColl(dbName, project + '.scene', query, null, function(err,doc) {
 			if(err) return callback(err);
 
 			callback(null, doc[0]["type"], uid, repoGraphScene.decode(doc))
@@ -265,7 +265,7 @@ exports.getObject = function(project, uid, rid, sid, callback) {
 			_id : stringToUUID(rid)
 		};
 
-		dbConn.getLatest(project, 'history', historyQuery, null, function(err, doc)
+		dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, doc)
 		{
 			var query = {
 				shared_id : stringToUUID(sid),
@@ -284,7 +284,7 @@ exports.getObject = function(project, uid, rid, sid, callback) {
 	}
 }
 
-exports.getScene = function(project, revision, callback) {
+exports.getScene = function(dbName, project, revision, callback) {
 	var historyQuery = null;
 
 	if (revision != null)
@@ -294,7 +294,7 @@ exports.getScene = function(project, revision, callback) {
 		};
 	}
 
-	dbConn.getLatest(project, 'history', historyQuery, null, function(err, docs)
+	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
 	{
 		if(err) return callback(err);
 
@@ -310,7 +310,7 @@ exports.getScene = function(project, revision, callback) {
 			_id: { $in: docs[0]['current'] }
 		};
 
-		dbConn.filterColl(project, 'scene', query, projection, function(err, coll) {
+		dbConn.filterColl(dbName, project + '.scene', query, projection, function(err, coll) {
 			if (err) return callback(err);
 
 			callback(null, repoGraphScene.decode(coll));

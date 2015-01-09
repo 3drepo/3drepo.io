@@ -17,7 +17,7 @@
 exports.route = function(router)
 {
     router.get('jpg', '/:account/:project/:uid', function(res, params) {
-        router.dbInterface.getObject(params.project, params.uid, null, null, function(err, type, uid, obj)
+        router.dbInterface.getObject(params.account, params.project, params.uid, null, null, function(err, type, uid, obj)
         {
             if(err) throw err;
 

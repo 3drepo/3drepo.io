@@ -552,7 +552,7 @@ function X3D_AddGroundPlane(xmlDoc, bbox)
  *						ground plane
  *******************************************************************************/
 function render(dbInterface, account, project, subFormat, revision, res, callback) {
-    dbInterface.getScene(project, revision, function(err, doc) {
+    dbInterface.getScene(account, project, revision, function(err, doc) {
 		var xmlDoc = X3D_Header();
 		var scene  = X3D_CreateScene(xmlDoc);
 
