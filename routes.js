@@ -19,9 +19,20 @@ var express = require('express');
 var bCrypt = require('bcrypt-nodejs');
 var log_iface = require('./js/core/logger.js');
 var logger = log_iface.logger;
-var login = require('connect-ensure-login');
+//var login = require('connect-ensure-login');
 var config = require('app-config').config;
 var package_json = require('./package.json');
+
+var expressJwt = require('express-jwt');
+var jwt = require('jsonwebtoken');
+
+var login = {};
+
+var secret = 'secret';
+
+login.ensureLoggedIn = function() {
+	return expressJwt({secret:secret});
+};
 
 module.exports = function(passport){
 	this.router = express.Router();
@@ -78,7 +89,9 @@ module.exports = function(passport){
 		next();
 	});
 
-	// Login pages
+	/*
+	  Old frontend based stuff
+
 	this.router.get('/login', function(req, res) {
 		var paramJson = {
 			message: req.flash('message')
@@ -106,6 +119,25 @@ module.exports = function(passport){
 	// Login routes
 	this.router.get('/', function(req, res) {
 		res.redirect('/login');
+	});
+
+	*/
+
+	this.router.post('/login', function(req, res) {
+		this.dbInterface.authenticate(req.body.username, req.body.password, function(err, user)
+		{
+			console.log(err)
+			if(err)
+			{
+				res.status(401).send('Incorrect usename or password');
+			} else {
+				var token = jwt.sign(user, secret, {expiresInMinutes: 60*5});
+
+				logger.log('debug', 'Authenticated ' + user.username + ' and signed token.')
+				console.log(token);
+				res.json({ token: token });
+			}
+		});
 	});
 
 	// Account information

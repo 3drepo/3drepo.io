@@ -6,18 +6,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
     <title> 3D Repo </title>
-    <script type="text/javascript" src="../public/jquery.min.js"></script>
-    <script type="text/javascript" src="../public/js/external/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="../public/css/external/bootstrap.min.css"/>
-    <link href="css/style.css" rel="stylesheet" />
-    <link href="css/font-awesome.min.css" rel="stylesheet" />
-    <script type="text/javascript" src="../public/js/external/showdown.min.js"></script>
-    <script type="text/javascript" src="../public/js/external/angular.min.js"></script>
-    <script type="text/javascript" src="../public/js/external/angular-ui-router.js"></script>
+    <script type="text/javascript" src="/public/jquery.min.js"></script>
+    <script type="text/javascript" src="/public/js/external/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/public/css/external/bootstrap.min.css"/>
+    <link href="/public/css/style.css" rel="stylesheet" />
+    <link href="/public/css/font-awesome.min.css" rel="stylesheet" />
+    <script type="text/javascript" src="/public/js/external/showdown.min.js"></script>
+    <script type="text/javascript" src="/public/js/external/angular.min.js"></script>
+    <script type="text/javascript" src="/public/js/external/angular-ui-router.js"></script>
 
-    <script type="text/javascript" src="../public/js/external/ui-bootstrap-tpls-0.12.0.min.js"></script>
+    <script type="text/javascript" src="/public/js/external/ui-bootstrap-tpls-0.12.0.min.js"></script>
 
-     <script src="js/project.js"></script>
+     <script src="/public/js/project.js"></script>
   </head>
 
   <body ng-app="3drepo">
@@ -506,7 +506,7 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a href="../" class="navbar-brand logo-pad header-logo"><img class="v-expand" src="images/logo.png" /></a>
+            <a href="../" class="navbar-brand logo-pad header-logo"><img class="v-expand" src="/public/images/logo.png" /></a>
           </div>
           <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
            <form class="navbar-left tight v-expand" role="search">
@@ -514,18 +514,22 @@
                 <input type="text" class="form-control" id="search-box" placeholder="Search 3D Repo">
               </div>
             </form>
-            <ul class="nav navbar-nav navbar-right">
-              <li><a href="http://expo.getbootstrap.com">Enterprise</a></li>
-              <li><a href="http://blog.getbootstrap.com">Frederic</a></li>
-              <li><a href="http://blog.getbootstrap.com">Sign out</a></li>
-              <li><a href="http://blog.getbootstrap.com"><img src="images/en.gif" height="16"/></a></li>
-            </ul>
+			<a href="http://blog.getbootstrap.com">Enterprise</a>
+			<form class="form-inline tight v-expand" ng-submit="login()">
+				<a ng-hide="!loggedIn" class="ng-hide" href="http://blog.getbootstrap.com">{{user.username}}</a>
+				<div class="form-group tight">
+					<input ng-hide="loggedIn" ng-model="user.username" type="text" class="ng-hide form-control" name="user" placeholder="Username">
+					<input ng-hide="loggedIn" ng-model="user.password" type="password" class="ng-hide form-control" name="pass" placeholder="Password">
+					<input ng-hide="loggedIn" class="ng-hide" type="submit" value="login">
+				</div>
+			</form>
+			<a href="http://blog.getbootstrap.com"><img src="/public/images/en.gif" height="16"/></a>
           </nav>
         </div>
       </div>
 
       <div class="placeholder-screenshot-large">
-		  <!-- <iframe class="placeholder-screenshot-large" src="x3dexample.html"></iframe> -->
+		  <iframe class="placeholder-screenshot-large" src="{{apiUrl}}"></iframe>
 	  </div>
 
       <div class="container-fluid">

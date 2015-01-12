@@ -15,73 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*global require*/
-
-var https = require("https");
-var fs = require('fs');
-var express = require('express');
+var express = require('express'),
+	app = express(),
+	vhost = require('vhost'),
+	path = require('path');
 
 var log_iface = require('./js/core/logger.js');
 var logger = log_iface.logger;
 onError = log_iface.onError;
 
-var dbInterface = require('./js/core/db_interface.js');
+var hostname = process.env.HOSTNAME;
 var config = require('app-config').config;
 
-var log = require('./js/core/login.js');
+app.use(vhost('api.' + hostname, require('./api.js').app));
+app.use(vhost(hostname, require('./frontend.js').app));
 
-var bodyParser = require('body-parser');
-var methodOverride = require('method-override');
-var compress = require('compression');
-
-var app = express();
-
-app.set('view engine', 'jade');
-app.set('views', './views');
-app.locals.pretty = true;
-
-var mongoose = require('mongoose');
-var connect_url = 'mongodb://' + config.db.username + ":" + config.db.password + '@' + config.db.host + ':' + config.db.port;
-
-mongoose.connect(connect_url);
-
-var passport = require('passport');
-var expressSession = require('express-session');
-
-var flash = require('connect-flash');
-app.use(flash());
-
-app.use(expressSession({ secret: 'secretKey',
-    saveUninitialized: true,
-    resave: true,
-	cookie: "secure"
-}));
-app.use(passport.initialize());
-app.use(passport.session());
-log(passport);
-
-//var favicon = require('serve-favicon');
-//app.use(favicon(options.favicon));
-app.use(bodyParser.urlencoded({
-    extended: false
-}));
-app.use(bodyParser.json());
-
-app.use(compress({
-    threshold: 512
-}));
-app.use(methodOverride());
-
-var routes = require('./routes.js')(passport);
-app.use('/', routes.router);
-
-// Attach the encoders to the router
-var x3dom_encoder = require('./js/core/encoders/x3dom_encoder.js').route(routes);
-var json_encoder = require('./js/core/encoders/json_encoder.js').route(routes);
-var html_encoder = require('./js/core/encoders/html_encoder.js').route(routes);
-var src_encoder = require('./js/core/encoders/src_encoder.js').route(routes);
-var jpg_encoder = require('./js/core/encoders/jpeg_encoder.js').route(routes);
-
+var https = require("https");
 var http = require('http');
 
 if ('ssl' in config) {
@@ -108,4 +57,5 @@ if ('ssl' in config) {
         logger.log('info', 'Starting HTTP service on port ' + config.server.http_port);
     });
 }
+
 

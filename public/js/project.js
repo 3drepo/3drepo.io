@@ -48,8 +48,8 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
   $urlRouterProvider.when('/{account}/{project}', '/{account}/{project}/info');
 
   // This will be needed to remove angular's #, but there is an error at the moment
-  // -> need ot investigage
-  // $locationProvider.html5Mode(true);
+  // -> need to investigate
+  $locationProvider.html5Mode(true);
 
 }])
 .factory('fake', function(){
@@ -276,8 +276,8 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		    		role: "Admin"
 		    	}
 		    ];
-			res.branches = [ 
-				"master", 
+			res.branches = [
+				"master",
 				"experimental"
 	    	];
 	    	res.n_log = 19;
@@ -366,7 +366,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 				var day = date.split(",")[0];
 
 				if(!res.hasOwnProperty(day)){
-					res[day] = [];  			
+					res[day] = [];
 			  	}
 
 	  			res[day].push(fake.revision(date));
@@ -497,7 +497,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		// - fetch the revisions
 		// - set the current revision (selected by default)
 		// - set the current diff
-		return o.fetchInfo() 
+		return o.fetchInfo()
 			.then(function(res){
 				o.setInfo(res);
 				return o.fetchCurrentBranch(o.info.branches[0]);
@@ -610,7 +610,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	return o;
 
 })
-.controller('MainCtrl', function($scope, $http, data, view, account, project, pagination, users, $state){
+.controller('MainCtrl', function($scope, $window, $location, $http, data, view, account, project, pagination, users, $state){
 
 	$scope.data = data;
 	$scope.view = view;
@@ -618,9 +618,11 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	$scope.project = project;
 	$scope.possible_views = ["info", "comments", "revisions", "log", "settings"];
 
+	$scope.apiUrl = '//api.' + $location.host() + ($location.port() ? (':' + $location.port()) : '');
+
 	console.log("ACCOUNT => " + $scope.account);
 	console.log("VIEW => " + $scope.view);
-	console.log("PROJECT => " + $scope.project);	
+	console.log("PROJECT => " + $scope.project);
 
 	$scope.pagination = pagination;
 	$scope.users = users;
@@ -651,4 +653,51 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
   	$scope.pageChanged();
 
+	if ($window.sessionStorage.username)
+	{
+		$scope.user = {username: $window.sessionStorage.username, password: ''};
+	} else {
+		$scope.user = {username :'', password: ''};
+	}
+
+	$scope.loggedIn = !!$window.sessionStorage.token;
+
+	$scope.login = function() {
+		url = $scope.apiUrl + '/login';
+		console.log('URL: ' + url);
+
+		$http.post(url, $scope.user)
+		.success(function (data, status, headers, config) {
+			$window.sessionStorage.token = data.token;
+			$window.sessionStorage.username = $scope.user.username;
+			$scope.loggedIn = true;
+		})
+		.error(function(data, status, headers, config) {
+			delete $window.sessionStorage.token;
+			console.log('Failed')
+		});
+	};
+}).factory('authInterceptor', function($rootScope, $q, $window) {
+	return {
+		request: function (config) {
+			config.headers = config.headers || {};
+			if ($window.sessionStorage.token) {
+				config.headers.Authorization = 'Bearer ' + $window.sessionStorage.token;
+			}
+			return config;
+		},
+		response: function (res) {
+			if (res.status === 401)
+			{
+				delete $window.sessionStorage.token;
+				delete $window.sessionStorage.user;
+				return
+			}
+			return res || $q.when(res);
+		}
+	};
+}).config(function ($httpProvider) {
+	$httpProvider.interceptors.push('authInterceptor');
 });
+
+jQuery.support.cors = true;
