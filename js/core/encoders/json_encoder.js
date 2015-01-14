@@ -204,8 +204,12 @@ exports.route = function(router)
 	});
 
 	router.get('json', '/:account/:project', function(res, params) {
-		// FIXME: Fill in
-		res.status(415).send("Not supported");
+		dbInterface.getProjectInfo(params.account, params.project, function(err, project)
+		{
+			if(err) throw err;
+
+			res.json(project);
+		});
 	});
 
 	router.get('json', '/:account/:project/revision/:rid', function(res, params) {

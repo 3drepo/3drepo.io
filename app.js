@@ -18,7 +18,8 @@
 var express = require('express'),
 	app = express(),
 	vhost = require('vhost'),
-	path = require('path');
+	path = require('path'),
+	cors = require('cors');
 
 var log_iface = require('./js/core/logger.js');
 var logger = log_iface.logger;
@@ -27,6 +28,21 @@ onError = log_iface.onError;
 var hostname = process.env.HOSTNAME;
 var config = require('app-config').config;
 
+var allowCrossDomain = function(req, res, next) {
+	res.header('Access-Control-Allow-Origin', '*');
+	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+	res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+	res.header('Cache-Control', 'public, max-age=3600');
+
+	// intercept OPTIONS method
+	if ('OPTIONS' == req.method) {
+		res.sendStatus(200);
+	} else {
+		next();
+	}
+}
+
+app.use(allowCrossDomain);
 app.use(vhost('api.' + hostname, require('./api.js').app));
 app.use(vhost(hostname, require('./frontend.js').app));
 

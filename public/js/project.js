@@ -1,56 +1,118 @@
+var viewUrl = function ($stateParams)
+{
+	// Each view is associated with a template
+	// However only a few views are possible
+	// Check that we have a view that exists otherwise redirects to info
+	var possible_views = ["info", "comments", "revisions", "log", "settings"];
+	var view = $stateParams.view;
+
+	if( possible_views.indexOf(view) == -1 ){
+		view = "info";
+	}
+
+	return view + '.html';
+}
+
 angular.module('3drepo', ['ui.router', 'ui.bootstrap'])
+.run(function($rootScope, $location) {
+	$rootScope.apiUrl = '//api.' + $location.host() + ($location.port() ? (':' + $location.port()) : '');
+})
 .config([
 '$stateProvider',
 '$urlRouterProvider',
 '$locationProvider',
 function($stateProvider, $urlRouterProvider, $locationProvider) {
-  $stateProvider
-    .state('info', {
-      url: '/:account/:project/:view',
-      templateUrl: function ($stateParams){
-      	// Each view is associated with a template
-      	// However only a few views are possible
-      	// Check that we have a view that exists otherwise redirects to info
-      	var possible_views = ["info", "comments", "revisions", "log", "settings"];
-      	var view = $stateParams.view;
-
-      	if( possible_views.indexOf(view) == -1 ){
-      		view = "info";
-      	}
-
-     	return view + '.html';
-   	  },
-      controller: 'MainCtrl',
-			resolve:{
-			  	view: function($stateParams){
-          			return $stateParams.view;
-      			},
-      			account : function($stateParams){
-          			return $stateParams.account;
-      			},
-      			project: function($stateParams){
-          			return $stateParams.project;
-      			},
-      			initPromise: function(data, $stateParams){
-	  				return data.initPromise($stateParams.account, $stateParams.project, $stateParams.view);
-      			}
+	$stateProvider
+		.state('main' ,{
+			url: '/:account/:project',
+			templateUrl: 'mainpage.html',
+			controller: 'MainCtrl',
+			resolve: {
+				account : function($stateParams){
+					return $stateParams.account;
+				},
+				project: function($stateParams){
+					return $stateParams.project;
+				},
 			}
-    })
-    .state('404', {
-      url: '/404',
-      templateUrl: '404.html',
-    });
+		}).state('main.view', {
+			url: '/:view',
+			templateUrl: viewUrl,
+			controller: 'ViewCtrl',
+			resolve: {
+				view: function($stateParams){
+					return $stateParams.view;
+				},
+				initPromise: function(data, $stateParams){
+					return data.initPromise($stateParams.account, $stateParams.project, 'master', 'head', $stateParams.view);
+				}
+			}
+		}).state('main.branch', {
+			url: '/revision/:branch/head',
+			controller: 'RevisionCtrl',
+			resolve: {
+				branch: function($stateParams) {
+					return $stateParams.branch;
+				}
+			}
+		}).state('main.branch.view', {
+			url: '/:view',
+			views : {
+				"footer@main" : {
+					templateUrl: viewUrl,
+					controller: 'ViewCtrl',
+					resolve: {
+						view: function($stateParams){
+							return $stateParams.view;
+						},
+						initPromise: function(data, $stateParams){
+							return data.initPromise($stateParams.account, $stateParams.project, $stateParams.branch, 'head', $stateParams.view);
+						}
+					}
+				}
+			}
+		}).state('main.revision', {
+			url: '/revision/:rid',
+			controller: 'RevisionCtrl',
+			resolve: {
+				rid: function($stateParams) {
+					return $stateParams.rid;
+				},
+				branch: function($stateParams) {
+					return null;
+				}
+			}
+		}).state('main.revision.view', {
+			url: '/:view',
+			views : {
+				"footer@main" : {
+					templateUrl: viewUrl,
+					controller: 'ViewCtrl',
+					resolve: {
+						view: function($stateParams){
+							return $stateParams.view;
+						},
+						initPromise: function(data, $stateParams){
+							return data.initPromise($stateParams.account, $stateParams.project, $stateParams.branch, $stateParams.rid, $stateParams.view);
+						}
+					}
+				}
+			}
+		})
+		.state('404', {
+		  url: '/404',
+		  templateUrl: '404.html',
+		});
 
-  // Invalid URL redirect to 404 state
-  $urlRouterProvider.otherwise('404');
+	// Invalid URL redirect to 404 state
+	$urlRouterProvider.otherwise('404');
 
-  // Empty view redirects to info view by default
-  $urlRouterProvider.when('/{account}/{project}', '/{account}/{project}/info');
+	// Empty view redirects to info view by default
+	$urlRouterProvider.when('/{account}/{project}', '/{account}/{project}/info');
 
-  // This will be needed to remove angular's #, but there is an error at the moment
-  // -> need to investigate
-  $locationProvider.html5Mode(true);
-
+	// This will be needed to remove angular's #, but there is an error at the moment
+	// -> need to investigate
+	$locationProvider.html5Mode(true);
 }])
 .factory('fake', function(){
 
@@ -67,17 +129,17 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	}
 
 	o.text = function(n, space){
-	    var text = "";
-	    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		var text = "";
+		var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-	    if(space){
-	    	possible = possible + "            ";
-	    }
+		if(space){
+			possible = possible + "			   ";
+		}
 
-	    for( var i=0; i < n; i++ )
-	        text += possible.charAt(Math.floor(Math.random() * possible.length));
+		for( var i=0; i < n; i++ )
+			text += possible.charAt(Math.floor(Math.random() * possible.length));
 
-	    return text;
+		return text;
 	}
 
 	o.entry = function(array){
@@ -179,7 +241,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	return o;
 
 })
-.factory('data', function($http, $q, fake){
+.factory('data', function($http, $q, $rootScope, fake){
 
 	/**
 	 * This provider is used to store the data about the project
@@ -190,15 +252,15 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		loading: true,
 		info: {
 			name: "",
-		    owner: "",
-		    readme: "",
-		    description: "",
-		    visibility: "",
-		    type: "",
-		    federation: [],
-		    users: [],
-		    branches: [],
-		    n_log: 0
+			owner: "",
+			readme: "",
+			description: "",
+			visibility: "",
+			type: "",
+			federation: [],
+			users: [],
+			branches: [],
+			n_log: 0
 		},
 		current_branch: {
 			name: "",
@@ -208,8 +270,8 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			name: "",
 			n_comments: 0,
 			author: "",
-	    	date: "",
-	    	message: "",
+			date: "",
+			message: "",
 		},
 		current_diff: {
 			name: "",
@@ -217,12 +279,12 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		comments:[
 		],
 		revisions: [
- 	 	],
-	  	revisions_by_day:
-  		{
-  		},
+		],
+		revisions_by_day:
+		{
+		},
 		log: [
-	    ]
+		]
 	};
 
 	/**
@@ -230,60 +292,77 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	 */
 
 	// Fetch general info about the project
-	o.fetchInfo = function(){
+	o.fetchInfo = function(account, project){
 
 		var deferred = $q.defer();
 
+	o.account = account;
+	o.project = project;
+
 		setTimeout(function() {
 			var res = {};
-			res.name = "OfficeFed";
-		    res.owner = "Tim";
-		    res.readme = "## We are leading the transformation of the Queen Elizabeth Olympic Park Stadium into an all-round multi-use venue\n\n		  \nWe are using sustainable construction methods like incorporating recycled features of the existing facility into the new Stadium and re-using crushed demolition material. \n\nAt construction peak the project will employ up to 400 people, and we are working to ensure the employment of local people where possible. We have also committed to create apprenticeships which will amount to 7% of the total workforce.\n\nThe new venue will host five matches during the Rugby World Cup 2015 and will be the permanent home of West Ham United Football Club from 2016.\n                    \nBalfour Beatty, the international infrastructure group, today announces that it has been awarded a &pound;154 million contract to carry out the full transformation works to the London 2012 Olympic Stadium for its operator, E20 Stadium LLP, a joint venture between the London Legacy Development Corporation and Newham Council. This new contract encompasses the &pound;41 million Stadium roof contract Balfour Beatty was awarded in the summer.\n                    \nBalfour Beatty will lead the transformation of the Stadium into an all-round multi-use venue, delivering a lasting sporting, cultural and commercial legacy in East London.\n                    \nThe new venue will host five matches during the Rugby World Cup 2015 and will be the permanent home of West Ham United Football Club from 2016. The venue will also become the new national competition Stadium for athletics in the UK as well as hosting elite international athletics events and other sporting, cultural and community events. A new community athletics track will also be provided next to the main Stadium.\n\nSustainable construction methods will include features of the existing facility being recycled and incorporated into the new Stadium and the re-use of crushed demolition material, existing balustrades and sanitary ware.\n\n\nAt construction peak the project will employ up to 400 people. Balfour Beatty will work with WorkPlace, Newham Council's employment service, to ensure the employment of local people where possible. Balfour Beatty has also committed to create apprenticeships which will amount to 7% of the total workforce.\n\nOnce reconfigured the Stadium's cable net roof, 84 metres wide at its deepest point, will be the largest cantilevered roof in the world covering every Stadium seat, improving acoustics and spectator experience.\n\nBalfour Beatty Chief Executive, Andrew McNaughton said: \"We are delighted to be continuing our activity at the Queen Elizabeth Olympic Park supporting the legacy commitment made as part of the London 2012 Olympic and Paralympic Games.\n\nDuring construction, our firm commitment to the use of local labour and the creation of apprenticeships will continue to benefit the local community and the wider industry and, upon completion, the Stadium will provide a first-class sporting and cultural facility for many generations to come. Balfour Beatty is proud to be associated with this project.\"\n\nWorks commence on site early in 2014 and are due for completion in the spring of 2016.";
-			res.description = "Description of the project";
-			res.visibility = "public";
-			res.type = "federated";
-			res.federation = [
-		    	{
-		    		name: "Helicopter project 1",
-		    		revisions: [
-		    			"HEAD",
-		    			"Rev 1",
-		    			"Rev 2",
-		    		],
-		    		revselected: "HEAD"
-		    	},
-		    	{
-		    		name: "Boat project 1",
-		    		revisions: [
-		    			"HEAD",
-		    			"Rev 3",
-		    			"Rev 4",
-		    		],
-		    		revselected: "Rev 4"
-		    	}
-	    	];
-	    	res.users = [
-		    	{
-		    		name: "Tim Scully",
-		    		role: "Admin"
-		    	},
-		    	{
-		    		name: "Jozef Dobos",
-		    		role: "Admin"
-		    	},
-		    	{
-		    		name: "Frederic Besse",
-		    		role: "Admin"
-		    	}
-		    ];
-			res.branches = [
-				"master",
-				"experimental"
-	    	];
-	    	res.n_log = 19;
+			res.name = project;
 
-	    	deferred.resolve(res);
-	    }, 100);
+			$http.get($rootScope.apiUrl + '/' + account + '/' + project + '.json')
+			.then(function(data) {
+				res.owner = data.owner;
+				res.description = data.desc;
+				//res.type = data.type;
+				res.visibility = data.read_access;
+
+				res.readme = "## We are leading the transformation of the Queen Elizabeth Olympic Park Stadium into an all-round multi-use venue\n\n		  \nWe are using sustainable construction methods like incorporating recycled features of the existing facility into the new Stadium and re-using crushed demolition material. \n\nAt construction peak the project will employ up to 400 people, and we are working to ensure the employment of local people where possible. We have also committed to create apprenticeships which will amount to 7% of the total workforce.\n\nThe new venue will host five matches during the Rugby World Cup 2015 and will be the permanent home of West Ham United Football Club from 2016.\n					   \nBalfour Beatty, the international infrastructure group, today announces that it has been awarded a &pound;154 million contract to carry out the full transformation works to the London 2012 Olympic Stadium for its operator, E20 Stadium LLP, a joint venture between the London Legacy Development Corporation and Newham Council. This new contract encompasses the &pound;41 million Stadium roof contract Balfour Beatty was awarded in the summer.\n					\nBalfour Beatty will lead the transformation of the Stadium into an all-round multi-use venue, delivering a lasting sporting, cultural and commercial legacy in East London.\n					   \nThe new venue will host five matches during the Rugby World Cup 2015 and will be the permanent home of West Ham United Football Club from 2016. The venue will also become the new national competition Stadium for athletics in the UK as well as hosting elite international athletics events and other sporting, cultural and community events. A new community athletics track will also be provided next to the main Stadium.\n\nSustainable construction methods will include features of the existing facility being recycled and incorporated into the new Stadium and the re-use of crushed demolition material, existing balustrades and sanitary ware.\n\n\nAt construction peak the project will employ up to 400 people. Balfour Beatty will work with WorkPlace, Newham Council's employment service, to ensure the employment of local people where possible. Balfour Beatty has also committed to create apprenticeships which will amount to 7% of the total workforce.\n\nOnce reconfigured the Stadium's cable net roof, 84 metres wide at its deepest point, will be the largest cantilevered roof in the world covering every Stadium seat, improving acoustics and spectator experience.\n\nBalfour Beatty Chief Executive, Andrew McNaughton said: \"We are delighted to be continuing our activity at the Queen Elizabeth Olympic Park supporting the legacy commitment made as part of the London 2012 Olympic and Paralympic Games.\n\nDuring construction, our firm commitment to the use of local labour and the creation of apprenticeships will continue to benefit the local community and the wider industry and, upon completion, the Stadium will provide a first-class sporting and cultural facility for many generations to come. Balfour Beatty is proud to be associated with this project.\"\n\nWorks commence on site early in 2014 and are due for completion in the spring of 2016.";
+
+				res.type = "federated";
+				res.federation = [
+					{
+						name: "Helicopter project 1",
+						revisions: [
+							"HEAD",
+							"Rev 1",
+							"Rev 2",
+						],
+						revselected: "HEAD"
+					},
+					{
+						name: "Boat project 1",
+						revisions: [
+							"HEAD",
+							"Rev 3",
+							"Rev 4",
+						],
+						revselected: "Rev 4"
+					}
+				];
+				res.users = [
+					{
+						name: "Tim Scully",
+						role: "Admin"
+					},
+					{
+						name: "Jozef Dobos",
+						role: "Admin"
+					},
+					{
+						name: "Frederic Besse",
+						role: "Admin"
+					}
+				];
+
+				return $http.get($rootScope.apiUrl + '/' + account + '/' + project + '/branches.json');
+
+			}).then(function(data) {
+				res.branches = data.data.map(function (item) {
+					if (item.name == "00000000-0000-0000-0000-000000000000")
+						return "master";
+					else
+						return item.name;
+				});
+
+				res.n_log = 19;
+
+				deferred.resolve(res);
+			});
+		},0);
 
 		return deferred.promise;
 	}
@@ -293,7 +372,6 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		var deferred = $q.defer();
 
 		setTimeout(function() {
-
 			var res = {
 				name: name,
 				n_revisions: fake.number(24),
@@ -307,17 +385,27 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	};
 
 	// Fetch info about the current revision given the name of the revision
-	o.fetchCurrentRevision = function(name){
+	o.fetchCurrentRevision = function(branch, name){
 		var deferred = $q.defer();
+
+		var url = "";
+
+		if (name == 'head')
+			url = $rootScope.apiUrl + '/' + o.account + '/' + o.project + '/revision/' + branch + '/' + name + '.json';
+		else
+			url = $rootScope.apiUrl + '/' + o.account + '/' + o.project + '/revision/' + name + '.json';
 
 		setTimeout(function() {
 
-			var date = fake.date();
-
-			var res = fake.revision(date);
-
-			deferred.resolve(res);
-
+			$http.get(url).then(function(data) {
+				var res     = {};
+				res.name    = data.data.name;
+				res.author  = data.data.author;
+				res.data    = data.data.date;
+				res.message = data.data.message;
+				res.n_comments = 24;
+				deferred.resolve(res);
+			});
 		}, 10);
 
 		return deferred.promise;
@@ -325,30 +413,15 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 	o.fetchRevisions = function(branch){
 
-		var fetchFakeRevisionsNames = function(branch){
-
-			console.log("Fetching revisions names ");
-
-			var res = [];
-			for(var i=0; i<o.current_branch.n_revisions; i++){
-				var date = fake.date();
-	  			res.push({name: fake.revision(date).name});
-			}
-
-			return res;
-
-		};
-
 		var deferred = $q.defer();
 
 		setTimeout(function() {
 
-			var res = fetchFakeRevisionsNames(branch);
-			console.log(res);
-
-	  		deferred.resolve(res);
-
-  		}, 10);
+			$http.get($rootScope.apiUrl + '/' + o.account + '/' + o.project + '/revisions/' + branch.name + '.json')
+			.then(function(data) {
+				deferred.resolve(data.data);
+			});
+		}, 10);
 
 		return deferred.promise;
 	};
@@ -367,9 +440,9 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 				if(!res.hasOwnProperty(day)){
 					res[day] = [];
-			  	}
+				}
 
-	  			res[day].push(fake.revision(date));
+				res[day].push(fake.revision(date));
 			}
 
 			return res;
@@ -381,8 +454,8 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		setTimeout(function() {
 			var res = fetchFakeRevisions(o.current_branch.name, o.current_revision.name, first, last);
 
-	  		deferred.resolve(res);
-  		}, 10);
+			deferred.resolve(res);
+		}, 10);
 
 		return deferred.promise;
 	};
@@ -407,11 +480,11 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 		setTimeout(function() {
 
-	    	var res = fetchFakeComments(o.current_branch.name, o.current_revision.name, first, last);
+			var res = fetchFakeComments(o.current_branch.name, o.current_revision.name, first, last);
 
 			deferred.resolve(res);
 
-  		}, 10);
+		}, 10);
 
 		return deferred.promise;
 	};
@@ -438,8 +511,8 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 			var res = fetchFakeLog(o.current_branch.name, o.current_revision.name, first, last);
 
-		    deferred.resolve(res);
-  		}, 10);
+			deferred.resolve(res);
+		}, 10);
 
 		return deferred.promise;
 	};
@@ -486,7 +559,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	 * Promises, used in the resolve to fetch data
 	 */
 
-	o.initPromise = function(account, project, info){
+	o.initPromise = function(account, project, branch, rid, info){
 
 		// Enable loading animation
 		o.loading = true;
@@ -497,10 +570,10 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		// - fetch the revisions
 		// - set the current revision (selected by default)
 		// - set the current diff
-		return o.fetchInfo()
+		return o.fetchInfo(account, project)
 			.then(function(res){
 				o.setInfo(res);
-				return o.fetchCurrentBranch(o.info.branches[0]);
+				return o.fetchCurrentBranch(branch);
 			})
 			.then(function(res){
 				o.setCurrentBranch(res);
@@ -508,7 +581,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			})
 			.then(function(res){
 				o.setRevisions(res);
-				return o.fetchCurrentRevision(o.revisions[0].name);
+				return o.fetchCurrentRevision(branch, rid);
 			})
 			.then(function(res){
 				o.setCurrentRevision(res);
@@ -532,12 +605,12 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	return {
 	  restrict: 'A',
 	  link: function (scope, element, attrs) {
-	      function renderMarkdown() {
-	          var htmlText = converter.makeHtml(scope.$eval(attrs.markdown)  || '');
-	          element.html(htmlText);
-	      }
-	      scope.$watch(attrs.markdown, renderMarkdown);
-	      renderMarkdown();
+		  function renderMarkdown() {
+			  var htmlText = converter.makeHtml(scope.$eval(attrs.markdown)  || '');
+			  element.html(htmlText);
+		  }
+		  scope.$watch(attrs.markdown, renderMarkdown);
+		  renderMarkdown();
 	  }
   };
 })
@@ -610,15 +683,11 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	return o;
 
 })
-.controller('MainCtrl', function($scope, $window, $location, $http, data, view, account, project, pagination, users, $state){
+.controller('ViewCtrl', function($scope, $http, data, view, pagination, users, $state){
 
 	$scope.data = data;
 	$scope.view = view;
-	$scope.account = account;
-	$scope.project = project;
 	$scope.possible_views = ["info", "comments", "revisions", "log", "settings"];
-
-	$scope.apiUrl = '//api.' + $location.host() + ($location.port() ? (':' + $location.port()) : '');
 
 	console.log("ACCOUNT => " + $scope.account);
 	console.log("VIEW => " + $scope.view);
@@ -629,41 +698,73 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 	$scope.loading = true;
 
-  	$scope.pageChanged = function() {
-  		$scope.pagination.init($scope.view);
-    	$scope.pagination.fetch($scope.view);
-  	};
+	$scope.pageChanged = function() {
+		$scope.pagination.init($scope.view);
+		$scope.pagination.fetch($scope.view);
+	};
 
 	$scope.isView = function(view){
-    	return $scope.view == view;
-  	};
+		return $scope.view == view;
+	};
 
-  	$scope.go = function(v){
-  		var o = {account: $scope.account, project: $scope.project, view: v};
-  		$state.go("info", o);
-  	}
-
-  	$scope.checkViewIsValid = function(){
-		if( $scope.possible_views.indexOf(view) == -1 ){
-      		$state.go("404");
-      	}
-  	}
-
-  	$scope.checkViewIsValid();
-
-  	$scope.pageChanged();
-
-	if ($window.sessionStorage.username)
-	{
-		$scope.user = {username: $window.sessionStorage.username, password: ''};
-	} else {
-		$scope.user = {username :'', password: ''};
+	$scope.go = function(v){
+		var o = {view: v};
+		$state.go("main.view", o);
 	}
 
+	$scope.checkViewIsValid = function(){
+		if( $scope.possible_views.indexOf(view) == -1 ){
+			$state.go("404");
+		}
+	}
+
+	$scope.setBranch = function(branch) {
+		$scope.branch = branch;
+	}
+
+	$scope.setRevision = function(rev) {
+		$scope.rid = rev;
+		var o = {
+			branch: $scope.branch,
+			rid:  $scope.rid.name,
+			view: $scope.view
+		};
+
+		$state.go('main.revision.view', o);
+	}
+
+	$scope.checkViewIsValid();
+
+	$scope.pageChanged();
+
+})
+.factory('iFrameURL', function() {
+	var o = {};
+
+	o.setURL = function(url)
+	{
+		o.url = url;
+	}
+
+	return o;
+})
+.controller('MainCtrl', function($scope, $http, iFrameURL, account, project, $location, $window, $state, $stateParams, $rootScope) {
 	$scope.loggedIn = !!$window.sessionStorage.token;
+	$rootScope.apiUrl = $rootScope.apiUrl;
+
+	$scope.iFrameURL = iFrameURL;
+	iFrameURL.setURL($rootScope.apiUrl + '/' + account + '/' + project + '/revision/master/head.x3d.src');
+
+	$scope.logOut = function() {
+		if ($window.sessionStorage.token)
+		{
+			delete $window.sessionStorage.username;
+			delete $window.sessionStorage.token;
+		}
+	}
 
 	$scope.login = function() {
-		url = $scope.apiUrl + '/login';
+		url = $rootScope.apiUrl + '/login';
 		console.log('URL: ' + url);
 
 		$http.post(url, $scope.user)
@@ -673,16 +774,39 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			$scope.loggedIn = true;
 		})
 		.error(function(data, status, headers, config) {
-			delete $window.sessionStorage.token;
+			logOut();
 			console.log('Failed')
 		});
 	};
-}).factory('authInterceptor', function($rootScope, $q, $window) {
+
+	if ($window.sessionStorage.username)
+	{
+		$scope.user = {username: $window.sessionStorage.username, password: ''};
+	} else {
+		$scope.user = {username :'', password: ''};
+	}
+
+	$scope.x3domreload = function() {
+		x3dom.reload();
+	};
+})
+.controller('RevisionCtrl', function($scope, $http, iFrameURL, account, project, branch, rid, $stateParams, $rootScope, $state) {
+	$scope.branch = branch;
+	$scope.rid = rid;
+
+	if (branch)
+		iFrameURL.setURL($rootScope.apiUrl + '/' + account + '/' + project + '/revision/' + branch + '/' + rid + '.x3d.src');
+	else
+		iFrameURL.setURL($rootScope.apiUrl + '/' + account + '/' + project + '/revision/' + rid + '.x3d.src');
+
+})
+.factory('authInterceptor', function($rootScope, $q, $window) {
 	return {
 		request: function (config) {
+			console.log(config)
 			config.headers = config.headers || {};
 			if ($window.sessionStorage.token) {
-				config.headers.Authorization = 'Bearer ' + $window.sessionStorage.token;
+				$window.sessionStorage.Authorization = 'Bearer ' + $window.sessionStorage.token;
 			}
 			return config;
 		},
@@ -691,13 +815,21 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			{
 				delete $window.sessionStorage.token;
 				delete $window.sessionStorage.user;
-				return
+				return;
 			}
+
 			return res || $q.when(res);
 		}
 	};
-}).config(function ($httpProvider) {
+})
+.config(function ($httpProvider, $sceDelegateProvider) {
 	$httpProvider.interceptors.push('authInterceptor');
+
+	$sceDelegateProvider.resourceUrlWhitelist([
+		'self',
+		'http://api.localhost:8081/**'
+	]);
+
 });
 
 jQuery.support.cors = true;

@@ -17,12 +17,13 @@
 
 var express = require('express'),
 	app = express(),
+	cors = require('cors'),
 	path = require('path');
 
 app.use('/public', express.static(__dirname + '/public'));
 
 app.get('*', function(req, res) {
-	res.sendfile(__dirname + '/frontend.html');
+	res.sendFile(__dirname + '/frontend.html');
 });
 
 exports.app = app

@@ -1,34 +1,34 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *	Copyright (C) 2014 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 // Inspired by
 // http://stackoverflow.com/questions/12037655/node-js-mongodb-native-driver-connection-sharing
 
-var async     = require('async');
-var config    = require('app-config').config;
-var mongo     = require('mongodb');
+var async	  = require('async');
+var config	  = require('app-config').config;
+var mongo	  = require('mongodb');
 var logIFace  = require('./logger.js');
-var logger    = logIFace.logger;
-onError       = logIFace.onError;
+var logger	  = logIFace.logger;
+onError		  = logIFace.onError;
 
 // Main DB Object constructor
 function MongoDB() {
-	this.host     = config.db.host;
-	this.port     = config.db.port;
+	this.host	  = config.db.host;
+	this.port	  = config.db.port;
 
 	this.userAuth = null;
 	this.dbConns  = {};
@@ -64,8 +64,8 @@ MongoDB.prototype.authenticateUser = function(username, password, callback) {
 			self.userAuth = dbConn;
 
 			dbConn.on('close', function(err) {
-                self.userAuth = null;
-            });
+				self.userAuth = null;
+			});
 
 			return self.authenticateUser(username, password, callback);
 		});
@@ -90,13 +90,13 @@ MongoDB.prototype.authenticateUser = function(username, password, callback) {
  *								dbConn is the returned database connection.
  ******************************************************************************/
 MongoDB.prototype.dbCallback = function(dbName, callback) {
-    var self = this;
+	var self = this;
 
 	// If we already have a connection, return that rather than
 	// opening a new connection
-    if (self.dbConns[dbName]) {
-        return callback(null, self.dbConns[dbName]);
-    }
+	if (self.dbConns[dbName]) {
+		return callback(null, self.dbConns[dbName]);
+	}
 
 	// Check if there is an open server connection
 	// if there isn't then open one
@@ -113,13 +113,13 @@ MongoDB.prototype.dbCallback = function(dbName, callback) {
 		});
 
 	// Attempt to open the database connection
-    db.open(function(err, dbConn) {
-        if (err) return callback(err);
+	db.open(function(err, dbConn) {
+		if (err) return callback(err);
 
 		// Authenticate against the NodeJS database user
-        var adminDb = db.admin();
+		var adminDb = db.admin();
 
-        adminDb.authenticate(config.db.username, config.db.password, function(err) {
+		adminDb.authenticate(config.db.username, config.db.password, function(err) {
 			if (err)
 				return callback(err);
 
@@ -127,16 +127,16 @@ MongoDB.prototype.dbCallback = function(dbName, callback) {
 			logger.log('debug', 'Authorized as ' + config.db.username);
 			logger.log('debug', 'DB CONNECTION:' + JSON.stringify(dbConn.serverConfig.auth.toArray()));
 
-            self.dbConns[dbName] = dbConn;
+			self.dbConns[dbName] = dbConn;
 
-            dbConn.on('close', function(err) {
-                logger.log('debug', 'Closing connection to ' + dbName + '. REASON: ' + err);
-                delete(self.dbConns[dbName]);
-            })
+			dbConn.on('close', function(err) {
+				logger.log('debug', 'Closing connection to ' + dbName + '. REASON: ' + err);
+				delete(self.dbConns[dbName]);
+			})
 
-            callback(null, dbConn);
-        });
-    });
+			callback(null, dbConn);
+		});
+	});
 
 }
 
@@ -152,19 +152,19 @@ MongoDB.prototype.Binary = mongo.Binary;
  * TODO: Fix this, if not currently working
  ******************************************************************************/
 MongoDB.prototype.aggregate = function(dbName, collName, query) {
-    var self = this;
+	var self = this;
 
-    async.waterfall([
+	async.waterfall([
 
-    function(callback) {
-        self.collCallback(dbName, collName, callback);
-    }, function(err, coll) {
-        coll.aggregate(query, callback)
-    }], function(err, result) {
-        setTimeout(function() {
-            return result;
-        }, 0);
-    });
+	function(callback) {
+		self.collCallback(dbName, collName, callback);
+	}, function(err, coll) {
+		coll.aggregate(query, callback)
+	}], function(err, result) {
+		setTimeout(function() {
+			return result;
+		}, 0);
+	});
 
 }
 
@@ -177,21 +177,21 @@ MongoDB.prototype.aggregate = function(dbName, collName, query) {
  *								callback as parameter
  ******************************************************************************/
 MongoDB.prototype.collCallback = function(dbName, collName, callback) {
-    logger.log('debug', 'Loading collection ' + collName);
+	logger.log('debug', 'Loading collection ' + collName + ' on ' + dbName);
 
 	// First get database connection
-    this.dbCallback(dbName, function(err, dbConn) {
-        if (err) return callback(err);
+	this.dbCallback(dbName, function(err, dbConn) {
+		if (err) return callback(err);
 
 		// Get collection from database to act on
-        dbConn.collection(collName, {strict:true}, function(err, coll) {
+		dbConn.collection(collName, {strict:true}, function(err, coll) {
 			if (err) {
 				return callback(err);
 			}
 
-            callback(null, coll);
-        });
-    });
+			callback(null, coll);
+		});
+	});
 }
 
 /*******************************************************************************
@@ -209,16 +209,25 @@ MongoDB.prototype.getLatest = function(dbName, collName, filter, projection, cal
 	this.collCallback(dbName, collName, function(err, coll) {
 		if (err) return callback(err);
 
+		projStr = JSON.stringify(projection);
+		filtStr = JSON.stringify(filter);
+
+		logger.log('debug', 'Getting latest for collection: ' + dbName + '/' + collName);
+		logger.log('debug', 'FILTER: \"' + filtStr + '\"');
+		logger.log('debug', 'PROJECTION: \"' + projStr + '\"');
+
 		if (projection != null)
 		{
 			coll.find(filter, projection).limit(1).sort({timestamp:-1}).toArray(function(err, docs) {
 				if (err) return callback(err);
+				logger.log('debug', 'Found ' + docs.length + ' result(s).');
 
 				callback(null, docs);
 			});
 		} else {
 			coll.find(filter).limit(1).sort({timestamp:-1}).toArray(function(err, docs) {
 				if (err) return callback(err);
+				logger.log('debug', 'Found ' + docs.length + ' result(s).');
 
 				callback(null, docs);
 			});
@@ -237,8 +246,8 @@ MongoDB.prototype.getLatest = function(dbName, collName, filter, projection, cal
  *								pass to callback as parameter
  ******************************************************************************/
 MongoDB.prototype.filterColl = function(dbName, collName, filter, projection, callback) {
-    this.collCallback(dbName, collName, function(err, coll) {
-        if (err) return callback(err);
+	this.collCallback(dbName, collName, function(err, coll) {
+		if (err) return callback(err);
 
 		projStr = JSON.stringify(projection);
 		filtStr = JSON.stringify(filter);
@@ -248,18 +257,20 @@ MongoDB.prototype.filterColl = function(dbName, collName, filter, projection, ca
 		logger.log('debug', 'PROJECTION: \"' + projStr + '\"');
 
 		if (projection != null) {
-            coll.find(filter, projection).toArray(function(err, docs) {
-                if (err) return callback(err);
+			coll.find(filter, projection).toArray(function(err, docs) {
+				if (err) return callback(err);
+				logger.log('debug', 'Found ' + docs.length + ' result(s).');
 
-                callback(null, docs);
-            });
-        } else {
-            coll.find(filter).toArray(function(err, docs) {
-                if (err) return callback(err);
+				callback(null, docs);
+			});
+		} else {
+			coll.find(filter).toArray(function(err, docs) {
+				if (err) return callback(err);
+				logger.log('debug', 'Found ' + docs.length + ' result(s).');
 
-                callback(null, docs);
-            });
-        }
+				callback(null, docs);
+			});
+		}
 	});
 }
 

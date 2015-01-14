@@ -137,9 +137,9 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 			var url_str = child['project'] + "." + mode + ".x3d";
 
 			if ('revision' in child)
-				var url_str = '/' + account + '/' + child['project'] + '/revision/master/' + child['revision'] + '.x3d.' + mode;
+				var url_str = '//' + config.server.apiHost + '/' + account + '/' + child['project'] + '/revision/master/' + child['revision'] + '.x3d.' + mode;
 			else
-				var url_str = '/' + account + '/' + child['project'] + '/revision/master/head.x3d.' + mode;
+				var url_str = '//' + config.server.apiHost + '/' + account + '/' + child['project'] + '/revision/master/head.x3d.' + mode;
 
 			newNode.setAttribute('onload', 'onLoaded(event);');
 			newNode.setAttribute('url', url_str);
@@ -227,7 +227,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 				X3D_AddChildren(xmlDoc, appearance, child, dbInterface, account, project, mode);
 		} else if (child['type'] == 'texture') {
             newNode = xmlDoc.createElement('ImageTexture');
-            newNode.setAttribute('url', '/' + account + '/' + project + '/' + child['id'] + '.' + child['extension']);
+            newNode.setAttribute('url', '//' + config.server.apiHost + '/' + account + '/' + project + '/' + child['id'] + '.' + child['extension']);
             newNode.textContent = ' ';
 			newNode.setAttribute("id", child['id']);
 			newNode.setAttribute('DEF', dbInterface.uuidToString(child["shared_id"]));
@@ -315,9 +315,9 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, mode
 
 			if ('children' in mat) {
 				var tex_id = mat['children'][0]['id'];
-				externalGeometry.setAttribute('url', '/' + account + '/' + project + '/' + meshId + '.src?tex_uuid=' + tex_id);
+				externalGeometry.setAttribute('url', '//' + config.server.apiHost + '/' + account + '/' + project + '/' + meshId + '.src?tex_uuid=' + tex_id);
 			} else {
-				externalGeometry.setAttribute('url', '/' + account + '/' + project + '/' + meshId + '.src');
+				externalGeometry.setAttribute('url', '//' + config.server.apiHost + '/' + account + '/' + project + '/' + meshId + '.src');
 			}
 
 			shape.appendChild(externalGeometry);
@@ -329,14 +329,14 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, mode
 
 			var binaryGeometry = xmlDoc.createElement('binaryGeometry');
 
-			binaryGeometry.setAttribute('normal', '/' + account + '/' + project + '/' + meshId + '.bin?mode=normals');
+			binaryGeometry.setAttribute('normal', '//' + config.server.apiHost + '/' + account + '/' + project + '/' + meshId + '.bin?mode=normals');
 
 			if ('children' in mat) {
-				binaryGeometry.setAttribute('texCoord', '/' + account + '/' + project + '/' + meshId + '.bin?mode=texcoords');
+				binaryGeometry.setAttribute('texCoord', '//' + config.server.apiHost + '/' + account + '/' + project + '/' + meshId + '.bin?mode=texcoords');
 			}
 
-			binaryGeometry.setAttribute('index', '/' + account + '/' + project + '/' + meshId + '.bin?mode=indices');
-			binaryGeometry.setAttribute('coord', '/' + account + '/' + project + '/' + meshId + '.bin?mode=coords');
+			binaryGeometry.setAttribute('index', '//' + config.server.apiHost + '/' + account + '/' + project + '/' + meshId + '.bin?mode=indices');
+			binaryGeometry.setAttribute('coord', '//' + config.server.apiHost + '/' + account + '/' + project + '/' + meshId + '.bin?mode=coords');
 			//binaryGeometry.setAttribute('vertexCount', mesh.vertices_count);
 			binaryGeometry.textContent = ' ';
 
@@ -377,7 +377,7 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, mode
 					for (var lvl = 0; lvl < cacheMesh.num_levels; lvl++) {
 						var popGeometryLevel = xmlDoc.createElement('PopGeometryLevel');
 
-						popGeometryLevel.setAttribute('src', '/' + account + '/' + project + '/' + meshId + '.pbf?level=' + lvl);
+						popGeometryLevel.setAttribute('src', '//' + config.server.apiHost + '/' + account + '/' + project + '/' + meshId + '.pbf?level=' + lvl);
 						popGeometryLevel.setAttribute('numIndices', cacheMesh[lvl].numIdx);
 						popGeometryLevel.setAttribute('vertexDataBufferOffset', cacheMesh[lvl].numVertices);
 

@@ -272,8 +272,8 @@ hr {
 	position: relative;
 	color: #666;
 	background-color: #FFF;
-  border-top: 1px solid;
-  border-color: #EEE;
+	border-top: 1px solid;
+	border-color: #EEE;
 }
 
 .project-menu-section h3{
@@ -288,8 +288,8 @@ hr {
 	position: relative;
 	color: #666;
 	background-color: #FAFAFA;
-  border-top: 1px solid;
-  border-color: #EEE;
+	border-top: 1px solid;
+	border-color: #EEE;
 }
 
 .project-menu-section:first-child, .project-menu-section:hover:first-child{
@@ -321,9 +321,8 @@ hr {
 
 .placeholder-screenshot-large{
 	background-color: #004594 !important;
-	min-height: 600px;
+	height: 600px;
 	box-shadow: inset  0  8px 18px -8px #000, inset  0 -8px 18px -8px #000;
-	width: 100%;
 	border: none;
 	display: block;
 }

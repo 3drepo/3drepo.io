@@ -31,10 +31,11 @@ var login = {};
 var secret = 'secret';
 
 login.ensureLoggedIn = function() {
+	console.log("Here");
 	return expressJwt({secret:secret});
 };
 
-module.exports = function(passport){
+module.exports = function(){
 	this.router = express.Router();
 	this.getMap = {}
 
@@ -69,11 +70,9 @@ module.exports = function(passport){
 
 			// If there is no error then we have access
 			if (!(format in this.getMap)) {
-				res.status(416);
-				res.redirect('/');
+				res.sendStatus(415);
 			} else if (!(regex in this.getMap[format])) {
-				res.status(416);
-				res.redirect('/');
+				res.sendStatus(501);
 			} else {
 				this.getMap[format][regex](res, params);
 			}
@@ -89,44 +88,9 @@ module.exports = function(passport){
 		next();
 	});
 
-	/*
-	  Old frontend based stuff
-
-	this.router.get('/login', function(req, res) {
-		var paramJson = {
-			message: req.flash('message')
-		};
-
-		Object.keys(config.external).forEach(function(key) {
-			paramJson[key] = config.external[key];
-		});
-
-		res.render('login', paramJson);
-	});
-
-	this.router.post('/login', passport.authenticate('login', {
-		successReturnToOrRedirect: '/home',
-		failureRedirect: '/',
-		failureFlash: true
-	}));
-
-	// Home simply points to the user's home page.
-	this.router.get('/home', login.ensureLoggedIn('/login'), function(req, res, next) {
-		var username = req.user.username;
-		res.redirect('/' + username);
-	});
-
-	// Login routes
-	this.router.get('/', function(req, res) {
-		res.redirect('/login');
-	});
-
-	*/
-
 	this.router.post('/login', function(req, res) {
 		this.dbInterface.authenticate(req.body.username, req.body.password, function(err, user)
 		{
-			console.log(err)
 			if(err)
 			{
 				res.status(401).send('Incorrect usename or password');
@@ -134,7 +98,6 @@ module.exports = function(passport){
 				var token = jwt.sign(user, secret, {expiresInMinutes: 60*5});
 
 				logger.log('debug', 'Authenticated ' + user.username + ' and signed token.')
-				console.log(token);
 				res.json({ token: token });
 			}
 		});
@@ -171,11 +134,11 @@ module.exports = function(passport){
 		var format = req.param("format");
 
 		var params = {
-				account:	req.param("account"),
-				project:	req.param("project"),
-				subformat:	req.param("subformat"),
-				user: req.user.username,
-				query: req.query
+			account:	req.param("account"),
+			project:	req.param("project"),
+			subformat:	req.param("subformat"),
+			user: req.user.username,
+			query: req.query
 		};
 
 		this.transRouter(format, '/:account/:project', res, params);
@@ -229,6 +192,22 @@ module.exports = function(passport){
 
 		this.transRouter(format, '/:account/:project/revision/:rid', res, params);
 	});
+
+	// Get the head of the master branch
+	this.router.get('/:account/:project/revision/master/head.:format?.:subformat?', login.ensureLoggedIn(), function(req, res, next) {
+		var format = req.param("format");
+
+		var params = {
+			account:   req.param("account"),
+			project:   req.param("project"),
+			subformat: req.param("subformat"),
+			user: req.user.username,
+			query: req.query
+		};
+
+		this.transRouter(format, '/:account/:project/revision/:branch/head', res, params);
+	});
+
 
 	// Get the head of a specific branch
 	this.router.get('/:account/:project/revision/:branch/head.:format?.:subformat?', login.ensureLoggedIn(), function(req, res, next) {
@@ -389,8 +368,8 @@ module.exports = function(passport){
 
 	// Everything else
 	this.router.get('*', function(req, res) {
-		logger.log('debug', 'Un-routed URL : ' + req.url);
-		res.redirect('/home');
+		logger.log('debug', 'Unsupported request ' + req.url);
+		res.sendStatus(501);
 	});
 
 	return this;

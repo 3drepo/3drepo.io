@@ -33,7 +33,7 @@ function uuidToString(uuidIn) {
 	return uuid.unparse(uuidIn.buffer);
 }
 
-var rootUUID = stringToUUID("00000000-0000-0000-0000-000000000000");
+var masterUUID = stringToUUID("00000000-0000-0000-0000-000000000000");
 
 /*******************************************************************************
  /* Authenticate user against the database
@@ -51,10 +51,12 @@ exports.authenticate = function(username, password, callback) {
 
 		callback(null, {username: username});
 	});
-}
+};
 
 exports.getUserDBList = function(username, callback) {
 	if (!username) return callback(new Error("Username is not defined"), null);
+
+	logger.log('debug', 'Getting database list for ' + username);
 
 	var filter = {
 		user: username
@@ -68,10 +70,12 @@ exports.getUserDBList = function(username, callback) {
 			)
 		);
 	});
-}
+};
 
 exports.getUserInfo = function(username, callback) {
 	if(!username) return callback(new Error("Unspecified username"));
+
+	logger.log('debug', 'Getting user info for ' + username);
 
 	var filter = {
 		user: username
@@ -86,24 +90,45 @@ exports.getUserInfo = function(username, callback) {
 
 		callback(null, coll[0]["customData"]);
 	});
-}
+};
 
+exports.getProjectInfo = function(account, project, callback) {
+	if(!project) return callback(new Error("Unspecified project"));
+
+	logger.log('debug', 'Getting project info for ' + account + '/' + project);
+
+	dbConn.filterColl(account, project + ".info", {}, {}, function(err, coll) {
+		if(err) return callback(err);
+
+		var res = {
+			owner:			coll[0]["owner"],
+			desc:			coll[0]["desc"],
+			type:			coll[0]["type"],
+			read_access:	coll[0]["r"],
+			write_access:	coll[0]["rw"]
+		};
+
+		callback(null, res);
+	});
+};
 
 exports.hasAccessToProject = function(username, account, project, callback) {
 	if (project == null)
 		return callback(null);
 
+	logger.log('debug', 'Getting access to ' + account + '/' + project + ' for ' + username);
+
 	this.getUserDBList(username, function(err, dbList) {
-		if(dbList.map( function (db)
-		{
-			return db["account"] + "." + db["project"]
-		}).indexOf(account + "." + project) > -1)
+		var dbListStr = dbList.map (function (db) {
+			return db["account"] + "." + db["project"];
+		});
+
+		if (dbListStr.indexOf(account + "." + project) > -1)
 			callback(null);
 		else
 			callback(new Error("Not Authorized to access database"));
 	});
-
-}
+};
 
 exports.getDBList = function(callback) {
 	dbConn.dbCallback('admin', function(err, db) {
@@ -122,7 +147,7 @@ exports.getDBList = function(callback) {
 			callback(null, dbList);
 		});
 	});
-}
+};
 
 exports.getChildren = function(dbName, project, uuid, callback) {
 	var filter = {
@@ -145,10 +170,11 @@ exports.getRevisionInfo = function(dbName, project, rid, callback) {
 	dbConn.filterColl(dbName, project + '.history', filter, null, function(err, doc) {
 		if (err) return callback(err);
 
-	doc = doc[0];
+		doc = doc[0];
 
 		rev = {};
 
+		rev.name    = uuidToString(doc["_id"]); // TODO: Input real name
 		rev.author  = ("author" in doc) ? doc.author : "unnamed";
 		rev.message = ("message" in doc) ? doc.message : "";
 		rev.tag     = ("tag" in doc) ? doc.tag : "";
@@ -173,8 +199,8 @@ exports.getRevisions = function(dbName, project, branch, callback) {
 	};
 
 	if(branch)
-		if (branch == "root")
-			filter["shared_id"] = rootUUID;
+		if (branch == "master")
+			filter["shared_id"] = masterUUID;
 		else
 			filter["shared_id"] = stringToUUID(branch);
 
@@ -183,19 +209,19 @@ exports.getRevisions = function(dbName, project, branch, callback) {
 	};
 
 	dbConn.filterColl(dbName, project + '.history', filter, projection, function(err, doc) {
-			if (err) return callback(err);
+		if (err) return callback(err);
 
-			var revisionList = [];
+		var revisionList = [];
 
-			for (var i in doc)
-			{
-				var revisionName = uuidToString(doc[i]._id);
-				revisionList.push({name : revisionName});
-			}
+		for (var i in doc)
+		{
+			var revisionName = uuidToString(doc[i]._id);
+			console.log(revisionName);
+			revisionList.push({name : revisionName});
+		}
 
-			callback(null, revisionList);
+		callback(null, revisionList);
 	});
-
 };
 
 exports.getBranches = function(dbName, project, callback) {
