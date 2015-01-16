@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title> 3D Repo </title>
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/0.2.0/Chart.min.js"></script>
+    <script src="js/home.js"></script>
+
+  </head>
+  <body ng-app="3drepo">
+    
+    <div id="wrap">
+
+      <div class="header">
+        <div class="container-fluid ">
+          <div class="navbar-header">
+            <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a href="../" class="navbar-brand logo-pad header-logo"><img class="v-expand" src="images/logo.png" /></a>
+          </div>
+          <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
+           <form class="navbar-left tight v-expand" role="search">
+              <div class="form-group tight">
+                <input type="text" class="form-control" id="search-box" placeholder="Search 3D Repo">
+              </div>
+            </form>
+            <ul class="nav navbar-nav navbar-right">
+              <li><a href="http://expo.getbootstrap.com">Enterprise</a></li>
+              <li><a href="http://blog.getbootstrap.com">Frederic</a></li>
+              <li><a href="http://blog.getbootstrap.com">Sign out</a></li>
+              <li><a href="http://blog.getbootstrap.com"><img src="images/en.gif" height="16"/></a></li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+
+      <div class="container-fluid"  ng-controller="DashboardCtrl">
+        <div class="row">
+          
+          <div class="col-md-12 padded-box">
+  
+            <!-- Left column -->
+            <div class="col-md-4 tight gutter-right">
+            
+              <!-- Profile pic and name -->
+              <div class="col-md-12 tight">
+                <div class="profile-pic">
+                </div>
+
+                <div class="profile-box">
+                  <h1>Frederic Besse</h1>
+                  <p>@fbesse</p>
+                </div>
+              </div>
+            
+              <!-- Menu -->
+              <div class="col-md-12 tight">
+                <div class="project-menu">
+                  <div class="project-menu-section" ng-class="{'project-menu-section-selected': isView('dashboard')}">
+                    <a href="#/" class="tight" ng-click="setView('dashboard')">
+                      <h3><i class="fa fa-home menu-icon"></i> Dashboard</h3>
+                    </a>
+                  </div>
+                  <div class="project-menu-section" ng-class="{'project-menu-section-selected': isView('projects')}">
+                    <a href="#/" class="tight" ng-click="setView('projects')">
+                      <h3><i class="fa fa-cube menu-icon"></i> Projects</h3>
+                    </a>
+                  </div>
+                  <div class="project-menu-section" ng-class="{'project-menu-section-selected': isView('discover')}">
+                    <a href="#/" class="tight" ng-click="setView('discover')">
+                      <h3><i class="fa fa-cloud menu-icon"></i> Discover</h3>
+                    </a>
+                  </div>
+                  <div class="project-menu-section" ng-class="{'project-menu-section-selected': isView('settings')}">
+                    <a href="#/" class="tight" ng-click="setView('settings')">
+                      <h3><i class="fa fa-gear menu-icon"></i> Settings</h3>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            
+            <!-- Main content -->
+            <div class="col-md-8 tight">
+
+              <!-- Dashboard -->
+              <div ng-show="view=='dashboard'">
+                <div class="col-md-12 tight">
+                  <div class=" block">
+                        <div class= "col-sm-12 margined block-header">
+                          <h3>Commit Activity</h3>
+                        </div>
+                        <div class="col-md-12 tight">
+                          <canvas id="commitChart" width="590" height="210"></canvas>
+                        </div>
+                  </div>
+                </div>
+                <div class="col-md-12 tight">
+                  <div class=" block">
+                        <div class= "col-sm-12 margined block-header">
+                          <h3>Polygon Count</h3>
+                        </div>
+                        <div class="col-md-12 tight">
+                          <canvas id="polygonChart" width="590" height="210"></canvas>
+                        </div>
+                  </div>
+                </div>
+                <div class="col-md-6 tight gutter-right">
+                  <div class=" block">
+                        <div class= "col-sm-12 block-header">
+                          <h3>Recently Contributed</h3>
+                        </div>
+                        <div class="col-md-12 tight">
+                          <div class="col-md-12 project-line">
+                          <i class="fa fa-cube menu-icon"></i><span class="commit-number">Project car 1</span> <a href="#/"></a> <span class="commit-by"> by </span> <span class="commit-author">Tim</span>
+                          </div>
+                          <div class="col-md-12 project-line">
+                          <i class="fa fa-cube menu-icon"></i><span class="commit-number">Project car 2</span> <a href="#/"></a> <span class="commit-by"> by </span> <span class="commit-author">Jozef</span>
+                          </div>
+                        </div>
+                  </div>
+                </div>
+                <div class="col-md-6 tight">
+                  <div class=" block">
+                        <div class= "col-sm-12 block-header">
+                          <h3>Popular Projects</h3>
+                        </div>
+                        <div class="col-md-12 tight">
+                          <div class="col-md-12 project-line">
+                          <i class="fa fa-cube menu-icon"></i><span class="commit-number">Helicopter</span> <a href="#/"></a> <span class="commit-by"> by </span> <span class="commit-author">Frederic</span>
+                          </div>
+                          <div class="col-md-12 project-line">
+                          <i class="fa fa-cube menu-icon"></i><span class="commit-number">Plane</span> <a href="#/"></a> <span class="commit-by"> by </span> <span class="commit-author">Jozef</span>
+                          </div>
+                          <div class="col-md-12 project-line">
+                          <i class="fa fa-cube menu-icon"></i><span class="commit-number">House</span> <a href="#/"></a> <span class="commit-by"> by </span> <span class="commit-author">Tim</span>
+                          </div>
+                        </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Projects -->
+              <div ng-if="view=='projects'">
+                <div class="col-md-12 tight">
+                  <div class="block">
+                    <div class= "col-sm-12 block-header">
+                      <h3 ><span class="block-header-project-name">Project 1</span> <span class="block-header-by">by</span> <span class="block-header-author">Jozef</span></h3>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="placeholder-screenshot"></div>
+                  </div>
+                </div>
+                <div class="col-md-12 tight">
+                  <div class="block">
+                    <div class= "col-sm-12 block-header">
+                      <h3 ><span class="block-header-project-name">Project 2</span> <span class="block-header-by">by</span> <span class="block-header-author">Tim</span></h3>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="placeholder-screenshot"></div>
+                  </div>
+                </div>
+                <div class="col-md-12 tight">
+                  <div class="block">
+                    <div class= "col-sm-12 block-header">
+                      <h3 ><span class="block-header-project-name">Project 3</span> <span class="block-header-by">by</span> <span class="block-header-author">Frederic</span></h3>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="placeholder-screenshot"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Discover -->
+              <div ng-if="view=='discover'">
+                <div class="col-md-12 tight">
+                  <div class="block">
+                    <div class= "col-sm-12 block-header">
+                      <h3 ><span class="block-header-project-name">Castle</span> <span class="block-header-by">by</span> <span class="block-header-author">Malcolm</span></h3>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="placeholder-screenshot"></div>
+                  </div>
+                </div>
+                <div class="col-md-12 tight">
+                  <div class="block">
+                    <div class= "col-sm-12 block-header">
+                      <h3 ><span class="block-header-project-name">Motorbike</span> <span class="block-header-by">by</span> <span class="block-header-author">Yotam</span></h3>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="placeholder-screenshot"></div>
+                  </div>
+                </div>
+                <div class="col-md-12 tight">
+                  <div class="block">
+                    <div class= "col-sm-12 block-header">
+                      <h3 ><span class="block-header-project-name">Hospital</span> <span class="block-header-by">by</span> <span class="block-header-author">Maciek</span></h3>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="placeholder-screenshot"></div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Settings -->
+              <div ng-if="view=='settings'">
+                <div class="block">
+                  <div class= "col-sm-12 margined block-header">
+                    <h3>Profile</h3>
+                  </div>
+
+                  <form role="form" class="standardform">
+
+                    <div class="form-group">
+                      <div class= "col-sm-6  margined">
+                      <label for="project-name">Name</label>
+                      <input type="email" class="form-control" id="project-name" value="Frederic Besse">
+                      </div>
+                      <div class= "col-sm-6  margined">
+                      <label for="project-name">Nickname</label>
+                      <input type="email" class="form-control" id="project-name" value="fbesse">
+                      </div>
+                      <div class= "col-sm-6  margined">
+                      <label for="project-name">Old password</label>
+                      <input type="email" class="form-control" id="project-name">
+                      </div>
+                      <div class="clearfix"></div>
+                      <div class= "col-sm-6  margined">
+                      <label for="project-name">New password</label>
+                      <input type="email" class="form-control" id="project-name">
+                      </div>
+                      <div class="clearfix"></div>
+                      <div class= "col-sm-6  margined">
+                      <label for="project-name">Confirm new password</label>
+                      <input type="email" class="form-control" id="project-name">
+                      </div>
+                      <div class="clearfix"></div>
+                      <div class= "col-sm-6  margined">
+                      <button type="submit" class="btn btn-success">Update</button>
+                      </div>
+                    </div>
+                    
+                  </form>
+                </div>
+              </div>
+              
+            </div>
+
+          </div>
+
+        </div>
+
+
+      </div>
+  
+      <div id="push"></div>
+
+    </div>
+
+    <div id="footer">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-2">© 2014 3D Repo LTD</div>
+          <div class="col-md-1">T&Cs</div>
+          <div class="col-md-1">Security</div>
+          <div class="col-md-1"></div>
+          <div class="col-md-2">LOGO</div>
+          <div class="col-md-2"></div>
+          <div class="col-md-1">Contact</div>
+          <div class="col-md-1">Blog</div>
+          <div class="col-md-1">About</div>
+        </div>
+      </div>
+    </div>
+
+  <script type="text/javascript">
+    var commitData = {
+      labels: ["Oct 9", "Oct 10", "Oct 11", "Oct 12", "Oct 13", "Oct 14", "Oct 15"],
+      datasets: [
+          {
+              label: "My First dataset",
+              fillColor: "rgba(220,220,220,0.2)",
+              strokeColor: "rgba(220,220,220,1)",
+              pointColor: "rgba(220,220,220,1)",
+              pointStrokeColor: "#fff",
+              pointHighlightFill: "#fff",
+              pointHighlightStroke: "rgba(220,220,220,1)",
+              data: [2, 0, 5, 4, 7, 5, 2]
+          }
+      ]
+    };
+
+    var polygonData = {
+      labels: ["Oct 9", "Oct 10", "Oct 11", "Oct 12", "Oct 13", "Oct 14", "Oct 15"],
+      datasets: [
+          {
+              label: "My Second dataset",
+            fillColor: "rgba(151,187,205,0.2)",
+            strokeColor: "rgba(151,187,205,1)",
+            pointColor: "rgba(151,187,205,1)",
+            pointStrokeColor: "#fff",
+            pointHighlightFill: "#fff",
+            pointHighlightStroke: "rgba(151,187,205,1)",
+            data: [8304, 8504, 8767, 9058, 9589, 10323, 11245]
+          }
+      ]
+    };
+
+    var commitCtx = document.getElementById("commitChart").getContext("2d");
+    var polygonCtx = document.getElementById("polygonChart").getContext("2d");
+
+    var options = {
+      bezierCurve: false
+    };
+
+    var commitChart = new Chart(commitCtx).Line(commitData, options);
+    var polygonChart = new Chart(polygonCtx).Line(polygonData, options);
+
+  </script>
+
+  </body>
+</html>

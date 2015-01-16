@@ -196,7 +196,7 @@ exports.route = function(router)
 	});
 
 	router.get('json', '/:account', function(res, params) {
-		dbInterface.getUserInfo( params.user, function(err, user)
+		dbInterface.getUserInfo( params.account, function(err, user)
 		{
 			if(err) throw err;
 			res.json(user);
@@ -220,6 +220,30 @@ exports.route = function(router)
 		});
 	});
 
+	router.get('json', '/:account/:project/revision/:branch/head', function(res, params) {
+		router.dbInterface.getHeadOf(params.account, params.project, params.branch, router.dbInterface.getRevisionInfo, function(err, revisionObj) {
+			if(err) throw err;
+
+			res.json(revisionObj);
+		});
+	});
+
+	router.get('json', '/:account/:project/revision/:rid/readme', function(res, params) {
+		router.dbInterface.getReadme(params.account, params.project, params.rid, function(err, readme) {
+			if(err) throw err;
+
+			res.json(readme);
+		});
+	});
+
+	router.get('json', '/:account/:project/revision/:branch/head/readme', function(res, params) {
+		router.dbInterface.getHeadOf(params.account, params.project, params.branch, router.dbInterface.getReadme, function(err, readme) {
+			if(err) throw err;
+
+			res.json(readme);
+		});
+	});
+
 	router.get('json', '/:account/:project/branches', function(res, params) {
 		router.dbInterface.getBranches(params.account, params.project, function(err, branchList) {
 			if(err) throw err;
@@ -229,7 +253,7 @@ exports.route = function(router)
 	});
 
 	router.get('json', '/:account/:project/revisions', function(res, params) {
-		router.dbInterface.getRevisions(params.account, params.project, null, function(err, revisionList) {
+		router.dbInterface.getRevisions(params.account, params.project, null, params.start, params.end, params.full, function(err, revisionList) {
 			if(err) throw err;
 
 			res.json(revisionList);
@@ -237,10 +261,19 @@ exports.route = function(router)
 	});
 
 	router.get('json', '/:account/:project/revisions/:branch', function(res, params) {
-		router.dbInterface.getRevisions(params.account, params.project, params.branch, function(err, revisionList) {
+		router.dbInterface.getRevisions(params.account, params.project, params.branch, params.start, params.end, params.full, function(err, revisionList) {
 			if(err) throw err;
 
 			res.json(revisionList);
+		});
+	});
+
+	router.get('json', '/:account/:project/users', function(res, params) {
+		dbInterface.getProjectUsers(params.account, params.project, function(err, project)
+		{
+			if(err) throw err;
+
+			res.json(project);
 		});
 	});
 

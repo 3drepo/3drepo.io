@@ -14,11 +14,9 @@ var viewUrl = function ($stateParams)
 }
 
 angular.module('3drepo', ['ui.router', 'ui.bootstrap'])
-.run(['$rootScope', '$location', function($rootScope, $location) {
-	$rootScope.apiUrl = function(tail) {
-		return '//api.' + $location.host() + ($location.port() ? (':' + $location.port()) : '') + '/' + tail;
-	};
-}])
+.run(function($rootScope, $location) {
+	$rootScope.apiUrl = '//api.' + $location.host() + ($location.port() ? (':' + $location.port()) : '');
+})
 .config([
 '$stateProvider',
 '$urlRouterProvider',
@@ -327,7 +325,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			var res = {};
 			res.name = project;
 
-			$http.get($rootScope.apiUrl(account + '/' + project + '.json')).then(function(json) {
+			$http.get($rootScope.apiUrl + '/' + account + '/' + project + '.json').then(function(json) {
 				res.owner       = json.data.owner;
 				res.description = json.data.desc;
 				res.type        = json.data.type;
@@ -344,7 +342,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 				res.visibility = json.data.read_access;
 
-				return $http.get($rootScope.apiUrl(account + '/' + project + '/revision/master/head/readme.json'));
+				return $http.get($rootScope.apiUrl + '/' + account + '/' + project + '/revision/master/head/readme.json');
 			}).then(function(json) {
 				res.readme = json.data.readme;
 
@@ -370,11 +368,11 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 					}
 				];
 
-				return $http.get($rootScope.apiUrl(account + '/' + project + '/users.json'));
+				return $http.get($rootScope.apiUrl + '/' + account + '/' + project + '/users.json');
 			}).then(function(json) {
 				res.users = json.data;
 
-				return $http.get($rootScope.apiUrl(account + '/' + project + '/branches.json'));
+				return $http.get($rootScope.apiUrl + '/' + account + '/' + project + '/branches.json');
 			}).then(function(json) {
 				res.branches = json.data.map(function (item) {
 					if (item.name == "00000000-0000-0000-0000-000000000000")
@@ -410,15 +408,15 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	};
 
 	// Fetch info about the current revision given the name of the revision
-	o.fetchCurrentRevision = function(branch, rid){
+	o.fetchCurrentRevision = function(branch, name){
 		var deferred = $q.defer();
 
 		var baseUrl = "";
 
 		if (name == 'head')
-			baseUrl = $rootScope.apiUrl(o.account + '/' + o.project + '/revision/' + branch + '/' + rid);
+			baseUrl = $rootScope.apiUrl + '/' + o.account + '/' + o.project + '/revision/' + branch + '/' + name;
 		else
-			baseUrl = $rootScope.apiUrl(o.account + '/' + o.project + '/revision/' + rid);
+			baseUrl = $rootScope.apiUrl + '/' + o.account + '/' + o.project + '/revision/' + name;
 
 		setTimeout(function() {
 			var res = {};
@@ -426,7 +424,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			$http.get(baseUrl + '.json').then(function(json) {
 				res.name    = json.data.name;
 				res.author  = json.data.author;
-				res.date    = json.data.date;
+				res.data    = json.data.date;
 				res.message = json.data.message;
 				res.n_comments = 24;
 				res.branch  = json.data.branch;
@@ -448,7 +446,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 		setTimeout(function() {
 
-			$http.get($rootScope.apiUrl(o.account + '/' + o.project + '/revisions/' + branch + '.json'))
+			$http.get($rootScope.apiUrl + '/' + o.account + '/' + o.project + '/revisions/' + branch + '.json')
 			.then(function(data) {
 				deferred.resolve(data.data);
 			});
@@ -458,13 +456,11 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	};
 
 	// Fetch some of the revisions grouped by day
-	o.fetchRevisionsByDay = function(branch, first, last) {
+	o.fetchRevisionsByDay = function(first, last) {
 
 		var fetchFakeRevisions = function(branch, rev, first, last){
 
 			console.log("Fetching revisions [" + first + "," + last + "] for branch " + branch + " and rev " + rev);
-
-
 
 			var res = {};
 			for(var i=first; i<=last; i++){
@@ -485,15 +481,6 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		var deferred = $q.defer();
 
 		setTimeout(function() {
-			$http.get($rootScope.apiUrl(o.account + '/' + o.project + '/revisions/' + branch + '.json?start=' + first + '&end=' + last + '?full=true'))
-			.then(function(json) {
-				for(var rev in json.data)
-				{
-					var dt = new Date(rev.date);
-
-
-				}
-			}
 			var res = fetchFakeRevisions(o.current_branch.name, o.current_revision.name, first, last);
 
 			deferred.resolve(res);
@@ -745,8 +732,8 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 	return o;
 
-}])
-.controller('ViewCtrl', ['$rootScope', '$scope', '$http', 'data', 'view', 'pagination', 'users', '$state', function($rootScope, $scope, $http, data, view, pagination, users, $state){
+})
+.controller('ViewCtrl', function($rootScope, $scope, $http, data, view, pagination, users, $state){
 
 	$scope.data = data;
 	$scope.view = view;
@@ -768,7 +755,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 	$scope.go = function(v){
 		var o = {view: v};
-		$state.go($state.current.name, o);
+		$state.go("main.view", o);
 	}
 
 	$scope.checkViewIsValid = function(){
@@ -796,7 +783,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 	$scope.pageChanged();
 
-}])
+})
 .factory('iFrameURL', function() {
 	var o = {};
 
@@ -807,11 +794,12 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 	return o;
 })
-.controller('MainCtrl', ['$scope', '$http', 'iFrameURL', 'account', 'project', '$location', '$window', '$rootScope', function($scope, $http, iFrameURL, account, project, $location, $window, $rootScope) {
+.controller('MainCtrl', function($scope, $http, iFrameURL, account, project, $location, $window, $state, $stateParams, $rootScope) {
 	$scope.loggedIn = !!$window.sessionStorage.token;
+	$rootScope.apiUrl = $rootScope.apiUrl;
 
 	$scope.iFrameURL = iFrameURL;
-	iFrameURL.setURL($rootScope.apiUrl(account + '/' + project + '/revision/master/head.x3d.src'));
+	iFrameURL.setURL($rootScope.apiUrl + '/' + account + '/' + project + '/revision/master/head.x3d.src');
 
 	$scope.logOut = function($location) {
 		if ($window.sessionStorage.token)
@@ -824,7 +812,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	}
 
 	$scope.login = function() {
-		url = $rootScope.apiUrl('/login')
+		url = $rootScope.apiUrl + '/login';
 		console.log('URL: ' + url);
 
 		$http.post(url, $scope.user)
@@ -849,18 +837,18 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	$scope.x3domreload = function() {
 		x3dom.reload();
 	};
-}])
-.controller('RevisionCtrl', ['$scope', '$http', 'iFrameURL', 'account', 'project', 'branch', 'rid', '$stateParams', '$rootScope', '$state', function($scope, $http, iFrameURL, account, project, branch, rid, $stateParams, $rootScope, $state) {
+})
+.controller('RevisionCtrl', function($scope, $http, iFrameURL, account, project, branch, rid, $stateParams, $rootScope, $state) {
 	$scope.branch = branch;
 	$scope.rid = rid;
 
 	if (branch)
-		iFrameURL.setURL($rootScope.apiUrl(account + '/' + project + '/revision/' + branch + '/' + rid + '.x3d.src'));
+		iFrameURL.setURL($rootScope.apiUrl + '/' + account + '/' + project + '/revision/' + branch + '/' + rid + '.x3d.src');
 	else
-		iFrameURL.setURL($rootScope.apiUrl(account + '/' + project + '/revision/' + rid + '.x3d.src'));
+		iFrameURL.setURL($rootScope.apiUrl + '/' + account + '/' + project + '/revision/' + rid + '.x3d.src');
 
-}])
-.factory('authInterceptor', ['$rootScope', '$q', '$window', '$location', function($rootScope, $q, $window, $location) {
+})
+.factory('authInterceptor', function($rootScope, $q, $window) {
 	return {
 		request: function (config) {
 			//console.log(config)
@@ -873,7 +861,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		response: function (res) {
 			return res || $q.when(res);
 		},
-		responseError: function(rej) {
+		responseError: function(rej, $location) {
 			if (rej.status === 401)
 			{
 				delete $window.sessionStorage.token;
@@ -885,8 +873,8 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			return rej | $q.when(rej);
 		}
 	};
-}])
-.config(['$httpProvider', '$sceDelegateProvider', function ($httpProvider, $sceDelegateProvider) {
+})
+.config(function ($httpProvider, $sceDelegateProvider) {
 	$httpProvider.interceptors.push('authInterceptor');
 
 	$sceDelegateProvider.resourceUrlWhitelist([
@@ -894,6 +882,6 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		'http://api.localhost:8081/**'
 	]);
 
-}]);
+});
 
 jQuery.support.cors = true;

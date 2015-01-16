@@ -112,21 +112,60 @@ exports.getProjectInfo = function(account, project, callback) {
 	});
 };
 
+exports.getProjectUsers = function(account, project, callback) {
+	if(!project) return callback(new Error("Unspecified project"));
+
+	logger.log('debug', 'Getting project info for ' + account + '/' + project);
+
+	dbConn.filterColl(account, project + ".users", {}, {}, function(err, coll) {
+		if(err) return callback(err);
+
+		var res = coll.map( function (user) {
+			return {
+				name: user.user,
+				role: user.role
+			};
+		});
+
+		callback(null, res);
+	});
+};
+
+exports.isPublicProject = function(account, project, callback)
+{
+	this.getProjectInfo(account, project, function (err, proj) {
+		console.log(JSON.stringify(proj));
+		if (proj["read_access"].toLowerCase() == "public")
+		{
+			callback(null);
+		} else {
+			callback(new Error("Not a public project"));
+		}
+	});
+};
+
 exports.hasAccessToProject = function(username, account, project, callback) {
 	if (project == null)
 		return callback(null);
 
 	logger.log('debug', 'Getting access to ' + account + '/' + project + ' for ' + username);
 
-	this.getUserDBList(username, function(err, dbList) {
-		var dbListStr = dbList.map (function (db) {
-			return db["account"] + "." + db["project"];
-		});
+	this.isPublicProject(account, project, function(err) {
+		if(err)
+		{
+			this.dbInterface.getUserDBList(username, function(err, dbList) {
+				var dbListStr = dbList.map (function (db) {
+					return db["account"] + "." + db["project"];
+				});
 
-		if (dbListStr.indexOf(account + "." + project) > -1)
+				if (dbListStr.indexOf(account + "." + project) > -1)
+					callback(null);
+				else
+					callback(new Error("Not Authorized to access database"));
+			});
+		} else {
 			callback(null);
-		else
-			callback(new Error("Not Authorized to access database"));
+		}
 	});
 };
 
@@ -162,6 +201,31 @@ exports.getChildren = function(dbName, project, uuid, callback) {
 	});
 };
 
+exports.getHeadOf = function(dbName, project, branch, getFunc, callback) {
+	if (branch == 'master')
+		var branch_id = masterUUID;
+	else
+		var branch_id = stringToUUID(branch);
+
+	var historyQuery = {
+		shared_id : branch_id
+	};
+
+	var self = this;
+
+	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, doc) {
+		if (err) return callback(err);
+
+		console.log("DOC" + JSON.stringify(doc[0]));
+
+		getFunc(dbName, project, uuidToString(doc[0]["_id"]), function(err, doc) {
+			if(err) return callback(err);
+
+			callback(null, doc);
+		});
+	});
+};
+
 exports.getRevisionInfo = function(dbName, project, rid, callback) {
 	var filter = {
 		_id: stringToUUID(rid)
@@ -178,6 +242,7 @@ exports.getRevisionInfo = function(dbName, project, rid, callback) {
 		rev.author  = ("author" in doc) ? doc.author : "unnamed";
 		rev.message = ("message" in doc) ? doc.message : "";
 		rev.tag     = ("tag" in doc) ? doc.tag : "";
+		rev.branch  = uuidToString(doc["shared_id"]);
 
 		if ("timestamp" in doc)
 		{
@@ -192,7 +257,28 @@ exports.getRevisionInfo = function(dbName, project, rid, callback) {
 	});
 };
 
-exports.getRevisions = function(dbName, project, branch, callback) {
+exports.getReadme = function(dbName, project, rid, callback) {
+	var historyQuery = {
+		_id : stringToUUID(rid)
+	};
+
+	dbConn.filterColl(dbName, project + '.history', historyQuery, null, function(err, doc)
+	{
+		var query = {
+			type:    "meta",
+			subtype: "readme",
+			_id		  : { $in : doc[0]['current']}
+		};
+
+		dbConn.filterColl(dbName, project + '.scene', query, null, function(err, readme) {
+			if(err) return callback(err);
+
+			callback(null, {readme : readme[0]["metadata"]["text"]});
+		});
+	});
+};
+
+exports.getRevisions = function(dbName, project, branch, from, to, full, callback) {
 
 	var filter = {
 		type: "revision"
@@ -204,9 +290,22 @@ exports.getRevisions = function(dbName, project, branch, callback) {
 		else
 			filter["shared_id"] = stringToUUID(branch);
 
-	var projection = {
-		_id : 1
-	};
+	var projection = null;
+
+	if (from && to)
+	{
+		var projection = {
+			_id : { $slice: [from, (to - from + 1)]}
+		};
+	}
+
+	if (!full)
+	{
+		if(!projection)
+			projection = {};
+
+		projection._id = 1;
+	}
 
 	dbConn.filterColl(dbName, project + '.history', filter, projection, function(err, doc) {
 		if (err) return callback(err);
@@ -216,8 +315,21 @@ exports.getRevisions = function(dbName, project, branch, callback) {
 		for (var i in doc)
 		{
 			var revisionName = uuidToString(doc[i]._id);
-			console.log(revisionName);
-			revisionList.push({name : revisionName});
+			var rev = {};
+
+			if (!full)
+			{
+				rev.name = revisionName;
+			} else {
+				var rev = {};
+				rev.name   = revisionName;
+				if ("author" in doc[i])  rev.author = doc[i].author;
+				if ("date" in doc[i])	 rev.date = doc[i].date;
+				if ("message" in doc[i]) rev.message = doc[i].message;
+				if ("branch" in doc[i])	 rev.branch = uuidToString(doc[i].shared_id);
+			}
+
+			revisionList.push(rev);
 		}
 
 		callback(null, revisionList);
@@ -291,14 +403,14 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 			_id : stringToUUID(rid)
 		};
 
-		dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, doc)
+		dbConn.filterColl(dbName, project + '.history', historyQuery, null, function(err, doc)
 		{
 			var query = {
 				shared_id : stringToUUID(sid),
 				_id		  : { $in : docs[0]['current']}
 			};
 
-			dbConn.filterColl(project, 'scene', query, null, function(err, obj) {
+			dbConn.filterColl(dbName, project + '.scene', query, null, function(err, obj) {
 				if (err) return callback(err);
 
 				callback(null, obj[0]["type"], this.stringToUUID(obj[0]["_id"]), repoGraphScene.decode(obj));

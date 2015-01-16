@@ -20,7 +20,7 @@ var config = require('app-config').config;
 exports.route = function(router)
 {
 	router.get('html', '/:account', function(res, params) {
-		router.dbInterface.getUserDBList(params.user, function(err, dbList) {
+		router.dbInterface.getUserDBList(params.account, function(err, dbList) {
 			if (err) throw err;
 
 			dbList.sort(function(a,b) { return a['project'].localeCompare(b['project']); });

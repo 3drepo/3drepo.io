@@ -7,17 +7,39 @@
 
 	<title> 3D Repo </title>
 
-	<script type="text/javascript" src="/public/js/controlinterface.js"/>
-	<script type="text/javascript" src="/public/js/viewer.js"/>
-	<script type="text/javascript" src="/public/js/floatingmeta.js"/>
+	<script type="text/javascript" src="/public/jquery.min.js"> </script>
+	<script type="text/javascript" src="/public/js/controlinterface.js"> </script>
+	<script type="text/javascript" src="/public/js/viewer.js"> </script>
+	<script type="text/javascript" src="/public/js/floatingmeta.js"> </script>
+	<script type="text/javascript" src="/public/js/external/x3dom.js"> </script>
+	<link rel="stylesheet" href="/public/css/x3dom.css"> </link>
+	<script type="text/javascript" src="/public/js/external/bootstrap.min.js"> </script>
+	<link rel="stylesheet" href="/public/css/external/bootstrap.min.css"> </script>
+	<link href="/public/css/style.css" rel="stylesheet"> </script>
+	<link href="/public/css/font-awesome.min.css" rel="stylesheet"> </script>
+	<script type="text/javascript" src="/public/js/external/showdown.min.js"> </script>
+	<script type="text/javascript" src="/public/js/external/angular.min.js"> </script>
+	<script type="text/javascript" src="/public/js/external/angular-ui-router.js"> </script>
+	<link rel="stylesheet" href="/public/css/ui.css"> </script>
+	<script type="text/javascript" src="/public/js/external/ui-bootstrap-tpls-0.12.0.min.js"> </script>
+
+	<script src="/public/js/project.js"> </script>
+
 	<script>
-		$(function() {
-			$("#meta-popup").draggable({ snap : ".viewport"})
-		});
+		//$(function() {
+		//	$("#meta-popup").draggable({ snap : ".viewport"})
+		//});
 	</script>
 
 	<script>
-		XMLHttpRequest.prototype.realSend = XMLHttpRequest.prototype.send;
+
+		var realOpen = XMLHttpRequest.prototype.open;
+		var realSend = XMLHttpRequest.prototype.send;
+
+		XMLHttpRequest.prototype.open = function(method, url, async, unk1, unk2) {
+			realOpen.apply(this, arguments);
+		};
+
 		XMLHttpRequest.prototype.send = function(body) {
 			if (!window.sessionStorage.Authorization)
 				if (window.sessionStorage.token)
@@ -28,10 +50,8 @@
 				this.setRequestHeader("Authorization", window.sessionStorage.Authorization)
 				delete window.sessionStorage.Authorization;
 			}
-
-			//this.setRequestHeader('Origin', 'null');
-
-			this.realSend(body);
+		
+			realSend.apply(this, arguments);
 		};
 
 	/*
@@ -45,20 +65,6 @@
 	*/
 	</script>
 
-	<script type="text/javascript" src="/public/js/external/x3dom.js"></script>
-	<link rel="stylesheet" href="/public/css/x3dom.css"/>
-	<script type="text/javascript" src="/public/jquery.min.js"></script>
-	<script type="text/javascript" src="/public/js/external/bootstrap.min.js"></script>
-	<link rel="stylesheet" href="/public/css/external/bootstrap.min.css"/>
-	<link href="/public/css/style.css" rel="stylesheet" />
-	<link href="/public/css/font-awesome.min.css" rel="stylesheet" />
-	<script type="text/javascript" src="/public/js/external/showdown.min.js"></script>
-	<script type="text/javascript" src="/public/js/external/angular.min.js"></script>
-	<script type="text/javascript" src="/public/js/external/angular-ui-router.js"></script>
-	<link rel="stylesheet" href="/public/css/ui.css" />
-	<script type="text/javascript" src="/public/js/external/ui-bootstrap-tpls-0.12.0.min.js"></script>
-
-	 <script src="/public/js/project.js"></script>
   </head>
 
   <body ng-app="3drepo">
@@ -319,41 +325,33 @@
 			  <div class="form-group">
 				
 				<div class= "col-sm-4 margined">
-				<label for="project-name">Owner</label>
-				<select class="form-control">
-				  <option value="one">Company 1</option>
-				  <option value="two">Company 2</option>
-				</select>
+					<label for="project-name">Owner</label>
+					<input type="text" class="form-control" id="project-name" ng-value="data.info.owner" disabled>
 				</div>
 				<div class= "col-sm-8  margined">
-				<label for="project-name">Project Name</label>
-				<input type="email" class="form-control" id="project-name" ng-value="data.info.name">
+					<label for="project-name">Project Name</label>
+					<input type="text" class="form-control" id="project-name" ng-value="data.info.name" disabled>
 				</div>
 			  </div>
 			  
-			  <div class="form-group">
+			<div class="form-group">
 				<div class= "col-sm-4 margined">
-				<label for="project-name">Type</label>
-				<select class="form-control">
-				  <option value="one">Architectural</option>
-				  <option value="two">Aerospace</option>
-				  <option value="two">Automotive</option>
-				  <option value="two">Engineering</option>
-				  <option value="two">Other</option>
-				</select>
+					<label for="project-name">Type</label>
+					<select class="form-control" ng-model="data.info.selected"
+						ng-options="type as type.label for type in data.projectTypes"></select>
 				</div>
-			  </div>
+			</div>
 
-			  <div class="form-group">
+			<div class="form-group">
 				<div class= "col-sm-12 margined">
 				<label for="project-name">Description</label><span> (optional)</span>
 				<input type="email" class="form-control" id="project-description" ng-value="data.info.description">
 				</div>
-			  </div>   
+			</div>
 
 			</form>
-		  </div>
-		  <div class="block">
+			</div>
+			<div class="block">
 
 			<div class= "col-sm-12 margined block-header">
 			  <h3>Visibility</h3>
@@ -570,11 +568,11 @@
 			</div>
 		  </div>
 
-		<div ng-init="x3domreload()" class="placeholder-screenshot-large">
+		<div ui-view="viewer" class="placeholder-screenshot-large">
 			<x3d xmlns="http://www.web3d.org/specification/x3d-namespace" id="viewer">
 				<scene onbackgroundClicked="bgroundClick(event);">
 					<viewpoint id="sceneVP"></viewpoint>
-						<inline namespacename="model" onload="onLoadedEvent();" url={{iFrameURL.url}} render="true" load="true">
+						<inline ng-init="x3domreload()" namespacename="model" onload="onLoadedEvent();" url={{iFrameURL.url}} render="true" load="true">
 				</scene>
 			</x3d>
 		</div>

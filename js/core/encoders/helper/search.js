@@ -47,14 +47,17 @@ function searchUsers(name, start, end, callback)
 		user: nameExp
 	};
 
-	dbInterface.dbConn.filterColl("admin", "system.users", query, null, function(err, coll) {
-		// TODO: Don't slice here, but on the database
+	var sliceProjection = {
+		_id: { $slice: [start, (end - start + 1) ]}
+	};
+
+	dbInterface.dbConn.filterColl("admin", "system.users", query, sliceProjection, function(err, coll) {
 		var userJson = {
 			users: coll.map(
 				function(user){
 					return user["user"];
 				}
-			).slice(start - 1, end - 1)
+			);
 		};
 
 		callback(null, userJson);
