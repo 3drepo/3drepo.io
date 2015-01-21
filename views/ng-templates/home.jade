@@ -1,0 +1,166 @@
+#wrap
+	ng-include(src="'header.html'")
+	.container-fluid
+		.row
+			.col-md-12.padded-box
+				// Left column
+				.col-md-4.tight.gutter-right
+					// Profile pic and name
+					.col-md-12.tight
+						.profile-pic
+						.profile-box
+							h1 {{userData.firstName}} {{userData.lastName}}
+							p {{userData.email}}
+					// Menu
+					.col-md-12.tight
+						.project-menu
+							.project-menu-section(ng-class="{'project-menu-section-selected': isView('dashboard')}")
+								a.tight(href='#/', ng-click="setView('dashboard')")
+									h3
+										i.fa.fa-home.menu-icon
+										|  Dashboard
+							.project-menu-section(ng-class="{'project-menu-section-selected': isView('projects')}")
+								a.tight(href='#/', ng-click="setView('projects')")
+									h3
+										i.fa.fa-cube.menu-icon
+										|  Projects
+							.project-menu-section(ng-class="{'project-menu-section-selected': isView('discover')}")
+								a.tight(href='#/', ng-click="setView('discover')")
+									h3
+										i.fa.fa-cloud.menu-icon
+										|  Discover
+							.project-menu-section(ng-class="{'project-menu-section-selected': isView('settings')}")
+								a.tight(href='#/', ng-click="setView('settings')")
+									h3
+										i.fa.fa-gear.menu-icon
+										|  Settings
+				// Main content
+				.col-md-8.tight
+					// Dashboard
+					div(ng-show="view=='dashboard'")
+						.col-md-12.tight
+							.block
+								.col-sm-12.margined.block-header
+									h3 Commit Activity
+								.col-md-12.tight
+									canvas#commitChart(width='590', height='210')
+						.col-md-12.tight
+							.block
+								.col-sm-12.margined.block-header
+									h3 Polygon Count
+								.col-md-12.tight
+									canvas#polygonChart(width='590', height='210')
+						.col-md-6.tight.gutter-right
+							.block
+								.col-sm-12.block-header
+									h3 Recently Contributed
+								.col-md-12.tight
+									.col-md-12.project-line
+										i.fa.fa-cube.menu-icon
+										span.commit-number Project car 1
+											a(href='#/')
+											span.commit-by by 
+											span.commit-author Tim
+									.col-md-12.project-line
+										i.fa.fa-cube.menu-icon
+										span.commit-number Project car 2
+											a(href='#/')
+											span.commit-by by 
+											span.commit-author Fred
+									.col-md-12.project-line
+										i.fa.fa-cube.menu-icon
+										span.commit-number Project car 3
+											a(href='#/')
+											span.commit-by by 
+											span.commit-author Jozef
+						.col-md-6.tight
+							.block
+								.col-sm-12.block-header
+									h3 Popular Projects
+								.col-md-12.tight
+									.col-md-12.project-line
+										i.fa.fa-cube.menu-icon
+										span.commit-number Helicopter
+											a(href='#/')
+											span.commit-by by
+											span.commit-author Frederic
+									.col-md-12.project-line
+										i.fa.fa-cube.menu-icon
+										span.commit-number Helicopter
+											a(href='#/')
+											span.commit-by by 
+											span.commit-author Frederic
+									.col-md-12.project-line
+										i.fa.fa-cube.menu-icon
+										span.commit-number Helicopter
+											a(href='#/')
+											span.commit-by by 
+											span.commit-author Frederic
+					// Projects
+					div(ng-if="view=='projects'")
+						.col-md-12.tight(ng-repeat='project in userData.projects')
+							.block
+								.col-sm-12.block-header
+									h3
+										a.dashboard-tab(href='#', ng-click='goProject(project.account, project.project)')
+											span.block-header-project-name {{project.project}} by 
+											span.block-header-project-author {{project.account}}
+								.clearfix
+								.placeholder-screenshot
+					// Discover
+					div(ng-if="view=='discover'")
+						.col-md-12.tight
+							.block
+								.col-sm-12.block-header
+									h3
+										span.block-header-project-name Castle
+										span.block-header-by by
+										span.block-header-author Malcolm
+								.clearfix
+								.placeholder-screenshot
+						.col-md-12.tight
+							.block
+								.col-sm-12.block-header
+									h3
+										span.block-header-project-name Motorbike
+										span.block-header-by by
+										span.block-header-author Yotam
+								.clearfix
+								.placeholder-screenshot
+						.col-md-12.tight
+							.block
+								.col-sm-12.block-header
+									h3
+										span.block-header-project-name Hospital
+										span.block-header-by by
+										span.block-header-author Maciek
+								.clearfix
+								.placeholder-screenshot
+					// Settings
+					div(ng-if="view=='settings'")
+						.block
+							.col-sm-12.margined.block-header
+								h3 Profile
+							form.standardform(role='form')
+								.form-group
+									.col-sm-6margined
+										label(for='project-name') Name
+										input#project-name.form-control(type='email', value='Frederic Besse')
+									.col-sm-6.margined
+										label(for='project-name') Nickname
+										input#project-name.form-control(type='email', value='fbesse')
+									.col-sm-6.margined
+										label(for='project-name') Old password
+										input#project-name.form-control(type='email')
+									.clearfix
+									.col-sm-6.margined
+										label(for='project-name') New password
+										input#project-name.form-control(type='email')
+									.clearfix
+									.col-sm-6.margined
+										label(for='project-name') Confirm new password
+										input#project-name.form-control(type='email')
+									.clearfix
+									.col-sm-6.margined
+										button.btn.btn-success(type='submit') Update
+

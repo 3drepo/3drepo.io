@@ -48,7 +48,7 @@ function searchUsers(name, start, end, callback)
 	};
 
 	var sliceProjection = {
-		_id: { $slice: [start, (end - start + 1) ]}
+		_id: { $slice: [start, (end - start + 1)]}
 	};
 
 	dbInterface.dbConn.filterColl("admin", "system.users", query, sliceProjection, function(err, coll) {
@@ -57,7 +57,7 @@ function searchUsers(name, start, end, callback)
 				function(user){
 					return user["user"];
 				}
-			);
+			)
 		};
 
 		callback(null, userJson);

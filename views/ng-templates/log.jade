@@ -1,0 +1,44 @@
+ng-include(src="'common.html'")
+.col-md-8.tight
+	ng-include(src="'menu.html'")
+	div(ng-if='data.loading')
+		img.loading(src='http://www.nasa.gov/multimedia/videogallery/ajax-loader.gif', width='20', height='20')
+	div(ng-if='!data.loading')
+		.block
+			.col-sm-12.margined.block-header
+				h3 History
+			.col-sm-12.log(ng-repeat='item in data.log')
+				.log-icon-block
+					i.fa.fa-cogs.fa-2x.log-icon(ng-if="item.type=='visibility'")
+					i.fa.fa-cogs.fa-2x.log-icon(ng-if="item.type=='project-type'")
+					i.fa.fa-code-fork.fa-2x.log-icon(ng-if="item.type=='branch-add'")
+					i.fa.fa-user.fa-2x.log-icon(ng-if="item.type=='user-add'")
+					i.fa.fa-cube.fa-2x.log-icon(ng-if="item.type=='creation'")
+				.log-block(ng-if="item.type=='visibility'")
+					span.history-author {{item.author}}
+					span.history-action changed the project visibility to
+					span.history-keyword {{item.keyword}}
+					span.commit-date {{item.date}}
+				.log-block(ng-if="item.type=='project-type'")
+					span.history-author {{item.author}}
+					span.history-action changed the project type to
+					span.history-keyword {{item.keyword}}
+					span.commit-date {{item.date}}
+				.log-block(ng-if="item.type=='branch-add'")
+					span.history-author {{item.author}}
+					span.history-action created branch 
+					span.history-keyword {{item.keyword}}
+					span.commit-date {{item.date}}
+				.log-block(ng-if="item.type=='user-add'")
+					span.history-author {{item.author}}
+					span.history-action added user
+					span.history-keyword {{item.keyword}}
+					span.history-action  to the project
+					span.commit-date {{item.date}}
+				.log-block(ng-if="item.type=='creation'")
+					span.history-author {{item.author}}
+					span.history-action created the project
+					span.commit-date {{item.date}}
+
+		pagination.pull-right(items-per-page='pagination.itemsperpage', total-items='pagination.totalItems', ng-model='pagination.currentPage', ng-change='pageChanged()', previous-text='‹', next-text='›', first-text='«', last-text='»')
+

@@ -18,12 +18,23 @@
 var express = require('express'),
 	app = express(),
 	cors = require('cors'),
-	path = require('path');
+	path = require('path'),
+	config = require('app-config').config;
+
+app.set('views', './views');
+app.set('view_engine', 'jade');
+app.locals.pretty = true;
 
 app.use('/public', express.static(__dirname + '/public'));
 
 app.get('*', function(req, res) {
-	res.sendFile(__dirname + '/frontend.html');
+	var params = {};
+
+	Object.keys(config.external).forEach(function(key) {
+		params[key] = config.external[key];
+	});
+
+	res.render('frontend.jade', params);
 });
 
 exports.app = app

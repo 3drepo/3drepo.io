@@ -160,9 +160,11 @@ module.exports = function(){
 		var format = req.param("format");
 		var current_user = ("user" in req) ? req.user.username : "";
 
-		var start = ("start" in queryParams) ? req.query("start") : 1;
-		var end   = ("end" in queryParams) ? req.query("end") : (start + 5);
-		var full  = ("full" in queryParams) ? req.query("full") : null;
+		var start = ("start" in req.query) ? req.query.start : 1;
+		var end   = ("end" in req.query) ? req.query.end : (start + 5);
+		var full  = ("full" in req.query) ? req.query.full : null;
+
+		console.log('QUERY: ' + req.query);
 
 		var params = {
 			account:	req.param("account"),
@@ -183,9 +185,9 @@ module.exports = function(){
 		var format = req.param("format");
 		var current_user = ("user" in req) ? req.user.username : "";
 
-		var start = ("start" in queryParams) ? req.query("start") : 1;
-		var end   = ("end" in queryParams) ? req.query("end") : (start + 5);
-		var full  = ("full" in queryParams) ? req.query("full") : null;
+		var start = ("start" in req.query) ? req.query.start : 1;
+		var end   = ("end" in req.query) ? req.query.end : (start + 5);
+		var full  = ("full" in req.query) ? req.query.full : null;
 
 		var params = {
 			account:	req.param("account"),
@@ -207,18 +209,11 @@ module.exports = function(){
 		var format = req.param("format");
 		var current_user = ("user" in req) ? req.user.username : "";
 
-		var start = ("start" in queryParams) ? req.query("start") : 1;
-		var end   = ("end" in queryParams) ? req.query("end") : (start + 5);
-		var full  = ("full" in queryParams) ? req.query("full") : null;
-
 		var params = {
 			account: req.param("account"),
 			project: req.param("project"),
 			branch:  req.param("branch"),
 			user:	 current_user,
-			start:	 start,
-			end:	 end,
-			full:	 full,
 			query:	 req.query
 		};
 

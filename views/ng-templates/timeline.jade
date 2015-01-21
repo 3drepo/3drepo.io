@@ -1,0 +1,22 @@
+ng-include(src="'common.html'")
+.col-md-8.tight
+	ng-include(src="'menu.html'")
+	div(ng-if='data.loading')
+		img.loading(src='http://www.nasa.gov/multimedia/videogallery/ajax-loader.gif', width='20', height='20')
+	div(ng-if='!data.loading')
+		.block
+			.col-sm-12.margined.block-header
+				h3 Timeline
+			.col-sm-12.month-block(ng-repeat='(day,revisions) in data.revisions_by_day')
+				hr.fancy-line
+				h3 {{day}}
+				.commit-block(ng-repeat='revision in revisions')
+					span.commit-revision Revision 
+					a(href='#/', ng-click='setRevision(revision)')
+						span.commit-number {{revision.name}}
+					span.commit-by by 
+					span.commit-author {{revision.author}}
+					span.commit-date {{revision.date.split(&apos;,&apos;)[1]}}
+					p {{revision.message}}
+		pagination.pull-right(items-per-page='pagination.itemsperpage', total-items='pagination.totalItems', ng-model='pagination.currentPage', ng-change='pageChanged()', previous-text='‹', next-text='›', first-text='«', last-text='»')
+

@@ -317,16 +317,13 @@ exports.getRevisions = function(dbName, project, branch, from, to, full, callbac
 			var revisionName = uuidToString(doc[i]._id);
 			var rev = {};
 
-			if (!full)
-			{
-				rev.name = revisionName;
-			} else {
-				var rev = {};
-				rev.name   = revisionName;
-				if ("author" in doc[i])  rev.author = doc[i].author;
-				if ("date" in doc[i])	 rev.date = doc[i].date;
-				if ("message" in doc[i]) rev.message = doc[i].message;
-				if ("branch" in doc[i])	 rev.branch = uuidToString(doc[i].shared_id);
+			rev.name = revisionName;
+
+			if (full) {
+				if ("author" in doc[i])		rev.author = doc[i].author;
+				if ("timestamp" in doc[i])	rev.timestamp = doc[i].timestamp;
+				if ("message" in doc[i])	rev.message = doc[i].message;
+				if ("branch" in doc[i])		rev.branch = uuidToString(doc[i].shared_id);
 			}
 
 			revisionList.push(rev);

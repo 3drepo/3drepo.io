@@ -25,17 +25,54 @@ angular.module('3drepo', ['ui.router', 'ui.bootstrap'])
 '$locationProvider',
 function($stateProvider, $urlRouterProvider, $locationProvider) {
 	$stateProvider
-		.state('main' ,{
-			url: '/:account/:project',
-			templateUrl: 'mainpage.html',
-			controller: 'MainCtrl',
+		.state('splash' ,{
+			url: '/',
+			templateUrl: 'splash.html',
+			controller: 'SplashCtrl',
+			resolve: {
+				account : function($stateParams){
+					return $stateParams.account;
+				}
+			}
+		}).state('home' ,{
+			url: '/:account',
+			templateUrl: 'home.html',
+			controller: 'DashboardCtrl',
 			resolve: {
 				account : function($stateParams){
 					return $stateParams.account;
 				},
-				project: function($stateParams){
-					return $stateParams.project;
+				initPromise: function(userData, $stateParams) {
+					return userData.initPromise($stateParams.account);
+				}
+			}
+		}).state('main' ,{
+			url: '/:account/:project',
+			views: {
+				"@" : {
+					templateUrl: 'mainpage.html',
+					controller: 'MainCtrl',
+					resolve: {
+						account : function($stateParams){
+							return $stateParams.account;
+						},
+						project: function($stateParams){
+							return $stateParams.project;
+						},
+					}
 				},
+				"footer@main" : {
+					templateUrl: 'info.html',
+					controller: 'ViewCtrl',
+					resolve: {
+						view: function($stateParams){
+							return "info";
+						},
+						initPromise: function(data, $stateParams) {
+							return data.initPromise($stateParams.account, $stateParams.project, 'master', 'head', $stateParams.view);
+						}
+					}
+				}
 			}
 		}).state('main.view', {
 			url: '/:view',
@@ -88,6 +125,12 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 						},
 						branch: function($stateParams) {
 							return null;
+						},
+						account : function($stateParams){
+							return $stateParams.account;
+						},
+						project: function($stateParams){
+							return $stateParams.project;
 						}
 					}
 				}
@@ -118,140 +161,13 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	$urlRouterProvider.otherwise('404');
 
 	// Empty view redirects to info view by default
-	$urlRouterProvider.when('/{account}/{project}', '/{account}/{project}/info');
+	$urlRouterProvider.when('/:account/:project', '/{account}/{project}/info');
 
 	// This will be needed to remove angular's #, but there is an error at the moment
 	// -> need to investigate
 	$locationProvider.html5Mode(true);
 }])
-.factory('fake', function(){
-
-	/**
-	 * This provider is used to generate random things
-	 * as placeholders until real-data fetching is implemented
-	 */
-
-	var o = {};
-
-	o.author = function(){
-		var authors = ["jozef", "tim", "fred"];
-		return o.entry(authors);
-	}
-
-	o.text = function(n, space){
-		var text = "";
-		var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-		if(space){
-			possible = possible + "			   ";
-		}
-
-		for( var i=0; i < n; i++ )
-			text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-		return text;
-	}
-
-	o.entry = function(array){
-		return array[Math.floor(Math.random() * array.length)];
-	}
-
-	o.branch = function(){
-		return "branch_" + o.text(8, false);
-	}
-
-	o.comment = function(){
-		return o.text(96, true);
-	}
-
-	o.number = function(n){
-		return Math.floor(Math.random() * n + 1);
-	}
-
-	o.day = function(){
-		// Only 5 possible days
-		return Math.floor(Math.random() * 5 + 1);
-	}
-
-	o.month = function(){
-		// Only 2 possible months
-		var months = ["January", "February"];
-		return o.entry(months);
-	}
-
-	o.time = function(){
-		return "" + Math.floor(Math.random() * 24) + ":" + Math.floor(Math.random() * 60);
-	}
-
-	o.date = function(){
-		// format: "15 october 2014, 01:00",
-		var date = "" + o.day() + " " + o.month() + " 2014, " + o.time();
-		return date;
-	}
-
-	o.log_type = function(){
-		var types = ["visibility", "branch-add", "project-type", "user-add", "creation"];
-		return o.entry(types);
-	}
-
-	o.log_keyword = function(type){
-		if(type == "visibility"){
-			return o.entry(["public", "private"]);
-		}
-		else if(type == "branch-add"){
-			return o.branch(8, false);
-		}
-		else if(type == "project-type"){
-			return o.entry(["Architectural", "Aerospatial", "Automotive", "Engineering", "Other"]);
-		}
-		else if(type == "user-add"){
-			return o.author();
-		}
-
-		return "";
-	}
-
-	o.log = function(){
-
-		var type = o.log_type();
-
-		var log = {
-			type: type,
-			author: o.author(),
-			keyword: o.log_keyword(type),
-			date: o.date()
-		};
-
-		return log;
-	}
-
-	o.comment = function(){
-		var c = {
-			author: o.author(),
-			date: o.date(),
-			message: o.text(92, true)
-		}
-
-		return c;
-	}
-
-	o.revision = function(date){
-
-		var c = {
-			name: "rev_" + o.text(8, false),
-			author: o.author(),
-			date: date,
-			message: o.text(92, true),
-			n_comments: o.number(24),
-		}
-
-		return c;
-	}
-
-	return o;
-
-})
-.factory('data', ['$http', '$q', '$rootScope', 'fake', function($http, $q, $rootScope, fake){
+.factory('data', ['$http', '$q', '$rootScope', function($http, $q, $rootScope){
 
 	/**
 	 * This provider is used to store the data about the project
@@ -282,6 +198,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			author: "",
 			date: "",
 			message: "",
+			branch: "master"
 		},
 		current_diff: {
 			name: "",
@@ -415,7 +332,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 		var baseUrl = "";
 
-		if (name == 'head')
+		if (rid == 'head')
 			baseUrl = $rootScope.apiUrl(o.account + '/' + o.project + '/revision/' + branch + '/' + rid);
 		else
 			baseUrl = $rootScope.apiUrl(o.account + '/' + o.project + '/revision/' + rid);
@@ -425,6 +342,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 			$http.get(baseUrl + '.json').then(function(json) {
 				res.name    = json.data.name;
+				res.shortName = json.data.name.substr(0,20) + "...";
 				res.author  = json.data.author;
 				res.date    = json.data.date;
 				res.message = json.data.message;
@@ -457,46 +375,44 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		return deferred.promise;
 	};
 
+	o.month = function(month) {
+		var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August",
+			"September", "October", "November", "December"];
+
+		return monthNames[month];
+	};
+
 	// Fetch some of the revisions grouped by day
 	o.fetchRevisionsByDay = function(branch, first, last) {
-
-		var fetchFakeRevisions = function(branch, rev, first, last){
-
-			console.log("Fetching revisions [" + first + "," + last + "] for branch " + branch + " and rev " + rev);
-
-
-
-			var res = {};
-			for(var i=first; i<=last; i++){
-				var date = fake.date();
-				var day = date.split(",")[0];
-
-				if(!res.hasOwnProperty(day)){
-					res[day] = [];
-				}
-
-				res[day].push(fake.revision(date));
-			}
-
-			return res;
-
-		};
 
 		var deferred = $q.defer();
 
 		setTimeout(function() {
-			$http.get($rootScope.apiUrl(o.account + '/' + o.project + '/revisions/' + branch + '.json?start=' + first + '&end=' + last + '?full=true'))
+			$http.get($rootScope.apiUrl(o.account + '/' + o.project + '/revisions/' + branch + '.json?start=' + first + '&end=' + last + '&full=true'))
 			.then(function(json) {
+
+				var res = {};
+
 				for(var rev in json.data)
 				{
-					var dt = new Date(rev.date);
+					var dt = new Date(json.data[rev].timestamp);
 
+					var day = dt.getDate();
+					var month = o.month(dt.getMonth());
+					var year  = dt.getFullYear();
 
+					var dtStr = day + " " + month + " " + year;
+
+					if (!(dtStr in res))
+						res[dtStr] = [];
+
+					json.data[rev].date = dtStr;
+					res[dtStr].push(json.data[rev]);
 				}
-			}
-			var res = fetchFakeRevisions(o.current_branch.name, o.current_revision.name, first, last);
 
-			deferred.resolve(res);
+				deferred.resolve(res);
+			});
+
 		}, 10);
 
 		return deferred.promise;
@@ -511,7 +427,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 			var res = [];
 			for(var i=first; i<=last; i++){
-				res.push(fake.comment());
+				res.push("Etc.");
 			}
 
 			return res;
@@ -540,7 +456,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 			var res = [];
 			for(var i=first; i<=last; i++){
-				res.push(fake.log());
+				res.push("etc");
 			}
 
 			return res;
@@ -709,7 +625,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 		if(view == "comments"){
 			data.loading = true;
-			data.fetchComments((o.currentPage-1)*o.itemsperpage, Math.min(o.totalItems-1, (o.currentPage)*o.itemsperpage-1))
+			data.fetchComments(data.current_revision.branch, (o.currentPage-1)*o.itemsperpage, Math.min(o.totalItems-1, (o.currentPage)*o.itemsperpage-1))
 			.then(function(res){
 				data.setComments(res);
 				data.loading = false;
@@ -717,7 +633,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		}
 		else if(view == "log"){
 			data.loading = true;
-			data.fetchLog((o.currentPage-1)*o.itemsperpage, Math.min(o.totalItems-1, (o.currentPage)*o.itemsperpage-1))
+			data.fetchLog(data.current_revision.branch, (o.currentPage-1)*o.itemsperpage, Math.min(o.totalItems-1, (o.currentPage)*o.itemsperpage-1))
 			.then(function(res){
 				data.setLog(res);
 				data.loading = false;
@@ -725,7 +641,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		}
 		else if(view == "revisions"){
 			data.loading = true;
-			data.fetchRevisionsByDay((o.currentPage-1)*o.itemsperpage, Math.min(o.totalItems-1, (o.currentPage)*o.itemsperpage-1))
+			data.fetchRevisionsByDay(data.current_revision.branch, (o.currentPage-1)*o.itemsperpage, Math.min(o.totalItems-1, (o.currentPage)*o.itemsperpage-1))
 			.then(function(res){
 				data.setRevisionsByDay(res);
 				data.loading = false;
@@ -768,7 +684,13 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 	$scope.go = function(v){
 		var o = {view: v};
-		$state.go($state.current.name, o);
+
+		var vw = $state.current.name;
+
+		if (vw.substr(vw.length - 5) == ".view")
+			$state.go($state.current.name, o);
+		else
+			$state.go($state.current.name + '.view', o);
 	}
 
 	$scope.checkViewIsValid = function(){
@@ -807,24 +729,24 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 	return o;
 })
-.controller('MainCtrl', ['$scope', '$http', 'iFrameURL', 'account', 'project', '$location', '$window', '$rootScope', function($scope, $http, iFrameURL, account, project, $location, $window, $rootScope) {
+.controller('LoginCtrl', ['$scope', '$state', '$window', '$location', '$http', '$rootScope', function($scope, $state, $window, $location, $http, $rootScope)
+{
 	$scope.loggedIn = !!$window.sessionStorage.token;
-
-	$scope.iFrameURL = iFrameURL;
-	iFrameURL.setURL($rootScope.apiUrl(account + '/' + project + '/revision/master/head.x3d.src'));
 
 	$scope.logOut = function($location) {
 		if ($window.sessionStorage.token)
 		{
 			delete $window.sessionStorage.username;
 			delete $window.sessionStorage.token;
-
-			$location.path('/').search('returnTo', $location.path());
+			$scope.loggedIn = false;
+			$scope.user = {};
 		}
+
+		$state.reload();
 	}
 
 	$scope.login = function() {
-		url = $rootScope.apiUrl('/login')
+		url = $rootScope.apiUrl('login')
 		console.log('URL: ' + url);
 
 		$http.post(url, $scope.user)
@@ -832,11 +754,18 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			$window.sessionStorage.token = data.token;
 			$window.sessionStorage.username = $scope.user.username;
 			$scope.loggedIn = true;
+
+			$state.reload();
 		})
 		.error(function(data, status, headers, config) {
 			logOut();
 			console.log('Failed')
 		});
+	};
+
+	$scope.goUser = function(username) {
+		var o = { account: username };
+		$state.go('home', o);
 	};
 
 	if ($window.sessionStorage.username)
@@ -845,6 +774,10 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	} else {
 		$scope.user = {username :'', password: ''};
 	}
+}])
+.controller('MainCtrl', ['$scope', '$http', 'iFrameURL', 'account', 'project', '$location', '$window', '$rootScope', function($scope, $http, iFrameURL, account, project, $location, $window, $rootScope) {
+	$scope.iFrameURL = iFrameURL;
+	iFrameURL.setURL($rootScope.apiUrl(account + '/' + project + '/revision/master/head.x3d.src'));
 
 	$scope.x3domreload = function() {
 		x3dom.reload();
@@ -859,6 +792,77 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	else
 		iFrameURL.setURL($rootScope.apiUrl(account + '/' + project + '/revision/' + rid + '.x3d.src'));
 
+}])
+.factory('userData', ['$http', '$q', '$rootScope', function($http, $q, $rootScope){
+	var o = {
+		loading: true,
+		firstName: "",
+		lastName: "",
+		email: "",
+		projects: []
+	};
+
+	o.setInfo = function(res){
+		angular.copy(res, o);
+	}
+
+	o.fetchInfo = function(account) {
+		var deferred = $q.defer();
+
+		setTimeout(function() {
+			var res = {};
+
+			$http.get($rootScope.apiUrl(account + '.json')).then(function(json) {
+				res.firstName = json.data.firstName;
+				res.lastName  = json.data.lastName;
+				res.email     = json.data.email;
+				res.projects  = json.data.projects;
+
+				deferred.resolve(res);
+			});
+		},10);
+
+		return deferred.promise;
+	};
+
+	/**
+	 * Promises, used in the resolve to fetch data
+	 */
+
+	o.initPromise = function(account){
+		// Enable loading animation
+		o.loading = true;
+
+		return o.fetchInfo(account)
+			.then(function(res){
+				o.setInfo(res);
+
+				// Disable loading animation
+				o.loading = false;
+			});
+	};
+
+	return o;
+}])
+.controller('DashboardCtrl', ['$scope', 'account', 'userData', '$http', '$state', function($scope, account, userData, $http, $state){
+	$scope.account = account;
+	$scope.view = "dashboard";
+	$scope.userData = userData;
+
+	$scope.setView = function(view){
+		$scope.view = view;
+
+		console.log("VIEW: " + view);
+	}
+
+	$scope.goProject = function(account, project){
+		var o = { account: account, project: project };
+		$state.go("main", o);
+	}
+
+	$scope.isView = function(view){
+		return $scope.view == view;
+	}
 }])
 .factory('authInterceptor', ['$rootScope', '$q', '$window', '$location', function($rootScope, $q, $window, $location) {
 	return {
