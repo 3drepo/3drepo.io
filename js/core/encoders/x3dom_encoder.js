@@ -71,11 +71,11 @@ function X3D_CreateScene(xmlDoc) {
 
     head.setAttribute('DEF', 'head');
     head.setAttribute('headlight', 'true');
-    head.setAttribute('type', 'EXAMINE');
+    head.setAttribute('type', 'walk');
 
     head.textContent = ' ';
 
-    //scene.appendChild(head);
+    scene.appendChild(head);
     xmlDoc.firstChild.appendChild(scene);
 
     // Background color (ie skybox)
@@ -488,7 +488,11 @@ function X3D_AddViewpoint(xmlDoc, bbox)
 
     var vpoint = xmlDoc.createElement('Viewpoint');
     vpoint.setAttribute('id', 'sceneVP');
-	vpoint.setAttribute('position', vpos.join(' '));
+	//vpoint.setAttribute('position', vpos.join(' '));
+
+	vpoint.setAttribute('position', '-26.06 1.43 15.28');
+	//vpoint.setAttribute('position', '100 100 100');
+
     vpoint.setAttribute('orientation', '0 0 -1 0');
     vpoint.setAttribute('zNear', 0.01);
 
