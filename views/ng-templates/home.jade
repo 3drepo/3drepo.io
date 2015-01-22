@@ -1,5 +1,4 @@
 #wrap
-	ng-include(src="'header.html'")
 	.container-fluid
 		.row
 			.col-md-12.padded-box
@@ -9,8 +8,8 @@
 					.col-md-12.tight
 						.profile-pic
 						.profile-box
-							h1 {{userData.firstName}} {{userData.lastName}}
-							p {{userData.email}}
+							h1 {{userData.user.firstName}} {{userData.user.lastName}}
+							p {{userData.user.email}}
 					// Menu
 					.col-md-12.tight
 						.project-menu
@@ -143,7 +142,7 @@
 								h3 Profile
 							form.standardform(role='form')
 								.form-group
-									.col-sm-6margined
+									.col-sm-6.margined
 										label(for='project-name') Name
 										input#project-name.form-control(type='email', value='Frederic Besse')
 									.col-sm-6.margined

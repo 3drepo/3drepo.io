@@ -18,7 +18,7 @@ var extend = require("node.extend");
 
 function containsString(value)
 {
-	return (value.indexOf(this.substr) !== -1);
+	return (value.name.indexOf(this.substr) !== -1);
 }
 
 function searchCompanies(name, start, end, callback)
@@ -85,18 +85,18 @@ function searchFunction(dbInterface, queryParams, callback)
 			callback(null, extend(json, userJson));
 		});
 	} else if (companyName) {
-		searchCompanies("arup", start, end, function (err, companyJson)
+		searchCompanies(userCompanyName, start, end, function (err, companyJson)
 		{
 			if(err) return callback(err);
 
 			callback(null, extend(json, companyJson));
 		});
 	} else if (userCompanyName) {
-		searchUsers(userName, start, end, function(err, userJson)
+		searchUsers(userCompanyName, start, end, function(err, userJson)
 		{
 			if(err) return callback(err);
 
-			searchCompanies("arup", start, end, function(err, companyJson)
+			searchCompanies(userCompanyName, start, end, function(err, companyJson)
 			{
 				if(err) return callback(err);
 

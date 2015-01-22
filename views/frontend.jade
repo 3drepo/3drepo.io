@@ -5,7 +5,7 @@ html(lang="en")
 		meta(charset='utf-8')
 		meta(http-equiv='X-UA-Compatible', content='IE=edge')
 
-		title  3D Repo 
+		title 3D Repo 
 
 		link(rel='stylesheet' type='text/css' href='#{x3domcss}')
 		script(type="text/javascript" src='#{x3domjs}')
@@ -18,7 +18,6 @@ html(lang="en")
 		link(rel='stylesheet', href="#{fancytreecss}" type="text/css")
 		script(type="text/javascript" src="#{jqueryfancytree}")
 		link(rel='stylesheet' type='text/css' href='#{repouicss}')
-		link(rel='stylesheet' type='text/css' href='#{stylecss}')
 		script(type="text/javascript" src='#{showdownjs}')
 		script(type="text/javascript" src='#{angularjs}')
 		script(type="text/javascript" src='#{angularutilsjs}')
@@ -60,7 +59,23 @@ html(lang="en")
 		// Not found template
 		script(type='text/ng-template', id='404.html')
 			include ng-templates/404.jade
-	
+
+		// Search results template
+		script(type='text/ng-template', id='search.html')
+			include ng-templates/search.jade
+
+		// Splash template
+		script(type='text/ng-template', id='splash.html')
+			include ng-templates/splash.jade
+
+		// Login template
+		script(type='text/ng-template', id='login.html')
+			include ng-templates/signin.jade
+
+		// Signup template
+		script(type='text/ng-template', id='signup.html')
+			include ng-templates/signup.jade
+
 		// Common template
 		script(type='text/ng-template', id='common.html')
 			include ng-templates/common.jade
@@ -105,6 +120,7 @@ html(lang="en")
 		script(type='text/ng-template', id='footer.html')
 			include ng-templates/footer.jade
 
+		ng-include(src="'header.html'")
 		div(ui-view='')
 		#push
 		ng-include(src="'footer.html'")

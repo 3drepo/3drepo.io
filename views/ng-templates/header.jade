@@ -11,14 +11,13 @@
 		nav.collapse.navbar-collapse.bs-navbar-collapse(role='navigation')
 			form.navbar-left.tight.v-expand(role='search')
 				.form-group.tight
-					input#search-box.form-control(type='text', placeholder='Search 3D Repo')
+					input#search-box.form-control(type='text', ng-model="asyncSelected", placeholder="Search 3D Repo", typeahead="thing for thing in getThings($viewValue)", typeahead-loading="Searching")
 			a(href='http://blog.getbootstrap.com') Enterprise
-			a(href='', ng-hide='!loggedIn', ng-click='logOut()') Log Out
-			form.form-inline.tight.v-expand(ng-submit='login()')
-				a.ng-hide(ng-hide='!loggedIn', href="{{'/' + user.username}}") {{user.username}}
+			form.navbar-left.tight.v-expand(role='login')
 				.form-group.tight
-					input.ng-hide.form-control(ng-hide='loggedIn', ng-model='user.username', type='text', name='user', placeholder='Username')
-					input.ng-hide.form-control(ng-hide='loggedIn', ng-model='user.password', type='password', name='pass', placeholder='Password')
-					input.ng-hide(ng-hide='loggedIn', type='submit', value='login')
-			a(href='http://blog.getbootstrap.com')
-				img(src='/public/images/en.gif', height='16')
+					button.v-expand.btn.btn-success.pull-left(ng-hide='!loggedIn', ng-click="logOut()") Log Out
+					button.v-expand.btn.btn-success.pull-left(ng-hide='loggedIn', ng-click="loginPage()") Login
+					button.v-expand.btn.btn-success.pull-left(ng-hide='loggedIn', ng-click="signupPage()") Sign Up
+			span.clearfix
+				a(href='http://blog.getbootstrap.com')
+					img(src='/public/images/en.gif', height='16')

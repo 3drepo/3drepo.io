@@ -28,12 +28,15 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		.state('splash' ,{
 			url: '/',
 			templateUrl: 'splash.html',
-			controller: 'SplashCtrl',
-			resolve: {
-				account : function($stateParams){
-					return $stateParams.account;
-				}
-			}
+			controller: 'SplashCtrl'
+		}).state('signup', {
+			url: '/signup',
+			templateUrl: 'signup.html',
+			controller: 'SignUpCtrl'
+		}).state('login', {
+			url: '/login',
+			templateUrl: 'login.html',
+			controller: 'LoginCtrl'
 		}).state('home' ,{
 			url: '/:account',
 			templateUrl: 'home.html',
@@ -732,6 +735,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 .controller('LoginCtrl', ['$scope', '$state', '$window', '$location', '$http', '$rootScope', function($scope, $state, $window, $location, $http, $rootScope)
 {
 	$scope.loggedIn = !!$window.sessionStorage.token;
+	$scope.asyncSelected = "";
 
 	$scope.logOut = function($location) {
 		if ($window.sessionStorage.token)
@@ -742,7 +746,15 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			$scope.user = {};
 		}
 
-		$state.reload();
+		$state.go('splash');
+	}
+
+	$scope.loginPage = function() {
+		$state.go('login');
+	}
+
+	$scope.signupPage = function() {
+		$state.go('signup');
 	}
 
 	$scope.login = function() {
@@ -755,7 +767,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			$window.sessionStorage.username = $scope.user.username;
 			$scope.loggedIn = true;
 
-			$state.reload();
+			$state.go('home', {account : $scope.user.username});
 		})
 		.error(function(data, status, headers, config) {
 			logOut();
@@ -766,6 +778,29 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	$scope.goUser = function(username) {
 		var o = { account: username };
 		$state.go('home', o);
+	};
+
+	$scope.getThings = function(val) {
+		return $http.get($rootScope.apiUrl('search.json'),
+		{
+			params: {
+				user_company_name: val
+			}
+		}).then(function(res) {
+			var users = res.data.users;
+			var companies = res.data.companies.map(function(obj){ return obj.name; });
+
+			users = users.map(function(user) {
+				return user + " (User)";
+			});
+
+			companies = companies.map(function(company) {
+				return company + " (Company)";
+			});
+
+
+			return users.concat(companies);
+		});
 	};
 
 	if ($window.sessionStorage.username)
@@ -796,15 +831,17 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 .factory('userData', ['$http', '$q', '$rootScope', function($http, $q, $rootScope){
 	var o = {
 		loading: true,
-		firstName: "",
-		lastName: "",
-		email: "",
-		projects: []
+		user: {
+			firstName: "",
+			lastName: "",
+			email: "",
+			projects: []
+		}
 	};
 
 	o.setInfo = function(res){
-		angular.copy(res, o);
-	}
+		angular.copy(res, o.user);
+	};
 
 	o.fetchInfo = function(account) {
 		var deferred = $q.defer();
@@ -864,6 +901,38 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		return $scope.view == view;
 	}
 }])
+.controller('SplashCtrl', ['$scope', function($scope) {
+}])
+.controller('SignUpCtrl', ['$scope', '$rootScope', '$http', function($scope, $rootScope, $http) {
+	$scope.username = "";
+	$scope.firstname = "";
+	$scope.lastname = "";
+	$scope.password = "";
+	$scope.retype = "";
+	$scope.email = "";
+	$scope.valid = false;
+	$scope.popoverText = "";
+
+	$scope.signupSubmit = function() {
+
+	};
+
+	$scope.checkUsername = function() {
+		setTimeout(function() {
+			$http.head($rootScope.apiUrl($scope.username + '.json')).
+				success(function(json, status) {
+					if (status === 404)
+					{
+						$scope.valid = true;
+						$scope.popoverText = "";
+					} else {
+						$scope.valid = false;
+						$scope.popoverText = "Username already taken";
+					}
+				});
+		},10);
+	};
+}])
 .factory('authInterceptor', ['$rootScope', '$q', '$window', '$location', function($rootScope, $q, $window, $location) {
 	return {
 		request: function (config) {
@@ -886,7 +955,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 				$location.path('/').search('returnTo', $location.path());
 			}
 
-			return rej | $q.when(rej);
+			return rej || $q.when(rej);
 		}
 	};
 }])

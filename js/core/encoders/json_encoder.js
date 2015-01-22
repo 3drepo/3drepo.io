@@ -196,10 +196,15 @@ exports.route = function(router)
 	});
 
 	router.get('json', '/:account', function(res, params) {
+		// TODO: Should only be public information
 		dbInterface.getUserInfo( params.account, function(err, user)
 		{
 			if(err) throw err;
-			res.json(user);
+
+			if(user)
+				res.json(user);
+			else
+				res.sendStatus(404);
 		});
 	});
 

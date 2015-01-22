@@ -100,6 +100,28 @@ module.exports = function(){
 		next();
 	});
 
+	this.router.post('/:account', function(req, res) {
+		this.dbInterface.getUserInfo( req.param("account"), function (err, user)
+		{
+			if (!user) // User currently doesn't exist so continue
+			{
+
+			} else {
+				this.checkAccess(req, res, function(req,res, function(err)
+				{
+					if(err)
+					{
+						// Do no have access to the user
+						res.sendStatus(403);
+					} else {
+						// Perform update of user
+
+					}
+				});
+			}
+		});
+	});
+
 	this.router.post('/login', function(req, res) {
 		this.dbInterface.authenticate(req.body.username, req.body.password, function(err, user)
 		{
@@ -127,7 +149,7 @@ module.exports = function(){
 	});
 
 	// Account information
-	this.router.get('/:account.:format?.:subformat?', this.checkAccess, function(req, res, next) {
+	this.router.get('/:account.:format?.:subformat?', function(req, res, next) {
 		var format = req.param("format");
 
 		var params = {

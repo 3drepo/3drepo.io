@@ -79,23 +79,6 @@ ng-include(src="'common.html'")
 									li
 										a(href='#/', ng-click="user.role='Viewer'")
 											span.button-keyword Viewer
-		.block
-			.col-sm-12.margined.block-header
-				h3 Type
-			form.standardform(role='form')
-				.form-group
-					.col-sm-12
-						label.radio.radio-pad
-							input#federated(type='radio', name='federated', value='single', ng-model='data.info.type', ng-checked="data.info.type=='single'", ng-change="setType('single')")
-							i.fa.fa-fila Single Project
-						.radio-pad
-							p Consist of only one element.
-					.col-sm-12.margined
-						label.radio.radio-pad
-							input#federated(type='radio', name='federated', value='federated', ng-model='data.info.type', ng-checked="data.info.type=='federated'", ng-change="setType('federated')")
-							i.fa.fa-folder-open Federated Project
-						.radio-pad
-							p Can have attached sub-projects.
 		.block(ng-if="data.info.type=='federated'")
 			.col-sm-12.margined.block-header
 				h3 Federation

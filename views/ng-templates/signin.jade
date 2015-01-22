@@ -1,0 +1,12 @@
+.container-fluid
+	.row
+		.col-md-4.col-md-offset-4
+			#login-box
+				form.signin(ng-submit='login()')
+					h2.signin-header
+						center Login
+					input.top-gap.form-control(type='text', ng-model="user.username" name='user', placeholder='Username', required)
+					input.top-gap.form-control(type='password', ng-model="user.password" name='password', placeholder='Password', required)
+					button#loginButton.btn.btn-warning-btn-block.top-gap(type='submit') Login
+					span.clearfix
+

@@ -53,6 +53,80 @@ exports.authenticate = function(username, password, callback) {
 	});
 };
 
+exports.createUser = function(username, password, email, callback) {
+	dbConn.dbCallback('admin', function(err, db) {
+		if (err) return callback(err);
+
+		db.addUser(username, password, function(err, result)
+		{
+			if(err) return callback(err);
+
+			dbConn.collCallback('admin', 'system.users', function(err, coll) {
+				if(err) return callback(err);
+
+				var selector = { user : username };
+
+				var updateJSON = {
+					$set: { "customData.email" : email}
+				};
+
+				coll.update(selector, updateJSON, function(err, doc) {
+					if (err) return callback(err);
+
+
+				});
+			});
+		}
+
+		var user = {
+			user: username.
+			pwd:  password,
+			customData: {
+				email: email
+			},
+			roles: []
+		};
+
+		db.admin().listDatabases(function(err, dbs) {
+			if (err) return callback(err);
+
+			var dbList = [];
+
+			for (var i in dbs.databases)
+				dbList.push({ name: dbs.databases[i].name});
+
+			dbList.sort();
+
+			callback(null, dbList);
+		});
+	});
+};
+
+exports.updateUser = function(username, password, email, callback) {
+	dbConn.dbCallback('admin', function(err, db) {
+		if (err) return callback(err);
+
+		this.getUserInfo(username, function(err, user) {
+			var oldCustomData = user;
+
+			user["email"] = email;
+
+			var userInfo = {
+				user: username.
+				pwd:  password,
+				customData: { function(err, user) {}
+					email: email
+				},
+				roles: []
+			};
+
+			db.updateUser(
+				username,
+				userInfo
+			);
+		});
+};
+
 exports.getUserDBList = function(username, callback) {
 	if (!username) return callback(new Error("Username is not defined"), null);
 
@@ -88,7 +162,10 @@ exports.getUserInfo = function(username, callback) {
 	dbConn.filterColl("admin", "system.users", filter, projection, function(err, coll) {
 		if(err) return callback(err);
 
-		callback(null, coll[0]["customData"]);
+		if (coll[0])
+			callback(null, coll[0]["customData"]);
+		else
+			callback(null, null);
 	});
 };
 
