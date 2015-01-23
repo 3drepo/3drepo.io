@@ -105,17 +105,16 @@ module.exports = function(){
 		{
 			if (!user) // User currently doesn't exist so continue
 			{
-
+				res.sendStatus(501);
 			} else {
-				this.checkAccess(req, res, function(req,res, function(err)
-				{
+				this.checkAccess(req, res, function(req, res, err) {
 					if(err)
 					{
 						// Do no have access to the user
 						res.sendStatus(403);
 					} else {
 						// Perform update of user
-
+						res.sendStatus(501);
 					}
 				});
 			}
