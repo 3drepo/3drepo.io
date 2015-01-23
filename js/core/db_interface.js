@@ -76,10 +76,10 @@ exports.createUser = function(username, password, email, callback) {
 
 				});
 			});
-		}
+		});
 
 		var user = {
-			user: username.
+			user: username,
 			pwd:  password,
 			customData: {
 				email: email
