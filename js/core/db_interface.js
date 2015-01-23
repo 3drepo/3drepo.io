@@ -53,6 +53,7 @@ exports.authenticate = function(username, password, callback) {
 	});
 };
 
+
 exports.createUser = function(username, password, email, callback) {
 	dbConn.dbCallback('admin', function(err, db) {
 		if (err) return callback(err);
@@ -112,9 +113,9 @@ exports.updateUser = function(username, password, email, callback) {
 			user["email"] = email;
 
 			var userInfo = {
-				user: username.
+				user: username,
 				pwd:  password,
-				customData: { function(err, user) {}
+				customData: {
 					email: email
 				},
 				roles: []
@@ -125,6 +126,7 @@ exports.updateUser = function(username, password, email, callback) {
 				userInfo
 			);
 		});
+	});
 };
 
 exports.getUserDBList = function(username, callback) {
