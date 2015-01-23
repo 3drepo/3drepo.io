@@ -1,0 +1,127 @@
+doctype html
+html(lang="en")
+	head
+		// Meta, title, CSS, favicons, etc.
+		meta(charset='utf-8')
+		meta(http-equiv='X-UA-Compatible', content='IE=edge')
+
+		title 3D Repo 
+
+		link(rel='stylesheet' type='text/css' href='#{x3domcss}')
+		script(type="text/javascript" src='#{x3domjs}')
+		script(type="text/javascript" src="#{jqueryjs}")
+		link(rel='stylesheet', href="#{jqueryuicss}")
+		script(type="text/javascript" src="#{jqueryuijs}")
+		link(rel='stylesheet', href='#{bootstrapcss}')
+		script(type="text/javascript" src="#{bootstrapjs}")
+		script(type="text/javascript" src="#{bootstrapdialog}")
+		link(rel='stylesheet', href="#{fancytreecss}" type="text/css")
+		script(type="text/javascript" src="#{jqueryfancytree}")
+		link(rel='stylesheet' type='text/css' href='#{repouicss}')
+		script(type="text/javascript" src='#{showdownjs}')
+		script(type="text/javascript" src='#{angularjs}')
+		script(type="text/javascript" src='#{angularutilsjs}')
+		script(type="text/javascript" src='#{angularrouterjs}')
+		script(type="text/javascript" src='#{x3dcontroller}')
+		script(type="text/javascript" src='#{threedrepoapp}')
+		script(type="text/javascript" src='#{uibootstrap}')
+		script(type="text/javascript" src='#{chartjs}')
+		link(rel='stylesheet' type='text/css' href='#{fontawesomecss}')
+
+		script(src='/public/js/project.js')
+		script.
+			$(function() {
+				$("#meta-popup").draggable({ snap : ".viewport"})
+			});
+		script.
+			var realOpen = XMLHttpRequest.prototype.open;
+			var realSend = XMLHttpRequest.prototype.send;
+
+			XMLHttpRequest.prototype.open = function(method, url, async, unk1, unk2) {
+				realOpen.apply(this, arguments);
+			};
+
+			XMLHttpRequest.prototype.send = function(body) {
+				if (!window.sessionStorage.Authorization)
+					if (window.sessionStorage.token)
+						window.sessionStorage.Authorization = "Bearer " + window.sessionStorage.token;
+
+				if (window.sessionStorage.Authorization)
+				{
+					this.setRequestHeader("Authorization", window.sessionStorage.Authorization)
+					delete window.sessionStorage.Authorization;
+				}
+
+				realSend.apply(this, arguments);
+			};
+
+	body(ng-app='3drepo').ng-scope
+		// Not found template
+		script(type='text/ng-template', id='404.html')
+			include ng-templates/404.jade
+
+		// Search results template
+		script(type='text/ng-template', id='search.html')
+			include ng-templates/search.jade
+
+		// Splash template
+		script(type='text/ng-template', id='splash.html')
+			include ng-templates/splash.jade
+
+		// Login template
+		script(type='text/ng-template', id='login.html')
+			include ng-templates/signin.jade
+
+		// Signup template
+		script(type='text/ng-template', id='signup.html')
+			include ng-templates/signup.jade
+
+		// Common template
+		script(type='text/ng-template', id='common.html')
+			include ng-templates/common.jade
+
+		// Menu template
+		script(type='text/ng-template', id='menu.html')
+			include ng-templates/menu.jade
+
+		// Info template
+		script(type='text/ng-template', id='info.html')
+			include ng-templates/info.jade
+
+		// Comments template
+		// script(type='text/ng-template', id='comments.html')
+		//	include ng-templates/comments.jade
+
+		// Timeline template
+		script(type='text/ng-template', id='revisions.html')
+			include ng-templates/timeline.jade
+
+		// Log template
+		script(type='text/ng-template', id='log.html')
+			include ng-templates/log.jade
+
+		// Settings template
+		script(type='text/ng-template', id='settings.html')
+			include ng-templates/settings.jade
+
+		// Home page template
+		script(type='text/ng-template', id='home.html')
+			include ng-templates/home.jade
+		
+		// Header template
+		script(type='text/ng-template', id='header.html')
+			include ng-templates/header.jade
+
+		// Header
+		script(type='text/ng-template', id='mainpage.html')
+			include ng-templates/mainpage.jade
+
+		// Footer
+		script(type='text/ng-template', id='footer.html')
+			include ng-templates/footer.jade
+
+		ng-include(src="'header.html'")
+		div(ui-view='')
+		#push
+		ng-include(src="'footer.html'")
+

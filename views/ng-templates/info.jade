@@ -1,0 +1,20 @@
+ng-include(src="'common.html'")
+.col-md-8.tight
+	ng-include(src="'menu.html'")
+	div(ng-if='data.loading')
+		img.loading(src='http://www.nasa.gov/multimedia/videogallery/ajax-loader.gif', width='20', height='20')
+	div(ng-if='!data.loading')
+		.block
+			.col-sm-12.margined.block-header
+				h3 Revision 
+					span.block-header-project-name {{data.current_revision.name}}
+					span.block-header-by by
+					span.block-header-author {{data.current_revision.author}}
+					span.commit-date-title {{data.current_revision.date}}
+			p {{data.current_revision.message}}
+		.block
+			.col-sm-12.margined.block-header
+				h3 Readme
+			// Display the processed markdown from readme
+			div(markdown='data.info.readme')
+

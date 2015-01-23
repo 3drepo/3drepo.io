@@ -14,23 +14,27 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-exports.route = function(router)
-{
-    router.get('jpg', '/:account/:project/:uid', function(res, params) {
-        router.dbInterface.getObject(params.account, params.project, params.uid, null, null, function(err, type, uid, obj)
-        {
-            if(err) throw err;
 
-            if (type == "texture")
-            {
-              res.write(obj.textures[uid].data.buffer);
-			  res.end();
-            } else {
-                throw new Error("Type of object not supported");
-            }
-        });
-    });
+var express = require('express'),
+	app = express(),
+	cors = require('cors'),
+	path = require('path'),
+	config = require('app-config').config;
 
-};
+app.set('views', './views');
+app.set('view_engine', 'jade');
+app.locals.pretty = true;
 
+app.use('/public', express.static(__dirname + '/public'));
 
+app.get('*', function(req, res) {
+	var params = {};
+
+	Object.keys(config.external).forEach(function(key) {
+		params[key] = config.external[key];
+	});
+
+	res.render('frontend.jade', params);
+});
+
+exports.app = app
