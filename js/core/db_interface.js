@@ -213,7 +213,8 @@ exports.getProjectUsers = function(account, project, callback) {
 exports.isPublicProject = function(account, project, callback)
 {
 	this.getProjectInfo(account, project, function (err, proj) {
-		console.log(JSON.stringify(proj));
+		if(err) return callback(err);
+
 		if (proj["read_access"].toLowerCase() == "public")
 		{
 			callback(null);
@@ -233,6 +234,8 @@ exports.hasAccessToProject = function(username, account, project, callback) {
 		if(err)
 		{
 			this.dbInterface.getUserDBList(username, function(err, dbList) {
+				if(err) return callback(err);
+
 				var dbListStr = dbList.map (function (db) {
 					return db["account"] + "." + db["project"];
 				});
@@ -294,8 +297,6 @@ exports.getHeadOf = function(dbName, project, branch, getFunc, callback) {
 
 	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, doc) {
 		if (err) return callback(err);
-
-		console.log("DOC" + JSON.stringify(doc[0]));
 
 		getFunc(dbName, project, uuidToString(doc[0]["_id"]), function(err, doc) {
 			if(err) return callback(err);

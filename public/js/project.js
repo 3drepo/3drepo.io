@@ -23,7 +23,8 @@ angular.module('3drepo', ['ui.router', 'ui.bootstrap'])
 '$stateProvider',
 '$urlRouterProvider',
 '$locationProvider',
-function($stateProvider, $urlRouterProvider, $locationProvider) {
+'$httpProvider',
+function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 	$stateProvider
 		.state('splash' ,{
 			url: '/',
@@ -169,6 +170,8 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	// This will be needed to remove angular's #, but there is an error at the moment
 	// -> need to investigate
 	$locationProvider.html5Mode(true);
+
+	$httpProvider.defaults.withCredentials = true;
 }])
 .factory('data', ['$http', '$q', '$rootScope', function($http, $q, $rootScope){
 
@@ -740,8 +743,14 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	$scope.logOut = function($location) {
 		if ($window.sessionStorage.token)
 		{
-			delete $window.sessionStorage.username;
-			delete $window.sessionStorage.token;
+			url = $rootScope.apiUrl('logout');
+
+			$http.post(url, $scope.user)
+			.success(function (data, status, headers, config) {
+				delete $window.sessionStorage.username;
+
+			});
+
 			$scope.loggedIn = false;
 			$scope.user = {};
 		}
@@ -766,13 +775,13 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			$window.sessionStorage.token = data.token;
 			$window.sessionStorage.username = $scope.user.username;
 			$scope.loggedIn = true;
-
 			$state.go('home', {account : $scope.user.username});
 		})
 		.error(function(data, status, headers, config) {
 			logOut();
 			console.log('Failed')
 		});
+
 	};
 
 	$scope.goUser = function(username) {
@@ -932,41 +941,5 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 				});
 		},10);
 	};
-}])
-.factory('authInterceptor', ['$rootScope', '$q', '$window', '$location', function($rootScope, $q, $window, $location) {
-	return {
-		request: function (config) {
-			//console.log(config)
-			config.headers = config.headers || {};
-			if ($window.sessionStorage.token) {
-				$window.sessionStorage.Authorization = 'Bearer ' + $window.sessionStorage.token;
-			}
-			return config;
-		},
-		response: function (res) {
-			return res || $q.when(res);
-		},
-		responseError: function(rej) {
-			if (rej.status === 401)
-			{
-				delete $window.sessionStorage.token;
-				delete $window.sessionStorage.user;
-
-				$location.path('/').search('returnTo', $location.path());
-			}
-
-			return rej || $q.when(rej);
-		}
-	};
-}])
-.config(['$httpProvider', '$sceDelegateProvider', function ($httpProvider, $sceDelegateProvider) {
-	$httpProvider.interceptors.push('authInterceptor');
-
-	$sceDelegateProvider.resourceUrlWhitelist([
-		'self',
-		'http://api.localhost:8081/**'
-	]);
-
 }]);
 
-jQuery.support.cors = true;

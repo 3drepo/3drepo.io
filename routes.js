@@ -50,15 +50,15 @@ module.exports = function(){
 		if (account && project)
 		{
 			this.dbInterface.isPublicProject(account, project, function(err) {
-				if(err)
+				if(err && !req.session.user)
 				{
-					return expressJwt({secret:secret})(req,res,next);
+					return res.sendStatus(401);
 				} else {
 					next();
 				}
 			});
 		} else {
-			return expressJwt({secret:secret})(req,res,next);
+			return res.sendStatus(401);
 		}
 	};
 
@@ -100,6 +100,36 @@ module.exports = function(){
 		next();
 	});
 
+	this.router.post('/login', function(req, res) {
+		this.dbInterface.authenticate(req.body.username, req.body.password, function(err, user)
+		{
+			if(err)
+			{
+				res.status(401).send('Incorrect usename or password');
+			} else {
+				if(user)
+				{
+					req.session.regenerate(function(err) {
+						if(err) return res.sendStatus(500);
+
+						req.session.user = user;
+
+						logger.log('debug', 'Authenticated ' + user.username + ' and signed token.')
+						res.sendStatus(200);
+					});
+				} else {
+					res.status(401).send('Invalid user');
+				}
+			}
+		});
+	});
+
+	this.router.post('/logout', function(req, res) {
+		req.session.destroy(function() {
+			res.sendStatus(200);
+		});
+	});
+
 	this.router.post('/:account', function(req, res) {
 		this.dbInterface.getUserInfo( req.param("account"), function (err, user)
 		{
@@ -117,21 +147,6 @@ module.exports = function(){
 						res.sendStatus(501);
 					}
 				});
-			}
-		});
-	});
-
-	this.router.post('/login', function(req, res) {
-		this.dbInterface.authenticate(req.body.username, req.body.password, function(err, user)
-		{
-			if(err)
-			{
-				res.status(401).send('Incorrect usename or password');
-			} else {
-				var token = jwt.sign(user, secret, {expiresInMinutes: 60*5});
-
-				logger.log('debug', 'Authenticated ' + user.username + ' and signed token.')
-				res.json({ token: token });
 			}
 		});
 	});
@@ -163,7 +178,7 @@ module.exports = function(){
 	// Project information
 	this.router.get('/:account/:project.:format?.:subformat?', this.checkAccess, function(req, res, next) {
 		var format = req.param("format");
-		var current_user = ("user" in req) ? req.user.username : "";
+		var current_user = ("user" in req) ? req.session.user.username : "";
 
 		var params = {
 			account:	req.param("account"),
@@ -179,13 +194,11 @@ module.exports = function(){
 	// Project revision list
 	this.router.get('/:account/:project/revisions.:format?.:subformat?', this.checkAccess, function(req, res, next) {
 		var format = req.param("format");
-		var current_user = ("user" in req) ? req.user.username : "";
+		var current_user = ("user" in req) ? req.session.user.username : "";
 
 		var start = ("start" in req.query) ? req.query.start : 1;
 		var end   = ("end" in req.query) ? req.query.end : (start + 5);
 		var full  = ("full" in req.query) ? req.query.full : null;
-
-		console.log('QUERY: ' + req.query);
 
 		var params = {
 			account:	req.param("account"),
@@ -204,7 +217,7 @@ module.exports = function(){
 	// Revision list for a particular branch
 	this.router.get('/:account/:project/revisions/:branch.:format?.:subformat?', this.checkAccess, function(req, res, next) {
 		var format = req.param("format");
-		var current_user = ("user" in req) ? req.user.username : "";
+		var current_user = ("user" in req) ? req.session.user.username : "";
 
 		var start = ("start" in req.query) ? req.query.start : 1;
 		var end   = ("end" in req.query) ? req.query.end : (start + 5);
@@ -228,7 +241,7 @@ module.exports = function(){
 	// Get README for branch's head revision
 	this.router.get('/:account/:project/revision/:branch/head/readme.:format?.:subformat?', this.checkAccess, function(req, res, next) {
 		var format = req.param("format");
-		var current_user = ("user" in req) ? req.user.username : "";
+		var current_user = ("user" in req) ? req.session.user.username : "";
 
 		var params = {
 			account: req.param("account"),
@@ -244,7 +257,7 @@ module.exports = function(){
 	// Get README for specific project revision
 	this.router.get('/:account/:project/revision/:rid/readme.:format?.:subformat?', this.checkAccess, function(req, res, next) {
 		var format = req.param("format");
-		var current_user = ("user" in req) ? req.user.username : "";
+		var current_user = ("user" in req) ? req.session.user.username : "";
 
 		var params = {
 			account: req.param("account"),
@@ -260,7 +273,7 @@ module.exports = function(){
 	// Revision rid for master branch
 	this.router.get('/:account/:project/revision/:rid.:format?.:subformat?', this.checkAccess, function(req, res, next) {
 		var format = req.param("format");
-		var current_user = ("user" in req) ? req.user.username : "";
+		var current_user = ("user" in req) ? req.session.user.username : "";
 
 		var params = {
 			account:	req.param("account"),
@@ -277,7 +290,7 @@ module.exports = function(){
 	// Get the head of a specific branch
 	this.router.get('/:account/:project/revision/:branch/head.:format?.:subformat?', this.checkAccess, function(req, res, next) {
 		var format = req.param("format");
-		var current_user = ("user" in req) ? req.user.username : "";
+		var current_user = ("user" in req) ? req.session.user.username : "";
 
 		var params = {
 			account:   req.param("account"),
@@ -294,7 +307,7 @@ module.exports = function(){
 	// Get specific object via shared_id sid
 	this.router.get('/:account/:project/revision/:rid/:sid.:format?.:subformat?', this.checkAccess, function(req, res, next) {
 		var format = req.param("format");
-		var current_user = ("user" in req) ? req.user.username : "";
+		var current_user = ("user" in req) ? req.session.user.username : "";
 
 		var params = {
 			account:	req.param("account"),
@@ -311,7 +324,7 @@ module.exports = function(){
 	// Get specific object via shared_id sid for particular branch
 	this.router.get('/:account/:project/revision/:branch/head/:sid.:format?.:subformat?', this.checkAccess, function(req, res, next) {
 		var format = req.param("format");
-		var current_user = ("user" in req) ? req.user.username : "";
+		var current_user = ("user" in req) ? req.session.user.username : "";
 
 		var params = {
 			account:	req.param("account"),
@@ -328,7 +341,7 @@ module.exports = function(){
 	// Get list of revision in a branch
 	this.router.get('/:account/:project/revision/:branch.:format?.:subformat?', this.checkAccess, function(req, res, next) {
 		var format = req.param("format");
-		var current_user = ("user" in req) ? req.user.username : "";
+		var current_user = ("user" in req) ? req.session.user.username : "";
 
 		var params = {
 			account:   req.param("account"),
@@ -344,7 +357,7 @@ module.exports = function(){
 	// List branches for project
 	this.router.get('/:account/:project/branches.:format?.:subformat?', this.checkAccess, function(req, res, next) {
 		var format = req.param("format");
-		var current_user = ("user" in req) ? req.user.username : "";
+		var current_user = ("user" in req) ? req.session.user.username : "";
 
 		var params = {
 			account:   req.param("account"),
@@ -360,7 +373,7 @@ module.exports = function(){
 	// Get audit log for project
 	this.router.get('/:account/:project/log.:format?.:subformat?', this.checkAccess, function(req, res, next) {
 		var format = req.param("format");
-		var current_user = ("user" in req) ? req.user.username : "";
+		var current_user = ("user" in req) ? req.session.user.username : "";
 
 		var params = {
 			account: req.param("account"),
@@ -375,7 +388,7 @@ module.exports = function(){
 	// Get list of users for project
 	this.router.get('/:account/:project/users.:format?.:subformat?', this.checkAccess, function(req, res, next) {
 		var format = req.param("format");
-		var current_user = ("user" in req) ? req.user.username : "";
+		var current_user = ("user" in req) ? req.session.user.username : "";
 
 		var params = {
 			account: req.param("account"),
@@ -390,7 +403,7 @@ module.exports = function(){
 	// Get object with specific uid in a specific format
 	this.router.get('/:account/:project/:uid.:format?.:subformat?', this.checkAccess, function(req, res, next) {
 		var format = req.param("format");
-		var current_user = ("user" in req) ? req.user.username : "";
+		var current_user = ("user" in req) ? req.session.user.username : "";
 
 		var params = {
 			account:   req.param("account"),
@@ -409,7 +422,7 @@ module.exports = function(){
 	// Get list of objects that match a specific type
 	this.router.get('/:account/:project/:rid/:type.:format?.:subformat?', this.checkAccess, function(req, res, next) {
 		var format = req.param("format");
-		var current_user = ("user" in req) ? req.user.username : "";
+		var current_user = ("user" in req) ? req.session.user.username : "";
 
 		var params = {
 			account:   req.param("account"),
@@ -428,7 +441,7 @@ module.exports = function(){
 	// Get subtree for sid in revision rid, with (optional) depth query string paramter
 	this.router.get('/:account/:project/revision/:rid/tree/:sid.:format?.:subformat?', this.checkAccess, function(req, res, next) {
 		var format = req.param("format");
-		var current_user = ("user" in req) ? req.user.username : "";
+		var current_user = ("user" in req) ? req.session.user.username : "";
 
 		var params = {
 			account:	req.param("account"),
