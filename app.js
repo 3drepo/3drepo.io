@@ -62,7 +62,7 @@ app.use(expressSession({
 	resave: false,
 	saveUninitialized: true,
 	cookie: {
-		domain: "." + hostname,
+		domain: "api." + hostname,
 		path: "/",
 		httpOnly: false
 	}
