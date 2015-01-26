@@ -33,7 +33,19 @@ html(lang="en")
 			$(function() {
 				$("#meta-popup").draggable({ snap : ".viewport"})
 			});
-	
+
+			var realOpen = XMLHttpRequest.prototype.open;
+			var realSend = XMLHttpRequest.prototype.send;
+			
+			XMLHttpRequest.prototype.open = function(method, url, async, unk1, unk2) {
+				this.withCredentials = true;
+				realOpen.apply(this, arguments);
+			};
+
+			XMLHttpRequest.prototype.send = function(body) {
+				realSend.apply(this, arguments);
+			};
+
 	body(ng-app='3drepo').ng-scope
 		// Not found template
 		script(type='text/ng-template', id='404.html')
