@@ -37,6 +37,9 @@
 		"express-jwt" : "latest",
 		"jsonwebtoken" : "latest",
 		"passport-token" : "latest",
-		"cors" : "latest"
+		"cors" : "latest",
+		"cookie-parser" : "latest",
+		"express-session" : "latest",
+		"cookie-session": "latest"
 	}
 }

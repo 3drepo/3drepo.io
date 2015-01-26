@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd 
+ *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -98,7 +98,7 @@ exports.decode = function(bsonArray) {
 		}
 	}
 	*/
-	
+
 	//---------------------------------------------------------------------
 	// Revisions
 	history.revisions = revisions;

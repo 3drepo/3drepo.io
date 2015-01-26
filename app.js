@@ -25,13 +25,20 @@ var log_iface = require('./js/core/logger.js');
 var logger = log_iface.logger;
 onError = log_iface.onError;
 
-var hostname = process.env.HOSTNAME;
 var config = require('app-config').config;
+var hostname = config.server.hostname;
+
+var bodyParser = require('body-parser');
+var methodOverride = require('method-override');
+var compress = require('compression');
+var cookieParser = require('cookie-parser');
+var expressSession = require('express-session');
 
 var allowCrossDomain = function(req, res, next) {
-	res.header('Access-Control-Allow-Origin', '*');
+	res.header('Access-Control-Allow-Origin', req.headers.origin);
 	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
 	res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+	res.header('Access-Control-Allow-Credentials', true);
 	//res.header('Cache-Control', 'public, max-age=3600');
 
 	// intercept OPTIONS method
@@ -42,7 +49,25 @@ var allowCrossDomain = function(req, res, next) {
 	}
 }
 
+app.use(bodyParser.urlencoded({
+	extended: true
+}));
+app.use(bodyParser.json());
+app.use(compress());
+
 app.use(allowCrossDomain);
+app.use(cookieParser('Yet another secret'));
+app.use(expressSession({
+	secret: 'Very very secret, yes ?',
+	resave: false,
+	saveUninitialized: true,
+	cookie: {
+		domain: "." + hostname,
+		path: "/",
+		httpOnly: false
+	}
+}));
+
 app.use(vhost('api.' + hostname, require('./api.js').app));
 app.use(vhost(hostname, require('./frontend.js').app));
 
@@ -61,15 +86,15 @@ if ('ssl' in config) {
         res.redirect('https://' + req.headers.host + req.url);
     });
 
-    http.createServer(http_app).listen(config.server.http_port, function() {
+    http.createServer(http_app).listen(config.server.http_port, config.server.hostname, function() {
         logger.log('info', 'Starting HTTP service on port ' + config.server.http_port);
     });
 
-    https.createServer(ssl_options, app).listen(config.server.https_port, function() {
+    https.createServer(ssl_options, app).listen(config.server.https_port, config.server.hostname, function() {
         logger.log('info', 'Starting HTTPS service on port ' + config.server.https_port);
     });
 } else {
-    http.createServer(app).listen(config.server.http_port, function() {
+    http.createServer(app).listen(config.server.http_port, config.server.hostname, function() {
         logger.log('info', 'Starting HTTP service on port ' + config.server.http_port);
     });
 }

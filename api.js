@@ -16,31 +16,8 @@
  */
 
 var express = require('express');
-var config = require('app-config').config;
-
-var log = require('./js/core/login.js');
-
-var bodyParser = require('body-parser');
-var methodOverride = require('method-override');
-var compress = require('compression');
-
 var app = express();
-
-app.locals.pretty = true;
-
-app.use(bodyParser.urlencoded({
-    extended: false
-}));
-app.use(bodyParser.json());
-
-app.use(compress({
-    threshold: 512
-}));
-app.use(methodOverride());
-
 var routes = require('./routes.js')();
-
-app.use('/', routes.router);
 
 // Attach the encoders to the router
 var x3dom_encoder = require('./js/core/encoders/x3dom_encoder.js').route(routes);
@@ -49,5 +26,7 @@ var html_encoder = require('./js/core/encoders/html_encoder.js').route(routes);
 var src_encoder = require('./js/core/encoders/src_encoder.js').route(routes);
 var jpg_encoder = require('./js/core/encoders/jpeg_encoder.js').route(routes);
 var bin_encoder = require('./js/core/encoders/bin_encoder.js').route(routes);
+
+app.use('/', routes.router);
 
 exports.app = app

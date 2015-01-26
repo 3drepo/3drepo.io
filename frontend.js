@@ -15,11 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var express = require('express'),
-	app = express(),
-	cors = require('cors'),
-	path = require('path'),
-	config = require('app-config').config;
+var express = require('express');
+var app = express();
+var config = require('app-config').config;
 
 app.set('views', './views');
 app.set('view_engine', 'jade');
