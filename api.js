@@ -24,7 +24,7 @@ var x3dom_encoder = require('./js/core/encoders/x3dom_encoder.js').route(routes)
 var json_encoder = require('./js/core/encoders/json_encoder.js').route(routes);
 var html_encoder = require('./js/core/encoders/html_encoder.js').route(routes);
 var src_encoder = require('./js/core/encoders/src_encoder.js').route(routes);
-var jpg_encoder = require('./js/core/encoders/jpeg_encoder.js').route(routes);
+var img_encoder = require('./js/core/encoders/img_encoder.js').route(routes);
 var bin_encoder = require('./js/core/encoders/bin_encoder.js').route(routes);
 
 app.use('/', routes.router);
