@@ -1,61 +1,63 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *	Copyright (C) 2014 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var C            = require("../constants.js");
-var fs           = require('fs');
+var C			 = require("../constants.js");
+var fs			 = require('fs');
 var repoNodeMesh = require('../repoNodeMesh.js');
-var xmlDom       = require('xmldom');
-var domImp       = xmlDom.DOMImplementation;
-var xmlSerial    = xmlDom.XMLSerializer;
-var config       = require('app-config').config;
-var logIface     = require('../logger.js');
-var logger       = logIface.logger;
-var sem          = require('semaphore')(10);
-var popCache     = require('../cache/pbf_cache.js');
+var xmlDom		 = require('xmldom');
+var domImp		 = xmlDom.DOMImplementation;
+var xmlSerial	 = xmlDom.XMLSerializer;
+var config		 = require('app-config').config;
+var logIface	 = require('../logger.js');
+var logger		 = logIface.logger;
+var sem			 = require('semaphore')(10);
+var popCache	 = require('../cache/pbf_cache.js');
 
 var jsonCache = {};
 
 function getChild(parent, type, n) {
-    if ((parent == null) || !('children' in parent))
-        return null;
+	if ((parent == null) || !('children' in parent))
+		return null;
 
-    var typeIdx = 0;
+	var typeIdx = 0;
 
-    n = typeof n !== 'undefined' ? n : 0;
+	n = typeof n !== 'undefined' ? n : 0;
 
-    for (var childIdx = 0; childIdx < parent.children.length; childIdx++) {
-        if (parent.children[childIdx]['type'] == type) {
-            if (typeIdx == n) {
-                return parent.children[childIdx];
-            }
+	for (var childIdx = 0; childIdx < parent.children.length; childIdx++) {
+		if (parent.children[childIdx]['type'] == type) {
+			if (typeIdx == n) {
+				return parent.children[childIdx];
+			}
 
-            typeIdx++;
-        }
-    }
+			typeIdx++;
+		}
+	}
 
-    return null;
+	return null;
 }
 
 function X3D_Header() {
-    var xmlDoc = new domImp().createDocument('http://www.web3d.org/specification/x3d-namespace', 'X3D');
+	var xmlDoc = new domImp().createDocument('http://www.web3d.org/specification/x3d-namespace', 'X3D');
 
-    xmlDoc.firstChild.setAttribute('xmlns', 'http://www.web3d.org/specification/x3d-namespace');
+	xmlDoc.firstChild.setAttribute('onload', 'onLoaded(event);');
 
-    return xmlDoc;
+	xmlDoc.firstChild.setAttribute('xmlns', 'http://www.web3d.org/specification/x3d-namespace');
+
+	return xmlDoc;
 }
 
 /*******************************************************************************
@@ -64,47 +66,46 @@ function X3D_Header() {
  * @param {xmlDom} xmlDoc - The XML document to add the scene to
  *******************************************************************************/
 function X3D_CreateScene(xmlDoc) {
-    var scene = xmlDoc.createElement('Scene');
+	var scene = xmlDoc.createElement('Scene');
 	scene.setAttribute('id', 'scene');
+	var head = xmlDoc.createElement('navigationInfo');
 
-    var head = xmlDoc.createElement('navigationInfo');
+	head.setAttribute('DEF', 'head');
+	head.setAttribute('headlight', 'true');
+	head.setAttribute('type', 'walk');
+	head.setAttribute('speed', 1.5);
+	head.textContent = ' ';
 
-    head.setAttribute('DEF', 'head');
-    head.setAttribute('headlight', 'true');
-    head.setAttribute('type', 'walk');
+	//scene.appendChild(head);
+	xmlDoc.firstChild.appendChild(scene);
 
-    head.textContent = ' ';
-
-    scene.appendChild(head);
-    xmlDoc.firstChild.appendChild(scene);
-
-    // Background color (ie skybox)
-    var bground = xmlDoc.createElement('background');
-    bground.setAttribute('skyangle', '0.9 1.5 1.57');
-    bground.setAttribute('skycolor', '0.21 0.18 0.66 0.2 0.44 0.85 0.51 0.81 0.95 0.83 0.93 1');
-    bground.setAttribute('groundangle', '0.9 1.5 1.57');
-    bground.setAttribute('groundcolor', '0.65 0.65 0.65 0.73 0.73 0.73 0.81 0.81 0.81 0.91 0.91 0.91');
+	// Background color (ie skybox)
+	var bground = xmlDoc.createElement('background');
+	bground.setAttribute('skyangle', '0.9 1.5 1.57');
+	bground.setAttribute('skycolor', '0.21 0.18 0.66 0.2 0.44 0.85 0.51 0.81 0.95 0.83 0.93 1');
+	bground.setAttribute('groundangle', '0.9 1.5 1.57');
+	bground.setAttribute('groundcolor', '0.65 0.65 0.65 0.73 0.73 0.73 0.81 0.81 0.81 0.91 0.91 0.91');
 	bground.textContent = ' ';
-    scene.appendChild(bground);
+	scene.appendChild(bground);
 
 /*
-    var fog = xmlDoc.createElement('fog');
-    fog.setAttribute('visibilityRange', '300');
-    fog.setAttribute('color', '1,1,1');
-    fog.setAttribute('fogType', 'LINEAR');
-    fog.textContent = ' ';
-    scene.appendChild(fog);
+	var fog = xmlDoc.createElement('fog');
+	fog.setAttribute('visibilityRange', '300');
+	fog.setAttribute('color', '1,1,1');
+	fog.setAttribute('fogType', 'LINEAR');
+	fog.textContent = ' ';
+	scene.appendChild(fog);
   */
 
-    // Environmental variables
-    var environ = xmlDoc.createElement('environment');
-    environ.setAttribute('frustumCulling', 'true');
-    environ.setAttribute('smallFeatureCulling', 'true');
-    environ.setAttribute('smallFeatureThreshold', 5);
-    environ.setAttribute('occlusionCulling', 'true');
-    environ.textContent = ' ';
+	// Environmental variables
+	var environ = xmlDoc.createElement('environment');
+	environ.setAttribute('frustumCulling', 'true');
+	environ.setAttribute('smallFeatureCulling', 'true');
+	environ.setAttribute('smallFeatureThreshold', 5);
+	environ.setAttribute('occlusionCulling', 'true');
+	environ.textContent = ' ';
 
-    scene.appendChild(environ);
+	scene.appendChild(environ);
 
 	return scene;
 }
@@ -141,7 +142,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 			else
 				var url_str = '//' + config.server.apiHost + '/' + account + '/' + child['project'] + '/revision/master/head.x3d.' + mode;
 
-			newNode.setAttribute('onload', 'onLoaded(event);');
+			//newNode.setAttribute('onload', 'onLoaded(event);');
 			newNode.setAttribute('url', url_str);
 			newNode.setAttribute('id', child['id']);
 			newNode.setAttribute('DEF', dbInterface.uuidToString(child["shared_id"]));
@@ -226,12 +227,17 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 				xmlNode.appendChild(appearance);
 				X3D_AddChildren(xmlDoc, appearance, child, dbInterface, account, project, mode);
 		} else if (child['type'] == 'texture') {
-            newNode = xmlDoc.createElement('ImageTexture');
-            newNode.setAttribute('url', '//' + config.server.apiHost + '/' + account + '/' + project + '/' + child['id'] + '.' + child['extension']);
-            newNode.textContent = ' ';
+			newNode = xmlDoc.createElement('ImageTexture');
+			newNode.setAttribute('url', '//' + config.server.apiHost + '/' + account + '/' + project + '/' + child['id'] + '.' + child['extension']);
+			newNode.textContent = ' ';
 			newNode.setAttribute("id", child['id']);
 			newNode.setAttribute('DEF', dbInterface.uuidToString(child["shared_id"]));
 			xmlNode.appendChild(newNode);
+
+			var texProperties = xmlDoc.createElement('TextureProperties');
+			texProperties.setAttribute('generateMipMaps', 'true');
+			newNode.appendChild(texProperties);
+
 			X3D_AddChildren(xmlDoc, newNode, child, dbInterface, account, project, mode);
 		} else if (child['type'] == 'mesh') {
 			var shape = xmlDoc.createElement('Shape');
@@ -260,14 +266,14 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
  * @param {string} mode - Type of X3D being rendered
  *******************************************************************************/
 function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, mode) {
-    var meshId = mesh['id'];
-    var mat = getChild(mesh, 'material')
+	var meshId = mesh['id'];
+	var mat = getChild(mesh, 'material')
 
-    logger.log('debug', 'Loading mesh ' + meshId);
+	logger.log('debug', 'Loading mesh ' + meshId);
 
-    var bbox = repoNodeMesh.extractBoundingBox(mesh);
+	var bbox = repoNodeMesh.extractBoundingBox(mesh);
 
-    switch (mode) {
+	switch (mode) {
 		case "x3d":
 			shape.setAttribute('bboxCenter', bbox.center.join(' '));
 			shape.setAttribute('bboxSize', bbox.size.join(' '));
@@ -392,8 +398,8 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, mode
 				}
 			});
 
-        break;
-    }
+		break;
+	}
 };
 
 /*******************************************************************************
@@ -435,10 +441,10 @@ function X3D_AddMeasurer(xmlDoc) {
 	var mat   = xmlDoc.createElement('Material');
 	mat.setAttribute('emissiveColor', '1 0 0');
 
-	var dm    = xmlDoc.createElement('DepthMode');
+	var dm	  = xmlDoc.createElement('DepthMode');
 	dm.setAttribute('enableDepthTest', 'false');
 
-	var lp    = xmlDoc.createElement('LineProperties');
+	var lp	  = xmlDoc.createElement('LineProperties');
 	lp.setAttribute('linewidthScaleFactor', 10);
 
 	app.appendChild(mat);
@@ -470,7 +476,7 @@ function X3D_AddMeasurer(xmlDoc) {
  *******************************************************************************/
 function X3D_AddViewpoint(xmlDoc, bbox)
 {
-    var scene = xmlDoc.getElementsByTagName('Scene')[0];
+	var scene = xmlDoc.getElementsByTagName('Scene')[0];
 	var vpos = [0,0,0];
 
 	vpos[0] = bbox.center[0];
@@ -486,22 +492,23 @@ function X3D_AddViewpoint(xmlDoc, bbox)
 	logger.log('debug', 'VPOS: ' + vpos.join(' '));
 	logger.log('debug', 'MAXDIM: ' + max_dim);
 
-    var vpoint = xmlDoc.createElement('Viewpoint');
-    vpoint.setAttribute('id', 'sceneVP');
-	//vpoint.setAttribute('position', vpos.join(' '));
+	var vpoint = xmlDoc.createElement('Viewpoint');
+	vpoint.setAttribute('id', 'sceneVP');
 
+	//vpoint.setAttribute('position', vpos.join(' '));
 	vpoint.setAttribute('position', '-26.06 1.43 15.28');
 	//vpoint.setAttribute('position', '100 100 100');
 
-    vpoint.setAttribute('orientation', '0 0 -1 0');
-    vpoint.setAttribute('zNear', 0.01);
+	vpoint.setAttribute('orientation', '0 0 -1 0');
+	vpoint.setAttribute('zNear', 0.01);
 
-    vpoint.setAttribute('zFar', 10000);
+	vpoint.setAttribute('zFar', 10000);
 	vpoint.setAttribute('fieldOfView', fov);
 
-    vpoint.textContent = ' ';
+	vpoint.setAttribute('onload', 'startNavigation()');
+	vpoint.textContent = ' ';
 
-    scene.appendChild(vpoint);
+	//scene.appendChild(vpoint);
 }
 
 /*******************************************************************************
@@ -556,7 +563,9 @@ function X3D_AddGroundPlane(xmlDoc, bbox)
  *						ground plane
  *******************************************************************************/
 function render(dbInterface, account, project, subFormat, revision, res, callback) {
-    dbInterface.getScene(account, project, revision, function(err, doc) {
+	dbInterface.getScene(account, project, revision, function(err, doc) {
+		if(err) return callback(err);
+
 		var xmlDoc = X3D_Header();
 		var scene  = X3D_CreateScene(xmlDoc);
 
@@ -589,11 +598,11 @@ function render(dbInterface, account, project, subFormat, revision, res, callbac
 			}
 		}
 
-		var bbox    = {};
-		bbox.min    = sceneBBoxMin;
-		bbox.max    = sceneBBoxMax;
+		var bbox	= {};
+		bbox.min	= sceneBBoxMin;
+		bbox.max	= sceneBBoxMax;
 		bbox.center = [0.5 * (bbox.min[0] + bbox.max[0]), 0.5 * (bbox.min[1] + bbox.max[1]), 0.5 * (bbox.min[2] + bbox.max[2])];
-		bbox.size   = [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])];
+		bbox.size	= [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])];
 
 		//X3D_AddGroundPlane(xmlDoc, bbox);
 		X3D_AddViewpoint(xmlDoc, bbox);
@@ -602,15 +611,16 @@ function render(dbInterface, account, project, subFormat, revision, res, callbac
 		var xmlStr = new xmlSerial().serializeToString(xmlDoc);
 		res.write(xmlStr);
 
+		console.log("Rendering ....");
 		res.end();
-    });
+	});
 };
 
 exports.route = function(router)
 {
 	router.get('x3d', '/:account/:project/revision/:rid', function(res, params)
 	{
-		render(router.dbInterface, params.account, params.project,  params.subformat, params.rid, res,
+		render(router.dbInterface, params.account, params.project,	params.subformat, params.rid, res,
 			function(err) {
 				throw err;
 			});
@@ -626,7 +636,7 @@ exports.route = function(router)
 
 	router.get('x3d', '/:account/:project/revision/:rid/:sid', function(res, params)
 	{
-	    render(router.dbInterface, params.account, params.project, params.subformat, params.rid, res,
+		render(router.dbInterface, params.account, params.project, params.subformat, params.rid, res,
 			function(err) {
 				throw err;
 		});

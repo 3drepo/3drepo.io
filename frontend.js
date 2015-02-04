@@ -32,7 +32,7 @@ app.get('*', function(req, res) {
 		params[key] = config.external[key];
 	});
 
-	res.render('frontend.jade', params);
+	res.render('simple.jade', params);
 });
 
 exports.app = app

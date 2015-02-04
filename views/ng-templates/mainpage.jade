@@ -1,11 +1,6 @@
 #wrap
-	.placeholder-screenshot-large(ui-view='viewer')
-		x3d#viewer(xmlns='http://www.web3d.org/specification/x3d-namespace')
-			scene(onbackgroundclicked='bgroundClick(event);')
-				viewpoint#sceneVP
-				inline(ng-init='x3domreload()', namespacename='model', onload='onLoadedEvent();', url="{{iFrameURL.url}}", render='true', load='true')
-.container-fluid
-	.row
-		.col-md-12.padded-box
-			.row.tight
-				div(ui-view='footer')
+	x3d#viewer(xmlns='http://www.web3d.org/specification/x3d-namespace')
+		scene(onbackgroundclicked='bgroundClick(event);')
+			viewpoint#sceneVP
+			inline(ng-init='x3domreload()', namespacename='model', onload='onLoadedEvent();', url="{{iFrameURL.url}}", render='true', load='true')
+

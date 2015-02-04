@@ -1,0 +1,30 @@
+.panel-default {
+	opacity: 0.9;
+	margin-top:30%;
+}
+
+#readme-text {
+	padding: 10px;
+	min-height: 93px;
+}
+
+.body-login { 
+ background: url('/public/images/background.jpg') no-repeat center center fixed; 
+ -webkit-background-size: cover;
+ -moz-background-size: cover;
+ -o-background-size: cover;
+ background-size: cover;
+}
+
+#visualize {
+	margin-left: -1px;
+	border-left: 1px;
+	padding: 10px;
+}
+
+#instructions {
+	margin-left: -1px;
+	border-left: 1px;
+	padding: 10px;
+}
+

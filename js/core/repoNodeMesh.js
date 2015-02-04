@@ -156,15 +156,9 @@ function toFloat32Array(binaryObject, isLittleEndian) {
 
 /**
  * Returns an array of arrays of uv channels, where each channel
-<<<<<<< Updated upstream
  * has 2 floats per vertex (there is vertices count pairs)
  *
  * @param {Object} binaryObject
-=======
- * has 2 floats per vertex (there is vertices count pairs)
- *
- * @param {Object} binaryObject
->>>>>>> Stashed changes
  * @param {number} channelsCount Number of channels, 1 for now
  * @param {boolean} isLittleEndian True or false
  * @return {Array.<Float32Array>}
@@ -201,13 +195,8 @@ function toDataView(binaryObject) {
 
 /**
  * Returns an ArrayBuffer from a binary buffer. This can
-<<<<<<< Updated upstream
  * be used to create a DataView from it.
  * See: http://stackoverflow.com/questions/8609289/convert-a-binary-nodejs-buffer-to-javascript-arraybuffer
-=======
- * be used to create a DataView from it.
- * See: http://stackoverflow.com/questions/8609289/convert-a-binary-nodejs-buffer-to-javascript-arraybuffer
->>>>>>> Stashed changes
  *
  * @param {Buffer} binary buffer
  */

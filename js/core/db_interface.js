@@ -22,6 +22,7 @@ var repoGraphScene = require('./repoGraphScene.js');
 var uuid = require('node-uuid');
 var log_iface = require('./logger.js');
 var logger = log_iface.logger;
+var ObjectID = require('mongodb').ObjectID;
 
 function stringToUUID(id) {
 	var bytes = uuid.parse(id);
@@ -125,6 +126,56 @@ exports.updateUser = function(username, password, email, callback) {
 				username,
 				userInfo
 			);
+		});
+	});
+};
+
+exports.getWayfinderInfo = function(dbName, project, uniqueIDs, callback) {
+	if(uniqueIDs) {
+		var uids = uniqueIDs.map(function(item) { return new ObjectID(item); });
+		var filter = {
+			_id: {$in : uids}
+		};
+
+		logger.log('debug', 'Searching for wayfinding in paths: ' + JSON.stringify(uniqueIDs));
+
+		dbConn.filterColl(dbName, project + ".wayfinder", filter, {}, function(err, docs) {
+			if (err) return callback(err);
+
+			return callback(null, docs);
+		});
+	} else {
+		var projection = {
+			user: 1,
+			timestamp: 1,
+			_id: 1
+		};
+
+		dbConn.filterColl(dbName, project + ".wayfinder", {}, projection, function(err, docs) {
+			if(err) return callback(err);
+
+			return callback(null, docs);
+		});
+	}
+};
+
+exports.storeWayfinderInfo = function(dbName, project, username, sessionID, data, timestamp, callback) {
+	dbConn.collCallback(dbName, project + ".wayfinder", function(err, coll) {
+		var uniqueID = {
+			user: username,
+			session: sessionID,
+			timestamp: timestamp
+		};
+
+		data.user      = username;
+		data.session   = sessionID;
+		data.timestamp = timestamp;
+
+		coll.update(uniqueID, { $set : data }, {upsert: true}, function(err, count) {
+			if (err) callback(err);
+
+			console.log('Updated ' + count + ' records.');
+			callback(null);
 		});
 	});
 };

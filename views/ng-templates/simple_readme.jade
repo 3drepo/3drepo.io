@@ -1,0 +1,24 @@
+.container.float#readme
+	.row
+		.col-md-9.col-md-offset-4.col-sm-9.col-sm-offset-4
+			#readme-box.panel.panel-default
+				.row
+					.col-sm-6.col-md-6#instructions
+						h3.padded-box
+							center Instructions
+						form.padded-box(ng-submit='begin()')
+							form-group
+								div#readme-text.text-center.padded-box Your task is to navigate you way through the station as quickly as possible.
+								div.text-center.padded-box
+									button#startButton.btn.btn-warning-btn-block.top-gap(type='submit') Begin
+					.col-sm-6.col-md-6#visualize
+						h3.padded-box
+							center Visualize
+						form.padded-box(ng-submit='visualize()')
+							form-group
+								div.text-center.padded-box
+									select.selectpicker(ng-model="visualizeThese" ng-options="o.label for o in previous" multiple)
+								div.text-center.padded-box
+									button#visButton.btn.btn-warning-btn-block.top-gap(type='submit') Visualize
+									button#flyButton.btn.btn-warning-btn-block.top-gap(ng-click='flythrough()') Fly Through
+

@@ -995,4 +995,11 @@ img.loading{
 	background-color: lightgreen;
 }
 
+#readme {
+	position: absolute;
+	min-width: 100px;
+	min-height: 100px;
+	z-index: 100;
+}
+
 
