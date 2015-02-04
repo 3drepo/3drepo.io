@@ -1,7 +1,7 @@
 angular.module('3drepo', ['ui.router', 'ui.bootstrap'])
 .run(['$rootScope', '$location', '$http', function($rootScope, $location, $http) {
 	$rootScope.apiUrl = function(tail) {
-		return '//api.' + $location.host() + ($location.port() ? (':' + $location.port()) : '') + '/' + tail;
+		return '//' + $location.host() + ':8081/' + tail;
 	};
 
 	// Force login check

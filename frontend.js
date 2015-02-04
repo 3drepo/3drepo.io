@@ -17,7 +17,17 @@
 
 var express = require('express');
 var app = express();
+
 var config = require('app-config').config;
+var bodyParser = require('body-parser');
+var methodOverride = require('method-override');
+var compress = require('compression');
+
+app.use(bodyParser.urlencoded({
+	extended: true
+}));
+app.use(bodyParser.json());
+app.use(compress());
 
 app.set('views', './views');
 app.set('view_engine', 'jade');

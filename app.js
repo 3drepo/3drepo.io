@@ -28,48 +28,8 @@ onError = log_iface.onError;
 var config = require('app-config').config;
 var hostname = config.server.hostname;
 
-var bodyParser = require('body-parser');
-var methodOverride = require('method-override');
-var compress = require('compression');
-var cookieParser = require('cookie-parser');
-var expressSession = require('express-session');
-
-var allowCrossDomain = function(req, res, next) {
-	res.header('Access-Control-Allow-Origin', req.headers.origin);
-	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-	res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
-	res.header('Access-Control-Allow-Credentials', true);
-	//res.header('Cache-Control', 'public, max-age=3600');
-
-	// intercept OPTIONS method
-	if ('OPTIONS' == req.method) {
-		res.sendStatus(200);
-	} else {
-		next();
-	}
-}
-
-app.use(bodyParser.urlencoded({
-	extended: true
-}));
-app.use(bodyParser.json());
-app.use(compress());
-
-app.use(allowCrossDomain);
-app.use(cookieParser('Yet another secret'));
-app.use(expressSession({
-	secret: 'Very very secret, yes ?',
-	resave: false,
-	saveUninitialized: true,
-	cookie: {
-		domain: "api." + hostname,
-		path: "/",
-		httpOnly: false
-	}
-}));
-
-app.use(vhost('api.' + hostname, require('./api.js').app));
-app.use(vhost(hostname, require('./frontend.js').app));
+var apiApp = require('./api.js').app;
+var frontApp = require('./frontend.js').app;
 
 var https = require("https");
 var http = require('http');
@@ -94,9 +54,14 @@ if ('ssl' in config) {
         logger.log('info', 'Starting HTTPS service on port ' + config.server.https_port);
     });
 } else {
-    http.createServer(app).listen(config.server.http_port, config.server.hostname, function() {
+    http.createServer(frontApp).listen("8080", config.server.hostname, function() {
         logger.log('info', 'Starting HTTP service on port ' + config.server.http_port);
     });
+
+    http.createServer(apiApp).listen("8081", config.server.hostname, function() {
+        logger.log('info', 'Starting API service on port 8081');
+    });
+
 }
 
 
