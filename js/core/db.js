@@ -19,7 +19,7 @@
 // http://stackoverflow.com/questions/12037655/node-js-mongodb-native-driver-connection-sharing
 
 var async	  = require('async');
-var config	  = require('app-config').config;
+var config	  = require('./config.js');
 var mongo	  = require('mongodb');
 var logIFace  = require('./logger.js');
 var logger	  = logIFace.logger;
@@ -66,6 +66,7 @@ MongoDB.prototype.authenticateUser = function(username, password, callback) {
 			dbConn.on('close', function(err) {
 				self.userAuth = null;
 			});
+			logger.log('info', 'Authenticating user: ' + username);
 
 			return self.authenticateUser(username, password, callback);
 		});

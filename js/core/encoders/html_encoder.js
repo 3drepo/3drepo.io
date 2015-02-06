@@ -15,7 +15,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var config = require('app-config').config;
+var config = require('../config.js').config;
 
 exports.route = function(router)
 {

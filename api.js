@@ -18,7 +18,7 @@
 var express = require('express');
 var app = express();
 var routes = require('./routes.js')();
-var config = require('app-config').config;
+var config = require('./js/core/config.js');
 var hostname = config.server.hostname;
 
 // Attach the encoders to the router

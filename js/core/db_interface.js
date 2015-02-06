@@ -132,6 +132,8 @@ exports.updateUser = function(username, password, email, callback) {
 
 exports.getWayfinderInfo = function(dbName, project, uniqueIDs, callback) {
 	if(uniqueIDs) {
+		logger.log('debug', 'Getting waypoint information for UIDs ' + JSON.stringify(uniqueIDs));
+
 		var uids = uniqueIDs.map(function(item) { return new ObjectID(item); });
 		var filter = {
 			_id: {$in : uids}
@@ -145,6 +147,8 @@ exports.getWayfinderInfo = function(dbName, project, uniqueIDs, callback) {
 			return callback(null, docs);
 		});
 	} else {
+		logger.log('debug', 'Getting list of all waypoint recordings');
+
 		var projection = {
 			user: 1,
 			timestamp: 1,
@@ -160,6 +164,8 @@ exports.getWayfinderInfo = function(dbName, project, uniqueIDs, callback) {
 };
 
 exports.storeWayfinderInfo = function(dbName, project, username, sessionID, data, timestamp, callback) {
+	logger.log('debug', 'Storing waypoint information for ' + username + ' @ ' + (new Date(timestamp)));
+
 	dbConn.collCallback(dbName, project + ".wayfinder", function(err, coll) {
 		var uniqueID = {
 			user: username,
@@ -174,7 +180,7 @@ exports.storeWayfinderInfo = function(dbName, project, username, sessionID, data
 		coll.update(uniqueID, { $set : data }, {upsert: true}, function(err, count) {
 			if (err) callback(err);
 
-			console.log('Updated ' + count + ' records.');
+			logger.log('debug', 'Updated ' + count + ' records.');
 			callback(null);
 		});
 	});
@@ -190,6 +196,8 @@ exports.getUserDBList = function(username, callback) {
 	};
 
 	this.getUserInfo(username, function(err, user) {
+		if(err) return callback(err);
+
 		callback(null, user["projects"].map(
 				function(proj){
 					return proj;
@@ -218,7 +226,7 @@ exports.getUserInfo = function(username, callback) {
 		if (coll[0])
 			callback(null, coll[0]["customData"]);
 		else
-			callback(null, null);
+			callback(new Error("User not found"));
 	});
 };
 
@@ -263,6 +271,8 @@ exports.getProjectUsers = function(account, project, callback) {
 
 exports.isPublicProject = function(account, project, callback)
 {
+	logger.log('debug', 'Checking whether ' + account + '/' + project + ' is a public project.');
+
 	this.getProjectInfo(account, project, function (err, proj) {
 		if(err) return callback(err);
 
@@ -277,9 +287,12 @@ exports.isPublicProject = function(account, project, callback)
 
 exports.hasAccessToProject = function(username, account, project, callback) {
 	if (project == null)
-		return callback(null);
+	{
+		logger.log('debug', 'Project name not specified');
+		return callback(new Error('Project name not specified'));
+	}
 
-	logger.log('debug', 'Getting access to ' + account + '/' + project + ' for ' + username);
+	logger.log('debug', 'Checking access to ' + account + '/' + project + ' for ' + username);
 
 	this.isPublicProject(account, project, function(err) {
 		if(err)
@@ -303,6 +316,8 @@ exports.hasAccessToProject = function(username, account, project, callback) {
 };
 
 exports.getDBList = function(callback) {
+	logger.log('debug', 'Getting list of databases');
+
 	dbConn.dbCallback('admin', function(err, db) {
 		if (err) return callback(err);
 

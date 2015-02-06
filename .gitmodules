@@ -20,3 +20,6 @@
 [submodule "submodules/fancytree"]
 	path = submodules/fancytree
 	url = https://github.com/mar10/fancytree.git
+[submodule "submodules/bootstrap-select"]
+	path = submodules/bootstrap-select
+	url = https://github.com/silviomoreto/bootstrap-select.git

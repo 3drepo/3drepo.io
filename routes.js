@@ -20,7 +20,7 @@ var bCrypt = require('bcrypt-nodejs');
 var log_iface = require('./js/core/logger.js');
 var logger = log_iface.logger;
 //var login = require('connect-ensure-login');
-var config = require('app-config').config;
+var config = require('./js/core/config.js');
 var package_json = require('./package.json');
 
 var expressJwt = require('express-jwt');
@@ -100,7 +100,8 @@ module.exports = function(){
 		} else {
 			dbInterface.hasAccessToProject(params.user, account, project, function(err)
 			{
-				if(err) throw onError(err);
+				if(err)
+					return res.sendStatus(401);
 
 				// If there is no error then we have access
 				if (!(format in this.getMap)) {
@@ -154,8 +155,6 @@ module.exports = function(){
 			res.sendStatus(200);
 		}
 	});
-
-
 
 	this.router.post('/logout', function(req, res) {
 		req.session.destroy(function() {
@@ -241,9 +240,9 @@ module.exports = function(){
 		var format = req.params["format"];
 
 		var params = {
-			subformat: req.params["subformat"],
-			account: req.params["account"],
-			query: req.query
+			subformat:	req.params["subformat"],
+			account:	req.params["account"],
+			query:		req.query
 		};
 
 		this.transRouter(format, '/:account', res, params);
@@ -506,7 +505,6 @@ module.exports = function(){
 			subformat: req.params["subformat"],
 			user:	   current_user,
 			query:	   req.query
-
 		};
 
 		this.transRouter(format, '/:account/:project/:rid/:type', res, params);

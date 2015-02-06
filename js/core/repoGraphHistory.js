@@ -49,7 +49,7 @@ exports.decode = function(bsonArray) {
 		for (var i = 0; i < bsonArray.length; ++i) {
 			bson = bsonArray[i];
 			if (!bson[C.REPO_NODE_LABEL_SHARED_ID]) {
-				console.log('Shared UUID not found!');
+				logger.log('error', 'Shared UUID not found!');
 			} else {
 
 				// Unique ID (UID) of a revision
@@ -68,7 +68,7 @@ exports.decode = function(bsonArray) {
 							rootNode = bson;
 						break;
 					default :
-						console.log('Unsupported node type found: ' + bson[C.REPO_NODE_LABEL_TYPE]);
+						logger.log('error','Unsupported node type found: ' + bson[C.REPO_NODE_LABEL_TYPE]);
 				}
 			}
 		}

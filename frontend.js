@@ -18,7 +18,7 @@
 var express = require('express');
 var app = express();
 
-var config = require('app-config').config;
+var config = require('./js/core/config.js');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var compress = require('compression');
@@ -32,6 +32,15 @@ app.use(compress());
 app.set('views', './views');
 app.set('view_engine', 'jade');
 app.locals.pretty = true;
+
+app.get('/public/js/config.js', function(req, res) {
+	var params = {};
+
+	params['config_js'] = 'var server_config = {}; server_config.apiUrl = function(path) { return "//' +
+		config.apiServer.url + '/" + path; };';
+
+	res.render('config.jade', params);
+});
 
 app.use('/public', express.static(__dirname + '/public'));
 

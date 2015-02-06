@@ -16,7 +16,7 @@
  */
 
 var winston = require('winston');
-var config = require('app-config').config;
+var config = require('./config.js');
 
 // Custom logging levels for logger
 var myCustomLevels = {

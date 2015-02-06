@@ -1,7 +1,7 @@
 angular.module('3drepo', ['ui.router', 'ui.bootstrap'])
 .run(['$rootScope', '$location', '$http', function($rootScope, $location, $http) {
 	$rootScope.apiUrl = function(tail) {
-		return '//' + $location.host() + ':8081/' + tail;
+		return server_config.apiUrl(tail);
 	};
 
 	// Force login check
@@ -97,7 +97,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 			$rootScope.bodylayout = "";
 		})
 		.error(function(data, status, headers, config) {
-			logOut();
+			$scope.logOut();
 			console.log('Failed')
 		});
 	};
@@ -147,10 +147,15 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 	return {
 		promise: promise,
 		getPrevious: function() {
-			return previous.map(function(item) {
-				var date = new Date(item.timestamp*1000);
-				return { label: item.user + ' @ ' + date, value: item._id };
-			})
+			if(previous && previous != "Unauthorized")
+			{
+				return previous.map(function(item) {
+					var date = new Date(item.timestamp*1000);
+					return { label: item.user + ' @ ' + date, value: item._id };
+				});
+			} else {
+				return {};
+			}
 		}
 	};
 }])
@@ -227,14 +232,6 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 			return rej || $q.when(rej);
 		}
 	};
-}])
-.config(['$httpProvider', '$sceDelegateProvider', function ($httpProvider, $sceDelegateProvider) {
-	$httpProvider.interceptors.push('authInterceptor');
-
-	$sceDelegateProvider.resourceUrlWhitelist([
-		'//api.localhost:8081/**'
-	]);
-
 }]);
 
 jQuery.support.cors = true;

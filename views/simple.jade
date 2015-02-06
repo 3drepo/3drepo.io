@@ -20,6 +20,8 @@ html(lang="en")
 				realSend.apply(this, arguments);
 			};
 
+		script(src='/public/js/config.js')
+
 		link(rel='stylesheet' type='text/css' href='#{x3domcss}')
 		script(type="text/javascript" src='#{x3domjs}')
 		script(type="text/javascript" src='#{ammojs}')
@@ -30,6 +32,10 @@ html(lang="en")
 		link(rel='stylesheet', href='/public/css/simple.css')
 		script(type="text/javascript" src="#{bootstrapjs}")
 		script(type="text/javascript" src="#{bootstrapdialog}")
+
+		script(type="text/javascript" src="#{bootstrapselectjs}")
+		link(rel='stylesheet', href="#{bootstrapselectcss}" type="text/css")
+
 		link(rel='stylesheet', href="#{fancytreecss}" type="text/css")
 		script(type="text/javascript" src="#{jqueryfancytree}")
 		link(rel='stylesheet' type='text/css' href='#{repouicss}')
@@ -44,8 +50,10 @@ html(lang="en")
 		link(rel='stylesheet' type='text/css' href='#{fontawesomecss}')
 
 		script(src='/public/js/controlinterface.js')
+		script(src='/public/js/waypoint.js')
 		script(src='/public/js/custom_keys.js')
 		script(src='/public/js/simple.js')
+
 		script.
 			$(function() {
 				$("#meta-popup").draggable({ snap : ".viewport"})
@@ -64,5 +72,5 @@ html(lang="en")
 		script(type='text/ng-template', id='mainpage.html')
 			include ng-templates/simple_mainpage.jade
 
-		div(ui-view='')
+		div.viewport(ui-view='')
 
