@@ -33,9 +33,6 @@ html(lang="en")
 		script(type="text/javascript" src="#{bootstrapjs}")
 		script(type="text/javascript" src="#{bootstrapdialog}")
 
-		script(type="text/javascript" src="#{bootstrapselectjs}")
-		link(rel='stylesheet', href="#{bootstrapselectcss}" type="text/css")
-
 		link(rel='stylesheet', href="#{fancytreecss}" type="text/css")
 		script(type="text/javascript" src="#{jqueryfancytree}")
 		link(rel='stylesheet' type='text/css' href='#{repouicss}')
@@ -49,6 +46,12 @@ html(lang="en")
 		script(type="text/javascript" src='#{chartjs}')
 		link(rel='stylesheet' type='text/css' href='#{fontawesomecss}')
 
+		script(type="text/javascript" src="/public/js/external/angular-bootstrap-multiselect.js")
+		script(type="text/javascript" src="/public/js/external/angular-bootstrap-select.js")
+
+		script(type="text/javascript" src="#{bootstrapselectjs}")
+		link(rel='stylesheet', href="#{bootstrapselectcss}" type="text/css")
+
 		script(src='/public/js/controlinterface.js')
 		script(src='/public/js/waypoint.js')
 		script(src='/public/js/custom_keys.js')
@@ -60,6 +63,7 @@ html(lang="en")
 			});
 
 	body(ng-app='3drepo', class="{{bodylayout}}").ng-scope
+		h1#logo 3D Repo
 		// Not found template
 		script(type='text/ng-template', id='404.html')
 			include ng-templates/404.jade

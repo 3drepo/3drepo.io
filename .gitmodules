@@ -23,3 +23,6 @@
 [submodule "submodules/bootstrap-select"]
 	path = submodules/bootstrap-select
 	url = https://github.com/silviomoreto/bootstrap-select.git
+[submodule "submodules/angular-bootstrap-select"]
+	path = submodules/angular-bootstrap-select
+	url = https://github.com/joaoneto/angular-bootstrap-select.git

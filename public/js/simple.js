@@ -1,8 +1,10 @@
-angular.module('3drepo', ['ui.router', 'ui.bootstrap'])
+angular.module('3drepo', ['ui.router', 'ui.bootstrap', 'angular-bootstrap-select', 'ui.multiselect'])
 .run(['$rootScope', '$location', '$http', function($rootScope, $location, $http) {
 	$rootScope.apiUrl = function(tail) {
 		return server_config.apiUrl(tail);
 	};
+
+	$('.selectpicker').selectpicker();
 
 	// Force login check
 	$http.get($rootScope.apiUrl('login')).then(function() {} );
@@ -165,6 +167,10 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 
 	$scope.visualizeThese = null;
 
+	$scope.visNav = "FLY";
+
+	$scope.viscontrolon = true;
+
 	if(uid)
 	{
 		var uidData = null;
@@ -182,7 +188,10 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 			if(mode == 'flythru')
 				runFlyThru(data);
 			else
+			{
+				$scope.viscontrolon = false;
 				plotSpheres(data);
+			}
 		});
 	}
 
@@ -206,6 +215,15 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 		$location.path('/demo').search('mode=flythru&uid=' + $scope.visualizeThese.map(function(item) { return item.value; }).join('&uid='));
 	}
 
+	$scope.changeNav = function()
+	{
+		$('#nav')[0].setAttribute('type', $scope.visNav);
+	}
+
+	$scope.backToMenu = function()
+	{
+		$location.path('/demo').search('');
+	}
 }])
 .factory('authInterceptor', ['$rootScope', '$q', '$window', '$location', function($rootScope, $q, $window, $location) {
 	return {

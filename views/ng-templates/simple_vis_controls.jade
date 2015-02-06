@@ -1,12 +1,10 @@
-.container.float#controls
-	.row
-		.col-md-2.col-md-offset-10.col-sm-2.col-sm-offset-10
-			#readme-box.panel.panel-default
-				.row
-					.col-sm-6.col-md-6
-						select.selectpicker(ng-model="visNav", ng-click="changeNav()")
-							option Examine
-							option Fly
-					.col-sm-6.col-md-6
-						button.btn.btn-warning-btn-block.top-gap(ng-click='return()') Return
+nav.navbar.whitenavbar.navbar-fixed-top
+	.container-fluid
+		ul#vis-controls.nav.navbar-nav.navbar-right(ng-hide="viscontrolon")
+			form.form-inline
+				select(selectpicker ng-model="visNav", ng-change="changeNav()")
+					option Fly
+					option Examine
+					option Walk
+				button.btn.btn-default(ng-click='backToMenu()') Previous Page
 
