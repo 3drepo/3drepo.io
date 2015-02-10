@@ -158,7 +158,11 @@ exports.getUserInfo = function(username, callback) {
 	};
 
 	var projection = {
-		customData : 1
+		customData : 1,
+		"customData.firstName" : 1,
+		"customData.lastName" : 1,
+		"customData.email" : 1,
+		"customData.projects" : 1
 	};
 
 	dbConn.filterColl("admin", "system.users", filter, projection, function(err, coll) {
@@ -166,6 +170,29 @@ exports.getUserInfo = function(username, callback) {
 
 		if (coll[0])
 			callback(null, coll[0]["customData"]);
+		else
+			callback(null, null);
+	});
+};
+
+exports.getAvatar = function(username, callback) {
+	if(!username) return callback(new Error(""));
+
+	logger.log('debug', 'Getting user avatar for ' + username);
+
+	var filter = {
+		user: username
+	};
+
+	var projection = {
+		"customData.avatar" : 1
+	};
+
+	dbConn.filterColl("admin", "system.users", filter, projection, function(err, coll) {
+		if(err) return callback(err);
+
+		if (coll[0])
+			callback(null, coll[0]["customData"]["avatar"]);
 		else
 			callback(null, null);
 	});

@@ -6,7 +6,7 @@
 				.col-md-4.tight.gutter-right
 					// Profile pic and name
 					.col-md-12.tight
-						.profile-pic
+						.profile-pic(ng-style="{'background-image':'url(' + userImage + ')'}")
 						.profile-box
 							h1 {{userData.user.firstName}} {{userData.user.lastName}}
 							p {{userData.user.email}}
@@ -37,18 +37,6 @@
 				.col-md-8.tight
 					// Dashboard
 					div(ng-show="view=='dashboard'")
-						.col-md-12.tight
-							.block
-								.col-sm-12.margined.block-header
-									h3 Commit Activity
-								.col-md-12.tight
-									canvas#commitChart(width='590', height='210')
-						.col-md-12.tight
-							.block
-								.col-sm-12.margined.block-header
-									h3 Polygon Count
-								.col-md-12.tight
-									canvas#polygonChart(width='590', height='210')
 						.col-md-6.tight.gutter-right
 							.block
 								.col-sm-12.block-header

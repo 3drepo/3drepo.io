@@ -40,6 +40,7 @@
 		"cors" : "latest",
 		"cookie-parser" : "latest",
 		"express-session" : "latest",
-		"cookie-session": "latest"
+		"cookie-session": "latest",
+		"easyimage": "latest"
 	}
 }

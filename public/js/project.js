@@ -778,7 +778,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 			$state.go('home', {account : $scope.user.username});
 		})
 		.error(function(data, status, headers, config) {
-			logOut();
+			$scope.logOut();
 			console.log('Failed')
 		});
 
@@ -890,7 +890,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 
 	return o;
 }])
-.controller('DashboardCtrl', ['$scope', 'account', 'userData', '$http', '$state', function($scope, account, userData, $http, $state){
+.controller('DashboardCtrl', ['$scope', 'account', 'userData', '$http', '$state', '$rootScope', function($scope, account, userData, $http, $state, $rootScope){
 	$scope.account = account;
 	$scope.view = "dashboard";
 	$scope.userData = userData;
@@ -909,6 +909,8 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 	$scope.isView = function(view){
 		return $scope.view == view;
 	}
+
+	$scope.userImage = $rootScope.apiUrl($scope.account + '.jpg');
 }])
 .controller('SplashCtrl', ['$scope', function($scope) {
 }])

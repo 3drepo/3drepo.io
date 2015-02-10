@@ -15,9 +15,49 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-exports.route = function(router)
+var child_process = require('child_process');
+var supportedFormats = ['gif', 'jpg', 'jpeg', 'tiff', 'png'];
+
+module.exports.isImage = function(format)
 {
-	var imgObject = function(res, params) {
+	var format = format.toLowerCase();
+
+	for (var i in supportedFormats)
+	{
+		if (supportedFormats[i] == format)
+			return true;
+	}
+
+	return false;
+}
+
+// Ability to transcode with ImageMagick
+// -- Won't use for now.
+module.exports.transcode = function (fromFormat, toFormat, buffer, callback) {
+	if (!this.isImage(fromFormat))
+		return callback(new Error('Invalid from image format'));
+
+	if (!this.isImage(toFormat))
+		return callback(new Error('Invalid to image format'));
+
+	var im = child_process.spawn('convert', [fromFormat + ':-', toFormat + ':-']);
+	im.stdin.write(buffer);
+	im.stdin.end();
+
+	var bufOut = [];
+
+	im.stdout.on('data', function(data) {
+		bufOut.push(data);
+	});
+
+	im.stdout.on('end', function() {
+		callback(null, Buffer.concat(bufOut));
+	});
+};
+
+module.exports.route = function(router)
+{
+	var imgObject = function(format, res, params) {
 		router.dbInterface.getObject(params.account, params.project, params.uid, null, null, function(err, type, uid, obj)
 		{
 			if(err) throw err;
@@ -36,6 +76,31 @@ exports.route = function(router)
 	router.get('png', '/:account/:project/:uid', imgObject);
 	router.get('bmp', '/:account/:project/:uid', imgObject);
 	router.get('gif', '/:account/:project/:uid', imgObject);
+
+	// Get Avatar image
+	router.get('jpg', '/:account', function(res, params) {
+		router.dbInterface.getAvatar(params.account, function(err, avatar) {
+			if (err)
+				res.sendStatus(500);
+
+			var imageTokens = avatar.media_type.split(/\//);
+
+			if (!(imageTokens[0] == 'image'))
+			{
+				logger.log('error', 'Avatar is not an image.');
+				res.sendStatus(500);
+			}
+
+			if (!(imageTokens[1]) == 'jpeg')
+			{
+				logger.log('error', 'Avatar is not a JPEG');
+				res.sendStatus(500);
+			}
+
+			res.write(avatar.data.buffer);
+			res.end();
+		});
+	});
 };
 
 
