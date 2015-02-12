@@ -41,7 +41,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 	});
 
 	// Invalid URL redirect to 404 state
-	//$urlRouterProvider.otherwise('404');
+	$urlRouterProvider.otherwise('login');
 
 	// This will be needed to remove angular's #, but there is an error at the moment
 	// -> need to investigate
@@ -244,7 +244,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 				delete $window.sessionStorage.token;
 				delete $window.sessionStorage.user;
 
-				$location.path('/login');
+				$location.path('/login').search('');
 			}
 
 			return rej || $q.when(rej);
