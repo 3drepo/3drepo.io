@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd 
+ *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -66,7 +66,7 @@ exports.decode = function(bsonArray) {
 		for (var i = 0; i < bsonArray.length; ++i) {
 			bson = bsonArray[i];
 			if (!bson[C.REPO_NODE_LABEL_SHARED_ID]) {
-				console.log('Shared UUID not found!');
+				logger.log('error','Shared UUID not found!');
 			} else {
 				var idBytes = bson[C.REPO_NODE_LABEL_ID].buffer;
 				bson.id = UUID.unparse(idBytes);
@@ -92,7 +92,7 @@ exports.decode = function(bsonArray) {
 					case C.REPO_NODE_TYPE_CAMERA :
 						cameras[bson.id] = bson;
 						scene[C.REPO_SCENE_LABEL_CAMERAS_COUNT]++;
-						break;	
+						break;
 					case C.REPO_NODE_TYPE_REF:
 						refs[bson.id] = bson;
 						scene[C.REPO_SCENE_LABEL_REF_COUNT]++;
@@ -101,7 +101,7 @@ exports.decode = function(bsonArray) {
 						metas[bson.id] = bson;
 						scene[C.REPO_SCENE_LABEL_METAS_COUNT]++;
 					default :
-						console.log('Unsupported node type found: ' + bson[C.REPO_NODE_LABEL_TYPE]);
+						logger.log('error','Unsupported node type found: ' + bson[C.REPO_NODE_LABEL_TYPE]);
 				}
 
 				var sidBytes = bson[C.REPO_NODE_LABEL_SHARED_ID].buffer;
@@ -135,19 +135,19 @@ exports.decode = function(bsonArray) {
 	//---------------------------------------------------------------------
 	// Textures
 	scene.textures = textures;
-	
-	//---------------------------------------------------------------------	
+
+	//---------------------------------------------------------------------
 	// Materials
 	for (var id in materials) {
-		materials[id] = repoNodeMaterial.decode(materials[id], scene.textures);		
-	}		
+		materials[id] = repoNodeMaterial.decode(materials[id], scene.textures);
+	}
 	scene.materials = materials;
 
 	//---------------------------------------------------------------------
 	// Meshes
 	for (var id in meshes) {
 		meshes[id] = repoNodeMesh.decode(meshes[id], scene.materials);
-	}		
+	}
 	scene.meshes = meshes;
 
 	//---------------------------------------------------------------------
@@ -171,7 +171,7 @@ exports.decode = function(bsonArray) {
 	//---------------------------------------------------------------------
 	// Metadata
 	scene.metas = metas;
-	
+
 	//---------------------------------------------------------------------
 	// Register root node
 	if (rootNode)

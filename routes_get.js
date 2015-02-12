@@ -349,9 +349,35 @@ module.exports = function(router, dbInterface, checkAccess){
 	});
 
 	// Everything else
-	this.router.get('*', function(req, res) {
+	router.get('*', function(req, res) {
 		logger.log('debug', 'Unsupported request ' + req.url);
 		res.sendStatus(501);
+	});
+
+	router.get('/wayfinder.:format?', function(req, res) {
+		if (!("user" in req.session)) {
+			res.sendStatus(401);
+		} else {
+			this.dbInterface.getWayfinderInfo(config.wayfinder.democompany, config.wayfinder.demoproject, null, function(err, docs) {
+				if (err) throw err;
+
+				res.json(docs);
+			});
+		}
+	});
+
+	router.get('/wayfinder/record.:format?', function(req, res) {
+		if (!("user" in req.session)) {
+			res.sendStatus(401);
+		} else {
+			var uids = JSON.parse(req.query.uid);
+
+			this.dbInterface.getWayfinderInfo(config.wayfinder.democompany, config.wayfinder.demoproject, uids, function(err, docs) {
+				if (err) throw err;
+
+				res.json(docs);
+			});
+		}
 	});
 
 	this.getMap = {}

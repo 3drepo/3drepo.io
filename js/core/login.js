@@ -31,7 +31,6 @@ module.exports = function(passport) {
 				if (err)
 					return done(null, false, req.flash('message', err));
 
-				console.log("USER: " + JSON.stringify(user));
 				done(null, user);
 			});
 		}

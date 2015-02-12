@@ -1,0 +1,80 @@
+doctype html
+html(lang="en")
+	head
+		// Meta, title, CSS, favicons, etc.
+		meta(charset='utf-8')
+		meta(http-equiv='X-UA-Compatible', content='IE=edge')
+
+		title 3D Repo 
+
+		script.
+			var realOpen = XMLHttpRequest.prototype.open;
+			var realSend = XMLHttpRequest.prototype.send;
+			
+			XMLHttpRequest.prototype.open = function(method, url, async, unk1, unk2) {
+				this.withCredentials = true;
+				realOpen.apply(this, arguments);
+			};
+
+			XMLHttpRequest.prototype.send = function(body) {
+				realSend.apply(this, arguments);
+			};
+
+		script(src='/public/js/config.js')
+
+		link(rel='stylesheet' type='text/css' href='#{x3domcss}')
+		script(type="text/javascript" src='#{x3domjs}')
+		script(type="text/javascript" src='#{ammojs}')
+		script(type="text/javascript" src="#{jqueryjs}")
+		link(rel='stylesheet', href="#{jqueryuicss}")
+		script(type="text/javascript" src="#{jqueryuijs}")
+		link(rel='stylesheet', href='#{bootstrapcss}')
+		link(rel='stylesheet', href='/public/css/simple.css')
+		script(type="text/javascript" src="#{bootstrapjs}")
+		script(type="text/javascript" src="#{bootstrapdialog}")
+
+		link(rel='stylesheet', href="#{fancytreecss}" type="text/css")
+		script(type="text/javascript" src="#{jqueryfancytree}")
+		link(rel='stylesheet' type='text/css' href='#{repouicss}')
+		script(type="text/javascript" src='#{showdownjs}')
+		script(type="text/javascript" src='#{angularjs}')
+		script(type="text/javascript" src='#{angularutilsjs}')
+		script(type="text/javascript" src='#{angularrouterjs}')
+		script(type="text/javascript" src='#{x3dcontroller}')
+		script(type="text/javascript" src='#{threedrepoapp}')
+		script(type="text/javascript" src='#{uibootstrap}')
+		script(type="text/javascript" src='#{chartjs}')
+		link(rel='stylesheet' type='text/css' href='#{fontawesomecss}')
+
+		script(type="text/javascript" src="/public/js/external/angular-bootstrap-multiselect.js")
+		script(type="text/javascript" src="/public/js/external/angular-bootstrap-select.js")
+
+		script(type="text/javascript" src="#{bootstrapselectjs}")
+		link(rel='stylesheet', href="#{bootstrapselectcss}" type="text/css")
+
+		script(src='/public/js/controlinterface.js')
+		script(src='/public/js/waypoint.js')
+		script(src='/public/js/custom_keys.js')
+		script(src='/public/js/simple.js')
+
+		script.
+			$(function() {
+				$("#meta-popup").draggable({ snap : ".viewport"})
+			});
+
+	body(ng-app='3drepo', class="{{bodylayout}}").ng-scope
+		h1#logo 3D Repo
+		// Not found template
+		script(type='text/ng-template', id='404.html')
+			include ng-templates/404.jade
+
+		// Login template
+		script(type='text/ng-template', id='login.html')
+			include ng-templates/simple_signin.jade
+
+		// Header
+		script(type='text/ng-template', id='mainpage.html')
+			include ng-templates/simple_mainpage.jade
+
+		div.viewport(ui-view='')
+

@@ -1,0 +1,10 @@
+nav.navbar.whitenavbar.navbar-fixed-top
+	.container-fluid
+		ul#vis-controls.nav.navbar-nav.navbar-right(ng-hide="viscontrolon")
+			form.form-inline
+				select(selectpicker ng-model="visNav", ng-change="changeNav()")
+					option Fly
+					option Examine
+					option Walk
+				button.btn.btn-default(ng-click='backToMenu()') Previous Page
+

@@ -1,0 +1,8 @@
+x3d#viewer(xmlns='http://www.web3d.org/specification/x3d-namespace', keysEnabled='false', disableDoubleClick='true')
+	include simple_readme
+	include simple_vis_controls
+	scene(onbackgroundclicked='bgroundClick(event);')
+		viewpoint#sceneVP
+		navigationInfo#nav
+		inline(ng-init='x3domreload()', namespacename='model', url="{{iFrameURL.url}}")
+

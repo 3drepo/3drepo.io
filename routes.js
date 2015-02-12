@@ -20,7 +20,7 @@ var bCrypt = require('bcrypt-nodejs');
 var log_iface = require('./js/core/logger.js');
 var logger = log_iface.logger;
 //var login = require('connect-ensure-login');
-var config = require('app-config').config;
+var config = require('./js/core/config.js');
 var package_json = require('./package.json');
 
 var imgEncoder = require('./js/core/encoders/img_encoder.js');
@@ -29,6 +29,13 @@ var expressJwt = require('express-jwt');
 var jwt = require('jsonwebtoken');
 
 var secret = 'secret';
+
+var isImage = function(format)
+{
+	var format = format.toLowerCase();
+
+	return (format == "jpg") || (format == "png") || (format == "gif") || (format == "bmp");
+}
 
 module.exports = function(){
 	this.router = express.Router();
@@ -61,6 +68,7 @@ module.exports = function(){
 		} else {
 			// No account and project specified, check user is logged in.
 			if (!("user" in req.session)) {
+				logger.log('debug', 'No account and project specified.');
 				return res.sendStatus(401);
 			} else {
 				next();
@@ -74,7 +82,6 @@ module.exports = function(){
 	this.postHandler = require('./routes_post.js')(this.router, this.dbInterface, this.checkAccess);
 
 	this.get = this.getHandler.get; // Re-route the call to the get handler.
-
 	this.router.use(express.static('./submodules'));
 	this.router.use(express.static('./public'));
 

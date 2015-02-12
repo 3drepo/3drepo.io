@@ -45,9 +45,26 @@ function onLoaded(event){
 	$.event.trigger("onLoaded", event);
 }
 
+function runtimeReady() {
+	$.event.trigger("runtimeReady");
+}
+
+x3dom.runtime.ready = runtimeReady;
+
+(function() {
+	window.avatarHeight = 1.83;
+	window.collDistance = 0.1;
+	window.stepHeight = 0.7;
+
+	window.speed = 2.0;
+})();
+
 /*
 document.onload = function () {
-	viewerLoaded();
+//	viewerLoaded();
+	var thisViewArea = thisDoc._viewarea;
+	thisViewArea._disableMove = false;
 };
 */
+
 

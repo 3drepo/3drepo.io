@@ -81,6 +81,21 @@ module.exports = function(router, dbInterface, checkAccess){
 		});
 	});
 
+	this.router.post('/wayfinder/record.:format?', function(req, res) {
+		if (!("user" in req.session)) {
+			res.sendStatus(401);
+		} else {
+			var data = JSON.parse(req.body.data);
+			var timestamp = JSON.parse(req.body.timestamp);
+
+			this.dbInterface.storeWayfinderInfo(config.wayfinder.democompany, config.wayfinder.demoproject, req.session.user.username, req.sessionID, data, timestamp, function(err) {
+				if (err) throw err;
+
+				res.sendStatus(200);
+			});
+		}
+	});
+
 	// Register handlers with Express Router
 	for(var idx in this.postMap)
 	{
