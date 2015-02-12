@@ -42,7 +42,6 @@
 		"express-session" : "latest",
 		"cookie-session": "latest",
 		"easyimage": "latest",
-		"jsonschema": "latest",
-		"jquery-ui": "latest"
+		"jsonschema": "latest"
 	}
 }
