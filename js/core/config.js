@@ -21,27 +21,31 @@ module.exports = config;
 
 // TODO: Should do some checking of validity of config file here.
 // TODO: Tidy up
+// TODO: Generate vhost boolean, and add checks for port/hostnames etc. (Maybe default ports)
 
 // Dynamic config based on static config variables
 
 if ('ssl' in config) {
-	module.exports.apiServer.port = config.apiServer.api_https_port ? config.apiServer.api_https_port : config.server.https_port;
+	module.exports.apiServer.port = config.apiServer.api_https_port ? config.apiServer.api_https_port : config.servers[0].https_port;
 } else {
-	module.exports.apiServer.port = config.apiServer.api_http_port ? config.apiServer.api_http_port : config.server.http_port;
+	module.exports.apiServer.port = config.apiServer.api_http_port ? config.apiServer.api_http_port : config.servers[0].http_port;
 }
 
 if (!config.apiServer.hostname)
 {
-	module.exports.apiServer.hostname = "api." + config.server.hostname;
+	module.exports.apiServer.hostname = "api." + config.servers[0].hostname;
 }
 
-if ('ssl' in config) {
-	module.exports.server.port = config.server.https_port;
-} else {
-	module.exports.server.port = config.server.http_port;
+for(i in config.servers)
+{
+	if ('ssl' in config) {
+		module.exports.servers[i].port = config.servers[i].https_port;
+	} else {
+		module.exports.servers[i].port = config.servers[i].http_port;
+	}
+
+	module.exports.servers[i].url = module.exports.servers[i].hostname + ':' + module.exports.servers[i].port;
 }
 
 module.exports.apiServer.url = module.exports.apiServer.hostname + ':' + module.exports.apiServer.port;
-module.exports.server.url = module.exports.server.hostname + ':' + module.exports.server.port;
-
 

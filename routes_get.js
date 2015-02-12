@@ -419,7 +419,7 @@ module.exports = function(router, dbInterface, checkAccess){
 		}
 	}
 
-	this.defaultFormat = ("format" in config.server) ? config.server.format : "html";
+	this.defaultFormat = config.defaultFormat ? config.defaultFormat : "html";
 
 	this.get = function (format, regex, callback)
 	{

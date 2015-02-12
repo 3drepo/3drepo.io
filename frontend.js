@@ -16,42 +16,45 @@
  */
 
 var express = require('express');
-var app = express();
-
 var config = require('./js/core/config.js');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var compress = require('compression');
 
-app.use(bodyParser.urlencoded({
-	extended: true
-}));
-app.use(bodyParser.json());
-app.use(compress());
+module.exports.createApp = function(template)
+{
+	var app = express();
 
-app.set('views', './views');
-app.set('view_engine', 'jade');
-app.locals.pretty = true;
+	app.use(bodyParser.urlencoded({
+		extended: true
+	}));
+	app.use(bodyParser.json());
+	app.use(compress());
 
-app.get('/public/js/config.js', function(req, res) {
-	var params = {};
+	app.set('views', './views');
+	app.set('view_engine', 'jade');
+	app.locals.pretty = true;
 
-	params['config_js'] = 'var server_config = {}; server_config.apiUrl = function(path) { return "//' +
-		config.apiServer.url + '/" + path; };';
+	app.get('/public/js/config.js', function(req, res) {
+		var params = {};
 
-	res.render('config.jade', params);
-});
+		params['config_js'] = 'var server_config = {}; server_config.apiUrl = function(path) { return "//' +
+			config.apiServer.url + '/" + path; };';
 
-app.use('/public', express.static(__dirname + '/public'));
-
-app.get('*', function(req, res) {
-	var params = {};
-
-	Object.keys(config.external).forEach(function(key) {
-		params[key] = config.external[key];
+		res.render('config.jade', params);
 	});
 
-	res.render('simple.jade', params);
-});
+	app.use('/public', express.static(__dirname + '/public'));
 
-exports.app = app
+	app.get('*', function(req, res) {
+		var params = {};
+
+		Object.keys(config.external).forEach(function(key) {
+			params[key] = config.external[key];
+		});
+
+		res.render(template, params);
+	});
+
+	return app;
+};

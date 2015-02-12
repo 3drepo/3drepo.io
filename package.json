@@ -41,10 +41,7 @@
 		"cookie-parser" : "latest",
 		"express-session" : "latest",
 		"cookie-session": "latest",
-<<<<<<< HEAD
-		"easyimage": "latest"
-=======
+		"easyimage": "latest",
 		"jsonschema": "latest"
->>>>>>> ISSUE_32
 	}
 }

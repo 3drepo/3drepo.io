@@ -19,7 +19,7 @@ var express = require('express');
 var app = express();
 var routes = require('./routes.js')();
 var config = require('./js/core/config.js');
-var hostname = config.server.hostname;
+var hostname = config.apiServer.hostname;
 
 // Attach the encoders to the router
 var x3dom_encoder = require('./js/core/encoders/x3dom_encoder.js').route(routes);

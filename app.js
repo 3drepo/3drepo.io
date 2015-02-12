@@ -27,11 +27,8 @@ var logger = log_iface.logger;
 onError = log_iface.onError;
 
 var config = require('./js/core/config.js');
-var hostname = config.server.hostname;
 
 var apiApp = require('./api.js').app;
-var frontApp = require('./frontend.js').app;
-
 var https = require("https");
 var http = require('http');
 
@@ -48,25 +45,35 @@ if ('ssl' in config) {
 		res.redirect('https://' + req.headers.host + req.url);
 	});
 
-	http.createServer(http_app).listen(config.server.http_port, config.server.hostname, function() {
-		logger.log('info', 'Starting routing HTTP service on port ' + config.server.http_port);
+	http.createServer(http_app).listen(config.servers[0].http_port, config.servers[0].hostname, function() {
+		logger.log('info', 'Starting routing HTTP for ' + config.servers[0].hostname + ' service on port ' + config.servers[0].http_port);
 	});
 }
 
-if (config.server.port != config.apiServer.port)
+if (!config.vhost)
 {
 	if ('ssl' in config)
 	{
-		var frontServer = https.createServer(ssl_options, frontApp);
 		var apiServer = https.createServer(ssl_options, apiApp);
 	} else {
-		var frontServer = https.createServer(frontApp);
-		var apiServer = https.createServer(apiApp);
+		var apiServer = http.createServer(apiApp);
 	}
 
-	frontServer.listen(config.server.port, config.server.hostname, function() {
-		logger.log('info', 'Starting HTTP service on ' + config.server.hostname + ' port ' + config.server.port);
-	});
+	for(i in config.servers)
+	{
+		var frontApp = require('./frontend.js').createApp(config.servers[i].template);
+
+		if ('ssl' in config)
+		{
+			var frontServer = https.createServer(ssl_options, frontApp);
+		} else {
+			var frontServer = http.createServer(frontApp);
+		}
+
+		frontServer.listen(config.servers[i].port, config.servers[i].hostname, function() {
+			logger.log('info', 'Starting web service on ' + config.servers[i].hostname + ' port ' + config.servers[i].port);
+		});
+	}
 
 	apiServer.listen(config.apiServer.port, config.apiServer.hostname, function() {
 		logger.log('info', 'Starting API service on ' + config.apiServer.hostname + ' port ' + config.apiServer.port);
@@ -77,8 +84,12 @@ if (config.server.port != config.apiServer.port)
 	logger.log('info', 'Starting VHOST for ' + config.apiServer.hostname);
 	vhostApp.use(vhost(config.apiServer.hostname, apiApp));
 
-	logger.log('info', 'Starting VHOST for ' + config.server.hostname);
-	vhostApp.use(vhost(config.server.hostname, frontApp));
+	for(i in config.servers)
+	{
+		var frontApp = require('./frontend.js').createApp(config.servers[i].template);
+		logger.log('info', 'Starting VHOST for ' + config.servers[i].hostname);
+		vhostApp.use(vhost(config.servers[i].hostname, frontApp));
+	}
 
 	if ('ssl' in config)
 	{
@@ -87,8 +98,8 @@ if (config.server.port != config.apiServer.port)
 		var server = http.createServer(vhostApp);
 	}
 
-	server.listen(config.server.port, function() {
-		logger.log('info', 'Started VHOST server on ' + config.server.port);
+	server.listen(config.servers[0].port, function() {
+		logger.log('info', 'Started VHOST server on ' + config.servers[0].port);
 	});
 }
 
