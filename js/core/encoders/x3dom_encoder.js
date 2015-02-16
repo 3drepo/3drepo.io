@@ -28,6 +28,8 @@ var logger		 = logIface.logger;
 var sem			 = require('semaphore')(10);
 var popCache	 = require('../cache/pbf_cache.js');
 
+var googleMaps	 = require('./helper/googleMap.js');
+
 var jsonCache = {};
 
 function getChild(parent, type, n) {
@@ -181,6 +183,13 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 				newNode.setAttribute('matrix', mat_str);
 			}
 
+			if ('bounding_box' in child)
+			{
+				var bbox = repoNodeMesh.extractBoundingBox(child);
+				newNode.setAttribute('bboxCenter', bbox.center);
+				newNode.setAttribute('bboxSize', bbox.size);
+			}
+
 			newNode.setAttribute("id", child['id']);
 			newNode.setAttribute('DEF', dbInterface.uuidToString(child["shared_id"]));
 			xmlNode.appendChild(newNode);
@@ -240,6 +249,8 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 			newNode.appendChild(texProperties);
 
 			X3D_AddChildren(xmlDoc, newNode, child, dbInterface, account, project, mode);
+		} else if (child['type'] == 'map') {
+			googleMaps.addGoogleTiles(xmlDoc, xmlNode, child['width'], child['yrot'], child['worldTileSize'], child['lat'], child['long'], child['zoom'], child['trans']);
 		} else if (child['type'] == 'mesh') {
 			var shape = xmlDoc.createElement('Shape');
 			shape.setAttribute('id', child['id']);
@@ -495,8 +506,8 @@ function X3D_AddViewpoint(xmlDoc, bbox)
 
 	var vpoint = xmlDoc.createElement('Viewpoint');
 	vpoint.setAttribute('id', 'sceneVP');
-	//vpoint.setAttribute('position', vpos.join(' '));
-	vpoint.setAttribute('position', '-26.06 1.43 15.28');
+	vpoint.setAttribute('position', vpos.join(' '));
+	//vpoint.setAttribute('position', '-26.06 1.43 15.28');
 	//vpoint.setAttribute('position', '100 100 100');
 
 	vpoint.setAttribute('orientation', '0 0 -1 0');
@@ -508,7 +519,7 @@ function X3D_AddViewpoint(xmlDoc, bbox)
 	vpoint.setAttribute('onload', 'startNavigation()');
 	vpoint.textContent = ' ';
 
-	//scene.appendChild(vpoint);
+	scene.appendChild(vpoint);
 }
 
 /*******************************************************************************
@@ -579,6 +590,7 @@ function render(dbInterface, account, project, subFormat, revision, res, callbac
 
 		X3D_AddChildren(xmlDoc, scene, dummyRoot, dbInterface, account, project, subFormat);
 
+		/*
 		// Compute the scene bounding box.
 		// Should be a better way of doing this.
 		for (var meshId in doc['meshes']) {
@@ -603,15 +615,15 @@ function render(dbInterface, account, project, subFormat, revision, res, callbac
 		bbox.max	= sceneBBoxMax;
 		bbox.center = [0.5 * (bbox.min[0] + bbox.max[0]), 0.5 * (bbox.min[1] + bbox.max[1]), 0.5 * (bbox.min[2] + bbox.max[2])];
 		bbox.size	= [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])];
+		*/
 
 		//X3D_AddGroundPlane(xmlDoc, bbox);
-		X3D_AddViewpoint(xmlDoc, bbox);
+		//X3D_AddViewpoint(xmlDoc, bbox);
 		//X3D_AddLights(xmlDoc, bbox);
 
 		var xmlStr = new xmlSerial().serializeToString(xmlDoc);
 		res.write(xmlStr);
 
-		console.log("Rendering ....");
 		res.end();
 	});
 };

@@ -59,18 +59,25 @@ $(document).on("clickObject", function(event, objEvent) {
 	);
 });
 
-$(document).ready( function() {
-	window.treeCtrl = new TreeControl();
-});
+function getGroup(name)
+{
+	return $('Group')
+		.filter(function() {
+			return this.id == name;
+		});
+}
 
-$(function () {
+var initTree = function(account, project)
+{
+	window.treeCtrl = new TreeControl();
+
 	$("#scenetree").fancytree({
 		selectMode: 3,
 		beforeSelect : function(event, data) {
 			window.wasPartSelect = data.node.partsel;
 		},
 		select : function(event, data) {
-			$('#' + data.node.data.namespace + data.node.data.uuid)[0].setAttribute("render", data.node.selected);
+			getGroup(data.node.data.namespace + data.node.data.uuid)[0].setAttribute("render", data.node.selected);
 
 			var parent = data.node.getParent();
 			if ((data.node.selected) && (data.node.selected != parent.selected))
@@ -79,7 +86,7 @@ $(function () {
 
 				while(par_node != null)
 				{
-					$('#' + par_node.data.namespace + par_node.data.uuid)[0].setAttribute("render", true);
+					getGroup(par_node.data.namespace + par_node.data.uuid)[0].setAttribute("render", true);
 					par_node = par_node.getParent();
 				}
 
@@ -87,7 +94,7 @@ $(function () {
 
 				for(var sib_idx = 0; sib_idx < siblings.length; sib_idx++)
 				{
-					$('#' + siblings[sib_idx].data.namespace + siblings[sib_idx].data.uuid)[0].setAttribute("render", false);
+					getGroup(siblings[sib_idx].data.namespace + siblings[sib_idx].data.uuid)[0].setAttribute("render", false);
 				}
 			}
 
@@ -106,7 +113,7 @@ $(function () {
 		activate: function(event, data) {
 			if ("uuid" in data.node.data)
 			{
-				var rootObj = $('#' + data.node.data.namespace + data.node.data.uuid)[0];
+				var rootObj = getGroup(data.node.data.namespace + data.node.data.uuid)[0];
 				viewer.lookAtObject(rootObj);
 				viewer.setApp(rootObj);
 				floating.addAllFloats(rootObj);
@@ -133,7 +140,7 @@ $(function () {
 		},
 		checkbox: true,
 		source: {
-			url: '/' + account + '/' + project + '/revision/head/tree/root.json?depth=1'
+			url: server_config.apiUrl(account + '/' + project + '/revision/head/tree/root.json?depth=1')
 		},
 		lazyLoad: function(event, data) {
 			var node = data.node;
@@ -150,10 +157,10 @@ $(function () {
 			params.depth = 1;
 
 			data.result = $.ajax({
-				url:  '/' + account + '/' + node.data.dbname + '/revision/head/tree/' + json_key + '.json',
+				url:  server_config.apiUrl(account + '/' + node.data.dbname + '/revision/head/tree/' + json_key + '.json'),
 				data: params,
 				cache: false
 			});
 		}
 	});
-});
+};

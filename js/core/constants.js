@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd 
+ *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -42,15 +42,16 @@ define('REPO_NODE_TYPE_CAMERA', 'camera');
 define('REPO_NODE_TYPE_REVISION', 'revision');
 define('REPO_NODE_TYPE_REF', 'ref');
 define('REPO_NODE_TYPE_META', 'meta');
+define('REPO_NODE_TYPE_MAP', 'map');
 
 //-----------------------------------------------------------------------------
 // Shared fields
 define('REPO_NODE_LABEL_ID', '_id'); // TODO: remove all references to replace with UNIQUE_ID instead
-define('REPO_NODE_LABEL_UNIQUE_ID', '_id'); 
+define('REPO_NODE_LABEL_UNIQUE_ID', '_id');
 define('REPO_NODE_LABEL_SHARED_ID', 'shared_id');
 define('REPO_NODE_LABEL_API', 'api');
 define('REPO_NODE_LABEL_PATH', 'paths'); // TODO: remove but make sure all references are fixed!
-define('REPO_NODE_LABEL_PATHS', 'paths'); // fixed typo 
+define('REPO_NODE_LABEL_PATHS', 'paths'); // fixed typo
 define('REPO_NODE_LABEL_TYPE', 'type');
 define('REPO_NODE_LABEL_PARENTS', 'parents');
 define('REPO_NODE_LABEL_NAME', 'name');
@@ -86,7 +87,6 @@ define('REPO_NODE_LABEL_NEAR', 'near');
 define('REPO_NODE_LABEL_FAR', 'far');
 define('REPO_NODE_LABEL_ASPECT_RATIO', 'aspect_ratio');
 
-
 //-----------------------------------------------------------------------------
 // Revision fields
 define('REPO_NODE_LABEL_AUTHOR', 'author');
@@ -112,6 +112,7 @@ define('REPO_SCENE_LABEL_CAMERAS_COUNT', 'cameras_count');
 define('REPO_HISTORY_LABEL_REVISIONS_COUNT', 'revisions_count');
 define('REPO_SCENE_LABEL_REF_COUNT', 'ref_count');
 define('REPO_SCENE_LABEL_METAS_COUNT', 'meta_count');
+define('REPO_SCENE_LABEL_MAPS_COUNT', 'map_count');
 
 //-----------------------------------------------------------------------------
 //

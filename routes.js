@@ -59,7 +59,7 @@ module.exports = function(){
 			this.dbInterface.isPublicProject(account, project, function(err) {
 				if(err && !req.session.user && !imgEncoder.isImage(format))
 				{
-					logger.log('debug', 'Not a public project and no user information.');
+					logger.log('debug', account + '/' + project + ' is public project and no user information.');
 					return res.sendStatus(401);
 				} else {
 					next();

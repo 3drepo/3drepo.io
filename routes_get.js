@@ -41,6 +41,32 @@ module.exports = function(router, dbInterface, checkAccess){
 		this.transRouter(format, '/search', res, params);
 	});
 
+	router.get('/wayfinder.:format?', function(req, res) {
+		if (!("user" in req.session)) {
+			res.sendStatus(401);
+		} else {
+			this.dbInterface.getWayfinderInfo(config.wayfinder.democompany, config.wayfinder.demoproject, null, function(err, docs) {
+				if (err) throw err;
+
+				res.json(docs);
+			});
+		}
+	});
+
+	router.get('/wayfinder/record.:format?', function(req, res) {
+		if (!("user" in req.session)) {
+			res.sendStatus(401);
+		} else {
+			var uids = JSON.parse(req.query.uid);
+
+			this.dbInterface.getWayfinderInfo(config.wayfinder.democompany, config.wayfinder.demoproject, uids, function(err, docs) {
+				if (err) throw err;
+
+				res.json(docs);
+			});
+		}
+	});
+
 	// Account information
 	router.get('/:account.:format?.:subformat?', function(req, res, next) {
 		var format = req.params["format"];
@@ -354,32 +380,6 @@ module.exports = function(router, dbInterface, checkAccess){
 		res.sendStatus(501);
 	});
 
-	router.get('/wayfinder.:format?', function(req, res) {
-		if (!("user" in req.session)) {
-			res.sendStatus(401);
-		} else {
-			this.dbInterface.getWayfinderInfo(config.wayfinder.democompany, config.wayfinder.demoproject, null, function(err, docs) {
-				if (err) throw err;
-
-				res.json(docs);
-			});
-		}
-	});
-
-	router.get('/wayfinder/record.:format?', function(req, res) {
-		if (!("user" in req.session)) {
-			res.sendStatus(401);
-		} else {
-			var uids = JSON.parse(req.query.uid);
-
-			this.dbInterface.getWayfinderInfo(config.wayfinder.democompany, config.wayfinder.demoproject, uids, function(err, docs) {
-				if (err) throw err;
-
-				res.json(docs);
-			});
-		}
-	});
-
 	this.getMap = {}
 
 	this.transRouter = function(format, regex, res, params)
@@ -403,19 +403,23 @@ module.exports = function(router, dbInterface, checkAccess){
 					this.getMap[format][regex](res, params);
 				}
 		} else {
-			dbInterface.hasAccessToProject(params.user, account, project, function(err)
-			{
-				if(err) throw onError(err);
+			if (account && project) {
+				dbInterface.hasAccessToProject(params.user, account, project, function(err)
+				{
+					if(err) throw onError(err);
 
-				// If there is no error then we have access
-				if (!(format in this.getMap)) {
-					res.sendStatus(415);
-				} else if (!(regex in this.getMap[format])) {
-					res.sendStatus(501);
-				} else {
-					this.getMap[format][regex](res, params);
-				}
-			});
+					// If there is no error then we have access
+					if (!(format in this.getMap)) {
+						res.sendStatus(415);
+					} else if (!(regex in this.getMap[format])) {
+						res.sendStatus(501);
+					} else {
+						this.getMap[format][regex](res, params);
+					}
+				});
+			} else {
+				this.getMap[format][regex](res,params);
+			}
 		}
 	}
 

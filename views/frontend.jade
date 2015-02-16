@@ -25,27 +25,17 @@ html(lang="en")
 		script(type="text/javascript" src='#{x3dcontroller}')
 		script(type="text/javascript" src='#{threedrepoapp}')
 		script(type="text/javascript" src='#{uibootstrap}')
-		script(type="text/javascript" src='#{chartjs}')
+		//script(type="text/javascript" src='#{chartjs}')
 		link(rel='stylesheet' type='text/css' href='#{fontawesomecss}')
 
+		script(type="text/javascript" src="/public/js/controlinterface.js")
+		script(type="text/javascript" src="/public/js/config.js")
+		script(type="text/javascript" src="/public/js/tree.js")
+		script(type="text/javascript" src="/public/js/floatingmeta.js")
+		script(type="text/javascript" src="/public/js/viewer.js")
+
 		script(src='/public/js/project.js')
-		script.
-			$(function() {
-				$("#meta-popup").draggable({ snap : ".viewport"})
-			});
-
-			var realOpen = XMLHttpRequest.prototype.open;
-			var realSend = XMLHttpRequest.prototype.send;
-			
-			XMLHttpRequest.prototype.open = function(method, url, async, unk1, unk2) {
-				this.withCredentials = true;
-				realOpen.apply(this, arguments);
-			};
-
-			XMLHttpRequest.prototype.send = function(body) {
-				realSend.apply(this, arguments);
-			};
-
+		
 	body(ng-app='3drepo').ng-scope
 		// Not found template
 		script(type='text/ng-template', id='404.html')

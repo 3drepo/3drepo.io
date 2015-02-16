@@ -18,6 +18,8 @@ var repoGraphScene = require('../repoGraphScene.js');
 var async = require('async');
 var uuidToString = require('../db_interface.js').uuidToString;
 var search = require('./helper/search.js').search;
+var log_iface = require('../logger.js');
+var logger = log_iface.logger;
 
 /*******************************************************************************
  * Recursively add JSON children
@@ -292,6 +294,8 @@ exports.route = function(router)
 			router.dbInterface.getScene(params.account, params.project, revision, function(err, doc) {
 				var head = [{}];
 				var node = doc['mRootNode'];
+
+				logger.log('debug', 'Found root node ' + node["id"]);
 
 				head[0]["title"]     = node["name"];
 				head[0]["key"]       = uuidToString(node["shared_id"]);

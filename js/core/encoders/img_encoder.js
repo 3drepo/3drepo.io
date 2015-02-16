@@ -57,7 +57,7 @@ module.exports.transcode = function (fromFormat, toFormat, buffer, callback) {
 
 module.exports.route = function(router)
 {
-	var imgObject = function(format, res, params) {
+	var imgObject = function(res, params) {
 		router.dbInterface.getObject(params.account, params.project, params.uid, null, null, function(err, type, uid, obj)
 		{
 			if(err) throw err;

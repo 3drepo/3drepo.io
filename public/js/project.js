@@ -15,9 +15,7 @@ var viewUrl = function ($stateParams)
 
 angular.module('3drepo', ['ui.router', 'ui.bootstrap'])
 .run(['$rootScope', '$location', function($rootScope, $location) {
-	$rootScope.apiUrl = function(tail) {
-		return '//api.' + $location.host() + ($location.port() ? (':' + $location.port()) : '') + '/' + tail;
-	};
+	$rootScope.apiUrl = server_config.apiUrl;
 }])
 .config([
 '$stateProvider',
@@ -822,6 +820,8 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 .controller('MainCtrl', ['$scope', '$http', 'iFrameURL', 'account', 'project', '$location', '$window', '$rootScope', function($scope, $http, iFrameURL, account, project, $location, $window, $rootScope) {
 	$scope.iFrameURL = iFrameURL;
 	iFrameURL.setURL($rootScope.apiUrl(account + '/' + project + '/revision/master/head.x3d.src'));
+
+	initTree(account, project);
 
 	$scope.x3domreload = function() {
 		x3dom.reload();

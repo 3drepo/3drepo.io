@@ -89,7 +89,7 @@ $(document).ready( function() {
 
 // When the user clicks on the background the select nothing.
 $(document).on("bgroundClicked", function(event) {
-	/*
+
 	// Very bad hacky way of doing this, speak to Fraunhofer
 	var twoMatNodes = document.getElementsByTagName("TwoSidedMaterial")
 	var oneMatNodes = document.getElementsByTagName("Material");
@@ -100,12 +100,12 @@ $(document).on("bgroundClicked", function(event) {
 		mat_nodes[m_idx].setAttribute("emissiveColor", "0 0 0");
 		mat_nodes[m_idx].setAttribute("transparency", "0.0");
 	}
-	*/
+
 });
 
 $(document).on("clickObject", function(event, objEvent) {
-	//viewer.lookAtObject(objEvent.target);
-	//viewer.setApp(objEvent.target);
+	viewer.lookAtObject(objEvent.target);
+	viewer.setApp(objEvent.target);
 });
 
 $(document).on("onViewpointChange", function(event, objEvent) {
@@ -113,7 +113,7 @@ $(document).on("onViewpointChange", function(event, objEvent) {
 });
 
 $(document).on("onLoaded", function(event, objEvent) {
-	//$('#viewer')[0].runtime.showAll();
+	$('#viewer')[0].runtime.showAll();
 });
 
 $(document).ready( function() {

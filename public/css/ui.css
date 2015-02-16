@@ -304,8 +304,6 @@ span.fancytree-title:hover {
 	visibility: hidden;
 	z-index: 2500;
 	top: 50px;
-	min-width: 300px;
-	max-width: 900px;
 	right: 1px;
 	padding: 5px;
 	position: absolute;
@@ -328,12 +326,18 @@ span.fancytree-title:hover {
 .metadata-row {
 	color: white;
 	font-weight: 100;
-	text-align: center;
+	text-align: left;
+	width: 50px;
 }
 
 #metadata {
-	width: 100%;
+	width: 200px;
 	height: 100%;
+}
+
+#metadata .tr {
+	text-align: left;
+
 }
 
 .floatingMeta {

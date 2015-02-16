@@ -41,7 +41,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 	});
 
 	// Invalid URL redirect to 404 state
-	//$urlRouterProvider.otherwise('404');
+	$urlRouterProvider.otherwise('login');
 
 	// This will be needed to remove angular's #, but there is an error at the moment
 	// -> need to investigate
@@ -227,29 +227,18 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 }])
 .factory('authInterceptor', ['$rootScope', '$q', '$window', '$location', function($rootScope, $q, $window, $location) {
 	return {
-		request: function (config) {
-			//console.log(config)
-			config.headers = config.headers || {};
-			if ($window.sessionStorage.token) {
-				$window.sessionStorage.Authorization = 'Bearer ' + $window.sessionStorage.token;
-			}
-			return config;
-		},
-		response: function (res) {
-			return res || $q.when(res);
-		},
 		responseError: function(rej) {
 			if (rej.status === 401)
 			{
-				delete $window.sessionStorage.token;
-				delete $window.sessionStorage.user;
-
-				$location.path('/login');
+				$location.path('/login').search('');
 			}
 
 			return rej || $q.when(rej);
 		}
 	};
-}]);
+}])
+.config(function ($httpProvider) {
+	$httpProvider.interceptors.push('authInterceptor');
+});
 
 jQuery.support.cors = true;

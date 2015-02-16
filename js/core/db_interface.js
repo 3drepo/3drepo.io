@@ -533,7 +533,7 @@ exports.getBranches = function(dbName, project, callback) {
 
 };
 
-exports.getMetadata = function(dbName, uuid, callback) {
+exports.getMetadata = function(dbName, project, uuid, callback) {
 	var filter = {
 		parents: stringToUUID(uuid),
 		type: 'meta'
