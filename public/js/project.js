@@ -160,7 +160,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 		});
 
 	// Invalid URL redirect to 404 state
-	$urlRouterProvider.otherwise('404');
+	$urlRouterProvider.otherwise('login');
 
 	// Empty view redirects to info view by default
 	$urlRouterProvider.when('/:account/:project', '/{account}/{project}/info');

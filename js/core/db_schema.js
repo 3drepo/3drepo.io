@@ -69,7 +69,7 @@ module.exports = function() {
 				var validateObj = v.validate(req.body, this.schemas[regex]);
 
 				if (validateObj.errors.length)
-					return res.sendStatus(400); // Bad request
+					return res.sendStatus(422); // Unprocessable Entity
 				else
 					next();
 			};

@@ -6,8 +6,13 @@ angular.module('3drepo', ['ui.router', 'ui.bootstrap', 'angular-bootstrap-select
 
 	$('.selectpicker').selectpicker();
 
+	$rootScope.democompany = server_config.democompany;
+	$rootScope.demoproject = server_config.demoproject;
+
 	// Force login check
 	$http.get($rootScope.apiUrl('login')).then(function() {} );
+
+	$http.get($rootScope.apiUrl($rootScope.democompany + '/' + $rootScope.demoproject + '.json')).then(function() {} );
 }])
 .config([
 '$stateProvider',
@@ -65,6 +70,8 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 	$scope.asyncSelected = "";
 	$rootScope.bodylayout = "body-login";
 
+	$scope.errorMessage = "";
+
 	$scope.logOut = function($location) {
 		if ($window.sessionStorage.token)
 		{
@@ -74,7 +81,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 			$scope.user = {};
 		}
 
-		$state.go('splash');
+		$state.go('login');
 	}
 
 	$scope.loginPage = function() {
@@ -97,10 +104,19 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 
 			$state.go('main');
 			$rootScope.bodylayout = "";
+			$scope.errorMessage = "";
 		})
 		.error(function(data, status, headers, config) {
+			if (status == 401)
+			{
+				$scope.errorMessage = "Unauthorized";
+			} else if(status == 400) {
+				$scope.errorMessage = "Invalid username/password"
+			}
+
 			$scope.logOut();
-			console.log('Failed')
+			$scope.user.password = "";
+			$scope.user.username = "";
 		});
 	};
 
@@ -163,7 +179,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 }])
 .controller('MainCtrl', ['$scope', '$http', 'iFrameURL', '$location', '$window', '$rootScope', 'uid', 'mode', 'Wayfinder', function($scope, $http, iFrameURL, $location, $window, $rootScope, uid, mode, Wayfinder) {
 	$scope.iFrameURL = iFrameURL;
-	iFrameURL.setURL($rootScope.apiUrl('arup/KX_All/revision/master/head.x3d.src'));
+	iFrameURL.setURL($rootScope.apiUrl($rootScope.democompany + '/' + $rootScope.demoproject + '/revision/master/head.x3d.src'));
 
 	$scope.visualizeThese = null;
 
@@ -225,20 +241,25 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 		$location.path('/demo').search('');
 	}
 }])
-.factory('authInterceptor', ['$rootScope', '$q', '$window', '$location', function($rootScope, $q, $window, $location) {
-	return {
-		responseError: function(rej) {
-			if (rej.status === 401)
-			{
-				$location.path('/login').search('');
-			}
-
-			return rej || $q.when(rej);
-		}
-	};
-}])
 .config(function ($httpProvider) {
-	$httpProvider.interceptors.push('authInterceptor');
+	var checkAuthorization = ['$q', '$location', function($q, $location) {
+		var onSuccess = function (res) { return res;}
+		var onError = function(res) {
+			if (res.status == 401 || res.status == 400) {
+				$location.path('/login');
+
+				return $q.reject(res);
+			} else {
+				return $q.reject(res);
+			}
+		};
+
+		return function (promise) {
+			return promise.then(onSuccess, onError);
+		};
+	}];
+
+	$httpProvider.interceptors.push(checkAuthorization);
 });
 
 jQuery.support.cors = true;

@@ -41,6 +41,10 @@ module.exports.createApp = function(template)
 		params['config_js'] = 'var server_config = {}; server_config.apiUrl = function(path) { return "//' +
 			config.apiServer.url + '/" + path; };';
 
+		// TODO: Make a public section in config for vars to be revealed
+		params['config_js'] += '\nserver_config.democompany = "' + config.wayfinder.democompany + '";';
+		params['config_js'] += '\nserver_config.demoproject = "' + config.wayfinder.demoproject + '";';
+
 		res.render('config.jade', params);
 	});
 

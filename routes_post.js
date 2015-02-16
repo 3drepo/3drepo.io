@@ -36,7 +36,7 @@ module.exports = function(router, dbInterface, checkAccess){
 		{
 			if(err)
 			{
-				res.status(401).send('Incorrect usename or password');
+				res.status(400).send('Incorrect usename or password');
 			} else {
 				if(user)
 				{
@@ -49,7 +49,7 @@ module.exports = function(router, dbInterface, checkAccess){
 						res.sendStatus(200);
 					});
 				} else {
-					res.status(401).send('Invalid user');
+					res.status(400).send('Invalid user');
 				}
 			}
 		});
