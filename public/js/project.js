@@ -14,9 +14,12 @@ var viewUrl = function ($stateParams)
 }
 
 angular.module('3drepo', ['ui.router', 'ui.bootstrap'])
-.run(['$rootScope', '$location', function($rootScope, $location) {
-	$rootScope.apiUrl = server_config.apiUrl;
-}])
+.service('serverConfig', function() {
+	this.apiUrl = server_config.apiUrl;
+
+	this.democompany = server_config.democompany;
+	this.demoproject = server_config.demoproject;
+})
 .config([
 '$stateProvider',
 '$urlRouterProvider',
@@ -34,8 +37,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 			controller: 'SignUpCtrl'
 		}).state('login', {
 			url: '/login',
-			templateUrl: 'login.html',
-			controller: 'LoginCtrl'
+			templateUrl: 'login.html'
 		}).state('home' ,{
 			url: '/:account',
 			templateUrl: 'home.html',
@@ -160,7 +162,17 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 		});
 
 	// Invalid URL redirect to 404 state
-	$urlRouterProvider.otherwise('login');
+	$urlRouterProvider.otherwise(
+		function(Auth, $location) {
+			Auth.isLoggedIn().then(function(isLoggedIn)
+			{
+				if(isLoggedIn)
+					$location.path('/' + Auth.getUsername());
+				else
+					$location.path('/login');
+			});
+		}
+	);
 
 	// Empty view redirects to info view by default
 	$urlRouterProvider.when('/:account/:project', '/{account}/{project}/info');
@@ -170,8 +182,116 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 	$locationProvider.html5Mode(true);
 
 	$httpProvider.defaults.withCredentials = true;
+	$httpProvider.interceptors.push('authInterceptor');
+
 }])
-.factory('data', ['$http', '$q', '$rootScope', function($http, $q, $rootScope){
+.service('Auth', ['$injector', '$q', 'serverConfig', function($injector, $q, serverConfig) {
+	this.loggedIn = null;
+	this.username = null;
+	var self = this;
+
+	this.isLoggedIn = function() {
+		var deferred = $q.defer();
+
+		// If we are not logged in, check
+		// with the API server whether we
+		// are or not
+		if(self.loggedIn === null)
+		{
+			var http = $injector.get('$http');
+
+			// Initialize
+			http.get(serverConfig.apiUrl('login')).success(function() {
+				self.loggedIn = true;
+				deferred.resolve(self.loggedIn);
+			}).error(function() {
+				self.loggedIn = false;
+				deferred.resolve(self.loggedIn);
+			});
+		} else {
+			deferred.resolve(self.loggedIn);
+		}
+
+		return deferred.promise;
+	}
+
+	this.getUsername = function() { return this.username; }
+
+	this.login = function(username, password) {
+		var deferred = $q.defer();
+
+		var postData = {username: username, password: password};
+		var http = $injector.get('$http');
+
+		http.post(serverConfig.apiUrl('login'), postData)
+		.success(function () {
+			self.username = username;
+			self.loggedIn = true;
+			deferred.resolve(username);
+		})
+		.error(function(data, status) {
+			self.username = null;
+			self.loggedIn = false;
+
+			if (status == 401)
+			{
+				deferred.reject("Unauthorized");
+			} else if (status == 400) {
+				deferred.reject("Invalid username/password");
+			} else {
+				deferred.reject("Unknown error");
+			}
+		});
+
+		return deferred.promise;
+	}
+
+	this.logout = function() {
+		var deferred = $q.defer();
+		var http = $injector.get('$http');
+
+		http.post(serverConfig.apiUrl('logout'), {})
+		.success(function _authLogOutSuccess() {
+			self.username = null;
+			self.loggedIn = false;
+
+			deferred.resolve();
+		})
+		.error(function _authLogOutFailure() {
+			deferred.reject("Unable to logout.");
+		});
+
+		return deferred.promise;
+	}
+}])
+.run(['$rootScope', '$location', 'Auth', function($rootScope, $location, Auth) {
+	Auth.isLoggedIn().then(function (isLoggedIn)
+	{
+		if (!isLoggedIn)
+			$location.path('/login');
+	});
+}])
+.factory('authInterceptor', ['$rootScope', '$q', 'Auth', function($rootScope, $q, Auth) {
+	return {
+		responseError: function(res)
+		{
+			var deferred = $q.defer();
+			if (res.status == 401) {
+				Auth.logout().then(function _authInterceptorSuccess()
+				{
+					$rootScope.$broadcast('loggedOut', null);
+					deferred.resolve();
+				}, function _authInterceptorFailure(reason) {
+					$rootScope.$broadcast("loggedOut", reason);
+					deferred.resolve();
+				});
+			}
+
+			return deferred.promise;
+		}
+	};
+}])
+.factory('data', ['$http', '$q', '$rootScope', 'serverConfig', function($http, $q, $rootScope, serverConfig){
 
 	/**
 	 * This provider is used to store the data about the project
@@ -248,7 +368,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 			var res = {};
 			res.name = project;
 
-			$http.get($rootScope.apiUrl(account + '/' + project + '.json')).then(function(json) {
+			$http.get(serverConfig.apiUrl(account + '/' + project + '.json')).then(function(json) {
 				res.owner       = json.data.owner;
 				res.description = json.data.desc;
 				res.type        = json.data.type;
@@ -265,7 +385,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 
 				res.visibility = json.data.read_access;
 
-				return $http.get($rootScope.apiUrl(account + '/' + project + '/revision/master/head/readme.json'));
+				return $http.get(serverConfig.apiUrl(account + '/' + project + '/revision/master/head/readme.json'));
 			}).then(function(json) {
 				res.readme = json.data.readme;
 
@@ -291,11 +411,11 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 					}
 				];
 
-				return $http.get($rootScope.apiUrl(account + '/' + project + '/users.json'));
+				return $http.get(serverConfig.apiUrl(account + '/' + project + '/users.json'));
 			}).then(function(json) {
 				res.users = json.data;
 
-				return $http.get($rootScope.apiUrl(account + '/' + project + '/branches.json'));
+				return $http.get(serverConfig.apiUrl(account + '/' + project + '/branches.json'));
 			}).then(function(json) {
 				res.branches = json.data.map(function (item) {
 					if (item.name == "00000000-0000-0000-0000-000000000000")
@@ -337,9 +457,9 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 		var baseUrl = "";
 
 		if (rid == 'head')
-			baseUrl = $rootScope.apiUrl(o.account + '/' + o.project + '/revision/' + branch + '/' + rid);
+			baseUrl = serverConfig.apiUrl(o.account + '/' + o.project + '/revision/' + branch + '/' + rid);
 		else
-			baseUrl = $rootScope.apiUrl(o.account + '/' + o.project + '/revision/' + rid);
+			baseUrl = serverConfig.apiUrl(o.account + '/' + o.project + '/revision/' + rid);
 
 		setTimeout(function() {
 			var res = {};
@@ -370,7 +490,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 
 		setTimeout(function() {
 
-			$http.get($rootScope.apiUrl(o.account + '/' + o.project + '/revisions/' + branch + '.json'))
+			$http.get(serverConfig.apiUrl(o.account + '/' + o.project + '/revisions/' + branch + '.json'))
 			.then(function(data) {
 				deferred.resolve(data.data);
 			});
@@ -392,7 +512,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 		var deferred = $q.defer();
 
 		setTimeout(function() {
-			$http.get($rootScope.apiUrl(o.account + '/' + o.project + '/revisions/' + branch + '.json?start=' + first + '&end=' + last + '&full=true'))
+			$http.get(serverConfig.apiUrl(o.account + '/' + o.project + '/revisions/' + branch + '.json?start=' + first + '&end=' + last + '&full=true'))
 			.then(function(json) {
 
 				var res = {};
@@ -426,9 +546,6 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 	o.fetchComments = function(first, last){
 
 		var fetchFakeComments = function(branch, rev, first, last){
-
-			console.log("Fetching comments [" + first + "," + last + "] for branch " + branch + " and rev " + rev);
-
 			var res = [];
 			for(var i=first; i<=last; i++){
 				res.push("Etc.");
@@ -455,9 +572,6 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 	o.fetchLog = function(first, last){
 
 		var fetchFakeLog = function(branch, rev, first, last){
-
-			console.log("Fetching log [" + first + "," + last + "] for branch " + branch + " and rev " + rev);
-
 			var res = [];
 			for(var i=first; i<=last; i++){
 				res.push("etc");
@@ -733,28 +847,36 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 
 	return o;
 })
-.controller('LoginCtrl', ['$scope', '$state', '$window', '$location', '$http', '$rootScope', function($scope, $state, $window, $location, $http, $rootScope)
+.controller('LoginCtrl', ['$scope', '$state', '$http', 'serverConfig', 'Auth', function($scope, $state, $http, serverConfig, Auth)
 {
-	$scope.loggedIn = !!$window.sessionStorage.token;
-	$scope.asyncSelected = "";
+	$scope.user = { username: "", password: ""};
 
-	$scope.logOut = function($location) {
-		if ($window.sessionStorage.token)
-		{
-			url = $rootScope.apiUrl('logout');
-
-			$http.post(url, $scope.user)
-			.success(function (data, status, headers, config) {
-				delete $window.sessionStorage.username;
-
-			});
-
-			$scope.loggedIn = false;
-			$scope.user = {};
-		}
-
-		$state.go('splash');
+	$scope.goDefault = function() {
+		Auth.isLoggedIn().then(function _loginGoDefaultSuccess(result) {
+			if(result)
+				$scope.goUser(Auth.username);
+			else
+				$state.go('login');
+		});
 	}
+
+	$scope.logOut = function()
+	{
+		Auth.logout().then(function _loginCtrlLogoutSuccess() {
+			$scope.errorMessage = null;
+			$scope.loggedIn = false;
+			$scope.goDefault();
+		}, function _loginCtrlLogoutFailure(reason) {
+			$scope.errorMessage = reason;
+			$scope.goDefault();
+		});
+	}
+
+	$scope.$on("loggedOut", function(event, message) {
+		$scope.errorMessage = message;
+		$scope.loggedIn = !(message === null);
+		$scope.goDefault();
+	});
 
 	$scope.loginPage = function() {
 		$state.go('login');
@@ -765,21 +887,17 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 	}
 
 	$scope.login = function() {
-		url = $rootScope.apiUrl('login')
-		console.log('URL: ' + url);
-
-		$http.post(url, $scope.user)
-		.success(function (data, status, headers, config) {
-			$window.sessionStorage.token = data.token;
-			$window.sessionStorage.username = $scope.user.username;
-			$scope.loggedIn = true;
-			$state.go('home', {account : $scope.user.username});
-		})
-		.error(function(data, status, headers, config) {
-			$scope.logOut();
-			console.log('Failed')
-		});
-
+		Auth.login($scope.user.username, $scope.user.password).then(
+			function _loginCtrlLoginSuccess(username) {
+				$state.errorMessage = null;
+				$scope.loggedIn = true;
+				$scope.goDefault();
+			}, function _loginCtrlLoginFailure(reason) {
+				$scope.errorMessage = reason;
+				$scope.loggedIn = false;
+				$state.goDefault();
+			}
+		);
 	};
 
 	$scope.goUser = function(username) {
@@ -788,12 +906,12 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 	};
 
 	$scope.getThings = function(val) {
-		return $http.get($rootScope.apiUrl('search.json'),
+		return $http.get(serverConfig.apiUrl('search.json'),
 		{
 			params: {
 				user_company_name: val
 			}
-		}).then(function(res) {
+		}).then(function _loginCtrlGetThingsSuccess(res) {
 			var users = res.data.users;
 			var companies = res.data.companies.map(function(obj){ return obj.name; });
 
@@ -805,21 +923,18 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 				return company + " (Company)";
 			});
 
-
 			return users.concat(companies);
 		});
 	};
 
-	if ($window.sessionStorage.username)
-	{
-		$scope.user = {username: $window.sessionStorage.username, password: ''};
-	} else {
-		$scope.user = {username :'', password: ''};
-	}
+	Auth.isLoggedIn().then(function _loginCtrlCheckLoggedInSuccess(result) {
+		$scope.loggedIn = result;
+	});
 }])
-.controller('MainCtrl', ['$scope', '$http', 'iFrameURL', 'account', 'project', '$location', '$window', '$rootScope', function($scope, $http, iFrameURL, account, project, $location, $window, $rootScope) {
+.controller('MainCtrl', ['$scope', 'iFrameURL', 'account', 'project', 'serverConfig', 'Auth', function($scope, iFrameURL, account, project, serverConfig, Auth) {
 	$scope.iFrameURL = iFrameURL;
-	iFrameURL.setURL($rootScope.apiUrl(account + '/' + project + '/revision/master/head.x3d.src'));
+
+	iFrameURL.setURL(serverConfig.apiUrl(account + '/' + project + '/revision/master/head.x3d.src'));
 
 	initTree(account, project);
 
@@ -827,17 +942,17 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 		x3dom.reload();
 	};
 }])
-.controller('RevisionCtrl', ['$scope', '$http', 'iFrameURL', 'account', 'project', 'branch', 'rid', '$stateParams', '$rootScope', '$state', function($scope, $http, iFrameURL, account, project, branch, rid, $stateParams, $rootScope, $state) {
+.controller('RevisionCtrl', ['$scope', 'iFrameURL', 'account', 'project', 'branch', 'rid', '$stateParams', 'serverConfig', function($scope, iFrameURL, account, project, branch, rid, $stateParams, serverConfig) {
 	$scope.branch = branch;
 	$scope.rid = rid;
 
 	if (branch)
-		iFrameURL.setURL($rootScope.apiUrl(account + '/' + project + '/revision/' + branch + '/' + rid + '.x3d.src'));
+		iFrameURL.setURL(serverConfig.apiUrl(account + '/' + project + '/revision/' + branch + '/' + rid + '.x3d.src'));
 	else
-		iFrameURL.setURL($rootScope.apiUrl(account + '/' + project + '/revision/' + rid + '.x3d.src'));
+		iFrameURL.setURL(serverConfig.apiUrl(account + '/' + project + '/revision/' + rid + '.x3d.src'));
 
 }])
-.factory('userData', ['$http', '$q', '$rootScope', function($http, $q, $rootScope){
+.factory('userData', ['$http', '$q', 'serverConfig', function($http, $q, serverConfig){
 	var o = {
 		loading: true,
 		user: {
@@ -858,7 +973,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 		setTimeout(function() {
 			var res = {};
 
-			$http.get($rootScope.apiUrl(account + '.json')).then(function(json) {
+			$http.get(serverConfig.apiUrl(account + '.json')).then(function(json) {
 				res.firstName = json.data.firstName;
 				res.lastName  = json.data.lastName;
 				res.email     = json.data.email;
@@ -890,15 +1005,13 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 
 	return o;
 }])
-.controller('DashboardCtrl', ['$scope', 'account', 'userData', '$http', '$state', '$rootScope', function($scope, account, userData, $http, $state, $rootScope){
+.controller('DashboardCtrl', ['$scope', 'account', 'userData', '$state', 'serverConfig', '$http', function($scope, account, userData, $state, serverConfig, $http){
 	$scope.account = account;
 	$scope.view = "dashboard";
 	$scope.userData = userData;
 
 	$scope.setView = function(view){
 		$scope.view = view;
-
-		console.log("VIEW: " + view);
 	}
 
 	$scope.goProject = function(account, project){
@@ -910,11 +1023,19 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 		return $scope.view == view;
 	}
 
-	$scope.userImage = $rootScope.apiUrl($scope.account + '.jpg');
+	$scope.avatarURL = serverConfig.apiUrl($scope.account + '.jpg');
+	$scope.hasAvatar = false;
+
+	$http.get($scope.avatarURL)
+	.success(function(data) {
+		$scope.hasAvatar = true;
+	}).error(function(data, status) {
+		$scope.hasAvatar = false;
+	});
 }])
 .controller('SplashCtrl', ['$scope', function($scope) {
 }])
-.controller('SignUpCtrl', ['$scope', '$rootScope', '$http', function($scope, $rootScope, $http) {
+.controller('SignUpCtrl', ['$scope', 'serverConfig', function($scope, serverConfig) {
 	$scope.username = "";
 	$scope.firstname = "";
 	$scope.lastname = "";
@@ -930,7 +1051,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 
 	$scope.checkUsername = function() {
 		setTimeout(function() {
-			$http.head($rootScope.apiUrl($scope.username + '.json')).
+			$http.head(serverConfig.apiUrl($scope.username + '.json')).
 				success(function(json, status) {
 					if (status === 404)
 					{
@@ -944,4 +1065,6 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 		},10);
 	};
 }]);
+
+
 

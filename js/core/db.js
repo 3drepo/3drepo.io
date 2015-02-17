@@ -115,7 +115,10 @@ MongoDB.prototype.dbCallback = function(dbName, callback) {
 
 	// Attempt to open the database connection
 	db.open(function(err, dbConn) {
-		if (err) return callback(err);
+		if (err) {
+			logger.log('debug', 'Error connecting to database');
+			return callback(err);
+		}
 
 		// Authenticate against the NodeJS database user
 		var adminDb = db.admin();

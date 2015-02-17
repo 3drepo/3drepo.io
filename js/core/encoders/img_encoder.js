@@ -81,7 +81,10 @@ module.exports.route = function(router)
 	router.get('jpg', '/:account', function(res, params) {
 		router.dbInterface.getAvatar(params.account, function(err, avatar) {
 			if (err)
-				res.sendStatus(500);
+				return res.sendStatus(500);
+
+			if(!avatar)
+				return res.sendStatus(404); // User does not have avatar
 
 			var imageTokens = avatar.media_type.split(/\//);
 

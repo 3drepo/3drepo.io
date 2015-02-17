@@ -317,6 +317,21 @@ span.fancytree-title:hover {
 	display: block;
 }
 
+#loginPage {
+	background-color: #004594;
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+}
+
+#credentials-box {
+    padding: 20% 0 0;	
+    width: 320px;
+    margin: auto;
+}
+
 .metadata-title{
 	border-bottom: 2px solid white;
 	font-size: 110%;
@@ -444,7 +459,7 @@ a:hover {
 .container-fluid {
 	margin-right: auto;
 	margin-left: auto;
-	max-width: 960px; /* or 950px */
+	//max-width: 960px; /* or 950px */
 }
 
 .padded-box{
@@ -571,13 +586,19 @@ hr {
 }
 
 .profile-pic{
-	margin: 0 auto;
-	background-image: url('../images/photo.png');
-	background-size: 200px 200px;
-	background-repeat: no-repeat;
-	min-height: 200px;
-	min-width: 200px;
+	margin: auto;
+	min-height: 302px;
+	max-height: 302px;
+	min-width: 302px;
+	max-width: 302px;
+	border: 1px solid;
 	background-position: center;
+	font-size: 200px;
+	text-align: center;
+}
+
+#picImg {
+	vertical-align: top;
 }
 
 /*Project items*/

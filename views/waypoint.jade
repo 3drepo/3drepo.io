@@ -62,7 +62,7 @@ html(lang="en")
 				$("#meta-popup").draggable({ snap : ".viewport"})
 			});
 
-	body(ng-app='3drepo', class="{{bodylayout}}").ng-scope
+	body(ng-app='3drepo' ng-controller='LoginCtrl' class="{{bodylayout}}").ng-scope
 		h1#logo 3D Repo
 		// Not found template
 		script(type='text/ng-template', id='404.html')

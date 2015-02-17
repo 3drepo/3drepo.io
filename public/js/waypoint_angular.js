@@ -1,18 +1,116 @@
+
 angular.module('3drepo', ['ui.router', 'ui.bootstrap', 'angular-bootstrap-select', 'ui.multiselect'])
-.run(['$rootScope', '$location', '$http', function($rootScope, $location, $http) {
-	$rootScope.apiUrl = function(tail) {
-		return server_config.apiUrl(tail);
+.service('serverConfig', function() {
+	this.apiUrl = server_config.apiUrl;
+
+	this.democompany = server_config.democompany;
+	this.demoproject = server_config.demoproject;
+})
+.service('Auth', ['$injector', '$q', 'serverConfig', function($injector, $q, serverConfig) {
+	this.loggedIn = null;
+	this.username = null;
+	var self = this;
+
+	this.isLoggedIn = function() {
+		var deferred = $q.defer();
+
+		// If we are not logged in, check
+		// with the API server whether we
+		// are or not
+		if(self.loggedIn === null)
+		{
+			var http = $injector.get('$http');
+
+			// Initialize
+			http.get(serverConfig.apiUrl('login')).success(function() {
+				self.loggedIn = true;
+				deferred.resolve(self.loggedIn);
+			}).error(function() {
+				self.loggedIn = false;
+				deferred.resolve(self.loggedIn);
+			});
+		} else {
+			deferred.resolve(self.loggedIn);
+		}
+
+		return deferred.promise;
+	}
+
+	this.getUsername = function() { return this.username; }
+
+	this.login = function(username, password) {
+		var deferred = $q.defer();
+
+		var postData = {username: username, password: password};
+		var http = $injector.get('$http');
+
+		http.post(serverConfig.apiUrl('login'), postData)
+		.success(function () {
+			self.username = username;
+			self.loggedIn = true;
+			deferred.resolve(username);
+		})
+		.error(function(data, status) {
+			self.username = null;
+			self.loggedIn = false;
+
+			if (status == 401)
+			{
+				deferred.reject("Unauthorized");
+			} else if (status == 400) {
+				deferred.reject("Invalid username/password");
+			} else {
+				deferred.reject("Unknown error");
+			}
+		});
+
+		return deferred.promise;
+	}
+
+	this.logout = function() {
+		var deferred = $q.defer();
+		var http = $injector.get('$http');
+
+		http.post(serverConfig.apiUrl('logout'), {})
+		.success(function _authLogOutSuccess() {
+			self.username = null;
+			self.loggedIn = false;
+
+			deferred.resolve();
+		})
+		.error(function _authLogOutFailure() {
+			deferred.reject("Unable to logout.");
+		});
+
+		return deferred.promise;
+	}
+}])
+.factory('authInterceptor', ['$rootScope', '$q', 'Auth', function($rootScope, $q, Auth) {
+	return {
+		responseError: function(res)
+		{
+			var deferred = $q.defer();
+			if (res.status == 401) {
+				Auth.logout().then(function _authInterceptorSuccess()
+				{
+					$rootScope.$broadcast('loggedOut', null);
+					deferred.resolve();
+				}, function _authInterceptorFailure(reason) {
+					$rootScope.$broadcast("loggedOut", reason);
+					deferred.resolve();
+				});
+			}
+
+			return deferred.promise;
+		}
 	};
-
-	$('.selectpicker').selectpicker();
-
-	$rootScope.democompany = server_config.democompany;
-	$rootScope.demoproject = server_config.demoproject;
-
-	// Force login check
-	$http.get($rootScope.apiUrl('login')).then(function() {} );
-
-	$http.get($rootScope.apiUrl($rootScope.democompany + '/' + $rootScope.demoproject + '.json')).then(function() {} );
+}])
+.run(['$location', 'Auth', function($location, Auth) {
+	Auth.isLoggedIn().then(function (isLoggedIn)
+	{
+		if (!isLoggedIn)
+			$location.path('/login');
+	});
 }])
 .config([
 '$stateProvider',
@@ -22,8 +120,7 @@ angular.module('3drepo', ['ui.router', 'ui.bootstrap', 'angular-bootstrap-select
 function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 	$stateProvider.state('login', {
 		url: '/login',
-		templateUrl: 'login.html',
-		controller: 'LoginCtrl'
+		templateUrl: 'login.html'
 	}).state('main', {
 		url: '/demo?uid?mode',
 		templateUrl: 'mainpage.html',
@@ -64,25 +161,36 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 
 	return o;
 })
-.controller('LoginCtrl', ['$scope', '$state', '$window', '$location', '$http', '$rootScope', function($scope, $state, $window, $location, $http, $rootScope)
+.controller('LoginCtrl', ['$scope', '$state', '$http', 'serverConfig', 'Auth', function($scope, $state, $http, serverConfig, Auth)
 {
-	$scope.loggedIn = !!$window.sessionStorage.token;
-	$scope.asyncSelected = "";
-	$rootScope.bodylayout = "body-login";
+	$scope.user = { username: "", password: ""};
 
-	$scope.errorMessage = "";
-
-	$scope.logOut = function($location) {
-		if ($window.sessionStorage.token)
-		{
-			delete $window.sessionStorage.username;
-			delete $window.sessionStorage.token;
-			$scope.loggedIn = false;
-			$scope.user = {};
-		}
-
-		$state.go('login');
+	$scope.goDefault = function() {
+		Auth.isLoggedIn().then(function _loginGoDefaultSuccess(result) {
+			if(result)
+				$state.go('main');
+			else
+				$state.go('login');
+		});
 	}
+
+	$scope.logOut = function()
+	{
+		Auth.logout().then(function _loginCtrlLogoutSuccess() {
+			$scope.errorMessage = null;
+			$scope.loggedIn = false;
+			$scope.goDefault();
+		}, function _loginCtrlLogoutFailure(reason) {
+			$scope.errorMessage = reason;
+			$scope.goDefault();
+		});
+	}
+
+	$scope.$on("loggedOut", function(event, message) {
+		$scope.errorMessage = message;
+		$scope.loggedIn = !(message === null);
+		$scope.goDefault();
+	});
 
 	$scope.loginPage = function() {
 		$state.go('login');
@@ -93,45 +201,26 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 	}
 
 	$scope.login = function() {
-		url = $rootScope.apiUrl('login')
-		console.log('URL: ' + url);
-
-		$http.post(url, $scope.user)
-		.success(function (data, status, headers, config) {
-			$window.sessionStorage.token = data.token;
-			$window.sessionStorage.username = $scope.user.username;
-			$scope.loggedIn = true;
-
-			$state.go('main');
-			$rootScope.bodylayout = "";
-			$scope.errorMessage = "";
-		})
-		.error(function(data, status, headers, config) {
-			if (status == 401)
-			{
-				$scope.errorMessage = "Unauthorized";
-			} else if(status == 400) {
-				$scope.errorMessage = "Invalid username/password"
+		Auth.login($scope.user.username, $scope.user.password).then(
+			function _loginCtrlLoginSuccess(username) {
+				$state.errorMessage = null;
+				$scope.loggedIn = true;
+				$scope.goDefault();
+			}, function _loginCtrlLoginFailure(reason) {
+				$scope.errorMessage = reason;
+				$scope.loggedIn = false;
+				$state.goDefault();
 			}
-
-			$scope.logOut();
-			$scope.user.password = "";
-			$scope.user.username = "";
-		});
-	};
-
-	$scope.goUser = function(username) {
-		var o = { account: username };
-		$state.go('home', o);
+		);
 	};
 
 	$scope.getThings = function(val) {
-		return $http.get($rootScope.apiUrl('search.json'),
+		return $http.get(serverConfig.apiUrl('search.json'),
 		{
 			params: {
 				user_company_name: val
 			}
-		}).then(function(res) {
+		}).then(function _loginCtrlGetThingsSuccess(res) {
 			var users = res.data.users;
 			var companies = res.data.companies.map(function(obj){ return obj.name; });
 
@@ -143,22 +232,18 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 				return company + " (Company)";
 			});
 
-
 			return users.concat(companies);
 		});
 	};
 
-	if ($window.sessionStorage.username)
-	{
-		$scope.user = {username: $window.sessionStorage.username, password: ''};
-	} else {
-		$scope.user = {username :'', password: ''};
-	}
+	Auth.isLoggedIn().then(function _loginCtrlCheckLoggedInSuccess(result) {
+		$scope.loggedIn = result;
+	});
 }])
-.service('Wayfinder', ['$http', '$rootScope', function($http, $rootScope) {
+.service('Wayfinder', ['$http', 'serverConfig', function($http, serverConfig) {
 	var previous = null;
 
-	var promise = $http.get($rootScope.apiUrl('wayfinder.json')).success(function(json) {
+	var promise = $http.get(serverConfig.apiUrl('wayfinder.json')).success(function(json) {
 		previous = json;
 	});
 
@@ -177,9 +262,9 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 		}
 	};
 }])
-.controller('MainCtrl', ['$scope', '$http', 'iFrameURL', '$location', '$window', '$rootScope', 'uid', 'mode', 'Wayfinder', function($scope, $http, iFrameURL, $location, $window, $rootScope, uid, mode, Wayfinder) {
+.controller('MainCtrl', ['$scope', '$http', 'iFrameURL', '$location', '$window', 'serverConfig', 'uid', 'mode', 'Wayfinder', function($scope, $http, iFrameURL, $location, $window, serverConfig, uid, mode, Wayfinder) {
 	$scope.iFrameURL = iFrameURL;
-	iFrameURL.setURL($rootScope.apiUrl($rootScope.democompany + '/' + $rootScope.demoproject + '/revision/master/head.x3d.src'));
+	iFrameURL.setURL(serverConfig.apiUrl(serverConfig.democompany + '/' + serverConfig.demoproject + '/revision/master/head.x3d.src'));
 
 	$scope.visualizeThese = null;
 
@@ -198,7 +283,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 		else
 			uidData = [uid];
 
-		$http.get($rootScope.apiUrl('wayfinder/record.json'),
+		$http.get(serverConfig.apiUrl('wayfinder/record.json'),
 			{ params : { uid: JSON.stringify(uidData) }})
 		.success(function(data, status) {
 			if(mode == 'flythru')

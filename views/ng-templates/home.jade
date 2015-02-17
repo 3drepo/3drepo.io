@@ -6,7 +6,9 @@
 				.col-md-4.tight.gutter-right
 					// Profile pic and name
 					.col-md-12.tight
-						.profile-pic(ng-style="{'background-image':'url(' + userImage + ')'}")
+						.profile-pic
+							img#picImg(ng-show="hasAvatar", ng-src='{{avatarURL}}')
+							i.fa.fa-user(ng-show="!hasAvatar")
 						.profile-box
 							h1 {{userData.user.firstName}} {{userData.user.lastName}}
 							p {{userData.user.email}}

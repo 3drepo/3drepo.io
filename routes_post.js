@@ -34,6 +34,8 @@ module.exports = function(router, dbInterface, checkAccess){
 	this.post('/login', false, function(req, res) {
 		this.dbInterface.authenticate(req.body.username, req.body.password, function(err, user)
 		{
+			logger.log('debug', 'Attempting to log user ' + req.body.username);
+
 			if(err)
 			{
 				res.status(400).send('Incorrect usename or password');
@@ -56,9 +58,11 @@ module.exports = function(router, dbInterface, checkAccess){
 	});
 
 	// Log the user out of the API
-	this.post('/logout', true, function(req, res) {
+	this.post('/logout', false, function(req, res) {
+		var username = req.session.username;
+
 		req.session.destroy(function() {
-			logger.log('debug', 'User ' + req.user.username + ' has logged out.')
+			logger.log('debug', 'User ' + username + ' has logged out.')
 			res.sendStatus(200);
 		});
 	});
