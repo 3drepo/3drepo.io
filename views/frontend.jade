@@ -108,8 +108,8 @@ html(lang="en")
 		script(type='text/ng-template', id='footer.html')
 			include ng-templates/footer.jade
 
-		ng-include(ng-show="loggedIn" src="'header.html'")
+		ng-include(ng-if="!(state.name=='login')" src="'header.html'")
 		div(ui-view='')
-		ng-include(ng-show="loggedIn" src="'footer.html'")
+		ng-include(ng-if="!(state.name!='login')" src="'footer.html'")
 
 

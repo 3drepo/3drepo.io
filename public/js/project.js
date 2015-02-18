@@ -27,6 +27,7 @@ angular.module('3drepo', ['ui.router', 'ui.bootstrap'])
 '$httpProvider',
 function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 	$stateProvider
+		/*
 		.state('splash' ,{
 			url: '/',
 			templateUrl: 'splash.html',
@@ -35,7 +36,8 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 			url: '/signup',
 			templateUrl: 'signup.html',
 			controller: 'SignUpCtrl'
-		}).state('login', {
+		})*/
+		.state('login', {
 			url: '/login',
 			templateUrl: 'login.html'
 		}).state('home' ,{
