@@ -3,7 +3,7 @@
 		#scenetree
 	div#meta-popup.draggable.ui-widget-content
 		div#metadata
-	x3d#viewer(xmlns='http://www.web3d.org/specification/x3d-namespace')
+	x3d#viewer(xmlns='http://www.web3d.org/specification/x3d-namespace' ng-non-bindable)
 		scene#mainScene(onbackgroundclicked='bgroundClick(event);')
 			viewpoint#sceneVP()
 			navigationInfo#nav 
