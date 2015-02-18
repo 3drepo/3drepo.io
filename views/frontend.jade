@@ -35,6 +35,13 @@ html(lang="en")
 		script(type="text/javascript" src="/public/js/viewer.js")
 
 		script(src='/public/js/project.js')
+		script.
+			var realOpen = XMLHttpRequest.prototype.open;
+			
+			XMLHttpRequest.prototype.open = function(method, url, async, unk1, unk2) {
+				this.withCredentials = true;
+				realOpen.apply(this, arguments);
+			};
 		
 	body(ng-app='3drepo' ng-controller='LoginCtrl').ng-scope
 		// Not found template

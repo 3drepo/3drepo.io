@@ -95,7 +95,7 @@ function processChild(child, project, selected, namespace)
 	// If a child is a ref then add project information to allow loading
 	// of information from a different database , otherwise if
 	// a mesh or a group (transformation) then add it as a normal node.
-	if ((child['type'] == 'mesh') || (child['type'] == 'transformation'))
+	if ((child['type'] == 'mesh') || (child['type'] == 'transformation') || child['type'] == 'map')
 	{
 		var uuid      = uuidToString(child["_id"]);
 		var shared_id = uuidToString(child["shared_id"]);
@@ -201,7 +201,8 @@ exports.route = function(router)
 		// TODO: Should only be public information
 		dbInterface.getUserInfo( params.account, function(err, user)
 		{
-			if(err) throw err;
+			if(err)
+				res.sendStatus(500);
 
 			if(user)
 				res.json(user);
@@ -297,7 +298,7 @@ exports.route = function(router)
 
 				logger.log('debug', 'Found root node ' + node["id"]);
 
-				head[0]["title"]     = node["name"];
+				head[0]["title"]     = params.project;
 				head[0]["key"]       = uuidToString(node["shared_id"]);
 				head[0]["folder"]    = true;
 				head[0]["lazy"]      = true;

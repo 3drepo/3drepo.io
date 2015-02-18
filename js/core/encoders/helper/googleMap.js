@@ -18,7 +18,7 @@
 // Inspired by http://stackoverflow.com/questions/19266002/get-latitude-and-longitude-from-static-google-map
 var config		 = require('../../config.js');
 
-module.exports.addGoogleTiles = function(xmlDoc, parentNode, width, yrot, worldTileSize, centLat, centLong, zoom, trans)
+module.exports.addGoogleTiles = function(xmlDoc, width, yrot, worldTileSize, centLat, centLong, zoom, trans)
 {
 	var yRotTrans = xmlDoc.createElement("Transform");
 	yRotTrans.setAttribute('rotation', '0,1,0,' + yrot);
@@ -72,8 +72,8 @@ module.exports.addGoogleTiles = function(xmlDoc, parentNode, width, yrot, worldT
 
 			yRotTrans.appendChild(shapeTrans);
 		}
-
-		parentNode.appendChild(yRotTrans);
 	}
+
+	return yRotTrans;
 };
 

@@ -108,15 +108,20 @@ $(document).on("clickObject", function(event, objEvent) {
 	viewer.setApp(objEvent.target);
 });
 
-$(document).on("onViewpointChange", function(event, objEvent) {
-	console.log(objEvent.position);
-});
+// $('scene')[0]._x3domNode.getVolume().center
+
 
 $(document).on("onLoaded", function(event, objEvent) {
 	$('#viewer')[0].runtime.showAll();
+
+	var bboxCenter = $('scene')[0]._x3domNode.getVolume().center;
+
+	$('#sceneVP')[0].setAttribute('centerofrotation', bboxCenter.x + ', ' + bboxCenter.y + ', ' + bboxCenter.z);
+	$('#sceneVP')[0].addEventListener('viewpointChanged', onViewpointChange, false);
+
 });
+
 
 $(document).ready( function() {
 	window.viewer = new Viewer();
-	document.getElementById('sceneVP').addEventListener('viewpointChanged', onViewpointChange, false);
 });

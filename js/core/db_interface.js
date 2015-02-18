@@ -230,7 +230,8 @@ exports.getUserInfo = function(username, callback) {
 		if (coll[0])
 			callback(null, coll[0]["customData"]);
 		else
-			callback(new Error("User not found"));
+			callback(null, null);
+		//new Error("User not found"), null);
 	});
 };
 
@@ -366,7 +367,7 @@ exports.getDBList = function(callback) {
 exports.getChildren = function(dbName, project, uuid, callback) {
 	var filter = {
 		parents : stringToUUID(uuid),
-		type: {$in : ['mesh', 'transformation', 'ref']}
+		type: {$in : ['mesh', 'transformation', 'ref', 'map']}
 	};
 
 	dbConn.filterColl(dbName, project + '.scene', filter, null, function(err, doc) {
@@ -446,7 +447,10 @@ exports.getReadme = function(dbName, project, rid, callback) {
 		dbConn.filterColl(dbName, project + '.scene', query, null, function(err, readme) {
 			if(err) return callback(err);
 
-			callback(null, {readme : readme[0]["metadata"]["text"]});
+			if (!readme.length)
+				callback(null, {readme: "Readme Missing"});
+			else
+				callback(null, {readme : readme[0]["metadata"]["text"]});
 		});
 	});
 };

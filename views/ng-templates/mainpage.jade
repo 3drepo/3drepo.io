@@ -7,5 +7,5 @@
 		scene#mainScene(onbackgroundclicked='bgroundClick(event);')
 			viewpoint#sceneVP()
 			navigationInfo#nav 
-			inline(ng-init='x3domreload()', namespacename='model', onload='onLoadedEvent();', url="{{iFrameURL.url}}", render='true', load='true')
+			inline#masterInline(namespacename="model", onload="onLoadedEvent();")
 

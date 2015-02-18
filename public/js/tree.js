@@ -59,12 +59,20 @@ $(document).on("clickObject", function(event, objEvent) {
 	);
 });
 
-function getGroup(name)
+function getProject(projectName)
 {
-	return $('Group')
+	return $('inline')
 		.filter(function() {
-			return this.id == name;
+			return this.nameSpaceName == projectName;
 		});
+}
+
+function getNode(node)
+{
+	if ('project' in node.data)
+		return getProject(node.data.project)[0];
+	else
+		return document.getElementById(node.data.namespace + node.data.uuid);
 }
 
 var initTree = function(account, project)
@@ -77,7 +85,7 @@ var initTree = function(account, project)
 			window.wasPartSelect = data.node.partsel;
 		},
 		select : function(event, data) {
-			getGroup(data.node.data.namespace + data.node.data.uuid)[0].setAttribute("render", data.node.selected);
+			getNode(data.node).setAttribute("render", data.node.selected);
 
 			var parent = data.node.getParent();
 			if ((data.node.selected) && (data.node.selected != parent.selected))
@@ -86,7 +94,7 @@ var initTree = function(account, project)
 
 				while(par_node != null)
 				{
-					getGroup(par_node.data.namespace + par_node.data.uuid)[0].setAttribute("render", true);
+					getNode(par_node).setAttribute("render", true);
 					par_node = par_node.getParent();
 				}
 
@@ -94,7 +102,7 @@ var initTree = function(account, project)
 
 				for(var sib_idx = 0; sib_idx < siblings.length; sib_idx++)
 				{
-					getGroup(siblings[sib_idx].data.namespace + siblings[sib_idx].data.uuid)[0].setAttribute("render", false);
+					getNode(siblings[sib_idx]).setAttribute("render", false);
 				}
 			}
 
@@ -113,7 +121,7 @@ var initTree = function(account, project)
 		activate: function(event, data) {
 			if ("uuid" in data.node.data)
 			{
-				var rootObj = getGroup(data.node.data.namespace + data.node.data.uuid)[0];
+				var rootObj = getNode(data.node);
 				viewer.lookAtObject(rootObj);
 				viewer.setApp(rootObj);
 				floating.addAllFloats(rootObj);

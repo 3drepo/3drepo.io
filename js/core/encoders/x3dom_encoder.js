@@ -145,7 +145,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 			else
 				var url_str = '//' + config.apiServer.url + '/' + account + '/' + child['project'] + '/revision/master/head.x3d.' + mode;
 
-			//newNode.setAttribute('onload', 'onLoaded(event);');
+			newNode.setAttribute('onload', 'onLoaded(event);');
 			newNode.setAttribute('url', url_str);
 			newNode.setAttribute('id', child['id']);
 			newNode.setAttribute('DEF', dbInterface.uuidToString(child["shared_id"]));
@@ -250,7 +250,12 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 
 			X3D_AddChildren(xmlDoc, newNode, child, dbInterface, account, project, mode);
 		} else if (child['type'] == 'map') {
-			googleMaps.addGoogleTiles(xmlDoc, xmlNode, child['width'], child['yrot'], child['worldTileSize'], child['lat'], child['long'], child['zoom'], child['trans']);
+			var newNode = googleMaps.addGoogleTiles(xmlDoc, child['width'], child['yrot'], child['worldTileSize'], child['lat'], child['long'], child['zoom'], child['trans']);
+
+			newNode.setAttribute("id", child['id']);
+			newNode.setAttribute('DEF', dbInterface.uuidToString(child["shared_id"]));
+
+			xmlNode.appendChild(newNode);
 		} else if (child['type'] == 'mesh') {
 			var shape = xmlDoc.createElement('Shape');
 			shape.setAttribute('id', child['id']);

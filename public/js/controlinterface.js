@@ -59,8 +59,8 @@ x3dom.runtime.ready = runtimeReady;
 
 	window.speed = 2.0 * window.scale;
 
-	$('#viewer')[0].setAttribute('keysEnabled', 'false');
-	$('#viewer')[0].setAttribute('disableDoubleClick', 'true');
+	//$('#viewer')[0].setAttribute('keysEnabled', 'false');
+	//$('#viewer')[0].setAttribute('disableDoubleClick', 'true');
 })();
 
 /*

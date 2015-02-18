@@ -201,11 +201,14 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 			var http = $injector.get('$http');
 
 			// Initialize
-			http.get(serverConfig.apiUrl('login')).success(function() {
+			http.get(serverConfig.apiUrl('login'))
+			.success(function(data, status) {
 				self.loggedIn = true;
+				self.username = data.username;
 				deferred.resolve(self.loggedIn);
-			}).error(function() {
+			}).error(function(data, status) {
 				self.loggedIn = false;
+				self.username = null;
 				deferred.resolve(self.loggedIn);
 			});
 		} else {
@@ -263,31 +266,37 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 
 		return deferred.promise;
 	}
+
+	this.isLoggedIn().then(function _loginCtrlCheckLoggedInSuccess(result) {
+		self.loggedIn = result;
+	});
+
 }])
-.run(['$rootScope', '$location', 'Auth', function($rootScope, $location, Auth) {
-	Auth.isLoggedIn().then(function (isLoggedIn)
+.run(['$rootScope', '$location', '$window', 'Auth', function($rootScope, $location, $window, Auth) {
+	Auth.isLoggedIn().then(function (result)
 	{
-		if (!isLoggedIn)
+		if (!result)
 			$location.path('/login');
 	});
+
+	$rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams)
+	{
+		if ($window.floating)
+			$window.floating.clearFloats();
+	});
 }])
-.factory('authInterceptor', ['$rootScope', '$q', 'Auth', function($rootScope, $q, Auth) {
+.factory('authInterceptor', ['$rootScope', '$q', function($rootScope, $q) {
 	return {
 		responseError: function(res)
 		{
-			var deferred = $q.defer();
+			//var deferred = $q.defer();
 			if (res.status == 401) {
-				Auth.logout().then(function _authInterceptorSuccess()
-				{
-					$rootScope.$broadcast('loggedOut', null);
-					deferred.resolve();
-				}, function _authInterceptorFailure(reason) {
-					$rootScope.$broadcast("loggedOut", reason);
-					deferred.resolve();
-				});
+				$rootScope.$broadcast("notAuthorized", null);
+				//deferred.resolve();
 			}
 
-			return deferred.promise;
+			return $q.reject(res);
+			//return deferred.promise;
 		}
 	};
 }])
@@ -368,10 +377,10 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 			var res = {};
 			res.name = project;
 
-			$http.get(serverConfig.apiUrl(account + '/' + project + '.json')).then(function(json) {
-				res.owner       = json.data.owner;
-				res.description = json.data.desc;
-				res.type        = json.data.type;
+			$http.get(serverConfig.apiUrl(account + '/' + project + '.json')).success(function(json, status) {
+				res.owner       = json.owner;
+				res.description = json.desc;
+				res.type        = json.type;
 				res.selected    = o.projectTypes[0];
 
 				for(var i = 0; i < o.projectTypes.length; i++)
@@ -383,7 +392,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 					}
 				}
 
-				res.visibility = json.data.read_access;
+				res.visibility = json.read_access;
 
 				return $http.get(serverConfig.apiUrl(account + '/' + project + '/revision/master/head/readme.json'));
 			}).then(function(json) {
@@ -837,18 +846,23 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 	$scope.pageChanged();
 
 }])
-.factory('iFrameURL', function() {
-	var o = {};
+.service('iFrameURL', function() {
+	this.ready = null;
+	this.url = "";
+	var self = this;
 
-	o.setURL = function(url)
+	this.setURL = function(url)
 	{
-		o.url = url;
+		// TODO: Terrible hack for demo, fix using directives.
+		$('#masterInline')[0].setAttribute("url", url);
+		x3dom.reload();
+		//this.url = url;
+		//this.ready = true;
 	}
-
-	return o;
 })
 .controller('LoginCtrl', ['$scope', '$state', '$http', 'serverConfig', 'Auth', function($scope, $state, $http, serverConfig, Auth)
 {
+	$scope.loggedIn = null;
 	$scope.user = { username: "", password: ""};
 
 	$scope.goDefault = function() {
@@ -862,19 +876,18 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 
 	$scope.logOut = function()
 	{
-		Auth.logout().then(function _loginCtrlLogoutSuccess() {
+		Auth.logout().then(function _logoutCtrlLogoutSuccess() {
 			$scope.errorMessage = null;
-			$scope.loggedIn = false;
 			$scope.goDefault();
-		}, function _loginCtrlLogoutFailure(reason) {
+		}, function _logoutCtrlLogoutFailure(reason) {
 			$scope.errorMessage = reason;
 			$scope.goDefault();
 		});
 	}
 
-	$scope.$on("loggedOut", function(event, message) {
-		$scope.errorMessage = message;
-		$scope.loggedIn = !(message === null);
+	$scope.$on("notAuthorized", function(event, message) {
+		//$scope.errorMessage = message;
+		//$scope.loggedIn = !(message === null);
 		$scope.goDefault();
 	});
 
@@ -890,12 +903,13 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 		Auth.login($scope.user.username, $scope.user.password).then(
 			function _loginCtrlLoginSuccess(username) {
 				$state.errorMessage = null;
-				$scope.loggedIn = true;
 				$scope.goDefault();
+				$scope.user.username = null;
+				$scope.user.password = null;
 			}, function _loginCtrlLoginFailure(reason) {
 				$scope.errorMessage = reason;
-				$scope.loggedIn = false;
-				$state.goDefault();
+				$scope.goDefault();
+				$scope.user.password = null;
 			}
 		);
 	};
@@ -927,8 +941,10 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 		});
 	};
 
-	Auth.isLoggedIn().then(function _loginCtrlCheckLoggedInSuccess(result) {
-		$scope.loggedIn = result;
+	$scope.$watch(function() {
+		return Auth.loggedIn;
+	}, function (newValue) {
+		$scope.loggedIn = newValue;
 	});
 }])
 .controller('MainCtrl', ['$scope', 'iFrameURL', 'account', 'project', 'serverConfig', 'Auth', function($scope, iFrameURL, account, project, serverConfig, Auth) {
@@ -941,6 +957,8 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 	$scope.x3domreload = function() {
 		x3dom.reload();
 	};
+
+	$scope.$watch(function() { return iFrameURL; }, function(newObj) { $scope.iFrameURL = newObj; });
 }])
 .controller('RevisionCtrl', ['$scope', 'iFrameURL', 'account', 'project', 'branch', 'rid', '$stateParams', 'serverConfig', function($scope, iFrameURL, account, project, branch, rid, $stateParams, serverConfig) {
 	$scope.branch = branch;
@@ -950,7 +968,6 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 		iFrameURL.setURL(serverConfig.apiUrl(account + '/' + project + '/revision/' + branch + '/' + rid + '.x3d.src'));
 	else
 		iFrameURL.setURL(serverConfig.apiUrl(account + '/' + project + '/revision/' + rid + '.x3d.src'));
-
 }])
 .factory('userData', ['$http', '$q', 'serverConfig', function($http, $q, serverConfig){
 	var o = {
@@ -1027,9 +1044,9 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 	$scope.hasAvatar = false;
 
 	$http.get($scope.avatarURL)
-	.success(function(data) {
+	.success(function() {
 		$scope.hasAvatar = true;
-	}).error(function(data, status) {
+	}).error(function() {
 		$scope.hasAvatar = false;
 	});
 }])

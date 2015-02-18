@@ -16,22 +16,22 @@
 					.col-md-12.tight
 						.project-menu
 							.project-menu-section(ng-class="{'project-menu-section-selected': isView('dashboard')}")
-								a.tight(href='#/', ng-click="setView('dashboard')")
+								div.tight
 									h3
 										i.fa.fa-home.menu-icon
 										|  Dashboard
 							.project-menu-section(ng-class="{'project-menu-section-selected': isView('projects')}")
-								a.tight(href='#/', ng-click="setView('projects')")
+								div.tight
 									h3
 										i.fa.fa-cube.menu-icon
 										|  Projects
 							.project-menu-section(ng-class="{'project-menu-section-selected': isView('discover')}")
-								a.tight(href='#/', ng-click="setView('discover')")
+								div.tight
 									h3
 										i.fa.fa-cloud.menu-icon
 										|  Discover
 							.project-menu-section(ng-class="{'project-menu-section-selected': isView('settings')}")
-								a.tight(href='#/', ng-click="setView('settings')")
+								div.tight
 									h3
 										i.fa.fa-gear.menu-icon
 										|  Settings
@@ -39,6 +39,16 @@
 				.col-md-8.tight
 					// Dashboard
 					div(ng-show="view=='dashboard'")
+						.col-xs-12.tight.gutter-right
+							.block
+								.col-xs-12.block-header
+									h3 Accessible Projects
+								.col-xs-12.tight(ng-repeat="project in userData.user.projects")
+									.col-xs-12.project-line
+										i.fa.fa-cube.menu-icon
+										span.commit-number 
+											a(ng-href="{{'/' + project.account + '/' + project.project}}") {{'/' + project.account + '/' + project.project}}
+					//div(ng-show="view=='dashboard'")
 						.col-md-6.tight.gutter-right
 							.block
 								.col-sm-12.block-header

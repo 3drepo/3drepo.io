@@ -27,7 +27,7 @@ var imgEncoder = require('./js/core/encoders/img_encoder.js');
 module.exports = function(router, dbInterface, checkAccess){
 	// Checks whether or not the user is logged in.
 	router.get('/login', checkAccess, function(req, res) {
-		res.sendStatus(200);
+		res.json({username: req.session.user.username});
 	});
 
 	// Account information
@@ -69,15 +69,21 @@ module.exports = function(router, dbInterface, checkAccess){
 
 	// Account information
 	router.get('/:account.:format?.:subformat?', function(req, res, next) {
-		var format = req.params["format"];
+		if (!("user" in req.session)) {
+			res.sendStatus(401);
+		} else if (req.session.user.username != req.params["account"]) {
+			res.sendStatus(401);
+		} else {
+			var format = req.params["format"];
 
-		var params = {
-			subformat: req.params["subformat"],
-			account: req.params["account"],
-			query: req.query
-		};
+			var params = {
+				subformat: req.params["subformat"],
+				account: req.params["account"],
+				query: req.query
+			};
 
-		this.transRouter(format, '/:account', res, params);
+			this.transRouter(format, '/:account', res, params);
+		}
 	});
 
 	// Project information
@@ -406,7 +412,8 @@ module.exports = function(router, dbInterface, checkAccess){
 			if (account && project) {
 				dbInterface.hasAccessToProject(params.user, account, project, function(err)
 				{
-					if(err) throw onError(err);
+					if(err)
+						return res.sendStatus(401);
 
 					// If there is no error then we have access
 					if (!(format in this.getMap)) {
