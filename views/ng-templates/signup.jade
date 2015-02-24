@@ -1,39 +1,30 @@
 .block.margined.padded-box
 	.container-fluid
 		.row
-			.col-md-6.col-md-offset-2
+			.col-md-6.col-md-offset-3.formStyle
 				.row
-					.col-sm-12.margined.block-header
-						h3 Signup
+					.col-xs-12.margined.block-header
+						h3 Signup 
+							span.errorMessage {{signupError}}
 				.row
 					form.standardform(role='form')
 						.form-group
 							.row
-								.col-sm-12.margined
-									label(for='nickname') Username
-									input#username.form-control(type='text', popover="{{popoverText}}",
-										popover-trigger="focus", ng-change='checkUsername()',
+								.col-xs-12.margined
+									label(for='nickname') Username 
+										span.errorMessage {{popoverText}}
+									input#username.form-control(type='text', ng-change='checkUsername()',
 										ng-model='username', placeholder="Username", aria-describedby="uservalid", required,
 										ng-class="{'uservalidbad glyphicon-remove' : !valid, 'uservalidgood glyphicon-ok' : valid}")
-								.col-sm-6.margined
-									label(for='first-name') First Name
-									input#firstname.form-control(type='text', ng-model='firstname', placeholder="First Name", required)
-								.col-sm-6.margined
-									label(for='last-name') Last Name
-									input#lastname.form-control(type='text', ng-model='lastname', placeholder="Last Name", required)
 							.row
-								.col-sm-12.margined
+								.col-xs-12.margined
 									label(for='email') E-mail
 									input#email.form-control(type='email', ng-model='email', placeholder="e-mail address", required)
 							.row
-								.col-sm-12.margined
+								.col-xs-12.margined
 									label(for='password') Password
 									input#password.form-control(type='password', ng-model='password', required)
 							.row
 								.col-sm-12.margined
-									label(for='retype-password') Re-type password
-									input#retype-password.form-control(type='password', ng-model='retype', required)
-							.row
-								.col-sm-12.margined
-									button.btn.btn-success(ng-click='signup') Signup
+									button.btn.btn-success(ng-click='signupSubmit()') Signup
 

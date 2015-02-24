@@ -21,6 +21,8 @@ var search = require('./helper/search.js').search;
 var log_iface = require('../logger.js');
 var logger = log_iface.logger;
 
+var responseCodes = require('../response_codes.js');
+
 /*******************************************************************************
  * Recursively add JSON children
  *
@@ -188,104 +190,123 @@ function render(dbInterface, dbName, project, revision, uuid, selected, namespac
 
 exports.route = function(router)
 {
-	router.get('json', '/search', function(res, params) {
+	router.get('json', '/search', function(res, params, err_callback) {
 		search(router.dbInterface, params.query, function(err, json)
 		{
-			if(err) throw err;
-
-			res.json(json);
-		});
-	});
-
-	router.get('json', '/:account', function(res, params) {
-		// TODO: Should only be public information
-		dbInterface.getUserInfo( params.account, function(err, user)
-		{
-			if(err)
-				res.sendStatus(500);
-
-			if(user)
-				res.json(user);
+			if(err.value)
+				err_callback(err);
 			else
-				res.sendStatus(404);
+				res.json(json);
 		});
 	});
 
-	router.get('json', '/:account/:project', function(res, params) {
+	router.get('json', '/:account', function(res, params, err_callback) {
+		if(!("getPublic" in params))
+		{
+			err_callback(responseCodes.GET_PUBLIC_NOT_SPECIFIED);
+		} else {
+			dbInterface.getUserInfo(params.account, params.getPublic, function(err, user)
+			{
+				if(err.value) {
+					err_callback(err);
+				} else {
+					console.log("debug", "USER: " + JSON.stringify(user));
+					if(user)
+					{
+						user.username = params.account;
+						err_callback(responseCodes.OK, user);
+					}
+					else
+						err_callback(responseCodes.USER_NOT_FOUND);
+				}
+			});
+		}
+	});
+
+	router.get('json', '/:account/:project', function(res, params, err_callback) {
 		dbInterface.getProjectInfo(params.account, params.project, function(err, project)
 		{
-			if(err) throw err;
-
-			res.json(project);
+			if(err.value)
+				err_callback(err);
+			else
+				err_callback(responseCodes.OK, project);
 		});
 	});
 
-	router.get('json', '/:account/:project/revision/:rid', function(res, params) {
+	router.get('json', '/:account/:project/revision/:rid', function(res, params, err_callback) {
 		router.dbInterface.getRevisionInfo(params.account, params.project, params.rid, function(err, revisionObj) {
-			if(err) throw err;
-
-			res.json(revisionObj);
+			if(err.value)
+				err_callback(err);
+			else
+				err_callback(responseCodes.OK, revisionObj);
 		});
 	});
 
-	router.get('json', '/:account/:project/revision/:branch/head', function(res, params) {
+	router.get('json', '/:account/:project/revision/:branch/head', function(res, params, err_callback) {
 		router.dbInterface.getHeadOf(params.account, params.project, params.branch, router.dbInterface.getRevisionInfo, function(err, revisionObj) {
-			if(err) throw err;
-
-			res.json(revisionObj);
+			if(err.value)
+				err_callback(err);
+			else
+				err_callback(responseCodes.OK, revisionObj);
 		});
 	});
 
-	router.get('json', '/:account/:project/revision/:rid/readme', function(res, params) {
+	router.get('json', '/:account/:project/revision/:rid/readme', function(res, params, err_callback) {
 		router.dbInterface.getReadme(params.account, params.project, params.rid, function(err, readme) {
-			if(err) throw err;
-
-			res.json(readme);
+			if(err.value)
+				err_callback(err);
+			else
+				err_callback(responseCodes.OK, readme);
 		});
 	});
 
-	router.get('json', '/:account/:project/revision/:branch/head/readme', function(res, params) {
+	router.get('json', '/:account/:project/revision/:branch/head/readme', function(res, params, err_callback) {
 		router.dbInterface.getHeadOf(params.account, params.project, params.branch, router.dbInterface.getReadme, function(err, readme) {
-			if(err) throw err;
-
-			res.json(readme);
+			if(err.value)
+				err_callback(err);
+			else
+				err_callback(responseCodes.OK, readme);
 		});
 	});
 
-	router.get('json', '/:account/:project/branches', function(res, params) {
+	router.get('json', '/:account/:project/branches', function(res, params, err_callback) {
 		router.dbInterface.getBranches(params.account, params.project, function(err, branchList) {
-			if(err) throw err;
-
-			res.json(branchList);
+			if(err.value)
+				err_callback(err);
+			else
+				err_callback(responseCodes.OK, readme);
 		});
 	});
 
-	router.get('json', '/:account/:project/revisions', function(res, params) {
+	router.get('json', '/:account/:project/revisions', function(res, params, err_callback) {
 		router.dbInterface.getRevisions(params.account, params.project, null, params.start, params.end, params.full, function(err, revisionList) {
-			if(err) throw err;
-
-			res.json(revisionList);
+			if(err.value)
+				err_callback(err);
+			else
+				err_callback(responseCodes.OK, revisionList);
 		});
 	});
 
-	router.get('json', '/:account/:project/revisions/:branch', function(res, params) {
+	router.get('json', '/:account/:project/revisions/:branch', function(res, params, err_callback) {
 		router.dbInterface.getRevisions(params.account, params.project, params.branch, params.start, params.end, params.full, function(err, revisionList) {
-			if(err) throw err;
-
-			res.json(revisionList);
+			if(err.value)
+				err_callback(err);
+			else
+				err_callback(responseCodes.OK, revisionList);
 		});
 	});
 
-	router.get('json', '/:account/:project/users', function(res, params) {
+	router.get('json', '/:account/:project/users', function(res, params, err_callback) {
 		dbInterface.getProjectUsers(params.account, params.project, function(err, project)
 		{
-			if(err) throw err;
-
-			res.json(project);
+			if(err.value)
+				err_callback(err);
+			else
+				err_callback(responseCodes.OK, project);
 		});
 	});
 
-	router.get('json', '/:account/:project/revision/:rid/tree/:sid', function(res, params) {
+	router.get('json', '/:account/:project/revision/:rid/tree/:sid', function(res, params, err_callback) {
 		var revision = (params.rid == "head") ? null : params.rid;
 		var namespace = params.query.namespace;
 		var selected  = params.query.selected;
@@ -322,7 +343,10 @@ exports.route = function(router)
 						treeChildMetadata(router.dbInterface, params.account, params.project, id, callback)
 					}, function(err, childWithMeta)
 					{
-						res.json(childWithMeta);
+						if(err)
+							err_callback(err);
+						else
+							err_callback(responseCodes.OK, childWithMeta);
 					});
 				});
 			});

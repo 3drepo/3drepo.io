@@ -13,6 +13,8 @@ var viewUrl = function ($stateParams)
 	return view + '.html';
 }
 
+var publicViews = ["login", "signup"];
+
 angular.module('3drepo', ['ui.router', 'ui.bootstrap'])
 .service('serverConfig', function() {
 	this.apiUrl = server_config.apiUrl;
@@ -32,11 +34,12 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 			url: '/',
 			templateUrl: 'splash.html',
 			controller: 'SplashCtrl'
-		}).state('signup', {
+		}).*/
+		.state('signup', {
 			url: '/signup',
 			templateUrl: 'signup.html',
 			controller: 'SignUpCtrl'
-		})*/
+		})
 		.state('login', {
 			url: '/login',
 			templateUrl: 'login.html'
@@ -49,7 +52,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 					return $stateParams.account;
 				},
 				initPromise: function(userData, $stateParams) {
-					return userData.initPromise($stateParams.account);
+					return userData.refresh($stateParams.account);
 				}
 			}
 		}).state('main' ,{
@@ -187,7 +190,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 	$httpProvider.interceptors.push('authInterceptor');
 
 }])
-.service('Auth', ['$injector', '$q', 'serverConfig', function($injector, $q, serverConfig) {
+.service('Auth', ['$injector', '$q', '$state', 'serverConfig', function($injector, $q, $state, serverConfig) {
 	this.loggedIn = null;
 	this.username = null;
 	var self = this;
@@ -255,7 +258,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 		var deferred = $q.defer();
 		var http = $injector.get('$http');
 
-		http.post(serverConfig.apiUrl('logout'), {})
+		http.post(serverConfig.apiUrl('logout'))
 		.success(function _authLogOutSuccess() {
 			self.username = null;
 			self.loggedIn = false;
@@ -272,15 +275,8 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 	this.isLoggedIn().then(function _loginCtrlCheckLoggedInSuccess(result) {
 		self.loggedIn = result;
 	});
-
 }])
-.run(['$rootScope', '$location', '$window', 'Auth', function($rootScope, $location, $window, Auth) {
-	Auth.isLoggedIn().then(function (result)
-	{
-		if (!result)
-			$location.path('/login');
-	});
-
+.run(['$rootScope', '$location', '$window', '$state', 'Auth', function($rootScope, $location, $window, $state, Auth) {
 	$rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams)
 	{
 		if ($window.floating)
@@ -888,9 +884,10 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 	}
 
 	$scope.$on("notAuthorized", function(event, message) {
-		//$scope.errorMessage = message;
-		//$scope.loggedIn = !(message === null);
-		$scope.goDefault();
+		if (publicViews.indexOf($state.$current.name) == -1)
+		{
+			$scope.goDefault();
+		}
 	});
 
 	$scope.loginPage = function() {
@@ -972,61 +969,80 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 		iFrameURL.setURL(serverConfig.apiUrl(account + '/' + project + '/revision/' + rid + '.x3d.src'));
 }])
 .factory('userData', ['$http', '$q', 'serverConfig', function($http, $q, serverConfig){
-	var o = {
-		loading: true,
-		user: {
-			firstName: "",
-			lastName: "",
-			email: "",
-			projects: []
-		}
-	};
+	var o = {};
 
-	o.setInfo = function(res){
-		angular.copy(res, o.user);
-	};
+	o.refresh = function(username) {
+		var self = this;
 
-	o.fetchInfo = function(account) {
+		self.firstNmae = "";
+		self.lastName  = "";
+		self.email     = "";
+		self.projects  = [];
+
+		self.avatarURL = serverConfig.apiUrl(username + '.jpg');
+
 		var deferred = $q.defer();
 
-		setTimeout(function() {
-			var res = {};
+		$http.get(serverConfig.apiUrl(username + '.json'))
+		.then(function(json) {
+			self.username = username;
 
-			$http.get(serverConfig.apiUrl(account + '.json')).then(function(json) {
-				res.firstName = json.data.firstName;
-				res.lastName  = json.data.lastName;
-				res.email     = json.data.email;
-				res.projects  = json.data.projects;
+			if(json.data.firstName)
+				self.firstName = json.data.firstName;
 
-				deferred.resolve(res);
-			});
-		},10);
+			if(json.data.lastName)
+				self.lastName  = json.data.lastName;
+
+			if(json.data.email)
+				self.email     = json.data.email;
+
+			if(json.data.projects)
+				self.projects  = json.data.projects;
+
+			return $http.get(self.avatarURL);
+		}, function(message) {
+			self.loadError = "[" + message + "]";
+			return $q.reject(message);
+		}).then(function(json) {
+			self.hasAvatar = true;
+			deferred.resolve();
+		}, function(message) {
+			self.hasAvatar = false;
+			deferred.resolve();
+		});
 
 		return deferred.promise;
 	};
 
-	/**
-	 * Promises, used in the resolve to fetch data
-	 */
+	o.updatePassword = function(oldPassword, newPassword)
+	{
+		var deferred = $q.defer();
 
-	o.initPromise = function(account){
-		// Enable loading animation
-		o.loading = true;
+		var passwords = {
+			oldPassword: oldPassword,
+			newPassword: newPassword
+		};
 
-		return o.fetchInfo(account)
-			.then(function(res){
-				o.setInfo(res);
+		return $http.post(serverConfig.apiUrl(this.username), passwords);
+	};
 
-				// Disable loading animation
-				o.loading = false;
-			});
+	o.updateUser = function()
+	{
+		var user = {
+			email: this.email,
+			firstName: this.firstName,
+			lastName: this.lastName
+		};
+
+		return $http.post(serverConfig.apiUrl(this.username), user);
 	};
 
 	return o;
 }])
-.controller('DashboardCtrl', ['$scope', 'account', 'userData', '$state', 'serverConfig', '$http', function($scope, account, userData, $state, serverConfig, $http){
+.controller('DashboardCtrl', ['$scope', 'account', 'userData', '$state', function($scope, account, userData, $state){
 	$scope.account = account;
-	$scope.view = "dashboard";
+	$scope.defaultView = "projects";
+	$scope.view = $scope.defaultView;
 	$scope.userData = userData;
 
 	$scope.setView = function(view){
@@ -1042,47 +1058,85 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 		return $scope.view == view;
 	}
 
-	$scope.avatarURL = serverConfig.apiUrl($scope.account + '.jpg');
-	$scope.hasAvatar = false;
+	$scope.passwords = {};
+	$scope.passwords.updateUserError = "";
+	$scope.passwords.changePasswordError = "";
 
-	$http.get($scope.avatarURL)
-	.success(function() {
-		$scope.hasAvatar = true;
-	}).error(function() {
-		$scope.hasAvatar = false;
-	});
+	$scope.errors = {};
+	$scope.errors.oldPassword = "";
+	$scope.errors.newPassword = "";
+
+	$scope.updateUser = function() {
+		$scope.userData.updateUser()
+		.success(function(data, status) {
+			$scope.setView($scope.defaultView);
+		}).error(function(message, status) {
+			$scope.errors.updateUserError = "[" + message.message + "]";
+		});
+	};
+
+	$scope.changePassword = function() {
+		$scope.userData.updatePassword($scope.passwords.oldPassword, $scope.passwords.newPassword)
+		.success(function(data, status) {
+			$scope.setView($scope.defaultView);
+		}).error(function(message, status) {
+			$scope.errors.changePasswordError = "[" + message.message + "]";
+		});
+	};
 }])
 .controller('SplashCtrl', ['$scope', function($scope) {
 }])
-.controller('SignUpCtrl', ['$scope', 'serverConfig', function($scope, serverConfig) {
+.controller('SignUpCtrl', ['$scope', 'serverConfig', '$http', '$state', 'Auth', function($scope, serverConfig, $http, $state, Auth) {
 	$scope.username = "";
-	$scope.firstname = "";
-	$scope.lastname = "";
 	$scope.password = "";
-	$scope.retype = "";
 	$scope.email = "";
 	$scope.valid = false;
 	$scope.popoverText = "";
+	$scope.signupError = "";
 
 	$scope.signupSubmit = function() {
+		if (!$scope.valid)
+		{
+			$scope.signupError = "[Username already taken]";
+		} else {
+			var user = {
+				username: $scope.username,
+				email: $scope.email,
+				password: $scope.password
+			};
 
+			$http.post(serverConfig.apiUrl($scope.username), user).
+				success(function(json, status) {
+					Auth.login($scope.username, $scope.password).then( function() {
+						$state.go('home', {account: $scope.username});
+					}, function() {
+						$scope.signupError = "[Error re-logging in]";
+					});
+				}).error(function(message, status) {
+					$scope.signupError = "[" + message.message + "]";
+				});
+		}
 	};
 
 	$scope.checkUsername = function() {
-		setTimeout(function() {
-			$http.head(serverConfig.apiUrl($scope.username + '.json')).
-				success(function(json, status) {
-					if (status === 404)
-					{
-						$scope.valid = true;
-						$scope.popoverText = "";
-					} else {
-						$scope.valid = false;
-						$scope.popoverText = "Username already taken";
-					}
-				});
-		},10);
+		$http.head(serverConfig.apiUrl($scope.username + '.json')).
+			success(function(json, status) {
+				$scope.valid = false;
+				$scope.popoverText = "[Username already taken]";
+			}).error(function(json, status) {
+				if (status === 404)
+				{
+					$scope.valid = true;
+					$scope.popoverText = "";
+				}
+			});
 	};
+
+	Auth.isLoggedIn().then( function (result) {
+		if(result)
+			$state.go('home', {account: Auth.username});
+	});
+
 }]);
 
 

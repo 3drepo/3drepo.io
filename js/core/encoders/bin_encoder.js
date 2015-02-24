@@ -75,12 +75,15 @@ function render(dbInterface, dbName, project, uuid, type, res, callback) {
 // Set up REST routing calls
 exports.route = function(router)
 {
-    router.get('bin', '/:account/:project/:uid', function(res, params) {
-		var type = params.query.type;
+    router.get('bin', '/:account/:project/:uid', function(res, params, err_callback) {
+	var type = params.query.type;
 
         render(router.dbInterface, params.account, params.project, params.uid, type, res, function(res)
         {
-            if(err) throw err;
+		if(err.value)
+			err_callback(err);
+		else
+			res.json(res);
         });
     });
 };

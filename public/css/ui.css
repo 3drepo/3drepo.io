@@ -1024,3 +1024,13 @@ img.loading{
 	background-color: lightgreen;
 }
 
+.formStyle {
+	border-style: solid;
+	border-width: 1px;
+	border-color: #DDD;
+}
+
+.errorMessage {
+	color: lightcoral;
+}
+

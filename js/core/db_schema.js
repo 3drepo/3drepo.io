@@ -38,7 +38,8 @@ module.exports = function() {
 	};
 
 	this.registerSchema('/login',
-		{	"username": {"type" : "string"},
+		{	
+			"username": {"type" : "string"},
 			"password": {"type" : "string"}
 		}
 	);
@@ -46,10 +47,10 @@ module.exports = function() {
 	this.registerSchema('/logout', {} );
 
 	this.registerSchema('/:account',
-		{	"username":  {"type": "string"},
-			"firstName": {"type": "string"},
-			"lastName":  {"type": "string"},
-			"email":     {"type": "string"}
+		{	
+			"username":  {"type": "string"},
+			"email":     {"type": "string"},
+			"password":  {"type": "string"}
 		}
 	);
 

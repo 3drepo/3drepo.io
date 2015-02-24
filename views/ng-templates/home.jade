@@ -15,30 +15,20 @@
 					// Menu
 					.col-md-12.tight
 						.project-menu
-							.project-menu-section(ng-class="{'project-menu-section-selected': isView('dashboard')}")
-								div.tight
+							.project-menu-section(ng-class="{'project-menu-section-selected': isView('projects')}")
+								a.tight(href='', ng-click="setView('projects')")
 									h3
 										i.fa.fa-home.menu-icon
-										|  Dashboard
-							.project-menu-section(ng-class="{'project-menu-section-selected': isView('projects')}")
-								div.tight
-									h3
-										i.fa.fa-cube.menu-icon
 										|  Projects
-							.project-menu-section(ng-class="{'project-menu-section-selected': isView('discover')}")
-								div.tight
-									h3
-										i.fa.fa-cloud.menu-icon
-										|  Discover
 							.project-menu-section(ng-class="{'project-menu-section-selected': isView('settings')}")
-								div.tight
+								a.tight(href='', ng-click="setView('settings')")
 									h3
 										i.fa.fa-gear.menu-icon
 										|  Settings
 				// Main content
 				.col-md-8.tight
 					// Dashboard
-					div(ng-show="view=='dashboard'")
+					div(ng-show="view=='projects'")
 						.col-xs-12.tight.gutter-right
 							.block
 								.col-xs-12.block-header
@@ -96,7 +86,7 @@
 											span.commit-by by 
 											span.commit-author Frederic
 					// Projects
-					div(ng-if="view=='projects'")
+					//div(ng-if="view=='projects'")
 						.col-md-12.tight(ng-repeat='project in userData.projects')
 							.block
 								.col-sm-12.block-header
@@ -107,7 +97,7 @@
 								.clearfix
 								.placeholder-screenshot
 					// Discover
-					div(ng-if="view=='discover'")
+					//div(ng-if="view=='discover'")
 						.col-md-12.tight
 							.block
 								.col-sm-12.block-header
@@ -137,29 +127,40 @@
 								.placeholder-screenshot
 					// Settings
 					div(ng-if="view=='settings'")
-						.block
-							.col-sm-12.margined.block-header
-								h3 Profile
-							form.standardform(role='form')
-								.form-group
-									.col-sm-6.margined
-										label(for='project-name') Name
-										input#project-name.form-control(type='email', value='Frederic Besse')
-									.col-sm-6.margined
-										label(for='project-name') Nickname
-										input#project-name.form-control(type='email', value='fbesse')
-									.col-sm-6.margined
-										label(for='project-name') Old password
-										input#project-name.form-control(type='email')
-									.clearfix
-									.col-sm-6.margined
-										label(for='project-name') New password
-										input#project-name.form-control(type='email')
-									.clearfix
-									.col-sm-6.margined
-										label(for='project-name') Confirm new password
-										input#project-name.form-control(type='email')
-									.clearfix
-									.col-sm-6.margined
-										button.btn.btn-success(type='submit') Update
+						.col-xs-12.tight.gutter-right
+							.block
+								.col-xs-12.block-header.margined
+									h3 Profile
+										span.errorMessage {{errors.updateUserError}}
+								form.standardform(role='form')
+									.form-group
+										.col-xs-12.margined
+											label(for='settings-username') Username
+											input#settings-username.form-control(ng-model='userData.username', type='text', disabled)
+										.col-xs-6.margined
+											label(for='settings-firstname') First Name
+											input#settings-firstname.form-control(ng-model='userData.firstName', type='text')
+										.col-xs-6.margined
+											label(for='settings-lastname') Last Name
+											input#settings-lastname.form-control(ng-model='userData.lastName', type='text')
+										.col-xs-12.margined
+											label(for='settings-email') Email Address
+											input#settings-email.form-control(ng-model='userData.email', type='email')
+										.col-xs-3.margined
+											button.btn.btn-success(ng-click="updateUser()") Update
+						.col-xs-12.tight.gutter-right
+							.block
+								.col-xs-12.block-header.margined
+									h3 Change Password
+										span.errorMessage {{errors.changePasswordError}}
+								form.standardform(role='form')
+									.form-group
+										.col-xs-12.margined
+											label(for='settings-email') Old Password
+											input#settings-old-password.form-control(ng-model='passwords.oldPassword', type='password')
+										.col-xs-12.margined
+											label(for='settings-email') New Password
+											input#settings-new-password.form-control(ng-model='passwords.newPassword', type='password')
+										.col-xs-3.margined
+											button.btn.btn-success(ng-click="changePassword()") Change Password
 

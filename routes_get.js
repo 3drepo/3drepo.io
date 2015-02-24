@@ -20,6 +20,8 @@ var log_iface = require('./js/core/logger.js');
 var logger = log_iface.logger;
 var imgEncoder = require('./js/core/encoders/img_encoder.js');
 
+var responseCodes = require('./js/core/response_codes.js');
+
 /***************************************************************************
 *  @file Contains the GET routes
 ****************************************************************************/
@@ -27,7 +29,7 @@ var imgEncoder = require('./js/core/encoders/img_encoder.js');
 module.exports = function(router, dbInterface, checkAccess){
 	// Checks whether or not the user is logged in.
 	router.get('/login', checkAccess, function(req, res) {
-		res.json({username: req.session.user.username});
+		responseCodes.respond("/login GET", responseCodes.OK, res, {username: req.session.user.username});
 	});
 
 	// Account information
@@ -42,48 +44,50 @@ module.exports = function(router, dbInterface, checkAccess){
 	});
 
 	router.get('/wayfinder.:format?', function(req, res) {
+		var resCode = responseCodes.OK;
+		var responsePlace = "/wayfinder GET";
+
 		if (!("user" in req.session)) {
-			res.sendStatus(401);
+			responseCodes.respond(responsePlace, responseCodes.USERNAME_NOT_SPECIFIED, res, {});
 		} else {
 			this.dbInterface.getWayfinderInfo(config.wayfinder.democompany, config.wayfinder.demoproject, null, function(err, docs) {
-				if (err) throw err;
-
-				res.json(docs);
+				responseCodes.onError(responsePlace, err, res, docs);
 			});
 		}
 	});
 
 	router.get('/wayfinder/record.:format?', function(req, res) {
+		var resCode = responseCodes.OK;
+		var responsePlace = "/wayfinder/record GET";
+
 		if (!("user" in req.session)) {
-			res.sendStatus(401);
+			responseCodes.respond(responsePlace, responseCodes.USERNAME_NOT_SPECIFIED, res, {});
 		} else {
 			var uids = JSON.parse(req.query.uid);
 
 			this.dbInterface.getWayfinderInfo(config.wayfinder.democompany, config.wayfinder.demoproject, uids, function(err, docs) {
-				if (err) throw err;
-
-				res.json(docs);
+				responseCodes.onError(responsePlace, err, res, docs);
 			});
 		}
 	});
 
 	// Account information
 	router.get('/:account.:format?.:subformat?', function(req, res, next) {
-		if (!("user" in req.session)) {
-			res.sendStatus(401);
-		} else if (req.session.user.username != req.params["account"]) {
-			res.sendStatus(401);
-		} else {
-			var format = req.params["format"];
+		if (!req.session.user)
+			getPublic = false;
+		else
+			getPublic = (req.session.user.username != req.params["account"]);
 
-			var params = {
-				subformat: req.params["subformat"],
-				account: req.params["account"],
-				query: req.query
-			};
+		var format = req.params["format"];
 
-			this.transRouter(format, '/:account', res, params);
-		}
+		var params = {
+			subformat:	req.params["subformat"],
+			account:	req.params["account"],
+			getPublic:	getPublic,
+			query:		req.query
+		};
+
+		this.transRouter(format, '/:account', res, params);
 	});
 
 	// Project information
@@ -398,36 +402,55 @@ module.exports = function(router, dbInterface, checkAccess){
 		if (!format)
 			format = this.defaultFormat;
 
+		var responsePlace = regex + "." + format;
+
 		if(imgEncoder.isImage(format))
 		{
 				// If there is no error then we have access
 				if (!(format in this.getMap)) {
-					res.sendStatus(415);
+					responseCodes.respond(responsePlace, responseCodes.FORMAT_NOT_SUPPORTED, res, {params: params});
 				} else if (!(regex in this.getMap[format])) {
-					res.sendStatus(501);
+					responseCodes.respond(responsePlace, responseCodes.FUNCTION_NOT_SUPPORTED, res, {params: params});
 				} else {
-					this.getMap[format][regex](res, params);
+					this.getMap[format][regex](res, params, function(err, data) {
+						responseCodes.onError(responsePlace, err, res, data, {params: params});
+					});
 				}
 		} else {
 			if (account && project) {
 				dbInterface.hasAccessToProject(params.user, account, project, function(err)
 				{
-					if(err)
-						return res.sendStatus(401);
-
-					// If there is no error then we have access
-					if (!(format in this.getMap)) {
-						res.sendStatus(415);
-					} else if (!(regex in this.getMap[format])) {
-						res.sendStatus(501);
-					} else {
-						this.getMap[format][regex](res, params);
+					if(err.value)
+						responseCodes.respond(responsePlace, err, res, {params: params});
+					else {
+						// If there is no error then we have access
+						if (!(format in this.getMap)) {
+							responseCodes.respond(responsePlace, responseCodes.FORMAT_NOT_SUPPORTED, res, {params: params});
+						} else if (!(regex in this.getMap[format])) {
+							responseCodes.respond(responsePlace, responseCodes.FUNCTION_NOT_SUPPORTED, res, {params: params});
+						} else {
+							this.getMap[format][regex](res, params, function(err, data) {
+								responseCodes.onError(responsePlace, err, res, data, {params: params});
+							});
+						}
 					}
 				});
 			} else {
-				this.getMap[format][regex](res,params);
+				// If there is no error then we have access
+				if (!(format in this.getMap)) {
+					responseCodes.respond(responsePlace, responseCodes.FORMAT_NOT_SUPPORTED, res, {params: params});
+				} else if (!(regex in this.getMap[format])) {
+					responseCodes.respond(responsePlace, responseCodes.FUNCTION_NOT_SUPPORTED, res, {params: params});
+				} else {
+					this.getMap[format][regex](res, params, function(err, data) {
+						responseCodes.onError(responsePlace, err, res, data, {params: params});
+					});
+				}
 			}
 		}
+
+		logger.log('debug',"--COMPLETE-- ACCOUNT: " + account + " PROJECT: " + project + " REGEX: " + regex + " [" + format + "]");
+
 	}
 
 	this.defaultFormat = config.defaultFormat ? config.defaultFormat : "html";

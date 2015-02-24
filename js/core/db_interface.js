@@ -24,6 +24,8 @@ var log_iface = require('./logger.js');
 var logger = log_iface.logger;
 var ObjectID = require('mongodb').ObjectID;
 
+var responseCodes = require('./response_codes.js');
+
 function stringToUUID(id) {
 	var bytes = uuid.parse(id);
 	var buf = new Buffer(bytes);
@@ -47,24 +49,25 @@ var masterUUID = stringToUUID("00000000-0000-0000-0000-000000000000");
 exports.authenticate = function(username, password, callback) {
 	dbConn.authenticateUser(username, password, function(err)
 	{
-		if(err)
-			return callback(new Error("Authentication Error"));
+		if(err.value)
+			return callback(responseCodes.AUTH_ERROR);
 
-		callback(null, {username: username});
+		callback(responseCodes.OK, {username: username});
 	});
 };
 
 
 exports.createUser = function(username, password, email, callback) {
 	dbConn.dbCallback('admin', function(err, db) {
-		if (err) return callback(err);
+		if (err.value) return callback(err);
 
 		db.addUser(username, password, function(err, result)
 		{
-			if(err) return callback(err);
+			// TODO: Should move this to db.js
+			if (err) return callback(responseCodes.DB_ERROR(err));
 
 			dbConn.collCallback('admin', 'system.users', function(err, coll) {
-				if(err) return callback(err);
+				if(err.value) return callback(err);
 
 				var selector = { user : username };
 
@@ -73,59 +76,85 @@ exports.createUser = function(username, password, email, callback) {
 				};
 
 				coll.update(selector, updateJSON, function(err, doc) {
-					if (err) return callback(err);
-
-
+					if (err)
+						callback(responseCodes.DB_ERROR(err));
+					else
+						callback(responseCodes.OK);
 				});
 			});
-		});
-
-		var user = {
-			user: username,
-			pwd:  password,
-			customData: {
-				email: email
-			},
-			roles: []
-		};
-
-		db.admin().listDatabases(function(err, dbs) {
-			if (err) return callback(err);
-
-			var dbList = [];
-
-			for (var i in dbs.databases)
-				dbList.push({ name: dbs.databases[i].name});
-
-			dbList.sort();
-
-			callback(null, dbList);
 		});
 	});
 };
 
-exports.updateUser = function(username, password, email, callback) {
+exports.updateUser = function(username, data, callback) {
 	dbConn.dbCallback('admin', function(err, db) {
-		if (err) return callback(err);
+		if (err.value)
+			return callback(err);
 
-		this.getUserInfo(username, function(err, user) {
-			var oldCustomData = user;
+		exports.getUserInfo(username, false, function(err, oldCustomData) {
+			if(err.value)
+				return callback(err);
 
-			user["email"] = email;
+			var user = { "updateUser" : username };
+			var newCustomData = oldCustomData;
 
-			var userInfo = {
-				user: username,
-				pwd:  password,
-				customData: {
-					email: email
-				},
-				roles: []
-			};
+			if(data.email)
+				newCustomData.email = data.email;
 
-			db.updateUser(
-				username,
-				userInfo
-			);
+			if(data.firstName)
+				newCustomData.firstName = data.firstName;
+
+			if(data.lastName)
+				newCustomData.lastName = data.lastName;
+
+			user.customData = newCustomData;
+
+			db.command( user, function(err, result) {
+				// TODO: Should move this to db.js
+				if (err)
+					callback(responseCodes.DB_ERROR(err));
+				else
+					callback(responseCodes.OK);
+			});
+		});
+	});
+};
+
+exports.updatePassword = function(username, passwords, callback) {
+	var oldPassword = passwords.oldPassword;
+	var newPassword = passwords.newPassword;
+
+	if(!(oldPassword && newPassword))
+	{
+		return callback(responseCodes.INVALID_INPUTS_TO_PASSWORD_UPDATE);
+	}
+
+	this.authenticate(username, oldPassword, function(err) {
+		console.log('AUTHENTICATING: ASDASDASDASD');
+
+		if(err.value)
+			return callback(err);
+
+		dbConn.dbCallback('admin', function(err, db) {
+			if (err.value)
+				return callback(err);
+
+			exports.getUserInfo(username, false, function(err, oldCustomData) {
+				if(err.value)
+					return callback(err);
+
+				var user = { "updateUser" : username };
+				user.pwd = newPassword;
+				user.customData = oldCustomData;
+
+				db.command(user, function(err, result) {
+					// TODO: Should move this to db.js
+					if(err)
+						callback(responseCodes.DB_ERROR(err));
+					else
+						callback(responseCodes.OK);
+				});
+			});
 		});
 	});
 };
@@ -144,7 +173,7 @@ exports.getWayfinderInfo = function(dbName, project, uniqueIDs, callback) {
 		dbConn.filterColl(dbName, project + ".wayfinder", filter, {}, function(err, docs) {
 			if (err) return callback(err);
 
-			return callback(null, docs);
+			callback(responseCodes.OK, docs);
 		});
 	} else {
 		logger.log('debug', 'Getting list of all waypoint recordings');
@@ -156,9 +185,9 @@ exports.getWayfinderInfo = function(dbName, project, uniqueIDs, callback) {
 		};
 
 		dbConn.filterColl(dbName, project + ".wayfinder", {}, projection, function(err, docs) {
-			if(err) return callback(err);
+			if(err.value) return callback(err);
 
-			return callback(null, docs);
+			callback(responseCodes.OK, docs);
 		});
 	}
 };
@@ -181,13 +210,16 @@ exports.storeWayfinderInfo = function(dbName, project, username, sessionID, data
 			if (err) callback(err);
 
 			logger.log('debug', 'Updated ' + count + ' records.');
-			callback(null);
+			callback(responseCodes.OK);
 		});
 	});
 };
 
 exports.getUserDBList = function(username, callback) {
-	if (!username) return callback(new Error("Username is not defined"), null);
+	var resCode = responseCodes.OK;
+
+	if (!username)
+		return callback(responseCodes.USERNAME_NOT_SPECIFIED);
 
 	logger.log('debug', 'Getting database list for ' + username);
 
@@ -195,20 +227,20 @@ exports.getUserDBList = function(username, callback) {
 		user: username
 	};
 
-	this.getUserInfo(username, function(err, user) {
-		if(err) return callback(err);
+	this.getUserInfo(username, false, function(err, user) {
+		if(err.value)
+			return callback(err);
 
-		callback(null, user["projects"].map(
-				function(proj){
-					return proj;
-				}
-			)
-		);
+		if(!user)
+			return callback(responseCodes.USER_NOT_FOUND);
+
+		callback(responseCodes.OK, user["projects"]);
 	});
 };
 
-exports.getUserInfo = function(username, callback) {
-	if(!username) return callback(new Error("Unspecified username"));
+exports.getUserInfo = function(username, getPublic, callback) {
+	if(!username)
+		return callback(responseCodes.USERNAME_NOT_SPECIFIED);
 
 	logger.log('debug', 'Getting user info for ' + username);
 
@@ -220,23 +252,30 @@ exports.getUserInfo = function(username, callback) {
 		customData : 1,
 		"customData.firstName" : 1,
 		"customData.lastName" : 1,
-		"customData.email" : 1,
-		"customData.projects" : 1
+		"customData.email" : 1
 	};
 
+	// Private user information goes here
+	if(!getPublic)
+		projection["customData.projects"] = 1;
+
 	dbConn.filterColl("admin", "system.users", filter, projection, function(err, coll) {
-		if(err) return callback(err);
+		if(err.value) return callback(err);
 
 		if (coll[0])
-			callback(null, coll[0]["customData"]);
+		{
+			var user = coll[0]["customData"];
+
+			callback(responseCodes.OK, user);
+		}
 		else
-			callback(null, null);
-		//new Error("User not found"), null);
+			callback(responseCodes.USER_NOT_FOUND, null);
 	});
 };
 
 exports.getAvatar = function(username, callback) {
-	if(!username) return callback(new Error(""));
+	if(!username)
+		return callback(responseCodes.USER_NOT_SPECIFIED);
 
 	logger.log('debug', 'Getting user avatar for ' + username);
 
@@ -249,24 +288,27 @@ exports.getAvatar = function(username, callback) {
 	};
 
 	dbConn.filterColl("admin", "system.users", filter, projection, function(err, coll) {
-		if(err) return callback(err);
+		if(err.value)
+			return callback(err);
 
 		if (coll[0])
-			callback(null, coll[0]["customData"]["avatar"]);
+			callback(responseCodes.OK, coll[0]["customData"]["avatar"]);
 		else
-			callback(null, null);
+			callback(responseCodes.USER_NOT_FOUND, null);
 	});
 };
 
 exports.getProjectInfo = function(account, project, callback) {
-	if(!project) return callback(new Error("Unspecified project"));
+	if(!project)
+		return callback(responseCodes.PROJECT_NOT_SPECIFIED);
 
 	logger.log('debug', 'Getting project info for ' + account + '/' + project);
 
 	dbConn.filterColl(account, project + ".info", {}, {}, function(err, coll) {
-		if(err) return callback(err);
+		if(err.value)
+			return callback(err);
 
-		var res = {
+		var projectInfo = {
 			owner:			coll[0]["owner"],
 			desc:			coll[0]["desc"],
 			type:			coll[0]["type"],
@@ -274,26 +316,28 @@ exports.getProjectInfo = function(account, project, callback) {
 			write_access:	coll[0]["rw"]
 		};
 
-		callback(null, res);
+		callback(responseCodes.OK, projectInfo);
 	});
 };
 
 exports.getProjectUsers = function(account, project, callback) {
-	if(!project) return callback(new Error("Unspecified project"));
+	if(!project)
+		return callback(responseCodes.PROJECT_NOT_SPECIFIED);
 
 	logger.log('debug', 'Getting project info for ' + account + '/' + project);
 
 	dbConn.filterColl(account, project + ".users", {}, {}, function(err, coll) {
-		if(err) return callback(err);
+		if(err.value)
+			return callback(err);
 
-		var res = coll.map( function (user) {
+		var projectUsers = coll.map( function (user) {
 			return {
 				name: user.user,
 				role: user.role
 			};
 		});
 
-		callback(null, res);
+		callback(responseCodes.OK, projectUsers);
 	});
 };
 
@@ -302,13 +346,14 @@ exports.isPublicProject = function(account, project, callback)
 	logger.log('debug', 'Checking whether ' + account + '/' + project + ' is a public project.');
 
 	this.getProjectInfo(account, project, function (err, proj) {
-		if(err) return callback(err);
+		if(err.value)
+			return callback(err);
 
 		if (proj["read_access"].toLowerCase() == "public")
 		{
-			callback(null);
+			callback(responseCodes.OK);
 		} else {
-			callback(new Error("Not a public project"));
+			callback(responseCodes.PROJECT_NOT_PUBLIC);
 		}
 	});
 };
@@ -317,28 +362,30 @@ exports.hasAccessToProject = function(username, account, project, callback) {
 	if (project == null)
 	{
 		logger.log('debug', 'Project name not specified');
-		return callback(new Error('Project name not specified'));
+
+		return callback(responseCodes.PROJECT_NOT_SPECIFIED);
 	}
 
 	logger.log('debug', 'Checking access to ' + account + '/' + project + ' for ' + username);
 
 	this.isPublicProject(account, project, function(err) {
-		if(err)
+		if(err.value)
 		{
 			this.dbInterface.getUserDBList(username, function(err, dbList) {
-				if(err) return callback(err);
+				if(err.value)
+					return callback(err);
 
 				var dbListStr = dbList.map (function (db) {
 					return db["account"] + "." + db["project"];
 				});
 
 				if (dbListStr.indexOf(account + "." + project) > -1)
-					callback(null);
+					callback(responseCodes.OK);
 				else
-					callback(new Error("Not Authorized to access database"));
+					callback(responseCodes.NOT_AUTHORIZED);
 			});
 		} else {
-			callback(null);
+			callback(responseCodes.OK);
 		}
 	});
 };
@@ -347,10 +394,12 @@ exports.getDBList = function(callback) {
 	logger.log('debug', 'Getting list of databases');
 
 	dbConn.dbCallback('admin', function(err, db) {
-		if (err) return callback(err);
+		if (err)
+			return callback(err);
 
 		db.admin().listDatabases(function(err, dbs) {
-			if (err) return callback(err);
+			if (err)
+				return callback(err);
 
 			var dbList = [];
 
@@ -359,7 +408,7 @@ exports.getDBList = function(callback) {
 
 			dbList.sort();
 
-			callback(null, dbList);
+			callback(responseCodes.OK, dbList);
 		});
 	});
 };
@@ -373,7 +422,7 @@ exports.getChildren = function(dbName, project, uuid, callback) {
 	dbConn.filterColl(dbName, project + '.scene', filter, null, function(err, doc) {
 		if (err) return callback(err);
 
-		callback(null, doc);
+		callback(responseCodes.OK, doc);
 	});
 };
 
@@ -390,12 +439,14 @@ exports.getHeadOf = function(dbName, project, branch, getFunc, callback) {
 	var self = this;
 
 	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, doc) {
-		if (err) return callback(err);
+		if (err)
+			return callback(responseCodes.OK);
 
 		getFunc(dbName, project, uuidToString(doc[0]["_id"]), function(err, doc) {
-			if(err) return callback(err);
+			if(err.value)
+				return callback(err);
 
-			callback(null, doc);
+			callback(responseCodes.OK, doc);
 		});
 	});
 };
@@ -406,7 +457,8 @@ exports.getRevisionInfo = function(dbName, project, rid, callback) {
 	};
 
 	dbConn.filterColl(dbName, project + '.history', filter, null, function(err, doc) {
-		if (err) return callback(err);
+		if (err)
+			return callback(err);
 
 		doc = doc[0];
 
@@ -427,7 +479,7 @@ exports.getRevisionInfo = function(dbName, project, rid, callback) {
 			rev.timestamp = "Unknown";
 		}
 
-		callback(null, rev);
+		callback(responseCodes.OK, rev);
 	});
 };
 
@@ -445,12 +497,13 @@ exports.getReadme = function(dbName, project, rid, callback) {
 		};
 
 		dbConn.filterColl(dbName, project + '.scene', query, null, function(err, readme) {
-			if(err) return callback(err);
+			if(err.value)
+				return callback(err);
 
 			if (!readme.length)
-				callback(null, {readme: "Readme Missing"});
+				callback(responseCodes.OK, {readme: "Readme Missing"});
 			else
-				callback(null, {readme : readme[0]["metadata"]["text"]});
+				callback(responseCodes.OK, {readme : readme[0]["metadata"]["text"]});
 		});
 	});
 };
@@ -485,7 +538,8 @@ exports.getRevisions = function(dbName, project, branch, from, to, full, callbac
 	}
 
 	dbConn.filterColl(dbName, project + '.history', filter, projection, function(err, doc) {
-		if (err) return callback(err);
+		if (err)
+			return callback(err);
 
 		var revisionList = [];
 
@@ -506,7 +560,7 @@ exports.getRevisions = function(dbName, project, branch, from, to, full, callbac
 			revisionList.push(rev);
 		}
 
-		callback(null, revisionList);
+		callback(responseCodes.OK, revisionList);
 	});
 };
 
@@ -520,7 +574,8 @@ exports.getBranches = function(dbName, project, callback) {
 	};
 
 	dbConn.filterColl(dbName, project + '.history', filter, projection, function(err, doc) {
-			if (err) return callback(err);
+			if (err)
+				return callback(err);
 
 			var branchList = [];
 
@@ -532,7 +587,7 @@ exports.getBranches = function(dbName, project, callback) {
 					branchList.push({ name: uuidToString(doc[i].shared_id)});
 			}
 
-			callback(null, branchList);
+			callback(responseCodes.OK, branchList);
 	});
 
 };
@@ -553,7 +608,7 @@ exports.getMetadata = function(dbName, project, uuid, callback) {
 	};
 
 	dbConn.filterColl(dbName, project + '.scene', filter, projection, function(err, doc) {
-		callback(null, doc);
+		callback(reponseCodes.OK, doc);
 	});
 };
 
@@ -567,9 +622,10 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 		};
 
 		dbConn.filterColl(dbName, project + '.scene', query, null, function(err,doc) {
-			if(err) return callback(err);
+			if(err.value)
+				return callback(err);
 
-			callback(null, doc[0]["type"], uid, repoGraphScene.decode(doc))
+			callback(responseCodes.OK, doc[0]["type"], uid, repoGraphScene.decode(doc))
 		});
 
 	} else if (rid && sid) {
@@ -585,14 +641,15 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 			};
 
 			dbConn.filterColl(dbName, project + '.scene', query, null, function(err, obj) {
-				if (err) return callback(err);
+				if (err)
+					return callback(err);
 
-				callback(null, obj[0]["type"], this.stringToUUID(obj[0]["_id"]), repoGraphScene.decode(obj));
+				callback(responseCodes.OK, obj[0]["type"], this.stringToUUID(obj[0]["_id"]), repoGraphScene.decode(obj));
 			});
 
 		});
 	} else {
-		return callback(new Error("Not enough information specified"), null, null);
+		return callback(responseCodes.RID_SID_OR_UID_NOT_SPECIFIED, null, null);
 	}
 }
 
@@ -608,7 +665,7 @@ exports.getScene = function(dbName, project, revision, callback) {
 
 	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
 	{
-		if(err) return callback(err);
+		if(err.value) return callback(err);
 
 		var projection = {
 			vertices: 0,
@@ -625,7 +682,7 @@ exports.getScene = function(dbName, project, revision, callback) {
 		dbConn.filterColl(dbName, project + '.scene', query, projection, function(err, coll) {
 			if (err) return callback(err);
 
-			callback(null, repoGraphScene.decode(coll));
+			callback(responseCodes.OK, repoGraphScene.decode(coll));
 		});
 	});
 
@@ -650,7 +707,7 @@ exports.getCache = function(project, uid, getData, level, callback) {
 	dbConn.filterColl(project, "repo.cache", filter, projection, function(err, coll) {
 		if (err) return callback(err);
 
-		callback(null, coll);
+		callback(responseCodes.OK, coll);
 	});
 
 };

@@ -17,6 +17,7 @@
 
 var child_process = require('child_process');
 var supportedFormats = ['gif', 'jpg', 'jpeg', 'tiff', 'png'];
+var responseCodes = require('../response_codes.js');
 
 module.exports.isImage = function(format)
 {
@@ -57,17 +58,18 @@ module.exports.transcode = function (fromFormat, toFormat, buffer, callback) {
 
 module.exports.route = function(router)
 {
-	var imgObject = function(res, params) {
+	var imgObject = function(res, params, err_callback) {
 		router.dbInterface.getObject(params.account, params.project, params.uid, null, null, function(err, type, uid, obj)
 		{
-			if(err) throw err;
+			if(err.value)
+				return err_callback(err);
 
 			if (type == "texture")
 			{
 			  res.write(obj.textures[uid].data.buffer);
 			  res.end();
 			} else {
-				throw new Error("Type of object not supported");
+				err_callback(responseCodes.OBJECT_TYPE_NOT_SUPPORTED);
 			}
 		});
 	};
@@ -78,27 +80,21 @@ module.exports.route = function(router)
 	router.get('gif', '/:account/:project/:uid', imgObject);
 
 	// Get Avatar image
-	router.get('jpg', '/:account', function(res, params) {
+	router.get('jpg', '/:account', function(res, params, err_callback) {
 		router.dbInterface.getAvatar(params.account, function(err, avatar) {
-			if (err)
-				return res.sendStatus(500);
+			if (err.value)
+				return err_callback(err);
 
 			if(!avatar)
-				return res.sendStatus(404); // User does not have avatar
+				return err_callback(responseCodes.USER_DOES_NOT_HAVE_AVATAR);
 
 			var imageTokens = avatar.media_type.split(/\//);
 
 			if (!(imageTokens[0] == 'image'))
-			{
-				logger.log('error', 'Avatar is not an image.');
-				res.sendStatus(500);
-			}
+				return err_callback(responseCodes.AVATAR_IS_NOT_AN_IMAGE);
 
 			if (!(imageTokens[1]) == 'jpeg')
-			{
-				logger.log('error', 'Avatar is not a JPEG');
-				res.sendStatus(500);
-			}
+				return err_callback(responseCodes.AVATAR_IS_NOT_A_JPEG);
 
 			res.write(avatar.data.buffer);
 			res.end();

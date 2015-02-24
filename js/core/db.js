@@ -25,6 +25,8 @@ var logIFace  = require('./logger.js');
 var logger	  = logIFace.logger;
 onError		  = logIFace.onError;
 
+var responseCodes = require('./response_codes.js');
+
 // Main DB Object constructor
 function MongoDB() {
 	this.host	  = config.db.host;
@@ -59,7 +61,7 @@ MongoDB.prototype.authenticateUser = function(username, password, callback) {
 
 		// TODO: Merge with code below
 		db.open(function(err, dbConn) {
-			if (err) return callback(err);
+			if (err) return callback(responseCodes.DB_ERROR(err));
 
 			self.userAuth = dbConn;
 
@@ -75,9 +77,9 @@ MongoDB.prototype.authenticateUser = function(username, password, callback) {
 
 		self.userAuth.authenticate(username, password, function(err) {
 			if(err)
-				return callback(err);
+				return callback(responseCodes.DB_ERROR(err));
 
-			callback(null);
+			callback(responseCodes.OK);
 		});
 	}
 };
@@ -96,7 +98,7 @@ MongoDB.prototype.dbCallback = function(dbName, callback) {
 	// If we already have a connection, return that rather than
 	// opening a new connection
 	if (self.dbConns[dbName]) {
-		return callback(null, self.dbConns[dbName]);
+		return callback(responseCodes.OK, self.dbConns[dbName]);
 	}
 
 	// Check if there is an open server connection
@@ -117,7 +119,7 @@ MongoDB.prototype.dbCallback = function(dbName, callback) {
 	db.open(function(err, dbConn) {
 		if (err) {
 			logger.log('debug', 'Error connecting to database');
-			return callback(err);
+			return callback(responseCodes.DB_ERROR(err));
 		}
 
 		// Authenticate against the NodeJS database user
@@ -125,7 +127,7 @@ MongoDB.prototype.dbCallback = function(dbName, callback) {
 
 		adminDb.authenticate(config.db.username, config.db.password, function(err) {
 			if (err)
-				return callback(err);
+				return callback(responseCodes.DB_ERROR(err));
 
 			logger.log('debug', 'Authentication successful');
 			logger.log('debug', 'Authorized as ' + config.db.username);
@@ -138,7 +140,7 @@ MongoDB.prototype.dbCallback = function(dbName, callback) {
 				delete(self.dbConns[dbName]);
 			})
 
-			callback(null, dbConn);
+			callback(responseCodes.OK, dbConn);
 		});
 	});
 
@@ -185,15 +187,15 @@ MongoDB.prototype.collCallback = function(dbName, collName, callback) {
 
 	// First get database connection
 	this.dbCallback(dbName, function(err, dbConn) {
-		if (err) return callback(err);
+		if (err.value) return callback(responseCodes.DB_ERROR(err));
 
 		// Get collection from database to act on
 		dbConn.collection(collName, {strict:true}, function(err, coll) {
 			if (err) {
-				return callback(err);
+				return callback(responseCodes.DB_ERROR(err));
 			}
 
-			callback(null, coll);
+			callback(responseCodes.OK, coll);
 		});
 	});
 }
@@ -211,7 +213,7 @@ MongoDB.prototype.getLatest = function(dbName, collName, filter, projection, cal
 	// Run collection callback that first sorts by timestamp
 	// and then gets the top row.
 	this.collCallback(dbName, collName, function(err, coll) {
-		if (err) return callback(err);
+		if (err.value) return callback(err);
 
 		projStr = JSON.stringify(projection);
 		filtStr = JSON.stringify(filter);
@@ -223,17 +225,17 @@ MongoDB.prototype.getLatest = function(dbName, collName, filter, projection, cal
 		if (projection != null)
 		{
 			coll.find(filter, projection).limit(1).sort({timestamp:-1}).toArray(function(err, docs) {
-				if (err) return callback(err);
+				if (err) return callback(responseCodes.DB_ERROR(err));
 				logger.log('debug', 'Found ' + docs.length + ' result(s).');
 
-				callback(null, docs);
+				callback(responseCodes.OK, docs);
 			});
 		} else {
 			coll.find(filter).limit(1).sort({timestamp:-1}).toArray(function(err, docs) {
-				if (err) return callback(err);
+				if (err) return callback(responseCodes.DB_ERROR(err));
 				logger.log('debug', 'Found ' + docs.length + ' result(s).');
 
-				callback(null, docs);
+				callback(responseCode.OK, docs);
 			});
 		}
 	});
@@ -251,7 +253,7 @@ MongoDB.prototype.getLatest = function(dbName, collName, filter, projection, cal
  ******************************************************************************/
 MongoDB.prototype.filterColl = function(dbName, collName, filter, projection, callback) {
 	this.collCallback(dbName, collName, function(err, coll) {
-		if (err) return callback(err);
+		if (err.value) return callback(err);
 
 		projStr = JSON.stringify(projection);
 		filtStr = JSON.stringify(filter);
@@ -262,17 +264,17 @@ MongoDB.prototype.filterColl = function(dbName, collName, filter, projection, ca
 
 		if (projection != null) {
 			coll.find(filter, projection).toArray(function(err, docs) {
-				if (err) return callback(err);
+				if (err) return callback(responseCodes.DB_ERROR(err));
 				logger.log('debug', 'Found ' + docs.length + ' result(s).');
 
-				callback(null, docs);
+				callback(responseCodes.OK, docs);
 			});
 		} else {
 			coll.find(filter).toArray(function(err, docs) {
-				if (err) return callback(err);
+				if (err) return callback(responseCodes.DB_ERROR(err));
 				logger.log('debug', 'Found ' + docs.length + ' result(s).');
 
-				callback(null, docs);
+				callback(responseCodes.OK, docs);
 			});
 		}
 	});
