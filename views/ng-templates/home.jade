@@ -7,11 +7,11 @@
 					// Profile pic and name
 					.col-md-12.tight
 						.profile-pic
-							img#picImg(ng-show="hasAvatar", ng-src='{{avatarURL}}')
-							i.fa.fa-user(ng-show="!hasAvatar")
+							img#picImg(ng-show="Data.UserData.hasAvatar", ng-src='{{Data.UserData.avatarURL}}')
+							i.fa.fa-user(ng-show="!Data.UserData.hasAvatar")
 						.profile-box
-							h1 {{userData.user.firstName}} {{userData.user.lastName}}
-							p {{userData.user.email}}
+							h1 {{Data.UserData.firstName}} {{Data.UserData.lastName}}
+							p {{Data.UserData.email}}
 					// Menu
 					.col-md-12.tight
 						.project-menu
@@ -33,7 +33,7 @@
 							.block
 								.col-xs-12.block-header
 									h3 Accessible Projects
-								.col-xs-12.tight(ng-repeat="project in userData.user.projects")
+								.col-xs-12.tight(ng-repeat="project in Data.UserData.projects")
 									.col-xs-12.project-line
 										i.fa.fa-cube.menu-icon
 										span.commit-number 
@@ -87,7 +87,7 @@
 											span.commit-author Frederic
 					// Projects
 					//div(ng-if="view=='projects'")
-						.col-md-12.tight(ng-repeat='project in userData.projects')
+						.col-md-12.tight(ng-repeat='project in Data.UserData.projects')
 							.block
 								.col-sm-12.block-header
 									h3
@@ -136,16 +136,16 @@
 									.form-group
 										.col-xs-12.margined
 											label(for='settings-username') Username
-											input#settings-username.form-control(ng-model='userData.username', type='text', disabled)
+											input#settings-username.form-control(ng-model='Data.UserData.username', type='text', disabled)
 										.col-xs-6.margined
 											label(for='settings-firstname') First Name
-											input#settings-firstname.form-control(ng-model='userData.firstName', type='text')
+											input#settings-firstname.form-control(ng-model='Data.UserData.firstName', type='text')
 										.col-xs-6.margined
 											label(for='settings-lastname') Last Name
-											input#settings-lastname.form-control(ng-model='userData.lastName', type='text')
+											input#settings-lastname.form-control(ng-model='Data.UserData.lastName', type='text')
 										.col-xs-12.margined
 											label(for='settings-email') Email Address
-											input#settings-email.form-control(ng-model='userData.email', type='email')
+											input#settings-email.form-control(ng-model='Data.UserData.email', type='email')
 										.col-xs-3.margined
 											button.btn.btn-success(ng-click="updateUser()") Update
 						.col-xs-12.tight.gutter-right

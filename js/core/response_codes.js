@@ -50,6 +50,8 @@ var responseCodes = {
 
 	INVALID_INPUTS_TO_PASSWORD_UPDATE: {value: 18, message: "Invalid new or old password", status: 422},
 
+	PROJECT_HISTORY_NOT_FOUND: {value: 19, message: "Project history not found", status: 404},
+
 	DB_ERROR: function(message) {
 		return {
 			value: 1000,
@@ -67,7 +69,7 @@ var responseCodes = {
 	}
 };
 
-var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 1000, 2000];
+var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 1000, 2000];
 
 responseCodes.respond = function(place, resCode, res, extraInfo)
 {
@@ -75,19 +77,31 @@ responseCodes.respond = function(place, resCode, res, extraInfo)
 		throw Error("Unspecified error code [VALUE: " + resCode.value + "]");
 	}
 
-	if (!extraInfo)
-		var responseObject = {};
-	else
-		var responseObject = extraInfo;
+	if (resCode.value) // Prepare error response
+	{
+		if (!extraInfo)
+			var responseObject = {};
+		else
+			var responseObject = extraInfo;
 
-	extraInfo.place   = place;
-	extraInfo.status  = resCode.status;
-	extraInfo.message = resCode.message;
+		responseObject.place   = place;
+		responseObject.status  = resCode.status;
+		responseObject.message = resCode.message;
 
-	if (resCode.value)
-		logger.log('error', JSON.stringify(extraInfo));
+		if (resCode.value)
+			logger.log('error', JSON.stringify(responseObject));
 
-	return res.status(resCode.status).send(JSON.stringify(extraInfo));
+		res.status(resCode.status).send(JSON.stringify(responseObject));
+	} else {
+		if(Buffer.isBuffer(extraInfo))
+		{
+			res.status(resCode.status);
+			res.write(extraInfo);
+			res.end();
+		} else {
+			res.status(resCode.status).send(extraInfo);
+		}
+	}
 }
 
 // On error respond with error code and errInfo (containing helpful information)

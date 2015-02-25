@@ -312,7 +312,7 @@ span.fancytree-title:hover {
 .viewport,
 #viewer{
 	width:100%;
-	height:100%;
+	height: 600px;
 	border:0px;
 	display: block;
 }

@@ -28,7 +28,7 @@ var responseCodes = require('../response_codes.js');
  * @param {boolean} embedded_texture - Determines whether or not the texture data is embedded in the SRC.
  * @param {Object} res - The http response object
  *******************************************************************************/
-function render(project, mesh, tex_uuid, embedded_texture, res)
+function render(project, mesh, tex_uuid, embedded_texture)
 {
 	logger.log('debug', 'Mesh #Verts: ' + mesh.vertices_count);
 	logger.log('debug', 'Mesh #Faces: ' + mesh.faces_count);
@@ -215,37 +215,66 @@ function render(project, mesh, tex_uuid, embedded_texture, res)
 
 	var json_str = JSON.stringify(src_json);
 
-	// Magic bit to identify type of file
-	var magic_bit = new Buffer(4);
-	magic_bit.writeUInt32LE(23, 0);
-
-	// SRC Version
-	var version = new Buffer(4);
-	version.writeUInt32LE(42, 0);
-
-	// Header length
-	var head_string = new Buffer(4);
-	head_string.writeUInt32LE(json_str.length, 0);
-
-	// Output everything
-	res.write(magic_bit, 'binary');
-	res.write(version, 'binary');
-	res.write(head_string, 'binary');
-	res.write(json_str);
-	res.write(mesh['vertices'].buffer, 'binary');
-	res.write(buf, 'binary');
-
-	if ('normals' in mesh)
-		res.write(mesh['normals'].buffer, 'binary');
+	var bufSize =
+		4 // Magic Bit
+		+ 4 // SRC Version
+		+ 4 // Header length
+		+ json_str.length // JSON String
+		+ mesh.vertices_byte_count // Vertex information
+		+ mesh.faces_byte_count // Indices
+		+ (("normals" in mesh) ? mesh.vertices_byte_count : 0)// Normal information
+	;
 
 	// Output optional texture bits
 	if (tex_uuid != null) {
 		if (embedded_texture)
-			res.write(texture.data.buffer, 'binary');
-		res.write(mesh['uv_channels'].buffer, 'binary');
+			bufSize += texture.data_byte_count;
+		bufSize += mesh.uv_channels_byte_count;
 	}
 
-	res.end();
+	var outputBuffer = new Buffer(bufSize);
+	var bufPos = 0;
+
+	// Magic bit to identify type of file
+	outputBuffer.writeUInt32LE(23, bufPos);
+	bufPos += 4;
+
+	// SRC Version
+	outputBuffer.writeUInt32LE(42, bufPos);
+	bufPos += 4;
+
+	// Header length
+	outputBuffer.writeUInt32LE(json_str.length, bufPos);
+	bufPos += 4;
+
+	outputBuffer.write(json_str, bufPos);
+	bufPos += json_str.length;
+
+	mesh['vertices'].buffer.copy(outputBuffer, bufPos);
+	bufPos += mesh.vertices_byte_count;
+
+	buf.copy(outputBuffer, bufPos);
+	bufPos += mesh.faces_byte_count;
+
+	if ('normals' in mesh)
+	{
+		mesh['normals'].buffer.copy(outputBuffer, bufPos);
+		bufPos += mesh.vertices_byte_count;
+	}
+
+	// Output optional texture bits
+	if (tex_uuid != null) {
+		if (embedded_texture)
+		{
+			texture.data.buffer.copy(outputBuffer, bufPos);
+			bufPos += texture.data.byte_count;
+		}
+
+		mesh['uv_channels'].buffer.copy(outputBuffer, bufPos);
+		bufPos += mesh.uv_channels_byte_count;
+	}
+
+	return outputBuffer;
 }
 
 // Set up REST routing calls
@@ -257,7 +286,7 @@ exports.route = function(router)
 		router.dbInterface.getObject(params.account, params.project, params.uid, null, null, function(err, type, uid, obj)
 		{
 			if(err.value)
-		return err_callback(err);
+				return err_callback(err);
 
 			if (type == "mesh")
 			{
@@ -268,9 +297,9 @@ exports.route = function(router)
 					tex_uuid = params.query.tex_uuid;
 				}
 
-				render(params.project, obj.meshes[uid], tex_uuid, false, res);
+				err_callback(responseCodes.OK, render(params.project, obj.meshes[uid], tex_uuid, false));
 			} else {
-				return err_callback(responseCodes.OBJECT_TYPE_NOT_SUPPORTED);
+				err_callback(responseCodes.OBJECT_TYPE_NOT_SUPPORTED);
 			}
 		});
 	});
@@ -292,9 +321,9 @@ exports.route = function(router)
 					tex_uuid = params.query.tex_uuid;
 				}
 
-				render(params.project, obj.meshes[uid], tex_uuid, false, res);
+				err_callback(responseCodes.OK, render(params.project, obj.meshes[uid], tex_uuid, false));
 			} else {
-				return err_callback(reponseCodes.OBJECT_TYPE_NOT_SUPPORTED);
+				err_callback(reponseCodes.OBJECT_TYPE_NOT_SUPPORTED);
 			}
 		});
 	});

@@ -235,7 +235,7 @@ MongoDB.prototype.getLatest = function(dbName, collName, filter, projection, cal
 				if (err) return callback(responseCodes.DB_ERROR(err));
 				logger.log('debug', 'Found ' + docs.length + ' result(s).');
 
-				callback(responseCode.OK, docs);
+				callback(responseCodes.OK, docs);
 			});
 		}
 	});

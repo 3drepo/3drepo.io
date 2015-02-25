@@ -1,5 +1,5 @@
 doctype html
-html(lang="en")
+html(lang="en" ng-app="3drepo")
 	head
 		// Meta, title, CSS, favicons, etc.
 		meta(charset='utf-8')
@@ -34,7 +34,40 @@ html(lang="en")
 		script(type="text/javascript" src="/public/js/floatingmeta.js")
 		script(type="text/javascript" src="/public/js/viewer.js")
 
-		script(src='/public/js/project.js')
+		script.
+			angular.module('3drepo', ['ui.router', 'ui.bootstrap']);
+
+		script(type="text/javascript" src='/public/js/angularjs/boilerplate/pageConfigProvider.js')
+
+		script(type="text/javascript" src="/public/js/angularjs/boilerplate/serverConfig.js")
+
+		script(type="text/javascript" src="/public/js/angularjs/data/Users.js")
+		script(type="text/javascript" src="/public/js/angularjs/data/UserData.js")
+		script(type="text/javascript" src="/public/js/angularjs/data/Branches.js")
+		script(type="text/javascript" src="/public/js/angularjs/data/Comments.js")
+		script(type="text/javascript" src="/public/js/angularjs/data/CurrentBranch.js")
+		script(type="text/javascript" src="/public/js/angularjs/data/CurrentRevision.js")
+		script(type="text/javascript" src="/public/js/angularjs/data/Federation.js")
+		script(type="text/javascript" src="/public/js/angularjs/data/Log.js")
+		script(type="text/javascript" src="/public/js/angularjs/data/ProjectData.js")
+		script(type="text/javascript" src="/public/js/angularjs/data/Readme.js")
+		script(type="text/javascript" src="/public/js/angularjs/data/RevisionsByDay.js")
+		script(type="text/javascript" src="/public/js/angularjs/data/UserData.js")
+		script(type="text/javascript" src="/public/js/angularjs/data/Users.js")
+
+		script(type="text/javascript" src="/public/js/angularjs/data/Data.js")
+
+		script(type="text/javascript" src="/public/js/angularjs/project.js")
+		script(type="text/javascript" src="/public/js/angularjs/projectPageConfig.js")
+		script(type="text/javascript" src="/public/js/angularjs/boilerplate/Auth.js")
+
+		script(type="text/javascript" src="/public/js/angularjs/controllers/LoginCtrl.js")
+		script(type="text/javascript" src="/public/js/angularjs/controllers/SearchCtrl.js")
+		script(type="text/javascript" src="/public/js/angularjs/controllers/project/DashboardCtrl.js")
+		script(type="text/javascript" src="/public/js/angularjs/controllers/project/ViewCtrl.js")
+		script(type="text/javascript" src="/public/js/angularjs/controllers/project/SignUpCtrl.js")
+		script(type="text/javascript" src="/public/js/angularjs/controllers/project/SplashCtrl.js")
+
 		script.
 			var realOpen = XMLHttpRequest.prototype.open;
 			
@@ -43,7 +76,7 @@ html(lang="en")
 				realOpen.apply(this, arguments);
 			};
 		
-	body(ng-app='3drepo' ng-controller='LoginCtrl').ng-scope
+	body(ng-controller='LoginCtrl').ng-scope
 		// Not found template
 		script(type='text/ng-template', id='404.html')
 			include ng-templates/404.jade
@@ -108,8 +141,8 @@ html(lang="en")
 		script(type='text/ng-template', id='footer.html')
 			include ng-templates/footer.jade
 
-		ng-include(ng-if="!(state.name=='login')" src="'header.html'")
+		ng-include(ng-if="!(state.current.name=='login')" src="'header.html'")
 		div(ui-view='')
-		ng-include(ng-if="!(state.name!='login')" src="'footer.html'")
+		ng-include(ng-if="!(state.current.name=='login')" src="'footer.html'")
 
 

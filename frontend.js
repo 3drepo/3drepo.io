@@ -45,6 +45,7 @@ module.exports.createApp = function(template)
 		params['config_js'] += '\nserver_config.democompany = "' + config.wayfinder.democompany + '";';
 		params['config_js'] += '\nserver_config.demoproject = "' + config.wayfinder.demoproject + '";';
 
+		res.header('Content-Type', 'text/javascript');
 		res.render('config.jade', params);
 	});
 

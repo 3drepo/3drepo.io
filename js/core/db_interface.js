@@ -171,7 +171,7 @@ exports.getWayfinderInfo = function(dbName, project, uniqueIDs, callback) {
 		logger.log('debug', 'Searching for wayfinding in paths: ' + JSON.stringify(uniqueIDs));
 
 		dbConn.filterColl(dbName, project + ".wayfinder", filter, {}, function(err, docs) {
-			if (err) return callback(err);
+			if (err.value) return callback(err);
 
 			callback(responseCodes.OK, docs);
 		});
@@ -196,6 +196,9 @@ exports.storeWayfinderInfo = function(dbName, project, username, sessionID, data
 	logger.log('debug', 'Storing waypoint information for ' + username + ' @ ' + (new Date(timestamp)));
 
 	dbConn.collCallback(dbName, project + ".wayfinder", function(err, coll) {
+		if(err.value)
+			return callback(err);
+
 		var uniqueID = {
 			user: username,
 			session: sessionID,
@@ -207,7 +210,8 @@ exports.storeWayfinderInfo = function(dbName, project, username, sessionID, data
 		data.timestamp = timestamp;
 
 		coll.update(uniqueID, { $set : data }, {upsert: true}, function(err, count) {
-			if (err) callback(err);
+			if (err)
+				callback(responseCodes.DB_ERROR(err));
 
 			logger.log('debug', 'Updated ' + count + ' records.');
 			callback(responseCodes.OK);
@@ -394,11 +398,11 @@ exports.getDBList = function(callback) {
 	logger.log('debug', 'Getting list of databases');
 
 	dbConn.dbCallback('admin', function(err, db) {
-		if (err)
+		if (err.value)
 			return callback(err);
 
 		db.admin().listDatabases(function(err, dbs) {
-			if (err)
+			if (err.value)
 				return callback(err);
 
 			var dbList = [];
@@ -420,7 +424,7 @@ exports.getChildren = function(dbName, project, uuid, callback) {
 	};
 
 	dbConn.filterColl(dbName, project + '.scene', filter, null, function(err, doc) {
-		if (err) return callback(err);
+		if (err.value) return callback(err);
 
 		callback(responseCodes.OK, doc);
 	});
@@ -439,8 +443,8 @@ exports.getHeadOf = function(dbName, project, branch, getFunc, callback) {
 	var self = this;
 
 	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, doc) {
-		if (err)
-			return callback(responseCodes.OK);
+		if (err.value)
+			return callback(err);
 
 		getFunc(dbName, project, uuidToString(doc[0]["_id"]), function(err, doc) {
 			if(err.value)
@@ -457,8 +461,11 @@ exports.getRevisionInfo = function(dbName, project, rid, callback) {
 	};
 
 	dbConn.filterColl(dbName, project + '.history', filter, null, function(err, doc) {
-		if (err)
+		if (err.value)
 			return callback(err);
+
+		if (!doc.length)
+			return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
 
 		doc = doc[0];
 
@@ -538,7 +545,7 @@ exports.getRevisions = function(dbName, project, branch, from, to, full, callbac
 	}
 
 	dbConn.filterColl(dbName, project + '.history', filter, projection, function(err, doc) {
-		if (err)
+		if (err.value)
 			return callback(err);
 
 		var revisionList = [];
@@ -574,7 +581,7 @@ exports.getBranches = function(dbName, project, callback) {
 	};
 
 	dbConn.filterColl(dbName, project + '.history', filter, projection, function(err, doc) {
-			if (err)
+			if (err.value)
 				return callback(err);
 
 			var branchList = [];
@@ -608,7 +615,7 @@ exports.getMetadata = function(dbName, project, uuid, callback) {
 	};
 
 	dbConn.filterColl(dbName, project + '.scene', filter, projection, function(err, doc) {
-		callback(reponseCodes.OK, doc);
+		callback(responseCodes.OK, doc);
 	});
 };
 
@@ -641,8 +648,7 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 			};
 
 			dbConn.filterColl(dbName, project + '.scene', query, null, function(err, obj) {
-				if (err)
-					return callback(err);
+				if (err.value) return callback(err);
 
 				callback(responseCodes.OK, obj[0]["type"], this.stringToUUID(obj[0]["_id"]), repoGraphScene.decode(obj));
 			});
@@ -680,7 +686,7 @@ exports.getScene = function(dbName, project, revision, callback) {
 		};
 
 		dbConn.filterColl(dbName, project + '.scene', query, projection, function(err, coll) {
-			if (err) return callback(err);
+			if (err.value) return callback(err);
 
 			callback(responseCodes.OK, repoGraphScene.decode(coll));
 		});
@@ -705,7 +711,7 @@ exports.getCache = function(project, uid, getData, level, callback) {
 		filter['level'] = parseInt(level);
 
 	dbConn.filterColl(project, "repo.cache", filter, projection, function(err, coll) {
-		if (err) return callback(err);
+		if (err.value) return callback(err);
 
 		callback(responseCodes.OK, coll);
 	});

@@ -580,9 +580,9 @@ function X3D_AddGroundPlane(xmlDoc, bbox)
  * @param {JSON} bbox - Bounding used to compute the position and size of
  *						ground plane
  *******************************************************************************/
-function render(dbInterface, account, project, subFormat, revision, res, callback) {
+function render(dbInterface, account, project, subFormat, revision, callback) {
 	dbInterface.getScene(account, project, revision, function(err, doc) {
-		if(err) return callback(err);
+		if(err.value) return callback(err);
 
 		var xmlDoc = X3D_Header();
 		var scene  = X3D_CreateScene(xmlDoc);
@@ -628,10 +628,7 @@ function render(dbInterface, account, project, subFormat, revision, res, callbac
 		//X3D_AddViewpoint(xmlDoc, bbox);
 		//X3D_AddLights(xmlDoc, bbox);
 
-		var xmlStr = new xmlSerial().serializeToString(xmlDoc);
-		res.write(xmlStr);
-
-		res.end();
+		return callback(responseCodes.OK, new xmlSerial().serializeToString(xmlDoc));
 	});
 };
 
@@ -639,22 +636,22 @@ exports.route = function(router)
 {
 	router.get('x3d', '/:account/:project/revision/:rid', function(res, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project,	params.subformat, params.rid, res, err_callback);
+		render(router.dbInterface, params.account, params.project,	params.subformat, params.rid, err_callback);
 	});
 
 	router.get('x3d', '/:account/:project/revision/:branch/head', function(res, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project, params.subformat, null, res, err_callback);
+		render(router.dbInterface, params.account, params.project, params.subformat, null, err_callback);
 	});
 
 	router.get('x3d', '/:account/:project/revision/:rid/:sid', function(res, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project, params.subformat, params.rid, res, err_callback);
+		render(router.dbInterface, params.account, params.project, params.subformat, params.rid, err_callback);
 	});
 
 	router.get('x3d', '/:account/:project/revision/:branch/head/:sid', function(res, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project, params.subformat, null, res, err_callback);
+		render(router.dbInterface, params.account, params.project, params.subformat, null, err_callback);
 	});
 }
 

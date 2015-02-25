@@ -274,7 +274,7 @@ exports.route = function(router)
 			if(err.value)
 				err_callback(err);
 			else
-				err_callback(responseCodes.OK, readme);
+				err_callback(responseCodes.OK, branchList);
 		});
 	});
 
