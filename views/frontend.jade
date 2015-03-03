@@ -67,15 +67,7 @@ html(lang="en" ng-app="3drepo")
 		script(type="text/javascript" src="/public/js/angularjs/controllers/project/ViewCtrl.js")
 		script(type="text/javascript" src="/public/js/angularjs/controllers/project/SignUpCtrl.js")
 		script(type="text/javascript" src="/public/js/angularjs/controllers/project/SplashCtrl.js")
-
-		script.
-			var realOpen = XMLHttpRequest.prototype.open;
-			
-			XMLHttpRequest.prototype.open = function(method, url, async, unk1, unk2) {
-				this.withCredentials = true;
-				realOpen.apply(this, arguments);
-			};
-		
+	
 	body(ng-controller='LoginCtrl').ng-scope
 		// Not found template
 		script(type='text/ng-template', id='404.html')
