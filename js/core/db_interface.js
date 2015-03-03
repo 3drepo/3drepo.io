@@ -603,6 +603,7 @@ exports.getMetadata = function(dbName, project, uuid, callback) {
 	var filter = {
 		parents: stringToUUID(uuid),
 		type: 'meta'
+		//subtype: {$not: "readme"}
 	};
 
 	var projection = {

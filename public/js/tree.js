@@ -134,11 +134,16 @@ var initTree = function(account, project)
 
 				$("#metadata").append("<tr><th c class=\"metadata-title\" colspan=\"2\">" + data.node["title"] + "</th></tr>");
 
-				var meta = data.node.data["meta"][0]["metadata"];
+				var metaObj = {};
 
-				Object.keys(meta).forEach(function(key)
+				for(var i = 0; i < data.node.data["meta"].length; i++)
 				{
-					$("#metadata").append("<tr><td class=\"metadata-row\">" + key + "</td><td class=\"metadata-row\">" + meta[key] + "</td></tr>")
+					$.extend(metaObj, data.node.data["meta"][i]["metadata"]);
+				}
+
+				Object.keys(metaObj).forEach(function(key)
+				{
+					$("#metadata").append("<tr><td class=\"metadata-row\">" + key + "</td><td class=\"metadata-row\">" + metaObj[key] + "</td></tr>")
 				});
 			} else {
 				$("#meta-popup").css("visibility", "hidden");

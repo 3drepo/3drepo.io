@@ -2,7 +2,7 @@ ng-include(src="'common.html'")
 .col-md-8.tight
 	ng-include(src="'menu.html'")
 	div(ng-if='Data.ProjectData.loading')
-		img.loading(src='http://www.nasa.gov/multimedia/videogallery/ajax-loader.gif', width='20', height='20')
+		img.loading(src='/public/images/ajax-loader.gif', width='20', height='20')
 	div(ng-if='!Data.ProjectData.loading')
 		.block
 			.col-sm-12.margined.block-header

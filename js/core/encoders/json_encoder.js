@@ -50,7 +50,7 @@ function treeChildMetadata(dbInterface, dbName, project, childNode, callback)
 	dbInterface.getMetadata(dbName, project, sharedId, function(err, meta) {
 		childNode["meta"] = meta;
 
-		callback(null, childNode); //
+		callback(null, childNode);
 	});
 }
 

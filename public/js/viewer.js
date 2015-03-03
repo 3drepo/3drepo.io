@@ -19,68 +19,80 @@ var Viewer = function() {
 
 	this.lookAtObject = function(obj)
 	{
-		var mat = obj._x3domNode.getCurrentTransform();
-		var min = x3dom.fields.SFVec3f.MAX();
-		var max = x3dom.fields.SFVec3f.MIN();
-		obj._x3domNode.getVolume().getBounds(min, max);
-
-		min = mat.multMatrixPnt(min);
-		max = mat.multMatrixPnt(max);
-
-		var bboxcenter = x3dom.fields.SFVec3f;
-
-		bboxcenter.x = (min.x + max.x) / 2;
-		bboxcenter.y = (min.y + max.y) / 2;
-		bboxcenter.z = (min.z + max.z) / 2;
-
-		this.lookAtPoint(bboxcenter.x, bboxcenter.y, bboxcenter.z);
+		$("#viewer")[0].runtime.fitObject(obj, true);
 	};
 
-	this.color_dict = {"Office_A_20110811" : "0.1 0.0 0.0", "Office_S_20110811" : "0.0 0.0 0.1", "Office_MEP_20110811" : "0.0 0.1 0.1"};
+	this.clickedFromView = false;
 
-	this.previousSelected = [];
+	this.previousSelectedOneSided = [];
+	this.previousSelectedTwoSided = [];
 
 	this.selectGroup = function(group)
 	{
-		this.lookAtObject(group);
+		if(!this.clickedFromView)
+			this.lookAtObject(group);
+
 		this.setApp(group);
+
+		this.clickedFromView = false;
+
 		//floating.addAllFloats(rootObj);
 
 	}
 
+	this.applyApp = function(nodes, factor, emiss, otherSide)
+	{
+		previous = [];
+
+		if(otherSide)
+		{
+			for(var m_idx = 0; m_idx < nodes.length; m_idx++)
+			{
+				var origDiff = nodes[m_idx]._x3domNode._vf.diffuseColor;
+				nodes[m_idx]._x3domNode._vf.diffuseColor.setValues(origDiff.multiply(factor));
+
+				var origAmb = nodes[m_idx]._x3domNode._vf.ambientIntensity;
+				nodes[m_idx]._x3domNode._vf.ambientIntensity = origAmb * factor;
+
+				nodes[m_idx]._x3domNode._vf.emissiveColor.setValueByStr(emiss);
+
+				previous[m_idx] = nodes[m_idx];
+			}
+		} else {
+			for(var m_idx = 0; m_idx < nodes.length; m_idx++)
+			{
+				var origDiff = nodes[m_idx]._x3domNode._vf.backDiffuseColor;
+				nodes[m_idx]._x3domNode._vf.backDiffuseColor.setValues(origDiff.multiply(factor));
+
+				var origAmb = nodes[m_idx]._x3domNode._vf.backAmbientIntensity;
+				nodes[m_idx]._x3domNode._vf.backAmbientIntensity = origAmb * factor;
+
+				nodes[m_idx]._x3domNode._vf.backEmissiveColor.setValueByStr(emiss);
+
+				previous[m_idx] = nodes[m_idx];
+			}
+		}
+
+		return previous;
+	}
+
+
 	this.setApp = function(group)
 	{
-		for(var m_idx = 0; m_idx < this.previousSelected.length; m_idx++)
-		{
-			this.previousSelected[m_idx].setAttribute("emissiveColor", "0.0 0.0 0.0");
-		}
+		this.applyApp(this.previousSelectedOneSided, 2.0, "0.0 0.0 0.0", false);
+		this.applyApp(this.previousSelectedTwoSided, 2.0, "0.0 0.0 0.0", false);
+		this.applyApp(this.previousSelectedTwoSided, 2.0, "0.0 0.0 0.0", true);
 
 		var twoGrpNodes = group.getElementsByTagName("TwoSidedMaterial");
 		var oneGrpNodes = group.getElementsByTagName("Material");
 
-		this.previousSelected = [];
+		this.previousSelectedOneSided = [];
+		this.previousSelectedTwoSided = [];
 
-		for(var m_idx = 0; m_idx < oneGrpNodes.length; m_idx++)
-		{
-			oneGrpNodes[m_idx].setAttribute("emissiveColor", "1.0 0.5 0.0");
-			this.previousSelected[m_idx] = oneGrpNodes[m_idx];
-		}
-
-		for(var m_idx = 0; m_idx < twoGrpNodes.length; m_idx++)
-		{
-			twoGrpNodes[m_idx].setAttribute("emissiveColor", "1.0 0.5 0.0");
-			this.previousSelected[m_idx + oneGrpNodes.length] = twoGrpNodes[m_idx];
-		}
+		this.previousSelectedOneSided = this.applyApp(oneGrpNodes, 0.5, "1.0 0.5 0.0", false);
+		this.previousSelectedTwoSided = this.applyApp(twoGrpNodes, 0.5, "1.0 0.5 0.0", false);
+		this.applyApp(twoGrpNodes, 0.5, "1.0 0.5 0.0", true);
 	}
-
-	this.lookAtPoint = function(x,y,z) {
-		var model = $("#viewer")[0];
-		if(model && model.runtime){
-			var pickVec = new x3dom.fields.SFVec3f(x,y,z);
-			model.runtime.canvas.doc._viewarea._pick = pickVec;
-			model.runtime.canvas.doc._viewarea.onDoubleClick();
-		}
-	};
 };
 
 $(document).ready( function() {
@@ -99,22 +111,12 @@ $(document).ready( function() {
 
 // When the user clicks on the background the select nothing.
 $(document).on("bgroundClicked", function(event) {
-
-	// Very bad hacky way of doing this, speak to Fraunhofer
-	var twoMatNodes = document.getElementsByTagName("TwoSidedMaterial")
-	var oneMatNodes = document.getElementsByTagName("Material");
-	var mat_nodes = $.merge(oneMatNodes, twoMatNodes);
-
-	for(var m_idx = 0; m_idx < mat_nodes.length; m_idx++)
-	{
-		mat_nodes[m_idx].setAttribute("emissiveColor", "0 0 0");
-		mat_nodes[m_idx].setAttribute("transparency", "0.0");
-	}
-
+	viewer.setApp([]);
 });
 
 $(document).on("clickObject", function(event, objEvent) {
 	//viewer.lookAtObject(objEvent.target);
+	viewer.clickedFromView = true;
 	viewer.setApp(objEvent.target);
 });
 
