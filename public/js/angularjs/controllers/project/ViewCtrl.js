@@ -22,10 +22,8 @@ angular.module('3drepo')
 	$scope.view = Data.view;
 	$scope.possible_views = ["info", "comments", "revisions", "log", "settings"];
 
-	$scope.loading = true;
-
 	$scope.pageChanged = function() {
-		$scope.Data.updatePaginatedView($scope.view);
+		Data.updatePaginatedView($scope.view);
 	};
 
 	$scope.isView = function(view){
@@ -50,16 +48,11 @@ angular.module('3drepo')
 		}
 	}
 
-	$scope.setBranch = function(branch) {
-		$scope.branch = branch;
-	}
-
 	$scope.setRevision = function(rev) {
-		$scope.rid = rev;
 		var o = {
-			branch: $scope.branch,
-			rid:  $scope.rid.name,
-			view: $scope.view
+			branch: Data.branch,
+			rid:	rev.name,
+			view:	$scope.view
 		};
 
 		$state.go('main.revision.view', o);

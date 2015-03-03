@@ -60,6 +60,12 @@ angular.module('3drepo')
 					self.RevisionsByDay.refresh(self.account, self.project, self.branch, first, last);
 			}
 
+			this.setBranch = function(branch)
+			{
+				self.branch = branch;
+				self.CurrentBranch.refresh(self.account, self.project, self.branch);
+			}
+
 			this.changeView = function(state, view, stateParams)
 			{
 				console.log(state, view, stateParams);
@@ -82,6 +88,7 @@ angular.module('3drepo')
 					self.ProjectData.refresh(self.account, self.project);
 					self.CurrentBranch.refresh(self.account, self.project, self.branch);
 					self.CurrentRevision.refresh(self.account, self.project, self.branch, self.revision);
+					self.Branches.refresh(self.account, self.project);
 				} else if ((state == 'main.view') || (state == 'main.branch.view') || (state == 'main.revision.view')) {
 					self.view = view;
 
@@ -110,6 +117,8 @@ angular.module('3drepo')
 							self.totalItems = n_revisions;
 							self.updatePaginatedView('revisions');
 						});
+					} else if (view == 'settings') {
+						self.Users.refresh(self.account, self.project);
 					}
 				} else if (state == 'main.branch') {
 					self.branch = stateParams.branch;

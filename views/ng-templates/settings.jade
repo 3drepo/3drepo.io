@@ -1,9 +1,9 @@
 ng-include(src="'common.html'")
 .col-md-8.tight
 	ng-include(src="'menu.html'")
-	div(ng-if='data.loading')
+	div(ng-if='Data.ProjectData.loading')
 		img.loading(src='http://www.nasa.gov/multimedia/videogallery/ajax-loader.gif', width='20', height='20')
-	div(ng-if='!data.loading')
+	div(ng-if='!Data.ProjectData.loading')
 		.block
 			.col-sm-12.margined.block-header
 				h3 General
@@ -11,19 +11,19 @@ ng-include(src="'common.html'")
 				.form-group
 					.col-sm-4.margined
 						label(for='project-name') Owner
-						input#project-name.form-control(type='text', ng-value='data.info.owner', disabled='')
+						input#project-name.form-control(type='text', ng-value='Data.ProjectData.owner', disabled='')
 					.col-sm-8.margined
 						label(for='project-name') Project Name
-						input#project-name.form-control(type='text', ng-value='data.info.name', disabled='')
+						input#project-name.form-control(type='text', ng-value='Data.ProjectData.name', disabled='')
 				.form-group
 					.col-sm-4.margined
 						label(for='project-name') Type
-						select.form-control(ng-model='data.info.selected', ng-options='type as type.label for type in data.projectTypes')
+						select.form-control(ng-model='Data.ProjectData.selected', ng-options='type as type.label for type in Data.ProjectData.projectTypes', disabled)
 				.form-group
 					.col-sm-12.margined
 						label(for='project-name') Description
 						span  (optional)
-						input#project-description.form-control(type='email', ng-value='data.info.description')
+						input#project-description.form-control(type='email', ng-value='Data.ProjectData.description', disabled)
 		.block
 			.col-sm-12.margined.block-header
 				h3 Visibility
@@ -31,13 +31,13 @@ ng-include(src="'common.html'")
 				.form-group
 					.col-sm-12
 						label.radio.radio-pad
-							input#visibility(type='radio', name='visibility', value='public', ng-model='data.info.visibility', ng-checked="data.info.visibility=='public'", ng-change="setVisibility('public')")
+							input#visibility(type='radio', name='visibility', value='public', ng-model='Data.ProjectData.visibility', ng-checked="Data.ProjectData.visibility=='public'", ng-change="Data.ProjectData.setVisibility('public')", disabled)
 							i.fa.fa-eye Public
 						.radio-pad
 							p Everybody can see this project.
 					.col-sm-12.margined
 						label.radio.radio-pad
-							input#visibility(type='radio', name='visibility', value='private', ng-model='data.info.visibility', ng-checked="data.info.visibility=='private'", ng-change="setVisibility('private')")
+							input#visibility(type='radio', name='visibility', value='private', ng-model='Data.ProjectData.visibility', ng-checked="Data.ProjectData.visibility=='private'", ng-change="Data.ProjectData.setVisibility('private')", disabled)
 							i.fa.fa-eye-slash Private
 						.radio-pad
 							p Only selected users can see this project.
@@ -46,26 +46,26 @@ ng-include(src="'common.html'")
 				h3 Users
 			form.standardform(role='form')
 				.form-group
-					.col-sm-6.margined
+					//.col-sm-6.margined
 						.input-group
 							input#searchBy.form-control(type='search', autocomplete='off', name='searchBy', ng-model='users.selected', typeahead='state for state in users.states | filter:$viewValue | limitTo:8', placeholder='Search user')
 							span.input-group-btn
 								button#filter.btn.btn-primary.btn-block
 									i.fa.fa-plus
-					div(ng-repeat='user in data.info.users')
+					div(ng-repeat='user in Data.Users.users')
 						.clearfix
 						.col-sm-6.margined
 							.input-group
 								span.input-group-btn
 									button#filter.btn.btn-primary.btn-block
 										i.fa.fa-user
-								input#searchBy.form-control(type='search', name='searchBy', readonly='', ng-value='user.name')
-								span.input-group-btn
+								input#searchBy.form-control(type='search', name='searchBy', readonly='', ng-value='user.name' disabled)
+								//span.input-group-btn
 									button#filter.btn.btn-primary.btn-block
 										i.fa.fa-minus
 						.col-sm-4.permission
 							.btn-group
-								button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-expanded='false')
+								button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-expanded='false' disabled)
 									span.button-title Role: 
 									span.button-keyword {{user.role}}
 									span.caret
@@ -111,6 +111,6 @@ ng-include(src="'common.html'")
 									li(ng-repeat='revision in fed.revisions')
 										a(href='#/', ng-click='fed.revselected=revision')
 											span.button-keyword {{revision}}
-		form(role='form')
+		//form(role='form')
 			button.btn.btn-success.pull-right(type='submit') Submit
 

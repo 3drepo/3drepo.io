@@ -1,13 +1,13 @@
 ng-include(src="'common.html'")
 .col-md-8.tight
 	ng-include(src="'menu.html'")
-	div(ng-if='data.loading')
+	div(ng-if='Data.Log.loading')
 		img.loading(src='http://www.nasa.gov/multimedia/videogallery/ajax-loader.gif', width='20', height='20')
-	div(ng-if='!data.loading')
+	div(ng-if='!Data.Log.loading')
 		.block
 			.col-sm-12.margined.block-header
 				h3 History
-			.col-sm-12.log(ng-repeat='item in data.log')
+			.col-sm-12.log(ng-repeat='item in Data.Log')
 				.log-icon-block
 					i.fa.fa-cogs.fa-2x.log-icon(ng-if="item.type=='visibility'")
 					i.fa.fa-cogs.fa-2x.log-icon(ng-if="item.type=='project-type'")
@@ -40,5 +40,5 @@ ng-include(src="'common.html'")
 					span.history-action created the project
 					span.commit-date {{item.date}}
 
-		pagination.pull-right(items-per-page='pagination.itemsperpage', total-items='pagination.totalItems', ng-model='pagination.currentPage', ng-change='pageChanged()', previous-text='‹', next-text='›', first-text='«', last-text='»')
+		pagination.pull-right(items-per-page='Data.itemsPerPage', total-items='Data.totalItems', ng-model='Data.currentPage', ng-change='pageChanged()', previous-text='‹', next-text='›', first-text='«', last-text='»')
 

@@ -23,45 +23,17 @@ var logger = log_iface.logger;
 
 var responseCodes = require('../response_codes.js');
 
-/*******************************************************************************
- * Recursively add JSON children
- *
- * @param {JSON} jsonNode - JSON node being built
- * @param {JSON} node - Current node from RepoSceneGraph
- *******************************************************************************/
-function JSONAddChildren(jsonNode, node)
-{
-	if (!('children' in node))
-		return;
+// Credit goes to http://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
+function escapeHtml(text) {
+  var map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
 
-	// Loop over all the children
-	for(var chIdx = 0; chIdx < node['children'].length; chIdx++)
-	{
-		var child = node['children'][chIdx];
-
-		if (child['type'] == 'mesh') {
-
-			var newJsonNode       = {};
-			newJsonNode['uuid']   = child['id'];
-			newJsonNode['name']   = child['name'];
-			newJsonNode['bid']    = 0;
-			newJsonNode['nodes']  = [];
-			jsonNode['nodes'].push(newJsonNode);
-
-		} else if(child['type'] == 'transformation') {
-
-			var newJsonNode       = {};
-			newJsonNode['uuid']   = child['id'];
-			newJsonNode['name']   = child['name'];
-			newJsonNode['bid']    = 0;
-			newJsonNode['nodes']  = [];
-			JSONAddChildren(newJsonNode, child);
-			jsonNode['nodes'].push(newJsonNode);
-
-		} else {
-			JSONAddChildren(jsonNode, child);
-		}
-	}
+  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
 }
 
 /*******************************************************************************
@@ -78,7 +50,7 @@ function treeChildMetadata(dbInterface, dbName, project, childNode, callback)
 	dbInterface.getMetadata(dbName, project, sharedId, function(err, meta) {
 		childNode["meta"] = meta;
 
-		callback(null, childNode);
+		callback(null, childNode); //
 	});
 }
 
@@ -89,8 +61,9 @@ function treeChildMetadata(dbInterface, dbName, project, childNode, callback)
  * @param {string} project - name of project containing child
  * @param {boolean} selected - Is the parent currently selected ?
  * @param {string} namespace - X3DOM Namespace in which the node exists
+ * @param {boolean} htmlMode - In this mode HTML characters are escaped
  *******************************************************************************/
-function processChild(child, project, selected, namespace)
+function processChild(child, project, selected, namespace, htmlMode)
 {
 	var childNode = {};
 
@@ -109,7 +82,7 @@ function processChild(child, project, selected, namespace)
 			name = uuid;
 
 		childNode["key"]       = shared_id;
-		childNode["title"]     = name;
+		childNode["title"]     = htmlMode ? escapeHtml(name) : name;
 		childNode["uuid"]      = uuid;
 		childNode["folder"]    = ("children" in child);
 		childNode["lazy"]      = true;
@@ -120,7 +93,7 @@ function processChild(child, project, selected, namespace)
 	} else if (child['type'] == 'ref') {
 
 		childNode["project"]   = child["project"];
-		childNode["title"]     = child["project"];
+		childNode["title"]     = htmlMode ? escapeHtml(child["project"]) : child["project"];
 		childNode["namespace"] = child["project"] + "__";
 		childNode["uuid"]      = uuid;
 		childNode["folder"]    = true;
@@ -134,60 +107,6 @@ function processChild(child, project, selected, namespace)
 	return childNode;
 }
 
-/*******************************************************************************
- * Render JSON tree
- *
- * @param {Object} dbInterface - Database interface object
- * @param {string} dbName - Company or database name containing project
- * @param {string} project - name of project containing tree
- * @param {uuid} revision - the id of the revision
- * @param {uuid} uuid - the uuid of the parent in the tree
- * @param {boolean} selected - Is the uuid
- * @param {RepoNodeMesh} mesh - The RepoNodeMesh object containing the mesh
- * @param {string} tex_uuid - A string representing the tex_uuid attached to the mesh
- * @param {boolean} embedded_texture - Determines whether or not the texture data is embedded in the SRC.
- * @param {Object} res - The http response object
- *******************************************************************************/
-function render(dbInterface, dbName, project, revision, uuid, selected, namespace, res, err_callback)
-{
-
-	if (uuid == null)
-	{
-		dbInterface.getScene(dbName, project, revision, function(err, doc) {
-			var head = [{}];
-			var node = doc['mRootNode'];
-
-			head[0]["title"]     = node["name"];
-			head[0]["key"]       = uuidToString(node["shared_id"]);
-			head[0]["folder"]    = true;
-			head[0]["lazy"]      = true;
-			head[0]["selected"]  = true;
-			head[0]["uuid"]      = node["id"];
-			head[0]["namespace"] = ((namespace != null) ? namespace : "model__");
-			head[0]["dbname"]    = project;
-
-			if (!("children" in node))
-				head[0]["children"] = [];
-
-			res.json(head);
-		});
-	} else {
-		dbInterface.getChildren(dbName, project, uuid, function(err, doc) {
-			async.map(doc, function(child, callback)
-				{
-					callback(err, processChild(child, project, selected, namespace));
-				}, function(err, children) {
-				async.map(children, function(id, callback) {
-					treeChildMetadata(dbInterface, dbName, project, id, callback)
-				}, function(err, childWithMeta)
-				{
-					res.json(childWithMeta);
-				});
-			});
-		});
-	}
-}
-
 exports.route = function(router)
 {
 	router.get('json', '/search', function(res, params, err_callback) {
@@ -196,7 +115,7 @@ exports.route = function(router)
 			if(err.value)
 				err_callback(err);
 			else
-				res.json(json);
+				err_callback(responseCodes.OK, json);
 		});
 	});
 
@@ -311,6 +230,8 @@ exports.route = function(router)
 		var namespace = params.query.namespace;
 		var selected  = params.query.selected;
 
+		var htmlMode  = params.query.htmlMode == 'true';
+
 		if (params.sid == "root")
 		{
 			router.dbInterface.getScene(params.account, params.project, revision, function(err, doc) {
@@ -320,7 +241,7 @@ exports.route = function(router)
 				logger.log('debug', 'Found root node ' + node["id"]);
 
 				head[0]["title"]     = params.project;
-				head[0]["key"]       = uuidToString(node["shared_id"]);
+				head[0]["key"]       = htmlMode ? escapeHtml(uuidToString(node["shared_id"])) : uuidToString(node["shared_id"]);
 				head[0]["folder"]    = true;
 				head[0]["lazy"]      = true;
 				head[0]["selected"]  = true;
@@ -331,24 +252,28 @@ exports.route = function(router)
 				if (!("children" in node))
 					head[0]["children"] = [];
 
-				res.json(head);
+				err_callback(responseCodes.OK, head);
 			});
 		} else {
 			router.dbInterface.getChildren(params.account, params.project, params.sid, function(err, doc) {
-				async.map(doc, function(child, callback)
-					{
-						callback(err, processChild(child, params.project, selected, namespace));
-					}, function(err, children) {
-					async.map(children, function(id, callback) {
-						treeChildMetadata(router.dbInterface, params.account, params.project, id, callback)
-					}, function(err, childWithMeta)
-					{
-						if(err)
-							err_callback(err);
-						else
-							err_callback(responseCodes.OK, childWithMeta);
-					});
-				});
+				async.map(doc,
+					function(child, callback) { // Called for all children
+						callback(null, processChild(child, params.project, selected, namespace, htmlMode));
+					},
+					function(err, children) { // Called when are children are ready
+						async.map(children,
+							function(id, callback) { // Called every item
+								treeChildMetadata(router.dbInterface, params.account, params.project, id, callback);
+							},
+							function(err, childrenWithMeta) { // Called when children are ready
+								if(err)
+									err_callback(responseCodes.EXTERNAL_ERROR(err));
+								else
+									err_callback(responseCodes.OK, childrenWithMeta);
+							}
+						);
+					}
+				);
 			});
 		}
 

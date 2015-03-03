@@ -122,9 +122,7 @@ var initTree = function(account, project)
 			if ("uuid" in data.node.data)
 			{
 				var rootObj = getNode(data.node);
-				viewer.lookAtObject(rootObj);
-				viewer.setApp(rootObj);
-				floating.addAllFloats(rootObj);
+				viewer.selectGroup(rootObj);
 			}
 
 			if (("meta" in data.node.data) && (data.node.data["meta"].length))
@@ -148,7 +146,7 @@ var initTree = function(account, project)
 		},
 		checkbox: true,
 		source: {
-			url: server_config.apiUrl(account + '/' + project + '/revision/head/tree/root.json?depth=1')
+			url: server_config.apiUrl(account + '/' + project + '/revision/head/tree/root.json?depth=1&htmlMode=true')
 		},
 		lazyLoad: function(event, data) {
 			var node = data.node;
@@ -165,7 +163,7 @@ var initTree = function(account, project)
 			params.depth = 1;
 
 			data.result = $.ajax({
-				url:  server_config.apiUrl(account + '/' + node.data.dbname + '/revision/head/tree/' + json_key + '.json'),
+				url:  server_config.apiUrl(account + '/' + node.data.dbname + '/revision/head/tree/' + json_key + '.json?htmlMode=true'),
 				data: params,
 				cache: false
 			});

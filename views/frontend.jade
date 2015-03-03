@@ -140,9 +140,13 @@ html(lang="en" ng-app="3drepo")
 		// Footer
 		script(type='text/ng-template', id='footer.html')
 			include ng-templates/footer.jade
-
-		ng-include(ng-if="!(state.current.name=='login')" src="'header.html'")
-		div(ui-view='')
-		ng-include(ng-if="!(state.current.name=='login')" src="'footer.html'")
+		
+		.container-fluid
+			ng-include(ng-if="!(state.current.name=='login')" src="'header.html'")
+		.row
+			.container-fluid
+				div(ui-view='')
+		.row.mainrow
+			ng-include(ng-if="!(state.current.name=='login')" src="'footer.html'")
 
 

@@ -20,6 +20,7 @@ angular.module('3drepo')
 {
 	$scope.loggedIn = null;
 	$scope.user = { username: "", password: ""};
+	$scope.goDefault = pageConfig.goDefault;
 
 	$scope.logOut = function()
 	{

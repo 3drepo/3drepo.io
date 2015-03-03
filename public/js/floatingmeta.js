@@ -134,21 +134,21 @@ var FloatingMetas = function() {
 };
 
 $(document).on("onViewpointChange", function(event, objEvent) {
-	floating.updateFloats();
+	//floating.updateFloats();
 });
 
 $(document).on("clickObject", function(event, objEvent) {
-	floating.addAllFloats(objEvent.target);
+	//floating.addAllFloats(objEvent.target);
 });
 
 $(document).on("onLoaded", function(event, objEvent) {
 	document.getElementById('sceneVP').addEventListener('viewpointChanged', onViewpointChange, false);
 
-	floating.addAllFloats(document);
+	//floating.addAllFloats(document);
 });
 
 $(document).on("bgroundClicked", function(event, objEvent) {
-	floating.addAllFloats(document);
+	//floating.addAllFloats(document);
 });
 
 $(document).ready( function() {

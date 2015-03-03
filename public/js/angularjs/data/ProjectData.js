@@ -39,6 +39,8 @@ angular.module('3drepo')
 		self.project = project;
 
 		self.selected = null;
+		self.loading  = true;
+		self.visibility = 'private';
 
 		var deferred = $q.defer();
 
@@ -60,11 +62,17 @@ angular.module('3drepo')
 
 			self.visibility = json.read_access;
 
+			self.loading = false;
 			deferred.resolve();
 		});
 
 		return deferred.promise;
 	};
+
+	o.setVisibility = function(vis)
+	{
+		this.visibility = vis;
+	}
 
 	o.updateInfo = function()
 	{

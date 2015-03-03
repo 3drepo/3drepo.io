@@ -23,18 +23,20 @@ angular.module('3drepo')
 		var self = this;
 
 		self.n_logentries = 0;
+		self.loading = true;
 
 		var deferred = $q.defer();
 
 		$http.get(serverConfig.apiUrl(account + '/' + project + '/log.json?mode=number'))
 		.then(function(json) {
 			self.n_logentries = json.data.n_logentries;
+			self.loading = false;
 			deferred.resolve(self.n_logentries);
 		}, function(json) {
 			deferred.resolve(0);
 		});
 
-		return deferred.promise();
+		return deferred.promise;
 	}
 
 	o.refresh = function(account, project, first, last) {
@@ -48,8 +50,10 @@ angular.module('3drepo')
 		$http.get(serverConfig.apiUrl(account + '/' + project + '/log.json?first=' + first + '&last=' + last))
 		.then(function(json) {
 			self.log = json.data;
+			self.loading = false;
 			deferred.resolve();
 		}, function(message) {
+			self.loading = false;
 			deferred.resolve();
 		});
 

@@ -1,17 +1,17 @@
 ng-include(src="'common.html'")
 .col-md-8.tight
 	ng-include(src="'menu.html'")
-	div(ng-if='data.loading')
+	div(ng-if='Data.Comments.loading')
 		img.loading(src='http://www.nasa.gov/multimedia/videogallery/ajax-loader.gif', width='20', height='20')
-	div(ng-if='!data.loading')
-		.block(ng-repeat='comment in data.comments')
+	div(ng-if='!Data.Comments.loading')
+		.block(ng-repeat='comment in Data.Comments')
 			.col-sm-12.margined.block-header
 				h3
 					i.fa.fa-comment.menu-icon {{comment.author}} 
 				span.comment-keyword-title commented
 				span.comment-date-title {{comment.date}}
 					p {{comment.message}}
-	pagination.pull-right(items-per-page='pagination.itemsperpage', total-items='pagination.totalItems', ng-model='pagination.currentPage', ng-change='pageChanged()', previous-text='‹', next-text='›', first-text='«', last-text='»')
+	pagination.pull-right(items-per-page='Data.itemsPerPage', total-items='Data.totalItems', ng-model='Data.currentPage', ng-change='pageChanged()', previous-text='‹', next-text='›', first-text='«', last-text='»')
 		.block
 			.col-sm-12.margined.block-header
 				h3 Leave a comment

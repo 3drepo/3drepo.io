@@ -25,7 +25,7 @@ angular.module('3drepo')
 		{label: 'Viewer', value: 3}
 	];
 
-	o.refresh = function(account, project, branch, revision) {
+	o.refresh = function(account, project) {
 		var self = this;
 
 		self.users		= [];

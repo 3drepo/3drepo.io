@@ -1,13 +1,13 @@
 ng-include(src="'common.html'")
 .col-md-8.tight
 	ng-include(src="'menu.html'")
-	div(ng-if='data.loading')
+	div(ng-if='Data.RevisionsByDay.loading')
 		img.loading(src='http://www.nasa.gov/multimedia/videogallery/ajax-loader.gif', width='20', height='20')
-	div(ng-if='!data.loading')
+	div(ng-if='!Data.RevisionsByDay.loading')
 		.block
 			.col-sm-12.margined.block-header
 				h3 Timeline
-			.col-sm-12.month-block(ng-repeat='(day,revisions) in data.revisions_by_day')
+			.col-sm-12.month-block(ng-repeat='(day,revisions) in Data.RevisionsByDay.revisionsByDay')
 				hr.fancy-line
 				h3 {{day}}
 				.commit-block(ng-repeat='revision in revisions')
@@ -18,5 +18,5 @@ ng-include(src="'common.html'")
 					span.commit-author {{revision.author}}
 					span.commit-date {{revision.date.split(&apos;,&apos;)[1]}}
 					p {{revision.message}}
-		pagination.pull-right(items-per-page='pagination.itemsperpage', total-items='pagination.totalItems', ng-model='pagination.currentPage', ng-change='pageChanged()', previous-text='‹', next-text='›', first-text='«', last-text='»')
+		pagination.pull-right(items-per-page='Data.itemsPerPage', total-items='Data.totalItems', ng-model='Data.currentPage', ng-change='pageChanged()', previous-text='‹', next-text='›', first-text='«', last-text='»')
 

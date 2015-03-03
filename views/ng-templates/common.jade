@@ -13,7 +13,7 @@
 				span.caret
 			ul.dropdown-menu(role='menu')
 				li(ng-repeat='branch in Data.Branches.branches')
-					a(href='#/', ng-click='setBranch(branch)')
+					a(href='#', ng-click='Data.setBranch(branch)')
 						span.button-keyword {{branch}}
 	// Revision selector
 	.row.tight
@@ -25,7 +25,7 @@
 				span.caret
 			ul.dropdown-menu(role='menu')
 				li(ng-repeat='rev in Data.CurrentBranch.revisions')
-					a(href='#/', ng-click='setRevision(rev)')
+					a(href='#', ng-click='setRevision(rev)')
 						span.button-keyword {{rev.name}}
 	// Diff selector
 	//.row.tight
@@ -44,6 +44,6 @@
 					a(href='#/', ng-click='setDiffName(rev.name)')
 						span.button-keyword {{rev.name}}
 	form(role='form')
-		button.btn.btn-success.pull-left(type='submit') Download
+		button.btn.btn-success.pull-left(type='submit', disabled) Download
 			i.fa.fa-download.menu-icon
 

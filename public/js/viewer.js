@@ -38,28 +38,38 @@ var Viewer = function() {
 
 	this.color_dict = {"Office_A_20110811" : "0.1 0.0 0.0", "Office_S_20110811" : "0.0 0.0 0.1", "Office_MEP_20110811" : "0.0 0.1 0.1"};
 
+	this.previousSelected = [];
+
+	this.selectGroup = function(group)
+	{
+		this.lookAtObject(group);
+		this.setApp(group);
+		//floating.addAllFloats(rootObj);
+
+	}
+
 	this.setApp = function(group)
 	{
-		// Very bad hacky way of doing this, speak to Fraunhofer
-		var twoMatNodes = document.getElementsByTagName("TwoSidedMaterial")
-		var oneMatNodes = document.getElementsByTagName("Material");
-		var mat_nodes = $.merge(oneMatNodes, twoMatNodes);
-
-		for(var m_idx = 0; m_idx < mat_nodes.length; m_idx++)
+		for(var m_idx = 0; m_idx < this.previousSelected.length; m_idx++)
 		{
-			var color = this.color_dict[mat_nodes[m_idx]._x3domNode._nameSpace.name];
-			mat_nodes[m_idx].setAttribute("emissiveColor", color);
-			mat_nodes[m_idx].setAttribute("transparency", "0.85");
+			this.previousSelected[m_idx].setAttribute("emissiveColor", "0.0 0.0 0.0");
 		}
 
 		var twoGrpNodes = group.getElementsByTagName("TwoSidedMaterial");
 		var oneGrpNodes = group.getElementsByTagName("Material");
-		var grp_nodes = $.merge(oneGrpNodes, twoGrpNodes);
 
-		for(var m_idx = 0; m_idx < grp_nodes.length; m_idx++)
+		this.previousSelected = [];
+
+		for(var m_idx = 0; m_idx < oneGrpNodes.length; m_idx++)
 		{
-			grp_nodes[m_idx].setAttribute("emissiveColor", "1.0 0.5 0.0");
-			grp_nodes[m_idx].setAttribute("transparency", "0.0");
+			oneGrpNodes[m_idx].setAttribute("emissiveColor", "1.0 0.5 0.0");
+			this.previousSelected[m_idx] = oneGrpNodes[m_idx];
+		}
+
+		for(var m_idx = 0; m_idx < twoGrpNodes.length; m_idx++)
+		{
+			twoGrpNodes[m_idx].setAttribute("emissiveColor", "1.0 0.5 0.0");
+			this.previousSelected[m_idx + oneGrpNodes.length] = twoGrpNodes[m_idx];
 		}
 	}
 
@@ -104,7 +114,7 @@ $(document).on("bgroundClicked", function(event) {
 });
 
 $(document).on("clickObject", function(event, objEvent) {
-	viewer.lookAtObject(objEvent.target);
+	//viewer.lookAtObject(objEvent.target);
 	viewer.setApp(objEvent.target);
 });
 

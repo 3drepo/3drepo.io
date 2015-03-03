@@ -41,6 +41,7 @@ angular.module('3drepo')
 		var self = this;
 
 		self.comments = [];
+		self.loading  = true;
 
 		var deferred = $q.defer();
 
@@ -48,6 +49,8 @@ angular.module('3drepo')
 		.then(function(json) {
 			self.comments = json.data;
 			self.n_comments = self.comments.length;
+			self.loading = false;
+
 			deferred.resolve();
 		}, function(json) {
 			deferred.resolve();

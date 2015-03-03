@@ -265,6 +265,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 			shape.setAttribute('onclick', 'clickObject(event);');
 			shape.setAttribute('onmouseover', 'onMouseOver(event);');
 			shape.setAttribute('onmousemove', 'onMouseMove(event);');
+
 			X3D_AddChildren(xmlDoc, shape, child, dbInterface, account, project, mode);
 
 			X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, child, mode);

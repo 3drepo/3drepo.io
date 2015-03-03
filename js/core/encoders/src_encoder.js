@@ -139,6 +139,7 @@ function render(project, mesh, tex_uuid, embedded_texture)
 	// Loop through the faces copying the byte information
 	// to a buffer in the src.
 	var buf = new Buffer(mesh.faces_count * 2 * 3);
+	var faces_byte_count = mesh.faces_count * 2 * 3;
 	var copy_ptr = 0;	  // Pointer to the place in SRC buffer to copy to
 	var orig_idx_ptr = 0; // Pointer in the RepoGraphScene buffer to copy from
 	var num_faces = 0;	  // Number of faces without non-triangle faces.
@@ -220,16 +221,16 @@ function render(project, mesh, tex_uuid, embedded_texture)
 		+ 4 // SRC Version
 		+ 4 // Header length
 		+ json_str.length // JSON String
-		+ mesh.vertices_byte_count // Vertex information
-		+ mesh.faces_byte_count // Indices
-		+ (("normals" in mesh) ? mesh.vertices_byte_count : 0)// Normal information
+		+ mesh['vertices'].buffer.length // Vertex information
+		+ buf.length // Indices
+		+ (("normals" in mesh) ? mesh['vertices'].buffer.length : 0)// Normal information
 	;
 
 	// Output optional texture bits
 	if (tex_uuid != null) {
 		if (embedded_texture)
-			bufSize += texture.data_byte_count;
-		bufSize += mesh.uv_channels_byte_count;
+			bufSize += texture.data.buffer.length;
+		bufSize += mesh['uv_channels'].buffer.length;
 	}
 
 	var outputBuffer = new Buffer(bufSize);
@@ -251,15 +252,15 @@ function render(project, mesh, tex_uuid, embedded_texture)
 	bufPos += json_str.length;
 
 	mesh['vertices'].buffer.copy(outputBuffer, bufPos);
-	bufPos += mesh.vertices_byte_count;
+	bufPos += mesh['vertices'].buffer.length;
 
 	buf.copy(outputBuffer, bufPos);
-	bufPos += mesh.faces_byte_count;
+	bufPos += buf.length;
 
 	if ('normals' in mesh)
 	{
 		mesh['normals'].buffer.copy(outputBuffer, bufPos);
-		bufPos += mesh.vertices_byte_count;
+		bufPos += mesh['normals'].buffer.length;
 	}
 
 	// Output optional texture bits
@@ -267,11 +268,11 @@ function render(project, mesh, tex_uuid, embedded_texture)
 		if (embedded_texture)
 		{
 			texture.data.buffer.copy(outputBuffer, bufPos);
-			bufPos += texture.data.byte_count;
+			bufPos += texture.data.buffer.length;
 		}
 
 		mesh['uv_channels'].buffer.copy(outputBuffer, bufPos);
-		bufPos += mesh.uv_channels_byte_count;
+		bufPos += mesh['uv_channels'].buffer.length;
 	}
 
 	return outputBuffer;

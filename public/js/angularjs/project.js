@@ -81,7 +81,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 						project: function($stateParams){
 							return $stateParams.project;
 						},
-						init: function(Data, $stateParams) {
+						init: function(Data, $state, $stateParams) {
 							Data.changeView('main', null, $stateParams);
 						}
 					}
@@ -107,7 +107,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 						view: function($stateParams){
 							return $stateParams.view;
 						},
-						init: function(ProjectData, view, $stateParams){
+						init: function(Data, view, $stateParams){
 							Data.changeView('main.view', view, $stateParams);
 						}
 					}
@@ -177,7 +177,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 						view: function($stateParams){
 							return $stateParams.view;
 						},
-						init: function(Data, $stateParams)
+						init: function(Data, view, $stateParams)
 						{
 							Data.changeView('main.revision.view', view, $stateParams);
 						}
@@ -203,10 +203,14 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	{
 		if ($window.floating)
 			$window.floating.clearFloats();
+
+		if (toState.name == "main")
+		{
+			$state.go("main.view", {view:"info"});
+		}
 	});
 }])
 .directive('markdown', function () {
-
 	/**
 	 * This directive allows us to convert markdown syntax into
 	 * formatted text

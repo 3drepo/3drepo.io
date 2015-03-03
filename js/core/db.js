@@ -187,13 +187,11 @@ MongoDB.prototype.collCallback = function(dbName, collName, callback) {
 
 	// First get database connection
 	this.dbCallback(dbName, function(err, dbConn) {
-		if (err.value) return callback(responseCodes.DB_ERROR(err));
+		if (err.value) return callback(err);
 
 		// Get collection from database to act on
 		dbConn.collection(collName, {strict:true}, function(err, coll) {
-			if (err) {
-				return callback(responseCodes.DB_ERROR(err));
-			}
+			if (err) return callback(responseCodes.DB_ERROR(err));
 
 			callback(responseCodes.OK, coll);
 		});

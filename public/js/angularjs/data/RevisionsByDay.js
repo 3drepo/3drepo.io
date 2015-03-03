@@ -26,7 +26,7 @@ angular.module('3drepo')
 		return monthNames[month];
 	};
 
-	o.getNumberOfLogEntries = function(account, project, branch) {
+	o.getNumberOfRevisions = function(account, project, branch) {
 		var self = this;
 
 		self.n_revisions = 0;
@@ -41,13 +41,14 @@ angular.module('3drepo')
 			deferred.resolve(0);
 		});
 
-		return deferred.promise();
+		return deferred.promise;
 	}
 
 	o.refresh = function(account, project, branch, first, last) {
 		var self = this;
 
 		self.revisionsByDay = {};
+		self.loading = true;
 
 		var deferred = $q.defer();
 
@@ -70,8 +71,10 @@ angular.module('3drepo')
 				self.revisionsByDay[dtStr].push(json.data[rev]);
 			}
 
+			self.loading = false;
 			deferred.resolve(res);
 		}, function(json) {
+			self.loading = false;
 			deferred.resolve();
 		});
 

@@ -53,6 +53,7 @@ var responseCodes = {
 	PROJECT_HISTORY_NOT_FOUND: {value: 19, message: "Project history not found", status: 404},
 
 	DB_ERROR: function(message) {
+		console.log(JSON.stringify(message));
 		return {
 			value: 1000,
 			message: JSON.stringify(message),
@@ -96,7 +97,7 @@ responseCodes.respond = function(place, resCode, res, extraInfo)
 		if(Buffer.isBuffer(extraInfo))
 		{
 			res.status(resCode.status);
-			res.write(extraInfo);
+			res.write(extraInfo, 'binary');
 			res.end();
 		} else {
 			res.status(resCode.status).send(extraInfo);

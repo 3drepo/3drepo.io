@@ -187,12 +187,13 @@ nav.navbar.transparent.navbar-inverse.navbar-fixed-top {
 /******************************************************************************/
 
 .treeview {
-    top: 60px;
+//    top: 60px;
     position: absolute;
     z-index: 1;
     overflow: auto;
-    height: calc(100% - 50px);  
-    max-height: calc(100% - 50px);  
+//    height: calc(100% - 50px);  
+//    max-height: calc(100% - 50px);  
+	max-height: 600px;
     max-width: 30%;
 }
 .treeview-header{
@@ -386,14 +387,9 @@ a:hover {
 .nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
 
 /* header, footer stuff */
-
-/* Wrapper for page content to push down footer */
-#wrap {
-  min-height: 100%;
-  height: auto !important;
-  height: 100%;
-  /* Negative indent footer by it's height */
-  margin: 0 auto -62px;
+.mainrow {
+	max-width: 80%;
+	margin: 0 auto;
 }
 
 /* Set the fixed height of the footer here */
