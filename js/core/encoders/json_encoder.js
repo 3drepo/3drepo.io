@@ -234,7 +234,7 @@ exports.route = function(router)
 
 		if (params.sid == "root")
 		{
-			router.dbInterface.getScene(params.account, params.project, revision, function(err, doc) {
+			router.dbInterface.getScene(params.account, params.project, revision, false, function(err, doc) {
 				var head = [{}];
 				var node = doc['mRootNode'];
 

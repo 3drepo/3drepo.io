@@ -17,6 +17,8 @@
 var logIface = require('../logger.js');
 var logger = logIface.logger;
 var repoNodeMesh = require('../repoNodeMesh.js');
+var responseCodes = require('../response_codes.js');
+
 
 /*******************************************************************************
  * Render Binary format data of parts of a mesh
@@ -24,32 +26,31 @@ var repoNodeMesh = require('../repoNodeMesh.js');
  * @param {dbInterface} dbInterface - Database interface object
  * @param {string} dbName - Database containing the project to get object from
  * @param {string} project - The name of the project containing the mesh
+ * @param {string} rid - Revision ID of the mesh to be rendered
+ * @param {string} sid - Shared ID of the mesh to be rendered
  * @param {string} uuid - UUID of the mesh to be rendered
  * @param {string} type - Part of the mesh to be rendered (normals, texcoords, indices, coords)
  * @param {Object} res - The http response object
  * @param {function} callback - Callback function that takes an Error object
  *******************************************************************************/
-function render(dbInterface, dbName, project, uuid, type, res, callback) {
-	logger.log('debug', 'Requesting b ' + type + ' for ' + uuid);
+function render(dbInterface, dbName, project, uuid, rid, sid, type, callback) {
+	logger.log('debug', 'Requesting ' + type + ' for ' + uuid);
 
-	dbInterface.getObject(dbName, project, uuid, function(err, doc) {
-		if (err) return callback(err);
+	dbInterface.getObject(dbName, project, uuid, rid, sid, function(err, objType, uid, obj) {
+		if (err.value)
+			return callback(err);
 
-		var mesh = doc.meshes[uuid];
+		var mesh = obj.meshes[uuid];
 
 		switch (type) {
 			case "normals":
-				res.write(mesh.normals.buffer, 'binary');
-				res.end();
-				break;
+				return callback(responseCodes.OK, mesh['normals'].buffer);
 			case "texcoords":
-				res.write(mesh.uv_channels.buffer, 'binary');
-				res.end();
-				break;
+				return callback(responseCodes.OK, mesh['uv_channels'].buffer);
 			case "indices":
 				var buf = new Buffer(mesh.faces_count * 2 * 3);
 				var copy_idx = 0;
-				var orig_idx = mesh.faces.buffer;
+				var orig_idx = mesh['faces'].buffer;
 
 				for (var face_idx = 0; face_idx < mesh.faces_count; face_idx++) {
 					for (var vert_comp = 0; vert_comp < 3; vert_comp++) {
@@ -61,13 +62,9 @@ function render(dbInterface, dbName, project, uuid, type, res, callback) {
 					}
 				}
 
-				res.write(buf, 'binary');
-				res.end();
-				break;
+				return callback(responseCodes.OK, buf);
 			case "coords":
-				res.write(mesh.vertices.buffer, 'binary');
-				res.end();
-				break;
+				return callback(responseCodes.OK, mesh['vertices'].buffer);
 		}
 	});
 };
@@ -76,16 +73,17 @@ function render(dbInterface, dbName, project, uuid, type, res, callback) {
 exports.route = function(router)
 {
     router.get('bin', '/:account/:project/:uid', function(res, params, err_callback) {
-	var type = params.query.type;
+		var type = params.query.mode;
 
-        render(router.dbInterface, params.account, params.project, params.uid, type, res, function(res)
-        {
-		if(err.value)
-			err_callback(err);
-		else
-			res.json(res);
-        });
+        render(router.dbInterface, params.account, params.project, params.uid, null, null, type, err_callback);
     });
+
+	router.get('bin', '/:account/:project/revision/:rid/:sid', function(res, params, err_callback) {
+		var type = params.query.mode;
+
+        render(router.dbInterface, params.account, params.project, null, params.rid, params.sid, type, err_callback);
+	});
+
 };
 
 

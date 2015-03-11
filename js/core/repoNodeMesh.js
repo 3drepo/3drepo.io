@@ -22,56 +22,6 @@ var UUID = require('node-uuid');
 var C = require('./constants');
 
 exports.decode = function(bson, materials) {
-    assert.equal(bson[C.REPO_NODE_LABEL_TYPE], C.REPO_NODE_TYPE_MESH, "Trying to convert " + bson[C.REPO_NODE_LABEL_TYPE] + " to mesh");
-
-    if (0) {
-        // Name
-        if (bson[C.REPO_NODE_LABEL_NAME]) bson[C.M_NAME] = bson[C.REPO_NODE_LABEL_NAME];
-
-        // Vertices
-        var verticesCount = bson[C.REPO_NODE_LABEL_VERTICES_COUNT];
-        if (bson[C.REPO_NODE_LABEL_VERTICES]) {
-            var verticesBinaryObject = bson[C.REPO_NODE_LABEL_VERTICES];
-            var vectorsArray = toFloat32Array(verticesBinaryObject, true);
-
-            // TODO: change mVertices to vertices
-            bson[C.M_VERTICES] = vectorsArray;
-        }
-
-        // Normals
-        // There is the same number of normals as vertices.
-        if (bson[C.REPO_NODE_LABEL_NORMALS]) {
-            var normalsBinaryObject = bson[C.REPO_NODE_LABEL_NORMALS];
-            var vectorsArray = toFloat32Array(normalsBinaryObject, true);
-
-            // TODO: change mNormals to normals
-            bson[C.M_NORMALS] = vectorsArray;
-        }
-
-        // Faces
-        if (bson[C.REPO_NODE_LABEL_FACES]) {
-            var expectedLength = bson[C.REPO_NODE_LABEL_FACES_COUNT];
-            var facesBinaryObject = bson[C.REPO_NODE_LABEL_FACES];
-
-            // number of bytes representing each value (int, should be 4)
-            var offset = facesBinaryObject.position / expectedLength;
-
-            // array of arrays of indices
-            var facesArray = toFaceArray(facesBinaryObject, offset, true);
-            bson[C.M_FACES] = facesArray;
-            // TODO: change mFaces to faces
-        }
-
-        // UV channels
-        if (bson[C.REPO_NODE_LABEL_UV_CHANNELS]) {
-            var uvChannelsBinaryObject = bson[C.REPO_NODE_LABEL_UV_CHANNELS];
-            var uvChannelsCount = bson[C.REPO_NODE_LABEL_UV_CHANNELS_COUNT] ? bson[C.REPO_NODE_LABEL_UV_CHANNELS_COUNT] : 0;
-            var uvChannels = toUVChannelsArray(uvChannelsBinaryObject, uvChannelsCount, true);
-            bson[C.REPO_NODE_LABEL_UV_CHANNELS] = uvChannels;
-        }
-
-    }
-
     // There should be always only a single material with the mesh!
     // Takes the very first match if multiple materials attached as children.
     // Children are appended on the fly from other repository components.

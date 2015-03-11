@@ -44,8 +44,22 @@ for(i in config.servers)
 		module.exports.servers[i].port = config.servers[i].http_port;
 	}
 
-	module.exports.servers[i].url = module.exports.servers[i].hostname + ':' + module.exports.servers[i].port;
+	if ("protocol" in module.exports.servers[i])
+	{
+		module.exports.servers[i].protocol = modules.exports.servers[i].protocol + '://';
+	} else {
+		module.exports.servers[i].protocol = '//';
+	}
+
+	module.exports.servers[i].url = module.exports.servers[i].protocol + module.exports.servers[i].hostname + ':' + module.exports.servers[i].port;
 }
 
-module.exports.apiServer.url = module.exports.apiServer.hostname + ':' + module.exports.apiServer.port;
+if("protocol" in module.exports.apiServer)
+{
+	module.exports.apiServer.url = module.exports.apiServer.url + '://';
+} else {
+	module.exports.apiServer.url = '//';
+}
+
+module.exports.apiServer.url = module.exports.apiServer.protocol + module.exports.apiServer.hostname + ':' + module.exports.apiServer.port;
 

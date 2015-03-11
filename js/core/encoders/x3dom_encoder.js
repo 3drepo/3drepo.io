@@ -306,23 +306,33 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, mode
 
 			var face_arr = '';
 			var idx = 0;
+			var nVerts = 0;
 
-			for (var faceIdx = 0; faceIdx < mesh.mFaces.length; faceIdx++) {
-				for (var vertIdx = 0; vertIdx < mesh.mFaces[faceIdx].length; vertIdx++) {
-					face_arr += mesh.mFaces[faceIdx][vertIdx] + ' ';
+			for (var faceIdx = 0; faceIdx < mesh.faces_count; faceIdx++)
+			{
+				nVerts = mesh['faces'].buffer.readInt32LE(idx);
+				idx += 4;
+
+				for(var vertIdx = 0; vertIdx < nVerts; vertIdx++) {
+					face_arr += mesh['faces'].buffer.readInt32LE(idx) + ' ';
+					idx += 4;
 				}
-				face_arr += '-1 ';
 
+				face_arr += '-1 ';
 			}
+
 			indexedfaces.setAttribute('coordIndex', face_arr);
 			shape.appendChild(indexedfaces);
 
 			var coordinate = xmlDoc.createElement('Coordinate');
 			var coord_arr = '';
 
-			for (var vertIdx = 0; vertIdx < mesh.mVertices.length; vertIdx++) {
+			idx = 0;
+			for (var vertIdx = 0; vertIdx < mesh.vertices_count; vertIdx++)
+			{
 				for (var comp_idx = 0; comp_idx < 3; comp_idx++) {
-					coord_arr += mesh.mVertices[comp_idx] + ' ';
+					coord_arr += mesh['vertices'].buffer.readFloatLE(idx) + ' ';
+					idx += 4;
 				}
 			}
 
@@ -582,7 +592,9 @@ function X3D_AddGroundPlane(xmlDoc, bbox)
  *						ground plane
  *******************************************************************************/
 function render(dbInterface, account, project, subFormat, revision, callback) {
-	dbInterface.getScene(account, project, revision, function(err, doc) {
+	var full = (subFormat == "x3d");
+
+	dbInterface.getScene(account, project, revision, full, function(err, doc) {
 		if(err.value) return callback(err);
 
 		var xmlDoc = X3D_Header();

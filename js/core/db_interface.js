@@ -660,7 +660,7 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 	}
 }
 
-exports.getScene = function(dbName, project, revision, callback) {
+exports.getScene = function(dbName, project, revision, full, callback) {
 	var historyQuery = null;
 
 	if (revision != null)
@@ -674,13 +674,18 @@ exports.getScene = function(dbName, project, revision, callback) {
 	{
 		if(err.value) return callback(err);
 
-		var projection = {
-			vertices: 0,
-			normals: 0,
-			faces: 0,
-			data: 0,
-			uv_channels: 0
-		};
+		if (!full)
+		{
+			var projection = {
+				vertices: 0,
+				normals: 0,
+				faces: 0,
+				data: 0,
+				uv_channels: 0
+			};
+		} else {
+			var projection = {};
+		}
 
 		var query = {
 			_id: { $in: docs[0]['current'] }

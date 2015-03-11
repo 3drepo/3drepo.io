@@ -23,34 +23,7 @@ In general, to configure a new configuration enviroment called <config_name>:
 1. Change to the configuration directory: `cd config`
 2. First create a new directory under config: `mkdir <config_name>`
 3. Copy config\_sample.js from dev to the directory as config.js: `cp dev/config_sample.js <config_name>/config.js`
-4. Edit config.js using the description below.
- 
-Configuration descriptions
---------------------------
-
-**server**: settings for the server to run with
-* **http_port**: port to run the http service on
-*  **https_port**: port to run the https service on
-
-**logfile**: settings for logging
-*  **filname**: output name of the log file
-*  **console_level**: logging level to output to the console
-*  **file_level**: logging level to output to the log file
-
-**db**: settings to connect to the mongo database
-*  **host**: host on which the mongodb runs
-*  **port**: port on which to connect to the mongodb
-*  **username**: username to use for mongodb authentication
-*  **password**: password to use for mongodb authentication
-
-**ssl**: **(Optional)** settings for ssl encryption, leave this out to disable it.
-*  **key**: filename of ssl encryption key
-*  **cert**: filename of ssl encryption certificate
-
-**external**: settings for external resources
-*  **x3domjs**: x3dom javascript URL
-*  **x3domcss**: x3dom css URL
-*  **repouicss**: 3drepo.io CSS location
+4. Edit config.js as described in [Configuration File](https://github.com/3drepo/3drepo.io/wiki/Configuration-File)
 
 Running the application
 -----------------------
