@@ -39,6 +39,8 @@ var TreeControl = function() {
 
 		this.onlyThis(parent);
 	};
+
+	this.clickedFromView = false;
 };
 
 $(document).on("bgroundClicked", function(event) {
@@ -52,6 +54,7 @@ $(document).on("clickObject", function(event, objEvent) {
 	tree.loadKeyPath(treeCtrl.getKeyPath(objEvent.target),
 		function(node, status) {
 			if(status === "ok") {
+				treeCtrl.clickedFromView = true;
 				treeCtrl.onlyThis(node);
 				node.setActive();
 			}
@@ -122,7 +125,7 @@ var initTree = function(account, project)
 			if ("uuid" in data.node.data)
 			{
 				var rootObj = getNode(data.node);
-				viewer.selectGroup(rootObj);
+				viewer.selectGroup(rootObj, !treeCtrl.clickedFromView);
 			}
 
 			if (("meta" in data.node.data) && (data.node.data["meta"].length))
@@ -148,6 +151,7 @@ var initTree = function(account, project)
 			} else {
 				$("#meta-popup").css("visibility", "hidden");
 			}
+			treeCtrl.clickedFromView = false;
 		},
 		checkbox: true,
 		source: {

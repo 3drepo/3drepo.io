@@ -28,6 +28,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		url: '/demo?uid?mode',
 		templateUrl: 'mainpage.html',
 		controller: 'MainCtrl',
+		Wayfinder: 'Wayfinder',
 		params: { uid: { value: null }, mode: { value: null } },
 		resolve: {
 			uid: function($stateParams) {
@@ -36,8 +37,9 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			mode: function($stateParams) {
 				return $stateParams.mode;
 			},
-			WayfinderData : function(Wayfinder) {
-				return Wayfinder.promise;
+			init: function(Wayfinder)
+			{
+				Wayfinder.refresh();
 			}
 		}
 	}).state('404', {
@@ -45,82 +47,120 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	  templateUrl: '404.html',
 	});
 
-	// This will be needed to remove angular's #, but there is an error at the moment
-	// -> need to investigate
+	// Remove # from URL
 	$locationProvider.html5Mode(true);
 }])
-.factory('iFrameURL', function() {
-	var o = {};
+.controller('MainCtrl', ['$scope', '$location', '$window', 'serverConfig', 'uid', 'mode', 'Wayfinder',
+	function($scope, $location, $window, serverConfig, uid, mode, Wayfinder) {
+		$window.viewer = new Viewer();
+		$scope.viewer = $window.viewer;
 
-	o.setURL = function(url)
-	{
-		o.url = url;
-	}
+		viewer.loadURL(serverConfig.apiUrl(serverConfig.democompany + '/' + serverConfig.demoproject + '/revision/master/head.x3d.src'));
 
-	return o;
-})
-.controller('MainCtrl', ['$scope', '$http', 'iFrameURL', '$location', '$window', 'serverConfig', 'uid', 'mode', 'Wayfinder', function($scope, $http, iFrameURL, $location, $window, serverConfig, uid, mode, Wayfinder) {
-	$scope.iFrameURL = iFrameURL;
-	iFrameURL.setURL(serverConfig.apiUrl(serverConfig.democompany + '/' + serverConfig.demoproject + '/revision/master/head.x3d.src'));
+		var avatarHeight = 1.83;
+		var collDistance = 0.1;
+		var stepHeight	= 0.4;
+		var speed		= 2.0;
+		var startPoint	= [-26.06, -0.21, 15.28];
+		var endPoint   = [-26.06, -0.21, -7.28];
+		var scaleY     = 0.05;
+		var trans	  = 0.3;
+		var blobRadius = 1.5;
 
-	$scope.visualizeThese = null;
+		viewer.changeCollisionDistance(collDistance);
+		viewer.changeAvatarHeight(avatarHeight);
+		viewer.changeStepHeight(stepHeight);
+		viewer.setSpeed(speed);
+		viewer.setNavMode("NONE");
 
-	$scope.visNav = "FLY";
+		var avrStart = startPoint.slice(0);
+		avrStart[1] += avatarHeight;
+		avrStart[2] += 9.0;
 
-	$scope.viscontrolon = true;
+		viewer.setStartingPoint(avrStart[0], avrStart[1], avrStart[2]);
 
-	if(uid)
-	{
-		var uidData = null;
-		$('#readme').hide();
-		walkInitialize(true);
+		$window.text = new Text();
+		var startRGB = [1.0, 0.0, 0.0];
+		$window.text.init(startRGB);
+		$scope.text  = $window.text;
 
-		if (uid instanceof Array)
-			uidData = uid;
-		else
-			uidData = [uid];
+		$window.arrow = new Arrow();
+		$scope.arrow  = $window.arrow;
 
-		$http.get(serverConfig.apiUrl('wayfinder/record.json'),
-			{ params : { uid: JSON.stringify(uidData) }})
-		.success(function(data, status) {
-			if(mode == 'flythru')
-				runFlyThru(data);
+		$window.recorder = new Recorder(startPoint, endPoint, blobRadius);
+		$scope.recorder = $window.recorder;
+
+		$window.spheres = new Spheres();
+		$scope.spheres = $window.spheres;
+
+		$scope.visualizeThese = null;
+
+		$scope.visNav = "FLY";
+
+		$scope.viscontrolon = true;
+
+		/*
+		if(uid)
+		{
+			var uidData = null;
+			$('#readme').hide();
+			walkInitialize(true);
+
+			if (uid instanceof Array)
+				uidData = uid;
 			else
-			{
-				$scope.viscontrolon = false;
-				plotSpheres(data);
-			}
-		});
+				uidData = [uid];
+
+			$http.get(serverConfig.apiUrl('wayfinder/record.json'),
+				{ params : { uid: JSON.stringify(uidData) }})
+			.success(function(data, status) {
+				if(mode == 'flythru')
+					runFlyThru(data);
+				else
+				{
+					$scope.viscontrolon = false;
+					plotSpheres(data);
+				}
+			});
+		}
+		*/
+
+		$scope.previous = Wayfinder.previous;
+
+		$scope.viewerReload = viewer.reload;
+
+		$scope.startWalking = function() {
+			viewer.reset();
+			spheres.addSphere(startPoint, blobRadius, scaleY, [0, 1, 0], trans);
+			spheres.addSphere(endPoint, blobRadius, scaleY, [1,0,0], trans);
+			arrow.addArrow(endPoint, [1,0,0], 0.3);
+
+			text.updateText('Step on pad to begin', [0,1,0], 2000);
+
+			viewer.setNavMode("WALK");
+		}
+
+		$scope.begin = function() {
+			$('#readme').hide();
+			$scope.startWalking();
+		};
+
+		$scope.visualize = function() {
+			$state.go('main', { url : $scope.visualizeThese });
+		}
+
+		$scope.flythrough = function() {
+			$state.go('main', { url : $scope.visualizeThese, mode: 'flythru' });
+		}
+
+		$scope.changeNav = function() {
+			viewer.setNavMode($scope.visNav);
+		}
+
+		$scope.backToMenu = function()
+		{
+			$state.go('main', {});
+		}
 	}
-
-	$scope.previous = Wayfinder.getPrevious();
-
-	$scope.x3domreload = function() {
-		x3dom.reload();
-		$scope.loadedfunc = 'onLoadedEvent()';
-	};
-
-	$scope.begin = function() {
-		$('#readme').hide();
-		walkInitialize();
-	};
-
-	$scope.visualize = function() {
-		$location.path('/demo').search('uid=' + $scope.visualizeThese.map(function(item) { return item.value; }).join('&uid='));
-	}
-
-	$scope.flythrough = function() {
-		$location.path('/demo').search('mode=flythru&uid=' + $scope.visualizeThese.map(function(item) { return item.value; }).join('&uid='));
-	}
-
-	$scope.changeNav = function()
-	{
-		$('#nav')[0].setAttribute('type', $scope.visNav);
-	}
-
-	$scope.backToMenu = function()
-	{
-		$location.path('/demo').search('');
-	}
-}]);
+]);
 

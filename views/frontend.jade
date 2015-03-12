@@ -1,5 +1,5 @@
 doctype html
-html(lang="en" ng-app="3drepo")
+html(lang="en" ng-app="3drepo").ng-scope
 	head
 		// Meta, title, CSS, favicons, etc.
 		meta(charset='utf-8')
@@ -65,8 +65,8 @@ html(lang="en" ng-app="3drepo")
 		script(type="text/javascript" src="/public/js/angularjs/controllers/project/ViewCtrl.js")
 		script(type="text/javascript" src="/public/js/angularjs/controllers/project/SignUpCtrl.js")
 		script(type="text/javascript" src="/public/js/angularjs/controllers/project/SplashCtrl.js")
-	
-	body(ng-controller='LoginCtrl').ng-scope
+
+	body(ng-controller='LoginCtrl')
 		// Not found template
 		script(type='text/ng-template', id='404.html')
 			include ng-templates/404.jade

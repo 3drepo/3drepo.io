@@ -1,5 +1,5 @@
 doctype html
-html(lang="en")
+html(lang="en" ng-app="3drepo").ng-scope
 	head
 		// Meta, title, CSS, favicons, etc.
 		meta(charset='utf-8')
@@ -46,9 +46,16 @@ html(lang="en")
 		script.
 			angular.module('3drepo', ['ui.router', 'ui.bootstrap', 'angular-bootstrap-select']);
 
+		script(type="text/javascript" src="/public/js/waypoint/draw.js")
+		script(type="text/javascript" src="/public/js/waypoint/record.js")
+
 		script(type="text/javascript" src="/public/js/angularjs/boilerplate/pageConfigProvider.js")
 		script(type="text/javascript" src="/public/js/angularjs/boilerplate/serverConfig.js")
 
+		script(type="text/javascript" src="/public/js/angularjs/data/Wayfinder.js")
+
+		script(type="text/javascript" src="/public/js/controlinterface.js")
+		script(type="text/javascript" src="/public/js/viewer.js")
 		script(type="text/javascript" src="/public/js/angularjs/waypoint.js")
 		script(type="text/javascript" src="/public/js/angularjs/waypointPageConfig.js")
 		script(type="text/javascript" src="/public/js/angularjs/boilerplate/Auth.js")
@@ -59,8 +66,9 @@ html(lang="en")
 				$("#meta-popup").draggable({ snap : ".viewport"})
 			});
 
-	body(ng-app='3drepo' ng-controller='LoginCtrl' class="{{bodylayout}}").ng-scope
-		h1#logo 3D Repo
+	body(ng-controller='LoginCtrl' ng-class="bodylayout")
+		h1#logo(ng-hide="!(state.current.name=='login')") 3D Repo
+
 		// Not found template
 		script(type='text/ng-template', id='404.html')
 			include ng-templates/404.jade
@@ -73,5 +81,7 @@ html(lang="en")
 		script(type='text/ng-template', id='mainpage.html')
 			include ng-templates/waypoint_mainpage.jade
 
-		div.viewport(ui-view='')
+		.row
+			.container-fluid
+				div(ui-view='')
 

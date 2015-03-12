@@ -53,10 +53,6 @@ x3dom.runtime.ready = runtimeReady;
 
 (function() {
 	window.scale = 1;
-	window.avatarHeight = 1.83 * window.scale;
-	window.collDistance = 0.1 * window.scale;
-	window.stepHeight = 0.4 * window.scale;
-
 	window.speed = 2.0 * window.scale;
 
 	//$('#viewer')[0].setAttribute('keysEnabled', 'false');

@@ -210,59 +210,18 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		}
 	});
 }])
-.directive('markdown', function () {
-	/**
-	 * This directive allows us to convert markdown syntax into
-	 * formatted text
-	 */
-
-	var converter = new Showdown.converter();
-	return {
-	  restrict: 'A',
-	  link: function (scope, element, attrs) {
-		  function renderMarkdown() {
-			  var htmlText = converter.makeHtml(scope.$eval(attrs.markdown)  || '');
-			  element.html(htmlText);
-		  }
-		  scope.$watch(attrs.markdown, renderMarkdown);
-		  renderMarkdown();
-	  }
-  };
-})
-.service('iFrameURL', function() {
-	this.ready = null;
-	this.url = "";
-	var self = this;
-
-	this.setURL = function(url)
-	{
-		// TODO: Terrible hack for demo, fix using directives.
-		$('#masterInline')[0].setAttribute("url", url);
-		x3dom.reload();
-		//this.url = url;
-		//this.ready = true;
-	}
-})
-.controller('MainCtrl', ['$scope', 'iFrameURL', 'account', 'project', 'serverConfig', 'Auth', function($scope, iFrameURL, account, project, serverConfig, Auth) {
-	$scope.iFrameURL = iFrameURL;
-
-	iFrameURL.setURL(serverConfig.apiUrl(account + '/' + project + '/revision/master/head.x3d.src'));
-
+.controller('MainCtrl', ['$window', 'account', 'project', 'serverConfig', function($window, account, project, serverConfig) {
+	$window.viewer = new Viewer();
+	$window.viewer.loadURL(serverConfig.apiUrl(account + '/' + project + '/revision/master/head.x3d.src'));
 	initTree(account, project);
-
-	$scope.x3domreload = function() {
-		x3dom.reload();
-	};
-
-	$scope.$watch(function() { return iFrameURL; }, function(newObj) { $scope.iFrameURL = newObj; });
 }])
-.controller('RevisionCtrl', ['$scope', 'iFrameURL', 'account', 'project', 'branch', 'rid', '$stateParams', 'serverConfig', function($scope, iFrameURL, account, project, branch, rid, $stateParams, serverConfig) {
+.controller('RevisionCtrl', ['$scope', 'account', 'project', 'branch', 'rid', '$stateParams', 'serverConfig', function($scope, account, project, branch, rid, $stateParams, serverConfig) {
 	$scope.branch = branch;
 	$scope.rid = rid;
 
 	if (branch)
-		iFrameURL.setURL(serverConfig.apiUrl(account + '/' + project + '/revision/' + branch + '/' + rid + '.x3d.src'));
+		viewer.loadURL(serverConfig.apiUrl(account + '/' + project + '/revision/' + branch + '/' + rid + '.x3d.src'));
 	else
-		iFrameURL.setURL(serverConfig.apiUrl(account + '/' + project + '/revision/' + rid + '.x3d.src'));
+		viewer.loadURL(serverConfig.apiUrl(account + '/' + project + '/revision/' + rid + '.x3d.src'));
 }]);
 
