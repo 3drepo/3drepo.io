@@ -55,8 +55,10 @@ if (!config.vhost)
 	if ('ssl' in config)
 	{
 		var apiServer = https.createServer(ssl_options, apiApp);
+		config.apiServer.port = config.apiServer.https_ports;
 	} else {
 		var apiServer = http.createServer(apiApp);
+		config.apiServer.port = config.apiServer.http_port;
 	}
 
 	for(i in config.servers)
@@ -66,8 +68,10 @@ if (!config.vhost)
 		if ('ssl' in config)
 		{
 			var frontServer = https.createServer(ssl_options, frontApp);
+			config.servers[i].port = config.servers[i].https_port;
 		} else {
 			var frontServer = http.createServer(frontApp);
+			config.servers[i].port = config.servers[i].http_port;
 		}
 
 		frontServer.listen(config.servers[i].port, config.servers[i].hostname, function() {
@@ -89,6 +93,11 @@ if (!config.vhost)
 		var frontApp = require('./frontend.js').createApp(config.servers[i].template);
 		logger.log('info', 'Starting VHOST for ' + config.servers[i].hostname);
 		vhostApp.use(vhost(config.servers[i].hostname, frontApp));
+
+		if('ssl' in config)
+			config.servers[i].port = config.servers[i].https_port;
+		else
+			config.servers[i].port = config.servers[i].http_port;
 	}
 
 	if ('ssl' in config)

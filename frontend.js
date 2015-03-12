@@ -39,11 +39,14 @@ module.exports.createApp = function(template)
 		var params = {};
 
 		params['config_js'] = 'var server_config = {}; server_config.apiUrl = function(path) { return "//' +
-			config.apiServer.url + '/" + path; };';
+		config.apiServer.url + '/" + path; };';
 
-		// TODO: Make a public section in config for vars to be revealed
-		params['config_js'] += '\nserver_config.democompany = "' + config.wayfinder.democompany + '";';
-		params['config_js'] += '\nserver_config.demoproject = "' + config.wayfinder.demoproject + '";';
+		if("wayfinder" in config)
+		{
+			// TODO: Make a public section in config for vars to be revealed
+			params['config_js'] += '\nserver_config.democompany = "' + config.wayfinder.democompany + '";';
+			params['config_js'] += '\nserver_config.demoproject = "' + config.wayfinder.demoproject + '";';
+		}
 
 		params['config_js'] += '\n\nvar realOpen = XMLHttpRequest.prototype.open;\n\nXMLHttpRequest.prototype.open = function(method, url, async, unk1, unk2) {\nthis.withCredentials = true;\nrealOpen.apply(this, arguments);\n};';
 

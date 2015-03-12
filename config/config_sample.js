@@ -52,9 +52,9 @@ module.exports = {
 	},
 	external: {
 		// 3DRepo
-		repouicss : '../css/ui.css',
-		repobasecss: '../css/base.css',
-		dblistbasecss: '../css/dblist_base.css',
+		repouicss : '/public/css/ui.css',
+		repobasecss: '/public/css/base.css',
+		dblistbasecss: '/public/css/dblist_base.css',
 
 		// X3DOM
 		x3domjs: 'http://x3dom.org/download/dev/x3dom.js',
@@ -78,6 +78,7 @@ module.exports = {
 		bootstrapselectjs: 'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.4/js/bootstrap-select.js',
 		bootstrapselectcss: 'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.4/css/bootstrap-select.css',
 		fontawesomecss: '//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css',
+		uibootstrap: 'https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.12.1/ui-bootstrap-tpls.min.js',
 
 		// Fancytree
 		fancytreecss: 'https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.8.1/skin-xp/ui.fancytree.min.css',

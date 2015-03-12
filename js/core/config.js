@@ -26,9 +26,9 @@ module.exports = config;
 // Dynamic config based on static config variables
 
 if ('ssl' in config) {
-	module.exports.apiServer.port = config.apiServer.api_https_port ? config.apiServer.api_https_port : config.servers[0].https_port;
+	module.exports.apiServer.port = config.apiServer.https_port ? config.apiServer.https_port : config.servers[0].https_port;
 } else {
-	module.exports.apiServer.port = config.apiServer.api_http_port ? config.apiServer.api_http_port : config.servers[0].http_port;
+	module.exports.apiServer.port = config.apiServer.http_port ? config.apiServer.http_port : config.servers[0].http_port;
 }
 
 if (!config.apiServer.hostname)
@@ -56,9 +56,9 @@ for(i in config.servers)
 
 if("protocol" in module.exports.apiServer)
 {
-	module.exports.apiServer.url = module.exports.apiServer.url + '://';
+	module.exports.apiServer.protocol = module.exports.apiServer.url + '://';
 } else {
-	module.exports.apiServer.url = '//';
+	module.exports.apiServer.protocol = '//';
 }
 
 module.exports.apiServer.url = module.exports.apiServer.protocol + module.exports.apiServer.hostname + ':' + module.exports.apiServer.port;
