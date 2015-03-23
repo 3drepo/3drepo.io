@@ -1,28 +1,7 @@
-[submodule "submodules/bootstrap"]
-	path = submodules/bootstrap
-	url = https://github.com/twbs/bootstrap.git
 [submodule "submodules/bootstrap-autohidingnavbar"]
 	path = submodules/bootstrap-autohidingnavbar
 	url = https://github.com/istvan-ujjmeszaros/bootstrap-autohidingnavbar.git
-[submodule "submodules/jquery"]
-	path = submodules/jquery
-	url = https://github.com/jquery/jquery.git
-[submodule "submodules/bootstrap3-dialog"]
-	path = submodules/bootstrap3-dialog
-	url = https://github.com/nakupanda/bootstrap3-dialog.git
 [submodule "x3dom"]
 	path = submodules/x3dom
 	url = git://github.com/3drepo/x3dom.git
 	ignore=dirty
-[submodule "submodules/jstree"]
-	path = submodules/jstree
-	url = https://github.com/vakata/jstree.git
-[submodule "submodules/fancytree"]
-	path = submodules/fancytree
-	url = https://github.com/mar10/fancytree.git
-[submodule "submodules/bootstrap-select"]
-	path = submodules/bootstrap-select
-	url = https://github.com/silviomoreto/bootstrap-select.git
-[submodule "submodules/angular-bootstrap-select"]
-	path = submodules/angular-bootstrap-select
-	url = https://github.com/joaoneto/angular-bootstrap-select.git
