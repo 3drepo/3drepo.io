@@ -1,6 +1,6 @@
 nav.navbar.whitenavbar.navbar-fixed-top
 	.container-fluid
-		ul#vis-controls.nav.navbar-nav.navbar-right(ng-hide="viscontrolon")
+		ul#vis-controls.nav.navbar-nav.navbar-right(ng-show="showVisControls")
 			form.form-inline
 				select(selectpicker ng-model="visNav", ng-change="changeNav()")
 					option Fly

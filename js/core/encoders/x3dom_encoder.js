@@ -73,46 +73,251 @@ function X3D_CreateScene(xmlDoc) {
 	var scene = xmlDoc.createElement('Scene');
 	scene.setAttribute('id', 'scene');
 
-	var head = xmlDoc.createElement('navigationInfo');
-
-	head.setAttribute('DEF', 'head');
-	head.setAttribute('headlight', 'true');
-	head.setAttribute('type', 'walk');
-	head.setAttribute('speed', 1.5);
-	head.textContent = ' ';
-
-	//scene.appendChild(head);
 	xmlDoc.firstChild.appendChild(scene);
 
-	// Background color (ie skybox)
-	var bground = xmlDoc.createElement('background');
-	bground.setAttribute('skyangle', '0.9 1.5 1.57');
-	bground.setAttribute('skycolor', '0.21 0.18 0.66 0.2 0.44 0.85 0.51 0.81 0.95 0.83 0.93 1');
-	bground.setAttribute('groundangle', '0.9 1.5 1.57');
-	bground.setAttribute('groundcolor', '0.65 0.65 0.65 0.73 0.73 0.73 0.81 0.81 0.81 0.91 0.91 0.91');
-	bground.textContent = ' ';
-	scene.appendChild(bground);
+	var rootGroup = xmlDoc.createElement("group");
+	rootGroup.setAttribute('id', 'root');
+	rootGroup.setAttribute('def', 'root');
+	rootGroup.setAttribute('render', 'true');
+	scene.appendChild(rootGroup);
+
+	return {scene: scene, root: rootGroup};
+}
+
+/*******************************************************************************
+ * Create scene in X3D document
+ *
+ * @param {xmlDom} xmlDoc - The XML document to add the scene to
+ *******************************************************************************/
+function X3D_CreateOculus(xmlDoc) {
+	var sceneRoot = X3D_CreateScene(xmlDoc);
+
+	var scene	= sceneRoot.scene;
+	var group	= sceneRoot.root;
+	//xmlDoc.firstChild.appendChild(scene);
+
+	var vp = xmlDoc.createElement("viewpoint");
+	vp.setAttribute('id', 'vpp');
+	vp.setAttribute('def', 'vp');
+	vp.setAttribute('zNear', 0.01);
+	vp.setAttribute('zFar', 10000);
+	vp.setAttribute('position', '0 0 0');
+	vp.textContent = ' ';
+	scene.appendChild(vp);
+
+	var alt = xmlDoc.createElement("viewpoint");
+	alt.setAttribute('def', 'AOPT_CAM');
+	alt.setAttribute('position', '0 0 0');
+	alt.textContent = ' ';
+	//scene.appendChild(alt);
+
+    //<viewpoint def='AOPT_CAM' centerofrotation='3.4625 1.73998 -5.55' </viewpoint>
+
+	// Add oculus eyes
+	var eyeGroup = xmlDoc.createElement('group');
+	eyeGroup.setAttribute('render', 'true');
+	scene.appendChild(eyeGroup);
+
+	var leftEye = xmlDoc.createElement('group');
+	leftEye.setAttribute('def', 'left');
+	eyeGroup.appendChild(leftEye);
+
+	var leftShape = xmlDoc.createElement('shape');
+	leftEye.appendChild(leftShape);
+
+	var leftApp = xmlDoc.createElement('appearance');
+	leftShape.appendChild(leftApp);
+
+	var leftTex = xmlDoc.createElement('renderedtexture');
+	leftTex.setAttribute('id', 'rtLeft');
+	leftTex.setAttribute('stereoMode', 'LEFT_EYE');
+	leftTex.setAttribute('update', 'ALWAYS');
+	leftTex.setAttribute('oculusRiftVersion', '2');
+	leftTex.setAttribute('dimensions', '980 1080 3');
+	leftTex.setAttribute('repeatS', 'false');
+	leftTex.setAttribute('repeatT', 'false');
+	leftTex.setAttribute('interpupillaryDistance', 0.0668);
+	leftApp.appendChild(leftTex);
+
+	var leftVP = xmlDoc.createElement('viewpoint');
+	leftVP.setAttribute('use', 'vp');
+	leftVP.setAttribute('containerfield', 'viewpoint');
+	leftVP.textContent = ' ';
+	leftTex.appendChild(leftVP);
+
+	var leftBground = xmlDoc.createElement('background');
+	leftBground.setAttribute('use', 'bground');
+	leftBground.setAttribute('containerfield', 'background');
+	leftBground.textContent = ' ';
+	leftTex.appendChild(leftBground);
+
+	var leftScene = xmlDoc.createElement('group');
+	leftScene.setAttribute('use', 'root');
+	leftScene.setAttribute('containerfield', 'scene');
+	leftTex.appendChild(leftScene);
+
+
+	var leftShader = xmlDoc.createElement('composedshader');
+	leftApp.appendChild(leftShader);
+
+	var leftTexField = xmlDoc.createElement('field');
+	leftTexField.setAttribute('name', 'tex');
+	leftTexField.setAttribute('type', 'SFInt32');
+	leftTexField.setAttribute('value', '0');
+	leftShader.appendChild(leftTexField);
+
+	/*
+	var leftEyeField = xmlDoc.createElement('field');
+	leftEyeField.setAttribute('name', 'leftEye');
+	leftEyeField.setAttribute('type', 'SFFloat');
+	leftEyeField.setAttribute('value', '1');
+	leftShader.appendChild(leftEyeField);
+	*/
+
+	var leftVertexShader = xmlDoc.createElement('shaderpart');
+	leftVertexShader.setAttribute('type', 'VERTEX');
+	leftVertexShader.textContent = "\n\
+		attribute vec3 position;\n\
+		attribute vec2 texcoord;\n\
+		\n\
+		uniform mat4 modelViewProjectionMatrix;\n\
+		varying vec2 fragTexCoord;\n\
+		\n\
+		void main()\n\
+		{\n\
+			vec2 pos = sign(position.xy);\n\
+			fragTexCoord = texcoord;\n\
+			gl_Position = vec4((pos.x - 1.0) / 2.0, pos.y, 0.0, 1.0);\n\
+		}\n\
+		";
+
+	leftShader.appendChild(leftVertexShader);
+
+	var leftFragShader = xmlDoc.createElement('shaderpart');
+	leftFragShader.setAttribute('def', 'frag');
+	leftFragShader.setAttribute('type', 'FRAGMENT');
+	leftFragShader.textContent = "\n\
+		#ifdef GL_ES\n\
+			precision highp float;\n\
+		#endif\n\
+		\n\
+		uniform sampler2D tex;\n\
+		varying vec2 fragTexCoord;\n\
+		\n\
+		void main()\n\
+		{\n\
+			vec3 col = texture2D(tex, fragTexCoord).rgb;\n\
+			//col.r = 1.0;\n\
+			gl_FragColor = vec4(col, 1.0);\n\
+		}\n";
+
+	leftShader.appendChild(leftFragShader);
+
+	var leftPlane = xmlDoc.createElement('plane');
+	leftPlane.setAttribute('solid', 'false');
+	leftPlane.setAttribute('invisible', 'true');
+	leftShape.appendChild(leftPlane);
+
+	// Right eye
+	var rightEye = xmlDoc.createElement('group');
+	rightEye.setAttribute('def', 'right');
+	eyeGroup.appendChild(rightEye);
+
+	var rightShape = xmlDoc.createElement('shape');
+	rightEye.appendChild(rightShape);
+
+	var rightApp = xmlDoc.createElement('appearance');
+	rightShape.appendChild(rightApp);
+
+	var rightTex = xmlDoc.createElement('renderedtexture');
+	rightTex.setAttribute('id', 'rtRight');
+	rightTex.setAttribute('stereoMode', 'RIGHT_EYE');
+	rightTex.setAttribute('update', 'ALWAYS');
+	rightTex.setAttribute('oculusRiftVersion', '2');
+	rightTex.setAttribute('dimensions', '980 1080 3');
+	rightTex.setAttribute('repeatS', 'false');
+	rightTex.setAttribute('repeatT', 'false');
+	rightTex.setAttribute('interpupillaryDistance', 0.0668);
+	rightApp.appendChild(rightTex);
+
+	var rightVP = xmlDoc.createElement('viewpoint');
+	rightVP.setAttribute('use', 'vp');
+	rightVP.setAttribute('containerfield', 'viewpoint');
+	rightVP.textContent = ' ';
+	rightTex.appendChild(rightVP);
+
+	var rightBground = xmlDoc.createElement('background');
+	rightBground.setAttribute('use', 'bground');
+	rightBground.setAttribute('containerfield', 'background');
+	rightBground.textContent = ' ';
+	rightTex.appendChild(rightBground);
+
+	var rightScene = xmlDoc.createElement('group');
+	rightScene.setAttribute('use', 'root');
+	rightScene.setAttribute('containerfield', 'scene');
+	rightScene.textContent = ' ';
+	rightTex.appendChild(rightScene);
+
+	var rightShader = xmlDoc.createElement('composedshader');
+	rightApp.appendChild(rightShader);
+
+	var rightTexField = xmlDoc.createElement('field');
+	rightTexField.setAttribute('name', 'tex');
+	rightTexField.setAttribute('type', 'SFInt32');
+	rightTexField.setAttribute('value', '0');
+	rightShader.appendChild(rightTexField);
 
 /*
-	var fog = xmlDoc.createElement('fog');
-	fog.setAttribute('visibilityRange', '300');
-	fog.setAttribute('color', '1,1,1');
-	fog.setAttribute('fogType', 'LINEAR');
-	fog.textContent = ' ';
-	scene.appendChild(fog);
-  */
+	var rightEyeField = xmlDoc.createElement('field');
+	rightEyeField.setAttribute('name', 'rightEye');
+	rightEyeField.setAttribute('type', 'SFFloat');
+	rightEyeField.setAttribute('value', '1');
+	rightShader.appendChild(rightEyeField);
+*/
 
-	// Environmental variables
-	var environ = xmlDoc.createElement('environment');
-	environ.setAttribute('frustumCulling', 'true');
-	environ.setAttribute('smallFeatureCulling', 'true');
-	environ.setAttribute('smallFeatureThreshold', 5);
-	environ.setAttribute('occlusionCulling', 'true');
-	environ.textContent = ' ';
+	var rightVertexShader = xmlDoc.createElement('shaderpart');
+	rightVertexShader.setAttribute('type', 'VERTEX');
+	rightVertexShader.textContent = "\n\
+		attribute vec3 position;\n\
+		attribute vec2 texcoord;\n\
+		\n\
+		uniform mat4 modelViewProjectionMatrix;\n\
+		varying vec2 fragTexCoord;\n\
+		\n\
+		void main()\n\
+		{\n\
+			vec2 pos = sign(position.xy);\n\
+			fragTexCoord = texcoord;\n\
+			gl_Position = vec4((pos.x + 1.0) / 2.0, pos.y, 0.0, 1.0);\n\
+		}";
 
-	scene.appendChild(environ);
+	rightShader.appendChild(rightVertexShader);
 
-	return scene;
+	var rightFragShader = xmlDoc.createElement('shaderpart');
+	rightFragShader.setAttribute('type', 'FRAGMENT');
+	//rightFragShader.setAttribute('use', 'frag');
+	rightFragShader.textContent = "\n\
+		#ifdef GL_ES\n\
+			precision highp float;\n\
+		#endif\n\
+		\n\
+		uniform sampler2D tex;\n\
+		varying vec2 fragTexCoord;\n\
+		\n\
+		void main()\n\
+		{\n\
+			vec3 col = texture2D(tex, fragTexCoord).rgb;\n\
+			gl_FragColor = vec4(col, 1.0);\n\
+		}\n";
+
+	rightShader.appendChild(rightFragShader);
+
+	var rightPlane = xmlDoc.createElement('plane');
+	rightPlane.setAttribute('solid', 'false');
+	rightPlane.setAttribute('invisible', 'true');
+	rightShape.appendChild(rightPlane);
+
+	return {scene: scene, root: group};
 }
 
 /*******************************************************************************
@@ -143,9 +348,9 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 			var url_str = child['project'] + "." + mode + ".x3d";
 
 			if ('revision' in child)
-				var url_str = '//' + config.apiServer.url + '/' + account + '/' + child['project'] + '/revision/master/' + child['revision'] + '.x3d.' + mode;
+				var url_str = config.apiServer.url + '/' + account + '/' + child['project'] + '/revision/master/' + child['revision'] + '.x3d.' + mode;
 			else
-				var url_str = '//' + config.apiServer.url + '/' + account + '/' + child['project'] + '/revision/master/head.x3d.' + mode;
+				var url_str = config.apiServer.url + '/' + account + '/' + child['project'] + '/revision/master/head.x3d.' + mode;
 
 			newNode.setAttribute('onload', 'onLoaded(event);');
 			newNode.setAttribute('url', url_str);
@@ -240,7 +445,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 				X3D_AddChildren(xmlDoc, appearance, child, dbInterface, account, project, mode);
 		} else if (child['type'] == 'texture') {
 			newNode = xmlDoc.createElement('ImageTexture');
-			newNode.setAttribute('url', '//' + config.apiServer.url + '/' + account + '/' + project + '/' + child['id'] + '.' + child['extension']);
+			newNode.setAttribute('url', config.apiServer.url + '/' + account + '/' + project + '/' + child['id'] + '.' + child['extension']);
 			newNode.textContent = ' ';
 			newNode.setAttribute("id", child['id']);
 			newNode.setAttribute('DEF', dbInterface.uuidToString(child["shared_id"]));
@@ -351,9 +556,9 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, mode
 
 			if ('children' in mat) {
 				var tex_id = mat['children'][0]['id'];
-				externalGeometry.setAttribute('url', '//' + config.apiServer.url + '/' + account + '/' + project + '/' + meshId + '.src?tex_uuid=' + tex_id);
+				externalGeometry.setAttribute('url', config.apiServer.url + '/' + account + '/' + project + '/' + meshId + '.src?tex_uuid=' + tex_id);
 			} else {
-				externalGeometry.setAttribute('url', '//' + config.apiServer.url + '/' + account + '/' + project + '/' + meshId + '.src');
+				externalGeometry.setAttribute('url', config.apiServer.url + '/' + account + '/' + project + '/' + meshId + '.src');
 			}
 
 			shape.appendChild(externalGeometry);
@@ -365,14 +570,14 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, mode
 
 			var binaryGeometry = xmlDoc.createElement('binaryGeometry');
 
-			binaryGeometry.setAttribute('normal', '//' + config.apiServer.url + '/' + account + '/' + project + '/' + meshId + '.bin?mode=normals');
+			binaryGeometry.setAttribute('normal', config.apiServer.url + '/' + account + '/' + project + '/' + meshId + '.bin?mode=normals');
 
 			if ('children' in mat) {
-				binaryGeometry.setAttribute('texCoord', '//' + config.apiServer.url + '/' + account + '/' + project + '/' + meshId + '.bin?mode=texcoords');
+				binaryGeometry.setAttribute('texCoord', config.apiServer.url + '/' + account + '/' + project + '/' + meshId + '.bin?mode=texcoords');
 			}
 
-			binaryGeometry.setAttribute('index', '//' + config.apiServer.url + '/' + account + '/' + project + '/' + meshId + '.bin?mode=indices');
-			binaryGeometry.setAttribute('coord', '//' + config.apiServer.url + '/' + account + '/' + project + '/' + meshId + '.bin?mode=coords');
+			binaryGeometry.setAttribute('index', config.apiServer.url + '/' + account + '/' + project + '/' + meshId + '.bin?mode=indices');
+			binaryGeometry.setAttribute('coord', config.apiServer.url + '/' + account + '/' + project + '/' + meshId + '.bin?mode=coords');
 			//binaryGeometry.setAttribute('vertexCount', mesh.vertices_count);
 			binaryGeometry.textContent = ' ';
 
@@ -413,7 +618,7 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, mode
 					for (var lvl = 0; lvl < cacheMesh.num_levels; lvl++) {
 						var popGeometryLevel = xmlDoc.createElement('PopGeometryLevel');
 
-						popGeometryLevel.setAttribute('src', '//' + config.apiServer.url + '/' + account + '/' + project + '/' + meshId + '.pbf?level=' + lvl);
+						popGeometryLevel.setAttribute('src', config.apiServer.url + '/' + account + '/' + project + '/' + meshId + '.pbf?level=' + lvl);
 						popGeometryLevel.setAttribute('numIndices', cacheMesh[lvl].numIdx);
 						popGeometryLevel.setAttribute('vertexDataBufferOffset', cacheMesh[lvl].numVertices);
 
@@ -443,12 +648,13 @@ function X3D_AddLights(xmlDoc, bbox)
 	var scene = xmlDoc.getElementsByTagName('Scene')[0];
 
 	var pLight = xmlDoc.createElement('PointLight');
-	pLight.setAttribute('ambientIntensity', '0.8');
-	pLight.setAttribute('location', bbox.max.join(' '));
-	pLight.setAttribute('shadowIntensity', 0.7);
+	pLight.setAttribute('ambientIntensity', '1.0');
+	pLight.setAttribute('intensity', '1.0');
+	//pLight.setAttribute('location', bbox.max.join(' '));
+	//pLight.setAttribute('shadowIntensity', 0.7);
 	pLight.textContent = ' ';
 
-	scene.appendChild(pLight);
+	//scene.appendChild(pLight);
 };
 
 /*******************************************************************************
@@ -591,14 +797,20 @@ function X3D_AddGroundPlane(xmlDoc, bbox)
  * @param {JSON} bbox - Bounding used to compute the position and size of
  *						ground plane
  *******************************************************************************/
-function render(dbInterface, account, project, subFormat, revision, callback) {
+function render(dbInterface, account, project, subFormat, revision, oculusMode, callback) {
 	var full = (subFormat == "x3d");
 
 	dbInterface.getScene(account, project, revision, full, function(err, doc) {
 		if(err.value) return callback(err);
 
 		var xmlDoc = X3D_Header();
-		var scene  = X3D_CreateScene(xmlDoc);
+
+		if (!oculusMode)
+		{
+			var sceneRoot	= X3D_CreateScene(xmlDoc);
+		} else {
+			var sceneRoot	= X3D_CreateOculus(xmlDoc);
+		}
 
 		// Hack for the demo, generate objects server side
 		json_objs = [];
@@ -608,7 +820,7 @@ function render(dbInterface, account, project, subFormat, revision, callback) {
 
 		var dummyRoot = { children: [doc.mRootNode] };
 
-		X3D_AddChildren(xmlDoc, scene, dummyRoot, dbInterface, account, project, subFormat);
+		X3D_AddChildren(xmlDoc, sceneRoot.root, dummyRoot, dbInterface, account, project, subFormat);
 
 		/*
 		// Compute the scene bounding box.
@@ -649,22 +861,43 @@ exports.route = function(router)
 {
 	router.get('x3d', '/:account/:project/revision/:rid', function(res, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project,	params.subformat, params.rid, err_callback);
+		render(router.dbInterface, params.account, params.project,	params.subformat, params.rid, false, err_callback);
 	});
 
 	router.get('x3d', '/:account/:project/revision/:branch/head', function(res, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project, params.subformat, null, err_callback);
+		render(router.dbInterface, params.account, params.project, params.subformat, null, false, err_callback);
 	});
 
 	router.get('x3d', '/:account/:project/revision/:rid/:sid', function(res, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project, params.subformat, params.rid, err_callback);
+		render(router.dbInterface, params.account, params.project, params.subformat, params.rid, false, err_callback);
 	});
 
 	router.get('x3d', '/:account/:project/revision/:branch/head/:sid', function(res, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project, params.subformat, null, err_callback);
+		render(router.dbInterface, params.account, params.project, params.subformat, null, false, err_callback);
 	});
+
+	router.get('occ', '/:account/:project/revision/:rid', function(res, params, err_callback)
+	{
+		render(router.dbInterface, params.account, params.project,	params.subformat, params.rid, true, err_callback);
+	});
+
+	router.get('occ', '/:account/:project/revision/:branch/head', function(res, params, err_callback)
+	{
+		render(router.dbInterface, params.account, params.project, params.subformat, null, true, err_callback);
+	});
+
+	router.get('occ', '/:account/:project/revision/:rid/:sid', function(res, params, err_callback)
+	{
+		render(router.dbInterface, params.account, params.project, params.subformat, params.rid, true, err_callback);
+	});
+
+	router.get('occ', '/:account/:project/revision/:branch/head/:sid', function(res, params, err_callback)
+	{
+		render(router.dbInterface, params.account, params.project, params.subformat, null, true, err_callback);
+	});
+
 }
 

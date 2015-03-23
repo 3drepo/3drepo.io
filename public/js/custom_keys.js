@@ -87,7 +87,7 @@ function lockChangeAlert() {
 	}
 }
 
-$(document).on("onLoadedEvent", function(event, objEvent) {
+$(document).on("onLoaded", function(event, objEvent) {
 	var currentCanvas = x3dom.canvases[0].canvas;
 	var currentViewArea = currentCanvas.parent.doc._viewarea;
 

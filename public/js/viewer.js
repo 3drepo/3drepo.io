@@ -31,9 +31,38 @@ var Viewer = function() {
 	this.viewer.appendChild(this.scene);
 
 	this.viewPoint = document.createElement('viewpoint');
+	this.viewPoint.setAttribute('id', 'current');
+	this.viewPoint.setAttribute('def', 'current');
 	this.scene.appendChild(this.viewPoint);
 
+	this.bground = document.createElement('background');
+	this.bground.setAttribute('DEF', 'bground');
+	this.bground.setAttribute('skyangle', '0.9 1.5 1.57');
+	this.bground.setAttribute('skycolor', '0.21 0.18 0.66 0.2 0.44 0.85 0.51 0.81 0.95 0.83 0.93 1');
+	this.bground.setAttribute('groundangle', '0.9 1.5 1.57');
+	this.bground.setAttribute('groundcolor', '0.65 0.65 0.65 0.73 0.73 0.73 0.81 0.81 0.81 0.91 0.91 0.91');
+	this.bground.textContent = ' ';
+	this.scene.appendChild(this.bground);
+
+	this.environ = document.createElement('environment');
+	this.environ.setAttribute('frustumCulling', 'true');
+	this.environ.setAttribute('smallFeatureCulling', 'true');
+	this.environ.setAttribute('smallFeatureThreshold', 5);
+	this.environ.setAttribute('occlusionCulling', 'true');
+	this.scene.appendChild(this.environ);
+
+	this.light = document.createElement('directionallight');
+	//this.light.setAttribute('intensity', '0.5');
+	this.light.setAttribute('color', '0.714, 0.910, 0.953');
+	this.light.setAttribute('direction', '0, -0.9323, -0.362');
+	this.light.setAttribute('global', 'true');
+	this.light.setAttribute('ambientIntensity', '0.8');
+	this.light.setAttribute('shadowIntensity', 0.0);
+	this.scene.appendChild(this.light);
+
 	this.nav = document.createElement('navigationInfo');
+	this.nav.setAttribute('headlight', 'false');
+	this.nav.setAttribute('type', 'TURNTABLE');
 	this.viewPoint.appendChild(this.nav);
 
 	this.inline = null;
@@ -42,8 +71,22 @@ var Viewer = function() {
 	this.initRuntime = function () {
 		self.runtime = this;
 		self.showAll = this.showAll;
-		self.viewPoint.addEventListener('viewpointChanged', onViewpointChange, false);
+
+		$(document).on("onLoaded", function(event, objEvent) {
+			self.runtime.fitAll();
+		});
 	};
+
+	if(oculus)
+	{
+		this.viewer.addEventListener("keypress", function(e) {
+			if (e.charCode == 'o'.charCodeAt(0))
+			{
+				self.switchVR();
+			}
+		});
+	}
+
 
 	x3dom.runtime.ready = this.initRuntime;
 
@@ -153,26 +196,49 @@ var Viewer = function() {
 		this.startingPoint[2] = z;
 	}
 
+	this.defaultOrientation = [0.0, 0.0, 1.0];
+	this.currentCameraPosition = this.defaultOrientation;
+	this.currentCameraOrientation = [0.0, 0.0, 0.0];
+
 	this.setCameraPosition = function(x,y,z)
 	{
-		this.viewPoint.setAttribute("position", x + " " + y + " " + z);
+		this.currentCameraPosition = [x,y,z];
+		this.updateCamera();
 	}
-
-	this.defaultOrientation = [0.0, 0.0, 1.0];
-	this.startViewDir		= this.defaultOrientation.slice(0);
 
 	this.setCameraViewDir = function(u,v,w)
 	{
-		var to = [u,v,w];
-		var quat = this.rotToRotation(this.defaultOrientation, to);
+		this.currentCameraOrientation = [u,v,w];
+		this.updateCamera();
+	}
 
-		this.viewPoint.setAttribute("orientation", quat);
+	this.updateCamera = function()
+	{
+		var quat = this.rotToRotation(this.defaultOrientation, this.currentCameraOrientation);
+
+		var nextPoint = document.createElement('viewpoint');
+		this.scene.appendChild(nextPoint);
+		nextPoint.setAttribute('id', 'next');
+		nextPoint.setAttribute("position", this.currentCameraPosition.join(" "));
+		nextPoint.setAttribute("orientation", quat);
+
+		oldViewPoint = this.viewPoint;
+		this.viewPoint = nextPoint;
+		this.viewPoint.appendChild(this.nav);
+		this.viewPoint.setAttribute('set_bind', 'true');
+
+		this.viewPoint.addEventListener('viewpointChanged', onViewpointChange, false);
+
+		setTimeout(function(oldViewPoint){
+			oldViewPoint.parentNode.removeChild(oldViewPoint);
+		}, 0, oldViewPoint); // Remove old viewpoint, once everything is done.
 	}
 
 	this.setCamera = function(x,y,z,u,v,w)
 	{
-		this.setCameraPosition(x,y,z);
-		this.setCameraViewDir(u,v,w);
+		this.currentCameraPosition = [x,y,z];
+		this.currentCameraOrientation = [u,v,w];
+		this.updateCamera();
 	}
 
 	this.collDistance = 0.1;
@@ -247,6 +313,28 @@ var Viewer = function() {
 			self.setApp(objEvent.target);
 		});
 	}
+
+	this.goFullScreen = function() {
+		var vrHMD = null;
+
+		if (oculus)
+			vrHMD = oculus.vrHMD;
+
+		if (this.viewer.mozRequestFullScreen) {
+			this.viewer.mozRequestFullScreen({
+				vrDisplay: vrHMD
+			});
+		} else if (this.viewer.webkitRequestFullscreen) {
+			this.viewer.webkitRequestFullscreen({
+				vrDisplay: vrHMD,
+			});
+		}
+	};
+
+	this.switchVR = function() {
+		if (oculus)
+			oculus.switchVR(this);
+	};
 };
 
 

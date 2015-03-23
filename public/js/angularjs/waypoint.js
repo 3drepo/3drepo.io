@@ -28,18 +28,20 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		url: '/demo?uid?mode',
 		templateUrl: 'mainpage.html',
 		controller: 'MainCtrl',
-		Wayfinder: 'Wayfinder',
+		WayfinderData: 'WayfinderData',
 		params: { uid: { value: null }, mode: { value: null } },
 		resolve: {
-			uid: function($stateParams) {
-				return $stateParams.uid;
-			},
 			mode: function($stateParams) {
 				return $stateParams.mode;
 			},
-			init: function(Wayfinder)
+			uid: function($stateParams, WayfinderData) {
+				WayfinderData.PointData.refresh($stateParams.uid, $stateParams.mode);
+
+				return $stateParams.uid;
+			},
+			init: function(WayfinderData)
 			{
-				Wayfinder.refresh();
+				WayfinderData.Wayfinder.refresh();
 			}
 		}
 	}).state('404', {
@@ -50,90 +52,33 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	// Remove # from URL
 	$locationProvider.html5Mode(true);
 }])
-.controller('MainCtrl', ['$scope', '$location', '$window', 'serverConfig', 'uid', 'mode', 'Wayfinder',
-	function($scope, $location, $window, serverConfig, uid, mode, Wayfinder) {
-		$window.viewer = new Viewer();
-		$scope.viewer = $window.viewer;
+.controller('MainCtrl', ['$scope', '$state', '$window', 'serverConfig', 'uid', 'mode', 'WayfinderData',
+	function($scope, $state, $window, serverConfig, uid, mode, WayfinderData) {
+		WayfinderData.init();
 
-		viewer.loadURL(serverConfig.apiUrl(serverConfig.democompany + '/' + serverConfig.demoproject + '/revision/master/head.x3d.src'));
+		$scope.text		= WayfinderData.text;
+		$scope.recorder = WayfinderData.recorder;
+		$scope.arrow	= WayfinderData.arrow;
+		$scope.spheres	= WayfinderData.spheres;
 
-		var avatarHeight = 1.83;
-		var collDistance = 0.1;
-		var stepHeight	= 0.4;
-		var speed		= 2.0;
-		var startPoint	= [-26.06, -0.21, 15.28];
-		var endPoint   = [-26.06, -0.21, -7.28];
-		var scaleY     = 0.05;
-		var trans	  = 0.3;
-		var blobRadius = 1.5;
-
-		viewer.changeCollisionDistance(collDistance);
-		viewer.changeAvatarHeight(avatarHeight);
-		viewer.changeStepHeight(stepHeight);
-		viewer.setSpeed(speed);
-		viewer.setNavMode("NONE");
-
-		var avrStart = startPoint.slice(0);
-		avrStart[1] += avatarHeight;
-		avrStart[2] += 9.0;
-
-		viewer.setStartingPoint(avrStart[0], avrStart[1], avrStart[2]);
-
-		$window.text = new Text();
-		var startRGB = [1.0, 0.0, 0.0];
-		$window.text.init(startRGB);
-		$scope.text  = $window.text;
-
-		$window.arrow = new Arrow();
-		$scope.arrow  = $window.arrow;
-
-		$window.recorder = new Recorder(startPoint, endPoint, blobRadius);
-		$scope.recorder = $window.recorder;
-
-		$window.spheres = new Spheres();
-		$scope.spheres = $window.spheres;
+		$scope.showReadme		= true;
+		$scope.showVisControls	= false;
 
 		$scope.visualizeThese = null;
 
 		$scope.visNav = "FLY";
 
-		$scope.viscontrolon = true;
+		$scope.Wayfinder = WayfinderData.Wayfinder;
 
-		/*
-		if(uid)
+		$scope.renderStartAndEnd = function()
 		{
-			var uidData = null;
-			$('#readme').hide();
-			walkInitialize(true);
-
-			if (uid instanceof Array)
-				uidData = uid;
-			else
-				uidData = [uid];
-
-			$http.get(serverConfig.apiUrl('wayfinder/record.json'),
-				{ params : { uid: JSON.stringify(uidData) }})
-			.success(function(data, status) {
-				if(mode == 'flythru')
-					runFlyThru(data);
-				else
-				{
-					$scope.viscontrolon = false;
-					plotSpheres(data);
-				}
-			});
+			spheres.addSphere(WayfinderData.startPoint, WayfinderData.blobRadius, WayfinderData.scaleY, [0, 1, 0], WayfinderData.trans);
+			spheres.addSphere(WayfinderData.endPoint, WayfinderData.blobRadius, WayfinderData.scaleY, [1,0,0], WayfinderData.trans);
 		}
-		*/
-
-		$scope.previous = Wayfinder.previous;
-
-		$scope.viewerReload = viewer.reload;
 
 		$scope.startWalking = function() {
 			viewer.reset();
-			spheres.addSphere(startPoint, blobRadius, scaleY, [0, 1, 0], trans);
-			spheres.addSphere(endPoint, blobRadius, scaleY, [1,0,0], trans);
-			arrow.addArrow(endPoint, [1,0,0], 0.3);
+			arrow.addArrow(WayfinderData.endPoint, [1,0,0], 0.3);
 
 			text.updateText('Step on pad to begin', [0,1,0], 2000);
 
@@ -141,16 +86,24 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		}
 
 		$scope.begin = function() {
-			$('#readme').hide();
+			$scope.showReadme = false;
 			$scope.startWalking();
 		};
 
 		$scope.visualize = function() {
-			$state.go('main', { url : $scope.visualizeThese });
+			$scope.renderStartAndEnd();
+			var uids = $scope.visualizeThese.map(function(o) { return o.value; });
+			$state.transitionTo('main', { uid : uids }, { location: true, inherit: true, relative: $state.$current, notify: false});
+			$scope.showReadme = false;
+			$scope.showVisControls = true;
+			viewer.reset();
 		}
 
 		$scope.flythrough = function() {
-			$state.go('main', { url : $scope.visualizeThese, mode: 'flythru' });
+			var uids = $scope.visualizeThese.map(function(o) { return o.value; });
+			$state.transitionTo('main', { uid : uids, mode: 'flythru' }, { location: true, inherit: true, relative: $state.$current, notify: false});
+			$scope.showReadme = false;
+			viewer.reset();
 		}
 
 		$scope.changeNav = function() {
@@ -159,7 +112,11 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 		$scope.backToMenu = function()
 		{
-			$state.go('main', {});
+			$state.transitionTo('main', { uid: null, mode: null}, { location: true, inherit: true, relative: $state.$current, notify: false});
+			$scope.showReadme = true;
+			$scope.showVisControls = false;
+			viewer.reset();
+			viewer.setCameraPosition(0.0, 0.0, 0.0);
 		}
 	}
 ]);

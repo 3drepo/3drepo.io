@@ -141,12 +141,6 @@ $(document).on("clickObject", function(event, objEvent) {
 	//floating.addAllFloats(objEvent.target);
 });
 
-$(document).on("onLoaded", function(event, objEvent) {
-	document.getElementById('sceneVP').addEventListener('viewpointChanged', onViewpointChange, false);
-
-	//floating.addAllFloats(document);
-});
-
 $(document).on("bgroundClicked", function(event, objEvent) {
 	//floating.addAllFloats(document);
 });

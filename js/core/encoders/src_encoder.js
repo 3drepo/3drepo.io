@@ -184,7 +184,7 @@ function render(project, mesh, tex_uuid, embedded_texture)
 		src_json.accessors.attributeViews.a2.decodeOffset  = [0, 0];
 		src_json.accessors.attributeViews.a2.decodeScale   = [1, 1];
 
-		src_json.meshes[project].attributes.texcoord				   = 'attributeView2';
+		src_json.meshes[project].attributes.texcoord				   = 'a2';
 	}
 
 	// Directly embed the texture data in the SRC file ?

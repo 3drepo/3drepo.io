@@ -68,8 +68,6 @@ angular.module('3drepo')
 
 			this.changeView = function(state, view, stateParams)
 			{
-				console.log(state, view, stateParams);
-
 				if (state == "home")
 				{
 					self.account = stateParams.account;

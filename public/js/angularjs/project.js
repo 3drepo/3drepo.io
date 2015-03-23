@@ -211,9 +211,13 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	});
 }])
 .controller('MainCtrl', ['$window', 'account', 'project', 'serverConfig', function($window, account, project, serverConfig) {
+	$window.oculus = new Oculus();
+
 	$window.viewer = new Viewer();
 	$window.viewer.loadURL(serverConfig.apiUrl(account + '/' + project + '/revision/master/head.x3d.src'));
 	initTree(account, project);
+
+	$window.viewer.enableClicking();
 }])
 .controller('RevisionCtrl', ['$scope', 'account', 'project', 'branch', 'rid', '$stateParams', 'serverConfig', function($scope, account, project, branch, rid, $stateParams, serverConfig) {
 	$scope.branch = branch;

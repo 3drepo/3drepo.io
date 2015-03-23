@@ -1,4 +1,4 @@
-.container.float#readme
+.container.float#readme(ng-show="showReadme")
 	.row
 		.col-md-9.col-md-offset-4.col-sm-9.col-sm-offset-4
 			#readme-box.panel.panel-default
@@ -17,7 +17,7 @@
 						form.padded-box(ng-submit='visualize()')
 							form-group
 								div.text-center.padded-box
-									multiselect(ms-header="Select which routes to visualize" ng-model='visualizeThese', options='o.label for o in previous', data-multiple='true', scroll-after-rows='4')
+									multiselect(ms-header="Select which routes to visualize" ng-model='visualizeThese', options='o.label for o in Wayfinder.previous', data-multiple='true', scroll-after-rows='4')
 								div.text-center.padded-box
 									button#visButton.btn.btn-warning-btn-block.top-gap(type='submit') Visualize
 									button#flyButton.btn.btn-warning-btn-block.top-gap(ng-click='flythrough()') Fly Through

@@ -34,7 +34,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 		link(rel='stylesheet' type='text/css' href='#{fontawesomecss}')
 
 		script(type="text/javascript" src="/public/js/external/angular-bootstrap-multiselect.js")
-		script(type="text/javascript" src="/public/js/external/angular-bootstrap-select.js")
+		//script(type="text/javascript" src="/public/js/external/angular-bootstrap-select.js")
 
 		script(type="text/javascript" src="#{bootstrapselectjs}")
 		link(rel='stylesheet', href="#{bootstrapselectcss}" type="text/css")
@@ -44,7 +44,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 		script(type="text/javascript" src='/public/js/custom_keys.js')
 
 		script.
-			angular.module('3drepo', ['ui.router', 'ui.bootstrap', 'angular-bootstrap-select']);
+			angular.module('3drepo', ['ui.router', 'ui.bootstrap', 'ui.multiselect']);
 
 		script(type="text/javascript" src="/public/js/waypoint/draw.js")
 		script(type="text/javascript" src="/public/js/waypoint/record.js")
@@ -53,6 +53,8 @@ html(lang="en" ng-app="3drepo").ng-scope
 		script(type="text/javascript" src="/public/js/angularjs/boilerplate/serverConfig.js")
 
 		script(type="text/javascript" src="/public/js/angularjs/data/Wayfinder.js")
+		script(type="text/javascript" src="/public/js/angularjs/data/PointData.js")
+		script(type="text/javascript" src="/public/js/angularjs/data/WayfinderData.js")
 
 		script(type="text/javascript" src="/public/js/controlinterface.js")
 		script(type="text/javascript" src="/public/js/viewer.js")
