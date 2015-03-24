@@ -66,5 +66,5 @@ if(!("external_port" in module.exports.apiServer))
 	module.exports.external_port = module.exports.port;
 }
 
-module.exports.apiServer.url = module.exports.apiServer.protocol + module.exports.apiServer.hostname + ':' + module.exports.apiServer.port;
+module.exports.apiServer.url = module.exports.apiServer.protocol + module.exports.apiServer.hostname + ':' + module.exports.apiServer.external_port;
 
