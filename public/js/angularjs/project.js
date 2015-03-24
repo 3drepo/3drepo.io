@@ -196,7 +196,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	// Removes Angular's # at the end of the URL
 	$locationProvider.html5Mode(true);
 }])
-.run(['$rootScope', '$window', '$state', function($rootScope, $window, $state) {
+.run(['$rootScope', '$window', '$state', 'Auth', 'pageConfig', function($rootScope, $window, $state, Auth, pageConfig) {
 	$rootScope.state = $state;
 
 	$rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams)
@@ -204,9 +204,21 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		if ($window.floating)
 			$window.floating.clearFloats();
 
-		if (toState.name == "main")
+		if(publicViews.indexOf(toState.name) == -1)
 		{
-			$state.go("main.view", {view:"info"});
+			Auth.isLoggedIn()
+			.then(function _pageStateChangeSuccess(isLoggedIn) {
+				if (!isLoggedIn) {
+					pageConfig.goDefault();
+				} else {
+					if (toState.name == "main")
+					{
+						event.preventDefault();
+						toParams['view'] = "info";
+						$state.transitionTo("main.view", toParams);
+					}
+				}
+			});
 		}
 	});
 }])

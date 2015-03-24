@@ -129,7 +129,6 @@ exports.route = function(router)
 				if(err.value) {
 					err_callback(err);
 				} else {
-					console.log("debug", "USER: " + JSON.stringify(user));
 					if(user)
 					{
 						user.username = params.account;

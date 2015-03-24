@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-angular('3drepo')
+angular.module('3drepo')
 .factory('authInterceptor', ['$rootScope', '$q', function($rootScope, $q) {
 	return {
 		responseError: function(res)

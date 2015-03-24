@@ -288,12 +288,14 @@ exports.getAvatar = function(username, callback) {
 	};
 
 	var projection = {
-		"customData.avatar" : 1
+		"customData" : 1
 	};
 
 	dbConn.filterColl("admin", "system.users", filter, projection, function(err, coll) {
 		if(err.value)
 			return callback(err);
+
+		console.log(JSON.stringify(coll[0]));
 
 		if (coll[0])
 			callback(responseCodes.OK, coll[0]["customData"]["avatar"]);
