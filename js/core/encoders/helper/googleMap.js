@@ -20,8 +20,23 @@ var config		 = require('../../config.js');
 
 module.exports.addGoogleTiles = function(xmlDoc, width, yrot, worldTileSize, centLat, centLong, zoom, trans)
 {
+	var topGroup = xmlDoc.createElement("group");
+	//topGroup.setAttribute("invisible", "true");
+
+	var topLevelTrans = xmlDoc.createElement("Transform");
+	topLevelTrans.setAttribute("id", "mapPosition");
+	topLevelTrans.setAttribute("translation", trans.join(","));
+	topLevelTrans.setAttribute("scale", "1,1,1");
+	topGroup.appendChild(topLevelTrans);
+
 	var yRotTrans = xmlDoc.createElement("Transform");
+	yRotTrans.setAttribute("id", "mapRotation");
 	yRotTrans.setAttribute('rotation', '0,1,0,' + yrot);
+	topLevelTrans.appendChild(yRotTrans);
+
+	var shapeTrans = xmlDoc.createElement("Transform");
+	shapeTrans.setAttribute('rotation', '1,0,0,4.7124');
+	yRotTrans.appendChild(shapeTrans);
 
 	var halfWidth = (width + 1) / 2;
 
@@ -32,19 +47,16 @@ module.exports.addGoogleTiles = function(xmlDoc, width, yrot, worldTileSize, cen
 	var centX = 128 + centLong * (256 / 360);
 	var centY = 128 + 0.5 * Math.log((1 + s) / (1 - s)) * (-256 / (2 * Math.PI));
 
+	var tileGroup = xmlDoc.createElement("group");
+	tileGroup.setAttribute('id', 'tileGroup');
+	shapeTrans.appendChild(tileGroup);
+
 	for(var x = -halfWidth; x < halfWidth; x++)
 	{
 		for(var y = -halfWidth; y < halfWidth; y++)
 		{
-			var shapeTrans = xmlDoc.createElement("Transform");
-			shapeTrans.setAttribute('rotation', '1,0,0,4.7124');
-
-			var topLevelTrans = xmlDoc.createElement("Transform");
-			topLevelTrans.setAttribute("translation", trans.join(","));
-			shapeTrans.appendChild(topLevelTrans);
-
 			var shape = xmlDoc.createElement("Shape");
-			topLevelTrans.appendChild(shape);
+			tileGroup.appendChild(shape);
 
 			var xPos = (x + 0.5) * googleTileSize;
 			var yPos = -(y + 0.5) * googleTileSize;
@@ -74,6 +86,6 @@ module.exports.addGoogleTiles = function(xmlDoc, width, yrot, worldTileSize, cen
 		}
 	}
 
-	return yRotTrans;
+	return topGroup;
 };
 

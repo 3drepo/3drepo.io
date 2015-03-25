@@ -24,6 +24,7 @@ var Viewer = function() {
 	this.viewer = document.createElement('x3d');
 	this.viewer.setAttribute('id', 'viewer');
 	this.viewer.setAttribute('xmlns', 'http://www.web3d.org/specification/x3d-namespace');
+
 	x3ddiv.appendChild(this.viewer);
 
 	this.scene = document.createElement('scene');
@@ -33,6 +34,8 @@ var Viewer = function() {
 	this.viewPoint = document.createElement('viewpoint');
 	this.viewPoint.setAttribute('id', 'current');
 	this.viewPoint.setAttribute('def', 'current');
+	this.viewPoint.setAttribute('zNear', 100);
+	this.viewPoint.setAttribute('zFar', 100000);
 	this.scene.appendChild(this.viewPoint);
 
 	this.bground = document.createElement('background');
@@ -87,6 +90,73 @@ var Viewer = function() {
 		});
 	}
 
+	if(0)
+	{
+		this.viewer.addEventListener("keypress", function(e) {
+			var mapPos = $("#model__mapPosition")[0];
+			var oldTrans = mapPos.getAttribute("translation").split(",").map(
+				function(res) { return parseFloat(res); });
+
+			if(e.charCode == 'q'.charCodeAt(0))
+			{
+				oldTrans[0] = oldTrans[0] + 0.1;
+				mapPos.setAttribute("translation", oldTrans.join(","));
+			}
+
+			if(e.charCode == 'w'.charCodeAt(0))
+			{
+				oldTrans[0] = oldTrans[0] - 0.1;
+				mapPos.setAttribute("translation", oldTrans.join(","));
+			}
+
+			if(e.charCode == 'e'.charCodeAt(0))
+			{
+				oldTrans[2] = oldTrans[2] + 0.1;
+				mapPos.setAttribute("translation", oldTrans.join(","));
+			}
+
+			if(e.charCode == 'f'.charCodeAt(0))
+			{
+				oldTrans[2] = oldTrans[2] - 0.1;
+				mapPos.setAttribute("translation", oldTrans.join(","));
+			}
+
+			var mapRotation = $("#model__mapRotation")[0];
+			var oldRotation = mapRotation.getAttribute("rotation").split(",").map(
+				function(res) { return parseFloat(res); });
+
+			if(e.charCode == 'g'.charCodeAt(0))
+			{
+				oldRotation[3] = oldRotation[3] + 0.01;
+				mapRotation.setAttribute("rotation", oldRotation.join(","));
+			}
+
+			if(e.charCode == 'h'.charCodeAt(0))
+			{
+				oldRotation[3] = oldRotation[3] - 0.01;
+				mapRotation.setAttribute("rotation", oldRotation.join(","));
+			}
+
+			var oldScale = mapPos.getAttribute("scale").split(",").map(
+				function(res) { return parseFloat(res); });
+
+			if(e.charCode == 'j'.charCodeAt(0))
+			{
+				oldScale[0] = oldScale[0] + 0.01;
+				oldScale[2] = oldScale[2] + 0.01;
+
+				mapPos.setAttribute("scale", oldScale.join(","));
+			}
+
+			if(e.charCode == 'k'.charCodeAt(0))
+			{
+				oldScale[0] = oldScale[0] - 0.01;
+				oldScale[2] = oldScale[2] - 0.01;
+
+				mapPos.setAttribute("scale", oldScale.join(","));
+			}
+		});
+	}
 
 	x3dom.runtime.ready = this.initRuntime;
 
