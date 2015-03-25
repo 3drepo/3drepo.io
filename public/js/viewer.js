@@ -34,8 +34,8 @@ var Viewer = function() {
 	this.viewPoint = document.createElement('viewpoint');
 	this.viewPoint.setAttribute('id', 'current');
 	this.viewPoint.setAttribute('def', 'current');
-	this.viewPoint.setAttribute('zNear', 100);
-	this.viewPoint.setAttribute('zFar', 100000);
+	//this.viewPoint.setAttribute('zNear', 100);
+	//this.viewPoint.setAttribute('zFar', 100000);
 	this.scene.appendChild(this.viewPoint);
 
 	this.bground = document.createElement('background');
