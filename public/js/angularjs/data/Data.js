@@ -81,8 +81,6 @@ angular.module('3drepo')
 					self.branch		= 'master';
 					self.revision	= 'head';
 
-					console.log(self.account + " " + self.project);
-
 					self.ProjectData.refresh(self.account, self.project);
 					self.CurrentBranch.refresh(self.account, self.project, self.branch);
 					self.CurrentRevision.refresh(self.account, self.project, self.branch, self.revision);

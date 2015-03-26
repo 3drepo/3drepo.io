@@ -51,9 +51,9 @@ var responseCodes = {
 	INVALID_INPUTS_TO_PASSWORD_UPDATE: {value: 18, message: "Invalid new or old password", status: 422},
 
 	PROJECT_HISTORY_NOT_FOUND: {value: 19, message: "Project history not found", status: 404},
+	PROJECT_INFO_NOT_FOUND:		{value: 20, message: "Project info not found", status: 404},
 
 	DB_ERROR: function(message) {
-		console.log(JSON.stringify(message));
 		return {
 			value: 1000,
 			message: JSON.stringify(message),
@@ -70,7 +70,7 @@ var responseCodes = {
 	}
 };
 
-var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 1000, 2000];
+var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 1000, 2000];
 
 responseCodes.respond = function(place, resCode, res, extraInfo)
 {

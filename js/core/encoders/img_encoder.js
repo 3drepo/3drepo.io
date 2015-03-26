@@ -85,8 +85,6 @@ module.exports.route = function(router)
 			if (err.value)
 				return err_callback(err);
 
-			console.log(JSON.stringify(avatar));
-
 			if(!avatar)
 				return err_callback(responseCodes.USER_DOES_NOT_HAVE_AVATAR);
 

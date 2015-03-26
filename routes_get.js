@@ -418,7 +418,7 @@ module.exports = function(router, dbInterface, checkAccess){
 				}
 		} else {
 			if (account && project) {
-				dbInterface.hasAccessToProject(params.user, account, project, function(err)
+				dbInterface.hasReadAccessToProject(params.user, account, project, function(err)
 				{
 					if(err.value)
 						responseCodes.respond(responsePlace, err, res, {params: params});

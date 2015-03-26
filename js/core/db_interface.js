@@ -24,6 +24,14 @@ var log_iface = require('./logger.js');
 var logger = log_iface.logger;
 var ObjectID = require('mongodb').ObjectID;
 
+var OWNER	= 0;
+var GROUP	= 1;
+var PUBLIC	= 2;
+
+var READ_BIT	= 4;
+var WRITE_BIT	= 2;
+var EXECUTE_BIT	= 1;
+
 var responseCodes = require('./response_codes.js');
 
 function stringToUUID(id) {
@@ -130,8 +138,6 @@ exports.updatePassword = function(username, passwords, callback) {
 	}
 
 	this.authenticate(username, oldPassword, function(err) {
-		console.log('AUTHENTICATING: ASDASDASDASD');
-
 		if(err.value)
 			return callback(err);
 
@@ -295,8 +301,6 @@ exports.getAvatar = function(username, callback) {
 		if(err.value)
 			return callback(err);
 
-		console.log(JSON.stringify(coll[0]));
-
 		if (coll[0])
 			callback(responseCodes.OK, coll[0]["customData"]["avatar"]);
 		else
@@ -310,19 +314,53 @@ exports.getProjectInfo = function(account, project, callback) {
 
 	logger.log('debug', 'Getting project info for ' + account + '/' + project);
 
-	dbConn.filterColl(account, project + ".info", {}, {}, function(err, coll) {
+	var filter = {
+		_id : project
+	};
+
+	var projection = {
+		groups: 0
+	};
+
+	dbConn.filterColl(account, "settings", filter, projection, function(err, coll) {
 		if(err.value)
 			return callback(err);
 
-		var projectInfo = {
-			owner:			coll[0]["owner"],
-			desc:			coll[0]["desc"],
-			type:			coll[0]["type"],
-			read_access:	coll[0]["r"],
-			write_access:	coll[0]["rw"]
-		};
+		if(coll[0])
+		{
+			var projectInfo = {
+				owner:			coll[0]["owner"],
+				desc:			coll[0]["desc"],
+				type:			coll[0]["type"],
+				permissions:	coll[0]["permissions"],
+				properties:		coll[0]["properties"]
+			};
 
-		callback(responseCodes.OK, projectInfo);
+			callback(responseCodes.OK, projectInfo);
+		} else {
+			callback(responseCodes.PROJECT_INFO_NOT_FOUND);
+		}
+
+	});
+};
+
+exports.getDatabaseGroups = function(account, callback) {
+
+	var filter = {
+		db: account
+	};
+
+	var projection = {
+		user: 1
+	};
+
+	logger.log('debug', 'Getting database groups for ' + account);
+
+	dbConn.filterColl("admin", "system.users", filter, projection, function(err, coll) {
+		if(err.value)
+			return callback(err);
+
+		callback(responseCodes.OK, coll);
 	});
 };
 
@@ -330,70 +368,98 @@ exports.getProjectUsers = function(account, project, callback) {
 	if(!project)
 		return callback(responseCodes.PROJECT_NOT_SPECIFIED);
 
-	logger.log('debug', 'Getting project info for ' + account + '/' + project);
+	logger.log('debug', 'Getting project users for ' + account + '/' + project);
 
-	dbConn.filterColl(account, project + ".users", {}, {}, function(err, coll) {
+	var filter = {
+		_id: project
+	};
+
+	var projection = {
+		users: 1
+	};
+
+	var self = this;
+
+	dbConn.filterColl(account, "settings", filter, projection, function(err, users) {
 		if(err.value)
 			return callback(err);
 
-		var projectUsers = coll.map( function (user) {
-			return {
-				name: user.user,
-				role: user.role
-			};
-		});
+		self.getDatabaseGroups(account, function(err, groups) {
+			if(err.value)
+				return callback(err);
 
-		callback(responseCodes.OK, projectUsers);
-	});
-};
-
-exports.isPublicProject = function(account, project, callback)
-{
-	logger.log('debug', 'Checking whether ' + account + '/' + project + ' is a public project.');
-
-	this.getProjectInfo(account, project, function (err, proj) {
-		if(err.value)
-			return callback(err);
-
-		if (proj["read_access"].toLowerCase() == "public")
-		{
-			callback(responseCodes.OK);
-		} else {
-			callback(responseCodes.PROJECT_NOT_PUBLIC);
-		}
-	});
-};
-
-exports.hasAccessToProject = function(username, account, project, callback) {
-	if (project == null)
-	{
-		logger.log('debug', 'Project name not specified');
-
-		return callback(responseCodes.PROJECT_NOT_SPECIFIED);
-	}
-
-	logger.log('debug', 'Checking access to ' + account + '/' + project + ' for ' + username);
-
-	this.isPublicProject(account, project, function(err) {
-		if(err.value)
-		{
-			this.dbInterface.getUserDBList(username, function(err, dbList) {
-				if(err.value)
-					return callback(err);
-
-				var dbListStr = dbList.map (function (db) {
-					return db["account"] + "." + db["project"];
-				});
-
-				if (dbListStr.indexOf(account + "." + project) > -1)
-					callback(responseCodes.OK);
-				else
-					callback(responseCodes.NOT_AUTHORIZED);
+			var projectUsers = users[0]["users"].map(function (user) {
+				return {
+					user: user,
+					type: (groups.indexOf(user["user"]) > 0) ? "group" : "user"
+				};
 			});
-		} else {
+
+			callback(responseCodes.OK, projectUsers);
+		});
+	});
+};
+
+exports.getAccessToProject = function(username, account, project, callback) {
+	if (project == null)
+		return callback(responseCodes.PROJECT_NOT_SPECIFIED);
+
+	var self = this;
+
+	self.getProjectInfo(account, project, function(err, info) {
+		if(err.value)
+			return callback(err);
+
+		logger.log("debug", "Checking access for " + username);
+
+		if(username == info["owner"])
+			return callback(responseCodes.OK, info["permissions"][OWNER])
+
+		self.getProjectUsers(account, project, function(err, users) {
+			if(err.value)
+				return callback(err);
+
+			var usernameList = users.map(function(user) { return user["user"]; });
+
+			if (usernameList.indexOf(username) > -1)
+			{
+				// Valid user or group
+				return callback(responseCodes.OK, info["permissions"][GROUP]);
+			} else {
+				// Must be a public user ?
+				return callback(responseCodes.OK, info["permissions"][PUBLIC]);
+			}
+		});
+	});
+};
+
+exports.checkPermissionsBit = function(username, account, project, bitMask, callback)
+{
+	this.getAccessToProject(username, account, project, function(err, permission) {
+		if(err.value)
+			return callback(err);
+
+		logger.log("debug", "Permission for " + username + " @ " + account + "/" + project + " is " + permission);
+
+		if (permission & bitMask)
+		{
 			callback(responseCodes.OK);
+		} else {
+			callback(responseCodes.NOT_AUTHORIZED);
 		}
 	});
+}
+
+exports.hasReadAccessToProject = function(username, account, project, callback) {
+	this.checkPermissionsBit(username, account, project, READ_BIT, callback);
+};
+
+exports.hasWriteAccessToProject = function(username, account, project, callback) {
+	this.checkPermissionsBit(username, account, project, WRITE_BIT, callback);
+};
+
+exports.hasExecuteAccessToProject = function(username, account, project, callback) {
+	this.checkPermissionsBit(username, account, project, EXECUTE_BIT, callback);
 };
 
 exports.getDBList = function(callback) {

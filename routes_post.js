@@ -125,7 +125,11 @@ module.exports = function(router, dbInterface, checkAccess){
 		});
 	});
 
-	this.router.post('/wayfinder/record.:format?', function(req, res) {
+	// Update or create a user's account
+	this.post('/:account/:project', false, function(req, res) {
+	});
+
+	this.post('/wayfinder/record.:format?', true, function(req, res) {
 		var resCode = responseCodes.OK;
 		var responsePlace = 'Wayfinder record POST';
 
@@ -146,6 +150,8 @@ module.exports = function(router, dbInterface, checkAccess){
 	for(var idx in this.postMap)
 	{
 		var item = this.postMap[idx];
+
+		console.log('debug', 'Adding POST call for ' + item['regex']);
 
 		if (item.shouldCheckAccess)
 			router.post(item.regex, schemaValidator.validate(item.regex), checkAccess, item.callback);

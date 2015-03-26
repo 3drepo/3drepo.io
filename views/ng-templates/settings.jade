@@ -30,17 +30,42 @@ ng-include(src="'common.html'")
 			form.standardform(role='form')
 				.form-group
 					.col-sm-12
-						label.radio.radio-pad
-							input#visibility(type='radio', name='visibility', value='public', ng-model='Data.ProjectData.visibility', ng-checked="Data.ProjectData.visibility=='public'", ng-change="Data.ProjectData.setVisibility('public')", disabled)
-							i.fa.fa-eye Public
-						.radio-pad
-							p Everybody can see this project.
-					.col-sm-12.margined
-						label.radio.radio-pad
-							input#visibility(type='radio', name='visibility', value='private', ng-model='Data.ProjectData.visibility', ng-checked="Data.ProjectData.visibility=='private'", ng-change="Data.ProjectData.setVisibility('private')", disabled)
-							i.fa.fa-eye-slash Private
-						.radio-pad
-							p Only selected users can see this project.
+							.row
+								.col-sm-3
+									label Access Type
+								.col-sm-3
+									label Read
+								.col-sm-3
+									label Write
+								.col-sm-3
+									label Execute
+							.row
+								.col-sm-3
+									label Public
+								.col-sm-3
+									input#visibility(type='checkbox', name='publicRead', ng-model='Data.ProjectData.publicPerm.read', disabled)
+								.col-sm-3
+									input#visibility(type='checkbox', name='publicWrite', ng-model='Data.ProjectData.publicPerm.write', disabled)
+								.col-sm-3
+									input#visibility(type='checkbox', name='publicExecute', ng-model='Data.ProjectData.publicPerm.execute', disabled)
+							.row
+								.col-sm-3
+									label User
+								.col-sm-3
+									input#visibility(type='checkbox', name='userRead', ng-model='Data.ProjectData.userPerm.read', disabled)
+								.col-sm-3
+									input#visibility(type='checkbox', name='userWrite', ng-model='Data.ProjectData.userPerm.write', disabled)
+								.col-sm-3
+									input#visibility(type='checkbox', name='userExecute', ng-model='Data.ProjectData.userPerm.execute', disabled)
+							.row
+								.col-sm-3
+									label Owner
+								.col-sm-3
+									input#visibility(type='checkbox', name='ownerRead', ng-model='Data.ProjectData.ownerPerm.read', disabled)
+								.col-sm-3
+									input#visibility(type='checkbox', name='ownerWrite', ng-model='Data.ProjectData.ownerPerm.write', disabled)
+								.col-sm-3
+									input#visibility(type='checkbox', name='ownerExecute', ng-model='Data.ProjectData.ownerPerm.execute', disabled)
 		.block
 			.col-sm-12.margined.block-header
 				h3 Users

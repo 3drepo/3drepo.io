@@ -34,8 +34,6 @@ var Viewer = function() {
 	this.viewPoint = document.createElement('viewpoint');
 	this.viewPoint.setAttribute('id', 'current');
 	this.viewPoint.setAttribute('def', 'current');
-	//this.viewPoint.setAttribute('zNear', 100);
-	//this.viewPoint.setAttribute('zFar', 100000);
 	this.scene.appendChild(this.viewPoint);
 
 	this.bground = document.createElement('background');
@@ -159,6 +157,19 @@ var Viewer = function() {
 	}
 
 	x3dom.runtime.ready = this.initRuntime;
+
+	this.updateSettings = function(settings)
+	{
+		if (settings)
+		{
+			// TODO: Can this function be merged with the init ?
+			if ('zNear' in settings)
+				this.viewPoint.setAttribute('zNear', settings['zNear']);
+
+			if ('zFar' in settings)
+				this.viewPoint.setAttribute('zFar', settings['zFar']);
+		}
+	}
 
 	this.lookAtObject = function(obj)
 	{

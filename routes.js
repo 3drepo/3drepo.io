@@ -28,6 +28,8 @@ var imgEncoder = require('./js/core/encoders/img_encoder.js');
 var expressJwt = require('express-jwt');
 var jwt = require('jsonwebtoken');
 
+var responseCodes = require('./js/core/response_codes.js');
+
 var secret = 'secret';
 
 var isImage = function(format)
@@ -54,13 +56,18 @@ module.exports = function(){
 		else
 			var format = null;
 
+		var username = null;
+
+		if ("user" in req.session)
+			username = req.session["user"].username;
+
 		if (account && project)
 		{
-			this.dbInterface.isPublicProject(account, project, function(err) {
-				if(err.value && !req.session.user && !imgEncoder.isImage(format))
+			this.dbInterface.hasReadAccessToProject(username, account, project, function(err) {
+				if(err.value && !imgEncoder.isImage(format))
 				{
 					logger.log('debug', account + '/' + project + ' is not public project and no user information.');
-					return res.sendStatus(401);
+					responseCodes.onError("Check user access", err, res, req.params, null);
 				} else {
 					next();
 				}
@@ -69,7 +76,7 @@ module.exports = function(){
 			// No account and project specified, check user is logged in.
 			if (!("user" in req.session)) {
 				logger.log('debug', 'No account and project specified.');
-				return res.sendStatus(401);
+				responseCodes.onError("Check user access (no account/user)", responseCodes.NOT_AUTHORIZED, res, req.params, null);
 			} else {
 				next();
 			}
