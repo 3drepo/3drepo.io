@@ -59,6 +59,9 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			controller: 'DashboardCtrl',
 			resolve: {
 				Data: 'Data',
+				auth: function authCheck(Auth) {
+					return Auth.init();
+				},
 				account: function($stateParams){
 					return $stateParams.account;
 				},
@@ -75,6 +78,9 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 					controller: 'MainCtrl',
 					Data: 'Data',
 					resolve: {
+						auth: function authCheck(Auth) {
+							return Auth.init();
+						},
 						account : function($stateParams){
 							return $stateParams.account;
 						},
@@ -206,19 +212,26 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 		if(publicViews.indexOf(toState.name) == -1)
 		{
-			Auth.isLoggedIn()
-			.then(function _pageStateChangeSuccess(isLoggedIn) {
-				if (!isLoggedIn) {
-					pageConfig.goDefault();
-				} else {
-					if (toState.name == "main")
-					{
-						event.preventDefault();
-						toParams['view'] = "info";
-						$state.transitionTo("main.view", toParams);
-					}
+			if (Auth.loggedIn == null) {
+				// Not sure whether or not we are logged in.
+				// Extreme case where resolve in state hasn't fired.
+				event.preventDefault();
+
+				Auth.init()
+				.then(function() {
+					$state.transitionTo(toState, toParams); // Try again
+				});
+			} else if (Auth.loggedIn) {
+				if (toState.name == "main")
+				{
+					event.preventDefault();
+					toParams['view'] = "info";
+					$state.transitionTo("main.view", toParams);
 				}
-			});
+			} else {
+				event.preventDefault();
+				pageConfig.goDefault();
+			}
 		}
 	});
 }])

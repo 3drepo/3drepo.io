@@ -68,6 +68,8 @@ var Viewer = function() {
 	this.inline = null;
 	this.runtime = null;
 
+	this.fullscreen = false;
+
 	this.initRuntime = function () {
 		self.runtime = this;
 		self.showAll = this.showAll;
@@ -314,20 +316,33 @@ var Viewer = function() {
 		});
 	}
 
-	this.goFullScreen = function() {
+	this.switchFullScreen = function() {
 		var vrHMD = null;
 
 		if (oculus)
 			vrHMD = oculus.vrHMD;
 
-		if (this.viewer.mozRequestFullScreen) {
-			this.viewer.mozRequestFullScreen({
-				vrDisplay: vrHMD
-			});
-		} else if (this.viewer.webkitRequestFullscreen) {
-			this.viewer.webkitRequestFullscreen({
-				vrDisplay: vrHMD,
-			});
+		if (!self.fullscreen)
+		{
+			if (this.viewer.mozRequestFullScreen) {
+				this.viewer.mozRequestFullScreen({
+					vrDisplay: vrHMD
+				});
+			} else if (this.viewer.webkitRequestFullscreen) {
+				this.viewer.webkitRequestFullscreen({
+					vrDisplay: vrHMD,
+				});
+			}
+
+			self.fullscreen = true;
+		} else {
+			if (document.mozCancelFullScreen) {
+				document.mozCancelFullScreen();
+			} else if (document.webkitCancelFullScreen) {
+				document.webkitCancelFullScreen();
+			}
+
+			self.fullscreen = false;
 		}
 	};
 

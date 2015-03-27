@@ -50,6 +50,7 @@ var Oculus = function() {
 			eyeGroup.appendChild(leftEye);
 
 			var leftShape = document.createElement('shape');
+			leftShape.setAttribute('isPickable', 'false');
 			leftEye.appendChild(leftShape);
 
 			var leftApp = document.createElement('appearance');
@@ -106,7 +107,7 @@ var Oculus = function() {
 
 			var leftPlane = document.createElement('plane');
 			leftPlane.setAttribute('solid', 'false');
-			leftPlane.setAttribute('invisible', 'true');
+			//leftPlane.setAttribute('invisible', 'true');
 			leftShape.appendChild(leftPlane);
 
 			// Right eye
@@ -115,6 +116,7 @@ var Oculus = function() {
 			eyeGroup.appendChild(rightEye);
 
 			var rightShape = document.createElement('shape');
+			rightShape.setAttribute('isPickable', 'false');
 			rightEye.appendChild(rightShape);
 
 			var rightApp = document.createElement('appearance');
@@ -133,7 +135,7 @@ var Oculus = function() {
 
 			var rightPlane = document.createElement('plane');
 			rightPlane.setAttribute('solid', 'false');
-			rightPlane.setAttribute('invisible', 'true');
+			//rightPlane.setAttribute('invisible', 'true');
 			rightShape.appendChild(rightPlane);
 
 
@@ -177,9 +179,16 @@ var Oculus = function() {
 
 			scene.appendChild(eyeGroup);
 
+			// Should this be in a setTimeout
+			leftShape._x3domNode._graph.needCulling = false;
+			rightShape._x3domNode._graph.needCulling = false;
+			eyeGroup._x3domNode._graph.needCulling = false;
+			//leftPlane._x3domNode._graph.needCulling = false;
+			//rightPlane._x3domNode._graph.needCulling = false;
+
 			this.startVR();
 
-			viewer.goFullScreen();
+			viewer.switchFullScreen();
 
 			this.enabled = true;
 		} else {
@@ -191,8 +200,8 @@ var Oculus = function() {
 			this.lastW		= null;
 			this.lastH		= null;
 
-			this.vrHMD		= null;
-			this.vrSensor	= null;
+			//this.vrHMD		= null;
+			//this.vrSensor	= null;
 
 			this.IPD		= 0.0064;
 
@@ -204,6 +213,8 @@ var Oculus = function() {
 
 			viewer.runtime.enterFrame = function () {};
 			viewer.runtime.exitFrame = function () {};
+
+			viewer.switchFullScreen();
 		}
 	}
 
@@ -233,8 +244,6 @@ var Oculus = function() {
 		{
 			var w = viewer.runtime.getWidth() * 2;
 			var h = viewer.runtime.getHeight() * 2;
-
-			debugger;
 
 			if (w != self.lastW || h != self.lastH)
 			{
