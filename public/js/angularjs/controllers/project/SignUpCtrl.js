@@ -62,10 +62,8 @@ angular.module('3drepo')
 			});
 	};
 
-	Auth.isLoggedIn().then( function (result) {
-		if(result)
-			$state.go('home', {account: Auth.username});
-	});
+	if (Auth.isLoggedIn())
+		$state.go('home', {account: Auth.username});
 
 }]);
 

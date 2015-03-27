@@ -21,7 +21,7 @@ angular.module('3drepo')
 	this.username = null;
 	var self = this;
 
-	this.isLoggedIn = function() {
+	this.init = function() {
 		var deferred = $q.defer();
 
 		// If we are not logged in, check
@@ -97,16 +97,5 @@ angular.module('3drepo')
 
 		return deferred.promise;
 	}
-
-	this.isLoggedIn().then(function _loginCtrlCheckLoggedInSuccess(result) {
-		self.loggedIn = result;
-	});
-}])
-.run(['$location', 'Auth', function($location, Auth) {
-	Auth.isLoggedIn().then(function (isLoggedIn)
-	{
-		if (!isLoggedIn)
-			$location.path('/login');
-	});
 }]);
 

@@ -33,12 +33,10 @@ angular.module('3drepo')
 
 		// Which state to go to by default
 		obj.goDefault = function() {
-			Auth.isLoggedIn().then(function _loginGoDefaultSuccess(result) {
-				if(result)
-					loggedInFunc(Auth, $state);
-				else
-					notLoggedInFunc(Auth, $state);
-			});
+			if (Auth.loggedIn)
+				loggedInFunc(Auth, $state);
+			else
+				notLoggedInFunc(Auth, $state);
 		}
 
 		$urlRouterProvider.otherwise(obj.goDefault);
