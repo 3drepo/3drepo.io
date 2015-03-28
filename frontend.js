@@ -39,7 +39,7 @@ module.exports.createApp = function(template)
 		var params = {};
 
 		params['config_js'] = 'var server_config = {}; server_config.apiUrl = function(path) { return "//' +
-		config.apiServer.url + '/" + path; };';
+		config.apiServer.hostname + ":" + config.apiServer.port + '/" + path; };';
 
 		if("wayfinder" in config)
 		{
