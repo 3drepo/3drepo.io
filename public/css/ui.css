@@ -984,11 +984,6 @@ hr.fancy-line {
  }
 
 /* Dashboard */
-
-.dashboard-tab{
-	color: #555 !important;
-}
-
 .margin-bottom{
 	margin-bottom: 20px;
 }
@@ -1070,7 +1065,7 @@ header button.btn {
 
 .panel-collapse-btn {
 	color: #ffffff;
-	background-color: rgba(0, 0, 0, 0.7);
+	background-color: rgb(45, 45, 45);
 	width: 40px;
 	height: 40px;
 	padding-top: 6px;
@@ -1088,12 +1083,28 @@ header button.btn {
 	margin-left: -11px;
 }
 
+.arrow-up {
+	width: 0;
+	height: 0;
+	border-left: 10px solid transparent;
+	border-right: 10px solid transparent;
+	border-bottom: 10px solid rgb(45, 45, 45);
+}
+
+.arrow-down {
+	width: 0;
+	height: 0;
+	border-left: 10px solid transparent;
+	border-right: 10px solid transparent;
+	border-top: 10px solid rgb(45, 45, 45);
+}
+
 .arrow-left {
 	width: 0;
 	height: 0;
 	border-top: 10px solid transparent;
 	border-bottom: 10px solid transparent;
-	border-right:10px solid rgba(0, 0, 0, 0.7);
+	border-right:10px solid rgb(45, 45, 45);
 	float: left;
 	position: relative;
 	left: -10px;
@@ -1105,7 +1116,7 @@ header button.btn {
 	height: 0;
 	border-top: 10px solid transparent;
 	border-bottom: 10px solid transparent;
-	border-left: 10px solid rgba(0, 0, 0, 0.7);
+	border-left: 10px solid rgb(45, 45, 45);
 	position: relative;
 	left: 40px;
 	top: -22px;
@@ -1130,4 +1141,45 @@ header button.btn {
 	font-size: 14pt;
 	left: -40px;
 	top: 50%;
+}
+
+/*#ui2-bottom-tabs {
+	position: fixed;
+	bottom: 45px;
+	left: 35%;
+	color: #ffffff;
+	background-color: rgba(45, 45, 45);
+	height: 40px;
+}
+
+.bottom-tab {
+	display: inline-block;
+	padding: 10px 20px;
+}*/
+
+.bottom-tabs {
+	position: relative;
+	top: -40px;
+}
+
+.bottom-tabs > li > a, .bottom-tabs > li > a:focus, .bottom-tabs > li > a:hover,
+.bottom-tabs > li.active > a, .bottom-tabs > li.active > a:focus, .bottom-tabs > li.active > a:hover {
+	border-radius: 0;
+	border: none;
+	background-color: rgb(45, 45, 45);
+	color: #ffffff;
+	margin-left: 0;
+	margin-right: 0;
+}
+
+.bottom-tabs > li.active::after {
+	content: " ";
+	width: 0;
+	height: 0;
+	border-left: 10px solid transparent;
+	border-right: 10px solid transparent;
+	border-top: 10px solid rgb(45, 45, 45);
+	position: relative;
+	top: 8px;
+	left: 45%;
 }
