@@ -443,9 +443,9 @@ var Viewer = function() {
 			}
 		});
 
-		$("#viewer").height($(window).height() - 60 - 82);
+		$("#viewer").height($(window).height() - 60 - 45);
 		$(window).resize(function() {
-			$("#viewer").height($(window).height() - 60 - 82);
+			$("#viewer").height($(window).height() - 60 - 45);
 		});
 	};
 

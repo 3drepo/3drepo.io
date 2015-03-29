@@ -403,14 +403,14 @@ a:hover {
 /* Set the fixed height of the footer here */
 #push,
 #footer {
-		height: 62px;
+		height: 30px;
 }
 #footer {
   background-color: #FFF;
   font-size: 12px;
   color: #BBB;
-  margin-top: 20px;
-  line-height: 60px
+  margin-top: 15px;
+  line-height: 18px
 }
 
 .v-expand {
@@ -1053,10 +1053,10 @@ header button.btn {
 
 #ui2-treeview {
 	position: fixed;
-	bottom: 82px;
+	bottom: 45px;
 	left: 0;
 	width: 25%;
-	height: calc(100% - 60px - 82px);
+	height: calc(100% - 60px - 45px);
 	background-color: rgba(255, 255, 255, 0.5);
 }
 
@@ -1113,10 +1113,10 @@ header button.btn {
 
 #ui2-metadata {
 	position: fixed;
-	bottom: 82px;
+	bottom: 45px;
 	right: 0;
 	width: 25%;
-	height: calc(100% - 60px - 82px);
+	height: calc(100% - 60px - 45px);
 	background-color: rgba(255, 255, 255, 0.5);
 }
 
