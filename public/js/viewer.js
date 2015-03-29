@@ -431,6 +431,26 @@ var Viewer = function() {
 		if (oculus)
 			oculus.switchVR(this);
 	};
+
+	// TODO(mg): find a better place to put this
+	this.initUi = function() {
+		$("#ui2-treeview-collapse-btn").click(function() {
+			console.log("hello");
+			var t = $(this).parent();
+			if (t.hasClass("collapsed")) {
+				t.switchClass("collapsed", 500);
+			} else {
+				t.switchClass([], "collapsed", 500);
+			}
+		});
+
+		$("#viewer").height($(window).height() - 60 - 82);
+		$(window).resize(function() {
+			$("#viewer").height($(window).height() - 60 - 82);
+		});
+	};
+
+	this.initUi();
 };
 
 
