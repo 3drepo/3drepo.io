@@ -434,13 +434,12 @@ var Viewer = function() {
 
 	// TODO(mg): find a better place to put this
 	this.initUi = function() {
-		$("#ui2-treeview-collapse-btn").click(function() {
-			console.log("hello");
-			var t = $(this).parent();
-			if (t.hasClass("collapsed")) {
-				t.switchClass("collapsed", 500);
+		$(".panel-collapse-btn").click(function() {
+			var parent = $(this).parent();
+			if (parent.hasClass("collapsed")) {
+				parent.switchClass("collapsed", 500);
 			} else {
-				t.switchClass([], "collapsed", 500);
+				parent.switchClass([], "collapsed", 500);
 			}
 		});
 

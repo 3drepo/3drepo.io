@@ -1062,22 +1062,73 @@ header button.btn {
 }
 
 #ui2-treeview.collapsed {
-	height: 0;
+	left: -25%;
 }
 
 #ui2-treeview.collapsed .treeview {
 	display: none;
 }
 
-#ui2-treeview-collapse-btn {
+.panel-collapse-btn {
 	color: #ffffff;
 	background-color: rgba(0, 0, 0, 0.7);
-	width: 30px;
-	padding: 6px 6px;
+	width: 40px;
+	height: 40px;
+	padding-top: 6px;
 	text-align: center;
+	font-size: 14pt;
+	position: relative;
 }
 
-#ui2-treeview.collapsed #ui2-treeview-collapse-btn {
+#ui2-treeview-collapse-btn {
+	right: -40px;
+	top: 50%;
+}
+
+#ui2-treeview-collapse-btn i {
+	margin-left: -11px;
+}
+
+.arrow-left {
+	width: 0;
+	height: 0;
+	border-top: 10px solid transparent;
+	border-bottom: 10px solid transparent;
+	border-right:10px solid rgba(0, 0, 0, 0.7);
+	float: left;
 	position: relative;
-	top: -32px;
+	left: -10px;
+	top: 4px;
+}
+
+.arrow-right {
+	width: 0;
+	height: 0;
+	border-top: 10px solid transparent;
+	border-bottom: 10px solid transparent;
+	border-left: 10px solid rgba(0, 0, 0, 0.7);
+	position: relative;
+	left: 40px;
+	top: -22px;
+}
+
+#ui2-metadata {
+	position: fixed;
+	bottom: 82px;
+	right: 0;
+	width: 25%;
+	height: calc(100% - 60px - 82px);
+	background-color: rgba(255, 255, 255, 0.5);
+}
+
+#ui2-metadata.collapsed {
+	right: -25%;
+}
+
+#ui2-metadata-collapse-btn {
+	width: 40px;
+	position: relative;
+	font-size: 14pt;
+	left: -40px;
+	top: 50%;
 }
