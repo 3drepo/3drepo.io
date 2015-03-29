@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd 
+ *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -33,7 +33,7 @@ body {
 	//height: 100%;
 	height:1000;
 	//overflow: hidden;
-    margin : 0;     
+    margin : 0;
     padding : 0;
           -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -43,7 +43,7 @@ body {
     user-select: none;
 }
 
-.fill {    
+.fill {
 background: rgb(87,156,228); /* Old browsers */
 background: -moz-linear-gradient(top,  rgb(87,156,228) 0%, rgb(130,206,242) 41%, rgb(207,236,254) 50%, rgb(210,235,252) 50%, rgb(229,232,233) 50%, rgb(231,231,231) 50%, rgb(206,206,206) 58%, rgb(195,195,195) 100%); /* FF3.6+ */
 background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgb(87,156,228)), color-stop(41%,rgb(130,206,242)), color-stop(50%,rgb(207,236,254)), color-stop(50%,rgb(210,235,252)), color-stop(50%,rgb(229,232,233)), color-stop(50%,rgb(231,231,231)), color-stop(58%,rgb(206,206,206)), color-stop(100%,rgb(195,195,195))); /* Chrome,Safari4+ */
@@ -77,7 +77,7 @@ dd
 }
 
 
-h1#logo { 
+h1#logo {
     font-family: '3drepo-font', sans-serif;
     position: absolute;
     bottom: 0;
@@ -110,7 +110,7 @@ div#x3dom_logdiv.x3dom-logcontainer {
     background-color: rgba(50, 50, 50, 0.9);
     border : 0;
     bottom : 0;
-    padding : 0;    
+    padding : 0;
     position : absolute;
     width : 100%;
 }
@@ -133,11 +133,11 @@ div#x3dom_logdiv.x3dom-logcontainer {
 
 nav.navbar.transparent.navbar-inverse.navbar-fixed-top {
     background-color: transparent !important;
-    border-color: transparent !important; 
+    border-color: transparent !important;
 }
 
 .nav>li>a:hover, .nav>li>a:focus {
-    background-color: rgba(255,255,255,0.25);	
+    background-color: rgba(255,255,255,0.25);
 }
 
 
@@ -191,8 +191,8 @@ nav.navbar.transparent.navbar-inverse.navbar-fixed-top {
     position: absolute;
     z-index: 1;
     overflow: auto;
-//    height: calc(100% - 50px);  
-//    max-height: calc(100% - 50px);  
+//    height: calc(100% - 50px);
+//    max-height: calc(100% - 50px);
 	max-height: 600px;
     /*max-width: 30%;*/
 }
@@ -226,7 +226,7 @@ span.fancytree-title:hover {
     /* Opera */
     height: -o-calc(100% - 120px);
     /* Standard */
-    height: calc(100% - 120px);    
+    height: calc(100% - 120px);
 }
 
 #filter {
@@ -337,7 +337,7 @@ span.fancytree-title:hover {
 }
 
 #credentials-box {
-    padding: 20% 0 0;	
+    padding: 20% 0 0;
     width: 320px;
     margin: auto;
 }
@@ -540,7 +540,7 @@ header {
 }
 
 .block h2 {
-  padding: 0 10px;	
+  padding: 0 10px;
 }
 
 .block-header{
@@ -709,7 +709,7 @@ hr {
 
 .project-title-updated p{
 	color: #AAA;
-	position: absolute; 
+	position: absolute;
   bottom: 0;
   margin-bottom: 0px;
 }
@@ -827,7 +827,7 @@ hr {
 	line-height: 42px;
 	min-height: 42px;
 	min-width: 42px;
-	
+
 }
 
 .log-icon{
@@ -843,7 +843,7 @@ hr {
 .log-block{
 
 	background-color: #FFF;
-	
+
 	min-height: 40px;
 	margin: 0px 10px;
 	margin-left: 42px;
@@ -904,7 +904,7 @@ hr {
 	font-size: 10pt;
 	line-height: 40px;
 	padding-top: 0px;
-	padding-bottom: 0px;	
+	padding-bottom: 0px;
 	color: #555;
 }
 
@@ -914,7 +914,7 @@ hr {
 	font-size: 10pt;
 	line-height: 40px;
 	padding-top: 0px;
-	padding-bottom: 0px;	
+	padding-bottom: 0px;
 	padding-right: 10px;
 	color: #888;
 }
@@ -924,7 +924,7 @@ hr {
 	font-weight: normal;
 	font-size: 10pt;;
 	padding-top: 0px;
-	padding-bottom: 0px;	
+	padding-bottom: 0px;
 	color: #888;
 }
 
@@ -932,7 +932,7 @@ hr {
 	font-weight: normal;
 	font-size: 10pt;;
 	padding-top: 0px;
-	padding-bottom: 0px;	
+	padding-bottom: 0px;
 	color: #888;
 }
 
@@ -941,7 +941,7 @@ hr {
 	font-weight: normal;
 	font-size: 10pt;;
 	padding-top: 0px;
-	padding-bottom: 0px;	
+	padding-bottom: 0px;
 	color: #888;
 }
 
@@ -950,7 +950,7 @@ hr {
 	font-size: 10pt;
 	line-height: 40px;
 	padding-top: 0px;
-	padding-bottom: 0px;	
+	padding-bottom: 0px;
 	padding-left: 10px;
 	color: #555;
 }
@@ -960,7 +960,7 @@ hr {
 	font-size: 10pt;
 	line-height: 40px;
 	padding-top: 0px;
-	padding-bottom: 0px;	
+	padding-bottom: 0px;
 	color: #555;
 }
 
@@ -969,13 +969,13 @@ hr {
 	font-size: 10pt;
 	line-height: 40px;
 	padding-top: 0px;
-	padding-bottom: 0px;	
+	padding-bottom: 0px;
 	color: #4183c4;
 }
 
-hr.fancy-line { 
+hr.fancy-line {
 	float: left;
-  border: 0; 
+  border: 0;
   height: 3px;
   min-width: 10px;
   color: #111;
@@ -987,7 +987,7 @@ hr.fancy-line {
 /* Dashboard */
 
 .dashboard-tab{
-	color: #555 !important; 	
+	color: #555 !important;
 }
 
 .margin-bottom{
