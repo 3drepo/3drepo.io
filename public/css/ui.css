@@ -428,11 +428,17 @@ a:hover {
 	padding: 10px;
 }
 
+header {
+	background: rgb(5, 58, 165);
+	color: #ffffff;
+}
+
 .header {
-	background: #fafafa;
+	/*background: rgb(5, 58, 165);*/
+
 	height: 60px;
 	min-height: 60px;
-	border-bottom: 1px solid #DDD;	
+	border-bottom: 1px solid #DDD;
 }
 
 .header-logo {
@@ -1040,6 +1046,12 @@ img.loading{
 }
 
 /***** UIv2 elements *****/
+header button.btn {
+	background: none;
+	font-size: 14pt;
+	padding-top: 2px;
+}
+
 #ui2-treeview {
 	position: fixed;
 	bottom: 82px;
