@@ -131,7 +131,7 @@ MongoDB.prototype.dbCallback = function(dbName, callback) {
 
 			logger.log('debug', 'Authentication successful');
 			logger.log('debug', 'Authorized as ' + config.db.username);
-			logger.log('debug', 'DB CONNECTION:' + JSON.stringify(dbConn.serverConfig.auth.toArray()));
+			//logger.log('debug', 'DB CONNECTION:' + JSON.stringify(dbConn.serverConfig.auth.toArray()));
 
 			self.dbConns[dbName] = dbConn;
 
