@@ -428,7 +428,7 @@ a:hover {
 }
 
 header {
-	background: rgb(5, 58, 165);
+	background: rgba(5, 58, 165, 0.84);
 	color: #ffffff;
 }
 
@@ -1182,4 +1182,28 @@ header button.btn {
 	position: relative;
 	top: 8px;
 	left: 45%;
+}
+
+#nav-version-control {
+	width: 540px;
+	position: absolute;
+	left: calc(50% - 270px);
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 20px;
+	display: inline;
+}
+
+#nav-version-control .fa {
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
+#nav-version-control .fa-caret-down {
+	font-size: 8pt;
+}
+
+#nav-version-control span {
+	margin-left: 15px;
+	margin-right: 15px;
 }
