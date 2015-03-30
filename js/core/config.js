@@ -56,9 +56,14 @@ for(i in config.servers)
 
 if("protocol" in module.exports.apiServer)
 {
-	module.exports.apiServer.protocol = module.exports.apiServer.protocol + '://';
+	module.exports.apiServer.protocol = module.exports.apiServer.protocol + '\://';
 } else {
 	module.exports.apiServer.protocol = '//';
+}
+
+if (!("external" in module.exports.apiServer))
+{
+	module.exports.apiServer.external = false;
 }
 
 if(!("external_port" in module.exports.apiServer))
