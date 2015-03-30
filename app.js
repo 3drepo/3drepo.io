@@ -52,13 +52,16 @@ if ('ssl' in config) {
 
 if (!config.vhost)
 {
-	if ('ssl' in config)
+	if (!config.apiServer.external)
 	{
-		var apiServer = https.createServer(ssl_options, apiApp);
-		config.apiServer.port = config.apiServer.https_ports;
-	} else {
-		var apiServer = http.createServer(apiApp);
-		config.apiServer.port = config.apiServer.http_port;
+		if ('ssl' in config)
+		{
+			var apiServer = https.createServer(ssl_options, apiApp);
+			config.apiServer.port = config.apiServer.https_ports;
+		} else {
+			var apiServer = http.createServer(apiApp);
+			config.apiServer.port = config.apiServer.http_port;
+		}
 	}
 
 	for(i in config.servers)
@@ -79,14 +82,21 @@ if (!config.vhost)
 		});
 	}
 
-	apiServer.listen(config.apiServer.port, config.apiServer.hostname, function() {
-		logger.log('info', 'Starting API service on ' + config.apiServer.hostname + ' port ' + config.apiServer.port);
-	});
+	if (!config.apiServer.external)
+	{
+		apiServer.listen(config.apiServer.port, config.apiServer.hostname, function() {
+			logger.log('info', 'Starting API service on ' + config.apiServer.hostname + ' port ' + config.apiServer.port);
+		});
+	}
+
 } else {
 	var vhostApp = express();
 
-	logger.log('info', 'Starting VHOST for ' + config.apiServer.hostname);
-	vhostApp.use(vhost(config.apiServer.hostname, apiApp));
+	if (!config.apiServer.external)
+	{
+		logger.log('info', 'Starting VHOST for ' + config.apiServer.hostname);
+		vhostApp.use(vhost(config.apiServer.hostname, apiApp));
+	}
 
 	for(i in config.servers)
 	{
