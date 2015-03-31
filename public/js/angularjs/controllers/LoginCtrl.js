@@ -16,9 +16,10 @@
  */
 
 angular.module('3drepo')
-.controller('LoginCtrl', ['$scope', '$state', 'pageConfig', 'serverConfig', 'Auth', function($scope, $state, pageConfig, serverConfig, Auth)
+.controller('LoginCtrl', ['$scope', '$state', 'Data', 'pageConfig', 'serverConfig', 'Auth', function($scope, $state, Data, pageConfig, serverConfig, Auth)
 {
 	$scope.loggedIn = null;
+	$scope.Data = Data;
 	$scope.user = { username: "", password: ""};
 	$scope.goDefault = pageConfig.goDefault;
 
