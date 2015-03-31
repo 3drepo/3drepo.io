@@ -443,6 +443,21 @@ var Viewer = function() {
 			}
 		});
 
+		// TODO(mg): remove this horrible hack
+		setInterval(function() {
+			$("#bp-collapser").unbind('click');
+			$("#bp-collapser").click(function() {
+				var bp = $("#bottom-panel");
+				if (bp.hasClass("collapsed")) {
+					bp.switchClass("collapsed", 100);
+					$(this).html("<i class='fa fa-caret-down'></i>")
+				} else {
+					bp.switchClass([], "collapsed", 100);
+					$(this).html("<i class='fa fa-caret-up'></i>")
+				}
+			});
+		}, 2000);
+
 		$("#viewer").height($(window).height() - 60 - 45);
 		$(window).resize(function() {
 			$("#viewer").height($(window).height() - 60 - 45);
