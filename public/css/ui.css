@@ -1064,6 +1064,11 @@ header button.btn {
 	display: none;
 }
 
+#ui2-treeview .treeview {
+	margin: 15px;
+	max-width: calc(100% - 30px);
+}
+
 .panel-collapse-btn {
 	color: #ffffff;
 	background-color: rgb(45, 45, 45);
@@ -1251,4 +1256,34 @@ header button.btn {
 #nav-version-control span {
 	margin-left: 5px;
 	margin-right: 5px;
+}
+
+/******** FANCYTREE OVERRIDES **********/
+.fancytree-selected span.fancytree-title, span.fancytree-title {
+	color: #000000;
+	text-shadow: none;
+	font-style: normal;
+}
+
+#fancytree-drop-marker,
+span.fancytree-checkbox,
+span.fancytree-drag-helper-img,
+span.fancytree-empty,
+span.fancytree-expander,
+span.fancytree-icon,
+span.fancytree-radio,
+span.fancytree-vline {
+	background-image: url("../images/icons2.png");
+}
+
+span.fancytree-icon {
+	width: 0;
+}
+
+ul.fancytree-container li {
+	background: none;
+}
+
+.fancytree-folder span.fancytree-title {
+	font-weight: normal;
 }
