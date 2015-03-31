@@ -1057,15 +1057,15 @@ header button.btn {
 }
 
 #ui2-treeview.collapsed {
-	left: -25%;
+	bottom: calc(-88.8% + 40px);
 }
 
-#ui2-treeview.collapsed .treeview {
+/*#ui2-treeview.collapsed .treeview {
 	display: none;
 }
-
+*/
 #ui2-treeview .treeview {
-	margin: 15px;
+	margin: 5px 5px 5px 25px;
 	max-width: calc(100% - 30px);
 }
 
@@ -1080,13 +1080,12 @@ header button.btn {
 	position: relative;
 }
 
-#ui2-treeview-collapse-btn {
-	right: -40px;
-	top: 50%;
+.collapsed .panel-collapse-btn {
+	top: -40px;
 }
 
 #ui2-treeview-collapse-btn i {
-	margin-left: -11px;
+	margin-top: 5px;
 }
 
 .arrow-up {
@@ -1138,15 +1137,12 @@ header button.btn {
 }
 
 #ui2-metadata.collapsed {
-	right: -25%;
+	bottom: calc(-88.8% + 40px);
 }
 
 #ui2-metadata-collapse-btn {
 	width: 40px;
-	position: relative;
 	font-size: 14pt;
-	left: -40px;
-	top: 50%;
 }
 
 /*#ui2-bottom-tabs {

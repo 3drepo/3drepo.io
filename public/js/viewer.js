@@ -437,9 +437,9 @@ var Viewer = function() {
 		$(".panel-collapse-btn").click(function() {
 			var parent = $(this).parent();
 			if (parent.hasClass("collapsed")) {
-				parent.switchClass("collapsed", 500);
+				parent.switchClass("collapsed", 100);
 			} else {
-				parent.switchClass([], "collapsed", 500);
+				parent.switchClass([], "collapsed", 100);
 			}
 		});
 
