@@ -1136,6 +1136,26 @@ header button.btn {
 	background-color: rgba(255, 255, 255, 0.5);
 }
 
+#metadata {
+	margin: 15px;
+}
+
+.metadata-title, .metadata-row {
+	color: #000000;
+	text-shadow: none;
+	font-size: 10pt;
+}
+
+.metadata-title {
+	border: 0;
+	font-weight: normal;
+	font-size: 11pt;
+}
+
+.metadata-row {
+	font-weight: 200;
+}
+
 #ui2-metadata.collapsed {
 	bottom: -80.9%;
 }
