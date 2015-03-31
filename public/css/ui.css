@@ -1057,7 +1057,7 @@ header button.btn {
 }
 
 #ui2-treeview.collapsed {
-	bottom: -80.9%;
+	left: -25%;
 }
 
 /*#ui2-treeview.collapsed .treeview {
@@ -1078,10 +1078,11 @@ header button.btn {
 	text-align: center;
 	font-size: 14pt;
 	position: relative;
+	top: 50%;
 }
 
-.collapsed .panel-collapse-btn {
-	top: -40px;
+#ui2-treeview-collapse-btn {
+	right: -40px;
 }
 
 #ui2-treeview-collapse-btn i {
@@ -1157,12 +1158,11 @@ header button.btn {
 }
 
 #ui2-metadata.collapsed {
-	bottom: -80.9%;
+	right: -25%;
 }
 
 #ui2-metadata-collapse-btn {
-	width: 40px;
-	font-size: 14pt;
+	left: -40px;
 }
 
 /*#ui2-bottom-tabs {
