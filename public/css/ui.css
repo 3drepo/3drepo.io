@@ -1161,7 +1161,11 @@ header button.btn {
 
 .bottom-tabs {
 	position: relative;
+	width: 62%;
+	height: 40px;
 	top: -40px;
+	left: 19%;
+	border: none;
 }
 
 .bottom-tabs > li > a, .bottom-tabs > li > a:focus, .bottom-tabs > li > a:hover,
@@ -1184,6 +1188,10 @@ header button.btn {
 	position: relative;
 	top: 8px;
 	left: 45%;
+}
+
+.bottom-info {
+	background-color: #ffffff;
 }
 
 #nav-version-control {

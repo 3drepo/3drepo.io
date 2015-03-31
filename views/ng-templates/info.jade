@@ -1,9 +1,9 @@
-ng-include(src="'common.html'")
-.col-md-8.tight
+.col-md-8.col-md-offset-2.bottom-info
 	ng-include(src="'menu.html'")
+	p Owner: {{Data.ProjectData.owner}}
 	.block
 		.col-sm-12.margined.block-header
-			h3 Revision 
+			h3 Revision
 				span.block-header-project-name {{Data.CurrentRevision.name}}
 				span.block-header-by by
 				span.block-header-author {{Data.CurrentRevision.author}}
@@ -15,3 +15,23 @@ ng-include(src="'common.html'")
 		// Display the processed markdown from readme
 		div(markdown='Data.Readme.text')
 
+	// Diff selector
+	//.row.tight
+		.btn-group.menu-button
+			button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-expanded='false')
+				i.fa.fa-copy.menu-icon
+				span.button-title Diff with:
+				span.button-keyword {{data.current_diff.name}}
+				span.caret
+			ul.dropdown-menu(role='menu')
+				li
+					a(href='#/')
+						span.button-keyword None
+				li.divider
+				li(ng-repeat='rev in data.revisions', ng-if='rev.name != current_revision.name')
+					a(href='#/', ng-click='setDiffName(rev.name)')
+						span.button-keyword {{rev.name}}
+
+	form(role='form')
+		button.btn.btn-success.pull-right(type='submit', disabled) Download
+			i.fa.fa-download.menu-icon

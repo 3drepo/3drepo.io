@@ -1,38 +1,10 @@
 .col-md-4.tight.gutter-right
-	// Project name and author
-	.project-title
-		h2 {{Data.ProjectData.name}}
-		p Owner: {{Data.ProjectData.owner}}
-	// Branch selector
-	.row.tight
-		.btn-group.menu-button
-			button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-expanded='false')
-				i.fa.fa-code-fork.menu-icon
-				span.button-title Branch: 
-				span.button-keyword {{Data.CurrentBranch.name}}
-				span.caret
-			ul.dropdown-menu(role='menu')
-				li(ng-repeat='branch in Data.Branches.branches')
-					a(href='#', ng-click='Data.setBranch(branch)')
-						span.button-keyword {{branch}}
-	// Revision selector
-	.row.tight
-		.btn-group.menu-button
-			button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-expanded='false')
-				i.fa.fa-tag.menu-icon
-				span.button-title Revision: 
-				span.button-keyword {{Data.CurrentRevision.shortName}}
-				span.caret
-			ul.dropdown-menu(role='menu')
-				li(ng-repeat='rev in Data.CurrentBranch.revisions')
-					a(href='#', ng-click='setRevision(rev)')
-						span.button-keyword {{rev.name}}
 	// Diff selector
 	//.row.tight
 		.btn-group.menu-button
 			button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-expanded='false')
 				i.fa.fa-copy.menu-icon
-				span.button-title Diff with: 
+				span.button-title Diff with:
 				span.button-keyword {{data.current_diff.name}}
 				span.caret
 			ul.dropdown-menu(role='menu')
@@ -43,7 +15,4 @@
 				li(ng-repeat='rev in data.revisions', ng-if='rev.name != current_revision.name')
 					a(href='#/', ng-click='setDiffName(rev.name)')
 						span.button-keyword {{rev.name}}
-	form(role='form')
-		button.btn.btn-success.pull-left(type='submit', disabled) Download
-			i.fa.fa-download.menu-icon
 

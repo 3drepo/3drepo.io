@@ -1,5 +1,4 @@
-ng-include(src="'common.html'")
-.col-md-8.tight
+.col-md-8.col-md-offset-2.bottom-info
 	ng-include(src="'menu.html'")
 	div(ng-if='Data.RevisionsByDay.loading')
 		img.loading(src='/public/images/ajax-loader.gif', width='20', height='20')
@@ -11,10 +10,10 @@ ng-include(src="'common.html'")
 				hr.fancy-line
 				h3 {{day}}
 				.commit-block(ng-repeat='revision in revisions')
-					span.commit-revision Revision 
+					span.commit-revision Revision
 					a(href='#/', ng-click='setRevision(revision)')
 						span.commit-number {{revision.name}}
-					span.commit-by by 
+					span.commit-by by
 					span.commit-author {{revision.author}}
 					span.commit-date {{revision.date.split(&apos;,&apos;)[1]}}
 					p {{revision.message}}
