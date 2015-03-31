@@ -1057,7 +1057,7 @@ header button.btn {
 }
 
 #ui2-treeview.collapsed {
-	bottom: calc(-88.8% + 40px);
+	bottom: -80.9%;
 }
 
 /*#ui2-treeview.collapsed .treeview {
@@ -1137,7 +1137,7 @@ header button.btn {
 }
 
 #ui2-metadata.collapsed {
-	bottom: calc(-88.8% + 40px);
+	bottom: -80.9%;
 }
 
 #ui2-metadata-collapse-btn {
@@ -1159,13 +1159,27 @@ header button.btn {
 	padding: 10px 20px;
 }*/
 
+#bottom-panel {
+	background-color: #ffffff;
+	width: 50%;
+	height: 100%;
+	position: fixed;
+	left: 25%;
+	top: 60px;
+}
+
+#bottom-panel.collapsed {
+	top: calc(100% - 45px);
+}
+
 .bottom-tabs {
+	border: none;
+}
+
+.collapsed .bottom-tabs {
 	position: relative;
-	width: 62%;
 	height: 40px;
 	top: -40px;
-	left: 19%;
-	border: none;
 }
 
 .bottom-tabs > li > a, .bottom-tabs > li > a:focus, .bottom-tabs > li > a:hover,
@@ -1190,8 +1204,8 @@ header button.btn {
 	left: 45%;
 }
 
-.bottom-info {
-	background-color: #ffffff;
+.collapsed .bottom-tabs > li.active::after {
+	border: none;
 }
 
 #nav-version-control {
