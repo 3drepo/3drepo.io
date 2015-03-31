@@ -1186,13 +1186,57 @@ header button.btn {
 }
 
 #nav-version-control {
-	width: 540px;
+	width: 650px;
 	position: absolute;
-	left: calc(50% - 270px);
+	left: calc(50% - 300px);
 	margin-left: auto;
 	margin-right: auto;
 	margin-top: 20px;
 	display: inline;
+}
+
+#nav-version-control .btn-group.menu-button {
+	margin-bottom: 0;
+}
+
+#nav-version-control .btn-group.menu-button button.btn {
+	border: none;
+	color: #ffffff;
+	padding: 0;
+	margin: 0 15px;
+	border-radius: 0;
+	background: none;
+}
+
+#nav-version-control .btn-group.menu-button button.btn:hover {
+	background: none;
+}
+
+.dropdown-menu {
+	border-radius: 0 !important;
+	width: calc(100% - 30px);
+	margin: 0 15px;
+}
+
+.dropdown-menu > li > a {
+	padding: 0 0;
+	text-align: center;
+}
+
+.dropdown-menu > li > a > .button-keyword {
+	font-size: 10pt;
+	font-weight: normal !important;
+	color: #000000;
+	text-shadow: none;
+}
+
+#nav-version-control .btn-group.menu-button button.btn .button-title,
+#nav-version-control .btn-group.menu-button button.btn .button-keyword {
+	color: #ffffff;
+}
+
+#nav-version-control .btn-group.menu-button button.btn .button-keyword {
+	font-weight: normal !important;
 }
 
 #nav-version-control .fa {
@@ -1205,6 +1249,6 @@ header button.btn {
 }
 
 #nav-version-control span {
-	margin-left: 15px;
-	margin-right: 15px;
+	margin-left: 5px;
+	margin-right: 5px;
 }

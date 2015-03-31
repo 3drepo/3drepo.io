@@ -134,8 +134,9 @@ html(lang="en" ng-app="3drepo").ng-scope
 		script(type='text/ng-template', id='footer.html')
 			include ng-templates/footer.jade
 
-		ng-include(ng-if="!(state.current.name=='login')" src="'header.html'")
 		.container-fluid
+			.row.mainrow
+				ng-include(ng-if="!(state.current.name=='login')" src="'header.html'")
 			.row
 					div(ui-view='')
 			.row.mainrow

@@ -1,4 +1,4 @@
-header.navbar.navbar-fixed-top
+header#header.navbar.navbar-fixed-top
 	.container-fluid
 		.row-fluid
 			.navbar-header
@@ -10,15 +10,28 @@ header.navbar.navbar-fixed-top
 				a.navbar-brand.logo-pad.header-logo(href="#", ng-click="goDefault()")
 					img.v-expand(src='/public/images/3drepo-logo-white.png')
 			#nav-version-control
-				span.nav-project-title  <b>OSTFed</b>
-				span.branch
-					i.fa.fa-code-fork
-					|  <b>BRANCH:</b> master&nbsp;
-					i.fa.fa-caret-down
+				span.nav-project-title  <b>{{Data.ProjectData.name}}</b>
+				.btn-group.menu-button
+					button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-expanded='false')
+						i.fa.fa-code-fork.menu-icon
+						span.button-title Branch:
+						span.button-keyword {{Data.CurrentBranch.name}}
+						span.caret
+					ul.dropdown-menu(role='menu')
+						li(ng-repeat='branch in Data.Branches.branches')
+							a(href='#', ng-click='Data.setBranch(branch)')
+								span.button-keyword {{branch}}
 				span.revision
-					i.fa.fa-tag
-					|  <b>REVISION:</b> 3CF11644-975f-B...&nbsp;
-					i.fa.fa-caret-down
+					.btn-group.menu-button
+						button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-expanded='false')
+							i.fa.fa-tag.menu-icon
+							span.button-title Revision:
+							span.button-keyword {{Data.CurrentRevision.shortName}}
+							span.caret
+						ul.dropdown-menu(role='menu')
+							li(ng-repeat='rev in Data.CurrentBranch.revisions')
+								a(href='#', ng-click='setRevision(rev)')
+									span.button-keyword {{rev.name}}
 			nav.collapse.navbar-collapse.bs-navbar-collapse(role='navigation')
 				//a(href='http://blog.getbootstrap.com') Enterprise
 				form.pull-right.tight.v-expand(role='login')
