@@ -1,14 +1,16 @@
 .col-md-8.col-md-offset-2.bottom-info
 	ng-include(src="'menu.html'")
-	p Owner: {{Data.ProjectData.owner}}
-	.block
-		.col-sm-12.margined.block-header
-			h3 Revision
-				span.block-header-project-name {{Data.CurrentRevision.name}}
-				span.block-header-by by
-				span.block-header-author {{Data.CurrentRevision.author}}
-				span.commit-date-title {{Data.CurrentRevision.date}}
-		p {{Data.CurrentRevision.message}}
+	.col-sm-12.margined
+		p Owner: {{Data.ProjectData.owner}}
+	.col-sm-12.margined
+		p
+			i.fa.fa-tag
+			b  REVISION
+			span.block-header-project-name  {{Data.CurrentRevision.name}}
+			span.block-header-by  by
+			span.block-header-author  {{Data.CurrentRevision.author}}
+			span.commit-date-title  {{Data.CurrentRevision.date}}
+	p {{Data.CurrentRevision.message}}
 	.block
 		.col-sm-12.margined.block-header
 			h3 Readme

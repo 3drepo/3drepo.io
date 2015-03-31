@@ -456,7 +456,7 @@ var Viewer = function() {
 					$(this).html("<i class='fa fa-caret-up'></i>")
 				}
 			});
-		}, 2000);
+		}, 1000);
 
 		$("#viewer").height($(window).height() - 60 - 45);
 		$(window).resize(function() {

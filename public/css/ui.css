@@ -1174,12 +1174,13 @@ header button.btn {
 
 .bottom-tabs {
 	border: none;
+	font-size: 8pt;
 }
 
 .collapsed .bottom-tabs {
 	position: relative;
 	height: 40px;
-	top: -40px;
+	top: -35px;
 }
 
 .bottom-tabs > li > a, .bottom-tabs > li > a:focus, .bottom-tabs > li > a:hover,
@@ -1202,6 +1203,14 @@ header button.btn {
 	position: relative;
 	top: 8px;
 	left: 45%;
+}
+
+#bp-collapser {
+	padding-left: 0;
+}
+
+.block-header-project-name {
+	font-weight: normal;
 }
 
 .collapsed .bottom-tabs > li.active::after {
@@ -1305,3 +1314,4 @@ ul.fancytree-container li {
 .fancytree-folder span.fancytree-title {
 	font-weight: normal;
 }
+
