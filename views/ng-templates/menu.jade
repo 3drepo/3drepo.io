@@ -1,21 +1,28 @@
 .col-md12.margin-bottom
-	ul.nav.nav-tabs.nav(role='tablist')
+	ul.nav.nav-tabs.nav.bottom-tabs(role='tablist')
 		li(ng-class="{'active': isView('info')}")
 			a.dashboard-tab(ng-click="go('info')")
 				i.fa.fa-info-circle.menu-icon
-				| Info
+				| INFO
 		// <li ng-class="{'active': isView('comments')}"><a class="dashboard-tab" ng-click="go('comments')"><i class="fa fa-comments menu-icon"></i>Comments <span class="badge">{{data.current_revision.n_comments}}</span></a></li> //
 		li(ng-class="{'active': isView('revisions')}")
-			a.dashboard-tab(ng-click="go('revisions')") 
+			a.dashboard-tab(ng-click="go('revisions')")
 				i.fa.fa-tag.menu-icon
-				| Revisions 
+				| REVISIONS
 				span.badge {{data.current_branch.n_revisions}}
 		li(ng-class="{'active': isView('log')}")
 			a.dashboard-tab(ng-click="go('log')")
 				i.fa.fa-save.menu-icon
-				| Log
+				| LOG
 		li(ng-class="{'active': isView('settings')}")
 			a.dashboard-tab(ng-click="go('settings')")
 				i.fa.fa-gear.menu-icon
-				| Settings
+				| SETTINGS
+		li(ng-class="{'active': isView('cobie')}")
+			a.dashboard-tab(ng-click="go('cobie')")
+				i.fa.fa-list-alt.menu-icon
+				| COBIE
+		li
+			a.dashboard-tab#bp-collapser
+				i.fa.fa-caret-up
 

@@ -1,5 +1,4 @@
-ng-include(src="'common.html'")
-.col-md-8.tight
+.col-md-12.bottom-info
 	ng-include(src="'menu.html'")
 	div(ng-if='Data.Log.loading')
 		img.loading(src='/public/images/ajax-loader.gif', width='20', height='20')
@@ -26,7 +25,7 @@ ng-include(src="'common.html'")
 					span.commit-date {{item.date}}
 				.log-block(ng-if="item.type=='branch-add'")
 					span.history-author {{item.author}}
-					span.history-action created branch 
+					span.history-action created branch
 					span.history-keyword {{item.keyword}}
 					span.commit-date {{item.date}}
 				.log-block(ng-if="item.type=='user-add'")

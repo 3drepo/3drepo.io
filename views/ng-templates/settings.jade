@@ -1,5 +1,4 @@
-ng-include(src="'common.html'")
-.col-md-8.tight
+.col-md-12.bottom-info
 	ng-include(src="'menu.html'")
 	div(ng-if='Data.ProjectData.loading')
 		img.loading(src='/public/images/ajax-loader.gif', width='20', height='20')
@@ -91,7 +90,7 @@ ng-include(src="'common.html'")
 						.col-sm-4.permission
 							.btn-group
 								button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-expanded='false' disabled)
-									span.button-title Role: 
+									span.button-title Role:
 									span.button-keyword {{user.role}}
 									span.caret
 								ul.dropdown-menu(role='menu')
@@ -129,7 +128,7 @@ ng-include(src="'common.html'")
 						.col-sm-4.permission
 							.btn-group
 								button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-expanded='false')
-									span.button-title Revision: 
+									span.button-title Revision:
 									span.button-keyword {{fed.revselected}}
 									span.caret
 								ul.dropdown-menu(role='menu')
