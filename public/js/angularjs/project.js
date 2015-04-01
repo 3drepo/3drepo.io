@@ -235,12 +235,14 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		}
 	});
 }])
-.controller('MainCtrl', ['$window', 'account', 'project', 'serverConfig', function($window, account, project, serverConfig) {
+.controller('MainCtrl', ['$scope', '$window', 'account', 'project', 'serverConfig', 'Data', function($scope, $window, account, project, serverConfig, Data) {
 	$window.oculus = new Oculus();
 
 	$window.viewer = new Viewer();
 	$window.viewer.loadURL(serverConfig.apiUrl(account + '/' + project + '/revision/master/head.x3d.src'));
 	initTree(account, project);
+
+	$scope.Data = Data;
 
 	$window.viewer.enableClicking();
 }])

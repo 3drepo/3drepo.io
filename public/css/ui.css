@@ -1232,11 +1232,11 @@ header button.btn {
 #nav-version-control {
 	width: 650px;
 	position: absolute;
-	left: calc(50% - 300px);
-	margin-left: auto;
-	margin-right: auto;
+	left: calc(50% - 315px);
 	margin-top: 20px;
 	display: inline;
+	top: 0;
+	z-index: 10000;
 }
 
 #nav-version-control .btn-group.menu-button {
@@ -1254,6 +1254,10 @@ header button.btn {
 
 #nav-version-control .btn-group.menu-button button.btn:hover {
 	background: none;
+}
+
+.nav-project-title {
+	color: #ffffff;
 }
 
 .dropdown-menu {
