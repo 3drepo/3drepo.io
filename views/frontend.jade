@@ -142,8 +142,5 @@ html(lang="en" ng-app="3drepo").ng-scope
 			.row.mainrow
 				ng-include(ng-if="!(state.current.name=='login')" src="'header.html'")
 			.row
-					div(ui-view='')
-			.row.mainrow
-				ng-include(ng-if="!(state.current.name=='login')" src="'footer.html'")
-
+				div(ui-view='')
 
