@@ -24,6 +24,7 @@ var Viewer = function() {
 	this.viewer = document.createElement('x3d');
 	this.viewer.setAttribute('id', 'viewer');
 	this.viewer.setAttribute('xmlns', 'http://www.web3d.org/specification/x3d-namespace');
+	this.viewer.setAttribute('keysEnabled', false);
 
 	x3ddiv.appendChild(this.viewer);
 
@@ -71,16 +72,21 @@ var Viewer = function() {
 
 	this.fullscreen = false;
 
+	this.clickingEnabled = false;
+
 	this.initRuntime = function () {
 		self.runtime = this;
-		self.showAll = this.showAll;
+
+		self.showAll = function() {
+			self.runtime.fitAll();
+		}
 
 		$(document).on("onLoaded", function(event, objEvent) {
 			self.runtime.fitAll();
 		});
 	};
 
-	if(oculus)
+	if(window.oculus)
 	{
 		this.viewer.addEventListener("keypress", function(e) {
 			if (e.charCode == 'o'.charCodeAt(0))
@@ -89,6 +95,28 @@ var Viewer = function() {
 			}
 		});
 	}
+
+	this.viewer.addEventListener("keypress", function(e) {
+		if (e.charCode == 'r'.charCodeAt(0))
+		{
+			self.reset();
+			self.setApp(null);
+			self.setNavMode("WALK");
+			self.disableClicking();
+		} else if (e.charCode == 'a'.charCodeAt(0)) {
+			self.showAll();
+			self.setNavMode("EXAMINE");
+			self.enableClicking();
+		} else if (e.charCode == 'n'.charCodeAt(0)) {
+			self.setNavMode("TURNTABLE");
+			self.enableClicking();
+		} else if (e.charCode == 'w'.charCodeAt(0)) {
+			self.setNavMode("WALK");
+		} else if (e.charCode == 'e'.charCodeAt(0)) {
+			self.setNavMode("EXAMINE");
+			self.enableClicking();
+		}
+	});
 
 	if(0)
 	{
@@ -170,6 +198,31 @@ var Viewer = function() {
 
 			if ('zFar' in settings)
 				this.viewPoint.setAttribute('zFar', settings['zFar']);
+
+			if ('viewpoints' in settings)
+			{
+				if(settings['viewpoints'].length > 0)
+				{
+					var currentViewpoint = settings["viewpoints"][0];
+
+					if("position" in currentViewpoint)
+					{
+						self.setStartingPoint(
+							currentViewpoint["position"][0],
+							currentViewpoint["position"][1],
+							currentViewpoint["position"][2]
+						);
+					}
+					if("direction" in currentViewpoint)
+					{
+						self.setStartingOrientation(
+							currentViewpoint["direction"][0],
+							currentViewpoint["direction"][1],
+							currentViewpoint["direction"][2]
+						);
+					}
+				}
+			}
 		}
 	}
 
@@ -280,6 +333,14 @@ var Viewer = function() {
 	}
 
 	this.defaultOrientation = [0.0, 0.0, 1.0];
+	this.setStartingOrientation = function(x,y,z)
+	{
+		this.defaultOrientation[0] = x;
+		this.defaultOrientation[1] = y;
+		this.defaultOrientation[2] = z;
+	}
+
+
 	this.currentCameraPosition = this.defaultOrientation;
 	this.currentCameraOrientation = [0.0, 0.0, 0.0];
 
@@ -385,23 +446,40 @@ var Viewer = function() {
 		this.nav.speed = speed;
 	}
 
-	this.enableClicking = function() {
-		// When the user clicks on the background the select nothing.
-		$(document).on("bgroundClicked", function(event) {
-			self.setApp(null);
-		});
+	this.bgroundClick = function(event) {
+		self.setApp(null);
+	}
 
-		$(document).on("clickObject", function(event, objEvent) {
-			//viewer.lookAtObject(objEvent.target);
-			self.setApp(objEvent.target);
-		});
+	this.clickObject = function(event, objEvent) {
+		self.setApp(objEvent.target);
+	}
+
+	this.disableClicking = function() {
+		if(self.clickingEnabled)
+		{
+			$(document).off("bgroundClicked", self.bgroundClick);
+			$(document).off("clickObject", self.clickObject);
+			self.viewer.setAttribute("disableDoubleClick", true);
+			self.clickingEnabled = false;
+		}
+	}
+
+	this.enableClicking = function() {
+		if(!self.clickingEnabled)
+		{
+			// When the user clicks on the background the select nothing.
+			$(document).on("bgroundClicked", self.bgroundClick);
+			$(document).on("clickObject", self.clickObject);
+			self.viewer.setAttribute("disableDoubleClick", false);
+			self.clickingEnabled = true;
+		}
 	}
 
 	this.switchFullScreen = function() {
 		var vrHMD = null;
 
-		if (oculus)
-			vrHMD = oculus.vrHMD;
+		if (window.oculus)
+			vrHMD = window.oculus.vrHMD;
 
 		if (!self.fullscreen)
 		{
@@ -428,8 +506,8 @@ var Viewer = function() {
 	};
 
 	this.switchVR = function() {
-		if (oculus)
-			oculus.switchVR(this);
+		if (window.oculus)
+			window.oculus.switchVR(this);
 	};
 
 	// TODO(mg): find a better place to put this
@@ -458,10 +536,6 @@ var Viewer = function() {
 			});
 		}, 1000);
 
-		$("#viewer").height($(window).height() - 60 - 45);
-		$(window).resize(function() {
-			$("#viewer").height($(window).height() - 60 - 45);
-		});
 	};
 
 	this.initUi();
