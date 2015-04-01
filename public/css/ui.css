@@ -1041,6 +1041,10 @@ img.loading{
 }
 
 /***** UIv2 elements *****/
+button, button.btn {
+	border-radius: 0;
+}
+
 header button.btn {
 	background: none;
 	font-size: 14pt;

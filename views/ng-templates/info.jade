@@ -11,9 +11,8 @@
 			span.block-header-author  {{Data.CurrentRevision.author}}
 			span.commit-date-title  {{Data.CurrentRevision.date}}
 	p {{Data.CurrentRevision.message}}
-	.block
-		.col-sm-12.margined.block-header
-			h3 Readme
+
+	.col-sm-12.margined
 		// Display the processed markdown from readme
 		div(markdown='Data.Readme.text')
 
