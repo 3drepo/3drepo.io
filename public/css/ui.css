@@ -1293,6 +1293,11 @@ header button.btn {
 	margin-right: 5px;
 }
 
+.cobie-spreadsheet-container img {
+	margin-left: auto;
+	margin-right: auto;
+}
+
 /******** FANCYTREE OVERRIDES **********/
 .fancytree-selected span.fancytree-title, span.fancytree-title {
 	color: #000000;

@@ -18,6 +18,10 @@
 			a.dashboard-tab(ng-click="go('settings')")
 				i.fa.fa-gear.menu-icon
 				| SETTINGS
+		li(ng-class="{'active': isView('cobie')}")
+			a.dashboard-tab(ng-click="go('cobie')")
+				i.fa.fa-list-alt.menu-icon
+				| COBIE
 		li
 			a.dashboard-tab#bp-collapser
 				i.fa.fa-caret-up

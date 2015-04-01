@@ -20,7 +20,7 @@ var viewUrl = function ($stateParams)
 	// Each view is associated with a template
 	// However only a few views are possible
 	// Check that we have a view that exists otherwise redirects to info
-	var possible_views = ["info", "comments", "revisions", "log", "settings"];
+	var possible_views = ["info", "comments", "revisions", "log", "settings", "cobie"];
 	var view = $stateParams.view;
 
 	if( possible_views.indexOf(view) == -1 ){
