@@ -1081,12 +1081,49 @@ header button.btn {
 	top: 50%;
 }
 
-#ui2-treeview-collapse-btn {
+.collapsed #ui2-treeview-collapse-btn {
 	right: -40px;
 }
 
 #ui2-treeview-collapse-btn i {
 	margin-top: 5px;
+}
+
+#ui2-metadata {
+	position: fixed;
+	bottom: 45px;
+	right: 0;
+	width: 25%;
+	height: calc(100% - 60px - 45px);
+	background-color: rgba(255, 255, 255, 0.5);
+}
+
+#metadata {
+	margin: 15px;
+}
+
+.metadata-title, .metadata-row {
+	color: #000000;
+	text-shadow: none;
+	font-size: 10pt;
+}
+
+.metadata-title {
+	border: 0;
+	font-weight: normal;
+	font-size: 11pt;
+}
+
+.metadata-row {
+	font-weight: 200;
+}
+
+#ui2-metadata.collapsed {
+	right: -25%;
+}
+
+.collapsed #ui2-metadata-collapse-btn {
+	left: -40px;
 }
 
 .arrow-up {
@@ -1127,57 +1164,6 @@ header button.btn {
 	left: 40px;
 	top: -22px;
 }
-
-#ui2-metadata {
-	position: fixed;
-	bottom: 45px;
-	right: 0;
-	width: 25%;
-	height: calc(100% - 60px - 45px);
-	background-color: rgba(255, 255, 255, 0.5);
-}
-
-#metadata {
-	margin: 15px;
-}
-
-.metadata-title, .metadata-row {
-	color: #000000;
-	text-shadow: none;
-	font-size: 10pt;
-}
-
-.metadata-title {
-	border: 0;
-	font-weight: normal;
-	font-size: 11pt;
-}
-
-.metadata-row {
-	font-weight: 200;
-}
-
-#ui2-metadata.collapsed {
-	right: -25%;
-}
-
-#ui2-metadata-collapse-btn {
-	left: -40px;
-}
-
-/*#ui2-bottom-tabs {
-	position: fixed;
-	bottom: 45px;
-	left: 35%;
-	color: #ffffff;
-	background-color: rgba(45, 45, 45);
-	height: 40px;
-}
-
-.bottom-tab {
-	display: inline-block;
-	padding: 10px 20px;
-}*/
 
 #bottom-panel {
 	background-color: #ffffff;
