@@ -1179,8 +1179,10 @@ header button.btn {
 }
 
 .bottom-tabs {
+	position: relative;
 	border: none;
 	font-size: 8pt;
+	left: 15%;
 }
 
 .collapsed .bottom-tabs {
