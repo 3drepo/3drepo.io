@@ -9,8 +9,9 @@ header#header.navbar.navbar-fixed-top
 					span.icon-bar
 				a.navbar-brand.logo-pad.header-logo(href="#", ng-click="goDefault()")
 					img.v-expand(src='/public/images/3drepo-logo-white.png')
-			#nav-version-control
+			#nav-version-control(ng-show='{{Data.ProjectData.name != null}}')
 				span.nav-project-title  <b>{{Data.ProjectData.name}}</b>
+				{{$scope.view}}
 				.btn-group.menu-button
 					button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-expanded='false')
 						i.fa.fa-code-fork.menu-icon
