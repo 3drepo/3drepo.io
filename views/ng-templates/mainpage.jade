@@ -1,9 +1,19 @@
 .container-fluid
-	.row
-		.treeview
-			#scenetree
-		div#meta-popup.draggable.ui-widget-content
-			div#metadata
+	#project-viewport-container.row
 		div#x3d.project-viewport
-	.row.mainrow
+	.ui2
+		#ui2-treeview
+			div#ui2-treeview-collapse-btn.pull-right.panel-collapse-btn
+				i.fa.fa-list
+			.treeview
+				#scenetree
+		#ui2-metadata
+			div#ui2-metadata-collapse-btn.panel-collapse-btn
+				i.fa.fa-tag
+			div#meta-popup
+				div#metadata
+
+
+
+	#bottom-panel.row.mainrow.collapsed
 		div(ui-view="footer")

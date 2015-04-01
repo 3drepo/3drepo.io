@@ -1,6 +1,6 @@
-.header
+header#header.navbar.navbar-fixed-top
 	.container-fluid
-		.row
+		.row-fluid
 			.navbar-header
 				button.navbar-toggle.collapsed(type='button', data-toggle='collapse', data-target='.bs-navbar-collapse')
 					span.sr-only Toggle navigation
@@ -8,17 +8,46 @@
 					span.icon-bar
 					span.icon-bar
 				a.navbar-brand.logo-pad.header-logo(href="#", ng-click="goDefault()")
-					img.v-expand(src='/public/images/logo.png')
+					img.v-expand(src='/public/images/3drepo-logo-white.png')
+			#nav-version-control(ng-show='{{Data.ProjectData.name != null}}')
+				span.nav-project-title  <b>{{Data.ProjectData.name}}</b>
+				.btn-group.menu-button
+					button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-expanded='false')
+						i.fa.fa-code-fork.menu-icon
+						span.button-title Branch:
+						span.button-keyword {{Data.CurrentBranch.name}}
+						span.caret
+					ul.dropdown-menu(role='menu')
+						li(ng-repeat='branch in Data.Branches.branches')
+							a(href='#', ng-click='Data.setBranch(branch)')
+								span.button-keyword {{branch}}
+				span.revision
+					.btn-group.menu-button
+						button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-expanded='false')
+							i.fa.fa-tag.menu-icon
+							span.button-title Revision:
+							span.button-keyword {{Data.CurrentRevision.shortName}}
+							span.caret
+						ul.dropdown-menu(role='menu')
+							li(ng-repeat='rev in Data.CurrentBranch.revisions')
+								a(href='#', ng-click='setRevision(rev)')
+									span.button-keyword {{rev.name}}
 			nav.collapse.navbar-collapse.bs-navbar-collapse(role='navigation')
-				form.navbar-left.tight.v-expand(role='search')
-					.form-group.tight
-						input#search-box.form-control(type='text', ng-model="asyncSelected", placeholder="Search 3D Repo", typeahead="thing for thing in getThings($viewValue)", typeahead-loading="Searching")
 				//a(href='http://blog.getbootstrap.com') Enterprise
-				form.navbar-left.tight.v-expand(role='login')
+				form.pull-right.tight.v-expand(role='login')
 					.form-group.tight#loginButtons
-						button.v-expand.btn.btn-danger.pull-left(ng-hide='!loggedIn', ng-click="logOut()") Log Out
-						button.v-expand.btn.btn-success.pull-left(ng-hide='loggedIn', ng-click="loginPage()") Login
-						button.v-expand.btn.btn-success.pull-left(ng-hide='loggedIn', ng-click="signupPage()") Sign Up
+						button.btn
+							i.fa.fa-search
+						button.btn
+							i.fa.fa-user(ng-hide='!loggedIn', ng-click="goDefault()")
+						button.btn
+							i.fa.fa-sign-out(ng-hide='!loggedIn', ng-click="logOut()")
+
+						// button.v-expand.btn.btn-success.pull-left(ng-hide='loggedIn', ng-click="loginPage()") Login
+						// button.v-expand.btn.btn-success.pull-left(ng-hide='loggedIn', ng-click="signupPage()") Sign Up
+				//form.pull-right.tight.v-expand(role='search')
+				//	.form-group.tight
+				//		input#search-box.form-control(type='text', ng-model="asyncSelected", placeholder="Search 3D Repo", typeahead="thing for thing in getThings($viewValue)", typeahead-loading="Searching")
 				//span.clearfix
 					a(href='http://blog.getbootstrap.com')
 						img(src='/public/images/en.gif', height='16')

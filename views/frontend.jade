@@ -5,7 +5,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 		meta(charset='utf-8')
 		meta(http-equiv='X-UA-Compatible', content='IE=edge')
 
-		title 3D Repo 
+		title 3D Repo
 
 		link(rel='stylesheet' type='text/css' href='#{x3domcss}')
 		script(type="text/javascript" src='#{ammojs}')
@@ -118,10 +118,14 @@ html(lang="en" ng-app="3drepo").ng-scope
 		script(type='text/ng-template', id='settings.html')
 			include ng-templates/settings.jade
 
+		// Cobie template
+		script(type='text/ng-template', id='cobie.html')
+			include ng-templates/cobie.jade
+
 		// Home page template
 		script(type='text/ng-template', id='home.html')
 			include ng-templates/home.jade
-		
+
 		// Header template
 		script(type='text/ng-template', id='header.html')
 			include ng-templates/header.jade
@@ -133,13 +137,13 @@ html(lang="en" ng-app="3drepo").ng-scope
 		// Footer
 		script(type='text/ng-template', id='footer.html')
 			include ng-templates/footer.jade
-		
+
 		.container-fluid
-			ng-include(ng-if="!(state.current.name=='login')" src="'header.html'")
-		.row
-			.container-fluid
-				div(ui-view='')
-		.row.mainrow
-			ng-include(ng-if="!(state.current.name=='login')" src="'footer.html'")
+			.row.mainrow
+				ng-include(ng-if="!(state.current.name=='login')" src="'header.html'")
+			.row
+					div(ui-view='')
+			.row.mainrow
+				ng-include(ng-if="!(state.current.name=='login')" src="'footer.html'")
 
 
