@@ -485,7 +485,7 @@ exports.getDBList = function(callback) {
 	});
 };
 
-exports.getChildren = function(dbName, project, uuid, callback) {
+exports.getChildren = function(dbName, branch, revision, project, uuid, callback) {
 	var filter = {
 		parents : stringToUUID(uuid),
 		type: {$in : ['mesh', 'transformation', 'ref', 'map']}
@@ -728,7 +728,7 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 	}
 }
 
-exports.getScene = function(dbName, project, revision, full, callback) {
+exports.getScene = function(dbName, project, branch, revision, full, callback) {
 	var historyQuery = null;
 
 	if (revision != null)
@@ -736,11 +736,25 @@ exports.getScene = function(dbName, project, revision, full, callback) {
 		historyQuery = {
 			_id: stringToUUID(revision)
 		};
+	} else {
+		console.log(branch);
+
+		if (branch == 'master')
+			var branch_id = masterUUID;
+		else
+			var branch_id = stringToUUID(branch);
+
+		historyQuery = {
+			shared_id:	branch_id
+		};
 	}
 
 	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
 	{
 		if(err.value) return callback(err);
+
+		if(!docs[0])
+			return callback(responseCodes.BRANCH_NOT_FOUND);
 
 		if (!full)
 		{

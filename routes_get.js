@@ -353,6 +353,30 @@ module.exports = function(router, dbInterface, checkAccess){
 		this.transRouter(format, '/:account/:project/:rid/:type', res, params);
 	});
 
+	// Get subtree for head revision for a branch, with (optional) depth query string paramter
+	router.get('/:account/:project/revision/:branch/head/tree/:sid.:format?.:subformat?', checkAccess, function(req, res, next) {
+		var format = req.params["format"];
+		var current_user = ("user" in req.session) ? req.session.user.username : "";
+
+		var params = {
+			account:	req.params["account"],
+			project:	req.params["project"],
+			branch:		req.params["branch"],
+			rid:		req.params["rid"],
+			subformat:	req.params["subformat"],
+			sid:		req.params["sid"],
+			user:		current_user,
+			query:		req.query
+		};
+
+		if ("depth" in req.query)
+			params.depth = req.query.depth;
+
+		this.transRouter(format, '/:account/:project/revision/:branch/head/tree/:sid', res, params);
+	});
+
+
+
 	// Get subtree for sid in revision rid, with (optional) depth query string paramter
 	router.get('/:account/:project/revision/:rid/tree/:sid.:format?.:subformat?', checkAccess, function(req, res, next) {
 		var format = req.params["format"];

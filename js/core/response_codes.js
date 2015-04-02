@@ -53,6 +53,8 @@ var responseCodes = {
 	PROJECT_HISTORY_NOT_FOUND: {value: 19, message: "Project history not found", status: 404},
 	PROJECT_INFO_NOT_FOUND:		{value: 20, message: "Project info not found", status: 404},
 
+	BRANCH_NOT_FOUND:			{value: 21, message: "Branch not found", status: 404},
+
 	DB_ERROR: function(message) {
 		return {
 			value: 1000,
@@ -70,7 +72,7 @@ var responseCodes = {
 	}
 };
 
-var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 1000, 2000];
+var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 1000, 2000];
 
 responseCodes.respond = function(place, resCode, res, extraInfo)
 {

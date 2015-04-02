@@ -16,24 +16,24 @@
  */
 
 angular.module('3drepo')
-.controller('LoginCtrl', ['$scope', '$state', 'pageConfig', 'serverConfig', 'Auth', function($scope, $state, pageConfig, serverConfig, Auth)
-{
-	$scope.loggedIn = null;
+.controller('HeaderCtrl', ['$scope', 'pageConfig', 'Auth', function($scope, pageConfig, Auth){
+	$scope.Auth = Auth;
 	$scope.user = { username: "", password: ""};
+	$scope.goDefault = pageConfig.goDefault;
 
-	$scope.login = function() {
-		Auth.login($scope.user.username, $scope.user.password).then(
-			function _loginCtrlLoginSuccess(username) {
-				$scope.errorMessage = null;
-				pageConfig.goDefault();
-				$scope.user.username = null;
-				$scope.user.password = null;
-			}, function _loginCtrlLoginFailure(reason) {
-				$scope.errorMessage = reason;
-				pageConfig.goDefault();
-				$scope.user.password = null;
-			}
-		);
-	};
-}])
+	$scope.logOut = function()
+	{
+		Auth.logout().then(function _logoutCtrlLogoutSuccess() {
+			$scope.errorMessage = null;
+			pageConfig.goDefault();
+		}, function _logoutCtrlLogoutFailure(reason) {
+			$scope.errorMessage = reason;
+			pageConfig.goDefault();
+		});
+	}
+
+	$scope.$on("notAuthorized", function(event, message) {
+		pageConfig.goDefault();
+	});
+}]);
 

@@ -78,7 +78,22 @@ function getNode(node)
 		return document.getElementById(node.data.namespace + node.data.uuid);
 }
 
-var initTree = function(account, project)
+function refreshTree(account, project, branch, revision)
+{
+	if(branch && !revision)
+	{
+		var sourceURL = server_config.apiUrl(account + '/' + project + '/revision/' + branch + '/head/tree/root.json?depth=1&htmlMode=true')
+	} else {
+		var sourceURL = server_config.apiUrl(account + '/' + project + '/revision/' + revision + '/tree/root.json?depth=1&htmlMode=true')
+	}
+
+	var tree = $("#scenetree").fancytree("getTree");
+	tree.reload({
+		url: sourceURL
+	});
+}
+
+var initTree = function(account, project, branch, revision)
 {
 	window.treeCtrl = new TreeControl();
 
@@ -154,9 +169,6 @@ var initTree = function(account, project)
 			treeCtrl.clickedFromView = false;
 		},
 		checkbox: true,
-		source: {
-			url: server_config.apiUrl(account + '/' + project + '/revision/head/tree/root.json?depth=1&htmlMode=true')
-		},
 		lazyLoad: function(event, data) {
 			var node = data.node;
 
@@ -178,4 +190,6 @@ var initTree = function(account, project)
 			});
 		}
 	});
+
+	refreshTree(account, project, branch, revision);
 };

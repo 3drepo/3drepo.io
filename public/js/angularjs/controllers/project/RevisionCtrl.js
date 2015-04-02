@@ -16,24 +16,22 @@
  */
 
 angular.module('3drepo')
-.controller('LoginCtrl', ['$scope', '$state', 'pageConfig', 'serverConfig', 'Auth', function($scope, $state, pageConfig, serverConfig, Auth)
-{
-	$scope.loggedIn = null;
-	$scope.user = { username: "", password: ""};
+.controller('RevisionCtrl', ['$scope', 'Data', 'serverConfig', '$window', '$state', function($scope,  Data, serverConfig, $window, $state){
+	$scope.Data = Data;
 
-	$scope.login = function() {
-		Auth.login($scope.user.username, $scope.user.password).then(
-			function _loginCtrlLoginSuccess(username) {
-				$scope.errorMessage = null;
-				pageConfig.goDefault();
-				$scope.user.username = null;
-				$scope.user.password = null;
-			}, function _loginCtrlLoginFailure(reason) {
-				$scope.errorMessage = reason;
-				pageConfig.goDefault();
-				$scope.user.password = null;
-			}
-		);
-	};
-}])
+	$scope.setRevision = function(rev) {
+		var o = {
+			branch: Data.branch,
+			rid:	rev.name,
+			view:	$scope.view
+		};
+
+		$window.viewer.loadURL(serverConfig.apiUrl(Data.account + '/' + Data.project + '/revision/' + rev.name + '.x3d.src'))
+		console.log(serverConfig.apiUrl(Data.account + '/' + Data.project + '/revision/' + rev.name + '.x3d.src'));
+		refreshTree(Data.account, Data.project, Data.branch, rev.name);
+
+		$state.go('main.revision.view', o);
+	}
+}]);
+
 

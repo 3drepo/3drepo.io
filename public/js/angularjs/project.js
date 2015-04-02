@@ -121,7 +121,6 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			}
 		}).state('main.branch', {
 			url: '/revision/:branch/head',
-			controller: 'RevisionCtrl',
 			resolve: {
 				branch: function($stateParams) {
 					return $stateParams.branch;
@@ -152,7 +151,6 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			url: '/revision/:rid',
 			views: {
 				"viewer@main" : {
-					controller: 'RevisionCtrl',
 					resolve: {
 						rid: function($stateParams) {
 							return $stateParams.rid;
@@ -240,19 +238,10 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 	$window.viewer = new Viewer();
 	$window.viewer.loadURL(serverConfig.apiUrl(account + '/' + project + '/revision/master/head.x3d.src'));
-	initTree(account, project);
+	initTree(account, project, 'master', null);
 
 	$scope.Data = Data;
 
 	$window.viewer.enableClicking();
-}])
-.controller('RevisionCtrl', ['$scope', 'account', 'project', 'branch', 'rid', '$stateParams', 'serverConfig', function($scope, account, project, branch, rid, $stateParams, serverConfig) {
-	$scope.branch = branch;
-	$scope.rid = rid;
-
-	if (branch)
-		viewer.loadURL(serverConfig.apiUrl(account + '/' + project + '/revision/' + branch + '/' + rid + '.x3d.src'));
-	else
-		viewer.loadURL(serverConfig.apiUrl(account + '/' + project + '/revision/' + rid + '.x3d.src'));
 }]);
 

@@ -1,4 +1,4 @@
-header#header.navbar.navbar-fixed-top
+header#header.navbar.navbar-fixed-top(ng-controller='HeaderCtrl')
 	.container-fluid
 		.row-fluid
 			.navbar-header
@@ -16,9 +16,9 @@ header#header.navbar.navbar-fixed-top
 						button.btn
 							i.fa.fa-search
 						button.btn
-							i.fa.fa-user(ng-hide='!loggedIn', ng-click="goDefault()")
+							i.fa.fa-user(ng-hide='!Auth.loggedIn', ng-click="goDefault()")
 						button.btn
-							i.fa.fa-sign-out(ng-hide='!loggedIn', ng-click="logOut()")
+							i.fa.fa-sign-out(ng-hide='!Auth.loggedIn', ng-click="logOut()")
 
 						// button.v-expand.btn.btn-success.pull-left(ng-hide='loggedIn', ng-click="loginPage()") Login
 						// button.v-expand.btn.btn-success.pull-left(ng-hide='loggedIn', ng-click="signupPage()") Sign Up

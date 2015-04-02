@@ -797,10 +797,10 @@ function X3D_AddGroundPlane(xmlDoc, bbox)
  * @param {JSON} bbox - Bounding used to compute the position and size of
  *						ground plane
  *******************************************************************************/
-function render(dbInterface, account, project, subFormat, revision, oculusMode, callback) {
+function render(dbInterface, account, project, subFormat, branch, revision, oculusMode, callback) {
 	var full = (subFormat == "x3d");
 
-	dbInterface.getScene(account, project, revision, full, function(err, doc) {
+	dbInterface.getScene(account, project, branch, revision, full, function(err, doc) {
 		if(err.value) return callback(err);
 
 		var xmlDoc = X3D_Header();
@@ -861,42 +861,42 @@ exports.route = function(router)
 {
 	router.get('x3d', '/:account/:project/revision/:rid', function(res, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project,	params.subformat, params.rid, false, err_callback);
+		render(router.dbInterface, params.account, params.project,	params.subformat, null, params.rid, false, err_callback);
 	});
 
 	router.get('x3d', '/:account/:project/revision/:branch/head', function(res, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project, params.subformat, null, false, err_callback);
+		render(router.dbInterface, params.account, params.project, params.subformat, params.branch, null, false, err_callback);
 	});
 
 	router.get('x3d', '/:account/:project/revision/:rid/:sid', function(res, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project, params.subformat, params.rid, false, err_callback);
+		render(router.dbInterface, params.account, params.project, params.subformat, null, params.rid, false, err_callback);
 	});
 
 	router.get('x3d', '/:account/:project/revision/:branch/head/:sid', function(res, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project, params.subformat, null, false, err_callback);
+		render(router.dbInterface, params.account, params.project, params.subformat, params.branch, null, false, err_callback);
 	});
 
 	router.get('occ', '/:account/:project/revision/:rid', function(res, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project,	params.subformat, params.rid, true, err_callback);
+		render(router.dbInterface, params.account, params.project,	params.subformat, null, params.rid, true, err_callback);
 	});
 
 	router.get('occ', '/:account/:project/revision/:branch/head', function(res, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project, params.subformat, null, true, err_callback);
+		render(router.dbInterface, params.account, params.project, params.subformat, params.branch, null, true, err_callback);
 	});
 
 	router.get('occ', '/:account/:project/revision/:rid/:sid', function(res, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project, params.subformat, params.rid, true, err_callback);
+		render(router.dbInterface, params.account, params.project, params.subformat, null, params.rid, true, err_callback);
 	});
 
 	router.get('occ', '/:account/:project/revision/:branch/head/:sid', function(res, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project, params.subformat, null, true, err_callback);
+		render(router.dbInterface, params.account, params.project, params.subformat, params.branch, null, true, err_callback);
 	});
 
 }

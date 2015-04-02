@@ -65,11 +65,13 @@ html(lang="en" ng-app="3drepo").ng-scope
 		script(type="text/javascript" src="/public/js/angularjs/controllers/LoginCtrl.js")
 		script(type="text/javascript" src="/public/js/angularjs/controllers/SearchCtrl.js")
 		script(type="text/javascript" src="/public/js/angularjs/controllers/project/DashboardCtrl.js")
+		script(type="text/javascript" src="/public/js/angularjs/controllers/project/HeaderCtrl.js")
+		script(type="text/javascript" src="/public/js/angularjs/controllers/project/RevisionCtrl.js")
 		script(type="text/javascript" src="/public/js/angularjs/controllers/project/ViewCtrl.js")
 		script(type="text/javascript" src="/public/js/angularjs/controllers/project/SignUpCtrl.js")
 		script(type="text/javascript" src="/public/js/angularjs/controllers/project/SplashCtrl.js")
 
-	body(ng-controller='LoginCtrl')
+	body
 		// Not found template
 		script(type='text/ng-template', id='404.html')
 			include ng-templates/404.jade

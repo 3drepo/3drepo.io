@@ -1,7 +1,7 @@
 .container-fluid#loginPage
 	.row
 		.col-md-4.col-md-offset-4
-			#credentials-box
+			#credentials-box(ng-controller='LoginCtrl')
 				img#logo(src='public/svg/3drepo_logo.svg')
 				//h5.version.top-gap Version: #{version}
 				form.signin(ng-submit='login()')

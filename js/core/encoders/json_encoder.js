@@ -107,6 +107,58 @@ function processChild(child, project, selected, namespace, htmlMode)
 	return childNode;
 }
 
+function getTree(dbInterface, account, project, branch, revision, sid, namespace, selected, htmlMode, err_callback)
+{
+		if (sid == "root")
+		{
+			dbInterface.getScene(account, project, branch, revision, false, function(err, doc) {
+				if(err.value) return err_callback(err);
+
+				var head = [{}];
+				var node = doc['mRootNode'];
+
+				logger.log('debug', 'Found root node ' + node["id"]);
+
+				head[0]["title"]     = project;
+				head[0]["key"]       = htmlMode ? escapeHtml(uuidToString(node["shared_id"])) : uuidToString(node["shared_id"]);
+				head[0]["folder"]    = true;
+				head[0]["lazy"]      = true;
+				head[0]["selected"]  = true;
+				head[0]["uuid"]      = node["id"];
+				head[0]["namespace"] = ((namespace != null) ? namespace : "model__");
+				head[0]["dbname"]    = project;
+
+				if (!("children" in node))
+					head[0]["children"] = [];
+
+				err_callback(responseCodes.OK, head);
+			});
+		} else {
+			dbInterface.getChildren(account, project, branch, revision, sid, function(err, doc) {
+				if(err.value) return err_callback(err);
+
+				async.map(doc,
+					function(child, callback) { // Called for all children
+						callback(null, processChild(child, project, selected, namespace, htmlMode));
+					},
+					function(err, children) { // Called when are children are ready
+						async.map(children,
+							function(id, callback) { // Called every item
+								treeChildMetadata(dbInterface, account, project, id, callback);
+							},
+							function(err, childrenWithMeta) { // Called when children are ready
+								if(err)
+									err_callback(responseCodes.EXTERNAL_ERROR(err));
+								else
+									err_callback(responseCodes.OK, childrenWithMeta);
+							}
+						);
+					}
+				);
+			});
+		}
+};
+
 exports.route = function(router)
 {
 	router.get('json', '/search', function(res, params, err_callback) {
@@ -224,58 +276,37 @@ exports.route = function(router)
 		});
 	});
 
+	router.get('json', '/:account/:project/revision/:branch/head/tree/:sid', function(res, params, err_callback) {
+		var account		= params.account;
+		var project		= params.project;
+
+		var sid			= params.sid;
+
+		var branch		= params.branch;
+
+		var namespace	= params.query.namespace;
+		var selected	= params.query.selected;
+
+		var htmlMode	= params.query.htmlMode == 'true';
+
+		getTree(dbInterface, account, project, branch, null, sid, namespace, selected, htmlMode, err_callback);
+	});
+
+
 	router.get('json', '/:account/:project/revision/:rid/tree/:sid', function(res, params, err_callback) {
-		var revision = (params.rid == "head") ? null : params.rid;
-		var namespace = params.query.namespace;
-		var selected  = params.query.selected;
+		var account		= params.account;
+		var project		= params.project;
 
-		var htmlMode  = params.query.htmlMode == 'true';
+		var sid			= params.sid;
 
-		if (params.sid == "root")
-		{
-			router.dbInterface.getScene(params.account, params.project, revision, false, function(err, doc) {
-				var head = [{}];
-				var node = doc['mRootNode'];
+		var revision	= params.rid;
 
-				logger.log('debug', 'Found root node ' + node["id"]);
+		var namespace	= params.query.namespace;
+		var selected	= params.query.selected;
 
-				head[0]["title"]     = params.project;
-				head[0]["key"]       = htmlMode ? escapeHtml(uuidToString(node["shared_id"])) : uuidToString(node["shared_id"]);
-				head[0]["folder"]    = true;
-				head[0]["lazy"]      = true;
-				head[0]["selected"]  = true;
-				head[0]["uuid"]      = node["id"];
-				head[0]["namespace"] = ((namespace != null) ? namespace : "model__");
-				head[0]["dbname"]    = params.project;
+		var htmlMode	= params.query.htmlMode == 'true';
 
-				if (!("children" in node))
-					head[0]["children"] = [];
-
-				err_callback(responseCodes.OK, head);
-			});
-		} else {
-			router.dbInterface.getChildren(params.account, params.project, params.sid, function(err, doc) {
-				async.map(doc,
-					function(child, callback) { // Called for all children
-						callback(null, processChild(child, params.project, selected, namespace, htmlMode));
-					},
-					function(err, children) { // Called when are children are ready
-						async.map(children,
-							function(id, callback) { // Called every item
-								treeChildMetadata(router.dbInterface, params.account, params.project, id, callback);
-							},
-							function(err, childrenWithMeta) { // Called when children are ready
-								if(err)
-									err_callback(responseCodes.EXTERNAL_ERROR(err));
-								else
-									err_callback(responseCodes.OK, childrenWithMeta);
-							}
-						);
-					}
-				);
-			});
-		}
-
+		getTree(dbInterface, account, project, null, revision, sid, namespace, selected, htmlMode, err_callback);
 	});
 };
 

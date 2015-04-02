@@ -16,7 +16,7 @@
  */
 
 angular.module('3drepo')
-.controller('ViewCtrl', ['$scope', 'Data', '$state', function($scope,  Data, $state){
+.controller('ViewCtrl', ['$scope', 'Data', 'serverConfig', '$window', '$state', function($scope,  Data, serverConfig, $window, $state){
 
 	$scope.Data = Data;
 	$scope.view = Data.view;
@@ -54,6 +54,10 @@ angular.module('3drepo')
 			rid:	rev.name,
 			view:	$scope.view
 		};
+
+		$window.viewer.loadURL(serverConfig.apiUrl(Data.account + '/' + Data.project + '/revision/' + rev.name + '.x3d.src'))
+
+		refreshTree(account, project, Data.branch, rev.name);
 
 		$state.go('main.revision.view', o);
 	}

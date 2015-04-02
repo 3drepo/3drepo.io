@@ -67,7 +67,7 @@ module.exports = function(){
 				if(err.value && !imgEncoder.isImage(format))
 				{
 					logger.log('debug', account + '/' + project + ' is not public project and no user information.');
-					responseCodes.onError("Check user access", err, res, req.params, null);
+					responseCodes.onError("Check user access", err, res, null, req.params);
 				} else {
 					next();
 				}
