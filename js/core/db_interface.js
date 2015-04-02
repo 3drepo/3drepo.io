@@ -485,7 +485,7 @@ exports.getDBList = function(callback) {
 	});
 };
 
-exports.getChildren = function(dbName, branch, revision, project, uuid, callback) {
+exports.getChildren = function(dbName, project, branch, revision, uuid, callback) {
 	var filter = {
 		parents : stringToUUID(uuid),
 		type: {$in : ['mesh', 'transformation', 'ref', 'map']}
