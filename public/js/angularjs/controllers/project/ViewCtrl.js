@@ -62,6 +62,15 @@ angular.module('3drepo')
 		$state.go('main.revision.view', o);
 	}
 
+	$scope.toggleBottomPanel = function() {
+		var bp = $('#bottom-panel');
+		if (bp.hasClass('collapsed')) {
+			bp.removeClass('collapsed');
+		} else {
+			bp.addClass('collapsed');
+		}
+	}
+
 	$scope.checkViewIsValid();
 
 	$scope.pageChanged();
