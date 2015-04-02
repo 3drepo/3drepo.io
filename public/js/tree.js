@@ -109,8 +109,6 @@ function treeURL(account, project, branch, revision, sid, depth)
 function refreshTree(account, project, branch, revision)
 {
 	var newURL = treeURL(account, project, branch, revision);
-	console.log(newURL);
-
 	var tree = $("#scenetree").fancytree("getTree");
 
 	tree.reload({

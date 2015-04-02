@@ -16,7 +16,7 @@
  */
 
 angular.module('3drepo')
-.controller('RevisionCtrl', ['$scope', 'Data', 'serverConfig', '$window', '$state', function($scope,  Data, serverConfig, $window, $state){
+.controller('RevisionCtrl', ['$scope', 'Data', 'serverConfig', '$window', '$q', '$http', '$state', function($scope,  Data, serverConfig, $window, $q, $http, $state){
 	$scope.Data = Data;
 
 	$scope.setRevision = function(rev) {
@@ -27,11 +27,36 @@ angular.module('3drepo')
 		};
 
 		$window.viewer.loadURL(serverConfig.apiUrl(Data.account + '/' + Data.project + '/revision/' + rev.name + '.x3d.src'))
-		console.log(serverConfig.apiUrl(Data.account + '/' + Data.project + '/revision/' + rev.name + '.x3d.src'));
 		refreshTree(Data.account, Data.project, Data.branch, rev.name);
 
 		$state.go('main.revision.view', o);
 	}
+
+	$scope.setDiff = function (rev) {
+		$window.otherView.loadURL(serverConfig.apiUrl(Data.account + '/' + Data.project + '/revision/' + rev.name + '.x3d.src'));
+
+		var baseUrl = serverConfig.apiUrl(Data.account + '/' + Data.project + '/revision/' + Data.revision + '/diff/' + rev.name + '.json');
+
+		//var deferred = $q.defer();
+
+		$http.get(baseUrl, { withCredentials : true})
+		.then(function(json) {
+			var diffColors = {
+				added:		json.data["added"],
+				modified:	json.data["modified"],
+				deleted:	json.data["deleted"]
+			};
+
+			viewer.setDiffColors(diffColors, true);
+			otherView.setDiffColors(diffColors, false);
+		});
+	}
+
+	$scope.$watch('Data.diffEnabled', function () {
+		if (Data.diffEnabled)
+			viewer.diffView();
+	});
+
 }]);
 
 

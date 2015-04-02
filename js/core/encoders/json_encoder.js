@@ -313,6 +313,15 @@ exports.route = function(router)
 
 		getTree(dbInterface, account, project, null, revision, sid, namespace, selected, htmlMode, err_callback);
 	});
+
+	router.get('json', '/:account/:project/revision/:rid/diff/:otherrid', function(res, params, err_callback) {
+		router.dbInterface.getDiff(params.account, params.project, null, params.rid, null, params.otherrid, function(err, diff) {
+			if(err.value)
+				err_callback(err);
+			else
+				err_callback(responseCodes.OK, diff);
+		});
+	});
 };
 
 

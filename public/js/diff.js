@@ -68,13 +68,13 @@ var Oculus = function() {
 			leftApp.appendChild(leftTex);
 
 			var leftVP = document.createElement('viewpoint');
-			leftVP.setAttribute('use', 'viewer_current');
+			leftVP.setAttribute('use', 'current');
 			leftVP.setAttribute('containerfield', 'viewpoint');
 			leftVP.textContent = ' ';
 			leftTex.appendChild(leftVP);
 
 			var leftBground = document.createElement('background');
-			leftBground.setAttribute('use', 'viewer_bground');
+			leftBground.setAttribute('use', 'bground');
 			leftBground.setAttribute('containerfield', 'background');
 			leftBground.textContent = ' ';
 			leftTex.appendChild(leftBground);
@@ -140,13 +140,13 @@ var Oculus = function() {
 
 
 			var rightVP = document.createElement('viewpoint');
-			rightVP.setAttribute('use', 'viewer_current');
+			rightVP.setAttribute('use', 'current');
 			rightVP.setAttribute('containerfield', 'viewpoint');
 			rightVP.textContent = ' ';
 			rightTex.appendChild(rightVP);
 
 			var rightBground = document.createElement('background');
-			rightBground.setAttribute('use', 'viewer_bground');
+			rightBground.setAttribute('use', 'bground');
 			rightBground.setAttribute('containerfield', 'background');
 			rightBground.textContent = ' ';
 			rightTex.appendChild(rightBground);
@@ -225,7 +225,7 @@ var Oculus = function() {
 		self.lastW		= viewer.runtime.getWidth();
 		self.lastH		= viewer.runtime.getHeight();
 
-		self.viewpoint	= viewer.viewpoint;
+		self.viewpoint	= $("#current")[0];
 
 		viewer.runtime.enterFrame = function () {
 			if (!self.vrSensor)

@@ -16,34 +16,39 @@
  */
 
 angular.module('3drepo')
-.factory('Readme', ['$http', '$q', 'serverConfig', function($http, $q, serverConfig){
+.factory('CurrentDiffRevision', ['$http', '$q', 'serverConfig', function($http, $q, serverConfig){
 	var o = {};
-
-	o.defaultReadme = "[Missing Readme]";
 
 	o.refresh = function(account, project, branch, revision) {
 		var self = this;
 
-		self.text		= "";
+		self.name = "";
+		self.shortName = "";
+		self.author = "";
+		self.date = "";
+		self.message = "";
+		self.branch = "";
 
 		var deferred = $q.defer();
 
-		var newURL = "";
+		var baseUrl = "";
 
-		if (branch)
-		{
-			newURL += account + '/' + project + '/revision/' + branch + '/head';
-		} else {
-			newURL += account + '/' + project + '/revision/' + revision;
-		}
+		if (revision == 'head')
+			baseUrl = serverConfig.apiUrl(account + '/' + project + '/revision/' + branch + '/' + revision);
+		else
+			baseUrl = serverConfig.apiUrl(account + '/' + project + '/revision/' + revision);
 
-		$http.get(serverConfig.apiUrl(newURL + '/readme.json'))
+		$http.get(baseUrl + '.json')
 		.then(function(json) {
-			self.text = json.data.readme;
+			self.name    = json.data.name;
+			self.shortName = json.data.name.substr(0,20) + "...";
+			self.author  = json.data.author;
+			self.date    = json.data.date;
+			self.message = json.data.message;
+			self.branch  = json.data.branch;
 
 			deferred.resolve();
-		}, function(json) {
-			self.text	= self.defaultReadme;
+		}, function(message) {
 			deferred.resolve();
 		});
 
@@ -51,24 +56,5 @@ angular.module('3drepo')
 	};
 
 	return o;
-}])
-.directive('markdown', function () {
-	/**
-	 * This directive allows us to convert markdown syntax into
-	 * formatted text
-	 */
-
-	var converter = new Showdown.converter();
-	return {
-	  restrict: 'A',
-	  link: function (scope, element, attrs) {
-		  function renderMarkdown() {
-			  var htmlText = converter.makeHtml(scope.$eval(attrs.markdown)  || '');
-			  element.html(htmlText);
-		  }
-		  scope.$watch(attrs.markdown, renderMarkdown);
-		  renderMarkdown();
-	  }
-  };
-});
+}]);
 

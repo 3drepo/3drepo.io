@@ -17,33 +17,38 @@
 
 angular.module('3drepo')
 .service('Data', ['ProjectData', 'Branches', 'Comments', 'CurrentBranch', 'CurrentRevision',
-		'Federation', 'Log', 'Readme', 'RevisionsByDay', 'UserData', 'Users',
-		function (ProjectData, Branches, Comments, CurrentBranch, CurrentRevision, Federation,
-			Log, Readme, RevisionsByDay, UserData, Users) {
+		'CurrentDiffBranch', 'CurrentDiffRevision', 'Federation', 'Log', 'Readme', 'RevisionsByDay', 'UserData', 'Users',
+		function (ProjectData, Branches, Comments, CurrentBranch, CurrentRevision, CurrentDiffBranch,
+			CurrentDiffRevision, Federation, Log, Readme, RevisionsByDay, UserData, Users) {
 
-			this.ProjectData		= ProjectData;
-			this.Branches			= Branches;
-			this.Comments			= Comments;
-			this.CurrentBranch		= CurrentBranch;
-			this.CurrentRevision	= CurrentRevision;
-			this.Federation			= Federation;
-			this.Log				= Log;
-			this.Readme				= Readme;
-			this.RevisionsByDay		= RevisionsByDay;
-			this.UserData			= UserData;
-			this.Users				= Users;
+			this.ProjectData			= ProjectData;
+			this.Branches				= Branches;
+			this.Comments				= Comments;
+			this.CurrentBranch			= CurrentBranch;
+			this.CurrentDiffBranch		= CurrentDiffBranch;
+			this.CurrentRevision		= CurrentRevision;
+			this.CurrentDiffRevision	= CurrentDiffRevision;
+			this.Federation				= Federation;
+			this.Log					= Log;
+			this.Readme					= Readme;
+			this.RevisionsByDay			= RevisionsByDay;
+			this.UserData				= UserData;
+			this.Users					= Users;
 
-			this.account			= null;
-			this.project			= null;
-			this.user				= null;
-			this.branch			= null;
-			this.revision			= null;
+			this.account				= null;
+			this.project				= null;
+			this.user					= null;
+			this.branch					= null;
+			this.diffBranch				= null;
+			this.revision				= null;
 
 			this.currentPage	= 0;
 			this.totalItems		= 1;
 			this.itemsPerPage	= 5;
 
 			this.view = "info";
+
+			this.diffEnabled = false;
 
 			var self = this;
 
@@ -64,6 +69,18 @@ angular.module('3drepo')
 			{
 				self.branch = branch;
 				self.CurrentBranch.refresh(self.account, self.project, self.branch);
+			}
+
+			this.enableDiff = function() {
+				this.diffEnabled = true;
+				this.setDiffBranch('master');
+			}
+
+			this.setDiffBranch = function(branch)
+			{
+				self.diffBranch = branch;
+				self.CurrentDiffBranch.refresh(self.account, self.project, self.diffBranch);
+				self.CurrentDiffRevision.refresh(self.account, self.project, self.diffBranch, 'head')
 			}
 
 			this.changeView = function(state, view, stateParams)

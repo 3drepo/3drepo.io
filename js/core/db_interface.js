@@ -486,15 +486,37 @@ exports.getDBList = function(callback) {
 };
 
 exports.getChildren = function(dbName, project, branch, revision, uuid, callback) {
-	var filter = {
-		parents : stringToUUID(uuid),
-		type: {$in : ['mesh', 'transformation', 'ref', 'map']}
-	};
+	var historyQuery = null;
 
-	dbConn.filterColl(dbName, project + '.scene', filter, null, function(err, doc) {
-		if (err.value) return callback(err);
+	if (revision != null)
+	{
+		historyQuery = {
+			_id: stringToUUID(revision)
+		};
+	} else {
+		if (branch == 'master')
+			var branch_id = masterUUID;
+		else
+			var branch_id = stringToUUID(branch);
 
-		callback(responseCodes.OK, doc);
+		historyQuery = {
+			shared_id:	branch_id
+		};
+	}
+
+	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
+	{
+		var filter = {
+			parents : stringToUUID(uuid),
+			type: {$in : ['mesh', 'transformation', 'ref', 'map']},
+			_id: {$in: docs[0]['current']}
+		};
+
+		dbConn.filterColl(dbName, project + '.scene', filter, null, function(err, doc) {
+			if (err.value) return callback(err);
+
+			callback(responseCodes.OK, doc);
+		});
 	});
 };
 
@@ -737,8 +759,6 @@ exports.getScene = function(dbName, project, branch, revision, full, callback) {
 			_id: stringToUUID(revision)
 		};
 	} else {
-		console.log(branch);
-
 		if (branch == 'master')
 			var branch_id = masterUUID;
 		else
@@ -781,6 +801,55 @@ exports.getScene = function(dbName, project, branch, revision, full, callback) {
 	});
 
 };
+
+exports.getDiff = function(account, project, branch, revision, otherbranch, otherrevision, callback) {
+	var historyQuery = null;
+
+	if (revision != null)
+	{
+		historyQuery = {
+			_id: stringToUUID(revision)
+		};
+	} else {
+		if (branch == 'master')
+			var branch_id = masterUUID;
+		else
+			var branch_id = stringToUUID(branch);
+
+		historyQuery = {
+			shared_id:	branch_id
+		};
+	}
+
+	var projection = {
+		added: 1,
+		modified: 1,
+		deleted : 1
+	};
+
+	dbConn.getLatest(account, project + '.history', historyQuery, null, function(err, docs)
+	{
+		if(err.value) return callback(err);
+
+		if(!docs[0])
+			return callback(responseCodes.BRANCH_NOT_FOUND);
+
+		var doc = docs[0];
+
+		if (doc['added'])
+			doc['added'] = doc['added'].map(function(uid) { return uuidToString(uid); });
+
+		if (doc['deleted'])
+			doc['deleted'] = doc['deleted'].map(function(uid) { return uuidToString(uid); });
+
+		if (doc['modified'])
+			doc['modified'] = doc['modified'].map(function(uid) { return uuidToString(uid); });
+
+		callback(responseCodes.OK, doc);
+	});
+};
+
+
 
 exports.getCache = function(project, uid, getData, level, callback) {
 	var projection = null;

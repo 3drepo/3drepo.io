@@ -15,16 +15,20 @@
  **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-var Viewer = function() {
+var Viewer = function(id) {
 	var self = this;
+
+	if(!id)
+		id = 'viewer';
 
 	// Create the viewer here
 	var x3ddiv = $('#x3d')[0];
 
 	this.viewer = document.createElement('x3d');
-	this.viewer.setAttribute('id', 'viewer');
+	this.viewer.setAttribute('id', id);
 	this.viewer.setAttribute('xmlns', 'http://www.web3d.org/specification/x3d-namespace');
 	this.viewer.setAttribute('keysEnabled', false);
+	this.viewer.className = 'viewer';
 
 	x3ddiv.appendChild(this.viewer);
 
@@ -33,12 +37,12 @@ var Viewer = function() {
 	this.viewer.appendChild(this.scene);
 
 	this.viewPoint = document.createElement('viewpoint');
-	this.viewPoint.setAttribute('id', 'current');
-	this.viewPoint.setAttribute('def', 'current');
+	this.viewPoint.setAttribute('id', id + '_current');
+	this.viewPoint.setAttribute('def', id + '_current');
 	this.scene.appendChild(this.viewPoint);
 
 	this.bground = document.createElement('background');
-	this.bground.setAttribute('DEF', 'bground');
+	this.bground.setAttribute('DEF', id + '_bground');
 	this.bground.setAttribute('skyangle', '0.9 1.5 1.57');
 	this.bground.setAttribute('skycolor', '0.21 0.18 0.66 0.2 0.44 0.85 0.51 0.81 0.95 0.83 0.93 1');
 	this.bground.setAttribute('groundangle', '0.9 1.5 1.57');
@@ -430,6 +434,8 @@ var Viewer = function() {
 		this.scene.appendChild(this.inline);
 		this.inline.setAttribute('url', url);
 		this.reload();
+
+		this.url = url;
 	}
 
 	this.getTransMatrix = function()
@@ -508,6 +514,46 @@ var Viewer = function() {
 	this.switchVR = function() {
 		if (window.oculus)
 			window.oculus.switchVR(this);
+	};
+
+	this.linkViewpoints = function(otherView) {
+
+		this.viewPoint.addEventListener('viewpointChanged', function (event) {
+			var newPos = event.position.x + "," + event.position.y + "," + event.position.z;
+			var newOrient = event.orientation[0].x + "," + event.orientation[0].y + "," + event.orientation[0].z
+				+ "," + event.orientation[1];
+
+			// TODO: Consider using DEF/USE instead (although across namespaces)
+			otherView.viewPoint.setAttribute("position", newPos);
+			otherView.viewPoint.setAttribute("orientation", newOrient);
+
+			//otherView.setNavMode("NONE");
+		});
+	};
+
+	this.diffView = function() {
+		this.viewer.style.width = "50%";
+		window.otherView = new Viewer('diffView');
+		otherView.viewer.style.left = "50%";
+		otherView.viewer.style.width = "50%";
+		otherView.loadURL(this.url);
+
+		this.linkViewpoints(otherView);
+		otherView.linkViewpoints(this);
+	};
+
+	this.setDiffColors = function(diffColors) {
+		if(diffColors["added"])
+		{
+			for(var i = 0; i < diffColors["added"].length; i++)
+				viewer.applyApp($("[DEF=" + diffColors["added"][i] + "]"), 2.0, "0.5 1.0 0.5", false);
+		}
+
+		if(diffColors["deleted"])
+		{
+			for(var i = 0; i < diffColors["deleted"].length; i++)
+				viewer.applyApp($("[DEF=" + diffColors["deleted"][i] + "]"), 2.0, "1.0 0.5 0.5", false);
+		}
 	};
 
 	// TODO(mg): find a better place to put this

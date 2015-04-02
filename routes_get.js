@@ -398,6 +398,25 @@ module.exports = function(router, dbInterface, checkAccess){
 		this.transRouter(format, '/:account/:project/revision/:rid/tree/:sid', res, params);
 	});
 
+	// Get subtree for sid in revision rid, with (optional) depth query string paramter
+	router.get('/:account/:project/revision/:rid/diff/:otherrid.:format?.:subformat?', checkAccess, function(req, res, next) {
+		var format = req.params["format"];
+		var current_user = ("user" in req.session) ? req.session.user.username : "";
+
+		var params = {
+			account:	req.params["account"],
+			project:	req.params["project"],
+			rid:		req.params["rid"],
+			otherrid:	req.params["otherrid"],
+			subformat:	req.params["subformat"],
+			user:		current_user
+		};
+
+		this.transRouter(format, '/:account/:project/revision/:rid/diff/:otherrid', res, params);
+	});
+
+
+
 	// Get audit log for account
 	router.get('/:account/log', checkAccess, function(req, res, next) {
 		var params = {
