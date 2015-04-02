@@ -63,7 +63,7 @@ function treeChildMetadata(dbInterface, dbName, project, childNode, callback)
  * @param {string} namespace - X3DOM Namespace in which the node exists
  * @param {boolean} htmlMode - In this mode HTML characters are escaped
  *******************************************************************************/
-function processChild(child, project, selected, namespace, htmlMode)
+function processChild(child, branch, revision, project, selected, namespace, htmlMode)
 {
 	var childNode = {};
 
@@ -89,6 +89,8 @@ function processChild(child, project, selected, namespace, htmlMode)
 		childNode["selected"]  = (selected == "true");
 		childNode["namespace"] = namespace;
 		childNode["dbname"]    = project;
+		childNode["branch"]    = branch;	// TODO: Find better way rather than duplicating
+		childNode["revision"]  = revision;
 
 	} else if (child['type'] == 'ref') {
 
@@ -100,8 +102,9 @@ function processChild(child, project, selected, namespace, htmlMode)
 		childNode["lazy"]      = true;
 		childNode["selected"]  = (selected == "true");
 		childNode["dbname"]    = child["project"];
+		childNode["branch"]    = branch;	// TODO: Find better way rather than duplicating
+		childNode["revision"]  = revision;
 		childNode["key"]       = uuidToString(child["shared_id"]);
-
 	}
 
 	return childNode;
@@ -127,6 +130,8 @@ function getTree(dbInterface, account, project, branch, revision, sid, namespace
 				head[0]["uuid"]      = node["id"];
 				head[0]["namespace"] = ((namespace != null) ? namespace : "model__");
 				head[0]["dbname"]    = project;
+				head[0]["branch"]	 = branch;
+				head[0]["revision"]	 = revision;
 
 				if (!("children" in node))
 					head[0]["children"] = [];
@@ -139,7 +144,7 @@ function getTree(dbInterface, account, project, branch, revision, sid, namespace
 
 				async.map(doc,
 					function(child, callback) { // Called for all children
-						callback(null, processChild(child, project, selected, namespace, htmlMode));
+						callback(null, processChild(child, branch, revision, project, selected, namespace, htmlMode));
 					},
 					function(err, children) { // Called when are children are ready
 						async.map(children,

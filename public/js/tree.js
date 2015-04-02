@@ -78,18 +78,43 @@ function getNode(node)
 		return document.getElementById(node.data.namespace + node.data.uuid);
 }
 
-function refreshTree(account, project, branch, revision)
+function treeURL(account, project, branch, revision, sid, depth)
 {
-	if(branch && !revision)
+	var newURL = "";
+
+	if (branch && !revision)
 	{
-		var sourceURL = server_config.apiUrl(account + '/' + project + '/revision/' + branch + '/head/tree/root.json?depth=1&htmlMode=true')
+		newURL += account + '/' + project + '/revision/' + branch + '/head/tree/';
 	} else {
-		var sourceURL = server_config.apiUrl(account + '/' + project + '/revision/' + revision + '/tree/root.json?depth=1&htmlMode=true')
+		newURL += account + '/' + project + '/revision/' + revision + '/tree/';
 	}
 
+	if (sid)
+	{
+		newURL += sid
+	} else {
+		newURL += 'root';
+	}
+
+	newURL += '.json?';
+
+	if (depth)
+		newURL += "depth=" + depth + "&";
+
+	newURL += 'htmlMode=true';
+
+	return server_config.apiUrl(newURL);
+}
+
+function refreshTree(account, project, branch, revision)
+{
+	var newURL = treeURL(account, project, branch, revision);
+	console.log(newURL);
+
 	var tree = $("#scenetree").fancytree("getTree");
+
 	tree.reload({
-		url: sourceURL
+		url: newURL
 	});
 }
 
@@ -168,6 +193,9 @@ var initTree = function(account, project, branch, revision)
 			}
 			treeCtrl.clickedFromView = false;
 		},
+		source: {
+			url: treeURL(account, project, branch, revision, null, null)
+		},
 		checkbox: true,
 		lazyLoad: function(event, data) {
 			var node = data.node;
@@ -184,12 +212,10 @@ var initTree = function(account, project, branch, revision)
 			params.depth = 1;
 
 			data.result = $.ajax({
-				url:  server_config.apiUrl(account + '/' + node.data.dbname + '/revision/head/tree/' + json_key + '.json?htmlMode=true'),
+				url:  treeURL(account, project, node.data.branch, node.data.revision, json_key, null),
 				data: params,
 				cache: false
 			});
 		}
 	});
-
-	refreshTree(account, project, branch, revision);
 };

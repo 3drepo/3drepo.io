@@ -23,7 +23,7 @@ angular.module('3drepo')
 		var o = {
 			branch: Data.branch,
 			rid:	rev.name,
-			view:	$scope.view
+			view:	Data.view
 		};
 
 		$window.viewer.loadURL(serverConfig.apiUrl(Data.account + '/' + Data.project + '/revision/' + rev.name + '.x3d.src'))
