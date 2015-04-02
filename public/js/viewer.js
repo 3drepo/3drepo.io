@@ -520,22 +520,6 @@ var Viewer = function() {
 				parent.switchClass([], "collapsed", 100);
 			}
 		});
-
-		// TODO(mg): remove this horrible hack
-		setInterval(function() {
-			$("#bp-collapser").unbind('click');
-			$("#bp-collapser").click(function() {
-				var bp = $("#bottom-panel");
-				if (bp.hasClass("collapsed")) {
-					bp.switchClass("collapsed", 100);
-					$(this).html("<i class='fa fa-caret-down'></i>")
-				} else {
-					bp.switchClass([], "collapsed", 100);
-					$(this).html("<i class='fa fa-caret-up'></i>")
-				}
-			});
-		}, 1000);
-
 	};
 
 	this.initUi();
