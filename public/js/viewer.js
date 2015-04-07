@@ -78,6 +78,8 @@ var Viewer = function(id) {
 
 	this.clickingEnabled = false;
 
+	this.avatarRadius = 0.25;
+
 	this.initRuntime = function () {
 		self.runtime = this;
 
@@ -96,6 +98,19 @@ var Viewer = function(id) {
 			}
 		});
 	};
+
+	this.getViewArea = function() {
+		return viewer.scene._x3domNode._nameSpace.doc._viewarea;
+	}
+
+	this.getViewMatrix = function() {
+		return this.getViewArea().getViewMatrix();
+	}
+
+	this.getProjectionMatrix = function()
+	{
+		return this.getViewArea().getProjectionMatrix();
+	}
 
 	if(window.oculus)
 	{
@@ -361,6 +376,14 @@ var Viewer = function(id) {
 		this.updateCamera();
 	}
 
+	this.moveCamera = function(dX, dY, dZ)
+	{
+		this.currentCameraPosition[0] += dX;
+		this.currentCameraPosition[1] += dY;
+		this.currentCameraPosition[2] += dZ;
+		this.updateCamera();
+	}
+
 	this.setCameraViewDir = function(u,v,w)
 	{
 		this.currentCameraOrientation = [u,v,w];
@@ -565,7 +588,7 @@ var Viewer = function(id) {
 					var obj = defMapSearch[this.diffColors["added"][i]];
 					if(obj)
 					{
-						var mat = $(obj._xmlNode).find("Material");
+						var mat = $(obj._xmlNode).find("TwoSidedMaterial");
 						this.applyApp(mat, 0.5, "0.0 1.0 0.0", false);
 					}
 				}
@@ -579,7 +602,7 @@ var Viewer = function(id) {
 					var obj = defMapSearch[this.diffColors["deleted"][i]];
 					if(obj)
 					{
-						var mat = $(obj._xmlNode).find("Material");
+						var mat = $(obj._xmlNode).find("TwoSidedMaterial");
 						this.applyApp(mat, 0.5, "1.0 0.0 0.0", false);
 					}
 				}

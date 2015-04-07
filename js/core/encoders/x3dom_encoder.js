@@ -406,7 +406,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 
 
 				if (!child['two_sided']) {
-					newNode = xmlDoc.createElement('Material');
+					newNode = xmlDoc.createElement('TwoSidedMaterial');
 				} else {
 					newNode = xmlDoc.createElement('TwoSidedMaterial');
 				}

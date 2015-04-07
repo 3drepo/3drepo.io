@@ -240,6 +240,11 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	$window.viewer.loadURL(serverConfig.apiUrl(account + '/' + project + '/revision/master/head.x3d.src'));
 	initTree(account, project, 'master', null);
 
+	$window.gamepad = new Gamepad();
+	$window.gamepad.init();
+
+	$window.collision = new Collision();
+
 	$scope.Data = Data;
 
 	$window.viewer.enableClicking();
