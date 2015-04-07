@@ -87,6 +87,13 @@ var Viewer = function(id) {
 
 		$(document).on("onLoaded", function(event, objEvent) {
 			self.runtime.fitAll();
+
+			var targetParent = $(objEvent.target)[0]._x3domNode._nameSpace.doc._x3dElem;
+
+			if(targetParent == self.viewer)
+			{
+				self.setDiffColors(null);
+			}
 		});
 	};
 
@@ -429,9 +436,9 @@ var Viewer = function(id) {
 		}
 
 		this.inline = document.createElement('inline');
-		this.inline.setAttribute('namespacename', 'model');
-		this.inline.setAttribute('onload', 'onLoaded();');
 		this.scene.appendChild(this.inline);
+		this.inline.setAttribute('namespacename', 'model');
+		this.inline.setAttribute('onload', 'onLoaded(event);');
 		this.inline.setAttribute('url', url);
 		this.reload();
 
@@ -543,16 +550,40 @@ var Viewer = function(id) {
 	};
 
 	this.setDiffColors = function(diffColors) {
-		if(diffColors["added"])
-		{
-			for(var i = 0; i < diffColors["added"].length; i++)
-				viewer.applyApp($("[DEF=" + diffColors["added"][i] + "]"), 2.0, "0.5 1.0 0.5", false);
-		}
+		if(diffColors)
+			this.diffColors = diffColors;
 
-		if(diffColors["deleted"])
+		if (this.inline.childNodes.length)
 		{
-			for(var i = 0; i < diffColors["deleted"].length; i++)
-				viewer.applyApp($("[DEF=" + diffColors["deleted"][i] + "]"), 2.0, "1.0 0.5 0.5", false);
+			var defMapSearch = this.inline.childNodes[0]._x3domNode._nameSpace.defMap;
+
+			if(this.diffColors["added"])
+			{
+				for(var i = 0; i < this.diffColors["added"].length; i++)
+				{
+					// TODO: Improve, with graph, to use appearance under  _cf rather than DOM.
+					var obj = defMapSearch[this.diffColors["added"][i]];
+					if(obj)
+					{
+						var mat = $(obj._xmlNode).find("Material");
+						this.applyApp(mat, 0.5, "0.0 1.0 0.0", false);
+					}
+				}
+			}
+
+			if(this.diffColors["deleted"])
+			{
+				for(var i = 0; i < this.diffColors["deleted"].length; i++)
+				{
+					// TODO: Improve, with graph, to use appearance under  _cf rather than DOM.
+					var obj = defMapSearch[this.diffColors["deleted"][i]];
+					if(obj)
+					{
+						var mat = $(obj._xmlNode).find("Material");
+						this.applyApp(mat, 0.5, "1.0 0.0 0.0", false);
+					}
+				}
+			}
 		}
 	};
 

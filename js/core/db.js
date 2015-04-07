@@ -61,13 +61,15 @@ MongoDB.prototype.authenticateUser = function(username, password, callback) {
 
 		// TODO: Merge with code below
 		db.open(function(err, dbConn) {
-			if (err) return callback(responseCodes.DB_ERROR(err));
+			if (err)
+				return callback(responseCodes.DB_ERROR(err));
 
 			self.userAuth = dbConn;
 
 			dbConn.on('close', function(err) {
 				self.userAuth = null;
 			});
+
 			logger.log('info', 'Authenticating user: ' + username);
 
 			return self.authenticateUser(username, password, callback);
@@ -118,7 +120,6 @@ MongoDB.prototype.dbCallback = function(dbName, callback) {
 	// Attempt to open the database connection
 	db.open(function(err, dbConn) {
 		if (err) {
-			logger.log('debug', 'Error connecting to database');
 			return callback(responseCodes.DB_ERROR(err));
 		}
 

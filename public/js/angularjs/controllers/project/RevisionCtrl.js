@@ -49,6 +49,8 @@ angular.module('3drepo')
 
 			viewer.setDiffColors(diffColors, true);
 			otherView.setDiffColors(diffColors, false);
+			viewer.disableClicking();
+			otherView.disableClicking();
 		});
 	}
 

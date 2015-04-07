@@ -58,7 +58,7 @@ exports.authenticate = function(username, password, callback) {
 	dbConn.authenticateUser(username, password, function(err)
 	{
 		if(err.value)
-			return callback(responseCodes.AUTH_ERROR);
+			return callback(err);
 
 		callback(responseCodes.OK, {username: username});
 	});

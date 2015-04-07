@@ -55,10 +55,10 @@ var responseCodes = {
 
 	BRANCH_NOT_FOUND:			{value: 21, message: "Branch not found", status: 404},
 
-	DB_ERROR: function(message) {
+	DB_ERROR: function(mongoErr) {
 		return {
 			value: 1000,
-			message: JSON.stringify(message),
+			message: mongoErr.toString(), //'[' + mongoErr["code"] + '] @ ' + mongoErr["err"],
 			status: 500
 		};
 	},
