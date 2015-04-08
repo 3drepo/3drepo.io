@@ -188,7 +188,7 @@ var Oculus = function() {
 
 			this.startVR();
 
-			//viewer.switchFullScreen();
+			viewer.switchFullScreen();
 
 			this.enabled = true;
 		} else {
