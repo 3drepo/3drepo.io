@@ -78,7 +78,11 @@ var Viewer = function(id) {
 
 	this.clickingEnabled = false;
 
-	this.avatarRadius = 0.25;
+	this.avatarRadius = 0.5;
+
+	this.switchDebug = function () {
+		this.getViewArea()._visDbgBuf = !this.getViewArea()._visDbgBuf;
+	}
 
 	this.initRuntime = function () {
 		self.runtime = this;
@@ -96,6 +100,8 @@ var Viewer = function(id) {
 			{
 				self.setDiffColors(null);
 			}
+
+			self.setNavMode("EXAMINE");
 		});
 	};
 
@@ -569,7 +575,9 @@ var Viewer = function(id) {
 		otherView.loadURL(this.url);
 
 		this.linkViewpoints(otherView);
-		otherView.linkViewpoints(this);
+		this.setNavMode("TURNTABLE");
+		otherView.setNavMode("NONE");
+		//otherView.linkViewpoints(this);
 	};
 
 	this.setDiffColors = function(diffColors) {

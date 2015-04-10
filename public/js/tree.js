@@ -210,7 +210,7 @@ var initTree = function(account, project, branch, revision)
 			params.depth = 1;
 
 			data.result = $.ajax({
-				url:  treeURL(account, project, node.data.branch, node.data.revision, json_key, null),
+				url:  treeURL(account, node.data.dbname, node.data.branch, node.data.revision, json_key, null),
 				data: params,
 				cache: false
 			});

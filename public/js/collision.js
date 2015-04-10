@@ -18,10 +18,16 @@
 var Collision = function() {
 	var self = this;
 
-	this._deltaT = 0.05;
+	this._deltaT = 0.1;
 
 	this.deltaX = 0.0;
-	this.deltaY = 0.0;
+	this.deltaZ = 0.0;
+
+	this.ticking = false;
+
+	this.prevMove = 0.0;
+
+	this.stopped = true;
 
 	this.updateDirections = function(event, gamepad)
 	{
@@ -29,23 +35,38 @@ var Collision = function() {
 		var userX = self._deltaT * speed * gamepad.xaxis;
 		var userY = self._deltaT * speed * gamepad.yaxis;
 
-		var currViewMat = viewer.getViewMatrix();
-		var xRotRad = 0;
-		var yRotRad = Math.asin(currViewMat._02);
-		var C = Math.cos(yRotRad);
+		if ((userX == 0) && (userY == 0))
+			self.stopped = true;
+		else
+			self.stopped = false;
 
-		if (Math.abs(C) > 0.0001) {
-			yRotRad = Math.atan2(-currViewMat._12 / C, currViewMat._22 / C);
+		if(!self.stopped)
+		{
+			var currViewMat = viewer.getViewMatrix();
+			var xRotRad = 0;
+			var yRotRad = Math.asin(currViewMat._02);
+			//var C = Math.cos(yRotRad);
+
+			/*
+			if (Math.abs(C) > 0.0001) {
+				yRotRad = Math.atan2(-currViewMat._12 / C, currViewMat._22 / C);
+			}
+			*/
+
+			self.deltaX = (userX * Math.cos(yRotRad) - userY * Math.sin(yRotRad));
+			self.deltaZ = (userX * Math.sin(yRotRad) + userY * Math.cos(yRotRad));
+
+			console.log(self.deltaX + " - " + self.deltaZ);
+
+			if(!self.ticking)
+				self.tick();
 		}
-
-		self.deltaX = (userX * Math.cos(yRotRad) - userY * Math.sin(yRotRad));
-		self.deltaZ = (userX * Math.sin(yRotRad) + userY * Math.cos(yRotRad));
-
-		self.tick();
 	}
 
 	this.tick = function()
 	{
+		self.ticking = true;
+
 		var viewArea = viewer.getViewArea();
 		var straightDown = new x3dom.fields.SFVec3f(0, -1, 0);
 		var straightUp = new x3dom.fields.SFVec3f(0, 1, 0);
@@ -62,13 +83,14 @@ var Collision = function() {
 		tmpFlatAt.z += self.deltaZ;
 
 		var tmpTmpMat = x3dom.fields.SFMatrix4f.lookAt(from, tmpFlatAt, straightUp);
+		tmpTmpMat = tmpTmpMat.inverse();
 
 		viewArea._scene._nameSpace.doc.ctx.pickValue(viewArea, viewArea._width/2, viewArea._height/2,
 					this._lastButton, tmpTmpMat, currProjMat.mult(tmpTmpMat));
 
 		var dist = viewArea._pickingInfo.pickPos.subtract(from).length();
 
-		if (dist > (2 * viewer.avatarRadius))
+		if (!self.stopped && dist > viewer.avatarRadius)
 		{
 			from.x += self.deltaX;
 			from.z += self.deltaZ;
@@ -83,8 +105,11 @@ var Collision = function() {
 						this._lastButton, tmpDownMat, currProjMat.mult(tmpDownMat));
 
 			var dist = viewArea._pickingInfo.pickPos.subtract(from).length();
+			//var dist = from.z - viewArea._pickingInfo.pickPos.z;
 
-			from.y += (viewer.avatarHeight - dist);
+			var movement = 0.5 * ((viewer.avatarHeight - dist) + self.prevMove);
+			from.y += movement;
+			self.prevMove = movement;
 
 			var at	 = from.subtract(flyMat.e2());
 			var up	 = flyMat.e1();

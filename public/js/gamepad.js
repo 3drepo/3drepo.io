@@ -40,30 +40,39 @@ var Gamepad = function() {
 		}
 	};
 
+	this.oldButton = false;
+
 	this.checkStatus = function() {
-		if(this.gamepad.timestamp &&
-			(this.gamepad.timestamp == this.timestamp))
+		if(!self.gamepad)
+			return;
+
+		if(self.gamepad.timestamp &&
+			(self.gamepad.timestamp == self.timestamp))
 				return;
 
-		this.timestamp = this.gamepad.timestamp;
+		self.timestamp = self.gamepad.timestamp;
 
 		$.event.trigger("gamepadMove",
 			{
-				xaxis: this.gamepad.axes[0],
-				yaxis: this.gamepad.axes[1],
-				button: this.gamepad.buttons[0]
+				xaxis: self.gamepad.axes[0],
+				yaxis: self.gamepad.axes[1],
+				button: self.gamepad.buttons[0]
 			}
 		);
-		/*
-			console.log(this.gamepad.axes[0]);
-			console.log(this.gamepad.axes[1]);
-			console.log(this.gamepad.buttons[0]);
-		*/
+
+		if (self.gamepad.buttons[0].pressed)
+			if (!this.oldButton)
+				viewer.reset();
+
+		this.oldButton = self.gamepad.buttons[0].pressed;
 	};
 
 	this.tick = function() {
 		if(navigator.getGamepads()[0])
 			self.gamepad = navigator.getGamepads()[0];
+
+		if(!this.gamepad)
+			viewer.setNavMode('NONE'); // Manually override navigation
 
 		if(this.gamepad)
 			self.checkStatus();
@@ -105,6 +114,5 @@ var Gamepad = function() {
 			}
 		}
 
-		viewer.setNavMode('NONE'); // Manually override navigation
 	};
 };
