@@ -4,32 +4,34 @@
 			// Left column
 			.col-md-3
 				// Profile pic and name
-				.col-md-12
-					.profile-pic
-						img#picImg(ng-show="Data.UserData.hasAvatar", ng-src='{{Data.UserData.avatarURL}}')
-						i.fa.fa-user(ng-show="!Data.UserData.hasAvatar")
-					.profile-box
-						h1 {{Data.UserData.firstName}} {{Data.UserData.lastName}}
-						p {{Data.UserData.email}}
+				.row
+					.col-md-12
+						.profile-pic
+							img#picImg(ng-show="Data.UserData.hasAvatar", ng-src='{{Data.UserData.avatarURL}}')
+							i.fa.fa-user(ng-show="!Data.UserData.hasAvatar")
+						.profile-box
+							h1 {{Data.UserData.firstName}} {{Data.UserData.lastName}}
+							p {{Data.UserData.email}}
 				// Menu
-				.col-md-12
-					span(ng-class="{'project-menu-section-selected': isView('projects')}")
-						a(href='', ng-click="setView('projects')")
-							button.btn.btn-primary
-								i.fa.fa-home
-								|  Projects
-					span(ng-class="{'project-menu-section-selected': isView('settings')}")
-						a(href='', ng-click="setView('settings')")
-							button.btn.btn-primary
-								i.fa.fa-gear
-								|  Settings
+				.row
+					.col-md-12
+						span(ng-class="{'project-menu-section-selected': isView('projects')}")
+							a(href='', ng-click="setView('projects')")
+								button.btn.btn-primary
+									i.fa.fa-home
+									|  Projects
+						span(ng-class="{'project-menu-section-selected': isView('settings')}")
+							a(href='', ng-click="setView('settings')")
+								button.btn.btn-primary.pull-right
+									i.fa.fa-gear
+									|  Settings
 			// Main content
-			.col-md-9
+			#profile-settings.col-md-9
 				// Dashboard
-				div(ng-show="view=='projects'")
+				div.row(ng-show="view=='projects'")
 					.col-xs-12
-						.col-xs-12(ng-repeat="project in Data.UserData.projects")
-							.col-xs-12.project-line
+						div(ng-repeat="project in Data.UserData.projects")
+							.project-line
 								i.fa.fa-cube.menu-icon
 								span.commit-number
 									a(ng-href="{{'/' + project.account + '/' + project.project}}") {{'/' + project.account + '/' + project.project}}
@@ -121,7 +123,7 @@
 							.clearfix
 							.placeholder-screenshot
 				// Settings
-				#profile-settings(ng-if="view=='settings'")
+				.row(ng-if="view=='settings'")
 					.col-xs-12
 						.block
 							.col-xs-12.block-header.margined

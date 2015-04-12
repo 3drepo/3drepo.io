@@ -595,14 +595,11 @@ hr {
 
 .profile-pic{
 	margin: auto;
-	min-height: 302px;
-	max-height: 302px;
-	min-width: 302px;
-	max-width: 302px;
-	border: 1px solid;
+	max-width: 350px;
 	background-position: center;
 	font-size: 200px;
 	text-align: center;
+	background-color: #eeeeee;
 }
 
 #picImg {
@@ -612,7 +609,7 @@ hr {
 #profile-settings input {
 	border: none;
 	border-radius: 0;
-	background-color: rgb(240, 240, 240);
+	background-color: #eeeeee;
 	box-shadow: none;
 }
 
