@@ -1,166 +1,161 @@
 #wrap
 	.container-fluid
-		.row
-			.col-md-12.padded-box
-				// Left column
-				.col-md-4.tight.gutter-right
-					// Profile pic and name
-					.col-md-12.tight
-						.profile-pic
-							img#picImg(ng-show="Data.UserData.hasAvatar", ng-src='{{Data.UserData.avatarURL}}')
-							i.fa.fa-user(ng-show="!Data.UserData.hasAvatar")
-						.profile-box
-							h1 {{Data.UserData.firstName}} {{Data.UserData.lastName}}
-							p {{Data.UserData.email}}
-					// Menu
-					.col-md-12.tight
-						.project-menu
-							.project-menu-section(ng-class="{'project-menu-section-selected': isView('projects')}")
-								a.tight(href='', ng-click="setView('projects')")
-									h3
-										i.fa.fa-home.menu-icon
-										|  Projects
-							.project-menu-section(ng-class="{'project-menu-section-selected': isView('settings')}")
-								a.tight(href='', ng-click="setView('settings')")
-									h3
-										i.fa.fa-gear.menu-icon
-										|  Settings
-				// Main content
-				.col-md-8.tight
-					// Dashboard
-					div(ng-show="view=='projects'")
-						.col-xs-12.tight.gutter-right
-							.block
-								.col-xs-12.block-header
-									h3 Accessible Projects
-								.col-xs-12.tight(ng-repeat="project in Data.UserData.projects")
-									.col-xs-12.project-line
-										i.fa.fa-cube.menu-icon
-										span.commit-number 
-											a(ng-href="{{'/' + project.account + '/' + project.project}}") {{'/' + project.account + '/' + project.project}}
-					//div(ng-show="view=='dashboard'")
-						.col-md-6.tight.gutter-right
-							.block
-								.col-sm-12.block-header
-									h3 Recently Contributed
-								.col-md-12.tight
-									.col-md-12.project-line
-										i.fa.fa-cube.menu-icon
-										span.commit-number Project car 1
-											a(href='#/')
-											span.commit-by by 
-											span.commit-author Tim
-									.col-md-12.project-line
-										i.fa.fa-cube.menu-icon
-										span.commit-number Project car 2
-											a(href='#/')
-											span.commit-by by 
-											span.commit-author Fred
-									.col-md-12.project-line
-										i.fa.fa-cube.menu-icon
-										span.commit-number Project car 3
-											a(href='#/')
-											span.commit-by by 
-											span.commit-author Jozef
-						.col-md-6.tight
-							.block
-								.col-sm-12.block-header
-									h3 Popular Projects
-								.col-md-12.tight
-									.col-md-12.project-line
-										i.fa.fa-cube.menu-icon
-										span.commit-number Helicopter
-											a(href='#/')
-											span.commit-by by
-											span.commit-author Frederic
-									.col-md-12.project-line
-										i.fa.fa-cube.menu-icon
-										span.commit-number Helicopter
-											a(href='#/')
-											span.commit-by by 
-											span.commit-author Frederic
-									.col-md-12.project-line
-										i.fa.fa-cube.menu-icon
-										span.commit-number Helicopter
-											a(href='#/')
-											span.commit-by by 
-											span.commit-author Frederic
-					// Projects
-					//div(ng-if="view=='projects'")
-						.col-md-12.tight(ng-repeat='project in Data.UserData.projects')
-							.block
-								.col-sm-12.block-header
-									h3
-										a.dashboard-tab(href='#', ng-click='goProject(project.account, project.project)')
-											span.block-header-project-name {{project.project}} by 
-											span.block-header-project-author {{project.account}}
-								.clearfix
-								.placeholder-screenshot
-					// Discover
-					//div(ng-if="view=='discover'")
-						.col-md-12.tight
-							.block
-								.col-sm-12.block-header
-									h3
-										span.block-header-project-name Castle
-										span.block-header-by by
-										span.block-header-author Malcolm
-								.clearfix
-								.placeholder-screenshot
-						.col-md-12.tight
-							.block
-								.col-sm-12.block-header
-									h3
-										span.block-header-project-name Motorbike
-										span.block-header-by by
-										span.block-header-author Yotam
-								.clearfix
-								.placeholder-screenshot
-						.col-md-12.tight
-							.block
-								.col-sm-12.block-header
-									h3
-										span.block-header-project-name Hospital
-										span.block-header-by by
-										span.block-header-author Maciek
-								.clearfix
-								.placeholder-screenshot
-					// Settings
-					div(ng-if="view=='settings'")
-						.col-xs-12.tight.gutter-right
-							.block
-								.col-xs-12.block-header.margined
-									h3 Profile
-										span.errorMessage {{errors.updateUserError}}
-								form.standardform(role='form')
-									.form-group
-										.col-xs-12.margined
-											label(for='settings-username') Username
-											input#settings-username.form-control(ng-model='Data.UserData.username', type='text', disabled)
-										.col-xs-6.margined
-											label(for='settings-firstname') First Name
-											input#settings-firstname.form-control(ng-model='Data.UserData.firstName', type='text')
-										.col-xs-6.margined
-											label(for='settings-lastname') Last Name
-											input#settings-lastname.form-control(ng-model='Data.UserData.lastName', type='text')
-										.col-xs-12.margined
-											label(for='settings-email') Email Address
-											input#settings-email.form-control(ng-model='Data.UserData.email', type='email')
-										.col-xs-3.margined
-											button.btn.btn-success(ng-click="updateUser()") Update
-						.col-xs-12.tight.gutter-right
-							.block
-								.col-xs-12.block-header.margined
-									h3 Change Password
-										span.errorMessage {{errors.changePasswordError}}
-								form.standardform(role='form')
-									.form-group
-										.col-xs-12.margined
-											label(for='settings-email') Old Password
-											input#settings-old-password.form-control(ng-model='passwords.oldPassword', type='password')
-										.col-xs-12.margined
-											label(for='settings-email') New Password
-											input#settings-new-password.form-control(ng-model='passwords.newPassword', type='password')
-										.col-xs-3.margined
-											button.btn.btn-success(ng-click="changePassword()") Change Password
+		.row.padded-top
+			// Left column
+			.col-md-3
+				// Profile pic and name
+				.col-md-12
+					.profile-pic
+						img#picImg(ng-show="Data.UserData.hasAvatar", ng-src='{{Data.UserData.avatarURL}}')
+						i.fa.fa-user(ng-show="!Data.UserData.hasAvatar")
+					.profile-box
+						h1 {{Data.UserData.firstName}} {{Data.UserData.lastName}}
+						p {{Data.UserData.email}}
+				// Menu
+				.col-md-12
+					span(ng-class="{'project-menu-section-selected': isView('projects')}")
+						a(href='', ng-click="setView('projects')")
+							button.btn.btn-primary
+								i.fa.fa-home
+								|  Projects
+					span(ng-class="{'project-menu-section-selected': isView('settings')}")
+						a(href='', ng-click="setView('settings')")
+							button.btn.btn-primary
+								i.fa.fa-gear
+								|  Settings
+			// Main content
+			.col-md-9
+				// Dashboard
+				div(ng-show="view=='projects'")
+					.col-xs-12
+						.col-xs-12(ng-repeat="project in Data.UserData.projects")
+							.col-xs-12.project-line
+								i.fa.fa-cube.menu-icon
+								span.commit-number
+									a(ng-href="{{'/' + project.account + '/' + project.project}}") {{'/' + project.account + '/' + project.project}}
+				//div(ng-show="view=='dashboard'")
+					.col-md-6.gutter-right
+						.block
+							.col-sm-12.block-header
+								h3 Recently Contributed
+							.col-md-12
+								.col-md-12.project-line
+									i.fa.fa-cube.menu-icon
+									span.commit-number Project car 1
+										a(href='#/')
+										span.commit-by by
+										span.commit-author Tim
+								.col-md-12.project-line
+									i.fa.fa-cube.menu-icon
+									span.commit-number Project car 2
+										a(href='#/')
+										span.commit-by by
+										span.commit-author Fred
+								.col-md-12.project-line
+									i.fa.fa-cube.menu-icon
+									span.commit-number Project car 3
+										a(href='#/')
+										span.commit-by by
+										span.commit-author Jozef
+					.col-md-6
+						.block
+							.col-sm-12.block-header
+								h3 Popular Projects
+							.col-md-12
+								.col-md-12.project-line
+									i.fa.fa-cube.menu-icon
+									span.commit-number Helicopter
+										a(href='#/')
+										span.commit-by by
+										span.commit-author Frederic
+								.col-md-12.project-line
+									i.fa.fa-cube.menu-icon
+									span.commit-number Helicopter
+										a(href='#/')
+										span.commit-by by
+										span.commit-author Frederic
+								.col-md-12.project-line
+									i.fa.fa-cube.menu-icon
+									span.commit-number Helicopter
+										a(href='#/')
+										span.commit-by by
+										span.commit-author Frederic
+				// Projects
+				//div(ng-if="view=='projects'")
+					.col-md-12(ng-repeat='project in Data.UserData.projects')
+						.block
+							.col-sm-12.block-header
+								h3
+									a.dashboard-tab(href='#', ng-click='goProject(project.account, project.project)')
+										span.block-header-project-name {{project.project}} by
+										span.block-header-project-author {{project.account}}
+							.clearfix
+							.placeholder-screenshot
+				// Discover
+				//div(ng-if="view=='discover'")
+					.col-md-12
+						.block
+							.col-sm-12.block-header
+								h3
+									span.block-header-project-name Castle
+									span.block-header-by by
+									span.block-header-author Malcolm
+							.clearfix
+							.placeholder-screenshot
+					.col-md-12
+						.block
+							.col-sm-12.block-header
+								h3
+									span.block-header-project-name Motorbike
+									span.block-header-by by
+									span.block-header-author Yotam
+							.clearfix
+							.placeholder-screenshot
+					.col-md-12
+						.block
+							.col-sm-12.block-header
+								h3
+									span.block-header-project-name Hospital
+									span.block-header-by by
+									span.block-header-author Maciek
+							.clearfix
+							.placeholder-screenshot
+				// Settings
+				div(ng-if="view=='settings'")
+					.col-xs-12.gutter-right
+						.block
+							.col-xs-12.block-header.margined
+								h3 Profile
+									span.errorMessage {{errors.updateUserError}}
+							form.standardform(role='form')
+								.form-group
+									.col-xs-12.margined
+										label(for='settings-username') Username
+										input#settings-username.form-control(ng-model='Data.UserData.username', type='text', disabled)
+									.col-xs-6.margined
+										label(for='settings-firstname') First Name
+										input#settings-firstname.form-control(ng-model='Data.UserData.firstName', type='text')
+									.col-xs-6.margined
+										label(for='settings-lastname') Last Name
+										input#settings-lastname.form-control(ng-model='Data.UserData.lastName', type='text')
+									.col-xs-12.margined
+										label(for='settings-email') Email Address
+										input#settings-email.form-control(ng-model='Data.UserData.email', type='email')
+									.col-xs-3.margined
+										button.btn.btn-success(ng-click="updateUser()") Update
+					.col-xs-12.gutter-right
+						.block
+							.col-xs-12.block-header.margined
+								h3 Change Password
+									span.errorMessage {{errors.changePasswordError}}
+							form.standardform(role='form')
+								.form-group
+									.col-xs-12.margined
+										label(for='settings-email') Old Password
+										input#settings-old-password.form-control(ng-model='passwords.oldPassword', type='password')
+									.col-xs-12.margined
+										label(for='settings-email') New Password
+										input#settings-new-password.form-control(ng-model='passwords.newPassword', type='password')
+									.col-xs-3.margined
+										button.btn.btn-success(ng-click="changePassword()") Change Password
 

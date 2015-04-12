@@ -490,6 +490,10 @@ header {
 	padding: 10px 20px;
 }
 
+.padded-top {
+	padding-top: 10px;
+}
+
 .shadow{
 	box-shadow: 2px 2px 2px #CCCCCC;
 }
@@ -584,7 +588,6 @@ hr {
 }
 
 /* Home profile */
-
 .profile-box{
 	padding: 0px 20px;
 	padding-bottom: 0px;
