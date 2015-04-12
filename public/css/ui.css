@@ -1050,6 +1050,10 @@ header button.btn {
 	padding-top: 2px;
 }
 
+.form-control {
+	border-radius: 0;
+}
+
 #ui2-treeview {
 	position: fixed;
 	bottom: 0px;
