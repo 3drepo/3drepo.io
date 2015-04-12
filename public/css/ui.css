@@ -1239,15 +1239,14 @@ header button.btn {
 }
 
 #nav-version-control {
-	//width: 650px;
 	position: absolute;
-	left: 200px;
-	//margin-left: auto;
 	margin-right: auto;
 	margin-top: 20px;
 	display: inline;
 	top: 0;
 	z-index: 10000;
+	left: 25%;
+	width: 50%;
 }
 
 #nav-version-control .btn-group.menu-button {
@@ -1269,6 +1268,32 @@ header button.btn {
 
 .nav-project-title {
 	color: #ffffff;
+	position: absolute;
+	width: 10%;
+}
+
+#revisions-selector {
+	position: absolute;
+	left: 75px;
+	width: 90%;
+}
+
+#diffToggle {
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+
+#diffToggle a {
+	color: #ffffff;
+}
+
+#diffSpan {
+	border-top: 2px solid #ffffff;
+	margin-top: 17px;
+	padding-top: 17px;
+	padding-bottom: 17px;
+	background-color: rgba(5, 58, 165, 0.84);
 }
 
 .dropdown-menu {
