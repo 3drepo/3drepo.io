@@ -121,14 +121,14 @@
 							.clearfix
 							.placeholder-screenshot
 				// Settings
-				div(ng-if="view=='settings'")
-					.col-xs-12.gutter-right
+				#profile-settings(ng-if="view=='settings'")
+					.col-xs-12
 						.block
 							.col-xs-12.block-header.margined
-								h3 Profile
+								h4 Profile
 									span.errorMessage {{errors.updateUserError}}
-							form.standardform(role='form')
-								.form-group
+							form(role='form')
+								.row.form-group
 									.col-xs-12.margined
 										label(for='settings-username') Username
 										input#settings-username.form-control(ng-model='Data.UserData.username', type='text', disabled)
@@ -141,21 +141,21 @@
 									.col-xs-12.margined
 										label(for='settings-email') Email Address
 										input#settings-email.form-control(ng-model='Data.UserData.email', type='email')
-									.col-xs-3.margined
-										button.btn.btn-success(ng-click="updateUser()") Update
-					.col-xs-12.gutter-right
+									.col-xs-12.margined
+										button.btn.btn-primary.pull-right(ng-click="updateUser()") Update
+					.col-xs-12
 						.block
 							.col-xs-12.block-header.margined
-								h3 Change Password
+								h4 Change Password
 									span.errorMessage {{errors.changePasswordError}}
-							form.standardform(role='form')
-								.form-group
+							form(role='form')
+								.row.form-group
 									.col-xs-12.margined
 										label(for='settings-email') Old Password
 										input#settings-old-password.form-control(ng-model='passwords.oldPassword', type='password')
 									.col-xs-12.margined
 										label(for='settings-email') New Password
 										input#settings-new-password.form-control(ng-model='passwords.newPassword', type='password')
-									.col-xs-3.margined
-										button.btn.btn-success(ng-click="changePassword()") Change Password
+									.col-xs-12.margined
+										button.btn.btn-primary.pull-right(ng-click="changePassword()") Update
 

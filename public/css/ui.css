@@ -530,18 +530,6 @@ header {
 	width: 100%;
 	padding-bottom: 0px;
 	margin-bottom: 20px;
-  border-radius: 3px;
-  border: 1px solid;
-  border-color: #DDD;
-}
-
-.block h3{
-	font-size: 11pt;
-	height: 100%;
-	font-weight: bold;
-	color: #555;
-	margin: 0px;
-	padding: 10px;
 }
 
 .block p{
@@ -552,19 +540,12 @@ header {
 	padding: 10px;
 }
 
-.block h2 {
-  padding: 0 10px;
-}
-
 .block-header{
-	background-color: #fafafa;
 	float: left;
 	padding-left: 0px;
 	padding-right: 0px;
 	width: 100%;
-	border-radius: 3px 3px 0px 0px;
-	border-bottom: 1px solid;
-	border-color: #DDD;
+	text-transform: uppercase;
 }
 
 hr {
@@ -626,6 +607,20 @@ hr {
 
 #picImg {
 	vertical-align: top;
+}
+
+#profile-settings input {
+	border: none;
+	border-radius: 0;
+	background-color: rgb(240, 240, 240);
+	box-shadow: none;
+}
+
+#profile-settings label {
+	font-weight: normal;
+	font-size: 16px;
+	margin-bottom: 5px;
+	margin-top: 10px;
 }
 
 /*Project items*/
@@ -1055,6 +1050,7 @@ img.loading{
 /***** UIv2 elements *****/
 button, button.btn {
 	border-radius: 0;
+	text-transform: uppercase;
 }
 
 header button.btn {
