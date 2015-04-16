@@ -80,6 +80,11 @@ var Viewer = function(id) {
 
 	this.avatarRadius = 0.5;
 
+	this.defaultShowAll = true;
+
+	this.zNear = -1;
+	this.zFar  = -1;
+
 	this.switchDebug = function () {
 		this.getViewArea()._visDbgBuf = !this.getViewArea()._visDbgBuf;
 	}
@@ -92,7 +97,10 @@ var Viewer = function(id) {
 		}
 
 		$(document).on("onLoaded", function(event, objEvent) {
-			self.runtime.fitAll();
+			if(self.defaultShowAll)
+				self.runtime.fitAll();
+			else
+				self.reset();
 
 			var targetParent = $(objEvent.target)[0]._x3domNode._nameSpace.doc._x3dElem;
 
@@ -101,7 +109,9 @@ var Viewer = function(id) {
 				self.setDiffColors(null);
 			}
 
-			self.setNavMode("EXAMINE");
+			$("#model__mapPosition")[0].parentNode._x3domNode._graph.needCulling = false;
+
+			self.setNavMode("TURNTABLE");
 		});
 	};
 
@@ -152,6 +162,8 @@ var Viewer = function(id) {
 
 	if(0)
 	{
+		this.moveScale = 1.0;
+
 		this.viewer.addEventListener("keypress", function(e) {
 			var mapPos = $("#model__mapPosition")[0];
 			var oldTrans = mapPos.getAttribute("translation").split(",").map(
@@ -159,25 +171,25 @@ var Viewer = function(id) {
 
 			if(e.charCode == 'q'.charCodeAt(0))
 			{
-				oldTrans[0] = oldTrans[0] + 0.1;
+				oldTrans[0] = oldTrans[0] + 0.5 * self.moveScale;
 				mapPos.setAttribute("translation", oldTrans.join(","));
 			}
 
 			if(e.charCode == 'w'.charCodeAt(0))
 			{
-				oldTrans[0] = oldTrans[0] - 0.1;
+				oldTrans[0] = oldTrans[0] - 0.5 * self.moveScale;
 				mapPos.setAttribute("translation", oldTrans.join(","));
 			}
 
 			if(e.charCode == 'e'.charCodeAt(0))
 			{
-				oldTrans[2] = oldTrans[2] + 0.1;
+				oldTrans[2] = oldTrans[2] + 0.5 * self.moveScale;
 				mapPos.setAttribute("translation", oldTrans.join(","));
 			}
 
 			if(e.charCode == 'f'.charCodeAt(0))
 			{
-				oldTrans[2] = oldTrans[2] - 0.1;
+				oldTrans[2] = oldTrans[2] - 0.5 * self.moveScale;
 				mapPos.setAttribute("translation", oldTrans.join(","));
 			}
 
@@ -187,13 +199,13 @@ var Viewer = function(id) {
 
 			if(e.charCode == 'g'.charCodeAt(0))
 			{
-				oldRotation[3] = oldRotation[3] + 0.01;
+				oldRotation[3] = oldRotation[3] + 0.01 * self.moveScale;
 				mapRotation.setAttribute("rotation", oldRotation.join(","));
 			}
 
 			if(e.charCode == 'h'.charCodeAt(0))
 			{
-				oldRotation[3] = oldRotation[3] - 0.01;
+				oldRotation[3] = oldRotation[3] - 0.01 * self.moveScale;
 				mapRotation.setAttribute("rotation", oldRotation.join(","));
 			}
 
@@ -202,16 +214,16 @@ var Viewer = function(id) {
 
 			if(e.charCode == 'j'.charCodeAt(0))
 			{
-				oldScale[0] = oldScale[0] + 0.01;
-				oldScale[2] = oldScale[2] + 0.01;
+				oldScale[0] = oldScale[0] + 0.01 * self.moveScale;
+				oldScale[2] = oldScale[2] + 0.01 * self.moveScale;
 
 				mapPos.setAttribute("scale", oldScale.join(","));
 			}
 
 			if(e.charCode == 'k'.charCodeAt(0))
 			{
-				oldScale[0] = oldScale[0] - 0.01;
-				oldScale[2] = oldScale[2] - 0.01;
+				oldScale[0] = oldScale[0] - 0.01 * self.moveScale;
+				oldScale[2] = oldScale[2] - 0.01 * self.moveScale;
 
 				mapPos.setAttribute("scale", oldScale.join(","));
 			}
@@ -226,10 +238,16 @@ var Viewer = function(id) {
 		{
 			// TODO: Can this function be merged with the init ?
 			if ('zNear' in settings)
-				this.viewPoint.setAttribute('zNear', settings['zNear']);
+				self.zNear = settings['zNear'];
 
 			if ('zFar' in settings)
-				this.viewPoint.setAttribute('zFar', settings['zFar']);
+				self.zFar  = settings['zFar'];
+
+			if ('start_all' in settings)
+				self.defaultShowAll = settings['start_all'];
+
+			if ('visibilityLimit' in settings)
+				self.nav.setAttribute('visibilityLimit', settings['visibilityLimit']);
 
 			if ('viewpoints' in settings)
 			{
@@ -411,6 +429,9 @@ var Viewer = function(id) {
 		this.viewPoint.appendChild(this.nav);
 		this.viewPoint.setAttribute('set_bind', 'true');
 
+		this.viewPoint.setAttribute('zNear', this.zNear);
+		this.viewPoint.setAttribute('zFar', this.zFar);
+
 		this.viewPoint.addEventListener('viewpointChanged', onViewpointChange, false);
 
 		setTimeout(function(oldViewPoint){
@@ -481,7 +502,7 @@ var Viewer = function(id) {
 		var viewPos = transMatrix.e3();
 	}
 
-	this.speed = 2.0;
+	this.speed = 5.0;
 	this.setSpeed = function(speed)
 	{
 		this.speed = speed;

@@ -28,7 +28,7 @@ var responseCodes = require('../response_codes.js');
  * @param {boolean} embedded_texture - Determines whether or not the texture data is embedded in the SRC.
  * @param {Object} res - The http response object
  *******************************************************************************/
-function render(project, mesh, tex_uuid, embedded_texture)
+function render(project, mesh, tex_uuid, embedded_texture, result_callback)
 {
 	logger.log('debug', 'Mesh #Verts: ' + mesh.vertices_count);
 	logger.log('debug', 'Mesh #Faces: ' + mesh.faces_count);
@@ -230,6 +230,10 @@ function render(project, mesh, tex_uuid, embedded_texture)
 	if (tex_uuid != null) {
 		if (embedded_texture)
 			bufSize += texture.data.buffer.length;
+
+		if (!mesh['uv_channels'])
+			return result_callback(responseCodes.ERROR_RENDERING_OBJECT);
+
 		bufSize += mesh['uv_channels'].buffer.length;
 	}
 
@@ -275,7 +279,7 @@ function render(project, mesh, tex_uuid, embedded_texture)
 		bufPos += mesh['uv_channels'].buffer.length;
 	}
 
-	return outputBuffer;
+	result_callback(responseCodes.OK, outputBuffer);
 }
 
 // Set up REST routing calls
@@ -298,7 +302,12 @@ exports.route = function(router)
 					tex_uuid = params.query.tex_uuid;
 				}
 
-				err_callback(responseCodes.OK, render(params.project, obj.meshes[uid], tex_uuid, false));
+				render(params.project, obj.meshes[uid], tex_uuid, false, function(err, renderedObj) {
+					if (err.value)
+						return err_callback(err);
+
+					err_callback(responseCodes.OK, renderedObj);
+				});
 			} else {
 				err_callback(responseCodes.OBJECT_TYPE_NOT_SUPPORTED);
 			}
@@ -322,7 +331,12 @@ exports.route = function(router)
 					tex_uuid = params.query.tex_uuid;
 				}
 
-				err_callback(responseCodes.OK, render(params.project, obj.meshes[uid], tex_uuid, false));
+				render(params.project, obj.meshes[uid], tex_uuid, false, function(err, renderedObj) {
+					if (err.value)
+						return err_callback(err);
+
+					err_callback(responseCodes.OK, renderedObj);
+				});
 			} else {
 				err_callback(reponseCodes.OBJECT_TYPE_NOT_SUPPORTED);
 			}

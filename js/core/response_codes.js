@@ -55,6 +55,8 @@ var responseCodes = {
 
 	BRANCH_NOT_FOUND:			{value: 21, message: "Branch not found", status: 404},
 
+	ERROR_RENDERING_OBJECT:	 {value : 22, message: "Error rendering object", status: 500},
+
 	DB_ERROR: function(mongoErr) {
 		return {
 			value: 1000,
@@ -72,7 +74,7 @@ var responseCodes = {
 	}
 };
 
-var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 1000, 2000];
+var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 22, 1000, 2000];
 
 responseCodes.respond = function(place, resCode, res, extraInfo)
 {

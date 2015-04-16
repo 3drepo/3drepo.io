@@ -49,6 +49,7 @@ module.exports.addGoogleTiles = function(xmlDoc, width, yrot, worldTileSize, cen
 
 	var tileGroup = xmlDoc.createElement("group");
 	tileGroup.setAttribute('id', 'tileGroup');
+	tileGroup.setAttribute('invisible', 'true');
 	shapeTrans.appendChild(tileGroup);
 
 	for(var x = -halfWidth; x < halfWidth; x++)

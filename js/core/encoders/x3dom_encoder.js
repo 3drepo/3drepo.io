@@ -341,6 +341,9 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 		var child = node['children'][ch_idx];
 		var newNode = null;
 
+		if (!child)
+			continue;
+
 		if (child['type'] == 'ref')
 		{
 			newNode = xmlDoc.createElement('Inline');
