@@ -92,6 +92,9 @@ angular.module('3drepo')
 			deferred.resolve();
 		})
 		.error(function _authLogOutFailure() {
+			self.username = null;
+			self.loggedIn = false;
+
 			deferred.reject("Unable to logout.");
 		});
 
