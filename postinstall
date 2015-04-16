@@ -1,4 +1,6 @@
 node_modules/.bin/bower install
+
+# Setup symbolic links
 cd public/js/external
 ln -s ../../../submodules/x3dom/dist/ammo.js .
 ln -s ../../../bower_components/angular-bootstrap-multiselect/angular-bootstrap-multiselect.js .
@@ -10,4 +12,8 @@ ln -s ../../../bower_components/jquery-ui/jquery-ui.js .
 ln -s ../../../bower_components/masonry/masonry.js .
 ln -s ../../../submodules/x3dom/dist/x3dom.debug.js .
 ln -s ../../../submodules/x3dom/dist/x3dom-full.debug.js .
+
+# Build X3DOM
+cd ../../..
+python manage.py --build
 
