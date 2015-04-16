@@ -1,0 +1,2 @@
+pkill node
+NODE_ENV=$1 NODE_CONFIG_DIR='./config' forever start app.js

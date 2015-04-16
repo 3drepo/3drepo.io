@@ -3,11 +3,19 @@
     "version": "0.0.1",
     "private": true,
     "scripts": {
-        "start" : "node app"
-    },
+        "start" : "./forever_app default",
+		"stop" : "pkill node",
+        "restart" : "npm stop && npm start",
+		"postinstall" : "node_modules/.bin/bower install",
+		"upgrade" : "git checkout master && git pull && npm restart",
+		"test" : "node_modules/.bin/mocha -w"
+	},
     "dependencies": {
         "app-config": "latest",
         "async": "latest",
+		"bower": "latest",
+		"mocha": "latest",
+		"should": ">= 0.0.1",
         "crypto": "latest",
         "express": "latest",
         "jade":    "latest",

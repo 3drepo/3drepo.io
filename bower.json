@@ -1,0 +1,30 @@
+{
+  "name": "3drepo.io",
+  "version": "0.0.1",
+  "homepage": "http://3drepo.org",
+  "authors": [
+    "Timothy Scully <tim.scully@3drepo.org>"
+  ],
+  "description": "3D Repository",
+  "main": "app.js",
+  "moduleType": [
+    "node"
+  ],
+  "keywords": [
+    "3drepo.io"
+  ],
+  "license": "AGPL",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-bootstrap-multiselect": "~0.3.0",
+    "angular-bootstrap-select": "~0.0.5",
+    "fancytree": "~2.8.1",
+    "masonry": "~3.3.0"
+  }
+}
