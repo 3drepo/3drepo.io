@@ -51,7 +51,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			controller: 'SignUpCtrl'
 		})
 		.state('login', {
-			url: '/login',
+			url: '/',
 			templateUrl: 'login.html'
 		}).state('home' ,{
 			url: '/:account',
