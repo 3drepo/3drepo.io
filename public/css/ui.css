@@ -328,18 +328,28 @@ span.fancytree-title:hover {
 }
 
 #loginPage {
-	background-color: #004594;
-	position: absolute;
-	top: 0px;
-	bottom: 0px;
-	left: 0px;
-	right: 0px;
+	height: 800px;
+	background: url('/public/images/dummies/login-background.jpg') no-repeat center center;
+	background-size: cover;
+	color: #ffffff;
 }
 
-#credentials-box {
-    padding: 20% 0 0;
-    width: 320px;
-    margin: auto;
+#loginPage h2 {
+	color: rgb(32, 65, 170);
+}
+
+#loginPage .row {
+	margin-top: 50px;
+}
+
+#credentials-box input {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+#credentials-box button {
+	margin-left: 10px;
+	text-transform: uppercase;
 }
 
 .metadata-title{
@@ -480,6 +490,10 @@ header {
 	padding: 10px 20px;
 }
 
+.padded-top {
+	padding-top: 10px;
+}
+
 .shadow{
 	box-shadow: 2px 2px 2px #CCCCCC;
 }
@@ -516,18 +530,6 @@ header {
 	width: 100%;
 	padding-bottom: 0px;
 	margin-bottom: 20px;
-  border-radius: 3px;
-  border: 1px solid;
-  border-color: #DDD;
-}
-
-.block h3{
-	font-size: 11pt;
-	height: 100%;
-	font-weight: bold;
-	color: #555;
-	margin: 0px;
-	padding: 10px;
 }
 
 .block p{
@@ -538,19 +540,12 @@ header {
 	padding: 10px;
 }
 
-.block h2 {
-  padding: 0 10px;
-}
-
 .block-header{
-	background-color: #fafafa;
 	float: left;
 	padding-left: 0px;
 	padding-right: 0px;
 	width: 100%;
-	border-radius: 3px 3px 0px 0px;
-	border-bottom: 1px solid;
-	border-color: #DDD;
+	text-transform: uppercase;
 }
 
 hr {
@@ -574,7 +569,6 @@ hr {
 }
 
 /* Home profile */
-
 .profile-box{
 	padding: 0px 20px;
 	padding-bottom: 0px;
@@ -601,18 +595,29 @@ hr {
 
 .profile-pic{
 	margin: auto;
-	min-height: 302px;
-	max-height: 302px;
-	min-width: 302px;
-	max-width: 302px;
-	border: 1px solid;
+	max-width: 350px;
 	background-position: center;
 	font-size: 200px;
 	text-align: center;
+	background-color: #eeeeee;
 }
 
 #picImg {
 	vertical-align: top;
+}
+
+#profile-settings input {
+	border: none;
+	border-radius: 0;
+	background-color: #eeeeee;
+	box-shadow: none;
+}
+
+#profile-settings label {
+	font-weight: normal;
+	font-size: 16px;
+	margin-bottom: 5px;
+	margin-top: 10px;
 }
 
 /*Project items*/
@@ -1042,12 +1047,17 @@ img.loading{
 /***** UIv2 elements *****/
 button, button.btn {
 	border-radius: 0;
+	text-transform: uppercase;
 }
 
 header button.btn {
 	background: none;
 	font-size: 14pt;
 	padding-top: 2px;
+}
+
+.form-control {
+	border-radius: 0;
 }
 
 #ui2-treeview {
@@ -1237,15 +1247,14 @@ header button.btn {
 }
 
 #nav-version-control {
-	//width: 650px;
 	position: absolute;
-	left: 200px;
-	//margin-left: auto;
 	margin-right: auto;
 	margin-top: 20px;
 	display: inline;
 	top: 0;
 	z-index: 10000;
+	left: 25%;
+	width: 50%;
 }
 
 #nav-version-control .btn-group.menu-button {
@@ -1267,6 +1276,32 @@ header button.btn {
 
 .nav-project-title {
 	color: #ffffff;
+	position: absolute;
+	width: 10%;
+}
+
+#revisions-selector {
+	position: absolute;
+	left: 75px;
+	width: 90%;
+}
+
+#diffToggle {
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+
+#diffToggle a {
+	color: #ffffff;
+}
+
+#diffSpan {
+	border-top: 2px solid #ffffff;
+	margin-top: 17px;
+	padding-top: 17px;
+	padding-bottom: 17px;
+	background-color: rgba(5, 58, 165, 0.84);
 }
 
 .dropdown-menu {
@@ -1345,3 +1380,21 @@ ul.fancytree-container li {
 	font-weight: normal;
 }
 
+/********** masonry **********/
+.item-masonry, .grid-sizer {
+	width: calc(25% - 1px);
+	/*margin-bottom: -3px;*/
+}
+
+.item-masonry.w2 {
+	width: calc(50% - 2px);
+}
+
+.item-masonry-description {
+	position: absolute;
+	bottom: 0;
+	padding: 10px;
+	background-color: rgba(255, 255, 255, 0.8);
+	width: 100%;
+	height: 30%;
+}

@@ -71,9 +71,14 @@ angular.module('3drepo')
 				self.CurrentBranch.refresh(self.account, self.project, self.branch);
 			}
 
-			this.enableDiff = function() {
-				this.diffEnabled = true;
-				this.setDiffBranch('master');
+			this.toggleDiff = function() {
+				if (this.diffEnabled) {
+					this.setDiffBranch('');
+					this.diffEnabled = false;
+				} else {
+					this.setDiffBranch('master');
+					this.diffEnabled = true;
+				}
 			}
 
 			this.setDiffBranch = function(branch)
