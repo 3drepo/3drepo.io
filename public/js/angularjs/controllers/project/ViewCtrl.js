@@ -34,6 +34,14 @@ angular.module('3drepo')
 		var o = {view: v};
 
 		var vw = $state.current.name;
+		var bp = $('#bottom-panel');
+		if (bp.hasClass('collapsed')) {
+			// if the bottom panel is collapsed and the tab was clicked, expand
+			bp.removeClass('collapsed');
+		} else if (v === $state.params.view) {
+			// if the panel is expanded and th same view was clicked again, collapse
+			bp.addClass('collapsed');
+		}
 
 		if (vw.substr(vw.length - 5) == ".view")
 			$state.go($state.current.name, o);
@@ -60,15 +68,6 @@ angular.module('3drepo')
 		refreshTree(account, project, Data.branch, rev.name);
 
 		$state.go('main.revision.view', o);
-	}
-
-	$scope.toggleBottomPanel = function() {
-		var bp = $('#bottom-panel');
-		if (bp.hasClass('collapsed')) {
-			bp.removeClass('collapsed');
-		} else {
-			bp.addClass('collapsed');
-		}
 	}
 
 	$scope.checkViewIsValid();
