@@ -652,6 +652,8 @@ var Viewer = function(id) {
 	};
 
 	this.initUi();
+
+	this.setNavMode('TURNTABLE'); // TODO: Shouldn't be here
 };
 
 

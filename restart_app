@@ -1,2 +1,2 @@
-pkill node
-NODE_ENV=$1 NODE_CONFIG_DIR='./config' forever start app.js
+forever stop 3drepo.js
+NODE_ENV=$1 NODE_CONFIG_DIR='./config' forever start 3drepo.js
