@@ -1220,6 +1220,14 @@ header button.btn {
 	padding-left: 0;
 }
 
+#oculus-icon {
+	width: 66px;
+}
+
+#oculus-icon img {
+	width: 22px;
+}
+
 .block-header-project-name {
 	font-weight: normal;
 }
