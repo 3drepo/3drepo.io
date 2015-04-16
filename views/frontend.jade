@@ -25,6 +25,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 		script(type="text/javascript" src='#{angularrouterjs}')
 		link(rel='stylesheet' type='text/css' href='#{fontawesomecss}')
 		script(type="text/javascript" src="#{uibootstrap}")
+		script(type="text/javascript" src="#{masonryjs}")
 
 
 		script(type="text/javascript" src="/public/js/controlinterface.js")
@@ -90,7 +91,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 
 		// Login template
 		script(type='text/ng-template', id='login.html')
-			include ng-templates/old_login.jade
+			include ng-templates/login.jade
 
 		// Signup template
 		script(type='text/ng-template', id='signup.html')
@@ -146,7 +147,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 
 		.container-fluid
 			.row.mainrow
-				ng-include(ng-if="!(state.current.name=='login')" src="'header.html'")
+				ng-include(src="'header.html'")
 			.row
 				div(ui-view='')
 

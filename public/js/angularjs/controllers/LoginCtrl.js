@@ -35,5 +35,14 @@ angular.module('3drepo')
 			}
 		);
 	};
-}])
+
+	// $scope.featuredProjects = [
+	// 	{img: '/public/images/dummies/kc.jpg', title: 'Kings Cross', description: 'Project description', additionalClass: 'w2'},
+	// 	{img: '/public/images/dummies/kc.jpg', title: 'Title', description: 'Project description'},
+	// 	{img: '/public/images/dummies/kc.jpg', title: 'Title', description: 'Project description'},
+	// 	{img: '/public/images/dummies/kc.jpg', title: 'Title', description: 'Project description', additionalClass: 'w2'},
+	// 	{img: '/public/images/dummies/kc.jpg', title: 'Title', description: 'Project description'},
+	// 	{img: '/public/images/dummies/kc.jpg', title: 'Title', description: 'Project description'}
+	// ];
+}]);
 

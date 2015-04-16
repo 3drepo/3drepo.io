@@ -22,6 +22,11 @@
 			a.dashboard-tab(ng-click="go('cobie')")
 				i.fa.fa-list-alt.menu-icon
 				| COBIE
+
+		li
+			a.dashboard-tab#oculus-icon(onclick="viewer.switchVR()")
+				img(src="/public/images/oculus_sm.png")
+
 		li
 			a.dashboard-tab#bp-collapser(ng-click="toggleBottomPanel()")
 				i.fa.fa-arrows-v
