@@ -15,5 +15,6 @@ ln -s ../../../submodules/x3dom/dist/x3dom-full.debug.js .
 
 # Build X3DOM
 cd ../../..
+cd submodules/x3dom
 python manage.py --build
 
