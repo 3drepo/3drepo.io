@@ -1,4 +1,4 @@
-3drepo.io
+3drepo.io ![](https://travis-ci.org/3drepo/3drepo.io.svg?branch=master)
 =========
 
 3DRepo is a web based front end for viewing version controlled 3D data stored in a MongoDB. Getting data into the database is controlled by the 3D Repo Core library and GUI separate projects hosted here on GitHub ([3DRepoCore][], [3DRepoGUI][])
