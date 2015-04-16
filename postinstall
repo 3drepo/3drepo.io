@@ -1,0 +1,14 @@
+node_modules/.bin/bower install
+pushd public/js/external
+ln -s ../../../submodules/x3dom/dist/ammo.js .
+ln -s ../../../bower_components/angular-bootstrap-multiselect/angular-bootstrap-multiselect.js .
+ln -s ../../../bower_components/angular-bootstrap-select/build/angular-bootstrap-select.js .
+ln -s ../../../bower_components/bootstrap-select/bootstrap-select.js .
+ln -s ../../../bower_components/fancytree/dist/jquery.fancytree-all.js .
+ln -s ../../../bower_components/jquery/dist/jquery.min.js .
+ln -s ../../../bower_components/jquery-ui/jquery-ui.js .
+ln -s ../../../bower_components/masonry/masonry.js .
+ln -s ../../../submodules/x3dom/dist/x3dom.debug.js .
+ln -s ../../../submodules/x3dom/dist/x3dom-full.debug.js .
+popd
+
