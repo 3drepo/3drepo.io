@@ -44,8 +44,17 @@ angular.module('3drepo')
 			if(json.data.email)
 				self.email     = json.data.email;
 
-			if(json.data.projects)
+			if(json.data.projects) {
 				self.projects  = json.data.projects;
+				self.projectsGrouped = {}
+				for (var p = 0; p < self.projects.length; p++) {
+					var project = self.projects[p];
+					if (!(project['account'] in self.projectsGrouped)) {
+						self.projectsGrouped[project['account']] = [];
+					}
+					self.projectsGrouped[project['account']].push(project['project']);
+				}
+			}
 
 			return $http.get(self.avatarURL);
 		}, function(message) {

@@ -33,11 +33,14 @@
 				// Dashboard
 				div.row(ng-show="view=='projects'")
 					.col-xs-12
-						div(ng-repeat="project in Data.UserData.projects")
-							.project-line
-								i.fa.fa-cube.menu-icon
-								span.commit-number
-									a(ng-href="{{'/' + project.account + '/' + project.project}}") {{'/' + project.account + '/' + project.project}}
+						div(ng-repeat="(account, projects) in Data.UserData.projectsGrouped")
+							h3 {{account}}
+							div(ng-repeat="project in projects")
+								.project-line
+									i.fa.fa-cube.menu-icon
+									span.commit-number
+										a(ng-href="{{'/' + account + '/' + project}}") {{project}}
+
 				//div(ng-show="view=='dashboard'")
 					.col-md-6.gutter-right
 						.block
