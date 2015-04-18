@@ -1185,11 +1185,12 @@ header button.btn {
 
 #bottom-panel {
 	background-color: #ffffff;
+	position: fixed;
+	top: 60px;
+	left: 25%;
 	width: 50%;
 	height: 100%;
-	position: fixed;
-	left: 25%;
-	top: 60px;
+	max-width: none;
 }
 
 #bottom-panel.collapsed {
@@ -1197,16 +1198,22 @@ header button.btn {
 }
 
 .bottom-tabs {
-	position: relative;
+	position: absolute;
 	border: none;
 	font-size: 8pt;
+	top: 0;
+	height: 35px;
+	width: 80%;
 	left: 10%;
 }
 
 .collapsed .bottom-tabs {
-	position: relative;
-	height: 40px;
 	top: -35px;
+}
+
+.bottom-tabs > li {
+	width: 20%;
+	text-align: center;
 }
 
 .bottom-tabs > li > a, .bottom-tabs > li > a:focus, .bottom-tabs > li > a:hover,
@@ -1228,11 +1235,10 @@ header button.btn {
 	border-top: 10px solid rgb(45, 45, 45);
 	position: relative;
 	top: 8px;
-	left: 45%;
 }
 
-#bp-collapser {
-	padding-left: 0;
+.bottom-info {
+	padding-top: 20px;
 }
 
 #oculus-icon {

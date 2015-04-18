@@ -39,7 +39,7 @@ angular.module('3drepo')
 			// if the bottom panel is collapsed and the tab was clicked, expand
 			bp.removeClass('collapsed');
 		} else if (v === $state.params.view) {
-			// if the panel is expanded and th same view was clicked again, collapse
+			// if the panel is expanded and the same view was clicked again, collapse
 			bp.addClass('collapsed');
 		}
 
