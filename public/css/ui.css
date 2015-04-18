@@ -1048,12 +1048,17 @@ img.loading{
 button, button.btn {
 	border-radius: 0;
 	text-transform: uppercase;
+	border: none;
 }
 
 header button.btn {
 	background: none;
 	font-size: 14pt;
 	padding-top: 2px;
+}
+
+.btn-profile {
+	width: 140px;
 }
 
 .form-control {

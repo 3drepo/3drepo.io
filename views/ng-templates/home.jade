@@ -9,22 +9,25 @@
 						.profile-pic
 							img#picImg(ng-show="Data.UserData.hasAvatar", ng-src='{{Data.UserData.avatarURL}}')
 							i.fa.fa-user(ng-show="!Data.UserData.hasAvatar")
-						.profile-box
-							h1 {{Data.UserData.firstName}} {{Data.UserData.lastName}}
-							p {{Data.UserData.email}}
 				// Menu
 				.row
 					.col-md-12
-						span(ng-class="{'project-menu-section-selected': isView('projects')}")
+						span(ng-class="{'project-menu-section-selected': isView('projects')}", ng-show="isView('settings')")
 							a(href='', ng-click="setView('projects')")
-								button.btn.btn-primary
+								button.btn.btn-primary.btn-profile.pull-right
 									i.fa.fa-home
 									|  Projects
-						span(ng-class="{'project-menu-section-selected': isView('settings')}")
+						span(ng-class="{'project-menu-section-selected': isView('settings')}", ng-show="isView('projects')")
 							a(href='', ng-click="setView('settings')")
-								button.btn.btn-primary.pull-right
+								button.btn.btn-primary.btn-profile.pull-right
 									i.fa.fa-gear
-									|  Settings
+									|  Edit Profile
+				.row
+					.col-md-12
+						.profile-box
+							h1 {{Data.UserData.firstName}} {{Data.UserData.lastName}}
+							p {{Data.UserData.email}}
+
 			// Main content
 			#profile-settings.col-md-9
 				// Dashboard
