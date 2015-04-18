@@ -35,11 +35,12 @@
 					.col-xs-12
 						div(ng-repeat="(account, projects) in Data.UserData.projectsGrouped")
 							h3 {{account}}
-							div(ng-repeat="project in projects")
-								.project-line
-									i.fa.fa-cube.menu-icon
-									span.commit-number
-										a(ng-href="{{'/' + account + '/' + project}}") {{project}}
+							.account-projects
+								div(ng-repeat="project in projects")
+									.project-line
+										i.fa.fa-cube.menu-icon
+										span.commit-number
+											a(ng-href="{{'/' + account + '/' + project}}") {{project}}
 
 				//div(ng-show="view=='dashboard'")
 					.col-md-6.gutter-right

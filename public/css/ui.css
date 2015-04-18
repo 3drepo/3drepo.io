@@ -622,6 +622,10 @@ hr {
 
 /*Project items*/
 
+.account-projects {
+	margin-left: 15px;
+}
+
 .project-title{
 	position: relative;
 	background-color: #FFF;
