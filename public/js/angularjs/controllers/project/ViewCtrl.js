@@ -49,6 +49,15 @@ angular.module('3drepo')
 			$state.go($state.current.name + '.view', o);
 	}
 
+	$scope.toggleTree = function() {
+		$("#ui2-treeview").toggleClass("collapsed");
+	}
+
+
+	$scope.toggleMetadata = function() {
+		$("#ui2-metadata").toggleClass("collapsed");
+	}
+
 	// TODO: Move somewhere else
 	$scope.checkViewIsValid = function(){
 		if( $scope.possible_views.indexOf(Data.view) == -1 ){

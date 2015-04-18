@@ -1072,6 +1072,8 @@ header button.btn {
 	width: 25%;
 	height: calc(100% - 60px);
 	background-color: rgba(255, 255, 255, 0.5);
+	-webkit-transition: all linear 0.05s;
+	transition: all linear 0.05s;
 }
 
 #ui2-treeview.collapsed {
@@ -1097,6 +1099,8 @@ header button.btn {
 	font-size: 14pt;
 	position: relative;
 	top: 50%;
+	-webkit-transition: all linear 0.05s;
+	transition: all linear 0.05s;
 }
 
 .collapsed #ui2-treeview-collapse-btn {
@@ -1114,6 +1118,8 @@ header button.btn {
 	width: 25%;
 	height: calc(100% - 60px);
 	background-color: rgba(255, 255, 255, 0.5);
+	-webkit-transition: all linear 0.05s;
+	transition: all linear 0.05s;
 }
 
 #metadata {
@@ -1191,6 +1197,8 @@ header button.btn {
 	width: 50%;
 	height: 100%;
 	max-width: none;
+	-webkit-transition: all linear 0.1s;
+	transition: all linear 0.1s;
 }
 
 #bottom-panel.collapsed {
@@ -1205,6 +1213,9 @@ header button.btn {
 	height: 35px;
 	width: 80%;
 	left: 10%;
+	-webkit-transition: all linear 0.1s;
+	transition: all linear 0.1s;
+
 }
 
 .collapsed .bottom-tabs {

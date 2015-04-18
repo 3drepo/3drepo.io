@@ -54,14 +54,14 @@
 
 	#project-viewport-container.row
 		div#x3d.project-viewport
-	.ui2
+	.ui2(ng-controller='ViewCtrl')
 		#ui2-treeview.collapsed
-			div#ui2-treeview-collapse-btn.pull-right.panel-collapse-btn
+			div#ui2-treeview-collapse-btn.pull-right.panel-collapse-btn(ng-click="toggleTree()")
 				i.fa.fa-list
 			.treeview
 				#scenetree
 		#ui2-metadata.collapsed
-			div#ui2-metadata-collapse-btn.panel-collapse-btn
+			div#ui2-metadata-collapse-btn.panel-collapse-btn(ng-click="toggleMetadata()")
 				i.fa.fa-tag
 			div#meta-popup
 				div#metadata
