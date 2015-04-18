@@ -1150,6 +1150,16 @@ header button.btn {
 	left: -40px;
 }
 
+#oculus-mode-icon {
+	position: absolute;
+	bottom: 0;
+	left: -50px;
+	width: 50px;
+	height: 37px;
+	padding: 10px;
+	cursor: pointer;
+}
+
 .arrow-up {
 	width: 0;
 	height: 0;
@@ -1250,14 +1260,6 @@ header button.btn {
 
 .bottom-info {
 	padding-top: 20px;
-}
-
-#oculus-icon {
-	width: 66px;
-}
-
-#oculus-icon img {
-	width: 22px;
 }
 
 .block-header-project-name {

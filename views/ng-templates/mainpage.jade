@@ -61,10 +61,14 @@
 			.treeview
 				#scenetree
 		#ui2-metadata.collapsed
-			div#ui2-metadata-collapse-btn.panel-collapse-btn(ng-click="toggleMetadata()")
+			#ui2-metadata-collapse-btn.panel-collapse-btn(ng-click="toggleMetadata()")
 				i.fa.fa-tag
-			div#meta-popup
+			#meta-popup
 				div#metadata
+			#oculus-mode-icon
+				a.dashboard-tab(onclick="viewer.switchVR()")
+					img.img-responsive(src="/public/images/oculus_sm.png")
+
 
 
 
