@@ -438,7 +438,7 @@ a:hover {
 }
 
 header {
-	background: rgba(5, 58, 165, 0.84);
+	background: rgba(5, 58, 165, 1.0);
 	color: #ffffff;
 }
 
@@ -575,27 +575,28 @@ hr {
 }
 
 .profile-box{
+	margin-top: 20px;
 	padding: 0px 20px;
 	padding-bottom: 0px;
 	width: 100%;
 	padding-bottom: 20px;
 }
 
-.profile-box h1{
-	font-size: 18pt;
-	font-weight: bold;
-	color: #555;
-	margin: 0px;
-	text-align: center;
-	padding: 10px;
+#profile button.btn {
+	padding-top: 10px;
+	padding-bottom: 10px;
 }
 
-.profile-box p{
-	font-size: 12pt;
+.profile-box h5 {
+	font-weight: bold;
+	text-transform: uppercase;
+}
+
+.profile-box p {
+	font-size: 11pt;
 	font-weight: normal;
 	color: #333;
 	margin: 0px;
-	text-align: center;
 }
 
 .profile-pic{
@@ -664,10 +665,26 @@ hr {
 	overflow: hidden;
 }
 
-#project-thumbnails .item-masonry, .grid-sizer {
+#projects-thumbnails .item-masonry, .grid-sizer {
 	width: calc(33.333% + 0px);
 }
 
+#projects-thumbnails .item-masonry-description {
+	height: 22%;
+}
+
+#projects-thumbnails, #projects-thumbnails a {
+	color: #000000;
+}
+
+#projects-thumbnails h5 {
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+p.project-owner {
+	color: #666666;
+}
 
 .menu-icon{
 	min-width: 17px;
@@ -1070,6 +1087,10 @@ button, button.btn {
 	border-radius: 0;
 	text-transform: uppercase;
 	border: none;
+}
+
+.btn-primary, .btn-primary.active, .btn-primary.focus, .btn-primary:active, .btn-primary:focus, .btn-primary:hover, .open > .dropdown-toggle.btn-primary {
+	background-color: rgba(5, 58, 165, 1.0);
 }
 
 header button.btn {

@@ -2,7 +2,7 @@
 	.container-fluid
 		.row
 			// Left column
-			.col-md-3.unpadded
+			#profile.col-md-3.unpadded
 				// Profile pic and name
 				.row
 					.col-md-12
@@ -35,8 +35,8 @@
 				.row
 					.col-md-12
 						.profile-box
-							h1 {{Data.UserData.firstName}} {{Data.UserData.lastName}}
-							p {{Data.UserData.email}}
+							h5 <i class="fa fa-user"></i> {{Data.UserData.firstName}} {{Data.UserData.lastName}}
+							p <i class="fa fa-envelope"></i> {{Data.UserData.email}}
 
 			// Main content
 			#profile-settings.col-md-9
@@ -60,8 +60,8 @@
 							a(ng-href="{{'/' + project.account + '/' + project.project}}")
 								img.img-responsive(src="/public/images/dummies/kc.jpg")
 								.item-masonry-description
-									{{project.project}}
-									// p {{project.description}}
+									h5 {{project.project}}
+									p.project-owner {{project.account}}
 				//div(ng-show="view=='dashboard'")
 					.col-md-6.gutter-right
 						.block
