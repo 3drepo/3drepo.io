@@ -656,6 +656,19 @@ hr {
 	padding-top: 0px;
 }
 
+.project-thumbnail {
+	display: inline-block;
+	position: relative;
+	margin-bottom: -5px;
+	margin-right: -1px;
+	overflow: hidden;
+}
+
+#project-thumbnails .item-masonry, .grid-sizer {
+	width: calc(33.333% + 0px);
+}
+
+
 .menu-icon{
 	min-width: 17px;
 	width: 17px;

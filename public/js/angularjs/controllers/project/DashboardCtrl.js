@@ -60,6 +60,12 @@ angular.module('3drepo')
 			$scope.errors.changePasswordError = "[" + message.message + "]";
 		});
 	};
+
+	$scope.projectsShowList = true;
+	$scope.toggleProjectsView = function() {
+		$scope.projectsShowList = !$scope.projectsShowList;
+	};
+
 }]);
 
 
