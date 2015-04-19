@@ -569,6 +569,11 @@ hr {
 }
 
 /* Home profile */
+.unpadded {
+	padding-left: 0;
+	padding-right: 0;
+}
+
 .profile-box{
 	padding: 0px 20px;
 	padding-bottom: 0px;
@@ -595,7 +600,6 @@ hr {
 
 .profile-pic{
 	margin: auto;
-	max-width: 350px;
 	background-position: center;
 	font-size: 200px;
 	text-align: center;
