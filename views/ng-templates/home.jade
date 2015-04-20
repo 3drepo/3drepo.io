@@ -1,40 +1,67 @@
 #wrap
 	.container-fluid
-		.row.padded-top
+		.row
 			// Left column
-			.col-md-3
+			#profile.col-md-3.unpadded
 				// Profile pic and name
 				.row
 					.col-md-12
 						.profile-pic
 							img#picImg(ng-show="Data.UserData.hasAvatar", ng-src='{{Data.UserData.avatarURL}}')
 							i.fa.fa-user(ng-show="!Data.UserData.hasAvatar")
-						.profile-box
-							h1 {{Data.UserData.firstName}} {{Data.UserData.lastName}}
-							p {{Data.UserData.email}}
 				// Menu
 				.row
 					.col-md-12
-						span(ng-class="{'project-menu-section-selected': isView('projects')}")
+						span(ng-show="isView('settings')")
 							a(href='', ng-click="setView('projects')")
-								button.btn.btn-primary
+								button.btn.btn-primary.btn-profile
 									i.fa.fa-home
 									|  Projects
-						span(ng-class="{'project-menu-section-selected': isView('settings')}")
+						span(ng-show="isView('projects')")
 							a(href='', ng-click="setView('settings')")
-								button.btn.btn-primary.pull-right
+								button.btn.btn-primary.btn-profile
 									i.fa.fa-gear
-									|  Settings
+									|  Edit Profile
+						span(ng-show="isView('projects') && projectsShowList")
+							a(href='', ng-click="toggleProjectsView()")
+								button.btn.btn-primary.btn-profile.pull-right
+									i.fa.fa-th-large
+									|  Thumbnails
+						span(ng-show="isView('projects') && !projectsShowList")
+							a(href='', ng-click="toggleProjectsView()")
+								button.btn.btn-primary.btn-profile.pull-right
+									i.fa.fa-list
+									|  List
+				.row
+					.col-md-12
+						.profile-box
+							h5 <i class="fa fa-user"></i> {{Data.UserData.firstName}} {{Data.UserData.lastName}}
+							p <i class="fa fa-envelope"></i> {{Data.UserData.email}}
+
 			// Main content
 			#profile-settings.col-md-9
 				// Dashboard
-				div.row(ng-show="view=='projects'")
+				// List of projects
+				#projects-list.row(ng-show="view=='projects' && projectsShowList")
 					.col-xs-12
-						div(ng-repeat="project in Data.UserData.projects")
-							.project-line
-								i.fa.fa-cube.menu-icon
-								span.commit-number
-									a(ng-href="{{'/' + project.account + '/' + project.project}}") {{'/' + project.account + '/' + project.project}}
+						div(ng-repeat="(account, projects) in Data.UserData.projectsGrouped")
+							h3 {{account}}
+							.account-projects
+								div(ng-repeat="project in projects")
+									.project-line
+										i.fa.fa-cube.menu-icon
+										span.commit-number
+											a(ng-href="{{'/' + account + '/' + project}}") {{project}}
+				// project thumbnails
+				#projects-thumbnails.row(ng-show="view=='projects' && !projectsShowList")
+					.col-xs-12.unpadded.js-masonry(data-masonry-options='{ "itemSelector": ".item-masonry", "columnWidth": ".grid-sizer", "gutter": 0, "percentPosition": true}')
+						.grid-sizer
+						div.item-masonry.project-thumbnail(ng-repeat="project in Data.UserData.projects")
+							a(ng-href="{{'/' + project.account + '/' + project.project}}")
+								img.img-responsive(src="/public/images/dummies/kc.jpg")
+								.item-masonry-description
+									h5 {{project.project}}
+									p.project-owner {{project.account}}
 				//div(ng-show="view=='dashboard'")
 					.col-md-6.gutter-right
 						.block

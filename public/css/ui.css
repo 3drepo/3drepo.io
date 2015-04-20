@@ -438,7 +438,7 @@ a:hover {
 }
 
 header {
-	background: rgba(5, 58, 165, 0.84);
+	background: rgba(5, 58, 165, 1.0);
 	color: #ffffff;
 }
 
@@ -569,33 +569,38 @@ hr {
 }
 
 /* Home profile */
+.unpadded {
+	padding-left: 0;
+	padding-right: 0;
+}
+
 .profile-box{
+	margin-top: 20px;
 	padding: 0px 20px;
 	padding-bottom: 0px;
 	width: 100%;
 	padding-bottom: 20px;
 }
 
-.profile-box h1{
-	font-size: 18pt;
-	font-weight: bold;
-	color: #555;
-	margin: 0px;
-	text-align: center;
-	padding: 10px;
+#profile button.btn {
+	padding-top: 10px;
+	padding-bottom: 10px;
 }
 
-.profile-box p{
-	font-size: 12pt;
+.profile-box h5 {
+	font-weight: bold;
+	text-transform: uppercase;
+}
+
+.profile-box p {
+	font-size: 11pt;
 	font-weight: normal;
 	color: #333;
 	margin: 0px;
-	text-align: center;
 }
 
 .profile-pic{
 	margin: auto;
-	max-width: 350px;
 	background-position: center;
 	font-size: 200px;
 	text-align: center;
@@ -622,6 +627,10 @@ hr {
 
 /*Project items*/
 
+.account-projects {
+	margin-left: 15px;
+}
+
 .project-title{
 	position: relative;
 	background-color: #FFF;
@@ -646,6 +655,35 @@ hr {
 	margin: 0px;
 	padding: 10px;
 	padding-top: 0px;
+}
+
+.project-thumbnail {
+	display: inline-block;
+	position: relative;
+	margin-bottom: -5px;
+	margin-right: -1px;
+	overflow: hidden;
+}
+
+#projects-thumbnails .item-masonry, .grid-sizer {
+	width: calc(33.333% + 0px);
+}
+
+#projects-thumbnails .item-masonry-description {
+	height: 22%;
+}
+
+#projects-thumbnails, #projects-thumbnails a {
+	color: #000000;
+}
+
+#projects-thumbnails h5 {
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+p.project-owner {
+	color: #666666;
 }
 
 .menu-icon{
@@ -1048,12 +1086,21 @@ img.loading{
 button, button.btn {
 	border-radius: 0;
 	text-transform: uppercase;
+	border: none;
+}
+
+.btn-primary, .btn-primary.active, .btn-primary.focus, .btn-primary:active, .btn-primary:focus, .btn-primary:hover, .open > .dropdown-toggle.btn-primary {
+	background-color: rgba(5, 58, 165, 1.0);
 }
 
 header button.btn {
 	background: none;
 	font-size: 14pt;
 	padding-top: 2px;
+}
+
+.btn-profile {
+	width: 140px;
 }
 
 .form-control {
@@ -1067,6 +1114,8 @@ header button.btn {
 	width: 25%;
 	height: calc(100% - 60px);
 	background-color: rgba(255, 255, 255, 0.5);
+	-webkit-transition: all linear 0.05s;
+	transition: all linear 0.05s;
 }
 
 #ui2-treeview.collapsed {
@@ -1092,6 +1141,8 @@ header button.btn {
 	font-size: 14pt;
 	position: relative;
 	top: 50%;
+	-webkit-transition: all linear 0.05s;
+	transition: all linear 0.05s;
 }
 
 .collapsed #ui2-treeview-collapse-btn {
@@ -1109,6 +1160,8 @@ header button.btn {
 	width: 25%;
 	height: calc(100% - 60px);
 	background-color: rgba(255, 255, 255, 0.5);
+	-webkit-transition: all linear 0.05s;
+	transition: all linear 0.05s;
 }
 
 #metadata {
@@ -1137,6 +1190,16 @@ header button.btn {
 
 .collapsed #ui2-metadata-collapse-btn {
 	left: -40px;
+}
+
+#oculus-mode-icon {
+	position: absolute;
+	bottom: 0;
+	left: -50px;
+	width: 50px;
+	height: 37px;
+	padding: 10px;
+	cursor: pointer;
 }
 
 .arrow-up {
@@ -1180,11 +1243,14 @@ header button.btn {
 
 #bottom-panel {
 	background-color: #ffffff;
+	position: fixed;
+	top: 60px;
+	left: 25%;
 	width: 50%;
 	height: 100%;
-	position: fixed;
-	left: 25%;
-	top: 60px;
+	max-width: none;
+	-webkit-transition: all linear 0.1s;
+	transition: all linear 0.1s;
 }
 
 #bottom-panel.collapsed {
@@ -1192,16 +1258,25 @@ header button.btn {
 }
 
 .bottom-tabs {
-	position: relative;
+	position: absolute;
 	border: none;
 	font-size: 8pt;
+	top: 0;
+	height: 35px;
+	width: 80%;
 	left: 10%;
+	-webkit-transition: all linear 0.1s;
+	transition: all linear 0.1s;
+
 }
 
 .collapsed .bottom-tabs {
-	position: relative;
-	height: 40px;
 	top: -35px;
+}
+
+.bottom-tabs > li {
+	width: 20%;
+	text-align: center;
 }
 
 .bottom-tabs > li > a, .bottom-tabs > li > a:focus, .bottom-tabs > li > a:hover,
@@ -1223,19 +1298,10 @@ header button.btn {
 	border-top: 10px solid rgb(45, 45, 45);
 	position: relative;
 	top: 8px;
-	left: 45%;
 }
 
-#bp-collapser {
-	padding-left: 0;
-}
-
-#oculus-icon {
-	width: 66px;
-}
-
-#oculus-icon img {
-	width: 22px;
+.bottom-info {
+	padding-top: 20px;
 }
 
 .block-header-project-name {

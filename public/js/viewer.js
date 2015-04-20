@@ -639,20 +639,6 @@ var Viewer = function(id) {
 		}
 	};
 
-	// TODO(mg): find a better place to put this
-	this.initUi = function() {
-		$(".panel-collapse-btn").click(function() {
-			var parent = $(this).parent();
-			if (parent.hasClass("collapsed")) {
-				parent.switchClass("collapsed", 100);
-			} else {
-				parent.switchClass([], "collapsed", 100);
-			}
-		});
-	};
-
-	this.initUi();
-
 	this.setNavMode('TURNTABLE'); // TODO: Shouldn't be here
 };
 
