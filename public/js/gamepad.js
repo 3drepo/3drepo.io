@@ -61,8 +61,11 @@ var Gamepad = function() {
 		);
 
 		if (self.gamepad.buttons[0].pressed)
-			if (!this.oldButton)
+			if (!this.oldButton) {
 				viewer.reset();
+				viewer.setNavMode('NONE');
+				viewer.disableClicking();
+			}
 
 		this.oldButton = self.gamepad.buttons[0].pressed;
 	};
@@ -71,13 +74,10 @@ var Gamepad = function() {
 		if(navigator.getGamepads()[0])
 			self.gamepad = navigator.getGamepads()[0];
 
-		//if(!this.gamepad)
-		//	viewer.setNavMode('TURNTABLE'); // Manually override navigation
-
-		if(this.gamepad) {
+		if(!this.gamepad)
+			viewer.setNavMode('TURNTABLE'); // Manually override navigation
+		else
 			self.checkStatus();
-			//viewer.setNavMode('NONE');
-		}
 
 		self.nextTick();
 	};

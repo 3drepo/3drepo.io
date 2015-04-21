@@ -56,8 +56,6 @@ var Collision = function() {
 			self.deltaX = (userX * Math.cos(yRotRad) - userY * Math.sin(yRotRad));
 			self.deltaZ = (userX * Math.sin(yRotRad) + userY * Math.cos(yRotRad));
 
-			console.log(self.deltaX + " - " + self.deltaZ);
-
 			if(!self.ticking)
 				self.tick();
 		}
@@ -90,35 +88,39 @@ var Collision = function() {
 
 		var dist = viewArea._pickingInfo.pickPos.subtract(from).length();
 
-		if (!self.stopped && dist > viewer.avatarRadius)
+		if (viewArea._pickingInfo.pickObj)
 		{
-			from.x += self.deltaX;
-			from.z += self.deltaZ;
+			if (!self.stopped && (dist > viewer.avatarRadius))
+			{
+				from.x += self.deltaX;
+				from.z += self.deltaZ;
 
-			// Attach to ground
-			var tmpAt = from.addScaled(straightDown, 1.0);
-			var tmpUp = straightAhead.cross(straightDown);
-			var tmpDownMat = x3dom.fields.SFMatrix4f.lookAt(from, tmpAt, tmpUp);
-			tmpDownMat = tmpDownMat.inverse();
+				// Attach to ground
+				var tmpAt = from.addScaled(straightDown, 1.0);
+				var tmpUp = straightAhead.cross(straightDown);
+				var tmpDownMat = x3dom.fields.SFMatrix4f.lookAt(from, tmpAt, tmpUp);
+				tmpDownMat = tmpDownMat.inverse();
 
-			viewArea._scene._nameSpace.doc.ctx.pickValue(viewArea, viewArea._width/2, viewArea._height/2,
-						this._lastButton, tmpDownMat, currProjMat.mult(tmpDownMat));
+				viewArea._scene._nameSpace.doc.ctx.pickValue(viewArea, viewArea._width/2, viewArea._height/2,
+							this._lastButton, tmpDownMat, currProjMat.mult(tmpDownMat));
 
-			var dist = viewArea._pickingInfo.pickPos.subtract(from).length();
-			//var dist = from.z - viewArea._pickingInfo.pickPos.z;
+				var dist = viewArea._pickingInfo.pickPos.subtract(from).length();
+				//var dist = from.z - viewArea._pickingInfo.pickPos.z;
 
-			var movement = 0.5 * ((viewer.avatarHeight - dist) + self.prevMove);
-			from.y += movement;
-			self.prevMove = movement;
+				if (viewArea._pickingInfo.pickObj)
+				{
+					var movement = 0.5 * ((viewer.avatarHeight - dist) + self.prevMove);
+					from.y += movement;
+					self.prevMove = movement;
+				}
 
-			var at	 = from.subtract(flyMat.e2());
-			var up	 = flyMat.e1();
+				var at	 = from.subtract(flyMat.e2());
+				var up	 = flyMat.e1();
+				var tmpMat = x3dom.fields.SFMatrix4f.lookAt(from, at, up);
 
-			var tmpMat = x3dom.fields.SFMatrix4f.lookAt(from, at, up);
-
-			viewArea._scene.getViewpoint().setView(tmpMat.inverse());
-
-			viewer.runtime.triggerRedraw();
+				viewArea._scene.getViewpoint().setView(tmpMat.inverse());
+				viewer.runtime.triggerRedraw();
+			}
 		}
 
 		self.nextTick();
