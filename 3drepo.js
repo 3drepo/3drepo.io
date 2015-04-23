@@ -20,7 +20,8 @@ var express = require('express'),
 	vhost = require('vhost'),
 	path = require('path'),
 	cors = require('cors'),
-	fs = require('fs');
+	fs = require('fs'),
+	constants = require('constants');
 
 var log_iface = require('./js/core/logger.js');
 var logger = log_iface.logger;
@@ -36,7 +37,12 @@ if ('ssl' in config) {
 	var ssl_options = {
 		key: fs.readFileSync(config.ssl.key, 'utf8'),
 		cert: fs.readFileSync(config.ssl.cert, 'utf8'),
-		ca: fs.readFileSync(config.ssl.ca, 'utf8')
+		ca: fs.readFileSync(config.ssl.ca, 'utf8'),
+		ciphers: 'ECDHE-ECDSA-AES128-GCM-SHA256|ECDHE-ECDSA-AES256-SHA:!RC4:!aNULL',
+		//ciphers: 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:!aNULL:!eNULL:!EXPORT:!DSS:!DES:!RC4:!3DES:!MD5:!PS:!SSLv3',
+		honorCipherOrder: true,
+		ecdhCurve: 'secp384r1',
+		secureOptions: constants.SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION|constants.SSL_OP_NO_SSLv2|constants.SSL_OP_NO_SSLv3
 	};
 
 	var http_app = express();
@@ -55,13 +61,9 @@ if (!config.vhost)
 	if (!config.apiServer.external)
 	{
 		if ('ssl' in config)
-		{
 			var apiServer = https.createServer(ssl_options, apiApp);
-			config.apiServer.port = config.apiServer.https_ports;
-		} else {
+		else
 			var apiServer = http.createServer(apiApp);
-			config.apiServer.port = config.apiServer.http_port;
-		}
 	}
 
 	for(i in config.servers)
@@ -69,16 +71,17 @@ if (!config.vhost)
 		var frontApp = require('./frontend.js').createApp(config.servers[i].template);
 
 		if ('ssl' in config)
-		{
 			var frontServer = https.createServer(ssl_options, frontApp);
-			config.servers[i].port = config.servers[i].https_port;
-		} else {
+		else
 			var frontServer = http.createServer(frontApp);
-			config.servers[i].port = config.servers[i].http_port;
-		}
 
-		frontServer.listen(config.servers[i].port, config.servers[i].hostname, function() {
-			logger.log('info', 'Starting web service on ' + config.servers[i].hostname + ' port ' + config.servers[i].port);
+		var serverPort = config.servers[i].port;
+		var serverHost = config.servers[i].hostname;
+
+		console.log(serverPort);
+
+		frontServer.listen(serverPort, serverHost, function() {
+			logger.log('info', 'Starting web service on ' + serverHost + ' port ' + serverPort);
 		});
 	}
 
