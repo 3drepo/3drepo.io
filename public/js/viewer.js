@@ -41,14 +41,25 @@ var Viewer = function(id) {
 	this.viewPoint.setAttribute('def', id + '_current');
 	this.scene.appendChild(this.viewPoint);
 
-	this.bground = document.createElement('background');
-	this.bground.setAttribute('DEF', id + '_bground');
-	this.bground.setAttribute('skyangle', '0.9 1.5 1.57');
-	this.bground.setAttribute('skycolor', '0.21 0.18 0.66 0.2 0.44 0.85 0.51 0.81 0.95 0.83 0.93 1');
-	this.bground.setAttribute('groundangle', '0.9 1.5 1.57');
-	this.bground.setAttribute('groundcolor', '0.65 0.65 0.65 0.73 0.73 0.73 0.81 0.81 0.81 0.91 0.91 0.91');
-	this.bground.textContent = ' ';
-	this.scene.appendChild(this.bground);
+	this.bground = null;
+
+	this.createBackground = function() {
+		if (this.bground)
+			this.bground.parentNode.removeChild(this.bground);
+
+		this.bground = document.createElement('background');
+
+		this.bground.setAttribute('DEF', id + '_bground');
+		this.bground.setAttribute('skyangle', '0.9 1.5 1.57');
+		this.bground.setAttribute('skycolor', '0.21 0.18 0.66 0.2 0.44 0.85 0.51 0.81 0.95 0.83 0.93 1');
+		this.bground.setAttribute('groundangle', '0.9 1.5 1.57');
+		this.bground.setAttribute('groundcolor', '0.65 0.65 0.65 0.73 0.73 0.73 0.81 0.81 0.81 0.91 0.91 0.91');
+		this.bground.textContent = ' ';
+
+		this.scene.appendChild(this.bground);
+	}
+
+	this.createBackground();
 
 	this.environ = document.createElement('environment');
 	this.environ.setAttribute('frustumCulling', 'true');
@@ -87,6 +98,10 @@ var Viewer = function(id) {
 
 	this.switchDebug = function () {
 		this.getViewArea()._visDbgBuf = !this.getViewArea()._visDbgBuf;
+	}
+
+	this.showStats = function () {
+		viewer.viewer.runtime.canvas.stateViewer.display();
 	}
 
 	this.initRuntime = function () {

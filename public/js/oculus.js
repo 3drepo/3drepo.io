@@ -84,30 +84,8 @@ var Oculus = function() {
 			leftScene.setAttribute('containerfield', 'scene');
 			leftTex.appendChild(leftScene);
 
-			var leftShader = document.createElement('composedshader');
-			leftApp.appendChild(leftShader);
-
-			var leftTexField = document.createElement('field');
-			leftTexField.setAttribute('name', 'tex');
-			leftTexField.setAttribute('id', 'leftTex');
-			leftTexField.setAttribute('type', 'SFInt32');
-			leftTexField.setAttribute('value', '0');
-			leftShader.appendChild(leftTexField);
-
-			var leftVertexShader = document.createElement('shaderpart');
-			leftVertexShader.setAttribute('type', 'VERTEX');
-			leftVertexShader.setAttribute('url', '/public/shader/oculus_left.vert');
-			leftShader.appendChild(leftVertexShader);
-
-			var leftFragShader = document.createElement('shaderpart');
-			leftFragShader.setAttribute('def', 'frag');
-			leftFragShader.setAttribute('type', 'FRAGMENT');
-			leftFragShader.setAttribute('url', '/public/shader/oculus.frag');
-			leftShader.appendChild(leftFragShader);
-
 			var leftPlane = document.createElement('plane');
 			leftPlane.setAttribute('solid', 'false');
-			//leftPlane.setAttribute('invisible', 'true');
 			leftShape.appendChild(leftPlane);
 
 			// Right eye
@@ -135,9 +113,7 @@ var Oculus = function() {
 
 			var rightPlane = document.createElement('plane');
 			rightPlane.setAttribute('solid', 'false');
-			//rightPlane.setAttribute('invisible', 'true');
 			rightShape.appendChild(rightPlane);
-
 
 			var rightVP = document.createElement('viewpoint');
 			rightVP.setAttribute('use', 'viewer_current');
@@ -156,26 +132,6 @@ var Oculus = function() {
 			rightScene.setAttribute('containerfield', 'scene');
 			rightScene.textContent = ' ';
 			rightTex.appendChild(rightScene);
-
-			var rightShader = document.createElement('composedshader');
-			rightApp.appendChild(rightShader);
-
-			var rightTexField = document.createElement('field');
-			rightTexField.setAttribute('id', 'rightTex');
-			rightTexField.setAttribute('name', 'tex');
-			rightTexField.setAttribute('type', 'SFInt32');
-			rightTexField.setAttribute('value', '0');
-			rightShader.appendChild(rightTexField);
-
-			var rightVertexShader = document.createElement('shaderpart');
-			rightVertexShader.setAttribute('type', 'VERTEX');
-			rightVertexShader.setAttribute('url', '/public/shader/oculus_right.vert');
-			rightShader.appendChild(rightVertexShader);
-
-			var rightFragShader = document.createElement('shaderpart');
-			rightFragShader.setAttribute('type', 'FRAGMENT');
-			rightFragShader.setAttribute('use', 'frag');
-			rightShader.appendChild(rightFragShader);
 
 			scene.appendChild(eyeGroup);
 
@@ -214,7 +170,11 @@ var Oculus = function() {
 			viewer.runtime.enterFrame = function () {};
 			viewer.runtime.exitFrame = function () {};
 
+			viewer.getViewArea().skipSceneRender = null;
+
 			viewer.switchFullScreen();
+
+			viewer.createBackground();
 		}
 	}
 
@@ -226,6 +186,8 @@ var Oculus = function() {
 		self.lastH		= viewer.runtime.getHeight();
 
 		self.viewpoint	= viewer.viewpoint;
+
+		viewer.getViewArea().skipSceneRender = true;
 
 		viewer.runtime.enterFrame = function () {
 			if (!self.vrSensor)
@@ -242,8 +204,14 @@ var Oculus = function() {
 
 		viewer.runtime.exitFrame = function ()
 		{
-			var w = viewer.runtime.getWidth() * 2;
-			var h = viewer.runtime.getHeight() * 2;
+			var w = viewer.runtime.getWidth();
+			var h = viewer.runtime.getHeight();
+
+			viewer.runtime.canvas.doc.ctx.stateManager.viewport(0,0,w / 2,h);
+			viewer.viewer.runtime.canvas.doc._scene._fgnd._webgl.render(viewer.viewer.runtime.canvas.doc.ctx.ctx3d, self.rtLeft._x3domNode._webgl.fbo.tex);
+
+			viewer.runtime.canvas.doc.ctx.stateManager.viewport(w / 2,0,w / 2,h);
+			viewer.viewer.runtime.canvas.doc._scene._fgnd._webgl.render(viewer.viewer.runtime.canvas.doc.ctx.ctx3d, self.rtRight._x3domNode._webgl.fbo.tex);
 
 			if (w != self.lastW || h != self.lastH)
 			{
