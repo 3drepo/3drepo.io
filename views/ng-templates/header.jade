@@ -15,11 +15,10 @@ header#header.navbar.navbar-fixed-top(ng-controller='HeaderCtrl')
 					.form-group.tight#loginButtons
 						button.btn
 							i.fa.fa-search
-						button.btn
-							i.fa.fa-user(ng-hide='!Auth.loggedIn', ng-click="goDefault()")
-						button.btn
-							i.fa.fa-sign-out(ng-hide='!Auth.loggedIn', ng-click="logOut()")
-
+						button.btn(ng-hide='!Auth.loggedIn', ng-click="goDefault()")
+							i.fa.fa-user
+						button.btn(ng-hide='!Auth.loggedIn', ng-click="logOut()")
+							i.fa.fa-sign-out
 						// button.v-expand.btn.btn-success.pull-left(ng-hide='loggedIn', ng-click="loginPage()") Login
 						// button.v-expand.btn.btn-success.pull-left(ng-hide='loggedIn', ng-click="signupPage()") Sign Up
 				//form.pull-right.tight.v-expand(role='search')
