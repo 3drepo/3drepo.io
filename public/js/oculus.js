@@ -195,11 +195,15 @@ var Oculus = function() {
 
 			var state	= self.vrSensor.getState();
 			var h		= state.orientation;
-			var q		= new x3dom.fields.Quaternion(h.x, h.y, h.z, h.w);
 
-			var flyMat	= viewer.viewPoint._x3domNode._viewMatrix.inverse();
-			flyMat.setRotate(q);
-			viewer.viewPoint._x3domNode.setView(flyMat.inverse());
+			if (h)
+			{
+				var q		= new x3dom.fields.Quaternion(h.x, h.y, h.z, h.w);
+
+				var flyMat	= viewer.viewPoint._x3domNode._viewMatrix.inverse();
+				flyMat.setRotate(q);
+				viewer.viewPoint._x3domNode.setView(flyMat.inverse());
+			}
 		};
 
 		viewer.runtime.exitFrame = function ()
