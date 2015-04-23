@@ -47,7 +47,7 @@ module.exports.createApp = function(template)
 			params['config_js'] += '\nserver_config.demoproject = "' + config.wayfinder.demoproject + '";';
 		}
 
-		params['config_js'] += '\n\nvar realOpen = XMLHttpRequest.prototype.open;\n\nXMLHttpRequest.prototype.open = function(method, url, async, unk1, unk2) {\nthis.withCredentials = true;\nrealOpen.apply(this, arguments);\n};';
+		params['config_js'] += '\n\nvar realOpen = XMLHttpRequest.prototype.open;\n\nXMLHttpRequest.prototype.open = function(method, url, async, unk1, unk2) {\n if(async) this.withCredentials = true;\nrealOpen.apply(this, arguments);\n};';
 
 		res.header('Content-Type', 'text/javascript');
 		res.render('config.jade', params);
