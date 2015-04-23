@@ -21,7 +21,7 @@ var Collision = function() {
 	this._deltaT = 0.1;
 
 	this.deltaX = 0.0;
-	this.deltaZ = 0.0;
+	this.deltaY = 0.0;
 
 	this.ticking = false;
 
@@ -43,21 +43,15 @@ var Collision = function() {
 		if(!self.stopped)
 		{
 			var currViewMat = viewer.getViewMatrix();
-			var xRotRad = 0;
-			var yRotRad = Math.asin(currViewMat._02);
-			//var C = Math.cos(yRotRad);
 
-			/*
-			if (Math.abs(C) > 0.0001) {
-				yRotRad = Math.atan2(-currViewMat._12 / C, currViewMat._22 / C);
-			}
-			*/
-
-			self.deltaX = (userX * Math.cos(yRotRad) - userY * Math.sin(yRotRad));
-			self.deltaZ = (userX * Math.sin(yRotRad) + userY * Math.cos(yRotRad));
+			self.userX = -userX;
+			self.userY = -userY;
 
 			if(!self.ticking)
 				self.tick();
+		} else {
+			self.userX = 0;
+			self.userY = 0;
 		}
 	}
 
@@ -76,6 +70,14 @@ var Collision = function() {
 		var from = flyMat.e3();
 
 		var tmpFlatAt = flyMat.e3();
+
+		var viewDir = currViewMat.inverse().e2().multiply(-1);
+
+		var viewX = viewDir.x;
+		var viewZ = viewDir.z;
+
+		self.deltaX = self.userX * viewZ + self.userY * viewX;
+		self.deltaZ = -self.userX * viewX + self.userY * viewZ;
 
 		tmpFlatAt.x += self.deltaX;
 		tmpFlatAt.z += self.deltaZ;
