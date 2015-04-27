@@ -39,6 +39,16 @@ var Waypoint = function() {
 
 	this.hasStarted			= false;
 
+	this.readmeFloat		= null;
+
+	this.showReadme = function() {
+		this.readmeFloat = document.createElement('div');
+		this.readmeFloat.setAttribute('name', 'readme');
+		this.readmeFloat.className = 'container float';
+
+
+	}
+
 	this.updateSettings = function(settings) {
 		if('wayfinder' in settings)
 		{
@@ -56,6 +66,9 @@ var Waypoint = function() {
 
 			if ('blobTransparency' in settings['wayfinder'])
 				self.blobTransparency = settings['wayfinder']['blobTransparency'];
+
+			if ('speed' in settings['wayfinder'])
+				viewer.setSpeed(settings['wayfinder']['speed']);
 		}
 	}
 
@@ -72,7 +85,7 @@ var Waypoint = function() {
 		self.initialized = false;
 
 		// TODO: Should waypoint be accessing the internals
-		viewer.nav.setAttribute('type', 'WALK');
+		viewer.nav.setAttribute('type', 'NONE');
 	}
 
 	this.checkFinished = function(event, objEvent) {
@@ -100,21 +113,25 @@ var Waypoint = function() {
 		{
 			var startDist = viewer.evDist(objEvent, self.startpoints[self.selectedStartPoint]);
 
-			console.log("DIST: " + startDist);
-			console.log(self.blobRadius + viewer.avatarHeight);
-
 			if (startDist < (self.blobRadius + viewer.avatarHeight)) {
 				viewer.displayMessage("Started", [0,1,0], 2000);
-
+				self.recorder.startRecording();
 				self.hasStarted = true;
 			}
 		}
 	}
 
+	this.begin = function() {
+		self.initialized = true;
+		viewer.displayMessage('Step on pad to begin', [0, 255, 0], 2000);
+		// TODO: Should waypoint be accessing the internals
+		viewer.nav.setAttribute('type', 'WALK');
+	}
+
 	this.checkInit = function(event, objEvent) {
 		// Potentially flying through the air after reset,
 		// so need to check when we get back to the start.
-		if (!self.initialized)
+		if (!self.initialized && !self.paused)
 		{
 			var currentStartPoint	= self.startpoints[self.selectedStartPoint].slice(0);
 
@@ -124,8 +141,7 @@ var Waypoint = function() {
 			var initDist = viewer.evDist(objEvent, currentStartPoint);
 
 			if (initDist < (self.blobRadius + viewer.avatarHeight)) {
-				self.initialized = true;
-				viewer.displayMessage('Step on pad to begin', [0, 255, 0], 2000);
+				this.begin();
 			}
 		}
 	}
@@ -147,11 +163,8 @@ var Waypoint = function() {
 	}
 
 	this.clear = function() {
-		if (self.initialized)
-		{
-			self.spheres.clearSpheres();
-			self.arrow.clearArrow();
-		}
+		self.spheres.clearSpheres();
+		self.arrow.clearArrow();
 	}
 
 	this.setNavMode = function(mode) {
@@ -165,8 +178,14 @@ var Waypoint = function() {
 			self.initViewingMode();
 		} else if (mode == 'FLYTHROUGH') {
 			self.initFlyThroughMode();
+		} else if (mode == 'NONE') {
+			self.close();
 		}
 	}
+
+	this.paused = true;
+	this.pause = function() { self.paused = true; }
+	this.unpause = function() { self.paused = false; }
 
 	this.init = function() {
 		self.setNavMode('RECORD');
@@ -175,6 +194,10 @@ var Waypoint = function() {
 	this.close = function() {
 		self.clear();
 		viewer.enableClicking();
+
+		self.recorder.stopRecording(true);
+		self.hasStarted = false;
+		self.initialized = false;
 
 		$(document).off("onViewpointChange", self.checkStarted);
 		$(document).off("onViewpointChange", self.checkFinished);

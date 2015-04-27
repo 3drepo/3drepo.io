@@ -211,11 +211,22 @@ exports.storeWayfinderInfo = function(dbName, project, username, sessionID, data
 			timestamp: timestamp
 		};
 
-		data.user      = username;
-		data.session   = sessionID;
-		data.timestamp = timestamp;
+		var dataObj = {};
+		dataObj.user      = username;
+		dataObj.session   = sessionID;
+		dataObj.timestamp = timestamp;
 
-		coll.update(uniqueID, { $set : data }, {upsert: true}, function(err, count) {
+		for(var idx = 0; idx < data["waypoints"].length; idx++)
+		{
+			var waypointIdx = data["waypoints"][idx]["idx"];
+
+			dataObj[waypointIdx]			= {};
+			dataObj[waypointIdx]["dir"]		= data["waypoints"][idx]["dir"];
+			dataObj[waypointIdx]["pos"]		= data["waypoints"][idx]["pos"];
+			dataObj[waypointIdx]["time"]	= data["waypoints"][idx]["time"];
+		}
+
+		coll.update(uniqueID, { $set : dataObj }, {upsert: true}, function(err, count) {
 			if (err)
 				callback(responseCodes.DB_ERROR(err));
 

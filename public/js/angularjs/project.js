@@ -259,5 +259,70 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	$scope.Data = Data;
 
 	$window.viewer.enableClicking();
+
+	$scope.showReadme = false;
+	$scope.showMultiSelect = false;
+	$scope.showSingleSelect = false;
+
+	// TODO: Move all of this stuff to a ToolsCtrl
+	$scope.okReadme = function () {
+		$scope.showReadme = false;
+		$window.waypoint.unpause();
+		$window.waypoint.begin();
+	}
+
+	$scope.goWayfinder = function() {
+		$window.viewer.setNavMode("WAYFINDER");
+		$scope.setWaypointMode("RECORD");
+	}
+
+	$scope.setViewerMode = function(mode) {
+		$window.viewer.setNavMode(mode);
+
+		if(mode == 'WAYFINDER')
+			$scope.setWaypointMode("RECORD");
+		else
+			$scope.setWaypointMode("NONE");
+	}
+
+	$scope.showAll = function() {
+		$scope.setWaypointMode("NONE");
+		$window.viewer.showAll();
+	}
+
+	$scope.reset = function() {
+		$scope.setWaypointMode("NONE");
+		$window.viewer.reset();
+	}
+
+	$scope.flyThrough = function() {
+		$scope.setWaypointMode("NONE");
+		$window.viewer.flyThrough(viewer.viewpoints);
+	}
+
+	$scope.setCurrentViewpoint = function(idx)
+	{
+		$scope.setWaypointMode("NONE");
+		$window.viewer.setCurrentViewpoint(idx);
+	}
+
+	$scope.setWaypointMode = function(mode) {
+		$scope.showReadme = false;
+		$scope.showMultiSelect = false;
+		$scope.showSingleSelect = false;
+
+		if (mode == 'RECORD')
+		{
+			$window.waypoint.pause();
+			$scope.showReadme = true;
+		} else if (mode == 'VIEWING') {
+			$scope.showMultiSelect = true;
+		} else if (mode == 'FLYTHROUGH') {
+			$scope.showSingleSelect = true;
+		}
+
+		$window.waypoint.setNavMode(mode);
+	}
+
 }]);
 

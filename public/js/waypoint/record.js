@@ -18,8 +18,8 @@
 var Recorder = function(startPoint, endPoint, distance) {
 	var self = this;
 
-	this.buffer1 = {};
-	this.buffer2 = {};
+	this.buffer1 = [];
+	this.buffer2 = [];
 	this.bufferlimit = 10;
 
 	this.isRecording = false;
@@ -30,24 +30,24 @@ var Recorder = function(startPoint, endPoint, distance) {
 	this.recording = this.buffer1;
 
 	this.timestamp = 0;
+	this.second    = 0;
 
 	this.sendRecording = function()
 	{
-		if(this.recording == this.buffer1)
-		{
-			this.recording	= this.buffer2;
-			var data_str	= JSON.stringify(this.buffer1);
-			this.buffer1	= {};
-		} else {
-			this.recording	= this.buffer1;
-			var data_str	= JSON.stringify(this.buffer2);
-			this.buffer2	= {};
-		}
+		var data_str	= JSON.stringify({"waypoints" : self.recording.slice(0)});
 
+		if(self.recording == self.buffer1)
+		{
+			self.recording	= self.buffer2;
+			self.buffer1	= [];
+		} else {
+			self.recording	= self.buffer1;
+			self.buffer2	= [];
+		}
 		$.ajax({
 			type: "POST",
 			url:  server_config.apiUrl("wayfinder/record"),
-			data: {"data" : data_str, "timestamp" : this.timestamp},
+			data: {"data" : data_str, "timestamp" : self.timestamp},
 			dataType: "json",
 			xhrFields: {
 				withCredentials: true
@@ -60,22 +60,27 @@ var Recorder = function(startPoint, endPoint, distance) {
 
 	this.recordViewpoint = function()
 	{
-		if(this.isRecording)
+		if(self.isRecording)
 		{
 			var viewDirPos = viewer.getViewDirPos();
 			var viewDir = viewDirPos["viewDir"];
 			var viewPos = viewDirPos["viewPos"];
 
-			this.recording[this.second] = {};
-			this.recording[this.second]["dir"] = [viewDir.x, viewDir.y, viewDir.z];
-			this.recording[this.second]["pos"] = [viewPos.x, viewPos.y, viewPos.z];
+			var tmpObj = {};
+			tmpObj["idx"]	= self.second;
+			tmpObj["dir"]	= [viewDir.x, viewDir.y, viewDir.z];
+			tmpObj["pos"]	= [viewPos.x, viewPos.y, viewPos.z];
+			tmpObj["time"]	= new Date().getTime() / 1000;
 
-			this.second += 1;
+			self.recording.push(tmpObj);
+			self.second += 1;
+
+			console.log('BLIP' + self.second);
 		}
 
-		if(Object.keys(this.recording).length >= this.bufferLimit)
+		if(self.recording.length > self.bufferlimit)
 		{
-			this.sendRecording();
+			self.sendRecording();
 		}
 	}
 
@@ -86,19 +91,24 @@ var Recorder = function(startPoint, endPoint, distance) {
 		self.timestamp		= new Date().getTime() / 1000;
 		self.timeFunction	= setInterval(self.recordViewpoint, 1000);
 		self.isRecording	= true;
-		self.timestamp		= 0;
+		self.second			= 0;
 	}
 
-	this.stopRecording = function()
+	this.stopRecording = function(dontSend)
 	{
+		dontSend = typeof dontSend !== 'undefined' ? dontSend : false;
+
 		if(self.isRecording)
 		{
 			if(self.timeFunction) {
-				clearInterval(self.timeFunction);
+				window.clearInterval(self.timeFunction);
 				self.timeFunction = null;
 			}
 
-			self.sendRecording();
+			if (!dontSend)
+				self.sendRecording();
+
+			self.isRecording = false;
 		}
 	}
 }

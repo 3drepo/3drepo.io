@@ -57,6 +57,8 @@ var responseCodes = {
 
 	ERROR_RENDERING_OBJECT:	 {value : 22, message: "Error rendering object", status: 500},
 
+	MISSING_SCHEMA: { value: 23, message: 'Trying to process request with missing schema', status: 500 },
+
 	DB_ERROR: function(mongoErr) {
 		return {
 			value: 1000,
@@ -71,10 +73,19 @@ var responseCodes = {
 			message: JSON.stringify(message),
 			status: 500
 		};
-	}
+	},
+
+	VALIDATION_ERROR: function(validErrors) {
+		return {
+			value: 3000,
+			message: JSON.stringify(validErrors),
+			status: 422
+		};
+	},
+
 };
 
-var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 22, 1000, 2000];
+var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 22, 23, 1000, 2000, 3000];
 
 responseCodes.respond = function(place, resCode, res, extraInfo)
 {

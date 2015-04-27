@@ -1501,3 +1501,18 @@ ul.fancytree-container li {
     min-width: 100px;
 }
 
+.readme-text {
+	padding: 10px;
+	min-height: 93px;
+}
+
+.readme {
+	opacity: 0.9;
+	margin-top:30%;
+	position: absolute;
+	min-width: 100px;
+	min-height: 100px;
+	z-index: 100;
+}
+
+

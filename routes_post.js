@@ -23,6 +23,7 @@ var schemaValidator = require('./js/core/db_schema.js')();
 var log_iface = require('./js/core/logger.js');
 var logger = log_iface.logger;
 var responseCodes = require('./js/core/response_codes.js');
+var config = require('./js/core/config.js');
 
 function createSession(place, res, req, username)
 {
@@ -54,6 +55,7 @@ module.exports = function(router, dbInterface, checkAccess){
 			logger.log('debug', 'Attempting to log user ' + req.body.username);
 
 			if(err.value) {
+				console.log("MESSAGE: " + err.message);
 				responseCodes.respond(responsePlace, err, res, {account: req.body.username});
 			} else {
 				if(user)
@@ -126,12 +128,16 @@ module.exports = function(router, dbInterface, checkAccess){
 	});
 
 	// Update or create a user's account
-	this.post('/:account/:project', false, function(req, res) {
-	});
+	//this.post('/:account/:project', false, function(req, res) {
+	//});
 
-	this.post('/wayfinder/record.:format?', true, function(req, res) {
+	this.post('/wayfinder/record', false, function(req, res) {
 		var resCode = responseCodes.OK;
 		var responsePlace = 'Wayfinder record POST';
+
+		logger.log('debug', 'Posting wayfinder record information');
+
+		console.log(JSON.stringify(req.session));
 
 		if (!("user" in req.session)) {
 			responseCodes.respond('Wayfinder record POST', responseCodes.NOT_LOGGED_IN, res, {});
@@ -153,10 +159,15 @@ module.exports = function(router, dbInterface, checkAccess){
 
 		console.log('debug', 'Adding POST call for ' + item['regex']);
 
+		var resFunction = schemaValidator.validate(item.regex);
+
+		console.log("REGEX: " + item.regex);
+		console.log("RESFUNCTION: " + resFunction.toString());
+
 		if (item.shouldCheckAccess)
-			router.post(item.regex, schemaValidator.validate(item.regex), checkAccess, item.callback);
+			router.post(item.regex.toString(), resFunction, checkAccess, item.callback);
 		else
-			router.post(item.regex, schemaValidator.validate(item.regex), item.callback);
+			router.post(item.regex, resFunction, item.callback);
 	}
 
 	return this;

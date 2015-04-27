@@ -19,6 +19,7 @@ var Validator = require('jsonschema').Validator;
 var v = new Validator();
 var log_iface = require('./logger.js');
 var logger = log_iface.logger;
+var responseCodes = require('./response_codes.js');
 
 module.exports = function() {
 
@@ -29,7 +30,7 @@ module.exports = function() {
 		logger.log('debug', 'Registering POST schema for ' + regex);
 
 		var schemaObj = {
-			"id" :  regex,
+			"id": regex,
 			"type": "object",
 			"properties" : schema
 		};
@@ -38,7 +39,7 @@ module.exports = function() {
 	};
 
 	this.registerSchema('/login',
-		{	
+		{
 			"username": {"type" : "string"},
 			"password": {"type" : "string"}
 		}
@@ -47,12 +48,42 @@ module.exports = function() {
 	this.registerSchema('/logout', {} );
 
 	this.registerSchema('/:account',
-		{	
+		{
 			"username":  {"type": "string"},
 			"email":     {"type": "string"},
 			"password":  {"type": "string"}
 		}
 	);
+
+	this.registerSchema('/wayfinder/record',
+		{
+			"waypoints" : {
+				"type" : "array",
+				"items" : { "$ref" : "/WaypointRecord" }
+			}
+		}
+	);
+
+	this.customTypes = [
+		{ // Waypoint recording entry
+			"id" : "/WaypointRecord",
+			"type": "object",
+			"properties" : {
+				"dir" : {
+					"type" : "array",
+					"items" : { "type" : "number" }
+				},
+				"pos" : {
+					"type" : "array",
+					"items" : { "type" : "number" }
+				},
+				"time": {"type": "number"}
+			}
+		}
+	];
+
+	for(var idx = 0; idx < this.customTypes.length; idx++)
+		v.addSchema(this.customTypes[idx], this.customTypes[idx]["id"]);
 
 	// Expose the validate function
 	this.validate = function(regex)
@@ -61,16 +92,14 @@ module.exports = function() {
 		{
 			logger.log('error', 'Schema not defined for regex :' + regex);
 			return function (req, res, next) {
-				return res.sendStatus(500); // Internal server error - missing schema
+				responseCodes.respond( 'Schema validation', responseCodes.MISSING_SCHEMA, res, { "regex" : regex });
 			};
 		} else {
-			logger.log('error', 'Checking input against ' + regex + ' schema.');
-
 			return function(req, res, next) {
 				var validateObj = v.validate(req.body, this.schemas[regex]);
 
 				if (validateObj.errors.length)
-					return res.sendStatus(422); // Unprocessable Entity
+					responseCodes.respond('Schema validation', responseCodes.VALIDATION_ERROR(validateObj.errors), res, {} );
 				else
 					next();
 			};
