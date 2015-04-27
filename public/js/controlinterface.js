@@ -51,20 +51,3 @@ function runtimeReady() {
 
 x3dom.runtime.ready = runtimeReady;
 
-(function() {
-	window.scale = 1;
-	window.speed = 2.0 * window.scale;
-
-	//$('#viewer')[0].setAttribute('keysEnabled', 'false');
-	//$('#viewer')[0].setAttribute('disableDoubleClick', 'true');
-})();
-
-/*
-document.onload = function () {
-//	viewerLoaded();
-	var thisViewArea = thisDoc._viewarea;
-	thisViewArea._disableMove = false;
-};
-*/
-
-

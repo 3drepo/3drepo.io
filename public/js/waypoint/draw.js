@@ -61,6 +61,8 @@ var Spheres = function() {
 
 		shape.appendChild(cone);
 
+		this.spheres.push(transform);
+
 		return transform;
 	}
 
@@ -94,6 +96,8 @@ var Spheres = function() {
 		sphere.setAttribute('solid', false);
 		shape.appendChild(sphere);
 
+		this.spheres.push(transform);
+
 		console.log("Adding sphere @ " + posStr);
 
 		return transform;
@@ -122,8 +126,11 @@ var Spheres = function() {
 	{
 		for(var i = 0; i < this.spheres.length; i++)
 		{
-			this.spheres[i].parentNode.removeChild(this.spheres[i]);
+			if (this.spheres[i])
+				this.spheres[i].parentNode.removeChild(this.spheres[i]);
 		}
+
+		this.spheres = [];
 	}
 
 	this.plotSpheres = function(dataJson)
@@ -149,8 +156,7 @@ var Spheres = function() {
 				} else {
 					var newRGB = this.getSpeedRGB(baseRGB, numWait);
 					numWait = 0;
-					//this.addSphere(newPos, 0.2, 1.0, newRGB, 0.3);
-					this.spheres.push(this.addViewDir(newPos, newDir, 0.2, newRGB, 0.3));
+					this.addSphere(newPos, 0.2, 1.0, newRGB, 0.3);
 				}
 
 				oldPos = newPos.slice(0);
@@ -210,8 +216,6 @@ var Text = function() {
 
 		fs.setAttribute('family', 'Times');
 		fs.setAttribute('size', '0.8');
-
-
 	}
 
 	this.updateText = function(str, rgb, aliveFor)
@@ -243,60 +247,69 @@ var Arrow = function() {
 	this.rgb			= null;
 	this.trans			= null;
 
+	var self = this;
+
 	this.addArrow = function(position, rgb, trans)
 	{
-		if(this.arrowElement)
+		self.clearArrow();
+
+		self.arrowElement = document.createElement('inline');
+		viewer.scene.appendChild(self.arrowElement);
+
+		self.arrowElement.setAttribute('namespacename', 'arrow');
+		self.arrowElement.setAttribute('url', '/public/arrow.x3d');
+		self.arrowElement.onload = self.startAnimation;
+		//self.arrowElement.setAttribute('onload', self.startAnimation());
+		self.arrowElement.setAttribute('isPickable', 'false');
+
+		self.position	= position;
+		self.rgb		= rgb;
+		self.trans		= trans;
+	}
+
+	this.clearArrow = function() {
+		if(self.arrowElement && self.arrowElement.parentNode)
 		{
-			this.arrowElement.parentNode.removeChild(this.arrowElement);
-			this.arrowElement = null;
+			self.arrowElement.parentNode.removeChild(self.arrowElement);
+			self.arrowElement = null;
 		}
-
-		this.arrowElement = document.createElement('inline');
-		viewer.scene.appendChild(this.arrowElement);
-
-		this.arrowElement.setAttribute('namespacename', 'arrow');
-		this.arrowElement.setAttribute('url', '/public/arrow.x3d');
-		this.arrowElement.setAttribute('onload', 'arrow.startAnimation()');
-		this.arrowElement.setAttribute('isPickable', 'false');
-
-		this.position	= position;
-		this.rgb		= rgb;
-		this.trans		= trans;
-
 	}
 
 	this.startAnimation = function()
 	{
-			var pos = this.position.slice(0);
+			var pos = self.position.slice(0);
 			var minBox = $("#arrow__ArrowRot")[0]._x3domNode.getVolume().min;
+			pos[1] -= minBox.y;
 
-			//pos[0] -= minBox.z;
-			//pos[1] -= minBox.y;
-			//pos[2] -= minBox.x;
+			var centerBox = $("#arrow__ArrowRot")[0]._x3domNode.getVolume().center;
+			pos[0] -= centerBox.x;
+			pos[2] -= centerBox.z;
 
 			var peakPos = pos.slice(0);
 			peakPos[1] += 3;
 
 			var posStr = pos.join(" ");
 			var peakStr = peakPos.join(" ");
-			var rgbStr = this.rgb.join(" ");
+			var rgbStr = self.rgb.join(" ");
 
 			var ts = document.createElement('timeSensor');
+			ts.setAttribute('DEF', 'ArrowTime');
 			ts.setAttribute('cycleInterval', 2);
 			ts.setAttribute('loop', 'true');
 
 			var pi = document.createElement('PositionInterpolator');
+			pi.setAttribute('DEF', 'ArrowPI');
 			pi.setAttribute('key', '0 0.5 1');
 			pi.setAttribute('keyValue', posStr + " " + peakStr + " " + posStr);
 
 			var timeRT = document.createElement('Route');
-			timeRT.setAttribute('fromNode', 'time');
+			timeRT.setAttribute('fromNode', 'ArrowTime');
 			timeRT.setAttribute('fromField', 'fraction_changed');
-			timeRT.setAttribute('toNode', 'move');
+			timeRT.setAttribute('toNode', 'ArrowPI');
 			timeRT.setAttribute('toField', 'set_fraction');
 
 			var moveRT = document.createElement('Route');
-			moveRT.setAttribute('fromNode', 'move');
+			moveRT.setAttribute('fromNode', 'ArrowPI');
 			moveRT.setAttribute('fromField', 'value_changed');
 			moveRT.setAttribute('toNode', 'ArrowTrans');
 			moveRT.setAttribute('toField', 'translation');
@@ -309,7 +322,7 @@ var Arrow = function() {
 			var color = document.createElement('appearance');
 			var colormat = document.createElement('Material');
 			colormat.setAttribute('diffuseColor', rgbStr);
-			colormat.setAttribute('transparency', this.trans);
+			colormat.setAttribute('transparency', self.trans);
 
 			color.appendChild(colormat);
 			$('#arrow__Arrow').append(color);

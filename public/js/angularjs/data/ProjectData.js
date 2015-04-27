@@ -39,6 +39,9 @@ angular.module('3drepo')
 		EXECUTE_BIT:	1
 	};
 
+	o.loading = false;
+	o.loadingPromise = $q.defer();
+
 	o.refresh = function(account, project) {
 		var self = this;
 
@@ -51,7 +54,8 @@ angular.module('3drepo')
 		self.project = project;
 
 		self.selected = null;
-		self.loading  = true;
+
+		self.settings = null;
 
 		self.publicPerm		= {read: false, write: false, execute: false};
 		self.userPerm		= {read: false, write: false, execute: false};
@@ -59,48 +63,50 @@ angular.module('3drepo')
 
 		self.visibility = 'private';
 
-		var deferred = $q.defer();
+		if(!self.loading)
+		{
+			self.loading  = true;
 
-		$http.get(serverConfig.apiUrl(account + '/' + project + '.json')).success(function(json, status) {
-			self.name				= project;
-			self.owner				= json.owner;
-			self.description		= json.desc;
-			self.type				= json.type;
-			self.selected			= self.projectTypes[0];
+			$http.get(serverConfig.apiUrl(account + '/' + project + '.json')).success(function(json, status) {
+				self.name				= project;
+				self.owner				= json.owner;
+				self.description		= json.desc;
+				self.type				= json.type;
+				self.selected			= self.projectTypes[0];
 
-			for(var i = 0; i < self.projectTypes.length; i++)
-			{
-				if (self.projectTypes[i].label.toLowerCase() == self.type.toLowerCase())
+				for(var i = 0; i < self.projectTypes.length; i++)
 				{
-					self.selected = self.projectTypes[i];
-					break;
+					if (self.projectTypes[i].label.toLowerCase() == self.type.toLowerCase())
+					{
+						self.selected = self.projectTypes[i];
+						break;
+					}
 				}
-			}
 
-			// Public permissions
-			self.publicPerm.read = (json.permissions[self.roleIndex["PUBLIC"]] & self.bitMasks["READ_BIT"]) > 0;
-			self.publicPerm.write = (json.permissions[self.roleIndex["PUBLIC"]] & self.bitMasks["WRITE_BIT"]) > 0;
-			self.publicPerm.execute = (json.permissions[self.roleIndex["PUBLIC"]] & self.bitMasks["EXECUTE_BIT"]) > 0;
+				// Public permissions
+				self.publicPerm.read = (json.permissions[self.roleIndex["PUBLIC"]] & self.bitMasks["READ_BIT"]) > 0;
+				self.publicPerm.write = (json.permissions[self.roleIndex["PUBLIC"]] & self.bitMasks["WRITE_BIT"]) > 0;
+				self.publicPerm.execute = (json.permissions[self.roleIndex["PUBLIC"]] & self.bitMasks["EXECUTE_BIT"]) > 0;
 
-			// User permissions
-			self.userPerm.read = (json.permissions[self.roleIndex["USER"]] & self.bitMasks["READ_BIT"]) > 0;
-			self.userPerm.write = (json.permissions[self.roleIndex["USER"]] & self.bitMasks["WRITE_BIT"]) > 0;
-			self.userPerm.execute = (json.permissions[self.roleIndex["USER"]] & self.bitMasks["EXECUTE_BIT"]) > 0;
+				// User permissions
+				self.userPerm.read = (json.permissions[self.roleIndex["USER"]] & self.bitMasks["READ_BIT"]) > 0;
+				self.userPerm.write = (json.permissions[self.roleIndex["USER"]] & self.bitMasks["WRITE_BIT"]) > 0;
+				self.userPerm.execute = (json.permissions[self.roleIndex["USER"]] & self.bitMasks["EXECUTE_BIT"]) > 0;
 
-			// Owner permissions
-			self.ownerPerm.read = (json.permissions[self.roleIndex["OWNER"]] & self.bitMasks["READ_BIT"]) > 0;
-			self.ownerPerm.write = (json.permissions[self.roleIndex["OWNER"]] & self.bitMasks["WRITE_BIT"]) > 0;
-			self.ownerPerm.execute = (json.permissions[self.roleIndex["OWNER"]] & self.bitMasks["EXECUTE_BIT"]) > 0;
+				// Owner permissions
+				self.ownerPerm.read = (json.permissions[self.roleIndex["OWNER"]] & self.bitMasks["READ_BIT"]) > 0;
+				self.ownerPerm.write = (json.permissions[self.roleIndex["OWNER"]] & self.bitMasks["WRITE_BIT"]) > 0;
+				self.ownerPerm.execute = (json.permissions[self.roleIndex["OWNER"]] & self.bitMasks["EXECUTE_BIT"]) > 0;
 
-			self.loading = false;
+				self.loading = false;
 
-			// Update viewer - disgusting
-			viewer.updateSettings(json.properties);
+				self.settings = json.properties;
 
-			deferred.resolve();
-		});
+				self.loadingPromise.resolve();
+			});
+		}
 
-		return deferred.promise;
+		return self.loadingPromise.promise;
 	};
 
 	o.updateInfo = function()

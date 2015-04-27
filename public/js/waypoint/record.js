@@ -16,6 +16,8 @@
  **/
 
 var Recorder = function(startPoint, endPoint, distance) {
+	var self = this;
+
 	this.buffer1 = {};
 	this.buffer2 = {};
 	this.bufferlimit = 10;
@@ -60,9 +62,9 @@ var Recorder = function(startPoint, endPoint, distance) {
 	{
 		if(this.isRecording)
 		{
-			var transMatrix = x3dom.canvases[0].doc._viewarea._scene.getViewpoint()._viewMatrix.inverse();
-			var viewDir = transMatrix.e2().multiply(-1);
-			var viewPos = transMatrix.e3();
+			var viewDirPos = viewer.getViewDirPos();
+			var viewDir = viewDirPos["viewDir"];
+			var viewPos = viewDirPos["viewPos"];
 
 			this.recording[this.second] = {};
 			this.recording[this.second]["dir"] = [viewDir.x, viewDir.y, viewDir.z];
@@ -81,60 +83,23 @@ var Recorder = function(startPoint, endPoint, distance) {
 
 	this.startRecording = function()
 	{
-		this.timestamp = new Date().getTime() / 1000;
-		this.timeFunction	= setInterval(this.recordViewpoint, 1000);
-		this.isRecording	= true;
-		this.timestamp		= 0;
+		self.timestamp		= new Date().getTime() / 1000;
+		self.timeFunction	= setInterval(self.recordViewpoint, 1000);
+		self.isRecording	= true;
+		self.timestamp		= 0;
 	}
 
-	this.stopRecoring = function()
+	this.stopRecording = function()
 	{
-		if(this.isRecording)
+		if(self.isRecording)
 		{
-			if(this.timeFunction) {
-				clearInterval(this.timeFunction);
-				this.timeFunction = null;
+			if(self.timeFunction) {
+				clearInterval(self.timeFunction);
+				self.timeFunction = null;
 			}
 
-			this.sendRecording();
+			self.sendRecording();
 		}
 	}
 }
-
-$(document).on("onViewpointChange", function(event, objEvent) {
-	if (recorder)
-	{
-		if (recorder.isRecording)
-		{
-			//objEvent.position.y += viewer.avatarHeight;
-
-			var endDist = viewer.evDist(objEvent, recorder.endPoint);
-
-			if (endDist < recorder.distance)
-			{
-				text.updateText("Finished", [1, 0, 0], 2000);
-				recorder.stopRecording();
-				viewer.setNavMode("NONE");
-				setTimeout( function() {
-					location.reload();
-				}, 3000);
-			}
-		}
-
-		if (!recorder.isRecording)
-		{
-			//objEvent.position.y += viewer.avatarHeight;
-
-
-			var startDist = viewer.evDist(objEvent, recorder.startPoint);
-
-			if (startDist < recorder.distance)
-			{
-				text.updateText("Started", [0,1,0], 2000);
-				recorder.startRecording();
-			}
-		}
-	}
-});
-
 

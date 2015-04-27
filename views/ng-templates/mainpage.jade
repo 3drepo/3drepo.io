@@ -68,9 +68,73 @@
 			#oculus-mode-icon
 				a.dashboard-tab(onclick="viewer.switchVR()")
 					img.img-responsive(src="/public/images/oculus_sm.png")
-
-
-
+			#tools-menu-icon
+				.dropup
+					i.fa.fa-wrench(role="button", data-toggle='dropdown', data-target='#')
+					ul.dropdown-menu.pull-right(role='menu').tools-menu-items
+						li Navigation
+						li.divider
+						li
+							a(ng-click='viewer.setNavMode("WALK")') 
+								i.fa.fa-check(ng-show="viewer.currentNavMode == 'WALK'") 
+								span Walk
+						li
+							a(ng-click='viewer.setNavMode("EXAMINE")') 
+								i.fa.fa-check(ng-show="viewer.currentNavMode == 'EXAMINE'") 
+								span Examine
+						li
+							a(ng-click='viewer.setNavMode("FLY")') 
+								i.fa.fa-check(ng-show="viewer.currentNavMode == 'FLY'") 
+								span Fly
+						li
+							a(ng-click='viewer.setNavMode("TURNTABLE")') 
+								i.fa.fa-check(ng-show="viewer.currentNavMode == 'TURNTABLE'")
+								span Turntable
+						li
+							a(ng-click='viewer.setNavMode("HELICOPTER")') 
+								i.fa.fa-check(ng-show="viewer.currentNavMode == 'HELICOPTER'")
+								span Helicopter
+						li
+							a(ng-click='viewer.setNavMode("WAYFINDER")') 
+								i.fa.fa-check(ng-show="viewer.currentNavMode == 'WAYFINDER'")
+								span Wayfinder
+						li.divider
+						li Viewpoints
+						li.divider
+						li
+							a(ng-click='viewer.showAll()')
+								span Show All
+						li
+							a(ng-click='viewer.reset()')
+								span Go To Viewpoint
+						li
+							a(ng-click='viewer.flyThrough(viewer.viewpoints)')
+								i.fa.fa-power-off(ng-show="viewer.isFlyingThrough")
+								span Fly Through
+						li.divider
+						div(ng-repeat="viewpoint in viewer.viewpoints track by viewpoint.name")
+							li
+								a(ng-click='viewer.setCurrentViewpoint(viewpoint.idx)')
+									i.fa.fa-check(ng-show="viewer.selectedViewpoint == viewpoint.idx")
+									span {{viewpoint.name}}
+						li.divider
+						div(ng-show="viewer.currentNavMode == 'WAYFINDER'")
+							li Wayfinder
+							li.divider
+							li
+								a(ng-click="waypoint.setNavMode('RECORD')")
+									i.fa.fa-check(ng-show="waypoint.currentNavMode == 'RECORD'")
+									span Record Mode
+							li
+								a(ng-click="waypoint.setNavMode('VIEWING')")
+									i.fa.fa-check(ng-show="waypoint.currentNavMode == 'VIEWING'")
+									span Viewing
+							li
+								a(ng-click="waypoint.setNavMode('FLYTHROUGH')")
+									i.fa.fa-check(ng-show="waypoint.currentNavMode == 'FLYTHROUGH'")
+									span Fly Through
+				button.btn(ng-hide='!Auth.loggedIn', ng-click="logOut()")
+					i.fa.fa-sign-out
 
 	#bottom-panel.row.mainrow.collapsed
 		div(ui-view="footer")

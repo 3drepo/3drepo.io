@@ -238,6 +238,17 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 	$window.viewer = new Viewer();
 	$window.viewer.loadURL(serverConfig.apiUrl(account + '/' + project + '/revision/master/head.x3d.src'));
+
+	$scope.settings = Data.ProjectData.settings;
+
+	$window.waypoint = new Waypoint();
+	$scope.waypoint = $window.waypoint;
+
+	Data.ProjectData.loadingPromise.promise.then(function() {
+		$window.viewer.updateSettings(Data.ProjectData.settings);
+		$window.waypoint.updateSettings(Data.ProjectData.settings);
+	});
+
 	initTree(account, project, 'master', null);
 
 	$window.gamepad = new Gamepad();

@@ -42,6 +42,7 @@ var Viewer = function(id) {
 	this.scene.appendChild(this.viewPoint);
 
 	this.bground = null;
+	this.currentNavMode = null;
 
 	this.createBackground = function() {
 		if (this.bground)
@@ -108,6 +109,7 @@ var Viewer = function(id) {
 		self.runtime = this;
 
 		self.showAll = function() {
+			self.setNavMode("TURNTABLE");
 			self.runtime.fitAll();
 		}
 
@@ -120,13 +122,11 @@ var Viewer = function(id) {
 			var targetParent = $(objEvent.target)[0]._x3domNode._nameSpace.doc._x3dElem;
 
 			if(targetParent == self.viewer)
-			{
 				self.setDiffColors(null);
-			}
 
-			$("#model__mapPosition")[0].parentNode._x3domNode._graph.needCulling = false;
-
-			self.setNavMode("TURNTABLE");
+			// TODO: Clean this up.
+			if ($("#model__mapPosition")[0])
+				$("#model__mapPosition")[0].parentNode._x3domNode._graph.needCulling = false;
 		});
 	};
 
@@ -141,16 +141,6 @@ var Viewer = function(id) {
 	this.getProjectionMatrix = function()
 	{
 		return this.getViewArea().getProjectionMatrix();
-	}
-
-	if(window.oculus)
-	{
-		this.viewer.addEventListener("keypress", function(e) {
-			if (e.charCode == 'o'.charCodeAt(0))
-			{
-				self.switchVR();
-			}
-		});
 	}
 
 	this.viewer.addEventListener("keypress", function(e) {
@@ -247,6 +237,96 @@ var Viewer = function(id) {
 
 	x3dom.runtime.ready = this.initRuntime;
 
+	this.viewpoints = [];
+	this.selectedViewpoint = 0;
+
+	this.isFlyingThrough = false;
+	this.flyThroughTime = 1000;
+
+	this.flyThrough = function()
+	{
+		if (!self.isFlyingThrough)
+		{
+			self.isFlyingThrough = true;
+			setTimeout(self.flyThroughTick, self.flyThroughTime);
+		} else {
+			self.isFlyingThrough = false;
+		}
+	}
+
+	this.flyThroughTick = function()
+	{
+		var newViewpoint = self.selectedViewpoint + 1;
+
+		if (newViewpoint == self.viewpoints.length)
+			newViewpoint = 0;
+
+		self.setCurrentViewpoint(newViewpoint);
+
+		if (self.isFlyingThrough)
+			setTimeout(self.flyThroughTick, self.flyThroughTime);
+	}
+
+	this.parseViewpoints = function(settings)
+	{
+		// Always have origin
+		var tmpView = {};
+		tmpView["idx"] = 0;
+		tmpView["name"] = "Origin";
+		tmpView["position"] = [0.0, 0.0, 0.0];
+		tmpView["direction"] = [0.0, 0.0, -1.0];
+
+		self.viewpoints.push(tmpView);
+
+		for(var i = 0; i < settings['viewpoints'].length; i++)
+		{
+			var tmpView = {};
+			var currentViewpoint = settings['viewpoints'][i];
+
+			tmpView["idx"] = i + 1;
+			if ("name" in currentViewpoint)
+				tmpView["name"] = currentViewpoint["name"];
+			else
+				tmpView["name"] = "Viewpoint " + (self.viewpoints.length + 1);
+
+			if ("position" in currentViewpoint)
+				tmpView["position"] = currentViewpoint["position"];
+			else
+				tmpView["position"] = [0.0,0.0,0.0];
+
+			if ("direction" in currentViewpoint)
+				tmpView["direction"] = currentViewpoint["direction"];
+			else
+				tmpView["direction"] = [0.0, 0.0, -1.0];
+
+			self.viewpoints.push(tmpView);
+		}
+	}
+
+	this.setCurrentViewpoint = function(idx)
+	{
+		if (idx < self.viewpoints.length)
+		{
+			self.selectedViewpoint = idx;
+
+			var currentViewpoint = self.viewpoints[idx];
+
+			self.setStartingPoint(
+				currentViewpoint["position"][0],
+				currentViewpoint["position"][1],
+				currentViewpoint["position"][2]
+			);
+
+			self.setStartingOrientation(
+				currentViewpoint["direction"][0],
+				currentViewpoint["direction"][1],
+				currentViewpoint["direction"][2]
+			);
+
+			self.reset();
+		}
+	}
+
 	this.updateSettings = function(settings)
 	{
 		if (settings)
@@ -265,29 +345,7 @@ var Viewer = function(id) {
 				self.nav.setAttribute('visibilityLimit', settings['visibilityLimit']);
 
 			if ('viewpoints' in settings)
-			{
-				if(settings['viewpoints'].length > 0)
-				{
-					var currentViewpoint = settings["viewpoints"][0];
-
-					if("position" in currentViewpoint)
-					{
-						self.setStartingPoint(
-							currentViewpoint["position"][0],
-							currentViewpoint["position"][1],
-							currentViewpoint["position"][2]
-						);
-					}
-					if("direction" in currentViewpoint)
-					{
-						self.setStartingOrientation(
-							currentViewpoint["direction"][0],
-							currentViewpoint["direction"][1],
-							currentViewpoint["direction"][2]
-						);
-					}
-				}
-			}
+				this.parseViewpoints(settings);
 		}
 	}
 
@@ -381,8 +439,50 @@ var Viewer = function(id) {
 		return crossVec.x + " " + crossVec.y + " " + crossVec.z + " " + Math.acos(dot);
 	}
 
+	this.rotQuat = function(from, to)
+	{
+		var vecFrom = new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
+		var vecTo   = new x3dom.fields.SFVec3f(to[0], to[1], to[2]);
+
+		var dot = vecFrom.dot(vecTo);
+
+		var crossVec = vecFrom.cross(vecTo);
+		var qt = new x3dom.fields.Quaternion(crossVec.x, crossVec.y, crossVec.z, 1);
+
+		qt.w = vecFrom.length() * vecTo.length() + dot;
+
+		return qt.normalize(qt);
+	}
+
 	this.setNavMode = function(mode) {
+		if (this.currentNavMode != mode)
+		{
+			// If the navigation mode has changed
+
+			if (mode == 'WAYFINDER') // If we are entering wayfinder navigation
+				waypoint.init();
+
+			if (self.currentNavMode == 'WAYFINDER') // Exiting the wayfinding mode
+				waypoint.close();
+		}
+		if((this.currentNavMode == 'WAYFINDER') && (mode != 'WAYFINDER'))
+		{
+			waypoint.close();
+		}
+
+		this.currentNavMode = mode;
 		this.nav.setAttribute('type', mode);
+
+		if (mode == 'WALK')
+		{
+			this.disableClicking();
+			this.setApp(null);
+		} else {
+			this.enableClicking();
+		}
+
+		if ((mode == 'WAYFINDER') && waypoint)
+			waypoint.resetViewer();
 	}
 
 	this.reload = function() {
@@ -492,6 +592,28 @@ var Viewer = function(id) {
 		this.changeStepHeight(this.stepHeight);
 	}
 
+	this.messageBox = document.createElement('div');
+	this.messageBox.setAttribute('id', 'viewerMessageBox');
+	this.messageBox.style["display"] = "none";
+	this.messageBox.setAttribute('visible', 'false');
+	this.messageBoxMessage = document.createElement('p');
+	this.messageBoxMessage.innerHTML = "";
+	this.messageBox.appendChild(this.messageBoxMessage);
+	this.viewer.appendChild(this.messageBox);
+
+	this.displayMessage = function(text, textColor, timeout) {
+		self.messageBoxMessage.innerHTML = text;
+		self.messageBox.style["display"] = "";
+
+		// Construct RGBA string
+		var rgbstr = "RGB(" + textColor[0] + ", " + textColor[1] + ", " + textColor[2] + ")";
+		self.messageBoxMessage.style["text-color"] = rgbstr;
+
+		setTimeout( function() {
+			self.messageBox.style["display"] = "none";
+		}, timeout);
+	}
+
 	this.loadURL = function(url)
 	{
 		if(this.inline)
@@ -515,6 +637,15 @@ var Viewer = function(id) {
 		return viewer.viewPoint._x3domNode._viewMatrix.inverse();
 		var viewDir = transMatrix.e2();
 		var viewPos = transMatrix.e3();
+	}
+
+	this.getViewDirPos = function()
+	{
+		var transMatrix = self.getViewMatrix().inverse();
+		var viewDir = transMatrix.e2().multiply(-1);
+		var viewPos = transMatrix.e3();
+
+		return { "viewPos" : viewPos, "viewDir" : viewDir };
 	}
 
 	this.speed = 5.0;
@@ -620,34 +751,37 @@ var Viewer = function(id) {
 		if(diffColors)
 			this.diffColors = diffColors;
 
-		if (this.inline.childNodes.length)
+		if (this.diffColors)
 		{
-			var defMapSearch = this.inline.childNodes[0]._x3domNode._nameSpace.defMap;
-
-			if(this.diffColors["added"])
+			if (this.inline.childNodes.length)
 			{
-				for(var i = 0; i < this.diffColors["added"].length; i++)
+				var defMapSearch = this.inline.childNodes[0]._x3domNode._nameSpace.defMap;
+
+				if(this.diffColors["added"])
 				{
-					// TODO: Improve, with graph, to use appearance under  _cf rather than DOM.
-					var obj = defMapSearch[this.diffColors["added"][i]];
-					if(obj)
+					for(var i = 0; i < this.diffColors["added"].length; i++)
 					{
-						var mat = $(obj._xmlNode).find("TwoSidedMaterial");
-						this.applyApp(mat, 0.5, "0.0 1.0 0.0", false);
+						// TODO: Improve, with graph, to use appearance under  _cf rather than DOM.
+						var obj = defMapSearch[this.diffColors["added"][i]];
+						if(obj)
+						{
+							var mat = $(obj._xmlNode).find("TwoSidedMaterial");
+							this.applyApp(mat, 0.5, "0.0 1.0 0.0", false);
+						}
 					}
 				}
-			}
 
-			if(this.diffColors["deleted"])
-			{
-				for(var i = 0; i < this.diffColors["deleted"].length; i++)
+				if(this.diffColors["deleted"])
 				{
-					// TODO: Improve, with graph, to use appearance under  _cf rather than DOM.
-					var obj = defMapSearch[this.diffColors["deleted"][i]];
-					if(obj)
+					for(var i = 0; i < this.diffColors["deleted"].length; i++)
 					{
-						var mat = $(obj._xmlNode).find("TwoSidedMaterial");
-						this.applyApp(mat, 0.5, "1.0 0.0 0.0", false);
+						// TODO: Improve, with graph, to use appearance under  _cf rather than DOM.
+						var obj = defMapSearch[this.diffColors["deleted"][i]];
+						if(obj)
+						{
+							var mat = $(obj._xmlNode).find("TwoSidedMaterial");
+							this.applyApp(mat, 0.5, "1.0 0.0 0.0", false);
+						}
 					}
 				}
 			}
