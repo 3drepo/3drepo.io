@@ -75,7 +75,7 @@ var Gamepad = function() {
 			self.gamepad = navigator.getGamepads()[0];
 
 		if(!this.gamepad)
-			viewer.setNavMode('TURNTABLE'); // Manually override navigation
+			viewerManager.getDefaultViewer().setNavMode('TURNTABLE'); // Manually override navigation
 		else
 			self.checkStatus();
 

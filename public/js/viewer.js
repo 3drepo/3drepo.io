@@ -15,20 +15,89 @@
  **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-var Viewer = function(id) {
+var Viewer = function(id, x3ddiv, manager) {
 	var self = this;
 
 	if(!id)
-		id = 'viewer';
+		this.id = 'viewer';
+	else
+		this.id = id;
 
-	// Create the viewer here
-	var x3ddiv = $('#x3d')[0];
+	// If not given the tag by the manager
+	// create here
+	if (!x3ddiv)
+		x3ddiv = $('#x3d')[0];
+
+	this.initRuntime = function () {
+		self.runtime = this;
+
+		self.showAll = function() {
+			self.setNavMode("TURNTABLE");
+			self.runtime.fitAll();
+		}
+
+		$(document).on("onLoaded", function(event, objEvent) {
+			if(self.defaultShowAll)
+				self.runtime.fitAll();
+			else
+				self.reset();
+
+			var targetParent = $(objEvent.target)[0]._x3domNode._nameSpace.doc._x3dElem;
+
+			if(targetParent == self.viewer)
+				self.setDiffColors(null);
+
+			// TODO: Clean this up.
+			if ($("#model__mapPosition")[0])
+				$("#model__mapPosition")[0].parentNode._x3domNode._graph.needCulling = false;
+		});
+	};
+
+	this.manager = null;
+
+	// If we have a viewer manager then it
+	// will take care of initializing the runtime
+	// else we'll do it ourselves
+	if(manager) {
+		manager.registerInitRuntime(this.id);
+		this.manager = manager;
+	} else {
+		x3dom.runtime.ready = this.initRuntime;
+	}
+
+	if (this.manager) {
+		this.displayMessage = this.manager.displayMessage;
+	} else {
+		this.displayMessage = function(text, textColor, timeout)
+		{
+			//TODO: Should we replicate the displayMessage stuff here ?
+		}
+	}
+
+	this.displayMessage = function(text, textColor, timeout) {
+		self.messageBoxMessage.innerHTML = text;
+		self.messageBox.style["display"] = "";
+
+		// Construct RGBA string
+		var rgbstr = "RGB(" + textColor[0] + ", " + textColor[1] + ", " + textColor[2] + ")";
+		self.messageBoxMessage.style["text-color"] = rgbstr;
+
+		setTimeout( function() {
+			self.messageBox.style["display"] = "none";
+		}, timeout);
+	}
+
 
 	this.viewer = document.createElement('x3d');
-	this.viewer.setAttribute('id', id);
+	this.viewer.setAttribute('id', this.id);
 	this.viewer.setAttribute('xmlns', 'http://www.web3d.org/specification/x3d-namespace');
 	this.viewer.setAttribute('keysEnabled', false);
 	this.viewer.className = 'viewer';
+
+	this.close = function() {
+		this.viewer.parentNode.removeChild(this.viewer);
+		this.viewer = null;
+	}
 
 	x3ddiv.appendChild(this.viewer);
 
@@ -104,31 +173,6 @@ var Viewer = function(id) {
 	this.showStats = function () {
 		viewer.viewer.runtime.canvas.stateViewer.display();
 	}
-
-	this.initRuntime = function () {
-		self.runtime = this;
-
-		self.showAll = function() {
-			self.setNavMode("TURNTABLE");
-			self.runtime.fitAll();
-		}
-
-		$(document).on("onLoaded", function(event, objEvent) {
-			if(self.defaultShowAll)
-				self.runtime.fitAll();
-			else
-				self.reset();
-
-			var targetParent = $(objEvent.target)[0]._x3domNode._nameSpace.doc._x3dElem;
-
-			if(targetParent == self.viewer)
-				self.setDiffColors(null);
-
-			// TODO: Clean this up.
-			if ($("#model__mapPosition")[0])
-				$("#model__mapPosition")[0].parentNode._x3domNode._graph.needCulling = false;
-		});
-	};
 
 	this.getViewArea = function() {
 		return viewer.scene._x3domNode._nameSpace.doc._viewarea;
@@ -234,8 +278,6 @@ var Viewer = function(id) {
 			}
 		});
 	}
-
-	x3dom.runtime.ready = this.initRuntime;
 
 	this.viewpoints = [];
 	this.selectedViewpoint = 0;
@@ -549,6 +591,12 @@ var Viewer = function(id) {
 
 		this.viewPoint.addEventListener('viewpointChanged', onViewpointChange, false);
 
+		if (this.manager) // If we are attached to a view manager, I am master.
+		{
+			this.viewPoint.addEventListener('viewpointChanged', this.manager.viewpointLinkFunction);
+			this.manager.switchMaster(this.id);
+		}
+
 		setTimeout(function(oldViewPoint){
 			oldViewPoint.parentNode.removeChild(oldViewPoint);
 		}, 0, oldViewPoint); // Remove old viewpoint, once everything is done.
@@ -590,28 +638,6 @@ var Viewer = function(id) {
 		this.changeCollisionDistance(this.collDistance);
 		this.changeAvatarHeight(this.avatarHeight);
 		this.changeStepHeight(this.stepHeight);
-	}
-
-	this.messageBox = document.createElement('div');
-	this.messageBox.setAttribute('id', 'viewerMessageBox');
-	this.messageBox.style["display"] = "none";
-	this.messageBox.setAttribute('visible', 'false');
-	this.messageBoxMessage = document.createElement('p');
-	this.messageBoxMessage.innerHTML = "";
-	this.messageBox.appendChild(this.messageBoxMessage);
-	this.viewer.appendChild(this.messageBox);
-
-	this.displayMessage = function(text, textColor, timeout) {
-		self.messageBoxMessage.innerHTML = text;
-		self.messageBox.style["display"] = "";
-
-		// Construct RGBA string
-		var rgbstr = "RGB(" + textColor[0] + ", " + textColor[1] + ", " + textColor[2] + ")";
-		self.messageBoxMessage.style["text-color"] = rgbstr;
-
-		setTimeout( function() {
-			self.messageBox.style["display"] = "none";
-		}, timeout);
 	}
 
 	this.loadURL = function(url)
@@ -719,34 +745,6 @@ var Viewer = function(id) {
 			window.oculus.switchVR(this);
 	};
 
-	this.linkViewpoints = function(otherView) {
-
-		this.viewPoint.addEventListener('viewpointChanged', function (event) {
-			var newPos = event.position.x + "," + event.position.y + "," + event.position.z;
-			var newOrient = event.orientation[0].x + "," + event.orientation[0].y + "," + event.orientation[0].z
-				+ "," + event.orientation[1];
-
-			// TODO: Consider using DEF/USE instead (although across namespaces)
-			otherView.viewPoint.setAttribute("position", newPos);
-			otherView.viewPoint.setAttribute("orientation", newOrient);
-
-			//otherView.setNavMode("NONE");
-		});
-	};
-
-	this.diffView = function() {
-		this.viewer.style.width = "50%";
-		window.otherView = new Viewer('diffView');
-		otherView.viewer.style.left = "50%";
-		otherView.viewer.style.width = "50%";
-		otherView.loadURL(this.url);
-
-		this.linkViewpoints(otherView);
-		this.setNavMode("TURNTABLE");
-		otherView.setNavMode("NONE");
-		//otherView.linkViewpoints(this);
-	};
-
 	this.setDiffColors = function(diffColors) {
 		if(diffColors)
 			this.diffColors = diffColors;
@@ -787,8 +785,6 @@ var Viewer = function(id) {
 			}
 		}
 	};
-
-	this.setNavMode('TURNTABLE'); // TODO: Shouldn't be here
 };
 
 

@@ -20,7 +20,6 @@ angular.module('3drepo')
 
 	$scope.Data = Data;
 	$scope.view = Data.view;
-	$scope.possible_views = ["info", "comments", "revisions", "log", "settings", "cobie"];
 	$scope.viewer = $window.viewer;
 
 	$scope.pageChanged = function() {
@@ -59,30 +58,6 @@ angular.module('3drepo')
 		$("#ui2-metadata").toggleClass("collapsed");
 	}
 
-	// TODO: Move somewhere else
-	$scope.checkViewIsValid = function(){
-		if( $scope.possible_views.indexOf(Data.view) == -1 ){
-			$state.go("404");
-		}
-	}
-
-	$scope.setRevision = function(rev) {
-		var o = {
-			branch: Data.branch,
-			rid:	rev.name,
-			view:	$scope.view
-		};
-
-		$window.viewer.loadURL(serverConfig.apiUrl(Data.account + '/' + Data.project + '/revision/' + rev.name + '.x3d.src'))
-
-		refreshTree(account, project, Data.branch, rev.name);
-
-		$state.go('main.revision.view', o);
-	}
-
-	$scope.checkViewIsValid();
-
 	$scope.pageChanged();
-
 }]);
 

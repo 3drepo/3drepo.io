@@ -15,8 +15,10 @@
  **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-var Waypoint = function() {
+var Waypoint = function(viewer) {
 	var self = this;
+
+	this.viewer = viewer;
 
 	this.recorder	= new Recorder();
 	this.spheres	= new Spheres();
@@ -45,8 +47,6 @@ var Waypoint = function() {
 		this.readmeFloat = document.createElement('div');
 		this.readmeFloat.setAttribute('name', 'readme');
 		this.readmeFloat.className = 'container float';
-
-
 	}
 
 	this.updateSettings = function(settings) {
@@ -68,7 +68,7 @@ var Waypoint = function() {
 				self.blobTransparency = settings['wayfinder']['blobTransparency'];
 
 			if ('speed' in settings['wayfinder'])
-				viewer.setSpeed(settings['wayfinder']['speed']);
+				self.viewer.setSpeed(settings['wayfinder']['speed']);
 		}
 	}
 
@@ -76,31 +76,31 @@ var Waypoint = function() {
 		// TODO: In here, we should initialize the random starting position
 		var currentStartPoint	= self.startpoints[self.selectedStartPoint].slice(0);
 
-		currentStartPoint[1] += viewer.avatarHeight;
+		currentStartPoint[1] += self.viewer.avatarHeight;
 		currentStartPoint[2] += 10.0; // TODO: Should be smarter than this
 
-		viewer.setCameraPosition(currentStartPoint[0], currentStartPoint[1], currentStartPoint[2]);
-		viewer.disableClicking();
+		self.viewer.setCameraPosition(currentStartPoint[0], currentStartPoint[1], currentStartPoint[2]);
+		self.viewer.disableClicking();
 		self.hasStarted = false;
 		self.initialized = false;
 
 		// TODO: Should waypoint be accessing the internals
-		viewer.nav.setAttribute('type', 'NONE');
+		self.viewer.nav.setAttribute('type', 'NONE');
 	}
 
 	this.checkFinished = function(event, objEvent) {
 		if(self.hasStarted && self.initialized)
 		{
-			objEvent.position.y -= viewer.avatarHeight;
+			objEvent.position.y -= self.viewer.avatarHeight;
 
-			var endDist = viewer.evDist(objEvent, self.endpoints[self.selectedEndPoint]);
+			var endDist = self.viewer.evDist(objEvent, self.endpoints[self.selectedEndPoint]);
 
-			if (endDist < (self.blobRadius + viewer.avatarHeight))
+			if (endDist < (self.blobRadius + self.viewer.avatarHeight))
 			{
-				viewer.displayMessage("Finished", [1, 0, 0], 2000);
+				self.viewer.displayMessage("Finished", [1, 0, 0], 2000);
 
 				self.recorder.stopRecording();
-				viewer.nav.setAttribute('type','NONE');
+				self.viewer.nav.setAttribute('type','NONE');
 				setTimeout( function() { self.initRecordMode(); }, 3000);
 
 				self.hasStarted = false;
@@ -111,10 +111,10 @@ var Waypoint = function() {
 	this.checkStarted = function(event, objEvent) {
 		if(!self.hasStarted && self.initialized)
 		{
-			var startDist = viewer.evDist(objEvent, self.startpoints[self.selectedStartPoint]);
+			var startDist = self.viewer.evDist(objEvent, self.startpoints[self.selectedStartPoint]);
 
-			if (startDist < (self.blobRadius + viewer.avatarHeight)) {
-				viewer.displayMessage("Started", [0,1,0], 2000);
+			if (startDist < (self.blobRadius + self.viewer.avatarHeight)) {
+				self.viewer.displayMessage("Started", [0,1,0], 2000);
 				self.recorder.startRecording();
 				self.hasStarted = true;
 			}
@@ -123,9 +123,9 @@ var Waypoint = function() {
 
 	this.begin = function() {
 		self.initialized = true;
-		viewer.displayMessage('Step on pad to begin', [0, 255, 0], 2000);
+		self.viewer.displayMessage('Step on pad to begin', [0, 255, 0], 2000);
 		// TODO: Should waypoint be accessing the internals
-		viewer.nav.setAttribute('type', 'WALK');
+		self.viewer.nav.setAttribute('type', 'WALK');
 	}
 
 	this.checkInit = function(event, objEvent) {
@@ -135,12 +135,12 @@ var Waypoint = function() {
 		{
 			var currentStartPoint	= self.startpoints[self.selectedStartPoint].slice(0);
 
-			currentStartPoint[1] += viewer.avatarHeight;
+			currentStartPoint[1] += self.viewer.avatarHeight;
 			currentStartPoint[2] += 10.0; // TODO: Should be smarter than this
 
-			var initDist = viewer.evDist(objEvent, currentStartPoint);
+			var initDist = self.viewer.evDist(objEvent, currentStartPoint);
 
-			if (initDist < (self.blobRadius + viewer.avatarHeight)) {
+			if (initDist < (self.blobRadius + self.viewer.avatarHeight)) {
 				this.begin();
 			}
 		}
@@ -154,12 +154,16 @@ var Waypoint = function() {
 		self.spheres.addSphere(currentEndPoint, self.blobRadius, self.blobHeight, [1, 0, 0], self.blobTransparency);
 		self.arrow.addArrow(currentEndPoint, [1, 0, 0], 0.3);
 
-		viewer.getViewArea()._mouseSensitivity = 360.0;
+		self.viewer.getViewArea()._mouseSensitivity = 360.0;
 		self.resetViewer();
 
 		$(document).on("onViewpointChange", self.checkStarted);
 		$(document).on("onViewpointChange", self.checkFinished);
 		$(document).on("onViewpointChange", self.checkInit);
+	}
+
+	this.initViewingMode = function(uids) {
+		debugger;
 	}
 
 	this.clear = function() {
@@ -175,7 +179,7 @@ var Waypoint = function() {
 		if (mode == 'RECORD') {
 			self.initRecordMode();
 		} else if (mode == 'VIEWING') {
-			self.initViewingMode();
+			//self.initViewingMode();
 		} else if (mode == 'FLYTHROUGH') {
 			self.initFlyThroughMode();
 		} else if (mode == 'NONE') {
@@ -193,7 +197,7 @@ var Waypoint = function() {
 
 	this.close = function() {
 		self.clear();
-		viewer.enableClicking();
+		self.viewer.enableClicking();
 
 		self.recorder.stopRecording(true);
 		self.hasStarted = false;

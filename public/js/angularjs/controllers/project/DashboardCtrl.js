@@ -16,19 +16,20 @@
  */
 
 angular.module('3drepo')
-.controller('DashboardCtrl', ['$scope', 'account', 'Data', '$state', function($scope, account, Data, $state){
-	$scope.account = account;
+.controller('DashboardCtrl', ['$scope', 'Data', '$state', function($scope, Data, $state){
 	$scope.defaultView = "projects";
 	$scope.view = $scope.defaultView;
 	$scope.Data = Data;
+	$scope.account = Data.state.account;
 
 	$scope.setView = function(view){
 		$scope.view = view;
 	}
 
 	$scope.goProject = function(account, project){
-		var o = { account: account, project: project };
-		$state.go("main", o);
+		Data.setStateVar("account", account);
+		Data.setStateVar("project", project);
+		Data.updateState();
 	}
 
 	$scope.isView = function(view){

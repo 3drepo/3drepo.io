@@ -572,11 +572,11 @@ exports.getRevisionInfo = function(dbName, project, rid, callback) {
 
 		rev = {};
 
-		rev.name    = uuidToString(doc["_id"]); // TODO: Input real name
-		rev.author  = ("author" in doc) ? doc.author : "unnamed";
-		rev.message = ("message" in doc) ? doc.message : "";
-		rev.tag     = ("tag" in doc) ? doc.tag : "";
-		rev.branch  = uuidToString(doc["shared_id"]);
+		rev.revision	= uuidToString(doc["_id"]); // TODO: Input real name
+		rev.author		= ("author" in doc) ? doc.author : "unnamed";
+		rev.message		= ("message" in doc) ? doc.message : "";
+		rev.tag			= ("tag" in doc) ? doc.tag : "";
+		rev.branch		= uuidToString(doc["shared_id"]);
 
 		if ("timestamp" in doc)
 		{
@@ -598,6 +598,9 @@ exports.getReadme = function(dbName, project, rid, callback) {
 
 	dbConn.filterColl(dbName, project + '.history', historyQuery, null, function(err, doc)
 	{
+		if(!doc[0])
+			return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+
 		var query = {
 			type:    "meta",
 			subtype: "readme",

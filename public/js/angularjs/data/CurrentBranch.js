@@ -17,15 +17,15 @@
 
 angular.module('3drepo')
 .factory('CurrentBranch', ['$http', '$q', 'serverConfig', function($http, $q, serverConfig){
-	var o = {};
+	var o = {
+		name:			"",
+		revisions:		[],
+		n_revisions:	0
+	};
 
 	o.refresh = function(account, project, branch) {
 		var self = this;
 		var deferred = $q.defer();
-
-		self.name = "";
-		self.revisions = [];
-		self.n_revisions = 0;
 
 		$http.get(serverConfig.apiUrl(account + '/' + project + '/revisions/' + branch + '.json'))
 		.then(function(json) {

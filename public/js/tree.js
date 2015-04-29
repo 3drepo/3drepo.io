@@ -41,6 +41,8 @@ var TreeControl = function() {
 	};
 
 	this.clickedFromView = false;
+
+	this.loading = false;
 };
 
 $(document).on("bgroundClicked", function(event) {
@@ -82,13 +84,12 @@ function treeURL(account, project, branch, revision, sid, depth)
 {
 	var newURL = "";
 
-	if (branch && !revision)
+	if (revision && (revision != 'head'))
 	{
-		newURL += account + '/' + project + '/revision/' + branch + '/head/tree/';
-	} else {
 		newURL += account + '/' + project + '/revision/' + revision + '/tree/';
+	} else {
+		newURL += account + '/' + project + '/revision/' + branch + '/head/tree/';
 	}
-
 	if (sid)
 	{
 		newURL += sid
@@ -111,9 +112,15 @@ function refreshTree(account, project, branch, revision)
 	var newURL = treeURL(account, project, branch, revision);
 	var tree = $("#scenetree").fancytree("getTree");
 
-	tree.reload({
-		url: newURL
-	});
+	if (!TreeControl.loading)
+	{
+		TreeControl.loading = true;
+		TreeControl.promise = tree.reload({
+			url: newURL
+		}).done(function() {
+			TreeControl.loading = false;
+		})
+	}
 }
 
 var initTree = function(account, project, branch, revision)

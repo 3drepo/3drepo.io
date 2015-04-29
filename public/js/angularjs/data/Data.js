@@ -17,9 +17,9 @@
 
 angular.module('3drepo')
 .service('Data', ['ProjectData', 'Branches', 'Comments', 'CurrentBranch', 'CurrentRevision',
-		'CurrentDiffBranch', 'CurrentDiffRevision', 'Federation', 'Log', 'Readme', 'RevisionsByDay', 'UserData', 'Users',
+		'CurrentDiffBranch', 'CurrentDiffRevision', 'Federation', 'Log', 'Readme', 'RevisionsByDay', 'UserData', 'Users', 'Wayfinder', '$state',
 		function (ProjectData, Branches, Comments, CurrentBranch, CurrentRevision, CurrentDiffBranch,
-			CurrentDiffRevision, Federation, Log, Readme, RevisionsByDay, UserData, Users) {
+			CurrentDiffRevision, Federation, Log, Readme, RevisionsByDay, UserData, Users, Wayfinder, $state) {
 
 			this.ProjectData			= ProjectData;
 			this.Branches				= Branches;
@@ -34,122 +34,216 @@ angular.module('3drepo')
 			this.RevisionsByDay			= RevisionsByDay;
 			this.UserData				= UserData;
 			this.Users					= Users;
+			this.Wayfinder				= Wayfinder;
 
-			this.account				= null;
-			this.project				= null;
-			this.user					= null;
-			this.branch					= null;
-			this.diffBranch				= null;
-			this.revision				= null;
+			this.state	= {
+				account:			null,
+				project:			null,
+				user:				null,
+				branch:				null,
+				revision:			null,
 
-			this.currentPage	= 0;
-			this.totalItems		= 1;
-			this.itemsPerPage	= 5;
+				// View and pagination
+				view:				"info",
+				currentPage:		1,
+				totalItems:			0,
+				itemsPerPage:		5,
 
-			this.view = "info";
+				// Diff state
+				diffEnabled:		false,
+				diffBranch:			null,
+				diffRevision:		null,
 
-			this.diffEnabled = false;
+				// Wayfinder function
+				wayfinderEnabled:	false
+			}
+
+			this.changed = {};
+
+			for(var i in this.state)
+				this.changed[i] = false;
 
 			var self = this;
 
-			this.updatePaginatedView = function(view)
+			this.updatePaginatedView = function()
 			{
-				var first = (self.currentPage - 1) * self.itemsPerPage;
-				var last  = Math.min(self.totalItems - 1, self.currentPage * self.itemsPerPage - 1);
+				var first = (self.state.currentPage - 1) * self.state.itemsPerPage;
+				var last  = Math.min(self.state.totalItems - 1, self.state.currentPage * self.state.itemsPerPage - 1);
 
-				if (view == "comments")
-					self.Comments.refresh(self.account, self.project, first, last);
-				else if (view == "log")
-					self.Log.refresh(self.account, self.project, first, last);
-				else if (view == "revisions")
-					self.RevisionsByDay.refresh(self.account, self.project, self.branch, first, last);
+				if (self.state.view == "comments")
+					self.Comments.refresh(self.state.account, self.state.project, first, last);
+				else if (self.state.view == "log")
+					self.Log.refresh(self.state.account, self.state.project, first, last);
+				else if (self.view == "revisions")
+					self.RevisionsByDay.refresh(self.state.account, self.state.project, self.state.branch, first, last);
 			}
 
-			this.setBranch = function(branch)
+			this.genStateName = function()
 			{
-				self.branch = branch;
-				self.CurrentBranch.refresh(self.account, self.project, self.branch);
-			}
+				var stateName = "";
 
-			this.toggleDiff = function() {
-				if (this.diffEnabled) {
-					this.setDiffBranch('');
-					this.diffEnabled = false;
-				} else {
-					this.setDiffBranch('master');
-					this.diffEnabled = true;
+				if (self.state.account && !self.state.project) {
+					stateName = "home";
+				} else if (self.state.account && self.state.project) {
+					stateName = "main";
+
+					if (self.state.revision)
+						stateName += ".revision";
+					else if (self.state.branch)
+						stateName += ".branch";
+
+					// Functions go here
+					if (self.state.wayfinder)
+						stateName += ".wayfinder";
+					else if (self.state.diffEnabled)
+						stateName += ".diff";
+
+					if (self.state.view)
+						stateName += ".view";
 				}
+
+				return stateName;
 			}
 
-			this.setDiffBranch = function(branch)
+			this.setStateVar = function(varName, value)
 			{
-				self.diffBranch = branch;
-				self.CurrentDiffBranch.refresh(self.account, self.project, self.diffBranch);
-				self.CurrentDiffRevision.refresh(self.account, self.project, self.diffBranch, 'head')
+				if (!(self.state[varName] == value))
+					self.changed[varName] = true;
+
+				self.state[varName] = value;
 			}
 
-			this.changeView = function(state, view, stateParams)
+			this.setState = function(stateParams, extraParams)
 			{
-				if (state == "home")
+				var stateObj = $.extend(stateParams, extraParams);
+
+				console.log("PARAMS: " + JSON.stringify(stateParams) + " ...");
+
+				// Copy all state parameters and extra parameters
+				// to the state
+				for(var i in stateObj)
+					if (i in self.state)
+						self.setStateVar(i, stateObj[i]);
+
+				// Clear out anything that hasn't been set
+				if ("clearState" in extraParams)
+					if (extraParams["clearState"])
+						for(var i in self.state)
+							if (!(i in stateObj))
+								if (typeof self.state[i] == 'boolean')
+									self.setStateVar(i, false);
+								else
+									self.setStateVar(i, null);
+
+				self.refresh();
+			}
+
+			this.clearChanged = function()
+			{
+				for(var i in self.changed)
+					self.changed[i] = false;
+			}
+
+			this.refresh = function()
+			{
+				var stateName = self.genStateName();
+
+				console.log("REFRESHING " + stateName + " ...");
+
+				if (stateName.search("home") > -1)
 				{
-					self.account = stateParams.account;
-					self.UserData.refresh(self.account);
+					// If only the home page then simply load user info
+					self.UserData.refresh(self.state.account);
+				} else {
+					// For the main page load everything that you can
+					if (self.changed.project) {
+						self.ProjectData.refresh(self.state.account, self.state.project);
+						self.Branches.refresh(self.state.account, self.state.project);
 
-				} else if (state == 'main') {
-					// Account and project with no specific branch (i.e. master/head)
-
-					self.account	= stateParams.account;
-					self.project	= stateParams.project;
-					self.branch		= 'master';
-					self.revision	= 'head';
-
-					self.ProjectData.refresh(self.account, self.project);
-					self.CurrentBranch.refresh(self.account, self.project, self.branch);
-					self.CurrentRevision.refresh(self.account, self.project, self.branch, self.revision);
-					self.Branches.refresh(self.account, self.project);
-				} else if ((state == 'main.view') || (state == 'main.branch.view') || (state == 'main.revision.view')) {
-					self.view = view;
-
-					// ["info", "comments", "revisions", "log", "settings"];
-					self.currentPage = 1;
-					self.totalItems  = 0;
-
-					if (view == 'info')
-					{
-						self.Readme.refresh(self.account, self.project, self.branch, self.revision);
-					} else if (view == 'comments') {
-						self.Comments.getNumberOfComments(self.account, self.project)
-						.then(function(n_comments) {
-							self.totalItems = n_comments;
-							self.updatePaginatedView('comments');
-						});
-					} else if (view == 'log') {
-						self.Log.getNumberOfLogEntries(self.account, self.project)
-						.then(function(n_logentries) {
-							self.totalItems = n_logentries;
-							self.updatePaginatedView('log');
-						});
-					} else if (view == 'revisions') {
-						self.RevisionsByDay.getNumberOfRevisions(self.account, self.project, self.branch)
-						.then(function(n_revisions) {
-							self.totalItems = n_revisions;
-							self.updatePaginatedView('revisions');
-						});
-					} else if (view == 'settings') {
-						self.Users.refresh(self.account, self.project);
+						// If we have changed the project but the branch
+						// and revision aren't set, select master branch.
+						if (!self.state.branch && !self.state.revision)
+							self.setStateVar("branch", "master");
 					}
-				} else if (state == 'main.branch') {
-					self.branch = stateParams.branch;
-					self.revision = 'head';
 
-					self.CurrentBranch.refresh(self.account, self.project, self.branch);
-					self.CurrentRevision.refresh(self.account, self.project, self.branch, self.revision);
-				} else if (state == 'main.revision') {
-					self.revision = stateParams.rid;
+					if (self.changed.branch)
+					{
+						self.CurrentBranch.refresh(self.state.account, self.state.project, self.state.branch);
 
-					self.CurrentBranch.refresh(self.account, self.project, self.branch);
-					self.CurrentRevision.refresh(self.account, self.project, self.branch, self.revision);
+						// If we have changed branch but not selected
+						// a revision then select head.
+						if (!self.state.revision)
+							self.setStateVar("revision", "head");
+					}
+
+					if (self.changed.revision)
+					{
+						self.CurrentRevision.refresh(self.state.account, self.state.project, self.state.branch, self.state.revision)
+						.then(function () {
+							self.setStateVar("revision", self.CurrentRevision.revision);
+						});
+					}
+
+					if (self.state.diffEnabled)
+					{
+						if (self.changed.diffBranch)
+						{
+							self.CurrentDiffBranch.refresh(self.state.account, self.state.project, self.state.diffBranch);
+
+							// If we have changed branch but not selected
+							// a revision then select head.
+							if (!self.state.diffRevision)
+								self.setStateVar("diffRevision", "head");
+						}
+
+						if (self.changed.diffRevision)
+						{
+							self.CurrentDiffRevision.refresh(self.state.account, self.state.project, self.state.diffBranch, self.state.diffRevision)
+							.then(function () {
+								self.setStateVar("diffRevision", self.CurrentDiffRevision.revision);
+							});
+						}
+					}
+
+					if (self.changed.view)
+					{
+						if (self.state.view == 'info')
+						{
+							self.Readme.refresh(self.state.account, self.state.project, self.state.branch, self.state.revision);
+						} else if (self.state.view == 'comments') {
+							self.Comments.getNumberOfComments(self.state.account, self.state.project)
+							.then(function(n_comments) {
+								self.state.totalItems = n_comments;
+								self.updatePaginatedView();
+							});
+						} else if (self.state.view == 'log') {
+							self.Log.getNumberOfLogEntries(self.state.account, self.state.project)
+							.then(function(n_logentries) {
+								self.state.totalItems = n_logentries;
+								self.updatePaginatedView();
+							});
+						} else if (self.state.view == 'revisions') {
+							self.RevisionsByDay.getNumberOfRevisions(self.state.account, self.state.project, self.state.branch)
+							.then(function(n_revisions) {
+								self.state.totalItems = n_revisions;
+								self.updatePaginatedView('revisions');
+							});
+						} else if (self.state.view == 'settings') {
+							self.Users.refresh(self.state.account, self.state.project);
+						} else if (self.state.view) {
+							// Unknown view
+							self.setStateVar("view", null);
+							return self.updateState();
+						}
+					}
 				}
-			};
+
+				self.clearChanged();
+			}
+
+			this.updateState = function()
+			{
+				$state.transitionTo(self.genStateName(), self.state, { location: true, inherit: true, relative: $state.$current, notify: false});
+			}
 }]);
 

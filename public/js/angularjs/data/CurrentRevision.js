@@ -17,40 +17,44 @@
 
 angular.module('3drepo')
 .factory('CurrentRevision', ['$http', '$q', 'serverConfig', function($http, $q, serverConfig){
-	var o = {};
+	var o = {
+		revision:	"",
+		shortName:	"",
+		author:		"",
+		date:		"",
+		message:	"",
+		branch:		""
+	};
 
 	o.refresh = function(account, project, branch, revision) {
 		var self = this;
-
-		self.name = "";
-		self.shortName = "";
-		self.author = "";
-		self.date = "";
-		self.message = "";
-		self.branch = "";
-
 		var deferred = $q.defer();
 
 		var baseUrl = "";
 
-		if (revision == 'head')
-			baseUrl = serverConfig.apiUrl(account + '/' + project + '/revision/' + branch + '/' + revision);
-		else
-			baseUrl = serverConfig.apiUrl(account + '/' + project + '/revision/' + revision);
-
-		$http.get(baseUrl + '.json')
-		.then(function(json) {
-			self.name    = json.data.name;
-			self.shortName = json.data.name.substr(0,20) + "...";
-			self.author  = json.data.author;
-			self.date    = json.data.date;
-			self.message = json.data.message;
-			self.branch  = json.data.branch;
-
+		if (revision == self.revision)
+		{
 			deferred.resolve();
-		}, function(message) {
-			deferred.resolve();
-		});
+		} else {
+			if (revision && (revision != 'head'))
+				baseUrl = serverConfig.apiUrl(account + '/' + project + '/revision/' + revision);
+			else
+				baseUrl = serverConfig.apiUrl(account + '/' + project + '/revision/' + branch + '/head');
+
+			$http.get(baseUrl + '.json')
+			.then(function(json) {
+				self.revision	= json.data.revision;
+				self.shortName	= json.data.revision.substr(0,20) + "...";
+				self.author		= json.data.author;
+				self.date		= json.data.date;
+				self.message	= json.data.message;
+				self.branch		= json.data.branch;
+
+				deferred.resolve();
+			}, function(message) {
+				deferred.resolve();
+			});
+		}
 
 		return deferred.promise;
 	};

@@ -17,7 +17,19 @@
 
 angular.module('3drepo')
 .factory('ProjectData', ['$http', '$q', 'serverConfig', function($http, $q, serverConfig){
-	var o = {};
+	var o = {
+		account:		null,
+		project:		null,
+		name:			"",
+		owner:			"",
+		description:	"",
+		branches:		[],
+		selected:		null,
+		settings:		null,
+		publicPerm:		{read: false, write: false, execute: false},
+		userPerm:		{read: false, write: false, execute: false},
+		ownerPerm:		{read: false, write: false, execute: false}
+	};
 
 	o.projectTypes = [
 		{label: 'Architectural', value : 1},
@@ -44,22 +56,6 @@ angular.module('3drepo')
 
 	o.refresh = function(account, project) {
 		var self = this;
-
-		self.name		= "";
-		self.owner		= "";
-		self.description= "";
-		self.branches	= [];
-
-		self.account = account;
-		self.project = project;
-
-		self.selected = null;
-
-		self.settings = null;
-
-		self.publicPerm		= {read: false, write: false, execute: false};
-		self.userPerm		= {read: false, write: false, execute: false};
-		self.ownerPerm		= {read: false, write: false, execute: false};
 
 		self.visibility = 'private';
 

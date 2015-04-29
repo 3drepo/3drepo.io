@@ -11,7 +11,7 @@
 						span.caret
 					ul.dropdown-menu(role='menu')
 						li(ng-repeat='branch in Data.Branches.branches')
-							a(href='#', ng-click='Data.setBranch(branch)')
+							a(href='#', ng-click='setBranch(branch)')
 								span.button-keyword {{branch}}
 				span.revision
 					.btn-group.menu-button
@@ -25,11 +25,11 @@
 								a(href='#', ng-click='setRevision(rev)')
 									span.button-keyword {{rev.name}}
 			#diffToggle.nav-project-title
-				a(href="#", ng-click="Data.toggleDiff()")
+				a(href="#", ng-click="toggleDiff()")
 					<i class='fa fa-random'></i>
 					| DIFF
 
-			#diffSpan(ng-show="Data.diffEnabled")
+			#diffSpan(ng-show="Data.state.diffEnabled")
 				.btn-group.menu-button
 					button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-expanded='false')
 						i.fa.fa-code-fork.menu-icon
@@ -38,7 +38,7 @@
 						span.caret
 					ul.dropdown-menu(role='menu')
 						li(ng-repeat='branch in Data.Branches.branches')
-							a(href='#', ng-click='Data.setDiffBranch(branch)')
+							a(href='#', ng-click='setDiffBranch(branch)')
 								span.button-keyword {{branch}}
 				span.revision
 					.btn-group.menu-button

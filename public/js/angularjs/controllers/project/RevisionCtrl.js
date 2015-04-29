@@ -19,45 +19,93 @@ angular.module('3drepo')
 .controller('RevisionCtrl', ['$scope', 'Data', 'serverConfig', '$window', '$q', '$http', '$state', function($scope,  Data, serverConfig, $window, $q, $http, $state){
 	$scope.Data = Data;
 
+	// Initialize to true so we load at least
+	// once at the start
+	$scope.refreshViewer	= true;
+	$scope.refreshDiffView	= true;
+
+	$scope.setBranch = function(branch) {
+		Data.setStateVar("branch", branch);
+		Data.refresh();
+	}
+
 	$scope.setRevision = function(rev) {
-		var o = {
-			branch: Data.branch,
-			rid:	rev.name,
-			view:	Data.view
-		};
+		Data.setStateVar("revision", rev.name);
+		if(Data.changed.revision)
+			$scope.refreshViewer = false;
 
-		$window.viewer.loadURL(serverConfig.apiUrl(Data.account + '/' + Data.project + '/revision/' + rev.name + '.x3d.src'))
-		refreshTree(Data.account, Data.project, Data.branch, rev.name);
+		Data.updateState();
+	}
 
-		$state.go('main.revision.view', o);
+	$scope.setDiffBranch = function(branch) {
+		Data.setStateVar("diffBranch", branch);
+		Data.refresh();
 	}
 
 	$scope.setDiff = function (rev) {
-		$window.otherView.loadURL(serverConfig.apiUrl(Data.account + '/' + Data.project + '/revision/' + rev.name + '.x3d.src'));
+		Data.setStateVar("diffRevision", rev.name);
+		if(Data.changed.diffRevision)
+			$scope.refreshDiffView = false;
 
-		var baseUrl = serverConfig.apiUrl(Data.account + '/' + Data.project + '/revision/' + Data.revision + '/diff/' + rev.name + '.json');
-
-		//var deferred = $q.defer();
-
-		$http.get(baseUrl, { withCredentials : true})
-		.then(function(json) {
-			var diffColors = {
-				added:		json.data["added"],
-				modified:	json.data["modified"],
-				deleted:	json.data["deleted"]
-			};
-
-			viewer.setDiffColors(diffColors, true);
-			otherView.setDiffColors(diffColors, false);
-			viewer.disableClicking();
-			otherView.disableClicking();
-		});
+		Data.updateState();
 	}
 
-	$scope.$watch('Data.diffEnabled', function () {
-		if (Data.diffEnabled)
-			viewer.diffView();
+	$scope.toggleDiff = function() {
+		if (Data.state.diffEnabled) {
+			Data.setStateVar("diffBranch", null);
+			Data.setStateVar("diffRevision", null);
+			Data.setStateVar("diffEnabled", false);
+			Data.refresh();
+			Data.updateState();
+		} else {
+			Data.setStateVar("diffBranch", Data.state.branch);
+			Data.setStateVar("diffRevision", Data.state.revision);
+			Data.setStateVar("diffEnabled", true);
+			Data.refresh();
+			Data.updateState();
+		}
+	}
+
+	$scope.$watchGroup(['Data.state.diffEnabled', 'Data.state.diffBranch', 'Data.state.diffRevision'], function () {
+		viewerManager.diffView(Data.state.diffEnabled);
+
+		if (Data.state.diffEnabled)
+		{
+			if($scope.refreshDiffView)
+			{
+				viewerManager.loadURL("diffView", Data.state.account, Data.state.project, Data.state.diffBranch, Data.state.diffRevision);
+
+				$scope.refreshDiffView = false;
+			}
+
+			var baseUrl = serverConfig.apiUrl(Data.state.account + '/' + Data.state.project + '/revision/' + Data.state.revision + '/diff/' + Data.state.diffRevision + '.json');
+
+			$http.get(baseUrl, { withCredentials : true})
+			.then(function(json) {
+				var diffColors = {
+					added:		json.data["added"],
+					modified:	json.data["modified"],
+					deleted:	json.data["deleted"]
+				};
+
+				viewer.setDiffColors(diffColors, true);
+				otherView.setDiffColors(diffColors, false);
+				otherView.disableClicking();
+			});
+		}
 	});
+
+	$scope.$watchGroup(['Data.state.branch', 'Data.state.revision'], function() {
+		if($scope.refreshViewer)
+		{
+			viewerManager.loadURL("viewer", Data.state.account, Data.state.project, Data.state.branch, Data.state.revision);
+
+			$scope.refreshViewer = false;
+		}
+
+		refreshTree(Data.state.account, Data.state.project, Data.state.branch, Data.state.revision);
+	});
+
 
 }]);
 

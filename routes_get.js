@@ -43,29 +43,29 @@ module.exports = function(router, dbInterface, checkAccess){
 		this.transRouter(format, '/search', res, params);
 	});
 
-	router.get('/wayfinder.:format?', function(req, res) {
+	router.get('/:account/:project/wayfinder.:format?', function(req, res) {
 		var resCode = responseCodes.OK;
-		var responsePlace = "/wayfinder GET";
+		var responsePlace = "/:account/:project/wayfinder GET";
 
 		if (!("user" in req.session)) {
 			responseCodes.respond(responsePlace, responseCodes.USERNAME_NOT_SPECIFIED, res, {});
 		} else {
-			this.dbInterface.getWayfinderInfo(config.wayfinder.democompany, config.wayfinder.demoproject, null, function(err, docs) {
+			this.dbInterface.getWayfinderInfo(req.params["account"], req.params["project"], null, function(err, docs) {
 				responseCodes.onError(responsePlace, err, res, docs);
 			});
 		}
 	});
 
-	router.get('/wayfinder/record.:format?', function(req, res) {
+	router.get('/:account/:project/wayfinder/record.:format?', function(req, res) {
 		var resCode = responseCodes.OK;
-		var responsePlace = "/wayfinder/record GET";
+		var responsePlace = "/:account/:project/wayfinder/record GET";
 
 		if (!("user" in req.session)) {
 			responseCodes.respond(responsePlace, responseCodes.USERNAME_NOT_SPECIFIED, res, {});
 		} else {
 			var uids = JSON.parse(req.query.uid);
 
-			this.dbInterface.getWayfinderInfo(config.wayfinder.democompany, config.wayfinder.demoproject, uids, function(err, docs) {
+			this.dbInterface.getWayfinderInfo(req.params["account"], req.params["project"], uids, function(err, docs) {
 				responseCodes.onError(responsePlace, err, res, docs);
 			});
 		}
@@ -375,8 +375,6 @@ module.exports = function(router, dbInterface, checkAccess){
 		this.transRouter(format, '/:account/:project/revision/:branch/head/tree/:sid', res, params);
 	});
 
-
-
 	// Get subtree for sid in revision rid, with (optional) depth query string paramter
 	router.get('/:account/:project/revision/:rid/tree/:sid.:format?.:subformat?', checkAccess, function(req, res, next) {
 		var format = req.params["format"];
@@ -414,8 +412,6 @@ module.exports = function(router, dbInterface, checkAccess){
 
 		this.transRouter(format, '/:account/:project/revision/:rid/diff/:otherrid', res, params);
 	});
-
-
 
 	// Get audit log for account
 	router.get('/:account/log', checkAccess, function(req, res, next) {

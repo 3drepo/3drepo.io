@@ -25,16 +25,16 @@ var logger = log_iface.logger;
 var responseCodes = require('./js/core/response_codes.js');
 var config = require('./js/core/config.js');
 
-function createSession(place, res, req, username)
+function createSession(place, res, req, user)
 {
 	req.session.regenerate(function(err) {
 		if(err)
-			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {account: username});
+			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {account: user.username});
 		else
 		{
-			logger.log('debug', 'Authenticated ' + username + ' and signed token.')
-			req.session.user = username;
-			responseCodes.respond(place, responseCodes.OK, res, {account: username});
+			logger.log('debug', 'Authenticated ' + user.username + ' and signed token.')
+			req.session.user = user;
+			responseCodes.respond(place, responseCodes.OK, res, {account: user.username});
 		}
 	});
 }
@@ -160,9 +160,6 @@ module.exports = function(router, dbInterface, checkAccess){
 		console.log('debug', 'Adding POST call for ' + item['regex']);
 
 		var resFunction = schemaValidator.validate(item.regex);
-
-		console.log("REGEX: " + item.regex);
-		console.log("RESFUNCTION: " + resFunction.toString());
 
 		if (item.shouldCheckAccess)
 			router.post(item.regex.toString(), resFunction, checkAccess, item.callback);

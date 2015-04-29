@@ -17,20 +17,19 @@
 
 angular.module('3drepo')
 .factory('CurrentDiffRevision', ['$http', '$q', 'serverConfig', function($http, $q, serverConfig){
-	var o = {};
+	var o = {
+		name:		"",
+		shortName:	"",
+		author:		"",
+		date:		"",
+		message:	"",
+		branch:		""
+	};
 
 	o.refresh = function(account, project, branch, revision) {
 		var self = this;
 
-		self.name = "";
-		self.shortName = "";
-		self.author = "";
-		self.date = "";
-		self.message = "";
-		self.branch = "";
-
 		var deferred = $q.defer();
-
 		var baseUrl = "";
 
 		if (revision == 'head')
@@ -40,12 +39,12 @@ angular.module('3drepo')
 
 		$http.get(baseUrl + '.json')
 		.then(function(json) {
-			self.name    = json.data.name;
-			self.shortName = json.data.name.substr(0,20) + "...";
-			self.author  = json.data.author;
-			self.date    = json.data.date;
-			self.message = json.data.message;
-			self.branch  = json.data.branch;
+			self.revisio	= json.data.revision;
+			self.shortName	= json.data.revision.substr(0,20) + "...";
+			self.author		= json.data.author;
+			self.data		= json.data.date;
+			self.message	= json.data.message;
+			self.branch		= json.data.branch;
 
 			deferred.resolve();
 		}, function(message) {
