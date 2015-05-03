@@ -1112,6 +1112,7 @@ header button.btn {
 	background-color: rgba(255, 255, 255, 0.5);
 	-webkit-transition: all linear 0.05s;
 	transition: all linear 0.05s;
+	z-index: 20000;
 }
 
 #ui2-treeview.collapsed {
@@ -1159,6 +1160,7 @@ header button.btn {
 	background-color: rgba(255, 255, 255, 0.5);
 	-webkit-transition: all linear 0.05s;
 	transition: all linear 0.05s;
+	z-index: 20000;
 }
 
 #metadata {
