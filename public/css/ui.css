@@ -1246,16 +1246,19 @@ header button.btn {
 	top: 60px;
 	left: 0;
 	width: 100%;
-	height: 100%;
+	height: calc(100% - 60px);
 	max-width: none;
 	-webkit-transition: all linear 0.1s;
 	transition: all linear 0.1s;
 	padding-left: 40px;
 	padding-right: 40px;
+	overflow-y: scroll;
+	margin-bottom: 500px;
 }
 
 #bottom-panel.collapsed {
-	top: 100%
+	top: 100%;
+	overflow: visible;
 }
 
 .bottom-tabs {
