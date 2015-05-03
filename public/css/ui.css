@@ -665,10 +665,6 @@ hr {
 	overflow: hidden;
 }
 
-#projects-thumbnails .item-masonry, .grid-sizer {
-	width: calc(33.333% + 0px);
-}
-
 #projects-thumbnails .item-masonry-description {
 	height: 22%;
 }
@@ -1453,6 +1449,24 @@ ul.fancytree-container li {
 }
 
 .item-masonry.w2 {
+	width: calc(50% - 2px);
+	padding-bottom: 25%;
+	float: left;
+	height: 0px;
+}
+
+.item-masonry.h2 {
+	padding-bottom: 50%;
+	height: 0;
+	float: left;
+	margin-top: 0;
+}
+
+.item-masonry.h2 img.img-responsive{
+	max-width: 200%;
+}
+
+.item-masonry.wh2 {
 	width: calc(50% - 2px);
 }
 
