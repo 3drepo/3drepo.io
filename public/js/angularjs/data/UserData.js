@@ -46,6 +46,11 @@ angular.module('3drepo')
 
 			if(json.data.projects) {
 				self.projects  = json.data.projects;
+				// // TODO: temporary hack to inject masonry sizing classes
+				// for (var p = 0; p < self.projects.length; p++) {
+				// 	self.projects[p]['tileSize'] = 'wh2';
+				// }
+
 				self.projectsGrouped = {}
 				for (var p = 0; p < self.projects.length; p++) {
 					var project = self.projects[p];

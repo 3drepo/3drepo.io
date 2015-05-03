@@ -56,7 +56,7 @@
 				#projects-thumbnails.row(ng-show="view=='projects' && !projectsShowList")
 					.col-xs-12.unpadded.js-masonry(data-masonry-options='{ "itemSelector": ".item-masonry", "columnWidth": ".grid-sizer", "gutter": 0, "percentPosition": true}')
 						.grid-sizer
-						div.item-masonry.project-thumbnail(ng-repeat="project in Data.UserData.projects")
+						div.item-masonry.project-thumbnail(ng-repeat="project in Data.UserData.projects" class="{{project.tileSize}}")
 							a(ng-href="{{'/' + project.account + '/' + project.project}}")
 								img.img-responsive(src="/public/images/dummies/kc.jpg")
 								.item-masonry-description
