@@ -1268,7 +1268,7 @@ header button.btn {
 	border: none;
 	font-size: 8pt;
 	top: 0;
-	height: 35px;
+	height: 51px;
 	width: 50%;
 	left: 25%;
 	-webkit-transition: all linear 0.1s;
@@ -1310,7 +1310,7 @@ header button.btn {
 }
 
 .collapsed .bottom-tabs {
-	top: -35px;
+	top: -51px;
 }
 
 .bottom-tabs > li {
@@ -1326,6 +1326,7 @@ header button.btn {
 	color: #ffffff;
 	margin-left: 0;
 	margin-right: 0;
+	padding: 10px 5px;
 }
 
 .bottom-tabs > li.active::after {
@@ -1340,7 +1341,7 @@ header button.btn {
 }
 
 .bottom-info {
-	padding-top: 20px;
+	padding-top: 51px;
 }
 
 .block-header-project-name {
