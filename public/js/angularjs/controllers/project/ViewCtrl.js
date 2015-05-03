@@ -51,11 +51,14 @@ angular.module('3drepo')
 
 	$scope.toggleTree = function() {
 		$("#ui2-treeview").toggleClass("collapsed");
+		$("#bottom-panel").toggleClass("with-tree");
 	}
 
 
 	$scope.toggleMetadata = function() {
 		$("#ui2-metadata").toggleClass("collapsed");
+		// $("#bottom-panel").toggleClass("full-width");
+		$("#bottom-panel").toggleClass("with-metadata");
 	}
 
 	// TODO: Move somewhere else
