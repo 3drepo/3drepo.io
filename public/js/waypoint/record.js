@@ -15,7 +15,7 @@
  **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-var Recorder = function(startPoint, endPoint, distance) {
+var Recorder = function(viewer, account, project) {
 	var self = this;
 
 	this.buffer1 = [];
@@ -23,14 +23,16 @@ var Recorder = function(startPoint, endPoint, distance) {
 	this.bufferlimit = 10;
 
 	this.isRecording = false;
-	this.distance 	 = distance;
-	this.startPoint  = startPoint;
-	this.endPoint    = endPoint;
+
+	this.viewer = viewer;
 
 	this.recording = this.buffer1;
 
 	this.timestamp = 0;
 	this.second    = 0;
+
+	this.account   = account;
+	this.project   = project;
 
 	this.sendRecording = function()
 	{
@@ -46,7 +48,7 @@ var Recorder = function(startPoint, endPoint, distance) {
 		}
 		$.ajax({
 			type: "POST",
-			url:  server_config.apiUrl("wayfinder/record"),
+			url:  server_config.apiUrl(self.account + "/" + self.project + "/wayfinder/record"),
 			data: {"data" : data_str, "timestamp" : self.timestamp},
 			dataType: "json",
 			xhrFields: {

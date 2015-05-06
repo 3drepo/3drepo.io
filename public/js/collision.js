@@ -15,7 +15,7 @@
  **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-var Collision = function() {
+var Collision = function(viewer) {
 	var self = this;
 
 	this._deltaT = 0.1;
@@ -29,9 +29,11 @@ var Collision = function() {
 
 	this.stopped = true;
 
+	this.viewer  = viewer;
+
 	this.updateDirections = function(event, gamepad)
 	{
-		var speed = viewer.nav._x3domNode._vf.speed;
+		var speed = self.viewer.nav._x3domNode._vf.speed;
 		var userX = self._deltaT * speed * gamepad.xaxis;
 		var userY = self._deltaT * speed * gamepad.yaxis;
 
@@ -42,7 +44,7 @@ var Collision = function() {
 
 		if(!self.stopped)
 		{
-			var currViewMat = viewer.getViewMatrix();
+			var currViewMat = self.viewer.getViewMatrix();
 
 			self.userX = -userX;
 			self.userY = -userY;
@@ -59,13 +61,13 @@ var Collision = function() {
 	{
 		self.ticking = true;
 
-		var viewArea = viewer.getViewArea();
+		var viewArea = self.viewer.getViewArea();
 		var straightDown = new x3dom.fields.SFVec3f(0, -1, 0);
 		var straightUp = new x3dom.fields.SFVec3f(0, 1, 0);
 		var straightAhead = new x3dom.fields.SFVec3f(0, 0, -1);
 
-		var currProjMat = viewer.getProjectionMatrix();
-		var currViewMat = viewer.getViewMatrix();
+		var currProjMat = self.viewer.getProjectionMatrix();
+		var currViewMat = self.viewer.getViewMatrix();
 		var flyMat = currViewMat.inverse();
 		var from = flyMat.e3();
 
@@ -92,7 +94,7 @@ var Collision = function() {
 
 		if (viewArea._pickingInfo.pickObj)
 		{
-			if (!self.stopped && (dist > viewer.avatarRadius))
+			if (!self.stopped && (dist > self.viewer.avatarRadius))
 			{
 				from.x += self.deltaX;
 				from.z += self.deltaZ;
@@ -111,7 +113,7 @@ var Collision = function() {
 
 				if (viewArea._pickingInfo.pickObj)
 				{
-					var movement = 0.5 * ((viewer.avatarHeight - dist) + self.prevMove);
+					var movement = 0.5 * ((self.viewer.avatarHeight - dist) + self.prevMove);
 					from.y += movement;
 					self.prevMove = movement;
 				}
@@ -121,7 +123,7 @@ var Collision = function() {
 				var tmpMat = x3dom.fields.SFMatrix4f.lookAt(from, at, up);
 
 				viewArea._scene.getViewpoint().setView(tmpMat.inverse());
-				viewer.runtime.triggerRedraw();
+				self.viewer.runtime.triggerRedraw();
 			}
 		}
 

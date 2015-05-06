@@ -15,26 +15,153 @@
  **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-var Viewer = function(id, x3ddiv, manager) {
+var Viewer = function(name, handle, x3ddiv, manager) {
+	// Properties
 	var self = this;
 
-	if(!id)
-		this.id = 'viewer';
+	if(!name)
+		this.name = 'viewer';
 	else
-		this.id = id;
+		this.name = name;
+
+	if(handle)
+		this.handle = handle;
 
 	// If not given the tag by the manager
 	// create here
 	if (!x3ddiv)
-		x3ddiv = $('#x3d')[0];
+		this.x3ddiv = $('#x3d')[0];
+	else
+		this.x3ddiv = x3ddiv;
 
-	this.initRuntime = function () {
-		self.runtime = this;
+	this.inline = null;
+	this.runtime = null;
+	this.fullscreen = false;
+
+	this.clickingEnabled = false;
+
+	this.avatarRadius = 0.5;
+
+	this.defaultShowAll = true;
+
+	this.zNear = -1;
+	this.zFar  = -1;
+
+	this.manager = null;
+
+	this.initialized = false;
+
+	this.init = function() {
+		if (!self.initialized)
+		{
+			// If we have a viewer manager then it
+			// will take care of initializing the runtime
+			// else we'll do it ourselves
+			if(manager) {
+				self.manager = manager;
+			} else {
+				x3dom.runtime.ready = self.initRuntime;
+			}
+
+			if (self.manager) {
+				self.displayMessage = self.manager.displayMessage;
+			} else {
+				self.displayMessage = function(text, textColor, timeout)
+				{
+					//TODO: Should we replicate the displayMessage stuff here ?
+				}
+			}
+
+			// Set up the DOM elements
+			self.viewer = document.createElement('x3d');
+			self.viewer.setAttribute('id', self.name);
+			self.viewer.setAttribute('xmlns', 'http://www.web3d.org/specification/x3d-namespace');
+			self.viewer.setAttribute('keysEnabled', false);
+			self.viewer.className = 'viewer';
+
+			self.x3ddiv.appendChild(self.viewer);
+
+			self.scene = document.createElement('scene');
+			self.scene.setAttribute('onbackgroundclicked', 'bgroundClick(event);');
+			self.viewer.appendChild(self.scene);
+
+			self.viewPoint = document.createElement('viewpoint');
+			self.viewPoint.setAttribute('id', name + '_current');
+			self.viewPoint.setAttribute('def', name + '_current');
+			self.scene.appendChild(self.viewPoint);
+
+			self.bground = null;
+			self.currentNavMode = null;
+
+			self.createBackground();
+
+			self.environ = document.createElement('environment');
+			self.environ.setAttribute('frustumCulling', 'true');
+			self.environ.setAttribute('smallFeatureCulling', 'true');
+			self.environ.setAttribute('smallFeatureThreshold', 5);
+			self.environ.setAttribute('occlusionCulling', 'true');
+			self.scene.appendChild(self.environ);
+
+			self.light = document.createElement('directionallight');
+			//self.light.setAttribute('intensity', '0.5');
+			self.light.setAttribute('color', '0.714, 0.910, 0.953');
+			self.light.setAttribute('direction', '0, -0.9323, -0.362');
+			self.light.setAttribute('global', 'true');
+			self.light.setAttribute('ambientIntensity', '0.8');
+			self.light.setAttribute('shadowIntensity', 0.0);
+			self.scene.appendChild(self.light);
+
+			self.nav = document.createElement('navigationInfo');
+			self.nav.setAttribute('headlight', 'false');
+			self.nav.setAttribute('type', 'TURNTABLE');
+			self.viewPoint.appendChild(self.nav);
+
+			self.viewer.addEventListener("keypress", function(e) {
+				if (e.charCode == 'r'.charCodeAt(0))
+				{
+					self.reset();
+					self.setApp(null);
+					self.setNavMode("WALK");
+					self.disableClicking();
+				} else if (e.charCode == 'a'.charCodeAt(0)) {
+					self.showAll();
+					self.setNavMode("EXAMINE");
+					self.enableClicking();
+				} else if (e.charCode == 'n'.charCodeAt(0)) {
+					self.setNavMode("TURNTABLE");
+					self.enableClicking();
+				} else if (e.charCode == 'w'.charCodeAt(0)) {
+					self.setNavMode("WALK");
+				} else if (e.charCode == 'e'.charCodeAt(0)) {
+					self.setNavMode("EXAMINE");
+					self.enableClicking();
+				}
+			});
+
+			self.initialized = true;
+		}
+	}
+
+	this.close = function() {
+		self.viewer.parentNode.removeChild(self.viewer);
+		self.viewer = null;
+	}
+
+	// This is called when the X3DOM runtime is initialized
+	this.initRuntime = function (x3domruntime) {
+		// If no manager, the calling object is the X3DOM runtime (this)
+		// otherwise we reference the one attached to the manager.
+		if (!self.manager)
+			self.runtime = this;
+		else
+			self.runtime = self.viewer.runtime;
 
 		self.showAll = function() {
 			self.setNavMode("TURNTABLE");
 			self.runtime.fitAll();
 		}
+
+		self.viewPoint.addEventListener('viewpointChanged', self.viewPointChanged);
 
 		$(document).on("onLoaded", function(event, objEvent) {
 			if(self.defaultShowAll)
@@ -53,27 +180,23 @@ var Viewer = function(id, x3ddiv, manager) {
 		});
 	};
 
-	this.manager = null;
+	this.createBackground = function() {
+		if (self.bground)
+			self.bground.parentNode.removeChild(self.bground);
 
-	// If we have a viewer manager then it
-	// will take care of initializing the runtime
-	// else we'll do it ourselves
-	if(manager) {
-		manager.registerInitRuntime(this.id);
-		this.manager = manager;
-	} else {
-		x3dom.runtime.ready = this.initRuntime;
-	}
+		self.bground = document.createElement('background');
 
-	if (this.manager) {
-		this.displayMessage = this.manager.displayMessage;
-	} else {
-		this.displayMessage = function(text, textColor, timeout)
-		{
-			//TODO: Should we replicate the displayMessage stuff here ?
-		}
-	}
+		self.bground.setAttribute('DEF', name + '_bground');
+		self.bground.setAttribute('skyangle', '0.9 1.5 1.57');
+		self.bground.setAttribute('skycolor', '0.21 0.18 0.66 0.2 0.44 0.85 0.51 0.81 0.95 0.83 0.93 1');
+		self.bground.setAttribute('groundangle', '0.9 1.5 1.57');
+		self.bground.setAttribute('groundcolor', '0.65 0.65 0.65 0.73 0.73 0.73 0.81 0.81 0.81 0.91 0.91 0.91');
+		self.bground.textContent = ' ';
 
+		self.scene.appendChild(self.bground);
+	};
+
+	/*
 	this.displayMessage = function(text, textColor, timeout) {
 		self.messageBoxMessage.innerHTML = text;
 		self.messageBox.style["display"] = "";
@@ -86,134 +209,49 @@ var Viewer = function(id, x3ddiv, manager) {
 			self.messageBox.style["display"] = "none";
 		}, timeout);
 	}
-
-
-	this.viewer = document.createElement('x3d');
-	this.viewer.setAttribute('id', this.id);
-	this.viewer.setAttribute('xmlns', 'http://www.web3d.org/specification/x3d-namespace');
-	this.viewer.setAttribute('keysEnabled', false);
-	this.viewer.className = 'viewer';
-
-	this.close = function() {
-		this.viewer.parentNode.removeChild(this.viewer);
-		this.viewer = null;
-	}
-
-	x3ddiv.appendChild(this.viewer);
-
-	this.scene = document.createElement('scene');
-	this.scene.setAttribute('onbackgroundclicked', 'bgroundClick(event);');
-	this.viewer.appendChild(this.scene);
-
-	this.viewPoint = document.createElement('viewpoint');
-	this.viewPoint.setAttribute('id', id + '_current');
-	this.viewPoint.setAttribute('def', id + '_current');
-	this.scene.appendChild(this.viewPoint);
-
-	this.bground = null;
-	this.currentNavMode = null;
-
-	this.createBackground = function() {
-		if (this.bground)
-			this.bground.parentNode.removeChild(this.bground);
-
-		this.bground = document.createElement('background');
-
-		this.bground.setAttribute('DEF', id + '_bground');
-		this.bground.setAttribute('skyangle', '0.9 1.5 1.57');
-		this.bground.setAttribute('skycolor', '0.21 0.18 0.66 0.2 0.44 0.85 0.51 0.81 0.95 0.83 0.93 1');
-		this.bground.setAttribute('groundangle', '0.9 1.5 1.57');
-		this.bground.setAttribute('groundcolor', '0.65 0.65 0.65 0.73 0.73 0.73 0.81 0.81 0.81 0.91 0.91 0.91');
-		this.bground.textContent = ' ';
-
-		this.scene.appendChild(this.bground);
-	}
-
-	this.createBackground();
-
-	this.environ = document.createElement('environment');
-	this.environ.setAttribute('frustumCulling', 'true');
-	this.environ.setAttribute('smallFeatureCulling', 'true');
-	this.environ.setAttribute('smallFeatureThreshold', 5);
-	this.environ.setAttribute('occlusionCulling', 'true');
-	this.scene.appendChild(this.environ);
-
-	this.light = document.createElement('directionallight');
-	//this.light.setAttribute('intensity', '0.5');
-	this.light.setAttribute('color', '0.714, 0.910, 0.953');
-	this.light.setAttribute('direction', '0, -0.9323, -0.362');
-	this.light.setAttribute('global', 'true');
-	this.light.setAttribute('ambientIntensity', '0.8');
-	this.light.setAttribute('shadowIntensity', 0.0);
-	this.scene.appendChild(this.light);
-
-	this.nav = document.createElement('navigationInfo');
-	this.nav.setAttribute('headlight', 'false');
-	this.nav.setAttribute('type', 'TURNTABLE');
-	this.viewPoint.appendChild(this.nav);
-
-	this.inline = null;
-	this.runtime = null;
-
-	this.fullscreen = false;
-
-	this.clickingEnabled = false;
-
-	this.avatarRadius = 0.5;
-
-	this.defaultShowAll = true;
-
-	this.zNear = -1;
-	this.zFar  = -1;
+	*/
 
 	this.switchDebug = function () {
-		this.getViewArea()._visDbgBuf = !this.getViewArea()._visDbgBuf;
+		self.getViewArea()._visDbgBuf = !self.getViewArea()._visDbgBuf;
 	}
 
 	this.showStats = function () {
-		viewer.viewer.runtime.canvas.stateViewer.display();
+		self.runtime.canvas.stateViewer.display()
 	}
 
 	this.getViewArea = function() {
-		return viewer.scene._x3domNode._nameSpace.doc._viewarea;
+		return self.runtime.canvas.doc._viewarea;
 	}
 
 	this.getViewMatrix = function() {
-		return this.getViewArea().getViewMatrix();
+		return self.getViewArea().getViewMatrix();
 	}
 
 	this.getProjectionMatrix = function()
 	{
-		return this.getViewArea().getProjectionMatrix();
+		return self.getViewArea().getProjectionMatrix();
 	}
 
-	this.viewer.addEventListener("keypress", function(e) {
-		if (e.charCode == 'r'.charCodeAt(0))
-		{
-			self.reset();
-			self.setApp(null);
-			self.setNavMode("WALK");
-			self.disableClicking();
-		} else if (e.charCode == 'a'.charCodeAt(0)) {
-			self.showAll();
-			self.setNavMode("EXAMINE");
-			self.enableClicking();
-		} else if (e.charCode == 'n'.charCodeAt(0)) {
-			self.setNavMode("TURNTABLE");
-			self.enableClicking();
-		} else if (e.charCode == 'w'.charCodeAt(0)) {
-			self.setNavMode("WALK");
-		} else if (e.charCode == 'e'.charCodeAt(0)) {
-			self.setNavMode("EXAMINE");
-			self.enableClicking();
-		}
-	});
+	this.onViewpointChanged = function(functionToBind)
+	{
+		$(self.viewer).on("myViewpointHasChanged", functionToBind);
+	}
+
+	this.offViewpointChanged = function(functionToBind)
+	{
+		$(self.viewer).off("myViewpointHasChanged", functionToBind);
+	}
+
+	this.viewPointChanged = function(event)
+	{
+		$(self.viewer).trigger("myViewpointHasChanged", event);
+	}
 
 	if(0)
 	{
 		this.moveScale = 1.0;
 
-		this.viewer.addEventListener("keypress", function(e) {
+		self.viewer.addEventListener("keypress", function(e) {
 			var mapPos = $("#model__mapPosition")[0];
 			var oldTrans = mapPos.getAttribute("translation").split(",").map(
 				function(res) { return parseFloat(res); });
@@ -387,21 +425,21 @@ var Viewer = function(id, x3ddiv, manager) {
 				self.nav.setAttribute('visibilityLimit', settings['visibilityLimit']);
 
 			if ('viewpoints' in settings)
-				this.parseViewpoints(settings);
+				self.parseViewpoints(settings);
 		}
 	}
 
 	this.lookAtObject = function(obj)
 	{
-		this.runtime.fitObject(obj, true);
+		self.runtime.fitObject(obj, true);
 	};
 
 	this.selectGroup = function(group, zoom)
 	{
 		if(zoom)
-			this.lookAtObject(group);
+			self.lookAtObject(group);
 
-		this.setApp(group);
+		self.setApp(group);
 	}
 
 	this.applyApp = function(nodes, factor, emiss, otherSide)
@@ -437,22 +475,22 @@ var Viewer = function(id, x3ddiv, manager) {
 
 	this.setApp = function(group)
 	{
-		this.applyApp(this.oneGrpNodes, 2.0, "0.0 0.0 0.0", false);
-		this.applyApp(this.twoGrpNodes, 2.0, "0.0 0.0 0.0", false);
-		this.applyApp(this.twoGrpNodes, 2.0, "0.0 0.0 0.0", true);
+		self.applyApp(self.oneGrpNodes, 2.0, "0.0 0.0 0.0", false);
+		self.applyApp(self.twoGrpNodes, 2.0, "0.0 0.0 0.0", false);
+		self.applyApp(self.twoGrpNodes, 2.0, "0.0 0.0 0.0", true);
 
 		if (group)
 		{
-			this.twoGrpNodes = group.getElementsByTagName("TwoSidedMaterial");
-			this.oneGrpNodes = group.getElementsByTagName("Material");
+			self.twoGrpNodes = group.getElementsByTagName("TwoSidedMaterial");
+			self.oneGrpNodes = group.getElementsByTagName("Material");
 		} else {
-			this.oneGrpNodes = [];
-			this.twoGrpNodes = [];
+			self.oneGrpNodes = [];
+			self.twoGrpNodes = [];
 		}
 
-		this.applyApp(this.oneGrpNodes, 0.5, "1.0 0.5 0.0", false);
-		this.applyApp(this.twoGrpNodes, 0.5, "1.0 0.5 0.0", false);
-		this.applyApp(this.twoGrpNodes, 0.5, "1.0 0.5 0.0", true);
+		self.applyApp(self.oneGrpNodes, 0.5, "1.0 0.5 0.0", false);
+		self.applyApp(self.twoGrpNodes, 0.5, "1.0 0.5 0.0", false);
+		self.applyApp(self.twoGrpNodes, 0.5, "1.0 0.5 0.0", true);
 	}
 
 	this.evDist = function(evt, posA)
@@ -497,7 +535,7 @@ var Viewer = function(id, x3ddiv, manager) {
 	}
 
 	this.setNavMode = function(mode) {
-		if (this.currentNavMode != mode)
+		if (self.currentNavMode != mode)
 		{
 			// If the navigation mode has changed
 
@@ -507,20 +545,20 @@ var Viewer = function(id, x3ddiv, manager) {
 			if (self.currentNavMode == 'WAYFINDER') // Exiting the wayfinding mode
 				waypoint.close();
 		}
-		if((this.currentNavMode == 'WAYFINDER') && (mode != 'WAYFINDER'))
+		if((self.currentNavMode == 'WAYFINDER') && (mode != 'WAYFINDER'))
 		{
 			waypoint.close();
 		}
 
-		this.currentNavMode = mode;
-		this.nav.setAttribute('type', mode);
+		self.currentNavMode = mode;
+		self.nav.setAttribute('type', mode);
 
 		if (mode == 'WALK')
 		{
-			this.disableClicking();
-			this.setApp(null);
+			self.disableClicking();
+			self.setApp(null);
 		} else {
-			this.enableClicking();
+			self.enableClicking();
 		}
 
 		if ((mode == 'WAYFINDER') && waypoint)
@@ -534,17 +572,17 @@ var Viewer = function(id, x3ddiv, manager) {
 	this.startingPoint = [0.0,0.0,0.0];
 	this.setStartingPoint = function(x,y,z)
 	{
-		this.startingPoint[0] = x;
-		this.startingPoint[1] = y;
-		this.startingPoint[2] = z;
+		self.startingPoint[0] = x;
+		self.startingPoint[1] = y;
+		self.startingPoint[2] = z;
 	}
 
 	this.defaultOrientation = [0.0, 0.0, 1.0];
 	this.setStartingOrientation = function(x,y,z)
 	{
-		this.defaultOrientation[0] = x;
-		this.defaultOrientation[1] = y;
-		this.defaultOrientation[2] = z;
+		self.defaultOrientation[0] = x;
+		self.defaultOrientation[1] = y;
+		self.defaultOrientation[2] = z;
 	}
 
 
@@ -553,109 +591,122 @@ var Viewer = function(id, x3ddiv, manager) {
 
 	this.setCameraPosition = function(x,y,z)
 	{
-		this.currentCameraPosition = [x,y,z];
-		this.updateCamera();
+		self.currentCameraPosition = [x,y,z];
+		self.updateCamera();
 	}
 
 	this.moveCamera = function(dX, dY, dZ)
 	{
-		this.currentCameraPosition[0] += dX;
-		this.currentCameraPosition[1] += dY;
-		this.currentCameraPosition[2] += dZ;
-		this.updateCamera();
+		self.currentCameraPosition[0] += dX;
+		self.currentCameraPosition[1] += dY;
+		self.currentCameraPosition[2] += dZ;
+		self.updateCamera();
 	}
 
 	this.setCameraViewDir = function(u,v,w)
 	{
-		this.currentCameraOrientation = [u,v,w];
-		this.updateCamera();
+		self.currentCameraOrientation = [u,v,w];
+		self.updateCamera();
 	}
 
 	this.updateCamera = function()
 	{
-		var quat = this.rotToRotation(this.defaultOrientation, this.currentCameraOrientation);
+		var quat = self.rotToRotation(self.defaultOrientation, self.currentCameraOrientation);
 
 		var nextPoint = document.createElement('viewpoint');
-		this.scene.appendChild(nextPoint);
+		self.scene.appendChild(nextPoint);
 		nextPoint.setAttribute('id', 'next');
-		nextPoint.setAttribute("position", this.currentCameraPosition.join(" "));
+		nextPoint.setAttribute("position", self.currentCameraPosition.join(" "));
 		nextPoint.setAttribute("orientation", quat);
 
-		oldViewPoint = this.viewPoint;
-		this.viewPoint = nextPoint;
-		this.viewPoint.appendChild(this.nav);
-		this.viewPoint.setAttribute('set_bind', 'true');
+		oldViewPoint = self.viewPoint;
+		self.viewPoint = nextPoint;
+		self.viewPoint.appendChild(self.nav);
+		self.viewPoint.setAttribute('set_bind', 'true');
 
-		this.viewPoint.setAttribute('zNear', this.zNear);
-		this.viewPoint.setAttribute('zFar', this.zFar);
+		self.viewPoint.setAttribute('zNear', self.zNear);
+		self.viewPoint.setAttribute('zFar', self.zFar);
+		self.viewPoint.addEventListener('viewpointChanged', self.viewPointChanged);
 
-		this.viewPoint.addEventListener('viewpointChanged', onViewpointChange, false);
-
-		if (this.manager) // If we are attached to a view manager, I am master.
-		{
-			this.viewPoint.addEventListener('viewpointChanged', this.manager.viewpointLinkFunction);
-			this.manager.switchMaster(this.id);
-		}
+		if(self.linked)
+			self.manager.switchMaster(self.handle);
 
 		setTimeout(function(oldViewPoint){
 			oldViewPoint.parentNode.removeChild(oldViewPoint);
 		}, 0, oldViewPoint); // Remove old viewpoint, once everything is done.
 	}
 
+	this.linked = false;
+	this.linkMe = function()
+	{
+		// Need to be attached to the viewer master
+		if (!self.manager)
+			return;
+
+		self.manager.linkMe(self.handle);
+		self.onViewpointChanged(self.manager.viewpointLinkFunction);
+
+		self.viewer.addEventListener('mousedown', function () {
+			self.manager.switchMaster(self.handle);
+		});
+
+		self.linked = true;
+	}
+
 	this.setCamera = function(x,y,z,u,v,w)
 	{
-		this.currentCameraPosition = [x,y,z];
-		this.currentCameraOrientation = [u,v,w];
-		this.updateCamera();
+		self.currentCameraPosition = [x,y,z];
+		self.currentCameraOrientation = [u,v,w];
+		self.updateCamera();
 	}
 
 	this.collDistance = 0.1;
 	this.changeCollisionDistance = function(collDistance)
 	{
-		this.collDistance = collDistance;
-		this.nav._x3domNode._vf.avatarSize[0] = collDistance;
+		self.collDistance = collDistance;
+		self.nav._x3domNode._vf.avatarSize[0] = collDistance;
 	}
 
 	this.avatarHeight = 1.83;
 	this.changeAvatarHeight = function(height)
 	{
-		this.avatarHeight = height;
-		this.nav._x3domNode._vf.avatarSize[1] = height;
+		self.avatarHeight = height;
+		self.nav._x3domNode._vf.avatarSize[1] = height;
 	}
 
 	this.stepHeight = 0.4;
 	this.changeStepHeight = function(stepHeight)
 	{
-		this.stepHeight = stepHeight;
-		this.nav._x3domNode._vf.avatarSize[2] = stepHeight;
+		self.stepHeight = stepHeight;
+		self.nav._x3domNode._vf.avatarSize[2] = stepHeight;
 	}
 
 	this.reset = function()
 	{
-		this.setCamera(this.startingPoint[0], this.startingPoint[1], this.startingPoint[2],
-			this.defaultOrientation[0], this.defaultOrientation[1], this.defaultOrientation[2]);
+		self.setCamera(self.startingPoint[0], self.startingPoint[1], self.startingPoint[2],
+			self.defaultOrientation[0], self.defaultOrientation[1], self.defaultOrientation[2]);
 
-		this.changeCollisionDistance(this.collDistance);
-		this.changeAvatarHeight(this.avatarHeight);
-		this.changeStepHeight(this.stepHeight);
+		self.changeCollisionDistance(self.collDistance);
+		self.changeAvatarHeight(self.avatarHeight);
+		self.changeStepHeight(self.stepHeight);
 	}
 
 	this.loadURL = function(url)
 	{
-		if(this.inline)
+		if(self.inline)
 		{
-			this.inline.parentNode.removeChild(this.inline);
-			this.inline = null;		// Garbage collect
+			self.inline.parentNode.removeChild(self.inline);
+			self.inline = null;		// Garbage collect
 		}
 
-		this.inline = document.createElement('inline');
-		this.scene.appendChild(this.inline);
-		this.inline.setAttribute('namespacename', 'model');
-		this.inline.setAttribute('onload', 'onLoaded(event);');
-		this.inline.setAttribute('url', url);
-		this.reload();
+		self.inline = document.createElement('inline');
+		self.scene.appendChild(self.inline);
+		self.inline.setAttribute('namespacename', 'model');
+		self.inline.setAttribute('onload', 'onLoaded(event);');
+		self.inline.setAttribute('url', url);
+		self.reload();
 
-		this.url = url;
+		self.url = url;
 	}
 
 	this.getTransMatrix = function()
@@ -674,11 +725,11 @@ var Viewer = function(id, x3ddiv, manager) {
 		return { "viewPos" : viewPos, "viewDir" : viewDir };
 	}
 
-	this.speed = 5.0;
+	this.speed = 2.0;
 	this.setSpeed = function(speed)
 	{
-		this.speed = speed;
-		this.nav.speed = speed;
+		self.speed = speed;
+		self.nav.speed = speed;
 	}
 
 	this.bgroundClick = function(event) {
@@ -718,12 +769,12 @@ var Viewer = function(id, x3ddiv, manager) {
 
 		if (!self.fullscreen)
 		{
-			if (this.viewer.mozRequestFullScreen) {
-				this.viewer.mozRequestFullScreen({
+			if (self.viewer.mozRequestFullScreen) {
+				self.viewer.mozRequestFullScreen({
 					vrDisplay: vrHMD
 				});
-			} else if (this.viewer.webkitRequestFullscreen) {
-				this.viewer.webkitRequestFullscreen({
+			} else if (self.viewer.webkitRequestFullscreen) {
+				self.viewer.webkitRequestFullscreen({
 					vrDisplay: vrHMD,
 				});
 			}
@@ -742,43 +793,43 @@ var Viewer = function(id, x3ddiv, manager) {
 
 	this.switchVR = function() {
 		if (window.oculus)
-			window.oculus.switchVR(this);
+			window.oculus.switchVR();
 	};
 
 	this.setDiffColors = function(diffColors) {
 		if(diffColors)
-			this.diffColors = diffColors;
+			self.diffColors = diffColors;
 
-		if (this.diffColors)
+		if (self.diffColors)
 		{
-			if (this.inline.childNodes.length)
+			if (self.inline.childNodes.length)
 			{
-				var defMapSearch = this.inline.childNodes[0]._x3domNode._nameSpace.defMap;
+				var defMapSearch = self.inline.childNodes[0]._x3domNode._nameSpace.defMap;
 
-				if(this.diffColors["added"])
+				if(self.diffColors["added"])
 				{
-					for(var i = 0; i < this.diffColors["added"].length; i++)
+					for(var i = 0; i < self.diffColors["added"].length; i++)
 					{
 						// TODO: Improve, with graph, to use appearance under  _cf rather than DOM.
-						var obj = defMapSearch[this.diffColors["added"][i]];
+						var obj = defMapSearch[self.diffColors["added"][i]];
 						if(obj)
 						{
 							var mat = $(obj._xmlNode).find("TwoSidedMaterial");
-							this.applyApp(mat, 0.5, "0.0 1.0 0.0", false);
+							self.applyApp(mat, 0.5, "0.0 1.0 0.0", false);
 						}
 					}
 				}
 
-				if(this.diffColors["deleted"])
+				if(self.diffColors["deleted"])
 				{
-					for(var i = 0; i < this.diffColors["deleted"].length; i++)
+					for(var i = 0; i < self.diffColors["deleted"].length; i++)
 					{
 						// TODO: Improve, with graph, to use appearance under  _cf rather than DOM.
-						var obj = defMapSearch[this.diffColors["deleted"][i]];
+						var obj = defMapSearch[self.diffColors["deleted"][i]];
 						if(obj)
 						{
 							var mat = $(obj._xmlNode).find("TwoSidedMaterial");
-							this.applyApp(mat, 0.5, "1.0 0.0 0.0", false);
+							self.applyApp(mat, 0.5, "1.0 0.0 0.0", false);
 						}
 					}
 				}

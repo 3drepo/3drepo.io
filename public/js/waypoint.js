@@ -15,14 +15,17 @@
  **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-var Waypoint = function(viewer) {
+var Waypoint = function(viewer, account, project) {
 	var self = this;
 
 	this.viewer = viewer;
 
-	this.recorder	= new Recorder();
-	this.spheres	= new Spheres();
-	this.arrow		= new Arrow();
+	this.account    = account;
+	this.project    = project;
+
+	this.recorder	= new Recorder(this.viewer, this.account, this.project);
+	this.spheres	= new Spheres(this.viewer);
+	this.arrow		= new Arrow(this.viewer);
 
 	this.startpoints = [];
 	this.endpoints = [];
@@ -43,11 +46,7 @@ var Waypoint = function(viewer) {
 
 	this.readmeFloat		= null;
 
-	this.showReadme = function() {
-		this.readmeFloat = document.createElement('div');
-		this.readmeFloat.setAttribute('name', 'readme');
-		this.readmeFloat.className = 'container float';
-	}
+	this.uids				= null;
 
 	this.updateSettings = function(settings) {
 		if('wayfinder' in settings)
@@ -97,7 +96,7 @@ var Waypoint = function(viewer) {
 
 			if (endDist < (self.blobRadius + self.viewer.avatarHeight))
 			{
-				self.viewer.displayMessage("Finished", [1, 0, 0], 2000);
+				self.viewer.displayMessage("Finished", [255.0, 0.0, 0.0], 2000);
 
 				self.recorder.stopRecording();
 				self.viewer.nav.setAttribute('type','NONE');
@@ -114,7 +113,7 @@ var Waypoint = function(viewer) {
 			var startDist = self.viewer.evDist(objEvent, self.startpoints[self.selectedStartPoint]);
 
 			if (startDist < (self.blobRadius + self.viewer.avatarHeight)) {
-				self.viewer.displayMessage("Started", [0,1,0], 2000);
+				self.viewer.displayMessage("Started", [0.0, 255.0, 0.0], 2000);
 				self.recorder.startRecording();
 				self.hasStarted = true;
 			}
@@ -123,7 +122,7 @@ var Waypoint = function(viewer) {
 
 	this.begin = function() {
 		self.initialized = true;
-		self.viewer.displayMessage('Step on pad to begin', [0, 255, 0], 2000);
+		self.viewer.displayMessage('Step on green pad to begin', [0.0, 255.0, 0.0], 0);
 		// TODO: Should waypoint be accessing the internals
 		self.viewer.nav.setAttribute('type', 'WALK');
 	}
@@ -141,7 +140,7 @@ var Waypoint = function(viewer) {
 			var initDist = self.viewer.evDist(objEvent, currentStartPoint);
 
 			if (initDist < (self.blobRadius + self.viewer.avatarHeight)) {
-				this.begin();
+				self.begin();
 			}
 		}
 	}
@@ -150,6 +149,8 @@ var Waypoint = function(viewer) {
 		var currentStartPoint	= self.startpoints[self.selectedStartPoint].slice(0);
 		var currentEndPoint		= self.endpoints[self.selectedEndPoint].slice(0);
 
+		self.clear();
+
 		self.spheres.addSphere(currentStartPoint, self.blobRadius, self.blobHeight, [0, 1, 0], self.blobTransparency);
 		self.spheres.addSphere(currentEndPoint, self.blobRadius, self.blobHeight, [1, 0, 0], self.blobTransparency);
 		self.arrow.addArrow(currentEndPoint, [1, 0, 0], 0.3);
@@ -157,13 +158,15 @@ var Waypoint = function(viewer) {
 		self.viewer.getViewArea()._mouseSensitivity = 360.0;
 		self.resetViewer();
 
-		$(document).on("onViewpointChange", self.checkStarted);
-		$(document).on("onViewpointChange", self.checkFinished);
-		$(document).on("onViewpointChange", self.checkInit);
+		self.viewer.onViewpointChanged(self.checkStarted);
+		self.viewer.onViewpointChanged(self.checkFinished);
+		self.viewer.onViewpointChanged(self.checkInit);
 	}
 
-	this.initViewingMode = function(uids) {
-		debugger;
+	this.initViewingMode = function(pointdata) {
+		self.clear();
+		self.spheres.plotSpheres(pointdata);
+		self.viewer.nav.type = 'EXAMINE';
 	}
 
 	this.clear = function() {
@@ -171,28 +174,12 @@ var Waypoint = function(viewer) {
 		self.arrow.clearArrow();
 	}
 
-	this.setNavMode = function(mode) {
-		self.clear();
-
-		self.currentNavMode = mode;
-
-		if (mode == 'RECORD') {
-			self.initRecordMode();
-		} else if (mode == 'VIEWING') {
-			//self.initViewingMode();
-		} else if (mode == 'FLYTHROUGH') {
-			self.initFlyThroughMode();
-		} else if (mode == 'NONE') {
-			self.close();
-		}
-	}
-
 	this.paused = true;
 	this.pause = function() { self.paused = true; }
 	this.unpause = function() { self.paused = false; }
 
 	this.init = function() {
-		self.setNavMode('RECORD');
+		self.initRecordMode();
 	}
 
 	this.close = function() {
@@ -203,8 +190,8 @@ var Waypoint = function(viewer) {
 		self.hasStarted = false;
 		self.initialized = false;
 
-		$(document).off("onViewpointChange", self.checkStarted);
-		$(document).off("onViewpointChange", self.checkFinished);
-		$(document).off("onViewpointChange", self.checkInit);
+		self.viewer.offViewpointChanged(self.checkStarted);
+		self.viewer.offViewpointChanged(self.checkFinished);
+		self.viewer.offViewpointChanged(self.checkInit);
 	}
 }

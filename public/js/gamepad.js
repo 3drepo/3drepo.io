@@ -15,12 +15,15 @@
  **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-var Gamepad = function() {
+var Gamepad = function(viewer) {
+
 	var self = this;
 
 	this.enabled = false;
 	this.gamepad = null;
 	this.timestamp = null;
+
+	this.viewer = viewer;
 
 	this.connected = function(event) {
 		this.gamepad = event.gamepad;	// Only support one gamepad
@@ -62,9 +65,9 @@ var Gamepad = function() {
 
 		if (self.gamepad.buttons[0].pressed)
 			if (!this.oldButton) {
-				viewer.reset();
-				viewer.setNavMode('NONE');
-				viewer.disableClicking();
+				self.viewer.reset();
+				self.viewer.setNavMode('NONE');
+				self.viewer.disableClicking();
 			}
 
 		this.oldButton = self.gamepad.buttons[0].pressed;
@@ -75,7 +78,7 @@ var Gamepad = function() {
 			self.gamepad = navigator.getGamepads()[0];
 
 		if(!this.gamepad)
-			viewerManager.getDefaultViewer().setNavMode('TURNTABLE'); // Manually override navigation
+			self.viewer.setNavMode('TURNTABLE'); // Manually override navigation
 		else
 			self.checkStatus();
 

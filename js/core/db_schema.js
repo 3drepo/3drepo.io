@@ -55,7 +55,7 @@ module.exports = function() {
 		}
 	);
 
-	this.registerSchema('/wayfinder/record',
+	this.registerSchema('/:account/:project/wayfinder/record',
 		{
 			"waypoints" : {
 				"type" : "array",

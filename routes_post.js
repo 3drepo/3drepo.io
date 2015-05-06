@@ -131,7 +131,7 @@ module.exports = function(router, dbInterface, checkAccess){
 	//this.post('/:account/:project', false, function(req, res) {
 	//});
 
-	this.post('/wayfinder/record', false, function(req, res) {
+	this.post('/:account/:project/wayfinder/record', false, function(req, res) {
 		var resCode = responseCodes.OK;
 		var responsePlace = 'Wayfinder record POST';
 
@@ -145,7 +145,7 @@ module.exports = function(router, dbInterface, checkAccess){
 			var data = JSON.parse(req.body.data);
 			var timestamp = JSON.parse(req.body.timestamp);
 
-			this.dbInterface.storeWayfinderInfo(config.wayfinder.democompany, config.wayfinder.demoproject, req.session.user.username, req.sessionID, data, timestamp, function(err) {
+			this.dbInterface.storeWayfinderInfo(req.params["account"], req.params["project"], req.session.user.username, req.sessionID, data, timestamp, function(err) {
 				responseCodes.onError('Wayfinder record POST', err, res, {});
 			});
 		}

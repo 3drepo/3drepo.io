@@ -73,7 +73,8 @@ angular.module('3drepo')
 		{
 			if($scope.refreshDiffView)
 			{
-				viewerManager.loadURL("diffView", Data.state.account, Data.state.project, Data.state.diffBranch, Data.state.diffRevision);
+				var diffHandle = viewerManager.getHandleByName("diffView");
+				viewerManager.loadURL(diffHandle, Data.state.account, Data.state.project, Data.state.diffBranch, Data.state.diffRevision);
 
 				$scope.refreshDiffView = false;
 			}
@@ -88,17 +89,18 @@ angular.module('3drepo')
 					deleted:	json.data["deleted"]
 				};
 
-				viewer.setDiffColors(diffColors, true);
-				otherView.setDiffColors(diffColors, false);
-				otherView.disableClicking();
+				viewerManager.setDiffColors(diffColors);
 			});
+		} else {
+			$scope.refreshDiffView = true; // Ready for when it's re-enabled
 		}
 	});
 
 	$scope.$watchGroup(['Data.state.branch', 'Data.state.revision'], function() {
 		if($scope.refreshViewer)
 		{
-			viewerManager.loadURL("viewer", Data.state.account, Data.state.project, Data.state.branch, Data.state.revision);
+			var handle = viewerManager.getHandleByName("viewer");
+			viewerManager.loadURL(handle, Data.state.account, Data.state.project, Data.state.branch, Data.state.revision);
 
 			$scope.refreshViewer = false;
 		}

@@ -1,5 +1,5 @@
 .container-fluid
-	#nav-version-control(ng-controller='RevisionCtrl')
+	#nav-version-control(ng-controller='RevisionCtrl', ng-show="Data.ui.revisionSelector")
 		div.nav-project-title  <b>{{Data.ProjectData.name}}</b>
 		div#revisions-selector
 			#revisionSpan
@@ -57,48 +57,49 @@
 			include waypoint_readme
 			include waypoint_select
 	.ui2(ng-controller='ViewCtrl')
-		#ui2-treeview.collapsed
-			div#ui2-treeview-collapse-btn.pull-right.panel-collapse-btn(ng-click="toggleTree()")
+		#ui2-treeview.collapsed(ng-show="Data.ui.treeView")
+			#ui2-treeview-collapse-btn.pull-right.panel-collapse-btn(ng-click="toggleTree()")
 				i.fa.fa-list
 			.treeview
 				#scenetree
-		#ui2-metadata.collapsed
+		#ui2-metadata.collapsed(ng-show="Data.ui.metaView")
 			#ui2-metadata-collapse-btn.panel-collapse-btn(ng-click="toggleMetadata()")
 				i.fa.fa-tag
 			#meta-popup
 				div#metadata
-			#oculus-mode-icon
-				a.dashboard-tab(onclick="viewer.switchVR()")
+		#ui2-metadata.collapsed
+			#oculus-mode-icon 
+				a.dashboard-tab(ng-click="defaultViewer.switchVR()")
 					img.img-responsive(src="/public/images/oculus_sm.png")
 			#tools-menu-icon
 				.dropup
 					i.fa.fa-wrench(role="button", data-toggle='dropdown', data-target='#')
 					ul.dropdown-menu.pull-right(role='menu').tools-menu-items
-						li Navigation
+						li Navigation 
 						li.divider
 						li
 							a(ng-click='setViewerMode("WALK")') 
-								i.fa.fa-check(ng-show="viewer.currentNavMode == 'WALK'") 
+								i.fa.fa-check(ng-show="defaultViewer.currentNavMode == 'WALK'") 
 								span Walk
 						li
 							a(ng-click='setViewerMode("EXAMINE")') 
-								i.fa.fa-check(ng-show="viewer.currentNavMode == 'EXAMINE'") 
+								i.fa.fa-check(ng-show="defaultViewer.currentNavMode == 'EXAMINE'") 
 								span Examine
 						li
 							a(ng-click='setViewerMode("FLY")') 
-								i.fa.fa-check(ng-show="viewer.currentNavMode == 'FLY'") 
+								i.fa.fa-check(ng-show="defaultViewer.currentNavMode == 'FLY'") 
 								span Fly
 						li
 							a(ng-click='setViewerMode("TURNTABLE")') 
-								i.fa.fa-check(ng-show="viewer.currentNavMode == 'TURNTABLE'")
+								i.fa.fa-check(ng-show="defaultViewer.currentNavMode == 'TURNTABLE'")
 								span Turntable
 						li
 							a(ng-click='setViewerMode("HELICOPTER")') 
-								i.fa.fa-check(ng-show="viewer.currentNavMode == 'HELICOPTER'")
+								i.fa.fa-check(ng-show="defaultViewer.currentNavMode == 'HELICOPTER'")
 								span Helicopter
 						li
 							a(ng-click='setViewerMode("WAYFINDER")') 
-								i.fa.fa-check(ng-show="viewer.currentNavMode == 'WAYFINDER'")
+								i.fa.fa-check(ng-show="defaultViewer.currentNavMode == 'WAYFINDER'")
 								span Wayfinder
 						li.divider
 						li Viewpoints
@@ -111,17 +112,17 @@
 								span Go To Viewpoint
 						li
 							a(ng-click='flyThrough()')
-								i.fa.fa-power-off(ng-show="viewer.isFlyingThrough")
+								i.fa.fa-power-off(ng-show="defaultViewer.isFlyingThrough")
 								span Fly Through
 						li.divider
-						div(ng-repeat="viewpoint in viewer.viewpoints track by viewpoint.name")
+						div(ng-repeat="viewpoint in defaultViewer.viewpoints track by viewpoint.name")
 							li
 								a(ng-click='setCurrentViewpoint(viewpoint.idx)')
-									i.fa.fa-check(ng-show="viewer.selectedViewpoint == viewpoint.idx")
+									i.fa.fa-check(ng-show="defaultViewer.selectedViewpoint == viewpoint.idx")
 									span {{viewpoint.name}}
 						li.divider
-						div(ng-show="viewer.currentNavMode == 'WAYFINDER'")
-							li Wayfinder
+						div(ng-show="defaultViewer.currentNavMode == 'WAYFINDER'")
+							li Wayfinder 
 							li.divider
 							li
 								a(ng-click="setWaypointMode('RECORD')")

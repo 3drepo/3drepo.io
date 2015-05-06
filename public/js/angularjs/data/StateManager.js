@@ -16,30 +16,40 @@
  */
 
 angular.module('3drepo')
-.service('Data', ['ProjectData', 'Branches', 'Comments', 'CurrentBranch', 'CurrentRevision',
+.service('StateManager', ['ProjectData', 'Branches', 'Comments', 'CurrentBranch', 'CurrentRevision',
 		'CurrentDiffBranch', 'CurrentDiffRevision', 'Federation', 'Log', 'Readme', 'RevisionsByDay', 'UserData', 'Users', 'Wayfinder', '$state',
 		function (ProjectData, Branches, Comments, CurrentBranch, CurrentRevision, CurrentDiffBranch,
 			CurrentDiffRevision, Federation, Log, Readme, RevisionsByDay, UserData, Users, Wayfinder, $state) {
 
 			this.ProjectData			= ProjectData;
+
+			// Revision
 			this.Branches				= Branches;
 			this.Comments				= Comments;
 			this.CurrentBranch			= CurrentBranch;
-			this.CurrentDiffBranch		= CurrentDiffBranch;
 			this.CurrentRevision		= CurrentRevision;
-			this.CurrentDiffRevision	= CurrentDiffRevision;
 			this.Federation				= Federation;
 			this.Log					= Log;
 			this.Readme					= Readme;
 			this.RevisionsByDay			= RevisionsByDay;
 			this.UserData				= UserData;
 			this.Users					= Users;
+
+			// Diff
+			this.CurrentDiffBranch		= CurrentDiffBranch;
+			this.CurrentDiffRevision	= CurrentDiffRevision;
+
+			// Wayfinding
 			this.Wayfinder				= Wayfinder;
+
+			this.enabled				= {},
 
 			this.state	= {
 				account:			null,
 				project:			null,
+
 				user:				null,
+
 				branch:				null,
 				revision:			null,
 
@@ -47,16 +57,31 @@ angular.module('3drepo')
 				view:				"info",
 				currentPage:		1,
 				totalItems:			0,
-				itemsPerPage:		5,
+				itemsPerPage:		5
 
 				// Diff state
-				diffEnabled:		false,
 				diffBranch:			null,
-				diffRevision:		null,
+				diffRevision:		null
 
 				// Wayfinder function
-				wayfinderEnabled:	false
+				enabled:			false,
+				uids:				null
 			}
+
+			this.ui = {
+				treeView:			true,
+				metaView:			true,
+				footerBar:			true,
+				revisionSelector:	true,
+
+				// TODO: Split this out into individual controllers
+				// Wayfinding stuff
+				wayfinder: {
+					readme:			false,
+					multiselect:	false,
+					select:			false
+				}
+			};
 
 			this.changed = {};
 
@@ -98,22 +123,31 @@ angular.module('3drepo')
 					else if (self.state.diffEnabled)
 						stateName += ".diff";
 
-					if (self.state.view)
-						stateName += ".view";
+					if (self.state.wayfinder)
+						if (self.state.mode)
+							stateName += "." + self.state.mode;
+					else
+						if (self.state.view)
+							stateName += ".view";
 				}
 
 				return stateName;
 			}
 
-			this.setStateVar = function(varName, value)
+			this.setStateVar = function(plugin, varName, value)
 			{
-				if (!(self.state[varName] == value))
-					self.changed[varName] = true;
+				if (!self.state[plugin])
+					self.state[plugin] = {};
 
-				self.state[varName] = value;
+				self.state[plugin][varName] = value;
+
+				//if (!(self.state[plugin][varName] == value))
+				//	self.changed[plugin][varName] = true;
+
+				//self.state[plugin][varName] = value;
 			}
 
-			this.setState = function(stateParams, extraParams)
+			this.setState = function(plugin, stateParams, extraParams)
 			{
 				var stateObj = $.extend(stateParams, extraParams);
 
@@ -123,17 +157,16 @@ angular.module('3drepo')
 				// to the state
 				for(var i in stateObj)
 					if (i in self.state)
-						self.setStateVar(i, stateObj[i]);
+						self.setStateVar(plugin, i, stateObj[i]);
 
 				// Clear out anything that hasn't been set
-				if ("clearState" in extraParams)
-					if (extraParams["clearState"])
-						for(var i in self.state)
-							if (!(i in stateObj))
-								if (typeof self.state[i] == 'boolean')
-									self.setStateVar(i, false);
-								else
-									self.setStateVar(i, null);
+				if (extraParams["clearState"])
+					for(var i in self.state)
+						if (!(i in stateObj))
+							if (typeof self.state[i] == 'boolean')
+								self.setStateVar(plugin, i, false);
+							else
+								self.setStateVar(plugin, i, null);
 
 				self.refresh();
 			}
@@ -184,6 +217,17 @@ angular.module('3drepo')
 						});
 					}
 
+					// Cannot be in both diff and wayfinder mode at the same time
+					if (self.state.wayfinder && self.state.diffEnabled)
+					{
+						if (self.changed.wayfinder)
+							self.setStateVar("diffEnabled", false);
+						else
+							self.setStateVar("wayfinder", false);
+
+						return self.updateState(); // Resolve this
+					}
+
 					if (self.state.diffEnabled)
 					{
 						if (self.changed.diffBranch)
@@ -202,6 +246,47 @@ angular.module('3drepo')
 							.then(function () {
 								self.setStateVar("diffRevision", self.CurrentDiffRevision.revision);
 							});
+						}
+					}
+
+					if (self.changed.wayfinder || self.changed.mode)
+					{
+						if (self.state.wayfinder)
+						{
+							self.ui.treeView			= false;
+							self.ui.metaView			= false;
+							self.ui.footerBar			= false;
+							self.ui.revisionSelector	= false;
+						} else  {
+							self.ui.treeView			= true;
+							self.ui.metaView			= true;
+							self.ui.footerBar			= true;
+							self.ui.revisionSelector	= true;
+						}
+
+						if (self.changed.mode)
+						{
+							self.Wayfinder.refresh(self.state.account, self.state.project);
+
+							if(self.state.mode == "record")
+							{
+								self.ui.wayfinder.readme = true;
+								self.ui.wayfinder.multiselect = false;
+								self.ui.wayfinder.select = false;
+								self.setStateVar("uids", null);
+							} else if (self.state.mode == "visualize" || self.state.mode == "flythrough") {
+								if (self.state.uids)
+								{
+									self.ui.wayfinder.multiselect = false;
+									self.ui.wayfinder.readme = false;
+									self.Wayfinder.loadUIDS(self.state.uids);
+								} else {
+									if(self.state.mode == "visualize")
+										self.ui.wayfinder.multiselect = true;
+									else
+										self.ui.wayfinder.select = true;
+								}
+							}
 						}
 					}
 
@@ -243,6 +328,7 @@ angular.module('3drepo')
 
 			this.updateState = function()
 			{
+				console.log('Moving to ' + self.genStateName() + ' ...');
 				$state.transitionTo(self.genStateName(), self.state, { location: true, inherit: true, relative: $state.$current, notify: false});
 			}
 }]);

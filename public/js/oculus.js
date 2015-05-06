@@ -15,7 +15,7 @@
  **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-var Oculus = function() {
+var Oculus = function(viewer) {
 	var self = this;
 
 	this.rtLeft		= null;
@@ -33,9 +33,11 @@ var Oculus = function() {
 
 	this.oculus		= null;
 
-	this.switchVR = function(viewer)
+	this.viewer		= viewer;
+
+	this.switchVR = function()
 	{
-		var scene = viewer.scene;
+		var scene = self.viewer.scene;
 
 		if (!this.enabled)
 		{
@@ -144,7 +146,7 @@ var Oculus = function() {
 
 			this.startVR();
 
-			viewer.switchFullScreen();
+			self.viewer.switchFullScreen();
 
 			this.enabled = true;
 		} else {
@@ -167,14 +169,14 @@ var Oculus = function() {
 
 			this.enabled = false;
 
-			viewer.runtime.enterFrame = function () {};
-			viewer.runtime.exitFrame = function () {};
+			self.viewer.runtime.enterFrame = function () {};
+			self.viewer.runtime.exitFrame = function () {};
 
-			viewer.getViewArea().skipSceneRender = null;
+			self.viewer.getViewArea().skipSceneRender = null;
 
-			viewer.switchFullScreen();
+			self.viewer.switchFullScreen();
 
-			viewer.createBackground();
+			self.viewer.createBackground();
 		}
 	}
 
@@ -182,14 +184,14 @@ var Oculus = function() {
 		self.rtLeft		= $("#rtLeft")[0];
 		self.rtRight	= $("#rtRight")[0];
 
-		self.lastW		= viewer.runtime.getWidth();
-		self.lastH		= viewer.runtime.getHeight();
+		self.lastW		= self.viewer.runtime.getWidth();
+		self.lastH		= self.viewer.runtime.getHeight();
 
-		self.viewpoint	= viewer.viewpoint;
+		self.viewpoint	= self.viewer.viewpoint;
 
-		viewer.getViewArea().skipSceneRender = true;
+		self.viewer.getViewArea().skipSceneRender = true;
 
-		viewer.runtime.enterFrame = function () {
+		self.viewer.runtime.enterFrame = function () {
 			if (!self.vrSensor)
 				return;
 
@@ -200,22 +202,22 @@ var Oculus = function() {
 			{
 				var q		= new x3dom.fields.Quaternion(h.x, h.y, h.z, h.w);
 
-				var flyMat	= viewer.viewPoint._x3domNode._viewMatrix.inverse();
+				var flyMat	= self.viewer.viewPoint._x3domNode._viewMatrix.inverse();
 				flyMat.setRotate(q);
-				viewer.viewPoint._x3domNode.setView(flyMat.inverse());
+				self.viewer.viewPoint._x3domNode.setView(flyMat.inverse());
 			}
 		};
 
-		viewer.runtime.exitFrame = function ()
+		self.viewer.runtime.exitFrame = function ()
 		{
-			var w = viewer.runtime.getWidth();
-			var h = viewer.runtime.getHeight();
+			var w = self.viewer.runtime.getWidth();
+			var h = self.viewer.runtime.getHeight();
 
-			viewer.runtime.canvas.doc.ctx.stateManager.viewport(0,0,w / 2,h);
-			viewer.viewer.runtime.canvas.doc._scene._fgnd._webgl.render(viewer.viewer.runtime.canvas.doc.ctx.ctx3d, self.rtLeft._x3domNode._webgl.fbo.tex);
+			self.viewer.runtime.canvas.doc.ctx.stateManager.viewport(0,0,w / 2,h);
+			self.viewer.viewer.runtime.canvas.doc._scene._fgnd._webgl.render(self.viewer.viewer.runtime.canvas.doc.ctx.ctx3d, self.rtLeft._x3domNode._webgl.fbo.tex);
 
-			viewer.runtime.canvas.doc.ctx.stateManager.viewport(w / 2,0,w / 2,h);
-			viewer.viewer.runtime.canvas.doc._scene._fgnd._webgl.render(viewer.viewer.runtime.canvas.doc.ctx.ctx3d, self.rtRight._x3domNode._webgl.fbo.tex);
+			self.viewer.runtime.canvas.doc.ctx.stateManager.viewport(w / 2,0,w / 2,h);
+			self.viewer.viewer.runtime.canvas.doc._scene._fgnd._webgl.render(self.viewer.viewer.runtime.canvas.doc.ctx.ctx3d, self.rtRight._x3domNode._webgl.fbo.tex);
 
 			if (w != self.lastW || h != self.lastH)
 			{
@@ -227,7 +229,7 @@ var Oculus = function() {
 				self.lastH = h;
 			}
 
-			viewer.runtime.triggerRedraw();
+			self.viewer.runtime.triggerRedraw();
 		};
 	}
 
@@ -239,6 +241,18 @@ var Oculus = function() {
 	this.peturbIPD = function(perturbation) {
 		var oldDistance = parseFloat(self.rtLeft.getAttribute("interpupillaryDistance"));
 		this.changeIPD(oldDistance + peturbation);
+	}
+
+	this.exitFullscreen = function() {
+		if (!document.webkitIsFullScreen && !document.msFullscreenElement && !document.mozFullScreen)
+			self.switchVR();
+	}
+
+	this.createFullscreenExit = function () {
+		document.addEventListener('webkitfullscreenchange', self.exitFullscreen, false);
+		document.addEventListener('mozfullscreenchange', self.exitFullscreen, false);
+		document.addEventListener('fullscreenchange', self.exitFullscreen, false);
+		document.addEventListener('MSFullscreenChange', self.exitFullscreen, false);
 	}
 
 	this.init = function(vrdevs) {
@@ -268,11 +282,13 @@ var Oculus = function() {
 			alert("Didn't find a HMD and sensor!");
 			return;
 		}
+
 	}
 
 	if (navigator.getVRDevices)
 		navigator.getVRDevices().then(this.init);
 
+	this.createFullscreenExit();
 	//http://blog.tojicode.com/2014/07/bringing-vr-to-chrome.html
 	//http://blog.bitops.com/blog/2014/08/20/updated-firefox-vr-builds/
 };

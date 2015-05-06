@@ -15,8 +15,49 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 angular.module('3drepo')
-.controller('DashboardCtrl', ['$scope', 'Data', '$state', function($scope, Data, $state){
+.config([
+'$stateProvider',
+'$urlRouterProvider',
+'$locationProvider',
+function($stateProvider, $urlRouterProvider, $locationProvider) {
+	$stateProvider
+	.state('home' ,{
+				url: '/:account',
+				templateUrl: 'home.html',
+				controller: 'DashboardCtrl',
+				resolve: {
+					StateManager:	'StateManager',
+					plugin:			'homepage',
+					auth: function authCheck(Auth) { return Auth.init();},
+					init: function(Data, $stateParams) { Data.setState($stateParams, {}); }
+				}
+			});
+}.controller('DashboardCtrl', ['$scope', 'StateManager', '$q', function($scope, StateManager, $q) {
+	// Standard plugin loader
+	StateManager.registerPlugin("homepage", $scope.init, $scope.deinit);
+
+	$scope.init = function(stateParams)
+	{
+		var deferred = $q.defer();
+
+		if (!StateManager.state.account)
+			state.account		= null;
+
+		StateManager.setStateVar("user", "account", stateParams.account);
+
+		if (state.changed.account)
+
+
+		return deferred.promise;
+	}
+
+	$scope.deinit = function()
+	{
+		state.account		= null;
+	}
+
 	$scope.defaultView = "projects";
 	$scope.view = $scope.defaultView;
 	$scope.Data = Data;
@@ -66,6 +107,32 @@ angular.module('3drepo')
 	$scope.toggleProjectsView = function() {
 		$scope.projectsShowList = !$scope.projectsShowList;
 	};
+
+	// If we've just come from a project, we
+	// need to clean up
+	$scope.$watch('Data.state.project', function() {
+		if (!Data.state.project)
+		{
+			if($window.viewerManager)
+			{
+				$window.viewerManager.close();
+				delete $window.viewerManager;
+				$scope.defaultViewer = null;
+			}
+
+			if ($window.oculus)
+				delete $window.oculus;
+
+			if($window.collision)
+				delete $window.collision;
+
+			if($window.waypoint)
+			{
+				delete $window.waypoint;
+				$scope.waypoint = null;
+			}
+		}
+	});
 
 }]);
 

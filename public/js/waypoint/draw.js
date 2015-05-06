@@ -15,8 +15,12 @@
  **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-var Spheres = function() {
+var Spheres = function(viewer) {
 	this.spheres = [];
+
+	this.viewer = viewer;
+
+	var self = this;
 
 	this.addViewDir = function(position, dir, radius, rgb, trans)
 	{
@@ -32,12 +36,12 @@ var Spheres = function() {
 		//var rotQt = rotQuat([0, 1, 0], dir);
 		//var rotStr = rotQt.x + " " + rotQt.y + " " + rotQt.z + " " + rotQt.w;
 
-		var rotStr = rotToRotation([0,1,0], dir);
+		var rotStr = self.viewer.rotToRotation([0,1,0], dir);
 
 		var transform = document.createElement('transform');
 		transform.setAttribute('translation', posStr);
 		transform.setAttribute('center', posStr);
-		viewer.scene.appendChild(transform);
+		self.viewer.scene.appendChild(transform);
 
 		var rotation = document.createElement('transform');
 		rotation.setAttribute('rotation', rotStr);
@@ -77,7 +81,7 @@ var Spheres = function() {
 		var transform = document.createElement('transform');
 		transform.setAttribute('scale', scaleStr);
 		transform.setAttribute('translation', posStr);
-		viewer.scene.appendChild(transform);
+		self.viewer.scene.appendChild(transform);
 
 		var shape = document.createElement('shape');
 		shape.setAttribute('isPickable', false);
@@ -136,7 +140,7 @@ var Spheres = function() {
 	this.plotSpheres = function(dataJson)
 	{
 		var numRoutes = dataJson.length;
-		var oldPos = viewer.startingPoint.slice(0);
+		var oldPos = self.viewer.startingPoint.slice(0);
 		var numWait = 0;
 
 		for(var routeIdx = 0; routeIdx < numRoutes; routeIdx++)
@@ -148,7 +152,7 @@ var Spheres = function() {
 			{
 				var newPos = dataJson[routeIdx][i].pos;
 				var newDir = dataJson[routeIdx][i].dir;
-				var lastDist = viewer.dist(newPos, oldPos);
+				var lastDist = self.viewer.dist(newPos, oldPos);
 
 				if (lastDist < this.threshold)
 				{
@@ -156,7 +160,8 @@ var Spheres = function() {
 				} else {
 					var newRGB = this.getSpeedRGB(baseRGB, numWait);
 					numWait = 0;
-					this.addSphere(newPos, 0.2, 1.0, newRGB, 0.3);
+					//this.addSphere(newPos, 0.2, 1.0, newRGB, 0.3);
+					this.addViewDir(newPos, newDir, 1.0, newRGB, 0.3);
 				}
 
 				oldPos = newPos.slice(0);
@@ -165,8 +170,12 @@ var Spheres = function() {
 	}
 };
 
-var Text = function() {
+var Text = function(viewer) {
 	this.textElement = null;
+
+	this.viewer = viewer;
+
+	var self = this;
 
 	this.init = function(rgb)
 	{
@@ -176,7 +185,7 @@ var Text = function() {
 			this.textElement = null;
 		}
 
-		var transMatrix = viewer.getTransMatrix();
+		var transMatrix = self.viewer.getTransMatrix();
 		var viewDir = transMatrix.e2();
 		var viewPos = transMatrix.e3();
 
@@ -187,7 +196,7 @@ var Text = function() {
 		var posStr = viewPos.x + " " + viewPos.y + " " + viewPos.z;
 
 		this.textElement = document.createElement('transform');
-		viewer.scene.appendChild(this.textElement);
+		self.viewer.scene.appendChild(this.textElement);
 
 		this.textElement.setAttribute('id', 'textInfo');
 		this.textElement.setAttribute('translation', posStr);
@@ -223,7 +232,7 @@ var Text = function() {
 		this.textElement.getElementsByTagName('text')[0].setAttribute('string', str);
 		this.textElement.getElementsByTagName('material')[0].setAttribute('diffuseColor', rgb.join(' '));
 
-		var transMatrix = viewer.getTransMatrix();
+		var transMatrix = self.viewer.getTransMatrix();
 		var viewDir = transMatrix.e2();
 		var viewPos = transMatrix.e3();
 		var rgbStr = rgb.join(' ');
@@ -241,7 +250,7 @@ var Text = function() {
 	}
 };
 
-var Arrow = function() {
+var Arrow = function(viewer) {
 	this.arrowElement	= null;
 	this.position		= null;
 	this.rgb			= null;
@@ -249,12 +258,14 @@ var Arrow = function() {
 
 	var self = this;
 
+	this.viewer = viewer;
+
 	this.addArrow = function(position, rgb, trans)
 	{
 		self.clearArrow();
 
 		self.arrowElement = document.createElement('inline');
-		viewer.scene.appendChild(self.arrowElement);
+		self.viewer.scene.appendChild(self.arrowElement);
 
 		self.arrowElement.setAttribute('namespacename', 'arrow');
 		self.arrowElement.setAttribute('url', '/public/arrow.x3d');

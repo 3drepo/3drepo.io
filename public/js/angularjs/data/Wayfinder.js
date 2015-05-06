@@ -55,26 +55,17 @@ angular.module('3drepo')
 			return $q.reject();
 
 		self.uids		= uids;
-		self.mode		= mode;
 		self.pointData	= {};
 
 		var deferred = $q.defer();
 
 		if (self.uids) {
-			$http.get(serverConfig.apiUrl(self.account + '/' + self.project + '/record.json'),
+			$http.get(serverConfig.apiUrl(self.account + '/' + self.project + '/wayfinder/record.json'),
 				{ params : { uid: JSON.stringify(self.uids) }})
 			.then(function(json) {
 				self.pointData = json.data;
-
-				debugger;
-
-				deferred.resolve();
-			}, function(message) {
 				deferred.resolve();
 			});
-		} else {
-			if (window.spheres)
-				window.spheres.clearSpheres();
 		}
 
 		return deferred.promise;

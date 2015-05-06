@@ -1493,12 +1493,15 @@ ul.fancytree-container li {
 #viewerMessageBox {
     margin: auto;
     top: 50%;
-    position: relative;
+	left: 50%;
+    position: absolute;
     text-align: center;
-    background-color: RGBA(45,45,45,0.5);
+	color: white;
+    background-color: RGBA(45,45,45,0.9);
     padding: 10px;
     max-width: 200px;
     min-width: 100px;
+	z-index: 10000;
 }
 
 .readme-text {

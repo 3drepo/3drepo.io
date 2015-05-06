@@ -146,8 +146,8 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 					}
 				}
 			}
-		}).state('main.wayfinder', {
-			url: '/wayfinder/?uid',
+		}).state('main.revision.wayfinder', {
+			url: '/wayfinder',
 			views: {
 				"viewer@main" : {
 					resolve: {
@@ -155,18 +155,41 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 					}
 				}
 			}
-		}).state('main.wayfinder.view', {
-			url: '/wayfinder/:view/?uid',
+		}).state('main.revision.wayfinder.visualize', {
+			url: '/visualize/?uids',
 			views : {
 				"footer@main" : {
 					templateUrl: viewUrl,
 					controller: 'ViewCtrl',
 					resolve: {
-						init: function(Data, $stateParams) { Data.setState($stateParams, {"wayfinedEnabled" : true}); }
+						init: function(Data, $stateParams) { Data.setState($stateParams, {"wayfinedEnabled" : true, "mode" : "visualize"}); }
+					}
+				}
+			}
+		}).state('main.revision.wayfinder.record', {
+			url: '/record',
+			views : {
+				"footer@main" : {
+					templateUrl: viewUrl,
+					controller: 'ViewCtrl',
+					resolve: {
+						init: function(Data, $stateParams) { Data.setState($stateParams, {"wayfinedEnabled" : true, "mode" : "record"}); }
+					}
+				}
+			}
+		}).state('main.revision.wayfinder.flythrough', {
+			url: '/flythrough/?uids',
+			views : {
+				"footer@main" : {
+					templateUrl: viewUrl,
+					controller: 'ViewCtrl',
+					resolve: {
+						init: function(Data, $stateParams) { Data.setState($stateParams, {"wayfinedEnabled" : true, "mode" : "flythrough"}); }
 					}
 				}
 			}
 		});
+
 
 	// Empty view redirects to info view by default
 	$urlRouterProvider.when('/:account/:project', '/{account}/{project}/info');
@@ -231,15 +254,8 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 .controller('MainCtrl', ['$scope', '$window', 'serverConfig', 'Data', function($scope, $window, serverConfig, Data) {
 
 	// Java bits
-	$window.viewerManager = new ViewerManager();
-	$window.viewerManager.getDefaultViewer().enableClicking();
-
-	$window.oculus = new Oculus();
-	$window.gamepad = new Gamepad();
-	$window.gamepad.init();
-	$window.collision = new Collision();
-	$window.waypoint = new Waypoint($window.viewerManager.getDefaultViewer());
-	$scope.waypoint = $window.waypoint;
+	$scope.waypoint = null;
+	$scope.defaultViewer = null;
 
 	// Data service
 	$scope.Data = Data;
@@ -247,89 +263,125 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	//$scope.Data.updateState();
 
 	// UI Components
-	$scope.showReadme = false;
-	$scope.showMultiSelect = false;
 	$scope.showSingleSelect = false;
 
-	// When the settings have loaded, update various components
-	Data.ProjectData.loadingPromise.promise.then(function() {
-		$window.viewerManager.getDefaultViewer().updateSettings(Data.ProjectData.settings);
-		$window.waypoint.updateSettings(Data.ProjectData.settings);
-	});
+	// If we open a project
+	$scope.$watch('Data.state.project', function() {
+		if (Data.state.project)
+		{
+			if (!$window.viewerManager)
+			{
+				$window.viewerManager = new ViewerManager();
+				$window.viewerManager.getDefaultViewer().enableClicking();
+				$scope.defaultViewer = $window.viewerManager.getDefaultViewer();
+			}
 
-	initTree(Data.state.account, Data.state.project, 'master', null);
+			if (!$window.oculus)
+				$window.oculus = new Oculus($scope.defaultViewer);
+
+			if (!$window.gamepad)
+			{
+				$window.gamepad = new Gamepad($scope.defaultViewer);
+				$window.gamepad.init();
+			}
+
+			if(!$window.collision)
+			{
+				$window.collision = new Collision($scope.defaultViewer);
+			}
+
+			if(!$window.waypoint)
+			{
+				$window.waypoint = new Waypoint($scope.defaultViewer, Data.state.account, Data.state.project);
+				$scope.waypoint = $window.waypoint;
+			}
+
+			// When the settings have loaded, update various components
+			Data.ProjectData.loadingPromise.promise.then(function() {
+				$scope.defaultViewer.updateSettings(Data.ProjectData.settings);
+				$window.waypoint.updateSettings(Data.ProjectData.settings);
+			});
+
+			initTree(Data.state.account, Data.state.project, 'master', null);
+		}
+	});
 
 	// TODO: Move all of this stuff to a ToolsCtrl
 	$scope.okReadme = function () {
-		$scope.showReadme = false;
+		$scope.Data.ui.wayfinder.readme = false;
 		$window.waypoint.unpause();
 		$window.waypoint.begin();
 	}
 
-	$scope.goWayfinder = function() {
-		$window.viewerManager().getDefaultViewer().setNavMode("WAYFINDER");
-		$scope.setWaypointMode("RECORD");
-	}
-
 	$scope.setViewerMode = function(mode) {
-		$window.viewerManager().getDefaultViewer().setNavMode(mode);
+		$scope.defaultViewer.setNavMode(mode);
 
-		if(mode == 'WAYFINDER')
+		if (mode == "WAYFINDER")
 			$scope.setWaypointMode("RECORD");
-		else
-			$scope.setWaypointMode("NONE");
 	}
 
 	$scope.showAll = function() {
 		$scope.setWaypointMode("NONE");
-		$window.viewerManager.getDefaultViewer().showAll();
+		$scope.defaultViewer.showAll();
 	}
 
 	$scope.reset = function() {
-		$scope.setWaypointMode("NONE");
-		$window.viewerManager.getDefaultViewer().reset();
+		$scope.defaultViewer.reset();
 	}
 
 	$scope.flyThrough = function() {
-		$scope.setWaypointMode("NONE");
-		$window.viewerManager.getDefaultViewer().flyThrough(getDefaultViewer().viewpoints);
+		$scope.defaultViewer.flyThrough($scope.defaultViewer.viewpoints);
 	}
 
 	$scope.setCurrentViewpoint = function(idx)
 	{
 		$scope.setWaypointMode("NONE");
-		$window.viewerManager.getDefaultViewer().setCurrentViewpoint(idx);
+		$scope.defaultViewer.setCurrentViewpoint(idx);
 	}
 
 	$scope.setWaypointMode = function(mode) {
-		$scope.showReadme = false;
-		$scope.showMultiSelect = false;
-		$scope.showSingleSelect = false;
+		$window.waypoint.pause();
 
 		if (mode == 'RECORD') {
-			$window.waypoint.pause();
-			$scope.showReadme = true;
+			Data.setStateVar("mode", "record");
 		} else if (mode == 'VIEWING') {
-			$scope.showMultiSelect = true;
+			Data.setStateVar("mode", "visualize");
 		} else if (mode == 'FLYTHROUGH') {
-			$scope.showSingleSelect = true;
+			Data.setStateVar("mode", "flythrough");
 		}
 
-		$window.waypoint.setNavMode(mode);
+		if (mode == 'NONE') {
+			Data.setStateVar("wayfinder", false);
+		} else {
+			Data.setStateVar("wayfinder", true);
+		}
+
+		if (Data.changed.wayfinder || Data.changed.mode)
+			Data.updateState();
 	}
+
+	$scope.$watchGroup(["defaultViewer.currentNavMode", "Data.state.mode"], function() {
+		if(($scope.defaultViewer.currentNavMode != 'WAYFINDER')) {
+			$scope.setWaypointMode("NONE");
+		} else {
+			if (Data.state.mode == 'record')
+				$window.waypoint.initRecordMode();
+		}
+	});
+
+	$scope.$watch(["Data.Wayfinder.pointData"], function() {
+		$window.waypoint.initViewingMode(Data.Wayfinder.pointData);
+	});
 
 	$scope.visualizeThese = null;
 
 	$scope.visualize = function() {
 		var uids = $scope.visualizeThese.map(function(o) { return o.value; });
-		$state.transitionTo('main.wayfinder.view', { uid : uids, view: Data.view }, { location: true, inherit: true, relative: $state.$current, notify: false});
 
-		if (uids)
-		{
-			$scope.setWaypointMode
-		}
+		Data.setStateVar("mode", "visualize");
+		Data.setStateVar("uids", uids);
+		Data.updateState();
+
 	}
-
-
 }]);
 

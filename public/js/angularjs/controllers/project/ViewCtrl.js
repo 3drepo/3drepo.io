@@ -20,7 +20,6 @@ angular.module('3drepo')
 
 	$scope.Data = Data;
 	$scope.view = Data.view;
-	$scope.viewer = $window.viewer;
 
 	$scope.pageChanged = function() {
 		Data.updatePaginatedView($scope.view);

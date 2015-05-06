@@ -28,6 +28,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 		script(type="text/javascript" src="#{uibootstrap}")
 		script(type="text/javascript" src="#{masonryjs}")
 
+		script(type="text/javascript" src="/public/js/external/angular-bootstrap-multiselect.js")
 
 		script(type="text/javascript" src="/public/js/controlinterface.js")
 		script(type="text/javascript" src="/public/js/config.js")
@@ -44,7 +45,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 		script(type="text/javascript" src="/public/js/collision.js")
 
 		script.
-			angular.module('3drepo', ['ui.router', 'ui.bootstrap']);
+			angular.module('3drepo', ['ui.router', 'ui.bootstrap', 'ui.multiselect']);
 
 		script(type="text/javascript" src='/public/js/angularjs/boilerplate/pageConfigProvider.js')
 
