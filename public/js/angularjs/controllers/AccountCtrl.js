@@ -15,62 +15,47 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 angular.module('3drepo')
 .config([
 '$stateProvider',
-'$urlRouterProvider',
-'$locationProvider',
-function($stateProvider, $urlRouterProvider, $locationProvider) {
+'parentStates',
+'pluginLevels',
+function($stateProvider, parentStates, pluginLevels) {
 	$stateProvider
-	.state('home' ,{
-				url: '/:account',
-				templateUrl: 'home.html',
-				controller: 'DashboardCtrl',
-				resolve: {
-					StateManager:	'StateManager',
-					plugin:			'homepage',
-					auth: function authCheck(Auth) { return Auth.init();},
-					init: function(Data, $stateParams) { Data.setState($stateParams, {}); }
-				}
-			});
-}.controller('DashboardCtrl', ['$scope', 'StateManager', '$q', function($scope, StateManager, $q) {
-	// Standard plugin loader
-	StateManager.registerPlugin("homepage", $scope.init, $scope.deinit);
-
-	$scope.init = function(stateParams)
-	{
-		var deferred = $q.defer();
-
-		if (!StateManager.state.account)
-			state.account		= null;
-
-		StateManager.setStateVar("user", "account", stateParams.account);
-
-		if (state.changed.account)
-
-
-		return deferred.promise;
-	}
-
-	$scope.deinit = function()
-	{
-		state.account		= null;
-	}
+	.state(parentStates["account"] + '.account', {
+		url: '/:account',
+		templateUrl: 'account.html',
+		resolve: {
+			StateManager: "StateManager",
+			auth: function authCheck(Auth) { return Auth.init(); },
+			init: function(StateManager, $stateParams) {
+				StateManager.registerPlugin('AccountData', pluginLevels['account']);
+				StateManager.setState($stateParams, {});
+			}
+		},
+		views: {
+			"@" : {
+				templateUrl: 'account.html',
+				controller: 'AccountCtrl'
+			}
+		}
+	})
+}])
+.controller('AccountCtrl', ['$scope', 'StateManager', function($scope, StateManager)
+{
+	$scope.Data = StateManager.Data;
 
 	$scope.defaultView = "projects";
 	$scope.view = $scope.defaultView;
-	$scope.Data = Data;
-	$scope.account = Data.state.account;
 
 	$scope.setView = function(view){
 		$scope.view = view;
 	}
 
 	$scope.goProject = function(account, project){
-		Data.setStateVar("account", account);
-		Data.setStateVar("project", project);
-		Data.updateState();
+		StateManager.setStateVar("account", account);
+		StateManager.setStateVar("project", project);
+		StateManager.updateState();
 	}
 
 	$scope.isView = function(view){
@@ -107,32 +92,6 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 	$scope.toggleProjectsView = function() {
 		$scope.projectsShowList = !$scope.projectsShowList;
 	};
-
-	// If we've just come from a project, we
-	// need to clean up
-	$scope.$watch('Data.state.project', function() {
-		if (!Data.state.project)
-		{
-			if($window.viewerManager)
-			{
-				$window.viewerManager.close();
-				delete $window.viewerManager;
-				$scope.defaultViewer = null;
-			}
-
-			if ($window.oculus)
-				delete $window.oculus;
-
-			if($window.collision)
-				delete $window.collision;
-
-			if($window.waypoint)
-			{
-				delete $window.waypoint;
-				$scope.waypoint = null;
-			}
-		}
-	});
 
 }]);
 

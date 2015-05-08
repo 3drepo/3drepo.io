@@ -213,16 +213,12 @@ var ViewerManager = function() {
 	}
 
 	// Helper function to load scene in viewers
-	this.loadURL = function(handle, account, project, branch, revision)
+	this.loadURL = function(handle, url)
 	{
 		if (self.isValidHandle(handle))
 		{
 			var viewer = self.viewers[handle];
-
-			if (revision && revision != 'head')
-				viewer.loadURL(server_config.apiUrl(account + '/' + project + '/revision/' + revision + '.x3d.src'));
-			else
-				viewer.loadURL(server_config.apiUrl(account + '/' + project + '/revision/' + branch + '/head.x3d.src'));
+			viewer.loadURL(url);
 		}
 	}
 

@@ -20,6 +20,21 @@ var config = require('./js/core/config.js');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var compress = require('compression');
+var fs = require('fs');
+var jade = require('jade');
+
+// Credit goes to http://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
+function escapeHtml(text) {
+  var map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+
+  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
 
 module.exports.createApp = function(template)
 {
@@ -55,12 +70,190 @@ module.exports.createApp = function(template)
 
 	app.use('/public', express.static(__dirname + '/public'));
 
+	// TODO: Replace with user based plugin selection
+	/*
+	var pluginStructure = {
+		"plugins" : ["base"],
+		"child" : {
+			"plugins" : ["user"],
+			"child" : {
+				"plugins" : ["project"],
+				"child" : { "plugins" : ["revision"],
+							"child" : {
+								"plugins": ["diff", "wayfinder"]
+							}
+						}
+			}
+		}
+	};
+	*/
+
+	/*
+	var pluginStructure = {
+		"plugin" : "base",
+		"children" : [
+			{
+				"plugin": "login",
+				"children": [
+					{
+						"plugin": "account",
+						"children" : [
+							{
+								"plugin": "accountView"
+							},
+							{
+								"plugin": "project",
+								"children": [
+									{
+										"plugin" : "revision",
+										"children" : [
+											{
+												"plugin": "revisionView",
+												"friends": ["tree", "meta"],
+												"children": [
+													{
+														"plugin": "diff"
+													}
+												]
+											},
+											{
+												"plugin": "wayfinder"
+											}
+										]
+									}
+								]
+							}
+						]
+					}
+				]
+		]
+	};
+	*/
+
+	var pluginStructure = {
+		"plugin" : "base",
+		"children" : [
+			{
+				"plugin": "login",
+				"children": [
+					{
+						"plugin": "account",
+						"children": [
+							{"plugin": "project"}
+						]
+					}
+				]
+			}
+		]
+	};
+
+	function buildParams(currentLevel, levelNum, parentState, pluginJade, pluginJS, pluginAngular, parentStateJSON, pluginLevelsJSON, uiJSON)
+	{
+		var plugin = currentLevel["plugin"];
+
+		pluginAngular[plugin]				= {};
+		pluginAngular[plugin]["plugin"]		= plugin;
+		parentStateJSON[plugin]				= parentState;
+		pluginLevelsJSON[plugin]				= levelNum;
+		pluginAngular[plugin]["files"]		= [];
+
+		// TODO: Check whether or not it doesn't exist
+		var pluginConfig = JSON.parse(fs.readFileSync("./config/plugins/" + plugin + ".json", "utf8"));
+
+		// Loop through the files to be loaded
+		if ("files" in pluginConfig)
+		{
+			if("jade" in pluginConfig["files"])
+			{
+				var nJadeFiles = pluginConfig["files"]["jade"].length;
+
+				for(var fileidx = 0; fileidx < nJadeFiles; fileidx++)
+				{
+					var jadeFile = pluginConfig["files"]["jade"][fileidx];
+					pluginJade.push(jadeFile);
+				}
+			}
+
+			if ("js" in pluginConfig["files"])
+			{
+				var nJSFiles = pluginConfig["files"]["js"].length;
+
+				for(var fileidx = 0; fileidx < nJSFiles; fileidx++)
+				{
+					var jsFile = '/public/js/' + pluginConfig["files"]["js"][fileidx];
+					pluginJS.push(jsFile);
+				}
+			}
+
+			if ("angular" in pluginConfig["files"])
+			{
+				var nAngularFiles = pluginConfig["files"]["angular"].length;
+
+				for(var fileidx = 0; fileidx < nAngularFiles; fileidx++)
+				{
+					var angularFile = '/public/js/angularjs/' + pluginConfig["files"]["angular"][fileidx];
+					pluginAngular[plugin]["files"].push(angularFile);
+				}
+			}
+
+			if ("ui" in pluginConfig["files"])
+			{
+				var nUIComponents = pluginConfig["files"]["ui"].length;
+
+				for(var uiidx = 0; uiidx < nUIComponents; uiidx++)
+				{
+					var uicomp = pluginConfig["files"]["ui"][uiidx];
+
+					if (!(uicomp["position"] in uiJSON))
+						uiJSON[uicomp["position"]] = [];
+
+					uiJSON[uicomp["position"]].push(uicomp["template"]);
+				}
+			}
+
+			if (parentState)
+				parentState += ".";
+
+			parentState += plugin;
+
+			if ("children" in currentLevel)
+				for(var i = 0; i < currentLevel["children"].length; i++)
+					buildParams(currentLevel["children"][i], levelNum + 1, parentState, pluginJade, pluginJS, pluginAngular, parentStateJSON, pluginLevelsJSON, uiJSON);
+		}
+	}
+
 	app.get('*', function(req, res) {
 		var params = {};
 
-		Object.keys(config.external).forEach(function(key) {
-			params[key] = config.external[key];
-		});
+		params["jsfiles"] = "";
+		params["cssfiles"] = "";
+
+		params["jsfiles"] = config.external.js;
+		params["cssfiles"] = config.external.css;
+
+		// Generate the list of files to load for the plugins
+		var hasChildren = true;
+		var levelStructure = pluginStructure;
+
+		params["pluginJade"]		= [];
+		params["pluginJS"]			= [];
+		params["pluginAngular"]		= {};
+		params["parentStateJSON"]		= {};
+		params["pluginLevelsJSON"]		= {};
+		params["ui"]					= {
+			"header" : [],
+			"right" : [],
+			"left" : [],
+			"viewport" : [],
+			"tools" : []
+		};
+		var parentState = "";
+		buildParams(pluginStructure, 0, parentState, params["pluginJade"], params["pluginJS"], params["pluginAngular"], params["parentStateJSON"], params["pluginLevelsJSON"], params["ui"]);
+
+		params["parentStateJSON"] = JSON.stringify(params["parentStateJSON"]);
+		params["pluginLevelsJSON"] = JSON.stringify(params["pluginLevelsJSON"]);
+
+		params["renderMe"] = jade.renderFile;
 
 		res.render(template, params);
 	});

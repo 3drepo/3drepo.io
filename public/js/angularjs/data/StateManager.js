@@ -16,11 +16,17 @@
  */
 
 angular.module('3drepo')
-.service('StateManager', ['ProjectData', 'Branches', 'Comments', 'CurrentBranch', 'CurrentRevision',
+.service('StateManager', ['$injector', function($injector) {
+		/*['ProjectData', 'Branches', 'Comments', 'CurrentBranch', 'CurrentRevision',
 		'CurrentDiffBranch', 'CurrentDiffRevision', 'Federation', 'Log', 'Readme', 'RevisionsByDay', 'UserData', 'Users', 'Wayfinder', '$state',
 		function (ProjectData, Branches, Comments, CurrentBranch, CurrentRevision, CurrentDiffBranch,
 			CurrentDiffRevision, Federation, Log, Readme, RevisionsByDay, UserData, Users, Wayfinder, $state) {
+		*/
+			var self = this;
 
+			this.Data = {};
+
+			/*
 			this.ProjectData			= ProjectData;
 
 			// Revision
@@ -41,10 +47,13 @@ angular.module('3drepo')
 
 			// Wayfinding
 			this.Wayfinder				= Wayfinder;
+			*/
 
 			this.enabled				= {},
 
-			this.state	= {
+			this.state	= {};
+
+			/*
 				account:			null,
 				project:			null,
 
@@ -67,7 +76,11 @@ angular.module('3drepo')
 				enabled:			false,
 				uids:				null
 			}
+			*/
 
+			this.ui = {};
+
+			/*
 			this.ui = {
 				treeView:			true,
 				metaView:			true,
@@ -82,27 +95,122 @@ angular.module('3drepo')
 					select:			false
 				}
 			};
+			*/
+
+			this.pluginLevel = {};
 
 			this.changed = {};
 
-			for(var i in this.state)
-				this.changed[i] = false;
-
-			var self = this;
-
-			this.updatePaginatedView = function()
+			this.clearChanged = function()
 			{
-				var first = (self.state.currentPage - 1) * self.state.itemsPerPage;
-				var last  = Math.min(self.state.totalItems - 1, self.state.currentPage * self.state.itemsPerPage - 1);
-
-				if (self.state.view == "comments")
-					self.Comments.refresh(self.state.account, self.state.project, first, last);
-				else if (self.state.view == "log")
-					self.Log.refresh(self.state.account, self.state.project, first, last);
-				else if (self.view == "revisions")
-					self.RevisionsByDay.refresh(self.state.account, self.state.project, self.state.branch, first, last);
+				for(var i in self.changed)
+					self.changed[i] = false;
 			}
 
+			self.clearChanged();
+
+			this.registerPlugin = function(dataFactory, level)
+			{
+				// Inject the data factory for a plugin
+				this.Data[dataFactory] = $injector.get(dataFactory);
+
+				if (!(level in self.pluginLevel))
+					self.pluginLevel[level] = [];
+
+				self.pluginLevel[level].push(this.Data[dataFactory]);
+			}
+
+			this.genStateName = function ()
+			{
+				var stateName = "";
+				var levels = Object.keys(self.pluginLevel);
+
+				for(var lvlidx = 0; lvlidx < levels.length; lvlidx++)
+				{
+					var validLevel = false;
+
+					for (var pluginidx = 0; pluginidx < self.pluginLevel.length; pluginidx++)
+					{
+						var level = levels[lvlidx];
+						var pluginStateName = self.pluginLevel[level][pluginidx].genStateName();
+
+						if (stateName != null)
+						{
+							if (validLevel)
+							{
+								console.log('error', 'Conflicting plugins loaded at level ' + level);
+								return null;
+							} else {
+								validLevel = true;
+								stateName += pluginStateName;
+							}
+						}
+					}
+
+					if (!validLevel)
+					{
+						console.log('error', 'No valid plugin found for level ' + level);
+						return null;
+					} else {
+						if (lvlidx != (levels.length - 1))
+							stateName + ".";
+					}
+				}
+			}
+
+			this.refresh = function()
+			{
+				for(key in this.Data)
+					this.Data[key].refresh();
+			}
+
+			this.createStateVar = function(varName, value)
+			{
+				// TODO: Check for duplication
+				this.state.varName = value;
+			}
+
+			this.setStateVar = function(varName, value)
+			{
+				if (!(self.state[varName] == value))
+					self.changed[varName] = true;
+
+				self.state[varName] = value;
+			}
+
+			this.setState = function(stateParams, extraParams)
+			{
+				var stateObj = $.extend(stateParams, extraParams);
+
+				// Copy all state parameters and extra parameters
+				// to the state
+				for(var i in stateObj)
+				{
+					if (!(i in self.state))
+						self.createStateVar(i, stateObj[i]);
+
+					self.setStateVar(i, stateObj[i]);
+				}
+
+				// Clear out anything that hasn't been set
+				if (extraParams["clearState"])
+					for(var i in self.state)
+						if (!(i in stateObj))
+							if (typeof self.state[i] == 'boolean')
+								self.setStateVar(i, false);
+							else
+								self.setStateVar(i, null);
+
+				self.refresh();
+			}
+
+			this.updateState = function()
+			{
+				console.log('Moving to ' + self.genStateName() + ' ...');
+				$state.transitionTo(self.genStateName(), self.state, { location: true, inherit: true, relative: $state.$current, notify: false});
+			}
+
+			/*
 			this.genStateName = function()
 			{
 				var stateName = "";
@@ -133,50 +241,9 @@ angular.module('3drepo')
 
 				return stateName;
 			}
+			*/
 
-			this.setStateVar = function(plugin, varName, value)
-			{
-				if (!self.state[plugin])
-					self.state[plugin] = {};
-
-				self.state[plugin][varName] = value;
-
-				//if (!(self.state[plugin][varName] == value))
-				//	self.changed[plugin][varName] = true;
-
-				//self.state[plugin][varName] = value;
-			}
-
-			this.setState = function(plugin, stateParams, extraParams)
-			{
-				var stateObj = $.extend(stateParams, extraParams);
-
-				console.log("PARAMS: " + JSON.stringify(stateParams) + " ...");
-
-				// Copy all state parameters and extra parameters
-				// to the state
-				for(var i in stateObj)
-					if (i in self.state)
-						self.setStateVar(plugin, i, stateObj[i]);
-
-				// Clear out anything that hasn't been set
-				if (extraParams["clearState"])
-					for(var i in self.state)
-						if (!(i in stateObj))
-							if (typeof self.state[i] == 'boolean')
-								self.setStateVar(plugin, i, false);
-							else
-								self.setStateVar(plugin, i, null);
-
-				self.refresh();
-			}
-
-			this.clearChanged = function()
-			{
-				for(var i in self.changed)
-					self.changed[i] = false;
-			}
-
+			/*
 			this.refresh = function()
 			{
 				var stateName = self.genStateName();
@@ -325,11 +392,7 @@ angular.module('3drepo')
 
 				self.clearChanged();
 			}
+			*/
 
-			this.updateState = function()
-			{
-				console.log('Moving to ' + self.genStateName() + ' ...');
-				$state.transitionTo(self.genStateName(), self.state, { location: true, inherit: true, relative: $state.$current, notify: false});
-			}
 }]);
 

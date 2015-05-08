@@ -1,0 +1,16 @@
+div(ng-show="defaultViewer.currentNavMode == 'WAYFINDER'")
+	li Wayfinder 
+	li.divider
+	li
+		a(ng-click="setWaypointMode('RECORD')")
+			i.fa.fa-check(ng-show="waypoint.currentNavMode == 'RECORD'")
+			span Record Mode
+	li
+		a(ng-click="setWaypointMode('VIEWING')")
+			i.fa.fa-check(ng-show="waypoint.currentNavMode == 'VIEWING'")
+			span Viewing
+	li
+		a(ng-click="setWaypointMode('FLYTHROUGH')")
+			i.fa.fa-check(ng-show="waypoint.currentNavMode == 'FLYTHROUGH'")
+			span Fly Through
+

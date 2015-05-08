@@ -1107,10 +1107,21 @@ header button.btn {
 	border-radius: 0;
 }
 
-#ui2-treeview {
+#ui2-left {
 	position: fixed;
 	bottom: 0px;
 	left: 0;
+	height: calc(100% - 60px);
+}
+
+#ui2-right {
+	position: fixed;
+	bottom: 0px;
+	right: 0;
+	height: calc(100% - 60px);
+}
+
+#ui2-treeview {
 	width: 25%;
 	height: calc(100% - 60px);
 	background-color: rgba(255, 255, 255, 0.5);
@@ -1154,11 +1165,7 @@ header button.btn {
 }
 
 #ui2-metadata {
-	position: fixed;
-	bottom: 0px;
-	right: 0;
 	width: 25%;
-	height: calc(100% - 60px);
 	background-color: rgba(255, 255, 255, 0.5);
 	-webkit-transition: all linear 0.05s;
 	transition: all linear 0.05s;

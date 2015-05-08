@@ -18,9 +18,9 @@
 angular.module('3drepo')
 .config(["pageConfigProvider", "$urlRouterProvider", function(pageConfigProvider, $urlRouterProvider) {
 	pageConfigProvider.setStateFuncs( function(Auth, $state) {
-		$state.go('home', {account: Auth.username});
+		$state.go('base.login.account', {account: Auth.username});
 	}, function(Auth, $state) {
-		$state.go('login');
+		$state.go('base.login');
 	});
 }]);
 

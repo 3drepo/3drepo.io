@@ -19,36 +19,36 @@ angular.module('3drepo')
 .config([
 '$stateProvider',
 'parentStates',
-function($stateProvider, parentStates) {
+'pluginLevels',
+function($stateProvider, parentStates, pluginLevels) {
 	$stateProvider
-	.state(parentStates["login"] + '.login', {
-		url: '',
+	.state(parentStates["project"] + '.project', {
+		url: '/:project',
+		templateUrl: 'account.html',
+		resolve: {
+			StateManager: "StateManager",
+			auth: function authCheck(Auth) { return Auth.init(); },
+			init: function(StateManager, $stateParams) {
+				StateManager.registerPlugin('ProjectData', pluginLevels['project']);
+				StateManager.setState($stateParams, {});
+			}
+		},
 		views: {
 			"@" : {
-				templateUrl: 'login.html'
+				templateUrl: 'project.html',
+				controller: 'ProjectCtrl'
 			}
 		}
 	})
 }])
-.controller('LoginCtrl', ['$scope', 'StateManager', 'pageConfig', 'Auth', function($scope, StateManager, pageConfig, Auth)
+.controller('ProjectCtrl', ['$scope', 'StateManager', 'ViewerService', function($scope, StateManager, ViewerService)
 {
-	$scope.user = { username: "", password: ""};
+	$scope.Data = StateManager.Data;
 
-	$scope.login = function() {
-		Auth.login($scope.user.username, $scope.user.password).then(
-			function _loginCtrlLoginSuccess(username) {
-				$scope.errorMessage = null;
-				pageConfig.goDefault();
-				$scope.user.username = null;
-				$scope.user.password = null;
-				StateManager.setStateVar("user", username);
-			}, function _loginCtrlLoginFailure(reason) {
-				$scope.errorMessage = reason;
-				pageConfig.goDefault();
-				$scope.user.password = null;
-				StateManager.setStateVar("user", null);
-			}
-		);
-	};
+	ViewerService.init();
+
+	$scope.$watch('StateManager.state.project', function () {
+		ViewerService.loadModel();
+	});
 }]);
 

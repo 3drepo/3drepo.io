@@ -7,8 +7,8 @@
 				.row
 					.col-md-12
 						.profile-pic
-							img#picImg(ng-show="Data.UserData.hasAvatar", ng-src='{{Data.UserData.avatarURL}}')
-							i.fa.fa-user(ng-show="!Data.UserData.hasAvatar")
+							img#picImg(ng-show="Data.AccountData.hasAvatar", ng-src='{{Data.AccountData.avatarURL}}')
+							i.fa.fa-user(ng-show="!Data.AccountData.hasAvatar")
 				// Menu
 				.row
 					.col-md-12
@@ -35,8 +35,8 @@
 				.row
 					.col-md-12
 						.profile-box
-							h5 <i class="fa fa-user"></i> {{Data.UserData.firstName}} {{Data.UserData.lastName}}
-							p <i class="fa fa-envelope"></i> {{Data.UserData.email}}
+							h5 <i class="fa fa-user"></i> {{Data.AccountData.firstName}} {{Data.AccountData.lastName}}
+							p <i class="fa fa-envelope"></i> {{Data.AccountData.email}}
 
 			// Main content
 			#profile-settings.col-md-9
@@ -44,7 +44,7 @@
 				// List of projects
 				#projects-list.row(ng-show="view=='projects' && projectsShowList")
 					.col-xs-12
-						div(ng-repeat="(account, projects) in Data.UserData.projectsGrouped")
+						div(ng-repeat="(account, projects) in Data.AccountData.projectsGrouped")
 							h3 {{account}}
 							.account-projects
 								div(ng-repeat="project in projects")
@@ -56,7 +56,7 @@
 				#projects-thumbnails.row(ng-show="view=='projects' && !projectsShowList")
 					.col-xs-12.unpadded.js-masonry(data-masonry-options='{ "itemSelector": ".item-masonry", "columnWidth": ".grid-sizer", "gutter": 0, "percentPosition": true}')
 						.grid-sizer
-						div.item-masonry.project-thumbnail(ng-repeat="project in Data.UserData.projects")
+						div.item-masonry.project-thumbnail(ng-repeat="project in Data.AccountData.projects")
 							a(ng-href="{{'/' + project.account + '/' + project.project}}")
 								img.img-responsive(src="/public/images/dummies/kc.jpg")
 								.item-masonry-description
@@ -111,7 +111,7 @@
 										span.commit-author Frederic
 				// Projects
 				//div(ng-if="view=='projects'")
-					.col-md-12(ng-repeat='project in Data.UserData.projects')
+					.col-md-12(ng-repeat='project in Data.AccountData.projects')
 						.block
 							.col-sm-12.block-header
 								h3
@@ -160,16 +160,16 @@
 								.row.form-group
 									.col-xs-12.margined
 										label(for='settings-username') Username
-										input#settings-username.form-control(ng-model='Data.UserData.username', type='text', disabled)
+										input#settings-username.form-control(ng-model='Data.AccountData.username', type='text', disabled)
 									.col-xs-6.margined
 										label(for='settings-firstname') First Name
-										input#settings-firstname.form-control(ng-model='Data.UserData.firstName', type='text')
+										input#settings-firstname.form-control(ng-model='Data.AccountData.firstName', type='text')
 									.col-xs-6.margined
 										label(for='settings-lastname') Last Name
-										input#settings-lastname.form-control(ng-model='Data.UserData.lastName', type='text')
+										input#settings-lastname.form-control(ng-model='Data.AccountData.lastName', type='text')
 									.col-xs-12.margined
 										label(for='settings-email') Email Address
-										input#settings-email.form-control(ng-model='Data.UserData.email', type='email')
+										input#settings-email.form-control(ng-model='Data.AccountData.email', type='email')
 									.col-xs-12.margined
 										button.btn.btn-primary.pull-right(ng-click="updateUser()") Update
 					.col-xs-12

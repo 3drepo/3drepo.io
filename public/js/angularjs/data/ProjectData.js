@@ -16,7 +16,7 @@
  */
 
 angular.module('3drepo')
-.factory('ProjectData', ['$http', '$q', 'serverConfig', function($http, $q, serverConfig){
+.factory('ProjectData', ['$http', '$q', 'serverConfig', 'StateManager', function($http, $q, serverConfig, StateManager){
 	var o = {
 		account:		null,
 		project:		null,
@@ -54,52 +54,59 @@ angular.module('3drepo')
 	o.loading = false;
 	o.loadingPromise = $q.defer();
 
-	o.refresh = function(account, project) {
+	o.refresh = function() {
 		var self = this;
-
-		self.visibility = 'private';
+		var account = StateManager.state.account;
+		var project = StateManager.state.project;
 
 		if(!self.loading)
 		{
-			self.loading  = true;
+			if (project != self.project)
+			{
+				self.visibility = 'private';
 
-			$http.get(serverConfig.apiUrl(account + '/' + project + '.json')).success(function(json, status) {
-				self.name				= project;
-				self.owner				= json.owner;
-				self.description		= json.desc;
-				self.type				= json.type;
-				self.selected			= self.projectTypes[0];
+					self.loading  = true;
 
-				for(var i = 0; i < self.projectTypes.length; i++)
-				{
-					if (self.projectTypes[i].label.toLowerCase() == self.type.toLowerCase())
-					{
-						self.selected = self.projectTypes[i];
-						break;
-					}
-				}
+					$http.get(serverConfig.apiUrl(account + '/' + project + '.json')).success(function(json, status) {
+						self.name				= project;
+						self.owner				= json.owner;
+						self.description		= json.desc;
+						self.type				= json.type;
+						self.selected			= self.projectTypes[0];
 
-				// Public permissions
-				self.publicPerm.read = (json.permissions[self.roleIndex["PUBLIC"]] & self.bitMasks["READ_BIT"]) > 0;
-				self.publicPerm.write = (json.permissions[self.roleIndex["PUBLIC"]] & self.bitMasks["WRITE_BIT"]) > 0;
-				self.publicPerm.execute = (json.permissions[self.roleIndex["PUBLIC"]] & self.bitMasks["EXECUTE_BIT"]) > 0;
+						for(var i = 0; i < self.projectTypes.length; i++)
+						{
+							if (self.projectTypes[i].label.toLowerCase() == self.type.toLowerCase())
+							{
+								self.selected = self.projectTypes[i];
+								break;
+							}
+						}
 
-				// User permissions
-				self.userPerm.read = (json.permissions[self.roleIndex["USER"]] & self.bitMasks["READ_BIT"]) > 0;
-				self.userPerm.write = (json.permissions[self.roleIndex["USER"]] & self.bitMasks["WRITE_BIT"]) > 0;
-				self.userPerm.execute = (json.permissions[self.roleIndex["USER"]] & self.bitMasks["EXECUTE_BIT"]) > 0;
+						// Public permissions
+						self.publicPerm.read = (json.permissions[self.roleIndex["PUBLIC"]] & self.bitMasks["READ_BIT"]) > 0;
+						self.publicPerm.write = (json.permissions[self.roleIndex["PUBLIC"]] & self.bitMasks["WRITE_BIT"]) > 0;
+						self.publicPerm.execute = (json.permissions[self.roleIndex["PUBLIC"]] & self.bitMasks["EXECUTE_BIT"]) > 0;
 
-				// Owner permissions
-				self.ownerPerm.read = (json.permissions[self.roleIndex["OWNER"]] & self.bitMasks["READ_BIT"]) > 0;
-				self.ownerPerm.write = (json.permissions[self.roleIndex["OWNER"]] & self.bitMasks["WRITE_BIT"]) > 0;
-				self.ownerPerm.execute = (json.permissions[self.roleIndex["OWNER"]] & self.bitMasks["EXECUTE_BIT"]) > 0;
+						// User permissions
+						self.userPerm.read = (json.permissions[self.roleIndex["USER"]] & self.bitMasks["READ_BIT"]) > 0;
+						self.userPerm.write = (json.permissions[self.roleIndex["USER"]] & self.bitMasks["WRITE_BIT"]) > 0;
+						self.userPerm.execute = (json.permissions[self.roleIndex["USER"]] & self.bitMasks["EXECUTE_BIT"]) > 0;
 
-				self.loading = false;
+						// Owner permissions
+						self.ownerPerm.read = (json.permissions[self.roleIndex["OWNER"]] & self.bitMasks["READ_BIT"]) > 0;
+						self.ownerPerm.write = (json.permissions[self.roleIndex["OWNER"]] & self.bitMasks["WRITE_BIT"]) > 0;
+						self.ownerPerm.execute = (json.permissions[self.roleIndex["OWNER"]] & self.bitMasks["EXECUTE_BIT"]) > 0;
 
-				self.settings = json.properties;
+						self.loading = false;
 
+						self.settings = json.properties;
+
+						self.loadingPromise.resolve();
+					});
+			} else {
 				self.loadingPromise.resolve();
-			});
+			}
 		}
 
 		return self.loadingPromise.promise;

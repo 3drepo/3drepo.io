@@ -1,0 +1,21 @@
+li.divider
+li Viewpoints
+li.divider
+li
+	a(ng-click='showAll()')
+		span Show All
+li
+	a(ng-click='reset()')
+		span Go To Viewpoint
+li
+	a(ng-click='flyThrough()')
+		i.fa.fa-power-off(ng-show="defaultViewer.isFlyingThrough")
+		span Fly Through
+li.divider
+div(ng-repeat="viewpoint in defaultViewer.viewpoints track by viewpoint.name")
+	li
+		a(ng-click='setCurrentViewpoint(viewpoint.idx)')
+			i.fa.fa-check(ng-show="defaultViewer.selectedViewpoint == viewpoint.idx")
+			span {{viewpoint.name}}
+li.divider
+
