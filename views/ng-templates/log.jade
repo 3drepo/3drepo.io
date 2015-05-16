@@ -1,8 +1,7 @@
 .col-md-12.bottom-info
-	ng-include(src="'menu.html'")
-	div(ng-if='Data.Log.loading')
+	div(ng-if='Data.ViewData.Log.loading')
 		img.loading(src='/public/images/ajax-loader.gif', width='20', height='20')
-	div(ng-if='!Data.Log.loading')
+	div(ng-if='!Data.ViewData.Log.loading')
 		.block
 			.col-sm-12.margined.block-header
 				h3 History

@@ -25,12 +25,10 @@ angular.module('3drepo')
 		self.defaultViewer = self.viewerManager.getDefaultViewer();
 		self.defaultViewer.enableClicking();
 
-		self.loadModel();
-
 		// Comes free with oculus support and gamepad support :)
 		self.oculus		= new Oculus(self.defaultViewer);
-		self.gamepad	= new Gamepad(self.defaultViewer);
-		self.gamepad.init();
+		//self.gamepad	= new Gamepad(self.defaultViewer);
+		//self.gamepad.init();
 	}
 
 	this.loadModel = function() {
@@ -46,6 +44,12 @@ angular.module('3drepo')
 		}
 
 		self.defaultViewer.loadURL(url);
+	}
+
+	this.switchVR = function()
+	{
+		if(self.oculus)
+			self.oculus.switchVR();
 	}
 
 	this.close = function() {

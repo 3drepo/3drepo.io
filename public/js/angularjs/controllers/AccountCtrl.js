@@ -19,32 +19,40 @@ angular.module('3drepo')
 .config([
 '$stateProvider',
 'parentStates',
-'pluginLevels',
-function($stateProvider, parentStates, pluginLevels) {
-	$stateProvider
-	.state(parentStates["account"] + '.account', {
-		url: '/:account',
-		templateUrl: 'account.html',
-		resolve: {
-			StateManager: "StateManager",
-			auth: function authCheck(Auth) { return Auth.init(); },
-			init: function(StateManager, $stateParams) {
-				StateManager.registerPlugin('AccountData', pluginLevels['account']);
-				StateManager.setState($stateParams, {});
+function($stateProvider, parentStates) {
+	var states = parentStates["account"];
+
+	for(var i = 0; i < states.length; i++) {
+		$stateProvider
+		.state(states[i] + '.account', {
+			url: '/:account',
+			templateUrl: 'account.html',
+			resolve: {
+				auth: function authCheck(Auth) { return Auth.init(); },
+				init: function(StateManager, $stateParams) {
+					StateManager.setState($stateParams, {});
+					StateManager.refresh("account");
+				}
+			},
+			views: {
+				"@" : {
+					templateUrl: 'account.html',
+					controller: 'AccountCtrl'
+				}
 			}
-		},
-		views: {
-			"@" : {
-				templateUrl: 'account.html',
-				controller: 'AccountCtrl'
-			}
-		}
-	})
+		})
+	}
+}])
+.run(['StateManager', function(StateManager) {
+	StateManager.registerPlugin('account', 'AccountData', function () {
+		if(StateManager.state.account)
+			return "account";
+		else
+			return null;
+	});
 }])
 .controller('AccountCtrl', ['$scope', 'StateManager', function($scope, StateManager)
 {
-	$scope.Data = StateManager.Data;
-
 	$scope.defaultView = "projects";
 	$scope.view = $scope.defaultView;
 

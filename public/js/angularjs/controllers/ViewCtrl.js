@@ -15,25 +15,82 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-angular.module('3drepo')
-.controller('ViewCtrl', ['$scope', 'Data', 'serverConfig', '$window', '$state', function($scope,  Data, serverConfig, $window, $state){
+var viewUrl = function ($stateParams)
+{
+	// Each view is associated with a template
+	// However only a few views are possible
+	// Check that we have a view that exists otherwise redirects to info
+	var possible_views = ["info", "comments", "revisions", "log", "settings", "cobie"];
+	var view = $stateParams.view;
 
-	$scope.Data = Data;
-	$scope.view = Data.view;
+	if( possible_views.indexOf(view) == -1 ){
+		view = "info";
+	}
+
+	return view + '.html';
+}
+
+angular.module('3drepo')
+.config([
+'$stateProvider',
+'parentStates',
+function($stateProvider, parentStates) {
+	var states = parentStates["view"];
+
+	for(var i = 0; i < states.length; i++) {
+		var newState = {
+			url: '/:view',
+			resolve: {
+				auth: function authCheck(Auth) { return Auth.init(); },
+				init: function(StateManager, $stateParams) {
+					StateManager.setState($stateParams, {});
+					StateManager.refresh("view");
+				}
+			},
+			views: {}
+		};
+
+		newState.views['footer@' + states[i] + ".view"] =
+		{
+			templateUrl: viewUrl
+		};
+
+		$stateProvider.state(states[i] + '.view', newState);
+	}
+}])
+.run(['$rootScope', 'parentStates', 'StateManager', function($rootScope, parentStates, StateManager) {
+	StateManager.registerPlugin('view', 'ViewData',  function () {
+		if (StateManager.state.view)
+			return "view";
+		else
+			return null;
+	});
+
+	$rootScope.$on('$stateChangeSuccess',function(event, toState, toParams, fromState, fromParams){
+		var states = parentStates["view"];
+
+		for(var i = 0; i < states.length; i++)
+		{
+			if (states[i] == toState.name)
+			{
+				StateManager.setStateVar('view', 'info');
+				StateManager.updateState();
+				break;
+			}
+		}
+	  console.log('$stateChangeSuccess to '+toState.name+'- fired once the state transition is complete.');
+	});
+}])
+.controller('ViewCtrl', ['$scope', 'StateManager', 'serverConfig', '$state', function($scope, StateManager, serverConfig, $state){
+	$scope.view = StateManager.state.view;
 
 	$scope.pageChanged = function() {
-		Data.updatePaginatedView($scope.view);
-	};
-
-	$scope.isView = function(view){
-		return $scope.view == view;
+		StateManager.Data.ViewData.updatePaginatedView($scope.view);
 	};
 
 	$scope.go = function(v){
-		var o = {view: v};
-
-		var vw = $state.current.name;
 		var bp = $('#bottom-panel');
+
 		if (bp.hasClass('collapsed')) {
 			// if the bottom panel is collapsed and the tab was clicked, expand
 			bp.removeClass('collapsed');
@@ -42,20 +99,10 @@ angular.module('3drepo')
 			bp.addClass('collapsed');
 		}
 
-		if (vw.substr(vw.length - 5) == ".view")
-			$state.go($state.current.name, o);
-		else
-			$state.go($state.current.name + '.view', o);
+		StateManager.setStateVar("view", v);
+		StateManager.updateState();
 	}
 
-	$scope.toggleTree = function() {
-		$("#ui2-treeview").toggleClass("collapsed");
-	}
-
-
-	$scope.toggleMetadata = function() {
-		$("#ui2-metadata").toggleClass("collapsed");
-	}
 
 	$scope.pageChanged();
 }]);

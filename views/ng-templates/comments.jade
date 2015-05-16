@@ -1,9 +1,8 @@
 ng-include(src="'common.html'")
 .col-md-8.tight
-	ng-include(src="'menu.html'")
-	div(ng-if='Data.Comments.loading')
+	div(ng-if='Data.ViewData.Comments.loading')
 		img.loading(src='/public/images/ajax-loader.gif', width='20', height='20')
-	div(ng-if='!Data.Comments.loading')
+	div(ng-if='!Data.ViewData.Comments.loading')
 		.block(ng-repeat='comment in Data.Comments')
 			.col-sm-12.margined.block-header
 				h3
@@ -11,7 +10,7 @@ ng-include(src="'common.html'")
 				span.comment-keyword-title commented
 				span.comment-date-title {{comment.date}}
 					p {{comment.message}}
-	pagination.pull-right(items-per-page='Data.itemsPerPage', total-items='Data.totalItems', ng-model='Data.currentPage', ng-change='pageChanged()', previous-text='‹', next-text='›', first-text='«', last-text='»')
+	pagination.pull-right(items-per-page='Data.ViewData.itemsPerPage', total-items='Data.ViewData.totalItems', ng-model='Data.ViewData.currentPage', ng-change='pageChanged()', previous-text='‹', next-text='›', first-text='«', last-text='»')
 		.block
 			.col-sm-12.margined.block-header
 				h3 Leave a comment

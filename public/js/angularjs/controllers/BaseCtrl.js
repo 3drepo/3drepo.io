@@ -20,13 +20,49 @@ angular.module('3drepo')
 '$stateProvider',
 '$locationProvider',
 function($stateProvider, $locationProvider) {
-	$stateProvider.state('base', {"name" : "base"});
+	$stateProvider.state('base', {
+		name : 'base',
+		resolve: {
+			StateManager: 'StateManager',
+			init : function(StateManager) { StateManager.refresh("base"); }
+		}
+	});
 
 	// Removes Angular's # at the end of the URL
 	$locationProvider.html5Mode(true);
 }])
-.run(['$rootScope', '$state', 'Auth', 'pageConfig', function($rootScope, $state, Auth, pageConfig) {
-	$rootScope.state = $state;
+.factory('BaseData', ['StateManager', 'uiState', function(StateManager, uiState) {
+	var o = {};
+
+	o.refresh = function () {
+		// In the base we reset all the UI components
+		for (uicomp in o.uiComps)
+			StateManager.ui[uicomp] = false;
+	};
+
+	o.uiComps = [];
+
+	for(k in uiState)
+	{
+		for(var i = 0; i < uiState[k].length; i++)
+		{
+			var plugin = uiState[k][i];
+
+			if (o.uiComps.indexOf(plugin) == -1)
+				o.uiComps.push(plugin);
+		}
+	}
+
+	return o;
+}])
+.run(['$rootScope', '$state', 'Auth', 'pageConfig', 'uiState', 'StateManager', function($rootScope, $state, Auth, pageConfig, uiState, StateManager) {
+	StateManager.registerPlugin('base', 'BaseData', function () {
+		return "base"; // Always valid
+	});
+
+	$rootScope.ui		= StateManager.ui;
+	$rootScope.Data		= StateManager.Data;
+	$rootScope.state	= StateManager.state;
 
 	$rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams)
 	{
@@ -64,7 +100,11 @@ function($stateProvider, $locationProvider) {
 	  console.log(arguments);
 	});
 	$rootScope.$on('$stateChangeSuccess',function(event, toState, toParams, fromState, fromParams){
-	  console.log('$stateChangeSuccess to '+toState.name+'- fired once the state transition is complete.');
+		var uiComps = uiState[toState.name];
+
+		if (uiComps)
+			for (var i = 0; i < uiComps.length; i++)
+				StateManager.ui[uiComps[i]] = true;
 	});
 	// $rootScope.$on('$viewContentLoading',function(event, viewConfig){
 	//   // runs on individual scopes, so putting it in "run" doesn't work.

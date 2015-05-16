@@ -19,36 +19,52 @@ angular.module('3drepo')
 .config([
 '$stateProvider',
 'parentStates',
-'pluginLevels',
-function($stateProvider, parentStates, pluginLevels) {
-	$stateProvider
-	.state(parentStates["project"] + '.project', {
-		url: '/:project',
-		templateUrl: 'account.html',
-		resolve: {
-			StateManager: "StateManager",
-			auth: function authCheck(Auth) { return Auth.init(); },
-			init: function(StateManager, $stateParams) {
-				StateManager.registerPlugin('ProjectData', pluginLevels['project']);
-				StateManager.setState($stateParams, {});
+function($stateProvider, parentStates) {
+	var states = parentStates["project"];
+
+	for(var i = 0; i < states.length; i++) {
+		$stateProvider
+		.state(states[i] + '.project', {
+			url: '/:project',
+			templateUrl: 'account.html',
+			resolve: {
+				auth: function authCheck(Auth) { return Auth.init(); },
+				init: function(StateManager, $stateParams) {
+					StateManager.setState($stateParams, {});
+					StateManager.refresh("project");
+				}
+			},
+			views: {
+				"@" : {
+					templateUrl: 'project.html',
+					controller: 'ProjectCtrl'
+				}
 			}
-		},
-		views: {
-			"@" : {
-				templateUrl: 'project.html',
-				controller: 'ProjectCtrl'
-			}
-		}
-	})
+		})
+	}
+}])
+.run(['StateManager', function(StateManager) {
+	StateManager.registerPlugin('project', 'ProjectData', function () {
+		if (StateManager.state.project)
+			return "project";
+		else
+			return null;
+	});
 }])
 .controller('ProjectCtrl', ['$scope', 'StateManager', 'ViewerService', function($scope, StateManager, ViewerService)
 {
-	$scope.Data = StateManager.Data;
-
 	ViewerService.init();
 
-	$scope.$watch('StateManager.state.project', function () {
-		ViewerService.loadModel();
+	$scope.$watch('state.project', function () {
+		StateManager.setStateVar("branch", "master");
+		StateManager.setStateVar("revision", "head");
+		StateManager.updateState();		// Want to preserve URL structure
 	});
+
+	$scope.$watchGroup(['state.branch', 'state.revision'], function() {
+		ViewerService.loadModel();
+		ViewerService.defaultViewer.setNavMode("TURNTABLE");
+	});
+
 }]);
 

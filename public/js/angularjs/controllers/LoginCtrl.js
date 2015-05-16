@@ -20,15 +20,27 @@ angular.module('3drepo')
 '$stateProvider',
 'parentStates',
 function($stateProvider, parentStates) {
-	$stateProvider
-	.state(parentStates["login"] + '.login', {
-		url: '',
-		views: {
-			"@" : {
-				templateUrl: 'login.html'
+	var states = parentStates["login"];
+
+	for(var i = 0; i < states.length; i++) {
+		$stateProvider
+		.state(states[i] + '.login', {
+			url: '',
+			views: {
+				"@" : {
+					templateUrl: 'login.html'
+				}
 			}
-		}
-	})
+		})
+	}
+}])
+.run(['StateManager', 'Auth', function(StateManager, Auth) {
+	StateManager.registerPlugin('login', null, function () {
+		if (Auth.loggedIn)
+			return "login";
+		else
+			return null
+	});
 }])
 .controller('LoginCtrl', ['$scope', 'StateManager', 'pageConfig', 'Auth', function($scope, StateManager, pageConfig, Auth)
 {

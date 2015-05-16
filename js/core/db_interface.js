@@ -547,6 +547,9 @@ exports.getHeadOf = function(dbName, project, branch, getFunc, callback) {
 		if (err.value)
 			return callback(err);
 
+		if (!doc.length)
+			return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+
 		getFunc(dbName, project, uuidToString(doc[0]["_id"]), function(err, doc) {
 			if(err.value)
 				return callback(err);

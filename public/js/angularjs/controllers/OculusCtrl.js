@@ -16,35 +16,13 @@
  */
 
 angular.module('3drepo')
-.factory('CurrentBranch', ['$http', '$q', 'serverConfig', 'StateManager', function($http, $q, serverConfig, StateManager){
-	var o = {
-		name:			"",
-		revisions:		[],
-		n_revisions:	0
-	};
+.controller('OculusCtrl', ['$scope', 'StateManager', 'ViewerService', function($scope, StateManager, ViewerService)
+{
+	$scope.defaultViewer = ViewerService.defaultViewer;
 
-	o.refresh = function() {
-		var self = this;
-		var account = StateManager.state.account;
-		var project = StateManager.state.project;
-		var branch  = StateManager.state.branch;
-
-		var deferred = $q.defer();
-
-		$http.get(serverConfig.apiUrl(account + '/' + project + '/revisions/' + branch + '.json'))
-		.then(function(json) {
-			self.name		 = branch;
-			self.revisions	 = json.data;
-			self.n_revisions = self.revisions.length;
-
-			deferred.resolve();
-		}, function(message) {
-			deferred.resolve();
-		});
-
-		return deferred.promise;
-	};
-
-	return o;
+	$scope.switchVR = function(mode)
+	{
+		ViewerService.switchVR();
+	}
 }]);
 

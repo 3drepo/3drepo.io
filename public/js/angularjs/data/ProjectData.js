@@ -18,19 +18,16 @@
 angular.module('3drepo')
 .factory('ProjectData', ['$http', '$q', 'serverConfig', 'StateManager', function($http, $q, serverConfig, StateManager){
 	var o = {
-		account:		null,
 		project:		null,
 		name:			"",
 		owner:			"",
 		description:	"",
-		branches:		[],
-		selected:		null,
 		settings:		null,
 		publicPerm:		{read: false, write: false, execute: false},
 		userPerm:		{read: false, write: false, execute: false},
 		ownerPerm:		{read: false, write: false, execute: false}
 	};
-
+
 	o.projectTypes = [
 		{label: 'Architectural', value : 1},
 		{label: 'Aerospace', value: 2},
@@ -65,45 +62,45 @@ angular.module('3drepo')
 			{
 				self.visibility = 'private';
 
-					self.loading  = true;
+				self.loading  = true;
 
-					$http.get(serverConfig.apiUrl(account + '/' + project + '.json')).success(function(json, status) {
-						self.name				= project;
-						self.owner				= json.owner;
-						self.description		= json.desc;
-						self.type				= json.type;
-						self.selected			= self.projectTypes[0];
+				$http.get(serverConfig.apiUrl(account + '/' + project + '.json')).success(function(json, status) {
+					self.name				= project;
+					self.owner				= json.owner;
+					self.description		= json.desc;
+					self.type				= json.type;
+					self.selected			= self.projectTypes[0];
 
-						for(var i = 0; i < self.projectTypes.length; i++)
+					for(var i = 0; i < self.projectTypes.length; i++)
+					{
+						if (self.projectTypes[i].label.toLowerCase() == self.type.toLowerCase())
 						{
-							if (self.projectTypes[i].label.toLowerCase() == self.type.toLowerCase())
-							{
-								self.selected = self.projectTypes[i];
-								break;
-							}
+							self.selected = self.projectTypes[i];
+							break;
 						}
+					}
 
-						// Public permissions
-						self.publicPerm.read = (json.permissions[self.roleIndex["PUBLIC"]] & self.bitMasks["READ_BIT"]) > 0;
-						self.publicPerm.write = (json.permissions[self.roleIndex["PUBLIC"]] & self.bitMasks["WRITE_BIT"]) > 0;
-						self.publicPerm.execute = (json.permissions[self.roleIndex["PUBLIC"]] & self.bitMasks["EXECUTE_BIT"]) > 0;
+					// Public permissions
+					self.publicPerm.read = (json.permissions[self.roleIndex["PUBLIC"]] & self.bitMasks["READ_BIT"]) > 0;
+					self.publicPerm.write = (json.permissions[self.roleIndex["PUBLIC"]] & self.bitMasks["WRITE_BIT"]) > 0;
+					self.publicPerm.execute = (json.permissions[self.roleIndex["PUBLIC"]] & self.bitMasks["EXECUTE_BIT"]) > 0;
 
-						// User permissions
-						self.userPerm.read = (json.permissions[self.roleIndex["USER"]] & self.bitMasks["READ_BIT"]) > 0;
-						self.userPerm.write = (json.permissions[self.roleIndex["USER"]] & self.bitMasks["WRITE_BIT"]) > 0;
-						self.userPerm.execute = (json.permissions[self.roleIndex["USER"]] & self.bitMasks["EXECUTE_BIT"]) > 0;
+					// User permissions
+					self.userPerm.read = (json.permissions[self.roleIndex["USER"]] & self.bitMasks["READ_BIT"]) > 0;
+					self.userPerm.write = (json.permissions[self.roleIndex["USER"]] & self.bitMasks["WRITE_BIT"]) > 0;
+					self.userPerm.execute = (json.permissions[self.roleIndex["USER"]] & self.bitMasks["EXECUTE_BIT"]) > 0;
 
-						// Owner permissions
-						self.ownerPerm.read = (json.permissions[self.roleIndex["OWNER"]] & self.bitMasks["READ_BIT"]) > 0;
-						self.ownerPerm.write = (json.permissions[self.roleIndex["OWNER"]] & self.bitMasks["WRITE_BIT"]) > 0;
-						self.ownerPerm.execute = (json.permissions[self.roleIndex["OWNER"]] & self.bitMasks["EXECUTE_BIT"]) > 0;
+					// Owner permissions
+					self.ownerPerm.read = (json.permissions[self.roleIndex["OWNER"]] & self.bitMasks["READ_BIT"]) > 0;
+					self.ownerPerm.write = (json.permissions[self.roleIndex["OWNER"]] & self.bitMasks["WRITE_BIT"]) > 0;
+					self.ownerPerm.execute = (json.permissions[self.roleIndex["OWNER"]] & self.bitMasks["EXECUTE_BIT"]) > 0;
 
-						self.loading = false;
+					self.loading = false;
 
-						self.settings = json.properties;
+					self.settings = json.properties;
 
-						self.loadingPromise.resolve();
-					});
+					self.loadingPromise.resolve();
+				});
 			} else {
 				self.loadingPromise.resolve();
 			}
@@ -119,7 +116,7 @@ angular.module('3drepo')
 			description:	this.description
 		};
 
-		return $http.post(serverConfig.apiUrl(self.account + '/' + self.project), newInfo);
+		return $http.post(serverConfig.apiUrl(StateManager.state.account + '/' + self.project), newInfo);
 	}
 
 	return o;

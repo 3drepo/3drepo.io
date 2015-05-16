@@ -22,6 +22,8 @@ var methodOverride = require('method-override');
 var compress = require('compression');
 var fs = require('fs');
 var jade = require('jade');
+var log_iface = require('./js/core/logger.js');
+var logger = log_iface.logger;
 
 // Credit goes to http://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
 function escapeHtml(text) {
@@ -108,7 +110,7 @@ module.exports.createApp = function(template)
 										"plugin" : "revision",
 										"children" : [
 											{
-												"plugin": "revisionView",
+												"plugin": "view",
 												"friends": ["tree", "meta"],
 												"children": [
 													{
@@ -139,7 +141,41 @@ module.exports.createApp = function(template)
 					{
 						"plugin": "account",
 						"children": [
-							{"plugin": "project"}
+							{
+								"plugin": "project",
+								"friends": [
+									"oculus", "tools", "navigation", "viewpoints"
+								],
+								"children": [
+									{
+										"plugin": "revision",
+										"children": [
+											{
+												"plugin": "view",
+												"friends": ["tree", "meta", "revisionselector"]
+											},
+											{
+												"plugin": "diff",
+												"children": [
+													{
+														"plugin": "view",
+														"friends": ["tree", "meta", "revisionselector"]
+													}
+												]
+											}
+										],
+									},
+									{
+										"plugin": "view",
+										"friends": ["tree", "meta", "revisionselector"],
+										"children": [
+											{
+												"plugin": "diff"
+											}
+										]
+									}
+								]
+							}
 						]
 					}
 				]
@@ -147,78 +183,132 @@ module.exports.createApp = function(template)
 		]
 	};
 
-	function buildParams(currentLevel, levelNum, parentState, pluginJade, pluginJS, pluginAngular, parentStateJSON, pluginLevelsJSON, uiJSON)
+	function loadPlugin(plugin, stateName, uistates, params)
 	{
-		var plugin = currentLevel["plugin"];
+		if (!(plugin in params["parentStateJSON"]))
+			params["parentStateJSON"][plugin] = [];
 
-		pluginAngular[plugin]				= {};
-		pluginAngular[plugin]["plugin"]		= plugin;
-		parentStateJSON[plugin]				= parentState;
-		pluginLevelsJSON[plugin]				= levelNum;
-		pluginAngular[plugin]["files"]		= [];
+		var stateTok = stateName.split(".");
+		var parentState = stateTok.slice(0, -1).join('.');
+
+		if (params["parentStateJSON"][plugin].indexOf(parentState) == -1)
+			params["parentStateJSON"][plugin].push(parentState);
 
 		// TODO: Check whether or not it doesn't exist
 		var pluginConfig = JSON.parse(fs.readFileSync("./config/plugins/" + plugin + ".json", "utf8"));
 
-		// Loop through the files to be loaded
-		if ("files" in pluginConfig)
+		if (params["pluginLoaded"].indexOf(plugin) == -1)
 		{
-			if("jade" in pluginConfig["files"])
-			{
-				var nJadeFiles = pluginConfig["files"]["jade"].length;
+			logger.log('info', 'Loading plugin ' + plugin + ' ...');
 
-				for(var fileidx = 0; fileidx < nJadeFiles; fileidx++)
+			params["pluginAngular"][plugin]				= {};
+			params["pluginAngular"][plugin]["plugin"]	= plugin;
+			params["pluginAngular"][plugin]["files"]	= [];
+
+			// Loop through the files to be loaded
+			if ("files" in pluginConfig)
+			{
+				if("jade" in pluginConfig["files"])
 				{
-					var jadeFile = pluginConfig["files"]["jade"][fileidx];
-					pluginJade.push(jadeFile);
+					var nJadeFiles = pluginConfig["files"]["jade"].length;
+
+					for(var fileidx = 0; fileidx < nJadeFiles; fileidx++)
+					{
+						var jadeFile = pluginConfig["files"]["jade"][fileidx];
+						params["pluginJade"].push(jadeFile);
+					}
+				}
+
+				if ("js" in pluginConfig["files"])
+				{
+					var nJSFiles = pluginConfig["files"]["js"].length;
+
+					for(var fileidx = 0; fileidx < nJSFiles; fileidx++)
+					{
+						var jsFile = '/public/js/' + pluginConfig["files"]["js"][fileidx];
+						params["pluginJS"].push(jsFile);
+					}
+				}
+
+				if ("angular" in pluginConfig["files"])
+				{
+					var nAngularFiles = pluginConfig["files"]["angular"].length;
+
+					for(var fileidx = 0; fileidx < nAngularFiles; fileidx++)
+					{
+						var angularFile = '/public/js/angularjs/' + pluginConfig["files"]["angular"][fileidx];
+						params["pluginAngular"][plugin]["files"].push(angularFile);
+					}
+				}
+
+				if ("ui" in pluginConfig["files"])
+				{
+					var nUIComponents = pluginConfig["files"]["ui"].length;
+
+					for(var uiidx = 0; uiidx < nUIComponents; uiidx++)
+					{
+						var uicomp = pluginConfig["files"]["ui"][uiidx];
+
+						if (!(uicomp["position"] in params["ui"]))
+							params["ui"][uicomp["position"]] = [];
+
+						params["ui"][uicomp["position"]].push(uicomp["template"]);
+
+					}
 				}
 			}
 
-			if ("js" in pluginConfig["files"])
-			{
-				var nJSFiles = pluginConfig["files"]["js"].length;
+			params["pluginLoaded"].push(plugin);
+		}
 
-				for(var fileidx = 0; fileidx < nJSFiles; fileidx++)
-				{
-					var jsFile = '/public/js/' + pluginConfig["files"]["js"][fileidx];
-					pluginJS.push(jsFile);
-				}
+		if ("ui" in pluginConfig["files"])
+		{
+			var nUIComponents = pluginConfig["files"]["ui"].length;
+
+			for(var uiidx = 0; uiidx < nUIComponents; uiidx++)
+			{
+				var uicomp = pluginConfig["files"]["ui"][uiidx];
+				uistates.push(uicomp["name"]);
 			}
 
-			if ("angular" in pluginConfig["files"])
-			{
-				var nAngularFiles = pluginConfig["files"]["angular"].length;
+			params["uistate"][stateName] = uistates.slice(0);
+		}
+	}
 
-				for(var fileidx = 0; fileidx < nAngularFiles; fileidx++)
+	function buildParams(currentLevel, levelNum, stateName, uistates, params)
+	{
+		var plugin = currentLevel["plugin"];
+
+		if (stateName)
+			stateName += ".";
+
+		var states = [];
+
+		var pluginConfig = JSON.parse(fs.readFileSync("./config/plugins/" + plugin + ".json", "utf8"));
+
+		if ("states" in pluginConfig)
+		{
+			states = pluginConfig["states"];
+		} else {
+			states = [plugin];
+		}
+
+		for(var stateidx = 0; stateidx < states.length; stateidx++)
+		{
+			loadPlugin(plugin, stateName + states[stateidx], uistates, params);
+
+			if ("friends" in currentLevel)
+			{
+				for(var i = 0; i < currentLevel["friends"].length; i++)
 				{
-					var angularFile = '/public/js/angularjs/' + pluginConfig["files"]["angular"][fileidx];
-					pluginAngular[plugin]["files"].push(angularFile);
+					var plugin = currentLevel["friends"][i];
+					loadPlugin(plugin, stateName + states[stateidx], uistates, params);
 				}
 			}
-
-			if ("ui" in pluginConfig["files"])
-			{
-				var nUIComponents = pluginConfig["files"]["ui"].length;
-
-				for(var uiidx = 0; uiidx < nUIComponents; uiidx++)
-				{
-					var uicomp = pluginConfig["files"]["ui"][uiidx];
-
-					if (!(uicomp["position"] in uiJSON))
-						uiJSON[uicomp["position"]] = [];
-
-					uiJSON[uicomp["position"]].push(uicomp["template"]);
-				}
-			}
-
-			if (parentState)
-				parentState += ".";
-
-			parentState += plugin;
 
 			if ("children" in currentLevel)
 				for(var i = 0; i < currentLevel["children"].length; i++)
-					buildParams(currentLevel["children"][i], levelNum + 1, parentState, pluginJade, pluginJS, pluginAngular, parentStateJSON, pluginLevelsJSON, uiJSON);
+					buildParams(currentLevel["children"][i], levelNum + 1, stateName + states[stateidx], uistates.slice(0), params);
 		}
 	}
 
@@ -235,25 +325,27 @@ module.exports.createApp = function(template)
 		var hasChildren = true;
 		var levelStructure = pluginStructure;
 
-		params["pluginJade"]		= [];
-		params["pluginJS"]			= [];
-		params["pluginAngular"]		= {};
-		params["parentStateJSON"]		= {};
-		params["pluginLevelsJSON"]		= {};
-		params["ui"]					= {
-			"header" : [],
-			"right" : [],
-			"left" : [],
-			"viewport" : [],
-			"tools" : []
-		};
-		var parentState = "";
-		buildParams(pluginStructure, 0, parentState, params["pluginJade"], params["pluginJS"], params["pluginAngular"], params["parentStateJSON"], params["pluginLevelsJSON"], params["ui"]);
+		params["pluginLoaded"]			= [];
 
-		params["parentStateJSON"] = JSON.stringify(params["parentStateJSON"]);
-		params["pluginLevelsJSON"] = JSON.stringify(params["pluginLevelsJSON"]);
+		params["pluginJade"]			= [];
+		params["pluginJS"]				= [];
+		params["pluginAngular"]			= {};
+		params["parentStateJSON"]		= {};
+		//params["pluginLevelsJSON"]		= {};
+		params["ui"]					= {};
+		params["uistate"]				= {};
+		//params["levelOrder"]			= {};
+
+		var parentState = "";
+		buildParams(pluginStructure, 0, parentState, [], params);
+
+		params["parentStateJSON"]	= JSON.stringify(params["parentStateJSON"]);
+		//params["pluginLevelsJSON"]	= JSON.stringify(params["pluginLevelsJSON"]);
+		params["uistate"]			= JSON.stringify(params["uistate"]);
 
 		params["renderMe"] = jade.renderFile;
+
+		params["structure"]			= JSON.stringify(pluginStructure);
 
 		res.render(template, params);
 	});

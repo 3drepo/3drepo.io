@@ -16,383 +16,142 @@
  */
 
 angular.module('3drepo')
-.service('StateManager', ['$injector', function($injector) {
-		/*['ProjectData', 'Branches', 'Comments', 'CurrentBranch', 'CurrentRevision',
-		'CurrentDiffBranch', 'CurrentDiffRevision', 'Federation', 'Log', 'Readme', 'RevisionsByDay', 'UserData', 'Users', 'Wayfinder', '$state',
-		function (ProjectData, Branches, Comments, CurrentBranch, CurrentRevision, CurrentDiffBranch,
-			CurrentDiffRevision, Federation, Log, Readme, RevisionsByDay, UserData, Users, Wayfinder, $state) {
-		*/
-			var self = this;
+.service('StateManager', ['$injector', '$state', 'structure', function($injector, $state, structure) {
+	var self = this;
 
-			this.Data = {};
+	// Stores the Data factories associated with each plugin
+	this.Data 		= {};
 
-			/*
-			this.ProjectData			= ProjectData;
+	// Stores the state, required as ui-router does not allow inherited
+	// stateParams, and we need to dynamically generate state diagram.
+	// One day this might change.
+	// https://github.com/angular-ui/ui-router/wiki/URL-Routing
+	this.state		= {};
 
-			// Revision
-			this.Branches				= Branches;
-			this.Comments				= Comments;
-			this.CurrentBranch			= CurrentBranch;
-			this.CurrentRevision		= CurrentRevision;
-			this.Federation				= Federation;
-			this.Log					= Log;
-			this.Readme					= Readme;
-			this.RevisionsByDay			= RevisionsByDay;
-			this.UserData				= UserData;
-			this.Users					= Users;
+	// Ui components to switch on and off
+	this.ui 		= {};
 
-			// Diff
-			this.CurrentDiffBranch		= CurrentDiffBranch;
-			this.CurrentDiffRevision	= CurrentDiffRevision;
+	// Link between plugins and data factories
+	this.pluginData	= {};
 
-			// Wayfinding
-			this.Wayfinder				= Wayfinder;
-			*/
+	// Link between plugin names and state changes
+	this.pluginState = {};
 
-			this.enabled				= {},
+	// Has a state variable changed. Is this necessary ?
+	this.changed 	= {};
 
-			this.state	= {};
+	this.clearChanged = function()
+	{
+		for(var i in self.changed)
+			self.changed[i] = false;
+	}
 
-			/*
-				account:			null,
-				project:			null,
+	self.clearChanged();
 
-				user:				null,
+	this.registerPlugin = function(plugin, dataFactory, stateFunc)
+	{
+		// Inject the data factory for a plugin
+		if (dataFactory) {
+			this.Data[dataFactory] = $injector.get(dataFactory);
 
-				branch:				null,
-				revision:			null,
+			if (plugin) {
+				if (!(plugin in this.pluginData))
+					this.pluginData[plugin] = [];
 
-				// View and pagination
-				view:				"info",
-				currentPage:		1,
-				totalItems:			0,
-				itemsPerPage:		5
-
-				// Diff state
-				diffBranch:			null,
-				diffRevision:		null
-
-				// Wayfinder function
-				enabled:			false,
-				uids:				null
+				this.pluginData[plugin].push(this.Data[dataFactory]);
 			}
-			*/
+		}
 
-			this.ui = {};
+		if (stateFunc)
+			this.pluginState[plugin] = stateFunc;
+	}
 
-			/*
-			this.ui = {
-				treeView:			true,
-				metaView:			true,
-				footerBar:			true,
-				revisionSelector:	true,
+	this.refresh = function(plugin)
+	{
+		var dataFactories = this.pluginData[plugin];
 
-				// TODO: Split this out into individual controllers
-				// Wayfinding stuff
-				wayfinder: {
-					readme:			false,
-					multiselect:	false,
-					select:			false
-				}
-			};
-			*/
+		for(var i = 0; i < dataFactories.length; i++)
+			dataFactories[i].refresh();
+	}
 
-			this.pluginLevel = {};
+	this.genStateName = function ()
+	{
+		var notFinished		= true;
+		var currentChildren	= structure["children"];
+		var childidx 		= 0;
+		var stateName 		= "base.";	// Assume that the base state is there.
 
-			this.changed = {};
+		while(childidx < currentChildren.length)
+		{
+			var child  = currentChildren[childidx];
+			var plugin = child["plugin"];
 
-			this.clearChanged = function()
+			var pluginStateName = this.pluginState[plugin](this);
+
+			if (pluginStateName)
 			{
-				for(var i in self.changed)
-					self.changed[i] = false;
+				stateName += pluginStateName + ".";
+
+				if (child["children"])
+					currentChildren = child["children"];
+				else
+					currentChildren = [];
+
+				childidx = -1;
 			}
 
-			self.clearChanged();
+			childidx += 1;
+		}
 
-			this.registerPlugin = function(dataFactory, level)
-			{
-				// Inject the data factory for a plugin
-				this.Data[dataFactory] = $injector.get(dataFactory);
+		return stateName.substring(0, stateName.length - 1);
+	}
 
-				if (!(level in self.pluginLevel))
-					self.pluginLevel[level] = [];
+	this.createStateVar = function(varName, value)
+	{
+		// TODO: Check for duplication
+		this.state.varName = value;
+	}
 
-				self.pluginLevel[level].push(this.Data[dataFactory]);
-			}
+	this.setStateVar = function(varName, value)
+	{
+		if (!(self.state[varName] == value))
+			self.changed[varName] = true;
 
-			this.genStateName = function ()
-			{
-				var stateName = "";
-				var levels = Object.keys(self.pluginLevel);
+		self.state[varName] = value;
+	}
 
-				for(var lvlidx = 0; lvlidx < levels.length; lvlidx++)
-				{
-					var validLevel = false;
+	this.setState = function(stateParams, extraParams)
+	{
+		var stateObj = $.extend(stateParams, extraParams);
 
-					for (var pluginidx = 0; pluginidx < self.pluginLevel.length; pluginidx++)
-					{
-						var level = levels[lvlidx];
-						var pluginStateName = self.pluginLevel[level][pluginidx].genStateName();
+		console.log('Setting state - ' + JSON.stringify(stateParams));
 
-						if (stateName != null)
-						{
-							if (validLevel)
-							{
-								console.log('error', 'Conflicting plugins loaded at level ' + level);
-								return null;
-							} else {
-								validLevel = true;
-								stateName += pluginStateName;
-							}
-						}
-					}
+		// Copy all state parameters and extra parameters
+		// to the state
+		for(var i in stateObj)
+		{
+			if (!(i in self.state))
+				self.createStateVar(i, stateObj[i]);
 
-					if (!validLevel)
-					{
-						console.log('error', 'No valid plugin found for level ' + level);
-						return null;
-					} else {
-						if (lvlidx != (levels.length - 1))
-							stateName + ".";
-					}
-				}
-			}
+			self.setStateVar(i, stateObj[i]);
+		}
 
-			this.refresh = function()
-			{
-				for(key in this.Data)
-					this.Data[key].refresh();
-			}
-
-			this.createStateVar = function(varName, value)
-			{
-				// TODO: Check for duplication
-				this.state.varName = value;
-			}
-
-			this.setStateVar = function(varName, value)
-			{
-				if (!(self.state[varName] == value))
-					self.changed[varName] = true;
-
-				self.state[varName] = value;
-			}
-
-			this.setState = function(stateParams, extraParams)
-			{
-				var stateObj = $.extend(stateParams, extraParams);
-
-				// Copy all state parameters and extra parameters
-				// to the state
-				for(var i in stateObj)
-				{
-					if (!(i in self.state))
-						self.createStateVar(i, stateObj[i]);
-
-					self.setStateVar(i, stateObj[i]);
-				}
-
-				// Clear out anything that hasn't been set
-				if (extraParams["clearState"])
-					for(var i in self.state)
-						if (!(i in stateObj))
-							if (typeof self.state[i] == 'boolean')
-								self.setStateVar(i, false);
-							else
-								self.setStateVar(i, null);
-
-				self.refresh();
-			}
-
-			this.updateState = function()
-			{
-				console.log('Moving to ' + self.genStateName() + ' ...');
-				$state.transitionTo(self.genStateName(), self.state, { location: true, inherit: true, relative: $state.$current, notify: false});
-			}
-
-			/*
-			this.genStateName = function()
-			{
-				var stateName = "";
-
-				if (self.state.account && !self.state.project) {
-					stateName = "home";
-				} else if (self.state.account && self.state.project) {
-					stateName = "main";
-
-					if (self.state.revision)
-						stateName += ".revision";
-					else if (self.state.branch)
-						stateName += ".branch";
-
-					// Functions go here
-					if (self.state.wayfinder)
-						stateName += ".wayfinder";
-					else if (self.state.diffEnabled)
-						stateName += ".diff";
-
-					if (self.state.wayfinder)
-						if (self.state.mode)
-							stateName += "." + self.state.mode;
+		// Clear out anything that hasn't been set
+		if (extraParams["clearState"])
+			for(var i in self.state)
+				if (!(i in stateObj))
+					if (typeof self.state[i] == 'boolean')
+						self.setStateVar(i, false);
 					else
-						if (self.state.view)
-							stateName += ".view";
-				}
+						self.setStateVar(i, null);
+	}
 
-				return stateName;
-			}
-			*/
+	this.updateState = function(dontUpdateLocation)
+	{
+		console.log('Moving to ' + self.genStateName() + ' ...');
 
-			/*
-			this.refresh = function()
-			{
-				var stateName = self.genStateName();
-
-				console.log("REFRESHING " + stateName + " ...");
-
-				if (stateName.search("home") > -1)
-				{
-					// If only the home page then simply load user info
-					self.UserData.refresh(self.state.account);
-				} else {
-					// For the main page load everything that you can
-					if (self.changed.project) {
-						self.ProjectData.refresh(self.state.account, self.state.project);
-						self.Branches.refresh(self.state.account, self.state.project);
-
-						// If we have changed the project but the branch
-						// and revision aren't set, select master branch.
-						if (!self.state.branch && !self.state.revision)
-							self.setStateVar("branch", "master");
-					}
-
-					if (self.changed.branch)
-					{
-						self.CurrentBranch.refresh(self.state.account, self.state.project, self.state.branch);
-
-						// If we have changed branch but not selected
-						// a revision then select head.
-						if (!self.state.revision)
-							self.setStateVar("revision", "head");
-					}
-
-					if (self.changed.revision)
-					{
-						self.CurrentRevision.refresh(self.state.account, self.state.project, self.state.branch, self.state.revision)
-						.then(function () {
-							self.setStateVar("revision", self.CurrentRevision.revision);
-						});
-					}
-
-					// Cannot be in both diff and wayfinder mode at the same time
-					if (self.state.wayfinder && self.state.diffEnabled)
-					{
-						if (self.changed.wayfinder)
-							self.setStateVar("diffEnabled", false);
-						else
-							self.setStateVar("wayfinder", false);
-
-						return self.updateState(); // Resolve this
-					}
-
-					if (self.state.diffEnabled)
-					{
-						if (self.changed.diffBranch)
-						{
-							self.CurrentDiffBranch.refresh(self.state.account, self.state.project, self.state.diffBranch);
-
-							// If we have changed branch but not selected
-							// a revision then select head.
-							if (!self.state.diffRevision)
-								self.setStateVar("diffRevision", "head");
-						}
-
-						if (self.changed.diffRevision)
-						{
-							self.CurrentDiffRevision.refresh(self.state.account, self.state.project, self.state.diffBranch, self.state.diffRevision)
-							.then(function () {
-								self.setStateVar("diffRevision", self.CurrentDiffRevision.revision);
-							});
-						}
-					}
-
-					if (self.changed.wayfinder || self.changed.mode)
-					{
-						if (self.state.wayfinder)
-						{
-							self.ui.treeView			= false;
-							self.ui.metaView			= false;
-							self.ui.footerBar			= false;
-							self.ui.revisionSelector	= false;
-						} else  {
-							self.ui.treeView			= true;
-							self.ui.metaView			= true;
-							self.ui.footerBar			= true;
-							self.ui.revisionSelector	= true;
-						}
-
-						if (self.changed.mode)
-						{
-							self.Wayfinder.refresh(self.state.account, self.state.project);
-
-							if(self.state.mode == "record")
-							{
-								self.ui.wayfinder.readme = true;
-								self.ui.wayfinder.multiselect = false;
-								self.ui.wayfinder.select = false;
-								self.setStateVar("uids", null);
-							} else if (self.state.mode == "visualize" || self.state.mode == "flythrough") {
-								if (self.state.uids)
-								{
-									self.ui.wayfinder.multiselect = false;
-									self.ui.wayfinder.readme = false;
-									self.Wayfinder.loadUIDS(self.state.uids);
-								} else {
-									if(self.state.mode == "visualize")
-										self.ui.wayfinder.multiselect = true;
-									else
-										self.ui.wayfinder.select = true;
-								}
-							}
-						}
-					}
-
-					if (self.changed.view)
-					{
-						if (self.state.view == 'info')
-						{
-							self.Readme.refresh(self.state.account, self.state.project, self.state.branch, self.state.revision);
-						} else if (self.state.view == 'comments') {
-							self.Comments.getNumberOfComments(self.state.account, self.state.project)
-							.then(function(n_comments) {
-								self.state.totalItems = n_comments;
-								self.updatePaginatedView();
-							});
-						} else if (self.state.view == 'log') {
-							self.Log.getNumberOfLogEntries(self.state.account, self.state.project)
-							.then(function(n_logentries) {
-								self.state.totalItems = n_logentries;
-								self.updatePaginatedView();
-							});
-						} else if (self.state.view == 'revisions') {
-							self.RevisionsByDay.getNumberOfRevisions(self.state.account, self.state.project, self.state.branch)
-							.then(function(n_revisions) {
-								self.state.totalItems = n_revisions;
-								self.updatePaginatedView('revisions');
-							});
-						} else if (self.state.view == 'settings') {
-							self.Users.refresh(self.state.account, self.state.project);
-						} else if (self.state.view) {
-							// Unknown view
-							self.setStateVar("view", null);
-							return self.updateState();
-						}
-					}
-				}
-
-				self.clearChanged();
-			}
-			*/
-
+		var updateLocation = !dontUpdateLocation ? true: false; // In case of null
+		$state.transitionTo(self.genStateName(), self.state, { location: updateLocation });
+	}
 }]);
 

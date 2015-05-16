@@ -1,20 +1,30 @@
 .container-fluid
 	#ui2-header
-		div.nav-project-title  <b>{{Data.ProjectData.name}}</b>
-		each uicomp in ui.header
-			!= renderMe('./views/ui/' + uicomp, locals)
+		#nav-version-control
+			div.nav-project-title  <b>{{Data.ProjectData.name}}</b>
+			if ui.header
+				each uicomp in ui.header
+					!= renderMe('./views/ui/' + uicomp, locals)
+
 	//#nav-version-control(ng-controller='RevisionCtrl', ng-show="Data.ui.revisionSelector")
 	#project-viewport-container.row
 		div#x3d.project-viewport
-		each uicomp in ui.viewport
-			!= renderMe('./views/ui/' + uicomp, locals)
+		if ui.viewport
+			each uicomp in ui.viewport
+				!= renderMe('./views/ui/' + uicomp, locals)
 	.ui2
 		#ui2-left
-			each uicomp in ui.left
-				!= renderMe('./views/ui/' + uicomp, locals)
+			if ui.left
+				each uicomp in ui.left
+					!= renderMe('./views/ui/' + uicomp, locals)
 		#ui2-right
-			each uicomp in ui.right
-				!= renderMe('./views/ui/' + uicomp, locals)
+			if ui.right
+				each uicomp in ui.right
+					!= renderMe('./views/ui/' + uicomp, locals)
 
 	#bottom-panel.row.mainrow.collapsed
+		if ui.footer
+			each uicomp in ui.footer
+				!= renderMe('./views/ui/' + uicomp, locals)
 		div(ui-view="footer")
+

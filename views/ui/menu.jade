@@ -1,5 +1,5 @@
 .margin-bottom
-	ul.nav.nav-tabs.nav.bottom-tabs(role='tablist', ng-show="ui.menu")
+	ul.nav.nav-tabs.nav.bottom-tabs(role='tablist', ng-show="ui.menu", ng-controller="ViewCtrl")
 		li(ng-class="{'active': isView('info')}")
 			a.dashboard-tab(ng-click="go('info')")
 				i.fa.fa-info-circle.menu-icon

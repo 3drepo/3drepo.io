@@ -16,99 +16,42 @@
  */
 
 angular.module('3drepo')
-.controller('RevisionCtrl', ['$scope', 'Data', 'serverConfig', '$window', '$q', '$http', '$state', function($scope,  Data, serverConfig, $window, $q, $http, $state){
-	$scope.Data = Data;
+.config([
+'$stateProvider',
+'parentStates',
+function($stateProvider, parentStates) {
+	var states = parentStates["revision"];
 
-	// Initialize to true so we load at least
-	// once at the start
-	$scope.refreshViewer	= true;
-	$scope.refreshDiffView	= true;
-
-	$scope.setBranch = function(branch) {
-		Data.setStateVar("branch", branch);
-		Data.refresh();
-	}
-
-	$scope.setRevision = function(rev) {
-		Data.setStateVar("revision", rev.name);
-		if(Data.changed.revision)
-			$scope.refreshViewer = false;
-
-		Data.updateState();
-	}
-
-	$scope.setDiffBranch = function(branch) {
-		Data.setStateVar("diffBranch", branch);
-		Data.refresh();
-	}
-
-	$scope.setDiff = function (rev) {
-		Data.setStateVar("diffRevision", rev.name);
-		if(Data.changed.diffRevision)
-			$scope.refreshDiffView = false;
-
-		Data.updateState();
-	}
-
-	$scope.toggleDiff = function() {
-		if (Data.state.diffEnabled) {
-			Data.setStateVar("diffBranch", null);
-			Data.setStateVar("diffRevision", null);
-			Data.setStateVar("diffEnabled", false);
-			Data.refresh();
-			Data.updateState();
-		} else {
-			Data.setStateVar("diffBranch", Data.state.branch);
-			Data.setStateVar("diffRevision", Data.state.revision);
-			Data.setStateVar("diffEnabled", true);
-			Data.refresh();
-			Data.updateState();
-		}
-	}
-
-	$scope.$watchGroup(['Data.state.diffEnabled', 'Data.state.diffBranch', 'Data.state.diffRevision'], function () {
-		viewerManager.diffView(Data.state.diffEnabled);
-
-		if (Data.state.diffEnabled)
-		{
-			if($scope.refreshDiffView)
-			{
-				var diffHandle = viewerManager.getHandleByName("diffView");
-				viewerManager.loadURL(diffHandle, Data.state.account, Data.state.project, Data.state.diffBranch, Data.state.diffRevision);
-
-				$scope.refreshDiffView = false;
+	for(var i = 0; i < states.length; i++) {
+		$stateProvider
+		.state(states[i] + '.branch', {
+			url: '/branch/:branch/head',
+			resolve: {
+				init: function(StateManager, $stateParams) {
+					StateManager.setState($stateParams, {});
+					StateManager.refresh('revision');
+				}
 			}
-
-			var baseUrl = serverConfig.apiUrl(Data.state.account + '/' + Data.state.project + '/revision/' + Data.state.revision + '/diff/' + Data.state.diffRevision + '.json');
-
-			$http.get(baseUrl, { withCredentials : true})
-			.then(function(json) {
-				var diffColors = {
-					added:		json.data["added"],
-					modified:	json.data["modified"],
-					deleted:	json.data["deleted"]
-				};
-
-				viewerManager.setDiffColors(diffColors);
-			});
-		} else {
-			$scope.refreshDiffView = true; // Ready for when it's re-enabled
-		}
+		})
+		.state(states[i] + '.revision', {
+			url: '/revision/:revision',
+			resolve: {
+				init: function(StateManager, $stateParams) {
+					StateManager.setState($stateParams, {});
+					StateManager.refresh('revision');
+				}
+			}
+		});
+	}
+}])
+.run(['StateManager', function(StateManager) {
+	StateManager.registerPlugin('revision', 'RevisionData', function () {
+		if (StateManager.state.branch && (StateManager.state.revision == 'head'))
+			return "branch";
+		else if (StateManager.state.revision)
+			return "revision";
+		else
+			return null;
 	});
-
-	$scope.$watchGroup(['Data.state.branch', 'Data.state.revision'], function() {
-		if($scope.refreshViewer)
-		{
-			var handle = viewerManager.getHandleByName("viewer");
-			viewerManager.loadURL(handle, Data.state.account, Data.state.project, Data.state.branch, Data.state.revision);
-
-			$scope.refreshViewer = false;
-		}
-
-		refreshTree(Data.state.account, Data.state.project, Data.state.branch, Data.state.revision);
-	});
-
-
 }]);
-
 

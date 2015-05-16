@@ -320,25 +320,6 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			$scope.setWaypointMode("RECORD");
 	}
 
-	$scope.showAll = function() {
-		$scope.setWaypointMode("NONE");
-		$scope.defaultViewer.showAll();
-	}
-
-	$scope.reset = function() {
-		$scope.defaultViewer.reset();
-	}
-
-	$scope.flyThrough = function() {
-		$scope.defaultViewer.flyThrough($scope.defaultViewer.viewpoints);
-	}
-
-	$scope.setCurrentViewpoint = function(idx)
-	{
-		$scope.setWaypointMode("NONE");
-		$scope.defaultViewer.setCurrentViewpoint(idx);
-	}
-
 	$scope.setWaypointMode = function(mode) {
 		$window.waypoint.pause();
 

@@ -791,11 +791,6 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		}
 	};
 
-	this.switchVR = function() {
-		if (window.oculus)
-			window.oculus.switchVR();
-	};
-
 	this.setDiffColors = function(diffColors) {
 		if(diffColors)
 			self.diffColors = diffColors;

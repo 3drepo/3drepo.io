@@ -16,35 +16,31 @@
  */
 
 angular.module('3drepo')
-.factory('CurrentBranch', ['$http', '$q', 'serverConfig', 'StateManager', function($http, $q, serverConfig, StateManager){
-	var o = {
-		name:			"",
-		revisions:		[],
-		n_revisions:	0
-	};
+.controller('ViewpointCtrl', ['$scope', 'StateManager', 'ViewerService', function($scope, StateManager, ViewerService)
+{
+	$scope.defaultViewer = ViewerService.defaultViewer;
 
-	o.refresh = function() {
-		var self = this;
-		var account = StateManager.state.account;
-		var project = StateManager.state.project;
-		var branch  = StateManager.state.branch;
+	$scope.showAll = function() {
+		$scope.defaultViewer.showAll();
+	}
 
-		var deferred = $q.defer();
+	$scope.reset = function() {
+		$scope.defaultViewer.reset();
+	}
 
-		$http.get(serverConfig.apiUrl(account + '/' + project + '/revisions/' + branch + '.json'))
-		.then(function(json) {
-			self.name		 = branch;
-			self.revisions	 = json.data;
-			self.n_revisions = self.revisions.length;
+	$scope.flyThrough = function() {
+		$scope.defaultViewer.flyThrough($scope.defaultViewer.viewpoints);
+	}
 
-			deferred.resolve();
-		}, function(message) {
-			deferred.resolve();
-		});
+	$scope.setCurrentViewpoint = function(idx)
+	{
+		$scope.defaultViewer.setCurrentViewpoint(idx);
+	}
 
-		return deferred.promise;
-	};
 
-	return o;
+	$scope.setViewerMode = function(mode)
+	{
+		defaultViewer.setNavMode(mode);
+	}
 }]);
 

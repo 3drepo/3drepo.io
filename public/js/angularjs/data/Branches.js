@@ -16,11 +16,13 @@
  */
 
 angular.module('3drepo')
-.factory('Branches', ['$http', '$q', 'serverConfig', function($http, $q, serverConfig){
+.factory('Branches', ['$http', '$q', 'serverConfig', 'StateManager', function($http, $q, serverConfig, StateManager){
 	var o = {};
 
-	o.refresh = function(account, project) {
+	o.refresh = function() {
 		var self = this;
+		var account = StateManager.state.account;
+		var project = StateManager.state.project;
 
 		self.branches = [];
 

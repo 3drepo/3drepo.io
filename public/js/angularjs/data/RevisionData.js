@@ -16,34 +16,29 @@
  */
 
 angular.module('3drepo')
-.factory('CurrentBranch', ['$http', '$q', 'serverConfig', 'StateManager', function($http, $q, serverConfig, StateManager){
+.factory('RevisionData', ['$http', '$q', 'serverConfig', 'StateManager', 'Branches', 'CurrentBranch', 'CurrentRevision', function($http, $q, serverConfig, StateManager, Branches, CurrentBranch, CurrentRevision){
 	var o = {
-		name:			"",
-		revisions:		[],
-		n_revisions:	0
+		CurrentBranch:		CurrentBranch,
+		CurrentRevision:	CurrentRevision,
 	};
+
+	o.genStateName = function () {
+		if (StateManager.state.branch && (StateManager.state.revision == 'head'))
+			return "branch";
+		else if (StateManager.state.revision)
+			return "revision";
+		else
+			return null;
+	}
 
 	o.refresh = function() {
 		var self = this;
-		var account = StateManager.state.account;
-		var project = StateManager.state.project;
-		var branch  = StateManager.state.branch;
 
-		var deferred = $q.defer();
-
-		$http.get(serverConfig.apiUrl(account + '/' + project + '/revisions/' + branch + '.json'))
-		.then(function(json) {
-			self.name		 = branch;
-			self.revisions	 = json.data;
-			self.n_revisions = self.revisions.length;
-
-			deferred.resolve();
-		}, function(message) {
-			deferred.resolve();
-		});
-
-		return deferred.promise;
-	};
+		return $q.all([
+			self.CurrentBranch.refresh(),
+			self.CurrentRevision.refresh()
+		]);
+	}
 
 	return o;
 }]);
