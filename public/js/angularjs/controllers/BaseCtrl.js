@@ -37,7 +37,11 @@ function($stateProvider, $locationProvider) {
 	o.refresh = function () {
 		// In the base we reset all the UI components
 		for (uicomp in o.uiComps)
-			StateManager.ui[uicomp] = false;
+			if (uicomp in StateManager.ui)
+				StateManager.ui[uicomp] = false;
+
+		for (statevar in StateManager.state)
+			StateManager.state[statevar] = null;
 	};
 
 	o.uiComps = [];
@@ -63,59 +67,5 @@ function($stateProvider, $locationProvider) {
 	$rootScope.ui		= StateManager.ui;
 	$rootScope.Data		= StateManager.Data;
 	$rootScope.state	= StateManager.state;
-
-	$rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams)
-	{
-		console.log('$stateChangeStart to '+JSON.stringify(toState)+'- fired when the transition begins. toState,toParams : \n',toState, toParams);
-
-		/*
-		if(publicViews.indexOf(toState.name) == -1)
-		{
-			if (Auth.loggedIn == null) {
-				// Not sure whether or not we are logged in.
-				// Extreme case where resolve in state hasn't fired.
-				event.preventDefault();
-
-				Auth.init()
-				.then(function() {
-					$state.transitionTo(toState, toParams); // Try again
-				});
-			} else if (Auth.loggedIn) {
-				if (toState.name == "main")
-				{
-					event.preventDefault();
-					toParams['view'] = "info";
-					$state.transitionTo("main.view", toParams);
-				}
-			} else {
-				event.preventDefault();
-				pageConfig.goDefault();
-			}
-		}
-		*/
-	});
-
-	$rootScope.$on('$stateChangeError',function(event, toState, toParams, fromState, fromParams, error){
-	  console.log('$stateChangeError - fired when an error occurs during transition.');
-	  console.log(arguments);
-	});
-	$rootScope.$on('$stateChangeSuccess',function(event, toState, toParams, fromState, fromParams){
-		var uiComps = uiState[toState.name];
-
-		if (uiComps)
-			for (var i = 0; i < uiComps.length; i++)
-				StateManager.ui[uiComps[i]] = true;
-	});
-	// $rootScope.$on('$viewContentLoading',function(event, viewConfig){
-	//   // runs on individual scopes, so putting it in "run" doesn't work.
-	//   console.log('$viewContentLoading - view begins loading - dom not rendered',viewConfig);
-	// });
-	$rootScope.$on('$viewContentLoaded',function(event){
-	  console.log('$viewContentLoaded - fired after dom rendered',event);
-	});
-	$rootScope.$on('$stateNotFound',function(event, unfoundState, fromState, fromParams){
-	  console.log('$stateNotFound '+unfoundState.to+'  - fired when a state cannot be found by its name.');
-	  console.log(unfoundState, fromState, fromParams);
-	});
 }]);
 

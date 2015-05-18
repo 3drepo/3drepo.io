@@ -50,6 +50,8 @@ function($stateProvider, parentStates) {
 		else
 			return null;
 	});
+
+	StateManager.setClearStateVars("project", ["project"]);
 }])
 .controller('ProjectCtrl', ['$scope', 'StateManager', 'ViewerService', function($scope, StateManager, ViewerService)
 {

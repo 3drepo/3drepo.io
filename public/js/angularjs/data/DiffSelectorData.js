@@ -16,34 +16,20 @@
  */
 
 angular.module('3drepo')
-.factory('CurrentDiffBranch', ['$http', '$q', 'serverConfig', 'StateManager', function($http, $q, serverConfig, StateManager){
+.factory('DiffSelectorData', ['$http', '$q', 'serverConfig', 'StateManager', 'Branches', function($http, $q, serverConfig, StateManager, Branches){
 	var o = {
-		name: "",
-		revision: [],
-		n_revision: 0
+		Branches:			Branches
 	};
 
-	o.refresh = function(account, project, branch) {
+	o.genStateName = function() {
+		return null;
+	}
+
+	o.refresh = function() {
 		var self = this;
-		var account = StateManager.state.account;
-		var project = StateManager.state.project;
-		var branch  = StateManager.state.branch;
 
-		var deferred = $q.defer();
-
-		$http.get(serverConfig.apiUrl(account + '/' + project + '/revisions/' + branch + '.json'))
-		.then(function(json) {
-			self.name		 = branch;
-			self.revisions	 = json.data;
-			self.n_revisions = self.revisions.length;
-
-			deferred.resolve();
-		}, function(message) {
-			deferred.resolve();
-		});
-
-		return deferred.promise;
-	};
+		self.Branches.refresh();
+	}
 
 	return o;
 }]);

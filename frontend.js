@@ -144,30 +144,27 @@ module.exports.createApp = function(template)
 							{
 								"plugin": "project",
 								"friends": [
-									"oculus", "tools", "navigation", "viewpoints"
+									"oculus", "tools", "navigation", "viewpoints", "tree", "meta", "revisionselector", "diffselector"
 								],
 								"children": [
 									{
 										"plugin": "revision",
 										"children": [
 											{
-												"plugin": "view",
-												"friends": ["tree", "meta", "revisionselector"]
-											},
-											{
 												"plugin": "diff",
 												"children": [
 													{
 														"plugin": "view",
-														"friends": ["tree", "meta", "revisionselector"]
 													}
 												]
+											},
+											{
+												"plugin": "view",
 											}
 										],
 									},
 									{
 										"plugin": "view",
-										"friends": ["tree", "meta", "revisionselector"],
 										"children": [
 											{
 												"plugin": "diff"

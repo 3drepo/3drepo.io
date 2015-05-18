@@ -50,6 +50,8 @@ function($stateProvider, parentStates) {
 		else
 			return null;
 	});
+
+	StateManager.setClearStateVars("account", ["account"]);
 }])
 .controller('AccountCtrl', ['$scope', 'StateManager', function($scope, StateManager)
 {

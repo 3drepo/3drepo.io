@@ -50,7 +50,9 @@ function($stateProvider, parentStates) {
 			views: {}
 		};
 
-		newState.views['footer@' + states[i] + ".view"] =
+		// TODO: This shouldn't be hard coded, need to
+		// work out position of footer from plugin list
+		newState.views['footer@base.login.account.project'] =
 		{
 			templateUrl: viewUrl
 		};
@@ -66,6 +68,8 @@ function($stateProvider, parentStates) {
 			return null;
 	});
 
+	StateManager.setClearStateVars("view", ["view"]);
+
 	$rootScope.$on('$stateChangeSuccess',function(event, toState, toParams, fromState, fromParams){
 		var states = parentStates["view"];
 
@@ -80,6 +84,7 @@ function($stateProvider, parentStates) {
 		}
 	  console.log('$stateChangeSuccess to '+toState.name+'- fired once the state transition is complete.');
 	});
+
 }])
 .controller('ViewCtrl', ['$scope', 'StateManager', 'serverConfig', '$state', function($scope, StateManager, serverConfig, $state){
 	$scope.view = StateManager.state.view;

@@ -16,6 +16,52 @@
  */
 
 angular.module('3drepo')
+.config([
+'$stateProvider',
+'parentStates',
+function($stateProvider, parentStates) {
+	var states = parentStates["diff"];
+
+	for(var i = 0; i < states.length; i++) {
+		$stateProvider
+		.state(states[i] + '.diffbranch', {
+			url: '/diff/branch/:diffbranch/head',
+			resolve: {
+				init: function(StateManager, $stateParams) {
+					StateManager.setState($stateParams, {});
+					StateManager.refresh('diff');
+				}
+			}
+		})
+		.state(states[i] + '.diffrevision', {
+			url: '/diff/revision/:diffrevision',
+			resolve: {
+				init: function(StateManager, $stateParams) {
+					StateManager.setState($stateParams, {});
+					StateManager.refresh('diff');
+				}
+			}
+		});
+	}
+}])
+.run(['StateManager', function(StateManager) {
+	StateManager.registerPlugin('diff', 'DiffData', function () {
+		if (!StateManager.state.diffrevision && StateManager.state.diffbranch)
+			StateManager.state.diffrevision = 'head';
+
+		if (StateManager.state.diffbranch && (StateManager.state.diffrevision == 'head'))
+			return "diffbranch";
+		else if (StateManager.state.diffrevision)
+			return "diffrevision";
+		else
+			return null;
+	});
+
+	StateManager.setClearStateVars("diffrevision", ["diffrevision"]);
+	StateManager.setClearStateVars("diffbranch", ["diffbranch"]);
+}]);
+
+/*
 .controller('DiffCtrl', ['$scope', 'StateManager', 'serverConfig', '$q', '$http', 'Branches', 'CurrentBranch', 'CurrentRevision', 'ViewerService', function($scope,  StateManager, serverConfig, $q, $http, Branches, CurrentDiffBranch, CurrentDiffRevision, ViewerService){
 	// Initialize to true so we load at least
 	// once at the start
@@ -57,11 +103,6 @@ angular.module('3drepo')
 		{
 			if($scope.refreshDiffView)
 			{
-				/*
-				var diffHandle = viewerManager.getHandleByName("diffView");
-				viewerManager.loadURL(diffHandle, Data.state.account, Data.state.project, Data.state.diffBranch, Data.state.diffRevision);
-				*/
-
 				viewerManager.loadModel();
 
 				$scope.refreshDiffView = false;
@@ -86,4 +127,4 @@ angular.module('3drepo')
 
 }]);
 
-
+*/

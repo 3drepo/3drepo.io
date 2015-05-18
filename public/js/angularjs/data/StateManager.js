@@ -16,6 +16,41 @@
  */
 
 angular.module('3drepo')
+.run(['$rootScope', 'uiState', 'StateManager', function($rootScope, uiState, StateManager) {
+	$rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams)
+	{
+		console.log('$stateChangeStart to '+JSON.stringify(toState)+'- fired when the transition begins. toState,toParams : \n',toState, toParams);
+	});
+
+	$rootScope.$on('$stateChangeError',function(event, toState, toParams, fromState, fromParams, error){
+	  console.log('$stateChangeError - fired when an error occurs during transition.');
+	  console.log(arguments);
+	});
+
+	$rootScope.$on('$stateChangeSuccess',function(event, toState, toParams, fromState, fromParams){
+		var uiComps = uiState[toState.name];
+
+		var toStates 	= toState.name.split(".");
+		var fromStates 	= fromState.name.split(".");
+
+		for(var i = 0; i < fromStates.length; i++)
+			if (toStates.indexOf(fromStates[i]) == -1)
+				StateManager.clearStateVars(fromStates[i]);
+
+		if (uiComps)
+			for (var i = 0; i < uiComps.length; i++)
+				StateManager.ui[uiComps[i]] = true;
+	});
+
+	$rootScope.$on('$viewContentLoaded',function(event){
+	  console.log('$viewContentLoaded - fired after dom rendered',event);
+	});
+
+	$rootScope.$on('$stateNotFound',function(event, unfoundState, fromState, fromParams){
+	  console.log('$stateNotFound '+unfoundState.to+'  - fired when a state cannot be found by its name.');
+	  console.log(unfoundState, fromState, fromParams);
+	});
+}])
 .service('StateManager', ['$injector', '$state', 'structure', function($injector, $state, structure) {
 	var self = this;
 
@@ -64,6 +99,19 @@ angular.module('3drepo')
 
 		if (stateFunc)
 			this.pluginState[plugin] = stateFunc;
+	}
+
+	this.stateVars    = {};
+	this.setClearStateVars = function(state, stateVars) {
+		self.stateVars[state] = stateVars;
+	}
+
+	this.clearStateVars = function(state) {
+		var myStateVars = self.stateVars[state];
+
+		if (myStateVars)
+			for(var i = 0; i < myStateVars.length; i++)
+				self.state[myStateVars[i]] = null;
 	}
 
 	this.refresh = function(plugin)

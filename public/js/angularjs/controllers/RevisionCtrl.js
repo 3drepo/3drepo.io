@@ -53,5 +53,8 @@ function($stateProvider, parentStates) {
 		else
 			return null;
 	});
+
+	StateManager.setClearStateVars("revision", ["revision"]);
+	StateManager.setClearStateVars("branch", ["branch"]);
 }]);
 

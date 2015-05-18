@@ -16,7 +16,7 @@
  */
 
 angular.module('3drepo')
-.factory('CurrentDiffRevision', ['$http', '$q', 'serverConfig', function($http, $q, serverConfig){
+.factory('CurrentDiffRevision', ['$http', '$q', 'serverConfig', 'StateManager', function($http, $q, serverConfig, StateManager){
 	var o = {
 		name:		"",
 		shortName:	"",
@@ -28,6 +28,10 @@ angular.module('3drepo')
 
 	o.refresh = function(account, project, branch, revision) {
 		var self = this;
+		var account		= StateManager.state.account;
+		var project		= StateManager.state.project;
+		var branch		= StateManager.state.branch;
+		var revision	= StateManager.state.revision;
 
 		var deferred = $q.defer();
 		var baseUrl = "";
@@ -39,7 +43,7 @@ angular.module('3drepo')
 
 		$http.get(baseUrl + '.json')
 		.then(function(json) {
-			self.revisio	= json.data.revision;
+			self.revision	= json.data.revision;
 			self.shortName	= json.data.revision.substr(0,20) + "...";
 			self.author		= json.data.author;
 			self.data		= json.data.date;
