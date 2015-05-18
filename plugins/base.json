@@ -1,0 +1,23 @@
+{
+	"name" : "base",
+	"files": {
+		"js" : [
+			"base/controlinterface.js",
+			"base/config.js"
+		],
+		"jade": [
+			{"template" : "base/404.jade", "id" : "404.html"},
+			{"template" : "base/header.jade", "id": "header.html"}
+		],
+		"angular": [
+			"base/serverConfig.js",
+			"base/Auth.js",
+			"base/pageConfigProvider.js",
+			"base/httpProvider.js",
+			"base/HeaderCtrl.js",
+			"base/BaseCtrl.js",
+			"base/StateManager.js",
+			"base/projectPageConfig.js"
+		]
+	}
+}

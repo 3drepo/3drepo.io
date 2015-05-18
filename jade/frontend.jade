@@ -38,7 +38,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 		// Plugin JADE Files
 		each j in pluginJade
 			script(type="text/ng-template", id=j.id)
-				!= renderMe('./views/ng-templates/' + j.template, locals)
+				!= renderMe('./plugins/' + j.template, locals)
 				
 		.container-fluid
 			.row.mainrow

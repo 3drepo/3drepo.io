@@ -48,11 +48,11 @@ module.exports.createApp = function(template)
 	app.use(bodyParser.json());
 	app.use(compress());
 
-	app.set('views', './views');
+	app.set('views', './jade');
 	app.set('view_engine', 'jade');
 	app.locals.pretty = true;
 
-	app.get('/public/js/config.js', function(req, res) {
+	app.get('/public/plugins/base/config.js', function(req, res) {
 		var params = {};
 
 		params['config_js'] = 'var server_config = {}; server_config.apiUrl = function(path) { return "' + config.apiServer.url + '/" + path; };';
@@ -192,7 +192,7 @@ module.exports.createApp = function(template)
 			params["parentStateJSON"][plugin].push(parentState);
 
 		// TODO: Check whether or not it doesn't exist
-		var pluginConfig = JSON.parse(fs.readFileSync("./config/plugins/" + plugin + ".json", "utf8"));
+		var pluginConfig = JSON.parse(fs.readFileSync("./plugins/" + plugin + ".json", "utf8"));
 
 		if (params["pluginLoaded"].indexOf(plugin) == -1)
 		{
@@ -222,7 +222,7 @@ module.exports.createApp = function(template)
 
 					for(var fileidx = 0; fileidx < nJSFiles; fileidx++)
 					{
-						var jsFile = '/public/js/' + pluginConfig["files"]["js"][fileidx];
+						var jsFile = '/public/plugins/' + pluginConfig["files"]["js"][fileidx];
 						params["pluginJS"].push(jsFile);
 					}
 				}
@@ -233,7 +233,7 @@ module.exports.createApp = function(template)
 
 					for(var fileidx = 0; fileidx < nAngularFiles; fileidx++)
 					{
-						var angularFile = '/public/js/angularjs/' + pluginConfig["files"]["angular"][fileidx];
+						var angularFile = '/public/plugins/' + pluginConfig["files"]["angular"][fileidx];
 						params["pluginAngular"][plugin]["files"].push(angularFile);
 					}
 				}
@@ -249,7 +249,7 @@ module.exports.createApp = function(template)
 						if (!(uicomp["position"] in params["ui"]))
 							params["ui"][uicomp["position"]] = [];
 
-						params["ui"][uicomp["position"]].push(uicomp["template"]);
+						params["ui"][uicomp["position"]].push('./plugins/' + uicomp["template"]);
 
 					}
 				}
@@ -281,7 +281,7 @@ module.exports.createApp = function(template)
 
 		var states = [];
 
-		var pluginConfig = JSON.parse(fs.readFileSync("./config/plugins/" + plugin + ".json", "utf8"));
+		var pluginConfig = JSON.parse(fs.readFileSync("./plugins/" + plugin + ".json", "utf8"));
 
 		if ("states" in pluginConfig)
 		{

@@ -1,0 +1,12 @@
+{
+	"name" : "meta",
+	"files": {
+		"angular": [
+			"meta/MetaCtrl.js"
+		],
+		"ui": [
+			{"name": "meta", "template" : "meta/meta.jade", "position" : "right"}
+		]
+	}
+}
+

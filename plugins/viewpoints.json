@@ -1,0 +1,12 @@
+{
+	"name" : "viewpoints",
+	"files": {
+		"angular": [
+			"viewpoints/ViewpointCtrl.js"
+		],
+		"ui": [
+			{"name": "viewpoints", "template" : "viewpoints/viewpoints.jade", "position" : "tools"}
+		]
+	}
+}
+

@@ -1,0 +1,14 @@
+{
+	"name" : "revisionselector",
+	"files": {
+		"angular": [
+			"revisionselector/SelectorData.js",
+			"revisionselector/SelectorCtrl.js",
+			"revisionselector/Branches.js"
+		],
+		"ui": [
+			{"name": "revisionselector", "template" : "revisionselector/revisionselector.jade", "position" : "header"}
+		]
+	}
+}
+

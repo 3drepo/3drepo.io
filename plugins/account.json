@@ -1,0 +1,12 @@
+{
+	"name" : "account",
+	"files": {
+		"jade" : [
+			{"template" : "account/account.jade", "id" : "account.html"}
+		],
+		"angular": [
+			"account/AccountData.js",
+			"account/AccountCtrl.js"
+		]
+	}
+}

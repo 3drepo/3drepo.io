@@ -4,27 +4,27 @@
 			div.nav-project-title  <b>{{Data.ProjectData.name}}</b>
 			if ui.header
 				each uicomp in ui.header
-					!= renderMe('./views/ui/' + uicomp, locals)
+					!= renderMe(uicomp, locals)
 
 	//#nav-version-control(ng-controller='RevisionCtrl', ng-show="Data.ui.revisionSelector")
 	#project-viewport-container.row
 		div#x3d.project-viewport
 		if ui.viewport
 			each uicomp in ui.viewport
-				!= renderMe('./views/ui/' + uicomp, locals)
+				!= renderMe(uicomp, locals)
 	.ui2
 		#ui2-left
 			if ui.left
 				each uicomp in ui.left
-					!= renderMe('./views/ui/' + uicomp, locals)
+					!= renderMe(uicomp, locals)
 		#ui2-right
 			if ui.right
 				each uicomp in ui.right
-					!= renderMe('./views/ui/' + uicomp, locals)
+					!= renderMe(uicomp, locals)
 
 	#bottom-panel.row.mainrow.collapsed
 		if ui.footer
 			each uicomp in ui.footer
-				!= renderMe('./views/ui/' + uicomp, locals)
+				!= renderMe(uicomp, locals)
 		div(ui-view="footer")
 
