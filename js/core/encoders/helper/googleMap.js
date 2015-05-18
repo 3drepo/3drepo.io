@@ -18,7 +18,7 @@
 // Inspired by http://stackoverflow.com/questions/19266002/get-latitude-and-longitude-from-static-google-map
 var config		 = require('../../config.js');
 
-module.exports.addGoogleTiles = function(xmlDoc, width, yrot, worldTileSize, centLat, centLong, zoom, trans)
+module.exports.addGoogleTiles = function(xmlDoc, width, yrot, worldTileSize, centLat, centLong, zoom, maptype, trans)
 {
 	var topGroup = xmlDoc.createElement("group");
 	//topGroup.setAttribute("invisible", "true");
@@ -68,7 +68,7 @@ module.exports.addGoogleTiles = function(xmlDoc, width, yrot, worldTileSize, cen
 			var tileLat = (2 * Math.atan(Math.exp(((tileCentY / nTiles) - 128) / -(256 / (2 * Math.PI)))) - Math.PI / 2) / (Math.PI / 180);
 			var tileLong = ((tileCentX / nTiles) - 128) / (256 / 360);
 
-			var googleMapsURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + tileLat + "," + tileLong + "&size=" + googleTileSize + "x" + googleTileSize + "&maptype=satellite&zoom=" + zoom + "&key=" + config.googleApiKey;
+			var googleMapsURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + tileLat + "," + tileLong + "&size=" + googleTileSize + "x" + googleTileSize + "&zoom=" + zoom + "&key=" + config.googleApiKey + "&maptype=" + maptype;
 
 			var app = xmlDoc.createElement('Appearance');
 			var it = xmlDoc.createElement('ImageTexture');
