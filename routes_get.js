@@ -226,8 +226,10 @@ module.exports = function(router, dbInterface, checkAccess){
 
 		var params = {
 			account:	req.params["account"],
-			roject:		req.params["project"],
+			project:	req.params["project"],
 			branch:		req.params["branch"],
+			rid:		req.params["rid"],
+			sid:		req.params["sid"],
 			subformat:	req.params["subformat"],
 			user:		current_user,
 			query:		req.query
@@ -245,6 +247,7 @@ module.exports = function(router, dbInterface, checkAccess){
 			account:	req.params["account"],
 			project:	req.params["project"],
 			branch:		req.params["branch"],
+			sid:		req.params["sid"],
 			subformat:	req.params["subformat"],
 			user:		current_user,
 			query:		req.query

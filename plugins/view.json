@@ -1,5 +1,6 @@
 {
 	"name" : "view",
+	"states" : ["info", "log", "comments", "revisions", "settings", "cobie"],
 	"files": {
 		"angular": [
 			"view/ViewCtrl.js",

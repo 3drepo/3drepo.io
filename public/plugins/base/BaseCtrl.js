@@ -59,13 +59,15 @@ function($stateProvider, $locationProvider) {
 
 	return o;
 }])
-.run(['$rootScope', '$state', 'Auth', 'pageConfig', 'uiState', 'StateManager', function($rootScope, $state, Auth, pageConfig, uiState, StateManager) {
+.controller('BaseCtrl', ['$scope', 'StateManager', function($scope, StateManager)
+{
+	$scope.ui		= StateManager.ui;
+	$scope.Data		= StateManager.Data;
+	$scope.state	= StateManager.state;
+}])
+.run(['StateManager', function(StateManager) {
 	StateManager.registerPlugin('base', 'BaseData', function () {
 		return "base"; // Always valid
 	});
-
-	$rootScope.ui		= StateManager.ui;
-	$rootScope.Data		= StateManager.Data;
-	$rootScope.state	= StateManager.state;
 }]);
 

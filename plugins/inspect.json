@@ -1,0 +1,16 @@
+{
+	"name" : "viewpoints",
+	"files": {
+		"angular": [
+			"inspect/InspectCtrl.js"
+		],
+		"jade" : [
+			{"template" : "inspect/camera.jade", "id" : "cameramodal.html"}
+		],
+		"ui": [
+			{"name": "inspect", "template" : "inspect/inspect.jade", "position" : "tools"},
+			{"name": "qrdrag", "template": "inspect/qrdrag.jade", "position": "right"}
+		]
+	}
+}
+

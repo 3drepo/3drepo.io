@@ -34,7 +34,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 			each file in plugin.files
 				script(type="text/javascript", src=file)
 
-	body
+	body(ng-controller='BaseCtrl')
 		// Plugin JADE Files
 		each j in pluginJade
 			script(type="text/ng-template", id=j.id)

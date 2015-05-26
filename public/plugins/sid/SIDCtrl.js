@@ -20,42 +20,29 @@ angular.module('3drepo')
 '$stateProvider',
 'parentStates',
 function($stateProvider, parentStates) {
-	var states = parentStates["revision"];
+	var states = parentStates["sid"];
 
 	for(var i = 0; i < states.length; i++) {
 		$stateProvider
-		.state(states[i] + '.branch', {
-			url: '/revision/:branch/head',
+		.state(states[i] + '.sid', {
+			url: '/:sid',
 			resolve: {
 				init: function(StateManager, $stateParams) {
 					StateManager.setState($stateParams, {});
-					StateManager.state.revision = 'head';
-					StateManager.refresh('revision');
-				}
-			}
-		})
-		.state(states[i] + '.revision', {
-			url: '/revision/:revision',
-			resolve: {
-				init: function(StateManager, $stateParams) {
-					StateManager.setState($stateParams, {});
-					StateManager.refresh('revision');
+					StateManager.refresh('sid');
 				}
 			}
 		});
 	}
 }])
 .run(['StateManager', function(StateManager) {
-	StateManager.registerPlugin('revision', 'RevisionData', function () {
-		if (StateManager.state.branch && (StateManager.state.revision == 'head'))
-			return "branch";
-		else if (StateManager.state.revision)
-			return "revision";
+	StateManager.registerPlugin('sid', 'SIDData', function () {
+		if (StateManager.state.sid)
+			return "sid";
 		else
 			return null;
 	});
 
-	StateManager.setClearStateVars("revision", ["revision"]);
-	StateManager.setClearStateVars("branch", ["branch"]);
+	StateManager.setClearStateVars("sid", ["sid"]);
 }]);
 

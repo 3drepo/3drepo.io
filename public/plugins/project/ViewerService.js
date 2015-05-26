@@ -34,6 +34,7 @@ angular.module('3drepo')
 	this.loadModel = function() {
 		var branch		= StateManager.state.branch ? StateManager.state.branch : "master";
 		var revision	= StateManager.state.revision ? StateManager.state.revision : "head";
+
 		var url = null;
 
 		if (revision == "head")
@@ -44,6 +45,12 @@ angular.module('3drepo')
 		}
 
 		self.defaultViewer.loadURL(url);
+	}
+
+	this.pickPoint = function(x,y)
+	{
+		self.defaultViewer.pickPoint(x,y);
+		return self.defaultViewer.pickObject;
 	}
 
 	this.switchVR = function()

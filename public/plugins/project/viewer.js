@@ -244,6 +244,9 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.viewPointChanged = function(event)
 	{
+		console.log(self.getCurrentViewpoint());
+		console.log(event);
+
 		$(self.viewer).trigger("myViewpointHasChanged", event);
 	}
 
@@ -470,6 +473,22 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		}
 	}
 
+	this.pickObject = {};
+
+	this.pickPoint = function(x,y)
+	{
+		var viewArea = self.getViewArea();
+		var scene	 = viewArea._scene;
+
+		var oldPickMode = scene._vf.pickMode.toLowerCase();
+		scene._vf.pickMode = "idbuf24";
+		var success = scene._nameSpace.doc.ctx.pickValue(viewArea, x, y);
+
+		self.pickObject.pickPos		= viewArea._pickingInfo.pickPos;
+		self.pickObject.pickNorm	= viewArea._pickingInfo.pickNorm;
+		self.pickObject.pickObj		= viewArea._pickingInfo.pickObj;
+	}
+
 	this.oneGrpNodes = [];
 	this.twoGrpNodes = [];
 
@@ -533,6 +552,108 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 		return qt.normalize(qt);
 	}
+
+	/*
+	this.quatLookAt = function (up, forward)
+	{
+		forward.normalize();
+		up.normalize();
+
+		var right = forward.cross(up);
+		up = right.cross(forward);
+
+		var w = Math.sqrt(1 + right.x + up.y + forward.z) * 0.5;
+		var recip = 1 / (4 * w);
+		var x = (forward.y - up.z) * recip;
+		var y = (right.z - forward.y) * recip;
+		var z = (up.x - right.y) * recip;
+
+		return new x3dom.fields.Quarternion(x,y,z,w);
+	}
+	*/
+
+	function scale(v, s)
+	{
+		return [v[0] * s, v[1] * s, v[2] * s];
+	}
+
+	function normalize(v)
+	{
+		var sz =  Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+		return scale(v, 1 / sz);
+	}
+
+	function dotProduct(a,b)
+	{
+		return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+	}
+
+	function crossProduct(a,b)
+	{
+		var x = a[1] * b[2] - a[2] * b[1];
+		var y = a[2] * b[0] - a[0] * b[2];
+		var z = a[0] * b[1] - a[1] * b[0];
+
+		return [x,y,z];
+	}
+
+	function vecAdd(a,b)
+	{
+		return [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+	}
+
+	function vecSub(a,b)
+	{
+		return vecAdd(a, scale(b,-1));
+	}
+
+	this.orientationLookAt = function(pos, lookAt, up)
+	{
+		// TODO: Probably a much faster way of doing this, but tired
+		// var x3domPos = new x3dom.fields.SFVec3f(pos[0], pos[1], pos[2]);
+		//var x3domAt  = new x3dom.fields.SFVec3f(lookAt[0], lookAt[1], lookAt[2]);
+		// var x3domUp  = new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
+
+		var mat = x3dom.fields.SFMatrix4f.lookAt(pos, lookAt, up);
+		var quat = new x3dom.fields.Quaternion(0,0,0,1);
+		quat.setValue(mat);
+
+		var axisang = quat.toAxisAngle();
+
+		return [axisang[1], axisang[0].x, axisang[0].y, axisang[0].z];
+	}
+	/*
+	this.quatLookAt = function(up, forward)
+	{
+		forward = normalize(forward);
+		up = normalize(up);
+
+		var right = crossProduct(forward, up);
+
+		up = scale(crossProduct(forward, right), -1);
+
+		var w = Math.sqrt(1 + right[0] + up[1] + forward[2]) * 0.5;
+
+		var recip = 1 / (4 * w);
+		var x = (forward[1] - up[2]) * recip;
+		var y = (right[2] - forward[0]) * recip;
+		var z = (up[0] - right[1]) * recip;
+
+		return [x,y,z,w];
+	}
+
+	this.axisAngle = function(quat)
+	{
+		var ang = 2 * Math.acos(quat[3]);
+		var recip = 1 / (1 - quat[3] * quat[3]);
+
+		var x = quat[0] * recip;
+		var y = quat[1] * recip;
+		var z = quat[2] * recip;
+
+		return [x,y,z,ang];
+	}
+	*/
 
 	this.setNavMode = function(mode) {
 		if (self.currentNavMode != mode)
@@ -709,21 +830,48 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		self.url = url;
 	}
 
-	this.getTransMatrix = function()
+	this.getCurrentViewpoint = function()
 	{
-		return viewer.viewPoint._x3domNode._viewMatrix.inverse();
-		var viewDir = transMatrix.e2();
-		var viewPos = transMatrix.e3();
+		var viewPoint = {};
+
+		var viewTrans	= self.getViewArea()._scene.getViewpoint().getCurrentTransform();
+		var viewMat		= self.getViewMatrix();
+
+		viewTrans = viewTrans.inverse().mult(viewMat);
+		viewTrans = viewTrans.inverse();
+
+		var viewPos = viewTrans.e3();
+		var viewDir = viewTrans.e2().multiply(-1.0);
+		var viewUp  = viewTrans.e1();
+
+		var lookAt = viewPos.add(viewDir);
+
+		viewPoint["up"] = [viewUp.x, viewUp.y, viewUp.z];
+		viewPoint["position"] = [viewPos.x, viewPos.y, viewPos.z];
+		viewPoint["look_at"] = [lookAt.x, lookAt.y, lookAt.z];
+
+		var projMat = self.getProjectionMatrix();
+
+		viewPoint["fov"]	= Math.atan((1 / projMat._00)) * 2.0;
+		viewPoint["aspect_ratio"]	= viewPoint["fov"] / projMat._11;
+
+		var f = projMat._23 / (projMat._22 + 1);
+		var n = (f * projMat._23) / (projMat._23 - 2 * f);
+
+		viewPoint["far"]	= f;
+		viewPoint["near"]	= n;
+
+		viewPoint["orientation"] = self.orientationLookAt(viewPos, lookAt, viewUp);
+		/*
+		var forward = [viewDir.x, viewDir.y, viewDir.z];
+		var tmpMat = x3dom.fields.SFMatrix4f.lookAt()
+		viewPoint["quat"] = self.quatLookAt(viewPoint["up"], forward);
+		viewPoint["axisAngle"] = self.axisAngle(viewPoint["quat"]);
+		*/
+
+		return viewPoint;
 	}
 
-	this.getViewDirPos = function()
-	{
-		var transMatrix = self.getViewMatrix().inverse();
-		var viewDir = transMatrix.e2().multiply(-1);
-		var viewPos = transMatrix.e3();
-
-		return { "viewPos" : viewPos, "viewDir" : viewDir };
-	}
 
 	this.speed = 2.0;
 	this.setSpeed = function(speed)

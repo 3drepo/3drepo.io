@@ -4,6 +4,10 @@
 		"angular": [
 			"viewpoints/ViewpointCtrl.js"
 		],
+		"jade": [
+			{"template" : "viewpoints/newViewpoint.jade", "id" : "newviewpointmodal.html"},
+			{"template" : "viewpoints/newViewpointInfo.jade", "id" : "newviewpointinfomodal.html"}
+		],
 		"ui": [
 			{"name": "viewpoints", "template" : "viewpoints/viewpoints.jade", "position" : "tools"}
 		]

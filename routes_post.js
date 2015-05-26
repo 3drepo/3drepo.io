@@ -152,6 +152,26 @@ module.exports = function(router, dbInterface, checkAccess){
 
 	});
 
+	// Ability to add a named viewpoint
+	this.post('/:account/:project/:branch/viewpoint', true, function(req, res) {
+		var resCode = responseCodes.OK;
+		var responsePlace = 'Adding a viewpoint';
+
+		logger.log('debug', 'Adding a new viewpoint to ' + req.params["account"] + req.params["project"]);
+
+		var data = JSON.parse(req.body.data);
+
+		this.dbInterface.getRootNode(req.params["account"], req.params["project"], req.params["branch"], null, function(err, root) {
+			if (err.value) return callback(err);
+
+			console.log(JSON.stringify(root));
+
+			this.dbInterface.storeViewpoint(req.params["account"], req.params["project"], req.params["branch"], req.session.user, this.dbInterface.uuidToString(root["shared_id"]), data, function(err) {
+				responseCodes.onError(responsePlace, err, res, {});
+			});
+		});
+	});
+
 	// Register handlers with Express Router
 	for(var idx in this.postMap)
 	{

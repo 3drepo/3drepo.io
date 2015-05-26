@@ -1218,6 +1218,16 @@ header button.btn {
 	color: #ffffff;
 }
 
+#qrdrag-menu-icon {
+	position: absolute;
+	bottom: 0;
+	left: -200px;
+	padding: 10px;
+	cursor: pointer;
+	color: #ffffff;
+}
+
+
 .tools-menu-items {
 	color: #ffffff;
 	padding: 10px;
@@ -1525,4 +1535,28 @@ ul.fancytree-container li {
 	z-index: 100;
 }
 
+#videocamera {
+	width: 100%;
+	height: 100%;
+	position: relative;
+}
+
+.modal {
+	color: white;
+	overflow: hidden;
+	text-align: center;
+}
+
+.modal-content {
+	margin-top: 50%;
+	background-color: RGBA(45,45,45,0.9) !important;
+	overflow: hidden;
+	margin-right: 0;
+	margin-left: 0;
+}
+
+.modal-dialog {
+	margin-right: 0;
+	margin-left: 0;
+}
 

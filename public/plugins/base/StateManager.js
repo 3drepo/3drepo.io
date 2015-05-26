@@ -37,6 +37,9 @@ angular.module('3drepo')
 			if (toStates.indexOf(fromStates[i]) == -1)
 				StateManager.clearStateVars(fromStates[i]);
 
+		for (uicomp in StateManager.ui)
+			StateManager.ui[uicomp] = false;
+
 		if (uiComps)
 			for (var i = 0; i < uiComps.length; i++)
 				StateManager.ui[uiComps[i]] = true;

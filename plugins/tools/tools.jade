@@ -1,7 +1,7 @@
 #tools-menu-icon
 	.dropup
 		i.fa.fa-wrench(role="button", data-toggle='dropdown', data-target='#')
-		ul.dropdown-menu.pull-right(role='menu').tools-menu-items
+		ul.dropdown-menu.pull-right(role='menu')
 			each tool in ui.tools
 				!= renderMe(tool, locals)
 

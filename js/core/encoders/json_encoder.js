@@ -322,6 +322,21 @@ exports.route = function(router)
 				err_callback(responseCodes.OK, diff);
 		});
 	});
+
+	router.get('json', '/:account/:project/revision/:branch/head/:sid', function(res, params, err_callback) {
+		router.dbInterface.getHeadUUID(params.account, params.project, params.branch, function (err, uuid)
+		{
+			router.dbInterface.getObject(params.account, params.project, null, uuidToString(uuid.uuid), params.sid, function (err, type, uid, obj) {
+				console.log(JSON.stringify(obj));
+
+				if (err.value)
+					err_callback(err);
+				else
+					err_callback(responseCodes.OK, obj);
+
+			})
+		});
+	});
 };
 
 

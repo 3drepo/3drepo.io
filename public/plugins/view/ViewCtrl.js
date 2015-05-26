@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
 var viewUrl = function ($stateParams)
 {
 	// Each view is associated with a template
@@ -29,6 +30,9 @@ var viewUrl = function ($stateParams)
 
 	return view + '.html';
 }
+*/
+
+var possible_views = ["info", "comments", "revisions", "log", "settings", "cobie"];
 
 angular.module('3drepo')
 .config([
@@ -38,37 +42,38 @@ function($stateProvider, parentStates) {
 	var states = parentStates["view"];
 
 	for(var i = 0; i < states.length; i++) {
-		var newState = {
-			url: '/:view',
-			resolve: {
-				auth: function authCheck(Auth) { return Auth.init(); },
-				init: function(StateManager, $stateParams) {
-					StateManager.setState($stateParams, {});
-					StateManager.refresh("view");
-				}
-			},
-			views: {}
-		};
-
-		// TODO: This shouldn't be hard coded, need to
-		// work out position of footer from plugin list
-		newState.views['footer@base.login.account.project'] =
+		for(var v = 0; v < possible_views.length; v++)
 		{
-			templateUrl: viewUrl
-		};
-
-		$stateProvider.state(states[i] + '.view', newState);
+			$stateProvider
+			.state(states[i] + '.' + possible_views[v], {
+				url: '/' + possible_views[v],
+				resolve: {
+					auth: function authCheck(Auth) { return Auth.init(); },
+					init: function(StateManager, $stateParams) {
+						StateManager.setState($stateParams, {});
+						StateManager.state.view = possible_views[v];
+						StateManager.refresh("view");
+					}
+				},
+				// TODO: This shouldn't be hard coded, need to
+				// work out position of footer from plugin list
+				views: { 'footer@base.login.account.project' : {
+					templateUrl : possible_views[v] + '.html'
+					}
+				}
+			});
+		}
 	}
 }])
 .run(['$rootScope', 'parentStates', 'StateManager', function($rootScope, parentStates, StateManager) {
 	StateManager.registerPlugin('view', 'ViewData',  function () {
-		if (StateManager.state.view)
-			return "view";
+		if (possible_views.indexOf(StateManager.state.view) != -1)
+			return StateManager.state.view;
 		else
 			return null;
 	});
 
-	StateManager.setClearStateVars("view", ["view"]);
+	StateManager.setClearStateVars('view', ["view"]);
 
 	$rootScope.$on('$stateChangeSuccess',function(event, toState, toParams, fromState, fromParams){
 		var states = parentStates["view"];

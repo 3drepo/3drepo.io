@@ -1,4 +1,4 @@
-div(ng-controller="ViewpointCtrl")
+div(ng-controller="ViewpointCtrl").tools-menu-items
 	li.divider
 	li Viewpoints
 	li.divider
@@ -19,4 +19,7 @@ div(ng-controller="ViewpointCtrl")
 				i.fa.fa-check(ng-show="defaultViewer.selectedViewpoint == viewpoint.idx")
 				span {{viewpoint.name}}
 	li.divider
-
+	li
+		a(ng-click='newViewpoint()')
+			span New Viewpoint
+	li.divider

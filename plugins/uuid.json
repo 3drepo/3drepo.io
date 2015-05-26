@@ -1,0 +1,11 @@
+{
+	"name" : "uuid",
+	"states": ["uuid"],
+	"files": {
+		"angular": [
+			"uuid/UUIDCtrl.js",
+			"uuid/UUIDData.js",
+		]
+	}
+}
+

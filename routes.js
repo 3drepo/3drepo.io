@@ -47,46 +47,48 @@ module.exports = function(){
 	//	  Does the user have access to it ?
 	// 2. If not, is the user logged in ?
 	// 3. Otherwise, unauthorized
-	this.checkAccess = function(req, res, next) {
-		var account = req.params["account"];
-		var project = req.params["project"];
+	this.checkAccess = function(accessFunc) {
+		return function(req, res, next) {
+			var account = req.params["account"];
+			var project = req.params["project"];
 
-		if (req.params["format"])
-			var format = req.params["format"].toLowerCase();
-		else
-			var format = null;
+			if (req.params["format"])
+				var format = req.params["format"].toLowerCase();
+			else
+				var format = null;
 
-		var username = null;
+			var username = null;
 
-		if ("user" in req.session)
-			username = req.session["user"].username;
+			if ("user" in req.session)
+				username = req.session["user"].username;
 
-		if (account && project)
-		{
-			this.dbInterface.hasReadAccessToProject(username, account, project, function(err) {
-				if(err.value && !imgEncoder.isImage(format))
-				{
-					logger.log('debug', account + '/' + project + ' is not public project and no user information.');
-					responseCodes.onError("Check user access", err, res, null, req.params);
+			if (account && project)
+			{
+				accessFunc(username, account, project, function(err) {
+					if(err.value && !imgEncoder.isImage(format))
+					{
+						logger.log('debug', account + '/' + project + ' is not public project and no user information.');
+						responseCodes.onError("Check user access", err, res, null, req.params);
+					} else {
+						next();
+					}
+				});
+			} else {
+				// No account and project specified, check user is logged in.
+				if (!("user" in req.session)) {
+					logger.log('debug', 'No account and project specified.');
+					responseCodes.onError("Check user access (no account/user)", responseCodes.NOT_AUTHORIZED, res, req.params, null);
 				} else {
 					next();
 				}
-			});
-		} else {
-			// No account and project specified, check user is logged in.
-			if (!("user" in req.session)) {
-				logger.log('debug', 'No account and project specified.');
-				responseCodes.onError("Check user access (no account/user)", responseCodes.NOT_AUTHORIZED, res, req.params, null);
-			} else {
-				next();
 			}
-		}
+		};
 	};
 
 	this.dbInterface = require('./js/core/db_interface.js');
 
-	this.getHandler  = require('./routes_get.js')(this.router, this.dbInterface, this.checkAccess);
-	this.postHandler = require('./routes_post.js')(this.router, this.dbInterface, this.checkAccess);
+	this.getHandler  = require('./routes_get.js')(this.router, this.dbInterface, this.checkAccess(this.dbInterface.hasReadAccessToProject));
+	this.postHandler = require('./routes_post.js')(this.router, this.dbInterface, this.checkAccess(this.dbInterface.hasWriteAccessToProject));
 
 	this.get = this.getHandler.get; // Re-route the call to the get handler.
 	this.router.use(express.static('./submodules'));

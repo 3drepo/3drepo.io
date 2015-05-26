@@ -55,6 +55,29 @@ module.exports = function() {
 		}
 	);
 
+	this.registerSchema('/:account/:project/:branch/viewpoint',
+		{
+			"name": {"type": "string"},
+			"shared_id": {"type": "string"},
+			"up": {
+				"type": "array",
+				"items": { "type" : "number"}
+			},
+			"look_at": {
+				"type": "array",
+				"items": { "type" : "number"}
+			},
+			"position": {
+				"type": "array",
+				"items": { "type": "number"}
+			},
+			"fov": {"type" : "number"},
+			"aspect_ratio" : {"type": "number"},
+			"far" : {"type": "number"},
+			"near" : {"type" : "number"}
+		}
+	);
+
 	this.registerSchema('/:account/:project/wayfinder/record',
 		{
 			"waypoints" : {
