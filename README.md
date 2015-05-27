@@ -3,6 +3,9 @@
 
 3DRepo is a web based front end for viewing version controlled 3D data stored in a MongoDB. Getting data into the database is controlled by the 3D Repo Core library and GUI separate projects hosted here on GitHub ([3DRepoCore][], [3DRepoGUI][])
 
+## License
+This project is Copyright of [3D Repo Ltd](http://3drepo.org) and is released under the open source [GNU Affero General Public License v3](http://www.gnu.org/licenses/agpl-3.0.en.html). Should you require a commercial license, please contact [support@3drepo.org](mailto:support@3drepo.org)
+
 Installation
 ------------
 
