@@ -16,14 +16,14 @@
  */
 
 angular.module('3drepo')
-.controller('MetaCtrl', ['$scope', 'MetaService', function($scope, MetaService)
+.controller('PanelCtrl', ['$scope', function($scope)
 {
-	$scope.MetaService = MetaService;
+	$scope.toggleLeftPanel = function() {
+		$("#ui2-leftpanel").toggleClass("collapsed");
+	}
 
-	$(document).on("objectSelected", function(event, object, zoom) {
-		if (object)
-			MetaService.getObjectMetaData(object);
-	});
-
+	$scope.toggleRightPanel = function() {
+		$("#ui2-rightpanel").toggleClass("collapsed");
+	}
 }]);
 

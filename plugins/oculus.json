@@ -8,7 +8,7 @@
 			"oculus/OculusCtrl.js"
 		],
 		"ui": [
-			{"name": "oculus", "template" : "oculus/oculus.jade", "position" : "right"}
+			{"name": "oculus", "template" : "oculus/oculus.jade", "position" : "icons"}
 		]
 	}
 }

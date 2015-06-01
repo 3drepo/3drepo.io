@@ -1,4 +1,4 @@
-div(ng-controller="ViewpointCtrl").tools-menu-items
+div(ng-controller='ViewpointCtrl')
 	li.divider
 	li Viewpoints
 	li.divider
@@ -10,16 +10,19 @@ div(ng-controller="ViewpointCtrl").tools-menu-items
 			span Go To Viewpoint
 	li
 		a(ng-click='flyThrough()')
-			i.fa.fa-power-off(ng-show="defaultViewer.isFlyingThrough")
+			i.fa.fa-power-off(ng-show="ViewerService.defaultViewer.isFlyingThrough")
 			span Fly Through
 	li.divider
-	div(ng-repeat="viewpoint in defaultViewer.viewpoints track by viewpoint.name")
-		li
-			a(ng-click='setCurrentViewpoint(viewpoint.idx)')
-				i.fa.fa-check(ng-show="defaultViewer.selectedViewpoint == viewpoint.idx")
-				span {{viewpoint.name}}
+	li.dropdown-submenu.pull-left(ng-repeat="(group, names) in ViewerService.defaultViewer.viewpoints")
+		a(href='#') {{group}}
+		ul.dropdown-menu
+			li(ng-repeat="(name, id) in names")
+				a(ng-click='setCurrentViewpoint(id)')
+					i.fa.fa-check(ng-show="ViewerService.defaultViewer.selectedViewpoint == id")
+					span {{name}}
 	li.divider
 	li
 		a(ng-click='newViewpoint()')
 			span New Viewpoint
 	li.divider
+

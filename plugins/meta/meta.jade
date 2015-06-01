@@ -1,6 +1,9 @@
-#ui2-metadata.collapsed(ng-show="ui.meta", ng-controller="MetaCtrl")
-	#ui2-metadata-collapse-btn.panel-collapse-btn(ng-click="toggleMetadata()")
-		i.fa.fa-tag
-	#meta-popup
-		div#metadata
+.metaview(ng-controller='MetaCtrl')
+	#metadata
+		table.metadata-table(ng-repeat="doc in MetaService.metadocs['metadata']")
+			tr
+				th.metadata-title(colspan="2") {{doc.name}}
+			tr(ng-repeat="(key,value) in doc['metadata']")
+				td.metadata-row {{key}}
+				td.metadata-row {{value}}
 

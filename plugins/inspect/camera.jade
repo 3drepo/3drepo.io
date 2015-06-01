@@ -4,5 +4,6 @@ block title
 	span Scan QR Code
 
 block content
-	video#videocamera.dialogs(autoplay, camera-switch='cameraSwitch')
+	div(ng-controller='InspectCtrl')
+		video#videocamera.dialogs(autoplay, capture='captureQRCode', camera-switch='cameraSwitch')
 

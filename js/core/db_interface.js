@@ -461,7 +461,7 @@ exports.getProjectUsers = function(account, project, callback) {
 			if(!users.length)
 				return callback(responseCodes.SETTINGS_ERROR);
 
-			if(!users["users"] || !users["users"].length)
+			if(!users[0]["users"] || !users[0]["users"].length)
 				return callback(responseCodes.OK, []);
 
 			var projectUsers = users[0]["users"].map(function (user) {
@@ -486,10 +486,10 @@ exports.getAccessToProject = function(username, account, project, callback) {
 		if(err.value)
 			return callback(err);
 
-		logger.log("debug", "Checking access for " + username);
-
-		if(username == info["owner"])
+		if(username == info["owner"]) {
+			logger.log("debug", username + " has owner permissions");
 			return callback(responseCodes.OK, info["permissions"][OWNER])
+		}
 
 		self.getProjectUsers(account, project, function(err, users) {
 			if(err.value)
@@ -497,12 +497,16 @@ exports.getAccessToProject = function(username, account, project, callback) {
 
 			var usernameList = users.map(function(user) { return user["user"]; });
 
+			logger.log("debug", project + " has the following users " + JSON.stringify(usernameList));
+
 			if (usernameList.indexOf(username) > -1)
 			{
 				// Valid user or group
+				logger.log("debug", username + " has group permissions");
 				return callback(responseCodes.OK, info["permissions"][GROUP]);
 			} else {
 				// Must be a public user ?
+				logger.log("debug", username + " has public permissions");
 				return callback(responseCodes.OK, info["permissions"][PUBLIC]);
 			}
 		});
@@ -836,25 +840,92 @@ exports.getBranches = function(dbName, project, callback) {
 
 };
 
-exports.getMetadata = function(dbName, project, uuid, callback) {
-	var filter = {
-		parents: stringToUUID(uuid),
-		type: 'meta'
-		//subtype: {$not: "readme"}
-	};
+exports.getMetadata = function(dbName, project, branch, revision, sid, uid, callback) {
 
-	var projection = {
-		_id: 0,
-		shared_id: 0,
-		paths: 0,
-		type: 0,
-		api: 0,
-		parents: 0
-	};
+	var historyQuery = null;
 
-	dbConn.filterColl(dbName, project + '.scene', filter, projection, function(err, doc) {
-		callback(responseCodes.OK, doc);
-	});
+	if (!uid)
+	{
+		if (revision != null)
+		{
+			historyQuery = {
+				_id: stringToUUID(revision)
+			};
+		} else {
+			if (branch == 'master')
+				var branch_id = masterUUID;
+			else
+				var branch_id = stringToUUID(branch);
+
+			historyQuery = {
+				shared_id:	branch_id
+			};
+		}
+
+		dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
+		{
+			if (!docs.length)
+				return callback(responseCodes.HISTORY_NOT_FOUND);
+
+			var filter = {
+				parents: stringToUUID(sid),
+				type: 'meta',
+				_id: { $in: docs[0]['current']}
+			};
+
+			var projection = {
+				_id: 0,
+				shared_id: 0,
+				paths: 0,
+				type: 0,
+				api: 0,
+				parents: 0
+			};
+
+			dbConn.filterColl(dbName, project + '.scene', filter, projection, function(err, metadocs) {
+				if (err.value) return callback(err);
+
+				callback(responseCodes.OK, metadocs);
+			});
+		});
+	} else {
+		var objQuery = {
+			_id: stringToUUID(uid)
+		};
+
+		var projection = {
+			shared_id : 1
+		};
+
+		dbConn.filterColl(dbName, project + '.scene', objQuery, null, function(err, obj) {
+			if (err.value) return callback(err);
+
+			if (!obj.length)
+				return callback(responseCodes.OBJECT_NOT_FOUND);
+
+			if (err.value) return callback(err);
+
+			var filter = {
+				parents: obj[0]["shared_id"],
+				type: 'meta'
+			};
+
+			var projection = {
+				_id: 0,
+				shared_id: 0,
+				paths: 0,
+				type: 0,
+				api: 0,
+				parents: 0
+			};
+
+			dbConn.filterColl(dbName, project + '.scene', filter, projection, function(err, metadocs) {
+				if (err.value) return callback(err);
+
+				callback(responseCodes.OK, metadocs);
+			});
+		});
+	}
 };
 
 exports.getObject = function(dbName, project, uid, rid, sid, callback) {

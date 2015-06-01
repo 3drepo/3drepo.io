@@ -153,7 +153,7 @@ module.exports.createApp = function(template)
 									{
 										"plugin": "revision",
 										"friends" : [
-											"tree", "meta", "revisionselector", "diffselector"
+											"panels", "tree", "meta", "revisionselector", "diffselector"
 										],
 										"children": [
 											{
@@ -183,7 +183,7 @@ module.exports.createApp = function(template)
 									{
 										"plugin": "view",
 										"friends" : [
-											"tree", "meta", "revisionselector", "diffselector"
+											"panels", "tree", "meta", "revisionselector", "diffselector"
 										],
 										"children": [
 											{

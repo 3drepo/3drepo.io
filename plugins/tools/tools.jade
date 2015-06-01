@@ -2,6 +2,6 @@
 	.dropup
 		i.fa.fa-wrench(role="button", data-toggle='dropdown', data-target='#')
 		ul.dropdown-menu.pull-right(role='menu')
-			each tool in ui.tools
-				!= renderMe(tool, locals)
-
+			if ui.tools
+				each tool in ui.tools
+					!= renderMe(tool, locals)

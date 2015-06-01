@@ -171,6 +171,8 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 			var targetParent = $(objEvent.target)[0]._x3domNode._nameSpace.doc._x3dElem;
 
+			self.loadViewpoints();
+
 			if(targetParent == self.viewer)
 				self.setDiffColors(null);
 
@@ -244,10 +246,40 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.viewPointChanged = function(event)
 	{
-		console.log(self.getCurrentViewpoint());
-		console.log(event);
-
+		self.getCurrentViewpoint();
 		$(self.viewer).trigger("myViewpointHasChanged", event);
+	}
+
+	this.onBackgroundClicked = function(functionToBind)
+	{
+		$(document).on("bgroundClicked", functionToBind);
+	}
+
+	this.offBackgroundClicked = function(functionToBind)
+	{
+		$(document).off("bgroundClicked", functionToBind);
+	}
+
+	this.triggerSelected = function(node)
+	{
+		$.event.trigger("objectSelected", node);
+	}
+
+	$(document).on("objectSelected", function(event, object, zoom) {
+		if(zoom)
+			self.lookAtObject(group);
+
+		self.setApp(object);
+	});
+
+	this.onClickObject = function(functionToBind)
+	{
+		$(document).on("clickObject", functionToBind);
+	}
+
+	this.offClickObject = function(functionToBind)
+	{
+		$(document).off("clickObject", functionToBind);
 	}
 
 	if(0)
@@ -320,7 +352,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		});
 	}
 
-	this.viewpoints = [];
+	this.viewpoints = {};
 	this.selectedViewpoint = 0;
 
 	this.isFlyingThrough = false;
@@ -350,6 +382,27 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			setTimeout(self.flyThroughTick, self.flyThroughTime);
 	}
 
+	this.loadViewpoints = function()
+	{
+		var viewpointList = $("viewpoint");
+
+		for(var v = 0; v < viewpointList.length; v++)
+		{
+			if(viewpointList[v]["id"] != "viewer_current")
+			{
+				var id		= viewpointList[v]["id"].trim();
+				var group	= id.split("__")[0].trim();
+				var name	= id.split("__")[1].trim();
+
+				if (!self.viewpoints[group])
+					self.viewpoints[group] = {};
+
+				self.viewpoints[group][name] = id;
+			}
+		}
+	}
+
+/*
 	this.parseViewpoints = function(settings)
 	{
 		// Always have origin
@@ -385,29 +438,16 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.viewpoints.push(tmpView);
 		}
 	}
+*/
 
-	this.setCurrentViewpoint = function(idx)
+	this.setCurrentViewpoint = function(id)
 	{
-		if (idx < self.viewpoints.length)
-		{
-			self.selectedViewpoint = idx;
+		self.selectedViewpoint = id;
 
-			var currentViewpoint = self.viewpoints[idx];
-
-			self.setStartingPoint(
-				currentViewpoint["position"][0],
-				currentViewpoint["position"][1],
-				currentViewpoint["position"][2]
-			);
-
-			self.setStartingOrientation(
-				currentViewpoint["direction"][0],
-				currentViewpoint["direction"][1],
-				currentViewpoint["direction"][2]
-			);
-
-			self.reset();
-		}
+		var viewpoint  = $("[id='" + id +"']")[0];
+		viewpoint.setAttribute("bind", true);
+		viewpoint.resetView();
+		viewpoint.addEventListener('viewpointChanged', self.viewPointChanged);
 	}
 
 	this.updateSettings = function(settings)
@@ -426,9 +466,6 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 			if ('visibilityLimit' in settings)
 				self.nav.setAttribute('visibilityLimit', settings['visibilityLimit']);
-
-			if ('viewpoints' in settings)
-				self.parseViewpoints(settings);
 		}
 	}
 
@@ -436,14 +473,6 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	{
 		self.runtime.fitObject(obj, true);
 	};
-
-	this.selectGroup = function(group, zoom)
-	{
-		if(zoom)
-			self.lookAtObject(group);
-
-		self.setApp(group);
-	}
 
 	this.applyApp = function(nodes, factor, emiss, otherSide)
 	{
@@ -607,54 +636,6 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		return vecAdd(a, scale(b,-1));
 	}
 
-	this.orientationLookAt = function(pos, lookAt, up)
-	{
-		// TODO: Probably a much faster way of doing this, but tired
-		// var x3domPos = new x3dom.fields.SFVec3f(pos[0], pos[1], pos[2]);
-		//var x3domAt  = new x3dom.fields.SFVec3f(lookAt[0], lookAt[1], lookAt[2]);
-		// var x3domUp  = new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
-
-		var mat = x3dom.fields.SFMatrix4f.lookAt(pos, lookAt, up);
-		var quat = new x3dom.fields.Quaternion(0,0,0,1);
-		quat.setValue(mat);
-
-		var axisang = quat.toAxisAngle();
-
-		return [axisang[1], axisang[0].x, axisang[0].y, axisang[0].z];
-	}
-	/*
-	this.quatLookAt = function(up, forward)
-	{
-		forward = normalize(forward);
-		up = normalize(up);
-
-		var right = crossProduct(forward, up);
-
-		up = scale(crossProduct(forward, right), -1);
-
-		var w = Math.sqrt(1 + right[0] + up[1] + forward[2]) * 0.5;
-
-		var recip = 1 / (4 * w);
-		var x = (forward[1] - up[2]) * recip;
-		var y = (right[2] - forward[0]) * recip;
-		var z = (up[0] - right[1]) * recip;
-
-		return [x,y,z,w];
-	}
-
-	this.axisAngle = function(quat)
-	{
-		var ang = 2 * Math.acos(quat[3]);
-		var recip = 1 / (1 - quat[3] * quat[3]);
-
-		var x = quat[0] * recip;
-		var y = quat[1] * recip;
-		var z = quat[2] * recip;
-
-		return [x,y,z,ang];
-	}
-	*/
-
 	this.setNavMode = function(mode) {
 		if (self.currentNavMode != mode)
 		{
@@ -743,11 +724,11 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		oldViewPoint = self.viewPoint;
 		self.viewPoint = nextPoint;
 		self.viewPoint.appendChild(self.nav);
-		self.viewPoint.setAttribute('set_bind', 'true');
-
+		self.viewPoint.setAttribute('bind', 'true');
 		self.viewPoint.setAttribute('zNear', self.zNear);
 		self.viewPoint.setAttribute('zFar', self.zFar);
-		self.viewPoint.addEventListener('viewpointChanged', self.viewPointChanged);
+
+		self.setCurrentViewpoint('next');
 
 		if(self.linked)
 			self.manager.switchMaster(self.handle);
@@ -840,15 +821,15 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		viewTrans = viewTrans.inverse().mult(viewMat);
 		viewTrans = viewTrans.inverse();
 
-		var viewPos = viewTrans.e3();
-		var viewDir = viewTrans.e2().multiply(-1.0);
 		var viewUp  = viewTrans.e1();
+		var viewDir = viewTrans.e2();
+		var viewPos = viewTrans.e3();
 
-		var lookAt = viewPos.add(viewDir);
 
+		// More viewing direction than lookAt to sync with Assimp
 		viewPoint["up"] = [viewUp.x, viewUp.y, viewUp.z];
 		viewPoint["position"] = [viewPos.x, viewPos.y, viewPos.z];
-		viewPoint["look_at"] = [lookAt.x, lookAt.y, lookAt.z];
+		viewPoint["look_at"] = [viewDir.x, viewDir.y, viewDir.z];
 
 		var projMat = self.getProjectionMatrix();
 
@@ -860,14 +841,6 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 		viewPoint["far"]	= f;
 		viewPoint["near"]	= n;
-
-		viewPoint["orientation"] = self.orientationLookAt(viewPos, lookAt, viewUp);
-		/*
-		var forward = [viewDir.x, viewDir.y, viewDir.z];
-		var tmpMat = x3dom.fields.SFMatrix4f.lookAt()
-		viewPoint["quat"] = self.quatLookAt(viewPoint["up"], forward);
-		viewPoint["axisAngle"] = self.axisAngle(viewPoint["quat"]);
-		*/
 
 		return viewPoint;
 	}
@@ -881,18 +854,18 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	}
 
 	this.bgroundClick = function(event) {
-		self.setApp(null);
+		self.triggerSelected(null);
 	}
 
 	this.clickObject = function(event, objEvent) {
-		self.setApp(objEvent.target);
+		self.triggerSelected(objEvent.target);
 	}
 
 	this.disableClicking = function() {
 		if(self.clickingEnabled)
 		{
-			$(document).off("bgroundClicked", self.bgroundClick);
-			$(document).off("clickObject", self.clickObject);
+			self.offBackgroundClicked(self.bgroundClick);
+			self.offClickObject(self.clickObject);
 			self.viewer.setAttribute("disableDoubleClick", true);
 			self.clickingEnabled = false;
 		}
@@ -902,8 +875,8 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		if(!self.clickingEnabled)
 		{
 			// When the user clicks on the background the select nothing.
-			$(document).on("bgroundClicked", self.bgroundClick);
-			$(document).on("clickObject", self.clickObject);
+			self.onBackgroundClicked(self.bgroundClick);
+			self.onClickObject(self.clickObject);
 			self.viewer.setAttribute("disableDoubleClick", false);
 			self.clickingEnabled = true;
 		}

@@ -1,14 +1,12 @@
 {
 	"name" : "tree",
 	"files": {
-		"js" : [
-			"tree/tree.js"
-		],
-		"angular": [
+		"angular" : [
+			"tree/TreeService.js",
 			"tree/TreeCtrl.js"
 		],
 		"ui": [
-			{"name": "tree", "template" : "tree/tree.jade", "position" : "left"}
+			{"name": "tree", "template" : "tree/tree.jade", "position" : "leftpanel"}
 		]
 	}
 }

@@ -25,6 +25,8 @@ angular.module('3drepo')
 		self.defaultViewer = self.viewerManager.getDefaultViewer();
 		self.defaultViewer.enableClicking();
 
+		$window.viewer = self.defaultViewer;
+
 		// Comes free with oculus support and gamepad support :)
 		self.oculus		= new Oculus(self.defaultViewer);
 		//self.gamepad	= new Gamepad(self.defaultViewer);

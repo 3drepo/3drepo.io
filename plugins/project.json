@@ -9,6 +9,9 @@
 		"jade" : [
 			{"template" : "project/project.jade", "id" : "project.html"}
 		],
+		"ui": [
+			{"name": "icons", "template" : "project/icons.jade", "position": "right"}
+		],
 		"angular": [
 			"project/ViewerService.js",
 			"project/ProjectData.js",

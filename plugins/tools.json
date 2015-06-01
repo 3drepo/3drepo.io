@@ -2,7 +2,7 @@
 	"name": "tools",
 	"files": {
 		"ui": [
-			{"name": "tools", "template" : "tools/tools.jade", "position": "right"}
+			{"name": "tools", "template" : "tools/tools.jade", "position": "icons"}
 		]
 	}
 }

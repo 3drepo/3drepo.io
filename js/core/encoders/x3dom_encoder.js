@@ -34,6 +34,8 @@ var responseCodes = require('../response_codes.js');
 
 var jsonCache = {};
 
+var mathjs		= require('mathjs');
+
 function getChild(parent, type, n) {
 	if ((parent == null) || !('children' in parent))
 		return null;
@@ -138,18 +140,101 @@ function quatLookAt(up, forward)
 	return [x,y,z,w];
 }
 
+function axisangle(mat)
+{
+	var tmpMat = mat.clone();
+	tmpMat = tmpMat.transpose();
+
+	var right = mathjs.subset(tmpMat, mathjs.index(0,[0,3]))._data[0];
+	right = normalize(right);
+
+	var up = mathjs.subset(tmpMat, mathjs.index(1,[0,3]))._data[0];
+	up = normalize(up);
+
+	var forward = mathjs.subset(tmpMat, mathjs.index(2,[0,3]))._data[0];
+	forward = normalize(forward);
+
+	var eps = 0.0001;
+
+	var a = (forward[1] - up[2]);
+	var b = (right[2] - forward[0]);
+	var c = (up[0] - right[1]);
+	var tr = right[0] + up[1] + forward[2];
+
+	var x = 1;
+	var y = 0;
+	var z = 0;
+	var angle = 0;
+
+	if ((Math.abs(a) < eps) && (Math.abs(b) < eps) && (Math.abs(c) < eps))
+	{
+		if (!(	(Math.abs(a) < eps)
+				&& (Math.abs(b) < eps)
+				&& (Math.abs(c) < eps)))
+		{
+			var d = forward[1] + up[2];
+			var e = right[2] + forward[0];
+			var f = up[0] + right[1];
+
+			if ((Math.abs(d) < eps) && (Math.abs(e) < eps) && (Math.abs(f) < eps) && ((Math.abs(tr) - 3) < eps))
+				return [0, 1, 0, 0];
+
+			angle = Math.PI;
+
+			var xx = (right[0] + 1) / 2;
+			var yy = (up[1] + 1) / 2;
+			var zz = (forward[2] + 1) / 2;
+
+			var xy = d / 4;
+			var xz = e / 4;
+			var yz = f / 4;
+
+			if ((xx > yy) && (xx > zz)) {
+				if (xx < eps) {
+					x = 0; y = Math.SQRT1_2; z = Math.SQRT1_2;
+				} else {
+					x = Math.sqrt(xx); y = xy/z; z = xz / x;
+				}
+			} else if (yy > zz) {
+				if (yy < eps) {
+					x = Math.SQRT1_2; y = 0; z = Math.SQRT1_2;
+				} else {
+					y = Math.sqrt(yy); x = xy / y; z = yz / y;
+				}
+			} else {
+				if (zz < eps) {
+					x = Math.SQRT1_2; y = Math.SQRT1_2; z = 0;
+				} else {
+					z = Math.sqrt(zz); x = xz / z; y = yz / z;
+				}
+			}
+		}
+	} else {
+		var recip = 1 / Math.sqrt(a * a + b * b + c * c);
+
+		x = a * recip;
+		y = b * recip;
+		z = c * recip;
+
+		angle = Math.acos((tr - 1) / 2);
+	}
+
+	return [angle, x, y, z];
+}
+
 /*******************************************************************************
  * Add children of node to xmlNode in X3D document
  *
  * @param {xmlDom} xmlDoc - The XML document to add the scene to
  * @param {xmlNode} xmlNode - The node to append the children to
  * @param {JSON} node - The node loaded from repoGraphScene
+ * @param {Matrix} matrix - Current transformation matrix
  * @param {dbInterface} dbInterface - Database interface object
  * @param {string} account - Name of the account containing the project
  * @param {string} project - Name of the project
  * @param {string} mode - Type of X3D being rendered
  *******************************************************************************/
-function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, mode)
+function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, project, mode)
 {
 	if (!('children' in node))
 		return;
@@ -187,45 +272,59 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 			}
 			xmlNode.appendChild(newNode);
 
-			X3D_AddChildren(xmlDoc, newNode, child, dbInterface, account, project, mode);
+			X3D_AddChildren(xmlDoc, newNode, child, matrix, dbInterface, account, project, mode);
 		}
 		else if (child['type'] == 'camera')
 		{
-			var scene = xmlDoc.getElementsByTagName('Scene')[0];
-
 			newNode = xmlDoc.createElement('viewpoint');
 
 			newNode.setAttribute('id', child['name']);
 			newNode.setAttribute('DEF',dbInterface.uuidToString(child['shared_id']));
 			newNode.setAttribute('bind', false);
 
-			if (child['fov'])
-				newNode.setAttribute('fieldOfView', child['fov']);
+			//if (child['fov'])
+			newNode.setAttribute('fieldOfView', 0.25 * Math.PI);
 
 			if (child['position'])
 				newNode.setAttribute('position', child['position'].join(','));
 
-			if (child['near'])
-				newNode.setAttribute('zNear', child['near']);
+			//if (child['near'])
+			//	newNode.setAttribute('zNear', child['near']);
 
-			if (child['far'])
-				newNode.setAttribute('zFar', child['far']);
+			//if (child['far'])
+			//	newNode.setAttribute('zFar', child['far']);
 
-			/*
+			newNode.setAttribute('zNear', -1);
+			newNode.setAttribute('zFar', -1);
+
 			var position = child["position"] ? child["position"] : [0,0,0];
+			var look_at = child["look_at"] ? child["look_at"] : [0,0,1];
+
+			var center = vecAdd(position, look_at);
+			newNode.setAttribute('centerOfRotation', center.join(','));
+
+			var up = child["up"] ? child["up"] : [0,1,0];
+			forward = normalize(look_at);
+			up = normalize(up);
+			var right = crossProduct(forward, up);
+
+			var viewMat = mathjs.matrix([[right[0], right[1], right[2], 0], [up[0], up[1], up[2], 0],
+				[forward[0], forward[1], forward[2], 0], [position[0], position[1], position[2], 1]]);
+
+			viewMat = viewMat.transpose();
+			//viewMat = mathjs.multiply(matrix, viewMat);
+
+			var tmpMat = viewMat.clone();
+			tmpMat = tmpMat.transpose();
+
+			position = mathjs.subset(tmpMat, mathjs.index(3,[0,3]))._data[0];
 			newNode.setAttribute('position', position.join(','));
 
-			var look_at = child["look_at"] ? child["look_at"] : vecAdd(position, [0,0,1]);
-			var up = child["up"] ? child["up"] : [0,1,0];
-
-			var orientation = quatLookAt(up, vecSub(look_at, position));
-			*/
-
-			var orientation = child["orientation"] ? child["orientation"] : [0,0,0,0];
-
+			var orientation = axisangle(viewMat);
 			newNode.setAttribute('orientation', orientation.join(','));
-			scene.appendChild(newNode);
-			X3D_AddChildren(xmlDoc, newNode, child, dbInterface, account, project, mode);
+
+			xmlNode.appendChild(newNode);
+			X3D_AddChildren(xmlDoc, newNode, child, matrix, dbInterface, account, project, mode);
 		}
 		else if (child['type'] == 'transformation')
 		{
@@ -259,7 +358,12 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 			newNode.setAttribute("id", child['id']);
 			newNode.setAttribute('DEF', dbInterface.uuidToString(child["shared_id"]));
 			xmlNode.appendChild(newNode);
-			X3D_AddChildren(xmlDoc, newNode, child, dbInterface, account, project, mode);
+
+			var newMatrix = matrix.clone();
+			var transMatrix  = mathjs.matrix(child['matrix']);
+			newMatrix = mathjs.multiply(transMatrix, newMatrix);
+
+			X3D_AddChildren(xmlDoc, newNode, child, newMatrix, dbInterface, account, project, mode);
 		} else if(child['type'] == 'material') {
 			 var appearance = xmlDoc.createElement('Appearance');
 
@@ -301,7 +405,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 				newNode.setAttribute('DEF', dbInterface.uuidToString(child["shared_id"]));
 				appearance.appendChild(newNode);
 				xmlNode.appendChild(appearance);
-				X3D_AddChildren(xmlDoc, appearance, child, dbInterface, account, project, mode);
+				X3D_AddChildren(xmlDoc, appearance, child, matrix, dbInterface, account, project, mode);
 		} else if (child['type'] == 'texture') {
 			newNode = xmlDoc.createElement('ImageTexture');
 			newNode.setAttribute('url', config.apiServer.url + '/' + account + '/' + project + '/' + child['id'] + '.' + child['extension']);
@@ -314,7 +418,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 			texProperties.setAttribute('generateMipMaps', 'true');
 			newNode.appendChild(texProperties);
 
-			X3D_AddChildren(xmlDoc, newNode, child, dbInterface, account, project, mode);
+			X3D_AddChildren(xmlDoc, newNode, child, matrix, dbInterface, account, project, mode);
 		} else if (child['type'] == 'map') {
 			if(!child['maptype'])
 				child['maptype'] = 'satellite';
@@ -333,7 +437,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 			shape.setAttribute('onmouseover', 'onMouseOver(event);');
 			shape.setAttribute('onmousemove', 'onMouseMove(event);');
 
-			X3D_AddChildren(xmlDoc, shape, child, dbInterface, account, project, mode);
+			X3D_AddChildren(xmlDoc, shape, child, matrix, dbInterface, account, project, mode);
 
 			X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, child, mode);
 			xmlNode.appendChild(shape);
@@ -677,7 +781,8 @@ function render(dbInterface, account, project, subFormat, branch, revision, call
 
 		var dummyRoot = { children: [doc.mRootNode] };
 
-		X3D_AddChildren(xmlDoc, sceneRoot.root, dummyRoot, dbInterface, account, project, subFormat);
+		var mat = mathjs.eye(4);
+		X3D_AddChildren(xmlDoc, sceneRoot.root, dummyRoot, mat, dbInterface, account, project, subFormat);
 
 		/*
 		// Compute the scene bounding box.

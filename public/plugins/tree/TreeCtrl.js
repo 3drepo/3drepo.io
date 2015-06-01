@@ -16,10 +16,12 @@
  */
 
 angular.module('3drepo')
-.controller('TreeCtrl', ['$scope', function($scope)
+.controller('TreeCtrl', ['$scope', 'TreeService', function($scope, TreeService)
 {
-	$scope.toggleTree = function() {
-		$("#ui2-treeview").toggleClass("collapsed");
-	}
+	$scope.$watchGroup(['state.project', 'state.branch', 'state.revision'], function() {
+		TreeService.refresh();
+	});
+
+	TreeService.init($("#scenetree"));
 }]);
 

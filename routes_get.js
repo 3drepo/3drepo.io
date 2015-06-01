@@ -337,6 +337,23 @@ module.exports = function(router, dbInterface, checkAccess){
 		this.transRouter(format, '/:account/:project/:uid', res, params);
 	});
 
+	// Get object with specific uid in a specific format
+	router.get('/:account/:project/meta/:uid.:format?', checkAccess, function(req, res, next) {
+		var format = req.params["format"].toLowerCase();
+		var current_user = ("user" in req.session) ? req.session.user.username : "";
+
+		var params = {
+			account:   req.params["account"],
+			project:   req.params["project"],
+			uid:	   req.params["uid"],
+			user:	   current_user
+		};
+
+		logger.log('debug', 'Retrieving object ' + params.uid);
+
+		this.transRouter(format, '/:account/:project/meta/:uid', res, params);
+	});
+
 	// Get list of objects that match a specific type
 	router.get('/:account/:project/:rid/:type.:format?.:subformat?', checkAccess, function(req, res, next) {
 		var format = req.params["format"];
@@ -414,6 +431,36 @@ module.exports = function(router, dbInterface, checkAccess){
 		};
 
 		this.transRouter(format, '/:account/:project/revision/:rid/diff/:otherrid', res, params);
+	});
+
+	router.get('/:account/:project/revision/:rid/meta/:sid.:format?', checkAccess, function(req, res, next) {
+		var format = req.params["format"];
+		var current_user = ("user" in req.session) ? req.session.user.username : "";
+
+		var params = {
+			account:	req.params["account"],
+			project:	req.params["project"],
+			rid:		req.params["rid"],
+			sid:		req.params["sid"],
+			user:		current_user
+		};
+
+		this.transRouter(format, '/:account/:project/revision/:rid/meta/:sid',res, params);
+	});
+
+	router.get('/:account/:project/revision/:branch/head/meta/:sid.:format?', checkAccess, function(req, res, next) {
+		var format = req.params["format"];
+		var current_user = ("user" in req.session) ? req.session.user.username : "";
+
+		var params = {
+			account:	req.params["account"],
+			project:	req.params["project"],
+			branch:		req.params["branch"],
+			sid:		req.params["sid"],
+			user:		current_user
+		};
+
+		this.transRouter(format, '/:account/:project/revision/:branch/head/meta/:sid', res, params);
 	});
 
 	// Get audit log for account

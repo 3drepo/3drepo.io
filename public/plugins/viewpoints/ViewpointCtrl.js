@@ -18,25 +18,25 @@
 angular.module('3drepo')
 .controller('ViewpointCtrl', ['$scope', 'StateManager', 'ViewerService', '$modal', '$rootScope', function($scope, StateManager, ViewerService, $modal, $rootScope)
 {
-	$scope.defaultViewer = ViewerService.defaultViewer;
+	$scope.ViewerService = ViewerService;
 	$scope.viewpointname = "";
 	$scope.sid			 = "";
 
 	$scope.showAll = function() {
-		$scope.defaultViewer.showAll();
+		ViewerService.defaultViewer.showAll();
 	}
 
 	$scope.reset = function() {
-		$scope.defaultViewer.reset();
+		ViewerService.defaultViewer.reset();
 	}
 
 	$scope.flyThrough = function() {
-		$scope.defaultViewer.flyThrough($scope.defaultViewer.viewpoints);
+		ViewerService.defaultViewer.flyThrough(ViewerService.defaultViewer.viewpoints);
 	}
 
-	$scope.setCurrentViewpoint = function(idx)
+	$scope.setCurrentViewpoint = function(id)
 	{
-		$scope.defaultViewer.setCurrentViewpoint(idx);
+		ViewerService.defaultViewer.setCurrentViewpoint(id);
 	}
 
 	$scope.newViewpoint = function()
