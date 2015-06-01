@@ -1,0 +1,11 @@
+{
+	"name" : "sid",
+	"states": ["sid"],
+	"files": {
+		"angular": [
+			"sid/SIDCtrl.js",
+			"sid/SIDData.js"
+		]
+	}
+}
+

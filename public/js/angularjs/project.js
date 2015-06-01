@@ -59,47 +59,24 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			controller: 'DashboardCtrl',
 			resolve: {
 				Data: 'Data',
-				auth: function authCheck(Auth) {
-					return Auth.init();
-				},
-				account: function($stateParams){
-					return $stateParams.account;
-				},
-				init: function(Data, $stateParams)
-				{
-					Data.changeView('home', null, $stateParams);
-				}
+				auth: function authCheck(Auth) { return Auth.init();},
+				init: function(Data, $stateParams) { Data.setState($stateParams, { "clearState" : true }); }
 			}
 		}).state('main' ,{
 			url: '/:account/:project',
+			Data: 'Data',
+			resolve: {
+				auth: function authCheck(Auth) { return Auth.init();},
+				init: function(Data, $stateParams) { Data.setState($stateParams, { "clearState" : true }); }
+			},
 			views: {
 				"@" : {
 					templateUrl: 'mainpage.html',
 					controller: 'MainCtrl',
-					Data: 'Data',
-					resolve: {
-						auth: function authCheck(Auth) {
-							return Auth.init();
-						},
-						account : function($stateParams){
-							return $stateParams.account;
-						},
-						project: function($stateParams){
-							return $stateParams.project;
-						},
-						init: function(Data, $state, $stateParams) {
-							Data.changeView('main', null, $stateParams);
-						}
-					}
 				},
 				"footer@main" : {
 					templateUrl: 'info.html',
 					controller: 'ViewCtrl',
-					resolve: {
-						view: function($stateParams){
-							return "info";
-						}
-					}
 				}
 			}
 		}).state('main.view', {
@@ -108,27 +85,15 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 				"footer@main" : {
 					templateUrl: viewUrl,
 					controller: 'ViewCtrl',
-					Data: 'Data',
 					resolve: {
-						view: function($stateParams){
-							return $stateParams.view;
-						},
-						init: function(Data, view, $stateParams){
-							Data.changeView('main.view', view, $stateParams);
-						}
+						init: function(Data, $stateParams) { Data.setState($stateParams, {}); }
 					}
 				}
 			}
 		}).state('main.branch', {
 			url: '/revision/:branch/head',
 			resolve: {
-				branch: function($stateParams) {
-					return $stateParams.branch;
-				},
-				init: function(Data, $stateParams)
-				{
-					Data.changeView('main.branch', null, $stateParams);
-				}
+				init: function(Data, $stateParams) { Data.setState($stateParams, {}); }
 			}
 		}).state('main.branch.view', {
 			url: '/:view',
@@ -137,37 +102,16 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 					templateUrl: viewUrl,
 					controller: 'ViewCtrl',
 					resolve: {
-						view: function($stateParams){
-							return $stateParams.view;
-						},
-						init: function(Data, $stateParams)
-						{
-							Data.changeView('main.branch.view', view, $stateParams);
-						}
+						init: function(Data, $stateParams) { Data.setState($stateParams, {}); }
 					}
 				}
 			}
 		}).state('main.revision', {
-			url: '/revision/:rid',
+			url: '/revision/:revision',
 			views: {
 				"viewer@main" : {
 					resolve: {
-						rid: function($stateParams) {
-							return $stateParams.rid;
-						},
-						branch: function($stateParams) {
-							return null;
-						},
-						account : function($stateParams){
-							return $stateParams.account;
-						},
-						project: function($stateParams){
-							return $stateParams.project;
-						},
-						init: function(Data, $stateParams)
-						{
-							Data.changeView('main.revision', null, $stateParams);
-						}
+						init: function(Data, $stateParams) { Data.setState($stateParams, {}); }
 					}
 				}
 			}
@@ -178,21 +122,74 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 					templateUrl: viewUrl,
 					controller: 'ViewCtrl',
 					resolve: {
-						view: function($stateParams){
-							return $stateParams.view;
-						},
-						init: function(Data, view, $stateParams)
-						{
-							Data.changeView('main.revision.view', view, $stateParams);
-						}
+						init: function(Data, $stateParams) { Data.setState($stateParams, {}); }
 					}
 				}
 			}
-		})
-		.state('404', {
-		  url: '/404',
-		  templateUrl: '404.html',
+		}).state('main.revision.diff', {
+			url: '/diff/:diffRevision',
+			views : {
+				"viewer@main" : {
+					resolve: {
+						init: function(Data, $stateParams) { Data.setState($stateParams, {"diffEnabled" : true}); }
+					}
+				}
+			}
+		}).state('main.revision.diff.view', {
+			url: '/:view',
+			views : {
+				"footer@main" : {
+					templateUrl: viewUrl,
+					controller: 'ViewCtrl',
+					resolve: {
+						init: function(Data, $stateParams) { Data.setState($stateParams, {"diffEnabled" : true}); }
+					}
+				}
+			}
+		}).state('main.revision.wayfinder', {
+			url: '/wayfinder',
+			views: {
+				"viewer@main" : {
+					resolve: {
+						init: function(Data, $stateParams) { Data.setState($stateParams, {"wayfinderEnabled" : true}); }
+					}
+				}
+			}
+		}).state('main.revision.wayfinder.visualize', {
+			url: '/visualize/?uids',
+			views : {
+				"footer@main" : {
+					templateUrl: viewUrl,
+					controller: 'ViewCtrl',
+					resolve: {
+						init: function(Data, $stateParams) { Data.setState($stateParams, {"wayfinedEnabled" : true, "mode" : "visualize"}); }
+					}
+				}
+			}
+		}).state('main.revision.wayfinder.record', {
+			url: '/record',
+			views : {
+				"footer@main" : {
+					templateUrl: viewUrl,
+					controller: 'ViewCtrl',
+					resolve: {
+						init: function(Data, $stateParams) { Data.setState($stateParams, {"wayfinedEnabled" : true, "mode" : "record"}); }
+					}
+				}
+			}
+		}).state('main.revision.wayfinder.flythrough', {
+			url: '/flythrough/?uids',
+			views : {
+				"footer@main" : {
+					templateUrl: viewUrl,
+					controller: 'ViewCtrl',
+					resolve: {
+						init: function(Data, $stateParams) { Data.setState($stateParams, {"wayfinedEnabled" : true, "mode" : "flythrough"}); }
+					}
+				}
+			}
 		});
+
 
 	// Empty view redirects to info view by default
 	$urlRouterProvider.when('/:account/:project', '/{account}/{project}/info');
@@ -205,6 +202,8 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 
 	$rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams)
 	{
+		console.log('$stateChangeStart to '+JSON.stringify(toState)+'- fired when the transition begins. toState,toParams : \n',toState, toParams);
+
 		if ($window.floating)
 			$window.floating.clearFloats();
 
@@ -232,21 +231,138 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 			}
 		}
 	});
+
+	$rootScope.$on('$stateChangeError',function(event, toState, toParams, fromState, fromParams, error){
+	  console.log('$stateChangeError - fired when an error occurs during transition.');
+	  console.log(arguments);
+	});
+	$rootScope.$on('$stateChangeSuccess',function(event, toState, toParams, fromState, fromParams){
+	  console.log('$stateChangeSuccess to '+toState.name+'- fired once the state transition is complete.');
+	});
+	// $rootScope.$on('$viewContentLoading',function(event, viewConfig){
+	//   // runs on individual scopes, so putting it in "run" doesn't work.
+	//   console.log('$viewContentLoading - view begins loading - dom not rendered',viewConfig);
+	// });
+	$rootScope.$on('$viewContentLoaded',function(event){
+	  console.log('$viewContentLoaded - fired after dom rendered',event);
+	});
+	$rootScope.$on('$stateNotFound',function(event, unfoundState, fromState, fromParams){
+	  console.log('$stateNotFound '+unfoundState.to+'  - fired when a state cannot be found by its name.');
+	  console.log(unfoundState, fromState, fromParams);
+	});
 }])
-.controller('MainCtrl', ['$scope', '$window', 'account', 'project', 'serverConfig', 'Data', function($scope, $window, account, project, serverConfig, Data) {
-	$window.oculus = new Oculus();
+.controller('MainCtrl', ['$scope', '$window', 'serverConfig', 'Data', function($scope, $window, serverConfig, Data) {
 
-	$window.viewer = new Viewer();
-	$window.viewer.loadURL(serverConfig.apiUrl(account + '/' + project + '/revision/master/head.x3d.src'));
-	initTree(account, project, 'master', null);
+	// Java bits
+	$scope.waypoint = null;
+	$scope.defaultViewer = null;
 
-	$window.gamepad = new Gamepad();
-	$window.gamepad.init();
-
-	$window.collision = new Collision();
-
+	// Data service
 	$scope.Data = Data;
+	$scope.settings = Data.ProjectData.settings;
+	//$scope.Data.updateState();
 
-	$window.viewer.enableClicking();
+	// UI Components
+	$scope.showSingleSelect = false;
+
+	// If we open a project
+	$scope.$watch('Data.state.project', function() {
+		if (Data.state.project)
+		{
+			if (!$window.viewerManager)
+			{
+				$window.viewerManager = new ViewerManager();
+				$window.viewerManager.getDefaultViewer().enableClicking();
+				$scope.defaultViewer = $window.viewerManager.getDefaultViewer();
+			}
+
+			if (!$window.oculus)
+				$window.oculus = new Oculus($scope.defaultViewer);
+
+			if (!$window.gamepad)
+			{
+				$window.gamepad = new Gamepad($scope.defaultViewer);
+				$window.gamepad.init();
+			}
+
+			if(!$window.collision)
+			{
+				$window.collision = new Collision($scope.defaultViewer);
+			}
+
+			if(!$window.waypoint)
+			{
+				$window.waypoint = new Waypoint($scope.defaultViewer, Data.state.account, Data.state.project);
+				$scope.waypoint = $window.waypoint;
+			}
+
+			// When the settings have loaded, update various components
+			Data.ProjectData.loadingPromise.promise.then(function() {
+				$scope.defaultViewer.updateSettings(Data.ProjectData.settings);
+				$window.waypoint.updateSettings(Data.ProjectData.settings);
+			});
+
+			initTree(Data.state.account, Data.state.project, 'master', null);
+		}
+	});
+
+	// TODO: Move all of this stuff to a ToolsCtrl
+	$scope.okReadme = function () {
+		$scope.Data.ui.wayfinder.readme = false;
+		$window.waypoint.unpause();
+		$window.waypoint.begin();
+	}
+
+	$scope.setViewerMode = function(mode) {
+		$scope.defaultViewer.setNavMode(mode);
+
+		if (mode == "WAYFINDER")
+			$scope.setWaypointMode("RECORD");
+	}
+
+	$scope.setWaypointMode = function(mode) {
+		$window.waypoint.pause();
+
+		if (mode == 'RECORD') {
+			Data.setStateVar("mode", "record");
+		} else if (mode == 'VIEWING') {
+			Data.setStateVar("mode", "visualize");
+		} else if (mode == 'FLYTHROUGH') {
+			Data.setStateVar("mode", "flythrough");
+		}
+
+		if (mode == 'NONE') {
+			Data.setStateVar("wayfinder", false);
+		} else {
+			Data.setStateVar("wayfinder", true);
+		}
+
+		if (Data.changed.wayfinder || Data.changed.mode)
+			Data.updateState();
+	}
+
+	$scope.$watchGroup(["defaultViewer.currentNavMode", "Data.state.mode"], function() {
+		if(($scope.defaultViewer.currentNavMode != 'WAYFINDER')) {
+			$scope.setWaypointMode("NONE");
+		} else {
+			if (Data.state.mode == 'record')
+				$window.waypoint.initRecordMode();
+		}
+	});
+
+	$scope.$watch(["Data.Wayfinder.pointData"], function() {
+		$window.waypoint.initViewingMode(Data.Wayfinder.pointData);
+	});
+
+	$scope.visualizeThese = null;
+
+	$scope.visualize = function() {
+		var uids = $scope.visualizeThese.map(function(o) { return o.value; });
+
+		Data.setStateVar("mode", "visualize");
+		Data.setStateVar("uids", uids);
+		Data.updateState();
+
+	}
 }]);
 

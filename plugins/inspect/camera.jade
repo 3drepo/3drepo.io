@@ -1,0 +1,9 @@
+extends ../base/dialog.jade
+
+block title
+	span Scan QR Code
+
+block content
+	div(ng-controller='InspectCtrl')
+		video#videocamera.dialogs(autoplay, capture='captureQRCode', camera-switch='cameraSwitch')
+

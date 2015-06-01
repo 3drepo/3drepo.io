@@ -43,10 +43,8 @@ function escapeHtml(text) {
  * @param {string} project - name of project containing child
  * @param {JSON} childNode - Child node JSON
  *******************************************************************************/
-function treeChildMetadata(dbInterface, dbName, project, childNode, callback)
+function treeChildMetadata(dbInterface, dbName, project, sharedId, callback)
 {
-	var sharedId = childNode["key"];
-
 	dbInterface.getMetadata(dbName, project, sharedId, function(err, meta) {
 		childNode["meta"] = meta;
 
@@ -147,17 +145,10 @@ function getTree(dbInterface, account, project, branch, revision, sid, namespace
 						callback(null, processChild(child, branch, revision, project, selected, namespace, htmlMode));
 					},
 					function(err, children) { // Called when are children are ready
-						async.map(children,
-							function(id, callback) { // Called every item
-								treeChildMetadata(dbInterface, account, project, id, callback);
-							},
-							function(err, childrenWithMeta) { // Called when children are ready
-								if(err)
-									err_callback(responseCodes.EXTERNAL_ERROR(err));
-								else
-									err_callback(responseCodes.OK, childrenWithMeta);
-							}
-						);
+							if(err)
+								err_callback(responseCodes.EXTERNAL_ERROR(err));
+							else
+								err_callback(responseCodes.OK, children);
 					}
 				);
 			});
@@ -314,12 +305,75 @@ exports.route = function(router)
 		getTree(dbInterface, account, project, null, revision, sid, namespace, selected, htmlMode, err_callback);
 	});
 
+	router.get('json', '/:account/:project/revision/:rid/meta/:sid', function(res, params, err_callback) {
+		var account		= params.account;
+		var project		= params.project;
+
+		var rid			= params.rid;
+
+		var sid			= params.sid;
+
+		router.dbInterface.getMetadata(account, project, null, rid, sid, null, function (err, metadocs) {
+			if (err.value)
+				err_callback(err);
+			else
+				err_callback(responseCodes.OK, {"meta" : metadocs});
+		});
+	});
+
+	router.get('json', '/:account/:project/revision/:branch/head/meta/:sid', function(res, params, err_callback) {
+		var account		= params.account;
+		var project		= params.project;
+
+		var	branch		= params.branch;
+
+		var sid			= params.sid;
+
+		router.dbInterface.getMetadata(account, project, branch, null, sid, null, function (err, metadocs) {
+			if (err.value)
+				err_callback(err);
+			else
+				err_callback(responseCodes.OK, {"meta" : metadocs});
+		});
+	});
+
+	router.get('json', '/:account/:project/meta/:uid', function(res, params, err_callback) {
+		var account		= params.account;
+		var project		= params.project;
+
+		var	branch		= params.branch;
+
+		var uid			= params.uid;
+
+		router.dbInterface.getMetadata(account, project, null, null, null, uid, function (err, metadocs) {
+			if (err.value)
+				err_callback(err);
+			else
+				err_callback(responseCodes.OK, {"meta" : metadocs});
+		});
+	});
+
 	router.get('json', '/:account/:project/revision/:rid/diff/:otherrid', function(res, params, err_callback) {
 		router.dbInterface.getDiff(params.account, params.project, null, params.rid, null, params.otherrid, function(err, diff) {
 			if(err.value)
 				err_callback(err);
 			else
 				err_callback(responseCodes.OK, diff);
+		});
+	});
+
+	router.get('json', '/:account/:project/revision/:branch/head/:sid', function(res, params, err_callback) {
+		router.dbInterface.getHeadUUID(params.account, params.project, params.branch, function (err, uuid)
+		{
+			router.dbInterface.getObject(params.account, params.project, null, uuidToString(uuid.uuid), params.sid, function (err, type, uid, obj) {
+				console.log(JSON.stringify(obj));
+
+				if (err.value)
+					err_callback(err);
+				else
+					err_callback(responseCodes.OK, obj);
+
+			})
 		});
 	});
 };

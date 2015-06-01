@@ -1,0 +1,13 @@
+{
+	"name" : "tree",
+	"files": {
+		"angular" : [
+			"tree/TreeService.js",
+			"tree/TreeCtrl.js"
+		],
+		"ui": [
+			{"name": "tree", "template" : "tree/tree.jade", "position" : "leftpanel"}
+		]
+	}
+}
+

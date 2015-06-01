@@ -25,6 +25,9 @@
     "angular-bootstrap-multiselect": "~0.3.0",
     "angular-bootstrap-select": "~0.0.5",
     "fancytree": "~2.8.1",
-    "masonry": "~3.3.0"
+    "masonry": "~3.3.0",
+    "angular": "~1.3.15",
+    "bootstrap-submenu": "~1.2.13",
+    "qrcode": "~1.0.2"
   }
 }

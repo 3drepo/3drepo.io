@@ -1,0 +1,48 @@
+doctype html
+html(lang="en" ng-app="3drepo").ng-scope
+	head
+		base(href="/")
+
+		// Meta, title, CSS, favicons, etc.
+		meta(charset='utf-8')
+		meta(http-equiv='X-UA-Compatible', content='IE=edge')
+
+		title 3D Repo
+
+		// CSS Files
+		each val, key in cssfiles
+			link(rel='stylesheet', type='text/css', href=val)
+
+		// JS Files
+		each val, key in jsfiles
+			script(type="text/javascript", src=val)
+
+		// Predefine the app
+		script.
+			angular.module('3drepo', ['ui.router', 'ui.bootstrap', 'ui.multiselect'])
+			.constant('structure', !{structure})
+			.constant('parentStates', !{parentStateJSON})
+			//.constant('pluginLevels', !{pluginLevelsJSON})
+			.constant('uiState', !{uistate});
+
+		// Plugin JS Files
+		each val in pluginJS
+			script(type="text/javascript", src=val)
+
+		// Plugin Angular Files
+		each plugin in pluginAngular
+			each file in plugin.files
+				script(type="text/javascript", src=file)
+
+	body(ng-controller='BaseCtrl')
+		// Plugin JADE Files
+		each j in pluginJade
+			script(type="text/ng-template", id=j.id)
+				!= renderMe('./plugins/' + j.template, locals)
+				
+		.container-fluid
+			.row.mainrow
+				ng-include(src="'header.html'")
+			.row
+				div(ui-view='')
+

@@ -1,0 +1,14 @@
+.container.float.readme#multiSelect(ng-show="Data.ui.wayfinder.multiselect")
+	.row
+		.col-md-9.col-md-offset-4.col-sm-9.col-sm-offset-4#visualize.panel.panel-default
+			.row
+				h3.padded-box
+					center Visualize
+				form.padded-box(ng-submit='visualize()')
+					form-group
+						div.text-center.padded-box
+							multiselect(ms-header="Select which routes to visualize" ng-model='visualizeThese', options='o.label for o in Data.Wayfinder.previous', data-multiple='true', scroll-after-rows='4')
+						div.text-center.padded-box
+							button#visButton.btn.btn-warning-btn-block.top-gap(type='submit') OK
+							//button#flyButton.btn.btn-warning-btn-block.top-gap(ng-click='flythrough()') Fly Through
+

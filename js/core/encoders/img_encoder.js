@@ -21,6 +21,9 @@ var responseCodes = require('../response_codes.js');
 
 module.exports.isImage = function(format)
 {
+	if (!format)
+		return false;
+
 	var format = format.toLowerCase();
 
 	for (var i in supportedFormats)

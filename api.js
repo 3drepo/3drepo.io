@@ -58,9 +58,9 @@ app.use(bodyParser.json());
 app.use(compress());
 
 app.use(allowCrossDomain);
-app.use(cookieParser('Yet another secret'));
+app.use(cookieParser(config.cookieParserSecret));
 app.use(expressSession({
-	secret: 'Very very secret, yes ?',
+	secret: config.cookieSecret,
 	resave: false,
 	saveUninitialized: true,
 	cookie: {

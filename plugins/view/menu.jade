@@ -1,0 +1,23 @@
+.margin-bottom
+	ul.nav.nav-tabs.nav.bottom-tabs(role='tablist', ng-show="ui.menu", ng-controller="ViewCtrl")
+		li(ng-class="{'active': isView('info')}")
+			a.dashboard-tab(ng-click="go('info')")
+				i.fa.fa-info-circle.menu-icon
+				| INFO
+		li(ng-class="{'active': isView('revisions')}")
+			a.dashboard-tab(ng-click="go('revisions')")
+				i.fa.fa-tag.menu-icon
+				| REVISIONS
+				span.badge {{data.current_branch.n_revisions}}
+		li(ng-class="{'active': isView('log')}")
+			a.dashboard-tab(ng-click="go('log')")
+				i.fa.fa-save.menu-icon
+				| LOG
+		li(ng-class="{'active': isView('settings')}")
+			a.dashboard-tab(ng-click="go('settings')")
+				i.fa.fa-gear.menu-icon
+				| SETTINGS
+		li(ng-class="{'active': isView('cobie')}")
+			a.dashboard-tab(ng-click="go('cobie')")
+				i.fa.fa-list-alt.menu-icon
+				| COBIE

@@ -23,17 +23,18 @@ var schemaValidator = require('./js/core/db_schema.js')();
 var log_iface = require('./js/core/logger.js');
 var logger = log_iface.logger;
 var responseCodes = require('./js/core/response_codes.js');
+var config = require('./js/core/config.js');
 
-function createSession(place, res, req, username)
+function createSession(place, res, req, user)
 {
 	req.session.regenerate(function(err) {
 		if(err)
-			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {account: username});
+			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {account: user.username});
 		else
 		{
-			logger.log('debug', 'Authenticated ' + username + ' and signed token.')
-			req.session.user = username;
-			responseCodes.respond(place, responseCodes.OK, res, {account: username});
+			logger.log('debug', 'Authenticated ' + user.username + ' and signed token.')
+			req.session.user = user;
+			responseCodes.respond(place, responseCodes.OK, res, {account: user.username});
 		}
 	});
 }
@@ -54,6 +55,7 @@ module.exports = function(router, dbInterface, checkAccess){
 			logger.log('debug', 'Attempting to log user ' + req.body.username);
 
 			if(err.value) {
+				console.log("MESSAGE: " + err.message);
 				responseCodes.respond(responsePlace, err, res, {account: req.body.username});
 			} else {
 				if(user)
@@ -126,12 +128,16 @@ module.exports = function(router, dbInterface, checkAccess){
 	});
 
 	// Update or create a user's account
-	this.post('/:account/:project', false, function(req, res) {
-	});
+	//this.post('/:account/:project', false, function(req, res) {
+	//});
 
-	this.post('/wayfinder/record.:format?', true, function(req, res) {
+	this.post('/:account/:project/wayfinder/record', false, function(req, res) {
 		var resCode = responseCodes.OK;
 		var responsePlace = 'Wayfinder record POST';
+
+		logger.log('debug', 'Posting wayfinder record information');
+
+		console.log(JSON.stringify(req.session));
 
 		if (!("user" in req.session)) {
 			responseCodes.respond('Wayfinder record POST', responseCodes.NOT_LOGGED_IN, res, {});
@@ -139,11 +145,31 @@ module.exports = function(router, dbInterface, checkAccess){
 			var data = JSON.parse(req.body.data);
 			var timestamp = JSON.parse(req.body.timestamp);
 
-			this.dbInterface.storeWayfinderInfo(config.wayfinder.democompany, config.wayfinder.demoproject, req.session.user.username, req.sessionID, data, timestamp, function(err) {
+			this.dbInterface.storeWayfinderInfo(req.params["account"], req.params["project"], req.session.user.username, req.sessionID, data, timestamp, function(err) {
 				responseCodes.onError('Wayfinder record POST', err, res, {});
 			});
 		}
 
+	});
+
+	// Ability to add a named viewpoint
+	this.post('/:account/:project/:branch/viewpoint', true, function(req, res) {
+		var resCode = responseCodes.OK;
+		var responsePlace = 'Adding a viewpoint';
+
+		logger.log('debug', 'Adding a new viewpoint to ' + req.params["account"] + req.params["project"]);
+
+		var data = JSON.parse(req.body.data);
+
+		this.dbInterface.getRootNode(req.params["account"], req.params["project"], req.params["branch"], null, function(err, root) {
+			if (err.value) return callback(err);
+
+			console.log(JSON.stringify(root));
+
+			this.dbInterface.storeViewpoint(req.params["account"], req.params["project"], req.params["branch"], req.session.user, this.dbInterface.uuidToString(root["shared_id"]), data, function(err) {
+				responseCodes.onError(responsePlace, err, res, {});
+			});
+		});
 	});
 
 	// Register handlers with Express Router
@@ -153,10 +179,12 @@ module.exports = function(router, dbInterface, checkAccess){
 
 		console.log('debug', 'Adding POST call for ' + item['regex']);
 
+		var resFunction = schemaValidator.validate(item.regex);
+
 		if (item.shouldCheckAccess)
-			router.post(item.regex, schemaValidator.validate(item.regex), checkAccess, item.callback);
+			router.post(item.regex.toString(), resFunction, checkAccess, item.callback);
 		else
-			router.post(item.regex, schemaValidator.validate(item.regex), item.callback);
+			router.post(item.regex, resFunction, item.callback);
 	}
 
 	return this;

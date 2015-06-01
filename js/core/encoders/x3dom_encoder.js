@@ -34,6 +34,8 @@ var responseCodes = require('../response_codes.js');
 
 var jsonCache = {};
 
+var mathjs		= require('mathjs');
+
 function getChild(parent, type, n) {
 	if ((parent == null) || !('children' in parent))
 		return null;
@@ -84,240 +86,140 @@ function X3D_CreateScene(xmlDoc) {
 	return {scene: scene, root: rootGroup};
 }
 
-/*******************************************************************************
- * Create scene in X3D document
- *
- * @param {xmlDom} xmlDoc - The XML document to add the scene to
- *******************************************************************************/
-function X3D_CreateOculus(xmlDoc) {
-	var sceneRoot = X3D_CreateScene(xmlDoc);
+function scale(v, s)
+{
+	return [v[0] * s, v[1] * s, v[2] * s];
+}
 
-	var scene	= sceneRoot.scene;
-	var group	= sceneRoot.root;
-	//xmlDoc.firstChild.appendChild(scene);
+function normalize(v)
+{
+	var sz =  Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+	return scale(v, 1 / sz);
+}
 
-	var vp = xmlDoc.createElement("viewpoint");
-	vp.setAttribute('id', 'vpp');
-	vp.setAttribute('def', 'vp');
-	vp.setAttribute('zNear', 0.01);
-	vp.setAttribute('zFar', 10000);
-	vp.setAttribute('position', '0 0 0');
-	vp.textContent = ' ';
-	scene.appendChild(vp);
+function dotProduct(a,b)
+{
+	return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
 
-	var alt = xmlDoc.createElement("viewpoint");
-	alt.setAttribute('def', 'AOPT_CAM');
-	alt.setAttribute('position', '0 0 0');
-	alt.textContent = ' ';
-	//scene.appendChild(alt);
+function crossProduct(a,b)
+{
+	var x = a[1] * b[2] - a[2] * b[1];
+	var y = a[2] * b[0] - a[0] * b[2];
+	var z = a[0] * b[1] - a[1] * b[0];
 
-    //<viewpoint def='AOPT_CAM' centerofrotation='3.4625 1.73998 -5.55' </viewpoint>
+	return [x,y,z];
+}
 
-	// Add oculus eyes
-	var eyeGroup = xmlDoc.createElement('group');
-	eyeGroup.setAttribute('render', 'true');
-	scene.appendChild(eyeGroup);
+function vecAdd(a,b)
+{
+	return [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+}
 
-	var leftEye = xmlDoc.createElement('group');
-	leftEye.setAttribute('def', 'left');
-	eyeGroup.appendChild(leftEye);
+function vecSub(a,b)
+{
+	return vecAdd(a, scale(b,-1));
+}
 
-	var leftShape = xmlDoc.createElement('shape');
-	leftEye.appendChild(leftShape);
+function quatLookAt(up, forward)
+{
+	forward = normalize(forward);
+	up = normalize(up);
 
-	var leftApp = xmlDoc.createElement('appearance');
-	leftShape.appendChild(leftApp);
+	var right = crossProduct(forward, up);
 
-	var leftTex = xmlDoc.createElement('renderedtexture');
-	leftTex.setAttribute('id', 'rtLeft');
-	leftTex.setAttribute('stereoMode', 'LEFT_EYE');
-	leftTex.setAttribute('update', 'ALWAYS');
-	leftTex.setAttribute('oculusRiftVersion', '2');
-	leftTex.setAttribute('dimensions', '980 1080 3');
-	leftTex.setAttribute('repeatS', 'false');
-	leftTex.setAttribute('repeatT', 'false');
-	leftTex.setAttribute('interpupillaryDistance', 0.0668);
-	leftApp.appendChild(leftTex);
+	up = crossProduct(right, forward);
 
-	var leftVP = xmlDoc.createElement('viewpoint');
-	leftVP.setAttribute('use', 'vp');
-	leftVP.setAttribute('containerfield', 'viewpoint');
-	leftVP.textContent = ' ';
-	leftTex.appendChild(leftVP);
+	var w = Math.sqrt(1 + right[0] + up[1] + forward[2]) * 0.5;
 
-	var leftBground = xmlDoc.createElement('background');
-	leftBground.setAttribute('use', 'bground');
-	leftBground.setAttribute('containerfield', 'background');
-	leftBground.textContent = ' ';
-	leftTex.appendChild(leftBground);
+	var recip = 1 / (4 * w);
+	var x = (forward[1] - up[2]) * recip;
+	var y = (right[2] - forward[1]) * recip;
+	var z = (up[0] - right[1]) * recip;
 
-	var leftScene = xmlDoc.createElement('group');
-	leftScene.setAttribute('use', 'root');
-	leftScene.setAttribute('containerfield', 'scene');
-	leftTex.appendChild(leftScene);
+	return [x,y,z,w];
+}
 
+function axisangle(mat)
+{
+	var tmpMat = mat.clone();
+	tmpMat = tmpMat.transpose();
 
-	var leftShader = xmlDoc.createElement('composedshader');
-	leftApp.appendChild(leftShader);
+	var right = mathjs.subset(tmpMat, mathjs.index(0,[0,3]))._data[0];
+	right = normalize(right);
 
-	var leftTexField = xmlDoc.createElement('field');
-	leftTexField.setAttribute('name', 'tex');
-	leftTexField.setAttribute('type', 'SFInt32');
-	leftTexField.setAttribute('value', '0');
-	leftShader.appendChild(leftTexField);
+	var up = mathjs.subset(tmpMat, mathjs.index(1,[0,3]))._data[0];
+	up = normalize(up);
 
-	/*
-	var leftEyeField = xmlDoc.createElement('field');
-	leftEyeField.setAttribute('name', 'leftEye');
-	leftEyeField.setAttribute('type', 'SFFloat');
-	leftEyeField.setAttribute('value', '1');
-	leftShader.appendChild(leftEyeField);
-	*/
+	var forward = mathjs.subset(tmpMat, mathjs.index(2,[0,3]))._data[0];
+	forward = normalize(forward);
 
-	var leftVertexShader = xmlDoc.createElement('shaderpart');
-	leftVertexShader.setAttribute('type', 'VERTEX');
-	leftVertexShader.textContent = "\n\
-		attribute vec3 position;\n\
-		attribute vec2 texcoord;\n\
-		\n\
-		uniform mat4 modelViewProjectionMatrix;\n\
-		varying vec2 fragTexCoord;\n\
-		\n\
-		void main()\n\
-		{\n\
-			vec2 pos = sign(position.xy);\n\
-			fragTexCoord = texcoord;\n\
-			gl_Position = vec4((pos.x - 1.0) / 2.0, pos.y, 0.0, 1.0);\n\
-		}\n\
-		";
+	var eps = 0.0001;
 
-	leftShader.appendChild(leftVertexShader);
+	var a = (forward[1] - up[2]);
+	var b = (right[2] - forward[0]);
+	var c = (up[0] - right[1]);
+	var tr = right[0] + up[1] + forward[2];
 
-	var leftFragShader = xmlDoc.createElement('shaderpart');
-	leftFragShader.setAttribute('def', 'frag');
-	leftFragShader.setAttribute('type', 'FRAGMENT');
-	leftFragShader.textContent = "\n\
-		#ifdef GL_ES\n\
-			precision highp float;\n\
-		#endif\n\
-		\n\
-		uniform sampler2D tex;\n\
-		varying vec2 fragTexCoord;\n\
-		\n\
-		void main()\n\
-		{\n\
-			vec3 col = texture2D(tex, fragTexCoord).rgb;\n\
-			//col.r = 1.0;\n\
-			gl_FragColor = vec4(col, 1.0);\n\
-		}\n";
+	var x = 1;
+	var y = 0;
+	var z = 0;
+	var angle = 0;
 
-	leftShader.appendChild(leftFragShader);
+	if ((Math.abs(a) < eps) && (Math.abs(b) < eps) && (Math.abs(c) < eps))
+	{
+		if (!(	(Math.abs(a) < eps)
+				&& (Math.abs(b) < eps)
+				&& (Math.abs(c) < eps)))
+		{
+			var d = forward[1] + up[2];
+			var e = right[2] + forward[0];
+			var f = up[0] + right[1];
 
-	var leftPlane = xmlDoc.createElement('plane');
-	leftPlane.setAttribute('solid', 'false');
-	leftPlane.setAttribute('invisible', 'true');
-	leftShape.appendChild(leftPlane);
+			if ((Math.abs(d) < eps) && (Math.abs(e) < eps) && (Math.abs(f) < eps) && ((Math.abs(tr) - 3) < eps))
+				return [0, 1, 0, 0];
 
-	// Right eye
-	var rightEye = xmlDoc.createElement('group');
-	rightEye.setAttribute('def', 'right');
-	eyeGroup.appendChild(rightEye);
+			angle = Math.PI;
 
-	var rightShape = xmlDoc.createElement('shape');
-	rightEye.appendChild(rightShape);
+			var xx = (right[0] + 1) / 2;
+			var yy = (up[1] + 1) / 2;
+			var zz = (forward[2] + 1) / 2;
 
-	var rightApp = xmlDoc.createElement('appearance');
-	rightShape.appendChild(rightApp);
+			var xy = d / 4;
+			var xz = e / 4;
+			var yz = f / 4;
 
-	var rightTex = xmlDoc.createElement('renderedtexture');
-	rightTex.setAttribute('id', 'rtRight');
-	rightTex.setAttribute('stereoMode', 'RIGHT_EYE');
-	rightTex.setAttribute('update', 'ALWAYS');
-	rightTex.setAttribute('oculusRiftVersion', '2');
-	rightTex.setAttribute('dimensions', '980 1080 3');
-	rightTex.setAttribute('repeatS', 'false');
-	rightTex.setAttribute('repeatT', 'false');
-	rightTex.setAttribute('interpupillaryDistance', 0.0668);
-	rightApp.appendChild(rightTex);
+			if ((xx > yy) && (xx > zz)) {
+				if (xx < eps) {
+					x = 0; y = Math.SQRT1_2; z = Math.SQRT1_2;
+				} else {
+					x = Math.sqrt(xx); y = xy/z; z = xz / x;
+				}
+			} else if (yy > zz) {
+				if (yy < eps) {
+					x = Math.SQRT1_2; y = 0; z = Math.SQRT1_2;
+				} else {
+					y = Math.sqrt(yy); x = xy / y; z = yz / y;
+				}
+			} else {
+				if (zz < eps) {
+					x = Math.SQRT1_2; y = Math.SQRT1_2; z = 0;
+				} else {
+					z = Math.sqrt(zz); x = xz / z; y = yz / z;
+				}
+			}
+		}
+	} else {
+		var recip = 1 / Math.sqrt(a * a + b * b + c * c);
 
-	var rightVP = xmlDoc.createElement('viewpoint');
-	rightVP.setAttribute('use', 'vp');
-	rightVP.setAttribute('containerfield', 'viewpoint');
-	rightVP.textContent = ' ';
-	rightTex.appendChild(rightVP);
+		x = a * recip;
+		y = b * recip;
+		z = c * recip;
 
-	var rightBground = xmlDoc.createElement('background');
-	rightBground.setAttribute('use', 'bground');
-	rightBground.setAttribute('containerfield', 'background');
-	rightBground.textContent = ' ';
-	rightTex.appendChild(rightBground);
+		angle = Math.acos((tr - 1) / 2);
+	}
 
-	var rightScene = xmlDoc.createElement('group');
-	rightScene.setAttribute('use', 'root');
-	rightScene.setAttribute('containerfield', 'scene');
-	rightScene.textContent = ' ';
-	rightTex.appendChild(rightScene);
-
-	var rightShader = xmlDoc.createElement('composedshader');
-	rightApp.appendChild(rightShader);
-
-	var rightTexField = xmlDoc.createElement('field');
-	rightTexField.setAttribute('name', 'tex');
-	rightTexField.setAttribute('type', 'SFInt32');
-	rightTexField.setAttribute('value', '0');
-	rightShader.appendChild(rightTexField);
-
-/*
-	var rightEyeField = xmlDoc.createElement('field');
-	rightEyeField.setAttribute('name', 'rightEye');
-	rightEyeField.setAttribute('type', 'SFFloat');
-	rightEyeField.setAttribute('value', '1');
-	rightShader.appendChild(rightEyeField);
-*/
-
-	var rightVertexShader = xmlDoc.createElement('shaderpart');
-	rightVertexShader.setAttribute('type', 'VERTEX');
-	rightVertexShader.textContent = "\n\
-		attribute vec3 position;\n\
-		attribute vec2 texcoord;\n\
-		\n\
-		uniform mat4 modelViewProjectionMatrix;\n\
-		varying vec2 fragTexCoord;\n\
-		\n\
-		void main()\n\
-		{\n\
-			vec2 pos = sign(position.xy);\n\
-			fragTexCoord = texcoord;\n\
-			gl_Position = vec4((pos.x + 1.0) / 2.0, pos.y, 0.0, 1.0);\n\
-		}";
-
-	rightShader.appendChild(rightVertexShader);
-
-	var rightFragShader = xmlDoc.createElement('shaderpart');
-	rightFragShader.setAttribute('type', 'FRAGMENT');
-	//rightFragShader.setAttribute('use', 'frag');
-	rightFragShader.textContent = "\n\
-		#ifdef GL_ES\n\
-			precision highp float;\n\
-		#endif\n\
-		\n\
-		uniform sampler2D tex;\n\
-		varying vec2 fragTexCoord;\n\
-		\n\
-		void main()\n\
-		{\n\
-			vec3 col = texture2D(tex, fragTexCoord).rgb;\n\
-			gl_FragColor = vec4(col, 1.0);\n\
-		}\n";
-
-	rightShader.appendChild(rightFragShader);
-
-	var rightPlane = xmlDoc.createElement('plane');
-	rightPlane.setAttribute('solid', 'false');
-	rightPlane.setAttribute('invisible', 'true');
-	rightShape.appendChild(rightPlane);
-
-	return {scene: scene, root: group};
+	return [angle, x, y, z];
 }
 
 /*******************************************************************************
@@ -326,12 +228,13 @@ function X3D_CreateOculus(xmlDoc) {
  * @param {xmlDom} xmlDoc - The XML document to add the scene to
  * @param {xmlNode} xmlNode - The node to append the children to
  * @param {JSON} node - The node loaded from repoGraphScene
+ * @param {Matrix} matrix - Current transformation matrix
  * @param {dbInterface} dbInterface - Database interface object
  * @param {string} account - Name of the account containing the project
  * @param {string} project - Name of the project
  * @param {string} mode - Type of X3D being rendered
  *******************************************************************************/
-function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, mode)
+function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, project, mode)
 {
 	if (!('children' in node))
 		return;
@@ -369,7 +272,59 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 			}
 			xmlNode.appendChild(newNode);
 
-			X3D_AddChildren(xmlDoc, newNode, child, dbInterface, account, project, mode);
+			X3D_AddChildren(xmlDoc, newNode, child, matrix, dbInterface, account, project, mode);
+		}
+		else if (child['type'] == 'camera')
+		{
+			newNode = xmlDoc.createElement('viewpoint');
+
+			newNode.setAttribute('id', child['name']);
+			newNode.setAttribute('DEF',dbInterface.uuidToString(child['shared_id']));
+			newNode.setAttribute('bind', false);
+
+			//if (child['fov'])
+			newNode.setAttribute('fieldOfView', 0.25 * Math.PI);
+
+			if (child['position'])
+				newNode.setAttribute('position', child['position'].join(','));
+
+			//if (child['near'])
+			//	newNode.setAttribute('zNear', child['near']);
+
+			//if (child['far'])
+			//	newNode.setAttribute('zFar', child['far']);
+
+			newNode.setAttribute('zNear', -1);
+			newNode.setAttribute('zFar', -1);
+
+			var position = child["position"] ? child["position"] : [0,0,0];
+			var look_at = child["look_at"] ? child["look_at"] : [0,0,1];
+
+			var center = vecAdd(position, look_at);
+			newNode.setAttribute('centerOfRotation', center.join(','));
+
+			var up = child["up"] ? child["up"] : [0,1,0];
+			forward = normalize(look_at);
+			up = normalize(up);
+			var right = crossProduct(forward, up);
+
+			var viewMat = mathjs.matrix([[right[0], right[1], right[2], 0], [up[0], up[1], up[2], 0],
+				[forward[0], forward[1], forward[2], 0], [position[0], position[1], position[2], 1]]);
+
+			viewMat = viewMat.transpose();
+			//viewMat = mathjs.multiply(matrix, viewMat);
+
+			var tmpMat = viewMat.clone();
+			tmpMat = tmpMat.transpose();
+
+			position = mathjs.subset(tmpMat, mathjs.index(3,[0,3]))._data[0];
+			newNode.setAttribute('position', position.join(','));
+
+			var orientation = axisangle(viewMat);
+			newNode.setAttribute('orientation', orientation.join(','));
+
+			xmlNode.appendChild(newNode);
+			X3D_AddChildren(xmlDoc, newNode, child, matrix, dbInterface, account, project, mode);
 		}
 		else if (child['type'] == 'transformation')
 		{
@@ -403,7 +358,12 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 			newNode.setAttribute("id", child['id']);
 			newNode.setAttribute('DEF', dbInterface.uuidToString(child["shared_id"]));
 			xmlNode.appendChild(newNode);
-			X3D_AddChildren(xmlDoc, newNode, child, dbInterface, account, project, mode);
+
+			var newMatrix = matrix.clone();
+			var transMatrix  = mathjs.matrix(child['matrix']);
+			newMatrix = mathjs.multiply(transMatrix, newMatrix);
+
+			X3D_AddChildren(xmlDoc, newNode, child, newMatrix, dbInterface, account, project, mode);
 		} else if(child['type'] == 'material') {
 			 var appearance = xmlDoc.createElement('Appearance');
 
@@ -445,7 +405,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 				newNode.setAttribute('DEF', dbInterface.uuidToString(child["shared_id"]));
 				appearance.appendChild(newNode);
 				xmlNode.appendChild(appearance);
-				X3D_AddChildren(xmlDoc, appearance, child, dbInterface, account, project, mode);
+				X3D_AddChildren(xmlDoc, appearance, child, matrix, dbInterface, account, project, mode);
 		} else if (child['type'] == 'texture') {
 			newNode = xmlDoc.createElement('ImageTexture');
 			newNode.setAttribute('url', config.apiServer.url + '/' + account + '/' + project + '/' + child['id'] + '.' + child['extension']);
@@ -458,7 +418,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 			texProperties.setAttribute('generateMipMaps', 'true');
 			newNode.appendChild(texProperties);
 
-			X3D_AddChildren(xmlDoc, newNode, child, dbInterface, account, project, mode);
+			X3D_AddChildren(xmlDoc, newNode, child, matrix, dbInterface, account, project, mode);
 		} else if (child['type'] == 'map') {
 			if(!child['maptype'])
 				child['maptype'] = 'satellite';
@@ -477,7 +437,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, dbInterface, account, project, m
 			shape.setAttribute('onmouseover', 'onMouseOver(event);');
 			shape.setAttribute('onmousemove', 'onMouseMove(event);');
 
-			X3D_AddChildren(xmlDoc, shape, child, dbInterface, account, project, mode);
+			X3D_AddChildren(xmlDoc, shape, child, matrix, dbInterface, account, project, mode);
 
 			X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, child, mode);
 			xmlNode.appendChild(shape);
@@ -803,7 +763,7 @@ function X3D_AddGroundPlane(xmlDoc, bbox)
  * @param {JSON} bbox - Bounding used to compute the position and size of
  *						ground plane
  *******************************************************************************/
-function render(dbInterface, account, project, subFormat, branch, revision, oculusMode, callback) {
+function render(dbInterface, account, project, subFormat, branch, revision, callback) {
 	var full = (subFormat == "x3d");
 
 	dbInterface.getScene(account, project, branch, revision, full, function(err, doc) {
@@ -811,12 +771,7 @@ function render(dbInterface, account, project, subFormat, branch, revision, ocul
 
 		var xmlDoc = X3D_Header();
 
-		if (!oculusMode)
-		{
-			var sceneRoot	= X3D_CreateScene(xmlDoc);
-		} else {
-			var sceneRoot	= X3D_CreateOculus(xmlDoc);
-		}
+		var sceneRoot	= X3D_CreateScene(xmlDoc);
 
 		// Hack for the demo, generate objects server side
 		json_objs = [];
@@ -826,7 +781,8 @@ function render(dbInterface, account, project, subFormat, branch, revision, ocul
 
 		var dummyRoot = { children: [doc.mRootNode] };
 
-		X3D_AddChildren(xmlDoc, sceneRoot.root, dummyRoot, dbInterface, account, project, subFormat);
+		var mat = mathjs.eye(4);
+		X3D_AddChildren(xmlDoc, sceneRoot.root, dummyRoot, mat, dbInterface, account, project, subFormat);
 
 		/*
 		// Compute the scene bounding box.
@@ -867,43 +823,22 @@ exports.route = function(router)
 {
 	router.get('x3d', '/:account/:project/revision/:rid', function(res, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project,	params.subformat, null, params.rid, false, err_callback);
+		render(router.dbInterface, params.account, params.project,	params.subformat, null, params.rid, err_callback);
 	});
 
 	router.get('x3d', '/:account/:project/revision/:branch/head', function(res, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project, params.subformat, params.branch, null, false, err_callback);
+		render(router.dbInterface, params.account, params.project, params.subformat, params.branch, null, err_callback);
 	});
 
 	router.get('x3d', '/:account/:project/revision/:rid/:sid', function(res, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project, params.subformat, null, params.rid, false, err_callback);
+		render(router.dbInterface, params.account, params.project, params.subformat, null, params.rid, err_callback);
 	});
 
 	router.get('x3d', '/:account/:project/revision/:branch/head/:sid', function(res, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project, params.subformat, params.branch, null, false, err_callback);
+		render(router.dbInterface, params.account, params.project, params.subformat, params.branch, null, err_callback);
 	});
-
-	router.get('occ', '/:account/:project/revision/:rid', function(res, params, err_callback)
-	{
-		render(router.dbInterface, params.account, params.project,	params.subformat, null, params.rid, true, err_callback);
-	});
-
-	router.get('occ', '/:account/:project/revision/:branch/head', function(res, params, err_callback)
-	{
-		render(router.dbInterface, params.account, params.project, params.subformat, params.branch, null, true, err_callback);
-	});
-
-	router.get('occ', '/:account/:project/revision/:rid/:sid', function(res, params, err_callback)
-	{
-		render(router.dbInterface, params.account, params.project, params.subformat, null, params.rid, true, err_callback);
-	});
-
-	router.get('occ', '/:account/:project/revision/:branch/head/:sid', function(res, params, err_callback)
-	{
-		render(router.dbInterface, params.account, params.project, params.subformat, params.branch, null, true, err_callback);
-	});
-
 }
 

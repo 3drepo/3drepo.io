@@ -19,14 +19,16 @@ angular.module('3drepo')
 .factory('Wayfinder', ['$http', '$q', 'serverConfig', function($http, $q, serverConfig) {
 	var o = {};
 
-	o.refresh = function() {
+	o.refresh = function(account, project) {
 		var self = this;
-
 		self.previous = {};
+
+		self.account = account;
+		self.project = project;
 
 		var deferred = $q.defer();
 
-		$http.get(serverConfig.apiUrl('wayfinder.json'))
+		$http.get(serverConfig.apiUrl(account + '/' + project + '/wayfinder.json'))
 		.then(function(previous) {
 			if(previous.data && previous.data != "Unauthorized")
 			{
@@ -45,6 +47,29 @@ angular.module('3drepo')
 
 		return deferred.promise;
 	};
+
+	o.loadUIDS = function(uids) {
+		var self = this;
+
+		if (!self.account && !self.project)
+			return $q.reject();
+
+		self.uids		= uids;
+		self.pointData	= {};
+
+		var deferred = $q.defer();
+
+		if (self.uids) {
+			$http.get(serverConfig.apiUrl(self.account + '/' + self.project + '/wayfinder/record.json'),
+				{ params : { uid: JSON.stringify(self.uids) }})
+			.then(function(json) {
+				self.pointData = json.data;
+				deferred.resolve();
+			});
+		}
+
+		return deferred.promise;
+	}
 
 	return o;
 }]);

@@ -1,0 +1,28 @@
+div#diff-selector(ng-controller='DiffSelectorCtrl')
+	#diffToggle.nav-project-title(ng-show="ui.diffselector")
+		a(href='#', ng-click="toggleDiff()")
+			i.fa.fa-random 
+				| DIFF
+	#diffSpan(ng-show="diffEnabled")
+		.btn-group.menu-button
+			button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-expanded='false')
+				i.fa.fa-code-fork.menu-icon
+				span.button-title Branch:
+				span.button-keyword {{Data.DiffData.CurrentDiffBranch.name}}
+				span.caret
+			ul.dropdown-menu(role='menu')
+				li(ng-repeat='branch in Data.SelectorData.Branches.branches')
+					a(href='#', ng-click='setDiffBranch(branch)')
+						span.button-keyword {{branch}}
+		span.revision
+			.btn-group.menu-button
+				button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-expanded='false')
+					i.fa.fa-tag.menu-icon
+					span.button-title Revision:
+					span.button-keyword {{Data.DiffData.CurrentDiffRevision.shortName}}
+					span.caret
+				ul.dropdown-menu(role='menu')
+					li(ng-repeat='rev in Data.DiffData.CurrentDiffBranch.revisions')
+						a(href='#', ng-click='setDiffRevision(rev)')
+							span.button-keyword {{rev.name}}
+

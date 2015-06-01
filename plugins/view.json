@@ -1,0 +1,26 @@
+{
+	"name" : "view",
+	"states" : ["info", "log", "comments", "revisions", "settings", "cobie"],
+	"files": {
+		"angular": [
+			"view/ViewCtrl.js",
+			"view/Readme.js",
+			"view/Log.js",
+			"view/RevisionsByDay.js",
+			"view/Comments.js",
+			"view/Users.js",
+			"view/ViewData.js"
+		],
+		"jade": [
+			{"template": "view/info.jade", "id": "info.html"},
+			{"template": "view/timeline.jade", "id": "revisions.html"},
+			{"template": "view/log.jade", "id": "log.html"},
+			{"template": "view/settings.jade", "id": "settings.html"},
+			{"template": "view/cobie.jade", "id": "cobie.html"}
+		],
+		"ui": [
+			{"name": "menu", "template" : "view/menu.jade", "position" : "footer"}
+		]
+	}
+}
+

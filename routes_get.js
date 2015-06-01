@@ -43,29 +43,29 @@ module.exports = function(router, dbInterface, checkAccess){
 		this.transRouter(format, '/search', res, params);
 	});
 
-	router.get('/wayfinder.:format?', function(req, res) {
+	router.get('/:account/:project/wayfinder.:format?', function(req, res) {
 		var resCode = responseCodes.OK;
-		var responsePlace = "/wayfinder GET";
+		var responsePlace = "/:account/:project/wayfinder GET";
 
 		if (!("user" in req.session)) {
 			responseCodes.respond(responsePlace, responseCodes.USERNAME_NOT_SPECIFIED, res, {});
 		} else {
-			this.dbInterface.getWayfinderInfo(config.wayfinder.democompany, config.wayfinder.demoproject, null, function(err, docs) {
+			this.dbInterface.getWayfinderInfo(req.params["account"], req.params["project"], null, function(err, docs) {
 				responseCodes.onError(responsePlace, err, res, docs);
 			});
 		}
 	});
 
-	router.get('/wayfinder/record.:format?', function(req, res) {
+	router.get('/:account/:project/wayfinder/record.:format?', function(req, res) {
 		var resCode = responseCodes.OK;
-		var responsePlace = "/wayfinder/record GET";
+		var responsePlace = "/:account/:project/wayfinder/record GET";
 
 		if (!("user" in req.session)) {
 			responseCodes.respond(responsePlace, responseCodes.USERNAME_NOT_SPECIFIED, res, {});
 		} else {
 			var uids = JSON.parse(req.query.uid);
 
-			this.dbInterface.getWayfinderInfo(config.wayfinder.democompany, config.wayfinder.demoproject, uids, function(err, docs) {
+			this.dbInterface.getWayfinderInfo(req.params["account"], req.params["project"], uids, function(err, docs) {
 				responseCodes.onError(responsePlace, err, res, docs);
 			});
 		}
@@ -226,8 +226,10 @@ module.exports = function(router, dbInterface, checkAccess){
 
 		var params = {
 			account:	req.params["account"],
-			roject:		req.params["project"],
+			project:	req.params["project"],
 			branch:		req.params["branch"],
+			rid:		req.params["rid"],
+			sid:		req.params["sid"],
 			subformat:	req.params["subformat"],
 			user:		current_user,
 			query:		req.query
@@ -245,6 +247,7 @@ module.exports = function(router, dbInterface, checkAccess){
 			account:	req.params["account"],
 			project:	req.params["project"],
 			branch:		req.params["branch"],
+			sid:		req.params["sid"],
 			subformat:	req.params["subformat"],
 			user:		current_user,
 			query:		req.query
@@ -334,6 +337,23 @@ module.exports = function(router, dbInterface, checkAccess){
 		this.transRouter(format, '/:account/:project/:uid', res, params);
 	});
 
+	// Get object with specific uid in a specific format
+	router.get('/:account/:project/meta/:uid.:format?', checkAccess, function(req, res, next) {
+		var format = req.params["format"].toLowerCase();
+		var current_user = ("user" in req.session) ? req.session.user.username : "";
+
+		var params = {
+			account:   req.params["account"],
+			project:   req.params["project"],
+			uid:	   req.params["uid"],
+			user:	   current_user
+		};
+
+		logger.log('debug', 'Retrieving object ' + params.uid);
+
+		this.transRouter(format, '/:account/:project/meta/:uid', res, params);
+	});
+
 	// Get list of objects that match a specific type
 	router.get('/:account/:project/:rid/:type.:format?.:subformat?', checkAccess, function(req, res, next) {
 		var format = req.params["format"];
@@ -375,8 +395,6 @@ module.exports = function(router, dbInterface, checkAccess){
 		this.transRouter(format, '/:account/:project/revision/:branch/head/tree/:sid', res, params);
 	});
 
-
-
 	// Get subtree for sid in revision rid, with (optional) depth query string paramter
 	router.get('/:account/:project/revision/:rid/tree/:sid.:format?.:subformat?', checkAccess, function(req, res, next) {
 		var format = req.params["format"];
@@ -415,7 +433,35 @@ module.exports = function(router, dbInterface, checkAccess){
 		this.transRouter(format, '/:account/:project/revision/:rid/diff/:otherrid', res, params);
 	});
 
+	router.get('/:account/:project/revision/:rid/meta/:sid.:format?', checkAccess, function(req, res, next) {
+		var format = req.params["format"];
+		var current_user = ("user" in req.session) ? req.session.user.username : "";
 
+		var params = {
+			account:	req.params["account"],
+			project:	req.params["project"],
+			rid:		req.params["rid"],
+			sid:		req.params["sid"],
+			user:		current_user
+		};
+
+		this.transRouter(format, '/:account/:project/revision/:rid/meta/:sid',res, params);
+	});
+
+	router.get('/:account/:project/revision/:branch/head/meta/:sid.:format?', checkAccess, function(req, res, next) {
+		var format = req.params["format"];
+		var current_user = ("user" in req.session) ? req.session.user.username : "";
+
+		var params = {
+			account:	req.params["account"],
+			project:	req.params["project"],
+			branch:		req.params["branch"],
+			sid:		req.params["sid"],
+			user:		current_user
+		};
+
+		this.transRouter(format, '/:account/:project/revision/:branch/head/meta/:sid', res, params);
+	});
 
 	// Get audit log for account
 	router.get('/:account/log', checkAccess, function(req, res, next) {

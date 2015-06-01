@@ -23,6 +23,7 @@ var uuid = require('node-uuid');
 var log_iface = require('./logger.js');
 var logger = log_iface.logger;
 var ObjectID = require('mongodb').ObjectID;
+var C = require('./constants');
 
 var OWNER	= 0;
 var GROUP	= 1;
@@ -45,6 +46,7 @@ function uuidToString(uuidIn) {
 }
 
 var masterUUID = stringToUUID("00000000-0000-0000-0000-000000000000");
+var self = exports;
 
 /*******************************************************************************
  /* Authenticate user against the database
@@ -211,19 +213,87 @@ exports.storeWayfinderInfo = function(dbName, project, username, sessionID, data
 			timestamp: timestamp
 		};
 
-		data.user      = username;
-		data.session   = sessionID;
-		data.timestamp = timestamp;
+		var dataObj = {};
+		dataObj.user      = username;
+		dataObj.session   = sessionID;
+		dataObj.timestamp = timestamp;
 
-		coll.update(uniqueID, { $set : data }, {upsert: true}, function(err, count) {
-			if (err)
-				callback(responseCodes.DB_ERROR(err));
+		for(var idx = 0; idx < data["waypoints"].length; idx++)
+		{
+			var waypointIdx = data["waypoints"][idx]["idx"];
+
+			dataObj[waypointIdx]			= {};
+			dataObj[waypointIdx]["dir"]		= data["waypoints"][idx]["dir"];
+			dataObj[waypointIdx]["pos"]		= data["waypoints"][idx]["pos"];
+			dataObj[waypointIdx]["time"]	= data["waypoints"][idx]["time"];
+		}
+
+		coll.update(uniqueID, { $set : dataObj }, {upsert: true}, function(err, count) {
+			if (err) return callback(responseCodes.DB_ERROR(err));
 
 			logger.log('debug', 'Updated ' + count + ' records.');
 			callback(responseCodes.OK);
 		});
 	});
 };
+
+// TODO: Remove this, as it shouldn't exist
+exports.addToCurrentList = function(dbName, project, branch, objUUID, callback) {
+	self.getHeadUUID(dbName, project, branch, function(err, uuid) {
+		dbConn.collCallback(dbName, project + '.history', function(err, coll) {
+			if(err.value) return callback(err);
+
+			var uniqueID = {
+				"_id" : uuid.uuid
+			};
+
+			coll.update(uniqueID, { $push: {"current" : objUUID} }, {}, function(err, count) {
+				if (err) return callback(responseCodes.DB_ERROR(err));
+
+				logger.log('debug', 'Adding ' + uuidToString(objUUID) + ' to current list of ' + uuidToString(uuid.uuid));
+
+				callback(responseCodes.OK);
+			});
+		});
+	});
+}
+
+exports.storeViewpoint = function(dbName, project, branch, username, parentSharedID, data, callback) {
+	data._id = uuid.v1();
+
+	if (!data.shared_id)
+		data.shared_id = uuid.v1();
+
+	logger.log('debug', 'Storing camera ' + data.name + ' for (U,S) => (' + data.shared_id + ',' + data._id + ') @ ' + parentSharedID);
+
+	data._id =			stringToUUID(data._id);
+	data.shared_id =	stringToUUID(data.shared_id);
+
+	data.type	= "camera";
+	data.api	= "1";
+
+	data.parents = [stringToUUID(parentSharedID)];
+
+	dbConn.collCallback(dbName, project + ".scene", function(err, coll) {
+		if(err.value) return callback(err);
+
+		var uniqueID = {
+			"_id" : data._id
+		};
+
+		coll.update(uniqueID, { $set : data }, { upsert: true }, function(err, count) {
+			if(err) return callback(responseCodes.DB_ERROR(err));
+
+			logger.log('debug', 'Updated ' + count + ' records.');
+
+			self.addToCurrentList(dbName, project, branch, data._id, function (err) {
+				if (err.value) return callback(err);
+
+				callback(responseCodes.OK);
+			});
+		});
+	});
+}
 
 exports.getUserDBList = function(username, callback) {
 	var resCode = responseCodes.OK;
@@ -388,6 +458,12 @@ exports.getProjectUsers = function(account, project, callback) {
 			if(err.value)
 				return callback(err);
 
+			if(!users.length)
+				return callback(responseCodes.SETTINGS_ERROR);
+
+			if(!users[0]["users"] || !users[0]["users"].length)
+				return callback(responseCodes.OK, []);
+
 			var projectUsers = users[0]["users"].map(function (user) {
 				return {
 					user: user,
@@ -410,10 +486,10 @@ exports.getAccessToProject = function(username, account, project, callback) {
 		if(err.value)
 			return callback(err);
 
-		logger.log("debug", "Checking access for " + username);
-
-		if(username == info["owner"])
+		if(username == info["owner"]) {
+			logger.log("debug", username + " has owner permissions");
 			return callback(responseCodes.OK, info["permissions"][OWNER])
+		}
 
 		self.getProjectUsers(account, project, function(err, users) {
 			if(err.value)
@@ -421,12 +497,16 @@ exports.getAccessToProject = function(username, account, project, callback) {
 
 			var usernameList = users.map(function(user) { return user["user"]; });
 
+			logger.log("debug", project + " has the following users " + JSON.stringify(usernameList));
+
 			if (usernameList.indexOf(username) > -1)
 			{
 				// Valid user or group
+				logger.log("debug", username + " has group permissions");
 				return callback(responseCodes.OK, info["permissions"][GROUP]);
 			} else {
 				// Must be a public user ?
+				logger.log("debug", username + " has public permissions");
 				return callback(responseCodes.OK, info["permissions"][PUBLIC]);
 			}
 		});
@@ -451,15 +531,15 @@ exports.checkPermissionsBit = function(username, account, project, bitMask, call
 }
 
 exports.hasReadAccessToProject = function(username, account, project, callback) {
-	this.checkPermissionsBit(username, account, project, READ_BIT, callback);
+	self.checkPermissionsBit(username, account, project, READ_BIT, callback);
 };
 
 exports.hasWriteAccessToProject = function(username, account, project, callback) {
-	this.checkPermissionsBit(username, account, project, WRITE_BIT, callback);
+	self.checkPermissionsBit(username, account, project, WRITE_BIT, callback);
 };
 
 exports.hasExecuteAccessToProject = function(username, account, project, callback) {
-	this.checkPermissionsBit(username, account, project, EXECUTE_BIT, callback);
+	self.checkPermissionsBit(username, account, project, EXECUTE_BIT, callback);
 };
 
 exports.getDBList = function(callback) {
@@ -481,6 +561,43 @@ exports.getDBList = function(callback) {
 			dbList.sort();
 
 			callback(responseCodes.OK, dbList);
+		});
+	});
+};
+
+exports.getRootNode = function(dbName, project, branch, revision, callback) {
+	var historyQuery = null;
+
+	if (revision != null)
+	{
+		historyQuery = {
+			_id: stringToUUID(revision)
+		};
+	} else {
+		if (branch == 'master')
+			var branch_id = masterUUID;
+		else
+			var branch_id = stringToUUID(branch);
+
+		historyQuery = {
+			shared_id:	branch_id
+		};
+	}
+
+	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
+	{
+		var filter = {
+			parents : {"$exists" : false},
+			_id: {$in: docs[0]['current']}
+		};
+
+		dbConn.filterColl(dbName, project + '.scene', filter, null, function(err, doc) {
+			if (err.value) return callback(err);
+
+			if (!doc.length)
+				return callback(responseCodes.ROOT_NODE_NOT_FOUND);
+
+			callback(responseCodes.OK, doc[0]);
 		});
 	});
 };
@@ -520,6 +637,34 @@ exports.getChildren = function(dbName, project, branch, revision, uuid, callback
 	});
 };
 
+exports.getHeadRevision = function(dbName, project, branch, callback) {
+	if (branch == 'master')
+		var branch_id = masterUUID;
+	else
+		var branch_id = stringToUUID(branch);
+
+	var historyQuery = {
+		shared_id : branch_id
+	};
+
+	var self = this;
+
+	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, doc) {
+		if (err.value) return callback(err);
+
+		callback(responseCodes.OK, doc);
+	});
+}
+
+exports.getHeadUUID = function(dbName, project, branch, callback) {
+	self.getHeadRevision(dbName, project, branch, function(err, doc) {
+		if (err.value)
+			return callback(err);
+
+		callback(responseCodes.OK, {"uuid" : doc[0]["_id"], "sid" : doc[0]["shared_id"]});
+	});
+}
+
 exports.getHeadOf = function(dbName, project, branch, getFunc, callback) {
 	if (branch == 'master')
 		var branch_id = masterUUID;
@@ -536,12 +681,15 @@ exports.getHeadOf = function(dbName, project, branch, getFunc, callback) {
 		if (err.value)
 			return callback(err);
 
-		getFunc(dbName, project, uuidToString(doc[0]["_id"]), function(err, doc) {
-			if(err.value)
-				return callback(err);
+		if (!doc.length)
+			return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
 
-			callback(responseCodes.OK, doc);
-		});
+			getFunc(dbName, project, uuidToString(doc[0]["_id"]), function(err, doc) {
+				if(err.value)
+					return callback(err);
+
+				callback(responseCodes.OK, doc);
+			});
 	});
 };
 
@@ -561,11 +709,11 @@ exports.getRevisionInfo = function(dbName, project, rid, callback) {
 
 		rev = {};
 
-		rev.name    = uuidToString(doc["_id"]); // TODO: Input real name
-		rev.author  = ("author" in doc) ? doc.author : "unnamed";
-		rev.message = ("message" in doc) ? doc.message : "";
-		rev.tag     = ("tag" in doc) ? doc.tag : "";
-		rev.branch  = uuidToString(doc["shared_id"]);
+		rev.revision	= uuidToString(doc["_id"]); // TODO: Input real name
+		rev.author		= ("author" in doc) ? doc.author : "unnamed";
+		rev.message		= ("message" in doc) ? doc.message : "";
+		rev.tag			= ("tag" in doc) ? doc.tag : "";
+		rev.branch		= uuidToString(doc["shared_id"]);
 
 		if ("timestamp" in doc)
 		{
@@ -587,6 +735,9 @@ exports.getReadme = function(dbName, project, rid, callback) {
 
 	dbConn.filterColl(dbName, project + '.history', historyQuery, null, function(err, doc)
 	{
+		if(!doc[0])
+			return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+
 		var query = {
 			type:    "meta",
 			subtype: "readme",
@@ -689,25 +840,92 @@ exports.getBranches = function(dbName, project, callback) {
 
 };
 
-exports.getMetadata = function(dbName, project, uuid, callback) {
-	var filter = {
-		parents: stringToUUID(uuid),
-		type: 'meta'
-		//subtype: {$not: "readme"}
-	};
+exports.getMetadata = function(dbName, project, branch, revision, sid, uid, callback) {
 
-	var projection = {
-		_id: 0,
-		shared_id: 0,
-		paths: 0,
-		type: 0,
-		api: 0,
-		parents: 0
-	};
+	var historyQuery = null;
 
-	dbConn.filterColl(dbName, project + '.scene', filter, projection, function(err, doc) {
-		callback(responseCodes.OK, doc);
-	});
+	if (!uid)
+	{
+		if (revision != null)
+		{
+			historyQuery = {
+				_id: stringToUUID(revision)
+			};
+		} else {
+			if (branch == 'master')
+				var branch_id = masterUUID;
+			else
+				var branch_id = stringToUUID(branch);
+
+			historyQuery = {
+				shared_id:	branch_id
+			};
+		}
+
+		dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
+		{
+			if (!docs.length)
+				return callback(responseCodes.HISTORY_NOT_FOUND);
+
+			var filter = {
+				parents: stringToUUID(sid),
+				type: 'meta',
+				_id: { $in: docs[0]['current']}
+			};
+
+			var projection = {
+				_id: 0,
+				shared_id: 0,
+				paths: 0,
+				type: 0,
+				api: 0,
+				parents: 0
+			};
+
+			dbConn.filterColl(dbName, project + '.scene', filter, projection, function(err, metadocs) {
+				if (err.value) return callback(err);
+
+				callback(responseCodes.OK, metadocs);
+			});
+		});
+	} else {
+		var objQuery = {
+			_id: stringToUUID(uid)
+		};
+
+		var projection = {
+			shared_id : 1
+		};
+
+		dbConn.filterColl(dbName, project + '.scene', objQuery, null, function(err, obj) {
+			if (err.value) return callback(err);
+
+			if (!obj.length)
+				return callback(responseCodes.OBJECT_NOT_FOUND);
+
+			if (err.value) return callback(err);
+
+			var filter = {
+				parents: obj[0]["shared_id"],
+				type: 'meta'
+			};
+
+			var projection = {
+				_id: 0,
+				shared_id: 0,
+				paths: 0,
+				type: 0,
+				api: 0,
+				parents: 0
+			};
+
+			dbConn.filterColl(dbName, project + '.scene', filter, projection, function(err, metadocs) {
+				if (err.value) return callback(err);
+
+				callback(responseCodes.OK, metadocs);
+			});
+		});
+	}
 };
 
 exports.getObject = function(dbName, project, uid, rid, sid, callback) {
@@ -731,8 +949,14 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 			_id : stringToUUID(rid)
 		};
 
-		dbConn.filterColl(dbName, project + '.history', historyQuery, null, function(err, doc)
+		dbConn.filterColl(dbName, project + '.history', historyQuery, null, function(err, docs)
 		{
+			if(err.value)
+				return callback(err);
+
+			if(!docs.length)
+				return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+
 			var query = {
 				shared_id : stringToUUID(sid),
 				_id		  : { $in : docs[0]['current']}
@@ -741,7 +965,10 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 			dbConn.filterColl(dbName, project + '.scene', query, null, function(err, obj) {
 				if (err.value) return callback(err);
 
-				callback(responseCodes.OK, obj[0]["type"], this.stringToUUID(obj[0]["_id"]), repoGraphScene.decode(obj));
+				if (!obj.length)
+					return callback(responseCodes.OBJECT_NOT_FOUND);
+
+				return callback(responseCodes.OK, obj[0]["type"], uuidToString(obj[0]["_id"]), repoGraphScene.decode(obj));
 			});
 
 		});

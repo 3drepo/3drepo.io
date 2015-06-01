@@ -1,0 +1,12 @@
+{
+	"name" : "navigation",
+	"files": {
+		"angular": [
+			"navigation/NavigationCtrl.js"
+		],
+		"ui": [
+			{"name": "navigation", "template" : "navigation/navigation.jade", "position" : "tools"}
+		]
+	}
+}
+

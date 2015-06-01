@@ -1,0 +1,13 @@
+{
+	"name" : "revision",
+	"states": ["revision", "branch"],
+	"files": {
+		"angular": [
+			"revision/RevisionCtrl.js",
+			"revision/RevisionData.js",
+			"revision/CurrentBranch.js",
+			"revision/CurrentRevision.js"
+		]
+	}
+}
+

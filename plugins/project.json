@@ -1,0 +1,21 @@
+{
+	"name" : "project",
+	"files": {
+		"js" : [
+			"project/viewermanager.js",
+			"project/viewer.js",
+			"project/gamepad.js"
+		],
+		"jade" : [
+			{"template" : "project/project.jade", "id" : "project.html"}
+		],
+		"ui": [
+			{"name": "icons", "template" : "project/icons.jade", "position": "right"}
+		],
+		"angular": [
+			"project/ViewerService.js",
+			"project/ProjectData.js",
+			"project/ProjectCtrl.js"
+		]
+	}
+}

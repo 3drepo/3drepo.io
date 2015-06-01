@@ -1,0 +1,30 @@
+.container-fluid
+	#ui2-header
+		#nav-version-control
+			div.nav-project-title  <b>{{Data.ProjectData.name}}</b>
+			if ui.header
+				each uicomp in ui.header
+					!= renderMe(uicomp, locals)
+
+	//#nav-version-control(ng-controller='RevisionCtrl', ng-show="Data.ui.revisionSelector")
+	#project-viewport-container.row
+		div#x3d.project-viewport
+		if ui.viewport
+			each uicomp in ui.viewport
+				!= renderMe(uicomp, locals)
+	.ui2
+		#ui2-left
+			if ui.left
+				each uicomp in ui.left
+					!= renderMe(uicomp, locals)
+		#ui2-right
+			if ui.right
+				each uicomp in ui.right
+					!= renderMe(uicomp, locals)
+
+	#bottom-panel.row.mainrow.collapsed
+		if ui.footer
+			each uicomp in ui.footer
+				!= renderMe(uicomp, locals)
+		div(ui-view="footer")
+

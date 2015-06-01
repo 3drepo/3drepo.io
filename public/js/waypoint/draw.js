@@ -15,8 +15,12 @@
  **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-var Spheres = function() {
+var Spheres = function(viewer) {
 	this.spheres = [];
+
+	this.viewer = viewer;
+
+	var self = this;
 
 	this.addViewDir = function(position, dir, radius, rgb, trans)
 	{
@@ -32,12 +36,12 @@ var Spheres = function() {
 		//var rotQt = rotQuat([0, 1, 0], dir);
 		//var rotStr = rotQt.x + " " + rotQt.y + " " + rotQt.z + " " + rotQt.w;
 
-		var rotStr = rotToRotation([0,1,0], dir);
+		var rotStr = self.viewer.rotToRotation([0,1,0], dir);
 
 		var transform = document.createElement('transform');
 		transform.setAttribute('translation', posStr);
 		transform.setAttribute('center', posStr);
-		viewer.scene.appendChild(transform);
+		self.viewer.scene.appendChild(transform);
 
 		var rotation = document.createElement('transform');
 		rotation.setAttribute('rotation', rotStr);
@@ -61,6 +65,8 @@ var Spheres = function() {
 
 		shape.appendChild(cone);
 
+		this.spheres.push(transform);
+
 		return transform;
 	}
 
@@ -75,7 +81,7 @@ var Spheres = function() {
 		var transform = document.createElement('transform');
 		transform.setAttribute('scale', scaleStr);
 		transform.setAttribute('translation', posStr);
-		viewer.scene.appendChild(transform);
+		self.viewer.scene.appendChild(transform);
 
 		var shape = document.createElement('shape');
 		shape.setAttribute('isPickable', false);
@@ -93,6 +99,8 @@ var Spheres = function() {
 		sphere.setAttribute('radius', radius);
 		sphere.setAttribute('solid', false);
 		shape.appendChild(sphere);
+
+		this.spheres.push(transform);
 
 		console.log("Adding sphere @ " + posStr);
 
@@ -122,14 +130,17 @@ var Spheres = function() {
 	{
 		for(var i = 0; i < this.spheres.length; i++)
 		{
-			this.spheres[i].parentNode.removeChild(this.spheres[i]);
+			if (this.spheres[i])
+				this.spheres[i].parentNode.removeChild(this.spheres[i]);
 		}
+
+		this.spheres = [];
 	}
 
 	this.plotSpheres = function(dataJson)
 	{
 		var numRoutes = dataJson.length;
-		var oldPos = viewer.startingPoint.slice(0);
+		var oldPos = self.viewer.startingPoint.slice(0);
 		var numWait = 0;
 
 		for(var routeIdx = 0; routeIdx < numRoutes; routeIdx++)
@@ -141,7 +152,7 @@ var Spheres = function() {
 			{
 				var newPos = dataJson[routeIdx][i].pos;
 				var newDir = dataJson[routeIdx][i].dir;
-				var lastDist = viewer.dist(newPos, oldPos);
+				var lastDist = self.viewer.dist(newPos, oldPos);
 
 				if (lastDist < this.threshold)
 				{
@@ -150,7 +161,7 @@ var Spheres = function() {
 					var newRGB = this.getSpeedRGB(baseRGB, numWait);
 					numWait = 0;
 					//this.addSphere(newPos, 0.2, 1.0, newRGB, 0.3);
-					this.spheres.push(this.addViewDir(newPos, newDir, 0.2, newRGB, 0.3));
+					this.addViewDir(newPos, newDir, 1.0, newRGB, 0.3);
 				}
 
 				oldPos = newPos.slice(0);
@@ -159,8 +170,12 @@ var Spheres = function() {
 	}
 };
 
-var Text = function() {
+var Text = function(viewer) {
 	this.textElement = null;
+
+	this.viewer = viewer;
+
+	var self = this;
 
 	this.init = function(rgb)
 	{
@@ -170,7 +185,7 @@ var Text = function() {
 			this.textElement = null;
 		}
 
-		var transMatrix = viewer.getTransMatrix();
+		var transMatrix = self.viewer.getTransMatrix();
 		var viewDir = transMatrix.e2();
 		var viewPos = transMatrix.e3();
 
@@ -181,7 +196,7 @@ var Text = function() {
 		var posStr = viewPos.x + " " + viewPos.y + " " + viewPos.z;
 
 		this.textElement = document.createElement('transform');
-		viewer.scene.appendChild(this.textElement);
+		self.viewer.scene.appendChild(this.textElement);
 
 		this.textElement.setAttribute('id', 'textInfo');
 		this.textElement.setAttribute('translation', posStr);
@@ -210,8 +225,6 @@ var Text = function() {
 
 		fs.setAttribute('family', 'Times');
 		fs.setAttribute('size', '0.8');
-
-
 	}
 
 	this.updateText = function(str, rgb, aliveFor)
@@ -219,7 +232,7 @@ var Text = function() {
 		this.textElement.getElementsByTagName('text')[0].setAttribute('string', str);
 		this.textElement.getElementsByTagName('material')[0].setAttribute('diffuseColor', rgb.join(' '));
 
-		var transMatrix = viewer.getTransMatrix();
+		var transMatrix = self.viewer.getTransMatrix();
 		var viewDir = transMatrix.e2();
 		var viewPos = transMatrix.e3();
 		var rgbStr = rgb.join(' ');
@@ -237,66 +250,77 @@ var Text = function() {
 	}
 };
 
-var Arrow = function() {
+var Arrow = function(viewer) {
 	this.arrowElement	= null;
 	this.position		= null;
 	this.rgb			= null;
 	this.trans			= null;
 
+	var self = this;
+
+	this.viewer = viewer;
+
 	this.addArrow = function(position, rgb, trans)
 	{
-		if(this.arrowElement)
+		self.clearArrow();
+
+		self.arrowElement = document.createElement('inline');
+		self.viewer.scene.appendChild(self.arrowElement);
+
+		self.arrowElement.setAttribute('namespacename', 'arrow');
+		self.arrowElement.setAttribute('url', '/public/arrow.x3d');
+		self.arrowElement.onload = self.startAnimation;
+		//self.arrowElement.setAttribute('onload', self.startAnimation());
+		self.arrowElement.setAttribute('isPickable', 'false');
+
+		self.position	= position;
+		self.rgb		= rgb;
+		self.trans		= trans;
+	}
+
+	this.clearArrow = function() {
+		if(self.arrowElement && self.arrowElement.parentNode)
 		{
-			this.arrowElement.parentNode.removeChild(this.arrowElement);
-			this.arrowElement = null;
+			self.arrowElement.parentNode.removeChild(self.arrowElement);
+			self.arrowElement = null;
 		}
-
-		this.arrowElement = document.createElement('inline');
-		viewer.scene.appendChild(this.arrowElement);
-
-		this.arrowElement.setAttribute('namespacename', 'arrow');
-		this.arrowElement.setAttribute('url', '/public/arrow.x3d');
-		this.arrowElement.setAttribute('onload', 'arrow.startAnimation()');
-		this.arrowElement.setAttribute('isPickable', 'false');
-
-		this.position	= position;
-		this.rgb		= rgb;
-		this.trans		= trans;
-
 	}
 
 	this.startAnimation = function()
 	{
-			var pos = this.position.slice(0);
+			var pos = self.position.slice(0);
 			var minBox = $("#arrow__ArrowRot")[0]._x3domNode.getVolume().min;
+			pos[1] -= minBox.y;
 
-			//pos[0] -= minBox.z;
-			//pos[1] -= minBox.y;
-			//pos[2] -= minBox.x;
+			var centerBox = $("#arrow__ArrowRot")[0]._x3domNode.getVolume().center;
+			pos[0] -= centerBox.x;
+			pos[2] -= centerBox.z;
 
 			var peakPos = pos.slice(0);
 			peakPos[1] += 3;
 
 			var posStr = pos.join(" ");
 			var peakStr = peakPos.join(" ");
-			var rgbStr = this.rgb.join(" ");
+			var rgbStr = self.rgb.join(" ");
 
 			var ts = document.createElement('timeSensor');
+			ts.setAttribute('DEF', 'ArrowTime');
 			ts.setAttribute('cycleInterval', 2);
 			ts.setAttribute('loop', 'true');
 
 			var pi = document.createElement('PositionInterpolator');
+			pi.setAttribute('DEF', 'ArrowPI');
 			pi.setAttribute('key', '0 0.5 1');
 			pi.setAttribute('keyValue', posStr + " " + peakStr + " " + posStr);
 
 			var timeRT = document.createElement('Route');
-			timeRT.setAttribute('fromNode', 'time');
+			timeRT.setAttribute('fromNode', 'ArrowTime');
 			timeRT.setAttribute('fromField', 'fraction_changed');
-			timeRT.setAttribute('toNode', 'move');
+			timeRT.setAttribute('toNode', 'ArrowPI');
 			timeRT.setAttribute('toField', 'set_fraction');
 
 			var moveRT = document.createElement('Route');
-			moveRT.setAttribute('fromNode', 'move');
+			moveRT.setAttribute('fromNode', 'ArrowPI');
 			moveRT.setAttribute('fromField', 'value_changed');
 			moveRT.setAttribute('toNode', 'ArrowTrans');
 			moveRT.setAttribute('toField', 'translation');
@@ -309,7 +333,7 @@ var Arrow = function() {
 			var color = document.createElement('appearance');
 			var colormat = document.createElement('Material');
 			colormat.setAttribute('diffuseColor', rgbStr);
-			colormat.setAttribute('transparency', this.trans);
+			colormat.setAttribute('transparency', self.trans);
 
 			color.appendChild(colormat);
 			$('#arrow__Arrow').append(color);

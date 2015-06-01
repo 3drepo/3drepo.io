@@ -1,0 +1,11 @@
+{
+	"name" : "login",
+	"files": {
+		"jade" : [
+			{"template" : "login/login.jade", "id": "login.html"}
+		],
+		"angular": [
+			"login/LoginCtrl.js"
+		]
+	}
+}

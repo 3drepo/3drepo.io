@@ -28,6 +28,7 @@ angular.module('3drepo')
 			this.init = function() {
 				if(!self.initialized)
 				{
+					/*
 					self.avatarHeight = 1.83;
 					self.collDistance = 0.1;
 					self.stepHeight	= 0.4;
@@ -47,6 +48,9 @@ angular.module('3drepo')
 
 					// Initialize viewer
 					self.viewer = $window.viewer;
+					*/
+
+					/*
 					var avrStart = self.startPoint.slice(0);
 					avrStart[1] += self.avatarHeight;
 					avrStart[2] += 9.0;
@@ -65,6 +69,7 @@ angular.module('3drepo')
 					$window.text.init(startRGB);
 
 					self.initialized = true;
+					*/
 				}
 			};
 		}
