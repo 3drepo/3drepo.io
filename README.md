@@ -9,23 +9,26 @@ This project is Copyright of [3D Repo Ltd](http://3drepo.org) and is released un
 Installation
 ------------
 
+Note: If using windows, please ensure cmd.exe was invoked as adminstrator (i.e. Right click -> Run as Administrator).
+
 1. Clone the repository: `git clone https://github.com/3drepo/3drepo.io.git`
 2. Change directory: `cd 3drepo.io`
 3. (Optional) Update submodules: `git submodule update --init --recursive`
 4. Configure the system as below.
-5. Install the required dependencies: `npm install`
+5. Ensure [Python v2](https://www.python.org/) and [Node.js](https://nodejs.org/) are installed.
+5. Install the required dependencies: `npm install`  
 
 Configuration
 -------------
 
 The configuration files are contained in the subdirectory config under the main project directory. 
-Each directory in config represents a different configuration you can run under. This allows you to quickly switch between, for example, a development environment and a production environment. In the repository we have include these as an exmaple; dev and prod directories. These both contain a file call config_sample.js that needs to be copied or renamed to config.js for it to work.
+Each directory in config represents a different configuration you can run under. This allows you to quickly switch between, for example, a development environment and a production environment. These both contain a file call config_sample.js that needs to be copied or renamed to config.js for it to work.
 
 In general, to configure a new configuration enviroment called <config_name>:
  
 1. Change to the configuration directory: `cd config`
 2. First create a new directory under config: `mkdir <config_name>`
-3. Copy config\_sample.js from dev to the directory as config.js: `cp dev/config_sample.js <config_name>/config.js`
+3. Copy config\_sample.js to the new directory as config.js: `cp config_sample.js <config_name>/config.js`
 4. Edit config.js as described in [Configuration File](https://github.com/3drepo/3drepo.io/wiki/Configuration-File)
 
 Running the application
