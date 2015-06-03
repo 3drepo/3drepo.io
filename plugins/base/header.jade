@@ -13,6 +13,8 @@ header#header.navbar.navbar-fixed-top(ng-controller='HeaderCtrl')
 				//a(href='http://blog.getbootstrap.com') Enterprise
 				form.pull-right.tight.v-expand(role='login')
 					.form-group.tight#loginButtons
+						button.btn(ng-hide='!Auth.loggedIn', ng-click='whereAmI()')
+							i.fa.fa-qrcode
 						button.btn
 							i.fa.fa-search
 						button.btn(ng-hide='!Auth.loggedIn', ng-click="goDefault()")

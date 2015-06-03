@@ -1,0 +1,14 @@
+#issues.metaview(ng-controller='IssuesCtrl')
+	#accordion.panel-group
+		.panel.panel-default(ng-repeat="issue in IssuesService.issues")
+			.panel-heading
+				h4.panel-title 
+					a(data-toggle="collapse", data-parent="#accordion", href="{{'#acc_' + issue.number}}") {{ issue.number + " - " + issue.name }}
+			.panel-collapse.collapse(id="{{'acc_' + issue.number}}")
+				.panel-body
+					table.metadata-table(ng-repeat="comment in issue.comments")
+						tr
+							th.metadata-title(colspan="2") {{comment.author}}
+						tr 
+							td {{comment.text}}
+					input(ng-model="newComment", placeholder="New Comment")

@@ -176,36 +176,36 @@ function axisangle(mat)
 			var e = right[2] + forward[0];
 			var f = up[0] + right[1];
 
-			if ((Math.abs(d) < eps) && (Math.abs(e) < eps) && (Math.abs(f) < eps) && ((Math.abs(tr) - 3) < eps))
-				return [0, 1, 0, 0];
+			if (!((Math.abs(d) < eps) && (Math.abs(e) < eps) && (Math.abs(f) < eps) && ((Math.abs(tr) - 3) < eps)))
+			{
+				angle = Math.PI;
 
-			angle = Math.PI;
+				var xx = (right[0] + 1) / 2;
+				var yy = (up[1] + 1) / 2;
+				var zz = (forward[2] + 1) / 2;
 
-			var xx = (right[0] + 1) / 2;
-			var yy = (up[1] + 1) / 2;
-			var zz = (forward[2] + 1) / 2;
+				var xy = d / 4;
+				var xz = e / 4;
+				var yz = f / 4;
 
-			var xy = d / 4;
-			var xz = e / 4;
-			var yz = f / 4;
-
-			if ((xx > yy) && (xx > zz)) {
-				if (xx < eps) {
-					x = 0; y = Math.SQRT1_2; z = Math.SQRT1_2;
+				if ((xx > yy) && (xx > zz)) {
+					if (xx < eps) {
+						x = 0; y = Math.SQRT1_2; z = Math.SQRT1_2;
+					} else {
+						x = Math.sqrt(xx); y = xy/z; z = xz / x;
+					}
+				} else if (yy > zz) {
+					if (yy < eps) {
+						x = Math.SQRT1_2; y = 0; z = Math.SQRT1_2;
+					} else {
+						y = Math.sqrt(yy); x = xy / y; z = yz / y;
+					}
 				} else {
-					x = Math.sqrt(xx); y = xy/z; z = xz / x;
-				}
-			} else if (yy > zz) {
-				if (yy < eps) {
-					x = Math.SQRT1_2; y = 0; z = Math.SQRT1_2;
-				} else {
-					y = Math.sqrt(yy); x = xy / y; z = yz / y;
-				}
-			} else {
-				if (zz < eps) {
-					x = Math.SQRT1_2; y = Math.SQRT1_2; z = 0;
-				} else {
-					z = Math.sqrt(zz); x = xz / z; y = yz / z;
+					if (zz < eps) {
+						x = Math.SQRT1_2; y = Math.SQRT1_2; z = 0;
+					} else {
+						z = Math.sqrt(zz); x = xz / z; y = yz / z;
+					}
 				}
 			}
 		}
@@ -219,7 +219,7 @@ function axisangle(mat)
 		angle = Math.acos((tr - 1) / 2);
 	}
 
-	return [angle, x, y, z];
+	return [-x, -y, -z, angle]; // Left-handed system
 }
 
 /*******************************************************************************
@@ -300,25 +300,26 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			var position = child["position"] ? child["position"] : [0,0,0];
 			var look_at = child["look_at"] ? child["look_at"] : [0,0,1];
 
-			var center = vecAdd(position, look_at);
-			newNode.setAttribute('centerOfRotation', center.join(','));
-
 			var up = child["up"] ? child["up"] : [0,1,0];
 			forward = normalize(look_at);
 			up = normalize(up);
-			var right = crossProduct(forward, up);
+			var right = crossProduct(forward, scale(up, -1)); // Left-hand coordinate system
 
 			var viewMat = mathjs.matrix([[right[0], right[1], right[2], 0], [up[0], up[1], up[2], 0],
 				[forward[0], forward[1], forward[2], 0], [position[0], position[1], position[2], 1]]);
 
-			viewMat = viewMat.transpose();
-			//viewMat = mathjs.multiply(matrix, viewMat);
+			viewMat = viewMat.transpose(); // Input as rows, rather than columns
+			viewMat = mathjs.multiply(matrix.transpose(), viewMat);
 
 			var tmpMat = viewMat.clone();
 			tmpMat = tmpMat.transpose();
 
 			position = mathjs.subset(tmpMat, mathjs.index(3,[0,3]))._data[0];
 			newNode.setAttribute('position', position.join(','));
+
+			look_at = mathjs.subset(viewMat, mathjs.index(2,[0,3]))._data[0];
+			var center = vecAdd(position, look_at);
+			newNode.setAttribute('centerOfRotation', center.join(','));
 
 			var orientation = axisangle(viewMat);
 			newNode.setAttribute('orientation', orientation.join(','));

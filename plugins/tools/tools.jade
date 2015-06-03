@@ -4,4 +4,4 @@
 		ul.dropdown-menu.pull-right(role='menu')
 			if ui.tools
 				each tool in ui.tools
-					!= renderMe(tool, locals)
+					!= renderMe(tool["template"], locals)

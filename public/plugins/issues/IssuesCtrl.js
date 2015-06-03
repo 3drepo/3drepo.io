@@ -16,7 +16,14 @@
  */
 
 angular.module('3drepo')
-.controller('SplashCtrl', ['$scope', function($scope) {
-}]);
+.controller('IssuesCtrl', ['$scope', 'IssuesService', function($scope, IssuesService)
+{
+	$scope.IssuesService = IssuesService;
 
+	$(document).on("objectSelected", function(event, object, zoom) {
+		if (object)
+			IssuesService.getObjectMetaData(object);
+	});
+
+}]);
 
