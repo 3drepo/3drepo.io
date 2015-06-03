@@ -3,5 +3,5 @@
 		i.fa.fa-list
 	if ui.leftpanel
 		each uicomp in ui.leftpanel
-			!= renderMe(uicomp, locals)
+			!= renderMe(uicomp["template"], locals)
 

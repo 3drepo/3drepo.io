@@ -16,7 +16,7 @@
  */
 
 angular.module('3drepo')
-.factory('SIDData', ['$http', '$q', 'serverConfig', 'StateManager', '$rootScope', function($http, $q, serverConfig, StateManager, $rootScope){
+.factory('SIDData', ['$http', '$q', 'serverConfig', 'StateManager', '$rootScope', 'ViewerService', function($http, $q, serverConfig, StateManager, $rootScope, ViewerService){
 	var o = {
 
 	};
@@ -43,7 +43,13 @@ angular.module('3drepo')
 
 		$http.get(url).then(function(json) {
 			// Study the type of object
-			debugger;
+			if (json.data.cameras_count)
+			{
+				var camkey	= Object.keys(json.data.cameras)[0];
+				var name	= json.data.cameras[camkey].name;
+
+				ViewerService.defaultViewer.setCurrentViewpoint("model__" + name);
+			}
 		}, function(json) {
 			$rootScope.$broadcast("sidNotFound", { uuid: sid });
 		});

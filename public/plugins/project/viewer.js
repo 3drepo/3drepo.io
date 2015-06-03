@@ -164,10 +164,15 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		self.viewPoint.addEventListener('viewpointChanged', self.viewPointChanged);
 
 		$(document).on("onLoaded", function(event, objEvent) {
-			if(self.defaultShowAll)
-				self.runtime.fitAll();
-			else
-				self.reset();
+			if (!self.loadViewpoint)
+			{
+				if(self.defaultShowAll)
+					self.runtime.fitAll();
+				else
+					self.reset();
+			} else {
+				self.setCurrentViewpoint(self.loadViewpoint);
+			}
 
 			var targetParent = $(objEvent.target)[0]._x3domNode._nameSpace.doc._x3dElem;
 
@@ -246,7 +251,6 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.viewPointChanged = function(event)
 	{
-		self.getCurrentViewpoint();
 		$(self.viewer).trigger("myViewpointHasChanged", event);
 	}
 
@@ -440,14 +444,24 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	}
 */
 
+	self.loadViewpoint = null;
+
 	this.setCurrentViewpoint = function(id)
 	{
 		self.selectedViewpoint = id;
 
 		var viewpoint  = $("[id='" + id +"']")[0];
-		viewpoint.setAttribute("bind", true);
-		viewpoint.resetView();
-		viewpoint.addEventListener('viewpointChanged', self.viewPointChanged);
+
+		if (!viewpoint)
+		{
+			self.loadViewpoint = id;
+		} else {
+			viewpoint.setAttribute("bind", true);
+			viewpoint.resetView();
+			self.runtime.resetExamin();
+			viewpoint.addEventListener('viewpointChanged', self.viewPointChanged);
+			self.loadViewpoint = null;
+		}
 	}
 
 	this.updateSettings = function(settings)

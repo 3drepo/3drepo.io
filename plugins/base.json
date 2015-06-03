@@ -7,7 +7,8 @@
 		],
 		"jade": [
 			{"template" : "base/404.jade", "id" : "404.html"},
-			{"template" : "base/header.jade", "id": "header.html"}
+			{"template" : "base/header.jade", "id": "header.html"},
+			{"template" : "base/camera.jade", "id" : "cameramodal.html"}
 		],
 		"angular": [
 			"base/serverConfig.js",

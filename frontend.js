@@ -153,7 +153,7 @@ module.exports.createApp = function(template)
 									{
 										"plugin": "revision",
 										"friends" : [
-											"panels", "tree", "meta", "revisionselector", "diffselector"
+											"panels", "tree", "issues", "meta", "revisionselector", "diffselector"
 										],
 										"children": [
 											{
@@ -183,7 +183,7 @@ module.exports.createApp = function(template)
 									{
 										"plugin": "view",
 										"friends" : [
-											"panels", "tree", "meta", "revisionselector", "diffselector"
+											"panels", "tree", "issues", "meta", "revisionselector", "diffselector"
 										],
 										"children": [
 											{
@@ -269,7 +269,12 @@ module.exports.createApp = function(template)
 						if (!(uicomp["position"] in params["ui"]))
 							params["ui"][uicomp["position"]] = [];
 
-						params["ui"][uicomp["position"]].push('./plugins/' + uicomp["template"]);
+						params["ui"][uicomp["position"]].push(
+							{
+								"name" : uicomp["name"],
+								"template" : './plugins/' + uicomp["template"]
+							}
+						);
 
 					}
 				}

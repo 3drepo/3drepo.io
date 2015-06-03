@@ -2,6 +2,12 @@
 	#ui2-rightpanel-collapse-btn.pull-left.panel-collapse-btn(ng-click="toggleRightPanel()")
 		i.fa.fa-list
 	if ui.rightpanel
-		each uicomp in ui.rightpanel
-			!= renderMe(uicomp, locals)
+		ul.nav.nab-tabs
+			each uicomp in ui.rightpanel
+				li
+					a(data-toggle="tab", href='#' + uicomp["name"]) #{uicomp["name"]}
+		.tab-content
+			each uicomp in ui.rightpanel
+				.tab-pane(id=uicomp.name)
+					!= renderMe(uicomp["template"], locals)
 

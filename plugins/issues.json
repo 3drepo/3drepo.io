@@ -1,0 +1,13 @@
+{
+	"name" : "issues",
+	"files": {
+		"angular": [
+			"issues/IssuesCtrl.js",
+			"issues/IssuesService.js"
+		],
+		"ui": [
+			{"name": "issues", "template" : "issues/issues.jade", "position" : "rightpanel"}
+		]
+	}
+}
+
