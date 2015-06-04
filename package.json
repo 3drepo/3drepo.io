@@ -36,6 +36,7 @@
     "jsonwebtoken": "latest",
     "mathjs": "^1.6.0",
     "method-override": "latest",
+    "minifier": "latest",
     "mocha": "latest",
     "mongodb": "latest",
     "mongoose": "latest",

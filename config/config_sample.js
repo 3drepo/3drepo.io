@@ -38,7 +38,8 @@ module.exports = {
 	logfile: {
 		filename: '/var/log/3drepo.log',
 		console_level: 'debug',
-		file_level: 'debug'
+		file_level: 'debug',
+		js_debug_level: 'debug'
 	},
 	db: {
 		host: 'localhost',
@@ -49,46 +50,6 @@ module.exports = {
 	ssl: {
 		key: 'my_key.pem',
 		cert:'my_server.crt'
-	},
-	external: {
-		// 3DRepo
-		repouicss : '/public/css/ui.css',
-		repobasecss: '/public/css/base.css',
-		dblistbasecss: '/public/css/dblist_base.css',
-
-		// X3DOM
-		x3domjs: 'http://x3dom.org/download/dev/x3dom.js',
-		x3domcss : 'http://x3dom.org/download/dev/x3dom.css',
-		ammojs: 'http://x3dom.org/download/dev/ammo.js',
-
-		// JQuery
-		jqueryjs : 'http://code.jquery.com/jquery-2.1.1.min.js',
-		jqueryuijs : 'http://code.jquery.com/ui/1.11.4/jquery-ui.min.js',
-		jqueryuicss: 'http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css',
-
-		// Angular
-		angularjs: '//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular.min.js',
-		angularutilsjs: '//cdnjs.cloudflare.com/ajax/libs/angular-ui-utils/0.1.1/angular-ui-utils.min.js',
-		angularrouterjs: '//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.10/angular-ui-router.js',
-
-		// Bootstrap
-		bootstrapcss: 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css',
-		bootstrapjs: 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js',
-		bootstrapdialog: 'https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.2/js/bootstrap-dialog.min.js',
-		bootstrapselectjs: 'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.4/js/bootstrap-select.js',
-		bootstrapselectcss: 'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.4/css/bootstrap-select.css',
-		fontawesomecss: '//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css',
-		uibootstrap: 'https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.12.1/ui-bootstrap-tpls.min.js',
-
-		// Fancytree
-		fancytreecss: 'https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.8.1/skin-xp/ui.fancytree.min.css',
-		jqueryfancytree: 'https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.8.1/jquery.fancytree-all.js',
-
-		// Typeahead
-		typeaheadjs: '//cdnjs.cloudflare.com/ajax/libs/typescript/1.0.0/typescript.min.js',
-
-		// Showdown
-		showdownjs: '//cdnjs.cloudflare.com/ajax/libs/showdown/0.3.1/showdown.min.js'
 	}
 }
 

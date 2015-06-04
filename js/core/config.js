@@ -16,6 +16,7 @@
  */
 
 var config = require('app-config').config;
+var frontend_scripts = require('../../common_public_files.js');
 
 module.exports = config;
 
@@ -73,3 +74,11 @@ if(!("external_port" in module.exports.apiServer))
 
 module.exports.apiServer.url = module.exports.apiServer.protocol + module.exports.apiServer.hostname + ':' + module.exports.apiServer.external_port;
 
+if(config.logfile.js_debug_level === 'debug')
+{
+	module.exports.external = frontend_scripts.debug_scripts;
+}
+else
+{
+	module.exports.external = frontend_scripts.prod_scripts;
+}
