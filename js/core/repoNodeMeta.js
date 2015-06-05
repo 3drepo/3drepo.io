@@ -15,33 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-angular.module('3drepo')
-.controller('MetaCtrl', ['$scope', 'MetaService', '$modal', function($scope, MetaService, $modal)
-{
-	$scope.MetaService = MetaService;
-	$scope.pdf = {};
+// Corresponds to repoNodeMesh in C++ definition of 3D Repo
+var mongodb = require('mongodb');
+var assert = require('assert');
+var UUID = require('node-uuid');
+var C = require('./constants');
 
-	$(document).on("objectSelected", function(event, object, zoom) {
-		if (object)
-			MetaService.getObjectMetaData(object);
-	});
+exports.decode = function(bson, meta) {
+	if (bson["mime"])
+	{
+		bson["data"] = {};
+		bson["data"].buffer = new Buffer(bson["metadata"]["data"].buffer.length);
+		bson["metadata"]["data"].buffer.copy(bson["data"].buffer);
 
-	$scope.openPDF = function(pdfURL) {
-		$scope.pdfURL = pdfURL;
-
-		var modalInstance = $modal.open({
-			templateUrl: 'pdfviewer.html',
-			controller: 'DialogCtrl',
-			backdrop: false,
-			size: 'lg',
-			resolve: {
-				params: function() {
-					return {
-						pdfURL: $scope.pdfURL
-					};
-				}
-			}
-		});
+		delete bson["metadata"];
 	}
-}]);
+
+	return bson;
+}
 

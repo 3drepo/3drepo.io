@@ -17,9 +17,12 @@
 
 angular.module('3drepo')
 .service('MetaService', ['StateManager', 'serverConfig', '$http', '$q', function(StateManager, serverConfig, $http, $q){
-	var self = this;
-	self.rootElement = null;
-	self.metadocs = {};
+	var self			= this;
+
+	self.rootElement	= null;
+	self.metadocs		= {};
+	self.loadingPromise = null;
+	self.loading		= false;
 
 	this.getObjectMetaData = function(object)
 	{
@@ -29,32 +32,55 @@ angular.module('3drepo')
 
 		var objectIDParts = object["id"].split("__");
 		var project = objectIDParts[0];
-		var uid = objectIDParts[1];
 
+		if (project == "model")
+			project = StateManager.state.project;
+
+		var uid = objectIDParts[1];
 		var baseUrl = serverConfig.apiUrl(account + '/' + project + '/meta/' + uid + '.json');
 
-		var deferred = $q.defer();
+		if (!self.loading)
+		{
+			self.loading = true;
+			self.currentLoadingID = uid;
+			self.loadingPromise = $q.defer();
 
-		self.metadocs = {};
+			self.metadocs = {};
 
-		$http.get(baseUrl)
-		.then(function(json) {
-			var meta = json.data.meta;
+			$http.get(baseUrl)
+			.then(function(json) {
+				var meta = json.data.meta;
 
-			for(var i = 0; i < meta.length; i++)
+				for(var i = 0; i < meta.length; i++)
+				{
+					var subtype = meta[i]["mime"] ? meta[i]["mime"] : "metadata";
+
+					if (!self.metadocs[subtype])
+						self.metadocs[subtype] = [];
+
+					var baseUrl = serverConfig.apiUrl(account + '/' + project + '/' + meta[i]["_id"] + '.pdf');
+
+					meta[i].url = baseUrl;
+
+					self.metadocs[subtype].push(meta[i]);
+				}
+
+				self.loading = false;
+				self.currentLoadingID = null;
+				self.loadingPromise.resolve();
+			}, function(message) {
+				self.loading = false;
+				self.currentLoadingID = null;
+				self.loadingPromise.resolve();
+			});
+		} else {
+			if (uid != self.currentLoadingID)
 			{
-				var subtype = meta[i]["subtype"] ? meta[i]["subtype"] : "metadata";
-
-				if (!self.metadocs[subtype])
-					self.metadocs[subtype] = [];
-
-				self.metadocs[subtype].push(meta[i]);
+				self.loadingPromise.then(function (res) {
+					self.getObjectMetaData(object);
+				});
 			}
-
-			deferred.resolve();
-		}, function(message) {
-			deferred.resolve();
-		});
+		}
 	}
 }]);
 

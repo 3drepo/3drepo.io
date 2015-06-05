@@ -33,7 +33,10 @@ if ('ssl' in config) {
 
 if (!config.apiServer.hostname)
 {
-	module.exports.apiServer.hostname = "api." + config.servers[0].hostname;
+	module.exports.apiServer.hostname = config.servers[0].hostname;
+	module.exports.apiServer.host_dir = "api";
+} else if (!config.apiServer.host_dir) {
+	module.exports.apiServer.host_dir = "";
 }
 
 for(i in config.servers)
@@ -71,5 +74,12 @@ if(!("external_port" in module.exports.apiServer))
 	module.exports.external_port = module.exports.port;
 }
 
-module.exports.apiServer.url = module.exports.apiServer.protocol + module.exports.apiServer.hostname + ':' + module.exports.apiServer.external_port;
+if (!module.exports.apiServer.host_dir)
+{
+	module.exports.crossOrigin = true;
+	module.exports.apiServer.url = module.exports.apiServer.protocol + module.exports.apiServer.hostname + ':' + module.exports.apiServer.external_port;
+} else {
+	module.exports.crossOrigin = false;
+	module.exports.apiServer.url = module.exports.apiServer.protocol + module.exports.apiServer.hostname + ':' + module.exports.apiServer.external_port + '/' + module.exports.apiServer.host_dir;
+}
 

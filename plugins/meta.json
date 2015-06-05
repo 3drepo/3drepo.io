@@ -5,8 +5,12 @@
 			"meta/MetaCtrl.js",
 			"meta/MetaService.js"
 		],
+		"jade": [
+			{"template" : "meta/pdf.jade", "id" : "pdfviewer.html"}
+		],
 		"ui": [
-			{"name": "meta", "template" : "meta/meta.jade", "position" : "rightpanel"}
+			{"name": "meta", "template" : "meta/meta.jade", "position" : "rightpanel"},
+			{"name": "docs", "template" : "meta/docs.jade", "position" : "rightpanel"}
 		]
 	}
 }

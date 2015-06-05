@@ -16,14 +16,118 @@
  */
 
 angular.module('3drepo')
-.controller('IssuesCtrl', ['$scope', 'IssuesService', function($scope, IssuesService)
+.controller('IssuesCtrl', ['$scope', '$modal', 'StateManager', 'IssuesService', '$rootScope', function($scope, $modal, StateManager, IssuesService, $rootScope)
 {
 	$scope.IssuesService = IssuesService;
+	$scope.currentSelected = null;
+
+	$scope.newComment = {};
+	$scope.newComment.text = "";
 
 	$(document).on("objectSelected", function(event, object, zoom) {
-		if (object)
-			IssuesService.getObjectMetaData(object);
+		$scope.currentSelected = object;
+
+		IssuesService.getObjectIssues(object);
 	});
+
+	$scope.refresh = function() {
+		IssuesService.getObjectIssues($scope.currentSelected);
+	}
+
+	$scope.locateObject = function(id) {
+		var issueIdx = IssuesService.issues.map(function (obj) { return obj._id; }).indexOf(id);
+
+		if (issueIdx > -1)
+		{
+			var objectID = IssuesService.issues[issueIdx].parent;
+			var object = $("shape").filter(function() { return ($(this)[0].getAttribute('DEF') == objectID); });
+
+			if (object.length)
+				$(document).trigger("objectSelected", object[0]);
+
+		}
+	}
+
+	$scope.postComment = function(object)
+	{
+		var sid = $scope.currentSelected.getAttribute("DEF");
+		var issuePostURL = server_config.apiUrl(StateManager.state.account + "/" + StateManager.state.project + "/issues/" + sid);
+
+		$.ajax({
+			type:	"POST",
+			url:	issuePostURL,
+			data: {"data" : JSON.stringify(object)},
+			dataType: "json",
+			xhrFields: {
+				withCredentials: true
+			},
+			success: function(data) {
+				$scope.newComment.text = "";
+				$scope.refresh();
+			}
+		});
+	}
+
+	$scope.addNewComment = function(id)
+	{
+		var issueObject = {
+			_id: id,
+			comment: $scope.newComment.text
+		};
+
+		$scope.postComment(issueObject);
+	}
+
+	$scope.complete = function(id)
+	{
+		var issueObject = {
+			_id: id,
+			complete: true
+		};
+
+		$scope.postComment(issueObject);
+	}
+
+	$scope.newIssue = function()
+	{
+		var modalInstance = $modal.open({
+			templateUrl: 'newissuemodal.html',
+			controller: 'DialogCtrl',
+			backdrop: false,
+			resolve: {
+				params: {
+					name: "",
+					date: null
+				}
+			}
+		});
+
+		modalInstance.result.then(function (params) {
+			var issueObject = {};
+
+			issueObject["name"]		= params.name;
+			issueObject["deadline"] = params.date.getTime();
+
+			var sid = $scope.currentSelected.getAttribute("DEF");
+			var issuePostURL = server_config.apiUrl(StateManager.state.account + "/" + StateManager.state.project + "/issues/" + sid);
+
+			$.ajax({
+				type:	"POST",
+				url:	issuePostURL,
+				data: {"data" : JSON.stringify(issueObject)},
+				dataType: "json",
+				xhrFields: {
+					withCredentials: true
+				},
+				success: function(data) {
+					console.log("Success: " + data);
+					$scope.refresh();
+				}
+			});
+		}, function () {
+			// TODO: Error here
+		});
+	}
 
 }]);
 

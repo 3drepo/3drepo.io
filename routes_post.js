@@ -154,7 +154,6 @@ module.exports = function(router, dbInterface, checkAccess){
 
 	// Ability to add a named viewpoint
 	this.post('/:account/:project/:branch/viewpoint', true, function(req, res) {
-		var resCode = responseCodes.OK;
 		var responsePlace = 'Adding a viewpoint';
 
 		logger.log('debug', 'Adding a new viewpoint to ' + req.params["account"] + req.params["project"]);
@@ -169,6 +168,17 @@ module.exports = function(router, dbInterface, checkAccess){
 			this.dbInterface.storeViewpoint(req.params["account"], req.params["project"], req.params["branch"], req.session.user, this.dbInterface.uuidToString(root["shared_id"]), data, function(err) {
 				responseCodes.onError(responsePlace, err, res, {});
 			});
+		});
+	});
+
+	this.post('/:account/:project/issues/:sid', true, function(req, res) {
+		var responsePlace = 'Adding or updating an issue';
+		var data = JSON.parse(req.body.data);
+
+		logger.log('debug', 'Upserting an issues for object ' + req.params['sid'] + ' in ' + req.params["account"] + '/' + req.params["project"]);
+
+		this.dbInterface.storeIssue(req.params["account"], req.params["project"], req.params["sid"], req.session.user.username, data, function(err) {
+			responseCodes.onError(responsePlace, err, res, {});
 		});
 	});
 

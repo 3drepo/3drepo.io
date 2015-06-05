@@ -319,25 +319,6 @@ module.exports = function(router, dbInterface, checkAccess){
 	});
 
 	// Get object with specific uid in a specific format
-	router.get('/:account/:project/:uid.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"].toLowerCase();
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:   req.params["account"],
-			project:   req.params["project"],
-			subformat: req.params["subformat"],
-			uid:	   req.params["uid"],
-			user:	   current_user,
-			query:	   req.query
-		};
-
-		logger.log('debug', 'Retrieving object ' + params.uid);
-
-		this.transRouter(format, '/:account/:project/:uid', res, params);
-	});
-
-	// Get object with specific uid in a specific format
 	router.get('/:account/:project/meta/:uid.:format?', checkAccess, function(req, res, next) {
 		var format = req.params["format"].toLowerCase();
 		var current_user = ("user" in req.session) ? req.session.user.username : "";
@@ -354,23 +335,31 @@ module.exports = function(router, dbInterface, checkAccess){
 		this.transRouter(format, '/:account/:project/meta/:uid', res, params);
 	});
 
-	// Get list of objects that match a specific type
-	router.get('/:account/:project/:rid/:type.:format?.:subformat?', checkAccess, function(req, res, next) {
+	router.get('/:account/:project/issues.:format?', checkAccess, function(req, res, next) {
 		var format = req.params["format"];
 		var current_user = ("user" in req.session) ? req.session.user.username : "";
 
 		var params = {
-			account:   req.params["account"],
-			project:   req.params["project"],
-			rid:	   req.params["rid"],
-			type:	   req.params["type"],
-			subformat: req.params["subformat"],
-			user:	   current_user,
-			query:	   req.query
-
+			account:	req.params["account"],
+			project:	req.params["project"],
+			user:		current_user
 		};
 
-		this.transRouter(format, '/:account/:project/:rid/:type', res, params);
+		this.transRouter(format, '/:account/:project/issues', res, params);
+	});
+
+	router.get('/:account/:project/issues/:sid.:format?', checkAccess, function(req, res, next) {
+		var format = req.params["format"];
+		var current_user = ("user" in req.session) ? req.session.user.username : "";
+
+		var params = {
+			account:	req.params["account"],
+			project:	req.params["project"],
+			sid:		req.params["sid"],
+			user:		current_user
+		};
+
+		this.transRouter(format, '/:account/:project/issues/:sid', res, params);
 	});
 
 	// Get subtree for head revision for a branch, with (optional) depth query string paramter
@@ -471,6 +460,43 @@ module.exports = function(router, dbInterface, checkAccess){
 		};
 
 		this.transRouter(format, '/:account/log', res, params);
+	});
+
+	// Get object with specific uid in a specific format
+	router.get('/:account/:project/:uid.:format?.:subformat?', checkAccess, function(req, res, next) {
+		var format = req.params["format"].toLowerCase();
+		var current_user = ("user" in req.session) ? req.session.user.username : "";
+
+		var params = {
+			account:   req.params["account"],
+			project:   req.params["project"],
+			subformat: req.params["subformat"],
+			uid:	   req.params["uid"],
+			user:	   current_user,
+			query:	   req.query
+		};
+
+		logger.log('debug', 'Retrieving object ' + params.uid);
+
+		this.transRouter(format, '/:account/:project/:uid', res, params);
+	});
+
+	// Get list of objects that match a specific type
+	router.get('/:account/:project/:rid/:type.:format?.:subformat?', checkAccess, function(req, res, next) {
+		var format = req.params["format"];
+		var current_user = ("user" in req.session) ? req.session.user.username : "";
+
+		var params = {
+			account:   req.params["account"],
+			project:   req.params["project"],
+			rid:	   req.params["rid"],
+			type:	   req.params["type"],
+			subformat: req.params["subformat"],
+			user:	   current_user,
+			query:	   req.query
+		};
+
+		this.transRouter(format, '/:account/:project/:rid/:type', res, params);
 	});
 
 	// Everything else

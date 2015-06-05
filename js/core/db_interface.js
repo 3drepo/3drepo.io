@@ -812,6 +812,88 @@ exports.getRevisions = function(dbName, project, branch, from, to, full, callbac
 	});
 };
 
+exports.getIssues = function(dbName, project, sid, callback) {
+
+	if (sid)
+	{
+		var filter = {
+			parent : stringToUUID(sid)
+		};
+	} else {
+		var filter = {}
+	};
+
+	dbConn.filterColl(dbName, project + '.issues', filter, {}, function (err, docs) {
+		if (err.value) return callback(err);
+
+		for(var i = 0; i < docs.length; i++) {
+			docs[i]["_id"] = uuidToString(docs[i]["_id"]);
+			docs[i]["parent"] = uuidToString(docs[i]["parent"]);
+		}
+
+		return callback(responseCodes.OK, docs);
+	});
+}
+
+exports.storeIssue = function(dbName, project, sid, owner, data, callback) {
+	dbConn.collCallback(dbName, project + ".issues", function(err, coll) {
+		if(err.value)
+			return callback(err);
+
+		if (!data._id) {
+			var newID = uuid.v1();
+
+			logger.log('debug', 'Creating new issue ' + newID);
+
+			// TODO: Implement this using sequence counters
+			coll.count(function(err, numIssues) {
+				if (err) return responseCodes.DB_ERROR(err);
+
+				// This is a new issue
+				data._id = stringToUUID(newID);
+				data.parent = stringToUUID(sid);
+				data.number = numIssues + 1;
+
+				if (!data.name)
+					data.name = 'Issue' + data.number;
+
+				data.owner = owner;
+
+				console.log("DATA: " + JSON.stringify(data));
+
+				coll.insert(data, function(err, count) {
+					if (err) return callback(responseCodes.DB_ERROR(err));
+
+					logger.log('debug', 'Updated ' + count + ' records.');
+					callback(responseCodes.OK);
+				});
+			});
+		} else {
+			logger.log('debug', 'Updating issue ' + data._id);
+
+			data._id = stringToUUID(data._id);
+
+			if (data.comment)
+			{
+				var updateQuery = {
+					$push: { comments: { author: owner,  text: data.comment} }
+				};
+			} else {
+				var updateQuery = {
+					$set: { complete: data.complete }
+				};
+			}
+
+			coll.update({ _id : data._id}, updateQuery, function(err, count) {
+				if (err) return callback(responseCodes.DB_ERROR(err));
+
+				logger.log('debug', 'Updated ' + count + ' records.');
+				callback(responseCodes.OK);
+			});
+		}
+	});
+}
+
 exports.getBranches = function(dbName, project, callback) {
 	var filter = {
 		type: "revision"
@@ -874,7 +956,6 @@ exports.getMetadata = function(dbName, project, branch, revision, sid, uid, call
 			};
 
 			var projection = {
-				_id: 0,
 				shared_id: 0,
 				paths: 0,
 				type: 0,
@@ -884,6 +965,9 @@ exports.getMetadata = function(dbName, project, branch, revision, sid, uid, call
 
 			dbConn.filterColl(dbName, project + '.scene', filter, projection, function(err, metadocs) {
 				if (err.value) return callback(err);
+
+				for(var i = 0; i < metadocs.length; i++)
+					metadocs[i]["_id"] = uuidToString(metadocs[i]["_id"]);
 
 				callback(responseCodes.OK, metadocs);
 			});
@@ -911,7 +995,6 @@ exports.getMetadata = function(dbName, project, branch, revision, sid, uid, call
 			};
 
 			var projection = {
-				_id: 0,
 				shared_id: 0,
 				paths: 0,
 				type: 0,
@@ -921,6 +1004,9 @@ exports.getMetadata = function(dbName, project, branch, revision, sid, uid, call
 
 			dbConn.filterColl(dbName, project + '.scene', filter, projection, function(err, metadocs) {
 				if (err.value) return callback(err);
+
+				for(var i = 0; i < metadocs.length; i++)
+					metadocs[i]["_id"] = uuidToString(metadocs[i]["_id"]);
 
 				callback(responseCodes.OK, metadocs);
 			});

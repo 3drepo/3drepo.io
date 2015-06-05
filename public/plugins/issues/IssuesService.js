@@ -18,70 +18,52 @@
 angular.module('3drepo')
 .service('IssuesService', ['StateManager', 'serverConfig', '$http', '$q', function(StateManager, serverConfig, $http, $q){
 	var self = this;
-	self.rootElement = null;
 	self.issues = [];
 
-	this.getObjectMetaData = function(object)
+	this.getObjectIssues = function(object)
 	{
-		/*
 		// TODO: Will break when the account is not same, as part
 		// of a federation.
 		var account = StateManager.state.account;
+		var project = StateManager.state.project;
 
-		var objectIDParts = object["id"].split("__");
-		var project = objectIDParts[0];
-		var uid = objectIDParts[1];
+		if (object)
+			var sid = object.getAttribute("DEF");
+		else
+			var sid = null;
 
-		var baseUrl = serverConfig.apiUrl(account + '/' + project + '/meta/' + uid + '.json');
+		if (sid)
+			var baseUrl = serverConfig.apiUrl(account + '/' + project + '/issues/' + sid + '.json');
+		else
+			var baseUrl = serverConfig.apiUrl(account + '/' + project + '/issues.json');
 
 		var deferred = $q.defer();
 
-		self.metadocs = {};
+		self.issues = {};
 
 		$http.get(baseUrl)
 		.then(function(json) {
-			var meta = json.data.meta;
+			self.issues = [];
 
-			for(var i = 0; i < meta.length; i++)
+			for(var i = 0; i < json.data.length; i++)
 			{
-				var subtype = meta[i]["subtype"] ? meta[i]["subtype"] : "metadata";
+				var issue = json.data[i];
 
-				if (!self.metadocs[subtype])
-					self.metadocs[subtype] = [];
+				if (!("comments" in issue))
+					issue["comments"] = [];
 
-				self.metadocs[subtype].push(meta[i]);
+				if (issue["complete"])
+					issue["deadlineString"] = "Complete";
+				else
+					issue["deadlineString"] = ((new Date(issue["deadline"])).toDateString());
+
+				self.issues.push(issue);
 			}
 
 			deferred.resolve();
 		}, function(message) {
 			deferred.resolve();
 		});
-		*/
-
-		//Return dummy data
-
-		self.issues = [
-		{
-			"number" : 1,
-			"name" : "Sort out the pillar",
-			"owner" : "jozef",
-			"comments" : [
-				{ "author" : "tim" , "text" : "Can I move to column to a pillar ?" },
-				{ "author" : "jozef", "text" : "No, not yet." }
-			]
-		},
-		{
-			"number" : 2,
-			"name" : "Tidy up that mess!!!",
-			"owner" : "tim",
-			"comments" : [
-				{ "author" : "tim" , "text" : "What's that mess on the carpet ?" },
-				{ "author" : "jozef", "text" : "I don't knoe" },
-				{ "author" : "tim", "text" : "Sort it out" },
-				{ "author" : "richard", "text" : "I concur"}
-			]
-		}
-		];
 	}
 }]);
 

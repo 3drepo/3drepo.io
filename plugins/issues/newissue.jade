@@ -1,0 +1,26 @@
+extends ../base/dialog.jade
+
+block title
+	span Create new issue
+
+block content
+	.form-horizontal
+		.form-group
+			label.control-label.col-sm-2(for="issuename") Issue name:
+			.col-sm-10
+				input.form-control#issuename(type='text', ng-model='params.name')
+		.form-group
+			label.control-label.col-sm-2(for="deadline") Deadline:
+			.col-sm-10
+				.dropdown
+					a#calendar.dropdown-toggle.calendar-select(role='button', data-toggle='dropdown', data-target='#')
+						.input-append
+							input(type='text', ng-model='params.date')
+							span.add-on
+								i.fa.fa-calendar
+					ul#calendarview.dropdown-menu(role='menu', aria-labelledby='calendar')
+						datetimepicker(ng-model='params.date', data-datetimepicker-config="{ dropdownSelector: '.calendar-select' }")
+
+block buttons
+	button.btn.btn-default(ng-click="ok()") Create
+

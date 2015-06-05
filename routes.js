@@ -36,7 +36,7 @@ var isImage = function(format)
 {
 	var format = format.toLowerCase();
 
-	return (format == "jpg") || (format == "png") || (format == "gif") || (format == "bmp");
+	return (format == 'pdf') || (format == "jpg") || (format == "png") || (format == "gif") || (format == "bmp");
 }
 
 module.exports = function(){
