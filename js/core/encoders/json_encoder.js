@@ -262,6 +262,24 @@ exports.route = function(router)
 		});
 	});
 
+	router.get('json', '/:account/:project/issues', function(res, params, err_callback) {
+		router.dbInterface.getIssues(params.account, params.project, null, function(err, issueList) {
+			if(err.value)
+				err_callback(err);
+			else
+				err_callback(responseCodes.OK, issueList);
+		});
+	});
+
+	router.get('json', '/:account/:project/issues/:sid', function(res, params, err_callback) {
+		router.dbInterface.getIssues(params.account, params.project, params.sid, function(err, issueList) {
+			if(err.value)
+				err_callback(err);
+			else
+				err_callback(responseCodes.OK, issueList);
+		});
+	});
+
 	router.get('json', '/:account/:project/users', function(res, params, err_callback) {
 		dbInterface.getProjectUsers(params.account, params.project, function(err, project)
 		{
@@ -334,6 +352,34 @@ exports.route = function(router)
 				err_callback(err);
 			else
 				err_callback(responseCodes.OK, {"meta" : metadocs});
+		});
+	});
+
+	router.get('json', '/:account/:project/revision/:rid/map', function(res, params, err_callback) {
+		var account		= params.account;
+		var project		= params.project;
+
+		var rid			= params.rid;
+
+		router.dbInterface.getSIDMap(account, project, null, rid, function (err, mapobj) {
+			if (err.value)
+				err_callback(err);
+			else
+				err_callback(responseCodes.OK, {"map" : mapobj});
+		});
+	});
+
+	router.get('json', '/:account/:project/revision/:branch/head/map', function(res, params, err_callback) {
+		var account		= params.account;
+		var project		= params.project;
+
+		var	branch		= params.branch;
+
+		router.dbInterface.getSIDMap(account, project, branch, null, function (err, mapobj) {
+			if (err.value)
+				err_callback(err);
+			else
+				err_callback(responseCodes.OK, {"map" : mapobj});
 		});
 	});
 

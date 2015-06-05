@@ -30,6 +30,8 @@ function($stateProvider, parentStates) {
 			resolve: {
 				auth: function authCheck(Auth) { return Auth.init(); },
 				init: function(StateManager, $stateParams) {
+					StateManager.setStateVar("branch", "master");
+					StateManager.setStateVar("revision", "head");
 					StateManager.setState($stateParams, {});
 					StateManager.refresh("project");
 				}

@@ -92,6 +92,25 @@ if (!config.vhost)
 		});
 	}
 
+} else if (!config.crossOrigin) {
+	var app = express();
+	app.use("/" + config.apiServer.host_dir, apiApp);
+
+	for(i in config.servers)
+	{
+		var frontApp = require('./frontend.js').createApp(config.servers[i].template);
+		app.use("/", frontApp);
+	}
+
+	if ('ssl' in config)
+		var server = https.createServer(ssl_options, app);
+	else
+		var server = http.createServer(app);
+
+	server.listen(config.apiServer.port, config.apiServer.hostname, function() {
+		logger.log('info', 'Starting API service on ' + config.apiServer.hostname + ' port ' + config.apiServer.port);
+	});
+
 } else {
 	var vhostApp = express();
 

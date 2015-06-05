@@ -1,9 +1,18 @@
-#issues.metaview(ng-controller='IssuesCtrl')
+#issues.issueview(ng-controller='IssuesCtrl')
+	.input-group
+		button.btn(ng-click='newIssue()')
+			i.fa.fa2x.fa-plus
+		button.btn(ng-click='refresh()')
+			i.fa.fa2x.fa-refresh
 	#accordion.panel-group
 		.panel.panel-default(ng-repeat="issue in IssuesService.issues")
 			.panel-heading
 				h4.panel-title 
-					a(data-toggle="collapse", data-parent="#accordion", href="{{'#acc_' + issue.number}}") {{ issue.number + " - " + issue.name }}
+					a(data-toggle="collapse", data-parent="#accordion", href="{{'#acc_' + issue.number}}") {{ issue.number + " - " + issue.name + " [" + issue.deadlineString + "]"}}
+					button.btn(ng-if="!issue.complete", ng-click='complete(issue._id)')
+						i.fa.fa-check
+					button.btn(ng-click='locateObject(issue._id)')
+						i.fa.fa-eye
 			.panel-collapse.collapse(id="{{'acc_' + issue.number}}")
 				.panel-body
 					table.metadata-table(ng-repeat="comment in issue.comments")
@@ -11,4 +20,8 @@
 							th.metadata-title(colspan="2") {{comment.author}}
 						tr 
 							td {{comment.text}}
-					input(ng-model="newComment", placeholder="New Comment")
+					.input-group(ng-if="!issue.complete")
+						input(ng-model="newComment.text", placeholder="New Comment")
+						button.btn(ng-click="addNewComment(issue._id)")
+								i.fa.fa-comment
+

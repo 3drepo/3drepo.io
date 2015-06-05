@@ -25,6 +25,7 @@ var repoNodeMesh = require('./repoNodeMesh');
 var repoNodeTransformation = require('./repoNodeTransformation');
 var repoNodeMaterial = require('./repoNodeMaterial');
 var repoNodeCamera = require('./repoNodeCamera');
+var repoNodeMeta   = require('./repoNodeMeta');
 var log_iface = require('./logger.js');
 var logger = log_iface.logger;
 
@@ -104,9 +105,11 @@ exports.decode = function(bsonArray) {
 					case C.REPO_NODE_TYPE_META:
 						metas[bson.id] = bson;
 						scene[C.REPO_SCENE_LABEL_METAS_COUNT]++;
+						break;
 					case C.REPO_NODE_TYPE_MAP:
 						maps[bson.id] = bson;
 						scene[C.REPO_SCENE_LABEL_MAPS_COUNT]++;
+						break;
 					default :
 						logger.log('error','Unsupported node type found: ' + bson[C.REPO_NODE_LABEL_TYPE]);
 				}
@@ -177,6 +180,10 @@ exports.decode = function(bsonArray) {
 
 	//---------------------------------------------------------------------
 	// Metadata
+	for (var id in metas) {
+		metas[id] = repoNodeMeta.decode(metas[id]);
+	}
+
 	scene.metas = metas;
 
 	//---------------------------------------------------------------------

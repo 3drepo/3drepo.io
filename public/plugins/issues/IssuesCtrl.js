@@ -16,14 +16,150 @@
  */
 
 angular.module('3drepo')
-.controller('IssuesCtrl', ['$scope', 'IssuesService', function($scope, IssuesService)
+.controller('IssuesCtrl', ['$scope', '$modal', 'StateManager', 'IssuesService', '$rootScope', '$http', '$q', 'serverConfig', function($scope, $modal, StateManager, IssuesService, $rootScope, $http, $q, serverConfig)
 {
-	$scope.IssuesService = IssuesService;
+	$scope.IssuesService	= IssuesService;
+	$scope.currentSelected	= null;
+	$scope.mapPromise		= null;
+	$scope.map				= {};
+
+	$scope.newComment = {};
+	$scope.newComment.text = "";
 
 	$(document).on("objectSelected", function(event, object, zoom) {
-		if (object)
-			IssuesService.getObjectMetaData(object);
+		$scope.currentSelected = object;
+
+		IssuesService.getObjectIssues(object);
 	});
 
+	$scope.refresh = function() {
+		IssuesService.getObjectIssues($scope.currentSelected, true);
+	}
+
+	$scope.locateObject = function(id) {
+		var issueIdx = IssuesService.issues.map(function (obj) { return obj._id; }).indexOf(id);
+
+		if (issueIdx > -1)
+		{
+			var objectID = IssuesService.issues[issueIdx].parent;
+
+			$scope.mapPromise.then(function() {
+				var uid = $scope.SIDMap[objectID];
+				var object = $("#model__" + uid);
+
+				if (object.length)
+					$(document).trigger("objectSelected", object[0]);
+			}, function(message) {
+				console.log(message);
+			});
+		}
+	}
+
+	$scope.postComment = function(object)
+	{
+		var sid = $scope.currentSelected.getAttribute("DEF");
+		var issuePostURL = server_config.apiUrl(StateManager.state.account + "/" + StateManager.state.project + "/issues/" + sid);
+
+		$.ajax({
+			type:	"POST",
+			url:	issuePostURL,
+			data: {"data" : JSON.stringify(object)},
+			dataType: "json",
+			xhrFields: {
+				withCredentials: true
+			},
+			success: function(data) {
+				$scope.newComment.text = "";
+				$scope.refresh();
+			}
+		});
+	}
+
+	$scope.addNewComment = function(id)
+	{
+		var issueObject = {
+			_id: id,
+			comment: $scope.newComment.text
+		};
+
+		$scope.postComment(issueObject);
+	}
+
+	$scope.complete = function(id)
+	{
+		var issueObject = {
+			_id: id,
+			complete: true
+		};
+
+		$scope.postComment(issueObject);
+	}
+
+	$scope.newIssue = function()
+	{
+		var modalInstance = $modal.open({
+			templateUrl: 'newissuemodal.html',
+			controller: 'DialogCtrl',
+			backdrop: false,
+			resolve: {
+				params: {
+					name: "",
+					date: null
+				}
+			}
+		});
+
+		modalInstance.result.then(function (params) {
+			var issueObject = {};
+
+			issueObject["name"]		= params.name;
+			issueObject["deadline"] = params.date.getTime();
+
+			var sid = $scope.currentSelected.getAttribute("DEF");
+			var issuePostURL = server_config.apiUrl(StateManager.state.account + "/" + StateManager.state.project + "/issues/" + sid);
+
+			$.ajax({
+				type:	"POST",
+				url:	issuePostURL,
+				data: {"data" : JSON.stringify(issueObject)},
+				dataType: "json",
+				xhrFields: {
+					withCredentials: true
+				},
+				success: function(data) {
+					console.log("Success: " + data);
+					$scope.refresh();
+				}
+			});
+		}, function () {
+			// TODO: Error here
+		});
+	}
+
+	$scope.$watchGroup(['StateManager.state.branch', 'StateManager.state.revision'], function () {
+		var account		= StateManager.state.account;
+		var project		= StateManager.state.project;
+		var branch		= StateManager.state.branch;
+		var revision	= StateManager.state.revision;
+
+		if (revision == 'head' || (branch && !revision))
+			var baseUrl = serverConfig.apiUrl(account + '/' + project + '/revision/' + branch + '/head/map.json');
+		else
+			var baseUrl = serverConfig.apiUrl(account + '/' + project + '/revision/' + revision + '/map.json');
+
+		if (!$scope.mapPromise) {
+			var deferred = $q.defer();
+			$scope.mapPromise = deferred.promise;
+
+			$http.get(baseUrl)
+			.then(function(json) {
+				$scope.SIDMap = json.data["map"];
+
+				deferred.resolve();
+			}, function(message) {
+				deferred.resolve();
+			});
+		}
+	});
 }]);
 

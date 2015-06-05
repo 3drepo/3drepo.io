@@ -1,0 +1,8 @@
+extends ../base/dialog.jade
+
+block title 
+	span PDF
+
+block content
+	iframe#pdfviewer(type="application/pdf", width="850px", height="600px", src="{{params.pdfURL}}")
+

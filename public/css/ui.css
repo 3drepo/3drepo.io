@@ -366,6 +366,15 @@ span.fancytree-title:hover {
 
 }
 
+#calendarview {
+	color: rgb(1,1,1);
+	position: relative;
+}
+
+#issues button {
+	background-color: transparent;
+}
+
 .floatingMeta {
     font-family: sans-serif;
 	color: white;
@@ -400,6 +409,11 @@ a:hover {
 .mainrow {
 	max-width: 80%;
 	margin: 0 auto;
+}
+
+.modal-dialog {
+	top: -300px;
+	margin: auto;
 }
 
 /* Set the fixed height of the footer here */
@@ -1597,8 +1611,6 @@ ul.fancytree-container li {
 	margin-left: 0;
 }
 
-.modal-dialog {
-	margin-right: 0;
-	margin-left: 0;
+.modal-header, .modal-body, .modal-footer {
+	background-color: rgb(5,58,165);
 }
-

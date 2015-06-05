@@ -78,6 +78,16 @@ module.exports = function() {
 		}
 	);
 
+	this.registerSchema('/:account/:project/issues/:sid',
+		{
+			"uid" : {"type" : "string" },
+			"name" : {"type" : "string" },
+			"deadline" : {"type" : "number" },
+			"comment" : { "type" : "string" },
+			"complete" : { "type": "boolean" }
+		}
+	);
+
 	this.registerSchema('/:account/:project/wayfinder/record',
 		{
 			"waypoints" : {
@@ -101,6 +111,14 @@ module.exports = function() {
 					"items" : { "type" : "number" }
 				},
 				"time": {"type": "number"}
+			}
+		},
+		{ // Comment entry
+			"id" : "/Comment",
+			"type" : "object",
+			"properties" : {
+				"author" : { "type" : "string" },
+				"text" : { "type" : "string" }
 			}
 		}
 	];

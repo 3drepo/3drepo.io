@@ -16,7 +16,7 @@
  */
 
 var child_process = require('child_process');
-var supportedFormats = ['gif', 'jpg', 'jpeg', 'tiff', 'png'];
+var supportedFormats = ['gif', 'jpg', 'jpeg', 'tiff', 'png', 'pdf'];
 var responseCodes = require('../response_codes.js');
 
 module.exports.isImage = function(format)
@@ -81,6 +81,19 @@ module.exports.route = function(router)
 	router.get('png', '/:account/:project/:uid', imgObject);
 	router.get('bmp', '/:account/:project/:uid', imgObject);
 	router.get('gif', '/:account/:project/:uid', imgObject);
+
+	router.get('pdf', '/:account/:project/:uid', function(res, params, err_callback) {
+		router.dbInterface.getObject(params.account, params.project, params.uid, null, null, function(err, type, uid, obj)
+		{
+			if (err.value) return err_callback(err);
+
+			if (obj.metas[uid])
+			{
+				res.write(obj.metas[uid].data.buffer);
+				res.end();
+			}
+		});
+	});
 
 	// Get Avatar image
 	router.get('jpg', '/:account', function(res, params, err_callback) {

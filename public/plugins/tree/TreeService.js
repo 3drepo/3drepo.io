@@ -113,6 +113,7 @@ angular.module('3drepo')
 			);
 		} else {
 			var rootNode = self.rootElement.fancytree("getRootNode");
+			rootNode.setActive(false);
 			rootNode.setExpanded(false);
 		}
 	}
