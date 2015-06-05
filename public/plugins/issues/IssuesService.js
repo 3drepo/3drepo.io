@@ -17,10 +17,14 @@
 
 angular.module('3drepo')
 .service('IssuesService', ['StateManager', 'serverConfig', '$http', '$q', function(StateManager, serverConfig, $http, $q){
-	var self = this;
-	self.issues = [];
+	var self			= this;
 
-	this.getObjectIssues = function(object)
+	self.issues			= [];
+	self.loadingPromise = null;
+	self.loading		= false;
+	self.loadedObject	= -1;
+
+	this.getObjectIssues = function(object, refresh)
 	{
 		// TODO: Will break when the account is not same, as part
 		// of a federation.
@@ -37,33 +41,51 @@ angular.module('3drepo')
 		else
 			var baseUrl = serverConfig.apiUrl(account + '/' + project + '/issues.json');
 
-		var deferred = $q.defer();
+		if (!self.loading && (!(self.loadedObject == sid) || refresh))
+		{
+			var deferred = $q.defer();
 
-		self.issues = {};
+			self.loadingPromise = deferred.promise;
+			self.loading		= true;
+			self.loadedObject	= sid;
 
-		$http.get(baseUrl)
-		.then(function(json) {
-			self.issues = [];
+			self.issues = {};
 
-			for(var i = 0; i < json.data.length; i++)
+			$http.get(baseUrl)
+			.then(function(json) {
+				self.issues = [];
+
+				for(var i = 0; i < json.data.length; i++)
+				{
+					var issue = json.data[i];
+
+					if (!("comments" in issue))
+						issue["comments"] = [];
+
+					if (issue["complete"])
+						issue["deadlineString"] = "Complete";
+					else
+						issue["deadlineString"] = ((new Date(issue["deadline"])).toDateString());
+
+					self.issues.push(issue);
+				}
+
+				self.loading		= false;
+				deferred.resolve();
+			}, function(message) {
+				self.loading		= false;
+				self.loadedObject	= null;		// Loading of object failed
+				deferred.resolve();
+			});
+		} else {
+			if (sid != self.loadedObject)
 			{
-				var issue = json.data[i];
-
-				if (!("comments" in issue))
-					issue["comments"] = [];
-
-				if (issue["complete"])
-					issue["deadlineString"] = "Complete";
-				else
-					issue["deadlineString"] = ((new Date(issue["deadline"])).toDateString());
-
-				self.issues.push(issue);
+				self.loadingPromise.then(function (res) {
+					self.getObjectIssues(object);
+				});
 			}
+		}
 
-			deferred.resolve();
-		}, function(message) {
-			deferred.resolve();
-		});
 	}
 }]);
 

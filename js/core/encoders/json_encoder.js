@@ -355,6 +355,34 @@ exports.route = function(router)
 		});
 	});
 
+	router.get('json', '/:account/:project/revision/:rid/map', function(res, params, err_callback) {
+		var account		= params.account;
+		var project		= params.project;
+
+		var rid			= params.rid;
+
+		router.dbInterface.getSIDMap(account, project, null, rid, function (err, mapobj) {
+			if (err.value)
+				err_callback(err);
+			else
+				err_callback(responseCodes.OK, {"map" : mapobj});
+		});
+	});
+
+	router.get('json', '/:account/:project/revision/:branch/head/map', function(res, params, err_callback) {
+		var account		= params.account;
+		var project		= params.project;
+
+		var	branch		= params.branch;
+
+		router.dbInterface.getSIDMap(account, project, branch, null, function (err, mapobj) {
+			if (err.value)
+				err_callback(err);
+			else
+				err_callback(responseCodes.OK, {"map" : mapobj});
+		});
+	});
+
 	router.get('json', '/:account/:project/meta/:uid', function(res, params, err_callback) {
 		var account		= params.account;
 		var project		= params.project;

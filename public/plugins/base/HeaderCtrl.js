@@ -81,10 +81,26 @@ angular.module('3drepo')
 
 	$scope.captureQRCode = function(scope, element, callback)
 	{
+		$window.navigator.getUserMedia = $window.navigator.getUserMedia || $window.navigator.webkitGetUserMedia || $window.navigator.mozGetUserMedia;
+
 		$window.MediaStreamTrack.getSources(function (srcs) {
-			debugger;
+			var videoSRCS = srcs.filter(function(item) { return item.kind == 'video'; });
+			var source = null;
+
+			if (videoSRCS.length > 1)
+			{
+				videoSRCS = videoSRCS.filter(function(item) { return (item.facing.indexOf('back') != -1); });
+			}
+
+			if (!videoSRCS.length)
+			{
+				callback("No valid cameras found");
+			}
+
+			var source = videoSRCS[0];
+
 			// Initialize camera
-			$window.navigator.webkitGetUserMedia({video: true}, function (videoStream) {
+			$window.navigator.getUserMedia({video: true, sourceId : source.value}, function (videoStream) {
 				element.src = $window.URL.createObjectURL(videoStream);
 
 				$timeout(function() { $scope.decodeCanvas(scope, element, callback); }, 200);

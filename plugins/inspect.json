@@ -3,10 +3,6 @@
 	"files": {
 		"angular": [
 			"inspect/InspectCtrl.js"
-		],
-		"ui": [
-			{"name": "inspect", "template" : "inspect/inspect.jade", "position" : "tools"},
-			{"name": "qrdrag", "template": "inspect/qrdrag.jade", "position": "icons"}
 		]
 	}
 }

@@ -16,10 +16,12 @@
  */
 
 angular.module('3drepo')
-.controller('IssuesCtrl', ['$scope', '$modal', 'StateManager', 'IssuesService', '$rootScope', function($scope, $modal, StateManager, IssuesService, $rootScope)
+.controller('IssuesCtrl', ['$scope', '$modal', 'StateManager', 'IssuesService', '$rootScope', '$http', '$q', 'serverConfig', function($scope, $modal, StateManager, IssuesService, $rootScope, $http, $q, serverConfig)
 {
-	$scope.IssuesService = IssuesService;
-	$scope.currentSelected = null;
+	$scope.IssuesService	= IssuesService;
+	$scope.currentSelected	= null;
+	$scope.mapPromise		= null;
+	$scope.map				= {};
 
 	$scope.newComment = {};
 	$scope.newComment.text = "";
@@ -31,7 +33,7 @@ angular.module('3drepo')
 	});
 
 	$scope.refresh = function() {
-		IssuesService.getObjectIssues($scope.currentSelected);
+		IssuesService.getObjectIssues($scope.currentSelected, true);
 	}
 
 	$scope.locateObject = function(id) {
@@ -40,11 +42,16 @@ angular.module('3drepo')
 		if (issueIdx > -1)
 		{
 			var objectID = IssuesService.issues[issueIdx].parent;
-			var object = $("shape").filter(function() { return ($(this)[0].getAttribute('DEF') == objectID); });
 
-			if (object.length)
-				$(document).trigger("objectSelected", object[0]);
+			$scope.mapPromise.then(function() {
+				var uid = $scope.SIDMap[objectID];
+				var object = $("#model__" + uid);
 
+				if (object.length)
+					$(document).trigger("objectSelected", object[0]);
+			}, function(message) {
+				console.log(message);
+			});
 		}
 	}
 
@@ -129,5 +136,30 @@ angular.module('3drepo')
 		});
 	}
 
+	$scope.$watchGroup(['StateManager.state.branch', 'StateManager.state.revision'], function () {
+		var account		= StateManager.state.account;
+		var project		= StateManager.state.project;
+		var branch		= StateManager.state.branch;
+		var revision	= StateManager.state.revision;
+
+		if (revision == 'head' || (branch && !revision))
+			var baseUrl = serverConfig.apiUrl(account + '/' + project + '/revision/' + branch + '/head/map.json');
+		else
+			var baseUrl = serverConfig.apiUrl(account + '/' + project + '/revision/' + revision + '/map.json');
+
+		if (!$scope.mapPromise) {
+			var deferred = $q.defer();
+			$scope.mapPromise = deferred.promise;
+
+			$http.get(baseUrl)
+			.then(function(json) {
+				$scope.SIDMap = json.data["map"];
+
+				deferred.resolve();
+			}, function(message) {
+				deferred.resolve();
+			});
+		}
+	});
 }]);
 

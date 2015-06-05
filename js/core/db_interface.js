@@ -637,6 +637,51 @@ exports.getChildren = function(dbName, project, branch, revision, uuid, callback
 	});
 };
 
+exports.getSIDMap = function(dbName, project, branch, revision, callback) {
+	var historyQuery = null;
+
+	if (revision != null)
+	{
+		historyQuery = {
+			_id: stringToUUID(revision)
+		};
+	} else {
+		if (branch == 'master')
+			var branch_id = masterUUID;
+		else
+			var branch_id = stringToUUID(branch);
+
+		historyQuery = {
+			shared_id:	branch_id
+		};
+	}
+
+	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
+	{
+		var filter = {
+			_id: {$in: docs[0]['current']}
+		};
+
+		var projection = {
+			_id : 1,
+			shared_id : 1
+		};
+
+		dbConn.filterColl(dbName, project + '.scene', filter, projection, function(err, doc) {
+			if (err.value) return callback(err);
+
+			var SIDMap = {};
+
+			for(var i = 0; i < doc.length; i++)
+				SIDMap[uuidToString(doc[i]["shared_id"])] = uuidToString(doc[i]["_id"]);
+
+			callback(responseCodes.OK, SIDMap);
+		});
+	});
+};
+
+
+
 exports.getHeadRevision = function(dbName, project, branch, callback) {
 	if (branch == 'master')
 		var branch_id = masterUUID;
@@ -1161,8 +1206,6 @@ exports.getDiff = function(account, project, branch, revision, otherbranch, othe
 		callback(responseCodes.OK, doc);
 	});
 };
-
-
 
 exports.getCache = function(project, uid, getData, level, callback) {
 	var projection = null;

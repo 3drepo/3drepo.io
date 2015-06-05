@@ -219,6 +219,35 @@ module.exports = function(router, dbInterface, checkAccess){
 		this.transRouter(format, '/:account/:project/revision/:branch/head', res, params);
 	});
 
+	// Map from SIDs to UIDs
+	router.get('/:account/:project/revision/:rid/map.:format?', checkAccess, function(req, res, next) {
+		var format = req.params["format"];
+		var current_user = ("user" in req.session) ? req.session.user.username : "";
+
+		var params = {
+			account:	req.params["account"],
+			project:	req.params["project"],
+			rid:		req.params["rid"],
+			user:		current_user
+		};
+
+		this.transRouter(format, '/:account/:project/revision/:rid/map',res, params);
+	});
+
+	router.get('/:account/:project/revision/:branch/head/map.:format?', checkAccess, function(req, res, next) {
+		var format = req.params["format"];
+		var current_user = ("user" in req.session) ? req.session.user.username : "";
+
+		var params = {
+			account:	req.params["account"],
+			project:	req.params["project"],
+			branch:		req.params["branch"],
+			user:		current_user
+		};
+
+		this.transRouter(format, '/:account/:project/revision/:branch/head/map', res, params);
+	});
+
 	// Get specific object via shared_id sid
 	router.get('/:account/:project/revision/:rid/:sid.:format?.:subformat?', checkAccess, function(req, res, next) {
 		var format = req.params["format"];
@@ -451,6 +480,8 @@ module.exports = function(router, dbInterface, checkAccess){
 
 		this.transRouter(format, '/:account/:project/revision/:branch/head/meta/:sid', res, params);
 	});
+
+
 
 	// Get audit log for account
 	router.get('/:account/log', checkAccess, function(req, res, next) {

@@ -19,10 +19,11 @@ angular.module('3drepo')
 .service('MetaService', ['StateManager', 'serverConfig', '$http', '$q', function(StateManager, serverConfig, $http, $q){
 	var self			= this;
 
-	self.rootElement	= null;
-	self.metadocs		= {};
-	self.loadingPromise = null;
-	self.loading		= false;
+	self.rootElement		= null;
+	self.metadocs			= {};
+	self.loadingPromise		= null;
+	self.loading			= false;
+	self.currentLoadingID	= null;
 
 	this.getObjectMetaData = function(object)
 	{
@@ -43,7 +44,9 @@ angular.module('3drepo')
 		{
 			self.loading = true;
 			self.currentLoadingID = uid;
-			self.loadingPromise = $q.defer();
+			var deferred = $q.defer();
+
+			self.loadingPromise = deferred.promise;
 
 			self.metadocs = {};
 
@@ -67,11 +70,11 @@ angular.module('3drepo')
 
 				self.loading = false;
 				self.currentLoadingID = null;
-				self.loadingPromise.resolve();
+				deferred.resolve();
 			}, function(message) {
 				self.loading = false;
 				self.currentLoadingID = null;
-				self.loadingPromise.resolve();
+				deferred.resolve();
 			});
 		} else {
 			if (uid != self.currentLoadingID)
