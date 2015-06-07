@@ -98,7 +98,7 @@ var internal_files = {
 	'bower_components/jsqrcode/src/alignpat.js',
 	'bower_components/jsqrcode/src/databr.js'
 	],
-	
+
 	bower_files: [
 	'bower_components/angular/angular.js',
 	'bower_components/angular/angular.min.js.map',
@@ -111,7 +111,7 @@ var internal_files = {
 	'bower_components/jquery-ui/jquery-ui.js',
 	'bower_components/masonry/masonry.js'
 	],
-	
+
 	x3dom_files: [
 	'submodules/x3dom/dist/ammo.js',
 	'submodules/x3dom/dist/x3dom.debug.js',
@@ -121,7 +121,7 @@ var internal_files = {
 
 var public_dir_js = path.normalize("public/js/external");
 var public_dir_css = path.normalize("public/css/external");
-	
+
 install_bower();
 install_x3dom();
 write_common_files_list();
@@ -130,14 +130,14 @@ write_common_files_list();
  * install bower components and publicize the relevant files.
  */
 function install_bower(){
-	var public_qr_dir = path.join(public_dir_js, 'qrcode') 
+	var public_qr_dir = path.join(public_dir_js, 'qrcode')
 	fs.stat(public_qr_dir, function(err, stat){
 		if(err !== null){
 			//create qr folder in $public_dir_js if it doesn't exist
 			exec('mkdir ' + public_qr_dir , standard_callback);
-			
+
 		}
-		
+
 		exec(path.normalize('node_modules/.bin/bower') + ' install', function (error, stdout, stderr) {
 			  if (error !== null) {
 			    console.log(error);
@@ -160,36 +160,36 @@ function install_bower(){
  */
 function install_x3dom(){
 
-	exec('cd ' + path.normalize('submodules/x3dom') + ' && python manage.py --build && cd '+ path.normalize('../../'), 
+	exec('cd ' + path.normalize('submodules/x3dom') + ' && python manage.py --build && cd '+ path.normalize('../../'),
 			function (error, stdout, stderr) {
 				if (error !== null) {
 					console.log(error);
-				} 
+				}
 				else{
 					console.log('X3Dom installation successful!');
 				}
-				
+
 				//create symlinks on callback to ensure the files exist (or windows will be unhappy)
 				publicize_files(internal_files.x3dom_files, public_dir_js, public_dir_css);
 			});
 
 }
 
-/* 
+/*
  * Create a symbolic link of file to target_dir.
- * 
+ *
  * For windows: mklink /H dest src
  * For linux:   ln -s src dest
  */
 function make_symlink(file, target_dir){
 	var fname = path.normalize(file);
 	var target_path = path.join(target_dir, path.basename(fname)) ;
-	
+
 	if (platform === 'win32') {
 		//TODO: check file exists before calling this.
 		exec('mklink /H ' + target_path + ' '+ fname);
 	}
-	else if(platform === 'linux'){
+	else if(platform === 'linux' || platform === 'darwin'){
 			exec('ln -s ' + fname + ' ' + path.join(target_dir, path.basename(fname)), standard_callback);
 	}
 	else{
@@ -201,27 +201,27 @@ function make_symlink(file, target_dir){
 /*
  * minify(file, target_dir)
  * minifies file and place the output in target_dir. The function returns the path to the output file.
- * 
+ *
  * If the file is not a .js or .cs, return null.
  * If the file is already minified, return null.
- * If there is already a .min version of the file, copy over the min file. (this is for 
+ * If there is already a .min version of the file, copy over the min file. (this is for
  * the sake of things like bower_components where some files already have a min version.)
- * 
+ *
  */
 function minify(file, target_dir){
 	//if the file is not js or css, ignore.
 	var ext = path.extname(file);
 	var output_path = path.join(target_dir, path.basename(file, ext) +  '.min'+ext);
-	
+
 	if(!ext.match(/(js|css)/)){
 		return null;
 	}
-	
+
 	//if the file is already a min file, return null.
 	if(file.match(/.min.(js|css)/)){
 		return null;
 	}
-	
+
 	//check if the min.file already exist in the same directory. if so, just symlink it over.
 	var min_file_name = path.join(path.dirname(file), path.basename(file, ext) +  '.min'+ext);
 	fs.stat(min_file_name, function(err, stat){
@@ -235,16 +235,16 @@ function minify(file, target_dir){
 					console.log('Minification complete: ' + output_path);
 				}
 			});
-			
+
 		}
 		else{
 			//exists
 			make_symlink(min_file_name, target_dir);
 		}
 	});
-	
+
 	return output_path;
-	
+
 }
 
 function minify_css(){
@@ -263,7 +263,7 @@ function minify_css(){
 function publicize_files(flist, target_dir_js, target_dir_css){
 	var index;
 	for (index = 0; index < flist.length; index++){
-		var target_dir = path.extname(flist[index]) === '.css' ? target_dir_css : target_dir_js; 
+		var target_dir = path.extname(flist[index]) === '.css' ? target_dir_css : target_dir_js;
 		make_symlink(flist[index], target_dir);
 		minify(flist[index], target_dir);
 	}
@@ -286,10 +286,10 @@ function write_common_files_list(){
 	var wstream = fs.createWriteStream('common_public_files.js')
 	//FIXME: is this a good idea? create the things to write in a string buffer and write it all at once.
 	//FIXME: minify CSS
-	
+
 	var files_to_str = obj_to_string(public_files, 'debug_scripts', false);
 	var min_files_to_str = obj_to_string(public_files, 'prod_scripts', true);
-	
+
 	wstream.once('open', function(fd){
 		wstream.write('/*\n * ========== !!!! DO NOT ALTER THIS FILE !!!! =======\n');
 		wstream.write(' * This file is automatically generated by postinstall.js\n');
@@ -302,7 +302,7 @@ function write_common_files_list(){
 		wstream.write('\n}');
 		wstream.end();
 	});
-	
+
 }
 
 
@@ -325,9 +325,9 @@ function obj_to_string(obj, name, convert_to_min){
                 		output_str += ',\n';
                 	}
                 	isFirst_lv2 = false;
-                	
+
                 	var file = lv1_obj[memlv2];
-                	
+
                 	//make sure the file is not already .min.[js|css].
                 	var write_min = !path.basename(file).match(/.min.(js|css)/) && convert_to_min;
                 	if(write_min){
@@ -335,18 +335,18 @@ function obj_to_string(obj, name, convert_to_min){
                 		var ext = path.extname(file);
                 		file = path.join(path.dirname(file), path.basename(file, ext) +  '.min'+ext);
                 	}
-                	
+
                 	//replace all \ to / as \ is an escape character...
                 	file = file.replace(/\\/g, '/');
-                	output_str += '\t\t\t' + memlv2 + ': "' + file + '"';                	
-                	
+                	output_str += '\t\t\t' + memlv2 + ': "' + file + '"';
+
                 }
             }
         	output_str += '\n\t\t}';
-        	
+
         }
     }
-	
-	
+
+
 	return output_str + '\n\t}';
 }
