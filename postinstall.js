@@ -119,8 +119,9 @@ var internal_files = {
 	]
 }
 
-var public_dir_js = path.normalize("public/js/external");
-var public_dir_css = path.normalize("public/css/external");
+var public_dir_js	= path.normalize("public/js/external");
+var public_dir_css	= path.normalize("public/css/external");
+var inverse_dir		= "../../../";
 
 install_bower();
 install_x3dom();
@@ -190,7 +191,7 @@ function make_symlink(file, target_dir){
 		exec('mklink /H ' + target_path + ' '+ fname);
 	}
 	else if(platform === 'linux' || platform === 'darwin'){
-			exec('ln -s ' + fname + ' ' + path.join(target_dir, path.basename(fname)), standard_callback);
+		exec('ln -s ' + (inverse_dir + fname) + ' ' + target_dir, standard_callback);
 	}
 	else{
 		console.error('Unknown environment:'+ platform +'. Please contact 3D Repo for further assistance.');
