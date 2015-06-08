@@ -136,7 +136,7 @@ angular.module('3drepo')
 					self.wasPartSelect = data.node.partsel;
 				},
 				select : function(event, data) {
-					getNode(data.node).setAttribute("render", data.node.selected);
+					self.getNode(data.node).setAttribute("render", data.node.selected);
 
 					var parent = data.node.getParent();
 					if ((data.node.selected) && (data.node.selected != parent.selected))
@@ -145,7 +145,7 @@ angular.module('3drepo')
 
 						while(par_node != null)
 						{
-							getNode(par_node).setAttribute("render", true);
+							self.getNode(par_node).setAttribute("render", true);
 							par_node = par_node.getParent();
 						}
 
@@ -153,7 +153,7 @@ angular.module('3drepo')
 
 						for(var sib_idx = 0; sib_idx < siblings.length; sib_idx++)
 						{
-							getNode(siblings[sib_idx]).setAttribute("render", false);
+							self.getNode(siblings[sib_idx]).setAttribute("render", false);
 						}
 					}
 
@@ -173,7 +173,7 @@ angular.module('3drepo')
 					if ("uuid" in data.node.data)
 					{
 						var rootObj = self.getNode(data.node);
-						$(document).trigger("objectSelected", rootObj, !self.clickedFromView);
+						$(document).trigger("objectSelected", [ rootObj, !self.clickedFromView ] );
 					}
 
 					self.clickedFromView = false;

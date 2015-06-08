@@ -271,7 +271,8 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	$(document).on("objectSelected", function(event, object, zoom) {
 		if(zoom)
-			self.lookAtObject(group);
+			if (!(object.getAttribute("render") == "false"))
+				self.lookAtObject(object);
 
 		self.setApp(object);
 	});
@@ -829,16 +830,17 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	{
 		var viewPoint = {};
 
-		var viewTrans	= self.getViewArea()._scene.getViewpoint().getCurrentTransform();
-		var viewMat		= self.getViewMatrix();
+		var origViewTrans	= self.getViewArea()._scene.getViewpoint().getCurrentTransform();
+		var viewMat		= self.getViewMatrix().inverse();
 
-		viewTrans = viewTrans.inverse().mult(viewMat);
-		viewTrans = viewTrans.inverse();
+		//var viewTrans = origViewTrans.inverse().mult(viewMat);
+		//viewTrans = viewTrans.inverse();
 
-		var viewUp  = viewTrans.e1();
-		var viewDir = viewTrans.e2();
-		var viewPos = viewTrans.e3();
+		var viewUp  = viewMat.e1();
+		var viewDir = viewMat.e2();
+		var viewPos = viewMat.e3();
 
+		//viewPoint["matrix"] = viewTrans;
 
 		// More viewing direction than lookAt to sync with Assimp
 		viewPoint["up"] = [viewUp.x, viewUp.y, viewUp.z];

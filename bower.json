@@ -24,6 +24,7 @@
   "dependencies": {
     "angular-bootstrap-multiselect": "~0.3.0",
     "angular-bootstrap-select": "~0.0.5",
+	"angular-ui-router": "*",
     "fancytree": "~2.8.1",
     "masonry": "~3.3.0",
     "angular": "~1.3.15",

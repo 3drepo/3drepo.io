@@ -102,7 +102,7 @@ angular.module('3drepo')
 			var constraints = {
 				video: {
 					optional: [{
-						sourceId: source.value
+						sourceId: source.id
 					}]
 				}
 			};

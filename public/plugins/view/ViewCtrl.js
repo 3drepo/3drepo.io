@@ -44,14 +44,18 @@ function($stateProvider, parentStates) {
 	for(var i = 0; i < states.length; i++) {
 		for(var v = 0; v < possible_views.length; v++)
 		{
-			$stateProvider
-			.state(states[i] + '.' + possible_views[v], {
+			var viewName = possible_views[v];
+
+			var stateObj = {
 				url: '/' + possible_views[v],
 				resolve: {
 					auth: function authCheck(Auth) { return Auth.init(); },
 					init: function(StateManager, $stateParams) {
+						var splitURL = this.url.source.split('/');
+						var view = splitURL[splitURL.length - 1];
+
 						StateManager.setState($stateParams, {});
-						StateManager.state.view = possible_views[v];
+						StateManager.setStateVar(view);
 						StateManager.refresh("view");
 					}
 				},
@@ -61,7 +65,9 @@ function($stateProvider, parentStates) {
 					templateUrl : possible_views[v] + '.html'
 					}
 				}
-			});
+			};
+
+			$stateProvider.state(states[i] + '.' + possible_views[v], stateObj);
 		}
 	}
 }])
@@ -92,8 +98,6 @@ function($stateProvider, parentStates) {
 
 }])
 .controller('ViewCtrl', ['$scope', 'StateManager', 'serverConfig', '$state', function($scope, StateManager, serverConfig, $state){
-	$scope.view = StateManager.state.view;
-
 	$scope.pageChanged = function() {
 		StateManager.Data.ViewData.updatePaginatedView($scope.view);
 	};
@@ -104,7 +108,7 @@ function($stateProvider, parentStates) {
 		if (bp.hasClass('collapsed')) {
 			// if the bottom panel is collapsed and the tab was clicked, expand
 			bp.removeClass('collapsed');
-		} else if (v === $state.params.view) {
+		} else if (v === StateManager.state.view) {
 			// if the panel is expanded and the same view was clicked again, collapse
 			bp.addClass('collapsed');
 		}

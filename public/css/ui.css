@@ -153,6 +153,7 @@ nav.navbar.transparent.navbar-inverse.navbar-fixed-top {
 }
 
 .dropdown-menu {
+	background-color: rgb(45,45,45);
     border-radius: none !important;
 }
 
@@ -1237,8 +1238,6 @@ header button.btn {
 }
 
 .dropdown-submenu {
-	top: 0;
-	right: 100%;
 	position: relative;
 }
 
@@ -1447,10 +1446,7 @@ header button.btn {
 }
 /* Menus under the submenu should show up on the right of the parent */
 .dropdown-submenu > .dropdown-menu {
-    top:0;
-    left:100%;
-    margin-top:-6px;
-    margin-left:-1px;
+	right: 100%;
     -webkit-border-radius:0 6px 6px 6px;
        -moz-border-radius:0 6px 6px 6px;
             border-radius:0 6px 6px 6px;
@@ -1604,7 +1600,7 @@ ul.fancytree-container li {
 }
 
 .modal-content {
-	margin-top: 50%;
+	margin-top: 450px;
 	background-color: RGBA(45,45,45,0.9) !important;
 	overflow: hidden;
 	margin-right: 0;

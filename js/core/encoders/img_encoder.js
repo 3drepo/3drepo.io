@@ -104,7 +104,17 @@ module.exports.route = function(router)
 			if(!avatar)
 				return err_callback(responseCodes.USER_DOES_NOT_HAVE_AVATAR);
 
-			var imageTokens = avatar.media_type.split(/\//);
+			var type = null;
+
+			if (avatar.media_type)
+				var type = avatar.media_type;
+			else if (avatar.mime)
+				var type = avatar.mime;
+
+			if(!type)
+				return err_callback(responseCodes.USER_DOES_NOT_HAVE_AVATAR);
+
+			var imageTokens = type.split(/\//);
 
 			if (!(imageTokens[0] == 'image'))
 				return err_callback(responseCodes.AVATAR_IS_NOT_AN_IMAGE);

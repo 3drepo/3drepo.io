@@ -19,6 +19,7 @@ angular.module('3drepo')
 .controller('ViewpointCtrl', ['$scope', 'StateManager', 'ViewerService', '$modal', '$rootScope', function($scope, StateManager, ViewerService, $modal, $rootScope)
 {
 	$scope.ViewerService = ViewerService;
+	$scope.viewpoints	 = ViewerService.defaultViewer.viewpoints;
 	$scope.viewpointname = "";
 	$scope.sid			 = "";
 
@@ -55,6 +56,12 @@ angular.module('3drepo')
 		modalInstance.result.then(function (params) {
 			var thisViewer = ViewerService.defaultViewer;
 			var viewpoint = thisViewer.getCurrentViewpoint();
+
+			// Add this automatically to the root,
+			// this may differ from that returned by the API server
+			var rootTrans = $("#model__root")[0]._x3domNode.getCurrentTransform().inverse();
+
+			debugger;
 
 			viewpoint["name"] = params.name;
 			if($scope.sid)

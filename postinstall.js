@@ -73,7 +73,7 @@ var public_files = {
 		bootstrapcss: '/public/css/external/bootstrap.min.css',
 		jqueryuicss: '/public/css/external/jquery-ui.css',
 		repouicss : '/public/css/ui.css',
-		datetimepickerjs: '/public/css/external/datetimepicker.css'
+		datetimepickercss: '/public/css/external/datetimepicker.css'
 	}
 }
 
@@ -104,6 +104,7 @@ var internal_files = {
 	bower_files: [
 	'bower_components/angular/angular.js',
 	'bower_components/angular/angular.min.js.map',
+	'bower_components/angular-ui-router/release/angular-ui-router.js',
 	'bower_components/angular-bootstrap-multiselect/angular-bootstrap-multiselect.js',
 	'bower_components/angular-bootstrap-select/build/angular-bootstrap-select.js',
 	'bower_components/bootstrap-select/bootstrap-select.js',
