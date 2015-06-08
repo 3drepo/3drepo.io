@@ -43,6 +43,7 @@ var public_files = {
 		jqueryfancytree: '/public/js/external/jquery.fancytree-all.js',
 		x3dcontroller: '/public/js/x3dcontroller.js',
 		typeaheadjs: '/public/js/external/typeahead.bundle.js',
+		datetimepickerjs: '/public/js/external/datetimepicker.js',
 
 		// QR Code stuff
 		qrgrid: '/public/js/external/qrcode/grid.js',
@@ -71,7 +72,8 @@ var public_files = {
 		bootstrapselectcss: '/public/css/external/bootstrap-select.css',
 		bootstrapcss: '/public/css/external/bootstrap.min.css',
 		jqueryuicss: '/public/css/external/jquery-ui.css',
-		repouicss : '/public/css/ui.css'
+		repouicss : '/public/css/ui.css',
+		datetimepickerjs: '/public/css/external/datetimepicker.css'
 	}
 }
 
@@ -106,6 +108,8 @@ var internal_files = {
 	'bower_components/angular-bootstrap-select/build/angular-bootstrap-select.js',
 	'bower_components/bootstrap-select/bootstrap-select.js',
 	'bower_components/bootstrap-select/bootstrap-select.css',
+	'bower_components/angular-bootstrap-datetimepicker/css/datetimepicker.css',
+	'bower_components/angular-bootstrap-datetimepicker/js/datetimepicker.js',
 	'bower_components/fancytree/dist/jquery.fancytree-all.js',
 	'bower_components/jquery/dist/jquery.js',
 	'bower_components/jquery-ui/jquery-ui.js',
