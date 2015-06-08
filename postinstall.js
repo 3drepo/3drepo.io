@@ -190,10 +190,10 @@ function make_symlink(file, target_dir){
 		exec('mklink /H ' + target_path + ' '+ fname);
 	}
 	else if(platform === 'linux' || platform === 'darwin'){
-		var numberofdirs = target_dir.match(/\//g).length;
-		var inversedir = Array.apply(null, new Array(numberofdirs)).map(function() { return "..";} ).join('/');
+		var numberofdirs = target_dir.match(/\//g).length + 1;
+		var inversedir = Array.apply(null, new Array(numberofdirs)).map(function() { return "..";} ).join('/') + "/";
 
-		exec('ln -s ' + (inversedir + fname) + ' ' + target_dir, standard_callback);
+		exec('ln -sf ' + (inversedir + fname) + ' ' + target_dir, standard_callback);
 	}
 	else{
 		console.error('Unknown environment:'+ platform +'. Please contact 3D Repo for further assistance.');
