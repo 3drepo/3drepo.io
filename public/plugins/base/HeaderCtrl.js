@@ -99,8 +99,16 @@ angular.module('3drepo')
 
 			var source = videoSRCS[0];
 
+			var constraints = {
+				video: {
+					optional: [{
+						sourceId: source.value
+					}]
+				}
+			};
+
 			// Initialize camera
-			$window.navigator.getUserMedia({video: true, sourceId : source.value}, function (videoStream) {
+			$window.navigator.getUserMedia(constraints, function (videoStream) {
 				element.src = $window.URL.createObjectURL(videoStream);
 
 				$timeout(function() { $scope.decodeCanvas(scope, element, callback); }, 200);
