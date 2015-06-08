@@ -241,8 +241,11 @@ function minify(file, target_dir){
 
 		}
 		else{
-			//exists
-			make_symlink(min_file_name, target_dir);
+			//min file exists, symlink it if it's not in the same directory.
+			if(path.dirname(min_file_name) !== path.normalize(target_dir)){
+				make_symlink(min_file_name, target_dir);
+			}
+
 		}
 	});
 
