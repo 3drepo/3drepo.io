@@ -89,7 +89,7 @@ angular.module('3drepo')
 
 			if (videoSRCS.length > 1)
 			{
-				videoSRCS = videoSRCS.filter(function(item) { return (item.facing.indexOf('back') != -1); });
+				videoSRCS = videoSRCS.filter(function(item) { return (item.facing == 'environment'); });
 			}
 
 			if (!videoSRCS.length)
