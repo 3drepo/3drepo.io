@@ -1,15 +1,16 @@
 div#revisions-selector(ng-controller='SelectorCtrl')
 	#revisionSpan(ng-show="ui.revisionselector")
-		.btn-group.menu-button
-			button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-expanded='false')
-				i.fa.fa-code-fork.menu-icon
-				span.button-title Branch:
-				span.button-keyword {{Data.RevisionData.CurrentBranch.name}}
-				span.caret
-			ul.dropdown-menu(role='menu')
-				li(ng-repeat='branch in Data.SelectorData.Branches.branches')
-					a(href='#', ng-click='setBranch(branch)')
-						span.button-keyword {{branch}}
+		span
+			.btn-group.menu-button
+				button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-expanded='false')
+					i.fa.fa-code-fork.menu-icon
+					span.button-title Branch:
+					span.button-keyword {{Data.RevisionData.CurrentBranch.name}}
+					span.caret
+				ul.dropdown-menu(role='menu')
+					li(ng-repeat='branch in Data.SelectorData.Branches.branches')
+						a(href='#', ng-click='setBranch(branch)')
+							span.button-keyword {{branch}}
 		span.revision
 			.btn-group.menu-button
 				button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-expanded='false')
