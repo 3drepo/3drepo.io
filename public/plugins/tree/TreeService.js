@@ -126,7 +126,7 @@ angular.module('3drepo')
 			var account		= StateManager.state.account;
 			var project		= StateManager.state.project;
 			var branch		= StateManager.state.branch;
-			var revision	= StateManager.state.sid;
+			var revision		= StateManager.state.revision;
 
 			self.rootElement = rootElement;
 
@@ -217,9 +217,8 @@ angular.module('3drepo')
 			var project		= StateManager.state.project;
 			var branch		= StateManager.state.branch;
 			var revision	= StateManager.state.revision;
-			var sid			= StateManager.state.sid;
 
-			var newURL = self.treeURL(account, project, branch, revision, sid);
+			var newURL = self.treeURL(account, project, branch, revision, null);
 
 			var tree = self.rootElement.fancytree("getTree");
 

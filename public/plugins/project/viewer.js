@@ -837,15 +837,17 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		//viewTrans = viewTrans.inverse();
 
 		var viewUp  = viewMat.e1();
-		var viewDir = viewMat.e2();
+		//var viewDir = viewMat.e2();
 		var viewPos = viewMat.e3();
+
+		var lookAt = self.getViewArea()._scene.getViewpoint().getCenterOfRotation().subtract(viewPos);
 
 		//viewPoint["matrix"] = viewTrans;
 
 		// More viewing direction than lookAt to sync with Assimp
 		viewPoint["up"] = [viewUp.x, viewUp.y, viewUp.z];
 		viewPoint["position"] = [viewPos.x, viewPos.y, viewPos.z];
-		viewPoint["look_at"] = [viewDir.x, viewDir.y, viewDir.z];
+		viewPoint["look_at"] = [lookAt.x, lookAt.y, lookAt.z];
 
 		var projMat = self.getProjectionMatrix();
 

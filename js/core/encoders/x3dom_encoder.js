@@ -301,7 +301,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			var look_at = child["look_at"] ? child["look_at"] : [0,0,1];
 
 			var up = child["up"] ? child["up"] : [0,1,0];
-			forward = normalize(look_at);
+			forward = scale(normalize(look_at), -1);
 			up = normalize(up);
 			var right = crossProduct(forward, scale(up, -1)); // Left-hand coordinate system
 
@@ -317,7 +317,10 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			position = mathjs.subset(tmpMat, mathjs.index(3,[0,3]))._data[0];
 			newNode.setAttribute('position', position.join(','));
 
-			look_at = mathjs.subset(viewMat, mathjs.index(2,[0,3]))._data[0];
+			var newLookAt = mathjs.matrix([[look_at[0], look_at[1], look_at[2], 0]]).transpose();
+			newLookAt = mathjs.multiply(matrix.transpose(), newLookAt);
+			look_at = mathjs.subset(newLookAt, mathjs.index([0,3],0)).transpose()._data[0];
+
 			var center = vecAdd(position, look_at);
 			newNode.setAttribute('centerOfRotation', center.join(','));
 

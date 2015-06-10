@@ -84,6 +84,17 @@ angular.module('3drepo')
 			self.changed[i] = false;
 	}
 
+	this.destroy = function()  {
+		delete this.state;
+		this.state = {};
+
+		delete this.ui;
+		this.ui = {};
+
+		delete this.Data;
+		this.Data = {};
+	}
+
 	self.clearChanged();
 
 	this.registerPlugin = function(plugin, dataFactory, stateFunc)

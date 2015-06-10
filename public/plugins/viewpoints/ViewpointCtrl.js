@@ -61,8 +61,6 @@ angular.module('3drepo')
 			// this may differ from that returned by the API server
 			var rootTrans = $("#model__root")[0]._x3domNode.getCurrentTransform().inverse();
 
-			debugger;
-
 			viewpoint["name"] = params.name;
 			if($scope.sid)
 				viewpoint["shared_id"] = $scope.sid;
