@@ -900,21 +900,18 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		}
 	}
 
-	this.switchFullScreen = function() {
-		var vrHMD = null;
-
-		if (window.oculus)
-			vrHMD = window.oculus.vrHMD;
+	this.switchFullScreen = function(vrDisplay) {
+		vrDisplay = vrDisplay || {};
 
 		if (!self.fullscreen)
 		{
 			if (self.viewer.mozRequestFullScreen) {
 				self.viewer.mozRequestFullScreen({
-					vrDisplay: vrHMD
+					vrDisplay: vrDisplay
 				});
 			} else if (self.viewer.webkitRequestFullscreen) {
 				self.viewer.webkitRequestFullscreen({
-					vrDisplay: vrHMD,
+					vrDisplay: vrDisplay,
 				});
 			}
 

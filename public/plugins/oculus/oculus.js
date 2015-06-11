@@ -146,7 +146,7 @@ var Oculus = function(viewer) {
 
 			this.startVR();
 
-			self.viewer.switchFullScreen();
+			self.viewer.switchFullScreen(self.vrHMD);
 
 			this.enabled = true;
 		} else {
@@ -174,7 +174,7 @@ var Oculus = function(viewer) {
 
 			self.viewer.getViewArea().skipSceneRender = null;
 
-			self.viewer.switchFullScreen();
+			self.viewer.switchFullScreen(self.vrHMD);
 
 			self.viewer.createBackground();
 		}
