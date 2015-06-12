@@ -2,8 +2,7 @@
 	"name" : "base",
 	"files": {
 		"js" : [
-			"base/controlinterface.js",
-			"base/config.js"
+			"base/controlinterface.js"
 		],
 		"jade": [
 			{"template" : "base/404.jade", "id" : "404.html"},
