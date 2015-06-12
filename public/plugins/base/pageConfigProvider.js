@@ -17,15 +17,15 @@
 
 angular.module('3drepo')
 .provider('pageConfig', ['$urlRouterProvider', function pageConfigProvider($urlRouterProvider) {
-	var loggedInFunc    = function(Auth) { $state.go('login'); }
-	var notLoggedInFunc = function(Auth) { $state.go('login'); }
+	var loggedInFunc    = null;
+	var notLoggedInFunc = null;
 
 	this.setStateFuncs = function(newLoggedInFunc, newNotLoggedInFunc) {
 		loggedInFunc = newLoggedInFunc;
 		notLoggedInFunc = newNotLoggedInFunc;
 	};
 
-	this.$get = ["Auth", "$state", function pageConfig(Auth, $state) {
+	this.$get = ["Auth", "StateManager", function pageConfig(Auth, StateManager) {
 		var obj = {};
 
 		obj.loggedInFunc    = loggedInFunc;
@@ -34,9 +34,9 @@ angular.module('3drepo')
 		// Which state to go to by default
 		obj.goDefault = function() {
 			if (Auth.loggedIn)
-				loggedInFunc(Auth, $state);
+				loggedInFunc(Auth, StateManager);
 			else
-				notLoggedInFunc(Auth, $state);
+				notLoggedInFunc(Auth, StateManager);
 		}
 
 		$urlRouterProvider.otherwise(obj.goDefault);

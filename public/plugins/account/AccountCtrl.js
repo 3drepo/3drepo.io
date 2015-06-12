@@ -25,11 +25,16 @@ function($stateProvider, parentStates) {
 	for(var i = 0; i < states.length; i++) {
 		$stateProvider
 		.state(states[i] + '.account', {
-			url: '/:account',
+			url: ':account',
 			templateUrl: 'account.html',
 			resolve: {
 				auth: function authCheck(Auth) { return Auth.init(); },
 				init: function(StateManager, $stateParams) {
+					// On the login page the account variable is set to ""
+					// we must override this.
+					if ($stateParams["account"] == "")
+						$stateParams["account"] = null;
+
 					StateManager.setState($stateParams, {});
 					StateManager.refresh("account");
 				}

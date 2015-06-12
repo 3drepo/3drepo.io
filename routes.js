@@ -65,7 +65,7 @@ module.exports = function(){
 			if (account && project)
 			{
 				accessFunc(username, account, project, function(err) {
-					if(err.value && !imgEncoder.isImage(format))
+					if(err.value)
 					{
 						logger.log('debug', account + '/' + project + ' is not public project and no user information.');
 						responseCodes.onError("Check user access", err, res, null, req.params);

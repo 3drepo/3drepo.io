@@ -25,7 +25,7 @@ function($stateProvider, parentStates) {
 	for(var i = 0; i < states.length; i++) {
 		$stateProvider
 		.state(states[i] + '.login', {
-			url: '',
+			url: '/',
 			views: {
 				"@" : {
 					templateUrl: 'login.html'
@@ -36,13 +36,10 @@ function($stateProvider, parentStates) {
 }])
 .run(['StateManager', 'Auth', function(StateManager, Auth) {
 	StateManager.registerPlugin('login', null, function () {
-		if (Auth.loggedIn)
-			return "login";
-		else
-			return null
+		return "login";
 	});
 }])
-.controller('LoginCtrl', ['$scope', 'StateManager', 'pageConfig', 'Auth', function($scope, StateManager, pageConfig, Auth)
+.controller('LoginCtrl', ['$scope', 'StateManager', 'Auth', function($scope, StateManager, Auth)
 {
 	$scope.user = { username: "", password: ""};
 
@@ -50,15 +47,15 @@ function($stateProvider, parentStates) {
 		Auth.login($scope.user.username, $scope.user.password).then(
 			function _loginCtrlLoginSuccess(username) {
 				$scope.errorMessage = null;
-				pageConfig.goDefault();
 				$scope.user.username = null;
 				$scope.user.password = null;
-				StateManager.setStateVar("user", username);
+				StateManager.setStateVar("account", username);
+				StateManager.updateState();
 			}, function _loginCtrlLoginFailure(reason) {
 				$scope.errorMessage = reason;
-				pageConfig.goDefault();
 				$scope.user.password = null;
-				StateManager.setStateVar("user", null);
+				StateManager.setStateVar("account", null);
+				StateManager.updateState();
 			}
 		);
 	};

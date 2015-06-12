@@ -100,10 +100,9 @@ angular.module('3drepo')
 		});
 	}
 }])
-.controller('HeaderCtrl', ['$scope', 'pageConfig', 'Auth', '$modal', '$timeout', '$window', 'CameraService', function($scope, pageConfig, Auth, $modal, $timeout, $window, CameraService){
+.controller('HeaderCtrl', ['$scope', 'Auth', '$modal', 'CameraService', 'StateManager', function($scope, Auth, $modal, CameraService, StateManager){
 	$scope.Auth = Auth;
 	$scope.user = { username: "", password: ""};
-	$scope.goDefault = pageConfig.goDefault;
 	$scope.CameraService = CameraService;
 	$scope.captureQRCode = $scope.CameraService.captureQRCode;
 
@@ -111,15 +110,22 @@ angular.module('3drepo')
 	{
 		Auth.logout().then(function _logoutCtrlLogoutSuccess() {
 			$scope.errorMessage = null;
-			pageConfig.goDefault();
+			StateManager.state.account = null;
+			StateManager.updateState();
 		}, function _logoutCtrlLogoutFailure(reason) {
 			$scope.errorMessage = reason;
-			pageConfig.goDefault();
+			StateManager.updateState();
 		});
 	}
 
+	$scope.goAccount = function()
+	{
+		StateManager.setState({ "account" : Auth.username }, {"clearState" : true});
+		StateManager.updateState();
+	}
+
 	$scope.$on("notAuthorized", function(event, message) {
-		pageConfig.goDefault();
+		$scope.goAccount();
 	});
 
 	$scope.whereAmI = function()

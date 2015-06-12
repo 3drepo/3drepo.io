@@ -174,6 +174,7 @@ angular.module('3drepo')
 		this.state.varName = value;
 	}
 
+	// TODO: Remove this function at some point
 	this.setStateVar = function(varName, value)
 	{
 		if (!(self.state[varName] == value))
@@ -192,20 +193,21 @@ angular.module('3drepo')
 		// to the state
 		for(var i in stateObj)
 		{
-			if (!(i in self.state))
+			var currentStateParams = Object.keys(self.state);
+			if (currentStateParams.indexOf(i) == -1)
 				self.createStateVar(i, stateObj[i]);
 
 			self.setStateVar(i, stateObj[i]);
 		}
 
 		// Clear out anything that hasn't been set
-		if (extraParams["clearState"])
-			for(var i in self.state)
-				if (!(i in stateObj))
-					if (typeof self.state[i] == 'boolean')
-						self.setStateVar(i, false);
-					else
-						self.setStateVar(i, null);
+		if (extraParams["clearState"]) {
+			var objectKeys = Object.keys(stateObj);
+			for(var i in self.state) {
+				if (objectKeys.indexOf(i) == -1)
+					delete self.state[i];
+			}
+		}
 	}
 
 	this.updateState = function(dontUpdateLocation)
