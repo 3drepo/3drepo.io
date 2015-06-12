@@ -164,7 +164,7 @@ MongoDB.prototype.aggregate = function(dbName, collName, query) {
 	async.waterfall([
 
 	function(callback) {
-		self.collCallback(dbName, collName, callback);
+		self.collCallback(dbName, collName, true, callback);
 	}, function(err, coll) {
 		coll.aggregate(query, callback)
 	}], function(err, result) {
@@ -180,10 +180,11 @@ MongoDB.prototype.aggregate = function(dbName, collName, query) {
  *
  * @param {string} dbName - Database name to run the aggregation on
  * @param {string} collName - Collection to run the aggregation on
+ * @param {boolean} strict - Enable strict mode or not
  * @param {function} callback - get collection from database and pass to
  *								callback as parameter
  ******************************************************************************/
-MongoDB.prototype.collCallback = function(dbName, collName, callback) {
+MongoDB.prototype.collCallback = function(dbName, collName, strict, callback) {
 	logger.log('debug', 'Loading collection ' + collName + ' on ' + dbName);
 
 	// First get database connection
@@ -191,7 +192,7 @@ MongoDB.prototype.collCallback = function(dbName, collName, callback) {
 		if (err.value) return callback(err);
 
 		// Get collection from database to act on
-		dbConn.collection(collName, {strict:true}, function(err, coll) {
+		dbConn.collection(collName, {strict:strict}, function(err, coll) {
 			if (err) return callback(responseCodes.DB_ERROR(err));
 
 			callback(responseCodes.OK, coll);
@@ -211,7 +212,7 @@ MongoDB.prototype.collCallback = function(dbName, collName, callback) {
 MongoDB.prototype.getLatest = function(dbName, collName, filter, projection, callback) {
 	// Run collection callback that first sorts by timestamp
 	// and then gets the top row.
-	this.collCallback(dbName, collName, function(err, coll) {
+	this.collCallback(dbName, collName, true, function(err, coll) {
 		if (err.value) return callback(err);
 
 		projStr = JSON.stringify(projection);
@@ -251,7 +252,7 @@ MongoDB.prototype.getLatest = function(dbName, collName, filter, projection, cal
  *								pass to callback as parameter
  ******************************************************************************/
 MongoDB.prototype.filterColl = function(dbName, collName, filter, projection, callback) {
-	this.collCallback(dbName, collName, function(err, coll) {
+	this.collCallback(dbName, collName, true, function(err, coll) {
 		if (err.value) return callback(err);
 
 		projStr = JSON.stringify(projection);

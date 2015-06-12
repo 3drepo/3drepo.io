@@ -5,5 +5,5 @@ block title
 
 block content
 	div(ng-controller='HeaderCtrl')
-		video#videocamera.dialogs(autoplay, capture='captureQRCode', camera-switch='cameraSwitch')
+		video#videocamera.dialogs(autoplay, capture='captureQRCode', camera-switch='{{CameraService.cameraSwitch}}')
 

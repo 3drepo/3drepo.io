@@ -76,7 +76,7 @@ exports.createUser = function(username, password, email, callback) {
 			// TODO: Should move this to db.js
 			if (err) return callback(responseCodes.DB_ERROR(err));
 
-			dbConn.collCallback('admin', 'system.users', function(err, coll) {
+			dbConn.collCallback('admin', 'system.users', true, function(err, coll) {
 				if(err.value) return callback(err);
 
 				var selector = { user : username };
@@ -203,7 +203,7 @@ exports.getWayfinderInfo = function(dbName, project, uniqueIDs, callback) {
 exports.storeWayfinderInfo = function(dbName, project, username, sessionID, data, timestamp, callback) {
 	logger.log('debug', 'Storing waypoint information for ' + username + ' @ ' + (new Date(timestamp)));
 
-	dbConn.collCallback(dbName, project + ".wayfinder", function(err, coll) {
+	dbConn.collCallback(dbName, project + ".wayfinder", false, function(err, coll) {
 		if(err.value)
 			return callback(err);
 
@@ -240,7 +240,7 @@ exports.storeWayfinderInfo = function(dbName, project, username, sessionID, data
 // TODO: Remove this, as it shouldn't exist
 exports.addToCurrentList = function(dbName, project, branch, objUUID, callback) {
 	self.getHeadUUID(dbName, project, branch, function(err, uuid) {
-		dbConn.collCallback(dbName, project + '.history', function(err, coll) {
+		dbConn.collCallback(dbName, project + '.history', true, function(err, coll) {
 			if(err.value) return callback(err);
 
 			var uniqueID = {
@@ -274,7 +274,7 @@ exports.storeViewpoint = function(dbName, project, branch, username, parentShare
 
 	data.parents = [stringToUUID(parentSharedID)];
 
-	dbConn.collCallback(dbName, project + ".scene", function(err, coll) {
+	dbConn.collCallback(dbName, project + ".scene", true, function(err, coll) {
 		if(err.value) return callback(err);
 
 		var uniqueID = {
@@ -881,7 +881,7 @@ exports.getIssues = function(dbName, project, sid, callback) {
 }
 
 exports.storeIssue = function(dbName, project, sid, owner, data, callback) {
-	dbConn.collCallback(dbName, project + ".issues", function(err, coll) {
+	dbConn.collCallback(dbName, project + ".issues", false, function(err, coll) {
 		if(err.value)
 			return callback(err);
 

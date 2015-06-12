@@ -16,39 +16,29 @@
  */
 
 angular.module('3drepo')
-.controller('HeaderCtrl', ['$scope', 'pageConfig', 'Auth', '$modal', '$timeout', '$window', function($scope, pageConfig, Auth, $modal, $timeout, $window){
-	$scope.Auth = Auth;
-	$scope.user = { username: "", password: ""};
-	$scope.goDefault = pageConfig.goDefault;
+.service('CameraService', ['$window', '$timeout', function($window, $timeout) {
+	var self = this;
+	self.cameraSwitch	= false;
+	self.source			= null;
 
-	$scope.logOut = function()
-	{
-		Auth.logout().then(function _logoutCtrlLogoutSuccess() {
-			$scope.errorMessage = null;
-			pageConfig.goDefault();
-		}, function _logoutCtrlLogoutFailure(reason) {
-			$scope.errorMessage = reason;
-			pageConfig.goDefault();
-		});
-	}
+	$window.MediaStreamTrack.getSources(function (srcs) {
+		var videoSRCS = srcs.filter(function(item) { return item.kind == 'video'; });
+		var source = null;
 
-	$scope.$on("notAuthorized", function(event, message) {
-		pageConfig.goDefault();
+		if (videoSRCS.length > 1)
+		{
+			videoSRCS = videoSRCS.filter(function(item) { return (item.facing == 'environment'); });
+		}
+
+		if (!videoSRCS.length)
+		{
+			callback("No valid cameras found");
+		}
+
+		self.source = videoSRCS[0];
 	});
 
-	$scope.cameraSwitch  = false;
-
-	$scope.whereAmI = function()
-	{
-		$modal.open({
-			templateUrl: "cameramodal.html",
-			backdrop: false
-		});
-
-		cameraSwitch = true;
-	}
-
-	$scope.decodeCanvas = function(scope, element, callback)
+	this.decodeCanvas = function(scope, element, callback)
 	{
 		var width  = element.videoWidth;
 		var height = element.videoHeight;
@@ -72,60 +62,94 @@ angular.module('3drepo')
 			try {
 				return callback(null, qrcode.decode());
 			} catch (err) {
+				if (!self.cameraSwitch)
+				{
+					if (self.videoStream)
+						self.videoStream.stop();
+
+					return callback(err);
+				}
+
 				callback(err);
 			}
 		}
 
-		$timeout(function() { $scope.decodeCanvas(scope, element, callback); }, 200);
+		$timeout(function() { self.decodeCanvas(scope, element, callback); }, 200);
 	}
 
-	$scope.captureQRCode = function(scope, element, callback)
+	this.captureQRCode = function(scope, element, callback)
 	{
 		$window.navigator.getUserMedia = $window.navigator.getUserMedia || $window.navigator.webkitGetUserMedia || $window.navigator.mozGetUserMedia;
 
-		$window.MediaStreamTrack.getSources(function (srcs) {
-			var videoSRCS = srcs.filter(function(item) { return item.kind == 'video'; });
-			var source = null;
-
-			if (videoSRCS.length > 1)
-			{
-				videoSRCS = videoSRCS.filter(function(item) { return (item.facing == 'environment'); });
+		var constraints = {
+			video: {
+				optional: [{
+					sourceId: self.source.id
+				}]
 			}
+		};
 
-			if (!videoSRCS.length)
-			{
-				callback("No valid cameras found");
-			}
+		// Initialize camera
+		$window.navigator.getUserMedia(constraints, function (videoStream) {
+			element.src = $window.URL.createObjectURL(videoStream);
 
-			var source = videoSRCS[0];
-
-			var constraints = {
-				video: {
-					optional: [{
-						sourceId: source.id
-					}]
-				}
-			};
-
-			// Initialize camera
-			$window.navigator.getUserMedia(constraints, function (videoStream) {
-				element.src = $window.URL.createObjectURL(videoStream);
-
-				$timeout(function() { $scope.decodeCanvas(scope, element, callback); }, 200);
-			}, function(err) {
-				callback(err);
-			})
+			self.videoStream = videoStream;
+			$timeout(function() { self.decodeCanvas(scope, element, callback); }, 200);
+		}, function(err) {
+			callback(err);
 		});
 	}
 }])
-.directive('cameraSwitch', function ($window) {
+.controller('HeaderCtrl', ['$scope', 'pageConfig', 'Auth', '$modal', '$timeout', '$window', 'CameraService', function($scope, pageConfig, Auth, $modal, $timeout, $window, CameraService){
+	$scope.Auth = Auth;
+	$scope.user = { username: "", password: ""};
+	$scope.goDefault = pageConfig.goDefault;
+	$scope.CameraService = CameraService;
+	$scope.captureQRCode = $scope.CameraService.captureQRCode;
+
+	$scope.logOut = function()
+	{
+		Auth.logout().then(function _logoutCtrlLogoutSuccess() {
+			$scope.errorMessage = null;
+			pageConfig.goDefault();
+		}, function _logoutCtrlLogoutFailure(reason) {
+			$scope.errorMessage = reason;
+			pageConfig.goDefault();
+		});
+	}
+
+	$scope.$on("notAuthorized", function(event, message) {
+		pageConfig.goDefault();
+	});
+
+	$scope.whereAmI = function()
+	{
+		$scope.CameraService.cameraSwitch = true;
+
+		var modalInstance = $modal.open({
+			templateUrl: "cameramodal.html",
+			controller: "DialogCtrl",
+			backdrop: false,
+			resolve: {
+				params: {}
+			}
+		});
+
+		modalInstance.result.then(function(params) {},
+		function() {
+			$scope.CameraService.cameraSwitch = false;
+		});
+	}
+
+}])
+.directive('cameraSwitch', function () {
 	return {
 		restrict: 'A',
 		scope: {
 			capture: '='
 		},
 		link: function link(scope, element, attrs) {
-			if (attrs.cameraSwitch) {
+			if (attrs["cameraSwitch"] == "true") {
 				scope.capture(scope, element[0], function(err, res) {
 					if(!err)
 						$window.location.replace(res);
