@@ -158,7 +158,7 @@ angular.module('3drepo')
 			if (attrs["cameraSwitch"] == "true") {
 				scope.capture(scope, element[0], function(err, res) {
 					if(!err)
-						$window.location.replace(res);
+						window.location.replace(res);
 					else
 						console.log("QRCode error: " + err);
 				});
