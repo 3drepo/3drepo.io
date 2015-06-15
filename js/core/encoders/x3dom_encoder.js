@@ -416,6 +416,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			newNode.textContent = ' ';
 			newNode.setAttribute("id", child['id']);
 			newNode.setAttribute('DEF', dbInterface.uuidToString(child["shared_id"]));
+			newNode.setAttribute('crossOrigin', 'use-credentials');
 			xmlNode.appendChild(newNode);
 
 			var texProperties = xmlDoc.createElement('TextureProperties');

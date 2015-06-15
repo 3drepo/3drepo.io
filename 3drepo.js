@@ -107,8 +107,8 @@ if (!config.vhost)
 	else
 		var server = http.createServer(app);
 
-	server.listen(config.apiServer.port, config.apiServer.hostname, function() {
-		logger.log('info', 'Starting API service on ' + config.apiServer.hostname + ' port ' + config.apiServer.port);
+	server.listen(config.servers[0].port, config.servers[0].hostname, function() {
+		logger.log('info', 'Starting service on ' + config.servers[0].hostname + ' port ' + config.servers[0].port);
 	});
 
 } else {

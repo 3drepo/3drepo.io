@@ -60,7 +60,7 @@ for(i in config.servers)
 
 if("protocol" in module.exports.apiServer)
 {
-	module.exports.apiServer.protocol = module.exports.apiServer.protocol + '\://';
+	module.exports.apiServer.protocol = module.exports.apiServer.protocol + '://';
 } else {
 	module.exports.apiServer.protocol = '//';
 }
