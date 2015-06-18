@@ -1,7 +1,7 @@
 .container-fluid
 	#ui2-header
 		#nav-version-control
-			div.nav-project-title  <b>{{Data.ProjectData.name}}</b>
+			//div.nav-project-title  <b>{{Data.ProjectData.name}}</b>
 			if ui.header
 				each uicomp in ui.header
 					!= renderMe(uicomp["template"], locals)
