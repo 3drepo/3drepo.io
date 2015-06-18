@@ -85,10 +85,6 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.scene.setAttribute('onbackgroundclicked', 'bgroundClick(event);');
 			self.viewer.appendChild(self.scene);
 
-			self.viewPoint = document.createElement('viewpoint');
-			self.viewPoint.setAttribute('id', name + '_current');
-			self.viewPoint.setAttribute('def', name + '_current');
-			self.scene.appendChild(self.viewPoint);
 
 			self.bground = null;
 			self.currentNavMode = null;
@@ -111,10 +107,13 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.light.setAttribute('shadowIntensity', 0.0);
 			self.scene.appendChild(self.light);
 
+			self.createViewpoint(name + "_current");
+
 			self.nav = document.createElement('navigationInfo');
 			self.nav.setAttribute('headlight', 'false');
 			self.nav.setAttribute('type', 'TURNTABLE');
-			self.viewPoint.appendChild(self.nav);
+
+			self.loadViewpoint = name + "_current"; // Must be called after creating nav
 
 			self.viewer.addEventListener("keypress", function(e) {
 				if (e.charCode == 'r'.charCodeAt(0))
@@ -161,7 +160,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.runtime.fitAll();
 		}
 
-		self.viewPoint.addEventListener('viewpointChanged', self.viewPointChanged);
+		self.getCurrentViewpoint().addEventListener('viewpointChanged', self.viewPointChanged);
 
 		$(document).on("onLoaded", function(event, objEvent) {
 			if (!self.loadViewpoint)
@@ -358,7 +357,10 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	}
 
 	this.viewpoints = {};
-	this.selectedViewpoint = 0;
+	this.viewpointsNames = {};
+
+	this.selectedViewpointIdx = 0;
+	this.selectedViewpoint    = null;
 
 	this.isFlyingThrough = false;
 	this.flyThroughTime = 1000;
@@ -376,15 +378,31 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.flyThroughTick = function()
 	{
-		var newViewpoint = self.selectedViewpoint + 1;
+		var newViewpoint = self.selectedViewpointIdx + 1;
 
 		if (newViewpoint == self.viewpoints.length)
 			newViewpoint = 0;
 
-		self.setCurrentViewpoint(newViewpoint);
+		self.setCurrentViewpoint(self.viewpoints[newViewpoint]);
 
 		if (self.isFlyingThrough)
 			setTimeout(self.flyThroughTick, self.flyThroughTime);
+	}
+
+	this.getViewpointGroupAndName = function(id)
+	{
+		var splitID = id.trim().split("__");
+
+		if (splitID.length > 1)
+		{
+			var group	= splitID[0].trim();
+			var name	= splitID[1].trim();
+		} else {
+			var name	= splitID[0].trim();
+			var group	= '<uncategorized>';
+		}
+
+		return {group: group, name: name};
 	}
 
 	this.loadViewpoints = function()
@@ -393,94 +411,111 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 		for(var v = 0; v < viewpointList.length; v++)
 		{
-			if(viewpointList[v]["id"] != "viewer_current")
-			{
-				var id		= viewpointList[v]["id"].trim();
-				var group	= id.split("__")[0].trim();
-				var name	= id.split("__")[1].trim();
+			var id		= viewpointList[v]["id"].trim();
+			viewpointList[v]["def"] = id;
 
-				if (!self.viewpoints[group])
-					self.viewpoints[group] = {};
+			var groupName = self.getViewpointGroupAndName(id);
 
-				self.viewpoints[group][name] = id;
-			}
+			if (!self.viewpoints[groupName.group])
+				self.viewpoints[groupName.group] = {};
+
+			self.viewpoints[groupName.group][groupName.name] = id;
+			self.viewpointsNames[id] = viewpointList[v];
 		}
 	}
 
-/*
-	this.parseViewpoints = function(settings)
+	this.loadViewpoint = null;
+
+	this.getAxisAngle = function(from, at, look)
 	{
-		// Always have origin
-		var tmpView = {};
-		tmpView["idx"] = 0;
-		tmpView["name"] = "Origin";
-		tmpView["position"] = [0.0, 0.0, 0.0];
-		tmpView["direction"] = [0.0, 0.0, -1.0];
+		var x3dfrom	= new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
+		var x3dat	= new x3dom.fields.SFVec3f(at[0], at[1], at[2]);
+		var x3dup	= new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
 
-		self.viewpoints.push(tmpView);
+		var viewMat = new x3dom.fields.SFMatrix4f.lookAt(x3dfrom, x3dat, x3dup).inverse();
 
-		for(var i = 0; i < settings['viewpoints'].length; i++)
+		var q = new x3dom.fields.Quaternion(0.0,0.0,0.0,1.0);
+		q.setValue(viewMat);
+
+		return (q.toAxisAngle()[0].toGL() + q[1]);
+	}
+
+	this.createViewpoint = function(name, from, at, up)
+	{
+		var groupName = self.getViewpointGroupAndName(name);
+
+		if (!(self.viewpoints[groupName.group] && self.viewpoints[groupName.group][groupName.name]))
 		{
-			var tmpView = {};
-			var currentViewpoint = settings['viewpoints'][i];
+			var newViewPoint = document.createElement('viewpoint');
+			newViewPoint.setAttribute('id', name);
+			newViewPoint.setAttribute('def', name);
+			self.scene.appendChild(newViewPoint);
 
-			tmpView["idx"] = i + 1;
-			if ("name" in currentViewpoint)
-				tmpView["name"] = currentViewpoint["name"];
-			else
-				tmpView["name"] = "Viewpoint " + (self.viewpoints.length + 1);
+			if (from && at && up)
+			{
+				var q = self.getAxisAngle(from, at, up);
+				newViewpoint.setAttribute('orientation', q.join(','));
+			}
 
-			if ("position" in currentViewpoint)
-				tmpView["position"] = currentViewpoint["position"];
-			else
-				tmpView["position"] = [0.0,0.0,0.0];
+			if (!self.viewpoints[groupName.group])
+				self.viewpoints[groupName.group] = {};
 
-			if ("direction" in currentViewpoint)
-				tmpView["direction"] = currentViewpoint["direction"];
-			else
-				tmpView["direction"] = [0.0, 0.0, -1.0];
+			self.viewpoints[groupName.group][groupName.name] = name;
+			self.viewpointsNames[name] = newViewPoint;
 
-			self.viewpoints.push(tmpView);
+		} else {
+			console.error('Tried to create viewpoint with duplicate name: ' + name);
 		}
 	}
-*/
 
-	self.loadViewpoint = null;
+	this.setCurrentViewpointIdx = function(idx)
+	{
+		var viewpointNames = Object.keys(self.viewpointsNames);
+		self.setCurrentViewpoint(viewpointNames[idx]);
+	}
 
 	this.setCurrentViewpoint = function(id)
 	{
-		self.selectedViewpoint = id;
-
-		var viewpoint  = $("[id='" + id +"']")[0];
-
-		if (!viewpoint)
+		if (Object.keys(self.viewpointsNames).indexOf(id) != -1)
 		{
-			self.loadViewpoint = id;
-		} else {
+			var viewpoint = self.viewpointsNames[id];
+
 			viewpoint.setAttribute("bind", true);
 			viewpoint.resetView();
 			self.runtime.resetExamin();
 			viewpoint.addEventListener('viewpointChanged', self.viewPointChanged);
 			self.loadViewpoint = null;
+			viewpoint.appendChild(self.nav);
+
+			self.applySettings();
+
+			return;
 		}
+
+		self.loadViewpoint = id;
 	}
 
 	this.updateSettings = function(settings)
 	{
 		if (settings)
+			self.settings = settings;
+	}
+
+	this.applySettings = function()
+	{
+		if (self.settings)
 		{
-			// TODO: Can this function be merged with the init ?
-			if ('zNear' in settings)
-				self.zNear = settings['zNear'];
+			if ('start_all' in self.settings)
+				self.defaultShowAll = self.settings['start_all'];
 
-			if ('zFar' in settings)
-				self.zFar  = settings['zFar'];
+			if ('speed' in self.settings)
+				self.speed = self.settings['speed'];
 
-			if ('start_all' in settings)
-				self.defaultShowAll = settings['start_all'];
+			if ('avatarHeight' in self.settings)
+				self.changeAvatarHeight(self.settings['avatarHeight']);
 
-			if ('visibilityLimit' in settings)
-				self.nav.setAttribute('visibilityLimit', settings['visibilityLimit']);
+			if ('visibilityLimit' in self.settings)
+				self.nav.setAttribute('visibilityLimit', self.settings['visibilityLimit']);
 		}
 	}
 
@@ -702,54 +737,67 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		self.defaultOrientation[2] = z;
 	}
 
-
-	this.currentCameraPosition = this.defaultOrientation;
-	this.currentCameraOrientation = [0.0, 0.0, 0.0];
-
 	this.setCameraPosition = function(x,y,z)
 	{
-		self.currentCameraPosition = [x,y,z];
-		self.updateCamera();
+		var newPos = [x,y,z];
+		var vpInfo		= self.getCurrentViewpointInfo();
+
+		var viewDir		= vpInfo["view_dir"];
+		var up			= vpInfo["up"];
+
+		self.updateCamera(currentPos, up, viewDir);
 	}
 
 	this.moveCamera = function(dX, dY, dZ)
 	{
-		self.currentCameraPosition[0] += dX;
-		self.currentCameraPosition[1] += dY;
-		self.currentCameraPosition[2] += dZ;
-		self.updateCamera();
+		var currentPos = self.getCurrentViewpointInfo()["position"];
+		currentPos[0] += dX;
+		currentPos[1] += dY;
+		currentPos[2] += dZ;
+
+		self.setCameraPosition(currentPos[0], currentPos[1], currentPos[2]);
 	}
 
 	this.setCameraViewDir = function(u,v,w)
 	{
-		self.currentCameraOrientation = [u,v,w];
-		self.updateCamera();
+		var newViewDir	= normalize([u,v,w]);
+		var viewRight	= self.getCurrentViewpointInfo()["right"];
+		var currentPos	= self.getCurrentViewpointInfo()["position"];
+
+		var up = crossProduct(newViewDir, viewRight);
+		self.updateCamera(currentPos, up, newViewDir);
 	}
 
-	this.updateCamera = function()
+	this.updateCamera = function(pos, up, viewDir)
 	{
-		var quat = self.rotToRotation(self.defaultOrientation, self.currentCameraOrientation);
+		viewDir = normalize(viewDir);
+		up		= normalize(up);
 
-		var nextPoint = document.createElement('viewpoint');
-		self.scene.appendChild(nextPoint);
-		nextPoint.setAttribute('id', 'next');
-		nextPoint.setAttribute("position", self.currentCameraPosition.join(" "));
-		nextPoint.setAttribute("orientation", quat);
+		var at = pos.add(viewDir);
 
-		oldViewPoint = self.viewPoint;
-		self.viewPoint = nextPoint;
-		self.viewPoint.appendChild(self.nav);
-		self.viewPoint.setAttribute('bind', 'true');
-		self.viewPoint.setAttribute('zNear', self.zNear);
-		self.viewPoint.setAttribute('zFar', self.zFar);
+		var groupName = self.getViewpointGroupAndName(self.name + '_next');
 
-		self.setCurrentViewpoint('next');
+		var oldViewPoint = null;
+
+		if (!(self.viewpoints[groupName.group] && self.viewpoints[groupName.group][groupName.name]))
+		{
+			// Create a variable reference to, and delete actual reference to old
+			// viewpoint
+			var oldViewPoint = self.viewpoints[groupName.group][groupName.name];
+			delete self.viewpoints[groupName.group][groupName.name];
+		}
+
+		self.createViewpoint(self.name + '_next', pos, at, up);
+		self.setCurrentViewpoint(self.name + '_next');
+
+		// TODO: Do we need this ?
 
 		if(self.linked)
 			self.manager.switchMaster(self.handle);
 
 		setTimeout(function(oldViewPoint){
-			oldViewPoint.parentNode.removeChild(oldViewPoint);
+			if (oldViewPoint)
+				oldViewPoint.parentNode.removeChild(oldViewPoint);
 		}, 0, oldViewPoint); // Remove old viewpoint, once everything is done.
 	}
 
@@ -772,9 +820,8 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.setCamera = function(x,y,z,u,v,w)
 	{
-		self.currentCameraPosition = [x,y,z];
-		self.currentCameraOrientation = [u,v,w];
-		self.updateCamera();
+		self.setCameraPosition(x,y,z);
+		self.setCameraViewDir(u,v,w);
 	}
 
 	this.collDistance = 0.1;
@@ -800,8 +847,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.reset = function()
 	{
-		self.setCamera(self.startingPoint[0], self.startingPoint[1], self.startingPoint[2],
-			self.defaultOrientation[0], self.defaultOrientation[1], self.defaultOrientation[2]);
+		self.setCurrentViewpoint('model__start');
 
 		self.changeCollisionDistance(self.collDistance);
 		self.changeAvatarHeight(self.avatarHeight);
@@ -828,26 +874,35 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.getCurrentViewpoint = function()
 	{
+		return self.getViewArea()._scene.getViewpoint()._xmlNode;
+	}
+
+	this.getCurrentViewpointInfo = function()
+	{
 		var viewPoint = {};
 
 		var origViewTrans	= self.getViewArea()._scene.getViewpoint().getCurrentTransform();
 		var viewMat		= self.getViewMatrix().inverse();
 
-		//var viewTrans = origViewTrans.inverse().mult(viewMat);
-		//viewTrans = viewTrans.inverse();
+		var viewRight	= viewMat.e0();
+		var viewUp		= viewMat.e1();
+		var viewDir		= viewMat.e2().multiply(-1);
+		var viewPos		= viewMat.e3();
 
-		var viewUp  = viewMat.e1();
-		//var viewDir = viewMat.e2();
-		var viewPos = viewMat.e3();
+		var center = self.getViewArea()._scene.getViewpoint().getCenterOfRotation();
 
-		var lookAt = self.getViewArea()._scene.getViewpoint().getCenterOfRotation().subtract(viewPos);
-
-		//viewPoint["matrix"] = viewTrans;
+		if (center)	{
+			var lookAt = center.subtract(viewPos);
+		} else {
+			var lookAt  = viewPos.add(viewDir);
+		}
 
 		// More viewing direction than lookAt to sync with Assimp
 		viewPoint["up"] = [viewUp.x, viewUp.y, viewUp.z];
 		viewPoint["position"] = [viewPos.x, viewPos.y, viewPos.z];
 		viewPoint["look_at"] = [lookAt.x, lookAt.y, lookAt.z];
+		viewPoint["view_dir"] = [viewDir.x, viewDir.y, viewDir.z];
+		viewPoint["right"] = [viewRight.x, viewRight.y, viewRight.z];
 
 		var projMat = self.getProjectionMatrix();
 

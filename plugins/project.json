@@ -4,7 +4,8 @@
 		"js" : [
 			"project/viewermanager.js",
 			"project/viewer.js",
-			"project/gamepad.js"
+			"project/gamepad.js",
+			"project/collision.js"
 		],
 		"jade" : [
 			{"template" : "project/project.jade", "id" : "project.html"}

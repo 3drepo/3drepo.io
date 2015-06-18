@@ -55,7 +55,7 @@ angular.module('3drepo')
 
 		modalInstance.result.then(function (params) {
 			var thisViewer = ViewerService.defaultViewer;
-			var viewpoint = thisViewer.getCurrentViewpoint();
+			var viewpoint = thisViewer.getCurrentViewpointInfo();
 
 			// Add this automatically to the root,
 			// this may differ from that returned by the API server

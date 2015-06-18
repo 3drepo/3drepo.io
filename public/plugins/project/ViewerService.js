@@ -16,7 +16,7 @@
  */
 
 angular.module('3drepo')
-.service('ViewerService', ['$window', 'StateManager', 'serverConfig', function($window, StateManager, serverConfig){
+.service('ViewerService', ['$window', 'StateManager', 'serverConfig', '$http', function($window, StateManager, serverConfig, $http){
 	var self = this;
 
 	this.init = function() {
@@ -27,10 +27,14 @@ angular.module('3drepo')
 
 		$window.viewer = self.defaultViewer;
 
-		// Comes free with oculus support and gamepad support :)
+		// TODO: Move this so that the attachment is contained
+		// within the plugins themselves.
+		// Comes free with oculus support and gamepad support
 		self.oculus		= new Oculus(self.defaultViewer);
-		//self.gamepad	= new Gamepad(self.defaultViewer);
-		//self.gamepad.init();
+		self.gamepad	= new Gamepad(self.defaultViewer);
+		self.gamepad.init();
+
+		self.collision  = new Collision(self.defaultViewer);
 	}
 
 	this.loadModel = function() {

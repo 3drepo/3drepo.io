@@ -70,7 +70,7 @@ var Oculus = function(viewer) {
 			leftApp.appendChild(leftTex);
 
 			var leftVP = document.createElement('viewpoint');
-			leftVP.setAttribute('use', 'viewer_current');
+			leftVP.setAttribute('use', self.viewer.getCurrentViewpoint().getAttribute('id'));
 			leftVP.setAttribute('containerfield', 'viewpoint');
 			leftVP.textContent = ' ';
 			leftTex.appendChild(leftVP);
@@ -118,7 +118,7 @@ var Oculus = function(viewer) {
 			rightShape.appendChild(rightPlane);
 
 			var rightVP = document.createElement('viewpoint');
-			rightVP.setAttribute('use', 'viewer_current');
+			rightVP.setAttribute('use', self.viewer.getCurrentViewpoint().getAttribute('id'));
 			rightVP.setAttribute('containerfield', 'viewpoint');
 			rightVP.textContent = ' ';
 			rightTex.appendChild(rightVP);
@@ -200,11 +200,12 @@ var Oculus = function(viewer) {
 
 			if (h)
 			{
-				var q		= new x3dom.fields.Quaternion(h.x, h.y, h.z, h.w);
+				var vp	= self.viewer.currentViewpoint;
+				var q	= new x3dom.fields.Quaternion(h.x, h.y, h.z, h.w);
 
-				var flyMat	= self.viewer.viewPoint._x3domNode._viewMatrix.inverse();
+				var flyMat	= vp.getViewMatrix().inverse();
 				flyMat.setRotate(q);
-				self.viewer.viewPoint._x3domNode.setView(flyMat.inverse());
+				vp.setView(flyMat.inverse());
 			}
 		};
 

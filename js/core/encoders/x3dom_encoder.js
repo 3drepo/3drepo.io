@@ -288,14 +288,15 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			if (child['position'])
 				newNode.setAttribute('position', child['position'].join(','));
 
-			//if (child['near'])
-			//	newNode.setAttribute('zNear', child['near']);
+			if (child['near'])
+				newNode.setAttribute('zNear', child['near']);
+			else
+				newNode.setAttribute('zNear', -1);
 
-			//if (child['far'])
-			//	newNode.setAttribute('zFar', child['far']);
-
-			newNode.setAttribute('zNear', -1);
-			newNode.setAttribute('zFar', -1);
+			if (child['far'])
+				newNode.setAttribute('zFar', child['far']);
+			else
+				newNode.setAttribute('zFar', -1);
 
 			var position = child["position"] ? child["position"] : [0,0,0];
 			var look_at = child["look_at"] ? child["look_at"] : [0,0,1];

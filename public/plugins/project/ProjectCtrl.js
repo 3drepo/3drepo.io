@@ -55,7 +55,7 @@ function($stateProvider, parentStates) {
 
 	StateManager.setClearStateVars("project", ["project"]);
 }])
-.controller('ProjectCtrl', ['$scope', 'StateManager', 'ViewerService', function($scope, StateManager, ViewerService)
+.controller('ProjectCtrl', ['$scope', 'StateManager', 'ViewerService', 'ProjectData', function($scope, StateManager, ViewerService, ProjectData)
 {
 	ViewerService.init();
 
@@ -63,6 +63,10 @@ function($stateProvider, parentStates) {
 		StateManager.setStateVar("branch", "master");
 		StateManager.setStateVar("revision", "head");
 		StateManager.updateState();		// Want to preserve URL structure
+
+		ProjectData.loadingPromise.promise.then(function() {
+			ViewerService.defaultViewer.updateSettings(ProjectData.settings);
+		});
 	});
 
 	$scope.$watchGroup(['state.branch', 'state.revision'], function() {
