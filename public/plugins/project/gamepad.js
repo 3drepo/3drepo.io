@@ -104,7 +104,7 @@ var Gamepad = function(viewer) {
 		}
 
 		/* Chrome Canary Windows */
-		else if ((self.platform === 'win32') && (self.browser === 'Chrome'))
+		else if ((self.platform === 'Win32') && (self.browser === 'Chrome'))
 		{
 			button_idx = 3;
 			$.event.trigger("gamepadMove",
@@ -117,7 +117,7 @@ var Gamepad = function(viewer) {
 		}
 
 		/* Firefox Windows */
-		else if ((self.platform === 'win32') && (self.browser === 'Firefox'))
+		else if ((self.platform === 'Win32') && (self.browser === 'Firefox'))
 		{
 			$.event.trigger("gamepadMove",
 				{
@@ -178,14 +178,16 @@ var Gamepad = function(viewer) {
 		if (gamepadSupportAvailable) {
 			if (window.navigator.platform.indexOf('Linux') != -1)
 				self.platform = 'Linux';
-			else if (window.navigator.platform.indexOf('win32') != -1)
-				self.platform = 'win32';
+			else if (window.navigator.platform.indexOf('Win32') != -1 || window.navigator.platform.indexOf('Win64') != -1 )
+				self.platform = 'Win32';
 			else
 				console.error('Platform ' + window.navigator.platform + ' is not supported.');
 
 			if (window.navigator.appVersion.indexOf('Chrome') != -1)
 				self.browser = 'Chrome';
 			else if (window.navigator.appVersion.indexOf('Firefox') != -1)
+				self.browser = 'Firefox';
+			else if (window.navigator.userAgent.indexOf('Firefox') != -1)
 				self.browser = 'Firefox';
 			else
 				console.error('Browser version ' + window.navigator.appVersion + ' is not supported.');
