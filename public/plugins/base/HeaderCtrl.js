@@ -21,22 +21,27 @@ angular.module('3drepo')
 	self.cameraSwitch	= false;
 	self.source			= null;
 
-	$window.MediaStreamTrack.getSources(function (srcs) {
-		var videoSRCS = srcs.filter(function(item) { return item.kind == 'video'; });
-		var source = null;
+	// TODO: Fix this
 
-		if (videoSRCS.length > 1)
-		{
-			videoSRCS = videoSRCS.filter(function(item) { return (item.facing == 'environment'); });
-		}
+	if ($window.MediaStreamTrack.getSources)
+	{
+		$window.MediaStreamTrack.getSources(function (srcs) {
+			var videoSRCS = srcs.filter(function(item) { return item.kind == 'video'; });
+			var source = null;
 
-		if (!videoSRCS.length)
-		{
-			callback("No valid cameras found");
-		}
+			if (videoSRCS.length > 1)
+			{
+				videoSRCS = videoSRCS.filter(function(item) { return (item.facing == 'environment'); });
+			}
 
-		self.source = videoSRCS[0];
-	});
+			if (!videoSRCS.length)
+			{
+				callback("No valid cameras found");
+			}
+
+			self.source = videoSRCS[0];
+		});
+	}
 
 	this.decodeCanvas = function(scope, element, callback)
 	{
