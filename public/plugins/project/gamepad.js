@@ -132,6 +132,7 @@ var Gamepad = function(viewer) {
 			if (!self.oldButton) {
 				viewer.reset();
 				viewer.setNavMode('NONE');
+				viewer.setApp(null);
 				viewer.disableClicking();
 			}
 
