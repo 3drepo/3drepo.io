@@ -156,8 +156,8 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.runtime = self.viewer.runtime;
 
 		self.showAll = function() {
-			self.setNavMode("TURNTABLE");
 			self.runtime.fitAll();
+			self.setNavMode("TURNTABLE");
 		}
 
 		self.getCurrentViewpoint().addEventListener('viewpointChanged', self.viewPointChanged);
@@ -286,11 +286,11 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		$(document).off("clickObject", functionToBind);
 	}
 
-	if(0)
+	if(1)
 	{
 		this.moveScale = 1.0;
 
-		self.viewer.addEventListener("keypress", function(e) {
+		self.x3ddiv.addEventListener("keypress", function(e) {
 			var mapPos = $("#model__mapPosition")[0];
 			var oldTrans = mapPos.getAttribute("translation").split(",").map(
 				function(res) { return parseFloat(res); });
@@ -482,10 +482,11 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 			viewpoint.setAttribute("bind", true);
 			viewpoint.resetView();
-			self.runtime.resetExamin();
 			viewpoint.addEventListener('viewpointChanged', self.viewPointChanged);
 			self.loadViewpoint = null;
 			viewpoint.appendChild(self.nav);
+
+			self.runtime.resetExamin();
 
 			self.applySettings();
 
@@ -696,25 +697,21 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 			if (self.currentNavMode == 'WAYFINDER') // Exiting the wayfinding mode
 				waypoint.close();
-		}
-		if((self.currentNavMode == 'WAYFINDER') && (mode != 'WAYFINDER'))
-		{
-			waypoint.close();
-		}
 
-		self.currentNavMode = mode;
-		self.nav.setAttribute('type', mode);
+			self.currentNavMode = mode;
+			self.nav.setAttribute('type', mode);
 
-		if (mode == 'WALK')
-		{
-			self.disableClicking();
-			self.setApp(null);
-		} else {
-			self.enableClicking();
+			if (mode == 'WALK')
+			{
+				self.disableClicking();
+				self.setApp(null);
+			} else {
+				self.enableClicking();
+			}
+
+			if ((mode == 'WAYFINDER') && waypoint)
+				waypoint.resetViewer();
 		}
-
-		if ((mode == 'WAYFINDER') && waypoint)
-			waypoint.resetViewer();
 	}
 
 	this.reload = function() {
