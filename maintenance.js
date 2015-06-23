@@ -27,4 +27,4 @@ app.get('/', function(req, res) {
 	res.render('maintenance.jade');
 });
 
-app.listen(80);
+app.listen(8080);
