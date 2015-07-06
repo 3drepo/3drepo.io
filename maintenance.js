@@ -28,3 +28,11 @@ app.get('/', function(req, res) {
 });
 
 app.listen(8080);
+
+var https_app = express();
+
+https_app.get('*', function(req, res) {
+	res.redirect('http://' + req.headers.host + req.url);
+});
+
+https_app.listen(443);

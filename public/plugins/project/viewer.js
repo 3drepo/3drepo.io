@@ -286,7 +286,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		$(document).off("clickObject", functionToBind);
 	}
 
-	if(1)
+	if(0)
 	{
 		this.moveScale = 1.0;
 
@@ -479,6 +479,8 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		if (Object.keys(self.viewpointsNames).indexOf(id) != -1)
 		{
 			var viewpoint = self.viewpointsNames[id];
+
+			self.currentViewpoint = viewpoint._x3domNode;
 
 			viewpoint.setAttribute("bind", true);
 			viewpoint.resetView();
