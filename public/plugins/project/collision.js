@@ -124,6 +124,8 @@ var Collision = function(viewer) {
 
 				viewArea._scene.getViewpoint().setView(tmpMat.inverse());
 				self.viewer.runtime.triggerRedraw();
+			} else {
+				 console.log('Collisiion');
 			}
 		}
 
