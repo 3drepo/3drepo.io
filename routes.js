@@ -62,30 +62,24 @@ module.exports = function(){
 			if ("user" in req.session)
 				username = req.session["user"].username;
 
-			if(!username)
+			if (account && project)
 			{
-				responseCodes.onError("Check user access", responseCodes.NOT_LOGGED_IN, res, null, req.params);
-
-			} else {
-				if (account && project)
-				{
-					accessFunc(username, account, project, function(err) {
-						if(err.value)
-						{
-							logger.log('debug', account + '/' + project + ' is not public project and no user information.');
-							responseCodes.onError("Check project/account access for " + username, err, res, null, req.params);
-						} else {
-							next();
-						}
-					});
-				} else {
-					// No account and project specified, check user is logged in.
-					if (!("user" in req.session)) {
-						logger.log('debug', 'No account and project specified.');
-						responseCodes.onError("Check other access for " + username, responseCodes.NOT_AUTHORIZED, res, req.params, null);
+				accessFunc(username, account, project, function(err) {
+					if(err.value)
+					{
+						logger.log('debug', account + '/' + project + ' is not public project and no user information.');
+						responseCodes.onError("Check project/account access for " + username, err, res, null, req.params);
 					} else {
 						next();
 					}
+				});
+			} else {
+				// No account and project specified, check user is logged in.
+				if (!("user" in req.session)) {
+					logger.log('debug', 'No account and project specified.');
+					responseCodes.onError("Check other access for " + username, responseCodes.NOT_AUTHORIZED, res, req.params, null);
+				} else {
+					next();
 				}
 			}
 		};
