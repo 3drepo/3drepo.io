@@ -128,14 +128,14 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.light.setAttribute('shadowIntensity', 0.0);
 			self.scene.appendChild(self.light);
 
-			self.createViewpoint(name + "_current");
+			self.createViewpoint(name + "_default");
 
 			self.nav = document.createElement('navigationInfo');
 			self.nav.setAttribute('headlight', 'false');
 			self.nav.setAttribute('type', 'TURNTABLE');
 			self.scene.appendChild(self.nav);
 
-			self.loadViewpoint = name + "_current"; // Must be called after creating nav
+			self.loadViewpoint = name + "_default"; // Must be called after creating nav
 
 			self.viewer.addEventListener("keypress", function(e) {
 				if (e.charCode == 'r'.charCodeAt(0))
@@ -185,15 +185,8 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		self.getCurrentViewpoint().addEventListener('viewpointChanged', self.viewPointChanged);
 
 		$(document).on("onLoaded", function(event, objEvent) {
-			if (!self.loadViewpoint)
-			{
-				if(self.defaultShowAll)
-					self.runtime.fitAll();
-				else
-					self.reset();
-			} else {
+			if (self.loadViewpoint)
 				self.setCurrentViewpoint(self.loadViewpoint);
-			}
 
 			var targetParent = $(objEvent.target)[0]._x3domNode._nameSpace.doc._x3dElem;
 
@@ -513,6 +506,14 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.runtime.resetExamin();
 
 			self.applySettings();
+
+			if (id === (self.name + "_default"))
+			{
+				if(self.defaultShowAll)
+					self.runtime.fitAll();
+				else
+					self.reset();
+			}
 
 			return;
 		}
