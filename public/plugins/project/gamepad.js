@@ -143,9 +143,7 @@ var Gamepad = function(viewer) {
 		if(navigator.getGamepads()[0])
 			self.gamepad = navigator.getGamepads()[0];
 
-		if(!self.gamepad)
-			self.viewer.setNavMode('TURNTABLE'); // Manually override navigation
-		else
+		if(self.gamepad)
 			self.checkStatus();
 
 		self.nextTick();
