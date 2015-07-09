@@ -18,7 +18,7 @@
 // Inspired by http://stackoverflow.com/questions/19266002/get-latitude-and-longitude-from-static-google-map
 var config		 = require('../../config.js');
 
-module.exports.addGoogleTiles = function(xmlDoc, width, yrot, worldTileSize, centLat, centLong, zoom, maptype, trans)
+module.exports.addGoogleTiles = function(xmlDoc, width, yrot, worldTileSize, centLat, centLong, zoom, maptype, twosided, trans)
 {
 	var topGroup = xmlDoc.createElement("group");
 	//topGroup.setAttribute("invisible", "true");
@@ -69,16 +69,84 @@ module.exports.addGoogleTiles = function(xmlDoc, width, yrot, worldTileSize, cen
 			var tileLong = ((tileCentX / nTiles) - 128) / (256 / 360);
 
 			var googleMapsURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + tileLat + "," + tileLong + "&size=" + googleTileSize + "x" + googleTileSize + "&zoom=" + zoom + "&key=" + config.googleApiKey + "&maptype=" + maptype;
-
 			var app = xmlDoc.createElement('Appearance');
+
+			if (twosided)
+			{
+				/*
+				var mat = xmlDoc.createElement('Material');
+				mat.setAttribute('transparency', 0.9);
+				app.appendChild(mat);
+				*/
+
+				var shader = xmlDoc.createElement('ComposedShader');
+				shader.setAttribute("USE", "TwoSidedShader");
+				var composedshader = xmlDoc.createElement("ComposedShader");
+				composedshader.setAttribute("DEF", "TwoSidedShader");
+
+				var alphaValue = xmlDoc.createElement("field");
+				alphaValue.setAttribute("name", "alpha");
+				alphaValue.setAttribute("type", "SFFloat");
+				alphaValue.setAttribute("value", twosided);
+
+				var textureID = xmlDoc.createElement("field");
+				textureID.setAttribute("name", "map");
+				textureID.setAttribute("type", "SFInt32");
+				textureID.setAttribute("values", 0);
+
+				composedshader.appendChild(alphaValue);
+				composedshader.appendChild(textureID);
+
+				var vertshader = xmlDoc.createElement("ShaderPart");
+				vertshader.setAttribute("type", "VERTEX");
+				vertshader.textContent = "\n\
+					attribute vec3 position;\n\
+					attribute vec2 texcoord;\n\
+					varying vec2 fragTexCoord;\n\
+					uniform mat4 modelViewProjectionMatrix;\n\
+					\n\
+					void main()\n\
+					{\n\
+						fragTexCoord = vec2(texcoord.x, 1.0 - texcoord.y);\n\
+						gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);\n\
+					}\n\
+				";
+
+				var fragshader = xmlDoc.createElement("ShaderPart");
+				fragshader.setAttribute("type", "FRAGMENT");
+				fragshader.textContent = " \
+					#ifdef GL_ES\n\
+						precision highp float;\n\
+					#endif\n\
+					\n\
+					varying vec2 fragTexCoord;\n\
+					\n\
+					uniform float alpha;\n\
+					uniform sampler2D map;\n\
+					\n\
+					void main()\n\
+					{\n\
+						vec4 mapCol = texture2D(map, fragTexCoord);\n\
+						gl_FragColor.rgba = vec4(mapCol.rgb, alpha);\n\
+					}\n\
+					";
+
+				composedshader.appendChild(vertshader);
+				composedshader.appendChild(fragshader);
+
+				app.appendChild(composedshader);
+			}
+
 			var it = xmlDoc.createElement('ImageTexture');
 			it.setAttribute("url", googleMapsURL);
+
 			app.appendChild(it);
 			shape.appendChild(app);
 
 			var plane = xmlDoc.createElement('Plane');
 			plane.setAttribute('center', x * worldTileSize + "," + y * worldTileSize);
 			plane.setAttribute('size', worldTileSize + "," + worldTileSize);
+			plane.setAttribute('solid', 'false');
 			plane.setAttribute('lit', false);
 
 			shape.appendChild(plane);
