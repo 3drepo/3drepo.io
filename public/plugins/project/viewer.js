@@ -541,6 +541,13 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 			if ('visibilityLimit' in self.settings)
 				self.nav.setAttribute('visibilityLimit', self.settings['visibilityLimit']);
+
+			if ('zFar' in self.settings)
+				self.currentViewpoint._xmlNode.setAttribute('zFar', self.settings['zFar']);
+
+			if ('zNear' in self.settings)
+				self.currentViewpoint._xmlNode.setAttribute('zNear', self.settings['zNear']);
+
 		}
 	}
 

@@ -429,7 +429,10 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			if(!child['maptype'])
 				child['maptype'] = 'satellite';
 
-			var newNode = googleMaps.addGoogleTiles(xmlDoc, child['width'], child['yrot'], child['worldTileSize'], child['lat'], child['long'], child['zoom'], child['maptype'], child['trans']);
+			if (!child["twosided"])
+				child["twosided"] = false;
+
+			var newNode = googleMaps.addGoogleTiles(xmlDoc, child['width'], child['yrot'], child['worldTileSize'], child['lat'], child['long'], child['zoom'], child['maptype'], child["twosided"], child['trans']);
 
 			newNode.setAttribute("id", child['id']);
 			newNode.setAttribute('DEF', dbInterface.uuidToString(child["shared_id"]));
