@@ -65,6 +65,7 @@ var Collision = function(viewer) {
 		var straightDown = new x3dom.fields.SFVec3f(0, -1, 0);
 		var straightUp = new x3dom.fields.SFVec3f(0, 1, 0);
 		var straightAhead = new x3dom.fields.SFVec3f(0, 0, -1);
+		var right = new x3dom.fields.SFVec3f(-1, 0, 0);
 
 		var currProjMat = self.viewer.getProjectionMatrix();
 		var currViewMat = self.viewer.getViewMatrix();
@@ -90,43 +91,59 @@ var Collision = function(viewer) {
 		viewArea._scene._nameSpace.doc.ctx.pickValue(viewArea, viewArea._width/2, viewArea._height/2,
 					this._lastButton, tmpTmpMat, currProjMat.mult(tmpTmpMat));
 
-		var dist = viewArea._pickingInfo.pickPos.subtract(from).length();
+		var dist = self.viewer.avatarRadius + 1.0;
 
 		if (viewArea._pickingInfo.pickObj)
 		{
-			if (!self.stopped && (dist > self.viewer.avatarRadius))
+			dist = viewArea._pickingInfo.pickPos.subtract(from).length();
+		}
+
+		if (!self.stopped && (dist > self.viewer.avatarRadius))
+		{
+
+			// Attach to ground
+			// ----------------
+			// Camera matrix is to look at the ground:
+			// FWD is DOWN
+			// UP is AHEAD
+			// RIGHT is RIGHT
+
+			var tmpUp = tmpFlatAt.subtract(from).normalize();
+			var right = straightDown.cross(tmpUp);
+			tmpUp = right.cross(straightDown);
+
+			//var right = tmpFlatAt
+			//var tmpUp = straightAhead.cross(straightRight);
+
+			from.x += self.deltaX;
+			from.z += self.deltaZ;
+
+			var tmpDownMat = x3dom.fields.SFMatrix4f.identity();
+			tmpDownMat.setValue(right, tmpUp, straightDown.multiply(-1), from);
+			tmpDownMat = tmpDownMat.inverse();
+
+			viewArea._pickingInfo.pickObj = null;
+			viewArea._scene._nameSpace.doc.ctx.pickValue(viewArea, viewArea._width/2, viewArea._height/2,
+						this._lastButton, tmpDownMat, currProjMat.mult(tmpDownMat));
+
+			if (viewArea._pickingInfo.pickObj)
 			{
-				from.x += self.deltaX;
-				from.z += self.deltaZ;
-
-				// Attach to ground
-				var tmpAt = from.addScaled(straightDown, 1.0);
-				var tmpUp = straightAhead.cross(straightDown);
-				var tmpDownMat = x3dom.fields.SFMatrix4f.lookAt(from, tmpAt, tmpUp);
-				tmpDownMat = tmpDownMat.inverse();
-
-				viewArea._scene._nameSpace.doc.ctx.pickValue(viewArea, viewArea._width/2, viewArea._height/2,
-							this._lastButton, tmpDownMat, currProjMat.mult(tmpDownMat));
-
 				var dist = viewArea._pickingInfo.pickPos.subtract(from).length();
-				//var dist = from.z - viewArea._pickingInfo.pickPos.z;
-
-				if (viewArea._pickingInfo.pickObj)
-				{
-					var movement = 0.5 * ((self.viewer.avatarHeight - dist) + self.prevMove);
-					from.y += movement;
-					self.prevMove = movement;
-				}
-
-				var at	 = from.subtract(flyMat.e2());
-				var up	 = flyMat.e1();
-				var tmpMat = x3dom.fields.SFMatrix4f.lookAt(from, at, up);
-
-				viewArea._scene.getViewpoint().setView(tmpMat.inverse());
-				self.viewer.runtime.triggerRedraw();
-			} else {
-				 console.log('Collisiion');
+				var movement = 0.5 * ((self.viewer.avatarHeight - dist) + self.prevMove);
+				from.y += movement;
+				self.prevMove = movement;
 			}
+
+			var at	 = from.subtract(flyMat.e2());
+			var up	 = flyMat.e1();
+			var tmpMat = x3dom.fields.SFMatrix4f.identity();
+
+			var right = up.cross(flyMat.e2());
+			tmpMat.setValue(right, up, flyMat.e2(), from);
+
+			viewArea._scene.getViewpoint().setView(tmpMat.inverse());
+			//viewArea._scene.getViewpoint().setView(tmpDownMat);
+			self.viewer.runtime.triggerRedraw();
 		}
 
 		self.nextTick();
