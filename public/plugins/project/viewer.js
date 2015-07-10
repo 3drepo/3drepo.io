@@ -535,7 +535,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 				self.defaultShowAll = self.settings['start_all'];
 
 			if ('speed' in self.settings)
-				self.speed = self.settings['speed'];
+				self.setSpeed(self.settings['speed']);
 
 			if ('avatarHeight' in self.settings)
 				self.changeAvatarHeight(self.settings['avatarHeight']);
