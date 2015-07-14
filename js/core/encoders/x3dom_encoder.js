@@ -374,7 +374,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 
 
 				if (!child['two_sided']) {
-					newNode = xmlDoc.createElement('TwoSidedMaterial');
+					newNode = xmlDoc.createElement('Material');
 				} else {
 					newNode = xmlDoc.createElement('TwoSidedMaterial');
 				}
@@ -391,17 +391,43 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 				}
 
 				if ('diffuse' in child)
+				{
 					newNode.setAttribute('diffuseColor', child['diffuse'].join(' '));
 
+					if (child['two_sided'])
+						newNode.setAttribute('backDiffuseColor', child['diffuse'].join(' '));
+				}
+
+				if ('emissive' in child)
+				{
+					newNode.setAttribute('emissiveColor', child['emissive'].join(' '));
+
+					if (child['two_sided'])
+						newNode.setAttribute('backEmissiveColor', child['emissive'].join(' '));
+				}
+
 				if ('shininess' in child)
-					newNode.setAttribute('shininess',  child['shininess'] / 512);
+				{
+					newNode.setAttribute('shininess',  child['shininess']); // / 512);
+
+					if (child['two_sided'])
+						newNode.setAttribute('backShininess', child['shininess']);
+				}
 
 				if ('specular' in child)
+				{
 					newNode.setAttribute('specularColor', child['specular'].join(' '));
+
+					if (child['two_sided'])
+						newNode.setAttribute('backSpecularColor', child['specular'].join(' '));
+				}
 
 				if ('opacity' in child) {
 					if (child['opacity'] != 1) {
 						newNode.setAttribute('transparency', 1.0 - child['opacity']);
+
+						if (child['two_sided'])
+							newNode.setAttribute('backTransparency', 1.0 - child['opacity']);
 					}
 				}
 
@@ -624,7 +650,7 @@ function X3D_AddLights(xmlDoc, bbox)
 
 	var pLight = xmlDoc.createElement('PointLight');
 	pLight.setAttribute('ambientIntensity', '1.0');
-	pLight.setAttribute('intensity', '1.0');
+	pLight.setAttribute('intensity', '0.5');
 	//pLight.setAttribute('location', bbox.max.join(' '));
 	//pLight.setAttribute('shadowIntensity', 0.7);
 	pLight.textContent = ' ';
