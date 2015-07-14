@@ -146,7 +146,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 					self.disableClicking();
 				} else if (e.charCode == 'a'.charCodeAt(0)) {
 					self.showAll();
-					self.setNavMode("EXAMINE");
+					self.setNavMode("TURNTABLE");
 					self.enableClicking();
 				} else if (e.charCode == 'n'.charCodeAt(0)) {
 					self.setNavMode("TURNTABLE");
@@ -743,6 +743,9 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 			if ((mode == 'WAYFINDER') && waypoint)
 				waypoint.resetViewer();
+
+			if ((mode == 'TURNTABLE'))
+				self.nav.setAttribute('typeParams', '-0.4 60.0 0 3.14 0.00001');
 		}
 	}
 
