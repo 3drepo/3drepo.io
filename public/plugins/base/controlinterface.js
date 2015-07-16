@@ -17,37 +17,4 @@
 
 // Exposed methods through the X3DOM nodes.
 
-function bgroundClick(event){
-	$.event.trigger("bgroundClicked", event);
-};
-
-function clickObject(event) {
-	$.event.trigger("clickObject", event);
-};
-
-function onMouseOver(event){
-	$.event.trigger("onMouseOver", event);
-}
-
-function onMouseMove(event){
-	$.event.trigger("onMouseMove", event);
-}
-
-function onMouseOver(event){
-	$.event.trigger("onMouseOver", event);
-}
-
-function onViewpointChange(event){
-	$.event.trigger("onViewpointChange", event);
-}
-
-function onLoaded(event){
-	$.event.trigger("onLoaded", event);
-}
-
-function runtimeReady() {
-	$.event.trigger("runtimeReady");
-}
-
-x3dom.runtime.ready = runtimeReady;
 

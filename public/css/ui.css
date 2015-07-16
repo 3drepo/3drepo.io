@@ -1617,3 +1617,11 @@ ul.fancytree-container li {
 .modal-header, .modal-body, .modal-footer {
 	background-color: rgb(5,58,165);
 }
+
+#Axes {
+	width: 100px;
+	height: 100px;
+	bottom: 0px;
+	position: absolute;
+	border: none;
+}
