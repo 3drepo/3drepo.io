@@ -51,6 +51,30 @@ The script may complain that you don't have access to the ports (EACCESS), in wh
 
 Although, this depends on the type of server/application you are running.
 
+Locally running the application
+-------------------------------
+
+The application requires the use of cookies for tracking user authentication. Some browsers do not
+allow the use of cookies for the localhost domain. To circumvent this problem, use need to associate
+a hostname with the loopback address (127.0.0.1)
+
+For both Windows and Linux you must edit the hosts file to add a manual DNS entry for a hostname. This will 
+redirect any requests to the hostname to the loopback address. In our example, we use `example.org` which is customary.
+
+For Windows, you must use an Administrator notepad to edit the file:
+
+`C:\Windows\System32\Drivers\etc\hosts`
+
+For Linux, you must edit the file with Administrator privileges:
+
+`sudo nano /etc/hosts`
+
+Within this file you must append to, or create, a line for the entry for example:
+
+`127.0.0.1 localhost example.org`
+
+In the configuration file for the server, you then set hostname to `example.org` or whatever host you have redirected.
+
 Contact
 -------
 
