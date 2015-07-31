@@ -49,6 +49,7 @@ var Oculus = function(viewer) {
 
 			var leftEye = document.createElement('group');
 			leftEye.setAttribute('def', 'left');
+			leftEye.setAttribute('render', 'false');
 			eyeGroup.appendChild(leftEye);
 
 			var leftShape = document.createElement('shape');
@@ -93,6 +94,7 @@ var Oculus = function(viewer) {
 			// Right eye
 			var rightEye = document.createElement('group');
 			rightEye.setAttribute('def', 'right');
+			rightEye.setAttribute('render', 'false');
 			eyeGroup.appendChild(rightEye);
 
 			var rightShape = document.createElement('shape');
