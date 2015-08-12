@@ -16,7 +16,7 @@
  */
 
 angular.module('3drepo')
-.factory('DiffData', ['$q', 'CurrentDiffBranch', 'CurrentDiffRevision', function($q, CurrentDiffBranch, CurrentDiffRevision){
+.factory('DiffData', ['$q', '$http', 'serverConfig', 'StateManager', 'ViewerService', 'CurrentDiffBranch', 'CurrentDiffRevision', function($q, $http, serverConfig, StateManager, ViewerService, CurrentDiffBranch, CurrentDiffRevision){
 	var o = {
 		CurrentDiffBranch:		CurrentDiffBranch,
 		CurrentDiffRevision:	CurrentDiffRevision,
@@ -28,7 +28,21 @@ angular.module('3drepo')
 		return $q.all([
 			self.CurrentDiffBranch.refresh(),
 			self.CurrentDiffRevision.refresh()
-		]);
+		]).then(function()
+			{
+				var baseUrl = serverConfig.apiUrl(StateManager.state.account + '/' + StateManager.state.project + '/revision/' + StateManager.Data.RevisionData.CurrentRevision.revision + '/diff/' + self.CurrentDiffRevision.revision + '.json');
+
+				$http.get(baseUrl, { withCredentials : true})
+				.then(function(json) {
+					var diffColors = {
+						added:		json.data["added"],
+						modified:	json.data["modified"],
+						deleted:	json.data["deleted"]
+					};
+
+					ViewerService.viewerManager.setDiffColors(diffColors);
+				})
+		});
 	}
 
 	return o;

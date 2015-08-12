@@ -637,6 +637,29 @@ exports.getChildren = function(dbName, project, branch, revision, uuid, callback
 	});
 };
 
+exports.getUIDMap = function(dbName, project, uids, callback) {
+	var uids = uids.map(function(uid) { return stringToUUID(uid); })
+
+	var query = {
+		_id: {$in : uids}
+	};
+
+	var projection = {
+		shared_id : 1
+	};
+
+	dbConn.filterColl(dbName, project + '.scene', query, projection, function(err, doc) {
+		if (err.value) return callback(err);
+
+		var UIDMap = {};
+
+		for (var i = 0; i < doc.length; i++)
+			UIDMap[uuidToString(doc[i]["_id"])] = uuidToString(doc[i]["shared_id"]);
+
+		callback(responseCodes.OK, UIDMap);
+	});
+};
+
 exports.getSIDMap = function(dbName, project, branch, revision, callback) {
 	var historyQuery = null;
 
@@ -1179,31 +1202,99 @@ exports.getDiff = function(account, project, branch, revision, otherbranch, othe
 		};
 	}
 
+	// TODO: Here we compute the added, modified and deleted
+	// should get it directly from the database really.
+
+	/*
 	var projection = {
 		added: 1,
 		modified: 1,
 		deleted : 1
 	};
+	*/
 
-	dbConn.getLatest(account, project + '.history', historyQuery, null, function(err, docs)
+	dbConn.getLatest(account, project + '.history', historyQuery, null, function(err, history)
 	{
 		if(err.value) return callback(err);
 
-		if(!docs[0])
+		if(!history[0])
 			return callback(responseCodes.BRANCH_NOT_FOUND);
 
-		var doc = docs[0];
+		var otherHistoryQuery = null;
 
-		if (doc['added'])
-			doc['added'] = doc['added'].map(function(uid) { return uuidToString(uid); });
+		if (revision != null)
+		{
+			otherHistoryQuery = {
+				_id: stringToUUID(otherrevision)
+			};
+		} else {
+			if (branch == 'master')
+				var branch_id = masterUUID;
+			else
+				var branch_id = stringToUUID(otherbranch);
 
-		if (doc['deleted'])
-			doc['deleted'] = doc['deleted'].map(function(uid) { return uuidToString(uid); });
+			otherHistoryQuery = {
+				shared_id:	branch_id
+			};
+		}	
 
-		if (doc['modified'])
-			doc['modified'] = doc['modified'].map(function(uid) { return uuidToString(uid); });
+		dbConn.getLatest(account, project + '.history', otherHistoryQuery, null, function(err, otherhistory)
+		{
+			if (err.value) return callback(err);
 
-		callback(responseCodes.OK, doc);
+			if(!otherhistory[0])
+				return callback(responseCodes.BRANCH_NOT_FOUND);
+
+			var doc = {};
+
+			var historycurrent      = history[0]['current'];
+			var otherhistorycurrent = otherhistory[0]['current'];
+
+			historycurrent      = historycurrent.map(function(uid) { return uuidToString(uid); })
+			otherhistorycurrent = otherhistorycurrent.map(function(uid) { return uuidToString(uid); })
+
+			/*
+			console.log(JSON.stringify(otherhistorycurrent));
+			console.log(JSON.stringify(historycurrent));
+
+			console.log(JSON.stringify(otherhistorycurrent.map(function (elem)
+				{
+					return historycurrent.indexOf(elem);
+				}
+			)));
+			*/
+
+			doc['added'] = otherhistorycurrent.filter( function (elem)
+				{	
+					return (historycurrent.indexOf(elem) == -1);
+				}
+			);
+
+			doc['deleted'] = historycurrent.filter( function (elem)
+				{	
+					return (otherhistorycurrent.indexOf(elem) == -1);
+				}
+			);
+
+
+			// TODO: Compute the modified
+			//if (doc['modified'])
+			//	doc['modified'] = doc['modified'].map(function(uid) { return uuidToString(uid); });
+
+			self.getUIDMap(account, project, doc['added'].concat(doc['deleted']), function (err, map) {
+				if (err.value) return callback(err);
+
+				console.log(doc);
+
+				doc['added']   = doc['added'].map(function(elem) { return map[elem]; });
+				doc['deleted'] = doc['deleted'].map(function(elem) { return map[elem]; });
+
+				console.log(JSON.stringify(map));
+				console.log(doc);
+
+				callback(responseCodes.OK, doc);
+			});
+		});
 	});
 };
 

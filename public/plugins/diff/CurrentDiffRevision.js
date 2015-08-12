@@ -30,8 +30,8 @@ angular.module('3drepo')
 		var self = this;
 		var account		= StateManager.state.account;
 		var project		= StateManager.state.project;
-		var branch		= StateManager.state.branch;
-		var revision	= StateManager.state.revision;
+		var branch		= StateManager.state.diffbranch;
+		var revision	= StateManager.state.diffrevision;
 
 		var deferred = $q.defer();
 		var baseUrl = "";

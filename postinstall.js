@@ -35,6 +35,7 @@ var public_files = {
 		angularutilsjs: '/public/js/external/angular-ui-utils.min.js',
 		angularrouterjs: '/public/js/external/angular-ui-router.js',
 		angularbsmulti: '/public/js/external/angular-bootstrap-multiselect.js',
+		momentjs: '/public/js/external/moment.js',
 		bootstrapjs: '/public/js/external/bootstrap.min.js',
 		bootstrapdialog: '/public/js/external/bootstrap-dialog.min.js',
 		bootstrapselectjs: '/public/js/external/bootstrap-select.js',
@@ -114,7 +115,8 @@ var internal_files = {
 	'bower_components/fancytree/dist/jquery.fancytree-all.js',
 	'bower_components/jquery/dist/jquery.js',
 	'bower_components/jquery-ui/jquery-ui.js',
-	'bower_components/masonry/masonry.js'
+	'bower_components/masonry/masonry.js',
+	'bower_components/moment/moment.js'
 	],
 
 	x3dom_files: [

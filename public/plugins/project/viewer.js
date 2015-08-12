@@ -602,24 +602,30 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		{
 			for(var m_idx = 0; m_idx < nodes.length; m_idx++)
 			{
-				var origDiff = nodes[m_idx]._x3domNode._vf.diffuseColor;
-				nodes[m_idx]._x3domNode._vf.diffuseColor.setValues(origDiff.multiply(factor));
+				if (nodes[m_idx]._x3domNode)
+				{
+					var origDiff = nodes[m_idx]._x3domNode._vf.diffuseColor;
+					nodes[m_idx]._x3domNode._vf.diffuseColor.setValues(origDiff.multiply(factor));
 
-				var origAmb = nodes[m_idx]._x3domNode._vf.ambientIntensity;
-				nodes[m_idx]._x3domNode._vf.ambientIntensity = origAmb * factor;
+					var origAmb = nodes[m_idx]._x3domNode._vf.ambientIntensity;
+					nodes[m_idx]._x3domNode._vf.ambientIntensity = origAmb * factor;
 
-				nodes[m_idx]._x3domNode._vf.emissiveColor.setValueByStr(emiss);
+					nodes[m_idx]._x3domNode._vf.emissiveColor.setValueByStr(emiss);
+				}
 			}
 		} else {
 			for(var m_idx = 0; m_idx < nodes.length; m_idx++)
 			{
-				var origDiff = nodes[m_idx]._x3domNode._vf.backDiffuseColor;
-				nodes[m_idx]._x3domNode._vf.backDiffuseColor.setValues(origDiff.multiply(factor));
+				if (nodes[m_idx]._x3domNode)
+				{
+					var origDiff = nodes[m_idx]._x3domNode._vf.backDiffuseColor;
+					nodes[m_idx]._x3domNode._vf.backDiffuseColor.setValues(origDiff.multiply(factor));
 
-				var origAmb = nodes[m_idx]._x3domNode._vf.backAmbientIntensity;
-				nodes[m_idx]._x3domNode._vf.backAmbientIntensity = origAmb * factor;
+					var origAmb = nodes[m_idx]._x3domNode._vf.backAmbientIntensity;
+					nodes[m_idx]._x3domNode._vf.backAmbientIntensity = origAmb * factor;
 
-				nodes[m_idx]._x3domNode._vf.backEmissiveColor.setValueByStr(emiss);
+					nodes[m_idx]._x3domNode._vf.backEmissiveColor.setValueByStr(emiss);
+				}
 			}
 		}
 	}
@@ -649,6 +655,10 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		self.applyApp(self.twoGrpNodes, 2.0, "0.0 0.0 0.0", false);
 		self.applyApp(self.twoGrpNodes, 2.0, "0.0 0.0 0.0", true);
 
+		// TODO: Make this more efficient
+		self.applyApp(self.diffColorAdded, 0.5, "0.0 1.0 0.0");
+		self.applyApp(self.diffColorDeleted, 0.5, "1.0 0.0 0.0");
+
 		if (group)
 		{
 			self.twoGrpNodes = group.getElementsByTagName("TwoSidedMaterial");
@@ -661,6 +671,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		self.applyApp(self.oneGrpNodes, 0.5, "1.0 0.5 0.0", false);
 		self.applyApp(self.twoGrpNodes, 0.5, "1.0 0.5 0.0", false);
 		self.applyApp(self.twoGrpNodes, 0.5, "1.0 0.5 0.0", true);
+
 	}
 
 	this.evDist = function(evt, posA)
@@ -1053,9 +1064,18 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		}
 	};
 
+	this.diffColorDeleted = [];
+	this.diffColorAdded   = [];
+
 	this.setDiffColors = function(diffColors) {
 		if(diffColors)
 			self.diffColors = diffColors;
+
+		self.applyApp(self.diffColorAdded, 2.0, "0.0 0.0 0.0", false);
+		self.applyApp(self.diffColorDeleted, 2.0, "0.0 0.0 0.0", false);
+
+		self.diffColorAdded   = [];
+		self.diffColorDeleted = [];
 
 		if (self.diffColors)
 		{
@@ -1071,8 +1091,19 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 						var obj = defMapSearch[self.diffColors["added"][i]];
 						if(obj)
 						{
-							var mat = $(obj._xmlNode).find("TwoSidedMaterial");
-							self.applyApp(mat, 0.5, "0.0 1.0 0.0", false);
+							var mat = $(obj._xmlNode).find("Material");
+
+							if (mat.length)
+							{
+								self.applyApp(mat, 0.5, "0.0 1.0 0.0", false);
+								self.diffColorAdded.push(mat[0]);
+							} else {
+								var mat = $(obj._xmlNode).find("TwoSidedMaterial");
+								self.applyApp(mat, 0.5, "0.0 1.0 0.0", false);
+
+								self.diffColorAdded.push(mat[0]);
+							}
+
 						}
 					}
 				}
@@ -1085,8 +1116,18 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 						var obj = defMapSearch[self.diffColors["deleted"][i]];
 						if(obj)
 						{
-							var mat = $(obj._xmlNode).find("TwoSidedMaterial");
-							self.applyApp(mat, 0.5, "1.0 0.0 0.0", false);
+							var mat = $(obj._xmlNode).find("Material");
+
+							if (mat.length)
+							{
+								self.applyApp(mat, 0.5, "1.0 0.0 0.0", false);
+								self.diffColorDeleted.push(mat[0]);
+							} else {
+								var mat = $(obj._xmlNode).find("TwoSidedMaterial");
+								self.applyApp(mat, 0.5, "1.0 0.0 0.0", false);
+
+								self.diffColorDeleted.push(mat[0]);
+							}
 						}
 					}
 				}

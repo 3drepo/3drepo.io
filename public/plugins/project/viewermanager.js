@@ -148,7 +148,7 @@ var ViewerManager = function() {
 			return;
 
 		// Only updates to the master should do anything
-		if (event.target != self.viewMaster.viewPoint)
+		if (event.target != self.viewMaster.getCurrentViewpoint())
 			return;
 
 		var newPos = event.position.x + "," + event.position.y + "," + event.position.z;
@@ -164,8 +164,8 @@ var ViewerManager = function() {
 
 			if (self.isValidHandle(handle))
 			{
-				self.viewers[handle].viewPoint.setAttribute("position", newPos);
-				self.viewers[handle].viewPoint.setAttribute("orientation", newOrient);
+				self.viewers[handle].getCurrentViewpoint().setAttribute("position", newPos);
+				self.viewers[handle].getCurrentViewpoint().setAttribute("orientation", newOrient);
 			}
 		}
 	};
@@ -197,9 +197,8 @@ var ViewerManager = function() {
 	};
 
 	this.setDiffColors = function(diffColors) {
-		self.getDefaultViewer().setDiffColors(diffColors, true);
-		self.getDiffViewer().setDiffColors(diffColors, false);
-		self.getDiffViewer().disableClicking();
+		self.getDefaultViewer().setDiffColors(diffColors);
+		self.getDiffViewer().setDiffColors(diffColors);
 	};
 
 	this.getDiffViewer = function() {
