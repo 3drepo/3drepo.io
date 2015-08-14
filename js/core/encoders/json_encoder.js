@@ -20,6 +20,8 @@ var uuidToString = require('../db_interface.js').uuidToString;
 var search = require('./helper/search.js').search;
 var log_iface = require('../logger.js');
 var logger = log_iface.logger;
+var C = require('../constants.js');
+var repoNodeMesh = require('../repoNodeMesh.js');
 
 var responseCodes = require('../response_codes.js');
 
@@ -112,8 +114,10 @@ function getTree(dbInterface, account, project, branch, revision, sid, namespace
 {
 		if (sid == "root")
 		{
-			dbInterface.getScene(account, project, branch, revision, false, function(err, doc) {
+			dbInterface.getRootNode(account, project, branch, revision, false, function(err, dbObj) {
 				if(err.value) return err_callback(err);
+
+				var doc = repoGraphScene.decode([dbObj]);
 
 				var head = [{}];
 				var node = doc['mRootNode'];
@@ -421,6 +425,94 @@ exports.route = function(router)
 
 			})
 		});
+	});
+
+	router.get('json', '/:account/:project/:uid', function(res, params, err_callback) {
+		if(params.subformat == "mpc")
+		{
+			router.dbInterface.getObject(params.account, params.project, params.uid, null, null, function (err, type, uid, fromStash, scene) {
+				if (err.value) return err_callback(err);
+
+				if (type == "mesh")
+				{
+					var mesh = scene.meshes[params.uid];
+
+					if (mesh)
+					{
+						if (mesh[C.REPO_NODE_LABEL_COMBINED_MAP])
+						{
+							var subMeshes   = mesh[C.REPO_NODE_LABEL_COMBINED_MAP];
+							var subMeshKeys = Object.keys(subMeshes);
+
+							var outJSON = {};
+
+							outJSON["numberOfIDs"] = subMeshKeys.length;
+							outJSON["maxGeoCount"] = subMeshKeys.length;
+
+							router.dbInterface.getChildrenByUID(params.account, params.project, params.uid, function (err, docs) {
+								if (err.value) return err_callback(err);
+
+								var children = repoGraphScene.decode(docs);
+
+								outJSON["appearance"] = [];
+
+								if (children.materials_count)
+								{
+									var childID = Object.keys(children.materials)[0];
+									var child   = children.materials[childID];
+
+									var app = {};
+									app["name"] = "A_0";
+
+									var material = {};
+
+									if ('diffuse' in child)
+										material["diffuseColor"] = child['diffuse'].join(' ');
+
+									if ('emissive' in child)
+										material["emissiveColor"] = child['emissive'].join(' ');
+
+									if ('shininess' in child)
+										material["shininess"] = child["shininess"];
+
+									if ('specular' in child)
+										material["specularColor"] = child["specular"].join(" ");
+
+									if ('opacity' in child)
+										material["transparency"] = 1.0 - child["opacity"];
+
+									app["material"] = material;
+								}
+
+								outJSON["appearance"].push(app);
+
+								var bbox = repoNodeMesh.extractBoundingBox(mesh);
+								outJSON["mapping"] = [];
+
+								for(var i = 0; i < subMeshKeys.length; i++)
+								{
+									var map = {};
+
+									map["name"]       = subMeshKeys[i];
+									map["appearance"] = "A_0"; // TODO: Relies on having an appearance
+									map["min"]        = bbox.min.join(' ');
+									map["max"]        = bbox.max.join(' ');
+									map["usage"]      = ["M_0"];
+
+									outJSON["mapping"].push(map);
+								}
+
+								return err_callback(responseCodes.OK, outJSON);
+							});
+						}
+					} else {
+						return err_callback(responseCodes.OBJECT_NOT_FOUND);
+					}
+				}
+			});
+		} else {
+			err_callback(responseCodes.FORMAT_NOT_SUPPORTED);
+		}
 	});
 };
 

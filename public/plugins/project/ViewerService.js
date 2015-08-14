@@ -45,9 +45,9 @@ angular.module('3drepo')
 
 		if (revision == "head")
 		{
-			url = serverConfig.apiUrl(StateManager.state.account + '/' + StateManager.state.project + '/revision/' + branch + '/head.x3d.src');
+			url = serverConfig.apiUrl(StateManager.state.account + '/' + StateManager.state.project + '/revision/' + branch + '/head.x3d.mp');
 		} else {
-			url = serverConfig.apiUrl(StateManager.state.account + '/' + StateManager.state.project + '/revision/' + revision + '.x3d.src');
+			url = serverConfig.apiUrl(StateManager.state.account + '/' + StateManager.state.project + '/revision/' + revision + '.x3d.mp');
 		}
 
 		self.defaultViewer.loadURL(url);

@@ -565,10 +565,11 @@ exports.getDBList = function(callback) {
 	});
 };
 
-exports.getRootNode = function(dbName, project, branch, revision, callback) {
+
+exports.queryScene = function(dbName, project, branch, revision, filter, projection, callback) {
 	var historyQuery = null;
 
-	if (revision != null)
+	if (revision)
 	{
 		historyQuery = {
 			_id: stringToUUID(revision)
@@ -586,23 +587,213 @@ exports.getRootNode = function(dbName, project, branch, revision, callback) {
 
 	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
 	{
-		var filter = {
-			parents : {"$exists" : false},
-			_id: {$in: docs[0]['current']}
-		};
+		if (err.value) return callback(err);
 
-		dbConn.filterColl(dbName, project + '.scene', filter, null, function(err, doc) {
-			if (err.value) return callback(err);
+		if (!docs.length) return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
 
-			if (!doc.length)
-				return callback(responseCodes.ROOT_NODE_NOT_FOUND);
+		filter["rev_id"] = docs[0]["_id"];
 
-			callback(responseCodes.OK, doc[0]);
+		dbConn.filterColl(dbName, project + '.stash.3drepo', filter, projection, function(err, coll) {
+			if (!coll.length || err.value)
+			{
+				// TODO: At this point we should generate send off to generate a stash
+				// There is no stash so just pass back the unoptimized scene graph
+				delete filter["rev_id"];
+
+				filter["_id"] = { $in: docs[0]['current'] };
+
+				dbConn.filterColl(dbName, project + '.scene', filter, projection, function(err, coll) {
+					if (err.value) return callback(err);
+
+					callback(responseCodes.OK, false, coll);
+				});
+			} else {
+				callback(responseCodes.OK, true, coll);
+			}
 		});
+	});
+}
+
+exports.getRootNode = function(dbName, project, branch, revision, queryStash, callback) {
+	var historyQuery = null;
+
+	if (revision)
+	{
+		historyQuery = {
+			_id: stringToUUID(revision)
+		};
+	} else {
+		if (branch == 'master')
+			var branch_id = masterUUID;
+		else
+			var branch_id = stringToUUID(branch);
+
+		historyQuery = {
+			shared_id:	branch_id
+		};
+	}
+
+	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
+	{
+		if (err.value) return callback(err);
+
+		if (!docs.length)
+			return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+
+		if (queryStash)
+		{
+			var filter = {
+				parents : {"$exists" : false},
+				rev_id : stringToUUID(docs[0]["_id"])
+			};
+
+			dbConn.filterColl(dbName, project + '.stash.3drepo', filter, null, function(err, doc) {
+				if (err.value) return callback(err)
+
+				if (!doc.length)
+					return callback(responseCodes.ROOT_NODE_NOT_FOUND);
+
+				callback(responseCodes.OK, doc[0]);
+			});
+		} else {
+			var filter = {
+				parents : {"$exists" : false},
+				_id: {$in: docs[0]['current']}
+			};
+
+			dbConn.filterColl(dbName, project + '.scene', filter, null, function(err, doc) {
+				if (err.value) return callback(err);
+
+				if (!doc.length)
+					return callback(responseCodes.ROOT_NODE_NOT_FOUND);
+
+				callback(responseCodes.OK, doc[0]);
+			});
+		}
 	});
 };
 
-exports.getChildren = function(dbName, project, branch, revision, uuid, callback) {
+/*
+exports.queryObjectsScene = function(dbName, project, uid, rid, sid, filter, projection, callback) {
+
+	// If the uid is not specified then we are requesting a 
+	// specific object for a branch and revision
+	if (!uid)
+	{
+		var filter = {
+			parents: stringToUUID(sid),
+			type: 'meta'
+		};
+
+		var projection = {
+			shared_id: 0,
+			paths: 0,
+			type: 0,
+			api: 0,
+			parents: 0
+		};
+
+		self.queryScene(dbName, project, branch, revision, filter, projection, function(err, fromStash, docs) {
+			if (err.value) return callback(err);
+
+			callback(responseCodes.OK, docs);
+		});
+	} else {
+		// In this case we want an object with a specific uid
+		// first we find the revision that it belongs to
+		var historyQuery = {
+			current : stringToUUID(uid)
+		};
+
+		var historyProjection = {
+			_id : 1
+		}
+
+		dbConn.filterColl(dbName, project + '.history', historyQuery, historyProjection, function(err, obj) {
+			if (err.value) return callback(err);
+
+			if (!obj.length)
+				return callback(responseCodes.HISTORY_NOT_FOUND);
+
+			var revision = uuidToString(obj[0]["_id"]);
+
+			var f
+				parents: obj[0]["shared_id"],
+				type: 'meta'
+			};
+
+			var projection = {
+				shared_id: 0,
+				paths: 0,
+				type: 0,
+				api: 0,
+				parents: 0
+			};
+
+			// TODO: This will query the history collection again, unnecessarily
+			self.queryScene(dbName, project, null, revision, filter, projection, function(err, docs) {
+				if (err.value) return callback(err);
+
+				callback(responseCodes.OK, docs);
+			});
+		});
+	}
+}
+*/
+
+exports.getChildrenByUID = function(dbName, project, uid, callback) {
+
+	// First lookup the object in either the stash or the scene
+	self.getObject(dbName, project, uid, null, null, function (err, type, uid, fromStash, obj) {
+		if (err.value) return callback(err);
+
+		if (obj["all"].length > 1) return callback(responseCodes.OBJECT_NOT_FOUND);
+
+		var sid    = Object.keys(obj["all"])[0];
+
+		var sceneQuery = {
+			parents: stringToUUID(sid)
+		};
+
+		if (fromStash) // If we got this from the stash
+		{
+			var rev_id = uuidToString(obj["all"][sid][C.REPO_NODE_LABEL_REV_ID]);
+
+			self.queryScene(dbName, project, null, rev_id, sceneQuery, null, function (err, fromStash, docs) {
+				if (err.value) return callback(err);
+
+				if (!docs.length) return callback(responseCodes.OBJECT_NOT_FOUND);
+
+				callback(responseCodes.OK, docs);
+			});
+		} else {
+			var historyQuery = {
+				current: stringToUUID(uid)
+			};
+
+			var projection = {
+				_id : 1
+			};
+
+			dbConn.getLatest(dbName, project + '.history', historyQuery, projection, function (err, docs) {
+				if (err.value) return callback(err);
+
+				if (!docs.length) return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+
+				// If the object came from the 
+				self.queryScene(dbName, project, null, uuidToString(docs[0]["_id"]), sceneQuery, null, function (err, fromStash, docs) {
+					if (err.value) return callback(err);
+
+					if (!docs.length) return callback(responseCodes.OBJECT_NOT_FOUND);
+
+					callback(responseCodes.OK, docs);
+				});
+			});
+		}
+	});
+}
+
+exports.getChildren = function(dbName, project, branch, revision, sid, callback) {
 	var historyQuery = null;
 
 	if (revision != null)
@@ -624,7 +815,7 @@ exports.getChildren = function(dbName, project, branch, revision, uuid, callback
 	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
 	{
 		var filter = {
-			parents : stringToUUID(uuid),
+			parents : stringToUUID(sid),
 			type: {$in : ['mesh', 'transformation', 'ref', 'map']},
 			_id: {$in: docs[0]['current']}
 		};
@@ -681,6 +872,11 @@ exports.getSIDMap = function(dbName, project, branch, revision, callback) {
 
 	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
 	{
+		if (err.value) return callback(err);
+
+		if (!docs.length)
+			return callback(repsonseCodes.PROJECT_HISTORY_NOT_FOUND);
+
 		var filter = {
 			_id: {$in: docs[0]['current']}
 		};
@@ -927,8 +1123,6 @@ exports.storeIssue = function(dbName, project, sid, owner, data, callback) {
 
 				data.owner = owner;
 
-				console.log("DATA: " + JSON.stringify(data));
-
 				coll.insert(data, function(err, count) {
 					if (err) return callback(responseCodes.DB_ERROR(err));
 
@@ -992,70 +1186,49 @@ exports.getBranches = function(dbName, project, callback) {
 
 exports.getMetadata = function(dbName, project, branch, revision, sid, uid, callback) {
 
-	var historyQuery = null;
-
+	// If the uid is not specified then we are requesting a 
+	// specific object for a branch and revision
 	if (!uid)
 	{
-		if (revision != null)
-		{
-			historyQuery = {
-				_id: stringToUUID(revision)
-			};
-		} else {
-			if (branch == 'master')
-				var branch_id = masterUUID;
-			else
-				var branch_id = stringToUUID(branch);
-
-			historyQuery = {
-				shared_id:	branch_id
-			};
-		}
-
-		dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
-		{
-			if (!docs.length)
-				return callback(responseCodes.HISTORY_NOT_FOUND);
-
-			var filter = {
-				parents: stringToUUID(sid),
-				type: 'meta',
-				_id: { $in: docs[0]['current']}
-			};
-
-			var projection = {
-				shared_id: 0,
-				paths: 0,
-				type: 0,
-				api: 0,
-				parents: 0
-			};
-
-			dbConn.filterColl(dbName, project + '.scene', filter, projection, function(err, metadocs) {
-				if (err.value) return callback(err);
-
-				for(var i = 0; i < metadocs.length; i++)
-					metadocs[i]["_id"] = uuidToString(metadocs[i]["_id"]);
-
-				callback(responseCodes.OK, metadocs);
-			});
-		});
-	} else {
-		var objQuery = {
-			_id: stringToUUID(uid)
+		var filter = {
+			parents: stringToUUID(sid),
+			type: 'meta'
 		};
 
 		var projection = {
-			shared_id : 1
+			shared_id: 0,
+			paths: 0,
+			type: 0,
+			api: 0,
+			parents: 0
 		};
 
-		dbConn.filterColl(dbName, project + '.scene', objQuery, null, function(err, obj) {
+		self.queryScene(dbName, project, branch, revision, filter, projection, function(err, fromStash, metadocs) {
+			if (err.value) return callback(err);
+
+			for(var i = 0; i < metadocs.length; i++)
+				metadocs[i]["_id"] = uuidToString(metadocs[i]["_id"]);
+
+			callback(responseCodes.OK, metadocs);
+		});
+	} else {
+		// In this case we want an object with a specific uid
+		// first we find the revision that it belongs to
+		var historyQuery = {
+			current : stringToUUID(uid)
+		};
+
+		var historyProjection = {
+			_id : 1
+		}
+
+		dbConn.filterColl(dbName, project + '.history', historyQuery, historyProjection, function(err, obj) {
 			if (err.value) return callback(err);
 
 			if (!obj.length)
 				return callback(responseCodes.OBJECT_NOT_FOUND);
 
-			if (err.value) return callback(err);
+			var revision = uuidToString(obj[0]["_id"]);
 
 			var filter = {
 				parents: obj[0]["shared_id"],
@@ -1070,7 +1243,8 @@ exports.getMetadata = function(dbName, project, branch, revision, sid, uid, call
 				parents: 0
 			};
 
-			dbConn.filterColl(dbName, project + '.scene', filter, projection, function(err, metadocs) {
+			// TODO: This will query the history collection again, unnecessarily
+			self.queryScene(dbName, project, null, revision, filter, projection, function(err, fromStash, metadocs) {
 				if (err.value) return callback(err);
 
 				for(var i = 0; i < metadocs.length; i++)
@@ -1090,97 +1264,69 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 		var query = {
 			_id: stringToUUID(uid)
 		};
+	
+		dbConn.filterColl(dbName, project + '.stash.3drepo', query, {}, function(err, obj) {
+			if (err.value) return callback(err);
 
-		dbConn.filterColl(dbName, project + '.scene', query, null, function(err,doc) {
-			if(err.value)
-				return callback(err);
+			if (!obj.length)
+			{
+				// TODO: At this point we should generate the scene graph
+				// There is no stash so just pass back the unoptimized scene graph
 
-			callback(responseCodes.OK, doc[0]["type"], uid, repoGraphScene.decode(doc))
+				dbConn.filterColl(dbName, project + '.scene', query, {}, function(err, obj) {
+					if (err.value) return callback(err);
+
+					if (!obj.length)
+						return callback(responseCodes.OBJECT_NOT_FOUND);
+
+					return callback(responseCodes.OK, obj[0]["type"], uuidToString(obj[0]["_id"]), false, repoGraphScene.decode(obj));
+				});
+			} else {
+				return callback(responseCodes.OK, obj[0]["type"], uuidToString(obj[0]["_id"]), true, repoGraphScene.decode(obj));
+			}
 		});
 
 	} else if (rid && sid) {
-		var historyQuery = {
-			_id : stringToUUID(rid)
+
+		var query = {
+			shared_id : stringToUUID(sid),
 		};
 
-		dbConn.filterColl(dbName, project + '.history', historyQuery, null, function(err, docs)
-		{
-			if(err.value)
-				return callback(err);
+		dbConn.filterColl(dbName, project + '.stash.3drepo', query, {}, function (err, obj) {
+			if (err.value) return callback(err);
 
-			if(!docs.length)
-				return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
-
-			var query = {
-				shared_id : stringToUUID(sid),
-				_id		  : { $in : docs[0]['current']}
-			};
-
-			dbConn.filterColl(dbName, project + '.scene', query, null, function(err, obj) {
+			self.queryScene(dbName, project, rid, query, {}, function(err, fromStash, obj) {
 				if (err.value) return callback(err);
 
 				if (!obj.length)
 					return callback(responseCodes.OBJECT_NOT_FOUND);
 
-				return callback(responseCodes.OK, obj[0]["type"], uuidToString(obj[0]["_id"]), repoGraphScene.decode(obj));
+				return callback(responseCodes.OK, obj[0]["type"], uuidToString(obj[0]["_id"]), fromStash, repoGraphScene.decode(obj));
 			});
-
 		});
 	} else {
-		return callback(responseCodes.RID_SID_OR_UID_NOT_SPECIFIED, null, null);
+		return callback(responseCodes.RID_SID_OR_UID_NOT_SPECIFIED, null, null, null);
 	}
 }
 
 exports.getScene = function(dbName, project, branch, revision, full, callback) {
-	var historyQuery = null;
 
-	if (revision != null)
+	if (!full)
 	{
-		historyQuery = {
-			_id: stringToUUID(revision)
+		var projection = {
+			vertices: 0,
+			normals: 0,
+			faces: 0,
+			data: 0,
+			uv_channels: 0
 		};
 	} else {
-		if (branch == 'master')
-			var branch_id = masterUUID;
-		else
-			var branch_id = stringToUUID(branch);
-
-		historyQuery = {
-			shared_id:	branch_id
-		};
+		var projection = {};
 	}
 
-	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
-	{
-		if(err.value) return callback(err);
-
-		if(!docs[0])
-			return callback(responseCodes.BRANCH_NOT_FOUND);
-
-		if (!full)
-		{
-			var projection = {
-				vertices: 0,
-				normals: 0,
-				faces: 0,
-				data: 0,
-				uv_channels: 0
-			};
-		} else {
-			var projection = {};
-		}
-
-		var query = {
-			_id: { $in: docs[0]['current'] }
-		};
-
-		dbConn.filterColl(dbName, project + '.scene', query, projection, function(err, coll) {
-			if (err.value) return callback(err);
-
-			callback(responseCodes.OK, repoGraphScene.decode(coll));
-		});
+	exports.queryScene(dbName, project, branch, revision, {}, projection, function(err, fromStash, coll) {
+		callback(responseCodes.OK, repoGraphScene.decode(coll));
 	});
-
 };
 
 exports.getDiff = function(account, project, branch, revision, otherbranch, otherrevision, callback) {
@@ -1296,30 +1442,6 @@ exports.getDiff = function(account, project, branch, revision, otherbranch, othe
 			});
 		});
 	});
-};
-
-exports.getCache = function(project, uid, getData, level, callback) {
-	var projection = null;
-
-	if (!getData)
-	{
-		projection = {
-			idx_buf : 0,
-			vert_buf : 0
-		};
-	}
-
-	var filter = {mesh_id : stringToUUID(uid)};
-
-	if (level)
-		filter['level'] = parseInt(level);
-
-	dbConn.filterColl(project, "repo.cache", filter, projection, function(err, coll) {
-		if (err.value) return callback(err);
-
-		callback(responseCodes.OK, coll);
-	});
-
 };
 
 exports.uuidToString = uuidToString;

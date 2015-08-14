@@ -348,13 +348,14 @@ module.exports = function(router, dbInterface, checkAccess){
 	});
 
 	// Get object with specific uid in a specific format
-	router.get('/:account/:project/meta/:uid.:format?', checkAccess, function(req, res, next) {
+	router.get('/:account/:project/meta/:uid.:format?.:subformat?', checkAccess, function(req, res, next) {
 		var format = req.params["format"].toLowerCase();
 		var current_user = ("user" in req.session) ? req.session.user.username : "";
 
 		var params = {
 			account:   req.params["account"],
 			project:   req.params["project"],
+			subformat: req.params["subformat"],
 			uid:	   req.params["uid"],
 			user:	   current_user
 		};

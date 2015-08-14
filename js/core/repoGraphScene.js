@@ -191,5 +191,7 @@ exports.decode = function(bsonArray) {
 	if (rootNode)
 		scene.mRootNode = rootNode;
 
+	scene.all = all;
+
 	return scene;
 };
