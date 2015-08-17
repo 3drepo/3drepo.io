@@ -117,10 +117,13 @@ function getTree(dbInterface, account, project, branch, revision, sid, namespace
 			dbInterface.getRootNode(account, project, branch, revision, false, function(err, dbObj) {
 				if(err.value) return err_callback(err);
 
-				var doc = repoGraphScene.decode([dbObj]);
+				var doc = repoGraphScene.decode(dbObj);
 
 				var head = [{}];
 				var node = doc['mRootNode'];
+
+				if (!node)
+					return err_callback(err);
 
 				logger.log('debug', 'Found root node ' + node["id"]);
 

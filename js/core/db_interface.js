@@ -875,7 +875,7 @@ exports.getSIDMap = function(dbName, project, branch, revision, callback) {
 		if (err.value) return callback(err);
 
 		if (!docs.length)
-			return callback(repsonseCodes.PROJECT_HISTORY_NOT_FOUND);
+			return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
 
 		var filter = {
 			_id: {$in: docs[0]['current']}
@@ -1256,6 +1256,34 @@ exports.getMetadata = function(dbName, project, branch, revision, sid, uid, call
 	}
 };
 
+exports.getMeshFiles = function(dbName, project, fromStash, uid, obj, callback)
+{
+		var gridfstypes = [
+			C.REPO_NODE_LABEL_VERTICES,
+			C.REPO_NODE_LABEL_FACES,
+			C.REPO_NODE_LABEL_NORMALS,
+			//C.REPO_NODE_LABEL_COLORS,
+			C.REPO_NODE_LABEL_UV_CHANNELS	
+		];
+
+		var numTasks = gridfstypes.length;
+		var subColl = fromStash ? 'stash.3drepo' : 'scene';
+
+		async.each(gridfstypes, function (fstype, callback) {
+			console.log(fstype);
+
+			dbConn.getGridFSFile(dbName, project + '.' + subColl, uid + "." + fstype, function(err, data)
+			{
+				if (!err["value"])
+					obj[fstype] = data;
+
+				callback(obj);
+			});
+		}, function (err, obj) {
+			return callback(responseCodes.OK, "mesh", uid, fromStash, repoGraphScene.decode(obj));
+		});
+}
+
 exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 	logger.log('debug', 'Requesting object (U, R, S) (' + uid + ',' + rid + ',' + sid + ')');
 
@@ -1279,10 +1307,28 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 					if (!obj.length)
 						return callback(responseCodes.OBJECT_NOT_FOUND);
 
-					return callback(responseCodes.OK, obj[0]["type"], uuidToString(obj[0]["_id"]), false, repoGraphScene.decode(obj));
+					var type = obj[0]["type"];
+					var uid = uuidToString(obj[0]["_id"]);
+
+					if (type == "mesh")
+					{
+						self.getMeshFiles(dbName, project, false, uid, obj, callback);
+					} else {
+						return callback(responseCodes.OK, type, uid, false, repoGraphScene.decode(obj));
+					}
 				});
 			} else {
-				return callback(responseCodes.OK, obj[0]["type"], uuidToString(obj[0]["_id"]), true, repoGraphScene.decode(obj));
+				var type = obj[0]["type"];
+				var uid = uuidToString(obj[0]["_id"]);
+
+				// TODO: Make this more concrete
+				// if a mesh load the vertices, indices, colors etc from GridFS
+				if (type == "mesh")
+				{
+					self.getMeshFiles(dbName, project, true, uid, obj, callback);
+				} else {
+					return callback(responseCodes.OK, type, uid, true, repoGraphScene.decode(obj));
+				}
 			}
 		});
 
@@ -1292,17 +1338,18 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 			shared_id : stringToUUID(sid),
 		};
 
-		dbConn.filterColl(dbName, project + '.stash.3drepo', query, {}, function (err, obj) {
+		self.queryScene(dbName, project, rid, query, {}, function(err, fromStash, obj) {
 			if (err.value) return callback(err);
 
-			self.queryScene(dbName, project, rid, query, {}, function(err, fromStash, obj) {
-				if (err.value) return callback(err);
+			if (!obj.length)
+				return callback(responseCodes.OBJECT_NOT_FOUND);
 
-				if (!obj.length)
-					return callback(responseCodes.OBJECT_NOT_FOUND);
-
-				return callback(responseCodes.OK, obj[0]["type"], uuidToString(obj[0]["_id"]), fromStash, repoGraphScene.decode(obj));
-			});
+			if (type == "mesh")
+			{
+				self.getMeshFiles(dbName, project, fromStash, uid, obj, callback);
+			} else {
+				return callback(responseCodes.OK, type, uid, fromStash, repoGraphScene.decode(obj));
+			}
 		});
 	} else {
 		return callback(responseCodes.RID_SID_OR_UID_NOT_SPECIFIED, null, null, null);

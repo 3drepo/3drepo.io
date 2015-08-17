@@ -144,10 +144,45 @@ MongoDB.prototype.dbCallback = function(dbName, callback) {
 			callback(responseCodes.OK, dbConn);
 		});
 	});
-
 }
 
 MongoDB.prototype.Binary = mongo.Binary;
+
+/*******************************************************************************
+ * Get a file from the Grid FS store
+ *
+ * @param {string} dbName     - Database name to get the file from
+ * @param {string} collName   - Collection to get the file from
+ * @param {string} fileName   - File name to retrieve
+ * @param {function} callback - Callback function to return the file data
+ *
+ ******************************************************************************/
+MongoDB.prototype.getGridFSFile = function(dbName, collName, fileName, callback)
+{
+	this.dbCallback(dbName, function (err, dbConn) {
+		if (err.value) return callback(err);
+
+		var options = {
+			"root" : collName
+		};
+
+		var gs = new mongo.GridStore(dbConn, fileName, "r", options);
+
+		gs.open(function (err, gs) {
+			if (err)
+				return callback(responseCodes.DB_ERROR(err));
+
+			gs.seek(0, function() {
+				gs.read(function(err, data) {
+					if (err)
+						return callback(responseCodes.DB_ERROR(err));
+
+					callback(responseCodes.OK, new mongo.Binary(data));
+				});
+			});
+		});
+	});
+}
 
 /*******************************************************************************
  * Run an aggregation query

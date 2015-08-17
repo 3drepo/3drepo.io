@@ -120,8 +120,9 @@
 		var bufPos = 0;
 
 		var vertexWritePosition = bufPos;
-		if (mesh['vertices'])
+		if (mesh['vertices']) {
 			bufPos += mesh['vertices'].buffer.length;
+		}
 
 		var normalWritePosition = bufPos;
 		if (mesh['normals'])

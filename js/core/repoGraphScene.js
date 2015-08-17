@@ -37,8 +37,10 @@ var logger = log_iface.logger;
  *
  * @param {Array} bsonArray
  */
-exports.decode = function(bsonArray) {
+exports.decode = function(bsonArray, gridfsfiles) {
 	var rootNode;
+
+	gridfsfiles = typeof(gridfsfiles) === 'undefined' ? {} : gridfsfiles;
 
 	// return variable
 	var scene = new Object();
@@ -83,6 +85,7 @@ exports.decode = function(bsonArray) {
 							rootNode = bson;
 						break;
 					case C.REPO_NODE_TYPE_MESH :
+						console.log(bson["vertices"]);
 						meshes[bson.id] = bson;
 						scene[C.REPO_SCENE_LABEL_MESHES_COUNT]++;
 						break;
