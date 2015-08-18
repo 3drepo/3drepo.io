@@ -3,5 +3,5 @@
 	url = https://github.com/istvan-ujjmeszaros/bootstrap-autohidingnavbar.git
 [submodule "x3dom"]
 	path = submodules/x3dom
-	url = git://github.com/3drepo/x3dom.git
+	url = https://github.com/3drepo/x3dom.git
 	ignore=dirty
