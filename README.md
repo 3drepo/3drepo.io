@@ -13,7 +13,7 @@ Note: If using windows, please ensure cmd.exe was invoked as adminstrator (i.e. 
 
 1. Clone the repository: `git clone https://github.com/3drepo/3drepo.io.git`
 2. Change directory: `cd 3drepo.io`
-3. (Optional) Update submodules: `git submodule update --init --recursive`
+3. Update submodules: `git submodule update --init --recursive`
 4. Configure the system as below.
 5. Ensure [Python v2](https://www.python.org/) and [Node.js](https://nodejs.org/) are installed.
 5. Install the required dependencies: `npm install`  
