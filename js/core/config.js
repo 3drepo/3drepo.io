@@ -77,10 +77,10 @@ var fillInServerDetails = function(serverObject, name, usingIP, using_ssl, host,
 
 	// Have to use subdirectory with an IP address
 	if (usingIP) {
-		if (!config.apiServer.sub_domain_or_dir)
+		if (!config.api_server.sub_domain_or_dir)
 		{
 			console.log("WARNING: IP specified but tried to use sub-domain. Setting to sub-directory.");
-			config.apiServer.sub_domain_or_dir = 1;
+			config.api_server.sub_domain_or_dir = 1;
 		}
 	}
 
@@ -118,8 +118,8 @@ config.host = coalesce(config.host, "127.0.0.1");
 var usingIP = checkIP(config.host);
 var using_ssl = ('ssl' in config);
 
-fillInServerDetails(config.apiServer, "api", usingIP, using_ssl, config.host, true);
-config.apiServer.external = coalesce(config.apiServer.external, false); // Do we need to start an API server, or just link to an external one.
+fillInServerDetails(config.api_server, "api", usingIP, using_ssl, config.host, true);
+config.api_server.external = coalesce(config.api_server.external, false); // Do we need to start an API server, or just link to an external one.
 
 // Set up other servers
 for(i in config.servers)
@@ -127,11 +127,11 @@ for(i in config.servers)
 	fillInServerDetails(config.servers[i], "server_" + i, usingIP, using_ssl, config.host, false);
 }
 
-// If the apiServer is running on a subdirectory, config.subdirectory will be true
-// If the apiServer is running different subdomain it will require virtual hosts
+// If the API server is running on a subdirectory, config.subdirectory will be true
+// If the API server is running different subdomain it will require virtual hosts
 // If both these are set to false then you enter advanced mode (see 3drepo.js)
-config.subdirectory = coalesce(config.crossOrigin, config.apiServer.sub_domain_or_dir === 1);
-config.vhost        = coalesce(config.vhost, config.apiServer.sub_domain_or_dir === 0);
+config.subdirectory = coalesce(config.crossOrigin, config.api_server.sub_domain_or_dir === 1);
+config.vhost        = coalesce(config.vhost, config.api_server.sub_domain_or_dir === 0);
 
 // Database configuration
 config.db          = coalesce(config.db, {});
@@ -149,7 +149,7 @@ config.cookie_parser_secret = coalesce(config.cookie_parser_secret, config.defau
 if ((config.cookie_secret === config.default_cookie_secret) || (config.cookie_parser_secret === config.default_cookie_parser_secret))
 {
 	console.log("Cookie secret phrase has the default value. Update the config");
-	exit(1);
+	process.exit(1);
 }
 
 config.default_format = coalesce(config.default_format, "html");

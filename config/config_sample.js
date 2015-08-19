@@ -21,7 +21,7 @@ var https_port = 443;
 
 module.exports = {
 	host: hostname,
-	apiServer: {
+	api_server: {
 		name: "api",
 		subdomain_or_subdir : 1,
 		http_port: http_port,

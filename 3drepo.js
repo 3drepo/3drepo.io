@@ -65,12 +65,12 @@ if (config.vhost)
 	// We have to start virtual host if the API server and web service have
 	// different sub-domains.
 
-	if (!config.apiServer.external)
+	if (!config.api_server.external)
 	{
 		if ('ssl' in config)
-			var apiServer = https.createServer(ssl_options, apiApp);
+			var api_server = https.createServer(ssl_options, apiApp);
 		else
-			var apiServer = http.createServer(apiApp);
+			var api_server = http.createServer(apiApp);
 	}
 
 	for(i in config.servers)
@@ -92,10 +92,10 @@ if (config.vhost)
 		});
 	}
 
-	if (!config.apiServer.external)
+	if (!config.api_server.external)
 	{
-		apiServer.listen(config.apiServer.port, config.apiServer.hostname, function() {
-			logger.log('info', 'Starting API service on ' + config.apiServer.hostname + ' port ' + config.apiServer.port);
+		api_server.listen(config.api_server.port, config.api_server.hostname, function() {
+			logger.log('info', 'Starting API service on ' + config.api_server.hostname + ' port ' + config.api_server.port);
 		});
 	}
 
@@ -103,7 +103,7 @@ if (config.vhost)
 	// Here the API server and web service run on same host
 	// but different directory.
 	var app = express();
-	app.use("/" + config.apiServer.host_dir, apiApp);
+	app.use("/" + config.api_server.host_dir, apiApp);
 
 	for(i in config.servers)
 	{
@@ -126,10 +126,10 @@ if (config.vhost)
 	// so you would have to set manually in config crossOrigin and vhost to false
 	var vhostApp = express();
 
-	if (!config.apiServer.external)
+	if (!config.api_server.external)
 	{
-		logger.log('info', 'Starting VHOST for ' + config.apiServer.hostname);
-		vhostApp.use(vhost(config.apiServer.hostname, apiApp));
+		logger.log('info', 'Starting VHOST for ' + config.api_server.hostname);
+		vhostApp.use(vhost(config.api_server.hostname, apiApp));
 	}
 
 	for(i in config.servers)
