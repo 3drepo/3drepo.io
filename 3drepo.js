@@ -37,13 +37,17 @@ if ('ssl' in config) {
 	var ssl_options = {
 		key: fs.readFileSync(config.ssl.key, 'utf8'),
 		cert: fs.readFileSync(config.ssl.cert, 'utf8'),
-		ca: fs.readFileSync(config.ssl.ca, 'utf8'),
 		ciphers: 'ECDHE-ECDSA-AES128-GCM-SHA256|ECDHE-ECDSA-AES256-SHA:!RC4:!aNULL',
 		//ciphers: 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:!aNULL:!eNULL:!EXPORT:!DSS:!DES:!RC4:!3DES:!MD5:!PS:!SSLv3',
 		honorCipherOrder: true,
 		ecdhCurve: 'secp384r1',
 		secureOptions: constants.SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION|constants.SSL_OP_NO_SSLv2|constants.SSL_OP_NO_SSLv3
 	};
+
+	// This is the optional certificate authority
+	if (config.ssl.ca) {
+		ssl_options['ca'] = fs.readFileSync(config.ssl.cs, 'utf8');
+	}
 
 	var http_app = express();
 
@@ -56,8 +60,11 @@ if ('ssl' in config) {
 	});
 }
 
-if (!config.vhost)
+if (config.vhost)
 {
+	// We have to start virtual host if the API server and web service have
+	// different sub-domains.
+
 	if (!config.apiServer.external)
 	{
 		if ('ssl' in config)
@@ -92,7 +99,9 @@ if (!config.vhost)
 		});
 	}
 
-} else if (!config.crossOrigin) {
+} else if (config.subdirectory) {
+	// Here the API server and web service run on same host
+	// but different directory.
 	var app = express();
 	app.use("/" + config.apiServer.host_dir, apiApp);
 
@@ -112,6 +121,9 @@ if (!config.vhost)
 	});
 
 } else {
+	// This is an advanced configuration, which allows for different ports
+	// and/or different hosts currently this won't be automatically detected
+	// so you would have to set manually in config crossOrigin and vhost to false
 	var vhostApp = express();
 
 	if (!config.apiServer.external)

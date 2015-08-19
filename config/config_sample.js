@@ -20,12 +20,17 @@ var http_port  = 80;
 var https_port = 443;
 
 module.exports = {
+	host: hostname,
 	apiServer: {
-		hostname: "api." + hostname,
+		name: "api",
+		subdomain_or_host_dir : 1,
 		http_port: http_port,
-		https_port: https_port
+		https_port: https_port,
+		public_port: http_port,
+		public_protocol: "http"
 	},
-	vhost: true,
+	cookieSecret: "A secret",
+	cookieParserSecret : "Another seceret",
 	defaultFormat: "html",
 	servers: [
 		{
@@ -49,7 +54,8 @@ module.exports = {
 	},
 	ssl: {
 		key: 'my_key.pem',
-		cert:'my_server.crt'
+		cert:'my_server.crt',
+		ca: 'my_server.ca'
 	}
 }
 
