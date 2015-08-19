@@ -23,15 +23,15 @@ module.exports = {
 	host: hostname,
 	apiServer: {
 		name: "api",
-		subdomain_or_host_dir : 1,
+		subdomain_or_subdir : 1,
 		http_port: http_port,
 		https_port: https_port,
 		public_port: http_port,
 		public_protocol: "http"
 	},
-	cookieSecret: "A secret",
-	cookieParserSecret : "Another seceret",
-	defaultFormat: "html",
+	cookie_secret: "A secret",
+	cookie_parser_secret : "Another secret",
+	default_format: "html",
 	servers: [
 		{
 			hostname:   hostname,
@@ -40,11 +40,11 @@ module.exports = {
 			template:   "frontend.jade"
 		}
 	],
+	js_debug_level: 'debug',
 	logfile: {
 		filename: '/var/log/3drepo.log',
 		console_level: 'debug',
-		file_level: 'debug',
-		js_debug_level: 'debug'
+		file_level: 'debug'
 	},
 	db: {
 		host: 'localhost',

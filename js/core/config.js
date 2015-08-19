@@ -142,16 +142,17 @@ config.db.password = coalesce(config.db.password, "password");
 
 // Other options
 config.js_debug_level     = coalesce(config.js_debug_level, 'debug'); // Loading prod or debug scripts
-config.cookieSecret       = coalesce(config.cookieSecret, config.default_cookie_secret);
-config.cookieParserSecret = coalesce(config.cookieParserSecret, config.default_cookie_parser_secret);
+config.cookie_secret       = coalesce(config.cookie_secret, config.default_cookie_secret);
+config.cookie_parser_secret = coalesce(config.cookie_parser_secret, config.default_cookie_parser_secret);
 
-if ((config.cookieSecret === config.default_cookie_secret) || (config.cookieParserSecret === config.default_cookie_parser_secret))
+// Check whether the secret have been set in the file or not
+if ((config.cookie_secret === config.default_cookie_secret) || (config.cookie_parser_secret === config.default_cookie_parser_secret))
 {
 	console.log("Cookie secret phrase has the default value. Update the config");
 	exit(1);
 }
 
-config.defaultFormat = coalesce(config.defaultFormat, "html");
+config.default_format = coalesce(config.default_format, "html");
 config.external      = (config.js_debug_level === 'debug') ? frontend_scripts.debug_scripts : frontend_scripts.prod_scripts;
 
 // Log file options
