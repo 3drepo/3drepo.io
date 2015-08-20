@@ -37,6 +37,7 @@
     "mathjs": "^1.6.0",
     "method-override": "latest",
     "minifier": "latest",
+    "minify": "^1.4.19",
     "mocha": "latest",
     "mongodb": "latest",
     "mongoose": "latest",
