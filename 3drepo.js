@@ -46,7 +46,7 @@ if ('ssl' in config) {
 
 	// This is the optional certificate authority
 	if (config.ssl.ca) {
-		ssl_options['ca'] = fs.readFileSync(config.ssl.cs, 'utf8');
+		ssl_options['ca'] = fs.readFileSync(config.ssl.ca, 'utf8');
 	}
 
 	var http_app = express();
