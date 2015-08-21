@@ -116,7 +116,9 @@ if (config.vhost)
 	else
 		var server = http.createServer(app);
 
-	server.listen(config.servers[0].port, config.servers[0].hostname, function() {
+	// Use '0.0.0.0' so that the website is accessible from all
+	// relevant addresses
+	server.listen(config.servers[0].port, '0.0.0.0', function() {
 		logger.log('info', 'Starting service on ' + config.servers[0].hostname + ' port ' + config.servers[0].port);
 	});
 
