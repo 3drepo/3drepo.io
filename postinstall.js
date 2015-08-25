@@ -45,6 +45,8 @@ var public_files = {
 		x3dcontroller: '/public/js/x3dcontroller.js',
 		typeaheadjs: '/public/js/external/typeahead.bundle.js',
 		datetimepickerjs: '/public/js/external/datetimepicker.js',
+		sliderjs: '/public/js/external/bootstrap-slider.js',
+		angularsliderjs: '/public/js/external/slider.js',
 
 		// QR Code stuff
 		qrgrid: '/public/js/external/qrcode/grid.js',
@@ -74,7 +76,8 @@ var public_files = {
 		bootstrapcss: '/public/css/external/bootstrap.min.css',
 		jqueryuicss: '/public/css/external/jquery-ui.css',
 		repouicss : '/public/css/ui.css',
-		datetimepickercss: '/public/css/external/datetimepicker.css'
+		datetimepickercss: '/public/css/external/datetimepicker.css',
+		slidercss: '/public/css/external/bootstrap-slider.css'
 	}
 }
 
@@ -108,6 +111,9 @@ var internal_files = {
 	'bower_components/angular-ui-router/release/angular-ui-router.js',
 	'bower_components/angular-bootstrap-multiselect/angular-bootstrap-multiselect.js',
 	'bower_components/angular-bootstrap-select/build/angular-bootstrap-select.js',
+	'bower_components/seiyria-bootstrap-slider/dist/css/bootstrap-slider.css',
+	'bower_components/seiyria-bootstrap-slider/js/bootstrap-slider.js',
+	'bower_components/angular-bootstrap-slider/slider.js',
 	'bower_components/bootstrap-select/bootstrap-select.js',
 	'bower_components/bootstrap-select/bootstrap-select.css',
 	'bower_components/angular-bootstrap-datetimepicker/src/css/datetimepicker.css',

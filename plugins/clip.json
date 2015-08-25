@@ -1,0 +1,12 @@
+{
+	"name" : "clip",
+	"files": {
+		"angular": [
+			"clip/ClipCtrl.js"
+		],
+		"ui": [
+			{"name": "clip", "template" : "clip/clip.jade", "position" : "rightpanel"}
+		]
+	}
+}
+

@@ -136,7 +136,7 @@ config.vhost        = coalesce(config.vhost, config.api_server.sub_domain_or_dir
 // Database configuration
 config.db          = coalesce(config.db, {});
 config.db.host     = coalesce(config.db.host, config.host);
-config.db.port     = coalesce(config.db.post, default_mongo_port);
+config.db.port     = coalesce(config.db.port, default_mongo_port);
 config.db.username = coalesce(config.db.username, "username");
 config.db.password = coalesce(config.db.password, "password");
 

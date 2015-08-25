@@ -91,9 +91,14 @@ function scale(v, s)
 	return [v[0] * s, v[1] * s, v[2] * s];
 }
 
+function length(v)
+{
+	return Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+}
+
 function normalize(v)
 {
-	var sz =  Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+	var sz = length(v);
 	return scale(v, 1 / sz);
 }
 
@@ -300,6 +305,9 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 
 			var position = child["position"] ? child["position"] : [0,0,0];
 			var look_at = child["look_at"] ? child["look_at"] : [0,0,1];
+
+			if (length(look_at) == 0)
+				look_at = [0,0,1];
 
 			var up = child["up"] ? child["up"] : [0,1,0];
 			forward = scale(normalize(look_at), -1);
