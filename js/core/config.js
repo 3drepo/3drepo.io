@@ -114,6 +114,8 @@ var fillInServerDetails = function(serverObject, name, usingIP, using_ssl, host,
 
 // Check for hostname and ip here
 config.host = coalesce(config.host, "127.0.0.1");
+default_http_port = coalesce(config.http_port, default_http_port);
+default_https_port = coalesce(config.https_port, default_https_port);
 
 var usingIP = checkIP(config.host);
 var using_ssl = ('ssl' in config);
@@ -157,7 +159,7 @@ config.external      = (config.js_debug_level === 'debug') ? frontend_scripts.de
 
 // Log file options
 config.logfile               = coalesce(config.logfile, {});
-config.logfile.filename      = coalesce(config.filename, "/var/log/3drepo.org");
+config.logfile.filename      = coalesce(config.logfile.filename, "/var/log/3drepo.org");
 config.logfile.console_level = coalesce(config.logfile.console_level, "info");
 config.logfile.file_level    = coalesce(config.logfile.file_level, "info");
 
