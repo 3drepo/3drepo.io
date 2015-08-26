@@ -218,6 +218,10 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 		self.showAll = function() {
 			self.runtime.fitAll();
+
+			// TODO: This is a hack to get around a bug in X3DOM
+			self.getViewArea()._flyMat = null;
+
 			self.setNavMode("TURNTABLE");
 		}
 
@@ -537,7 +541,11 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.currentViewpoint = viewpoint._x3domNode;
 
 			viewpoint.setAttribute("bind", true);
-			viewpoint.resetView();
+			self.getViewArea().resetView();
+
+			// TODO: This is a hack to get around a bug in X3DOM
+			self.getViewArea()._flyMat = null;
+
 			viewpoint.addEventListener('viewpointChanged', self.viewPointChanged);
 			self.loadViewpoint = null;
 			viewpoint.appendChild(self.nav);
@@ -963,15 +971,15 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	{
 		var viewPoint = {};
 
-		var origViewTrans	= self.getViewArea()._scene.getViewpoint().getCurrentTransform();
-		var viewMat		= self.getViewMatrix().inverse();
+		var origViewTrans = self.getViewArea()._scene.getViewpoint().getCurrentTransform();
+		var viewMat	  = self.getViewMatrix().inverse();
 
-		var viewRight	= viewMat.e0();
-		var viewUp		= viewMat.e1();
-		var viewDir		= viewMat.e2().multiply(-1);
-		var viewPos		= viewMat.e3();
+		var viewRight	  = viewMat.e0();
+		var viewUp	  = viewMat.e1();
+		var viewDir	  = viewMat.e2().multiply(-1); // Because OpenGL points out of screen
+		var viewPos	  = viewMat.e3();
 
-		var center = self.getViewArea()._scene.getViewpoint().getCenterOfRotation();
+		var center        = self.getViewArea()._scene.getViewpoint().getCenterOfRotation();
 
 		if (center)	{
 			var lookAt = center.subtract(viewPos);

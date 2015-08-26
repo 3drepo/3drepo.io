@@ -293,26 +293,26 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			if (child['position'])
 				newNode.setAttribute('position', child['position'].join(','));
 
-			if (child['near'])
-				newNode.setAttribute('zNear', child['near']);
-			else
+			//if (child['near'])
+			//	newNode.setAttribute('zNear', child['near']);
+			//else
 				newNode.setAttribute('zNear', -1);
 
-			if (child['far'])
-				newNode.setAttribute('zFar', child['far']);
-			else
+			//if (child['far'])
+			//	newNode.setAttribute('zFar', child['far']);
+			//else
 				newNode.setAttribute('zFar', -1);
 
 			var position = child["position"] ? child["position"] : [0,0,0];
-			var look_at = child["look_at"] ? child["look_at"] : [0,0,1];
+			var look_at = child["look_at"] ? child["look_at"] : [0,0,-1];
 
 			if (length(look_at) == 0)
-				look_at = [0,0,1];
+				look_at = [0,0,-1];
 
 			var up = child["up"] ? child["up"] : [0,1,0];
 			forward = scale(normalize(look_at), -1);
 			up = normalize(up);
-			var right = crossProduct(forward, scale(up, -1)); // Left-hand coordinate system
+			var right = crossProduct(forward, scale(up, -1)); // X3DOM uses a right-hand coordinate system
 
 			var viewMat = mathjs.matrix([[right[0], right[1], right[2], 0], [up[0], up[1], up[2], 0],
 				[forward[0], forward[1], forward[2], 0], [position[0], position[1], position[2], 1]]);
@@ -716,12 +716,14 @@ function X3D_AddMeasurer(xmlDoc) {
 /*******************************************************************************
  * Add viewpoint to scene
  *
- * @param {xmlDom} xmlDoc - The XML document to add the scene to
+ * @param {xmlDom} xmlDoc - The XML document to create the viewpoint
+ * @param {Object} root - The root group element
+ * @param {String} account - contains the account name
+ * @param {String} project - contains the project name
  * @param {JSON} bbox - Bounding used to compute the position of the viewpoint
  *******************************************************************************/
-function X3D_AddViewpoint(xmlDoc, bbox)
+function X3D_AddViewpoint(xmlDoc, root, account, project, bbox)
 {
-	var scene = xmlDoc.getElementsByTagName('Scene')[0];
 	var vpos = [0,0,0];
 
 	vpos[0] = bbox.center[0];
@@ -734,25 +736,16 @@ function X3D_AddViewpoint(xmlDoc, bbox)
 
 	vpos[2] += bbox.size[2] * 0.5 + max_dim / Math.tan(0.5 * fov);
 
-	logger.log('debug', 'VPOS: ' + vpos.join(' '));
-	logger.log('debug', 'MAXDIM: ' + max_dim);
-
 	var vpoint = xmlDoc.createElement('Viewpoint');
-	vpoint.setAttribute('id', 'sceneVP');
+	vpoint.setAttribute('id', account + '_' + project + '_' + 'origin');
 	vpoint.setAttribute('position', vpos.join(' '));
-	//vpoint.setAttribute('position', '-26.06 1.43 15.28');
-	//vpoint.setAttribute('position', '100 100 100');
+	vpoint.setAttribute('centerOfRotation', bbox.center.join(' '));
 
 	vpoint.setAttribute('orientation', '0 0 -1 0');
-	vpoint.setAttribute('zNear', 0.01);
-
-	vpoint.setAttribute('zFar', 10000);
 	vpoint.setAttribute('fieldOfView', fov);
-
-	vpoint.setAttribute('onload', 'startNavigation()');
 	vpoint.textContent = ' ';
 
-	scene.appendChild(vpoint);
+	root.appendChild(vpoint);
 }
 
 /*******************************************************************************
@@ -814,7 +807,7 @@ function render(dbInterface, account, project, subFormat, branch, revision, call
 
 		var xmlDoc = X3D_Header();
 
-		var sceneRoot	= X3D_CreateScene(xmlDoc);
+		var sceneRoot	= X3D_CreateScene(xmlDoc, doc.mRootNode);
 
 		// Hack for the demo, generate objects server side
 		json_objs = [];
@@ -855,7 +848,7 @@ function render(dbInterface, account, project, subFormat, branch, revision, call
 		*/
 
 		//X3D_AddGroundPlane(xmlDoc, bbox);
-		//X3D_AddViewpoint(xmlDoc, bbox);
+		X3D_AddViewpoint(xmlDoc, sceneRoot.scene, account, project, bbox);
 		//X3D_AddLights(xmlDoc, bbox);
 
 		return callback(responseCodes.OK, new xmlSerial().serializeToString(xmlDoc));
