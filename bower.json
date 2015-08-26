@@ -22,15 +22,16 @@
     "tests"
   ],
   "dependencies": {
+    "angular": "~1.3.15",
+    "angular-bootstrap-datetimepicker": "~0.3.12",
     "angular-bootstrap-multiselect": "~0.3.0",
     "angular-bootstrap-select": "~0.0.5",
+    "angular-bootstrap-slider": "~0.1.18",
     "angular-ui-router": "*",
-    "fancytree": "~2.8.1",
-    "masonry": "~3.3.0",
-    "angular": "~1.3.15",
     "bootstrap-submenu": "~1.2.13",
+    "fancytree": "~2.8.1",
     "jsqrcode": "*",
-    "angular-bootstrap-datetimepicker": "~0.3.12",
+    "masonry": "~3.3.0",
     "moment": "~2.10.6"
   },
   "resolutions": {
