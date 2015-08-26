@@ -127,7 +127,6 @@ var internal_files = {
 
 	x3dom_files: [
 	'submodules/x3dom/dist/ammo.js',
-	'submodules/x3dom/dist/x3dom.debug.js',
 	'submodules/x3dom/dist/x3dom-full.debug.js'
 	]
 }
