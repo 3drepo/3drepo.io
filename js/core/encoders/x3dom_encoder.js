@@ -847,6 +847,8 @@ function render(dbInterface, account, project, subFormat, branch, revision, call
 		bbox.size	= [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])];
 		*/
 
+		var bbox = repoNodeMesh.extractBoundingBox(doc.mRootNode);
+
 		//X3D_AddGroundPlane(xmlDoc, bbox);
 		X3D_AddViewpoint(xmlDoc, sceneRoot.scene, account, project, bbox);
 		//X3D_AddLights(xmlDoc, bbox);
