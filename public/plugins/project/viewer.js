@@ -35,10 +35,6 @@ function onMouseMove(event){
 	$.event.trigger("onMouseMove", event);
 }
 
-function onMouseOver(event){
-	$.event.trigger("onMouseOver", event);
-}
-
 function onViewpointChange(event){
 	$.event.trigger("onViewpointChange", event);
 }
