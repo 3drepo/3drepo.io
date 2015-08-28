@@ -498,6 +498,34 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		return (q.toAxisAngle()[0].toGL() + q[1]);
 	}
 
+	// TODO: Should move this to somewhere more general (utils ? )
+	this.axisAngleToMatrix = function(axis, angle)
+	{
+		var mat = new x3dom.fields.SFMatrix4f();
+
+		var cosAngle = Math.cos(angle);
+		var sinAngle = Math.sin(angle);
+		var t = 1 - cosAngle;
+
+		var v = axis.normalize();
+
+		// As always, should be right hand coordinate system
+		/*
+		mat.setFromArray( [
+			t * v.x * v.x + cosAngle, t * v.x * v.y - v.z * sinAngle, t * v.x * v.z + v.y * sinAngle, 0,
+			t * v.x * v.y + v.z * sinAngle, t * v.y * v.y + cosAngle, t * v.y * v.z - v.x * sinAngle, 0,
+			t * v.x * v.z - v.y * sinAngle, t * v.y * v.z + v.x * sinAngle, t * v.z * v.z + cosAngle, 0,
+			0, 0, 0, 1]);
+		*/
+
+		mat.setFromArray([ t * v.x * v.x + cosAngle, t * v.x * v.y + v.z * sinAngle, t * v.x * v.z - v.y * sinAngle, 0,
+			t * v.x * v.y - v.z * sinAngle, t * v.y * v.y + cosAngle, t * v.y * v.z + v.x * sinAngle, 0,
+			t * v.x * v.z + v.y * sinAngle, t * v.y * v.z - v.x * sinAngle, t * v.z * v.z + cosAngle, 0,
+			0, 0, 0, 1]);
+
+		return mat;
+	}
+
 	this.createViewpoint = function(name, from, at, up)
 	{
 		var groupName = self.getViewpointGroupAndName(name);
@@ -537,6 +565,10 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		if (Object.keys(self.viewpointsNames).indexOf(id) != -1)
 		{
 			var viewpoint = self.viewpointsNames[id];
+
+			// Remove event listener from viewpoint
+			if (self.currentViewpoint)
+				self.currentViewpoint._xmlNode.removeEventListener('viewpointChanged', self.viewPointChanged);
 
 			self.currentViewpoint = viewpoint._x3domNode;
 
@@ -1143,11 +1175,36 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		}
 	};
 
-	this.axesMove = function(event, newEvent) {
-		var axesRot = newEvent.orientation;
-		var rotStr = axesRot[0].x + ' ' + axesRot[0].y + ' ' + axesRot[0].z + ' ' + (-1 * axesRot[1])
+	this.transformEvent = function(event, viewpoint, inverse)
+	{
+		if (inverse)
+			var transformation = viewpoint._x3domNode.getTransformation().inverse();
+		else
+			var transformation = viewpoint._x3domNode.getTransformation();
 
-		self.axesGroup.setAttribute('rotation', rotStr);
+		var newPos       = transformation.multMatrixVec(event.position);
+		var newOrientMat = self.axisAngleToMatrix(event.orientation[0], event.orientation[1]);
+		newOrientMat     = transformation.mult(newOrientMat);
+
+		var newOrient    = new x3dom.fields.Quaternion();
+		newOrient.setValue(newOrientMat);
+		newOrient = newOrient.toAxisAngle();
+
+		event.position    = newPos;
+		event.orientation = newOrient;
+	}
+
+	// TODO: Merge this function with the Viewer Manager
+	this.axesMove = function(origEvent, event) {
+		// Axes should rotate inversely to orientation
+		// of camera
+		event.orientation[1] = event.orientation[1] * -1;
+
+		// Fix transformation from viewpoint basis
+		self.transformEvent(event, event.target, false);
+
+		// Set rotation of the overlying group
+		self.axesGroup.setAttribute('rotation', event.orientation.toString());
 	}
 
 	this.linkAxes = function()
@@ -1184,68 +1241,9 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		self.axesGroup = document.createElement('Transform');
 		scene.appendChild(self.axesGroup);
 
-		for (var ax = 0; ax < 3; ax++)
-		{
-			var rot = document.createElement('transform');
-			rot.setAttribute('rotation', rotation[ax]);
-
-			var trans = document.createElement('transform');
-			trans.setAttribute('translation', '0.0 0.5 0.0');
-			rot.appendChild(trans);
-
-			var axis = document.createElement('group');
-			trans.appendChild(axis);
-
-			var shape = document.createElement('Shape');
-			axis.appendChild(shape);
-
-			var cone = document.createElement('Cone');
-			cone.setAttribute('bottomRadius', '0.05');
-			cone.setAttribute('height', '1.0');
-			cone.textContent = ' ';
-			shape.appendChild(cone);
-
-			axis.appendChild(shape);
-
-			var nameTrans = document.createElement('transform');
-			nameTrans.setAttribute('translation', '0.0 0.5 0.0');
-
-			var nameShape = document.createElement('shape');
-
-			var nameApp = document.createElement('Appearance');
-			var nameMat = document.createElement('Material');
-			nameMat.setAttribute('diffuseColor', axesDiffColor[ax]);
-			nameMat.setAttribute('emissiveColor', axesEmissiveColor[ax]);
-
-			nameApp.appendChild(nameMat);
-			nameShape.appendChild(nameApp);
-
-			var nameText = document.createElement('text');
-			nameText.setAttribute('string', axisName[ax]);
-			nameText.setAttribute('solid', 'false');
-			nameShape.appendChild(nameText);
-
-			var nameFont = document.createElement('fontstyle');
-			nameFont.setAttribute('family', "'Orbitron'");
-			nameFont.setAttribute('style', 'BOLD');
-			nameFont.setAttribute('size', '1');
-
-			nameText.appendChild(nameFont);
-			nameShape.appendChild(nameText);
-
-			nameTrans.appendChild(nameShape);
-			axis.appendChild(nameTrans);
-
-			var app = document.createElement('Appearance');
-			var mat = document.createElement('Material');
-			mat.setAttribute('diffuseColor', axesDiffColor[ax]);
-			mat.setAttribute('emissiveColor', axesEmissiveColor[ax]);
-			app.appendChild(mat);
-
-			shape.appendChild(app);
-
-			self.axesGroup.appendChild(rot);
-		}
+		var x3dFile = document.createElement('inline');
+		x3dFile.setAttribute('url', 'public/box.x3d');
+		self.axesGroup.appendChild(x3dFile);
 
 		self.reload();
 		self.linkAxes();

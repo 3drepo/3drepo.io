@@ -161,71 +161,79 @@ function axisangle(mat)
 
 	var eps = 0.0001;
 
-	var a = (forward[1] - up[2]);
-	var b = (right[2] - forward[0]);
-	var c = (up[0] - right[1]);
+	var a = up[0] - right[1];
+	var b = forward[0] - right[2];
+	var c = forward[1] - up[2];
 	var tr = right[0] + up[1] + forward[2];
 
-	var x = 1;
+	var x = 0;
 	var y = 0;
 	var z = 0;
-	var angle = 0;
+	var angle = 1;
 
 	if ((Math.abs(a) < eps) && (Math.abs(b) < eps) && (Math.abs(c) < eps))
 	{
-		if (!(	(Math.abs(a) < eps)
-				&& (Math.abs(b) < eps)
-				&& (Math.abs(c) < eps)))
+		var d = up[0] + right[1];
+		var e = forward[0] + right[2];
+		var f = forward[1] + up[2];
+
+		if (!((Math.abs(d) < eps) && (Math.abs(e) < eps) && (Math.abs(f) < eps) && (Math.abs(tr - 3) < eps)))
 		{
-			var d = forward[1] + up[2];
-			var e = right[2] + forward[0];
-			var f = up[0] + right[1];
+			angle = Math.PI;
 
-			if (!((Math.abs(d) < eps) && (Math.abs(e) < eps) && (Math.abs(f) < eps) && ((Math.abs(tr) - 3) < eps)))
-			{
-				angle = Math.PI;
+			var xx = (right[0] + 1) / 2;
+			var yy = (up[1] + 1) / 2;
+			var zz = (forward[2] + 1) / 2;
 
-				var xx = (right[0] + 1) / 2;
-				var yy = (up[1] + 1) / 2;
-				var zz = (forward[2] + 1) / 2;
+			var xy = d / 4;
+			var xz = e / 4;
+			var yz = f / 4;
 
-				var xy = d / 4;
-				var xz = e / 4;
-				var yz = f / 4;
-
-				if ((xx > yy) && (xx > zz)) {
-					if (xx < eps) {
-						x = 0; y = Math.SQRT1_2; z = Math.SQRT1_2;
-					} else {
-						x = Math.sqrt(xx); y = xy/z; z = xz / x;
-					}
-				} else if (yy > zz) {
-					if (yy < eps) {
-						x = Math.SQRT1_2; y = 0; z = Math.SQRT1_2;
-					} else {
-						y = Math.sqrt(yy); x = xy / y; z = yz / y;
-					}
+			if (((xx - yy) > eps) && ((xx - zz) > eps)) {
+				if (xx < eps) {
+					x = 0; y = Math.SQRT1_2; z = Math.SQRT1_2;
 				} else {
-					if (zz < eps) {
-						x = Math.SQRT1_2; y = Math.SQRT1_2; z = 0;
-					} else {
-						z = Math.sqrt(zz); x = xz / z; y = yz / z;
-					}
+					x = Math.sqrt(xx); y = xy/x; z = xz / x;
+				}
+			} else if ((yy - zz) > eps) {
+				if (yy < eps) {
+					x = Math.SQRT1_2; y = 0; z = Math.SQRT1_2;
+				} else {
+					y = Math.sqrt(yy); x = xy / y; z = yz / y;
+				}
+			} else {
+				if (zz < eps) {
+					x = Math.SQRT1_2; y = Math.SQRT1_2; z = 0;
+				} else {
+					z = Math.sqrt(zz); x = xz / z; y = yz / z;
 				}
 			}
 		}
 	} else {
-		var recip = 1 / Math.sqrt(a * a + b * b + c * c);
+		var s = Math.sqrt(a * a + b * b + c * c);
 
-		x = a * recip;
-		y = b * recip;
-		z = c * recip;
+		if (s < eps) s = 1;
+
+		x = -c / s;
+		y = b / s;
+		z = -a / s;
 
 		angle = Math.acos((tr - 1) / 2);
 	}
 
-	return [-x, -y, -z, angle]; // Left-handed system
+	return [x, y, z, angle]; // Right-handed system
 }
+
+/*
+function det(mat) {
+	console.log(mat);
+	console.log(mat[0,0]);
+
+	return mat[0,0] * (mat[1,1] * mat[2,2] - mat[1,2] * mat[2,1])
+		- mat[0,1] * (mat[1,0] * mat[2,2] - mat[1,2] * mat[2,0])
+		- mat[0,2] * (mat[1,0] * mat[2,1] - mat[1,1] * mat[2,0]);
+}*/
+
 
 /*******************************************************************************
  * Add children of node to xmlNode in X3D document
@@ -310,25 +318,23 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 				look_at = [0,0,-1];
 
 			var up = child["up"] ? child["up"] : [0,1,0];
-			forward = scale(normalize(look_at), -1);
+
+			forward = normalize(scale(look_at,-1)); // scale(look_at,-1)); // Forward, z-axis comes out of screen
 			up = normalize(up);
-			var right = crossProduct(forward, scale(up, -1)); // X3DOM uses a right-hand coordinate system
+
+			// X3DOM uses a right-hand coordinate system
+			// In this case it's again reversed because of the
+			// reversal above.
+			var right = crossProduct(up, forward);
 
 			var viewMat = mathjs.matrix([[right[0], right[1], right[2], 0], [up[0], up[1], up[2], 0],
 				[forward[0], forward[1], forward[2], 0], [position[0], position[1], position[2], 1]]);
 
 			viewMat = viewMat.transpose(); // Input as rows, rather than columns
-			viewMat = mathjs.multiply(matrix.transpose(), viewMat);
 
-			var tmpMat = viewMat.clone();
-			tmpMat = tmpMat.transpose();
+			var det = mathjs.det(viewMat);
 
-			position = mathjs.subset(tmpMat, mathjs.index(3,[0,3]))._data[0];
 			newNode.setAttribute('position', position.join(','));
-
-			var newLookAt = mathjs.matrix([[look_at[0], look_at[1], look_at[2], 0]]).transpose();
-			newLookAt = mathjs.multiply(matrix.transpose(), newLookAt);
-			look_at = mathjs.subset(newLookAt, mathjs.index([0,3],0)).transpose()._data[0];
 
 			var center = vecAdd(position, look_at);
 			newNode.setAttribute('centerOfRotation', center.join(','));
