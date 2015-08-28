@@ -148,10 +148,18 @@ exports.decode = function(bson, materials) {
 exports.extractBoundingBox = function(mesh) {
     var bbox = {};
 
-    bbox.min = mesh['bounding_box'][0];
-    bbox.max = mesh['bounding_box'][1];
-    bbox.center = [(bbox.min[0] + bbox.max[0]) / 2, (bbox.min[1] + bbox.max[1]) / 2, (bbox.min[2] + bbox.max[2]) / 2];
-    bbox.size = [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])];
+	if (mesh['bounding_box'])
+	{
+		bbox.min = mesh['bounding_box'][0];
+		bbox.max = mesh['bounding_box'][1];
+		bbox.center = [(bbox.min[0] + bbox.max[0]) / 2, (bbox.min[1] + bbox.max[1]) / 2, (bbox.min[2] + bbox.max[2]) / 2];
+		bbox.size = [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])];
+	} else {
+		bbox.min    = [-1,-1,-1];
+		bbox.max    = [ 1, 1, 1];
+		bbox.center = [ 0, 0, 0];
+		bbox.size   = [ 2, 2, 2];
+	}
 
     return bbox;
 }

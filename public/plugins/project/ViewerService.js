@@ -51,6 +51,7 @@ angular.module('3drepo')
 		}
 
 		self.defaultViewer.loadURL(url);
+		self.defaultViewer.setCurrentViewpoint("model__" + StateManager.state.account + "_" + StateManager.state.project + "_origin");
 	}
 
 	this.pickPoint = function(x,y)

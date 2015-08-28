@@ -161,71 +161,79 @@ function axisangle(mat)
 
 	var eps = 0.0001;
 
-	var a = (forward[1] - up[2]);
-	var b = (right[2] - forward[0]);
-	var c = (up[0] - right[1]);
+	var a = up[0] - right[1];
+	var b = forward[0] - right[2];
+	var c = forward[1] - up[2];
 	var tr = right[0] + up[1] + forward[2];
 
-	var x = 1;
+	var x = 0;
 	var y = 0;
 	var z = 0;
-	var angle = 0;
+	var angle = 1;
 
 	if ((Math.abs(a) < eps) && (Math.abs(b) < eps) && (Math.abs(c) < eps))
 	{
-		if (!(	(Math.abs(a) < eps)
-				&& (Math.abs(b) < eps)
-				&& (Math.abs(c) < eps)))
+		var d = up[0] + right[1];
+		var e = forward[0] + right[2];
+		var f = forward[1] + up[2];
+
+		if (!((Math.abs(d) < eps) && (Math.abs(e) < eps) && (Math.abs(f) < eps) && (Math.abs(tr - 3) < eps)))
 		{
-			var d = forward[1] + up[2];
-			var e = right[2] + forward[0];
-			var f = up[0] + right[1];
+			angle = Math.PI;
 
-			if (!((Math.abs(d) < eps) && (Math.abs(e) < eps) && (Math.abs(f) < eps) && ((Math.abs(tr) - 3) < eps)))
-			{
-				angle = Math.PI;
+			var xx = (right[0] + 1) / 2;
+			var yy = (up[1] + 1) / 2;
+			var zz = (forward[2] + 1) / 2;
 
-				var xx = (right[0] + 1) / 2;
-				var yy = (up[1] + 1) / 2;
-				var zz = (forward[2] + 1) / 2;
+			var xy = d / 4;
+			var xz = e / 4;
+			var yz = f / 4;
 
-				var xy = d / 4;
-				var xz = e / 4;
-				var yz = f / 4;
-
-				if ((xx > yy) && (xx > zz)) {
-					if (xx < eps) {
-						x = 0; y = Math.SQRT1_2; z = Math.SQRT1_2;
-					} else {
-						x = Math.sqrt(xx); y = xy/z; z = xz / x;
-					}
-				} else if (yy > zz) {
-					if (yy < eps) {
-						x = Math.SQRT1_2; y = 0; z = Math.SQRT1_2;
-					} else {
-						y = Math.sqrt(yy); x = xy / y; z = yz / y;
-					}
+			if (((xx - yy) > eps) && ((xx - zz) > eps)) {
+				if (xx < eps) {
+					x = 0; y = Math.SQRT1_2; z = Math.SQRT1_2;
 				} else {
-					if (zz < eps) {
-						x = Math.SQRT1_2; y = Math.SQRT1_2; z = 0;
-					} else {
-						z = Math.sqrt(zz); x = xz / z; y = yz / z;
-					}
+					x = Math.sqrt(xx); y = xy/x; z = xz / x;
+				}
+			} else if ((yy - zz) > eps) {
+				if (yy < eps) {
+					x = Math.SQRT1_2; y = 0; z = Math.SQRT1_2;
+				} else {
+					y = Math.sqrt(yy); x = xy / y; z = yz / y;
+				}
+			} else {
+				if (zz < eps) {
+					x = Math.SQRT1_2; y = Math.SQRT1_2; z = 0;
+				} else {
+					z = Math.sqrt(zz); x = xz / z; y = yz / z;
 				}
 			}
 		}
 	} else {
-		var recip = 1 / Math.sqrt(a * a + b * b + c * c);
+		var s = Math.sqrt(a * a + b * b + c * c);
 
-		x = a * recip;
-		y = b * recip;
-		z = c * recip;
+		if (s < eps) s = 1;
+
+		x = -c / s;
+		y = b / s;
+		z = -a / s;
 
 		angle = Math.acos((tr - 1) / 2);
 	}
 
-	return [-x, -y, -z, angle]; // Left-handed system
+	return [x, y, z, angle]; // Right-handed system
 }
+
+/*
+function det(mat) {
+	console.log(mat);
+	console.log(mat[0,0]);
+
+	return mat[0,0] * (mat[1,1] * mat[2,2] - mat[1,2] * mat[2,1])
+		- mat[0,1] * (mat[1,0] * mat[2,2] - mat[1,2] * mat[2,0])
+		- mat[0,2] * (mat[1,0] * mat[2,1] - mat[1,1] * mat[2,0]);
+}*/
+
 
 /*******************************************************************************
  * Add children of node to xmlNode in X3D document
@@ -259,9 +267,9 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			var url_str = child['project'] + "." + mode + ".x3d";
 
 			if ('revision' in child)
-				var url_str = config.apiServer.url + '/' + account + '/' + child['project'] + '/revision/master/' + child['revision'] + '.x3d.' + mode;
+				var url_str = config.api_server.url + '/' + account + '/' + child['project'] + '/revision/master/' + child['revision'] + '.x3d.' + mode;
 			else
-				var url_str = config.apiServer.url + '/' + account + '/' + child['project'] + '/revision/master/head.x3d.' + mode;
+				var url_str = config.api_server.url + '/' + account + '/' + child['project'] + '/revision/master/head.x3d.' + mode;
 
 			newNode.setAttribute('onload', 'onLoaded(event);');
 			newNode.setAttribute('url', url_str);
@@ -293,42 +301,42 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			if (child['position'])
 				newNode.setAttribute('position', child['position'].join(','));
 
-			if (child['near'])
-				newNode.setAttribute('zNear', child['near']);
-			else
+			//if (child['near'])
+			//	newNode.setAttribute('zNear', child['near']);
+			//else
 				newNode.setAttribute('zNear', -1);
 
-			if (child['far'])
-				newNode.setAttribute('zFar', child['far']);
-			else
+			//if (child['far'])
+			//	newNode.setAttribute('zFar', child['far']);
+			//else
 				newNode.setAttribute('zFar', -1);
 
 			var position = child["position"] ? child["position"] : [0,0,0];
-			var look_at = child["look_at"] ? child["look_at"] : [0,0,1];
+			var look_at = child["look_at"] ? child["look_at"] : [0,0,-1];
+
+			if (length(look_at) == 0)
+				look_at = [0,0,-1];
 
 			if (length(look_at) == 0) look_at = [0,0,1];
 
 			// X3DOM has right-hand coordinate
 			var up = child["up"] ? child["up"] : [0,1,0];
-			forward = normalize(look_at);
+			forward = normalize(scale(look_at,-1)); // scale(look_at,-1)); // Forward, z-axis comes out of screen
 			up = normalize(up);
 
-			var right = crossProduct(forward, up);
+			// X3DOM uses a right-hand coordinate system
+			// In this case it's again reversed because of the
+			// reversal above.
+			var right = crossProduct(up, forward);
+
 			var viewMat = mathjs.matrix([[right[0], right[1], right[2], 0], [up[0], up[1], up[2], 0],
 				[forward[0], forward[1], forward[2], 0], [position[0], position[1], position[2], 1]]);
 
 			viewMat = viewMat.transpose(); // Input as rows, rather than columns
-			viewMat = mathjs.multiply(matrix.transpose(), viewMat);
 
-			var tmpMat = viewMat.clone();
-			tmpMat = tmpMat.transpose();
+			var det = mathjs.det(viewMat);
 
-			position = mathjs.subset(tmpMat, mathjs.index(3,[0,3]))._data[0];
 			newNode.setAttribute('position', position.join(','));
-
-			var newLookAt = mathjs.matrix([[look_at[0], look_at[1], look_at[2], 0]]).transpose();
-			newLookAt = mathjs.multiply(matrix.transpose(), newLookAt);
-			look_at = mathjs.subset(newLookAt, mathjs.index([0,3],0)).transpose()._data[0];
 
 			var center = vecAdd(position, look_at);
 			newNode.setAttribute('centerOfRotation', center.join(','));
@@ -440,7 +448,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 				X3D_AddChildren(xmlDoc, appearance, child, matrix, dbInterface, account, project, mode);
 		} else if (child['type'] == 'texture') {
 			newNode = xmlDoc.createElement('ImageTexture');
-			newNode.setAttribute('url', config.apiServer.url + '/' + account + '/' + project + '/' + child['id'] + '.' + child['extension']);
+			newNode.setAttribute('url', config.api_server.url + '/' + account + '/' + project + '/' + child['id'] + '.' + child['extension']);
 			newNode.textContent = ' ';
 			newNode.setAttribute("id", child['id']);
 			newNode.setAttribute('DEF', dbInterface.uuidToString(child["shared_id"]));
@@ -625,14 +633,14 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, subM
 
 			var binaryGeometry = xmlDoc.createElement('binaryGeometry');
 
-			binaryGeometry.setAttribute('normal', config.apiServer.url + '/' + account + '/' + project + '/' + meshId + '.bin?mode=normals');
+			binaryGeometry.setAttribute('normal', config.api_server.url + '/' + account + '/' + project + '/' + meshId + '.bin?mode=normals');
 
 			if ('children' in mat) {
-				binaryGeometry.setAttribute('texCoord', config.apiServer.url + '/' + account + '/' + project + '/' + meshId + '.bin?mode=texcoords');
+				binaryGeometry.setAttribute('texCoord', config.api_server.url + '/' + account + '/' + project + '/' + meshId + '.bin?mode=texcoords');
 			}
 
-			binaryGeometry.setAttribute('index', config.apiServer.url + '/' + account + '/' + project + '/' + meshId + '.bin?mode=indices');
-			binaryGeometry.setAttribute('coord', config.apiServer.url + '/' + account + '/' + project + '/' + meshId + '.bin?mode=coords');
+			binaryGeometry.setAttribute('index', config.api_server.url + '/' + account + '/' + project + '/' + meshId + '.bin?mode=indices');
+			binaryGeometry.setAttribute('coord', config.api_server.url + '/' + account + '/' + project + '/' + meshId + '.bin?mode=coords');
 			//binaryGeometry.setAttribute('vertexCount', mesh.vertices_count);
 			binaryGeometry.textContent = ' ';
 
@@ -673,7 +681,7 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, subM
 					for (var lvl = 0; lvl < cacheMesh.num_levels; lvl++) {
 						var popGeometryLevel = xmlDoc.createElement('PopGeometryLevel');
 
-						popGeometryLevel.setAttribute('src', config.apiServer.url + '/' + account + '/' + project + '/' + meshId + '.pbf?level=' + lvl);
+						popGeometryLevel.setAttribute('src', config.api_server.url + '/' + account + '/' + project + '/' + meshId + '.pbf?level=' + lvl);
 						popGeometryLevel.setAttribute('numIndices', cacheMesh[lvl].numIdx);
 						popGeometryLevel.setAttribute('vertexDataBufferOffset', cacheMesh[lvl].numVertices);
 
@@ -762,12 +770,14 @@ function X3D_AddMeasurer(xmlDoc) {
 /*******************************************************************************
  * Add viewpoint to scene
  *
- * @param {xmlDom} xmlDoc - The XML document to add the scene to
+ * @param {xmlDom} xmlDoc - The XML document to create the viewpoint
+ * @param {Object} root - The root group element
+ * @param {String} account - contains the account name
+ * @param {String} project - contains the project name
  * @param {JSON} bbox - Bounding used to compute the position of the viewpoint
  *******************************************************************************/
-function X3D_AddViewpoint(xmlDoc, bbox)
+function X3D_AddViewpoint(xmlDoc, root, account, project, bbox)
 {
-	var scene = xmlDoc.getElementsByTagName('Scene')[0];
 	var vpos = [0,0,0];
 
 	vpos[0] = bbox.center[0];
@@ -783,20 +793,15 @@ function X3D_AddViewpoint(xmlDoc, bbox)
 	vpos[2] += bbox.size[2] * 0.5 + max_dim / Math.tan(0.5 * fov);
 
 	var vpoint = xmlDoc.createElement('Viewpoint');
-	vpoint.setAttribute('id', 'sceneVP');
+	vpoint.setAttribute('id', account + '_' + project + '_' + 'origin');
 	vpoint.setAttribute('position', vpos.join(' '));
 	vpoint.setAttribute('centerOfRotation', bbox.center.join(' '));
 
 	vpoint.setAttribute('orientation', '0 0 -1 0');
-	vpoint.setAttribute('zNear', 0.01);
-
-	vpoint.setAttribute('zFar', 10000);
 	vpoint.setAttribute('fieldOfView', fov);
-
-	vpoint.setAttribute('onload', 'startNavigation()');
 	vpoint.textContent = ' ';
 
-	scene.appendChild(vpoint);
+	root.appendChild(vpoint);
 }
 
 /*******************************************************************************
@@ -858,7 +863,7 @@ function render(dbInterface, account, project, subFormat, branch, revision, call
 
 		var xmlDoc = X3D_Header();
 
-		var sceneRoot	= X3D_CreateScene(xmlDoc);
+		var sceneRoot	= X3D_CreateScene(xmlDoc, doc.mRootNode);
 
 		// Hack for the demo, generate objects server side
 		json_objs = [];
@@ -898,8 +903,10 @@ function render(dbInterface, account, project, subFormat, branch, revision, call
 		bbox.size	= [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])];
 		*/
 
+		var bbox = repoNodeMesh.extractBoundingBox(doc.mRootNode);
+
 		//X3D_AddGroundPlane(xmlDoc, bbox);
-		//X3D_AddViewpoint(xmlDoc, bbox);
+		X3D_AddViewpoint(xmlDoc, sceneRoot.scene, account, project, bbox);
 		//X3D_AddLights(xmlDoc, bbox);
 
 		return callback(responseCodes.OK, new xmlSerial().serializeToString(xmlDoc));

@@ -151,9 +151,8 @@ var ViewerManager = function() {
 		if (event.target != self.viewMaster.getCurrentViewpoint())
 			return;
 
-		var newPos = event.position.x + "," + event.position.y + "," + event.position.z;
-		var newOrient = event.orientation[0].x + "," + event.orientation[0].y + "," + event.orientation[0].z
-			+ "," + event.orientation[1];
+		event.orientation[1] = event.orientation[1] * -1;
+		self.viewMaster.transformEvent(event, event.target, false);
 
 		for(var i = 0; i < self.linkedViewers.length; i++)
 		{
@@ -164,8 +163,10 @@ var ViewerManager = function() {
 
 			if (self.isValidHandle(handle))
 			{
-				self.viewers[handle].getCurrentViewpoint().setAttribute("position", newPos);
-				self.viewers[handle].getCurrentViewpoint().setAttribute("orientation", newOrient);
+				//self.viewers[handle].transformEvent(event, self.viewers[handle].getCurrentViewpoint(), false);
+				self.viewers[handle].getCurrentViewpoint().setAttribute("position", event.position.toString());
+				self.viewers[handle].getCurrentViewpoint().setAttribute("orientation", event.orientation.toString());
+				//self.viewers[handle].transformEvent(event, self.viewers[handle].getCurrentViewpoint(), true);
 			}
 		}
 	};

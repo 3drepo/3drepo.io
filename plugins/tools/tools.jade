@@ -1,7 +1,7 @@
 #tools-menu-icon
-	.dropup
-		i.fa.fa-wrench(role="button", data-toggle='dropdown', data-target='#')
-		ul.dropdown-menu.pull-right(role='menu')
+	.dropup.btn-group(dropdown)
+		i.fa.fa-wrench#toolsMenu(type="button", data-toggle='dropdown')
+		ul.dropdown-menu.pull-right(role='menu' aria-labelledby="toolsMenu")
 			if ui.tools
 				each tool in ui.tools
 					!= renderMe(tool["template"], locals)

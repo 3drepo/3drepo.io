@@ -18,77 +18,149 @@
 var config = require('app-config').config;
 var frontend_scripts = require('../../common_public_files.js');
 
-module.exports = config;
+var default_http_port  = 80;
+var default_https_port = 443;
+var default_mongo_port = 27017;
+
+var default_cookie_secret        = 'cookie secret';
+var default_cookie_parser_secret = 'another cookie secret';
+
+/*******************************************************************************
+  * Coalesce function
+  * @param {Object} variable - variable to coalesce
+  * @param {Object} value - value to return if object is null or undefined
+  *******************************************************************************/
+var coalesce = function(variable, value)
+{
+	if (variable === null || variable === undefined)
+		return value;
+	else
+		return variable;
+}
+
+/*******************************************************************************
+  * Function to check whether or not a string is an IP address
+  * @param {string} str - String to test
+  *
+  * http://stackoverflow.com/questions/4460586/javascript-regular-expression-to-check-for-ip-addresses
+  *******************************************************************************/
+var checkIP = function(str)
+{
+	if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(str))
+		return true;
+	else
+		return false;
+}
 
 // TODO: Should do some checking of validity of config file here.
 // TODO: Tidy up
 // TODO: Generate vhost boolean, and add checks for port/hostnames etc. (Maybe default ports)
 
-// Dynamic config based on static config variables
-
-if ('ssl' in config) {
-	module.exports.apiServer.port = config.apiServer.https_port ? config.apiServer.https_port : config.servers[0].https_port;
-} else {
-	module.exports.apiServer.port = config.apiServer.http_port ? config.apiServer.http_port : config.servers[0].http_port;
-}
-
-if (!config.apiServer.hostname)
+/*******************************************************************************
+ * Fill in the details of a server
+ * @param {Object} serverObject - The object to populate
+ * @param {string} name - The name of the server (also populates sub-domain/sub-directory)
+ * @param {boolean} usingIP - Are we using an IP address for the base host
+ * @param {boolean} using_ssl - Are we using SSL encryption
+ * @param {string} host - A string representing the base host name
+ * @param {boolean} applyName - Do we want to use the name for sub-directory/sub-domain
+ *******************************************************************************/
+var fillInServerDetails = function(serverObject, name, usingIP, using_ssl, host, applyName)
 {
-	module.exports.apiServer.hostname = config.servers[0].hostname;
-	module.exports.apiServer.host_dir = "api";
-} else if (!config.apiServer.host_dir) {
-	module.exports.apiServer.host_dir = "";
+	serverObject                   = coalesce(serverObject, {});
+	serverObject.name              = coalesce(serverObject.name, name);
+	serverObject.sub_domain_or_dir = coalesce(serverObject.sub_domain_or_dir, 1);
+	serverObject.http_port         = coalesce(serverObject.http_port, default_http_port);
+	serverObject.https_port        = coalesce(serverObject.https_port, default_https_port);
+	serverObject.public_port       = coalesce(serverObject.public_port, using_ssl ? serverObject.https_port : serverObject.http_port);
+	serverObject.public_protocol   = coalesce(serverObject.public_protocol, using_ssl ? "https" : "http");
+
+	// Have to use subdirectory with an IP address
+	if (usingIP) {
+		if (!config.api_server.sub_domain_or_dir)
+		{
+			console.log("WARNING: IP specified but tried to use sub-domain. Setting to sub-directory.");
+			config.api_server.sub_domain_or_dir = 1;
+		}
+	}
+
+	// Are we using ssl
+	serverObject.port = using_ssl ? coalesce(serverObject.https_port, default_https_port) : coalesce(serverObject.http_port, default_http_port);
+
+	// If we don't have a hostname, we should construct one
+	if (!serverObject.hostname)
+	{
+		if (applyName)
+		{
+			// Is this a subdomain or a directory
+			if (!serverObject.sub_domain_or_dir)
+			{
+				// Sub-domain
+				serverObject.hostname = serverObject.name + "." + host;
+				serverObject.host_dir = "";
+			} else {
+				// Sub-directory
+				serverObject.hostname = host;
+				serverObject.host_dir = serverObject.name;
+			}
+		} else {
+			serverObject.hostname = host;
+			serverObject.host_dir = "";
+		}
+	}
+
+	serverObject.url = serverObject.public_protocol + "://" + serverObject.hostname + ":" + serverObject.public_port + "/" + serverObject.host_dir;
 }
 
+// Check for hostname and ip here
+config.host = coalesce(config.host, "127.0.0.1");
+default_http_port = coalesce(config.http_port, default_http_port);
+default_https_port = coalesce(config.https_port, default_https_port);
+
+var usingIP = checkIP(config.host);
+var using_ssl = ('ssl' in config);
+
+fillInServerDetails(config.api_server, "api", usingIP, using_ssl, config.host, true);
+config.api_server.external = coalesce(config.api_server.external, false); // Do we need to start an API server, or just link to an external one.
+
+// Set up other servers
 for(i in config.servers)
 {
-	if ('ssl' in config) {
-		module.exports.servers[i].port = config.servers[i].https_port;
-	} else {
-		module.exports.servers[i].port = config.servers[i].http_port;
-	}
-
-	if ("protocol" in module.exports.servers[i])
-	{
-		module.exports.servers[i].protocol = modules.exports.servers[i].protocol + '://';
-	} else {
-		module.exports.servers[i].protocol = '//';
-	}
-
-	module.exports.servers[i].url = module.exports.servers[i].protocol + module.exports.servers[i].hostname + ':' + module.exports.servers[i].port;
+	fillInServerDetails(config.servers[i], "server_" + i, usingIP, using_ssl, config.host, false);
 }
 
-if("protocol" in module.exports.apiServer)
+// If the API server is running on a subdirectory, config.subdirectory will be true
+// If the API server is running different subdomain it will require virtual hosts
+// If both these are set to false then you enter advanced mode (see 3drepo.js)
+config.subdirectory = coalesce(config.crossOrigin, config.api_server.sub_domain_or_dir === 1);
+config.vhost        = coalesce(config.vhost, config.api_server.sub_domain_or_dir === 0);
+
+// Database configuration
+config.db          = coalesce(config.db, {});
+config.db.host     = coalesce(config.db.host, config.host);
+config.db.port     = coalesce(config.db.port, default_mongo_port);
+config.db.username = coalesce(config.db.username, "username");
+config.db.password = coalesce(config.db.password, "password");
+
+// Other options
+config.js_debug_level     = coalesce(config.js_debug_level, 'debug'); // Loading prod or debug scripts
+config.cookie_secret       = coalesce(config.cookie_secret, config.default_cookie_secret);
+config.cookie_parser_secret = coalesce(config.cookie_parser_secret, config.default_cookie_parser_secret);
+
+// Check whether the secret have been set in the file or not
+if ((config.cookie_secret === config.default_cookie_secret) || (config.cookie_parser_secret === config.default_cookie_parser_secret))
 {
-	module.exports.apiServer.protocol = module.exports.apiServer.protocol + '://';
-} else {
-	module.exports.apiServer.protocol = '//';
+	console.log("Cookie secret phrase has the default value. Update the config");
+	process.exit(1);
 }
 
-if (!("external" in module.exports.apiServer))
-{
-	module.exports.apiServer.external = false;
-}
+config.default_format = coalesce(config.default_format, "html");
+config.external      = (config.js_debug_level === 'debug') ? frontend_scripts.debug_scripts : frontend_scripts.prod_scripts;
 
-if(!("external_port" in module.exports.apiServer))
-{
-	module.exports.external_port = module.exports.port;
-}
+// Log file options
+config.logfile               = coalesce(config.logfile, {});
+config.logfile.filename      = coalesce(config.logfile.filename, "/var/log/3drepo.org");
+config.logfile.console_level = coalesce(config.logfile.console_level, "info");
+config.logfile.file_level    = coalesce(config.logfile.file_level, "info");
 
-if (!module.exports.apiServer.host_dir)
-{
-	module.exports.crossOrigin = true;
-	module.exports.apiServer.url = module.exports.apiServer.protocol + module.exports.apiServer.hostname + ':' + module.exports.apiServer.external_port;
-} else {
-	module.exports.crossOrigin = false;
-	module.exports.apiServer.url = module.exports.apiServer.protocol + module.exports.apiServer.hostname + ':' + module.exports.apiServer.external_port + '/' + module.exports.apiServer.host_dir;
-}
-
-if(config.logfile.js_debug_level === 'debug')
-{
-	module.exports.external = frontend_scripts.debug_scripts;
-}
-else
-{
-	module.exports.external = frontend_scripts.prod_scripts;
-}
+module.exports = config;

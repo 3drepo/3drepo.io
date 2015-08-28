@@ -55,7 +55,7 @@ module.exports.createApp = function(template)
 	app.get('/public/plugins/base/config.js', function(req, res) {
 		var params = {};
 
-		params['config_js'] = 'var server_config = {}; server_config.apiUrl = function(path) { return "' + config.apiServer.url + '/" + path; };';
+		params['config_js'] = 'var server_config = {}; server_config.apiUrl = function(path) { return "' + config.api_server.url + '/" + path; };';
 
 		if("wayfinder" in config)
 		{
@@ -153,7 +153,7 @@ module.exports.createApp = function(template)
 									{
 										"plugin": "revision",
 										"friends" : [
-											"panels", "tree", "meta", "issues", "revisionselector", "diffselector"
+											"panels", "tree", "meta", "issues", "revisionselector", "diffselector", "clip"
 										],
 										"children": [
 											{
@@ -183,7 +183,7 @@ module.exports.createApp = function(template)
 									{
 										"plugin": "view",
 										"friends" : [
-											"panels", "tree", "meta", "issues", "revisionselector", "diffselector"
+											"panels", "tree", "meta", "issues", "revisionselector", "diffselector", "clip"
 										],
 										"children": [
 											{

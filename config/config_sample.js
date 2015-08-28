@@ -20,15 +20,18 @@ var http_port  = 80;
 var https_port = 443;
 
 module.exports = {
-	apiServer: {
-		hostname: "api." + hostname,
+	host: hostname,
+	api_server: {
+		name: "api",
+		subdomain_or_subdir : 1,
 		http_port: http_port,
-		https_port: https_port
+		https_port: https_port,
+		public_port: http_port,
+		public_protocol: "http"
 	},
-	vhost: true,
-	cookieSecret: "secret key",
-	cookieParserSecret: "another secret key",
-	defaultFormat: "html",
+	cookie_secret: "A secret",
+	cookie_parser_secret : "Another secret",
+	default_format: "html",
 	servers: [
 		{
 			hostname:   hostname,
@@ -37,11 +40,11 @@ module.exports = {
 			template:   "frontend.jade"
 		}
 	],
+	js_debug_level: 'debug',
 	logfile: {
 		filename: '/var/log/3drepo.log',
 		console_level: 'debug',
-		file_level: 'debug',
-		js_debug_level: 'debug'
+		file_level: 'debug'
 	},
 	db: {
 		host: 'localhost',
@@ -51,7 +54,8 @@ module.exports = {
 	},
 	ssl: {
 		key: 'my_key.pem',
-		cert:'my_server.crt'
+		cert:'my_server.crt',
+		ca: 'my_server.ca'
 	}
 }
 

@@ -547,7 +547,7 @@ module.exports = function(router, dbInterface, checkAccess){
 		logger.log('debug',"ACCOUNT: " + account + " PROJECT: " + project + " REGEX: " + regex + " [" + format + "]");
 
 		if (!format)
-			format = this.defaultFormat;
+			format = this.default_format;
 
 		var responsePlace = regex + "." + format;
 
@@ -600,7 +600,7 @@ module.exports = function(router, dbInterface, checkAccess){
 
 	}
 
-	this.defaultFormat = config.defaultFormat ? config.defaultFormat : "html";
+	this.default_format = config.default_format ? config.default_format : "html";
 
 	this.get = function (format, regex, callback)
 	{

@@ -1,0 +1,15 @@
+.metaview(ng-controller='ClipCtrl')
+	#clipplane
+		.input-group
+			span Axis
+			button.btn(ng-click="changeAxis('X')")
+				span X
+			button.btn(ng-click="changeAxis('Y')")
+				span Y
+			button.btn(ng-click="changeAxis('Z')")
+				span Z
+		#clipslider.input-group
+			span Slider Position
+			slider(ng-model="slider",min=1,max=1000,step=1)
+
+

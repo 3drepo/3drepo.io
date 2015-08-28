@@ -37,13 +37,17 @@ if ('ssl' in config) {
 	var ssl_options = {
 		key: fs.readFileSync(config.ssl.key, 'utf8'),
 		cert: fs.readFileSync(config.ssl.cert, 'utf8'),
-		ca: fs.readFileSync(config.ssl.ca, 'utf8'),
 		ciphers: 'ECDHE-ECDSA-AES128-GCM-SHA256|ECDHE-ECDSA-AES256-SHA:!RC4:!aNULL',
 		//ciphers: 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:!aNULL:!eNULL:!EXPORT:!DSS:!DES:!RC4:!3DES:!MD5:!PS:!SSLv3',
 		honorCipherOrder: true,
 		ecdhCurve: 'secp384r1',
 		secureOptions: constants.SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION|constants.SSL_OP_NO_SSLv2|constants.SSL_OP_NO_SSLv3
 	};
+
+	// This is the optional certificate authority
+	if (config.ssl.ca) {
+		ssl_options['ca'] = fs.readFileSync(config.ssl.ca, 'utf8');
+	}
 
 	var http_app = express();
 
@@ -56,14 +60,17 @@ if ('ssl' in config) {
 	});
 }
 
-if (!config.vhost)
+if (config.vhost)
 {
-	if (!config.apiServer.external)
+	// We have to start virtual host if the API server and web service have
+	// different sub-domains.
+
+	if (!config.api_server.external)
 	{
 		if ('ssl' in config)
-			var apiServer = https.createServer(ssl_options, apiApp);
+			var api_server = https.createServer(ssl_options, apiApp);
 		else
-			var apiServer = http.createServer(apiApp);
+			var api_server = http.createServer(apiApp);
 	}
 
 	for(i in config.servers)
@@ -85,16 +92,18 @@ if (!config.vhost)
 		});
 	}
 
-	if (!config.apiServer.external)
+	if (!config.api_server.external)
 	{
-		apiServer.listen(config.apiServer.port, config.apiServer.hostname, function() {
-			logger.log('info', 'Starting API service on ' + config.apiServer.hostname + ' port ' + config.apiServer.port);
+		api_server.listen(config.api_server.port, config.api_server.hostname, function() {
+			logger.log('info', 'Starting API service on ' + config.api_server.hostname + ' port ' + config.api_server.port);
 		});
 	}
 
-} else if (!config.crossOrigin) {
+} else if (config.subdirectory) {
+	// Here the API server and web service run on same host
+	// but different directory.
 	var app = express();
-	app.use("/" + config.apiServer.host_dir, apiApp);
+	app.use("/" + config.api_server.host_dir, apiApp);
 
 	for(i in config.servers)
 	{
@@ -107,17 +116,22 @@ if (!config.vhost)
 	else
 		var server = http.createServer(app);
 
-	server.listen(config.servers[0].port, config.servers[0].hostname, function() {
+	// Use '0.0.0.0' so that the website is accessible from all
+	// relevant addresses
+	server.listen(config.servers[0].port, '0.0.0.0', function() {
 		logger.log('info', 'Starting service on ' + config.servers[0].hostname + ' port ' + config.servers[0].port);
 	});
 
 } else {
+	// This is an advanced configuration, which allows for different ports
+	// and/or different hosts currently this won't be automatically detected
+	// so you would have to set manually in config crossOrigin and vhost to false
 	var vhostApp = express();
 
-	if (!config.apiServer.external)
+	if (!config.api_server.external)
 	{
-		logger.log('info', 'Starting VHOST for ' + config.apiServer.hostname);
-		vhostApp.use(vhost(config.apiServer.hostname, apiApp));
+		logger.log('info', 'Starting VHOST for ' + config.api_server.hostname);
+		vhostApp.use(vhost(config.api_server.hostname, apiApp));
 	}
 
 	for(i in config.servers)

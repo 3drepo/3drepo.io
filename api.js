@@ -19,7 +19,7 @@ var express = require('express');
 var app = express();
 var routes = require('./routes.js')();
 var config = require('./js/core/config.js');
-var hostname = config.apiServer.hostname;
+var hostname = config.api_server.hostname;
 
 // Attach the encoders to the router
 var x3dom_encoder = require('./js/core/encoders/x3dom_encoder.js').route(routes);
@@ -63,14 +63,14 @@ app.use(compress());
 if (!config.crossOrigin)
 	app.use(allowCrossDomain);
 
-app.use(cookieParser(config.cookieParserSecret));
+app.use(cookieParser(config.cookie_parser_secret));
 app.use(expressSession({
-	secret: config.cookieSecret,
+	secret: config.cookie_secret,
 	resave: false,
 	saveUninitialized: true,
 	cookie: {
 		domain: hostname,
-		path: "/" + config.apiServer.host_dir,
+		path: "/" + config.api_server.host_dir,
 		httpOnly: false
 	}
 }));
