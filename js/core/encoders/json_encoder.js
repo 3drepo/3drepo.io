@@ -117,13 +117,13 @@ function getTree(dbInterface, account, project, branch, revision, sid, namespace
 			dbInterface.getRootNode(account, project, branch, revision, false, function(err, dbObj) {
 				if(err.value) return err_callback(err);
 
-				var doc = repoGraphScene.decode(dbObj);
+				var doc = repoGraphScene.decode([dbObj]);
 
 				var head = [{}];
 				var node = doc['mRootNode'];
 
 				if (!node)
-					return err_callback(err);
+					return err_callback(responseCodes.ROOT_NODE_NOT_FOUND);
 
 				logger.log('debug', 'Found root node ' + node["id"]);
 
@@ -419,8 +419,6 @@ exports.route = function(router)
 		router.dbInterface.getHeadUUID(params.account, params.project, params.branch, function (err, uuid)
 		{
 			router.dbInterface.getObject(params.account, params.project, null, uuidToString(uuid.uuid), params.sid, function (err, type, uid, obj) {
-				console.log(JSON.stringify(obj));
-
 				if (err.value)
 					err_callback(err);
 				else
@@ -445,7 +443,9 @@ exports.route = function(router)
 						if (mesh[C.REPO_NODE_LABEL_COMBINED_MAP])
 						{
 							var subMeshes   = mesh[C.REPO_NODE_LABEL_COMBINED_MAP];
-							var subMeshKeys = Object.keys(subMeshes);
+							var subMeshKeys = mesh[C.REPO_NODE_LABEL_COMBINED_MAP].map(function (item) {
+								return item[C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]
+							});
 
 							var outJSON = {};
 
@@ -461,33 +461,36 @@ exports.route = function(router)
 
 								if (children.materials_count)
 								{
-									var childID = Object.keys(children.materials)[0];
-									var child   = children.materials[childID];
+									for (var i = 0; i < children.materials_count; i++)
+									{
+										var childID = Object.keys(children.materials)[i];
+										var child   = children.materials[childID];
 
-									var app = {};
-									app["name"] = "A_0";
+										var app = {};
+										app["name"] = childID;
 
-									var material = {};
+										var material = {};
 
-									if ('diffuse' in child)
-										material["diffuseColor"] = child['diffuse'].join(' ');
+										if ('diffuse' in child)
+											material["diffuseColor"] = child['diffuse'].join(' ');
 
-									if ('emissive' in child)
-										material["emissiveColor"] = child['emissive'].join(' ');
+										if ('emissive' in child)
+											material["emissiveColor"] = child['emissive'].join(' ');
 
-									if ('shininess' in child)
-										material["shininess"] = child["shininess"];
+										if ('shininess' in child)
+											material["shininess"] = child["shininess"];
 
-									if ('specular' in child)
-										material["specularColor"] = child["specular"].join(" ");
+										if ('specular' in child)
+											material["specularColor"] = child["specular"].join(" ");
 
-									if ('opacity' in child)
-										material["transparency"] = 1.0 - child["opacity"];
+										if ('opacity' in child)
+											material["transparency"] = 1.0 - child["opacity"];
 
-									app["material"] = material;
+										app["material"] = material;
+
+										outJSON["appearance"].push(app);
+									}
 								}
-
-								outJSON["appearance"].push(app);
 
 								var bbox = repoNodeMesh.extractBoundingBox(mesh);
 								outJSON["mapping"] = [];
@@ -497,10 +500,10 @@ exports.route = function(router)
 									var map = {};
 
 									map["name"]       = subMeshKeys[i];
-									map["appearance"] = "A_0"; // TODO: Relies on having an appearance
-									map["min"]        = bbox.min.join(' ');
-									map["max"]        = bbox.max.join(' ');
-									map["usage"]      = ["M_0"];
+									map["appearance"] = subMeshes[i]["mat_id"];
+									map["min"]        = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][0].join(' ');
+									map["max"]        = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][1].join(' ');
+									map["usage"]      = params.uid + "_0"
 
 									outJSON["mapping"].push(map);
 								}

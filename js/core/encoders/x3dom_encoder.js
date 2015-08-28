@@ -91,9 +91,14 @@ function scale(v, s)
 	return [v[0] * s, v[1] * s, v[2] * s];
 }
 
+function length(v)
+{
+	return Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+}
+
 function normalize(v)
 {
-	var sz =  Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+	var sz = length(v);
 	return scale(v, 1 / sz);
 }
 
@@ -301,11 +306,14 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			var position = child["position"] ? child["position"] : [0,0,0];
 			var look_at = child["look_at"] ? child["look_at"] : [0,0,1];
 
-			var up = child["up"] ? child["up"] : [0,1,0];
-			forward = scale(normalize(look_at), -1);
-			up = normalize(up);
-			var right = crossProduct(forward, scale(up, -1)); // Left-hand coordinate system
+			if (length(look_at) == 0) look_at = [0,0,1];
 
+			// X3DOM has right-hand coordinate
+			var up = child["up"] ? child["up"] : [0,1,0];
+			forward = normalize(look_at);
+			up = normalize(up);
+
+			var right = crossProduct(forward, up);
 			var viewMat = mathjs.matrix([[right[0], right[1], right[2], 0], [up[0], up[1], up[2], 0],
 				[forward[0], forward[1], forward[2], 0], [position[0], position[1], position[2], 1]]);
 
@@ -351,13 +359,6 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			} else {
 				newNode = xmlDoc.createElement('MatrixTransform');
 				newNode.setAttribute('matrix', mat_str);
-			}
-
-			if ('bounding_box' in child)
-			{
-				var bbox = repoNodeMesh.extractBoundingBox(child);
-				newNode.setAttribute('bboxCenter', bbox.center);
-				newNode.setAttribute('bboxSize', bbox.size);
 			}
 
 			newNode.setAttribute("id", child['id']);
@@ -469,10 +470,16 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 
 			if (child[C.REPO_NODE_LABEL_COMBINED_MAP])
 			{
-				subMeshKeys = Object.keys(child[C.REPO_NODE_LABEL_COMBINED_MAP]);
+				subMeshKeys = child[C.REPO_NODE_LABEL_COMBINED_MAP].map(function (item) {
+					return item[C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]
+				});
 			} else {
 				subMeshKeys = [null]; // No submesh
 			}
+
+			var bbox = null;
+
+			if ('bounding_box' in child) bbox = repoNodeMesh.extractBoundingBox(child);
 
 			if ((mode == "mp") && (subMeshKeys.length > 1))
 			{
@@ -483,6 +490,12 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 				mp.setAttribute('onclick', 'clickObject(event);');
 				mp.setAttribute('onmouseover', 'onMouseOver(event);');
 				mp.setAttribute('onmousemove', 'onMouseMove(event);');
+
+				if (bbox)
+				{
+					mp.setAttribute('bboxCenter', bbox.center);
+					mp.setAttribute('bboxSize', bbox.size);
+				}
 
 				xmlNode.appendChild(mp);
 			} else {
@@ -496,6 +509,12 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 					shape.setAttribute('onclick', 'clickObject(event);');
 					shape.setAttribute('onmouseover', 'onMouseOver(event);');
 					shape.setAttribute('onmousemove', 'onMouseMove(event);');
+
+					if (bbox)
+					{
+						shape.setAttribute('bboxCenter', bbox.center);
+						shape.setAttribute('bboxSize', bbox.size);
+					}
 
 					X3D_AddChildren(xmlDoc, shape, child, matrix, dbInterface, account, project, mode);
 
@@ -531,8 +550,8 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, subM
 
 	switch (mode) {
 		case "x3d":
-			shape.setAttribute('bboxCenter', bbox.center.join(' '));
-			shape.setAttribute('bboxSize', bbox.size.join(' '));
+			//shape.setAttribute('bboxCenter', bbox.center.join(' '));
+			//shape.setAttribute('bboxSize', bbox.size.join(' '));
 
 			var indexedfaces = xmlDoc.createElement('IndexedFaceSet');
 
@@ -576,11 +595,11 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, subM
 			indexedfaces.appendChild(coordinate);
 
 			break;
-			
+
 		case "mp":
 		case "src":
-			shape.setAttribute('bboxCenter', bbox.center.join(' '));
-			shape.setAttribute('bboxSize', bbox.size.join(' '));
+			//shape.setAttribute('bboxCenter', bbox.center.join(' '));
+			//shape.setAttribute('bboxSize', bbox.size.join(' '));
 
 			var externalGeometry = xmlDoc.createElement('ExternalGeometry');
 
@@ -601,8 +620,8 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, subM
 			shape.appendChild(externalGeometry);
 			break;
 		case "bin":
-			shape.setAttribute('bboxCenter', bbox.center.join(' '));
-			shape.setAttribute('bboxSize', bbox.size.join(' '));
+		    //shape.setAttribute('bboxCenter', bbox.center.join(' '));
+			//shape.setAttribute('bboxSize', bbox.size.join(' '));
 
 			var binaryGeometry = xmlDoc.createElement('binaryGeometry');
 
@@ -664,8 +683,8 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, subM
 
 					shape.appendChild(popGeometry);
 
-					shape.setAttribute('bboxCenter', bbox.center.join(' '));
-					shape.setAttribute('bboxSize', bbox.size.join(' '));
+					//shape.setAttribute('bboxCenter', bbox.center.join(' '));
+					//shape.setAttribute('bboxSize', bbox.size.join(' '));
 				}
 			});
 
@@ -757,18 +776,16 @@ function X3D_AddViewpoint(xmlDoc, bbox)
 
 	var max_dim = Math.max(bbox.size[0], bbox.size[1]) * 0.5;
 
-	var fov = 40 * (Math.PI / 180); // Field of view in radians
+	var fov = 40 * (Math.PI / 180); // Field of view in radians (40 degrees)
 
+	// Move back in the z direction such that the model takes
+	// up half the center of the screen.
 	vpos[2] += bbox.size[2] * 0.5 + max_dim / Math.tan(0.5 * fov);
-
-	logger.log('debug', 'VPOS: ' + vpos.join(' '));
-	logger.log('debug', 'MAXDIM: ' + max_dim);
 
 	var vpoint = xmlDoc.createElement('Viewpoint');
 	vpoint.setAttribute('id', 'sceneVP');
 	vpoint.setAttribute('position', vpos.join(' '));
-	//vpoint.setAttribute('position', '-26.06 1.43 15.28');
-	//vpoint.setAttribute('position', '100 100 100');
+	vpoint.setAttribute('centerOfRotation', bbox.center.join(' '));
 
 	vpoint.setAttribute('orientation', '0 0 -1 0');
 	vpoint.setAttribute('zNear', 0.01);
@@ -924,11 +941,13 @@ exports.route = function(router)
 			var app = xmlDoc.createElement('Appearance');
 			var mat = xmlDoc.createElement('Material');
 			mat.setAttribute('diffuseColor', '0 1 0');
+			mat.textContent = ' ';
 			app.appendChild(mat);
 			shape.appendChild(app);
 
 			var eg  = xmlDoc.createElement('ExternalGeometry');
 			eg.setAttribute('url', config.apiServer.url + '/' + params.account + '/' + params.project + '/' + params.uid + '.src.mpc');
+			eg.textContent = ' ';
 			shape.appendChild(eg);
 
 			sceneRoot.root.appendChild(shape);

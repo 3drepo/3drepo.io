@@ -42,6 +42,34 @@ exports.decode = function(bson, materials) {
 
     var myUUID = bson["id"];
 
+    if (bson[C.REPO_NODE_LABEL_COMBINED_MAP])
+    {
+        // TODO: Here we have multiple maps, including ones that
+        // are no originally ours, let's hope we never have an example
+        // of this.
+        var myMap = bson[C.REPO_NODE_LABEL_COMBINED_MAP][myUUID];
+
+        if (myUUID in bson[C.REPO_NODE_LABEL_COMBINED_MAP])
+        {
+            bson[C.REPO_NODE_LABEL_COMBINED_MAP] = bson[C.REPO_NODE_LABEL_COMBINED_MAP][myUUID];
+
+            for(var i = 0; i < bson[C.REPO_NODE_LABEL_COMBINED_MAP].length; i++)
+            {
+                bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID] =
+                    UUID.unparse(bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID].buffer);
+
+                bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_MATERIAL_ID] =
+                    UUID.unparse(bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_MATERIAL_ID].buffer);
+
+				bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET] =
+					bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
+            }
+        }
+
+        delete bson[C.REPO_NODE_LABEL_COMBINED_MAP][myUUID];
+    }
+
+    /*
     if (bson[C.REPO_NODE_LABEL_VERTEX_MAP]) {
         bson[C.REPO_NODE_LABEL_COMBINED_MAP] = {};
 
@@ -107,6 +135,7 @@ exports.decode = function(bson, materials) {
 
         delete bson[C.REPO_NODE_LABEL_TRIANGLE_MAP];
     }
+    */
 
 	return bson;
 }

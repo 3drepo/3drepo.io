@@ -106,13 +106,14 @@ define('REPO_NODE_LABEL_MERGED_NODES', 'merged_nodes');
 define('REPO_NODE_LABEL_VERTEX_MAP', 'v_map');
 define('REPO_NODE_LABEL_TRIANGLE_MAP', 't_map');
 define('REPO_NODE_LABEL_MERGE_MAP_MESH_ID', 'map_id');
+define('REPO_NODE_LABEL_MERGE_MAP_MATERIAL_ID', 'mat_id');
 define('REPO_NODE_LABEL_MERGE_MAP_FROM', 'from');
 define('REPO_NODE_LABEL_MERGE_MAP_TO', 'to');
-define('REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM', 'vertFrom');
-define('REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO', 'vertTo');
-define('REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_FROM', 'triFrom');
-define('REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO', 'triTo');
-define('REPO_NODE_LABEL_COMBINED_MAP', 'merge_map');
+define('REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM', 'v_from');
+define('REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO', 'v_to');
+define('REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_FROM', 't_from');
+define('REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO', 't_to');
+define('REPO_NODE_LABEL_COMBINED_MAP', 'm_map');
 define('REPO_NODE_LABEL_MERGE_MAP_OFFSET', 'offset');
 
 //-----------------------------------------------------------------------------

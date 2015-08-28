@@ -594,7 +594,7 @@ exports.queryScene = function(dbName, project, branch, revision, filter, project
 		filter["rev_id"] = docs[0]["_id"];
 
 		dbConn.filterColl(dbName, project + '.stash.3drepo', filter, projection, function(err, coll) {
-			if (!coll.length || err.value)
+			if (err.value || !coll.length)
 			{
 				// TODO: At this point we should generate send off to generate a stash
 				// There is no stash so just pass back the unoptimized scene graph
@@ -643,7 +643,8 @@ exports.getRootNode = function(dbName, project, branch, revision, queryStash, ca
 		if (queryStash)
 		{
 			var filter = {
-				parents : {"$exists" : false},
+				parents : {$exists : false},
+				type: "transformation",
 				rev_id : stringToUUID(docs[0]["_id"])
 			};
 
@@ -657,7 +658,8 @@ exports.getRootNode = function(dbName, project, branch, revision, queryStash, ca
 			});
 		} else {
 			var filter = {
-				parents : {"$exists" : false},
+				parents : {$exists : false},
+				type: "transformation",
 				_id: {$in: docs[0]['current']}
 			};
 
@@ -676,7 +678,7 @@ exports.getRootNode = function(dbName, project, branch, revision, queryStash, ca
 /*
 exports.queryObjectsScene = function(dbName, project, uid, rid, sid, filter, projection, callback) {
 
-	// If the uid is not specified then we are requesting a 
+	// If the uid is not specified then we are requesting a
 	// specific object for a branch and revision
 	if (!uid)
 	{
@@ -780,7 +782,7 @@ exports.getChildrenByUID = function(dbName, project, uid, callback) {
 
 				if (!docs.length) return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
 
-				// If the object came from the 
+				// If the object came from the
 				self.queryScene(dbName, project, null, uuidToString(docs[0]["_id"]), sceneQuery, null, function (err, fromStash, docs) {
 					if (err.value) return callback(err);
 
@@ -1186,7 +1188,7 @@ exports.getBranches = function(dbName, project, callback) {
 
 exports.getMetadata = function(dbName, project, branch, revision, sid, uid, callback) {
 
-	// If the uid is not specified then we are requesting a 
+	// If the uid is not specified then we are requesting a
 	// specific object for a branch and revision
 	if (!uid)
 	{
@@ -1256,31 +1258,29 @@ exports.getMetadata = function(dbName, project, branch, revision, sid, uid, call
 	}
 };
 
-exports.getMeshFiles = function(dbName, project, fromStash, uid, obj, callback)
+exports.appendMeshFiles = function(dbName, project, fromStash, uid, obj, callback)
 {
 		var gridfstypes = [
 			C.REPO_NODE_LABEL_VERTICES,
 			C.REPO_NODE_LABEL_FACES,
 			C.REPO_NODE_LABEL_NORMALS,
 			//C.REPO_NODE_LABEL_COLORS,
-			C.REPO_NODE_LABEL_UV_CHANNELS	
+			C.REPO_NODE_LABEL_UV_CHANNELS
 		];
 
 		var numTasks = gridfstypes.length;
 		var subColl = fromStash ? 'stash.3drepo' : 'scene';
 
 		async.each(gridfstypes, function (fstype, callback) {
-			console.log(fstype);
-
 			dbConn.getGridFSFile(dbName, project + '.' + subColl, uid + "." + fstype, function(err, data)
 			{
 				if (!err["value"])
 					obj[fstype] = data;
 
-				callback(obj);
+				callback();
 			});
-		}, function (err, obj) {
-			return callback(responseCodes.OK, "mesh", uid, fromStash, repoGraphScene.decode(obj));
+		}, function (err) {
+			return callback(responseCodes.OK, "mesh", uid, fromStash, repoGraphScene.decode([obj]));
 		});
 }
 
@@ -1292,7 +1292,7 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 		var query = {
 			_id: stringToUUID(uid)
 		};
-	
+
 		dbConn.filterColl(dbName, project + '.stash.3drepo', query, {}, function(err, obj) {
 			if (err.value) return callback(err);
 
@@ -1312,7 +1312,7 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 
 					if (type == "mesh")
 					{
-						self.getMeshFiles(dbName, project, false, uid, obj, callback);
+						self.appendMeshFiles(dbName, project, false, uid, obj[0], callback);
 					} else {
 						return callback(responseCodes.OK, type, uid, false, repoGraphScene.decode(obj));
 					}
@@ -1325,7 +1325,7 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 				// if a mesh load the vertices, indices, colors etc from GridFS
 				if (type == "mesh")
 				{
-					self.getMeshFiles(dbName, project, true, uid, obj, callback);
+					self.appendMeshFiles(dbName, project, true, uid, obj[0], callback);
 				} else {
 					return callback(responseCodes.OK, type, uid, true, repoGraphScene.decode(obj));
 				}
@@ -1429,7 +1429,7 @@ exports.getDiff = function(account, project, branch, revision, otherbranch, othe
 			otherHistoryQuery = {
 				shared_id:	branch_id
 			};
-		}	
+		}
 
 		dbConn.getLatest(account, project + '.history', otherHistoryQuery, null, function(err, otherhistory)
 		{
@@ -1458,13 +1458,13 @@ exports.getDiff = function(account, project, branch, revision, otherbranch, othe
 			*/
 
 			doc['added'] = otherhistorycurrent.filter( function (elem)
-				{	
+				{
 					return (historycurrent.indexOf(elem) == -1);
 				}
 			);
 
 			doc['deleted'] = historycurrent.filter( function (elem)
-				{	
+				{
 					return (otherhistorycurrent.indexOf(elem) == -1);
 				}
 			);
@@ -1477,13 +1477,8 @@ exports.getDiff = function(account, project, branch, revision, otherbranch, othe
 			self.getUIDMap(account, project, doc['added'].concat(doc['deleted']), function (err, map) {
 				if (err.value) return callback(err);
 
-				console.log(doc);
-
 				doc['added']   = doc['added'].map(function(elem) { return map[elem]; });
 				doc['deleted'] = doc['deleted'].map(function(elem) { return map[elem]; });
-
-				console.log(JSON.stringify(map));
-				console.log(doc);
 
 				callback(responseCodes.OK, doc);
 			});

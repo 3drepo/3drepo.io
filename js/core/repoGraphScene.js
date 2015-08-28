@@ -85,7 +85,6 @@ exports.decode = function(bsonArray, gridfsfiles) {
 							rootNode = bson;
 						break;
 					case C.REPO_NODE_TYPE_MESH :
-						console.log(bson["vertices"]);
 						meshes[bson.id] = bson;
 						scene[C.REPO_SCENE_LABEL_MESHES_COUNT]++;
 						break;
@@ -144,6 +143,7 @@ exports.decode = function(bsonArray, gridfsfiles) {
 			}
 		}
 	}
+
 
 	//---------------------------------------------------------------------
 	// Textures

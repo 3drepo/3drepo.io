@@ -26,6 +26,8 @@ module.exports = {
 		https_port: https_port
 	},
 	vhost: true,
+	cookieSecret: "secret key",
+	cookieParserSecret: "another secret key",
 	defaultFormat: "html",
 	servers: [
 		{
