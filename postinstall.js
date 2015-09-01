@@ -44,7 +44,6 @@ var public_files = {
 		jqueryfancytree: '/public/js/external/jquery.fancytree-all.js',
 		x3dcontroller: '/public/js/x3dcontroller.js',
 		typeaheadjs: '/public/js/external/typeahead.bundle.js',
-		datetimepickerjs: '/public/js/external/datetimepicker.js',
 		sliderjs: '/public/js/external/bootstrap-slider.js',
 		angularsliderjs: '/public/js/external/slider.js',
 
@@ -76,7 +75,6 @@ var public_files = {
 		bootstrapcss: '/public/css/external/bootstrap.min.css',
 		jqueryuicss: '/public/css/external/jquery-ui.css',
 		repouicss : '/public/css/ui.css',
-		datetimepickercss: '/public/css/external/datetimepicker.css',
 		slidercss: '/public/css/external/bootstrap-slider.css'
 	}
 }
@@ -116,13 +114,12 @@ var internal_files = {
 	'bower_components/angular-bootstrap-slider/slider.js',
 	'bower_components/bootstrap-select/bootstrap-select.js',
 	'bower_components/bootstrap-select/bootstrap-select.css',
-	'bower_components/angular-bootstrap-datetimepicker/src/css/datetimepicker.css',
-	'bower_components/angular-bootstrap-datetimepicker/src/js/datetimepicker.js',
 	'bower_components/fancytree/dist/jquery.fancytree-all.js',
 	'bower_components/jquery/dist/jquery.js',
 	'bower_components/jquery-ui/jquery-ui.js',
 	'bower_components/masonry/masonry.js',
-	'bower_components/moment/moment.js'
+	'bower_components/moment/moment.js',
+	'bower_components/font-awesome/css/font-awesome.min.css'
 	],
 
 	x3dom_files: [

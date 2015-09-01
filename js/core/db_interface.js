@@ -927,8 +927,6 @@ exports.storeIssue = function(dbName, project, sid, owner, data, callback) {
 
 				data.owner = owner;
 
-				console.log("DATA: " + JSON.stringify(data));
-
 				coll.insert(data, function(err, count) {
 					if (err) return callback(responseCodes.DB_ERROR(err));
 
@@ -1236,7 +1234,7 @@ exports.getDiff = function(account, project, branch, revision, otherbranch, othe
 			otherHistoryQuery = {
 				shared_id:	branch_id
 			};
-		}	
+		}
 
 		dbConn.getLatest(account, project + '.history', otherHistoryQuery, null, function(err, otherhistory)
 		{
@@ -1253,29 +1251,17 @@ exports.getDiff = function(account, project, branch, revision, otherbranch, othe
 			historycurrent      = historycurrent.map(function(uid) { return uuidToString(uid); })
 			otherhistorycurrent = otherhistorycurrent.map(function(uid) { return uuidToString(uid); })
 
-			/*
-			console.log(JSON.stringify(otherhistorycurrent));
-			console.log(JSON.stringify(historycurrent));
-
-			console.log(JSON.stringify(otherhistorycurrent.map(function (elem)
-				{
-					return historycurrent.indexOf(elem);
-				}
-			)));
-			*/
-
 			doc['added'] = otherhistorycurrent.filter( function (elem)
-				{	
+				{
 					return (historycurrent.indexOf(elem) == -1);
 				}
 			);
 
 			doc['deleted'] = historycurrent.filter( function (elem)
-				{	
+				{
 					return (otherhistorycurrent.indexOf(elem) == -1);
 				}
 			);
-
 
 			// TODO: Compute the modified
 			//if (doc['modified'])
@@ -1284,13 +1270,8 @@ exports.getDiff = function(account, project, branch, revision, otherbranch, othe
 			self.getUIDMap(account, project, doc['added'].concat(doc['deleted']), function (err, map) {
 				if (err.value) return callback(err);
 
-				console.log(doc);
-
 				doc['added']   = doc['added'].map(function(elem) { return map[elem]; });
 				doc['deleted'] = doc['deleted'].map(function(elem) { return map[elem]; });
-
-				console.log(JSON.stringify(map));
-				console.log(doc);
 
 				callback(responseCodes.OK, doc);
 			});

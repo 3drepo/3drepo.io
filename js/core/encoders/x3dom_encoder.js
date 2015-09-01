@@ -275,7 +275,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			newNode.setAttribute('url', url_str);
 			newNode.setAttribute('id', child['id']);
 			newNode.setAttribute('DEF', dbInterface.uuidToString(child["shared_id"]));
-			newNode.setAttribute('nameSpaceName', child['project']);
+			newNode.setAttribute('nameSpaceName', child['account'] + '__' + child['project']);
 
 			if ('bounding_box' in child)
 			{

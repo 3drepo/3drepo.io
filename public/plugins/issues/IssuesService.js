@@ -17,12 +17,17 @@
 
 angular.module('3drepo')
 .service('IssuesService', ['StateManager', 'serverConfig', '$http', '$q', function(StateManager, serverConfig, $http, $q){
-	var self			= this;
+	var self            = this;
 
-	self.issues			= [];
+	self.issues         = [];
 	self.loadingPromise = null;
-	self.loading		= false;
-	self.loadedObject	= -1;
+	self.loading        = false;
+	self.loadedObject   = -1;
+
+	this.getPinPositions = function(object, refresh)
+	{
+
+	}
 
 	this.getObjectIssues = function(object, refresh)
 	{
@@ -46,8 +51,8 @@ angular.module('3drepo')
 			var deferred = $q.defer();
 
 			self.loadingPromise = deferred.promise;
-			self.loading		= true;
-			self.loadedObject	= sid;
+			self.loading        = true;
+			self.loadedObject   = sid;
 
 			self.issues = {};
 
@@ -70,11 +75,11 @@ angular.module('3drepo')
 					self.issues.push(issue);
 				}
 
-				self.loading		= false;
+				self.loading = false;
 				deferred.resolve();
 			}, function(message) {
-				self.loading		= false;
-				self.loadedObject	= null;		// Loading of object failed
+				self.loading      = false;
+				self.loadedObject = null;  // Loading of object failed
 				deferred.resolve();
 			});
 		} else {
