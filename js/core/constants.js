@@ -119,31 +119,3 @@ define('REPO_SCENE_LABEL_MAPS_COUNT', 'map_count');
 // Old API
 //
 //-----------------------------------------------------------------------------
-define('AI_MESH', 'aiMesh');
-define('AI_NODE', 'aiNode');
-define('AI_MATERIAL', 'aiMaterial');
-define('UUID', 'uuid');
-define('PATH', 'path');
-define('TYPE', 'type');
-define('INDEX', 'index');
-define('FACES_ARRAY_SIZE', 'facesArraySize');
-define('M_PARENT', 'mParent');
-define('M_NAME', 'mName');
-define('M_MESHES', 'mMeshes');
-define('M_TRANSFORMATION', 'mTransformation');
-define('M_NUM_VERTICES', 'mNumVertices');
-define('M_FACES', 'mFaces');
-define('M_MATERIAL_INDEX', 'mMaterialIndex');
-define('M_NORMALS', 'mNormals');
-define('M_PRIMITIVE_TYPES', 'mPrimitiveTypes');
-define('M_TANGENTS', 'mTangents');
-define('M_VERTICES', 'mVertices');
-define('AI_MATKEY_NAME', 'AI_MATKEY_NAME');
-define('AI_MATKEY_COLOR_AMBIENT', 'AI_MATKEY_COLOR_AMBIENT');
-define('AI_MATKEY_COLOR_DIFFUSE', 'AI_MATKEY_COLOR_DIFFUSE');
-define('AI_MATKEY_COLOR_EMISSIVE', 'AI_MATKEY_COLOR_EMISSIVE');
-define('AI_MATKEY_COLOR_SPECULAR', 'AI_MATKEY_COLOR_SPECULAR');
-define('AI_MATKEY_ENABLE_WIREFRAME', 'AI_MATKEY_ENABLE_WIREFRAME');
-define('AI_MATKEY_SHININESS', 'AI_MATKEY_SHININESS');
-define('AI_MATKEY_SHININESS_STRENGTH', 'AI_MATKEY_SHININESS_STRENGTH');
-define('AI_MATKEY_TWOSIDED', 'AI_MATKEY_TWOSIDED');

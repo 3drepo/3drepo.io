@@ -16,14 +16,16 @@
  */
 
 var express = require('express');
-var config = require('./js/core/config.js');
+var config = require('../js/core/config.js');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var compress = require('compression');
 var fs = require('fs');
 var jade = require('jade');
-var log_iface = require('./js/core/logger.js');
+var log_iface = require('../js/core/logger.js');
 var logger = log_iface.logger;
+
+var params = null; // TODO: Shouldn't use a global variable
 
 // Credit goes to http://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
 function escapeHtml(text) {
@@ -335,6 +337,8 @@ module.exports.createApp = function(template)
 	}
 
 	app.get('*', function(req, res) {
+		if (!params)
+
 		var params = {};
 
 		params["jsfiles"] = "";

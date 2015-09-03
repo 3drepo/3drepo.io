@@ -1,6 +1,6 @@
 #issues.issueview(ng-controller='IssuesCtrl')
 	.input-group
-		button.btn(ng-click='newIssue()')
+		button.btn(ng-click='newIssue()', ng-disabled='!objectIsSelected')
 			i.fa.fa2x.fa-plus
 		button.btn(ng-click='refresh()')
 			i.fa.fa2x.fa-refresh
@@ -8,7 +8,7 @@
 		.panel.panel-default(ng-repeat="issue in IssuesService.issues")
 			.panel-heading
 				h4.panel-title 
-					a(data-toggle="collapse", data-parent="#accordion", href="{{'#acc_' + issue.number}}") {{ issue.number + " - " + issue.name + " [" + issue.deadlineString + "]"}}
+					a(data-toggle='collapse', data-parent='#accordion', ng-click='openIssue(issue._id)', href="{{'#acc_' + issue.number}}") {{ issue.number + " - " + issue.name + " [" + issue.deadlineString + "]"}}
 					button.btn(ng-if="!issue.complete", ng-click='complete(issue._id)')
 						i.fa.fa-check
 					button.btn(ng-click='locateObject(issue._id)')

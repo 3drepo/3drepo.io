@@ -18,18 +18,26 @@
 angular.module('3drepo')
 .controller('IssuesCtrl', ['$scope', '$modal', 'StateManager', 'IssuesService', '$rootScope', '$http', '$q', 'serverConfig', function($scope, $modal, StateManager, IssuesService, $rootScope, $http, $q, serverConfig)
 {
-	$scope.IssuesService	= IssuesService;
-	$scope.currentSelected	= null;
-	$scope.mapPromise		= null;
-	$scope.map				= {};
-
-	$scope.newComment = {};
-	$scope.newComment.text = "";
+	$scope.IssuesService    = IssuesService;
+	$scope.objectIsSelected = false;
+	$scope.currentSelected  = null;
+	$scope.mapPromise       = null;
+	$scope.map              = {};
+	$scope.io               = io(serverConfig.chatHost, {path :  serverConfig.chatPath});
+	$scope.newComment       = {};
+	$scope.newComment.text  = "";
 
 	$(document).on("objectSelected", function(event, object, zoom) {
-		$scope.currentSelected = object;
+		// If the background is selected
+		if (object === undefined)
+		{
+			$scope.objectIsSelected = false;
+		} else {
+			$scope.objectIsSelected = true;
+			$scope.currentSelected  = object;
+		}
 
-		IssuesService.getObjectIssues(object);
+		IssuesService.getIssueStubs(object);
 	});
 
 	$scope.refresh = function() {
@@ -57,8 +65,21 @@ angular.module('3drepo')
 
 	$scope.postComment = function(object)
 	{
+		// We should post to either the object's project and account if one is selected.
+		// Otherwise, we should post to the over arching project
+		var postAccount = null;
+		var postProject = null;
+
+		if (!$scope.currentSelected)
+		{
+			postAccount = StateManager.state.account;
+			postProject = StateManager.state.project;
+		} else {
+			debugger;
+		}
+
 		var sid = $scope.currentSelected.getAttribute("DEF");
-		var issuePostURL = server_config.apiUrl(StateManager.state.account + "/" + StateManager.state.project + "/issues/" + sid);
+		var issuePostURL = serverConfig.apiUrl(postAccount + "/" + postProject + "/issues/" + sid);
 
 		$.ajax({
 			type:	"POST",
@@ -75,6 +96,11 @@ angular.module('3drepo')
 		});
 	}
 
+	$scope.openIssue = function(id)
+	{
+		debugger;
+	}
+
 	$scope.addNewComment = function(id)
 	{
 		var issueObject = {
@@ -83,6 +109,11 @@ angular.module('3drepo')
 		};
 
 		$scope.postComment(issueObject);
+
+		issueObject["account"] = StateManager.state.account;
+		issueObject["project"] = StateManager.state.project;
+
+		$scope.io.emit("post_message", issueObject);
 	}
 
 	$scope.complete = function(id)
@@ -116,7 +147,7 @@ angular.module('3drepo')
 			issueObject["deadline"] = params.date.getTime();
 
 			var sid = $scope.currentSelected.getAttribute("DEF");
-			var issuePostURL = server_config.apiUrl(StateManager.state.account + "/" + StateManager.state.project + "/issues/" + sid);
+			var issuePostURL = serverConfig.apiUrl(StateManager.state.account + "/" + StateManager.state.project + "/issues/" + sid);
 
 			$.ajax({
 				type:	"POST",

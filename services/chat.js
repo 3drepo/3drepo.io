@@ -15,33 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
-var bCrypt = require('bcrypt-nodejs');
-var dbInterface = require('./db_interface.js');
+var log_iface = require('../js/core/logger.js');
+var logger = log_iface.logger;
 
-module.exports = function(passport) {
-	passport.use('login', new LocalStrategy(
-		{
-			passReqToCallback: true
-		},
-		function(req, username, password, done) {
-			dbInterface.authenticate(username, password, function(err, user)
-			{
-				if (err)
-					return done(null, false, req.flash('message', err));
+var sharedSession = require("express-socket.io-session");
+var config = require('../js/core/config.js');
 
-				done(null, user);
+module.exports.init = function (session, server) {
+	var socketio = require('socket.io')(server, { path: config.api_server.chat_path });
+
+	socketio.use(sharedSession(session, { autoSave: true }));
+
+	socketio.sockets.on("connection", function (socket) {
+
+		//console.log(JSON.stringify(socket));
+
+		socket.on("error", function(err) {
+			if (err)
+				logger.log("error", err.stack);
 			});
-		}
-	));
 
-	passport.serializeUser(function(user, done) {
-		done(null, user);
-	});
+//		socket.on("open_issue", function(userdata) {
 
-	passport.deserializeUser(function(obj, done) {
-		done(null, obj);
+//		});
+
+		socket.on("post_message", function(userdata)
+		{
+			console.log(JSON.stringify(userdata));
+		});
 	});
-}
+};
 

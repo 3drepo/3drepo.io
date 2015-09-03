@@ -880,7 +880,69 @@ exports.getRevisions = function(dbName, project, branch, from, to, full, callbac
 	});
 };
 
-exports.getIssues = function(dbName, project, sid, callback) {
+exports.getFederatedProjectList = function(dbName, project, branch, revision, callback) {
+
+	var historyQuery = null;
+
+	if (revision != null)
+	{
+		historyQuery = {
+			_id: stringToUUID(revision)
+		};
+	} else {
+		if (branch == 'master')
+			var branch_id = masterUUID;
+		else
+			var branch_id = stringToUUID(branch);
+
+		historyQuery = {
+			shared_id:	branch_id
+		};
+	}
+
+	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
+	{
+		if (!docs.length)
+			return callback(responseCodes.HISTORY_NOT_FOUND);
+
+		var filter = {
+			parents: stringToUUID(sid),
+			type: 'ref',
+			_id: { $in: docs[0]['current']}
+		};
+
+		dbConn.filterColl(dbName, project + '.scene', filter, {}, function(err, refs) {
+			async.concat(refs, function (item, iter_callback) {
+				var childDbName  = item["owner"];
+				var childProject = item["project"];
+
+				var unique = ("unique" in item) ? item["unique"] : false;
+
+				if (unique)
+				{
+					var childRevision = uuidToString(item["_rid"]);
+					var childBranch   = null;
+				} else {
+					var childRevision = null;
+					var childBranch   = uuidToString(item["_rid"]);
+				}
+
+				self.getFederatedProjectList(childDbName, childProject, childBranch, childRevision, function (err, refs) {
+					if (err.value) iter_callback(err);
+
+					iter_callback(null, refs);
+				});
+			},
+			function (err, results) {
+				if (err.value) callback(err);
+
+				callback(null, results);
+			});
+		});
+	});
+}
+
+exports.getProjectIssues = function(dbName, project, sid, callback) {
 
 	if (sid)
 	{

@@ -24,12 +24,15 @@ angular.module('3drepo')
 	self.loading		= false;
 	self.loadedObject	= -1;
 
-	this.getObjectIssues = function(object, refresh)
+	this.getIssueStubs = function(object, refresh)
 	{
-		// TODO: Will break when the account is not same, as part
-		// of a federation.
-		var account = StateManager.state.account;
-		var project = StateManager.state.project;
+		if (!object)
+		{
+			var account = StateManager.state.account;
+			var project = StateManager.state.project;
+		} else {
+			debugger;
+		}
 
 		if (object)
 			var sid = object.getAttribute("DEF");

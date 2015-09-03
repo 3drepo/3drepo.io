@@ -117,16 +117,18 @@ config.host = coalesce(config.host, "127.0.0.1");
 default_http_port = coalesce(config.http_port, default_http_port);
 default_https_port = coalesce(config.https_port, default_https_port);
 
-var usingIP = checkIP(config.host);
-var using_ssl = ('ssl' in config);
+config.using_ip = checkIP(config.host);
+config.using_ssl = ('ssl' in config);
 
-fillInServerDetails(config.api_server, "api", usingIP, using_ssl, config.host, true);
+fillInServerDetails(config.api_server, "api", config.using_ip, config.using_ssl, config.host, true);
 config.api_server.external = coalesce(config.api_server.external, false); // Do we need to start an API server, or just link to an external one.
+config.api_server.chat_subpath = coalesce(config.api_server.chat_subpath, 'chat');
+config.api_server.chat_path = '/' + config.api_server.host_dir + '/' + config.api_server.chat_subpath;
 
 // Set up other servers
 for(i in config.servers)
 {
-	fillInServerDetails(config.servers[i], "server_" + i, usingIP, using_ssl, config.host, false);
+	fillInServerDetails(config.servers[i], "server_" + i, config.using_ip, config.using_ssl, config.host, false);
 }
 
 // If the API server is running on a subdirectory, config.subdirectory will be true
