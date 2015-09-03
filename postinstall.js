@@ -113,7 +113,8 @@ var internal_files = {
 	'bower_components/jquery-ui/jquery-ui.js',
 	'bower_components/masonry/masonry.js',
 	'bower_components/moment/moment.js',
-	'bower_components/socket.io-client/socket.io.js'
+	'bower_components/socket.io-client/socket.io.js',
+	'bower_components/font-awesome/css/font-awesome.min.css'
 	],
 
 	x3dom_files: [

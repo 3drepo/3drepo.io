@@ -26,6 +26,7 @@ angular.module('3drepo')
 	$scope.io               = io(serverConfig.chatHost, {path :  serverConfig.chatPath});
 	$scope.newComment       = {};
 	$scope.newComment.text  = "";
+	$scope.pickedPos       = null;
 
 	$(document).on("objectSelected", function(event, object, zoom) {
 		// If the background is selected
@@ -135,7 +136,8 @@ angular.module('3drepo')
 			resolve: {
 				params: {
 					name: "",
-					date: null
+					date: null,
+					pickedObj: $scope.pickedObj
 				}
 			}
 		});
@@ -144,7 +146,11 @@ angular.module('3drepo')
 			var issueObject = {};
 
 			issueObject["name"]		= params.name;
-			issueObject["deadline"] = params.date.getTime();
+			//issueObject["deadline"] = params.date.getTime();
+			issueObject["deadline"] = (new Date()).getTime();
+
+			if ($scope.pickedPos)
+				issueObject["pickedPos"] = $scope.pickedPos.toGL();
 
 			var sid = $scope.currentSelected.getAttribute("DEF");
 			var issuePostURL = serverConfig.apiUrl(StateManager.state.account + "/" + StateManager.state.project + "/issues/" + sid);
@@ -192,5 +198,27 @@ angular.module('3drepo')
 			});
 		}
 	});
+}])
+.directive('simpleDraggable', ['ViewerService', function (ViewerService) {
+	return {
+		restrict: 'A',
+		link: function link(scope, element, attrs) {
+			angular.element(element).attr("draggable", "true");
+
+			element.bind("dragend", function (event) {
+				// For some reason event.clientX is offset by the
+				// width of other screens for a multi-screen set-up.
+				var dragEndX = event.clientX - screen.availLeft;
+				var dragEndY = event.clientY;
+
+				var pickObj = ViewerService.pickPoint(dragEndX, dragEndY);
+
+				scope.currentSelected = pickObj.pickObj._xmlNode;
+				scope.pickedPos       = pickObj.pickPos;
+
+				scope.newIssue();
+			});
+		}
+	};
 }]);
 
