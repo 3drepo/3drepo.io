@@ -364,6 +364,20 @@ module.exports = function(router, dbInterface, checkAccess){
 		this.transRouter(format, '/:account/:project/meta/:uid', res, params);
 	});
 
+	router.get('/:account/:project/issue/:uid.:format?', function(req, res, next) {
+		var format = req.params["format"];
+		var current_user = ("user" in req.session) ? req.session.user.username : "";
+
+		var params = {
+			account:    req.params["account"],
+			project:    req.params["project"],
+			uid:        req.params["uid"],
+			user:       current_user
+		};
+
+		this.transRouter(format, '/:account/:project/issue/:uid', res, params);
+	});
+
 	router.get('/:account/:project/issues.:format?', checkAccess, function(req, res, next) {
 		var format = req.params["format"];
 		var current_user = ("user" in req.session) ? req.session.user.username : "";
@@ -387,6 +401,9 @@ module.exports = function(router, dbInterface, checkAccess){
 			sid:		req.params["sid"],
 			user:		current_user
 		};
+
+		if ("number" in req.query)
+			params.number = parseInt(req.query.number);
 
 		this.transRouter(format, '/:account/:project/issues/:sid', res, params);
 	});

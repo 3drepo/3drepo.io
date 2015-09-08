@@ -18,39 +18,31 @@
 angular.module('3drepo')
 .controller('IssuesCtrl', ['$scope', '$modal', 'StateManager', 'IssuesService', '$rootScope', '$http', '$q', 'serverConfig', function($scope, $modal, StateManager, IssuesService, $rootScope, $http, $q, serverConfig)
 {
-	$scope.IssuesService    = IssuesService;
 	$scope.objectIsSelected = false;
 	$scope.currentSelected  = null;
 	$scope.mapPromise       = null;
 	$scope.map              = {};
-	$scope.io               = io(serverConfig.chatHost, {path :  serverConfig.chatPath});
+
+	$scope.IssuesService    = IssuesService;
+	$scope.chat_updated     = $scope.IssuesService.updated;
+
+	// Has to be a sub-object to tie in with Angular ng-model
 	$scope.newComment       = {};
 	$scope.newComment.text  = "";
-	$scope.pickedPos       = null;
+
+	$scope.pickedPos        = null;
 
 	$(document).on("objectSelected", function(event, object, zoom) {
-		// If the background is selected
-		if (object === undefined)
-		{
-			$scope.objectIsSelected = false;
-		} else {
-			$scope.objectIsSelected = true;
-			$scope.currentSelected  = object;
-		}
-
-		IssuesService.getIssueStubs(object);
+		$scope.objectIsSelected = !(object === undefined);
+		$scope.currentSelected  = object;
 	});
 
-	$scope.refresh = function() {
-		IssuesService.getObjectIssues($scope.currentSelected, true);
-	}
-
 	$scope.locateObject = function(id) {
-		var issueIdx = IssuesService.issues.map(function (obj) { return obj._id; }).indexOf(id);
+		var issueIdx = $scope.IssuesService.issues.map(function (obj) { return obj._id; }).indexOf(id);
 
 		if (issueIdx > -1)
 		{
-			var objectID = IssuesService.issues[issueIdx].parent;
+			var objectID = $scope.IssuesService.issues[issueIdx].parent;
 
 			$scope.mapPromise.then(function() {
 				var uid = $scope.SIDMap[objectID];
@@ -64,63 +56,28 @@ angular.module('3drepo')
 		}
 	}
 
-	$scope.postComment = function(object)
+	$scope.openIssue = function(issue)
 	{
-		// We should post to either the object's project and account if one is selected.
-		// Otherwise, we should post to the over arching project
-		var postAccount = null;
-		var postProject = null;
+		// Tell the chat server that we want updates
+		$scope.IssuesService.getIssue(issue["account"], issue["project"], issue["_id"]);
+		$scope.newComment.text = "";
+	}
 
-		if (!$scope.currentSelected)
-		{
-			postAccount = StateManager.state.account;
-			postProject = StateManager.state.project;
-		} else {
-			debugger;
-		}
-
-		var sid = $scope.currentSelected.getAttribute("DEF");
-		var issuePostURL = serverConfig.apiUrl(postAccount + "/" + postProject + "/issues/" + sid);
-
-		$.ajax({
-			type:	"POST",
-			url:	issuePostURL,
-			data: {"data" : JSON.stringify(object)},
-			dataType: "json",
-			xhrFields: {
-				withCredentials: true
-			},
-			success: function(data) {
-				$scope.newComment.text = "";
-				$scope.refresh();
-			}
+	$scope.addNewComment = function(issue)
+	{
+		$scope.IssuesService.postComment(issue["account"], issue["project"], issue["_id"], issue["parent"], $scope.newComment.text).then(function () {
+			setTimeout(function() {
+				$scope.$apply();
+			},0);
 		});
+
+		$scope.newComment.text = "";
 	}
 
-	$scope.openIssue = function(id)
-	{
-		debugger;
-	}
-
-	$scope.addNewComment = function(id)
+	$scope.complete = function(issue)
 	{
 		var issueObject = {
-			_id: id,
-			comment: $scope.newComment.text
-		};
-
-		$scope.postComment(issueObject);
-
-		issueObject["account"] = StateManager.state.account;
-		issueObject["project"] = StateManager.state.project;
-
-		$scope.io.emit("post_message", issueObject);
-	}
-
-	$scope.complete = function(id)
-	{
-		var issueObject = {
-			_id: id,
+			_id: issue.id,
 			complete: true
 		};
 
@@ -143,31 +100,11 @@ angular.module('3drepo')
 		});
 
 		modalInstance.result.then(function (params) {
-			var issueObject = {};
-
-			issueObject["name"]		= params.name;
-			//issueObject["deadline"] = params.date.getTime();
-			issueObject["deadline"] = (new Date()).getTime();
-
-			if ($scope.pickedPos)
-				issueObject["pickedPos"] = $scope.pickedPos.toGL();
-
+			var account = StateManager.state.account;
+			var project = StateManager.state.project;
 			var sid = $scope.currentSelected.getAttribute("DEF");
-			var issuePostURL = serverConfig.apiUrl(StateManager.state.account + "/" + StateManager.state.project + "/issues/" + sid);
 
-			$.ajax({
-				type:	"POST",
-				url:	issuePostURL,
-				data: {"data" : JSON.stringify(issueObject)},
-				dataType: "json",
-				xhrFields: {
-					withCredentials: true
-				},
-				success: function(data) {
-					console.log("Success: " + data);
-					$scope.refresh();
-				}
-			});
+			$scope.IssuesService.newIssue(account, project, params.name, $scope.pickedPos, sid, (new Date()).getTime());
 		}, function () {
 			// TODO: Error here
 		});
@@ -192,10 +129,17 @@ angular.module('3drepo')
 			.then(function(json) {
 				$scope.SIDMap = json.data["map"];
 
-				deferred.resolve();
+				$scope.IssuesService.getIssueStubs().then( function()
+					{
+						deferred.resolve();
+					}, function (message) {
+						deferred.resolve();
+					});
 			}, function(message) {
 				deferred.resolve();
 			});
+
+			return $scope.mapPromise;
 		}
 	});
 }])

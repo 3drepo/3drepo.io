@@ -64,7 +64,7 @@ module.exports.createApp = function(template)
 			// TODO: Make a public section in config for vars to be revealed
 			params['config_js'] += '\nserver_config.democompany = "' + config.wayfinder.democompany + '";';
 			params['config_js'] += '\nserver_config.demoproject = "' + config.wayfinder.demoproject + '";';
-			params['config_js'] += '\nserver_config.chatHost    = "' + config.api_server.url + '";';
+			params['config_js'] += '\nserver_config.chatHost    = "' + config.api_server.chat_host + '";';
 			params['config_js'] += '\nserver_config.chatPath    = "' + config.api_server.chat_path + '";';
 		}
 

@@ -23,25 +23,106 @@ var config = require('../js/core/config.js');
 
 module.exports.init = function (session, server) {
 	var socketio = require('socket.io')(server, { path: config.api_server.chat_path });
+	var dbInterface = require('../js/core/db_interface.js');
+
+	var issueMonitoring   = {};
+	var projectMonitoring = {};
 
 	socketio.use(sharedSession(session, { autoSave: true }));
 
 	socketio.sockets.on("connection", function (socket) {
-
-		//console.log(JSON.stringify(socket));
 
 		socket.on("error", function(err) {
 			if (err)
 				logger.log("error", err.stack);
 			});
 
-//		socket.on("open_issue", function(userdata) {
+		socket.on("new_issue", function(data) {
+			var username = socket.handshake.session.user.username;
 
-//		});
+			dbInterface.hasWriteAccessToProject(username, data.account, data.project, function(err) {
+				if (!err.value)
+				{
+					var proj_account_key = data.account + "__" + data.project;
 
-		socket.on("post_message", function(userdata)
+					if (projectMonitoring[proj_account_key])
+					{
+						for(var i = 0; i < projectMonitoring[proj_account_key].length; i++)
+						{
+							var clientSocket = projectMonitoring[proj_account_key][i];
+
+							if (clientSocket !== socket)
+								clientSocket.emit("new_issue", data);
+						}
+					}
+				} else {
+					logger.log("error", "User " + username + " does not have access to read this issue.");
+				}
+			});
+		});
+
+		socket.on("open_issue", function(data) {
+			var username = socket.handshake.session.user.username;
+
+			dbInterface.hasReadAccessToProject(username, data.account, data.project, function(err) {
+				if (!err.value)
+				{
+					if (!issueMonitoring[data.id])
+						issueMonitoring[data.id] = [];
+
+					issueMonitoring[data.id].push(socket);
+
+				} else {
+					logger.log("error", "User " + username + " does not have access to read this issue.");
+				}
+			});
+		});
+
+		socket.on("watch_project", function(data) {
+			var username = socket.handshake.session.user.username;
+
+			dbInterface.hasReadAccessToProject(username, data.account, data.project, function(err) {
+				var proj_account_key = data.account + "__" + data.project;
+
+				if (!err.value)
+				{
+					if (!projectMonitoring[proj_account_key])
+						projectMonitoring[proj_account_key] = [];
+
+					projectMonitoring[proj_account_key].push(socket);
+
+				} else {
+					logger.log("error", "User " + username + " does not have access to read this issue.");
+				}
+			});
+		});
+
+		socket.on("post_comment", function(data)
 		{
-			console.log(JSON.stringify(userdata));
+			var username = socket.handshake.session.user.username;
+
+			dbInterface.hasWriteAccessToProject(username, data.account, data.project, function(err) {
+				if (!err.value)
+				{
+					if (issueMonitoring[data.id])
+					{
+						// Clean up the data to send back to the client
+						delete data["account"];
+						delete data["project"];
+						data["owner"] = username;
+
+						for(var i = 0; i < issueMonitoring[data.id].length; i++)
+						{
+							var clientSocket = issueMonitoring[data.id][i];
+
+							if (clientSocket !== socket)
+								clientSocket.emit("post_comment", data);
+						}
+					}
+				} else {
+					logger.log("error", "User " + username + " does not have access to post to this issue.");
+				}
+			});
 		});
 	});
 };

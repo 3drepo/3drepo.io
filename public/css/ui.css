@@ -1627,3 +1627,7 @@ ul.fancytree-container li {
 	width: 100%;
 }
 
+#hiddensubmitbutton {
+	visibility: hidden;
+}
+

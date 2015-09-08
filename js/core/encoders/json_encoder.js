@@ -266,8 +266,17 @@ exports.route = function(router)
 		});
 	});
 
+	router.get('json', '/:account/:project/issue/:uid', function(res, params, err_callback) {
+		router.dbInterface.getIssue(params.account, params.project, params.uid, false, function(err, issueList) {
+			if(err.value)
+				err_callback(err);
+			else
+				err_callback(responseCodes.OK, issueList);
+		});
+	});
+
 	router.get('json', '/:account/:project/issues', function(res, params, err_callback) {
-		router.dbInterface.getIssues(params.account, params.project, null, function(err, issueList) {
+		router.dbInterface.getIssues(params.account, params.project, 'master', null, true, function(err, issueList) {
 			if(err.value)
 				err_callback(err);
 			else
@@ -276,7 +285,7 @@ exports.route = function(router)
 	});
 
 	router.get('json', '/:account/:project/issues/:sid', function(res, params, err_callback) {
-		router.dbInterface.getIssues(params.account, params.project, params.sid, function(err, issueList) {
+		router.dbInterface.getObjectIssues(params.account, params.project, params.sid, params.number, false, function(err, issueList) {
 			if(err.value)
 				err_callback(err);
 			else

@@ -109,21 +109,23 @@ var fillInServerDetails = function(serverObject, name, usingIP, using_ssl, host,
 		}
 	}
 
-	serverObject.url = serverObject.public_protocol + "://" + serverObject.hostname + ":" + serverObject.public_port + "/" + serverObject.host_dir;
+	serverObject.base_url = serverObject.public_protocol + "://" + serverObject.hostname + ":" + serverObject.public_port;
+	serverObject.url      = serverObject.base_url + "/" + serverObject.host_dir;
 }
 
 // Check for hostname and ip here
-config.host = coalesce(config.host, "127.0.0.1");
-default_http_port = coalesce(config.http_port, default_http_port);
+config.host        = coalesce(config.host, "127.0.0.1");
+default_http_port  = coalesce(config.http_port, default_http_port);
 default_https_port = coalesce(config.https_port, default_https_port);
 
-config.using_ip = checkIP(config.host);
+config.using_ip  = checkIP(config.host);
 config.using_ssl = ('ssl' in config);
 
 fillInServerDetails(config.api_server, "api", config.using_ip, config.using_ssl, config.host, true);
-config.api_server.external = coalesce(config.api_server.external, false); // Do we need to start an API server, or just link to an external one.
+config.api_server.external     = coalesce(config.api_server.external, false); // Do we need to start an API server, or just link to an external one.
 config.api_server.chat_subpath = coalesce(config.api_server.chat_subpath, 'chat');
-config.api_server.chat_path = '/' + config.api_server.host_dir + '/' + config.api_server.chat_subpath;
+config.api_server.chat_path    = '/' + config.api_server.host_dir + '/' + config.api_server.chat_subpath;
+config.api_server.chat_host    = config.api_server.base_url;
 
 // Set up other servers
 for(i in config.servers)
@@ -145,8 +147,8 @@ config.db.username = coalesce(config.db.username, "username");
 config.db.password = coalesce(config.db.password, "password");
 
 // Other options
-config.js_debug_level     = coalesce(config.js_debug_level, 'debug'); // Loading prod or debug scripts
-config.cookie_secret       = coalesce(config.cookie_secret, config.default_cookie_secret);
+config.js_debug_level       = coalesce(config.js_debug_level, 'debug'); // Loading prod or debug scripts
+config.cookie_secret        = coalesce(config.cookie_secret, config.default_cookie_secret);
 config.cookie_parser_secret = coalesce(config.cookie_parser_secret, config.default_cookie_parser_secret);
 
 // Check whether the secret have been set in the file or not
@@ -157,7 +159,7 @@ if ((config.cookie_secret === config.default_cookie_secret) || (config.cookie_pa
 }
 
 config.default_format = coalesce(config.default_format, "html");
-config.external      = (config.js_debug_level === 'debug') ? frontend_scripts.debug_scripts : frontend_scripts.prod_scripts;
+config.external       = (config.js_debug_level === 'debug') ? frontend_scripts.debug_scripts : frontend_scripts.prod_scripts;
 
 // Log file options
 config.logfile               = coalesce(config.logfile, {});
