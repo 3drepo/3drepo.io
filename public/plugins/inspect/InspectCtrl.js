@@ -63,21 +63,6 @@ function($stateProvider, $locationProvider, parentStates) {
 
 	return o;
 })
-.directive('simpleDraggable', ['ViewerService', function (ViewerService) {
-	return {
-		restrict: 'A',
-		link: function link(scope, element, attrs) {
-			angular.element(element).attr("draggable", "true");
-
-			element.bind("dragend", function (event) {
-				console.log(event.originalEvent.screenX + " " + event.originalEvent.screenY);
-				var pickObj = ViewerService.pickPoint(event.originalEvent.screenX, event.originalEvent.screenY);
-
-				debugger;
-			});
-		}
-	};
-}])
 .run(['StateManager', function(StateManager) {
 	StateManager.registerPlugin('inspect', 'InspectData', function () {
 		if (StateManager.state.inspect)

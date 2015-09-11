@@ -31,6 +31,14 @@ function onMouseOver(event){
 	$.event.trigger("onMouseOver", event);
 }
 
+function onMouseDown(event){
+	$.event.trigger("onMouseDown", event);
+}
+
+function onMouseUp(event){
+	$.event.trigger("onMouseUp", event);
+}
+
 function onMouseMove(event){
 	$.event.trigger("onMouseMove", event);
 }
@@ -136,6 +144,9 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.viewer.setAttribute('id', self.name);
 			self.viewer.setAttribute('xmlns', 'http://www.web3d.org/specification/x3d-namespace');
 			self.viewer.setAttribute('keysEnabled', false);
+			self.viewer.setAttribute('mousedown', onMouseDown);
+			self.viewer.setAttribute('mouseup', onMouseUp);
+
 			self.viewer.className = 'viewer';
 
 			self.x3ddiv.appendChild(self.viewer);
@@ -143,7 +154,6 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.scene = document.createElement('scene');
 			self.scene.setAttribute('onbackgroundclicked', 'bgroundClick(event);');
 			self.viewer.appendChild(self.scene);
-
 
 			self.bground = null;
 			self.currentNavMode = null;
@@ -294,6 +304,16 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	this.getProjectionMatrix = function()
 	{
 		return self.getViewArea().getProjectionMatrix();
+	}
+
+	this.onMouseUp = function(functionToBind)
+	{
+		$(self.viewer).on("onMouseUp", functionToBind);
+	}
+
+	this.onMouseDown = function(functionToBind)
+	{
+		$(self.viewer).on("onMouseDown", functionToBind);
 	}
 
 	this.onViewpointChanged = function(functionToBind)
@@ -678,7 +698,6 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		var scene	 = viewArea._scene;
 
 		var oldPickMode = scene._vf.pickMode.toLowerCase();
-		scene._vf.pickMode = "idbuf24";
 		var success = scene._nameSpace.doc.ctx.pickValue(viewArea, x, y);
 
 		self.pickObject.pickPos		= viewArea._pickingInfo.pickPos;
@@ -740,7 +759,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		return crossVec.x + " " + crossVec.y + " " + crossVec.z + " " + Math.acos(dot);
 	}
 
-	this.rotQuat = function(from, to)
+	this.rotAxisAngle = function(from, to)
 	{
 		var vecFrom = new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
 		var vecTo   = new x3dom.fields.SFVec3f(to[0], to[1], to[2]);

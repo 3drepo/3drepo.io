@@ -382,19 +382,16 @@ span.fancytree-title:hover {
 	background-color: transparent;
 }
 
-.floatingMeta {
+floating {
     font-family: sans-serif;
-	color: white;
+	color: red;
 	font-weight: 100;
-	padding: 6px;
-	margin:  2px;
 	text-align: center;
-	background-color: rgba(0, 0, 0, 0.5);
 	position: absolute;
-	border:   none
+	cursor: pointer;
+	pointer-events: none;
+	border:   none;
 	z-index:   15000;
-	min-width:    70px;
-	min-height:   1px;
 	left:     0px;
 	top:      0px;
 }
@@ -486,7 +483,7 @@ header {
 	min-width: 300px;
 }
 
-#loginButtons {
+.loginButtons {
 	height: 34px;
 	margin-top: 13px;
 }
@@ -1228,15 +1225,9 @@ header button.btn {
 	color: #ffffff;
 }
 
-#qrdrag-menu-icon {
-	position: absolute;
-	bottom: 0;
-	left: -200px;
-	padding: 10px;
-	cursor: pointer;
-	color: #ffffff;
+#map-pin-menu-icon {
+	display: inline-block;
 }
-
 
 .tools-menu-items {
 	color: #ffffff;
@@ -1631,5 +1622,9 @@ ul.fancytree-container li {
 
 #clipslider {
 	width: 100%;
+}
+
+#hiddensubmitbutton {
+	visibility: hidden;
 }
 

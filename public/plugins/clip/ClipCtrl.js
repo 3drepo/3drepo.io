@@ -46,7 +46,7 @@ var ClipPlane = function ( scope, proxyParent, runtime )
 
     var _runtime = runtime;
 
-    var initialize = function ()
+    this.initialize = function ()
     {
         updateVolume();
         createProxy();
@@ -211,37 +211,40 @@ var ClipPlane = function ( scope, proxyParent, runtime )
     {
         var p0, p1, p2, p3, p4;
 
-        if ( _axis == "X")
-        {
-            p0 = "0 " + _volume.max.y + " " + _volume.min.z + ", ";
-            p1 = "0 " + _volume.min.y + " " + _volume.min.z + ", ";
-            p2 = "0 " + _volume.min.y + " " + _volume.max.z + ", ";
-            p3 = "0 " + _volume.max.y + " " + _volume.max.z + ", ";
-            p4 = "0 " + _volume.max.y + " " + _volume.min.z;
+		if (_volume)
+		{
+			if ( _axis == "X")
+			{
+				p0 = "0 " + _volume.max.y + " " + _volume.min.z + ", ";
+				p1 = "0 " + _volume.min.y + " " + _volume.min.z + ", ";
+				p2 = "0 " + _volume.min.y + " " + _volume.max.z + ", ";
+				p3 = "0 " + _volume.max.y + " " + _volume.max.z + ", ";
+				p4 = "0 " + _volume.max.y + " " + _volume.min.z;
 
-            _proxyCoordinates.setAttribute("point", p0 + p1 + p2 + p3 + p4);
-        }
-        else if ( _axis == "Y" )
-        {
-            p0 = _volume.min.x + " 0 " + _volume.max.z + ", ";
-            p1 = _volume.min.x + " 0 " + _volume.min.z + ", ";
-            p2 = _volume.max.x + " 0 " + _volume.min.z + ", ";
-            p3 = _volume.max.x + " 0 " + _volume.max.z + ", ";
-            p4 = _volume.min.x + " 0 " + _volume.max.z;
+				_proxyCoordinates.setAttribute("point", p0 + p1 + p2 + p3 + p4);
+			}
+			else if ( _axis == "Y" )
+			{
+				p0 = _volume.min.x + " 0 " + _volume.max.z + ", ";
+				p1 = _volume.min.x + " 0 " + _volume.min.z + ", ";
+				p2 = _volume.max.x + " 0 " + _volume.min.z + ", ";
+				p3 = _volume.max.x + " 0 " + _volume.max.z + ", ";
+				p4 = _volume.min.x + " 0 " + _volume.max.z;
 
-            _proxyCoordinates.setAttribute("point", p0 + p1 + p2 + p3 + p4);
-        }
-        else if ( _axis == "Z" )
-        {
-            p0 = _volume.min.x + " " + _volume.max.y + " 0, ";
-            p1 = _volume.min.x + " " + _volume.min.y + " 0, ";
-            p2 = _volume.max.x + " " + _volume.min.y + " 0, ";
-            p3 = _volume.max.x + " " + _volume.max.y + " 0, ";
-            p4 = _volume.min.x + " " + _volume.max.y + " 0";
+				_proxyCoordinates.setAttribute("point", p0 + p1 + p2 + p3 + p4);
+			}
+			else if ( _axis == "Z" )
+			{
+				p0 = _volume.min.x + " " + _volume.max.y + " 0, ";
+				p1 = _volume.min.x + " " + _volume.min.y + " 0, ";
+				p2 = _volume.max.x + " " + _volume.min.y + " 0, ";
+				p3 = _volume.max.x + " " + _volume.max.y + " 0, ";
+				p4 = _volume.min.x + " " + _volume.max.y + " 0";
 
-            _proxyCoordinates.setAttribute("point", p0 + p1 + p2 + p3 + p4);
-        }
-    };
+				_proxyCoordinates.setAttribute("point", p0 + p1 + p2 + p3 + p4);
+			}
+		}
+	};
 
     var createClipPlane = function()
     {
@@ -284,7 +287,6 @@ var ClipPlane = function ( scope, proxyParent, runtime )
         _proxyParent.appendChild( _proxyTransform );
     };
 
-    initialize();
 };
 
 angular.module('3drepo')
@@ -298,6 +300,7 @@ angular.module('3drepo')
 	$scope.addClipPlane = function()
 	{
 		$scope.clipPlane = new ClipPlane($("#model__root")[0], ViewerService.defaultViewer.getViewArea()._scene._xmlNode, ViewerService.defaultViewer.runtime);
+		$scope.clipPlane.initialize();
 	}
 
 	$scope.changeAxis = function (axs)
@@ -309,10 +312,8 @@ angular.module('3drepo')
 	}
 
 	$scope.$watch('slider', function() {
-		if (!$scope.clipPlane)
-			$scope.addClipPlane();
-
-		$scope.clipPlane.Move($scope.slider / 1000);
+		if ($scope.clipPlane)
+			$scope.clipPlane.Move($scope.slider / 1000);
 	});
 
 	$scope.openPDF = function(pdfURL) {

@@ -21,6 +21,9 @@ angular.module('3drepo')
 
 	this.democompany = server_config.democompany;
 	this.demoproject = server_config.demoproject;
+
+	this.chatHost    = server_config.chatHost;
+	this.chatPath    = server_config.chatPath;
 });
 
 

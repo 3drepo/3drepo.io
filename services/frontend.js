@@ -16,14 +16,16 @@
  */
 
 var express = require('express');
-var config = require('./js/core/config.js');
+var config = require('../js/core/config.js');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var compress = require('compression');
 var fs = require('fs');
 var jade = require('jade');
-var log_iface = require('./js/core/logger.js');
+var log_iface = require('../js/core/logger.js');
 var logger = log_iface.logger;
+
+var params = null; // TODO: Shouldn't use a global variable
 
 // Credit goes to http://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
 function escapeHtml(text) {
@@ -62,6 +64,8 @@ module.exports.createApp = function(template)
 			// TODO: Make a public section in config for vars to be revealed
 			params['config_js'] += '\nserver_config.democompany = "' + config.wayfinder.democompany + '";';
 			params['config_js'] += '\nserver_config.demoproject = "' + config.wayfinder.demoproject + '";';
+			params['config_js'] += '\nserver_config.chatHost    = "' + config.api_server.chat_host + '";';
+			params['config_js'] += '\nserver_config.chatPath    = "' + config.api_server.chat_path + '";';
 		}
 
 		params['config_js'] += '\n\nvar realOpen = XMLHttpRequest.prototype.open;\n\nXMLHttpRequest.prototype.open = function(method, url, async, unk1, unk2) {\n if(async) this.withCredentials = true;\nrealOpen.apply(this, arguments);\n};';
@@ -70,7 +74,7 @@ module.exports.createApp = function(template)
 		res.render('config.jade', params);
 	});
 
-	app.use('/public', express.static(__dirname + '/public'));
+	app.use('/public', express.static(__dirname + '/../public'));
 
 	// TODO: Replace with user based plugin selection
 	/*
@@ -335,39 +339,42 @@ module.exports.createApp = function(template)
 	}
 
 	app.get('*', function(req, res) {
-		var params = {};
+		if (!params) // FIXME: Relies on global variable
+		{
+			params = {};
 
-		params["jsfiles"] = "";
-		params["cssfiles"] = "";
+			params["jsfiles"] = "";
+			params["cssfiles"] = "";
 
-		params["jsfiles"] = config.external.js;
-		params["cssfiles"] = config.external.css;
+			params["jsfiles"] = config.external.js;
+			params["cssfiles"] = config.external.css;
 
-		// Generate the list of files to load for the plugins
-		var hasChildren = true;
-		var levelStructure = pluginStructure;
+			// Generate the list of files to load for the plugins
+			var hasChildren = true;
+			var levelStructure = pluginStructure;
 
-		params["pluginLoaded"]			= [];
+			params["pluginLoaded"]			= [];
 
-		params["pluginJade"]			= [];
-		params["pluginJS"]				= [];
-		params["pluginAngular"]			= {};
-		params["parentStateJSON"]		= {};
-		//params["pluginLevelsJSON"]		= {};
-		params["ui"]					= {};
-		params["uistate"]				= {};
-		//params["levelOrder"]			= {};
+			params["pluginJade"]			= [];
+			params["pluginJS"]				= [];
+			params["pluginAngular"]			= {};
+			params["parentStateJSON"]		= {};
+			//params["pluginLevelsJSON"]		= {};
+			params["ui"]					= {};
+			params["uistate"]				= {};
+			//params["levelOrder"]			= {};
 
-		var parentState = "";
-		buildParams(pluginStructure, 0, parentState, [], params);
+			var parentState = "";
+			buildParams(pluginStructure, 0, parentState, [], params);
 
-		params["parentStateJSON"]	= JSON.stringify(params["parentStateJSON"]);
-		//params["pluginLevelsJSON"]	= JSON.stringify(params["pluginLevelsJSON"]);
-		params["uistate"]			= JSON.stringify(params["uistate"]);
+			params["parentStateJSON"]	= JSON.stringify(params["parentStateJSON"]);
+			//params["pluginLevelsJSON"]	= JSON.stringify(params["pluginLevelsJSON"]);
+			params["uistate"]			= JSON.stringify(params["uistate"]);
 
-		params["renderMe"] = jade.renderFile;
+			params["renderMe"] = jade.renderFile;
 
-		params["structure"]			= JSON.stringify(pluginStructure);
+			params["structure"]			= JSON.stringify(pluginStructure);
+		}
 
 		res.render(template, params);
 	});
