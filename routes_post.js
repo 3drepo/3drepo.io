@@ -177,8 +177,8 @@ module.exports = function(router, dbInterface, checkAccess){
 
 		logger.log('debug', 'Upserting an issues for object ' + req.params['sid'] + ' in ' + req.params["account"] + '/' + req.params["project"]);
 
-		this.dbInterface.storeIssue(req.params["account"], req.params["project"], req.params["sid"], req.session.user.username, data, function(err, result) {
-			responseCodes.onError(responsePlace, err, res, result);
+		this.dbInterface.storeIssue(req.params["account"], req.params["project"], req.params["sid"], req.session.user.username, data, function(err) {
+			responseCodes.onError(responsePlace, err, res, {});
 		});
 	});
 

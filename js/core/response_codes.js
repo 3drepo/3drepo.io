@@ -67,8 +67,6 @@ var responseCodes = {
 
 	ISSUE_NOT_FOUND: { value: 27, message: 'Issue not found', status: 404},
 
-	HEAD_REVISION_NOT_FOUND: { value: 28, message: 'Head revision not found', status: 404 },
-
 	DB_ERROR: function(mongoErr) {
 		return {
 			value: 1000,

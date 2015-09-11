@@ -1,28 +1,27 @@
 #issues.issueview(ng-controller='IssuesCtrl')
 	.input-group
-		button.btn(ng-click='newIssue()', ng-disabled='!objectIsSelected')
+		button.btn(ng-click='newIssue()')
 			i.fa.fa2x.fa-plus
-	#accordion.panel-group(ng-repeat="(project, projectIssues) in IssuesService.issues")
-		.panel.panel-default
-			.panel-heading 
-				h4.panel-title {{ project }}
-		.panel.panel-default(ng-repeat="issue in projectIssues")
+		button.btn(ng-click='refresh()')
+			i.fa.fa2x.fa-refresh
+	#accordion.panel-group
+		.panel.panel-default(ng-repeat="issue in IssuesService.issues")
 			.panel-heading
-				h2.panel-title 
-					a(data-toggle='collapse', data-parent='#accordion', ng-click='openIssue(issue)', data-target="#{{issue._id}}") {{ issue.number + " - " + issue.name + " [" + issue.deadlineString + "]"}}
-					button.btn(ng-if="!issue.complete", ng-click='complete(issue)')
+				h4.panel-title 
+					a(data-toggle="collapse", data-parent="#accordion", href="{{'#acc_' + issue.number}}") {{ issue.number + " - " + issue.name + " [" + issue.deadlineString + "]"}}
+					button.btn(ng-if="!issue.complete", ng-click='complete(issue._id)')
 						i.fa.fa-check
 					button.btn(ng-click='locateObject(issue._id)')
 						i.fa.fa-eye
-			.panel-collapse.collapse(id="{{issue._id}}")
+			.panel-collapse.collapse(id="{{'acc_' + issue.number}}")
 				.panel-body
-					table.metadata-table(ng-repeat="comment in IssuesService.issueContents[issue._id]")
+					table.metadata-table(ng-repeat="comment in issue.comments")
 						tr
-							th.metadata-title(colspan="2") {{comment.owner}}
+							th.metadata-title(colspan="2") {{comment.author}}
 						tr 
-							td {{comment.comment}}
+							td {{comment.text}}
 					.input-group(ng-if="!issue.complete")
-						form(ng-submit="addNewComment(issue)")
-							input(ng-model="newComment.text", placeholder="New Comment")
-							input#hiddensubmitbutton(type="submit")
+						input(ng-model="newComment.text", placeholder="New Comment")
+						button.btn(ng-click="addNewComment(issue._id)")
+								i.fa.fa-comment
 

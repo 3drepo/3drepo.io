@@ -64,18 +64,18 @@ $(document).on("clickObject", function(event, objEvent) {
 	);
 });
 
-function getProject(accountName, projectName)
+function getProject(projectName)
 {
 	return $('inline')
 		.filter(function() {
-			return this.nameSpaceName == (accountName + "__" + projectName);
+			return this.nameSpaceName == projectName;
 		});
 }
 
 function getNode(node)
 {
 	if ('project' in node.data)
-		return getProject(node.data.account, node.data.project)[0];
+		return getProject(node.data.project)[0];
 	else
 		return document.getElementById(node.data.namespace + node.data.uuid);
 }

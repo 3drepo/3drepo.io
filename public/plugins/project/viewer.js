@@ -678,6 +678,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		var scene	 = viewArea._scene;
 
 		var oldPickMode = scene._vf.pickMode.toLowerCase();
+		scene._vf.pickMode = "idbuf24";
 		var success = scene._nameSpace.doc.ctx.pickValue(viewArea, x, y);
 
 		self.pickObject.pickPos		= viewArea._pickingInfo.pickPos;

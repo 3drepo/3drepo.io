@@ -18,31 +18,30 @@
 angular.module('3drepo')
 .controller('IssuesCtrl', ['$scope', '$modal', 'StateManager', 'IssuesService', '$rootScope', '$http', '$q', 'serverConfig', function($scope, $modal, StateManager, IssuesService, $rootScope, $http, $q, serverConfig)
 {
-	$scope.objectIsSelected = false;
-	$scope.currentSelected  = null;
-	$scope.mapPromise       = null;
-	$scope.map              = {};
+	$scope.IssuesService	= IssuesService;
+	$scope.currentSelected	= null;
+	$scope.mapPromise		= null;
+	$scope.map				= {};
 
-	$scope.IssuesService    = IssuesService;
-	$scope.chat_updated     = $scope.IssuesService.updated;
-
-	// Has to be a sub-object to tie in with Angular ng-model
-	$scope.newComment       = {};
-	$scope.newComment.text  = "";
-
-	$scope.pickedPos        = null;
+	$scope.newComment = {};
+	$scope.newComment.text = "";
 
 	$(document).on("objectSelected", function(event, object, zoom) {
-		$scope.objectIsSelected = !(object === undefined);
-		$scope.currentSelected  = object;
+		$scope.currentSelected = object;
+
+		IssuesService.getObjectIssues(object);
 	});
 
+	$scope.refresh = function() {
+		IssuesService.getObjectIssues($scope.currentSelected, true);
+	}
+
 	$scope.locateObject = function(id) {
-		var issueIdx = $scope.IssuesService.issues.map(function (obj) { return obj._id; }).indexOf(id);
+		var issueIdx = IssuesService.issues.map(function (obj) { return obj._id; }).indexOf(id);
 
 		if (issueIdx > -1)
 		{
-			var objectID = $scope.IssuesService.issues[issueIdx].parent;
+			var objectID = IssuesService.issues[issueIdx].parent;
 
 			$scope.mapPromise.then(function() {
 				var uid = $scope.SIDMap[objectID];
@@ -56,28 +55,40 @@ angular.module('3drepo')
 		}
 	}
 
-	$scope.openIssue = function(issue)
+	$scope.postComment = function(object)
 	{
-		// Tell the chat server that we want updates
-		$scope.IssuesService.getIssue(issue["account"], issue["project"], issue["_id"]);
-		$scope.newComment.text = "";
-	}
+		var sid = $scope.currentSelected.getAttribute("DEF");
+		var issuePostURL = server_config.apiUrl(StateManager.state.account + "/" + StateManager.state.project + "/issues/" + sid);
 
-	$scope.addNewComment = function(issue)
-	{
-		$scope.IssuesService.postComment(issue["account"], issue["project"], issue["_id"], issue["parent"], $scope.newComment.text).then(function () {
-			setTimeout(function() {
-				$scope.$apply();
-			},0);
+		$.ajax({
+			type:	"POST",
+			url:	issuePostURL,
+			data: {"data" : JSON.stringify(object)},
+			dataType: "json",
+			xhrFields: {
+				withCredentials: true
+			},
+			success: function(data) {
+				$scope.newComment.text = "";
+				$scope.refresh();
+			}
 		});
-
-		$scope.newComment.text = "";
 	}
 
-	$scope.complete = function(issue)
+	$scope.addNewComment = function(id)
 	{
 		var issueObject = {
-			_id: issue.id,
+			_id: id,
+			comment: $scope.newComment.text
+		};
+
+		$scope.postComment(issueObject);
+	}
+
+	$scope.complete = function(id)
+	{
+		var issueObject = {
+			_id: id,
 			complete: true
 		};
 
@@ -93,18 +104,33 @@ angular.module('3drepo')
 			resolve: {
 				params: {
 					name: "",
-					date: null,
-					pickedObj: $scope.pickedObj
+					date: null
 				}
 			}
 		});
 
 		modalInstance.result.then(function (params) {
-			var account = StateManager.state.account;
-			var project = StateManager.state.project;
-			var sid = $scope.currentSelected.getAttribute("DEF");
+			var issueObject = {};
 
-			$scope.IssuesService.newIssue(account, project, params.name, $scope.pickedPos, sid, (new Date()).getTime());
+			issueObject["name"]		= params.name;
+			issueObject["deadline"] = params.date.getTime();
+
+			var sid = $scope.currentSelected.getAttribute("DEF");
+			var issuePostURL = server_config.apiUrl(StateManager.state.account + "/" + StateManager.state.project + "/issues/" + sid);
+
+			$.ajax({
+				type:	"POST",
+				url:	issuePostURL,
+				data: {"data" : JSON.stringify(issueObject)},
+				dataType: "json",
+				xhrFields: {
+					withCredentials: true
+				},
+				success: function(data) {
+					console.log("Success: " + data);
+					$scope.refresh();
+				}
+			});
 		}, function () {
 			// TODO: Error here
 		});
@@ -129,40 +155,11 @@ angular.module('3drepo')
 			.then(function(json) {
 				$scope.SIDMap = json.data["map"];
 
-				$scope.IssuesService.getIssueStubs().then( function()
-					{
-						deferred.resolve();
-					}, function (message) {
-						deferred.resolve();
-					});
+				deferred.resolve();
 			}, function(message) {
 				deferred.resolve();
 			});
-
-			return $scope.mapPromise;
 		}
 	});
-}])
-.directive('simpleDraggable', ['ViewerService', function (ViewerService) {
-	return {
-		restrict: 'A',
-		link: function link(scope, element, attrs) {
-			angular.element(element).attr("draggable", "true");
-
-			element.bind("dragend", function (event) {
-				// For some reason event.clientX is offset by the
-				// width of other screens for a multi-screen set-up.
-				var dragEndX = event.clientX - screen.availLeft;
-				var dragEndY = event.clientY;
-
-				var pickObj = ViewerService.pickPoint(dragEndX, dragEndY);
-
-				scope.currentSelected = pickObj.pickObj._xmlNode;
-				scope.pickedPos       = pickObj.pickPos;
-
-				scope.newIssue();
-			});
-		}
-	};
 }]);
 

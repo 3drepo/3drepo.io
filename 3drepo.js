@@ -16,6 +16,10 @@
  */
 
 var express = require('express'),
+	app = express(),
+	vhost = require('vhost'),
+	path = require('path'),
+	cors = require('cors'),
 	fs = require('fs'),
 	constants = require('constants');
 
@@ -25,10 +29,7 @@ onError = log_iface.onError;
 
 var config = require('./js/core/config.js');
 
-var session = require('./services/session.js').session;
-var apiApp = require('./services/api.js').app(session);
-var chatServer = require('./services/chat.js');
-
+var apiApp = require('./api.js').app;
 var https = require("https");
 var http = require('http');
 
@@ -74,7 +75,7 @@ if (config.vhost)
 
 	for(i in config.servers)
 	{
-		var frontApp = require('./services/frontend.js').createApp(config.servers[i].template);
+		var frontApp = require('./frontend.js').createApp(config.servers[i].template);
 
 		if ('ssl' in config)
 			var frontServer = https.createServer(ssl_options, frontApp);
@@ -102,21 +103,18 @@ if (config.vhost)
 	// Here the API server and web service run on same host
 	// but different directory.
 	var app = express();
+	app.use("/" + config.api_server.host_dir, apiApp);
+
+	for(i in config.servers)
+	{
+		var frontApp = require('./frontend.js').createApp(config.servers[i].template);
+		app.use("/", frontApp);
+	}
 
 	if ('ssl' in config)
 		var server = https.createServer(ssl_options, app);
 	else
 		var server = http.createServer(app);
-
-	chatServer.init(session, server);
-
-	app.use("/" + config.api_server.host_dir, apiApp);
-
-	for(i in config.servers)
-	{
-		var frontApp = require('./services/frontend.js').createApp(config.servers[i].template);
-		app.use("/", frontApp);
-	}
 
 	// Use '0.0.0.0' so that the website is accessible from all
 	// relevant addresses
@@ -138,7 +136,7 @@ if (config.vhost)
 
 	for(i in config.servers)
 	{
-		var frontApp = require('./services/frontend.js').createApp(config.servers[i].template);
+		var frontApp = require('./frontend.js').createApp(config.servers[i].template);
 		logger.log('info', 'Starting VHOST for ' + config.servers[i].hostname);
 		vhostApp.use(vhost(config.servers[i].hostname, frontApp));
 

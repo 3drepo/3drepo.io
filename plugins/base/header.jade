@@ -10,10 +10,9 @@ header#header.navbar.navbar-fixed-top(ng-controller='HeaderCtrl')
 				a.navbar-brand.logo-pad.header-logo(href="#", ng-click="goAccount()")
 					img.v-expand(src='/public/images/3drepo-logo-white.png')
 			nav.collapse.navbar-collapse.bs-navbar-collapse(role='navigation')
+				//a(href='http://blog.getbootstrap.com') Enterprise
 				form.pull-right.tight.v-expand(role='login')
-					.form-group.tight.loginButtons
-						each uicomp in ui.loginButtons
-							!= renderMe(uicomp["template"])
+					.form-group.tight#loginButtons
 						button.btn(ng-hide='!Auth.loggedIn', ng-click='whereAmI()')
 							i.fa.fa-qrcode
 						button.btn
@@ -22,4 +21,11 @@ header#header.navbar.navbar-fixed-top(ng-controller='HeaderCtrl')
 							i.fa.fa-user
 						button.btn(ng-hide='!Auth.loggedIn', ng-click="logOut()")
 							i.fa.fa-sign-out
-
+						// button.v-expand.btn.btn-success.pull-left(ng-hide='loggedIn', ng-click="loginPage()") Login
+						// button.v-expand.btn.btn-success.pull-left(ng-hide='loggedIn', ng-click="signupPage()") Sign Up
+				//form.pull-right.tight.v-expand(role='search')
+				//	.form-group.tight
+				//		input#search-box.form-control(type='text', ng-model="asyncSelected", placeholder="Search 3D Repo", typeahead="thing for thing in getThings($viewValue)", typeahead-loading="Searching")
+				//span.clearfix
+					a(href='http://blog.getbootstrap.com')
+						img(src='/public/images/en.gif', height='16')

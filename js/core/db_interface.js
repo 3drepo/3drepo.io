@@ -681,10 +681,6 @@ exports.getSIDMap = function(dbName, project, branch, revision, callback) {
 
 	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
 	{
-		if (err.value) return callback(err);
-
-		if (!docs.length) return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
-
 		var filter = {
 			_id: {$in: docs[0]['current']}
 		};
@@ -884,199 +880,23 @@ exports.getRevisions = function(dbName, project, branch, from, to, full, callbac
 	});
 };
 
-exports.getFederatedProjectList = function(dbName, project, branch, revision, callback) {
+exports.getIssues = function(dbName, project, sid, callback) {
 
-	var historyQuery = null;
-
-	if (revision != null)
+	if (sid)
 	{
-		historyQuery = {
-			_id: stringToUUID(revision)
+		var filter = {
+			parent : stringToUUID(sid)
 		};
 	} else {
-		if (branch == 'master')
-			var branch_id = masterUUID;
-		else
-			var branch_id = stringToUUID(branch);
-
-		historyQuery = {
-			shared_id:	branch_id
-		};
-	}
-
-	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
-	{
-		if (err.value) return callback(err.value);
-
-		if (!docs.length)
-			return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
-
-		var filter = {
-			type: 'ref',
-			_id: { $in: docs[0]['current']}
-		};
-
-		dbConn.filterColl(dbName, project + '.scene', filter, {}, function(err, refs) {
-			async.concat(refs, function (item, iter_callback) {
-				var childDbName  = item["owner"];
-				var childProject = item["project"];
-
-				var unique = ("unique" in item) ? item["unique"] : false;
-
-				if ("_rid" in item)
-				{
-					if (unique)
-					{
-						var childRevision = uuidToString(item["_rid"]);
-						var childBranch   = null;
-					} else {
-						var childRevision = null;
-						var childBranch   = uuidToString(item["_rid"]);
-					}
-				} else {
-					var childBranch   = 'master';
-					var childRevision = 'head';
-				}
-
-				self.getFederatedProjectList(childDbName, childProject, childBranch, childRevision, function (err, childrefs) {
-					if (err.value) return iter_callback(err);
-
-					iter_callback(responseCodes.OK, childrefs);
-				});
-			},
-			function (err, results) {
-				// TODO: Deal with errors here
-
-				callback(responseCodes.OK, refs.concat(results));
-			});
-		});
-	});
-}
-
-exports.getIssue = function(dbName, project, uid, onlyStubs, callback) {
-	var filter = {
-		_id : stringToUUID(uid)
+		var filter = {}
 	};
-
-	var projection = {};
-
-	if (onlyStubs)
-	{
-		projection = {
-			_id : 1,
-			name : 1,
-			deadline : 1,
-			position: 1,
-			parent: 1
-		}
-	}
-
-	dbConn.filterColl(dbName, project + '.issues', filter, projection, function (err, docs) {
-		if (err.value) return callback(err);
-
-		for(var i = 0; i < docs.length; i++) {
-			docs[i]["_id"]     = uuidToString(docs[i]["_id"]);
-			docs[i]["parent"]  = uuidToString(docs[i]["parent"]);
-			docs[i]["account"] = dbName;
-			docs[i]["project"] = project;
-		}
-
-		return callback(responseCodes.OK, docs);
-	});
-}
-
-exports.getIssues = function(dbName, project, branch, revision, onlyStubs, callback) {
-	// First get the main project issues
-	self.getSIDMap(dbName, project, branch, revision, function (err, SIDMap) {
-		if (err.value) return callback(err);
-
-		var sids = Object.keys(SIDMap);
-
-		self.getObjectIssues(dbName, project, sids, null, onlyStubs, function (err, docs) {
-			if (err.value) return callback(err);
-
-			var collatedDocs = docs;
-
-			// Now search for all federated issues
-			self.getFederatedProjectList(dbName, project, branch, revision, function (err, refs) {
-				if (err.value) return callback(err);
-
-				async.concat(refs, function (item, iter_callback) {
-					var childDbName  = item["owner"];
-					var childProject = item["project"];
-
-					var unique = ("unique" in item) ? item["unique"] : false;
-
-					if ("_rid" in item)
-					{
-						if (unique)
-						{
-							var childRevision = uuidToString(item["_rid"]);
-							var childBranch   = null;
-						} else {
-							var childRevision = null;
-							var childBranch   = uuidToString(item["_rid"]);
-						}
-					} else {
-						var childBranch   = 'master';
-						var childRevision = 'head';
-					}
-
-					self.getSIDMap(childDbName, childProject, childBranch, childRevision, function (err, SIDMap) {
-						if (err.value) return iter_callback(err);
-
-						var sids = Object.keys(SIDMap);
-
-						// For all federated child projects get a list of shared IDs
-						self.getObjectIssues(childDbName, childProject, sids, null, onlyStubs, function (err, refs) {
-							if (err.value) return iter_callback(err);
-
-							iter_callback(responseCodes.OK, refs);
-						});
-					});
-				},
-				function (err, results) {
-					// TODO: Deal with errors here
-
-					callback(responseCodes.OK, collatedDocs.concat(results));
-				});
-			});
-		});
-	});
-}
-
-exports.getObjectIssues = function(dbName, project, sids, number, onlyStubs, callback) {
-	if (sids.constructor !== Array) sids = [sids];
-
-	sids = sids.map( function (item) { return stringToUUID(item); } )
-
-	var filter = {
-		parent : { $in : sids }
-	};
-
-	if ( number ) filter["number"] = number;
-
-	var projection = {};
-
-	if (onlyStubs)
-	{
-		projection = {
-			_id : 1,
-			name : 1,
-			deadline : 1,
-			position: 1,
-			parent: 1
-		}
-	}
 
 	dbConn.filterColl(dbName, project + '.issues', filter, {}, function (err, docs) {
 		if (err.value) return callback(err);
 
 		for(var i = 0; i < docs.length; i++) {
-			docs[i]["_id"]     = uuidToString(docs[i]["_id"]);
-			docs[i]["parent"]  = uuidToString(docs[i]["parent"]);
-			docs[i]["account"] = dbName;
-			docs[i]["project"] = project;
+			docs[i]["_id"] = uuidToString(docs[i]["_id"]);
+			docs[i]["parent"] = uuidToString(docs[i]["parent"]);
 		}
 
 		return callback(responseCodes.OK, docs);
@@ -1107,11 +927,13 @@ exports.storeIssue = function(dbName, project, sid, owner, data, callback) {
 
 				data.owner = owner;
 
+				console.log("DATA: " + JSON.stringify(data));
+
 				coll.insert(data, function(err, count) {
 					if (err) return callback(responseCodes.DB_ERROR(err));
 
 					logger.log('debug', 'Updated ' + count + ' records.');
-					callback(responseCodes.OK, { issue_id : uuidToString(data._id), number : data.number });
+					callback(responseCodes.OK);
 				});
 			});
 		} else {
@@ -1122,7 +944,7 @@ exports.storeIssue = function(dbName, project, sid, owner, data, callback) {
 			if (data.comment)
 			{
 				var updateQuery = {
-					$push: { comments: { owner: owner,  comment: data.comment} }
+					$push: { comments: { author: owner,  text: data.comment} }
 				};
 			} else {
 				var updateQuery = {
@@ -1134,7 +956,7 @@ exports.storeIssue = function(dbName, project, sid, owner, data, callback) {
 				if (err) return callback(responseCodes.DB_ERROR(err));
 
 				logger.log('debug', 'Updated ' + count + ' records.');
-				callback(responseCodes.OK, { issue_id : uuidToString(data._id), number: data.number });
+				callback(responseCodes.OK);
 			});
 		}
 	});
@@ -1414,7 +1236,7 @@ exports.getDiff = function(account, project, branch, revision, otherbranch, othe
 			otherHistoryQuery = {
 				shared_id:	branch_id
 			};
-		}
+		}	
 
 		dbConn.getLatest(account, project + '.history', otherHistoryQuery, null, function(err, otherhistory)
 		{
@@ -1431,17 +1253,29 @@ exports.getDiff = function(account, project, branch, revision, otherbranch, othe
 			historycurrent      = historycurrent.map(function(uid) { return uuidToString(uid); })
 			otherhistorycurrent = otherhistorycurrent.map(function(uid) { return uuidToString(uid); })
 
-			doc['added'] = otherhistorycurrent.filter( function (elem)
+			/*
+			console.log(JSON.stringify(otherhistorycurrent));
+			console.log(JSON.stringify(historycurrent));
+
+			console.log(JSON.stringify(otherhistorycurrent.map(function (elem)
 				{
+					return historycurrent.indexOf(elem);
+				}
+			)));
+			*/
+
+			doc['added'] = otherhistorycurrent.filter( function (elem)
+				{	
 					return (historycurrent.indexOf(elem) == -1);
 				}
 			);
 
 			doc['deleted'] = historycurrent.filter( function (elem)
-				{
+				{	
 					return (otherhistorycurrent.indexOf(elem) == -1);
 				}
 			);
+
 
 			// TODO: Compute the modified
 			//if (doc['modified'])
@@ -1450,8 +1284,13 @@ exports.getDiff = function(account, project, branch, revision, otherbranch, othe
 			self.getUIDMap(account, project, doc['added'].concat(doc['deleted']), function (err, map) {
 				if (err.value) return callback(err);
 
+				console.log(doc);
+
 				doc['added']   = doc['added'].map(function(elem) { return map[elem]; });
 				doc['deleted'] = doc['deleted'].map(function(elem) { return map[elem]; });
+
+				console.log(JSON.stringify(map));
+				console.log(doc);
 
 				callback(responseCodes.OK, doc);
 			});

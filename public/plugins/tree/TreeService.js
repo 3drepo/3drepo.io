@@ -54,20 +54,18 @@ angular.module('3drepo')
 	this.clickedFromView = false;
 	this.loading = false;
 
-	this.getProject = function(accountName, projectName)
+	this.getProject = function(projectName)
 	{
 		return $('inline')
 			.filter(function() {
-				return this.nameSpaceName == (accountName + "__" + projectName);
+				return this.nameSpaceName == projectName;
 			});
 	}
 
 	this.getNode = function(node)
 	{
-		// If there is project in the node data then it is a
-		// reference node.
 		if ('project' in node.data)
-			return getProject(node.data.account, node.data.project)[0];
+			return getProject(node.data.project)[0];
 		else
 			return document.getElementById(node.data.namespace + node.data.uuid);
 	}
