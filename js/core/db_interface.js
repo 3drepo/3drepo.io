@@ -918,7 +918,7 @@ exports.getFederatedProjectList = function(dbName, project, branch, revision, ca
 
 		dbConn.filterColl(dbName, project + '.scene', filter, {}, function(err, refs) {
 			async.concat(refs, function (item, iter_callback) {
-				var childDbName  = item["owner"];
+				var childDbName  = item["owner"] ? item["owner"] : dbName;
 				var childProject = item["project"];
 
 				var unique = ("unique" in item) ? item["unique"] : false;
@@ -1002,7 +1002,7 @@ exports.getIssues = function(dbName, project, branch, revision, onlyStubs, callb
 				if (err.value) return callback(err);
 
 				async.concat(refs, function (item, iter_callback) {
-					var childDbName  = item["owner"];
+					var childDbName  = item["owner"] ? item["owner"] : dbName;
 					var childProject = item["project"];
 
 					var unique = ("unique" in item) ? item["unique"] : false;
