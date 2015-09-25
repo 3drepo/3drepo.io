@@ -1446,8 +1446,9 @@ exports.appendMeshFiles = function(dbName, project, fromStash, uid, obj, callbac
 		var numTasks = gridfstypes.length;
 		var subColl = fromStash ? 'stash.3drepo' : 'scene';
 
+		// TODO: Make this more generic, get filename from field
 		async.each(gridfstypes, function (fstype, callback) {
-			dbConn.getGridFSFile(dbName, project + '.' + subColl, uid + "." + fstype, function(err, data)
+			dbConn.getGridFSFile(dbName, project + '.' + subColl, uid + "_" + fstype, function(err, data)
 			{
 				if (!err["value"])
 					obj[fstype] = data;
