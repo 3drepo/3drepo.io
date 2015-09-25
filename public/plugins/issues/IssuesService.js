@@ -16,76 +16,208 @@
  */
 
 angular.module('3drepo')
-.service('IssuesService', ['StateManager', 'serverConfig', '$http', '$q', function(StateManager, serverConfig, $http, $q){
-	var self			= this;
+.service('IssuesService', ['StateManager', 'Auth', 'serverConfig', '$http', '$q', '$rootScope', function(StateManager, Auth, serverConfig, $http, $q, $rootScope){
+	var self            = this;
 
-	self.issues			= [];
+	self.issues         = {};
+	self.issueContents  = {};
 	self.loadingPromise = null;
-	self.loading		= false;
-	self.loadedObject	= -1;
+	self.loading        = false;
+	self.pinPosition    = [];
+	self.io             = io(serverConfig.chatHost, {path :  serverConfig.chatPath});
 
-	this.getObjectIssues = function(object, refresh)
+	// TODO: Should do some basic checking on the socket information here.
+	self.io.on("new_issue", function(data) {
+		if (!self.issues[data.project])
+				self.issues[data.project] = {};
+
+		if (!self.issues[data.project][data._id])
+		{
+			self.issues[data.project][data._id] = data;
+			$rootScope.$apply();
+		}
+	});
+
+	self.io.on("post_comment", function(data) {
+		if (!self.issueContents[data._id])
+			self.issueContents[data._id] = [];
+
+		self.issueContents[data._id].push(data);
+		$rootScope.$apply();
+	});
+
+	self.prepareIssue = function(issue)
 	{
-		// TODO: Will break when the account is not same, as part
-		// of a federation.
+		if (!("comments" in issue))
+			issue["comments"] = [];
+
+		if (issue["complete"])
+			issue["deadlineString"] = "Complete";
+		else
+			issue["deadlineString"] = ((new Date(issue["deadline"])).toDateString());
+
+		return issue;
+	}
+
+	self.newIssue = function(account, project, name, pickedPos, sid, deadline)
+	{
+		var deferred = $q.defer();
+		var newIssueObject = {};
+
+		newIssueObject["name"]     = name
+		newIssueObject["deadline"] = deadline;
+
+		if (pickedPos) newIssueObject["pickedPos"] = pickedPos.toGL();
+
+		// Get the shared ID of the current object to attach the comment to
+		var issuePostURL = serverConfig.apiUrl(account + "/" + project + "/issues/" + sid);
+
+		$.ajax({
+			type:	"POST",
+			url:	issuePostURL,
+			data: {"data" : JSON.stringify(newIssueObject)},
+			dataType: "json",
+			xhrFields: {
+				withCredentials: true
+			},
+			success: function(data) {
+				// Construct issue object to place in the menu
+				newIssueObject["_id"]      = data["issue_id"];
+				newIssueObject["account"]  = account;
+				newIssueObject["project"]  = project;
+				newIssueObject["owner"]    = Auth.username;
+				newIssueObject["parent"]   = sid;
+				newIssueObject["number"]   = data["number"];
+
+				newIssueObject = self.prepareIssue(newIssueObject);
+
+				if (!self.issues[project])
+					self.issues[project] = {};
+
+				self.issues[project][newIssueObject["_id"]] = newIssueObject;
+				self.io.emit("new_issue", newIssueObject);
+
+				$rootScope.$apply();
+				deferred.resolve();
+			}
+		});
+
+		return deferred.promise;
+	}
+
+	self.postComment = function(account, project, id, sid, comment)
+	{
+		var deferred = $q.defer();
+		var issuePostURL = serverConfig.apiUrl(account + "/" + project + "/issues/" + sid);
+
+		var issueObject = {
+			_id: id,
+			comment: comment
+		};
+
+		$.ajax({
+			type:	"POST",
+			url:	issuePostURL,
+			data: {"data" : JSON.stringify(issueObject)},
+			dataType: "json",
+			xhrFields: {
+				withCredentials: true
+			},
+			success: function(data) {
+				issueObject["owner"]    = Auth.username;
+
+				if (!self.issueContents[data.issue_id])
+					self.issueContents[data.issue_id] = [];
+
+				self.issueContents[data.issue_id].push(issueObject);
+
+				issueObject["account"] = account;
+				issueObject["project"] = project;
+
+				self.io.emit("post_comment", issueObject);
+
+				deferred.resolve();
+			}
+		});
+
+		return deferred.promise;
+	}
+
+	self.getIssue = function(account, project, id)
+	{
+		if (!(id in self.issueContents))
+		{
+			var deferred = $q.defer();
+			var baseUrl = serverConfig.apiUrl(account + '/' + project + '/issue/' + id + '.json');
+
+			$http.get(baseUrl)
+			.then(function(json) {
+				self.issueContents[id] = json.data[0]["comments"];
+
+				// Tell the chat server that we want
+				// updates to this issue posted to us
+				self.io.emit("open_issue", { project: project, account: account, issue_id: id });
+
+				deferred.resolve();
+			}, function(message) {
+				deferred.resolve();
+			});
+
+			return deferred.promise;
+		} else {
+			return $q.when();
+		}
+	}
+
+	self.getIssueStubs = function()
+	{
 		var account = StateManager.state.account;
 		var project = StateManager.state.project;
 
-		if (object)
-			var sid = object.getAttribute("DEF");
-		else
-			var sid = null;
+		var baseUrl = serverConfig.apiUrl(account + '/' + project + '/issues.json');
 
-		if (sid)
-			var baseUrl = serverConfig.apiUrl(account + '/' + project + '/issues/' + sid + '.json');
-		else
-			var baseUrl = serverConfig.apiUrl(account + '/' + project + '/issues.json');
-
-		if (!self.loading && (!(self.loadedObject == sid) || refresh))
+		if (!self.loading)
 		{
 			var deferred = $q.defer();
 
 			self.loadingPromise = deferred.promise;
-			self.loading		= true;
-			self.loadedObject	= sid;
+			self.loading        = true;
 
 			self.issues = {};
 
 			$http.get(baseUrl)
 			.then(function(json) {
-				self.issues = [];
-
 				for(var i = 0; i < json.data.length; i++)
 				{
-					var issue = json.data[i];
+					var issue = self.prepareIssue(json.data[i]);
 
-					if (!("comments" in issue))
-						issue["comments"] = [];
+					if (!self.issues[issue["project"]])
+						self.issues[issue["project"]] = {};
 
-					if (issue["complete"])
-						issue["deadlineString"] = "Complete";
-					else
-						issue["deadlineString"] = ((new Date(issue["deadline"])).toDateString());
+					self.issues[issue["project"]][issue["_id"]] = issue;
 
-					self.issues.push(issue);
+					if (!issue["complete"] && issue["position"])
+					{
+						var pinObj = {
+							id:       issue["id"],
+							position: issue["position"]
+						};
+
+						self.pinPosition.push(pinObj);
+					}
 				}
 
-				self.loading		= false;
+				// Tell the chat server that we want updates to this project
+				self.io.emit("watch_project", { account: account, project: project });
+				self.loading      = false;
 				deferred.resolve();
 			}, function(message) {
-				self.loading		= false;
-				self.loadedObject	= null;		// Loading of object failed
+				self.loading      = false;
 				deferred.resolve();
 			});
-		} else {
-			if (sid != self.loadedObject)
-			{
-				self.loadingPromise.then(function (res) {
-					self.getObjectIssues(object);
-				});
-			}
 		}
 
+		return self.loadingPromise;
 	}
 }]);
 

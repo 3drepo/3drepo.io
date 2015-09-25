@@ -9,6 +9,7 @@
 			{"template" : "issues/newissue.jade", "id" : "newissuemodal.html"}
 		],
 		"ui": [
+			{"name": "issue-pin", "template" : "issues/pin.jade", "position" : "loginButtons"},
 			{"name": "issues", "template" : "issues/issues.jade", "position" : "rightpanel"}
 		]
 	}

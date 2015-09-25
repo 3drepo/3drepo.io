@@ -63,7 +63,7 @@ function treeChildMetadata(dbInterface, dbName, project, sharedId, callback)
  * @param {string} namespace - X3DOM Namespace in which the node exists
  * @param {boolean} htmlMode - In this mode HTML characters are escaped
  *******************************************************************************/
-function processChild(child, branch, revision, project, selected, namespace, htmlMode)
+function processChild(child, branch, revision, account, project, selected, namespace, htmlMode)
 {
 	var childNode = {};
 
@@ -89,20 +89,24 @@ function processChild(child, branch, revision, project, selected, namespace, htm
 		childNode["selected"]  = (selected == "true");
 		childNode["namespace"] = namespace;
 		childNode["dbname"]    = project;
-		childNode["branch"]    = branch;	// TODO: Find better way rather than duplicating
+		childNode["branch"]    = branch;   // TODO: Find better way rather than duplicating
 		childNode["revision"]  = revision;
 
 	} else if (child['type'] == 'ref') {
 
+		childNode["account"]   = account;
 		childNode["project"]   = child["project"];
 		childNode["title"]     = htmlMode ? escapeHtml(child["project"]) : child["project"];
-		childNode["namespace"] = child["project"] + "__";
+
+		// FIXME: Currently only federation within the same account is supported
+		// Otherwise, account needs to be on the child
+		childNode["namespace"] = account + "__" + child["project"] + "__";
 		childNode["uuid"]      = uuid;
 		childNode["folder"]    = true;
 		childNode["lazy"]      = true;
 		childNode["selected"]  = (selected == "true");
 		childNode["dbname"]    = child["project"];
-		childNode["branch"]    = branch;	// TODO: Find better way rather than duplicating
+		childNode["branch"]    = branch;   // TODO: Find better way rather than duplicating
 		childNode["revision"]  = revision;
 		childNode["key"]       = uuidToString(child["shared_id"]);
 	}
@@ -135,8 +139,8 @@ function getTree(dbInterface, account, project, branch, revision, sid, namespace
 				head[0]["uuid"]      = node["id"];
 				head[0]["namespace"] = ((namespace != null) ? namespace : "model__");
 				head[0]["dbname"]    = project;
-				head[0]["branch"]	 = branch;
-				head[0]["revision"]	 = revision;
+				head[0]["branch"]    = branch;
+				head[0]["revision"]  = revision;
 
 				if (!("children" in node))
 					head[0]["children"] = [];
@@ -149,7 +153,7 @@ function getTree(dbInterface, account, project, branch, revision, sid, namespace
 
 				async.map(doc,
 					function(child, callback) { // Called for all children
-						callback(null, processChild(child, branch, revision, project, selected, namespace, htmlMode));
+						callback(null, processChild(child, branch, revision, account, project, selected, namespace, htmlMode));
 					},
 					function(err, children) { // Called when are children are ready
 							if(err)
@@ -269,8 +273,17 @@ exports.route = function(router)
 		});
 	});
 
+	router.get('json', '/:account/:project/issue/:uid', function(res, params, err_callback) {
+		router.dbInterface.getIssue(params.account, params.project, params.uid, false, function(err, issueList) {
+			if(err.value)
+				err_callback(err);
+			else
+				err_callback(responseCodes.OK, issueList);
+		});
+	});
+
 	router.get('json', '/:account/:project/issues', function(res, params, err_callback) {
-		router.dbInterface.getIssues(params.account, params.project, null, function(err, issueList) {
+		router.dbInterface.getIssues(params.account, params.project, 'master', null, true, function(err, issueList) {
 			if(err.value)
 				err_callback(err);
 			else
@@ -279,7 +292,7 @@ exports.route = function(router)
 	});
 
 	router.get('json', '/:account/:project/issues/:sid', function(res, params, err_callback) {
-		router.dbInterface.getIssues(params.account, params.project, params.sid, function(err, issueList) {
+		router.dbInterface.getObjectIssues(params.account, params.project, params.sid, params.number, false, function(err, issueList) {
 			if(err.value)
 				err_callback(err);
 			else

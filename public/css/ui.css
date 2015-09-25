@@ -486,7 +486,7 @@ header {
 	min-width: 300px;
 }
 
-#loginButtons {
+.loginButtons {
 	height: 34px;
 	margin-top: 13px;
 }
@@ -1228,15 +1228,9 @@ header button.btn {
 	color: #ffffff;
 }
 
-#qrdrag-menu-icon {
-	position: absolute;
-	bottom: 0;
-	left: -200px;
-	padding: 10px;
-	cursor: pointer;
-	color: #ffffff;
+#map-pin-menu-icon {
+	display: inline-block;
 }
-
 
 .tools-menu-items {
 	color: #ffffff;
@@ -1631,5 +1625,9 @@ ul.fancytree-container li {
 
 #clipslider {
 	width: 100%;
+}
+
+#hiddensubmitbutton {
+	visibility: hidden;
 }
 
