@@ -326,6 +326,22 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		$.event.trigger("objectSelected", node);
 	}
 
+	this.triggerPartSelected = function(part)
+	{
+		$.event.trigger("partSelected", part);
+	}
+
+	$(document).on("partSelected", function(event, part, zoom) {
+		if(zoom)
+			part.fit();
+
+		if (self.oldPart)
+			self.oldPart.resetColor();
+
+		self.oldPart = part;
+		part.setEmissiveColor("1.0 0.5 0.0", "front");
+	});
+
 	$(document).on("objectSelected", function(event, object, zoom) {
 		if(zoom)
 			if (!(object.getAttribute("render") == "false"))
@@ -1052,7 +1068,10 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	}
 
 	this.clickObject = function(event, objEvent) {
-		self.triggerSelected(objEvent.target);
+		if (objEvent.partID)
+			self.triggerPartSelected(objEvent.part);
+		else
+			self.triggerSelected(objEvent.target);
 	}
 
 	this.disableClicking = function() {

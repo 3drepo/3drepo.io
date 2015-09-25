@@ -493,8 +493,8 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			{
 				var mp = xmlDoc.createElement('MultiPart');
 				mp.setAttribute('id', child['id']);
-				mp.setAttribute('url', config.apiServer.url + '/' + account + '/' + project + '/' + child['id'] + '.x3d.mpc');
-				mp.setAttribute('urlIDMap', config.apiServer.url + '/' + account + '/' + project + '/' + child['id'] + '.json.mpc');
+				mp.setAttribute('url', config.api_server.url + '/' + account + '/' + project + '/' + child['id'] + '.x3d.mpc');
+				mp.setAttribute('urlIDMap', config.api_server.url + '/' + account + '/' + project + '/' + child['id'] + '.json.mpc');
 				mp.setAttribute('onclick', 'clickObject(event);');
 				mp.setAttribute('onmouseover', 'onMouseOver(event);');
 				mp.setAttribute('onmousemove', 'onMouseMove(event);');
@@ -623,7 +623,7 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, subM
 				suffix += "?tex_uuid=" + tex_id;
 			}
 
-			externalGeometry.setAttribute('url', config.apiServer.url + '/' + account + '/' + project + '/' + meshId + '.src' + suffix);
+			externalGeometry.setAttribute('url', config.api_server.url + '/' + account + '/' + project + '/' + meshId + '.src' + suffix);
 
 			shape.appendChild(externalGeometry);
 			break;
@@ -939,27 +939,37 @@ exports.route = function(router)
 	{
 		if (params.subformat == "mpc")
 		{
-			var xmlDoc = X3D_Header();
-			var sceneRoot	= X3D_CreateScene(xmlDoc);
+			// TODO: Only needs the shell not the whole thing
+			router.dbInterface.getObject(params.account, params.project, params.uid, null, null, function(err, type, uid, fromStash, obj)
+			{
+				if (err.value) return callback(err);
 
-			var shape = xmlDoc.createElement('Shape');
-			shape.setAttribute('DEF', 'M_0');
+				var xmlDoc = X3D_Header();
+				var sceneRoot	= X3D_CreateScene(xmlDoc);
 
-			var app = xmlDoc.createElement('Appearance');
-			var mat = xmlDoc.createElement('Material');
-			mat.setAttribute('diffuseColor', '0 1 0');
-			mat.textContent = ' ';
-			app.appendChild(mat);
-			shape.appendChild(app);
+				var shape = xmlDoc.createElement('Shape');
+				shape.setAttribute('DEF', 'M_0');
 
-			var eg  = xmlDoc.createElement('ExternalGeometry');
-			eg.setAttribute('url', config.apiServer.url + '/' + params.account + '/' + params.project + '/' + params.uid + '.src.mpc');
-			eg.textContent = ' ';
-			shape.appendChild(eg);
+				var bbox = repoNodeMesh.extractBoundingBox(obj.meshes[params.uid]);
+				shape.setAttribute('bboxCenter', bbox.center);
+				shape.setAttribute('bboxSize', bbox.size);
 
-			sceneRoot.root.appendChild(shape);
+				var app = xmlDoc.createElement('Appearance');
+				var mat = xmlDoc.createElement('Material');
+				mat.setAttribute('diffuseColor', '0 1 0');
+				mat.textContent = ' ';
+				app.appendChild(mat);
+				shape.appendChild(app);
 
-			return err_callback(responseCodes.OK, new xmlSerial().serializeToString(xmlDoc));
+				var eg  = xmlDoc.createElement('ExternalGeometry');
+				eg.setAttribute('url', config.api_server.url + '/' + params.account + '/' + params.project + '/' + params.uid + '.src.mpc');
+				eg.textContent = ' ';
+				shape.appendChild(eg);
+
+				sceneRoot.root.appendChild(shape);
+
+				return err_callback(responseCodes.OK, new xmlSerial().serializeToString(xmlDoc));
+			});
 		} else {
 			return err_callback(responseCodes.FORMAT_NOT_SUPPORTED);
 		}

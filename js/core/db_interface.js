@@ -1469,9 +1469,7 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 		};
 
 		dbConn.filterColl(dbName, project + '.stash.3drepo', query, {}, function(err, obj) {
-			if (err.value) return callback(err);
-
-			if (!obj.length)
+			if (err.value || !obj.length)
 			{
 				// TODO: At this point we should generate the scene graph
 				// There is no stash so just pass back the unoptimized scene graph
@@ -1495,6 +1493,8 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 			} else {
 				var type = obj[0]["type"];
 				var uid = uuidToString(obj[0]["_id"]);
+
+				var sceneObj = repoGraphScene.decode(obj);
 
 				// TODO: Make this more concrete
 				// if a mesh load the vertices, indices, colors etc from GridFS

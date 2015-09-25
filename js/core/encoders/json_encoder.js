@@ -114,6 +114,13 @@ function processChild(child, branch, revision, account, project, selected, names
 	return childNode;
 }
 
+function getMultiMap(dbInterface, account, project, branch, revision, err_callback)
+{
+	dbInterface.getScene(account, project, branch, revision, full, function(err, doc) {
+		err_callback(responseCode.OK, null);	
+	});
+}
+
 function getTree(dbInterface, account, project, branch, revision, sid, namespace, selected, htmlMode, err_callback)
 {
 		if (sid == "root")
@@ -441,6 +448,14 @@ exports.route = function(router)
 		});
 	});
 
+	router.get('json', '/:account/:project/revision/:rid/tree/multimap', function(res, params, err_callback) {
+		getMultiMap(dbInterface, params.account, params.project, null, params.rid, err_callback);
+	});
+
+	router.get('json', '/:account/:project/revision/:branch/head/tree/multimap', function(res, params, err_callback) {
+		getMultiMap(dbInterface, params.account, params.project, params.branch, null, err_callback);
+	});
+
 	router.get('json', '/:account/:project/:uid', function(res, params, err_callback) {
 		if(params.subformat == "mpc")
 		{
@@ -512,8 +527,8 @@ exports.route = function(router)
 								{
 									var map = {};
 
-									map["name"]       = subMeshKeys[i];
-									map["appearance"] = subMeshes[i]["mat_id"];
+									map["name"]       = uuidToString(subMeshKeys[i]);
+									map["appearance"] = uuidToString(subMeshes[i]["mat_id"]);
 									map["min"]        = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][0].join(' ');
 									map["max"]        = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][1].join(' ');
 									map["usage"]      = params.uid + "_0"
