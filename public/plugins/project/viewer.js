@@ -173,7 +173,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.nav.setAttribute('type', 'TURNTABLE');
 			self.scene.appendChild(self.nav);
 
-			self.loadViewpoint = name + "_default"; // Must be called after creating nav
+			self.loadViewpoint = self.name + "_default"; // Must be called after creating nav
 
 			self.viewer.addEventListener("keypress", function(e) {
 				if (e.charCode == 'r'.charCodeAt(0))
