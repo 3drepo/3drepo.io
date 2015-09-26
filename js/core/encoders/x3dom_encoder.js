@@ -71,7 +71,7 @@ function X3D_Header() {
  *
  * @param {xmlDom} xmlDoc - The XML document to add the scene to
  *******************************************************************************/
-function X3D_CreateScene(xmlDoc) {
+function X3D_CreateScene(xmlDoc, rootNode) {
 	var scene = xmlDoc.createElement('Scene');
 	scene.setAttribute('id', 'scene');
 
@@ -81,6 +81,18 @@ function X3D_CreateScene(xmlDoc) {
 	rootGroup.setAttribute('id', 'root');
 	rootGroup.setAttribute('def', 'root');
 	rootGroup.setAttribute('render', 'true');
+
+	// TODO: Why would rootNode not exists ?
+	if (rootNode)
+	{
+		if (rootNode['bounding_box'])
+		{
+			var bbox = repoNodeMesh.extractBoundingBox(rootNode);
+			rootGroup.setAttribute('bboxCenter', bbox.center);
+			rootGroup.setAttribute('bboxSize', bbox.size);
+		}
+	}
+
 	scene.appendChild(rootGroup);
 
 	return {scene: scene, root: rootGroup};
