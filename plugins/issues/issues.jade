@@ -9,12 +9,10 @@
 		.panel.panel-default(ng-repeat="issue in projectIssues")
 			.panel-heading
 				h2.panel-title 
-					a(data-toggle='collapse', data-parent='#accordion', ng-click='openIssue(issue)', data-target="#{{issue._id}}") {{ issue.number + " - " + issue.name + " [" + issue.deadlineString + "]"}}
+					a(data-toggle='collapse', ng-click='openIssue(issue)') {{ issue.number + " - " + issue.name }}
 					button.btn(ng-if="!issue.complete", ng-click='complete(issue)')
 						i.fa.fa-check
-					button.btn(ng-click='locateObject(issue._id)')
-						i.fa.fa-eye
-			.panel-collapse.collapse(id="{{issue._id}}")
+			.panel-collapse(id="{{issue._id}}", collapse="expanded[issue._id] ? !expanded[issue._id] : true")
 				.panel-body
 					table.metadata-table(ng-repeat="comment in IssuesService.issueContents[issue._id]")
 						tr

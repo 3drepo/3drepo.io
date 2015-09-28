@@ -16,8 +16,11 @@
  */
 
 angular.module('3drepo')
-.service('ViewerService', ['$window', 'StateManager', 'serverConfig', '$http', function($window, StateManager, serverConfig, $http){
+.service('ViewerService', ['$window', 'StateManager', 'serverConfig', '$http', '$q', function($window, StateManager, serverConfig, $http, $q){
 	var self = this;
+	var readyQ = $q.defer();
+
+	self.ready = readyQ.promise;
 
 	this.init = function() {
 		// Viewer Manager controls layout of viewer
@@ -35,6 +38,15 @@ angular.module('3drepo')
 		self.gamepad.init();
 
 		self.collision  = new Collision(self.defaultViewer);
+
+		self.defaultViewer.whenLoaded(function () {
+			readyQ.resolve();
+		});
+	}
+
+	this.linkFunction = function (callback)
+	{
+		self.viewerManager.linkFunction(callback);
 	}
 
 	this.loadModel = function() {

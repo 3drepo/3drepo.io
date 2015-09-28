@@ -125,6 +125,21 @@ var ViewerManager = function() {
 		}
 	}
 
+	this.linkedViewers = [];
+	this.linkedFunctions = [];
+	this.linkMe = function(handle) { self.addMe(self.linkedViewers, handle); }
+
+	this.viewMaster = null;
+	this.switchMaster = function(handle) {
+		if (self.isValidHandle(handle))
+			self.viewMaster = self.viewers[handle];
+	}
+
+	this.linkFunction = function(callback)
+	{
+		this.linkedFunctions.push(callback);
+	}
+
 	this.addMe = function(array, handle)
 	{
 		if (self.isValidHandle(handle))
@@ -132,15 +147,6 @@ var ViewerManager = function() {
 			if (array.indexOf(handle) == -1)
 				array.push(handle);
 		}
-	}
-
-	this.linkedViewers = [];
-	this.linkMe = function(handle) { self.addMe(self.linkedViewers, handle); }
-
-	this.viewMaster = null;
-	this.switchMaster = function(handle) {
-		if (self.isValidHandle(handle))
-			self.viewMaster = self.viewers[handle];
 	}
 
 	this.viewpointLinkFunction = function (newEvent, event) {
@@ -169,7 +175,11 @@ var ViewerManager = function() {
 				//self.viewers[handle].transformEvent(event, self.viewers[handle].getCurrentViewpoint(), true);
 			}
 		}
+
+		for (var i = 0; i < self.linkedFunctions.length; i++)
+			self.linkedFunctions[i](event);
 	};
+
 
 	this.initRuntime = function () {
 		for(handle in self.viewers)

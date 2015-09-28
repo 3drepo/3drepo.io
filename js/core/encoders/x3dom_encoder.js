@@ -78,6 +78,8 @@ function X3D_CreateScene(xmlDoc, rootNode) {
 	xmlDoc.firstChild.appendChild(scene);
 
 	var rootGroup = xmlDoc.createElement("group");
+
+	rootGroup.setAttribute('onload', 'onLoaded(event);');
 	rootGroup.setAttribute('id', 'root');
 	rootGroup.setAttribute('def', 'root');
 	rootGroup.setAttribute('render', 'true');
@@ -504,6 +506,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			if ((mode == "mp") && (subMeshKeys.length > 1))
 			{
 				var mp = xmlDoc.createElement('MultiPart');
+				mp.setAttribute('onload', 'onLoaded(event);');
 				mp.setAttribute('id', child['id']);
 				mp.setAttribute('url', config.api_server.url + '/' + account + '/' + project + '/' + child['id'] + '.x3d.mpc');
 				mp.setAttribute('urlIDMap', config.api_server.url + '/' + account + '/' + project + '/' + child['id'] + '.json.mpc');
