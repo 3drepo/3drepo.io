@@ -39,7 +39,9 @@ angular.module('3drepo')
 
 		self.collision  = new Collision(self.defaultViewer);
 
-		readyQ.resolve();
+		self.defaultViewer.whenLoaded(function () {
+			readyQ.resolve();
+		});
 	}
 
 	this.linkFunction = function (callback)
