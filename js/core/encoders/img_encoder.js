@@ -62,15 +62,15 @@ module.exports.transcode = function (fromFormat, toFormat, buffer, callback) {
 module.exports.route = function(router)
 {
 	var imgObject = function(res, params, err_callback) {
-		router.dbInterface.getObject(params.account, params.project, params.uid, null, null, function(err, type, uid, obj)
+		router.dbInterface.getObject(params.account, params.project, params.uid, null, null, function(err, type, uid, fromStash, obj)
 		{
 			if(err.value)
 				return err_callback(err);
 
 			if (type == "texture")
 			{
-			  res.write(obj.textures[uid].data.buffer);
-			  res.end();
+				res.write(obj.textures[params.uid].data.buffer);
+				res.end();
 			} else {
 				err_callback(responseCodes.OBJECT_TYPE_NOT_SUPPORTED);
 			}

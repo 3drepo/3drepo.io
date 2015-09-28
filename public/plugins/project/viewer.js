@@ -166,7 +166,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.light.setAttribute('shadowIntensity', 0.0);
 			self.scene.appendChild(self.light);
 
-			self.createViewpoint(name + "_default");
+			self.createViewpoint(self.name + "_default");
 
 			self.nav = document.createElement('navigationInfo');
 			self.nav.setAttribute('headlight', 'false');

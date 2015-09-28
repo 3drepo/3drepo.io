@@ -25,7 +25,7 @@
  * Render SRC format of a mesh
  *
  * @param {string} project - The name of the project containing the mesh
- * @param {RepoGraphScene} - Render all meshes contained in RepoGraphScene object. 
+ * @param {RepoGraphScene} - Render all meshes contained in RepoGraphScene object.
  * @param {string} tex_uuid - A string representing the tex_uuid attached to the mesh
  * @param {boolean} embedded_texture - Determines whether or not the texture data is embedded in the SRC.
  * @param {string} subformat - Subformat, currently for Multipart
@@ -41,8 +41,10 @@
 
  	var idx = 0;
 
- 	var dataBuffers    = []; // Array of data buffers to concatenate at the end
-	var bufferPosition = 0;  // Stores the position of the processing buffer object relative to the full buffer
+ 	var dataBuffers		= []; // Array of data buffers to concatenate at the end
+	var bufferPosition	= 0;  // Stores the position of the processing buffer object relative to the full buffer
+	var idMapBuf		= null;
+	var needsIdMapBuf	= (subformat === "mpc");
 
 	// Create placeholders for JSON output
 	srcJSON.accessors				  = {};
@@ -71,7 +73,6 @@
 
 		var subMeshArray         = [];
 		var subMeshKeys          = [];
-		var idMapBuf             = []; // Filled in for multipart
 		var subMeshBBoxCenters   = [];
 		var subMeshBBoxSizes     = [];
 
@@ -230,10 +231,10 @@
 			bufPos += faceBuf.length;
 
 		var idMapWritePosition = bufPos;
-		if (idMapBuf)
+		if (needsIdMapBuf)
 			bufPos += mesh.vertices_count * 4;
 
-		var UVWritePosition     = bufPos;
+		var uvWritePosition     = bufPos;
 		var numSubMeshes = subMeshArray.length;
 
 		// Loop through a set of possible submeshes
@@ -411,13 +412,13 @@
 				srcJSON.meshes[meshID].attributes.texcoord = uvAttributeView;
 
 				srcJSON.bufferViews[uvBufferView]        = {};
-				srcJSON.bufferViews[uvBufferView].chunks = [textureBufferChunk];
+				srcJSON.bufferViews[uvBufferView].chunks = [uvBufferChunk];
 
 				srcJSON.bufferChunks[uvBufferChunk]            = {};
-				srcJSON.bufferChunks[uvBufferChunk].byteOffset = UVWritePosition;
+				srcJSON.bufferChunks[uvBufferChunk].byteOffset = uvWritePosition;
 				srcJSON.bufferChunks[uvBufferChunk].byteLength = subMeshVerticesCount * 4 * 2;
 
-				UVWritePosition += srcJSON.bufferChunks[uvBufferChunk].byteLength;
+				uvWritePosition += srcJSON.bufferChunks[uvBufferChunk].byteLength;
 
 				// Directly embed the texture data in the SRC file ?
 				// TODO: Fix this, may not work
@@ -482,8 +483,6 @@
 			}
 		}
 
-		var idMapBuf = null;
-
 		for(var i = 0; i < subMeshArray.length; i++)http://localhost/api/test/basetest/a35e54ef-8fe3-4bda-99f8-f69d1ddde2eb.src.mp
 		{
 			if (subMeshArray[i].idMapBuf)
@@ -536,14 +535,15 @@
 
 		// Output optional texture bits
 		if (tex_uuid != null) {
+
+			mesh['uv_channels'].buffer.copy(dataBuffers[idx], bufPos);
+			bufPos += mesh['uv_channels'].buffer.length;
+
 			if (embedded_texture)
 			{
 				texture.data.buffer.copy(dataBuffers[idx], bufPos);
 				bufPos += texture.data.buffer.length;
 			}
-
-			mesh['uv_channels'].buffer.copy(dataBuffers[idx], bufPos);
-			bufPos += mesh['uv_channels'].buffer.length;
 		}
 	}
 
