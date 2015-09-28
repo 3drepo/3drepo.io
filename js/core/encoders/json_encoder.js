@@ -20,6 +20,8 @@ var uuidToString = require('../db_interface.js').uuidToString;
 var search = require('./helper/search.js').search;
 var log_iface = require('../logger.js');
 var logger = log_iface.logger;
+var C = require('../constants.js');
+var repoNodeMesh = require('../repoNodeMesh.js');
 
 var responseCodes = require('../response_codes.js');
 
@@ -112,15 +114,27 @@ function processChild(child, branch, revision, account, project, selected, names
 	return childNode;
 }
 
+function getMultiMap(dbInterface, account, project, branch, revision, err_callback)
+{
+	dbInterface.getScene(account, project, branch, revision, full, function(err, doc) {
+		err_callback(responseCode.OK, null);	
+	});
+}
+
 function getTree(dbInterface, account, project, branch, revision, sid, namespace, selected, htmlMode, err_callback)
 {
 		if (sid == "root")
 		{
-			dbInterface.getScene(account, project, branch, revision, false, function(err, doc) {
+			dbInterface.getRootNode(account, project, branch, revision, false, function(err, dbObj) {
 				if(err.value) return err_callback(err);
+
+				var doc = repoGraphScene.decode([dbObj]);
 
 				var head = [{}];
 				var node = doc['mRootNode'];
+
+				if (!node)
+					return err_callback(responseCodes.ROOT_NODE_NOT_FOUND);
 
 				logger.log('debug', 'Found root node ' + node["id"]);
 
@@ -425,8 +439,6 @@ exports.route = function(router)
 		router.dbInterface.getHeadUUID(params.account, params.project, params.branch, function (err, uuid)
 		{
 			router.dbInterface.getObject(params.account, params.project, null, uuidToString(uuid.uuid), params.sid, function (err, type, uid, obj) {
-				console.log(JSON.stringify(obj));
-
 				if (err.value)
 					err_callback(err);
 				else
@@ -434,6 +446,107 @@ exports.route = function(router)
 
 			})
 		});
+	});
+
+	router.get('json', '/:account/:project/revision/:rid/tree/multimap', function(res, params, err_callback) {
+		getMultiMap(dbInterface, params.account, params.project, null, params.rid, err_callback);
+	});
+
+	router.get('json', '/:account/:project/revision/:branch/head/tree/multimap', function(res, params, err_callback) {
+		getMultiMap(dbInterface, params.account, params.project, params.branch, null, err_callback);
+	});
+
+	router.get('json', '/:account/:project/:uid', function(res, params, err_callback) {
+		if(params.subformat == "mpc")
+		{
+			router.dbInterface.getObject(params.account, params.project, params.uid, null, null, function (err, type, uid, fromStash, scene) {
+				if (err.value) return err_callback(err);
+
+				if (type == "mesh")
+				{
+					var mesh = scene.meshes[params.uid];
+
+					if (mesh)
+					{
+						if (mesh[C.REPO_NODE_LABEL_COMBINED_MAP])
+						{
+							var subMeshes   = mesh[C.REPO_NODE_LABEL_COMBINED_MAP];
+							var subMeshKeys = mesh[C.REPO_NODE_LABEL_COMBINED_MAP].map(function (item) {
+								return item[C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]
+							});
+
+							var outJSON = {};
+
+							outJSON["numberOfIDs"] = subMeshKeys.length;
+							outJSON["maxGeoCount"] = subMeshKeys.length;
+
+							router.dbInterface.getChildrenByUID(params.account, params.project, params.uid, function (err, docs) {
+								if (err.value) return err_callback(err);
+
+								var children = repoGraphScene.decode(docs);
+
+								outJSON["appearance"] = [];
+
+								if (children.materials_count)
+								{
+									for (var i = 0; i < children.materials_count; i++)
+									{
+										var childID = Object.keys(children.materials)[i];
+										var child   = children.materials[childID];
+
+										var app = {};
+										app["name"] = childID;
+
+										var material = {};
+
+										if ('diffuse' in child)
+											material["diffuseColor"] = child['diffuse'].join(' ');
+
+										if ('emissive' in child)
+											material["emissiveColor"] = child['emissive'].join(' ');
+
+										if ('shininess' in child)
+											material["shininess"] = child["shininess"];
+
+										if ('specular' in child)
+											material["specularColor"] = child["specular"].join(" ");
+
+										if ('opacity' in child)
+											material["transparency"] = 1.0 - child["opacity"];
+
+										app["material"] = material;
+
+										outJSON["appearance"].push(app);
+									}
+								}
+
+								var bbox = repoNodeMesh.extractBoundingBox(mesh);
+								outJSON["mapping"] = [];
+
+								for(var i = 0; i < subMeshKeys.length; i++)
+								{
+									var map = {};
+
+									map["name"]       = uuidToString(subMeshKeys[i]);
+									map["appearance"] = uuidToString(subMeshes[i]["mat_id"]);
+									map["min"]        = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][0].join(' ');
+									map["max"]        = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][1].join(' ');
+									map["usage"]      = params.uid + "_0"
+
+									outJSON["mapping"].push(map);
+								}
+
+								return err_callback(responseCodes.OK, outJSON);
+							});
+						}
+					} else {
+						return err_callback(responseCodes.OBJECT_NOT_FOUND);
+					}
+				}
+			});
+		} else {
+			err_callback(responseCodes.FORMAT_NOT_SUPPORTED);
+		}
 	});
 };
 

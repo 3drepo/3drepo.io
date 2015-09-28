@@ -37,8 +37,10 @@ var logger = log_iface.logger;
  *
  * @param {Array} bsonArray
  */
-exports.decode = function(bsonArray) {
+exports.decode = function(bsonArray, gridfsfiles) {
 	var rootNode;
+
+	gridfsfiles = typeof(gridfsfiles) === 'undefined' ? {} : gridfsfiles;
 
 	// return variable
 	var scene = new Object();
@@ -142,6 +144,7 @@ exports.decode = function(bsonArray) {
 		}
 	}
 
+
 	//---------------------------------------------------------------------
 	// Textures
 	scene.textures = textures;
@@ -190,6 +193,8 @@ exports.decode = function(bsonArray) {
 	// Register root node
 	if (rootNode)
 		scene.mRootNode = rootNode;
+
+	scene.all = all;
 
 	return scene;
 };

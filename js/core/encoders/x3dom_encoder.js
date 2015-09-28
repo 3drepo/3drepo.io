@@ -71,7 +71,7 @@ function X3D_Header() {
  *
  * @param {xmlDom} xmlDoc - The XML document to add the scene to
  *******************************************************************************/
-function X3D_CreateScene(xmlDoc) {
+function X3D_CreateScene(xmlDoc, rootNode) {
 	var scene = xmlDoc.createElement('Scene');
 	scene.setAttribute('id', 'scene');
 
@@ -81,6 +81,18 @@ function X3D_CreateScene(xmlDoc) {
 	rootGroup.setAttribute('id', 'root');
 	rootGroup.setAttribute('def', 'root');
 	rootGroup.setAttribute('render', 'true');
+
+	// TODO: Why would rootNode not exists ?
+	if (rootNode)
+	{
+		if (rootNode['bounding_box'])
+		{
+			var bbox = repoNodeMesh.extractBoundingBox(rootNode);
+			rootGroup.setAttribute('bboxCenter', bbox.center);
+			rootGroup.setAttribute('bboxSize', bbox.size);
+		}
+	}
+
 	scene.appendChild(rootGroup);
 
 	return {scene: scene, root: rootGroup};
@@ -275,7 +287,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			newNode.setAttribute('url', url_str);
 			newNode.setAttribute('id', child['id']);
 			newNode.setAttribute('DEF', dbInterface.uuidToString(child["shared_id"]));
-			newNode.setAttribute('nameSpaceName', child['account'] + '__' + child['project']);
+			newNode.setAttribute('nameSpaceName', account + '__' + child['project']);
 
 			if ('bounding_box' in child)
 			{
@@ -317,8 +329,10 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			if (length(look_at) == 0)
 				look_at = [0,0,-1];
 
-			var up = child["up"] ? child["up"] : [0,1,0];
+			if (length(look_at) == 0) look_at = [0,0,1];
 
+			// X3DOM has right-hand coordinate
+			var up = child["up"] ? child["up"] : [0,1,0];
 			forward = normalize(scale(look_at,-1)); // scale(look_at,-1)); // Forward, z-axis comes out of screen
 			up = normalize(up);
 
@@ -365,13 +379,6 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			} else {
 				newNode = xmlDoc.createElement('MatrixTransform');
 				newNode.setAttribute('matrix', mat_str);
-			}
-
-			if ('bounding_box' in child)
-			{
-				var bbox = repoNodeMesh.extractBoundingBox(child);
-				newNode.setAttribute('bboxCenter', bbox.center);
-				newNode.setAttribute('bboxSize', bbox.size);
 			}
 
 			newNode.setAttribute("id", child['id']);
@@ -479,17 +486,63 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 
 			xmlNode.appendChild(newNode);
 		} else if (child['type'] == 'mesh') {
-			var shape = xmlDoc.createElement('Shape');
-			shape.setAttribute('id', child['id']);
-			shape.setAttribute('DEF', dbInterface.uuidToString(child["shared_id"]));
-			shape.setAttribute('onclick', 'clickObject(event);');
-			shape.setAttribute('onmouseover', 'onMouseOver(event);');
-			shape.setAttribute('onmousemove', 'onMouseMove(event);');
+			var subMeshKeys = [];
 
-			X3D_AddChildren(xmlDoc, shape, child, matrix, dbInterface, account, project, mode);
+			if (child[C.REPO_NODE_LABEL_COMBINED_MAP])
+			{
+				subMeshKeys = child[C.REPO_NODE_LABEL_COMBINED_MAP].map(function (item) {
+					return item[C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]
+				});
+			} else {
+				subMeshKeys = [null]; // No submesh
+			}
 
-			X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, child, mode);
-			xmlNode.appendChild(shape);
+			var bbox = null;
+
+			if ('bounding_box' in child) bbox = repoNodeMesh.extractBoundingBox(child);
+
+			if ((mode == "mp") && (subMeshKeys.length > 1))
+			{
+				var mp = xmlDoc.createElement('MultiPart');
+				mp.setAttribute('id', child['id']);
+				mp.setAttribute('url', config.api_server.url + '/' + account + '/' + project + '/' + child['id'] + '.x3d.mpc');
+				mp.setAttribute('urlIDMap', config.api_server.url + '/' + account + '/' + project + '/' + child['id'] + '.json.mpc');
+				mp.setAttribute('onclick', 'clickObject(event);');
+				mp.setAttribute('onmouseover', 'onMouseOver(event);');
+				mp.setAttribute('onmousemove', 'onMouseMove(event);');
+
+				if (bbox)
+				{
+					mp.setAttribute('bboxCenter', bbox.center);
+					mp.setAttribute('bboxSize', bbox.size);
+				}
+
+				xmlNode.appendChild(mp);
+			} else {
+				for(var i = 0; i < subMeshKeys.length; i++)
+				{
+					var shape = xmlDoc.createElement('Shape');
+					var childUniqueID = subMeshKeys[i] ? subMeshKeys[i] : child["id"];
+
+					shape.setAttribute('id', childUniqueID);
+					shape.setAttribute('DEF', childUniqueID); //dbInterface.uuidToString(child["shared_id"]));
+					shape.setAttribute('onclick', 'clickObject(event);');
+					shape.setAttribute('onmouseover', 'onMouseOver(event);');
+					shape.setAttribute('onmousemove', 'onMouseMove(event);');
+
+					if (bbox)
+					{
+						shape.setAttribute('bboxCenter', bbox.center);
+						shape.setAttribute('bboxSize', bbox.size);
+					}
+
+					X3D_AddChildren(xmlDoc, shape, child, matrix, dbInterface, account, project, mode);
+
+					X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, child, subMeshKeys[i],mode);
+
+					xmlNode.appendChild(shape);
+				}
+			}
 		}
 	}
 }
@@ -503,9 +556,11 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
  * @param {dbInterface} dbInterface - Database interface object
  * @param {string} account - Name of the account containing the project
  * @param {string} project - Name of the project
+ * @param {RepoNodeMesh} mesh - Mesh to render
+ * @param {integer} subMeshID - sub mesh ID to render
  * @param {string} mode - Type of X3D being rendered
  *******************************************************************************/
-function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, mode) {
+function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, subMeshID, mode) {
 	var meshId = mesh['id'];
 	var mat = getChild(mesh, 'material')
 
@@ -515,8 +570,8 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, mode
 
 	switch (mode) {
 		case "x3d":
-			shape.setAttribute('bboxCenter', bbox.center.join(' '));
-			shape.setAttribute('bboxSize', bbox.size.join(' '));
+			//shape.setAttribute('bboxCenter', bbox.center.join(' '));
+			//shape.setAttribute('bboxSize', bbox.size.join(' '));
 
 			var indexedfaces = xmlDoc.createElement('IndexedFaceSet');
 
@@ -561,27 +616,32 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, mode
 
 			break;
 
+		case "mp":
 		case "src":
-			shape.setAttribute('bboxCenter', bbox.center.join(' '));
-			shape.setAttribute('bboxSize', bbox.size.join(' '));
+			//shape.setAttribute('bboxCenter', bbox.center.join(' '));
+			//shape.setAttribute('bboxSize', bbox.size.join(' '));
 
 			var externalGeometry = xmlDoc.createElement('ExternalGeometry');
 
 			//externalGeometry.setAttribute('solid', 'true');
 
+			var suffix = "";
+
+			if (subMeshID)
+				suffix += "#" + subMeshID;
+
 			if ('children' in mat) {
 				var tex_id = mat['children'][0]['id'];
-				externalGeometry.setAttribute('url', config.api_server.url + '/' + account + '/' + project + '/' + meshId + '.src?tex_uuid=' + tex_id);
-			} else {
-				externalGeometry.setAttribute('url', config.api_server.url + '/' + account + '/' + project + '/' + meshId + '.src');
+				suffix += "?tex_uuid=" + tex_id;
 			}
+
+			externalGeometry.setAttribute('url', config.api_server.url + '/' + account + '/' + project + '/' + meshId + '.src' + suffix);
 
 			shape.appendChild(externalGeometry);
 			break;
-
 		case "bin":
-			shape.setAttribute('bboxCenter', bbox.center.join(' '));
-			shape.setAttribute('bboxSize', bbox.size.join(' '));
+		    //shape.setAttribute('bboxCenter', bbox.center.join(' '));
+			//shape.setAttribute('bboxSize', bbox.size.join(' '));
 
 			var binaryGeometry = xmlDoc.createElement('binaryGeometry');
 
@@ -643,8 +703,8 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, mode
 
 					shape.appendChild(popGeometry);
 
-					shape.setAttribute('bboxCenter', bbox.center.join(' '));
-					shape.setAttribute('bboxSize', bbox.size.join(' '));
+					//shape.setAttribute('bboxCenter', bbox.center.join(' '));
+					//shape.setAttribute('bboxSize', bbox.size.join(' '));
 				}
 			});
 
@@ -738,8 +798,10 @@ function X3D_AddViewpoint(xmlDoc, root, account, project, bbox)
 
 	var max_dim = Math.max(bbox.size[0], bbox.size[1]) * 0.5;
 
-	var fov = 40 * (Math.PI / 180); // Field of view in radians
+	var fov = 40 * (Math.PI / 180); // Field of view in radians (40 degrees)
 
+	// Move back in the z direction such that the model takes
+	// up half the center of the screen.
 	vpos[2] += bbox.size[2] * 0.5 + max_dim / Math.tan(0.5 * fov);
 
 	var vpoint = xmlDoc.createElement('Viewpoint');
@@ -883,6 +945,46 @@ exports.route = function(router)
 	router.get('x3d', '/:account/:project/revision/:branch/head/:sid', function(res, params, err_callback)
 	{
 		render(router.dbInterface, params.account, params.project, params.subformat, params.branch, null, err_callback);
+	});
+
+	router.get('x3d', '/:account/:project/:uid', function(res, params, err_callback)
+	{
+		if (params.subformat == "mpc")
+		{
+			// TODO: Only needs the shell not the whole thing
+			router.dbInterface.getObject(params.account, params.project, params.uid, null, null, function(err, type, uid, fromStash, obj)
+			{
+				if (err.value) return callback(err);
+
+				var xmlDoc = X3D_Header();
+				var sceneRoot	= X3D_CreateScene(xmlDoc);
+
+				var shape = xmlDoc.createElement('Shape');
+				shape.setAttribute('DEF', 'M_0');
+
+				var bbox = repoNodeMesh.extractBoundingBox(obj.meshes[params.uid]);
+				shape.setAttribute('bboxCenter', bbox.center);
+				shape.setAttribute('bboxSize', bbox.size);
+
+				var app = xmlDoc.createElement('Appearance');
+				var mat = xmlDoc.createElement('Material');
+				mat.setAttribute('diffuseColor', '0 1 0');
+				mat.textContent = ' ';
+				app.appendChild(mat);
+				shape.appendChild(app);
+
+				var eg  = xmlDoc.createElement('ExternalGeometry');
+				eg.setAttribute('url', config.api_server.url + '/' + params.account + '/' + params.project + '/' + params.uid + '.src.mpc');
+				eg.textContent = ' ';
+				shape.appendChild(eg);
+
+				sceneRoot.root.appendChild(shape);
+
+				return err_callback(responseCodes.OK, new xmlSerial().serializeToString(xmlDoc));
+			});
+		} else {
+			return err_callback(responseCodes.FORMAT_NOT_SUPPORTED);
+		}
 	});
 }
 

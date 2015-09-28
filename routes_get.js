@@ -348,13 +348,14 @@ module.exports = function(router, dbInterface, checkAccess){
 	});
 
 	// Get object with specific uid in a specific format
-	router.get('/:account/:project/meta/:uid.:format?', checkAccess, function(req, res, next) {
+	router.get('/:account/:project/meta/:uid.:format?.:subformat?', checkAccess, function(req, res, next) {
 		var format = req.params["format"].toLowerCase();
 		var current_user = ("user" in req.session) ? req.session.user.username : "";
 
 		var params = {
 			account:   req.params["account"],
 			project:   req.params["project"],
+			subformat: req.params["subformat"],
 			uid:	   req.params["uid"],
 			user:	   current_user
 		};
@@ -451,7 +452,50 @@ module.exports = function(router, dbInterface, checkAccess){
 		this.transRouter(format, '/:account/:project/revision/:rid/tree/:sid', res, params);
 	});
 
-	// Get subtree for sid in revision rid, with (optional) depth query string paramter
+
+	// Get map from object id to path in tree for multipart
+	router.get('/:account/:project/revision/:branch/head/tree/multimap.:format?.:subformat?', checkAccess, function(req, res, next) {
+		var format = req.params["format"];
+		var current_user = ("user" in req.session) ? req.session.user.username : "";
+
+		var params = {
+			account:	req.params["account"],
+			project:	req.params["project"],
+			branch:		req.params["branch"],
+			rid:		req.params["rid"],
+			subformat:	req.params["subformat"],
+			sid:		req.params["sid"],
+			user:		current_user,
+			query:		req.query
+		};
+
+		if ("depth" in req.query)
+			params.depth = req.query.depth;
+
+		this.transRouter(format, '/:account/:project/revision/:branch/head/tree/multimap', res, params);
+	});
+
+	// Get map from object id to path in tree for multipart
+	router.get('/:account/:project/revision/:rid/tree/multimap.:format?.:subformat?', checkAccess, function(req, res, next) {
+		var format = req.params["format"];
+		var current_user = ("user" in req.session) ? req.session.user.username : "";
+
+		var params = {
+			account:	req.params["account"],
+			project:	req.params["project"],
+			rid:		req.params["rid"],
+			subformat:	req.params["subformat"],
+			sid:		req.params["sid"],
+			user:		current_user,
+			query:		req.query
+		};
+
+		if ("depth" in req.query)
+			params.depth = req.query.depth;
+
+		this.transRouter(format, '/:account/:project/revision/:rid/tree/multimap', res, params);
+	});
+
 	router.get('/:account/:project/revision/:rid/diff/:otherrid.:format?.:subformat?', checkAccess, function(req, res, next) {
 		var format = req.params["format"];
 		var current_user = ("user" in req.session) ? req.session.user.username : "";

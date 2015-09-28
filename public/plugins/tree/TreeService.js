@@ -120,6 +120,10 @@ angular.module('3drepo')
 		}
 	}
 
+	this.onPartSelected = function(objEvent) {
+		debugger;
+	}
+
 	this.wasPartSelect = false;
 
 	this.init = function (rootElement) {
@@ -208,6 +212,10 @@ angular.module('3drepo')
 
 			$(document).on("objectSelected", function(event, object, zoom) {
 				self.onObjectSelected(object);
+			});
+
+			$(document).on("partSelected", function(event, objEvent, zoom) {
+				self.onPartSelected(objEvent);
 			});
 		}
 	}

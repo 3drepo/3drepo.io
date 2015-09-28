@@ -183,7 +183,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.nav.setAttribute('type', 'TURNTABLE');
 			self.scene.appendChild(self.nav);
 
-			self.loadViewpoint = name + "_default"; // Must be called after creating nav
+			self.loadViewpoint = self.name + "_default"; // Must be called after creating nav
 
 			self.viewer.addEventListener("keypress", function(e) {
 				if (e.charCode == 'r'.charCodeAt(0))
@@ -345,6 +345,22 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	{
 		$.event.trigger("objectSelected", node);
 	}
+
+	this.triggerPartSelected = function(part)
+	{
+		$.event.trigger("partSelected", part);
+	}
+
+	$(document).on("partSelected", function(event, part, zoom) {
+		if(zoom)
+			part.fit();
+
+		if (self.oldPart)
+			self.oldPart.resetColor();
+
+		self.oldPart = part;
+		part.setEmissiveColor("1.0 0.5 0.0", "front");
+	});
 
 	$(document).on("objectSelected", function(event, object, zoom) {
 		if(zoom)
@@ -1072,7 +1088,10 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	}
 
 	this.clickObject = function(event, objEvent) {
-		self.triggerSelected(objEvent.target);
+		if (objEvent.partID)
+			self.triggerPartSelected(objEvent.part);
+		else
+			self.triggerSelected(objEvent.target);
 	}
 
 	this.disableClicking = function() {

@@ -154,7 +154,7 @@ function install_bower(){
 				//qr files are in a separate list as they need to be put inside $public_dir_js/qrcode
 				publicize_files(internal_files.bower_qr_files, public_qr_dir, public_dir_css);
 				//FIXME: if we ever need to minify an x3dom file this might cause a problem. Ideally we should split it like js.
-				minify_css();
+				//minify_css();
 			});
 	});
 }
@@ -275,7 +275,7 @@ function publicize_files(flist, target_dir_js, target_dir_css){
 	for (index = 0; index < flist.length; index++){
 		var target_dir = path.extname(flist[index]) === '.css' ? target_dir_css : target_dir_js;
 		make_symlink(flist[index], target_dir);
-		minify(flist[index], target_dir);
+		//minify(flist[index], target_dir);
 	}
 
 }

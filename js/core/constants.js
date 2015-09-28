@@ -49,6 +49,7 @@ define('REPO_NODE_TYPE_MAP', 'map');
 define('REPO_NODE_LABEL_ID', '_id'); // TODO: remove all references to replace with UNIQUE_ID instead
 define('REPO_NODE_LABEL_UNIQUE_ID', '_id');
 define('REPO_NODE_LABEL_SHARED_ID', 'shared_id');
+define('REPO_NODE_LABEL_REV_ID', 'rev_id');
 define('REPO_NODE_LABEL_API', 'api');
 define('REPO_NODE_LABEL_PATH', 'paths'); // TODO: remove but make sure all references are fixed!
 define('REPO_NODE_LABEL_PATHS', 'paths'); // fixed typo
@@ -98,6 +99,33 @@ define('REPO_NODE_LABEL_ADDED_SHARED_IDS', 'added');
 define('REPO_NODE_LABEL_DELETED_SHARED_IDS', 'deleted');
 define('REPO_NODE_LABEL_MODIFIED_SHARED_IDS', 'modified');
 define('REPO_NODE_LABEL_UNMODIFIED_SHARED_IDS', 'unmodified');
+
+//-----------------------------------------------------------------------------
+// Merge map
+define('REPO_NODE_LABEL_MERGED_NODES', 'merged_nodes');
+define('REPO_NODE_LABEL_VERTEX_MAP', 'v_map');
+define('REPO_NODE_LABEL_TRIANGLE_MAP', 't_map');
+define('REPO_NODE_LABEL_MERGE_MAP_MESH_ID', 'map_id');
+define('REPO_NODE_LABEL_MERGE_MAP_MATERIAL_ID', 'mat_id');
+define('REPO_NODE_LABEL_MERGE_MAP_FROM', 'from');
+define('REPO_NODE_LABEL_MERGE_MAP_TO', 'to');
+define('REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM', 'v_from');
+define('REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO', 'v_to');
+define('REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_FROM', 't_from');
+define('REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO', 't_to');
+define('REPO_NODE_LABEL_COMBINED_MAP', 'm_map');
+define('REPO_NODE_LABEL_MERGE_MAP_OFFSET', 'offset');
+
+//-----------------------------------------------------------------------------
+// X3DOM defines
+define('X3DOM_SRC_BYTE', 5120);
+define('X3DOM_SRC_UBYTE', 5121);
+define('X3DOM_SRC_SHORT', 5122);
+define('X3DOM_SRC_USHORT', 5123);
+define('X3DOM_SRC_INT', 5124);
+define('X3DOM_SRC_UINT', 5125);
+define('X3DOM_SRC_FLOAT', 5126);
+define('X3DOM_SRC_TRIANGLE', 4);
 
 //-----------------------------------------------------------------------------
 // Following fields are not stored in the repository,

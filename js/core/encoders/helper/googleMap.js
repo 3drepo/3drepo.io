@@ -68,7 +68,7 @@ module.exports.addGoogleTiles = function(xmlDoc, width, yrot, worldTileSize, cen
 			var tileLat = (2 * Math.atan(Math.exp(((tileCentY / nTiles) - 128) / -(256 / (2 * Math.PI)))) - Math.PI / 2) / (Math.PI / 180);
 			var tileLong = ((tileCentX / nTiles) - 128) / (256 / 360);
 
-			var googleMapsURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + tileLat + "," + tileLong + "&size=" + googleTileSize + "x" + googleTileSize + "&zoom=" + zoom + "&key=" + config.googleApiKey + "&maptype=" + maptype;
+			var googleMapsURL = "https://maps.googleapis.com/maps/api/staticmap?center=" + tileLat + "," + tileLong + "&size=" + googleTileSize + "x" + googleTileSize + "&zoom=" + zoom + "&key=" + config.google_api_key + "&maptype=" + maptype;
 			var app = xmlDoc.createElement('Appearance');
 
 			if (twosided)
