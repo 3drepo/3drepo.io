@@ -383,13 +383,13 @@
 
 				srcJSON.meshes[meshID].meta               = {};
 				srcJSON.meshes[meshID].meta.idMap         = idMapID;
-				srcJSON.meshes[meshID].meta.subMeshLabels = subMeshKeys[subMesh];
+				srcJSON.meshes[meshID].meta.subMeshLabels = uuidToString(subMeshKeys[subMesh]);
 
 				srcJSON.meta.idMaps                      = {};
 				srcJSON.meta.idMaps[idMapID]             = {};
 				srcJSON.meta.idMaps[idMapID].bboxCenters = subMeshBBoxCenters[subMesh];
 				srcJSON.meta.idMaps[idMapID].bboxSizes   = subMeshBBoxSizes[subMesh];
-				srcJSON.meta.idMaps[idMapID].labels      = subMeshKeys[subMesh];
+				srcJSON.meta.idMaps[idMapID].labels      = uuidToString(subMeshKeys[subMesh]);
 
 				idMapWritePosition += srcJSON.bufferChunks[idMapBufferChunk].byteLength;
 			}
