@@ -195,9 +195,6 @@ angular.module('3drepo')
 
 				var t = scope.ctx.pickRect(scope.viewArea, 0, 0, scope.sceneWidth / scope.ps, scope.sceneHeight / scope.ps);
 
-				console.log(mat_view);
-				console.log(mat_scene);
-
 				scope.pixelData = scope.scene._webgl.fboPick.pixelData.slice(0);
 			}),
 
@@ -234,8 +231,6 @@ angular.module('3drepo')
 
 				line = scope.viewArea.calcViewRay(dragEndX, dragEndY, scope.cctowc);
 
-				console.log("DIST: " + dist + " LINE: " + line);
-
 				pickPos = line.pos.add(line.dir.multiply(dist * scope.sceneSize));
 
 				// get right pixel
@@ -258,9 +253,6 @@ angular.module('3drepo')
 
 				pickNorm = right.cross(up).normalize();
 				var pickObj = x3dom.nodeTypes.Shape.idMap.nodeID[objId];
-
-				console.log("PN: " + pickNorm.toGL());
-				console.log("PP: " + pickPos.toGL());
 
 				scope.currentSelected = pickObj;
 				scope.pickedPos       = pickPos;

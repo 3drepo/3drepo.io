@@ -470,6 +470,22 @@ exports.route = function(router)
 					{
 						if (mesh[C.REPO_NODE_LABEL_COMBINED_MAP])
 						{
+							console.log(mesh[C.REPO_NODE_LABEL_COMBINED_MAP]);
+
+							// First sort the combined map in order of vertex ID
+							mesh[C.REPO_NODE_LABEL_COMBINED_MAP].sort(function(left, right)
+							{
+								if (left[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] < right[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM])
+									return -1;
+								else if (left[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] > right[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]
+								)
+									return 1;
+								else
+									return 0;
+							});
+
+							console.log(mesh[C.REPO_NODE_LABEL_COMBINED_MAP]);
+
 							var subMeshes   = mesh[C.REPO_NODE_LABEL_COMBINED_MAP];
 							var subMeshKeys = mesh[C.REPO_NODE_LABEL_COMBINED_MAP].map(function (item) {
 								return item[C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]

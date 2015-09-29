@@ -265,9 +265,6 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			if ($("#model__mapPosition")[0])
 				$("#model__mapPosition")[0].parentNode._x3domNode._graph.needCulling = false;
 
-				console.log(x3dom.canvases[0].doc.downloadCount);
-				console.log(x3dom.canvases[1].doc.downloadCount);
-
 			self.downloadsLeft += (objEvent.target.querySelectorAll("[load]").length - 1);
 
 			if (!self.downloadsLeft)
