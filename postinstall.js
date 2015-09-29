@@ -40,7 +40,6 @@ var public_files = {
 		uibootstrap: '/public/js/external/ui-bootstrap-tpls-0.12.0.min.js',
 		showdownjs: '/public/js/external/showdown.min.js',
 		jqueryfancytree: '/public/js/external/jquery.fancytree-all.js',
-		x3dcontroller: '/public/js/x3dcontroller.js',
 		typeaheadjs: '/public/js/external/typeahead.bundle.js',
 		sliderjs: '/public/js/external/bootstrap-slider.js',
 		angularsliderjs: '/public/js/external/slider.js',

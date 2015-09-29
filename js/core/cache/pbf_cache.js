@@ -14,15 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+var constants    = require('../constants.js');
 var logIface     = require('../logger.js');
 var logger       = logIface.logger;
 var repoNodeMesh = require('../repoNodeMesh.js');
 var pbf_levels   = 10;
 
 function PBFCache() {
+	"use strict";
+	
 	this.pbfCache = {};
 
 	this.genPopCache = function(mesh) {
+		"use strict";
 
 		if (!(mesh['id'] in pbfCache)) {
 			var bbox             = repoNodeMesh.extractBoundingBox(mesh);
@@ -45,7 +50,7 @@ function PBFCache() {
 			var has_tex = false;
 
 			if ('uv_channels' in mesh) {
-				if (mesh['uv_channels_count'] == 2) {
+				if (mesh[C.REPO_NODE_LABEL_UV_CHANNELS_COUNT] == 2) {
 					logging.log('error', 'Only support two channels texture coordinates');
 					return null;
 				} else {

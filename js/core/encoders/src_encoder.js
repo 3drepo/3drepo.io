@@ -25,7 +25,7 @@
  * Render SRC format of a mesh
  *
  * @param {string} project - The name of the project containing the mesh
- * @param {RepoGraphScene} - Render all meshes contained in RepoGraphScene object.
+ * @param {RepoGraphScene} - Render all meshes contained in RepoGraphScene object. 
  * @param {string} tex_uuid - A string representing the tex_uuid attached to the mesh
  * @param {boolean} embedded_texture - Determines whether or not the texture data is embedded in the SRC.
  * @param {string} subformat - Subformat, currently for Multipart

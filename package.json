@@ -31,6 +31,7 @@
     "jade": "latest",
     "jquery": "latest",
     "jquery-ui": "latest",
+    "jshint": "^2.8.0",
     "json": "latest",
     "jsonschema": "latest",
     "jsonwebtoken": "latest",
@@ -57,5 +58,9 @@
     "socketio-wildcard": "^0.1.1",
     "winston": "latest",
     "xmldom": "latest"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "^0.11.3",
+    "jshint": "^2.8.0"
   }
 }

@@ -895,7 +895,12 @@ exports.getSIDMap = function(dbName, project, branch, revision, callback) {
 			for(var i = 0; i < doc.length; i++)
 				SIDMap[uuidToString(doc[i]["shared_id"])] = uuidToString(doc[i]["_id"]);
 
-			callback(responseCodes.OK, SIDMap);
+			var invSIDMap = {};
+
+			for(var i = 0; i < doc.length; i++)
+				invSIDMap[uuidToString(doc[i]["_id"])] = uuidToString(doc[i]["shared_id"]);
+
+			callback(responseCodes.OK, SIDMap, invSIDMap);
 		});
 	});
 };
@@ -1254,11 +1259,7 @@ exports.getObjectIssues = function(dbName, project, sids, number, onlyStubs, cal
 	if (onlyStubs)
 	{
 		projection = {
-			_id : 1,
-			name : 1,
-			deadline : 1,
-			position: 1,
-			parent: 1
+			comments: 0
 		}
 	}
 
@@ -1291,9 +1292,10 @@ exports.storeIssue = function(dbName, project, sid, owner, data, callback) {
 				if (err) return responseCodes.DB_ERROR(err);
 
 				// This is a new issue
-				data._id = stringToUUID(newID);
-				data.parent = stringToUUID(sid);
-				data.number = numIssues + 1;
+				data._id     = stringToUUID(newID);
+				data.created = (new Date()).getTime();
+				data.parent  = stringToUUID(sid);
+				data.number  = numIssues + 1;
 
 				if (!data.name)
 					data.name = 'Issue' + data.number;

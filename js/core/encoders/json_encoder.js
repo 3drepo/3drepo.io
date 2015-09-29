@@ -117,7 +117,7 @@ function processChild(child, branch, revision, account, project, selected, names
 function getMultiMap(dbInterface, account, project, branch, revision, err_callback)
 {
 	dbInterface.getScene(account, project, branch, revision, full, function(err, doc) {
-		err_callback(responseCode.OK, null);	
+		err_callback(responseCode.OK, null);
 	});
 }
 
@@ -388,11 +388,11 @@ exports.route = function(router)
 
 		var rid			= params.rid;
 
-		router.dbInterface.getSIDMap(account, project, null, rid, function (err, mapobj) {
+		router.dbInterface.getSIDMap(account, project, null, rid, function (err, mapobj, invMapObj) {
 			if (err.value)
 				err_callback(err);
 			else
-				err_callback(responseCodes.OK, {"map" : mapobj});
+				err_callback(responseCodes.OK, {"map" : mapobj, "invMap": invMapObj});
 		});
 	});
 
@@ -402,11 +402,11 @@ exports.route = function(router)
 
 		var	branch		= params.branch;
 
-		router.dbInterface.getSIDMap(account, project, branch, null, function (err, mapobj) {
+		router.dbInterface.getSIDMap(account, project, branch, null, function (err, mapobj, invMapObj) {
 			if (err.value)
 				err_callback(err);
 			else
-				err_callback(responseCodes.OK, {"map" : mapobj});
+				err_callback(responseCodes.OK, {"map" : mapobj, "invMap": invMapObj});
 		});
 	});
 
