@@ -163,6 +163,8 @@
 				subMeshArray[subMeshIDX]["num_faces"]    = runningFaceTotal;
 				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET] = subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
 
+				var runningIDX = 0;
+
 				for(var i = 0; i < subMeshArray.length; i++)
 				{
 					subMeshArray[i].idMapBuf                            = new Buffer(subMeshArray[i]["num_vertices"] * 4);
@@ -171,7 +173,7 @@
 					subMeshKeys[i]                                      = [];
 
 					for(var p = 0; p < subMeshArray[i]["idx_list"].length; p++)
-						subMeshKeys[i].push(mesh[C.REPO_NODE_LABEL_COMBINED_MAP][p][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]);
+						subMeshKeys[i].push(uuidToString(mesh[C.REPO_NODE_LABEL_COMBINED_MAP][p][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]));
 
 					// If this is multipart then generate the idMap
 					for(var j = 0; j < subMeshArray[i]["idx_list"].length; j++)
@@ -180,7 +182,7 @@
 						var map    = mesh[C.REPO_NODE_LABEL_COMBINED_MAP][mapIDX];
 
 						for(var k = map[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]; k < map[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO]; k++)
-							subMeshArray[i].idMapBuf.writeFloatLE(j, (k - subMeshArray[i][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET]) * 4);
+							subMeshArray[i].idMapBuf.writeFloatLE(runningIDX, (k - subMeshArray[i][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET]) * 4);
 
 						var bbox = mesh[C.REPO_NODE_LABEL_COMBINED_MAP][j]["bounding_box"];
 
@@ -191,6 +193,8 @@
 
 						subMeshBBoxCenters[i].push(bboxCenter);
 						subMeshBBoxSizes[i].push(bboxSize);
+
+						runningIDX += 1;
 					}
 				}
 			}
@@ -383,13 +387,13 @@
 
 				srcJSON.meshes[meshID].meta               = {};
 				srcJSON.meshes[meshID].meta.idMap         = idMapID;
-				srcJSON.meshes[meshID].meta.subMeshLabels = uuidToString(subMeshKeys[subMesh]);
+				srcJSON.meshes[meshID].meta.subMeshLabels = subMeshKeys[subMesh];
 
 				srcJSON.meta.idMaps                      = {};
 				srcJSON.meta.idMaps[idMapID]             = {};
 				srcJSON.meta.idMaps[idMapID].bboxCenters = subMeshBBoxCenters[subMesh];
 				srcJSON.meta.idMaps[idMapID].bboxSizes   = subMeshBBoxSizes[subMesh];
-				srcJSON.meta.idMaps[idMapID].labels      = uuidToString(subMeshKeys[subMesh]);
+				srcJSON.meta.idMaps[idMapID].labels      = subMeshKeys[subMesh];
 
 				idMapWritePosition += srcJSON.bufferChunks[idMapBufferChunk].byteLength;
 			}
