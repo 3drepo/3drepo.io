@@ -9,6 +9,10 @@ block content
 			label.control-label.col-sm-2(for="issuename") Issue name:
 			.col-sm-10
 				input.form-control#issuename(type='text', ng-model='params.name', ng-required='true')
+		.form-group
+			label.control-label.col-sm-2(for="deadline") Deadline:
+			.col-sm-10
+				input.form-control(type='date', datepicker-popup, ng-model='params.date', ng-required='true')
 block buttons
 	button.btn.btn-default(ng-click="ok()") Create
 

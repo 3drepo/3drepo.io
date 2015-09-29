@@ -32,14 +32,12 @@ angular.module('3drepo')
 		var account = StateManager.state.account;
 
 		var objectIDParts = object["id"].split("__");
-		var numIDParts    = objectIDParts.length;
-
-		var project = objectIDParts[numIDParts - 2];
+		var project = objectIDParts[1];
 
 		if (project == "model")
 			project = StateManager.state.project;
 
-		var uid = objectIDParts[numIDParts - 1];
+		var uid = objectIDParts[2];
 		var baseUrl = serverConfig.apiUrl(account + '/' + project + '/meta/' + uid + '.json');
 
 		if (!self.loading)

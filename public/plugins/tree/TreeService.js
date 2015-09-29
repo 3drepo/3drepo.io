@@ -121,7 +121,7 @@ angular.module('3drepo')
 	}
 
 	this.onPartSelected = function(objEvent) {
-		//debugger;
+		debugger;
 	}
 
 	this.wasPartSelect = false;

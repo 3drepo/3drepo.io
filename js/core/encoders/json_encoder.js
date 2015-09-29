@@ -117,7 +117,7 @@ function processChild(child, branch, revision, account, project, selected, names
 function getMultiMap(dbInterface, account, project, branch, revision, err_callback)
 {
 	dbInterface.getScene(account, project, branch, revision, full, function(err, doc) {
-		err_callback(responseCode.OK, null);
+		err_callback(responseCode.OK, null);	
 	});
 }
 
@@ -388,11 +388,11 @@ exports.route = function(router)
 
 		var rid			= params.rid;
 
-		router.dbInterface.getSIDMap(account, project, null, rid, function (err, mapobj, invMapObj) {
+		router.dbInterface.getSIDMap(account, project, null, rid, function (err, mapobj) {
 			if (err.value)
 				err_callback(err);
 			else
-				err_callback(responseCodes.OK, {"map" : mapobj, "invMap": invMapObj});
+				err_callback(responseCodes.OK, {"map" : mapobj});
 		});
 	});
 
@@ -402,11 +402,11 @@ exports.route = function(router)
 
 		var	branch		= params.branch;
 
-		router.dbInterface.getSIDMap(account, project, branch, null, function (err, mapobj, invMapObj) {
+		router.dbInterface.getSIDMap(account, project, branch, null, function (err, mapobj) {
 			if (err.value)
 				err_callback(err);
 			else
-				err_callback(responseCodes.OK, {"map" : mapobj, "invMap": invMapObj});
+				err_callback(responseCodes.OK, {"map" : mapobj});
 		});
 	});
 
@@ -470,22 +470,6 @@ exports.route = function(router)
 					{
 						if (mesh[C.REPO_NODE_LABEL_COMBINED_MAP])
 						{
-							console.log(mesh[C.REPO_NODE_LABEL_COMBINED_MAP]);
-
-							// First sort the combined map in order of vertex ID
-							mesh[C.REPO_NODE_LABEL_COMBINED_MAP].sort(function(left, right)
-							{
-								if (left[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] < right[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM])
-									return -1;
-								else if (left[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] > right[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]
-								)
-									return 1;
-								else
-									return 0;
-							});
-
-							console.log(mesh[C.REPO_NODE_LABEL_COMBINED_MAP]);
-
 							var subMeshes   = mesh[C.REPO_NODE_LABEL_COMBINED_MAP];
 							var subMeshKeys = mesh[C.REPO_NODE_LABEL_COMBINED_MAP].map(function (item) {
 								return item[C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]

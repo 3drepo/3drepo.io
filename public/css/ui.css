@@ -382,16 +382,19 @@ span.fancytree-title:hover {
 	background-color: transparent;
 }
 
-floating {
+.floatingMeta {
     font-family: sans-serif;
-	color: red;
+	color: white;
 	font-weight: 100;
+	padding: 6px;
+	margin:  2px;
 	text-align: center;
+	background-color: rgba(0, 0, 0, 0.5);
 	position: absolute;
-	cursor: pointer;
-	pointer-events: none;
-	border:   none;
+	border:   none
 	z-index:   15000;
+	min-width:    70px;
+	min-height:   1px;
 	left:     0px;
 	top:      0px;
 }
