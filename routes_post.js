@@ -156,7 +156,7 @@ module.exports = function(router, dbInterface, checkAccess){
                     logger.log('error' , 'Failed to create a channel to ' + config.cn_queue.host);
                 }
                 //structure is import file database project [config]
-                var msg = 'import ' + filePath + ' ' + req.body.databaseName + ' ' + req.body.projectName;
+                var msg = 'import ' + filePath + ' ' + req.body.databaseName + ' ' + req.body.projectName + ' ' + req.params["account"];
                 
                 //initiate callback queue
                 ch.assertQueue('', { exclusive: true }, function (err, q) {
