@@ -26,3 +26,6 @@ prototype/OSTFed.txt
 
 sessions
 
+#Visual Studio junk
+*.njsproj
+*.suo

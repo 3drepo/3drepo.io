@@ -87,6 +87,13 @@ module.exports = function() {
 			"complete" : { "type": "boolean" }
 		}
 	);
+    
+    this.registerSchema('/:account/upload',
+        {
+           "databaseName" : {"type" : "string"}, 
+           "projectName" : {"type" : "string"}
+     }
+    );
 
 	this.registerSchema('/:account/:project/wayfinder/record',
 		{

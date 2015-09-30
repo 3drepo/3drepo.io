@@ -24,6 +24,7 @@ var log_iface = require('./js/core/logger.js');
 var logger = log_iface.logger;
 var responseCodes = require('./js/core/response_codes.js');
 var config = require('./js/core/config.js');
+var amqp = require('amqplib/callback_api');
 
 function createSession(place, res, req, user)
 {
@@ -31,7 +32,7 @@ function createSession(place, res, req, user)
 		if(err)
 			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {account: user.username});
 		else
-		{
+	{	
 			logger.log('debug', 'Authenticated ' + user.username + ' and signed token.')
 			req.session.user = user;
 			responseCodes.respond(place, responseCodes.OK, res, {account: user.username});
@@ -125,7 +126,61 @@ module.exports = function(router, dbInterface, checkAccess){
 				}
 			}
 		});
-	});
+    });
+    
+    
+    //upload and import file into repo world
+    this.post('/:account/upload', false, function (req, res) {
+        var responsePlace = 'Uploading a new model';
+        logger.log('debug', 'Uploading a new model by ' + req.params["account"] + ' to ' + req.body.databaseName + '.' + req.body.projectName);
+
+
+        //TODO: file path should be generated from gettin gthe file from request and moving it to the shared storage
+        var filePath = 'C:/Users/Carmen/Desktop/models/suzanne-cameras-non-identity.dae';
+        
+        
+        logger.log('debug', 'importing ' + filePath + ' to ' + req.body.databaseName + '.' + req.body.projectName);
+        //TODO: we may want to put this code somewhere else...
+        amqp.connect(config.cn_queue.host, function (err, conn) {
+            if (err == null) {
+                logger.log('debug', 'established connection to ' + config.cn_queue.host);
+            }
+            else {
+                logger.log('error' , 'Failed to establish connection to ' + config.cn_queue.host);
+            }
+            conn.createChannel(function (err, ch) {
+                if (err == null) {
+                    logger.log('debug', 'created channel in' + config.cn_queue.host);
+                }
+                else {
+                    logger.log('error' , 'Failed to create a channel to ' + config.cn_queue.host);
+                }
+                //structure is import file database project [config]
+                var msg = 'import ' + filePath + ' ' + req.body.databaseName + ' ' + req.body.projectName;
+                
+                //initiate callback queue
+                ch.assertQueue('', { exclusive: true }, function (err, q) {
+                    //FIXME: There must be a generate UUID somewhere...
+                    var corr = Math.random().toString() + Math.random().toString() + Math.random().toString();
+                    
+                    ch.consume(q.queue, function (rep) {
+                        //consume callback
+                        logger.log('info', 'Upload request returned: ' + rep.content.toString());
+                        setTimeout(function () { conn.close();}, 500);
+                    }, { noAck: true });
+                    
+                    //Send request to queue
+                    ch.sendToQueue(config.cn_queue.worker_queue, new Buffer(msg), { correlationId: corr, replyTo: q.queue, persistent: true });
+                    logger.log('info', 'Sent work to queue: ' + msg.toString());
+
+                });
+		
+
+            });
+        });
+
+        res.json({ "user": req.params["account"], "database" : req.body.databaseName, "project" : req.body.projectName });
+    });
 
 	// Update or create a user's account
 	//this.post('/:account/:project', false, function(req, res) {
@@ -181,6 +236,7 @@ module.exports = function(router, dbInterface, checkAccess){
 			responseCodes.onError(responsePlace, err, res, result);
 		});
 	});
+
 
 	// Register handlers with Express Router
 	for(var idx in this.postMap)
