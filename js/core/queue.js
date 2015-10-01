@@ -55,24 +55,25 @@ function dispatchWork(corID, msg, callback){
             else {
                 logger.log('error' , 'Failed to create a channel to ' + config.cn_queue.host);
             }
-                      
+                    
             //initiate callback queue
-            ch.assertQueue(config.cn_queue.callback_queue, { exclusive: true }, function (err, q) {
+            ch.assertQueue(config.cn_queue.callback_queue, { durable: true }, function (err, q) {
                 
-                ch.consume(q.queue, function (rep) {
+                ch.consume(config.cn_queue.callback_queue, function (rep) {
                     //consume callback
-                    if (corID == rep.properties.correlationId) {
-                        logger.log('info', 'Upload request id ' + corID + 'returned: ' + rep.content.toString());
-                        callback(rep.content.toString());
+                    if (this.corID == rep.properties.correlationId) {
+                        logger.log('info', 'Upload request id ' + this.corID + 'returned: ' + rep.content.toString());
+                       callback(rep.content.toString());
                     }
                     else {
-                        logger.log('info', '[NOT MATCHED]Upload request id ' + rep.correlationId + ' returned: ' + rep.content.toString());
+                        logger.log('info', '[UNMATCHED]Upload request id ' + this.corID + 'returned: ' + rep.properties.correlationId);
                     }
                 }, { noAck: true });
                 
+                this.corID = corID;
                 //Send request to queue
-                ch.sendToQueue(config.cn_queue.worker_queue, new Buffer(msg), { correlationId: corID, replyTo: q.queue, persistent: true });
-                logger.log('info', 'Sent work to queue: ' + msg.toString() + ' with corr id: ' + corID.toString() + ' reply queue: ' + q.queue);
+                ch.sendToQueue(config.cn_queue.worker_queue, new Buffer(msg), { correlationId: corID, replyTo: config.cn_queue.callback_queue, persistent: true });
+                logger.log('info', 'Sent work to queue: ' + msg.toString() + ' with corr id: ' + corID.toString() + ' reply queue: ' + config.cn_queue.callback_queue);
 
             });
 		
@@ -102,14 +103,26 @@ function moveFileToSharedSpace(corID, orgFilePath, newFileName, callback) {
     });
 }
 
-
+/*******************************************************************************
+ * Dispatch work to queue to import a model via a file uploaded by User
+ * @param {filePath} filePath - Path to uploaded file
+ * @param {orgFileName} orgFileName - Original file name of the file
+ * @param {databaseName} databaseName - name of database to commit to
+ * @param {projectName} projectName - name of project to commit to
+ * @param {userName} userName - name of user
+ * @param {callback} callback - callback(status)
+ *******************************************************************************/
 exports.importFile = function (filePath, orgFileName, databaseName, projectName, userName, callback) {
     //structure is import file database project [owner] [config]
     var corID = uuid.v1();
     
     moveFileToSharedSpace(corID, filePath, orgFileName, function (err, newPath) {
         var msg = 'import ' + newPath + ' ' + databaseName + ' ' + projectName + ' ' + userName;
-        dispatchWork(corID, msg, function(status) {
+        dispatchWork(corID, msg, function (status) {
+            //delete the file from shared space
+            fs.remove(config.cn_queue.sharedSpace + "/" + this.corID);
+            //FIXME: remove space No worky yet.
+            
             if(callback) callback(status);
         });
     });
