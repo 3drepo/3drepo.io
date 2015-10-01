@@ -24,10 +24,9 @@ var log_iface = require('./js/core/logger.js');
 var logger = log_iface.logger;
 var responseCodes = require('./js/core/response_codes.js');
 var config = require('./js/core/config.js');
-var amqp = require('amqplib/callback_api');
-var uuid = require('node-uuid');
+var queue = require('./js/core/queue.js');
 var multer = require('multer');
-var fs = require('fs.extra');
+var upload = multer({ dest: './uploads/' });
 
 function createSession(place, res, req, user)
 {
@@ -136,82 +135,16 @@ module.exports = function(router, dbInterface, checkAccess){
     this.post('/:account/upload', false, function (req, res) {
         var responsePlace = 'Uploading a new model';
         
-        multer( {
-                dest: './uploads/',       
-                onFileUploadStart: function (file) {
-                    console.log(file.originalname + ' is starting ...');
-                },
-                onFileUploadComplete: function (file) {
-                    console.log(file.fieldname + ' uploaded to  ' + file.path)
-                    done = true;
-                }
-            }).single('file')(req, res, function (err) {
+        upload.single('file')(req, res, function (err) {
             if (err) {
                 logger.log('debug', 'error: ' + err);
             }
             else {                
-                var corr = uuid.v1();
-                //move the file to shared storage space defined in config.js, put it in a folder + rename it back to original
-                //note: using mv instead of rename as rename doesn't allow cross device
-                var newFileDir = config.cn_queue.storage + "/" + corr + "/";
-                var filePath = newFileDir + req.file.originalname;
-                  
-                fs.mkdir(newFileDir, function (err) {
-                    fs.move(req.file.path, filePath, function (err) {
-                        if (err)
-                            console.log('error moving file: ' + err);
-                        else {
-                            logger.log('debug', 'importing ' + filePath + ' to ' + req.body.databaseName + '.' + req.body.projectName);
-
-                           amqp.connect(config.cn_queue.host, function (err, conn) {
-                                if (err == null) {
-                                    logger.log('debug', 'established connection to ' + config.cn_queue.host);
-                                }
-                                else {
-                                    logger.log('error' , 'Failed to establish connection to ' + config.cn_queue.host);
-                                }
-                                conn.createChannel(function (err, ch) {
-                                    if (err == null) {
-                                        logger.log('debug', 'created channel in' + config.cn_queue.host);
-                                    }
-                                    else {
-                                        logger.log('error' , 'Failed to create a channel to ' + config.cn_queue.host);
-                                    }
-                                    //structure is import file database project [owner] [config]
-                                    var msg = 'import ' + filePath + ' ' + req.body.databaseName + ' ' + req.body.projectName + ' ' + req.params["account"];
-                
-                                    //initiate callback queue
-                                    ch.assertQueue('', { exclusive: true }, function (err, q) {
-                                        var corr = uuid.v1();
-                    
-                                        ch.consume(q.queue, function (rep) {
-                                            //consume callback
-                                            logger.log('info', 'Upload request returned: ' + rep.content.toString());
-                                            setTimeout(function () { conn.close();}, 500);
-                                        }, { noAck: true });
-                    
-                                        //Send request to queue
-                                        ch.sendToQueue(config.cn_queue.worker_queue, new Buffer(msg), { correlationId: corr, replyTo: q.queue, persistent: true });
-                                        logger.log('info', 'Sent work to queue: ' + msg.toString() + ' with corr id: ' + corr.toString() + ' reply queue: ' + q.queue);
-
-                                    });
-		
-
-                                });
-                            });
-
-                            
-                            res.json({ "user": req.params["account"], "database" : req.body.databaseName, "project" : req.body.projectName });
-                        }
-                    });
-
-                });
-                
-            }
-            
+                queue.importFile(req.file.path, req.file.originalname, req.body.databaseName, req.body.projectName, req.params["account"]);
+                res.json({ "user": req.params["account"], "database" : req.body.databaseName, "project" : req.body.projectName });
+              
+            }            
         });
-       
-
     });
 
 	// Update or create a user's account
