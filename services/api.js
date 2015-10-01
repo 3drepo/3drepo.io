@@ -39,6 +39,7 @@ module.exports.app = function (sharedSession) {
 	app.use(bodyParser.urlencoded({
 		extended: true
 	}));
+
 	app.use(bodyParser.json());
 
 	app.use(compress());
@@ -49,7 +50,9 @@ module.exports.app = function (sharedSession) {
 		var allowCrossDomain = function(req, res, next) {
 			logger.log("info", "Allowing cross origin ...");
 
-			res.header("Access-Control-Allow-Origin", "*");
+			console.log("REQ: " + req.method);
+
+			res.header("Access-Control-Allow-Origin", req.get('origin'));
 			res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
 			res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, Content-Length, X-Requested-With");
 			res.header("Access-Control-Allow-Credentials", true);
