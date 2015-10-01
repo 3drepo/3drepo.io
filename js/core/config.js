@@ -85,8 +85,6 @@ var fillInServerDetails = function(serverObject, name, usingIP, using_ssl, host,
 		}
 	}
 
-
-
 	if (applyName)
 	{
 		// Is this a subdomain or a directory
@@ -141,7 +139,7 @@ for(i in config.servers)
 // If the API server is running on a subdirectory, config.subdirectory will be true
 // If the API server is running different subdomain it will require virtual hosts
 // If both these are set to false then you enter advanced mode (see 3drepo.js)
-config.subdirectory = coalesce(config.crossOrigin, config.api_server.sub_domain_or_dir === 1);
+config.subdirectory = coalesce(config.subdirectory, config.api_server.sub_domain_or_dir === 1);
 config.vhost        = coalesce(config.vhost, config.api_server.sub_domain_or_dir === 0);
 
 // Database configuration
