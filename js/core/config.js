@@ -72,7 +72,8 @@ var fillInServerDetails = function(serverObject, name, usingIP, using_ssl, host,
 	serverObject.sub_domain_or_dir = coalesce(serverObject.sub_domain_or_dir, 1);
 	serverObject.http_port         = coalesce(serverObject.http_port, default_http_port);
 	serverObject.https_port        = coalesce(serverObject.https_port, default_https_port);
-	serverObject.public_port       = coalesce(serverObject.public_port, using_ssl ? serverObject.https_port : serverObject.http_port);
+	serverObject.port              = coalesce(serverObject.port, using_ssl ? serverObject.https_port : serverObject.http_port);
+	serverObject.public_port       = coalesce(serverObject.public_port, serverObject.port);
 	serverObject.public_protocol   = coalesce(serverObject.public_protocol, using_ssl ? "https" : "http");
 
 	// Have to use subdirectory with an IP address
@@ -84,29 +85,33 @@ var fillInServerDetails = function(serverObject, name, usingIP, using_ssl, host,
 		}
 	}
 
-	// Are we using ssl
-	serverObject.port = using_ssl ? coalesce(serverObject.https_port, default_https_port) : coalesce(serverObject.http_port, default_http_port);
 
-	// If we don't have a hostname, we should construct one
-	if (!serverObject.hostname)
+
+	if (applyName)
 	{
-		if (applyName)
+		// Is this a subdomain or a directory
+		if (!serverObject.sub_domain_or_dir)
 		{
-			// Is this a subdomain or a directory
-			if (!serverObject.sub_domain_or_dir)
-			{
-				// Sub-domain
+			// Sub-domain
+			if (!serverObject.hostname) {
 				serverObject.hostname = serverObject.name + "." + host;
-				serverObject.host_dir = "";
-			} else {
-				// Sub-directory
-				serverObject.hostname = host;
-				serverObject.host_dir = serverObject.name;
 			}
-		} else {
-			serverObject.hostname = host;
+
 			serverObject.host_dir = "";
+		} else {
+			// Sub-directory
+			if (!serverObject.hostname) {
+				serverObject.hostname = host;
+			}
+
+			serverObject.host_dir = serverObject.name;
 		}
+	} else {
+		if (!serverObject.hostname) {
+			serverObject.hostname = host;
+		}
+
+		serverObject.host_dir = "";
 	}
 
 	serverObject.base_url = serverObject.public_protocol + "://" + serverObject.hostname + ":" + serverObject.public_port;

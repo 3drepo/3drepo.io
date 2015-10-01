@@ -202,10 +202,10 @@ var Oculus = function(viewer) {
 
 			if (h)
 			{
-				var vp	= self.viewer.currentViewpoint;
+				var vp = self.viewer.getCurrentViewpoint()._x3domNode;
+				var flyMat	= vp.getViewMatrix().inverse();
 				var q	= new x3dom.fields.Quaternion(h.x, h.y, h.z, h.w);
 
-				var flyMat	= vp.getViewMatrix().inverse();
 				flyMat.setRotate(q);
 				vp.setView(flyMat.inverse());
 			}
