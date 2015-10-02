@@ -36,7 +36,9 @@ angular.module('3drepo')
 	self.currentOpenIssue = null;
 	self.expanded         = {};
 
-	self.mapPromise       = null;
+	var mapDeferred       = $q.defer();
+	var mapResolved       = false;
+	self.mapPromise       = mapDeferred.promise;
 
 	self.IDMap            = {};
 	self.SIDMap           = {};
@@ -381,17 +383,16 @@ angular.module('3drepo')
 				else
 					var baseUrl = serverConfig.apiUrl(account + '/' + project + '/revision/' + revision + '/map.json');
 
-				if (!self.mapPromise) {
-					self.mapPromise = $q.defer();
-
+				if (!mapResolved) {
 					$http.get(baseUrl)
 					.then(function(json) {
 						self.SIDMap = json.data["map"];
 						self.IDMap  = json.data["invMap"];
 
-						self.mapPromise.resolve();
+						mapResolved = true;
+						mapDeferred.resolve();
 					}, function (message) {
-						self.mapPromise.reject();
+						mapDeferred.reject();
 					});
 				}
 

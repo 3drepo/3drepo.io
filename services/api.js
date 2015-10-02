@@ -48,10 +48,6 @@ module.exports.app = function (sharedSession) {
 	if (config.crossOrigin)
 	{
 		var allowCrossDomain = function(req, res, next) {
-			logger.log("info", "Allowing cross origin ...");
-
-			console.log("REQ: " + req.method);
-
 			res.header("Access-Control-Allow-Origin", req.get('origin'));
 			res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
 			res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, Content-Length, X-Requested-With");
