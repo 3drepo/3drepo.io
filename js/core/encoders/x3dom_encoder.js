@@ -25,7 +25,6 @@ var xmlSerial	 = xmlDom.XMLSerializer;
 var config		 = require('../config.js');
 var logIface	 = require('../logger.js');
 var logger		 = logIface.logger;
-var sem			 = require('semaphore')(10);
 var popCache	 = require('../cache/pbf_cache.js');
 
 var googleMaps	 = require('./helper/googleMap.js');
