@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+var _       = require('underscore');
 var winston = require('winston');
 var config = require('./config.js');
 

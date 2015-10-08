@@ -18,7 +18,6 @@
 var express = require('express');
 var config = require('../js/core/config.js');
 var bodyParser = require('body-parser');
-var methodOverride = require('method-override');
 var compress = require('compression');
 var fs = require('fs');
 var jade = require('jade');

@@ -57,7 +57,7 @@ exports.encode = function(camera, root_shared_id) {
     repo_camera[C.REPO_NODE_LABEL_NAME] = camera.name ? camera.name : "camera";
 
     // TODO: add camera hash appendix
-    repo_camera[C.REPO_NODE_LABEL_SHARED_ID] = Utils.hashTextToUUID(repo_camera[C.REPO_NODE_LABEL_NAME]);
+    repo_camera[C.REPO_NODE_LABEL_SHARED_ID] = Utils.generateUUID();
     repo_camera[C.REPO_NODE_LABEL_API] = 1;	
     repo_camera[C.REPO_NODE_LABEL_TYPE] = C.REPO_NODE_TYPE_CAMERA;
 

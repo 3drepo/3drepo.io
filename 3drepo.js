@@ -127,7 +127,7 @@ if (config.vhost)
 } else {
 	// This is an advanced configuration, which allows for different ports
 	// and/or different hosts currently this won't be automatically detected
-	// so you would have to set manually in config crossOrigin and vhost to false
+	// so you would have to set manually in config subdirectory and vhost to false
 	var vhostApp = express();
 
 	if (!config.api_server.external)

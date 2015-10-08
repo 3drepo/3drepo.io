@@ -16,18 +16,13 @@
  */
 
 var express = require('express');
-var bCrypt = require('bcrypt-nodejs');
 var log_iface = require('./js/core/logger.js');
 var logger = log_iface.logger;
-//var login = require('connect-ensure-login');
+
 var config = require('./js/core/config.js');
 var package_json = require('./package.json');
 
 var imgEncoder = require('./js/core/encoders/img_encoder.js');
-
-var expressJwt = require('express-jwt');
-var jwt = require('jsonwebtoken');
-
 var responseCodes = require('./js/core/response_codes.js');
 
 var secret = 'secret';

@@ -22,7 +22,6 @@
     // Dependencies
     var UUID = require('node-uuid');
     var mongodb = require('mongodb');
-    var Crypto = require('crypto');
 
     // Shortcuts
     var Binary = mongodb.Binary;
@@ -48,14 +47,7 @@
     //-------------------------------------------------------------------------
     // Returns a new binary uuid suitable for DB insertion (level 3)
     ns.generateUUID = function() {
-	return ns.stringToUUID(UUID.v4()); 		
-    };
-
-    //-------------------------------------------------------------------------
-    // Hashes (md5) given text into a uuid
-    ns.hashTextToUUID = function(text) {
-        var hash = Crypto.createHash('md5').update(text).digest('hex');
-        return ns.stringToUUID(hash);
+	return ns.stringToUUID(UUID.v4());
     };
 
     //-------------------------------------------------------------------------
@@ -63,12 +55,5 @@
     ns.uuidToString = function(uuid) {
 	return UUID.unparse(uuid.buffer);
     };
-
-    //-------------------------------------------------------------------------
-    ns.setCacheHeaders = function(res) {
-        var expires = new Date((new Date()).valueOf() + expiryTime);
-        res.setHeader("Cache-Control", "public, max-age=345600");
-        res.setHeader("Expires", expires.toUTCString());
-    }
 
 }(exports));

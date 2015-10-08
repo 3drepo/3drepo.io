@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-var extend = require("node.extend");
+var _ = require("underscore");
 
 function containsString(value)
 {
@@ -82,14 +82,14 @@ function searchFunction(dbInterface, queryParams, callback)
 		{
 			if(err) return callback(err);
 
-			callback(null, extend(json, userJson));
+			callback(null, _.extend(json, userJson));
 		});
 	} else if (companyName) {
 		searchCompanies(userCompanyName, start, end, function (err, companyJson)
 		{
 			if(err) return callback(err);
 
-			callback(null, extend(json, companyJson));
+			callback(null, _.extend(json, companyJson));
 		});
 	} else if (userCompanyName) {
 		searchUsers(userCompanyName, start, end, function(err, userJson)
@@ -100,7 +100,7 @@ function searchFunction(dbInterface, queryParams, callback)
 			{
 				if(err) return callback(err);
 
-				callback(null, extend(json, extend(companyJson, userJson)));
+				callback(null, _.extend(json, _.extend(companyJson, userJson)));
 			});
 		});
 	}

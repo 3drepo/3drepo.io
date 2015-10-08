@@ -909,6 +909,13 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			if (self.currentNavMode == 'WAYFINDER') // Exiting the wayfinding mode
 				waypoint.close();
 
+			if (mode == 'HELICOPTER')
+			{
+				var eye = self.getCurrentViewpointInfo()["position"];
+				self.nav._x3domNode._vf.typeParams[0] = 0.0;
+				self.nav._x3domNode._vf.typeParams[1] = eye[1];
+			}
+
 			self.currentNavMode = mode;
 			self.nav.setAttribute('type', mode);
 
@@ -994,6 +1001,14 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 		var viewMatrix = x3dom.fields.SFMatrix4f.lookAt(x3domFrom, x3domAt, x3domUp).inverse();
 		var currMatrix = self.getCurrentViewpoint()._x3domNode;
+
+		if (self.currentNavMode == 'HELICOPTER')
+		{
+			var angle = Math.acos(x3domUp.y);
+
+			self.nav._x3domNode._vf.typeParams[0] = angle;
+			self.nav._x3domNode._vf.typeParams[1] = x3domFrom.y;
+		}
 
 		self.getViewArea().animateTo(viewMatrix, currMatrix);
 

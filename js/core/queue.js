@@ -62,8 +62,9 @@ function dispatchWork(corID, msg, callback){
                 ch.consume(config.cn_queue.callback_queue, function (rep) {
                     //consume callback
                     if (this.corID == rep.properties.correlationId) {
-                        logger.log('info', 'Upload request id ' + this.corID + 'returned: ' + rep.content.toString());
-                       callback(rep.content.toString());
+                        callback(rep.content.toString());
+                        logger.log('info', 'Upload request id ' + this.corID + ' returned: ' + rep.content.toString());
+
                     }
                     else {
                         logger.log('info', '[UNMATCHED]Upload request id ' + this.corID + 'returned: ' + rep.properties.correlationId);
@@ -118,11 +119,7 @@ exports.importFile = function (filePath, orgFileName, databaseName, projectName,
     
     moveFileToSharedSpace(corID, filePath, orgFileName, function (err, newPath) {
         var msg = 'import ' + newPath + ' ' + databaseName + ' ' + projectName + ' ' + userName;
-        dispatchWork(corID, msg, function (status) {
-            //delete the file from shared space
-            fs.remove(config.cn_queue.sharedSpace + "/" + this.corID);
-            //FIXME: remove space No worky yet.
-            
+        dispatchWork(corID, msg, function (status) {          
             if(callback) callback(status);
         });
     });

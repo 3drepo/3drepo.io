@@ -139,9 +139,12 @@ module.exports = function(router, dbInterface, checkAccess){
             if (err) {
                 logger.log('debug', 'error: ' + err);
             }
-            else {                
-                queue.importFile(req.file.path, req.file.originalname, req.body.databaseName, req.body.projectName, req.params["account"]);
-                res.json({ "user": req.params["account"], "database" : req.body.databaseName, "project" : req.body.projectName });
+            else {
+                queue.importFile(req.file.path, req.file.originalname, req.body.databaseName, req.body.projectName, req.params["account"], function (status) {
+                    res.json({ "user": req.params["account"], "database" : req.body.databaseName, "project" : req.body.projectName, "response" : status });
+
+                });                   
+
               
             }            
         });
