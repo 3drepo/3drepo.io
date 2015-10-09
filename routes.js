@@ -53,10 +53,11 @@ module.exports = function(){
 				var format = null;
 
 			var username = null;
-
+            
+            logger.log("debug", "session: " + JSON.stringify(req.session));
 			if ("user" in req.session)
 				username = req.session["user"].username;
-
+            
 			if (account && project)
 			{
 				accessFunc(username, account, project, function(err) {

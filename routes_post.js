@@ -26,7 +26,7 @@ var responseCodes = require('./js/core/response_codes.js');
 var config = require('./js/core/config.js');
 var queue = require('./js/core/queue.js');
 var multer = require('multer');
-var upload = multer({ dest: config.cn_queue.upload_dir});
+
 
 function createSession(place, res, req, user)
 {
@@ -126,20 +126,26 @@ module.exports = function (router, dbInterface, checkAccess) {
     //upload and import file into repo world
     this.post('/:account/:project/upload', true, function (req, res) {
         var responsePlace = 'Uploading a new model';
-        
-        upload.single('file')(req, res, function (err) {
-            if (err) {
-                logger.log('debug', 'error: ' + err);
-            }
-            else {
-                console.log("session: " , req.session);
-                queue.importFile(req.file.path, req.file.originalname, req.params["account"], req.params["project"], req.session.user, function (err) {
-                    logger.log("debug", "callback of importfile: " + err);
-                    responseCodes.onError(responsePlace, err, res, { "user": req.session.user.username, "database" : req.params["account"], "project": req.params["project"] });
+        if (config.cn_queue) {
+            var upload = multer({ dest: config.cn_queue.upload_dir });
+            upload.single('file')(req, res, function (err) {
+                if (err) {
+                    logger.log('debug', 'error: ' + err);
+                }
+                else {
+                    console.log("session: " , req.session);
+                    queue.importFile(req.file.path, req.file.originalname, req.params["account"], req.params["project"], req.session.user, function (err) {
+                        logger.log("debug", "callback of importfile: " + err);
+                        responseCodes.onError(responsePlace, err, res, { "user": req.session.user.username, "database" : req.params["account"], "project": req.params["project"] });
 
-                });
-           }            
-        });
+                    });
+                }
+            });
+        }
+        else {
+            responseCodes.onError(responsePlace, responseCodes.QUEUE_NO_CONFIG, res, { "user": req.session.user.username, "database" : req.params["account"], "project": req.params["project"] });
+        }
+
     });
 
 	// Update or create a user's account
