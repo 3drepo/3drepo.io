@@ -67,7 +67,14 @@ var responseCodes = {
 
 	ISSUE_NOT_FOUND: { value: 27, message: 'Issue not found', status: 404},
 
-	HEAD_REVISION_NOT_FOUND: { value: 28, message: 'Head revision not found', status: 404 },
+    HEAD_REVISION_NOT_FOUND: { value: 28, message: 'Head revision not found', status: 404 },
+
+    FILE_IMPORT_PROCESS_ERR: { value: 29, message: 'Failed to process file: Unsupported file format?', status: 400 },
+    FILE_IMPORT_INVALID_ARGS: { value: 30, message: 'Failed to process file: Invalid arguments', status: 500 },
+    FILE_IMPORT_UNKNOWN_ERR: { value: 31, message: 'Failed to process file: Unknown error', status: 500 },
+    FILE_IMPORT_UNKNOWN_CMD: { value: 32, message: 'Failed to process file: Unknown command', status: 500 },
+
+
 
 	DB_ERROR: function(mongoErr) {
 		return {
@@ -95,7 +102,7 @@ var responseCodes = {
 
 };
 
-var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 1000, 2000, 3000];
+var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 29, 1000, 2000, 3000];
 
 responseCodes.respond = function(place, resCode, res, extraInfo)
 {
@@ -116,7 +123,6 @@ responseCodes.respond = function(place, resCode, res, extraInfo)
 
 		if (resCode.value)
 			logger.log('error', JSON.stringify(responseObject));
-
 		res.status(resCode.status).send(JSON.stringify(responseObject));
 	} else {
 		if(Buffer.isBuffer(extraInfo))

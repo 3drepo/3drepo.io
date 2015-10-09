@@ -42,92 +42,84 @@ function createSession(place, res, req, user)
 	});
 }
 
-module.exports = function(router, dbInterface, checkAccess){
-	this.postMap = [];
-
-	this.post = function(regex, shouldCheckAccess, callback) {
-		this.postMap.push({regex: regex, shouldCheckAccess: shouldCheckAccess, callback: callback});
-	};
-
-	// Log the user into the API
-	this.post('/login', false, function(req, res) {
-		var responsePlace = "Login POST";
-
-		this.dbInterface.authenticate(req.body.username, req.body.password, function(err, user)
-		{
-			logger.log('debug', 'Attempting to log user ' + req.body.username);
-
-			if(err.value) {
-				console.log("MESSAGE: " + err.message);
-				responseCodes.respond(responsePlace, err, res, {account: req.body.username});
-			} else {
-				if(user)
-				{
-					createSession(responsePlace, res, req, user);
-				} else {
-					responseCodes.respond(responsePlace, responseCodes.USER_NOT_FOUND, res, {account: req.body.username});
-				}
-			}
-		});
-	});
-
-	// Log the user out of the API
-	this.post('/logout', false, function(req, res) {
-		if(!req.session.user)
-		{
-			return responseCodes.respond("Logout POST", responseCodes.NOT_LOGGED_IN, res, {});
-		}
-
-		var username = req.session.user.username;
-
-		req.session.destroy(function() {
-			logger.log('debug', 'User ' + username + ' has logged out.')
-
-			responseCodes.respond("Logout POST", responseCodes.OK, res, {account: username});
-		});
-	});
-
-	// Update or create a user's account
-	this.post('/:account', false, function(req, res) {
-		var responsePlace = "Account POST";
-
-		logger.log("debug", "Trying to affect user" + req.params["account"]);
-
-		this.dbInterface.getUserInfo( req.params["account"], false, function (err, user)
-		{
-			if (!user)
-			{
-				// Trying to sign-up
-				logger.log("debug", "Trying to add user " + req.params["account"]);
-				this.dbInterface.createUser(req.params["account"], req.body.password, req.body.email, function(err) {
-					createSession(responsePlace, res, req, req.params["account"]);
-				});
-			} else {
-				if(!req.session.user)
-				{
-					return responseCodes.respond(responsePlace, responseCodes.NOT_LOGGED_IN, res, {});
-				}
-
-				if (req.session.user.username != req.params['account'])
-				{
-					responseCodes.respond(responsePlace, responseCodes.NOT_AUTHORIZED, res, {account: req.params["account"]});
-				} else {
-					// Modify account here
-					logger.log("debug", "Updating account for " + req.params["account"]);
-
-					if (req.body.oldPassword)
-					{
-						this.dbInterface.updatePassword(req.params["account"], req.body, function(err) {
-							responseCodes.onError(responsePlace, err, res, {account: req.params["account"]});
-						});
-					} else {
-						this.dbInterface.updateUser(req.params["account"], req.body, function(err) {
-							responseCodes.onError(responsePlace, err, res, {account: req.params["account"]});
-						});
-					}
-				}
-			}
-		});
+module.exports = function (router, dbInterface, checkAccess) {
+    this.postMap = [];
+    
+    this.post = function (regex, shouldCheckAccess, callback) {
+        this.postMap.push({ regex: regex, shouldCheckAccess: shouldCheckAccess, callback: callback });
+    };
+    
+    // Log the user into the API
+    this.post('/login', false, function (req, res) {
+        var responsePlace = "Login POST";
+        
+        this.dbInterface.authenticate(req.body.username, req.body.password, function (err, user) {
+            logger.log('debug', 'Attempting to log user ' + req.body.username);
+            
+            if (err.value) {
+                console.log("MESSAGE: " + err.message);
+                responseCodes.respond(responsePlace, err, res, { account: req.body.username });
+            } else {
+                if (user) {
+                    createSession(responsePlace, res, req, user);
+                } else {
+                    responseCodes.respond(responsePlace, responseCodes.USER_NOT_FOUND, res, { account: req.body.username });
+                }
+            }
+        });
+    });
+    
+    // Log the user out of the API
+    this.post('/logout', false, function (req, res) {
+        if (!req.session.user) {
+            return responseCodes.respond("Logout POST", responseCodes.NOT_LOGGED_IN, res, {});
+        }
+        
+        var username = req.session.user.username;
+        
+        req.session.destroy(function () {
+            logger.log('debug', 'User ' + username + ' has logged out.')
+            
+            responseCodes.respond("Logout POST", responseCodes.OK, res, { account: username });
+        });
+    });
+    
+    // Update or create a user's account
+    this.post('/:account', false, function (req, res) {
+        var responsePlace = "Account POST";
+        
+        logger.log("debug", "Trying to affect user" + req.params["account"]);
+        
+        this.dbInterface.getUserInfo(req.params["account"], false, function (err, user) {
+            if (!user) {
+                // Trying to sign-up
+                logger.log("debug", "Trying to add user " + req.params["account"]);
+                this.dbInterface.createUser(req.params["account"], req.body.password, req.body.email, function (err) {
+                    createSession(responsePlace, res, req, req.params["account"]);
+                });
+            } else {
+                if (!req.session.user) {
+                    return responseCodes.respond(responsePlace, responseCodes.NOT_LOGGED_IN, res, {});
+                }
+                
+                if (req.session.user.username != req.params['account']) {
+                    responseCodes.respond(responsePlace, responseCodes.NOT_AUTHORIZED, res, { account: req.params["account"] });
+                } else {
+                    // Modify account here
+                    logger.log("debug", "Updating account for " + req.params["account"]);
+                    
+                    if (req.body.oldPassword) {
+                        this.dbInterface.updatePassword(req.params["account"], req.body, function (err) {
+                            responseCodes.onError(responsePlace, err, res, { account: req.params["account"] });
+                        });
+                    } else {
+                        this.dbInterface.updateUser(req.params["account"], req.body, function (err) {
+                            responseCodes.onError(responsePlace, err, res, { account: req.params["account"] });
+                        });
+                    }
+                }
+            }
+        });
     });
     
     
@@ -140,13 +132,12 @@ module.exports = function(router, dbInterface, checkAccess){
                 logger.log('debug', 'error: ' + err);
             }
             else {
-                queue.importFile(req.file.path, req.file.originalname, req.body.databaseName, req.body.projectName, req.params["account"], function (status) {
-                    res.json({ "user": req.params["account"], "database" : req.body.databaseName, "project" : req.body.projectName, "response" : status });
+                queue.importFile(req.file.path, req.file.originalname, req.body.databaseName, req.body.projectName, req.params["account"], function (err) {
+                    logger.log("debug", "callback of importfile: " + err);
+                    responseCodes.onError(responsePlace, err, res, { "user": req.params["account"], "database" : req.body.databaseName, "project": req.body.projectName });
 
-                });                   
-
-              
-            }            
+                });
+           }            
         });
     });
 

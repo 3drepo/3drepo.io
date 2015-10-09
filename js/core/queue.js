@@ -25,11 +25,41 @@
 var amqp = require('amqplib/callback_api');
 var fs = require('fs.extra');
 var uuid = require('node-uuid');
-
+var responseCodes = require('./response_codes.js');
 var config = require('./config.js');
 var log_iface = require('./logger.js');
 var logger = log_iface.logger;
 
+/*******************************************************************************
+ * Converts error code from repobouncerclient to a response error object
+ * @param {errCode} - error code referenced in error_codes.h
+ *******************************************************************************/
+function convertToErrorCode(errCode){
+    logger.log("debug", "convert To response code: " + errCode);
+    var errObj;
+    switch (errCode) {
+        case 0:
+            errObj = responseCodes.OK;
+            break;
+        case 1:
+            errObj = responseCodes.FILE_IMPORT_INVALID_ARGS;
+            break;
+        case 2:
+            errObj = responseCodes.NOT_AUTHORIZED;
+            break;
+        case 3:
+            errObj = responseCodes.FILE_IMPORT_UNKNOWN_CMD;
+            break;
+        case 5:
+            errObj = responseCodes.FILE_IMPORT_PROCESS_ERR;
+            break;
+        default:
+            errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
+            break;
+
+    }
+    return errObj;
+}
 
 /*******************************************************************************
  * Move a specified file to shared storage (area shared by queue workers)
@@ -62,9 +92,8 @@ function dispatchWork(corID, msg, callback){
                 ch.consume(config.cn_queue.callback_queue, function (rep) {
                     //consume callback
                     if (this.corID == rep.properties.correlationId) {
-                        callback(rep.content.toString());
-                        logger.log('info', 'Upload request id ' + this.corID + ' returned: ' + rep.content.toString());
-
+                        logger.log('info', 'Upload request id ' + this.corID + ' returned: ' + rep.content);
+                        callback(convertToErrorCode(parseInt(JSON.parse(rep.content).value)));
                     }
                     else {
                         logger.log('info', '[UNMATCHED]Upload request id ' + this.corID + 'returned: ' + rep.properties.correlationId);
@@ -119,8 +148,8 @@ exports.importFile = function (filePath, orgFileName, databaseName, projectName,
     
     moveFileToSharedSpace(corID, filePath, orgFileName, function (err, newPath) {
         var msg = 'import ' + newPath + ' ' + databaseName + ' ' + projectName + ' ' + userName;
-        dispatchWork(corID, msg, function (status) {          
-            if(callback) callback(status);
+        dispatchWork(corID, msg, function (err) {          
+            if(callback) callback(err);
         });
     });
 }
