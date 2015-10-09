@@ -69,6 +69,11 @@ exports.decode = function(bson, materials) {
         delete bson[C.REPO_NODE_LABEL_COMBINED_MAP][myUUID];
     }
 
+    if (bson.vertices && bson.vertices.buffer)
+    {
+        bson.vertices_count = bson.vertices.buffer.length / 12;
+    }
+
     /*
     if (bson[C.REPO_NODE_LABEL_VERTEX_MAP]) {
         bson[C.REPO_NODE_LABEL_COMBINED_MAP] = {};
