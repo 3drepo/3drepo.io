@@ -76,7 +76,8 @@ function dispatchWork(corID, msg, callback){
             logger.log('debug', 'established connection to ' + config.cn_queue.host);
         }
         else {
-            logger.log('error' , 'Failed to establish connection to ' + config.cn_queue.host);
+            callback(responseCodes.QUEUE_CONN_ERR);
+            return;
         }
         conn.createChannel(function (err, ch) {
             if (err == null) {
@@ -84,11 +85,16 @@ function dispatchWork(corID, msg, callback){
             }
             else {
                 logger.log('error' , 'Failed to create a channel to ' + config.cn_queue.host);
+                callback(responseCodes.QUEUE_CONN_ERR);
+                return;
             }
                     
             //initiate callback queue
             ch.assertQueue(config.cn_queue.callback_queue, { durable: true }, function (err, q) {
-                
+                if (err) {
+                    callback(responseCodes.QUEUE_CONN_ERR);
+                    return;
+                }
                 ch.consume(config.cn_queue.callback_queue, function (rep) {
                     //consume callback
                     if (this.corID == rep.properties.correlationId) {
@@ -127,9 +133,19 @@ function moveFileToSharedSpace(corID, orgFilePath, newFileName, callback) {
     var filePath = newFileDir + newFileName;
     
     fs.mkdir(newFileDir, function (err) {
-        fs.move(orgFilePath, filePath, function (err) {
-            callback(err, filePath);
-        });
+        if (err) {
+            callback(responseCodes.QUEUE_INTERNAL_ERR, filePath);
+        }
+        else {
+            fs.move(orgFilePath, filePath, function (err) {
+                if (err) {
+                    callback(responseCodes.QUEUE_INTERNAL_ERR, filePath);
+                }
+                else
+                    callback(err, filePath);
+            });
+        }
+
     });
 }
 
@@ -147,10 +163,15 @@ exports.importFile = function (filePath, orgFileName, databaseName, projectName,
     var corID = uuid.v1();
     
     moveFileToSharedSpace(corID, filePath, orgFileName, function (err, newPath) {
-        var msg = 'import ' + newPath + ' ' + databaseName + ' ' + projectName + ' ' + userName;
-        dispatchWork(corID, msg, function (err) {          
-            if(callback) callback(err);
-        });
+        if (err)
+            callback(responseCodes.QUEUE_INTERNAL_ERR);
+        else {
+            var msg = 'import ' + newPath + ' ' + databaseName + ' ' + projectName + ' ' + userName;
+            dispatchWork(corID, msg, function (err) {
+                if (callback) callback(err);
+            });
+        }
+
     });
 }
 
