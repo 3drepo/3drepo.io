@@ -87,6 +87,8 @@ module.exports = function() {
 			"complete" : { "type": "boolean" }
 		}
 	);
+    
+    this.registerSchema('/:account/:project/upload',{});
 
 	this.registerSchema('/:account/:project/wayfinder/record',
 		{

@@ -56,6 +56,13 @@ module.exports = {
 		key: 'my_key.pem',
 		cert:'my_server.crt',
 		ca: 'my_server.ca'
+	},
+	cn_queue: {
+		host: 'amqp://localhost:5672',
+		worker_queue: 'jobq',
+		callback_queue: 'callbackq',
+		upload_dir: 'uploads',
+		shared_storage: 'D:/sharedSpace/'
 	}
 }
 

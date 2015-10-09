@@ -534,7 +534,8 @@ exports.hasReadAccessToProject = function(username, account, project, callback) 
 	self.checkPermissionsBit(username, account, project, READ_BIT, callback);
 };
 
-exports.hasWriteAccessToProject = function(username, account, project, callback) {
+exports.hasWriteAccessToProject = function (username, account, project, callback) {
+    logger.log("debug", "check access: " + " username[" + username + "] account[" + account + "] project[" + project + "]");
 	self.checkPermissionsBit(username, account, project, WRITE_BIT, callback);
 };
 

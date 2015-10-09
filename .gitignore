@@ -4,6 +4,7 @@ common_public_files.js
 fetch_latest
 public/x3dom.css
 public/x3dom.debug.js
+uploads
 
 /public/css/*.css~
 /*.log
@@ -26,3 +27,10 @@ prototype/OSTFed.txt
 
 sessions
 
+#Visual Studio junk
+*.njsproj
+*.suo
+*.sln
+*.dll
+.ntvs_analysis.dat
+build/config.gypi
