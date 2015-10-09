@@ -124,7 +124,7 @@ module.exports = function (router, dbInterface, checkAccess) {
     
     
     //upload and import file into repo world
-    this.post('/:account/upload', false, function (req, res) {
+    this.post('/:account/:project/upload', true, function (req, res) {
         var responsePlace = 'Uploading a new model';
         
         upload.single('file')(req, res, function (err) {
@@ -132,9 +132,10 @@ module.exports = function (router, dbInterface, checkAccess) {
                 logger.log('debug', 'error: ' + err);
             }
             else {
-                queue.importFile(req.file.path, req.file.originalname, req.body.databaseName, req.body.projectName, req.params["account"], function (err) {
+                console.log("session: " , req.session);
+                queue.importFile(req.file.path, req.file.originalname, req.params["account"], req.params["project"], req.session.user, function (err) {
                     logger.log("debug", "callback of importfile: " + err);
-                    responseCodes.onError(responsePlace, err, res, { "user": req.params["account"], "database" : req.body.databaseName, "project": req.body.projectName });
+                    responseCodes.onError(responsePlace, err, res, { "user": req.session.user.username, "database" : req.params["account"], "project": req.params["project"] });
 
                 });
            }            

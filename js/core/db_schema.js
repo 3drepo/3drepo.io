@@ -88,12 +88,7 @@ module.exports = function() {
 		}
 	);
     
-    this.registerSchema('/:account/upload',
-        {
-           "databaseName" : {"type" : "string"}, 
-           "projectName" : {"type" : "string"}
-     }
-    );
+    this.registerSchema('/:account/:project/upload',{});
 
 	this.registerSchema('/:account/:project/wayfinder/record',
 		{
