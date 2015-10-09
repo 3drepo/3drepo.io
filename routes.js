@@ -54,7 +54,6 @@ module.exports = function(){
 
 			var username = null;
             
-            logger.log("debug", "session: " + JSON.stringify(req.session));
 			if ("user" in req.session)
 				username = req.session["user"].username;
             
