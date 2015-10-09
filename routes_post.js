@@ -26,7 +26,7 @@ var responseCodes = require('./js/core/response_codes.js');
 var config = require('./js/core/config.js');
 var queue = require('./js/core/queue.js');
 var multer = require('multer');
-var upload = multer({ dest: './uploads/' });
+var upload = multer({ dest: config.cn_queue.upload_dir});
 
 function createSession(place, res, req, user)
 {

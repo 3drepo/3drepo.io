@@ -129,7 +129,7 @@ function dispatchWork(corID, msg, callback){
  * @param {callback} callback - callback(err)
  *******************************************************************************/
 function moveFileToSharedSpace(corID, orgFilePath, newFileName, callback) {
-    var newFileDir = config.cn_queue.storage + "/" + corID + "/";
+    var newFileDir = config.cn_queue.shared_storage + "/" + corID + "/";
     var filePath = newFileDir + newFileName;
     
     fs.mkdir(newFileDir, function (err) {
