@@ -23,6 +23,8 @@ var logger = log_iface.logger;
 var C = require('../constants.js');
 var repoNodeMesh = require('../repoNodeMesh.js');
 
+var _ = require('underscore');
+
 var responseCodes = require('../response_codes.js');
 
 // Credit goes to http://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
@@ -171,6 +173,52 @@ function getTree(dbInterface, account, project, branch, revision, sid, namespace
 				);
 			});
 		}
+};
+
+function getFullTreeRecurse(sceneGraph, current, json) {
+	var currentSID = current;
+
+	if (current[C.REPO_NODE_LABEL_CHILDREN])
+	{
+		for(var i = 0; i < current[C.REPO_NODE_LABEL_CHILDREN].length; i++)
+		{
+			var childID = uuidToString(current[C.REPO_NODE_LABEL_CHILDREN][i]["shared_id"]);
+			var child = sceneGraph.all[childID];
+
+			var childJSON = {
+				"name"      : child[C.REPO_NODE_LABEL_NAME],
+				"_id"       : childID,
+				"shared_id" : uuidToString(child[C.REPO_NODE_LABEL_SHARED_ID]),
+				"children"  : []
+			};
+
+			json["children"].push(_.clone(childJSON));
+
+			getFullTreeRecurse(sceneGraph, child, childJSON);
+		}
+	}
+};
+
+function getFullTree(dbInterface, account, project, branch, revision, callback) {
+	dbInterface.getScene(account, project, branch, revision, false, function(err, sceneGraph) {
+		if (err.value) return callback(err);
+
+		var root       = sceneGraph['mRootNode'];
+
+		if (!root)
+			return callback(responseCodes.ROOT_NODE_NOT_FOUND);
+
+		var json       = {
+			"name" :root[C.REPO_NODE_LABEL_NAME],
+			"_id"  : uuidToString(root[C.REPO_NODE_LABEL_ID]),
+			"shared_id" : uuidToString(root[C.REPO_NODE_LABEL_SHARED_ID]),
+			"children" : []
+		};
+
+		getFullTreeRecurse(sceneGraph, root, json);
+
+		callback(responseCodes.OK, json);
+	});
 };
 
 exports.route = function(router)
@@ -396,6 +444,22 @@ exports.route = function(router)
 		});
 	});
 
+	router.get('json', '/:account/:project/revision/:rid/tree/multimap', function(res, params, err_callback) {
+		getMultiMap(dbInterface, params.account, params.project, null, params.rid, err_callback);
+	});
+
+	router.get('json', '/:account/:project/revision/:branch/head/tree/multimap', function(res, params, err_callback) {
+		getMultiMap(dbInterface, params.account, params.project, params.branch, null, err_callback);
+	});
+
+	router.get('json', '/:account/:project/revision/:branch/head/fulltree', function(res, params, err_callback) {
+		getFullTree(dbInterface, params.account, params.project, params.branch, null, err_callback);
+	});
+
+	router.get('json', '/:account/:project/revision/:rid/fulltree', function(res, params, err_callback) {
+		getFullTree(dbInterface, params.account, params.project, null, params.rid, err_callback);
+	});
+
 	router.get('json', '/:account/:project/revision/:branch/head/map', function(res, params, err_callback) {
 		var account		= params.account;
 		var project		= params.project;
@@ -446,14 +510,6 @@ exports.route = function(router)
 
 			})
 		});
-	});
-
-	router.get('json', '/:account/:project/revision/:rid/tree/multimap', function(res, params, err_callback) {
-		getMultiMap(dbInterface, params.account, params.project, null, params.rid, err_callback);
-	});
-
-	router.get('json', '/:account/:project/revision/:branch/head/tree/multimap', function(res, params, err_callback) {
-		getMultiMap(dbInterface, params.account, params.project, params.branch, null, err_callback);
 	});
 
 	router.get('json', '/:account/:project/:uid', function(res, params, err_callback) {

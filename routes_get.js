@@ -153,6 +153,51 @@ module.exports = function(router, dbInterface, checkAccess){
 		this.transRouter(format, '/:account/:project/revisions/:branch', res, params);
 	});
 
+	// Get map from object id to path in tree for multipart
+	router.get('/:account/:project/revision/:branch/head/fulltree.:format?', checkAccess, function(req, res, next) {
+		var format = req.params["format"];
+		var current_user = ("user" in req.session) ? req.session.user.username : "";
+
+		var params = {
+			account:	req.params["account"],
+			project:	req.params["project"],
+			branch:		req.params["branch"],
+			rid:		req.params["rid"],
+			subformat:	req.params["subformat"],
+			sid:		req.params["sid"],
+			user:		current_user,
+			query:		req.query
+		};
+
+		if ("depth" in req.query)
+			params.depth = req.query.depth;
+
+		this.transRouter(format, '/:account/:project/revision/:branch/head/fulltree', res, params);
+	});
+
+	// Get subtree for head revision for a branch, with (optional) depth query string paramter
+	router.get('/:account/:project/revision/:branch/head/tree/:sid.:format?.:subformat?', checkAccess, function(req, res, next) {
+		var format = req.params["format"];
+		var current_user = ("user" in req.session) ? req.session.user.username : "";
+
+		var params = {
+			account:	req.params["account"],
+			project:	req.params["project"],
+			branch:		req.params["branch"],
+			rid:		req.params["rid"],
+			subformat:	req.params["subformat"],
+			sid:		req.params["sid"],
+			user:		current_user,
+			query:		req.query
+		};
+
+		if ("depth" in req.query)
+			params.depth = req.query.depth;
+
+		this.transRouter(format, '/:account/:project/revision/:branch/head/tree/:sid', res, params);
+	});
+
+
 	// Get README for branch's head revision
 	router.get('/:account/:project/revision/:branch/head/readme.:format?.:subformat?', checkAccess, function(req, res, next) {
 		var format = req.params["format"];
@@ -409,27 +454,6 @@ module.exports = function(router, dbInterface, checkAccess){
 		this.transRouter(format, '/:account/:project/issues/:sid', res, params);
 	});
 
-	// Get subtree for head revision for a branch, with (optional) depth query string paramter
-	router.get('/:account/:project/revision/:branch/head/tree/:sid.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:	req.params["account"],
-			project:	req.params["project"],
-			branch:		req.params["branch"],
-			rid:		req.params["rid"],
-			subformat:	req.params["subformat"],
-			sid:		req.params["sid"],
-			user:		current_user,
-			query:		req.query
-		};
-
-		if ("depth" in req.query)
-			params.depth = req.query.depth;
-
-		this.transRouter(format, '/:account/:project/revision/:branch/head/tree/:sid', res, params);
-	});
 
 	// Get subtree for sid in revision rid, with (optional) depth query string paramter
 	router.get('/:account/:project/revision/:rid/tree/:sid.:format?.:subformat?', checkAccess, function(req, res, next) {
@@ -494,6 +518,28 @@ module.exports = function(router, dbInterface, checkAccess){
 			params.depth = req.query.depth;
 
 		this.transRouter(format, '/:account/:project/revision/:rid/tree/multimap', res, params);
+	});
+
+
+	// Get map from object id to path in tree for multipart
+	router.get('/:account/:project/revision/:rid/fulltree.:format?.:subformat?', checkAccess, function(req, res, next) {
+		var format = req.params["format"];
+		var current_user = ("user" in req.session) ? req.session.user.username : "";
+
+		var params = {
+			account:	req.params["account"],
+			project:	req.params["project"],
+			rid:		req.params["rid"],
+			subformat:	req.params["subformat"],
+			sid:		req.params["sid"],
+			user:		current_user,
+			query:		req.query
+		};
+
+		if ("depth" in req.query)
+			params.depth = req.query.depth;
+
+		this.transRouter(format, '/:account/:project/revision/:rid/fulltree', res, params);
 	});
 
 	router.get('/:account/:project/revision/:rid/diff/:otherrid.:format?.:subformat?', checkAccess, function(req, res, next) {
@@ -604,7 +650,7 @@ module.exports = function(router, dbInterface, checkAccess){
 		var account = ("account" in params) ? params["account"] : null;
 		var project = ("project" in params) ? params["project"] : null;
 
-		logger.log('debug',"ACCOUNT: " + account + " PROJECT: " + project + " REGEX: " + regex + " [" + format + "]");
+		logger.log('info',"ACCOUNT: " + account + " PROJECT: " + project + " REGEX: " + regex + " [" + format + "]");
 
 		if (!format)
 			format = this.default_format;
