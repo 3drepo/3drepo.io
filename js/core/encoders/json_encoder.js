@@ -200,7 +200,7 @@ function getFullTreeRecurse(sceneGraph, current, json) {
 };
 
 function getFullTree(dbInterface, account, project, branch, revision, callback) {
-	dbInterface.getScene(account, project, branch, revision, false, function(err, sceneGraph) {
+	dbInterface.getUnoptimizedScene(account, project, branch, revision, false, function(err, sceneGraph) {
 		if (err.value) return callback(err);
 
 		var root       = sceneGraph['mRootNode'];

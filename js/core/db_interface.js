@@ -1554,6 +1554,48 @@ exports.getScene = function(dbName, project, branch, revision, full, callback) {
 	});
 };
 
+exports.getUnoptimizedScene = function(dbName, project, branch, revision, full, callback)
+{
+	var historyQuery = null;
+
+	if (revision)
+	{
+		historyQuery = {
+			_id: stringToUUID(revision)
+		};
+	} else {
+		if (branch == 'master')
+			var branch_id = masterUUID;
+		else
+			var branch_id = stringToUUID(branch);
+
+		historyQuery = {
+			shared_id:	branch_id
+		};
+	}
+
+	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
+	{
+		if (err.value) return callback(err);
+
+		if (!docs.length)
+			return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+
+		var filter = {
+			_id: {$in: docs[0]['current']}
+		};
+
+		dbConn.filterColl(dbName, project + '.scene', filter, null, function(err, doc) {
+			if (err.value) return callback(err);
+
+			if (!doc.length)
+				return callback(responseCodes.ROOT_NODE_NOT_FOUND);
+
+			callback(responseCodes.OK, repoGraphScene.decode(doc));
+		});
+	});
+}
+
 exports.getDiff = function(account, project, branch, revision, otherbranch, otherrevision, callback) {
 	var historyQuery = null;
 
