@@ -97,7 +97,7 @@ var responseCodes = {
 
 var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 1000, 2000, 3000];
 
-responseCodes.respond = function(place, resCode, res, extraInfo)
+responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 {
 	if (valid_values.indexOf(resCode.value) == -1) {
 		throw Error("Unspecified error code [VALUE: " + resCode.value + "]");
@@ -115,7 +115,7 @@ responseCodes.respond = function(place, resCode, res, extraInfo)
 		responseObject.message = resCode.message;
 
 		if (resCode.value)
-			logger.log('error', JSON.stringify(responseObject));
+			logger.logError(JSON.stringify(responseObject), req);
 
 		res.status(resCode.status).send(JSON.stringify(responseObject));
 	} else {
@@ -128,19 +128,21 @@ responseCodes.respond = function(place, resCode, res, extraInfo)
 			res.status(resCode.status).send(extraInfo);
 		}
 	}
+
+	next();
 }
 
 // On error respond with error code and errInfo (containing helpful information)
 // On OK, response with OK status and extraInfo
-responseCodes.onError = function(place, err, res, extraInfo, errInfo)
+responseCodes.onError = function(place, req, res, next, err, extraInfo, errInfo)
 {
 	if(!errInfo)
 		errInfo = {};
 
 	if(err.value)
-		responseCodes.respond(place, err, res, errInfo);
+		responseCodes.respond(place, req, res, next, err, errInfo);
 	else
-		responseCodes.respond(place, responseCodes.OK, res, extraInfo);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, extraInfo);
 }
 
 module.exports = Object.freeze(responseCodes);

@@ -36,6 +36,12 @@ var bodyParser = require("body-parser");
 module.exports.app = function (sharedSession) {
 	var app = express();
 
+	app.use(function(req, res, next) {
+		console.log("TIME: " + req.url);
+		console.time(req.url);
+		next();
+	});
+
 	app.use(bodyParser.urlencoded({
 		extended: true
 	}));
@@ -67,6 +73,11 @@ module.exports.app = function (sharedSession) {
 
 	app.use(sharedSession);
 	app.use("/", routes.router);
+
+	app.use(function(req, res) {
+		console.log("TIMEEND: " + req.url);
+		console.timeEnd(req.url);
+	});
 
 	return app;
 }

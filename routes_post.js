@@ -32,7 +32,7 @@ function createSession(place, res, req, user)
 			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {account: user.username});
 		else
 		{
-			logger.log('debug', 'Authenticated ' + user.username + ' and signed token.')
+			logger.logDebug('Authenticated user and signed token.', req);
 			req.session.user = user;
 			responseCodes.respond(place, responseCodes.OK, res, {account: user.username});
 		}
@@ -52,10 +52,9 @@ module.exports = function(router, dbInterface, checkAccess){
 
 		this.dbInterface.authenticate(req.body.username, req.body.password, function(err, user)
 		{
-			logger.log('debug', 'Attempting to log user ' + req.body.username);
+			logger.logDebug('User is logging in', req);
 
 			if(err.value) {
-				console.log("MESSAGE: " + err.message);
 				responseCodes.respond(responsePlace, err, res, {account: req.body.username});
 			} else {
 				if(user)
@@ -69,33 +68,33 @@ module.exports = function(router, dbInterface, checkAccess){
 	});
 
 	// Log the user out of the API
-	this.post('/logout', false, function(req, res) {
+	this.post('/logout', false, function(req, res, next) {
 		if(!req.session.user)
 		{
-			return responseCodes.respond("Logout POST", responseCodes.NOT_LOGGED_IN, res, {});
+			return responseCodes.respond("Logout POST", req, res, next, responseCodes.NOT_LOGGED_IN, {});
 		}
 
 		var username = req.session.user.username;
 
 		req.session.destroy(function() {
-			logger.log('debug', 'User ' + username + ' has logged out.')
+			logger.logDebug('User has logged out.', req);
 
-			responseCodes.respond("Logout POST", responseCodes.OK, res, {account: username});
+			responseCodes.respond("Logout POST", req, res, next, responseCodes.OK, {account: username});
 		});
 	});
 
 	// Update or create a user's account
-	this.post('/:account', false, function(req, res) {
+	this.post('/:account', false, function(req, res, next) {
 		var responsePlace = "Account POST";
 
-		logger.log("debug", "Trying to affect user" + req.params["account"]);
+		logger.logDebug("Updating user", req);
 
 		this.dbInterface.getUserInfo( req.params["account"], false, function (err, user)
 		{
 			if (!user)
 			{
 				// Trying to sign-up
-				logger.log("debug", "Trying to add user " + req.params["account"]);
+				logger.logDebug("Attempting to add user: " + req.params["account"], req);
 				this.dbInterface.createUser(req.params["account"], req.body.password, req.body.email, function(err) {
 					createSession(responsePlace, res, req, req.params["account"]);
 				});
@@ -110,16 +109,16 @@ module.exports = function(router, dbInterface, checkAccess){
 					responseCodes.respond(responsePlace, responseCodes.NOT_AUTHORIZED, res, {account: req.params["account"]});
 				} else {
 					// Modify account here
-					logger.log("debug", "Updating account for " + req.params["account"]);
+					logger.logDebug("Updating account", req);
 
 					if (req.body.oldPassword)
 					{
 						this.dbInterface.updatePassword(req.params["account"], req.body, function(err) {
-							responseCodes.onError(responsePlace, err, res, {account: req.params["account"]});
+							responseCodes.onError(responsePlace, req, res, next, err, {account: req.params["account"]});
 						});
 					} else {
 						this.dbInterface.updateUser(req.params["account"], req.body, function(err) {
-							responseCodes.onError(responsePlace, err, res, {account: req.params["account"]});
+							responseCodes.onError(responsePlace, req, res, next, err, {account: req.params["account"]});
 						});
 					}
 				}
@@ -131,13 +130,11 @@ module.exports = function(router, dbInterface, checkAccess){
 	//this.post('/:account/:project', false, function(req, res) {
 	//});
 
-	this.post('/:account/:project/wayfinder/record', false, function(req, res) {
+	this.post('/:account/:project/wayfinder/record', false, function(req, res, next) {
 		var resCode = responseCodes.OK;
 		var responsePlace = 'Wayfinder record POST';
 
-		logger.log('debug', 'Posting wayfinder record information');
-
-		console.log(JSON.stringify(req.session));
+		logger.logDebug('Posting wayfinder record information', req);
 
 		if (!("user" in req.session)) {
 			responseCodes.respond('Wayfinder record POST', responseCodes.NOT_LOGGED_IN, res, {});
@@ -146,39 +143,37 @@ module.exports = function(router, dbInterface, checkAccess){
 			var timestamp = JSON.parse(req.body.timestamp);
 
 			this.dbInterface.storeWayfinderInfo(req.params["account"], req.params["project"], req.session.user.username, req.sessionID, data, timestamp, function(err) {
-				responseCodes.onError('Wayfinder record POST', err, res, {});
+				responseCodes.onError('Wayfinder record POST', req, res, next, err, {});
 			});
 		}
 
 	});
 
 	// Ability to add a named viewpoint
-	this.post('/:account/:project/:branch/viewpoint', true, function(req, res) {
+	this.post('/:account/:project/:branch/viewpoint', true, function(req, res, next) {
 		var responsePlace = 'Adding a viewpoint';
 
-		logger.log('debug', 'Adding a new viewpoint to ' + req.params["account"] + req.params["project"]);
+		logger.logDebug('Adding a new viewpoint to ' + req.params["account"] + req.params["project"], req);
 
 		var data = JSON.parse(req.body.data);
 
 		this.dbInterface.getRootNode(req.params["account"], req.params["project"], req.params["branch"], null, function(err, root) {
 			if (err.value) return callback(err);
 
-			console.log(JSON.stringify(root));
-
 			this.dbInterface.storeViewpoint(req.params["account"], req.params["project"], req.params["branch"], req.session.user, this.dbInterface.uuidToString(root["shared_id"]), data, function(err) {
-				responseCodes.onError(responsePlace, err, res, {});
+				responseCodes.onError(responsePlace, req, res, next, err, {});
 			});
 		});
 	});
 
-	this.post('/:account/:project/issues/:sid', true, function(req, res) {
+	this.post('/:account/:project/issues/:sid', true, function(req, res, next) {
 		var responsePlace = 'Adding or updating an issue';
 		var data = JSON.parse(req.body.data);
 
-		logger.log('debug', 'Upserting an issues for object ' + req.params['sid'] + ' in ' + req.params["account"] + '/' + req.params["project"]);
+		logger.logDebug('Upserting an issues for object ' + req.params['sid'] + ' in ' + req.params["account"] + '/' + req.params["project"], req);
 
 		this.dbInterface.storeIssue(req.params["account"], req.params["project"], req.params["sid"], req.session.user.username, data, function(err, result) {
-			responseCodes.onError(responsePlace, err, res, result);
+			responseCodes.onError(responsePlace, req, res, next, err, result);
 		});
 	});
 
@@ -186,8 +181,6 @@ module.exports = function(router, dbInterface, checkAccess){
 	for(var idx in this.postMap)
 	{
 		var item = this.postMap[idx];
-
-		console.log('debug', 'Adding POST call for ' + item['regex']);
 
 		var resFunction = schemaValidator.validate(item.regex);
 

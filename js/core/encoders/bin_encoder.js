@@ -36,7 +36,7 @@ var responseCodes = require('../response_codes.js');
 function render(dbInterface, dbName, project, uuid, rid, sid, type, callback) {
 	logger.log('debug', 'Requesting ' + type + ' for ' + uuid);
 
-	dbInterface.getObject(dbName, project, uuid, rid, sid, function(err, objType, uid, obj) {
+	dbInterface.getObject(dbName, project, uuid, rid, sid, true, function(err, objType, uid, obj) {
 		if (err.value)
 			return callback(err);
 

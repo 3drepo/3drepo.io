@@ -119,8 +119,6 @@
 
 					prevVTo = currentMeshVTo;
 
-					//console.log(currentMeshVFrom + " " + currentMeshVTo + " " + currentMeshTFrom + " " + currentMeshTTo);
-
 					var currentMeshNumVertices = currentMeshVTo - currentMeshVFrom;
 					var currentMeshNumFaces = currentMeshTTo - currentMeshTFrom;
 
@@ -588,7 +586,7 @@ exports.route = function(router)
 	router.get('src', '/:account/:project/:uid', function(res, params, err_callback) {
 		// Get object based on UID, check whether or not it is a mesh
 		// and then output the result.
-		router.dbInterface.getObject(params.account, params.project, params.uid, null, null, function(err, type, uid, fromStash, obj)
+		router.dbInterface.getObject(params.account, params.project, params.uid, null, null, true, function(err, type, uid, fromStash, obj)
 		{
 			if(err.value)
 				return err_callback(err);
@@ -617,7 +615,7 @@ exports.route = function(router)
 	router.get('src', '/:account/:project/revision/:rid/:sid', function(res, params, err_callback) {
 		// Get object based on revision rid, and object shared_id sid. Check
 		// whether or not it is a mesh and then output the result.
-		router.dbInterface.getObject(params.account, params.project, null, params.rid, params.sid, function(err, type, uid, fromStash, obj)
+		router.dbInterface.getObject(params.account, params.project, null, params.rid, params.sid, true, function(err, type, uid, fromStash, obj)
 		{
 			if(err.value)
 				return err_callback(err);

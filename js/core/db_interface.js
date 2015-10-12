@@ -15,9 +15,8 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var dbConn_js = require('./db.js');
+var dbConn = require('./db.js');
 var async = require('async');
-var dbConn = new dbConn_js();
 var repoGraphScene = require('./repoGraphScene.js');
 var uuid = require('node-uuid');
 var log_iface = require('./logger.js');
@@ -743,10 +742,10 @@ exports.queryObjectsScene = function(dbName, project, uid, rid, sid, filter, pro
 }
 */
 
-exports.getChildrenByUID = function(dbName, project, uid, callback) {
+exports.getChildrenByUID = function(dbName, project, uid, needFiles, callback) {
 
 	// First lookup the object in either the stash or the scene
-	self.getObject(dbName, project, uid, null, null, function (err, type, uid, fromStash, obj) {
+	self.getObject(dbName, project, uid, null, null, needFiles, function (err, type, uid, fromStash, obj) {
 		if (err.value) return callback(err);
 
 		if (obj["all"].length > 1) return callback(responseCodes.OBJECT_NOT_FOUND);
@@ -1462,8 +1461,10 @@ exports.appendMeshFiles = function(dbName, project, fromStash, uid, obj, callbac
 		});
 }
 
-exports.getObject = function(dbName, project, uid, rid, sid, callback) {
+exports.getObject = function(dbName, project, uid, rid, sid, needFiles, callback) {
 	logger.log('debug', 'Requesting object (U, R, S) (' + uid + ',' + rid + ',' + sid + ')');
+
+	// TODO: Get mesh files on demand
 
 	if (uid)
 	{
@@ -1486,7 +1487,7 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 					var type = obj[0]["type"];
 					var uid = uuidToString(obj[0]["_id"]);
 
-					if (type == "mesh")
+					if ((type == "mesh") && needFiles)
 					{
 						self.appendMeshFiles(dbName, project, false, uid, obj[0], callback);
 					} else {
@@ -1501,7 +1502,7 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 
 				// TODO: Make this more concrete
 				// if a mesh load the vertices, indices, colors etc from GridFS
-				if (type == "mesh")
+				if ((type == "mesh") && needFiles)
 				{
 					self.appendMeshFiles(dbName, project, true, uid, obj[0], callback);
 				} else {
@@ -1522,9 +1523,9 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 			if (!obj.length)
 				return callback(responseCodes.OBJECT_NOT_FOUND);
 
-			if (type == "mesh")
+			if ((type == "mesh") && needFiles)
 			{
-				self.getMeshFiles(dbName, project, fromStash, uid, obj, callback);
+				self.appendMeshFiles(dbName, project, fromStash, uid, obj, callback);
 			} else {
 				return callback(responseCodes.OK, type, uid, fromStash, repoGraphScene.decode(obj));
 			}

@@ -526,8 +526,8 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 					var shape = xmlDoc.createElement('Shape');
 					var childUniqueID = subMeshKeys[i] ? subMeshKeys[i] : child["id"];
 
-					shape.setAttribute('id', childUniqueID);
-					shape.setAttribute('DEF', childUniqueID); //dbInterface.uuidToString(child["shared_id"]));
+					shape.setAttribute('id', dbInterface.uuidToString(childUniqueID));
+					shape.setAttribute('DEF', dbInterface.uuidToString(childUniqueID)); //dbInterface.uuidToString(child["shared_id"]));
 					shape.setAttribute('onclick', 'clickObject(event);');
 					shape.setAttribute('onmouseover', 'onMouseOver(event);');
 					shape.setAttribute('onmousemove', 'onMouseMove(event);');
@@ -630,11 +630,11 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, subM
 			var suffix = "";
 
 			if (subMeshID)
-				suffix += "#" + subMeshID;
+				suffix += "#" + dbInterface.uuidToString(subMeshID);
 
 			if ('children' in mat) {
 				var tex_id = mat['children'][0]['id'];
-				suffix += "?tex_uuid=" + tex_id;
+				suffix += "?tex_uuid=" + dbInterface.uuidToString(tex_id);
 			}
 
 			externalGeometry.setAttribute('url', config.api_server.url + '/' + account + '/' + project + '/' + meshId + '.src' + suffix);
@@ -954,7 +954,7 @@ exports.route = function(router)
 		if (params.subformat == "mpc")
 		{
 			// TODO: Only needs the shell not the whole thing
-			router.dbInterface.getObject(params.account, params.project, params.uid, null, null, function(err, type, uid, fromStash, obj)
+			router.dbInterface.getObject(params.account, params.project, params.uid, null, null, false, function(err, type, uid, fromStash, obj)
 			{
 				if (err.value) return callback(err);
 

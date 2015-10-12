@@ -62,8 +62,8 @@ module.exports = function(){
 				accessFunc(username, account, project, function(err) {
 					if(err.value)
 					{
-						logger.log('debug', account + '/' + project + ' is not public project and no user information.');
-						responseCodes.onError("Check project/account access for " + username, err, res, null, req.params);
+						logger.logDebug(account + '/' + project + ' is not public project and no user information.', req);
+						responseCodes.onError("Check project/account access", req, res, next, err, null, req.params);
 					} else {
 						next();
 					}
@@ -72,7 +72,7 @@ module.exports = function(){
 				// No account and project specified, check user is logged in.
 				if (!("user" in req.session)) {
 					logger.log('debug', 'No account and project specified.');
-					responseCodes.onError("Check other access for " + username, responseCodes.NOT_AUTHORIZED, res, req.params, null);
+					responseCodes.onError("Check other access", req, res, next, responseCodes.NOT_AUTHORIZED, req.params, null);
 				} else {
 					next();
 				}
@@ -88,12 +88,6 @@ module.exports = function(){
 	this.get = this.getHandler.get; // Re-route the call to the get handler.
 	this.router.use(express.static('./submodules'));
 	this.router.use(express.static('./public'));
-
-	this.router.use(function(req, res, next)
-	{
-		logger.log('debug', req.originalUrl)
-		next();
-	});
 
 	return this;
 }

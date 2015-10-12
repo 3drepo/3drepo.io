@@ -62,7 +62,7 @@ module.exports.transcode = function (fromFormat, toFormat, buffer, callback) {
 module.exports.route = function(router)
 {
 	var imgObject = function(res, params, err_callback) {
-		router.dbInterface.getObject(params.account, params.project, params.uid, null, null, function(err, type, uid, fromStash, obj)
+		router.dbInterface.getObject(params.account, params.project, params.uid, null, null, true, function(err, type, uid, fromStash, obj)
 		{
 			if(err.value)
 				return err_callback(err);
@@ -83,7 +83,7 @@ module.exports.route = function(router)
 	router.get('gif', '/:account/:project/:uid', imgObject);
 
 	router.get('pdf', '/:account/:project/:uid', function(res, params, err_callback) {
-		router.dbInterface.getObject(params.account, params.project, params.uid, null, null, function(err, type, uid, fromStash, obj)
+		router.dbInterface.getObject(params.account, params.project, params.uid, null, null, true, function(err, type, uid, fromStash, obj)
 		{
 			if (err.value) return err_callback(err);
 

@@ -438,7 +438,7 @@ exports.route = function(router)
 	router.get('json', '/:account/:project/revision/:branch/head/:sid', function(res, params, err_callback) {
 		router.dbInterface.getHeadUUID(params.account, params.project, params.branch, function (err, uuid)
 		{
-			router.dbInterface.getObject(params.account, params.project, null, uuidToString(uuid.uuid), params.sid, function (err, type, uid, obj) {
+			router.dbInterface.getObject(params.account, params.project, null, uuidToString(uuid.uuid), params.sid, true, function (err, type, uid, obj) {
 				if (err.value)
 					err_callback(err);
 				else
@@ -459,7 +459,7 @@ exports.route = function(router)
 	router.get('json', '/:account/:project/:uid', function(res, params, err_callback) {
 		if(params.subformat == "mpc")
 		{
-			router.dbInterface.getObject(params.account, params.project, params.uid, null, null, function (err, type, uid, fromStash, scene) {
+			router.dbInterface.getObject(params.account, params.project, params.uid, null, null, false, function (err, type, uid, fromStash, scene) {
 				if (err.value) return err_callback(err);
 
 				if (type == "mesh")
@@ -470,6 +470,19 @@ exports.route = function(router)
 					{
 						if (mesh[C.REPO_NODE_LABEL_COMBINED_MAP])
 						{
+
+							// First sort the combined map in order of vertex ID
+							mesh[C.REPO_NODE_LABEL_COMBINED_MAP].sort(function(left, right)
+							{
+								if (left[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] < right[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM])
+									return -1;
+								else if (left[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] > right[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]
+								)
+									return 1;
+								else
+									return 0;
+							});
+
 							var subMeshes   = mesh[C.REPO_NODE_LABEL_COMBINED_MAP];
 							var subMeshKeys = mesh[C.REPO_NODE_LABEL_COMBINED_MAP].map(function (item) {
 								return item[C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]
@@ -480,7 +493,11 @@ exports.route = function(router)
 							outJSON["numberOfIDs"] = subMeshKeys.length;
 							outJSON["maxGeoCount"] = subMeshKeys.length;
 
-							router.dbInterface.getChildrenByUID(params.account, params.project, params.uid, function (err, docs) {
+							//console.log(JSON.stringify(mesh["children"]));
+
+							console.log("START");
+							
+							router.dbInterface.getChildrenByUID(params.account, params.project, params.uid, false, function (err, docs) {
 								if (err.value) return err_callback(err);
 
 								var children = repoGraphScene.decode(docs);
@@ -523,6 +540,8 @@ exports.route = function(router)
 								var bbox = repoNodeMesh.extractBoundingBox(mesh);
 								outJSON["mapping"] = [];
 
+								console.time("SUBMESHLOOP");
+
 								for(var i = 0; i < subMeshKeys.length; i++)
 								{
 									var map = {};
@@ -535,6 +554,8 @@ exports.route = function(router)
 
 									outJSON["mapping"].push(map);
 								}
+
+								console.timeEnd("SUBMESHLOOP");
 
 								return err_callback(responseCodes.OK, outJSON);
 							});

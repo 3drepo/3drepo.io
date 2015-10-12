@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var _       = require('underscore');
-var winston = require('winston');
-var config = require('./config.js');
+var _        = require("underscore");
+var winston  = require("winston");
+var config   = require("./config.js");
+var shortid  = require("shortid");
 
 // Custom logging levels for logger
 var myCustomLevels = {
@@ -28,10 +29,10 @@ var myCustomLevels = {
         error: 3
     },
     colors: {
-        debug: 'white',
-        info: 'yellow',
-        warn: 'orange',
-        error: 'red'
+        debug: "white",
+        info: "yellow",
+        warn: "orange",
+        error: "red"
     }
 };
 
@@ -50,8 +51,50 @@ var logger = new(winston.Logger)({
     })]
 });
 
-module.exports.logger = logger;
-module.exports.onError = function(err) {
-	logger.log('error', err.stack);
+var logMessage(type, req)
+{
+	var uid = "";
+
+	if (req === null)
+	{
+		uid = "internal";
+	} else {
+		uid = req.repoid;
+	}
+
+    logger.log(type, (new Date()).toString() + "\t" + req.repoid + "\t" + msg);
+
+}
+
+module.exports.logInfo = function(msg, req) {
+	logMessage("info", req);
+};
+
+module.exports.logError = function(msg, req) {
+    logMessage("error", req);
+};
+
+module.exports.logDebug = function(msg, req) {
+	logMessage("debug", req);
+};
+
+module.exports.logWarning = function(msg, req) {
+    logMessage("warn", msg);
+};
+
+module.exports.startRequest = function(req, res, next)
+{
+    req.repouid = shortid.generate();
+
+    this.logInfo(req.repouid, "BEGIN " + req.url);
+
+    next();
+};
+
+module.export.endRequest = function(req, res, next)
+{
+    this.logInfo(req.repouid, "END " + req.url);
+
+    next();
 }
 

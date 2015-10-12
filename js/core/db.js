@@ -20,21 +20,52 @@
 
 var async	  = require('async');
 var config	  = require('./config.js');
-var mongo	  = require('mongodb');
-var logIFace  = require('./logger.js');
-var logger	  = logIFace.logger;
-onError		  = logIFace.onError;
 
 var responseCodes = require('./response_codes.js');
 
-// Main DB Object constructor
-function MongoDB() {
-	this.host	  = config.db.host;
-	this.port	  = config.db.port;
+var MongoClient = require('mongodb').MongoClient,
+	Server      = require('mongodb').Server,
+	GridStore   = require('mongodb').GridStore;
 
-	this.userAuth = null;
+// Create connection to Mongo
+// Main DB Object constructor
+var MongoDBObject = function()
+{
+	var self = this;
+
+	this.host = config.db.host;
+	this.port = config.db.port;
+
+	this.username = config.db.username;
+	this.password = config.db.password;
+
 	this.dbConns  = {};
-}
+
+	this.getURL = function(database)
+	{
+		return "mongodb://" + this.username + ":" + this.password + "@" + this.host + ":" + this.port + "/" + database;
+	}
+
+	this.open = function(database, callback)
+	{
+		if (dbConns[database])
+		{
+			callback(null, dbConns[database]);
+		} else {
+			MongoClient.connect(this.getURL(database), function(err, db) {
+				if (err) return callback(err, null);
+
+				dbConns[database] = db;
+
+				callback(null, dbConns[database]);
+			}
+		}
+	}
+};
+
+var mongo = new MongoDBObject();
+
+var MongoWrapper = function(logger) {};
 
 /*******************************************************************************
  * Authenticate User against admin database
@@ -45,45 +76,28 @@ function MongoDB() {
  * @param {function} callback - has parameters (err, user) where
  *								user is the user object
  ******************************************************************************/
-MongoDB.prototype.authenticateUser = function(username, password, callback) {
-	var self = this;
+MongoWrapper.prototype.authenticateUser = function(username, password, callback) {
 
 	// Create a separate admin database connection to avoid
 	// constantly switching between auth user and NodeJS
 	// user
-	if (!self.userAuth)
-	{
-		var serv = new mongo.Server(self.host, self.port, {
-			auto_reconnect: true,
-		});
 
-		var db = new mongo.Db('admin', serv, { safe: false });
+	mongo.open("admin", function(err, adminDb) {
+		if (err) {
+			return callback(responseCodes.DB_ERROR(err));
+		}
 
-		// TODO: Merge with code below
-		db.open(function(err, dbConn) {
-			if (err)
+		logger.logInfo('Authenticating user');
+
+		adminDb.authenticate(username, password, function(err) {
+			if(err) {
 				return callback(responseCodes.DB_ERROR(err));
-
-			self.userAuth = dbConn;
-
-			dbConn.on('close', function(err) {
-				self.userAuth = null;
-			});
-
-			logger.log('info', 'Authenticating user: ' + username);
-
-			return self.authenticateUser(username, password, callback);
-		});
-	} else {
-		logger.log('info', 'Authenticating user: ' + username);
-
-		self.userAuth.authenticate(username, password, function(err) {
-			if(err)
-				return callback(responseCodes.DB_ERROR(err));
+			}
 
 			callback(responseCodes.OK);
 		});
-	}
+
+	});
 };
 
 /*******************************************************************************
@@ -94,59 +108,17 @@ MongoDB.prototype.authenticateUser = function(username, password, callback) {
  * @param {function} callback - has parameters (err, dbConn) where
  *								dbConn is the returned database connection.
  ******************************************************************************/
-MongoDB.prototype.dbCallback = function(dbName, callback) {
-	var self = this;
-
-	// If we already have a connection, return that rather than
-	// opening a new connection
-	if (self.dbConns[dbName]) {
-		return callback(responseCodes.OK, self.dbConns[dbName]);
-	}
-
-	// Check if there is an open server connection
-	// if there isn't then open one
-	logger.log('info', 'Opening server ' + self.host + ' : ' + self.port);
-
-	var serv = new mongo.Server(self.host, self.port, {
-		auto_reconnect: true,
-	});
-
-	logger.log('info', 'Opening database ' + dbName);
-
-	var db = new mongo.Db(dbName, serv, {
-			safe: false
-		});
-
-	// Attempt to open the database connection
-	db.open(function(err, dbConn) {
+MongoWrapper.prototype.dbCallback = function(dbName, callback) {
+	mongo.open(dbName, function(err, db) {
 		if (err) {
 			return callback(responseCodes.DB_ERROR(err));
 		}
 
-		// Authenticate against the NodeJS database user
-		var adminDb = db.admin();
-
-		adminDb.authenticate(config.db.username, config.db.password, function(err) {
-			if (err)
-				return callback(responseCodes.DB_ERROR(err));
-
-			logger.log('debug', 'Authentication successful');
-			logger.log('debug', 'Authorized as ' + config.db.username);
-			//logger.log('debug', 'DB CONNECTION:' + JSON.stringify(dbConn.serverConfig.auth.toArray()));
-
-			self.dbConns[dbName] = dbConn;
-
-			dbConn.on('close', function(err) {
-				logger.log('debug', 'Closing connection to ' + dbName + '. REASON: ' + err);
-				delete(self.dbConns[dbName]);
-			})
-
-			callback(responseCodes.OK, dbConn);
-		});
-	});
+		callback(responseCodes.OK, db);
+	}
 }
 
-MongoDB.prototype.Binary = mongo.Binary;
+MongoWrapper.prototype.Binary = mongo.Binary;
 
 /*******************************************************************************
  * Get a file from the Grid FS store
@@ -157,7 +129,7 @@ MongoDB.prototype.Binary = mongo.Binary;
  * @param {function} callback - Callback function to return the file data
  *
  ******************************************************************************/
-MongoDB.prototype.getGridFSFile = function(dbName, collName, fileName, callback)
+MongoWrapper.prototype.getGridFSFile = function(dbName, collName, fileName, callback)
 {
 	this.dbCallback(dbName, function (err, dbConn) {
 		if (err.value) return callback(err);
@@ -166,7 +138,7 @@ MongoDB.prototype.getGridFSFile = function(dbName, collName, fileName, callback)
 			"root" : collName
 		};
 
-		var gs = new mongo.GridStore(dbConn, fileName, "r", options);
+		var gs = new GridStore(dbConn, fileName, "r", options);
 
 		gs.open(function (err, gs) {
 			if (err)
@@ -185,32 +157,6 @@ MongoDB.prototype.getGridFSFile = function(dbName, collName, fileName, callback)
 }
 
 /*******************************************************************************
- * Run an aggregation query
- *
- * @param {string} dbName - Database name to run the aggregation on
- * @param {string} collName - Collection to run the aggregation on
- * @param {string} query- aggregation query
- *
- * TODO: Fix this, if not currently working
- ******************************************************************************/
-MongoDB.prototype.aggregate = function(dbName, collName, query) {
-	var self = this;
-
-	async.waterfall([
-
-	function(callback) {
-		self.collCallback(dbName, collName, true, callback);
-	}, function(err, coll) {
-		coll.aggregate(query, callback)
-	}], function(err, result) {
-		setTimeout(function() {
-			return result;
-		}, 0);
-	});
-
-}
-
-/*******************************************************************************
  * Run callback on collection from the database
  *
  * @param {string} dbName - Database name to run the aggregation on
@@ -219,8 +165,8 @@ MongoDB.prototype.aggregate = function(dbName, collName, query) {
  * @param {function} callback - get collection from database and pass to
  *								callback as parameter
  ******************************************************************************/
-MongoDB.prototype.collCallback = function(dbName, collName, strict, callback) {
-	logger.log('debug', 'Loading collection ' + collName + ' on ' + dbName);
+MongoWrapper.prototype.collCallback = function(dbName, collName, strict, callback) {
+	logger.logDebug('Loading collection ' + collName + ' on ' + dbName);
 
 	// First get database connection
 	this.dbCallback(dbName, function(err, dbConn) {
@@ -244,7 +190,7 @@ MongoDB.prototype.collCallback = function(dbName, collName, strict, callback) {
  * @param {function} callback - get collection from database and pass to
  *								callback as parameter
  ******************************************************************************/
-MongoDB.prototype.getLatest = function(dbName, collName, filter, projection, callback) {
+MongoWrapper.prototype.getLatest = function(dbName, collName, filter, projection, callback) {
 	// Run collection callback that first sorts by timestamp
 	// and then gets the top row.
 	this.collCallback(dbName, collName, true, function(err, coll) {
@@ -253,22 +199,22 @@ MongoDB.prototype.getLatest = function(dbName, collName, filter, projection, cal
 		projStr = JSON.stringify(projection);
 		filtStr = JSON.stringify(filter);
 
-		logger.log('debug', 'Getting latest for collection: ' + dbName + '/' + collName);
-		logger.log('debug', 'FILTER: \"' + filtStr + '\"');
-		logger.log('debug', 'PROJECTION: \"' + projStr + '\"');
+		logger.logDebug('Getting latest for collection: ' + dbName + '/' + collName);
+		logger.logDebug('FILTER: \"' + filtStr + '\"');
+		logger.logDebug('PROJECTION: \"' + projStr + '\"');
 
 		if (projection != null)
 		{
 			coll.find(filter, projection).limit(1).sort({timestamp:-1}).toArray(function(err, docs) {
 				if (err) return callback(responseCodes.DB_ERROR(err));
-				logger.log('debug', 'Found ' + docs.length + ' result(s).');
+				logger.logDebug('Found ' + docs.length + ' result(s).');
 
 				callback(responseCodes.OK, docs);
 			});
 		} else {
 			coll.find(filter).limit(1).sort({timestamp:-1}).toArray(function(err, docs) {
 				if (err) return callback(responseCodes.DB_ERROR(err));
-				logger.log('debug', 'Found ' + docs.length + ' result(s).');
+				logger.logDebug('Found ' + docs.length + ' result(s).');
 
 				callback(responseCodes.OK, docs);
 			});
@@ -286,28 +232,28 @@ MongoDB.prototype.getLatest = function(dbName, collName, filter, projection, cal
  * @param {function} callback - get filtered collection from database
  *								pass to callback as parameter
  ******************************************************************************/
-MongoDB.prototype.filterColl = function(dbName, collName, filter, projection, callback) {
+MongoWrapper.prototype.filterColl = function(dbName, collName, filter, projection, callback) {
 	this.collCallback(dbName, collName, true, function(err, coll) {
 		if (err.value) return callback(err);
 
 		projStr = JSON.stringify(projection);
 		filtStr = JSON.stringify(filter);
 
-		logger.log('debug', 'Filter collection: ' + dbName + '/' + collName);
-		logger.log('debug', 'FILTER: \"' + filtStr + '\"');
-		logger.log('debug', 'PROJECTION: \"' + projStr + '\"');
+		logger.logDebug('Filter collection: ' + dbName + '/' + collName);
+		logger.logDebug('FILTER: \"' + filtStr + '\"');
+		logger.logDebug('PROJECTION: \"' + projStr + '\"');
 
 		if (projection != null) {
 			coll.find(filter, projection).toArray(function(err, docs) {
 				if (err) return callback(responseCodes.DB_ERROR(err));
-				logger.log('debug', 'Found ' + docs.length + ' result(s).');
+				logger.logDebug('Found ' + docs.length + ' result(s).');
 
 				callback(responseCodes.OK, docs);
 			});
 		} else {
 			coll.find(filter).toArray(function(err, docs) {
 				if (err) return callback(responseCodes.DB_ERROR(err));
-				logger.log('debug', 'Found ' + docs.length + ' result(s).');
+				logger.logDebug('Found ' + docs.length + ' result(s).');
 
 				callback(responseCodes.OK, docs);
 			});
@@ -315,5 +261,7 @@ MongoDB.prototype.filterColl = function(dbName, collName, filter, projection, ca
 	});
 }
 
-module.exports = MongoDB;
+module.exports = function(logger) {
+	return new MongoWrapper(logger);
+};
 
