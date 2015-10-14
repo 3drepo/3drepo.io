@@ -19,56 +19,62 @@
 *  @file Contains the POST routes
 ****************************************************************************/
 
-var schemaValidator = require('./js/core/db_schema.js')();
-var log_iface = require('./js/core/logger.js');
-var logger = log_iface.logger;
-var responseCodes = require('./js/core/response_codes.js');
-var config = require('./js/core/config.js');
+var schemaValidator = require("./js/core/db_schema.js")();
+var systemLogger    = require("./js/core/logger.js").systemLogger;
 
-function createSession(place, res, req, user)
+var dbInterface     = require("./js/core/db_interface.js");
+var responseCodes   = require("./js/core/response_codes.js");
+var C               = require("./js/core/constants");
+
+function createSession(place, req, res, next, user)
 {
+	"use strict";
+
 	req.session.regenerate(function(err) {
-		if(err)
+		if(err) {
 			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {account: user.username});
-		else
-		{
-			logger.logDebug('Authenticated user and signed token.', req);
+		} else {
+			systemLogger.logDebug("Authenticated user and signed token.", req);
 			req.session.user = user;
-			responseCodes.respond(place, responseCodes.OK, res, {account: user.username});
+			responseCodes.respond(place, req, res, next, responseCodes.OK, {account: user.username});
 		}
 	});
 }
 
-module.exports = function(router, dbInterface, checkAccess){
-	this.postMap = [];
 
-	this.post = function(regex, shouldCheckAccess, callback) {
-		this.postMap.push({regex: regex, shouldCheckAccess: shouldCheckAccess, callback: callback});
+var repoPostHandler = function(router, checkAccess){
+	"use strict";
+
+	var self = this instanceof repoPostHandler ? this : Object.create(repoPostHandler.prototype);
+	self.postMap = [];
+
+	self.post = function(regex, shouldCheckAccess, callback) {
+		self.postMap.push({regex: regex, shouldCheckAccess: shouldCheckAccess, callback: callback});
 	};
 
 	// Log the user into the API
-	this.post('/login', false, function(req, res) {
+	self.post("/login", false, function(req, res, next) {
 		var responsePlace = "Login POST";
 
-		this.dbInterface.authenticate(req.body.username, req.body.password, function(err, user)
+		dbInterface(req[C.REQ_REPO].logger).authenticate(req.body.username, req.body.password, function(err, user)
 		{
-			logger.logDebug('User is logging in', req);
+			req[C.REQ_REPO].logger.logDebug("User is logging in", req);
 
 			if(err.value) {
-				responseCodes.respond(responsePlace, err, res, {account: req.body.username});
+				responseCodes.respond(responsePlace, req, res, next, err, {account: req.body.username});
 			} else {
 				if(user)
 				{
-					createSession(responsePlace, res, req, user);
+					createSession(responsePlace, req, res, next, user);
 				} else {
-					responseCodes.respond(responsePlace, responseCodes.USER_NOT_FOUND, res, {account: req.body.username});
+					responseCodes.respond(responsePlace, req, res, next, responseCodes.USER_NOT_FOUND, {account: req.body.username});
 				}
 			}
 		});
 	});
 
 	// Log the user out of the API
-	this.post('/logout', false, function(req, res, next) {
+	self.post("/logout", false, function(req, res, next) {
 		if(!req.session.user)
 		{
 			return responseCodes.respond("Logout POST", req, res, next, responseCodes.NOT_LOGGED_IN, {});
@@ -77,26 +83,26 @@ module.exports = function(router, dbInterface, checkAccess){
 		var username = req.session.user.username;
 
 		req.session.destroy(function() {
-			logger.logDebug('User has logged out.', req);
+			req[C.REQ_REPO].logger.logDebug("User has logged out.", req);
 
 			responseCodes.respond("Logout POST", req, res, next, responseCodes.OK, {account: username});
 		});
 	});
 
-	// Update or create a user's account
-	this.post('/:account', false, function(req, res, next) {
+	// Update or create a user"s account
+	self.post("/:account", false, function(req, res, next) {
 		var responsePlace = "Account POST";
 
-		logger.logDebug("Updating user", req);
+		req[C.REQ_REPO].logger.logDebug("Updating user", req);
 
-		this.dbInterface.getUserInfo( req.params["account"], false, function (err, user)
+		dbInterface(req[C.REQ_REPO].logger).getUserInfo( req.params[C.REPO_REST_API_ACCOUNT], false, function (err, user)
 		{
 			if (!user)
 			{
 				// Trying to sign-up
-				logger.logDebug("Attempting to add user: " + req.params["account"], req);
-				this.dbInterface.createUser(req.params["account"], req.body.password, req.body.email, function(err) {
-					createSession(responsePlace, res, req, req.params["account"]);
+				req[C.REQ_REPO].logger.logDebug("Attempting to add user: " + req.params[C.REPO_REST_API_ACCOUNT], req);
+				dbInterface(req[C.REQ_REPO].logger).createUser(req.params[C.REPO_REST_API_ACCOUNT], req.body.password, req.body.email, function() {
+					createSession(responsePlace, req, res, next, req.params[C.REPO_REST_API_ACCOUNT]);
 				});
 			} else {
 				if(!req.session.user)
@@ -104,21 +110,21 @@ module.exports = function(router, dbInterface, checkAccess){
 					return responseCodes.respond(responsePlace, responseCodes.NOT_LOGGED_IN, res, {});
 				}
 
-				if (req.session.user.username != req.params['account'])
+				if (req.session.user.username !== req.params[C.REPO_REST_API_ACCOUNT])
 				{
-					responseCodes.respond(responsePlace, responseCodes.NOT_AUTHORIZED, res, {account: req.params["account"]});
+					responseCodes.respond(responsePlace, req, res, next, err, responseCodes.NOT_AUTHORIZED, {account: req.params[C.REPO_REST_API_ACCOUNT]});
 				} else {
 					// Modify account here
-					logger.logDebug("Updating account", req);
+					req[C.REQ_REPO].logger.logDebug("Updating account", req);
 
 					if (req.body.oldPassword)
 					{
-						this.dbInterface.updatePassword(req.params["account"], req.body, function(err) {
-							responseCodes.onError(responsePlace, req, res, next, err, {account: req.params["account"]});
+						self.dbInterface.updatePassword(req.params[C.REPO_REST_API_ACCOUNT], req.body, function(err) {
+							responseCodes.onError(responsePlace, req, res, next, err, {account: req.params[C.REPO_REST_API_ACCOUNT]});
 						});
 					} else {
-						this.dbInterface.updateUser(req.params["account"], req.body, function(err) {
-							responseCodes.onError(responsePlace, req, res, next, err, {account: req.params["account"]});
+						self.dbInterface.updateUser(req.params[C.REPO_REST_API_ACCOUNT], req.body, function(err) {
+							responseCodes.onError(responsePlace, req, res, next, err, {account: req.params[C.REPO_REST_API_ACCOUNT]});
 						});
 					}
 				}
@@ -126,69 +132,91 @@ module.exports = function(router, dbInterface, checkAccess){
 		});
 	});
 
-	// Update or create a user's account
-	//this.post('/:account/:project', false, function(req, res) {
+	// Update or create a user"s account
+	//this.post("/:account/:project", false, function(req, res) {
 	//});
 
-	this.post('/:account/:project/wayfinder/record', false, function(req, res, next) {
-		var resCode = responseCodes.OK;
-		var responsePlace = 'Wayfinder record POST';
+	self.post("/:account/:project/wayfinder/record", false, function(req, res, next) {
+		var responsePlace = "Wayfinder record POST";
 
-		logger.logDebug('Posting wayfinder record information', req);
+		req[C.REQ_REPO].logger.logDebug("Posting wayfinder record information", req);
 
 		if (!("user" in req.session)) {
-			responseCodes.respond('Wayfinder record POST', responseCodes.NOT_LOGGED_IN, res, {});
+			responseCodes.respond(responsePlace, responseCodes.NOT_LOGGED_IN, res, {});
 		} else {
 			var data = JSON.parse(req.body.data);
 			var timestamp = JSON.parse(req.body.timestamp);
 
-			this.dbInterface.storeWayfinderInfo(req.params["account"], req.params["project"], req.session.user.username, req.sessionID, data, timestamp, function(err) {
-				responseCodes.onError('Wayfinder record POST', req, res, next, err, {});
+			self.dbInterface.storeWayfinderInfo(req.params[C.REPO_REST_API_ACCOUNT], req.params[C.REPO_REST_API_PROJECT], req.session.user.username, req.sessionID, data, timestamp, function(err) {
+				responseCodes.onError(responsePlace, req, res, next, err, {});
 			});
 		}
 
 	});
 
 	// Ability to add a named viewpoint
-	this.post('/:account/:project/:branch/viewpoint', true, function(req, res, next) {
-		var responsePlace = 'Adding a viewpoint';
+	self.post("/:account/:project/:branch/viewpoint", true, function(req, res, next) {
+		var responsePlace = "Adding a viewpoint";
 
-		logger.logDebug('Adding a new viewpoint to ' + req.params["account"] + req.params["project"], req);
+		req[C.REQ_REPO].logger.logDebug("Adding a new viewpoint to " + req.params[C.REPO_REST_API_ACCOUNT] + req.params[C.REPO_REST_API_PROJECT], req);
 
 		var data = JSON.parse(req.body.data);
 
-		this.dbInterface.getRootNode(req.params["account"], req.params["project"], req.params["branch"], null, function(err, root) {
-			if (err.value) return callback(err);
+		dbInterface(req[C.REQ_REPO].logger).getRootNode(req.params[C.REPO_REST_API_ACCOUNT], req.params[C.REPO_REST_API_PROJECT], req.params[C.REPO_REST_API_BRANCH], null, function(err, root) {
+			if (err.value) {
+				return responseCodes.onError(responsePlace, req, res, next, err, {});
+			}
 
-			this.dbInterface.storeViewpoint(req.params["account"], req.params["project"], req.params["branch"], req.session.user, this.dbInterface.uuidToString(root["shared_id"]), data, function(err) {
+			self.dbInterface.storeViewpoint(req.params[C.REPO_REST_API_ACCOUNT], req.params[C.REPO_REST_API_PROJECT], req.params[C.REPO_REST_API_BRANCH], req.session.user, self.dbInterface.uuidToString(root[C.REPO_NODE_LABEL_SHARED_ID]), data, function(err) {
 				responseCodes.onError(responsePlace, req, res, next, err, {});
 			});
 		});
 	});
 
-	this.post('/:account/:project/issues/:sid', true, function(req, res, next) {
-		var responsePlace = 'Adding or updating an issue';
+	self.post("/:account/:project/issues/:sid", true, function(req, res, next) {
+		var responsePlace = "Adding or updating an issue";
 		var data = JSON.parse(req.body.data);
 
-		logger.logDebug('Upserting an issues for object ' + req.params['sid'] + ' in ' + req.params["account"] + '/' + req.params["project"], req);
+		req[C.REQ_REPO].logger.logDebug("Upserting an issues for object " + req.params[C.REPO_REST_API_SID] + " in " + req.params[C.REPO_REST_API_ACCOUNT] + "/" + req.params[C.REPO_REST_API_PROJECT], req);
 
-		this.dbInterface.storeIssue(req.params["account"], req.params["project"], req.params["sid"], req.session.user.username, data, function(err, result) {
+		dbInterface(req[C.REQ_REPO].logger).storeIssue(req.params[C.REPO_REST_API_ACCOUNT], req.params[C.REPO_REST_API_PROJECT], req.params[C.REPO_REST_API_SID], req.session.user.username, data, function(err, result) {
 			responseCodes.onError(responsePlace, req, res, next, err, result);
 		});
 	});
 
+	var checkProcessed = function (callback) {
+		return function(req, res, next) {
+			// Have we already processed this request
+			if (req[C.REQ_REPO].processed) {
+				return next();
+			} else {
+				req[C.REQ_REPO].processed = true;
+			}
+
+			callback(req, res, next);
+		};
+	};
+
 	// Register handlers with Express Router
-	for(var idx in this.postMap)
+	for(var idx in self.postMap)
 	{
-		var item = this.postMap[idx];
+		if (self.postMap.hasOwnProperty(idx))
+		{
+			var item = self.postMap[idx];
 
-		var resFunction = schemaValidator.validate(item.regex);
+			var resFunction = schemaValidator.validate(item.regex);
 
-		if (item.shouldCheckAccess)
-			router.post(item.regex.toString(), resFunction, checkAccess, item.callback);
-		else
-			router.post(item.regex, resFunction, item.callback);
+			systemLogger.logInfo("Adding POST regex " + item.regex);
+
+			if (item.shouldCheckAccess) {
+				router.post(item.regex.toString(), resFunction, checkAccess, checkProcessed(item.callback));
+			} else {
+				router.post(item.regex, resFunction, checkProcessed(item.callback));
+			}
+		}
 	}
 
-	return this;
+	return self;
 };
+
+module.exports = repoPostHandler;

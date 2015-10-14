@@ -4,7 +4,7 @@
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU Affero General Public License as
  *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *	License, or (at your option) a/exitny later version.
  *
  *	This program is distributed in the hope that it will be useful,
  *	but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,24 +16,27 @@
  */
  var logIface = require('../logger.js');
  var C = require('../constants.js');
- var logger = logIface.logger;
  var uuidToString = require('../db_interface.js').uuidToString;
  var repoNodeMesh = require('../repoNodeMesh.js');
  var responseCodes = require('../response_codes.js');
+
+ var utils         = require('../utils.js');
+
+ var dbInterface   = require('../db_interface.js');
 
 /*******************************************************************************
  * Render SRC format of a mesh
  *
  * @param {string} project - The name of the project containing the mesh
- * @param {RepoGraphScene} - Render all meshes contained in RepoGraphScene object. 
+ * @param {RepoGraphScene} - Render all meshes contained in RepoGraphScene object.
  * @param {string} tex_uuid - A string representing the tex_uuid attached to the mesh
  * @param {boolean} embedded_texture - Determines whether or not the texture data is embedded in the SRC.
  * @param {string} subformat - Subformat, currently for Multipart
  * @param {Object} res - The http response object
  *******************************************************************************/
- function render(project, scene, tex_uuid, embedded_texture, subformat, result_callback)
+ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, result_callback)
  {
- 	logger.log('debug', 'Passed ' + scene[C.REPO_SCENE_LABEL_MESHES_COUNT]);
+ 	logger.logDebug('Passed ' + scene[C.REPO_SCENE_LABEL_MESHES_COUNT]);
 
  	var meshIDs = Object.keys(scene.meshes);
  	var meshIDX = 0;
@@ -67,9 +70,9 @@
 
 		var mesh = scene.meshes[meshID]; // Current mesh object
 
-		logger.log('debug', 'Processing mesh ' + meshID);
-		logger.log('debug', 'Mesh #Verts: ' + mesh.vertices_count);
-		logger.log('debug', 'Mesh #Faces: ' + mesh.faces_count);
+		logger.logDebug('Processing mesh ' + meshID);
+		logger.logDebug('Mesh #Verts: ' + mesh.vertices_count);
+		logger.logDebug('Mesh #Faces: ' + mesh.faces_count);
 
 		var subMeshArray         = [];
 		var subMeshKeys          = [];
@@ -171,7 +174,7 @@
 					subMeshKeys[i]                                      = [];
 
 					for(var p = 0; p < subMeshArray[i]["idx_list"].length; p++)
-						subMeshKeys[i].push(uuidToString(mesh[C.REPO_NODE_LABEL_COMBINED_MAP][p][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]));
+						subMeshKeys[i].push(utils.uuidToString(mesh[C.REPO_NODE_LABEL_COMBINED_MAP][p][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]));
 
 					// If this is multipart then generate the idMap
 					for(var j = 0; j < subMeshArray[i]["idx_list"].length; j++)
@@ -461,7 +464,7 @@
 					var num_comp = orig_idx.readInt32LE(orig_idx_ptr);
 
 					if (num_comp != 3) {
-						logger.log('error', 'Non triangulated face with ' + num_comp + ' vertices.');
+						logger.logError('Non triangulated face with ' + num_comp + ' vertices.');
 					} else {
 
 						num_faces += 1; // This is a triangulated face
@@ -583,10 +586,10 @@
 // Set up REST routing calls
 exports.route = function(router)
 {
-	router.get('src', '/:account/:project/:uid', function(res, params, err_callback) {
+	router.get('src', '/:account/:project/:uid', function(res, req, params, err_callback) {
 		// Get object based on UID, check whether or not it is a mesh
 		// and then output the result.
-		router.dbInterface.getObject(params.account, params.project, params.uid, null, null, true, function(err, type, uid, fromStash, obj)
+		dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, function(err, type, uid, fromStash, obj)
 		{
 			if(err.value)
 				return err_callback(err);
@@ -600,7 +603,7 @@ exports.route = function(router)
 					tex_uuid = params.query.tex_uuid;
 				}
 
-				render(params.project, obj, tex_uuid, false, params.subformat, function(err, renderedObj) {
+				render(params.project, obj, tex_uuid, false, params.subformat, req[C.REQ_REPO].logger, function(err, renderedObj) {
 					if (err.value)
 						return err_callback(err);
 
@@ -612,10 +615,10 @@ exports.route = function(router)
 		});
 	});
 
-	router.get('src', '/:account/:project/revision/:rid/:sid', function(res, params, err_callback) {
+	router.get('src', '/:account/:project/revision/:rid/:sid', function(res, req, params, err_callback) {
 		// Get object based on revision rid, and object shared_id sid. Check
 		// whether or not it is a mesh and then output the result.
-		router.dbInterface.getObject(params.account, params.project, null, params.rid, params.sid, true, function(err, type, uid, fromStash, obj)
+		dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, null, params.rid, params.sid, true, function(err, type, uid, fromStash, obj)
 		{
 			if(err.value)
 				return err_callback(err);
@@ -629,7 +632,7 @@ exports.route = function(router)
 					tex_uuid = params.query.tex_uuid;
 				}
 
-				render(params.project, obj, tex_uuid, false, params.subformat, function(err, renderedObj) {
+				render(params.project, obj, tex_uuid, false, params.subformat, req[C.REQ_REPO].logger, function(err, renderedObj) {
 					if (err.value)
 						return err_callback(err);
 

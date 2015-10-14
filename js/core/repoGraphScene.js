@@ -26,8 +26,6 @@ var repoNodeTransformation = require('./repoNodeTransformation');
 var repoNodeMaterial = require('./repoNodeMaterial');
 var repoNodeCamera = require('./repoNodeCamera');
 var repoNodeMeta   = require('./repoNodeMeta');
-var log_iface = require('./logger.js');
-var logger = log_iface.logger;
 
 // Documentation
 // http://mongodb.github.com/node-mongodb-native/contents.html
@@ -37,8 +35,20 @@ var logger = log_iface.logger;
  *
  * @param {Array} bsonArray
  */
-exports.decode = function(bsonArray, gridfsfiles) {
+var repoGraphScene = function(logger) {
+	"use strict";
+
+	var self = this instanceof repoGraphScene ? this : Object.create(repoGraphScene.prototype);
+
+	self.logger = logger;
+
+	return self;
+};
+
+repoGraphScene.prototype.decode = function(bsonArray, gridfsfiles) {
 	var rootNode;
+
+	this.logger.logTrace("repoGraphScene start decode");
 
 	gridfsfiles = typeof(gridfsfiles) === 'undefined' ? {} : gridfsfiles;
 
@@ -67,13 +77,15 @@ exports.decode = function(bsonArray, gridfsfiles) {
 	// dictionary of {shared_id : bson}
 	var all = new Object();
 
+	var startTime = (new Date()).getTime();
+
 	if (bsonArray) {
 		// Separate out all the nodes, meshes, materials and textures and
 		// find the single root node
 		for (var i = 0; i < bsonArray.length; ++i) {
 			bson = bsonArray[i];
 			if (!bson[C.REPO_NODE_LABEL_SHARED_ID]) {
-				logger.log('error','Shared UUID not found!');
+				this.logger.logError('Shared UUID not found!');
 			} else {
 				var idBytes = bson[C.REPO_NODE_LABEL_ID].buffer;
 				bson.id = UUID.unparse(idBytes);
@@ -113,7 +125,7 @@ exports.decode = function(bsonArray, gridfsfiles) {
 						scene[C.REPO_SCENE_LABEL_MAPS_COUNT]++;
 						break;
 					default :
-						logger.log('error','Unsupported node type found: ' + bson[C.REPO_NODE_LABEL_TYPE]);
+						logger.logError('Unsupported node type found: ' + bson[C.REPO_NODE_LABEL_TYPE]);
 				}
 
 				var sidBytes = bson[C.REPO_NODE_LABEL_SHARED_ID].buffer;
@@ -196,5 +208,12 @@ exports.decode = function(bsonArray, gridfsfiles) {
 
 	scene.all = all;
 
+	this.logger.logTrace("repoGraphScene end decode");
+
 	return scene;
 };
+
+module.exports = function(logger) {
+	 return new repoGraphScene(logger);
+};
+

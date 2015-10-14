@@ -265,7 +265,9 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 			self.downloadsLeft += (objEvent.target.querySelectorAll("[load]").length - 1);
 
-			if (!self.downloadsLeft)
+			self.showAll();
+
+			if (!self.downloadsLeft) 
 				self.loadedPromise.resolve();
 		});
 	};

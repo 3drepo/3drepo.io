@@ -18,54 +18,72 @@
 // Inspired by
 // http://stackoverflow.com/questions/12037655/node-js-mongodb-native-driver-connection-sharing
 
-var async	  = require('async');
-var config	  = require('./config.js');
+var config	  = require("./config.js");
 
-var responseCodes = require('./response_codes.js');
+var responseCodes = require("./response_codes.js");
 
-var MongoClient = require('mongodb').MongoClient,
-	Server      = require('mongodb').Server,
-	GridStore   = require('mongodb').GridStore;
+var MongoClient = require("mongodb").MongoClient,
+	GridStore   = require("mongodb").GridStore;
 
 // Create connection to Mongo
 // Main DB Object constructor
 var MongoDBObject = function()
 {
+	"use strict";
+
+	var self = this instanceof MongoDBObject ? this : Object.create(MongoDBObject.prototype);
+
+	self.host = config.db.host;
+	self.port = config.db.port;
+
+	self.username = config.db.username;
+	self.password = config.db.password;
+
+	self.dbConns  = {};
+
+	return self;
+};
+
+MongoDBObject.prototype.getURL = function(database)
+{
+	"use strict";
+
+	return "mongodb://" + this.username + ":" + this.password + "@" + this.host + ":" + this.port + "/" + database + "?authSource=admin";
+};
+
+MongoDBObject.prototype.open = function(database, callback)
+{
+	"use strict";
+
 	var self = this;
 
-	this.host = config.db.host;
-	this.port = config.db.port;
-
-	this.username = config.db.username;
-	this.password = config.db.password;
-
-	this.dbConns  = {};
-
-	this.getURL = function(database)
+	if (this.dbConns[database])
 	{
-		return "mongodb://" + this.username + ":" + this.password + "@" + this.host + ":" + this.port + "/" + database;
-	}
-
-	this.open = function(database, callback)
-	{
-		if (dbConns[database])
-		{
-			callback(null, dbConns[database]);
-		} else {
-			MongoClient.connect(this.getURL(database), function(err, db) {
-				if (err) return callback(err, null);
-
-				dbConns[database] = db;
-
-				callback(null, dbConns[database]);
+		callback(null, this.dbConns[database]);
+	} else {
+		MongoClient.connect(this.getURL(database), function(err, db) {
+			if (err) {
+				return callback(err, null);
 			}
-		}
+
+			self.dbConns[database] = db;
+
+			callback(null, self.dbConns[database]);
+		});
 	}
 };
 
 var mongo = new MongoDBObject();
 
-var MongoWrapper = function(logger) {};
+var MongoWrapper = function(logger) {
+	"use strict";
+
+	var self = this instanceof MongoWrapper ? this : Object.create(MongoWrapper.prototype);
+
+	self.logger = logger;
+
+	return self;
+};
 
 /*******************************************************************************
  * Authenticate User against admin database
@@ -77,17 +95,20 @@ var MongoWrapper = function(logger) {};
  *								user is the user object
  ******************************************************************************/
 MongoWrapper.prototype.authenticateUser = function(username, password, callback) {
+	"use strict";
 
 	// Create a separate admin database connection to avoid
 	// constantly switching between auth user and NodeJS
 	// user
+
+	var self = this;
 
 	mongo.open("admin", function(err, adminDb) {
 		if (err) {
 			return callback(responseCodes.DB_ERROR(err));
 		}
 
-		logger.logInfo('Authenticating user');
+		self.logger.logInfo("Authenticating user");
 
 		adminDb.authenticate(username, password, function(err) {
 			if(err) {
@@ -109,16 +130,16 @@ MongoWrapper.prototype.authenticateUser = function(username, password, callback)
  *								dbConn is the returned database connection.
  ******************************************************************************/
 MongoWrapper.prototype.dbCallback = function(dbName, callback) {
+	"use strict";
+
 	mongo.open(dbName, function(err, db) {
 		if (err) {
 			return callback(responseCodes.DB_ERROR(err));
 		}
 
 		callback(responseCodes.OK, db);
-	}
-}
-
-MongoWrapper.prototype.Binary = mongo.Binary;
+	});
+};
 
 /*******************************************************************************
  * Get a file from the Grid FS store
@@ -131,8 +152,12 @@ MongoWrapper.prototype.Binary = mongo.Binary;
  ******************************************************************************/
 MongoWrapper.prototype.getGridFSFile = function(dbName, collName, fileName, callback)
 {
+	"use strict";
+
 	this.dbCallback(dbName, function (err, dbConn) {
-		if (err.value) return callback(err);
+		if (err.value) {
+			return callback(err);
+		}
 
 		var options = {
 			"root" : collName
@@ -141,20 +166,22 @@ MongoWrapper.prototype.getGridFSFile = function(dbName, collName, fileName, call
 		var gs = new GridStore(dbConn, fileName, "r", options);
 
 		gs.open(function (err, gs) {
-			if (err)
+			if (err) {
 				return callback(responseCodes.DB_ERROR(err));
+			}
 
 			gs.seek(0, function() {
 				gs.read(function(err, data) {
-					if (err)
+					if (err) {
 						return callback(responseCodes.DB_ERROR(err));
+					}
 
 					callback(responseCodes.OK, new mongo.Binary(data));
 				});
 			});
 		});
 	});
-}
+};
 
 /*******************************************************************************
  * Run callback on collection from the database
@@ -166,20 +193,28 @@ MongoWrapper.prototype.getGridFSFile = function(dbName, collName, fileName, call
  *								callback as parameter
  ******************************************************************************/
 MongoWrapper.prototype.collCallback = function(dbName, collName, strict, callback) {
-	logger.logDebug('Loading collection ' + collName + ' on ' + dbName);
+	"use strict";
+
+	var self = this;
+
+	self.logger.logDebug("Loading collection " + collName + " on " + dbName);
 
 	// First get database connection
-	this.dbCallback(dbName, function(err, dbConn) {
-		if (err.value) return callback(err);
+	self.dbCallback(dbName, function(err, dbConn) {
+		if (err.value) {
+			return callback(err);
+		}
 
 		// Get collection from database to act on
 		dbConn.collection(collName, {strict:strict}, function(err, coll) {
-			if (err) return callback(responseCodes.DB_ERROR(err));
+			if (err) {
+				return callback(responseCodes.DB_ERROR(err));
+			}
 
 			callback(responseCodes.OK, coll);
 		});
 	});
-}
+};
 
 /*******************************************************************************
  * Get top result from query with latest timestamp
@@ -191,30 +226,42 @@ MongoWrapper.prototype.collCallback = function(dbName, collName, strict, callbac
  *								callback as parameter
  ******************************************************************************/
 MongoWrapper.prototype.getLatest = function(dbName, collName, filter, projection, callback) {
+	"use strict";
+
+	var self = this;
+
 	// Run collection callback that first sorts by timestamp
 	// and then gets the top row.
-	this.collCallback(dbName, collName, true, function(err, coll) {
-		if (err.value) return callback(err);
+	self.collCallback(dbName, collName, true, function(err, coll) {
+		if (err.value) {
+			return callback(err);
+		}
 
-		projStr = JSON.stringify(projection);
-		filtStr = JSON.stringify(filter);
+		var projStr = JSON.stringify(projection);
+		var filtStr = JSON.stringify(filter);
 
-		logger.logDebug('Getting latest for collection: ' + dbName + '/' + collName);
-		logger.logDebug('FILTER: \"' + filtStr + '\"');
-		logger.logDebug('PROJECTION: \"' + projStr + '\"');
+		self.logger.logDebug("Getting latest for collection: " + dbName + "/" + collName);
+		self.logger.logDebug("FILTER: \"" + filtStr + "\"");
+		self.logger.logDebug("PROJECTION: \"" + projStr + "\"");
 
-		if (projection != null)
+		if (projection !== null)
 		{
 			coll.find(filter, projection).limit(1).sort({timestamp:-1}).toArray(function(err, docs) {
-				if (err) return callback(responseCodes.DB_ERROR(err));
-				logger.logDebug('Found ' + docs.length + ' result(s).');
+				if (err) {
+					return callback(responseCodes.DB_ERROR(err));
+				}
+
+				self.logger.logDebug("Found " + docs.length + " result(s).");
 
 				callback(responseCodes.OK, docs);
 			});
 		} else {
 			coll.find(filter).limit(1).sort({timestamp:-1}).toArray(function(err, docs) {
-				if (err) return callback(responseCodes.DB_ERROR(err));
-				logger.logDebug('Found ' + docs.length + ' result(s).');
+				if (err) {
+					return callback(responseCodes.DB_ERROR(err));
+				}
+
+				self.logger.logDebug("Found " + docs.length + " result(s).");
 
 				callback(responseCodes.OK, docs);
 			});
@@ -233,35 +280,49 @@ MongoWrapper.prototype.getLatest = function(dbName, collName, filter, projection
  *								pass to callback as parameter
  ******************************************************************************/
 MongoWrapper.prototype.filterColl = function(dbName, collName, filter, projection, callback) {
+	"use strict";
+
+	var self = this;
+
 	this.collCallback(dbName, collName, true, function(err, coll) {
-		if (err.value) return callback(err);
+		if (err.value) {
+			return callback(err);
+		}
 
-		projStr = JSON.stringify(projection);
-		filtStr = JSON.stringify(filter);
+		var projStr = JSON.stringify(projection);
+		var filtStr = JSON.stringify(filter);
 
-		logger.logDebug('Filter collection: ' + dbName + '/' + collName);
-		logger.logDebug('FILTER: \"' + filtStr + '\"');
-		logger.logDebug('PROJECTION: \"' + projStr + '\"');
+		self.logger.logDebug("Filter collection: " + dbName + "/" + collName);
+		self.logger.logDebug("FILTER: \"" + filtStr + "\"");
+		self.logger.logDebug("PROJECTION: \"" + projStr + "\"");
 
-		if (projection != null) {
+		if (projection !== null) {
 			coll.find(filter, projection).toArray(function(err, docs) {
-				if (err) return callback(responseCodes.DB_ERROR(err));
-				logger.logDebug('Found ' + docs.length + ' result(s).');
+				if (err) {
+					return callback(responseCodes.DB_ERROR(err));
+				}
+
+				self.logger.logDebug("Found " + docs.length + " result(s).");
 
 				callback(responseCodes.OK, docs);
 			});
 		} else {
 			coll.find(filter).toArray(function(err, docs) {
-				if (err) return callback(responseCodes.DB_ERROR(err));
-				logger.logDebug('Found ' + docs.length + ' result(s).');
+				if (err) {
+					return callback(responseCodes.DB_ERROR(err));
+				}
+
+				self.logger.logDebug("Found " + docs.length + " result(s).");
 
 				callback(responseCodes.OK, docs);
 			});
 		}
 	});
-}
+};
 
 module.exports = function(logger) {
+	"use strict";
+
 	return new MongoWrapper(logger);
 };
 
