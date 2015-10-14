@@ -37,7 +37,7 @@ var responseCodes = require("./response_codes.js");
 
 var utils = require("./utils.js");
 
-// TODO: Remove these 
+// TODO: Remove these
 stringToUUID = utils.stringToUUID;
 uuidToString = utils.uuidToString;
 
@@ -131,7 +131,7 @@ DBInterface.prototype.updateUser = function(username, data, callback) {
 
 			var user = { "updateUser" : username };
 			var newCustomData = oldCustomData;
- 
+
 			if(data.email) {
 				newCustomData.email = data.email;
 			}

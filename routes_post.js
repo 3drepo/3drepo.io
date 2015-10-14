@@ -21,6 +21,10 @@
 
 var schemaValidator = require("./js/core/db_schema.js")();
 var systemLogger    = require("./js/core/logger.js").systemLogger;
+var responseCodes = require("./js/core/response_codes.js");
+var config = require("./js/core/config.js");
+var queue = require("./js/core/queue.js");
+var multer = require("multer");
 
 var dbInterface     = require("./js/core/db_interface.js");
 var responseCodes   = require("./js/core/response_codes.js");
@@ -40,7 +44,6 @@ function createSession(place, req, res, next, user)
 		}
 	});
 }
-
 
 var repoPostHandler = function(router, checkAccess){
 	"use strict";
@@ -131,6 +134,30 @@ var repoPostHandler = function(router, checkAccess){
 			}
 		});
 	});
+
+    //upload and import file into repo world
+    self.post("/:account/:project/upload", true, function (req, res) {
+        var responsePlace = "Uploading a new model";
+        if (config.cn_queue) {
+            var upload = multer({ dest: config.cn_queue.upload_dir });
+            upload.single("file")(req, res, function (err) {
+                if (err) {
+                    req[C.REQ_REPO].logDebug("error: " + err);
+                }
+                else {
+                    console.log("session: " , req.session);
+                    queue.importFile(req.file.path, req.file.originalname, req.params["account"], req.params["project"], req.session.user, function (err) {
+                        req[C.REQ_REPO].logDebug("callback of importfile: " + err);
+                        responseCodes.onError(responsePlace, req, res, err, { "user": req.session.user.username, "database" : req.params["account"], "project": req.params["project"] });
+
+                    });
+                }
+            });
+        }
+        else {
+            responseCodes.onError(responsePlace, responseCodes.QUEUE_NO_CONFIG, res, { "user": req.session.user.username, "database" : req.params["account"], "project": req.params["project"] });
+        }
+    });
 
 	// Update or create a user"s account
 	//this.post("/:account/:project", false, function(req, res) {

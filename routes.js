@@ -40,7 +40,7 @@ function hasWriteAccessToProject(req, account, project, callback)
 function hasReadAccessToProject(req, account, project, callback)
 {
 	"use strict";
-	
+
 	var username = null;
 
 	if (req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
@@ -68,7 +68,7 @@ var repoRouter = function() {
 			if (req[C.REQ_REPO].processed)
 			{
 				return next();
-			} 
+			}
 
 			// Account and project they are trying to access
 			var account = req.params[C.REPO_REST_API_ACCOUNT];
@@ -78,7 +78,7 @@ var repoRouter = function() {
 
 			if (req.params[C.REPO_REST_API_FORMAT]) {
 				format = req.params[C.REPO_REST_API_FORMAT].toLowerCase();
-			} 
+			}
 
 			req.accessError = responseCodes.OK;
 
