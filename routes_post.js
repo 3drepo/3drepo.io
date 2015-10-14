@@ -142,20 +142,17 @@ var repoPostHandler = function(router, checkAccess){
             var upload = multer({ dest: config.cn_queue.upload_dir });
             upload.single("file")(req, res, function (err) {
                 if (err) {
-                    req[C.REQ_REPO].logDebug("error: " + err);
+                    return responseCodes.response(responsePlace, responseCodes.FILE_IMPORT_PROCESS_ERR, res, {});
                 }
                 else {
-                    console.log("session: " , req.session);
-                    queue.importFile(req.file.path, req.file.originalname, req.params["account"], req.params["project"], req.session.user, function (err) {
-                        req[C.REQ_REPO].logDebug("callback of importfile: " + err);
-                        responseCodes.onError(responsePlace, req, res, err, { "user": req.session.user.username, "database" : req.params["account"], "project": req.params["project"] });
-
+                    queue.importFile(req.file.path, req.file.originalname, req.params[C.REPO_REST_API_ACCOUNT], req.params[C.REPO_REST_API_PROJECT], req.session.user, function (err) {
+                        responseCodes.onError(responsePlace, req, res, err, { "user": req.session.user.username, "database" : req.params[C.REPO_REST_API_ACCOUNT], "project": req.params[C.REPO_REST_API_PROJECT] });
                     });
                 }
             });
         }
         else {
-            responseCodes.onError(responsePlace, responseCodes.QUEUE_NO_CONFIG, res, { "user": req.session.user.username, "database" : req.params["account"], "project": req.params["project"] });
+            responseCodes.onError(responsePlace, responseCodes.QUEUE_NO_CONFIG, res, { "user": req.session.user.username, "database" : req.params[C.REPO_REST_API_ACCOUNT], "project": req.params[C.REPO_REST_API_PROJECT] });
         }
     });
 
