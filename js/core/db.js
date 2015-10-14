@@ -51,11 +51,13 @@ MongoDBObject.prototype.getURL = function(database)
 	return "mongodb://" + this.username + ":" + this.password + "@" + this.host + ":" + this.port + "/" + database + "?authSource=admin";
 };
 
-MongoDBObject.prototype.open = function(database, callback)
+MongoDBObject.prototype.open = function(database, callback, forgetMe)
 {
 	"use strict";
 
 	var self = this;
+
+	forgetMe = (forgetMe === undefined) ? false : true;
 
 	if (this.dbConns[database])
 	{
@@ -66,9 +68,11 @@ MongoDBObject.prototype.open = function(database, callback)
 				return callback(err, null);
 			}
 
-			self.dbConns[database] = db;
+			if (!forgetMe) {
+				self.dbConns[database] = db;
+			}
 
-			callback(null, self.dbConns[database]);
+			callback(null, db);
 		});
 	}
 };
@@ -118,7 +122,7 @@ MongoWrapper.prototype.authenticateUser = function(username, password, callback)
 			callback(responseCodes.OK);
 		});
 
-	});
+	}, true);
 };
 
 /*******************************************************************************
