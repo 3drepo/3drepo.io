@@ -25,7 +25,8 @@ var responseCodes = require("./response_codes.js");
 var MongoClient = require("mongodb").MongoClient,
 	Server      = require("mongodb").Server,
 	Db          = require("mongodb").Db,
-	GridStore   = require("mongodb").GridStore;
+	GridStore   = require("mongodb").GridStore,
+	Binary      = require("mongodb").Binary;
 
 var systemLogger = require("./logger.js").systemLogger;
 
@@ -200,7 +201,7 @@ MongoWrapper.prototype.getGridFSFile = function(dbName, collName, fileName, call
 						return callback(responseCodes.DB_ERROR(err));
 					}
 
-					callback(responseCodes.OK, new mongo.Binary(data));
+					callback(responseCodes.OK, new Binary(data));
 				});
 			});
 		});
