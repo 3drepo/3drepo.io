@@ -23,7 +23,11 @@ var config	  = require("./config.js");
 var responseCodes = require("./response_codes.js");
 
 var MongoClient = require("mongodb").MongoClient,
+	Server      = require("mongodb").Server,
+	Db          = require("mongodb").Db,
 	GridStore   = require("mongodb").GridStore;
+
+var systemLogger = require("./logger.js").systemLogger;
 
 // Create connection to Mongo
 // Main DB Object constructor
@@ -40,6 +44,22 @@ var MongoDBObject = function()
 	self.password = config.db.password;
 
 	self.dbConns  = {};
+
+	var authDBConn = new Db("admin", new Server(config.db.host, config.db.port,
+		{
+			auto_reconnect: true
+		}),
+	{ safe : false });
+
+	authDBConn.open(function(err, dbConn) {
+		if(err) {
+			var dbError = responseCodes.DB_ERROR(err);
+			systemLogger.logError(dbError);
+			throw Error(dbError);
+		}
+
+		self.authDB = dbConn;
+	});
 
 	return self;
 };
@@ -73,6 +93,20 @@ MongoDBObject.prototype.open = function(database, callback)
 	}
 };
 
+MongoDBObject.prototype.authenticateUser = function(username, password, callback)
+{
+	"use strict";
+	var self = this;
+
+	self.authDB.admin().authenticate(username, password, function(err) {
+		if(err) {
+			return callback(responseCodes.DB_ERROR(err));
+		}
+
+		callback(responseCodes.OK);
+	});
+}
+
 var mongo = new MongoDBObject();
 
 var MongoWrapper = function(logger) {
@@ -103,22 +137,8 @@ MongoWrapper.prototype.authenticateUser = function(username, password, callback)
 
 	var self = this;
 
-	mongo.open("admin", function(err, adminDb) {
-		if (err) {
-			return callback(responseCodes.DB_ERROR(err));
-		}
-
-		self.logger.logInfo("Authenticating user");
-
-		adminDb.authenticate(username, password, function(err) {
-			if(err) {
-				return callback(responseCodes.DB_ERROR(err));
-			}
-
-			callback(responseCodes.OK);
-		});
-
-	});
+	self.logger.logInfo("Authenticating user");
+	mongo.authenticateUser(username, password, callback);
 };
 
 /*******************************************************************************
