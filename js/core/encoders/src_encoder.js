@@ -589,7 +589,7 @@ exports.route = function(router)
 	router.get('src', '/:account/:project/:uid', function(res, req, params, err_callback) {
 		// Get object based on UID, check whether or not it is a mesh
 		// and then output the result.
-		dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, function(err, type, uid, fromStash, obj)
+		dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, {}, function(err, type, uid, fromStash, obj)
 		{
 			if(err.value)
 				return err_callback(err);
@@ -618,7 +618,7 @@ exports.route = function(router)
 	router.get('src', '/:account/:project/revision/:rid/:sid', function(res, req, params, err_callback) {
 		// Get object based on revision rid, and object shared_id sid. Check
 		// whether or not it is a mesh and then output the result.
-		dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, null, params.rid, params.sid, true, function(err, type, uid, fromStash, obj)
+		dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, null, params.rid, params.sid, true, {}, function(err, type, uid, fromStash, obj)
 		{
 			if(err.value)
 				return err_callback(err);

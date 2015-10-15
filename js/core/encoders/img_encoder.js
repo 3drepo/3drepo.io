@@ -76,7 +76,7 @@ module.exports.route = function(router)
 	"use strict";
 
 	var imgObject = function(res, req, params, err_callback) {
-		dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, function(err, type, uid, fromStash, obj)
+		dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, {}, function(err, type, uid, fromStash, obj)
 		{
 			if(err.value) {
 				return err_callback(err);
@@ -98,7 +98,7 @@ module.exports.route = function(router)
 	router.get("gif", "/:account/:project/:uid", imgObject);
 
 	router.get("pdf", "/:account/:project/:uid", function(res, req, params, err_callback) {
-		dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, function(err, type, uid, fromStash, obj)
+		dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, {}, function(err, type, uid, fromStash, obj)
 		{
 			if (err.value) {
 				return err_callback(err);

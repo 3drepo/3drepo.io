@@ -956,7 +956,7 @@ exports.route = function(router)
 		if (params.subformat == "mpc")
 		{
 			// TODO: Only needs the shell not the whole thing
-			dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, false, function(err, type, uid, fromStash, obj)
+			dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, false, {bounding_box : 1}, function(err, type, uid, fromStash, obj)
 			{
 				if (err.value) return callback(err);
 

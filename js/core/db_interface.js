@@ -831,7 +831,7 @@ DBInterface.prototype.getChildrenByUID = function(dbName, project, uid, needFile
 	self.logger.logTrace("Checking whether the UID exists in the stash or not");
 
 	// First lookup the object in either the stash or the scene
-	self.getObject(dbName, project, uid, null, null, needFiles, function (err, type, uid, fromStash, obj) {
+	self.getObject(dbName, project, uid, null, null, needFiles, {}, function (err, type, uid, fromStash, obj) {
 		if (err.value) return callback(err);
 
 		if (obj["all"].length > 1) return callback(responseCodes.OBJECT_NOT_FOUND);
@@ -1028,6 +1028,8 @@ DBInterface.prototype.getHeadUUID = function(dbName, project, branch, callback) 
 }
 
 DBInterface.prototype.getHeadOf = function(dbName, project, branch, getFunc, callback) {
+	var self = this;
+
 	if (branch == "master")
 		var branch_id = masterUUID;
 	else
@@ -1037,9 +1039,11 @@ DBInterface.prototype.getHeadOf = function(dbName, project, branch, getFunc, cal
 		shared_id : branch_id
 	};
 
-	var self = this;
+	var projection = {
+		_id : 1
+	};
 
-	dbConn(self.logger).getLatest(dbName, project + ".history", historyQuery, null, function(err, doc) {
+	dbConn(self.logger).getLatest(dbName, project + ".history", historyQuery, projection, function(err, doc) {
 		if (err.value)
 			return callback(err);
 
@@ -1056,13 +1060,22 @@ DBInterface.prototype.getHeadOf = function(dbName, project, branch, getFunc, cal
 };
 
 DBInterface.prototype.getRevisionInfo = function(dbName, project, rid, callback) {
+	var self = this;
+
 	var filter = {
 		_id: stringToUUID(rid)
 	};
 
-	var self = this;
+	var projection = {
+		_id :      1,
+		shared_id: 1,
+		author:    1,
+		message:   1,
+		tag:       1,
+		timestamp: 1
+	};
 
-	dbConn(self.logger).filterColl(dbName, project + ".history", filter, null, function(err, doc) {
+	dbConn(self.logger).filterColl(dbName, project + ".history", filter, projection, function(err, doc) {
 		if (err.value)
 			return callback(err);
 
@@ -1212,6 +1225,13 @@ DBInterface.prototype.getFederatedProjectList = function(dbName, project, branch
 		var filter = {
 			type: "ref",
 			_id: { $in: docs[0]["current"]}
+		};
+
+		var projection = {
+			_rid : 1,
+			owner: 1,
+			project: 1,
+			unique: 1
 		};
 
 		dbConn(self.logger).filterColl(dbName, project + ".scene", filter, {}, function(err, refs) {
@@ -1555,6 +1575,8 @@ DBInterface.prototype.appendMeshFiles = function(dbName, project, fromStash, uid
 	var numTasks = gridfstypes.length;
 	var subColl = fromStash ? "stash.3drepo" : "scene";
 
+	self.logger.logTrace("Retrieving mesh files and appending");
+
 	// TODO: Make this more generic, get filename from field
 	async.each(gridfstypes, function (fstype, callback) {
 		dbConn(self.logger).getGridFSFile(dbName, project + "." + subColl, uid + "_" + fstype, function(err, data)
@@ -1569,12 +1591,20 @@ DBInterface.prototype.appendMeshFiles = function(dbName, project, fromStash, uid
 	});
 }
 
-DBInterface.prototype.getObject = function(dbName, project, uid, rid, sid, needFiles, callback) {
+DBInterface.prototype.getObject = function(dbName, project, uid, rid, sid, needFiles, projection, callback) {
 	var self = this;
 
 	self.logger.logDebug("Requesting object (U, R, S) (" + uid + "," + rid + "," + sid + ")");
 
 	// TODO: Get mesh files on demand
+
+	// We need at least these fields for object construction
+	if (projection !== null && Object.keys(projection).length)
+	{
+		projection["_id"]       = 1;
+		projection["shared_id"] = 1;
+		projection["type"]      = 1;
+	}
 
 	if (uid)
 	{
@@ -1582,13 +1612,13 @@ DBInterface.prototype.getObject = function(dbName, project, uid, rid, sid, needF
 			_id: stringToUUID(uid)
 		};
 
-		dbConn(self.logger).filterColl(dbName, project + ".stash.3drepo", query, {}, function(err, obj) {
+		dbConn(self.logger).filterColl(dbName, project + ".stash.3drepo", query, projection, function(err, obj) {
 			if (err.value || !obj.length)
 			{
 				// TODO: At this point we should generate the scene graph
 				// There is no stash so just pass back the unoptimized scene graph
 
-				dbConn(self.logger).filterColl(dbName, project + ".scene", query, {}, function(err, obj) {
+				dbConn(self.logger).filterColl(dbName, project + ".scene", query, projection, function(err, obj) {
 					if (err.value) return callback(err);
 
 					if (!obj.length)

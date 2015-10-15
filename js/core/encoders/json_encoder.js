@@ -450,7 +450,7 @@ exports.route = function(router)
 	router.get("json", "/:account/:project/revision/:branch/head/:sid", function(res, req, params, err_callback) {
 		dbInterface(req[C.REQ_REPO].logger).getHeadUUID(params.account, params.project, params.branch, function (err, uuid)
 		{
-			dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, null, utils.uuidToString(uuid.uuid), params.sid, true, function (err, type, uid, obj) {
+			dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, null, utils.uuidToString(uuid.uuid), params.sid, true, {}, function (err, type, uid, obj) {
 				if (err.value)
 					err_callback(err);
 				else
@@ -471,7 +471,7 @@ exports.route = function(router)
 	router.get("json", "/:account/:project/:uid", function(res, req, params, err_callback) {
 		if(params.subformat == "mpc")
 		{
-			dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, false, function (err, type, uid, fromStash, scene) {
+			dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, false, {}, function (err, type, uid, fromStash, scene) {
 				if (err.value) return err_callback(err);
 
 				if (type == "mesh")
