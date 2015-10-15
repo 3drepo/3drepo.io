@@ -1,6 +1,6 @@
 .metaview(ng-controller='MetaCtrl')
 	#docs
-		table.metadata-table(ng-repeat="(mimetype, docs) in MetaService.metadocs")
+		table.metadata-table(ng-repeat="(mimetype, docs) in MetaService.metadocs" ng-if="mimetype !== 'metadata'")
 			tr
 				th.metadata-title(colspan="2") {{mimetype}}
 			tr(ng-repeat="doc in docs")

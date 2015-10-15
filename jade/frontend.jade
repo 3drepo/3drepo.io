@@ -28,14 +28,14 @@ html(lang="en" ng-app="3drepo").ng-scope
 			.constant('uiState', !{uistate});
 
 		// Plugin JS and Angular files
-		script(type="text/javascript", src='/public/dist/plugins.min.js')
+		//script(type="text/javascript", src='/public/dist/plugins.min.js')
 
 		// Plugin JS Files
-		//each val in pluginJS
+		each val in pluginJS
 			script(type="text/javascript", src=val)
 
 		// Plugin Angular Files
-		//each plugin in pluginAngular
+		each plugin in pluginAngular
 			each file in plugin.files
 				script(type="text/javascript", src=file)
 

@@ -664,6 +664,8 @@ DBInterface.prototype.queryScene = function(dbName, project, branch, revision, f
 
 	var self = this;
 
+	self.logger.logTrace("Querying scene");
+
 	dbConn(self.logger).getLatest(dbName, project + ".history", historyQuery, historyProjection, function(err, docs)
 	{
 		if (err.value) return callback(err);
@@ -671,6 +673,10 @@ DBInterface.prototype.queryScene = function(dbName, project, branch, revision, f
 		if (!docs.length) return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
 
 		filter["rev_id"] = docs[0]["_id"];
+
+		self.logger.logTrace(JSON.stringify(filter));
+
+		self.logger.logTrace("Looking in stash");
 
 		dbConn(self.logger).filterColl(dbName, project + ".stash.3drepo", filter, projection, function(err, coll) {
 			if (err.value || !coll.length)
@@ -680,6 +686,8 @@ DBInterface.prototype.queryScene = function(dbName, project, branch, revision, f
 				delete filter["rev_id"];
 
 				filter["_id"] = { $in: docs[0]["current"] };
+
+				self.logger.logTrace("Looking in scene");
 
 				dbConn(self.logger).filterColl(dbName, project + ".scene", filter, projection, function(err, coll) {
 					if (err.value) return callback(err);
@@ -1523,38 +1531,47 @@ DBInterface.prototype.getMetadata = function(dbName, project, branch, revision, 
 		};
 
 		var historyProjection = {
-			_id : 1
+			_id       : 1,
+			shared_id : 1
 		}
 
-		dbConn(self.logger).filterColl(dbName, project + ".history", historyQuery, historyProjection, function(err, obj) {
+		dbConn(self.logger).filterColl(dbName, project + ".history", historyQuery, historyProjection, function(err, revisions) {
 			if (err.value) return callback(err);
 
-			if (!obj.length)
+			if (!revisions.length)
 				return callback(responseCodes.OBJECT_NOT_FOUND);
 
-			var revision = uuidToString(obj[0]["_id"]);
+			var revision = uuidToString(revisions[0][C.REPO_NODE_LABEL_ID]);
 
-			var filter = {
-				parents: obj[0]["shared_id"],
-				type: "meta"
-			};
+			self.getObject(dbName, project, uid, null, null, false, { shared_id : 1 }, function(err, type, uid, fromStash, objs) {
+				if (err.value) {
+					return callback(err);
+				}
 
-			var projection = {
-				shared_id: 0,
-				paths: 0,
-				type: 0,
-				api: 0,
-				parents: 0
-			};
+				var objSID = Object.keys(objs.all)[0];
 
-			// TODO: This will query the history collection again, unnecessarily
-			self.queryScene(dbName, project, null, revision, filter, projection, function(err, fromStash, metadocs) {
-				if (err.value) return callback(err);
+				var filter = {
+					parents: utils.stringToUUID(objSID),
+					type:    C.REPO_NODE_TYPE_META
+				};
 
-				for(var i = 0; i < metadocs.length; i++)
-					metadocs[i]["_id"] = uuidToString(metadocs[i]["_id"]);
+				var projection = {
+					shared_id: 0,
+					paths: 0,
+					type: 0,
+					api: 0,
+					parents: 0
+				};
 
-				callback(responseCodes.OK, metadocs);
+				// TODO: This will query the history collection again, unnecessarily
+				self.queryScene(dbName, project, null, revision, filter, projection, function(err, fromStash, metadocs) {
+					if (err.value) return callback(err);
+
+					for(var i = 0; i < metadocs.length; i++)
+						metadocs[i]["_id"] = uuidToString(metadocs[i]["_id"]);
+
+					callback(responseCodes.OK, metadocs);
+				});
 			});
 		});
 	}
