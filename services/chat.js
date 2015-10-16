@@ -15,15 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var log_iface = require('../js/core/logger.js');
-var logger = log_iface.logger;
+var systemLogger = require("../js/core/logger.js").systemLogger;
 
 var sharedSession = require("express-socket.io-session");
-var config = require('../js/core/config.js');
+var config = require("../js/core/config.js");
 
 module.exports.init = function (session, server) {
-	var socketio = require('socket.io')(server, { path: config.api_server.chat_path });
-	var dbInterface = require('../js/core/db_interface.js');
+	"use strict";
+
+	var socketio = require("socket.io")(server, { path: config.api_server.chat_path });
+	var dbInterface = require("../js/core/db_interface.js");
 
 	var issueMonitoring   = {};
 	var projectMonitoring = {};
@@ -33,8 +34,9 @@ module.exports.init = function (session, server) {
 	socketio.sockets.on("connection", function (socket) {
 
 		socket.on("error", function(err) {
-			if (err)
-				logger.log("error", err.stack);
+			if (err) {
+				systemLogger.logError(err.stack);
+			}
 			});
 
 		socket.on("new_issue", function(data) {
@@ -51,12 +53,13 @@ module.exports.init = function (session, server) {
 						{
 							var clientSocket = projectMonitoring[proj_account_key][i];
 
-							if (clientSocket !== socket)
+							if (clientSocket !== socket) {
 								clientSocket.emit("new_issue", data);
+							}
 						}
 					}
 				} else {
-					logger.log("error", "User " + username + " does not have access to read this issue.");
+					systemLogger.logError("User " + username + " does not have access to read this issue.");
 				}
 			});
 		});
@@ -67,13 +70,14 @@ module.exports.init = function (session, server) {
 			dbInterface.hasReadAccessToProject(username, data.account, data.project, function(err) {
 				if (!err.value)
 				{
-					if (!issueMonitoring[data.id])
+					if (!issueMonitoring[data.id]) {
 						issueMonitoring[data.id] = [];
+					}
 
 					issueMonitoring[data.id].push(socket);
 
 				} else {
-					logger.log("error", "User " + username + " does not have access to read this issue.");
+					systemLogger.logError("User " + username + " does not have access to read this issue.");
 				}
 			});
 		});
@@ -86,13 +90,14 @@ module.exports.init = function (session, server) {
 
 				if (!err.value)
 				{
-					if (!projectMonitoring[proj_account_key])
+					if (!projectMonitoring[proj_account_key]) {
 						projectMonitoring[proj_account_key] = [];
+					}
 
 					projectMonitoring[proj_account_key].push(socket);
 
 				} else {
-					logger.log("error", "User " + username + " does not have access to read this issue.");
+					systemLogger.logError("User " + username + " does not have access to read this issue.");
 				}
 			});
 		});
@@ -120,7 +125,7 @@ module.exports.init = function (session, server) {
 						}
 					}
 				} else {
-					logger.log("error", "User " + username + " does not have access to post to this issue.");
+					systemLogger.logError("User " + username + " does not have access to post to this issue.");
 				}
 			});
 		});

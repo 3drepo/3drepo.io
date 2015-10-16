@@ -23,8 +23,6 @@ var domImp		 = xmlDom.DOMImplementation;
 var xmlSerial	 = xmlDom.XMLSerializer;
 
 var config		 = require('../config.js');
-var logIface	 = require('../logger.js');
-var logger		 = logIface.logger;
 var popCache	 = require('../cache/pbf_cache.js');
 
 var googleMaps	 = require('./helper/googleMap.js');
@@ -34,6 +32,10 @@ var responseCodes = require('../response_codes.js');
 var jsonCache = {};
 
 var mathjs		= require('mathjs');
+
+var dbInterface  = require('../db_interface.js');
+
+var utils       = require('../utils.js');
 
 function getChild(parent, type, n) {
 	if ((parent == null) || !('children' in parent))
@@ -260,7 +262,7 @@ function det(mat) {
  * @param {string} project - Name of the project
  * @param {string} mode - Type of X3D being rendered
  *******************************************************************************/
-function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, project, mode)
+function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, project, mode, logger)
 {
 	if (!('children' in node))
 		return;
@@ -287,7 +289,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			newNode.setAttribute('onload', 'onLoaded(event);');
 			newNode.setAttribute('url', url_str);
 			newNode.setAttribute('id', child['id']);
-			newNode.setAttribute('DEF', dbInterface.uuidToString(child["shared_id"]));
+			newNode.setAttribute('DEF', utils.uuidToString(child["shared_id"]));
 			newNode.setAttribute('nameSpaceName', account + '__' + child['project']);
 
 			if ('bounding_box' in child)
@@ -298,14 +300,14 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			}
 			xmlNode.appendChild(newNode);
 
-			X3D_AddChildren(xmlDoc, newNode, child, matrix, dbInterface, account, project, mode);
+			X3D_AddChildren(xmlDoc, newNode, child, matrix, dbInterface, account, project, mode, logger);
 		}
 		else if (child['type'] == 'camera')
 		{
 			newNode = xmlDoc.createElement('viewpoint');
 
 			newNode.setAttribute('id', child['name']);
-			newNode.setAttribute('DEF',dbInterface.uuidToString(child['shared_id']));
+			newNode.setAttribute('DEF',utils.uuidToString(child['shared_id']));
 			newNode.setAttribute('bind', false);
 
 			//if (child['fov'])
@@ -358,7 +360,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			newNode.setAttribute('orientation', orientation.join(','));
 
 			xmlNode.appendChild(newNode);
-			X3D_AddChildren(xmlDoc, newNode, child, matrix, dbInterface, account, project, mode);
+			X3D_AddChildren(xmlDoc, newNode, child, matrix, dbInterface, account, project, mode, logger);
 		}
 		else if (child['type'] == 'transformation')
 		{
@@ -383,14 +385,14 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			}
 
 			newNode.setAttribute("id", child['id']);
-			newNode.setAttribute('DEF', dbInterface.uuidToString(child["shared_id"]));
+			newNode.setAttribute('DEF', utils.uuidToString(child["shared_id"]));
 			xmlNode.appendChild(newNode);
 
 			var newMatrix = matrix.clone();
 			var transMatrix  = mathjs.matrix(child['matrix']);
 			newMatrix = mathjs.multiply(transMatrix, newMatrix);
 
-			X3D_AddChildren(xmlDoc, newNode, child, newMatrix, dbInterface, account, project, mode);
+			X3D_AddChildren(xmlDoc, newNode, child, newMatrix, dbInterface, account, project, mode, logger);
 		} else if(child['type'] == 'material') {
 			 var appearance = xmlDoc.createElement('Appearance');
 
@@ -455,16 +457,16 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 
 				newNode.textContent = ' ';
 				newNode.setAttribute("id", child['id']);
-				newNode.setAttribute('DEF', dbInterface.uuidToString(child["shared_id"]));
+				newNode.setAttribute('DEF', utils.uuidToString(child["shared_id"]));
 				appearance.appendChild(newNode);
 				xmlNode.appendChild(appearance);
-				X3D_AddChildren(xmlDoc, appearance, child, matrix, dbInterface, account, project, mode);
+				X3D_AddChildren(xmlDoc, appearance, child, matrix, dbInterface, account, project, mode, logger);
 		} else if (child['type'] == 'texture') {
 			newNode = xmlDoc.createElement('ImageTexture');
 			newNode.setAttribute('url', config.api_server.url + '/' + account + '/' + project + '/' + child['id'] + '.' + child['extension']);
 			newNode.textContent = ' ';
 			newNode.setAttribute("id", child['id']);
-			newNode.setAttribute('DEF', dbInterface.uuidToString(child["shared_id"]));
+			newNode.setAttribute('DEF', utils.uuidToString(child["shared_id"]));
 			newNode.setAttribute('crossOrigin', 'use-credentials');
 			xmlNode.appendChild(newNode);
 
@@ -472,7 +474,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			texProperties.setAttribute('generateMipMaps', 'true');
 			newNode.appendChild(texProperties);
 
-			X3D_AddChildren(xmlDoc, newNode, child, matrix, dbInterface, account, project, mode);
+			X3D_AddChildren(xmlDoc, newNode, child, matrix, dbInterface, account, project, mode, logger);
 		} else if (child['type'] == 'map') {
 			if(!child['maptype'])
 				child['maptype'] = 'satellite';
@@ -483,7 +485,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			var newNode = googleMaps.addGoogleTiles(xmlDoc, child['width'], child['yrot'], child['worldTileSize'], child['lat'], child['long'], child['zoom'], child['maptype'], child["twosided"], child['trans']);
 
 			newNode.setAttribute("id", child['id']);
-			newNode.setAttribute('DEF', dbInterface.uuidToString(child["shared_id"]));
+			newNode.setAttribute('DEF', utils.uuidToString(child["shared_id"]));
 
 			xmlNode.appendChild(newNode);
 		} else if (child['type'] == 'mesh') {
@@ -538,9 +540,9 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 						shape.setAttribute('bboxSize', bbox.size);
 					}
 
-					X3D_AddChildren(xmlDoc, shape, child, matrix, dbInterface, account, project, mode);
+					X3D_AddChildren(xmlDoc, shape, child, matrix, dbInterface, account, project, mode, logger);
 
-					X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, child, subMeshKeys[i],mode);
+					X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, child, subMeshKeys[i],mode, logger);
 
 					xmlNode.appendChild(shape);
 				}
@@ -562,11 +564,11 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
  * @param {integer} subMeshID - sub mesh ID to render
  * @param {string} mode - Type of X3D being rendered
  *******************************************************************************/
-function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, subMeshID, mode) {
+function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, subMeshID, mode, logger) {
 	var meshId = mesh['id'];
 	var mat = getChild(mesh, 'material')
 
-	logger.log('debug', 'Loading mesh ' + meshId);
+	logger.logDebug('Loading mesh ' + meshId);
 
 	var bbox = repoNodeMesh.extractBoundingBox(mesh);
 
@@ -630,7 +632,7 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, subM
 			var suffix = "";
 
 			if (subMeshID)
-				suffix += "#" + subMeshID;
+				suffix += "#" + utils.uuidToString(subMeshID);
 
 			if ('children' in mat) {
 				var tex_id = mat['children'][0]['id'];
@@ -888,7 +890,7 @@ function render(dbInterface, account, project, subFormat, branch, revision, call
 		var dummyRoot = { children: [doc.mRootNode] };
 
 		var mat = mathjs.eye(4);
-		X3D_AddChildren(xmlDoc, sceneRoot.root, dummyRoot, mat, dbInterface, account, project, subFormat);
+		X3D_AddChildren(xmlDoc, sceneRoot.root, dummyRoot, mat, dbInterface, account, project, subFormat, dbInterface.logger);
 
 		/*
 		// Compute the scene bounding box.
@@ -929,32 +931,32 @@ function render(dbInterface, account, project, subFormat, branch, revision, call
 
 exports.route = function(router)
 {
-	router.get('x3d', '/:account/:project/revision/:rid', function(res, params, err_callback)
+	router.get('x3d', '/:account/:project/revision/:rid', function(res, req, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project,	params.subformat, null, params.rid, err_callback);
+		render(dbInterface(req[C.REQ_REPO].logger), params.account, params.project,	params.subformat, null, params.rid, err_callback);
 	});
 
-	router.get('x3d', '/:account/:project/revision/:branch/head', function(res, params, err_callback)
+	router.get('x3d', '/:account/:project/revision/:branch/head', function(res, req, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project, params.subformat, params.branch, null, err_callback);
+		render(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.subformat, params.branch, null, err_callback);
 	});
 
-	router.get('x3d', '/:account/:project/revision/:rid/:sid', function(res, params, err_callback)
+	router.get('x3d', '/:account/:project/revision/:rid/:sid', function(res, req, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project, params.subformat, null, params.rid, err_callback);
+		render(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.subformat, null, params.rid,  err_callback);
 	});
 
-	router.get('x3d', '/:account/:project/revision/:branch/head/:sid', function(res, params, err_callback)
+	router.get('x3d', '/:account/:project/revision/:branch/head/:sid', function(res, req, params, err_callback)
 	{
-		render(router.dbInterface, params.account, params.project, params.subformat, params.branch, null, err_callback);
+		render(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.subformat, params.branch, null, err_callback);
 	});
 
-	router.get('x3d', '/:account/:project/:uid', function(res, params, err_callback)
+	router.get('x3d', '/:account/:project/:uid', function(res, req, params, err_callback)
 	{
 		if (params.subformat == "mpc")
 		{
 			// TODO: Only needs the shell not the whole thing
-			router.dbInterface.getObject(params.account, params.project, params.uid, null, null, function(err, type, uid, fromStash, obj)
+			dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, false, {bounding_box : 1}, function(err, type, uid, fromStash, obj)
 			{
 				if (err.value) return callback(err);
 

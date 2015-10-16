@@ -15,23 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var _       = require('underscore');
-var winston = require('winston');
-var config = require('./config.js');
+var winston  = require("winston");
+var config   = require("./config.js");
+var shortid  = require("shortid");
+var C        = require("./constants");
 
 // Custom logging levels for logger
 var myCustomLevels = {
     levels: {
-        debug: 0,
-        info: 1,
-        warn: 2,
-        error: 3
+        trace: 0,
+        debug: 1,
+        info: 2,
+        warn: 3,
+        error: 4
     },
     colors: {
-        debug: 'white',
-        info: 'yellow',
-        warn: 'orange',
-        error: 'red'
+        trace: "magenta",
+        debug: "white",
+        info: "yellow",
+        warn: "orange",
+        error: "red"
     }
 };
 
@@ -40,18 +43,104 @@ var myCustomLevels = {
 // Levels are set separately in the config.
 var logger = new(winston.Logger)({
     levels: myCustomLevels.levels,
+    colors: myCustomLevels.colors,
     transports: [
+
     new(winston.transports.Console)({
+        colorize: true,
         level: config.logfile.console_level,
-    }), new(winston.transports.File)
+    }), 
+
+    new(winston.transports.File)
     ({
         level: config.logfile.file_level,
         filename: config.logfile.filename
     })]
+
 });
 
-module.exports.logger = logger;
-module.exports.onError = function(err) {
-	logger.log('error', err.stack);
-}
+
+var repoLogger = function(req, id) {
+    "use strict";
+
+    var self = this instanceof repoLogger ? this : Object.create(repoLogger.prototype);
+
+    if (id === undefined)
+    {
+        self.uid = shortid.generate();
+    } else {
+        self.uid = id;
+    }
+
+    if (req)
+    {
+        self.session        = req.session;
+    }
+
+    self.logger = logger;
+    self.startTime = (new Date()).getTime();
+    
+    return self;
+};
+
+repoLogger.prototype.logMessage = function(type, msg)
+{
+	"use strict";
+
+    //console.log(type + ": " + (new Date()).toString() + "\t" + this.uid + "\t" + msg);
+    
+    var currentTime  = (new Date()).getTime();
+    var timeDiff     = currentTime - this.startTime; 
+
+    this.logger.log(type, (new Date()).toString() + "\t" + this.uid + "\t" + msg + " [" + timeDiff + " ms]");
+};
+
+repoLogger.prototype.logInfo = function(msg) {
+	"use strict";
+
+	this.logMessage("info", msg);
+};
+
+repoLogger.prototype.logError = function(msg) {
+	"use strict";
+
+    this.logMessage("error", msg);
+};
+
+repoLogger.prototype.logDebug = function(msg) {
+	"use strict";
+
+	this.logMessage("debug", msg);
+};
+
+repoLogger.prototype.logWarning = function(msg) {
+	"use strict";
+
+    this.logMessage("warn", msg);
+};
+
+repoLogger.prototype.logTrace = function(msg) {
+    "use strict";
+
+    this.logMessage("trace", msg);
+};
+
+module.exports.startRequest = function(req, res, next)
+{
+	"use strict";
+
+    req[C.REQ_REPO] = {};
+	req[C.REQ_REPO].logger = new repoLogger(req); // Create logger for this request
+    req[C.REQ_REPO].logger.logInfo("BEGIN " + req.method + " " + req.url);
+
+    next();
+};
+
+module.exports.endRequest = function(req)
+{
+	"use strict";
+    req[C.REQ_REPO].logger.logInfo("END " + req.method + " " + req.url);
+};
+
+module.exports.systemLogger = new repoLogger(null, "system");
 
