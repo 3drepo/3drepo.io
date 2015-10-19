@@ -879,6 +879,11 @@ function render(dbInterface, account, project, subFormat, branch, revision, call
 
 		var xmlDoc = X3D_Header();
 
+		if (!doc.mRootNode)
+		{
+			return callback(responseCodes.ROOT_NODE_NOT_FOUND);
+		}
+
 		var sceneRoot	= X3D_CreateScene(xmlDoc, doc.mRootNode);
 
 		// Hack for the demo, generate objects server side
