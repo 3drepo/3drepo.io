@@ -27,9 +27,9 @@
         var vw = this;
         vw.currentViewing = 0;
         vw.viewings = [
-            {label: "T", mode: "TURNTABLE"},
-            {label: "H", mode: "HELICOPTER"},
-            {label: "W", mode: "WALK"}
+            {icon: "fa-mouse-pointer", mode: "TURNTABLE"},
+            {icon: "fa-arrows", mode: "HELICOPTER"},
+            {icon: "fa-child", mode: "WALK"}
         ];
 
         vw.setCurrentViewing = function(index) {

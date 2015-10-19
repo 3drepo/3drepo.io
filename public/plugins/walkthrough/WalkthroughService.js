@@ -112,7 +112,7 @@
                 $timeout.cancel(userControlTimeout);
                 userControlTimeout = $timeout(function () {
                     play();
-                }, 5000);
+                }, 60000);
             }
         };
 
