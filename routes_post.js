@@ -173,6 +173,18 @@ module.exports = function (router, dbInterface, checkAccess) {
 
 	});
 
+    this.post('/:account/:project/walkthrough', false, function(req, res) {
+        if (!("user" in req.session)) {
+            responseCodes.respond('Walkthrough record POST', responseCodes.NOT_LOGGED_IN, res, {});
+        }
+        else {
+            this.dbInterface.storeWalkthroughInfo(req.params.account, req.params.project, req.body, function(err) {
+                responseCodes.onError('Walkthrough record POST', err, res, {});
+            });
+        }
+
+    });
+
 	// Ability to add a named viewpoint
 	this.post('/:account/:project/:branch/viewpoint', true, function(req, res) {
 		var responsePlace = 'Adding a viewpoint';

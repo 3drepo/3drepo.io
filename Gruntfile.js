@@ -24,7 +24,9 @@ module.exports = function(grunt) {
                     'public/plugins/clip/*.js',
                     'public/plugins/diff/*.js',
                     'public/plugins/view/*.js',
-                    'public/plugins/sid/*.js'
+                    'public/plugins/sid/*.js',
+                    'public/plugins/walkthrough/*.js',
+                    'public/plugins/viewing/*.js'
                 ],
                 dest: 'public/dist/plugins.concat.js'
             }

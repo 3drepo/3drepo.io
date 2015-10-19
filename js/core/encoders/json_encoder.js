@@ -173,6 +173,16 @@ function getTree(dbInterface, account, project, branch, revision, sid, namespace
 		}
 };
 
+function walkthrough(dbInterface, account, index, callback) {
+
+    dbInterface.searchTree(account, project, index, function(err, data) {
+        if (err.value) {
+            return callback(err);
+        }
+        callback(responseCodes.OK, data);
+    });
+}
+
 exports.route = function(router)
 {
 	router.get('json', '/search', function(res, params, err_callback) {
@@ -548,6 +558,10 @@ exports.route = function(router)
 			err_callback(responseCodes.FORMAT_NOT_SUPPORTED);
 		}
 	});
+
+    router.get('json', '/:account/:project/:index/walkthrough', function(res, params, err_callback) {
+        searchTree(dbInterface, params.account, params.project, params.index, err_callback);
+    });
 };
 
 

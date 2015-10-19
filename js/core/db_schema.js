@@ -99,6 +99,8 @@ module.exports = function() {
 		}
 	);
 
+    this.registerSchema('/:account/:project/walkthrough', {});
+
 	this.customTypes = [
 		{ // Waypoint recording entry
 			"id" : "/WaypointRecord",

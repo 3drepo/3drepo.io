@@ -237,6 +237,38 @@ exports.storeWayfinderInfo = function(dbName, project, username, sessionID, data
 	});
 };
 
+exports.getWalkthroughInfo = function(dbName, project, index, callback) {
+    var filter = {};
+    if (index !== "all") {
+        filter.index = parseInt(index);
+    }
+    dbConn.filterColl(dbName, project + ".walkthrough", filter, {}, function(err, docs) {
+        if (err.value) {
+            return callback(err);
+        }
+        callback(responseCodes.OK, docs);
+    });
+};
+
+exports.storeWalkthroughInfo = function(dbName, project, data, callback) {
+    dbConn.collCallback(dbName, project + ".walkthrough", false, function(err, coll) {
+        if (err.value) {
+            return callback(err);
+        }
+
+        var uniqueID = {
+            index : data.index
+        };
+
+        coll.update(uniqueID, {$set : data }, {upsert: true}, function(err, count) {
+            if (err) {
+                return callback(responseCodes.DB_ERROR(err));
+            }
+            callback(responseCodes.OK);
+        });
+    });
+};
+
 // TODO: Remove this, as it shouldn't exist
 exports.addToCurrentList = function(dbName, project, branch, objUUID, callback) {
 	self.getHeadUUID(dbName, project, branch, function(err, uuid) {

@@ -71,6 +71,19 @@ module.exports = function(router, dbInterface, checkAccess){
 		}
 	});
 
+    router.get('/:account/:project/:index/walkthrough.:format?', function(req, res) {
+        var responsePlace = "/:account/:project/walkthrough GET";
+
+        if (!("user" in req.session)) {
+            responseCodes.respond(responsePlace, responseCodes.USERNAME_NOT_SPECIFIED, res, {});
+        }
+        else {
+            this.dbInterface.getWalkthroughInfo(req.params.account, req.params.project, req.params.index, function(err, docs) {
+                responseCodes.onError(responsePlace, err, res, docs);
+            });
+        }
+    });
+
 	// Account information
 	router.get('/:account.:format?.:subformat?', function(req, res, next) {
 		if (!req.session.user)

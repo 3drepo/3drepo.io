@@ -5,6 +5,9 @@
 			if ui.header
 				each uicomp in ui.header
 					!= renderMe(uicomp["template"], locals)
+	if ui.viewing
+		each uicomp in ui.viewing
+			!= renderMe(uicomp["template"], locals)
 
 	//#nav-version-control(ng-controller='RevisionCtrl', ng-show="Data.ui.revisionSelector")
 	#project-viewport-container.row
@@ -22,9 +25,12 @@
 				each uicomp in ui.right
 					!= renderMe(uicomp["template"], locals)
 
-	#bottom-panel.row.mainrow.collapsed
+	//#bottom-panel.row.mainrow.collapsed
 		if ui.footer
 			each uicomp in ui.footer
 				!= renderMe(uicomp["template"], locals)
 		div(ui-view="footer")
 
+	if ui.walkthrough
+		each uicomp in ui.walkthrough
+			!= renderMe(uicomp["template"], locals)
