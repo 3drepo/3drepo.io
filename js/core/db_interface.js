@@ -15,15 +15,15 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var dbConn_js = require('./db.js');
-var async = require('async');
-var dbConn = new dbConn_js();
-var repoGraphScene = require('./repoGraphScene.js');
-var uuid = require('node-uuid');
-var log_iface = require('./logger.js');
-var logger = log_iface.logger;
-var ObjectID = require('mongodb').ObjectID;
-var C = require('./constants');
+var dbConn = require("./db.js");
+var async = require("async");
+var repoGraphScene = require("./repoGraphScene.js");
+var uuid = require("node-uuid");
+
+var ObjectID = require("mongodb").ObjectID;
+var C = require("./constants");
+
+var mongo = require("mongodb"); // TODO: Remove this
 
 var OWNER	= 0;
 var GROUP	= 1;
@@ -33,20 +33,25 @@ var READ_BIT	= 4;
 var WRITE_BIT	= 2;
 var EXECUTE_BIT	= 1;
 
-var responseCodes = require('./response_codes.js');
+var responseCodes = require("./response_codes.js");
 
-function stringToUUID(id) {
-	var bytes = uuid.parse(id);
-	var buf = new Buffer(bytes);
-	return dbConn.Binary(buf, 3);
-}
+var utils = require("./utils.js");
 
-function uuidToString(uuidIn) {
-	return uuid.unparse(uuidIn.buffer);
-}
+// TODO: Remove these
+stringToUUID = utils.stringToUUID;
+uuidToString = utils.uuidToString;
 
 var masterUUID = stringToUUID("00000000-0000-0000-0000-000000000000");
-var self = exports;
+
+var DBInterface = function(logger) {
+	"use strict";
+
+	var self = this instanceof DBInterface ? this : Object.create(DBInterface.prototype);
+
+	self.logger = logger;
+
+	return self;
+};
 
 /*******************************************************************************
  /* Authenticate user against the database
@@ -56,28 +61,40 @@ var self = exports;
  * @param {boolean} embedded_texture - Determines whether or not the texture data is embedded in the SRC.
  * @param {Object} res - The http response object
  *******************************************************************************/
-exports.authenticate = function(username, password, callback) {
-	dbConn.authenticateUser(username, password, function(err)
+DBInterface.prototype.authenticate = function(username, password, callback) {
+	"use strict";
+
+	dbConn(this.logger).authenticateUser(username, password, function(err)
 	{
-		if(err.value)
+		if(err.value) {
 			return callback(err);
+		}
 
 		callback(responseCodes.OK, {username: username});
 	});
 };
 
+DBInterface.prototype.createUser = function(username, password, email, callback) {
+	"use strict";
 
-exports.createUser = function(username, password, email, callback) {
-	dbConn.dbCallback('admin', function(err, db) {
-		if (err.value) return callback(err);
+	var self = this;
+
+	dbConn(self.logger).dbCallback("admin", function(err, db) {
+		if (err.value) {
+			return callback(err);
+		}
 
 		db.addUser(username, password, function(err, result)
 		{
 			// TODO: Should move this to db.js
-			if (err) return callback(responseCodes.DB_ERROR(err));
+			if (err) {
+				return callback(responseCodes.DB_ERROR(err));
+			}
 
-			dbConn.collCallback('admin', 'system.users', true, function(err, coll) {
-				if(err.value) return callback(err);
+			dbConn(self.logger).collCallback("admin", "system.users", true, function(err, coll) {
+				if(err.value) {
+					return callback(err);
+				}
 
 				var selector = { user : username };
 
@@ -86,70 +103,88 @@ exports.createUser = function(username, password, email, callback) {
 				};
 
 				coll.update(selector, updateJSON, function(err, doc) {
-					if (err)
+					if (err) {
 						callback(responseCodes.DB_ERROR(err));
-					else
+					} else {
 						callback(responseCodes.OK);
+					}
 				});
 			});
 		});
 	});
 };
 
-exports.updateUser = function(username, data, callback) {
-	dbConn.dbCallback('admin', function(err, db) {
-		if (err.value)
-			return callback(err);
+DBInterface.prototype.updateUser = function(username, data, callback) {
+	"use strict";
 
-		exports.getUserInfo(username, false, function(err, oldCustomData) {
-			if(err.value)
+	var self = this;
+
+	dbConn(self.logger).dbCallback("admin", function(err, db) {
+		if (err.value) {
+			return callback(err);
+		}
+
+		self.getUserInfo(username, false, function(err, oldCustomData) {
+			if(err.value) {
 				return callback(err);
+			}
 
 			var user = { "updateUser" : username };
 			var newCustomData = oldCustomData;
 
-			if(data.email)
+			if(data.email) {
 				newCustomData.email = data.email;
+			}
 
-			if(data.firstName)
+			if(data.firstName) {
 				newCustomData.firstName = data.firstName;
+			}
 
-			if(data.lastName)
+			if(data.lastName) {
 				newCustomData.lastName = data.lastName;
+			}
 
 			user.customData = newCustomData;
 
 			db.command( user, function(err, result) {
 				// TODO: Should move this to db.js
-				if (err)
+				if (err) {
 					callback(responseCodes.DB_ERROR(err));
-				else
+				} else {
 					callback(responseCodes.OK);
+				}
 			});
 		});
 	});
 };
 
-exports.updatePassword = function(username, passwords, callback) {
+DBInterface.prototype.updatePassword = function(username, passwords, callback) {
+	"use strict";
+
 	var oldPassword = passwords.oldPassword;
 	var newPassword = passwords.newPassword;
+
+	var self = this;
 
 	if(!(oldPassword && newPassword))
 	{
 		return callback(responseCodes.INVALID_INPUTS_TO_PASSWORD_UPDATE);
 	}
 
-	this.authenticate(username, oldPassword, function(err) {
-		if(err.value)
+	self.authenticate(username, oldPassword, function(err) {
+		if(err.value) {
 			return callback(err);
+		}
 
-		dbConn.dbCallback('admin', function(err, db) {
-			if (err.value)
+		dbConn(self.logger).dbCallback("admin", function(err, db) {
+			if (err.value) {
 				return callback(err);
+			}
 
-			exports.getUserInfo(username, false, function(err, oldCustomData) {
-				if(err.value)
+			DBInterface.prototype.getUserInfo(username, false, function(err, oldCustomData) {
+				if(err.value) {
 					return callback(err);
+				}
 
 				var user = { "updateUser" : username };
 				user.pwd = newPassword;
@@ -157,34 +192,39 @@ exports.updatePassword = function(username, passwords, callback) {
 
 				db.command(user, function(err, result) {
 					// TODO: Should move this to db.js
-					if(err)
+					if(err) {
 						callback(responseCodes.DB_ERROR(err));
-					else
+					} else {
 						callback(responseCodes.OK);
+					}
 				});
 			});
 		});
 	});
 };
 
-exports.getWayfinderInfo = function(dbName, project, uniqueIDs, callback) {
+DBInterface.prototype.getWayfinderInfo = function(dbName, project, uniqueIDs, callback) {
+	"use strict";
+
 	if(uniqueIDs) {
-		logger.log('debug', 'Getting waypoint information for UIDs ' + JSON.stringify(uniqueIDs));
+		this.logger.logDebug("Getting waypoint information for UIDs " + JSON.stringify(uniqueIDs));
 
 		var uids = uniqueIDs.map(function(item) { return new ObjectID(item); });
 		var filter = {
 			_id: {$in : uids}
 		};
 
-		logger.log('debug', 'Searching for wayfinding in paths: ' + JSON.stringify(uniqueIDs));
+		this.logger.logDebug("Searching for wayfinding in paths: " + JSON.stringify(uniqueIDs));
 
-		dbConn.filterColl(dbName, project + ".wayfinder", filter, {}, function(err, docs) {
-			if (err.value) return callback(err);
+		dbConn(this.logger).filterColl(dbName, project + ".wayfinder", filter, {}, function(err, docs) {
+			if (err.value) {
+				return callback(err);
+			}
 
 			callback(responseCodes.OK, docs);
 		});
 	} else {
-		logger.log('debug', 'Getting list of all waypoint recordings');
+		this.logger.logDebug("Getting list of all waypoint recordings");
 
 		var projection = {
 			user: 1,
@@ -192,20 +232,27 @@ exports.getWayfinderInfo = function(dbName, project, uniqueIDs, callback) {
 			_id: 1
 		};
 
-		dbConn.filterColl(dbName, project + ".wayfinder", {}, projection, function(err, docs) {
-			if(err.value) return callback(err);
+		dbConn(this.logger).filterColl(dbName, project + ".wayfinder", {}, projection, function(err, docs) {
+			if(err.value) {
+				return callback(err);
+			}
 
 			callback(responseCodes.OK, docs);
 		});
 	}
 };
 
-exports.storeWayfinderInfo = function(dbName, project, username, sessionID, data, timestamp, callback) {
-	logger.log('debug', 'Storing waypoint information for ' + username + ' @ ' + (new Date(timestamp)));
+DBInterface.prototype.storeWayfinderInfo = function(dbName, project, username, sessionID, data, timestamp, callback) {
+	"use strict";
 
-	dbConn.collCallback(dbName, project + ".wayfinder", false, function(err, coll) {
-		if(err.value)
+	this.logger.logDebug("Storing waypoint information for " + username + " @ " + (new Date(timestamp)));
+
+	var self = this;
+
+	dbConn(this.logger).collCallback(dbName, project + ".wayfinder", false, function(err, coll) {
+		if(err.value) {
 			return callback(err);
+		}
 
 		var uniqueID = {
 			user: username,
@@ -231,18 +278,20 @@ exports.storeWayfinderInfo = function(dbName, project, username, sessionID, data
 		coll.update(uniqueID, { $set : dataObj }, {upsert: true}, function(err, count) {
 			if (err) return callback(responseCodes.DB_ERROR(err));
 
-			logger.log('debug', 'Updated ' + count + ' records.');
+			self.logger.logDebug("Updated " + count + " records.");
 			callback(responseCodes.OK);
 		});
 	});
 };
 
-exports.getWalkthroughInfo = function(dbName, project, index, callback) {
+DBInterface.prototype.getWalkthroughInfo = function(dbName, project, index, callback) {
+    "use strict";
+
     var filter = {};
     if (index !== "all") {
         filter.index = parseInt(index);
     }
-    dbConn.filterColl(dbName, project + ".walkthrough", filter, {}, function(err, docs) {
+    dbConn(this.logger).filterColl(dbName, project + ".walkthrough", filter, {}, function(err, docs) {
         if (err.value) {
             return callback(err);
         }
@@ -250,8 +299,10 @@ exports.getWalkthroughInfo = function(dbName, project, index, callback) {
     });
 };
 
-exports.storeWalkthroughInfo = function(dbName, project, data, callback) {
-    dbConn.collCallback(dbName, project + ".walkthrough", false, function(err, coll) {
+DBInterface.prototype.storeWalkthroughInfo = function(dbName, project, data, callback) {
+    "use strict";
+
+    dbConn(this.logger).collCallback(dbName, project + ".walkthrough", false, function(err, coll) {
         if (err.value) {
             return callback(err);
         }
@@ -269,10 +320,14 @@ exports.storeWalkthroughInfo = function(dbName, project, data, callback) {
     });
 };
 
-// TODO: Remove this, as it shouldn't exist
-exports.addToCurrentList = function(dbName, project, branch, objUUID, callback) {
+// TODO: Remove this, as it shouldn"t exist
+DBInterface.prototype.addToCurrentList = function(dbName, project, branch, objUUID, callback) {
+	"use strict";
+
+	var self = this;
+
 	self.getHeadUUID(dbName, project, branch, function(err, uuid) {
-		dbConn.collCallback(dbName, project + '.history', true, function(err, coll) {
+		dbConn(this.logger).collCallback(dbName, project + ".history", true, function(err, coll) {
 			if(err.value) return callback(err);
 
 			var uniqueID = {
@@ -282,7 +337,7 @@ exports.addToCurrentList = function(dbName, project, branch, objUUID, callback) 
 			coll.update(uniqueID, { $push: {"current" : objUUID} }, {}, function(err, count) {
 				if (err) return callback(responseCodes.DB_ERROR(err));
 
-				logger.log('debug', 'Adding ' + uuidToString(objUUID) + ' to current list of ' + uuidToString(uuid.uuid));
+				self.logger.logDebug("Adding " + uuidToString(objUUID) + " to current list of " + uuidToString(uuid.uuid));
 
 				callback(responseCodes.OK);
 			});
@@ -290,13 +345,15 @@ exports.addToCurrentList = function(dbName, project, branch, objUUID, callback) 
 	});
 }
 
-exports.storeViewpoint = function(dbName, project, branch, username, parentSharedID, data, callback) {
+DBInterface.prototype.storeViewpoint = function(dbName, project, branch, username, parentSharedID, data, callback) {
+	"use strict";
+
 	data._id = uuid.v1();
 
 	if (!data.shared_id)
 		data.shared_id = uuid.v1();
 
-	logger.log('debug', 'Storing camera ' + data.name + ' for (U,S) => (' + data.shared_id + ',' + data._id + ') @ ' + parentSharedID);
+	this.logger.logDebug("Storing camera " + data.name + " for (U,S) => (" + data.shared_id + "," + data._id + ") @ " + parentSharedID);
 
 	data._id =			stringToUUID(data._id);
 	data.shared_id =	stringToUUID(data.shared_id);
@@ -306,7 +363,9 @@ exports.storeViewpoint = function(dbName, project, branch, username, parentShare
 
 	data.parents = [stringToUUID(parentSharedID)];
 
-	dbConn.collCallback(dbName, project + ".scene", true, function(err, coll) {
+	var self = this;
+
+	dbConn(this.logger).collCallback(dbName, project + ".scene", true, function(err, coll) {
 		if(err.value) return callback(err);
 
 		var uniqueID = {
@@ -316,7 +375,7 @@ exports.storeViewpoint = function(dbName, project, branch, username, parentShare
 		coll.update(uniqueID, { $set : data }, { upsert: true }, function(err, count) {
 			if(err) return callback(responseCodes.DB_ERROR(err));
 
-			logger.log('debug', 'Updated ' + count + ' records.');
+			self.logger.logDebug("Updated " + count + " records.");
 
 			self.addToCurrentList(dbName, project, branch, data._id, function (err) {
 				if (err.value) return callback(err);
@@ -327,13 +386,13 @@ exports.storeViewpoint = function(dbName, project, branch, username, parentShare
 	});
 }
 
-exports.getUserDBList = function(username, callback) {
+DBInterface.prototype.getUserDBList = function(username, callback) {
 	var resCode = responseCodes.OK;
 
 	if (!username)
 		return callback(responseCodes.USERNAME_NOT_SPECIFIED);
 
-	logger.log('debug', 'Getting database list for ' + username);
+	this.logger.logDebug("Getting database list for " + username);
 
 	var filter = {
 		user: username
@@ -350,11 +409,11 @@ exports.getUserDBList = function(username, callback) {
 	});
 };
 
-exports.getUserInfo = function(username, getPublic, callback) {
+DBInterface.prototype.getUserInfo = function(username, callback) {
 	if(!username)
 		return callback(responseCodes.USERNAME_NOT_SPECIFIED);
 
-	logger.log('debug', 'Getting user info for ' + username);
+	this.logger.logDebug("Getting user info for " + username);
 
 	var filter = {
 		user: username
@@ -364,14 +423,11 @@ exports.getUserInfo = function(username, getPublic, callback) {
 		customData : 1,
 		"customData.firstName" : 1,
 		"customData.lastName" : 1,
-		"customData.email" : 1
+		"customData.email" : 1,
+		"customData.projects" : 1
 	};
 
-	// Private user information goes here
-	if(!getPublic)
-		projection["customData.projects"] = 1;
-
-	dbConn.filterColl("admin", "system.users", filter, projection, function(err, coll) {
+	dbConn(this.logger).filterColl("admin", "system.users", filter, projection, function(err, coll) {
 		if(err.value) return callback(err);
 
 		if (coll[0])
@@ -385,11 +441,11 @@ exports.getUserInfo = function(username, getPublic, callback) {
 	});
 };
 
-exports.getAvatar = function(username, callback) {
+DBInterface.prototype.getAvatar = function(username, callback) {
 	if(!username)
 		return callback(responseCodes.USER_NOT_SPECIFIED);
 
-	logger.log('debug', 'Getting user avatar for ' + username);
+	this.logger.logDebug("Getting user avatar for " + username);
 
 	var filter = {
 		user: username
@@ -399,7 +455,7 @@ exports.getAvatar = function(username, callback) {
 		"customData" : 1
 	};
 
-	dbConn.filterColl("admin", "system.users", filter, projection, function(err, coll) {
+	dbConn(this.logger).filterColl("admin", "system.users", filter, projection, function(err, coll) {
 		if(err.value)
 			return callback(err);
 
@@ -410,11 +466,11 @@ exports.getAvatar = function(username, callback) {
 	});
 };
 
-exports.getProjectInfo = function(account, project, callback) {
+DBInterface.prototype.getProjectInfo = function(account, project, callback) {
 	if(!project)
 		return callback(responseCodes.PROJECT_NOT_SPECIFIED);
 
-	logger.log('debug', 'Getting project info for ' + account + '/' + project);
+	this.logger.logDebug("Getting project info for " + account + "/" + project);
 
 	var filter = {
 		_id : project
@@ -424,7 +480,7 @@ exports.getProjectInfo = function(account, project, callback) {
 		groups: 0
 	};
 
-	dbConn.filterColl(account, "settings", filter, projection, function(err, coll) {
+	dbConn(this.logger).filterColl(account, "settings", filter, projection, function(err, coll) {
 		if(err.value)
 			return callback(err);
 
@@ -446,7 +502,7 @@ exports.getProjectInfo = function(account, project, callback) {
 	});
 };
 
-exports.getDatabaseGroups = function(account, callback) {
+DBInterface.prototype.getDatabaseGroups = function(account, callback) {
 
 	var filter = {
 		db: account
@@ -456,9 +512,9 @@ exports.getDatabaseGroups = function(account, callback) {
 		user: 1
 	};
 
-	logger.log('debug', 'Getting database groups for ' + account);
+	this.logger.logDebug("Getting database groups for " + account);
 
-	dbConn.filterColl("admin", "system.users", filter, projection, function(err, coll) {
+	dbConn(this.logger).filterColl("admin", "system.users", filter, projection, function(err, coll) {
 		if(err.value)
 			return callback(err);
 
@@ -466,11 +522,11 @@ exports.getDatabaseGroups = function(account, callback) {
 	});
 };
 
-exports.getProjectUsers = function(account, project, callback) {
+DBInterface.prototype.getProjectUsers = function(account, project, callback) {
 	if(!project)
 		return callback(responseCodes.PROJECT_NOT_SPECIFIED);
 
-	logger.log('debug', 'Getting project users for ' + account + '/' + project);
+	this.logger.logDebug("Getting project users for " + account + "/" + project);
 
 	var filter = {
 		_id: project
@@ -482,7 +538,7 @@ exports.getProjectUsers = function(account, project, callback) {
 
 	var self = this;
 
-	dbConn.filterColl(account, "settings", filter, projection, function(err, users) {
+	dbConn(this.logger).filterColl(account, "settings", filter, projection, function(err, users) {
 		if(err.value)
 			return callback(err);
 
@@ -508,7 +564,7 @@ exports.getProjectUsers = function(account, project, callback) {
 	});
 };
 
-exports.getAccessToProject = function(username, account, project, callback) {
+DBInterface.prototype.getAccessToProject = function(username, account, project, callback) {
 	if (project == null)
 		return callback(responseCodes.PROJECT_NOT_SPECIFIED);
 
@@ -519,7 +575,7 @@ exports.getAccessToProject = function(username, account, project, callback) {
 			return callback(err);
 
 		if(username == info["owner"]) {
-			logger.log("debug", username + " has owner permissions");
+			self.logger.logDebug(username + " has owner permissions");
 			return callback(responseCodes.OK, info["permissions"][OWNER])
 		}
 
@@ -529,29 +585,31 @@ exports.getAccessToProject = function(username, account, project, callback) {
 
 			var usernameList = users.map(function(user) { return user["user"]; });
 
-			logger.log("debug", project + " has the following users " + JSON.stringify(usernameList));
+			self.logger.logDebug(project + " has the following users " + JSON.stringify(usernameList));
 
 			if (usernameList.indexOf(username) > -1)
 			{
 				// Valid user or group
-				logger.log("debug", username + " has group permissions");
+				self.logger.logDebug(username + " has group permissions");
 				return callback(responseCodes.OK, info["permissions"][GROUP]);
 			} else {
 				// Must be a public user ?
-				logger.log("debug", username + " has public permissions");
+				self.logger.logDebug(username + " has public permissions");
 				return callback(responseCodes.OK, info["permissions"][PUBLIC]);
 			}
 		});
 	});
 };
 
-exports.checkPermissionsBit = function(username, account, project, bitMask, callback)
+DBInterface.prototype.checkPermissionsBit = function(username, account, project, bitMask, callback)
 {
+	var self = this;
+
 	this.getAccessToProject(username, account, project, function(err, permission) {
 		if(err.value)
 			return callback(err);
 
-		logger.log("debug", "Permission for " + username + " @ " + account + "/" + project + " is " + permission);
+		self.logger.logDebug("Permission for " + username + " @ " + account + "/" + project + " is " + permission);
 
 		if (permission & bitMask)
 		{
@@ -562,22 +620,22 @@ exports.checkPermissionsBit = function(username, account, project, bitMask, call
 	});
 }
 
-exports.hasReadAccessToProject = function(username, account, project, callback) {
-	self.checkPermissionsBit(username, account, project, READ_BIT, callback);
+DBInterface.prototype.hasReadAccessToProject = function(username, account, project, callback) {
+	this.checkPermissionsBit(username, account, project, READ_BIT, callback);
 };
 
-exports.hasWriteAccessToProject = function (username, account, project, callback) {
-	self.checkPermissionsBit(username, account, project, WRITE_BIT, callback);
+DBInterface.prototype.hasWriteAccessToProject = function(username, account, project, callback) {
+	this.checkPermissionsBit(username, account, project, WRITE_BIT, callback);
 };
 
-exports.hasExecuteAccessToProject = function(username, account, project, callback) {
-	self.checkPermissionsBit(username, account, project, EXECUTE_BIT, callback);
+DBInterface.prototype.hasExecuteAccessToProject = function(username, account, project, callback) {
+	this.checkPermissionsBit(username, account, project, EXECUTE_BIT, callback);
 };
 
-exports.getDBList = function(callback) {
-	logger.log('debug', 'Getting list of databases');
+DBInterface.prototype.getDBList = function(callback) {
+	this.logger.logDebug("Getting list of databases");
 
-	dbConn.dbCallback('admin', function(err, db) {
+	dbConn(this.logger).dbCallback("admin", function(err, db) {
 		if (err.value)
 			return callback(err);
 
@@ -598,7 +656,25 @@ exports.getDBList = function(callback) {
 };
 
 
-exports.queryScene = function(dbName, project, branch, revision, filter, projection, callback) {
+DBInterface.prototype.queryStashByRevision = function(dbName, project, revision, filter, projection, callback) {
+	var historyQuery = {
+		_id: stringToUUID(revision)
+	};
+
+	var self = this;
+
+	dbConn(self.logger).filterColl(dbName, project + ".stash.3drepo", filter, projection, function(err, coll) {
+		if (err.value) {
+			return callback(err);
+		}
+
+		if (!coll.length) return callback(responseCodes.OBJECT_NOT_FOUND);
+
+		callback(responseCodes.OK, coll);
+	});
+}
+
+DBInterface.prototype.queryScene = function(dbName, project, branch, revision, filter, projection, callback) {
 	var historyQuery = null;
 
 	if (revision)
@@ -607,7 +683,7 @@ exports.queryScene = function(dbName, project, branch, revision, filter, project
 			_id: stringToUUID(revision)
 		};
 	} else {
-		if (branch == 'master')
+		if (branch == "master")
 			var branch_id = masterUUID;
 		else
 			var branch_id = stringToUUID(branch);
@@ -617,7 +693,16 @@ exports.queryScene = function(dbName, project, branch, revision, filter, project
 		};
 	}
 
-	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
+	var historyProjection = {
+		_id: 1,
+		current: 1
+	};
+
+	var self = this;
+
+	self.logger.logTrace("Querying scene");
+
+	dbConn(self.logger).getLatest(dbName, project + ".history", historyQuery, historyProjection, function(err, docs)
 	{
 		if (err.value) return callback(err);
 
@@ -625,16 +710,22 @@ exports.queryScene = function(dbName, project, branch, revision, filter, project
 
 		filter["rev_id"] = docs[0]["_id"];
 
-		dbConn.filterColl(dbName, project + '.stash.3drepo', filter, projection, function(err, coll) {
+		self.logger.logTrace(JSON.stringify(filter));
+
+		self.logger.logTrace("Looking in stash");
+
+		dbConn(self.logger).filterColl(dbName, project + ".stash.3drepo", filter, projection, function(err, coll) {
 			if (err.value || !coll.length)
 			{
 				// TODO: At this point we should generate send off to generate a stash
 				// There is no stash so just pass back the unoptimized scene graph
 				delete filter["rev_id"];
 
-				filter["_id"] = { $in: docs[0]['current'] };
+				filter["_id"] = { $in: docs[0]["current"] };
 
-				dbConn.filterColl(dbName, project + '.scene', filter, projection, function(err, coll) {
+				self.logger.logTrace("Looking in scene");
+
+				dbConn(self.logger).filterColl(dbName, project + ".scene", filter, projection, function(err, coll) {
 					if (err.value) return callback(err);
 
 					callback(responseCodes.OK, false, coll);
@@ -646,7 +737,7 @@ exports.queryScene = function(dbName, project, branch, revision, filter, project
 	});
 }
 
-exports.getRootNode = function(dbName, project, branch, revision, queryStash, callback) {
+DBInterface.prototype.getRootNode = function(dbName, project, branch, revision, queryStash, callback) {
 	var historyQuery = null;
 
 	if (revision)
@@ -655,7 +746,7 @@ exports.getRootNode = function(dbName, project, branch, revision, queryStash, ca
 			_id: stringToUUID(revision)
 		};
 	} else {
-		if (branch == 'master')
+		if (branch == "master")
 			var branch_id = masterUUID;
 		else
 			var branch_id = stringToUUID(branch);
@@ -665,7 +756,9 @@ exports.getRootNode = function(dbName, project, branch, revision, queryStash, ca
 		};
 	}
 
-	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
+	var self = this;
+
+	dbConn(this.logger).getLatest(dbName, project + ".history", historyQuery, null, function(err, docs)
 	{
 		if (err.value) return callback(err);
 
@@ -680,7 +773,7 @@ exports.getRootNode = function(dbName, project, branch, revision, queryStash, ca
 				rev_id : stringToUUID(docs[0]["_id"])
 			};
 
-			dbConn.filterColl(dbName, project + '.stash.3drepo', filter, null, function(err, doc) {
+			dbConn(self.logger).filterColl(dbName, project + ".stash.3drepo", filter, null, function(err, doc) {
 				if (err.value) return callback(err)
 
 				if (!doc.length)
@@ -692,10 +785,10 @@ exports.getRootNode = function(dbName, project, branch, revision, queryStash, ca
 			var filter = {
 				parents : {$exists : false},
 				type: "transformation",
-				_id: {$in: docs[0]['current']}
+				_id: {$in: docs[0]["current"]}
 			};
 
-			dbConn.filterColl(dbName, project + '.scene', filter, null, function(err, doc) {
+			dbConn(self.logger).filterColl(dbName, project + ".scene", filter, null, function(err, doc) {
 				if (err.value) return callback(err);
 
 				if (!doc.length)
@@ -716,7 +809,7 @@ exports.queryObjectsScene = function(dbName, project, uid, rid, sid, filter, pro
 	{
 		var filter = {
 			parents: stringToUUID(sid),
-			type: 'meta'
+			type: "meta"
 		};
 
 		var projection = {
@@ -743,7 +836,7 @@ exports.queryObjectsScene = function(dbName, project, uid, rid, sid, filter, pro
 			_id : 1
 		}
 
-		dbConn.filterColl(dbName, project + '.history', historyQuery, historyProjection, function(err, obj) {
+		dbConn.filterColl(dbName, project + ".history", historyQuery, historyProjection, function(err, obj) {
 			if (err.value) return callback(err);
 
 			if (!obj.length)
@@ -753,7 +846,7 @@ exports.queryObjectsScene = function(dbName, project, uid, rid, sid, filter, pro
 
 			var f
 				parents: obj[0]["shared_id"],
-				type: 'meta'
+				type: "meta"
 			};
 
 			var projection = {
@@ -775,10 +868,14 @@ exports.queryObjectsScene = function(dbName, project, uid, rid, sid, filter, pro
 }
 */
 
-exports.getChildrenByUID = function(dbName, project, uid, callback) {
+DBInterface.prototype.getChildrenByUID = function(dbName, project, uid, needFiles, callback) {
+	var self = this;
+
+	self.logger.logTrace("getChildrenByUID " + arguments);
+	self.logger.logTrace("Checking whether the UID exists in the stash or not");
 
 	// First lookup the object in either the stash or the scene
-	self.getObject(dbName, project, uid, null, null, function (err, type, uid, fromStash, obj) {
+	self.getObject(dbName, project, uid, null, null, needFiles, {}, function (err, type, uid, fromStash, obj) {
 		if (err.value) return callback(err);
 
 		if (obj["all"].length > 1) return callback(responseCodes.OBJECT_NOT_FOUND);
@@ -793,10 +890,10 @@ exports.getChildrenByUID = function(dbName, project, uid, callback) {
 		{
 			var rev_id = uuidToString(obj["all"][sid][C.REPO_NODE_LABEL_REV_ID]);
 
-			self.queryScene(dbName, project, null, rev_id, sceneQuery, null, function (err, fromStash, docs) {
-				if (err.value) return callback(err);
+			self.logger.logTrace("Querying stash ...");
 
-				if (!docs.length) return callback(responseCodes.OBJECT_NOT_FOUND);
+			self.queryStashByRevision(dbName, project, rev_id, sceneQuery, null, function (err, docs) {
+				if (err.value) return callback(err);
 
 				callback(responseCodes.OK, docs);
 			});
@@ -809,12 +906,13 @@ exports.getChildrenByUID = function(dbName, project, uid, callback) {
 				_id : 1
 			};
 
-			dbConn.getLatest(dbName, project + '.history', historyQuery, projection, function (err, docs) {
+			self.logger.logTrace("Finding UID in scene");
+			dbConn(self.logger).getLatest(dbName, project + ".history", historyQuery, projection, function (err, docs) {
 				if (err.value) return callback(err);
 
 				if (!docs.length) return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
 
-				// If the object came from the
+				self.logger.logTrace("Querying scene ...");
 				self.queryScene(dbName, project, null, uuidToString(docs[0]["_id"]), sceneQuery, null, function (err, fromStash, docs) {
 					if (err.value) return callback(err);
 
@@ -827,7 +925,7 @@ exports.getChildrenByUID = function(dbName, project, uid, callback) {
 	});
 }
 
-exports.getChildren = function(dbName, project, branch, revision, sid, callback) {
+DBInterface.prototype.getChildren = function(dbName, project, branch, revision, sid, callback) {
 	var historyQuery = null;
 
 	if (revision != null)
@@ -836,7 +934,7 @@ exports.getChildren = function(dbName, project, branch, revision, sid, callback)
 			_id: stringToUUID(revision)
 		};
 	} else {
-		if (branch == 'master')
+		if (branch == "master")
 			var branch_id = masterUUID;
 		else
 			var branch_id = stringToUUID(branch);
@@ -846,15 +944,17 @@ exports.getChildren = function(dbName, project, branch, revision, sid, callback)
 		};
 	}
 
-	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
+	var self = this;
+
+	dbConn(self.logger).getLatest(dbName, project + ".history", historyQuery, null, function(err, docs)
 	{
 		var filter = {
 			parents : stringToUUID(sid),
-			type: {$in : ['mesh', 'transformation', 'ref', 'map']},
-			_id: {$in: docs[0]['current']}
+			type: {$in : ["mesh", "transformation", "ref", "map"]},
+			_id: {$in: docs[0]["current"]}
 		};
 
-		dbConn.filterColl(dbName, project + '.scene', filter, null, function(err, doc) {
+		dbConn(self.logger).filterColl(dbName, project + ".scene", filter, null, function(err, doc) {
 			if (err.value) return callback(err);
 
 			callback(responseCodes.OK, doc);
@@ -862,7 +962,7 @@ exports.getChildren = function(dbName, project, branch, revision, sid, callback)
 	});
 };
 
-exports.getUIDMap = function(dbName, project, uids, callback) {
+DBInterface.prototype.getUIDMap = function(dbName, project, uids, callback) {
 	var uids = uids.map(function(uid) { return stringToUUID(uid); })
 
 	var query = {
@@ -873,7 +973,9 @@ exports.getUIDMap = function(dbName, project, uids, callback) {
 		shared_id : 1
 	};
 
-	dbConn.filterColl(dbName, project + '.scene', query, projection, function(err, doc) {
+	var self = this;
+
+	dbConn(self.logger).filterColl(dbName, project + ".scene", query, projection, function(err, doc) {
 		if (err.value) return callback(err);
 
 		var UIDMap = {};
@@ -885,7 +987,7 @@ exports.getUIDMap = function(dbName, project, uids, callback) {
 	});
 };
 
-exports.getSIDMap = function(dbName, project, branch, revision, callback) {
+DBInterface.prototype.getSIDMap = function(dbName, project, branch, revision, callback) {
 	var historyQuery = null;
 
 	if (revision != null)
@@ -894,7 +996,7 @@ exports.getSIDMap = function(dbName, project, branch, revision, callback) {
 			_id: stringToUUID(revision)
 		};
 	} else {
-		if (branch == 'master')
+		if (branch == "master")
 			var branch_id = masterUUID;
 		else
 			var branch_id = stringToUUID(branch);
@@ -904,14 +1006,16 @@ exports.getSIDMap = function(dbName, project, branch, revision, callback) {
 		};
 	}
 
-	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
+	var self = this;
+
+	dbConn(self.logger).getLatest(dbName, project + ".history", historyQuery, null, function(err, docs)
 	{
 		if (err.value) return callback(err);
 
 		if (!docs.length) return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
 
 		var filter = {
-			_id: {$in: docs[0]['current']}
+			_id: {$in: docs[0]["current"]}
 		};
 
 		var projection = {
@@ -919,7 +1023,7 @@ exports.getSIDMap = function(dbName, project, branch, revision, callback) {
 			shared_id : 1
 		};
 
-		dbConn.filterColl(dbName, project + '.scene', filter, projection, function(err, doc) {
+		dbConn(self.logger).filterColl(dbName, project + ".scene", filter, projection, function(err, doc) {
 			if (err.value) return callback(err);
 
 			var SIDMap = {};
@@ -939,8 +1043,8 @@ exports.getSIDMap = function(dbName, project, branch, revision, callback) {
 
 
 
-exports.getHeadRevision = function(dbName, project, branch, callback) {
-	if (branch == 'master')
+DBInterface.prototype.getHeadRevision = function(dbName, project, branch, callback) {
+	if (branch == "master")
 		var branch_id = masterUUID;
 	else
 		var branch_id = stringToUUID(branch);
@@ -951,14 +1055,14 @@ exports.getHeadRevision = function(dbName, project, branch, callback) {
 
 	var self = this;
 
-	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, doc) {
+	dbConn(self.logger).getLatest(dbName, project + ".history", historyQuery, null, function(err, doc) {
 		if (err.value) return callback(err);
 
 		callback(responseCodes.OK, doc);
 	});
 }
 
-exports.getHeadUUID = function(dbName, project, branch, callback) {
+DBInterface.prototype.getHeadUUID = function(dbName, project, branch, callback) {
 	self.getHeadRevision(dbName, project, branch, function(err, doc) {
 		if (err.value)
 			return callback(err);
@@ -967,8 +1071,10 @@ exports.getHeadUUID = function(dbName, project, branch, callback) {
 	});
 }
 
-exports.getHeadOf = function(dbName, project, branch, getFunc, callback) {
-	if (branch == 'master')
+DBInterface.prototype.getHeadOf = function(dbName, project, branch, getFunc, callback) {
+	var self = this;
+
+	if (branch == "master")
 		var branch_id = masterUUID;
 	else
 		var branch_id = stringToUUID(branch);
@@ -977,16 +1083,18 @@ exports.getHeadOf = function(dbName, project, branch, getFunc, callback) {
 		shared_id : branch_id
 	};
 
-	var self = this;
+	var projection = {
+		_id : 1
+	};
 
-	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, doc) {
+	dbConn(self.logger).getLatest(dbName, project + ".history", historyQuery, projection, function(err, doc) {
 		if (err.value)
 			return callback(err);
 
 		if (!doc.length)
 			return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
 
-			getFunc(dbName, project, uuidToString(doc[0]["_id"]), function(err, doc) {
+			getFunc.call(self, dbName, project, uuidToString(doc[0]["_id"]), function(err, doc) {
 				if(err.value)
 					return callback(err);
 
@@ -995,12 +1103,23 @@ exports.getHeadOf = function(dbName, project, branch, getFunc, callback) {
 	});
 };
 
-exports.getRevisionInfo = function(dbName, project, rid, callback) {
+DBInterface.prototype.getRevisionInfo = function(dbName, project, rid, callback) {
+	var self = this;
+
 	var filter = {
 		_id: stringToUUID(rid)
 	};
 
-	dbConn.filterColl(dbName, project + '.history', filter, null, function(err, doc) {
+	var projection = {
+		_id :      1,
+		shared_id: 1,
+		author:    1,
+		message:   1,
+		tag:       1,
+		timestamp: 1
+	};
+
+	dbConn(self.logger).filterColl(dbName, project + ".history", filter, projection, function(err, doc) {
 		if (err.value)
 			return callback(err);
 
@@ -1030,12 +1149,14 @@ exports.getRevisionInfo = function(dbName, project, rid, callback) {
 	});
 };
 
-exports.getReadme = function(dbName, project, rid, callback) {
+DBInterface.prototype.getReadme = function(dbName, project, rid, callback) {
 	var historyQuery = {
 		_id : stringToUUID(rid)
 	};
 
-	dbConn.filterColl(dbName, project + '.history', historyQuery, null, function(err, doc)
+	var self = this;
+
+	dbConn(this.logger).filterColl(dbName, project + ".history", historyQuery, null, function(err, doc)
 	{
 		if(!doc[0])
 			return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
@@ -1043,10 +1164,10 @@ exports.getReadme = function(dbName, project, rid, callback) {
 		var query = {
 			type:    "meta",
 			subtype: "readme",
-			_id		  : { $in : doc[0]['current']}
+			_id		  : { $in : doc[0]["current"]}
 		};
 
-		dbConn.filterColl(dbName, project + '.scene', query, null, function(err, readme) {
+		dbConn(self.logger).filterColl(dbName, project + ".scene", query, null, function(err, readme) {
 			if(err.value)
 				return callback(err);
 
@@ -1058,7 +1179,7 @@ exports.getReadme = function(dbName, project, rid, callback) {
 	});
 };
 
-exports.getRevisions = function(dbName, project, branch, from, to, full, callback) {
+DBInterface.prototype.getRevisions = function(dbName, project, branch, from, to, full, callback) {
 
 	var filter = {
 		type: "revision"
@@ -1087,7 +1208,9 @@ exports.getRevisions = function(dbName, project, branch, from, to, full, callbac
 		projection._id = 1;
 	}
 
-	dbConn.filterColl(dbName, project + '.history', filter, projection, function(err, doc) {
+	var self = this;
+
+	dbConn(this.logger).filterColl(dbName, project + ".history", filter, projection, function(err, doc) {
 		if (err.value)
 			return callback(err);
 
@@ -1114,7 +1237,7 @@ exports.getRevisions = function(dbName, project, branch, from, to, full, callbac
 	});
 };
 
-exports.getFederatedProjectList = function(dbName, project, branch, revision, callback) {
+DBInterface.prototype.getFederatedProjectList = function(dbName, project, branch, revision, callback) {
 
 	var historyQuery = null;
 
@@ -1124,7 +1247,7 @@ exports.getFederatedProjectList = function(dbName, project, branch, revision, ca
 			_id: stringToUUID(revision)
 		};
 	} else {
-		if (branch == 'master')
+		if (branch == "master")
 			var branch_id = masterUUID;
 		else
 			var branch_id = stringToUUID(branch);
@@ -1134,7 +1257,9 @@ exports.getFederatedProjectList = function(dbName, project, branch, revision, ca
 		};
 	}
 
-	dbConn.getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
+	var self = this;
+
+	dbConn(this.logger).getLatest(dbName, project + ".history", historyQuery, null, function(err, docs)
 	{
 		if (err.value) return callback(err.value);
 
@@ -1142,11 +1267,18 @@ exports.getFederatedProjectList = function(dbName, project, branch, revision, ca
 			return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
 
 		var filter = {
-			type: 'ref',
-			_id: { $in: docs[0]['current']}
+			type: "ref",
+			_id: { $in: docs[0]["current"]}
 		};
 
-		dbConn.filterColl(dbName, project + '.scene', filter, {}, function(err, refs) {
+		var projection = {
+			_rid : 1,
+			owner: 1,
+			project: 1,
+			unique: 1
+		};
+
+		dbConn(self.logger).filterColl(dbName, project + ".scene", filter, {}, function(err, refs) {
 			async.concat(refs, function (item, iter_callback) {
 				var childDbName  = item["owner"] ? item["owner"] : dbName;
 				var childProject = item["project"];
@@ -1164,8 +1296,8 @@ exports.getFederatedProjectList = function(dbName, project, branch, revision, ca
 						var childBranch   = uuidToString(item["_rid"]);
 					}
 				} else {
-					var childBranch   = 'master';
-					var childRevision = 'head';
+					var childBranch   = "master";
+					var childRevision = "head";
 				}
 
 				self.getFederatedProjectList(childDbName, childProject, childBranch, childRevision, function (err, childrefs) {
@@ -1183,7 +1315,7 @@ exports.getFederatedProjectList = function(dbName, project, branch, revision, ca
 	});
 }
 
-exports.getIssue = function(dbName, project, uid, onlyStubs, callback) {
+DBInterface.prototype.getIssue = function(dbName, project, uid, onlyStubs, callback) {
 	var filter = {
 		_id : stringToUUID(uid)
 	};
@@ -1201,7 +1333,7 @@ exports.getIssue = function(dbName, project, uid, onlyStubs, callback) {
 		}
 	}
 
-	dbConn.filterColl(dbName, project + '.issues', filter, projection, function (err, docs) {
+	dbConn(this.logger).filterColl(dbName, project + ".issues", filter, projection, function (err, docs) {
 		if (err.value) return callback(err);
 
 		for(var i = 0; i < docs.length; i++) {
@@ -1215,7 +1347,9 @@ exports.getIssue = function(dbName, project, uid, onlyStubs, callback) {
 	});
 }
 
-exports.getIssues = function(dbName, project, branch, revision, onlyStubs, callback) {
+DBInterface.prototype.getIssues = function(dbName, project, branch, revision, onlyStubs, callback) {
+	var self = this;
+
 	// First get the main project issues
 	self.getSIDMap(dbName, project, branch, revision, function (err, SIDMap) {
 		if (err.value) return callback(err);
@@ -1248,8 +1382,8 @@ exports.getIssues = function(dbName, project, branch, revision, onlyStubs, callb
 							var childBranch   = uuidToString(item["_rid"]);
 						}
 					} else {
-						var childBranch   = 'master';
-						var childRevision = 'head';
+						var childBranch   = "master";
+						var childRevision = "head";
 					}
 
 					self.getSIDMap(childDbName, childProject, childBranch, childRevision, function (err, SIDMap) {
@@ -1275,7 +1409,7 @@ exports.getIssues = function(dbName, project, branch, revision, onlyStubs, callb
 	});
 }
 
-exports.getObjectIssues = function(dbName, project, sids, number, onlyStubs, callback) {
+DBInterface.prototype.getObjectIssues = function(dbName, project, sids, number, onlyStubs, callback) {
 	if (sids.constructor !== Array) sids = [sids];
 
 	sids = sids.map( function (item) { return stringToUUID(item); } )
@@ -1295,7 +1429,7 @@ exports.getObjectIssues = function(dbName, project, sids, number, onlyStubs, cal
 		}
 	}
 
-	dbConn.filterColl(dbName, project + '.issues', filter, {}, function (err, docs) {
+	dbConn(this.logger).filterColl(dbName, project + ".issues", filter, {}, function (err, docs) {
 		if (err.value) return callback(err);
 
 		for(var i = 0; i < docs.length; i++) {
@@ -1309,15 +1443,17 @@ exports.getObjectIssues = function(dbName, project, sids, number, onlyStubs, cal
 	});
 }
 
-exports.storeIssue = function(dbName, project, sid, owner, data, callback) {
-	dbConn.collCallback(dbName, project + ".issues", false, function(err, coll) {
+DBInterface.prototype.storeIssue = function(dbName, project, sid, owner, data, callback) {
+	var self = this;
+
+	dbConn(this.logger).collCallback(dbName, project + ".issues", false, function(err, coll) {
 		if(err.value)
 			return callback(err);
 
 		if (!data._id) {
 			var newID = uuid.v1();
 
-			logger.log('debug', 'Creating new issue ' + newID);
+			self.logger.logDebug("Creating new issue " + newID);
 
 			// TODO: Implement this using sequence counters
 			coll.count(function(err, numIssues) {
@@ -1330,19 +1466,19 @@ exports.storeIssue = function(dbName, project, sid, owner, data, callback) {
 				data.number  = numIssues + 1;
 
 				if (!data.name)
-					data.name = 'Issue' + data.number;
+					data.name = "Issue" + data.number;
 
 				data.owner = owner;
 
 				coll.insert(data, function(err, count) {
 					if (err) return callback(responseCodes.DB_ERROR(err));
 
-					logger.log('debug', 'Updated ' + count + ' records.');
+					self.logger.logDebug("Updated " + count + " records.");
 					callback(responseCodes.OK, { issue_id : uuidToString(data._id), number : data.number });
 				});
 			});
 		} else {
-			logger.log('debug', 'Updating issue ' + data._id);
+			self.logger.logDebug("Updating issue " + data._id);
 
 			data._id = stringToUUID(data._id);
 
@@ -1360,14 +1496,14 @@ exports.storeIssue = function(dbName, project, sid, owner, data, callback) {
 			coll.update({ _id : data._id}, updateQuery, function(err, count) {
 				if (err) return callback(responseCodes.DB_ERROR(err));
 
-				logger.log('debug', 'Updated ' + count + ' records.');
+				self.logger.logDebug("Updated " + count + " records.");
 				callback(responseCodes.OK, { issue_id : uuidToString(data._id), number: data.number });
 			});
 		}
 	});
 }
 
-exports.getBranches = function(dbName, project, callback) {
+DBInterface.prototype.getBranches = function(dbName, project, callback) {
 	var filter = {
 		type: "revision"
 	};
@@ -1376,7 +1512,7 @@ exports.getBranches = function(dbName, project, callback) {
 		shared_id : 1
 	};
 
-	dbConn.filterColl(dbName, project + '.history', filter, projection, function(err, doc) {
+	dbConn(this.logger).filterColl(dbName, project + ".history", filter, projection, function(err, doc) {
 			if (err.value)
 				return callback(err);
 
@@ -1395,7 +1531,8 @@ exports.getBranches = function(dbName, project, callback) {
 
 };
 
-exports.getMetadata = function(dbName, project, branch, revision, sid, uid, callback) {
+DBInterface.prototype.getMetadata = function(dbName, project, branch, revision, sid, uid, callback) {
+	var self = this;
 
 	// If the uid is not specified then we are requesting a
 	// specific object for a branch and revision
@@ -1403,7 +1540,7 @@ exports.getMetadata = function(dbName, project, branch, revision, sid, uid, call
 	{
 		var filter = {
 			parents: stringToUUID(sid),
-			type: 'meta'
+			type: "meta"
 		};
 
 		var projection = {
@@ -1430,72 +1567,97 @@ exports.getMetadata = function(dbName, project, branch, revision, sid, uid, call
 		};
 
 		var historyProjection = {
-			_id : 1
+			_id       : 1,
+			shared_id : 1
 		}
 
-		dbConn.filterColl(dbName, project + '.history', historyQuery, historyProjection, function(err, obj) {
+		dbConn(self.logger).filterColl(dbName, project + ".history", historyQuery, historyProjection, function(err, revisions) {
 			if (err.value) return callback(err);
 
-			if (!obj.length)
+			if (!revisions.length)
 				return callback(responseCodes.OBJECT_NOT_FOUND);
 
-			var revision = uuidToString(obj[0]["_id"]);
+			var revision = uuidToString(revisions[0][C.REPO_NODE_LABEL_ID]);
 
-			var filter = {
-				parents: obj[0]["shared_id"],
-				type: 'meta'
-			};
+			self.getObject(dbName, project, uid, null, null, false, { shared_id : 1 }, function(err, type, uid, fromStash, objs) {
+				if (err.value) {
+					return callback(err);
+				}
 
-			var projection = {
-				shared_id: 0,
-				paths: 0,
-				type: 0,
-				api: 0,
-				parents: 0
-			};
+				var objSID = Object.keys(objs.all)[0];
 
-			// TODO: This will query the history collection again, unnecessarily
-			self.queryScene(dbName, project, null, revision, filter, projection, function(err, fromStash, metadocs) {
-				if (err.value) return callback(err);
+				var filter = {
+					parents: utils.stringToUUID(objSID),
+					type:    C.REPO_NODE_TYPE_META
+				};
 
-				for(var i = 0; i < metadocs.length; i++)
-					metadocs[i]["_id"] = uuidToString(metadocs[i]["_id"]);
+				var projection = {
+					shared_id: 0,
+					paths: 0,
+					type: 0,
+					api: 0,
+					parents: 0
+				};
 
-				callback(responseCodes.OK, metadocs);
+				// TODO: This will query the history collection again, unnecessarily
+				self.queryScene(dbName, project, null, revision, filter, projection, function(err, fromStash, metadocs) {
+					if (err.value) return callback(err);
+
+					for(var i = 0; i < metadocs.length; i++)
+						metadocs[i]["_id"] = uuidToString(metadocs[i]["_id"]);
+
+					callback(responseCodes.OK, metadocs);
+				});
 			});
 		});
 	}
 };
 
-exports.appendMeshFiles = function(dbName, project, fromStash, uid, obj, callback)
+DBInterface.prototype.appendMeshFiles = function(dbName, project, fromStash, uid, obj, callback)
 {
-		var gridfstypes = [
-			C.REPO_NODE_LABEL_VERTICES,
-			C.REPO_NODE_LABEL_FACES,
-			C.REPO_NODE_LABEL_NORMALS,
-			//C.REPO_NODE_LABEL_COLORS,
-			C.REPO_NODE_LABEL_UV_CHANNELS
-		];
+	var self = this;
 
-		var numTasks = gridfstypes.length;
-		var subColl = fromStash ? 'stash.3drepo' : 'scene';
+	var gridfstypes = [
+		C.REPO_NODE_LABEL_VERTICES,
+		C.REPO_NODE_LABEL_FACES,
+		C.REPO_NODE_LABEL_NORMALS,
+		//C.REPO_NODE_LABEL_COLORS,
+		C.REPO_NODE_LABEL_UV_CHANNELS
+	];
 
-		// TODO: Make this more generic, get filename from field
-		async.each(gridfstypes, function (fstype, callback) {
-			dbConn.getGridFSFile(dbName, project + '.' + subColl, uid + "_" + fstype, function(err, data)
-			{
-				if (!err["value"])
-					obj[fstype] = data;
+	var numTasks = gridfstypes.length;
+	var subColl = fromStash ? "stash.3drepo" : "scene";
 
-				callback();
-			});
-		}, function (err) {
-			return callback(responseCodes.OK, "mesh", uid, fromStash, repoGraphScene.decode([obj]));
+	self.logger.logTrace("Retrieving mesh files and appending");
+
+	// TODO: Make this more generic, get filename from field
+	async.each(gridfstypes, function (fstype, callback) {
+		dbConn(self.logger).getGridFSFile(dbName, project + "." + subColl, uid + "_" + fstype, function(err, data)
+		{
+			if (!err["value"])
+				obj[fstype] = data;
+
+			callback();
 		});
+	}, function (err) {
+		return callback(responseCodes.OK, "mesh", uid, fromStash, repoGraphScene(self.logger).decode([obj]));
+	});
 }
 
-exports.getObject = function(dbName, project, uid, rid, sid, callback) {
-	logger.log('debug', 'Requesting object (U, R, S) (' + uid + ',' + rid + ',' + sid + ')');
+DBInterface.prototype.getObject = function(dbName, project, uid, rid, sid, needFiles, projection, callback) {
+	var self = this;
+
+	self.logger.logDebug("Requesting object (U, R, S) (" + uid + "," + rid + "," + sid + ")");
+
+	// TODO: Get mesh files on demand
+
+	// We need at least these fields for object construction
+	if (projection !== null && Object.keys(projection).length)
+	{
+		projection["_id"]       = 1;
+		projection["shared_id"] = 1;
+		projection["type"]      = 1;
+	}
 
 	if (uid)
 	{
@@ -1503,13 +1665,13 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 			_id: stringToUUID(uid)
 		};
 
-		dbConn.filterColl(dbName, project + '.stash.3drepo', query, {}, function(err, obj) {
+		dbConn(self.logger).filterColl(dbName, project + ".stash.3drepo", query, projection, function(err, obj) {
 			if (err.value || !obj.length)
 			{
 				// TODO: At this point we should generate the scene graph
 				// There is no stash so just pass back the unoptimized scene graph
 
-				dbConn.filterColl(dbName, project + '.scene', query, {}, function(err, obj) {
+				dbConn(self.logger).filterColl(dbName, project + ".scene", query, projection, function(err, obj) {
 					if (err.value) return callback(err);
 
 					if (!obj.length)
@@ -1518,26 +1680,26 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 					var type = obj[0]["type"];
 					var uid = uuidToString(obj[0]["_id"]);
 
-					if (type == "mesh")
+					if ((type == "mesh") && needFiles)
 					{
 						self.appendMeshFiles(dbName, project, false, uid, obj[0], callback);
 					} else {
-						return callback(responseCodes.OK, type, uid, false, repoGraphScene.decode(obj));
+						return callback(responseCodes.OK, type, uid, false, repoGraphScene(self.logger).decode(obj));
 					}
 				});
 			} else {
 				var type = obj[0]["type"];
 				var uid = uuidToString(obj[0]["_id"]);
 
-				var sceneObj = repoGraphScene.decode(obj);
+				var sceneObj = repoGraphScene(self.logger).decode(obj);
 
 				// TODO: Make this more concrete
 				// if a mesh load the vertices, indices, colors etc from GridFS
-				if (type == "mesh")
+				if ((type == "mesh") && needFiles)
 				{
 					self.appendMeshFiles(dbName, project, true, uid, obj[0], callback);
 				} else {
-					return callback(responseCodes.OK, type, uid, true, repoGraphScene.decode(obj));
+					return callback(responseCodes.OK, type, uid, true, repoGraphScene(self.logger).decode(obj));
 				}
 			}
 		});
@@ -1554,11 +1716,11 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 			if (!obj.length)
 				return callback(responseCodes.OBJECT_NOT_FOUND);
 
-			if (type == "mesh")
+			if ((type == "mesh") && needFiles)
 			{
-				self.getMeshFiles(dbName, project, fromStash, uid, obj, callback);
+				self.appendMeshFiles(dbName, project, fromStash, uid, obj, callback);
 			} else {
-				return callback(responseCodes.OK, type, uid, fromStash, repoGraphScene.decode(obj));
+				return callback(responseCodes.OK, type, uid, fromStash, repoGraphScene(this.logger).decode(obj));
 			}
 		});
 	} else {
@@ -1566,7 +1728,7 @@ exports.getObject = function(dbName, project, uid, rid, sid, callback) {
 	}
 }
 
-exports.getScene = function(dbName, project, branch, revision, full, callback) {
+DBInterface.prototype.getScene = function(dbName, project, branch, revision, full, callback) {
 
 	if (!full)
 	{
@@ -1581,12 +1743,58 @@ exports.getScene = function(dbName, project, branch, revision, full, callback) {
 		var projection = {};
 	}
 
-	exports.queryScene(dbName, project, branch, revision, {}, projection, function(err, fromStash, coll) {
-		callback(responseCodes.OK, repoGraphScene.decode(coll));
+	var self = this;
+
+	self.queryScene(dbName, project, branch, revision, {}, projection, function(err, fromStash, coll) {
+		callback(responseCodes.OK, repoGraphScene(self.logger).decode(coll));
 	});
 };
 
-exports.getDiff = function(account, project, branch, revision, otherbranch, otherrevision, callback) {
+// TODO: Get rid of this function
+DBInterface.prototype.getUnoptimizedScene = function(dbName, project, branch, revision, full, callback)
+{
+	var historyQuery = null;
+
+	if (revision)
+	{
+		historyQuery = {
+			_id: stringToUUID(revision)
+		};
+	} else {
+		if (branch == 'master')
+			var branch_id = masterUUID;
+		else
+			var branch_id = stringToUUID(branch);
+
+		historyQuery = {
+			shared_id:	branch_id
+		};
+	}
+
+	dbConn(self.logger).getLatest(dbName, project + '.history', historyQuery, null, function(err, docs)
+	{
+		if (err.value) return callback(err);
+
+		if (!docs.length) {
+			return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+		}
+
+		var filter = {
+			_id: {$in: docs[0]['current']}
+		};
+
+		dbConn(self.logger).filterColl(dbName, project + '.scene', filter, null, function(err, doc) {
+			if (err.value) return callback(err);
+
+			if (!doc.length)
+				return callback(responseCodes.ROOT_NODE_NOT_FOUND);
+
+			callback(responseCodes.OK, repoGraphScene.decode(doc));
+		});
+	});
+}
+
+DBInterface.prototype.getDiff = function(account, project, branch, revision, otherbranch, otherrevision, callback) {
 	var historyQuery = null;
 
 	if (revision != null)
@@ -1595,7 +1803,7 @@ exports.getDiff = function(account, project, branch, revision, otherbranch, othe
 			_id: stringToUUID(revision)
 		};
 	} else {
-		if (branch == 'master')
+		if (branch == "master")
 			var branch_id = masterUUID;
 		else
 			var branch_id = stringToUUID(branch);
@@ -1616,7 +1824,9 @@ exports.getDiff = function(account, project, branch, revision, otherbranch, othe
 	};
 	*/
 
-	dbConn.getLatest(account, project + '.history', historyQuery, null, function(err, history)
+	var self = this;
+
+	dbConn(self.logger).getLatest(account, project + ".history", historyQuery, null, function(err, history)
 	{
 		if(err.value) return callback(err);
 
@@ -1631,7 +1841,7 @@ exports.getDiff = function(account, project, branch, revision, otherbranch, othe
 				_id: stringToUUID(otherrevision)
 			};
 		} else {
-			if (branch == 'master')
+			if (branch == "master")
 				var branch_id = masterUUID;
 			else
 				var branch_id = stringToUUID(otherbranch);
@@ -1641,7 +1851,7 @@ exports.getDiff = function(account, project, branch, revision, otherbranch, othe
 			};
 		}
 
-		dbConn.getLatest(account, project + '.history', otherHistoryQuery, null, function(err, otherhistory)
+		dbConn(self.logger).getLatest(account, project + ".history", otherHistoryQuery, null, function(err, otherhistory)
 		{
 			if (err.value) return callback(err);
 
@@ -1650,33 +1860,33 @@ exports.getDiff = function(account, project, branch, revision, otherbranch, othe
 
 			var doc = {};
 
-			var historycurrent      = history[0]['current'];
-			var otherhistorycurrent = otherhistory[0]['current'];
+			var historycurrent      = history[0]["current"];
+			var otherhistorycurrent = otherhistory[0]["current"];
 
 			historycurrent      = historycurrent.map(function(uid) { return uuidToString(uid); })
 			otherhistorycurrent = otherhistorycurrent.map(function(uid) { return uuidToString(uid); })
 
-			doc['added'] = otherhistorycurrent.filter( function (elem)
+			doc["added"] = otherhistorycurrent.filter( function (elem)
 				{
 					return (historycurrent.indexOf(elem) == -1);
 				}
 			);
 
-			doc['deleted'] = historycurrent.filter( function (elem)
+			doc["deleted"] = historycurrent.filter( function (elem)
 				{
 					return (otherhistorycurrent.indexOf(elem) == -1);
 				}
 			);
 
 			// TODO: Compute the modified
-			//if (doc['modified'])
-			//	doc['modified'] = doc['modified'].map(function(uid) { return uuidToString(uid); });
+			//if (doc["modified"])
+			//	doc["modified"] = doc["modified"].map(function(uid) { return uuidToString(uid); });
 
-			self.getUIDMap(account, project, doc['added'].concat(doc['deleted']), function (err, map) {
+			self.getUIDMap(account, project, doc["added"].concat(doc["deleted"]), function (err, map) {
 				if (err.value) return callback(err);
 
-				doc['added']   = doc['added'].map(function(elem) { return map[elem]; });
-				doc['deleted'] = doc['deleted'].map(function(elem) { return map[elem]; });
+				doc["added"]   = doc["added"].map(function(elem) { return map[elem]; });
+				doc["deleted"] = doc["deleted"].map(function(elem) { return map[elem]; });
 
 				callback(responseCodes.OK, doc);
 			});
@@ -1684,5 +1894,10 @@ exports.getDiff = function(account, project, branch, revision, otherbranch, othe
 	});
 };
 
-exports.uuidToString = uuidToString;
-exports.dbConn		 = dbConn;
+DBInterface.prototype.uuidToString = uuidToString;
+
+module.exports = function(logger) {
+	"use strict";
+
+	return new DBInterface(logger);
+};

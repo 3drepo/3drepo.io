@@ -27,6 +27,9 @@ prototype/OSTFed.txt
 
 sessions
 
+public/dist/plugins.min.js
+public/dist/plugins.concat.js
+
 #Visual Studio junk
 *.njsproj
 *.suo

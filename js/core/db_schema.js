@@ -17,8 +17,7 @@
 
 var Validator = require('jsonschema').Validator;
 var v = new Validator();
-var log_iface = require('./logger.js');
-var logger = log_iface.logger;
+var systemLogger = require('./logger.js').systemLogger;
 var responseCodes = require('./response_codes.js');
 
 module.exports = function() {
@@ -27,7 +26,7 @@ module.exports = function() {
 
 	this.registerSchema = function(regex, schema)
 	{
-		logger.log('debug', 'Registering POST schema for ' + regex);
+		systemLogger.logDebug('Registering POST schema for ' + regex);
 
 		var schemaObj = {
 			"id": regex,
@@ -135,7 +134,7 @@ module.exports = function() {
 	{
 		if(!(regex in this.schemas))
 		{
-			logger.log('error', 'Schema not defined for regex :' + regex);
+			systemLogger.logError('Schema not defined for regex :' + regex);
 			return function (req, res, next) {
 				responseCodes.respond( 'Schema validation', responseCodes.MISSING_SCHEMA, res, { "regex" : regex });
 			};
