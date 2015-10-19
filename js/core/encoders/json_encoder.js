@@ -28,6 +28,8 @@ var dbInterface = require("../db_interface.js");
 var uuid = require("node-uuid");
 var utils = require("../utils.js");
 
+var responseCodes = require("../response_codes.js");
+
 // Credit goes to http://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
 function escapeHtml(text) {
 	"use strict";
@@ -36,7 +38,7 @@ function escapeHtml(text) {
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
-    """: "&quot;",
+    "'": "&quot;",
     "\"": "&#039;"
   };
 
