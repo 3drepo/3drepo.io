@@ -110,14 +110,14 @@ var repoGetHandler = function(router, checkAccess){
 		});
 
 	// Get map from object id to path in tree for multipart
-	self.getInternal("/:account/:project/revision/:branch/head/fulltree.:format?");
-	self.getInternal("/:account/:project/revision/:rid/fulltree.:format?.:subformat?");
+	self.getInternal("/:account/:project/revision/:branch/head/fulltree.:format");
+	self.getInternal("/:account/:project/revision/:rid/fulltree.:format.:subformat?");
 
 	// Get subtree for head revision for a branch, with (optional) depth query string parameter
-	self.getInternal("/:account/:project/revision/:branch/head/tree/:sid.:format?.:subformat?");
+	self.getInternal("/:account/:project/revision/:branch/head/tree/:sid.:format.:subformat?");
 
 	// Get README for branch"s head revision
-	self.getInternal("/:account/:project/revision/:branch/head/readme.:format?.:subformat?");
+	self.getInternal("/:account/:project/revision/:branch/head/readme.:format.:subformat?");
 
 	// Get README for branch"s head revision
 	self.getInternal("/:account/:project/revision/:branch/head/readme.:format.:subformat?");

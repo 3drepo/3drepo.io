@@ -14,15 +14,15 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- var logIface = require('../logger.js');
- var C = require('../constants.js');
- var uuidToString = require('../db_interface.js').uuidToString;
- var repoNodeMesh = require('../repoNodeMesh.js');
- var responseCodes = require('../response_codes.js');
+ var logIface = require("../logger.js");
+ var C = require("../constants.js");
+ var uuidToString = require("../db_interface.js").uuidToString;
+ var repoNodeMesh = require("../repoNodeMesh.js");
+ var responseCodes = require("../response_codes.js");
 
- var utils         = require('../utils.js');
+ var utils         = require("../utils.js");
 
- var dbInterface   = require('../db_interface.js');
+ var dbInterface   = require("../db_interface.js");
 
 /*******************************************************************************
  * Render SRC format of a mesh
@@ -36,7 +36,9 @@
  *******************************************************************************/
  function render(project, scene, tex_uuid, embedded_texture, subformat, logger, result_callback)
  {
- 	logger.logDebug('Passed ' + scene[C.REPO_SCENE_LABEL_MESHES_COUNT]);
+ 	"use strict";
+
+ 	logger.logDebug("Passed " + scene[C.REPO_SCENE_LABEL_MESHES_COUNT]);
 
  	var meshIDs = Object.keys(scene.meshes);
  	var meshIDX = 0;
@@ -64,15 +66,16 @@
 	srcJSON.meshes                    = {};
 	srcJSON.meta                      = {};
 
-	for(var idx = 0; idx < meshIDs.length; idx++)
+
+	for(idx = 0; idx < meshIDs.length; idx++)
 	{
 		meshID = meshIDs[idx];
 
 		var mesh = scene.meshes[meshID]; // Current mesh object
 
-		logger.logDebug('Processing mesh ' + meshID);
-		logger.logDebug('Mesh #Verts: ' + mesh.vertices_count);
-		logger.logDebug('Mesh #Faces: ' + mesh.faces_count);
+		logger.logDebug("Processing mesh " + meshID);
+		logger.logDebug("Mesh #Verts: " + mesh.vertices_count);
+		logger.logDebug("Mesh #Faces: " + mesh.faces_count);
 
 		var subMeshArray         = [];
 		var subMeshKeys          = [];
@@ -83,17 +86,7 @@
 		if (mesh[C.REPO_NODE_LABEL_COMBINED_MAP])
 		{
 			// First sort the combined map in order of vertex ID
-			mesh[C.REPO_NODE_LABEL_COMBINED_MAP].sort(function(left, right)
-			{
-				if (left[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] < right[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM])
-					return -1;
-				else if (left[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] > right[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]
-				)
-					return 1;
-				else
-					return 0;
-			});
-
+			mesh[C.REPO_NODE_LABEL_COMBINED_MAP].sort(repoNodeMesh.mergeMapSort);
 
 			if (subformat !== "mpc")
 			{
@@ -102,7 +95,6 @@
 			} else {
 				// Split the mesh into separate submeshes where
 				// each mesh is under the vertex limit
-				var vertexLimit = 65535;
 
 				var subMeshIDX       = -1;
 				var runningVertTotal = 0;
@@ -125,26 +117,26 @@
 					var currentMeshNumVertices = currentMeshVTo - currentMeshVFrom;
 					var currentMeshNumFaces = currentMeshTTo - currentMeshTFrom;
 
-					if (currentMeshNumVertices > vertexLimit)
-					{
-						console.log("OH DEAR !!!!" + currentMeshNumVertices);
-						process.exit(0);
+					if (currentMeshNumVertices > C.SRC_VERTEX_LIMIT)
+			{
+						return result_callback(responseCodes.INVALID_MESH);
 					}
 
-					if (((currentMeshVTo - runningOffset) > vertexLimit) || (subMeshIDX === -1))
+					if (((currentMeshVTo - runningOffset) > C.SRC_VERTEX_LIMIT) || (subMeshIDX === -1))
 					{
-						if  (!(subMeshIDX == -1))
+						if  (subMeshIDX !== -1)
 						{
 							subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET] = subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
-							runningOffset = subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET];
-							subMeshArray[subMeshIDX]["num_vertices"] = runningVertTotal;
-							subMeshArray[subMeshIDX]["num_faces"]    = runningFaceTotal;
+							runningOffset                                                = subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET];
+							subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_VERTICES_COUNT]   = runningVertTotal;
+							subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_FACES_COUNT]      = runningFaceTotal;
 						}
 
 						subMeshIDX += 1;
-						subMeshArray[subMeshIDX]                 = [];
-						subMeshArray[subMeshIDX]["map_id"]       = mesh["id"] + "_" + subMeshIDX;
-						subMeshArray[subMeshIDX]["idx_list"]     = [];
+						subMeshArray[subMeshIDX]                                            = {};
+						subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]       = mesh["id"] + "_" + subMeshIDX;
+
+						subMeshArray[subMeshIDX][C.SRC_IDX_LIST]                            = [];
 						subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]   = currentMeshVFrom;
 						subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_FROM] = currentMeshTFrom;
 
@@ -155,37 +147,39 @@
 					runningVertTotal += currentMeshNumVertices;
 					runningFaceTotal += currentMeshNumFaces;
 
-					subMeshArray[subMeshIDX]["idx_list"].push(i);
+					subMeshArray[subMeshIDX][C.SRC_IDX_LIST].push(i);
 					subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO]     = currentMeshVTo;
 					subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO]   = currentMeshTTo;
 				}
 
-				subMeshArray[subMeshIDX]["num_vertices"] = runningVertTotal;
-				subMeshArray[subMeshIDX]["num_faces"]    = runningFaceTotal;
+				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_VERTICES_COUNT]   = runningVertTotal;
+				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_FACES_COUNT]      = runningFaceTotal;
 				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET] = subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
 
 				var runningIDX = 0;
 
 				for(var i = 0; i < subMeshArray.length; i++)
 				{
-					subMeshArray[i].idMapBuf                            = new Buffer(subMeshArray[i]["num_vertices"] * 4);
+					subMeshArray[i].idMapBuf                            = new Buffer(subMeshArray[i][C.REPO_NODE_LABEL_VERTICES_COUNT] * 4);
 					subMeshBBoxCenters[i]                               = [];
 					subMeshBBoxSizes[i]                                 = [];
 					subMeshKeys[i]                                      = [];
 
-					for(var p = 0; p < subMeshArray[i]["idx_list"].length; p++)
+					for(var p = 0; p < subMeshArray[i][C.SRC_IDX_LIST].length; p++) {
 						subMeshKeys[i].push(utils.uuidToString(mesh[C.REPO_NODE_LABEL_COMBINED_MAP][p][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]));
+					}
 
 					// If this is multipart then generate the idMap
-					for(var j = 0; j < subMeshArray[i]["idx_list"].length; j++)
+					for(var j = 0; j < subMeshArray[i][C.SRC_IDX_LIST].length; j++)
 					{
-						var mapIDX = subMeshArray[i]["idx_list"][j];
+						var mapIDX = subMeshArray[i][C.SRC_IDX_LIST][j];
 						var map    = mesh[C.REPO_NODE_LABEL_COMBINED_MAP][mapIDX];
 
-						for(var k = map[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]; k < map[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO]; k++)
+						for(var k = map[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]; k < map[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO]; k++) {
 							subMeshArray[i].idMapBuf.writeFloatLE(runningIDX, (k - subMeshArray[i][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET]) * 4);
+						}
 
-						var bbox = mesh[C.REPO_NODE_LABEL_COMBINED_MAP][j]["bounding_box"];
+						var bbox = mesh[C.REPO_NODE_LABEL_COMBINED_MAP][j][C.REPO_NODE_LABEL_BOUNDING_BOX];
 
 						var bboxMin    = bbox[0];
 						var bboxMax    = bbox[1];
@@ -202,8 +196,8 @@
 		} else {
 			// Submesh array consists of a single mesh (the entire thing)
 			subMeshArray[0]                                            = {};
-			subMeshArray[0]["num_vertices"]                            = mesh.vertices_count;
-			subMeshArray[0]["num_faces"]                               = mesh.faces_count;
+			subMeshArray[0][C.REPO_NODE_LABEL_VERTICES_COUNT]          = mesh.vertices_count;
+			subMeshArray[0][C.REPO_NODE_LABEL_FACES_COUNT]             = mesh.faces_count;
 			subMeshArray[0][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]       = meshID;
 			subMeshArray[0][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]   = 0;
 			subMeshArray[0][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO]     = mesh.vertices_count;
@@ -215,7 +209,7 @@
 		var subMeshBuffers = [];
 		var faceBuf = new Buffer(mesh.faces_count * 2 * 3); // Holder for buffer of face indices
 		var copy_ptr = 0;	  								// Pointer to the place in SRC buffer to copy to
-		var orig_idx = mesh['faces'].buffer;
+		var orig_idx = mesh["faces"].buffer;
 		var orig_idx_ptr = 0; 								// Pointer in the RepoGraphScene buffer to copy from
 
 
@@ -223,24 +217,27 @@
 		var bufPos = 0;
 
 		var vertexWritePosition = bufPos;
-		if (mesh['vertices']) {
-			bufPos += mesh['vertices'].buffer.length;
+		if (mesh[C.REPO_NODE_LABEL_VERTICES]) {
+			bufPos += mesh[C.REPO_NODE_LABEL_VERTICES].buffer.length;
 		}
 
 		var normalWritePosition = bufPos;
-		if (mesh['normals'])
-			bufPos += mesh['normals'].buffer.length;
+		if (mesh[C.REPO_NODE_LABEL_NORMALS]) {
+			bufPos += mesh[C.REPO_NODE_LABEL_NORMALS].buffer.length;
+		}
 
 		var facesWritePosition  = bufPos;
-		if (mesh['faces'])
+		if (mesh[C.REPO_NODE_LABEL_FACES]) {
 			bufPos += faceBuf.length;
+		}
 
 		var idMapWritePosition = bufPos;
-		if (needsIdMapBuf)
+		if (needsIdMapBuf) {
 			bufPos += mesh.vertices_count * 4;
+		}
 
-		var uvWritePosition     = bufPos;
-		var numSubMeshes = subMeshArray.length;
+		var uvWritePosition = bufPos;
+		var numSubMeshes    = subMeshArray.length;
 
 		// Loop through a set of possible submeshes
 		for(var subMesh = 0; subMesh < numSubMeshes; subMesh++)
@@ -253,33 +250,35 @@
 
 			meshIDX = idx + "_" + subMesh;
 
-			var positionAttributeView = 'p' + meshIDX;
-			var normalAttributeView   = 'n' + meshIDX;
-			var uvAttributeView       = 'u' + meshIDX;
-			var idMapAttributeView    = 'id' + meshIDX;
-			var indexView             = 'i' + meshIDX;
+			var positionAttributeView = "p" + meshIDX;
+			var normalAttributeView   = "n" + meshIDX;
+			var uvAttributeView       = "u" + meshIDX;
+			var idMapAttributeView    = "id" + meshIDX;
+			var indexView             = "i" + meshIDX;
 
-			var positionBufferView    = 'pb' + meshIDX;
-			var normalBufferView      = 'nb' + meshIDX;
-			var texBufferView         = 'tb' + meshIDX;
-			var uvBufferView          = 'ub' + meshIDX;
-			var indexBufferView       = 'ib' + meshIDX;
-			var idMapBufferView       = 'idb' + meshIDX;
+			var positionBufferView    = "pb" + meshIDX;
+			var normalBufferView      = "nb" + meshIDX;
+			var texBufferView         = "tb" + meshIDX;
+			var uvBufferView          = "ub" + meshIDX;
+			var indexBufferView       = "ib" + meshIDX;
+			var idMapBufferView       = "idb" + meshIDX;
 
-			var positionBufferChunk = 'pc' + meshIDX;
-			var indexBufferChunk 	= 'ic' + meshIDX;
-			var normalBufferChunk   = 'nc' + meshIDX;
-			var texBufferChunk      = 'tc' + meshIDX;
-			var uvBufferChunk       = 'uc' + meshIDX;
-			var idMapBufferChunk    = 'idc' + meshIDX;
+			var positionBufferChunk = "pc" + meshIDX;
+			var indexBufferChunk 	= "ic" + meshIDX;
+			var normalBufferChunk   = "nc" + meshIDX;
+			var texBufferChunk      = "tc" + meshIDX;
+			var uvBufferChunk       = "uc" + meshIDX;
+			var idMapBufferChunk    = "idc" + meshIDX;
 
-			var idMapID             = 'idMap' + meshIDX;
+			var idMapID             = "idMap" + meshIDX;
 
-			meshID = subMeshArray[subMesh]["map_id"];
+			var meshID = subMeshArray[subMesh][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID];
 
 			// SRC Header for this mesh
 			srcJSON.meshes[meshID]            = {};
 			srcJSON.meshes[meshID].attributes = {};
+
+			console.log("MESHID: " + meshID);
 
 			// Extract and attach the bounding box
 			/*
@@ -289,18 +288,18 @@
 			srcJSON.meshes[meshID].bboxSize   = bbox.size;
 			*/
 
-			var subMeshVerticesCount = subMeshArray[subMesh]["num_vertices"];
-			var subMeshFacesCount    = subMeshArray[subMesh]["num_faces"];
+			var subMeshVerticesCount = subMeshArray[subMesh][C.REPO_NODE_LABEL_VERTICES_COUNT];
+			var subMeshFacesCount    = subMeshArray[subMesh][C.REPO_NODE_LABEL_FACES_COUNT];
 
 			// Vertices
-			if (mesh["vertices"])
+			if (mesh[C.REPO_NODE_LABEL_VERTICES])
 			{
 				srcJSON.accessors.attributeViews[positionAttributeView]			   	  = {};
 				srcJSON.accessors.attributeViews[positionAttributeView].bufferView    = positionBufferView;
 				srcJSON.accessors.attributeViews[positionAttributeView].byteOffset    = 0;
 				srcJSON.accessors.attributeViews[positionAttributeView].byteStride    = 12;
 				srcJSON.accessors.attributeViews[positionAttributeView].componentType = C.X3DOM_SRC_FLOAT;
-				srcJSON.accessors.attributeViews[positionAttributeView].type		  = 'VEC3';
+				srcJSON.accessors.attributeViews[positionAttributeView].type		  = "VEC3";
 				srcJSON.accessors.attributeViews[positionAttributeView].count		  = subMeshVerticesCount;
 				srcJSON.accessors.attributeViews[positionAttributeView].decodeOffset  = [0, 0, 0];
 				srcJSON.accessors.attributeViews[positionAttributeView].decodeScale   = [1, 1, 1];
@@ -318,14 +317,14 @@
 			}
 
 			// Normal Attribute View
-			if (mesh["normals"])
+			if (mesh[C.REPO_NODE_LABEL_NORMALS])
 			{
 				srcJSON.accessors.attributeViews[normalAttributeView]               = {};
 				srcJSON.accessors.attributeViews[normalAttributeView].bufferView    = normalBufferView;
 				srcJSON.accessors.attributeViews[normalAttributeView].byteOffset    = 0;
 				srcJSON.accessors.attributeViews[normalAttributeView].byteStride    = 12;
 				srcJSON.accessors.attributeViews[normalAttributeView].componentType = C.X3DOM_SRC_FLOAT;
-				srcJSON.accessors.attributeViews[normalAttributeView].type		    = 'VEC3';
+				srcJSON.accessors.attributeViews[normalAttributeView].type		    = "VEC3";
 				srcJSON.accessors.attributeViews[normalAttributeView].count		    = subMeshVerticesCount;
 				srcJSON.accessors.attributeViews[normalAttributeView].decodeOffset  = [0, 0, 0];
 				srcJSON.accessors.attributeViews[normalAttributeView].decodeScale   = [1, 1, 1];
@@ -343,7 +342,7 @@
 			}
 
 			// Index View
-			if (mesh["faces"])
+			if (mesh[C.REPO_NODE_LABEL_FACES])
 			{
 				srcJSON.accessors.indexViews[indexView]               = {};
 				srcJSON.accessors.indexViews[indexView].bufferView    = indexBufferView;
@@ -372,7 +371,7 @@
 				srcJSON.accessors.attributeViews[idMapAttributeView].byteOffset    = 0;
 				srcJSON.accessors.attributeViews[idMapAttributeView].byteStride    = 4;
 				srcJSON.accessors.attributeViews[idMapAttributeView].componentType = C.X3DOM_SRC_FLOAT;
-				srcJSON.accessors.attributeViews[idMapAttributeView].type		   = 'SCALAR';
+				srcJSON.accessors.attributeViews[idMapAttributeView].type		   = "SCALAR";
 				srcJSON.accessors.attributeViews[idMapAttributeView].count		   = subMeshVerticesCount;
 				srcJSON.accessors.attributeViews[idMapAttributeView].decodeOffset  = [0];
 				srcJSON.accessors.attributeViews[idMapAttributeView].decodeScale   = [1];
@@ -401,7 +400,7 @@
 
 			// If there is a texture attached then place it in the SRC JSON
 			// Here we define the binary data for the UV coordinates
-			if (tex_uuid != null)
+			if (tex_uuid !== null)
 			{
 				// UV coordinates
 				srcJSON.accessors.attributeViews[uvAttributeView]               = {};
@@ -409,7 +408,7 @@
 				srcJSON.accessors.attributeViews[uvAttributeView].byteOffset    = 0;
 				srcJSON.accessors.attributeViews[uvAttributeView].byteStride    = 8;
 				srcJSON.accessors.attributeViews[uvAttributeView].componentType = C.X3DOM_SRC_FLOAT;
-				srcJSON.accessors.attributeViews[uvAttributeView].type		    = 'VEC2';
+				srcJSON.accessors.attributeViews[uvAttributeView].type		    = "VEC2";
 				srcJSON.accessors.attributeViews[uvAttributeView].count		 	= subMeshVerticesCount;
 				srcJSON.accessors.attributeViews[uvAttributeView].decodeOffset  = [0, 0];
 				srcJSON.accessors.attributeViews[uvAttributeView].decodeScale   = [1, 1];
@@ -463,8 +462,8 @@
 				for (var face_idx = 0; face_idx < subMeshFacesCount; face_idx++) {
 					var num_comp = orig_idx.readInt32LE(orig_idx_ptr);
 
-					if (num_comp != 3) {
-						logger.logError('Non triangulated face with ' + num_comp + ' vertices.');
+					if (num_comp !== 3) {
+						logger.logError("Non triangulated face with " + num_comp + " vertices.");
 					} else {
 
 						num_faces += 1; // This is a triangulated face
@@ -500,9 +499,9 @@
 		}
 
 		var bufferSize =
-			(mesh['vertices'] ? (mesh.vertices_count * 4 * 3) : 0) +
-			(mesh['normals'] ? (mesh.vertices_count * 4 * 3) : 0) +
-			(mesh['faces'] ? (mesh.faces_count * 3 * 2) : 0) +
+			(mesh["vertices"] ? (mesh.vertices_count * 4 * 3) : 0) +
+			(mesh["normals"] ? (mesh.vertices_count * 4 * 3) : 0) +
+			(mesh["faces"] ? (mesh.faces_count * 3 * 2) : 0) +
 			(idMapBuf ? idMapBuf.length : 0) +
 			((tex_uuid != null) ? (mesh.vertices_count * 4 * 2) : 0);
 
@@ -511,22 +510,22 @@
 		var bufPos = 0;
 
 		// Output vertices
-		if (mesh['vertices'])
+		if (mesh["vertices"])
 		{
-			mesh['vertices'].buffer.copy(dataBuffers[idx], bufPos);
+			mesh["vertices"].buffer.copy(dataBuffers[idx], bufPos);
 
-			bufPos += mesh['vertices'].buffer.length;
+			bufPos += mesh["vertices"].buffer.length;
 		}
 
 		// Output normals
 		if (mesh["normals"])
 		{
-			mesh['normals'].buffer.copy(dataBuffers[idx], bufPos);
-			bufPos += mesh['normals'].buffer.length;
+			mesh["normals"].buffer.copy(dataBuffers[idx], bufPos);
+			bufPos += mesh["normals"].buffer.length;
 		}
 
 		// Output face indices
-		if (mesh['faces'])
+		if (mesh["faces"])
 		{
 			faceBuf.copy(dataBuffers[idx], bufPos);
 			bufPos += faceBuf.length;
@@ -541,8 +540,8 @@
 		// Output optional texture bits
 		if (tex_uuid != null) {
 
-			mesh['uv_channels'].buffer.copy(dataBuffers[idx], bufPos);
-			bufPos += mesh['uv_channels'].buffer.length;
+			mesh["uv_channels"].buffer.copy(dataBuffers[idx], bufPos);
+			bufPos += mesh["uv_channels"].buffer.length;
 
 			if (embedded_texture)
 			{
@@ -586,7 +585,7 @@
 // Set up REST routing calls
 exports.route = function(router)
 {
-	router.get('src', '/:account/:project/:uid', function(res, req, params, err_callback) {
+	router.get("src", "/:account/:project/:uid", function(res, req, params, err_callback) {
 		// Get object based on UID, check whether or not it is a mesh
 		// and then output the result.
 		dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, {}, function(err, type, uid, fromStash, obj)
@@ -615,7 +614,7 @@ exports.route = function(router)
 		});
 	});
 
-	router.get('src', '/:account/:project/revision/:rid/:sid', function(res, req, params, err_callback) {
+	router.get("src", "/:account/:project/revision/:rid/:sid", function(res, req, params, err_callback) {
 		// Get object based on revision rid, and object shared_id sid. Check
 		// whether or not it is a mesh and then output the result.
 		dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, null, params.rid, params.sid, true, {}, function(err, type, uid, fromStash, obj)

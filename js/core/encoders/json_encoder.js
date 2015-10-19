@@ -220,10 +220,10 @@ function getFullTree(dbInterface, account, project, branch, revision, callback) 
 			return callback(responseCodes.ROOT_NODE_NOT_FOUND);
 
 		var json       = {
-			"name" :root[C.REPO_NODE_LABEL_NAME],
-			"_id"  : uuidToString(root[C.REPO_NODE_LABEL_ID]),
+			"name" :      root[C.REPO_NODE_LABEL_NAME],
+			"_id"  :      uuidToString(root[C.REPO_NODE_LABEL_ID]),
 			"shared_id" : uuidToString(root[C.REPO_NODE_LABEL_SHARED_ID]),
-			"children" : []
+			"children" :  []
 		};
 
 		getFullTreeRecurse(sceneGraph, root, json);
@@ -537,16 +537,7 @@ exports.route = function(router)
 						if (mesh[C.REPO_NODE_LABEL_COMBINED_MAP])
 						{
 							// First sort the combined map in order of vertex ID
-							mesh[C.REPO_NODE_LABEL_COMBINED_MAP].sort(function(left, right)
-							{
-								if (left[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] < right[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM])
-									return -1;
-								else if (left[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] > right[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]
-								)
-									return 1;
-								else
-									return 0;
-							});
+							mesh[C.REPO_NODE_LABEL_COMBINED_MAP].sort(repoNodeMesh.mergeMapSort);
 
 							var subMeshes   = mesh[C.REPO_NODE_LABEL_COMBINED_MAP];
 							var subMeshKeys = mesh[C.REPO_NODE_LABEL_COMBINED_MAP].map(function (item) {
@@ -605,11 +596,11 @@ exports.route = function(router)
 								{
 									var map = {};
 
-									map["name"]       = subMeshKeys[i];
+									map["name"]       = utils.uuidToString(subMeshKeys[i]);
 									map["appearance"] = utils.uuidToString(subMeshes[i]["mat_id"]);
 									map["min"]        = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][0].join(" ");
 									map["max"]        = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][1].join(" ");
-									map["usage"]      = params.uid + "_0"
+									map["usage"]      = [params.uid + "_0"]
 
 									outJSON["mapping"].push(map);
 								}

@@ -1541,7 +1541,7 @@ DBInterface.prototype.getMetadata = function(dbName, project, branch, revision, 
 			if (!revisions.length)
 				return callback(responseCodes.OBJECT_NOT_FOUND);
 
-			var revision = uuidToString(revisions[0][C.REPO_NODE_LABEL_ID]);
+			var revision = uuidToString(revisions[0][C.REPO_NODE_LABEL_UNIQUE_ID]);
 
 			self.getObject(dbName, project, uid, null, null, false, { shared_id : 1 }, function(err, type, uid, fromStash, objs) {
 				if (err.value) {
