@@ -77,6 +77,8 @@ var responseCodes = {
 	QUEUE_INTERNAL_ERR: { value: 34, message: "Failed preprocessing for queue dispatch", status: 500 },
 	QUEUE_NO_CONFIG: { value: 35, message: "Server has no queue configuration", status: 404 },
 
+	INVALID_MESH : { value: 36, message: "Mesh not valid for processing", status: 500},
+
 	DB_ERROR: function(mongoErr) {
 		"use strict";
 
@@ -109,7 +111,7 @@ var responseCodes = {
 
 };
 
-var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 33, 34, 35, 1000, 2000, 3000];
+var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 33, 34, 35, 36, 1000, 2000, 3000];
 
 responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 {

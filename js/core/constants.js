@@ -93,6 +93,7 @@ define("REPO_NODE_LABEL_ASPECT_RATIO", "aspect_ratio");
 //-----------------------------------------------------------------------------
 // Revision fields
 define("REPO_NODE_LABEL_AUTHOR", "author");
+define("REPO_NODE_LABEL_BRANCH", "branch");
 define("REPO_NODE_LABEL_CURRENT", "current");
 define("REPO_NODE_LABEL_CURRENT_UNIQUE_IDS", "current");
 define("REPO_NODE_LABEL_MESSAGE", "message");
@@ -146,6 +147,14 @@ define("REPO_SCENE_LABEL_MAPS_COUNT", "map_count");
 
 //-----------------------------------------------------------------------------
 //
+// SRC format output
+//
+//-----------------------------------------------------------------------------
+define("SRC_IDX_LIST", "idx_list");
+define("SRC_VERTEX_LIMIT", 65535);
+
+//-----------------------------------------------------------------------------
+//
 // API server constants
 //
 //-----------------------------------------------------------------------------
@@ -158,3 +167,6 @@ define("REPO_REST_API_FORMAT", "format");
 define("REPO_SESSION_USER", "user");
 
 define("REQ_REPO", "repo");
+
+
+
