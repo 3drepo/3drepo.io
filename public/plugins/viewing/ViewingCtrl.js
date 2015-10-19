@@ -21,7 +21,7 @@
     angular.module("3drepo")
         .controller('ViewingCtrl', ViewingCtrl);
 
-    WalkthroughCtrl.$inject = ["ViewerService"];
+    ViewingCtrl.$inject = ["ViewerService"];
 
     function ViewingCtrl (ViewerService) {
         var vw = this;

@@ -178,13 +178,13 @@ var repoPostHandler = function(router, checkAccess){
 
 	});
 
-    this.post('/:account/:project/walkthrough', false, function(req, res) {
+    self.post("/:account/:project/walkthrough", false, function(req, res) {
         if (!("user" in req.session)) {
-            responseCodes.respond('Walkthrough record POST', responseCodes.NOT_LOGGED_IN, res, {});
+            responseCodes.respond("Walkthrough record POST", responseCodes.NOT_LOGGED_IN, res, {});
         }
         else {
-            this.dbInterface.storeWalkthroughInfo(req.params.account, req.params.project, req.body, function(err) {
-                responseCodes.onError('Walkthrough record POST', err, res, {});
+            self.dbInterface.storeWalkthroughInfo(req.params.account, req.params.project, req.body, function(err) {
+                responseCodes.onError("Walkthrough record POST", err, res, {});
             });
         }
 
