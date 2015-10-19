@@ -87,15 +87,15 @@ var repoGetHandler = function(router, checkAccess){
 		}
 	});
 
-    router.get('/:account/:project/:index/walkthrough.:format?', function(req, res) {
+    router.get('/:account/:project/:index/walkthrough.:format?', function(req, res, next) {
         var responsePlace = "/:account/:project/walkthrough GET";
 
         if (!("user" in req.session)) {
-            responseCodes.respond(responsePlace, responseCodes.USERNAME_NOT_SPECIFIED, res, {});
+            responseCodes.respond(responsePlace, req, res, next, responseCodes.USERNAME_NOT_SPECIFIED, {});
         }
         else {
-            this.dbInterface.getWalkthroughInfo(req.params.account, req.params.project, req.params.index, function(err, docs) {
-                responseCodes.onError(responsePlace, err, res, docs);
+            dbInterface(req[C.REQ_REPO].logger).getWalkthroughInfo(req.params.account, req.params.project, req.params.index, function(err, docs) {
+                responseCodes.onError(responsePlace, req, res, next, err, docs);
             });
         }
     });
