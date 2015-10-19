@@ -147,7 +147,7 @@ module.exports.createApp = function(template)
 							{
 								"plugin": "project",
 								"friends": [
-									"oculus", "tools", "navigation", "viewpoints"
+									"oculus", "navigation", "viewpoints", "viewing"
 								],
 								"children": [
 									{
@@ -156,14 +156,14 @@ module.exports.createApp = function(template)
 									{
 										"plugin": "revision",
 										"friends" : [
-											"panels", "tree", "meta", "issues", "revisionselector", "diffselector", "clip"
+											"panels", "tree", "meta", "issues", "revisionselector", "diffselector", "clip", "walkthrough"
 										],
 										"children": [
 											{
 												"plugin": "diff",
 												"children": [
 													{
-														"plugin": "view",
+														"plugin": "view"
 													}
 												]
 											},
@@ -179,14 +179,14 @@ module.exports.createApp = function(template)
 												]
 											},
 											{
-												"plugin": "view",
+												"plugin": "view"
 											}
-										],
+										]
 									},
 									{
 										"plugin": "view",
 										"friends" : [
-											"panels", "tree", "meta", "issues", "revisionselector", "diffselector", "clip"
+											"panels", "tree", "meta", "issues", "revisionselector", "diffselector", "clip", "walkthrough"
 										],
 										"children": [
 											{
