@@ -40,7 +40,7 @@ var repoGetHandler = function(router, checkAccess){
 	self.checkAccess = checkAccess; // Store access checking function
 
 	// Checks whether or not the user is logged in.
-	self.router.get("/login", function(req, res, next) {
+	self.getInternal("/login", function(req, res, next) {
 		if (!req.session.user) {
 			responseCodes.respond("/login GET", req, res, next, responseCodes.NOT_LOGGED_IN, {});
 		} else {
@@ -49,7 +49,7 @@ var repoGetHandler = function(router, checkAccess){
 	});
 
 	// TODO: Move these two functions to the JSON encoder
-	self.router.get("/:account/:project/wayfinder.:format", checkAccess, function(req, res, next) {
+	self.getInternal("/:account/:project/wayfinder.:format", checkAccess, function(req, res, next) {
 		// If there has been an error where checking access skip this middleware
 		if (req.accessError.value)
 		{
@@ -67,7 +67,7 @@ var repoGetHandler = function(router, checkAccess){
 		}
 	});
 
-	self.router.get("/:account/:project/wayfinder/record.:format", checkAccess, function(req, res, next) {
+	self.getInternal("/:account/:project/wayfinder/record.:format", function(req, res, next) {
 		// If there has been an error where checking access skip this middleware
 		if (req.accessError.value)
 		{
@@ -87,7 +87,7 @@ var repoGetHandler = function(router, checkAccess){
 		}
 	});
 
-    router.get('/:account/:project/:index/walkthrough.:format?', function(req, res, next) {
+    self.getInternal('/:account/:project/:index/walkthrough.:format?', function(req, res, next) {
         var responsePlace = "/:account/:project/walkthrough GET";
 
         if (!("user" in req.session)) {

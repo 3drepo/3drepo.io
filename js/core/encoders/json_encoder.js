@@ -628,8 +628,8 @@ exports.route = function(router)
 		}
 	});
 
-    router.get('json', '/:account/:project/:index/walkthrough', function(res, params, err_callback) {
-        searchTree(dbInterface, params.account, params.project, params.index, err_callback);
+    router.get('json', '/:account/:project/:index/walkthrough', function(res, req, params, err_callback) {
+        walkthrough(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.index, err_callback);
     });
 };
 

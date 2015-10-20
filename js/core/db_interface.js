@@ -206,17 +206,19 @@ DBInterface.prototype.updatePassword = function(username, passwords, callback) {
 DBInterface.prototype.getWayfinderInfo = function(dbName, project, uniqueIDs, callback) {
 	"use strict";
 
+    var self = this;
+
 	if(uniqueIDs) {
-		this.logger.logDebug("Getting waypoint information for UIDs " + JSON.stringify(uniqueIDs));
+		self.logger.logDebug("Getting waypoint information for UIDs " + JSON.stringify(uniqueIDs));
 
 		var uids = uniqueIDs.map(function(item) { return new ObjectID(item); });
 		var filter = {
 			_id: {$in : uids}
 		};
 
-		this.logger.logDebug("Searching for wayfinding in paths: " + JSON.stringify(uniqueIDs));
+		self.logger.logDebug("Searching for wayfinding in paths: " + JSON.stringify(uniqueIDs));
 
-		dbConn(this.logger).filterColl(dbName, project + ".wayfinder", filter, {}, function(err, docs) {
+		dbConn(self.logger).filterColl(dbName, project + ".wayfinder", filter, {}, function(err, docs) {
 			if (err.value) {
 				return callback(err);
 			}
@@ -224,7 +226,7 @@ DBInterface.prototype.getWayfinderInfo = function(dbName, project, uniqueIDs, ca
 			callback(responseCodes.OK, docs);
 		});
 	} else {
-		this.logger.logDebug("Getting list of all waypoint recordings");
+		self.logger.logDebug("Getting list of all waypoint recordings");
 
 		var projection = {
 			user: 1,
@@ -232,7 +234,7 @@ DBInterface.prototype.getWayfinderInfo = function(dbName, project, uniqueIDs, ca
 			_id: 1
 		};
 
-		dbConn(this.logger).filterColl(dbName, project + ".wayfinder", {}, projection, function(err, docs) {
+		dbConn(self.logger).filterColl(dbName, project + ".wayfinder", {}, projection, function(err, docs) {
 			if(err.value) {
 				return callback(err);
 			}
@@ -327,7 +329,7 @@ DBInterface.prototype.addToCurrentList = function(dbName, project, branch, objUU
 	var self = this;
 
 	self.getHeadUUID(dbName, project, branch, function(err, uuid) {
-		dbConn(this.logger).collCallback(dbName, project + ".history", true, function(err, coll) {
+		dbConn(self.logger).collCallback(dbName, project + ".history", true, function(err, coll) {
 			if(err.value) return callback(err);
 
 			var uniqueID = {
