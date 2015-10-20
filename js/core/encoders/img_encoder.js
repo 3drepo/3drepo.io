@@ -26,7 +26,7 @@ var C           = require("../constants.js");
 module.exports.isImage = function(format)
 {
 	"use strict";
-	
+
 	if (!format) {
 		return false;
 	}
@@ -75,7 +75,7 @@ module.exports.route = function(router)
 {
 	"use strict";
 
-	var imgObject = function(res, req, params, err_callback) {
+	var imgObject = function(req, res, params, err_callback) {
 		dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, {}, function(err, type, uid, fromStash, obj)
 		{
 			if(err.value) {
@@ -97,7 +97,7 @@ module.exports.route = function(router)
 	router.get("bmp", "/:account/:project/:uid", imgObject);
 	router.get("gif", "/:account/:project/:uid", imgObject);
 
-	router.get("pdf", "/:account/:project/:uid", function(res, req, params, err_callback) {
+	router.get("pdf", "/:account/:project/:uid", function(req, res, params, err_callback) {
 		dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, {}, function(err, type, uid, fromStash, obj)
 		{
 			if (err.value) {
@@ -113,7 +113,7 @@ module.exports.route = function(router)
 	});
 
 	// Get Avatar image
-	router.get("jpg", "/:account", function(res, req, params, err_callback) {
+	router.get("jpg", "/:account", function(req, res, params, err_callback) {
 		dbInterface(req[C.REQ_REPO].logger).getAvatar(params.account, function(err, avatar) {
 			if (err.value) {
 				return err_callback(err);

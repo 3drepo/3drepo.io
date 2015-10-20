@@ -244,7 +244,7 @@ function walkthrough(dbInterface, account, index, callback) {
 
 exports.route = function(router)
 {
-	router.get("json", "/search", function(res, req, params, err_callback) {
+	router.get("json", "/search", function(req, res, params, err_callback) {
 		search(dbInterface(req[C.REQ_REPO].logger), params.query, function(err, json)
 		{
 			if(err.value)
@@ -254,7 +254,7 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account", function(res, req, params, err_callback) {
+	router.get("json", "/:account", function(req, res, params, err_callback) {
 		dbInterface(req[C.REQ_REPO].logger).getUserInfo(params.account, function(err, user)
 		{
 			if(err.value) {
@@ -271,7 +271,7 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account/:project", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project", function(req, res, params, err_callback) {
 		dbInterface(req[C.REQ_REPO].logger).getProjectInfo(params.account, params.project, function(err, project)
 		{
 			if(err.value)
@@ -281,7 +281,7 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account/:project/revision/:rid", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/revision/:rid", function(req, res, params, err_callback) {
 		dbInterface(req[C.REQ_REPO].logger).getRevisionInfo(params.account, params.project, params.rid, function(err, revisionObj) {
 			if(err.value)
 				err_callback(err);
@@ -290,7 +290,7 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account/:project/revision/:branch/head", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/revision/:branch/head", function(req, res, params, err_callback) {
 		var dbInter = dbInterface(req[C.REQ_REPO].logger);
 
 		dbInter.getHeadOf(params.account, params.project, params.branch, dbInter.getRevisionInfo, function(err, revisionObj) {
@@ -301,7 +301,7 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account/:project/revision/:rid/readme", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/revision/:rid/readme", function(req, res, params, err_callback) {
 		dbInterface(req[C.REQ_REPO].logger).getReadme(params.account, params.project, params.rid, function(err, readme) {
 			if(err.value)
 				err_callback(err);
@@ -310,7 +310,7 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account/:project/revision/:branch/head/readme", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/revision/:branch/head/readme", function(req, res, params, err_callback) {
 		var dbInter = dbInterface(req[C.REQ_REPO].logger);
 
 		dbInter.getHeadOf(params.account, params.project, params.branch, dbInter.getReadme, function(err, readme) {
@@ -321,7 +321,7 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account/:project/branches", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/branches", function(req, res, params, err_callback) {
 		dbInterface(req[C.REQ_REPO].logger).getBranches(params.account, params.project, function(err, branchList) {
 			if(err.value)
 				err_callback(err);
@@ -330,7 +330,7 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account/:project/revisions", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/revisions", function(req, res, params, err_callback) {
 		dbInterface(req[C.REQ_REPO].logger).getRevisions(params.account, params.project, null, params.start, params.end, params.full, function(err, revisionList) {
 			if(err.value)
 				err_callback(err);
@@ -339,7 +339,7 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account/:project/revisions/:branch", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/revisions/:branch", function(req, res, params, err_callback) {
 		dbInterface(req[C.REQ_REPO].logger).getRevisions(params.account, params.project, params.branch, params.start, params.end, params.full, function(err, revisionList) {
 			if(err.value)
 				err_callback(err);
@@ -348,7 +348,7 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account/:project/issue/:uid", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/issue/:uid", function(req, res, params, err_callback) {
 		dbInterface(req[C.REQ_REPO].logger).getIssue(params.account, params.project, params.uid, false, function(err, issueList) {
 			if(err.value)
 				err_callback(err);
@@ -357,7 +357,7 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account/:project/issues", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/issues", function(req, res, params, err_callback) {
 		dbInterface(req[C.REQ_REPO].logger).getIssues(params.account, params.project, "master", null, true, function(err, issueList) {
 			if(err.value)
 				err_callback(err);
@@ -366,7 +366,7 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account/:project/issues/:sid", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/issues/:sid", function(req, res, params, err_callback) {
 		dbInterface(req[C.REQ_REPO].logger).getObjectIssues(params.account, params.project, params.sid, params.number, false, function(err, issueList) {
 			if(err.value)
 				err_callback(err);
@@ -375,7 +375,7 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account/:project/users", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/users", function(req, res, params, err_callback) {
 		dbInterface(req[C.REQ_REPO].logger).getProjectUsers(params.account, params.project, function(err, project)
 		{
 			if(err.value)
@@ -385,7 +385,7 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account/:project/revision/:branch/head/tree/:sid", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/revision/:branch/head/tree/:sid", function(req, res, params, err_callback) {
 		var account		= params.account;
 		var project		= params.project;
 
@@ -402,7 +402,7 @@ exports.route = function(router)
 	});
 
 
-	router.get("json", "/:account/:project/revision/:rid/tree/:sid", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/revision/:rid/tree/:sid", function(req, res, params, err_callback) {
 		var account		= params.account;
 		var project		= params.project;
 
@@ -418,7 +418,7 @@ exports.route = function(router)
 		getTree(dbInterface(req[C.REQ_REPO].logger), account, project, null, revision, sid, namespace, selected, htmlMode, err_callback);
 	});
 
-	router.get("json", "/:account/:project/revision/:rid/meta/:sid", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/revision/:rid/meta/:sid", function(req, res, params, err_callback) {
 		var account		= params.account;
 		var project		= params.project;
 
@@ -434,7 +434,7 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account/:project/revision/:branch/head/meta/:sid", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/revision/:branch/head/meta/:sid", function(req, res, params, err_callback) {
 		var account		= params.account;
 		var project		= params.project;
 
@@ -450,7 +450,7 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account/:project/revision/:rid/map", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/revision/:rid/map", function(req, res, params, err_callback) {
 		var account		= params.account;
 		var project		= params.project;
 
@@ -472,7 +472,7 @@ exports.route = function(router)
 		getFullTree(dbInterface, params.account, params.project, null, params.rid, err_callback);
 	});
 
-	router.get("json", "/:account/:project/revision/:branch/head/map", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/revision/:branch/head/map", function(req, res, params, err_callback) {
 		var account		= params.account;
 		var project		= params.project;
 
@@ -486,7 +486,7 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account/:project/meta/:uid", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/meta/:uid", function(req, res, params, err_callback) {
 		var account		= params.account;
 		var project		= params.project;
 
@@ -502,7 +502,7 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account/:project/revision/:rid/diff/:otherrid", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/revision/:rid/diff/:otherrid", function(req, res, params, err_callback) {
 		dbInterface(req[C.REQ_REPO].logger).getDiff(params.account, params.project, null, params.rid, null, params.otherrid, function(err, diff) {
 			if(err.value)
 				err_callback(err);
@@ -511,7 +511,7 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account/:project/revision/:branch/head/:sid", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/revision/:branch/head/:sid", function(req, res, params, err_callback) {
 		dbInterface(req[C.REQ_REPO].logger).getHeadUUID(params.account, params.project, params.branch, function (err, uuid)
 		{
 			dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, null, utils.uuidToString(uuid.uuid), params.sid, true, {}, function (err, type, uid, obj) {
@@ -524,15 +524,15 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account/:project/revision/:rid/tree/multimap", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/revision/:rid/tree/multimap", function(req, res, params, err_callback) {
 		getMultiMap(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, null, params.rid, req[C.REQ_REPO].logger, err_callback);
 	});
 
-	router.get("json", "/:account/:project/revision/:branch/head/tree/multimap", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/revision/:branch/head/tree/multimap", function(req, res, params, err_callback) {
 		getMultiMap(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.branch, null, req[C.REQ_REPO].logger, err_callback);
 	});
 
-	router.get("json", "/:account/:project/:uid", function(res, req, params, err_callback) {
+	router.get("json", "/:account/:project/:uid", function(req, res, params, err_callback) {
 		if(params.subformat == "mpc")
 		{
 			dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, false, {}, function (err, type, uid, fromStash, scene) {
@@ -628,7 +628,7 @@ exports.route = function(router)
 		}
 	});
 
-    router.get('json', '/:account/:project/:index/walkthrough', function(res, req, params, err_callback) {
+    router.get('json', '/:account/:project/:index/walkthrough', function(req, res, params, err_callback) {
         walkthrough(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.index, err_callback);
     });
 };

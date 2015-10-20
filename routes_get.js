@@ -256,22 +256,22 @@ repoGetHandler.prototype.getInternal = function(regex, queryDefaults, customCall
 			regex = regex.replace(".:format", "");
 			regex = regex.replace(".:subformat?", "");
 
-			self.transRouter(format, regex, res, req, next, params);
+			self.transRouter(format, regex, req, res, next, params);
 		});
 	} else {
-		self.router.get(regex, this.checkAccess, function(res, req, next) {
+		self.router.get(regex, this.checkAccess, function(req, res, next) {
 			if (req[C.REQ_REPO].processed) {
 				next();
 			} else {
 				req[C.REQ_REPO].processed = true;
 			}
 
-			customCallback(res, req, next);
+			customCallback(req, res, next);
 		});
 	}
 };
 
-repoGetHandler.prototype.transRouter = function(format, regex, res, req, next, params)
+repoGetHandler.prototype.transRouter = function(format, regex, req, res, next, params)
 {
 	"use strict";
 
@@ -294,7 +294,7 @@ repoGetHandler.prototype.transRouter = function(format, regex, res, req, next, p
 			} else if (!(regex in self.getMap[format])) {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.FUNCTION_NOT_SUPPORTED, {params: params});
 			} else {
-				self.getMap[format][regex](res, req, params, function(err, data) {
+				self.getMap[format][regex](req, res, params, function(err, data) {
 					responseCodes.onError(responsePlace, req, res, next, err, data, {params: params});
 				});
 			}
@@ -306,7 +306,7 @@ repoGetHandler.prototype.transRouter = function(format, regex, res, req, next, p
 			} else if (!(regex in self.getMap[format])) {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.FUNCTION_NOT_SUPPORTED, {params: params});
 			} else {
-				self.getMap[format][regex](res, req, params, function(err, data) {
+				self.getMap[format][regex](req, res, params, function(err, data) {
 					responseCodes.onError(responsePlace, req, res, next, err, data, {params: params});
 				});
 			}
@@ -317,7 +317,7 @@ repoGetHandler.prototype.transRouter = function(format, regex, res, req, next, p
 			} else if (!(regex in self.getMap[format])) {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.FUNCTION_NOT_SUPPORTED, {params: params});
 			} else {
-				self.getMap[format][regex](res, req, params, function(err, data) {
+				self.getMap[format][regex](req, res, params, function(err, data) {
 					responseCodes.onError(responsePlace, req, res, next, err, data, {params: params});
 				});
 			}
