@@ -15,64 +15,93 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var express = require('express');
-var log_iface = require('./js/core/logger.js');
-var logger = log_iface.logger;
+var log_iface  = require("./js/core/logger.js");
+var express = require("express");
+var responseCodes = require("./js/core/response_codes.js");
+var dbInterface = require("./js/core/db_interface.js");
 
-var config = require('./js/core/config.js');
-var package_json = require('./package.json');
+var express = require("express");
 
-var imgEncoder = require('./js/core/encoders/img_encoder.js');
-var responseCodes = require('./js/core/response_codes.js');
+var C = require("./js/core/constants");
 
-var secret = 'secret';
-
-var isImage = function(format)
+function hasWriteAccessToProject(req, account, project, callback)
 {
-	var format = format.toLowerCase();
+	"use strict";
 
-	return (format == 'pdf') || (format == "jpg") || (format == "png") || (format == "gif") || (format == "bmp");
+	var username = null;
+
+	if (req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
+		username = req.session[C.REPO_SESSION_USER].username;
+	}
+
+	dbInterface(req[C.REQ_REPO].logger).hasWriteAccessToProject(username, account, project, callback);
 }
 
-module.exports = function(){
-	this.router = express.Router();
+function hasReadAccessToProject(req, account, project, callback)
+{
+	"use strict";
+
+	var username = null;
+
+	if (req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
+		username = req.session[C.REPO_SESSION_USER].username;
+	}
+
+	dbInterface(req[C.REQ_REPO].logger).hasReadAccessToProject(username, account, project, callback);
+}
+
+var repoRouter = function() {
+	"use strict";
+
+	var self = this instanceof repoRouter ? this : Object.create(repoRouter.prototype);
+	self.router = express.Router();
+
+	self.router.use(express.static("./public"));
 
 	// Check the user has access
 	// 1. First check whether or not this is a specific project.
 	//	  Does the user have access to it ?
 	// 2. If not, is the user logged in ?
 	// 3. Otherwise, unauthorized
-	this.checkAccess = function(accessFunc) {
+	self.checkAccess = function(accessFunc) {
 		return function(req, res, next) {
-			var account = req.params["account"];
-			var project = req.params["project"];
+			if (req[C.REQ_REPO].processed)
+			{
+				return next();
+			}
 
-			if (req.params["format"])
-				var format = req.params["format"].toLowerCase();
-			else
-				var format = null;
+			// Account and project they are trying to access
+			var account = req.params[C.REPO_REST_API_ACCOUNT];
+			var project = req.params[C.REPO_REST_API_PROJECT];
 
-			var username = null;
-            
-			if ("user" in req.session)
-				username = req.session["user"].username;
-            
+			var format  = null;  // In what format ?
+
+			if (req.params[C.REPO_REST_API_FORMAT]) {
+				format = req.params[C.REPO_REST_API_FORMAT].toLowerCase();
+			}
+
+			req.accessError = responseCodes.OK;
+
 			if (account && project)
 			{
-				accessFunc(username, account, project, function(err) {
+				accessFunc(req, account, project, function(err) {
 					if(err.value)
 					{
-						logger.log('debug', account + '/' + project + ' is not public project and no user information.');
-						responseCodes.onError("Check project/account access for " + username, err, res, null, req.params);
+						req[C.REQ_REPO].logger.logDebug(account + "/" + project + " is not public project and no user information.", req);
+						req[C.REQ_REPO].processed = true;
+
+						responseCodes.onError("Check project/account access", req, res, next, err, null, req.params);
 					} else {
 						next();
 					}
 				});
 			} else {
 				// No account and project specified, check user is logged in.
-				if (!("user" in req.session)) {
-					logger.log('debug', 'No account and project specified.');
-					responseCodes.onError("Check other access for " + username, responseCodes.NOT_AUTHORIZED, res, req.params, null);
+				if (!(req.session.hasOwnProperty(C.REPO_SESSION_USER))) {
+					req[C.REQ_REPO].logger.logDebug("No account and project specified.");
+					req[C.REQ_REPO].processed = true;
+
+					responseCodes.onError("Check other access", req, res, next, responseCodes.NOT_AUTHORIZED, null, req.params);
 				} else {
 					next();
 				}
@@ -80,20 +109,20 @@ module.exports = function(){
 		};
 	};
 
-	this.dbInterface = require('./js/core/db_interface.js');
+	self.router.use(log_iface.startRequest);
+	self.getHandler  = require("./routes_get")(self.router, self.checkAccess(hasReadAccessToProject));
+	self.postHandler = require("./routes_post")(self.router, self.checkAccess(hasWriteAccessToProject));
+	self.router.use(log_iface.endRequest);
 
-	this.getHandler  = require('./routes_get.js')(this.router, this.dbInterface, this.checkAccess(this.dbInterface.hasReadAccessToProject));
-	this.postHandler = require('./routes_post.js')(this.router, this.dbInterface, this.checkAccess(this.dbInterface.hasWriteAccessToProject));
+	self.get  = function(format, regex, callback) {
+		self.getHandler.get(format, regex, callback);
+	};
 
-	this.get = this.getHandler.get; // Re-route the call to the get handler.
-	this.router.use(express.static('./submodules'));
-	this.router.use(express.static('./public'));
+	self.post = function(format, regex, callback) {
+		self.getHandler.get(format, regex, callback);
+	};
 
-	this.router.use(function(req, res, next)
-	{
-		logger.log('debug', req.originalUrl)
-		next();
-	});
+	return self;
+};
 
-	return this;
-}
+module.exports = repoRouter;

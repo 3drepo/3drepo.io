@@ -16,36 +16,36 @@
  */
 
 // Corresponds to repoNodeMesh in C++ definition of 3D Repo
-var mongodb = require('mongodb');
-var assert = require('assert');
-var UUID = require('node-uuid');
-var C = require('./constants');
+var mongodb = require("mongodb");
+var assert = require("assert");
+var UUID = require("node-uuid");
+var C = require("./constants");
 
 exports.decode = function(bson, materials) {
     // There should be always only a single material with the mesh!
     // Takes the very first match if multiple materials attached as children.
     // Children are appended on the fly from other repository components.
-    // If a single mesh is being decoded on it's own, it will not have the
-	// children array attached!
-	if (bson[C.REPO_NODE_LABEL_CHILDREN]) {
-		for (var i = 0; i < bson[C.REPO_NODE_LABEL_CHILDREN].length; ++i) {
-			var childIDbytes = bson[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID].buffer;
-			var childID = UUID.unparse(childIDbytes);
-			var material = materials[childID];
-			if (material) {
-				// TODO: change mMaterialIndex to material
-				bson[C.M_MATERIAL_INDEX] = childID;
-				break;
-			}
-		}
-	}
+    // If a single mesh is being decoded on it"s own, it will not have the
+    // children array attached!
+    if (bson[C.REPO_NODE_LABEL_CHILDREN]) {
+        for (var i = 0; i < bson[C.REPO_NODE_LABEL_CHILDREN].length; ++i) {
+            var childIDbytes = bson[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID].buffer;
+            var childID = UUID.unparse(childIDbytes);
+            var material = materials[childID];
+            if (material) {
+                // TODO: change mMaterialIndex to material
+                bson[C.M_MATERIAL_INDEX] = childID;
+                break;
+            }
+        }
+    }
 
     var myUUID = bson["id"];
 
     if (bson[C.REPO_NODE_LABEL_COMBINED_MAP])
     {
         // TODO: Here we have multiple maps, including ones that
-        // are no originally ours, let's hope we never have an example
+        // are no originally ours, let"s hope we never have an example
         // of this.
         var myMap = bson[C.REPO_NODE_LABEL_COMBINED_MAP][myUUID];
 
@@ -61,8 +61,8 @@ exports.decode = function(bson, materials) {
                 bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_MATERIAL_ID] =
                     UUID.unparse(bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_MATERIAL_ID].buffer);
 
-				bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET] =
-					bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
+                bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET] =
+                    bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
             }
         }
 
@@ -142,32 +142,47 @@ exports.decode = function(bson, materials) {
     }
     */
 
-	return bson;
+    return bson;
 }
 
 /**
- * Extracts the mesh's bounding box
+ * Extracts the mesh"s bounding box
  *
  * @param {Object} mesh
  */
 exports.extractBoundingBox = function(mesh) {
     var bbox = {};
 
-	if (mesh['bounding_box'])
-	{
-		bbox.min = mesh['bounding_box'][0];
-		bbox.max = mesh['bounding_box'][1];
-		bbox.center = [(bbox.min[0] + bbox.max[0]) / 2, (bbox.min[1] + bbox.max[1]) / 2, (bbox.min[2] + bbox.max[2]) / 2];
-		bbox.size = [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])];
-	} else {
-		bbox.min    = [-1,-1,-1];
-		bbox.max    = [ 1, 1, 1];
-		bbox.center = [ 0, 0, 0];
-		bbox.size   = [ 2, 2, 2];
-	}
+    if (mesh["bounding_box"])
+    {
+        bbox.min = mesh["bounding_box"][0];
+        bbox.max = mesh["bounding_box"][1];
+        bbox.center = [(bbox.min[0] + bbox.max[0]) / 2, (bbox.min[1] + bbox.max[1]) / 2, (bbox.min[2] + bbox.max[2]) / 2];
+        bbox.size = [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])];
+    } else {
+        bbox.min    = [-1,-1,-1];
+        bbox.max    = [ 1, 1, 1];
+        bbox.center = [ 0, 0, 0];
+        bbox.size   = [ 2, 2, 2];
+    }
 
     return bbox;
 }
+
+
+exports.mergeMapSort = function(left, right) {
+    "use strict";
+
+    if (left[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] < right[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]) {
+        return -1;
+    } else if (left[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] > right[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] ) {
+        return 1;
+    } else {
+        return 0;
+    }
+};
+
+
 
 /**
  * Expects a byte array where each offset bytes are integers.

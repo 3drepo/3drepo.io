@@ -9,671 +9,333 @@
  *	This program is distributed in the hope that it will be useful,
  *	but WITHOUT ANY WARRANTY; without even the implied warranty of
  *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *	GNU Affero General Public License for more de::tails.
  *
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var config = require('app-config').config;
-var log_iface = require('./js/core/logger.js');
-var logger = log_iface.logger;
-var imgEncoder = require('./js/core/encoders/img_encoder.js');
+var config       = require("app-config").config;
+var log_iface    = require("./js/core/logger.js");
+var systemLogger = log_iface.systemLogger;
+var imgEncoder   = require("./js/core/encoders/img_encoder.js");
 
-var responseCodes = require('./js/core/response_codes.js');
+var responseCodes = require("./js/core/response_codes.js");
+var _ = require("underscore");
+var dbInterface = require("./js/core/db_interface.js");
+
+var C = require("./js/core/constants");
 
 /***************************************************************************
 *  @file Contains the GET routes
 ****************************************************************************/
 
-module.exports = function(router, dbInterface, checkAccess){
+var repoGetHandler = function(router, checkAccess){
+	"use strict";
+
+	var self = this instanceof repoGetHandler ? this : Object.create(repoGetHandler.prototype);
+
+	self.router = router;
+
+	self.checkAccess = checkAccess; // Store access checking function
+
 	// Checks whether or not the user is logged in.
-	router.get('/login', checkAccess, function(req, res) {
-		responseCodes.respond("/login GET", responseCodes.OK, res, {username: req.session.user.username});
+	self.router.get("/login", function(req, res, next) {
+		if (!req.session.user) {
+			responseCodes.respond("/login GET", req, res, next, responseCodes.NOT_LOGGED_IN, {});
+		} else {
+			responseCodes.respond("/login GET", req, res, next, responseCodes.OK, {username: req.session.user.username});
+		}
 	});
 
-	// Account information
-	router.get('/search.:format?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
+	// TODO: Move these two functions to the JSON encoder
+	self.router.get("/:account/:project/wayfinder.:format", checkAccess, function(req, res, next) {
+		// If there has been an error where checking access skip this middleware
+		if (req.accessError.value)
+		{
+			return next();
+		}
 
-		var params = {
-			query: req.query
-		};
-
-		this.transRouter(format, '/search', res, params);
-	});
-
-	router.get('/:account/:project/wayfinder.:format?', function(req, res) {
-		var resCode = responseCodes.OK;
 		var responsePlace = "/:account/:project/wayfinder GET";
 
 		if (!("user" in req.session)) {
-			responseCodes.respond(responsePlace, responseCodes.USERNAME_NOT_SPECIFIED, res, {});
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.USERNAME_NOT_SPECIFIED, {});
 		} else {
-			this.dbInterface.getWayfinderInfo(req.params["account"], req.params["project"], null, function(err, docs) {
-				responseCodes.onError(responsePlace, err, res, docs);
+			dbInterface(req[C.REQ_REPO].logger).getWayfinderInfo(req.params[C.REPO_REST_API_ACCOUNT], req.params[C.REPO_REST_API_PROJECT], null, function(err, docs) {
+				responseCodes.onError(responsePlace, req, res, next, err, docs);
 			});
 		}
 	});
 
-	router.get('/:account/:project/wayfinder/record.:format?', function(req, res) {
-		var resCode = responseCodes.OK;
+	self.router.get("/:account/:project/wayfinder/record.:format", checkAccess, function(req, res, next) {
+		// If there has been an error where checking access skip this middleware
+		if (req.accessError.value)
+		{
+			return next();
+		}
+
 		var responsePlace = "/:account/:project/wayfinder/record GET";
 
 		if (!("user" in req.session)) {
-			responseCodes.respond(responsePlace, responseCodes.USERNAME_NOT_SPECIFIED, res, {});
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.USERNAME_NOT_SPECIFIED, {});
 		} else {
 			var uids = JSON.parse(req.query.uid);
 
-			this.dbInterface.getWayfinderInfo(req.params["account"], req.params["project"], uids, function(err, docs) {
-				responseCodes.onError(responsePlace, err, res, docs);
+			dbInterface(req[C.REQ_REPO].logger).getWayfinderInfo(req.params[C.REPO_REST_API_ACCOUNT], req.params[C.REPO_REST_API_PROJECT], uids, function(err, docs) {
+				responseCodes.onError(responsePlace, req, res, next, err, docs);
 			});
 		}
 	});
 
+    router.get('/:account/:project/:index/walkthrough.:format?', function(req, res, next) {
+        var responsePlace = "/:account/:project/walkthrough GET";
+
+        if (!("user" in req.session)) {
+            responseCodes.respond(responsePlace, req, res, next, responseCodes.USERNAME_NOT_SPECIFIED, {});
+        }
+        else {
+            dbInterface(req[C.REQ_REPO].logger).getWalkthroughInfo(req.params.account, req.params.project, req.params.index, function(err, docs) {
+                responseCodes.onError(responsePlace, req, res, next, err, docs);
+            });
+        }
+    });
+
 	// Account information
-	router.get('/:account.:format?.:subformat?', function(req, res, next) {
-		if (!req.session.user)
-			getPublic = false;
-		else
-			getPublic = (req.session.user.username != req.params["account"]);
-
-		var format = req.params["format"];
-
-		var params = {
-			subformat:	req.params["subformat"],
-			account:	req.params["account"],
-			getPublic:	getPublic,
-			query:		req.query
-		};
-
-		this.transRouter(format, '/:account', res, params);
-	});
+	self.getInternal("/search.:format");
+	self.getInternal("/:account.:format.:subformat?");
 
 	// Project information
-	router.get('/:account/:project.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:	req.params["account"],
-			project:	req.params["project"],
-			subformat:	req.params["subformat"],
-			user:		current_user,
-			query:		req.query
-		};
-
-		this.transRouter(format, '/:account/:project', res, params);
-	});
+	self.getInternal("/:account/:project.:format.:subformat?");
 
 	// Project revision list
-	router.get('/:account/:project/revisions.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
+	self.getInternal("/:account/:project/revisions.:format.:subformat?",
+		{
+			"start"  : 1,
+			"number" : 5,
+			"full"   : null
+		});
 
-		var start = ("start" in req.query) ? req.query.start : 1;
-		var end   = ("end" in req.query) ? req.query.end : (start + 5);
-		var full  = ("full" in req.query) ? req.query.full : null;
+	self.getInternal("/:account/:project/revisions/:branch.:format.:subformat?",
+		{
+			"start"  : 1,
+			"number" : 5,
+			"full"   : null
+		});
 
-		var params = {
-			account:	req.params["account"],
-			project:	req.params["project"],
-			subformat:	req.params["subformat"],
-			user:		current_user,
-			start:		start,
-			end:		end,
-			full:		full,
-			query:		req.query
-		};
+	// Get map from object id to path in tree for multipart
+	self.getInternal("/:account/:project/revision/:branch/head/fulltree.:format");
+	self.getInternal("/:account/:project/revision/:rid/fulltree.:format.:subformat?");
 
-		this.transRouter(format, '/:account/:project/revisions', res, params);
-	});
+	// Get subtree for head revision for a branch, with (optional) depth query string parameter
+	self.getInternal("/:account/:project/revision/:branch/head/tree/:sid.:format.:subformat?");
 
-	// Revision list for a particular branch
-	router.get('/:account/:project/revisions/:branch.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
+	// Get README for branch"s head revision
+	self.getInternal("/:account/:project/revision/:branch/head/readme.:format.:subformat?");
 
-		var start = ("start" in req.query) ? req.query.start : 1;
-		var end   = ("end" in req.query) ? req.query.end : (start + 5);
-		var full  = ("full" in req.query) ? req.query.full : null;
-
-		var params = {
-			account:	req.params["account"],
-			project:	req.params["project"],
-			branch:		req.params["branch"],
-			subformat:	req.params["subformat"],
-			user:		current_user,
-			start:		start,
-			end:		end,
-			full:		full,
-			query:		req.query
-		};
-
-		this.transRouter(format, '/:account/:project/revisions/:branch', res, params);
-	});
-
-	// Get README for branch's head revision
-	router.get('/:account/:project/revision/:branch/head/readme.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account: req.params["account"],
-			project: req.params["project"],
-			branch:  req.params["branch"],
-			user:	 current_user,
-			query:	 req.query
-		};
-
-		this.transRouter(format, '/:account/:project/revision/:branch/head/readme', res, params);
-	});
+	// Get README for branch"s head revision
+	self.getInternal("/:account/:project/revision/:branch/head/readme.:format.:subformat?");
 
 	// Get README for specific project revision
-	router.get('/:account/:project/revision/:rid/readme.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account: req.params["account"],
-			project: req.params["project"],
-			rid:	 req.params["rid"],
-			user:	 current_user,
-			query:	 req.query
-		};
-
-		this.transRouter(format, '/:account/:project/revision/:rid/readme', res, params);
-	});
+	self.getInternal("/:account/:project/revision/:rid/readme.:format.:subformat?");
 
 	// Revision rid for master branch
-	router.get('/:account/:project/revision/:rid.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:	req.params["account"],
-			project:	req.params["project"],
-			rid:		req.params["rid"],
-			subformat:	req.params["subformat"],
-			user:		current_user,
-			query:		req.query
-		};
-
-		this.transRouter(format, '/:account/:project/revision/:rid', res, params);
-	});
+	self.getInternal("/:account/:project/revision/:rid.:format.:subformat?");
 
 	// Get the head of a specific branch
-	router.get('/:account/:project/revision/:branch/head.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:   req.params["account"],
-			project:   req.params["project"],
-			branch:    req.params["branch"],
-			subformat: req.params["subformat"],
-			user:	   current_user,
-			query:	   req.query
-		};
-
-		this.transRouter(format, '/:account/:project/revision/:branch/head', res, params);
-	});
+	self.getInternal("/:account/:project/revision/:branch/head.:format.:subformat?");
 
 	// Map from SIDs to UIDs
-	router.get('/:account/:project/revision/:rid/map.:format?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:	req.params["account"],
-			project:	req.params["project"],
-			rid:		req.params["rid"],
-			user:		current_user
-		};
-
-		this.transRouter(format, '/:account/:project/revision/:rid/map',res, params);
-	});
-
-	router.get('/:account/:project/revision/:branch/head/map.:format?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:	req.params["account"],
-			project:	req.params["project"],
-			branch:		req.params["branch"],
-			user:		current_user
-		};
-
-		this.transRouter(format, '/:account/:project/revision/:branch/head/map', res, params);
-	});
+	self.getInternal("/:account/:project/revision/:rid/map.:format");
+	self.getInternal("/:account/:project/revision/:branch/head/map.:format");
 
 	// Get specific object via shared_id sid
-	router.get('/:account/:project/revision/:rid/:sid.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:	req.params["account"],
-			project:	req.params["project"],
-			branch:		req.params["branch"],
-			rid:		req.params["rid"],
-			sid:		req.params["sid"],
-			subformat:	req.params["subformat"],
-			user:		current_user,
-			query:		req.query
-		}
-
-		this.transRouter(format, '/:account/:project/revision/:rid/:sid', res, params);
-	});
+	self.getInternal("/:account/:project/revision/:rid/:sid.:format.:subformat?");
 
 	// Get specific object via shared_id sid for particular branch
-	router.get('/:account/:project/revision/:branch/head/:sid.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:	req.params["account"],
-			project:	req.params["project"],
-			branch:		req.params["branch"],
-			sid:		req.params["sid"],
-			subformat:	req.params["subformat"],
-			user:		current_user,
-			query:		req.query
-		};
-
-		this.transRouter(format, '/:account/:project/revision/:branch/head/:sid', res, params);
-	});
+	self.getInternal("/:account/:project/revision/:branch/head/:sid.:format.:subformat?");
 
 	// Get list of revision in a branch
-	router.get('/:account/:project/revision/:branch.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:   req.params["account"],
-			project:   req.params["project"],
-			subformat: req.params["subformat"],
-			user:	   current_user,
-			query:	   req.query
-		};
-
-		this.transRouter(format, '/:account/:project/revision/:branch', res, params);
-	});
+	self.getInternal("/:account/:project/revision/:branch.:format.:subformat?");
 
 	// List branches for project
-	router.get('/:account/:project/branches.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:   req.params["account"],
-			project:   req.params["project"],
-			subformat: req.params["subformat"],
-			user:	   current_user,
-			query:	   req.query
-		};
-
-		this.transRouter(format, '/:account/:project/branches', res, params);
-	});
+	self.getInternal("/:account/:project/branches.:format.:subformat?");
 
 	// Get audit log for project
-	router.get('/:account/:project/log.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account: req.params["account"],
-			project: req.params["project"],
-			user:	 current_user,
-			query:	 req.query
-		};
-
-		this.transRouter(format, '/:account/:project/log', res, params);
-	});
+	self.getInternal("/:account/:project/log.:format.:subformat?");
 
 	// Get list of users for project
-	router.get('/:account/:project/users.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account: req.params["account"],
-			project: req.params["project"],
-			user:	 current_user,
-			query:	 req.query
-		};
-
-		this.transRouter(format, '/:account/:project/users', res, params);
-	});
+	self.getInternal("/:account/:project/users.:format.:subformat?");
 
 	// Get object with specific uid in a specific format
-	router.get('/:account/:project/meta/:uid.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"].toLowerCase();
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:   req.params["account"],
-			project:   req.params["project"],
-			subformat: req.params["subformat"],
-			uid:	   req.params["uid"],
-			user:	   current_user
-		};
-
-		logger.log('debug', 'Retrieving object ' + params.uid);
-
-		this.transRouter(format, '/:account/:project/meta/:uid', res, params);
-	});
-
-	router.get('/:account/:project/issue/:uid.:format?', function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:    req.params["account"],
-			project:    req.params["project"],
-			uid:        req.params["uid"],
-			user:       current_user
-		};
-
-		this.transRouter(format, '/:account/:project/issue/:uid', res, params);
-	});
-
-	router.get('/:account/:project/issues.:format?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:	req.params["account"],
-			project:	req.params["project"],
-			user:		current_user
-		};
-
-		this.transRouter(format, '/:account/:project/issues', res, params);
-	});
-
-	router.get('/:account/:project/issues/:sid.:format?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:	req.params["account"],
-			project:	req.params["project"],
-			sid:		req.params["sid"],
-			user:		current_user
-		};
-
-		if ("number" in req.query)
-			params.number = parseInt(req.query.number);
-
-		this.transRouter(format, '/:account/:project/issues/:sid', res, params);
-	});
-
-	// Get subtree for head revision for a branch, with (optional) depth query string paramter
-	router.get('/:account/:project/revision/:branch/head/tree/:sid.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:	req.params["account"],
-			project:	req.params["project"],
-			branch:		req.params["branch"],
-			rid:		req.params["rid"],
-			subformat:	req.params["subformat"],
-			sid:		req.params["sid"],
-			user:		current_user,
-			query:		req.query
-		};
-
-		if ("depth" in req.query)
-			params.depth = req.query.depth;
-
-		this.transRouter(format, '/:account/:project/revision/:branch/head/tree/:sid', res, params);
-	});
-
-	// Get subtree for sid in revision rid, with (optional) depth query string paramter
-	router.get('/:account/:project/revision/:rid/tree/:sid.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:	req.params["account"],
-			project:	req.params["project"],
-			rid:		req.params["rid"],
-			subformat:	req.params["subformat"],
-			sid:		req.params["sid"],
-			user:		current_user,
-			query:		req.query
-		};
-
-		if ("depth" in req.query)
-			params.depth = req.query.depth;
-
-		this.transRouter(format, '/:account/:project/revision/:rid/tree/:sid', res, params);
-	});
-
+	self.getInternal("/:account/:project/meta/:uid.:format.:subformat?");
+	self.getInternal("/:account/:project/issue/:uid.:format");
+	self.getInternal("/:account/:project/issues/:sid.:format");
+	self.getInternal("/:account/:project/issues.:format");
 
 	// Get map from object id to path in tree for multipart
-	router.get('/:account/:project/revision/:branch/head/tree/multimap.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
+	self.getInternal("/:account/:project/revision/:branch/head/tree/multimap.:format.:subformat?");
+	self.getInternal("/:account/:project/revision/:rid/tree/multimap.:format.:subformat?");
 
-		var params = {
-			account:	req.params["account"],
-			project:	req.params["project"],
-			branch:		req.params["branch"],
-			rid:		req.params["rid"],
-			subformat:	req.params["subformat"],
-			sid:		req.params["sid"],
-			user:		current_user,
-			query:		req.query
-		};
-
-		if ("depth" in req.query)
-			params.depth = req.query.depth;
-
-		this.transRouter(format, '/:account/:project/revision/:branch/head/tree/multimap', res, params);
-	});
-
-	// Get map from object id to path in tree for multipart
-	router.get('/:account/:project/revision/:rid/tree/multimap.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:	req.params["account"],
-			project:	req.params["project"],
-			rid:		req.params["rid"],
-			subformat:	req.params["subformat"],
-			sid:		req.params["sid"],
-			user:		current_user,
-			query:		req.query
-		};
-
-		if ("depth" in req.query)
-			params.depth = req.query.depth;
-
-		this.transRouter(format, '/:account/:project/revision/:rid/tree/multimap', res, params);
-	});
-
-	router.get('/:account/:project/revision/:rid/diff/:otherrid.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:	req.params["account"],
-			project:	req.params["project"],
-			rid:		req.params["rid"],
-			otherrid:	req.params["otherrid"],
-			subformat:	req.params["subformat"],
-			user:		current_user
-		};
-
-		this.transRouter(format, '/:account/:project/revision/:rid/diff/:otherrid', res, params);
-	});
-
-	router.get('/:account/:project/revision/:rid/meta/:sid.:format?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:	req.params["account"],
-			project:	req.params["project"],
-			rid:		req.params["rid"],
-			sid:		req.params["sid"],
-			user:		current_user
-		};
-
-		this.transRouter(format, '/:account/:project/revision/:rid/meta/:sid',res, params);
-	});
-
-	router.get('/:account/:project/revision/:branch/head/meta/:sid.:format?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:	req.params["account"],
-			project:	req.params["project"],
-			branch:		req.params["branch"],
-			sid:		req.params["sid"],
-			user:		current_user
-		};
-
-		this.transRouter(format, '/:account/:project/revision/:branch/head/meta/:sid', res, params);
-	});
-
-
+	// Get subtree for sid in revision rid, with (optional) depth query string parameter
+	self.getInternal("/:account/:project/revision/:rid/tree/:sid.:format.:subformat?");
+	self.getInternal("/:account/:project/revision/:rid/diff/:otherrid.:format.:subformat?");
+	self.getInternal("/:account/:project/revision/:rid/meta/:sid.:format");
+	self.getInternal("/:account/:project/revision/:branch/head/meta/:sid.:format");
 
 	// Get audit log for account
-	router.get('/:account/log', checkAccess, function(req, res, next) {
-		var params = {
-			account: req.params["account"],
-			query:	 req.query
-		};
-
-		this.transRouter(format, '/:account/log', res, params);
-	});
+	self.getInternal("/:account/log.:format");
 
 	// Get object with specific uid in a specific format
-	router.get('/:account/:project/:uid.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"].toLowerCase();
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:   req.params["account"],
-			project:   req.params["project"],
-			subformat: req.params["subformat"],
-			uid:	   req.params["uid"],
-			user:	   current_user,
-			query:	   req.query
-		};
-
-		logger.log('debug', 'Retrieving object ' + params.uid);
-
-		this.transRouter(format, '/:account/:project/:uid', res, params);
-	});
+	self.getInternal("/:account/:project/:uid.:format.:subformat?");
 
 	// Get list of objects that match a specific type
-	router.get('/:account/:project/:rid/:type.:format?.:subformat?', checkAccess, function(req, res, next) {
-		var format = req.params["format"];
-		var current_user = ("user" in req.session) ? req.session.user.username : "";
-
-		var params = {
-			account:   req.params["account"],
-			project:   req.params["project"],
-			rid:	   req.params["rid"],
-			type:	   req.params["type"],
-			subformat: req.params["subformat"],
-			user:	   current_user,
-			query:	   req.query
-		};
-
-		this.transRouter(format, '/:account/:project/:rid/:type', res, params);
-	});
+	self.getInternal("/:account/:project/:rid/:type.:format.:subformat?");
 
 	// Everything else
-	router.get('*', function(req, res) {
-		logger.log('debug', 'Unsupported request ' + req.url);
+	/*
+	self.router.get("*", function(req, res, next) {
+		req[C.REQ_REPO].logger.logDebug("Unsupported request " + req.url);
 		res.sendStatus(501);
+		next();
 	});
+	*/
 
-	this.getMap = {}
+	self.getMap = {};
 
-	this.transRouter = function(format, regex, res, params)
-	{
-		var account = ("account" in params) ? params["account"] : null;
-		var project = ("project" in params) ? params["project"] : null;
+	self.default_format = config.default_format ? config.default_format : "html";
 
-		logger.log('debug',"ACCOUNT: " + account + " PROJECT: " + project + " REGEX: " + regex + " [" + format + "]");
-
-		if (!format)
-			format = this.default_format;
-
-		var responsePlace = regex + "." + format;
-
-		if(imgEncoder.isImage(format))
-		{
-				// If there is no error then we have access
-				if (!(format in this.getMap)) {
-					responseCodes.respond(responsePlace, responseCodes.FORMAT_NOT_SUPPORTED, res, {params: params});
-				} else if (!(regex in this.getMap[format])) {
-					responseCodes.respond(responsePlace, responseCodes.FUNCTION_NOT_SUPPORTED, res, {params: params});
-				} else {
-					this.getMap[format][regex](res, params, function(err, data) {
-						responseCodes.onError(responsePlace, err, res, data, {params: params});
-					});
-				}
-		} else {
-			if (account && project) {
-				dbInterface.hasReadAccessToProject(params.user, account, project, function(err)
-				{
-					if(err.value)
-						responseCodes.respond(responsePlace, err, res, {params: params});
-					else {
-						// If there is no error then we have access
-						if (!(format in this.getMap)) {
-							responseCodes.respond(responsePlace, responseCodes.FORMAT_NOT_SUPPORTED, res, {params: params});
-						} else if (!(regex in this.getMap[format])) {
-							responseCodes.respond(responsePlace, responseCodes.FUNCTION_NOT_SUPPORTED, res, {params: params});
-						} else {
-							this.getMap[format][regex](res, params, function(err, data) {
-								responseCodes.onError(responsePlace, err, res, data, {params: params});
-							});
-						}
-					}
-				});
-			} else {
-				// If there is no error then we have access
-				if (!(format in this.getMap)) {
-					responseCodes.respond(responsePlace, responseCodes.FORMAT_NOT_SUPPORTED, res, {params: params});
-				} else if (!(regex in this.getMap[format])) {
-					responseCodes.respond(responsePlace, responseCodes.FUNCTION_NOT_SUPPORTED, res, {params: params});
-				} else {
-					this.getMap[format][regex](res, params, function(err, data) {
-						responseCodes.onError(responsePlace, err, res, data, {params: params});
-					});
-				}
-			}
-		}
-
-		logger.log('debug',"--COMPLETE-- ACCOUNT: " + account + " PROJECT: " + project + " REGEX: " + regex + " [" + format + "]");
-
-	}
-
-	this.default_format = config.default_format ? config.default_format : "html";
-
-	this.get = function (format, regex, callback)
-	{
-		if (!(format in this.getMap))
-		{
-			this.getMap[format] = {};
-		}
-
-		logger.log('debug', 'Adding GET ' + regex + ' [' + format + ']');
-		this.getMap[format][regex] = callback;
-	}
-
-	return this;
+	return self;
 };
 
 
+repoGetHandler.prototype.getInternal = function(regex, queryDefaults, customCallback) {
+	"use strict";
+
+	if (queryDefaults === undefined)
+	{
+		queryDefaults = {};
+	}
+
+	var self = this;
+
+	if (customCallback === undefined)
+	{
+		self.router.get(regex, this.checkAccess, function(req, res, next) {
+			// Have we already processed this request
+			if (req[C.REQ_REPO].processed) {
+				return next();
+			} else {
+				req[C.REQ_REPO].processed = true;
+			}
+
+			req[C.REQ_REPO].logger.logInfo("Matched REGEX " + regex);
+
+			var current_user = (req.session.hasOwnProperty(C.REPO_SESSION_USER)) ? req.session.user.username : "";
+			var format = req.params[C.REPO_REST_API_FORMAT];
+
+			var params = _.clone(req.params);
+			params.user  = current_user;
+
+			if (req.query) {
+				params.query = _.clone(req.query);
+			} else {
+				params.query = {};
+			}
+
+			for(var defValue in queryDefaults)
+			{
+				if(queryDefaults.hasOwnProperty(defValue))
+				{
+					if (!params.query.hasOwnProperty(defValue))
+					{
+						params.query[defValue] = queryDefaults[defValue];
+					}
+				}
+			}
+
+			regex = regex.replace(".:format", "");
+			regex = regex.replace(".:subformat?", "");
+
+			self.transRouter(format, regex, res, req, next, params);
+		});
+	} else {
+		self.router.get(regex, this.checkAccess, function(res, req, next) {
+			if (req[C.REQ_REPO].processed) {
+				next();
+			} else {
+				req[C.REQ_REPO].processed = true;
+			}
+
+			customCallback(res, req, next);
+		});
+	}
+};
+
+repoGetHandler.prototype.transRouter = function(format, regex, res, req, next, params)
+{
+	"use strict";
+
+	var account = params.hasOwnProperty(C.REPO_REST_API_ACCOUNT) ? params[C.REPO_REST_API_ACCOUNT] : null;
+	var project = params.hasOwnProperty(C.REPO_REST_API_PROJECT) ? params[C.REPO_REST_API_PROJECT] : null;
+
+	if (!format) {
+		format = this.default_format;
+	}
+
+	var responsePlace = regex + "." + format;
+
+	var self = this;
+
+	if(imgEncoder.isImage(format))
+	{
+			// If there is no error then we have access
+			if (!(format in self.getMap)) {
+				responseCodes.respond(responsePlace, req, res, next, responseCodes.FORMAT_NOT_SUPPORTED, {params: params});
+			} else if (!(regex in self.getMap[format])) {
+				responseCodes.respond(responsePlace, req, res, next, responseCodes.FUNCTION_NOT_SUPPORTED, {params: params});
+			} else {
+				self.getMap[format][regex](res, req, params, function(err, data) {
+					responseCodes.onError(responsePlace, req, res, next, err, data, {params: params});
+				});
+			}
+	} else {
+		if (account && project) {
+			// If there is no error then we have access
+			if (!(format in self.getMap)) {
+				responseCodes.respond(responsePlace, req, res, next, responseCodes.FORMAT_NOT_SUPPORTED, {params: params});
+			} else if (!(regex in self.getMap[format])) {
+				responseCodes.respond(responsePlace, req, res, next, responseCodes.FUNCTION_NOT_SUPPORTED, {params: params});
+			} else {
+				self.getMap[format][regex](res, req, params, function(err, data) {
+					responseCodes.onError(responsePlace, req, res, next, err, data, {params: params});
+				});
+			}
+		} else {
+			// If there is no error then we have access
+			if (!(format in self.getMap)) {
+				responseCodes.respond(responsePlace, req, res, next, responseCodes.FORMAT_NOT_SUPPORTED, {params: params});
+			} else if (!(regex in self.getMap[format])) {
+				responseCodes.respond(responsePlace, req, res, next, responseCodes.FUNCTION_NOT_SUPPORTED, {params: params});
+			} else {
+				self.getMap[format][regex](res, req, params, function(err, data) {
+					responseCodes.onError(responsePlace, req, res, next, err, data, {params: params});
+				});
+			}
+		}
+	}
+};
+
+repoGetHandler.prototype.get = function (format, regex, callback)
+{
+	"use strict";
+
+	if (!(this.getMap.hasOwnProperty(format)))
+	{
+		this.getMap[format] = {};
+	}
+
+	systemLogger.logDebug("Adding GET " + regex + " [" + format + "]");
+	this.getMap[format][regex] = callback;
+};
+
+module.exports = repoGetHandler;

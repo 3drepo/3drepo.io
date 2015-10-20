@@ -232,10 +232,14 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	this.initRuntime = function (x3domruntime) {
 		// If no manager, the calling object is the X3DOM runtime (this)
 		// otherwise we reference the one attached to the manager.
-		if (!self.manager)
-			self.runtime = this;
-		else
+
+		if (!self.manager) {
+			if (this.doc.id === "viewer") {
+				self.runtime = this;
+			}
+		} else {
 			self.runtime = self.viewer.runtime;
+		}
 
 		self.showAll = function() {
 			self.runtime.fitAll();
@@ -264,6 +268,8 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 				$("#model__mapPosition")[0].parentNode._x3domNode._graph.needCulling = false;
 
 			self.downloadsLeft += (objEvent.target.querySelectorAll("[load]").length - 1);
+
+			self.showAll();
 
 			if (!self.downloadsLeft)
 				self.loadedPromise.resolve();
@@ -756,13 +762,13 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			{
 				var mp = scene._multiPartMap.multiParts[mpi];
 
-				if (objId > mp._minId && objId <= mp._maxId)	
+				if (objId > mp._minId && objId <= mp._maxId)
 				{
 					var colorMap 		= mp._inlineNamespace.defMap["MultiMaterial_ColorMap"];
 					var emissiveMap 	= mp._inlineNamespace.defMap["MultiMaterial_EmissiveMap"];
 					var specularMap 	= mp._inlineNamespace.defMap["MultiMaterial_SpecularMap"];
 					var visibilityMap 	= mp._inlineNamespace.defMap["MultiMaterial_VisibilityMap"];
-						
+
                     self.pickObject.part = new x3dom.Parts(mp, [objId - mp._minId], colorMap, emissiveMap, specularMap, visibilityMap);
                     self.pickObject.partID = mp._idMap.mapping[objId - mp._minId].name;
 				}

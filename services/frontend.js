@@ -21,8 +21,8 @@ var bodyParser = require('body-parser');
 var compress = require('compression');
 var fs = require('fs');
 var jade = require('jade');
-var log_iface = require('../js/core/logger.js');
-var logger = log_iface.logger;
+
+var systemLogger = require('../js/core/logger.js').systemLogger;
 
 var params = null; // TODO: Shouldn't use a global variable
 
@@ -147,7 +147,7 @@ module.exports.createApp = function(template)
 							{
 								"plugin": "project",
 								"friends": [
-									"oculus", "tools", "navigation", "viewpoints"
+									"oculus", "navigation", "viewpoints", "viewing"
 								],
 								"children": [
 									{
@@ -156,14 +156,14 @@ module.exports.createApp = function(template)
 									{
 										"plugin": "revision",
 										"friends" : [
-											"panels", "tree", "meta", "issues", "revisionselector", "diffselector", "clip"
+											"panels", "tree", "meta", "issues", "revisionselector", "diffselector", "clip", "walkthrough"
 										],
 										"children": [
 											{
 												"plugin": "diff",
 												"children": [
 													{
-														"plugin": "view",
+														"plugin": "view"
 													}
 												]
 											},
@@ -179,14 +179,14 @@ module.exports.createApp = function(template)
 												]
 											},
 											{
-												"plugin": "view",
+												"plugin": "view"
 											}
-										],
+										]
 									},
 									{
 										"plugin": "view",
 										"friends" : [
-											"panels", "tree", "meta", "issues", "revisionselector", "diffselector", "clip"
+											"panels", "tree", "meta", "issues", "revisionselector", "diffselector", "clip", "walkthrough"
 										],
 										"children": [
 											{
@@ -219,7 +219,7 @@ module.exports.createApp = function(template)
 
 		if (params["pluginLoaded"].indexOf(plugin) == -1)
 		{
-			logger.log('info', 'Loading plugin ' + plugin + ' ...');
+			systemLogger.logInfo('Loading plugin ' + plugin + ' ...');
 
 			params["pluginAngular"][plugin]				= {};
 			params["pluginAngular"][plugin]["plugin"]	= plugin;

@@ -53,12 +53,12 @@ exports.decode = function(bsonArray) {
 			} else {
 
 				// Unique ID (UID) of a revision
-				var idBytes = bson[C.REPO_NODE_LABEL_ID].buffer;
-				bson.id = UUID.unparse(idBytes);
+				var idBytes                = bson[C.REPO_NODE_LABEL_UNIQUE_ID].buffer;
+				bson[C.REPO_NODE_LABEL_ID] = UUID.unparse(idBytes);
 
 				// Shared ID (SID) of a revision (its branch ID)
 				idBytes = bson[C.REPO_NODE_LABEL_SHARED_ID].buffer;
-				bson.branch = UUID.unparse(idBytes);
+				bson[C.REPO_NODE_LABEL_BRANCH] = UUID.unparse(idBytes);
 
 				switch(bson[C.REPO_NODE_LABEL_TYPE]) {
 					case C.REPO_NODE_TYPE_REVISION :

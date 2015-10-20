@@ -1,0 +1,11 @@
+{
+    "name" : "viewing",
+    "files": {
+        "angular" : [
+            "viewing/ViewingCtrl.js"
+        ],
+        "ui": [
+            {"name": "viewing", "template" : "viewing/viewing.jade", "position" : "viewing"}
+        ]
+    }
+}

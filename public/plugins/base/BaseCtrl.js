@@ -69,5 +69,37 @@ function($stateProvider, $locationProvider) {
 	StateManager.registerPlugin('base', 'BaseData', function () {
 		return "base"; // Always valid
 	});
-}]);
+}])
 
+// Inspired by Ben Lesh's answer - http://stackoverflow.com/a/12936046/782358
+.factory('clickOutsideService', function ($document) {
+    return function($scope, expr) {
+        var clickCB = function() {
+            $scope.$apply(expr);
+        };
+
+        $document.on('click', clickCB);
+
+        $scope.$on('$destroy', function(){
+            $document.off('click', clickCB);
+        });
+    };
+})
+
+.directive('clickOutside', function ($document, clickOutsideService) {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attr) {
+            var clickCB = function(event) {
+                event.stopPropagation();
+            };
+            element.on('click', clickCB);
+
+            scope.$on('$destroy', function(){
+                element.off('click', clickCB);
+            });
+
+            clickOutsideService(scope, attr.clickOutside);
+        }
+    };
+});

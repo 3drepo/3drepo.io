@@ -1,36 +1,17 @@
 node_modules
-auth.json
 common_public_files.js
-fetch_latest
-public/x3dom.css
-public/x3dom.debug.js
-uploads
 
 /public/css/*.css~
 /*.log
 config
-config/live
-config/local
-public/x3dom
 bower_components
 
 certs
-upgrade
 
-prototype/OST3
-prototype/OSTFed
-prototype/OST_Back_Roof
-prototype/OST_Roof
-prototype/OSTFed.txt
+public/dist/plugins.concat.js
+public/dist/plugins.min.js
 
 .DS_Store
 
 sessions
 
-#Visual Studio junk
-*.njsproj
-*.suo
-*.sln
-*.dll
-.ntvs_analysis.dat
-build/config.gypi

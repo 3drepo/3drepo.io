@@ -1,0 +1,5 @@
+#viewing(ng-controller="ViewingCtrl as vw")
+	.btn-toolbar(role="toolbar")
+		.btn-group(role="group")
+			button(type="button", ng-class="{viewingButtonSelected : vw.currentViewing===$index, viewingButtonUnselected : vw.currentViewing!==$index}", ng-repeat="viewing in vw.viewings track by $index" ng-click="vw.setCurrentViewing($index)")
+				span(class="fa {{viewing.icon}}")
