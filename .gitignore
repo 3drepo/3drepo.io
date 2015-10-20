@@ -15,3 +15,12 @@ public/dist/plugins.min.js
 
 sessions
 
+#Visual Studio junk
+*.njsproj
+*.suo
+*.sln
+*.dll
+.ntvs_analysis.dat
+build/config.gypi
+obj/Debug
+

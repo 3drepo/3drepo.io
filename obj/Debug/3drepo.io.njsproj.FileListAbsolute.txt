@@ -1,2 +1,0 @@
-C:\Users\Carmen\3D Repo\Repo\3drepo.io\obj\Debug\3drepo.io.njsprojResolveAssemblyReference.cache
-C:\Users\Carmen\3D Repo\Repo\3drepo.io\bin\Microsoft.NodejsTools.WebRole.dll
