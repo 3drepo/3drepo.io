@@ -214,6 +214,8 @@ module.exports.createApp = function(template)
 
 	function loadPlugin(plugin, stateName, uistates, params)
 	{
+        var cssFile = "";
+
 		if (!(plugin in params["parentStateJSON"]))
 			params["parentStateJSON"][plugin] = [];
 
@@ -296,6 +298,16 @@ module.exports.createApp = function(template)
 
 					}
 				}
+
+                if ("css" in pluginConfig["files"])
+                {
+                    var nCSSFiles = pluginConfig["files"]["css"].length;
+                    for (var fileidx = 0; fileidx < nCSSFiles; fileidx++)
+                    {
+                        cssFile = '/public/plugins/' + pluginConfig["files"]["css"][fileidx];
+                        params["pluginCSS"].push(cssFile);
+                    }
+                }
 			}
 
 			params["pluginLoaded"].push(plugin);
@@ -384,6 +396,7 @@ module.exports.createApp = function(template)
 			params["ui"]					= {};
 			params["uistate"]				= {};
 			//params["levelOrder"]			= {};
+            params["pluginCSS"]			    = [];
 
 			var parentState = "";
 			buildParams(pluginStructure, 0, parentState, [], params);

@@ -44,6 +44,10 @@ var public_files = {
 		sliderjs: '/public/js/external/bootstrap-slider.js',
 		angularsliderjs: '/public/js/external/slider.js',
 		socketio: '/public/js/external/socket.io.js',
+        uitreejs: '/public/js/external/angular-ui-tree.min.js',
+        angularmaterialjs: '/public/js/external/angular-material.min.js',
+        angularanimatejs: '/public/js/external/angular-animate.min.js',
+        angularariajs: '/public/js/external/angular-aria.min.js',
 
 		// QR Code stuff
 		qrgrid: '/public/js/external/qrcode/grid.js',
@@ -72,7 +76,9 @@ var public_files = {
 		bootstrapcss: '/public/css/external/bootstrap.min.css',
 		jqueryuicss: '/public/css/external/jquery-ui.css',
 		repouicss : '/public/css/ui.css',
-		slidercss: '/public/css/external/bootstrap-slider.css'
+		slidercss: '/public/css/external/bootstrap-slider.css',
+        uitreecss: '/public/css/external/angular-ui-tree.min.css',
+        angularmaterialcss: '/public/css/external/angular-material.min.css'
 	}
 }
 
@@ -113,7 +119,11 @@ var internal_files = {
 	'bower_components/masonry/masonry.js',
 	'bower_components/moment/moment.js',
 	'bower_components/socket.io-client/socket.io.js',
-	'bower_components/font-awesome/css/font-awesome.min.css'
+	'bower_components/font-awesome/css/font-awesome.min.css',
+    'bower_components/angular-material/angular-material.min.js',
+    'bower_components/angular-material/angular-material.min.css',
+    'bower_components/angular-material/angular-animate.min.js',
+    'bower_components/angular-material/angular-aria.min.js'
 	],
 
 	x3dom_files: [

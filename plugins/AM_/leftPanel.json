@@ -6,6 +6,9 @@
         ],
         "jade": [
             {"template" : "AM_/leftPanel/leftPanel.jade", "id" : "leftPanel.html"}
+        ],
+        "css" : [
+            "AM_/leftPanel/leftPanel.css"
         ]
     }
 }

@@ -21,7 +21,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 
 		// Predefine the app
 		script.
-			angular.module('3drepo', ['ui.router', 'ui.bootstrap', 'ui.bootstrap-slider'])
+			angular.module('3drepo', ['ui.router', 'ui.bootstrap', 'ui.bootstrap-slider', 'ngMaterial'])
 			.constant('structure', !{structure})
 			.constant('parentStates', !{parentStateJSON})
 			//.constant('pluginLevels', !{pluginLevelsJSON})
@@ -39,6 +39,10 @@ html(lang="en" ng-app="3drepo").ng-scope
 		each plugin in pluginAngular
 			each file in plugin.files
 				script(type="text/javascript", src=file)
+
+		// Plugin CSS Files
+		each css in pluginCSS
+			link(href=css, rel='stylesheet', type="text/css")
 
 	body(ng-controller='BaseCtrl')
 		// Plugin JADE Files
