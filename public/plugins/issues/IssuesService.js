@@ -25,7 +25,7 @@ angular.module('3drepo')
 	self.loading        = false;
 	self.pinPositions   = [];
 	self.pinNamespaces  = {};
-	self.io             = io(serverConfig.chatHost, {path :  serverConfig.chatPath});
+	//self.io             = io(serverConfig.chatHost, {path :  serverConfig.chatPath});
 
 	self.draggedPin     = null;
 
@@ -95,6 +95,7 @@ angular.module('3drepo')
 	 * @listens chat:new_issue
 	 * @param {Object} data - Data received from the chat server
 	 */
+	/*
 	self.io.on("new_issue", function(data) {
 		// Create placeholder for issue
 		if (!self.issues[data.project])
@@ -108,6 +109,7 @@ angular.module('3drepo')
 			$rootScope.$apply();
 		}
 	});
+	*/
 
 	/**
 	 * When a post_comment is received from chat server
@@ -115,6 +117,7 @@ angular.module('3drepo')
 	 * @listens chat:post_comment
 	 * @param {Object} data - Data received from the chat server
 	 */
+	/*
 	self.io.on("post_comment", function(data) {
 		// Create placeholder for issue
 		if (!self.issueContents[data._id])
@@ -124,6 +127,7 @@ angular.module('3drepo')
 		self.issueContents[data._id].push(data);
 		$rootScope.$apply();
 	});
+	*/
 
 	/**
 	 * Prepare and object by filling in placeholders and
@@ -404,7 +408,7 @@ angular.module('3drepo')
 				});
 
 				// Tell the chat server that we want updates to this project
-				self.io.emit("watch_project", { account: account, project: project });
+				//self.io.emit("watch_project", { account: account, project: project });
 				self.loading      = false;
 				deferred.resolve();
 			}, function(message) {

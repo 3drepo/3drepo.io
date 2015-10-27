@@ -39,7 +39,7 @@ function createSession(place, req, res, next, user)
 			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {account: user.username});
 		} else {
 			systemLogger.logDebug("Authenticated user and signed token.", req);
-			req.session.user = user;
+			req.session[C.REPO_SESSION_USER] = user;
 			responseCodes.respond(place, req, res, next, responseCodes.OK, {account: user.username});
 		}
 	});

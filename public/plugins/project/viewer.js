@@ -110,6 +110,8 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.downloadsLeft = 1;
 
+	this.defaultNavMode = "TURNTABLE";
+
 	this.init = function() {
 		if (!self.initialized)
 		{
@@ -191,7 +193,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 			self.nav = document.createElement('navigationInfo');
 			self.nav.setAttribute('headlight', 'false');
-			self.nav.setAttribute('type', 'TURNTABLE');
+			self.nav.setAttribute('type', self.defaultNavMode);
 			self.scene.appendChild(self.nav);
 
 			self.loadViewpoint = self.name + "_default"; // Must be called after creating nav
@@ -205,15 +207,6 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 					self.disableClicking();
 				} else if (e.charCode == 'a'.charCodeAt(0)) {
 					self.showAll();
-					self.setNavMode("TURNTABLE");
-					self.enableClicking();
-				} else if (e.charCode == 'n'.charCodeAt(0)) {
-					self.setNavMode("TURNTABLE");
-					self.enableClicking();
-				} else if (e.charCode == 'w'.charCodeAt(0)) {
-					self.setNavMode("WALK");
-				} else if (e.charCode == 'e'.charCodeAt(0)) {
-					self.setNavMode("EXAMINE");
 					self.enableClicking();
 				}
 			});
@@ -247,7 +240,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			// TODO: This is a hack to get around a bug in X3DOM
 			self.getViewArea()._flyMat = null;
 
-			self.setNavMode("TURNTABLE");
+			self.setNavMode(self.defaultNavMode);
 		}
 
 		self.getCurrentViewpoint().addEventListener('viewpointChanged', self.viewPointChanged);
@@ -917,8 +910,11 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 			if (mode == 'HELICOPTER')
 			{
-				var eye = self.getCurrentViewpointInfo()["position"];
-				self.nav._x3domNode._vf.typeParams[0] = 0.0;
+				var vpInfo  = self.getCurrentViewpointInfo();
+				var eye     = vpInfo["position"];
+				var viewDir = vpInfo["view_dir"];
+
+				self.nav._x3domNode._vf.typeParams[0] = Math.asin(viewDir[1]);
 				self.nav._x3domNode._vf.typeParams[1] = eye[1];
 			}
 

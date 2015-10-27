@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd 
+ *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -49,7 +49,7 @@ var Utils = function() {
     * @returns {Buffer} binuuids - Binary representation of a UUID
     *******************************************************************************/
     this.stringsToUUIDs = function(uuids) {
-        return uuids.map(function(uuid) { 
+        return uuids.map(function(uuid) {
             return self.stringToUUID(uuid);
         });
     };
@@ -60,7 +60,7 @@ var Utils = function() {
     * @returns {string} uuid - String representation of a UUID
     *******************************************************************************/
     this.uuidsToStrings = function(binuuids) {
-        return binuuids.map(function(binuuid) { 
+        return binuuids.map(function(binuuid) {
             return self.uuidToString(binuuid);
         });
     };
@@ -70,7 +70,7 @@ var Utils = function() {
     * @returns {Buffer} - Binary representation of a UUID
     *******************************************************************************/
     this.generateUUID = function() {
-       return self.stringToUUID(nodeuuid.v4());       
+       return self.stringToUUID(nodeuuid.v4());
     };
 
     /*******************************************************************************
@@ -80,7 +80,7 @@ var Utils = function() {
       *******************************************************************************/
     this.coalesce = function(variable, value)
     {
-        if (variable === null || variable === undefined) { 
+        if (variable === null || variable === undefined) {
             return value;
         } else {
             return variable;
