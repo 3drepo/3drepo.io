@@ -1650,6 +1650,8 @@ DBInterface.prototype.appendMeshFiles = function(dbName, project, fromStash, uid
 		}, function (err) {
 			return callback(responseCodes.OK, "mesh", uid, fromStash, repoGraphScene(self.logger).decode([obj]));
 		});
+	} else {
+		return callback(responseCodes.OK, "mesh", uid, fromStash, repoGraphScene(self.logger).decode([obj]));
 	}
 }
 
