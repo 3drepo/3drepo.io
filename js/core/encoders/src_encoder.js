@@ -237,7 +237,7 @@
 				logger.logTrace("Re-indexing faces");
 
 				// TODO: Currently just ignores non triangulated faces.
-				for (var face_idx = 0; face_idx < subMeshFacesCount; face_idx++) {
+				for (var face_idx = 0; face_idx < mesh.faces_count; face_idx++) {
 					var num_comp = mesh["faces"].buffer.readInt32LE(orig_idx_ptr);
 
 					if (num_comp !== 3) {
@@ -253,7 +253,7 @@
 							var byte_position = orig_idx_ptr + (vert_comp + 1) * 4;
 							var idx_val       = mesh["faces"].buffer.readInt32LE(byte_position);
 
-							idx_val -= subMeshArray[subMesh].offset;
+							idx_val -= subMeshArray[0].offset;
 
 							faceBuf.writeUInt16LE(idx_val, copy_ptr);
 							copy_ptr += 2;
