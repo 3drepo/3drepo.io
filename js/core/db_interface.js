@@ -1632,18 +1632,25 @@ DBInterface.prototype.appendMeshFiles = function(dbName, project, fromStash, uid
 
 	self.logger.logTrace("Retrieving mesh files and appending");
 
-	// TODO: Make this more generic, get filename from field
-	async.each(gridfstypes, function (fstype, callback) {
-		dbConn(self.logger).getGridFSFile(dbName, project + "." + subColl, uid + "_" + fstype, function(err, data)
-		{
-			if (!err["value"])
-				obj[fstype] = data;
+	if (obj["_extRef"] !== undefined)
+	{
+		// TODO: Make this more generic, get filename from field
+		async.each(Object.keys(obj["_extRef"]), function (type, callback) {
+			var fileName = obj["_extRef"][type];
 
-			callback();
+			dbConn(self.logger).getGridFSFile(dbName, project + "." + subColl, fileName, function(err, data)
+			{
+				if (!err["value"]) {
+					console.log("Setting " + type);
+					obj[type] = data;
+				}
+
+				callback();
+			});
+		}, function (err) {
+			return callback(responseCodes.OK, "mesh", uid, fromStash, repoGraphScene(self.logger).decode([obj]));
 		});
-	}, function (err) {
-		return callback(responseCodes.OK, "mesh", uid, fromStash, repoGraphScene(self.logger).decode([obj]));
-	});
+	}
 }
 
 DBInterface.prototype.getObject = function(dbName, project, uid, rid, sid, needFiles, projection, callback) {
