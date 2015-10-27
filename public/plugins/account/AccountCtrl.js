@@ -28,8 +28,10 @@ function($stateProvider, parentStates) {
 			url: ':account',
 			templateUrl: 'account.html',
 			resolve: {
-				auth: function authCheck(Auth) { return Auth.init(); },
-				init: function(StateManager, $stateParams) {
+				auth: function authCheck(Auth) {
+					return Auth.init();
+				},
+				init: function(StateManager, auth, $stateParams) {
 					// On the login page the account variable is set to ""
 					// we must override this.
 					if ($stateParams["account"] == "")

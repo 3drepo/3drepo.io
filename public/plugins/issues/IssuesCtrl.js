@@ -37,7 +37,12 @@ angular.module('3drepo')
 
 	$(document).on("objectSelected", function(event, object, zoom) {
 		$scope.objectIsSelected = !(object === undefined);
-		$scope.selectedID  		= object.getAttribute("DEF");
+
+		if (object !== undefined) {
+			$scope.selectedID  		= object.getAttribute("DEF");
+		} else {
+			$scope.selectedID = undefined;
+		}
 	});
 
 	$(document).on("partSelected", function(event, part, zoom) {
@@ -136,7 +141,11 @@ angular.module('3drepo')
 		var account		= StateManager.state.account;
 		var project		= StateManager.state.project;
 
-		return $scope.IssuesService.getIssueStubs();
+		if (account !== undefined && project !== undefined) {
+			return $scope.IssuesService.getIssueStubs();
+		} else {
+			return(Promise.resolve("Undefined Account and Project"));
+		}
 	});
 }])
 .directive('simpleDraggable', ['ViewerService', function (ViewerService) {

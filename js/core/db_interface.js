@@ -1065,9 +1065,12 @@ DBInterface.prototype.getHeadRevision = function(dbName, project, branch, callba
 }
 
 DBInterface.prototype.getHeadUUID = function(dbName, project, branch, callback) {
+	var self = this;
+
 	self.getHeadRevision(dbName, project, branch, function(err, doc) {
-		if (err.value)
+		if (err.value) {
 			return callback(err);
+		}
 
 		callback(responseCodes.OK, {"uuid" : doc[0]["_id"], "sid" : doc[0]["shared_id"]});
 	});
@@ -1719,7 +1722,7 @@ DBInterface.prototype.getObject = function(dbName, project, uid, rid, sid, needF
 			shared_id : stringToUUID(sid),
 		};
 
-		self.queryScene(dbName, project, rid, query, {}, function(err, fromStash, obj) {
+		self.queryScene(dbName, project, null, rid, query, {}, function(err, fromStash, obj) {
 			if (err.value) return callback(err);
 
 			if (!obj.length)

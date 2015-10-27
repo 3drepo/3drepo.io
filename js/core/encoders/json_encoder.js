@@ -234,7 +234,7 @@ function getFullTree(dbInterface, account, project, branch, revision, callback) 
 
 function walkthrough(dbInterface, account, index, callback) {
 
-    dbInterface.searchTree(account, project, index, function(err, data) {
+    dbInterface.getWalkthroughInfo(account, project, index, function(err, data) {
         if (err.value) {
             return callback(err);
         }
@@ -514,6 +514,11 @@ exports.route = function(router)
 	router.get("json", "/:account/:project/revision/:branch/head/:sid", function(req, res, params, err_callback) {
 		dbInterface(req[C.REQ_REPO].logger).getHeadUUID(params.account, params.project, params.branch, function (err, uuid)
 		{
+			if (err.value)
+			{
+				return err_callback(err);
+			}
+
 			dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, null, utils.uuidToString(uuid.uuid), params.sid, true, {}, function (err, type, uid, obj) {
 				if (err.value)
 					err_callback(err);
