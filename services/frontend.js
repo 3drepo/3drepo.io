@@ -193,7 +193,16 @@ module.exports.createApp = function(template)
 												"plugin": "diff"
 											}
 										]
-									}
+									},
+                                    {
+                                        plugin: "AM_home"
+                                    },
+                                    {
+                                        plugin: "AM_leftPanel"
+                                    },
+                                    {
+                                        plugin: "AM_search"
+                                    }
 								]
 							}
 						]
@@ -215,7 +224,13 @@ module.exports.createApp = function(template)
 			params["parentStateJSON"][plugin].push(parentState);
 
 		// TODO: Check whether or not it doesn't exist
-		var pluginConfig = JSON.parse(fs.readFileSync("./plugins/" + plugin + ".json", "utf8"));
+		var pluginConfig = {};
+        if (plugin.indexOf("AM_") !== -1) {
+            pluginConfig = JSON.parse(fs.readFileSync("./plugins/AM_/" + plugin.substring(3) + ".json", "utf8"));
+        }
+        else {
+            pluginConfig = JSON.parse(fs.readFileSync("./plugins/" + plugin + ".json", "utf8"));
+        }
 
 		if (params["pluginLoaded"].indexOf(plugin) == -1)
 		{
@@ -303,13 +318,20 @@ module.exports.createApp = function(template)
 	function buildParams(currentLevel, levelNum, stateName, uistates, params)
 	{
 		var plugin = currentLevel["plugin"];
+            AMPluguin = "";
 
 		if (stateName)
 			stateName += ".";
 
 		var states = [];
 
-		var pluginConfig = JSON.parse(fs.readFileSync("./plugins/" + plugin + ".json", "utf8"));
+		var pluginConfig = {};
+        if (plugin.indexOf("AM_") !== -1) {
+            pluginConfig = JSON.parse(fs.readFileSync("./plugins/AM_/" + plugin.substring(3) + ".json", "utf8"));
+        }
+        else {
+            pluginConfig = JSON.parse(fs.readFileSync("./plugins/" + plugin + ".json", "utf8"));
+        }
 
 		if ("states" in pluginConfig)
 		{
@@ -326,7 +348,7 @@ module.exports.createApp = function(template)
 			{
 				for(var i = 0; i < currentLevel["friends"].length; i++)
 				{
-					var plugin = currentLevel["friends"][i];
+					plugin = currentLevel["friends"][i];
 					loadPlugin(plugin, stateName + states[stateidx], uistates, params);
 				}
 			}

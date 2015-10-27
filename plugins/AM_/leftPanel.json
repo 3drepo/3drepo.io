@@ -1,0 +1,11 @@
+{
+    "name" : "leftPanel",
+    "files": {
+        "angular" : [
+            "AM_/leftPanel/LeftPanelDirective.js"
+        ],
+        "jade": [
+            {"template" : "AM_/leftPanel/leftPanel.jade", "id" : "leftPanel.html"}
+        ]
+    }
+}

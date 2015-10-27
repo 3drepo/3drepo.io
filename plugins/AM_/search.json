@@ -1,0 +1,11 @@
+{
+    "name" : "search",
+    "files": {
+        "angular" : [
+            "AM_/search/SearchDirective.js"
+        ],
+        "jade": [
+            {"template" : "AM_/search/search.jade", "id" : "search.html"}
+        ]
+    }
+}
