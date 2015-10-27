@@ -1644,7 +1644,6 @@ DBInterface.prototype.appendMeshFiles = function(dbName, project, fromStash, uid
 			dbConn(self.logger).getGridFSFile(dbName, project + "." + subColl, fileName, function(err, data)
 			{
 				if (!err["value"]) {
-					console.log("Setting " + type);
 					obj[type] = data;
 				}
 
