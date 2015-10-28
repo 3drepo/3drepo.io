@@ -19,28 +19,28 @@
     "use strict";
 
     angular.module("3drepo")
-        .directive("home", home);
+        .directive("tree", tree);
 
-    function home() {
+    function tree() {
         return {
-            restrict: 'E',
-            templateUrl: 'home.html',
+            restrict: 'EA',
+            templateUrl: 'tree.html',
             scope: {},
-            controller: HomeCtrl,
-            controllerAs: 'hm',
+            controller: treeCtrl,
+            controllerAs: 'tr',
             bindToController: true
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "EventService"];
+    treeCtrl.$inject = ["$scope", "EventService"];
 
-    function HomeCtrl($scope, EventService) {
-        var hm = this;
-        console.log(EventService.EVENT);
-        $scope.test = EventService.test;
-        $scope.$watch("test", function (newValue) {
-            console.log(newValue);
-        })
+    function treeCtrl($scope, EventService) {
+        var tr = this;
+
+        $scope.$watch(EventService.currentEvent, function (event) {
+            if (event.type === EventService.EVENT.FILTER) {
+                tr.filterText = event.value;
+            }
+        });
     }
 }());
-

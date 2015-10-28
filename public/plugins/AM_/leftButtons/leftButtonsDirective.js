@@ -19,28 +19,31 @@
     "use strict";
 
     angular.module("3drepo")
-        .directive("home", home);
+        .directive("leftButtons", leftButtons);
 
-    function home() {
+    function leftButtons() {
         return {
             restrict: 'E',
-            templateUrl: 'home.html',
+            templateUrl: 'leftButtons.html',
             scope: {},
-            controller: HomeCtrl,
-            controllerAs: 'hm',
+            controller: LeftButtonsCtrl,
+            controllerAs: 'lb',
             bindToController: true
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "EventService"];
+    LeftButtonsCtrl.$inject = ["EventService"];
 
-    function HomeCtrl($scope, EventService) {
-        var hm = this;
-        console.log(EventService.EVENT);
-        $scope.test = EventService.test;
-        $scope.$watch("test", function (newValue) {
-            console.log(newValue);
-        })
+    function LeftButtonsCtrl(EventService) {
+        var lb = this;
+
+        lb.buttons = [
+            {label: "1", content: ["tree", "viewpoints"]},
+            {label: "2", content: ["meta", "pdf"]}
+        ];
+
+        lb.click = function (index) {
+            EventService.send(EventService.EVENT.LEFT_BUTTON_CLICK, lb.buttons[index].content);
+        }
     }
 }());
-

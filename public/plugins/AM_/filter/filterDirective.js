@@ -19,28 +19,28 @@
     "use strict";
 
     angular.module("3drepo")
-        .directive("home", home);
+        .directive("filter", filter);
 
-    function home() {
+    function filter() {
         return {
             restrict: 'E',
-            templateUrl: 'home.html',
+            templateUrl: 'filter.html',
             scope: {},
-            controller: HomeCtrl,
-            controllerAs: 'hm',
+            controller: FilterCtrl,
+            controllerAs: 'fl',
             bindToController: true
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "EventService"];
+    FilterCtrl.$inject = ["$scope", "EventService"];
 
-    function HomeCtrl($scope, EventService) {
-        var hm = this;
-        console.log(EventService.EVENT);
-        $scope.test = EventService.test;
-        $scope.$watch("test", function (newValue) {
-            console.log(newValue);
+    function FilterCtrl($scope, EventService) {
+        var fl = this;
+
+        $scope.$watch("fl.filterText", function (newValue) {
+            if (angular.isDefined(newValue)) {
+                EventService.send(EventService.EVENT.FILTER, newValue);
+            }
         })
     }
 }());
-

@@ -2,10 +2,12 @@
     "name" : "leftPanel",
     "files": {
         "angular" : [
-            "AM_/leftPanel/LeftPanelDirective.js"
+            "AM_/leftPanel/leftPanelDirective.js",
+            "AM_/leftPanel/leftPanelContentDirective.js"
         ],
         "jade": [
-            {"template" : "AM_/leftPanel/leftPanel.jade", "id" : "leftPanel.html"}
+            {"template" : "AM_/leftPanel/leftPanel.jade", "id" : "leftPanel.html"},
+            {"template" : "AM_/leftPanel/leftPanelContent.jade", "id" : "leftPanelContent.html"}
         ],
         "css" : [
             "AM_/leftPanel/leftPanel.css"

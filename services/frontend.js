@@ -195,13 +195,24 @@ module.exports.createApp = function(template)
 										]
 									},
                                     {
-                                        plugin: "AM_home"
-                                    },
-                                    {
-                                        plugin: "AM_leftPanel"
-                                    },
-                                    {
-                                        plugin: "AM_search"
+                                        plugin: "AM_home",
+                                        children: [
+                                            {
+                                                plugin: "AM_leftPanel"
+                                            },
+                                            {
+                                                plugin: "AM_filter"
+                                            },
+                                            {
+                                                plugin: "AM_tree"
+                                            },
+                                            {
+                                                plugin: "AM_viewpoints"
+                                            },
+                                            {
+                                                plugin: "AM_leftButtons"
+                                            }
+                                        ]
                                     }
 								]
 							}

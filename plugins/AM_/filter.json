@@ -1,0 +1,11 @@
+{
+    "name" : "filter",
+    "files": {
+        "angular" : [
+            "AM_/filter/filterDirective.js"
+        ],
+        "jade": [
+            {"template" : "AM_/filter/filter.jade", "id" : "filter.html"}
+        ]
+    }
+}

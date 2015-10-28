@@ -19,22 +19,28 @@
     "use strict";
 
     angular.module("3drepo")
-        .directive("search", search);
+        .directive("viewpoints", viewpoints);
 
-    function search() {
+    function viewpoints() {
         return {
-            restrict: 'E',
-            templateUrl: 'search.html',
-            scope: {
-                collection: "=",
-                showChildren: "="
-            },
-            controller: SearchCtrl,
-            controllerAs: 'tc',
+            restrict: 'EA',
+            templateUrl: 'viewpoints.html',
+            scope: {},
+            controller: viewpointsCtrl,
+            controllerAs: 'vp',
             bindToController: true
         };
     }
 
-    function SearchCtrl() {
+    viewpointsCtrl.$inject = ["$scope", "EventService"];
+
+    function viewpointsCtrl($scope, EventService) {
+        var vp = this;
+
+        $scope.$watch(EventService.currentEvent, function (event) {
+            if (event.type === EventService.EVENT.FILTER) {
+                vp.filterText = event.value;
+            }
+        });
     }
 }());

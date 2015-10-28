@@ -1,11 +1,11 @@
 .container-fluid
-	#ui2-header
+	//#ui2-header
 		#nav-version-control
 			//div.nav-project-title  <b>{{Data.ProjectData.name}}</b>
 			if ui.header
 				each uicomp in ui.header
 					!= renderMe(uicomp["template"], locals)
-	if ui.viewing
+	//if ui.viewing
 		each uicomp in ui.viewing
 			!= renderMe(uicomp["template"], locals)
 
@@ -15,7 +15,7 @@
 			if ui.viewport
 				each uicomp in ui.viewport
 					!= renderMe(uicomp["template"], locals)
-	.ui2
+	//.ui2
 		#ui2-left
 			if ui.left
 				each uicomp in ui.left
@@ -25,14 +25,9 @@
 				each uicomp in ui.right
 					!= renderMe(uicomp["template"], locals)
 
-	//#bottom-panel.row.mainrow.collapsed
-		if ui.footer
-			each uicomp in ui.footer
-				!= renderMe(uicomp["template"], locals)
-		div(ui-view="footer")
-
-	if ui.walkthrough
+	//if ui.walkthrough
 		each uicomp in ui.walkthrough
 			!= renderMe(uicomp["template"], locals)
 
 	left-panel
+	left-buttons

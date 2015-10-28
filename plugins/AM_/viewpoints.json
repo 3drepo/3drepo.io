@@ -1,0 +1,14 @@
+{
+    "name" : "viewpoints",
+    "files": {
+        "angular" : [
+            "AM_/viewpoints/viewpointsDirective.js"
+        ],
+        "jade": [
+            {"template" : "AM_/viewpoints/viewpoints.jade", "id" : "viewpoints.html"}
+        ],
+        "css" : [
+            "AM_/viewpoints/viewpoints.css"
+        ]
+    }
+}

@@ -4,6 +4,24 @@ left-panel {
   left: 150px;
   top: 100px;
   width: 300px;
-  height: 400px;
-  background: #fff;
+}
+
+left-panel md-toolbar {
+  min-height: 32px;
+  height: 32px;
+}
+
+left-panel md-toolbar label {
+  font-weight: normal;
+  font-size: medium;
+}
+
+.leftPanelContentSelected {
+  max-height: 500px;
+  outline: 0 none;
+}
+
+.leftPanelContentUnselected {
+  max-height: 60px;
+  outline: none;
 }

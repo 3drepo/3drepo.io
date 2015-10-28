@@ -2,7 +2,8 @@
     "name" : "home",
     "files": {
         "angular" : [
-            "AM_/home/homeDirective.js"
+            "AM_/home/homeDirective.js",
+            "AM_/home/eventService.js"
         ],
         "jade": [
             {"template" : "AM_/home/home.jade", "id" : "home.html"}

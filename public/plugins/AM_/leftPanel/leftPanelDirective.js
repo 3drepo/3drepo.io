@@ -25,16 +25,25 @@
         return {
             restrict: 'E',
             templateUrl: 'leftPanel.html',
-            scope: {
-                collection: "=",
-                showChildren: "="
-            },
+            scope: {},
             controller: LeftPanelCtrl,
-            controllerAs: 'tc',
+            controllerAs: 'lp',
             bindToController: true
         };
     }
 
-    function LeftPanelCtrl() {
+    LeftPanelCtrl.$inject = ["$scope", "$element", "$compile", "EventService"];
+
+    function LeftPanelCtrl($scope, $element, $compile, EventService) {
+        var lp = this;
+
+        // Tree and Viewpoints are the default content items
+        lp.contentItems = ["tree", "viewpoints"];
+
+        $scope.$watch(EventService.currentEvent, function (event) {
+            if (event.type === EventService.EVENT.LEFT_BUTTON_CLICK) {
+                lp.contentItems = event.value;
+            }
+        });
     }
 }());

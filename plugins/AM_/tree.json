@@ -1,0 +1,14 @@
+{
+    "name" : "tree",
+    "files": {
+        "angular" : [
+            "AM_/tree/treeDirective.js"
+        ],
+        "jade": [
+            {"template" : "AM_/tree/tree.jade", "id" : "tree.html"}
+        ],
+        "css" : [
+            "AM_/tree/tree.css"
+        ]
+    }
+}

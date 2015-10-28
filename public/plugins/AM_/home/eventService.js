@@ -19,28 +19,25 @@
     "use strict";
 
     angular.module("3drepo")
-        .directive("home", home);
+        .factory('EventService', EventService);
 
-    function home() {
-        return {
-            restrict: 'E',
-            templateUrl: 'home.html',
-            scope: {},
-            controller: HomeCtrl,
-            controllerAs: 'hm',
-            bindToController: true
+    function EventService () {
+        var EVENT = {
+            FILTER: "EVENT_FILTER_SEARCH",
+            LEFT_BUTTON_CLICK: "EVENT_LEFT_BUTTON_CLICK",
+            LEFT_PANEL_CONTENT_CLICK: "EVENT_LEFT_PANEL_CONTENT_CLICK"
         };
-    }
 
-    HomeCtrl.$inject = ["$scope", "EventService"];
+        var currentEvent = "";
 
-    function HomeCtrl($scope, EventService) {
-        var hm = this;
-        console.log(EventService.EVENT);
-        $scope.test = EventService.test;
-        $scope.$watch("test", function (newValue) {
-            console.log(newValue);
-        })
+        var send = function (type, value) {
+            currentEvent = {type: type, value: value};
+        };
+
+        return {
+            EVENT: EVENT,
+            currentEvent: function() {return currentEvent;},
+            send: send
+        }
     }
 }());
-

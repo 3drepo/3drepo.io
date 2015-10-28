@@ -1,0 +1,4 @@
+div(ng-repeat="button in lb.buttons track by $index")
+	md-button(class="md-fab md-primary md-mini", md-ink-ripple, ng-click="lb.click($index)")
+		| {{button.label}}
+	br
