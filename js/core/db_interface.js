@@ -1621,16 +1621,6 @@ DBInterface.prototype.getMetadata = function(dbName, project, branch, revision, 
 DBInterface.prototype.appendMeshFiles = function(dbName, project, fromStash, uid, obj, callback)
 {
 	var self = this;
-
-	var gridfstypes = [
-		C.REPO_NODE_LABEL_VERTICES,
-		C.REPO_NODE_LABEL_FACES,
-		C.REPO_NODE_LABEL_NORMALS,
-		//C.REPO_NODE_LABEL_COLORS,
-		C.REPO_NODE_LABEL_UV_CHANNELS
-	];
-
-	var numTasks = gridfstypes.length;
 	var subColl = fromStash ? "stash.3drepo" : "scene";
 
 	self.logger.logTrace("Retrieving mesh files and appending");
@@ -1655,6 +1645,45 @@ DBInterface.prototype.appendMeshFiles = function(dbName, project, fromStash, uid
 	} else {
 		return callback(responseCodes.OK, "mesh", uid, fromStash, repoGraphScene(self.logger).decode([obj]));
 	}
+}
+
+DBInterface.prototype.cacheFunction = function(dbName, collection, req, generate, callback)
+{
+	"use strict";
+	var self = this;
+
+	// Get the format of the file
+	var format = req.params[C.REPO_REST_API_FORMAT].toLowerCase();
+	var stashCollection = collection + "." + C.REPO_COLLECTION_STASH + "." + format;
+
+	dbConn(self.logger).getGridFSFile(dbName, stashCollection, req.url, function(err, result) {
+		if (err.value === responseCodes.FILE_DOESNT_EXIST.value) {
+			self.logger.logDebug("Doesn't exist in stash, generating ...");
+
+			generate(function(err, data) {
+				if (err.value)
+				{
+					return callback(err);
+				}
+
+				dbConn(self.logger).storeGridFSFile(dbName, stashCollection, req.url, data, false, function(err) {
+					if (err.value)
+					{
+						return callback(err);
+					}
+
+					self.logger.logDebug("Storing in " + dbName + " : " + stashCollection);
+					callback(responseCodes.OK, data);
+				});
+			});
+		} else if (err.value) {
+			callback(err);
+		} else {
+			self.logger.logDebug("Retrieved from stash");
+
+			callback(responseCodes.OK, result.buffer);
+		}
+	});
 }
 
 DBInterface.prototype.getObject = function(dbName, project, uid, rid, sid, needFiles, projection, callback) {

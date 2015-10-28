@@ -167,6 +167,36 @@ MongoWrapper.prototype.dbCallback = function(dbName, callback) {
 };
 
 /*******************************************************************************
+ * Run callbacks dependant on whether file exists or not
+ *
+ * @param {string} dbName     - Database name to get the file from
+ * @param {string} collName   - Collection to get the file from
+ * @param {string} fileName   - File name to retrieve
+ * @param {function} callback - Callback function to run if file exists
+ *
+ ******************************************************************************/
+MongoWrapper.prototype.existsGridFSFile = function(dbName, collName, fileName, callback)
+{
+	"use strict";
+	var self = this;
+
+	self.dbCallback(dbName, function (err, dbConn) {
+		if (err.value) {
+			return callback(err);
+		}
+
+		// Verify that the file exists
+		GridStore.exist(dbConn, fileName, collName, function(err, result) {
+			if (err) {
+				return callback(responseCodes.DB_ERROR(err));
+			}
+
+			callback(responseCodes.OK, result);
+		});
+	});
+};
+
+/*******************************************************************************
  * Get a file from the Grid FS store
  *
  * @param {string} dbName     - Database name to get the file from
@@ -178,8 +208,9 @@ MongoWrapper.prototype.dbCallback = function(dbName, callback) {
 MongoWrapper.prototype.getGridFSFile = function(dbName, collName, fileName, callback)
 {
 	"use strict";
+	var self = this;
 
-	this.dbCallback(dbName, function (err, dbConn) {
+	self.dbCallback(dbName, function (err, dbConn) {
 		if (err.value) {
 			return callback(err);
 		}
@@ -188,23 +219,103 @@ MongoWrapper.prototype.getGridFSFile = function(dbName, collName, fileName, call
 			"root" : collName
 		};
 
-		var gs = new GridStore(dbConn, fileName, "r", options);
-
-		gs.open(function (err, gs) {
-			if (err) {
-				return callback(responseCodes.DB_ERROR(err));
+		// Verify that the file exists
+		self.existsGridFSFile(dbName, collName, fileName, function(err, result) {
+			if (err.value) {
+				return callback(err);
 			}
 
-			gs.seek(0, function() {
-				gs.read(function(err, data) {
+			if (!result) {
+				return callback(responseCodes.FILE_DOESNT_EXIST);
+			}
+
+			var gs = new GridStore(dbConn, fileName, "r", options);
+
+			gs.open(function (err, gs) {
+				if (err) {
+					return callback(responseCodes.DB_ERROR(err));
+				}
+
+				gs.seek(0, function() {
+					gs.read(function(err, data) {
+						if (err) {
+							return callback(responseCodes.DB_ERROR(err));
+						}
+
+						callback(responseCodes.OK, new Binary(data));
+					});
+				});
+			});
+		});
+	});
+};
+
+/*******************************************************************************
+ * Store a file in the Grid FS store
+ *
+ * @param {string} dbName     - Database name to get the file from
+ * @param {string} collName   - Collection to get the file from
+ * @param {string} fileName   - File name to retrieve
+ * @param {Object} data       - Data to store in object
+ * @param {boolean} overwrite - If true, will overwrite existing files
+ * @param {function} callback - Callback function to return the file data
+ *
+ ******************************************************************************/
+MongoWrapper.prototype.storeGridFSFile = function(dbName, collName, fileName, data, overwrite, callback)
+{
+	"use strict";
+	var self = this;
+
+	self.dbCallback(dbName, function (err, dbConn) {
+		if (err.value) {
+			return callback(err);
+		}
+
+		var options = {
+			"root" : collName
+		};
+
+		var storeFile = function () {
+			var gs = new GridStore(dbConn, fileName, "w", options);
+
+			gs.open(function (err, gs) {
+				if (err) {
+					return callback(responseCodes.DB_ERROR(err));
+				}
+
+				gs.write(data, function(err, gridStore) {
 					if (err) {
 						return callback(responseCodes.DB_ERROR(err));
 					}
 
-					callback(responseCodes.OK, new Binary(data));
+					gridStore.close(function(err, result) {
+						if (err) {
+							return callback(responseCodes.DB_ERROR(err));
+						}
+
+						callback(responseCodes.OK);
+					});
 				});
 			});
-		});
+		};
+
+		if (overwrite)
+		{
+			// Verify that the file exists
+			self.existsGridFSFile(dbName, collName, fileName, function(err, result) {
+				if (err.value) {
+					return callback(err);
+				}
+
+				if (result) {
+					return callback(responseCodes.FILE_ALREADY_EXISTS);
+				}
+
+				storeFile();
+			});
+		} else {
+			storeFile();
+		}
 	});
 };
 

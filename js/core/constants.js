@@ -33,6 +33,7 @@ function define(name, value) {
 // Main collections (tables) in 3D Repo
 define("REPO_COLLECTION_SCENE", "scene");
 define("REPO_COLLECTION_HISTORY", "history");
+define("REPO_COLLECTION_STASH", "stash");
 
 //-----------------------------------------------------------------------------
 // Node types

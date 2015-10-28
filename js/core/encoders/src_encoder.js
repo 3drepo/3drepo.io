@@ -66,7 +66,6 @@
 	srcJSON.meshes                    = {};
 	srcJSON.meta                      = {};
 
-
 	for(idx = 0; idx < meshIDs.length; idx++)
 	{
 		meshID = meshIDs[idx];
@@ -134,7 +133,6 @@
 
 					runningVertTotal += currentMeshNumVertices;
 					runningFaceTotal += currentMeshNumFaces;
-					runningIDX       += 1;
 
 					if ((runningVertTotal > C.SRC_VERTEX_LIMIT) || (subMeshIDX === -1))
 					{
@@ -208,6 +206,8 @@
 
 						orig_idx_ptr += (num_comp + 1) * 4;
 					}
+
+					runningIDX       += 1;
 				}
 
 				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET] = 0; //subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
@@ -228,7 +228,7 @@
 			subMeshArray[0][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET]        = 0;
 
 			// Start writing to buffer
-			if (mesh["faces"])
+			if (mesh["faces"] && mesh["faces"].buffer)
 			{
 				// Loop through the faces copying the byte information
 				// to a buffer in the src.
@@ -263,7 +263,6 @@
 					orig_idx_ptr += (num_comp + 1) * 4;
 				}
 			}
-
 		}
 
 		var subMeshBuffers = [];
@@ -609,59 +608,68 @@ exports.route = function(router)
 	router.get("src", "/:account/:project/:uid", function(req, res, params, err_callback) {
 		// Get object based on UID, check whether or not it is a mesh
 		// and then output the result.
-		dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, {}, function(err, type, uid, fromStash, obj)
-		{
-			if(err.value)
-				return err_callback(err);
 
-			if (type == "mesh")
+		dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req, function(callback) {
+			dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, {}, function(err, type, uid, fromStash, obj)
 			{
-				var tex_uuid = null;
-
-				if ("tex_uuid" in params.query)
-				{
-					tex_uuid = params.query.tex_uuid;
+				if(err.value) {
+					return callback(err);
 				}
 
-				render(params.project, obj, tex_uuid, false, params.subformat, req[C.REQ_REPO].logger, function(err, renderedObj) {
-					if (err.value)
-						return err_callback(err);
+				if (type === C.REPO_NODE_TYPE_MESH)
+				{
+					var tex_uuid = null;
 
-					err_callback(responseCodes.OK, renderedObj);
-				});
-			} else {
-				err_callback(responseCodes.OBJECT_TYPE_NOT_SUPPORTED);
-			}
-		});
+					if ("tex_uuid" in params.query)
+					{
+						tex_uuid = params.query.tex_uuid;
+					}
+
+					render(params.project, obj, tex_uuid, false, params.subformat, req[C.REQ_REPO].logger, function(err, renderedObj) {
+						if (err.value) {
+							return callback(err);
+						}
+
+						callback(responseCodes.OK, renderedObj);
+					});
+				} else {
+					callback(responseCodes.OBJECT_TYPE_NOT_SUPPORTED);
+				}
+			});
+		}, err_callback);
 	});
 
 	router.get("src", "/:account/:project/revision/:rid/:sid", function(req, res, params, err_callback) {
 		// Get object based on revision rid, and object shared_id sid. Check
 		// whether or not it is a mesh and then output the result.
-		dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, null, params.rid, params.sid, true, {}, function(err, type, uid, fromStash, obj)
-		{
-			if(err.value)
-				return err_callback(err);
 
-			if (type == "mesh")
+		dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req, function(callback) {
+			dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, null, params.rid, params.sid, true, {}, function(err, type, uid, fromStash, obj)
 			{
-				var tex_uuid = null;
-
-				if ("tex_uuid" in params.query)
-				{
-					tex_uuid = params.query.tex_uuid;
+				if(err.value) {
+					return callback(err);
 				}
 
-				render(params.project, obj, tex_uuid, false, params.subformat, req[C.REQ_REPO].logger, function(err, renderedObj) {
-					if (err.value)
-						return err_callback(err);
+				if (type === C.REPO_NODE_TYPE_MESH)
+				{
+					var tex_uuid = null;
 
-					err_callback(responseCodes.OK, renderedObj);
-				});
-			} else {
-				err_callback(reponseCodes.OBJECT_TYPE_NOT_SUPPORTED);
-			}
-		});
+					if ("tex_uuid" in params.query)
+					{
+						tex_uuid = params.query.tex_uuid;
+					}
+
+					render(params.project, obj, tex_uuid, false, params.subformat, req[C.REQ_REPO].logger, function(err, renderedObj) {
+						if (err.value)
+							return err_callback(err);
+
+						callback(responseCodes.OK, renderedObj);
+					});
+				} else {
+					callback(responseCodes.OBJECT_TYPE_NOT_SUPPORTED);
+				}
+			});
+		}, err_callback);
 	});
 };
 

@@ -396,12 +396,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 		} else if(child['type'] == 'material') {
 			 var appearance = xmlDoc.createElement('Appearance');
 
-
-				if (!child['two_sided']) {
-					newNode = xmlDoc.createElement('Material');
-				} else {
-					newNode = xmlDoc.createElement('TwoSidedMaterial');
-				}
+				newNode = xmlDoc.createElement('TwoSidedMaterial');
 
 				var ambient_intensity = 1;
 
