@@ -37,7 +37,18 @@ angular.module('3drepo')
 
 	$(document).on("objectSelected", function(event, object, zoom) {
 		$scope.objectIsSelected = !(object === undefined);
-		$scope.selectedID  		= object.getAttribute("DEF");
+
+		if (object !== undefined) {
+			$scope.selectedID  		= object.getAttribute("DEF");
+		} else {
+			$scope.selectedID = undefined;
+
+			if (!object.hasOwnProperty("fake")) {
+				$scope.selectedID  		= object.getAttribute("DEF");
+			}
+		} else {
+			$scope.selectedID = null;
+		}
 	});
 
 	$(document).on("partSelected", function(event, part, zoom) {

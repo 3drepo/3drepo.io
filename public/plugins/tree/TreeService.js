@@ -179,6 +179,14 @@ angular.module('3drepo')
 					if ("uuid" in data.node.data)
 					{
 						var rootObj = self.getNode(data.node);
+
+						if (rootObj === null)
+						{
+							rootObj = {};
+							rootObj["fake"] = true;
+							rootObj["id"] = data.node.data.namespace + data.node.data.uuid;
+						}
+
 						$(document).trigger("objectSelected", [ rootObj, !self.clickedFromView ] );
 					}
 
@@ -211,7 +219,9 @@ angular.module('3drepo')
 			});
 
 			$(document).on("objectSelected", function(event, object, zoom) {
-				self.onObjectSelected(object);
+				if (object && !object.hasOwnProperty("fake")) {
+					self.onObjectSelected(object);
+				}
 			});
 
 			$(document).on("partSelected", function(event, objEvent, zoom) {
