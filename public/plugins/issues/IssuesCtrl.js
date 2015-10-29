@@ -46,8 +46,6 @@ angular.module('3drepo')
 			if (!object.hasOwnProperty("fake")) {
 				$scope.selectedID  		= object.getAttribute("DEF");
 			}
-		} else {
-			$scope.selectedID = null;
 		}
 	});
 
