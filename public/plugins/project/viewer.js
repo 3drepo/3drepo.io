@@ -382,11 +382,13 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	});
 
 	$(document).on("objectSelected", function(event, object, zoom) {
-		if(zoom)
-			if (!(object.getAttribute("render") == "false"))
-				self.lookAtObject(object);
+		if (!object.hasOwnProperty("fake")) {
+			if(zoom)
+				if (!(object.getAttribute("render") == "false"))
+					self.lookAtObject(object);
 
-		self.setApp(object);
+			self.setApp(object);
+		}
 	});
 
 	$(document).on("pinClick", function(event, clickInfo) {
