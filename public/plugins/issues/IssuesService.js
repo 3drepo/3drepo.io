@@ -25,7 +25,7 @@ angular.module('3drepo')
 	self.loading        = false;
 	self.pinPositions   = [];
 	self.pinNamespaces  = {};
-	//self.io             = io(serverConfig.chatHost, {path :  serverConfig.chatPath});
+	self.io             = io(serverConfig.chatHost, {path :  serverConfig.chatPath});
 
 	self.draggedPin     = null;
 
@@ -39,9 +39,6 @@ angular.module('3drepo')
 	var mapDeferred       = $q.defer();
 	var mapResolved       = false;
 	self.mapPromise       = mapDeferred.promise;
-
-	self.IDMap            = {};
-	self.SIDMap           = {};
 
 	/**
 	 * Switch the collapsed status of an issue in the sidebar.
@@ -95,7 +92,6 @@ angular.module('3drepo')
 	 * @listens chat:new_issue
 	 * @param {Object} data - Data received from the chat server
 	 */
-	/*
 	self.io.on("new_issue", function(data) {
 		// Create placeholder for issue
 		if (!self.issues[data.project])
@@ -109,7 +105,6 @@ angular.module('3drepo')
 			$rootScope.$apply();
 		}
 	});
-	*/
 
 	/**
 	 * When a post_comment is received from chat server
@@ -117,7 +112,7 @@ angular.module('3drepo')
 	 * @listens chat:post_comment
 	 * @param {Object} data - Data received from the chat server
 	 */
-	/*
+	
 	self.io.on("post_comment", function(data) {
 		// Create placeholder for issue
 		if (!self.issueContents[data._id])
@@ -126,8 +121,7 @@ angular.module('3drepo')
 		// Add received data to contents
 		self.issueContents[data._id].push(data);
 		$rootScope.$apply();
-	});
-	*/
+	});	
 
 	/**
 	 * Prepare and object by filling in placeholders and
@@ -151,14 +145,14 @@ angular.module('3drepo')
 
 	/**
 	 * Create a new issue
-	 * @param {string} account - The account in which the project lies
-	 * @param {string} project - The project in which the issue lies
-	 * @param {string} name - The issue description/name/title
-	 * @param {string} sid - The shared ID of the parent object
-	 * @param {SFVec3f} [pickedPos] - The pin position of the issue
+	 * @param {string} account       - The account in which the project lies
+	 * @param {string} project       - The project in which the issue lies
+	 * @param {string} name          - The issue description/name/title
+	 * @param {string} id            - The ID of the parent object
+	 * @param {SFVec3f} [pickedPos]  - The pin position of the issue
 	 * @param {SFVec3f} [pickedNorm] - The norm of the surface to which the pin is attached
 	 */
-	self.newIssue = function(account, project, name, sid, pickedPos, pickedNorm)
+	self.newIssue = function(account, project, name, id, pickedPos, pickedNorm)
 	{
 		var deferred = $q.defer();
 		var newIssueObject = {};
@@ -194,7 +188,7 @@ angular.module('3drepo')
 		}
 
 		// Get the shared ID of the current object to attach the comment to
-		var issuePostURL = serverConfig.apiUrl(account + "/" + project + "/issues/" + sid);
+		var issuePostURL = serverConfig.apiUrl(account + "/" + project + "/issues/" + id);
 
 		$.ajax({
 			type:	"POST",
@@ -210,7 +204,7 @@ angular.module('3drepo')
 				newIssueObject["account"]  = account;
 				newIssueObject["project"]  = project;
 				newIssueObject["owner"]    = Auth.username;
-				newIssueObject["parent"]   = sid;
+				newIssueObject["parent"]   = data["parent"];
 				newIssueObject["number"]   = data["number"];
 
 				newIssueObject = self.prepareIssue(newIssueObject);
@@ -262,7 +256,7 @@ angular.module('3drepo')
 		}
 
 		var pinNamespace = parentTrans.parentNode._x3domNode._nameSpace.name;
-		var parentSize = parentTrans.parentNode._x3domNode._graph.volume.max.subtract(parentTrans.parentNode._x3domNode._graph.volume.min).length();
+		//var parentSize = parentTrans.parentNode._x3domNode._graph.volume.max.subtract(parentTrans.parentNode._x3domNode._graph.volume.min).length();
 		var pinSize = parentSize / 10.0;
 
 		if (!self.pinNamespaces[pinNamespace])
@@ -363,8 +357,9 @@ angular.module('3drepo')
 				{
 					var issue = self.prepareIssue(json.data[i]);
 
-					if (!self.issues[issue["project"]])
+					if (!self.issues[issue["project"]]) {
 						self.issues[issue["project"]] = {};
+					}
 
 					self.issues[issue["project"]][issue["_id"]] = issue;
 
@@ -382,22 +377,10 @@ angular.module('3drepo')
 					}
 				}
 
-				if (revision == 'head' || (branch && !revision))
+				if (revision == 'head' || (branch && !revision)) {
 					var baseUrl = serverConfig.apiUrl(account + '/' + project + '/revision/' + branch + '/head/map.json');
-				else
+				} else {
 					var baseUrl = serverConfig.apiUrl(account + '/' + project + '/revision/' + revision + '/map.json');
-
-				if (!mapResolved) {
-					$http.get(baseUrl)
-					.then(function(json) {
-						self.SIDMap = json.data["map"];
-						self.IDMap  = json.data["invMap"];
-
-						mapResolved = true;
-						mapDeferred.resolve();
-					}, function (message) {
-						mapDeferred.reject();
-					});
 				}
 
 				ViewerService.ready.then(function () {
@@ -408,7 +391,7 @@ angular.module('3drepo')
 				});
 
 				// Tell the chat server that we want updates to this project
-				//self.io.emit("watch_project", { account: account, project: project });
+				self.io.emit("watch_project", { account: account, project: project });
 				self.loading      = false;
 				deferred.resolve();
 			}, function(message) {
@@ -428,6 +411,10 @@ angular.module('3drepo')
 		var parentSize = parentTrans._x3domNode._graph.volume.max.subtract(parentTrans._x3domNode._graph.volume.min).length();
 		var pinSize = parentSize / 10.0;
 		*/
+
+		var sceneBBox = ViewerService.defaultViewer.scene._x3domNode.getVolume();
+		var sceneSize = sceneBBox.max.subtract(sceneBBox.min).length();
+		var pinSize   = sceneSize / 20;
 
 		//if (!self.pinNamespaces[pinNamespace])
 		//	self.prepareX3DScene(pinNamespace, 0.25, 0.1, 1.0);
@@ -459,7 +446,7 @@ angular.module('3drepo')
 
 		//var zdist = Math.abs(ViewerService.defaultViewer.getCurrentViewpoint()._x3domNode._vf.position.z - pin["position"][2]);
 
-		self.createPinShape(pinPlacement, pin["id"], self.pinRadius, self.pinHeight, pin["scale"]);
+		self.createPinShape(pinPlacement, pin["id"], self.pinRadius, self.pinHeight, pinSize);
 		$("#model__root")[0].appendChild(pinPlacement);
 
 		return pinPlacement;

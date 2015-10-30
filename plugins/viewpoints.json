@@ -2,7 +2,8 @@
 	"name" : "viewpoints",
 	"files": {
 		"angular": [
-			"viewpoints/ViewpointCtrl.js"
+			"viewpoints/ViewpointCtrl.js",
+			"viewpoints/ViewpointService.js"
 		],
 		"jade": [
 			{"template" : "viewpoints/newViewpoint.jade", "id" : "newviewpointmodal.html"},

@@ -190,7 +190,6 @@ nav.navbar.transparent.navbar-inverse.navbar-fixed-top {
 
 .treeview {
 	position: relative;
-	height: 100%;
 }
 
 .treeview-header{
@@ -198,15 +197,10 @@ nav.navbar.transparent.navbar-inverse.navbar-fixed-top {
     height: 100px;
 }
 
-#scenetree {
-	overflow-y: auto;
-	height: 100%;
-	position: relative;
-}
-
 ul.fancytree-container {
     background-color: transparent;
     overflow: hidden;
+    font-size: 12pt;
     border: none !important;
     outline:none !important;
 }
@@ -1133,10 +1127,12 @@ header button.btn {
 	background-color: rgba(255, 255, 255, 0.5);
 	-webkit-transition: all linear 0.05s;
 	transition: all linear 0.05s;
+	overflow-y: auto;
 }
 
 #ui2-leftpanel.collapsed {
 	left: -25%;
+	overflow-y: inherit;
 }
 
 .panel-collapse-btn {

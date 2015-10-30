@@ -15,9 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-angular.module('3drepo')
-.controller('IssuesCtrl', ['$scope', '$modal', 'StateManager', 'IssuesService', '$rootScope', '$http', '$q', 'serverConfig', 'ViewerService', function($scope, $modal, StateManager, IssuesService, $rootScope, $http, $q, serverConfig, ViewerService)
+angular.module("3drepo")
+.controller("IssuesCtrl", ["$scope", "$modal", "StateManager", "IssuesService", "$rootScope", "$http", "$q", "serverConfig", "ViewerService", function($scope, $modal, StateManager, IssuesService, $rootScope, $http, $q, serverConfig, ViewerService)
 {
+	"use strict";
+
 	$scope.objectIsSelected = false;
 	$scope.currentSelected  = null;
 	$scope.mapPromise       = null;
@@ -39,13 +41,11 @@ angular.module('3drepo')
 		$scope.objectIsSelected = !(object === undefined);
 
 		if (object !== undefined) {
-			$scope.selectedID  		= object.getAttribute("DEF");
+			if (!object.hasOwnProperty("multipart")) {
+				$scope.selectedID  		= object.getAttribute("id");
+			}
 		} else {
 			$scope.selectedID = undefined;
-
-			if (!object.hasOwnProperty("fake")) {
-				$scope.selectedID  		= object.getAttribute("DEF");
-			}
 		}
 	});
 
@@ -53,7 +53,7 @@ angular.module('3drepo')
 		$scope.objectIsSelected = !(part === undefined);
 
 		$scope.IssuesService.mapPromise.then(function () {
-			$scope.selectedID       = $scope.IssuesService.IDMap[part.partID];
+			$scope.selectedID       = part.partID;
 		});
 	});
 
@@ -69,16 +69,19 @@ angular.module('3drepo')
 
 		ViewerService.defaultViewer.setCamera(newPos, newViewDir, newUpDir);
 
-		/*
-		if (issue["viewpoint"]["clippingPlanes"])
-			if (issue["viewpoint"]["clippingPlanes"].length)
+		if (issue["viewpoint"]["clippingPlanes"]) {
+			if (issue["viewpoint"]["clippingPlanes"].length) {
 				ViewerService.defaultViewer.setClippingPlanes(issue["viewpoint"]["clippingPlanes"]);
-		*/
+			} else {
+				ViewerService.defaultViewer.clearClippingPlanes();
+			}
+		}
 
-		if (!$scope.expanded[issue["_id"]])
+		if (!$scope.expanded[issue["_id"]]) {
 			$(document).trigger("pinClick", { fromViewer : false, object: $("#" + issue["_id"])[0] });
-		else
+		} else {
 			$(document).trigger("pinClick", { fromViewer : false, object: null } );
+		}
 	}
 
 	$scope.addNewComment = function(issue)
@@ -90,7 +93,7 @@ angular.module('3drepo')
 		});
 
 		$scope.newComment.text = "";
-	}
+	};
 
 	$scope.complete = function(issue)
 	{
@@ -100,21 +103,22 @@ angular.module('3drepo')
 		};
 
 		$scope.postComment(issueObject);
-	}
+	};
 
 	$scope.drawPin = function()
 	{
-		if ($scope.currentSelected)
+		if ($scope.currentSelected) {
 			$scope.IssuesService.drawPin($scope.pickedPos, $scope.pickedNorm, $scope.currentSelected._xmlNode);
-	}
+		}
+	};
 
 	$scope.newIssue = function()
 	{
 		if ($scope.selectedID)
 		{
 			var modalInstance = $modal.open({
-				templateUrl: 'newissuemodal.html',
-				controller: 'DialogCtrl',
+				templateUrl: "newissuemodal.html",
+				controller: "DialogCtrl",
 				backdrop: false,
 				resolve: {
 					params: {
@@ -127,21 +131,21 @@ angular.module('3drepo')
 			modalInstance.result.then(function (params) {
 				var account = StateManager.state.account;
 				var project = StateManager.state.project;
-				var sid 	= $scope.selectedID;
+				var id 	    = $scope.selectedID;
 
-				position = $scope.pickedPos;
+				var position = $scope.pickedPos;
 
 				// For a normal, transpose is the inverse of the inverse transpose :)
-				norm = $scope.pickedNorm;
+				var norm = $scope.pickedNorm;
 
-				$scope.IssuesService.newIssue(account, project, params.name, sid, position, norm, sid);
+				$scope.IssuesService.newIssue(account, project, params.name, id, position, norm);
 			}, function () {
 				// TODO: Error here
 			});
 		}
-	}
+	};
 
-	$scope.$watchGroup(['StateManager.state.branch', 'StateManager.state.revision'], function () {
+	$scope.$watchGroup(["StateManager.state.branch", "StateManager.state.revision"], function () {
 		var account		= StateManager.state.account;
 		var project		= StateManager.state.project;
 
@@ -152,9 +156,9 @@ angular.module('3drepo')
 		}
 	});
 }])
-.directive('simpleDraggable', ['ViewerService', function (ViewerService) {
+.directive("simpleDraggable", ["ViewerService", function (ViewerService) {
 	return {
-		restrict: 'A',
+		restrict: "A",
 		link: function link(scope, element, attrs) {
 			angular.element(element).attr("draggable", "true");
 
@@ -292,10 +296,11 @@ angular.module('3drepo')
 
 				var pickObj = ViewerService.pickPoint(dragEndX, dragEndY);
 
-				if (!pickObj.partID)
-					scope.selectedID 		= pickObj.pickObj._xmlNode.getAttribute("DEF");
-				else
-					scope.selectedID		= scope.IssuesService.IDMap[pickObj.partID];
+				if (!pickObj.partID) {
+					scope.selectedID 		= pickObj.pickObj._xmlNode.getAttribute("id");
+				} else {
+					scope.selectedID		= pickObj.partID;
+				}
 
 				scope.pickedPos       	= pickObj.pickPos;
 				scope.pickedNorm      	= pickObj.pickNorm;
@@ -306,9 +311,9 @@ angular.module('3drepo')
 	};
 }]);
 /*
-.directive('floating', ['ViewerService', function (ViewerService) {
+.directive("floating", ["ViewerService", function (ViewerService) {
 	return {
-		restrict: 'AE',
+		restrict: "AE",
 		scope: true,
 		link: function link(scope, elem, attrs) {
 			scope.viewerWidth = $(ViewerService.defaultViewer.viewer).width();

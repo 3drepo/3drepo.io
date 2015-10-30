@@ -347,6 +347,16 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.viewPointChanged = function(event)
 	{
+		var vpInfo  = self.getCurrentViewpointInfo();
+		var eye     = vpInfo["position"];
+		var viewDir = vpInfo["view_dir"];
+		
+		if (self.currentNavMode == 'HELICOPTER')
+		{
+			self.nav._x3domNode._vf.typeParams[0] = Math.asin(viewDir[1]);
+			self.nav._x3domNode._vf.typeParams[1] = eye[1];
+		}
+
 		$(self.viewer).trigger("myViewpointHasChanged", event);
 	}
 
@@ -379,15 +389,24 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 		self.oldPart = part;
 		part.setEmissiveColor("1.0 0.5 0.0", "front");
+
+		var obj          = {};
+		obj["multipart"] = true;
+		obj["id"]        = part.multiPart._nameSpace.name + "__" + part.partID;
+
+		$(document).trigger("objectSelected", obj);
 	});
 
 	$(document).on("objectSelected", function(event, object, zoom) {
-		if (!object.hasOwnProperty("fake")) {
-			if(zoom)
-				if (!(object.getAttribute("render") == "false"))
-					self.lookAtObject(object);
+		if (object !== undefined) 
+		{
+			if (!object.hasOwnProperty("multipart")) {
+				if(zoom)
+					if (!(object.getAttribute("render") == "false"))
+						self.lookAtObject(object);
 
-			self.setApp(object);
+				self.setApp(object);
+			}
 		}
 	});
 
@@ -518,7 +537,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			var name	= splitID[1].trim();
 		} else {
 			var name	= splitID[0].trim();
-			var group	= '<uncategorized>';
+			var group	= 'uncategorized';
 		}
 
 		return {group: group, name: name};
@@ -530,16 +549,18 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 		for(var v = 0; v < viewpointList.length; v++)
 		{
-			var id		= viewpointList[v]["id"].trim();
-			viewpointList[v]["def"] = id;
+			if (viewpointList[v].hasAttribute("id")) {
+				var id		= viewpointList[v]["id"].trim();
+				viewpointList[v]["def"] = id;
 
-			var groupName = self.getViewpointGroupAndName(id);
+				var groupName = self.getViewpointGroupAndName(id);
 
-			if (!self.viewpoints[groupName.group])
-				self.viewpoints[groupName.group] = {};
+				if (!self.viewpoints[groupName.group])
+					self.viewpoints[groupName.group] = {};
 
-			self.viewpoints[groupName.group][groupName.name] = id;
-			self.viewpointsNames[id] = viewpointList[v];
+				self.viewpoints[groupName.group][groupName.name] = id;
+				self.viewpointsNames[id] = viewpointList[v];
+			}
 		}
 	}
 
@@ -646,6 +667,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.runtime.resetExamin();
 
 			self.applySettings();
+
 
 			if (id === (self.name + "_default"))
 			{
@@ -1008,9 +1030,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 		if (self.currentNavMode == 'HELICOPTER')
 		{
-			var angle = Math.acos(x3domUp.y);
-
-			self.nav._x3domNode._vf.typeParams[0] = angle;
+			self.nav._x3domNode._vf.typeParams[0] = Math.asin(x3domView.y);
 			self.nav._x3domNode._vf.typeParams[1] = x3domFrom.y;
 		}
 
@@ -1368,7 +1388,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		{
 			var clipPlaneIDX = self.addClippingPlane(
 					clippingPlanes[clipidx]["axis"],
-					clippingPlanes[clipidx]["distance"],
+					clippingPlanes[clipidx]["percentage"],
 					clippingPlanes[clipidx]["clipDirection"]
 				);
 		}
@@ -1377,13 +1397,13 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	/**
 	* Adds a clipping plane to the viewer
 	* @param {string} axis - Axis through which the plane clips
-	* @param {number} distance - Distance from the origin
+	* @param {number} percentage - Percentage along the bounding box to clip
 	* @param {number} clipDirection - Direction of clipping (-1 or 1)
 	*/
-	this.addClippingPlane = function(axis, distance, clipDirection) {
+	this.addClippingPlane = function(axis, percentage, clipDirection) {
 		clippingPlaneID += 1;
 
-		var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, [1, 1, 1], distance, clipDirection);
+		var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, [1, 1, 1], percentage, clipDirection);
 		self.clippingPlanes.push(newClipPlane);
 
 		return clippingPlaneID;
@@ -1398,7 +1418,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			delete clipPlane;
 		});
 
-		clippingPlanes = [];
+		self.clippingPlanes = [];
 	}
 
 	/**
@@ -1425,10 +1445,10 @@ var Viewer = function(name, handle, x3ddiv, manager) {
  * @param {Viewer} parentViewer - Parent viewer
  * @param {string} axis - Letter representing the axis: "X", "Y" or "Z"
  * @param {array} colour - Array representing the color of the slice
- * @param {number} distance - Clipping distance from origin
+ * @param {number} percentage - Percentage along the bounding box to clip
  * @param {number} clipDirection - Direction of clipping (-1 or 1)
  */
-var ClipPlane = function(id, viewer, axis, colour, distance, clipDirection)
+var ClipPlane = function(id, viewer, axis, colour, percentage, clipDirection)
 {
 	var self = this;
 
@@ -1451,7 +1471,7 @@ var ClipPlane = function(id, viewer, axis, colour, distance, clipDirection)
 	* the clip plane
 	* @type {number}
 	*/
-	this.distance = (distance === undefined) ? 0 : distance;
+	this.percentage = (percentage === undefined) ? 1.0 : percentage
 
 	/**
 	* Volume containing the clipping plane
@@ -1570,13 +1590,15 @@ var ClipPlane = function(id, viewer, axis, colour, distance, clipDirection)
 		var min = volume.min.toGL();
 		var max = volume.max.toGL();
 
-		this.distance = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
+		self.percentage = percentage;
+
+		var distance = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
 
 		// Update the clipping element plane equation
-		clipPlaneElem.setAttribute("plane", normal.toGL().join(" ") + " " + this.distance);
+		clipPlaneElem.setAttribute("plane", normal.toGL().join(" ") + " " + distance);
 
 		var translation = [0,0,0];
-		translation[axisIDX] = -this.distance * this.clipDirection;
+		translation[axisIDX] = -distance * this.clipDirection;
 		coordinateFrame.setAttribute("translation", translation.join(","));
 	}
 
@@ -1594,7 +1616,7 @@ var ClipPlane = function(id, viewer, axis, colour, distance, clipDirection)
 		normal.z = (axis === "Z") ? this.clipDirection : 0;
 
 		// Reset plane to the start
-		this.movePlane(100.0);
+		this.movePlane(1.0);
 
 		setOutlineCoordinates();
 	}
@@ -1604,8 +1626,13 @@ var ClipPlane = function(id, viewer, axis, colour, distance, clipDirection)
 	*/
 	this.destroy = function()
 	{
-		clipPlaneElem.parentNode.removeChild(clipPlaneElem);
-		coordinateFrame.parentNode.removeChild(coordinateFrame);
+		if (clipPlaneElem && clipPlaneElem.parentNode) {
+			clipPlaneElem.parentNode.removeChild(clipPlaneElem);
+		}
+
+		if (coordinateFrame && coordinateFrame.parentNode) {
+			coordinateFrame.parentNode.removeChild(coordinateFrame);
+		}
 	}
 
 	// Construct and connect everything together
@@ -1626,6 +1653,7 @@ var ClipPlane = function(id, viewer, axis, colour, distance, clipDirection)
 	// Move the plane to finish construction
 	this.changeAxis(axis);
 	viewer.getScene().appendChild(clipPlaneElem);
+	this.movePlane(percentage);
 };
 
 

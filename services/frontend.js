@@ -156,7 +156,7 @@ module.exports.createApp = function(template)
 									{
 										"plugin": "revision",
 										"friends" : [
-											"panels", "tree", "meta", "issues", "revisionselector", "clip", "walkthrough"
+											"panels", "tree", "viewpoints", "meta", "issues", "revisionselector", "clip", "walkthrough"
 										],
 										"children": [
 											{
@@ -178,7 +178,7 @@ module.exports.createApp = function(template)
 									{
 										"plugin": "view",
 										"friends" : [
-											"panels", "tree", "meta", "issues", "revisionselector", "clip", "walkthrough"
+											"panels", "tree", "viewpoints", "meta", "issues", "revisionselector", "clip", "walkthrough"
 										]
 									}
 								]

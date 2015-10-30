@@ -1448,38 +1448,57 @@ DBInterface.prototype.getObjectIssues = function(dbName, project, sids, number, 
 	});
 }
 
-DBInterface.prototype.storeIssue = function(dbName, project, sid, owner, data, callback) {
+DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, callback) {
 	var self = this;
 
 	dbConn(this.logger).collCallback(dbName, project + ".issues", false, function(err, coll) {
-		if(err.value)
+		if(err.value) {
 			return callback(err);
+		}
 
 		if (!data._id) {
 			var newID = uuid.v1();
 
-			self.logger.logDebug("Creating new issue " + newID);
+			self.logger.logDebug("Creating new issue " + newID + " for ID: " + id);
 
-			// TODO: Implement this using sequence counters
-			coll.count(function(err, numIssues) {
-				if (err) return responseCodes.DB_ERROR(err);
+			var projection = {};
+			projection[C.REPO_NODE_LABEL_SHARED_ID] = 1;
 
-				// This is a new issue
-				data._id     = stringToUUID(newID);
-				data.created = (new Date()).getTime();
-				data.parent  = stringToUUID(sid);
-				data.number  = numIssues + 1;
 
-				if (!data.name)
-					data.name = "Issue" + data.number;
+			self.getObject(dbName, project, id, null, null, false, projection, function(err, type, uid, fromStash, obj) {
+				if (err.value) {
+					return callback(err);
+				}
 
-				data.owner = owner;
+				// TODO: Implement this using sequence counters
+				coll.count(function(err, numIssues) {
+					if (err) {
+						return callback(responseCodes.DB_ERROR(err));
+					}
 
-				coll.insert(data, function(err, count) {
-					if (err) return callback(responseCodes.DB_ERROR(err));
+					// This is a new issue
+					data._id     = stringToUUID(newID);
+					data.created = (new Date()).getTime();
 
-					self.logger.logDebug("Updated " + count + " records.");
-					callback(responseCodes.OK, { issue_id : uuidToString(data._id), number : data.number });
+					console.log(JSON.stringify(obj));
+
+					data.parent  = obj.meshes[id][C.REPO_NODE_LABEL_SHARED_ID];
+					data.number  = numIssues + 1;
+
+					if (!data.name) {
+						data.name = "Issue" + data.number;
+					}
+
+					data.owner = owner;
+
+					coll.insert(data, function(err, count) {
+						if (err) {
+							return callback(responseCodes.DB_ERROR(err));
+						}
+
+						self.logger.logDebug("Updated " + count + " records.");
+						callback(responseCodes.OK, { issue_id : uuidToString(data._id), number : data.number });
+					});
 				});
 			});
 		} else {

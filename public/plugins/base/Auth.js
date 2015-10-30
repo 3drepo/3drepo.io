@@ -67,13 +67,11 @@ angular.module('3drepo')
 			self.username = null;
 			self.loggedIn = false;
 
-			if (status == 401)
+			if (status === 401)
 			{
-				deferred.reject("Unauthorized");
-			} else if (status == 400) {
 				deferred.reject("Invalid username/password");
 			} else {
-				deferred.reject("Unknown error");
+				deferred.reject("Unable to connect to the API server");
 			}
 		});
 

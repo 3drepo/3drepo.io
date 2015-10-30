@@ -91,6 +91,7 @@ function processChild(child, branch, revision, account, project, selected, names
 
 		childNode["key"]       = shared_id;
 		childNode["title"]     = htmlMode ? escapeHtml(name) : name;
+		childNode["tooltip"]   = childNode["title"];
 		childNode["uuid"]      = uuid;
 		childNode["folder"]    = ("children" in child);
 		childNode["lazy"]      = true;
@@ -105,6 +106,7 @@ function processChild(child, branch, revision, account, project, selected, names
 		childNode["account"]   = account;
 		childNode["project"]   = child["project"];
 		childNode["title"]     = htmlMode ? escapeHtml(child["project"]) : child["project"];
+		childNode["tooltip"]   = childNode["title"];
 
 		// FIXME: Currently only federation within the same account is supported
 		// Otherwise, account needs to be on the child
