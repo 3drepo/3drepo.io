@@ -64,7 +64,7 @@ angular.module("3drepo")
 		$scope.newComment.text = "";
 
 		var newPos = issue["viewpoint"]["position"];
-		var newViewDir = issue["viewpoint"]["view_dir"];
+		var newViewDir = issue["viewpoint"]["look_at"];
 		var newUpDir = issue["viewpoint"]["up"];
 
 		ViewerService.defaultViewer.setCamera(newPos, newViewDir, newUpDir);

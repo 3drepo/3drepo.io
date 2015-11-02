@@ -350,7 +350,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		var vpInfo  = self.getCurrentViewpointInfo();
 		var eye     = vpInfo["position"];
 		var viewDir = vpInfo["view_dir"];
-		
+
 		if (self.currentNavMode == 'HELICOPTER')
 		{
 			self.nav._x3domNode._vf.typeParams[0] = Math.asin(viewDir[1]);
@@ -398,7 +398,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	});
 
 	$(document).on("objectSelected", function(event, object, zoom) {
-		if (object !== undefined) 
+		if (object !== undefined)
 		{
 			if (!object.hasOwnProperty("multipart")) {
 				if(zoom)
@@ -1015,7 +1015,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	this.updateCamera = function(pos, up, viewDir)
 	{
 		var x3domView = new x3dom.fields.SFVec3f();
-		x3domView.setValueByStr(normalize(viewDir).join(","));
+		x3domView.setValueByStr(viewDir.join(","));
 
 		var x3domUp   = new x3dom.fields.SFVec3f();
 		x3domUp.setValueByStr(normalize(up).join(","));
