@@ -995,8 +995,6 @@ exports.route = function(router)
 					}
 				}
 
-				maxSubMeshIDX += 1;
-
 				for(var subMeshIDX = 0; subMeshIDX < maxSubMeshIDX; subMeshIDX++)
 				{
 					var subMeshName = mesh["id"] + "_" + subMeshIDX;
