@@ -32,15 +32,13 @@
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "EventService"];
+    HomeCtrl.$inject = ["EventService"];
 
-    function HomeCtrl($scope, EventService) {
-        var hm = this;
-        console.log(EventService.EVENT);
-        $scope.test = EventService.test;
-        $scope.$watch("test", function (newValue) {
-            console.log(newValue);
-        })
+    function HomeCtrl(EventService) {
+        var hm = this,
+            content = ["tree", "viewpoints", "meta", "pdf"];
+
+        EventService.send(EventService.EVENT.LEFT_PANEL_CONTENT_SETUP, content)
     }
 }());
 

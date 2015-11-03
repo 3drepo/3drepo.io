@@ -1,4 +1,3 @@
 div(ng-repeat="button in lb.buttons track by $index")
-	md-button(class="md-fab md-primary md-mini", md-ink-ripple, ng-click="lb.click($index)")
-		| {{button.label}}
-	br
+	md-button.md-fab.md-primary.md-mini(ng-click="lb.click($index)", aria-label="{{button.icon}}")
+		md-icon(md-font-icon="{{button.icon}}", class="fa")

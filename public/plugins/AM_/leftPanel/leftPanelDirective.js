@@ -21,7 +21,7 @@
     angular.module("3drepo")
         .directive("leftPanel", leftPanel);
 
-    function leftPanel() {
+    function leftPanel () {
         return {
             restrict: 'E',
             templateUrl: 'leftPanel.html',
@@ -34,15 +34,39 @@
 
     LeftPanelCtrl.$inject = ["$scope", "$element", "$compile", "EventService"];
 
-    function LeftPanelCtrl($scope, $element, $compile, EventService) {
-        var lp = this;
-
-        // Tree and Viewpoints are the default content items
-        lp.contentItems = ["tree", "viewpoints"];
+    function LeftPanelCtrl ($scope, $element, $compile, EventService) {
+        var lp = this,
+            items = angular.element($element[0].querySelector("#items")),
+            content = "",
+            i = 0,
+            length = 0;
+        lp.contentItems = [];
 
         $scope.$watch(EventService.currentEvent, function (event) {
-            if (event.type === EventService.EVENT.LEFT_BUTTON_CLICK) {
-                lp.contentItems = event.value;
+            if (event.type === EventService.EVENT.LEFT_PANEL_CONTENT_SETUP) {
+                for (i = 0, length = event.value.length; i < length; i += 1) {
+                    if (event.value[i] === "tree") {
+                        lp.contentItems.push({type: event.value[i], show: true});
+                    }
+                    else {
+                        lp.contentItems.push({type: event.value[i], show: false});
+                    }
+                    content = angular.element(
+                            "<left-panel-content " +
+                                "content-item='lp.contentItems[" + i + "].type' " +
+                                "show-content='lp.contentItems[" + i + "].show'>" +
+                            "</left-panel-content>"
+                    );
+                    items.append(content);
+                    $compile(content)($scope);
+                }
+            }
+            else if (event.type === EventService.EVENT.LEFT_BUTTON_CLICK) {
+                for (i = 0, length = lp.contentItems.length; i < length; i += 1) {
+                    if (event.value === lp.contentItems[i].type) {
+                        lp.contentItems[i].show = !lp.contentItems[i].show;
+                    }
+                }
             }
         });
     }

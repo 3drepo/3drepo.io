@@ -2,10 +2,15 @@
     "name" : "tree",
     "files": {
         "angular" : [
-            "AM_/tree/treeDirective.js"
+            "AM_/tree/treeDirective.js",
+            "AM_/tree/treeService.js",
+            "AM_/tree/treeNodesDirective.js",
+            "AM_/tree/treeNodeDirective.js"
         ],
         "jade": [
-            {"template" : "AM_/tree/tree.jade", "id" : "tree.html"}
+            {"template" : "AM_/tree/tree.jade", "id" : "tree.html"},
+            {"template" : "AM_/tree/treeNodes.jade", "id" : "treeNodes.html"},
+            {"template" : "AM_/tree/treeNode.jade", "id" : "treeNode.html"}
         ],
         "css" : [
             "AM_/tree/tree.css"

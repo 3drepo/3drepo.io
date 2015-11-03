@@ -19,30 +19,32 @@
     "use strict";
 
     angular.module("3drepo")
-        .directive("viewpoints", viewpoints);
+        .directive("treeNodes", treeNodes);
 
-    function viewpoints() {
+    function treeNodes() {
         return {
-            restrict: 'EA',
-            templateUrl: 'viewpoints.html',
+            restrict: 'E',
+            templateUrl: 'treeNodes.html',
             scope: {
+                nodes: "=",
+                showChildren: "=",
+                onNodeSelected: "&onNodeSelected",
+                onNodeToggled: "&onNodeToggled",
+                selectedNode: "=",
+                toggledNode: "=",
                 filterText: "="
             },
-            controller: ViewpointsCtrl,
-            controllerAs: 'vp',
+            controller: TreeNodesCtrl,
+            controllerAs: 'tns',
             bindToController: true
         };
     }
 
-    ViewpointsCtrl.$inject = ["$scope"];
+    TreeNodesCtrl.$inject = ["$scope", "$filter"];
 
-    function ViewpointsCtrl($scope) {
-        var vp = this;
-
-        $scope.$watch("vp.filterText", function (newValue) {
-            if (angular.isDefined(newValue)) {
-                vp.filterText = newValue;
-            }
-        });
+    function TreeNodesCtrl ($scope, $filter) {
+        var tns = this;
+        tns.treeFilter = $filter('uiTreeFilter');
+        tns.supportedFields = ['name'];
     }
 }());

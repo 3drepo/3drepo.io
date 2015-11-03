@@ -1,1 +1,10 @@
-p {{tr.filterText}}
+div(ui-tree, data-nodrop-enabled="true", data-nodrag="true")
+	tree-nodes(
+		nodes="tr.nodes"
+		show-children="tr.showChildren"
+		ng-if="true"
+		on-node-selected="tr.nodeSelected(nodeId)"
+		on-node-toggled="tr.nodeToggled(nodeId)"
+		selected-node="tr.selectedNode"
+		toggled-node="tr.toggledNode"
+		filter-text="tr.filterText")

@@ -1,7 +1,7 @@
 left-panel {
   display: block;
   position: absolute;
-  left: 150px;
+  left: 100px;
   top: 100px;
   width: 300px;
 }
@@ -9,6 +9,7 @@ left-panel {
 left-panel md-toolbar {
   min-height: 32px;
   height: 32px;
+  outline: none;
 }
 
 left-panel md-toolbar label {
@@ -16,12 +17,15 @@ left-panel md-toolbar label {
   font-size: medium;
 }
 
+filter, left-panel-content {
+  display: block;
+  margin-bottom: 20px;
+}
+
 .leftPanelContentSelected {
   max-height: 500px;
-  outline: 0 none;
 }
 
 .leftPanelContentUnselected {
-  max-height: 60px;
-  outline: none;
+  max-height: 100px;
 }

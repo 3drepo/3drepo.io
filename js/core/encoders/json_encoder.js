@@ -198,7 +198,7 @@ function getFullTreeRecurse(sceneGraph, current, json) {
 
 			var childJSON = {
 				"name"      : child[C.REPO_NODE_LABEL_NAME],
-				"_id"       : childID,
+				"_id"       : uuidToString(current[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID]),
 				"shared_id" : uuidToString(child[C.REPO_NODE_LABEL_SHARED_ID]),
 				"children"  : []
 			};
@@ -239,6 +239,14 @@ function walkthrough(dbInterface, account, index, callback) {
             return callback(err);
         }
         callback(responseCodes.OK, data);
+    });
+}
+
+function searchTree(dbInterface, account, project, branch, revision, searchstring, callback) {
+    dbInterface.searchTree(account, project, branch, revision, searchstring, function(err, sceneGraph) {
+        if (err.value) return callback(err);
+
+        callback(responseCodes.OK, sceneGraph);
     });
 }
 
@@ -464,12 +472,12 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account/:project/revision/:branch/head/fulltree", function(res, params, err_callback) {
-		getFullTree(dbInterface, params.account, params.project, params.branch, null, err_callback);
+	router.get("json", "/:account/:project/revision/:branch/head/fulltree", function(req, res, params, err_callback) {
+		getFullTree(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.branch, null, err_callback);
 	});
 
-	router.get("json", "/:account/:project/revision/:rid/fulltree", function(res, params, err_callback) {
-		getFullTree(dbInterface, params.account, params.project, null, params.rid, err_callback);
+	router.get("json", "/:account/:project/revision/:rid/fulltree", function(req, res, params, err_callback) {
+		getFullTree(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, null, params.rid, err_callback);
 	});
 
 	router.get("json", "/:account/:project/revision/:branch/head/map", function(req, res, params, err_callback) {
@@ -630,6 +638,10 @@ exports.route = function(router)
 
     router.get('json', '/:account/:project/:index/walkthrough', function(req, res, params, err_callback) {
         walkthrough(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.index, err_callback);
+    });
+
+    router.get('json', '/:account/:project/revision/:branch/head/:searchstring/searchtree', function(req, res, params, err_callback) {
+        searchTree(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.branch, null, params.searchstring, err_callback);
     });
 };
 

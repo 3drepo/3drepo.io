@@ -1,5 +1,9 @@
 left-buttons {
   position: absolute;
   left: 0;
-  top: 250px;
+  top: 212px;
+}
+
+left-buttons md-icon[md-font-icon] {
+  font-size: 20px;
 }

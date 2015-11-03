@@ -21,7 +21,7 @@
     angular.module("3drepo")
         .directive("leftButtons", leftButtons);
 
-    function leftButtons() {
+    function leftButtons () {
         return {
             restrict: 'E',
             templateUrl: 'leftButtons.html',
@@ -32,18 +32,40 @@
         };
     }
 
-    LeftButtonsCtrl.$inject = ["EventService"];
+    LeftButtonsCtrl.$inject = ["$scope", "EventService"];
 
-    function LeftButtonsCtrl(EventService) {
-        var lb = this;
+    function LeftButtonsCtrl ($scope, EventService) {
+        var lb = this,
+            i = 0,
+            length = 0,
+            button = {};
+        lb.buttons = [];
 
-        lb.buttons = [
-            {label: "1", content: ["tree", "viewpoints"]},
-            {label: "2", content: ["meta", "pdf"]}
-        ];
+        $scope.$watch(EventService.currentEvent, function (event) {
+            if (event.type === EventService.EVENT.LEFT_PANEL_CONTENT_SETUP) {
+                for (i = 0, length = event.value.length; i < length; i += 1) {
+                    button = {content: event.value};
+                    switch (event.value[i]) {
+                        case "tree":
+                            button.icon = "fa-tree";
+                            break;
+                        case "viewpoints":
+                            button.icon = "fa-street-view";
+                            break;
+                        case "meta":
+                            button.icon = "fa-map-o";
+                            break;
+                        case "pdf":
+                            button.icon = "fa-file-pdf-o";
+                            break;
+                    }
+                    lb.buttons.push(button);
+                }
+            }
+        });
 
         lb.click = function (index) {
-            EventService.send(EventService.EVENT.LEFT_BUTTON_CLICK, lb.buttons[index].content);
+            EventService.send(EventService.EVENT.LEFT_BUTTON_CLICK, lb.buttons[index].content[index]);
         }
     }
 }());

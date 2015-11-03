@@ -32,14 +32,20 @@
         };
     }
 
-    FilterCtrl.$inject = ["$scope", "EventService"];
+    FilterCtrl.$inject = ["$scope", "$timeout", "EventService"];
 
-    function FilterCtrl($scope, EventService) {
+    function FilterCtrl($scope, $timeout, EventService) {
         var fl = this;
+        fl.filter = null;
 
         $scope.$watch("fl.filterText", function (newValue) {
             if (angular.isDefined(newValue)) {
-                EventService.send(EventService.EVENT.FILTER, newValue);
+                if (fl.filter !== null) {
+                    $timeout.cancel(fl.filter);
+                }
+                fl.filter = $timeout(function() {
+                    EventService.send(EventService.EVENT.FILTER, newValue);
+                }, 500)
             }
         })
     }

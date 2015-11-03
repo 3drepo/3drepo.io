@@ -26,7 +26,8 @@
             restrict: 'E',
             templateUrl: 'leftPanelContent.html',
             scope: {
-                contentItem: "="
+                contentItem: "=",
+                showContent: "="
             },
             controller: LeftPanelContentCtrl,
             controllerAs: 'lpc',
@@ -39,34 +40,58 @@
     function LeftPanelContentCtrl($scope, $element, $compile, EventService) {
         var lpc = this,
             content = "",
-            contentItem = "";
-
+            contentItem = "",
+            filterWatch = null;
         lpc.class = "leftPanelContentUnselected";
+        lpc.filterText  = "";
 
         function uppercaseFirstLetter(string) {
             return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        function setupFilterWatch() {
+            filterWatch = $scope.$watch(EventService.currentEvent, function (event) {
+                if (event.type === EventService.EVENT.FILTER) {
+                    lpc.filterText = event.value;
+                }
+            });
         }
 
         $scope.$watch("lpc.contentItem", function (newValue) {
             if (angular.isDefined(newValue)) {
                 lpc.title = uppercaseFirstLetter(lpc.contentItem);
                 content = angular.element($element[0].querySelector('#content'));
-                contentItem = angular.element("<" + lpc.contentItem + "></" + lpc.contentItem + ">");
+                contentItem = angular.element(
+                    "<" + lpc.contentItem + " filter-text='lpc.filterText'></" + lpc.contentItem + ">"
+                );
                 content.append(contentItem);
                 $compile(contentItem)($scope);
+                if (newValue === "tree") {
+                    lpc.class = "leftPanelContentSelected";
+                    setupFilterWatch();
+                }
             }
         });
 
         $scope.$watch(EventService.currentEvent, function (event) {
             if ((angular.isDefined(event)) && (event.type === EventService.EVENT.LEFT_PANEL_CONTENT_CLICK) && (event.value !== lpc.contentItem)) {
-                console.log(lpc.contentItem);
                 lpc.class = "leftPanelContentUnselected";
+                if (filterWatch !== null) {
+                    filterWatch(); // Cancel filter watch
+                }
             }
         });
 
         lpc.click = function () {
-            EventService.send(EventService.EVENT.LEFT_PANEL_CONTENT_CLICK, lpc.contentItem);
-            lpc.class = "leftPanelContentSelected";
+            if (lpc.class === "leftPanelContentUnselected") {
+                EventService.send(EventService.EVENT.LEFT_PANEL_CONTENT_CLICK, lpc.contentItem);
+                lpc.class = "leftPanelContentSelected";
+                setupFilterWatch();
+            }
+            else {
+                lpc.class = "leftPanelContentUnselected";
+                filterWatch();
+            }
         }
     }
 }());
