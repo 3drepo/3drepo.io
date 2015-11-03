@@ -45,6 +45,6 @@
     function TreeNodesCtrl ($scope, $filter) {
         var tns = this;
         tns.treeFilter = $filter('uiTreeFilter');
-        tns.supportedFields = ['name'];
+        tns.supportedFields = ['path'];
     }
 }());

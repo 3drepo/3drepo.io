@@ -5,4 +5,4 @@ div(ui-tree-handle class="tree-node tree-node-content" ng-class="tn.selectedClas
 	md-button.md-raised.md-mini.md-primary(ng-click="tn.nodeToggled(tn.node._id)", aria-label="Toggle")
 		md-icon(md-font-icon="fa-eye", class="fa", ng-if="tn.toggleState")
 		md-icon(md-font-icon="fa-eye-slash", class="fa", ng-if="!tn.toggleState")
-	label(ng-click="tn.nodeSelected(tn.node._id)") {{tn.node.name}}
+	label(ng-click="tn.nodeSelected(tn.node._id)" ng-class="tn.labelClass") {{tn.node.name}}

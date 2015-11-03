@@ -63,10 +63,16 @@ tree {
 }
 .tree-node-content label {
   font-size: 12px;
-  color: #777777;
 }
 .tree-node-content label:hover {
   cursor: pointer;
+}
+
+.treeNodeLabelWithoutFilterText {
+  color: #777777;
+}
+.treeNodeLabelWithFilterText {
+  color: #771111;
 }
 
 .tree-handle {

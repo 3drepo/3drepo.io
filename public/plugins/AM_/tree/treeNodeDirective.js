@@ -69,6 +69,7 @@
         tn.toggleState = true;
         tn.selected = false;
         tn.selectedClass = "tree-node-unselected";
+        tn.labelClass = "treeNodeLabelWithoutFilterText";
 
         $scope.$watchGroup(["tn.node", "tn.showChildren"], function (newValues) {
             if (angular.isDefined(newValues[0]) && angular.isDefined(newValues[1])) {
@@ -92,9 +93,15 @@
         $scope.$watch("tn.filterText", function (newValue) {
             if (angular.isUndefined(newValue) || (tn.filterText === "")) {
                 tn.filtered = false;
+                tn.collapsed = true;
             }
             else {
-                tn.filtered = $filter('uiTreeFilter')(tn.node, tn.filterText, ['name']);
+                tn.filtered = $filter('uiTreeFilter')(tn.node, tn.filterText, ['path']);
+                if (tn.filtered && tn.node.hasOwnProperty("name")) {
+                    tn.labelClass =
+                        (tn.node.name.toLowerCase().search(tn.filterText.toLowerCase()) !== -1) ?
+                            "treeNodeLabelWithFilterText" : "treeNodeLabelWithoutFilterText";
+                }
                 tn.collapsed = !tn.filtered;
             }
         });

@@ -198,10 +198,12 @@ function getFullTreeRecurse(sceneGraph, current, json) {
 
 			var childJSON = {
 				"name"      : child[C.REPO_NODE_LABEL_NAME],
+                "path"      : current.path + "_" + child[C.REPO_NODE_LABEL_NAME],
 				"_id"       : uuidToString(current[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID]),
 				"shared_id" : uuidToString(child[C.REPO_NODE_LABEL_SHARED_ID]),
 				"children"  : []
 			};
+            child.path = childJSON.path;
 
 			json["children"].push(_.clone(childJSON));
 
@@ -219,12 +221,14 @@ function getFullTree(dbInterface, account, project, branch, revision, callback) 
 		if (!root)
 			return callback(responseCodes.ROOT_NODE_NOT_FOUND);
 
-		var json       = {
-			"name" :      root[C.REPO_NODE_LABEL_NAME],
-			"_id"  :      uuidToString(root[C.REPO_NODE_LABEL_ID]),
+		var json = {
+			"name"      : root[C.REPO_NODE_LABEL_NAME],
+            "path"      : root[C.REPO_NODE_LABEL_NAME],
+			"_id"       : uuidToString(root[C.REPO_NODE_LABEL_ID]),
 			"shared_id" : uuidToString(root[C.REPO_NODE_LABEL_SHARED_ID]),
-			"children" :  []
+			"children"  : []
 		};
+        root.path = json.path;
 
 		getFullTreeRecurse(sceneGraph, root, json);
 
