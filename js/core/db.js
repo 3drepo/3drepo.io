@@ -505,7 +505,7 @@ MongoWrapper.prototype.getUserPrivileges = function (username, database, callbac
                 return callback(responseCodes.DB_ERROR(err));
             }
             
-            if (roles.length == 0) {
+            if (!roles || roles.length == 0) {
                 //no roles under this user, no point trying to find privileges
                 return callback(responseCodes.OK, []);
             }
@@ -517,6 +517,10 @@ MongoWrapper.prototype.getUserPrivileges = function (username, database, callbac
                 if (err) {
                     self.logger.logDebug("Error found :( : message - " + err.message);
                     return callback(responseCodes.DB_ERROR(err));
+                }
+
+                if (!docs || docs["roles"].length == 0){
+                    return callback(responseCodes.OK, []);
                 }
                 var rolesArr = docs["roles"];
                 self.logger.logDebug("docs :" + JSON.stringify(docs));
