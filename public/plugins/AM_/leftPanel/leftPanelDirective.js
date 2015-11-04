@@ -41,6 +41,7 @@
             i = 0,
             length = 0;
         lp.contentItems = [];
+        lp.showFilter = true;
 
         $scope.$watch(EventService.currentEvent, function (event) {
             if (event.type === EventService.EVENT.LEFT_PANEL_CONTENT_SETUP) {
@@ -52,19 +53,23 @@
                         lp.contentItems.push({type: event.value[i], show: false});
                     }
                     content = angular.element(
-                            "<left-panel-content " +
-                                "content-item='lp.contentItems[" + i + "].type' " +
-                                "show-content='lp.contentItems[" + i + "].show'>" +
-                            "</left-panel-content>"
+                        "<left-panel-content " +
+                            "content-item='lp.contentItems[" + i + "].type' " +
+                            "show-content='lp.contentItems[" + i + "].show'>" +
+                        "</left-panel-content>"
                     );
                     items.append(content);
                     $compile(content)($scope);
                 }
             }
             else if (event.type === EventService.EVENT.LEFT_BUTTON_CLICK) {
+                lp.showFilter = false;
                 for (i = 0, length = lp.contentItems.length; i < length; i += 1) {
                     if (event.value === lp.contentItems[i].type) {
                         lp.contentItems[i].show = !lp.contentItems[i].show;
+                    }
+                    if (!lp.showFilter && lp.contentItems[i].show) {
+                        lp.showFilter = true;
                     }
                 }
             }

@@ -19,7 +19,18 @@
     "use strict";
 
     angular.module("3drepo")
-        .directive("home", home);
+        .directive("home", home)
+        .config(function($mdThemingProvider) {
+            $mdThemingProvider.theme('default')
+                .primaryPalette('indigo', {
+                    'default': '500',
+                    'hue-1': '400',
+                    'hue-2': '200',
+                    'hue-3': '50'
+                })
+                .accentPalette('orange')
+                .warnPalette('red');
+        });
 
     function home() {
         return {
@@ -38,7 +49,7 @@
         var hm = this,
             content = ["tree", "viewpoints", "meta", "pdf"];
 
-        EventService.send(EventService.EVENT.LEFT_PANEL_CONTENT_SETUP, content)
+        EventService.send(EventService.EVENT.LEFT_PANEL_CONTENT_SETUP, content);
     }
 }());
 

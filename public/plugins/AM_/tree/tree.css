@@ -19,15 +19,15 @@ tree {
 
 .angular-ui-tree-handle {
   background: #f8faff;
-  border: 1px solid #dae2ea;
+  border: 1px solid #C5CAE9;
   color: #7c9eb2;
   padding: 10px 10px;
+  cursor: default;
 }
-
 .angular-ui-tree-handle:hover {
   color: #438eb9;
-  background: #f4f6f7;
-  border-color: #dce2e8;
+  background: #e3e5f1;
+  border: 1px solid #C5CAE9;
 }
 
 .angular-ui-tree-placeholder {
@@ -44,7 +44,7 @@ tree {
 }
 
 .tree-node-unselected {
-  background: #f8faff;
+  background: #E8EAF6;
 }
 .tree-node-selected {
   background: #e1e3e8;
@@ -63,6 +63,8 @@ tree {
 }
 .tree-node-content label {
   font-size: 12px;
+  margin-left: 5px;
+  position: absolute;
 }
 .tree-node-content label:hover {
   cursor: pointer;
@@ -99,7 +101,7 @@ tree {
   width: 800px;
 }
 
-tree-node button {
+.treeNodeButton {
   width: 22px;
   min-width: 22px !important;
   height: 22px;
@@ -107,8 +109,14 @@ tree-node button {
   line-height: 22px !important;
   margin: 0 4px 0 0 !important;
   padding: 4px !important;
+  background-color: #3F51B5;
 }
-
+.treeNodeButton:not([disabled]):hover {
+  background-color: #5C6BC0;
+}
+.treeNodeButton md-icon {
+  color: #FFFFFF;
+}
 .angular-ui-tree-node {
   min-height: 0;
 }

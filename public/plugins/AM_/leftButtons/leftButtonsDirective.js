@@ -66,6 +66,6 @@
 
         lb.click = function (index) {
             EventService.send(EventService.EVENT.LEFT_BUTTON_CLICK, lb.buttons[index].content[index]);
-        }
+        };
     }
 }());
