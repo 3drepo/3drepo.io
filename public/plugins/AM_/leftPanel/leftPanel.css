@@ -20,12 +20,12 @@ left-panel md-toolbar label {
 filter, left-panel-content {
   display: block;
   margin-bottom: 20px;
+  position: relative;
 }
 
 .leftPanelContentSelected {
   max-height: 500px;
 }
-
 .leftPanelContentUnselected {
   max-height: 100px;
 }

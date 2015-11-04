@@ -28,7 +28,9 @@
                     'hue-2': '200',
                     'hue-3': '50'
                 })
-                .accentPalette('orange')
+                .accentPalette('orange', {
+                    'default': '600'
+                })
                 .warnPalette('red');
         });
 

@@ -43,15 +43,18 @@
             contentItem = "",
             filterWatch = null;
         lpc.class = "leftPanelContentUnselected";
-        lpc.filterText  = "";
+        lpc.showHelp = false;
+        lpc.filterText = "";
+        lpc.tooltipText = "Default help text text";
 
         function uppercaseFirstLetter(string) {
-            return string.charAt(0).toUpperCase() + string.slice(1);
+            return string.slice(0, 1).toUpperCase() + string.slice(1);
         }
 
         function setupFilterWatch() {
             filterWatch = $scope.$watch(EventService.currentEvent, function (event) {
                 if (event.type === EventService.EVENT.FILTER) {
+
                     lpc.filterText = event.value;
                 }
             });
@@ -62,7 +65,10 @@
                 lpc.title = uppercaseFirstLetter(lpc.contentItem);
                 content = angular.element($element[0].querySelector('#content'));
                 contentItem = angular.element(
-                    "<" + lpc.contentItem + " filter-text='lpc.filterText'></" + lpc.contentItem + ">"
+                    "<" + lpc.contentItem + " " +
+                        "filter-text='lpc.filterText' " +
+                        "tooltip-text='lpc.tooltipText'>" +
+                    "</" + lpc.contentItem + ">"
                 );
                 content.append(contentItem);
                 $compile(contentItem)($scope);
@@ -74,11 +80,16 @@
         });
 
         $scope.$watch(EventService.currentEvent, function (event) {
-            if ((angular.isDefined(event)) && (event.type === EventService.EVENT.LEFT_PANEL_CONTENT_CLICK) && (event.value !== lpc.contentItem)) {
-                lpc.class = "leftPanelContentUnselected";
-                if (filterWatch !== null) {
-                    filterWatch(); // Cancel filter watch
+            if (event.type === EventService.EVENT.LEFT_PANEL_CONTENT_CLICK) {
+                if (event.value !== lpc.contentItem) {
+                    lpc.class = "leftPanelContentUnselected";
+                    if (filterWatch !== null) {
+                        filterWatch(); // Cancel filter watch
+                    }
                 }
+            }
+            else if (event.type === EventService.EVENT.TOGGLE_HELP) {
+                lpc.showHelp = !lpc.showHelp;
             }
         });
 
@@ -92,6 +103,6 @@
                 lpc.class = "leftPanelContentUnselected";
                 filterWatch();
             }
-        }
+        };
     }
 }());

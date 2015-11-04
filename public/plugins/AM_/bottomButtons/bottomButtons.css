@@ -17,10 +17,6 @@ bottom-buttons .md-button {
   margin-right: 2px;
 }
 
-bottom-buttons md-icon[md-font-icon] {
-  font-size: 20px;
-}
-
 bottom-buttons .md-hue-3 md-icon {
   color: rgba(0, 0, 0, 0.5) !important;
 }

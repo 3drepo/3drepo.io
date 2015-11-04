@@ -38,21 +38,31 @@
         var bb = this;
         bb.showButtons = false;
 
-        function blah () {
+        var blah = function () {
             console.log("blah");
-        }
+        };
+
+        var toggleHelp = function () {
+            EventService.send(EventService.EVENT.TOGGLE_HELP);
+        };
+
+        var toggleFullScreen = function () {
+            EventService.send(EventService.EVENT.TOGGLE_FULL_SCREEN);
+            bb.showButtons = false;
+        };
 
         bb.leftButtons = [
-            {label: "Walk", icon: "fa-repeat", callback: blah},
-            {label: "Wire frame", icon: "fa-star-half-o", callback: blah},
-            {label: "Orthographic", icon: "fa-cube", callback: blah},
-            {label: "Full screen", icon: "fa-arrows-alt", callback: blah}
+            {label: "Walk", icon: "fa-repeat", click: blah},
+            {label: "Wire frame", icon: "fa-star-half-o", click: blah},
+            {label: "Orthographic", icon: "fa-cube", click: blah},
+            {label: "Full screen", icon: "fa-arrows-alt", click: toggleFullScreen}
         ];
+
         bb.rightButtons = [
-            {label: "Help", icon: "fa-question", callback: "bb.showHelp()"},
-            {label: "Play", icon: "fa-play", callback: blah},
-            {label: "QR Reader", icon: "fa-qrcode", callback: blah},
-            {label: "Pin", icon: "fa-map-pin", callback: blah}
+            {label: "Help", icon: "fa-question", click: toggleHelp},
+            {label: "Play", icon: "fa-play", click: blah},
+            {label: "QR Reader", icon: "fa-qrcode", click: blah},
+            {label: "Pin", icon: "fa-map-pin", click: blah}
         ];
 
         bb.showHideButtons = function () {

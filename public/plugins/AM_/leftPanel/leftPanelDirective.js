@@ -41,7 +41,8 @@
             i = 0,
             length = 0;
         lp.contentItems = [];
-        lp.showFilter = true;
+        lp.hideFilter = false;
+        lp.showPanel = true;
 
         $scope.$watch(EventService.currentEvent, function (event) {
             if (event.type === EventService.EVENT.LEFT_PANEL_CONTENT_SETUP) {
@@ -63,15 +64,18 @@
                 }
             }
             else if (event.type === EventService.EVENT.LEFT_BUTTON_CLICK) {
-                lp.showFilter = false;
+                lp.hideFilter = true; // Hide the filter if no content is shown
                 for (i = 0, length = lp.contentItems.length; i < length; i += 1) {
                     if (event.value === lp.contentItems[i].type) {
                         lp.contentItems[i].show = !lp.contentItems[i].show;
                     }
-                    if (!lp.showFilter && lp.contentItems[i].show) {
-                        lp.showFilter = true;
+                    if (lp.hideFilter && lp.contentItems[i].show) {
+                        lp.hideFilter = false;
                     }
                 }
+            }
+            else if (event.type === EventService.EVENT.TOGGLE_FULL_SCREEN) {
+                lp.showPanel = !lp.showPanel;
             }
         });
     }

@@ -23,10 +23,14 @@
 
     function EventService () {
         var EVENT = {
-            FILTER: "EVENT_FILTER_SEARCH",
+            FILTER: "EVENT_FILTER",
+
             LEFT_BUTTON_CLICK: "EVENT_LEFT_BUTTON_CLICK",
             LEFT_PANEL_CONTENT_CLICK: "EVENT_LEFT_PANEL_CONTENT_CLICK",
-            LEFT_PANEL_CONTENT_SETUP: "EVENT_LEFT_PANEL_CONTENT_SETUP"
+            LEFT_PANEL_CONTENT_SETUP: "EVENT_LEFT_PANEL_CONTENT_SETUP",
+
+            TOGGLE_FULL_SCREEN: "EVENT_TOGGLE_FULL_SCREEN",
+            TOGGLE_HELP: "EVENT_TOGGLE_HELP"
         };
 
         var currentEvent = "";
@@ -39,6 +43,6 @@
             EVENT: EVENT,
             currentEvent: function() {return currentEvent;},
             send: send
-        }
+        };
     }
 }());

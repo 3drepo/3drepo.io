@@ -3,7 +3,3 @@ left-buttons {
   left: 0;
   top: 212px;
 }
-
-left-buttons md-icon[md-font-icon] {
-  font-size: 20px;
-}

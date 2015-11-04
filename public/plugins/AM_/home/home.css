@@ -1,0 +1,10 @@
+.md-mini md-icon {
+  font-size: 20px;
+}
+
+#helpButton {
+  position: absolute;
+  top: -20px;
+  right: -36px;
+  opacity: 0.75;
+}

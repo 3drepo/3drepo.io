@@ -40,6 +40,7 @@
             length = 0,
             button = {};
         lb.buttons = [];
+        lb.showButtons = true;
 
         $scope.$watch(EventService.currentEvent, function (event) {
             if (event.type === EventService.EVENT.LEFT_PANEL_CONTENT_SETUP) {
@@ -61,6 +62,9 @@
                     }
                     lb.buttons.push(button);
                 }
+            }
+            else if (event.type === EventService.EVENT.TOGGLE_FULL_SCREEN) {
+                lb.showButtons = !lb.showButtons;
             }
         });
 

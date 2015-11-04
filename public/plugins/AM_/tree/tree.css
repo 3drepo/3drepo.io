@@ -71,10 +71,10 @@ tree {
 }
 
 .treeNodeLabelWithoutFilterText {
-  color: #777777;
+  color: #3F51B5;
 }
 .treeNodeLabelWithFilterText {
-  color: #771111;
+  color: #EF6C00;
 }
 
 .tree-handle {
@@ -116,6 +116,7 @@ tree {
 }
 .treeNodeButton md-icon {
   color: #FFFFFF;
+  font-size: 14px;
 }
 .angular-ui-tree-node {
   min-height: 0;
