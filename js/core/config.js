@@ -112,8 +112,9 @@ var fillInServerDetails = function(serverObject, name, usingIP, using_ssl, host,
 		serverObject.host_dir = "";
 	}
 
-	serverObject.base_url = serverObject.public_protocol + "://" + serverObject.hostname + ":" + serverObject.public_port;
-	serverObject.url      = serverObject.base_url + "/" + serverObject.host_dir;
+	serverObject.base_url     = serverObject.public_protocol + "://" + serverObject.hostname + ":" + serverObject.public_port;
+	serverObject.location_url = "function(path) { return \"//\" + window.location.host + \"/\" + \"" + serverObject.host_dir + "\" + \"/\" + path; }";
+	serverObject.url          = serverObject.base_url + "/" + serverObject.host_dir;
 }
 
 // Check for hostname and ip here

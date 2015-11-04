@@ -56,7 +56,11 @@ module.exports.createApp = function(template)
 	app.get('/public/plugins/base/config.js', function(req, res) {
 		var params = {};
 
-		params['config_js'] = 'var server_config = {}; server_config.apiUrl = function(path) { return "' + config.api_server.url + '/" + path; };';
+		if (config.api_server.use_location) {
+			params['config_js'] = 'var server_config = {}; server_config.apiUrl = ' + config.api_server.location_url;
+		} else {
+			params['config_js'] = 'var server_config = {}; server_config.apiUrl = function(path) { return "' + config.api_server.url + '/" + path; };';
+		}
 
 		if("wayfinder" in config)
 		{
