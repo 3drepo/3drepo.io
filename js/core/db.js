@@ -481,7 +481,6 @@ MongoWrapper.prototype.getUserRoles = function (username, database, callback) {
         
         self.logger.logDebug("filter: " + JSON.stringify(filter));
         self.logger.logDebug("projection: " + JSON.stringify(projection));
-        coll.aggre
         coll.find(filter, projection).toArray(function (err, docs) {
             if (err) {
                 return callback(responseCodes.DB_ERROR(err));
@@ -492,7 +491,14 @@ MongoWrapper.prototype.getUserRoles = function (username, database, callback) {
                 return callback(responseCodes.USER_NOT_FOUND, docs);
             }
             
-            callback(responseCodes.OK, docs[0]["roles"]);
+            var roles = [];
+            for (i = 0; i < docs[0]["roles"].length; i++) {
+                if (docs[0]["roles"][i]["db"] == dbName || docs[0]["roles"][i]["db"] == database) {
+                    roles.push(docs[0]["roles"][i]);
+                }
+            }
+        
+            callback(responseCodes.OK, roles);
         });
     });
 
@@ -515,16 +521,9 @@ MongoWrapper.prototype.getUserPrivileges = function (username, database, callbac
                 //no roles under this user, no point trying to find privileges
                 return callback(responseCodes.OK, []);
         }
-        
-        var rolesToQuery = [];
-        for (i = 0; i < roles.length; i++) {
-            if (roles[i]["db"] == adminDB || roles[i]["db"] == database) {
-                rolesToQuery.push(roles[i]);
-            }
-        }
-        
+
         self.dbCallback(adminDB, function (err, dbConn) {
-            var command = { rolesInfo : rolesToQuery, showPrivileges: true };            
+            var command = { rolesInfo : roles, showPrivileges: true };            
             //Given the roles, get the privilege information         
             dbConn.command(command, function (err, docs) {
                 if (err) {
