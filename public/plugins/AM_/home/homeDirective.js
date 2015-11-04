@@ -52,6 +52,9 @@
             content = ["tree", "viewpoints", "meta", "pdf"];
 
         EventService.send(EventService.EVENT.LEFT_PANEL_CONTENT_SETUP, content);
+
+        //var pcontent = ["issues"];
+        //EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, {position: "right", content: pcontent});
     }
 }());
 

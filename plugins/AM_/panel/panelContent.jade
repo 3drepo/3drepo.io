@@ -1,0 +1,12 @@
+div(layout="column", class="md-whiteframe-1dp", ng-class="pc.class", ng-show="pc.showContent")
+
+	md-toolbar(class="md-primary", ng-click="pc.click()")
+		div(class="md-toolbar-tools")
+			label(class="md-flex") {{pc.title}}
+
+	md-content(id="content", flex, layout-padding)
+
+	div(ng-if="pc.showHelp")
+		md-button.md-fab.md-mini#helpButton(aria-label="Help")
+			md-icon(md-font-icon="fa-question", class="fa")
+			md-tooltip(md-direction="top") {{pc.tooltipText}}

@@ -1,0 +1,13 @@
+{
+    "name" : "panel",
+    "files": {
+        "angular" : [
+            "AM_/panel/panelDirective.js",
+            "AM_/panel/panelContentDirective.js"
+        ],
+        "jade": [
+            {"template" : "AM_/panel/panel.jade", "id" : "panel.html"},
+            {"template" : "AM_/panel/panelContent.jade", "id" : "panelContent.html"}
+        ]
+    }
+}

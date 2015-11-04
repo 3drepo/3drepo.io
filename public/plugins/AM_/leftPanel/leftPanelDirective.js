@@ -45,7 +45,9 @@
         lp.showPanel = true;
 
         $scope.$watch(EventService.currentEvent, function (event) {
+            console.log(event);
             if (event.type === EventService.EVENT.LEFT_PANEL_CONTENT_SETUP) {
+                console.log(6666666);
                 for (i = 0, length = event.value.length; i < length; i += 1) {
                     if (event.value[i] === "tree") {
                         lp.contentItems.push({type: event.value[i], show: true});

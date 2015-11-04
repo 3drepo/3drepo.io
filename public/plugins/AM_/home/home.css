@@ -8,3 +8,11 @@
   right: -36px;
   opacity: 0.75;
 }
+
+#rightPanel {
+  display: block;
+  position: absolute;
+  right: 100px;
+  top: 100px;
+  width: 300px;
+}
