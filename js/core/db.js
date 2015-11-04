@@ -466,9 +466,22 @@ MongoWrapper.prototype.getUserRoles = function (username, database, callback) {
             return callback(responseCodes.DB_ERROR(err));
         }
         
+        // We could do this with aggregate, but i'm not sure if this is better in performance.
+        // sticking to find (and pruning out roles of other db before getting privileges) for now.
+        //db.getCollection('system.users').aggregate(
+        //    { $match: { "user" : "richard" } },
+        //    { $unwind: "$roles" },
+        //    { $match: { "roles.db" : { $in: ["admin", "canarywharf"] } } },    
+        //    { $group: { _id: "$user", list: { $push: "$roles" } } }
+        //)
+
         var filter = { "user" : username };
         //only return roles in admin and the specified database, the rest are irrelevant.
-        var projection = { "roles" : { "$elemMatch": { "db": { "$in": ["admin", database] } } } };
+        var projection = { "roles" : 1};
+        
+        self.logger.logDebug("filter: " + JSON.stringify(filter));
+        self.logger.logDebug("projection: " + JSON.stringify(projection));
+        coll.aggre
         coll.find(filter, projection).toArray(function (err, docs) {
             if (err) {
                 return callback(responseCodes.DB_ERROR(err));
@@ -501,9 +514,17 @@ MongoWrapper.prototype.getUserPrivileges = function (username, database, callbac
             if (!roles || roles.length == 0) {
                 //no roles under this user, no point trying to find privileges
                 return callback(responseCodes.OK, []);
+        }
+        
+        var rolesToQuery = [];
+        for (i = 0; i < roles.length; i++) {
+            if (roles[i]["db"] == adminDB || roles[i]["db"] == database) {
+                rolesToQuery.push(roles[i]);
             }
+        }
+        
         self.dbCallback(adminDB, function (err, dbConn) {
-            var command = { rolesInfo : roles, showPrivileges: true };            
+            var command = { rolesInfo : rolesToQuery, showPrivileges: true };            
             //Given the roles, get the privilege information         
             dbConn.command(command, function (err, docs) {
                 if (err) {
@@ -521,6 +542,7 @@ MongoWrapper.prototype.getUserPrivileges = function (username, database, callbac
                 for (i = 0; i < rolesArr.length; i++) {
                     privileges = privileges.concat(rolesArr[i]["inheritedPrivileges"]);
                 }
+                self.logger.logDebug(privileges.length + "privileges found.");
                 callback(responseCodes.OK, privileges);
             });
         });
