@@ -489,50 +489,38 @@ MongoWrapper.prototype.getUserRoles = function (username, database, dbConn, call
 MongoWrapper.prototype.getUserPrivileges = function (username, database, callback) {
     "use strict";
     var self = this;
-    //First get all the roles this user is granted within the databases of interest
-   self.logger.logDebug("Getting user privileges... for " + username);
-
-        //Given the roles, get the privilege information
+   
     var adminDB = "admin";
-     self.dbCallback(adminDB, function (err, dbConn) {
-
-        self.logger.logDebug("obtained db connection");
-
+    self.dbCallback(adminDB, function (err, dbConn) {
+        //First get all the roles this user is granted within the databases of interest
         self.getUserRoles(username, database, dbConn, function (status, roles) {
-
             if (status.value) {
-                self.logger.logDebug("Error found :(");
                 return callback(responseCodes.DB_ERROR(err));
             }
-            
+           
             if (!roles || roles.length == 0) {
                 //no roles under this user, no point trying to find privileges
                 return callback(responseCodes.OK, []);
             }
-            var command = {rolesInfo : roles, showPrivileges: true};            
             
-            self.logger.logDebug("Running command: " + JSON.stringify(command));
-            
+            var command = { rolesInfo : roles, showPrivileges: true };            
+            //Given the roles, get the privilege information         
             dbConn.command(command, function (err, docs) {
                 if (err) {
-                    self.logger.logDebug("Error found :( : message - " + err.message);
                     return callback(responseCodes.DB_ERROR(err));
                 }
 
-                if (!docs || docs["roles"].length == 0){
+                if (!docs || docs["roles"].length == 0) {
+                    //No privileges return empty array
                     return callback(responseCodes.OK, []);
                 }
-                var rolesArr = docs["roles"];
-                self.logger.logDebug("docs :" + JSON.stringify(docs));
-                self.logger.logDebug("Found " + rolesArr.length + " result(s).");
-                
 
+                var rolesArr = docs["roles"];
                 var privileges = [];
 
                 for (i = 0; i < rolesArr.length; i++) {
                     privileges = privileges.concat(rolesArr[i]["inheritedPrivileges"]);
                 }
-                self.logger.logDebug("Found " + privileges.length + " entries of privileges.");
                 callback(responseCodes.OK, privileges);
             });
         });
