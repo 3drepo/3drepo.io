@@ -454,6 +454,16 @@ MongoWrapper.prototype.filterColl = function(dbName, collName, filter, projectio
 	});
 };
 
+/*******************************************************************************
+ * Get roles granted to a user within a specific database
+ * The function will find all roles within the specified database and also
+ * admin database and return this on the callback
+ *
+ * @param {string} username - username of the user
+ * @param {string} database - database we are interested in
+ * @param {function} callback - get filtered roles from database
+ *								pass to callback as parameter
+ ******************************************************************************/
 MongoWrapper.prototype.getUserRoles = function (username, database, callback) {
     "use strict";
     var self = this;
@@ -505,6 +515,15 @@ MongoWrapper.prototype.getUserRoles = function (username, database, callback) {
 
 };
 
+
+/*******************************************************************************
+ * Get the list of privileges the user has on the database 
+ *
+ * @param {string} username - username of the user
+ * @param {string} database - database we are interested in
+ * @param {function} callback - get filtered privileges from database
+ *								pass to callback as parameter
+ ******************************************************************************/
 MongoWrapper.prototype.getUserPrivileges = function (username, database, callback) {
     "use strict";
     var self = this;
