@@ -87,7 +87,8 @@ var repoRouter = function() {
 				accessFunc(req, account, project, function(err) {
 					if(err.value)
 					{
-						req[C.REQ_REPO].logger.logDebug(account + "/" + project + " is not public project and no user information.", req);
+                        req[C.REQ_REPO].logger.logDebug(account + "/" + project + " is not public project and no user information.", req);
+                        req[C.REQ_REPO].logger.logDebug("error is : " + err.message, req);
 						req[C.REQ_REPO].processed = true;
 
 						responseCodes.onError("Check project/account access", req, res, next, err, null, req.params);

@@ -527,8 +527,8 @@ DBInterface.prototype.getDatabaseGroups = function(account, callback) {
 DBInterface.prototype.getProjectUsers = function(account, project, callback) {
 	if(!project)
 		return callback(responseCodes.PROJECT_NOT_SPECIFIED);
-
-	this.logger.logDebug("Getting project users for " + account + "/" + project);
+    var self = this;
+    self.logger.logDebug("Getting project users for " + account + "/" + project);
 
 	var filter = {
 		_id: project
@@ -567,11 +567,14 @@ DBInterface.prototype.getProjectUsers = function(account, project, callback) {
 };
 
 DBInterface.prototype.checkUserPermission = function (username, account, project, callback) {
-    dbConn(this.logger).getUserPrivileges(username, account, function (err, privileges) {
-        if (err) {
-            callback(err);
+    var self = this;
+    self.logger.logDebug("Checking permissions for " + username + " @ " + account + "." + project);
+    dbConn(this.logger).getUserPrivileges(username, account, function (status, privileges) {
+        if (status.value) {
+            self.logger.logDebug("Errored @ checkUserPermission : " + status.message);
+            return callback(status);
         }
-
+        self.logger.logDebug("Obtained privileges: " + privileges.length);
         //Determine the access rights of a project via privileges on the history collection
         var collection = project + ".history";
         var writePermission = false;
@@ -579,8 +582,8 @@ DBInterface.prototype.checkUserPermission = function (username, account, project
         for (i = 0; i < privileges.length; i++) {
             if (privileges[i]["resource"]["db"] == account) {
                 if (privileges[i]["resource"]["collection"] == "" || privileges[i]["resource"]["collection"] == collection) {
-                    readPermission |= privileges[i]["actions"].toArray().indexOf("find") > -1;
-                    writePermission |= privileges[i]["actions"].toArray().indexOf("insert") > -1;
+                    readPermission |= privileges[i]["actions"].indexOf("find") > -1;
+                    writePermission |= privileges[i]["actions"].indexOf("insert") > -1;
                     
                 }
             }

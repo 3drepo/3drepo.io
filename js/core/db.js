@@ -156,9 +156,10 @@ MongoWrapper.prototype.authenticateUser = function(username, password, callback)
  ******************************************************************************/
 MongoWrapper.prototype.dbCallback = function(dbName, callback) {
 	"use strict";
+    var self = this;
+    mongo.open(dbName, function (err, db) {
 
-	mongo.open(dbName, function(err, db) {
-		if (err) {
+        if (err) {
 			return callback(responseCodes.DB_ERROR(err));
 		}
 
@@ -456,50 +457,76 @@ MongoWrapper.prototype.filterColl = function(dbName, collName, filter, projectio
 	});
 };
 
-MongoWrapper.prototype.getUserRoles = function (username, database, callback) {
+MongoWrapper.prototype.getUserRoles = function (username, database, dbConn, callback) {
     "use strict";
     var self = this;
     
-    self.collCallback("admin", "system.users", true, function (err, coll) {
+    dbConn.collection("system.users", { strict: true }, function (err, coll) {
+        if (err) {
+            return callback(responseCodes.DB_ERROR(err));
+        }
+        
         var filter = { "user" : username };
         //only return roles in admin and the specified database, the rest are irrelevant.
         var projection = { "roles" : { "$elemMatch": { "db": { "$in": ["admin", database] } } } };
-        coll.find(filter, projection).toArray(function(err, docs){
+        coll.find(filter, projection).toArray(function (err, docs) {
             if (err) {
                 return callback(responseCodes.DB_ERROR(err));
             }
-
+            
             if (docs.length != 1) {
                 self.logger.logError("Unexpected number of documents found in getUserRoles(). size:" + docs.length);
-                callback(responseCodes.USER_NOT_FOUND, docs);
+                return callback(responseCodes.USER_NOT_FOUND, docs);
             }
-
+            
             callback(responseCodes.OK, docs[0]["roles"]);
         });
     });
-    
+
+
 };
 
 MongoWrapper.prototype.getUserPrivileges = function (username, database, callback) {
     "use strict";
     var self = this;
     //First get all the roles this user is granted within the databases of interest
-    this.getUserRoles(username, database, function (status, roles) {
-        //Given the roles, get the privilege information
-        self.dbCallBack("admin", function (err, dbConn) {
-            var command = {"rolesInfo" : roles, "showPrivileges": true};            
+   self.logger.logDebug("Getting user privileges... for " + username);
 
+        //Given the roles, get the privilege information
+    var adminDB = "admin";
+     self.dbCallback(adminDB, function (err, dbConn) {
+
+        self.logger.logDebug("obtained db connection");
+
+        self.getUserRoles(username, database, dbConn, function (status, roles) {
+
+            if (status.value) {
+                self.logger.logDebug("Error found :(");
+                return callback(responseCodes.DB_ERROR(err));
+            }
+            
+            if (roles.length == 0) {
+                //no roles under this user, no point trying to find privileges
+                return callback(responseCodes.OK, []);
+            }
+            var command = {rolesInfo : roles, showPrivileges: true};            
+            
+            self.logger.logDebug("Running command: " + JSON.stringify(command));
+            
             dbConn.command(command, function (err, docs) {
                 if (err) {
+                    self.logger.logDebug("Error found :( : message - " + err.message);
                     return callback(responseCodes.DB_ERROR(err));
                 }
-                self.logger.logDebug("Found " + docs.length + " result(s).");
+                var rolesArr = docs["roles"];
+                self.logger.logDebug("docs :" + JSON.stringify(docs));
+                self.logger.logDebug("Found " + rolesArr.length + " result(s).");
+                
 
-                var rolesArr = docs.toArray();
                 var privileges = [];
 
                 for (i = 0; i < rolesArr.length; i++) {
-                    privileges = privileges.concat(rolesArr[i]["inheritedPrivileges"].toArray());
+                    privileges = privileges.concat(rolesArr[i]["inheritedPrivileges"]);
                 }
                 self.logger.logDebug("Found " + privileges.length + " entries of privileges.");
                 callback(responseCodes.OK, privileges);
