@@ -333,10 +333,7 @@ MongoWrapper.prototype.collCallback = function(dbName, collName, strict, callbac
 	"use strict";
 
 	var self = this;
-
-	self.logger.logDebug("Loading collection " + collName + " on " + dbName);
-
-	// First get database connection
+    // First get database connection
 	self.dbCallback(dbName, function(err, dbConn) {
 		if (err.value) {
 			return callback(err);

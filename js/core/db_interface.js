@@ -568,13 +568,10 @@ DBInterface.prototype.getProjectUsers = function(account, project, callback) {
 
 DBInterface.prototype.checkUserPermission = function (username, account, project, callback) {
     var self = this;
-    self.logger.logDebug("Checking permissions for " + username + " @ " + account + "." + project);
     dbConn(this.logger).getUserPrivileges(username, account, function (status, privileges) {
         if (status.value) {
-            self.logger.logDebug("Errored @ checkUserPermission : " + status.message);
             return callback(status);
         }
-        self.logger.logDebug("Obtained privileges: " + privileges.length);
         //Determine the access rights of a project via privileges on the history collection
         var collection = project + ".history";
         var writePermission = false;
