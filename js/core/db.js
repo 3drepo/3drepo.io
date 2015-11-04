@@ -457,12 +457,15 @@ MongoWrapper.prototype.filterColl = function(dbName, collName, filter, projectio
 	});
 };
 
-MongoWrapper.prototype.getUserRoles = function (username, database, dbConn, callback) {
+MongoWrapper.prototype.getUserRoles = function (username, database, callback) {
     "use strict";
     var self = this;
     
-    dbConn.collection("system.users", { strict: true }, function (err, coll) {
-        if (err) {
+    var dbName = "admin";
+    var collName = "system.users"
+
+    self.collCallback(dbName, collName, true, function (err, coll) {
+        if (err.value) {
             return callback(responseCodes.DB_ERROR(err));
         }
         
@@ -491,18 +494,18 @@ MongoWrapper.prototype.getUserPrivileges = function (username, database, callbac
     var self = this;
    
     var adminDB = "admin";
-    self.dbCallback(adminDB, function (err, dbConn) {
-        //First get all the roles this user is granted within the databases of interest
-        self.getUserRoles(username, database, dbConn, function (status, roles) {
+
+    //First get all the roles this user is granted within the databases of interest
+     self.getUserRoles(username, database, function (status, roles) {
             if (status.value) {
-                return callback(responseCodes.DB_ERROR(err));
+                return callback(responseCodes.DB_ERROR(status));
             }
            
             if (!roles || roles.length == 0) {
                 //no roles under this user, no point trying to find privileges
                 return callback(responseCodes.OK, []);
             }
-            
+        self.dbCallback(adminDB, function (err, dbConn) {
             var command = { rolesInfo : roles, showPrivileges: true };            
             //Given the roles, get the privilege information         
             dbConn.command(command, function (err, docs) {
