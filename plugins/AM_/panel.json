@@ -8,6 +8,9 @@
         "jade": [
             {"template" : "AM_/panel/panel.jade", "id" : "panel.html"},
             {"template" : "AM_/panel/panelContent.jade", "id" : "panelContent.html"}
+        ],
+        "css" : [
+            "AM_/panel/panel.css"
         ]
     }
 }

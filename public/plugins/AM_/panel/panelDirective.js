@@ -39,8 +39,9 @@
     function PanelCtrl ($scope, $element, $compile, EventService) {
         var pl = this,
             items = angular.element($element[0].querySelector("#items")),
+            buttons = angular.element($element[0].querySelector("#buttons")),
             content = "",
-            contentElement = "",
+            element = "",
             i = 0,
             length = 0;
         pl.contentItems = [];
@@ -48,39 +49,57 @@
         pl.showPanel = true;
 
         $scope.$watch(EventService.currentEvent, function (event) {
-            if ((event.type === EventService.EVENT.PANEL_CONTENT_SETUP) && (event.value.position === pl.position)) {
-                content = event.value.content;
+            if (event.type === EventService.EVENT.PANEL_CONTENT_SETUP) {
+                content = event.value[pl.position];
                 for (i = 0, length = content.length; i < length; i += 1) {
-                    if (content[i] === "tree") {
-                        pl.contentItems.push({type: content[i], show: true});
-                    }
-                    else {
-                        pl.contentItems.push({type: content[i], show: true});
-                    }
-                    contentElement = angular.element(
+                    pl.contentItems.push(content[i]);
+
+                    // Content items
+                    element = angular.element(
                         "<panel-content " +
+                            "position='pl.position' " +
                             "content-item='pl.contentItems[" + i + "].type' " +
-                            "show-content='pl.contentItems[" + i + "].show'>" +
+                            "content-title='pl.contentItems[" + i + "].title' " +
+                            "show-content='pl.contentItems[" + i + "].show' " +
+                            "help='pl.contentItems[" + i + "].help'>" +
                         "</panel-content>"
                     );
-                    items.append(contentElement);
-                    $compile(contentElement)($scope);
-                }
-            }
-            else if (event.type === EventService.EVENT.RIGHT_BUTTON_CLICK) {
-                pl.hideFilter = true; // Hide the filter if no content is shown
-                for (i = 0, length = pl.contentItems.length; i < length; i += 1) {
-                    if (event.value === pl.contentItems[i].type) {
-                        pl.contentItems[i].show = !pl.contentItems[i].show;
-                    }
-                    if (pl.hideFilter && pl.contentItems[i].show) {
-                        pl.hideFilter = false;
+                    items.append(element);
+                    $compile(element)($scope);
+
+                    // Buttons
+                    if (pl.contentItems[i].hasOwnProperty("buttonIcon")) {
+                        element = angular.element(
+                            "<md-button " +
+                                "class='md-fab md-primary md-mini' " +
+                                "ng-click=pl.buttonClick('" + pl.contentItems[i].type + "') " +
+                                "aria-label='{{pl.contentItems[" + i + "].title}}'>" +
+                                "<md-icon " +
+                                    "class='fa' " +
+                                    "md-font-icon='{{pl.contentItems[" + i + "].buttonIcon}}'>" +
+                                "</md-icon>" +
+                            "</md-button>"
+                        );
+                        buttons.append(element);
+                        $compile(element)($scope);
                     }
                 }
             }
             else if (event.type === EventService.EVENT.TOGGLE_FULL_SCREEN) {
                 pl.showPanel = !pl.showPanel;
             }
+
+            pl.buttonClick = function (contentType) {
+                pl.hideFilter = true; // Hide the filter if no content is shown
+                for (i = 0, length = pl.contentItems.length; i < length; i += 1) {
+                    if (contentType === pl.contentItems[i].type) {
+                        pl.contentItems[i].show = !pl.contentItems[i].show;
+                    }
+                    if (pl.hideFilter && pl.contentItems[i].show) {
+                        pl.hideFilter = false;
+                    }
+                }
+            };
         });
     }
 }());

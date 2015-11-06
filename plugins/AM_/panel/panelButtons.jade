@@ -1,0 +1,4 @@
+div(ng-show="pb.showButtons")
+	div(ng-repeat="button in pb.buttons track by $index")
+		md-button.md-fab.md-primary.md-mini(ng-click="pb.click($index)", aria-label="{{button.icon}}")
+			md-icon(md-font-icon="{{button.icon}}", class="fa")

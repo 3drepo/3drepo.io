@@ -49,12 +49,54 @@
 
     function HomeCtrl(EventService) {
         var hm = this,
-            content = ["tree", "viewpoints", "meta", "pdf"];
-
-        EventService.send(EventService.EVENT.LEFT_PANEL_CONTENT_SETUP, content);
-
-        //var pcontent = ["issues"];
-        //EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, {position: "right", content: pcontent});
+            panelContent = {
+                left: [
+                    {
+                        type: "filter",
+                        title: "",
+                        show: true,
+                        help: "Filter content"
+                    },
+                    {
+                        type: "tree",
+                        title: "Tree",
+                        show: true,
+                        help: "Model elements shown in a tree structure",
+                        buttonIcon: "fa-sitemap"
+                    },
+                    {
+                        type: "viewpoints",
+                        title: "Viewpoints",
+                        show: false,
+                        help: "Show a list of saved viewpoints",
+                        buttonIcon: "fa-street-view"
+                    },
+                    {
+                        type: "meta",
+                        title: "Meta data",
+                        show: false,
+                        help: "Show all the Meta data",
+                        buttonIcon: "fa-map-o"
+                    },
+                    {
+                        type: "pdf",
+                        title: "PDF",
+                        show: false,
+                        help: "List associated PDF files",
+                        buttonIcon: "fa-file-pdf-o"
+                    }
+                ],
+                right: [
+                    {
+                        type: "issues",
+                        title: "Issues",
+                        show: true,
+                        help: "List current issues",
+                        buttonIcon: "fa-cogs"
+                    }
+                ]
+            };
+        EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelContent);
     }
 }());
 

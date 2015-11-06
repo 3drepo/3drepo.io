@@ -29,8 +29,7 @@
             restrict: 'EA',
             templateUrl: 'tree.html',
             scope: {
-                filterText: "=",
-                tooltipText: "="
+                filterText: "="
             },
             controller: TreeCtrl,
             controllerAs: 'tr',
@@ -45,7 +44,6 @@
             promise = null;
         tr.nodes = [];
         tr.showTree = false;
-        tr.tooltipText = "Model elements shown in a tree structure";
 
         /*
         tr.allNodes = [

@@ -1,0 +1,63 @@
+panel  {
+  display: block;
+  position: absolute;
+  top: 100px;
+  width: 400px;
+}
+panel #items {
+  position: absolute;
+  width: 300px;
+}
+
+#leftPanel {
+  left: 0;
+}
+#leftPanel #items {
+  right: 0;
+}
+#leftPanel #buttons {
+  left: 0;
+}
+
+#rightPanel {
+  right: 0;
+}
+#rightPanel #items {
+  left: 0;
+}
+#rightPanel #buttons {
+  right: 0;
+}
+
+panel md-toolbar {
+  min-height: 32px;
+  height: 32px;
+  outline: none;
+}
+
+panel md-toolbar label {
+  font-weight: normal;
+  font-size: medium;
+}
+
+filter, panel-content {
+  display: block;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.panelContentSelected {
+  max-height: 500px;
+}
+.panelContentUnselected {
+  max-height: 100px;
+}
+
+panel #buttons {
+  position: absolute;
+  top: 150px;
+}
+panel #buttons button {
+  display: block;
+  margin-bottom: 20px;
+}

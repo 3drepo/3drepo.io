@@ -26,8 +26,11 @@
             restrict: 'E',
             templateUrl: 'panelContent.html',
             scope: {
+                position: "=",
                 contentItem: "=",
-                showContent: "="
+                contentTitle: "=",
+                showContent: "=",
+                help: "="
             },
             controller: PanelContentCtrl,
             controllerAs: 'pc',
@@ -45,16 +48,10 @@
         pc.class = "panelContentUnselected";
         pc.showHelp = false;
         pc.filterText = "";
-        pc.tooltipText = "Default help text text";
-
-        function uppercaseFirstLetter(string) {
-            return string.slice(0, 1).toUpperCase() + string.slice(1);
-        }
 
         function setupFilterWatch() {
             filterWatch = $scope.$watch(EventService.currentEvent, function (event) {
                 if (event.type === EventService.EVENT.FILTER) {
-
                     pc.filterText = event.value;
                 }
             });
@@ -62,13 +59,9 @@
 
         $scope.$watch("pc.contentItem", function (newValue) {
             if (angular.isDefined(newValue)) {
-                pc.title = uppercaseFirstLetter(pc.contentItem);
                 content = angular.element($element[0].querySelector('#content'));
                 contentItem = angular.element(
-                    "<" + pc.contentItem + " " +
-                        "filter-text='pc.filterText' " +
-                        "tooltip-text='pc.tooltipText'>" +
-                    "</" + pc.contentItem + ">"
+                    "<" + pc.contentItem + " filter-text='pc.filterText'></" + pc.contentItem + ">"
                 );
                 content.append(contentItem);
                 $compile(contentItem)($scope);
@@ -79,9 +72,15 @@
             }
         });
 
+        $scope.$watch("pc.contentTitle", function (newValue) {
+            if (angular.isDefined(newValue)) {
+                pc.showTitleBar = (newValue !== "");
+            }
+        });
+
         $scope.$watch(EventService.currentEvent, function (event) {
-            if (event.type === EventService.EVENT.LEFT_PANEL_CONTENT_CLICK) {
-                if (event.value !== pc.contentItem) {
+            if ((event.type === EventService.EVENT.PANEL_CONTENT_CLICK) && (event.value.position === pc.position)) {
+                if (event.value.contentItem !== pc.contentItem) {
                     pc.class = "panelContentUnselected";
                     if (filterWatch !== null) {
                         filterWatch(); // Cancel filter watch
@@ -95,7 +94,13 @@
 
         pc.click = function () {
             if (pc.class === "panelContentUnselected") {
-                EventService.send(EventService.EVENT.LEFT_PANEL_CONTENT_CLICK, pc.contentItem);
+                EventService.send(
+                    EventService.EVENT.PANEL_CONTENT_CLICK,
+                    {
+                        position: pc.position,
+                        contentItem: pc.contentItem
+                    }
+                );
                 pc.class = "panelContentSelected";
                 setupFilterWatch();
             }

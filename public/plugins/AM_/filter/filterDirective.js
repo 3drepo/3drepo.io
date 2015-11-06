@@ -37,7 +37,6 @@
     function FilterCtrl($scope, $timeout, EventService) {
         var fl = this;
         fl.filter = null;
-        fl.showHelp = false;
 
         $scope.$watch("fl.filterText", function (newValue) {
             if (angular.isDefined(newValue)) {
@@ -47,12 +46,6 @@
                 fl.filter = $timeout(function() {
                     EventService.send(EventService.EVENT.FILTER, newValue);
                 }, 500);
-            }
-        });
-
-        $scope.$watch(EventService.currentEvent, function (event) {
-            if (event.type === EventService.EVENT.TOGGLE_HELP) {
-                fl.showHelp = !fl.showHelp;
             }
         });
     }
