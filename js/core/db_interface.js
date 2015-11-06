@@ -1706,7 +1706,7 @@ DBInterface.prototype.cacheFunction = function(dbName, collection, req, generate
 			}
 		});
 	} else {
-		self.logger.logInfo("Doesn't exist in stash, generating ...");
+		self.logger.logInfo("Stash disabled, generating ...");
 
 		generate(function(err, data) {
 			if (err.value)

@@ -51,7 +51,7 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 	var dataBuffers		= []; // Array of data buffers to concatenate at the end
 	var bufferPosition	= 0;  // Stores the position of the processing buffer object relative to the full buffer
 	var idMapBuf		= null;
-	var needsIdMapBuf	= (subformat === "mpc");
+	var needsIdMapBuf	= true;
 
 	// Create placeholders for JSON output
 	srcJSON.accessors				  = {};
@@ -178,6 +178,10 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 			// the limit itself. In the case that it is, this will always flag as above.
 			if (currentMeshNumVertices > C.SRC_VERTEX_LIMIT)
 			{
+				logger.logInfo("Splitting large meshes into smaller meshes");
+
+				process.exit(0);
+
 				// Index from old vertex IDs to new ones
 				var reindexMap      = {};
 
@@ -327,8 +331,8 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 
 					if (num_comp !== 3) {
 						logger.logError("Non triangulated face with " + num_comp + " vertices.");
-						runningFaceTotal--;
-						subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO]--;
+						//runningFaceTotal--;
+						//subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO]--;
 					} else {
 						for (var vert_comp = 0; vert_comp < num_comp; vert_comp++) {
 							// First int32 is number of sides (i.e. 3 = Triangle)]

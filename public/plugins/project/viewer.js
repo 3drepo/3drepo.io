@@ -799,7 +799,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.setApp = function(group, app)
 	{
-		if (!group.multipart) {
+		if (!group || !group.multipart) {
 			if (app === undefined)
 				app = "1.0 0.5 0.0";
 
