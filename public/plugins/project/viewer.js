@@ -404,10 +404,10 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 				if(zoom)
 					if (!(object.getAttribute("render") == "false"))
 						self.lookAtObject(object);
-
-				self.setApp(object);
 			}
 		}
+
+		self.setApp(object);
 	});
 
 	$(document).on("pinClick", function(event, clickInfo) {
@@ -799,31 +799,33 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.setApp = function(group, app)
 	{
-		if (app === undefined)
-			app = "1.0 0.5 0.0";
+		if (!group.multipart) {
+			if (app === undefined)
+				app = "1.0 0.5 0.0";
 
-		self.applyApp(self.oneGrpNodes, 2.0, "0.0 0.0 0.0", false);
-		self.applyApp(self.twoGrpNodes, 2.0, "0.0 0.0 0.0", false);
-		self.applyApp(self.twoGrpNodes, 2.0, "0.0 0.0 0.0", true);
+			self.applyApp(self.oneGrpNodes, 2.0, "0.0 0.0 0.0", false);
+			self.applyApp(self.twoGrpNodes, 2.0, "0.0 0.0 0.0", false);
+			self.applyApp(self.twoGrpNodes, 2.0, "0.0 0.0 0.0", true);
 
-		// TODO: Make this more efficient
-		self.applyApp(self.diffColorAdded, 0.5, "0.0 1.0 0.0");
-		self.applyApp(self.diffColorDeleted, 0.5, "1.0 0.0 0.0");
+			// TODO: Make this more efficient
+			self.applyApp(self.diffColorAdded, 0.5, "0.0 1.0 0.0");
+			self.applyApp(self.diffColorDeleted, 0.5, "1.0 0.0 0.0");
 
-		if (group)
-		{
-			self.twoGrpNodes = group.getElementsByTagName("TwoSidedMaterial");
-			self.oneGrpNodes = group.getElementsByTagName("Material");
-		} else {
-			self.oneGrpNodes = [];
-			self.twoGrpNodes = [];
+			if (group)
+			{
+				self.twoGrpNodes = group.getElementsByTagName("TwoSidedMaterial");
+				self.oneGrpNodes = group.getElementsByTagName("Material");
+			} else {
+				self.oneGrpNodes = [];
+				self.twoGrpNodes = [];
+			}
+
+			self.applyApp(self.oneGrpNodes, 0.5, app, false);
+			self.applyApp(self.twoGrpNodes, 0.5, app, false);
+			self.applyApp(self.twoGrpNodes, 0.5, app, true);
+
+			self.viewer.render();
 		}
-
-		self.applyApp(self.oneGrpNodes, 0.5, app, false);
-		self.applyApp(self.twoGrpNodes, 0.5, app, false);
-		self.applyApp(self.twoGrpNodes, 0.5, app, true);
-
-		self.viewer.render();
 	}
 
 	this.evDist = function(evt, posA)

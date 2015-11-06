@@ -103,9 +103,6 @@ var repoRouter = function() {
 
 					responseCodes.onError("Check other access", req, res, next, responseCodes.NOT_AUTHORIZED, null, req.params);
 				} else {
-					console.log("USER: " + req.session[C.REPO_SESSION_USER]);
-					console.log("ACC: " + account);
-
 					if (!account || (account && req.session[C.REPO_SESSION_USER].username === account))
 					{
 						next();

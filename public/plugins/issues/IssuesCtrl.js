@@ -42,7 +42,10 @@ angular.module("3drepo")
 
 		if (object !== undefined) {
 			if (!object.hasOwnProperty("multipart")) {
-				$scope.selectedID  		= object.getAttribute("id");
+				var idParts = object.getAttribute("id").split("__");
+				var objID = idParts[idParts.length - 1];
+
+				$scope.selectedID  		= objID;
 			}
 		} else {
 			$scope.selectedID = undefined;
@@ -297,7 +300,10 @@ angular.module("3drepo")
 				var pickObj = ViewerService.pickPoint(dragEndX, dragEndY);
 
 				if (!pickObj.partID) {
-					scope.selectedID 		= pickObj.pickObj._xmlNode.getAttribute("id");
+					var idParts = pickObj.pickObj._xmlNode.getAttribute("id").split("__");
+					var objID = idParts[idParts.length - 1];
+
+					scope.selectedID 		= objID;
 				} else {
 					scope.selectedID		= pickObj.partID;
 				}

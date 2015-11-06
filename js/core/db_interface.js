@@ -37,6 +37,8 @@ var responseCodes = require("./response_codes.js");
 
 var utils = require("./utils.js");
 
+var config       = require("app-config").config;
+
 // TODO: Remove these
 stringToUUID = utils.stringToUUID;
 uuidToString = utils.uuidToString;
@@ -1043,8 +1045,6 @@ DBInterface.prototype.getSIDMap = function(dbName, project, branch, revision, ca
 	});
 };
 
-
-
 DBInterface.prototype.getHeadRevision = function(dbName, project, branch, callback) {
 	if (branch == "master")
 		var branch_id = masterUUID;
@@ -1480,8 +1480,6 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 					data._id     = stringToUUID(newID);
 					data.created = (new Date()).getTime();
 
-					console.log(JSON.stringify(obj));
-
 					data.parent  = obj.meshes[id][C.REPO_NODE_LABEL_SHARED_ID];
 					data.number  = numIssues + 1;
 
@@ -1675,34 +1673,50 @@ DBInterface.prototype.cacheFunction = function(dbName, collection, req, generate
 	var format = req.params[C.REPO_REST_API_FORMAT].toLowerCase();
 	var stashCollection = collection + "." + C.REPO_COLLECTION_STASH + "." + format;
 
-	dbConn(self.logger).getGridFSFile(dbName, stashCollection, req.url, function(err, result) {
-		if (err.value === responseCodes.FILE_DOESNT_EXIST.value) {
-			self.logger.logDebug("Doesn't exist in stash, generating ...");
+	if (!config.disableCache)
+	{
+		dbConn(self.logger).getGridFSFile(dbName, stashCollection, req.url, function(err, result) {
+			console.log(JSON.stringify(err));
 
-			generate(function(err, data) {
-				if (err.value)
-				{
-					return callback(err);
-				}
+			if (err.value === responseCodes.FILE_DOESNT_EXIST.value) {
+				self.logger.logInfo("Doesn't exist in stash, generating ...");
 
-				dbConn(self.logger).storeGridFSFile(dbName, stashCollection, req.url, data, false, function(err) {
-					if (err.value)
+				generate(function(generateErr, data) {
+					if (generateErr.value)
 					{
-						return callback(err);
+						return callback(generateErr);
 					}
 
-					self.logger.logDebug("Storing in " + dbName + " : " + stashCollection);
-					callback(responseCodes.OK, data);
-				});
-			});
-		} else if (err.value) {
-			callback(err);
-		} else {
-			self.logger.logDebug("Retrieved from stash");
+					self.logger.logInfo("Storing in " + dbName + " : " + stashCollection);
+					dbConn(self.logger).storeGridFSFile(dbName, stashCollection, req.url, data, false, function(stashErr) {
+						if (stashErr.value)
+						{
+							return callback(stashErr);
+						}
 
-			callback(responseCodes.OK, result.buffer);
-		}
-	});
+						callback(responseCodes.OK, data);
+					});
+				});
+			} else if (err.value) {
+				callback(err);
+			} else {
+				self.logger.logInfo("Retrieved from stash");
+
+				callback(responseCodes.OK, result.buffer);
+			}
+		});
+	} else {
+		self.logger.logInfo("Doesn't exist in stash, generating ...");
+
+		generate(function(err, data) {
+			if (err.value)
+			{
+				return callback(err);
+			}
+
+			callback(responseCodes.OK, data);
+		});
+	}
 }
 
 DBInterface.prototype.getObject = function(dbName, project, uid, rid, sid, needFiles, projection, callback) {
