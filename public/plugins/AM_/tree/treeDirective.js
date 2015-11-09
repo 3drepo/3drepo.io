@@ -19,10 +19,7 @@
     "use strict";
 
     angular.module("3drepo")
-        .directive("tree", tree)
-        .config(function (uiTreeFilterSettingsProvider) {
-            uiTreeFilterSettingsProvider.descendantCollection = 'children';
-        });
+        .directive("tree", tree);
 
     function tree() {
         return {
@@ -37,65 +34,15 @@
         };
     }
 
-    TreeCtrl.$inject = ["$scope", "TreeService"];
+    TreeCtrl.$inject = ["$scope", "$timeout", "TreeService"];
 
-    function TreeCtrl($scope, TreeService) {
+    function TreeCtrl($scope, $timeout, TreeService) {
         var tr = this,
-            promise = null;
+            promise = null,
+            item = {};
         tr.nodes = [];
         tr.showTree = false;
-
-        /*
-        tr.allNodes = [
-            {
-                id: 1,
-                name: '1. dragon-breath',
-                description: 'lorem ipsum dolor sit amet',
-            },
-            {
-                id: 2,
-                name: '2. moiré-vision',
-                description: 'Ut tempus magna id nibh',
-                children: [
-                    {
-                        id: 21,
-                        name: '2.1. tofu-animation',
-                        description: 'Sed nec diam laoreet, aliquam',
-                        children: [
-                            {
-                                id: 211,
-                                name: '2.1.1. spooky-giraffe',
-                                description: 'In vel imperdiet justo. Ut',
-                            },
-                            {
-                                id: 212,
-                                name: '2.1.2. bubble-burst',
-                                description: 'Maecenas sodales a ante at',
-                            }
-                        ]
-                    },
-                    {
-                        id: 22,
-                        name: '2.2. barehand-atomsplitting',
-                        description: 'Fusce ut tellus posuere sapien',
-                    }
-                ]
-            },
-            {
-                id: 3,
-                name: '3. unicorn-zapper',
-                description: 'Integer ullamcorper nibh eu ipsum',
-            },
-            {
-                id: 4,
-                name: '4. romantic-transclusion',
-                description: 'Nullam luctus velit eget enim',
-            }
-        ];
-        tr.nodes = tr.allNodes;
-        tr.showChildren = true;
-        tr.showTree = true;
-        */
+        tr.showFilterList = true;
 
         promise = TreeService.init();
         promise.then(function(data) {
@@ -106,24 +53,28 @@
             tr.showTree = true;
         });
 
-        /*
         $scope.$watch("tr.filterText", function (newValue) {
             if (angular.isDefined(newValue)) {
                 if (newValue === "") {
+                    tr.showTree = true;
+                    tr.showFilterList = false;
                     tr.showChildren = true;
                     tr.nodes = tr.allNodes;
                 }
                 else {
+                    tr.showTree = false;
+                    tr.showFilterList = true;
                     tr.showChildren = true;
                     promise = TreeService.search(newValue);
                     promise.then(function(json) {
                         tr.showChildren = false;
                         tr.nodes = json.data;
+                        console.log(tr.nodes);
+                        setupInfiniteItems();
                     });
                 }
             }
         });
-        */
 
         tr.nodeSelected = function (nodeId) {
             tr.selectedNode = nodeId;
@@ -135,5 +86,50 @@
             TreeService.toggleNode(nodeId);
             tr.data.openNodes.push(nodeId);
         };
+
+        function setupInfiniteItems() {
+            tr.infiniteItems = {
+                numLoaded_: 0,
+                toLoad_: 0,
+                // Required.
+                getItemAtIndex: function(index) {
+                    if (index > this.numLoaded_) {
+                        this.fetchMoreItems_(index);
+                        return null;
+                    }
+                    item = {};
+                    if (index < tr.nodes.length) {
+                        item.name = tr.nodes[index].name;
+                        item.showToggleButton = true;
+                        item.toggleState = true;
+                    }
+                    else {
+                        item.name = "";
+                        item.showToggleButton = false;
+                    }
+                    return item;
+                },
+                // Required.
+                // For infinite scroll behavior, we always return a slightly higher
+                // number than the previously loaded items.
+                getLength: function() {
+                    return this.numLoaded_ + 5;
+                },
+                fetchMoreItems_: function(index) {
+                    console.log(index);
+                    // For demo purposes, we simulate loading more items with a timed
+                    // promise. In real code, this function would likely contain an
+                    // $http request.
+                    /*
+                    if (this.toLoad_ < index) {
+                        this.toLoad_ += 20;
+                        $timeout(angular.noop, 300).then(angular.bind(this, function() {
+                            this.numLoaded_ = this.toLoad_;
+                        }));
+                    }
+                    */
+                }
+            };
+        }
     }
 }());

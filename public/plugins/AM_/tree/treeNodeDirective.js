@@ -32,8 +32,7 @@
                 onNodeSelected: "&onNodeSelected",
                 onNodeToggled: "&onNodeToggled",
                 selectedNode: "=",
-                toggledNode: "=",
-                filterText: "="
+                toggledNode: "="
             },
             controller: TreeNodeCtrl,
             controllerAs: 'tn',
@@ -46,12 +45,11 @@
                     "<tree-nodes " +
                         "nodes='tn.node.children' " +
                         "show-children='tn.showChildren' " +
-                        "ng-if='!tn.collapsed || tn.filtered' " +
+                        "ng-if='!tn.collapsed' " +
                         "on-node-selected='tn.onNodeSelected({nodeId: nodeId})' " +
                         "on-node-toggled='tn.onNodeToggled({nodeId: nodeId})' " +
                         "selected-node='tn.selectedNode' " +
-                        "toggled-node='tn.toggledNode' " +
-                        "filter-text='tn.filterText'>" +
+                        "toggled-node='tn.toggledNode'>" +
                     "</tree-nodes>";
                 $compile(node)(scope, function(cloned){
                     element.append(cloned);
@@ -69,7 +67,6 @@
         tn.toggleState = true;
         tn.selected = false;
         tn.selectedClass = "tree-node-unselected";
-        tn.labelClass = "treeNodeLabelWithoutFilterText";
 
         $scope.$watchGroup(["tn.node", "tn.showChildren"], function (newValues) {
             if (angular.isDefined(newValues[0]) && angular.isDefined(newValues[1])) {
@@ -90,25 +87,8 @@
             }
         });
 
-        $scope.$watch("tn.filterText", function (newValue) {
-            if (angular.isUndefined(newValue) || (tn.filterText === "")) {
-                tn.filtered = false;
-                tn.collapsed = true;
-            }
-            else {
-                tn.filtered = $filter('uiTreeFilter')(tn.node, tn.filterText, ['path']);
-                if (tn.filtered && tn.node.hasOwnProperty("name")) {
-                    tn.labelClass =
-                        (tn.node.name.toLowerCase().search(tn.filterText.toLowerCase()) !== -1) ?
-                            "treeNodeLabelWithFilterText" : "treeNodeLabelWithoutFilterText";
-                }
-                tn.collapsed = !tn.filtered;
-            }
-        });
-
         tn.collapse = function () {
             tn.collapsed = !tn.collapsed;
-            tn.filtered = false;
         };
 
         tn.nodeSelected = function (nodeId) {

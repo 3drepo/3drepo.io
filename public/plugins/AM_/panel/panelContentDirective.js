@@ -30,7 +30,8 @@
                 contentItem: "=",
                 contentTitle: "=",
                 showContent: "=",
-                help: "="
+                help: "=",
+                icon: "="
             },
             controller: PanelContentCtrl,
             controllerAs: 'pc',

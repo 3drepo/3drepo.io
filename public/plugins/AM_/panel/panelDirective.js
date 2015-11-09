@@ -61,14 +61,15 @@
                             "content-item='pl.contentItems[" + i + "].type' " +
                             "content-title='pl.contentItems[" + i + "].title' " +
                             "show-content='pl.contentItems[" + i + "].show' " +
-                            "help='pl.contentItems[" + i + "].help'>" +
+                            "help='pl.contentItems[" + i + "].help' " +
+                            "icon='pl.contentItems[" + i + "].icon'>" +
                         "</panel-content>"
                     );
                     items.append(element);
                     $compile(element)($scope);
 
                     // Buttons
-                    if (pl.contentItems[i].hasOwnProperty("buttonIcon")) {
+                    if (pl.contentItems[i].hasOwnProperty("icon")) {
                         element = angular.element(
                             "<md-button " +
                                 "class='md-fab md-primary md-mini' " +
@@ -76,7 +77,7 @@
                                 "aria-label='{{pl.contentItems[" + i + "].title}}'>" +
                                 "<md-icon " +
                                     "class='fa' " +
-                                    "md-font-icon='{{pl.contentItems[" + i + "].buttonIcon}}'>" +
+                                    "md-font-icon='{{pl.contentItems[" + i + "].icon}}'>" +
                                 "</md-icon>" +
                             "</md-button>"
                         );

@@ -6,6 +6,4 @@ ol(ui-tree-nodes, ng-model="tns.nodes")
 			on-node-selected="tns.onNodeSelected({nodeId: nodeId})"
 			on-node-toggled="tns.onNodeToggled({nodeId: nodeId})"
 			selected-node="tns.selectedNode"
-			toggled-node="tns.toggledNode"
-			filter-text="tns.filterText"
-			ng-if="tns.treeFilter(node, tns.filterText, tns.supportedFields)")
+			toggled-node="tns.toggledNode")

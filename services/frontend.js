@@ -198,7 +198,7 @@ module.exports.createApp = function(template)
                                         plugin: "AM_home",
                                         children: [
                                             {
-                                                plugin: "AM_leftPanel"
+                                                plugin: "AM_panel"
                                             },
                                             {
                                                 plugin: "AM_filter"
@@ -210,7 +210,7 @@ module.exports.createApp = function(template)
                                                 plugin: "AM_viewpoints"
                                             },
                                             {
-                                                plugin: "AM_leftButtons"
+                                                plugin: "AM_bottomButtons"
                                             }
                                         ]
                                     }

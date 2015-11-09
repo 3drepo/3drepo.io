@@ -1,8 +1,10 @@
 div(ui-tree-handle, class="tree-node tree-node-content", ng-class="tn.selectedClass")
-	md-button.md-mini.treeNodeButton(ng-click="tn.collapse()", aria-label="Collapse", ng-if="tn.showCollapseButton")
-		md-icon(md-font-icon="fa-chevron-right", class="fa", ng-if="tn.collapsed")
-		md-icon(md-font-icon="fa-chevron-down", class="fa", ng-if="!tn.collapsed")
-	md-button.md-mini.treeNodeButton(ng-click="tn.nodeToggled(tn.node._id)", aria-label="Toggle")
-		md-icon(md-font-icon="fa-eye", class="fa", ng-if="tn.toggleState")
-		md-icon(md-font-icon="fa-eye-slash", class="fa", ng-if="!tn.toggleState")
-	label(ng-click="tn.nodeSelected(tn.node._id)" ng-class="tn.labelClass") {{tn.node.name}}
+	//md-button.md-mini.treeNodeButton(ng-click="tn.collapse()", aria-label="Collapse", ng-if="tn.showCollapseButton")
+	span(ng-click="tn.collapse()", ng-if="tn.showCollapseButton")
+		span(class="fa fa-chevron-right", ng-if="tn.collapsed")
+		span(class="fa fa-chevron-down", ng-if="!tn.collapsed")
+	//md-button.md-mini.treeNodeButton(ng-click="tn.nodeToggled(tn.node._id)", aria-label="Toggle")
+	span(ng-click="tn.nodeToggled(tn.node._id)")
+		span(class="fa fa-eye", ng-if="tn.toggleState")
+		span(class="fa fa-eye-slash", ng-if="!tn.toggleState")
+	label(ng-click="tn.nodeSelected(tn.node._id)") {{tn.node.name}}

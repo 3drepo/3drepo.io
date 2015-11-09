@@ -62,28 +62,28 @@
                         title: "Tree",
                         show: true,
                         help: "Model elements shown in a tree structure",
-                        buttonIcon: "fa-sitemap"
+                        icon: "fa-sitemap"
                     },
                     {
                         type: "viewpoints",
                         title: "Viewpoints",
                         show: false,
                         help: "Show a list of saved viewpoints",
-                        buttonIcon: "fa-street-view"
+                        icon: "fa-street-view"
                     },
                     {
                         type: "meta",
                         title: "Meta data",
                         show: false,
                         help: "Show all the Meta data",
-                        buttonIcon: "fa-map-o"
+                        icon: "fa-map-o"
                     },
                     {
                         type: "pdf",
                         title: "PDF",
                         show: false,
                         help: "List associated PDF files",
-                        buttonIcon: "fa-file-pdf-o"
+                        icon: "fa-file-pdf-o"
                     }
                 ],
                 right: [
@@ -92,7 +92,7 @@
                         title: "Issues",
                         show: true,
                         help: "List current issues",
-                        buttonIcon: "fa-cogs"
+                        icon: "fa-cogs"
                     }
                 ]
             };

@@ -13,10 +13,10 @@ bottom-buttons #showButtonIcon {
   margin-top: -5px;
 }
 
-bottom-buttons .md-button {
-  margin-right: 2px;
+bottom-buttons .actionButton {
+  background: #FFFFFF !important;
 }
 
-bottom-buttons .md-hue-3 md-icon {
-  color: rgba(0, 0, 0, 0.5) !important;
+bottom-buttons .actionButton md-icon {
+  color: rgba(0, 0, 0, 0.6) !important;
 }

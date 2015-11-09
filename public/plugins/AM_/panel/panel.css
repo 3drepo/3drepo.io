@@ -34,10 +34,12 @@ panel md-toolbar {
   height: 32px;
   outline: none;
 }
-
+panel md-toolbar span {
+  font-size: 18px;
+}
 panel md-toolbar label {
-  font-weight: normal;
   font-size: medium;
+  margin-left: 10px;
 }
 
 filter, panel-content {
@@ -60,4 +62,8 @@ panel #buttons {
 panel #buttons button {
   display: block;
   margin-bottom: 20px;
+}
+
+filter md-input-container {
+  padding-bottom: 0;
 }
