@@ -178,6 +178,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.environ.setAttribute('smallFeatureCulling', 'true');
 			self.environ.setAttribute('smallFeatureThreshold', 5);
 			self.environ.setAttribute('occlusionCulling', 'true');
+			self.environ.setAttribute('sorttrans', 'false');
 			self.scene.appendChild(self.environ);
 
 			self.light = document.createElement('directionallight');

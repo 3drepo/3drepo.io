@@ -295,7 +295,7 @@ angular.module("3drepo")
 				// width of other screens for a multi-screen set-up.
 				// This only affects the dragend event.
 				var dragEndX = event.clientX - screen.availLeft;
-				var dragEndY = event.clientY;
+				var dragEndY = event.clientY - screen.availTop;
 
 				var pickObj = ViewerService.pickPoint(dragEndX, dragEndY);
 
