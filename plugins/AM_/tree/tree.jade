@@ -6,15 +6,20 @@ div(ui-tree, data-nodrop-enabled="true", data-nodrag="true", ng-show="tr.showTre
 		on-node-selected="tr.nodeSelected(nodeId)"
 		on-node-toggled="tr.nodeToggled(nodeId)"
 		selected-node="tr.selectedNode"
-		toggled-node="tr.toggledNode")
+		toggled-node="tr.toggledNode"
+	)
 
-div(ng-if="tr.showFilterList")
-	md-virtual-repeat-container(id="vertical-container")
-		div(md-virtual-repeat="item in tr.infiniteItems", md-on-demand, class="repeated-item", flex)
-			//md-button.md-mini.treeNodeButton(ng-click="tn.nodeToggled(tn.node._id)", aria-label="Toggle", ng-if="item.showToggleButton")
-				md-icon(md-font-icon="fa-eye", class="fa", ng-if="item.toggleState")
-				md-icon(md-font-icon="fa-eye-slash", class="fa", ng-if="!item.toggleState")
-			span(ng-click="tn.nodeToggled(tn.node._id)")
-				span(class="fa fa-eye", ng-if="tn.toggleState")
-				span(class="fa fa-eye-slash", ng-if="!tn.toggleState")
-			label {{item.name}}
+div(ng-cloak="", class="virtualRepeatdemoInfiniteScroll", ng-if="tr.showFilterList")
+	md-content(layout="column")
+		md-virtual-repeat-container(id="vertical-container")
+			div(
+				md-virtual-repeat="item in tr.infiniteItems"
+				md-on-demand="", class="repeated-item"
+				flex=""
+				ng-click="tr.filterItemSelected(item)"
+				ng-class="item.class"
+			)
+				span(ng-click="tr.filterItemToggled(item)", ng-if="item!==null")
+					span(class="fa fa-eye", ng-if="item.toggleState")
+					span(class="fa fa-eye-slash", ng-if="!item.toggleState")
+				label {{item.name}}

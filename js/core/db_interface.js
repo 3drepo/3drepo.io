@@ -328,21 +328,25 @@ DBInterface.prototype.searchTree = function(dbName, project, branch, revision, s
     var i,
         length,
         searchStringChars = searchstring.split(""),
-        regex = "",
         regexStr = "",
-        filter = {};
+        filter = {},
+        projection = {_id: 1, name: 1};
 
+    // If searchstring is "door" create regex to search for [dD][oO][oO][rR]
     for (i = 0, length = searchStringChars.length; i < length; i += 1) {
         regexStr += "[" + searchStringChars[i] + searchStringChars[i].toUpperCase() + "]";
     }
-    regex = new RegExp(regexStr);
     filter = {
-        name: regex
+        name: new RegExp(regexStr)
     };
 
-    dbConn(this.logger).filterColl(dbName, project + ".scene", filter, null, function(err, docs) {
-        if (err.value) return callback(err);
-
+    dbConn(this.logger).filterColl(dbName, project + ".scene", filter, projection, function(err, docs) {
+        if (err.value) {
+            return callback(err);
+        }
+        for (i = 0, length = docs.length; i < length; i += 1) {
+            docs[i]._id = uuidToString(docs[i]._id);
+        }
         callback(responseCodes.OK, docs);
     });
 };

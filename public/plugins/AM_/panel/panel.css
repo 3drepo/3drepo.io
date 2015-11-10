@@ -49,10 +49,14 @@ filter, panel-content {
 }
 
 .panelContentSelected {
-  max-height: 500px;
+  height: 500px;
 }
 .panelContentUnselected {
-  max-height: 100px;
+  height: 100px;
+}
+
+panel-content md-content {
+  height: 100%;
 }
 
 panel #buttons {

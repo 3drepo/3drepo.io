@@ -13,16 +13,14 @@ tree span .fa {
   padding: 0 2px 0 0;
 }
 
-.angular-ui-tree-handle,
-tree .repeated-item {
+.angular-ui-tree-handle {
   border-bottom: 1px solid #C5CAE9;
   cursor: default;
   padding: 6px 0 4px;
   display: inline-block;
   width: 800px;
 }
-.angular-ui-tree-handle:hover,
-tree .repeated-item:hover{
+.angular-ui-tree-handle:hover {
   background: #E8EAF6;
 }
 
@@ -35,8 +33,7 @@ tree .repeated-item:hover{
 .tree-node:hover {
   cursor: default;
 }
-.tree-node label,
-tree .repeated-item label {
+.tree-node label {
   font-size: 12px;
   margin-left: 10px;
   position: absolute;
@@ -46,14 +43,34 @@ tree .repeated-item label {
   cursor: pointer;
 }
 
-.md-virtual-repeat-container {
-  position: inherit;
-  display: inline-block;
+tree .virtualRepeatdemoInfiniteScroll #vertical-container {
+  height: 500px;
+  min-width: 280px;
+  max-width: 800px;
 }
-.md-virtual-repeat-scroller,
-.md-virtual-repeat-offsetter{
-  position: relative !important;
+
+tree .virtualRepeatdemoInfiniteScroll .repeated-item {
+  border-bottom: 1px solid #C5CAE9;
+  cursor: default;
+  padding: 6px 0 4px;
+  height: 31px;
+  outline: none;
 }
-.md-virtual-repeat-sizer {
-  height: 0 !important;
+tree .virtualRepeatdemoInfiniteScroll .repeated-item:hover {
+  background: #E8EAF6;
+}
+
+.selectedFilterItem {
+  background: #E8EAF6;
+}
+.unselectedFilterItem {
+  background: #FFFFFF;
+}
+
+tree .virtualRepeatdemoInfiniteScroll .repeated-item label {
+  font-size: 12px;
+  margin-left: 10px;
+  position: absolute;
+  color: #3F51B5;
+  white-space: nowrap;
 }

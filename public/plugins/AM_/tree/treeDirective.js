@@ -39,10 +39,13 @@
     function TreeCtrl($scope, $timeout, TreeService) {
         var tr = this,
             promise = null,
-            item = {};
+            item = {},
+            i = 0,
+            length = 0;
         tr.nodes = [];
         tr.showTree = false;
         tr.showFilterList = true;
+        tr.currentFilterItemSelected = null;
 
         promise = TreeService.init();
         promise.then(function(data) {
@@ -69,7 +72,11 @@
                     promise.then(function(json) {
                         tr.showChildren = false;
                         tr.nodes = json.data;
-                        console.log(tr.nodes);
+                        for (i = 0, length = tr.nodes.length; i < length; i += 1) {
+                            tr.nodes[i].index = i;
+                            tr.nodes[i].toggleState = true;
+                            tr.nodes[i].class = "unselectedFilterItem";
+                        }
                         setupInfiniteItems();
                     });
                 }
@@ -84,50 +91,57 @@
         tr.nodeToggled = function (nodeId) {
             tr.toggledNode = nodeId;
             TreeService.toggleNode(nodeId);
-            tr.data.openNodes.push(nodeId);
         };
 
-        function setupInfiniteItems() {
+        tr.filterItemSelected = function (item) {
+            if (tr.currentFilterItemSelected === null) {
+                tr.nodes[item.index].class = "selectedFilterItem";
+                tr.currentFilterItemSelected = item;
+            }
+            else if (item.index === tr.currentFilterItemSelected.index) {
+                tr.nodes[item.index].class = "unselectedFilterItem";
+                tr.currentFilterItemSelected = null;
+            }
+            else {
+                tr.nodes[tr.currentFilterItemSelected.index].class = "unselectedFilterItem";
+                tr.nodes[item.index].class = "selectedFilterItem";
+                tr.currentFilterItemSelected = item;
+            }
+            TreeService.selectNode(tr.nodes[item.index]._id);
+        };
+
+        tr.filterItemToggled = function (item) {
+            tr.nodes[item.index].toggleState = !tr.nodes[item.index].toggleState;
+            TreeService.toggleNode(item._id);
+        };
+
+        function setupInfiniteItems () {
             tr.infiniteItems = {
                 numLoaded_: 0,
                 toLoad_: 0,
-                // Required.
                 getItemAtIndex: function(index) {
                     if (index > this.numLoaded_) {
                         this.fetchMoreItems_(index);
                         return null;
                     }
-                    item = {};
+
                     if (index < tr.nodes.length) {
-                        item.name = tr.nodes[index].name;
-                        item.showToggleButton = true;
-                        item.toggleState = true;
+                        return tr.nodes[index];
                     }
                     else {
-                        item.name = "";
-                        item.showToggleButton = false;
+                        return null;
                     }
-                    return item;
                 },
-                // Required.
-                // For infinite scroll behavior, we always return a slightly higher
-                // number than the previously loaded items.
                 getLength: function() {
                     return this.numLoaded_ + 5;
                 },
                 fetchMoreItems_: function(index) {
-                    console.log(index);
-                    // For demo purposes, we simulate loading more items with a timed
-                    // promise. In real code, this function would likely contain an
-                    // $http request.
-                    /*
                     if (this.toLoad_ < index) {
                         this.toLoad_ += 20;
                         $timeout(angular.noop, 300).then(angular.bind(this, function() {
                             this.numLoaded_ = this.toLoad_;
                         }));
                     }
-                    */
                 }
             };
         }

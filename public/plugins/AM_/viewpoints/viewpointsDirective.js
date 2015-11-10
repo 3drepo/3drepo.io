@@ -34,12 +34,14 @@
         };
     }
 
-    ViewpointsCtrl.$inject = ["$scope"];
+    ViewpointsCtrl.$inject = ["$scope", "ViewerService"];
 
-    function ViewpointsCtrl($scope) {
+    function ViewpointsCtrl($scope, ViewerService) {
         var vp = this;
+        console.log(ViewerService.defaultViewer.viewpoints);
 
         $scope.$watch("vp.filterText", function (newValue) {
+            console.log(newValue);
             if (angular.isDefined(newValue)) {
                 vp.filterText = newValue;
             }

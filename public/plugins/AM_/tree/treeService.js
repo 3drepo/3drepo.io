@@ -31,11 +31,8 @@
             var deferred = $q.defer(),
                 url = "/" + state.account + "/" + state.project + "/revision/" + state.branch + "/head/fulltree.json";
 
-            console.log(new Date());
             $http.get(serverConfig.apiUrl(url))
                 .then(function(json) {
-                    console.log(new Date());
-                    console.log(json.data);
                     deferred.resolve(json.data);
                 });
 
@@ -48,7 +45,6 @@
 
             $http.get(serverConfig.apiUrl(url))
                 .then(function(json) {
-                    console.log(json);
                     deferred.resolve(json);
                 });
 
