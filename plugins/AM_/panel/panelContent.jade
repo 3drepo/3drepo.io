@@ -3,7 +3,7 @@ div(layout="column", class="md-whiteframe-1dp", ng-show="pc.showContent")
 	md-toolbar(class="md-primary", ng-click="pc.click()" ng-if="pc.showTitleBar")
 		div(class="md-toolbar-tools")
 			span(class="fa", ng-class="pc.icon")
-			//label(class="md-flex") {{pc.contentTitle}}
+			label(class="md-flex") {{pc.contentTitle}}
 
 	md-content(id="content", flex, layout-padding, ng-class="pc.class")
 

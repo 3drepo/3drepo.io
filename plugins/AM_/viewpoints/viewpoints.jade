@@ -1,2 +1,10 @@
-| {{vp.filterText}}
+.viewpoint(ng-repeat="viewpoint in vp.viewpoints")
+	label {{viewpoint.name}}
+
 .viewpointsTools
+	.viewpointsToolsInput(ng-show="vp.inputState")
+		md-input-container(md-no-float="")
+			input(type="text", placeholder="Name", ng-model="vp.viewpointName")
+		md-button(ng-click="vp.saveViewpoint()") Save
+	.viewpointsToolsBar
+		span.fa.fa-plus(ng-click="vp.toggleInputState()")

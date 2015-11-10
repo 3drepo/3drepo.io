@@ -161,6 +161,7 @@ define("SRC_VERTEX_LIMIT", 65535);
 
 define("REPO_REST_API_ACCOUNT", "account");
 define("REPO_REST_API_PROJECT", "project");
+define("REPO_REST_API_BRANCH", "branch");
 define("REPO_REST_API_SID", "sid");
 define("REPO_REST_API_FORMAT", "format");
 
