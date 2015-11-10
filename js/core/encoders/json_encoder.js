@@ -91,6 +91,7 @@ function processChild(child, branch, revision, account, project, selected, names
 
 		childNode["key"]       = shared_id;
 		childNode["title"]     = htmlMode ? escapeHtml(name) : name;
+		childNode["tooltip"]   = childNode["title"];
 		childNode["uuid"]      = uuid;
 		childNode["folder"]    = ("children" in child);
 		childNode["lazy"]      = true;
@@ -105,6 +106,7 @@ function processChild(child, branch, revision, account, project, selected, names
 		childNode["account"]   = account;
 		childNode["project"]   = child["project"];
 		childNode["title"]     = htmlMode ? escapeHtml(child["project"]) : child["project"];
+		childNode["tooltip"]   = childNode["title"];
 
 		// FIXME: Currently only federation within the same account is supported
 		// Otherwise, account needs to be on the child
@@ -541,7 +543,9 @@ exports.route = function(router)
 		if(params.subformat == "mpc")
 		{
 			dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, false, {}, function (err, type, uid, fromStash, scene) {
-				if (err.value) return err_callback(err);
+				if (err.value) {
+					return err_callback(err);
+				}
 
 				if (type == "mesh")
 				{
@@ -565,7 +569,9 @@ exports.route = function(router)
 							outJSON["maxGeoCount"] = subMeshKeys.length;
 
 							dbInterface(req[C.REQ_REPO].logger).getChildrenByUID(params.account, params.project, params.uid, false, function (err, docs) {
-								if (err.value) return err_callback(err);
+									if (err.value) {
+										return err_callback(err);
+									}
 
 								var children = repoGraphScene(req[C.REQ_REPO].logger).decode(docs);
 

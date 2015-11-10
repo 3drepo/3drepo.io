@@ -162,6 +162,7 @@ define("SRC_VERTEX_LIMIT", 65535);
 
 define("REPO_REST_API_ACCOUNT", "account");
 define("REPO_REST_API_PROJECT", "project");
+define("REPO_REST_API_ID", "id");
 define("REPO_REST_API_SID", "sid");
 define("REPO_REST_API_FORMAT", "format");
 
@@ -170,4 +171,10 @@ define("REPO_SESSION_USER", "user");
 define("REQ_REPO", "repo");
 
 
+//-----------------------------------------------------------------------------
+//
+// MongoDB error codes
+//
+//-----------------------------------------------------------------------------
 
+define("MONGO_AUTH_FAILED", 18);

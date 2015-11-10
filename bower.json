@@ -22,7 +22,7 @@
     "tests"
   ],
   "dependencies": {
-    "angular": "1.4.4",
+    "angular": "1.4.7",
     "angular-bootstrap-slider": "~0.1.18",
     "angular-ui-router": "*",
     "bootstrap-submenu": "~1.2.13",

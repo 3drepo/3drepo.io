@@ -98,6 +98,8 @@ var Gamepad = function(viewer) {
 				{
 					xaxis: self.gamepad.axes[0],
 					yaxis: self.gamepad.axes[1],
+                    xoffset: 0.0,
+                    yoffset: 0.0,
 					button: self.gamepad.buttons[button_idx]
 				}
 			);
@@ -111,6 +113,8 @@ var Gamepad = function(viewer) {
 				{
 					xaxis: self.gamepad.buttons[15].value - self.gamepad.buttons[14].value,
 					yaxis: self.gamepad.buttons[13].value - self.gamepad.buttons[12].value,
+                    xoffset: 0.0,
+                    yoffset: 0.0,
 					button: self.gamepad.buttons[button_idx]
 				}
 			);
@@ -121,8 +125,10 @@ var Gamepad = function(viewer) {
 		{
 			$.event.trigger("gamepadMove",
 				{
-					xaxis: self.gamepad.axes[4],
-					yaxis: self.gamepad.axes[5],
+					xaxis: self.gamepad.axes[0],
+					yaxis: self.gamepad.axes[1],
+                    xoffset: 0.0,
+                    yoffset: 0.15,
 					button: self.gamepad.buttons[button_idx]
 				}
 			);

@@ -88,6 +88,7 @@ var responseCodes = {
 		return {
 			value: 1000,
 			message: mongoErr.toString(), //"[" + mongoErr["code"] + "] @ " + mongoErr["err"],
+			dbErr: mongoErr,
 			status: 500
 		};
 	},
@@ -120,8 +121,9 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 {
 	"use strict";
 
-	if (valid_values.indexOf(resCode.value) === -1) {
-		throw Error("Unspecified error code [VALUE: " + resCode.value + "]");
+	if (!resCode || valid_values.indexOf(resCode.value) === -1) {
+
+		throw Error("Unspecified error code [" + JSON.stringify(resCode) + " @ " + place + "]");
 	}
 
 	if (resCode.value) // Prepare error response

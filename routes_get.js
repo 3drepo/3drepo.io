@@ -281,6 +281,8 @@ repoGetHandler.prototype.transRouter = function(format, regex, req, res, next, p
 		format = this.default_format;
 	}
 
+    format = format.toLowerCase();
+
 	var responsePlace = regex + "." + format;
 
 	var self = this;

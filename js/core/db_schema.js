@@ -20,6 +20,8 @@ var v = new Validator();
 var systemLogger = require('./logger.js').systemLogger;
 var responseCodes = require('./response_codes.js');
 
+var C = require("./constants.js");
+
 module.exports = function() {
 
 	this.schemas = {};
@@ -77,7 +79,7 @@ module.exports = function() {
 		}
 	);
 
-	this.registerSchema('/:account/:project/issues/:sid',
+	this.registerSchema('/:account/:project/issues/:id',
 		{
 			"uid" : {"type" : "string" },
 			"name" : {"type" : "string" },
@@ -126,8 +128,9 @@ module.exports = function() {
 		}
 	];
 
-	for(var idx = 0; idx < this.customTypes.length; idx++)
+	for(var idx = 0; idx < this.customTypes.length; idx++) {
 		v.addSchema(this.customTypes[idx], this.customTypes[idx]["id"]);
+	}
 
 	// Expose the validate function
 	this.validate = function(regex)
@@ -136,16 +139,21 @@ module.exports = function() {
 		{
 			systemLogger.logError('Schema not defined for regex :' + regex);
 			return function (req, res, next) {
-				responseCodes.respond( 'Schema validation', responseCodes.MISSING_SCHEMA, res, { "regex" : regex });
+				req[C.REQ_REPO].processed = true;
+
+				responseCodes.respond( 'Schema validation', req, res, next, responseCodes.MISSING_SCHEMA, { "regex" : regex });
 			};
 		} else {
 			return function(req, res, next) {
 				var validateObj = v.validate(req.body, this.schemas[regex]);
 
-				if (validateObj.errors.length)
-					responseCodes.respond('Schema validation', responseCodes.VALIDATION_ERROR(validateObj.errors), res, {} );
-				else
+				if (validateObj.errors.length) {
+					req[C.REQ_REPO].processed = true;
+
+					responseCodes.respond('Schema validation', req, res, next, responseCodes.VALIDATION_ERROR(validateObj.errors), {} );
+				} else {
 					next();
+				}
 			};
 		}
 	};

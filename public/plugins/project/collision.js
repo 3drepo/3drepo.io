@@ -34,8 +34,8 @@ var Collision = function(viewer) {
 	this.updateDirections = function(event, gamepad)
 	{
 		var speed = self.viewer.nav._x3domNode._vf.speed;
-		var userX = self._deltaT * speed * gamepad.xaxis;
-		var userY = self._deltaT * speed * gamepad.yaxis;
+		var userX = self._deltaT * speed * (gamepad.xaxis + gamepad.xoffset);
+		var userY = self._deltaT * speed * (gamepad.yaxis + gamepad.yoffset);
 
 		if ((userX == 0) && (userY == 0))
 			self.stopped = true;

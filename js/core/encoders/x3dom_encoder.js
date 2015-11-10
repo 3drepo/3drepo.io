@@ -241,9 +241,6 @@ function axisangle(mat)
 
 /*
 function det(mat) {
-	console.log(mat);
-	console.log(mat[0,0]);
-
 	return mat[0,0] * (mat[1,1] * mat[2,2] - mat[1,2] * mat[2,1])
 		- mat[0,1] * (mat[1,0] * mat[2,2] - mat[1,2] * mat[2,0])
 		- mat[0,2] * (mat[1,0] * mat[2,1] - mat[1,1] * mat[2,0]);
@@ -489,7 +486,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			if (child[C.REPO_NODE_LABEL_COMBINED_MAP])
 			{
 				subMeshKeys = child[C.REPO_NODE_LABEL_COMBINED_MAP].map(function (item) {
-					return item[C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]
+					return utils.uuidToString(item[C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]);
 				});
 			} else {
 				subMeshKeys = [null]; // No submesh
@@ -626,8 +623,9 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, subM
 
 			var suffix = "";
 
-			if (subMeshID)
-				suffix += "#" + utils.uuidToString(subMeshID);
+			if (subMeshID) {
+				suffix += "#" + subMeshID
+			}
 
 			if ('children' in mat) {
 				var tex_id = mat['children'][0]['id'];
@@ -964,67 +962,109 @@ exports.route = function(router)
 			var runningFaceTotal = 0;
 
 			// TODO: Only needs the shell not the whole thing
-			dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, false, projection, function(err, type, uid, fromStash, objs)
-			{
-				if (err.value) return callback(err);
-
-				var xmlDoc      = X3D_Header();
-				var sceneRoot	= X3D_CreateScene(xmlDoc);
-
-				var mesh = objs.meshes[params.uid];
-				var maxSubMeshIDX = 1;
-
-				// First sort the combined map in order of vertex ID
-				mesh[C.REPO_NODE_LABEL_COMBINED_MAP].sort(repoNodeMesh.mergeMapSort);
-
-				for(var i = 0; i < mesh[C.REPO_NODE_LABEL_COMBINED_MAP].length; i++)
+			dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req, function(callback) {
+				dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, false, projection, function(err, type, uid, fromStash, objs)
 				{
-					var currentMesh      = mesh[C.REPO_NODE_LABEL_COMBINED_MAP][i];
-
-					var currentMeshVFrom = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
-					var currentMeshVTo   = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO];
-
-					var currentMeshNumVertices = currentMeshVTo - currentMeshVFrom;
-
-					runningVertTotal += currentMeshNumVertices;
-
-					if (runningVertTotal > C.SRC_VERTEX_LIMIT) {
-						maxSubMeshIDX += 1;
-
-						runningVertTotal = currentMeshNumVertices;
+					if (err.value) {
+						return callback(err);
 					}
-				}
 
-				maxSubMeshIDX += 1;
+					var xmlDoc      = X3D_Header();
+					var sceneRoot	= X3D_CreateScene(xmlDoc);
 
-				for(var subMeshIDX = 0; subMeshIDX < maxSubMeshIDX; subMeshIDX++)
-				{
-					var subMeshName = mesh["id"] + "_" + subMeshIDX;
+					var mesh = objs.meshes[params.uid];
+					var maxSubMeshIDX = 1;
 
-					var shape = xmlDoc.createElement('Shape');
-					shape.setAttribute('DEF', subMeshName);
+					// First sort the combined map in order of vertex ID
+					mesh[C.REPO_NODE_LABEL_COMBINED_MAP].sort(repoNodeMesh.mergeMapSort);
 
-					var bbox = repoNodeMesh.extractBoundingBox(mesh);
-					shape.setAttribute('bboxCenter', bbox.center);
-					shape.setAttribute('bboxSize', bbox.size);
+					var subMeshBBoxes = [];
+					var bbox = [[],[]];
 
-					var app = xmlDoc.createElement('Appearance');
-					var mat = xmlDoc.createElement('Material');
-					mat.setAttribute('diffuseColor', '0 1 0');
-					mat.textContent = ' ';
-					app.appendChild(mat);
-					shape.appendChild(app);
+					for(var i = 0; i < mesh[C.REPO_NODE_LABEL_COMBINED_MAP].length; i++)
+					{
+						var currentMesh      = mesh[C.REPO_NODE_LABEL_COMBINED_MAP][i];
 
-					var eg  = xmlDoc.createElement('ExternalGeometry');
-					eg.setAttribute('url', config.api_server.url + '/' + params.account + '/' + params.project + '/' + params.uid + '.src.mpc#' + subMeshName);
-					eg.textContent = ' ';
-					shape.appendChild(eg);
+						var currentMeshVFrom = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
+						var currentMeshVTo   = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO];
 
-					sceneRoot.root.appendChild(shape);
-				}
+						var currentMeshNumVertices = currentMeshVTo - currentMeshVFrom;
 
-				return err_callback(responseCodes.OK, new xmlSerial().serializeToString(xmlDoc));
-			});
+						var currentMeshBBox   = currentMesh[C.REPO_NODE_LABEL_BOUNDING_BOX];
+
+						runningVertTotal += currentMeshNumVertices;
+
+						for(var v_idx = 0; v_idx < 3; v_idx++)
+						{
+							if (v_idx >= bbox[0].length)
+							{
+								bbox[0][v_idx] = currentMeshBBox[0][v_idx];
+								bbox[1][v_idx] = currentMeshBBox[1][v_idx];
+							} else {
+								if (bbox[0][v_idx] > currentMeshBBox[0][v_idx]) {
+									bbox[0][v_idx] = currentMeshBBox[0][v_idx];
+								}
+
+								if (bbox[1][v_idx] < currentMeshBBox[1][v_idx]) {
+									bbox[1][v_idx] = currentMeshBBox[1][v_idx];
+								}
+							}
+						}
+
+						if (runningVertTotal > C.SRC_VERTEX_LIMIT) {
+							var numAddedMeshes = 0;
+
+							if (currentMeshNumVertices > C.SRC_VERTEX_LIMIT) {
+								numAddedMeshes = Math.ceil(currentMeshNumVertices / C.SRC_VERTEX_LIMIT)
+								runningVertTotal = 0;
+							} else {
+								numAddedMeshes = 1;
+								runningVertTotal = currentMeshNumVertices;
+							}
+
+							maxSubMeshIDX += numAddedMeshes;
+
+							for(var j = 0; j < numAddedMeshes; j++)
+							{
+								subMeshBBoxes.push(bbox);
+							}
+
+							bbox = [[], []];
+						}
+					}
+
+					for(var subMeshIDX = 0; subMeshIDX < maxSubMeshIDX; subMeshIDX++)
+					{
+						var subMeshName = mesh["id"] + "_" + subMeshIDX;
+
+						var shape = xmlDoc.createElement('Shape');
+						shape.setAttribute('DEF', subMeshName);
+
+						var fakeMesh = {};
+						fakeMesh[C.REPO_NODE_LABEL_BOUNDING_BOX] = subMeshBBoxes[subMeshIDX];
+						var bbox = repoNodeMesh.extractBoundingBox(fakeMesh);
+
+						shape.setAttribute('bboxCenter', bbox.center);
+						shape.setAttribute('bboxSize', bbox.size);
+
+						var app = xmlDoc.createElement('Appearance');
+						var mat = xmlDoc.createElement('Material');
+						mat.setAttribute('diffuseColor', '0 1 0');
+						mat.textContent = ' ';
+						app.appendChild(mat);
+						shape.appendChild(app);
+
+						var eg  = xmlDoc.createElement('ExternalGeometry');
+						eg.setAttribute('url', config.api_server.url + '/' + params.account + '/' + params.project + '/' + params.uid + '.src.mpc#' + subMeshName);
+						eg.textContent = ' ';
+						shape.appendChild(eg);
+
+						sceneRoot.root.appendChild(shape);
+					}
+
+					return callback(responseCodes.OK, new xmlSerial().serializeToString(xmlDoc));
+				});
+			}, err_callback);
 		} else {
 			return err_callback(responseCodes.FORMAT_NOT_SUPPORTED);
 		}
