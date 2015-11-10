@@ -180,8 +180,6 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 			{
 				logger.logInfo("Splitting large meshes into smaller meshes");
 
-				process.exit(0);
-
 				// Index from old vertex IDs to new ones
 				var reindexMap      = {};
 

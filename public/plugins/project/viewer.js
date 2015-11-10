@@ -567,7 +567,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.loadViewpoint = null;
 
-	this.getAxisAngle = function(from, at, look)
+	this.getAxisAngle = function(from, at, up)
 	{
 		var x3dfrom	= new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
 		var x3dat	= new x3dom.fields.SFVec3f(at[0], at[1], at[2]);
@@ -578,7 +578,9 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		var q = new x3dom.fields.Quaternion(0.0,0.0,0.0,1.0);
 		q.setValue(viewMat);
 
-		return (q.toAxisAngle()[0].toGL() + q[1]);
+		q = q.toAxisAngle();
+
+		return Array.prototype.concat(q[0].toGL(), q[1]);
 	}
 
 	// TODO: Should move this to somewhere more general (utils ? )
@@ -623,7 +625,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			if (from && at && up)
 			{
 				var q = self.getAxisAngle(from, at, up);
-				newViewpoint.setAttribute('orientation', q.join(','));
+				newViewPoint.setAttribute('orientation', q.join(','));
 			}
 
 			if (!self.viewpoints[groupName.group])
@@ -1391,6 +1393,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		{
 			var clipPlaneIDX = self.addClippingPlane(
 					clippingPlanes[clipidx]["axis"],
+					clippingPlanes[clipidx]["distance"],
 					clippingPlanes[clipidx]["percentage"],
 					clippingPlanes[clipidx]["clipDirection"]
 				);
@@ -1400,13 +1403,14 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	/**
 	* Adds a clipping plane to the viewer
 	* @param {string} axis - Axis through which the plane clips
-	* @param {number} percentage - Percentage along the bounding box to clip
+	* @param {number} distance - Distance along the bounding box to clip
+	* @param {number} percentage - Percentage along the bounding box to clip (overrides distance)
 	* @param {number} clipDirection - Direction of clipping (-1 or 1)
 	*/
-	this.addClippingPlane = function(axis, percentage, clipDirection) {
+	this.addClippingPlane = function(axis, distance, percentage, clipDirection) {
 		clippingPlaneID += 1;
 
-		var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, [1, 1, 1], percentage, clipDirection);
+		var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, [1, 1, 1], distance, percentage, clipDirection);
 		self.clippingPlanes.push(newClipPlane);
 
 		return clippingPlaneID;
@@ -1451,7 +1455,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
  * @param {number} percentage - Percentage along the bounding box to clip
  * @param {number} clipDirection - Direction of clipping (-1 or 1)
  */
-var ClipPlane = function(id, viewer, axis, colour, percentage, clipDirection)
+var ClipPlane = function(id, viewer, axis, colour, distance, percentage, clipDirection)
 {
 	var self = this;
 
@@ -1470,11 +1474,18 @@ var ClipPlane = function(id, viewer, axis, colour, percentage, clipDirection)
 	this.clipDirection = (clipDirection === undefined) ? -1 : clipDirection;
 
 	/**
-	* Value representing the distance from the origin of
+	* Value representing the percentage distance from the origin of
 	* the clip plane
 	* @type {number}
 	*/
 	this.percentage = (percentage === undefined) ? 1.0 : percentage
+
+	/**
+	* Value representing the distance from the origin of
+	* the clip plane
+	* @type {number}
+	*/
+	this.distance = distance;
 
 	/**
 	* Volume containing the clipping plane
@@ -1594,8 +1605,14 @@ var ClipPlane = function(id, viewer, axis, colour, percentage, clipDirection)
 		var max = volume.max.toGL();
 
 		self.percentage = percentage;
+		var distance = 0.0;
 
-		var distance = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
+		if (self.distance)
+		{
+			distance = self.distance;
+		} else {
+			distance = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
+		}
 
 		// Update the clipping element plane equation
 		clipPlaneElem.setAttribute("plane", normal.toGL().join(" ") + " " + distance);

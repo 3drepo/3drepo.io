@@ -1464,9 +1464,8 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 			var projection = {};
 			projection[C.REPO_NODE_LABEL_SHARED_ID] = 1;
 
-
 			self.getObject(dbName, project, id, null, null, false, projection, function(err, type, uid, fromStash, obj) {
-				if (err.value) {
+				if (err.value && err.value !== responseCodes.OBJECT_NOT_FOUND.value) {
 					return callback(err);
 				}
 
@@ -1480,7 +1479,11 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 					data._id     = stringToUUID(newID);
 					data.created = (new Date()).getTime();
 
-					data.parent  = obj.meshes[id][C.REPO_NODE_LABEL_SHARED_ID];
+					if (obj)
+					{
+						data.parent  = obj.meshes[id][C.REPO_NODE_LABEL_SHARED_ID];
+					}
+
 					data.number  = numIssues + 1;
 
 					if (!data.name) {
