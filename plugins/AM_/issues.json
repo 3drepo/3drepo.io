@@ -1,0 +1,17 @@
+{
+    "name" : "issues",
+    "files": {
+        "angular" : [
+            "AM_/issues/issuesDirective.js",
+            "AM_/issues/issuesService.js",
+            "AM_/issues/issueDirective.js"
+        ],
+        "jade": [
+            {"template" : "AM_/issues/issues.jade", "id" : "issues.html"},
+            {"template" : "AM_/issues/issue.jade", "id" : "issue.html"}
+        ],
+        "css" : [
+            "AM_/issues/issues.css"
+        ]
+    }
+}

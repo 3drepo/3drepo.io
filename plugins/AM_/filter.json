@@ -6,6 +6,9 @@
         ],
         "jade": [
             {"template" : "AM_/filter/filter.jade", "id" : "filter.html"}
+        ],
+        "css" : [
+            "AM_/filter/filter.css"
         ]
     }
 }

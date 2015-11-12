@@ -1,0 +1,9 @@
+div(ng-class="iss.height")
+	issue(
+		ng-repeat="issue in iss.issues",
+		data="issue",
+		on-comments-toggled="iss.commentsToggled(issueId)"
+		comments-toggled-issue-id="iss.commentsToggledIssueId"
+	)
+
+	panel-content-add(ng-if="iss.showAdd", placeholder="Issue")

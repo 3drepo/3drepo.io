@@ -5,6 +5,13 @@ viewpoints {
   height: 100%;
 }
 
+viewpoints .minHeight {
+  height: 100px;
+}
+viewpoints .maxHeight {
+  height: 500px;
+}
+
 .viewpoint {
   display: block;
   border-bottom: 1px solid #C5CAE9;

@@ -1,0 +1,9 @@
+.issueTitle
+	md-button.md-primary.md-icon-button(ng-click="is.toggleComments()" aria-label="Toggle commentary")
+		md-icon(class="fa", ng-class="is.issueToggleButtonClass")
+	label {{is.data.name}}
+
+div(ng-if="is.showComments")
+	div.issueComment(ng-repeat="comment in is.data.comments")
+		label {{comment.comment}} ({{comment.owner}})
+	panel-content-add(placeholder="Comment")

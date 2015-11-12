@@ -26,7 +26,8 @@
             restrict: 'EA',
             templateUrl: 'viewpoints.html',
             scope: {
-                filterText: "="
+                filterText: "=",
+                height: "="
             },
             controller: ViewpointsCtrl,
             controllerAs: 'vp',
@@ -37,10 +38,11 @@
     ViewpointsCtrl.$inject = ["$scope", "ViewerService", "StateManager", "serverConfig"];
 
     function ViewpointsCtrl($scope, ViewerService, StateManager, serverConfig) {
-        var vp = this;
+        var vp = this,
+            defaultViewer = ViewerService.defaultViewer,
+            currentViewpointInfo = {};
         vp.viewpoints = [];
         vp.inputState = false;
-        console.log(ViewerService.defaultViewer.viewpoints);
 
         $scope.$watch("vp.filterText", function (newValue) {
             if (angular.isDefined(newValue)) {
@@ -53,28 +55,23 @@
         };
 
         vp.saveViewpoint = function () {
-            var url = "",
-                state = StateManager.state,
-                viewpoint = ViewerService.defaultViewer.getCurrentViewpointInfo();
-
             if (angular.isDefined(vp.viewpointName) && (vp.viewpointName !== "")) {
-                var rootTrans = $("#model__root")[0]._x3domNode.getCurrentTransform().inverse();
-                viewpoint.name = vp.viewpointName;
-                url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + state.branch + "/viewpoint");
-                $.ajax({
-                    type: "POST",
-                    url: url,
-                    data: {"data" : JSON.stringify(viewpoint)},
-                    dataType: "json",
-                    xhrFields: {
-                        withCredentials: true
-                    },
-                    success: function(data) {
-                        console.log("Success: " + data);
-                        vp.viewpoints.push({name: vp.viewpointName});
-                    }
-                });
+                currentViewpointInfo = defaultViewer.getCurrentViewpointInfo();
+                console.log(currentViewpointInfo);
+                defaultViewer.createViewpoint(
+                    "test__" + vp.viewpointName,
+                    currentViewpointInfo.position,
+                    currentViewpointInfo.look_at,
+                    currentViewpointInfo.up
+                );
+                console.log(defaultViewer.viewpoints);
+                vp.viewpoints.push(vp.viewpointName);
             }
+        };
+
+        vp.selectViewpoint = function (index) {
+            console.log("test__" + vp.viewpoints[index]);
+            defaultViewer.setCurrentViewpoint("test__" + vp.viewpoints[index]);
         };
     }
 }());

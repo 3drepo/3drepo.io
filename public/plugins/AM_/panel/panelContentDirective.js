@@ -46,9 +46,9 @@
             content = "",
             contentItem = "",
             filterWatch = null;
-        pc.class = "panelContentUnselected";
         pc.showHelp = false;
         pc.filterText = "";
+        pc.height = "minHeight";
 
         function setupFilterWatch() {
             filterWatch = $scope.$watch(EventService.currentEvent, function (event) {
@@ -62,12 +62,15 @@
             if (angular.isDefined(newValue)) {
                 content = angular.element($element[0].querySelector('#content'));
                 contentItem = angular.element(
-                    "<" + pc.contentItem + " filter-text='pc.filterText'></" + pc.contentItem + ">"
+                    "<" + pc.contentItem + " " +
+                        "filter-text='pc.filterText' " +
+                        "height='pc.height'>" +
+                    "</" + pc.contentItem + ">"
                 );
                 content.append(contentItem);
                 $compile(contentItem)($scope);
                 if (newValue === "tree") {
-                    pc.class = "panelContentSelected";
+                    pc.height = "maxHeight";
                     setupFilterWatch();
                 }
             }
@@ -82,7 +85,7 @@
         $scope.$watch(EventService.currentEvent, function (event) {
             if ((event.type === EventService.EVENT.PANEL_CONTENT_CLICK) && (event.value.position === pc.position)) {
                 if (event.value.contentItem !== pc.contentItem) {
-                    pc.class = "panelContentUnselected";
+                    pc.height = "minHeight";
                     if (filterWatch !== null) {
                         filterWatch(); // Cancel filter watch
                     }
@@ -94,7 +97,7 @@
         });
 
         pc.click = function () {
-            if (pc.class === "panelContentUnselected") {
+            if (pc.height === "minHeight") {
                 EventService.send(
                     EventService.EVENT.PANEL_CONTENT_CLICK,
                     {
@@ -102,11 +105,11 @@
                         contentItem: pc.contentItem
                     }
                 );
-                pc.class = "panelContentSelected";
+                pc.height = "maxHeight";
                 setupFilterWatch();
             }
             else {
-                pc.class = "panelContentUnselected";
+                pc.height = "minHeight";
                 filterWatch();
             }
         };

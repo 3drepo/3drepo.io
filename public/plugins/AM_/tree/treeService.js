@@ -53,7 +53,7 @@
 
         var selectNode = function (nodeId) {
             if (nodeId === currentSelectedNodeId) {
-                $(document).trigger("objectSelected", [null, true]);
+                $(document).trigger("objectSelected", [undefined, true]);
                 currentSelectedNodeId = null;
             }
             else {

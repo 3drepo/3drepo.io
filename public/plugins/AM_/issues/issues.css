@@ -1,0 +1,38 @@
+issues .maxHeight {
+  height: 300px;
+}
+issues .minHeight {
+  height: 50px;
+}
+
+issue {
+  display: block;
+  border-bottom: 1px solid #C5CAE9;
+  color: #3F51B5;
+}
+
+.issueTitle {
+  position: relative;
+  display: block;
+  height: 48px;
+}
+.issueTitle:hover {
+  background: #E8EAF6;
+  cursor: pointer;
+}
+.issueTitle span {
+  outline: none;
+}
+.issueTitle label {
+  position: absolute;
+  top: 14px;
+  left: 60px;
+}
+
+issue .issueComment {
+  display: block;
+  padding-left: 10px;
+}
+issue .issueComment label {
+  font-weight: normal;
+}

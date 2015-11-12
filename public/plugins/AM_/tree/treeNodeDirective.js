@@ -63,8 +63,10 @@
     function TreeNodeCtrl ($scope, $filter) {
         var tn = this;
         tn.collapsed = true;
+        tn.collapseButtonClass = "fa-chevron-right";
         tn.showCollapseButton = false;
         tn.toggleState = true;
+        tn.toggleButtonClass = "fa-eye";
         tn.selected = false;
         tn.selectedClass = "tree-node-unselected";
 
@@ -89,6 +91,7 @@
 
         tn.collapse = function () {
             tn.collapsed = !tn.collapsed;
+            tn.collapseButtonClass = tn.collapsed ? "fa-chevron-right" : "fa-chevron-down";
         };
 
         tn.nodeSelected = function (nodeId) {
@@ -99,6 +102,7 @@
 
         tn.nodeToggled = function (nodeId) {
             tn.toggleState = !tn.toggleState;
+            tn.toggleButtonClass = tn.toggleState ? "fa-eye" : "fa-eye-slash";
             tn.onNodeToggled({nodeId: nodeId});
         };
     }

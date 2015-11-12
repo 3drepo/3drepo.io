@@ -1,3 +1,5 @@
+/** Panel *************************************************************************************************************/
+
 panel  {
   display: block;
   position: absolute;
@@ -7,26 +9,6 @@ panel  {
 panel #items {
   position: absolute;
   width: 300px;
-}
-
-#leftPanel {
-  left: 0;
-}
-#leftPanel #items {
-  right: 0;
-}
-#leftPanel #buttons {
-  left: 0;
-}
-
-#rightPanel {
-  right: 0;
-}
-#rightPanel #items {
-  left: 0;
-}
-#rightPanel #buttons {
-  right: 0;
 }
 
 panel md-toolbar {
@@ -42,21 +24,30 @@ panel md-toolbar label {
   margin-left: 10px;
 }
 
-filter, panel-content {
+panel-content {
   display: block;
   margin-bottom: 20px;
   position: relative;
 }
 
-.panelContentSelected {
-  height: 500px;
+#leftPanel {
+  left: 0;
 }
-.panelContentUnselected {
-  height: 100px;
+#leftPanel #items {
+  right: 0;
+}
+#leftPanel #buttons {
+  left: 0;
 }
 
-panel-content md-content {
-  height: 100%;
+#rightPanel {
+  right: 500px;
+}
+#rightPanel #items {
+  left: 0;
+}
+#rightPanel #buttons {
+  right: 0;
 }
 
 panel #buttons {
@@ -68,6 +59,50 @@ panel #buttons button {
   margin-bottom: 20px;
 }
 
-filter md-input-container {
-  padding-bottom: 0;
+/** Panel Content *****************************************************************************************************/
+
+panel-content md-content {
+  height: 100%;
+}
+
+/** Panel Content Add *************************************************************************************************/
+
+panel-content-add {
+  display: block;
+  margin: 30px 0 10px;
+}
+
+panel-content-add .panelContentAddInput {
+  width: 100%;
+  height: 50px;
+  bottom: 30px;
+  color: #3F51B5;
+  border: #9FA8DA 1px solid;
+  border-bottom: none;
+}
+panel-content-add .panelContentAddInput input {
+  position: absolute;
+  top: 5px;
+  width: 180px;
+}
+panel-content-add .panelContentAddInput button {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+panel-content-add .panelContentAddBar {
+  width: 100%;
+  height: 30px;
+  bottom: 0;
+  background: #9FA8DA;
+  color: #3F51B5;
+  padding: 5px 5px 5px 10px;
+}
+panel-content-add .panelContentAddBar span {
+  font-size: 20px;
+  outline: none;
+}
+panel-content-add .panelContentAddBar span:hover {
+  cursor: pointer;
 }

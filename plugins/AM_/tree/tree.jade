@@ -1,25 +1,26 @@
-div(ui-tree, data-nodrop-enabled="true", data-nodrag="true", ng-show="tr.showTree")
-	tree-nodes(
-		nodes="tr.nodes"
-		show-children="tr.showChildren"
-		ng-if="true"
-		on-node-selected="tr.nodeSelected(nodeId)"
-		on-node-toggled="tr.nodeToggled(nodeId)"
-		selected-node="tr.selectedNode"
-		toggled-node="tr.toggledNode"
-	)
+div(ng-class="tr.height")
+	div(ui-tree, data-nodrop-enabled="true", data-nodrag="true", ng-show="tr.showTree")
+		tree-nodes(
+			nodes="tr.nodes"
+			show-children="tr.showChildren"
+			ng-if="true"
+			on-node-selected="tr.nodeSelected(nodeId)"
+			on-node-toggled="tr.nodeToggled(nodeId)"
+			selected-node="tr.selectedNode"
+			toggled-node="tr.toggledNode"
+		)
 
-div(ng-cloak="", class="virtualRepeatdemoInfiniteScroll", ng-if="tr.showFilterList")
-	md-content(layout="column")
-		md-virtual-repeat-container(id="vertical-container")
-			div(
-				md-virtual-repeat="item in tr.infiniteItems"
-				md-on-demand="", class="repeated-item"
-				flex=""
-				ng-click="tr.filterItemSelected(item)"
-				ng-class="item.class"
-			)
-				span(ng-click="tr.filterItemToggled(item)", ng-if="item!==null")
-					span(class="fa fa-eye", ng-if="item.toggleState")
-					span(class="fa fa-eye-slash", ng-if="!item.toggleState")
-				label {{item.name}}
+	div(ng-cloak="", class="virtualRepeatdemoInfiniteScroll", ng-if="tr.showFilterList")
+		md-content(layout="column")
+			md-virtual-repeat-container(id="vertical-container")
+				div(
+					md-virtual-repeat="item in tr.infiniteItems"
+					md-on-demand="", class="repeated-item"
+					flex=""
+					ng-click="tr.filterItemSelected(item)"
+					ng-class="item.class"
+				)
+					span(ng-click="tr.filterItemToggled(item)", ng-if="item!==null")
+						span(class="fa fa-eye", ng-if="item.toggleState")
+						span(class="fa fa-eye-slash", ng-if="!item.toggleState")
+					label {{item.name}}

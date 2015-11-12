@@ -1,8 +1,15 @@
 tree {
   display: block;
   width: 100%;
+}
+
+tree .minHeight {
+  height: 100px;
+}
+tree .maxHeight {
   height: 500px;
 }
+
 tree span {
   outline: none;
   margin: 0;
@@ -24,6 +31,9 @@ tree span .fa {
   background: #E8EAF6;
 }
 
+.tree-node {
+  color: #3F51B5;
+}
 .tree-node-unselected {
   background: #FFFFFF;
 }
@@ -33,11 +43,13 @@ tree span .fa {
 .tree-node:hover {
   cursor: default;
 }
+.tree-node span {
+  padding-right: 5px;
+}
 .tree-node label {
   font-size: 12px;
   margin-left: 10px;
   position: absolute;
-  color: #3F51B5;
 }
 .tree-node label:hover {
   cursor: pointer;

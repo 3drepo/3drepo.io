@@ -210,6 +210,9 @@ module.exports.createApp = function(template)
                                                 plugin: "AM_viewpoints"
                                             },
                                             {
+                                                plugin: "AM_issues"
+                                            },
+                                            {
                                                 plugin: "AM_bottomButtons"
                                             }
                                         ]

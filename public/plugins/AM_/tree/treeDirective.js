@@ -26,7 +26,8 @@
             restrict: 'EA',
             templateUrl: 'tree.html',
             scope: {
-                filterText: "="
+                filterText: "=",
+                height: "="
             },
             controller: TreeCtrl,
             controllerAs: 'tr',
