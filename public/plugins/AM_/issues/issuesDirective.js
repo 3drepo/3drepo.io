@@ -52,5 +52,10 @@
         iss.commentsToggled = function (issueId) {
             iss.commentsToggledIssueId = issueId;
         };
+
+        iss.saveComment = function (issue, text) {
+            console.log(issue, text);
+            NewIssuesService.saveComment(issue, text);
+        };
     }
 }());

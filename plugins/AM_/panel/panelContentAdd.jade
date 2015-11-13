@@ -1,6 +1,3 @@
-.panelContentAddInput(ng-show="pca.showInput")
-	md-input-container(md-no-float="")
-		input(type="text", placeholder="{{pca.placeholder}}", ng-model="vp.viewpointName")
-		md-button(ng-click="vp.saveViewpoint()") Save
-.panelContentAddBar
-	span.fa.fa-plus(ng-click="pca.toggleInput()")
+md-input-container(md-no-float="")
+	input(type="text", placeholder="{{pca.placeholder}}", ng-model="pca.text")
+	md-button(ng-click="pca.save()") Save

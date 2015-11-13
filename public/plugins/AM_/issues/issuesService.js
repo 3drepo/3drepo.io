@@ -24,11 +24,13 @@
     NewIssuesService.$inject = ["$http", "$q", "StateManager", "serverConfig"];
 
     function NewIssuesService($http, $q, StateManager, serverConfig) {
-        var state = StateManager.state;
+        var state = StateManager.state,
+            deferred = null,
+            url = "";
 
         var getIssues = function () {
-            var deferred = $q.defer(),
-                url = state.account + '/' + state.project + '/issues.json';
+            deferred = $q.defer();
+            url = state.account + '/' + state.project + '/issues.json';
 
             $http.get(serverConfig.apiUrl(url))
                 .then(function(data) {
@@ -38,8 +40,34 @@
             return deferred.promise;
         };
 
+        var saveComment = function (issue, text) {
+            deferred = $q.defer();
+            url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue.parent);
+
+            var issueObject = {
+                _id: issue._id,
+                comment: text
+            };
+
+            $.ajax({
+                type:	"POST",
+                url:	url,
+                data: {"data" : JSON.stringify(issueObject)},
+                dataType: "json",
+                xhrFields: {
+                    withCredentials: true
+                },
+                success: function(data) {
+                    deferred.resolve(data);
+                }
+            });
+
+            return deferred.promise;
+        };
+
         return {
-            getIssues: getIssues
+            getIssues: getIssues,
+            saveComment: saveComment
         };
     }
 }());

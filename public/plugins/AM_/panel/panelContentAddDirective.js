@@ -26,7 +26,8 @@
             restrict: 'E',
             templateUrl: 'panelContentAdd.html',
             scope: {
-                placeholder: "@"
+                placeholder: "@",
+                onSave: "&"
             },
             controller: PanelContentAddCtrl,
             controllerAs: 'pca',
@@ -42,6 +43,12 @@
 
         pca.toggleInput = function () {
             pca.showInput = !pca.showInput;
+        };
+
+        pca.save = function () {
+            if (angular.isDefined(pca.text) && (pca.text !== "")) {
+                pca.onSave({text: pca.text});
+            }
         };
     }
 }());

@@ -3,7 +3,8 @@
 		md-icon(class="fa", ng-class="is.issueToggleButtonClass")
 	label {{is.data.name}}
 
-div(ng-if="is.showComments")
-	div.issueComment(ng-repeat="comment in is.data.comments")
-		label {{comment.comment}} ({{comment.owner}})
-	panel-content-add(placeholder="Comment")
+div(ng-show="is.showComments", ng-class="{issueComments: is.toggleCommentsState}")
+	div
+		div.issueComment(ng-repeat="comment in is.data.comments")
+			label {{comment.comment}} ({{comment.owner}})
+		panel-content-add(placeholder="New comment", on-save="is.saveComment(text)")
