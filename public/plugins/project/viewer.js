@@ -112,6 +112,8 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.defaultNavMode = "TURNTABLE";
 
+	this.pinSize = null;
+
 	this.init = function() {
 		if (!self.initialized)
 		{
@@ -705,6 +707,16 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			if ('avatarHeight' in self.settings)
 				self.changeAvatarHeight(self.settings['avatarHeight']);
 
+			if ('defaultNavMode' in self.settings)
+			{
+				self.defaultNavMode = self.settings['defaultNavMode'];
+			}
+
+			if ('pinSize' in self.settings)
+			{
+				self.pinSize = self.settings['pinSize'];
+			}
+
 			if ('visibilityLimit' in self.settings)
 				self.nav.setAttribute('visibilityLimit', self.settings['visibilityLimit']);
 
@@ -958,11 +970,13 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 				self.enableClicking();
 			}
 
-			if ((mode == 'WAYFINDER') && waypoint)
+			if ((mode == 'WAYFINDER') && waypoint) {
 				waypoint.resetViewer();
+			}
 
-			if ((mode == 'TURNTABLE'))
+			if ((mode == 'TURNTABLE')) {
 				self.nav.setAttribute('typeParams', '-0.4 60.0 0 3.14 0.00001');
+			}
 		}
 	}
 

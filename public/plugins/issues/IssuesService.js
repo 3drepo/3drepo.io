@@ -416,6 +416,11 @@ angular.module('3drepo')
 		var sceneSize = sceneBBox.max.subtract(sceneBBox.min).length();
 		var pinSize   = sceneSize / 20;
 
+		if (ViewerService.defaultViewer.pinSize)
+		{
+			pinSize = ViewerService.defaultViewer.pinSize;
+		}
+
 		//if (!self.pinNamespaces[pinNamespace])
 		//	self.prepareX3DScene(pinNamespace, 0.25, 0.1, 1.0);
 

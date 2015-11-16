@@ -35,6 +35,9 @@ angular.module("3drepo")
 	$scope.pickedPos        = null;
 	$scope.pickedNorm       = null;
 
+	$scope.selectedProject  = null;
+	$scope.selectedAccount  = null;
+
 	$scope.expanded         = $scope.IssuesService.expanded;
 
 	$(document).on("objectSelected", function(event, object, zoom) {
@@ -134,8 +137,18 @@ angular.module("3drepo")
 			modalInstance.result.then(function (params) {
 				var account = StateManager.state.account;
 				var project = StateManager.state.project;
-				var id 	    = $scope.selectedID;
 
+				if ( $scope.selectedAccount )
+				{
+					account = $scope.selectedAccount;
+				}
+
+				if ( $scope.selectedProject )
+				{
+					project = $scope.selectedProject;
+				}
+
+				var id 	    = $scope.selectedID;
 				var position = $scope.pickedPos;
 
 				// For a normal, transpose is the inverse of the inverse transpose :)
@@ -305,7 +318,10 @@ angular.module("3drepo")
 
 					scope.selectedID 		= objID;
 				} else {
-					scope.selectedID		= pickObj.partID;
+					var projectParts = pickObj.part.multiPart._xmlNode.id.split("__");
+					scope.selectedAccount   = projectParts[0];
+					scope.selectedProject   = projectParts[1];
+					scope.selectedID        = pickObj.partID;
 				}
 
 				scope.pickedPos       	= pickObj.pickPos;
