@@ -232,14 +232,17 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 								splitBBox = [[], []];
 
 								runningIDX       += 1;
-								subMeshIDX++;
-
+								subMeshIDX       += 1;
+								
+								subMeshKeys[subMeshIDX]  = [];
 								subMeshArray[subMeshIDX] = {};
 
 								reindexMap = {};
 							}
 
 							subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]       = mesh["id"] + "_" + subMeshIDX;
+							subMeshKeys[subMeshIDX].push(subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]);
+
 							currentMeshVFrom                                                    += runningVertTotal;
 
 							subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]   = currentMeshVFrom;
@@ -700,7 +703,7 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 		4                  // Magic Bit
 		+ 4                // SRC Version
 		+ 4                // Header length
-		+ JSONstr.length; // JSON String
+		+ JSONstr.length;  // JSON String
 
 	var headerBuffer = new Buffer(bufSize); // Buffer containing SRC header info
 	var bufPos = 0;
@@ -781,8 +784,9 @@ exports.route = function(router)
 					}
 
 					render(params.project, obj, tex_uuid, false, params.subformat, req[C.REQ_REPO].logger, function(err, renderedObj) {
-						if (err.value)
+						if (err.value) {
 							return err_callback(err);
+						}
 
 						callback(responseCodes.OK, renderedObj);
 					});
