@@ -14,7 +14,7 @@ issue {
 .issueTitle {
   position: relative;
   display: block;
-  height: 50px;
+  height: 48px;
 }
 .issueTitle:hover {
   background: #E8EAF6;
@@ -28,6 +28,14 @@ issue {
   top: 14px;
   left: 60px;
 }
+issue .issueDull {
+  padding-right: 10px;
+  font-weight: normal;
+  color: #7986CB;
+}
+issue .issueBold {
+  padding-right: 10px;
+}
 
 .issueComments {
 }
@@ -37,5 +45,5 @@ issue .issueComment {
   padding-left: 10px;
 }
 issue .issueComment label {
-  font-weight: normal;
+  line-height: 18px;
 }

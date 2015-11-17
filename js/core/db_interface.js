@@ -1475,7 +1475,8 @@ DBInterface.prototype.getObjectIssues = function(dbName, project, sids, number, 
 }
 
 DBInterface.prototype.storeIssue = function(dbName, project, sid, owner, data, callback) {
-	var self = this;
+	var self = this,
+        timeStamp = null;
 
 	dbConn(this.logger).collCallback(dbName, project + ".issues", false, function(err, coll) {
 		if(err.value)
@@ -1513,14 +1514,15 @@ DBInterface.prototype.storeIssue = function(dbName, project, sid, owner, data, c
 
 			data._id = stringToUUID(data._id);
 
+            timeStamp = (new Date()).getTime();
 			if (data.comment)
 			{
 				var updateQuery = {
-					$push: { comments: { owner: owner,  comment: data.comment} }
+					$push: { comments: { owner: owner,  comment: data.comment, created: timeStamp} }
 				};
 			} else {
 				var updateQuery = {
-					$set: { complete: data.complete }
+					$set: { complete: data.complete, created: timeStamp }
 				};
 			}
 
@@ -1528,7 +1530,7 @@ DBInterface.prototype.storeIssue = function(dbName, project, sid, owner, data, c
 				if (err) return callback(responseCodes.DB_ERROR(err));
 
 				self.logger.logDebug("Updated " + count + " records.");
-				callback(responseCodes.OK, { issue_id : uuidToString(data._id), number: data.number });
+				callback(responseCodes.OK, { issue_id : uuidToString(data._id), number: data.number, owner: owner, created: timeStamp });
 			});
 		}
 	});

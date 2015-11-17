@@ -23,8 +23,8 @@
 
     function issue() {
         return {
-            restrict: 'EA',
-            templateUrl: 'issue.html',
+            restrict: "EA",
+            templateUrl: "issue.html",
             scope: {
                 data: "=",
                 onCommentsToggled: "&",
@@ -32,18 +32,19 @@
                 onSaveComment : "&"
             },
             controller: IssueCtrl,
-            controllerAs: 'is',
+            controllerAs: "is",
             bindToController: true
         };
     }
 
-    IssueCtrl.$inject = ["$scope"];
+    IssueCtrl.$inject = ["$scope", "$element"];
 
-    function IssueCtrl($scope) {
+    function IssueCtrl($scope, $element) {
         var is = this;
         is.showComments = false;
         is.toggleCommentsState = false;
         is.issueToggleButtonClass = "fa-plus-square";
+        is.numNewComments = 0;
 
         $scope.$watch("is.commentsToggledIssueId", function (newValue) {
             if (angular.isDefined(newValue) && (newValue !== is.data._id)) {
@@ -64,18 +65,19 @@
 
         is.saveComment = function(text) {
             is.onSaveComment({issue: is.data, text: text});
+            is.numNewComments += 1; // This is used to increase the height of the comments list
         };
     }
 
-    angular.module('3drepo')
-        .animation('.issueComments', issueComments);
+    angular.module("3drepo")
+        .animation(".issueComments", issueComments);
 
     function issueComments () {
         var height;
         return {
             addClass: function (element, className, done) {
-                if (className === 'issueComments') {
-                    $(element)
+                if (className === "issueComments") {
+                    jQuery(element)
                         .css({
                             height: 0,
                             opacity: 0
@@ -90,8 +92,8 @@
             },
             removeClass: function (element, className, done) {
                 height = element[0].children[0].offsetHeight;
-                if (className === 'issueComments') {
-                    $(element)
+                if (className === "issueComments") {
+                    jQuery(element)
                         .css({
                             height: height,
                             opacity: 1
@@ -105,5 +107,27 @@
                 }
            }
         };
+    }
+
+    angular.module("3drepo")
+        .directive("commentsHeight", commentsHeight);
+
+    function commentsHeight() {
+        return {
+            restrict: "A",
+            scope: {
+                numNewComments: "="
+            },
+            link: link
+        };
+
+        function link (scope, element, attrs) {
+            var commentHeight = 30;
+            scope.$watch("numNewComments", function (newValue) {
+                if (angular.isDefined(newValue) && (newValue !== 0)) {
+                    element.css("height", (element[0].offsetHeight + commentHeight).toString() + "px");
+                }
+            });
+        }
     }
 }());

@@ -4,7 +4,7 @@ panel  {
   display: block;
   position: absolute;
   top: 100px;
-  width: 400px;
+  width: 370px;
 }
 panel #items {
   position: absolute;
@@ -12,8 +12,8 @@ panel #items {
 }
 
 panel md-toolbar {
-  min-height: 32px;
-  height: 32px;
+  min-height: 48px;
+  height: 48px;
   outline: none;
 }
 panel md-toolbar span {
@@ -70,15 +70,14 @@ panel-content md-content {
 panel-content-add {
   display: block;
   position: relative;
-  height: 80px;
+  height: 70px;
 }
 panel-content-add md-input-container {
   position: absolute;
-  top: 20px;
+  top: 10px;
   color: #3F51B5;
-  border: #9FA8DA 1px solid;
   width: 100%;
-  height: 50px;
+  height: 48px;
 }
 panel-content-add input {
   position: absolute;

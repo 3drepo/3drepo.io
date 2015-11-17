@@ -1,10 +1,17 @@
 .issueTitle
 	md-button.md-primary.md-icon-button(ng-click="is.toggleComments()" aria-label="Toggle commentary")
 		md-icon(class="fa", ng-class="is.issueToggleButtonClass")
-	label {{is.data.name}}
+	label
+		span.issueDull {{is.data.number}}
+		span.issueBold {{is.data.name}}
+		span.issueDull {{is.data.timeStamp}}
 
-div(ng-show="is.showComments", ng-class="{issueComments: is.toggleCommentsState}")
+div(ng-show="is.showComments", ng-class="{issueComments: is.toggleCommentsState}", comments-height, num-new-comments="is.numNewComments")
 	div
 		div.issueComment(ng-repeat="comment in is.data.comments")
-			label {{comment.comment}} ({{comment.owner}})
+			label
+				span.issueBold {{comment.comment}}
+				br
+				span.issueDull {{comment.owner}}
+				span.issueDull {{comment.timeStamp}}
 		panel-content-add(placeholder="New comment", on-save="is.saveComment(text)")

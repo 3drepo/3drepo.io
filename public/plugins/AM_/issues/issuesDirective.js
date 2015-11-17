@@ -39,7 +39,9 @@
 
     function IssuesCtrl($scope, ViewerService, StateManager, serverConfig, NewIssuesService) {
         var iss = this,
-            promise = null;
+            promise = null,
+            i = 0,
+            length = 0;
         iss.showAdd = false;
 
         promise = NewIssuesService.getIssues();
@@ -53,9 +55,24 @@
             iss.commentsToggledIssueId = issueId;
         };
 
-        iss.saveComment = function (issue, text) {
-            console.log(issue, text);
-            NewIssuesService.saveComment(issue, text);
+        iss.saveComment = function (issue, comment) {
+            console.log(issue, comment);
+            promise = NewIssuesService.saveComment(issue, comment);
+            promise.then(function (data) {
+                for (i = 0, length = iss.issues.length; i < length; i += 1) {
+                    if (issue._id === iss.issues[i]._id) {
+                        if (!iss.issues[i].hasOwnProperty("comments")) {
+                            iss.issues[i].comments = [];
+                        }
+                        iss.issues[i].comments.push({
+                            owner: data.owner,
+                            comment: comment,
+                            timeStamp: NewIssuesService.prettyTime(data.created)
+                        });
+                        break;
+                    }
+                }
+            });
         };
     }
 }());

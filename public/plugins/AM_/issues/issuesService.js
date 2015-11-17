@@ -26,46 +26,73 @@
     function NewIssuesService($http, $q, StateManager, serverConfig) {
         var state = StateManager.state,
             deferred = null,
-            url = "";
+            url = "",
+            data = {},
+            config = {},
+            i, j = 0,
+            numIssues = 0, numComments = 0,
+            date = null;
+
+        var prettyTime = function(time) {
+            var date = new Date(time);
+            return (
+                date.getFullYear() + "-" +
+                (date.getMonth() + 1) + "-" +
+                date.getDate() + " " +
+                date.getHours() + ":" +
+                date.getMinutes()
+            );
+        };
 
         var getIssues = function () {
             deferred = $q.defer();
-            url = state.account + '/' + state.project + '/issues.json';
+            url = serverConfig.apiUrl(state.account + '/' + state.project + '/issues.json');
 
-            $http.get(serverConfig.apiUrl(url))
+            $http.get(url)
                 .then(function(data) {
                     deferred.resolve(data.data);
+                    // Convert created field to displayable time stamp
+                    // Issue
+                    for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
+                        data.data[i].timeStamp = prettyTime(data.data[i].created);
+                        // Comments
+                        if (data.data[i].hasOwnProperty("comments")) {
+                            for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
+                                if (data.data[i].comments[j].hasOwnProperty("created")) {
+                                    data.data[i].comments[j].timeStamp = prettyTime(data.data[i].comments[j].created);
+                                }
+                            }
+                        }
+                    }
                 });
 
             return deferred.promise;
         };
 
-        var saveComment = function (issue, text) {
+        var saveComment = function (issue, comment) {
             deferred = $q.defer();
             url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue.parent);
-
-            var issueObject = {
-                _id: issue._id,
-                comment: text
+            data = {
+                data: JSON.stringify({
+                    _id: issue._id,
+                    comment: comment,
+                    number: issue.number
+                })
+            };
+            config = {
+                withCredentials: true
             };
 
-            $.ajax({
-                type:	"POST",
-                url:	url,
-                data: {"data" : JSON.stringify(issueObject)},
-                dataType: "json",
-                xhrFields: {
-                    withCredentials: true
-                },
-                success: function(data) {
-                    deferred.resolve(data);
-                }
-            });
+            $http.post(url, data, config)
+                .then(function successCallback(response) {
+                    deferred.resolve(response.data);
+                });
 
             return deferred.promise;
         };
 
         return {
+            prettyTime: prettyTime,
             getIssues: getIssues,
             saveComment: saveComment
         };
