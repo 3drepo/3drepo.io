@@ -1,4 +1,4 @@
-filter md-input-container {
-  height: 40px;
-  padding-bottom: 0;
+filter {
+  display: block;
+  padding: 10px 10px 0;
 }

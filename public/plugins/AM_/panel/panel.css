@@ -11,24 +11,16 @@ panel #items {
   width: 300px;
 }
 
-panel md-toolbar {
-  min-height: 48px;
-  height: 48px;
-  outline: none;
+panel #buttons {
+  position: absolute;
+  top: 150px;
 }
-panel md-toolbar span {
-  font-size: 18px;
-}
-panel md-toolbar label {
-  font-size: medium;
-  margin-left: 10px;
-}
-
-panel-content {
+panel #buttons button {
   display: block;
   margin-bottom: 20px;
-  position: relative;
 }
+
+/** Panels ************************************************************************************************************/
 
 #leftPanel {
   left: 0;
@@ -50,19 +42,29 @@ panel-content {
   right: 0;
 }
 
-panel #buttons {
-  position: absolute;
-  top: 150px;
-}
-panel #buttons button {
+/** Panel Content *****************************************************************************************************/
+
+panel-content {
   display: block;
   margin-bottom: 20px;
+  position: relative;
 }
-
-/** Panel Content *****************************************************************************************************/
 
 panel-content md-content {
   height: 100%;
+}
+
+panel-content md-toolbar {
+  min-height: 48px;
+  height: 48px;
+  outline: none;
+}
+panel-content md-toolbar span {
+  font-size: 18px;
+}
+panel-content md-toolbar label {
+  font-size: medium;
+  margin-left: 10px;
 }
 
 /** Panel Content Add *************************************************************************************************/
@@ -75,7 +77,6 @@ panel-content-add {
 panel-content-add md-input-container {
   position: absolute;
   top: 10px;
-  color: #3F51B5;
   width: 100%;
   height: 48px;
 }

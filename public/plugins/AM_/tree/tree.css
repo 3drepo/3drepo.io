@@ -31,6 +31,8 @@ tree span .fa {
   background: #E8EAF6;
 }
 
+/** Tree Node *********************************************************************************************************/
+
 .tree-node {
   color: #3F51B5;
 }
@@ -55,6 +57,8 @@ tree span .fa {
   cursor: pointer;
 }
 
+/** Tree filter list **************************************************************************************************/
+
 tree .virtualRepeatdemoInfiniteScroll #vertical-container {
   height: 500px;
   min-width: 280px;
@@ -62,14 +66,9 @@ tree .virtualRepeatdemoInfiniteScroll #vertical-container {
 }
 
 tree .virtualRepeatdemoInfiniteScroll .repeated-item {
-  border-bottom: 1px solid #C5CAE9;
+  border-bottom: 1px solid rgba(0,0,0,0.12);;
   cursor: default;
-  padding: 6px 0 4px;
-  height: 31px;
-  outline: none;
-}
-tree .virtualRepeatdemoInfiniteScroll .repeated-item:hover {
-  background: #E8EAF6;
+  height: 48px;
 }
 
 .selectedFilterItem {
@@ -79,10 +78,13 @@ tree .virtualRepeatdemoInfiniteScroll .repeated-item:hover {
   background: #FFFFFF;
 }
 
-tree .virtualRepeatdemoInfiniteScroll .repeated-item label {
-  font-size: 12px;
-  margin-left: 10px;
-  position: absolute;
-  color: #3F51B5;
-  white-space: nowrap;
+tree .virtualRepeatdemoInfiniteScroll md-checkbox {
+  margin-right: 10px !important;
+}
+
+tree .virtualRepeatdemoInfiniteScroll p {
+  outline: none;
+}
+tree .virtualRepeatdemoInfiniteScroll p:hover {
+  cursor: pointer;
 }

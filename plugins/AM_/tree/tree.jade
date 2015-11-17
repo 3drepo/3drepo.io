@@ -1,4 +1,5 @@
 div(ng-class="tr.height")
+	// Tree
 	div(ui-tree, data-nodrop-enabled="true", data-nodrag="true", ng-show="tr.showTree")
 		tree-nodes(
 			nodes="tr.nodes"
@@ -10,17 +11,22 @@ div(ng-class="tr.height")
 			toggled-node="tr.toggledNode"
 		)
 
+	// Filter list
 	div(ng-cloak="", class="virtualRepeatdemoInfiniteScroll", ng-if="tr.showFilterList")
 		md-content(layout="column")
 			md-virtual-repeat-container(id="vertical-container")
 				div(
 					md-virtual-repeat="item in tr.infiniteItems"
-					md-on-demand="", class="repeated-item"
+					md-on-demand=""
+					class="repeated-item"
 					flex=""
-					ng-click="tr.filterItemSelected(item)"
 					ng-class="item.class"
 				)
-					span(ng-click="tr.filterItemToggled(item)", ng-if="item!==null")
-						span(class="fa fa-eye", ng-if="item.toggleState")
-						span(class="fa fa-eye-slash", ng-if="!item.toggleState")
-					label {{item.name}}
+					md-list-item
+						md-checkbox(
+							ng-if="item!==null"
+							ng-model="item.toggleState"
+							ng-change="tr.filterItemToggled(item)"
+							aria-label="Toggle"
+						)
+						p(ng-click="tr.filterItemSelected(item)") {{item.name}}

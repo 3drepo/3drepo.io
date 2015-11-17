@@ -1,3 +1,5 @@
+/** Issues ************************************************************************************************************/
+
 issues .maxHeight {
   height: 300px;
 }
@@ -5,45 +7,26 @@ issues .minHeight {
   height: 50px;
 }
 
+/** Issue *************************************************************************************************************/
+
 issue {
   display: block;
-  border-bottom: 1px solid #C5CAE9;
-  color: #3F51B5;
 }
 
-.issueTitle {
-  position: relative;
-  display: block;
-  height: 48px;
-}
-.issueTitle:hover {
-  background: #E8EAF6;
-  cursor: pointer;
-}
-.issueTitle span {
+issue .md-subheader,
+issue .md-subheader-wrapper:not(.md-sticky-no-effect) .md-subheader {
   outline: none;
+  margin: 0;
 }
-.issueTitle label {
-  position: absolute;
-  top: 14px;
-  left: 60px;
+issue .md-subheader:hover,
+issue .md-subheader-wrapper:not(.md-sticky-no-effect) .md-subheader:hover {
+  cursor: pointer;
+  background: #E8EAF6;
 }
-issue .issueDull {
-  padding-right: 10px;
-  font-weight: normal;
-  color: #7986CB;
-}
-issue .issueBold {
-  padding-right: 10px;
+
+issue md-list-item.md-3-line {
+  min-height: 75px;
 }
 
 .issueComments {
-}
-
-issue .issueComment {
-  display: block;
-  padding-left: 10px;
-}
-issue .issueComment label {
-  line-height: 18px;
 }

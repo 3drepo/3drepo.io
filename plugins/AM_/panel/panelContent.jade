@@ -5,7 +5,7 @@ div(layout="column", class="md-whiteframe-1dp", ng-show="pc.showContent")
 			span(class="fa", ng-class="pc.icon")
 			label(class="md-flex") {{pc.contentTitle}}
 
-	md-content(id="content", flex, layout-padding, ng-class="pc.class")
+	md-content(id="content", ng-class="pc.class")
 
 	div(ng-if="pc.showHelp")
 		md-button.md-fab.md-mini#helpButton(aria-label="Help")

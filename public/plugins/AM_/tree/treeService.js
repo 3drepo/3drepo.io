@@ -52,14 +52,17 @@
         };
 
         var selectNode = function (nodeId) {
+            console.log(nodeId);
             if (nodeId === currentSelectedNodeId) {
-                $(document).trigger("objectSelected", [undefined, true]);
+                console.log(1);
                 currentSelectedNodeId = null;
+                $(document).trigger("objectSelected", [undefined, true]);
             }
             else {
+                console.log(2);
                 var rootObj = document.getElementById("model__" + nodeId);
-                $(document).trigger("objectSelected", [rootObj, true]);
                 currentSelectedNodeId = nodeId;
+                $(document).trigger("objectSelected", [rootObj, true]);
             }
         };
 

@@ -76,6 +76,7 @@
                         for (i = 0, length = tr.nodes.length; i < length; i += 1) {
                             tr.nodes[i].index = i;
                             tr.nodes[i].toggleState = true;
+                            tr.nodes[i].toggleIcon = "fa-eye";
                             tr.nodes[i].class = "unselectedFilterItem";
                         }
                         setupInfiniteItems();
@@ -112,7 +113,7 @@
         };
 
         tr.filterItemToggled = function (item) {
-            tr.nodes[item.index].toggleState = !tr.nodes[item.index].toggleState;
+            tr.nodes[item.index].toggleIcon = tr.nodes[item.index].toggleState ? "fa-eye" : "fa-eye-slash";
             TreeService.toggleNode(item._id);
         };
 
