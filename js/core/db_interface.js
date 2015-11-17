@@ -1357,18 +1357,24 @@ DBInterface.prototype.getIssues = function(dbName, project, branch, revision, on
 
 	// First get the main project issues
 	self.getSIDMap(dbName, project, branch, revision, function (err, SIDMap) {
-		if (err.value) return callback(err);
+		if (err.value) {
+			return callback(err);
+		}
 
 		var sids = Object.keys(SIDMap);
 
 		self.getObjectIssues(dbName, project, sids, null, onlyStubs, function (err, docs) {
-			if (err.value) return callback(err);
+			if (err.value) {
+				return callback(err);
+			}
 
 			var collatedDocs = docs;
 
 			// Now search for all federated issues
 			self.getFederatedProjectList(dbName, project, branch, revision, function (err, refs) {
-				if (err.value) return callback(err);
+				if (err.value) {
+					return callback(err);
+				}
 
 				async.concat(refs, function (item, iter_callback) {
 					var childDbName  = item["owner"] ? item["owner"] : dbName;
@@ -1392,20 +1398,26 @@ DBInterface.prototype.getIssues = function(dbName, project, branch, revision, on
 					}
 
 					self.getSIDMap(childDbName, childProject, childBranch, childRevision, function (err, SIDMap) {
-						if (err.value) return iter_callback(err);
+						if (err.value) {
+							return iter_callback(err);
+						}
 
 						var sids = Object.keys(SIDMap);
 
 						// For all federated child projects get a list of shared IDs
-						self.getObjectIssues(childDbName, childProject, sids, null, onlyStubs, function (err, refs) {
-							if (err.value) return iter_callback(err);
+						self.getObjectIssues(childDbName, childProject, sids, null, onlyStubs, function (err, objIssues) {
+							if (err.value) {
+								return iter_callback(err);
+							}
 
-							iter_callback(responseCodes.OK, refs);
+							iter_callback(null, objIssues);
 						});
 					});
 				},
 				function (err, results) {
-					// TODO: Deal with errors here
+					if (err) {
+						return callback(err);
+					}
 
 					callback(responseCodes.OK, collatedDocs.concat(results));
 				});
