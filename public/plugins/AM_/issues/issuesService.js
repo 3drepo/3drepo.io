@@ -21,9 +21,9 @@
     angular.module('3drepo')
         .factory('NewIssuesService', NewIssuesService);
 
-    NewIssuesService.$inject = ["$http", "$q", "StateManager", "serverConfig"];
+    NewIssuesService.$inject = ["$http", "$q", "StateManager", "serverConfig", "ViewerService"];
 
-    function NewIssuesService($http, $q, StateManager, serverConfig) {
+    function NewIssuesService($http, $q, StateManager, serverConfig, ViewerService) {
         var state = StateManager.state,
             deferred = null,
             url = "",
@@ -69,6 +69,30 @@
             return deferred.promise;
         };
 
+        var saveIssue = function (name, objectId) {
+            deferred = $q.defer();
+            url = serverConfig.apiUrl(state.account + "/" + state.project + "/issues/" + objectId);
+            data = {
+                data: JSON.stringify({
+                    name: name,
+                    viewpoint: ViewerService.defaultViewer.getCurrentViewpointInfo(),
+                    scale: 1.0
+                })
+            };
+            config = {
+                withCredentials: true
+            };
+
+            $http.post(url, data, config)
+                .then(function successCallback(response) {
+                    console.log(response);
+                    response.data.issue.timeStamp = prettyTime(response.data.issue.created);
+                    deferred.resolve(response.data.issue);
+                });
+
+            return deferred.promise;
+        };
+
         var saveComment = function (issue, comment) {
             deferred = $q.defer();
             url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue.parent);
@@ -94,6 +118,7 @@
         return {
             prettyTime: prettyTime,
             getIssues: getIssues,
+            saveIssue: saveIssue,
             saveComment: saveComment
         };
     }

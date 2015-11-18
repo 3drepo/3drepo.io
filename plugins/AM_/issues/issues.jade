@@ -5,6 +5,12 @@ div(ng-class="iss.height")
 		on-comments-toggled="iss.commentsToggled(issueId)"
 		comments-toggled-issue-id="iss.commentsToggledIssueId"
 		on-save-comment="iss.saveComment(issue, text)"
+		comment-saved="iss.commentSaved"
 	)
 
-	panel-content-add(ng-if="iss.showAdd", placeholder="New issue")
+	panel-content-add(
+		ng-if="iss.showAdd"
+		placeholder="New issue"
+		on-save="iss.saveIssue(text)"
+		clear-input="iss.clearInput"
+	)

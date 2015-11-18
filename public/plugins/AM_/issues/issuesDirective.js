@@ -56,9 +56,10 @@
         };
 
         iss.saveComment = function (issue, comment) {
-            console.log(issue, comment);
+            iss.commentSaved = false;
             promise = NewIssuesService.saveComment(issue, comment);
             promise.then(function (data) {
+                iss.commentSaved = true;
                 for (i = 0, length = iss.issues.length; i < length; i += 1) {
                     if (issue._id === iss.issues[i]._id) {
                         if (!iss.issues[i].hasOwnProperty("comments")) {
@@ -74,5 +75,25 @@
                 }
             });
         };
+
+        iss.saveIssue = function (name) {
+            iss.clearInput = false;
+            promise = NewIssuesService.saveIssue(name, iss.selectedObjectId);
+            promise.then(function (data) {
+                console.log(data);
+                iss.issues.push(data);
+                iss.clearInput = true;
+            });
+        };
+
+        $(document).on("objectSelected", function(event, object, zoom) {
+            iss.selectedObjectId = object.getAttribute("DEF");
+        });
+
+        $(document).on("partSelected", function(event, part, zoom) {
+            $scope.IssuesService.mapPromise.then(function () {
+                iss.selectedObjectId = $scope.IssuesService.IDMap[part.partID];
+            });
+        });
     }
 }());

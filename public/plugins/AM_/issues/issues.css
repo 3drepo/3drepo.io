@@ -13,15 +13,17 @@ issue {
   display: block;
 }
 
-issue .md-subheader,
-issue .md-subheader-wrapper:not(.md-sticky-no-effect) .md-subheader {
+issue .issueTitle {
+  height: 50px;
   outline: none;
-  margin: 0;
-}
-issue .md-subheader:hover,
-issue .md-subheader-wrapper:not(.md-sticky-no-effect) .md-subheader:hover {
-  cursor: pointer;
+  padding: 0 16px 0 16px;
   background: #E8EAF6;
+}
+issue .issueTitle:hover {
+  cursor: pointer;
+}
+issue .issueTitle label {
+  font-weight: normal;
 }
 
 issue md-list-item.md-3-line {

@@ -45,7 +45,7 @@
                     "<tree-nodes " +
                         "nodes='tn.node.children' " +
                         "show-children='tn.showChildren' " +
-                        "ng-if='!tn.collapsed' " +
+                        "ng-if='tn.expanded' " +
                         "on-node-selected='tn.onNodeSelected({nodeId: nodeId})' " +
                         "on-node-toggled='tn.onNodeToggled({nodeId: nodeId})' " +
                         "selected-node='tn.selectedNode' " +
@@ -62,17 +62,15 @@
 
     function TreeNodeCtrl ($scope, $filter) {
         var tn = this;
-        tn.collapsed = true;
-        tn.collapseButtonClass = "fa-chevron-right";
-        tn.showCollapseButton = false;
+        tn.expanded = false;
+        tn.canExpand = false;
         tn.toggleState = true;
-        tn.toggleButtonClass = "fa-eye";
         tn.selected = false;
         tn.selectedClass = "tree-node-unselected";
 
         $scope.$watchGroup(["tn.node", "tn.showChildren"], function (newValues) {
             if (angular.isDefined(newValues[0]) && angular.isDefined(newValues[1])) {
-                tn.showCollapseButton = (newValues[0].children && (newValues[0].children.length > 0) && newValues[1]);
+                tn.canExpand = (newValues[0].children && (newValues[0].children.length > 0) && newValues[1]);
             }
         });
 
@@ -89,20 +87,17 @@
             }
         });
 
-        tn.collapse = function () {
-            tn.collapsed = !tn.collapsed;
-            tn.collapseButtonClass = tn.collapsed ? "fa-chevron-right" : "fa-chevron-down";
+        tn.expand = function () {
+            tn.expanded = !tn.expanded;
         };
 
         tn.nodeSelected = function (nodeId) {
-            tn.onNodeSelected({nodeId: nodeId});
             tn.selected = !tn.selected;
             tn.selectedClass = tn.selected ? "tree-node-selected" : "tree-node-unselected";
+            tn.onNodeSelected({nodeId: nodeId});
         };
 
         tn.nodeToggled = function (nodeId) {
-            tn.toggleState = !tn.toggleState;
-            tn.toggleButtonClass = tn.toggleState ? "fa-eye" : "fa-eye-slash";
             tn.onNodeToggled({nodeId: nodeId});
         };
     }

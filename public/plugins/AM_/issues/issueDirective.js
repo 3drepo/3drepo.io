@@ -29,7 +29,8 @@
                 data: "=",
                 onCommentsToggled: "&",
                 commentsToggledIssueId: "=",
-                onSaveComment : "&"
+                onSaveComment : "&",
+                commentSaved: "="
             },
             controller: IssueCtrl,
             controllerAs: "is",
@@ -37,9 +38,9 @@
         };
     }
 
-    IssueCtrl.$inject = ["$scope", "$element"];
+    IssueCtrl.$inject = ["$scope", "ViewerService", "StateManager"];
 
-    function IssueCtrl($scope, $element) {
+    function IssueCtrl($scope, ViewerService, StateManager) {
         var is = this;
         is.showComments = false;
         is.toggleCommentsState = false;
@@ -54,6 +55,12 @@
             }
         });
 
+        $scope.$watch("is.commentSaved", function (newValue) {
+            if (angular.isDefined(newValue) && newValue) {
+                is.clearInput = true;
+            }
+        });
+
         is.toggleComments = function () {
             if (!is.showComments) {
                 is.showComments = true;
@@ -61,9 +68,17 @@
             is.toggleCommentsState = !is.toggleCommentsState;
             is.issueToggleButtonClass = is.toggleCommentsState ? "fa-minus-square" : "fa-plus-square";
             is.onCommentsToggled({issueId: is.data._id});
+
+            // Set the camera position
+            ViewerService.defaultViewer.setCamera(
+                is.data.viewpoint.position,
+                is.data.viewpoint.view_dir,
+                is.data.viewpoint.up
+            );
         };
 
         is.saveComment = function(text) {
+            is.clearInput = false;
             is.onSaveComment({issue: is.data, text: text});
             is.numNewComments += 1; // This is used to increase the height of the comments list
         };
@@ -122,7 +137,7 @@
         };
 
         function link (scope, element, attrs) {
-            var commentHeight = 30;
+            var commentHeight = 75;
             scope.$watch("numNewComments", function (newValue) {
                 if (angular.isDefined(newValue) && (newValue !== 0)) {
                     element.css("height", (element[0].offsetHeight + commentHeight).toString() + "px");

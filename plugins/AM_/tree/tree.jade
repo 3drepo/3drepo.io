@@ -21,12 +21,14 @@ div(ng-class="tr.height")
 					class="repeated-item"
 					flex=""
 					ng-class="item.class"
+					layout="row"
+					layout-align="start center"
 				)
-					md-list-item
-						md-checkbox(
-							ng-if="item!==null"
-							ng-model="item.toggleState"
-							ng-change="tr.filterItemToggled(item)"
-							aria-label="Toggle"
-						)
-						p(ng-click="tr.filterItemSelected(item)") {{item.name}}
+					md-checkbox(
+						ng-show="item!==null"
+						ng-model="item.toggleState"
+						ng-change="tr.filterItemToggled(item)"
+						aria-label="Toggle"
+					)
+					md-list-item#treeFilterItemName(ng-click="tr.filterItemSelected(item)")
+						p {{item.name}}

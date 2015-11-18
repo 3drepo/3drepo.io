@@ -20,22 +20,31 @@ tree span .fa {
   padding: 0 2px 0 0;
 }
 
-.angular-ui-tree-handle {
-  border-bottom: 1px solid #C5CAE9;
-  cursor: default;
-  padding: 6px 0 4px;
-  display: inline-block;
-  width: 800px;
+tree p {
+  outline: none;
+  width: 200px;
+  word-break: break-all;
+  word-wrap: break-word;
+  padding: 5px;
+  line-height: 18px;
 }
-.angular-ui-tree-handle:hover {
-  background: #E8EAF6;
+tree p:hover {
+  cursor: pointer;
+}
+
+tree md-checkbox {
+  margin-right: 8px !important;
+}
+
+.angular-ui-tree-handle {
+  border-bottom: 1px solid rgba(0,0,0,0.12);
+  cursor: default;
+  display: inline-block;
+  font-weight: normal;
 }
 
 /** Tree Node *********************************************************************************************************/
 
-.tree-node {
-  color: #3F51B5;
-}
 .tree-node-unselected {
   background: #FFFFFF;
 }
@@ -48,14 +57,14 @@ tree span .fa {
 .tree-node span {
   padding-right: 5px;
 }
-.tree-node label {
-  font-size: 12px;
-  margin-left: 10px;
-  position: absolute;
+
+.tree-node button {
+  padding: 0;
 }
-.tree-node label:hover {
-  cursor: pointer;
+.tree-node .md-button {
+  border-radius: 0;
 }
+
 
 /** Tree filter list **************************************************************************************************/
 
@@ -66,9 +75,14 @@ tree .virtualRepeatdemoInfiniteScroll #vertical-container {
 }
 
 tree .virtualRepeatdemoInfiniteScroll .repeated-item {
-  border-bottom: 1px solid rgba(0,0,0,0.12);;
+  border-bottom: 1px solid rgba(0,0,0,0.12);
   cursor: default;
-  height: 48px;
+  min-height: 48px;
+  padding-left: 10px;
+}
+
+tree .virtualRepeatdemoInfiniteScroll .repeated-item p {
+  line-height: 18px;
 }
 
 .selectedFilterItem {
@@ -78,13 +92,10 @@ tree .virtualRepeatdemoInfiniteScroll .repeated-item {
   background: #FFFFFF;
 }
 
-tree .virtualRepeatdemoInfiniteScroll md-checkbox {
-  margin-right: 10px !important;
+#treeFilterItemName button {
+  padding: 0;
+  width: 246px;
 }
-
-tree .virtualRepeatdemoInfiniteScroll p {
-  outline: none;
-}
-tree .virtualRepeatdemoInfiniteScroll p:hover {
-  cursor: pointer;
+#treeFilterItemName .md-button {
+  border-radius: 0;
 }

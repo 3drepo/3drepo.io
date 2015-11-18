@@ -27,7 +27,8 @@
             templateUrl: 'panelContentAdd.html',
             scope: {
                 placeholder: "@",
-                onSave: "&"
+                onSave: "&",
+                clearInput: "="
             },
             controller: PanelContentAddCtrl,
             controllerAs: 'pca',
@@ -50,5 +51,11 @@
                 pca.onSave({text: pca.text});
             }
         };
+
+        $scope.$watch("pca.clearInput", function (newValue) {
+            if (angular.isDefined(newValue) && newValue) {
+                pca.text = "";
+            }
+        });
     }
 }());
