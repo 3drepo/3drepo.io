@@ -40,6 +40,8 @@ angular.module("3drepo")
 
 	$scope.expanded         = $scope.IssuesService.expanded;
 
+	$scope.StateManager     = StateManager;
+
 	$(document).on("objectSelected", function(event, object, zoom) {
 		$scope.objectIsSelected = !(object === undefined);
 
@@ -319,8 +321,16 @@ angular.module("3drepo")
 					scope.selectedID 		= objID;
 				} else {
 					var projectParts = pickObj.part.multiPart._xmlNode.id.split("__");
-					scope.selectedAccount   = projectParts[0];
-					scope.selectedProject   = projectParts[1];
+
+					if (projectParts[0] === "model")
+					{
+						scope.selectedAccount   = scope.StateManager.state.account;
+						scope.selectedProject   = scope.StateManager.state.project;
+					} else {
+						scope.selectedAccount   = projectParts[0];
+						scope.selectedProject   = projectParts[1];
+					}
+
 					scope.selectedID        = pickObj.partID;
 				}
 

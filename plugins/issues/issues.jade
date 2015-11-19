@@ -9,14 +9,14 @@
 		.panel.panel-default(ng-repeat="issue in projectIssues")
 			.panel-heading
 				h2.panel-title 
-					a(data-toggle='collapse', ng-click='openIssue(issue)') {{ issue.number + " - " + issue.name }}
+					a(data-toggle='collapse', ng-click='openIssue(issue)') {{ issue.number + " - " + issue.name + " [" + issue.created + "]" }}
 					button.btn(ng-if="!issue.complete", ng-click='complete(issue)')
 						i.fa.fa-check
 			.panel-collapse(id="{{issue._id}}", collapse="expanded[issue._id] ? !expanded[issue._id] : true")
 				.panel-body
 					table.metadata-table(ng-repeat="comment in IssuesService.issueContents[issue._id]")
 						tr
-							th.metadata-title(colspan="2") {{comment.owner}}
+							th.metadata-title(colspan="2") {{comment.owner + " [" + comment.created + "]" }}
 						tr 
 							td {{comment.comment}}
 					.input-group(ng-if="!issue.complete")

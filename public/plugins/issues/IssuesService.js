@@ -133,14 +133,24 @@ angular.module('3drepo')
 		if (!("comments" in issue))
 			issue["comments"] = [];
 
-		/*
 		if (issue["complete"])
-			issue["deadlineString"] = "Complete";
+			issue["created"] = "Complete";
 		else
-			issue["deadlineString"] = ((new Date(issue["deadline"])).toDateString());
-		*/
+			issue["created"] = ((new Date(issue["created"])).toDateString());
 
 		return issue;
+	}
+
+
+	/**
+	 * Prepare the contents of an issue
+	 * @param {Object} contents
+	 */
+	self.prepareContents = function(contents)
+	{
+		contents.map(function(item) { item.created = ((new Date(item["created"])).toDateString());; return item; })
+
+		return contents;
 	}
 
 	/**
@@ -187,7 +197,9 @@ angular.module('3drepo')
 			newIssueObject["scale"] = scale;
 		}
 
-		// Get the shared ID of the current object to attach the comment to
+		// Post using the ID of the current object that the comment needs to be attached to.
+		// If this is a multipart ID of a split node, may contain a "_", so trim this out.
+		id = id.split("_")[0];
 		var issuePostURL = serverConfig.apiUrl(account + "/" + project + "/issues/" + id);
 
 		$.ajax({
@@ -298,6 +310,7 @@ angular.module('3drepo')
 				issueObject["account"] = account;
 				issueObject["project"] = project;
 
+				self.issueContents[id] = self.prepareContents(self.issueContents[id]);
 				self.io.emit("post_comment", issueObject);
 
 				deferred.resolve();
@@ -316,7 +329,13 @@ angular.module('3drepo')
 
 			$http.get(baseUrl)
 			.then(function(json) {
-				self.issueContents[id] = json.data[0]["comments"];
+				if ("comments" in json.data[0])
+				{
+					self.issueContents[id] = json.data[0]["comments"];
+					self.issueContents[id] = self.prepareContents(self.issueContents[id]);
+				} else {
+					self.issueContents[id] = [];
+				}
 
 				// Tell the chat server that we want
 				// updates to this issue posted to us

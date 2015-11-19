@@ -1376,6 +1376,12 @@ DBInterface.prototype.getIssues = function(dbName, project, branch, revision, on
 					return callback(err);
 				}
 
+				// If there are no federated projects
+				if (!refs.length)
+				{
+					return callback(responseCodes.OK, docs);
+				}
+
 				async.concat(refs, function (item, iter_callback) {
 					var childDbName  = item["owner"] ? item["owner"] : dbName;
 					var childProject = item["project"];
@@ -1519,14 +1525,15 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 
 			data._id = stringToUUID(data._id);
 
+			timeStamp = (new Date()).getTime();
 			if (data.comment)
 			{
 				var updateQuery = {
-					$push: { comments: { owner: owner,  comment: data.comment} }
+					$push: { comments: { owner: owner,  comment: data.comment, created: timeStamp} }
 				};
 			} else {
 				var updateQuery = {
-					$set: { complete: data.complete }
+					$set: { complete: data.complete, created: timeStamp }
 				};
 			}
 
@@ -1534,7 +1541,7 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 				if (err) return callback(responseCodes.DB_ERROR(err));
 
 				self.logger.logDebug("Updated " + count + " records.");
-				callback(responseCodes.OK, { issue_id : uuidToString(data._id), number: data.number });
+				callback(responseCodes.OK, { issue_id : uuidToString(data._id), number: data.number, owner: owner, created: timeStamp });
 			});
 		}
 	});

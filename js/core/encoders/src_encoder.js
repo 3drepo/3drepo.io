@@ -231,7 +231,6 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 
 								splitBBox = [[], []];
 
-								runningIDX       += 1;
 								subMeshIDX       += 1;
 								
 								subMeshKeys[subMeshIDX]  = [];
@@ -310,6 +309,14 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 
 				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_VERTICES_COUNT]          = runningVertTotal;
 				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_BOUNDING_BOX]            = splitBBox;
+
+				subMeshArray[subMeshIDX].idMapBuf = new Buffer(runningVertTotal * 4);
+				logger.logTrace("Writing IDMapBuf");
+				for(var k = 0; k < runningVertTotal; k++) {
+					subMeshArray[subMeshIDX].idMapBuf.writeFloatLE(runningIDX, k * 4);
+				}
+
+				runningVertTotal = 0;
 			} else {
 				logger.logTrace("Reindexing faces");
 

@@ -591,20 +591,25 @@ exports.route = function(router)
 
 										var material = {};
 
-										if ("diffuse" in child)
+										if ("diffuse" in child) {
 											material["diffuseColor"] = child["diffuse"].join(" ");
+										}
 
-										if ("emissive" in child)
+										if ("emissive" in child) {
 											material["emissiveColor"] = child["emissive"].join(" ");
+										}
 
-										if ("shininess" in child)
+										if ("shininess" in child) {
 											material["shininess"] = child["shininess"];
+										}
 
-										if ("specular" in child)
+										if ("specular" in child) {
 											material["specularColor"] = child["specular"].join(" ");
+										}
 
-										if ("opacity" in child)
+										if ("opacity" in child) {
 											material["transparency"] = 1.0 - child["opacity"];
+										}
 
 										app["material"] = material;
 
@@ -632,13 +637,15 @@ exports.route = function(router)
 
 										var numMeshesRequired = Math.ceil(numVertices / C.SRC_VERTEX_LIMIT);
 
+										meshCounter += 1;
+
 										for(var j = 0; j < numMeshesRequired; j++)
 										{
-											map["name"]       = params.uid + "_" + j;
+											map["name"]       = utils.uuidToString(subMeshKeys[i]) + "_" + j;
 											map["appearance"] = utils.uuidToString(subMeshes[i]["mat_id"]);
 											map["min"]        = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][0].join(" ");
 											map["max"]        = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][1].join(" ");
-											map["usage"]      = [params.uid + "_" + j]
+											map["usage"]      = [params.uid + "_" + meshCounter]
 
 											meshCounter += 1;
 

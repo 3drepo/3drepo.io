@@ -504,6 +504,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 				mp.setAttribute('url', config.api_server.url + '/' + account + '/' + project + '/' + child['id'] + '.x3d.mpc');
 				mp.setAttribute('urlIDMap', config.api_server.url + '/' + account + '/' + project + '/' + child['id'] + '.json.mpc');
 				mp.setAttribute('onclick', 'clickObject(event);');
+				mp.setAttribute('solid', 'false');
 				mp.setAttribute('onmouseover', 'onMouseOver(event);');
 				mp.setAttribute('onmousemove', 'onMouseMove(event);');
 
@@ -973,7 +974,7 @@ exports.route = function(router)
 					var sceneRoot	= X3D_CreateScene(xmlDoc);
 
 					var mesh = objs.meshes[params.uid];
-					var maxSubMeshIDX = 1;
+					var maxSubMeshIDX = 0;
 
 					// First sort the combined map in order of vertex ID
 					mesh[C.REPO_NODE_LABEL_COMBINED_MAP].sort(repoNodeMesh.mergeMapSort);
@@ -992,7 +993,22 @@ exports.route = function(router)
 
 						var currentMeshBBox   = currentMesh[C.REPO_NODE_LABEL_BOUNDING_BOX];
 
-						runningVertTotal += currentMeshNumVertices;
+						var numAddedMeshes = 0;
+
+						if (currentMeshNumVertices > C.SRC_VERTEX_LIMIT) {
+							// Cut the previous off short
+							if (bbox[0].length) {
+								maxSubMeshIDX += 1;
+								subMeshBBoxes.push(bbox);
+							}
+
+							numAddedMeshes = Math.ceil(currentMeshNumVertices / C.SRC_VERTEX_LIMIT)
+							runningVertTotal = 0;
+							bbox = [[],[]];
+						} else {
+							runningVertTotal += currentMeshNumVertices;
+							numAddedMeshes = 1;
+						}
 
 						for(var v_idx = 0; v_idx < 3; v_idx++)
 						{
@@ -1001,27 +1017,18 @@ exports.route = function(router)
 								bbox[0][v_idx] = currentMeshBBox[0][v_idx];
 								bbox[1][v_idx] = currentMeshBBox[1][v_idx];
 							} else {
-								if (bbox[0][v_idx] > currentMeshBBox[0][v_idx]) {
+								if (bbox[0][v_idx] < currentMeshBBox[0][v_idx]) {
 									bbox[0][v_idx] = currentMeshBBox[0][v_idx];
 								}
 
-								if (bbox[1][v_idx] < currentMeshBBox[1][v_idx]) {
+								if (bbox[1][v_idx] > currentMeshBBox[1][v_idx]) {
 									bbox[1][v_idx] = currentMeshBBox[1][v_idx];
 								}
 							}
 						}
 
-						if (runningVertTotal > C.SRC_VERTEX_LIMIT) {
-							var numAddedMeshes = 0;
-
-							if (currentMeshNumVertices > C.SRC_VERTEX_LIMIT) {
-								numAddedMeshes = Math.ceil(currentMeshNumVertices / C.SRC_VERTEX_LIMIT)
-								runningVertTotal = 0;
-							} else {
-								numAddedMeshes = 1;
-								runningVertTotal = currentMeshNumVertices;
-							}
-
+						if ((runningVertTotal > C.SRC_VERTEX_LIMIT) || (currentMeshNumVertices > C.SRC_VERTEX_LIMIT)) {
+							runningVertTotal = currentMeshNumVertices;
 							maxSubMeshIDX += numAddedMeshes;
 
 							for(var j = 0; j < numAddedMeshes; j++)
@@ -1048,7 +1055,7 @@ exports.route = function(router)
 						shape.setAttribute('bboxSize', bbox.size);
 
 						var app = xmlDoc.createElement('Appearance');
-						var mat = xmlDoc.createElement('Material');
+						var mat = xmlDoc.createElement('TwoSidedMaterial');
 						mat.setAttribute('diffuseColor', '0 1 0');
 						mat.textContent = ' ';
 						app.appendChild(mat);
