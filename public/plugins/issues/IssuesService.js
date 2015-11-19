@@ -218,6 +218,7 @@ angular.module('3drepo')
 				newIssueObject["owner"]    = Auth.username;
 				newIssueObject["parent"]   = data["parent"];
 				newIssueObject["number"]   = data["number"];
+				newIssueObject["created"]  = data["created"];
 
 				newIssueObject = self.prepareIssue(newIssueObject);
 
@@ -309,6 +310,7 @@ angular.module('3drepo')
 
 				issueObject["account"] = account;
 				issueObject["project"] = project;
+				issueObject["created"] = data.created;
 
 				self.issueContents[id] = self.prepareContents(self.issueContents[id]);
 				self.io.emit("post_comment", issueObject);
