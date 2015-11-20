@@ -1,14 +1,14 @@
 clip {
   display: block;
   width: 100%;
-  padding: 10px;
+  padding: 20px 10px 0 10px;
 }
 
 clip .minHeight {
-  height: 170px;
+  height: 110px;
 }
 clip .maxHeight {
-  height: 170px;
+  height: 110px;
 }
 
 clip md-radio-button {
@@ -16,17 +16,9 @@ clip md-radio-button {
 }
 
 .clipSlider {
-  margin-top: 30px;
+  margin-top: 20px;
 }
-
-clip md-slider {
-  margin-left: 15px;
-  margin-right: 15px;
-}
-
-clip .value {
-  margin-left: 5px;
-  color: #009688;
-  font-weight: bold;
-  padding: 5px;
+.clipSlider md-slider {
+  width: 100px;
+  padding-right: 25px;
 }

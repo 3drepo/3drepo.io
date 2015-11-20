@@ -19,28 +19,21 @@
     "use strict";
 
     angular.module("3drepo")
-        .factory('EventService', EventService);
+        .directive("global", global);
 
-    function EventService () {
-        var EVENT = {
-            FILTER: "EVENT_FILTER",
-            GLOBAL_CLICK: "EVENT_GLOBAL_CLICK",
-            PANEL_CONTENT_CLICK: "EVENT_LEFT_PANEL_CONTENT_CLICK",
-            PANEL_CONTENT_SETUP: "EVENT_PANEL_CONTENT_SETUP",
-            TOGGLE_FULL_SCREEN: "EVENT_TOGGLE_FULL_SCREEN",
-            TOGGLE_HELP: "EVENT_TOGGLE_HELP"
-        };
+    global.$inject = ["EventService"];
 
-        var currentEvent = "";
-
-        var send = function (type, value) {
-            currentEvent = {type: type, value: value};
-        };
-
+    function global(EventService) {
         return {
-            EVENT: EVENT,
-            currentEvent: function() {return currentEvent;},
-            send: send
+            restrict: "A",
+            link: link
         };
+
+        function link (scope, element) {
+            element.bind('click', function (event){
+                EventService.send(EventService.EVENT.GLOBAL_CLICK, event);
+            });
+        }
     }
 }());
+

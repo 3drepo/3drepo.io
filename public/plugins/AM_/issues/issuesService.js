@@ -30,8 +30,11 @@
             data = {},
             config = {},
             i, j = 0,
-            numIssues = 0, numComments = 0,
-            date = null;
+            numIssues = 0,
+            numComments = 0,
+            pinCoverage = 15.0,
+            pinRadius = 0.25,
+            pinHeight = 1.0;
 
         var prettyTime = function(time) {
             var date = new Date(time);
@@ -69,7 +72,9 @@
             return deferred.promise;
         };
 
-        var saveIssue = function (name, objectId) {
+        var saveIssue = function (name, objectId, pickedPos, pickedNorm) {
+            var currentVP = ViewerService.defaultViewer.getCurrentViewpointInfo();
+
             deferred = $q.defer();
             url = serverConfig.apiUrl(state.account + "/" + state.project + "/issues/" + objectId);
             data = {
@@ -83,10 +88,43 @@
                 withCredentials: true
             };
 
+            if (pickedPos !== null) {
+                data.position = pickedPos.toGL();
+                data.norm = pickedNorm.toGL();
+
+                var vp = new x3dom.fields.SFVec3f(0.0, 0.0, 0.0);
+                vp.setValueByStr(currentVP.position.join(' '));
+
+                var pp = new x3dom.fields.SFVec3f();
+                pp.setValueByStr(data.position.join(' '));
+
+                var pn = new x3dom.fields.SFVec3f();
+                pn.setValueByStr(data.norm.join(' '));
+
+                pp = pp.add(pn.multiply(pinHeight));
+
+                var dist = pp.subtract(vp).length();
+                var pixelViewRatio = currentVP.unityHeight / ViewerService.defaultViewer.getViewArea()._height;
+                var pinPixelSize = 2.0 * pinRadius / (pixelViewRatio * dist);
+
+                data.scale = pinCoverage / pinPixelSize;
+            }
+            console.log(data);
+
             $http.post(url, data, config)
                 .then(function successCallback(response) {
                     console.log(response);
                     response.data.issue.timeStamp = prettyTime(response.data.issue.created);
+
+                    if (pickedPos !== null) {
+                        addPin({
+                            id: data._id,
+                            position: data.position,
+                            norm: data.norm,
+                            parent: data.parent,
+                            scale: data.scale
+                        });
+                    }
                     deferred.resolve(response.data.issue);
                 });
 
@@ -114,6 +152,86 @@
 
             return deferred.promise;
         };
+
+        function addPin (pin) {
+            var pinPlacement = document.createElement("Transform");
+            var position = new x3dom.fields.SFVec3f(pin["position"][0], pin["position"][1], pin["position"][2]);
+
+            // Transform the pin into the coordinate frame of the parent
+            pinPlacement.setAttribute("translation", position.toString());
+
+            var norm = new x3dom.fields.SFVec3f(pin["norm"][0], pin["norm"][1], pin["norm"][2]);
+
+            // Transform the normal into the coordinate frame of the parent
+            var axisAngle = ViewerService.defaultViewer.rotAxisAngle([0,1,0], norm.toGL());
+
+            pinPlacement.setAttribute("rotation", axisAngle.toString());
+            createPinShape(pinPlacement, pin.id, pinRadius, pinHeight, pin.scale);
+            $("#model__root")[0].appendChild(pinPlacement);
+        }
+
+        function createPinShape (parent, id, radius, height, scale)
+        {
+            var coneHeight = height - radius;
+            var pinshape = document.createElement("Group");
+            pinshape.setAttribute("id", id);
+
+            pinshape.setAttribute('onclick', 'clickPin(event)');
+
+            var pinshapeapp = document.createElement("Appearance");
+            pinshape.appendChild(pinshapeapp);
+
+            var pinshapedepth = document.createElement("DepthMode");
+            pinshapedepth.setAttribute("depthFunc", "ALWAYS");
+            pinshapedepth.setAttribute("enableDepthTest", false);
+            pinshapeapp.appendChild(pinshapedepth);
+
+            var pinshapemat = document.createElement("Material");
+            pinshapemat.setAttribute("diffuseColor", "1.0 0.0 0.0");
+            pinshapeapp.appendChild(pinshapemat);
+
+            var pinshapescale = document.createElement("Transform");
+            pinshapescale.setAttribute("scale", scale + " " + scale + " " + scale);
+            pinshape.appendChild(pinshapescale);
+
+            var pinshapeconetrans = document.createElement("Transform");
+            pinshapeconetrans.setAttribute("translation", "0.0 " + (0.5 * coneHeight) + " 0.0");
+            pinshapescale.appendChild(pinshapeconetrans);
+
+            var pinshapeconerot = document.createElement("Transform");
+
+            pinshapeconerot.setAttribute("rotation", "1.0 0.0 0.0 3.1416");
+            pinshapeconetrans.appendChild(pinshapeconerot);
+
+            var pinshapeconeshape = document.createElement("Shape");
+            pinshapeconerot.appendChild(pinshapeconeshape);
+
+            var pinshapecone = document.createElement("Cone");
+            pinshapecone.setAttribute("bottomRadius", radius * 0.5);
+            pinshapecone.setAttribute("height", coneHeight);
+
+            var coneApp = pinshapeapp.cloneNode(true);
+
+            pinshapeconeshape.appendChild(pinshapecone);
+            pinshapeconeshape.appendChild(coneApp);
+
+            var pinshapeballtrans = document.createElement("Transform");
+            pinshapeballtrans.setAttribute("translation", "0.0 " + coneHeight + " 0.0");
+            pinshapescale.appendChild(pinshapeballtrans);
+
+            var pinshapeballshape = document.createElement("Shape");
+            pinshapeballtrans.appendChild(pinshapeballshape);
+
+            var pinshapeball = document.createElement("Sphere");
+            pinshapeball.setAttribute("radius", radius);
+
+            var ballApp = pinshapeapp.cloneNode(true);
+
+            pinshapeballshape.appendChild(pinshapeball);
+            pinshapeballshape.appendChild(ballApp);
+
+            parent.appendChild(pinshape);
+        }
 
         return {
             prettyTime: prettyTime,

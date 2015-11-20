@@ -1,4 +1,18 @@
 div(ng-class="iss.height")
+	div
+		div(layout="row", layout-align="space-around center")
+			md-button.md-icon-button(aria-label="View", ng-class="iss.issueAddNormalClass", ng-click="iss.setupAddNormal()")
+				md-icon(class="fa fa-plus")
+			md-button.md-icon-button(aria-label="View", ng-class="iss.issueAddPinClass", ng-click="iss.setupAddPin()")
+				md-icon(class="fa fa-map-pin")
+		panel-content-add(
+			ng-if="iss.showAdd"
+			placeholder="New issue"
+			on-save="iss.saveIssue(text)"
+			clear-input="iss.clearInput"
+		)
+		md-divider
+
 	issue(
 		ng-repeat="issue in iss.issues",
 		data="issue",
@@ -6,11 +20,4 @@ div(ng-class="iss.height")
 		comments-toggled-issue-id="iss.commentsToggledIssueId"
 		on-save-comment="iss.saveComment(issue, text)"
 		comment-saved="iss.commentSaved"
-	)
-
-	panel-content-add(
-		ng-if="iss.showAdd"
-		placeholder="New issue"
-		on-save="iss.saveIssue(text)"
-		clear-input="iss.clearInput"
 	)

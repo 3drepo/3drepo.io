@@ -35,20 +35,23 @@
         };
     }
 
-    IssuesCtrl.$inject = ["$scope", "ViewerService", "StateManager", "serverConfig", "NewIssuesService"];
+    IssuesCtrl.$inject = ["$scope", "$timeout", "EventService", "NewIssuesService", "ViewerService"];
 
-    function IssuesCtrl($scope, ViewerService, StateManager, serverConfig, NewIssuesService) {
+    function IssuesCtrl($scope, $timeout, EventService, NewIssuesService, ViewerService) {
         var iss = this,
             promise = null,
             i = 0,
             length = 0;
         iss.showAdd = false;
+        iss.issueAddNormalClass = "issueAddUnselectedClass";
+        iss.issueAddPinClass = "issueAddUnselectedClass";
+        iss.pickedPos = null;
+        iss.pickedNorm = null;
 
         promise = NewIssuesService.getIssues();
         promise.then(function (data) {
             console.log(data);
             iss.issues = data;
-            iss.showAdd = true;
         });
 
         iss.commentsToggled = function (issueId) {
@@ -78,12 +81,56 @@
 
         iss.saveIssue = function (name) {
             iss.clearInput = false;
-            promise = NewIssuesService.saveIssue(name, iss.selectedObjectId);
+            promise = NewIssuesService.saveIssue(name, iss.selectedObjectId, iss.pickedPos, iss.pickedNorm);
             promise.then(function (data) {
                 console.log(data);
                 iss.issues.push(data);
                 iss.clearInput = true;
             });
+        };
+
+        iss.setupAddNormal = function () {
+            iss.issueAddPinClass = "issueAddUnselectedClass";
+            iss.issueAddNormalClass = (iss.issueAddNormalClass === "issueAddUnselectedClass") ? "md-accent" : "issueAddUnselectedClass";
+            iss.showAdd = (iss.issueAddNormalClass === "md-accent");
+            if (iss.showAdd) {
+                iss.pickedPos = null;
+                iss.pickedNorm = null;
+            }
+        };
+
+        iss.setupAddPin = function () {
+            iss.issueAddNormalClass = "issueAddUnselectedClass";
+            iss.issueAddPinClass = (iss.issueAddPinClass === "issueAddUnselectedClass") ? "md-accent" : "issueAddUnselectedClass";
+            if (iss.issueAddPinClass === "issueAddUnselectedClass") {
+                iss.showAdd = false;
+                iss.globalClickWatch();
+            }
+            else {
+                iss.globalClickWatch = $scope.$watch(EventService.currentEvent, function (event) {
+                    if (event.type === EventService.EVENT.GLOBAL_CLICK) {
+                        if (event.value.target.className === "x3dom-canvas") {
+                            iss.showAdd = true;
+
+                            var dragEndX = event.value.clientX - screen.availLeft;
+                            var dragEndY = event.value.clientY;
+
+                            var pickObj = ViewerService.pickPoint(dragEndX, dragEndY);
+
+                            if (!pickObj.partID) {
+                                iss.selectedObjectId = pickObj.pickObj._xmlNode.getAttribute("DEF");
+                                console.log(iss.selectedObjectId);
+                            }
+                            else {
+                                //iss.selectedID = scope.IssuesService.IDMap[pickObj.partID];
+                            }
+
+                            iss.pickedPos = pickObj.pickPos;
+                            iss.pickedNorm = pickObj.pickNorm;
+                        }
+                    }
+                });
+            }
         };
 
         $(document).on("objectSelected", function(event, object, zoom) {

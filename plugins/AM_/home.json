@@ -3,6 +3,7 @@
     "files": {
         "angular" : [
             "AM_/home/homeDirective.js",
+            "AM_/home/globalDirective.js",
             "AM_/home/eventService.js"
         ],
         "jade": [

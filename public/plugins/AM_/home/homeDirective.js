@@ -90,7 +90,7 @@
                     {
                         type: "issues",
                         title: "Issues",
-                        show: false,
+                        show: true,
                         help: "List current issues",
                         icon: "fa-cogs"
                     },
