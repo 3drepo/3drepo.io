@@ -33,6 +33,7 @@ function define(name, value) {
 // Main collections (tables) in 3D Repo
 define("REPO_COLLECTION_SCENE", "scene");
 define("REPO_COLLECTION_HISTORY", "history");
+define("REPO_COLLECTION_STASH", "stash");
 
 //-----------------------------------------------------------------------------
 // Node types
@@ -162,6 +163,7 @@ define("SRC_VERTEX_LIMIT", 65535);
 define("REPO_REST_API_ACCOUNT", "account");
 define("REPO_REST_API_PROJECT", "project");
 define("REPO_REST_API_BRANCH", "branch");
+define("REPO_REST_API_ID", "id");
 define("REPO_REST_API_SID", "sid");
 define("REPO_REST_API_FORMAT", "format");
 
@@ -170,4 +172,10 @@ define("REPO_SESSION_USER", "user");
 define("REQ_REPO", "repo");
 
 
+//-----------------------------------------------------------------------------
+//
+// MongoDB error codes
+//
+//-----------------------------------------------------------------------------
 
+define("MONGO_AUTH_FAILED", 18);

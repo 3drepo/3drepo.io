@@ -20,10 +20,10 @@ var systemLogger = require("../js/core/logger.js").systemLogger;
 var sharedSession = require("express-socket.io-session");
 var config = require("../js/core/config.js");
 
-module.exports.init = function (session, server) {
+module.exports.init = function (session, listener) {
 	"use strict";
 
-	var socketio = require("socket.io")(server, { path: config.api_server.chat_path });
+	var socketio = require("socket.io")(listener, { path: config.api_server.chat_path });
 	var dbInterface = require("../js/core/db_interface.js");
 
 	var issueMonitoring   = {};

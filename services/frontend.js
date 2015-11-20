@@ -56,16 +56,21 @@ module.exports.createApp = function(template)
 	app.get('/public/plugins/base/config.js', function(req, res) {
 		var params = {};
 
-		params['config_js'] = 'var server_config = {}; server_config.apiUrl = function(path) { return "' + config.api_server.url + '/" + path; };';
+		if (config.api_server.use_location) {
+			params['config_js'] = 'var server_config = {}; server_config.apiUrl = ' + config.api_server.location_url;
+		} else {
+			params['config_js'] = 'var server_config = {}; server_config.apiUrl = function(path) { return "' + config.api_server.url + '/" + path; };';
+		}
 
 		if("wayfinder" in config)
 		{
 			// TODO: Make a public section in config for vars to be revealed
 			params['config_js'] += '\nserver_config.democompany = "' + config.wayfinder.democompany + '";';
 			params['config_js'] += '\nserver_config.demoproject = "' + config.wayfinder.demoproject + '";';
-			params['config_js'] += '\nserver_config.chatHost    = "' + config.api_server.chat_host + '";';
-			params['config_js'] += '\nserver_config.chatPath    = "' + config.api_server.chat_path + '";';
 		}
+
+		params['config_js'] += '\nserver_config.chatHost    = "' + config.api_server.chat_host + '";';
+		params['config_js'] += '\nserver_config.chatPath    = "' + config.api_server.chat_path + '";';
 
 		params['config_js'] += '\n\nvar realOpen = XMLHttpRequest.prototype.open;\n\nXMLHttpRequest.prototype.open = function(method, url, async, unk1, unk2) {\n if(async) this.withCredentials = true;\nrealOpen.apply(this, arguments);\n};';
 
@@ -156,17 +161,9 @@ module.exports.createApp = function(template)
 									{
 										"plugin": "revision",
 										"friends" : [
-											"panels", "tree", "meta", "issues", "revisionselector", "diffselector", "clip", "walkthrough"
+											"panels", "tree", "viewpoints", "meta", "issues", "revisionselector", "clip", "walkthrough"
 										],
 										"children": [
-											{
-												"plugin": "diff",
-												"children": [
-													{
-														"plugin": "view"
-													}
-												]
-											},
 											{
 												"plugin": "sid",
 												"children": [
@@ -186,12 +183,7 @@ module.exports.createApp = function(template)
 									{
 										"plugin": "view",
 										"friends" : [
-											"panels", "tree", "meta", "issues", "revisionselector", "diffselector", "clip", "walkthrough"
-										],
-										"children": [
-											{
-												"plugin": "diff"
-											}
+											"panels", "tree", "viewpoints", "meta", "issues", "revisionselector", "clip", "walkthrough"
 										]
 									},
                                     {

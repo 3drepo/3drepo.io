@@ -21,21 +21,33 @@
     angular.module("3drepo")
         .controller('ViewingCtrl', ViewingCtrl);
 
-    ViewingCtrl.$inject = ["ViewerService"];
+    ViewingCtrl.$inject = ["$scope", "ViewerService"];
 
-    function ViewingCtrl (ViewerService) {
+    function ViewingCtrl ($scope, ViewerService) {
         var vw = this;
         vw.currentViewing = 0;
         vw.viewings = [
             {icon: "fa-mouse-pointer", mode: "TURNTABLE"},
             {icon: "fa-arrows", mode: "HELICOPTER"},
-            {icon: "fa-child", mode: "WALK"}
+            {icon: "fa-child", mode: "WALK"},
+			{icon: "fa-home", mode: "HOME"}
         ];
 
         vw.setCurrentViewing = function(index) {
-            vw.currentViewing = index;
-            ViewerService.defaultViewer.setNavMode(vw.viewings[index].mode);
-        };
+
+			if (vw.viewings[index].mode === "HOME") {
+				ViewerService.defaultViewer.showAll();
+
+				var navModeIndex = vw.viewings.map(function(item) {
+					return item.mode;
+				}).indexOf(ViewerService.defaultViewer.nav.type);
+
+				vw.currentViewing = navModeIndex;
+			} else {
+				vw.currentViewing = index;
+	            ViewerService.defaultViewer.setNavMode(vw.viewings[index].mode);
+			}
+		};
     }
 }());
 

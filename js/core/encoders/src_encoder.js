@@ -24,6 +24,8 @@
 
  var dbInterface   = require("../db_interface.js");
 
+ var config       = require("app-config").config;
+
 /*******************************************************************************
  * Render SRC format of a mesh
  *
@@ -34,22 +36,22 @@
  * @param {string} subformat - Subformat, currently for Multipart
  * @param {Object} res - The http response object
  *******************************************************************************/
- function render(project, scene, tex_uuid, embedded_texture, subformat, logger, result_callback)
- {
- 	"use strict";
+function render(project, scene, tex_uuid, embedded_texture, subformat, logger, result_callback)
+{
+	"use strict";
 
- 	logger.logDebug("Passed " + scene[C.REPO_SCENE_LABEL_MESHES_COUNT]);
+	logger.logDebug("Passed " + scene[C.REPO_SCENE_LABEL_MESHES_COUNT]);
 
- 	var meshIDs = Object.keys(scene.meshes);
- 	var meshIDX = 0;
- 	var srcJSON = {};
+	var meshIDs = Object.keys(scene.meshes);
+	var meshIDX = 0;
+	var srcJSON = {};
 
- 	var idx = 0;
+	var idx = 0;
 
- 	var dataBuffers		= []; // Array of data buffers to concatenate at the end
+	var dataBuffers		= []; // Array of data buffers to concatenate at the end
 	var bufferPosition	= 0;  // Stores the position of the processing buffer object relative to the full buffer
 	var idMapBuf		= null;
-	var needsIdMapBuf	= (subformat === "mpc");
+	var needsIdMapBuf	= true;
 
 	// Create placeholders for JSON output
 	srcJSON.accessors				  = {};
@@ -65,12 +67,13 @@
 	// SRC Header
 	srcJSON.meshes                    = {};
 	srcJSON.meta                      = {};
-
+	srcJSON.meta.idMaps               = {};
 
 	for(idx = 0; idx < meshIDs.length; idx++)
 	{
 		meshID = meshIDs[idx];
 
+		var orig_idx_ptr = 0;
 		var mesh = scene.meshes[meshID]; // Current mesh object
 
 		logger.logDebug("Processing mesh " + meshID);
@@ -82,136 +85,309 @@
 		var subMeshBBoxCenters   = [];
 		var subMeshBBoxSizes     = [];
 
+		var faceBuf = new Buffer(mesh.faces_count * 2 * 3); // Holder for buffer of face indices
+		var copy_ptr = 0;	  								// Pointer to the place in SRC buffer to copy to
+
 		// Is this mesh composed of several other meshes (through optimization) ?
-		if (mesh[C.REPO_NODE_LABEL_COMBINED_MAP])
+		if (!mesh[C.REPO_NODE_LABEL_COMBINED_MAP])
 		{
-			// First sort the combined map in order of vertex ID
-			mesh[C.REPO_NODE_LABEL_COMBINED_MAP].sort(repoNodeMesh.mergeMapSort);
-
-			if (subformat !== "mpc")
-			{
-				// In the case the this is not multipart then we separate out all the submeshes
-				subMeshArray = mesh[C.REPO_NODE_LABEL_COMBINED_MAP];
-			} else {
-				// Split the mesh into separate submeshes where
-				// each mesh is under the vertex limit
-
-				var subMeshIDX       = -1;
-				var runningVertTotal = 0;
-				var runningFaceTotal = 0;
-				var runningOffset    = 0;
-
-				var prevVTo = 0;
-
-				// If this is multipart then generate the idMap
-				for(var i = 0; i < mesh[C.REPO_NODE_LABEL_COMBINED_MAP].length; i++)
-				{
-					var currentMesh      = mesh[C.REPO_NODE_LABEL_COMBINED_MAP][i];
-					var currentMeshVFrom = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
-					var currentMeshVTo   = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO];
-					var currentMeshTFrom = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_FROM];
-					var currentMeshTTo   = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO];
-
-					prevVTo = currentMeshVTo;
-
-					var currentMeshNumVertices = currentMeshVTo - currentMeshVFrom;
-					var currentMeshNumFaces = currentMeshTTo - currentMeshTFrom;
-
-					if (currentMeshNumVertices > C.SRC_VERTEX_LIMIT)
-			{
-						return result_callback(responseCodes.INVALID_MESH);
-					}
-
-					if (((currentMeshVTo - runningOffset) > C.SRC_VERTEX_LIMIT) || (subMeshIDX === -1))
-					{
-						if  (subMeshIDX !== -1)
-						{
-							subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET] = subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
-							runningOffset                                                = subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET];
-							subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_VERTICES_COUNT]   = runningVertTotal;
-							subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_FACES_COUNT]      = runningFaceTotal;
-						}
-
-						subMeshIDX += 1;
-						subMeshArray[subMeshIDX]                                            = {};
-						subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]       = mesh["id"] + "_" + subMeshIDX;
-
-						subMeshArray[subMeshIDX][C.SRC_IDX_LIST]                            = [];
-						subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]   = currentMeshVFrom;
-						subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_FROM] = currentMeshTFrom;
-
-						runningVertTotal = 0;
-						runningFaceTotal = 0;
-					}
-
-					runningVertTotal += currentMeshNumVertices;
-					runningFaceTotal += currentMeshNumFaces;
-
-					subMeshArray[subMeshIDX][C.SRC_IDX_LIST].push(i);
-					subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO]     = currentMeshVTo;
-					subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO]   = currentMeshTTo;
-				}
-
-				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_VERTICES_COUNT]   = runningVertTotal;
-				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_FACES_COUNT]      = runningFaceTotal;
-				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET] = subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
-
-				var runningIDX = 0;
-
-				for(var i = 0; i < subMeshArray.length; i++)
-				{
-					subMeshArray[i].idMapBuf                            = new Buffer(subMeshArray[i][C.REPO_NODE_LABEL_VERTICES_COUNT] * 4);
-					subMeshBBoxCenters[i]                               = [];
-					subMeshBBoxSizes[i]                                 = [];
-					subMeshKeys[i]                                      = [];
-
-					for(var p = 0; p < subMeshArray[i][C.SRC_IDX_LIST].length; p++) {
-						subMeshKeys[i].push(utils.uuidToString(mesh[C.REPO_NODE_LABEL_COMBINED_MAP][p][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]));
-					}
-
-					// If this is multipart then generate the idMap
-					for(var j = 0; j < subMeshArray[i][C.SRC_IDX_LIST].length; j++)
-					{
-						var mapIDX = subMeshArray[i][C.SRC_IDX_LIST][j];
-						var map    = mesh[C.REPO_NODE_LABEL_COMBINED_MAP][mapIDX];
-
-						for(var k = map[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]; k < map[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO]; k++) {
-							subMeshArray[i].idMapBuf.writeFloatLE(runningIDX, (k - subMeshArray[i][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET]) * 4);
-						}
-
-						var bbox = mesh[C.REPO_NODE_LABEL_COMBINED_MAP][j][C.REPO_NODE_LABEL_BOUNDING_BOX];
-
-						var bboxMin    = bbox[0];
-						var bboxMax    = bbox[1];
-						var bboxCenter = [(bboxMin[0] + bboxMax[0]) / 2, (bboxMin[1] + bboxMax[1]) / 2, (bboxMin[2] + bboxMax[2]) / 2];
-						var bboxSize   = [(bboxMax[0] - bboxMin[0]), (bboxMax[1] - bboxMin[1]), (bboxMax[2] - bboxMin[2])];
-
-						subMeshBBoxCenters[i].push(bboxCenter);
-						subMeshBBoxSizes[i].push(bboxSize);
-
-						runningIDX += 1;
-					}
-				}
-			}
-		} else {
 			// Submesh array consists of a single mesh (the entire thing)
-			subMeshArray[0]                                            = {};
-			subMeshArray[0][C.REPO_NODE_LABEL_VERTICES_COUNT]          = mesh.vertices_count;
-			subMeshArray[0][C.REPO_NODE_LABEL_FACES_COUNT]             = mesh.faces_count;
-			subMeshArray[0][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]       = meshID;
-			subMeshArray[0][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]   = 0;
-			subMeshArray[0][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO]     = mesh.vertices_count;
-			subMeshArray[0][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_FROM] = 0;
-			subMeshArray[0][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO]   = mesh.faces_count;
-			subMeshArray[0][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET]        = 0;
+			mesh[C.REPO_NODE_LABEL_COMBINED_MAP]                       = [];
+
+			var fakeSubMesh = {};
+			fakeSubMesh[C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]       = utils.stringToUUID(meshID);
+			fakeSubMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]   = 0;
+			fakeSubMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO]     = mesh.vertices_count;
+			fakeSubMesh[C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_FROM] = 0;
+			fakeSubMesh[C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO]   = mesh.faces_count;
+			fakeSubMesh[C.REPO_NODE_LABEL_VERTICES_COUNT]          = mesh.vertices_count;
+			fakeSubMesh[C.REPO_NODE_LABEL_FACES_COUNT]             = mesh.faces_count;
+			fakeSubMesh[C.REPO_NODE_LABEL_BOUNDING_BOX]            = mesh.bounding_box;
+
+			mesh[C.REPO_NODE_LABEL_COMBINED_MAP].push(fakeSubMesh);
+		}
+
+		// First sort the combined map in order of vertex ID
+		mesh[C.REPO_NODE_LABEL_COMBINED_MAP].sort(repoNodeMesh.mergeMapSort);
+
+		var subMeshIDX       = -1;
+		var runningVertTotal = 0;
+		var runningFaceTotal = 0;
+
+		var prevVTo = 0;
+
+		var runningIDX = 0;
+
+		var startLargeMeshSplit = false;
+
+		logger.logTrace("Generating idMap");
+
+		// If this is multipart then generate the idMap
+		for(var i = 0; i < mesh[C.REPO_NODE_LABEL_COMBINED_MAP].length; i++)
+		{
+			logger.logTrace("Running m_map #" + i);
+
+			var currentMesh      = mesh[C.REPO_NODE_LABEL_COMBINED_MAP][i];
+
+			var currentMeshVFrom = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
+			var currentMeshVTo   = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO];
+			var currentMeshTFrom = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_FROM];
+			var currentMeshTTo   = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO];
+
+			prevVTo = currentMeshVTo;
+
+			var currentMeshNumVertices = currentMeshVTo - currentMeshVFrom;
+			var currentMeshNumFaces    = currentMeshTTo - currentMeshTFrom;
+
+			// If the current cumulative count of vertices is greater than the
+			// vertex limit that start a new mesh.
+			// If subMeshIDX === -1 we need to initialize the first mesh
+			if (((runningVertTotal + currentMeshNumVertices) > C.SRC_VERTEX_LIMIT) || (subMeshIDX === -1))
+			{
+
+				if  ((subMeshIDX !== -1) && !startLargeMeshSplit)
+				{
+					subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET] = 0; //subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
+					subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_VERTICES_COUNT]   = runningVertTotal;
+					subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_FACES_COUNT]      = runningFaceTotal;
+					subMeshArray[subMeshIDX].idMapBuf                            = Buffer.concat(subMeshArray[subMeshIDX].idMapBuf);
+				}
+
+				startLargeMeshSplit = false;
+
+				subMeshIDX += 1;
+				subMeshArray[subMeshIDX]                                            = {};
+				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]       = mesh["id"] + "_" + subMeshIDX;
+
+				subMeshArray[subMeshIDX][C.SRC_IDX_LIST]                            = [];
+				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]   = currentMeshVFrom;
+				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_FROM] = currentMeshTFrom;
+
+				subMeshArray[subMeshIDX].idMapBuf                            = [];
+				subMeshBBoxCenters[subMeshIDX]                               = [];
+				subMeshBBoxSizes[subMeshIDX]                                 = [];
+				subMeshKeys[subMeshIDX]                                      = [];
+
+				// Reset runnning values
+				runningVertTotal = 0;
+				runningFaceTotal = 0;
+				runningIDX       = 0;
+			}
+
+			// Now we've started a new mesh is the mesh that we're trying to add greater than
+			// the limit itself. In the case that it is, this will always flag as above.
+			if (currentMeshNumVertices > C.SRC_VERTEX_LIMIT)
+			{
+				logger.logInfo("Splitting large meshes into smaller meshes");
+
+				// Index from old vertex IDs to new ones
+				var reindexMap      = {};
+
+				// How many vertices have mapped so far ?
+				var totalNumMappedVerts = 0;
+				var newVertexBuffer = new Buffer(currentMeshNumVertices * 4 * 3);
+
+				var splitBBox = [[],[]];
+
+				// Perform quick and dirty splitting algorithm
+				for (var face_idx = 0; face_idx < currentMeshNumFaces; face_idx++) {
+					var num_comp = mesh["faces"].buffer.readInt32LE(orig_idx_ptr);
+
+					if (num_comp !== 3) {
+						logger.logError("Non triangulated face with " + num_comp + " vertices.");
+						runningFaceTotal--;
+						subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO]--;
+					} else {
+						if (((runningVertTotal + num_comp) > C.SRC_VERTEX_LIMIT) || !startLargeMeshSplit)
+						{
+							// If new meshes has at least one in, then we are updating
+							// an old one
+							if (startLargeMeshSplit) {
+								subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO]     = currentMeshVFrom;
+								subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO]   = currentMeshTFrom + face_idx;
+
+								subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_FACES_COUNT]             =
+									subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO] -
+									subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_FROM];
+
+								subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_VERTICES_COUNT]          = runningVertTotal;
+								subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_BOUNDING_BOX]            = splitBBox;
+
+								subMeshArray[subMeshIDX].idMapBuf = new Buffer(runningVertTotal * 4);
+								logger.logTrace("Writing IDMapBuf");
+								for(var k = 0; k < runningVertTotal; k++) {
+									subMeshArray[subMeshIDX].idMapBuf.writeFloatLE(runningIDX, k * 4);
+								}
+
+								var bbox = splitBBox;
+
+								var bboxMin    = bbox[0];
+								var bboxMax    = bbox[1];
+								var bboxCenter = [(bboxMin[0] + bboxMax[0]) / 2, (bboxMin[1] + bboxMax[1]) / 2, (bboxMin[2] + bboxMax[2]) / 2];
+								var bboxSize   = [(bboxMax[0] - bboxMin[0]), (bboxMax[1] - bboxMin[1]), (bboxMax[2] - bboxMin[2])];
+
+								subMeshBBoxCenters[subMeshIDX] = [bboxCenter];
+								subMeshBBoxSizes[subMeshIDX]   = [bboxSize];
+
+								splitBBox = [[], []];
+
+								runningIDX       += 1;
+								subMeshIDX++;
+
+								subMeshArray[subMeshIDX] = {};
+
+								reindexMap = {};
+							}
+
+							subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]       = mesh["id"] + "_" + subMeshIDX;
+							currentMeshVFrom                                                    += runningVertTotal;
+
+							subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]   = currentMeshVFrom;
+							subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_FROM] = currentMeshTFrom + face_idx;
+
+							runningVertTotal                                       = 0;
+
+							startLargeMeshSplit = true;
+						}
+
+						for (var vert_comp = 0; vert_comp < num_comp; vert_comp++) {
+							// First int32 is number of sides (i.e. 3 = Triangle)]
+							// After that there Int32 for each index (0..2)
+							var byte_position = orig_idx_ptr + (vert_comp + 1) * 4;
+							var idx_val       = mesh["faces"].buffer.readInt32LE(byte_position);
+
+							if (!reindexMap[idx_val])
+							{
+								reindexMap[idx_val] = runningVertTotal;
+								faceBuf.writeUInt16LE(runningVertTotal, copy_ptr);
+
+								// Loop over all the verex components and copy them
+								for(var v_idx = 0; v_idx < 3; v_idx++)
+								{
+									var vertComp = mesh["vertices"].buffer.readFloatLE(idx_val * 4 * 3 + v_idx * 4);
+
+									if (v_idx >= splitBBox[0].length)
+									{
+										splitBBox[0][v_idx] = vertComp;
+										splitBBox[1][v_idx] = vertComp;
+									} else {
+										if (splitBBox[0][v_idx] < vertComp) {
+											splitBBox[0][v_idx] = vertComp;
+										}
+
+										if (splitBBox[1][v_idx] > vertComp) {
+											splitBBox[1][v_idx] = vertComp;
+										}
+									}
+
+									newVertexBuffer.writeFloatLE(vertComp, totalNumMappedVerts * 4 * 3 + v_idx * 4);
+								}
+
+								runningVertTotal++;
+								totalNumMappedVerts++;
+							} else {
+								faceBuf.writeUInt16LE(reindexMap[idx_val]);
+							}
+
+							copy_ptr += 2;
+						}
+					}
+
+					orig_idx_ptr += (num_comp + 1) * 4;
+				}
+
+				newVertexBuffer.copy(mesh.vertices.buffer,  currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] * 3 * 4);
+
+				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO]     = currentMeshVFrom;
+				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO]   = currentMeshTFrom + face_idx;
+
+				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_FACES_COUNT]             =
+					subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO] -
+					subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_FROM];
+
+				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_VERTICES_COUNT]          = runningVertTotal;
+				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_BOUNDING_BOX]            = splitBBox;
+			} else {
+				logger.logTrace("Reindexing faces");
+
+				/*
+				for (var v_idx = 0; v_idx < 3; v_idx++) {
+					if (currentBBox[0][v_idx] < subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_BOUNDING_BOX][0][v_idx])
+					{
+						subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_BOUNDING_BOX][0][v_idx] = currentBBox[0][v_idx];
+					}
+
+					if (currentBBox[1][v_idx] > subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_BOUNDING_BOX][1][v_idx])
+					{
+						subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_BOUNDING_BOX][1][v_idx] = currentBBox[1][v_idx];
+					}
+				}
+				*/
+
+				for (var face_idx = 0; face_idx < currentMeshNumFaces; face_idx++) {
+					var num_comp = mesh["faces"].buffer.readInt32LE(orig_idx_ptr);
+
+					if (num_comp !== 3) {
+						logger.logError("Non triangulated face with " + num_comp + " vertices.");
+						//runningFaceTotal--;
+						//subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO]--;
+					} else {
+						for (var vert_comp = 0; vert_comp < num_comp; vert_comp++) {
+							// First int32 is number of sides (i.e. 3 = Triangle)]
+							// After that there Int32 for each index (0..2)
+							var byte_position = orig_idx_ptr + (vert_comp + 1) * 4;
+							var idx_val       = mesh["faces"].buffer.readInt32LE(byte_position);
+
+							// Take currentMeshVFrom from Index Value to reset to zero start,
+							// then add back in the current running total to append after
+							// pervious mesh.
+							idx_val          += (runningVertTotal - currentMeshVFrom);
+
+							faceBuf.writeUInt16LE(idx_val, copy_ptr);
+							copy_ptr += 2;
+						}
+					}
+
+					orig_idx_ptr += (num_comp + 1) * 4;
+				}
+
+				subMeshKeys[subMeshIDX].push(utils.uuidToString(currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]));
+				subMeshArray[subMeshIDX].idMapBuf.push(new Buffer(currentMeshNumVertices * 4));
+
+				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO]     = currentMeshVTo;
+				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO]   = currentMeshTTo;
+
+				var bbox = currentMesh[C.REPO_NODE_LABEL_BOUNDING_BOX];
+
+				var bboxMin    = bbox[0];
+				var bboxMax    = bbox[1];
+				var bboxCenter = [(bboxMin[0] + bboxMax[0]) / 2, (bboxMin[1] + bboxMax[1]) / 2, (bboxMin[2] + bboxMax[2]) / 2];
+				var bboxSize   = [(bboxMax[0] - bboxMin[0]), (bboxMax[1] - bboxMin[1]), (bboxMax[2] - bboxMin[2])];
+
+				subMeshBBoxCenters[subMeshIDX].push(bboxCenter);
+				subMeshBBoxSizes[subMeshIDX].push(bboxSize);
+
+				logger.logTrace("Writing IDMapBuf");
+				for(var k = 0; k < currentMeshNumVertices; k++) {
+					subMeshArray[subMeshIDX].idMapBuf[runningIDX].writeFloatLE(runningIDX, k * 4);
+				}
+
+				runningIDX       += 1;
+			}
+
+			runningVertTotal += currentMeshNumVertices;
+			runningFaceTotal += currentMeshNumFaces;
+
+		}
+
+		if (!startLargeMeshSplit) {
+			subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET] = 0; //subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
+			subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_VERTICES_COUNT]   = runningVertTotal;
+			subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_FACES_COUNT]      = runningFaceTotal;
+			subMeshArray[subMeshIDX].idMapBuf                            = Buffer.concat(subMeshArray[subMeshIDX].idMapBuf);
 		}
 
 		var subMeshBuffers = [];
-		var faceBuf = new Buffer(mesh.faces_count * 2 * 3); // Holder for buffer of face indices
-		var copy_ptr = 0;	  								// Pointer to the place in SRC buffer to copy to
-		var orig_idx = mesh["faces"].buffer;
-		var orig_idx_ptr = 0; 								// Pointer in the RepoGraphScene buffer to copy from
-
 
 		// Positions where the mesh will eventually output
 		var bufPos = 0;
@@ -240,6 +416,7 @@
 		var numSubMeshes    = subMeshArray.length;
 
 		// Loop through a set of possible submeshes
+		logger.logTrace("Looping through submeshes");
 		for(var subMesh = 0; subMesh < numSubMeshes; subMesh++)
 		{
 			// ------------------------------------------------------------------------
@@ -247,6 +424,8 @@
 			// Each attributeView has an associated bufferView
 			// Each bufferView is composed of several chunks.
 			// ------------------------------------------------------------------------
+
+			logger.logTrace("Generating subMesh #" + subMesh);
 
 			meshIDX = idx + "_" + subMesh;
 
@@ -277,8 +456,6 @@
 			// SRC Header for this mesh
 			srcJSON.meshes[meshID]            = {};
 			srcJSON.meshes[meshID].attributes = {};
-
-			console.log("MESHID: " + meshID);
 
 			// Extract and attach the bounding box
 			/*
@@ -389,7 +566,6 @@
 				srcJSON.meshes[meshID].meta.idMap         = idMapID;
 				srcJSON.meshes[meshID].meta.subMeshLabels = subMeshKeys[subMesh];
 
-				srcJSON.meta.idMaps                      = {};
 				srcJSON.meta.idMaps[idMapID]             = {};
 				srcJSON.meta.idMaps[idMapID].bboxCenters = subMeshBBoxCenters[subMesh];
 				srcJSON.meta.idMaps[idMapID].bboxSizes   = subMeshBBoxSizes[subMesh];
@@ -449,51 +625,16 @@
 					bufferPosition += texture.data_byte_count;
 				}
 			}
-
-
-			// Start writing to buffer
-			if (mesh["faces"])
-			{
-				// Loop through the faces copying the byte information
-				// to a buffer in the src.
-				var num_faces = 0;	  // Number of faces without non-triangle faces.
-
-				// TODO: Currently just ignores non triangulated faces.
-				for (var face_idx = 0; face_idx < subMeshFacesCount; face_idx++) {
-					var num_comp = orig_idx.readInt32LE(orig_idx_ptr);
-
-					if (num_comp !== 3) {
-						logger.logError("Non triangulated face with " + num_comp + " vertices.");
-					} else {
-
-						num_faces += 1; // This is a triangulated face
-
-						// Copy vertices across one by one, num_comp should be 3 :)
-						for (var vert_comp = 0; vert_comp < num_comp; vert_comp++) {
-							// First int32 is number of sides (i.e. 3 = Triangle)]
-							// After that there Int32 for each index (0..2)
-							var byte_position = orig_idx_ptr + (vert_comp + 1) * 4;
-							var idx_val = orig_idx.readInt32LE(byte_position);
-
-							idx_val -= subMeshArray[subMesh].offset;
-
-							faceBuf.writeUInt16LE(idx_val, copy_ptr);
-							copy_ptr += 2;
-						}
-					}
-
-					orig_idx_ptr += (num_comp + 1) * 4;
-				}
-			}
 		}
 
-		for(var i = 0; i < subMeshArray.length; i++)http://localhost/api/test/basetest/a35e54ef-8fe3-4bda-99f8-f69d1ddde2eb.src.mp
+		logger.logTrace("Generating output buffer");
+
+		idMapBuf = new Buffer(0);
+
+		for(var i = 0; i < subMeshArray.length; i++)
 		{
 			if (subMeshArray[i].idMapBuf)
 			{
-				if (!idMapBuf)
-					idMapBuf = new Buffer(0);
-
 				idMapBuf = Buffer.concat([idMapBuf, subMeshArray[i].idMapBuf]);
 			}
 		}
@@ -588,59 +729,68 @@ exports.route = function(router)
 	router.get("src", "/:account/:project/:uid", function(req, res, params, err_callback) {
 		// Get object based on UID, check whether or not it is a mesh
 		// and then output the result.
-		dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, {}, function(err, type, uid, fromStash, obj)
-		{
-			if(err.value)
-				return err_callback(err);
 
-			if (type == "mesh")
+		dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req, function(callback) {
+			dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, {}, function(err, type, uid, fromStash, obj)
 			{
-				var tex_uuid = null;
-
-				if ("tex_uuid" in params.query)
-				{
-					tex_uuid = params.query.tex_uuid;
+				if(err.value) {
+					return callback(err);
 				}
 
-				render(params.project, obj, tex_uuid, false, params.subformat, req[C.REQ_REPO].logger, function(err, renderedObj) {
-					if (err.value)
-						return err_callback(err);
+				if (type === C.REPO_NODE_TYPE_MESH)
+				{
+					var tex_uuid = null;
 
-					err_callback(responseCodes.OK, renderedObj);
-				});
-			} else {
-				err_callback(responseCodes.OBJECT_TYPE_NOT_SUPPORTED);
-			}
-		});
+					if ("tex_uuid" in params.query)
+					{
+						tex_uuid = params.query.tex_uuid;
+					}
+
+					render(params.project, obj, tex_uuid, false, params.subformat, req[C.REQ_REPO].logger, function(err, renderedObj) {
+						if (err.value) {
+							return callback(err);
+						}
+
+						callback(responseCodes.OK, renderedObj);
+					});
+				} else {
+					callback(responseCodes.OBJECT_TYPE_NOT_SUPPORTED);
+				}
+			});
+		}, err_callback);
 	});
 
 	router.get("src", "/:account/:project/revision/:rid/:sid", function(req, res, params, err_callback) {
 		// Get object based on revision rid, and object shared_id sid. Check
 		// whether or not it is a mesh and then output the result.
-		dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, null, params.rid, params.sid, true, {}, function(err, type, uid, fromStash, obj)
-		{
-			if(err.value)
-				return err_callback(err);
 
-			if (type == "mesh")
+		dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req, function(callback) {
+			dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, null, params.rid, params.sid, true, {}, function(err, type, uid, fromStash, obj)
 			{
-				var tex_uuid = null;
-
-				if ("tex_uuid" in params.query)
-				{
-					tex_uuid = params.query.tex_uuid;
+				if(err.value) {
+					return callback(err);
 				}
 
-				render(params.project, obj, tex_uuid, false, params.subformat, req[C.REQ_REPO].logger, function(err, renderedObj) {
-					if (err.value)
-						return err_callback(err);
+				if (type === C.REPO_NODE_TYPE_MESH)
+				{
+					var tex_uuid = null;
 
-					err_callback(responseCodes.OK, renderedObj);
-				});
-			} else {
-				err_callback(reponseCodes.OBJECT_TYPE_NOT_SUPPORTED);
-			}
-		});
+					if ("tex_uuid" in params.query)
+					{
+						tex_uuid = params.query.tex_uuid;
+					}
+
+					render(params.project, obj, tex_uuid, false, params.subformat, req[C.REQ_REPO].logger, function(err, renderedObj) {
+						if (err.value)
+							return err_callback(err);
+
+						callback(responseCodes.OK, renderedObj);
+					});
+				} else {
+					callback(responseCodes.OBJECT_TYPE_NOT_SUPPORTED);
+				}
+			});
+		}, err_callback);
 	});
 };
 

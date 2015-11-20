@@ -123,7 +123,8 @@ var internal_files = {
     'bower_components/angular-material/angular-material.min.js',
     'bower_components/angular-material/angular-material.min.css',
     'bower_components/angular-material/angular-animate.min.js',
-    'bower_components/angular-material/angular-aria.min.js'
+    'bower_components/angular-material/angular-aria.min.js',
+	'bower_components/angular-cookies/angular-cookies.js'
 	],
 
 	x3dom_files: [

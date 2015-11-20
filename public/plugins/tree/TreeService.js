@@ -67,7 +67,7 @@ angular.module('3drepo')
 		// If there is project in the node data then it is a
 		// reference node.
 		if ('project' in node.data)
-			return getProject(node.data.account, node.data.project)[0];
+			return self.getProject(node.data.account, node.data.project)[0];
 		else
 			return document.getElementById(node.data.namespace + node.data.uuid);
 	}
@@ -149,7 +149,7 @@ angular.module('3drepo')
 					{
 						var par_node = parent;
 
-						while(par_node != null)
+						while(par_node !== null)
 						{
 							self.getNode(par_node).setAttribute("render", true);
 							par_node = par_node.getParent();
@@ -179,6 +179,16 @@ angular.module('3drepo')
 					if ("uuid" in data.node.data)
 					{
 						var rootObj = self.getNode(data.node);
+
+						// If we can't find the element in the DOM, then we assume
+						// multipart
+						if (rootObj === null)
+						{
+							rootObj = {};
+							rootObj["multipart"] = true;
+							rootObj["id"] = data.node.data.namespace + data.node.data.uuid;
+						}
+
 						$(document).trigger("objectSelected", [ rootObj, !self.clickedFromView ] );
 					}
 
@@ -211,7 +221,9 @@ angular.module('3drepo')
 			});
 
 			$(document).on("objectSelected", function(event, object, zoom) {
-				self.onObjectSelected(object);
+				if (object && !object.hasOwnProperty("multipart")) {
+					self.onObjectSelected(object);
+				}
 			});
 
 			$(document).on("partSelected", function(event, objEvent, zoom) {

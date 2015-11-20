@@ -110,6 +110,8 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.downloadsLeft = 1;
 
+	this.defaultNavMode = "TURNTABLE";
+
 	this.init = function() {
 		if (!self.initialized)
 		{
@@ -176,6 +178,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.environ.setAttribute('smallFeatureCulling', 'true');
 			self.environ.setAttribute('smallFeatureThreshold', 5);
 			self.environ.setAttribute('occlusionCulling', 'true');
+			self.environ.setAttribute('sorttrans', 'false');
 			self.scene.appendChild(self.environ);
 
 			self.light = document.createElement('directionallight');
@@ -191,7 +194,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 			self.nav = document.createElement('navigationInfo');
 			self.nav.setAttribute('headlight', 'false');
-			self.nav.setAttribute('type', 'TURNTABLE');
+			self.nav.setAttribute('type', self.defaultNavMode);
 			self.scene.appendChild(self.nav);
 
 			self.loadViewpoint = self.name + "_default"; // Must be called after creating nav
@@ -205,15 +208,6 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 					self.disableClicking();
 				} else if (e.charCode == 'a'.charCodeAt(0)) {
 					self.showAll();
-					self.setNavMode("TURNTABLE");
-					self.enableClicking();
-				} else if (e.charCode == 'n'.charCodeAt(0)) {
-					self.setNavMode("TURNTABLE");
-					self.enableClicking();
-				} else if (e.charCode == 'w'.charCodeAt(0)) {
-					self.setNavMode("WALK");
-				} else if (e.charCode == 'e'.charCodeAt(0)) {
-					self.setNavMode("EXAMINE");
 					self.enableClicking();
 				}
 			});
@@ -247,7 +241,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			// TODO: This is a hack to get around a bug in X3DOM
 			self.getViewArea()._flyMat = null;
 
-			self.setNavMode("TURNTABLE");
+			self.setNavMode(self.defaultNavMode);
 		}
 
 		self.getCurrentViewpoint().addEventListener('viewpointChanged', self.viewPointChanged);
@@ -354,6 +348,16 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.viewPointChanged = function(event)
 	{
+		var vpInfo  = self.getCurrentViewpointInfo();
+		var eye     = vpInfo["position"];
+		var viewDir = vpInfo["view_dir"];
+
+		if (self.currentNavMode == 'HELICOPTER')
+		{
+			self.nav._x3domNode._vf.typeParams[0] = Math.asin(viewDir[1]);
+			self.nav._x3domNode._vf.typeParams[1] = eye[1];
+		}
+
 		$(self.viewer).trigger("myViewpointHasChanged", event);
 	}
 
@@ -386,12 +390,23 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 		self.oldPart = part;
 		part.setEmissiveColor("1.0 0.5 0.0", "front");
+
+		var obj          = {};
+		obj["multipart"] = true;
+		obj["id"]        = part.multiPart._nameSpace.name + "__" + part.partID;
+
+		$(document).trigger("objectSelected", obj);
 	});
 
 	$(document).on("objectSelected", function(event, object, zoom) {
-		if(zoom)
-			if (!(object.getAttribute("render") == "false"))
-				self.lookAtObject(object);
+		if (object !== undefined)
+		{
+			if (!object.hasOwnProperty("multipart")) {
+				if(zoom)
+					if (!(object.getAttribute("render") == "false"))
+						self.lookAtObject(object);
+			}
+		}
 
 		self.setApp(object);
 	});
@@ -523,7 +538,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			var name	= splitID[1].trim();
 		} else {
 			var name	= splitID[0].trim();
-			var group	= '<uncategorized>';
+			var group	= 'uncategorized';
 		}
 
 		return {group: group, name: name};
@@ -535,22 +550,24 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 		for(var v = 0; v < viewpointList.length; v++)
 		{
-			var id		= viewpointList[v]["id"].trim();
-			viewpointList[v]["def"] = id;
+			if (viewpointList[v].hasAttribute("id")) {
+				var id		= viewpointList[v]["id"].trim();
+				viewpointList[v]["def"] = id;
 
-			var groupName = self.getViewpointGroupAndName(id);
+				var groupName = self.getViewpointGroupAndName(id);
 
-			if (!self.viewpoints[groupName.group])
-				self.viewpoints[groupName.group] = {};
+				if (!self.viewpoints[groupName.group])
+					self.viewpoints[groupName.group] = {};
 
-			self.viewpoints[groupName.group][groupName.name] = id;
-			self.viewpointsNames[id] = viewpointList[v];
+				self.viewpoints[groupName.group][groupName.name] = id;
+				self.viewpointsNames[id] = viewpointList[v];
+			}
 		}
 	}
 
 	this.loadViewpoint = null;
 
-	this.getAxisAngle = function(from, at, look)
+	this.getAxisAngle = function(from, at, up)
 	{
 		var x3dfrom	= new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
 		var x3dat	= new x3dom.fields.SFVec3f(at[0], at[1], at[2]);
@@ -561,7 +578,9 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		var q = new x3dom.fields.Quaternion(0.0,0.0,0.0,1.0);
 		q.setValue(viewMat);
 
-		return (q.toAxisAngle()[0].toGL() + q[1]);
+		q = q.toAxisAngle();
+
+		return Array.prototype.concat(q[0].toGL(), q[1]);
 	}
 
 	// TODO: Should move this to somewhere more general (utils ? )
@@ -606,7 +625,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			if (from && at && up)
 			{
 				var q = self.getAxisAngle(from, at, up);
-				newViewpoint.setAttribute('orientation', q.join(','));
+				newViewPoint.setAttribute('orientation', q.join(','));
 			}
 
 			if (!self.viewpoints[groupName.group])
@@ -651,6 +670,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.runtime.resetExamin();
 
 			self.applySettings();
+
 
 			if (id === (self.name + "_default"))
 			{
@@ -782,31 +802,33 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.setApp = function(group, app)
 	{
-		if (app === undefined)
-			app = "1.0 0.5 0.0";
+		if (!group || !group.multipart) {
+			if (app === undefined)
+				app = "1.0 0.5 0.0";
 
-		self.applyApp(self.oneGrpNodes, 2.0, "0.0 0.0 0.0", false);
-		self.applyApp(self.twoGrpNodes, 2.0, "0.0 0.0 0.0", false);
-		self.applyApp(self.twoGrpNodes, 2.0, "0.0 0.0 0.0", true);
+			self.applyApp(self.oneGrpNodes, 2.0, "0.0 0.0 0.0", false);
+			self.applyApp(self.twoGrpNodes, 2.0, "0.0 0.0 0.0", false);
+			self.applyApp(self.twoGrpNodes, 2.0, "0.0 0.0 0.0", true);
 
-		// TODO: Make this more efficient
-		self.applyApp(self.diffColorAdded, 0.5, "0.0 1.0 0.0");
-		self.applyApp(self.diffColorDeleted, 0.5, "1.0 0.0 0.0");
+			// TODO: Make this more efficient
+			self.applyApp(self.diffColorAdded, 0.5, "0.0 1.0 0.0");
+			self.applyApp(self.diffColorDeleted, 0.5, "1.0 0.0 0.0");
 
-		if (group)
-		{
-			self.twoGrpNodes = group.getElementsByTagName("TwoSidedMaterial");
-			self.oneGrpNodes = group.getElementsByTagName("Material");
-		} else {
-			self.oneGrpNodes = [];
-			self.twoGrpNodes = [];
+			if (group)
+			{
+				self.twoGrpNodes = group.getElementsByTagName("TwoSidedMaterial");
+				self.oneGrpNodes = group.getElementsByTagName("Material");
+			} else {
+				self.oneGrpNodes = [];
+				self.twoGrpNodes = [];
+			}
+
+			self.applyApp(self.oneGrpNodes, 0.5, app, false);
+			self.applyApp(self.twoGrpNodes, 0.5, app, false);
+			self.applyApp(self.twoGrpNodes, 0.5, app, true);
+
+			self.viewer.render();
 		}
-
-		self.applyApp(self.oneGrpNodes, 0.5, app, false);
-		self.applyApp(self.twoGrpNodes, 0.5, app, false);
-		self.applyApp(self.twoGrpNodes, 0.5, app, true);
-
-		self.viewer.render();
 	}
 
 	this.evDist = function(evt, posA)
@@ -917,8 +939,11 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 			if (mode == 'HELICOPTER')
 			{
-				var eye = self.getCurrentViewpointInfo()["position"];
-				self.nav._x3domNode._vf.typeParams[0] = 0.0;
+				var vpInfo  = self.getCurrentViewpointInfo();
+				var eye     = vpInfo["position"];
+				var viewDir = vpInfo["view_dir"];
+
+				self.nav._x3domNode._vf.typeParams[0] = Math.asin(viewDir[1]);
 				self.nav._x3domNode._vf.typeParams[1] = eye[1];
 			}
 
@@ -995,7 +1020,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	this.updateCamera = function(pos, up, viewDir)
 	{
 		var x3domView = new x3dom.fields.SFVec3f();
-		x3domView.setValueByStr(normalize(viewDir).join(","));
+		x3domView.setValueByStr(viewDir.join(","));
 
 		var x3domUp   = new x3dom.fields.SFVec3f();
 		x3domUp.setValueByStr(normalize(up).join(","));
@@ -1010,9 +1035,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 		if (self.currentNavMode == 'HELICOPTER')
 		{
-			var angle = Math.acos(x3domUp.y);
-
-			self.nav._x3domNode._vf.typeParams[0] = angle;
+			self.nav._x3domNode._vf.typeParams[0] = Math.asin(x3domView.y);
 			self.nav._x3domNode._vf.typeParams[1] = x3domFrom.y;
 		}
 
@@ -1371,6 +1394,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			var clipPlaneIDX = self.addClippingPlane(
 					clippingPlanes[clipidx]["axis"],
 					clippingPlanes[clipidx]["distance"],
+					clippingPlanes[clipidx]["percentage"],
 					clippingPlanes[clipidx]["clipDirection"]
 				);
 		}
@@ -1379,13 +1403,14 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	/**
 	* Adds a clipping plane to the viewer
 	* @param {string} axis - Axis through which the plane clips
-	* @param {number} distance - Distance from the origin
+	* @param {number} distance - Distance along the bounding box to clip
+	* @param {number} percentage - Percentage along the bounding box to clip (overrides distance)
 	* @param {number} clipDirection - Direction of clipping (-1 or 1)
 	*/
-	this.addClippingPlane = function(axis, distance, clipDirection) {
+	this.addClippingPlane = function(axis, distance, percentage, clipDirection) {
 		clippingPlaneID += 1;
 
-		var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, [1, 1, 1], distance, clipDirection);
+		var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, [1, 1, 1], distance, percentage, clipDirection);
 		self.clippingPlanes.push(newClipPlane);
 
 		return clippingPlaneID;
@@ -1400,7 +1425,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			delete clipPlane;
 		});
 
-		clippingPlanes = [];
+		self.clippingPlanes = [];
 	}
 
 	/**
@@ -1427,10 +1452,10 @@ var Viewer = function(name, handle, x3ddiv, manager) {
  * @param {Viewer} parentViewer - Parent viewer
  * @param {string} axis - Letter representing the axis: "X", "Y" or "Z"
  * @param {array} colour - Array representing the color of the slice
- * @param {number} distance - Clipping distance from origin
+ * @param {number} percentage - Percentage along the bounding box to clip
  * @param {number} clipDirection - Direction of clipping (-1 or 1)
  */
-var ClipPlane = function(id, viewer, axis, colour, distance, clipDirection)
+var ClipPlane = function(id, viewer, axis, colour, distance, percentage, clipDirection)
 {
 	var self = this;
 
@@ -1449,11 +1474,18 @@ var ClipPlane = function(id, viewer, axis, colour, distance, clipDirection)
 	this.clipDirection = (clipDirection === undefined) ? -1 : clipDirection;
 
 	/**
+	* Value representing the percentage distance from the origin of
+	* the clip plane
+	* @type {number}
+	*/
+	this.percentage = (percentage === undefined) ? 1.0 : percentage
+
+	/**
 	* Value representing the distance from the origin of
 	* the clip plane
 	* @type {number}
 	*/
-	this.distance = (distance === undefined) ? 0 : distance;
+	this.distance = distance;
 
 	/**
 	* Volume containing the clipping plane
@@ -1572,13 +1604,21 @@ var ClipPlane = function(id, viewer, axis, colour, distance, clipDirection)
 		var min = volume.min.toGL();
 		var max = volume.max.toGL();
 
-		this.distance = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
+		self.percentage = percentage;
+		var distance = 0.0;
+
+		if (self.distance)
+		{
+			distance = self.distance;
+		} else {
+			distance = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
+		}
 
 		// Update the clipping element plane equation
-		clipPlaneElem.setAttribute("plane", normal.toGL().join(" ") + " " + this.distance);
+		clipPlaneElem.setAttribute("plane", normal.toGL().join(" ") + " " + distance);
 
 		var translation = [0,0,0];
-		translation[axisIDX] = -this.distance * this.clipDirection;
+		translation[axisIDX] = -distance * this.clipDirection;
 		coordinateFrame.setAttribute("translation", translation.join(","));
 	}
 
@@ -1596,7 +1636,7 @@ var ClipPlane = function(id, viewer, axis, colour, distance, clipDirection)
 		normal.z = (axis === "Z") ? this.clipDirection : 0;
 
 		// Reset plane to the start
-		this.movePlane(100.0);
+		this.movePlane(1.0);
 
 		setOutlineCoordinates();
 	}
@@ -1606,8 +1646,13 @@ var ClipPlane = function(id, viewer, axis, colour, distance, clipDirection)
 	*/
 	this.destroy = function()
 	{
-		clipPlaneElem.parentNode.removeChild(clipPlaneElem);
-		coordinateFrame.parentNode.removeChild(coordinateFrame);
+		if (clipPlaneElem && clipPlaneElem.parentNode) {
+			clipPlaneElem.parentNode.removeChild(clipPlaneElem);
+		}
+
+		if (coordinateFrame && coordinateFrame.parentNode) {
+			coordinateFrame.parentNode.removeChild(coordinateFrame);
+		}
 	}
 
 	// Construct and connect everything together
@@ -1628,6 +1673,7 @@ var ClipPlane = function(id, viewer, axis, colour, distance, clipDirection)
 	// Move the plane to finish construction
 	this.changeAxis(axis);
 	viewer.getScene().appendChild(clipPlaneElem);
+	this.movePlane(percentage);
 };
 
 

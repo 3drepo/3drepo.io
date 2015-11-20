@@ -79,7 +79,7 @@ if (config.vhost)
 	// different sub-domains.
 
 	if (!config.api_server.external)
-	{ 
+	{
 		if ("ssl" in config) {
 			var api_server = https.createServer(ssl_options, apiApp);
 		} else {
@@ -109,8 +109,6 @@ if (config.vhost)
 	var app = express();
 	var server = config.hasOwnProperty("ssl") ? https.createServer(ssl_options, app) : http.createServer(app);
 
-	chatServer.init(session, server);
-
 	app.use("/" + config.api_server.host_dir, apiApp);
 
 	for(var i = 0; i < config.servers.length; i++)
@@ -121,8 +119,9 @@ if (config.vhost)
 
 	// Use "0.0.0.0" so that the website is accessible from all
 	// relevant addresses
-	server.listen(config.servers[0].port, "0.0.0.0", serverStartFunction("", config.servers[0].hostname, config.servers[0].port));
+	var listener = server.listen(config.servers[0].port, "0.0.0.0", serverStartFunction("", config.servers[0].hostname, config.servers[0].port));
 
+	chatServer.init(session, listener);
 } else {
 	// This is an advanced configuration, which allows for different ports
 	// and/or different hosts currently this won"t be automatically detected

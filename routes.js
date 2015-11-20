@@ -103,9 +103,15 @@ var repoRouter = function() {
 
 					responseCodes.onError("Check other access", req, res, next, responseCodes.NOT_AUTHORIZED, null, req.params);
 				} else {
-					next();
-				}
+					if (!account || (account && req.session[C.REPO_SESSION_USER].username === account))
+					{
+						next();
+					} else{
+						req[C.REQ_REPO].processed = true;
+						responseCodes.onError("Check account access", req, res, next, responseCodes.NOT_AUTHORIZED, null, req.params);
+					}
 			}
+		}
 		};
 	};
 

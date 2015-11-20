@@ -37,6 +37,8 @@ var responseCodes = require("./response_codes.js");
 
 var utils = require("./utils.js");
 
+var config       = require("app-config").config;
+
 // TODO: Remove these
 stringToUUID = utils.stringToUUID;
 uuidToString = utils.uuidToString;
@@ -1072,8 +1074,6 @@ DBInterface.prototype.getSIDMap = function(dbName, project, branch, revision, ca
 	});
 };
 
-
-
 DBInterface.prototype.getHeadRevision = function(dbName, project, branch, callback) {
 	if (branch == "master")
 		var branch_id = masterUUID;
@@ -1094,9 +1094,12 @@ DBInterface.prototype.getHeadRevision = function(dbName, project, branch, callba
 }
 
 DBInterface.prototype.getHeadUUID = function(dbName, project, branch, callback) {
+	var self = this;
+
 	self.getHeadRevision(dbName, project, branch, function(err, doc) {
-		if (err.value)
+		if (err.value) {
 			return callback(err);
+		}
 
 		callback(responseCodes.OK, {"uuid" : doc[0]["_id"], "sid" : doc[0]["shared_id"]});
 	});
@@ -1474,39 +1477,59 @@ DBInterface.prototype.getObjectIssues = function(dbName, project, sids, number, 
 	});
 }
 
-DBInterface.prototype.storeIssue = function(dbName, project, sid, owner, data, callback) {
-	var self = this,
+DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, callback) {
+    var self = this,
         timeStamp = null;
 
 	dbConn(this.logger).collCallback(dbName, project + ".issues", false, function(err, coll) {
-		if(err.value)
+		if(err.value) {
 			return callback(err);
+		}
 
 		if (!data._id) {
 			var newID = uuid.v1();
 
-			self.logger.logDebug("Creating new issue " + newID);
+			self.logger.logDebug("Creating new issue " + newID + " for ID: " + id);
 
-			// TODO: Implement this using sequence counters
-			coll.count(function(err, numIssues) {
-				if (err) return responseCodes.DB_ERROR(err);
+			var projection = {};
+			projection[C.REPO_NODE_LABEL_SHARED_ID] = 1;
 
-				// This is a new issue
-				data._id     = stringToUUID(newID);
-				data.created = (new Date()).getTime();
-				data.parent  = stringToUUID(sid);
-				data.number  = numIssues + 1;
+			self.getObject(dbName, project, id, null, null, false, projection, function(err, type, uid, fromStash, obj) {
+				if (err.value && err.value !== responseCodes.OBJECT_NOT_FOUND.value) {
+					return callback(err);
+				}
 
-				if (!data.name)
-					data.name = "Issue" + data.number;
+				// TODO: Implement this using sequence counters
+				coll.count(function(err, numIssues) {
+					if (err) {
+						return callback(responseCodes.DB_ERROR(err));
+					}
 
-				data.owner = owner;
+					// This is a new issue
+					data._id     = stringToUUID(newID);
+					data.created = (new Date()).getTime();
 
-				coll.insert(data, function(err, count) {
-					if (err) return callback(responseCodes.DB_ERROR(err));
+					if (obj)
+					{
+						data.parent  = obj.meshes[id][C.REPO_NODE_LABEL_SHARED_ID];
+					}
 
-					self.logger.logDebug("Updated " + count + " records.");
-					callback(responseCodes.OK, { issue_id : uuidToString(data._id), number : data.number, issue:  data});
+					data.number  = numIssues + 1;
+
+					if (!data.name) {
+						data.name = "Issue" + data.number;
+					}
+
+					data.owner = owner;
+
+					coll.insert(data, function(err, count) {
+						if (err) {
+							return callback(responseCodes.DB_ERROR(err));
+						}
+
+						self.logger.logDebug("Updated " + count + " records.");
+						callback(responseCodes.OK, { issue_id : uuidToString(data._id), number : data.number });
+					});
 				});
 			});
 		} else {
@@ -1649,32 +1672,85 @@ DBInterface.prototype.getMetadata = function(dbName, project, branch, revision, 
 DBInterface.prototype.appendMeshFiles = function(dbName, project, fromStash, uid, obj, callback)
 {
 	var self = this;
-
-	var gridfstypes = [
-		C.REPO_NODE_LABEL_VERTICES,
-		C.REPO_NODE_LABEL_FACES,
-		C.REPO_NODE_LABEL_NORMALS,
-		//C.REPO_NODE_LABEL_COLORS,
-		C.REPO_NODE_LABEL_UV_CHANNELS
-	];
-
-	var numTasks = gridfstypes.length;
 	var subColl = fromStash ? "stash.3drepo" : "scene";
 
 	self.logger.logTrace("Retrieving mesh files and appending");
 
-	// TODO: Make this more generic, get filename from field
-	async.each(gridfstypes, function (fstype, callback) {
-		dbConn(self.logger).getGridFSFile(dbName, project + "." + subColl, uid + "_" + fstype, function(err, data)
-		{
-			if (!err["value"])
-				obj[fstype] = data;
+	if (obj["_extRef"] !== undefined)
+	{
+		// TODO: Make this more generic, get filename from field
+		async.each(Object.keys(obj["_extRef"]), function (type, callback) {
+			var fileName = obj["_extRef"][type];
 
-			callback();
+			dbConn(self.logger).getGridFSFile(dbName, project + "." + subColl, fileName, function(err, data)
+			{
+				if (!err["value"]) {
+					obj[type] = data;
+				}
+
+				callback();
+			});
+		}, function (err) {
+			return callback(responseCodes.OK, "mesh", uid, fromStash, repoGraphScene(self.logger).decode([obj]));
 		});
-	}, function (err) {
+	} else {
 		return callback(responseCodes.OK, "mesh", uid, fromStash, repoGraphScene(self.logger).decode([obj]));
-	});
+	}
+}
+
+DBInterface.prototype.cacheFunction = function(dbName, collection, req, generate, callback)
+{
+	"use strict";
+	var self = this;
+
+	// Get the format of the file
+	var format = req.params[C.REPO_REST_API_FORMAT].toLowerCase();
+	var stashCollection = collection + "." + C.REPO_COLLECTION_STASH + "." + format;
+
+	if (!config.disableCache)
+	{
+		dbConn(self.logger).getGridFSFile(dbName, stashCollection, req.url, function(err, result) {
+			console.log(JSON.stringify(err));
+
+			if (err.value === responseCodes.FILE_DOESNT_EXIST.value) {
+				self.logger.logInfo("Doesn't exist in stash, generating ...");
+
+				generate(function(generateErr, data) {
+					if (generateErr.value)
+					{
+						return callback(generateErr);
+					}
+
+					self.logger.logInfo("Storing in " + dbName + " : " + stashCollection);
+					dbConn(self.logger).storeGridFSFile(dbName, stashCollection, req.url, data, false, function(stashErr) {
+						if (stashErr.value)
+						{
+							return callback(stashErr);
+						}
+
+						callback(responseCodes.OK, data);
+					});
+				});
+			} else if (err.value) {
+				callback(err);
+			} else {
+				self.logger.logInfo("Retrieved from stash");
+
+				callback(responseCodes.OK, result.buffer);
+			}
+		});
+	} else {
+		self.logger.logInfo("Stash disabled, generating ...");
+
+		generate(function(err, data) {
+			if (err.value)
+			{
+				return callback(err);
+			}
+
+			callback(responseCodes.OK, data);
+		});
+	}
 }
 
 DBInterface.prototype.getObject = function(dbName, project, uid, rid, sid, needFiles, projection, callback) {
@@ -1743,7 +1819,7 @@ DBInterface.prototype.getObject = function(dbName, project, uid, rid, sid, needF
 			shared_id : stringToUUID(sid),
 		};
 
-		self.queryScene(dbName, project, rid, query, {}, function(err, fromStash, obj) {
+		self.queryScene(dbName, project, null, rid, query, {}, function(err, fromStash, obj) {
 			if (err.value) return callback(err);
 
 			if (!obj.length)

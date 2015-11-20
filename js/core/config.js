@@ -112,8 +112,9 @@ var fillInServerDetails = function(serverObject, name, usingIP, using_ssl, host,
 		serverObject.host_dir = "";
 	}
 
-	serverObject.base_url = serverObject.public_protocol + "://" + serverObject.hostname + ":" + serverObject.public_port;
-	serverObject.url      = serverObject.base_url + "/" + serverObject.host_dir;
+	serverObject.base_url     = serverObject.public_protocol + "://" + serverObject.hostname + ":" + serverObject.public_port;
+	serverObject.location_url = "function(path) { return \"//\" + window.location.host + \"/\" + \"" + serverObject.host_dir + "\" + \"/\" + path; }";
+	serverObject.url          = serverObject.base_url + "/" + serverObject.host_dir;
 }
 
 // Check for hostname and ip here
@@ -129,6 +130,8 @@ config.api_server.external     = coalesce(config.api_server.external, false); //
 config.api_server.chat_subpath = coalesce(config.api_server.chat_subpath, 'chat');
 config.api_server.chat_path    = '/' + config.api_server.host_dir + '/' + config.api_server.chat_subpath;
 config.api_server.chat_host    = config.api_server.base_url;
+
+config.disableCache            = coalesce(config.disableCache, false);
 
 // Set up other servers
 for(i in config.servers)

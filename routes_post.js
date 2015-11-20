@@ -39,7 +39,7 @@ function createSession(place, req, res, next, user)
 			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {account: user.username});
 		} else {
 			systemLogger.logDebug("Authenticated user and signed token.", req);
-			req.session.user = user;
+			req.session[C.REPO_SESSION_USER] = user;
 			responseCodes.respond(place, req, res, next, responseCodes.OK, {account: user.username});
 		}
 	});
@@ -64,7 +64,12 @@ var repoPostHandler = function(router, checkAccess){
 			req[C.REQ_REPO].logger.logDebug("User is logging in", req);
 
 			if(err.value) {
-				responseCodes.respond(responsePlace, req, res, next, err, {account: req.body.username});
+				if (err.dbErr.code == C.MONGO_AUTH_FAILED)
+				{
+					responseCodes.respond(responsePlace, req, res, next, responseCodes.NOT_AUTHORIZED, {account: req.body.username});
+				} else {
+					responseCodes.respond(responsePlace, req, res, next, err, {account: req.body.username});
+				}
 			} else {
 				if(user)
 				{
@@ -87,6 +92,7 @@ var repoPostHandler = function(router, checkAccess){
 
 		req.session.destroy(function() {
 			req[C.REQ_REPO].logger.logDebug("User has logged out.", req);
+            res.clearCookie("connect.sid", { path: "/" + config.api_server.host_dir });
 
 			responseCodes.respond("Logout POST", req, res, next, responseCodes.OK, {account: username});
 		});
@@ -209,13 +215,13 @@ var repoPostHandler = function(router, checkAccess){
 		});
 	});
 
-	self.post("/:account/:project/issues/:sid", true, function(req, res, next) {
+	self.post("/:account/:project/issues/:id", true, function(req, res, next) {
 		var responsePlace = "Adding or updating an issue";
 		var data = JSON.parse(req.body.data);
 
 		req[C.REQ_REPO].logger.logDebug("Upserting an issues for object " + req.params[C.REPO_REST_API_SID] + " in " + req.params[C.REPO_REST_API_ACCOUNT] + "/" + req.params[C.REPO_REST_API_PROJECT], req);
 
-		dbInterface(req[C.REQ_REPO].logger).storeIssue(req.params[C.REPO_REST_API_ACCOUNT], req.params[C.REPO_REST_API_PROJECT], req.params[C.REPO_REST_API_SID], req.session.user.username, data, function(err, result) {
+		dbInterface(req[C.REQ_REPO].logger).storeIssue(req.params[C.REPO_REST_API_ACCOUNT], req.params[C.REPO_REST_API_PROJECT], req.params[C.REPO_REST_API_ID], req.session.user.username, data, function(err, result) {
 			responseCodes.onError(responsePlace, req, res, next, err, result);
 		});
 	});
