@@ -16,14 +16,24 @@ issue {
 issue .issueTitle {
   height: 50px;
   outline: none;
-  padding: 0 16px 0 16px;
-  background: #E8EAF6;
+  padding: 0 16px 0 0;
 }
 issue .issueTitle:hover {
   cursor: pointer;
 }
 issue .issueTitle label {
   font-weight: normal;
+}
+issue .issueTitle .md-button.md-icon-button {
+  margin-right: -30px;
+}
+
+.issueTitleSelected {
+  background: #E8EAF6;
+}
+
+.issueTitleunSelected {
+  background: #FFFFFF;
 }
 
 issue md-list-item.md-3-line {

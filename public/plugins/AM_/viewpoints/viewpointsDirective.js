@@ -43,6 +43,7 @@
             currentViewpointInfo = {};
         vp.viewpoints = [];
         vp.inputState = false;
+        vp.clearInput = false;
 
         $scope.$watch("vp.filterText", function (newValue) {
             if (angular.isDefined(newValue)) {
@@ -54,19 +55,21 @@
             vp.inputState = !vp.inputState;
         };
 
-        vp.saveViewpoint = function () {
-            if (angular.isDefined(vp.viewpointName) && (vp.viewpointName !== "")) {
-                currentViewpointInfo = defaultViewer.getCurrentViewpointInfo();
-                console.log(currentViewpointInfo);
-                defaultViewer.createViewpoint(
-                    "test__" + vp.viewpointName,
-                    currentViewpointInfo.position,
-                    currentViewpointInfo.look_at,
-                    currentViewpointInfo.up
-                );
-                console.log(defaultViewer.viewpoints);
-                vp.viewpoints.push(vp.viewpointName);
-            }
+        vp.saveViewpoint = function (text) {
+            console.log(text);
+            vp.clearInput = true;
+            /*
+            currentViewpointInfo = defaultViewer.getCurrentViewpointInfo();
+            console.log(currentViewpointInfo);
+            defaultViewer.createViewpoint(
+                "test__" + text,
+                currentViewpointInfo.position,
+                currentViewpointInfo.look_at,
+                currentViewpointInfo.up
+            );
+            console.log(defaultViewer.viewpoints);
+            vp.viewpoints.push(text);
+            */
         };
 
         vp.selectViewpoint = function (index) {

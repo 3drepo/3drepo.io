@@ -28,7 +28,7 @@
                     'hue-2': '200',
                     'hue-3': '50'
                 })
-                .accentPalette('orange', {
+                .accentPalette('teal', {
                     'default': '600'
                 })
                 .warnPalette('red');
@@ -90,9 +90,16 @@
                     {
                         type: "issues",
                         title: "Issues",
-                        show: true,
+                        show: false,
                         help: "List current issues",
                         icon: "fa-cogs"
+                    },
+                    {
+                        type: "clip",
+                        title: "Clip",
+                        show: false,
+                        help: "Clipping plane",
+                        icon: "fa-object-group"
                     }
                 ]
             };

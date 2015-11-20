@@ -213,6 +213,9 @@ module.exports.createApp = function(template)
                                                 plugin: "AM_issues"
                                             },
                                             {
+                                                plugin: "AM_clip"
+                                            },
+                                            {
                                                 plugin: "AM_bottomButtons"
                                             }
                                         ]

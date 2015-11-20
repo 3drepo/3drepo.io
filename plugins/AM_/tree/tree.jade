@@ -30,5 +30,4 @@ div(ng-class="tr.height")
 						ng-change="tr.filterItemToggled(item)"
 						aria-label="Toggle"
 					)
-					md-list-item#treeFilterItemName(ng-click="tr.filterItemSelected(item)")
-						p {{item.name}}
+					p#treeFilterItemName(ng-click="tr.filterItemSelected(item)") {{item.name}}

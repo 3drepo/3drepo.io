@@ -1,11 +1,5 @@
 div(ng-class="vp.height")
-	.viewpoint(ng-repeat="viewpoint in vp.viewpoints track by $index" ng-click="vp.selectViewpoint($index)")
+	.viewpoint(ng-repeat="viewpoint in vp.viewpoints track by $index", ng-click="vp.selectViewpoint($index)")
 		label {{viewpoint}}
 
-	.viewpointsTools
-		.viewpointsToolsInput(ng-show="vp.inputState")
-			md-input-container(md-no-float="")
-				input(type="text", placeholder="Name", ng-model="vp.viewpointName")
-			md-button(ng-click="vp.saveViewpoint()") Save
-		.viewpointsToolsBar
-			span.fa.fa-plus(ng-click="vp.toggleInputState()")
+	panel-content-add(placeholder="New viewpoint", on-save="vp.saveViewpoint(text)", clear-input="vp.clearInput")

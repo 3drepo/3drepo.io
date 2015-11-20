@@ -1,6 +1,7 @@
 .md-mini md-icon,
 .md-icon-button md-icon{
   font-size: 20px;
+  outline: none;
 }
 
 #helpButton {

@@ -64,7 +64,8 @@
                 contentItem = angular.element(
                     "<" + pc.contentItem + " " +
                         "filter-text='pc.filterText' " +
-                        "height='pc.height'>" +
+                        "height='pc.height' " +
+                        "show='pc.showContent'>" +
                     "</" + pc.contentItem + ">"
                 );
                 content.append(contentItem);

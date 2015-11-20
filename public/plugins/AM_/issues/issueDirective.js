@@ -38,20 +38,21 @@
         };
     }
 
-    IssueCtrl.$inject = ["$scope", "ViewerService", "StateManager"];
+    IssueCtrl.$inject = ["$scope", "ViewerService"];
 
-    function IssueCtrl($scope, ViewerService, StateManager) {
+    function IssueCtrl($scope, ViewerService) {
         var is = this;
         is.showComments = false;
         is.toggleCommentsState = false;
-        is.issueToggleButtonClass = "fa-plus-square";
         is.numNewComments = 0;
+        is.titleBackground = "issueTitleUnselected";
+        is.viewButtonClass = "md-accent";
 
         $scope.$watch("is.commentsToggledIssueId", function (newValue) {
             if (angular.isDefined(newValue) && (newValue !== is.data._id)) {
                 is.toggleCommentsState = false;
                 is.showComments = false;
-                is.issueToggleButtonClass = "fa-plus-square";
+                is.titleBackground = "issueTitleUnselected";
             }
         });
 
@@ -66,8 +67,19 @@
                 is.showComments = true;
             }
             is.toggleCommentsState = !is.toggleCommentsState;
-            is.issueToggleButtonClass = is.toggleCommentsState ? "fa-minus-square" : "fa-plus-square";
+            is.titleBackground = is.toggleCommentsState ? "issueTitleSelected" :  "issueTitleUnselected";
             is.onCommentsToggled({issueId: is.data._id});
+        };
+
+        is.saveComment = function(text) {
+            is.clearInput = false;
+            is.onSaveComment({issue: is.data, text: text});
+            is.numNewComments += 1; // This is used to increase the height of the comments list
+        };
+
+        is.viewObject = function (event) {
+            event.stopPropagation();
+            is.viewButtonClass = "md-accent";
 
             // Set the camera position
             ViewerService.defaultViewer.setCamera(
@@ -75,12 +87,6 @@
                 is.data.viewpoint.view_dir,
                 is.data.viewpoint.up
             );
-        };
-
-        is.saveComment = function(text) {
-            is.clearInput = false;
-            is.onSaveComment({issue: is.data, text: text});
-            is.numNewComments += 1; // This is used to increase the height of the comments list
         };
     }
 

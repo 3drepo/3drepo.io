@@ -1,0 +1,20 @@
+div(ng-class="cl.height")
+	div(layout="column", layout-align="start center")
+		p
+			| Axis:
+			span.value {{cl.selectedAxis}}
+		md-radio-group(ng-model="cl.selectedAxis")
+			md-radio-button(ng-repeat="axis in cl.axes", value="{{axis}}") {{axis}}
+
+	.clipSlider
+		P
+			| Position:
+			span.value {{cl.sliderPosition}}
+		md-slider(
+			flex
+			ng-model="cl.sliderPosition"
+			step="{{cl.sliderStep}}"
+			min="{{cl.sliderMin}}"
+			max="{{cl.sliderMax}}"
+			aria-label="Position"
+		)

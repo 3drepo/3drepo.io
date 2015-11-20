@@ -27,6 +27,7 @@ tree p {
   word-wrap: break-word;
   padding: 5px;
   line-height: 18px;
+  margin: 0;
 }
 tree p:hover {
   cursor: pointer;
@@ -79,10 +80,6 @@ tree .virtualRepeatdemoInfiniteScroll .repeated-item {
   cursor: default;
   min-height: 48px;
   padding-left: 10px;
-}
-
-tree .virtualRepeatdemoInfiniteScroll .repeated-item p {
-  line-height: 18px;
 }
 
 .selectedFilterItem {
