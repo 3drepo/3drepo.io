@@ -122,9 +122,8 @@ var internal_files = {
 	'bower_components/font-awesome/css/font-awesome.min.css',
     'bower_components/angular-material/angular-material.min.js',
     'bower_components/angular-material/angular-material.min.css',
-    'bower_components/angular-material/angular-animate.min.js',
-    'bower_components/angular-material/angular-aria.min.js',
-	'bower_components/angular-cookies/angular-cookies.js'
+    'bower_components/angular-animate/angular-animate.min.js',
+    'bower_components/angular-aria/angular-aria.min.js'
 	],
 
 	x3dom_files: [

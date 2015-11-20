@@ -49,6 +49,7 @@
         pl.showPanel = true;
 
         $scope.$watch(EventService.currentEvent, function (event) {
+            console.log(event);
             if (event.type === EventService.EVENT.PANEL_CONTENT_SETUP) {
                 content = event.value[pl.position];
                 for (i = 0, length = content.length; i < length; i += 1) {
