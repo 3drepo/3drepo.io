@@ -236,6 +236,8 @@ angular.module('3drepo')
 				{
 					var pinObj = {
 						id:       newIssueObject["_id"],
+						account:  account,
+						project:  project,
 						position: newIssueObject["position"],
 						norm:     newIssueObject["norm"],
 						parent:   newIssueObject["parent"],
@@ -388,6 +390,8 @@ angular.module('3drepo')
 					{
 						var pinObj = {
 							id:       issue["_id"],
+							account:  issue["account"],
+							project:  issue["project"],
 							position: issue["position"],
 							norm:     issue["norm"],
 							scale:    issue["scale"],
@@ -426,12 +430,18 @@ angular.module('3drepo')
 
 	self.addPin = function(pin)
 	{
+		var trans = $("#" + pin["account"] + "__" + pin["project"] + "__root")[0]._x3domNode.getCurrentTransform();
+
 		/*
-		var parentTrans = $("[DEF=" + pin["parent"] + "]")[0].parentNode;
 		var pinNamespace = parentTrans._x3domNode._nameSpace.name;
 		var parentSize = parentTrans._x3domNode._graph.volume.max.subtract(parentTrans._x3domNode._graph.volume.min).length();
 		var pinSize = parentSize / 10.0;
 		*/
+
+		var v = new x3dom.fields.SFVec3f();
+
+		var position = trans.multMatrixVec(v.setValueByStr(pin["position"].join(",")));
+		var norm     = trans.inverse().transpose().multMatrixVec(v.setValueByStr(pin["norm"].join(",")));
 
 		var sceneBBox = ViewerService.defaultViewer.scene._x3domNode.getVolume();
 		var sceneSize = sceneBBox.max.subtract(sceneBBox.min).length();
@@ -442,35 +452,15 @@ angular.module('3drepo')
 			pinSize = ViewerService.defaultViewer.pinSize;
 		}
 
-		//if (!self.pinNamespaces[pinNamespace])
-		//	self.prepareX3DScene(pinNamespace, 0.25, 0.1, 1.0);
-
 		var pinPlacement = document.createElement("Transform");
 
-		//pinPlacement.setAttribute("scale", pinSize + " " + pinSize + " " + pinSize);
-
-		var position = new x3dom.fields.SFVec3f(pin["position"][0], pin["position"][1], pin["position"][2]);
-
 		// Transform the pin into the coordinate frame of the parent
-		//position = parentTrans._x3domNode.getCurrentTransform().multMatrixVec(position);
 		pinPlacement.setAttribute("translation", position.toString());
 
-		var norm = new x3dom.fields.SFVec3f(pin["norm"][0], pin["norm"][1], pin["norm"][2]);
-
 		// Transform the normal into the coordinate frame of the parent
-		//norm = parentTrans._x3domNode.getCurrentTransform().inverse().transpose().multMatrixVec(norm);
 		var axisAngle = ViewerService.defaultViewer.rotAxisAngle([0,1,0], norm.toGL());
 
 		pinPlacement.setAttribute("rotation", axisAngle.toString());
-
-		/*
-		var pinshapeinstan = document.createElement("Group");
-		pinshapeinstan.setAttribute("USE", "pinshape");
-		pinshapeinstan.setAttribute("render", true);
-		pinPlacement.appendChild(pinshapeinstan);
-		*/
-
-		//var zdist = Math.abs(ViewerService.defaultViewer.getCurrentViewpoint()._x3domNode._vf.position.z - pin["position"][2]);
 
 		self.createPinShape(pinPlacement, pin["id"], self.pinRadius, self.pinHeight, pinSize);
 		$("#model__root")[0].appendChild(pinPlacement);

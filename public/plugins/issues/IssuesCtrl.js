@@ -72,7 +72,7 @@ angular.module("3drepo")
 		$scope.newComment.text = "";
 
 		var newPos = issue["viewpoint"]["position"];
-		var newViewDir = issue["viewpoint"]["look_at"];
+		var newViewDir = issue["viewpoint"]["view_dir"];
 		var newUpDir = issue["viewpoint"]["up"];
 
 		ViewerService.defaultViewer.setCamera(newPos, newViewDir, newUpDir);
@@ -334,8 +334,10 @@ angular.module("3drepo")
 					scope.selectedID        = pickObj.partID;
 				}
 
-				scope.pickedPos       	= pickObj.pickPos;
-				scope.pickedNorm      	= pickObj.pickNorm;
+				var trans = $("#" + scope.selectedAccount + "__" + scope.selectedProject + "__root")[0]._x3domNode.getCurrentTransform();
+
+				scope.pickedPos       	= trans.inverse().multMatrixVec(pickObj.pickPos);
+				scope.pickedNorm      	= trans.transpose().multMatrixVec(pickObj.pickNorm);
 
 				scope.newIssue();
 			});

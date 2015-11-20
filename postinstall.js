@@ -27,7 +27,7 @@ var fs = require('fs');
  */
 var public_files = {
 	js: {
-		x3domjs: '/public/js/external/x3dom-full.debug.js',
+		x3domjs: '/public/js/external/x3dom.js',
 		angularjs: '/public/js/external/angular.js',
 		ammojs: '/public/js/external/ammo.js',
 		jqueryjs : '/public/js/external/jquery.js',
@@ -119,7 +119,7 @@ var internal_files = {
 
 	x3dom_files: [
 	'submodules/x3dom/dist/ammo.js',
-	'submodules/x3dom/dist/x3dom-full.debug.js'
+	'submodules/x3dom/dist/x3dom.js'
 	]
 }
 
