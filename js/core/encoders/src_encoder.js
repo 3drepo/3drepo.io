@@ -85,6 +85,8 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 		var subMeshBBoxCenters   = [];
 		var subMeshBBoxSizes     = [];
 
+		var useIDMap             = true;
+
 		var faceBuf = new Buffer(mesh.faces_count * 2 * 3); // Holder for buffer of face indices
 		var copy_ptr = 0;	  								// Pointer to the place in SRC buffer to copy to
 
@@ -105,6 +107,8 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 			fakeSubMesh[C.REPO_NODE_LABEL_BOUNDING_BOX]            = mesh.bounding_box;
 
 			mesh[C.REPO_NODE_LABEL_COMBINED_MAP].push(fakeSubMesh);
+
+			useIDMap = false;
 		}
 
 		// First sort the combined map in order of vertex ID
@@ -213,10 +217,12 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 								subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_VERTICES_COUNT]          = runningVertTotal;
 								subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_BOUNDING_BOX]            = splitBBox;
 
-								subMeshArray[subMeshIDX].idMapBuf = new Buffer(runningVertTotal * 4);
-								logger.logTrace("Writing IDMapBuf");
-								for(var k = 0; k < runningVertTotal; k++) {
-									subMeshArray[subMeshIDX].idMapBuf.writeFloatLE(runningIDX, k * 4);
+								if (useIDMap) {
+									subMeshArray[subMeshIDX].idMapBuf = new Buffer(runningVertTotal * 4);
+									logger.logTrace("Writing IDMapBuf");
+									for(var k = 0; k < runningVertTotal; k++) {
+										subMeshArray[subMeshIDX].idMapBuf.writeFloatLE(runningIDX, k * 4);
+									}
 								}
 
 								var bbox = splitBBox;
@@ -352,7 +358,10 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 				}
 
 				subMeshKeys[subMeshIDX].push(utils.uuidToString(currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]));
-				subMeshArray[subMeshIDX].idMapBuf.push(new Buffer(currentMeshNumVertices * 4));
+
+				if (useIDMap) {
+					subMeshArray[subMeshIDX].idMapBuf.push(new Buffer(currentMeshNumVertices * 4));
+				}
 
 				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO]     = currentMeshVTo;
 				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO]   = currentMeshTTo;
@@ -367,9 +376,12 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 				subMeshBBoxCenters[subMeshIDX].push(bboxCenter);
 				subMeshBBoxSizes[subMeshIDX].push(bboxSize);
 
-				logger.logTrace("Writing IDMapBuf");
-				for(var k = 0; k < currentMeshNumVertices; k++) {
-					subMeshArray[subMeshIDX].idMapBuf[runningIDX].writeFloatLE(runningIDX, k * 4);
+				if (useIDMap)
+				{
+					logger.logTrace("Writing IDMapBuf");
+					for(var k = 0; k < currentMeshNumVertices; k++) {
+						subMeshArray[subMeshIDX].idMapBuf[runningIDX].writeFloatLE(runningIDX, k * 4);
+					}
 				}
 
 				runningIDX       += 1;
@@ -384,7 +396,10 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 			subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET] = 0; //subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
 			subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_VERTICES_COUNT]   = runningVertTotal;
 			subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_FACES_COUNT]      = runningFaceTotal;
-			subMeshArray[subMeshIDX].idMapBuf                            = Buffer.concat(subMeshArray[subMeshIDX].idMapBuf);
+
+			if (useIDMap) {
+				subMeshArray[subMeshIDX].idMapBuf                            = Buffer.concat(subMeshArray[subMeshIDX].idMapBuf);
+			}
 		}
 
 		var subMeshBuffers = [];
@@ -408,7 +423,7 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 		}
 
 		var idMapWritePosition = bufPos;
-		if (needsIdMapBuf) {
+		if (useIDMap && needsIdMapBuf) {
 			bufPos += mesh.vertices_count * 4;
 		}
 
@@ -541,7 +556,7 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 				srcJSON.accessors.indexViews[indexView].count = subMeshFacesCount * 3; // Face Indices
 			}
 
-			if (subMeshArray[subMesh].idMapBuf)
+			if (useIDMap && subMeshArray[subMesh].idMapBuf)
 			{
 				srcJSON.accessors.attributeViews[idMapAttributeView]               = {};
 				srcJSON.accessors.attributeViews[idMapAttributeView].bufferView    = idMapBufferView;
@@ -553,7 +568,7 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 				srcJSON.accessors.attributeViews[idMapAttributeView].decodeOffset  = [0];
 				srcJSON.accessors.attributeViews[idMapAttributeView].decodeScale   = [1];
 
-				srcJSON.meshes[meshID].attributes.id = idMapAttributeView
+				srcJSON.meshes[meshID].attributes.id = idMapAttributeView;
 
 				srcJSON.bufferChunks[idMapBufferChunk]            = {};
 				srcJSON.bufferChunks[idMapBufferChunk].byteOffset = idMapWritePosition;
@@ -629,13 +644,16 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 
 		logger.logTrace("Generating output buffer");
 
-		idMapBuf = new Buffer(0);
-
-		for(var i = 0; i < subMeshArray.length; i++)
+		if (useIDMap)
 		{
-			if (subMeshArray[i].idMapBuf)
+			idMapBuf = new Buffer(0);
+
+			for(var i = 0; i < subMeshArray.length; i++)
 			{
-				idMapBuf = Buffer.concat([idMapBuf, subMeshArray[i].idMapBuf]);
+				if (subMeshArray[i].idMapBuf)
+				{
+					idMapBuf = Buffer.concat([idMapBuf, subMeshArray[i].idMapBuf]);
+				}
 			}
 		}
 
@@ -643,7 +661,7 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 			(mesh["vertices"] ? (mesh.vertices_count * 4 * 3) : 0) +
 			(mesh["normals"] ? (mesh.vertices_count * 4 * 3) : 0) +
 			(mesh["faces"] ? (mesh.faces_count * 3 * 2) : 0) +
-			(idMapBuf ? idMapBuf.length : 0) +
+			((useIDMap && idMapBuf) ? idMapBuf.length : 0) +
 			((tex_uuid != null) ? (mesh.vertices_count * 4 * 2) : 0);
 
 		dataBuffers[idx] = new Buffer(bufferSize);
@@ -672,7 +690,7 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 			bufPos += faceBuf.length;
 		}
 
-		if (idMapBuf)
+		if (useIDMap && idMapBuf)
 		{
 			idMapBuf.copy(dataBuffers[idx], bufPos);
 			bufPos += idMapBuf.length;
