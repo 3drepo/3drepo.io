@@ -55,15 +55,14 @@ module.exports.app = function (sharedSession) {
 			res.header("Access-Control-Allow-Credentials", true);
 			//res.header("Cache-Control", "public, max-age=3600");
 
-			// intercept OPTIONS method
-			if ("OPTIONS" === req.method) {
-				res.sendStatus(200);
-			} else {
-				next();
-			}
-		};
-
 		app.use(allowCrossDomain);
+	}
+
+	// intercept OPTIONS method
+	if ("OPTIONS" === req.method) {
+		res.sendStatus(200);
+	} else {
+		next();
 	}
 
 	app.use(sharedSession);
