@@ -41,12 +41,17 @@
         var iss = this,
             promise = null,
             i = 0,
-            length = 0;
-        iss.showAdd = false;
+            length = 0,
+            normalIssueInfo = "Select an object before creating an issue",
+            pinIssueInfo = "Click on an object at the required position of the pin before creating an issue";
+        iss.showInput = false;
+        iss.showInfo = false;
         iss.issueAddNormalClass = "issueAddUnselectedClass";
         iss.issueAddPinClass = "issueAddUnselectedClass";
         iss.pickedPos = null;
         iss.pickedNorm = null;
+        iss.selectedObjectId = null;
+        iss.globalClickWatch = null;
 
         promise = NewIssuesService.getIssues();
         promise.then(function (data) {
@@ -92,49 +97,112 @@
         iss.setupAddNormal = function () {
             iss.issueAddPinClass = "issueAddUnselectedClass";
             iss.issueAddNormalClass = (iss.issueAddNormalClass === "issueAddUnselectedClass") ? "md-accent" : "issueAddUnselectedClass";
-            iss.showAdd = (iss.issueAddNormalClass === "md-accent");
-            if (iss.showAdd) {
+
+            if (iss.issueAddNormalClass === "md-accent") {
                 iss.pickedPos = null;
                 iss.pickedNorm = null;
+                if (iss.selectedObjectId === null) {
+                    iss.showInfo = true;
+                    iss.info = normalIssueInfo;
+                }
+                else {
+                    iss.showInput = true;
+                }
+            }
+            else {
+                iss.showInfo = false;
+                iss.showInput = false;
             }
         };
 
-        iss.setupAddPin = function () {
+        iss.setupAddPin = function (event) {
+            event.stopPropagation();
             iss.issueAddNormalClass = "issueAddUnselectedClass";
             iss.issueAddPinClass = (iss.issueAddPinClass === "issueAddUnselectedClass") ? "md-accent" : "issueAddUnselectedClass";
-            if (iss.issueAddPinClass === "issueAddUnselectedClass") {
-                iss.showAdd = false;
-                iss.globalClickWatch();
+
+            if (iss.issueAddPinClass === "md-accent") {
+                iss.showInfo = true;
+                iss.info = pinIssueInfo;
+                setupGlobalClickWatch();
             }
             else {
-                iss.globalClickWatch = $scope.$watch(EventService.currentEvent, function (event) {
-                    if (event.type === EventService.EVENT.GLOBAL_CLICK) {
-                        if (event.value.target.className === "x3dom-canvas") {
-                            iss.showAdd = true;
+                iss.showInfo = false;
+                iss.showInput = false;
+                cancelGlobalClickWatch();
+                NewIssuesService.removePin();
+            }
+        };
 
-                            var dragEndX = event.value.clientX - screen.availLeft;
-                            var dragEndY = event.value.clientY;
+        function setupGlobalClickWatch () {
+            if (iss.globalClickWatch === null) {
+                iss.globalClickWatch = $scope.$watch(EventService.currentEvent, function (event, oldEvent) {
+                    if ((event.clientX !== oldEvent.clientX) && (event.clientY !== oldEvent.clientY)) {
+                        if (event.type === EventService.EVENT.GLOBAL_CLICK) {
+                            console.log(event);
+                            if (event.value.target.className === "x3dom-canvas") {
+                                var dragEndX = event.value.clientX - screen.availLeft;
+                                var dragEndY = event.value.clientY;
+                                var pickObj = ViewerService.pickPoint(dragEndX, dragEndY);
+                                console.log(pickObj);
 
-                            var pickObj = ViewerService.pickPoint(dragEndX, dragEndY);
+                                if (pickObj.pickObj !== null) {
+                                    iss.showInput = true;
 
-                            if (!pickObj.partID) {
-                                iss.selectedObjectId = pickObj.pickObj._xmlNode.getAttribute("DEF");
-                                console.log(iss.selectedObjectId);
+                                    iss.selectedObjectId = pickObj.pickObj._xmlNode.getAttribute("DEF");
+                                    console.log(iss.selectedObjectId);
+
+                                    iss.pickedPos = pickObj.pickPos;
+                                    iss.pickedNorm = pickObj.pickNorm;
+
+                                    NewIssuesService.addPin({
+                                        id: undefined,
+                                        position: pickObj.pickPos.toGL(),
+                                        norm: pickObj.pickNorm.toGL(),
+                                        scale: 10.0
+                                    });
+                                }
+                                else {
+                                    NewIssuesService.removePin();
+                                }
                             }
-                            else {
-                                //iss.selectedID = scope.IssuesService.IDMap[pickObj.partID];
-                            }
-
-                            iss.pickedPos = pickObj.pickPos;
-                            iss.pickedNorm = pickObj.pickNorm;
                         }
                     }
                 });
             }
-        };
+        }
+
+        function cancelGlobalClickWatch () {
+            if (typeof iss.globalClickWatch === "function") {
+                iss.globalClickWatch();
+                iss.globalClickWatch = null;
+            }
+        }
 
         $(document).on("objectSelected", function(event, object, zoom) {
-            iss.selectedObjectId = object.getAttribute("DEF");
+            if (angular.isUndefined(object)) {
+                iss.selectedObjectId = null;
+                iss.showInput = false;
+                if (iss.issueAddNormalClass === "md-accent") {
+                    iss.showInfo = true;
+                    iss.info = normalIssueInfo;
+                }
+                else if (iss.issueAddPinClass === "md-accent") {
+                    iss.showInfo = true;
+                    iss.info = pinIssueInfo;
+                }
+            }
+            else {
+                iss.selectedObjectId = object.getAttribute("DEF");
+                if (iss.issueAddNormalClass === "md-accent") {
+                    iss.showInfo = false;
+                    iss.showInput = true;
+                }
+                else if (iss.issueAddPinClass === "md-accent") {
+                    iss.showInfo = false;
+                    iss.showInput = true;
+                }
+            }
+            $scope.$apply();
         });
 
         $(document).on("partSelected", function(event, part, zoom) {

@@ -1522,13 +1522,14 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 
 					data.owner = owner;
 
+                    console.log(data);
 					coll.insert(data, function(err, count) {
 						if (err) {
 							return callback(responseCodes.DB_ERROR(err));
 						}
 
 						self.logger.logDebug("Updated " + count + " records.");
-						callback(responseCodes.OK, { issue_id : uuidToString(data._id), number : data.number });
+						callback(responseCodes.OK, { issue_id : uuidToString(data._id), number : data.number, issue: data });
 					});
 				});
 			});

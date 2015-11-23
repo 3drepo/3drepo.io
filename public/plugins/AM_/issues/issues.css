@@ -11,6 +11,12 @@ issues .minHeight {
   color: rgba(0,0,0,0.54);
 }
 
+.issuesAddInfo {
+  padding: 10px;
+  text-align: center;
+  height: 70px;
+}
+
 /** Issue *************************************************************************************************************/
 
 issue {

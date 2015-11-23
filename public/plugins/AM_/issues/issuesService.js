@@ -34,7 +34,8 @@
             numComments = 0,
             pinCoverage = 15.0,
             pinRadius = 0.25,
-            pinHeight = 1.0;
+            pinHeight = 1.0,
+            currentPinId = null;
 
         var prettyTime = function(time) {
             var date = new Date(time);
@@ -73,16 +74,15 @@
         };
 
         var saveIssue = function (name, objectId, pickedPos, pickedNorm) {
-            var currentVP = ViewerService.defaultViewer.getCurrentViewpointInfo();
+            var currentVP = ViewerService.defaultViewer.getCurrentViewpointInfo(),
+                dataToSend = {};
 
             deferred = $q.defer();
             url = serverConfig.apiUrl(state.account + "/" + state.project + "/issues/" + objectId);
             data = {
-                data: JSON.stringify({
-                    name: name,
-                    viewpoint: ViewerService.defaultViewer.getCurrentViewpointInfo(),
-                    scale: 1.0
-                })
+                name: name,
+                viewpoint: ViewerService.defaultViewer.getCurrentViewpointInfo(),
+                scale: 1.0
             };
             config = {
                 withCredentials: true
@@ -109,19 +109,19 @@
 
                 data.scale = pinCoverage / pinPixelSize;
             }
-            console.log(data);
 
-            $http.post(url, data, config)
+            dataToSend = {data: JSON.stringify(data)};
+
+            $http.post(url, dataToSend, config)
                 .then(function successCallback(response) {
                     console.log(response);
                     response.data.issue.timeStamp = prettyTime(response.data.issue.created);
 
                     if (pickedPos !== null) {
                         addPin({
-                            id: data._id,
+                            id: response._id,
                             position: data.position,
                             norm: data.norm,
-                            parent: data.parent,
                             scale: data.scale
                         });
                     }
@@ -154,13 +154,16 @@
         };
 
         function addPin (pin) {
+            removePin();
+            console.log(pin);
             var pinPlacement = document.createElement("Transform");
-            var position = new x3dom.fields.SFVec3f(pin["position"][0], pin["position"][1], pin["position"][2]);
+            pinPlacement.setAttribute("id", "pinPlacement");
+            var position = new x3dom.fields.SFVec3f(pin.position[0], pin.position[1], pin.position[2]);
 
             // Transform the pin into the coordinate frame of the parent
             pinPlacement.setAttribute("translation", position.toString());
 
-            var norm = new x3dom.fields.SFVec3f(pin["norm"][0], pin["norm"][1], pin["norm"][2]);
+            var norm = new x3dom.fields.SFVec3f(pin.norm[0], pin.norm[1], pin.norm[2]);
 
             // Transform the normal into the coordinate frame of the parent
             var axisAngle = ViewerService.defaultViewer.rotAxisAngle([0,1,0], norm.toGL());
@@ -168,6 +171,13 @@
             pinPlacement.setAttribute("rotation", axisAngle.toString());
             createPinShape(pinPlacement, pin.id, pinRadius, pinHeight, pin.scale);
             $("#model__root")[0].appendChild(pinPlacement);
+        }
+
+        function removePin () {
+            var pinPlacement = document.getElementById("pinPlacement");
+            if (pinPlacement !== null) {
+                $("#model__root")[0].removeChild(pinPlacement);
+            }
         }
 
         function createPinShape (parent, id, radius, height, scale)
@@ -183,7 +193,7 @@
 
             var pinshapedepth = document.createElement("DepthMode");
             pinshapedepth.setAttribute("depthFunc", "ALWAYS");
-            pinshapedepth.setAttribute("enableDepthTest", false);
+            pinshapedepth.setAttribute("enableDepthTest", "false");
             pinshapeapp.appendChild(pinshapedepth);
 
             var pinshapemat = document.createElement("Material");
@@ -207,8 +217,8 @@
             pinshapeconerot.appendChild(pinshapeconeshape);
 
             var pinshapecone = document.createElement("Cone");
-            pinshapecone.setAttribute("bottomRadius", radius * 0.5);
-            pinshapecone.setAttribute("height", coneHeight);
+            pinshapecone.setAttribute("bottomRadius", (radius * 0.5).toString());
+            pinshapecone.setAttribute("height", coneHeight.toString());
 
             var coneApp = pinshapeapp.cloneNode(true);
 
@@ -237,7 +247,9 @@
             prettyTime: prettyTime,
             getIssues: getIssues,
             saveIssue: saveIssue,
-            saveComment: saveComment
+            saveComment: saveComment,
+            addPin: addPin,
+            removePin: removePin
         };
     }
 }());
