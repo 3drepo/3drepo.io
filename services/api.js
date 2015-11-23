@@ -64,6 +64,15 @@ module.exports.app = function (sharedSession) {
 		};
 
 		app.use(allowCrossDomain);
+	} else {
+		app.use(function(req, res, next) {
+			// intercept OPTIONS method
+			if ("OPTIONS" === req.method) {
+				res.sendStatus(200);
+			} else {
+				next();
+			}
+		});
 	}
 
 	app.use(sharedSession);
