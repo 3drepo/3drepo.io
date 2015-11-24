@@ -41,9 +41,9 @@
         var cl = this,
             clipPlane = null;
         cl.sliderMin = 0;
-        cl.sliderMax = 1000;
-        cl.sliderStep = 1;
-        cl.sliderPosition = cl.sliderMax;
+        cl.sliderMax = 100;
+        cl.sliderStep = 0.1;
+        cl.sliderPosition = cl.sliderMin;
         cl.clipPlane = null;
         cl.axes = ["X", "Y", "Z"];
         cl.selectedAxis = cl.axes[0];
@@ -52,8 +52,12 @@
             $timeout(function () {
                 cl.clipPlaneID = ViewerService.defaultViewer.addClippingPlane(cl.selectedAxis);
                 clipPlane = ViewerService.defaultViewer.getClippingPlane(cl.clipPlaneID);
-                clipPlane.movePlane(cl.sliderPosition / cl.sliderMax);
+                moveClippingPlane(cl.sliderPosition);
             });
+        }
+
+        function moveClippingPlane(sliderPosition) {
+            clipPlane.movePlane((cl.sliderMax - sliderPosition) / cl.sliderMax);
         }
 
         $scope.$watch("cl.show", function (newValue) {
@@ -71,13 +75,13 @@
         $scope.$watch("cl.selectedAxis", function (newValue) {
             if ((angular.isDefined(newValue) && clipPlane)) {
                 clipPlane.changeAxis(newValue);
-                cl.sliderPosition = cl.sliderMax;
+                cl.sliderPosition = cl.sliderMin;
             }
         });
 
         $scope.$watch("cl.sliderPosition", function (newValue) {
             if (clipPlane) {
-                clipPlane.movePlane(newValue / cl.sliderMax);
+                moveClippingPlane(newValue);
             }
         });
     }

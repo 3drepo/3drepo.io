@@ -1,8 +1,6 @@
 md-content
 	//md-subheader(ng-click="is.toggleComments()") {{is.data.number}} {{is.data.name}} {{is.data.timeStamp}}
 	div.issueTitle(layout="row", layout-align="space-between center", ng-click="is.toggleComments()", ng-class="is.titleBackground")
-		md-button.md-icon-button(aria-label="View")
-			md-icon(class="fa fa-eye", ng-click="is.viewObject($event)", ng-class="is.viewButtonClass")
 		label {{is.data.number}}
 		label {{is.data.name}}
 		label {{is.data.timeStamp}}
@@ -16,5 +14,3 @@ md-content
 						h4 {{comment.owner}}
 						p {{comment.timeStamp}}
 			panel-content-add(placeholder="New comment", on-save="is.saveComment(text)", clear-input="is.clearInput")
-
-	md-divider

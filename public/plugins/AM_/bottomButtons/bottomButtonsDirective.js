@@ -32,38 +32,64 @@
         };
     }
 
-    BottomButtonsCtrl.$inject = ["$scope", "EventService"];
+    BottomButtonsCtrl.$inject = ["$scope", "EventService", "ViewerService"];
 
-    function BottomButtonsCtrl ($scope, EventService) {
-        var bb = this;
-        bb.showButtons = false;
+    function BottomButtonsCtrl ($scope, EventService, ViewerService) {
+        var bb = this,
+            defaultViewer = ViewerService.defaultViewer;
+        bb.showButtons = true;
 
-        var blah = function () {
-            console.log("blah");
+        var turntable = function () {
+            defaultViewer.setNavMode("TURNTABLE");
+        };
+
+        var helicopter = function () {
+            defaultViewer.setNavMode("HELICOPTER");
+        };
+
+        var walk = function () {
+            defaultViewer.setNavMode("WALK");
+        };
+
+        var home = function () {
+            defaultViewer.showAll();
         };
 
         var toggleHelp = function () {
             EventService.send(EventService.EVENT.TOGGLE_HELP);
         };
 
-        var toggleFullScreen = function () {
+        bb.toggleFullScreen = function () {
             EventService.send(EventService.EVENT.TOGGLE_FULL_SCREEN);
-            bb.showButtons = false;
+            bb.showButtons = !bb.showButtons;
         };
 
+        /*
         bb.leftButtons = [
             {label: "Walk", icon: "fa-repeat", click: blah},
             {label: "Wire frame", icon: "fa-star-half-o", click: blah},
             {label: "Orthographic", icon: "fa-cube", click: blah},
             {label: "Full screen", icon: "fa-arrows-alt", click: toggleFullScreen}
         ];
+        */
 
+        bb.leftButtons = [];
+        bb.leftButtons.push({label: "Turntable", icon: "fa-mouse-pointer", click: turntable});
+        bb.leftButtons.push({label: "Helicopter", icon: "fa-arrows", click: helicopter});
+        bb.leftButtons.push({label: "Walk", icon: "fa-child", click: walk});
+
+        /*
         bb.rightButtons = [
             {label: "Help", icon: "fa-question", click: toggleHelp},
             {label: "Play", icon: "fa-play", click: blah},
             {label: "QR Reader", icon: "fa-qrcode", click: blah},
             {label: "Pin", icon: "fa-map-pin", click: blah}
         ];
+        */
+
+        bb.rightButtons = [];
+        bb.rightButtons.push({label: "Home", icon: "fa-home", click: home});
+        bb.rightButtons.push({label: "Help", icon: "fa-question", click: toggleHelp});
 
         bb.showHideButtons = function () {
             bb.showButtons = !bb.showButtons;

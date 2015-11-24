@@ -27,7 +27,8 @@
             templateUrl: 'issues.html',
             scope: {
                 filterText: "=",
-                height: "="
+                height: "=",
+                showAdd: "="
             },
             controller: IssuesCtrl,
             controllerAs: 'iss',
@@ -35,9 +36,9 @@
         };
     }
 
-    IssuesCtrl.$inject = ["$scope", "$timeout", "EventService", "NewIssuesService", "ViewerService"];
+    IssuesCtrl.$inject = ["$scope", "EventService", "NewIssuesService", "ViewerService"];
 
-    function IssuesCtrl($scope, $timeout, EventService, NewIssuesService, ViewerService) {
+    function IssuesCtrl($scope, EventService, NewIssuesService, ViewerService) {
         var iss = this,
             promise = null,
             i = 0,
@@ -124,47 +125,43 @@
                 iss.showInfo = true;
                 iss.info = pinIssueInfo;
                 setupGlobalClickWatch();
+                showAlert();
             }
             else {
                 iss.showInfo = false;
                 iss.showInput = false;
                 cancelGlobalClickWatch();
                 NewIssuesService.removePin();
+                closeAlert();
             }
         };
 
         function setupGlobalClickWatch () {
             if (iss.globalClickWatch === null) {
                 iss.globalClickWatch = $scope.$watch(EventService.currentEvent, function (event, oldEvent) {
-                    if ((event.clientX !== oldEvent.clientX) && (event.clientY !== oldEvent.clientY)) {
-                        if (event.type === EventService.EVENT.GLOBAL_CLICK) {
-                            console.log(event);
-                            if (event.value.target.className === "x3dom-canvas") {
-                                var dragEndX = event.value.clientX - screen.availLeft;
-                                var dragEndY = event.value.clientY;
-                                var pickObj = ViewerService.pickPoint(dragEndX, dragEndY);
-                                console.log(pickObj);
+                    if ((event.type === EventService.EVENT.GLOBAL_CLICK) &&
+                        (event.value.target.className === "x3dom-canvas") &&
+                        (!((event.value.clientX === oldEvent.value.clientX) &&
+                           (event.value.clientY === oldEvent.value.clientY)))) {
 
-                                if (pickObj.pickObj !== null) {
-                                    iss.showInput = true;
+                        var dragEndX = event.value.clientX - screen.availLeft;
+                        var dragEndY = event.value.clientY;
+                        var pickObj = ViewerService.pickPoint(dragEndX, dragEndY);
+                        if (pickObj.pickObj !== null) {
+                            iss.showInput = true;
+                            iss.selectedObjectId = pickObj.pickObj._xmlNode.getAttribute("DEF");
+                            iss.pickedPos = pickObj.pickPos;
+                            iss.pickedNorm = pickObj.pickNorm;
 
-                                    iss.selectedObjectId = pickObj.pickObj._xmlNode.getAttribute("DEF");
-                                    console.log(iss.selectedObjectId);
-
-                                    iss.pickedPos = pickObj.pickPos;
-                                    iss.pickedNorm = pickObj.pickNorm;
-
-                                    NewIssuesService.addPin({
-                                        id: undefined,
-                                        position: pickObj.pickPos.toGL(),
-                                        norm: pickObj.pickNorm.toGL(),
-                                        scale: 10.0
-                                    });
-                                }
-                                else {
-                                    NewIssuesService.removePin();
-                                }
-                            }
+                            NewIssuesService.addPin({
+                                id: undefined,
+                                position: pickObj.pickPos.toGL(),
+                                norm: pickObj.pickNorm.toGL(),
+                                scale: 10.0
+                            });
+                        }
+                        else {
+                            NewIssuesService.removePin();
                         }
                     }
                 });

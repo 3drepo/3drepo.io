@@ -6,7 +6,7 @@ div(ng-class="cl.height")
 				md-radio-button(ng-repeat="axis in cl.axes", value="{{axis}}") {{axis}}
 
 		.clipSlider
-			div(layout)
+			div(layout="row", layout-align="start center")
 				md-slider(
 					flex
 					ng-model="cl.sliderPosition"
@@ -15,5 +15,13 @@ div(ng-class="cl.height")
 					max="{{cl.sliderMax}}"
 					aria-label="Position"
 				)
-				div(flex="20", layout, layout-align="center center")
-					input(flex, type="number", ng-model="cl.sliderPosition")
+				div
+					input(
+						flex
+						type="number"
+						ng-model="cl.sliderPosition"
+						step="{{cl.sliderStep}}"
+						min="{{cl.sliderMin}}"
+						max="{{cl.sliderMax}}"
+					)
+					| &nbsp;%

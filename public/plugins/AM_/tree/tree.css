@@ -38,7 +38,6 @@ tree md-checkbox {
 }
 
 .angular-ui-tree-handle {
-  border-bottom: 1px solid rgba(0,0,0,0.12);
   cursor: default;
   display: inline-block;
   font-weight: normal;
@@ -76,7 +75,6 @@ tree .virtualRepeatdemoInfiniteScroll #vertical-container {
 }
 
 tree .virtualRepeatdemoInfiniteScroll .repeated-item {
-  border-bottom: 1px solid rgba(0,0,0,0.12);
   cursor: default;
   min-height: 48px;
   padding-left: 10px;

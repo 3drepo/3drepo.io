@@ -46,7 +46,6 @@
         is.toggleCommentsState = false;
         is.numNewComments = 0;
         is.titleBackground = "issueTitleUnselected";
-        is.viewButtonClass = "md-accent";
 
         $scope.$watch("is.commentsToggledIssueId", function (newValue) {
             if (angular.isDefined(newValue) && (newValue !== is.data._id)) {
@@ -67,6 +66,14 @@
                 is.showComments = true;
             }
             is.toggleCommentsState = !is.toggleCommentsState;
+            if (is.toggleCommentsState) {
+                // Set the camera position
+                ViewerService.defaultViewer.setCamera(
+                    is.data.viewpoint.position,
+                    is.data.viewpoint.view_dir,
+                    is.data.viewpoint.up
+                );
+            }
             is.titleBackground = is.toggleCommentsState ? "issueTitleSelected" :  "issueTitleUnselected";
             is.onCommentsToggled({issueId: is.data._id});
         };
@@ -75,18 +82,6 @@
             is.clearInput = false;
             is.onSaveComment({issue: is.data, text: text});
             is.numNewComments += 1; // This is used to increase the height of the comments list
-        };
-
-        is.viewObject = function (event) {
-            event.stopPropagation();
-            is.viewButtonClass = "md-accent";
-
-            // Set the camera position
-            ViewerService.defaultViewer.setCamera(
-                is.data.viewpoint.position,
-                is.data.viewpoint.view_dir,
-                is.data.viewpoint.up
-            );
         };
     }
 

@@ -62,7 +62,8 @@
                             "content-title='pl.contentItems[" + i + "].title' " +
                             "show-content='pl.contentItems[" + i + "].show' " +
                             "help='pl.contentItems[" + i + "].help' " +
-                            "icon='pl.contentItems[" + i + "].icon'>" +
+                            "icon='pl.contentItems[" + i + "].icon' " +
+                            "can-add='pl.contentItems[" + i + "].canAdd'>" +
                         "</panel-content>"
                     );
                     items.append(element);

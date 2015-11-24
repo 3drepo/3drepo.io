@@ -7,14 +7,16 @@ issues .minHeight {
   height: 50px;
 }
 
-.issueAddUnselectedClass {
-  color: rgba(0,0,0,0.54);
+issues .issueAdd {
+  margin: 10px;
 }
 
-.issuesAddInfo {
-  padding: 10px;
-  text-align: center;
-  height: 70px;
+issues .issueAdd .md-button {
+  margin: 0 2px 10px 2px;
+}
+
+issues .issueAdd textarea {
+  min-height: 70px;
 }
 
 /** Issue *************************************************************************************************************/

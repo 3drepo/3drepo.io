@@ -31,7 +31,8 @@
                 contentTitle: "=",
                 showContent: "=",
                 help: "=",
-                icon: "="
+                icon: "=",
+                canAdd: "="
             },
             controller: PanelContentCtrl,
             controllerAs: 'pc',
@@ -49,6 +50,7 @@
         pc.showHelp = false;
         pc.filterText = "";
         pc.height = "minHeight";
+        pc.addStatus = false;
 
         function setupFilterWatch() {
             filterWatch = $scope.$watch(EventService.currentEvent, function (event) {
@@ -65,7 +67,8 @@
                     "<" + pc.contentItem + " " +
                         "filter-text='pc.filterText' " +
                         "height='pc.height' " +
-                        "show='pc.showContent'>" +
+                        "show='pc.showContent' " +
+                        "show-add='pc.addStatus'>" +
                     "</" + pc.contentItem + ">"
                 );
                 content.append(contentItem);
@@ -113,6 +116,11 @@
                 pc.height = "minHeight";
                 filterWatch();
             }
+        };
+
+        pc.toggleAdd = function (event) {
+            event.stopPropagation();
+            pc.addStatus = !pc.addStatus;
         };
     }
 }());

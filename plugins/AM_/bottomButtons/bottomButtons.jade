@@ -3,14 +3,18 @@ div(layout="row", layout-align="center center")
 		md-button.md-fab.md-mini.actionButton(
 			ng-repeat="button in bb.leftButtons track by $index"
 			ng-click="button.click()"
-			aria-label="{{button.label}}")
+			aria-label="{{button.label}}"
+		)
+			md-tooltip(md-direction="top") {{button.label}}
 			md-icon(md-font-icon="{{button.icon}}", class="fa")
 	div
-		md-button.md-fab.md-primary(ng-click="bb.showHideButtons()", aria-label="Show buttons")
+		md-button.md-fab.md-primary(ng-click="bb.toggleFullScreen()", aria-label="Show buttons")
 			md-icon#showButtonIcon(md-font-icon="fa-navicon", class="fa")
 	div(ng-if="bb.showButtons")
 		md-button.md-fab.md-mini.actionButton(
 			ng-repeat="button in bb.rightButtons track by $index"
 			ng-click="button.click()"
-			aria-label="{{button.label}}")
+			aria-label="{{button.label}}"
+		)
+			md-tooltip(md-direction="top") {{button.label}}
 			md-icon(md-font-icon="{{button.icon}}", class="fa")

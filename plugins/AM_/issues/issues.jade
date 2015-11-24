@@ -1,18 +1,15 @@
 div(ng-class="iss.height")
-	div
-		div(layout="row", layout-align="space-around center")
-			md-button.md-icon-button(aria-label="View", ng-class="iss.issueAddNormalClass", ng-click="iss.setupAddNormal()")
-				md-icon(class="fa fa-plus")
-			md-button.md-icon-button(aria-label="View", ng-class="iss.issueAddPinClass", ng-click="iss.setupAddPin($event)")
-				md-icon(class="fa fa-map-pin")
-		panel-content-add(
-			ng-if="iss.showInput"
-			placeholder="New issue"
-			on-save="iss.saveIssue(text)"
-			clear-input="iss.clearInput"
-		)
-		div.issuesAddInfo(ng-if="iss.showInfo")
-			label {{iss.info}}
+	div(ng-if="iss.showAdd")
+		//panel-content-add(placeholder="Title" on-save="iss.saveIssue(text)" clear-input="iss.clearInput")
+		.issueAdd
+			md-input-container(md-no-float="")
+				input(placeholder="Title", ng-model="pca.title")
+
+			md-input-container(md-no-float="")
+				textarea(placeholder="Description", ng-model="pca.description")
+
+			md-button.md-raised.md-accent(ng-click="pca.save()") Save
+
 		md-divider
 
 	issue(
