@@ -114,6 +114,8 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.pinSize = null;
 
+	this.selectionDisabled = false;
+
 	this.init = function() {
 		if (!self.initialized)
 		{
@@ -963,10 +965,12 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.currentNavMode = mode;
 			self.nav.setAttribute('type', mode);
 
-			if (mode == 'WALK' || mode == 'HELICOPTER')
+			if (mode == 'WALK')
 			{
 				self.disableClicking();
 				self.setApp(null);
+			} else if (mode == 'HELICOPTER') {
+				self.disableSelecting();
 			} else {
 				self.enableClicking();
 			}
@@ -1197,7 +1201,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	this.hiddenParts = [];
 
 	this.clickObject = function(event, objEvent) {
-		if (objEvent.button == 1)
+		if ((objEvent.button == 1) && !self.selectionDisabled)
 		{
 			if (objEvent.partID)
 			{
@@ -1206,7 +1210,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			} else {
 				self.triggerSelected(objEvent.target);
 			}
-		} else {
+		} else if (objEvent.button == 2) {
 			if (objEvent.part)
 			{
 				objEvent.part.setVisibility(false);
@@ -1233,6 +1237,10 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.viewer.setAttribute("disableDoubleClick", true);
 			self.clickingEnabled = false;
 		}
+	}
+
+	this.disableSelecting = function() {
+		self.selectionDisabled = true;
 	}
 
 	this.enableClicking = function() {
