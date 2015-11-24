@@ -166,8 +166,9 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 			self.x3ddiv.appendChild(self.viewer);
 
-			self.scene = document.createElement('scene');
+			self.scene = document.createElement('Scene');
 			self.scene.setAttribute('onbackgroundclicked', 'bgroundClick(event);');
+			self.scene.setAttribute('dopickpass', false);
 			self.viewer.appendChild(self.scene);
 
 			self.bground = null;

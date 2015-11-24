@@ -202,6 +202,25 @@ angular.module('3drepo')
 		id = id.split("_")[0];
 		var issuePostURL = serverConfig.apiUrl(account + "/" + project + "/issues/" + id);
 
+		// If there is a position associated with the issue
+		// then create the pin.
+		if (pickedPos)
+		{
+			var pinObj = {
+				id:       1, //newIssueObject["_id"],
+				account:  account,
+				project:  project,
+				position: newIssueObject["position"],
+				norm:     newIssueObject["norm"],
+				parent:   newIssueObject["parent"],
+				scale:    newIssueObject["scale"]
+			};
+
+			self.draggedPin = null;
+			self.pinPositions.push(pinObj);
+			self.addPin(pinObj);
+		}
+
 		$.ajax({
 			type:	"POST",
 			url:	issuePostURL,
@@ -225,29 +244,12 @@ angular.module('3drepo')
 				// If there are no issues currently in this project
 				// then create placeholder.
 				if (!self.issues[project])
+				{
 					self.issues[project] = {};
+				}
 
 				self.issues[project][newIssueObject["_id"]] = newIssueObject; // Add issue to project list
 				self.io.emit("new_issue", newIssueObject); // Tell the chat server.
-
-				// If there is a position associated with the issue
-				// then create the pin.
-				if (pickedPos)
-				{
-					var pinObj = {
-						id:       newIssueObject["_id"],
-						account:  account,
-						project:  project,
-						position: newIssueObject["position"],
-						norm:     newIssueObject["norm"],
-						parent:   newIssueObject["parent"],
-						scale:    newIssueObject["scale"]
-					};
-
-					self.draggedPin = null;
-					self.pinPositions.push(pinObj);
-					self.addPin(pinObj);
-				}
 
 				$rootScope.$apply();
 				deferred.resolve();

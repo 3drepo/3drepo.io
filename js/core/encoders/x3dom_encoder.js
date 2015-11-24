@@ -75,6 +75,7 @@ function X3D_Header() {
 function X3D_CreateScene(xmlDoc, rootNode) {
 	var scene = xmlDoc.createElement('Scene');
 	scene.setAttribute('id', 'scene');
+	scene.setAttribute('dopickpass', 'false');
 
 	xmlDoc.firstChild.appendChild(scene);
 
@@ -1040,6 +1041,12 @@ exports.route = function(router)
 						}
 					}
 
+					// Cut the previous off short
+					if (bbox[0].length) {
+						maxSubMeshIDX += 1;
+						subMeshBBoxes.push(bbox);
+					}
+
 					for(var subMeshIDX = 0; subMeshIDX < maxSubMeshIDX; subMeshIDX++)
 					{
 						var subMeshName = mesh["id"] + "_" + subMeshIDX;
@@ -1055,8 +1062,7 @@ exports.route = function(router)
 						shape.setAttribute('bboxSize', bbox.size);
 
 						var app = xmlDoc.createElement('Appearance');
-						var mat = xmlDoc.createElement('TwoSidedMaterial');
-						mat.setAttribute('diffuseColor', '0 1 0');
+						var mat = xmlDoc.createElement('Material');
 						mat.textContent = ' ';
 						app.appendChild(mat);
 						shape.appendChild(app);
