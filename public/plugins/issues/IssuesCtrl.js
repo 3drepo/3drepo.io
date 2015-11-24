@@ -321,20 +321,21 @@ angular.module("3drepo")
 					scope.selectedID 		= objID;
 				} else {
 					var projectParts = pickObj.part.multiPart._xmlNode.id.split("__");
+					var trans = null;
 
 					if (projectParts[0] === "model")
 					{
 						scope.selectedAccount   = scope.StateManager.state.account;
 						scope.selectedProject   = scope.StateManager.state.project;
+						trans = $("#model__root")[0]._x3domNode.getCurrentTransform();
 					} else {
 						scope.selectedAccount   = projectParts[0];
 						scope.selectedProject   = projectParts[1];
+						trans = $("#" + scope.selectedAccount + "__" + scope.selectedProject + "__root")[0]._x3domNode.getCurrentTransform();
 					}
 
 					scope.selectedID        = pickObj.partID;
 				}
-
-				var trans = $("#" + scope.selectedAccount + "__" + scope.selectedProject + "__root")[0]._x3domNode.getCurrentTransform();
 
 				scope.pickedPos       	= trans.inverse().multMatrixVec(pickObj.pickPos);
 				scope.pickedNorm      	= trans.transpose().multMatrixVec(pickObj.pickNorm);

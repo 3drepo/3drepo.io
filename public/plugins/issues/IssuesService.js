@@ -432,7 +432,14 @@ angular.module('3drepo')
 
 	self.addPin = function(pin)
 	{
-		var trans = $("#" + pin["account"] + "__" + pin["project"] + "__root")[0]._x3domNode.getCurrentTransform();
+		var trans = null;
+
+		if ((pin["account"] == StateManager.state.account) && (pin["project"] == StateManager.state.project))
+		{
+			trans = $("#model__root")[0]._x3domNode.getCurrentTransform();
+		} else {
+			trans = $("#" + pin["account"] + "__" + pin["project"] + "__root")[0]._x3domNode.getCurrentTransform();
+		}
 
 		/*
 		var pinNamespace = parentTrans._x3domNode._nameSpace.name;

@@ -1018,11 +1018,11 @@ exports.route = function(router)
 								bbox[0][v_idx] = currentMeshBBox[0][v_idx];
 								bbox[1][v_idx] = currentMeshBBox[1][v_idx];
 							} else {
-								if (bbox[0][v_idx] < currentMeshBBox[0][v_idx]) {
+								if (bbox[0][v_idx] > currentMeshBBox[0][v_idx]) {
 									bbox[0][v_idx] = currentMeshBBox[0][v_idx];
 								}
 
-								if (bbox[1][v_idx] > currentMeshBBox[1][v_idx]) {
+								if (bbox[1][v_idx] < currentMeshBBox[1][v_idx]) {
 									bbox[1][v_idx] = currentMeshBBox[1][v_idx];
 								}
 							}

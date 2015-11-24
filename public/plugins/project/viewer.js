@@ -1194,14 +1194,35 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		self.triggerSelected(null);
 	}
 
+	this.hiddenParts = [];
+
 	this.clickObject = function(event, objEvent) {
-		if (objEvent.partID)
+		if (objEvent.button == 1)
 		{
-			objEvent.part.partID = objEvent.partID;
-			self.triggerPartSelected(objEvent.part);
+			if (objEvent.partID)
+			{
+				objEvent.part.partID = objEvent.partID;
+				self.triggerPartSelected(objEvent.part);
+			} else {
+				self.triggerSelected(objEvent.target);
+			}
 		} else {
-			self.triggerSelected(objEvent.target);
+			if (objEvent.part)
+			{
+				objEvent.part.setVisibility(false);
+				self.hiddenParts.push(objEvent.part);
+			}
 		}
+	}
+
+	this.revealAll = function(event, objEvent)
+	{
+		for(var part in self.hiddenParts)
+		{
+			self.hiddenParts[part].setVisibility(true);
+		}
+
+		self.hiddenParts = [];
 	}
 
 	this.disableClicking = function() {

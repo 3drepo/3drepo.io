@@ -30,7 +30,8 @@
             {icon: "fa-mouse-pointer", mode: "TURNTABLE"},
             {icon: "fa-arrows", mode: "HELICOPTER"},
             {icon: "fa-child", mode: "WALK"},
-			{icon: "fa-home", mode: "HOME"}
+   	    {icon: "fa-home", mode: "HOME"},
+            {icon: "fa-eye", mode: "EYE"}
         ];
 
         vw.setCurrentViewing = function(index) {
@@ -43,7 +44,9 @@
 				}).indexOf(ViewerService.defaultViewer.nav.type);
 
 				vw.currentViewing = navModeIndex;
-			} else {
+			} else if (vw.viewings[index].mode === "EYE") {
+                ViewerService.defaultViewer.revealAll();
+            } else {
 				vw.currentViewing = index;
 	            ViewerService.defaultViewer.setNavMode(vw.viewings[index].mode);
 			}
