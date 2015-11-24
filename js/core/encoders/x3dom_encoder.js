@@ -508,6 +508,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 				mp.setAttribute('solid', 'false');
 				mp.setAttribute('onmouseover', 'onMouseOver(event);');
 				mp.setAttribute('onmousemove', 'onMouseMove(event);');
+				mp.setAttribute('nameSpaceName', child['id']);
 
 				if (bbox)
 				{
