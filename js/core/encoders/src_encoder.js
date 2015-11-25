@@ -53,12 +53,14 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 	var idMapBuf		= null;
 	var needsIdMapBuf	= true;
 
+	var runningIDX = 0;
+
 	// Create placeholders for JSON output
 	srcJSON.accessors				  = {};
 	srcJSON.accessors.indexViews	  = {};
 	srcJSON.accessors.attributeViews  = {};
-	srcJSON.meta					  = {};
-	srcJSON.meta.generator			  = "3DRepo";
+	//srcJSON.meta					  = {};
+	//srcJSON.meta.generator			  = "3DRepo";
 	srcJSON.textureViews			  = {};
 	srcJSON.textures				  = {};
 	srcJSON.bufferViews               = {};
@@ -66,8 +68,8 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 
 	// SRC Header
 	srcJSON.meshes                    = {};
-	srcJSON.meta                      = {};
-	srcJSON.meta.idMaps               = {};
+	//srcJSON.meta                      = {};
+	//srcJSON.meta.idMaps               = {};
 
 	for(idx = 0; idx < meshIDs.length; idx++)
 	{
@@ -117,10 +119,9 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 		var subMeshIDX       = -1;
 		var runningVertTotal = 0;
 		var runningFaceTotal = 0;
+		var idBufIDX         = 0;
 
 		var prevVTo = 0;
-
-		var runningIDX = 0;
 
 		var startLargeMeshSplit = false;
 
@@ -148,18 +149,21 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 			// If subMeshIDX === -1 we need to initialize the first mesh
 			if (((runningVertTotal + currentMeshNumVertices) > C.SRC_VERTEX_LIMIT) || (subMeshIDX === -1))
 			{
-
 				if  ((subMeshIDX !== -1) && !startLargeMeshSplit)
 				{
 					subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_OFFSET] = 0; //subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
 					subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_VERTICES_COUNT]   = runningVertTotal;
 					subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_FACES_COUNT]      = runningFaceTotal;
-					subMeshArray[subMeshIDX].idMapBuf                            = Buffer.concat(subMeshArray[subMeshIDX].idMapBuf);
+
+					if (useIDMap)
+					{
+						subMeshArray[subMeshIDX].idMapBuf                        = Buffer.concat(subMeshArray[subMeshIDX].idMapBuf);
+					}
 				}
 
 				startLargeMeshSplit = false;
 
-				subMeshIDX += 1;
+				subMeshIDX                                                          += 1;
 				subMeshArray[subMeshIDX]                                            = {};
 				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]       = mesh["id"] + "_" + subMeshIDX;
 
@@ -167,7 +171,11 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]   = currentMeshVFrom;
 				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_FROM] = currentMeshTFrom;
 
-				subMeshArray[subMeshIDX].idMapBuf                            = [];
+				if (useIDMap)
+				{
+					subMeshArray[subMeshIDX].idMapBuf                        = [];
+				}
+
 				subMeshBBoxCenters[subMeshIDX]                               = [];
 				subMeshBBoxSizes[subMeshIDX]                                 = [];
 				subMeshKeys[subMeshIDX]                                      = [];
@@ -175,7 +183,9 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 				// Reset runnning values
 				runningVertTotal = 0;
 				runningFaceTotal = 0;
-				runningIDX       = 0;
+
+				//runningIDX += 1;
+				idBufIDX = 0;
 			}
 
 			// Now we've started a new mesh is the mesh that we're trying to add greater than
@@ -219,11 +229,14 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 
 								if (useIDMap) {
 									subMeshArray[subMeshIDX].idMapBuf = new Buffer(runningVertTotal * 4);
+
 									logger.logTrace("Writing IDMapBuf");
 									for(var k = 0; k < runningVertTotal; k++) {
 										subMeshArray[subMeshIDX].idMapBuf.writeFloatLE(runningIDX, k * 4);
 									}
 								}
+
+								runningIDX += 1;
 
 								var bbox = splitBBox;
 
@@ -237,15 +250,17 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 
 								splitBBox = [[], []];
 
-								runningIDX       += 1;
-								subMeshIDX++;
+								subMeshIDX       += 1;
 
+								subMeshKeys[subMeshIDX]  = [];
 								subMeshArray[subMeshIDX] = {};
 
 								reindexMap = {};
 							}
 
 							subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]       = mesh["id"] + "_" + subMeshIDX;
+							subMeshKeys[subMeshIDX].push(subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]);
+
 							currentMeshVFrom                                                    += runningVertTotal;
 
 							subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM]   = currentMeshVFrom;
@@ -313,6 +328,20 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 
 				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_VERTICES_COUNT]          = runningVertTotal;
 				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_BOUNDING_BOX]            = splitBBox;
+
+				if (useIDMap)
+				{
+					subMeshArray[subMeshIDX].idMapBuf = new Buffer(runningVertTotal * 4);
+
+					logger.logTrace("Writing IDMapBuf");
+					for(var k = 0; k < runningVertTotal; k++) {
+						subMeshArray[subMeshIDX].idMapBuf.writeFloatLE(runningIDX, k * 4);
+					}
+
+					runningIDX += 1;
+				}
+
+				runningVertTotal = 0;
 			} else {
 				logger.logTrace("Reindexing faces");
 
@@ -359,10 +388,6 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 
 				subMeshKeys[subMeshIDX].push(utils.uuidToString(currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]));
 
-				if (useIDMap) {
-					subMeshArray[subMeshIDX].idMapBuf.push(new Buffer(currentMeshNumVertices * 4));
-				}
-
 				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO]     = currentMeshVTo;
 				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO]   = currentMeshTTo;
 
@@ -378,13 +403,19 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 
 				if (useIDMap)
 				{
+					subMeshArray[subMeshIDX].idMapBuf.push(new Buffer(currentMeshNumVertices * 4));
+
+					var currentIDMapBufIDX = subMeshArray[subMeshIDX].idMapBuf.length - 1;
+
 					logger.logTrace("Writing IDMapBuf");
 					for(var k = 0; k < currentMeshNumVertices; k++) {
-						subMeshArray[subMeshIDX].idMapBuf[runningIDX].writeFloatLE(runningIDX, k * 4);
+						subMeshArray[subMeshIDX].idMapBuf[currentIDMapBufIDX].writeFloatLE(runningIDX, k * 4);
 					}
+
+					idBufIDX         += 1;
+					runningIDX       += 1;
 				}
 
-				runningIDX       += 1;
 			}
 
 			runningVertTotal += currentMeshNumVertices;
@@ -577,6 +608,7 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 				srcJSON.bufferViews[idMapBufferView]        = {};
 				srcJSON.bufferViews[idMapBufferView].chunks = [idMapBufferChunk];
 
+				/*
 				srcJSON.meshes[meshID].meta               = {};
 				srcJSON.meshes[meshID].meta.idMap         = idMapID;
 				srcJSON.meshes[meshID].meta.subMeshLabels = subMeshKeys[subMesh];
@@ -585,6 +617,7 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 				srcJSON.meta.idMaps[idMapID].bboxCenters = subMeshBBoxCenters[subMesh];
 				srcJSON.meta.idMaps[idMapID].bboxSizes   = subMeshBBoxSizes[subMesh];
 				srcJSON.meta.idMaps[idMapID].labels      = subMeshKeys[subMesh];
+				*/
 
 				idMapWritePosition += srcJSON.bufferChunks[idMapBufferChunk].byteLength;
 			}
@@ -718,7 +751,7 @@ function render(project, scene, tex_uuid, embedded_texture, subformat, logger, r
 		4                  // Magic Bit
 		+ 4                // SRC Version
 		+ 4                // Header length
-		+ JSONstr.length; // JSON String
+		+ JSONstr.length;  // JSON String
 
 	var headerBuffer = new Buffer(bufSize); // Buffer containing SRC header info
 	var bufPos = 0;
@@ -799,8 +832,9 @@ exports.route = function(router)
 					}
 
 					render(params.project, obj, tex_uuid, false, params.subformat, req[C.REQ_REPO].logger, function(err, renderedObj) {
-						if (err.value)
+						if (err.value) {
 							return err_callback(err);
+						}
 
 						callback(responseCodes.OK, renderedObj);
 					});

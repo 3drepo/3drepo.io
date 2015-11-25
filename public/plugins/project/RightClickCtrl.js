@@ -16,24 +16,17 @@
  */
 
 angular.module('3drepo')
-.controller('PanelCtrl', ['$scope', '$location', 'StateManager', function($scope, $location, StateManager)
+.controller('RightClickCtrl', ['$scope', function($scope)
 {
-	$scope.currentTab = "meta";
+	$scope.menuOptions = [
+		['Hide', function($itemScope) {
+			debugger;
+		}],
+		null,
+		['Unhide all', function($itemScope) {
+			debugger;
+		}]
+	];
 
-	$(document).on("pinClick", function (event, clickInfo) {
-		$scope.currentTab = "issues";
-	});
-
-	$scope.changeTab = function(tab) {
-		$scope.currentTab = tab;
-	};
-
-	$scope.toggleLeftPanel = function() {
-		$("#ui2-leftpanel").toggleClass("collapsed");
-	};
-
-	$scope.toggleRightPanel = function() {
-		$("#ui2-rightpanel").toggleClass("collapsed");
-	};
 }]);
 

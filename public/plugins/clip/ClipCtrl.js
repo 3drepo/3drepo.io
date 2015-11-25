@@ -33,6 +33,8 @@ angular.module('3drepo')
 
 	$scope.changeAxis = function (axs)
 	{
+		ViewerService.defaultViewer.clearClippingPlanes();
+		
 		var clipPlane = ViewerService.defaultViewer.getClippingPlane($scope.clipPlaneID);
 
 		// If there is no clipping plane then create one

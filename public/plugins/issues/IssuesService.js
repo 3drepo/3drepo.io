@@ -134,14 +134,24 @@ angular.module('3drepo')
 		if (!("comments" in issue))
 			issue["comments"] = [];
 
-		/*
 		if (issue["complete"])
-			issue["deadlineString"] = "Complete";
+			issue["created"] = "Complete";
 		else
-			issue["deadlineString"] = ((new Date(issue["deadline"])).toDateString());
-		*/
+			issue["created"] = ((new Date(issue["created"])).toDateString());
 
 		return issue;
+	}
+
+
+	/**
+	 * Prepare the contents of an issue
+	 * @param {Object} contents
+	 */
+	self.prepareContents = function(contents)
+	{
+		contents.map(function(item) { item.created = ((new Date(item["created"])).toDateString());; return item; })
+
+		return contents;
 	}
 
 	/**
@@ -188,7 +198,9 @@ angular.module('3drepo')
 			newIssueObject["scale"] = scale;
 		}
 
-		// Get the shared ID of the current object to attach the comment to
+		// Post using the ID of the current object that the comment needs to be attached to.
+		// If this is a multipart ID of a split node, may contain a "_", so trim this out.
+		id = id.split("_")[0];
 		var issuePostURL = serverConfig.apiUrl(account + "/" + project + "/issues/" + id);
 
 		$.ajax({
@@ -207,13 +219,16 @@ angular.module('3drepo')
 				newIssueObject["owner"]    = Auth.username;
 				newIssueObject["parent"]   = data["parent"];
 				newIssueObject["number"]   = data["number"];
+				newIssueObject["created"]  = data["created"];
 
 				newIssueObject = self.prepareIssue(newIssueObject);
 
 				// If there are no issues currently in this project
 				// then create placeholder.
 				if (!self.issues[project])
+				{
 					self.issues[project] = {};
+				}
 
 				self.issues[project][newIssueObject["_id"]] = newIssueObject; // Add issue to project list
 				//self.io.emit("new_issue", newIssueObject); // Tell the chat server.
@@ -224,6 +239,8 @@ angular.module('3drepo')
 				{
 					var pinObj = {
 						id:       newIssueObject["_id"],
+						account:  account,
+						project:  project,
 						position: newIssueObject["position"],
 						norm:     newIssueObject["norm"],
 						parent:   newIssueObject["parent"],
@@ -298,7 +315,9 @@ angular.module('3drepo')
 
 				issueObject["account"] = account;
 				issueObject["project"] = project;
+				issueObject["created"] = data.created;
 
+				self.issueContents[id] = self.prepareContents(self.issueContents[id]);
 				self.io.emit("post_comment", issueObject);
 
 				deferred.resolve();
@@ -317,7 +336,13 @@ angular.module('3drepo')
 
 			$http.get(baseUrl)
 			.then(function(json) {
-				self.issueContents[id] = json.data[0]["comments"];
+				if ("comments" in json.data[0])
+				{
+					self.issueContents[id] = json.data[0]["comments"];
+					self.issueContents[id] = self.prepareContents(self.issueContents[id]);
+				} else {
+					self.issueContents[id] = [];
+				}
 
 				// Tell the chat server that we want
 				// updates to this issue posted to us
@@ -368,6 +393,8 @@ angular.module('3drepo')
 					{
 						var pinObj = {
 							id:       issue["_id"],
+							account:  issue["account"],
+							project:  issue["project"],
 							position: issue["position"],
 							norm:     issue["norm"],
 							scale:    issue["scale"],
@@ -406,46 +433,44 @@ angular.module('3drepo')
 
 	self.addPin = function(pin)
 	{
+		var trans = null;
+
+		if ((pin["account"] == StateManager.state.account) && (pin["project"] == StateManager.state.project))
+		{
+			trans = $("#model__root")[0]._x3domNode.getCurrentTransform();
+		} else {
+			trans = $("#" + pin["account"] + "__" + pin["project"] + "__root")[0]._x3domNode.getCurrentTransform();
+		}
+
 		/*
-		var parentTrans = $("[DEF=" + pin["parent"] + "]")[0].parentNode;
 		var pinNamespace = parentTrans._x3domNode._nameSpace.name;
 		var parentSize = parentTrans._x3domNode._graph.volume.max.subtract(parentTrans._x3domNode._graph.volume.min).length();
 		var pinSize = parentSize / 10.0;
 		*/
 
+		var v = new x3dom.fields.SFVec3f();
+
+		var position = trans.multMatrixVec(v.setValueByStr(pin["position"].join(",")));
+		var norm     = trans.inverse().transpose().multMatrixVec(v.setValueByStr(pin["norm"].join(",")));
+
 		var sceneBBox = ViewerService.defaultViewer.scene._x3domNode.getVolume();
 		var sceneSize = sceneBBox.max.subtract(sceneBBox.min).length();
 		var pinSize   = sceneSize / 20;
 
-		//if (!self.pinNamespaces[pinNamespace])
-		//	self.prepareX3DScene(pinNamespace, 0.25, 0.1, 1.0);
+		if (ViewerService.defaultViewer.pinSize)
+		{
+			pinSize = ViewerService.defaultViewer.pinSize;
+		}
 
 		var pinPlacement = document.createElement("Transform");
 
-		//pinPlacement.setAttribute("scale", pinSize + " " + pinSize + " " + pinSize);
-
-		var position = new x3dom.fields.SFVec3f(pin["position"][0], pin["position"][1], pin["position"][2]);
-
 		// Transform the pin into the coordinate frame of the parent
-		//position = parentTrans._x3domNode.getCurrentTransform().multMatrixVec(position);
 		pinPlacement.setAttribute("translation", position.toString());
 
-		var norm = new x3dom.fields.SFVec3f(pin["norm"][0], pin["norm"][1], pin["norm"][2]);
-
 		// Transform the normal into the coordinate frame of the parent
-		//norm = parentTrans._x3domNode.getCurrentTransform().inverse().transpose().multMatrixVec(norm);
 		var axisAngle = ViewerService.defaultViewer.rotAxisAngle([0,1,0], norm.toGL());
 
 		pinPlacement.setAttribute("rotation", axisAngle.toString());
-
-		/*
-		var pinshapeinstan = document.createElement("Group");
-		pinshapeinstan.setAttribute("USE", "pinshape");
-		pinshapeinstan.setAttribute("render", true);
-		pinPlacement.appendChild(pinshapeinstan);
-		*/
-
-		//var zdist = Math.abs(ViewerService.defaultViewer.getCurrentViewpoint()._x3domNode._vf.position.z - pin["position"][2]);
 
 		self.createPinShape(pinPlacement, pin["id"], self.pinRadius, self.pinHeight, pinSize);
 		$("#model__root")[0].appendChild(pinPlacement);

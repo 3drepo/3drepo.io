@@ -561,7 +561,9 @@ exports.route = function(router)
 
 				if (type == "mesh")
 				{
-					var mesh = scene.meshes[params.uid];
+					var mesh        = scene.meshes[params.uid];
+					var meshCounter = 0;
+					var vertsCount  = 0;
 
 					if (mesh)
 					{
@@ -601,20 +603,25 @@ exports.route = function(router)
 
 										var material = {};
 
-										if ("diffuse" in child)
+										if ("diffuse" in child) {
 											material["diffuseColor"] = child["diffuse"].join(" ");
+										}
 
-										if ("emissive" in child)
+										if ("emissive" in child) {
 											material["emissiveColor"] = child["emissive"].join(" ");
+										}
 
-										if ("shininess" in child)
+										if ("shininess" in child) {
 											material["shininess"] = child["shininess"];
+										}
 
-										if ("specular" in child)
+										if ("specular" in child) {
 											material["specularColor"] = child["specular"].join(" ");
+										}
 
-										if ("opacity" in child)
+										if ("opacity" in child) {
 											material["transparency"] = 1.0 - child["opacity"];
+										}
 
 										app["material"] = material;
 
@@ -629,13 +636,48 @@ exports.route = function(router)
 								{
 									var map = {};
 
-									map["name"]       = utils.uuidToString(subMeshKeys[i]);
-									map["appearance"] = utils.uuidToString(subMeshes[i]["mat_id"]);
-									map["min"]        = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][0].join(" ");
-									map["max"]        = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][1].join(" ");
-									map["usage"]      = [params.uid + "_0"]
+									var currentMesh      = mesh[C.REPO_NODE_LABEL_COMBINED_MAP][i];
+									var currentMeshVFrom = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
+									var currentMeshVTo   = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO];
+									var numVertices      = currentMeshVTo - currentMeshVFrom;
 
-									outJSON["mapping"].push(map);
+									vertsCount += numVertices;
+
+									if (numVertices > C.SRC_VERTEX_LIMIT)
+									{
+										vertsCount   = 0;
+
+										var numMeshesRequired = Math.ceil(numVertices / C.SRC_VERTEX_LIMIT);
+
+										meshCounter += 1;
+
+										for(var j = 0; j < numMeshesRequired; j++)
+										{
+											map["name"]       = utils.uuidToString(subMeshKeys[i]) + "_" + j;
+											map["appearance"] = utils.uuidToString(subMeshes[i]["mat_id"]);
+											map["min"]        = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][0].join(" ");
+											map["max"]        = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][1].join(" ");
+											map["usage"]      = [params.uid + "_" + meshCounter]
+
+											meshCounter += 1;
+
+											outJSON["mapping"].push(map);
+											map = {};
+										}
+									} else {
+										if (vertsCount > C.SRC_VERTEX_LIMIT) {
+											meshCounter += 1;
+											vertsCount = numVertices;
+										}
+
+										map["name"]       = utils.uuidToString(subMeshKeys[i]);
+										map["appearance"] = utils.uuidToString(subMeshes[i]["mat_id"]);
+										map["min"]        = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][0].join(" ");
+										map["max"]        = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][1].join(" ");
+										map["usage"]      = [params.uid + "_" + meshCounter]
+
+										outJSON["mapping"].push(map);
+									}
 								}
 
 								return err_callback(responseCodes.OK, outJSON);

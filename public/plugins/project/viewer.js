@@ -112,6 +112,10 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.defaultNavMode = "TURNTABLE";
 
+	this.pinSize = null;
+
+	this.selectionDisabled = false;
+
 	this.init = function() {
 		if (!self.initialized)
 		{
@@ -164,8 +168,9 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 			self.x3ddiv.appendChild(self.viewer);
 
-			self.scene = document.createElement('scene');
+			self.scene = document.createElement('Scene');
 			self.scene.setAttribute('onbackgroundclicked', 'bgroundClick(event);');
+			self.scene.setAttribute('dopickpass', false);
 			self.viewer.appendChild(self.scene);
 
 			self.bground = null;
@@ -705,6 +710,16 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			if ('avatarHeight' in self.settings)
 				self.changeAvatarHeight(self.settings['avatarHeight']);
 
+			if ('defaultNavMode' in self.settings)
+			{
+				self.defaultNavMode = self.settings['defaultNavMode'];
+			}
+
+			if ('pinSize' in self.settings)
+			{
+				self.pinSize = self.settings['pinSize'];
+			}
+
 			if ('visibilityLimit' in self.settings)
 				self.nav.setAttribute('visibilityLimit', self.settings['visibilityLimit']);
 
@@ -950,19 +965,23 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.currentNavMode = mode;
 			self.nav.setAttribute('type', mode);
 
-			if (mode == 'WALK' || mode == 'HELICOPTER')
+			if (mode == 'WALK')
 			{
 				self.disableClicking();
 				self.setApp(null);
+			} else if (mode == 'HELICOPTER') {
+				self.disableSelecting();
 			} else {
 				self.enableClicking();
 			}
 
-			if ((mode == 'WAYFINDER') && waypoint)
+			if ((mode == 'WAYFINDER') && waypoint) {
 				waypoint.resetViewer();
+			}
 
-			if ((mode == 'TURNTABLE'))
+			if ((mode == 'TURNTABLE')) {
 				self.nav.setAttribute('typeParams', '-0.4 60.0 0 3.14 0.00001');
+			}
 		}
 	}
 
@@ -1179,14 +1198,35 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		self.triggerSelected(null);
 	}
 
+	this.hiddenParts = [];
+
 	this.clickObject = function(event, objEvent) {
-		if (objEvent.partID)
+		if ((objEvent.button == 1) && !self.selectionDisabled)
 		{
-			objEvent.part.partID = objEvent.partID;
-			self.triggerPartSelected(objEvent.part);
-		} else {
-			self.triggerSelected(objEvent.target);
+			if (objEvent.partID)
+			{
+				objEvent.part.partID = objEvent.partID;
+				self.triggerPartSelected(objEvent.part);
+			} else {
+				self.triggerSelected(objEvent.target);
+			}
+		} else if (objEvent.button == 2) {
+			if (objEvent.part)
+			{
+				objEvent.part.setVisibility(false);
+				self.hiddenParts.push(objEvent.part);
+			}
 		}
+	}
+
+	this.revealAll = function(event, objEvent)
+	{
+		for(var part in self.hiddenParts)
+		{
+			self.hiddenParts[part].setVisibility(true);
+		}
+
+		self.hiddenParts = [];
 	}
 
 	this.disableClicking = function() {
@@ -1197,6 +1237,10 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.viewer.setAttribute("disableDoubleClick", true);
 			self.clickingEnabled = false;
 		}
+	}
+
+	this.disableSelecting = function() {
+		self.selectionDisabled = true;
 	}
 
 	this.enableClicking = function() {

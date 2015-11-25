@@ -35,7 +35,12 @@ angular.module("3drepo")
 	$scope.pickedPos        = null;
 	$scope.pickedNorm       = null;
 
+	$scope.selectedProject  = null;
+	$scope.selectedAccount  = null;
+
 	$scope.expanded         = $scope.IssuesService.expanded;
+
+	$scope.StateManager     = StateManager;
 
 	$(document).on("objectSelected", function(event, object, zoom) {
 		$scope.objectIsSelected = !(object === undefined);
@@ -67,7 +72,7 @@ angular.module("3drepo")
 		$scope.newComment.text = "";
 
 		var newPos = issue["viewpoint"]["position"];
-		var newViewDir = issue["viewpoint"]["look_at"];
+		var newViewDir = issue["viewpoint"]["view_dir"];
 		var newUpDir = issue["viewpoint"]["up"];
 
 		ViewerService.defaultViewer.setCamera(newPos, newViewDir, newUpDir);
@@ -134,8 +139,18 @@ angular.module("3drepo")
 			modalInstance.result.then(function (params) {
 				var account = StateManager.state.account;
 				var project = StateManager.state.project;
-				var id 	    = $scope.selectedID;
 
+				if ( $scope.selectedAccount )
+				{
+					account = $scope.selectedAccount;
+				}
+
+				if ( $scope.selectedProject )
+				{
+					project = $scope.selectedProject;
+				}
+
+				var id 	    = $scope.selectedID;
 				var position = $scope.pickedPos;
 
 				// For a normal, transpose is the inverse of the inverse transpose :)
@@ -305,11 +320,25 @@ angular.module("3drepo")
 
 					scope.selectedID 		= objID;
 				} else {
-					scope.selectedID		= pickObj.partID;
+					var projectParts = pickObj.part.multiPart._xmlNode.id.split("__");
+					var trans = null;
+
+					if (projectParts[0] === "model")
+					{
+						scope.selectedAccount   = scope.StateManager.state.account;
+						scope.selectedProject   = scope.StateManager.state.project;
+						trans = $("#model__root")[0]._x3domNode.getCurrentTransform();
+					} else {
+						scope.selectedAccount   = projectParts[0];
+						scope.selectedProject   = projectParts[1];
+						trans = $("#" + scope.selectedAccount + "__" + scope.selectedProject + "__root")[0]._x3domNode.getCurrentTransform();
+					}
+
+					scope.selectedID        = pickObj.partID;
 				}
 
-				scope.pickedPos       	= pickObj.pickPos;
-				scope.pickedNorm      	= pickObj.pickNorm;
+				scope.pickedPos       	= trans.inverse().multMatrixVec(pickObj.pickPos);
+				scope.pickedNorm      	= trans.transpose().multMatrixVec(pickObj.pickNorm);
 
 				scope.newIssue();
 			});
