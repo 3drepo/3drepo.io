@@ -1357,18 +1357,30 @@ DBInterface.prototype.getIssues = function(dbName, project, branch, revision, on
 
 	// First get the main project issues
 	self.getSIDMap(dbName, project, branch, revision, function (err, SIDMap) {
-		if (err.value) return callback(err);
+		if (err.value) {
+			return callback(err);
+		}
 
 		var sids = Object.keys(SIDMap);
 
 		self.getObjectIssues(dbName, project, sids, null, onlyStubs, function (err, docs) {
-			if (err.value) return callback(err);
+			if (err.value) {
+				return callback(err);
+			}
 
 			var collatedDocs = docs;
 
 			// Now search for all federated issues
 			self.getFederatedProjectList(dbName, project, branch, revision, function (err, refs) {
-				if (err.value) return callback(err);
+				if (err.value) {
+					return callback(err);
+				}
+
+				// If there are no federated projects
+				if (!refs.length)
+				{
+					return callback(responseCodes.OK, docs);
+				}
 
 				async.concat(refs, function (item, iter_callback) {
 					var childDbName  = item["owner"] ? item["owner"] : dbName;
@@ -1392,20 +1404,26 @@ DBInterface.prototype.getIssues = function(dbName, project, branch, revision, on
 					}
 
 					self.getSIDMap(childDbName, childProject, childBranch, childRevision, function (err, SIDMap) {
-						if (err.value) return iter_callback(err);
+						if (err.value) {
+							return iter_callback(err);
+						}
 
 						var sids = Object.keys(SIDMap);
 
 						// For all federated child projects get a list of shared IDs
-						self.getObjectIssues(childDbName, childProject, sids, null, onlyStubs, function (err, refs) {
-							if (err.value) return iter_callback(err);
+						self.getObjectIssues(childDbName, childProject, sids, null, onlyStubs, function (err, objIssues) {
+							if (err.value) {
+								return iter_callback(err);
+							}
 
-							iter_callback(responseCodes.OK, refs);
+							iter_callback(null, objIssues);
 						});
 					});
 				},
 				function (err, results) {
-					// TODO: Deal with errors here
+					if (err) {
+						return callback(err);
+					}
 
 					callback(responseCodes.OK, collatedDocs.concat(results));
 				});
@@ -1464,9 +1482,8 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 			var projection = {};
 			projection[C.REPO_NODE_LABEL_SHARED_ID] = 1;
 
-
 			self.getObject(dbName, project, id, null, null, false, projection, function(err, type, uid, fromStash, obj) {
-				if (err.value) {
+				if (err.value && err.value !== responseCodes.OBJECT_NOT_FOUND.value) {
 					return callback(err);
 				}
 
@@ -1480,7 +1497,11 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 					data._id     = stringToUUID(newID);
 					data.created = (new Date()).getTime();
 
-					data.parent  = obj.meshes[id][C.REPO_NODE_LABEL_SHARED_ID];
+					if (obj)
+					{
+						data.parent  = obj.meshes[id][C.REPO_NODE_LABEL_SHARED_ID];
+					}
+
 					data.number  = numIssues + 1;
 
 					if (!data.name) {
@@ -1495,7 +1516,7 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 						}
 
 						self.logger.logDebug("Updated " + count + " records.");
-						callback(responseCodes.OK, { issue_id : uuidToString(data._id), number : data.number });
+						callback(responseCodes.OK, { issue_id : uuidToString(data._id), number : data.number, created : data.created });
 					});
 				});
 			});
@@ -1504,14 +1525,15 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 
 			data._id = stringToUUID(data._id);
 
+			timeStamp = (new Date()).getTime();
 			if (data.comment)
 			{
 				var updateQuery = {
-					$push: { comments: { owner: owner,  comment: data.comment} }
+					$push: { comments: { owner: owner,  comment: data.comment, created: timeStamp} }
 				};
 			} else {
 				var updateQuery = {
-					$set: { complete: data.complete }
+					$set: { complete: data.complete, created: timeStamp }
 				};
 			}
 
@@ -1519,7 +1541,7 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 				if (err) return callback(responseCodes.DB_ERROR(err));
 
 				self.logger.logDebug("Updated " + count + " records.");
-				callback(responseCodes.OK, { issue_id : uuidToString(data._id), number: data.number });
+				callback(responseCodes.OK, { issue_id : uuidToString(data._id), number: data.number, owner: owner, created: timeStamp });
 			});
 		}
 	});

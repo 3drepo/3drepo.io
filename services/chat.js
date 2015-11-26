@@ -42,7 +42,7 @@ module.exports.init = function (session, listener) {
 		socket.on("new_issue", function(data) {
 			var username = socket.handshake.session.user.username;
 
-			dbInterface.hasWriteAccessToProject(username, data.account, data.project, function(err) {
+			dbInterface(systemLogger).hasWriteAccessToProject(username, data.account, data.project, function(err) {
 				if (!err.value)
 				{
 					var proj_account_key = data.account + "__" + data.project;
@@ -67,7 +67,7 @@ module.exports.init = function (session, listener) {
 		socket.on("open_issue", function(data) {
 			var username = socket.handshake.session.user.username;
 
-			dbInterface.hasReadAccessToProject(username, data.account, data.project, function(err) {
+			dbInterface(systemLogger).hasReadAccessToProject(username, data.account, data.project, function(err) {
 				if (!err.value)
 				{
 					if (!issueMonitoring[data.id]) {
@@ -85,7 +85,7 @@ module.exports.init = function (session, listener) {
 		socket.on("watch_project", function(data) {
 			var username = socket.handshake.session.user.username;
 
-			dbInterface.hasReadAccessToProject(username, data.account, data.project, function(err) {
+			dbInterface(systemLogger).hasReadAccessToProject(username, data.account, data.project, function(err) {
 				var proj_account_key = data.account + "__" + data.project;
 
 				if (!err.value)
@@ -106,7 +106,7 @@ module.exports.init = function (session, listener) {
 		{
 			var username = socket.handshake.session.user.username;
 
-			dbInterface.hasWriteAccessToProject(username, data.account, data.project, function(err) {
+			dbInterface(systemLogger).hasWriteAccessToProject(username, data.account, data.project, function(err) {
 				if (!err.value)
 				{
 					if (issueMonitoring[data.id])

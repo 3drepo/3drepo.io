@@ -187,11 +187,16 @@ MongoWrapper.prototype.existsGridFSFile = function(dbName, collName, fileName, c
 
 		// Verify that the file exists
 		GridStore.exist(dbConn, fileName, collName, function(err, result) {
+			if (!result)
+			{
+				return callback(responseCodes.OK, false);
+			}
+
 			if (err) {
 				return callback(responseCodes.DB_ERROR(err));
 			}
 
-			callback(responseCodes.OK, result);
+			callback(responseCodes.OK, true);
 		});
 	});
 };
@@ -215,23 +220,23 @@ MongoWrapper.prototype.getGridFSFile = function(dbName, collName, fileName, call
 			return callback(err);
 		}
 
-		var options = {
-			"root" : collName
-		};
-
 		// Verify that the file exists
 		self.existsGridFSFile(dbName, collName, fileName, function(err, result) {
-			if (err.value) {
-				return callback(err);
-			}
-
 			if (!result) {
 				return callback(responseCodes.FILE_DOESNT_EXIST);
 			}
 
-			var gs = new GridStore(dbConn, fileName, "r", options);
+			if (err.value) {
+				return callback(err);
+			}
 
-			gs.open(function (err, gs) {
+			var options = {
+				root : collName
+			};
+
+			var grid = new GridStore(dbConn, fileName, "r", options);
+
+			grid.open(function (err, gs) {
 				if (err) {
 					return callback(responseCodes.DB_ERROR(err));
 				}
@@ -272,7 +277,7 @@ MongoWrapper.prototype.storeGridFSFile = function(dbName, collName, fileName, da
 		}
 
 		var options = {
-			"root" : collName
+			root : collName
 		};
 
 		var storeFile = function () {

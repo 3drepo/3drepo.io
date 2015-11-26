@@ -112,6 +112,10 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.defaultNavMode = "TURNTABLE";
 
+	this.pinSize = null;
+
+	this.selectionDisabled = false;
+
 	this.init = function() {
 		if (!self.initialized)
 		{
@@ -164,8 +168,9 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 			self.x3ddiv.appendChild(self.viewer);
 
-			self.scene = document.createElement('scene');
+			self.scene = document.createElement('Scene');
 			self.scene.setAttribute('onbackgroundclicked', 'bgroundClick(event);');
+			self.scene.setAttribute('dopickpass', false);
 			self.viewer.appendChild(self.scene);
 
 			self.bground = null;
@@ -178,6 +183,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.environ.setAttribute('smallFeatureCulling', 'true');
 			self.environ.setAttribute('smallFeatureThreshold', 5);
 			self.environ.setAttribute('occlusionCulling', 'true');
+			self.environ.setAttribute('sorttrans', 'false');
 			self.scene.appendChild(self.environ);
 
 			self.light = document.createElement('directionallight');
@@ -566,7 +572,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.loadViewpoint = null;
 
-	this.getAxisAngle = function(from, at, look)
+	this.getAxisAngle = function(from, at, up)
 	{
 		var x3dfrom	= new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
 		var x3dat	= new x3dom.fields.SFVec3f(at[0], at[1], at[2]);
@@ -577,7 +583,9 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		var q = new x3dom.fields.Quaternion(0.0,0.0,0.0,1.0);
 		q.setValue(viewMat);
 
-		return (q.toAxisAngle()[0].toGL() + q[1]);
+		q = q.toAxisAngle();
+
+		return Array.prototype.concat(q[0].toGL(), q[1]);
 	}
 
 	// TODO: Should move this to somewhere more general (utils ? )
@@ -622,7 +630,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			if (from && at && up)
 			{
 				var q = self.getAxisAngle(from, at, up);
-				newViewpoint.setAttribute('orientation', q.join(','));
+				newViewPoint.setAttribute('orientation', q.join(','));
 			}
 
 			if (!self.viewpoints[groupName.group])
@@ -701,6 +709,16 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 			if ('avatarHeight' in self.settings)
 				self.changeAvatarHeight(self.settings['avatarHeight']);
+
+			if ('defaultNavMode' in self.settings)
+			{
+				self.defaultNavMode = self.settings['defaultNavMode'];
+			}
+
+			if ('pinSize' in self.settings)
+			{
+				self.pinSize = self.settings['pinSize'];
+			}
 
 			if ('visibilityLimit' in self.settings)
 				self.nav.setAttribute('visibilityLimit', self.settings['visibilityLimit']);
@@ -947,19 +965,23 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.currentNavMode = mode;
 			self.nav.setAttribute('type', mode);
 
-			if (mode == 'WALK' || mode == 'HELICOPTER')
+			if (mode == 'WALK')
 			{
 				self.disableClicking();
 				self.setApp(null);
+			} else if (mode == 'HELICOPTER') {
+				self.disableSelecting();
 			} else {
 				self.enableClicking();
 			}
 
-			if ((mode == 'WAYFINDER') && waypoint)
+			if ((mode == 'WAYFINDER') && waypoint) {
 				waypoint.resetViewer();
+			}
 
-			if ((mode == 'TURNTABLE'))
+			if ((mode == 'TURNTABLE')) {
 				self.nav.setAttribute('typeParams', '-0.4 60.0 0 3.14 0.00001');
+			}
 		}
 	}
 
@@ -1176,14 +1198,35 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		self.triggerSelected(null);
 	}
 
+	this.hiddenParts = [];
+
 	this.clickObject = function(event, objEvent) {
-		if (objEvent.partID)
+		if ((objEvent.button == 1) && !self.selectionDisabled)
 		{
-			objEvent.part.partID = objEvent.partID;
-			self.triggerPartSelected(objEvent.part);
-		} else {
-			self.triggerSelected(objEvent.target);
+			if (objEvent.partID)
+			{
+				objEvent.part.partID = objEvent.partID;
+				self.triggerPartSelected(objEvent.part);
+			} else {
+				self.triggerSelected(objEvent.target);
+			}
+		} else if (objEvent.button == 2) {
+			if (objEvent.part)
+			{
+				objEvent.part.setVisibility(false);
+				self.hiddenParts.push(objEvent.part);
+			}
 		}
+	}
+
+	this.revealAll = function(event, objEvent)
+	{
+		for(var part in self.hiddenParts)
+		{
+			self.hiddenParts[part].setVisibility(true);
+		}
+
+		self.hiddenParts = [];
 	}
 
 	this.disableClicking = function() {
@@ -1194,6 +1237,10 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.viewer.setAttribute("disableDoubleClick", true);
 			self.clickingEnabled = false;
 		}
+	}
+
+	this.disableSelecting = function() {
+		self.selectionDisabled = true;
 	}
 
 	this.enableClicking = function() {
@@ -1390,6 +1437,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		{
 			var clipPlaneIDX = self.addClippingPlane(
 					clippingPlanes[clipidx]["axis"],
+					clippingPlanes[clipidx]["distance"],
 					clippingPlanes[clipidx]["percentage"],
 					clippingPlanes[clipidx]["clipDirection"]
 				);
@@ -1399,13 +1447,14 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	/**
 	* Adds a clipping plane to the viewer
 	* @param {string} axis - Axis through which the plane clips
-	* @param {number} percentage - Percentage along the bounding box to clip
+	* @param {number} distance - Distance along the bounding box to clip
+	* @param {number} percentage - Percentage along the bounding box to clip (overrides distance)
 	* @param {number} clipDirection - Direction of clipping (-1 or 1)
 	*/
-	this.addClippingPlane = function(axis, percentage, clipDirection) {
+	this.addClippingPlane = function(axis, distance, percentage, clipDirection) {
 		clippingPlaneID += 1;
 
-		var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, [1, 1, 1], percentage, clipDirection);
+		var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, [1, 1, 1], distance, percentage, clipDirection);
 		self.clippingPlanes.push(newClipPlane);
 
 		return clippingPlaneID;
@@ -1450,7 +1499,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
  * @param {number} percentage - Percentage along the bounding box to clip
  * @param {number} clipDirection - Direction of clipping (-1 or 1)
  */
-var ClipPlane = function(id, viewer, axis, colour, percentage, clipDirection)
+var ClipPlane = function(id, viewer, axis, colour, distance, percentage, clipDirection)
 {
 	var self = this;
 
@@ -1469,11 +1518,18 @@ var ClipPlane = function(id, viewer, axis, colour, percentage, clipDirection)
 	this.clipDirection = (clipDirection === undefined) ? -1 : clipDirection;
 
 	/**
-	* Value representing the distance from the origin of
+	* Value representing the percentage distance from the origin of
 	* the clip plane
 	* @type {number}
 	*/
 	this.percentage = (percentage === undefined) ? 1.0 : percentage
+
+	/**
+	* Value representing the distance from the origin of
+	* the clip plane
+	* @type {number}
+	*/
+	this.distance = distance;
 
 	/**
 	* Volume containing the clipping plane
@@ -1593,8 +1649,14 @@ var ClipPlane = function(id, viewer, axis, colour, percentage, clipDirection)
 		var max = volume.max.toGL();
 
 		self.percentage = percentage;
+		var distance = 0.0;
 
-		var distance = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
+		if (self.distance)
+		{
+			distance = self.distance;
+		} else {
+			distance = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
+		}
 
 		// Update the clipping element plane equation
 		clipPlaneElem.setAttribute("plane", normal.toGL().join(" ") + " " + distance);
