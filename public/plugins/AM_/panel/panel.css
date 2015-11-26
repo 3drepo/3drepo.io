@@ -58,9 +58,9 @@ panel-content md-toolbar {
   min-height: 48px;
   height: 48px;
   outline: none;
-  -webkit-box-shadow: 0 8px 10px 1px rgba(0,0,0,0.15);
+  /*-webkit-box-shadow: 0 8px 10px 1px rgba(0,0,0,0.15);
   -moz-box-shadow: 0 8px 10px 1px rgba(0,0,0,0.15);
-  box-shadow: 0 8px 10px 1px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 10px 1px rgba(0,0,0,0.15);*/
 }
 panel-content md-toolbar span {
   font-size: 18px;
@@ -68,6 +68,10 @@ panel-content md-toolbar span {
 panel-content md-toolbar label {
   font-size: medium;
   margin-left: 10px;
+}
+
+panel-content .md-button.md-raised:not([disabled]) {
+  box-shadow: none;
 }
 
 /** Panel Content Add *************************************************************************************************/
@@ -89,8 +93,14 @@ panel-content-add input {
   left: 10px;
   width: 170px !important;
 }
-panel-content-add button {
+
+.panelContentAddButton {
   position: absolute !important;
-  top: 0;
+  top: 10px;
   right: 0;
+}
+.panelContentAddButton md-icon {
+  font-size: 30px;
+  margin-top: 5px;
+
 }

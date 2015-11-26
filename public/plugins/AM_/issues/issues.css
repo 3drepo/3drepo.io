@@ -10,11 +10,9 @@ issues .minHeight {
 issues .issueAdd {
   margin: 10px;
 }
-
 issues .issueAdd .md-button {
   margin: 0 2px 10px 2px;
 }
-
 issues .issueAdd textarea {
   min-height: 70px;
 }
@@ -25,32 +23,37 @@ issue {
   display: block;
 }
 
-issue .issueTitle {
-  height: 50px;
-  outline: none;
-  padding: 0 16px 0 0;
-}
-issue .issueTitle:hover {
-  cursor: pointer;
-}
-issue .issueTitle label {
-  font-weight: normal;
-}
-issue .issueTitle .md-button.md-icon-button {
-  margin-right: -30px;
-}
-
-.issueTitleSelected {
-  background: #E8EAF6;
-}
-
-.issueTitleunSelected {
-  background: #FFFFFF;
-}
-
-issue md-list-item.md-3-line {
-  min-height: 75px;
-}
-
 .issueComments {
+}
+
+issue md-list-item .md-button,
+issue md-list-item .md-button .md-ripple-container {
+  border-radius: 0;
+}
+
+issue md-list-item.md-2-line {
+  margin-bottom: 20px;
+  min-height: 0;
+}
+
+#issueTitle button {
+  min-height: 0;
+}
+
+#issueTitleIcon {
+  display: block;
+  width: 35px;
+  height: 100%;
+}
+#issueTitleIcon span {
+  font-size: 30px;
+  color: rgba(0,0,0,0.54);
+  position: absolute;
+  top: 0;
+}
+
+issue h3,
+issue h4 {
+  word-wrap: break-word;
+  white-space: normal !important;
 }

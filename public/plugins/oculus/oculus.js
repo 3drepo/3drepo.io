@@ -247,8 +247,9 @@ var Oculus = function(viewer) {
 	}
 
 	this.exitFullscreen = function() {
-		if (!document.webkitIsFullScreen && !document.msFullscreenElement && !document.mozFullScreen)
-			self.switchVR();
+		if (!document.webkitIsFullScreen && !document.msFullscreenElement && !document.mozFullScreen && self.enabled) {
+            self.switchVR();
+        }
 	}
 
 	this.createFullscreenExit = function () {

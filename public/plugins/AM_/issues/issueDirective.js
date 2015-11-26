@@ -45,13 +45,11 @@
         is.showComments = false;
         is.toggleCommentsState = false;
         is.numNewComments = 0;
-        is.titleBackground = "issueTitleUnselected";
 
         $scope.$watch("is.commentsToggledIssueId", function (newValue) {
             if (angular.isDefined(newValue) && (newValue !== is.data._id)) {
                 is.toggleCommentsState = false;
                 is.showComments = false;
-                is.titleBackground = "issueTitleUnselected";
             }
         });
 
@@ -74,7 +72,6 @@
                     is.data.viewpoint.up
                 );
             }
-            is.titleBackground = is.toggleCommentsState ? "issueTitleSelected" :  "issueTitleUnselected";
             is.onCommentsToggled({issueId: is.data._id});
         };
 

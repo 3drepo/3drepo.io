@@ -1,22 +1,23 @@
 div(ng-class="iss.height")
-	div(ng-if="iss.showAdd")
+	div(ng-show="iss.showAdd")
 		//panel-content-add(placeholder="Title" on-save="iss.saveIssue(text)" clear-input="iss.clearInput")
 		.issueAdd
 			md-input-container(md-no-float="")
-				input(placeholder="Title", ng-model="pca.title")
+				input(placeholder="Title", ng-model="iss.name")
 
 			md-input-container(md-no-float="")
-				textarea(placeholder="Description", ng-model="pca.description")
+				textarea(placeholder="Comment", ng-model="iss.description")
 
-			md-button.md-raised.md-accent(ng-click="pca.save()") Save
+			md-button.md-raised.md-accent(ng-click="iss.saveIssue()", ng-disabled="false") Save
 
 		md-divider
 
-	issue(
-		ng-repeat="issue in iss.issues",
-		data="issue",
-		on-comments-toggled="iss.commentsToggled(issueId)"
-		comments-toggled-issue-id="iss.commentsToggledIssueId"
-		on-save-comment="iss.saveComment(issue, text)"
-		comment-saved="iss.commentSaved"
-	)
+	md-list
+		issue(
+			ng-repeat="issue in iss.issues",
+			data="issue",
+			on-comments-toggled="iss.commentsToggled(issueId)"
+			comments-toggled-issue-id="iss.commentsToggledIssueId"
+			on-save-comment="iss.saveComment(issue, text)"
+			comment-saved="iss.commentSaved"
+		)

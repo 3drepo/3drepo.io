@@ -5,8 +5,9 @@ div(layout="column", class="md-whiteframe-1dp", ng-show="pc.showContent")
 			span(class="fa", ng-class="pc.icon")
 			label(class="md-flex") {{pc.contentTitle}}
 			span(flex)
-			md-button.md-icon-button(aria-label="Add", ng-click="pc.toggleAdd($event)", ng-if="pc.canAdd")
-				md-icon(class="fa fa-plus")
+
+	md-button.md-fab.md-primary.panelContentAddButton(aria-label="Add", ng-click="pc.toggleAdd($event)", ng-if="pc.canAdd")
+		md-icon(class="fa fa-plus")
 
 	md-content(id="content", ng-class="pc.class")
 

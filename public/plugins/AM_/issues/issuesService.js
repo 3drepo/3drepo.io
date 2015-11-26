@@ -73,7 +73,7 @@
             return deferred.promise;
         };
 
-        var saveIssue = function (name, objectId, pickedPos, pickedNorm) {
+        var saveIssue = function (name, description, objectId, pickedPos, pickedNorm) {
             var currentVP = ViewerService.defaultViewer.getCurrentViewpointInfo(),
                 dataToSend = {};
 
@@ -81,6 +81,7 @@
             url = serverConfig.apiUrl(state.account + "/" + state.project + "/issues/" + objectId);
             data = {
                 name: name,
+                description: description,
                 viewpoint: ViewerService.defaultViewer.getCurrentViewpointInfo(),
                 scale: 1.0
             };

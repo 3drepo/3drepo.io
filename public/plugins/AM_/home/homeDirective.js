@@ -49,62 +49,6 @@
 
     function HomeCtrl(EventService) {
         var hm = this;
-        /*
-        var panelContent = {
-                left: [
-                    {
-                        type: "filter",
-                        title: "",
-                        show: true,
-                        help: "Filter content"
-                    },
-                    {
-                        type: "tree",
-                        title: "Tree",
-                        show: true,
-                        help: "Model elements shown in a tree structure",
-                        icon: "fa-sitemap"
-                    },
-                    {
-                        type: "viewpoints",
-                        title: "Viewpoints",
-                        show: false,
-                        help: "Show a list of saved viewpoints",
-                        icon: "fa-street-view"
-                    },
-                    {
-                        type: "meta",
-                        title: "Meta data",
-                        show: false,
-                        help: "Show all the Meta data",
-                        icon: "fa-map-o"
-                    },
-                    {
-                        type: "pdf",
-                        title: "PDF",
-                        show: false,
-                        help: "List associated PDF files",
-                        icon: "fa-file-pdf-o"
-                    }
-                ],
-                right: [
-                    {
-                        type: "issues",
-                        title: "Issues",
-                        show: true,
-                        help: "List current issues",
-                        icon: "fa-cogs"
-                    },
-                    {
-                        type: "clip",
-                        title: "Clip",
-                        show: false,
-                        help: "Clipping plane",
-                        icon: "fa-object-group"
-                    }
-                ]
-            };
-            */
 
         var panelContent = {
             left: [],
