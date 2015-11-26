@@ -1529,7 +1529,8 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 						}
 
 						self.logger.logDebug("Updated " + count + " records.");
-						callback(responseCodes.OK, { issue_id : uuidToString(data._id), number : data.number, issue: data });
+                        data._id = uuidToString(data._id);
+						callback(responseCodes.OK, { issue_id : data._id, number : data.number, issue: data });
 					});
 				});
 			});

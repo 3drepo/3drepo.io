@@ -73,7 +73,7 @@
                 );
                 content.append(contentItem);
                 $compile(contentItem)($scope);
-                if (newValue === "tree") {
+                if ((newValue === "tree") || (newValue === "issues")) {
                     pc.height = "maxHeight";
                     setupFilterWatch();
                 }

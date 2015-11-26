@@ -135,7 +135,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 			self.logo = document.createElement('div');
 			self.logo.setAttribute('id', 'viewer_logo');
-			self.logo.setAttribute('style', 'top: 0px; left: 0px; position: absolute; z-index:2;');
+			self.logo.setAttribute('style', 'top: 0px; left: 60px; position: absolute; z-index:2;');
 
 			self.logoImage = document.createElement('img');
 			self.logoImage.setAttribute('src', logo_string);

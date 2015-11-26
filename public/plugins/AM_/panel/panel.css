@@ -3,7 +3,7 @@
 panel  {
   display: block;
   position: absolute;
-  top: 100px;
+  top: 80px;
   width: 370px;
 }
 panel #items {
@@ -33,7 +33,7 @@ panel #buttons button {
 }
 
 #rightPanel {
-  right: 400px;
+  right: 0;
 }
 #rightPanel #items {
   left: 0;
@@ -96,11 +96,12 @@ panel-content-add input {
 
 .panelContentAddButton {
   position: absolute !important;
-  top: 10px;
+  top: 12px;
   right: 0;
+  box-shadow: none !important;
+  background: #7986CB !important;
 }
 .panelContentAddButton md-icon {
   font-size: 30px;
-  margin-top: 5px;
-
+  margin-top: -5px;
 }

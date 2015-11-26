@@ -36,9 +36,9 @@
         };
     }
 
-    IssuesCtrl.$inject = ["$scope", "EventService", "NewIssuesService", "ViewerService"];
+    IssuesCtrl.$inject = ["$scope", "$element", "$mdDialog", "EventService", "NewIssuesService", "ViewerService"];
 
-    function IssuesCtrl($scope, EventService, NewIssuesService, ViewerService) {
+    function IssuesCtrl($scope, $element, $mdDialog, EventService, NewIssuesService, ViewerService) {
         var iss = this,
             promise = null,
             i = 0,
@@ -47,6 +47,7 @@
         iss.pickedNorm = null;
         iss.selectedObjectId = null;
         iss.globalClickWatch = null;
+        iss.saveIssueDisabled = true;
 
         promise = NewIssuesService.getIssues();
         promise.then(function (data) {
@@ -64,6 +65,12 @@
             }
         });
 
+        $scope.$watch("iss.title", function (newValue) {
+            if (angular.isDefined(newValue)) {
+                iss.saveIssueDisabled = (newValue === "");
+            }
+        });
+
         iss.commentsToggled = function (issueId) {
             iss.commentsToggledIssueId = issueId;
         };
@@ -72,6 +79,7 @@
             iss.commentSaved = false;
             promise = NewIssuesService.saveComment(issue, comment);
             promise.then(function (data) {
+                console.log(data);
                 iss.commentSaved = true;
                 for (i = 0, length = iss.issues.length; i < length; i += 1) {
                     if (issue._id === iss.issues[i]._id) {
@@ -90,14 +98,24 @@
         };
 
         iss.saveIssue = function () {
-            if ((iss.name !== undefined) && ((iss.name !== ""))) {
-                iss.clearInput = false;
-                promise = NewIssuesService.saveIssue(iss.name, iss.description, iss.selectedObjectId, iss.pickedPos, iss.pickedNorm);
-                promise.then(function (data) {
-                    console.log(data);
-                    iss.issues.push(data);
-                    iss.clearInput = true;
-                });
+            if (angular.isDefined(iss.title) && (iss.title !== "")) {
+                if (iss.pickedPos === null) {
+                    iss.showAlert();
+                }
+                else {
+                    promise = NewIssuesService.saveIssue(iss.title, iss.selectedObjectId, iss.pickedPos, iss.pickedNorm);
+                    promise.then(function (data) {
+                        console.log(data);
+                        iss.issues.push(data);
+                        iss.title = "";
+                        iss.pickedPos = null;
+                        iss.pickedNorm = null;
+                        if (angular.isDefined(iss.comment) && (iss.comment !== "")) {
+                            iss.saveComment(data, iss.comment);
+                            iss.comment = "";
+                        }
+                    });
+                }
             }
         };
 
@@ -143,6 +161,8 @@
         $(document).on("objectSelected", function(event, object, zoom) {
             if (angular.isUndefined(object)) {
                 iss.selectedObjectId = null;
+                iss.pickedPos = null;
+                iss.pickedNorm = null;
                 NewIssuesService.removePin();
             }
             else {
@@ -155,5 +175,16 @@
                 iss.selectedObjectId = $scope.IssuesService.IDMap[part.partID];
             });
         });
+
+        iss.showAlert = function() {
+            $mdDialog.show(
+                $mdDialog.alert()
+                    .parent(angular.element($element[0].querySelector("#issuesAddContainer")))
+                    .clickOutsideToClose(true)
+                    .title("Add a pin before saving")
+                    .ariaLabel("Pin alert")
+                    .ok("OK")
+            );
+        };
     }
 }());

@@ -1,14 +1,13 @@
 div(ng-class="iss.height")
 	div(ng-show="iss.showAdd")
-		//panel-content-add(placeholder="Title" on-save="iss.saveIssue(text)" clear-input="iss.clearInput")
-		.issueAdd
+		#issuesAddContainer
 			md-input-container(md-no-float="")
-				input(placeholder="Title", ng-model="iss.name")
+				input(placeholder="Title", ng-model="iss.title")
 
 			md-input-container(md-no-float="")
-				textarea(placeholder="Comment", ng-model="iss.description")
+				textarea(placeholder="Comment", ng-model="iss.comment")
 
-			md-button.md-raised.md-accent(ng-click="iss.saveIssue()", ng-disabled="false") Save
+			md-button.md-raised.md-accent(ng-click="iss.saveIssue()", ng-disabled="iss.saveIssueDisabled") Save
 
 		md-divider
 

@@ -74,7 +74,16 @@
 
         $scope.$watch("cl.selectedAxis", function (newValue) {
             if ((angular.isDefined(newValue) && clipPlane)) {
-                clipPlane.changeAxis(newValue);
+                // Swap Y and Z axes
+                if (newValue === "Y") {
+                    clipPlane.changeAxis("Z");
+                }
+                else if (newValue === "Z") {
+                    clipPlane.changeAxis("Y");
+                }
+                else {
+                    clipPlane.changeAxis(newValue);
+                }
                 cl.sliderPosition = cl.sliderMin;
             }
         });

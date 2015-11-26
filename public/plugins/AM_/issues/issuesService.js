@@ -42,9 +42,7 @@
             return (
                 date.getFullYear() + "-" +
                 (date.getMonth() + 1) + "-" +
-                date.getDate() + " " +
-                date.getHours() + ":" +
-                date.getMinutes()
+                date.getDate()
             );
         };
 
@@ -73,7 +71,7 @@
             return deferred.promise;
         };
 
-        var saveIssue = function (name, description, objectId, pickedPos, pickedNorm) {
+        var saveIssue = function (name, objectId, pickedPos, pickedNorm) {
             var currentVP = ViewerService.defaultViewer.getCurrentViewpointInfo(),
                 dataToSend = {};
 
@@ -81,7 +79,6 @@
             url = serverConfig.apiUrl(state.account + "/" + state.project + "/issues/" + objectId);
             data = {
                 name: name,
-                description: description,
                 viewpoint: ViewerService.defaultViewer.getCurrentViewpointInfo(),
                 scale: 1.0
             };
@@ -116,6 +113,8 @@
             $http.post(url, dataToSend, config)
                 .then(function successCallback(response) {
                     console.log(response);
+                    response.data.issue.account = state.account;
+                    response.data.issue.project = state.project;
                     response.data.issue.timeStamp = prettyTime(response.data.issue.created);
 
                     if (pickedPos !== null) {

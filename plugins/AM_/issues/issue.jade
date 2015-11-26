@@ -1,15 +1,23 @@
 md-list-item.md-2-line#issueTitle(ng-click="is.toggleComments()")
-	#issueTitleIcon
-		span(class="fa fa-map-marker")
 	div.md-list-item-text
-		h3 {{is.data.number}} {{is.data.name}}
-		p  {{is.data.owner}} ({{is.data.timeStamp}})
+		h3 &#35;{{is.data.number}} {{is.data.name}}
+		.issueInfo
+			p {{is.data.owner}}
+			p(class="issueTimeStamp") {{is.data.timeStamp}}
 
 div(ng-show="is.showComments", ng-class="{issueComments: is.toggleCommentsState}", comments-height, num-new-comments="is.numNewComments")
-	div
+	.issueCommentsContainer
 		md-list
 			md-list-item.md-2-line(ng-repeat="comment in is.data.comments")
 				div.md-list-item-text
 					h3 {{comment.comment}}
-					p {{comment.owner}} ({{comment.timeStamp}})
-		panel-content-add(placeholder="New comment", on-save="is.saveComment(text)", clear-input="is.clearInput")
+					.issueInfo
+						p {{comment.owner}}
+						p(class="issueTimeStamp") {{comment.timeStamp}}
+					//p {{comment.owner}} ({{comment.timeStamp}})
+			md-input-container(md-no-float="")
+				textarea(placeholder="New comment", ng-model="is.comment")
+
+		md-button.md-raised.md-accent(ng-click="is.saveComment()", ng-disabled="is.saveCommentDisabled") Save
+
+md-divider
