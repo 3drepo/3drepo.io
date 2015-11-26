@@ -126,7 +126,7 @@ DBInterface.prototype.updateUser = function(username, data, callback) {
 			return callback(err);
 		}
 
-		self.getUserInfo(username, false, function(err, oldCustomData) {
+		self.getUserInfo(username, function(err, oldCustomData) {
 			if(err.value) {
 				return callback(err);
 			}
@@ -183,7 +183,7 @@ DBInterface.prototype.updatePassword = function(username, passwords, callback) {
 				return callback(err);
 			}
 
-			DBInterface.prototype.getUserInfo(username, false, function(err, oldCustomData) {
+			self.getUserInfo(username, function(err, oldCustomData) {
 				if(err.value) {
 					return callback(err);
 				}
@@ -402,7 +402,7 @@ DBInterface.prototype.getUserDBList = function(username, callback) {
 		user: username
 	};
 
-	this.getUserInfo(username, false, function(err, user) {
+	this.getUserInfo(username, function(err, user) {
 		if(err.value)
 			return callback(err);
 
@@ -414,8 +414,9 @@ DBInterface.prototype.getUserDBList = function(username, callback) {
 };
 
 DBInterface.prototype.getUserInfo = function(username, callback) {
-	if(!username)
+	if(!username) {
 		return callback(responseCodes.USERNAME_NOT_SPECIFIED);
+	}
 
 	this.logger.logDebug("Getting user info for " + username);
 
@@ -432,7 +433,9 @@ DBInterface.prototype.getUserInfo = function(username, callback) {
 	};
 
 	dbConn(this.logger).filterColl("admin", "system.users", filter, projection, function(err, coll) {
-		if(err.value) return callback(err);
+		if(err.value) {
+			return callback(err);
+		}
 
 		if (coll[0])
 		{

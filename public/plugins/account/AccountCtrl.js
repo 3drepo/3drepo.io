@@ -97,7 +97,7 @@ function($stateProvider, parentStates) {
 	};
 
 	$scope.changePassword = function() {
-		$scope.Data.UserData.updatePassword($scope.passwords.oldPassword, $scope.passwords.newPassword)
+		$scope.Data.AccountData.updatePassword($scope.passwords.oldPassword, $scope.passwords.newPassword)
 		.success(function(data, status) {
 			$scope.setView($scope.defaultView);
 		}).error(function(message, status) {

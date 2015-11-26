@@ -104,7 +104,7 @@ var repoPostHandler = function(router, checkAccess){
 
 		req[C.REQ_REPO].logger.logDebug("Updating user", req);
 
-		dbInterface(req[C.REQ_REPO].logger).getUserInfo( req.params[C.REPO_REST_API_ACCOUNT], false, function (err, user)
+		dbInterface(req[C.REQ_REPO].logger).getUserInfo( req.params[C.REPO_REST_API_ACCOUNT], function (err, user)
 		{
 			if (!user)
 			{
@@ -128,11 +128,11 @@ var repoPostHandler = function(router, checkAccess){
 
 					if (req.body.oldPassword)
 					{
-						self.dbInterface.updatePassword(req.params[C.REPO_REST_API_ACCOUNT], req.body, function(err) {
+						dbInterface(req[C.REQ_REPO].logger).updatePassword(req.params[C.REPO_REST_API_ACCOUNT], req.body, function(err) {
 							responseCodes.onError(responsePlace, req, res, next, err, {account: req.params[C.REPO_REST_API_ACCOUNT]});
 						});
 					} else {
-						self.dbInterface.updateUser(req.params[C.REPO_REST_API_ACCOUNT], req.body, function(err) {
+						dbInterface(req[C.REQ_REPO].logger).updateUser(req.params[C.REPO_REST_API_ACCOUNT], req.body, function(err) {
 							responseCodes.onError(responsePlace, req, res, next, err, {account: req.params[C.REPO_REST_API_ACCOUNT]});
 						});
 					}
