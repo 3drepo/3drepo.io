@@ -42,9 +42,7 @@
             return (
                 date.getFullYear() + "-" +
                 (date.getMonth() + 1) + "-" +
-                date.getDate() + " " +
-                date.getHours() + ":" +
-                date.getMinutes()
+                date.getDate()
             );
         };
 
@@ -115,6 +113,8 @@
             $http.post(url, dataToSend, config)
                 .then(function successCallback(response) {
                     console.log(response);
+                    response.data.issue.account = state.account;
+                    response.data.issue.project = state.project;
                     response.data.issue.timeStamp = prettyTime(response.data.issue.created);
 
                     if (pickedPos !== null) {

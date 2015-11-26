@@ -36,28 +36,39 @@
         };
     }
 
-    IssuesCtrl.$inject = ["$scope", "EventService", "NewIssuesService", "ViewerService"];
+    IssuesCtrl.$inject = ["$scope", "$element", "$mdDialog", "EventService", "NewIssuesService", "ViewerService"];
 
-    function IssuesCtrl($scope, EventService, NewIssuesService, ViewerService) {
+    function IssuesCtrl($scope, $element, $mdDialog, EventService, NewIssuesService, ViewerService) {
         var iss = this,
             promise = null,
             i = 0,
-            length = 0,
-            normalIssueInfo = "Select an object before creating an issue",
-            pinIssueInfo = "Click on an object at the required position of the pin before creating an issue";
-        iss.showInput = false;
-        iss.showInfo = false;
-        iss.issueAddNormalClass = "issueAddUnselectedClass";
-        iss.issueAddPinClass = "issueAddUnselectedClass";
+            length = 0;
         iss.pickedPos = null;
         iss.pickedNorm = null;
         iss.selectedObjectId = null;
         iss.globalClickWatch = null;
+        iss.saveIssueDisabled = true;
 
         promise = NewIssuesService.getIssues();
         promise.then(function (data) {
             console.log(data);
             iss.issues = data;
+        });
+
+        $scope.$watch("iss.showAdd", function (newValue) {
+            if (newValue) {
+                setupGlobalClickWatch();
+            }
+            else {
+                cancelGlobalClickWatch();
+                NewIssuesService.removePin();
+            }
+        });
+
+        $scope.$watch("iss.title", function (newValue) {
+            if (angular.isDefined(newValue)) {
+                iss.saveIssueDisabled = (newValue === "");
+            }
         });
 
         iss.commentsToggled = function (issueId) {
@@ -68,6 +79,7 @@
             iss.commentSaved = false;
             promise = NewIssuesService.saveComment(issue, comment);
             promise.then(function (data) {
+                console.log(data);
                 iss.commentSaved = true;
                 for (i = 0, length = iss.issues.length; i < length; i += 1) {
                     if (issue._id === iss.issues[i]._id) {
@@ -85,54 +97,25 @@
             });
         };
 
-        iss.saveIssue = function (name) {
-            iss.clearInput = false;
-            promise = NewIssuesService.saveIssue(name, iss.selectedObjectId, iss.pickedPos, iss.pickedNorm);
-            promise.then(function (data) {
-                console.log(data);
-                iss.issues.push(data);
-                iss.clearInput = true;
-            });
-        };
-
-        iss.setupAddNormal = function () {
-            iss.issueAddPinClass = "issueAddUnselectedClass";
-            iss.issueAddNormalClass = (iss.issueAddNormalClass === "issueAddUnselectedClass") ? "md-accent" : "issueAddUnselectedClass";
-
-            if (iss.issueAddNormalClass === "md-accent") {
-                iss.pickedPos = null;
-                iss.pickedNorm = null;
-                if (iss.selectedObjectId === null) {
-                    iss.showInfo = true;
-                    iss.info = normalIssueInfo;
+        iss.saveIssue = function () {
+            if (angular.isDefined(iss.title) && (iss.title !== "")) {
+                if (iss.pickedPos === null) {
+                    iss.showAlert();
                 }
                 else {
-                    iss.showInput = true;
+                    promise = NewIssuesService.saveIssue(iss.title, iss.selectedObjectId, iss.pickedPos, iss.pickedNorm);
+                    promise.then(function (data) {
+                        console.log(data);
+                        iss.issues.push(data);
+                        iss.title = "";
+                        iss.pickedPos = null;
+                        iss.pickedNorm = null;
+                        if (angular.isDefined(iss.comment) && (iss.comment !== "")) {
+                            iss.saveComment(data, iss.comment);
+                            iss.comment = "";
+                        }
+                    });
                 }
-            }
-            else {
-                iss.showInfo = false;
-                iss.showInput = false;
-            }
-        };
-
-        iss.setupAddPin = function (event) {
-            event.stopPropagation();
-            iss.issueAddNormalClass = "issueAddUnselectedClass";
-            iss.issueAddPinClass = (iss.issueAddPinClass === "issueAddUnselectedClass") ? "md-accent" : "issueAddUnselectedClass";
-
-            if (iss.issueAddPinClass === "md-accent") {
-                iss.showInfo = true;
-                iss.info = pinIssueInfo;
-                setupGlobalClickWatch();
-                showAlert();
-            }
-            else {
-                iss.showInfo = false;
-                iss.showInput = false;
-                cancelGlobalClickWatch();
-                NewIssuesService.removePin();
-                closeAlert();
             }
         };
 
@@ -178,28 +161,13 @@
         $(document).on("objectSelected", function(event, object, zoom) {
             if (angular.isUndefined(object)) {
                 iss.selectedObjectId = null;
-                iss.showInput = false;
-                if (iss.issueAddNormalClass === "md-accent") {
-                    iss.showInfo = true;
-                    iss.info = normalIssueInfo;
-                }
-                else if (iss.issueAddPinClass === "md-accent") {
-                    iss.showInfo = true;
-                    iss.info = pinIssueInfo;
-                }
+                iss.pickedPos = null;
+                iss.pickedNorm = null;
+                NewIssuesService.removePin();
             }
             else {
                 iss.selectedObjectId = object.getAttribute("DEF");
-                if (iss.issueAddNormalClass === "md-accent") {
-                    iss.showInfo = false;
-                    iss.showInput = true;
-                }
-                else if (iss.issueAddPinClass === "md-accent") {
-                    iss.showInfo = false;
-                    iss.showInput = true;
-                }
             }
-            $scope.$apply();
         });
 
         $(document).on("partSelected", function(event, part, zoom) {
@@ -207,5 +175,16 @@
                 iss.selectedObjectId = $scope.IssuesService.IDMap[part.partID];
             });
         });
+
+        iss.showAlert = function() {
+            $mdDialog.show(
+                $mdDialog.alert()
+                    .parent(angular.element($element[0].querySelector("#issuesAddContainer")))
+                    .clickOutsideToClose(true)
+                    .title("Add a pin before saving")
+                    .ariaLabel("Pin alert")
+                    .ok("OK")
+            );
+        };
     }
 }());

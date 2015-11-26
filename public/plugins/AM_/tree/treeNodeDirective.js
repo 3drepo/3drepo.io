@@ -81,11 +81,13 @@
             }
         });
 
+        /*
         $scope.$watch("tn.toggledNode", function (newValue) {
             if (angular.isDefined(newValue) && (newValue !== tn.node._id)) {
                 tn.toggleState = true;
             }
         });
+        */
 
         tn.expand = function () {
             tn.expanded = !tn.expanded;

@@ -1178,6 +1178,7 @@ header button.btn {
 
 .collapsed #ui2-rightpanel-collapse-btn {
 	left: -40px;
+  opacity: 0;
 }
 
 #metadata {

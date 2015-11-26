@@ -45,19 +45,24 @@
         is.showComments = false;
         is.toggleCommentsState = false;
         is.numNewComments = 0;
-        is.titleBackground = "issueTitleUnselected";
+        is.saveCommentDisabled = true;
 
         $scope.$watch("is.commentsToggledIssueId", function (newValue) {
             if (angular.isDefined(newValue) && (newValue !== is.data._id)) {
                 is.toggleCommentsState = false;
                 is.showComments = false;
-                is.titleBackground = "issueTitleUnselected";
             }
         });
 
         $scope.$watch("is.commentSaved", function (newValue) {
             if (angular.isDefined(newValue) && newValue) {
-                is.clearInput = true;
+                is.comment = "";
+            }
+        });
+
+        $scope.$watch("is.comment", function (newValue) {
+            if (angular.isDefined(newValue)) {
+                is.saveCommentDisabled = (newValue === "");
             }
         });
 
@@ -74,14 +79,14 @@
                     is.data.viewpoint.up
                 );
             }
-            is.titleBackground = is.toggleCommentsState ? "issueTitleSelected" :  "issueTitleUnselected";
             is.onCommentsToggled({issueId: is.data._id});
         };
 
-        is.saveComment = function(text) {
-            is.clearInput = false;
-            is.onSaveComment({issue: is.data, text: text});
-            is.numNewComments += 1; // This is used to increase the height of the comments list
+        is.saveComment = function () {
+            if (angular.isDefined(is.comment) && (is.comment !== "")) {
+                is.onSaveComment({issue: is.data, text: is.comment});
+                is.numNewComments += 1; // This is used to increase the height of the comments list
+            }
         };
     }
 

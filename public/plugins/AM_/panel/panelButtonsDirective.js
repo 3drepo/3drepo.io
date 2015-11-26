@@ -63,7 +63,7 @@
                     pb.buttons.push(button);
                 }
             }
-            else if (event.type === EventService.EVENT.TOGGLE_FULL_SCREEN) {
+            else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
                 pb.showButtons = !pb.showButtons;
             }
         });

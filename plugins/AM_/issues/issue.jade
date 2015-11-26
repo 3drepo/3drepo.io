@@ -1,16 +1,23 @@
-md-content
-	//md-subheader(ng-click="is.toggleComments()") {{is.data.number}} {{is.data.name}} {{is.data.timeStamp}}
-	div.issueTitle(layout="row", layout-align="space-between center", ng-click="is.toggleComments()", ng-class="is.titleBackground")
-		label {{is.data.number}}
-		label {{is.data.name}}
-		label {{is.data.timeStamp}}
+md-list-item.md-2-line#issueTitle(ng-click="is.toggleComments()")
+	div.md-list-item-text
+		h3 &#35;{{is.data.number}} {{is.data.name}}
+		.issueInfo
+			p {{is.data.owner}}
+			p(class="issueTimeStamp") {{is.data.timeStamp}}
 
-	div(ng-show="is.showComments", ng-class="{issueComments: is.toggleCommentsState}", comments-height, num-new-comments="is.numNewComments")
-		div
-			md-list
-				md-list-item.md-3-line(ng-repeat="comment in is.data.comments")
-					.md-list-item-text(layout="column")
-						h3 {{comment.comment}}
-						h4 {{comment.owner}}
-						p {{comment.timeStamp}}
-			panel-content-add(placeholder="New comment", on-save="is.saveComment(text)", clear-input="is.clearInput")
+div(ng-show="is.showComments", ng-class="{issueComments: is.toggleCommentsState}", comments-height, num-new-comments="is.numNewComments")
+	.issueCommentsContainer
+		md-list
+			md-list-item.md-2-line(ng-repeat="comment in is.data.comments")
+				div.md-list-item-text
+					h3 {{comment.comment}}
+					.issueInfo
+						p {{comment.owner}}
+						p(class="issueTimeStamp") {{comment.timeStamp}}
+					//p {{comment.owner}} ({{comment.timeStamp}})
+			md-input-container(md-no-float="")
+				textarea(placeholder="New comment", ng-model="is.comment")
+
+		md-button.md-raised.md-accent(ng-click="is.saveComment()", ng-disabled="is.saveCommentDisabled") Save
+
+md-divider

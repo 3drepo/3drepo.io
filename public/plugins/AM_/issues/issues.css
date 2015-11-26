@@ -1,22 +1,27 @@
 /** Issues ************************************************************************************************************/
 
 issues .maxHeight {
-  height: 300px;
+  height: 700px;
 }
 issues .minHeight {
   height: 50px;
 }
 
-issues .issueAdd {
+issues #issuesAddContainer {
+  position: relative;
   margin: 10px;
 }
 
-issues .issueAdd .md-button {
-  margin: 0 2px 10px 2px;
+issues textarea {
+  min-height: 70px !important;
 }
 
-issues .issueAdd textarea {
-  min-height: 70px;
+issues md-list {
+  padding: 0;
+}
+
+issues p {
+  color: rgba(0,0,0,0.35) !important;
 }
 
 /** Issue *************************************************************************************************************/
@@ -25,32 +30,42 @@ issue {
   display: block;
 }
 
-issue .issueTitle {
-  height: 50px;
-  outline: none;
-  padding: 0 16px 0 0;
-}
-issue .issueTitle:hover {
-  cursor: pointer;
-}
-issue .issueTitle label {
-  font-weight: normal;
-}
-issue .issueTitle .md-button.md-icon-button {
-  margin-right: -30px;
-}
-
-.issueTitleSelected {
-  background: #E8EAF6;
-}
-
-.issueTitleunSelected {
-  background: #FFFFFF;
-}
-
-issue md-list-item.md-3-line {
-  min-height: 75px;
-}
-
 .issueComments {
+}
+
+issue md-list-item .md-button,
+issue md-list-item .md-button .md-ripple-container {
+  border-radius: 0;
+}
+
+issue md-list-item.md-2-line {
+  min-height: 0;
+}
+
+#issueTitle button {
+  min-height: 0;
+  height: 60px;
+}
+
+issue h3,
+issue h4 {
+  word-wrap: break-word;
+  white-space: normal !important;
+}
+
+.issueCommentsContainer {
+  padding: 10px 5px  10px 10px;
+}
+.issueCommentsContainer md-list-item {
+  padding: 10px;
+}
+
+issue .issueInfo {
+  position: relative;
+}
+
+issue .issueInfo .issueTimeStamp {
+  position: absolute;
+  top: 0;
+  right: 0;
 }

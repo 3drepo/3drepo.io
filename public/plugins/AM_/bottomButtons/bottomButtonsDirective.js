@@ -38,6 +38,12 @@
         var bb = this,
             defaultViewer = ViewerService.defaultViewer;
         bb.showButtons = true;
+        bb.fullScreen = false;
+
+        bb.toggleElements = function () {
+            EventService.send(EventService.EVENT.TOGGLE_ELEMENTS);
+            bb.showButtons = !bb.showButtons;
+        };
 
         var turntable = function () {
             defaultViewer.setNavMode("TURNTABLE");
@@ -59,40 +65,30 @@
             EventService.send(EventService.EVENT.TOGGLE_HELP);
         };
 
-        bb.toggleFullScreen = function () {
-            EventService.send(EventService.EVENT.TOGGLE_FULL_SCREEN);
-            bb.showButtons = !bb.showButtons;
+        var enterFullScreen = function () {
+            defaultViewer.switchFullScreen(null);
+            bb.fullScreen = true;
         };
 
-        /*
-        bb.leftButtons = [
-            {label: "Walk", icon: "fa-repeat", click: blah},
-            {label: "Wire frame", icon: "fa-star-half-o", click: blah},
-            {label: "Orthographic", icon: "fa-cube", click: blah},
-            {label: "Full screen", icon: "fa-arrows-alt", click: toggleFullScreen}
-        ];
-        */
+        var exitFullScreen = function() {
+            if (!document.webkitIsFullScreen && !document.msFullscreenElement && !document.mozFullScreen && bb.fullScreen) {
+                defaultViewer.switchFullScreen(null);
+                bb.fullScreen = false;
+            }
+        };
+        document.addEventListener('webkitfullscreenchange', exitFullScreen, false);
+        document.addEventListener('mozfullscreenchange', exitFullScreen, false);
+        document.addEventListener('fullscreenchange', exitFullScreen, false);
+        document.addEventListener('MSFullscreenChange', exitFullScreen, false);
 
         bb.leftButtons = [];
         bb.leftButtons.push({label: "Turntable", icon: "fa-mouse-pointer", click: turntable});
         bb.leftButtons.push({label: "Helicopter", icon: "fa-arrows", click: helicopter});
         bb.leftButtons.push({label: "Walk", icon: "fa-child", click: walk});
 
-        /*
-        bb.rightButtons = [
-            {label: "Help", icon: "fa-question", click: toggleHelp},
-            {label: "Play", icon: "fa-play", click: blah},
-            {label: "QR Reader", icon: "fa-qrcode", click: blah},
-            {label: "Pin", icon: "fa-map-pin", click: blah}
-        ];
-        */
-
         bb.rightButtons = [];
         bb.rightButtons.push({label: "Home", icon: "fa-home", click: home});
         bb.rightButtons.push({label: "Help", icon: "fa-question", click: toggleHelp});
-
-        bb.showHideButtons = function () {
-            bb.showButtons = !bb.showButtons;
-        };
+        bb.rightButtons.push({label: "Full screen", icon: "fa-square-o", click: enterFullScreen});
     }
 }());
