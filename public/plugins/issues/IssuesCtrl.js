@@ -319,6 +319,8 @@ angular.module("3drepo")
 					var objID = idParts[idParts.length - 1];
 
 					scope.selectedID 		= objID;
+
+					trans = $("#model__root")[0]._x3domNode.getCurrentTransform();
 				} else {
 					var projectParts = pickObj.part.multiPart._xmlNode.id.split("__");
 					var trans = null;
