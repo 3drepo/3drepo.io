@@ -1,4 +1,4 @@
-.container-fluid
+.container-fluid(global)
 	//#ui2-header
 		#nav-version-control
 			//div.nav-project-title  <b>{{Data.ProjectData.name}}</b>
@@ -29,6 +29,7 @@
 		each uicomp in ui.walkthrough
 			!= renderMe(uicomp["template"], locals)
 
+	project
 	panel#leftPanel(position="left")
 	panel#rightPanel(position="right")
 	bottom-buttons

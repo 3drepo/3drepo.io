@@ -40,75 +40,13 @@
             templateUrl: 'home.html',
             scope: {},
             controller: HomeCtrl,
-            controllerAs: 'hm',
+            controllerAs: 'vm',
             bindToController: true
         };
     }
 
-    HomeCtrl.$inject = ["EventService"];
-
-    function HomeCtrl(EventService) {
-        var hm = this;
-
-        var panelContent = {
-            left: [],
-            right: []
-        };
-
-        panelContent.left.push({
-            type: "filter",
-            title: "",
-            show: true,
-            help: "Filter content"
-        });
-        panelContent.left.push({
-            type: "tree",
-            title: "Tree",
-            show: true,
-            help: "Model elements shown in a tree structure",
-            icon: "fa-sitemap"
-        });
-        /*
-        panelContent.left.push({
-            type: "viewpoints",
-            title: "Viewpoints",
-            show: false,
-            help: "Show a list of saved viewpoints",
-            icon: "fa-street-view"
-        });
-        panelContent.left.push({
-            type: "meta",
-            title: "Meta data",
-            show: false,
-            help: "Show all the Meta data",
-            icon: "fa-map-o"
-        });
-        panelContent.left.push({
-            type: "pdf",
-            title: "PDF",
-            show: false,
-            help: "List associated PDF files",
-            icon: "fa-file-pdf-o"
-        });
-        */
-
-        panelContent.right.push({
-            type: "issues",
-            title: "Issues",
-            show: true,
-            help: "List current issues",
-            icon: "fa-map-marker",
-            canAdd: true
-        });
-        panelContent.right.push({
-            type: "clip",
-            title: "Clip",
-            show: false,
-            help: "Clipping plane",
-            icon: "fa-object-group"
-        });
-
-        EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelContent);
+    function HomeCtrl() {
+        var vm = this;
     }
 }());
 

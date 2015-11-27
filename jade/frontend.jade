@@ -44,7 +44,9 @@ html(lang="en" ng-app="3drepo").ng-scope
 		each css in pluginCSS
 			link(href=css, rel='stylesheet', type="text/css")
 
-	body(ng-controller='BaseCtrl' global)
+	body(ng-controller='BaseCtrl')
+		home
+
 		// Plugin JADE Files
 		each j in pluginJade
 			script(type="text/ng-template", id=j.id)
@@ -56,4 +58,3 @@ html(lang="en" ng-app="3drepo").ng-scope
 			.row
 				div(ui-view='')
 
-		home

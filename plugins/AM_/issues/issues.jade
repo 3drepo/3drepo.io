@@ -13,7 +13,7 @@ div(ng-class="iss.height")
 
 	md-list
 		issue(
-			ng-repeat="issue in iss.issues",
+			ng-repeat="issue in iss.sortedIssues",
 			data="issue",
 			on-comments-toggled="iss.commentsToggled(issueId)"
 			comments-toggled-issue-id="iss.commentsToggledIssueId"

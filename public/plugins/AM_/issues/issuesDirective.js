@@ -28,7 +28,9 @@
             scope: {
                 filterText: "=",
                 height: "=",
-                showAdd: "="
+                showAdd: "=",
+                options: "=",
+                selectedOption: "="
             },
             controller: IssuesCtrl,
             controllerAs: 'iss',
@@ -42,7 +44,9 @@
         var iss = this,
             promise = null,
             i = 0,
-            length = 0;
+            j = 0,
+            length = 0,
+            sortedIssuesLength;
         iss.pickedPos = null;
         iss.pickedNorm = null;
         iss.selectedObjectId = null;
@@ -53,6 +57,7 @@
         promise.then(function (data) {
             console.log(data);
             iss.issues = data;
+            iss.sortedIssues = iss.issues;
         });
 
         $scope.$watch("iss.showAdd", function (newValue) {
@@ -68,6 +73,27 @@
         $scope.$watch("iss.title", function (newValue) {
             if (angular.isDefined(newValue)) {
                 iss.saveIssueDisabled = (newValue === "");
+            }
+        });
+
+        $scope.$watch("iss.selectedOption", function (newValue) {
+            if (angular.isDefined(newValue)) {
+                console.log(newValue);
+                iss.sortedIssues = [iss.issues[0]];
+                if (newValue.value === "sortByDate") {
+                    for (i = 1, length = iss.issues.length; i < length; i += 1) {
+                        for (j = 0, sortedIssuesLength = iss.sortedIssues.length; j < sortedIssuesLength; j += 1) {
+                            if (iss.issues[i].created > iss.sortedIssues[j].created) {
+                                iss.sortedIssues.splice(j, 0, iss.issues[i]);
+                                break;
+                            }
+                            else if (j === (iss.sortedIssues.length - 1)) {
+                                iss.sortedIssues.push(iss.issues[i]);
+                            }
+                        }
+                    }
+                }
+                //iss.sortedIssues = iss.issues;
             }
         });
 

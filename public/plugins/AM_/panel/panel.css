@@ -74,6 +74,10 @@ panel-content .md-button.md-raised:not([disabled]) {
   box-shadow: none;
 }
 
+panel-content .md-menu {
+  padding: 0;
+}
+
 /** Panel Content Add *************************************************************************************************/
 
 panel-content-add {

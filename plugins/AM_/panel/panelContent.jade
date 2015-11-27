@@ -1,17 +1,25 @@
-div(layout="column", class="md-whiteframe-1dp", ng-show="pc.showContent")
+div(id="vm.contentItem", layout="column", class="md-whiteframe-1dp", ng-show="vm.showContent")
 
-	md-toolbar(class="md-primary", ng-click="pc.click()" ng-if="pc.showTitleBar")
+	md-toolbar(class="md-primary", ng-click="vm.click()" ng-if="vm.showTitleBar")
 		div(class="md-toolbar-tools")
-			span(class="fa", ng-class="pc.icon")
-			label(class="md-flex") {{pc.contentTitle}}
+			span(class="fa", ng-class="vm.icon")
+			label(class="md-flex") {{vm.contentTitle}}
 			span(flex)
-			md-button.md-icon-button(aria-label="Add", ng-click="pc.toggleAdd($event)", ng-if="pc.canAdd")
+			md-button.md-icon-button(aria-label="Add", ng-click="vm.toggleAdd($event)", ng-if="vm.canAdd")
 				md-icon(class="fa fa-pencil")
+			md-menu(md-position-mode="target-right target", ng-if="vm.hasOptions", md-offset="2 14")
+				md-button.md-icon-button(aria-label="Options", ng-click="$mdOpenMenu($event)")
+					md-icon(class="fa fa-ellipsis-v")
+				md-menu-content(width="4")
+					md-menu-item(ng-repeat="option in vm.options")
+						md-button(ng-click="vm.optionSelected(option)")
+							div(layout="row")
+								p(flex="") {{option.label}}
 
 
-	md-content(id="content", ng-class="pc.class")
+	md-content(id="content", ng-class="vm.class")
 
-	div(ng-if="pc.showHelp")
+	div(ng-if="vm.showHelp")
 		md-button.md-fab.md-mini#helpButton(aria-label="Help")
 			md-icon(md-font-icon="fa-question", class="fa")
-			md-tooltip(md-direction="top") {{pc.help}}
+			md-tooltip(md-direction="top") {{vm.help}}
