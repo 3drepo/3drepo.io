@@ -37,18 +37,21 @@
             right: []
         };
 
+        /*
         panelContent.left.push({
             type: "filter",
             title: "",
             show: true,
             help: "Filter content"
         });
+        */
         panelContent.left.push({
             type: "tree",
             title: "Tree",
             show: true,
             help: "Model elements shown in a tree structure",
-            icon: "fa-sitemap"
+            icon: "fa-sitemap",
+            hasFilter: true
         });
         /*
          panelContent.left.push({
@@ -80,15 +83,12 @@
             show: true,
             help: "List current issues",
             icon: "fa-map-marker",
+            hasFilter: true,
             canAdd: true,
             options: [
                 {
                     value: "sortByDate",
                     label: "Sort by Date"
-                },
-                {
-                    value: "sortAlphabetically",
-                    label: "Sort Alphabetically"
                 }
             ]
         });

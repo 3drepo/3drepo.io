@@ -1,7 +1,7 @@
 /** Issues ************************************************************************************************************/
 
 issues .maxHeight {
-  height: 700px;
+  height: 720px;
 }
 issues .minHeight {
   height: 50px;
@@ -10,6 +10,13 @@ issues .minHeight {
 issues #issuesAddContainer {
   position: relative;
   margin: 10px;
+}
+issues #issuesAddContainer .md-dialog-container {
+  top: 0 !important;
+  height: 200px !important;
+}
+issues #issuesAddContainer .md-dialog-backdrop {
+  height: 205px !important;
 }
 
 issues textarea {

@@ -33,34 +33,37 @@
                 selectedOption: "="
             },
             controller: IssuesCtrl,
-            controllerAs: 'iss',
+            controllerAs: 'vm',
             bindToController: true
         };
     }
 
-    IssuesCtrl.$inject = ["$scope", "$element", "$mdDialog", "EventService", "NewIssuesService", "ViewerService"];
+    IssuesCtrl.$inject = ["$scope", "$element", "$mdDialog", "$filter", "EventService", "NewIssuesService", "ViewerService"];
 
-    function IssuesCtrl($scope, $element, $mdDialog, EventService, NewIssuesService, ViewerService) {
-        var iss = this,
+    function IssuesCtrl($scope, $element, $mdDialog, $filter, EventService, NewIssuesService, ViewerService) {
+        var vm = this,
             promise = null,
             i = 0,
             j = 0,
             length = 0,
-            sortedIssuesLength;
-        iss.pickedPos = null;
-        iss.pickedNorm = null;
-        iss.selectedObjectId = null;
-        iss.globalClickWatch = null;
-        iss.saveIssueDisabled = true;
+            sortedIssuesLength,
+            sortOldestFirst = true,
+            sortAFirst = false;
+        vm.pickedPos = null;
+        vm.pickedNorm = null;
+        vm.selectedObjectId = null;
+        vm.globalClickWatch = null;
+        vm.saveIssueDisabled = true;
 
         promise = NewIssuesService.getIssues();
         promise.then(function (data) {
-            console.log(data);
-            iss.issues = data;
-            iss.sortedIssues = iss.issues;
+            vm.issues = data;
+            vm.sortedIssues = vm.issues;
+            vm.sortedFilteredIssues = vm.issues;
+            sortIssues();
         });
 
-        $scope.$watch("iss.showAdd", function (newValue) {
+        $scope.$watch("vm.showAdd", function (newValue) {
             if (newValue) {
                 setupGlobalClickWatch();
             }
@@ -70,49 +73,70 @@
             }
         });
 
-        $scope.$watch("iss.title", function (newValue) {
+        $scope.$watch("vm.title", function (newValue) {
             if (angular.isDefined(newValue)) {
-                iss.saveIssueDisabled = (newValue === "");
+                vm.saveIssueDisabled = (newValue === "");
             }
         });
 
-        $scope.$watch("iss.selectedOption", function (newValue) {
-            if (angular.isDefined(newValue)) {
-                console.log(newValue);
-                iss.sortedIssues = [iss.issues[0]];
-                if (newValue.value === "sortByDate") {
-                    for (i = 1, length = iss.issues.length; i < length; i += 1) {
-                        for (j = 0, sortedIssuesLength = iss.sortedIssues.length; j < sortedIssuesLength; j += 1) {
-                            if (iss.issues[i].created > iss.sortedIssues[j].created) {
-                                iss.sortedIssues.splice(j, 0, iss.issues[i]);
-                                break;
-                            }
-                            else if (j === (iss.sortedIssues.length - 1)) {
-                                iss.sortedIssues.push(iss.issues[i]);
-                            }
-                        }
+        function filterIssues () {
+            if (angular.isDefined(vm.filterText)) {
+                if (vm.filterText === "") {
+                    vm.sortedFilteredIssues = vm.sortedIssues;
+                }
+                else {
+                    vm.sortedFilteredIssues = ($filter('filter')(vm.sortedIssues, {name: vm.filterText}));
+                }
+            }
+        }
+
+        function sortIssues () {
+            vm.sortedIssues = [vm.issues[0]];
+            for (i = 1, length = vm.issues.length; i < length; i += 1) {
+                for (j = 0, sortedIssuesLength = vm.sortedIssues.length; j < sortedIssuesLength; j += 1) {
+                    if (((vm.issues[i].created > vm.sortedIssues[j].created) && (sortOldestFirst)) ||
+                        ((vm.issues[i].created < vm.sortedIssues[j].created) && (!sortOldestFirst))) {
+                        vm.sortedIssues.splice(j, 0, vm.issues[i]);
+                        break;
+                    }
+                    else if (j === (vm.sortedIssues.length - 1)) {
+                        vm.sortedIssues.push(vm.issues[i]);
                     }
                 }
-                //iss.sortedIssues = iss.issues;
+            }
+            filterIssues();
+        }
+
+        $scope.$watch("vm.selectedOption", function (newValue) {
+            if (angular.isDefined(newValue)) {
+                console.log(newValue);
+                if (newValue.value === "sortByDate") {
+                    sortOldestFirst = !sortOldestFirst;
+                    sortIssues();
+                }
             }
         });
 
-        iss.commentsToggled = function (issueId) {
-            iss.commentsToggledIssueId = issueId;
+        $scope.$watch("vm.filterText", function (newValue) {
+            filterIssues(newValue);
+        });
+
+        vm.commentsToggled = function (issueId) {
+            vm.commentsToggledIssueId = issueId;
         };
 
-        iss.saveComment = function (issue, comment) {
-            iss.commentSaved = false;
+        vm.saveComment = function (issue, comment) {
+            vm.commentSaved = false;
             promise = NewIssuesService.saveComment(issue, comment);
             promise.then(function (data) {
                 console.log(data);
-                iss.commentSaved = true;
-                for (i = 0, length = iss.issues.length; i < length; i += 1) {
-                    if (issue._id === iss.issues[i]._id) {
-                        if (!iss.issues[i].hasOwnProperty("comments")) {
-                            iss.issues[i].comments = [];
+                vm.commentSaved = true;
+                for (i = 0, length = vm.issues.length; i < length; i += 1) {
+                    if (issue._id === vm.issues[i]._id) {
+                        if (!vm.issues[i].hasOwnProperty("comments")) {
+                            vm.issues[i].comments = [];
                         }
-                        iss.issues[i].comments.push({
+                        vm.issues[i].comments.push({
                             owner: data.owner,
                             comment: comment,
                             timeStamp: NewIssuesService.prettyTime(data.created)
@@ -123,31 +147,32 @@
             });
         };
 
-        iss.saveIssue = function () {
-            if (angular.isDefined(iss.title) && (iss.title !== "")) {
-                if (iss.pickedPos === null) {
-                    iss.showAlert();
+        vm.saveIssue = function () {
+            if (angular.isDefined(vm.title) && (vm.title !== "")) {
+                if (vm.pickedPos === null) {
+                    vm.showAlert();
                 }
                 else {
-                    promise = NewIssuesService.saveIssue(iss.title, iss.selectedObjectId, iss.pickedPos, iss.pickedNorm);
+                    promise = NewIssuesService.saveIssue(vm.title, vm.selectedObjectId, vm.pickedPos, vm.pickedNorm);
                     promise.then(function (data) {
                         console.log(data);
-                        iss.issues.push(data);
-                        iss.title = "";
-                        iss.pickedPos = null;
-                        iss.pickedNorm = null;
-                        if (angular.isDefined(iss.comment) && (iss.comment !== "")) {
-                            iss.saveComment(data, iss.comment);
-                            iss.comment = "";
+                        vm.issues.push(data);
+                        vm.title = "";
+                        vm.pickedPos = null;
+                        vm.pickedNorm = null;
+                        if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
+                            vm.saveComment(data, vm.comment);
+                            vm.comment = "";
                         }
+                        sortIssues();
                     });
                 }
             }
         };
 
         function setupGlobalClickWatch () {
-            if (iss.globalClickWatch === null) {
-                iss.globalClickWatch = $scope.$watch(EventService.currentEvent, function (event, oldEvent) {
+            if (vm.globalClickWatch === null) {
+                vm.globalClickWatch = $scope.$watch(EventService.currentEvent, function (event, oldEvent) {
                     if ((event.type === EventService.EVENT.GLOBAL_CLICK) &&
                         (event.value.target.className === "x3dom-canvas") &&
                         (!((event.value.clientX === oldEvent.value.clientX) &&
@@ -157,10 +182,10 @@
                         var dragEndY = event.value.clientY;
                         var pickObj = ViewerService.pickPoint(dragEndX, dragEndY);
                         if (pickObj.pickObj !== null) {
-                            iss.showInput = true;
-                            iss.selectedObjectId = pickObj.pickObj._xmlNode.getAttribute("DEF");
-                            iss.pickedPos = pickObj.pickPos;
-                            iss.pickedNorm = pickObj.pickNorm;
+                            vm.showInput = true;
+                            vm.selectedObjectId = pickObj.pickObj._xmlNode.getAttribute("DEF");
+                            vm.pickedPos = pickObj.pickPos;
+                            vm.pickedNorm = pickObj.pickNorm;
 
                             NewIssuesService.addPin({
                                 id: undefined,
@@ -178,31 +203,31 @@
         }
 
         function cancelGlobalClickWatch () {
-            if (typeof iss.globalClickWatch === "function") {
-                iss.globalClickWatch();
-                iss.globalClickWatch = null;
+            if (typeof vm.globalClickWatch === "function") {
+                vm.globalClickWatch();
+                vm.globalClickWatch = null;
             }
         }
 
         $(document).on("objectSelected", function(event, object, zoom) {
             if (angular.isUndefined(object)) {
-                iss.selectedObjectId = null;
-                iss.pickedPos = null;
-                iss.pickedNorm = null;
+                vm.selectedObjectId = null;
+                vm.pickedPos = null;
+                vm.pickedNorm = null;
                 NewIssuesService.removePin();
             }
             else {
-                iss.selectedObjectId = object.getAttribute("DEF");
+                vm.selectedObjectId = object.getAttribute("DEF");
             }
         });
 
         $(document).on("partSelected", function(event, part, zoom) {
             $scope.IssuesService.mapPromise.then(function () {
-                iss.selectedObjectId = $scope.IssuesService.IDMap[part.partID];
+                vm.selectedObjectId = $scope.IssuesService.IDMap[part.partID];
             });
         });
 
-        iss.showAlert = function() {
+        vm.showAlert = function() {
             $mdDialog.show(
                 $mdDialog.alert()
                     .parent(angular.element($element[0].querySelector("#issuesAddContainer")))

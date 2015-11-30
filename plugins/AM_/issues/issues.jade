@@ -1,22 +1,22 @@
-div(ng-class="iss.height")
-	div(ng-show="iss.showAdd")
+div(ng-class="vm.height")
+	div(ng-show="vm.showAdd")
 		#issuesAddContainer
 			md-input-container(md-no-float="")
-				input(placeholder="Title", ng-model="iss.title")
+				input(placeholder="Title", ng-model="vm.title")
 
 			md-input-container(md-no-float="")
-				textarea(placeholder="Comment", ng-model="iss.comment")
+				textarea(placeholder="Comment", ng-model="vm.comment")
 
-			md-button.md-raised.md-accent(ng-click="iss.saveIssue()", ng-disabled="iss.saveIssueDisabled") Save
+			md-button.md-raised.md-accent(ng-click="vm.saveIssue()", ng-disabled="vm.saveIssueDisabled") Save
 
 		md-divider
 
 	md-list
 		issue(
-			ng-repeat="issue in iss.sortedIssues",
+			ng-repeat="issue in vm.sortedFilteredIssues",
 			data="issue",
-			on-comments-toggled="iss.commentsToggled(issueId)"
-			comments-toggled-issue-id="iss.commentsToggledIssueId"
-			on-save-comment="iss.saveComment(issue, text)"
-			comment-saved="iss.commentSaved"
+			on-comments-toggled="vm.commentsToggled(issueId)"
+			comments-toggled-issue-id="vm.commentsToggledIssueId"
+			on-save-comment="vm.saveComment(issue, text)"
+			comment-saved="vm.commentSaved"
 		)

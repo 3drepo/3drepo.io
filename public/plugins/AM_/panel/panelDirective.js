@@ -79,6 +79,7 @@
                             "show-content='pl.contentItems[" + i + "].show' " +
                             "help='pl.contentItems[" + i + "].help' " +
                             "icon='pl.contentItems[" + i + "].icon' " +
+                            "has-filter='pl.contentItems[" + i + "].hasFilter' " +
                             "can-add='pl.contentItems[" + i + "].canAdd' " +
                             "options='pl.contentItems[" + i + "].options'>" +
                         "</panel-content>"
@@ -94,8 +95,8 @@
                             "ng-click=pl.buttonClick('" + pl.contentItems[i].type + "') " +
                             "aria-label='{{pl.contentItems[" + i + "].title}}'>" +
                             "<md-icon " +
-                            "class='fa' " +
-                            "md-font-icon='{{pl.contentItems[" + i + "].icon}}'>" +
+                                "class='fa' " +
+                                "md-font-icon='{{pl.contentItems[" + i + "].icon}}'>" +
                             "</md-icon>" +
                             "</md-button>"
                         );

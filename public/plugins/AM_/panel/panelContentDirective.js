@@ -32,6 +32,7 @@
                 showContent: "=",
                 help: "=",
                 icon: "=",
+                hasFilter: "=",
                 canAdd: "=",
                 options: "="
             },
@@ -41,13 +42,16 @@
         };
     }
 
-    PanelContentCtrl.$inject = ["$scope", "$element", "$compile", "$mdDialog", "EventService"];
+    PanelContentCtrl.$inject = ["$scope", "$element", "$compile", "$timeout", "EventService"];
 
-    function PanelContentCtrl($scope, $element, $compile, $mdDialog, EventService) {
+    function PanelContentCtrl($scope, $element, $compile, $timeout, EventService) {
         var vm = this,
             content = "",
             contentItem = "",
-            filterWatch = null,
+            i = 0,
+            length = 0,
+            currentSortIndex,
+            filter = null,
             last = {
                 bottom: false,
                 top: true,
@@ -59,14 +63,6 @@
         vm.height = "minHeight";
         vm.addStatus = false;
         vm.toastPosition = angular.extend({}, last);
-
-        function setupFilterWatch() {
-            filterWatch = $scope.$watch(EventService.currentEvent, function (event) {
-                if (event.type === EventService.EVENT.FILTER) {
-                    vm.filterText = event.value;
-                }
-            });
-        }
 
         $scope.$watch("vm.contentItem", function (newValue) {
             if (angular.isDefined(newValue)) {
@@ -85,7 +81,6 @@
                 $compile(contentItem)($scope);
                 if ((newValue === "tree") || (newValue === "issues")) {
                     vm.height = "maxHeight";
-                    setupFilterWatch();
                 }
             }
         });
@@ -98,15 +93,38 @@
 
         $scope.$watch("vm.options", function (newValue) {
             vm.hasOptions = (angular.isDefined(newValue));
+            if (vm.hasOptions) {
+                for (i = 0, length = vm.options.length; i < length; i += 1) {
+                    if (vm.contentItem === "issues") {
+                        vm.options[i].selected = true;
+                        vm.options[i].firstSelected = true;
+                        vm.options[i].secondSelected = false;
+                        currentSortIndex = 0;
+                    }
+                    else {
+                        vm.options[i].selected = false;
+                        vm.options[i].firstSelected = false;
+                        vm.options[i].secondSelected = false;
+                    }
+                }
+            }
+        });
+
+        $scope.$watch("vm.filterInputText", function (newValue) {
+            if (angular.isDefined(newValue)) {
+                if (filter !== null) {
+                    $timeout.cancel(filter);
+                }
+                filter = $timeout(function() {
+                    vm.filterText = vm.filterInputText;
+                }, 500);
+            }
         });
 
         $scope.$watch(EventService.currentEvent, function (event) {
             if ((event.type === EventService.EVENT.PANEL_CONTENT_CLICK) && (event.value.position === vm.position)) {
                 if (event.value.contentItem !== vm.contentItem) {
                     vm.height = "minHeight";
-                    if (filterWatch !== null) {
-                        filterWatch(); // Cancel filter watch
-                    }
                 }
             }
             else if (event.type === EventService.EVENT.TOGGLE_HELP) {
@@ -124,11 +142,9 @@
                     }
                 );
                 vm.height = "maxHeight";
-                setupFilterWatch();
             }
             else {
                 vm.height = "minHeight";
-                filterWatch();
             }
         };
 
@@ -141,8 +157,31 @@
             $mdOpenMenu(ev);
         };
 
-        vm.optionSelected = function (option) {
-            vm.selectedOption = option;
+        vm.optionSelected = function (index) {
+            if (index !== currentSortIndex) {
+                if (angular.isDefined(currentSortIndex)) {
+                    vm.options[currentSortIndex].selected = false;
+                    vm.options[currentSortIndex].firstSelected = false;
+                    vm.options[currentSortIndex].secondSelected = false;
+                }
+                currentSortIndex = index;
+                vm.options[currentSortIndex].selected = true;
+                vm.options[currentSortIndex].firstSelected = true;
+            }
+            else {
+                vm.options[currentSortIndex].firstSelected = !vm.options[currentSortIndex].firstSelected;
+                vm.options[currentSortIndex].secondSelected = !vm.options[currentSortIndex].secondSelected;
+            }
+            vm.selectedOption = vm.options[currentSortIndex];
+
+            // 'Reset' vm.selectedOption so that selecting the same option can be registered down the line
+            $timeout(function () {
+                vm.selectedOption = undefined;
+            });
+        };
+
+        vm.clearFilter = function () {
+            vm.filterInputText = "";
         };
     }
 }());

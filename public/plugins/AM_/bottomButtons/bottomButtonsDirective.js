@@ -89,6 +89,6 @@
         bb.rightButtons = [];
         bb.rightButtons.push({label: "Home", icon: "fa-home", click: home});
         bb.rightButtons.push({label: "Help", icon: "fa-question", click: toggleHelp});
-        bb.rightButtons.push({label: "Full screen", icon: "fa-square-o", click: enterFullScreen});
+        bb.rightButtons.push({label: "Full screen", icon: "fa-arrows-alt", click: enterFullScreen});
     }
 }());
