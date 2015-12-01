@@ -30,7 +30,7 @@ function clickObject(event) {
 function clickPin(event) {
 	var pinGroupObject = event.hitObject.parentElement.parentElement.parentElement;
 	$.event.trigger("pinClick", {
-			fromViewer: true,
+			changeView: true,
 			object: pinGroupObject
 		});
 }
@@ -161,8 +161,8 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.viewer.setAttribute('id', self.name);
 			self.viewer.setAttribute('xmlns', 'http://www.web3d.org/specification/x3d-namespace');
 			self.viewer.setAttribute('keysEnabled', false);
-			self.viewer.setAttribute('mousedown', onMouseDown);
-			self.viewer.setAttribute('mouseup', onMouseUp);
+			self.viewer.setAttribute('mousedown', "onMouseDown");
+			self.viewer.setAttribute('mouseup', "onMouseUp");
 
 			self.viewer.className = 'viewer';
 

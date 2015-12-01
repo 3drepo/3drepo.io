@@ -81,7 +81,7 @@ angular.module('3drepo')
 
 		self.switchCollapse(issueId);
 
-		if (clickInfo.fromViewer)
+		if (clickInfo.changeView)
 			$rootScope.$apply();
 	});
 

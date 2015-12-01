@@ -86,9 +86,9 @@ angular.module("3drepo")
 		}
 
 		if (!$scope.expanded[issue["_id"]]) {
-			$(document).trigger("pinClick", { fromViewer : false, object: $("#" + issue["_id"])[0] });
+			$(document).trigger("pinClick", { changeView : true, object: $("#" + issue["_id"])[0] });
 		} else {
-			$(document).trigger("pinClick", { fromViewer : false, object: null } );
+			$(document).trigger("pinClick", { changeView : true, object: null } );
 		}
 	}
 
