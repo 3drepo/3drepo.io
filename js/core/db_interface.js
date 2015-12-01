@@ -561,8 +561,8 @@ DBInterface.prototype.getDatabaseGroups = function(account, callback) {
 DBInterface.prototype.getProjectUsers = function(account, project, callback) {
 	if(!project)
 		return callback(responseCodes.PROJECT_NOT_SPECIFIED);
-
-	this.logger.logDebug("Getting project users for " + account + "/" + project);
+    var self = this;
+    self.logger.logDebug("Getting project users for " + account + "/" + project);
 
 	var filter = {
 		_id: project
@@ -600,41 +600,40 @@ DBInterface.prototype.getProjectUsers = function(account, project, callback) {
 	});
 };
 
+DBInterface.prototype.checkUserPermission = function (username, account, project, callback) {
+    var self = this;
+    dbConn(this.logger).getUserPrivileges(username, account, function (status, privileges) {
+        if (status.value) {
+            return callback(status);
+        }
+        //Determine the access rights of a project via privileges on the history collection
+        var collection = project + ".history";
+        var writePermission = false;
+        var readPermission = false;
+        for (i = 0; i < privileges.length; i++) {
+            if (privileges[i]["resource"]["db"] == account) {
+                if (privileges[i]["resource"]["collection"] == "" || privileges[i]["resource"]["collection"] == collection) {
+                    readPermission |= privileges[i]["actions"].indexOf("find") > -1;
+                    writePermission |= privileges[i]["actions"].indexOf("insert") > -1;
+                    
+                }
+            }
+        }
+        var permissionFlag = readPermission? READ_BIT : 0;
+        permissionFlag += writePermission? WRITE_BIT : 0;
+        
+        callback(responseCodes.OK, permissionFlag)
+    });
+}
+
 DBInterface.prototype.getAccessToProject = function(username, account, project, callback) {
 	if (project == null)
 		return callback(responseCodes.PROJECT_NOT_SPECIFIED);
 
 	var self = this;
 
-	self.getProjectInfo(account, project, function(err, info) {
-		if(err.value)
-			return callback(err);
+    self.checkUserPermission(username, account, project, callback);
 
-		if(username == info["owner"]) {
-			self.logger.logDebug(username + " has owner permissions");
-			return callback(responseCodes.OK, info["permissions"][OWNER])
-		}
-
-		self.getProjectUsers(account, project, function(err, users) {
-			if(err.value)
-				return callback(err);
-
-			var usernameList = users.map(function(user) { return user["user"]; });
-
-			self.logger.logDebug(project + " has the following users " + JSON.stringify(usernameList));
-
-			if (usernameList.indexOf(username) > -1)
-			{
-				// Valid user or group
-				self.logger.logDebug(username + " has group permissions");
-				return callback(responseCodes.OK, info["permissions"][GROUP]);
-			} else {
-				// Must be a public user ?
-				self.logger.logDebug(username + " has public permissions");
-				return callback(responseCodes.OK, info["permissions"][PUBLIC]);
-			}
-		});
-	});
 };
 
 DBInterface.prototype.checkPermissionsBit = function(username, account, project, bitMask, callback)

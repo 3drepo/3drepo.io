@@ -156,9 +156,10 @@ MongoWrapper.prototype.authenticateUser = function(username, password, callback)
  ******************************************************************************/
 MongoWrapper.prototype.dbCallback = function(dbName, callback) {
 	"use strict";
+    var self = this;
+    mongo.open(dbName, function (err, db) {
 
-	mongo.open(dbName, function(err, db) {
-		if (err) {
+        if (err) {
 			return callback(responseCodes.DB_ERROR(err));
 		}
 
@@ -337,10 +338,7 @@ MongoWrapper.prototype.collCallback = function(dbName, collName, strict, callbac
 	"use strict";
 
 	var self = this;
-
-	self.logger.logDebug("Loading collection " + collName + " on " + dbName);
-
-	// First get database connection
+    // First get database connection
 	self.dbCallback(dbName, function(err, dbConn) {
 		if (err.value) {
 			return callback(err);
@@ -459,6 +457,100 @@ MongoWrapper.prototype.filterColl = function(dbName, collName, filter, projectio
 			});
 		}
 	});
+};
+
+/*******************************************************************************
+ * Get roles granted to a user within a specific database
+ * The function will find all roles within the specified database and also
+ * admin database and return this on the callback
+ *
+ * @param {string} username - username of the user
+ * @param {string} database - database we are interested in
+ * @param {function} callback - get filtered roles from database
+ *								pass to callback as parameter
+ ******************************************************************************/
+MongoWrapper.prototype.getUserRoles = function (username, database, callback) {
+	"use strict";
+	var self = this;
+
+	var dbName = "admin";
+	var collName = "system.users"
+	var filter = { "user" : username };
+
+	//only return roles in admin and the specified database, the rest are irrelevant.
+	var projection = { "roles" : 1};
+
+	self.filterColl(dbName, collName, filter, projection, function(err, docs) {
+		if (err.value) {
+			return callback(err);
+		}
+
+		if (docs.length != 1) {
+			self.logger.logError("Unexpected number of documents found in getUserRoles(). size:" + docs.length);
+			return callback(responseCodes.USER_NOT_FOUND, docs);
+		}
+
+		var roles = [];
+		for (i = 0; i < docs[0]["roles"].length; i++) {
+			if (docs[0]["roles"][i]["db"] == dbName || docs[0]["roles"][i]["db"] == database) {
+				roles.push(docs[0]["roles"][i]);
+			}
+		}
+
+		callback(responseCodes.OK, roles);
+	});
+};
+
+/*******************************************************************************
+ * Get the list of privileges the user has on the database
+ *
+ * @param {string} username - username of the user
+ * @param {string} database - database we are interested in
+ * @param {function} callback - get filtered privileges from database
+ *								pass to callback as parameter
+ ******************************************************************************/
+MongoWrapper.prototype.getUserPrivileges = function (username, database, callback) {
+    "use strict";
+    var self = this;
+
+    var adminDB = "admin";
+
+    //First get all the roles this user is granted within the databases of interest
+     self.getUserRoles(username, database, function (status, roles) {
+            if (status.value) {
+                return callback(responseCodes.DB_ERROR(status));
+            }
+
+            if (!roles || roles.length == 0) {
+                //no roles under this user, no point trying to find privileges
+                return callback(responseCodes.OK, []);
+        }
+
+        self.dbCallback(adminDB, function (err, dbConn) {
+            var command = { rolesInfo : roles, showPrivileges: true };
+            //Given the roles, get the privilege information
+            dbConn.command(command, function (err, docs) {
+                if (err) {
+                    return callback(responseCodes.DB_ERROR(err));
+                }
+
+                if (!docs || docs["roles"].length == 0) {
+                    //No privileges return empty array
+                    return callback(responseCodes.OK, []);
+                }
+
+                var rolesArr = docs["roles"];
+                var privileges = [];
+
+                for (i = 0; i < rolesArr.length; i++) {
+                    privileges = privileges.concat(rolesArr[i]["inheritedPrivileges"]);
+                }
+                self.logger.logDebug(privileges.length + "privileges found.");
+                callback(responseCodes.OK, privileges);
+            });
+        });
+    });
+
 };
 
 module.exports = function(logger) {
