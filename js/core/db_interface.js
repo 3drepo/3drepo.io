@@ -615,13 +615,13 @@ DBInterface.prototype.checkUserPermission = function (username, account, project
                 if (privileges[i]["resource"]["collection"] == "" || privileges[i]["resource"]["collection"] == collection) {
                     readPermission |= privileges[i]["actions"].indexOf("find") > -1;
                     writePermission |= privileges[i]["actions"].indexOf("insert") > -1;
-                    
+
                 }
             }
         }
         var permissionFlag = readPermission? READ_BIT : 0;
         permissionFlag += writePermission? WRITE_BIT : 0;
-        
+
         callback(responseCodes.OK, permissionFlag)
     });
 }
@@ -1394,7 +1394,7 @@ DBInterface.prototype.getIssues = function(dbName, project, branch, revision, on
 
 		var sids = Object.keys(SIDMap);
 
-		self.getObjectIssues(dbName, project, sids, null, onlyStubs, function (err, docs) {
+		self.getObjectIssues(dbName, project, null, null, onlyStubs, function (err, docs) {
 			if (err.value) {
 				return callback(err);
 			}
@@ -1442,7 +1442,7 @@ DBInterface.prototype.getIssues = function(dbName, project, branch, revision, on
 						var sids = Object.keys(SIDMap);
 
 						// For all federated child projects get a list of shared IDs
-						self.getObjectIssues(childDbName, childProject, sids, null, onlyStubs, function (err, objIssues) {
+						self.getObjectIssues(childDbName, childProject, null, null, onlyStubs, function (err, objIssues) {
 							if (err.value) {
 								return iter_callback(err);
 							}
@@ -1464,15 +1464,24 @@ DBInterface.prototype.getIssues = function(dbName, project, branch, revision, on
 }
 
 DBInterface.prototype.getObjectIssues = function(dbName, project, sids, number, onlyStubs, callback) {
-	if (sids.constructor !== Array) sids = [sids];
+	if (sids !== null && sids.constructor !== Array) {
+		sids = [sids];
+	}
 
-	sids = sids.map( function (item) { return stringToUUID(item); } )
+	var filter = {};
 
-	var filter = {
-		parent : { $in : sids }
-	};
+	if (sids !== null)
+	{
+		sids = sids.map( function (item) { return stringToUUID(item); } )
 
-	if ( number ) filter["number"] = number;
+		filter = {
+			parent : { $in : sids }
+		};
+	}
+
+	if ( number ) {
+		filter["number"] = number;
+	}
 
 	var projection = {};
 
@@ -1542,7 +1551,6 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 
 					data.owner = owner;
 
-                    console.log(data);
 					coll.insert(data, function(err, count) {
 						if (err) {
 							return callback(responseCodes.DB_ERROR(err));
@@ -1731,8 +1739,6 @@ DBInterface.prototype.cacheFunction = function(dbName, collection, req, generate
 	if (!config.disableCache)
 	{
 		dbConn(self.logger).getGridFSFile(dbName, stashCollection, req.url, function(err, result) {
-			console.log(JSON.stringify(err));
-
 			if (err.value === responseCodes.FILE_DOESNT_EXIST.value) {
 				self.logger.logInfo("Doesn't exist in stash, generating ...");
 

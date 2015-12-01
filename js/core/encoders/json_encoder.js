@@ -193,7 +193,7 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, jso
 
 	if (current[C.REPO_NODE_LABEL_CHILDREN])
 	{
-		async.concat(current[C.REPO_NODE_LABEL_CHILDREN], function(childJSON, loopCallback) 
+		async.concat(current[C.REPO_NODE_LABEL_CHILDREN], function(childJSON, loopCallback)
 		{
 			var childID = uuidToString(childJSON["shared_id"]);
 			var child = sceneGraph.all[childID]; // Get object from sceneGraph
@@ -231,7 +231,7 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, jso
 					}
 
 					childRefJSON["children"].push(refJSON);
-					loopCallback(responseCodes.OK, childRefJSON);
+					loopCallback(null, childRefJSON);
 				});
 
 			} else {
@@ -252,15 +252,11 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, jso
 						return loopCallback(err);
 					}
 
-					//console.log(childTreeJSON);
-					//console.log(recurseJSON);
-					//process.exit(0);
-
-					loopCallback(responseCodes.OK, recurseJSON);
+					loopCallback(null, recurseJSON);
 				});
 			}
 		}, function (err, children) {
-			if (err.value)
+			if (err)
 			{
 				return callback(err);
 			}
@@ -269,7 +265,7 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, jso
 			{
 				console.log("#CHILDREN: " + children.length);
 			}
-			
+
 			json["children"] = children;
 			callback(responseCodes.OK, json);
 		});
@@ -284,8 +280,8 @@ function getFullTree(dbInterface, account, project, branch, revision, callback) 
 	dbInterface.logger.logInfo("Obtaining full tree for [" + account + ", " + project + ", " + branch + ", " + revision + "]");
 
 	var treeFilter = {
-		type : { $in : [ 
-			C.REPO_NODE_TYPE_TRANSFORMATION, 
+		type : { $in : [
+			C.REPO_NODE_TYPE_TRANSFORMATION,
 			C.REPO_NODE_TYPE_MESH,
 			C.REPO_NODE_TYPE_CAMERA,
 			C.REPO_NODE_TYPE_REF
@@ -315,7 +311,7 @@ function getFullTree(dbInterface, account, project, branch, revision, callback) 
 
 		// Deals with async errors
 		var treeError = responseCodes.OK;
-	
+
 		getFullTreeRecurse(dbInterface, sceneGraph, root, account, rootJSON, function(err, fullJSON) {
 			if (!treeError.value)
 			{
