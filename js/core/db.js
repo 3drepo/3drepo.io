@@ -465,59 +465,39 @@ MongoWrapper.prototype.filterColl = function(dbName, collName, filter, projectio
  *								pass to callback as parameter
  ******************************************************************************/
 MongoWrapper.prototype.getUserRoles = function (username, database, callback) {
-    "use strict";
-    var self = this;
-    
-    var dbName = "admin";
-    var collName = "system.users"
+	"use strict";
+	var self = this;
 
-    self.collCallback(dbName, collName, true, function (err, coll) {
-        if (err.value) {
-            return callback(responseCodes.DB_ERROR(err));
-        }
-        
-        // We could do this with aggregate, but i'm not sure if this is better in performance.
-        // sticking to find (and pruning out roles of other db before getting privileges) for now.
-        //db.getCollection('system.users').aggregate(
-        //    { $match: { "user" : "richard" } },
-        //    { $unwind: "$roles" },
-        //    { $match: { "roles.db" : { $in: ["admin", "canarywharf"] } } },    
-        //    { $group: { _id: "$user", list: { $push: "$roles" } } }
-        //)
+	var dbName = "admin";
+	var collName = "system.users"
+	var filter = { "user" : username };
 
-        var filter = { "user" : username };
-        //only return roles in admin and the specified database, the rest are irrelevant.
-        var projection = { "roles" : 1};
-        
-        self.logger.logDebug("filter: " + JSON.stringify(filter));
-        self.logger.logDebug("projection: " + JSON.stringify(projection));
-        coll.find(filter, projection).toArray(function (err, docs) {
-            if (err) {
-                return callback(responseCodes.DB_ERROR(err));
-            }
-            
-            if (docs.length != 1) {
-                self.logger.logError("Unexpected number of documents found in getUserRoles(). size:" + docs.length);
-                return callback(responseCodes.USER_NOT_FOUND, docs);
-            }
-            
-            var roles = [];
-            for (i = 0; i < docs[0]["roles"].length; i++) {
-                if (docs[0]["roles"][i]["db"] == dbName || docs[0]["roles"][i]["db"] == database) {
-                    roles.push(docs[0]["roles"][i]);
-                }
-            }
-        
-            callback(responseCodes.OK, roles);
-        });
-    });
+	//only return roles in admin and the specified database, the rest are irrelevant.
+	var projection = { "roles" : 1};
 
+	self.filterColl(dbName, collName, filter, projection, function(err, docs) {
+		if (err.value) {
+			return callback(err);
+		}
 
+		if (docs.length != 1) {
+			self.logger.logError("Unexpected number of documents found in getUserRoles(). size:" + docs.length);
+			return callback(responseCodes.USER_NOT_FOUND, docs);
+		}
+
+		var roles = [];
+		for (i = 0; i < docs[0]["roles"].length; i++) {
+			if (docs[0]["roles"][i]["db"] == dbName || docs[0]["roles"][i]["db"] == database) {
+				roles.push(docs[0]["roles"][i]);
+			}
+		}
+
+		callback(responseCodes.OK, roles);
+	});
 };
 
-
 /*******************************************************************************
- * Get the list of privileges the user has on the database 
+ * Get the list of privileges the user has on the database
  *
  * @param {string} username - username of the user
  * @param {string} database - database we are interested in
@@ -527,7 +507,7 @@ MongoWrapper.prototype.getUserRoles = function (username, database, callback) {
 MongoWrapper.prototype.getUserPrivileges = function (username, database, callback) {
     "use strict";
     var self = this;
-   
+
     var adminDB = "admin";
 
     //First get all the roles this user is granted within the databases of interest
@@ -535,15 +515,15 @@ MongoWrapper.prototype.getUserPrivileges = function (username, database, callbac
             if (status.value) {
                 return callback(responseCodes.DB_ERROR(status));
             }
-           
+
             if (!roles || roles.length == 0) {
                 //no roles under this user, no point trying to find privileges
                 return callback(responseCodes.OK, []);
         }
 
         self.dbCallback(adminDB, function (err, dbConn) {
-            var command = { rolesInfo : roles, showPrivileges: true };            
-            //Given the roles, get the privilege information         
+            var command = { rolesInfo : roles, showPrivileges: true };
+            //Given the roles, get the privilege information
             dbConn.command(command, function (err, docs) {
                 if (err) {
                     return callback(responseCodes.DB_ERROR(err));
