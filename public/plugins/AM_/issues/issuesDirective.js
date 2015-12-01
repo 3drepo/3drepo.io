@@ -48,7 +48,7 @@
             length = 0,
             sortedIssuesLength,
             sortOldestFirst = true,
-            sortAFirst = false;
+            showClosed = false;
         vm.pickedPos = null;
         vm.pickedNorm = null;
         vm.selectedObjectId = null;
@@ -58,9 +58,7 @@
         promise = NewIssuesService.getIssues();
         promise.then(function (data) {
             vm.issues = data;
-            vm.sortedIssues = vm.issues;
-            vm.sortedFilteredIssues = vm.issues;
-            sortIssues();
+            setupIssuesToShow();
         });
 
         $scope.$watch("vm.showAdd", function (newValue) {
@@ -79,46 +77,55 @@
             }
         });
 
-        function filterIssues () {
-            if (angular.isDefined(vm.filterText)) {
-                if (vm.filterText === "") {
-                    vm.sortedFilteredIssues = vm.sortedIssues;
+        function setupIssuesToShow () {
+            if (angular.isDefined(vm.issues)) {
+                // Sort
+                vm.issuesToShow = [vm.issues[0]];
+                for (i = 1, length = vm.issues.length; i < length; i += 1) {
+                    for (j = 0, sortedIssuesLength = vm.issuesToShow.length; j < sortedIssuesLength; j += 1) {
+                        if (((vm.issues[i].created > vm.issuesToShow[j].created) && (sortOldestFirst)) ||
+                            ((vm.issues[i].created < vm.issuesToShow[j].created) && (!sortOldestFirst))) {
+                            vm.issuesToShow.splice(j, 0, vm.issues[i]);
+                            break;
+                        }
+                        else if (j === (vm.issuesToShow.length - 1)) {
+                            vm.issuesToShow.push(vm.issues[i]);
+                        }
+                    }
                 }
-                else {
-                    vm.sortedFilteredIssues = ($filter('filter')(vm.sortedIssues, {name: vm.filterText}));
-                }
-            }
-        }
 
-        function sortIssues () {
-            vm.sortedIssues = [vm.issues[0]];
-            for (i = 1, length = vm.issues.length; i < length; i += 1) {
-                for (j = 0, sortedIssuesLength = vm.sortedIssues.length; j < sortedIssuesLength; j += 1) {
-                    if (((vm.issues[i].created > vm.sortedIssues[j].created) && (sortOldestFirst)) ||
-                        ((vm.issues[i].created < vm.sortedIssues[j].created) && (!sortOldestFirst))) {
-                        vm.sortedIssues.splice(j, 0, vm.issues[i]);
-                        break;
-                    }
-                    else if (j === (vm.sortedIssues.length - 1)) {
-                        vm.sortedIssues.push(vm.issues[i]);
+                // Filter
+                if (vm.filterText !== "") {
+                    vm.issuesToShow = ($filter('filter')(vm.issuesToShow, {name: vm.filterText}));
+                }
+
+                // Closed
+                if (!showClosed) {
+                    for (i = (vm.issuesToShow.length - 1); i >= 0; i -= 1) {
+                        if (vm.issuesToShow[i].hasOwnProperty("closed")) {
+                            vm.issuesToShow.splice(i, 1);
+                        }
                     }
                 }
             }
-            filterIssues();
         }
 
         $scope.$watch("vm.selectedOption", function (newValue) {
             if (angular.isDefined(newValue)) {
-                console.log(newValue);
                 if (newValue.value === "sortByDate") {
                     sortOldestFirst = !sortOldestFirst;
-                    sortIssues();
                 }
+                else if (newValue.value === "showClosed") {
+                    showClosed = !showClosed;
+                }
+                setupIssuesToShow();
             }
         });
 
         $scope.$watch("vm.filterText", function (newValue) {
-            filterIssues(newValue);
+            if (angular.isDefined(newValue)) {
+                setupIssuesToShow();
+            }
         });
 
         vm.commentsToggled = function (issueId) {
@@ -147,6 +154,10 @@
             });
         };
 
+        vm.deleteComment = function (issue, commentIndex) {
+            console.log(issue, commentIndex);
+        };
+
         vm.saveIssue = function () {
             if (angular.isDefined(vm.title) && (vm.title !== "")) {
                 if (vm.pickedPos === null) {
@@ -164,10 +175,26 @@
                             vm.saveComment(data, vm.comment);
                             vm.comment = "";
                         }
-                        sortIssues();
+                        setupIssuesToShow();
                     });
                 }
             }
+        };
+
+        vm.closeIssue = function (issue) {
+            vm.commentSaved = false;
+            promise = NewIssuesService.closeIssue(issue);
+            promise.then(function (data) {
+                console.log(data);
+                for (i = 0, length = vm.issues.length; i < length; i += 1) {
+                    if (issue._id === vm.issues[i]._id) {
+                        vm.issues[i].closed = data.closed;
+                        vm.issues[i].closed_time = data.created; // TODO: Shouldn't really use the created value
+                        break;
+                    }
+                }
+                setupIssuesToShow();
+            });
         };
 
         function setupGlobalClickWatch () {

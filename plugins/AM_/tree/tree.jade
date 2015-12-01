@@ -1,22 +1,22 @@
-div(ng-class="tr.height")
+div(ng-class="vm.height")
 	// Tree
-	div(ui-tree, data-nodrop-enabled="true", data-nodrag="true", ng-show="tr.showTree")
+	div(ui-tree, data-nodrop-enabled="true", data-nodrag="true", ng-show="vm.showTree")
 		tree-nodes(
-			nodes="tr.nodes"
-			show-children="tr.showChildren"
+			nodes="vm.nodes"
+			show-children="vm.showChildren"
 			ng-if="true"
-			on-node-selected="tr.nodeSelected(nodeId)"
-			on-node-toggled="tr.nodeToggled(nodeId)"
-			selected-node="tr.selectedNode"
-			toggled-node="tr.toggledNode"
+			on-node-selected="vm.nodeSelected(nodeId)"
+			on-node-toggled="vm.nodeToggled(nodeId)"
+			selected-node="vm.selectedNode"
+			toggled-node="vm.toggledNode"
 		)
 
 	// Filter list
-	div(ng-cloak="", class="virtualRepeatdemoInfiniteScroll", ng-if="tr.showFilterList")
+	div(ng-cloak="", class="virtualRepeatdemoInfiniteScroll", ng-if="vm.showFilterList")
 		md-content(layout="column")
 			md-virtual-repeat-container(id="vertical-container")
 				div(
-					md-virtual-repeat="item in tr.infiniteItems"
+					md-virtual-repeat="item in vm.infiniteItems"
 					md-on-demand=""
 					class="repeated-item"
 					flex=""
@@ -27,7 +27,7 @@ div(ng-class="tr.height")
 					md-checkbox(
 						ng-show="item!==null"
 						ng-model="item.toggleState"
-						ng-change="tr.filterItemToggled(item)"
+						ng-change="vm.filterItemToggled(item)"
 						aria-label="Toggle"
 					)
-					p#treeFilterItemName(ng-click="tr.filterItemSelected(item)") {{item.name}}
+					p#treeFilterItemName(ng-click="vm.filterItemSelected(item)") {{item.name}}

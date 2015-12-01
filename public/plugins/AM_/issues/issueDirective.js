@@ -30,10 +30,14 @@
                 onCommentsToggled: "&",
                 commentsToggledIssueId: "=",
                 onSaveComment : "&",
-                commentSaved: "="
+                commentSaved: "=",
+                onDeleteComment : "&",
+                commentDeleted: "=",
+                onCloseIssue : "&",
+                issueClosed: "="
             },
             controller: IssueCtrl,
-            controllerAs: "is",
+            controllerAs: "vm",
             bindToController: true
         };
     }
@@ -41,52 +45,81 @@
     IssueCtrl.$inject = ["$scope", "ViewerService"];
 
     function IssueCtrl($scope, ViewerService) {
-        var is = this;
-        is.showComments = false;
-        is.toggleCommentsState = false;
-        is.numNewComments = 0;
-        is.saveCommentDisabled = true;
+        var vm = this,
+            i = 0,
+            length = 0,
+            currentTime = 0,
+            thirtyMinutes = 3600000;
+        vm.showComments = false;
+        vm.toggleCommentsState = false;
+        vm.numNewComments = 0;
+        vm.saveCommentDisabled = true;
+        vm.backgroundClass = "issueClosedBackground";
 
-        $scope.$watch("is.commentsToggledIssueId", function (newValue) {
-            if (angular.isDefined(newValue) && (newValue !== is.data._id)) {
-                is.toggleCommentsState = false;
-                is.showComments = false;
+        $scope.$watch("vm.commentsToggledIssueId", function (newValue) {
+            if (angular.isDefined(newValue) && (newValue !== vm.data._id)) {
+                vm.toggleCommentsState = false;
+                vm.showComments = false;
             }
         });
 
-        $scope.$watch("is.commentSaved", function (newValue) {
+        $scope.$watch("vm.commentSaved", function (newValue) {
             if (angular.isDefined(newValue) && newValue) {
-                is.comment = "";
+                vm.comment = "";
             }
         });
 
-        $scope.$watch("is.comment", function (newValue) {
+        $scope.$watch("vm.comment", function (newValue) {
             if (angular.isDefined(newValue)) {
-                is.saveCommentDisabled = (newValue === "");
+                vm.saveCommentDisabled = (newValue === "");
             }
         });
 
-        is.toggleComments = function () {
-            if (!is.showComments) {
-                is.showComments = true;
+        $scope.$watch("vm.data", function (newValue) {
+            if (angular.isDefined(newValue)) {
+                vm.backgroundClass = newValue.hasOwnProperty("closed") ? "issueClosedBackground" : "issueOpenBackground";
+                vm.issueIsOpen = !newValue.hasOwnProperty("closed");
+                if (vm.issueIsOpen && newValue.hasOwnProperty("comments")) {
+                    currentTime = new Date();
+                    for (i = 0, length = newValue.comments.length; i < length; i += 1) {
+                        newValue.comments[i].canDelete =
+                            (i === (newValue.comments.length - 1) &&
+                            (currentTime.getTime() - newValue.comments[i].created) < thirtyMinutes);
+                    }
+                }
             }
-            is.toggleCommentsState = !is.toggleCommentsState;
-            if (is.toggleCommentsState) {
+        }, true);
+
+        vm.toggleComments = function () {
+            if (!vm.showComments) {
+                vm.showComments = true;
+            }
+            vm.toggleCommentsState = !vm.toggleCommentsState;
+            if (vm.toggleCommentsState) {
                 // Set the camera position
                 ViewerService.defaultViewer.setCamera(
-                    is.data.viewpoint.position,
-                    is.data.viewpoint.view_dir,
-                    is.data.viewpoint.up
+                    vm.data.viewpoint.position,
+                    vm.data.viewpoint.view_dir,
+                    vm.data.viewpoint.up
                 );
             }
-            is.onCommentsToggled({issueId: is.data._id});
+            vm.onCommentsToggled({issueId: vm.data._id});
         };
 
-        is.saveComment = function () {
-            if (angular.isDefined(is.comment) && (is.comment !== "")) {
-                is.onSaveComment({issue: is.data, text: is.comment});
-                is.numNewComments += 1; // This is used to increase the height of the comments list
+        vm.saveComment = function () {
+            if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
+                vm.onSaveComment({issue: vm.data, text: vm.comment});
+                vm.numNewComments += 1; // This is used to increase the height of the comments list
             }
+        };
+
+        vm.deleteComment = function (index) {
+            vm.onDeleteComment({issue: vm.data, commentIndex: index});
+            vm.numNewComments -= 1; // This is used to decrease the height of the comments list
+        };
+
+        vm.closeIssue = function () {
+            vm.onCloseIssue({issue: vm.data});
         };
     }
 

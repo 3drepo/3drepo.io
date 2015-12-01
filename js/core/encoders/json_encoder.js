@@ -188,7 +188,7 @@ function getTree(dbInterface, account, project, branch, revision, sid, namespace
 	}
 };
 
-function getFullTreeRecurse(sceneGraph, current, json) {
+function getFullTreeRecurse(sceneGraph, current, node, idToName) {
 	var currentSID = current;
 
 	if (current[C.REPO_NODE_LABEL_CHILDREN])
@@ -198,18 +198,19 @@ function getFullTreeRecurse(sceneGraph, current, json) {
 			var childID = uuidToString(current[C.REPO_NODE_LABEL_CHILDREN][i]["shared_id"]);
 			var child = sceneGraph.all[childID];
 
-			var childJSON = {
+			var childNode = {
 				"name"      : child[C.REPO_NODE_LABEL_NAME],
                 "path"      : current.path + "_" + child[C.REPO_NODE_LABEL_NAME],
 				"_id"       : uuidToString(current[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID]),
 				"shared_id" : uuidToString(child[C.REPO_NODE_LABEL_SHARED_ID]),
 				"children"  : []
 			};
-            child.path = childJSON.path;
+            child.path = childNode.path;
+            idToName.push({_id: childNode._id, name: childNode.name});
 
-			json["children"].push(_.clone(childJSON));
+            node["children"].push(_.clone(childNode));
 
-			getFullTreeRecurse(sceneGraph, child, childJSON);
+			getFullTreeRecurse(sceneGraph, child, childNode, idToName);
 		}
 	}
 };
@@ -223,18 +224,19 @@ function getFullTree(dbInterface, account, project, branch, revision, callback) 
 		if (!root)
 			return callback(responseCodes.ROOT_NODE_NOT_FOUND);
 
-		var json = {
+		var nodes = {
 			"name"      : root[C.REPO_NODE_LABEL_NAME],
             "path"      : root[C.REPO_NODE_LABEL_NAME],
 			"_id"       : uuidToString(root[C.REPO_NODE_LABEL_ID]),
 			"shared_id" : uuidToString(root[C.REPO_NODE_LABEL_SHARED_ID]),
 			"children"  : []
 		};
-        root.path = json.path;
+        root.path = nodes.path;
+        var idToName = [{_id: nodes._id, name: nodes.name}];
 
-		getFullTreeRecurse(sceneGraph, root, json);
+		getFullTreeRecurse(sceneGraph, root, nodes, idToName);
 
-		callback(responseCodes.OK, json);
+		callback(responseCodes.OK, {nodes: nodes, idToName: idToName});
 	});
 };
 

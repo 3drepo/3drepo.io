@@ -10,3 +10,10 @@
   right: -36px;
   opacity: 0.75;
 }
+
+home .logoutButton {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+}
