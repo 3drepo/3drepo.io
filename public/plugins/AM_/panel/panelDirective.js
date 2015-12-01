@@ -43,14 +43,30 @@
             content = "",
             element = "",
             i = 0,
-            length = 0;
+            length = 0,
+            currentEvent = null;
         pl.contentItems = [];
         pl.hideFilter = false;
         pl.showPanel = true;
+        pl.panelIsSetUp = false;
+
+        // Panel setup coming from login
+        currentEvent = EventService.currentEvent();
+        if (currentEvent.type === EventService.EVENT.PANEL_CONTENT_SETUP) {
+            setupPanels(currentEvent.value[pl.position]);
+        }
 
         $scope.$watch(EventService.currentEvent, function (event) {
             if (event.type === EventService.EVENT.PANEL_CONTENT_SETUP) {
-                content = event.value[pl.position];
+                setupPanels(event.value[pl.position]);
+            }
+            else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
+                pl.showPanel = !pl.showPanel;
+            }
+        });
+
+        function setupPanels (content) {
+            if (!pl.panelIsSetUp) {
                 for (i = 0, length = content.length; i < length; i += 1) {
                     pl.contentItems.push(content[i]);
 
@@ -63,7 +79,9 @@
                             "show-content='pl.contentItems[" + i + "].show' " +
                             "help='pl.contentItems[" + i + "].help' " +
                             "icon='pl.contentItems[" + i + "].icon' " +
-                            "can-add='pl.contentItems[" + i + "].canAdd'>" +
+                            "has-filter='pl.contentItems[" + i + "].hasFilter' " +
+                            "can-add='pl.contentItems[" + i + "].canAdd' " +
+                            "options='pl.contentItems[" + i + "].options'>" +
                         "</panel-content>"
                     );
                     items.append(element);
@@ -73,35 +91,33 @@
                     if (pl.contentItems[i].hasOwnProperty("icon")) {
                         element = angular.element(
                             "<md-button " +
-                                "class='md-fab md-primary md-mini' " +
-                                "ng-click=pl.buttonClick('" + pl.contentItems[i].type + "') " +
-                                "aria-label='{{pl.contentItems[" + i + "].title}}'>" +
-                                "<md-icon " +
-                                    "class='fa' " +
-                                    "md-font-icon='{{pl.contentItems[" + i + "].icon}}'>" +
-                                "</md-icon>" +
+                            "class='md-fab md-primary md-mini' " +
+                            "ng-click=pl.buttonClick('" + pl.contentItems[i].type + "') " +
+                            "aria-label='{{pl.contentItems[" + i + "].title}}'>" +
+                            "<md-icon " +
+                                "class='fa' " +
+                                "md-font-icon='{{pl.contentItems[" + i + "].icon}}'>" +
+                            "</md-icon>" +
                             "</md-button>"
                         );
                         buttons.append(element);
                         $compile(element)($scope);
                     }
                 }
+                pl.panelIsSetUp = true;
             }
-            else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
-                pl.showPanel = !pl.showPanel;
-            }
+        }
 
-            pl.buttonClick = function (contentType) {
-                pl.hideFilter = true; // Hide the filter if no content is shown
-                for (i = 0, length = pl.contentItems.length; i < length; i += 1) {
-                    if (contentType === pl.contentItems[i].type) {
-                        pl.contentItems[i].show = !pl.contentItems[i].show;
-                    }
-                    if (pl.hideFilter && pl.contentItems[i].show) {
-                        pl.hideFilter = false;
-                    }
+        pl.buttonClick = function (contentType) {
+            pl.hideFilter = true; // Hide the filter if no content is shown
+            for (i = 0, length = pl.contentItems.length; i < length; i += 1) {
+                if (contentType === pl.contentItems[i].type) {
+                    pl.contentItems[i].show = !pl.contentItems[i].show;
                 }
-            };
-        });
+                if (pl.hideFilter && pl.contentItems[i].show) {
+                    pl.hideFilter = false;
+                }
+            }
+        };
     }
 }());

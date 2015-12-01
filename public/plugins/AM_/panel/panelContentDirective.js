@@ -32,95 +32,156 @@
                 showContent: "=",
                 help: "=",
                 icon: "=",
-                canAdd: "="
+                hasFilter: "=",
+                canAdd: "=",
+                options: "="
             },
             controller: PanelContentCtrl,
-            controllerAs: 'pc',
+            controllerAs: 'vm',
             bindToController: true
         };
     }
 
-    PanelContentCtrl.$inject = ["$scope", "$element", "$compile", "EventService"];
+    PanelContentCtrl.$inject = ["$scope", "$element", "$compile", "$timeout", "EventService"];
 
-    function PanelContentCtrl($scope, $element, $compile, EventService) {
-        var pc = this,
+    function PanelContentCtrl($scope, $element, $compile, $timeout, EventService) {
+        var vm = this,
             content = "",
             contentItem = "",
-            filterWatch = null;
-        pc.showHelp = false;
-        pc.filterText = "";
-        pc.height = "minHeight";
-        pc.addStatus = false;
+            i = 0,
+            length = 0,
+            currentSortIndex,
+            filter = null,
+            last = {
+                bottom: false,
+                top: true,
+                left: true,
+                right: false
+            };
+        vm.showHelp = false;
+        vm.filterText = "";
+        vm.height = "minHeight";
+        vm.addStatus = false;
+        vm.toastPosition = angular.extend({}, last);
 
-        function setupFilterWatch() {
-            filterWatch = $scope.$watch(EventService.currentEvent, function (event) {
-                if (event.type === EventService.EVENT.FILTER) {
-                    pc.filterText = event.value;
-                }
-            });
-        }
-
-        $scope.$watch("pc.contentItem", function (newValue) {
+        $scope.$watch("vm.contentItem", function (newValue) {
             if (angular.isDefined(newValue)) {
                 content = angular.element($element[0].querySelector('#content'));
                 contentItem = angular.element(
-                    "<" + pc.contentItem + " " +
-                        "filter-text='pc.filterText' " +
-                        "height='pc.height' " +
-                        "show='pc.showContent' " +
-                        "show-add='pc.addStatus'>" +
-                    "</" + pc.contentItem + ">"
+                    "<" + vm.contentItem + " " +
+                        "filter-text='vm.filterText' " +
+                        "height='vm.height' " +
+                        "show='vm.showContent' " +
+                        "show-add='vm.addStatus' " +
+                        "options='vm.options' " +
+                        "selected-option='vm.selectedOption'>" +
+                    "</" + vm.contentItem + ">"
                 );
                 content.append(contentItem);
                 $compile(contentItem)($scope);
                 if ((newValue === "tree") || (newValue === "issues")) {
-                    pc.height = "maxHeight";
-                    setupFilterWatch();
+                    vm.height = "maxHeight";
                 }
             }
         });
 
-        $scope.$watch("pc.contentTitle", function (newValue) {
+        $scope.$watch("vm.contentTitle", function (newValue) {
             if (angular.isDefined(newValue)) {
-                pc.showTitleBar = (newValue !== "");
+                vm.showTitleBar = (newValue !== "");
+            }
+        });
+
+        $scope.$watch("vm.options", function (newValue) {
+            vm.hasOptions = (angular.isDefined(newValue));
+            if (vm.hasOptions) {
+                for (i = 0, length = vm.options.length; i < length; i += 1) {
+                    if (vm.contentItem === "issues") {
+                        vm.options[i].selected = true;
+                        vm.options[i].firstSelected = true;
+                        vm.options[i].secondSelected = false;
+                        currentSortIndex = 0;
+                    }
+                    else {
+                        vm.options[i].selected = false;
+                        vm.options[i].firstSelected = false;
+                        vm.options[i].secondSelected = false;
+                    }
+                }
+            }
+        });
+
+        $scope.$watch("vm.filterInputText", function (newValue) {
+            if (angular.isDefined(newValue)) {
+                if (filter !== null) {
+                    $timeout.cancel(filter);
+                }
+                filter = $timeout(function() {
+                    vm.filterText = vm.filterInputText;
+                }, 500);
             }
         });
 
         $scope.$watch(EventService.currentEvent, function (event) {
-            if ((event.type === EventService.EVENT.PANEL_CONTENT_CLICK) && (event.value.position === pc.position)) {
-                if (event.value.contentItem !== pc.contentItem) {
-                    pc.height = "minHeight";
-                    if (filterWatch !== null) {
-                        filterWatch(); // Cancel filter watch
-                    }
+            if ((event.type === EventService.EVENT.PANEL_CONTENT_CLICK) && (event.value.position === vm.position)) {
+                if (event.value.contentItem !== vm.contentItem) {
+                    vm.height = "minHeight";
                 }
             }
             else if (event.type === EventService.EVENT.TOGGLE_HELP) {
-                pc.showHelp = !pc.showHelp;
+                vm.showHelp = !vm.showHelp;
             }
         });
 
-        pc.click = function () {
-            if (pc.height === "minHeight") {
+        vm.click = function () {
+            if (vm.height === "minHeight") {
                 EventService.send(
                     EventService.EVENT.PANEL_CONTENT_CLICK,
                     {
-                        position: pc.position,
-                        contentItem: pc.contentItem
+                        position: vm.position,
+                        contentItem: vm.contentItem
                     }
                 );
-                pc.height = "maxHeight";
-                setupFilterWatch();
+                vm.height = "maxHeight";
             }
             else {
-                pc.height = "minHeight";
-                filterWatch();
+                vm.height = "minHeight";
             }
         };
 
-        pc.toggleAdd = function (event) {
+        vm.toggleAdd = function (event) {
             event.stopPropagation();
-            pc.addStatus = !pc.addStatus;
+            vm.addStatus = !vm.addStatus;
+        };
+
+        vm.openMenu = function($mdOpenMenu, ev) {
+            $mdOpenMenu(ev);
+        };
+
+        vm.optionSelected = function (index) {
+            if (index !== currentSortIndex) {
+                if (angular.isDefined(currentSortIndex)) {
+                    vm.options[currentSortIndex].selected = false;
+                    vm.options[currentSortIndex].firstSelected = false;
+                    vm.options[currentSortIndex].secondSelected = false;
+                }
+                currentSortIndex = index;
+                vm.options[currentSortIndex].selected = true;
+                vm.options[currentSortIndex].firstSelected = true;
+            }
+            else {
+                vm.options[currentSortIndex].firstSelected = !vm.options[currentSortIndex].firstSelected;
+                vm.options[currentSortIndex].secondSelected = !vm.options[currentSortIndex].secondSelected;
+            }
+            vm.selectedOption = vm.options[currentSortIndex];
+
+            // 'Reset' vm.selectedOption so that selecting the same option can be registered down the line
+            $timeout(function () {
+                vm.selectedOption = undefined;
+            });
+        };
+
+        vm.clearFilter = function () {
+            vm.filterInputText = "";
         };
     }
 }());

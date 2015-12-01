@@ -190,6 +190,9 @@ module.exports.createApp = function(template)
                                         plugin: "AM_home",
                                         children: [
                                             {
+                                                plugin: "AM_project"
+                                            },
+                                            {
                                                 plugin: "AM_panel"
                                             },
                                             {

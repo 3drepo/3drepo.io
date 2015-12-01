@@ -4,11 +4,11 @@ panel  {
   display: block;
   position: absolute;
   top: 80px;
-  width: 370px;
+  width: 420px;
 }
 panel #items {
   position: absolute;
-  width: 300px;
+  width: 350px;
 }
 
 panel #buttons {
@@ -72,6 +72,18 @@ panel-content md-toolbar label {
 
 panel-content .md-button.md-raised:not([disabled]) {
   box-shadow: none;
+}
+
+panel-content .md-menu {
+  padding: 0;
+}
+
+.panelContentFilter {
+  width: 100%;
+  height: 50px;
+  background: #E8EAF6;
+  border-bottom: solid 1px #C5CAE9;
+  padding: 0 10px 0 10px;
 }
 
 /** Panel Content Add *************************************************************************************************/
