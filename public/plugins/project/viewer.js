@@ -147,7 +147,14 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.logoImage.textContent = ' ';
 
 			self.logoLink = document.createElement('a');
-			self.logoLink.setAttribute('href', 'https://3drepo.io');
+
+			if (server_config.return_path)
+			{
+				self.logoLink.setAttribute('href', server_config.return_path);
+			} else {
+				self.logoLink.setAttribute('href', 'https://3drepo.io');
+			}
+
 			self.logoLink.setAttribute('style', 'top: 0px; left: 0px; padding: 10px; position: absolute;')
 			self.logoLink.appendChild(self.logoImage);
 
@@ -161,9 +168,9 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.viewer.setAttribute('id', self.name);
 			self.viewer.setAttribute('xmlns', 'http://www.web3d.org/specification/x3d-namespace');
 			self.viewer.setAttribute('keysEnabled', false);
-			self.viewer.setAttribute('mousedown', "onMouseDown");
-			self.viewer.setAttribute('mouseup', "onMouseUp");
-
+			self.viewer.addEventListener("mousedown", onMouseDown);
+			self.viewer.addEventListener("mouseup", onMouseUp);
+			self.viewer.style["pointer-events"] = "all";
 			self.viewer.className = 'viewer';
 
 			self.x3ddiv.appendChild(self.viewer);
@@ -418,6 +425,14 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	$(document).on("pinClick", function(event, clickInfo) {
 		self.setApp(clickInfo.object, "0.5 0.5 1.0");
+	});
+
+	$(document).on("onMouseDown", function(event, mouseEvent) {
+		$("body")[0].style["pointer-events"] = "none";
+	});
+
+	$(document).on("onMouseUp", function(event, mouseEvent) {
+		$("body")[0].style["pointer-events"] = "all";
 	});
 
 	this.onClickObject = function(functionToBind)

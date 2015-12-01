@@ -23,11 +23,11 @@ var C        = require("./constants");
 // Custom logging levels for logger
 var myCustomLevels = {
     levels: {
-        trace: 0,
-        debug: 1,
-        info: 2,
-        warn: 3,
-        error: 4
+		error: 0,
+		warn: 1,
+		info: 2,
+		debug: 3,
+		trace: 4
     },
     colors: {
         trace: "magenta",
@@ -49,7 +49,7 @@ var logger = new(winston.Logger)({
     new(winston.transports.Console)({
         colorize: true,
         level: config.logfile.console_level,
-    }), 
+    }),
 
     new(winston.transports.File)
     ({
@@ -58,7 +58,6 @@ var logger = new(winston.Logger)({
     })]
 
 });
-
 
 var repoLogger = function(req, id) {
     "use strict";
@@ -79,7 +78,7 @@ var repoLogger = function(req, id) {
 
     self.logger = logger;
     self.startTime = (new Date()).getTime();
-    
+
     return self;
 };
 
@@ -88,9 +87,9 @@ repoLogger.prototype.logMessage = function(type, msg)
 	"use strict";
 
     //console.log(type + ": " + (new Date()).toString() + "\t" + this.uid + "\t" + msg);
-    
+
     var currentTime  = (new Date()).getTime();
-    var timeDiff     = currentTime - this.startTime; 
+    var timeDiff     = currentTime - this.startTime;
 
     this.logger.log(type, (new Date()).toString() + "\t" + this.uid + "\t" + msg + " [" + timeDiff + " ms]");
 };

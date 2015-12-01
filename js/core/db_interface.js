@@ -1881,9 +1881,13 @@ DBInterface.prototype.getScene = function(dbName, project, branch, revision, ful
 };
 
 // TODO: Get rid of this function
-DBInterface.prototype.getUnoptimizedScene = function(dbName, project, branch, revision, full, callback)
+DBInterface.prototype.queryUnoptimizedScene = function(dbName, project, branch, revision, full, filter, callback)
 {
 	var historyQuery = null;
+
+	if (!filter) {
+		filter = {};
+	}
 
 	if (revision)
 	{
@@ -1891,10 +1895,11 @@ DBInterface.prototype.getUnoptimizedScene = function(dbName, project, branch, re
 			_id: stringToUUID(revision)
 		};
 	} else {
-		if (branch == 'master')
+		if (branch == 'master') {
 			var branch_id = masterUUID;
-		else
+		} else {
 			var branch_id = stringToUUID(branch);
+		}
 
 		historyQuery = {
 			shared_id:	branch_id
@@ -1911,9 +1916,7 @@ DBInterface.prototype.getUnoptimizedScene = function(dbName, project, branch, re
 			return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
 		}
 
-		var filter = {
-			_id: {$in: docs[0]['current']}
-		};
+		filter[C.REPO_NODE_LABEL_UNIQUE_ID] = { $in: docs[0][C.REPO_NODE_LABEL_CURRENT] };
 
 		dbConn(self.logger).filterColl(dbName, project + '.scene', filter, null, function(err, doc) {
 			if (err.value) return callback(err);

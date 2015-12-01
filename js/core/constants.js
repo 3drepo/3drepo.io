@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+var utils = require("./utils.js");
+
 function define(name, value) {
 	"use strict";
 
@@ -29,6 +31,11 @@ function define(name, value) {
 // New API
 //
 //-----------------------------------------------------------------------------
+
+
+// Overall constants
+define("MASTER_BRANCH", "00000000-0000-0000-0000-000000000000");
+define("MASTER_UUID", utils.stringToUUID(module.exports.MASTER_BRANCH));
 
 // Main collections (tables) in 3D Repo
 define("REPO_COLLECTION_SCENE", "scene");

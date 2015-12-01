@@ -25,7 +25,7 @@ angular.module('3drepo')
 	self.loading        = false;
 	self.pinPositions   = [];
 	self.pinNamespaces  = {};
-	//self.io             = io(serverConfig.chatHost, {path :  serverConfig.chatPath});
+	self.io             = io(serverConfig.chatHost, {path :  serverConfig.chatPath});
 
 	self.draggedPin     = null;
 

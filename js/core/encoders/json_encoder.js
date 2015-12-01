@@ -188,53 +188,147 @@ function getTree(dbInterface, account, project, branch, revision, sid, namespace
 	}
 };
 
-function getFullTreeRecurse(sceneGraph, current, json) {
+function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, json, callback) {
 	var currentSID = current;
 
 	if (current[C.REPO_NODE_LABEL_CHILDREN])
 	{
-		for(var i = 0; i < current[C.REPO_NODE_LABEL_CHILDREN].length; i++)
+		async.concat(current[C.REPO_NODE_LABEL_CHILDREN], function(childJSON, loopCallback) 
 		{
-			var childID = uuidToString(current[C.REPO_NODE_LABEL_CHILDREN][i]["shared_id"]);
-			var child = sceneGraph.all[childID];
+			var childID = uuidToString(childJSON["shared_id"]);
+			var child = sceneGraph.all[childID]; // Get object from sceneGraph
 
-			var childJSON = {
-				"name"      : child[C.REPO_NODE_LABEL_NAME],
-                "path"      : current.path + "_" + child[C.REPO_NODE_LABEL_NAME],
-				"_id"       : uuidToString(current[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID]),
-				"shared_id" : uuidToString(child[C.REPO_NODE_LABEL_SHARED_ID]),
-				"children"  : []
-			};
-            child.path = childJSON.path;
+			if (child[C.REPO_NODE_LABEL_TYPE] === C.REPO_NODE_TYPE_REF)
+			{
+				var account       = utils.coalesce(child["owner"], parentAccount);
+				var project       = child["project"];
 
-			json["children"].push(_.clone(childJSON));
+				var branch        = null;
+				var revision      = null;
 
-			getFullTreeRecurse(sceneGraph, child, childJSON);
-		}
+				if (child['unique']) {
+					revision = uuidToString(child["_rid"]);
+				} else {
+					if (child["_rid"])
+					{
+						branch   = uuidToString(child["_rid"]);
+					} else {
+						branch   = uuidToString(C.MASTER_UUID);
+					}
+				}
+
+				var childRefJSON = {
+					"name"      : account + "/" + project,
+					"path"      : current.path + "_" + child[C.REPO_NODE_LABEL_NAME],
+					"_id"       : uuidToString(child[C.REPO_NODE_LABEL_ID]),
+					"shared_id" : uuidToString(child[C.REPO_NODE_LABEL_SHARED_ID]),
+					"children"  : []
+				}
+
+				getFullTree(dbInterface, account, project, branch, revision, function(err, refJSON) {
+					if (err.value) {
+						return loopCallback(err);
+					}
+
+					childRefJSON["children"].push(refJSON);
+					loopCallback(responseCodes.OK, childRefJSON);
+				});
+
+			} else {
+				var childName = utils.coalesce(childJSON[C.REPO_NODE_LABEL_NAME], uuidToString(child[C.REPO_NODE_LABEL_ID]));
+
+				var childTreeJSON = {
+					"name"      : childName,
+	                "path"      : current.path + "_" + childName,
+					"_id"       : uuidToString(child[C.REPO_NODE_LABEL_ID]),
+					"shared_id" : uuidToString(child[C.REPO_NODE_LABEL_SHARED_ID]),
+					"children"  : []
+				};
+
+	            child.path = childTreeJSON.path;
+
+				getFullTreeRecurse(dbInterface, sceneGraph, child, account, childTreeJSON, function(err, recurseJSON) {
+					if (err.value) {
+						return loopCallback(err);
+					}
+
+					//console.log(childTreeJSON);
+					//console.log(recurseJSON);
+					//process.exit(0);
+
+					loopCallback(responseCodes.OK, recurseJSON);
+				});
+			}
+		}, function (err, children) {
+			if (err.value)
+			{
+				return callback(err);
+			}
+
+			if (children.length > 1)
+			{
+				console.log("#CHILDREN: " + children.length);
+			}
+			
+			json["children"] = children;
+			callback(responseCodes.OK, json);
+		});
+	} else {
+		callback(responseCodes.OK, json);
 	}
 };
 
 function getFullTree(dbInterface, account, project, branch, revision, callback) {
-	dbInterface.getUnoptimizedScene(account, project, branch, revision, false, function(err, sceneGraph) {
-		if (err.value) return callback(err);
+	// TODO: Check permisssions here
+
+	dbInterface.logger.logInfo("Obtaining full tree for [" + account + ", " + project + ", " + branch + ", " + revision + "]");
+
+	var treeFilter = {
+		type : { $in : [ 
+			C.REPO_NODE_TYPE_TRANSFORMATION, 
+			C.REPO_NODE_TYPE_MESH,
+			C.REPO_NODE_TYPE_CAMERA,
+			C.REPO_NODE_TYPE_REF
+		]}
+	};
+
+	dbInterface.queryUnoptimizedScene(account, project, branch, revision, false, treeFilter, function(err, sceneGraph) {
+		if (err.value) {
+			return callback(err);
+		}
 
 		var root       = sceneGraph["mRootNode"];
 
-		if (!root)
+		if (!root) {
 			return callback(responseCodes.ROOT_NODE_NOT_FOUND);
+		}
 
-		var json = {
+		var rootJSON = {
 			"name"      : root[C.REPO_NODE_LABEL_NAME],
             "path"      : root[C.REPO_NODE_LABEL_NAME],
 			"_id"       : uuidToString(root[C.REPO_NODE_LABEL_ID]),
 			"shared_id" : uuidToString(root[C.REPO_NODE_LABEL_SHARED_ID]),
 			"children"  : []
 		};
-        root.path = json.path;
 
-		getFullTreeRecurse(sceneGraph, root, json);
+        root.path = rootJSON.path;
 
-		callback(responseCodes.OK, json);
+		// Deals with async errors
+		var treeError = responseCodes.OK;
+	
+		getFullTreeRecurse(dbInterface, sceneGraph, root, account, rootJSON, function(err, fullJSON) {
+			if (!treeError.value)
+			{
+				if (err.value) {
+					treeError = err;
+
+					return callback(err);
+				}
+
+				dbInterface.logger.logInfo("Complete.");
+				callback(responseCodes.OK, fullJSON);
+			}
+		});
 	});
 };
 
