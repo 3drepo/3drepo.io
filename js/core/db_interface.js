@@ -336,7 +336,12 @@ DBInterface.prototype.searchTree = function(dbName, project, branch, revision, s
 
     // If searchstring is "door" create regex to search for [dD][oO][oO][rR]
     for (i = 0, length = searchStringChars.length; i < length; i += 1) {
-        regexStr += "[" + searchStringChars[i] + searchStringChars[i].toUpperCase() + "]";
+        if (searchStringChars[i] === ":") {
+            regexStr += "[" + searchStringChars[i] + "]";
+        }
+        else {
+            regexStr += "[" + searchStringChars[i] + searchStringChars[i].toUpperCase() + "]";
+        }
     }
     filter = {
         name: new RegExp(regexStr)
@@ -1508,7 +1513,8 @@ DBInterface.prototype.getObjectIssues = function(dbName, project, sids, number, 
 
 DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, callback) {
     var self = this,
-        timeStamp = null;
+        timeStamp = null,
+        updateQuery = {};
 
 	dbConn(this.logger).collCallback(dbName, project + ".issues", false, function(err, coll) {
 		if(err.value) {
@@ -1569,14 +1575,19 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 			timeStamp = (new Date()).getTime();
 			if (data.comment)
 			{
-				var updateQuery = {
+				updateQuery = {
 					$push: { comments: { owner: owner,  comment: data.comment, created: timeStamp} }
 				};
-			} else {
-				var updateQuery = {
-					$set: { complete: data.complete, created: timeStamp }
-				};
 			}
+            else if (data.closed) {
+				updateQuery = {
+					$set: { closed: true, closed_time: timeStamp }
+				};
+			} else {
+                updateQuery = {
+                    $set: { complete: data.complete, created: timeStamp }
+                };
+            }
 
 			coll.update({ _id : data._id}, updateQuery, function(err, count) {
 				if (err) return callback(responseCodes.DB_ERROR(err));

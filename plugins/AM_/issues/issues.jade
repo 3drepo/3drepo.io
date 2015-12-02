@@ -13,10 +13,14 @@ div(ng-class="vm.height")
 
 	md-list
 		issue(
-			ng-repeat="issue in vm.sortedFilteredIssues",
+			ng-repeat="issue in vm.issuesToShow",
 			data="issue",
 			on-comments-toggled="vm.commentsToggled(issueId)"
 			comments-toggled-issue-id="vm.commentsToggledIssueId"
 			on-save-comment="vm.saveComment(issue, text)"
 			comment-saved="vm.commentSaved"
+			on-delete-comment="vm.deleteComment(issue, commentIndex)"
+			comment-deleted="vm.commentDeleted"
+			on-close-issue="vm.closeIssue(issue)"
+			issue-closed="vm.issueClosed"
 		)

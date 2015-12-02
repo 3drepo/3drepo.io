@@ -45,8 +45,24 @@
         };
     }
 
-    function HomeCtrl() {
+    HomeCtrl.$inject = ["$scope", "Auth", "StateManager"];
+
+    function HomeCtrl($scope, Auth, StateManager) {
         var vm = this;
+
+        vm.logout = function () {
+            Auth.logout().then(
+                function _logoutCtrlLogoutSuccess () {
+                    $scope.errorMessage = null;
+                    StateManager.state.account = null;
+                    StateManager.updateState();
+                },
+                function _logoutCtrlLogoutFailure (reason) {
+                    $scope.errorMessage = reason;
+                    StateManager.updateState();
+                }
+            );
+        };
     }
 }());
 

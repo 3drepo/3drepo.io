@@ -37,6 +37,17 @@ issue {
   display: block;
 }
 
+issue .issue {
+
+}
+
+.issueOpenBackground {
+  background: #FFFFFF;
+}
+.issueClosedBackground {
+  background: #E0E0E0;
+}
+
 .issueComments {
 }
 
@@ -65,6 +76,9 @@ issue h4 {
 }
 .issueCommentsContainer md-list-item {
   padding: 10px;
+}
+.issueCommentsContainer md-list-item .commentDeleteButton {
+  margin-top: -15px;
 }
 
 issue .issueInfo {

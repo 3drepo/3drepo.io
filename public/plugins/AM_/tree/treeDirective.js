@@ -23,61 +23,72 @@
 
     function tree() {
         return {
-            restrict: 'EA',
-            templateUrl: 'tree.html',
+            restrict: "EA",
+            templateUrl: "tree.html",
             scope: {
                 filterText: "=",
                 height: "="
             },
             controller: TreeCtrl,
-            controllerAs: 'tr',
+            controllerAs: "vm",
             bindToController: true
         };
     }
 
-    TreeCtrl.$inject = ["$scope", "$timeout", "TreeService"];
+    TreeCtrl.$inject = ["$scope", "$timeout", "$filter", "TreeService"];
 
-    function TreeCtrl($scope, $timeout, TreeService) {
-        var tr = this,
+    function TreeCtrl($scope, $timeout, $filter, TreeService) {
+        var vm = this,
             promise = null,
             item = {},
             i = 0,
             length = 0;
-        tr.nodes = [];
-        tr.showTree = false;
-        tr.showFilterList = true;
-        tr.currentFilterItemSelected = null;
+        vm.nodes = [];
+        vm.showTree = false;
+        vm.showFilterList = true;
+        vm.currentFilterItemSelected = null;
+        vm.viewerSelectedObject = null;
 
         promise = TreeService.init();
         promise.then(function(data) {
-            tr.showChildren = true;
-            tr.allNodes = [];
-            tr.allNodes.push(data);
-            tr.nodes = tr.allNodes;
-            tr.showTree = true;
+            vm.showChildren = true;
+            vm.allNodes = [];
+            vm.allNodes.push(data.nodes);
+            vm.nodes = vm.allNodes;
+            vm.showTree = true;
+            vm.idToName = data.idToName;
         });
 
-        $scope.$watch("tr.filterText", function (newValue) {
+        $scope.$watch("vm.filterText", function (newValue) {
             if (angular.isDefined(newValue)) {
                 if (newValue === "") {
-                    tr.showTree = true;
-                    tr.showFilterList = false;
-                    tr.showChildren = true;
-                    tr.nodes = tr.allNodes;
+                    vm.showTree = true;
+                    vm.showFilterList = false;
+                    vm.showChildren = true;
+                    vm.nodes = vm.allNodes;
                 }
                 else {
-                    tr.showTree = false;
-                    tr.showFilterList = true;
-                    tr.showChildren = true;
+                    vm.showTree = false;
+                    vm.showFilterList = true;
+                    vm.showChildren = true;
                     promise = TreeService.search(newValue);
                     promise.then(function(json) {
-                        tr.showChildren = false;
-                        tr.nodes = json.data;
-                        for (i = 0, length = tr.nodes.length; i < length; i += 1) {
-                            tr.nodes[i].index = i;
-                            tr.nodes[i].toggleState = true;
-                            tr.nodes[i].toggleIcon = "fa-eye";
-                            tr.nodes[i].class = "unselectedFilterItem";
+                        vm.showChildren = false;
+                        vm.nodes = json.data;
+                        // If an object has been selected in the viewer to prompt this filter, only show the node
+                        // with the exact name of the selected object (this needs rethinking as showing the selected
+                        // object shouldn't trigger the filter)
+                        if (vm.viewerSelectedObject !== null) {
+                            for (i = (vm.nodes.length - 1); i >= 0; i -= 1) {
+                                if (vm.nodes[i].name !== vm.viewerSelectedObject.name) {
+                                    vm.nodes.splice(i, 1);
+                                }
+                            }
+                        }
+                        for (i = 0, length = vm.nodes.length; i < length; i += 1) {
+                            vm.nodes[i].index = i;
+                            vm.nodes[i].toggleState = true;
+                            vm.nodes[i].class = "unselectedFilterItem";
                         }
                         setupInfiniteItems();
                     });
@@ -85,40 +96,39 @@
             }
         });
 
-        tr.nodeSelected = function (nodeId) {
-            tr.selectedNode = nodeId;
+        vm.nodeSelected = function (nodeId) {
+            vm.selectedNode = nodeId;
             TreeService.selectNode(nodeId);
         };
 
-        tr.nodeToggled = function (nodeId) {
-            tr.toggledNode = nodeId;
+        vm.nodeToggled = function (nodeId) {
+            vm.toggledNode = nodeId;
             TreeService.toggleNode(nodeId);
         };
 
-        tr.filterItemSelected = function (item) {
-            if (tr.currentFilterItemSelected === null) {
-                tr.nodes[item.index].class = "selectedFilterItem";
-                tr.currentFilterItemSelected = item;
+        vm.filterItemSelected = function (item) {
+            if (vm.currentFilterItemSelected === null) {
+                vm.nodes[item.index].class = "selectedFilterItem";
+                vm.currentFilterItemSelected = item;
             }
-            else if (item.index === tr.currentFilterItemSelected.index) {
-                tr.nodes[item.index].class = "unselectedFilterItem";
-                tr.currentFilterItemSelected = null;
+            else if (item.index === vm.currentFilterItemSelected.index) {
+                vm.nodes[item.index].class = "unselectedFilterItem";
+                vm.currentFilterItemSelected = null;
             }
             else {
-                tr.nodes[tr.currentFilterItemSelected.index].class = "unselectedFilterItem";
-                tr.nodes[item.index].class = "selectedFilterItem";
-                tr.currentFilterItemSelected = item;
+                vm.nodes[vm.currentFilterItemSelected.index].class = "unselectedFilterItem";
+                vm.nodes[item.index].class = "selectedFilterItem";
+                vm.currentFilterItemSelected = item;
             }
-            TreeService.selectNode(tr.nodes[item.index]._id);
+            TreeService.selectNode(vm.nodes[item.index]._id);
         };
 
-        tr.filterItemToggled = function (item) {
-            tr.nodes[item.index].toggleIcon = tr.nodes[item.index].toggleState ? "fa-eye" : "fa-eye-slash";
+        vm.filterItemToggled = function (item) {
             TreeService.toggleNode(item._id);
         };
 
         function setupInfiniteItems () {
-            tr.infiniteItems = {
+            vm.infiniteItems = {
                 numLoaded_: 0,
                 toLoad_: 0,
                 getItemAtIndex: function(index) {
@@ -127,8 +137,8 @@
                         return null;
                     }
 
-                    if (index < tr.nodes.length) {
-                        return tr.nodes[index];
+                    if (index < vm.nodes.length) {
+                        return vm.nodes[index];
                     }
                     else {
                         return null;
@@ -147,5 +157,25 @@
                 }
             };
         }
+
+        $(document).on("objectSelected", function(event, object, zoom) {
+            $timeout(function () {
+                if (angular.isUndefined(object)) {
+                    vm.viewerSelectedObject = null;
+                    vm.filterText = "";
+                }
+                else {
+                    vm.viewerSelectedObject = $filter('filter')(vm.idToName, {_id: object.getAttribute("DEF")})[0];
+                    vm.filterText = vm.viewerSelectedObject.name;
+                }
+            });
+        });
+
+        $(document).on("partSelected", function(event, part, zoom) {
+            $scope.IssuesService.mapPromise.then(function () {
+                vm.viewerSelectedObject = $filter('filter')(vm.idToName, {_id: $scope.IssuesService.IDMap[part.partID]})[0];
+                vm.filterText = vm.viewSelectedObject.name;
+            });
+        });
     }
 }());

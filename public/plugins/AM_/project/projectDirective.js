@@ -88,7 +88,21 @@
             options: [
                 {
                     value: "sortByDate",
-                    label: "Sort by Date"
+                    label: "Sort by Date",
+                    firstSelectedIcon: "fa-sort-amount-desc",
+                    secondSelectedIcon: "fa-sort-amount-asc",
+                    toggle: false,
+                    selected: true,
+                    firstSelected: true,
+                    secondSelected: false
+                },
+                {
+                    value: "showClosed",
+                    label: "Show closed issues",
+                    toggle: true,
+                    selected: false,
+                    firstSelected: false,
+                    secondSelected: false
                 }
             ]
         });

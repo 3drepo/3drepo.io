@@ -63,6 +63,7 @@
         vm.height = "minHeight";
         vm.addStatus = false;
         vm.toastPosition = angular.extend({}, last);
+        vm.showClearFilterButton = false;
 
         $scope.$watch("vm.contentItem", function (newValue) {
             if (angular.isDefined(newValue)) {
@@ -93,21 +94,6 @@
 
         $scope.$watch("vm.options", function (newValue) {
             vm.hasOptions = (angular.isDefined(newValue));
-            if (vm.hasOptions) {
-                for (i = 0, length = vm.options.length; i < length; i += 1) {
-                    if (vm.contentItem === "issues") {
-                        vm.options[i].selected = true;
-                        vm.options[i].firstSelected = true;
-                        vm.options[i].secondSelected = false;
-                        currentSortIndex = 0;
-                    }
-                    else {
-                        vm.options[i].selected = false;
-                        vm.options[i].firstSelected = false;
-                        vm.options[i].secondSelected = false;
-                    }
-                }
-            }
         });
 
         $scope.$watch("vm.filterInputText", function (newValue) {
@@ -117,7 +103,14 @@
                 }
                 filter = $timeout(function() {
                     vm.filterText = vm.filterInputText;
+                    vm.showClearFilterButton = (vm.filterInputText !== "");
                 }, 500);
+            }
+        });
+
+        $scope.$watch("vm.filterText", function (newValue) {
+            if (angular.isDefined(newValue)) {
+                vm.filterInputText = newValue;
             }
         });
 
@@ -158,21 +151,27 @@
         };
 
         vm.optionSelected = function (index) {
-            if (index !== currentSortIndex) {
-                if (angular.isDefined(currentSortIndex)) {
-                    vm.options[currentSortIndex].selected = false;
-                    vm.options[currentSortIndex].firstSelected = false;
-                    vm.options[currentSortIndex].secondSelected = false;
-                }
-                currentSortIndex = index;
-                vm.options[currentSortIndex].selected = true;
-                vm.options[currentSortIndex].firstSelected = true;
+            if (vm.options[index].toggle) {
+                vm.options[index].selected = !vm.options[index].selected;
+                vm.selectedOption = vm.options[index];
             }
             else {
-                vm.options[currentSortIndex].firstSelected = !vm.options[currentSortIndex].firstSelected;
-                vm.options[currentSortIndex].secondSelected = !vm.options[currentSortIndex].secondSelected;
+                if (index !== currentSortIndex) {
+                    if (angular.isDefined(currentSortIndex)) {
+                        vm.options[currentSortIndex].selected = false;
+                        vm.options[currentSortIndex].firstSelected = false;
+                        vm.options[currentSortIndex].secondSelected = false;
+                    }
+                    currentSortIndex = index;
+                    vm.options[currentSortIndex].selected = true;
+                    vm.options[currentSortIndex].firstSelected = true;
+                }
+                else {
+                    vm.options[currentSortIndex].firstSelected = !vm.options[currentSortIndex].firstSelected;
+                    vm.options[currentSortIndex].secondSelected = !vm.options[currentSortIndex].secondSelected;
+                }
+                vm.selectedOption = vm.options[currentSortIndex];
             }
-            vm.selectedOption = vm.options[currentSortIndex];
 
             // 'Reset' vm.selectedOption so that selecting the same option can be registered down the line
             $timeout(function () {

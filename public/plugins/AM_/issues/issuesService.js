@@ -131,6 +131,28 @@
             return deferred.promise;
         };
 
+        var closeIssue = function (issue) {
+            deferred = $q.defer();
+            url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue.parent);
+            data = {
+                data: JSON.stringify({
+                    _id: issue._id,
+                    closed: true,
+                    number: issue.number
+                })
+            };
+            config = {
+                withCredentials: true
+            };
+
+            $http.post(url, data, config)
+                .then(function successCallback(response) {
+                    deferred.resolve(response.data);
+                });
+
+            return deferred.promise;
+        };
+
         var saveComment = function (issue, comment) {
             deferred = $q.defer();
             url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue.parent);
@@ -247,6 +269,7 @@
             prettyTime: prettyTime,
             getIssues: getIssues,
             saveIssue: saveIssue,
+            closeIssue: closeIssue,
             saveComment: saveComment,
             addPin: addPin,
             removePin: removePin
