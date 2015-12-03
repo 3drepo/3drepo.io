@@ -49,6 +49,7 @@
             sortedIssuesLength,
             sortOldestFirst = true,
             showClosed = false;
+
         vm.pickedPos = null;
         vm.pickedNorm = null;
         vm.selectedObjectId = null;
@@ -78,32 +79,39 @@
         });
 
         function setupIssuesToShow () {
+            var pin = null;
+
             if (angular.isDefined(vm.issues)) {
-                // Sort
-                vm.issuesToShow = [vm.issues[0]];
-                for (i = 1, length = vm.issues.length; i < length; i += 1) {
-                    for (j = 0, sortedIssuesLength = vm.issuesToShow.length; j < sortedIssuesLength; j += 1) {
-                        if (((vm.issues[i].created > vm.issuesToShow[j].created) && (sortOldestFirst)) ||
-                            ((vm.issues[i].created < vm.issuesToShow[j].created) && (!sortOldestFirst))) {
-                            vm.issuesToShow.splice(j, 0, vm.issues[i]);
-                            break;
-                        }
-                        else if (j === (vm.issuesToShow.length - 1)) {
-                            vm.issuesToShow.push(vm.issues[i]);
+                if (vm.issues.length > 0) {
+                    // Sort
+                    vm.issuesToShow = [vm.issues[0]];
+                    for (i = 1, length = vm.issues.length; i < length; i += 1) {
+                        for (j = 0, sortedIssuesLength = vm.issuesToShow.length; j < sortedIssuesLength; j += 1) {
+                            if (((vm.issues[i].created > vm.issuesToShow[j].created) && (sortOldestFirst)) ||
+                                ((vm.issues[i].created < vm.issuesToShow[j].created) && (!sortOldestFirst))) {
+                                vm.issuesToShow.splice(j, 0, vm.issues[i]);
+                                break;
+                            }
+                            else if (j === (vm.issuesToShow.length - 1)) {
+                                vm.issuesToShow.push(vm.issues[i]);
+                            }
                         }
                     }
-                }
 
-                // Filter
-                if (vm.filterText !== "") {
-                    vm.issuesToShow = ($filter('filter')(vm.issuesToShow, {name: vm.filterText}));
-                }
+                    // Filter
+                    if (vm.filterText !== "") {
+                        vm.issuesToShow = ($filter('filter')(vm.issuesToShow, {name: vm.filterText}));
+                    }
 
-                // Closed
-                if (!showClosed) {
+                    // Closed
                     for (i = (vm.issuesToShow.length - 1); i >= 0; i -= 1) {
-                        if (vm.issuesToShow[i].hasOwnProperty("closed")) {
-                            vm.issuesToShow.splice(i, 1);
+                        pin = angular.element(document.getElementById(vm.issuesToShow[i]._id));
+                        if (pin.length > 0) {
+                            pin[0].setAttribute("render", "true");
+                            if (!showClosed && vm.issuesToShow[i].hasOwnProperty("closed")) {
+                                pin[0].setAttribute("render", "false");
+                                vm.issuesToShow.splice(i, 1);
+                            }
                         }
                     }
                 }
@@ -132,32 +140,6 @@
             vm.commentsToggledIssueId = issueId;
         };
 
-        vm.saveComment = function (issue, comment) {
-            vm.commentSaved = false;
-            promise = NewIssuesService.saveComment(issue, comment);
-            promise.then(function (data) {
-                console.log(data);
-                vm.commentSaved = true;
-                for (i = 0, length = vm.issues.length; i < length; i += 1) {
-                    if (issue._id === vm.issues[i]._id) {
-                        if (!vm.issues[i].hasOwnProperty("comments")) {
-                            vm.issues[i].comments = [];
-                        }
-                        vm.issues[i].comments.push({
-                            owner: data.owner,
-                            comment: comment,
-                            timeStamp: NewIssuesService.prettyTime(data.created)
-                        });
-                        break;
-                    }
-                }
-            });
-        };
-
-        vm.deleteComment = function (issue, commentIndex) {
-            console.log(issue, commentIndex);
-        };
-
         vm.saveIssue = function () {
             if (angular.isDefined(vm.title) && (vm.title !== "")) {
                 if (vm.pickedPos === null) {
@@ -166,13 +148,12 @@
                 else {
                     promise = NewIssuesService.saveIssue(vm.title, vm.selectedObjectId, vm.pickedPos, vm.pickedNorm);
                     promise.then(function (data) {
-                        console.log(data);
                         vm.issues.push(data);
                         vm.title = "";
                         vm.pickedPos = null;
                         vm.pickedNorm = null;
                         if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
-                            vm.saveComment(data, vm.comment);
+                            vm.saveCommentWithIssue(data, vm.comment);
                             vm.comment = "";
                         }
                         setupIssuesToShow();
@@ -182,10 +163,8 @@
         };
 
         vm.closeIssue = function (issue) {
-            vm.commentSaved = false;
             promise = NewIssuesService.closeIssue(issue);
             promise.then(function (data) {
-                console.log(data);
                 for (i = 0, length = vm.issues.length; i < length; i += 1) {
                     if (issue._id === vm.issues[i]._id) {
                         vm.issues[i].closed = data.closed;
@@ -194,6 +173,19 @@
                     }
                 }
                 setupIssuesToShow();
+            });
+        };
+
+        vm.saveCommentWithIssue = function (issue, comment) {
+            promise = NewIssuesService.saveComment(issue, comment);
+            promise.then(function (data) {
+                vm.issues[vm.issues.length - 1].comments = [
+                    {
+                        owner: data.owner,
+                        comment: comment,
+                        timeStamp: NewIssuesService.prettyTime(data.created)
+                    }
+                ];
             });
         };
 
@@ -215,7 +207,7 @@
                             vm.pickedNorm = pickObj.pickNorm;
 
                             NewIssuesService.addPin({
-                                id: undefined,
+                                id: vm.selectedObjectId,
                                 position: pickObj.pickPos.toGL(),
                                 norm: pickObj.pickNorm.toGL(),
                                 scale: 10.0

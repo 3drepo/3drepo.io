@@ -25,7 +25,6 @@
 
     function NewIssuesService($http, $q, StateManager, serverConfig, ViewerService) {
         var state = StateManager.state,
-            deferred = null,
             url = "",
             data = {},
             config = {},
@@ -34,8 +33,7 @@
             numComments = 0,
             pinCoverage = 15.0,
             pinRadius = 0.25,
-            pinHeight = 1.0,
-            currentPinId = null;
+            pinHeight = 1.0;
 
         var prettyTime = function(time) {
             var date = new Date(time);
@@ -47,7 +45,7 @@
         };
 
         var getIssues = function () {
-            deferred = $q.defer();
+            var deferred = $q.defer();
             url = serverConfig.apiUrl(state.account + '/' + state.project + '/issues.json');
 
             $http.get(url)
@@ -73,9 +71,9 @@
 
         var saveIssue = function (name, objectId, pickedPos, pickedNorm) {
             var currentVP = ViewerService.defaultViewer.getCurrentViewpointInfo(),
-                dataToSend = {};
+                dataToSend = {},
+                deferred = $q.defer();
 
-            deferred = $q.defer();
             url = serverConfig.apiUrl(state.account + "/" + state.project + "/issues/" + objectId);
             data = {
                 name: name,
@@ -131,48 +129,38 @@
             return deferred.promise;
         };
 
-        var closeIssue = function (issue) {
-            deferred = $q.defer();
+        function doPost(issue, data) {
+            var deferred = $q.defer();
             url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue.parent);
-            data = {
-                data: JSON.stringify({
-                    _id: issue._id,
-                    closed: true,
-                    number: issue.number
-                })
-            };
             config = {
                 withCredentials: true
             };
-
-            $http.post(url, data, config)
-                .then(function successCallback(response) {
+            data._id = issue._id;
+            $http.post(url, {data: JSON.stringify(data)}, config)
+                .then(function (response) {
                     deferred.resolve(response.data);
                 });
-
             return deferred.promise;
+        }
+
+        var closeIssue = function (issue) {
+            return doPost(issue, {closed: true, number: issue.number});
         };
 
         var saveComment = function (issue, comment) {
-            deferred = $q.defer();
-            url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue.parent);
-            data = {
-                data: JSON.stringify({
-                    _id: issue._id,
-                    comment: comment,
-                    number: issue.number
-                })
-            };
-            config = {
-                withCredentials: true
-            };
+            return doPost(issue, {comment: comment, number: issue.number});
+        };
 
-            $http.post(url, data, config)
-                .then(function successCallback(response) {
-                    deferred.resolve(response.data);
-                });
+        var editComment = function (issue, comment, commentIndex) {
+            return doPost(issue, {comment: comment, number: issue.number, edit: true, commentIndex: commentIndex});
+        };
 
-            return deferred.promise;
+        var deleteComment = function (issue, index) {
+            return doPost(issue, {comment: "", number: issue.number, delete: true, commentCreated: issue.comments[index].created});
+        };
+
+        var setComment = function (issue, commentIndex) {
+            return doPost(issue, {comment: "", number: issue.number, set: true, commentIndex: commentIndex});
         };
 
         function addPin (pin) {
@@ -271,6 +259,9 @@
             saveIssue: saveIssue,
             closeIssue: closeIssue,
             saveComment: saveComment,
+            editComment: editComment,
+            deleteComment: deleteComment,
+            setComment: setComment,
             addPin: addPin,
             removePin: removePin
         };
