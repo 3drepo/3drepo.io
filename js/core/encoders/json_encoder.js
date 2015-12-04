@@ -188,20 +188,22 @@ function getTree(dbInterface, account, project, branch, revision, sid, namespace
 	}
 };
 
-function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, json, idToPath, callback) {
+function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, json, callback) {
 	var currentSID = current;
 
 	if (current[C.REPO_NODE_LABEL_CHILDREN])
 	{
 		async.concat(current[C.REPO_NODE_LABEL_CHILDREN], function(childJSON, loopCallback)
 		{
-			var childID = uuidToString(childJSON["shared_id"]);
-			var child = sceneGraph.all[childID]; // Get object from sceneGraph
+			var childID  = uuidToString(childJSON[C.REPO_NODE_LABEL_ID]);
+			var childSID = uuidToString(childJSON[C.REPO_NODE_LABEL_SHARED_ID]);
+			var child    = sceneGraph.all[childSID]; // Get object from sceneGraph
 
 			if (child[C.REPO_NODE_LABEL_TYPE] === C.REPO_NODE_TYPE_REF)
 			{
 				var account       = utils.coalesce(child["owner"], parentAccount);
 				var project       = child["project"];
+				var refName       = (account === parentAccount) ? project : (account + "/" + project);
 
 				var branch        = null;
 				var revision      = null;
@@ -218,20 +220,21 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, jso
 				}
 
 				var childRefJSON = {
-					"name"      : account + "/" + project,
-					"path"      : current.path + "__" + child[C.REPO_NODE_LABEL_NAME],
-					"_id"       : uuidToString(child[C.REPO_NODE_LABEL_ID]),
-					"shared_id" : uuidToString(child[C.REPO_NODE_LABEL_SHARED_ID]),
+					"name"      : refName,
+					"path"      : current.path + "__" + childID,
+					"_id"       : childID,
+					"shared_id" : childSID,
 					"children"  : []
-				}
+				};
 
-				getFullTree(dbInterface, account, project, branch, revision, childRefJSON + "__", idToPath, function(err, refJSON) {
+				getFullTree(dbInterface, account, project, branch, revision, childRefJSON.path, function(err, refJSON) {
 					if (err.value) {
 						return loopCallback(err);
 					}
 
-					childRefJSON["children"].push(refJSON);
-					loopCallback(null, childRefJSON);
+					childRefJSON["children"] = [refJSON.nodes];
+
+					loopCallback(null, { idToPath : refJSON["idToPath"], idToName: refJSON["idToName"], nodes: childRefJSON });
 				});
 
 			} else {
@@ -239,9 +242,9 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, jso
 
 				var childTreeJSON = {
 					"name"      : childName,
-	                "path"      : current.path + "__" + childName,
-					"_id"       : uuidToString(child[C.REPO_NODE_LABEL_ID]),
-					"shared_id" : uuidToString(child[C.REPO_NODE_LABEL_SHARED_ID]),
+	                "path"      : current.path + "__" + childID,
+					"_id"       : childID,
+					"shared_id" : childSID,
 					"children"  : []
 				};
 
@@ -261,20 +264,36 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, jso
 				return callback(err);
 			}
 
-			if (children.length > 1)
+			var idToPath = {};
+			var idToName = {};
+			var nodes    = [];
+
+			for(var i = 0; i < children.length; i++)
 			{
-				console.log("#CHILDREN: " + children.length);
+				idToPath = _.extend(idToPath, children[i]["idToPath"]);
+				idToName = _.extend(idToName, children[i]["idToName"]);
+
+				delete children[i]["idToPath"];
+				delete children[i]["idToName"];
+
+				children[i] = children[i]["nodes"]; // Collapse the children
 			}
 
 			json["children"] = children;
-			callback(responseCodes.OK, json);
+			callback(responseCodes.OK, {idToPath: idToPath, idToName: idToName, nodes: json});
 		});
 	} else {
-		callback(responseCodes.OK, json);
+		// Leaf node
+		var idToPath = {}, idToName = {};
+
+		idToPath[json["_id"]] = json["path"];
+		idToName[json["_id"]] = json["name"];
+
+		callback(responseCodes.OK, {idToPath: idToPath, idToName: idToName, nodes: json});
 	}
 };
 
-function getFullTree(dbInterface, account, project, branch, revision, path, idToPath, callback) {
+function getFullTree(dbInterface, account, project, branch, revision, path, callback) {
 	// TODO: Check permisssions here
 
 	dbInterface.logger.logInfo("Obtaining full tree for [" + account + ", " + project + ", " + branch + ", " + revision + "]");
@@ -301,7 +320,7 @@ function getFullTree(dbInterface, account, project, branch, revision, path, idTo
 
 		var rootJSON = {
 			"name"      : root[C.REPO_NODE_LABEL_NAME],
-            "path"      : ((path !== null) ? path : "") + root[C.REPO_NODE_LABEL_NAME],
+            "path"      : ((path !== null) ? (path + "__") : "") + uuidToString(root[C.REPO_NODE_LABEL_ID]),
 			"_id"       : uuidToString(root[C.REPO_NODE_LABEL_ID]),
 			"shared_id" : uuidToString(root[C.REPO_NODE_LABEL_SHARED_ID]),
 			"children"  : []
@@ -569,11 +588,11 @@ exports.route = function(router)
 	});
 
 	router.get("json", "/:account/:project/revision/:branch/head/fulltree", function(req, res, params, err_callback) {
-		getFullTree(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.branch, null, null, {}, err_callback);
+		getFullTree(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.branch, null, null, err_callback);
 	});
 
 	router.get("json", "/:account/:project/revision/:rid/fulltree", function(req, res, params, err_callback) {
-		getFullTree(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, null, params.rid, null, {}, err_callback);
+		getFullTree(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, null, params.rid, null, err_callback);
 	});
 
 	router.get("json", "/:account/:project/revision/:branch/head/map", function(req, res, params, err_callback) {

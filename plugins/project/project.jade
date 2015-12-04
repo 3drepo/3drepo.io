@@ -11,10 +11,8 @@
 
 	//#nav-version-control(ng-controller='RevisionCtrl', ng-show="Data.ui.revisionSelector")
 	#project-viewport-container.row
-		div#x3d.project-viewport.viewport
-			if ui.viewport
-				each uicomp in ui.viewport
-					!= renderMe(uicomp["template"], locals)
+		viewermanager
+			viewer.project-viewport.viewport(manager="manager")
 	.ui2
 		//#ui2-left
 			if ui.left

@@ -35,9 +35,9 @@
         };
     }
 
-    TreeCtrl.$inject = ["$scope", "$timeout", "$filter", "TreeService"];
+    TreeCtrl.$inject = ["$scope", "$timeout", "$filter", "TreeService", "ViewerService"];
 
-    function TreeCtrl($scope, $timeout, $filter, TreeService) {
+    function TreeCtrl($scope, $timeout, $filter, TreeService, ViewerService) {
         var vm = this,
             promise = null,
             item = {},
@@ -71,27 +71,45 @@
                     vm.showTree = false;
                     vm.showFilterList = true;
                     vm.showChildren = true;
-                    promise = TreeService.search(newValue);
-                    promise.then(function(json) {
+
+                    if (vm.filterText.indexOf("###") === 0)
+                    {
                         vm.showChildren = false;
-                        vm.nodes = json.data;
-                        // If an object has been selected in the viewer to prompt this filter, only show the node
-                        // with the exact name of the selected object (this needs rethinking as showing the selected
-                        // object shouldn't trigger the filter)
-                        if (vm.viewerSelectedObject !== null) {
-                            for (i = (vm.nodes.length - 1); i >= 0; i -= 1) {
-                                if (vm.nodes[i].name !== vm.viewerSelectedObject.name) {
-                                    vm.nodes.splice(i, 1);
+
+                        $timeout(angular.noop, 300).then(angular.bind(this, function() {
+                            vm.nodes = [{}];
+                            vm.nodes[0]._id = vm.origID;
+                            vm.nodes[0].name = vm.anObject;
+                            vm.nodes[0].index = 0;
+                            vm.nodes[0].toggleState = true;
+                            vm.nodes[0].class = "unselectedFilterItem";
+
+                            setupInfiniteItems();
+                        }));
+
+                    } else {
+                        promise = TreeService.search(newValue);
+                        promise.then(function(json) {
+                            vm.showChildren = false;
+                            vm.nodes = json.data;
+                            // If an object has been selected in the viewer to prompt this filter, only show the node
+                            // with the exact name of the selected object (this needs rethinking as showing the selected
+                            // object shouldn't trigger the filter)
+                            if (vm.viewerSelectedObject !== null) {
+                                for (i = (vm.nodes.length - 1); i >= 0; i -= 1) {
+                                    if (vm.nodes[i].name !== vm.viewerSelectedObject.name) {
+                                        vm.nodes.splice(i, 1);
+                                    }
                                 }
                             }
-                        }
-                        for (i = 0, length = vm.nodes.length; i < length; i += 1) {
-                            vm.nodes[i].index = i;
-                            vm.nodes[i].toggleState = true;
-                            vm.nodes[i].class = "unselectedFilterItem";
-                        }
-                        setupInfiniteItems();
-                    });
+                            for (i = 0, length = vm.nodes.length; i < length; i += 1) {
+                                vm.nodes[i].index = i;
+                                vm.nodes[i].toggleState = true;
+                                vm.nodes[i].class = "unselectedFilterItem";
+                            }
+                            setupInfiniteItems();
+                        });
+                    }
                 }
             }
         });
@@ -101,9 +119,9 @@
             TreeService.selectNode(nodeId);
         };
 
-        vm.nodeToggled = function (nodeId) {
+        vm.nodeToggled = function (nodeId, state) {
             vm.toggledNode = nodeId;
-            TreeService.toggleNode(nodeId);
+            TreeService.toggleNode(nodeId, state);
         };
 
         vm.filterItemSelected = function (item) {
@@ -163,10 +181,22 @@
                 if (angular.isUndefined(object)) {
                     vm.viewerSelectedObject = null;
                     vm.filterText = "";
-                }
-                else {
-                    vm.viewerSelectedObject = $filter('filter')(vm.idToName, {_id: object.getAttribute("DEF")})[0];
-                    vm.filterText = vm.viewerSelectedObject.name;
+                } else {
+                    var objectID = null;
+                    var idParts  = null;
+
+                    if (object["multipart"])
+                    {
+                        idParts = object.id.split("__");
+                    } else {
+                        idParts = object.getAttribute("id").split("__");
+                    }
+
+                    objectID = idParts[idParts.length - 1];
+                    vm.filterText = "###" + vm.idToName[objectID];
+
+                    vm.anObject      = objectID;
+                    vm.origID        = "###" + object.id;
                 }
             });
         });
@@ -174,7 +204,7 @@
         $(document).on("partSelected", function(event, part, zoom) {
             $scope.IssuesService.mapPromise.then(function () {
                 vm.viewerSelectedObject = $filter('filter')(vm.idToName, {_id: $scope.IssuesService.IDMap[part.partID]})[0];
-                vm.filterText = vm.viewSelectedObject.name;
+                vm.filterText = vm.viewSelectedObject;
             });
         });
     }

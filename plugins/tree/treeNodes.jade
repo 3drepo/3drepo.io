@@ -4,6 +4,6 @@ ol(ui-tree-nodes, ng-model="tns.nodes")
 			node="node"
 			show-children="tns.showChildren"
 			on-node-selected="tns.onNodeSelected({nodeId: nodeId})"
-			on-node-toggled="tns.onNodeToggled({nodeId: nodeId})"
+			on-node-toggled="tns.onNodeToggled({nodeId: nodeId, state: state})"
 			selected-node="tns.selectedNode"
 			toggled-node="tns.toggledNode")

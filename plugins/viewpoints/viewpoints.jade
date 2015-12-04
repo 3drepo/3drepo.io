@@ -1,29 +1,5 @@
-div.tools-menu-items(ng-controller='ViewpointCtrl')
-	li.divider
-	li Viewpoints
-	li.divider
-	li
-		a(ng-click='showAll()')
-			span Show All
-	li
-		a(ng-click='reset()')
-			span Go To Viewpoint
-	li
-		a(ng-click='flyThrough()')
-			i.fa.fa-power-off(ng-show="ViewerService.defaultViewer.isFlyingThrough")
-			span Fly Through
-	li.divider
-	li
-		div.dropdown-submenu(ng-repeat="(group, names) in viewpoints")
-			a(href='#') {{group}}
-			ul.dropdown-menu
-				li(ng-repeat="(name, id) in names")
-					a(ng-click='setCurrentViewpoint(id)')
-						i.fa.fa-check(ng-show="ViewerService.defaultViewer.selectedViewpoint == id")
-						span {{name}}
-	li.divider
-	li
-		a(ng-click='newViewpoint()')
-			span New Viewpoint
-	li.divider
+div(ng-class="vp.height")
+	.viewpoint(ng-repeat="viewpoint in vp.viewpoints track by $index", ng-click="vp.selectViewpoint($index)")
+		label {{viewpoint}}
 
+	panel-content-add(placeholder="New viewpoint", on-save="vp.saveViewpoint(text)", clear-input="vp.clearInput")

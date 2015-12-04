@@ -327,6 +327,8 @@ DBInterface.prototype.storeWalkthroughInfo = function(dbName, project, data, cal
 DBInterface.prototype.searchTree = function(dbName, project, branch, revision, searchstring, callback) {
     "use strict";
 
+    var self = this;
+
     var i,
         length,
         searchStringChars = searchstring.split(""),
@@ -347,13 +349,15 @@ DBInterface.prototype.searchTree = function(dbName, project, branch, revision, s
         name: new RegExp(regexStr)
     };
 
-    dbConn(this.logger).filterColl(dbName, project + ".scene", filter, projection, function(err, docs) {
+    self.filterFederatedProject(dbName, project, branch, revision, filter, function(err, docs) {
         if (err.value) {
             return callback(err);
         }
         for (i = 0, length = docs.length; i < length; i += 1) {
             docs[i]._id = uuidToString(docs[i]._id);
         }
+
+        // Now we need to follow any references
         callback(responseCodes.OK, docs);
     });
 };
@@ -1278,6 +1282,104 @@ DBInterface.prototype.getRevisions = function(dbName, project, branch, from, to,
 	});
 };
 
+
+DBInterface.prototype.filterFederatedProject = function(dbName, project, branch, revision, filter, callback) {
+
+	var historyQuery = null;
+
+	if (revision != null)
+	{
+		historyQuery = {
+			_id: stringToUUID(revision)
+		};
+	} else {
+		if (branch == "master")
+			var branch_id = masterUUID;
+		else
+			var branch_id = stringToUUID(branch);
+
+		historyQuery = {
+			shared_id:	branch_id
+		};
+	}
+
+	var self = this;
+
+	self.logger.logInfo("Filtering [" + project + " " + branch + " " + revision + "]");
+
+	dbConn(this.logger).getLatest(dbName, project + ".history", historyQuery, null, function(err, docs)
+	{
+		if (err.value) {
+			return callback(err.value);
+		}
+
+		if (!docs.length) {
+			return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+		}
+
+		filter["_id"] = { $in : docs[0]["current"] };
+
+		// First find the list of nodes that match the filter in the project.
+		dbConn(self.logger).filterColl(dbName, project + ".scene", filter, {}, function(err, nodes) {
+			if (err.value) 
+			{
+				return err;
+			}
+
+        	// Now get references to the subprojects
+			var refFilter = {
+				type: "ref",
+				_id: { $in: docs[0]["current"]}
+			};
+
+			var projection = {
+				_rid : 1,
+				owner: 1,
+				project: 1,
+				unique: 1
+			};
+
+			dbConn(self.logger).filterColl(dbName, project + ".scene", refFilter, projection, function(err, refs) {
+				// Asynchronously loop over all references.
+				async.concat(refs, function (item, iter_callback) {
+					var childDbName  = item["owner"] ? item["owner"] : dbName;
+					var childProject = item["project"];
+
+					var unique = ("unique" in item) ? item["unique"] : false;
+
+					if ("_rid" in item)
+					{
+						if (unique)
+						{
+							var childRevision = uuidToString(item["_rid"]);
+							var childBranch   = null;
+						} else {
+							var childRevision = null;
+							var childBranch   = uuidToString(item["_rid"]);
+						}
+					} else {
+						var childBranch   = "master";
+						var childRevision = null;
+					}
+
+					self.filterFederatedProject(childDbName, childProject, childBranch, childRevision, filter, function (err, childNodes) {
+						if (err.value) {
+							return iter_callback(err);
+						}
+
+						iter_callback(null, childNodes);
+					});
+				},
+				function (err, results) {
+					// TODO: Deal with errors here
+
+					callback(responseCodes.OK, nodes.concat(results));
+				});
+			});
+		});
+	});
+}
+
 DBInterface.prototype.getFederatedProjectList = function(dbName, project, branch, revision, callback) {
 
 	var historyQuery = null;
@@ -1338,13 +1440,13 @@ DBInterface.prototype.getFederatedProjectList = function(dbName, project, branch
 					}
 				} else {
 					var childBranch   = "master";
-					var childRevision = "head";
+					var childRevision = null;
 				}
 
 				self.getFederatedProjectList(childDbName, childProject, childBranch, childRevision, function (err, childrefs) {
 					if (err.value) return iter_callback(err);
 
-					iter_callback(responseCodes.OK, childrefs);
+					iter_callback(null, childrefs);
 				});
 			},
 			function (err, results) {
@@ -1436,7 +1538,7 @@ DBInterface.prototype.getIssues = function(dbName, project, branch, revision, on
 						}
 					} else {
 						var childBranch   = "master";
-						var childRevision = "head";
+						var childRevision = null;
 					}
 
 					self.getSIDMap(childDbName, childProject, childBranch, childRevision, function (err, SIDMap) {

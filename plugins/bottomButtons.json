@@ -1,0 +1,15 @@
+{
+    "name" : "bottomButtons",
+    "files": {
+        "angular" : [
+            "bottomButtons/bottomButtonsDirective.js"
+        ],
+        "jade": [
+            {"template" : "bottomButtons/bottomButtons.jade", "id" : "bottomButtons.html"},
+            {"template" : "bottomButtons/help.jade", "id" : "help.html"}
+        ],
+        "css" : [
+            "bottomButtons/bottomButtons.css"
+        ]
+    }
+}

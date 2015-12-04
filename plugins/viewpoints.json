@@ -1,17 +1,14 @@
 {
-	"name" : "viewpoints",
-	"files": {
-		"angular": [
-			"viewpoints/ViewpointCtrl.js",
-			"viewpoints/ViewpointService.js"
-		],
-		"jade": [
-			{"template" : "viewpoints/newViewpoint.jade", "id" : "newviewpointmodal.html"},
-			{"template" : "viewpoints/newViewpointInfo.jade", "id" : "newviewpointinfomodal.html"}
-		],
-		"ui": [
-			{"name": "viewpoints", "template" : "viewpoints/viewpoints.jade", "position" : "tools"}
-		]
-	}
+    "name" : "viewpoints",
+    "files": {
+        "angular" : [
+            "viewpoints/viewpointsDirective.js"
+        ],
+        "jade": [
+            {"template" : "viewpoints/viewpoints.jade", "id" : "viewpoints.html"}
+        ],
+        "css" : [
+            "viewpoints/viewpoints.css"
+        ]
+    }
 }
-

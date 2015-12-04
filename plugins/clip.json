@@ -1,12 +1,14 @@
 {
-	"name" : "clip",
-	"files": {
-		"angular": [
-			"clip/ClipCtrl.js"
-		],
-		"ui": [
-			{"name": "clip", "template" : "clip/clip.jade", "position" : "rightpanel"}
-		]
-	}
+    "name" : "clip",
+    "files": {
+        "angular" : [
+            "clip/clipDirective.js"
+        ],
+        "jade": [
+            {"template" : "clip/clip.jade", "id" : "clip.html"}
+        ],
+        "css" : [
+            "clip/clip.css"
+        ]
+    }
 }
-

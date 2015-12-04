@@ -47,7 +47,7 @@
                         "show-children='tn.showChildren' " +
                         "ng-if='tn.expanded' " +
                         "on-node-selected='tn.onNodeSelected({nodeId: nodeId})' " +
-                        "on-node-toggled='tn.onNodeToggled({nodeId: nodeId})' " +
+                        "on-node-toggled='tn.onNodeToggled({nodeId: nodeId, state: state})' " +
                         "selected-node='tn.selectedNode' " +
                         "toggled-node='tn.toggledNode'>" +
                     "</tree-nodes>";
@@ -99,8 +99,8 @@
             tn.onNodeSelected({nodeId: nodeId});
         };
 
-        tn.nodeToggled = function (nodeId) {
-            tn.onNodeToggled({nodeId: nodeId});
+        tn.nodeToggled = function (nodeId, state) {
+            tn.onNodeToggled({nodeId: nodeId, state: tn.toggleState});
         };
     }
 }());

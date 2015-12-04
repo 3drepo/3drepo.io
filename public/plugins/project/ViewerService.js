@@ -22,10 +22,10 @@ angular.module('3drepo')
 
 	self.ready = readyQ.promise;
 
-	this.init = function() {
+	this.init = function(viewerManager, defaultViewer) {
 		// Viewer Manager controls layout of viewer
-		self.viewerManager = new ViewerManager();
-		self.defaultViewer = self.viewerManager.getDefaultViewer();
+		self.viewerManager = viewerManager;
+		self.defaultViewer = defaultViewer;
 		self.defaultViewer.enableClicking();
 
 		$window.viewer = self.defaultViewer;
@@ -88,5 +88,6 @@ angular.module('3drepo')
 		delete $window.viewerManager;
 		self.defaultViewer = null;
 	}
+
 }]);
 

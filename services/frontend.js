@@ -1,18 +1,18 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *	Copyright (C) 2014 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 var express = require('express');
@@ -69,8 +69,8 @@ module.exports.createApp = function(template)
 			params['config_js'] += '\nserver_config.demoproject = "' + config.wayfinder.demoproject + '";';
 		}
 
-		params['config_js'] += '\nserver_config.chatHost    = "' + config.api_server.chat_host + '";';
-		params['config_js'] += '\nserver_config.chatPath    = "' + config.api_server.chat_path + '";';
+		params['config_js'] += '\nserver_config.chatHost	= "' + config.api_server.chat_host + '";';
+		params['config_js'] += '\nserver_config.chatPath	= "' + config.api_server.chat_path + '";';
 
 		params['config_js'] += '\nserver_config.return_path = "/";'
 
@@ -153,70 +153,8 @@ module.exports.createApp = function(template)
 						"children": [
 							{
 								"plugin": "project",
-								"friends": [
-									"oculus", "navigation", "viewpoints", "viewing"
-								],
-								"children": [
-									{
-										"plugin": "inspect"
-									},
-									{
-										"plugin": "revision",
-										"friends" : [
-											"panels", "tree", "viewpoints", "meta", "issues", "revisionselector", "clip", "walkthrough"
-										],
-										"children": [
-											{
-												"plugin": "sid",
-												"children": [
-													{
-														"plugin": "inspect"
-													},
-													{
-														"plugin": "view"
-													}
-												]
-											},
-											{
-												"plugin": "view"
-											}
-										]
-									},
-									{
-										"plugin": "view",
-										"friends" : [
-											"panels", "tree", "viewpoints", "meta", "issues", "revisionselector", "clip", "walkthrough"
-										]
-									},
-                                    {
-                                        plugin: "AM_home",
-                                        children: [
-                                            {
-                                                plugin: "AM_project"
-                                            },
-                                            {
-                                                plugin: "AM_panel"
-                                            },
-                                            {
-                                                plugin: "AM_filter"
-                                            },
-                                            {
-                                                plugin: "AM_tree"
-                                            },
-                                            {
-                                                plugin: "AM_viewpoints"
-                                            },
-                                            {
-                                                plugin: "AM_issues"
-                                            },
-                                            {
-                                                plugin: "AM_clip"
-                                            },
-                                            {
-                                                plugin: "AM_bottomButtons"
-                                            }
-                                        ]
-                                    }
+								"friends" : [
+									"panel", "filter", "tree", "viewpoints", "issues", "oculus", "clip", "bottomButtons"
 								]
 							}
 						]
@@ -228,27 +166,24 @@ module.exports.createApp = function(template)
 
 	function loadPlugin(plugin, stateName, uistates, params)
 	{
-        var cssFile = "";
+		var cssFile = "";
 
-		if (!(plugin in params["parentStateJSON"]))
+		if (!(plugin in params["parentStateJSON"])) {
 			params["parentStateJSON"][plugin] = [];
+		}
 
 		var stateTok = stateName.split(".");
 		var parentState = stateTok.slice(0, -1).join('.');
 
-		if (params["parentStateJSON"][plugin].indexOf(parentState) == -1)
+		if (params["parentStateJSON"][plugin].indexOf(parentState) === -1) {
 			params["parentStateJSON"][plugin].push(parentState);
+		}
 
 		// TODO: Check whether or not it doesn't exist
 		var pluginConfig = {};
-        if (plugin.indexOf("AM_") !== -1) {
-            pluginConfig = JSON.parse(fs.readFileSync("./plugins/AM_/" + plugin.substring(3) + ".json", "utf8"));
-        }
-        else {
-            pluginConfig = JSON.parse(fs.readFileSync("./plugins/" + plugin + ".json", "utf8"));
-        }
+		pluginConfig = JSON.parse(fs.readFileSync("./plugins/" + plugin + ".json", "utf8"));
 
-		if (params["pluginLoaded"].indexOf(plugin) == -1)
+		if (params["pluginLoaded"].indexOf(plugin) === -1)
 		{
 			systemLogger.logInfo('Loading plugin ' + plugin + ' ...');
 
@@ -313,15 +248,15 @@ module.exports.createApp = function(template)
 					}
 				}
 
-                if ("css" in pluginConfig["files"])
-                {
-                    var nCSSFiles = pluginConfig["files"]["css"].length;
-                    for (var fileidx = 0; fileidx < nCSSFiles; fileidx++)
-                    {
-                        cssFile = '/public/plugins/' + pluginConfig["files"]["css"][fileidx];
-                        params["pluginCSS"].push(cssFile);
-                    }
-                }
+				if ("css" in pluginConfig["files"])
+				{
+					var nCSSFiles = pluginConfig["files"]["css"].length;
+					for (var fileidx = 0; fileidx < nCSSFiles; fileidx++)
+					{
+						cssFile = '/public/plugins/' + pluginConfig["files"]["css"][fileidx];
+						params["pluginCSS"].push(cssFile);
+					}
+				}
 			}
 
 			params["pluginLoaded"].push(plugin);
@@ -344,7 +279,7 @@ module.exports.createApp = function(template)
 	function buildParams(currentLevel, levelNum, stateName, uistates, params)
 	{
 		var plugin = currentLevel["plugin"];
-            AMPluguin = "";
+			AMPluguin = "";
 
 		if (stateName)
 			stateName += ".";
@@ -352,12 +287,12 @@ module.exports.createApp = function(template)
 		var states = [];
 
 		var pluginConfig = {};
-        if (plugin.indexOf("AM_") !== -1) {
-            pluginConfig = JSON.parse(fs.readFileSync("./plugins/AM_/" + plugin.substring(3) + ".json", "utf8"));
-        }
-        else {
-            pluginConfig = JSON.parse(fs.readFileSync("./plugins/" + plugin + ".json", "utf8"));
-        }
+		if (plugin.indexOf("AM_") !== -1) {
+			pluginConfig = JSON.parse(fs.readFileSync("./plugins/AM_/" + plugin.substring(3) + ".json", "utf8"));
+		}
+		else {
+			pluginConfig = JSON.parse(fs.readFileSync("./plugins/" + plugin + ".json", "utf8"));
+		}
 
 		if ("states" in pluginConfig)
 		{
@@ -410,7 +345,7 @@ module.exports.createApp = function(template)
 			params["ui"]					= {};
 			params["uistate"]				= {};
 			//params["levelOrder"]			= {};
-            params["pluginCSS"]			    = [];
+			params["pluginCSS"]				= [];
 
 			var parentState = "";
 			buildParams(pluginStructure, 0, parentState, [], params);

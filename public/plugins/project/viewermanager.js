@@ -15,13 +15,13 @@
  **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-var ViewerManager = function() {
+var ViewerManager = function(element) {
 	var self = this;
 
 	this.defaultViewerHandle = null;
 	this.viewers = {};
 
-	this.x3ddiv = $('#x3d')[0];
+	this.x3ddiv = element;
 
 	this.newIdx = 0;
 
@@ -37,7 +37,7 @@ var ViewerManager = function() {
 			self.viewers[idx].viewer.style.width = viewerSize + "%";
 			self.viewers[idx].viewer.style.left = (i * viewerSize) + "%";
 		}
-	}
+	};
 
 	this.close = function() {
 		var idxes = Object.keys(self.viewers).slice(0);
@@ -48,7 +48,7 @@ var ViewerManager = function() {
 
 			self.removeViewer(handle);
 		}
-	}
+	};
 
 	this.addViewer = function(name) {
 		// TODO: Check for unique ID
@@ -60,102 +60,116 @@ var ViewerManager = function() {
 		self.reshape();
 
 		return self.newIdx;
-	}
+	};
 
 	this.isValidHandle = function(handle) {
-		if(!handle) return false;
+		if(!handle) { 
+			return false;
+		}
 
 		// TODO: Too much, optimize to avoid calling this all the time
 		// And also the function below this.
 		var idx = Object.keys(self.viewers).map(function(v) { return parseInt(v); }).indexOf(handle);
 
-		if (idx == -1)
+		if (idx === -1) {
 			console.log('INVALID HANDLE ' + handle);
+		}
 
 		return (idx > -1);
-	}
+	};
 
 	this.getHandleByName = function(name) {
-		var match = Object.keys(self.viewers).filter(function(v) { return self.viewers[v].name == name; });
+		var match = Object.keys(self.viewers).filter(function(v) { return self.viewers[v].name === name; });
 
-		if (match.length)
+		if (match.length) {
 			return parseInt(match[0]);
-		else
+		} else {
 			return null;
-	}
+		}
+	};
 
 	this.getViewerByName = function(name) {
 		var handle = self.getHandleByName(name);
 
-		if (handle)
+		if (handle) {
 			return self.viewers[handle];
-		else
+		} else {
 			return null;
-	}
+		}
+	};
 
 	this.getViewer = function(handle) {
-		if (self.isValidHandle(handle))
+		if (self.isValidHandle(handle)) {
 			return self.viewers[handle];
-		else
+		} else {
 			return null;
-	}
+		}
+	};
 
 	this.removeViewer = function(handle) {
 		if (self.isValidHandle(handle))
 		{
 			// Can't be left with nothing
-			if (Object.keys(self.viewers).length == 1)
+			if (Object.keys(self.viewers).length === 1) {
 				return;
+			}
 
-			if (self.viewers[handle] == self.viewMaster)
+			if (self.viewers[handle] === self.viewMaster) {
 				self.viewMaster = null;
+			}
 
-			if (self.defaultViewerHandle == handle)
+			if (self.defaultViewerHandle === handle) {
 				self.defaultViewerHandle = parseInt(Object.keys(self.viewers)[0]);
-
-			if (self.diffHandle == handle)
+			}
+ 
+			if (self.diffHandle === handle) {
 				self.diffHandle = null;
+			}
 
-			self.linkedViewers = self.linkedViewers.filter(function(idx) { return (idx != handle); })
+			self.linkedViewers = self.linkedViewers.filter(function(idx) { return (idx !== handle); });
 
 			self.viewers[handle].close();
 			delete self.viewers[handle];
 
 			self.reshape();
 		}
-	}
+	};
 
 	this.linkedViewers = [];
 	this.linkedFunctions = [];
-	this.linkMe = function(handle) { self.addMe(self.linkedViewers, handle); }
+	this.linkMe = function(handle) { self.addMe(self.linkedViewers, handle); };
 
 	this.viewMaster = null;
 	this.switchMaster = function(handle) {
-		if (self.isValidHandle(handle))
+		if (self.isValidHandle(handle)) {
 			self.viewMaster = self.viewers[handle];
-	}
+		}
+	};
 
 	this.linkFunction = function(callback)
 	{
 		this.linkedFunctions.push(callback);
-	}
+	};
 
 	this.addMe = function(array, handle)
 	{
 		if (self.isValidHandle(handle))
 		{
-			if (array.indexOf(handle) == -1)
+			if (array.indexOf(handle) === -1) {
 				array.push(handle);
+			}
 		}
-	}
+	};
 
 	this.viewpointLinkFunction = function (newEvent, event) {
-		if (!self.linkedViewers.length || !self.viewMaster)
+		if (!self.linkedViewers.length || !self.viewMaster) {
 			return;
+		}
 
 		// Only updates to the master should do anything
-		if (event.target != self.viewMaster.getCurrentViewpoint())
+		if (event.target !== self.viewMaster.getCurrentViewpoint()) {
 			return;
+		}
 
 		event.orientation[1] = event.orientation[1] * -1;
 		self.viewMaster.transformEvent(event, event.target, false);
@@ -164,8 +178,9 @@ var ViewerManager = function() {
 		{
 			var handle = self.linkedViewers[i];
 
-			if (self.viewMaster.handle == handle) // Don't need to update the master
+			if (self.viewMaster.handle === handle)  {// Don't need to update the master
 				continue;
+			}
 
 			if (self.isValidHandle(handle))
 			{
@@ -176,17 +191,21 @@ var ViewerManager = function() {
 			}
 		}
 
-		for (var i = 0; i < self.linkedFunctions.length; i++)
+		for (var i = 0; i < self.linkedFunctions.length; i++) {
 			self.linkedFunctions[i](event);
+		}
 	};
 
 
 	this.initRuntime = function () {
-		for(handle in self.viewers)
-			if(self.viewers[handle])
-				if(!self.viewers[handle].runtime)
+		for(handle in self.viewers) {
+			if(self.viewers[handle]) {
+				if(!self.viewers[handle].runtime) {
 					self.viewers[handle].initRuntime();
-	}
+				}
+			}
+		}
+	};
 
 	x3dom.runtime.ready = this.initRuntime;
 
@@ -202,8 +221,9 @@ var ViewerManager = function() {
 				self.getDefaultViewer().linkMe();
 			}
 		} else {
-			if (self.isValidHandle(self.diffHandle))
+			if (self.isValidHandle(self.diffHandle)) {
 				self.removeViewer(self.diffHandle);
+			}
 		}
 	};
 
@@ -213,14 +233,16 @@ var ViewerManager = function() {
 	};
 
 	this.getDiffViewer = function() {
-		if(self.diffHandle)
+		if(self.diffHandle) {
 			return self.viewers[self.diffHandle];
-	}
+		}
+	};
 
 	this.getDefaultViewer = function() {
-		if(self.defaultViewerHandle)
+		if(self.defaultViewerHandle) {
 			return self.viewers[self.defaultViewerHandle];
-	}
+		}
+	};
 
 	// Helper function to load scene in viewers
 	this.loadURL = function(handle, url)
@@ -230,8 +252,9 @@ var ViewerManager = function() {
 			var viewer = self.viewers[handle];
 			viewer.loadURL(url);
 		}
-	}
+	};
 
+/*
 	this.messageBox = document.createElement('div');
 	this.messageBox.setAttribute('id', 'viewerMessageBox');
 	this.messageBox.className = "panel panel-default";
@@ -253,6 +276,7 @@ var ViewerManager = function() {
 			self.messageBox.style["display"] = "none";
 		}, timeout);
 	}
+	*/
 
 	// Create the default viewer
 	self.defaultViewerHandle = self.addViewer("viewer");

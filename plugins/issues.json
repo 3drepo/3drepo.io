@@ -1,17 +1,17 @@
 {
-	"name" : "issues",
-	"files": {
-		"angular": [
-			"issues/IssuesCtrl.js",
-			"issues/IssuesService.js"
-		],
-		"jade": [
-			{"template" : "issues/newissue.jade", "id" : "newissuemodal.html"}
-		],
-		"ui": [
-			{"name": "issue-pin", "template" : "issues/pin.jade", "position" : "loginButtons"},
-			{"name": "issues", "template" : "issues/issues.jade", "position" : "rightpanel"}
-		]
-	}
+    "name" : "issues",
+    "files": {
+        "angular" : [
+            "issues/issuesDirective.js",
+            "issues/issuesService.js",
+            "issues/issueDirective.js"
+        ],
+        "jade": [
+            {"template" : "issues/issues.jade", "id" : "issues.html"},
+            {"template" : "issues/issue.jade", "id" : "issue.html"}
+        ],
+        "css" : [
+            "issues/issues.css"
+        ]
+    }
 }
-

@@ -64,6 +64,7 @@
         vm.addStatus = false;
         vm.toastPosition = angular.extend({}, last);
         vm.showClearFilterButton = false;
+        vm.scrollPosition = 0;
 
         $scope.$watch("vm.contentItem", function (newValue) {
             if (angular.isDefined(newValue)) {
@@ -75,7 +76,8 @@
                         "show='vm.showContent' " +
                         "show-add='vm.addStatus' " +
                         "options='vm.options' " +
-                        "selected-option='vm.selectedOption'>" +
+                        "selected-option='vm.selectedOption' " +
+                        "scroll-position='vm.scrollPosition'>" + 
                     "</" + vm.contentItem + ">"
                 );
                 content.append(contentItem);
@@ -94,6 +96,11 @@
 
         $scope.$watch("vm.options", function (newValue) {
             vm.hasOptions = (angular.isDefined(newValue));
+        });
+
+        $scope.$watch("vm.scrollPosition", function (newValue) {
+            content = angular.element($element[0].querySelector('#content'));
+            content[0].scrollTop = parseInt(newValue);
         });
 
         $scope.$watch("vm.filterInputText", function (newValue) {

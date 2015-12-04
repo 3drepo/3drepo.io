@@ -1,13 +1,19 @@
 {
-	"name" : "tree",
-	"files": {
-		"angular" : [
-			"tree/TreeService.js",
-			"tree/TreeCtrl.js"
-		],
-		"ui": [
-			{"name": "tree", "template" : "tree/tree.jade", "position" : "leftpanel"}
-		]
-	}
+    "name" : "tree",
+    "files": {
+        "angular" : [
+            "tree/treeDirective.js",
+            "tree/treeService.js",
+            "tree/treeNodesDirective.js",
+            "tree/treeNodeDirective.js"
+        ],
+        "jade": [
+            {"template" : "tree/tree.jade", "id" : "tree.html"},
+            {"template" : "tree/treeNodes.jade", "id" : "treeNodes.html"},
+            {"template" : "tree/treeNode.jade", "id" : "treeNode.html"}
+        ],
+        "css" : [
+            "tree/tree.css"
+        ]
+    }
 }
-

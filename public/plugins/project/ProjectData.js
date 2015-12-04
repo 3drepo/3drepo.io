@@ -22,10 +22,7 @@ angular.module('3drepo')
 		name:			"",
 		owner:			"",
 		description:	"",
-		settings:		null,
-		publicPerm:		{read: false, write: false, execute: false},
-		userPerm:		{read: false, write: false, execute: false},
-		ownerPerm:		{read: false, write: false, execute: false}
+		settings:		null
 	};
 
 	o.projectTypes = [
@@ -35,18 +32,6 @@ angular.module('3drepo')
 		{label: 'Enginering', value: 4},
 		{label: 'Other', value: 5}
 	];
-
-	o.roleIndex = {
-		OWNER: 0,
-		USER: 1,
-		PUBLIC: 2
-	};
-
-	o.bitMasks = {
-		READ_BIT:		4,
-		WRITE_BIT:		2,
-		EXECUTE_BIT:	1
-	};
 
 	o.loading = false;
 	o.loadingPromise = $q.defer();
@@ -71,34 +56,8 @@ angular.module('3drepo')
 					self.type				= json.type;
 					self.selected			= self.projectTypes[0];
 
-					for(var i = 0; i < self.projectTypes.length; i++)
-					{
-						if (self.projectTypes[i].label.toLowerCase() == self.type.toLowerCase())
-						{
-							self.selected = self.projectTypes[i];
-							break;
-						}
-					}
-
-					// Public permissions
-					self.publicPerm.read = (json.permissions[self.roleIndex["PUBLIC"]] & self.bitMasks["READ_BIT"]) > 0;
-					self.publicPerm.write = (json.permissions[self.roleIndex["PUBLIC"]] & self.bitMasks["WRITE_BIT"]) > 0;
-					self.publicPerm.execute = (json.permissions[self.roleIndex["PUBLIC"]] & self.bitMasks["EXECUTE_BIT"]) > 0;
-
-					// User permissions
-					self.userPerm.read = (json.permissions[self.roleIndex["USER"]] & self.bitMasks["READ_BIT"]) > 0;
-					self.userPerm.write = (json.permissions[self.roleIndex["USER"]] & self.bitMasks["WRITE_BIT"]) > 0;
-					self.userPerm.execute = (json.permissions[self.roleIndex["USER"]] & self.bitMasks["EXECUTE_BIT"]) > 0;
-
-					// Owner permissions
-					self.ownerPerm.read = (json.permissions[self.roleIndex["OWNER"]] & self.bitMasks["READ_BIT"]) > 0;
-					self.ownerPerm.write = (json.permissions[self.roleIndex["OWNER"]] & self.bitMasks["WRITE_BIT"]) > 0;
-					self.ownerPerm.execute = (json.permissions[self.roleIndex["OWNER"]] & self.bitMasks["EXECUTE_BIT"]) > 0;
-
 					self.loading = false;
-
 					self.settings = json.properties;
-
 					self.loadingPromise.resolve();
 				});
 			} else {
@@ -108,16 +67,6 @@ angular.module('3drepo')
 
 		return self.loadingPromise.promise;
 	};
-
-	o.updateInfo = function()
-	{
-		var newInfo = {
-			type:			this.type,
-			description:	this.description
-		};
-
-		return $http.post(serverConfig.apiUrl(StateManager.state.account + '/' + self.project), newInfo);
-	}
 
 	return o;
 }]);

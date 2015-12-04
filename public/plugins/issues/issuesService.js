@@ -71,12 +71,13 @@
             return deferred.promise;
         };
 
-        var saveIssue = function (name, objectId, pickedPos, pickedNorm) {
+        var saveIssue = function (account, project, name, objectId, pickedPos, pickedNorm) {
             var currentVP = ViewerService.defaultViewer.getCurrentViewpointInfo(),
                 dataToSend = {};
 
             deferred = $q.defer();
-            url = serverConfig.apiUrl(state.account + "/" + state.project + "/issues/" + objectId);
+            url = serverConfig.apiUrl(account + "/" + project + "/issues/" + objectId);
+
             data = {
                 name: name,
                 viewpoint: ViewerService.defaultViewer.getCurrentViewpointInfo(),
@@ -89,22 +90,6 @@
             if (pickedPos !== null) {
                 data.position = pickedPos.toGL();
                 data.norm = pickedNorm.toGL();
-
-                var vp = new x3dom.fields.SFVec3f(0.0, 0.0, 0.0);
-                vp.setValueByStr(currentVP.position.join(' '));
-
-                var pp = new x3dom.fields.SFVec3f();
-                pp.setValueByStr(data.position.join(' '));
-
-                var pn = new x3dom.fields.SFVec3f();
-                pn.setValueByStr(data.norm.join(' '));
-
-                pp = pp.add(pn.multiply(pinHeight));
-
-                var dist = pp.subtract(vp).length();
-                var pixelViewRatio = currentVP.unityHeight / ViewerService.defaultViewer.getViewArea()._height;
-                var pinPixelSize = 2.0 * pinRadius / (pixelViewRatio * dist);
-
                 data.scale = pinCoverage / pinPixelSize;
             }
 
@@ -118,11 +103,10 @@
                     response.data.issue.timeStamp = prettyTime(response.data.issue.created);
 
                     if (pickedPos !== null) {
-                        addPin({
+                        fixPin({
                             id: response._id,
                             position: data.position,
-                            norm: data.norm,
-                            scale: data.scale
+                            norm: data.norm
                         });
                     }
                     deferred.resolve(response.data.issue);
@@ -177,37 +161,50 @@
 
         function addPin (pin) {
             removePin();
-            console.log(pin);
-            var pinPlacement = document.createElement("Transform");
-            pinPlacement.setAttribute("id", "pinPlacement");
+
+            createPinShape("pinPlacement", pin, pinRadius, pinHeight);
+         }
+
+        function removePin () {
+            var pinPlacement = document.getElementById("pinPlacement");
+            if (pinPlacement !== null) {
+               pinPlacement.parentElement.removeChild(pinPlacement) 
+            }
+        }
+
+        function fixPin (pin) {
+            createPinShape(pin.id, pin, pinRadius, pinHeight);
+        }
+
+        function createPinShape (id, pin, radius, height, scale)
+        {   
+            var sceneBBox = ViewerService.defaultViewer.scene._x3domNode.getVolume();
+            var sceneSize = sceneBBox.max.subtract(sceneBBox.min).length();
+            var scale     = sceneSize / 20;
+
+            if (ViewerService.defaultViewer.pinSize)
+            {
+                scale = ViewerService.defaultViewer.pinSize;
+            }
+
+            var parent = document.createElement("Transform");
+            parent.setAttribute("id", id);
             var position = new x3dom.fields.SFVec3f(pin.position[0], pin.position[1], pin.position[2]);
 
             // Transform the pin into the coordinate frame of the parent
-            pinPlacement.setAttribute("translation", position.toString());
+            parent.setAttribute("translation", position.toString());
 
             var norm = new x3dom.fields.SFVec3f(pin.norm[0], pin.norm[1], pin.norm[2]);
 
             // Transform the normal into the coordinate frame of the parent
             var axisAngle = ViewerService.defaultViewer.rotAxisAngle([0,1,0], norm.toGL());
 
-            pinPlacement.setAttribute("rotation", axisAngle.toString());
-            createPinShape(pinPlacement, pin.id, pinRadius, pinHeight, pin.scale);
-            $("#model__root")[0].appendChild(pinPlacement);
-        }
+            parent.setAttribute("rotation", axisAngle.toString());
 
-        function removePin () {
-            var pinPlacement = document.getElementById("pinPlacement");
-            if (pinPlacement !== null) {
-                $("#model__root")[0].removeChild(pinPlacement);
-            }
-        }
+            $("#" + pin.account + "__" + pin.project + "__root")[0].appendChild(parent);
 
-        function createPinShape (parent, id, radius, height, scale)
-        {
             var coneHeight = height - radius;
             var pinshape = document.createElement("Group");
-            pinshape.setAttribute("id", id);
-
             pinshape.setAttribute('onclick', 'clickPin(event)');
 
             var pinshapeapp = document.createElement("Appearance");
@@ -272,6 +269,7 @@
             closeIssue: closeIssue,
             saveComment: saveComment,
             addPin: addPin,
+            fixPin: fixPin,
             removePin: removePin
         };
     }

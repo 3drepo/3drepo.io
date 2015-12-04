@@ -1,7 +1,0 @@
-#ui2-leftpanel.collapsed(ng-controller="PanelCtrl", ng-show="ui.leftPanel")
-	#ui2-leftpanel-collapse-btn.pull-right.panel-collapse-btn(ng-click="toggleLeftPanel()")
-		i.fa.fa-list
-	if ui.leftpanel
-		each uicomp in ui.leftpanel
-			!= renderMe(uicomp["template"], locals)
-

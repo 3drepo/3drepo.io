@@ -1,26 +1,26 @@
-#issues.issueview(ng-controller='IssuesCtrl')
-	.input-group
-		button.btn(ng-click='newIssue()', ng-disabled='!objectIsSelected')
-			i.fa.fa2x.fa-plus
-	#accordion.panel-group(ng-repeat="(project, projectIssues) in IssuesService.issues")
-		.panel.panel-default
-			.panel-heading 
-				h4.panel-title {{ project }}
-		.panel.panel-default(ng-repeat="issue in projectIssues")
-			.panel-heading
-				h2.panel-title 
-					a(data-toggle='collapse', ng-click='openIssue(issue)') {{ issue.number + " - " + issue.name + " [" + issue.created + "]" }}
-					button.btn(ng-if="!issue.complete", ng-click='complete(issue)')
-						i.fa.fa-check
-			.panel-collapse(id="{{issue._id}}", collapse="expanded[issue._id] ? !expanded[issue._id] : true")
-				.panel-body
-					table.metadata-table(ng-repeat="comment in IssuesService.issueContents[issue._id]")
-						tr
-							th.metadata-title(colspan="2") {{comment.owner + " [" + comment.created + "]" }}
-						tr 
-							td {{comment.comment}}
-					.input-group(ng-if="!issue.complete")
-						form(ng-submit="addNewComment(issue)")
-							input(ng-model="newComment.text", placeholder="New Comment")
-							input#hiddensubmitbutton(type="submit")
+div(ng-class="vm.height")
+	div(ng-show="vm.showAdd")
+		#issuesAddContainer
+			md-input-container(md-no-float="")
+				input(placeholder="Title", ng-model="vm.title")
 
+			md-input-container(md-no-float="")
+				textarea(placeholder="Comment", ng-model="vm.comment")
+
+			md-button.md-raised.md-accent(ng-click="vm.saveIssue()", ng-disabled="vm.saveIssueDisabled") Save
+
+		md-divider
+
+	md-list
+		issue(
+			ng-repeat="issue in vm.issuesToShow",
+			data="issue",
+			on-comments-toggled="vm.commentsToggled(issueId)"
+			comments-toggled-issue-id="vm.commentsToggledIssueId"
+			on-save-comment="vm.saveComment(issue, text)"
+			comment-saved="vm.commentSaved"
+			on-delete-comment="vm.deleteComment(issue, commentIndex)"
+			comment-deleted="vm.commentDeleted"
+			on-close-issue="vm.closeIssue(issue)"
+			issue-closed="vm.issueClosed"
+		)

@@ -21,9 +21,9 @@
     angular.module('3drepo')
         .factory('TreeService', TreeService);
 
-    TreeService.$inject = ["$http", "$q", "StateManager", "serverConfig"];
+    TreeService.$inject = ["$http", "$q", "StateManager", "ViewerService", "serverConfig"];
 
-    function TreeService($http, $q, StateManager, serverConfig) {
+    function TreeService($http, $q, StateManager, ViewerService, serverConfig) {
         var state = StateManager.state,
             currentSelectedNodeId = null;
 
@@ -63,9 +63,29 @@
             }
         };
 
-        var toggleNode = function (nodeId) {
-            var rootObj = document.getElementById("model__" + nodeId);
-            rootObj.setAttribute("render", (rootObj.getAttribute("render") === "false") ? "true" : "false");
+        var toggleNode = function (nodeId, state) {
+            if (nodeId.indexOf("###") === 0)
+            {
+                var actualID = nodeId.slice(3);
+
+                var idParts = actualID.split("__");
+                var mpnodes = $("multipart[id^=" + idParts[0] + "__" + idParts[1] + "]");
+                var objectID = idParts[idParts.length - 1];
+
+                for(var i = 0; i < mpnodes.length; i++)
+                {
+                    var parts = mpnodes[i].getParts([objectID]);
+
+                    if (parts.ids.length > 0)
+                    {
+                        parts.setVisibility(state);
+                        ViewerService.defaultViewer.addHiddenPart(parts);
+                    }
+                }
+            } else {
+                var rootObj = document.getElementById("model__" + nodeId);
+                rootObj.setAttribute("render", state.toString());
+            }
         };
 
         return {

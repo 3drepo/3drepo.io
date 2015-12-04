@@ -42,9 +42,9 @@
         };
     }
 
-    IssueCtrl.$inject = ["$scope", "ViewerService"];
+    IssueCtrl.$inject = ["$scope", "NewIssuesService", "ViewerService"];
 
-    function IssueCtrl($scope, ViewerService) {
+    function IssueCtrl($scope, NewIssuesService, ViewerService) {
         var vm = this,
             i = 0,
             length = 0,
@@ -55,6 +55,13 @@
         vm.numNewComments = 0;
         vm.saveCommentDisabled = true;
         vm.backgroundClass = "issueClosedBackground";
+
+        NewIssuesService.fixPin({
+            id: vm.data._id,
+            position: vm.data.position,
+            norm: vm.data.norm,
+            scale: vm.data.scale
+        });
 
         $scope.$watch("vm.commentsToggledIssueId", function (newValue) {
             if (angular.isDefined(newValue) && (newValue !== vm.data._id)) {

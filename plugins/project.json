@@ -8,15 +8,21 @@
 			"project/collision.js"
 		],
 		"jade" : [
-			{"template" : "project/project.jade", "id" : "project.html"}
+			{"template" : "project/project.jade", "id" : "project.html" },
+			{"template" : "project/home.jade", "id" : "home.html" }
 		],
-		"ui": [
-			{"name": "icons", "template" : "project/icons.jade", "position": "right"}
-		],
-		"angular": [
-			"project/ViewerService.js",
+		"angular" : [
+			"project/homeDirective.js",
+			"project/globalDirective.js",
+			"project/eventService.js",
 			"project/ProjectData.js",
-			"project/ProjectCtrl.js"
+			"project/ViewerService.js",
+			"project/projectDirective.js",
+			"project/viewerDirective.js",
+			"project/viewerManagerDirective.js"
+		],
+		"css" : [
+			"project/home.css"
 		]
 	}
 }

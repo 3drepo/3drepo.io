@@ -1,8 +1,0 @@
-{
-    "name" : "project",
-    "files": {
-        "angular" : [
-            "AM_/project/projectDirective.js"
-        ]
-    }
-}

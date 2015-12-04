@@ -49,8 +49,11 @@
             sortedIssuesLength,
             sortOldestFirst = true,
             showClosed = false;
+        vm.pickedAccount = null;
+        vm.pickedProject = null;
         vm.pickedPos = null;
         vm.pickedNorm = null;
+        vm.pickedTrans = null;
         vm.selectedObjectId = null;
         vm.globalClickWatch = null;
         vm.saveIssueDisabled = true;
@@ -164,11 +167,14 @@
                     vm.showAlert();
                 }
                 else {
-                    promise = NewIssuesService.saveIssue(vm.title, vm.selectedObjectId, vm.pickedPos, vm.pickedNorm);
+                    promise = NewIssuesService.saveIssue(vm.pickedAccount, vm.pickedProject, vm.title, vm.selectedObjectId, vm.pickedPos, vm.pickedNorm);
                     promise.then(function (data) {
                         console.log(data);
                         vm.issues.push(data);
                         vm.title = "";
+                        vm.pickedAccount = null;
+                        vm.pickedProject = null;
+                        vm.pickedTrans   = null;
                         vm.pickedPos = null;
                         vm.pickedNorm = null;
                         if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
@@ -205,20 +211,36 @@
                         (!((event.value.clientX === oldEvent.value.clientX) &&
                            (event.value.clientY === oldEvent.value.clientY)))) {
 
-                        var dragEndX = event.value.clientX - screen.availLeft;
+                        var dragEndX = event.value.clientX;
                         var dragEndY = event.value.clientY;
                         var pickObj = ViewerService.pickPoint(dragEndX, dragEndY);
+
                         if (pickObj.pickObj !== null) {
                             vm.showInput = true;
-                            vm.selectedObjectId = pickObj.pickObj._xmlNode.getAttribute("DEF");
-                            vm.pickedPos = pickObj.pickPos;
-                            vm.pickedNorm = pickObj.pickNorm;
+                            vm.selectedObjectId = pickObj.partID ? pickObj.partID : pickObj.pickObj._xmlNode.getAttribute("DEF");
+
+                            var projectParts = pickObj.pickObj._xmlNode.getAttribute("id").split("__");
+
+                            if (projectParts[0] === "model")
+                            {
+                                vm.pickedAccount = NewIssuesService.state.account;
+                                vm.pickedProject = NewIssuesService.state.project;
+                                vm.pickedTrans   = $("#model__root")[0]._x3domNode.getCurrentTransform();
+                            } else {
+                                vm.pickedAccount = projectParts[0];
+                                vm.pickedProject = projectParts[1];
+                                vm.pickedTrans   = $("#" + vm.pickedAccount + "__" + vm.pickedProject + "__root")[0]._x3domNode.getCurrentTransform();
+                            }
+
+                            vm.pickedNorm = vm.pickedTrans.transpose().multMatrixVec(pickObj.pickNorm);
+                            vm.pickedPos = vm.pickedTrans.inverse().multMatrixVec(pickObj.pickPos);
 
                             NewIssuesService.addPin({
                                 id: undefined,
+                                account: vm.pickedAccount,
+                                project: vm.pickedProject,
                                 position: pickObj.pickPos.toGL(),
-                                norm: pickObj.pickNorm.toGL(),
-                                scale: 10.0
+                                norm: pickObj.pickNorm.toGL()
                             });
                         }
                         else {
@@ -236,6 +258,7 @@
             }
         }
 
+        /*
         $(document).on("objectSelected", function(event, object, zoom) {
             if (angular.isUndefined(object)) {
                 vm.selectedObjectId = null;
@@ -244,14 +267,61 @@
                 NewIssuesService.removePin();
             }
             else {
-                vm.selectedObjectId = object.getAttribute("DEF");
+                if (object["multipart"])
+                {
+                    var projectParts = object.id.split("__");
+
+                    if (projectParts[0] === "model")
+                    {
+                        vm.pickedAccount = NewIssuesService.state.account;
+                        vm.pickedProject = NewIssuesService.state.project;
+                        vm.pickedTrans   = $("#model__root")[0]._x3domNode.getCurrentTransform();
+                    } else {
+                        vm.pickedAccount = projectParts[0];
+                        vm.pickedProject = projectParts[1];
+                        vm.pickedTrans   = $("#" + vm.pickedAccount + "__" + vm.pickedProject + "__root")[0]._x3domNode.getCurrentTransform();
+                    }
+
+                    vm.selectedObjectId = projectParts[projectParts.length - 1];
+                } else {
+                    vm.selectedObjectId = object.getAttribute("DEF");
+                }
             }
         });
+        */
 
         $(document).on("partSelected", function(event, part, zoom) {
             $scope.IssuesService.mapPromise.then(function () {
-                vm.selectedObjectId = $scope.IssuesService.IDMap[part.partID];
+                var projectParts = part.part.multiPart._xmlNode.id.split("__");
+
+                if (projectParts[0] === "model")
+                {
+                    vm.pickedAccount = $scope.IssuesService.state.account;
+                    vm.pickedProject = $scope.IssuesService.state.project;
+                    vm.pickedTrans   = $("#model__root")[0]._x3domNode.getCurrentTransform();
+                } else {
+                    vm.pickedAccount = projectParts[0];
+                    vm.pickedProject = projectParts[1];
+                    vm.pickedTrans   = $("#" + scope.pickedAccount + "__" + scope.pickedProject + "__root")[0]._x3domNode.getCurrentTransform();
+                }
+
+                vm.selectedObjectId = projectParts[projectParts.length - 1];
             });
+        });
+
+        /*
+         * When a pin is clicked that make sure the issue sidebar
+         * also reflects the updated state
+         * @listens pinClick
+         * @param {event} event - Originating event
+         * @param {object} clickInfo - Contains object and information about the source of the click
+         */
+        $(document).on("pinClick", function (event, clickInfo) {
+            // If there has been a pin selected then switch
+            // that issue
+            var issueId = clickInfo.object ? clickInfo.object["id"] : null;
+            
+            vm.commentsToggled(issueId);
         });
 
         vm.showAlert = function() {

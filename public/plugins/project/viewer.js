@@ -221,6 +221,8 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 				} else if (e.charCode == 'a'.charCodeAt(0)) {
 					self.showAll();
 					self.enableClicking();
+				} else if (e.charCode == 'u'.charCodeAt(0)) {
+					self.revealAll();
 				}
 			});
 
@@ -821,6 +823,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
                     self.pickObject.part = new x3dom.Parts(mp, [objId - mp._minId], colorMap, emissiveMap, specularMap, visibilityMap);
                     self.pickObject.partID = mp._idMap.mapping[objId - mp._minId].name;
+                    self.pickObject.pickObj = self.pickObject.part.multiPart;
 				}
 			}
 		}
@@ -1215,6 +1218,11 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.hiddenParts = [];
 
+	this.addHiddenPart = function(part)
+	{
+		this.hiddenParts.push(part);
+	}
+
 	this.clickObject = function(event, objEvent) {
 		if ((objEvent.button == 1) && !self.selectionDisabled)
 		{
@@ -1225,13 +1233,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			} else {
 				self.triggerSelected(objEvent.target);
 			}
-		} else if (objEvent.button == 2) {
-			if (objEvent.part)
-			{
-				objEvent.part.setVisibility(false);
-				self.hiddenParts.push(objEvent.part);
-			}
-		}
+		} 
 	}
 
 	this.revealAll = function(event, objEvent)
