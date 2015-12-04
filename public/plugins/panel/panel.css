@@ -78,12 +78,11 @@ panel-content .md-menu {
   padding: 0;
 }
 
-.panelContentFilter {
-  width: 100%;
-  height: 50px;
+panel-content .panelContentFilter {
   background: #E8EAF6;
+  padding: 5px 10px 0 10px;
+  height: 50px;
   border-bottom: solid 1px #C5CAE9;
-  padding: 0 10px 0 10px;
 }
 
 /** Panel Content Add *************************************************************************************************/
@@ -117,3 +116,4 @@ panel-content-add input {
   font-size: 30px;
   margin-top: -5px;
 }
+

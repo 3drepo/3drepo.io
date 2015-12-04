@@ -41,10 +41,10 @@
             bindToController: true
         };
     }
+    
+    PanelContentCtrl.$inject = ["$scope", "$element", "$compile", "$timeout", "$mdSidenav", "EventService"];
 
-    PanelContentCtrl.$inject = ["$scope", "$element", "$compile", "$timeout", "EventService"];
-
-    function PanelContentCtrl($scope, $element, $compile, $timeout, EventService) {
+    function PanelContentCtrl($scope, $element, $compile, $timeout, $mdSidenav, EventService) {
         var vm = this,
             content = "",
             contentItem = "",

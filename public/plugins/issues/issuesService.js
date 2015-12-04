@@ -25,7 +25,6 @@
 
     function NewIssuesService($http, $q, StateManager, serverConfig, ViewerService) {
         var state = StateManager.state,
-            deferred = null,
             url = "",
             data = {},
             config = {},
@@ -34,8 +33,7 @@
             numComments = 0,
             pinCoverage = 15.0,
             pinRadius = 0.25,
-            pinHeight = 1.0,
-            currentPinId = null;
+            pinHeight = 1.0;
 
         var prettyTime = function(time) {
             var date = new Date(time);
@@ -47,7 +45,7 @@
         };
 
         var getIssues = function () {
-            deferred = $q.defer();
+            var deferred = $q.defer();
             url = serverConfig.apiUrl(state.account + '/' + state.project + '/issues.json');
 
             $http.get(url)
@@ -73,9 +71,9 @@
 
         var saveIssue = function (account, project, name, objectId, pickedPos, pickedNorm) {
             var currentVP = ViewerService.defaultViewer.getCurrentViewpointInfo(),
-                dataToSend = {};
+                dataToSend = {},
+                deferred = $q.defer();
 
-            deferred = $q.defer();
             url = serverConfig.apiUrl(account + "/" + project + "/issues/" + objectId);
 
             data = {
@@ -90,7 +88,6 @@
             if (pickedPos !== null) {
                 data.position = pickedPos.toGL();
                 data.norm = pickedNorm.toGL();
-                data.scale = pinCoverage / pinPixelSize;
             }
 
             dataToSend = {data: JSON.stringify(data)};
@@ -98,17 +95,13 @@
             $http.post(url, dataToSend, config)
                 .then(function successCallback(response) {
                     console.log(response);
-                    response.data.issue.account = state.account;
-                    response.data.issue.project = state.project;
+                    response.data.issue._id     = response.data.issue_id;
+                    response.data.issue.account = account;
+                    response.data.issue.project = project;
                     response.data.issue.timeStamp = prettyTime(response.data.issue.created);
 
-                    if (pickedPos !== null) {
-                        fixPin({
-                            id: response._id,
-                            position: data.position,
-                            norm: data.norm
-                        });
-                    }
+                    removePin();
+
                     deferred.resolve(response.data.issue);
                 });
 
@@ -137,26 +130,38 @@
             return deferred.promise;
         };
 
-        var saveComment = function (issue, comment) {
-            deferred = $q.defer();
+        function doPost(issue, data) {
+            var deferred = $q.defer();
             url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue.parent);
-            data = {
-                data: JSON.stringify({
-                    _id: issue._id,
-                    comment: comment,
-                    number: issue.number
-                })
-            };
             config = {
                 withCredentials: true
             };
-
-            $http.post(url, data, config)
-                .then(function successCallback(response) {
+            data._id = issue._id;
+            $http.post(url, {data: JSON.stringify(data)}, config)
+                .then(function (response) {
                     deferred.resolve(response.data);
                 });
-
             return deferred.promise;
+        }
+
+        var closeIssue = function (issue) {
+            return doPost(issue, {closed: true, number: issue.number});
+        };
+
+        var saveComment = function (issue, comment) {
+            return doPost(issue, {comment: comment, number: issue.number});
+        };
+
+        var editComment = function (issue, comment, commentIndex) {
+            return doPost(issue, {comment: comment, number: issue.number, edit: true, commentIndex: commentIndex});
+        };
+
+        var deleteComment = function (issue, index) {
+            return doPost(issue, {comment: "", number: issue.number, delete: true, commentCreated: issue.comments[index].created});
+        };
+
+        var setComment = function (issue, commentIndex) {
+            return doPost(issue, {comment: "", number: issue.number, set: true, commentIndex: commentIndex});
         };
 
         function addPin (pin) {
@@ -187,21 +192,37 @@
                 scale = ViewerService.defaultViewer.pinSize;
             }
 
-            var parent = document.createElement("Transform");
+            var parent = document.createElement("MatrixTransform");
             parent.setAttribute("id", id);
-            var position = new x3dom.fields.SFVec3f(pin.position[0], pin.position[1], pin.position[2]);
 
-            // Transform the pin into the coordinate frame of the parent
-            parent.setAttribute("translation", position.toString());
+            var inlines = $("inline");
+            var trans = null;
+
+            for (var i = 0; i < inlines.length; i++)
+            {
+                if (inlines[i].getAttribute("nameSpaceName") === (pin.account + "__" + pin.project))
+                {
+                    trans = inlines[i]._x3domNode.getCurrentTransform();
+                    break
+                }
+            }
+
+            parent.setAttribute("matrix", trans.toGL());
 
             var norm = new x3dom.fields.SFVec3f(pin.norm[0], pin.norm[1], pin.norm[2]);
 
             // Transform the normal into the coordinate frame of the parent
             var axisAngle = ViewerService.defaultViewer.rotAxisAngle([0,1,0], norm.toGL());
 
-            parent.setAttribute("rotation", axisAngle.toString());
+            var modelTransform = document.createElement("Transform");
+            modelTransform.setAttribute("rotation", axisAngle.toString());
+ 
+            var position = new x3dom.fields.SFVec3f(pin.position[0], pin.position[1], pin.position[2]);
 
-            $("#" + pin.account + "__" + pin.project + "__root")[0].appendChild(parent);
+            // Transform the pin into the coordinate frame of the parent
+            modelTransform.setAttribute("translation", position.toString());
+          
+            parent.appendChild(modelTransform);
 
             var coneHeight = height - radius;
             var pinshape = document.createElement("Group");
@@ -259,7 +280,9 @@
             pinshapeballshape.appendChild(pinshapeball);
             pinshapeballshape.appendChild(ballApp);
 
-            parent.appendChild(pinshape);
+            modelTransform.appendChild(pinshape);
+
+            $("#model__root")[0].appendChild(parent);
         }
 
         return {
@@ -268,6 +291,9 @@
             saveIssue: saveIssue,
             closeIssue: closeIssue,
             saveComment: saveComment,
+            editComment: editComment,
+            deleteComment: deleteComment,
+            setComment: setComment,
             addPin: addPin,
             fixPin: fixPin,
             removePin: removePin

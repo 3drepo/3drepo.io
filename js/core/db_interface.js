@@ -1665,7 +1665,7 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 						}
 
 						self.logger.logDebug("Updated " + count + " records.");
-						callback(responseCodes.OK, { issue_id : uuidToString(data._id), number : data.number, created : data.created, issue: data });
+						callback(responseCodes.OK, { account: dbName, project: project, issue_id : uuidToString(data._id), number : data.number, created : data.created, issue: data });
 					});
 				});
 			});
@@ -1695,7 +1695,7 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 				if (err) return callback(responseCodes.DB_ERROR(err));
 
 				self.logger.logDebug("Updated " + count + " records.");
-				callback(responseCodes.OK, { issue_id : uuidToString(data._id), number: data.number, owner: owner, created: timeStamp });
+				callback(responseCodes.OK, { account: dbName, project: project, issue_id : uuidToString(data._id), number: data.number, owner: owner, created: timeStamp });
 			});
 		}
 	});

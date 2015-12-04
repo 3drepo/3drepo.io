@@ -79,7 +79,7 @@
                         $timeout(angular.noop, 300).then(angular.bind(this, function() {
                             vm.nodes = [{}];
                             vm.nodes[0]._id = vm.origID;
-                            vm.nodes[0].name = vm.anObject;
+                            vm.nodes[0].name = vm.objectName;
                             vm.nodes[0].index = 0;
                             vm.nodes[0].toggleState = true;
                             vm.nodes[0].class = "unselectedFilterItem";
@@ -193,10 +193,16 @@
                     }
 
                     objectID = idParts[idParts.length - 1];
-                    vm.filterText = "###" + vm.idToName[objectID];
 
-                    vm.anObject      = objectID;
-                    vm.origID        = "###" + object.id;
+                    if (objectID === vm.idToName[objectID])
+                    {
+                        vm.filterText = "###" + vm.idToName[objectID];
+
+                        vm.objectName    = objectID;
+                        vm.origID        = "###" + object.id;
+                    } else {
+                        vm.filterText    = vm.idToName[objectID];
+                    }
                 }
             });
         });

@@ -1,33 +1,39 @@
 .issue(ng-class="vm.backgroundClass")
-	md-list-item.md-2-line#issueTitle(ng-click="vm.toggleComments()")
-		div.md-list-item-text
-			h3 &#35;{{vm.data.number}} {{vm.data.name}}
-			.issueInfo
-				p {{vm.data.owner}}
-				p(class="issueTimeStamp") {{vm.data.timeStamp}}
+	.issueHeader
+		md-list-item.md-2-line.issueTitle(ng-click="vm.toggleComments()")
+			div.md-list-item-text
+				h3 &#35;{{vm.data.number}} {{vm.data.name}}
+				.issueTitleInfo(layout="row" layout-align="space-between center")
+					p {{vm.data.owner}}
+					p {{vm.data.timeStamp}}
+
+		.issueInfo(ng-if="vm.showInfo", layout="row" layout-align="start center")
+			div(flex)
+				h5 {{vm.infoText}}
+			div(flex="15")
+				md-button.md-icon-button(ng-click="vm.hideInfo()", aria-label="Hide info")
+					md-icon(md-font-icon="fa-times-circle", class="fa")
+
 
 	div(ng-show="vm.showComments", ng-class="{issueComments: vm.toggleCommentsState}", comments-height, num-new-comments="vm.numNewComments")
 		.issueCommentsContainer
 			md-list
 				md-list-item.md-2-line(ng-repeat="comment in vm.data.comments")
 					div.md-list-item-text
-						div(layout="row", layout-wrap)
-							h3(flex="80") {{comment.comment}}
-							md-button.md-icon-button.commentDeleteButton(
-								aria-label="Delete comment"
-								flex="15"
-								ng-if="comment.canDelete"
-								ng-click="vm.deleteComment($index)"
-							)
-								md-icon(class="fa fa-times-circle")
-						.issueInfo
+						div(layout="row" layout-align="space-between center")
+							h3 {{comment.comment}}
+							//md-button.md-icon-button.commentDeleteButton(aria-label="Delete comment", flex="15", ng-if="comment.canDelete", ng-click="vm.deleteComment($index)")
+							.commentModify(layout="row" layout-align="center center", ng-if="vm.issueIsOpen")
+								md-icon.md-accent.commentModifyButton(class="fa fa-pencil", ng-if="comment.canDelete", ng-click="vm.toggleEditComment($index)")
+								md-icon.md-accent.commentModifyButton(class="fa fa-times-circle", ng-if="comment.canDelete", ng-click="vm.deleteComment($index)")
+						.issueCommentInfo(layout="row" layout-align="space-between center")
 							p {{comment.owner}}
 							p(class="issueTimeStamp") {{comment.timeStamp}}
 				md-input-container(md-no-float="", ng-if="vm.issueIsOpen")
 					textarea(placeholder="New comment", ng-model="vm.comment")
 
-			div(layout="row", layout-align="space-between center")
+			.issueCommentsFooter(layout="row", layout-align="start center")
 				md-button.md-raised.md-accent(ng-click="vm.saveComment()", ng-disabled="vm.saveCommentDisabled", ng-if="vm.issueIsOpen") Save
-				md-button.md-raised.md-primary.md-hue-1(ng-click="vm.closeIssue()", ng-if="vm.issueIsOpen") Close issue
+				md-button.md-primary.md-accent(ng-click="vm.closeIssue()", ng-if="vm.issueIsOpen") Close issue
 
 	md-divider

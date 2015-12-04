@@ -29,10 +29,6 @@
                 data: "=",
                 onCommentsToggled: "&",
                 commentsToggledIssueId: "=",
-                onSaveComment : "&",
-                commentSaved: "=",
-                onDeleteComment : "&",
-                commentDeleted: "=",
                 onCloseIssue : "&",
                 issueClosed: "="
             },
@@ -42,37 +38,46 @@
         };
     }
 
-    IssueCtrl.$inject = ["$scope", "NewIssuesService", "ViewerService"];
+    IssueCtrl.$inject = ["$scope", "$timeout", "NewIssuesService", "ViewerService"];
 
-    function IssueCtrl($scope, NewIssuesService, ViewerService) {
+    function IssueCtrl($scope, $timeout, NewIssuesService, ViewerService) {
         var vm = this,
             i = 0,
             length = 0,
-            currentTime = 0,
-            thirtyMinutes = 3600000;
+            promise = null;
+
         vm.showComments = false;
         vm.toggleCommentsState = false;
         vm.numNewComments = 0;
         vm.saveCommentDisabled = true;
         vm.backgroundClass = "issueClosedBackground";
+        vm.autoSaveComment = false;
+        vm.showInfo        = false;
+        vm.editingComment  = false;
 
         NewIssuesService.fixPin({
             id: vm.data._id,
+            account: vm.data.account,
+            project: vm.data.project,
             position: vm.data.position,
-            norm: vm.data.norm,
-            scale: vm.data.scale
+            norm: vm.data.norm
         });
 
         $scope.$watch("vm.commentsToggledIssueId", function (newValue) {
             if (angular.isDefined(newValue) && (newValue !== vm.data._id)) {
                 vm.toggleCommentsState = false;
                 vm.showComments = false;
-            }
-        });
 
-        $scope.$watch("vm.commentSaved", function (newValue) {
-            if (angular.isDefined(newValue) && newValue) {
-                vm.comment = "";
+                if (vm.editingComment) {
+                    vm.comment = "";
+                }
+                else {
+                    // Auto-save a comment
+                    if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
+                        vm.autoSaveComment = true;
+                        vm.saveComment();
+                    }
+                }
             }
         });
 
@@ -87,19 +92,19 @@
                 vm.backgroundClass = newValue.hasOwnProperty("closed") ? "issueClosedBackground" : "issueOpenBackground";
                 vm.issueIsOpen = !newValue.hasOwnProperty("closed");
                 if (vm.issueIsOpen && newValue.hasOwnProperty("comments")) {
-                    currentTime = new Date();
                     for (i = 0, length = newValue.comments.length; i < length; i += 1) {
                         newValue.comments[i].canDelete =
-                            (i === (newValue.comments.length - 1) &&
-                            (currentTime.getTime() - newValue.comments[i].created) < thirtyMinutes);
+                            (i === (newValue.comments.length - 1)) && (!newValue.comments[i].set);
                     }
                 }
             }
         }, true);
-
         vm.toggleComments = function () {
             if (!vm.showComments) {
                 vm.showComments = true;
+
+                var pinGroup = $("#" + vm.data._id)[0].getElementsByTagName("group");
+                $(document).trigger("pinClick", { object: pinGroup[0] } );
             }
             vm.toggleCommentsState = !vm.toggleCommentsState;
             if (vm.toggleCommentsState) {
@@ -115,18 +120,78 @@
 
         vm.saveComment = function () {
             if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
-                vm.onSaveComment({issue: vm.data, text: vm.comment});
-                vm.numNewComments += 1; // This is used to increase the height of the comments list
+                if (vm.editingComment) {
+                    promise = NewIssuesService.editComment(vm.data, vm.comment, vm.editingCommentIndex);
+                    promise.then(function (data) {
+                        vm.data.comments[vm.editingCommentIndex].comment = vm.comment;
+                        vm.data.comments[vm.editingCommentIndex].timeStamp = NewIssuesService.prettyTime(data.created);
+                        vm.comment = "";
+                    });
+                }
+                else {
+                    promise = NewIssuesService.saveComment(vm.data, vm.comment);
+                    promise.then(function (data) {
+                        if (!vm.data.hasOwnProperty("comments")) {
+                            vm.data.comments = [];
+                        }
+                        vm.data.comments.push({
+                            owner: data.owner,
+                            comment: vm.comment,
+                            created: data.created,
+                            timeStamp: NewIssuesService.prettyTime(data.created)
+                        });
+                        vm.comment = "";
+                        vm.numNewComments += 1; // This is used to increase the height of the comments list
+
+                        if (vm.autoSaveComment) {
+                            vm.autoSaveComment = false;
+                            vm.showInfo = true;
+                            vm.infoText = "Comment on issue #" + vm.data.number + " auto-saved";
+                            vm.infoTimeout = $timeout(function () {
+                                vm.showInfo = false;
+                            }, 4000);
+                        }
+
+                        // Mark previous comment as 'set' - no longer deletable or editable
+                        if (vm.data.comments.length > 1) {
+                            promise = NewIssuesService.setComment(vm.data, (vm.data.comments.length - 2));
+                            promise.then(function (data) {
+                                vm.data.comments[vm.data.comments.length - 2].set = true;
+                            });
+                        }
+                    });
+                }
             }
         };
 
         vm.deleteComment = function (index) {
-            vm.onDeleteComment({issue: vm.data, commentIndex: index});
-            vm.numNewComments -= 1; // This is used to decrease the height of the comments list
+            promise = NewIssuesService.deleteComment(vm.data, index);
+            promise.then(function (data) {
+                vm.data.comments.splice(index, 1);
+                vm.numNewComments -= 1; // This is used to reduce the height of the comments list
+                vm.comment = "";
+                vm.editingComment = false;
+            });
+        };
+
+        vm.toggleEditComment = function (index) {
+            vm.editingComment = !vm.editingComment;
+            vm.editingCommentIndex = index;
+            if (vm.editingComment) {
+                vm.comment = vm.data.comments[vm.data.comments.length - 1].comment;
+            }
+            else {
+                vm.comment = "";
+            }
         };
 
         vm.closeIssue = function () {
             vm.onCloseIssue({issue: vm.data});
+        };
+
+        vm.hideInfo = function () {
+            vm.showInfo = false;
+            $timeout.cancel(vm.infoTimeout);
         };
     }
 
@@ -183,10 +248,17 @@
         };
 
         function link (scope, element, attrs) {
-            var commentHeight = 75;
-            scope.$watch("numNewComments", function (newValue) {
-                if (angular.isDefined(newValue) && (newValue !== 0)) {
-                    element.css("height", (element[0].offsetHeight + commentHeight).toString() + "px");
+            var commentHeight = 75,
+                height = "0";
+            scope.$watch("numNewComments", function (newValue, oldValue) {
+                if (angular.isDefined(newValue)) {
+                    if (newValue > oldValue) {
+                        height = (element[0].offsetHeight + commentHeight).toString();
+                    }
+                    else if (newValue < oldValue) {
+                        height = (element[0].offsetHeight - commentHeight).toString();
+                    }
+                    element.css("height", height + "px");
                 }
             });
         }

@@ -17,10 +17,6 @@ div(ng-class="vm.height")
 			data="issue",
 			on-comments-toggled="vm.commentsToggled(issueId)"
 			comments-toggled-issue-id="vm.commentsToggledIssueId"
-			on-save-comment="vm.saveComment(issue, text)"
-			comment-saved="vm.commentSaved"
-			on-delete-comment="vm.deleteComment(issue, commentIndex)"
-			comment-deleted="vm.commentDeleted"
 			on-close-issue="vm.closeIssue(issue)"
 			issue-closed="vm.issueClosed"
 		)
