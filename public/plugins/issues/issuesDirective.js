@@ -150,7 +150,6 @@
                 else {
                     promise = NewIssuesService.saveIssue(vm.pickedAccount, vm.pickedProject, vm.title, vm.selectedObjectId, vm.pickedPos, vm.pickedNorm);
                     promise.then(function (data) {
-                        console.log(data);
                         vm.issues.push(data);
                         vm.title = "";
                         vm.pickedAccount = null;

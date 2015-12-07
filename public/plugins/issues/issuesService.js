@@ -108,26 +108,22 @@
             return deferred.promise;
         };
 
-        var closeIssue = function (issue) {
-            deferred = $q.defer();
+        function doPost(issue, data) {
+            var deferred = $q.defer();
             url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue.parent);
-            data = {
-                data: JSON.stringify({
-                    _id: issue._id,
-                    closed: true,
-                    number: issue.number
-                })
-            };
             config = {
                 withCredentials: true
             };
-
-            $http.post(url, data, config)
-                .then(function successCallback(response) {
+            data._id = issue._id;
+            $http.post(url, {data: JSON.stringify(data)}, config)
+                .then(function (response) {
                     deferred.resolve(response.data);
                 });
-
             return deferred.promise;
+        }
+
+        var closeIssue = function (issue) {
+            return doPost(issue, {closed: true, number: issue.number});
         };
 
         function doPost(issue, data) {
@@ -173,7 +169,7 @@
         function removePin () {
             var pinPlacement = document.getElementById("pinPlacement");
             if (pinPlacement !== null) {
-               pinPlacement.parentElement.removeChild(pinPlacement) 
+               pinPlacement.parentElement.removeChild(pinPlacement)
             }
         }
 
@@ -182,7 +178,7 @@
         }
 
         function createPinShape (id, pin, radius, height, scale)
-        {   
+        {
             var sceneBBox = ViewerService.defaultViewer.scene._x3domNode.getVolume();
             var sceneSize = sceneBBox.max.subtract(sceneBBox.min).length();
             var scale     = sceneSize / 20;
@@ -216,12 +212,12 @@
 
             var modelTransform = document.createElement("Transform");
             modelTransform.setAttribute("rotation", axisAngle.toString());
- 
+
             var position = new x3dom.fields.SFVec3f(pin.position[0], pin.position[1], pin.position[2]);
 
             // Transform the pin into the coordinate frame of the parent
             modelTransform.setAttribute("translation", position.toString());
-          
+
             parent.appendChild(modelTransform);
 
             var coneHeight = height - radius;

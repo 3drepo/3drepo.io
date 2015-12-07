@@ -41,7 +41,7 @@
             bindToController: true
         };
     }
-    
+
     PanelContentCtrl.$inject = ["$scope", "$element", "$compile", "$timeout", "$mdSidenav", "EventService"];
 
     function PanelContentCtrl($scope, $element, $compile, $timeout, $mdSidenav, EventService) {
@@ -77,7 +77,7 @@
                         "show-add='vm.addStatus' " +
                         "options='vm.options' " +
                         "selected-option='vm.selectedOption' " +
-                        "scroll-position='vm.scrollPosition'>" + 
+                        "scroll-position='vm.scrollPosition'>" +
                     "</" + vm.contentItem + ">"
                 );
                 content.append(contentItem);
