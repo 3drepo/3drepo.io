@@ -76,7 +76,7 @@
                 {
                     var parts = mpnodes[i].getParts([objectID]);
 
-                    if (parts.ids.length > 0)
+                    if (parts && parts.ids.length > 0)
                     {
                         parts.setVisibility(state);
                         ViewerService.defaultViewer.addHiddenPart(parts);

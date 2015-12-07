@@ -987,9 +987,10 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			{
 				self.disableClicking();
 				self.setApp(null);
-			} else if (mode == 'HELICOPTER') {
+			} 
+			/*else if (mode == 'HELICOPTER') {
 				self.disableSelecting();
-			} else {
+			} */ else {
 				self.enableClicking();
 			}
 

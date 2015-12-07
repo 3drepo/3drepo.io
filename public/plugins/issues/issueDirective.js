@@ -47,7 +47,6 @@
             promise = null;
 
         vm.showComments = false;
-        vm.toggleCommentsState = false;
         vm.numNewComments = 0;
         vm.saveCommentDisabled = true;
         vm.backgroundClass = "issueClosedBackground";
@@ -64,18 +63,35 @@
         });
 
         $scope.$watch("vm.commentsToggledIssueId", function (newValue) {
-            if (angular.isDefined(newValue) && (newValue !== vm.data._id)) {
-                vm.toggleCommentsState = false;
-                vm.showComments = false;
+            // If the comments is toggled on another comment, then close this one.
+            if (angular.isDefined(newValue)) {
+                if (newValue !== vm.data._id) {
+                    vm.showComments = false;
 
-                if (vm.editingComment) {
-                    vm.comment = "";
-                }
-                else {
-                    // Auto-save a comment
-                    if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
-                        vm.autoSaveComment = true;
-                        vm.saveComment();
+                    // If we are editing the comment, then clear it.
+                    if (vm.editingComment) {
+                        vm.comment = "";
+                    } else {
+                        // Auto-save a comment
+                        if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
+                            vm.autoSaveComment = true;
+                            vm.saveComment();
+                        }
+                    }
+                } else {
+                    vm.showComments = !vm.showComments;
+
+                    if (vm.showComments) 
+                    {
+                        var pinGroup = $("#" + vm.data._id)[0].getElementsByTagName("group");
+                        $(document).trigger("pinClick", { object: pinGroup[0] } );
+
+                        // Set the camera position
+                        ViewerService.defaultViewer.setCamera(
+                            vm.data.viewpoint.position,
+                            vm.data.viewpoint.view_dir,
+                            vm.data.viewpoint.up
+                        );
                     }
                 }
             }
@@ -99,22 +115,8 @@
                 }
             }
         }, true);
-        vm.toggleComments = function () {
-            if (!vm.showComments) {
-                vm.showComments = true;
 
-                var pinGroup = $("#" + vm.data._id)[0].getElementsByTagName("group");
-                $(document).trigger("pinClick", { object: pinGroup[0] } );
-            }
-            vm.toggleCommentsState = !vm.toggleCommentsState;
-            if (vm.toggleCommentsState) {
-                // Set the camera position
-                ViewerService.defaultViewer.setCamera(
-                    vm.data.viewpoint.position,
-                    vm.data.viewpoint.view_dir,
-                    vm.data.viewpoint.up
-                );
-            }
+        vm.toggleComments = function () {
             vm.onCommentsToggled({issueId: vm.data._id});
         };
 

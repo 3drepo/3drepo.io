@@ -15,7 +15,7 @@
 					md-icon(md-font-icon="fa-times-circle", class="fa")
 
 
-	div(ng-show="vm.showComments", ng-class="{issueComments: vm.toggleCommentsState}", comments-height, num-new-comments="vm.numNewComments")
+	div(ng-show="vm.showComments", ng-class="{issueComments: vm.showComments}", comments-height, num-new-comments="vm.numNewComments")
 		.issueCommentsContainer
 			md-list
 				md-list-item.md-2-line(ng-repeat="comment in vm.data.comments")

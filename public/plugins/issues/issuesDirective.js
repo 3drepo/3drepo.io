@@ -38,9 +38,9 @@
         };
     }
 
-    IssuesCtrl.$inject = ["$scope", "$element", "$mdDialog", "$filter", "EventService", "NewIssuesService", "ViewerService"];
+    IssuesCtrl.$inject = ["$scope", "$rootScope", "$element", "$timeout", "$mdDialog", "$filter", "EventService", "NewIssuesService", "ViewerService"];
 
-    function IssuesCtrl($scope, $element, $mdDialog, $filter, EventService, NewIssuesService, ViewerService) {
+    function IssuesCtrl($scope, $rootScope, $element, $timeout, $mdDialog, $filter, EventService, NewIssuesService, ViewerService) {
         var vm = this,
             promise = null,
             i = 0,
@@ -314,7 +314,12 @@
             // that issue
             var issueId = clickInfo.object ? clickInfo.object.parentElement.parentElement.getAttribute("id") : null;
 
+
             vm.commentsToggled(issueId);
+
+            $timeout(function() {
+                $rootScope.$apply()
+            });
         });
 
         vm.showAlert = function() {
