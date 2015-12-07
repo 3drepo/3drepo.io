@@ -1321,7 +1321,7 @@ DBInterface.prototype.filterFederatedProject = function(dbName, project, branch,
 
 		// First find the list of nodes that match the filter in the project.
 		dbConn(self.logger).filterColl(dbName, project + ".scene", filter, {}, function(err, nodes) {
-			if (err.value) 
+			if (err.value)
 			{
 				return err;
 			}
@@ -1616,7 +1616,8 @@ DBInterface.prototype.getObjectIssues = function(dbName, project, sids, number, 
 DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, callback) {
     var self = this,
         timeStamp = null,
-        updateQuery = {};
+        updateQuery = {},
+        existingComment = "";
 
 	dbConn(this.logger).collCallback(dbName, project + ".issues", false, function(err, coll) {
 		if(err.value) {
@@ -1674,12 +1675,30 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 
 			data._id = stringToUUID(data._id);
 
-			timeStamp = (new Date()).getTime();
-			if (data.comment)
-			{
-				updateQuery = {
-					$push: { comments: { owner: owner,  comment: data.comment, created: timeStamp} }
-				};
+            timeStamp = (new Date()).getTime();
+			if (data.hasOwnProperty("comment")) {
+                if (data.hasOwnProperty("edit")) {
+                    updateQuery = {
+                        $set: {created: timeStamp}
+                    };
+                    updateQuery.$set["comments." + data.commentIndex + ".comment"] = data.comment;
+                }
+                else if (data.hasOwnProperty("delete")) {
+                    updateQuery = {
+                        $pull: {comments: {created: data.commentCreated}}
+                    };
+                }
+                else if (data.hasOwnProperty("set")) {
+                    updateQuery = {
+                        $set: {}
+                    };
+                    updateQuery.$set["comments." + data.commentIndex + ".set"] = true;
+                }
+                else {
+                    updateQuery = {
+                        $push: { comments: { owner: owner,  comment: data.comment, created: timeStamp} }
+                    };
+                }
 			}
             else if (data.closed) {
 				updateQuery = {
