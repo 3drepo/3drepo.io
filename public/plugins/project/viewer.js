@@ -30,7 +30,7 @@ function clickObject(event) {
 function clickPin(event) {
 	var pinGroupObject = event.hitObject.parentElement.parentElement.parentElement;
 	$.event.trigger("pinClick", {
-			changeView: true,
+			fromViewer: true,
 			object: pinGroupObject
 		});
 }
@@ -987,7 +987,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			{
 				self.disableClicking();
 				self.setApp(null);
-			} 
+			}
 			/*else if (mode == 'HELICOPTER') {
 				self.disableSelecting();
 			} */ else {
@@ -1234,7 +1234,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			} else {
 				self.triggerSelected(objEvent.target);
 			}
-		} 
+		}
 	}
 
 	this.revealAll = function(event, objEvent)
