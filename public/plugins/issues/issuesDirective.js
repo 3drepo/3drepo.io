@@ -63,6 +63,7 @@
         promise = NewIssuesService.getIssues();
         promise.then(function (data) {
             vm.issues = data;
+			console.log(data);
             setupIssuesToShow();
         });
 
@@ -116,6 +117,7 @@
                             }
                         }
                     }
+					console.log(vm.issuesToShow);
                 }
             }
         }

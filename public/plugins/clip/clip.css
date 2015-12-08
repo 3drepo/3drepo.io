@@ -4,13 +4,6 @@ clip {
   padding: 20px 10px 0 10px;
 }
 
-clip .minHeight {
-  height: 110px;
-}
-clip .maxHeight {
-  height: 110px;
-}
-
 clip md-radio-button {
   display: inline;
 }

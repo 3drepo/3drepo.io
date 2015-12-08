@@ -42,13 +42,205 @@
             promise = null,
             item = {},
             i = 0,
-            length = 0;
+            length = 0,
+            levels = 4,
+            levelCount = 0;
+
         vm.nodes = [];
         vm.showTree = false;
         vm.showFilterList = true;
         vm.currentFilterItemSelected = null;
         vm.viewerSelectedObject = null;
+        
+        promise = TreeService.init();
+        promise.then(function(data) {
+            vm.showChildren = true;
+            vm.allNodes = [];
+            vm.allNodes.push(data.nodes);
+            vm.nodes = vm.allNodes;
+            vm.showTree = true;
 
+			vm.idToPath = data.idToPath;
+
+            vm.nodesToShow = [vm.allNodes[0]];
+            vm.nodesToShow[0].level = 0;
+            vm.nodesToShow[0].expanded = false;
+			vm.nodesToShow[0].hasChildren = true;
+
+            setupInfiniteScroll();
+        });
+
+        $scope.toggleChildren = function (_id) {
+            var i,
+                j,
+                numChildren,
+                index = -1,
+                length,
+                endOfSplice = false;
+
+            for (i = 0, length = vm.nodesToShow.length; i < length; i += 1) {
+                if (vm.nodesToShow[i]._id === _id) {
+                    index = i;
+                    break;
+                }
+            }
+            if (index !== -1) {
+                if (vm.nodesToShow[index].expanded) {
+                    while (!endOfSplice) {
+                        if (angular.isDefined(vm.nodesToShow[index + 1]) && vm.nodesToShow[index + 1].path.indexOf(_id) !== -1) {
+                            vm.nodesToShow.splice(index + 1, 1);
+                        }
+                        else {
+                            endOfSplice = true;
+                        }
+                    }
+                }
+                else {
+                    numChildren = vm.nodesToShow[index].children.length;
+                    for (i = 0; i < numChildren; i += 1) {
+                        vm.nodesToShow[index].children[i].expanded = false;
+                        vm.nodesToShow[index].children[i].level = vm.nodesToShow[index].level + 1;
+						vm.nodesToShow[index].children[i].hasChildren = vm.nodesToShow[index].children[i].children.length > 0;
+                        vm.nodesToShow.splice(index + i + 1, 0, vm.nodesToShow[index].children[i]);
+                    }
+                }
+                console.log(vm.nodesToShow);
+                vm.nodesToShow[index].expanded = !vm.nodesToShow[index].expanded;
+            }
+        };
+
+        function expand (path, level) {
+            var i,
+                j,
+                length = 0,
+                pathLength,
+                childrenLength,
+                selectedId = path[path.length - 1],
+                selectedIndex = 0,
+                selectionFound = false;
+
+            for (i = 0, length = vm.nodesToShow.length; i < length; i += 1) {
+                if (vm.nodesToShow[i]._id === path[level]) {
+                    vm.nodesToShow[i].expanded = true;
+                    vm.nodesToShow[i].selected = false;
+                    childrenLength = vm.nodesToShow[i].children.length;
+
+                    if (level === (path.length - 2)) {
+                        selectedIndex = i;
+                    }
+
+                    for (j = 0; j < childrenLength; j += 1) {
+                        vm.nodesToShow[i].children[j].selected = (vm.nodesToShow[i].children[j]._id === selectedId);
+						vm.nodesToShow[i].children[j].toggled = true;
+						vm.nodesToShow[i].children[j].hasChildren = vm.nodesToShow[i].children[j].children.length > 0;
+                        if (vm.nodesToShow[i].children[j].selected) {
+                            selectionFound = true;
+                        }
+                        if ((level === (path.length - 2)) && !selectionFound) {
+                            selectedIndex += 1;
+                        }
+						vm.nodesToShow[i].children[j].level = level + 1;
+                        vm.nodesToShow.splice(i + j + 1, 0, vm.nodesToShow[i].children[j]);
+                    }
+                }
+            }
+            if (level < (path.length - 2)) {
+                expand(path, (level + 1));
+            }
+            else if (level === (path.length - 2)) {
+                vm.topIndex = selectedIndex - 2;
+            }
+        }
+
+        $(document).on("objectSelected", function(event, object, zoom) {
+            $timeout(function () {
+                if (angular.isUndefined(object)) {
+                    vm.viewerSelectedObject = null;
+                    vm.filterText = "";
+                } else {
+                    var objectID = null;
+                    var idParts  = null;
+					var path = null;
+
+                    if (object["multipart"])
+                    {
+                        idParts = object.id.split("__");
+                    } else {
+                        idParts = object.getAttribute("id").split("__");
+                    }
+					path = vm.idToPath[idParts[idParts.length - 1]].split("__");
+					console.log(path);
+					console.log(path[path.length - 1]);
+					vm.nodesToShow = [vm.allNodes[0]];
+					vm.nodesToShow[0].level = 0;
+					vm.nodesToShow[0].expanded = false;
+					vm.nodesToShow[0].selected = false;
+					vm.nodesToShow[0].toggled = true;
+					expand(path, 0);
+
+                    /*
+                    objectID = idParts[idParts.length - 1];
+
+                    if (objectID === vm.idToName[objectID])
+                    {
+                        vm.filterText = "###" + vm.idToName[objectID];
+
+                        vm.objectName    = objectID;
+                        vm.origID        = "###" + object.id;
+                    } else {
+                        vm.filterText    = vm.idToName[objectID];
+                    }
+                    */
+                }
+            });
+        });
+
+		vm.nodeSelected = function (nodeId) {
+			vm.selectedNode = nodeId;
+			TreeService.selectNode(nodeId);
+		};
+
+		vm.nodeToggled = function (nodeId, state) {
+			vm.toggledNode = nodeId;
+			TreeService.toggleNode(nodeId, state);
+		};
+
+        function setupInfiniteScroll () {
+            // Infinite items
+            vm.infiniteItems = {
+                numLoaded_: 0,
+                toLoad_: 0,
+
+                getItemAtIndex: function(index) {
+                    if (index > this.numLoaded_) {
+                        this.fetchMoreItems_(index);
+                        return null;
+                    }
+
+                    if (index < vm.nodesToShow.length) {
+                        return vm.nodesToShow[index];
+                    }
+                    else {
+                        return null;
+                    }
+                },
+
+                getLength: function() {
+                    return this.numLoaded_ + 5;
+                },
+
+                fetchMoreItems_: function(index) {
+                    if (this.toLoad_ < index) {
+                        this.toLoad_ += 500;
+                        $timeout(angular.noop, 300).then(angular.bind(this, function() {
+                            this.numLoaded_ = this.toLoad_;
+                        }));
+                    }
+                }
+            };
+        }
+
+        /*
         promise = TreeService.init();
         promise.then(function(data) {
             vm.showChildren = true;
@@ -213,5 +405,6 @@
                 vm.filterText = vm.viewSelectedObject;
             });
         });
+        */
     }
 }());

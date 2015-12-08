@@ -52,6 +52,7 @@
         };
 
         var selectNode = function (nodeId) {
+			console.log(nodeId);
             if (nodeId === currentSelectedNodeId) {
                 currentSelectedNodeId = null;
                 $(document).trigger("objectSelected", [undefined, true]);

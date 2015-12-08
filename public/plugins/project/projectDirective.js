@@ -76,21 +76,15 @@
 
 		var state = StateManager.state;
 
-		/*
-		panelContent.left.push({
-			type: "filter",
-			title: "",
-			show: true,
-			help: "Filter content"
-		});
-		*/
 		panelContent.left.push({
 			type: "tree",
 			title: "Tree",
 			show: true,
 			help: "Model elements shown in a tree structure",
 			icon: "fa-sitemap",
-			hasFilter: true
+			hasFilter: true,
+            minHeight: 100,
+            maxHeight: 820
 		});
 		/*
 		 panelContent.left.push({
@@ -143,14 +137,18 @@
 					firstSelected: false,
 					secondSelected: false
 				}
-			]
+			],
+            minHeight: 100,
+            maxHeight: 820
 		});
 		panelContent.right.push({
 			type: "clip",
 			title: "Clip",
 			show: false,
 			help: "Clipping plane",
-			icon: "fa-object-group"
+			icon: "fa-object-group",
+            minHeight: 110,
+            maxHeight: 190
 		});
 
 		StateManager.setStateVar("branch", "master");

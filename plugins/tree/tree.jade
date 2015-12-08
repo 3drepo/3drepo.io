@@ -1,33 +1,46 @@
-div(ng-class="vm.height")
-	// Tree
-	div(ui-tree, data-nodrop-enabled="true", data-nodrag="true", ng-show="vm.showTree")
-		tree-nodes(
-			nodes="vm.nodes"
-			show-children="vm.showChildren"
-			ng-if="true"
-			on-node-selected="vm.nodeSelected(nodeId)"
-			on-node-toggled="vm.nodeToggled(nodeId, state)"
-			selected-node="vm.selectedNode"
-			toggled-node="vm.toggledNode"
-		)
+// Tree
+div(ng-cloak="", class="virtualRepeatdemoInfiniteScroll", ng-show="true")
+	md-virtual-repeat-container(md-top-index="vm.topIndex", id="vertical-container")
+		div(md-virtual-repeat="item in vm.infiniteItems", md-on-demand="", class="repeated-item", flex="")
+			div(style="margin-left:{{item.level * 20}}px", ng-if="item", layout="row", layout-align="start center")
+				md-button.md-icon-button(aria-label="Collapse", ng-click="toggleChildren(item._id)", ng-disabled="!item.hasChildren")
+					md-icon.md-accent(md-font-icon="fa-chevron-circle-right", class="fa", ng-if="!tn.expanded")
+					md-icon(md-font-icon="fa-chevron-circle-down", class="fa", ng-if="tn.expanded")
+				md-checkbox(
+					ng-model="item.toggled"
+					ng-change="tn.nodeToggled(tn.node._id)"
+					aria-label="Toggle")
+				p(ng-click="vm.nodeSelected(item._id)", ng-class="{viewerSelected: item.selected}") {{item.name}}
 
-	// Filter list
-	div(ng-cloak="", class="virtualRepeatdemoInfiniteScroll", ng-if="vm.showFilterList")
-		md-content(layout="column")
-			md-virtual-repeat-container(id="vertical-container")
-				div(
-					md-virtual-repeat="item in vm.infiniteItems"
-					md-on-demand=""
-					class="repeated-item"
-					flex=""
-					ng-class="item.class"
-					layout="row"
-					layout-align="start center"
+
+//div(ui-tree, data-nodrop-enabled="true", data-nodrag="true", ng-show="vm.showTree")
+	tree-nodes(
+		nodes="vm.nodes"
+		show-children="vm.showChildren"
+		ng-if="true"
+		on-node-selected="vm.nodeSelected(nodeId)"
+		on-node-toggled="vm.nodeToggled(nodeId, state)"
+		selected-node="vm.selectedNode"
+		toggled-node="vm.toggledNode"
+	)
+
+// Filter list
+//div(ng-cloak="", class="virtualRepeatdemoInfiniteScroll", ng-if="vm.showFilterList")
+	md-content(layout="column")
+		md-virtual-repeat-container(id="vertical-container")
+			div(
+				md-virtual-repeat="item in vm.infiniteItems"
+				md-on-demand=""
+				class="repeated-item"
+				flex=""
+				ng-class="item.class"
+				layout="row"
+				layout-align="start center"
+			)
+				md-checkbox(
+					ng-show="item!==null"
+					ng-model="item.toggleState"
+					ng-change="vm.filterItemToggled(item)"
+					aria-label="Toggle"
 				)
-					md-checkbox(
-						ng-show="item!==null"
-						ng-model="item.toggleState"
-						ng-change="vm.filterItemToggled(item)"
-						aria-label="Toggle"
-					)
-					p#treeFilterItemName(ng-click="vm.filterItemSelected(item)") {{item.name}}
+				p#treeFilterItemName(ng-click="vm.filterItemSelected(item)") {{item.name}}

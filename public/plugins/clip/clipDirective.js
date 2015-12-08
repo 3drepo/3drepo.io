@@ -30,7 +30,7 @@
                 show: "="
             },
             controller: ClipCtrl,
-            controllerAs: 'cl',
+            controllerAs: 'vm',
             bindToController: true
         };
     }
@@ -38,41 +38,41 @@
     ClipCtrl.$inject = ["$scope", "$timeout", "ViewerService"];
 
     function ClipCtrl($scope, $timeout, ViewerService) {
-        var cl = this,
+        var vm = this,
             clipPlane = null;
-        cl.sliderMin = 0;
-        cl.sliderMax = 100;
-        cl.sliderStep = 0.1;
-        cl.sliderPosition = cl.sliderMin;
-        cl.clipPlane = null;
-        cl.axes = ["X", "Y", "Z"];
-        cl.selectedAxis = cl.axes[0];
+        vm.sliderMin = 0;
+        vm.sliderMax = 100;
+        vm.sliderStep = 0.1;
+        vm.sliderPosition = vm.sliderMin;
+        vm.clipPlane = null;
+        vm.axes = ["X", "Y", "Z"];
+        vm.selectedAxis = vm.axes[0];
 
         function initClippingPlane () {
             $timeout(function () {
-                cl.clipPlaneID = ViewerService.defaultViewer.addClippingPlane(cl.selectedAxis);
-                clipPlane = ViewerService.defaultViewer.getClippingPlane(cl.clipPlaneID);
-                moveClippingPlane(cl.sliderPosition);
+                vm.clipPlaneID = ViewerService.defaultViewer.addClippingPlane(vm.selectedAxis);
+                clipPlane = ViewerService.defaultViewer.getClippingPlane(vm.clipPlaneID);
+                moveClippingPlane(vm.sliderPosition);
             });
         }
 
         function moveClippingPlane(sliderPosition) {
-            clipPlane.movePlane((cl.sliderMax - sliderPosition) / cl.sliderMax);
+            clipPlane.movePlane((vm.sliderMax - sliderPosition) / vm.sliderMax);
         }
 
-        $scope.$watch("cl.show", function (newValue) {
+        $scope.$watch("vm.show", function (newValue) {
             if (angular.isDefined(newValue)) {
                 if (newValue) {
                     initClippingPlane();
                 }
                 else {
-                    cl.clipPlane = null;
+                    vm.clipPlane = null;
                     ViewerService.defaultViewer.clearClippingPlanes();
                 }
             }
         });
 
-        $scope.$watch("cl.selectedAxis", function (newValue) {
+        $scope.$watch("vm.selectedAxis", function (newValue) {
             if ((angular.isDefined(newValue) && clipPlane)) {
                 // Swap Y and Z axes
                 if (newValue === "Y") {
@@ -84,11 +84,11 @@
                 else {
                     clipPlane.changeAxis(newValue);
                 }
-                cl.sliderPosition = cl.sliderMin;
+                vm.sliderPosition = vm.sliderMin;
             }
         });
 
-        $scope.$watch("cl.sliderPosition", function (newValue) {
+        $scope.$watch("vm.sliderPosition", function (newValue) {
             if (clipPlane) {
                 moveClippingPlane(newValue);
             }

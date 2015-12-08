@@ -1,12 +1,5 @@
 /** Issues ************************************************************************************************************/
 
-issues .maxHeight {
-  height: 720px;
-}
-issues .minHeight {
-  height: 50px;
-}
-
 issues #issuesAddContainer {
   position: relative;
   margin: 10px;

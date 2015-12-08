@@ -3,13 +3,6 @@ tree {
   width: 100%;
 }
 
-tree .minHeight {
-  height: 100px;
-}
-tree .maxHeight {
-  height: 500px;
-}
-
 tree span {
   outline: none;
   margin: 0;
@@ -69,7 +62,7 @@ tree md-checkbox {
 /** Tree filter list **************************************************************************************************/
 
 tree .virtualRepeatdemoInfiniteScroll #vertical-container {
-  height: 500px;
+  height: 770px;
   min-width: 280px;
   max-width: 800px;
 }
@@ -77,7 +70,6 @@ tree .virtualRepeatdemoInfiniteScroll #vertical-container {
 tree .virtualRepeatdemoInfiniteScroll .repeated-item {
   cursor: default;
   min-height: 48px;
-  padding-left: 10px;
 }
 
 .selectedFilterItem {
@@ -93,4 +85,9 @@ tree .virtualRepeatdemoInfiniteScroll .repeated-item {
 }
 #treeFilterItemName .md-button {
   border-radius: 0;
+}
+
+
+.viewerSelected {
+  color: #F00;
 }

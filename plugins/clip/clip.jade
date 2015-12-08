@@ -1,27 +1,26 @@
-div(ng-class="cl.height")
-	div(layout="column", layout-align="start center")
-		div
-			| Axis:
-			md-radio-group(ng-model="cl.selectedAxis")
-				md-radio-button(ng-repeat="axis in cl.axes", value="{{axis}}") {{axis}}
+div(layout="column", layout-align="start center")
+	div
+		| Axis:
+		md-radio-group(ng-model="vm.selectedAxis")
+			md-radio-button(ng-repeat="axis in vm.axes", value="{{axis}}") {{axis}}
 
-		.clipSlider
-			div(layout="row", layout-align="start center")
-				md-slider(
+	.clipSlider
+		div(layout="row", layout-align="start center")
+			md-slider(
+				flex
+				ng-model="vm.sliderPosition"
+				step="{{vm.sliderStep}}"
+				min="{{vm.sliderMin}}"
+				max="{{vm.sliderMax}}"
+				aria-label="Position"
+			)
+			div
+				input(
 					flex
-					ng-model="cl.sliderPosition"
-					step="{{cl.sliderStep}}"
-					min="{{cl.sliderMin}}"
-					max="{{cl.sliderMax}}"
-					aria-label="Position"
+					type="number"
+					ng-model="vm.sliderPosition"
+					step="{{vm.sliderStep}}"
+					min="{{vm.sliderMin}}"
+					max="{{vm.sliderMax}}"
 				)
-				div
-					input(
-						flex
-						type="number"
-						ng-model="cl.sliderPosition"
-						step="{{cl.sliderStep}}"
-						min="{{cl.sliderMin}}"
-						max="{{cl.sliderMax}}"
-					)
-					| &nbsp;%
+				| &nbsp;%

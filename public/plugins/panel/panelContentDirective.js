@@ -27,14 +27,7 @@
             templateUrl: 'panelContent.html',
             scope: {
                 position: "=",
-                contentItem: "=",
-                contentTitle: "=",
-                showContent: "=",
-                help: "=",
-                icon: "=",
-                hasFilter: "=",
-                canAdd: "=",
-                options: "="
+                contentData: "="
             },
             controller: PanelContentCtrl,
             controllerAs: 'vm',
@@ -42,9 +35,9 @@
         };
     }
 
-    PanelContentCtrl.$inject = ["$scope", "$element", "$compile", "$timeout", "$mdSidenav", "EventService"];
+    PanelContentCtrl.$inject = ["$scope", "$element", "$compile", "$timeout", "EventService"];
 
-    function PanelContentCtrl($scope, $element, $compile, $timeout, $mdSidenav, EventService) {
+    function PanelContentCtrl($scope, $element, $compile, $timeout, EventService) {
         var vm = this,
             content = "",
             contentItem = "",
@@ -57,44 +50,39 @@
                 top: true,
                 left: true,
                 right: false
-            };
+			},
+			maxHeight = 0,
+			changeHeight = 0,
+			contentHeightExtra = 20;
+
         vm.showHelp = false;
         vm.filterText = "";
-        vm.height = "minHeight";
-        vm.addStatus = false;
+		vm.showFilter = false;
+		vm.addStatus = false;
         vm.toastPosition = angular.extend({}, last);
         vm.showClearFilterButton = false;
         vm.scrollPosition = 0;
 
-        $scope.$watch("vm.contentItem", function (newValue) {
-            if (angular.isDefined(newValue)) {
-                content = angular.element($element[0].querySelector('#content'));
-                contentItem = angular.element(
-                    "<" + vm.contentItem + " " +
-                        "filter-text='vm.filterText' " +
-                        "height='vm.height' " +
-                        "show='vm.showContent' " +
-                        "show-add='vm.addStatus' " +
-                        "options='vm.options' " +
-                        "selected-option='vm.selectedOption' " +
-                        "scroll-position='vm.scrollPosition'>" +
-                    "</" + vm.contentItem + ">"
-                );
-                content.append(contentItem);
-                $compile(contentItem)($scope);
-                if ((newValue === "tree") || (newValue === "issues")) {
-                    vm.height = "maxHeight";
-                }
-            }
-        });
+		$scope.$watch("vm.contentData.type", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				content = angular.element($element[0].querySelector('#content'));
+				contentItem = angular.element(
+					"<" + vm.contentData.type + " " +
+						"filter-text='vm.filterText' " +
+						"height='vm.contentHeight' " +
+						"show='vm.contentData.show' " +
+						"show-add='vm.addStatus' " +
+						"options='vm.contentData.options' " +
+						"selected-option='vm.selectedOption' " +
+						"scroll-position='vm.scrollPosition'>" +
+					"</" + vm.contentData.type + ">"
+				);
+				content.append(contentItem);
+				$compile(contentItem)($scope);
+			}
+		});
 
-        $scope.$watch("vm.contentTitle", function (newValue) {
-            if (angular.isDefined(newValue)) {
-                vm.showTitleBar = (newValue !== "");
-            }
-        });
-
-        $scope.$watch("vm.options", function (newValue) {
+        $scope.$watch("vm.contentData.options", function (newValue) {
             vm.hasOptions = (angular.isDefined(newValue));
         });
 
@@ -121,30 +109,49 @@
             }
         });
 
+		$scope.$watch("vm.contentData.maxHeight", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				maxHeight = newValue;
+				vm.contentHeight = maxHeight;
+			}
+		});
+
         $scope.$watch(EventService.currentEvent, function (event) {
             if ((event.type === EventService.EVENT.PANEL_CONTENT_CLICK) && (event.value.position === vm.position)) {
-                if (event.value.contentItem !== vm.contentItem) {
-                    vm.height = "minHeight";
+                if (event.value.contentItem !== vm.contentData.type) {
+					vm.contentHeight = maxHeight;
                 }
             }
             else if (event.type === EventService.EVENT.TOGGLE_HELP) {
                 vm.showHelp = !vm.showHelp;
             }
+			else if ((event.type === EventService.EVENT.PANEL_CONTENT_TOGGLED) &&
+					 (event.value.position === vm.position) &&
+					 (event.value.type !== vm.contentData.type)) {
+				changeHeight = event.value.contentHeight + contentHeightExtra;
+				maxHeight = (event.value.show) ? (maxHeight - changeHeight) : (maxHeight + changeHeight);
+				if (maxHeight > vm.contentData.maxHeight) {
+					vm.contentHeight = vm.contentData.maxHeight;
+				}
+				else {
+					vm.contentHeight = maxHeight;
+				}
+			}
         });
 
         vm.click = function () {
-            if (vm.height === "minHeight") {
+            if (vm.contentHeight === 100) {
                 EventService.send(
                     EventService.EVENT.PANEL_CONTENT_CLICK,
                     {
                         position: vm.position,
-                        contentItem: vm.contentItem
+                        contentItem: vm.contentData.type
                     }
                 );
-                vm.height = "maxHeight";
+				vm.contentHeight = maxHeight;
             }
             else {
-                vm.height = "minHeight";
+				vm.contentHeight = 100;
             }
         };
 
@@ -153,31 +160,36 @@
             vm.addStatus = !vm.addStatus;
         };
 
+        vm.toggleFilter = function (event) {
+            event.stopPropagation();
+            vm.showFilter = !vm.showFilter;
+        };
+
         vm.openMenu = function($mdOpenMenu, ev) {
             $mdOpenMenu(ev);
         };
 
         vm.optionSelected = function (index) {
-            if (vm.options[index].toggle) {
-                vm.options[index].selected = !vm.options[index].selected;
+            if (vm.contentData.options[index].toggle) {
+                vm.contentData.options[index].selected = !vm.contentData.options[index].selected;
                 vm.selectedOption = vm.options[index];
             }
             else {
                 if (index !== currentSortIndex) {
                     if (angular.isDefined(currentSortIndex)) {
-                        vm.options[currentSortIndex].selected = false;
-                        vm.options[currentSortIndex].firstSelected = false;
-                        vm.options[currentSortIndex].secondSelected = false;
+                        vm.contentData.options[currentSortIndex].selected = false;
+                        vm.contentData.options[currentSortIndex].firstSelected = false;
+                        vm.contentData.options[currentSortIndex].secondSelected = false;
                     }
                     currentSortIndex = index;
-                    vm.options[currentSortIndex].selected = true;
-                    vm.options[currentSortIndex].firstSelected = true;
+                    vm.contentData.options[currentSortIndex].selected = true;
+                    vm.contentData.options[currentSortIndex].firstSelected = true;
                 }
                 else {
-                    vm.options[currentSortIndex].firstSelected = !vm.options[currentSortIndex].firstSelected;
-                    vm.options[currentSortIndex].secondSelected = !vm.options[currentSortIndex].secondSelected;
+                    vm.contentData.options[currentSortIndex].firstSelected = !vm.contentData.options[currentSortIndex].firstSelected;
+                    vm.contentData.options[currentSortIndex].secondSelected = !vm.contentData.options[currentSortIndex].secondSelected;
                 }
-                vm.selectedOption = vm.options[currentSortIndex];
+                vm.selectedOption = vm.contentData.options[currentSortIndex];
             }
 
             // 'Reset' vm.selectedOption so that selecting the same option can be registered down the line
