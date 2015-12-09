@@ -19,7 +19,7 @@ var logo_string = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAB0CAMAAAC
 
 // --------------------- Control Interface ---------------------
 
-function bgroundClick(event){
+function bgroundClick(event) {
 	$.event.trigger("bgroundClicked", event);
 };
 
@@ -30,32 +30,32 @@ function clickObject(event) {
 function clickPin(event) {
 	var pinGroupObject = event.hitObject.parentElement.parentElement.parentElement;
 	$.event.trigger("pinClick", {
-			fromViewer: true,
-			object: pinGroupObject
-		});
+		fromViewer: true,
+		object: pinGroupObject
+	});
 }
 
-function onMouseOver(event){
+function onMouseOver(event) {
 	$.event.trigger("onMouseOver", event);
 }
 
-function onMouseDown(event){
+function onMouseDown(event) {
 	$.event.trigger("onMouseDown", event);
 }
 
-function onMouseUp(event){
+function onMouseUp(event) {
 	$.event.trigger("onMouseUp", event);
 }
 
-function onMouseMove(event){
+function onMouseMove(event) {
 	$.event.trigger("onMouseMove", event);
 }
 
-function onViewpointChange(event){
+function onViewpointChange(event) {
 	$.event.trigger("onViewpointChange", event);
 }
 
-function onLoaded(event){
+function onLoaded(event) {
 	$.event.trigger("onLoaded", event);
 }
 
@@ -67,16 +67,16 @@ x3dom.runtime.ready = runtimeReady;
 
 // ----------------------------------------------------------
 
-var Viewer = function(name, handle, x3ddiv, manager) {
+var Viewer = function (name, handle, x3ddiv, manager) {
 	// Properties
 	var self = this;
 
-	if(!name)
+	if (!name)
 		this.name = 'viewer';
 	else
 		this.name = name;
 
-	if(handle)
+	if (handle)
 		this.handle = handle;
 
 	// If not given the tag by the manager
@@ -97,7 +97,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	this.defaultShowAll = true;
 
 	this.zNear = -1;
-	this.zFar  = -1;
+	this.zFar = -1;
 
 	this.manager = null;
 
@@ -112,13 +112,12 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.selectionDisabled = false;
 
-	this.init = function() {
-		if (!self.initialized)
-		{
+	this.init = function () {
+		if (!self.initialized) {
 			// If we have a viewer manager then it
 			// will take care of initializing the runtime
 			// else we'll do it ourselves
-			if(manager) {
+			if (manager) {
 				self.manager = manager;
 			} else {
 				x3dom.runtime.ready = self.initRuntime;
@@ -127,8 +126,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			if (self.manager) {
 				self.displayMessage = self.manager.displayMessage;
 			} else {
-				self.displayMessage = function(text, textColor, timeout)
-				{
+				self.displayMessage = function (text, textColor, timeout) {
 					//TODO: Should we replicate the displayMessage stuff here ?
 				}
 			}
@@ -144,8 +142,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 			self.logoLink = document.createElement('a');
 
-			if (server_config.return_path)
-			{
+			if (server_config.return_path) {
 				self.logoLink.setAttribute('href', server_config.return_path);
 			} else {
 				self.logoLink.setAttribute('href', 'https://3drepo.io');
@@ -207,9 +204,8 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 			self.loadViewpoint = self.name + "_default"; // Must be called after creating nav
 
-			self.viewer.addEventListener("keypress", function(e) {
-				if (e.charCode == 'r'.charCodeAt(0))
-				{
+			self.viewer.addEventListener("keypress", function (e) {
+				if (e.charCode == 'r'.charCodeAt(0)) {
 					self.reset();
 					self.setApp(null);
 					self.setNavMode("WALK");
@@ -227,7 +223,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		}
 	}
 
-	this.close = function() {
+	this.close = function () {
 		self.viewer.parentNode.removeChild(self.viewer);
 		self.viewer = null;
 	}
@@ -245,7 +241,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.runtime = self.viewer.runtime;
 		}
 
-		self.showAll = function() {
+		self.showAll = function () {
 			self.runtime.fitAll();
 
 			// TODO: This is a hack to get around a bug in X3DOM
@@ -256,7 +252,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 		self.getCurrentViewpoint().addEventListener('viewpointChanged', self.viewPointChanged);
 
-		$(document).on("onLoaded", function(event, objEvent) {
+		$(document).on("onLoaded", function (event, objEvent) {
 			if (self.loadViewpoint)
 				self.setCurrentViewpoint(self.loadViewpoint);
 
@@ -264,7 +260,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 			self.loadViewpoints();
 
-			if(targetParent == self.viewer)
+			if (targetParent == self.viewer)
 				self.setDiffColors(null);
 
 			// TODO: Clean this up.
@@ -280,11 +276,11 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		});
 	};
 
-	this.whenLoaded = function( callback ) {
+	this.whenLoaded = function (callback) {
 		self.loadedPromise.done(callback);
 	};
 
-	this.createBackground = function() {
+	this.createBackground = function () {
 		if (self.bground)
 			self.bground.parentNode.removeChild(self.bground);
 
@@ -323,47 +319,40 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		self.runtime.canvas.stateViewer.display()
 	}
 
-	this.getViewArea = function() {
+	this.getViewArea = function () {
 		return self.runtime.canvas.doc._viewarea;
 	}
 
-	this.getViewMatrix = function() {
+	this.getViewMatrix = function () {
 		return self.getViewArea().getViewMatrix();
 	}
 
-	this.getProjectionMatrix = function()
-	{
+	this.getProjectionMatrix = function () {
 		return self.getViewArea().getProjectionMatrix();
 	}
 
-	this.onMouseUp = function(functionToBind)
-	{
+	this.onMouseUp = function (functionToBind) {
 		$(self.viewer).on("onMouseUp", functionToBind);
 	}
 
-	this.onMouseDown = function(functionToBind)
-	{
+	this.onMouseDown = function (functionToBind) {
 		$(self.viewer).on("onMouseDown", functionToBind);
 	}
 
-	this.onViewpointChanged = function(functionToBind)
-	{
+	this.onViewpointChanged = function (functionToBind) {
 		$(self.viewer).on("myViewpointHasChanged", functionToBind);
 	}
 
-	this.offViewpointChanged = function(functionToBind)
-	{
+	this.offViewpointChanged = function (functionToBind) {
 		$(self.viewer).off("myViewpointHasChanged", functionToBind);
 	}
 
-	this.viewPointChanged = function(event)
-	{
-		var vpInfo  = self.getCurrentViewpointInfo();
-		var eye     = vpInfo["position"];
+	this.viewPointChanged = function (event) {
+		var vpInfo = self.getCurrentViewpointInfo();
+		var eye = vpInfo["position"];
 		var viewDir = vpInfo["view_dir"];
 
-		if (self.currentNavMode == 'HELICOPTER')
-		{
+		if (self.currentNavMode == 'HELICOPTER') {
 			self.nav._x3domNode._vf.typeParams[0] = Math.asin(viewDir[1]);
 			self.nav._x3domNode._vf.typeParams[1] = eye[1];
 		}
@@ -371,140 +360,174 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		$(self.viewer).trigger("myViewpointHasChanged", event);
 	}
 
-	this.onBackgroundClicked = function(functionToBind)
-	{
+	this.onBackgroundClicked = function (functionToBind) {
 		$(document).on("bgroundClicked", functionToBind);
 	}
 
-	this.offBackgroundClicked = function(functionToBind)
-	{
+	this.offBackgroundClicked = function (functionToBind) {
 		$(document).off("bgroundClicked", functionToBind);
 	}
 
-	this.triggerSelected = function(node)
-	{
+	this.triggerSelected = function (node) {
 		$.event.trigger("objectSelected", node);
 	}
 
-	this.triggerPartSelected = function(part)
-	{
+	this.triggerPartSelected = function (part) {
 		$.event.trigger("partSelected", part);
 	}
 
-	$(document).on("partSelected", function(event, part, zoom) {
-		if(zoom)
-			part.fit();
+	this.setVisibilityByID = function (ids, visibility) {
+		var mpnodes = $("multipart");
+		for (i = 0, length = mpnodes.length; i < length; i += 1) {
+			var parts = mpnodes[i].getParts(ids);
+			if (parts && parts.ids.length > 0) {
+				parts.setVisibility(visibility);
+			}
+		}
+	}
 
-		if (self.oldPart)
-			self.oldPart.resetColor();
+	this.selectParts = function (part, zoom) {
+
+		if (!Array.isArray(part)) {
+			part = [part];
+		}
+
+		if (zoom) {
+			for (var i = 0; i < part.length; i++) {
+				part[i].fit();
+			}
+		}
+
+		if (self.oldPart) {
+			for (var i = 0; i < self.oldPart.length; i++) {
+				self.oldPart[i].resetColor();
+			}
+		}
 
 		self.oldPart = part;
-		part.setEmissiveColor("1.0 0.5 0.0", "front");
 
-		var obj          = {};
+		for (var i = 0; i < part.length; i++) {
+			part[i].setEmissiveColor("1.0 0.5 0.0", "front");
+		}
+	}
+
+	this.selectPartsByID = function (ids, zoom) {
+		var mpnodes = $("multipart");
+		var fullPartsList = [];
+
+		for (i = 0, length = mpnodes.length; i < length; i += 1) {
+			var parts = mpnodes[i].getParts(ids);
+			if (parts && parts.ids.length > 0) {
+				fullPartsList.push(parts);
+			}
+		}
+
+		self.selectParts(fullPartsList, zoom);
+	}
+
+	$(document).on("partSelected", function (event, part, zoom) {
+		self.selectParts(part, zoom);
+
+		var obj = {};
 		obj["multipart"] = true;
-		obj["id"]        = part.multiPart._nameSpace.name + "__" + part.partID;
+		obj["id"] = part.multiPart._nameSpace.name + "__" + part.partID;
 
 		$(document).trigger("objectSelected", obj);
 	});
 
-	$(document).on("objectSelected", function(event, object, zoom) {
-		if (object !== undefined)
-		{
+	$(document).on("objectSelected", function (event, object, zoom) {
+		if (object !== undefined) {
 			if (!object.hasOwnProperty("multipart")) {
-				if(zoom)
+				if (zoom)
 					if (!(object.getAttribute("render") == "false"))
 						self.lookAtObject(object);
 			}
+		} else {
+			self.selectParts([], false);
 		}
 
 		self.setApp(object);
 	});
 
-	$(document).on("pinClick", function(event, clickInfo) {
+	$(document).on("pinClick", function (event, clickInfo) {
 		self.setApp(clickInfo.object, "0.5 0.5 1.0");
 	});
 
-	$(document).on("onMouseDown", function(event, mouseEvent) {
+	$(document).on("onMouseDown", function (event, mouseEvent) {
 		$("body")[0].style["pointer-events"] = "none";
 	});
 
-	$(document).on("onMouseUp", function(event, mouseEvent) {
+	$(document).on("onMouseUp", function (event, mouseEvent) {
 		$("body")[0].style["pointer-events"] = "all";
 	});
 
-	this.onClickObject = function(functionToBind)
-	{
+	this.onClickObject = function (functionToBind) {
 		$(document).on("clickObject", functionToBind);
 	}
 
-	this.offClickObject = function(functionToBind)
-	{
+	this.offClickObject = function (functionToBind) {
 		$(document).off("clickObject", functionToBind);
 	}
 
-	if(0)
-	{
+	if (0) {
 		this.moveScale = 1.0;
 
-		self.x3ddiv.addEventListener("keypress", function(e) {
+		self.x3ddiv.addEventListener("keypress", function (e) {
 			var mapPos = $("#model__mapPosition")[0];
 			var oldTrans = mapPos.getAttribute("translation").split(",").map(
-				function(res) { return parseFloat(res); });
+				function (res) {
+					return parseFloat(res);
+				});
 
-			if(e.charCode == 'q'.charCodeAt(0))
-			{
+			if (e.charCode == 'q'.charCodeAt(0)) {
 				oldTrans[0] = oldTrans[0] + 0.5 * self.moveScale;
 				mapPos.setAttribute("translation", oldTrans.join(","));
 			}
 
-			if(e.charCode == 'w'.charCodeAt(0))
-			{
+			if (e.charCode == 'w'.charCodeAt(0)) {
 				oldTrans[0] = oldTrans[0] - 0.5 * self.moveScale;
 				mapPos.setAttribute("translation", oldTrans.join(","));
 			}
 
-			if(e.charCode == 'e'.charCodeAt(0))
-			{
+			if (e.charCode == 'e'.charCodeAt(0)) {
 				oldTrans[2] = oldTrans[2] + 0.5 * self.moveScale;
 				mapPos.setAttribute("translation", oldTrans.join(","));
 			}
 
-			if(e.charCode == 'f'.charCodeAt(0))
-			{
+			if (e.charCode == 'f'.charCodeAt(0)) {
 				oldTrans[2] = oldTrans[2] - 0.5 * self.moveScale;
 				mapPos.setAttribute("translation", oldTrans.join(","));
 			}
 
 			var mapRotation = $("#model__mapRotation")[0];
 			var oldRotation = mapRotation.getAttribute("rotation").split(",").map(
-				function(res) { return parseFloat(res); });
+				function (res) {
+					return parseFloat(res);
+				});
 
-			if(e.charCode == 'g'.charCodeAt(0))
-			{
+			if (e.charCode == 'g'.charCodeAt(0)) {
 				oldRotation[3] = oldRotation[3] + 0.01 * self.moveScale;
 				mapRotation.setAttribute("rotation", oldRotation.join(","));
 			}
 
-			if(e.charCode == 'h'.charCodeAt(0))
-			{
+			if (e.charCode == 'h'.charCodeAt(0)) {
 				oldRotation[3] = oldRotation[3] - 0.01 * self.moveScale;
 				mapRotation.setAttribute("rotation", oldRotation.join(","));
 			}
 
 			var oldScale = mapPos.getAttribute("scale").split(",").map(
-				function(res) { return parseFloat(res); });
+				function (res) {
+					return parseFloat(res);
+				});
 
-			if(e.charCode == 'j'.charCodeAt(0))
-			{
+			if (e.charCode == 'j'.charCodeAt(0)) {
 				oldScale[0] = oldScale[0] + 0.01 * self.moveScale;
 				oldScale[2] = oldScale[2] + 0.01 * self.moveScale;
 
 				mapPos.setAttribute("scale", oldScale.join(","));
 			}
 
-			if(e.charCode == 'k'.charCodeAt(0))
-			{
+			if (e.charCode == 'k'.charCodeAt(0)) {
 				oldScale[0] = oldScale[0] - 0.01 * self.moveScale;
 				oldScale[2] = oldScale[2] - 0.01 * self.moveScale;
 
@@ -517,15 +540,13 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	this.viewpointsNames = {};
 
 	this.selectedViewpointIdx = 0;
-	this.selectedViewpoint    = null;
+	this.selectedViewpoint = null;
 
 	this.isFlyingThrough = false;
 	this.flyThroughTime = 1000;
 
-	this.flyThrough = function()
-	{
-		if (!self.isFlyingThrough)
-		{
+	this.flyThrough = function () {
+		if (!self.isFlyingThrough) {
 			self.isFlyingThrough = true;
 			setTimeout(self.flyThroughTick, self.flyThroughTime);
 		} else {
@@ -533,8 +554,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		}
 	}
 
-	this.flyThroughTick = function()
-	{
+	this.flyThroughTick = function () {
 		var newViewpoint = self.selectedViewpointIdx + 1;
 
 		if (newViewpoint == self.viewpoints.length)
@@ -546,30 +566,29 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			setTimeout(self.flyThroughTick, self.flyThroughTime);
 	}
 
-	this.getViewpointGroupAndName = function(id)
-	{
+	this.getViewpointGroupAndName = function (id) {
 		var splitID = id.trim().split("__");
 
-		if (splitID.length > 1)
-		{
-			var group	= splitID[0].trim();
-			var name	= splitID[1].trim();
+		if (splitID.length > 1) {
+			var group = splitID[0].trim();
+			var name = splitID[1].trim();
 		} else {
-			var name	= splitID[0].trim();
-			var group	= 'uncategorized';
+			var name = splitID[0].trim();
+			var group = 'uncategorized';
 		}
 
-		return {group: group, name: name};
+		return {
+			group: group,
+			name: name
+		};
 	}
 
-	this.loadViewpoints = function()
-	{
+	this.loadViewpoints = function () {
 		var viewpointList = $("viewpoint");
 
-		for(var v = 0; v < viewpointList.length; v++)
-		{
+		for (var v = 0; v < viewpointList.length; v++) {
 			if (viewpointList[v].hasAttribute("id")) {
-				var id		= viewpointList[v]["id"].trim();
+				var id = viewpointList[v]["id"].trim();
 				viewpointList[v]["def"] = id;
 
 				var groupName = self.getViewpointGroupAndName(id);
@@ -585,15 +604,14 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.loadViewpoint = null;
 
-	this.getAxisAngle = function(from, at, up)
-	{
-		var x3dfrom	= new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
-		var x3dat	= new x3dom.fields.SFVec3f(at[0], at[1], at[2]);
-		var x3dup	= new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
+	this.getAxisAngle = function (from, at, up) {
+		var x3dfrom = new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
+		var x3dat = new x3dom.fields.SFVec3f(at[0], at[1], at[2]);
+		var x3dup = new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
 
 		var viewMat = new x3dom.fields.SFMatrix4f.lookAt(x3dfrom, x3dat, x3dup).inverse();
 
-		var q = new x3dom.fields.Quaternion(0.0,0.0,0.0,1.0);
+		var q = new x3dom.fields.Quaternion(0.0, 0.0, 0.0, 1.0);
 		q.setValue(viewMat);
 
 		q = q.toAxisAngle();
@@ -602,8 +620,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	}
 
 	// TODO: Should move this to somewhere more general (utils ? )
-	this.axisAngleToMatrix = function(axis, angle)
-	{
+	this.axisAngleToMatrix = function (axis, angle) {
 		var mat = new x3dom.fields.SFMatrix4f();
 
 		var cosAngle = Math.cos(angle);
@@ -621,27 +638,25 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			0, 0, 0, 1]);
 		*/
 
-		mat.setFromArray([ t * v.x * v.x + cosAngle, t * v.x * v.y + v.z * sinAngle, t * v.x * v.z - v.y * sinAngle, 0,
+		mat.setFromArray([t * v.x * v.x + cosAngle, t * v.x * v.y + v.z * sinAngle, t * v.x * v.z - v.y * sinAngle, 0,
 			t * v.x * v.y - v.z * sinAngle, t * v.y * v.y + cosAngle, t * v.y * v.z + v.x * sinAngle, 0,
 			t * v.x * v.z + v.y * sinAngle, t * v.y * v.z - v.x * sinAngle, t * v.z * v.z + cosAngle, 0,
-			0, 0, 0, 1]);
+			0, 0, 0, 1
+		]);
 
 		return mat;
 	}
 
-	this.createViewpoint = function(name, from, at, up)
-	{
+	this.createViewpoint = function (name, from, at, up) {
 		var groupName = self.getViewpointGroupAndName(name);
 
-		if (!(self.viewpoints[groupName.group] && self.viewpoints[groupName.group][groupName.name]))
-		{
+		if (!(self.viewpoints[groupName.group] && self.viewpoints[groupName.group][groupName.name])) {
 			var newViewPoint = document.createElement('viewpoint');
 			newViewPoint.setAttribute('id', name);
 			newViewPoint.setAttribute('def', name);
 			self.scene.appendChild(newViewPoint);
 
-			if (from && at && up)
-			{
+			if (from && at && up) {
 				var q = self.getAxisAngle(from, at, up);
 				newViewPoint.setAttribute('orientation', q.join(','));
 			}
@@ -657,16 +672,13 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		}
 	}
 
-	this.setCurrentViewpointIdx = function(idx)
-	{
+	this.setCurrentViewpointIdx = function (idx) {
 		var viewpointNames = Object.keys(self.viewpointsNames);
 		self.setCurrentViewpoint(viewpointNames[idx]);
 	}
 
-	this.setCurrentViewpoint = function(id)
-	{
-		if (Object.keys(self.viewpointsNames).indexOf(id) != -1)
-		{
+	this.setCurrentViewpoint = function (id) {
+		if (Object.keys(self.viewpointsNames).indexOf(id) != -1) {
 			var viewpoint = self.viewpointsNames[id];
 
 			// Remove event listener from viewpoint
@@ -690,9 +702,8 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.applySettings();
 
 
-			if (id === (self.name + "_default"))
-			{
-				if(self.defaultShowAll)
+			if (id === (self.name + "_default")) {
+				if (self.defaultShowAll)
 					self.runtime.fitAll();
 				else
 					self.reset();
@@ -704,16 +715,13 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		self.loadViewpoint = id;
 	}
 
-	this.updateSettings = function(settings)
-	{
+	this.updateSettings = function (settings) {
 		if (settings)
 			self.settings = settings;
 	}
 
-	this.applySettings = function()
-	{
-		if (self.settings)
-		{
+	this.applySettings = function () {
+		if (self.settings) {
 			if ('start_all' in self.settings)
 				self.defaultShowAll = self.settings['start_all'];
 
@@ -723,13 +731,11 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			if ('avatarHeight' in self.settings)
 				self.changeAvatarHeight(self.settings['avatarHeight']);
 
-			if ('defaultNavMode' in self.settings)
-			{
+			if ('defaultNavMode' in self.settings) {
 				self.defaultNavMode = self.settings['defaultNavMode'];
 			}
 
-			if ('pinSize' in self.settings)
-			{
+			if ('pinSize' in self.settings) {
 				self.pinSize = self.settings['pinSize'];
 			}
 
@@ -745,19 +751,14 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		}
 	}
 
-	this.lookAtObject = function(obj)
-	{
+	this.lookAtObject = function (obj) {
 		self.runtime.fitObject(obj, true);
 	};
 
-	this.applyApp = function(nodes, factor, emiss, otherSide)
-	{
-		if(!otherSide)
-		{
-			for(var m_idx = 0; m_idx < nodes.length; m_idx++)
-			{
-				if (nodes[m_idx]._x3domNode)
-				{
+	this.applyApp = function (nodes, factor, emiss, otherSide) {
+		if (!otherSide) {
+			for (var m_idx = 0; m_idx < nodes.length; m_idx++) {
+				if (nodes[m_idx]._x3domNode) {
 					var origDiff = nodes[m_idx]._x3domNode._vf.diffuseColor;
 					nodes[m_idx]._x3domNode._vf.diffuseColor.setValues(origDiff.multiply(factor));
 
@@ -768,10 +769,8 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 				}
 			}
 		} else {
-			for(var m_idx = 0; m_idx < nodes.length; m_idx++)
-			{
-				if (nodes[m_idx]._x3domNode)
-				{
+			for (var m_idx = 0; m_idx < nodes.length; m_idx++) {
+				if (nodes[m_idx]._x3domNode) {
 					var origDiff = nodes[m_idx]._x3domNode._vf.backDiffuseColor;
 					nodes[m_idx]._x3domNode._vf.backDiffuseColor.setValues(origDiff.multiply(factor));
 
@@ -786,40 +785,36 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 	this.pickObject = {};
 
-	this.pickPoint = function(x,y)
-	{
+	this.pickPoint = function (x, y) {
 		var viewArea = self.getViewArea();
-		var scene	 = viewArea._scene;
+		var scene = viewArea._scene;
 
 		var oldPickMode = scene._vf.pickMode.toLowerCase();
 		scene._vf.pickMode = "idbuf";
 		var success = scene._nameSpace.doc.ctx.pickValue(viewArea, x, y);
 		scene._vf.pickMode = oldPickMode;
 
-		self.pickObject.pickPos		= viewArea._pickingInfo.pickPos;
-		self.pickObject.pickNorm	= viewArea._pickingInfo.pickNorm;
-		self.pickObject.pickObj		= viewArea._pickingInfo.pickObj;
-		self.pickObject.part        = null;
-		self.pickObject.partID      = null;
+		self.pickObject.pickPos = viewArea._pickingInfo.pickPos;
+		self.pickObject.pickNorm = viewArea._pickingInfo.pickNorm;
+		self.pickObject.pickObj = viewArea._pickingInfo.pickObj;
+		self.pickObject.part = null;
+		self.pickObject.partID = null;
 
 		var objId = viewArea._pickingInfo.shadowObjectId;
 
-		if (scene._multiPartMap)
-		{
-			for(var mpi = 0; mpi < scene._multiPartMap.multiParts.length; mpi++)
-			{
+		if (scene._multiPartMap) {
+			for (var mpi = 0; mpi < scene._multiPartMap.multiParts.length; mpi++) {
 				var mp = scene._multiPartMap.multiParts[mpi];
 
-				if (objId > mp._minId && objId <= mp._maxId)
-				{
-					var colorMap 		= mp._inlineNamespace.defMap["MultiMaterial_ColorMap"];
-					var emissiveMap 	= mp._inlineNamespace.defMap["MultiMaterial_EmissiveMap"];
-					var specularMap 	= mp._inlineNamespace.defMap["MultiMaterial_SpecularMap"];
-					var visibilityMap 	= mp._inlineNamespace.defMap["MultiMaterial_VisibilityMap"];
+				if (objId > mp._minId && objId <= mp._maxId) {
+					var colorMap = mp._inlineNamespace.defMap["MultiMaterial_ColorMap"];
+					var emissiveMap = mp._inlineNamespace.defMap["MultiMaterial_EmissiveMap"];
+					var specularMap = mp._inlineNamespace.defMap["MultiMaterial_SpecularMap"];
+					var visibilityMap = mp._inlineNamespace.defMap["MultiMaterial_VisibilityMap"];
 
-                    self.pickObject.part = new x3dom.Parts(mp, [objId - mp._minId], colorMap, emissiveMap, specularMap, visibilityMap);
-                    self.pickObject.partID = mp._idMap.mapping[objId - mp._minId].name;
-                    self.pickObject.pickObj = self.pickObject.part.multiPart;
+					self.pickObject.part = new x3dom.Parts(mp, [objId - mp._minId], colorMap, emissiveMap, specularMap, visibilityMap);
+					self.pickObject.partID = mp._idMap.mapping[objId - mp._minId].name;
+					self.pickObject.pickObj = self.pickObject.part.multiPart;
 				}
 			}
 		}
@@ -829,8 +824,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	this.oneGrpNodes = [];
 	this.twoGrpNodes = [];
 
-	this.setApp = function(group, app)
-	{
+	this.setApp = function (group, app) {
 		if (!group || !group.multipart) {
 			if (app === undefined)
 				app = "1.0 0.5 0.0";
@@ -843,8 +837,7 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.applyApp(self.diffColorAdded, 0.5, "0.0 1.0 0.0");
 			self.applyApp(self.diffColorDeleted, 0.5, "1.0 0.0 0.0");
 
-			if (group)
-			{
+			if (group) {
 				self.twoGrpNodes = group.getElementsByTagName("TwoSidedMaterial");
 				self.oneGrpNodes = group.getElementsByTagName("Material");
 			} else {
@@ -860,24 +853,21 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		}
 	}
 
-	this.evDist = function(evt, posA)
-	{
+	this.evDist = function (evt, posA) {
 		return Math.sqrt(Math.pow(posA[0] - evt.position.x, 2) +
-				Math.pow(posA[1] - evt.position.y, 2) +
-				Math.pow(posA[2] - evt.position.z, 2));
+			Math.pow(posA[1] - evt.position.y, 2) +
+			Math.pow(posA[2] - evt.position.z, 2));
 	}
 
-	this.dist = function(posA, posB)
-	{
+	this.dist = function (posA, posB) {
 		return Math.sqrt(Math.pow(posA[0] - posB[0], 2) +
-				Math.pow(posA[1] - posB[1], 2) +
-				Math.pow(posA[2] - posB[2], 2));
+			Math.pow(posA[1] - posB[1], 2) +
+			Math.pow(posA[2] - posB[2], 2));
 	}
 
-	this.rotToRotation = function(from, to)
-	{
+	this.rotToRotation = function (from, to) {
 		var vecFrom = new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
-		var vecTo   = new x3dom.fields.SFVec3f(to[0], to[1], to[2]);
+		var vecTo = new x3dom.fields.SFVec3f(to[0], to[1], to[2]);
 
 		var dot = vecFrom.dot(vecTo);
 
@@ -886,10 +876,9 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		return crossVec.x + " " + crossVec.y + " " + crossVec.z + " " + Math.acos(dot);
 	}
 
-	this.rotAxisAngle = function(from, to)
-	{
+	this.rotAxisAngle = function (from, to) {
 		var vecFrom = new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
-		var vecTo   = new x3dom.fields.SFVec3f(to[0], to[1], to[2]);
+		var vecTo = new x3dom.fields.SFVec3f(to[0], to[1], to[2]);
 
 		var dot = vecFrom.dot(vecTo);
 
@@ -920,44 +909,37 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	}
 	*/
 
-	function scale(v, s)
-	{
+	function scale(v, s) {
 		return [v[0] * s, v[1] * s, v[2] * s];
 	}
 
-	function normalize(v)
-	{
-		var sz =  Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+	function normalize(v) {
+		var sz = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
 		return scale(v, 1 / sz);
 	}
 
-	function dotProduct(a,b)
-	{
+	function dotProduct(a, b) {
 		return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 	}
 
-	function crossProduct(a,b)
-	{
+	function crossProduct(a, b) {
 		var x = a[1] * b[2] - a[2] * b[1];
 		var y = a[2] * b[0] - a[0] * b[2];
 		var z = a[0] * b[1] - a[1] * b[0];
 
-		return [x,y,z];
+		return [x, y, z];
 	}
 
-	function vecAdd(a,b)
-	{
+	function vecAdd(a, b) {
 		return [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
 	}
 
-	function vecSub(a,b)
-	{
-		return vecAdd(a, scale(b,-1));
+	function vecSub(a, b) {
+		return vecAdd(a, scale(b, -1));
 	}
 
-	this.setNavMode = function(mode) {
-		if (self.currentNavMode != mode)
-		{
+	this.setNavMode = function (mode) {
+		if (self.currentNavMode != mode) {
 			// If the navigation mode has changed
 
 			if (mode == 'WAYFINDER') // If we are entering wayfinder navigation
@@ -966,10 +948,9 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			if (self.currentNavMode == 'WAYFINDER') // Exiting the wayfinding mode
 				waypoint.close();
 
-			if (mode == 'HELICOPTER')
-			{
-				var vpInfo  = self.getCurrentViewpointInfo();
-				var eye     = vpInfo["position"];
+			if (mode == 'HELICOPTER') {
+				var vpInfo = self.getCurrentViewpointInfo();
+				var eye = vpInfo["position"];
 				var viewDir = vpInfo["view_dir"];
 
 				self.nav._x3domNode._vf.typeParams[0] = Math.asin(viewDir[1]);
@@ -979,14 +960,14 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 			self.currentNavMode = mode;
 			self.nav.setAttribute('type', mode);
 
-			if (mode == 'WALK')
-			{
+			if (mode == 'WALK') {
 				self.disableClicking();
 				self.setApp(null);
 			}
 			/*else if (mode == 'HELICOPTER') {
 				self.disableSelecting();
-			} */ else {
+			} */
+			else {
 				self.enableClicking();
 			}
 
@@ -1000,38 +981,34 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		}
 	}
 
-	this.reload = function() {
+	this.reload = function () {
 		x3dom.reload();
 	}
 
-	this.startingPoint = [0.0,0.0,0.0];
-	this.setStartingPoint = function(x,y,z)
-	{
+	this.startingPoint = [0.0, 0.0, 0.0];
+	this.setStartingPoint = function (x, y, z) {
 		self.startingPoint[0] = x;
 		self.startingPoint[1] = y;
 		self.startingPoint[2] = z;
 	}
 
 	this.defaultOrientation = [0.0, 0.0, 1.0];
-	this.setStartingOrientation = function(x,y,z)
-	{
+	this.setStartingOrientation = function (x, y, z) {
 		self.defaultOrientation[0] = x;
 		self.defaultOrientation[1] = y;
 		self.defaultOrientation[2] = z;
 	}
 
-	this.setCameraPosition = function(pos)
-	{
-		var vpInfo		= self.getCurrentViewpointInfo();
+	this.setCameraPosition = function (pos) {
+		var vpInfo = self.getCurrentViewpointInfo();
 
-		var viewDir		= vpInfo["view_dir"];
-		var up			= vpInfo["up"];
+		var viewDir = vpInfo["view_dir"];
+		var up = vpInfo["up"];
 
 		self.updateCamera(pos, up, viewDir);
 	}
 
-	this.moveCamera = function(dV)
-	{
+	this.moveCamera = function (dV) {
 		var currentPos = self.getCurrentViewpointInfo()["position"];
 		currentPos[0] += dV[0];
 		currentPos[1] += dV[1];
@@ -1040,23 +1017,20 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		self.setCameraPosition(currentPos);
 	}
 
-	this.setCameraViewDir = function(viewDir, upDir)
-	{
+	this.setCameraViewDir = function (viewDir, upDir) {
 		var currentPos = self.getCurrentViewpointInfo()["position"];
 		self.updateCamera(currentPos, upDir, viewDir);
 	}
 
-	this.setCamera = function(pos, viewDir, upDir)
-	{
+	this.setCamera = function (pos, viewDir, upDir) {
 		self.updateCamera(pos, upDir, viewDir);
 	}
 
-	this.updateCamera = function(pos, up, viewDir)
-	{
+	this.updateCamera = function (pos, up, viewDir) {
 		var x3domView = new x3dom.fields.SFVec3f();
 		x3domView.setValueByStr(viewDir.join(","));
 
-		var x3domUp   = new x3dom.fields.SFVec3f();
+		var x3domUp = new x3dom.fields.SFVec3f();
 		x3domUp.setValueByStr(normalize(up).join(","));
 
 		var x3domFrom = new x3dom.fields.SFVec3f();
@@ -1067,21 +1041,19 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		var viewMatrix = x3dom.fields.SFMatrix4f.lookAt(x3domFrom, x3domAt, x3domUp).inverse();
 		var currMatrix = self.getCurrentViewpoint()._x3domNode;
 
-		if (self.currentNavMode == 'HELICOPTER')
-		{
+		if (self.currentNavMode == 'HELICOPTER') {
 			self.nav._x3domNode._vf.typeParams[0] = Math.asin(x3domView.y);
 			self.nav._x3domNode._vf.typeParams[1] = x3domFrom.y;
 		}
 
 		self.getViewArea().animateTo(viewMatrix, currMatrix);
 
-		if(self.linked)
+		if (self.linked)
 			self.manager.switchMaster(self.handle);
 	}
 
 	this.linked = false;
-	this.linkMe = function()
-	{
+	this.linkMe = function () {
 		// Need to be attached to the viewer master
 		if (!self.manager)
 			return;
@@ -1098,28 +1070,24 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 
 	this.collDistance = 0.1;
-	this.changeCollisionDistance = function(collDistance)
-	{
+	this.changeCollisionDistance = function (collDistance) {
 		self.collDistance = collDistance;
 		self.nav._x3domNode._vf.avatarSize[0] = collDistance;
 	}
 
 	this.avatarHeight = 1.83;
-	this.changeAvatarHeight = function(height)
-	{
+	this.changeAvatarHeight = function (height) {
 		self.avatarHeight = height;
 		self.nav._x3domNode._vf.avatarSize[1] = height;
 	}
 
 	this.stepHeight = 0.4;
-	this.changeStepHeight = function(stepHeight)
-	{
+	this.changeStepHeight = function (stepHeight) {
 		self.stepHeight = stepHeight;
 		self.nav._x3domNode._vf.avatarSize[2] = stepHeight;
 	}
 
-	this.reset = function()
-	{
+	this.reset = function () {
 		self.setCurrentViewpoint('model__start');
 
 		self.changeCollisionDistance(self.collDistance);
@@ -1127,12 +1095,10 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		self.changeStepHeight(self.stepHeight);
 	}
 
-	this.loadURL = function(url)
-	{
-		if(self.inline)
-		{
+	this.loadURL = function (url) {
+		if (self.inline) {
 			self.inline.parentNode.removeChild(self.inline);
-			self.inline = null;		// Garbage collect
+			self.inline = null; // Garbage collect
 		}
 
 		self.inline = document.createElement('inline');
@@ -1145,56 +1111,54 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		self.url = url;
 	}
 
-	this.getRoot = function() {
+	this.getRoot = function () {
 		return self.inline;
 	}
 
-	this.getScene = function() {
+	this.getScene = function () {
 		return self.scene;
 	}
 
-	this.getCurrentViewpoint = function()
-	{
+	this.getCurrentViewpoint = function () {
 		return self.getViewArea()._scene.getViewpoint()._xmlNode;
 	}
 
-	this.getCurrentViewpointInfo = function()
-	{
+	this.getCurrentViewpointInfo = function () {
 		var viewPoint = {};
 
 		var origViewTrans = self.getViewArea()._scene.getViewpoint().getCurrentTransform();
-		var viewMat	  = self.getViewMatrix().inverse();
+		var viewMat = self.getViewMatrix().inverse();
 
-		var viewRight	  = viewMat.e0();
-		var viewUp	  = viewMat.e1();
-		var viewDir	  = viewMat.e2().multiply(-1); // Because OpenGL points out of screen
-		var viewPos	  = viewMat.e3();
+		var viewRight = viewMat.e0();
+		var viewUp = viewMat.e1();
+		var viewDir = viewMat.e2().multiply(-1); // Because OpenGL points out of screen
+		var viewPos = viewMat.e3();
 
-		var center        = self.getViewArea()._scene.getViewpoint().getCenterOfRotation();
+		var center = self.getViewArea()._scene.getViewpoint().getCenterOfRotation();
 
-		if (center)	{
+		if (center) {
 			var lookAt = center.subtract(viewPos);
 		} else {
-			var lookAt  = viewPos.add(viewDir);
+			var lookAt = viewPos.add(viewDir);
 		}
 
 		var projMat = self.getProjectionMatrix();
 
 		// More viewing direction than lookAt to sync with Assimp
-		viewPoint["up"]           = [viewUp.x, viewUp.y, viewUp.z];
-		viewPoint["position"]     = [viewPos.x, viewPos.y, viewPos.z];
-		viewPoint["look_at"]      = [lookAt.x, lookAt.y, lookAt.z];
-		viewPoint["view_dir"]     = [viewDir.x, viewDir.y, viewDir.z];
-		viewPoint["right"]        = [viewRight.x, viewRight.y, viewRight.z];
-		viewPoint["unityHeight"]  = 2.0 / projMat._00;
-		viewPoint["fov"]	      = Math.atan((1 / projMat._00)) * 2.0;
+		viewPoint["up"] = [viewUp.x, viewUp.y, viewUp.z];
+		viewPoint["position"] = [viewPos.x, viewPos.y, viewPos.z];
+		viewPoint["look_at"] = [lookAt.x, lookAt.y, lookAt.z];
+		viewPoint["view_dir"] = [viewDir.x, viewDir.y, viewDir.z];
+		viewPoint["right"] = [viewRight.x, viewRight.y, viewRight.z];
+		viewPoint["unityHeight"] = 2.0 / projMat._00;
+		viewPoint["fov"] = Math.atan((1 / projMat._00)) * 2.0;
 		viewPoint["aspect_ratio"] = viewPoint["fov"] / projMat._11;
 
 		var f = projMat._23 / (projMat._22 + 1);
 		var n = (f * projMat._23) / (projMat._23 - 2 * f);
 
-		viewPoint["far"]	= f;
-		viewPoint["near"]	= n;
+		viewPoint["far"] = f;
+		viewPoint["near"] = n;
 
 		viewPoint["clippingPlanes"] = self.clippingPlanes;
 
@@ -1203,28 +1167,24 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 
 
 	this.speed = 2.0;
-	this.setSpeed = function(speed)
-	{
+	this.setSpeed = function (speed) {
 		self.speed = speed;
 		self.nav.speed = speed;
 	}
 
-	this.bgroundClick = function(event) {
+	this.bgroundClick = function (event) {
 		self.triggerSelected(null);
 	}
 
 	this.hiddenParts = [];
 
-	this.addHiddenPart = function(part)
-	{
+	this.addHiddenPart = function (part) {
 		this.hiddenParts.push(part);
 	}
 
-	this.clickObject = function(event, objEvent) {
-		if ((objEvent.button == 1) && !self.selectionDisabled)
-		{
-			if (objEvent.partID)
-			{
+	this.clickObject = function (event, objEvent) {
+		if ((objEvent.button == 1) && !self.selectionDisabled) {
+			if (objEvent.partID) {
 				objEvent.part.partID = objEvent.partID;
 				self.triggerPartSelected(objEvent.part);
 			} else {
@@ -1233,19 +1193,16 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		}
 	}
 
-	this.revealAll = function(event, objEvent)
-	{
-		for(var part in self.hiddenParts)
-		{
+	this.revealAll = function (event, objEvent) {
+		for (var part in self.hiddenParts) {
 			self.hiddenParts[part].setVisibility(true);
 		}
 
 		self.hiddenParts = [];
 	}
 
-	this.disableClicking = function() {
-		if(self.clickingEnabled)
-		{
+	this.disableClicking = function () {
+		if (self.clickingEnabled) {
 			self.offBackgroundClicked(self.bgroundClick);
 			self.offClickObject(self.clickObject);
 			self.viewer.setAttribute("disableDoubleClick", true);
@@ -1253,13 +1210,12 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		}
 	}
 
-	this.disableSelecting = function() {
+	this.disableSelecting = function () {
 		self.selectionDisabled = true;
 	}
 
-	this.enableClicking = function() {
-		if(!self.clickingEnabled)
-		{
+	this.enableClicking = function () {
+		if (!self.clickingEnabled) {
 			// When the user clicks on the background the select nothing.
 			self.onBackgroundClicked(self.bgroundClick);
 			self.onClickObject(self.clickObject);
@@ -1268,11 +1224,10 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		}
 	}
 
-	this.switchFullScreen = function(vrDisplay) {
+	this.switchFullScreen = function (vrDisplay) {
 		vrDisplay = vrDisplay || {};
 
-		if (!self.fullscreen)
-		{
+		if (!self.fullscreen) {
 			if (self.viewer.mozRequestFullScreen) {
 				self.viewer.mozRequestFullScreen({
 					vrDisplay: vrDisplay
@@ -1296,36 +1251,30 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	};
 
 	this.diffColorDeleted = [];
-	this.diffColorAdded   = [];
+	this.diffColorAdded = [];
 
-	this.setDiffColors = function(diffColors) {
-		if(diffColors)
+	this.setDiffColors = function (diffColors) {
+		if (diffColors)
 			self.diffColors = diffColors;
 
 		self.applyApp(self.diffColorAdded, 2.0, "0.0 0.0 0.0", false);
 		self.applyApp(self.diffColorDeleted, 2.0, "0.0 0.0 0.0", false);
 
-		self.diffColorAdded   = [];
+		self.diffColorAdded = [];
 		self.diffColorDeleted = [];
 
-		if (self.diffColors)
-		{
-			if (self.inline.childNodes.length)
-			{
+		if (self.diffColors) {
+			if (self.inline.childNodes.length) {
 				var defMapSearch = self.inline.childNodes[0]._x3domNode._nameSpace.defMap;
 
-				if(self.diffColors["added"])
-				{
-					for(var i = 0; i < self.diffColors["added"].length; i++)
-					{
+				if (self.diffColors["added"]) {
+					for (var i = 0; i < self.diffColors["added"].length; i++) {
 						// TODO: Improve, with graph, to use appearance under  _cf rather than DOM.
 						var obj = defMapSearch[self.diffColors["added"][i]];
-						if(obj)
-						{
+						if (obj) {
 							var mat = $(obj._xmlNode).find("Material");
 
-							if (mat.length)
-							{
+							if (mat.length) {
 								self.applyApp(mat, 0.5, "0.0 1.0 0.0", false);
 								self.diffColorAdded.push(mat[0]);
 							} else {
@@ -1339,18 +1288,14 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 					}
 				}
 
-				if(self.diffColors["deleted"])
-				{
-					for(var i = 0; i < self.diffColors["deleted"].length; i++)
-					{
+				if (self.diffColors["deleted"]) {
+					for (var i = 0; i < self.diffColors["deleted"].length; i++) {
 						// TODO: Improve, with graph, to use appearance under  _cf rather than DOM.
 						var obj = defMapSearch[self.diffColors["deleted"][i]];
-						if(obj)
-						{
+						if (obj) {
 							var mat = $(obj._xmlNode).find("Material");
 
-							if (mat.length)
-							{
+							if (mat.length) {
 								self.applyApp(mat, 0.5, "1.0 0.0 0.0", false);
 								self.diffColorDeleted.push(mat[0]);
 							} else {
@@ -1366,27 +1311,26 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		}
 	};
 
-	this.transformEvent = function(event, viewpoint, inverse)
-	{
+	this.transformEvent = function (event, viewpoint, inverse) {
 		if (inverse)
 			var transformation = viewpoint._x3domNode.getTransformation().inverse();
 		else
 			var transformation = viewpoint._x3domNode.getTransformation();
 
-		var newPos       = transformation.multMatrixVec(event.position);
+		var newPos = transformation.multMatrixVec(event.position);
 		var newOrientMat = self.axisAngleToMatrix(event.orientation[0], event.orientation[1]);
-		newOrientMat     = transformation.mult(newOrientMat);
+		newOrientMat = transformation.mult(newOrientMat);
 
-		var newOrient    = new x3dom.fields.Quaternion();
+		var newOrient = new x3dom.fields.Quaternion();
 		newOrient.setValue(newOrientMat);
 		newOrient = newOrient.toAxisAngle();
 
-		event.position    = newPos;
+		event.position = newPos;
 		event.orientation = newOrient;
 	}
 
 	// TODO: Merge this function with the Viewer Manager
-	this.axesMove = function(origEvent, event) {
+	this.axesMove = function (origEvent, event) {
 		// Axes should rotate inversely to orientation
 		// of camera
 		event.orientation[1] = event.orientation[1] * -1;
@@ -1398,12 +1342,11 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 		self.axesGroup.setAttribute('rotation', event.orientation.toString());
 	}
 
-	this.linkAxes = function()
-	{
+	this.linkAxes = function () {
 		self.onViewpointChanged(self.axesMove);
 	}
 
-	this.addAxes = function() {
+	this.addAxes = function () {
 		var axesDiffColor = ['0.1 0.6 0.1', '0.7 0.1 0.1', '0.3 0.3 1.0'];
 		var axesEmissiveColor = ['0.05 0.2 0.05', '0.33 0.0 0.0', '0.1 0.1 0.33'];
 		var rotation = ['0.0 0.0 1.0 0.0', '0.0 0.0 1.0 -1.57079', '1.0 0.0 0.0 1.57079'];
@@ -1441,31 +1384,29 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	}
 
 	var clippingPlaneID = -1;
-	this.clippingPlanes  = [];
+	this.clippingPlanes = [];
 
-	this.setClippingPlanes = function(clippingPlanes)
-	{
+	this.setClippingPlanes = function (clippingPlanes) {
 		self.clearClippingPlanes();
 
-		for(var clipidx = 0; clipidx < clippingPlanes.length; clipidx++)
-		{
+		for (var clipidx = 0; clipidx < clippingPlanes.length; clipidx++) {
 			var clipPlaneIDX = self.addClippingPlane(
-					clippingPlanes[clipidx]["axis"],
-					clippingPlanes[clipidx]["distance"],
-					clippingPlanes[clipidx]["percentage"],
-					clippingPlanes[clipidx]["clipDirection"]
-				);
+				clippingPlanes[clipidx]["axis"],
+				clippingPlanes[clipidx]["distance"],
+				clippingPlanes[clipidx]["percentage"],
+				clippingPlanes[clipidx]["clipDirection"]
+			);
 		}
 	}
 
 	/**
-	* Adds a clipping plane to the viewer
-	* @param {string} axis - Axis through which the plane clips
-	* @param {number} distance - Distance along the bounding box to clip
-	* @param {number} percentage - Percentage along the bounding box to clip (overrides distance)
-	* @param {number} clipDirection - Direction of clipping (-1 or 1)
-	*/
-	this.addClippingPlane = function(axis, distance, percentage, clipDirection) {
+	 * Adds a clipping plane to the viewer
+	 * @param {string} axis - Axis through which the plane clips
+	 * @param {number} distance - Distance along the bounding box to clip
+	 * @param {number} percentage - Percentage along the bounding box to clip (overrides distance)
+	 * @param {number} clipDirection - Direction of clipping (-1 or 1)
+	 */
+	this.addClippingPlane = function (axis, distance, percentage, clipDirection) {
 		clippingPlaneID += 1;
 
 		var newClipPlane = new ClipPlane(clippingPlaneID, self, axis, [1, 1, 1], distance, percentage, clipDirection);
@@ -1475,10 +1416,10 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	}
 
 	/**
-	* Clear out all clipping planes
-	*/
-	this.clearClippingPlanes = function() {
-		self.clippingPlanes.forEach(function(clipPlane) {
+	 * Clear out all clipping planes
+	 */
+	this.clearClippingPlanes = function () {
+		self.clippingPlanes.forEach(function (clipPlane) {
 			clipPlane.destroy();
 			delete clipPlane;
 		});
@@ -1487,10 +1428,10 @@ var Viewer = function(name, handle, x3ddiv, manager) {
 	}
 
 	/**
-	* Clear out all clipping planes
-	* @param {number} id - Get the clipping plane with matching unique ID
-	*/
-	this.getClippingPlane = function(id) {
+	 * Clear out all clipping planes
+	 * @param {number} id - Get the clipping plane with matching unique ID
+	 */
+	this.getClippingPlane = function (id) {
 		// If the clipping plane no longer exists this
 		// will return undefined
 		return self.clippingPlanes.filter(function (clipPlane) {
@@ -1513,118 +1454,121 @@ var Viewer = function(name, handle, x3ddiv, manager) {
  * @param {number} percentage - Percentage along the bounding box to clip
  * @param {number} clipDirection - Direction of clipping (-1 or 1)
  */
-var ClipPlane = function(id, viewer, axis, colour, distance, percentage, clipDirection)
-{
+var ClipPlane = function (id, viewer, axis, colour, distance, percentage, clipDirection) {
 	var self = this;
 
 	// Public properties
 
 	/**
-	* Axis on which the clipping plane is based
-	* @type {string}
-	*/
+	 * Axis on which the clipping plane is based
+	 * @type {string}
+	 */
 	this.axis = "X";
 
 	/**
-	* Value representing the direction of clipping
-	* @type {number}
-	*/
+	 * Value representing the direction of clipping
+	 * @type {number}
+	 */
 	this.clipDirection = (clipDirection === undefined) ? -1 : clipDirection;
 
 	/**
-	* Value representing the percentage distance from the origin of
-	* the clip plane
-	* @type {number}
-	*/
+	 * Value representing the percentage distance from the origin of
+	 * the clip plane
+	 * @type {number}
+	 */
 	this.percentage = (percentage === undefined) ? 1.0 : percentage
 
 	/**
-	* Value representing the distance from the origin of
-	* the clip plane
-	* @type {number}
-	*/
+	 * Value representing the distance from the origin of
+	 * the clip plane
+	 * @type {number}
+	 */
 	this.distance = distance;
 
 	/**
-	* Volume containing the clipping plane
-	* @type {BoxVolume}
-	*/
+	 * Volume containing the clipping plane
+	 * @type {BoxVolume}
+	 */
 	var volume = null;
 
 	/**
-	* DOM Element representing the clipping plane
-	* @private
-	* @type {HTMLElement}
-	*/
+	 * DOM Element representing the clipping plane
+	 * @private
+	 * @type {HTMLElement}
+	 */
 	var clipPlaneElem = document.createElement("ClipPlane");
 
 	/**
-	* Normal vector to the clipping plane
-	* @private
-	* @type {SFVec3f}
-	*/
+	 * Normal vector to the clipping plane
+	 * @private
+	 * @type {SFVec3f}
+	 */
 	var normal = new x3dom.fields.SFVec3f(0, 0, 0);
 
 	/**
-	* Coordinate frame for clipping plane
-	* @private
-	* @type {HTMLElement}
-	*/
+	 * Coordinate frame for clipping plane
+	 * @private
+	 * @type {HTMLElement}
+	 */
 	var coordinateFrame = document.createElement("Transform");
 
 	/**
-	* Outline shape
-	* @private
-	* @type {HTMLElement}
-	*/
-	var outline      = document.createElement("Shape");
+	 * Outline shape
+	 * @private
+	 * @type {HTMLElement}
+	 */
+	var outline = document.createElement("Shape");
 
 	/**
-	* Outline appearance
-	* @private
-	* @type {HTMLElement}
-	*/
-	var outlineApp   = document.createElement("Appearance");
+	 * Outline appearance
+	 * @private
+	 * @type {HTMLElement}
+	 */
+	var outlineApp = document.createElement("Appearance");
 
 	/**
-	* Outline material
-	* @private
-	* @type {HTMLElement}
-	*/
-	var outlineMat   = document.createElement("Material");
+	 * Outline material
+	 * @private
+	 * @type {HTMLElement}
+	 */
+	var outlineMat = document.createElement("Material");
 
 	/**
-	* Outline line set
-	* @private
-	* @type {HTMLElement}
-	*/
+	 * Outline line set
+	 * @private
+	 * @type {HTMLElement}
+	 */
 	var outlineLines = document.createElement("LineSet");
 
 	/**
-	* Outline coordinates
-	* @private
-	* @type {HTMLElement}
-	*/
+	 * Outline coordinates
+	 * @private
+	 * @type {HTMLElement}
+	 */
 	var outlineCoords = document.createElement("Coordinate");
 
 	/**
-	* Get my unique ID
-	*/
-	this.getID = function()
-	{
+	 * Get my unique ID
+	 */
+	this.getID = function () {
 		return id;
 	}
 
 	/**
-	* Set the coordinates of the clipping plane outline
-	*/
-	var setOutlineCoordinates = function()
-	{
+	 * Set the coordinates of the clipping plane outline
+	 */
+	var setOutlineCoordinates = function () {
 		var min = volume.min.toGL();
 		var max = volume.max.toGL();
 
 		var axisIDX = "XYZ".indexOf(self.axis);
-		var outline = [[0,0,0], [0,0,0], [0,0,0], [0,0,0], [0,0,0]];
+		var outline = [
+			[0, 0, 0],
+			[0, 0, 0],
+			[0, 0, 0],
+			[0, 0, 0],
+			[0, 0, 0]
+		];
 
 		var minor = (axisIDX + 1) % 3;
 		var major = (axisIDX + 2) % 3;
@@ -1645,18 +1589,17 @@ var ClipPlane = function(id, viewer, axis, colour, distance, percentage, clipDir
 		outline[4][major] = max[major];
 
 		outlineCoords.setAttribute("point",
-			outline.map(function(item) {
+			outline.map(function (item) {
 				return item.join(" ");
 			}).join(",")
 		);
 	}
 
 	/**
-	* Move the clipping plane
-	* @param {number} percentage - Percentage of entire clip volume to move across
-	*/
-	this.movePlane = function(percentage)
-	{
+	 * Move the clipping plane
+	 * @param {number} percentage - Percentage of entire clip volume to move across
+	 */
+	this.movePlane = function (percentage) {
 		// Update the transform containing the clipping plane
 		var axisIDX = "XYZ".indexOf(this.axis);
 		var min = volume.min.toGL();
@@ -1665,8 +1608,7 @@ var ClipPlane = function(id, viewer, axis, colour, distance, percentage, clipDir
 		self.percentage = percentage;
 		var distance = 0.0;
 
-		if (self.distance)
-		{
+		if (self.distance) {
 			distance = self.distance;
 		} else {
 			distance = ((max[axisIDX] - min[axisIDX]) * percentage) + min[axisIDX];
@@ -1675,17 +1617,16 @@ var ClipPlane = function(id, viewer, axis, colour, distance, percentage, clipDir
 		// Update the clipping element plane equation
 		clipPlaneElem.setAttribute("plane", normal.toGL().join(" ") + " " + distance);
 
-		var translation = [0,0,0];
+		var translation = [0, 0, 0];
 		translation[axisIDX] = -distance * this.clipDirection;
 		coordinateFrame.setAttribute("translation", translation.join(","));
 	}
 
 	/**
-	* Change the clipping axis
-	* @param {string} axis - Axis on which the clipping plane acts
-	*/
-	this.changeAxis = function(axis)
-	{
+	 * Change the clipping axis
+	 * @param {string} axis - Axis on which the clipping plane acts
+	 */
+	this.changeAxis = function (axis) {
 		this.axis = axis.toUpperCase();
 
 		// When the axis is change the normal to the plane is changed
@@ -1700,10 +1641,9 @@ var ClipPlane = function(id, viewer, axis, colour, distance, percentage, clipDir
 	}
 
 	/**
-	* Destroy me and everything connected with me
-	*/
-	this.destroy = function()
-	{
+	 * Destroy me and everything connected with me
+	 */
+	this.destroy = function () {
 		if (clipPlaneElem && clipPlaneElem.parentNode) {
 			clipPlaneElem.parentNode.removeChild(clipPlaneElem);
 		}
@@ -1732,7 +1672,5 @@ var ClipPlane = function(id, viewer, axis, colour, distance, percentage, clipDir
 	this.changeAxis(axis);
 	viewer.getScene().appendChild(clipPlaneElem);
 	this.movePlane(percentage);
+
 };
-
-
-
