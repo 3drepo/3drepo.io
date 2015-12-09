@@ -70,7 +70,6 @@
 					"<" + vm.contentData.type + " " +
 						"filter-text='vm.filterText' " +
 						"height='vm.contentHeight' " +
-						"show='vm.contentData.show' " +
 						"show-add='vm.addStatus' " +
 						"options='vm.contentData.options' " +
 						"selected-option='vm.selectedOption' " +

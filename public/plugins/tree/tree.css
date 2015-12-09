@@ -15,7 +15,7 @@ tree span .fa {
 
 tree p {
   outline: none;
-  width: 200px;
+  width: 400px;
   word-break: break-all;
   word-wrap: break-word;
   padding: 5px;
@@ -34,6 +34,20 @@ tree md-checkbox {
   cursor: default;
   display: inline-block;
   font-weight: normal;
+}
+
+tree .treeToggleButton {
+  outline: none;
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  padding-top: 8px;
+}
+tree .treeToggleButton md-icon {
+  font-size: 22px;
+}
+tree .treeToggleButton .treeToggleButtonDisabled {
+  color: #DDDDDD;
 }
 
 /** Tree Node *********************************************************************************************************/
@@ -61,9 +75,9 @@ tree md-checkbox {
 
 /** Tree filter list **************************************************************************************************/
 
-tree .virtualRepeatdemoInfiniteScroll #vertical-container {
+tree .virtualRepeatdemoInfiniteScroll .vertical-container {
   height: 770px;
-  min-width: 280px;
+  min-width: 800px;
   max-width: 800px;
 }
 
@@ -86,7 +100,6 @@ tree .virtualRepeatdemoInfiniteScroll .repeated-item {
 #treeFilterItemName .md-button {
   border-radius: 0;
 }
-
 
 .viewerSelected {
   color: #F00;

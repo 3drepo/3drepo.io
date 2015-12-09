@@ -83,7 +83,8 @@
                         ViewerService.defaultViewer.addHiddenPart(parts);
                     }
                 }
-            } else {
+            }
+			else {
                 var rootObj = document.getElementById("model__" + nodeId);
                 rootObj.setAttribute("render", state.toString());
             }

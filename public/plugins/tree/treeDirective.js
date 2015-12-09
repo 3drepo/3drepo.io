@@ -62,15 +62,20 @@
 
 			vm.idToPath = data.idToPath;
 
-            vm.nodesToShow = [vm.allNodes[0]];
-            vm.nodesToShow[0].level = 0;
-            vm.nodesToShow[0].expanded = false;
-			vm.nodesToShow[0].hasChildren = true;
-
+			initNodesToShow();
             setupInfiniteScroll();
         });
 
-        $scope.toggleChildren = function (_id) {
+		var initNodesToShow = function () {
+			vm.nodesToShow = [vm.allNodes[0]];
+			vm.nodesToShow[0].level = 0;
+			vm.nodesToShow[0].expanded = false;
+			vm.nodesToShow[0].hasChildren = true;
+			vm.nodesToShow[0].selected = false;
+			vm.nodesToShow[0].toggleState = "visible";
+		};
+
+        vm.expand = function (_id) {
             var i,
                 j,
                 numChildren,
@@ -85,31 +90,33 @@
                 }
             }
             if (index !== -1) {
-                if (vm.nodesToShow[index].expanded) {
-                    while (!endOfSplice) {
-                        if (angular.isDefined(vm.nodesToShow[index + 1]) && vm.nodesToShow[index + 1].path.indexOf(_id) !== -1) {
-                            vm.nodesToShow.splice(index + 1, 1);
-                        }
-                        else {
-                            endOfSplice = true;
-                        }
-                    }
-                }
-                else {
-                    numChildren = vm.nodesToShow[index].children.length;
-                    for (i = 0; i < numChildren; i += 1) {
-                        vm.nodesToShow[index].children[i].expanded = false;
-                        vm.nodesToShow[index].children[i].level = vm.nodesToShow[index].level + 1;
-						vm.nodesToShow[index].children[i].hasChildren = vm.nodesToShow[index].children[i].children.length > 0;
-                        vm.nodesToShow.splice(index + i + 1, 0, vm.nodesToShow[index].children[i]);
-                    }
-                }
-                console.log(vm.nodesToShow);
-                vm.nodesToShow[index].expanded = !vm.nodesToShow[index].expanded;
+				if (vm.nodesToShow[index].hasChildren) {
+					if (vm.nodesToShow[index].expanded) {
+						while (!endOfSplice) {
+							if (angular.isDefined(vm.nodesToShow[index + 1]) && vm.nodesToShow[index + 1].path.indexOf(_id) !== -1) {
+								vm.nodesToShow.splice(index + 1, 1);
+							}
+							else {
+								endOfSplice = true;
+							}
+						}
+					}
+					else {
+						numChildren = vm.nodesToShow[index].children.length;
+						for (i = 0; i < numChildren; i += 1) {
+							vm.nodesToShow[index].children[i].expanded = false;
+							vm.nodesToShow[index].children[i].toggleState = vm.nodesToShow[index].toggleState;
+							vm.nodesToShow[index].children[i].level = vm.nodesToShow[index].level + 1;
+							vm.nodesToShow[index].children[i].hasChildren = vm.nodesToShow[index].children[i].children.length > 0;
+							vm.nodesToShow.splice(index + i + 1, 0, vm.nodesToShow[index].children[i]);
+						}
+					}
+					vm.nodesToShow[index].expanded = !vm.nodesToShow[index].expanded;
+				}
             }
         };
 
-        function expand (path, level) {
+        function expandToSelection (path, level) {
             var i,
                 j,
                 length = 0,
@@ -131,9 +138,10 @@
 
                     for (j = 0; j < childrenLength; j += 1) {
                         vm.nodesToShow[i].children[j].selected = (vm.nodesToShow[i].children[j]._id === selectedId);
-						vm.nodesToShow[i].children[j].toggled = true;
+						vm.nodesToShow[i].children[j].toggleState = "visible";
 						vm.nodesToShow[i].children[j].hasChildren = vm.nodesToShow[i].children[j].children.length > 0;
                         if (vm.nodesToShow[i].children[j].selected) {
+							console.log(vm.nodesToShow[i].children[j]);
                             selectionFound = true;
                         }
                         if ((level === (path.length - 2)) && !selectionFound) {
@@ -145,7 +153,7 @@
                 }
             }
             if (level < (path.length - 2)) {
-                expand(path, (level + 1));
+				expandToSelection(path, (level + 1));
             }
             else if (level === (path.length - 2)) {
                 vm.topIndex = selectedIndex - 2;
@@ -169,28 +177,9 @@
                         idParts = object.getAttribute("id").split("__");
                     }
 					path = vm.idToPath[idParts[idParts.length - 1]].split("__");
-					console.log(path);
-					console.log(path[path.length - 1]);
-					vm.nodesToShow = [vm.allNodes[0]];
-					vm.nodesToShow[0].level = 0;
-					vm.nodesToShow[0].expanded = false;
-					vm.nodesToShow[0].selected = false;
-					vm.nodesToShow[0].toggled = true;
-					expand(path, 0);
 
-                    /*
-                    objectID = idParts[idParts.length - 1];
-
-                    if (objectID === vm.idToName[objectID])
-                    {
-                        vm.filterText = "###" + vm.idToName[objectID];
-
-                        vm.objectName    = objectID;
-                        vm.origID        = "###" + object.id;
-                    } else {
-                        vm.filterText    = vm.idToName[objectID];
-                    }
-                    */
+					initNodesToShow();
+					expandToSelection(path, 0);
                 }
             });
         });
@@ -200,14 +189,67 @@
 			TreeService.selectNode(nodeId);
 		};
 
-		vm.nodeToggled = function (nodeId, state) {
-			vm.toggledNode = nodeId;
-			TreeService.toggleNode(nodeId, state);
+		vm.toggleTreeNode = function (node) {
+			var i = 0,
+				j = 0,
+				k = 0,
+				nodesLength,
+				path,
+				parent = null,
+				nodeToggleState = "visible",
+				numInvisible = 0;
+
+			vm.toggledNode = node;
+
+			path = node.path.split("__");
+			path.splice(path.length - 1, 1);
+
+			for (i = 0, nodesLength = vm.nodesToShow.length; i < nodesLength; i += 1) {
+				// Set node toggle state
+				if (vm.nodesToShow[i]._id === node._id) {
+					vm.nodesToShow[i].toggleState = (vm.nodesToShow[i].toggleState === "visible") ? "invisible" : "visible";
+					nodeToggleState = vm.nodesToShow[i].toggleState;
+				}
+				// Set children to node toggle state
+				else if (vm.nodesToShow[i].path.indexOf(node._id) !== -1) {
+					vm.nodesToShow[i].toggleState = nodeToggleState;
+				}
+				// Get node parent
+				if (vm.nodesToShow[i]._id === path[path.length - 1]) {
+					parent = vm.nodesToShow[i];
+				}
+			}
+
+			// Set the toggle state of the nodes above
+			if (parent !== null) {
+				for (i = (path.length - 1); i >= 0; i -= 1) {
+					for (j = 0, nodesLength = vm.nodesToShow.length; j < nodesLength; j += 1) {
+						if (vm.nodesToShow[j]._id === path[i]) {
+							vm.nodesToShow[j].toggleState = "visible";
+							numInvisible = 0;
+							for (k = 0; k < vm.nodesToShow[j].children.length; k += 1) {
+								if (vm.nodesToShow[j].children[k].toggleState === "invisible") {
+									numInvisible += 1;
+									vm.nodesToShow[j].toggleState = "parentOfInvisible";
+								}
+								else if (vm.nodesToShow[j].children[k].toggleState === "parentOfInvisible") {
+									vm.nodesToShow[j].toggleState = "parentOfInvisible";
+								}
+							}
+							if (numInvisible === vm.nodesToShow[j].children.length) {
+								vm.nodesToShow[j].toggleState = "invisible";
+							}
+						}
+					}
+				}
+			}
+
+			//TreeService.toggleNode(node._id, state);
 		};
 
         function setupInfiniteScroll () {
             // Infinite items
-            vm.infiniteItems = {
+            vm.infiniteItemsTree = {
                 numLoaded_: 0,
                 toLoad_: 0,
 
@@ -240,17 +282,6 @@
             };
         }
 
-        /*
-        promise = TreeService.init();
-        promise.then(function(data) {
-            vm.showChildren = true;
-            vm.allNodes = [];
-            vm.allNodes.push(data.nodes);
-            vm.nodes = vm.allNodes;
-            vm.showTree = true;
-            vm.idToName = data.idToName;
-        });
-
         $scope.$watch("vm.filterText", function (newValue) {
             if (angular.isDefined(newValue)) {
                 if (newValue === "") {
@@ -264,57 +295,30 @@
                     vm.showFilterList = true;
                     vm.showChildren = true;
 
-                    if (vm.filterText.indexOf("###") === 0)
-                    {
-                        vm.showChildren = false;
-
-                        $timeout(angular.noop, 300).then(angular.bind(this, function() {
-                            vm.nodes = [{}];
-                            vm.nodes[0]._id = vm.origID;
-                            vm.nodes[0].name = vm.objectName;
-                            vm.nodes[0].index = 0;
-                            vm.nodes[0].toggleState = true;
-                            vm.nodes[0].class = "unselectedFilterItem";
-
-                            setupInfiniteItems();
-                        }));
-
-                    } else {
-                        promise = TreeService.search(newValue);
-                        promise.then(function(json) {
-                            vm.showChildren = false;
-                            vm.nodes = json.data;
-                            // If an object has been selected in the viewer to prompt this filter, only show the node
-                            // with the exact name of the selected object (this needs rethinking as showing the selected
-                            // object shouldn't trigger the filter)
-                            if (vm.viewerSelectedObject !== null) {
-                                for (i = (vm.nodes.length - 1); i >= 0; i -= 1) {
-                                    if (vm.nodes[i].name !== vm.viewerSelectedObject.name) {
-                                        vm.nodes.splice(i, 1);
-                                    }
-                                }
-                            }
-                            for (i = 0, length = vm.nodes.length; i < length; i += 1) {
-                                vm.nodes[i].index = i;
-                                vm.nodes[i].toggleState = true;
-                                vm.nodes[i].class = "unselectedFilterItem";
-                            }
-                            setupInfiniteItems();
-                        });
-                    }
+					promise = TreeService.search(newValue);
+					promise.then(function(json) {
+						vm.showChildren = false;
+						vm.nodes = json.data;
+						// If an object has been selected in the viewer to prompt this filter, only show the node
+						// with the exact name of the selected object (this needs rethinking as showing the selected
+						// object shouldn't trigger the filter)
+						if (vm.viewerSelectedObject !== null) {
+							for (i = (vm.nodes.length - 1); i >= 0; i -= 1) {
+								if (vm.nodes[i].name !== vm.viewerSelectedObject.name) {
+									vm.nodes.splice(i, 1);
+								}
+							}
+						}
+						for (i = 0, length = vm.nodes.length; i < length; i += 1) {
+							vm.nodes[i].index = i;
+							vm.nodes[i].toggleState = "visible";
+							vm.nodes[i].class = "unselectedFilterItem";
+						}
+						setupInfiniteItemsFilter();
+					});
                 }
             }
         });
-
-        vm.nodeSelected = function (nodeId) {
-            vm.selectedNode = nodeId;
-            TreeService.selectNode(nodeId);
-        };
-
-        vm.nodeToggled = function (nodeId, state) {
-            vm.toggledNode = nodeId;
-            TreeService.toggleNode(nodeId, state);
-        };
 
         vm.filterItemSelected = function (item) {
             if (vm.currentFilterItemSelected === null) {
@@ -333,12 +337,13 @@
             TreeService.selectNode(vm.nodes[item.index]._id);
         };
 
-        vm.filterItemToggled = function (item) {
+        vm.toggleFilterNode = function (item) {
+			item.toggleState = (item.toggleState === "visible") ? "invisible" : "visible";
             TreeService.toggleNode(item._id);
         };
 
-        function setupInfiniteItems () {
-            vm.infiniteItems = {
+        function setupInfiniteItemsFilter () {
+            vm.infiniteItemsFilter = {
                 numLoaded_: 0,
                 toLoad_: 0,
                 getItemAtIndex: function(index) {
@@ -368,6 +373,7 @@
             };
         }
 
+		/*
         $(document).on("objectSelected", function(event, object, zoom) {
             $timeout(function () {
                 if (angular.isUndefined(object)) {

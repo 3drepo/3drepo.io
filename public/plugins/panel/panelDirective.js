@@ -70,26 +70,11 @@
                     pl.contentItems.push(content[i]);
 
                     // Content items
-					/*
-                    element = angular.element(
-                        "<panel-content " +
-                            "position='pl.position' " +
-                            "content-item='pl.contentItems[" + i + "].type' " +
-                            "content-title='pl.contentItems[" + i + "].title' " +
-                            "show-content='pl.contentItems[" + i + "].show' " +
-                            "help='pl.contentItems[" + i + "].help' " +
-                            "icon='pl.contentItems[" + i + "].icon' " +
-                            "has-filter='pl.contentItems[" + i + "].hasFilter' " +
-                            "can-add='pl.contentItems[" + i + "].canAdd' " +
-                            "options='pl.contentItems[" + i + "].options' " +
-							"height='pl.contentItems[" + i + "].maxHeight'>" +
-                        "</panel-content>"
-                    );
-                    */
 					element = angular.element(
 						"<panel-content " +
 							"position='pl.position' " +
-							"content-data='pl.contentItems[" + i + "]'>" +
+							"content-data='pl.contentItems[" + i + "]' " +
+							"ng-show='pl.contentItems[" + i + "].show'>" +
 						"</panel-content>"
 					);
                     items.append(element);
