@@ -9,7 +9,7 @@ This project is Copyright of [3D Repo Ltd](http://3drepo.org) and is released un
 Installation
 ------------
 
-Note: If using windows, please ensure cmd.exe was invoked as adminstrator (i.e. Right click -> Run as Administrator).
+Note: If using windows, please ensure cmd.exe was invoked as administrator (i.e. Right click -> Run as Administrator).
 
 1. Clone the repository: `git clone https://github.com/3drepo/3drepo.io.git`
 2. Change directory: `cd 3drepo.io`
