@@ -105,7 +105,9 @@
 						numChildren = vm.nodesToShow[index].children.length;
 						for (i = 0; i < numChildren; i += 1) {
 							vm.nodesToShow[index].children[i].expanded = false;
-							vm.nodesToShow[index].children[i].toggleState = vm.nodesToShow[index].toggleState;
+							if (!vm.nodesToShow[index].children[i].hasOwnProperty("toggleState")) {
+								vm.nodesToShow[index].children[i].toggleState = vm.nodesToShow[index].toggleState;
+							}
 							vm.nodesToShow[index].children[i].level = vm.nodesToShow[index].level + 1;
 							vm.nodesToShow[index].children[i].hasChildren = vm.nodesToShow[index].children[i].children.length > 0;
 							vm.nodesToShow.splice(index + i + 1, 0, vm.nodesToShow[index].children[i]);
@@ -243,8 +245,26 @@
 					}
 				}
 			}
+			toggleNode(node);
+		};
 
-			//TreeService.toggleNode(node._id, state);
+		var toggleNode = function (node) {
+			var map = [];
+			var pathArr = [];
+			for (var obj in vm.idToPath) {
+				if (vm.idToPath.hasOwnProperty(obj) && (vm.idToPath[obj].indexOf(node.path) !== -1)) {
+					pathArr = vm.idToPath[obj].split("__");
+					map.push(pathArr[pathArr.length - 1]);
+				}
+			}
+			var mpnodes = $("multipart");
+			for (i = 0, length = mpnodes.length; i < length; i += 1) {
+				var parts = mpnodes[i].getParts(map);
+				if (parts && parts.ids.length > 0) {
+					var visibility = (node.toggleState === "visible");
+					parts.setVisibility(visibility);
+				}
+			}
 		};
 
         function setupInfiniteScroll () {
@@ -339,7 +359,8 @@
 
         vm.toggleFilterNode = function (item) {
 			item.toggleState = (item.toggleState === "visible") ? "invisible" : "visible";
-            TreeService.toggleNode(item._id);
+			item.path = item._id;
+            toggleNode(item);
         };
 
         function setupInfiniteItemsFilter () {

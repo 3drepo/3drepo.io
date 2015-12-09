@@ -302,7 +302,7 @@
 				} else {
 					vm.pickedAccount = projectParts[0];
 					vm.pickedProject = projectParts[1];
-					vm.pickedTrans	 = $("#" + scope.pickedAccount + "__" + scope.pickedProject + "__root")[0]._x3domNode.getCurrentTransform();
+					vm.pickedTrans	 = $("#" + $scope.pickedAccount + "__" + $scope.pickedProject + "__root")[0]._x3domNode.getCurrentTransform();
 				}
 
 				vm.selectedObjectId = projectParts[projectParts.length - 1];

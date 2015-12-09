@@ -64,6 +64,7 @@
             }
         };
 
+
         var toggleNode = function (nodeId, state) {
             if (nodeId.indexOf("###") === 0)
             {
