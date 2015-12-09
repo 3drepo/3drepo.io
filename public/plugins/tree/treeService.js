@@ -52,6 +52,7 @@
         };
 
         var selectNode = function (nodeId) {
+			console.log(nodeId);
             if (nodeId === currentSelectedNodeId) {
                 currentSelectedNodeId = null;
                 $(document).trigger("objectSelected", [undefined, true]);
@@ -62,6 +63,7 @@
                 $(document).trigger("objectSelected", [rootObj, true]);
             }
         };
+
 
         var toggleNode = function (nodeId, state) {
             if (nodeId.indexOf("###") === 0)
@@ -82,7 +84,8 @@
                         ViewerService.defaultViewer.addHiddenPart(parts);
                     }
                 }
-            } else {
+            }
+			else {
                 var rootObj = document.getElementById("model__" + nodeId);
                 rootObj.setAttribute("render", state.toString());
             }

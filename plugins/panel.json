@@ -3,13 +3,11 @@
     "files": {
         "angular" : [
             "panel/panelDirective.js",
-            "panel/panelContentDirective.js",
-            "panel/panelContentAddDirective.js"
+            "panel/panelContentDirective.js"
         ],
         "jade": [
             {"template" : "panel/panel.jade", "id" : "panel.html"},
-            {"template" : "panel/panelContent.jade", "id" : "panelContent.html"},
-            {"template" : "panel/panelContentAdd.jade", "id" : "panelContentAdd.html"}
+            {"template" : "panel/panelContent.jade", "id" : "panelContent.html"}
         ],
         "css" : [
             "panel/panel.css"

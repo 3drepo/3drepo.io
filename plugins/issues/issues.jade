@@ -1,22 +1,21 @@
-div(ng-class="vm.height")
-	div(ng-show="vm.showAdd")
-		#issuesAddContainer
-			md-input-container(md-no-float="")
-				input(placeholder="Title", ng-model="vm.title")
+div(ng-show="vm.showAdd")
+	#issuesAddContainer
+		md-input-container(md-no-float="")
+			input(placeholder="Title", ng-model="vm.title")
 
-			md-input-container(md-no-float="")
-				textarea(placeholder="Comment", ng-model="vm.comment")
+		md-input-container(md-no-float="")
+			textarea(placeholder="Comment", ng-model="vm.comment")
 
-			md-button.md-raised.md-accent(ng-click="vm.saveIssue()", ng-disabled="vm.saveIssueDisabled") Save
+		md-button.md-raised.md-accent(ng-click="vm.saveIssue()", ng-disabled="vm.saveIssueDisabled") Save
 
-		md-divider
+	md-divider
 
-	md-list
-		issue(
-			ng-repeat="issue in vm.issuesToShow",
-			data="issue",
-			on-comments-toggled="vm.commentsToggled(issueId)"
-			comments-toggled-issue-id="vm.commentsToggledIssueId"
-			on-close-issue="vm.closeIssue(issue)"
-			issue-closed="vm.issueClosed"
-		)
+md-list
+	issue(
+		ng-repeat="issue in vm.issuesToShow",
+		data="issue",
+		on-comments-toggled="vm.commentsToggled(issueId)"
+		comments-toggled-issue-id="vm.commentsToggledIssueId"
+		on-close-issue="vm.closeIssue(issue)"
+		issue-closed="vm.issueClosed"
+	)

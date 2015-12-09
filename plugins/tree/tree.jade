@@ -1,33 +1,44 @@
-div(ng-class="vm.height")
-	// Tree
-	div(ui-tree, data-nodrop-enabled="true", data-nodrag="true", ng-show="vm.showTree")
-		tree-nodes(
-			nodes="vm.nodes"
-			show-children="vm.showChildren"
-			ng-if="true"
-			on-node-selected="vm.nodeSelected(nodeId)"
-			on-node-toggled="vm.nodeToggled(nodeId, state)"
-			selected-node="vm.selectedNode"
-			toggled-node="vm.toggledNode"
-		)
+// Tree
+div(ng-cloak="", class="virtualRepeatdemoInfiniteScroll", ng-show="vm.showTree")
+	md-virtual-repeat-container.vertical-container(md-top-index="vm.topIndex")
+		div(md-virtual-repeat="item in vm.infiniteItemsTree", md-on-demand="", class="repeated-item", flex="")
+			div(style="margin-left:{{item.level * 20}}px", ng-if="item", layout="row", layout-align="start center")
+				.treeToggleButton(ng-click="vm.expand(item._id)")
+					md-icon.md-accent(md-font-icon="fa-chevron-circle-right", class="fa", ng-if="!item.expanded", ng-class="{treeToggleButtonDisabled: !item.hasChildren}")
+					md-icon(md-font-icon="fa-chevron-circle-down", class="fa", ng-if="item.expanded")
+				.treeToggleButton(ng-click="vm.toggleTreeNode(item)")
+					md-icon.md-accent(md-font-icon="fa-square", class="fa", ng-if="item.toggleState==='visible'")
+					md-icon.md-accent(md-font-icon="fa-square-o", class="fa", ng-if="item.toggleState==='invisible'")
+					md-icon(md-font-icon="fa-minus-square", class="fa", ng-if="item.toggleState==='parentOfInvisible'")
+				p(ng-click="vm.nodeSelected(item._id)", ng-class="{viewerSelected: item.selected}") {{item.name}}
 
-	// Filter list
-	div(ng-cloak="", class="virtualRepeatdemoInfiniteScroll", ng-if="vm.showFilterList")
-		md-content(layout="column")
-			md-virtual-repeat-container(id="vertical-container")
-				div(
-					md-virtual-repeat="item in vm.infiniteItems"
-					md-on-demand=""
-					class="repeated-item"
-					flex=""
-					ng-class="item.class"
-					layout="row"
-					layout-align="start center"
-				)
-					md-checkbox(
-						ng-show="item!==null"
-						ng-model="item.toggleState"
-						ng-change="vm.filterItemToggled(item)"
-						aria-label="Toggle"
-					)
-					p#treeFilterItemName(ng-click="vm.filterItemSelected(item)") {{item.name}}
+
+//div(ui-tree, data-nodrop-enabled="true", data-nodrag="true", ng-show="vm.showTree")
+	tree-nodes(
+		nodes="vm.nodes"
+		show-children="vm.showChildren"
+		ng-if="true"
+		on-node-selected="vm.nodeSelected(nodeId)"
+		on-node-toggled="vm.nodeToggled(nodeId, state)"
+		selected-node="vm.selectedNode"
+		toggled-node="vm.toggledNode"
+	)
+
+// Filter list
+div(ng-cloak="", class="virtualRepeatdemoInfiniteScroll", ng-if="vm.showFilterList")
+	md-content(layout="column")
+		md-virtual-repeat-container.vertical-container
+			div(
+				md-virtual-repeat="item in vm.infiniteItemsFilter"
+				md-on-demand=""
+				class="repeated-item"
+				flex=""
+				ng-class="item.class"
+				layout="row"
+				layout-align="start center"
+			)
+				.treeToggleButton(ng-click="vm.toggleFilterNode(item)")
+					md-icon.md-accent(md-font-icon="fa-square", class="fa", ng-if="item.toggleState==='visible'")
+					md-icon.md-accent(md-font-icon="fa-square-o", class="fa", ng-if="item.toggleState==='invisible'")
+
+				p#treeFilterItemName(ng-click="vm.filterItemSelected(item)") {{item.name}}

@@ -15,9 +15,17 @@ panel #buttons {
   position: absolute;
   top: 150px;
 }
-panel #buttons button {
-  display: block;
+panel #buttons .panelButtonGroup {
   margin-bottom: 20px;
+  text-align: center;
+}
+panel #buttons .panelButtonGroup button {
+  display: block;
+  margin-bottom: 2px;
+}
+panel #buttons .panelButtonGroup label {
+  color: rgb(63, 81, 181);
+  text-shadow: 0 0 1px #FFFFFF;
 }
 
 /** Panels ************************************************************************************************************/
@@ -69,6 +77,9 @@ panel-content md-toolbar label {
   font-size: medium;
   margin-left: 10px;
 }
+panel-content md-toolbar button {
+  margin: 0 !important;
+}
 
 panel-content .md-button.md-raised:not([disabled]) {
   box-shadow: none;
@@ -81,39 +92,6 @@ panel-content .md-menu {
 panel-content .panelContentFilter {
   background: #E8EAF6;
   padding: 5px 10px 0 10px;
-  height: 50px;
+  height: 60px;
   border-bottom: solid 1px #C5CAE9;
 }
-
-/** Panel Content Add *************************************************************************************************/
-
-panel-content-add {
-  display: block;
-  position: relative;
-  height: 70px;
-}
-panel-content-add md-input-container {
-  position: absolute;
-  top: 10px;
-  width: 100%;
-  height: 48px;
-}
-panel-content-add input {
-  position: absolute;
-  top: 5px;
-  left: 10px;
-  width: 170px !important;
-}
-
-.panelContentAddButton {
-  position: absolute !important;
-  top: 12px;
-  right: 0;
-  box-shadow: none !important;
-  background: #7986CB !important;
-}
-.panelContentAddButton md-icon {
-  font-size: 30px;
-  margin-top: -5px;
-}
-

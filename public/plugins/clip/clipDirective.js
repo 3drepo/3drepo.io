@@ -21,79 +21,77 @@
 	angular.module("3drepo")
 		.directive("clip", clip);
 
-	function clip() {
-		return {
-			restrict: 'EA',
-			templateUrl: 'clip.html',
-			scope: {
-				height: "=",
-				show: "="
-			},
-			controller: ClipCtrl,
-			controllerAs: 'cl',
-			bindToController: true
-		};
-	}
+    function clip() {
+        return {
+            restrict: 'EA',
+            templateUrl: 'clip.html',
+            scope: {
+                height: "=",
+                show: "="
+            },
+            controller: ClipCtrl,
+            controllerAs: 'vm',
+            bindToController: true
+        };
+    }
 
 	ClipCtrl.$inject = ["$scope", "$timeout", "ViewerService"];
 
-	function ClipCtrl($scope, $timeout, ViewerService) {
-		var cl = this,
-			clipPlane = null;
-		cl.sliderMin = 0;
-		cl.sliderMax = 100;
-		cl.sliderStep = 0.1;
-		cl.sliderPosition = cl.sliderMin;
-		cl.clipPlane = null;
-		cl.axes = ["X", "Y", "Z"];
-		cl.selectedAxis = cl.axes[0];
+    function ClipCtrl($scope, $timeout, ViewerService) {
+        var vm = this,
+            clipPlane = null;
+        vm.sliderMin = 0;
+        vm.sliderMax = 100;
+        vm.sliderStep = 0.1;
+        vm.sliderPosition = vm.sliderMin;
+        vm.clipPlane = null;
+        vm.axes = ["X", "Y", "Z"];
+        vm.selectedAxis = vm.axes[0];
 
-		function swapAxes (axis) {
-			// Swap Y and Z axes
-			if (axis === "Y") {
-				return "Z";
-			} else if (axis === "Z") {
-				return "Y";
-			} else {
-				return "X";
-			}
-		}
+        function initClippingPlane () {
+            $timeout(function () {
+                vm.clipPlaneID = ViewerService.defaultViewer.addClippingPlane(vm.selectedAxis);
+                clipPlane = ViewerService.defaultViewer.getClippingPlane(vm.clipPlaneID);
+                moveClippingPlane(vm.sliderPosition);
+            });
+        }
 
-		function initClippingPlane () {
-			$timeout(function () {
-				cl.clipPlaneID = ViewerService.defaultViewer.addClippingPlane(swapAxes(cl.selectedAxis));
-				clipPlane = ViewerService.defaultViewer.getClippingPlane(cl.clipPlaneID);
-				moveClippingPlane(cl.sliderPosition);
-			});
-		}
+        function moveClippingPlane(sliderPosition) {
+            clipPlane.movePlane((vm.sliderMax - sliderPosition) / vm.sliderMax);
+        }
 
-		function moveClippingPlane(sliderPosition) {
-			clipPlane.movePlane((cl.sliderMax - sliderPosition) / cl.sliderMax);
-		}
+        $scope.$watch("vm.show", function (newValue) {
+            if (angular.isDefined(newValue)) {
+                if (newValue) {
+                    initClippingPlane();
+                }
+                else {
+                    vm.clipPlane = null;
+                    ViewerService.defaultViewer.clearClippingPlanes();
+                }
+            }
+        });
 
-		$scope.$watch("cl.show", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				if (newValue) {
-					initClippingPlane();
-				}
-				else {
-					cl.clipPlane = null;
-					ViewerService.defaultViewer.clearClippingPlanes();
-				}
-			}
-		});
+        $scope.$watch("vm.selectedAxis", function (newValue) {
+            if ((angular.isDefined(newValue) && clipPlane)) {
+                // Swap Y and Z axes
+                if (newValue === "Y") {
+                    clipPlane.changeAxis("Z");
+                }
+                else if (newValue === "Z") {
+                    clipPlane.changeAxis("Y");
+                }
+                else {
+                    clipPlane.changeAxis(newValue);
+                }
+                vm.sliderPosition = vm.sliderMin;
+            }
+        });
 
-		$scope.$watch("cl.selectedAxis", function (newValue) {
-			if ((angular.isDefined(newValue) && clipPlane)) {
-				clipPlane.changeAxis(swapAxes(newValue));
-				cl.sliderPosition = cl.sliderMin;
-			}
-		});
-
-		$scope.$watch("cl.sliderPosition", function (newValue) {
-			if (clipPlane) {
-				moveClippingPlane(newValue);
-			}
-		});
-	}
+        $scope.$watch("vm.sliderPosition", function (newValue) {
+            if (clipPlane) {
+                moveClippingPlane(newValue);
+            }
+        });
+    }
 }());

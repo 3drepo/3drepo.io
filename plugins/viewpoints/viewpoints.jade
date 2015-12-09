@@ -1,5 +1,3 @@
 div(ng-class="vp.height")
 	.viewpoint(ng-repeat="viewpoint in vp.viewpoints track by $index", ng-click="vp.selectViewpoint($index)")
 		label {{viewpoint}}
-
-	panel-content-add(placeholder="New viewpoint", on-save="vp.saveViewpoint(text)", clear-input="vp.clearInput")

@@ -203,7 +203,9 @@
                 }
             }
 
-            parent.setAttribute("matrix", trans.toGL());
+			if (trans !== null) {
+				parent.setAttribute("matrix", trans.toGL());
+			}
 
             var norm = new x3dom.fields.SFVec3f(pin.norm[0], pin.norm[1], pin.norm[2]);
 

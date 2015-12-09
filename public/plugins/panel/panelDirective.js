@@ -46,7 +46,6 @@
             length = 0,
             currentEvent = null;
         pl.contentItems = [];
-        pl.hideFilter = false;
         pl.showPanel = true;
         pl.panelIsSetUp = false;
 
@@ -71,34 +70,31 @@
                     pl.contentItems.push(content[i]);
 
                     // Content items
-                    element = angular.element(
-                        "<panel-content " +
-                            "position='pl.position' " +
-                            "content-item='pl.contentItems[" + i + "].type' " +
-                            "content-title='pl.contentItems[" + i + "].title' " +
-                            "show-content='pl.contentItems[" + i + "].show' " +
-                            "help='pl.contentItems[" + i + "].help' " +
-                            "icon='pl.contentItems[" + i + "].icon' " +
-                            "has-filter='pl.contentItems[" + i + "].hasFilter' " +
-                            "can-add='pl.contentItems[" + i + "].canAdd' " +
-                            "options='pl.contentItems[" + i + "].options'>" +
-                        "</panel-content>"
-                    );
+					element = angular.element(
+						"<panel-content " +
+							"position='pl.position' " +
+							"content-data='pl.contentItems[" + i + "]' " +
+							"ng-show='pl.contentItems[" + i + "].show'>" +
+						"</panel-content>"
+					);
                     items.append(element);
                     $compile(element)($scope);
 
                     // Buttons
                     if (pl.contentItems[i].hasOwnProperty("icon")) {
                         element = angular.element(
-                            "<md-button " +
-                            "class='md-fab md-primary md-mini' " +
-                            "ng-click=pl.buttonClick('" + pl.contentItems[i].type + "') " +
-                            "aria-label='{{pl.contentItems[" + i + "].title}}'>" +
-                            "<md-icon " +
-                                "class='fa' " +
-                                "md-font-icon='{{pl.contentItems[" + i + "].icon}}'>" +
-                            "</md-icon>" +
-                            "</md-button>"
+                            "<div class='panelButtonGroup'>" +
+                                "<md-button " +
+                                    "class='md-fab md-primary md-mini' " +
+                                    "ng-click=pl.buttonClick('" + pl.contentItems[i].type + "') " +
+                                    "aria-label='{{pl.contentItems[" + i + "].title}}'>" +
+                                        "<md-icon " +
+                                            "class='fa' " +
+                                            "md-font-icon='{{pl.contentItems[" + i + "].icon}}'>" +
+                                        "</md-icon>" +
+                                "</md-button>" +
+                                "<label>{{pl.contentItems[" + i + "].title}}</label>" +
+                            "</div>"
                         );
                         buttons.append(element);
                         $compile(element)($scope);
@@ -109,13 +105,18 @@
         }
 
         pl.buttonClick = function (contentType) {
-            pl.hideFilter = true; // Hide the filter if no content is shown
             for (i = 0, length = pl.contentItems.length; i < length; i += 1) {
                 if (contentType === pl.contentItems[i].type) {
                     pl.contentItems[i].show = !pl.contentItems[i].show;
-                }
-                if (pl.hideFilter && pl.contentItems[i].show) {
-                    pl.hideFilter = false;
+					EventService.send(
+						EventService.EVENT.PANEL_CONTENT_TOGGLED,
+						{
+							position: pl.position,
+							type: pl.contentItems[i].type,
+							show: pl.contentItems[i].show,
+							contentHeight: pl.contentItems[i].maxHeight
+						}
+					);
                 }
             }
         };
