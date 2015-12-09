@@ -35,9 +35,9 @@
         };
     }
 
-    TreeCtrl.$inject = ["$scope", "$timeout", "$filter", "TreeService", "ViewerService"];
+    TreeCtrl.$inject = ["$scope", "$rootScope", "$timeout", "$filter", "TreeService", "ViewerService"];
 
-    function TreeCtrl($scope, $timeout, $filter, TreeService, ViewerService) {
+    function TreeCtrl($scope, $rootScope, $timeout, $filter, TreeService, ViewerService) {
         var vm = this,
             promise = null,
             item = {},
@@ -402,6 +402,8 @@
                         vm.filterText    = vm.idToName[objectID];
                     }
                 }
+
+				$rootScope.$apply();
             });
         });
 
