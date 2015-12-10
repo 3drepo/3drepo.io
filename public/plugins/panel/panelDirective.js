@@ -34,77 +34,48 @@
         };
     }
 
-    PanelCtrl.$inject = ["$scope", "$element", "$compile", "EventService"];
+    PanelCtrl.$inject = ["$scope", "EventService"];
 
-    function PanelCtrl ($scope, $element, $compile, EventService) {
+    function PanelCtrl ($scope, EventService) {
         var pl = this,
-            items = angular.element($element[0].querySelector("#items")),
-            buttons = angular.element($element[0].querySelector("#buttons")),
-            content = "",
-            element = "",
             i = 0,
             length = 0,
-            currentEvent = null;
-        pl.contentItems = [];
+            currentEvent;
+
+		pl.contentItems = [];
         pl.showPanel = true;
-        pl.panelIsSetUp = false;
 
         // Panel setup coming from login
         currentEvent = EventService.currentEvent();
         if (currentEvent.type === EventService.EVENT.PANEL_CONTENT_SETUP) {
-            setupPanels(currentEvent.value[pl.position]);
+			pl.contentItems = currentEvent.value[pl.position];
+			hideLastItemGap();
         }
 
         $scope.$watch(EventService.currentEvent, function (event) {
             if (event.type === EventService.EVENT.PANEL_CONTENT_SETUP) {
-                setupPanels(event.value[pl.position]);
+				pl.contentItems = (event.value[pl.position]);
+				hideLastItemGap();
             }
             else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
                 pl.showPanel = !pl.showPanel;
             }
         });
 
-        function setupPanels (content) {
-            if (!pl.panelIsSetUp) {
-                for (i = 0, length = content.length; i < length; i += 1) {
-                    pl.contentItems.push(content[i]);
+		function hideLastItemGap () {
+			var lastFound = false;
+			for (i = (pl.contentItems.length - 1); i >= 0; i -= 1) {
+				if ((!lastFound) && (pl.contentItems[i].show)) {
+					pl.contentItems[i].last = true;
+					lastFound = true;
+					console.log(pl.contentItems[i]);
+				} else {
+					pl.contentItems[i].last = true;
+				}
+			}
+		}
 
-                    // Content items
-					element = angular.element(
-						"<panel-content " +
-							"position='pl.position' " +
-							"content-data='pl.contentItems[" + i + "]' " +
-							"ng-show='pl.contentItems[" + i + "].show'>" +
-						"</panel-content>"
-					);
-                    items.append(element);
-                    $compile(element)($scope);
-
-                    // Buttons
-                    if (pl.contentItems[i].hasOwnProperty("icon")) {
-                        element = angular.element(
-                            "<div class='panelButtonGroup'>" +
-                                "<md-button " +
-                                    "class='md-fab md-primary md-mini' " +
-                                    "ng-click=pl.buttonClick('" + pl.contentItems[i].type + "') " +
-                                    "aria-label='{{pl.contentItems[" + i + "].title}}'>" +
-                                        "<md-icon " +
-                                            "class='fa' " +
-                                            "md-font-icon='{{pl.contentItems[" + i + "].icon}}'>" +
-                                        "</md-icon>" +
-                                "</md-button>" +
-                                "<label>{{pl.contentItems[" + i + "].title}}</label>" +
-                            "</div>"
-                        );
-                        buttons.append(element);
-                        $compile(element)($scope);
-                    }
-                }
-                pl.panelIsSetUp = true;
-            }
-        }
-
-        pl.buttonClick = function (contentType) {
+		pl.buttonClick = function (contentType) {
             for (i = 0, length = pl.contentItems.length; i < length; i += 1) {
                 if (contentType === pl.contentItems[i].type) {
                     pl.contentItems[i].show = !pl.contentItems[i].show;

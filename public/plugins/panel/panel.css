@@ -5,10 +5,14 @@ panel  {
   position: absolute;
   top: 80px;
   width: 420px;
+  height: calc(100% - 95px);
 }
 panel #items {
   position: absolute;
-  width: 350px;
+  width: 346px;
+  height: 100%;
+  overflow-y: auto;
+  padding: 0 2px 0 2px;
 }
 
 panel #buttons {
@@ -54,7 +58,6 @@ panel #buttons .panelButtonGroup label {
 
 panel-content {
   display: block;
-  margin-bottom: 20px;
   position: relative;
 }
 
