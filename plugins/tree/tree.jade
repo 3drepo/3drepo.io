@@ -1,5 +1,5 @@
 // Tree
-div(ng-cloak="", class="virtualRepeatdemoInfiniteScroll", ng-show="vm.showTree")
+div#treeContainerGroup(ng-cloak="", class="virtualRepeatdemoInfiniteScroll", ng-show="vm.showTree")
 	md-virtual-repeat-container.vertical-container(md-top-index="vm.topIndex")
 		div(md-virtual-repeat="item in vm.infiniteItemsTree", md-on-demand="", class="repeated-item", flex="")
 			div(style="margin-left:{{item.level * 20}}px", ng-if="item", layout="row", layout-align="start center")

@@ -75,6 +75,10 @@ tree .treeToggleButton .treeToggleButtonDisabled {
 
 /** Tree filter list **************************************************************************************************/
 
+tree .virtualRepeatdemoInfiniteScroll {
+  overflow: auto;
+}
+
 tree .virtualRepeatdemoInfiniteScroll .vertical-container {
   height: 770px;
   min-width: 800px;
