@@ -45,10 +45,29 @@
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "Auth", "StateManager"];
+    HomeCtrl.$inject = ["$scope", "$window", "$timeout", "Auth", "StateManager", "EventService"];
 
-    function HomeCtrl($scope, Auth, StateManager) {
-        var vm = this;
+    function HomeCtrl($scope, $window, $timeout, Auth, StateManager, EventService) {
+        var vm = this,
+			initialWindowHeight = $window.innerHeight;
+		vm.window = $window;
+		console.log(Auth);
+
+		// TODO Improve way to send initial event without timeout pause
+		$timeout(function () {
+			sendWindowHeightChangeEvent(initialWindowHeight);
+		}, 1000);
+
+		$scope.$watch("vm.window.innerHeight", function (newValue) {
+			sendWindowHeightChangeEvent(newValue);
+		});
+
+		function sendWindowHeightChangeEvent (height) {
+			EventService.send(
+				EventService.EVENT.WINDOW_HEIGHT_CHANGE,
+				{height: height, change: (initialWindowHeight - height)}
+			);
+		}
 
         vm.logout = function () {
             Auth.logout().then(

@@ -147,7 +147,7 @@
 			show: false,
 			help: "Clipping plane",
 			icon: "fa-object-group",
-            minHeight: 110,
+            minHeight: 190,
             maxHeight: 190
 		});
 

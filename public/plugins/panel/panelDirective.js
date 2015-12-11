@@ -34,9 +34,9 @@
         };
     }
 
-    PanelCtrl.$inject = ["$scope", "EventService"];
+    PanelCtrl.$inject = ["$scope", "$element", "EventService"];
 
-    function PanelCtrl ($scope, EventService) {
+    function PanelCtrl ($scope, $element, EventService) {
         var pl = this,
             i = 0,
             length = 0,
@@ -44,6 +44,8 @@
 
 		pl.contentItems = [];
         pl.showPanel = true;
+
+		//console.log($element.css("height", "200px"));
 
         // Panel setup coming from login
         currentEvent = EventService.currentEvent();
@@ -60,6 +62,10 @@
             else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
                 pl.showPanel = !pl.showPanel;
             }
+			else if (event.type === EventService.EVENT.WINDOW_HEIGHT_CHANGE) {
+				console.log(event.value);
+				$element.css("height", (event.value.height - 97).toString() + "px");
+			}
         });
 
 		// The last card should not have a gap so that scrolling in resized window works correctly

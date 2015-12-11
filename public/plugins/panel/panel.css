@@ -5,14 +5,11 @@ panel  {
   position: absolute;
   top: 80px;
   width: 420px;
-  height: calc(100% - 95px);
 }
+
 panel #items {
   position: absolute;
-  width: 346px;
-  height: 100%;
-  overflow-y: auto;
-  padding: 0 2px 0 2px;
+  width: 350px;
 }
 
 panel #buttons {
