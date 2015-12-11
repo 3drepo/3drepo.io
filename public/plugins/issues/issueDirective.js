@@ -134,7 +134,7 @@
 					promise = NewIssuesService.editComment(vm.data, vm.comment, vm.editingCommentIndex);
 					promise.then(function (data) {
 						vm.data.comments[vm.editingCommentIndex].comment = vm.comment;
-						vm.data.comments[vm.editingCommentIndex].timeStamp = NewIssuesService.prettyTime(data.created);
+						vm.data.comments[vm.editingCommentIndex].timeStamp = NewIssuesService.getPrettyTime(data.created);
 						vm.comment = "";
 					});
 				}
@@ -148,7 +148,7 @@
 							owner: data.owner,
 							comment: vm.comment,
 							created: data.created,
-							timeStamp: NewIssuesService.prettyTime(data.created)
+							timeStamp: NewIssuesService.getPrettyTime(data.created)
 						});
 						vm.comment = "";
 						vm.numNewComments += 1; // This is used to increase the height of the comments list

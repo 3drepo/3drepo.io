@@ -35,13 +35,38 @@
             pinRadius = 0.25,
             pinHeight = 1.0;
 
-        var prettyTime = function(time) {
-            var date = new Date(time);
-            return (
-                date.getFullYear() + "-" +
-                (date.getMonth() + 1) + "-" +
-                date.getDate()
-            );
+		// TODO: Internationalise and make globally accessible
+        var getPrettyTime = function(time) {
+            var date = new Date(time),
+				currentDate = new Date(),
+				prettyTime,
+				postFix,
+				hours,
+				monthToText = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+			if ((date.getFullYear() === currentDate.getFullYear()) &&
+				(date.getMonth() === currentDate.getMonth()) &&
+				(date.getDate() === currentDate.getDate())) {
+				hours = date.getHours();
+				if (hours > 11) {
+					postFix = " PM";
+					if (hours > 12) {
+						hours -= 12;
+					}
+				} else {
+					postFix = " AM";
+					if (hours === 0) {
+						hours = 12;
+					}
+				}
+				prettyTime = hours + ":" + date.getMinutes() + postFix;
+			} else if (date.getFullYear() === currentDate.getFullYear()) {
+				prettyTime = date.getDate() + " " + monthToText[date.getMonth()];
+			} else {
+				prettyTime = monthToText[date.getMonth()] + " '" + (currentDate.getFullYear()).toString().slice(-2);
+			}
+
+            return prettyTime;
         };
 
         var getIssues = function () {
@@ -54,12 +79,12 @@
                     // Convert created field to displayable time stamp
                     // Issue
                     for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
-                        data.data[i].timeStamp = prettyTime(data.data[i].created);
+                        data.data[i].timeStamp = getPrettyTime(data.data[i].created);
                         // Comments
                         if (data.data[i].hasOwnProperty("comments")) {
                             for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
                                 if (data.data[i].comments[j].hasOwnProperty("created")) {
-                                    data.data[i].comments[j].timeStamp = prettyTime(data.data[i].comments[j].created);
+                                    data.data[i].comments[j].timeStamp = getPrettyTime(data.data[i].comments[j].created);
                                 }
                             }
                         }
@@ -98,7 +123,7 @@
                     response.data.issue._id     = response.data.issue_id;
                     response.data.issue.account = account;
                     response.data.issue.project = project;
-                    response.data.issue.timeStamp = prettyTime(response.data.issue.created);
+                    response.data.issue.timeStamp = getPrettyTime(response.data.issue.created);
 
                     removePin();
 
@@ -106,24 +131,6 @@
                 });
 
             return deferred.promise;
-        };
-
-        function doPost(issue, data) {
-            var deferred = $q.defer();
-            url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue.parent);
-            config = {
-                withCredentials: true
-            };
-            data._id = issue._id;
-            $http.post(url, {data: JSON.stringify(data)}, config)
-                .then(function (response) {
-                    deferred.resolve(response.data);
-                });
-            return deferred.promise;
-        }
-
-        var closeIssue = function (issue) {
-            return doPost(issue, {closed: true, number: issue.number});
         };
 
         function doPost(issue, data) {
@@ -284,7 +291,7 @@
         }
 
         return {
-            prettyTime: prettyTime,
+            getPrettyTime: getPrettyTime,
             getIssues: getIssues,
             saveIssue: saveIssue,
             closeIssue: closeIssue,
@@ -294,7 +301,8 @@
             setComment: setComment,
             addPin: addPin,
             fixPin: fixPin,
-            removePin: removePin
+            removePin: removePin,
+			state: state
         };
     }
 }());

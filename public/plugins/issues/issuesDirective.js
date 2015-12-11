@@ -197,7 +197,7 @@
 					{
 						owner: data.owner,
 						comment: comment,
-						timeStamp: NewIssuesService.prettyTime(data.created)
+						timeStamp: NewIssuesService.getPrettyTime(data.created)
 					}
 				];
 			});
