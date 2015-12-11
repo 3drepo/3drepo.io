@@ -2,7 +2,7 @@ div(ng-show="pl.showPanel")
 	div#items
 		div(ng-repeat="contentItem in pl.contentItems")
 			panel-content(position="pl.position", content-data='contentItem', ng-show='contentItem.show')
-			div(ng-if="!contentItem.last", style="display:block; height:20px;")
+			div(ng-if="contentItem.showGap", style="display:block; height:20px;")
 	div#buttons
 		.panelButtonGroup(ng-repeat="contentItem in pl.contentItems")
 			md-button.md-fab.md-primary.md-mini(ng-click="pl.buttonClick(contentItem.type)", aria-label="{{contentItem.title}}")

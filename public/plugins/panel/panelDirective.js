@@ -62,15 +62,17 @@
             }
         });
 
+		// The last card should not have a gap so that scrolling in resized window works correctly
 		function hideLastItemGap () {
 			var lastFound = false;
 			for (i = (pl.contentItems.length - 1); i >= 0; i -= 1) {
-				if ((!lastFound) && (pl.contentItems[i].show)) {
-					pl.contentItems[i].last = true;
-					lastFound = true;
-					console.log(pl.contentItems[i]);
-				} else {
-					pl.contentItems[i].last = true;
+				if (pl.contentItems[i].show) {
+					if (!lastFound) {
+						pl.contentItems[i].showGap = false;
+						lastFound = true;
+					} else {
+						pl.contentItems[i].showGap = true;
+					}
 				}
 			}
 		}
@@ -79,6 +81,9 @@
             for (i = 0, length = pl.contentItems.length; i < length; i += 1) {
                 if (contentType === pl.contentItems[i].type) {
                     pl.contentItems[i].show = !pl.contentItems[i].show;
+					if (!pl.contentItems[i].show) {
+						pl.contentItems[i].showGap = false;
+					}
 					EventService.send(
 						EventService.EVENT.PANEL_CONTENT_TOGGLED,
 						{
@@ -90,6 +95,7 @@
 					);
                 }
             }
+			hideLastItemGap();
         };
     }
 }());
