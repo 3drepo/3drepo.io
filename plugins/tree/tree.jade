@@ -1,16 +1,18 @@
 // Tree
-div#treeContainerGroup(ng-cloak="", class="virtualRepeatdemoInfiniteScroll", ng-show="vm.showTree")
+div#treeContainerGroup(ng-cloak="", class="virtualRepeatInfiniteScroll", ng-show="vm.showTree")
 	md-virtual-repeat-container.vertical-container(md-top-index="vm.topIndex")
 		div(md-virtual-repeat="item in vm.infiniteItemsTree", md-on-demand="", class="repeated-item", flex="")
-			div(style="margin-left:{{item.level * 20}}px", ng-if="item", layout="row", layout-align="start center")
-				.treeToggleButton(ng-click="vm.expand(item._id)")
-					md-icon.md-accent(md-font-icon="fa-chevron-circle-right", class="fa", ng-if="!item.expanded", ng-class="{treeToggleButtonDisabled: !item.hasChildren}")
-					md-icon(md-font-icon="fa-chevron-circle-down", class="fa", ng-if="item.expanded")
-				.treeToggleButton(ng-click="vm.toggleTreeNode(item)")
-					md-icon.md-accent(md-font-icon="fa-square", class="fa", ng-if="item.toggleState==='visible'")
-					md-icon.md-accent(md-font-icon="fa-square-o", class="fa", ng-if="item.toggleState==='invisible'")
-					md-icon(md-font-icon="fa-minus-square", class="fa", ng-if="item.toggleState==='parentOfInvisible'")
+			div(style="margin-left:{{item.level * 20}}px", ng-if="item", layout="row")
+				.treeButton(ng-click="vm.expand(item._id)")
+					md-icon.md-accent(md-font-icon="fa-plus-square-o", class="fa", ng-if="!item.expanded", ng-class="{treeButtonDisabled: !item.hasChildren}")
+					md-icon.md-accent(md-font-icon="fa-minus-square-o", class="fa", ng-if="item.expanded")
 				p(ng-click="vm.nodeSelected(item._id)", ng-class="{viewerSelected: item.selected}") {{item.name}}
+				.treeButton(ng-click="vm.toggleTreeNode(item)")
+					md-icon.md-accent(md-font-icon="fa-circle-thin", class="fa", ng-if="item.toggleState==='visible'")
+						.treeIconCheck(class="fa fa-check")
+					md-icon.md-accent(md-font-icon="fa-circle-thin", class="fa", ng-if="item.toggleState==='invisible'")
+					md-icon(md-font-icon="fa-circle-thin", class="fa", ng-if="item.toggleState==='parentOfInvisible'")
+						.treeIconDot(class="fa fa-circle")
 
 
 //div(ui-tree, data-nodrop-enabled="true", data-nodrag="true", ng-show="vm.showTree")
@@ -25,7 +27,7 @@ div#treeContainerGroup(ng-cloak="", class="virtualRepeatdemoInfiniteScroll", ng-
 	)
 
 // Filter list
-div(ng-cloak="", class="virtualRepeatdemoInfiniteScroll", ng-if="vm.showFilterList")
+div(ng-cloak="", class="virtualRepeatInfiniteScroll", ng-if="vm.showFilterList")
 	md-content(layout="column")
 		md-virtual-repeat-container.vertical-container
 			div(
@@ -35,10 +37,11 @@ div(ng-cloak="", class="virtualRepeatdemoInfiniteScroll", ng-if="vm.showFilterLi
 				flex=""
 				ng-class="item.class"
 				layout="row"
-				layout-align="start center"
 			)
-				.treeToggleButton(ng-click="vm.toggleFilterNode(item)")
-					md-icon.md-accent(md-font-icon="fa-square", class="fa", ng-if="item.toggleState==='visible'")
-					md-icon.md-accent(md-font-icon="fa-square-o", class="fa", ng-if="item.toggleState==='invisible'")
-
 				p#treeFilterItemName(ng-click="vm.filterItemSelected(item)") {{item.name}}
+
+				.treeButton(ng-click="vm.toggleFilterNode(item)")
+					md-icon.md-accent(md-font-icon="fa-circle-thin", class="fa", ng-if="item.toggleState==='visible'")
+						.treeIconCheck(class="fa fa-check")
+					md-icon.md-accent(md-font-icon="fa-circle-thin", class="fa", ng-if="item.toggleState==='invisible'")
+

@@ -100,7 +100,6 @@
 								endOfSplice = true;
 							}
 						}
-						scrollToShow(vm.nodesToShow[index].level - 1);
 					} else {
 						numChildren = vm.nodesToShow[index].children.length;
 						for (i = 0; i < numChildren; i += 1) {
@@ -112,7 +111,6 @@
 							vm.nodesToShow[index].children[i].hasChildren = vm.nodesToShow[index].children[i].children.length > 0;
 							vm.nodesToShow.splice(index + i + 1, 0, vm.nodesToShow[index].children[i]);
 						}
-						scrollToShow(vm.nodesToShow[index].level);
 					}
 					vm.nodesToShow[index].expanded = !vm.nodesToShow[index].expanded;
 				}
@@ -158,7 +156,6 @@
 				expandToSelection(path, (level + 1));
 			} else if (level === (path.length - 2)) {
 				vm.topIndex = selectedIndex - 2;
-				scrollToShow(level);
 			}
 		}
 
@@ -388,11 +385,6 @@
 					}
 				}
 			};
-		}
-
-		function scrollToShow (level) {
-			var factor = 20;
-			treeContainerGroup[0].scrollLeft = level * factor;
 		}
 	}
 }());

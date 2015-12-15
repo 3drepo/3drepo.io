@@ -60,6 +60,7 @@ panel-content {
 
 panel-content md-content {
   height: 100%;
+  overflow-x: hidden;
 }
 
 panel-content md-toolbar {
