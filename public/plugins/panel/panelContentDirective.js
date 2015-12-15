@@ -41,21 +41,19 @@
         var vm = this,
             content = "",
             contentItem = "",
-            i = 0,
-            length = 0,
             currentSortIndex,
             filter = null,
 			currentHeight = 0,
 			changedHeight = 0,
 			contentHeightExtra = 20,
-			toggledContentHeight = 0;
+			toggledContentHeight = 0,
+			minimized = false;
 
         vm.showHelp = false;
         vm.filterText = "";
 		vm.showFilter = false;
 		vm.addStatus = false;
         vm.showClearFilterButton = false;
-        vm.scrollPosition = 0;
 
 		$scope.$watch("vm.contentData.type", function (newValue) {
 			if (angular.isDefined(newValue)) {
@@ -66,8 +64,7 @@
 						"height='vm.contentHeight' " +
 						"show-add='vm.addStatus' " +
 						"options='vm.contentData.options' " +
-						"selected-option='vm.selectedOption' " +
-						"scroll-position='vm.scrollPosition'>" +
+						"selected-option='vm.selectedOption'>" +
 					"</" + vm.contentData.type + ">"
 				);
 				content.append(contentItem);
@@ -77,11 +74,6 @@
 
         $scope.$watch("vm.contentData.options", function (newValue) {
             vm.hasOptions = (angular.isDefined(newValue));
-        });
-
-        $scope.$watch("vm.scrollPosition", function (newValue) {
-            content = angular.element($element[0].querySelector('#content'));
-            content[0].scrollTop = parseInt(newValue);
         });
 
         $scope.$watch("vm.filterInputText", function (newValue) {
@@ -95,6 +87,10 @@
                 }, 500);
             }
         });
+
+		$scope.$watch("vm.contentData.maxHeight", function (newValue) {
+			vm.contentHeight = newValue;
+		});
 
         $scope.$watch("vm.filterText", function (newValue) {
             if (angular.isDefined(newValue)) {
@@ -114,12 +110,13 @@
 			else if ((event.type === EventService.EVENT.PANEL_CONTENT_TOGGLED) &&
 					 (event.value.position === vm.position) &&
 					 (event.value.type !== vm.contentData.type)) {
-				if (vm.contentData.maxHeight !== vm.contentData.minHeight) {
+				if (vm.contentData.hasOwnProperty("minHeight")) {
 					toggledContentHeight = event.value.contentHeight + contentHeightExtra;
 					if (event.value.show) {
 						changedHeight += toggledContentHeight;
 						vm.contentHeight -= toggledContentHeight;
-					} else {
+					}
+					else {
 						changedHeight -= toggledContentHeight;
 						if (vm.contentHeight !== vm.contentData.minHeight) {
 							vm.contentHeight += toggledContentHeight;
@@ -134,36 +131,33 @@
 				}
 			}
 			else if (event.type === EventService.EVENT.WINDOW_HEIGHT_CHANGE) {
-				if (vm.contentHeight !== vm.contentData.minHeight) {
-					if (vm.contentData.maxHeight !== vm.contentData.minHeight) {
-						vm.contentHeight = vm.contentData.maxHeight - changedHeight - event.value.change;
-					} else {
-						vm.contentHeight = vm.contentData.maxHeight;
+				if (vm.contentData.hasOwnProperty("minHeight")) {
+					currentHeight = vm.contentData.maxHeight - changedHeight - event.value.change;
+					if (!minimized) {
+						vm.contentHeight = currentHeight;
 					}
-
-					if (vm.contentHeight < vm.contentData.minHeight) {
-						vm.contentHeight = vm.contentData.minHeight;
-					}
-
-					currentHeight = vm.contentHeight;
 				}
 			}
         });
 
         vm.click = function () {
-            if (vm.contentHeight === vm.contentData.minHeight) {
-                EventService.send(
-                    EventService.EVENT.PANEL_CONTENT_CLICK,
-                    {
-                        position: vm.position,
-                        contentItem: vm.contentData.type
-                    }
-                );
-				vm.contentHeight = currentHeight;
-            }
-            else {
-				vm.contentHeight = vm.contentData.minHeight;
-            }
+			if (vm.contentData.hasOwnProperty("minHeight")) {
+				if (minimized) {
+					EventService.send(
+						EventService.EVENT.PANEL_CONTENT_CLICK,
+						{
+							position: vm.position,
+							contentItem: vm.contentData.type
+						}
+					);
+					vm.contentHeight = currentHeight;
+					minimized = false;
+				}
+				else {
+					vm.contentHeight = vm.contentData.minHeight;
+					minimized = true;
+				}
+			}
         };
 
         vm.toggleAdd = function (event) {

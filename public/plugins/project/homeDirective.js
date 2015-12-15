@@ -49,9 +49,10 @@
 
     function HomeCtrl($scope, $window, $timeout, Auth, StateManager, EventService) {
         var vm = this,
+			defaultWindowHeight = 917,  // The height of the window during dev
 			initialWindowHeight = $window.innerHeight;
 		vm.window = $window;
-		console.log(Auth);
+		console.log(initialWindowHeight);
 
 		// TODO Improve way to send initial event without timeout pause
 		$timeout(function () {
@@ -65,7 +66,7 @@
 		function sendWindowHeightChangeEvent (height) {
 			EventService.send(
 				EventService.EVENT.WINDOW_HEIGHT_CHANGE,
-				{height: height, change: (initialWindowHeight - height)}
+				{height: height, change: (defaultWindowHeight - height)}
 			);
 		}
 

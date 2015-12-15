@@ -45,8 +45,6 @@
 		pl.contentItems = [];
         pl.showPanel = true;
 
-		//console.log($element.css("height", "200px"));
-
         // Panel setup coming from login
         currentEvent = EventService.currentEvent();
         if (currentEvent.type === EventService.EVENT.PANEL_CONTENT_SETUP) {
@@ -63,7 +61,6 @@
                 pl.showPanel = !pl.showPanel;
             }
 			else if (event.type === EventService.EVENT.WINDOW_HEIGHT_CHANGE) {
-				console.log(event.value);
 				$element.css("height", (event.value.height - 97).toString() + "px");
 			}
         });
