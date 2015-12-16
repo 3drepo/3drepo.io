@@ -35,16 +35,13 @@
 		};
 	}
 
-	TreeCtrl.$inject = ["$scope", "$timeout", "$filter", "$element", "TreeService", "ViewerService"];
+	TreeCtrl.$inject = ["$scope", "$timeout", "$element", "TreeService", "ViewerService"];
 
-	function TreeCtrl($scope, $timeout, $filter, $element, TreeService, ViewerService) {
+	function TreeCtrl($scope, $timeout, $element, TreeService, ViewerService) {
 		var vm = this,
 			promise = null,
-			item = {},
 			i = 0,
 			length = 0,
-			levels = 4,
-			levelCount = 0,
 			treeContainerGroup = angular.element($element[0].querySelector("#treeContainerGroup"));
 
 		vm.nodes = [];
@@ -78,7 +75,6 @@
 
 		vm.expand = function (_id) {
 			var i,
-				j,
 				numChildren,
 				index = -1,
 				length,
@@ -120,8 +116,7 @@
 		function expandToSelection(path, level) {
 			var i,
 				j,
-				length = 0,
-				pathLength,
+				length,
 				childrenLength,
 				selectedId = path[path.length - 1],
 				selectedIndex = 0,
@@ -159,15 +154,14 @@
 			}
 		}
 
-		$(document).on("objectSelected", function (event, object, zoom) {
+		$(document).on("objectSelected", function (event, object) {
 			$timeout(function () {
 				if (angular.isUndefined(object)) {
 					vm.viewerSelectedObject = null;
 					vm.filterText = "";
 				} else {
-					var objectID = null;
 					var idParts = null;
-					var path = null;
+					var path;
 
 					if (object["multipart"]) {
 						idParts = object.id.split("__");

@@ -90,6 +90,12 @@ panel-content .md-menu {
   padding: 0;
 }
 
+panel-content .panelContentContainer {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
 panel-content .panelContentFilter {
   background: #E8EAF6;
   padding: 5px 10px 0 10px;
