@@ -1,0 +1,9 @@
+md-dialog(aria-label="QR Code Reader",  ng-cloak)
+	md-toolbar
+		.md-toolbar-tools
+			h2 QR Code Reader
+			span(flex)
+			md-button.md-icon-button(ng-click="cancel()")
+				md-icon(md-font-icon="fa-close", class="fa", aria-label="Close dialog")
+
+	video#videocamera.dialogs(autoplay, capture='vm.captureQRCode', camera-switch-new='vm.CameraService.cameraSwitch')
