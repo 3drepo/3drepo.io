@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2015 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -24,7 +24,9 @@
 	QrCodeReaderService.$inject = ["$window", "$timeout"];
 
 	function QrCodeReaderService($window, $timeout) {
-		var cameraSwitch = false,
+		var cameraOn = {
+				status: false
+			},
 			source = null,
 			videoStream = null;
 
@@ -39,12 +41,10 @@
 					videoSRCS = videoSRCS.filter(function(item) { return (item.facing === 'environment'); });
 				}
 
-				/*
 				if (!videoSRCS.length)
 				{
 					callback("No valid cameras found");
 				}
-				*/
 
 				source = videoSRCS[0];
 			});
@@ -74,7 +74,7 @@
 				try {
 					return callback(null, qrcode.decode());
 				} catch (err) {
-					if (!cameraSwitch)
+					if (!cameraOn.status)
 					{
 						if (videoStream) {
 							videoStream.stop();
@@ -114,6 +114,7 @@
 		};
 
 		return {
+			cameraOn: cameraOn,
 			captureQRCode: captureQRCode
 		};
 	}

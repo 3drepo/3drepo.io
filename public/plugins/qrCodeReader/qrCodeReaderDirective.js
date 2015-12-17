@@ -20,27 +20,7 @@
 
 	angular.module("3drepo")
 		.directive("qrCodeReader", qrCodeReader)
-		.directive('cameraSwitchNew', function () {
-			return {
-				restrict: 'A',
-				scope: {
-					capture: '='
-				},
-				link: function link(scope, element, attrs) {
-					if (attrs["cameraSwitchNew"] === "true") {
-						scope.capture(scope, element[0], function(err, res) {
-							if(!err) {
-								window.location.replace(res);
-							}
-							else {
-								console.log("QRCode error: " + err);
-							}
-						});
-					}
-				}
-			};
-		});
-
+		.directive('qrCodeCameraSwitch', qrCodeCameraSwitch);
 
 	function qrCodeReader() {
 		return {
@@ -52,32 +32,61 @@
 		};
 	}
 
-	QrCodeReaderCtrl.$inject = ["$scope", "$mdDialog", "EventService", "CameraService"];
+	QrCodeReaderCtrl.$inject = ["$scope", "$mdDialog", "EventService", "QrCodeReaderService"];
 
-	function QrCodeReaderCtrl($scope, $mdDialog, EventService, CameraService) {
+	function QrCodeReaderCtrl($scope, $mdDialog, EventService, QrCodeReaderService) {
 		var vm = this;
-		vm.CameraService = CameraService;
-		vm.captureQRCode = vm.CameraService.captureQRCode;
+		$scope.captureQRCode = QrCodeReaderService.captureQRCode;
+		$scope.cameraOn = QrCodeReaderService.cameraOn;
 
 		$scope.$watch(EventService.currentEvent, function (event) {
 			if (event.type === EventService.EVENT.SHOW_QR_CODE_READER) {
-				vm.CameraService.cameraSwitch = true;
+				$scope.cameraOn.status = true;
 				$mdDialog.show({
 					controller: qrCodeReaderDialogController,
 					templateUrl: 'qrCodeReaderDialog.html',
 					parent: angular.element(document.body),
 					targetEvent: event,
 					clickOutsideToClose:true,
-					fullscreen: true
+					fullscreen: true,
+					scope: $scope,
+					preserveScope: true,
+					onRemoving: removeDialog
 				});
 			}
 		});
 
-		function qrCodeReaderDialogController($scope, $mdDialog) {
-			$scope.cancel = function() {
-				vm.CameraService.cameraSwitch = false;
-				$mdDialog.cancel();
-			};
+		$scope.closeDialog = function() {
+			$scope.cameraOn.status = false;
+			$mdDialog.cancel();
+		};
+
+		function removeDialog () {
+			$scope.closeDialog();
 		}
+
+		function qrCodeReaderDialogController($scope) {
+		}
+	}
+
+	function qrCodeCameraSwitch () {
+		return {
+			restrict: 'A',
+			scope: {
+				capture: '='
+			},
+			link: function link(scope, element, attrs) {
+				if (attrs.qrCodeCameraSwitch === "true") {
+					scope.capture(scope, element[0], function(err, res) {
+						if(!err) {
+							window.location.replace(res);
+						}
+						else {
+							console.log("QRCode error: " + err);
+						}
+					});
+				}
+			}
+		};
 	}
 }());

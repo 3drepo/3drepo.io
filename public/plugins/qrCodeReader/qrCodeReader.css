@@ -1,3 +1,8 @@
-qr-code-reader {
-  position: absolute;
+md-dialog.qrCodeReaderDialog {
+  max-height: 90%;
+}
+
+md-dialog.qrCodeReaderDialog .qrCodeReaderIcon {
+  margin-top: 22px;
+  margin-right: 10px;
 }

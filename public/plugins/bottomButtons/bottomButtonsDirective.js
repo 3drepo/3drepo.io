@@ -86,7 +86,7 @@
 		};
 
 		var enterOculusDisplay = function () {
-
+			ViewerService.switchVR();
 		};
 
         bb.leftButtons = [];
@@ -99,6 +99,6 @@
         bb.rightButtons.push({label: "Help", icon: "fa-question", click: toggleHelp});
         bb.rightButtons.push({label: "Full screen", icon: "fa-arrows-alt", click: enterFullScreen});
 		bb.rightButtons.push({label: "QR code", icon: "fa-qrcode", click: showQRCodeReader});
-		bb.rightButtons.push({label: "Oculus", icon: "fa-shield", click: enterOculusDisplay});
+		bb.rightButtons.push({label: "Oculus", icon: "fa-simplybuilt", click: enterOculusDisplay});
     }
 }());
