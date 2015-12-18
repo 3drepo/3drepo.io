@@ -29,71 +29,80 @@
                 position: "@"
             },
             controller: PanelCtrl,
-            controllerAs: 'pl',
+            controllerAs: 'vm',
             bindToController: true
         };
     }
 
-    PanelCtrl.$inject = ["$scope", "$element", "EventService"];
+    PanelCtrl.$inject = ["$scope", "$element", "$window", "$timeout", "EventService"];
 
-    function PanelCtrl ($scope, $element, EventService) {
-        var pl = this,
+    function PanelCtrl ($scope, $element, $window, $timeout, EventService) {
+        var vm = this,
             i = 0,
             length = 0,
-            currentEvent;
+			defaultWindowHeight = 917,  // The height of the window during dev
+			initialWindowHeight = $window.innerHeight;
 
-		pl.contentItems = [];
-        pl.showPanel = true;
+		vm.contentItems = [];
+        vm.showPanel = true;
+		vm.window = $window;
 
-        // Panel setup coming from login
-        currentEvent = EventService.currentEvent();
-        if (currentEvent.type === EventService.EVENT.PANEL_CONTENT_SETUP) {
-			pl.contentItems = currentEvent.value[pl.position];
-			hideLastItemGap();
-        }
+		$scope.$watch("vm.window.innerHeight", function (newValue) {
+			sendWindowHeightChangeEvent(newValue);
+		});
+
+		function sendWindowHeightChangeEvent (height) {
+			$element.css("height", (height - 97).toString() + "px");
+
+			EventService.send(
+				EventService.EVENT.WINDOW_HEIGHT_CHANGE,
+				{height: height, change: (defaultWindowHeight - height)}
+			);
+		}
 
         $scope.$watch(EventService.currentEvent, function (event) {
             if (event.type === EventService.EVENT.PANEL_CONTENT_SETUP) {
-				pl.contentItems = (event.value[pl.position]);
+				vm.contentItems = (event.value[vm.position]);
 				hideLastItemGap();
+
+				$timeout(function () {
+					sendWindowHeightChangeEvent(initialWindowHeight);
+				});
             }
             else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
-                pl.showPanel = !pl.showPanel;
+                vm.showPanel = !vm.showPanel;
             }
-			else if (event.type === EventService.EVENT.WINDOW_HEIGHT_CHANGE) {
-				$element.css("height", (event.value.height - 97).toString() + "px");
-			}
         });
 
 		// The last card should not have a gap so that scrolling in resized window works correctly
 		function hideLastItemGap () {
 			var lastFound = false;
-			for (i = (pl.contentItems.length - 1); i >= 0; i -= 1) {
-				if (pl.contentItems[i].show) {
+			for (i = (vm.contentItems.length - 1); i >= 0; i -= 1) {
+				if (vm.contentItems[i].show) {
 					if (!lastFound) {
-						pl.contentItems[i].showGap = false;
+						vm.contentItems[i].showGap = false;
 						lastFound = true;
 					} else {
-						pl.contentItems[i].showGap = true;
+						vm.contentItems[i].showGap = true;
 					}
 				}
 			}
 		}
 
-		pl.buttonClick = function (contentType) {
-            for (i = 0, length = pl.contentItems.length; i < length; i += 1) {
-                if (contentType === pl.contentItems[i].type) {
-                    pl.contentItems[i].show = !pl.contentItems[i].show;
-					if (!pl.contentItems[i].show) {
-						pl.contentItems[i].showGap = false;
+		vm.buttonClick = function (contentType) {
+            for (i = 0, length = vm.contentItems.length; i < length; i += 1) {
+                if (contentType === vm.contentItems[i].type) {
+                    vm.contentItems[i].show = !vm.contentItems[i].show;
+					if (!vm.contentItems[i].show) {
+						vm.contentItems[i].showGap = false;
 					}
 					EventService.send(
 						EventService.EVENT.PANEL_CONTENT_TOGGLED,
 						{
-							position: pl.position,
-							type: pl.contentItems[i].type,
-							show: pl.contentItems[i].show,
-							contentHeight: pl.contentItems[i].maxHeight
+							position: vm.position,
+							type: vm.contentItems[i].type,
+							show: vm.contentItems[i].show,
+							contentHeight: vm.contentItems[i].maxHeight
 						}
 					);
                 }
