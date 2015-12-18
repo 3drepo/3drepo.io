@@ -21,7 +21,7 @@
 				md-list-item.md-2-line(ng-repeat="comment in vm.data.comments")
 					div.md-list-item-text
 						div(layout="row" layout-align="space-between center")
-							h3 {{comment.comment}}
+							h3(ng-bind-html="comment.comment | linky:'_blank'") {{comment.comment}}
 							//md-button.md-icon-button.commentDeleteButton(aria-label="Delete comment", flex="15", ng-if="comment.canDelete", ng-click="vm.deleteComment($index)")
 							.commentModify(layout="row" layout-align="center center", ng-if="vm.issueIsOpen")
 								md-icon.md-accent.commentModifyButton(class="fa fa-pencil", ng-if="comment.canDelete", ng-click="vm.toggleEditComment($index)")

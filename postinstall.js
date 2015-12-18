@@ -48,6 +48,7 @@ var public_files = {
         angularmaterialjs: '/public/js/external/angular-material.min.js',
         angularanimatejs: '/public/js/external/angular-animate.min.js',
         angularariajs: '/public/js/external/angular-aria.min.js',
+		angularsanitizejs: '/public/js/external/angular-sanitize.min.js',
 
 		// QR Code stuff
 		qrgrid: '/public/js/external/qrcode/grid.js',
@@ -125,7 +126,8 @@ var internal_files = {
     'bower_components/angular-animate/angular-animate.min.js',
     'bower_components/angular-aria/angular-aria.min.js',
 	'bower_components/angular-ui-tree/dist/angular-ui-tree.min.js',
-	'bower_components/angular-ui-tree/dist/angular-ui-tree.min.css'
+	'bower_components/angular-ui-tree/dist/angular-ui-tree.min.css',
+	'bower_components/angular-sanitize/angular-sanitize.min.js'
 	],
 
 	x3dom_files: [
