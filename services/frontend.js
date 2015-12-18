@@ -154,7 +154,16 @@ module.exports.createApp = function(template)
 							{
 								"plugin": "project",
 								"friends" : [
-									"panel", "filter", "tree", "viewpoints", "issues", "oculus", "clip", "bottomButtons", "qrCodeReader"
+									"panel",
+									"filter",
+									"tree",
+									"viewpoints",
+									"issues",
+									"oculus",
+									"clip",
+									"bottomButtons",
+									"qrCodeReader",
+									"docs"
 								]
 							}
 						]

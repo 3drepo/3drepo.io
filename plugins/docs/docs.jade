@@ -1,0 +1,5 @@
+md-list
+	md-list-item.md-1-line(ng-repeat="docs in vm.docs")
+		md-icon(class="fa", md-font-icon="fa-file-pdf-o")
+		.md-list-item-text
+			p {{docs.name}}

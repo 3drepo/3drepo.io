@@ -198,13 +198,12 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, jso
 			var childID  = uuidToString(childJSON[C.REPO_NODE_LABEL_ID]);
 			var childSID = uuidToString(childJSON[C.REPO_NODE_LABEL_SHARED_ID]);
 			var child    = sceneGraph.all[childSID]; // Get object from sceneGraph
+			var account  = utils.coalesce(child["owner"], parentAccount);
+			var project  = child["project"];
+			var refName  = (account === parentAccount) ? project : (account + "/" + project);
 
 			if (child[C.REPO_NODE_LABEL_TYPE] === C.REPO_NODE_TYPE_REF)
 			{
-				var account       = utils.coalesce(child["owner"], parentAccount);
-				var project       = child["project"];
-				var refName       = (account === parentAccount) ? project : (account + "/" + project);
-
 				var branch        = null;
 				var revision      = null;
 
@@ -224,7 +223,8 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, jso
 					"path"      : current.path + "__" + childID,
 					"_id"       : childID,
 					"shared_id" : childSID,
-					"children"  : []
+					"children"  : [],
+					"project"	: ((project === undefined) || (project === null)) ? null : project
 				};
 
 				getFullTree(dbInterface, account, project, branch, revision, childRefJSON.path, function(err, refJSON) {
@@ -245,7 +245,8 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, jso
 	                "path"      : current.path + "__" + childID,
 					"_id"       : childID,
 					"shared_id" : childSID,
-					"children"  : []
+					"children"  : [],
+					"project"	: ((project === undefined) || (project === null)) ? null : project
 				};
 
 	            child.path = childTreeJSON.path;

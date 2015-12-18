@@ -6,7 +6,7 @@ div#treeContainerGroup(ng-cloak="", class="virtualRepeatInfiniteScroll", ng-show
 				.treeButton(ng-click="vm.expand(item._id)")
 					md-icon.md-accent(md-font-icon="fa-plus-square-o", class="fa", ng-if="!item.expanded", ng-class="{treeButtonDisabled: !item.hasChildren}")
 					md-icon.md-accent(md-font-icon="fa-minus-square-o", class="fa", ng-if="item.expanded")
-				p(ng-click="vm.nodeSelected(item._id)", ng-class="{viewerSelected: item.selected}") {{item.name}}
+				p(ng-click="vm.nodeSelected(item)", ng-class="{viewerSelected: item.selected}") {{item.name}}
 				.treeButton(ng-click="vm.toggleTreeNode(item)")
 					md-icon.md-accent(md-font-icon="fa-circle-thin", class="fa", ng-if="item.toggleState==='visible'")
 						.treeIconCheck(class="fa fa-check")

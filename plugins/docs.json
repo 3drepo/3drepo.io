@@ -1,0 +1,15 @@
+{
+    "name" : "docs",
+    "files": {
+        "angular" : [
+            "docs/docsDirective.js",
+            "docs/docsService.js"
+        ],
+        "jade": [
+            {"template" : "docs/docs.jade", "id" : "docs.html"}
+        ],
+        "css" : [
+            "docs/docs.css"
+        ]
+    }
+}

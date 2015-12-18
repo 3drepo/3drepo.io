@@ -7,4 +7,4 @@ div(ng-show="vm.showPanel")
 		.panelButtonGroup(ng-repeat="contentItem in vm.contentItems")
 			md-button.md-fab.md-primary.md-mini(ng-click="vm.buttonClick(contentItem.type)", aria-label="{{contentItem.title}}")
 				md-icon(class="fa", md-font-icon="{{contentItem.icon}}")
-		label {{contentItem.title}}
+			label {{contentItem.title}}

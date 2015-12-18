@@ -113,7 +113,7 @@
 		panelContent.right.push({
 			type: "issues",
 			title: "Issues",
-			show: true,
+			show: false,
 			help: "List current issues",
 			icon: "fa-map-marker",
 			hasFilter: true,
@@ -148,6 +148,14 @@
 			help: "Clipping plane",
 			icon: "fa-object-group",
             maxHeight: 190
+		});
+		panelContent.right.push({
+			type: "docs",
+			title: "Docs",
+			show: true,
+			help: "Documents",
+			icon: "fa-clone",
+			maxHeight: 290
 		});
 
 		StateManager.setStateVar("branch", "master");

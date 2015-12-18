@@ -35,9 +35,9 @@
 		};
 	}
 
-	TreeCtrl.$inject = ["$scope", "$timeout", "$element", "TreeService", "ViewerService"];
+	TreeCtrl.$inject = ["$scope", "$timeout", "$element", "TreeService", "ViewerService", "EventService"];
 
-	function TreeCtrl($scope, $timeout, $element, TreeService, ViewerService) {
+	function TreeCtrl($scope, $timeout, $element, TreeService, ViewerService, EventService) {
 		var vm = this,
 			promise = null,
 			i = 0,
@@ -245,17 +245,19 @@
 			ViewerService.defaultViewer.setVisibilityByID(map, (node.toggleState === "visible"));
 		};
 
-		vm.nodeSelected = function (nodeId) {
+		vm.nodeSelected = function (node) {
+			console.log(node);
 			var map = [];
 			var pathArr = [];
 			for (var obj in vm.idToPath) {
-				if (vm.idToPath.hasOwnProperty(obj) && (vm.idToPath[obj].indexOf(nodeId) !== -1)) {
+				if (vm.idToPath.hasOwnProperty(obj) && (vm.idToPath[obj].indexOf(node._id) !== -1)) {
 					pathArr = vm.idToPath[obj].split("__");
 					map.push(pathArr[pathArr.length - 1]);
 				}
 			}
-
 			ViewerService.defaultViewer.selectPartsByID(map, false);
+
+			EventService.send(EventService.EVENT.OBJECT_SELECTED, {id: "55d6ae0c-5d62-4fe7-8bd5-5c84fb90df1c"});
 		};
 
 
