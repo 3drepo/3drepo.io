@@ -71,7 +71,9 @@ var Oculus = function(viewer) {
 			leftApp.appendChild(leftTex);
 
 			var leftVP = document.createElement('viewpoint');
-			leftVP.setAttribute('use', self.viewer.getCurrentViewpoint().getAttribute('id'));
+			if (self.viewer.getCurrentViewpoint() !== null) {
+				leftVP.setAttribute('use', self.viewer.getCurrentViewpoint().getAttribute('id'));
+			}
 			leftVP.setAttribute('containerfield', 'viewpoint');
 			leftVP.textContent = ' ';
 			leftTex.appendChild(leftVP);
@@ -120,7 +122,9 @@ var Oculus = function(viewer) {
 			rightShape.appendChild(rightPlane);
 
 			var rightVP = document.createElement('viewpoint');
-			rightVP.setAttribute('use', self.viewer.getCurrentViewpoint().getAttribute('id'));
+			if (self.viewer.getCurrentViewpoint() !== null) {
+				rightVP.setAttribute('use', self.viewer.getCurrentViewpoint().getAttribute('id'));
+			}
 			rightVP.setAttribute('containerfield', 'viewpoint');
 			rightVP.textContent = ' ';
 			rightTex.appendChild(rightVP);
