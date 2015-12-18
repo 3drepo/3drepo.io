@@ -66,9 +66,9 @@
         };
     }
 
-	ProjectCtrl.$inject = ["EventService", "ViewerService", "StateManager"];
+	ProjectCtrl.$inject = ["$timeout", "EventService", "ViewerService", "StateManager"];
 
-	function ProjectCtrl(EventService, ViewerService, StateManager) {
+	function ProjectCtrl($timeout, EventService, ViewerService, StateManager) {
 		var panelContent = {
 			left: [],
 			right: []
@@ -147,7 +147,6 @@
 			show: false,
 			help: "Clipping plane",
 			icon: "fa-object-group",
-            minHeight: 110,
             maxHeight: 190
 		});
 
@@ -159,6 +158,8 @@
 			ViewerService.defaultViewer.updateSettings(StateManager.Data.ProjectData.settings);
 		});
 
-		EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelContent);
+		$timeout(function () {
+			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelContent);
+		});
 	}
 }());

@@ -41,27 +41,19 @@
         var vm = this,
             content = "",
             contentItem = "",
-            i = 0,
-            length = 0,
             currentSortIndex,
             filter = null,
-            last = {
-                bottom: false,
-                top: true,
-                left: true,
-                right: false
-			},
-			maxHeight = 0,
-			changeHeight = 0,
-			contentHeightExtra = 20;
+			currentHeight = 0,
+			changedHeight = 0,
+			contentHeightExtra = 20,
+			toggledContentHeight = 0,
+			minimized = false;
 
         vm.showHelp = false;
         vm.filterText = "";
 		vm.showFilter = false;
 		vm.addStatus = false;
-        vm.toastPosition = angular.extend({}, last);
         vm.showClearFilterButton = false;
-        vm.scrollPosition = 0;
 
 		$scope.$watch("vm.contentData.type", function (newValue) {
 			if (angular.isDefined(newValue)) {
@@ -72,8 +64,7 @@
 						"height='vm.contentHeight' " +
 						"show-add='vm.addStatus' " +
 						"options='vm.contentData.options' " +
-						"selected-option='vm.selectedOption' " +
-						"scroll-position='vm.scrollPosition'>" +
+						"selected-option='vm.selectedOption'>" +
 					"</" + vm.contentData.type + ">"
 				);
 				content.append(contentItem);
@@ -83,11 +74,6 @@
 
         $scope.$watch("vm.contentData.options", function (newValue) {
             vm.hasOptions = (angular.isDefined(newValue));
-        });
-
-        $scope.$watch("vm.scrollPosition", function (newValue) {
-            content = angular.element($element[0].querySelector('#content'));
-            content[0].scrollTop = parseInt(newValue);
         });
 
         $scope.$watch("vm.filterInputText", function (newValue) {
@@ -102,23 +88,20 @@
             }
         });
 
+		$scope.$watch("vm.contentData.maxHeight", function (newValue) {
+			vm.contentHeight = newValue;
+		});
+
         $scope.$watch("vm.filterText", function (newValue) {
             if (angular.isDefined(newValue)) {
                 vm.filterInputText = newValue;
             }
         });
 
-		$scope.$watch("vm.contentData.maxHeight", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				maxHeight = newValue;
-				vm.contentHeight = maxHeight;
-			}
-		});
-
         $scope.$watch(EventService.currentEvent, function (event) {
             if ((event.type === EventService.EVENT.PANEL_CONTENT_CLICK) && (event.value.position === vm.position)) {
                 if (event.value.contentItem !== vm.contentData.type) {
-					vm.contentHeight = maxHeight;
+					vm.contentHeight = vm.contentData.maxHeight;
                 }
             }
             else if (event.type === EventService.EVENT.TOGGLE_HELP) {
@@ -127,31 +110,54 @@
 			else if ((event.type === EventService.EVENT.PANEL_CONTENT_TOGGLED) &&
 					 (event.value.position === vm.position) &&
 					 (event.value.type !== vm.contentData.type)) {
-				changeHeight = event.value.contentHeight + contentHeightExtra;
-				maxHeight = (event.value.show) ? (maxHeight - changeHeight) : (maxHeight + changeHeight);
-				if (maxHeight > vm.contentData.maxHeight) {
-					vm.contentHeight = vm.contentData.maxHeight;
+				if (vm.contentData.hasOwnProperty("minHeight")) {
+					toggledContentHeight = event.value.contentHeight + contentHeightExtra;
+					if (event.value.show) {
+						changedHeight += toggledContentHeight;
+						vm.contentHeight -= toggledContentHeight;
+					}
+					else {
+						changedHeight -= toggledContentHeight;
+						if (vm.contentHeight !== vm.contentData.minHeight) {
+							vm.contentHeight += toggledContentHeight;
+						}
+					}
+
+					if (vm.contentHeight < vm.contentData.minHeight) {
+						vm.contentHeight = vm.contentData.minHeight;
+					}
+
+					currentHeight = vm.contentHeight;
 				}
-				else {
-					vm.contentHeight = maxHeight;
+			}
+			else if (event.type === EventService.EVENT.WINDOW_HEIGHT_CHANGE) {
+				if (vm.contentData.hasOwnProperty("minHeight")) {
+					currentHeight = vm.contentData.maxHeight - changedHeight - event.value.change;
+					if (!minimized) {
+						vm.contentHeight = currentHeight;
+					}
 				}
 			}
         });
 
         vm.click = function () {
-            if (vm.contentHeight === 100) {
-                EventService.send(
-                    EventService.EVENT.PANEL_CONTENT_CLICK,
-                    {
-                        position: vm.position,
-                        contentItem: vm.contentData.type
-                    }
-                );
-				vm.contentHeight = maxHeight;
-            }
-            else {
-				vm.contentHeight = 100;
-            }
+			if (vm.contentData.hasOwnProperty("minHeight")) {
+				if (minimized) {
+					EventService.send(
+						EventService.EVENT.PANEL_CONTENT_CLICK,
+						{
+							position: vm.position,
+							contentItem: vm.contentData.type
+						}
+					);
+					vm.contentHeight = currentHeight;
+					minimized = false;
+				}
+				else {
+					vm.contentHeight = vm.contentData.minHeight;
+					minimized = true;
+				}
+			}
         };
 
         vm.toggleAdd = function (event) {
@@ -200,5 +206,5 @@
         vm.clearFilter = function () {
             vm.filterInputText = "";
         };
-    }
+	}
 }());

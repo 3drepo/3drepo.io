@@ -29,96 +29,85 @@
                 position: "@"
             },
             controller: PanelCtrl,
-            controllerAs: 'pl',
+            controllerAs: 'vm',
             bindToController: true
         };
     }
 
-    PanelCtrl.$inject = ["$scope", "$element", "$compile", "EventService"];
+    PanelCtrl.$inject = ["$scope", "$element", "$window", "$timeout", "EventService"];
 
-    function PanelCtrl ($scope, $element, $compile, EventService) {
-        var pl = this,
-            items = angular.element($element[0].querySelector("#items")),
-            buttons = angular.element($element[0].querySelector("#buttons")),
-            content = "",
-            element = "",
+    function PanelCtrl ($scope, $element, $window, $timeout, EventService) {
+        var vm = this,
             i = 0,
             length = 0,
-            currentEvent = null;
-        pl.contentItems = [];
-        pl.showPanel = true;
-        pl.panelIsSetUp = false;
+			defaultWindowHeight = 917,  // The height of the window during dev
+			initialWindowHeight = $window.innerHeight;
 
-        // Panel setup coming from login
-        currentEvent = EventService.currentEvent();
-        if (currentEvent.type === EventService.EVENT.PANEL_CONTENT_SETUP) {
-            setupPanels(currentEvent.value[pl.position]);
-        }
+		vm.contentItems = [];
+        vm.showPanel = true;
+		vm.window = $window;
+
+		$scope.$watch("vm.window.innerHeight", function (newValue) {
+			sendWindowHeightChangeEvent(newValue);
+		});
+
+		function sendWindowHeightChangeEvent (height) {
+			$element.css("height", (height - 97).toString() + "px");
+
+			EventService.send(
+				EventService.EVENT.WINDOW_HEIGHT_CHANGE,
+				{height: height, change: (defaultWindowHeight - height)}
+			);
+		}
 
         $scope.$watch(EventService.currentEvent, function (event) {
             if (event.type === EventService.EVENT.PANEL_CONTENT_SETUP) {
-                setupPanels(event.value[pl.position]);
+				vm.contentItems = (event.value[vm.position]);
+				hideLastItemGap();
+
+				$timeout(function () {
+					sendWindowHeightChangeEvent(initialWindowHeight);
+				});
             }
             else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
-                pl.showPanel = !pl.showPanel;
+                vm.showPanel = !vm.showPanel;
             }
         });
 
-        function setupPanels (content) {
-            if (!pl.panelIsSetUp) {
-                for (i = 0, length = content.length; i < length; i += 1) {
-                    pl.contentItems.push(content[i]);
+		// The last card should not have a gap so that scrolling in resized window works correctly
+		function hideLastItemGap () {
+			var lastFound = false;
+			for (i = (vm.contentItems.length - 1); i >= 0; i -= 1) {
+				if (vm.contentItems[i].show) {
+					if (!lastFound) {
+						vm.contentItems[i].showGap = false;
+						lastFound = true;
+					} else {
+						vm.contentItems[i].showGap = true;
+					}
+				}
+			}
+		}
 
-                    // Content items
-					element = angular.element(
-						"<panel-content " +
-							"position='pl.position' " +
-							"content-data='pl.contentItems[" + i + "]' " +
-							"ng-show='pl.contentItems[" + i + "].show'>" +
-						"</panel-content>"
-					);
-                    items.append(element);
-                    $compile(element)($scope);
-
-                    // Buttons
-                    if (pl.contentItems[i].hasOwnProperty("icon")) {
-                        element = angular.element(
-                            "<div class='panelButtonGroup'>" +
-                                "<md-button " +
-                                    "class='md-fab md-primary md-mini' " +
-                                    "ng-click=pl.buttonClick('" + pl.contentItems[i].type + "') " +
-                                    "aria-label='{{pl.contentItems[" + i + "].title}}'>" +
-                                        "<md-icon " +
-                                            "class='fa' " +
-                                            "md-font-icon='{{pl.contentItems[" + i + "].icon}}'>" +
-                                        "</md-icon>" +
-                                "</md-button>" +
-                                "<label>{{pl.contentItems[" + i + "].title}}</label>" +
-                            "</div>"
-                        );
-                        buttons.append(element);
-                        $compile(element)($scope);
-                    }
-                }
-                pl.panelIsSetUp = true;
-            }
-        }
-
-        pl.buttonClick = function (contentType) {
-            for (i = 0, length = pl.contentItems.length; i < length; i += 1) {
-                if (contentType === pl.contentItems[i].type) {
-                    pl.contentItems[i].show = !pl.contentItems[i].show;
+		vm.buttonClick = function (contentType) {
+            for (i = 0, length = vm.contentItems.length; i < length; i += 1) {
+                if (contentType === vm.contentItems[i].type) {
+                    vm.contentItems[i].show = !vm.contentItems[i].show;
+					if (!vm.contentItems[i].show) {
+						vm.contentItems[i].showGap = false;
+					}
 					EventService.send(
 						EventService.EVENT.PANEL_CONTENT_TOGGLED,
 						{
-							position: pl.position,
-							type: pl.contentItems[i].type,
-							show: pl.contentItems[i].show,
-							contentHeight: pl.contentItems[i].maxHeight
+							position: vm.position,
+							type: vm.contentItems[i].type,
+							show: vm.contentItems[i].show,
+							contentHeight: vm.contentItems[i].maxHeight
 						}
 					);
                 }
             }
+			hideLastItemGap();
         };
     }
 }());

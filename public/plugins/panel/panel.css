@@ -6,6 +6,7 @@ panel  {
   top: 80px;
   width: 420px;
 }
+
 panel #items {
   position: absolute;
   width: 350px;
@@ -54,7 +55,6 @@ panel #buttons .panelButtonGroup label {
 
 panel-content {
   display: block;
-  margin-bottom: 20px;
   position: relative;
 }
 
