@@ -35,16 +35,14 @@
 		};
 	}
 
-	TreeCtrl.$inject = ["$scope", "$rootScope", "$timeout", "$filter", "TreeService", "ViewerService"];
+	TreeCtrl.$inject = ["$scope", "$timeout", "$element", "TreeService", "ViewerService"];
 
-	function TreeCtrl($scope, $rootScope, $timeout, $filter, TreeService, ViewerService) {
+	function TreeCtrl($scope, $timeout, $element, TreeService, ViewerService) {
 		var vm = this,
 			promise = null,
-			item = {},
 			i = 0,
 			length = 0,
-			levels = 4,
-			levelCount = 0;
+			treeContainerGroup = angular.element($element[0].querySelector("#treeContainerGroup"));
 
 		vm.nodes = [];
 		vm.showTree = false;
@@ -66,18 +64,17 @@
 			setupInfiniteScroll();
 		});
 
-		var initNodesToShow = function () {
+		function initNodesToShow () {
 			vm.nodesToShow = [vm.allNodes[0]];
 			vm.nodesToShow[0].level = 0;
 			vm.nodesToShow[0].expanded = false;
 			vm.nodesToShow[0].hasChildren = true;
 			vm.nodesToShow[0].selected = false;
 			vm.nodesToShow[0].toggleState = "visible";
-		};
+		}
 
 		vm.expand = function (_id) {
 			var i,
-				j,
 				numChildren,
 				index = -1,
 				length,
@@ -119,8 +116,7 @@
 		function expandToSelection(path, level) {
 			var i,
 				j,
-				length = 0,
-				pathLength,
+				length,
 				childrenLength,
 				selectedId = path[path.length - 1],
 				selectedIndex = 0,
@@ -141,7 +137,6 @@
 						vm.nodesToShow[i].children[j].toggleState = "visible";
 						vm.nodesToShow[i].children[j].hasChildren = vm.nodesToShow[i].children[j].children.length > 0;
 						if (vm.nodesToShow[i].children[j].selected) {
-							console.log(vm.nodesToShow[i].children[j]);
 							selectionFound = true;
 						}
 						if ((level === (path.length - 2)) && !selectionFound) {
@@ -159,15 +154,14 @@
 			}
 		}
 
-		$(document).on("objectSelected", function (event, object, zoom) {
+		$(document).on("objectSelected", function (event, object) {
 			$timeout(function () {
 				if (angular.isUndefined(object)) {
 					vm.viewerSelectedObject = null;
 					vm.filterText = "";
 				} else {
-					var objectID = null;
 					var idParts = null;
-					var path = null;
+					var path;
 
 					if (object["multipart"]) {
 						idParts = object.id.split("__");
@@ -386,47 +380,5 @@
 				}
 			};
 		}
-
-		/*
-        $(document).on("objectSelected", function(event, object, zoom) {
-            $timeout(function () {
-                if (angular.isUndefined(object)) {
-                    vm.viewerSelectedObject = null;
-                    vm.filterText = "";
-                } else {
-                    var objectID = null;
-                    var idParts  = null;
-
-                    if (object["multipart"])
-                    {
-                        idParts = object.id.split("__");
-                    } else {
-                        idParts = object.getAttribute("id").split("__");
-                    }
-
-                    objectID = idParts[idParts.length - 1];
-
-                    if (objectID === vm.idToName[objectID])
-                    {
-                        vm.filterText = "###" + vm.idToName[objectID];
-
-                        vm.objectName    = objectID;
-                        vm.origID        = "###" + object.id;
-                    } else {
-                        vm.filterText    = vm.idToName[objectID];
-                    }
-                }
-
-				$rootScope.$apply();
-            });
-        });
-
-        $(document).on("partSelected", function(event, part, zoom) {
-            $scope.IssuesService.mapPromise.then(function () {
-                vm.viewerSelectedObject = $filter('filter')(vm.idToName, {_id: $scope.IssuesService.IDMap[part.partID]})[0];
-                vm.filterText = vm.viewSelectedObject;
-            });
-        });
-        */
 	}
 }());

@@ -60,6 +60,7 @@ panel-content {
 
 panel-content md-content {
   height: 100%;
+  overflow-x: hidden;
 }
 
 panel-content md-toolbar {
@@ -87,6 +88,12 @@ panel-content .md-button.md-raised:not([disabled]) {
 
 panel-content .md-menu {
   padding: 0;
+}
+
+panel-content .panelContentContainer {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
 }
 
 panel-content .panelContentFilter {
