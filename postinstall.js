@@ -35,16 +35,12 @@ var public_files = {
 		angularutilsjs: '/public/js/external/angular-ui-utils.min.js',
 		angularrouterjs: '/public/js/external/angular-ui-router.js',
 		momentjs: '/public/js/external/moment.js',
-		bootstrapjs: '/public/js/external/bootstrap.min.js',
-		bootstrapdialog: '/public/js/external/bootstrap-dialog.min.js',
-		uibootstrap: '/public/js/external/ui-bootstrap-tpls-0.12.0.min.js',
 		showdownjs: '/public/js/external/showdown.min.js',
 		jqueryfancytree: '/public/js/external/jquery.fancytree-all.js',
 		typeaheadjs: '/public/js/external/typeahead.bundle.js',
 		sliderjs: '/public/js/external/bootstrap-slider.js',
 		angularsliderjs: '/public/js/external/slider.js',
 		socketio: '/public/js/external/socket.io.js',
-        uitreejs: '/public/js/external/angular-ui-tree.min.js',
         angularmaterialjs: '/public/js/external/angular-material.min.js',
         angularanimatejs: '/public/js/external/angular-animate.min.js',
         angularariajs: '/public/js/external/angular-aria.min.js',
@@ -74,11 +70,9 @@ var public_files = {
 		x3domcss : '/public/css/external/x3dom.css',
 		fontawesomecss: '/public/css/external/font-awesome.min.css',
 		fancytreecss: '/public/css/external/ui.fancytree.min.css',
-		bootstrapcss: '/public/css/external/bootstrap.min.css',
 		jqueryuicss: '/public/css/external/jquery-ui.css',
 		repouicss : '/public/css/ui.css',
 		slidercss: '/public/css/external/bootstrap-slider.css',
-        uitreecss: '/public/css/external/angular-ui-tree.min.css',
         angularmaterialcss: '/public/css/external/angular-material.min.css'
 	}
 }

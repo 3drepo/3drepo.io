@@ -6,7 +6,8 @@
             "docs/docsService.js"
         ],
         "jade": [
-            {"template" : "docs/docs.jade", "id" : "docs.html"}
+            {"template" : "docs/docs.jade", "id" : "docs.html"},
+            {"template" : "docs/docsDialog.jade", "id" : "docsDialog.html"}
         ],
         "css" : [
             "docs/docs.css"

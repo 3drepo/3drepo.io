@@ -1,5 +1,8 @@
-md-list
-	md-list-item.md-1-line(ng-repeat="docs in vm.docs")
-		md-icon(class="fa", md-font-icon="fa-file-pdf-o")
-		.md-list-item-text
-			p {{docs.name}}
+.docList(layout="row", layout-align="start center", ng-repeat="doc in vm.docs", ng-click="vm.showDoc(doc)", ng-if="!vm.showDocsGetProgress")
+	md-icon(class="fa", md-font-icon="fa-file-pdf-o")
+	p {{doc.name}}
+
+.docsLoadInfo(ng-if="vm.showDocsLoadInfo")
+	p {{vm.docsLoadInfo}}
+
+tdr-progress(ng-if="vm.showDocsGetProgress", info="vm.progressInfo")

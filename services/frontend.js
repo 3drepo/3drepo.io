@@ -163,7 +163,8 @@ module.exports.createApp = function(template)
 									"clip",
 									"bottomButtons",
 									"qrCodeReader",
-									"docs"
+									"docs",
+									"utils"
 								]
 							}
 						]

@@ -92,29 +92,25 @@
 		};
 
 		var getDocs = function (objectId) {
-			var deferred = $q.defer(),
+			var i,
+				length,
+				deferred = $q.defer(),
 				url = serverConfig.apiUrl(StateManager.state.account + "/" + "pdf" + "/meta/" + objectId + ".json");
 
 			$http.get(url)
-				.then(function(json) {
-					/*
-					var meta = json.data.meta;
-
-					for(var i = 0; i < meta.length; i++)
-					{
-						var subtype = meta[i].mime ? meta[i].mime : "metadata";
-
-						if (!metadocs[subtype]) {
-							metadocs[subtype] = [];
+				.then(
+					function(json) {
+					console.log(json);
+						// Set up the url for each PDF doc
+						for (i = 0, length = json.data.meta.length; i < length; i += 1) {
+							json.data.meta[i].url = serverConfig.apiUrl(StateManager.state.account + "/" + "pdf" + '/' + json.data.meta[i]._id + ".pdf");
 						}
-
-						meta[i].url = serverConfig.apiUrl(account + "/" + project + "/" + meta[i]._id + ".pdf");
-
-						metadocs[subtype].push(meta[i]);
+						deferred.resolve(json.data);
+					},
+					function () {
+						deferred.resolve({meta: []});
 					}
-					*/
-					deferred.resolve(json.data);
-				});
+				);
 
 			return deferred.promise;
 		};

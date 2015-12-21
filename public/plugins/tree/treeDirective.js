@@ -246,7 +246,6 @@
 		};
 
 		vm.nodeSelected = function (node) {
-			console.log(node);
 			var map = [];
 			var pathArr = [];
 			for (var obj in vm.idToPath) {
@@ -257,7 +256,7 @@
 			}
 			ViewerService.defaultViewer.selectPartsByID(map, false);
 
-			EventService.send(EventService.EVENT.OBJECT_SELECTED, {id: "55d6ae0c-5d62-4fe7-8bd5-5c84fb90df1c"});
+			EventService.send(EventService.EVENT.OBJECT_SELECTED, {id: node._id, name: node.name});
 		};
 
 

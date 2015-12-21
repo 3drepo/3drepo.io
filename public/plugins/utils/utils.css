@@ -1,0 +1,9 @@
+/** TDR Progress ******************************************************************************************************/
+tdr-progress {
+  display: block;
+  padding: 20px 40px 0 40px;
+}
+
+tdr-progress p {
+  margin-top: 10px;
+}
