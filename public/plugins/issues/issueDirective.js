@@ -54,13 +54,46 @@
 		vm.showInfo		   = false;
 		vm.editingComment  = false;
 
-		NewIssuesService.fixPin({
-			id: vm.data._id,
-			account: vm.data.account,
-			project: vm.data.project,
-			position: vm.data.position,
-			norm: vm.data.norm
-		});
+		vm.roles = [
+			{name: "PinakinDesai"},
+			{name: "Chopin"}
+		];
+		vm.assignedRoles = [];
+
+		NewIssuesService.fixPin(
+			{
+				id: vm.data._id,
+				account: vm.data.account,
+				project: vm.data.project,
+				position: vm.data.position,
+				norm: vm.data.norm
+			},
+			hexToRgb(vm.data.roleColour)
+		);
+
+		function hexToRgb(hex) {
+			var hexColours = [];
+
+			if (hex.charAt(0) === "#") {
+				hex = hex.substr(1);
+			}
+
+			if (hex.length === 6) {
+				hexColours.push(hex.substr(0, 2));
+				hexColours.push(hex.substr(2, 2));
+				hexColours.push(hex.substr(4, 2));
+			}
+			else if (hex.length === 3) {
+				hexColours.push(hex.substr(0, 1) + hex.substr(0, 1));
+				hexColours.push(hex.substr(1, 1) + hex.substr(1, 1));
+				hexColours.push(hex.substr(2, 1) + hex.substr(2, 1));
+			}
+			else {
+				hexColours = ["00", "00", "00"];
+			}
+
+			return [(parseInt(hexColours[0], 16) / 255.0), (parseInt(hexColours[1], 16) / 255.0), (parseInt(hexColours[2], 16) / 255.0)];
+		}
 
 		$scope.$watch("vm.commentsToggledIssueId", function (newValue) {
 			// If the comments is toggled on another comment, then close this one.
@@ -203,6 +236,25 @@
 			vm.showInfo = false;
 			$timeout.cancel(vm.infoTimeout);
 		};
+
+		vm.querySearch = querySearch;
+
+		function querySearch (query) {
+			var results = query ? vm.roles.filter(createFilterFor(query)) : [];
+			return results;
+		}
+
+		/**
+		 * Create filter function for a query string
+		 */
+		function createFilterFor(query) {
+			var lowercaseQuery = angular.lowercase(query);
+
+			return function filterFn(role) {
+				return (role._lowername.indexOf(lowercaseQuery) !== -1);
+			};
+
+		}
 	}
 
 	angular.module("3drepo")

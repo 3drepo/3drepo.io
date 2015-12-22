@@ -1,3 +1,6 @@
+// Progress
+tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
+
 div(ng-show="vm.showAdd")
 	#issuesAddContainer
 		md-input-container(md-no-float="")
@@ -10,7 +13,7 @@ div(ng-show="vm.showAdd")
 
 	md-divider
 
-md-list
+md-list(ng-if="!vm.showIssuesInfo")
 	issue(
 		ng-repeat="issue in vm.issuesToShow",
 		data="issue",
@@ -19,3 +22,7 @@ md-list
 		on-close-issue="vm.closeIssue(issue)"
 		issue-closed="vm.issueClosed"
 	)
+
+.issuesInfo(ng-if="vm.showIssuesInfo")
+	p {{vm.issuesInfo}}
+

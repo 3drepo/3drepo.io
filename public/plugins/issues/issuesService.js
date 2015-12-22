@@ -31,7 +31,6 @@
             i, j = 0,
             numIssues = 0,
             numComments = 0,
-            pinCoverage = 15.0,
             pinRadius = 0.25,
             pinHeight = 1.0;
 
@@ -74,29 +73,37 @@
             url = serverConfig.apiUrl(state.account + '/' + state.project + '/issues.json');
 
             $http.get(url)
-                .then(function(data) {
-                    deferred.resolve(data.data);
-                    // Convert created field to displayable time stamp
-                    // Issue
-                    for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
-                        data.data[i].timeStamp = getPrettyTime(data.data[i].created);
-                        // Comments
-                        if (data.data[i].hasOwnProperty("comments")) {
-                            for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
-                                if (data.data[i].comments[j].hasOwnProperty("created")) {
-                                    data.data[i].comments[j].timeStamp = getPrettyTime(data.data[i].comments[j].created);
-                                }
-                            }
-                        }
-                    }
-                });
+                .then(
+					function(data) {
+						deferred.resolve(data.data);
+						for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
+							data.data[i].timeStamp = getPrettyTime(data.data[i].created);
+							if (data.data[i].owner === "PinakinDesai") {
+								data.data[i].roleColour = "#99ff99";
+							}
+							else if (data.data[i].owner === "Chopin") {
+								data.data[i].roleColour = "#6699ff";
+							}
+
+							if (data.data[i].hasOwnProperty("comments")) {
+								for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
+									if (data.data[i].comments[j].hasOwnProperty("created")) {
+										data.data[i].comments[j].timeStamp = getPrettyTime(data.data[i].comments[j].created);
+									}
+								}
+							}
+						}
+					},
+					function () {
+						deferred.resolve([]);
+					}
+                );
 
             return deferred.promise;
         };
 
         var saveIssue = function (account, project, name, objectId, pickedPos, pickedNorm) {
-            var currentVP = ViewerService.defaultViewer.getCurrentViewpointInfo(),
-                dataToSend = {},
+            var dataToSend,
                 deferred = $q.defer();
 
             url = serverConfig.apiUrl(account + "/" + project + "/issues/" + objectId);
@@ -176,15 +183,15 @@
         function removePin () {
             var pinPlacement = document.getElementById("pinPlacement");
             if (pinPlacement !== null) {
-               pinPlacement.parentElement.removeChild(pinPlacement)
+               pinPlacement.parentElement.removeChild(pinPlacement);
             }
         }
 
-        function fixPin (pin) {
-            createPinShape(pin.id, pin, pinRadius, pinHeight);
+        function fixPin (pin, colour) {
+            createPinShape(pin.id, pin, pinRadius, pinHeight, colour);
         }
 
-        function createPinShape (id, pin, radius, height, scale)
+        function createPinShape (id, pin, radius, height, colour)
         {
             var sceneBBox = ViewerService.defaultViewer.scene._x3domNode.getVolume();
             var sceneSize = sceneBBox.max.subtract(sceneBBox.min).length();
@@ -206,7 +213,7 @@
                 if (inlines[i].getAttribute("nameSpaceName") === (pin.account + "__" + pin.project))
                 {
                     trans = inlines[i]._x3domNode.getCurrentTransform();
-                    break
+                    break;
                 }
             }
 
@@ -242,7 +249,12 @@
             pinshapeapp.appendChild(pinshapedepth);
 
             var pinshapemat = document.createElement("Material");
-            pinshapemat.setAttribute("diffuseColor", "1.0 0.0 0.0");
+			if (typeof colour === "undefined") {
+				pinshapemat.setAttribute("diffuseColor", "1.0 0.0 0.0");
+			}
+			else {
+				pinshapemat.setAttribute("diffuseColor", colour[0] + " " + colour[1] + " " + colour[2]);
+			}
             pinshapeapp.appendChild(pinshapemat);
 
             var pinshapescale = document.createElement("Transform");

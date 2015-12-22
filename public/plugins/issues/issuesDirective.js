@@ -59,10 +59,16 @@
 		vm.globalClickWatch = null;
 		vm.saveIssueDisabled = true;
 		vm.issues = [];
+		vm.showProgress = true;
+		vm.progressInfo = "Loading issues";
+		vm.showIssuesInfo = false;
+		vm.issuesInfo = "There are currently no open issues";
 
 		promise = NewIssuesService.getIssues();
 		promise.then(function (data) {
+			vm.showProgress = false;
 			vm.issues = data;
+			vm.showIssuesInfo = (vm.issues.length === 0);
 			setupIssuesToShow();
 		});
 

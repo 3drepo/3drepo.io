@@ -20,8 +20,13 @@ issues md-list {
   padding: 0;
 }
 
-issues p {
-  color: rgba(0,0,0,0.35) !important;
+issues .issuesInfo {
+  text-align: center;
+  padding: 15px;
+}
+issues .issuesInfo p {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.7);
 }
 
 /** Issue *************************************************************************************************************/
@@ -30,8 +35,8 @@ issue {
   display: block;
 }
 
-issue .issue {
-
+issue p {
+  color: rgba(0,0,0,0.35) !important;
 }
 
 .issueOpenBackground {
@@ -67,6 +72,16 @@ issue .issueHeader .issueTitle button {
 issue .issueHeader .issueTitle {
   min-height: 0;
   height: 100%;
+}
+
+issue .issueHeader .issueRoleMarker {
+  display: block;
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  width: 15px;
+  height: 10px;
+  border-radius: 4px;
 }
 
 issue .issueHeader .issueInfo {
@@ -108,5 +123,48 @@ issue .issueCommentsContainer .issueCommentInfo {
   position: relative;
 }
 issue .issueCommentsContainer .issueCommentsFooter {
-  margin-top: -10px;
+  margin-top: -15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
+
+.chipsdemoContactChips md-content.autocomplete {
+  min-height: 250px; }
+.chipsdemoContactChips md-content.autocomplete input {
+  min-width: 400px; }
+
+.chipsdemoContactChips .md-item-text.compact {
+  padding-top: 8px;
+  padding-bottom: 8px; }
+
+.chipsdemoContactChips .contact-item {
+  box-sizing: border-box; }
+.chipsdemoContactChips .contact-item.selected {
+  opacity: 0.5; }
+.chipsdemoContactChips .contact-item.selected h3 {
+  opacity: 0.5; }
+.chipsdemoContactChips .contact-item .md-list-item-text {
+  padding: 14px 0;
+  max-width: 190px; }
+.chipsdemoContactChips .contact-item .md-list-item-text h3 {
+  margin: 0 !important;
+  padding: 0;
+  line-height: 1.2em !important; }
+.chipsdemoContactChips .contact-item .md-list-item-text h3, .chipsdemoContactChips .contact-item .md-list-item-text p {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden; }
+@media screen and (min-width: 960px) {
+  .chipsdemoContactChips .contact-item {
+    float: left;
+    width: 33%; } }
+
+.chipsdemoContactChips md-contact-chips {
+  margin-bottom: 10px; }
+
+.chipsdemoContactChips .md-chips {
+  padding: 5px 0 8px; }
+
+.chipsdemoContactChips .fixedRows {
+  height: 250px;
+  overflow: hidden; }
