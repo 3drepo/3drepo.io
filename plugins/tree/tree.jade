@@ -1,5 +1,8 @@
+// Progress
+tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
+
 // Tree
-div#treeContainerGroup(ng-cloak="", class="virtualRepeatInfiniteScroll", ng-show="vm.showTree")
+div(ng-cloak="", class="virtualRepeatInfiniteScroll", ng-show="vm.showTree")
 	md-virtual-repeat-container.vertical-container(md-top-index="vm.topIndex")
 		div(md-virtual-repeat="item in vm.infiniteItemsTree", md-on-demand="", class="repeated-item", flex="")
 			div(style="margin-left:{{item.level * 20}}px", ng-if="item", layout="row")
@@ -13,18 +16,6 @@ div#treeContainerGroup(ng-cloak="", class="virtualRepeatInfiniteScroll", ng-show
 					md-icon.md-accent(md-font-icon="fa-circle-thin", class="fa", ng-if="item.toggleState==='invisible'")
 					md-icon(md-font-icon="fa-circle-thin", class="fa", ng-if="item.toggleState==='parentOfInvisible'")
 						.treeIconDot(class="fa fa-circle")
-
-
-//div(ui-tree, data-nodrop-enabled="true", data-nodrag="true", ng-show="vm.showTree")
-	tree-nodes(
-		nodes="vm.nodes"
-		show-children="vm.showChildren"
-		ng-if="true"
-		on-node-selected="vm.nodeSelected(nodeId)"
-		on-node-toggled="vm.nodeToggled(nodeId, state)"
-		selected-node="vm.selectedNode"
-		toggled-node="vm.toggledNode"
-	)
 
 // Filter list
 div(ng-cloak="", class="virtualRepeatInfiniteScroll", ng-if="vm.showFilterList")
@@ -44,4 +35,3 @@ div(ng-cloak="", class="virtualRepeatInfiniteScroll", ng-if="vm.showFilterList")
 					md-icon.md-accent(md-font-icon="fa-circle-thin", class="fa", ng-if="item.toggleState==='visible'")
 						.treeIconCheck(class="fa fa-check")
 					md-icon.md-accent(md-font-icon="fa-circle-thin", class="fa", ng-if="item.toggleState==='invisible'")
-

@@ -50,7 +50,6 @@
 			minimized = false;
 
         vm.showHelp = false;
-        vm.filterText = "";
 		vm.showFilter = false;
 		vm.addStatus = false;
         vm.showClearFilterButton = false;
@@ -70,6 +69,24 @@
 				);
 				content.append(contentItem);
 				$compile(contentItem)($scope);
+
+				currentHeight = vm.contentData.maxHeight;
+				vm.contentHeight = vm.contentData.maxHeight;
+
+				// If the panel content appears by default inform other default panel contents
+				if (vm.contentData.show) {
+					$timeout(function () {
+						EventService.send(
+							EventService.EVENT.PANEL_CONTENT_TOGGLED,
+							{
+								position: vm.position,
+								type: vm.contentData.type,
+								show: vm.contentData.show,
+								contentHeight: vm.contentData.maxHeight
+							}
+						);
+					});
+				}
 			}
 		});
 

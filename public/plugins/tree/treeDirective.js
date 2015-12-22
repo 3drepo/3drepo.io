@@ -41,25 +41,25 @@
 		var vm = this,
 			promise = null,
 			i = 0,
-			length = 0,
-			treeContainerGroup = angular.element($element[0].querySelector("#treeContainerGroup"));
+			length = 0;
 
 		vm.nodes = [];
-		vm.showTree = false;
-		vm.showFilterList = true;
+		vm.showTree = true;
+		vm.showFilterList = false;
 		vm.currentFilterItemSelected = null;
 		vm.viewerSelectedObject = null;
+		vm.showProgress = true;
+		vm.progressInfo = "Loading full tree structure";
 
 		promise = TreeService.init();
 		promise.then(function (data) {
-			vm.showChildren = true;
 			vm.allNodes = [];
 			vm.allNodes.push(data.nodes);
 			vm.nodes = vm.allNodes;
 			vm.showTree = true;
+			vm.showProgress = false;
 
 			vm.idToPath = data.idToPath;
-
 			initNodesToShow();
 			setupInfiniteScroll();
 		});
@@ -299,27 +299,18 @@
 				if (newValue === "") {
 					vm.showTree = true;
 					vm.showFilterList = false;
-					vm.showChildren = true;
 					vm.nodes = vm.allNodes;
 				} else {
 					vm.showTree = false;
-					vm.showFilterList = true;
-					vm.showChildren = true;
+					vm.showFilterList = false;
+					vm.showProgress = true;
+					vm.progressInfo = "Filtering tree for objects";
 
 					promise = TreeService.search(newValue);
 					promise.then(function (json) {
-						vm.showChildren = false;
+						vm.showFilterList = true;
+						vm.showProgress = false;
 						vm.nodes = json.data;
-						// If an object has been selected in the viewer to prompt this filter, only show the node
-						// with the exact name of the selected object (this needs rethinking as showing the selected
-						// object shouldn't trigger the filter)
-						if (vm.viewerSelectedObject !== null) {
-							for (i = (vm.nodes.length - 1); i >= 0; i -= 1) {
-								if (vm.nodes[i].name !== vm.viewerSelectedObject.name) {
-									vm.nodes.splice(i, 1);
-								}
-							}
-						}
 						for (i = 0, length = vm.nodes.length; i < length; i += 1) {
 							vm.nodes[i].index = i;
 							vm.nodes[i].toggleState = "visible";

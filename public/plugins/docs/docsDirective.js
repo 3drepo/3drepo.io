@@ -66,22 +66,6 @@
 		$scope.$watch(EventService.currentEvent, function (newValue) {
 			if (newValue.type === EventService.EVENT.OBJECT_SELECTED) {
 				getObjectsDocs(newValue.value);
-				/*
-				vm.docs = [];
-				vm.showDocsLoadInfo = false;
-				vm.progressInfo = "Loading documents for " + newValue.value.name;
-				vm.showDocsGetProgress = true;
-				promise = DocsService.getDocs(newValue.value.id);
-				//promise = DocsService.getDocs("55d6ae0c-5d62-4fe7-8bd5-5c84fb90df1c");
-				promise.then(function (data) {
-					vm.docs = data.meta;
-					vm.showDocsGetProgress = false;
-					vm.showDocsLoadInfo = (vm.docs.length === 0);
-					if (vm.showDocsLoadInfo) {
-						vm.docsLoadInfo = "No documents exist for " + newValue.value.name;
-					}
-				});
-				*/
 			}
 		});
 
