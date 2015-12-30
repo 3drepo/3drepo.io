@@ -79,10 +79,10 @@
 						for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
 							data.data[i].timeStamp = getPrettyTime(data.data[i].created);
 							if (data.data[i].owner === "PinakinDesai") {
-								data.data[i].roleColour = "#99ff99";
+								data.data[i].roleColour = "#ff585a";
 							}
 							else if (data.data[i].owner === "Chopin") {
-								data.data[i].roleColour = "#6699ff";
+								data.data[i].roleColour = "#91d7ff";
 							}
 
 							if (data.data[i].hasOwnProperty("comments")) {

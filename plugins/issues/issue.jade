@@ -37,25 +37,13 @@
 				md-button.md-raised.md-accent(ng-click="vm.saveComment()", ng-disabled="vm.saveCommentDisabled", ng-if="vm.issueIsOpen") Save
 				md-button.md-primary.md-accent(ng-click="vm.closeIssue()", ng-if="vm.issueIsOpen") Close issue
 
-			div(layout="column", class="chipsdemoContactChips")
-				md-contact-chips(
-					ng-model="vm.assignedRoles"
-					md-contacts="vm.querySearch($query)"
-					md-contact-name="name"
-					md-require-match="true"
-					md-highlight-flags="i"
-					filter-selected="true"
-					placeholder="Assign issue to")
-
-				md-list.fixedRows
-					md-subheader.md-no-sticky Roles
-					md-list-item.md-1-line.contact-item(ng-repeat="role in vm.roles", ng-if="vm.assignedRoles.indexOf(role) < 0")
-						.md-list-item-text(compact)
+			.issueAssignedTo
+				label Assigned to roles
+				.issueAssignedToList
+					md-list(ng-cloak)
+						md-list-item(ng-repeat="role in vm.roles")
+							.issueRoleMarker(style="background:{{role.roleColour}}")
 							p {{role.name}}
-					md-list-item.md-1-line.contact-item.selected(ng-repeat="role in vm.assignedRoles")
-						.md-list-item-text(compact)
-							p {{role.name}}
-
-				md-button.md-primary.md-accent(ng-click="vm.saveIssueAssignment()", ng-if="vm.issueIsOpen") Save
+							md-checkbox.md-secondary(ng-model="role.assigned")
 
 	md-divider

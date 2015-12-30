@@ -55,10 +55,18 @@
 		vm.editingComment  = false;
 
 		vm.roles = [
-			{name: "PinakinDesai"},
-			{name: "Chopin"}
+			{
+				roleColour: "#ff585a",
+				name: "Architect",
+				assigned: true
+			},
+			{
+				roleColour: "#91d7ff",
+				name: "Engineer",
+				assigned: false
+			}
 		];
-		vm.assignedRoles = [];
+		setupRolesWatch();
 
 		NewIssuesService.fixPin(
 			{
@@ -157,6 +165,15 @@
 			}
 		}, true);
 
+		function setupRolesWatch () {
+			$scope.$watch("vm.roles", function (newValue, oldValue) {
+				// Ignore initial setup of roles
+				if (JSON.stringify(newValue) !== JSON.stringify(oldValue)) {
+					console.log("Role change");
+				}
+			}, true);
+		}
+
 		vm.toggleComments = function () {
 			vm.onCommentsToggled({issueId: vm.data._id});
 		};
@@ -236,25 +253,6 @@
 			vm.showInfo = false;
 			$timeout.cancel(vm.infoTimeout);
 		};
-
-		vm.querySearch = querySearch;
-
-		function querySearch (query) {
-			var results = query ? vm.roles.filter(createFilterFor(query)) : [];
-			return results;
-		}
-
-		/**
-		 * Create filter function for a query string
-		 */
-		function createFilterFor(query) {
-			var lowercaseQuery = angular.lowercase(query);
-
-			return function filterFn(role) {
-				return (role._lowername.indexOf(lowercaseQuery) !== -1);
-			};
-
-		}
 	}
 
 	angular.module("3drepo")

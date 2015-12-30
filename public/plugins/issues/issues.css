@@ -35,7 +35,7 @@ issue {
   display: block;
 }
 
-issue p {
+issue .issueTitle p {
   color: rgba(0,0,0,0.35) !important;
 }
 
@@ -74,14 +74,17 @@ issue .issueHeader .issueTitle {
   height: 100%;
 }
 
-issue .issueHeader .issueRoleMarker {
+.issueRoleMarker {
   display: block;
-  position: absolute;
-  top: 14px;
-  right: 16px;
   width: 15px;
   height: 10px;
   border-radius: 4px;
+}
+
+issue .issueHeader .issueRoleMarker {
+  position: absolute;
+  top: 14px;
+  right: 16px;
 }
 
 issue .issueHeader .issueInfo {
@@ -104,7 +107,7 @@ issue h4 {
 }
 
 issue .issueCommentsContainer {
-  padding: 10px 5px  10px 10px;
+  padding: 0 20px 0 20px
 }
 issue .issueCommentsContainer md-list-item {
   padding: 10px;
@@ -122,49 +125,42 @@ issue .issueCommentsContainer md-list-item .commentModifyButton {
 issue .issueCommentsContainer .issueCommentInfo {
   position: relative;
 }
+issue .issueCommentsContainer .issueCommentInfo p {
+  color: rgba(0,0,0,0.35) !important;
+}
 issue .issueCommentsContainer .issueCommentsFooter {
   margin-top: -15px;
   padding-bottom: 10px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
 
-.chipsdemoContactChips md-content.autocomplete {
-  min-height: 250px; }
-.chipsdemoContactChips md-content.autocomplete input {
-  min-width: 400px; }
+issue .issueAssignedTo {
+  display: block;
+  height: 210px;
+}
+issue .issueAssignedTo label {
+  margin: 10px 0 10px 10px;
+  font-weight: normal;
+}
 
-.chipsdemoContactChips .md-item-text.compact {
-  padding-top: 8px;
-  padding-bottom: 8px; }
-
-.chipsdemoContactChips .contact-item {
-  box-sizing: border-box; }
-.chipsdemoContactChips .contact-item.selected {
-  opacity: 0.5; }
-.chipsdemoContactChips .contact-item.selected h3 {
-  opacity: 0.5; }
-.chipsdemoContactChips .contact-item .md-list-item-text {
-  padding: 14px 0;
-  max-width: 190px; }
-.chipsdemoContactChips .contact-item .md-list-item-text h3 {
-  margin: 0 !important;
+issue .issueAssignedTo .issueAssignedToList {
+  display: block;
+  width: 100%;
+  height: 150px;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  overflow: auto;
+}
+issue .issueAssignedTo .issueAssignedToList md-list-item {
   padding: 0;
-  line-height: 1.2em !important; }
-.chipsdemoContactChips .contact-item .md-list-item-text h3, .chipsdemoContactChips .contact-item .md-list-item-text p {
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden; }
-@media screen and (min-width: 960px) {
-  .chipsdemoContactChips .contact-item {
-    float: left;
-    width: 33%; } }
-
-.chipsdemoContactChips md-contact-chips {
-  margin-bottom: 10px; }
-
-.chipsdemoContactChips .md-chips {
-  padding: 5px 0 8px; }
-
-.chipsdemoContactChips .fixedRows {
-  height: 250px;
-  overflow: hidden; }
+  min-height: 40px;
+}
+issue .issueAssignedTo .issueAssignedToList md-list-item .md-list-item-inner {
+  min-height: 40px;
+}
+issue .issueAssignedTo .issueAssignedToList .issueRoleMarker {
+  position: relative;
+  margin-right: 10px;
+}
+issue .issueAssignedTo .issueAssignedToList p {
+  color: rgba(0, 0, 0, 0.6);
+}
