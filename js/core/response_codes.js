@@ -82,6 +82,8 @@ var responseCodes = {
 	FILE_ALREADY_EXISTS : { value: 37, message: "File already exists", status: 500},
 	FILE_DOESNT_EXIST : { value: 38, message: "File doesn't exist", status: 404},
 
+	ROLE_SETTINGS_NOT_FOUND : { value: 39, message: "Role settings not found", status: 500 },
+
 	DB_ERROR: function(mongoErr) {
 		"use strict";
 

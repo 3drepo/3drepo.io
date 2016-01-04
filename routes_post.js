@@ -40,7 +40,7 @@ function createSession(place, req, res, next, user)
 		} else {
 			systemLogger.logDebug("Authenticated user and signed token.", req);
 			req.session[C.REPO_SESSION_USER] = user;
-			responseCodes.respond(place, req, res, next, responseCodes.OK, {account: user.username});
+			responseCodes.respond(place, req, res, next, responseCodes.OK, {account: user.username, roles: user.roles});
 		}
 	});
 }
@@ -62,6 +62,7 @@ var repoPostHandler = function(router, checkAccess){
 		dbInterface(req[C.REQ_REPO].logger).authenticate(req.body.username, req.body.password, function(err, user)
 		{
 			req[C.REQ_REPO].logger.logDebug("User is logging in", req);
+            		res.clearCookie("connect.sid", { path: "/" + config.api_server.host_dir });
 
 			if(err.value) {
 				if (err.dbErr.code == C.MONGO_AUTH_FAILED)
