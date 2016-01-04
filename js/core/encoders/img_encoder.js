@@ -44,7 +44,7 @@ module.exports.isImage = function(format)
 };
 
 // Ability to transcode with ImageMagick
-// -- Won"t use for now.
+// -- Won't use for now.
 module.exports.transcode = function (fromFormat, toFormat, buffer, callback) {
 	"use strict";
 
@@ -71,6 +71,34 @@ module.exports.transcode = function (fromFormat, toFormat, buffer, callback) {
 	});
 };
 
+var createHeightMap = function(format, buffer, callback) {
+	"use strict";
+
+	if (!module.exports.isImage(format)) {
+		return callback(new Error("Invalid image format"));
+	}
+
+	var im = child_process.spawn("convert", ["-colorspace", "gray", "+conrast", format + ":-", format + ":-"]);
+	im.stdin.write(buffer);
+	im.stdin.end();
+
+	var bufOut = [];
+
+	im.stdout.on("data", function(data) {
+		bufOut.push(data);
+	});
+
+	im.stderr.on("data", function(data) {
+		// If there is any output on stderr, we assume something has gone wrong
+		return callback(responseCodes.PROCESS_ERROR(data.data));
+	});
+
+	im.stdout.on("close", function(code) {
+		// If the conversion process has a non-zero return value.
+			callback(responseCodes.OK, Buffer.concat(bufOut));
+	});
+};
+
 module.exports.route = function(router)
 {
 	"use strict";
@@ -84,8 +112,20 @@ module.exports.route = function(router)
 
 			if (type === "texture")
 			{
-				res.write(obj.textures[params.uid].data.buffer);
-				res.end();
+				if (params.subformat === "heightmap")
+				{
+					createHeightMap(params.format, obj.textures[params.uid].data.buffer, function(err, grayImage) {
+						if (err.value) {
+							return err_callback(err);
+						}
+
+						res.write(grayImage);
+						res.end();
+					});
+				} else {
+					res.write(obj.textures[params.uid].data.buffer);
+					res.end();
+				}
 			} else {
 				err_callback(responseCodes.OBJECT_TYPE_NOT_SUPPORTED);
 			}
@@ -132,7 +172,7 @@ module.exports.route = function(router)
 			}
 
 			if(!type) {
-				return err_callback(responseCodes.USER_DOES_NOT_HAVE_AVATAR);
+				return err_callback(responseCodes.AVATAR_INVALID_IMAGE_TYPE);
 			}
 
 			var imageTokens = type.split(/\//);
