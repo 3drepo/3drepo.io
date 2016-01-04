@@ -42,10 +42,11 @@
 
 	function IssuesCtrl($scope, $rootScope, $element, $timeout, $mdDialog, $filter, EventService, NewIssuesService, ViewerService) {
 		var vm = this,
-			promise = null,
 			i = 0,
 			j = 0,
 			length = 0,
+			promise = null,
+			rolesPromise = null,
 			sortedIssuesLength,
 			sortOldestFirst = true,
 			showClosed = false;
@@ -63,6 +64,7 @@
 		vm.progressInfo = "Loading issues";
 		vm.showIssuesInfo = false;
 		vm.issuesInfo = "There are currently no open issues";
+		vm.avialableRoles = [];
 
 		promise = NewIssuesService.getIssues();
 		promise.then(function (data) {
@@ -70,6 +72,12 @@
 			vm.issues = data;
 			vm.showIssuesInfo = (vm.issues.length === 0);
 			setupIssuesToShow();
+		});
+
+		rolesPromise = NewIssuesService.getRoles();
+		rolesPromise.then(function (data) {
+			console.log(data);
+			vm.avialableRoles = data;
 		});
 
 		$scope.$watch("vm.showAdd", function (newValue) {

@@ -38,12 +38,12 @@
 				md-button.md-primary.md-accent(ng-click="vm.closeIssue()", ng-if="vm.issueIsOpen") Close issue
 
 			.issueAssignedTo
-				label Assigned to roles
-				.issueAssignedToList
+				label(ng-click="vm.toggleShowAssignedRoles()") Assigned to roles
+				.issueAssignedToList(ng-if="vm.showAssignedRoles")
 					md-list(ng-cloak)
 						md-list-item(ng-repeat="role in vm.roles")
-							.issueRoleMarker(style="background:{{role.roleColour}}")
-							p {{role.name}}
+							.issueRoleMarker(style="background:{{role.color}}")
+							p {{role.role}}
 							md-checkbox.md-secondary(ng-model="role.assigned")
 
 	md-divider

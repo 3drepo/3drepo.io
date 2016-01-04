@@ -21,7 +21,7 @@ md-list(ng-if="!vm.showIssuesInfo")
 		comments-toggled-issue-id="vm.commentsToggledIssueId"
 		on-close-issue="vm.closeIssue(issue)"
 		issue-closed="vm.issueClosed"
-	)
+		available-roles="vm.avialableRoles")
 
 .issuesInfo(ng-if="vm.showIssuesInfo")
 	p {{vm.issuesInfo}}

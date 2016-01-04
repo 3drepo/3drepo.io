@@ -2241,8 +2241,9 @@ DBInterface.prototype.getRolesByProject = function(dbName, project, readWriteAny
 	var filter = {};
 
 	// Get all roles which have permissions on this project
+
+	filter["db"] = { $in : ["admin", dbName] };
 	filter["privileges"] = {
-		db: { $in : ["admin", dbName] },
 		$elemMatch : { "resource.collection" : project + ".history" }
 	};
 
@@ -2276,7 +2277,23 @@ DBInterface.prototype.getRolesByProject = function(dbName, project, readWriteAny
 			}
 		}
 
-		return callback(responseCodes.OK, rolesToReturn);
+		// Add role settings (like role color) to the returned data
+		if (rolesToReturn.length > 0) {
+			var roles = rolesToReturn.map(function(role) {
+				return role.role;
+			});
+			self.getRoleSettings(dbName, roles, function (err, roleSettings) {
+				if (roleSettings.length > 0) {
+					for (i = 0; i < roleSettings.length; i += 1) {
+						rolesToReturn[i].color = roleSettings[i].color;
+					}
+				}
+				return callback(responseCodes.OK, rolesToReturn);
+			});
+		}
+		else {
+			return callback(responseCodes.OK, rolesToReturn);
+		}
 	});
 };
 
@@ -2294,6 +2311,7 @@ DBInterface.prototype.getRolesByProject = function(dbName, project, readWriteAny
 DBInterface.prototype.getRoleSettings = function(dbName, roles, callback)
 {
 	"use strict";
+	var self = this;
 
 	if (roles.constructor !== Array)
 	{
@@ -2302,13 +2320,13 @@ DBInterface.prototype.getRoleSettings = function(dbName, roles, callback)
 
 	var filter = { _id : { $in : roles}};
 
-	self.filterColl(database, "settings.roles", filter, {}, function (err, docs) {
+	dbConn(self.logger).filterColl(dbName, "settings.roles", filter, {}, function (err, docs) {
 		if (err.value)
 		{
-			return callback(err);
+			return callback(responseCodes.DB_ERROR(err), []);
 		}
 
-		return callback(docs);
+		return callback(responseCodes.OK, docs);
 	});
 };
 

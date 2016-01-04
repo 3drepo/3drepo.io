@@ -30,7 +30,8 @@
 				onCommentsToggled: "&",
 				commentsToggledIssueId: "=",
 				onCloseIssue : "&",
-				issueClosed: "="
+				issueClosed: "=",
+				availableRoles: "="
 			},
 			controller: IssueCtrl,
 			controllerAs: "vm",
@@ -53,7 +54,17 @@
 		vm.autoSaveComment = false;
 		vm.showInfo		   = false;
 		vm.editingComment  = false;
+		vm.showAssignedRoles = false;
 
+		$scope.$watch("vm.availableRoles", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				console.log(newValue);
+				vm.roles = newValue;
+				setupRolesWatch();
+			}
+		});
+
+		/*
 		vm.roles = [
 			{
 				roleColour: "#ff585a",
@@ -67,6 +78,7 @@
 			}
 		];
 		setupRolesWatch();
+		*/
 
 		NewIssuesService.fixPin(
 			{
@@ -176,6 +188,7 @@
 
 		vm.toggleComments = function () {
 			vm.onCommentsToggled({issueId: vm.data._id});
+			vm.showAssignedRoles = false;
 		};
 
 		vm.saveComment = function () {
@@ -252,6 +265,10 @@
 		vm.hideInfo = function () {
 			vm.showInfo = false;
 			$timeout.cancel(vm.infoTimeout);
+		};
+
+		vm.toggleShowAssignedRoles = function () {
+			vm.showAssignedRoles = !vm.showAssignedRoles;
 		};
 	}
 

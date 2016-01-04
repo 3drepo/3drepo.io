@@ -302,6 +302,23 @@
             $("#model__root")[0].appendChild(parent);
         }
 
+		var getRoles = function () {
+			var deferred = $q.defer();
+			url = serverConfig.apiUrl(state.account + '/' + state.project + '/roles.json');
+
+			$http.get(url)
+				.then(
+					function(data) {
+						deferred.resolve(data.data);
+					},
+					function () {
+						deferred.resolve([]);
+					}
+				);
+
+			return deferred.promise;
+		};
+
         return {
             getPrettyTime: getPrettyTime,
             getIssues: getIssues,
@@ -314,7 +331,8 @@
             addPin: addPin,
             fixPin: fixPin,
             removePin: removePin,
-			state: state
+			state: state,
+			getRoles: getRoles
         };
     }
 }());
