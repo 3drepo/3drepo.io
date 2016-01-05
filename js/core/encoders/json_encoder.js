@@ -822,6 +822,17 @@ exports.route = function(router)
 		});
 	});
 
+	router.get("json", "/:account/:project/:username/userRolesForProject", function( req, res, params, err_callback ) {
+		dbInterface(req[C.REQ_REPO].logger).getUserRolesForProject(params.account, params.project, params.username, function (err, roles) {
+			if (err.value)
+			{
+				return err_callback(err);
+			}
+
+			return err_callback(responseCodes.OK, roles);
+		});
+	});
+
 };
 
 

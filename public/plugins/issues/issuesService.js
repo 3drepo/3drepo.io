@@ -21,9 +21,9 @@
     angular.module('3drepo')
         .factory('NewIssuesService', NewIssuesService);
 
-    NewIssuesService.$inject = ["$http", "$q", "StateManager", "serverConfig", "ViewerService"];
+    NewIssuesService.$inject = ["$http", "$q", "StateManager", "serverConfig", "ViewerService", "Auth"];
 
-    function NewIssuesService($http, $q, StateManager, serverConfig, ViewerService) {
+    function NewIssuesService($http, $q, StateManager, serverConfig, ViewerService, Auth) {
         var state = StateManager.state,
             url = "",
             data = {},
@@ -78,12 +78,6 @@
 						deferred.resolve(data.data);
 						for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
 							data.data[i].timeStamp = getPrettyTime(data.data[i].created);
-							if (data.data[i].owner === "PinakinDesai") {
-								data.data[i].roleColour = "#ff585a";
-							}
-							else if (data.data[i].owner === "Chopin") {
-								data.data[i].roleColour = "#91d7ff";
-							}
 
 							if (data.data[i].hasOwnProperty("comments")) {
 								for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
@@ -102,24 +96,25 @@
             return deferred.promise;
         };
 
-        var saveIssue = function (account, project, name, objectId, pickedPos, pickedNorm) {
+        var saveIssue = function (issue) {
             var dataToSend,
                 deferred = $q.defer();
 
-            url = serverConfig.apiUrl(account + "/" + project + "/issues/" + objectId);
+            url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue.objectId);
 
             data = {
-                name: name,
+                name: issue.name,
                 viewpoint: ViewerService.defaultViewer.getCurrentViewpointInfo(),
-                scale: 1.0
+                scale: 1.0,
+				creatorRole: issue.creatorRole
             };
             config = {
                 withCredentials: true
             };
 
-            if (pickedPos !== null) {
-                data.position = pickedPos.toGL();
-                data.norm = pickedNorm.toGL();
+            if (issue.pickedPos !== null) {
+                data.position = issue.pickedPos.toGL();
+                data.norm = issue.pickedNorm.toGL();
             }
 
             dataToSend = {data: JSON.stringify(data)};
@@ -128,12 +123,12 @@
                 .then(function successCallback(response) {
                     console.log(response);
                     response.data.issue._id     = response.data.issue_id;
-                    response.data.issue.account = account;
-                    response.data.issue.project = project;
+                    response.data.issue.account = issue.account;
+                    response.data.issue.project = issue.project;
                     response.data.issue.timeStamp = getPrettyTime(response.data.issue.created);
+					response.data.issue.creatorRole = issue.creatorRole;
 
                     removePin();
-
                     deferred.resolve(response.data.issue);
                 });
 
@@ -174,10 +169,9 @@
             return doPost(issue, {comment: "", number: issue.number, set: true, commentIndex: commentIndex});
         };
 
-        function addPin (pin) {
+        function addPin (pin, colour) {
             removePin();
-
-            createPinShape("pinPlacement", pin, pinRadius, pinHeight);
+            createPinShape("pinPlacement", pin, pinRadius, pinHeight, colour);
          }
 
         function removePin () {
@@ -319,7 +313,49 @@
 			return deferred.promise;
 		};
 
-        return {
+		var getUserRolesForProject = function () {
+			var deferred = $q.defer();
+			url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + Auth.username + "/userRolesForProject.json");
+
+			$http.get(url)
+				.then(
+					function(data) {
+						console.log(data);
+						deferred.resolve(data.data);
+					},
+					function () {
+						deferred.resolve([]);
+					}
+				);
+
+			return deferred.promise;
+		};
+
+		var hexToRgb = function (hex) {
+			var hexColours = [];
+
+			if (hex.charAt(0) === "#") {
+				hex = hex.substr(1);
+			}
+
+			if (hex.length === 6) {
+				hexColours.push(hex.substr(0, 2));
+				hexColours.push(hex.substr(2, 2));
+				hexColours.push(hex.substr(4, 2));
+			}
+			else if (hex.length === 3) {
+				hexColours.push(hex.substr(0, 1) + hex.substr(0, 1));
+				hexColours.push(hex.substr(1, 1) + hex.substr(1, 1));
+				hexColours.push(hex.substr(2, 1) + hex.substr(2, 1));
+			}
+			else {
+				hexColours = ["00", "00", "00"];
+			}
+
+			return [(parseInt(hexColours[0], 16) / 255.0), (parseInt(hexColours[1], 16) / 255.0), (parseInt(hexColours[2], 16) / 255.0)];
+		};
+
+		return {
             getPrettyTime: getPrettyTime,
             getIssues: getIssues,
             saveIssue: saveIssue,
@@ -332,7 +368,9 @@
             fixPin: fixPin,
             removePin: removePin,
 			state: state,
-			getRoles: getRoles
+			getRoles: getRoles,
+			getUserRolesForProject: getUserRolesForProject,
+			hexToRgb: hexToRgb
         };
     }
 }());

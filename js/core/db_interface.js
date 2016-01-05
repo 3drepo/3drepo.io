@@ -2333,6 +2333,7 @@ DBInterface.prototype.getRoleSettings = function(dbName, roles, callback)
 DBInterface.prototype.getUserRolesForProject = function(database, project, username, callback)
 {
 	"use strict";
+	var self = this;
 
 	self.getRolesByProject(database, project, C.REPO_ANY, function(err, projectRoles) {
 		if (err.value)
@@ -2340,21 +2341,21 @@ DBInterface.prototype.getUserRolesForProject = function(database, project, usern
 			return callback(err);
 		}
 
-		var projectRoleNames = projectRoles.map(function(projectRole) { return projectRole["_id"]; });
+		var projectRoleNames = projectRoles.map(function(projectRole) { return projectRole["role"]; });
 
 		self.getUserRoles(username, database, function(err, userRoles) {
-			var userRoleNames = userRoles.map(function(userRole) { return userRole["_id"]; });
+			var userRoleNames = userRoles.map(function(userRole) { return userRole["role"]; });
 			var rolesToReturn = [];
 
 			for(var i = 0; i < userRoleNames.length; i++)
 			{
 				if(projectRoleNames.indexOf(userRoleNames[i]) !== -1)
 				{
-					rolesToReturn.push(userRoles[i]);
+					rolesToReturn.push(userRoleNames[i]);
 				}
 			}
 
-			return callback(rolesToReturn);
+			return callback(responseCodes.OK, rolesToReturn);
 		});
 	});
 };

@@ -45,11 +45,13 @@
 			i = 0,
 			j = 0,
 			length = 0,
-			promise = null,
-			rolesPromise = null,
+			promise,
+			rolesPromise,
+			projectUserRolesPromise,
 			sortedIssuesLength,
 			sortOldestFirst = true,
-			showClosed = false;
+			showClosed = false,
+			issue;
 
 		vm.pickedAccount = null;
 		vm.pickedProject = null;
@@ -65,6 +67,8 @@
 		vm.showIssuesInfo = false;
 		vm.issuesInfo = "There are currently no open issues";
 		vm.avialableRoles = [];
+		vm.projectUserRoles = [];
+		vm.issueCreatorRoleColor = "#FF0000";
 
 		promise = NewIssuesService.getIssues();
 		promise.then(function (data) {
@@ -76,9 +80,27 @@
 
 		rolesPromise = NewIssuesService.getRoles();
 		rolesPromise.then(function (data) {
-			console.log(data);
 			vm.avialableRoles = data;
+			setupIssueCreatorRoleColor();
 		});
+
+		projectUserRolesPromise = NewIssuesService.getUserRolesForProject();
+		projectUserRolesPromise.then(function (data) {
+			vm.projectUserRoles = data;
+			setupIssueCreatorRoleColor();
+		});
+
+		// Todo: This should really be handled better instead of being called by two functions
+		function setupIssueCreatorRoleColor() {
+			if ((vm.avialableRoles.length > 0) && (vm.projectUserRoles.length > 0)) {
+				for (i = 0, length = vm.avialableRoles.length; i < length; i += 1) {
+					if (vm.avialableRoles[i].role === vm.projectUserRoles[0]) {
+						vm.issueCreatorRoleColor = vm.avialableRoles[i].color;
+						break;
+					}
+				}
+			}
+		}
 
 		$scope.$watch("vm.showAdd", function (newValue) {
 			if (newValue) {
@@ -134,6 +156,21 @@
 			}
 		}
 
+		function showPins () {
+			for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
+				NewIssuesService.fixPin(
+					{
+						id: vm.issuesToShow[i]._id,
+						account: vm.issuesToShow[i].account,
+						project: vm.issuesToShow[i].project,
+						position: vm.issuesToShow[i].position,
+						norm: vm.issuesToShow[i].norm
+					},
+					NewIssuesService.hexToRgb(vm.issueCreatorRoleColor)
+				);
+			}
+		}
+
 		$scope.$watch("vm.selectedOption", function (newValue) {
 			if (angular.isDefined(newValue)) {
 				if (newValue.value === "sortByDate") {
@@ -163,29 +200,43 @@
 		};
 
 		vm.saveIssue = function () {
-			if (angular.isDefined(vm.title) && (vm.title !== "")) {
-				if (vm.pickedPos === null) {
-					vm.showAlert();
-				}
-				else {
-					promise = NewIssuesService.saveIssue(vm.pickedAccount, vm.pickedProject, vm.title, vm.selectedObjectId, vm.pickedPos, vm.pickedNorm);
-					promise.then(function (data) {
-						vm.issues.push(data);
-						vm.title = "";
-						vm.pickedAccount = null;
-						vm.pickedProject = null;
-						vm.pickedTrans	 = null;
-						vm.pickedPos = null;
-						vm.pickedNorm = null;
-						if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
-							vm.saveCommentWithIssue(data, vm.comment);
-							vm.comment = "";
-						}
+			if (vm.projectUserRoles.length === 0) {
+				vm.showAlert("You do not have permission to save an issue");
+			}
+			else {
+				if (angular.isDefined(vm.title) && (vm.title !== "")) {
+					if (vm.pickedPos === null) {
+						vm.showAlert("Add a pin before saving");
+					}
+					else {
+						issue = {
+							account: vm.pickedAccount,
+							project: vm.pickedProject,
+							name: vm.title,
+							objectId: vm.selectedObjectId,
+							pickedPos: vm.pickedPos,
+							pickedNorm: vm.pickedNorm,
+							creatorRole: vm.projectUserRoles[0]
+						};
+						promise = NewIssuesService.saveIssue(issue);
+						promise.then(function (data) {
+							vm.issues.push(data);
+							vm.title = "";
+							vm.pickedAccount = null;
+							vm.pickedProject = null;
+							vm.pickedTrans	 = null;
+							vm.pickedPos = null;
+							vm.pickedNorm = null;
+							if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
+								vm.saveCommentWithIssue(data, vm.comment);
+								vm.comment = "";
+							}
 
-						vm.showAdd = false;
+							vm.showAdd = false;
 
-						setupIssuesToShow();
-					});
+							setupIssuesToShow();
+						});
+					}
 				}
 			}
 		};
@@ -249,13 +300,16 @@
 							vm.pickedNorm = vm.pickedTrans.transpose().multMatrixVec(pickObj.pickNorm);
 							vm.pickedPos = vm.pickedTrans.inverse().multMatrixVec(pickObj.pickPos);
 
-							NewIssuesService.addPin({
-								id: undefined,
-								account: vm.pickedAccount,
-								project: vm.pickedProject,
-								position: vm.pickedPos.toGL(),
-								norm: vm.pickedNorm.toGL()
-							});
+							NewIssuesService.addPin(
+								{
+									id: undefined,
+									account: vm.pickedAccount,
+									project: vm.pickedProject,
+									position: vm.pickedPos.toGL(),
+									norm: vm.pickedNorm.toGL()
+								},
+								NewIssuesService.hexToRgb(vm.issueCreatorRoleColor)
+							);
 						}
 						else {
 							NewIssuesService.removePin();
@@ -343,12 +397,12 @@
 			});
 		});
 
-		vm.showAlert = function() {
+		vm.showAlert = function(title) {
 			$mdDialog.show(
 				$mdDialog.alert()
 					.parent(angular.element($element[0].querySelector("#issuesAddContainer")))
 					.clickOutsideToClose(true)
-					.title("Add a pin before saving")
+					.title(title)
 					.ariaLabel("Pin alert")
 					.ok("OK")
 			);

@@ -45,7 +45,9 @@
 		var vm = this,
 			i = 0,
 			length = 0,
-			promise = null;
+			promise = null,
+			originatorEv = null,
+			pinColour;
 
 		vm.showComments = false;
 		vm.numNewComments = 0;
@@ -54,66 +56,36 @@
 		vm.autoSaveComment = false;
 		vm.showInfo		   = false;
 		vm.editingComment  = false;
-		vm.showAssignedRoles = false;
+		vm.roles = [];
+		vm.creatorRoleColor = "";
 
 		$scope.$watch("vm.availableRoles", function (newValue) {
 			if (angular.isDefined(newValue)) {
-				console.log(newValue);
-				vm.roles = newValue;
+				for (i = 0, length = newValue.length; i < length; i += 1) {
+					vm.roles.push({
+						role: newValue[i].role,
+						color: newValue[i].color
+					});
+					if (vm.data.creatorRole === newValue[i].role) {
+						vm.creatorRoleColor = newValue[i].color;
+					}
+				}
 				setupRolesWatch();
 			}
+
+			/*
+			NewIssuesService.fixPin(
+				{
+					id: vm.data._id,
+					account: vm.data.account,
+					project: vm.data.project,
+					position: vm.data.position,
+					norm: vm.data.norm
+				},
+				NewIssuesService.hexToRgb(vm.creatorRoleColor)
+			);
+			*/
 		});
-
-		/*
-		vm.roles = [
-			{
-				roleColour: "#ff585a",
-				name: "Architect",
-				assigned: true
-			},
-			{
-				roleColour: "#91d7ff",
-				name: "Engineer",
-				assigned: false
-			}
-		];
-		setupRolesWatch();
-		*/
-
-		NewIssuesService.fixPin(
-			{
-				id: vm.data._id,
-				account: vm.data.account,
-				project: vm.data.project,
-				position: vm.data.position,
-				norm: vm.data.norm
-			},
-			hexToRgb(vm.data.roleColour)
-		);
-
-		function hexToRgb(hex) {
-			var hexColours = [];
-
-			if (hex.charAt(0) === "#") {
-				hex = hex.substr(1);
-			}
-
-			if (hex.length === 6) {
-				hexColours.push(hex.substr(0, 2));
-				hexColours.push(hex.substr(2, 2));
-				hexColours.push(hex.substr(4, 2));
-			}
-			else if (hex.length === 3) {
-				hexColours.push(hex.substr(0, 1) + hex.substr(0, 1));
-				hexColours.push(hex.substr(1, 1) + hex.substr(1, 1));
-				hexColours.push(hex.substr(2, 1) + hex.substr(2, 1));
-			}
-			else {
-				hexColours = ["00", "00", "00"];
-			}
-
-			return [(parseInt(hexColours[0], 16) / 255.0), (parseInt(hexColours[1], 16) / 255.0), (parseInt(hexColours[2], 16) / 255.0)];
-		}
 
 		$scope.$watch("vm.commentsToggledIssueId", function (newValue) {
 			// If the comments is toggled on another comment, then close this one.
@@ -267,8 +239,9 @@
 			$timeout.cancel(vm.infoTimeout);
 		};
 
-		vm.toggleShowAssignedRoles = function () {
-			vm.showAssignedRoles = !vm.showAssignedRoles;
+		vm.openAssignedRolesMenu = function ($mdOpenMenu, ev) {
+			originatorEv = ev;
+			$mdOpenMenu(ev);
 		};
 	}
 

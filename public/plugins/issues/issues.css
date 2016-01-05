@@ -77,17 +77,13 @@ issue .issueHeader .issueTitle {
   height: 100%;
 }
 
-.issueRoleMarker {
-  display: block;
-  width: 15px;
-  height: 10px;
-  border-radius: 4px;
-}
-
 issue .issueHeader .issueRoleMarker {
   position: absolute;
-  top: 14px;
-  right: 16px;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 10px;
+  height: 100%;
 }
 
 issue .issueHeader .issueInfo {
@@ -137,6 +133,14 @@ issue .issueCommentsContainer .issueCommentsFooter {
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
 
+.issueAssignColourMarker {
+  display: block;
+  width: 10px;
+  height: 25px;
+  margin-right: 10px;
+}
+
+/*
 issue .issueAssignedTo {
   display: block;
   height: 210px;
@@ -167,3 +171,4 @@ issue .issueAssignedTo .issueAssignedToList .issueRoleMarker {
 issue .issueAssignedTo .issueAssignedToList p {
   color: rgba(0, 0, 0, 0.6);
 }
+*/
