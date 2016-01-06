@@ -24,6 +24,8 @@ angular.module('3drepo')
 
 	this.chatHost    = server_config.chatHost;
 	this.chatPath    = server_config.chatPath;
+
+	this.backgroundImage = server_config.backgroundImage;
 });
 
 

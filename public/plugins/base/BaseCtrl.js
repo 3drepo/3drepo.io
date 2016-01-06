@@ -59,11 +59,13 @@ function($stateProvider, $locationProvider) {
 
 	return o;
 }])
-.controller('BaseCtrl', ['$scope', 'StateManager', function($scope, StateManager)
+.controller('BaseCtrl', ['$scope', 'serverConfig', 'StateManager', function($scope, serverConfig, StateManager)
 {
 	$scope.ui		= StateManager.ui;
 	$scope.Data		= StateManager.Data;
 	$scope.state	= StateManager.state;
+
+	$scope.backgroundImage = serverConfig.backgroundImage;
 }])
 .run(['StateManager', function(StateManager) {
 	StateManager.registerPlugin('base', 'BaseData', function () {
