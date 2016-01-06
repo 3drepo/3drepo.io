@@ -32,7 +32,8 @@
             numIssues = 0,
             numComments = 0,
             pinRadius = 0.25,
-            pinHeight = 1.0;
+            pinHeight = 1.0,
+			avialableRoles = [];
 
 		// TODO: Internationalise and make globally accessible
         var getPrettyTime = function(time) {
@@ -106,7 +107,8 @@
                 name: issue.name,
                 viewpoint: ViewerService.defaultViewer.getCurrentViewpointInfo(),
                 scale: 1.0,
-				creatorRole: issue.creatorRole
+				creator_role: issue.creator_role,
+				assigned_roles: []
             };
             config = {
                 withCredentials: true
@@ -126,7 +128,7 @@
                     response.data.issue.account = issue.account;
                     response.data.issue.project = issue.project;
                     response.data.issue.timeStamp = getPrettyTime(response.data.issue.created);
-					response.data.issue.creatorRole = issue.creatorRole;
+					response.data.issue.creator_role = issue.creator_role;
 
                     removePin();
                     deferred.resolve(response.data.issue);
@@ -152,6 +154,10 @@
         var closeIssue = function (issue) {
             return doPost(issue, {closed: true, number: issue.number});
         };
+
+		var assignIssue = function (issue) {
+			return doPost(issue, {assigned_roles: issue.assigned_roles, number: issue.number});
+		};
 
         var saveComment = function (issue, comment) {
             return doPost(issue, {comment: comment, number: issue.number});
@@ -303,7 +309,8 @@
 			$http.get(url)
 				.then(
 					function(data) {
-						deferred.resolve(data.data);
+						avialableRoles = data.data;
+						deferred.resolve(avialableRoles);
 					},
 					function () {
 						deferred.resolve([]);
@@ -355,11 +362,28 @@
 			return [(parseInt(hexColours[0], 16) / 255.0), (parseInt(hexColours[1], 16) / 255.0), (parseInt(hexColours[2], 16) / 255.0)];
 		};
 
+		var getRoleColor = function (role) {
+			var i = 0,
+				length = 0,
+				roleColor;
+
+			if (avialableRoles.length > 0) {
+				for (i = 0, length = avialableRoles.length; i < length; i += 1) {
+					if (avialableRoles[i].role === role) {
+						roleColor = avialableRoles[i].color;
+						break;
+					}
+				}
+			}
+			return roleColor;
+		};
+
 		return {
             getPrettyTime: getPrettyTime,
             getIssues: getIssues,
             saveIssue: saveIssue,
             closeIssue: closeIssue,
+			assignIssue: assignIssue,
             saveComment: saveComment,
             editComment: editComment,
             deleteComment: deleteComment,
@@ -370,7 +394,8 @@
 			state: state,
 			getRoles: getRoles,
 			getUserRolesForProject: getUserRolesForProject,
-			hexToRgb: hexToRgb
+			hexToRgb: hexToRgb,
+			getRoleColor: getRoleColor
         };
     }
 }());

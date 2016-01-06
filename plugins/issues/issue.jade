@@ -1,4 +1,4 @@
-.issue(ng-class="vm.backgroundClass")
+.issue(style="background:{{vm.backgroundColor}}")
 	.issueHeader
 		md-list-item.md-2-line.issueTitle(ng-click="vm.toggleComments()")
 			div.md-list-item-text
@@ -6,9 +6,10 @@
 				.issueTitleInfo(layout="row" layout-align="space-between center")
 					p {{vm.data.owner}}
 					p {{vm.data.timeStamp}}
-		.issueRoleMarker(style="background:{{vm.creatorRoleColor}}")
+		.issueRoleMarkers(layout="column")
+			div(ng-repeat="roleColor in vm.assignedRolesColors", style="background:{{roleColor}};", flex)
 
-		.issueInfo(ng-if="vm.showInfo", layout="row" layout-align="start center")
+	.issueInfo(ng-if="vm.showInfo", layout="row" layout-align="start center")
 			div(flex)
 				h5 {{vm.infoText}}
 			div(flex="15")
@@ -35,27 +36,18 @@
 
 			.issueCommentsFooter(layout="row", layout-align="start center")
 				md-button.md-raised.md-accent(ng-click="vm.saveComment()", ng-disabled="vm.saveCommentDisabled", ng-if="vm.issueIsOpen") Save
-				md-button.md-primary.md-accent(ng-click="vm.closeIssue()", ng-if="vm.issueIsOpen") Close issue
 
-			md-menu(ng-show="vm.issueIsOpen")
-				md-button(ng-click="vm.openAssignedRolesMenu($mdOpenMenu, $event)") Assigned to roles
-				md-menu-content(width="4")
-					md-menu-item(ng-repeat="role in vm.roles")
-						div(layout="row", layout-align="space-between center")
-							div(layout="row", layout-align="start center")
-								.issueAssignColourMarker(style="background:{{role.color}}")
-								| {{role.role}}
-							md-checkbox.md-secondary(ng-model="role.assigned", aria-label="Issue Assign")
-					md-menu-item
-						md-button.md-primary.md-hue-1
-							h5 Close
+				md-menu(ng-show="vm.issueIsOpen", md-position-mode="target-right target")
+					md-button.md-primary(ng-click="vm.openAssignedRolesMenu($mdOpenMenu, $event)") Assign
+					md-menu-content(width="4")
+						md-menu-item(ng-repeat="role in vm.roles")
+							md-list-item.issueRole
+								div(layout="row", layout-align="start center")
+									.issueAssignColourMarker(style="background:{{role.color}}")
+									| {{role.role}}
+								md-checkbox.md-secondary(ng-model="role.assigned", aria-label="Issue Assign")
 
-				//label(ng-click="vm.toggleShowAssignedRoles()") Assigned to roles
-				//.issueAssignedToList(ng-if="vm.showAssignedRoles")
-					md-list(ng-cloak)
-						md-list-item(ng-repeat="role in vm.roles")
-							.issueRoleMarker(style="background:{{role.color}}")
-							p {{role.role}}
-							md-checkbox.md-secondary(ng-model="role.assigned")
+				md-button.md-primary.md-accent(ng-click="vm.closeIssue()", ng-if="vm.issueIsOpen") Close
+
 
 	md-divider

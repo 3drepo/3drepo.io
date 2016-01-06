@@ -43,8 +43,6 @@
 
 	function IssueCtrl($scope, $timeout, NewIssuesService, ViewerService) {
 		var vm = this,
-			i = 0,
-			length = 0,
 			promise = null,
 			originatorEv = null,
 			pinColour;
@@ -52,39 +50,26 @@
 		vm.showComments = false;
 		vm.numNewComments = 0;
 		vm.saveCommentDisabled = true;
-		vm.backgroundClass = "issueClosedBackground";
+		vm.backgroundColor = "#FFFFFF";
 		vm.autoSaveComment = false;
 		vm.showInfo		   = false;
 		vm.editingComment  = false;
 		vm.roles = [];
-		vm.creatorRoleColor = "";
+		vm.assignedRolesColors = [];
 
 		$scope.$watch("vm.availableRoles", function (newValue) {
+			var i = 0, length = 0;
+
 			if (angular.isDefined(newValue)) {
 				for (i = 0, length = newValue.length; i < length; i += 1) {
 					vm.roles.push({
 						role: newValue[i].role,
 						color: newValue[i].color
 					});
-					if (vm.data.creatorRole === newValue[i].role) {
-						vm.creatorRoleColor = newValue[i].color;
-					}
 				}
 				setupRolesWatch();
+				initAssignedRolesDisplay();
 			}
-
-			/*
-			NewIssuesService.fixPin(
-				{
-					id: vm.data._id,
-					account: vm.data.account,
-					project: vm.data.project,
-					position: vm.data.position,
-					norm: vm.data.norm
-				},
-				NewIssuesService.hexToRgb(vm.creatorRoleColor)
-			);
-			*/
 		});
 
 		$scope.$watch("vm.commentsToggledIssueId", function (newValue) {
@@ -137,8 +122,10 @@
 		});
 
 		$scope.$watch("vm.data", function (newValue) {
+			var i = 0, length = 0;
+
 			if (angular.isDefined(newValue)) {
-				vm.backgroundClass = newValue.hasOwnProperty("closed") ? "issueClosedBackground" : "issueOpenBackground";
+				vm.backgroundColor = newValue.hasOwnProperty("closed") ? "#E0E0E0" : "#FFFFFF";
 				vm.issueIsOpen = !newValue.hasOwnProperty("closed");
 				if (vm.issueIsOpen && newValue.hasOwnProperty("comments")) {
 					for (i = 0, length = newValue.comments.length; i < length; i += 1) {
@@ -146,16 +133,52 @@
 							(i === (newValue.comments.length - 1)) && (!newValue.comments[i].set);
 					}
 				}
+				initAssignedRolesDisplay();
 			}
 		}, true);
 
 		function setupRolesWatch () {
 			$scope.$watch("vm.roles", function (newValue, oldValue) {
+				var i = 0,  length = 0;
+
 				// Ignore initial setup of roles
 				if (JSON.stringify(newValue) !== JSON.stringify(oldValue)) {
-					console.log("Role change");
+					vm.data.assigned_roles = [];
+					for (i = 0, length = vm.roles.length; i < length; i += 1) {
+						if (vm.roles[i].assigned) {
+							vm.data.assigned_roles.push(vm.roles[i].role);
+						}
+					}
+					setAssignedRolesColors();
+
+					promise = NewIssuesService.assignIssue(vm.data);
+					promise.then(function (data) {
+						console.log(data);
+					});
 				}
 			}, true);
+		}
+
+		function initAssignedRolesDisplay () {
+			var i = 0, length = 0;
+
+			if (angular.isDefined(vm.availableRoles) && angular.isDefined(vm.data) && vm.data.hasOwnProperty("assigned_roles")) {
+				for (i = 0, length = vm.roles.length; i < length; i += 1) {
+					vm.roles[i].assigned = (vm.data.assigned_roles.indexOf(vm.roles[i].role) !== -1);
+				}
+				setAssignedRolesColors();
+			}
+		}
+
+		function setAssignedRolesColors () {
+			var i = 0, length = 0;
+
+			vm.assignedRolesColors = [];
+			for (i = 0, length = vm.roles.length; i < length; i += 1) {
+				if (vm.data.assigned_roles.indexOf(vm.roles[i].role) !== -1) {
+					vm.assignedRolesColors.push(NewIssuesService.getRoleColor(vm.roles[i].role));
+				}
+			}
 		}
 
 		vm.toggleComments = function () {

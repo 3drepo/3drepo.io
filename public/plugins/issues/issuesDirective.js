@@ -42,16 +42,14 @@
 
 	function IssuesCtrl($scope, $rootScope, $element, $timeout, $mdDialog, $filter, EventService, NewIssuesService, ViewerService) {
 		var vm = this,
-			i = 0,
-			j = 0,
-			length = 0,
 			promise,
 			rolesPromise,
 			projectUserRolesPromise,
 			sortedIssuesLength,
 			sortOldestFirst = true,
 			showClosed = false,
-			issue;
+			issue,
+			rolesToFilter = [];
 
 		vm.pickedAccount = null;
 		vm.pickedProject = null;
@@ -68,7 +66,6 @@
 		vm.issuesInfo = "There are currently no open issues";
 		vm.avialableRoles = [];
 		vm.projectUserRoles = [];
-		vm.issueCreatorRoleColor = "#FF0000";
 
 		promise = NewIssuesService.getIssues();
 		promise.then(function (data) {
@@ -76,31 +73,18 @@
 			vm.issues = data;
 			vm.showIssuesInfo = (vm.issues.length === 0);
 			setupIssuesToShow();
+			showPins();
 		});
 
 		rolesPromise = NewIssuesService.getRoles();
 		rolesPromise.then(function (data) {
 			vm.avialableRoles = data;
-			setupIssueCreatorRoleColor();
 		});
 
 		projectUserRolesPromise = NewIssuesService.getUserRolesForProject();
 		projectUserRolesPromise.then(function (data) {
 			vm.projectUserRoles = data;
-			setupIssueCreatorRoleColor();
 		});
-
-		// Todo: This should really be handled better instead of being called by two functions
-		function setupIssueCreatorRoleColor() {
-			if ((vm.avialableRoles.length > 0) && (vm.projectUserRoles.length > 0)) {
-				for (i = 0, length = vm.avialableRoles.length; i < length; i += 1) {
-					if (vm.avialableRoles[i].role === vm.projectUserRoles[0]) {
-						vm.issueCreatorRoleColor = vm.avialableRoles[i].color;
-						break;
-					}
-				}
-			}
-		}
 
 		$scope.$watch("vm.showAdd", function (newValue) {
 			if (newValue) {
@@ -119,6 +103,8 @@
 		});
 
 		function setupIssuesToShow () {
+			var i = 0, j = 0, length = 0, roleAssigned;
+
 			if (angular.isDefined(vm.issues)) {
 				if (vm.issues.length > 0) {
 					// Sort
@@ -136,42 +122,77 @@
 						}
 					}
 
-					// Filter
+					// Filter text
 					if (vm.filterText !== "") {
 						vm.issuesToShow = ($filter('filter')(vm.issuesToShow, vm.filterText));
 					}
 
-					// Closed
-					for (i = (vm.issuesToShow.length - 1); i >= 0; i -= 1) {
-						var pin = angular.element(document.getElementById(vm.issuesToShow[i]._id));
-						if (pin.length > 0) {
-							pin[0].setAttribute("render", "true");
-							if (!showClosed && vm.issuesToShow[i].hasOwnProperty("closed")) {
-								pin[0].setAttribute("render", "false");
+					// Don't show issues assigned to certain roles
+					if (rolesToFilter.length > 0) {
+						for (i = (vm.issuesToShow.length - 1); i >= 0; i -= 1) {
+							roleAssigned = false;
+							for (j = 0, length = vm.issuesToShow[i].assigned_roles.length; j < length; j += 1) {
+								if (rolesToFilter.indexOf(vm.issuesToShow[i].assigned_roles[j]) !== -1) {
+									roleAssigned = true;
+								}
+							}
+							if (roleAssigned) {
 								vm.issuesToShow.splice(i, 1);
 							}
 						}
 					}
+
+					// Closed
+					for (i = (vm.issuesToShow.length - 1); i >= 0; i -= 1) {
+						if (!showClosed && vm.issuesToShow[i].hasOwnProperty("closed")) {
+							vm.issuesToShow.splice(i, 1);
+						}
+					}
+
+					// Un-expand any expanded issue
+					vm.commentsToggledIssueId = null;
 				}
 			}
 		}
 
 		function showPins () {
-			for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
-				NewIssuesService.fixPin(
-					{
-						id: vm.issuesToShow[i]._id,
-						account: vm.issuesToShow[i].account,
-						project: vm.issuesToShow[i].project,
-						position: vm.issuesToShow[i].position,
-						norm: vm.issuesToShow[i].norm
-					},
-					NewIssuesService.hexToRgb(vm.issueCreatorRoleColor)
-				);
+			var i = 0, length = 0,
+				pin, pinData, pinColor;
+
+			for (i = 0, length = vm.issues.length; i < length; i += 1) {
+				pin = angular.element(document.getElementById(vm.issues[i]._id));
+				if (pin.length > 0) {
+					// Existing pin
+					pin[0].setAttribute("render", "true");
+					if (!showClosed && vm.issues[i].hasOwnProperty("closed")) {
+						pin[0].setAttribute("render", "false");
+					}
+				}
+				else {
+					// New pin
+					if (!vm.issues[i].hasOwnProperty("closed") || (showClosed && vm.issues[i].hasOwnProperty("closed"))) {
+						pinData =
+							{
+								id: vm.issues[i]._id,
+								account: vm.issues[i].account,
+								project: vm.issues[i].project,
+								position: vm.issues[i].position,
+								norm: vm.issues[i].norm
+							};
+						if (vm.issues[i].assigned_roles.length > 0) {
+							pinColor = NewIssuesService.hexToRgb(NewIssuesService.getRoleColor(vm.issues[i].assigned_roles[0]));
+						}
+						else {
+							pinColor = [1.0, 1.0, 1.0];
+						}
+						NewIssuesService.fixPin(pinData, pinColor);
+					}
+				}
 			}
 		}
 
 		$scope.$watch("vm.selectedOption", function (newValue) {
+			var role, roleIndex;
 			if (angular.isDefined(newValue)) {
 				if (newValue.value === "sortByDate") {
 					sortOldestFirst = !sortOldestFirst;
@@ -179,7 +200,18 @@
 				else if (newValue.value === "showClosed") {
 					showClosed = !showClosed;
 				}
+				else if (newValue.value.indexOf("filterRole") !== -1) {
+					role = newValue.value.split("_")[1];
+					roleIndex = rolesToFilter.indexOf(role);
+					if (roleIndex !== -1) {
+						rolesToFilter.splice(roleIndex, 1);
+					}
+					else {
+						rolesToFilter.push(role);
+					}
+				}
 				setupIssuesToShow();
+				showPins();
 			}
 		});
 
@@ -216,7 +248,7 @@
 							objectId: vm.selectedObjectId,
 							pickedPos: vm.pickedPos,
 							pickedNorm: vm.pickedNorm,
-							creatorRole: vm.projectUserRoles[0]
+							creator_role: vm.projectUserRoles[0]
 						};
 						promise = NewIssuesService.saveIssue(issue);
 						promise.then(function (data) {
@@ -242,6 +274,9 @@
 		};
 
 		vm.closeIssue = function (issue) {
+			var i = 0,
+				length = 0;
+
 			promise = NewIssuesService.closeIssue(issue);
 			promise.then(function (data) {
 				for (i = 0, length = vm.issues.length; i < length; i += 1) {
@@ -308,7 +343,7 @@
 									position: vm.pickedPos.toGL(),
 									norm: vm.pickedNorm.toGL()
 								},
-								NewIssuesService.hexToRgb(vm.issueCreatorRoleColor)
+								NewIssuesService.hexToRgb(NewIssuesService.getRoleColor(vm.projectUserRoles[0]))
 							);
 						}
 						else {

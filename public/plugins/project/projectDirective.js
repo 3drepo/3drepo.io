@@ -66,15 +66,17 @@
         };
     }
 
-	ProjectCtrl.$inject = ["$timeout", "EventService", "ViewerService", "StateManager"];
+	ProjectCtrl.$inject = ["$timeout", "EventService", "ViewerService", "StateManager", "ProjectService"];
 
-	function ProjectCtrl($timeout, EventService, ViewerService, StateManager) {
+	function ProjectCtrl($timeout, EventService, ViewerService, StateManager, ProjectService) {
 		var panelContent = {
 			left: [],
 			right: []
 		};
 
-		var state = StateManager.state;
+		var state = StateManager.state,
+			promise,
+			i, length;
 
 		panelContent.left.push({
 			type: "tree",
@@ -133,6 +135,24 @@
 			help: "Documents",
 			icon: "fa-clone",
 			maxHeight: 290
+		});
+
+		// Add filtering options for the Issues panel
+		promise = ProjectService.getRoles();
+		promise.then(function (data) {
+			console.log(data);
+			for (i = 0, length = data.length; i < length; i += 1) {
+				panelContent.right[0].options.push(
+					{
+						value: "filterRole_" + data[i].role,
+						label: "Filter " + data[i].role,
+						toggle: true,
+						selected: true,
+						firstSelected: false,
+						secondSelected: false
+					}
+				);
+			}
 		});
 
 		StateManager.setStateVar("branch", "master");

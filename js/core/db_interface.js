@@ -1714,7 +1714,13 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 				updateQuery = {
 					$set: { closed: true, closed_time: timeStamp }
 				};
-			} else {
+			}
+			else if (data.hasOwnProperty("assigned_roles")) {
+				updateQuery = {
+					$set: { assigned_roles: data.assigned_roles}
+				};
+			}
+			else {
                 updateQuery = {
                     $set: { complete: data.complete, created: timeStamp }
                 };
