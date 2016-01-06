@@ -23,7 +23,7 @@ var fileStore = require('session-file-store')(expressSession);
 var config = require('../js/core/config.js');
 
 module.exports.session = expressSession({
-	secret: config.cookie_secret,
+	secret: config.cookie.secret,
 	resave: false,
 	saveUninitialized: true,
 	cookie: {

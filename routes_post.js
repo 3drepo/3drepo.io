@@ -39,11 +39,37 @@ function createSession(place, req, res, next, user)
 			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {account: user.username});
 		} else {
 			systemLogger.logDebug("Authenticated user and signed token.", req);
+
 			req.session[C.REPO_SESSION_USER] = user;
+
+			if (config.cookie.maxAge)
+			{
+				req.session.cookie.maxAge = config.cookie.maxAge;
+			}
+
 			responseCodes.respond(place, req, res, next, responseCodes.OK, {account: user.username});
 		}
 	});
 }
+
+function expireSession(req, res, next, callback) {
+	"use strict";
+	req.session.cookie.expires = new Date(0);
+	req.session.cookie.maxAge = 0;
+
+	return callback(req, res, next);
+}
+
+function destroySession(req, res, next, callback) {
+	"use strict";
+
+	req.session.destroy(function() {
+		req[C.REQ_REPO].logger.logDebug("User has logged out.", req);
+		res.clearCookie("connect.sid", { path: "/" + config.api_server.host_dir });
+
+		return callback(req, res, next);
+	});
+};
 
 var repoPostHandler = function(router, checkAccess){
 	"use strict";
@@ -63,21 +89,23 @@ var repoPostHandler = function(router, checkAccess){
 		{
 			req[C.REQ_REPO].logger.logDebug("User is logging in", req);
 
-			if(err.value) {
-				if (err.dbErr.code == C.MONGO_AUTH_FAILED)
-				{
-					responseCodes.respond(responsePlace, req, res, next, responseCodes.NOT_AUTHORIZED, {account: req.body.username});
+			expireSession(req, res, next, function(req, res, next) {
+				if(err.value) {
+					if (err.dbErr.code === C.MONGO_AUTH_FAILED)
+					{
+						responseCodes.respond(responsePlace, req, res, next, responseCodes.NOT_AUTHORIZED, {account: req.body.username});
+					} else {
+						responseCodes.respond(responsePlace, req, res, next, err, {account: req.body.username});
+					}
 				} else {
-					responseCodes.respond(responsePlace, req, res, next, err, {account: req.body.username});
+					if(user)
+					{
+						createSession(responsePlace, req, res, next, user);
+					} else {
+						responseCodes.respond(responsePlace, req, res, next, responseCodes.USER_NOT_FOUND, {account: req.body.username});
+					}
 				}
-			} else {
-				if(user)
-				{
-					createSession(responsePlace, req, res, next, user);
-				} else {
-					responseCodes.respond(responsePlace, req, res, next, responseCodes.USER_NOT_FOUND, {account: req.body.username});
-				}
-			}
+			});
 		});
 	});
 
@@ -90,10 +118,7 @@ var repoPostHandler = function(router, checkAccess){
 
 		var username = req.session.user.username;
 
-		req.session.destroy(function() {
-			req[C.REQ_REPO].logger.logDebug("User has logged out.", req);
-            res.clearCookie("connect.sid", { path: "/" + config.api_server.host_dir });
-
+		destroySession(req, res, next, function(req, res, next) {
 			responseCodes.respond("Logout POST", req, res, next, responseCodes.OK, {account: username});
 		});
 	});

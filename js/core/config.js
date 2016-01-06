@@ -154,11 +154,13 @@ config.db.password = coalesce(config.db.password, "password");
 
 // Other options
 config.js_debug_level       = coalesce(config.js_debug_level, 'debug'); // Loading prod or debug scripts
-config.cookie_secret        = coalesce(config.cookie_secret, config.default_cookie_secret);
-config.cookie_parser_secret = coalesce(config.cookie_parser_secret, config.default_cookie_parser_secret);
+
+config.cookie               = coalesce(config.cookie, {});
+config.cookie.secret        = coalesce(config.cookie.secret, config.default_cookie_secret);
+config.cookie.parser_secret = coalesce(config.cookie.parser_secret, config.default_cookie_parser_secret);
 
 // Check whether the secret have been set in the file or not
-if ((config.cookie_secret === config.default_cookie_secret) || (config.cookie_parser_secret === config.default_cookie_parser_secret))
+if ((config.cookie.secret === config.default_cookie_secret) || (config.cookie.parser_secret === config.default_cookie_parser_secret))
 {
 	console.log("Cookie secret phrase has the default value. Update the config");
 	process.exit(1);
