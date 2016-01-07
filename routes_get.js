@@ -185,6 +185,12 @@ var repoGetHandler = function(router, checkAccess){
 	self.getInternal("/:account/:project/revision/:rid/meta/:sid.:format");
 	self.getInternal("/:account/:project/revision/:branch/head/meta/:sid.:format");
 
+	// Get list of roles for a project
+	self.getInternal("/:account/:project/roles.:format");
+
+	// Get list of user roles for a project
+	self.getInternal("/:account/:project/:username/userRolesForProject.:format");
+
 	// Get audit log for account
 	self.getInternal("/:account/log.:format");
 

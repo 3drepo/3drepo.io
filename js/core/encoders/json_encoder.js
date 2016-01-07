@@ -810,6 +810,29 @@ exports.route = function(router)
     router.get('json', '/:account/:project/revision/:branch/head/:searchstring/searchtree', function(req, res, params, err_callback) {
         searchTree(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.branch, null, params.searchstring, err_callback);
     });
+
+	router.get("json", "/:account/:project/roles", function( req, res, params, err_callback ) {
+		dbInterface(req[C.REQ_REPO].logger).getRolesByProject(params.account, params.project, C.REPO_ANY, function (err, roles) {
+			if (err.value)
+			{
+				return err_callback(err);
+			}
+
+			return err_callback(responseCodes.OK, roles);
+		});
+	});
+
+	router.get("json", "/:account/:project/:username/userRolesForProject", function( req, res, params, err_callback ) {
+		dbInterface(req[C.REQ_REPO].logger).getUserRolesForProject(params.account, params.project, params.username, function (err, roles) {
+			if (err.value)
+			{
+				return err_callback(err);
+			}
+
+			return err_callback(responseCodes.OK, roles);
+		});
+	});
+
 };
 
 

@@ -21,9 +21,9 @@
     angular.module('3drepo')
         .factory('NewIssuesService', NewIssuesService);
 
-    NewIssuesService.$inject = ["$http", "$q", "StateManager", "serverConfig", "ViewerService"];
+    NewIssuesService.$inject = ["$http", "$q", "StateManager", "serverConfig", "ViewerService", "Auth"];
 
-    function NewIssuesService($http, $q, StateManager, serverConfig, ViewerService) {
+    function NewIssuesService($http, $q, StateManager, serverConfig, ViewerService, Auth) {
         var state = StateManager.state,
             url = "",
             data = {},
@@ -31,9 +31,9 @@
             i, j = 0,
             numIssues = 0,
             numComments = 0,
-            pinCoverage = 15.0,
             pinRadius = 0.25,
-            pinHeight = 1.0;
+            pinHeight = 1.0,
+			avialableRoles = [];
 
 		// TODO: Internationalise and make globally accessible
         var getPrettyTime = function(time) {
@@ -74,45 +74,49 @@
             url = serverConfig.apiUrl(state.account + '/' + state.project + '/issues.json');
 
             $http.get(url)
-                .then(function(data) {
-                    deferred.resolve(data.data);
-                    // Convert created field to displayable time stamp
-                    // Issue
-                    for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
-                        data.data[i].timeStamp = getPrettyTime(data.data[i].created);
-                        // Comments
-                        if (data.data[i].hasOwnProperty("comments")) {
-                            for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
-                                if (data.data[i].comments[j].hasOwnProperty("created")) {
-                                    data.data[i].comments[j].timeStamp = getPrettyTime(data.data[i].comments[j].created);
-                                }
-                            }
-                        }
-                    }
-                });
+                .then(
+					function(data) {
+						deferred.resolve(data.data);
+						for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
+							data.data[i].timeStamp = getPrettyTime(data.data[i].created);
+
+							if (data.data[i].hasOwnProperty("comments")) {
+								for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
+									if (data.data[i].comments[j].hasOwnProperty("created")) {
+										data.data[i].comments[j].timeStamp = getPrettyTime(data.data[i].comments[j].created);
+									}
+								}
+							}
+						}
+					},
+					function () {
+						deferred.resolve([]);
+					}
+                );
 
             return deferred.promise;
         };
 
-        var saveIssue = function (account, project, name, objectId, pickedPos, pickedNorm) {
-            var currentVP = ViewerService.defaultViewer.getCurrentViewpointInfo(),
-                dataToSend = {},
+        var saveIssue = function (issue) {
+            var dataToSend,
                 deferred = $q.defer();
 
-            url = serverConfig.apiUrl(account + "/" + project + "/issues/" + objectId);
+            url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue.objectId);
 
             data = {
-                name: name,
+                name: issue.name,
                 viewpoint: ViewerService.defaultViewer.getCurrentViewpointInfo(),
-                scale: 1.0
+                scale: 1.0,
+				creator_role: issue.creator_role,
+				assigned_roles: []
             };
             config = {
                 withCredentials: true
             };
 
-            if (pickedPos !== null) {
-                data.position = pickedPos.toGL();
-                data.norm = pickedNorm.toGL();
+            if (issue.pickedPos !== null) {
+                data.position = issue.pickedPos.toGL();
+                data.norm = issue.pickedNorm.toGL();
             }
 
             dataToSend = {data: JSON.stringify(data)};
@@ -121,12 +125,12 @@
                 .then(function successCallback(response) {
                     console.log(response);
                     response.data.issue._id     = response.data.issue_id;
-                    response.data.issue.account = account;
-                    response.data.issue.project = project;
+                    response.data.issue.account = issue.account;
+                    response.data.issue.project = issue.project;
                     response.data.issue.timeStamp = getPrettyTime(response.data.issue.created);
+					response.data.issue.creator_role = issue.creator_role;
 
                     removePin();
-
                     deferred.resolve(response.data.issue);
                 });
 
@@ -147,9 +151,17 @@
             return deferred.promise;
         }
 
-        var closeIssue = function (issue) {
-            return doPost(issue, {closed: true, number: issue.number});
+        var toggleCloseIssue = function (issue) {
+			var closed = true;
+			if (issue.hasOwnProperty("closed")) {
+				closed = !issue.closed;
+			}
+            return doPost(issue, {closed: closed, number: issue.number});
         };
+
+		var assignIssue = function (issue) {
+			return doPost(issue, {assigned_roles: issue.assigned_roles, number: issue.number});
+		};
 
         var saveComment = function (issue, comment) {
             return doPost(issue, {comment: comment, number: issue.number});
@@ -167,24 +179,23 @@
             return doPost(issue, {comment: "", number: issue.number, set: true, commentIndex: commentIndex});
         };
 
-        function addPin (pin) {
+        function addPin (pin, colour) {
             removePin();
-
-            createPinShape("pinPlacement", pin, pinRadius, pinHeight);
+            createPinShape("pinPlacement", pin, pinRadius, pinHeight, colour);
          }
 
         function removePin () {
             var pinPlacement = document.getElementById("pinPlacement");
             if (pinPlacement !== null) {
-               pinPlacement.parentElement.removeChild(pinPlacement)
+               pinPlacement.parentElement.removeChild(pinPlacement);
             }
         }
 
-        function fixPin (pin) {
-            createPinShape(pin.id, pin, pinRadius, pinHeight);
+        function fixPin (pin, colour) {
+            createPinShape(pin.id, pin, pinRadius, pinHeight, colour);
         }
 
-        function createPinShape (id, pin, radius, height, scale)
+        function createPinShape (id, pin, radius, height, colour)
         {
             var sceneBBox = ViewerService.defaultViewer.scene._x3domNode.getVolume();
             var sceneSize = sceneBBox.max.subtract(sceneBBox.min).length();
@@ -206,7 +217,7 @@
                 if (inlines[i].getAttribute("nameSpaceName") === (pin.account + "__" + pin.project))
                 {
                     trans = inlines[i]._x3domNode.getCurrentTransform();
-                    break
+                    break;
                 }
             }
 
@@ -242,7 +253,12 @@
             pinshapeapp.appendChild(pinshapedepth);
 
             var pinshapemat = document.createElement("Material");
-            pinshapemat.setAttribute("diffuseColor", "1.0 0.0 0.0");
+			if (typeof colour === "undefined") {
+				pinshapemat.setAttribute("diffuseColor", "1.0 0.0 0.0");
+			}
+			else {
+				pinshapemat.setAttribute("diffuseColor", colour[0] + " " + colour[1] + " " + colour[2]);
+			}
             pinshapeapp.appendChild(pinshapemat);
 
             var pinshapescale = document.createElement("Transform");
@@ -290,11 +306,87 @@
             $("#model__root")[0].appendChild(parent);
         }
 
-        return {
+		var getRoles = function () {
+			var deferred = $q.defer();
+			url = serverConfig.apiUrl(state.account + '/' + state.project + '/roles.json');
+
+			$http.get(url)
+				.then(
+					function(data) {
+						avialableRoles = data.data;
+						deferred.resolve(avialableRoles);
+					},
+					function () {
+						deferred.resolve([]);
+					}
+				);
+
+			return deferred.promise;
+		};
+
+		var getUserRolesForProject = function () {
+			var deferred = $q.defer();
+			url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + Auth.username + "/userRolesForProject.json");
+
+			$http.get(url)
+				.then(
+					function(data) {
+						deferred.resolve(data.data);
+					},
+					function () {
+						deferred.resolve([]);
+					}
+				);
+
+			return deferred.promise;
+		};
+
+		var hexToRgb = function (hex) {
+			var hexColours = [];
+
+			if (hex.charAt(0) === "#") {
+				hex = hex.substr(1);
+			}
+
+			if (hex.length === 6) {
+				hexColours.push(hex.substr(0, 2));
+				hexColours.push(hex.substr(2, 2));
+				hexColours.push(hex.substr(4, 2));
+			}
+			else if (hex.length === 3) {
+				hexColours.push(hex.substr(0, 1) + hex.substr(0, 1));
+				hexColours.push(hex.substr(1, 1) + hex.substr(1, 1));
+				hexColours.push(hex.substr(2, 1) + hex.substr(2, 1));
+			}
+			else {
+				hexColours = ["00", "00", "00"];
+			}
+
+			return [(parseInt(hexColours[0], 16) / 255.0), (parseInt(hexColours[1], 16) / 255.0), (parseInt(hexColours[2], 16) / 255.0)];
+		};
+
+		var getRoleColor = function (role) {
+			var i = 0,
+				length = 0,
+				roleColor;
+
+			if (avialableRoles.length > 0) {
+				for (i = 0, length = avialableRoles.length; i < length; i += 1) {
+					if (avialableRoles[i].role === role) {
+						roleColor = avialableRoles[i].color;
+						break;
+					}
+				}
+			}
+			return roleColor;
+		};
+
+		return {
             getPrettyTime: getPrettyTime,
             getIssues: getIssues,
             saveIssue: saveIssue,
-            closeIssue: closeIssue,
+			toggleCloseIssue: toggleCloseIssue,
+			assignIssue: assignIssue,
             saveComment: saveComment,
             editComment: editComment,
             deleteComment: deleteComment,
@@ -302,7 +394,11 @@
             addPin: addPin,
             fixPin: fixPin,
             removePin: removePin,
-			state: state
+			state: state,
+			getRoles: getRoles,
+			getUserRolesForProject: getUserRolesForProject,
+			hexToRgb: hexToRgb,
+			getRoleColor: getRoleColor
         };
     }
 }());

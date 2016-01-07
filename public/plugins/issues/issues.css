@@ -20,8 +20,16 @@ issues md-list {
   padding: 0;
 }
 
-issues p {
-  color: rgba(0,0,0,0.35) !important;
+issues .issuesInfo {
+  text-align: center;
+  padding: 15px;
+  background: #E8EAF6;
+  margin: 15px;
+  border-radius: 4px;
+}
+issues .issuesInfo p {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.7);
 }
 
 /** Issue *************************************************************************************************************/
@@ -30,8 +38,8 @@ issue {
   display: block;
 }
 
-issue .issue {
-
+issue .issueTitle p {
+  color: rgba(0,0,0,0.35) !important;
 }
 
 .issueOpenBackground {
@@ -69,6 +77,14 @@ issue .issueHeader .issueTitle {
   height: 100%;
 }
 
+issue .issueHeader .issueRoleMarkers {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 100%;
+}
+
 issue .issueHeader .issueInfo {
   position: absolute;
   top: 0;
@@ -89,7 +105,7 @@ issue h4 {
 }
 
 issue .issueCommentsContainer {
-  padding: 10px 5px  10px 10px;
+  padding: 0 20px 0 20px
 }
 issue .issueCommentsContainer md-list-item {
   padding: 10px;
@@ -107,6 +123,28 @@ issue .issueCommentsContainer md-list-item .commentModifyButton {
 issue .issueCommentsContainer .issueCommentInfo {
   position: relative;
 }
+issue .issueCommentsContainer .issueCommentInfo p {
+  color: rgba(0,0,0,0.35) !important;
+}
 issue .issueCommentsContainer .issueCommentsFooter {
-  margin-top: -10px;
+  margin-top: -15px;
+  padding-bottom: 10px;
+  /*border-bottom: 1px solid rgba(0, 0, 0, 0.12);*/
+}
+
+md-list-item.issueRole {
+  padding: 0;
+}
+md-list-item .issueAssignColourMarker {
+  display: block;
+  width: 10px;
+  height: 25px;
+  margin-right: 10px;
+}
+
+issue .issueOpenContainer {
+  margin-top: 10px;
+}
+issue .issueOpenContainer button {
+  margin-left: 220px;
 }

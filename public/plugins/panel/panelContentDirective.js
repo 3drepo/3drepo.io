@@ -195,7 +195,7 @@
         vm.optionSelected = function (index) {
             if (vm.contentData.options[index].toggle) {
                 vm.contentData.options[index].selected = !vm.contentData.options[index].selected;
-                vm.selectedOption = vm.options[index];
+                vm.selectedOption = vm.contentData.options[index];
             }
             else {
                 if (index !== currentSortIndex) {

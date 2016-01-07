@@ -16,7 +16,7 @@
  */
 
 angular.module('3drepo')
-.service('Auth', ['$injector', '$q', '$state', 'serverConfig', function($injector, $q, $state, serverConfig) {
+.service('Auth', ['$injector', '$q', '$state', '$http', 'serverConfig', 'StateManager', function($injector, $q, $state, $http, serverConfig, StateManager) {
 	this.loggedIn = null;
 	this.username = null;
 	var self = this;
@@ -29,22 +29,38 @@ angular.module('3drepo')
 		// are or not
 		if(self.loggedIn === null)
 		{
-			var http = $injector.get('$http');
-
 			// Initialize
-			http.get(serverConfig.apiUrl('login'))
+			$http.get(serverConfig.apiUrl('login'))
 			.success(function(data, status) {
 				self.loggedIn = true;
 				self.username = data.username;
+				self.userRoles = data.roles;
 				deferred.resolve(self.loggedIn);
 			}).error(function(data, status) {
 				self.loggedIn = false;
 				self.username = null;
+				self.userRoles = null;
 				deferred.resolve(self.loggedIn);
 			});
 		} else {
 			deferred.resolve(self.loggedIn);
 		}
+
+		return deferred.promise;
+	};
+
+	this.loadProjectRoles = function(account, project)
+	{
+		var deferred = $q.defer();
+
+		$http.get(serverConfig.apiUrl(account + '/' + project + '/roles.json'))
+		.success(function(data, status) {
+			self.projectRoles = data;
+			deferred.resolve();
+		}).error(function(data, status) {
+			self.projectRoles = null;
+			deferred.resolve();
+		});
 
 		return deferred.promise;
 	}
@@ -58,13 +74,15 @@ angular.module('3drepo')
 		var http = $injector.get('$http');
 
 		http.post(serverConfig.apiUrl('login'), postData)
-		.success(function () {
+		.success(function (data, status) {
 			self.username = username;
+			self.userRoles = data.roles;
 			self.loggedIn = true;
 			deferred.resolve(username);
 		})
 		.error(function(data, status) {
 			self.username = null;
+			self.userRoles = data.roles;
 			self.loggedIn = false;
 
 			if (status === 401)

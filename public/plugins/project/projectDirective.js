@@ -66,15 +66,17 @@
         };
     }
 
-	ProjectCtrl.$inject = ["$timeout", "EventService", "ViewerService", "StateManager"];
+	ProjectCtrl.$inject = ["$timeout", "EventService", "ViewerService", "StateManager", "ProjectService"];
 
-	function ProjectCtrl($timeout, EventService, ViewerService, StateManager) {
+	function ProjectCtrl($timeout, EventService, ViewerService, StateManager, ProjectService) {
 		var panelContent = {
 			left: [],
 			right: []
 		};
 
-		var state = StateManager.state;
+		var state = StateManager.state,
+			promise,
+			i, length;
 
 		panelContent.left.push({
 			type: "tree",
@@ -86,34 +88,11 @@
             minHeight: 100,
             maxHeight: 820
 		});
-		/*
-		 panelContent.left.push({
-		 type: "viewpoints",
-		 title: "Viewpoints",
-		 show: false,
-		 help: "Show a list of saved viewpoints",
-		 icon: "fa-street-view"
-		 });
-		 panelContent.left.push({
-		 type: "meta",
-		 title: "Meta data",
-		 show: false,
-		 help: "Show all the Meta data",
-		 icon: "fa-map-o"
-		 });
-		 panelContent.left.push({
-		 type: "pdf",
-		 title: "PDF",
-		 show: false,
-		 help: "List associated PDF files",
-		 icon: "fa-file-pdf-o"
-		 });
-		 */
 
 		panelContent.right.push({
 			type: "issues",
 			title: "Issues",
-			show: false,
+			show: true,
 			help: "List current issues",
 			icon: "fa-map-marker",
 			hasFilter: true,
@@ -152,10 +131,28 @@
 		panelContent.right.push({
 			type: "docs",
 			title: "Docs",
-			show: true,
+			show: false,
 			help: "Documents",
 			icon: "fa-clone",
 			maxHeight: 290
+		});
+
+		// Add filtering options for the Issues panel
+		promise = ProjectService.getRoles();
+		promise.then(function (data) {
+			console.log(data);
+			for (i = 0, length = data.length; i < length; i += 1) {
+				panelContent.right[0].options.push(
+					{
+						value: "filterRole_" + data[i].role,
+						label: data[i].role,
+						toggle: true,
+						selected: true,
+						firstSelected: false,
+						secondSelected: false
+					}
+				);
+			}
 		});
 
 		StateManager.setStateVar("branch", "master");

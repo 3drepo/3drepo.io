@@ -65,6 +65,7 @@ var DBInterface = function(logger) {
  *******************************************************************************/
 DBInterface.prototype.authenticate = function(username, password, callback) {
 	"use strict";
+	var self = this;
 
 	dbConn(this.logger).authenticateUser(username, password, function(err)
 	{
@@ -72,7 +73,16 @@ DBInterface.prototype.authenticate = function(username, password, callback) {
 			return callback(err);
 		}
 
-		callback(responseCodes.OK, {username: username});
+		self.getUserRoles(username, null, function(err, roles) {
+			if (err.value) {
+				return callback(err);
+			}
+
+			callback(responseCodes.OK, {
+				username: username,
+				roles: roles
+			});
+		});
 	});
 };
 
@@ -1702,11 +1712,25 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
                     };
                 }
 			}
-            else if (data.closed) {
+            else if (data.hasOwnProperty("closed")) {
+				if (data.closed) {
+					updateQuery = {
+						$set: { closed: true, closed_time: (new Date()).getTime() }
+					};
+				}
+				else {
+					updateQuery = {
+						$set: { closed: false },
+						$unset: { closed_time: "" }
+					};
+				}
+			}
+			else if (data.hasOwnProperty("assigned_roles")) {
 				updateQuery = {
-					$set: { closed: true, closed_time: timeStamp }
+					$set: { assigned_roles: data.assigned_roles}
 				};
-			} else {
+			}
+			else {
                 updateQuery = {
                     $set: { complete: data.complete, created: timeStamp }
                 };
@@ -1716,7 +1740,18 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 				if (err) return callback(responseCodes.DB_ERROR(err));
 
 				self.logger.logDebug("Updated " + count + " records.");
-				callback(responseCodes.OK, { account: dbName, project: project, issue_id : uuidToString(data._id), number: data.number, owner: owner, created: timeStamp });
+				callback(
+					responseCodes.OK,
+					{
+						account: dbName,
+						project: project,
+						issue: data,
+						issue_id : uuidToString(data._id),
+						number: data.number,
+						owner: owner,
+						created: timeStamp
+					}
+				);
 			});
 		}
 	});
@@ -2167,6 +2202,358 @@ DBInterface.prototype.getDiff = function(account, project, branch, revision, oth
 			});
 		});
 	});
+};
+
+/*******************************************************************************
+ * Get list of roles by database
+ *
+ * @param {string} dbName - Database name which holds the project
+ * @param {number} readWriteAny - Select what permissions the role should have
+ * @param {function} callback - function to return the list of roles
+ ******************************************************************************/
+DBInterface.prototype.getRolesByDatabase = function(dbName, readWriteAny, callback)
+{
+	"use strict";
+	var collection = "system.roles";
+
+	var filter = {};
+
+	self.filterColl(dbName, collection, filter, {}, function (err, docs) {
+		if (err.value)
+		{
+			return callback(err);
+		}
+
+		var rolesToReturn = [];
+
+		for (var i = 0; i < docs.length; i++)
+		{
+			if (docs[i]["privileges"].length)
+			{
+				if (readWriteAny !== C.REPO_ANY)
+				{
+					var validActions= docs[i]["privileges"][0]["actions"];
+					var privilegeType = 0;
+
+					if (validActions.indexOf("find") !== -1) { privilegeType |= 1; };
+					if (validActions.indexOf("insert") !== -1) { privilegeType |= 2; };
+
+					if (privilegeType === readWriteAny)
+					{
+						rolesToReturn.push(docs[i]);
+					}
+				}
+			}
+		}
+
+		return callback(responseCode.OK, rolesToReturn);
+	});
+};
+
+/*******************************************************************************
+ * Get list of roles by project
+ *
+ * @param {string} dbName - Database name which holds the project
+ * @param {string} project - Project to which the permissions apply
+ * @param {number} readWriteAny - A permission type filter (see constants.js)
+ * @param {function} callback - function to return the list of roles
+ ******************************************************************************/
+DBInterface.prototype.getRolesByProject = function(dbName, project, readWriteAny, callback)
+{
+	"use strict";
+	var self = this;
+
+	var adminDatabase = "admin";
+	var collection = "system.roles";
+	var filter = {};
+
+	// Get all roles which have permissions on this project
+
+	filter["db"] = { $in : ["admin", dbName] };
+	filter["privileges"] = {
+		$elemMatch : { "resource.collection" : project + ".history" }
+	};
+
+	dbConn(self.logger).filterColl(adminDatabase, collection, filter, {}, function (err, docs) {
+		if (err.value)
+		{
+			return callback(err);
+		}
+
+		var rolesToReturn = [];
+
+		for (var i = 0; i < docs.length; i++)
+		{
+			if (docs[i]["privileges"].length)
+			{
+				if (readWriteAny !== C.REPO_ANY)
+				{
+					var validActions= docs[i]["privileges"][0]["actions"];
+					var privilegeType = 0;
+
+					if (validActions.indexOf("find") !== -1) { privilegeType |= 1; };
+					if (validActions.indexOf("insert") !== -1) { privilegeType |= 2; };
+
+					if (privilegeType === readWriteAny)
+					{
+						rolesToReturn.push(docs[i]);
+					}
+				} else {
+					 rolesToReturn.push(docs[i]);
+				}
+			}
+		}
+
+		// Add role settings (like role color) to the returned data
+		if (rolesToReturn.length > 0) {
+			var roles = rolesToReturn.map(function(role) {
+				return role.role;
+			});
+			self.getRoleSettings(dbName, roles, function (err, roleSettings) {
+				if (roleSettings.length > 0) {
+					for (i = 0; i < roleSettings.length; i += 1) {
+						rolesToReturn[i].color = roleSettings[i].color;
+					}
+				}
+				return callback(responseCodes.OK, rolesToReturn);
+			});
+		}
+		else {
+			return callback(responseCodes.OK, rolesToReturn);
+		}
+	});
+};
+
+// Get list of roles to check permissions on a project
+// Get a user's current role for a project
+// Get a list of valid roles for a project and their associated role.
+
+/*******************************************************************************
+ * Get settings for a particular role
+ *
+ * @param {string} dbName - Database name which holds the project
+ * @param {array} roles - list of role names
+ * @param {function} callback - function to return the list of roles
+ ******************************************************************************/
+DBInterface.prototype.getRoleSettings = function(dbName, roles, callback)
+{
+	"use strict";
+	var self = this;
+
+	if (roles.constructor !== Array)
+	{
+		roles = [roles];
+	}
+
+	var filter = { _id : { $in : roles}};
+
+	dbConn(self.logger).filterColl(dbName, "settings.roles", filter, {}, function (err, docs) {
+		if (err.value)
+		{
+			return callback(responseCodes.DB_ERROR(err), []);
+		}
+
+		return callback(responseCodes.OK, docs);
+	});
+};
+
+DBInterface.prototype.getUserRolesForProject = function(database, project, username, callback)
+{
+	"use strict";
+	var self = this;
+
+	self.getRolesByProject(database, project, C.REPO_ANY, function(err, projectRoles) {
+		if (err.value)
+		{
+			return callback(err);
+		}
+
+		var projectRoleNames = projectRoles.map(function(projectRole) { return projectRole["role"]; });
+
+		self.getUserRoles(username, database, function(err, userRoles) {
+			var userRoleNames = userRoles.map(function(userRole) { return userRole["role"]; });
+			var rolesToReturn = [];
+
+			for(var i = 0; i < userRoleNames.length; i++)
+			{
+				if(projectRoleNames.indexOf(userRoleNames[i]) !== -1)
+				{
+					rolesToReturn.push(userRoleNames[i]);
+				}
+			}
+
+			return callback(responseCodes.OK, rolesToReturn);
+		});
+	});
+};
+
+/******************************************************************************
+ * Get roles granted to a user within a specific database
+ * The function will find all roles within the specified database and also
+ * admin database and return this on the callback
+ *
+ * @param {string} username - username of the user
+ * @param {string} database - database we are interested in
+ * @param {function} callback - get filtered roles from database
+ *								pass to callback as parameter
+ ******************************************************************************/
+DBInterface.prototype.getRoles = function (database, username, full, callback) {
+	"use strict";
+	var self = this;
+
+	var dbName = "admin";
+	var collName = "system.users";
+	var filter = {};
+	var rolesToReturn = [];
+
+	// If the username is supplied, start by getting the roles just for this user
+	if (username)
+	{
+		self.getUserRoles(username, dbName, function (err, userRoles)
+		{
+			if (err.value)
+			{
+				return callback(err);
+			}
+
+			var roleNames = userRoles.map( function (userRole) {
+				return userRole["_id"].replace(".history", "");
+			});
+
+			self.getRoleSettings(database, roleNames, function(err, roleSettings)
+			{
+				for (var i = 0; i < roleNames.length; i++)
+				{
+					delete roleSettings[i]["_id"]; // Delete the ID attach to the settings
+					_.extend(userRoles[i], roleSettings[i]);
+				}
+
+				return callback(responseCodes.OK, userRoles);
+			});
+
+		});
+	} else {
+		self.getRolesByDatabase(database, C.REPO_ANY, function(err, dbRoles) {
+			if (err.value)
+			{
+				return callback(err);
+			}
+
+			var roleNames = dbRoles.map( function (dbRole) {
+				return dbRole["_id"].replace(".history", "");
+			});
+
+			self.getRoleSettings(database, roleNames, function(err, roleSettings)
+			{
+				for (var i = 0; i < roleNames.length; i++)
+				{
+					delete roleSettings[i]["_id"]; // Delete the ID attach to the settings
+					_.extend(dbRoles[i], roleSettings[i]);
+				}
+
+				return callback(responseCodes.OK, dbRoles);
+			});
+		});
+	}
+};
+
+/*******************************************************************************
+ * Get roles granted to a user within a specific database
+ * The function will find all roles within the specified database and also
+ * admin database and return this on the callback
+ *
+ * @param {string} username - username of the user
+ * @param {string} database - database we are interested in
+ * @param {function} callback - get filtered roles from database
+ *								pass to callback as parameter
+ ******************************************************************************/
+DBInterface.prototype.getUserRoles = function (username, database, callback) {
+	"use strict";
+	var self = this;
+
+	var dbName = "admin";
+	var collName = "system.users"
+	var filter = { "user" : username };
+
+	//only return roles in admin and the specified database, the rest are irrelevant.
+	var projection = { "roles" : 1 };
+
+	dbConn(self.logger).filterColl(dbName, collName, filter, projection, function(err, docs) {
+		if (err.value) {
+			return callback(err);
+		}
+
+		if (docs.length != 1) {
+			self.logger.logError("Unexpected number of documents found in getUserRoles(). size:" + docs.length);
+			return callback(responseCodes.USER_NOT_FOUND, docs);
+		}
+
+		if (database)
+		{
+			var roles = [];
+			for (i = 0; i < docs[0]["roles"].length; i++) {
+				if (docs[0]["roles"][i]["db"] == dbName || docs[0]["roles"][i]["db"] == database) {
+					roles.push(docs[0]["roles"][i]);
+				}
+			}
+		} else {
+			roles = docs[0]["roles"];
+		}
+
+		callback(responseCodes.OK, roles);
+	});
+};
+
+/*******************************************************************************
+ * Get the list of privileges the user has on the database
+ *
+ * @param {string} username - username of the user
+ * @param {string} database - database we are interested in
+ * @param {function} callback - get filtered privileges from database
+ *								pass to callback as parameter
+ ******************************************************************************/
+DBInterface.prototype.getUserPrivileges = function (username, database, callback) {
+    "use strict";
+    var self = this;
+
+    var adminDB = "admin";
+
+    //First get all the roles this user is granted within the databases of interest
+     self.getUserRoles(username, database, function (status, roles) {
+            if (status.value) {
+                return callback(responseCodes.DB_ERROR(status));
+            }
+
+            if (!roles || roles.length == 0) {
+                //no roles under this user, no point trying to find privileges
+                return callback(responseCodes.OK, []);
+        }
+
+        dbConn(self.logger).dbCallback(adminDB, function (err, dbConn) {
+            var command = { rolesInfo : roles, showPrivileges: true };
+            //Given the roles, get the privilege information
+            dbConn(self.logger).command(command, function (err, docs) {
+                if (err) {
+                    return callback(responseCodes.DB_ERROR(err));
+                }
+
+                if (!docs || docs["roles"].length == 0) {
+                    //No privileges return empty array
+                    return callback(responseCodes.OK, []);
+                }
+
+                var rolesArr = docs["roles"];
+                var privileges = [];
+
+                for (i = 0; i < rolesArr.length; i++) {
+                    privileges = privileges.concat(rolesArr[i]["inheritedPrivileges"]);
+                }
+                self.logger.logDebug(privileges.length + "privileges found.");
+                callback(responseCodes.OK, privileges);
+            });
+        });
+    });
+
 };
 
 DBInterface.prototype.uuidToString = uuidToString;

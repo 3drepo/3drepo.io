@@ -42,13 +42,14 @@
 
 	function IssuesCtrl($scope, $rootScope, $element, $timeout, $mdDialog, $filter, EventService, NewIssuesService, ViewerService) {
 		var vm = this,
-			promise = null,
-			i = 0,
-			j = 0,
-			length = 0,
+			promise,
+			rolesPromise,
+			projectUserRolesPromise,
 			sortedIssuesLength,
 			sortOldestFirst = true,
-			showClosed = false;
+			showClosed = false,
+			issue,
+			rolesToFilter = [];
 
 		vm.pickedAccount = null;
 		vm.pickedProject = null;
@@ -59,11 +60,30 @@
 		vm.globalClickWatch = null;
 		vm.saveIssueDisabled = true;
 		vm.issues = [];
+		vm.showProgress = true;
+		vm.progressInfo = "Loading issues";
+		vm.showIssuesInfo = false;
+		vm.issuesInfo = "There are currently no open issues";
+		vm.avialableRoles = [];
+		vm.projectUserRoles = [];
 
 		promise = NewIssuesService.getIssues();
 		promise.then(function (data) {
+			vm.showProgress = false;
 			vm.issues = data;
+			vm.showIssuesInfo = (vm.issues.length === 0);
 			setupIssuesToShow();
+			vm.showPins();
+		});
+
+		rolesPromise = NewIssuesService.getRoles();
+		rolesPromise.then(function (data) {
+			vm.avialableRoles = data;
+		});
+
+		projectUserRolesPromise = NewIssuesService.getUserRolesForProject();
+		projectUserRolesPromise.then(function (data) {
+			vm.projectUserRoles = data;
 		});
 
 		$scope.$watch("vm.showAdd", function (newValue) {
@@ -83,6 +103,8 @@
 		});
 
 		function setupIssuesToShow () {
+			var i = 0, j = 0, length = 0, roleAssigned;
+
 			if (angular.isDefined(vm.issues)) {
 				if (vm.issues.length > 0) {
 					// Sort
@@ -100,27 +122,95 @@
 						}
 					}
 
-					// Filter
+					// Filter text
 					if (vm.filterText !== "") {
 						vm.issuesToShow = ($filter('filter')(vm.issuesToShow, vm.filterText));
 					}
 
-					// Closed
-					for (i = (vm.issuesToShow.length - 1); i >= 0; i -= 1) {
-						var pin = angular.element(document.getElementById(vm.issuesToShow[i]._id));
-						if (pin.length > 0) {
-							pin[0].setAttribute("render", "true");
-							if (!showClosed && vm.issuesToShow[i].hasOwnProperty("closed")) {
-								pin[0].setAttribute("render", "false");
+					// Don't show issues assigned to certain roles
+					if (rolesToFilter.length > 0) {
+						for (i = (vm.issuesToShow.length - 1); i >= 0; i -= 1) {
+							roleAssigned = false;
+							for (j = 0, length = vm.issuesToShow[i].assigned_roles.length; j < length; j += 1) {
+								if (rolesToFilter.indexOf(vm.issuesToShow[i].assigned_roles[j]) !== -1) {
+									roleAssigned = true;
+								}
+							}
+							if (roleAssigned) {
 								vm.issuesToShow.splice(i, 1);
 							}
 						}
 					}
+
+					// Closed
+					for (i = (vm.issuesToShow.length - 1); i >= 0; i -= 1) {
+						if (!showClosed && vm.issuesToShow[i].hasOwnProperty("closed") && vm.issuesToShow[i].closed) {
+							vm.issuesToShow.splice(i, 1);
+						}
+					}
+
+					// Un-expand any expanded issue
+					vm.commentsToggledIssueId = null;
 				}
 			}
 		}
 
+		vm.showPins = function () {
+			var i, j, length, assignedRolesLength,
+				pin, pinData, pinColor,
+				roleAssigned;
+
+			for (i = 0, length = vm.issues.length; i < length; i += 1) {
+				pin = angular.element(document.getElementById(vm.issues[i]._id));
+				if (pin.length > 0) {
+					// Existing pin
+					pin[0].setAttribute("render", "true");
+
+					// Closed
+					if (!showClosed && vm.issues[i].hasOwnProperty("closed") && vm.issues[i].closed) {
+						pin[0].setAttribute("render", "false");
+					}
+
+					// Role filter
+					if (rolesToFilter.length > 0) {
+						roleAssigned = false;
+						for (j = 0, assignedRolesLength = vm.issues[i].assigned_roles.length; j < assignedRolesLength; j += 1) {
+							if (rolesToFilter.indexOf(vm.issues[i].assigned_roles[j]) !== -1) {
+								roleAssigned = true;
+							}
+						}
+						if (roleAssigned) {
+							pin[0].setAttribute("render", "false");
+						}
+					}
+				}
+				else {
+					// New pin
+					if (!vm.issues[i].hasOwnProperty("closed") ||
+						(vm.issues[i].hasOwnProperty("closed") && !vm.issues[i].closed) ||
+						(showClosed && vm.issues[i].hasOwnProperty("closed") && vm.issues[i].closed)) {
+						pinData =
+							{
+								id: vm.issues[i]._id,
+								account: vm.issues[i].account,
+								project: vm.issues[i].project,
+								position: vm.issues[i].position,
+								norm: vm.issues[i].norm
+							};
+						if (vm.issues[i].assigned_roles.length > 0) {
+							pinColor = NewIssuesService.hexToRgb(NewIssuesService.getRoleColor(vm.issues[i].assigned_roles[0]));
+						}
+						else {
+							pinColor = [1.0, 1.0, 1.0];
+						}
+						NewIssuesService.fixPin(pinData, pinColor);
+					}
+				}
+			}
+		};
+
 		$scope.$watch("vm.selectedOption", function (newValue) {
+			var role, roleIndex;
 			if (angular.isDefined(newValue)) {
 				if (newValue.value === "sortByDate") {
 					sortOldestFirst = !sortOldestFirst;
@@ -128,7 +218,18 @@
 				else if (newValue.value === "showClosed") {
 					showClosed = !showClosed;
 				}
+				else if (newValue.value.indexOf("filterRole") !== -1) {
+					role = newValue.value.split("_")[1];
+					roleIndex = rolesToFilter.indexOf(role);
+					if (roleIndex !== -1) {
+						rolesToFilter.splice(roleIndex, 1);
+					}
+					else {
+						rolesToFilter.push(role);
+					}
+				}
 				setupIssuesToShow();
+				vm.showPins();
 			}
 		});
 
@@ -149,44 +250,62 @@
 		};
 
 		vm.saveIssue = function () {
-			if (angular.isDefined(vm.title) && (vm.title !== "")) {
-				if (vm.pickedPos === null) {
-					vm.showAlert();
-				}
-				else {
-					promise = NewIssuesService.saveIssue(vm.pickedAccount, vm.pickedProject, vm.title, vm.selectedObjectId, vm.pickedPos, vm.pickedNorm);
-					promise.then(function (data) {
-						vm.issues.push(data);
-						vm.title = "";
-						vm.pickedAccount = null;
-						vm.pickedProject = null;
-						vm.pickedTrans	 = null;
-						vm.pickedPos = null;
-						vm.pickedNorm = null;
-						if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
-							vm.saveCommentWithIssue(data, vm.comment);
-							vm.comment = "";
-						}
+			if (vm.projectUserRoles.length === 0) {
+				vm.showAlert("You do not have permission to save an issue");
+			}
+			else {
+				if (angular.isDefined(vm.title) && (vm.title !== "")) {
+					if (vm.pickedPos === null) {
+						vm.showAlert("Add a pin before saving");
+					}
+					else {
+						issue = {
+							account: vm.pickedAccount,
+							project: vm.pickedProject,
+							name: vm.title,
+							objectId: vm.selectedObjectId,
+							pickedPos: vm.pickedPos,
+							pickedNorm: vm.pickedNorm,
+							creator_role: vm.projectUserRoles[0]
+						};
+						promise = NewIssuesService.saveIssue(issue);
+						promise.then(function (data) {
+							vm.issues.push(data);
+							vm.title = "";
+							vm.pickedAccount = null;
+							vm.pickedProject = null;
+							vm.pickedTrans	 = null;
+							vm.pickedPos = null;
+							vm.pickedNorm = null;
+							if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
+								vm.saveCommentWithIssue(data, vm.comment);
+								vm.comment = "";
+							}
 
-						vm.showAdd = false;
+							vm.showAdd = false;
 
-						setupIssuesToShow();
-					});
+							setupIssuesToShow();
+							vm.showPins();
+						});
+					}
 				}
 			}
 		};
 
-		vm.closeIssue = function (issue) {
-			promise = NewIssuesService.closeIssue(issue);
+		vm.toggleCloseIssue = function (issue) {
+			var i = 0, length = 0;
+
+			promise = NewIssuesService.toggleCloseIssue(issue);
 			promise.then(function (data) {
 				for (i = 0, length = vm.issues.length; i < length; i += 1) {
 					if (issue._id === vm.issues[i]._id) {
-						vm.issues[i].closed = data.closed;
-						vm.issues[i].closed_time = data.created; // TODO: Shouldn't really use the created value
+						vm.issues[i].closed = data.issue.closed;
+						//vm.issues[i].closed_time = data.created; // TODO: Shouldn't really use the created value
 						break;
 					}
 				}
 				setupIssuesToShow();
+				vm.showPins();
 			});
 		};
 
@@ -235,13 +354,16 @@
 							vm.pickedNorm = vm.pickedTrans.transpose().multMatrixVec(pickObj.pickNorm);
 							vm.pickedPos = vm.pickedTrans.inverse().multMatrixVec(pickObj.pickPos);
 
-							NewIssuesService.addPin({
-								id: undefined,
-								account: vm.pickedAccount,
-								project: vm.pickedProject,
-								position: vm.pickedPos.toGL(),
-								norm: vm.pickedNorm.toGL()
-							});
+							NewIssuesService.addPin(
+								{
+									id: undefined,
+									account: vm.pickedAccount,
+									project: vm.pickedProject,
+									position: vm.pickedPos.toGL(),
+									norm: vm.pickedNorm.toGL()
+								},
+								NewIssuesService.hexToRgb(NewIssuesService.getRoleColor(vm.projectUserRoles[0]))
+							);
 						}
 						else {
 							NewIssuesService.removePin();
@@ -329,12 +451,12 @@
 			});
 		});
 
-		vm.showAlert = function() {
+		vm.showAlert = function(title) {
 			$mdDialog.show(
 				$mdDialog.alert()
 					.parent(angular.element($element[0].querySelector("#issuesAddContainer")))
 					.clickOutsideToClose(true)
-					.title("Add a pin before saving")
+					.title(title)
 					.ariaLabel("Pin alert")
 					.ok("OK")
 			);
