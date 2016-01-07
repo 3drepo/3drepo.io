@@ -52,18 +52,25 @@ module.exports = function(grunt) {
                 forin: true,
                 freeze: true,
                 futurehostile: true,
-                maxcomplexity: 4,
-                maxdepth: 2,
+                maxcomplexity: 6,
+                maxdepth: 4,
                 strict: true,
                 unused: true,
                 varstmt: true,
+                strict: false,
+                esnext: true,
                 // options here to override JSHint defaults
                 globals: {
                     console: true,
                     module: true,
                     document: true
                 }
+            },
+
+            backend:{
+                files: { src: ['js/core/**/*.js', 'services/*.js']}
             }
+
         }
     });
 

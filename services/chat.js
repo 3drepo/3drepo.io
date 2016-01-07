@@ -15,19 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var systemLogger = require("../js/core/logger.js").systemLogger;
 
-var sharedSession = require("express-socket.io-session");
-var config = require("../js/core/config.js");
 
 module.exports.init = function (session, listener) {
 	"use strict";
 
-	var socketio = require("socket.io")(listener, { path: config.api_server.chat_path });
-	var dbInterface = require("../js/core/db_interface.js");
+	let systemLogger = require("../js/core/logger.js").systemLogger;
 
-	var issueMonitoring   = {};
-	var projectMonitoring = {};
+	let sharedSession = require("express-socket.io-session");
+	let config = require("../js/core/config.js");
+
+	let socketio = require("socket.io")(listener, { path: config.api_server.chat_path });
+	let dbInterface = require("../js/core/db_interface.js");
+
+	let issueMonitoring   = {};
+	let projectMonitoring = {};
 
 	socketio.use(sharedSession(session, { autoSave: true }));
 
@@ -40,18 +42,18 @@ module.exports.init = function (session, listener) {
 			});
 
 		socket.on("new_issue", function(data) {
-			var username = socket.handshake.session.user.username;
+			let username = socket.handshake.session.user.username;
 
 			dbInterface(systemLogger).hasWriteAccessToProject(username, data.account, data.project, function(err) {
 				if (!err.value)
 				{
-					var proj_account_key = data.account + "__" + data.project;
+					let proj_account_key = data.account + "__" + data.project;
 
 					if (projectMonitoring[proj_account_key])
 					{
-						for(var i = 0; i < projectMonitoring[proj_account_key].length; i++)
+						for(let i = 0; i < projectMonitoring[proj_account_key].length; i++)
 						{
-							var clientSocket = projectMonitoring[proj_account_key][i];
+							let clientSocket = projectMonitoring[proj_account_key][i];
 
 							if (clientSocket !== socket) {
 								clientSocket.emit("new_issue", data);
@@ -65,7 +67,7 @@ module.exports.init = function (session, listener) {
 		});
 
 		socket.on("open_issue", function(data) {
-			var username = socket.handshake.session.user.username;
+			let username = socket.handshake.session.user.username;
 
 			dbInterface(systemLogger).hasReadAccessToProject(username, data.account, data.project, function(err) {
 				if (!err.value)
@@ -83,10 +85,10 @@ module.exports.init = function (session, listener) {
 		});
 
 		socket.on("watch_project", function(data) {
-			var username = socket.handshake.session.user.username;
+			let username = socket.handshake.session.user.username;
 
 			dbInterface(systemLogger).hasReadAccessToProject(username, data.account, data.project, function(err) {
-				var proj_account_key = data.account + "__" + data.project;
+				let proj_account_key = data.account + "__" + data.project;
 
 				if (!err.value)
 				{
@@ -104,7 +106,7 @@ module.exports.init = function (session, listener) {
 
 		socket.on("post_comment", function(data)
 		{
-			var username = socket.handshake.session.user.username;
+			let username = socket.handshake.session.user.username;
 
 			dbInterface(systemLogger).hasWriteAccessToProject(username, data.account, data.project, function(err) {
 				if (!err.value)
@@ -112,16 +114,17 @@ module.exports.init = function (session, listener) {
 					if (issueMonitoring[data.id])
 					{
 						// Clean up the data to send back to the client
-						delete data["account"];
-						delete data["project"];
-						data["owner"] = username;
+						delete data.account;
+						delete data.project;
+						data.owner = username;
 
-						for(var i = 0; i < issueMonitoring[data.id].length; i++)
+						for(let i = 0; i < issueMonitoring[data.id].length; i++)
 						{
-							var clientSocket = issueMonitoring[data.id][i];
+							let clientSocket = issueMonitoring[data.id][i];
 
-							if (clientSocket !== socket)
+							if (clientSocket !== socket){
 								clientSocket.emit("post_comment", data);
+							}
 						}
 					}
 				} else {

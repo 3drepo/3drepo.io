@@ -16,7 +16,7 @@
  */
 
 var hostname   = "example.org";
-var http_port  = 80;
+var http_port  = 8000;
 var https_port = 443;
 
 module.exports = {

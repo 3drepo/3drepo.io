@@ -15,27 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var log_iface = require("../js/core/logger.js");
-
-var express = require("express");
-var routes = require("../routes.js")();
-var config = require("../js/core/config.js");
-var compress = require("compression");
-
-// Attach the encoders to the router
-require("../js/core/encoders/x3dom_encoder.js").route(routes);
-require("../js/core/encoders/json_encoder.js").route(routes);
-//var html_encoder = require("./js/core/encoders/html_encoder.js").route(routes);
-require("../js/core/encoders/src_encoder.js").route(routes);
-require("../js/core/encoders/img_encoder.js").route(routes);
-require("../js/core/encoders/bin_encoder.js").route(routes);
-
-var bodyParser = require("body-parser");
 
 module.exports.app = function (sharedSession) {
 	"use strict";
 
-	var app = express();
+	//let log_iface = require("../js/core/logger.js");
+
+	let express = require("express");
+	let routes = require("../routes.js")();
+	let config = require("../js/core/config.js");
+	let compress = require("compression");
+
+	// Attach the encoders to the router
+	require("../js/core/encoders/x3dom_encoder.js").route(routes);
+	require("../js/core/encoders/json_encoder.js").route(routes);
+	//var html_encoder = require("./js/core/encoders/html_encoder.js").route(routes);
+	require("../js/core/encoders/src_encoder.js").route(routes);
+	require("../js/core/encoders/img_encoder.js").route(routes);
+	require("../js/core/encoders/bin_encoder.js").route(routes);
+
+	let bodyParser = require("body-parser");
+
+	let app = express();
 
 	app.use(bodyParser.urlencoded({
 		extended: true
@@ -48,7 +49,7 @@ module.exports.app = function (sharedSession) {
 	// Allow cross origin requests to the API server
 	if (config.crossOrigin)
 	{
-		var allowCrossDomain = function(req, res, next) {
+		let allowCrossDomain = function(req, res, next) {
 			res.header("Access-Control-Allow-Origin", req.get("origin"));
 			res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
 			res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, Content-Length, X-Requested-With");

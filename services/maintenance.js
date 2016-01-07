@@ -15,24 +15,31 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var express = require('express');
-var app = express();
+(function(){
+	'use strict';
+	
+	let express = require('express');
+	let app = express();
 
-app.engine('html', require('jade').renderFile);
-app.use(express.static('main'));
-app.set('view engine', 'html');
-app.set('views', 'main');
+	app.engine('html', require('jade').renderFile);
+	app.use(express.static('main'));
+	app.set('view engine', 'html');
+	app.set('views', 'main');
 
-app.get('/', function(req, res) {
-	res.render('maintenance.jade');
-});
+	app.get('/', function(req, res) {
+		res.render('maintenance.jade');
+	});
 
-app.listen(8080);
+	app.listen(8080);
 
-var https_app = express();
+	let https_app = express();
 
-https_app.get('*', function(req, res) {
-	res.redirect('http://' + req.headers.host + req.url);
-});
+	https_app.get('*', function(req, res) {
+		res.redirect('http://' + req.headers.host + req.url);
+	});
 
-https_app.listen(443);
+	https_app.listen(443);
+
+})();
+
+
