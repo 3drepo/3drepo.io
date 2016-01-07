@@ -59,7 +59,7 @@ function($stateProvider, $locationProvider) {
 
 	return o;
 }])
-.controller('BaseCtrl', ['$scope', 'StateManager', 'Auth', function($scope, StateManager, Auth)
+.controller('BaseCtrl', ['$scope', 'serverConfig', 'StateManager', function($scope, serverConfig, StateManager)
 {
 	$scope.ui		= StateManager.ui;
 	$scope.Data		= StateManager.Data;
@@ -73,6 +73,8 @@ function($stateProvider, $locationProvider) {
 			Auth.loadProjectRoles($scope.state.account, $scope.state.project);
 		}
 	});
+
+	$scope.backgroundImage = serverConfig.backgroundImage;
 }])
 .run(['StateManager', function(StateManager) {
 	StateManager.registerPlugin('base', 'BaseData', function () {
