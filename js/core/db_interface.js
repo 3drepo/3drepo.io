@@ -501,13 +501,15 @@ DBInterface.prototype.getAvatar = function(username, callback) {
 	};
 
 	dbConn(this.logger).filterColl("admin", "system.users", filter, projection, function(err, coll) {
-		if(err.value)
+		if(err.value) {
 			return callback(err);
+		}
 
-		if (coll[0])
+		if (coll.length) {
 			callback(responseCodes.OK, coll[0]["customData"]["avatar"]);
-		else
+		} else {
 			callback(responseCodes.USER_NOT_FOUND, null);
+		}
 	});
 };
 
