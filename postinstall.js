@@ -34,6 +34,9 @@ var public_files = {
 		jqueryuijs : '/public/js/external/jquery-ui.js',
 		angularutilsjs: '/public/js/external/angular-ui-utils.min.js',
 		angularrouterjs: '/public/js/external/angular-ui-router.js',
+		bootstrapjs: '/public/js/external/bootstrap.min.js',
+		bootstrapdialog: '/public/js/external/bootstrap-dialog.min.js',
+		uibootstrap: '/public/js/external/ui-bootstrap-tpls-0.12.0.min.js',
 		momentjs: '/public/js/external/moment.js',
 		showdownjs: '/public/js/external/showdown.min.js',
 		jqueryfancytree: '/public/js/external/jquery.fancytree-all.js',
@@ -45,6 +48,7 @@ var public_files = {
         angularanimatejs: '/public/js/external/angular-animate.min.js',
         angularariajs: '/public/js/external/angular-aria.min.js',
 		angularsanitizejs: '/public/js/external/angular-sanitize.min.js',
+		angularuitreejs: '/public/js/external/angular-ui-tree.min.js',
 
 		// QR Code stuff
 		qrgrid: '/public/js/external/qrcode/grid.js',
@@ -72,8 +76,10 @@ var public_files = {
 		fancytreecss: '/public/css/external/ui.fancytree.min.css',
 		jqueryuicss: '/public/css/external/jquery-ui.css',
 		repouicss : '/public/css/ui.css',
+		bootstrapcss: '/public/css/external/bootstrap.min.css',
 		slidercss: '/public/css/external/bootstrap-slider.css',
-        angularmaterialcss: '/public/css/external/angular-material.min.css'
+        angularmaterialcss: '/public/css/external/angular-material.min.css',
+		angularuitreecss: '/public/css/external/angular-ui-tree.min.css'
 	}
 }
 

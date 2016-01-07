@@ -59,7 +59,7 @@ function($stateProvider, $locationProvider) {
 
 	return o;
 }])
-.controller('BaseCtrl', ['$scope', 'serverConfig', 'StateManager', function($scope, serverConfig, StateManager)
+.controller('BaseCtrl', ['$scope', 'serverConfig', 'StateManager', 'Auth', function($scope, serverConfig, StateManager, Auth)
 {
 	$scope.ui		= StateManager.ui;
 	$scope.Data		= StateManager.Data;

@@ -208,6 +208,7 @@
 			pinshapedepth.setAttribute("enableDepthTest", ghostPin);
 			pinshapeapp.appendChild(pinshapedepth);
 
+			/*
 			if(ghostPin)
 			{
 				var pinshader = document.createElement("ComposedShader");
@@ -226,6 +227,7 @@
 
 				pinshapeapp.appendChild(pinshader);
 			}
+			*/
 
 			var pinshapemat = document.createElement("Material");
 			if (typeof colour === "undefined") {
@@ -234,6 +236,7 @@
 			else {
 				pinshapemat.setAttribute("diffuseColor", colour[0] + " " + colour[1] + " " + colour[2]);
 			}
+			pinshapemat.setAttribute("transparency", 1.0 - trans);
 
 			pinshapeapp.appendChild(pinshapemat);
 			var pinshapescale = document.createElement("Transform");
@@ -279,7 +282,7 @@
 			parentElement.appendChild(pinshape);
 		}
 
-		function createPinShape (id, pin, radius, height, scale)
+		function createPinShape (id, pin, radius, height, scale, colour)
 		{
 			var sceneBBox = ViewerService.defaultViewer.scene._x3domNode.getVolume();
 			var sceneSize = sceneBBox.max.subtract(sceneBBox.min).length();
@@ -323,8 +326,6 @@
 			modelTransform.setAttribute("translation", position.toString());
 
 			parent.appendChild(modelTransform);
-
-			var colour = "1.0 0.0 0.0";
 
 			createBasicPinShape(modelTransform, "ALWAYS", colour, 0.1, radius, height, scale, false);
 			createBasicPinShape(modelTransform, "LESS", colour, 0.9, radius, height, scale, true);

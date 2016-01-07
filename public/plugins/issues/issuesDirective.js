@@ -131,11 +131,15 @@
 					if (rolesToFilter.length > 0) {
 						for (i = (vm.issuesToShow.length - 1); i >= 0; i -= 1) {
 							roleAssigned = false;
-							for (j = 0, length = vm.issuesToShow[i].assigned_roles.length; j < length; j += 1) {
-								if (rolesToFilter.indexOf(vm.issuesToShow[i].assigned_roles[j]) !== -1) {
-									roleAssigned = true;
+
+							if (vm.issuesToShow[i].hawOwnProperty("assigned_roles")) {
+								for (j = 0, length = vm.issuesToShow[i].assigned_roles.length; j < length; j += 1) {
+									if (rolesToFilter.indexOf(vm.issuesToShow[i].assigned_roles[j]) !== -1) {
+										roleAssigned = true;
+									}
 								}
 							}
+
 							if (roleAssigned) {
 								vm.issuesToShow.splice(i, 1);
 							}
@@ -174,11 +178,15 @@
 					// Role filter
 					if (rolesToFilter.length > 0) {
 						roleAssigned = false;
-						for (j = 0, assignedRolesLength = vm.issues[i].assigned_roles.length; j < assignedRolesLength; j += 1) {
-							if (rolesToFilter.indexOf(vm.issues[i].assigned_roles[j]) !== -1) {
-								roleAssigned = true;
+
+						if (vm.issuesToShow[i].hawOwnProperty("assigned_roles")) {
+							for (j = 0, assignedRolesLength = vm.issues[i].assigned_roles.length; j < assignedRolesLength; j += 1) {
+								if (rolesToFilter.indexOf(vm.issues[i].assigned_roles[j]) !== -1) {
+									roleAssigned = true;
+								}
 							}
 						}
+
 						if (roleAssigned) {
 							pin[0].setAttribute("render", "false");
 						}
@@ -197,7 +205,8 @@
 								position: vm.issues[i].position,
 								norm: vm.issues[i].norm
 							};
-						if (vm.issues[i].assigned_roles.length > 0) {
+
+						if (vm.issues[i].hasOwnProperty("assigned_roles") && vm.issues[i].assigned_roles.length > 0) {
 							pinColor = NewIssuesService.hexToRgb(NewIssuesService.getRoleColor(vm.issues[i].assigned_roles[0]));
 						}
 						else {
