@@ -134,8 +134,8 @@ var public_dir_js	= path.normalize("public/js/external");
 var public_dir_css	= path.normalize("public/css/external");
 
 install_bower();
-install_x3dom();
 write_common_files_list();
+install_x3dom();
 
 /*
  * install bower components and publicize the relevant files.
@@ -195,6 +195,8 @@ function install_x3dom(){
 function make_symlink(file, target_dir){
 	var fname = path.normalize(file);
 	var target_path = path.join(target_dir, path.basename(fname)) ;
+
+	console.log("Making symlink " + fname + " => " + target_path);
 
 	if (platform === 'win32') {
 		//TODO: check file exists before calling this.
@@ -306,6 +308,8 @@ function write_common_files_list(){
 
 	var files_to_str = obj_to_string(public_files, 'debug_scripts', false);
 	var min_files_to_str = obj_to_string(public_files, 'prod_scripts', true);
+
+	console.log(files_to_str);
 
 	wstream.once('open', function(fd){
 		wstream.write('/*\n * ========== !!!! DO NOT ALTER THIS FILE !!!! =======\n');
