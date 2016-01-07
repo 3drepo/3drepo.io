@@ -151,8 +151,12 @@
             return deferred.promise;
         }
 
-        var closeIssue = function (issue) {
-            return doPost(issue, {closed: true, number: issue.number});
+        var toggleCloseIssue = function (issue) {
+			var closed = true;
+			if (issue.hasOwnProperty("closed")) {
+				closed = !issue.closed;
+			}
+            return doPost(issue, {closed: closed, number: issue.number});
         };
 
 		var assignIssue = function (issue) {
@@ -327,7 +331,6 @@
 			$http.get(url)
 				.then(
 					function(data) {
-						console.log(data);
 						deferred.resolve(data.data);
 					},
 					function () {
@@ -382,7 +385,7 @@
             getPrettyTime: getPrettyTime,
             getIssues: getIssues,
             saveIssue: saveIssue,
-            closeIssue: closeIssue,
+			toggleCloseIssue: toggleCloseIssue,
 			assignIssue: assignIssue,
             saveComment: saveComment,
             editComment: editComment,

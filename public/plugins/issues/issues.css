@@ -129,7 +129,7 @@ issue .issueCommentsContainer .issueCommentInfo p {
 issue .issueCommentsContainer .issueCommentsFooter {
   margin-top: -15px;
   padding-bottom: 10px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  /*border-bottom: 1px solid rgba(0, 0, 0, 0.12);*/
 }
 
 md-list-item.issueRole {
@@ -140,4 +140,11 @@ md-list-item .issueAssignColourMarker {
   width: 10px;
   height: 25px;
   margin-right: 10px;
+}
+
+issue .issueOpenContainer {
+  margin-top: 10px;
+}
+issue .issueOpenContainer button {
+  margin-left: 220px;
 }

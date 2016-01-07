@@ -34,20 +34,20 @@
 				md-input-container(md-no-float="", ng-if="vm.issueIsOpen")
 					textarea(placeholder="New comment", ng-model="vm.comment")
 
-			.issueCommentsFooter(layout="row", layout-align="start center")
-				md-button.md-raised.md-accent(ng-click="vm.saveComment()", ng-disabled="vm.saveCommentDisabled", ng-if="vm.issueIsOpen") Save
-
-				md-menu(ng-show="vm.issueIsOpen", md-position-mode="target-right target")
-					md-button.md-primary(ng-click="vm.openAssignedRolesMenu($mdOpenMenu, $event)") Assign
-					md-menu-content(width="4")
-						md-menu-item(ng-repeat="role in vm.roles")
-							md-list-item.issueRole
-								div(layout="row", layout-align="start center")
-									.issueAssignColourMarker(style="background:{{role.color}}")
-									| {{role.role}}
-								md-checkbox.md-secondary(ng-model="role.assigned", aria-label="Issue Assign")
-
-				md-button.md-primary.md-accent(ng-click="vm.closeIssue()", ng-if="vm.issueIsOpen") Close
-
+			.issueCommentsFooter
+				div(ng-if="vm.issueIsOpen",layout="row", layout-align="start center")
+					md-button.md-raised.md-accent(ng-click="vm.saveComment()", ng-disabled="vm.saveCommentDisabled") Save
+					md-menu(md-position-mode="target-right target")
+						md-button.md-primary(ng-click="vm.openAssignedRolesMenu($mdOpenMenu, $event)") Assign
+						md-menu-content(width="4")
+							md-menu-item(ng-repeat="role in vm.roles")
+								md-list-item.issueRole
+									div(layout="row", layout-align="start center")
+										.issueAssignColourMarker(style="background:{{role.color}}")
+										| {{role.role}}
+									md-checkbox.md-secondary(ng-model="role.assigned", aria-label="Issue Assign")
+					md-button.md-primary.md-accent(ng-click="vm.toggleCloseIssue()") Close
+				.issueOpenContainer(ng-if="!vm.issueIsOpen")
+					md-button.md-primary.md-accent(ng-click="vm.toggleCloseIssue()") Open
 
 	md-divider

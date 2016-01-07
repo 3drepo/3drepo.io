@@ -145,7 +145,7 @@
 				panelContent.right[0].options.push(
 					{
 						value: "filterRole_" + data[i].role,
-						label: "Filter " + data[i].role,
+						label: data[i].role,
 						toggle: true,
 						selected: true,
 						firstSelected: false,

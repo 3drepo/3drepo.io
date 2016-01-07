@@ -73,7 +73,7 @@
 			vm.issues = data;
 			vm.showIssuesInfo = (vm.issues.length === 0);
 			setupIssuesToShow();
-			showPins();
+			vm.showPins();
 		});
 
 		rolesPromise = NewIssuesService.getRoles();
@@ -144,7 +144,7 @@
 
 					// Closed
 					for (i = (vm.issuesToShow.length - 1); i >= 0; i -= 1) {
-						if (!showClosed && vm.issuesToShow[i].hasOwnProperty("closed")) {
+						if (!showClosed && vm.issuesToShow[i].hasOwnProperty("closed") && vm.issuesToShow[i].closed) {
 							vm.issuesToShow.splice(i, 1);
 						}
 					}
@@ -155,22 +155,40 @@
 			}
 		}
 
-		function showPins () {
-			var i = 0, length = 0,
-				pin, pinData, pinColor;
+		vm.showPins = function () {
+			var i, j, length, assignedRolesLength,
+				pin, pinData, pinColor,
+				roleAssigned;
 
 			for (i = 0, length = vm.issues.length; i < length; i += 1) {
 				pin = angular.element(document.getElementById(vm.issues[i]._id));
 				if (pin.length > 0) {
 					// Existing pin
 					pin[0].setAttribute("render", "true");
-					if (!showClosed && vm.issues[i].hasOwnProperty("closed")) {
+
+					// Closed
+					if (!showClosed && vm.issues[i].hasOwnProperty("closed") && vm.issues[i].closed) {
 						pin[0].setAttribute("render", "false");
+					}
+
+					// Role filter
+					if (rolesToFilter.length > 0) {
+						roleAssigned = false;
+						for (j = 0, assignedRolesLength = vm.issues[i].assigned_roles.length; j < assignedRolesLength; j += 1) {
+							if (rolesToFilter.indexOf(vm.issues[i].assigned_roles[j]) !== -1) {
+								roleAssigned = true;
+							}
+						}
+						if (roleAssigned) {
+							pin[0].setAttribute("render", "false");
+						}
 					}
 				}
 				else {
 					// New pin
-					if (!vm.issues[i].hasOwnProperty("closed") || (showClosed && vm.issues[i].hasOwnProperty("closed"))) {
+					if (!vm.issues[i].hasOwnProperty("closed") ||
+						(vm.issues[i].hasOwnProperty("closed") && !vm.issues[i].closed) ||
+						(showClosed && vm.issues[i].hasOwnProperty("closed") && vm.issues[i].closed)) {
 						pinData =
 							{
 								id: vm.issues[i]._id,
@@ -189,7 +207,7 @@
 					}
 				}
 			}
-		}
+		};
 
 		$scope.$watch("vm.selectedOption", function (newValue) {
 			var role, roleIndex;
@@ -211,7 +229,7 @@
 					}
 				}
 				setupIssuesToShow();
-				showPins();
+				vm.showPins();
 			}
 		});
 
@@ -267,26 +285,27 @@
 							vm.showAdd = false;
 
 							setupIssuesToShow();
+							vm.showPins();
 						});
 					}
 				}
 			}
 		};
 
-		vm.closeIssue = function (issue) {
-			var i = 0,
-				length = 0;
+		vm.toggleCloseIssue = function (issue) {
+			var i = 0, length = 0;
 
-			promise = NewIssuesService.closeIssue(issue);
+			promise = NewIssuesService.toggleCloseIssue(issue);
 			promise.then(function (data) {
 				for (i = 0, length = vm.issues.length; i < length; i += 1) {
 					if (issue._id === vm.issues[i]._id) {
-						vm.issues[i].closed = data.closed;
-						vm.issues[i].closed_time = data.created; // TODO: Shouldn't really use the created value
+						vm.issues[i].closed = data.issue.closed;
+						//vm.issues[i].closed_time = data.created; // TODO: Shouldn't really use the created value
 						break;
 					}
 				}
 				setupIssuesToShow();
+				vm.showPins();
 			});
 		};
 

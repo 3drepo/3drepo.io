@@ -29,9 +29,9 @@
 				data: "=",
 				onCommentsToggled: "&",
 				commentsToggledIssueId: "=",
-				onCloseIssue : "&",
-				issueClosed: "=",
-				availableRoles: "="
+				onToggleCloseIssue : "&",
+				availableRoles: "=",
+				onIssueAssignChange: "&"
 			},
 			controller: IssueCtrl,
 			controllerAs: "vm",
@@ -125,8 +125,13 @@
 			var i = 0, length = 0;
 
 			if (angular.isDefined(newValue)) {
-				vm.backgroundColor = newValue.hasOwnProperty("closed") ? "#E0E0E0" : "#FFFFFF";
-				vm.issueIsOpen = !newValue.hasOwnProperty("closed");
+				vm.backgroundColor = "#FFFFFF";
+				vm.issueIsOpen = true;
+				if ( newValue.hasOwnProperty("closed")) {
+					vm.backgroundColor = newValue.closed ? "#E0E0E0" : "#FFFFFF";
+					vm.issueIsOpen = !newValue.closed;
+				}
+
 				if (vm.issueIsOpen && newValue.hasOwnProperty("comments")) {
 					for (i = 0, length = newValue.comments.length; i < length; i += 1) {
 						newValue.comments[i].canDelete =
@@ -149,11 +154,12 @@
 							vm.data.assigned_roles.push(vm.roles[i].role);
 						}
 					}
-					setAssignedRolesColors();
 
 					promise = NewIssuesService.assignIssue(vm.data);
 					promise.then(function (data) {
 						console.log(data);
+						setAssignedRolesColors();
+						vm.onIssueAssignChange();
 					});
 				}
 			}, true);
@@ -253,8 +259,8 @@
 			}
 		};
 
-		vm.closeIssue = function () {
-			vm.onCloseIssue({issue: vm.data});
+		vm.toggleCloseIssue = function () {
+			vm.onToggleCloseIssue({issue: vm.data});
 		};
 
 		vm.hideInfo = function () {

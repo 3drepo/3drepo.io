@@ -1710,10 +1710,18 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
                     };
                 }
 			}
-            else if (data.closed) {
-				updateQuery = {
-					$set: { closed: true, closed_time: timeStamp }
-				};
+            else if (data.hasOwnProperty("closed")) {
+				if (data.closed) {
+					updateQuery = {
+						$set: { closed: true, closed_time: (new Date()).getTime() }
+					};
+				}
+				else {
+					updateQuery = {
+						$set: { closed: false },
+						$unset: { closed_time: "" }
+					};
+				}
 			}
 			else if (data.hasOwnProperty("assigned_roles")) {
 				updateQuery = {
@@ -1730,7 +1738,18 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 				if (err) return callback(responseCodes.DB_ERROR(err));
 
 				self.logger.logDebug("Updated " + count + " records.");
-				callback(responseCodes.OK, { account: dbName, project: project, issue_id : uuidToString(data._id), number: data.number, owner: owner, created: timeStamp });
+				callback(
+					responseCodes.OK,
+					{
+						account: dbName,
+						project: project,
+						issue: data,
+						issue_id : uuidToString(data._id),
+						number: data.number,
+						owner: owner,
+						created: timeStamp
+					}
+				);
 			});
 		}
 	});
