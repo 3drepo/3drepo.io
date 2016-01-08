@@ -17,7 +17,7 @@
 
 // Corresponds to repoNodeTransformation in C++ definition of 3D Repo
 
-var mongodb = require('mongodb');
+// var mongodb = require('mongodb');
 var assert = require('assert');
 var UUID = require('node-uuid');
 var C = require('./constants');
@@ -27,8 +27,8 @@ exports.decode = function(bson, meshes, cameras) {
 
 	//---------------------------------------------------------------------	
 	// Meshes & Cameras extraction	
-	var mMeshes = new Array();
-	var mCameras = new Array();
+	var mMeshes = [];
+	var mCameras = [];
 	if (bson[C.REPO_NODE_LABEL_CHILDREN])
 	{
 		for (var i = 0; i < bson[C.REPO_NODE_LABEL_CHILDREN].length; ++i) {			
@@ -52,13 +52,15 @@ exports.decode = function(bson, meshes, cameras) {
 	//---------------------------------------------------------------------
 	// Meshes
 	// TODO: rename to meshes
-	if (mMeshes.length > 0) 
+	if (mMeshes.length > 0) {
 		bson[C.M_MESHES] = mMeshes;
+	}
 
 	//---------------------------------------------------------------------
 	// Cameras
-	if (mCameras.length > 0)
+	if (mCameras.length > 0){
 		bson[C.REPO_NODE_LABEL_CAMERAS] = mCameras;
+	}
 	
 	return bson;
 };

@@ -17,8 +17,8 @@
 
 // Corresponds to repoGraphScene in C++ definition of 3D Repo
 
-var mongodb = require('mongodb');
-var assert = require('assert');
+// var mongodb = require('mongodb');
+// var assert = require('assert');
 var UUID = require('node-uuid');
 var C = require('./constants');
 var repoNodeMesh = require('./repoNodeMesh');
@@ -46,6 +46,8 @@ var repoGraphScene = function(logger) {
 };
 
 repoGraphScene.prototype.decode = function(bsonArray, gridfsfiles) {
+	'use strict';
+
 	var rootNode;
 
 	this.logger.logTrace("repoGraphScene start decode");
@@ -53,7 +55,7 @@ repoGraphScene.prototype.decode = function(bsonArray, gridfsfiles) {
 	gridfsfiles = typeof(gridfsfiles) === 'undefined' ? {} : gridfsfiles;
 
 	// return variable
-	var scene = new Object();
+	var scene = {};
 	scene[C.REPO_SCENE_LABEL_MESHES_COUNT] = 0;
 	scene[C.REPO_SCENE_LABEL_MATERIALS_COUNT] = 0;
 	scene[C.REPO_SCENE_LABEL_TEXTURES_COUNT] = 0;
@@ -65,25 +67,25 @@ repoGraphScene.prototype.decode = function(bsonArray, gridfsfiles) {
 	// Sort documents into categories (dictionaries of {id : bson} pairs)
 	// UUID is a binary object of subtype 3 (old) or 4 (new)
 	// see http://mongodb.github.com/node-mongodb-native/api-bson-generated/binary.html
-	var transformations = new Object();
-	var meshes = new Object();
-	var materials = new Object();
-	var textures = new Object();
-	var cameras = new Object();
-	var refs = new Object();
-	var metas = new Object();
-	var maps = new Object();
+	var transformations = {};
+	var meshes = {};
+	var materials = {};
+	var textures = {};
+	var cameras = {};
+	var refs = {};
+	var metas = {};
+	var maps = {};
 
 	// dictionary of {shared_id : bson}
-	var all = new Object();
+	var all = {};
 
-	var startTime = (new Date()).getTime();
+	// var startTime = (new Date()).getTime();
 
 	if (bsonArray) {
 		// Separate out all the nodes, meshes, materials and textures and
 		// find the single root node
-		for (var i = 0; i < bsonArray.length; ++i) {
-			bson = bsonArray[i];
+		for (let i = 0; i < bsonArray.length; ++i) {
+			let bson = bsonArray[i];
 			if (!bson[C.REPO_NODE_LABEL_SHARED_ID]) {
 				this.logger.logError('Shared UUID not found!');
 			} else {
@@ -93,8 +95,9 @@ repoGraphScene.prototype.decode = function(bsonArray, gridfsfiles) {
 				switch(bson[C.REPO_NODE_LABEL_TYPE]) {
 					case C.REPO_NODE_TYPE_TRANSFORMATION :
 						transformations[bson.id] = bson;
-						if (!bson[C.REPO_NODE_LABEL_PARENTS])
+						if (!bson[C.REPO_NODE_LABEL_PARENTS]){
 							rootNode = bson;
+						}
 						break;
 					case C.REPO_NODE_TYPE_MESH :
 						meshes[bson.id] = bson;
@@ -128,8 +131,8 @@ repoGraphScene.prototype.decode = function(bsonArray, gridfsfiles) {
 						logger.logError('Unsupported node type found: ' + bson[C.REPO_NODE_LABEL_TYPE]);
 				}
 
-				var sidBytes = bson[C.REPO_NODE_LABEL_SHARED_ID].buffer;
-				var sid = UUID.unparse(sidBytes);
+				let sidBytes = bson[C.REPO_NODE_LABEL_SHARED_ID].buffer;
+				let sid = UUID.unparse(sidBytes);
 				all[sid] = bson;
 			}
 		}
@@ -140,22 +143,23 @@ repoGraphScene.prototype.decode = function(bsonArray, gridfsfiles) {
 	// CAREFUL: under normal circumstances JavaScript is pass-by-value
 	// unless you update the fields in place (using dot notation) or pass objects.
 	// Hence children will be propagated to bson entries in array 'all' as well as 'meshes' etc.
-	for (var sid in all) {
+
+	Object.keys(all).forEach(sid => {
 		var parents = all[sid][C.REPO_NODE_LABEL_PARENTS];
 		if (parents) {
-			for ( i = 0; i < parents.length; ++i) {
+			for (let i = 0; i < parents.length; ++i) {
 				var parentSidBytes = parents[i].buffer;
 				var parent = all[UUID.unparse(parentSidBytes)];
 
 				if (parent) {
-					if (!parent[C.REPO_NODE_LABEL_CHILDREN])
-						parent[C.REPO_NODE_LABEL_CHILDREN] = new Array();
+					if (!parent[C.REPO_NODE_LABEL_CHILDREN]){
+						parent[C.REPO_NODE_LABEL_CHILDREN] = [];
+					}
 					parent[C.REPO_NODE_LABEL_CHILDREN].push(all[sid]);
 				}
 			}
 		}
-	}
-
+	});
 
 	//---------------------------------------------------------------------
 	// Textures
@@ -163,31 +167,36 @@ repoGraphScene.prototype.decode = function(bsonArray, gridfsfiles) {
 
 	//---------------------------------------------------------------------
 	// Materials
-	for (var id in materials) {
+	Object.keys(materials).forEach(id => {
 		materials[id] = repoNodeMaterial.decode(materials[id], scene.textures);
-	}
+	});
+
 	scene.materials = materials;
 
 	//---------------------------------------------------------------------
 	// Meshes
-	for (var id in meshes) {
+
+	Object.keys(meshes).forEach(id => {
 		meshes[id] = repoNodeMesh.decode(meshes[id], scene.materials);
-	}
+	});
+
 	scene.meshes = meshes;
 
 	//---------------------------------------------------------------------
 	// Cameras
-	for (var id in cameras) {
+	Object.keys(cameras).forEach(id => {
 		cameras[id] = repoNodeCamera.decode(cameras[id]);
-	}
+	});
+
 	scene.cameras = cameras;
 
 	//---------------------------------------------------------------------
 	// Attach ID of meshes to transformation which points to them (ID, not SID!)
 	//var mTransformations = new Object();
-	for (var id in transformations) {
+
+	Object.keys(transformations).forEach(id => {
 		transformations[id] = repoNodeTransformation.decode(transformations[id], meshes, cameras);
-	}
+	});
 
 	//---------------------------------------------------------------------
 	// Federation references
@@ -195,16 +204,17 @@ repoGraphScene.prototype.decode = function(bsonArray, gridfsfiles) {
 
 	//---------------------------------------------------------------------
 	// Metadata
-	for (var id in metas) {
+	Object.keys(metas).forEach(id => {
 		metas[id] = repoNodeMeta.decode(metas[id]);
-	}
+	});
 
 	scene.metas = metas;
 
 	//---------------------------------------------------------------------
 	// Register root node
-	if (rootNode)
+	if (rootNode){
 		scene.mRootNode = rootNode;
+	}
 
 	scene.all = all;
 

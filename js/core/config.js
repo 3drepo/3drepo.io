@@ -22,8 +22,8 @@ var default_http_port  = 80;
 var default_https_port = 443;
 var default_mongo_port = 27017;
 
-var default_cookie_secret        = 'cookie secret';
-var default_cookie_parser_secret = 'another cookie secret';
+// var default_cookie_secret        = 'cookie secret';
+// var default_cookie_parser_secret = 'another cookie secret';
 
 /*******************************************************************************
   * Coalesce function
@@ -32,11 +32,14 @@ var default_cookie_parser_secret = 'another cookie secret';
   *******************************************************************************/
 var coalesce = function(variable, value)
 {
-	if (variable === null || variable === undefined)
+	'use strict';
+	
+	if (variable === null || variable === undefined) {
 		return value;
-	else
+	} else {
 		return variable;
-}
+	}
+};
 
 /*******************************************************************************
   * Function to check whether or not a string is an IP address
@@ -46,11 +49,14 @@ var coalesce = function(variable, value)
   *******************************************************************************/
 var checkIP = function(str)
 {
-	if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(str))
+	'use strict';
+
+	if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(str)){
 		return true;
-	else
+	} else {
 		return false;
-}
+	}
+};
 
 // TODO: Should do some checking of validity of config file here.
 // TODO: Tidy up
@@ -67,6 +73,8 @@ var checkIP = function(str)
  *******************************************************************************/
 var fillInServerDetails = function(serverObject, name, usingIP, using_ssl, host, applyName)
 {
+	'use strict';
+
 	serverObject                   = coalesce(serverObject, {});
 	serverObject.name              = coalesce(serverObject.name, name);
 	serverObject.sub_domain_or_dir = coalesce(serverObject.sub_domain_or_dir, 1);
@@ -115,12 +123,12 @@ var fillInServerDetails = function(serverObject, name, usingIP, using_ssl, host,
 	serverObject.base_url     = serverObject.public_protocol + "://" + serverObject.hostname + ":" + serverObject.public_port;
 	serverObject.location_url = "function(path) { return \"//\" + window.location.host + \"/\" + \"" + serverObject.host_dir + "\" + \"/\" + path; }";
 	serverObject.url          = serverObject.base_url + "/" + serverObject.host_dir;
-}
+};
 
 // Check for hostname and ip here
 config.host        = coalesce(config.host, "127.0.0.1");
-default_http_port  = coalesce(config.http_port, default_http_port);
-default_https_port = coalesce(config.https_port, default_https_port);
+// default_http_port  = coalesce(config.http_port, default_http_port);
+// default_https_port = coalesce(config.https_port, default_https_port);
 
 config.using_ip  = checkIP(config.host);
 config.using_ssl = ('ssl' in config);
@@ -134,10 +142,10 @@ config.api_server.chat_host    = config.api_server.base_url;
 config.disableCache            = coalesce(config.disableCache, false);
 
 // Set up other servers
-for(i in config.servers)
-{
-	fillInServerDetails(config.servers[i], "server_" + i, config.using_ip, config.using_ssl, config.host, false);
-}
+
+config.servers.forEach((server, i) => {
+	fillInServerDetails(server, "server_" + i, config.using_ip, config.using_ssl, config.host, false);
+});
 
 // If the API server is running on a subdirectory, config.subdirectory will be true
 // If the API server is running different subdomain it will require virtual hosts

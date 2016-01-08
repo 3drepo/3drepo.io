@@ -110,7 +110,7 @@ MongoDBObject.prototype.authenticateUser = function(username, password, callback
 
 		callback(responseCodes.OK);
 	});
-}
+};
 
 var mongo = new MongoDBObject();
 
@@ -156,7 +156,7 @@ MongoWrapper.prototype.authenticateUser = function(username, password, callback)
  ******************************************************************************/
 MongoWrapper.prototype.dbCallback = function(dbName, callback) {
 	"use strict";
-    var self = this;
+    // var self = this;
     mongo.open(dbName, function (err, db) {
 
         if (err) {
@@ -294,7 +294,7 @@ MongoWrapper.prototype.storeGridFSFile = function(dbName, collName, fileName, da
 						return callback(responseCodes.DB_ERROR(err));
 					}
 
-					gridStore.close(function(err, result) {
+					gridStore.close(function(err) {
 						if (err) {
 							return callback(responseCodes.DB_ERROR(err));
 						}
@@ -471,10 +471,11 @@ MongoWrapper.prototype.filterColl = function(dbName, collName, filter, projectio
  ******************************************************************************/
 MongoWrapper.prototype.getUserRoles = function (username, database, callback) {
 	"use strict";
+
 	var self = this;
 
 	var dbName = "admin";
-	var collName = "system.users"
+	var collName = "system.users";
 	var filter = { "user" : username };
 
 	//only return roles in admin and the specified database, the rest are irrelevant.
@@ -485,15 +486,15 @@ MongoWrapper.prototype.getUserRoles = function (username, database, callback) {
 			return callback(err);
 		}
 
-		if (docs.length != 1) {
+		if (docs.length !== 1) {
 			self.logger.logError("Unexpected number of documents found in getUserRoles(). size:" + docs.length);
 			return callback(responseCodes.USER_NOT_FOUND, docs);
 		}
 
 		var roles = [];
-		for (i = 0; i < docs[0]["roles"].length; i++) {
-			if (docs[0]["roles"][i]["db"] == dbName || docs[0]["roles"][i]["db"] == database) {
-				roles.push(docs[0]["roles"][i]);
+		for (let i = 0; i < docs[0].roles.length; i++) {
+			if (docs[0].roles[i].db === dbName || docs[0].roles[i].db === database) {
+				roles.push(docs[0].roles[i]);
 			}
 		}
 
@@ -521,7 +522,7 @@ MongoWrapper.prototype.getUserPrivileges = function (username, database, callbac
                 return callback(responseCodes.DB_ERROR(status));
             }
 
-            if (!roles || roles.length == 0) {
+            if (!roles || roles.length === 0) {
                 //no roles under this user, no point trying to find privileges
                 return callback(responseCodes.OK, []);
         }
@@ -534,16 +535,16 @@ MongoWrapper.prototype.getUserPrivileges = function (username, database, callbac
                     return callback(responseCodes.DB_ERROR(err));
                 }
 
-                if (!docs || docs["roles"].length == 0) {
+                if (!docs || docs.roles.length === 0) {
                     //No privileges return empty array
                     return callback(responseCodes.OK, []);
                 }
 
-                var rolesArr = docs["roles"];
+                var rolesArr = docs.roles;
                 var privileges = [];
 
-                for (i = 0; i < rolesArr.length; i++) {
-                    privileges = privileges.concat(rolesArr[i]["inheritedPrivileges"]);
+                for (let i = 0; i < rolesArr.length; i++) {
+                    privileges = privileges.concat(rolesArr[i].inheritedPrivileges);
                 }
                 self.logger.logDebug(privileges.length + "privileges found.");
                 callback(responseCodes.OK, privileges);

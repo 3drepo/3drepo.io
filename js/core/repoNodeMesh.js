@@ -16,19 +16,20 @@
  */
 
 // Corresponds to repoNodeMesh in C++ definition of 3D Repo
-var mongodb = require("mongodb");
-var assert = require("assert");
+// var mongodb = require("mongodb");
+// var assert = require("assert");
 var UUID = require("node-uuid");
 var C = require("./constants");
 
 exports.decode = function(bson, materials) {
+    "use strict";
     // There should be always only a single material with the mesh!
     // Takes the very first match if multiple materials attached as children.
     // Children are appended on the fly from other repository components.
     // If a single mesh is being decoded on it"s own, it will not have the
     // children array attached!
     if (bson[C.REPO_NODE_LABEL_CHILDREN]) {
-        for (var i = 0; i < bson[C.REPO_NODE_LABEL_CHILDREN].length; ++i) {
+        for (let i = 0; i < bson[C.REPO_NODE_LABEL_CHILDREN].length; ++i) {
             var childIDbytes = bson[C.REPO_NODE_LABEL_CHILDREN][i][C.REPO_NODE_LABEL_ID].buffer;
             var childID = UUID.unparse(childIDbytes);
             var material = materials[childID];
@@ -40,20 +41,20 @@ exports.decode = function(bson, materials) {
         }
     }
 
-    var myUUID = bson["id"];
+    var myUUID = bson.id;
 
     if (bson[C.REPO_NODE_LABEL_COMBINED_MAP])
     {
         // TODO: Here we have multiple maps, including ones that
         // are no originally ours, let"s hope we never have an example
         // of this.
-        var myMap = bson[C.REPO_NODE_LABEL_COMBINED_MAP][myUUID];
+        // var myMap = bson[C.REPO_NODE_LABEL_COMBINED_MAP][myUUID];
 
         if (myUUID in bson[C.REPO_NODE_LABEL_COMBINED_MAP])
         {
             bson[C.REPO_NODE_LABEL_COMBINED_MAP] = bson[C.REPO_NODE_LABEL_COMBINED_MAP][myUUID];
 
-            for(var i = 0; i < bson[C.REPO_NODE_LABEL_COMBINED_MAP].length; i++)
+            for(let i = 0; i < bson[C.REPO_NODE_LABEL_COMBINED_MAP].length; i++)
             {
                 bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID] =
                     UUID.unparse(bson[C.REPO_NODE_LABEL_COMBINED_MAP][i][C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID].buffer);
@@ -143,7 +144,7 @@ exports.decode = function(bson, materials) {
     */
 
     return bson;
-}
+};
 
 /**
  * Extracts the mesh"s bounding box
@@ -151,12 +152,14 @@ exports.decode = function(bson, materials) {
  * @param {Object} mesh
  */
 exports.extractBoundingBox = function(mesh) {
+    "use strict";
+
     var bbox = {};
 
-    if (mesh["bounding_box"])
+    if (mesh.bounding_box)
     {
-        bbox.min = mesh["bounding_box"][0];
-        bbox.max = mesh["bounding_box"][1];
+        bbox.min = mesh.bounding_box[0];
+        bbox.max = mesh.bounding_box[1];
         bbox.center = [(bbox.min[0] + bbox.max[0]) / 2, (bbox.min[1] + bbox.max[1]) / 2, (bbox.min[2] + bbox.max[2]) / 2];
         bbox.size = [(bbox.max[0] - bbox.min[0]), (bbox.max[1] - bbox.min[1]), (bbox.max[2] - bbox.min[2])];
     } else {
@@ -167,7 +170,7 @@ exports.extractBoundingBox = function(mesh) {
     }
 
     return bbox;
-}
+};
 
 
 exports.mergeMapSort = function(left, right) {
@@ -192,26 +195,26 @@ exports.mergeMapSort = function(left, right) {
  * @param {Object} offset // 4 for 4 bytes in integer32
  * @param {boolean} isLittleEndian
  */
-function toFaceArray(facesBinaryObject, offset, isLittleEndian) {
-    var facesArray = new Array();
-    // return variable, array of arrays of face indices
-    var byteBuffer = toDataView(facesBinaryObject);
+// function toFaceArray(facesBinaryObject, offset, isLittleEndian) {
+//     var facesArray = [];
+//     // return variable, array of arrays of face indices
+//     var byteBuffer = toDataView(facesBinaryObject);
 
-    // You do not know the number of faces up front as each can
-    // have a different number of indices (ie triangle, polygon etc).
-    var index = 0;
-    while (index < facesBinaryObject.position) {
-        // true for little Endianness
-        var numberOfIndices = byteBuffer.getInt32(index, isLittleEndian);
-        var lastFaceIndex = index + (numberOfIndices + 1) * offset;
-        var face = new Array();
-        for (index += offset; index < lastFaceIndex; index += offset) {
-            face.push(byteBuffer.getInt32(index, isLittleEndian));
-        }
-        facesArray.push(face);
-    }
-    return facesArray;
-}
+//     // You do not know the number of faces up front as each can
+//     // have a different number of indices (ie triangle, polygon etc).
+//     var index = 0;
+//     while (index < facesBinaryObject.position) {
+//         // true for little Endianness
+//         var numberOfIndices = byteBuffer.getInt32(index, isLittleEndian);
+//         var lastFaceIndex = index + (numberOfIndices + 1) * offset;
+//         var face = [];
+//         for (index += offset; index < lastFaceIndex; index += offset) {
+//             face.push(byteBuffer.getInt32(index, isLittleEndian));
+//         }
+//         facesArray.push(face);
+//     }
+//     return facesArray;
+// }
 
 /**
  * Transforms a byte object of aiVector3D (3 floats) into an array of vectors [x,y,z]
@@ -220,19 +223,19 @@ function toFaceArray(facesBinaryObject, offset, isLittleEndian) {
  * @param {boolean} isLittleEndian
  * @return {Float32Array}
  */
-function toFloat32Array(binaryObject, isLittleEndian) {
-    var result = new Float32Array(binaryObject.position / Float32Array.BYTES_PER_ELEMENT);
-    // array of floats [x,y,z ...], return variable
-    var byteBuffer = toDataView(binaryObject);
+// function toFloat32Array(binaryObject, isLittleEndian) {
+//     var result = new Float32Array(binaryObject.position / Float32Array.BYTES_PER_ELEMENT);
+//     // array of floats [x,y,z ...], return variable
+//     var byteBuffer = toDataView(binaryObject);
 
-    var count = 0,
-        floatValue;
-    for (var i = 0; i < binaryObject.position; i += Float32Array.BYTES_PER_ELEMENT) {
-        floatValue = byteBuffer.getFloat32(i, isLittleEndian);
-        result[count++] = floatValue;
-    }
-    return result;
-}
+//     var count = 0,
+//         floatValue;
+//     for (var i = 0; i < binaryObject.position; i += Float32Array.BYTES_PER_ELEMENT) {
+//         floatValue = byteBuffer.getFloat32(i, isLittleEndian);
+//         result[count++] = floatValue;
+//     }
+//     return result;
+// }
 
 
 /**
@@ -244,25 +247,25 @@ function toFloat32Array(binaryObject, isLittleEndian) {
  * @param {boolean} isLittleEndian True or false
  * @return {Array.<Float32Array>}
  */
-function toUVChannelsArray(binaryObject, channelsCount, isLittleEndian) {
-    var uvChannelsArray = new Array(channelsCount);
+// function toUVChannelsArray(binaryObject, channelsCount, isLittleEndian) {
+//     var uvChannelsArray = new Array(channelsCount);
 
-    var byteBuffer = toDataView(binaryObject);
-    var channelBytesCount = binaryObject.position / channelsCount;
+//     var byteBuffer = toDataView(binaryObject);
+//     var channelBytesCount = binaryObject.position / channelsCount;
 
-    for (var i = 0; i < channelsCount; ++i) {
-        var channel = new Float32Array(channelBytesCount / Float32Array.BYTES_PER_ELEMENT);
-        var offset = i * channelBytesCount;
-        var count = 0,
-            floatValue;
-        for (var j = 0; j < channelBytesCount; j += Float32Array.BYTES_PER_ELEMENT) {
-            floatValue = byteBuffer.getFloat32(offset + j, isLittleEndian);
-            channel[count++] = floatValue;
-        }
-        uvChannelsArray[i] = channel;
-    }
-    return uvChannelsArray;
-}
+//     for (var i = 0; i < channelsCount; ++i) {
+//         var channel = new Float32Array(channelBytesCount / Float32Array.BYTES_PER_ELEMENT);
+//         var offset = i * channelBytesCount;
+//         var count = 0,
+//             floatValue;
+//         for (var j = 0; j < channelBytesCount; j += Float32Array.BYTES_PER_ELEMENT) {
+//             floatValue = byteBuffer.getFloat32(offset + j, isLittleEndian);
+//             channel[count++] = floatValue;
+//         }
+//         uvChannelsArray[i] = channel;
+//     }
+//     return uvChannelsArray;
+// }
 
 /**
  * Returns a DataView out of a given BSON binary object (BinDataGeneral).
@@ -270,9 +273,11 @@ function toUVChannelsArray(binaryObject, channelsCount, isLittleEndian) {
  *
  * @param {BinDataGeneral} binary object
  */
-function toDataView(binaryObject) {
-    return new DataView(toArrayBuffer(binaryObject.buffer));
-}
+// function toDataView(binaryObject) {
+//     "use strict";
+
+//     return new DataView(toArrayBuffer(binaryObject.buffer));
+// }
 
 /**
  * Returns an ArrayBuffer from a binary buffer. This can
@@ -281,14 +286,16 @@ function toDataView(binaryObject) {
  *
  * @param {Buffer} binary buffer
  */
-function toArrayBuffer(binaryBuffer) {
-    var arrayBuffer = new ArrayBuffer(binaryBuffer.length);
-    var view = new Uint8Array(arrayBuffer);
-    for (var i = 0; i < binaryBuffer.length; ++i) {
-        view[i] = binaryBuffer[i];
-    }
-    return arrayBuffer;
-}
+// function toArrayBuffer(binaryBuffer) {
+//     "use strict";
+    
+//     var arrayBuffer = new ArrayBuffer(binaryBuffer.length);
+//     var view = new Uint8Array(arrayBuffer);
+//     for (var i = 0; i < binaryBuffer.length; ++i) {
+//         view[i] = binaryBuffer[i];
+//     }
+//     return arrayBuffer;
+// }
 
 /*
 */

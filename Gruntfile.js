@@ -46,17 +46,15 @@ module.exports = function(grunt) {
         jshint: {
             files: ['js/core/**/*.js', 'public/plugins/**/*.js', 'services/*.js', 'public/js/*.js'],
             options: {
-                bitwise: true,
+                bitwise: false,
                 curly: true,
                 eqeqeq: true,
                 forin: true,
                 freeze: true,
                 futurehostile: true,
-                maxcomplexity: 6,
-                maxdepth: 4,
                 strict: true,
                 unused: true,
-                varstmt: true,
+                varstmt: false,
                 strict: false,
                 esnext: true,
                 // options here to override JSHint defaults
@@ -68,7 +66,7 @@ module.exports = function(grunt) {
             },
 
             backend:{
-                files: { src: ['js/core/**/*.js', 'services/*.js']}
+                files: { src: ['js/core/**/*.js', 'services/*.js']},
             }
 
         }

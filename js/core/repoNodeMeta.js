@@ -16,21 +16,21 @@
  */
 
 // Corresponds to repoNodeMesh in C++ definition of 3D Repo
-var mongodb = require('mongodb');
-var assert = require('assert');
-var UUID = require('node-uuid');
-var C = require('./constants');
+// var mongodb = require('mongodb');
+// var assert = require('assert');
+// var UUID = require('node-uuid');
+// var C = require('./constants');
 
-exports.decode = function(bson, meta) {
-	if (bson["mime"])
+exports.decode = function(bson /*, meta*/) {
+	if (bson.mime)
 	{
-		bson["data"] = {};
-		bson["data"].buffer = new Buffer(bson["metadata"]["data"].buffer.length);
-		bson["metadata"]["data"].buffer.copy(bson["data"].buffer);
+		bson.data = {};
+		bson.data.buffer = new Buffer(bson.metadata.data.buffer.length);
+		bson.metadata.data.buffer.copy(bson.data.buffer);
 
-		delete bson["metadata"];
+		delete bson.metadata;
 	}
 
 	return bson;
-}
+};
 

@@ -129,7 +129,7 @@ module.exports = function() {
 	];
 
 	for(var idx = 0; idx < this.customTypes.length; idx++) {
-		v.addSchema(this.customTypes[idx], this.customTypes[idx]["id"]);
+		v.addSchema(this.customTypes[idx], this.customTypes[idx].id);
 	}
 
 	// Expose the validate function
