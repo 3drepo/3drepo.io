@@ -37,7 +37,7 @@
 			.issueCommentsFooter
 				div(ng-if="vm.issueIsOpen",layout="row", layout-align="start center")
 					md-button.md-raised.md-accent(ng-click="vm.saveComment()", ng-disabled="vm.saveCommentDisabled") Save
-					md-menu(md-position-mode="target-right target")
+					md-menu(md-position-mode="target-right target", ng-if="vm.canModifyIssue")
 						md-button.md-primary(ng-click="vm.openAssignedRolesMenu($mdOpenMenu, $event)") Assign
 						md-menu-content(width="4")
 							md-menu-item(ng-repeat="role in vm.roles")
@@ -46,8 +46,8 @@
 										.issueAssignColourMarker(style="background:{{role.color}}")
 										| {{role.role}}
 									md-checkbox.md-secondary(ng-model="role.assigned", aria-label="Issue Assign")
-					md-button.md-primary.md-accent(ng-click="vm.toggleCloseIssue()") Close
+					md-button.md-primary.md-accent(ng-click="vm.toggleCloseIssue()", ng-if="vm.canModifyIssue") Close
 				.issueOpenContainer(ng-if="!vm.issueIsOpen")
-					md-button.md-primary.md-accent(ng-click="vm.toggleCloseIssue()") Open
+					md-button.md-primary.md-accent(ng-click="vm.toggleCloseIssue()", ng-if="vm.canModifyIssue") Open
 
 	md-divider

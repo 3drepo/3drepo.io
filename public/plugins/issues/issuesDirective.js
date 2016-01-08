@@ -161,7 +161,7 @@
 
 		vm.showPins = function () {
 			var i, j, length, assignedRolesLength,
-				pin, pinData, pinColor,
+				pin, pinData, pinColor, pinMaterial,
 				roleAssigned;
 
 			for (i = 0, length = vm.issues.length; i < length; i += 1) {
@@ -191,6 +191,12 @@
 							pin[0].setAttribute("render", "false");
 						}
 					}
+
+					/*
+					pinMaterial = angular.element(document.getElementById(vm.issues[i]._id + "_material"));
+					console.log(pinMaterial);
+					pinMaterial[0].setAttribute("diffuseColor", "0.0 1.0 1.0");
+					*/
 				}
 				else {
 					// New pin
@@ -280,6 +286,7 @@
 						promise = NewIssuesService.saveIssue(issue);
 						promise.then(function (data) {
 							vm.issues.push(data);
+
 							vm.title = "";
 							vm.pickedAccount = null;
 							vm.pickedProject = null;

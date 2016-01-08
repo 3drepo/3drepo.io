@@ -140,7 +140,6 @@
 		// Add filtering options for the Issues panel
 		promise = ProjectService.getRoles();
 		promise.then(function (data) {
-			console.log(data);
 			for (i = 0, length = data.length; i < length; i += 1) {
 				panelContent.right[0].options.push(
 					{

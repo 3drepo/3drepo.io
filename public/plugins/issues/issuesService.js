@@ -23,17 +23,18 @@
 
 	NewIssuesService.$inject = ["$http", "$q", "StateManager", "serverConfig", "ViewerService", "Auth"];
 
-	function NewIssuesService($http, $q, StateManager, serverConfig, ViewerService, Auth) {
-		var state = StateManager.state,
-			url = "",
-			data = {},
-			config = {},
-			i, j = 0,
-			numIssues = 0,
-			numComments = 0,
-			pinRadius = 0.25,
-			pinHeight = 1.0,
-			availableRoles = [];
+    function NewIssuesService($http, $q, StateManager, serverConfig, ViewerService, Auth) {
+        var state = StateManager.state,
+            url = "",
+            data = {},
+            config = {},
+            i, j = 0,
+            numIssues = 0,
+            numComments = 0,
+            pinRadius = 0.25,
+            pinHeight = 1.0,
+			availableRoles = [],
+			userRoles = [];
 
 		// TODO: Internationalise and make globally accessible
 		var getPrettyTime = function(time) {
@@ -108,26 +109,25 @@
 				viewpoint: ViewerService.defaultViewer.getCurrentViewpointInfo(),
 				scale: 1.0,
 				creator_role: issue.creator_role,
-				assigned_roles: []
-			};
-			config = {
-				withCredentials: true
-			};
+				assigned_roles: userRoles
+            };
+            config = {
+                withCredentials: true
+            };
 
-			if (issue.pickedPos !== null) {
-				data.position = issue.pickedPos.toGL();
-				data.norm = issue.pickedNorm.toGL();
-			}
+            if (issue.pickedPos !== null) {
+                data.position = issue.pickedPos.toGL();
+                data.norm = issue.pickedNorm.toGL();
+            }
 
-			dataToSend = {data: JSON.stringify(data)};
+            dataToSend = {data: JSON.stringify(data)};
 
-			$http.post(url, dataToSend, config)
-				.then(function successCallback(response) {
-					console.log(response);
-					response.data.issue._id		= response.data.issue_id;
-					response.data.issue.account = issue.account;
-					response.data.issue.project = issue.project;
-					response.data.issue.timeStamp = getPrettyTime(response.data.issue.created);
+            $http.post(url, dataToSend, config)
+                .then(function successCallback(response) {
+                    response.data.issue._id     = response.data.issue_id;
+                    response.data.issue.account = issue.account;
+                    response.data.issue.project = issue.project;
+                    response.data.issue.timeStamp = getPrettyTime(response.data.issue.created);
 					response.data.issue.creator_role = issue.creator_role;
 
 					removePin();
@@ -229,7 +229,8 @@
 			}
 			*/
 
-			var pinshapemat = document.createElement("Material");
+            var pinshapemat = document.createElement("Material");
+			//pinshapemat.setAttribute("id", id + "_material");
 			if (typeof colour === "undefined") {
 				pinshapemat.setAttribute("diffuseColor", "1.0 0.0 0.0");
 			}
@@ -282,7 +283,7 @@
 			parentElement.appendChild(pinshape);
 		}
 
-		function createPinShape (id, pin, radius, height, scale, colour)
+		function createPinShape (id, pin, radius, height, colour)
 		{
 			var sceneBBox = ViewerService.defaultViewer.scene._x3domNode.getVolume();
 			var sceneSize = sceneBBox.max.subtract(sceneBBox.min).length();
@@ -426,7 +427,8 @@
 			$http.get(url)
 				.then(
 					function(data) {
-						deferred.resolve(data.data);
+						userRoles = data.data;
+						deferred.resolve(userRoles);
 					},
 					function () {
 						deferred.resolve([]);

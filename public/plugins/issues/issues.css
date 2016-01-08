@@ -38,8 +38,12 @@ issue {
   display: block;
 }
 
+issue .issueTitle h3 {
+  margin-left: 5px !important;
+}
 issue .issueTitle p {
   color: rgba(0,0,0,0.35) !important;
+  margin-left: 5px !important;
 }
 
 .issueOpenBackground {
