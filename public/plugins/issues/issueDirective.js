@@ -31,6 +31,7 @@
 				commentsToggledIssueId: "=",
 				onToggleCloseIssue : "&",
 				availableRoles: "=",
+				projectUserRoles: "=",
 				onIssueAssignChange: "&"
 			},
 			controller: IssueCtrl,
@@ -54,13 +55,14 @@
 		vm.autoSaveComment = false;
 		vm.showInfo		   = false;
 		vm.editingComment  = false;
-		vm.roles = [];
 		vm.assignedRolesColors = [];
 
 		$scope.$watch("vm.availableRoles", function (newValue) {
 			var i = 0, length = 0;
 
 			if (angular.isDefined(newValue)) {
+				// Create a local copy of the available roles
+				vm.roles = [];
 				for (i = 0, length = newValue.length; i < length; i += 1) {
 					vm.roles.push({
 						role: newValue[i].role,
@@ -69,6 +71,7 @@
 				}
 				setupRolesWatch();
 				initAssignedRolesDisplay();
+				setupCanModifyIssue();
 			}
 		});
 
@@ -157,7 +160,6 @@
 
 					promise = NewIssuesService.assignIssue(vm.data);
 					promise.then(function (data) {
-						console.log(data);
 						setAssignedRolesColors();
 						vm.onIssueAssignChange();
 					});
@@ -168,7 +170,7 @@
 		function initAssignedRolesDisplay () {
 			var i = 0, length = 0;
 
-			if (angular.isDefined(vm.availableRoles) && angular.isDefined(vm.data) && vm.data.hasOwnProperty("assigned_roles")) {
+			if (angular.isDefined(vm.roles) && angular.isDefined(vm.data) && vm.data.hasOwnProperty("assigned_roles")) {
 				for (i = 0, length = vm.roles.length; i < length; i += 1) {
 					vm.roles[i].assigned = (vm.data.assigned_roles.indexOf(vm.roles[i].role) !== -1);
 				}
@@ -183,6 +185,25 @@
 			for (i = 0, length = vm.roles.length; i < length; i += 1) {
 				if (vm.data.assigned_roles.indexOf(vm.roles[i].role) !== -1) {
 					vm.assignedRolesColors.push(NewIssuesService.getRoleColor(vm.roles[i].role));
+				}
+			}
+		}
+
+		// A user with the same role as the issue creator_role or
+		// a role that is one of the roles that the issues has been assigned to can modify the issue
+		function setupCanModifyIssue () {
+			var i = 0, length = 0;
+
+			vm.canModifyIssue = false;
+			if (angular.isDefined(vm.projectUserRoles) && angular.isDefined(vm.data) && vm.data.hasOwnProperty("assigned_roles")) {
+				vm.canModifyIssue = (vm.projectUserRoles.indexOf(vm.data.creator_role) !== -1);
+				if (!vm.canModifyIssue) {
+					for (i = 0, length = vm.projectUserRoles.length; i < length; i += 1) {
+						if (vm.data.assigned_roles.indexOf(vm.projectUserRoles[i]) !== -1) {
+							vm.canModifyIssue = true;
+							break;
+						}
+					}
 				}
 			}
 		}
