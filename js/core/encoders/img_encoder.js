@@ -78,7 +78,7 @@ var createHeightMap = function(format, buffer, callback) {
 		return callback(new Error("Invalid image format"));
 	}
 
-	var im = child_process.spawn("convert", ["-colorspace", "gray", "+conrast", format + ":-", format + ":-"]);
+	var im = child_process.spawn("convert", ["-colorspace", "gray", "+contrast", format + ":-", format + ":-"]);
 	im.stdin.write(buffer);
 	im.stdin.end();
 
@@ -90,7 +90,7 @@ var createHeightMap = function(format, buffer, callback) {
 
 	im.stderr.on("data", function(data) {
 		// If there is any output on stderr, we assume something has gone wrong
-		return callback(responseCodes.PROCESS_ERROR(data.data));
+		return callback(responseCodes.PROCESS_ERROR(data.toString()));
 	});
 
 	im.stdout.on("close", function(code) {
