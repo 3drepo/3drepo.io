@@ -23,16 +23,16 @@
 
 	NewIssuesService.$inject = ["$http", "$q", "StateManager", "serverConfig", "ViewerService", "Auth"];
 
-    function NewIssuesService($http, $q, StateManager, serverConfig, ViewerService, Auth) {
-        var state = StateManager.state,
-            url = "",
-            data = {},
-            config = {},
-            i, j = 0,
-            numIssues = 0,
-            numComments = 0,
-            pinRadius = 0.25,
-            pinHeight = 1.0,
+	function NewIssuesService($http, $q, StateManager, serverConfig, ViewerService, Auth) {
+		var state = StateManager.state,
+			url = "",
+			data = {},
+			config = {},
+			i, j = 0,
+			numIssues = 0,
+			numComments = 0,
+			pinRadius = 0.25,
+			pinHeight = 1.0,
 			availableRoles = [],
 			userRoles = [];
 
@@ -110,24 +110,24 @@
 				scale: 1.0,
 				creator_role: issue.creator_role,
 				assigned_roles: userRoles
-            };
-            config = {
-                withCredentials: true
-            };
+			};
+			config = {
+				withCredentials: true
+			};
 
-            if (issue.pickedPos !== null) {
-                data.position = issue.pickedPos.toGL();
-                data.norm = issue.pickedNorm.toGL();
-            }
+			if (issue.pickedPos !== null) {
+				data.position = issue.pickedPos.toGL();
+				data.norm = issue.pickedNorm.toGL();
+			}
 
-            dataToSend = {data: JSON.stringify(data)};
+			dataToSend = {data: JSON.stringify(data)};
 
-            $http.post(url, dataToSend, config)
-                .then(function successCallback(response) {
-                    response.data.issue._id     = response.data.issue_id;
-                    response.data.issue.account = issue.account;
-                    response.data.issue.project = issue.project;
-                    response.data.issue.timeStamp = getPrettyTime(response.data.issue.created);
+			$http.post(url, dataToSend, config)
+				.then(function successCallback(response) {
+					response.data.issue._id		= response.data.issue_id;
+					response.data.issue.account = issue.account;
+					response.data.issue.project = issue.project;
+					response.data.issue.timeStamp = getPrettyTime(response.data.issue.created);
 					response.data.issue.creator_role = issue.creator_role;
 
 					removePin();
@@ -195,7 +195,16 @@
 			createPinShape(pin.id, pin, pinRadius, pinHeight, colour);
 		}
 
-		function createBasicPinShape(parentElement, depthMode, colour, trans, radius, height, scale, ghostPin) {
+		function changePinColour (id, colour) {
+			// Find both the material for the ghosted pin and the opaque pin
+			var ghostPin  = $("#" + id + "_ghost")[0];
+			var opaquePin = $("#" + id)[0];
+
+			ghostPin.setAttribute("diffuseColor", colour);
+			opaquePin.setAttribute("diffuseColor", colour);
+		}
+
+		function createBasicPinShape(id, parentElement, depthMode, colour, trans, radius, height, scale, ghostPin) {
 			var coneHeight = height - 2 * radius;
 			var pinshape = document.createElement("Group");
 			pinshape.setAttribute("onclick", "clickPin(event)");
@@ -208,35 +217,15 @@
 			pinshapedepth.setAttribute("enableDepthTest", ghostPin);
 			pinshapeapp.appendChild(pinshapedepth);
 
-			/*
-			if(ghostPin)
-			{
-				var pinshader = document.createElement("ComposedShader");
-				pinshader.setAttribute("USE", "InvertNormals");
-				pinshapeapp.appendChild(pinshader);
+			var pinshapemat = document.createElement("Material");
+			pinshapemat.setAttribute("ID", id + (ghostPin ? "_ghost" : ""));
 
-				var pinvert = document.createElement("ShaderPart");
-				pinvert.setAttribute("type","VERTEX");
-				pinvert.setAttribute("USE", "ghostVert");
-				pinshader.appendChild(pinvert);
-
-				var pinfrag = document.createElement("ShaderPart");
-				pinfrag.setAttribute("type","FRAGMENT");
-				pinfrag.setAttribute("USE", "ghostFrag");
-				pinshader.appendChild(pinfrag);
-
-				pinshapeapp.appendChild(pinshader);
-			}
-			*/
-
-            var pinshapemat = document.createElement("Material");
-			//pinshapemat.setAttribute("id", id + "_material");
 			if (typeof colour === "undefined") {
 				pinshapemat.setAttribute("diffuseColor", "1.0 0.0 0.0");
-			}
-			else {
+			} else {
 				pinshapemat.setAttribute("diffuseColor", colour[0] + " " + colour[1] + " " + colour[2]);
 			}
+
 			pinshapemat.setAttribute("transparency", 1.0 - trans);
 
 			pinshapeapp.appendChild(pinshapemat);
@@ -328,76 +317,8 @@
 
 			parent.appendChild(modelTransform);
 
-			createBasicPinShape(modelTransform, "ALWAYS", colour, 0.1, radius, height, scale, false);
-			createBasicPinShape(modelTransform, "LESS", colour, 0.9, radius, height, scale, true);
-
-			/*
-			var pinshader = document.createElement("ComposedShader");
-			pinshader.setAttribute("DEF", "InvertNormals");
-
-			var pinvert = document.createElement("ShaderPart");
-			pinvert.setAttribute("type","VERTEX");
-			pinvert.setAttribute("DEF", "ghostVert");
-			pinvert.textContent = "attribute vec3 position;" +
-				"\nattribute vec3 normal;" +
-				"\nattribute vec3 tangent;" +
-				"\nattribute vec3 binormal;" +
-				"\nattribute vec4 color;" +
-				"\nuniform mat4 modelViewMatrix;" +
-				"\nuniform mat4 modelViewMatrixInverse;" +
-				"\nuniform mat4 modelViewProjectionMatrix;" +
-				"\nvarying vec3 fragNormal;" +
-				"\nvarying vec3 fragEyeVector;" +
-				"\nvarying vec3 fragTangent;" +
-				"\nvarying vec3 fragBinormal;" +
-				"\nvarying vec4 fragColor;" +
-				"\n" +
-				"\nvoid main()" +
-				"\n{" +
-				"\n\tvec4 eye = vec4(modelViewMatrixInverse * vec4(0.,0.,0.,1.));" +
-				"\n\tfragEyeVector = position - eye.xyz;" +
-				"\n\tfragNormal = normal;" +
-				"\n\tfragTangent = tangent;" +
-				"\n\tfragBinormal = binormal;" +
-				"\n\tfragColor = color;" +
-				"\n\tgl_Position = modelViewProjectionMatrix * vec4(position, 1.0);" +
-				"\n}";
-
-			pinshader.appendChild(pinvert);
-
-			var pinfrag = document.createElement("ShaderPart");
-			pinfrag.setAttribute("type", "FRAGMENT");
-			pinfrag.setAttribute("DEF", "ghostFrag");
-			pinfrag.textContent = "#ifdef GL_ES" +
-				"\n\tprecision highp float;" +
-				"\n#endif" +
-				"\nvarying vec3 fragNormal;" +
-				"\nvarying vec3 fragEyeVector;" +
-				"\nvarying vec3 fragTangent;" +
-				"\nvarying vec3 fragBinormal;" +
-				"\nvarying vec4 fragColor;" +
-				"\nvoid main()" +
-				"\n{" +
-				"\n\tvec3 eye = normalize(fragEyeVector);" +
-				"\n\tvec3 normal = normalize(fragNormal);" +
-				"\n\tvec3 tangent = normalize(fragTangent);" +
-				"\n\tvec3 binormal = normalize(fragBinormal);" +
-				"\n\t" +
-				//"\n\tvec3 cubecoord = reflect(eye, normal);" +
-				//"\n\tfloat p = max(0.1, dot(normal, eye));" +
-				//"\n\ttexCol.rgb *= p;" +
-				//"\n\ttexCol.rgb += max(0.0, pow(p, 128.0)) * vec3(0.8);" +
-				//"\n\ttexCol.rgb = clamp(texCol.rgb, 0.0, 1.0);" +
-				"\n\tif (dot(eye, normal) < 0) {" +
-				"\n\t\tdiscard;" +
-				"\n\t}" +
-				"\n\tgl_FragColor = fragColor;" +
-				"\n};";
-
-				pinshader.appendChild(pinfrag);
-
-				$("#model__root")[0].appendChild(pinshader);
-			*/
+			createBasicPinShape(id, modelTransform, "ALWAYS", colour, 0.1, radius, height, scale, false);
+			createBasicPinShape(id, modelTransform, "LESS", colour, 0.9, radius, height, scale, true);
 
 			$("#model__root")[0].appendChild(parent);
 		}
