@@ -29,8 +29,11 @@ module.exports = {
 		public_port: http_port,
 		public_protocol: "http"
 	},
-	cookie_secret: "A secret",
-	cookie_parser_secret : "Another secret",
+	cookie: {
+		secret: "A secret",
+		parser_secret : "Another secret",
+		maxAge: 3600,
+	},
 	default_format: "html",
 	servers: [
 		{
