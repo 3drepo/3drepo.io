@@ -17,8 +17,8 @@
 
 // Corresponds to repoGraphHistory in C++ definition of 3D Repo
 
-var mongodb = require('mongodb');
-var assert = require('assert');
+// var mongodb = require('mongodb');
+// var assert = require('assert');
 var UUID = require('node-uuid');
 var C = require('./constants');
 //var repoNodeRevision = require('./repoNodeRevision');
@@ -35,13 +35,13 @@ exports.decode = function(bsonArray) {
 	var rootNode;
 
 	// return variable
-	var history = new Object();
+	var history = {};
 	history[C.REPO_HISTORY_LABEL_REVISIONS_COUNT] = 0;
 
 	// Sort documents into categories (dictionaries of {id : bson} pairs)
 	// UUID is a binary object of subtype 3 (old) or 4 (new)
 	// see http://mongodb.github.com/node-mongodb-native/api-bson-generated/binary.html
-	var revisions = new Object();
+	var revisions = {};
 
 	if (bsonArray) {
 		// Separate out all the revisions and
@@ -64,8 +64,9 @@ exports.decode = function(bsonArray) {
 					case C.REPO_NODE_TYPE_REVISION :
 						revisions[bson.id] = bson;
 						history[C.REPO_HISTORY_LABEL_REVISIONS_COUNT]++;
-						if (!bson[C.REPO_NODE_LABEL_PARENTS])
+						if (!bson[C.REPO_NODE_LABEL_PARENTS]){
 							rootNode = bson;
+						}
 						break;
 					default :
 						logger.log('error','Unsupported node type found: ' + bson[C.REPO_NODE_LABEL_TYPE]);
@@ -106,8 +107,9 @@ exports.decode = function(bsonArray) {
 
 	//---------------------------------------------------------------------
 	// Register root node
-	if (rootNode)
+	if (rootNode){
 		history.root = rootNode;
+	}
 
 	return history;
 };

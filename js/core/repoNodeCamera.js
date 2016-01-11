@@ -17,9 +17,9 @@
 
 // Corresponds to RepoNodeCamera in C++ definition of 3D Repo
 
-var mongodb = require('mongodb');
+// var mongodb = require('mongodb');
 var assert = require('assert');
-var UUID = require('node-uuid');
+// var UUID = require('node-uuid');
 var C = require('./constants');
 var Utils = require('./utils.js');
 
@@ -45,7 +45,7 @@ exports.encode = function(camera, root_shared_id) {
     assert(camera, "repoNodeCamera: Camera object is empty");
     assert(root_shared_id, "repoNodeCamera: Root node is empty");
 
-    var repo_camera = new Object();
+    var repo_camera = [];
 
     //-------------------------------------------------------------------------
     // ID field has to come first
@@ -64,26 +64,33 @@ exports.encode = function(camera, root_shared_id) {
     repo_camera[C.REPO_NODE_LABEL_PARENTS] = [root_shared_id];
     repo_camera[C.REPO_NODE_LABEL_PATHS] = [[root_shared_id]];
 
-    if (camera.look_at)
+    if (camera.look_at){
         repo_camera[C.REPO_NODE_LABEL_LOOK_AT] = camera.look_at;
+    }
 
-    if (camera.position)
+    if (camera.position){
         repo_camera[C.REPO_NODE_LABEL_POSITION] = camera.position;
+    }
 
-    if (camera.up)
+    if (camera.up){
         repo_camera[C.REPO_NODE_LABEL_UP] = camera.up;
+    }
 
-    if (camera.fov)
+    if (camera.fov){
         repo_camera[C.REPO_NODE_LABEL_FOV] = camera.fov;
+    }
 
-    if (camera.near)
+    if (camera.near){
         repo_camera[C.REPO_NODE_LABEL_NEAR] = camera.near;
+    }
 
-    if (camera.far)
+    if (camera.far){
         repo_camera[C.REPO_NODE_LABEL_FAR] = camera.far;
+    }
 
-    if (camera.aspect_ratio)
+    if (camera.aspect_ratio){
         repo_camera[C.REPO_NODE_LABEL_ASPECT_RATIO] = camera.aspect_ratio;
+    }
    
     return repo_camera;
-}
+};

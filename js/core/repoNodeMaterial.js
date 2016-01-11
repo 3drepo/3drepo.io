@@ -17,7 +17,7 @@
 
 // Corresponds to repoNodeMaterial in C++ definition of 3D Repo
 
-var mongodb = require('mongodb');
+// var mongodb = require('mongodb');
 var assert = require('assert');
 var UUID = require('node-uuid');
 var C = require('./constants');

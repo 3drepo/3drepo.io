@@ -14,13 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-var nodeuuid = require("node-uuid");
-var mongo    = require("mongodb");
 
-var Utils = function() {
+function Utils() {
     "use strict";
 
-    var self = this;
+    let nodeuuid = require("node-uuid");
+    let mongo    = require("mongodb");
+
+    let self = this;
 
     /*******************************************************************************
     * Convert a string to a UUID
@@ -28,8 +29,8 @@ var Utils = function() {
     * @returns {Buffer} binuuid - Binary representation of a UUID
     *******************************************************************************/
     this.stringToUUID = function(uuid) {
-        var bytes = nodeuuid.parse(uuid);
-        var buf   = new Buffer(bytes);
+        let bytes = nodeuuid.parse(uuid);
+        let buf   = new Buffer(bytes);
 
         return mongo.Binary(buf, 3);
     };
@@ -93,11 +94,11 @@ var Utils = function() {
     *******************************************************************************/
     this.bulkDecode = function(Type, bsons)
     {
-        var results = {};
+        let results = {};
 
-        for (var i = 0; i < bsons.length; i++)
+        for (let i = 0; i < bsons.length; i++)
         {
-            var obj = new Type(bsons[i]);
+            let obj = new Type(bsons[i]);
             results[obj.getID()] = obj;
         }
 
@@ -113,18 +114,18 @@ var Utils = function() {
      * @param {boolean} isLittleEndian
      */
     this.toFaceArray = function(facesBinaryObject, offset, isLittleEndian) {
-        var facesArray = new Array();
+        let facesArray = [];
         // return variable, array of arrays of face indices
-        var byteBuffer = toDataView(facesBinaryObject);
+        let byteBuffer = toDataView(facesBinaryObject);
 
         // You do not know the number of faces up front as each can
         // have a different number of indices (ie triangle, polygon etc).
-        var index = 0;
+        let index = 0;
         while (index < facesBinaryObject.position) {
             // true for little Endianness
-            var numberOfIndices = byteBuffer.getInt32(index, isLittleEndian);
-            var lastFaceIndex = index + (numberOfIndices + 1) * offset;
-            var face = new Array();
+            let numberOfIndices = byteBuffer.getInt32(index, isLittleEndian);
+            let lastFaceIndex = index + (numberOfIndices + 1) * offset;
+            let face = [];
             for (index += offset; index < lastFaceIndex; index += offset) {
                 face.push(byteBuffer.getInt32(index, isLittleEndian));
             }
@@ -142,13 +143,13 @@ var Utils = function() {
      * @return {Float32Array}
      */
     this.toFloat32Array = function(binaryObject, isLittleEndian) {
-        var result = new Float32Array(binaryObject.position / Float32Array.BYTES_PER_ELEMENT);
+        let result = new Float32Array(binaryObject.position / Float32Array.BYTES_PER_ELEMENT);
         // array of floats [x,y,z ...], return variable
-        var byteBuffer = toDataView(binaryObject);
+        let byteBuffer = toDataView(binaryObject);
 
-        var count = 0,
+        let count = 0,
             floatValue;
-        for (var i = 0; i < binaryObject.position; i += Float32Array.BYTES_PER_ELEMENT) {
+        for (let i = 0; i < binaryObject.position; i += Float32Array.BYTES_PER_ELEMENT) {
             floatValue = byteBuffer.getFloat32(i, isLittleEndian);
             result[count++] = floatValue;
         }
@@ -166,17 +167,17 @@ var Utils = function() {
      * @return {Array.<Float32Array>}
      */
     this.toUVChannelsArray = function(binaryObject, channelsCount, isLittleEndian) {
-        var uvChannelsArray = new Array(channelsCount);
+        let uvChannelsArray = new Array(channelsCount);
 
-        var byteBuffer = toDataView(binaryObject);
-        var channelBytesCount = binaryObject.position / channelsCount;
+        let byteBuffer = toDataView(binaryObject);
+        let channelBytesCount = binaryObject.position / channelsCount;
 
-        for (var i = 0; i < channelsCount; ++i) {
-            var channel = new Float32Array(channelBytesCount / Float32Array.BYTES_PER_ELEMENT);
-            var offset = i * channelBytesCount;
-            var count = 0,
+        for (let i = 0; i < channelsCount; ++i) {
+            let channel = new Float32Array(channelBytesCount / Float32Array.BYTES_PER_ELEMENT);
+            let offset = i * channelBytesCount;
+            let count = 0,
                 floatValue;
-            for (var j = 0; j < channelBytesCount; j += Float32Array.BYTES_PER_ELEMENT) {
+            for (let j = 0; j < channelBytesCount; j += Float32Array.BYTES_PER_ELEMENT) {
                 floatValue = byteBuffer.getFloat32(offset + j, isLittleEndian);
                 channel[count++] = floatValue;
             }
@@ -203,13 +204,13 @@ var Utils = function() {
      * @param {Buffer} binary buffer
      */
     this.toArrayBuffer = function(binaryBuffer) {
-        var arrayBuffer = new ArrayBuffer(binaryBuffer.length);
-        var view = new Uint8Array(arrayBuffer);
-        for (var i = 0; i < binaryBuffer.length; ++i) {
+        let arrayBuffer = new ArrayBuffer(binaryBuffer.length);
+        let view = new Uint8Array(arrayBuffer);
+        for (let i = 0; i < binaryBuffer.length; ++i) {
             view[i] = binaryBuffer[i];
         }
         return arrayBuffer;
     };
-};
+}
 
 module.exports = new Utils();
