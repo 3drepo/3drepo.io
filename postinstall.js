@@ -34,20 +34,21 @@ var public_files = {
 		jqueryuijs : '/public/js/external/jquery-ui.js',
 		angularutilsjs: '/public/js/external/angular-ui-utils.min.js',
 		angularrouterjs: '/public/js/external/angular-ui-router.js',
-		momentjs: '/public/js/external/moment.js',
 		bootstrapjs: '/public/js/external/bootstrap.min.js',
 		bootstrapdialog: '/public/js/external/bootstrap-dialog.min.js',
 		uibootstrap: '/public/js/external/ui-bootstrap-tpls-0.12.0.min.js',
+		momentjs: '/public/js/external/moment.js',
 		showdownjs: '/public/js/external/showdown.min.js',
 		jqueryfancytree: '/public/js/external/jquery.fancytree-all.js',
 		typeaheadjs: '/public/js/external/typeahead.bundle.js',
 		sliderjs: '/public/js/external/bootstrap-slider.js',
 		angularsliderjs: '/public/js/external/slider.js',
 		socketio: '/public/js/external/socket.io.js',
-        uitreejs: '/public/js/external/angular-ui-tree.min.js',
         angularmaterialjs: '/public/js/external/angular-material.min.js',
         angularanimatejs: '/public/js/external/angular-animate.min.js',
         angularariajs: '/public/js/external/angular-aria.min.js',
+		angularsanitizejs: '/public/js/external/angular-sanitize.min.js',
+		angularuitreejs: '/public/js/external/angular-ui-tree.min.js',
 
 		// QR Code stuff
 		qrgrid: '/public/js/external/qrcode/grid.js',
@@ -73,12 +74,12 @@ var public_files = {
 		x3domcss : '/public/css/external/x3dom.css',
 		fontawesomecss: '/public/css/external/font-awesome.min.css',
 		fancytreecss: '/public/css/external/ui.fancytree.min.css',
-		bootstrapcss: '/public/css/external/bootstrap.min.css',
 		jqueryuicss: '/public/css/external/jquery-ui.css',
 		repouicss : '/public/css/ui.css',
+		bootstrapcss: '/public/css/external/bootstrap.min.css',
 		slidercss: '/public/css/external/bootstrap-slider.css',
-        uitreecss: '/public/css/external/angular-ui-tree.min.css',
-        angularmaterialcss: '/public/css/external/angular-material.min.css'
+        angularmaterialcss: '/public/css/external/angular-material.min.css',
+		angularuitreecss: '/public/css/external/angular-ui-tree.min.css'
 	}
 }
 
@@ -125,7 +126,8 @@ var internal_files = {
     'bower_components/angular-animate/angular-animate.min.js',
     'bower_components/angular-aria/angular-aria.min.js',
 	'bower_components/angular-ui-tree/dist/angular-ui-tree.min.js',
-	'bower_components/angular-ui-tree/dist/angular-ui-tree.min.css'
+	'bower_components/angular-ui-tree/dist/angular-ui-tree.min.css',
+	'bower_components/angular-sanitize/angular-sanitize.min.js'
 	],
 
 	x3dom_files: [
@@ -138,8 +140,8 @@ var public_dir_js	= path.normalize("public/js/external");
 var public_dir_css	= path.normalize("public/css/external");
 
 install_bower();
-install_x3dom();
 write_common_files_list();
+install_x3dom();
 
 /*
  * install bower components and publicize the relevant files.
@@ -199,6 +201,8 @@ function install_x3dom(){
 function make_symlink(file, target_dir){
 	var fname = path.normalize(file);
 	var target_path = path.join(target_dir, path.basename(fname)) ;
+
+	console.log("Making symlink " + fname + " => " + target_path);
 
 	if (platform === 'win32') {
 		//TODO: check file exists before calling this.
@@ -310,6 +314,8 @@ function write_common_files_list(){
 
 	var files_to_str = obj_to_string(public_files, 'debug_scripts', false);
 	var min_files_to_str = obj_to_string(public_files, 'prod_scripts', true);
+
+	console.log(files_to_str);
 
 	wstream.once('open', function(fd){
 		wstream.write('/*\n * ========== !!!! DO NOT ALTER THIS FILE !!!! =======\n');

@@ -178,6 +178,11 @@ define("REPO_SESSION_USER", "user");
 
 define("REQ_REPO", "repo");
 
+// Filters for the permissions
+define("REPO_ANY", 0);
+define("REPO_READWRITE", 3);
+define("REPO_READ", 1);
+define("REPO_WRITE", 2);
 
 //-----------------------------------------------------------------------------
 //

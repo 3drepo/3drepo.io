@@ -29,8 +29,10 @@
 				data: "=",
 				onCommentsToggled: "&",
 				commentsToggledIssueId: "=",
-				onCloseIssue : "&",
-				issueClosed: "="
+				onToggleCloseIssue : "&",
+				availableRoles: "=",
+				projectUserRoles: "=",
+				onIssueAssignChange: "&"
 			},
 			controller: IssueCtrl,
 			controllerAs: "vm",
@@ -42,24 +44,35 @@
 
 	function IssueCtrl($scope, $timeout, NewIssuesService, ViewerService) {
 		var vm = this,
-			i = 0,
-			length = 0,
-			promise = null;
+			promise = null,
+			originatorEv = null,
+			pinColour;
 
 		vm.showComments = false;
 		vm.numNewComments = 0;
 		vm.saveCommentDisabled = true;
-		vm.backgroundClass = "issueClosedBackground";
+		vm.backgroundColor = "#FFFFFF";
 		vm.autoSaveComment = false;
 		vm.showInfo		   = false;
 		vm.editingComment  = false;
+		vm.assignedRolesColors = [];
 
-		NewIssuesService.fixPin({
-			id: vm.data._id,
-			account: vm.data.account,
-			project: vm.data.project,
-			position: vm.data.position,
-			norm: vm.data.norm
+		$scope.$watch("vm.availableRoles", function (newValue) {
+			var i = 0, length = 0;
+
+			if (angular.isDefined(newValue)) {
+				// Create a local copy of the available roles
+				vm.roles = [];
+				for (i = 0, length = newValue.length; i < length; i += 1) {
+					vm.roles.push({
+						role: newValue[i].role,
+						color: newValue[i].color
+					});
+				}
+				setupRolesWatch();
+				initAssignedRolesDisplay();
+				setupCanModifyIssue();
+			}
 		});
 
 		$scope.$watch("vm.commentsToggledIssueId", function (newValue) {
@@ -112,20 +125,92 @@
 		});
 
 		$scope.$watch("vm.data", function (newValue) {
+			var i = 0, length = 0;
+
 			if (angular.isDefined(newValue)) {
-				vm.backgroundClass = newValue.hasOwnProperty("closed") ? "issueClosedBackground" : "issueOpenBackground";
-				vm.issueIsOpen = !newValue.hasOwnProperty("closed");
+				vm.backgroundColor = "#FFFFFF";
+				vm.issueIsOpen = true;
+				if ( newValue.hasOwnProperty("closed")) {
+					vm.backgroundColor = newValue.closed ? "#E0E0E0" : "#FFFFFF";
+					vm.issueIsOpen = !newValue.closed;
+				}
+
 				if (vm.issueIsOpen && newValue.hasOwnProperty("comments")) {
 					for (i = 0, length = newValue.comments.length; i < length; i += 1) {
 						newValue.comments[i].canDelete =
 							(i === (newValue.comments.length - 1)) && (!newValue.comments[i].set);
 					}
 				}
+				initAssignedRolesDisplay();
 			}
 		}, true);
 
+		function setupRolesWatch () {
+			$scope.$watch("vm.roles", function (newValue, oldValue) {
+				var i = 0,  length = 0;
+
+				// Ignore initial setup of roles
+				if (JSON.stringify(newValue) !== JSON.stringify(oldValue)) {
+					vm.data.assigned_roles = [];
+					for (i = 0, length = vm.roles.length; i < length; i += 1) {
+						if (vm.roles[i].assigned) {
+							vm.data.assigned_roles.push(vm.roles[i].role);
+						}
+					}
+
+					promise = NewIssuesService.assignIssue(vm.data);
+					promise.then(function (data) {
+						setAssignedRolesColors();
+						vm.onIssueAssignChange();
+					});
+				}
+			}, true);
+		}
+
+		function initAssignedRolesDisplay () {
+			var i = 0, length = 0;
+
+			if (angular.isDefined(vm.roles) && angular.isDefined(vm.data) && vm.data.hasOwnProperty("assigned_roles")) {
+				for (i = 0, length = vm.roles.length; i < length; i += 1) {
+					vm.roles[i].assigned = (vm.data.assigned_roles.indexOf(vm.roles[i].role) !== -1);
+				}
+				setAssignedRolesColors();
+			}
+		}
+
+		function setAssignedRolesColors () {
+			var i = 0, length = 0;
+
+			vm.assignedRolesColors = [];
+			for (i = 0, length = vm.roles.length; i < length; i += 1) {
+				if (vm.data.assigned_roles.indexOf(vm.roles[i].role) !== -1) {
+					vm.assignedRolesColors.push(NewIssuesService.getRoleColor(vm.roles[i].role));
+				}
+			}
+		}
+
+		// A user with the same role as the issue creator_role or
+		// a role that is one of the roles that the issues has been assigned to can modify the issue
+		function setupCanModifyIssue () {
+			var i = 0, length = 0;
+
+			vm.canModifyIssue = false;
+			if (angular.isDefined(vm.projectUserRoles) && angular.isDefined(vm.data) && vm.data.hasOwnProperty("assigned_roles")) {
+				vm.canModifyIssue = (vm.projectUserRoles.indexOf(vm.data.creator_role) !== -1);
+				if (!vm.canModifyIssue) {
+					for (i = 0, length = vm.projectUserRoles.length; i < length; i += 1) {
+						if (vm.data.assigned_roles.indexOf(vm.projectUserRoles[i]) !== -1) {
+							vm.canModifyIssue = true;
+							break;
+						}
+					}
+				}
+			}
+		}
+
 		vm.toggleComments = function () {
 			vm.onCommentsToggled({issueId: vm.data._id});
+			vm.showAssignedRoles = false;
 		};
 
 		vm.saveComment = function () {
@@ -134,7 +219,7 @@
 					promise = NewIssuesService.editComment(vm.data, vm.comment, vm.editingCommentIndex);
 					promise.then(function (data) {
 						vm.data.comments[vm.editingCommentIndex].comment = vm.comment;
-						vm.data.comments[vm.editingCommentIndex].timeStamp = NewIssuesService.prettyTime(data.created);
+						vm.data.comments[vm.editingCommentIndex].timeStamp = NewIssuesService.getPrettyTime(data.created);
 						vm.comment = "";
 					});
 				}
@@ -148,7 +233,7 @@
 							owner: data.owner,
 							comment: vm.comment,
 							created: data.created,
-							timeStamp: NewIssuesService.prettyTime(data.created)
+							timeStamp: NewIssuesService.getPrettyTime(data.created)
 						});
 						vm.comment = "";
 						vm.numNewComments += 1; // This is used to increase the height of the comments list
@@ -195,13 +280,18 @@
 			}
 		};
 
-		vm.closeIssue = function () {
-			vm.onCloseIssue({issue: vm.data});
+		vm.toggleCloseIssue = function () {
+			vm.onToggleCloseIssue({issue: vm.data});
 		};
 
 		vm.hideInfo = function () {
 			vm.showInfo = false;
 			$timeout.cancel(vm.infoTimeout);
+		};
+
+		vm.openAssignedRolesMenu = function ($mdOpenMenu, ev) {
+			originatorEv = ev;
+			$mdOpenMenu(ev);
 		};
 	}
 

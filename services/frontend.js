@@ -73,8 +73,11 @@ module.exports.createApp = function(template)
 			params.config_js += '\nserver_config.demoproject = "' + config.wayfinder.demoproject + '";';
 		}
 
+
+		params.config_js += '\nserver_config.backgroundImage = "' + config.backgroundImage + '";';
 		params.config_js += '\nserver_config.chatHost	= "' + config.api_server.chat_host + '";';
 		params.config_js += '\nserver_config.chatPath	= "' + config.api_server.chat_path + '";';
+
 
 		params.config_js += '\nserver_config.return_path = "/";';
 
@@ -145,6 +148,39 @@ module.exports.createApp = function(template)
 		]
 	};
 	*/
+
+
+	var pluginStructure = {
+		"plugin" : "base",
+		"children" : [
+			{
+				"plugin": "login",
+				"children": [
+					{
+						"plugin": "account",
+						"children": [
+							{
+								"plugin": "project",
+								"friends" : [
+									"panel",
+									"filter",
+									"tree",
+									"viewpoints",
+									"issues",
+									"oculus",
+									"clip",
+									"bottomButtons",
+									"qrCodeReader",
+									"docs",
+									"utils"
+								]
+							}
+						]
+					}
+				]
+			}
+		]
+	};
 
 
 	function loadPlugin(plugin, stateName, uistates, params)
@@ -307,28 +343,6 @@ module.exports.createApp = function(template)
 		// let hasChildren = true;
 		// let levelStructure = pluginStructure;
 		let parentState = "";
-		let pluginStructure = {
-			"plugin" : "base",
-			"children" : [
-				{
-					"plugin": "login",
-					"children": [
-						{
-							"plugin": "account",
-							"children": [
-								{
-									"plugin": "project",
-									"friends" : [
-										"panel", "filter", "tree", "viewpoints", "issues", "oculus", "clip", "bottomButtons"
-									]
-								}
-							]
-						}
-					]
-				}
-			]
-		};
-
 
 
 		// Generate the list of files to load for the plugins

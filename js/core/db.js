@@ -28,6 +28,7 @@ var MongoClient = require("mongodb").MongoClient,
 	GridStore   = require("mongodb").GridStore,
 	Binary      = require("mongodb").Binary;
 
+var C = require("./constants.js");
 var systemLogger = require("./logger.js").systemLogger;
 
 // Create connection to Mongo
@@ -457,6 +458,233 @@ MongoWrapper.prototype.filterColl = function(dbName, collName, filter, projectio
 			});
 		}
 	});
+};
+
+/*******************************************************************************
+ * Get list of roles by database
+ *
+ * @param {string} dbName - Database name which holds the project
+ * @param {number} readWriteAny - Select what permissions the role should have
+ * @param {function} callback - function to return the list of roles
+ ******************************************************************************/
+MongoWrapper.prototype.getRolesByDatabase = function(dbName, readWriteAny, callback)
+{
+	"use strict";
+	var collection = "system.roles";
+
+	var filter = {};
+
+	self.filterColl(dbName, collection, filter, {}, function (err, docs) {
+		if (err.value)
+		{
+			return callback(err);
+		}
+
+		var rolesToReturn = [];
+
+		for (var i = 0; i < docs.length; i++)
+		{
+			if (docs[i]["privileges"].length)
+			{
+				if (readWriteAny !== C.REPO_ANY)
+				{
+					var validActions= docs[i]["privileges"][0]["actions"];
+					var privilegeType = 0;
+
+					if (validActions.indexOf("find") !== -1) { privilegeType |= 1; };
+					if (validActions.indexOf("insert") !== -1) { privilegeType |= 2; };
+
+					if (privilegeType === readWriteAny)
+					{
+						rolesToReturn.push(docs[i]);
+					}
+				}
+			}
+		}
+
+		return callback(responseCode.OK, rolesToReturn);
+	});
+};
+
+/*******************************************************************************
+ * Get list of roles by project
+ *
+ * @param {string} dbName - Database name which holds the project
+ * @param {string} project - Project to which the permissions apply
+ * @param {number} readWriteAny - A permission type filter (see constants.js)
+ * @param {function} callback - function to return the list of roles
+ ******************************************************************************/
+MongoWrapper.prototype.getRolesByProject = function(dbName, project, readWriteAny, callback)
+{
+	"use strict";
+	var collection = "system.roles";
+
+	var filter = {};
+
+	// Get all roles which have permissions on this project
+	filter["privileges"] = { $elemMatch : { "resource.collection" : project + ".history" } };
+
+	self.filterColl(dbName, collection, filter, {}, function (err, docs) {
+		if (err.value)
+		{
+			return callback(err);
+		}
+
+		var rolesToReturn = [];
+
+		for (var i = 0; i < docs.length; i++)
+		{
+			if (docs[i]["privileges"].length)
+			{
+				if (readWriteAny !== C.REPO_ANY)
+				{
+					var validActions= docs[i]["privileges"][0]["actions"];
+					var privilegeType = 0;
+
+					if (validActions.indexOf("find") !== -1) { privilegeType |= 1; };
+					if (validActions.indexOf("insert") !== -1) { privilegeType |= 2; };
+
+					if (privilegeType === readWriteAny)
+					{
+						rolesToReturn.push(docs[i]);
+					}
+				}
+			}
+		}
+
+		return callback(responseCode.OK, rolesToReturn);
+	});
+};
+
+// Get list of roles to check permissions on a project
+// Get a user's current role for a project
+// Get a list of valid roles for a project and their associated role.
+
+/*******************************************************************************
+ * Get settings for a particular role
+ *
+ * @param {string} dbName - Database name which holds the project
+ * @param {array} roles - list of role names
+ * @param {function} callback - function to return the list of roles
+ ******************************************************************************/
+MongoWrapper.prototype.getRoleSettings = function(dbName, roles, callback)
+{
+	"use strict";
+
+	if (roles.constructor !== Array)
+	{
+		roles = [roles];
+	}
+
+	var filter = { _id : { $in : roles}};
+
+	self.filterColl(database, "settings.roles", filter, {}, function (err, docs) {
+		if (err.value)
+		{
+			return callback(err);
+		}
+
+		return callback(docs);
+	});
+};
+
+MongoWrapper.prototype.getUserRolesForProject = function(database, project, username, callback)
+{
+	"use strict";
+
+	self.getRolesByProject(database, project, C.REPO_ANY, function(err, projectRoles) {
+		if (err.value)
+		{
+			return callback(err);
+		}
+
+		var projectRoleNames = projectRoles.map(function(projectRole) { return projectRole["_id"]; });
+
+		self.getUserRoles(username, database, function(err, userRoles) {
+			var userRoleNames = userRoles.map(function(userRole) { return userRole["_id"]; });
+			var rolesToReturn = [];
+
+			for(var i = 0; i < userRoleNames.length; i++)
+			{
+				if(projectRoleNames.indexOf(userRoleNames[i]) !== -1)
+				{
+					rolesToReturn.push(userRoles[i]);
+				}
+			}
+
+			return callback(rolesToReturn);
+		});
+	});
+};
+
+/******************************************************************************
+ * Get roles granted to a user within a specific database
+ * The function will find all roles within the specified database and also
+ * admin database and return this on the callback
+ *
+ * @param {string} username - username of the user
+ * @param {string} database - database we are interested in
+ * @param {function} callback - get filtered roles from database
+ *								pass to callback as parameter
+ ******************************************************************************/
+MongoWrapper.prototype.getRoles = function (database, username, full, callback) {
+	"use strict";
+	var self = this;
+
+	var dbName = "admin";
+	var collName = "system.users";
+	var filter = {};
+	var rolesToReturn = [];
+
+	// If the username is supplied, start by getting the roles just for this user
+	if (username)
+	{
+		self.getUserRoles(username, dbName, function (err, userRoles)
+		{
+			if (err.value)
+			{
+				return callback(err);
+			}
+
+			var roleNames = userRoles.map( function (userRole) {
+				return userRole["_id"].replace(".history", "");
+			});
+
+			self.getRoleSettings(database, roleNames, function(err, roleSettings)
+			{
+				for (var i = 0; i < roleNames.length; i++)
+				{
+					delete roleSettings[i]["_id"]; // Delete the ID attach to the settings
+					_.extend(userRoles[i], roleSettings[i]);
+				}
+
+				return callback(responseCodes.OK, userRoles);
+			});
+
+		});
+	} else {
+		self.getRolesByDatabase(database, C.REPO_ANY, function(err, dbRoles) {
+			if (err.value)
+			{
+				return callback(err);
+			}
+
+			var roleNames = dbRoles.map( function (dbRole) {
+				return dbRole["_id"].replace(".history", "");
+			});
+
+			self.getRoleSettings(database, roleNames, function(err, roleSettings)
+			{
+				for (var i = 0; i < roleNames.length; i++)
+				{
+					delete roleSettings[i]["_id"]; // Delete the ID attach to the settings
+					_.extend(dbRoles[i], roleSettings[i]);
+				}
+
+				return callback(responseCodes.OK, dbRoles);
+			});
+		});
+	}
 };
 
 /*******************************************************************************

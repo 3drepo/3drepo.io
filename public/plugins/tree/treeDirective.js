@@ -35,49 +35,46 @@
 		};
 	}
 
-	TreeCtrl.$inject = ["$scope", "$rootScope", "$timeout", "$filter", "TreeService", "ViewerService"];
+	TreeCtrl.$inject = ["$scope", "$timeout", "$element", "TreeService", "ViewerService", "EventService"];
 
-	function TreeCtrl($scope, $rootScope, $timeout, $filter, TreeService, ViewerService) {
+	function TreeCtrl($scope, $timeout, $element, TreeService, ViewerService, EventService) {
 		var vm = this,
 			promise = null,
-			item = {},
 			i = 0,
-			length = 0,
-			levels = 4,
-			levelCount = 0;
+			length = 0;
 
 		vm.nodes = [];
-		vm.showTree = false;
-		vm.showFilterList = true;
+		vm.showTree = true;
+		vm.showFilterList = false;
 		vm.currentFilterItemSelected = null;
 		vm.viewerSelectedObject = null;
+		vm.showProgress = true;
+		vm.progressInfo = "Loading full tree structure";
 
 		promise = TreeService.init();
 		promise.then(function (data) {
-			vm.showChildren = true;
 			vm.allNodes = [];
 			vm.allNodes.push(data.nodes);
 			vm.nodes = vm.allNodes;
 			vm.showTree = true;
+			vm.showProgress = false;
 
 			vm.idToPath = data.idToPath;
-
 			initNodesToShow();
 			setupInfiniteScroll();
 		});
 
-		var initNodesToShow = function () {
+		function initNodesToShow () {
 			vm.nodesToShow = [vm.allNodes[0]];
 			vm.nodesToShow[0].level = 0;
 			vm.nodesToShow[0].expanded = false;
 			vm.nodesToShow[0].hasChildren = true;
 			vm.nodesToShow[0].selected = false;
 			vm.nodesToShow[0].toggleState = "visible";
-		};
+		}
 
 		vm.expand = function (_id) {
 			var i,
-				j,
 				numChildren,
 				index = -1,
 				length,
@@ -119,8 +116,7 @@
 		function expandToSelection(path, level) {
 			var i,
 				j,
-				length = 0,
-				pathLength,
+				length,
 				childrenLength,
 				selectedId = path[path.length - 1],
 				selectedIndex = 0,
@@ -141,7 +137,6 @@
 						vm.nodesToShow[i].children[j].toggleState = "visible";
 						vm.nodesToShow[i].children[j].hasChildren = vm.nodesToShow[i].children[j].children.length > 0;
 						if (vm.nodesToShow[i].children[j].selected) {
-							console.log(vm.nodesToShow[i].children[j]);
 							selectionFound = true;
 						}
 						if ((level === (path.length - 2)) && !selectionFound) {
@@ -159,15 +154,14 @@
 			}
 		}
 
-		$(document).on("objectSelected", function (event, object, zoom) {
+		$(document).on("objectSelected", function (event, object) {
 			$timeout(function () {
 				if (angular.isUndefined(object)) {
 					vm.viewerSelectedObject = null;
 					vm.filterText = "";
 				} else {
-					var objectID = null;
 					var idParts = null;
-					var path = null;
+					var path;
 
 					if (object["multipart"]) {
 						idParts = object.id.split("__");
@@ -251,17 +245,18 @@
 			ViewerService.defaultViewer.setVisibilityByID(map, (node.toggleState === "visible"));
 		};
 
-		vm.nodeSelected = function (nodeId) {
+		vm.nodeSelected = function (node) {
 			var map = [];
 			var pathArr = [];
 			for (var obj in vm.idToPath) {
-				if (vm.idToPath.hasOwnProperty(obj) && (vm.idToPath[obj].indexOf(nodeId) !== -1)) {
+				if (vm.idToPath.hasOwnProperty(obj) && (vm.idToPath[obj].indexOf(node._id) !== -1)) {
 					pathArr = vm.idToPath[obj].split("__");
 					map.push(pathArr[pathArr.length - 1]);
 				}
 			}
-
 			ViewerService.defaultViewer.selectPartsByID(map, false);
+
+			EventService.send(EventService.EVENT.OBJECT_SELECTED, {id: node._id, name: node.name});
 		};
 
 
@@ -304,27 +299,18 @@
 				if (newValue === "") {
 					vm.showTree = true;
 					vm.showFilterList = false;
-					vm.showChildren = true;
 					vm.nodes = vm.allNodes;
 				} else {
 					vm.showTree = false;
-					vm.showFilterList = true;
-					vm.showChildren = true;
+					vm.showFilterList = false;
+					vm.showProgress = true;
+					vm.progressInfo = "Filtering tree for objects";
 
 					promise = TreeService.search(newValue);
 					promise.then(function (json) {
-						vm.showChildren = false;
+						vm.showFilterList = true;
+						vm.showProgress = false;
 						vm.nodes = json.data;
-						// If an object has been selected in the viewer to prompt this filter, only show the node
-						// with the exact name of the selected object (this needs rethinking as showing the selected
-						// object shouldn't trigger the filter)
-						if (vm.viewerSelectedObject !== null) {
-							for (i = (vm.nodes.length - 1); i >= 0; i -= 1) {
-								if (vm.nodes[i].name !== vm.viewerSelectedObject.name) {
-									vm.nodes.splice(i, 1);
-								}
-							}
-						}
 						for (i = 0, length = vm.nodes.length; i < length; i += 1) {
 							vm.nodes[i].index = i;
 							vm.nodes[i].toggleState = "visible";
@@ -386,47 +372,5 @@
 				}
 			};
 		}
-
-		/*
-        $(document).on("objectSelected", function(event, object, zoom) {
-            $timeout(function () {
-                if (angular.isUndefined(object)) {
-                    vm.viewerSelectedObject = null;
-                    vm.filterText = "";
-                } else {
-                    var objectID = null;
-                    var idParts  = null;
-
-                    if (object["multipart"])
-                    {
-                        idParts = object.id.split("__");
-                    } else {
-                        idParts = object.getAttribute("id").split("__");
-                    }
-
-                    objectID = idParts[idParts.length - 1];
-
-                    if (objectID === vm.idToName[objectID])
-                    {
-                        vm.filterText = "###" + vm.idToName[objectID];
-
-                        vm.objectName    = objectID;
-                        vm.origID        = "###" + object.id;
-                    } else {
-                        vm.filterText    = vm.idToName[objectID];
-                    }
-                }
-
-				$rootScope.$apply();
-            });
-        });
-
-        $(document).on("partSelected", function(event, part, zoom) {
-            $scope.IssuesService.mapPromise.then(function () {
-                vm.viewerSelectedObject = $filter('filter')(vm.idToName, {_id: $scope.IssuesService.IDMap[part.partID]})[0];
-                vm.filterText = vm.viewSelectedObject;
-            });
-        });
-        */
 	}
 }());

@@ -15,10 +15,9 @@ tree span .fa {
 
 tree p {
   outline: none;
-  width: 400px;
+  width: 100%;
   word-break: break-all;
   word-wrap: break-word;
-  padding: 5px;
   line-height: 18px;
   margin: 0;
 }
@@ -36,18 +35,30 @@ tree md-checkbox {
   font-weight: normal;
 }
 
-tree .treeToggleButton {
+tree .treeButton {
   outline: none;
-  width: 40px;
-  height: 40px;
+  width: 45px;
   text-align: center;
-  padding-top: 8px;
+  padding-top: 1px;
 }
-tree .treeToggleButton md-icon {
-  font-size: 22px;
+tree .treeButton md-icon {
+  font-size: 20px;
+  position: relative;
 }
-tree .treeToggleButton .treeToggleButtonDisabled {
-  color: #DDDDDD;
+tree .treeButton md-icon .treeIconCheck {
+  position: absolute;
+  left: 3px;
+  font-size: 11px;
+  top: 5px;
+}
+tree .treeButton md-icon  .treeIconDot {
+  position: absolute;
+  left: 6px;
+  font-size: 6px;
+  top: 7px;
+}
+tree .treeButton .treeButtonDisabled {
+  color: #CCCCCC;
 }
 
 /** Tree Node *********************************************************************************************************/
@@ -75,15 +86,19 @@ tree .treeToggleButton .treeToggleButtonDisabled {
 
 /** Tree filter list **************************************************************************************************/
 
-tree .virtualRepeatdemoInfiniteScroll .vertical-container {
-  height: 770px;
-  min-width: 800px;
-  max-width: 800px;
+tree .virtualRepeatInfiniteScroll {
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-tree .virtualRepeatdemoInfiniteScroll .repeated-item {
+tree .virtualRepeatInfiniteScroll .vertical-container {
+  height: 770px;
+  width: 350px;
+}
+
+tree .virtualRepeatInfiniteScroll .repeated-item {
   cursor: default;
-  min-height: 48px;
+  padding: 8px 0 8px;
 }
 
 .selectedFilterItem {
@@ -93,12 +108,8 @@ tree .virtualRepeatdemoInfiniteScroll .repeated-item {
   background: #FFFFFF;
 }
 
-#treeFilterItemName button {
-  padding: 0;
-  width: 246px;
-}
-#treeFilterItemName .md-button {
-  border-radius: 0;
+#treeFilterItemName {
+  margin-left: 20px;
 }
 
 .viewerSelected {

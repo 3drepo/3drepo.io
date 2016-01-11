@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2015 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-angular.module('3drepo')
-.service('serverConfig', function() {
-	this.apiUrl = server_config.apiUrl;
+(function () {
+	"use strict";
 
-	this.democompany = server_config.democompany;
-	this.demoproject = server_config.demoproject;
+	angular.module('3drepo')
+		.factory('ProjectService', ProjectService);
 
-	this.chatHost    = server_config.chatHost;
-	this.chatPath    = server_config.chatPath;
+	ProjectService.$inject = ["$http", "$q", "StateManager", "serverConfig"];
 
-	this.backgroundImage = server_config.backgroundImage;
-});
+	function ProjectService($http, $q, StateManager, serverConfig) {
+		var state = StateManager.state;
 
+		var getRoles = function () {
+			var deferred = $q.defer(),
+				url = serverConfig.apiUrl(state.account + '/' + state.project + '/roles.json');
 
+			$http.get(url)
+				.then(
+					function(data) {
+						deferred.resolve(data.data);
+					},
+					function () {
+						deferred.resolve([]);
+					}
+				);
+
+			return deferred.promise;
+		};
+
+		return {
+			getRoles: getRoles
+		};
+	}
+}());

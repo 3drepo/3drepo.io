@@ -174,6 +174,8 @@ if ((config.cookie.secret === config.default_cookie_secret) || (config.cookie.pa
 	process.exit(1);
 }
 
+config.backgroundImage = coalesce(config.backgroundImage, 'public/images/dummies/login-background.jpg');
+
 config.default_format = coalesce(config.default_format, "html");
 config.external       = (config.js_debug_level === 'debug') ? frontend_scripts.debug_scripts : frontend_scripts.prod_scripts;
 

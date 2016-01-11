@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2015 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-angular.module('3drepo')
-.service('serverConfig', function() {
-	this.apiUrl = server_config.apiUrl;
+(function () {
+	"use strict";
 
-	this.democompany = server_config.democompany;
-	this.demoproject = server_config.demoproject;
+	angular.module("3drepo")
+		.directive("tdrProgress", tdrProgress);
 
-	this.chatHost    = server_config.chatHost;
-	this.chatPath    = server_config.chatPath;
+	function tdrProgress() {
+		return {
+			restrict: "EA",
+			templateUrl: "tdrProgress.html",
+			scope: {
+				info: "="
+			},
+			controller: TdrProgressCtrl,
+			controllerAs: "vm",
+			bindToController: true
+		};
+	}
 
-	this.backgroundImage = server_config.backgroundImage;
-});
+	TdrProgressCtrl.$inject = ["$scope"];
 
+	function TdrProgressCtrl($scope) {
+		var vm = this;
+	}
 
+}());

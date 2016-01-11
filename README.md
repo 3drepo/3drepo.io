@@ -1,10 +1,22 @@
 3drepo.io ![](https://travis-ci.org/3drepo/3drepo.io.svg?branch=master)
 =========
 
-3drepo.io is a web based front end for viewing version controlled 3D data stored in a MongoDB. Getting data into the database is controlled by the 3D Repo Core library and GUI separate projects hosted here on GitHub ([3DRepoCore][], [3DRepoGUI][])
+3drepo.io is a web based front-end for viewing version controlled 3D data stored in a MongoDB. Getting data into the database is controlled by the [3D Repo Bouncer](https://github.com/3drepo/3drepobouncer) library and [3D Repo GUI](https://github.com/3drepo/3drepogui) separate projects.
 
-## License
-This project is Copyright of [3D Repo Ltd](http://3drepo.org) and is released under the open source [GNU Affero General Public License v3](http://www.gnu.org/licenses/agpl-3.0.en.html). Should you require a commercial license, please contact [support@3drepo.org](mailto:support@3drepo.org)
+## Licenses
+This project is Copyright of [3D Repo Ltd](http://3drepo.org), a company registered in England and Wales No. 09014101, and is released under the open source [GNU Affero General Public License v3](http://www.gnu.org/licenses/agpl-3.0.en.html). Should you require a commercial license, please contact [support@3drepo.org](mailto:support@3drepo.org). All contributors are required to sign either the [3D Repo Individual](https://gist.github.com/jozefdobos/e177af804c9bcd217b73) or the [3D Repo Entity](https://gist.github.com/jozefdobos/c7c4c1c18cfb211c45d2) [Contributor License Agreement (CLA)](https://en.wikipedia.org/wiki/Contributor_License_Agreement).
+
+### Contributing
+We very much encourage contributions to the 3D Repo project. Firstly, fork the desired repository and commit your modifications there. Once happy with the changes, you can generate a [pull request](https://help.github.com/articles/using-pull-requests/) and our team will integrate it upstream after a review.
+
+Your pull requests should:
+
+1. Follow the style of the existing code
+2. One commit should just do one thing, and one thing only
+3. Work in a branch assigned to a specific issue number, e.g. branch called "ISSUE_138"
+4. Each commit message should be prefixed with the issue number, e.g. "#138 Fixing bug xyz..."
+5. Rebase your branch against [upstream's master](https://help.github.com/articles/merging-an-upstream-repository-into-your-fork/) so that we don't pull redundant commits
+6. Sign our [3D Repo Individual CLA](https://gist.github.com/jozefdobos/e177af804c9bcd217b73) or if you are representing a legal entity, sign the [3D Repo Entity CLA](https://gist.github.com/jozefdobos/c7c4c1c18cfb211c45d2)
 
 Installation
 ------------
@@ -78,8 +90,5 @@ In the configuration file for the server, you then set hostname to `example.org`
 Contact
 -------
 
-If you need any help or want to contribute please contact: `support@3drepo.org`
+If you need any help or want to contribute please contact: [support@3drepo.org](mailto:support@3drepo.org)
 We look forward to hearing from you.
-
-[3DRepoCore]: https://github.com/3drepo/3drepocore
-[3DRepoGUI]: https://github.com/3drepo/3drepogui

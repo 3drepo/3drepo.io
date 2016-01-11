@@ -59,11 +59,22 @@ function($stateProvider, $locationProvider) {
 
 	return o;
 }])
-.controller('BaseCtrl', ['$scope', 'StateManager', function($scope, StateManager)
+.controller('BaseCtrl', ['$scope', 'serverConfig', 'StateManager', 'Auth', function($scope, serverConfig, StateManager, Auth)
 {
 	$scope.ui		= StateManager.ui;
 	$scope.Data		= StateManager.Data;
 	$scope.state	= StateManager.state;
+
+	// This is used to updte the information in the Auth service
+	$scope.$watchGroup(['state.account', 'state.project'], function(newValues) {
+		// If the project has changed then we need to update the list of groups
+		if ($scope.state.account && $scope.state.project)
+		{
+			Auth.loadProjectRoles($scope.state.account, $scope.state.project);
+		}
+	});
+
+	$scope.backgroundImage = serverConfig.backgroundImage;
 }])
 .run(['StateManager', function(StateManager) {
 	StateManager.registerPlugin('base', 'BaseData', function () {

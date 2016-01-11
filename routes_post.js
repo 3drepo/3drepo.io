@@ -47,7 +47,7 @@ function createSession(place, req, res, next, user)
 				req.session.cookie.maxAge = config.cookie.maxAge;
 			}
 
-			responseCodes.respond(place, req, res, next, responseCodes.OK, {account: user.username});
+			responseCodes.respond(place, req, res, next, responseCodes.OK, {account: user.username, roles: user.roles});
 		}
 	});
 }
@@ -88,6 +88,7 @@ var repoPostHandler = function(router, checkAccess){
 		dbInterface(req[C.REQ_REPO].logger).authenticate(req.body.username, req.body.password, function(err, user)
 		{
 			req[C.REQ_REPO].logger.logDebug("User is logging in", req);
+            		res.clearCookie("connect.sid", { path: "/" + config.api_server.host_dir });
 
 			expireSession(req, res, next, function(req, res, next) {
 				if(err.value) {

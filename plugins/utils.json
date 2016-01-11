@@ -1,0 +1,14 @@
+{
+    "name" : "utils",
+    "files": {
+        "angular" : [
+            "utils/progressDirective.js"
+        ],
+        "jade": [
+            {"template" : "utils/tdrProgress.jade", "id" : "tdrProgress.html"}
+        ],
+        "css" : [
+            "utils/utils.css"
+        ]
+    }
+}
