@@ -35,9 +35,9 @@
         };
     }
 
-    PanelContentCtrl.$inject = ["$scope", "$element", "$compile", "$timeout", "EventService"];
+    PanelContentCtrl.$inject = ["$scope", "$element", "$compile", "$timeout", "serverConfig", "EventService", "StateManager"];
 
-    function PanelContentCtrl($scope, $element, $compile, $timeout, EventService) {
+    function PanelContentCtrl($scope, $element, $compile, $timeout, serverConfig, EventService, StateManager) {
         var vm = this,
             content = "",
             contentItem = "",
@@ -48,6 +48,8 @@
 			contentHeightExtra = 20,
 			toggledContentHeight = 0,
 			minimized = false;
+
+		vm.issuesUrl = serverConfig.apiUrl(StateManager.state.account + "/" + StateManager.state.project + "/issues.html");
 
         vm.showHelp = false;
 		vm.showFilter = false;

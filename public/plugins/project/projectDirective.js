@@ -95,6 +95,7 @@
 			show: true,
 			help: "List current issues",
 			icon: "fa-map-marker",
+			canPrint: true,
 			hasFilter: true,
 			canAdd: true,
 			options: [

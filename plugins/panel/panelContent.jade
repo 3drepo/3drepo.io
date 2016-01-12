@@ -5,6 +5,8 @@ div(id="vm.contentItem", layout="column", class="md-whiteframe-1dp", style="heig
 			span(class="fa", ng-class="vm.contentData.icon")
 			label(class="md-flex") {{vm.contentData.title}}
 			span(flex)
+			md-button.md-icon-button(aria-label="Print", ng-href="{{vm.issuesUrl}}", target="_blank", ng-if="vm.contentData.canPrint")
+				md-icon(class="fa fa-print")
 			md-button.md-icon-button(aria-label="Add", ng-click="vm.toggleFilter($event)", ng-if="vm.contentData.hasFilter")
 				md-icon(class="fa fa-search")
 			md-button.md-icon-button(aria-label="Add", ng-click="vm.toggleAdd($event)", ng-if="vm.contentData.canAdd")
