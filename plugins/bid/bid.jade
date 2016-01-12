@@ -1,0 +1,7 @@
+md-toolbar(flex=80)
+	.md-toolbar-tools
+		h2
+			span Bid 4 Free: {{vm.StateManager.state.project}} ({{vm.StateManager.state.account}})
+		span(flex)
+		md-button.md-icon-button(aria-label="Home", ng-click="vm.home($event)")
+			md-icon(class="fa fa-home")

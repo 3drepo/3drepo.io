@@ -173,6 +173,11 @@ module.exports.createApp = function(template)
 									"qrCodeReader",
 									"docs",
 									"utils"
+								],
+								"children" : [
+									{
+										"plugin": "bid"
+									}
 								]
 							}
 						]

@@ -2,11 +2,13 @@
 	"name" : "account",
 	"files": {
 		"jade" : [
-			{"template" : "account/account.jade", "id" : "account.html"}
+			{"template" : "account/account.jade", "id" : "account.html"},
+            {"template" : "account/projectsList.jade", "id" : "projectsList.html"}
 		],
 		"angular": [
 			"account/AccountData.js",
-			"account/AccountCtrl.js"
+			"account/AccountCtrl.js",
+            "account/projectsListDirective.js"
 		]
 	}
 }

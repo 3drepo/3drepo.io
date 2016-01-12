@@ -1,0 +1,11 @@
+| {{vm.projectsGrouped}}
+.col-xs-12
+	div(ng-repeat="(account, projects) in vm.AccountData.projectsGrouped")
+		h3 {{account}}
+		.account-projects
+			div(ng-repeat="project in projects")
+				.project-line
+					i.fa.fa-cube.menu-icon
+					span.commit-number
+						a(ng-href="{{'/' + account + '/' + project}}") {{project}}
+					md-button(ng-click="vm.b4f(account, project)") B4F

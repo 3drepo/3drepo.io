@@ -1,0 +1,17 @@
+{
+    "name" : "bid",
+    "files": {
+        "jade" : [
+            {"template" : "bid/bidPage.jade", "id" : "bidPage.html" },
+            {"template" : "bid/bid.jade", "id" : "bid.html" }
+        ],
+        "angular" : [
+            "bid/bidConfig.js",
+            "bid/bidDirective.js",
+            "bid/bidData.js"
+        ],
+        "css" : [
+            "bid/bid.css"
+        ]
+    }
+}

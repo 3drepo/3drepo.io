@@ -43,7 +43,8 @@
 				// Dashboard
 				// List of projects
 				#projects-list.row(ng-show="view=='projects' && projectsShowList")
-					.col-xs-12
+					projects-list
+					//.col-xs-12
 						div(ng-repeat="(account, projects) in Data.AccountData.projectsGrouped")
 							h3 {{account}}
 							.account-projects
