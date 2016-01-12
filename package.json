@@ -29,6 +29,7 @@
     "minify": "^1.4.19",
     "mocha": "latest",
     "mongodb": "latest",
+    "mongoose": "^4.3.5",
     "multer": "latest",
     "node-static": "latest",
     "node-uuid": "1.4.3",
