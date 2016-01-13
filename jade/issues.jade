@@ -1,36 +1,28 @@
 doctype html
 html(lang="en" ng-app="3drepo").ng-scope
 	head
-		table
-			each issueTypeIssues, issueType in issues
-				tr
-					if issueType === "open"
-						th Open Issues
-					else if issueType === "closed"
-						th Closed Issues
-				each issue in issueTypeIssues
+		each issueTypeIssues, issueType in issues
+			if issueType === "open"
+				h2 Open Issues
+			else if issueType === "closed"
+				h2 Closed Issues
+			each issue in issueTypeIssues
+				table(border=0)
 					tr
-						td Name
-						td #!{issue.number} !{issue.name}
+						td(colspan=2)
+							h3 #!{issue.number} !{issue.name}
+					if issue.assigned_roles
+						tr
+							td(colspan=2) 
+								b Assigned: 
+								span [!{issue.assigned_roles.join(",")}]
 					tr
-						td Author
-						td !{issue.owner}
-					tr
-						td Timestamp
-						td !{issue.created}
-					tr
-						td Roles
-						if issue.assigned_roles
-							each role in issue.assigned_roles
-								td !{role}
+						td !{issue.owner} [!{issue.created}]
+						td Issue Opened....
 					if issue.comments
 						each comment in issue.comments
 							tr
-								td Owner
-								td !{comment.owner}
-							tr
-								td Timestamp
-								td !{comment.created}
-							tr
+								td !{comment.owner} [!{comment.created}]
 								td !{comment.comment}
+				br
 

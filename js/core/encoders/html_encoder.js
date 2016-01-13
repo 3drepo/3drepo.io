@@ -38,6 +38,14 @@ exports.route = function(router)
 
 			for (var i = 0; i < issues.length; i++)
 			{
+				if (issues[i].hasOwnProperty("comments"))
+				{
+					for (var j = 0; j < issues[i].comments.length; j++)
+					{
+						issues[i].comments[j].created = new Date(issues[i].comments[j].created).toString();
+					}
+				}
+
 				if(issues[i].closed)
 				{
 					issues[i].created = new Date(issues[i].created).toString();
