@@ -32,15 +32,52 @@
 		};
 	}
 
-	BidCtrl.$inject = ["$window", "StateManager", "Auth"];
+	BidCtrl.$inject = ["$scope", "$location", "StateManager", "Auth"];
 
-	function BidCtrl($window, StateManager, Auth) {
+	function BidCtrl($scope, $location, StateManager, Auth) {
 		var vm = this;
 
 		vm.StateManager = StateManager;
+		vm.subContractors = [
+			{name: "Pinakin"},
+			{name: "Carmen"},
+			{name: "Henry"}
+		];
+		vm.invitedSubContractors = [];
+		vm.addSubContractorDisabled = true;
 
 		vm.home = function () {
-			$window.open("/" + Auth.username, "_self");
+			$location.path("/" + Auth.username, "_self");
+		};
+
+		vm.addSubContractor = function () {
+			var i, length, index ;
+			for (i = 0, length = vm.subContractors.length; i < length; i += 1) {
+				if (vm.subContractors[i].name === vm.subContractor) {
+					index = i;
+					break;
+				}
+			}
+			vm.invitedSubContractors.push(vm.subContractors[index]);
+			vm.invitedSubContractors[vm.invitedSubContractors.length - 1].invitedIcon = "fa fa-circle-thin";
+			vm.subContractors.splice(index, 1);
+			vm.subContractor = undefined;
+		};
+
+		$scope.$watch("vm.subContractor", function (newValue) {
+			vm.addSubContractorDisabled = !angular.isDefined(newValue);
+		});
+
+		vm.changeAssignIcon = function (index) {
+			if (vm.invitedSubContractors[index].invitedIcon === "fa fa-circle-thin") {
+				vm.invitedSubContractors[index].invitedIcon = "fa fa-check md-accent";
+			}
+			else if (vm.invitedSubContractors[index].invitedIcon === "fa fa-check md-accent") {
+				vm.invitedSubContractors[index].invitedIcon = "fa fa-remove md-warn";
+			}
+			else if (vm.invitedSubContractors[index].invitedIcon === "fa fa-remove md-warn") {
+				vm.invitedSubContractors[index].invitedIcon = "fa fa-circle-thin";
+			}
 		};
 	}
 }());

@@ -2,5 +2,69 @@ bid {
   align-items: center;
   display: flex;
   justify-content: center;
-  padding: 40px 0 0 0;
+  padding: 40px;
+  flex-direction: column;
+}
+
+bid md-toolbar {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+bid .bidHeader {
+  width: 100%;
+  margin-bottom: 50px;
+}
+bid .bidHeader.md-whiteframe-1dp {
+  border-radius: 4px;
+}
+bid .bidHeader md-toolbar {
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+}
+
+bid .bidContent {
+  width: 100%;
+}
+
+bid .bidSummary {
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+}
+bid  .bidSummary .bidSummaryContent {
+  width: 100%;
+  height: 390px;
+}
+bid  .bidSummary .bidSummaryContent .bidSummaryContentDatePicker {
+  margin: -20px 0 20px;
+}
+bid  .bidSummary .bidSummaryContent .bidSummaryContentDatePicker h5 {
+  color: rgba(0,0,0,0.5);
+}
+
+bid .bidInvite {
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+}
+bid .bidInvite .bidInviteContent {
+  width: 100%;
+  height: 400px;
+}
+bid .bidInvite .bidInviteContent md-icon {
+  font-size: 1.5em;
+}
+bid .bidInvite .bidInviteContent md-list-item p {
+  font-size: 1.6rem;
+  font-weight: 400;
+  letter-spacing: 0.010em;
+  line-height: 1.6em;
+  outline: none;
+}
+
+/* Done to counter bootstrap styling. This should really be set in a top level style file */
+.md-datepicker-input-mask {
+  width: 308px;
 }

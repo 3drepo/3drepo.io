@@ -33,15 +33,15 @@
 		};
 	}
 
-	ProjectsListCtrl.$inject = ["$window", "AccountData"];
+	ProjectsListCtrl.$inject = ["$location", "AccountData"];
 
-	function ProjectsListCtrl($window, AccountData) {
+	function ProjectsListCtrl($location, AccountData) {
 		var vm = this;
 
 		vm.AccountData = AccountData;
 
 		vm.b4f = function (account, project) {
-			$window.open("/" + account + "/" + project + "/bid", "_self");
+			$location.path("/" + account + "/" + project + "/bid", "_self");
 		};
 	}
 }());
