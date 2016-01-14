@@ -17,3 +17,15 @@ home .logoutButton {
   right: 0;
   z-index: 1;
 }
+
+.cardInfo {
+  text-align: center;
+  padding: 15px;
+  background: #E8EAF6;
+  margin: 15px;
+  border-radius: 4px;
+}
+.cardInfo p {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.7);
+}

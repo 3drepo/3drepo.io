@@ -1,3 +1,10 @@
+/* Done to counter bootstrap styling. This should really be set in a top level style file */
+.md-datepicker-input-mask {
+  width: 308px;
+}
+
+/** Bid ***************************************************************************************************************/
+
 bid {
   align-items: center;
   display: flex;
@@ -28,6 +35,16 @@ bid .bidContent {
   width: 100%;
 }
 
+bid md-list-item p {
+  font-size: 1.6rem;
+  font-weight: 400;
+  letter-spacing: 0.010em;
+  line-height: 1.6em;
+  outline: none;
+}
+
+/** Summary ***********************************************************************************************************/
+
 bid .bidSummary {
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
@@ -35,7 +52,7 @@ bid .bidSummary {
 }
 bid  .bidSummary .bidSummaryContent {
   width: 100%;
-  height: 390px;
+  min-height: 390px;
 }
 bid  .bidSummary .bidSummaryContent .bidSummaryContentDatePicker {
   margin: -20px 0 20px;
@@ -43,6 +60,21 @@ bid  .bidSummary .bidSummaryContent .bidSummaryContentDatePicker {
 bid  .bidSummary .bidSummaryContent .bidSummaryContentDatePicker h5 {
   color: rgba(0,0,0,0.5);
 }
+
+bid  .bidSummary .bidSummaryContent .projectTitle {
+  margin-bottom: 10px;
+}
+bid  .bidSummary .bidSummaryContent .projectTitle md-icon {
+  margin: 12px 0 0 20px;
+  font-size: 1.7em;
+}
+
+bid  .bidSummary .bidSummaryContent .projectDates {
+  margin-top: 10px;
+  color: rgba(0,0,0,.5);
+}
+
+/** Invite ************************************************************************************************************/
 
 bid .bidInvite {
   -webkit-border-radius: 4px;
@@ -56,15 +88,14 @@ bid .bidInvite .bidInviteContent {
 bid .bidInvite .bidInviteContent md-icon {
   font-size: 1.5em;
 }
-bid .bidInvite .bidInviteContent md-list-item p {
-  font-size: 1.6rem;
-  font-weight: 400;
-  letter-spacing: 0.010em;
-  line-height: 1.6em;
-  outline: none;
+
+bid .bidInvite .bidInviteContent .invitedProject:hover {
+  cursor: pointer;
 }
 
-/* Done to counter bootstrap styling. This should really be set in a top level style file */
-.md-datepicker-input-mask {
-  width: 308px;
+bid .bidInvite .bidInviteContent .selectedProject {
+  background: #E8EAF6;
+}
+bid .bidInvite .bidInviteContent .unselectedProject {
+  background: #FFFFFF;
 }

@@ -12,29 +12,65 @@
 		md-toolbar
 			.md-toolbar-tools
 				h2
-					span Summary
+					span {{vm.summaryTitle}}
 		.bidSummaryContent
 			md-content(layout-padding)
-				md-input-container.md-block
-					label Budget
-					input(required type="number" step="any" name="budget" ng-model="vm.budget")
-				md-input-container.md-block
-					label Site
-					input(required name="site" ng-model="vm.site")
-				.bidSummaryContentDatePicker
-					h5 Completed by
-					md-datepicker(ng-model="vm.completedBy", md-placeholder="Enter date")
-				md-divider
-				div(layout="row", layout-align="center center")
-					md-button.md-accent Save
+				// Main Contractor
+				div(ng-if="vm.userIsTheMainContractor")
+					md-input-container.md-block
+						label Budget
+						input(required type="number" step="any" name="budget" ng-model="vm.budget")
+					md-input-container.md-block
+						label Site
+						input(required name="site" ng-model="vm.site")
+					.bidSummaryContentDatePicker
+						h5 Completed by
+						md-datepicker(ng-model="vm.completedBy", md-placeholder="Enter date")
+					md-divider
+					div(layout="row", layout-align="center center")
+						md-button.md-accent Save
+
+				// Sub Contractor
+				div(ng-if="vm.userIsASubContractor")
+					.cardInfo(ng-if="!vm.projectSelected")
+						p There is currently no project selected
+					div(ng-if="vm.projectSelected")
+						.projectTitle(layout="row", layout-align="start center")
+							h3 {{vm.invitedProjects[vm.selectedProjectIndex].name}}
+							md-icon(ng-class="vm.invitedProjects[vm.selectedProjectIndex].statusIcon")
+						md-list-item
+							p(flex="20") Budget
+							p(flex="80") {{vm.invitedProjects[vm.selectedProjectIndex].budget}}
+						md-list-item
+							p(flex="20") Site
+							p(flex="80") {{vm.invitedProjects[vm.selectedProjectIndex].site}}
+						md-list-item
+							p(flex="20") Completed by
+							p(flex="80") {{vm.invitedProjects[vm.selectedProjectIndex].completed_by_pretty}}
+						md-divider
+						div(display="row", ng-if="vm.showRepondButtons")
+							md-button.md-accent(ng-click="vm.acceptInvite(true)") Accept
+							md-button.md-accent(ng-click="vm.acceptInvite(false)") Decline
+						.projectDates
+							md-list-item
+								p(flex="20") Invited
+								p(flex="80") {{vm.invitedProjects[vm.selectedProjectIndex].date_invited_pretty}}
+							md-list-item
+								p(flex="20") Responded
+								p(flex="80") {{vm.invitedProjects[vm.selectedProjectIndex].date_responded_pretty}}
+							md-list-item
+								p(flex="20") Result
+								p(flex="80") {{vm.invitedProjects[vm.selectedProjectIndex].date_answered_pretty}}
 
 	.bidInvite.md-whiteframe-1dp(flex=45)
-			md-toolbar
-				.md-toolbar-tools
-					h2
-						span Invite
-			.bidInviteContent
-				md-content(layout-padding)
+		md-toolbar
+			.md-toolbar-tools
+				h2
+					span {{vm.inviteTitle}}
+		.bidInviteContent
+			md-content(layout-padding)
+				// Main Contractor
+				div(ng-if="vm.userIsTheMainContractor")
 					div(layout="row" layout-align="space-between start")
 						md-input-container.md-block(flex="80")
 							label Sub Contractors
@@ -47,3 +83,13 @@
 						md-list-item(ng-repeat="invited in vm.invitedSubContractors")
 							md-icon(ng-class="invited.invitedIcon")
 							p(ng-click="vm.changeAssignIcon($index)") {{invited.name}}
+
+				// Sub Contractor
+				div(ng-if="vm.userIsASubContractor")
+					md-subheader.md-no-sticky Invited Projects
+					md-list-item.invitedProject(
+						ng-repeat="invited in vm.invitedProjects"
+						ng-class="{selectedProject: invited.selected, unselectedProject: !invited.selected}"
+						)
+						md-icon(ng-class="invited.statusIcon")
+						p(ng-click="vm.selectProject($index)") {{invited.name}}
