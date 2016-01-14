@@ -64,7 +64,7 @@
 		vm.progressInfo = "Loading issues";
 		vm.showIssuesInfo = false;
 		vm.issuesInfo = "There are currently no open issues";
-		vm.avialableRoles = [];
+		vm.availableRoles = [];
 		vm.projectUserRoles = [];
 
 		promise = NewIssuesService.getIssues();
@@ -78,7 +78,7 @@
 
 		rolesPromise = NewIssuesService.getRoles();
 		rolesPromise.then(function (data) {
-			vm.avialableRoles = data;
+			vm.availableRoles = data;
 		});
 
 		projectUserRolesPromise = NewIssuesService.getUserRolesForProject();

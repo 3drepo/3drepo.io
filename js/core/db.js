@@ -57,7 +57,7 @@ var MongoDBObject = function()
 		if(err) {
 			var dbError = responseCodes.DB_ERROR(err);
 			systemLogger.logError(dbError);
-			throw Error(dbError);
+			throw Error(JSON.stringify(dbError));
 		}
 
 		self.authDB = dbConn;
