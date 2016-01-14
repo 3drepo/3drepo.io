@@ -424,6 +424,12 @@
 		};
 
 		var hexToRgb = function (hex) {
+			// If nothing comes end, then send nothing out.
+			if (typeof hex === "undefined")
+			{
+				return undefined;
+			}
+
 			var hexColours = [];
 
 			if (hex.charAt(0) === "#") {

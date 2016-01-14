@@ -22,9 +22,6 @@ var default_http_port  = 80;
 var default_https_port = 443;
 var default_mongo_port = 27017;
 
-var default_cookie_secret        = 'cookie secret';
-var default_cookie_parser_secret = 'another cookie secret';
-
 /*******************************************************************************
   * Coalesce function
   * @param {Object} variable - variable to coalesce
@@ -64,6 +61,8 @@ var checkIP = function(str)
  * @param {boolean} using_ssl - Are we using SSL encryption
  * @param {string} host - A string representing the base host name
  * @param {boolean} applyName - Do we want to use the name for sub-directory/sub-domain
+ * @param {number} default_http_port - Default HTTP port for the server is none is configured
+ * @param {number} default_https_port - Default HTTPS port for the server is none in configured
  *******************************************************************************/
 var fillInServerDetails = function(serverObject, name, usingIP, using_ssl, host, applyName)
 {
@@ -117,64 +116,67 @@ var fillInServerDetails = function(serverObject, name, usingIP, using_ssl, host,
 	serverObject.url          = serverObject.base_url + "/" + serverObject.host_dir;
 }
 
-// Check for hostname and ip here
-config.host        = coalesce(config.host, "127.0.0.1");
-default_http_port  = coalesce(config.http_port, default_http_port);
-default_https_port = coalesce(config.https_port, default_https_port);
+(function(){
+	// Check for hostname and ip here
+	config.host        = coalesce(config.host, "127.0.0.1");
+	default_http_port  = coalesce(config.http_port, default_http_port);
+	default_https_port = coalesce(config.https_port, default_https_port);
 
-config.using_ip  = checkIP(config.host);
-config.using_ssl = ('ssl' in config);
+	config.using_ip  = checkIP(config.host);
+	config.using_ssl = ('ssl' in config);
 
-fillInServerDetails(config.api_server, "api", config.using_ip, config.using_ssl, config.host, true);
-config.api_server.external     = coalesce(config.api_server.external, false); // Do we need to start an API server, or just link to an external one.
-config.api_server.chat_subpath = coalesce(config.api_server.chat_subpath, 'chat');
-config.api_server.chat_path    = '/' + config.api_server.host_dir + '/' + config.api_server.chat_subpath;
-config.api_server.chat_host    = config.api_server.base_url;
+	fillInServerDetails(config.api_server, "api", config.using_ip, config.using_ssl, config.host, true, default_http_port, default_https_port);
+	config.api_server.external     = coalesce(config.api_server.external, false); // Do we need to start an API server, or just link to an external one.
+	config.api_server.chat_subpath = coalesce(config.api_server.chat_subpath, 'chat');
+	config.api_server.chat_path    = '/' + config.api_server.host_dir + '/' + config.api_server.chat_subpath;
+	config.api_server.chat_host    = config.api_server.base_url;
 
-config.disableCache            = coalesce(config.disableCache, false);
+	config.disableCache            = coalesce(config.disableCache, false);
 
-// Set up other servers
-for(i in config.servers)
-{
-	fillInServerDetails(config.servers[i], "server_" + i, config.using_ip, config.using_ssl, config.host, false);
-}
+	// Set up other servers
+	for(i in config.servers)
+	{
+		fillInServerDetails(config.servers[i], "server_" + i, config.using_ip, config.using_ssl, config.host, false);
+	}
 
-// If the API server is running on a subdirectory, config.subdirectory will be true
-// If the API server is running different subdomain it will require virtual hosts
-// If both these are set to false then you enter advanced mode (see 3drepo.js)
-config.subdirectory = coalesce(config.subdirectory, config.api_server.sub_domain_or_dir === 1);
-config.vhost        = coalesce(config.vhost, config.api_server.sub_domain_or_dir === 0);
+	// If the API server is running on a subdirectory, config.subdirectory will be true
+	// If the API server is running different subdomain it will require virtual hosts
+	// If both these are set to false then you enter advanced mode (see 3drepo.js)
+	config.subdirectory = coalesce(config.subdirectory, config.api_server.sub_domain_or_dir === 1);
+	config.vhost        = coalesce(config.vhost, config.api_server.sub_domain_or_dir === 0);
 
-// Database configuration
-config.db          = coalesce(config.db, {});
-config.db.host     = coalesce(config.db.host, config.host);
-config.db.port     = coalesce(config.db.port, default_mongo_port);
-config.db.username = coalesce(config.db.username, "username");
-config.db.password = coalesce(config.db.password, "password");
+	// Database configuration
+	config.db          = coalesce(config.db, {});
+	config.db.host     = coalesce(config.db.host, config.host);
+	config.db.port     = coalesce(config.db.port, default_mongo_port);
+	config.db.username = coalesce(config.db.username, "username");
+	config.db.password = coalesce(config.db.password, "password");
 
-// Other options
-config.js_debug_level       = coalesce(config.js_debug_level, 'debug'); // Loading prod or debug scripts
+	// Other options
+	config.js_debug_level       = coalesce(config.js_debug_level, 'debug'); // Loading prod or debug scripts
 
-config.cookie               = coalesce(config.cookie, {});
-config.cookie.secret        = coalesce(config.cookie.secret, config.default_cookie_secret);
-config.cookie.parser_secret = coalesce(config.cookie.parser_secret, config.default_cookie_parser_secret);
+	config.cookie               = coalesce(config.cookie, {});
+	config.cookie.secret        = coalesce(config.cookie.secret, config.default_cookie_secret);
+	config.cookie.parser_secret = coalesce(config.cookie.parser_secret, config.default_cookie_parser_secret);
 
-// Check whether the secret have been set in the file or not
-if ((config.cookie.secret === config.default_cookie_secret) || (config.cookie.parser_secret === config.default_cookie_parser_secret))
-{
-	console.log("Cookie secret phrase has the default value. Update the config");
-	process.exit(1);
-}
+	// Check whether the secret have been set in the file or not
+	if ((config.cookie.secret === config.default_cookie_secret) || (config.cookie.parser_secret === config.default_cookie_parser_secret))
+	{
+		console.log("Cookie secret phrase has the default value. Update the config");
+		process.exit(1);
+	}
 
-config.backgroundImage = coalesce(config.backgroundImage, 'public/images/dummies/login-background.jpg');
+	config.backgroundImage = coalesce(config.backgroundImage, 'public/images/dummies/login-background.jpg');
 
-config.default_format = coalesce(config.default_format, "html");
-config.external       = (config.js_debug_level === 'debug') ? frontend_scripts.debug_scripts : frontend_scripts.prod_scripts;
+	config.default_format = coalesce(config.default_format, "html");
+	config.external       = (config.js_debug_level === 'debug') ? frontend_scripts.debug_scripts : frontend_scripts.prod_scripts;
 
-// Log file options
-config.logfile               = coalesce(config.logfile, {});
-config.logfile.filename      = coalesce(config.logfile.filename, "/var/log/3drepo.org");
-config.logfile.console_level = coalesce(config.logfile.console_level, "info");
-config.logfile.file_level    = coalesce(config.logfile.file_level, "info");
+	// Log file options
+	config.logfile               = coalesce(config.logfile, {});
+	config.logfile.filename      = coalesce(config.logfile.filename, "/var/log/3drepo.org");
+	config.logfile.console_level = coalesce(config.logfile.console_level, "info");
+	config.logfile.file_level    = coalesce(config.logfile.file_level, "info");
 
-module.exports = config;
+	module.exports = config;
+})()
+
