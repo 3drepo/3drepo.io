@@ -121,13 +121,15 @@
 
 	// Check for hostname and ip here
 	config.host        = coalesce(config.host, "127.0.0.1");
-	default_http_port  = coalesce(config.http_port, default_http_port);
-	default_https_port = coalesce(config.https_port, default_https_port);
+
+	// Global config variable used in the function above
+	let default_http_port  = coalesce(config.http_port, 80); // Default http port
+	let default_https_port = coalesce(config.https_port, 443); // Default https port
 
 	config.using_ip  = checkIP(config.host);
 	config.using_ssl = ('ssl' in config);
 
-	fillInServerDetails(config.api_server, "api", config.using_ip, config.using_ssl, config.host, true, default_http_port, default_https_port);
+	fillInServerDetails(config.api_server, "api", config.using_ip, config.using_ssl, config.host, true);
 	config.api_server.external     = coalesce(config.api_server.external, false); // Do we need to start an API server, or just link to an external one.
 	config.api_server.chat_subpath = coalesce(config.api_server.chat_subpath, 'chat');
 	config.api_server.chat_path    = '/' + config.api_server.host_dir + '/' + config.api_server.chat_subpath;
@@ -136,10 +138,10 @@
 	config.disableCache            = coalesce(config.disableCache, false);
 
 	// Set up other servers
-	for(let i in config.servers)
-	{
-		fillInServerDetails(config.servers[i], "server_" + i, config.using_ip, config.using_ssl, config.host, false);
-	}
+
+	config.servers.forEach((server, i) => {
+		fillInServerDetails(server, "server_" + i, config.using_ip, config.using_ssl, config.host, false, default_http_port, default_https_port);
+	});
 
 	// If the API server is running on a subdirectory, config.subdirectory will be true
 	// If the API server is running different subdomain it will require virtual hosts
@@ -150,7 +152,7 @@
 	// Database configuration
 	config.db          = coalesce(config.db, {});
 	config.db.host     = coalesce(config.db.host, config.host);
-	config.db.port     = coalesce(config.db.port, default_mongo_port);
+	config.db.port     = coalesce(config.db.port, 27017); // Default mongo port
 	config.db.username = coalesce(config.db.username, "username");
 	config.db.password = coalesce(config.db.password, "password");
 
@@ -181,4 +183,3 @@
 
 	module.exports = config;
 })()
-

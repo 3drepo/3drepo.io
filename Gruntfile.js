@@ -46,31 +46,48 @@ module.exports = function(grunt) {
         jshint: {
             files: ['js/core/**/*.js', 'public/plugins/**/*.js', 'services/*.js', 'public/js/*.js'],
             options: {
-                bitwise: true,
+                bitwise: false,
                 curly: true,
                 eqeqeq: true,
                 forin: true,
                 freeze: true,
                 futurehostile: true,
-                maxcomplexity: 4,
-                maxdepth: 2,
                 strict: true,
                 unused: true,
-                varstmt: true,
+                varstmt: false,
+                strict: false,
+                esnext: true,
                 // options here to override JSHint defaults
                 globals: {
                     console: true,
                     module: true,
                     document: true
                 }
+            },
+
+            backend:{
+                files: { src: ['js/core/**/*.js', 'services/*.js']},
             }
+
+        },
+
+        mochaTest: {
+          test: {
+            options: {
+              reporter: 'spec',
+              quiet: false, // Optionally suppress output to standard out (defaults to false)
+              clearRequireCache: false // Optionally clear the require cache before running tests (defaults to false)
+            },
+            src: ['test/**/*.js']
+          }
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-mocha-test');
 
     grunt.registerTask('default', ['concat', 'uglify']);
-    grunt.registerTask('test', ['jshint']);
+    grunt.registerTask('test', ['jshint:backend', 'mochaTest']);
 };

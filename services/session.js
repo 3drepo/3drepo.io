@@ -18,20 +18,26 @@
 // This file contains the session shared between various services
 // TODO: Currently this stores everything on the filesystem,
 // but it needs to be changed.
-var expressSession = require('express-session');
-var fileStore = require('session-file-store')(expressSession);
-var config = require('../js/core/config.js');
+(function(){
+	'use strict';
 
-module.exports.session = expressSession({
-	secret: config.cookie.secret,
-	resave: false,
-	saveUninitialized: true,
-	cookie: {
-		domain: config.api_server.hostname,
-		path: "/" + config.api_server.host_dir,
-		secure: config.using_ssl,
-		httpOnly: false
-	},
-	store: new fileStore()
+	let expressSession = require('express-session');
+	let FileStore = require('session-file-store')(expressSession);
+	let config = require('../js/core/config.js');
+
+	module.exports.session = expressSession({
+		secret: config.cookie.secret,
+		resave: false,
+		saveUninitialized: true,
+		cookie: {
+			domain: config.api_server.hostname,
+			path: "/" + config.api_server.host_dir,
+			secure: config.using_ssl,
+			httpOnly: false
+		},
+		store: new FileStore()
 	});
+
+})();
+
 

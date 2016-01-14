@@ -72,7 +72,7 @@ function convertToErrorCode(errCode){
  *******************************************************************************/
 function dispatchWork(corID, msg, callback){
     amqp.connect(config.cn_queue.host, function (err, conn) {
-        if (err == null) {
+        if (err === null) {
             logger.log('debug', 'established connection to ' + config.cn_queue.host);
         }
         else {
@@ -80,7 +80,7 @@ function dispatchWork(corID, msg, callback){
             return;
         }
         conn.createChannel(function (err, ch) {
-            if (err == null) {
+            if (err === null) {
                 logger.log('debug', 'created channel in' + config.cn_queue.host);
             }
             else {
@@ -90,14 +90,14 @@ function dispatchWork(corID, msg, callback){
             }
                     
             //initiate callback queue
-            ch.assertQueue(config.cn_queue.callback_queue, { durable: true }, function (err, q) {
+            ch.assertQueue(config.cn_queue.callback_queue, { durable: true }, function (err) {
                 if (err) {
                     callback(responseCodes.QUEUE_CONN_ERR);
                     return;
                 }
                 ch.consume(config.cn_queue.callback_queue, function (rep) {
                     //consume callback
-                    if (this.corID == rep.properties.correlationId) {
+                    if (this.corID === rep.properties.correlationId) {
                         logger.log('info', 'Upload request id ' + this.corID + ' returned: ' + rep.content);
                         callback(convertToErrorCode(parseInt(JSON.parse(rep.content).value)));
                     }
@@ -140,9 +140,9 @@ function moveFileToSharedSpace(corID, orgFilePath, newFileName, callback) {
             fs.move(orgFilePath, filePath, function (err) {
                 if (err) {
                     callback(responseCodes.QUEUE_INTERNAL_ERR, filePath);
-                }
-                else
+                } else {
                     callback(err, filePath);
+                }
             });
         }
 
@@ -163,15 +163,15 @@ exports.importFile = function (filePath, orgFileName, databaseName, projectName,
     var corID = uuid.v1();
     
     moveFileToSharedSpace(corID, filePath, orgFileName, function (err, newPath) {
-        if (err)
+        if (err) {
             callback(responseCodes.QUEUE_INTERNAL_ERR);
-        else {
+        } else {
             var msg = 'import ' + newPath + ' ' + databaseName + ' ' + projectName + ' ' + userName;
             dispatchWork(corID, msg, function (err) {
-                if (callback) callback(err);
+                if (callback) { callback(err); }
             });
         }
 
     });
-}
+};
 

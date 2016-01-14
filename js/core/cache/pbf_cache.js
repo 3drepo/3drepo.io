@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var constants    = require('../constants.js');
+// var constants    = require('../constants.js');
 var logIface     = require('../logger.js');
 var logger       = logIface.logger;
 var repoNodeMesh = require('../repoNodeMesh.js');
-var pbf_levels   = 10;
+// var pbf_levels   = 10;
 
 function PBFCache() {
 	"use strict";
@@ -27,11 +27,10 @@ function PBFCache() {
 	this.pbfCache = {};
 
 	this.genPopCache = function(mesh) {
-		"use strict";
 
-		if (!(mesh['id'] in pbfCache)) {
+		if (!(mesh.id in pbfCache)) {
 			var bbox             = repoNodeMesh.extractBoundingBox(mesh);
-			var valid_tri        = Array(mesh.faces_count);
+			var valid_tri        = new Array(mesh.faces_count);
 			var vertex_map       = new Array(mesh.vertices_count);
 			var vertex_quant_idx = new Array(mesh.vertices_count);
 			var vertex_quant     = new Array(mesh.vertices_count);
@@ -50,7 +49,7 @@ function PBFCache() {
 			var has_tex = false;
 
 			if ('uv_channels' in mesh) {
-				if (mesh[C.REPO_NODE_LABEL_UV_CHANNELS_COUNT] == 2) {
+				if (mesh[C.REPO_NODE_LABEL_UV_CHANNELS_COUNT] === 2) {
 					logging.log('error', 'Only support two channels texture coordinates');
 					return null;
 				} else {
@@ -79,23 +78,23 @@ function PBFCache() {
 					for (comp_idx = 0; comp_idx < 2; comp_idx++) {
 						tex_coords[vertNum][comp_idx] = mesh.uv_channels.buffer.readFloatLE(8 * vertNum + 4 * comp_idx);
 
-						if (comp_idx == 0) {
-							if (vertNum == 0) {
+						if (comp_idx === 0) {
+							if (vertNum === 0) {
 								minTexcoordU = tex_coords[vertNum][comp_idx];
 								maxTexcoordu = tex_coords[vertNum][comp_idx];
 							} else {
-								if (tex_coords[vertNum][comp_idx] < minTexcoordU) minTexcoordU = tex_coords[vertNum][comp_idx];
-								if (tex_coords[vertNum][comp_idx] > maxTexcoordu) maxTexcoordu = tex_coords[vertNum][comp_idx];
+								if (tex_coords[vertNum][comp_idx] < minTexcoordU) { minTexcoordU = tex_coords[vertNum][comp_idx]; }
+								if (tex_coords[vertNum][comp_idx] > maxTexcoordu) { maxTexcoordu = tex_coords[vertNum][comp_idx]; }
 							}
 						}
 
-						if (comp_idx == 1) {
-							if (vertNum == 0) {
+						if (comp_idx === 1) {
+							if (vertNum === 0) {
 								minTexcoordV = tex_coords[vertNum][comp_idx];
 								maxTexcoordV = tex_coords[vertNum][comp_idx];
 							} else {
-								if (tex_coords[vertNum][comp_idx] < minTexcoordV) minTexcoordV = tex_coords[vertNum][comp_idx];
-								if (tex_coords[vertNum][comp_idx] > maxTexcoordV) maxTexcoordV = tex_coords[vertNum][comp_idx];
+								if (tex_coords[vertNum][comp_idx] < minTexcoordV) { minTexcoordV = tex_coords[vertNum][comp_idx]; }
+								if (tex_coords[vertNum][comp_idx] > maxTexcoordV) { maxTexcoordV = tex_coords[vertNum][comp_idx]; }
 							}
 						}
 					}
@@ -112,7 +111,7 @@ function PBFCache() {
 				}
 			}
 
-			pbfCache[mesh['id']] = {};
+			pbfCache[mesh.id] = {};
 
 			var lod = 0;
 			var buf_offset = 0;
@@ -123,17 +122,17 @@ function PBFCache() {
 			var max_quant = Math.pow(2, max_bits) - 1;
 
 			var stride = has_tex ? 16 : 12;
-			pbfCache[mesh['id']].stride = stride;
+			pbfCache[mesh.id].stride = stride;
 
-			pbfCache[mesh['id']].minTexcoordU = minTexcoordU;
-			pbfCache[mesh['id']].maxTexcoordu = maxTexcoordu;
-			pbfCache[mesh['id']].minTexcoordV = minTexcoordV;
-			pbfCache[mesh['id']].maxTexcoordV = maxTexcoordV;
+			pbfCache[mesh.id].minTexcoordU = minTexcoordU;
+			pbfCache[mesh.id].maxTexcoordu = maxTexcoordu;
+			pbfCache[mesh.id].minTexcoordV = minTexcoordV;
+			pbfCache[mesh.id].maxTexcoordV = maxTexcoordV;
 
-			if (has_tex) pbfCache[mesh['id']].has_tex = has_tex;
+			if (has_tex) { pbfCache[mesh.id].has_tex = has_tex; }
 
 			while ((new_vertex_id < mesh.vertices_count) && (lod < 16)) {
-				logger.log('debug', 'Mesh ' + mesh['id'] + ' - Generating LOD ' + lod);
+				logger.log('debug', 'Mesh ' + mesh.id + ' - Generating LOD ' + lod);
 				var idxBuf = new Buffer(2 * 3 * mesh.faces_count);
 				var vertBuf = new Buffer(stride * mesh.vertices_count);
 
@@ -143,7 +142,7 @@ function PBFCache() {
 
 				// For all non mapped vertices compute quantization
 				for (vertNum = 0; vertNum < mesh.vertices_count; vertNum++) {
-					if (vertex_map[vertNum] == -1) {
+					if (vertex_map[vertNum] === -1) {
 						var vert_x_normal = Math.floor(((vertex_values[vertNum][0] - bbox.min[0]) / bbox.size[0]) * max_quant + 0.5);
 						var vert_y_normal = Math.floor(((vertex_values[vertNum][1] - bbox.min[1]) / bbox.size[1]) * max_quant + 0.5);
 						var vert_z_normal = Math.floor(((vertex_values[vertNum][2] - bbox.min[2]) / bbox.size[2]) * max_quant + 0.5);
@@ -184,7 +183,7 @@ function PBFCache() {
 							for (vertIdx = 0; vertIdx < 3; vertIdx++) {
 								vertNum = tri[tri_num][vertIdx];
 
-								if (vertex_map[vertNum] == -1) {
+								if (vertex_map[vertNum] === -1) {
 
 									// Store quantized coordinates
 									for (comp_idx = 0; comp_idx < 3; comp_idx++) {
@@ -198,8 +197,8 @@ function PBFCache() {
 
 									// Write normals in 8-bit
 									for (comp_idx = 0; comp_idx < 3; comp_idx++) {
-										var comp = Math.floor((normal_values[vertNum][comp_idx] + 1) * 127 + 0.5);
-										if (isNaN(comp)) comp = 0;
+										let comp = Math.floor((normal_values[vertNum][comp_idx] + 1) * 127 + 0.5);
+										if (isNaN(comp)) { comp = 0; }
 
 										vertBuf.writeUInt8(comp, vertBufPtr);
 										vertBufPtr++;
@@ -213,12 +212,15 @@ function PBFCache() {
 										for (comp_idx = 0; comp_idx < 2; comp_idx++) {
 											var wrap_tex = tex_coords[vertNum][comp_idx];
 
-											if (comp_idx == 0) wrap_tex = (wrap_tex - minTexcoordU) / (maxTexcoordu - minTexcoordU);
-											else wrap_tex = (wrap_tex - minTexcoordV) / (maxTexcoordV - minTexcoordV);
+											if (comp_idx === 0) { 
+												wrap_tex = (wrap_tex - minTexcoordU) / (maxTexcoordu - minTexcoordU); 
+											} else {
+												wrap_tex = (wrap_tex - minTexcoordV) / (maxTexcoordV - minTexcoordV);
+											}
 
-											if (isNaN(wrap_tex)) wrap_tex = 0;
+											if (isNaN(wrap_tex)) { wrap_tex = 0; }
 
-											var comp = Math.floor((wrap_tex * 65535) + 0.5);
+											let comp = Math.floor((wrap_tex * 65535) + 0.5);
 
 											vertBuf.writeUInt16LE(comp, vertBufPtr);
 											vertBufPtr += 2;
@@ -232,7 +234,7 @@ function PBFCache() {
 							}
 
 							for (vertIdx = 0; vertIdx < 3; vertIdx++) {
-								var vertNum = tri[tri_num][vertIdx];
+								vertNum = tri[tri_num][vertIdx];
 
 								idxBuf.writeUInt16LE(vertex_map[vertNum], idxBufPtr);
 								idxBufPtr += 2;
@@ -243,64 +245,65 @@ function PBFCache() {
 					}
 				}
 
-				pbfCache[mesh['id']][lod]                = {};
-				pbfCache[mesh['id']][lod].numIdx         = num_indices;
-				pbfCache[mesh['id']][lod].idxBuf         = idxBuf.slice(0, idxBufPtr);
-				pbfCache[mesh['id']][lod].vertBuf        = vertBuf.slice(0, vertBufPtr);
-				pbfCache[mesh['id']][lod].vertBufOffset  = buf_offset;
-				pbfCache[mesh['id']][lod].numVertices    = prev_added_verts;
+				pbfCache[mesh.id][lod]                = {};
+				pbfCache[mesh.id][lod].numIdx         = num_indices;
+				pbfCache[mesh.id][lod].idxBuf         = idxBuf.slice(0, idxBufPtr);
+				pbfCache[mesh.id][lod].vertBuf        = vertBuf.slice(0, vertBufPtr);
+				pbfCache[mesh.id][lod].vertBufOffset  = buf_offset;
+				pbfCache[mesh.id][lod].numVertices    = prev_added_verts;
 				prev_added_verts                         = added_verts;
-				buf_offset                              += pbfCache[mesh['id']][lod].vertBuf.length;
+				buf_offset                              += pbfCache[mesh.id][lod].vertBuf.length;
 
 				lod += 1;
 
 			}
 
-			pbfCache[mesh['id']].num_levels = lod;
-			logger.log('debug', '#LEVELS : ' + pbfCache[mesh['id']].num_levels);
+			pbfCache[mesh.id].num_levels = lod;
+			logger.log('debug', '#LEVELS : ' + pbfCache[mesh.id].num_levels);
 		}
-	}
+	};
 
 	this.getDBCache = function(dbInterface, project, meshId, getData, level, callback)
 	{
 		dbInterface.getCache(project, meshId, getData, level, function(err, coll) {
-			if (err) return callback(err);
-
+			if (err) { return callback(err); }
+ 
 			var max_lod = 0;
 
 			for (var idx = 0; idx < coll.length; idx++) {
 
 				var cache_obj = coll[idx];
-				if (cache_obj['type'] == 'PopGeometry') {
-					if ('stride' in cache_obj) pbfCache[meshId].stride = cache_obj['stride'];
+				if (cache_obj.type === 'PopGeometry') {
+					if ('stride' in cache_obj) { pbfCache[meshId].stride = cache_obj.stride; }
 
 					if ('min_texcoordu' in cache_obj) {
-						pbfCache[meshId].minTexcoordU = cache_obj['min_texcoordu'];
-						pbfCache[meshId].maxTexcoordu = cache_obj['max_texcoordu'];
-						pbfCache[meshId].minTexcoordV = cache_obj['min_texcoordv'];
-						pbfCache[meshId].maxTexcoordV = cache_obj['max_texcoordv'];
+						pbfCache[meshId].minTexcoordU = cache_obj.min_texcoordu;
+						pbfCache[meshId].maxTexcoordu = cache_obj.max_texcoordu;
+						pbfCache[meshId].minTexcoordV = cache_obj.min_texcoordv;
+						pbfCache[meshId].maxTexcoordV = cache_obj.max_texcoordv;
 						pbfCache[meshId].has_tex      = true;
 					}
-				} else if (cache_obj['type'] == 'PopGeometryLevel') {
-					var lod                                    = cache_obj['level'];
+				} else if (cache_obj.type === 'PopGeometryLevel') {
+					var lod                                    = cache_obj.level;
 					pbfCache[meshId][lod]               = {};
-					pbfCache[meshId][lod].numIdx        = cache_obj['num_idx'];
-					pbfCache[meshId][lod].vertBufOffset = cache_obj['vert_buf_offset'];
-					pbfCache[meshId][lod].numVertices   = cache_obj['num_vertices'];
+					pbfCache[meshId][lod].numIdx        = cache_obj.num_idx;
+					pbfCache[meshId][lod].vertBufOffset = cache_obj.vert_buf_offset;
+					pbfCache[meshId][lod].numVertices   = cache_obj.num_vertices;
 
 					pbfCache[meshId][lod].has_data      = get_data;
 
 					if (get_data) {
-						pbfCache[meshId][lod].idxBuf  = cache_obj['idx_buf'];
-						pbfCache[meshId][lod].vertBuf = cache_obj['vert_buf'];
+						pbfCache[meshId][lod].idxBuf  = cache_obj.idx_buf;
+						pbfCache[meshId][lod].vertBuf = cache_obj.vert_buf;
 					}
 
-					if (lod > max_lod) max_lod = lod;
+					if (lod > max_lod) { max_lod = lod; }
 				}
 			}
 
-			if (!level)
+			if (!level) {
 				pbfCache[meshId].num_levels = max_lod + 1;
+			}
 
 			callback(null, pbfCache[meshId]);
 		});
@@ -317,8 +320,11 @@ function PBFCache() {
 				alreadyHave = false;
 				}
 			else if (level) {
-				if (!(level in pbfCache[meshId])) alreadyHave = false;
-				else alreadyHave = (pbfCache[meshId][level].has_data == getData);
+				if (!(level in pbfCache[meshId])) { 
+					alreadyHave = false; 
+				} else {
+					alreadyHave = (pbfCache[meshId][level].has_data === getData);
+				}
 			}
 
 			// Do we have an empty object
@@ -333,8 +339,9 @@ function PBFCache() {
 			if (level)
 			{
 				getPopCache(dbInterface, project, false, null, meshId, function(err, cacheObj) {
-					if(err)
+					if(err) {
 						return callback(err);
+					}
 
 					return callback(null, cacheObj);
 				});
@@ -345,14 +352,14 @@ function PBFCache() {
 
 		if (!alreadyHave) {
 			getDBCache(dbInterface, project, meshId, getData, level, function(err, cacheObj) {
-				if(err) return callback(err);
+				if(err) { return callback(err); }
 
 				return callback(null, cacheObj);
 			});
 		} else {
 			return callback(null, pbfCache[meshId]);
 		}
-	}
+	};
 }
 
 module.exports = PBFCache;

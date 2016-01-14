@@ -16,6 +16,7 @@
  */
 
 var C = require("./constants");
+var _ = require('lodash');
 
 var responseCodes = {
 	// User error codes
@@ -142,23 +143,27 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 
 	if (resCode.value) // Prepare error response
 	{
-		var responseObject = null;
+		let responseObject = _.extend({}, extraInfo, {
+			place: place,
+			status: resCode.status,
+			message: resCode.message
+		});
 
-		if (!extraInfo) {
-			responseObject = {};
-		} else {
-			responseObject = extraInfo;
-		}
+		// if (!extraInfo) {
+		// 	responseObject = {};
+		// } else {
+		// 	responseObject = extraInfo;
+		// }
 
-		responseObject.place   = place;
-		responseObject.status  = resCode.status;
-		responseObject.message = resCode.message;
+		// responseObject.place   = place;
+		// responseObject.status  = resCode.status;
+		// responseObject.message = resCode.message;
 
-		if (resCode.value) {
-			req[C.REQ_REPO].logger.logError(JSON.stringify(responseObject), req);
-		}
+
+		req[C.REQ_REPO].logger.logError(JSON.stringify(responseObject), req);
 
 		res.status(resCode.status).send(JSON.stringify(responseObject));
+
 	} else {
 		if(Buffer.isBuffer(extraInfo))
 		{

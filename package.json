@@ -8,7 +8,8 @@
     "restart": "npm stop; npm start",
     "postinstall": "node ./postinstall.js",
     "upgrade": "git checkout master && git pull && npm restart",
-    "test": "node_modules/.bin/mocha"
+    "test": "grunt test",
+    "dev": "nodemon 3drepo.js"
   },
   "dependencies": {
     "amqplib": "latest",
@@ -23,6 +24,7 @@
     "fs.extra": "latest",
     "jade": "latest",
     "jsonschema": "latest",
+    "lodash": "^3.10.1",
     "mathjs": "^1.6.0",
     "minify": "^1.4.19",
     "mocha": "latest",
@@ -42,8 +44,9 @@
   "devDependencies": {
     "grunt-contrib-concat": "^0.5.1",
     "grunt-contrib-jshint": "^0.11.3",
-    "response-time": "^2.3.1",
     "grunt-contrib-uglify": "^0.9.2",
-    "jshint": "^2.8.0"
+    "grunt-mocha-test": "^0.12.7",
+    "jshint": "^2.8.0",
+    "response-time": "^2.3.1"
   }
 }

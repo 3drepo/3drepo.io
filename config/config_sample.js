@@ -16,7 +16,7 @@
  */
 
 var hostname   = "example.org";
-var http_port  = 80;
+var http_port  = 8000;
 var https_port = 443;
 
 module.exports = {
@@ -29,8 +29,10 @@ module.exports = {
 		public_port: http_port,
 		public_protocol: "http"
 	},
-	cookie_secret: "A secret",
-	cookie_parser_secret : "Another secret",
+	cookie: {
+	    secret: "A secret",
+	    parser_secret: "Another secret"
+	},
 	default_format: "html",
 	servers: [
 		{
