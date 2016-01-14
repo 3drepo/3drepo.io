@@ -57,7 +57,7 @@ var MongoDBObject = function()
 		if(err) {
 			var dbError = responseCodes.DB_ERROR(err);
 			systemLogger.logError(dbError);
-			throw Error(dbError);
+			throw Error(JSON.stringify(dbError));
 		}
 
 		self.authDB = dbConn;
@@ -719,7 +719,7 @@ MongoWrapper.prototype.getUserRoles = function (username, database, callback) {
 		}
 
 		var roles = [];
-		for (i = 0; i < docs[0]["roles"].length; i++) {
+		for (let i = 0; i < docs[0]["roles"].length; i++) {
 			if (docs[0]["roles"][i]["db"] == dbName || docs[0]["roles"][i]["db"] == database) {
 				roles.push(docs[0]["roles"][i]);
 			}
@@ -770,7 +770,7 @@ MongoWrapper.prototype.getUserPrivileges = function (username, database, callbac
                 var rolesArr = docs["roles"];
                 var privileges = [];
 
-                for (i = 0; i < rolesArr.length; i++) {
+                for (let i = 0; i < rolesArr.length; i++) {
                     privileges = privileges.concat(rolesArr[i]["inheritedPrivileges"]);
                 }
                 self.logger.logDebug(privileges.length + "privileges found.");
