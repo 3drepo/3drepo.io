@@ -200,6 +200,11 @@
 			// Find both the material for the ghosted pin and the opaque pin
 			var numColours = 0;
 
+            if ((typeof colours === "undefined") || (!colours.length))
+            {
+                colours = [1.0, 1.0, 1.0];
+            }
+
 			if (typeof colours[0] === "number")
 			{
 				numColours = 1;
@@ -210,8 +215,14 @@
 			var numColoursField   = $("#" + id + "_ncol")[0];
 			var multiColoursField = $("#" + id + "_col")[0];
 
-			numColoursField.setAttribute("value", numColoursField);
-			multiColoursField.setAttribute("multicolours", colours);
+			numColoursField.setAttribute("value", numColours);
+			multiColoursField.setAttribute("value", colours.join(" "));
+
+            var ghostNumColoursField   = $("#" + id + "_ghost_ncol")[0];
+			var ghostMultiColoursField = $("#" + id + "_ghost_col")[0];
+
+			ghostNumColoursField.setAttribute("value", numColours);
+			ghostMultiColoursField.setAttribute("value", colours.join(" "));
 		}
 
 		function createBasicPinShape(id, parentElement, depthMode, colours, numColours, trans, radius, height, scale, ghostPin) {
@@ -282,7 +293,7 @@
 			pinshader.appendChild(pinheadradius);
 
 			var pinheadncol = document.createElement("field");
-			pinheadncol.setAttribute("id", id + "_ncol");
+			pinheadncol.setAttribute("id", id + (ghostPin ? "_ghost" : "") + "_ncol");
 			pinheadncol.setAttribute("type", "SFFloat");
 			pinheadncol.setAttribute("name", "numColours");
 			pinheadncol.setAttribute("value", numColours);
@@ -295,7 +306,7 @@
 			pinshader.appendChild(pinheadalpha);
 
 			var pinheadcolor = document.createElement("field");
-			pinheadcolor.setAttribute("id", id + "_col");
+			pinheadcolor.setAttribute("id", id + (ghostPin ? "_ghost" : "") + "_col");
 			pinheadcolor.setAttribute("type", "MFFloat");
 			pinheadcolor.setAttribute("name", "multicolours");
 			pinheadcolor.setAttribute("value", colours);
@@ -478,9 +489,7 @@
 			pinvert.setAttribute("DEF", "multiVert");
 			pinvert.textContent = "attribute vec3 position;" +
 				"\nattribute vec3 normal;" +
-				//"\nattribute vec2 texcoord;" +
 				"\n" +
-				//"\nuniform mat4 modelViewMatrix;" +
 				"\nuniform mat4 modelViewMatrixInverse;" +
 				"\nuniform mat4 modelViewProjectionMatrix;" +
 				"\nuniform float radius;" +
@@ -489,16 +498,11 @@
 				"\nvarying vec3 fragNormal;" +
 				"\nvarying vec3 fragEyeVector;" +
 				"\nvarying vec3 fragPosition;" +
-				//"\nvarying vec4 fragColor;" +
-				//"\n" +
 				"\nvoid main()" +
 				"\n{" +
-				//"\n\tvec4 eye = vec4(modelViewMatrixInverse * vec4(0.,0.,0.,1.));" +
-				//"\n\tfragEyeVector = normalize(position - eye.xyz);" +
 				"\n\tfragEyeVector = vec3(0.2, 0.2, 0.2);" +
 				"\n\tfragNormal = normal;" +
-
-				"\n\tfragColourSelect = ((position.y / radius) + 1.0) / 2.0;" +
+				"\n\tfragColourSelect = 1.0 - ((position.y / radius) + 1.0) / 2.0;" +
 				"\n\t" +
 				"\n\tfragPosition = position;" +
 				"\n\tgl_Position = modelViewProjectionMatrix * vec4(position, 1.0);" +
@@ -521,23 +525,14 @@
 				"\nuniform float ambientIntensity;" +
 				"\nvarying float fragColourSelect;" +
 				"\nvarying vec3 fragNormal;" +
-				//"\nvarying vec4 fragColor;" +
-				"\nvarying vec3 fragEyeVector;" +
+                "\nvarying vec3 fragEyeVector;" +
 				"\nvarying vec3 fragPosition;" +
-				//"\nvarying vec4 fragColor;" +
-				//"\n" +
 				"\nuniform float alpha;" +
 				"\nuniform vec3 multicolours[20];" +
 				"\n" +
 				"\nvoid main()" +
 				"\n{" +
-				//"\n\tfloat colourSelected = float(int(floor(fragColourSelect)));" +
 				"\n\tint colourSelected = int(floor(fragColourSelect * numColours));" +
-				//"\n\tvec3 eye = normalize(fragEyeVector);" +
-				//"\n\tvec3 normal = normalize(fragNormal);" +
-				//"\n\tif (dot(eye, normal) < 0) {" +
-				//"\n\t\tdiscard;" +
-				//"\n\t}" +
 				"\n\tvec3 eye = -fragPosition.xyz;" +
 				"\n\tvec3 normal = normalize(fragNormal);" +
 				"\n\tvec3 ads = lighting(light0_Type, light0_Location, light0_Direction, light0_Color, light0_Attenuation, light0_Radius, light0_Intensity, light0_AmbientIntensity, light0_BeamWidth, light0_CutOffAngle, normalize(fragNormal), eye, 0.0, ambientIntensity);" +
@@ -553,7 +548,6 @@
 				"\n\t\t\tpinColor = gammaEncode(pinColor);" +
 				"\n\t\t\tgl_FragColor = vec4(pinColor, alpha);" +
 				"\n\t\t}" +
-				//"\ngl_FragColor = vec4(colourSelected, 0.0, 0.0, 1.0);" +
 				"\n\t}" +
 				"\n}";
 
@@ -575,6 +569,7 @@
 			editComment: editComment,
 			deleteComment: deleteComment,
 			setComment: setComment,
+            changePinColour: changePinColour,
 			addPin: addPin,
 			fixPin: fixPin,
 			removePin: removePin,

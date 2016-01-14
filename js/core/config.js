@@ -16,14 +16,11 @@
  */
 
 (function(){
+(function() {
 	"use strict";
 
 	var config = require('app-config').config;
 	var frontend_scripts = require('../../common_public_files.js');
-
-	var default_http_port  = 80;
-	var default_https_port = 443;
-	var default_mongo_port = 27017;
 
 	/*******************************************************************************
 	  * Coalesce function
@@ -32,11 +29,14 @@
 	  *******************************************************************************/
 	var coalesce = function(variable, value)
 	{
-		if (variable === null || variable === undefined)
+		'use strict';
+
+		if (variable === null || variable === undefined) {
 			return value;
-		else
+		} else {
 			return variable;
-	}
+		}
+	};
 
 	/*******************************************************************************
 	  * Function to check whether or not a string is an IP address
@@ -46,11 +46,14 @@
 	  *******************************************************************************/
 	var checkIP = function(str)
 	{
-		if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(str))
+		'use strict';
+
+		if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(str)){
 			return true;
-		else
+		} else {
 			return false;
-	}
+		}
+	};
 
 	// TODO: Should do some checking of validity of config file here.
 	// TODO: Tidy up
@@ -67,7 +70,7 @@
 	 * @param {number} default_http_port - Default HTTP port for the server is none is configured
 	 * @param {number} default_https_port - Default HTTPS port for the server is none in configured
 	 *******************************************************************************/
-	var fillInServerDetails = function(serverObject, name, usingIP, using_ssl, host, applyName)
+	var fillInServerDetails = function(serverObject, name, usingIP, using_ssl, host, applyName, default_http_port, default_https_port)
 	{
 		serverObject                   = coalesce(serverObject, {});
 		serverObject.name              = coalesce(serverObject.name, name);
@@ -121,8 +124,10 @@
 
 	// Check for hostname and ip here
 	config.host        = coalesce(config.host, "127.0.0.1");
-	default_http_port  = coalesce(config.http_port, default_http_port);
-	default_https_port = coalesce(config.https_port, default_https_port);
+
+	// Global config variable used in the function above
+	let default_http_port  = coalesce(config.http_port, 80); // Default http port
+	let default_https_port = coalesce(config.https_port, 443); // Default https port
 
 	config.using_ip  = checkIP(config.host);
 	config.using_ssl = ('ssl' in config);
@@ -135,11 +140,9 @@
 
 	config.disableCache            = coalesce(config.disableCache, false);
 
-	// Set up other servers
-	for(let i in config.servers)
-	{
-		fillInServerDetails(config.servers[i], "server_" + i, config.using_ip, config.using_ssl, config.host, false);
-	}
+	config.servers.forEach((server, i) => {
+		fillInServerDetails(server, "server_" + i, config.using_ip, config.using_ssl, config.host, false, default_http_port, default_https_port);
+	});
 
 	// If the API server is running on a subdirectory, config.subdirectory will be true
 	// If the API server is running different subdomain it will require virtual hosts
@@ -150,7 +153,8 @@
 	// Database configuration
 	config.db          = coalesce(config.db, {});
 	config.db.host     = coalesce(config.db.host, config.host);
-	config.db.port     = coalesce(config.db.port, default_mongo_port);
+	config.db.port     = coalesce(config.db.port, 27017); // Default mongo port
+
 	config.db.username = coalesce(config.db.username, "username");
 	config.db.password = coalesce(config.db.password, "password");
 
@@ -181,4 +185,3 @@
 
 	module.exports = config;
 })()
-

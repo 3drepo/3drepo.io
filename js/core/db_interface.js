@@ -634,7 +634,7 @@ DBInterface.prototype.getProjectUsers = function(account, project, callback) {
 };
 
 DBInterface.prototype.checkUserPermission = function (username, account, project, callback) {
-    
+
     // var self = this;
     dbConn(this.logger).getUserPrivileges(username, account, function (status, privileges) {
         if (status.value) {
@@ -1215,7 +1215,7 @@ DBInterface.prototype.getHeadOf = function(dbName, project, branch, getFunc, cal
 		if (!doc.length){
 			return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
 		}
-			
+
 
 		getFunc.call(self, dbName, project, uuidToString(doc[0]._id), function(err, doc) {
 			if(err.value) {
@@ -2427,8 +2427,15 @@ DBInterface.prototype.getRolesByProject = function(dbName, project, readWriteAny
 			});
 			self.getRoleSettings(dbName, roles, function (err, roleSettings) {
 				if (roleSettings.length > 0) {
-					for (i = 0; i < roleSettings.length; i += 1) {
-						rolesToReturn[i].color = roleSettings[i].color;
+					var roleSettingsMap = {};
+
+					for(let i = 0; i < roleSettings.length; i++)
+					{
+						roleSettingsMap[roleSettings[i]._id] = roleSettings[i];
+					}
+
+					for (let i = 0; i < rolesToReturn.length; i++) {
+						rolesToReturn[i].color = roleSettingsMap[rolesToReturn[i].role].color;
 					}
 				}
 				return callback(responseCodes.OK, rolesToReturn);
