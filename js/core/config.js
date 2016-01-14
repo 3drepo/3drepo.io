@@ -15,15 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(function(){
+(function() {
 	"use strict";
 
 	var config = require('app-config').config;
 	var frontend_scripts = require('../../common_public_files.js');
-
-	var default_http_port  = 80;
-	var default_https_port = 443;
-	var default_mongo_port = 27017;
 
 	/*******************************************************************************
 	  * Coalesce function
@@ -32,11 +28,14 @@
 	  *******************************************************************************/
 	var coalesce = function(variable, value)
 	{
-		if (variable === null || variable === undefined)
+		'use strict';
+
+		if (variable === null || variable === undefined) {
 			return value;
-		else
+		} else {
 			return variable;
-	}
+		}
+	};
 
 	/*******************************************************************************
 	  * Function to check whether or not a string is an IP address
@@ -46,11 +45,14 @@
 	  *******************************************************************************/
 	var checkIP = function(str)
 	{
-		if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(str))
+		'use strict';
+
+		if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(str)){
 			return true;
-		else
+		} else {
 			return false;
-	}
+		}
+	};
 
 	// TODO: Should do some checking of validity of config file here.
 	// TODO: Tidy up
@@ -67,7 +69,7 @@
 	 * @param {number} default_http_port - Default HTTP port for the server is none is configured
 	 * @param {number} default_https_port - Default HTTPS port for the server is none in configured
 	 *******************************************************************************/
-	var fillInServerDetails = function(serverObject, name, usingIP, using_ssl, host, applyName)
+	var fillInServerDetails = function(serverObject, name, usingIP, using_ssl, host, applyName, default_http_port, default_https_port)
 	{
 		serverObject                   = coalesce(serverObject, {});
 		serverObject.name              = coalesce(serverObject.name, name);
@@ -129,7 +131,7 @@
 	config.using_ip  = checkIP(config.host);
 	config.using_ssl = ('ssl' in config);
 
-	fillInServerDetails(config.api_server, "api", config.using_ip, config.using_ssl, config.host, true);
+	fillInServerDetails(config.api_server, "api", config.using_ip, config.using_ssl, config.host, true, default_http_port, default_https_port);
 	config.api_server.external     = coalesce(config.api_server.external, false); // Do we need to start an API server, or just link to an external one.
 	config.api_server.chat_subpath = coalesce(config.api_server.chat_subpath, 'chat');
 	config.api_server.chat_path    = '/' + config.api_server.host_dir + '/' + config.api_server.chat_subpath;
