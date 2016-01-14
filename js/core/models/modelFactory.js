@@ -25,48 +25,78 @@ module.exports = {
 		this.db = db;
 	},
 
-	checkDb: function(){
+	__checkDb: function(){
 		if (!this.db){
-			throw new Error('db connection is null')
+			throw new Error('db connection is null');
 		}
 	},
 
 	get: function (modelName, options){
 		'use strict';
 
-		this.checkDb();
+		this.__checkDb();
 
 		let model = this.db.model(modelName);
 		
 		let data  = options && options.data || {};
 
 		let item = new model(data);
+		
+		item.collection = this.db.useDb(options.account).collection(this.__collectionName(modelName, options));
 
+		return item;		
+	},
+
+	__collectionName: function(modelName, options){
+		'use strict';
+		
 		let collectionName;
 
+		console.log(options);
+
+		//collectionName can be a function or a static string
 		if (typeof this.models[modelName].collectionName === 'function'){
+
+			console.log('hello');
 			collectionName = this.models[modelName].collectionName(options);
 		} else {
 			collectionName = this.models[modelName].collectionName;
 		}
-		
-		item.collection = this.db.useDb(options.account).collection(collectionName);
 
-		return item;		
+		return collectionName;
 	},
 
 	createClass: function(modelName, schema, collectionName) {
 		'use strict';
 
-		this.checkDb();
+		this.__checkDb();
 
 		let mongooseModel =  this.db.model(modelName, schema);
-		
-		console.log(this.models);
 
 		this.models[modelName] = { 
 			collectionName
 		};
+
+
+		mongooseModel.createInstance = (options, data) => {
+			options.data = data;
+			return this.get(modelName, options);
+		};
+
+		let findOne = mongooseModel.findOne;
+
+		//use rest parameters when node no longer requires the --es_staging flag 
+		let self = this;
+
+		mongooseModel.findOne = function(options){
+
+			var args = Array.prototype.slice.call(arguments);
+			args.shift();
+
+			mongooseModel.collection = self.db.useDb(options.account).collection(self.__collectionName(modelName, options));
+
+			return findOne.apply(mongooseModel, args);
+		}
 
 		return mongooseModel;
 	}
@@ -78,7 +108,7 @@ module.exports = {
 
 // Create model
 
-// ModelFactory.createClass(
+// var Test = ModelFactory.createClass(
 // 	'Test', 
 // 	{name: String}, 
 // 	options => { 
@@ -89,6 +119,13 @@ module.exports = {
 // Instantiate a model
 
 // var test = ModelFactory.get('Test', {
+// 	account: 'dbtest001',
+// 	project: 'project001'
+// });
+
+//or 
+
+//var test = Test.createInstance({
 // 	account: 'dbtest001',
 // 	project: 'project001'
 // });
