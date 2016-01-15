@@ -47,59 +47,17 @@
 		vm.addSubContractorDisabled = true;
 		//vm.userRole = "mainContractor";
 		vm.userRole = "subContractor";
-		vm.invitedProjects = [
-			{
-				name: "Revit_House",
-				status: "won",
-				budget: 45023,
-				site: "Wood Lane",
-				completed_by: 1464091380000,
-				date_invited: 1464091380000,
-				date_responded: 1464091380000,
-				date_answered: 1464091380000
-			},
-			{
-				name: "Camden_Hotel",
-				status: "lost",
-				budget: 105023,
-				site: "Camden Square",
-				completed_by: 1467460980000,
-				date_invited: 1467460980000,
-				date_responded: 1467460980000,
-				date_answered: 1467460980000
-			},
-			{
-				name: "Hollywood_Swimming_Pool",
-				status: "accepted",
-				budget: 905000,
-				site: "Hollywood",
-				completed_by: 1504353780000,
-				date_invited: 1504353780000,
-				date_responded: 1504353780000,
-				date_answered: null
-			},
-			{
-				name: "Mars_Settlement",
-				status: "declined",
-				budget: 905000,
-				site: "Mars",
-				completed_by: 1504353780000,
-				date_invited: 1504353780000,
-				date_responded: 1504353780000,
-				date_answered: null
-			},
-			{
-				name: "Mumbia_Ditch",
-				status: "invited",
-				budget: 5,
-				site: "Mumbai",
-				completed_by: 1455453720000,
-				date_invited: 1455453720000,
-				date_responded: null,
-				date_answered: null
-			}
-		];
-		vm.projectSelected = false;
+		vm.summary = {
+			budget: 45023,
+			site: "Wood Lane",
+			completed_by: 1464091380000
+		};
+		vm.response = {
+			date_invited: 1464091380000,
+			date_responded: 1464091380000,
+			date_answered: 1464091380000,
+			status: "won"
+		};
 
 		$scope.$watch("vm.subContractor", function (newValue) {
 			vm.addSubContractorDisabled = !angular.isDefined(newValue);
@@ -120,34 +78,35 @@
 			}
 		});
 
-		$scope.$watch("vm.invitedProjects", function (newValue) {
-			var i, length, date;
-			for (i = 0, length = newValue.length; i < length; i += 1) {
-				if (newValue[i].status === "won") {
-					newValue[i].statusIcon = "fa fa-check md-accent";
-				}
-				else if (newValue[i].status === "lost") {
-					newValue[i].statusIcon = "fa fa-remove md-warn";
-				}
-				else if (newValue[i].status === "accepted") {
-					newValue[i].statusIcon = "fa fa-check";
-				}
-				else if (newValue[i].status === "declined") {
-					newValue[i].statusIcon = "fa fa-remove";
-				}
-				else if (newValue[i].status === "invited") {
-					newValue[i].statusIcon = "fa fa-circle-thin";
-				}
+		$scope.$watch("vm.summary", function (newValue) {
+			vm.summary.completed_by_pretty = prettyDate(new Date(newValue.completed_by));
+		});
 
-				newValue[i].selected = false;
-				newValue[i].completed_by_pretty = prettyDate(new Date(newValue[i].completed_by));
-				newValue[i].date_invited_pretty = prettyDate(new Date(newValue[i].date_invited));
-				if (newValue[i].date_responded !== null) {
-					newValue[i].date_responded_pretty = prettyDate(new Date(newValue[i].date_responded));
-				}
-				if (newValue[i].date_answered !== null) {
-					newValue[i].date_answered_pretty = prettyDate(new Date(newValue[i].date_answered));
-				}
+		$scope.$watch("vm.response", function (newValue) {
+			if (vm.response.status === "won") {
+				vm.response.statusIcon = "fa fa-check md-accent";
+			}
+			else if (vm.response.status === "lost") {
+				vm.response.statusIcon = "fa fa-remove md-warn";
+			}
+			else if (vm.response.status === "accepted") {
+				vm.response.statusIcon = "fa fa-check";
+			}
+			else if (vm.response.status === "declined") {
+				vm.response.statusIcon = "fa fa-remove";
+			}
+			else if (vm.response.status === "invited") {
+				vm.response.statusIcon = "fa fa-circle-thin";
+			}
+
+			vm.response.selected = false;
+			vm.response.completed_by_pretty = prettyDate(new Date(vm.response.completed_by));
+			vm.response.date_invited_pretty = prettyDate(new Date(vm.response.date_invited));
+			if (vm.response.date_responded !== null) {
+				vm.response.date_responded_pretty = prettyDate(new Date(vm.response.date_responded));
+			}
+			if (vm.response.date_answered !== null) {
+				vm.response.date_answered_pretty = prettyDate(new Date(vm.response.date_answered));
 			}
 		});
 
@@ -179,25 +138,6 @@
 			else if (vm.invitedSubContractors[index].invitedIcon === "fa fa-remove md-warn") {
 				vm.invitedSubContractors[index].invitedIcon = "fa fa-circle-thin";
 			}
-		};
-
-		vm.selectProject = function (index) {
-			vm.projectSelected = true;
-			if (angular.isDefined(vm.selectedProjectIndex)) {
-				vm.invitedProjects[vm.selectedProjectIndex].selected = false;
-			}
-			vm.selectedProjectIndex = index;
-			vm.invitedProjects[vm.selectedProjectIndex].selected = true;
-			vm.showRepondButtons = (vm.invitedProjects[vm.selectedProjectIndex].date_responded === null);
-		};
-
-		vm.acceptInvite = function (accept) {
-			vm.showRepondButtons = false;
-			vm.invitedProjects[vm.selectedProjectIndex].status = accept ? "accepted" : "declined";
-			vm.invitedProjects[vm.selectedProjectIndex].statusIcon = accept ? "fa fa-check" : "fa fa-remove";
-			vm.invitedProjects[vm.selectedProjectIndex].date_responded = new Date();
-			vm.invitedProjects[vm.selectedProjectIndex].date_responded_pretty =
-				prettyDate(vm.invitedProjects[vm.selectedProjectIndex].date_responded);
 		};
 
 		var prettyDate = function (date) {

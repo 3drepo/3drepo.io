@@ -3,12 +3,20 @@
 	"files": {
 		"jade" : [
 			{"template" : "account/account.jade", "id" : "account.html"},
-            {"template" : "account/projectsList.jade", "id" : "projectsList.html"}
+            {"template" : "account/dashboard.jade", "id" : "dashboard.html"},
+            {"template" : "account/projectsList.jade", "id" : "projectsList.html"},
+            {"template" : "account/bids.jade", "id" : "bids.html"}
 		],
 		"angular": [
 			"account/AccountData.js",
 			"account/AccountCtrl.js",
-            "account/projectsListDirective.js"
-		]
+            "account/dashboardDirective.js",
+            "account/projectsListDirective.js",
+            "account/bidsDirective.js"
+		],
+        "css" : [
+            "account/dashboard.css",
+            "account/bids.css"
+        ]
 	}
 }

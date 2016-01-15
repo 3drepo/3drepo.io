@@ -1,0 +1,33 @@
+bids .bidsList md-icon {
+  font-size: 1.5em;
+}
+
+bids .bidsList .bidsListProject:hover {
+  cursor: pointer;
+}
+
+bids .bidsList .selectedProject {
+  background: #E8EAF6;
+}
+bids .bidsList .unselectedProject {
+  background: #FFFFFF;
+}
+
+bids .bidsContent {
+  margin-top: -10px;
+}
+
+bids .bidsContent .bidsProjectTitle {
+  height: 50px;
+}
+bids .bidsContent .bidsProjectTitle .md-title {
+  margin: 4px;
+}
+bids .bidsContent .bidsProjectTitle md-icon {
+  margin: 6px 50px 0 20px;
+  font-size: 1.7em;
+}
+bids .bidsContent .bidsProjectTitle .responseButtons {
+  margin: 6px 50px 0 20px;
+  font-size: 1.7em;
+}

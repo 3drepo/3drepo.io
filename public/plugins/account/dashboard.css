@@ -1,0 +1,15 @@
+dashboard md-tab-content {
+  transition: none;
+}
+
+dashboard md-ink-bar.md-left {
+  transition: none;
+}
+
+dashboard md-ink-bar.md-right {
+  transition: none;
+}
+
+dashboard md-tabs {
+  height: 600px;
+}

@@ -41,8 +41,9 @@
 			// Main content
 			#profile-settings.col-md-9
 				// Dashboard
+				dashboard
 				// List of projects
-				#projects-list.row(ng-show="view=='projects' && projectsShowList")
+				//#projects-list.row(ng-show="view=='projects' && projectsShowList")
 					projects-list
 					//.col-xs-12
 						div(ng-repeat="(account, projects) in Data.AccountData.projectsGrouped")
@@ -63,93 +64,6 @@
 								.item-masonry-description
 									h5 {{project.project}}
 									p.project-owner {{project.account}}
-				//div(ng-show="view=='dashboard'")
-					.col-md-6.gutter-right
-						.block
-							.col-sm-12.block-header
-								h3 Recently Contributed
-							.col-md-12
-								.col-md-12.project-line
-									i.fa.fa-cube.menu-icon
-									span.commit-number Project car 1
-										a(href='#/')
-										span.commit-by by
-										span.commit-author Tim
-								.col-md-12.project-line
-									i.fa.fa-cube.menu-icon
-									span.commit-number Project car 2
-										a(href='#/')
-										span.commit-by by
-										span.commit-author Fred
-								.col-md-12.project-line
-									i.fa.fa-cube.menu-icon
-									span.commit-number Project car 3
-										a(href='#/')
-										span.commit-by by
-										span.commit-author Jozef
-					.col-md-6
-						.block
-							.col-sm-12.block-header
-								h3 Popular Projects
-							.col-md-12
-								.col-md-12.project-line
-									i.fa.fa-cube.menu-icon
-									span.commit-number Helicopter
-										a(href='#/')
-										span.commit-by by
-										span.commit-author Frederic
-								.col-md-12.project-line
-									i.fa.fa-cube.menu-icon
-									span.commit-number Helicopter
-										a(href='#/')
-										span.commit-by by
-										span.commit-author Frederic
-								.col-md-12.project-line
-									i.fa.fa-cube.menu-icon
-									span.commit-number Helicopter
-										a(href='#/')
-										span.commit-by by
-										span.commit-author Frederic
-				// Projects
-				//div(ng-if="view=='projects'")
-					.col-md-12(ng-repeat='project in Data.AccountData.projects')
-						.block
-							.col-sm-12.block-header
-								h3
-									a.dashboard-tab(href='#', ng-click='goProject(project.account, project.project)')
-										span.block-header-project-name {{project.project}} by
-										span.block-header-project-author {{project.account}}
-							.clearfix
-							.placeholder-screenshot
-				// Discover
-				//div(ng-if="view=='discover'")
-					.col-md-12
-						.block
-							.col-sm-12.block-header
-								h3
-									span.block-header-project-name Castle
-									span.block-header-by by
-									span.block-header-author Malcolm
-							.clearfix
-							.placeholder-screenshot
-					.col-md-12
-						.block
-							.col-sm-12.block-header
-								h3
-									span.block-header-project-name Motorbike
-									span.block-header-by by
-									span.block-header-author Yotam
-							.clearfix
-							.placeholder-screenshot
-					.col-md-12
-						.block
-							.col-sm-12.block-header
-								h3
-									span.block-header-project-name Hospital
-									span.block-header-by by
-									span.block-header-author Maciek
-							.clearfix
-							.placeholder-screenshot
 				// Settings
 				.row(ng-if="view=='settings'")
 					.col-xs-12
