@@ -88,6 +88,8 @@ var responseCodes = {
 	IMAGE_CONVERSION_FAILED : { value: 40, message: "Image conversion failed", status: 500},
 	ROLE_SETTINGS_NOT_FOUND : { value: 41, message: "Role settings not found", status: 500 },
 
+	MONGOOSE_VALIDATION_ERROR: {value: 42, status: 400 },
+	
 	DB_ERROR: function(mongoErr) {
 		"use strict";
 
@@ -130,7 +132,7 @@ var responseCodes = {
 	}
 };
 
-var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 1000, 2000, 3000, 4000];
+var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 1000, 2000, 3000, 4000];
 
 responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 {

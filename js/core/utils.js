@@ -211,6 +211,23 @@ function Utils() {
         }
         return arrayBuffer;
     };
+
+    /**
+     * Map mongoose error to our defined error codes
+     *
+     * @param {Object} err object from mongoose
+     * @param {number} channelsCount Number of channels, 1 for now
+     * @param {boolean} isLittleEndian True or false
+     * @return {Object} our defined response code 
+     */
+    this.mongoErrorToResCode = function(err){
+      let responseCodes = require('./response_codes');
+      if(err.name === 'ValidationError'){
+        return responseCodes.MONGOOSE_VALIDATION_ERROR;
+      } else {
+        return responseCodes.DB_ERROR(err);
+      }
+    }
 }
 
 module.exports = new Utils();
