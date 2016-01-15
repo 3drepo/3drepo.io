@@ -16,12 +16,14 @@
  */
 
  // mongoose model factory for different db and collection name for each instance
+var mongoose = require('mongoose');
+mongoose.Promise = Promise;
 
 module.exports = {
 
 	models: {},
 
-	setDb: function(db){	
+	setDB: function(db){	
 		this.db = db;
 	},
 
@@ -36,13 +38,13 @@ module.exports = {
 
 		this.__checkDb();
 
-		let model = this.db.model(modelName);
+		let model = mongoose.model(modelName);
 		
 		let data  = options && options.data || {};
 
 		let item = new model(data);
 		
-		item.collection = this.db.useDb(options.account).collection(this.__collectionName(modelName, options));
+		item.collection = this.db.db(options.account).collection(this.__collectionName(modelName, options));
 
 		return item;		
 	},
@@ -52,12 +54,10 @@ module.exports = {
 		
 		let collectionName;
 
-		console.log(options);
 
 		//collectionName can be a function or a static string
 		if (typeof this.models[modelName].collectionName === 'function'){
 
-			console.log('hello');
 			collectionName = this.models[modelName].collectionName(options);
 		} else {
 			collectionName = this.models[modelName].collectionName;
@@ -69,34 +69,64 @@ module.exports = {
 	createClass: function(modelName, schema, collectionName) {
 		'use strict';
 
-		this.__checkDb();
+		if (this.models[modelName] && this.models[modelName].mongooseModel){
 
-		let mongooseModel =  this.db.model(modelName, schema);
+			return this.models[modelName].mongooseModel;
+		}
+
+		let mongooseModel =  mongoose.model(modelName, schema);
+
 
 		this.models[modelName] = { 
-			collectionName
+			collectionName,
+			mongooseModel
 		};
-
 
 		mongooseModel.createInstance = (options, data) => {
 			options.data = data;
 			return this.get(modelName, options);
 		};
 
-		let findOne = mongooseModel.findOne;
-
-		//use rest parameters when node no longer requires the --es_staging flag 
 		let self = this;
 
-		mongooseModel.findOne = function(options){
+		function staticFunctionProxy(staticFuncName){
 
-			var args = Array.prototype.slice.call(arguments);
-			args.shift();
+			let staticFunc = mongooseModel[staticFuncName];
 
-			mongooseModel.collection = self.db.useDb(options.account).collection(self.__collectionName(modelName, options));
+			return function(options){
 
-			return findOne.apply(mongooseModel, args);
+				var args = Array.prototype.slice.call(arguments);
+				args.shift();
+
+				// resetting the static collection
+				if (!options || !options.account){
+					throw new Error('account name (db) is missing')
+				}
+
+				let collection = self.db.db(options.account).collection(self.__collectionName(modelName, options));
+				mongooseModel.collection = collection;
+
+				return staticFunc.apply(this, args).then(items => {
+					if (Array.isArray(items)){
+
+						items.forEach((item, index, array) => {
+							item.collection = collection;
+							array[index] = item;
+						});
+						
+					} else if (items){
+
+						items.collection = collection;
+					}
+
+					return Promise.resolve(items);
+				});
+			}
 		}
+
+		['find', 'findOne', 'count', 'distinct', 'where', 'findOneAndUpdate', 'findOneAndRemove', 'update'].forEach(staticFuncName => {
+			mongooseModel[staticFuncName] = staticFunctionProxy(staticFuncName);
+		});
 
 		return mongooseModel;
 	}
@@ -134,3 +164,16 @@ module.exports = {
 // test.save();
 
 // will save to collection: project001.test in db: dbtest001 
+
+// findOne and find
+// Test.find({account: 'a', project: 'p'}, {name : 'abc'}).then(items => {
+// 	// items: [item1, item2, item3...]
+// 	// item is an instance of Test 
+
+// 	//items[0].name = 'new name';
+// 	//items[0].save(); 
+// })
+
+// Test.findOne({account: 'a', project: 'p'}, {name : 'abc'}).then(item => {
+
+// })
