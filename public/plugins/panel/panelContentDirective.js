@@ -197,6 +197,10 @@
 			vm.visibleStatus = !vm.visibleStatus;
 		};
 
+		vm.doPrint = function(event) {
+			event.stopPropagation();
+		};
+
 		vm.openMenu = function($mdOpenMenu, ev) {
 			$mdOpenMenu(ev);
 		};

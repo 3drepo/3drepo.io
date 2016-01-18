@@ -106,6 +106,7 @@
 							vm.data.viewpoint.up
 						);
 
+						NewIssuesService.highlightPin(newValue);
 						EventService.send(EventService.EVENT.SET_CLIPPING_PLANES, vm.data.viewpoint);
 					}
 				}
