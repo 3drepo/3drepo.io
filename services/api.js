@@ -96,8 +96,10 @@ module.exports.app = function (sharedSession) {
 	}
 
 	app.use(sharedSession);
-	// add bid handlers
-	app.use('/:account/:project', require('../js/core/handlers/bid'));
+	// project package handlers
+	app.use('/:account/:project', require('../js/core/handlers/projectPackage'));
+	// bid hanlders
+	app.use('/:account/:project/packages/:packageName', require('../js/core/handlers/bid'));
 	app.use("/", routes.router);
 
 

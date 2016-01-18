@@ -4,47 +4,87 @@ var config = require("../config.js");
 var _ = require('lodash');
 var utils = require('../utils');
 
-var ModelFactory = require('../models/modelFactory');
-var ProjectPackage = require('../models/projectPackage');
+var Bid = require('../models/bid');
 var resHelper = require('../response_codes');
 
-router.post('/packages', checkPremission, function(req, res, next) {
+module.exports = router;
+
+// Create a bid
+router.post('/bids.json', checkPremission, createBid);
+// List bids
+router.get('/bids.json', checkPremission, listBids);
+// Award bid
+router.post('/bids/:id/award', checkPremission, awardBid);
+
+
+var getDbColOptions = function(req){
+	return {account: req.params.account, project: req.params.project};
+}
+
+function createBid(req, res, next) {
 	'use strict';
+	
+	let place = '/:account/:project/packages/:package/bids.json POST';
+
+	let whitelist = ['user'];
 
 	// Instantiate a model
-	let account = req.params.account;
-	let project = req.params.project;
+	let bid = Bid.createInstance(getDbColOptions(req));
 
-	let projectPackage = ProjectPackage.createInstance({account, project});
+	let cleanedReq = _.pick(req.body, whitelist);
 
-	console.log(req.body)
-	//projectPackage.name = 'testname';
-	//projectPackage.site = 'sitename';
-	projectPackage.budget = '200,000,000';
-	projectPackage.completedBy = new Date();
+	_.forEach(cleanedReq, (value, key) => {
+		bid[key] = value;
+	});
 
-	let place = '/:account/:project/packages POST';
+	bid.packageName = req.params.packageName;
 
-	projectPackage.save().then(projectPackage => {
-		resHelper.respond(place, req, res, next, resHelper.OK, projectPackage);
+	bid.save().then(bid => {
+		resHelper.respond(place, req, res, next, resHelper.OK, bid);
 
 	}).catch(err => {
-
-		console.log(err);
 		let errCode = utils.mongoErrorToResCode(err);
 		resHelper.respond(place, req, res, next, errCode, err);
 
 	});
-	
-	
 
-});
-
-
-function checkPremission(req, res, next){
-	next();			
 }
 
+function listBids(req, res, next){
+	'use strict';
+	
+	let place = '/:account/:project/packages/:package/bids.json GET';
+	Bid.findByPackage(getDbColOptions(req), req.params.packageName).then(bids => {
+		resHelper.respond(place, req, res, next, resHelper.OK, bids);
+	}).catch(err => {
+		resHelper.respond(place, req, res, next, utils.mongoErrorToResCode(err), err);
+	});
+}
 
+function awardBid(req, res, next){
+	'use strict';
 
-module.exports = router;
+	let place = '/:account/:project/packages/:package/bids/:id/award POST';
+
+	Bid.findById(getDbColOptions(req), req.params.id).then(bid => {
+		if (!bid){
+			return Promise.reject({ resCode: resHelper.BID_NOT_FOUND});
+		} else {
+
+			bid.awarded = true;
+			bid.awardedOn = new Date();
+			
+			return bid.save();
+		}
+
+	}).then(bid => {
+		resHelper.respond(place, req, res, next, resHelper.OK, bid);
+	}).catch(err => {
+		resHelper.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	})
+}
+
+function checkPremission(req, res, next){
+	next();
+}
+

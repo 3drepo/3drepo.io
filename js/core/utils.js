@@ -223,11 +223,13 @@ function Utils() {
     this.mongoErrorToResCode = function(err){
       let responseCodes = require('./response_codes');
       if(err.name === 'ValidationError'){
-        return responseCodes.MONGOOSE_VALIDATION_ERROR;
+        return responseCodes.MONGOOSE_VALIDATION_ERROR(err);
       } else {
         return responseCodes.DB_ERROR(err);
       }
     }
+
+
 }
 
 module.exports = new Utils();
