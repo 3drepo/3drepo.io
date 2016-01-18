@@ -78,6 +78,12 @@
 		$scope.$watch("vm.commentsToggledIssueId", function (newValue) {
 			// If the comments is toggled on another comment, then close this one.
 			if (angular.isDefined(newValue)) {
+				// If the new value is null then all issues have been closed
+				if (!newValue)
+				{
+					NewIssuesService.highlightPin(null);
+				}
+
 				if (newValue !== vm.data._id) {
 					vm.showComments = false;
 

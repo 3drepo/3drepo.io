@@ -226,6 +226,11 @@
 			ghostMultiColoursField.setAttribute("value", colours.join(" "));
 		}
 
+		/*******************************************************************************
+		 * Highlight pin in the scene by ID
+		 *
+		 * @param {string} id - Unique ID of pin to highlight (null deselects all)
+		 ******************************************************************************/
 		function highlightPin(id) {
 			if (highlightedPin)
 			{
@@ -238,25 +243,26 @@
 				$("#" + highlightedPin + "_cone_depth")[0].setAttribute("depthFunc", "LESS");
 			}
 
-			$("#" + id + "_ishighlighted")[0].setAttribute("value", "true");
-			$("#" + id + "_ghost_ishighlighted")[0].setAttribute("value", "true");
-			$("#" + id + "_cone_ishighlighted")[0].setAttribute("value", "true");
-			$("#" + id + "_cone_ghost_ishighlighted")[0].setAttribute("value", "true");
+			if (id)
+			{
+				$("#" + id + "_ishighlighted")[0].setAttribute("value", "true");
+				$("#" + id + "_ghost_ishighlighted")[0].setAttribute("value", "true");
+				$("#" + id + "_cone_ishighlighted")[0].setAttribute("value", "true");
+				$("#" + id + "_cone_ghost_ishighlighted")[0].setAttribute("value", "true");
 
-			$("#" + id + "_depth")[0].setAttribute("depthFunc", "ALWAYS");
-			$("#" + id + "_cone_depth")[0].setAttribute("depthFunc", "ALWAYS");
+				$("#" + id + "_depth")[0].setAttribute("depthFunc", "ALWAYS");
+				$("#" + id + "_cone_depth")[0].setAttribute("depthFunc", "ALWAYS");
+			}
 
 			highlightedPin = id;
 		}
 
 		function createBasicPinShape(id, parentElement, depthMode, colours, numColours, trans, radius, height, scale, ghostPin) {
+			var ORANGE_HIGHLIGHT = "1.0000 0.7 0.0";
+
 			var coneHeight = height - 2 * radius;
 			var pinshape = document.createElement("Group");
-
-			if (ghostPin)
-			{
-				pinshape.setAttribute("onclick", "clickPin(event)");
-			}
+			pinshape.setAttribute("onclick", "clickPin(event)");
 
 			var pinshapeapp = document.createElement("Appearance");
 			//pinshape.appendChild(pinshapeapp);
@@ -294,7 +300,7 @@
 			var conehighlight = document.createElement("field");
 			conehighlight.setAttribute("type", "SFVec3f");
 			conehighlight.setAttribute("name", "highlightColor");
-			conehighlight.setAttribute("value", "1.0000 0.39607843137 0.0");
+			conehighlight.setAttribute("value", ORANGE_HIGHLIGHT);
 			coneshader.appendChild(conehighlight);
 
 			var coneishighlighted = document.createElement("field");
@@ -374,7 +380,7 @@
 			var pinheadhighlight = document.createElement("field");
 			pinheadhighlight.setAttribute("type", "SFVec3f");
 			pinheadhighlight.setAttribute("name", "highlightColor");
-			pinheadhighlight.setAttribute("value", "1.0000 0.39607843137 0.0");
+			pinheadhighlight.setAttribute("value", ORANGE_HIGHLIGHT);
 			pinshader.appendChild(pinheadhighlight);
 
 			var pinheadishighlighted = document.createElement("field");
@@ -629,7 +635,7 @@
 				"\n\t\t\tpinColor = multicolours[colidx];" + // * max(ambient + diffuse, 0.0);" +
 				"\n\t\t\tpinColor = clamp(pinColor, 0.0, 1.0);" +
 				"\n\t\t\tif (highlightPin) {" +
-				"\n\t\t\t\tpinColor = length(pinColor) * highlightColor;" +
+				"\n\t\t\t\tpinColor = highlightColor;" +
 				"\n\t\t\t}" +
 				//"\n\t\t\tpinColor = gammaEncode(pinColor);" +
 				"\n\t\t\tgl_FragColor = vec4(pinColor, transparency);" +
@@ -676,7 +682,7 @@
 				"\n{" +
 				"\n\tvec3 diffuseColor = clamp(diffuseColor, 0.0, 1.0);" +
 				"\n\tif (highlightPin) {" +
-				"\n\t\tdiffuseColor = highlightColor * length(diffuseColor);" +
+				"\n\t\tdiffuseColor = highlightColor;" +
 				"\n\t}" +
 				"\n\tgl_FragColor = vec4(diffuseColor, transparency);" +
 				"\n}";
