@@ -1,44 +1,55 @@
-div(layout="row")
+div(layout="row", ng-if="vm.userIsASubContractor")
 	.bidsList(flex=35)
 		md-content(layout-padding)
-			// Sub Contractor
-			div(ng-if="vm.userIsASubContractor")
+			div
 				md-list-item.bidsListProject(
-					ng-repeat="invited in vm.invitedProjects"
-					ng-class="{selectedProject: invited.selected, unselectedProject: !invited.selected}"
-					ng-click="vm.selectProject($index)"
+						ng-repeat="invited in vm.invitedProjects"
+						ng-class="{selectedProject: invited.selected, unselectedProject: !invited.selected}"
+						ng-click="vm.selectProject($index)"
 					)
 					md-icon(ng-class="invited.statusIcon")
 					p {{invited.name}}
 
 	.bidsContent(flex=45)
 		md-content(layout-padding)
-			// Sub Contractor
-			div(ng-if="vm.userIsASubContractor")
-				div(ng-if="vm.projectSelected")
-					.bidsProjectTitle(layout="row", layout-align="start center")
-						h3.md-title {{vm.invitedProjects[vm.selectedProjectIndex].name}}
-						md-icon(ng-class="vm.invitedProjects[vm.selectedProjectIndex].statusIcon")
-						.responseButtons(display="row", ng-if="vm.showRepondButtons")
-							md-button.md-accent(ng-click="vm.acceptInvite(true)") Accept
-							md-button.md-accent(ng-click="vm.acceptInvite(false)") Decline
+			div(ng-if="vm.projectSelected")
+				.bidsProjectTitle(layout="row", layout-align="start center")
+					h3.md-title {{vm.invitedProjects[vm.selectedProjectIndex].name}}
+					md-icon(ng-class="vm.invitedProjects[vm.selectedProjectIndex].statusIcon")
+					.responseButtons(display="row", ng-if="vm.showRepondButtons")
+						md-button.md-accent(ng-click="vm.acceptInvite(true)") Accept
+						md-button.md-accent(ng-click="vm.acceptInvite(false)") Decline
+				md-list-item
+					p(flex="20") Budget
+					p(flex="80") {{vm.invitedProjects[vm.selectedProjectIndex].budget}}
+				md-list-item
+					p(flex="20") Site
+					p(flex="80") {{vm.invitedProjects[vm.selectedProjectIndex].site}}
+				md-list-item
+					p(flex="20") Completed by
+					p(flex="80") {{vm.invitedProjects[vm.selectedProjectIndex].completed_by_pretty}}
+				md-divider
+				.projectDates
 					md-list-item
-						p(flex="20") Budget
-						p(flex="80") {{vm.invitedProjects[vm.selectedProjectIndex].budget}}
+						p(flex="20") Invited
+						p(flex="80") {{vm.invitedProjects[vm.selectedProjectIndex].date_invited_pretty}}
 					md-list-item
-						p(flex="20") Site
-						p(flex="80") {{vm.invitedProjects[vm.selectedProjectIndex].site}}
+						p(flex="20") Responded
+						p(flex="80") {{vm.invitedProjects[vm.selectedProjectIndex].date_responded_pretty}}
 					md-list-item
-						p(flex="20") Completed by
-						p(flex="80") {{vm.invitedProjects[vm.selectedProjectIndex].completed_by_pretty}}
-					md-divider
-					.projectDates
-						md-list-item
-							p(flex="20") Invited
-							p(flex="80") {{vm.invitedProjects[vm.selectedProjectIndex].date_invited_pretty}}
-						md-list-item
-							p(flex="20") Responded
-							p(flex="80") {{vm.invitedProjects[vm.selectedProjectIndex].date_responded_pretty}}
-						md-list-item
-							p(flex="20") Result
-							p(flex="80") {{vm.invitedProjects[vm.selectedProjectIndex].date_answered_pretty}}
+						p(flex="20") Result
+						p(flex="80") {{vm.invitedProjects[vm.selectedProjectIndex].date_answered_pretty}}
+
+div(layout="row", ng-if="!vm.userIsASubContractor")
+	.bidsList(flex=35)
+		md-content(layout-padding)
+			div
+				md-list-item.bidsListProject(
+					ng-repeat="invited in vm.invitedProjects"
+					ng-class="{selectedProject: invited.selected, unselectedProject: !invited.selected}"
+				)
+					p(flex="20") {{invited.name}}
+					md-icon(flex="5", ng-class="invited.statusIcon")
+					span(flex="20")
+						md-button.md-accent(ng-click="vm.view($index)") View
+

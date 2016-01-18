@@ -85,17 +85,10 @@ bid .bidInvite .bidInviteContent {
   width: 100%;
   height: 400px;
 }
-bid .bidInvite .bidInviteContent md-icon {
+bid .bidInvite .bidInviteContent md-list-item md-icon {
   font-size: 1.5em;
 }
-
-bid .bidInvite .bidInviteContent .invitedProject:hover {
-  cursor: pointer;
-}
-
-bid .bidInvite .bidInviteContent .selectedProject {
-  background: #E8EAF6;
-}
-bid .bidInvite .bidInviteContent .unselectedProject {
-  background: #FFFFFF;
+bid .bidInvite .bidInviteContent md-icon {
+  font-size: 2em;
+  margin: 15px;
 }

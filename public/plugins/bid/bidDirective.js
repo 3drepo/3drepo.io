@@ -45,8 +45,8 @@
 		];
 		vm.invitedSubContractors = [];
 		vm.addSubContractorDisabled = true;
-		//vm.userRole = "mainContractor";
-		vm.userRole = "subContractor";
+		vm.userRole = "mainContractor";
+		//vm.userRole = "subContractor";
 		vm.summary = {
 			budget: 45023,
 			site: "Wood Lane",
@@ -58,6 +58,12 @@
 			date_answered: 1464091380000,
 			status: "won"
 		};
+		vm.responded = false;
+		vm.chosenSubContractors = [
+			{name: "Pinakin", status: "accepted"},
+			{name: "Carmen", status: "declined"},
+			{name: "Henry", status: "accepted"}
+		];
 
 		$scope.$watch("vm.subContractor", function (newValue) {
 			vm.addSubContractorDisabled = !angular.isDefined(newValue);
@@ -69,12 +75,14 @@
 				vm.userIsASubContractor = false;
 				vm.summaryTitle = "Summary";
 				vm.inviteTitle = "Invite";
+				vm.showInput = true;
 			}
 			else if (newValue === "subContractor") {
 				vm.userIsTheMainContractor = false;
 				vm.userIsASubContractor = true;
 				vm.summaryTitle = "Summary";
 				vm.inviteTitle = "Bid Status";
+				vm.showInput = false;
 			}
 		});
 
@@ -82,23 +90,8 @@
 			vm.summary.completed_by_pretty = prettyDate(new Date(newValue.completed_by));
 		});
 
-		$scope.$watch("vm.response", function (newValue) {
-			if (vm.response.status === "won") {
-				vm.response.statusIcon = "fa fa-check md-accent";
-			}
-			else if (vm.response.status === "lost") {
-				vm.response.statusIcon = "fa fa-remove md-warn";
-			}
-			else if (vm.response.status === "accepted") {
-				vm.response.statusIcon = "fa fa-check";
-			}
-			else if (vm.response.status === "declined") {
-				vm.response.statusIcon = "fa fa-remove";
-			}
-			else if (vm.response.status === "invited") {
-				vm.response.statusIcon = "fa fa-circle-thin";
-			}
-
+		$scope.$watch("vm.response", function () {
+			vm.response.statusIcon = getStatusIcon(vm.response.status);
 			vm.response.selected = false;
 			vm.response.completed_by_pretty = prettyDate(new Date(vm.response.completed_by));
 			vm.response.date_invited_pretty = prettyDate(new Date(vm.response.date_invited));
@@ -110,12 +103,22 @@
 			}
 		});
 
+		$scope.$watch("vm.chosenSubContractors", function () {
+			var i, length;
+			vm.showInput = false;
+			vm.inviteTitle = "Invited";
+			for (i = 0, length = vm.chosenSubContractors.length; i < length; i += 1) {
+				vm.chosenSubContractors[i].statusIcon = getStatusIcon(vm.chosenSubContractors[i].status);
+				vm.chosenSubContractors[i].accepted = (vm.chosenSubContractors[i].status === "accepted");
+			}
+		});
+
 		vm.home = function () {
 			$location.path("/" + Auth.username, "_self");
 		};
 
 		vm.addSubContractor = function () {
-			var i, length, index ;
+			var i, length, index;
 			for (i = 0, length = vm.subContractors.length; i < length; i += 1) {
 				if (vm.subContractors[i].name === vm.subContractor) {
 					index = i;
@@ -140,8 +143,48 @@
 			}
 		};
 
-		var prettyDate = function (date) {
-			return date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
+		vm.acceptInvite = function (accept) {
+			vm.responded = true;
+			vm.response = {
+				date_invited: 1464091380000,
+				date_responded: (new Date()),
+				date_answered: null,
+				status: accept ? "accepted" : "declined"
+			};
 		};
+
+		vm.acceptSubContractor = function (index) {
+			var i, length;
+			for (i = 0, length = vm.chosenSubContractors.length; i < length; i += 1) {
+				if (vm.chosenSubContractors[i].status === "accepted") {
+					vm.chosenSubContractors[i].statusIcon = (i === index) ? getStatusIcon("won") : getStatusIcon("lost");
+					vm.chosenSubContractors[i].accepted = false;
+				}
+			}
+		};
+
+		function prettyDate (date) {
+			return date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
+		}
+
+		function getStatusIcon (status) {
+			var icon = "";
+			if (status === "won") {
+				icon = "fa fa-check md-accent";
+			}
+			else if (status === "lost") {
+				icon = "fa fa-remove md-warn";
+			}
+			else if (status === "accepted") {
+				icon = "fa fa-check";
+			}
+			else if (status === "declined") {
+				icon = "fa fa-remove";
+			}
+			else if (status === "invited") {
+				icon = "fa fa-circle-thin";
+			}
+			return icon;
+		}
 	}
 }());

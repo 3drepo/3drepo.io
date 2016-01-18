@@ -1,7 +1,5 @@
 div(ng-cloak)
 	md-content(style="height:600px")
-		md-tabs(md-border-bottom)
-			md-tab(label="Projects")
-				projects-list
-			md-tab(label="Bid 4 Free")
-				bids
+		md-tabs(md-border-bottom, md-selected="vm.selectedTab")
+			md-tab(ng-repeat="tab in vm.tabs", label="{{tab.name}}", ng-click="vm.selectTab($index)")
+				div(dashboard-tab-content="{{tab.content}}")

@@ -37,7 +37,7 @@
 	function BidsCtrl($scope) {
 		var vm = this;
 
-		vm.userIsASubContractor = true;
+		vm.userIsASubContractor = false;
 		vm.invitedProjects = [
 			{
 				name: "Revit_House",
