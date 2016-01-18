@@ -9,6 +9,29 @@ var schema = mongoose.Schema({
 });
 
 
+schema.pre('save', function(next){
+	'use strict'
+
+	ProjectPackage.count(this._dbcolOptions, {name: this.name}).then(count => {
+		if(count > 0) {
+
+			let err = new Error('This package name has been taken');
+			err.name = 'ValidationError'
+			next(err);
+		} else {
+			next();
+		}
+	})
+});
+
+var defaultProjection = { __v: 0};
+
+// Model statics method
+schema.statics.findByName = function(dbColOptions, name){
+	return ProjectPackage.findOne(dbColOptions, {name}, defaultProjection);
+}
+
+
 
 var ProjectPackage = ModelFactory.createClass(
 	'Package', 

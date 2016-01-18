@@ -46,6 +46,8 @@ module.exports = {
 		
 		item.collection = this.db.db(options.account).collection(this.__collectionName(modelName, options));
 
+		item._dbcolOptions = options;
+
 		return item;		
 	},
 
@@ -111,12 +113,17 @@ module.exports = {
 
 						items.forEach((item, index, array) => {
 							item.collection = collection;
+							item._dbcolOptions = options;
 							array[index] = item;
 						});
 						
+					} else if (typeof items === 'number') {
+
+
 					} else if (items){
 
 						items.collection = collection;
+						items._dbcolOptions = options;
 					}
 
 					return Promise.resolve(items);
@@ -127,6 +134,22 @@ module.exports = {
 		['find', 'findOne', 'count', 'distinct', 'where', 'findOneAndUpdate', 'findOneAndRemove', 'update'].forEach(staticFuncName => {
 			mongooseModel[staticFuncName] = staticFunctionProxy(staticFuncName);
 		});
+
+
+		mongooseModel.findById = function(options, id){
+
+			var args = Array.prototype.slice.call(arguments);
+			args.splice(0, 2);
+
+			args.unshift(options, { _id: id});
+
+			return mongooseModel.findOne.apply(mongooseModel, args);
+		}
+
+		mongooseModel.prototype.model = modelName => {
+			let model = this.models[modelName].mongooseModel;
+			return model;
+		};
 
 		return mongooseModel;
 	}
