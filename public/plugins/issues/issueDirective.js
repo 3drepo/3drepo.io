@@ -40,9 +40,9 @@
 		};
 	}
 
-	IssueCtrl.$inject = ["$scope", "$timeout", "NewIssuesService", "ViewerService"];
+	IssueCtrl.$inject = ["$scope", "$timeout", "NewIssuesService", "ViewerService", "EventService"];
 
-	function IssueCtrl($scope, $timeout, NewIssuesService, ViewerService) {
+	function IssueCtrl($scope, $timeout, NewIssuesService, ViewerService, EventService) {
 		var vm = this,
 			promise = null,
 			originatorEv = null,
@@ -106,13 +106,7 @@
 							vm.data.viewpoint.up
 						);
 
-						if (vm.data.viewpoint.clippingPlanes) {
-							if (vm.data.viewpoint.clippingPlanes.length) {
-								ViewerService.defaultViewer.setClippingPlanes(vm.data.viewpoint.clippingPlanes);
-							} else {
-								ViewerService.defaultViewer.clearClippingPlanes();
-							}
-						}
+						EventService.send(EventService.EVENT.SET_CLIPPING_PLANES, vm.data.viewpoint);
 					}
 				}
 			}
