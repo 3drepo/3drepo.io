@@ -127,7 +127,8 @@
 			show: false,
 			help: "Clipping plane",
 			icon: "fa-object-group",
-            maxHeight: 190
+			maxHeight: 190,
+			showVisible: true
 		});
 		panelContent.right.push({
 			type: "docs",
