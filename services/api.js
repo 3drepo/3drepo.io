@@ -19,7 +19,7 @@
 module.exports.app = function (sharedSession) {
 	"use strict";
 
-	//let log_iface = require("../js/core/logger.js");
+	let log_iface = require("../js/core/logger.js");
 
 	let express = require("express");
 	let routes = require("../routes.js")();
@@ -34,9 +34,28 @@ module.exports.app = function (sharedSession) {
 	require("../js/core/encoders/img_encoder.js").route(routes);
 	require("../js/core/encoders/bin_encoder.js").route(routes);
 
-	let bodyParser = require("body-parser");
+	var C = require("../js/core/constants");
 
+	let bodyParser = require("body-parser");
+	let resHelper = require('../js/core/response_codes');
 	let app = express();
+	
+	// put logger in req object
+	app.use(log_iface.startRequest);
+
+	// init the singleton db connection for modelFactory
+	app.use((req, res, next) => {
+		// init the singleton db connection
+		let DB = require('../js/core/db')(req[C.REQ_REPO].logger);
+
+		DB.getDB('default').then( db => {
+			// set db to singleton modelFactory class
+			require('../js/core/models/modelFactory').setDB(db);
+			next();
+		}).catch( err => {
+			resHelper.respond('Express Middleware', req, res, next, resHelper.DB_ERROR, err);
+		});
+	});
 
 	app.use(bodyParser.urlencoded({
 		extended: true
@@ -77,7 +96,12 @@ module.exports.app = function (sharedSession) {
 	}
 
 	app.use(sharedSession);
+	// project package handlers
+	app.use('/:account/:project', require('../js/core/handlers/projectPackage'));
+	// bid hanlders
+	app.use('/:account/:project/packages/:packageName', require('../js/core/handlers/bid'));
 	app.use("/", routes.router);
+
 
 	return app;
 };

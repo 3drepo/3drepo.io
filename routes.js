@@ -115,7 +115,7 @@ var repoRouter = function() {
 		};
 	};
 
-	self.router.use(log_iface.startRequest);
+	//self.router.use(log_iface.startRequest); // moved to api.js
 	self.getHandler  = require("./routes_get")(self.router, self.checkAccess(hasReadAccessToProject));
 	self.postHandler = require("./routes_post")(self.router, self.checkAccess(hasWriteAccessToProject));
 	self.router.use(log_iface.endRequest);

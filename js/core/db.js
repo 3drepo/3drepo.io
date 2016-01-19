@@ -709,6 +709,7 @@ MongoWrapper.prototype.getUserRoles = function (username, database, callback) {
 	//only return roles in admin and the specified database, the rest are irrelevant.
 	var projection = { "roles" : 1};
 
+		console.log('filter', filter);
 	self.filterColl(dbName, collName, filter, projection, function(err, docs) {
 		if (err.value) {
 			return callback(err);
@@ -780,6 +781,39 @@ MongoWrapper.prototype.getUserPrivileges = function (username, database, callbac
         });
     });
 
+};
+
+
+/*******************************************************************************
+ * Return signleton db connection
+ *
+ * @param {string} dbName - Database name
+ * @param {function} callback - get db connection
+ *								pass to callback as parameter
+ * @return {promise} promise with db connection as resolved value 
+ ******************************************************************************/
+MongoWrapper.prototype.getDB = function(dbName, callback) {
+	"use strict";
+    
+    if(this._db) {
+
+    	callback && callback(null, db);
+    	return Promise.resolve(this._db.db(dbName));
+
+    } else {
+
+    	return new Promise((resolve, reject) => {
+			mongo.open(dbName, (err, db) => {
+				callback && callback(err, db);
+				if(err){
+					return reject(err);
+				} else {
+					return resolve(db);
+				}
+			});
+    	});
+
+    }
 };
 
 module.exports = function(logger) {

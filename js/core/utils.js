@@ -14,6 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+var _ = require('lodash');
+var C = require("./constants");
+var resHelper = require('./response_codes');
 
 function Utils() {
     "use strict";
@@ -211,6 +214,61 @@ function Utils() {
         }
         return arrayBuffer;
     };
+
+    /**
+     * Map mongoose error to our defined error codes
+     *
+     * @param {Object} err object from mongoose
+     * @param {number} channelsCount Number of channels, 1 for now
+     * @param {boolean} isLittleEndian True or false
+     * @return {Object} our defined response code 
+     */
+    this.mongoErrorToResCode = function(err){
+      let responseCodes = require('./response_codes');
+      if(err.name === 'ValidationError'){
+        return responseCodes.MONGOOSE_VALIDATION_ERROR(err);
+      } else {
+        return responseCodes.DB_ERROR(err);
+      }
+    }
+
+    /**
+     * Clean req body and assign it to mongoose model
+     *
+     * @param {Array} list of accepted keys
+     * @param {dirtyBody} express req.body
+     * @param {Object} mongoose model instance to be updated
+     * @return {Object} updated mongoose model instance
+     */
+    this.writeCleanedBodyToModel = function(whitelist, dirtyBody, model){
+        'use strict';
+
+        let cleanedReq = _.pick(dirtyBody, whitelist);
+        _.forEach(cleanedReq, (value, key) => {
+            model[key] = value;
+        });
+
+        return model;
+    }
+
+    /**
+     * Check logged in middleware
+     *
+     * @param {Object} express req
+     * @param {Object} express res
+     * @param {Object} express next
+     */
+    this.loggedIn = function(req, res, next){
+        'use strict';
+
+        if (!(req.session.hasOwnProperty(C.REPO_SESSION_USER))) {
+            resHelper.respond("Check logged in middleware", req, res, next, resHelper.AUTH_ERROR, null, req.params);
+        } else {
+            next();
+        }
+    }
+
+
 }
 
 module.exports = new Utils();

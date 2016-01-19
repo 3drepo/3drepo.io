@@ -640,6 +640,9 @@ DBInterface.prototype.checkUserPermission = function (username, account, project
         if (status.value) {
             return callback(status);
         }
+
+        console.log(privileges, privileges);
+        
         //Determine the access rights of a project via privileges on the history collection
         var collection = project + ".history";
         var writePermission = false;
@@ -2607,7 +2610,7 @@ DBInterface.prototype.getUserRoles = function (username, database, callback) {
 		if (database)
 		{
 			var roles = [];
-			for (i = 0; i < docs[0]["roles"].length; i++) {
+			for (let i = 0; i < docs[0]["roles"].length; i++) {
 				if (docs[0]["roles"][i]["db"] == dbName || docs[0]["roles"][i]["db"] == database) {
 					roles.push(docs[0]["roles"][i]);
 				}
