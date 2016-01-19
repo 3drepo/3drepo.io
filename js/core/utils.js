@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+var _ = require('lodash');
 
 function Utils() {
     "use strict";
@@ -229,6 +230,24 @@ function Utils() {
       }
     }
 
+    /**
+     * Clean req body and assign it to mongoose model
+     *
+     * @param {Array} list of accepted keys
+     * @param {dirtyBody} express req.body
+     * @param {Object} mongoose model instance to be updated
+     * @return {Object} updated mongoose model instance
+     */
+    this.writeCleanedBodyToModel = function(whitelist, dirtyBody, model){
+        'use strict';
+
+        let cleanedReq = _.pick(dirtyBody, whitelist);
+        _.forEach(cleanedReq, (value, key) => {
+            model[key] = value;
+        });
+
+        return model;
+    }
 
 }
 

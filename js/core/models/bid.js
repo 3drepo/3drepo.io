@@ -35,6 +35,10 @@ schema.statics.findByPackage = function(dbColOptions, packageName){
 	return Bid.find(dbColOptions, {packageName});
 }
 
+schema.statics.findByUser = function(dbColOptions, user){
+	return Bid.findOne(dbColOptions, {user});
+}
+
 var Bid = ModelFactory.createClass(
 	'Bid', 
 	schema, 

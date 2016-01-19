@@ -709,6 +709,7 @@ MongoWrapper.prototype.getUserRoles = function (username, database, callback) {
 	//only return roles in admin and the specified database, the rest are irrelevant.
 	var projection = { "roles" : 1};
 
+		console.log('filter', filter);
 	self.filterColl(dbName, collName, filter, projection, function(err, docs) {
 		if (err.value) {
 			return callback(err);

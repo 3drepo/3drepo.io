@@ -7,6 +7,9 @@ var utils = require('../utils');
 var ProjectPackage = require('../models/projectPackage');
 var resHelper = require('../response_codes');
 
+var dbInterface     = require("../db_interface.js");
+var C               = require("../constants");
+
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
 }
@@ -64,9 +67,12 @@ function findPackage(req, res, next){
 }
 
 function checkPremission(req, res, next){
-	next();
-}
+	var username = null;
 
+	// logged in?
+	// package -> account == login.username OR
+	// you are invited.
+}
 
 
 module.exports = router;

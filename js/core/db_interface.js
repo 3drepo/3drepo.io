@@ -640,6 +640,9 @@ DBInterface.prototype.checkUserPermission = function (username, account, project
         if (status.value) {
             return callback(status);
         }
+
+        console.log(privileges, privileges);
+        
         //Determine the access rights of a project via privileges on the history collection
         var collection = project + ".history";
         var writePermission = false;
