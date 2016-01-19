@@ -135,6 +135,10 @@
 					vm.selectedAxis   = translateAxis(event.value.clippingPlanes[0].axis);
 					vm.sliderPosition = (1.0 - event.value.clippingPlanes[0].percentage) * 100.0;
 					initClippingPlane();
+					vm.visible = true;
+				} else {
+					vm.visible = false;
+					vm.sliderPosition = 0.0;
 				}
 			}
 		});
