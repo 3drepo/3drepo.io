@@ -33,11 +33,13 @@
 		};
 	}
 
-	DashboardCtrl.$inject = ["Auth"];
+	DashboardCtrl.$inject = ["$location", "$stateParams", "Auth"];
 
-	function DashboardCtrl(Auth) {
-		var vm = this;
+	function DashboardCtrl($location, $stateParams, Auth) {
+		var vm = this,
+			i, length;
 
+		// Set up the tabs
 		vm.tabs = [
 			{
 				name: "Projects",
@@ -52,8 +54,19 @@
 
 		];
 
+		// Select the correct tab on page load
+		vm.selectedTab = 0;
+		if (angular.isDefined($stateParams.tab)) {
+			for (i = 0, length = vm.tabs.length; i < length; i += 1) {
+				if (vm.tabs[i].tabOption === $stateParams.tab) {
+					vm.selectedTab = i;
+					break;
+				}
+			}
+		}
+
 		vm.selectTab = function (index) {
-			//$location.path("/" + Auth.username, "_self").search('tab', vm.tabs[index].tabOption);
+			$location.search('tab', vm.tabs[index].tabOption);
 		};
 	}
 

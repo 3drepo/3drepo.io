@@ -41,7 +41,7 @@
 			// Main content
 			#profile-settings.col-md-9
 				// Dashboard
-				dashboard
+				dashboard(ng-show="view=='projects' && projectsShowList")
 				// List of projects
 				//#projects-list.row(ng-show="view=='projects' && projectsShowList")
 					projects-list
