@@ -2610,7 +2610,7 @@ DBInterface.prototype.getUserRoles = function (username, database, callback) {
 		if (database)
 		{
 			var roles = [];
-			for (i = 0; i < docs[0]["roles"].length; i++) {
+			for (let i = 0; i < docs[0]["roles"].length; i++) {
 				if (docs[0]["roles"][i]["db"] == dbName || docs[0]["roles"][i]["db"] == database) {
 					roles.push(docs[0]["roles"][i]);
 				}

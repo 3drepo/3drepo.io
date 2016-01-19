@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 var _ = require('lodash');
+var C = require("./constants");
+var resHelper = require('./response_codes');
 
 function Utils() {
     "use strict";
@@ -248,6 +250,24 @@ function Utils() {
 
         return model;
     }
+
+    /**
+     * Check logged in middleware
+     *
+     * @param {Object} express req
+     * @param {Object} express res
+     * @param {Object} express next
+     */
+    this.loggedIn = function(req, res, next){
+        'use strict';
+
+        if (!(req.session.hasOwnProperty(C.REPO_SESSION_USER))) {
+            resHelper.respond("Check logged in middleware", req, res, next, resHelper.AUTH_ERROR, null, req.params);
+        } else {
+            next();
+        }
+    }
+
 
 }
 

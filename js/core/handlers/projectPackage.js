@@ -14,10 +14,13 @@ var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
 }
 
+//Every API list below has to log in to access
+router.use(utils.loggedIn);
+
 // Create a package
-router.post('/packages.json', checkPremission, createPackage);
+router.post('/packages.json', isMainContractor, createPackage);
 // Get a package by name
-router.get('/packages/:name.json', checkPremission, findPackage);
+router.get('/packages/:name.json', hasAccess, findPackage);
 
 
 function createPackage(req, res, next) {
@@ -25,16 +28,12 @@ function createPackage(req, res, next) {
 	
 	let place = '/:account/:project/packages.json POST';
 
-	let whitelist = ['name', 'site', 'budget', 'completedBy'];
-
 	// Instantiate a model
 	let projectPackage = ProjectPackage.createInstance(getDbColOptions(req));
 
-	let cleanedReq = _.pick(req.body, whitelist);
+	let whitelist = ['name', 'site', 'budget', 'completedBy'];
 
-	_.forEach(cleanedReq, (value, key) => {
-		projectPackage[key] = value;
-	});
+	projectPackage = utils.writeCleanedBodyToModel(whitelist, req.body, projectPackage);
 
 	projectPackage.save().then(projectPackage => {
 		resHelper.respond(place, req, res, next, resHelper.OK, projectPackage);
@@ -66,13 +65,51 @@ function findPackage(req, res, next){
 	
 }
 
-function checkPremission(req, res, next){
-	var username = null;
-
-	// logged in?
-	// package -> account == login.username OR
-	// you are invited.
+function hasAccess(req, res, next){
+	next()
+	//checkRole([C.REPO_ROLE_SUBCONTRACTOR, C.REPO_ROLE_MAINCONTRACTOR], req, res, next);
 }
 
+function isMainContractor(req, res, next){
+	next()
+	//checkRole([C.REPO_ROLE_MAINCONTRACTOR], req, res, next);
+}
+
+function checkRole(acceptedRoles, req, res, next){
+	'use strict';
+
+	var dbInterface = require("../db_interface.js");
+
+	var dbCol = getDbColOptions(req);
+
+	dbInterface(req[C.REQ_REPO].logger).getUserRoles(req.session[C.REPO_SESSION_USER].username, dbCol.account, function(err, roles){
+		
+		console.log('roles', roles);
+		
+		roles = _.filter(roles, item => {
+			return acceptedRoles.indexOf(item.role) !== -1;
+		});
+
+		if(roles.length > 0){
+			next();
+		} else {
+			resHelper.respond("Check package API Read access", req, res, next, resHelper.AUTH_ERROR, null, req.params);
+		}
+
+	});
+	// dbInterface(req[C.REQ_REPO].logger).getRolesByProject(dbCol.account,  dbCol.project, C.REPO_ANY, function(err, roles){
+
+	// 	roles = _.filter(roles, item => {
+	// 		return acceptedRoles.indexOf(item.role) !== -1;
+	// 	});
+
+	// 	if(roles.length > 0){
+	// 		next();
+	// 	} else {
+	// 		resHelper.respond("Check package API Read access", req, res, next, resHelper.AUTH_ERROR, null, req.params);
+	// 	}
+
+	// });
+}
 
 module.exports = router;

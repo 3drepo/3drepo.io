@@ -91,6 +91,8 @@ var responseCodes = {
 	PACKAGE_NOT_FOUND: {value: 43, message: 'Package not found', status: 404},
 	BID_NOT_FOUND: {value: 44, message: 'Bid not found', status: 404},
 	BID_ALREADY_ACCEPTED: {value : 45, message: 'Bid already accepted', status: 400},
+	USER_ALREADY_IN_BID: {value: 46, message: 'User already has a bid created in this package', status: 400},
+	BID_NOT_ACCEPTED: {value: 47, message: 'Bid invitation is not yet accepted', status: 400},
 
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {
@@ -142,7 +144,7 @@ var responseCodes = {
 	}
 };
 
-var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 1000, 2000, 3000, 4000];
+var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 1000, 2000, 3000, 4000];
 
 responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 {

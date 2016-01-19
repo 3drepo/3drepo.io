@@ -35,26 +35,31 @@ function createBid(req, res, next) {
 	
 	let place = '/:account/:project/packages/:package/bids.json POST';
 
-	let whitelist = ['user'];
-
 	// Instantiate a model
-	let bid = Bid.createInstance(getDbColOptions(req));
 
-	let cleanedReq = _.pick(req.body, whitelist);
+	Bid.count(getDbColOptions(req), { 
+		packageName: req.params.packageName, 
+		user: req.body.user
+	}).then(count => {
 
-	_.forEach(cleanedReq, (value, key) => {
-		bid[key] = value;
-	});
+		if (count > 0) {
+			return Promise.reject({ resCode: resHelper.USER_ALREADY_IN_BID})
+		} else {
 
-	bid.packageName = req.params.packageName;
+			let bid = Bid.createInstance(getDbColOptions(req));
 
-	bid.save().then(bid => {
+			let whitelist = ['user'];
+
+			bid = utils.writeCleanedBodyToModel(whitelist, req.body, bid);
+			bid.packageName = req.params.packageName;
+			return bid.save();
+		}
+		
+	}).then(bid => {
 		resHelper.respond(place, req, res, next, resHelper.OK, bid);
 
 	}).catch(err => {
-		let errCode = utils.mongoErrorToResCode(err);
-		resHelper.respond(place, req, res, next, errCode, err);
-
+		resHelper.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 
 }
@@ -78,6 +83,8 @@ function awardBid(req, res, next){
 	Bid.findById(getDbColOptions(req), req.params.id).then(bid => {
 		if (!bid){
 			return Promise.reject({ resCode: resHelper.BID_NOT_FOUND});
+		} else if (!bid.accepted) {
+			return Promise.reject({ resCode: resHelper.BID_NOT_ACCEPTED})
 		} else {
 
 			bid.awarded = true;
@@ -159,9 +166,13 @@ function updateMyBid(req, res, next){
 
 	_getMyBid(req).then(bid => {
 		
-		let whitelist = ['budget'];
-		bid = utils.writeCleanedBodyToModel(whitelist, req.body, bid);
-		return bid.save();
+		if (!bid.accepted){
+			return Promise.reject({ resCode: resHelper.BID_NOT_ACCEPTED})
+		} else  {
+			let whitelist = ['budget'];
+			bid = utils.writeCleanedBodyToModel(whitelist, req.body, bid);
+			return bid.save();
+		}
 
 	}).then(bid => {
 		resHelper.respond(place, req, res, next, resHelper.OK, bid);
