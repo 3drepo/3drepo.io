@@ -21,8 +21,11 @@ router.use(middlewares.loggedIn);
 
 // Create a package
 router.post('/packages.json', middlewares.isMainContractor, createPackage);
+// Get all packages
+router.get('/packages.json', middlewares.isMainContractor, listPackages);
 // Get a package by name
 router.get('/packages/:packageName.json', hasReadPackageAccess, findPackage);
+
 
 
 function createPackage(req, res, next) {
@@ -51,7 +54,7 @@ function createPackage(req, res, next) {
 function findPackage(req, res, next){
 	'use strict';
 
-	let place = '/:account/:project/package/:packageName.json GET';
+	let place = '/:account/:project/packages/:packageName.json GET';
 
 	ProjectPackage.findByName(getDbColOptions(req), req.params.packageName).then(projectPackage => {
 		if(projectPackage){
@@ -59,6 +62,21 @@ function findPackage(req, res, next){
 		} else {
 			resHelper.respond(place, req, res, next, resHelper.PACKAGE_NOT_FOUND);
 		}
+	}).catch(err => {
+		let errCode = utils.mongoErrorToResCode(err);
+		resHelper.respond(place, req, res, next, errCode, err);
+
+	});
+	
+}
+
+function listPackages(req, res, next){
+	'use strict';
+
+	let place = '/:account/:project/packages.json GET';
+
+	ProjectPackage.find(getDbColOptions(req)).then(projectPackages => {
+		resHelper.respond(place, req, res, next, resHelper.OK, projectPackages);
 	}).catch(err => {
 		let errCode = utils.mongoErrorToResCode(err);
 		resHelper.respond(place, req, res, next, errCode, err);
