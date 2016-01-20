@@ -16,17 +16,22 @@
 			md-content(layout-padding)
 				div(ng-if="vm.showInput")
 					md-input-container.md-block
-						label Budget
-						input(required type="number" step="any" name="budget" ng-model="vm.budget")
+						label Name
+						input(required name="name" ng-model="vm.name")
 					md-input-container.md-block
 						label Site
 						input(required name="site" ng-model="vm.site")
+					md-input-container.md-block
+						label Budget
+						input(required type="number" step="any" name="budget" ng-model="vm.budget")
 					.bidSummaryContentDatePicker
 						h5 Completed by
 						md-datepicker(ng-model="vm.completedBy", md-placeholder="Enter date")
 					md-divider
 					div(layout="row", layout-align="center center")
-						md-button.md-accent Save
+						md-button.md-accent(ng-click="vm.save()", ng-disabled="vm.saveDisabled") Save
+					.cardInfo(ng-if="true")
+						p Basdasdasd asd asd asd asd asd
 
 				div(ng-if="!vm.showInput")
 					md-list-item

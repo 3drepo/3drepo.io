@@ -32,10 +32,11 @@
 		};
 	}
 
-	BidCtrl.$inject = ["$scope", "$location", "StateManager", "Auth"];
+	BidCtrl.$inject = ["$scope", "$location", "StateManager", "Auth", "BidService"];
 
-	function BidCtrl($scope, $location, StateManager, Auth) {
-		var vm = this;
+	function BidCtrl($scope, $location, StateManager, Auth, BidService) {
+		var vm = this,
+			promise = null;
 
 		vm.StateManager = StateManager;
 		vm.subContractors = [
@@ -64,6 +65,11 @@
 			{name: "Carmen", status: "declined"},
 			{name: "Henry", status: "accepted"}
 		];
+
+		promise = BidService.getPackage("Test");
+		promise.then(function (data) {
+			console.log(data);
+		});
 
 		$scope.$watch("vm.subContractor", function (newValue) {
 			vm.addSubContractorDisabled = !angular.isDefined(newValue);
@@ -105,7 +111,7 @@
 
 		$scope.$watch("vm.chosenSubContractors", function () {
 			var i, length;
-			vm.showInput = false;
+			//vm.showInput = false;
 			vm.inviteTitle = "Invited";
 			for (i = 0, length = vm.chosenSubContractors.length; i < length; i += 1) {
 				vm.chosenSubContractors[i].statusIcon = getStatusIcon(vm.chosenSubContractors[i].status);
@@ -113,8 +119,39 @@
 			}
 		});
 
+		$scope.$watchGroup(["vm.name", "vm.site", "vm.budget", "vm.completedBy"], function (newValues) {
+			vm.saveDisabled = (
+				angular.isUndefined(newValues[0]) ||
+				angular.isUndefined(newValues[1]) ||
+				angular.isUndefined(newValues[2]) ||
+				angular.isUndefined(newValues[3])
+			);
+			vm.showInfo = false;
+		});
+
 		vm.home = function () {
 			$location.path("/" + Auth.username, "_self");
+		};
+
+		vm.save = function () {
+			vm.saveDisabled = true;
+			promise = BidService.addPackage({
+				name: vm.name,
+				site: vm.site,
+				budget: vm.budget,
+				completedBy: new Date(vm.completedBy)
+			});
+			promise.then(function (response) {
+				console.log(response);
+				vm.showInfo = true;
+				vm.saveDisabled = (response.statusText === "OK");
+				if (vm.saveDisabled) {
+					vm.info = "Package " + vm.name + " saved";
+				}
+				else {
+					vm.info = "Error saving package " + vm.name;
+				}
+			});
 		};
 
 		vm.addSubContractor = function () {

@@ -52,7 +52,7 @@ bid .bidSummary {
 }
 bid  .bidSummary .bidSummaryContent {
   width: 100%;
-  min-height: 390px;
+  min-height: 450px;
 }
 bid  .bidSummary .bidSummaryContent .bidSummaryContentDatePicker {
   margin: -20px 0 20px;
