@@ -6,6 +6,7 @@ var utils = require('../utils');
 
 var ProjectPackage = require('../models/projectPackage');
 var resHelper = require('../response_codes');
+var Bid = require('../models/bid');
 
 var dbInterface     = require("../db_interface.js");
 var C               = require("../constants");
@@ -20,7 +21,7 @@ router.use(utils.loggedIn);
 // Create a package
 router.post('/packages.json', isMainContractor, createPackage);
 // Get a package by name
-router.get('/packages/:name.json', hasAccess, findPackage);
+router.get('/packages/:name.json', hasReadPackageAccess, findPackage);
 
 
 function createPackage(req, res, next) {
@@ -65,51 +66,70 @@ function findPackage(req, res, next){
 	
 }
 
-function hasAccess(req, res, next){
-	next()
-	//checkRole([C.REPO_ROLE_SUBCONTRACTOR, C.REPO_ROLE_MAINCONTRACTOR], req, res, next);
+// Permission checking middleware for /packages/*
+function hasReadPackageAccess(req, res, next){
+	checkRole([C.REPO_ROLE_SUBCONTRACTOR, C.REPO_ROLE_MAINCONTRACTOR], req).then((roles) => {
+		// if role is maincontractor then no more check is needed
+		
+		if(roles.indexOf(C.REPO_ROLE_MAINCONTRACTOR) !== -1){
+			return Promise.resolve();
+		} else {
+			return isSubContractorInvited(req);
+		}
+
+	}).then(() => {
+		next();
+	}).catch(resCode => {
+		resHelper.respond("Package middleware: check has read access", req, res, next, resCode, null, req.params);
+	});
 }
 
 function isMainContractor(req, res, next){
-	next()
-	//checkRole([C.REPO_ROLE_MAINCONTRACTOR], req, res, next);
+	checkRole([C.REPO_ROLE_MAINCONTRACTOR], req).then(() => {
+		next();
+	}).catch(resCode => {
+		resHelper.respond("Package middleware: check is maincontractor", req, res, next, resCode, null, req.params);
+	});
 }
 
-function checkRole(acceptedRoles, req, res, next){
+function isSubContractorInvited(req){
+
+	return Bid.count(getDbColOptions(req), { 
+		packageName: req.params.name,
+		user: req.session[C.REPO_SESSION_USER].username
+	}).then(count => {
+		if (count > 0) {
+			console.log('resolved')
+			return Promise.resolve();
+		} else {
+			return Promise.reject(resHelper.AUTH_ERROR);
+		}
+	});
+}
+
+function checkRole(acceptedRoles, req){
 	'use strict';
 
 	var dbInterface = require("../db_interface.js");
 
 	var dbCol = getDbColOptions(req);
 
-	dbInterface(req[C.REQ_REPO].logger).getUserRoles(req.session[C.REPO_SESSION_USER].username, dbCol.account, function(err, roles){
-		
-		console.log('roles', roles);
-		
-		roles = _.filter(roles, item => {
-			return acceptedRoles.indexOf(item.role) !== -1;
+	return new Promise((resolve, reject) => {
+		dbInterface(req[C.REQ_REPO].logger).getUserRoles(req.session[C.REPO_SESSION_USER].username, dbCol.account, function(err, roles){
+			
+			roles = _.filter(roles, item => {
+				return acceptedRoles.indexOf(item.role) !== -1;
+			});
+
+			if(roles.length > 0){
+				resolve(_.map(roles, 'role'));
+			} else {
+				reject(resHelper.AUTH_ERROR);
+			}
+
 		});
-
-		if(roles.length > 0){
-			next();
-		} else {
-			resHelper.respond("Check package API Read access", req, res, next, resHelper.AUTH_ERROR, null, req.params);
-		}
-
 	});
-	// dbInterface(req[C.REQ_REPO].logger).getRolesByProject(dbCol.account,  dbCol.project, C.REPO_ANY, function(err, roles){
 
-	// 	roles = _.filter(roles, item => {
-	// 		return acceptedRoles.indexOf(item.role) !== -1;
-	// 	});
-
-	// 	if(roles.length > 0){
-	// 		next();
-	// 	} else {
-	// 		resHelper.respond("Check package API Read access", req, res, next, resHelper.AUTH_ERROR, null, req.params);
-	// 	}
-
-	// });
 }
 
 module.exports = router;

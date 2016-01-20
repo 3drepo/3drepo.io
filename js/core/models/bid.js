@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var ModelFactory = require('./modelFactory');
 var ProjectPackage = require('./projectPackage');
-var Bid = require('./bid');
+
 
 var schema = mongoose.Schema({
 	user: { type: String, required: true },
