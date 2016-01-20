@@ -250,25 +250,6 @@ function Utils() {
 
         return model;
     }
-
-    /**
-     * Check logged in middleware
-     *
-     * @param {Object} express req
-     * @param {Object} express res
-     * @param {Object} express next
-     */
-    this.loggedIn = function(req, res, next){
-        'use strict';
-
-        if (!(req.session.hasOwnProperty(C.REPO_SESSION_USER))) {
-            resHelper.respond("Check logged in middleware", req, res, next, resHelper.AUTH_ERROR, null, req.params);
-        } else {
-            next();
-        }
-    }
-
-
 }
 
 module.exports = new Utils();

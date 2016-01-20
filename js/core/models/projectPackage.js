@@ -4,7 +4,7 @@ var ModelFactory = require('./modelFactory');
 var schema = mongoose.Schema({
 	name: { type: String, required: true },
 	site: { type: String, required: true },
-	budget: String, 
+	budget: Number, 
 	completedBy: Date
 });
 

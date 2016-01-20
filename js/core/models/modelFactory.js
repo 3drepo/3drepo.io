@@ -131,7 +131,7 @@ module.exports = {
 			}
 		}
 
-		['find', 'findOne', 'count', 'distinct', 'where', 'findOneAndUpdate', 'findOneAndRemove', 'update'].forEach(staticFuncName => {
+		['find', 'findOne', 'count', 'distinct', 'where', 'findOneAndUpdate', 'findOneAndRemove'].forEach(staticFuncName => {
 			mongooseModel[staticFuncName] = staticFunctionProxy(staticFuncName);
 		});
 
@@ -144,6 +144,18 @@ module.exports = {
 			args.unshift(options, { _id: id});
 
 			return mongooseModel.findOne.apply(mongooseModel, args);
+		}
+
+
+		let update = mongooseModel.update;
+
+		mongooseModel.update = function(options){
+
+			self.db.db(options.account).collection(self.__collectionName(modelName, options));
+			var args = Array.prototype.slice.call(arguments);
+			args.shift();
+
+			update.apply(mongooseModel, args);
 		}
 
 		mongooseModel.prototype.model = modelName => {

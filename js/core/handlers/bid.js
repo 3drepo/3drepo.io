@@ -3,24 +3,28 @@ var router = express.Router({mergeParams: true});
 var config = require("../config.js");
 var _ = require('lodash');
 var utils = require('../utils');
+var middlewares = require('./middlewares');
 
 var Bid = require('../models/bid');
 var resHelper = require('../response_codes');
 var C = require("../constants");
 module.exports = router;
 
+//Every API list below has to log in to access
+router.use(middlewares.loggedIn);
+
 // Create a bid
-router.post('/bids.json', checkPremission, createBid);
+router.post('/bids.json', /*middlewares.isMainContractor, */ createBid);
 // List bids
-router.get('/bids.json', checkPremission, listBids);
+router.get('/bids.json', /*middlewares.isMainContractor, */ listBids);
 // Award bid
-router.post('/bids/:id/award', checkPremission, awardBid);
+router.post('/bids/:id/award', /*middlewares.isMainContractor, */ awardBid);
 // get My bid (SC)
-router.get('/bids/mine.json', checkPremission, findMyBid);
+router.get('/bids/mine.json', /*middlewares.isSubContractorInvited, */ findMyBid);
 // accept bid (sc)
-router.post('/bids/mine/accept', checkPremission, acceptMyBid);
+router.post('/bids/mine/accept', /*middlewares.isSubContractorInvited, */ acceptMyBid);
 // update my bid (sc)
-router.put('/bids/mine.json', checkPremission, updateMyBid);
+router.put('/bids/mine.json', /*middlewares.isSubContractorInvited, */ updateMyBid);
 
 
 
@@ -80,17 +84,12 @@ function awardBid(req, res, next){
 
 	let place = '/:account/:project/packages/:package/bids/:id/award POST';
 
+
 	Bid.findById(getDbColOptions(req), req.params.id).then(bid => {
 		if (!bid){
 			return Promise.reject({ resCode: resHelper.BID_NOT_FOUND});
-		} else if (!bid.accepted) {
-			return Promise.reject({ resCode: resHelper.BID_NOT_ACCEPTED})
 		} else {
-
-			bid.awarded = true;
-			bid.awardedOn = new Date();
-			
-			return bid.save();
+			return bid.award();
 		}
 
 	}).then(bid => {

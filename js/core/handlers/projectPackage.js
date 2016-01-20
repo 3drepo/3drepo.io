@@ -3,9 +3,11 @@ var router = express.Router({mergeParams: true});
 var config = require("../config.js");
 var _ = require('lodash');
 var utils = require('../utils');
+var middlewares = require('./middlewares');
 
 var ProjectPackage = require('../models/projectPackage');
 var resHelper = require('../response_codes');
+var Bid = require('../models/bid');
 
 var dbInterface     = require("../db_interface.js");
 var C               = require("../constants");
@@ -15,12 +17,15 @@ var getDbColOptions = function(req){
 }
 
 //Every API list below has to log in to access
-router.use(utils.loggedIn);
+router.use(middlewares.loggedIn);
 
 // Create a package
-router.post('/packages.json', isMainContractor, createPackage);
+router.post('/packages.json', /*middlewares.isMainContractor, */ createPackage);
+// Get all packages
+router.get('/packages.json', /*middlewares.isMainContractor, */ listPackages);
 // Get a package by name
-router.get('/packages/:name.json', hasAccess, findPackage);
+router.get('/packages/:packageName.json', /*hasReadPackageAccess, */ findPackage);
+
 
 
 function createPackage(req, res, next) {
@@ -49,9 +54,9 @@ function createPackage(req, res, next) {
 function findPackage(req, res, next){
 	'use strict';
 
-	let place = '/:account/:project/package/:name.json GET';
+	let place = '/:account/:project/packages/:packageName.json GET';
 
-	ProjectPackage.findByName(getDbColOptions(req), req.params.name).then(projectPackage => {
+	ProjectPackage.findByName(getDbColOptions(req), req.params.packageName).then(projectPackage => {
 		if(projectPackage){
 			resHelper.respond(place, req, res, next, resHelper.OK, projectPackage);
 		} else {
@@ -65,51 +70,38 @@ function findPackage(req, res, next){
 	
 }
 
-function hasAccess(req, res, next){
-	next()
-	//checkRole([C.REPO_ROLE_SUBCONTRACTOR, C.REPO_ROLE_MAINCONTRACTOR], req, res, next);
-}
-
-function isMainContractor(req, res, next){
-	next()
-	//checkRole([C.REPO_ROLE_MAINCONTRACTOR], req, res, next);
-}
-
-function checkRole(acceptedRoles, req, res, next){
+function listPackages(req, res, next){
 	'use strict';
 
-	var dbInterface = require("../db_interface.js");
+	let place = '/:account/:project/packages.json GET';
 
-	var dbCol = getDbColOptions(req);
-
-	dbInterface(req[C.REQ_REPO].logger).getUserRoles(req.session[C.REPO_SESSION_USER].username, dbCol.account, function(err, roles){
-		
-		console.log('roles', roles);
-		
-		roles = _.filter(roles, item => {
-			return acceptedRoles.indexOf(item.role) !== -1;
-		});
-
-		if(roles.length > 0){
-			next();
-		} else {
-			resHelper.respond("Check package API Read access", req, res, next, resHelper.AUTH_ERROR, null, req.params);
-		}
+	ProjectPackage.find(getDbColOptions(req)).then(projectPackages => {
+		resHelper.respond(place, req, res, next, resHelper.OK, projectPackages);
+	}).catch(err => {
+		let errCode = utils.mongoErrorToResCode(err);
+		resHelper.respond(place, req, res, next, errCode, err);
 
 	});
-	// dbInterface(req[C.REQ_REPO].logger).getRolesByProject(dbCol.account,  dbCol.project, C.REPO_ANY, function(err, roles){
-
-	// 	roles = _.filter(roles, item => {
-	// 		return acceptedRoles.indexOf(item.role) !== -1;
-	// 	});
-
-	// 	if(roles.length > 0){
-	// 		next();
-	// 	} else {
-	// 		resHelper.respond("Check package API Read access", req, res, next, resHelper.AUTH_ERROR, null, req.params);
-	// 	}
-
-	// });
+	
 }
+
+// packages/* specific middlewares
+function hasReadPackageAccess(req, res, next){
+	middlewares.checkRole([C.REPO_ROLE_SUBCONTRACTOR, C.REPO_ROLE_MAINCONTRACTOR], req).then((roles) => {
+		// if role is maincontractor then no more check is needed
+
+		if(roles.indexOf(C.REPO_ROLE_MAINCONTRACTOR) !== -1){
+			return Promise.resolve();
+		} else {
+			return middlewares.isSubContractorInvitedHelper(req);
+		}
+
+	}).then(() => {
+		next();
+	}).catch(resCode => {
+		resHelper.respond("Middleware: check has read access", req, res, next, resCode, null, req.params);
+	});
+}
+
 
 module.exports = router;
