@@ -43,6 +43,18 @@ bid md-list-item p {
   outline: none;
 }
 
+/** Packages **********************************************************************************************************/
+
+bid .bidPackageList {
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+}
+bid .bidPackageList .bidPackageListContent {
+  width: 100%;
+  height: 400px;
+}
+
 /** Summary ***********************************************************************************************************/
 
 bid .bidSummary {

@@ -43,12 +43,14 @@
 			return doPost(data);
 		};
 
+		// Get all or named package(s)
 		var getPackage = function (name) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(state.account + "/" + state.project + "/packages/" + name + ".json");
+				part = angular.isDefined(name) ? ("/" + name) : "",
+				url = serverConfig.apiUrl(state.account + "/" + state.project + "/packages" + part + ".json");
 			$http.get(url).then(
 				function (response) {
-					deferred.resolve(response);
+					deferred.resolve(response.data);
 				},
 				function () {
 					deferred.resolve([]);

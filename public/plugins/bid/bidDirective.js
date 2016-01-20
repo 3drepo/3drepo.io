@@ -35,6 +35,7 @@
 	BidCtrl.$inject = ["$scope", "$location", "StateManager", "Auth", "BidService"];
 
 	function BidCtrl($scope, $location, StateManager, Auth, BidService) {
+		console.log(Auth);
 		var vm = this,
 			promise = null;
 
@@ -48,11 +49,6 @@
 		vm.addSubContractorDisabled = true;
 		vm.userRole = "mainContractor";
 		//vm.userRole = "subContractor";
-		vm.summary = {
-			budget: 45023,
-			site: "Wood Lane",
-			completed_by: 1464091380000
-		};
 		vm.response = {
 			date_invited: 1464091380000,
 			date_responded: 1464091380000,
@@ -60,15 +56,16 @@
 			status: "won"
 		};
 		vm.responded = false;
-		vm.chosenSubContractors = [
-			{name: "Pinakin", status: "accepted"},
-			{name: "Carmen", status: "declined"},
-			{name: "Henry", status: "accepted"}
-		];
+		vm.packages = [];
 
-		promise = BidService.getPackage("Test");
+		promise = BidService.getPackage();
 		promise.then(function (data) {
+			var i, length;
 			console.log(data);
+			vm.packages = data;
+			for (i = 0, length = vm.packages.length; i < length; i += 1) {
+				vm.packages[i].completedByPretty = prettyDate(new Date(vm.packages[i].completedBy));
+			}
 		});
 
 		$scope.$watch("vm.subContractor", function (newValue) {
@@ -92,10 +89,6 @@
 			}
 		});
 
-		$scope.$watch("vm.summary", function (newValue) {
-			vm.summary.completed_by_pretty = prettyDate(new Date(newValue.completed_by));
-		});
-
 		$scope.$watch("vm.response", function () {
 			vm.response.statusIcon = getStatusIcon(vm.response.status);
 			vm.response.selected = false;
@@ -106,16 +99,6 @@
 			}
 			if (vm.response.date_answered !== null) {
 				vm.response.date_answered_pretty = prettyDate(new Date(vm.response.date_answered));
-			}
-		});
-
-		$scope.$watch("vm.chosenSubContractors", function () {
-			var i, length;
-			//vm.showInput = false;
-			vm.inviteTitle = "Invited";
-			for (i = 0, length = vm.chosenSubContractors.length; i < length; i += 1) {
-				vm.chosenSubContractors[i].statusIcon = getStatusIcon(vm.chosenSubContractors[i].status);
-				vm.chosenSubContractors[i].accepted = (vm.chosenSubContractors[i].status === "accepted");
 			}
 		});
 
@@ -134,18 +117,21 @@
 		};
 
 		vm.save = function () {
-			vm.saveDisabled = true;
-			promise = BidService.addPackage({
+			var data = {
 				name: vm.name,
 				site: vm.site,
 				budget: vm.budget,
 				completedBy: new Date(vm.completedBy)
-			});
+			};
+			vm.saveDisabled = true;
+			promise = BidService.addPackage(data);
 			promise.then(function (response) {
 				console.log(response);
 				vm.showInfo = true;
 				vm.saveDisabled = (response.statusText === "OK");
 				if (vm.saveDisabled) {
+					data.completedByPretty = prettyDate(new Date(data.completedBy));
+					vm.packages.push(data);
 					vm.info = "Package " + vm.name + " saved";
 				}
 				else {
@@ -198,6 +184,15 @@
 					vm.chosenSubContractors[i].accepted = false;
 				}
 			}
+		};
+
+		vm.showPackage = function (index) {
+			vm.showInput = false;
+			vm.selectedPackage = vm.packages[index];
+		};
+
+		vm.setupAddPackage = function () {
+			vm.showInput = true;
 		};
 
 		function prettyDate (date) {

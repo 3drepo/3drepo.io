@@ -8,7 +8,20 @@
 				md-icon(class="fa fa-home")
 
 .bidContent(layout="row" layout-align="space-between start")
-	.bidSummary.md-whiteframe-1dp(flex=45)
+	.bidPackageList.md-whiteframe-1dp(flex=15)
+		md-toolbar
+			.md-toolbar-tools
+				h2 Packages
+				span(flex)
+				md-button.md-icon-button(aria-label="Add Package", ng-click="vm.setupAddPackage()")
+					md-icon(class="fa fa-plus")
+		.bidPackageListContent
+			md-content(layout-padding)
+				md-list
+					md-list-item(ng-repeat="package in vm.packages", ng-click="vm.showPackage($index)")
+						p {{package.name}}
+
+	.bidSummary.md-whiteframe-1dp(flex=35)
 		md-toolbar
 			.md-toolbar-tools
 				h2 {{vm.summaryTitle}}
@@ -30,21 +43,25 @@
 					md-divider
 					div(layout="row", layout-align="center center")
 						md-button.md-accent(ng-click="vm.save()", ng-disabled="vm.saveDisabled") Save
-					.cardInfo(ng-if="true")
-						p Basdasdasd asd asd asd asd asd
+					.cardInfo(ng-if="vm.showInfo")
+						p {{vm.info}}
 
 				div(ng-if="!vm.showInput")
-					md-list-item
-						p(flex="20") Budget
-						p(flex="80") {{vm.summary.budget}}
-					md-list-item
-						p(flex="20") Site
-						p(flex="80") {{vm.summary.site}}
-					md-list-item
-						p(flex="20") Completed by
-						p(flex="80") {{vm.summary.completed_by_pretty}}
+					md-list
+						md-list-item
+							p(flex="30") Name
+							p(flex) {{vm.selectedPackage.name}}
+						md-list-item
+							p(flex="30") Site
+							p(flex) {{vm.selectedPackage.site}}
+						md-list-item
+							p(flex="30") Budget
+							p(flex) {{vm.selectedPackage.budget}}
+						md-list-item
+							p(flex="30") Completed by
+							p(flex) {{vm.selectedPackage.completedByPretty}}
 
-	.bidInvite.md-whiteframe-1dp(flex=45)
+	.bidInvite.md-whiteframe-1dp(flex=35)
 		md-toolbar
 			.md-toolbar-tools
 				h2
@@ -53,7 +70,7 @@
 			md-content(layout-padding)
 				// Main Contractor
 				div(ng-if="vm.userIsTheMainContractor")
-					div(ng-if="vm.showInput")
+					div(ng-if="!vm.showInput")
 						div(layout="row" layout-align="space-between start")
 							md-input-container.md-block(flex="80")
 								label Sub Contractors
@@ -65,8 +82,8 @@
 							md-subheader.md-no-sticky Invited
 							md-list-item(ng-repeat="invited in vm.invitedSubContractors")
 								md-icon(ng-class="invited.invitedIcon")
-								p(ng-click="vm.changeAssignIcon($index)") {{invited.name}}
-					div(ng-if="!vm.showInput")
+								//p(ng-click="vm.changeAssignIcon($index)") {{invited.name}}
+					//div(ng-if="!vm.showInput")
 						md-list-item(ng-repeat="subContractor in vm.chosenSubContractors")
 							md-icon(flex="5", ng-class="subContractor.statusIcon")
 							p(flex="20") {{subContractor.name}}
