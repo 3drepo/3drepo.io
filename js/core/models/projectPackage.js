@@ -10,6 +10,10 @@ var schema = mongoose.Schema({
 	user: String
 });
 
+schema.plugin(require('mongoose-timestamp'), {
+  createdAt: 'createdOn',
+  updatedAt: 'updatedOn'
+});
 
 schema.pre('save', function(next){
 	'use strict'

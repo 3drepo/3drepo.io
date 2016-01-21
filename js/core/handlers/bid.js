@@ -170,13 +170,13 @@ function replyMyBid(req, res, next){
 			return Promise.reject({ resCode: responseCodes.BID_ALREADY_ACCEPTED_OR_DECLINED })
 		} else {
 
-			if (typeof req.body.accept !== 'boolean'){
-				return Promise.reject({ resCode: responseCodes.MONGOOSE_VALIDATION_ERROR({ message: 'accept must be true or false'}) })
-			} else {
+			// if (typeof req.body.accept !== 'boolean'){
+			// 	return Promise.reject({ resCode: responseCodes.MONGOOSE_VALIDATION_ERROR({ message: 'accept must be true or false'}) })
+			// } else {
 				bid.accepted = req.body.accept;
 				bid.acceptedOn = new Date();
 				return bid.save();
-			}
+			//}
 			
 		}
 

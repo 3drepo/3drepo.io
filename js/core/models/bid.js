@@ -11,9 +11,14 @@ var schema = mongoose.Schema({
 	acceptedOn: Date,
 	awarded: { type: Boolean, default: null },
 	awardedOn: Date,
+	invitedOn: Date,
 	packageName: { type: String, required: true }
 });
 
+schema.plugin(require('mongoose-timestamp'), {
+  createdAt: 'createdOn',
+  updatedAt: 'updatedOn'
+});
 
 schema.pre('save', function(next){
 	'use strict'
@@ -28,7 +33,11 @@ schema.pre('save', function(next){
 
 			next();
 		}
-	})
+	});
+
+	if(this.isNew){
+		this.invitedOn = new Date();
+	}
 });
 
 schema.post('save', function(doc){
