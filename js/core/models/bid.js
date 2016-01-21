@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var ModelFactory = require('./modelFactory');
 var ProjectPackage = require('./projectPackage');
 var responseCode = require('../response_codes');
+var C = require('../constants.js');
 
 var schema = mongoose.Schema({
 	user: { type: String, required: true },
@@ -28,6 +29,31 @@ schema.pre('save', function(next){
 			next();
 		}
 	})
+});
+
+schema.post('save', function(doc){
+	'use strict';
+
+	// add to customData.bids for quick lookup 
+
+	let db = ModelFactory.db;
+	let database = 'admin';
+	let collection = 'system.users'
+	let bid = {
+		role: C.REPO_ROLE_SUBCONTRACTOR,
+		account: doc._dbcolOptions.account,
+		project : doc._dbcolOptions.project,
+		package: doc.packageName,
+	};
+
+	db.db(database)
+	.collection(collection)
+	.findOneAndUpdate({ 
+		user: doc.user 
+	},{'$addToSet':{ 
+		'customData.bids': bid
+	}});
+
 });
 
 // Model statics method

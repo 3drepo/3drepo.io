@@ -1,11 +1,13 @@
 var mongoose = require('mongoose');
 var ModelFactory = require('./modelFactory');
+var C = require('../constants.js');
 
 var schema = mongoose.Schema({
 	name: { type: String, required: true },
 	site: { type: String, required: true },
 	budget: Number, 
-	completedBy: Date
+	completedBy: Date,
+	user: String
 });
 
 
@@ -24,7 +26,32 @@ schema.pre('save', function(next){
 	})
 });
 
-var defaultProjection = { __v: 0};
+schema.post('save', function(doc){
+	'use strict';
+
+	// add to customData.bids for quick lookup 
+
+	let db = ModelFactory.db;
+	let database = 'admin';
+	let collection = 'system.users'
+	let bid = {
+		role: C.REPO_ROLE_MAINCONTRACTOR,
+		account: doc._dbcolOptions.account,
+		project : doc._dbcolOptions.project,
+		package: doc.name,
+	};
+
+	db.db(database)
+	.collection(collection)
+	.findOneAndUpdate({ 
+		user: doc.user 
+	},{'$addToSet':{ 
+		'customData.bids': bid
+	}});
+
+});
+
+var defaultProjection = { __v: 0, user: 0};
 
 // Model statics method
 schema.statics.findByName = function(dbColOptions, name){

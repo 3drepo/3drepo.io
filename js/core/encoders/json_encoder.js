@@ -379,20 +379,37 @@ exports.route = function(router)
 	});
 
 	router.get("json", "/:account", function(req, res, params, err_callback) {
-		dbInterface(req[C.REQ_REPO].logger).getUserInfo(params.account, function(err, user)
-		{
-			if(err.value) {
-				err_callback(err);
-			} else {
-				if(user)
-				{
-					user.username = params.account;
-					err_callback(responseCodes.OK, user);
+
+		if (req.query.hasOwnProperty('bids')){
+			dbInterface(req[C.REQ_REPO].logger).getUserBidInfo(params.account, function(err, bids)
+			{
+				if(err.value) {
+					err_callback(err);
+				} else {
+		
+					err_callback(responseCodes.OK, bids);
+				
 				}
-				else
-					err_callback(responseCodes.USER_NOT_FOUND);
-			}
-		});
+			});
+
+		} else {
+			dbInterface(req[C.REQ_REPO].logger).getUserInfo(params.account, function(err, user)
+			{
+				if(err.value) {
+					err_callback(err);
+				} else {
+					if(user)
+					{
+						user.username = params.account;
+						err_callback(responseCodes.OK, user);
+					}
+					else
+						err_callback(responseCodes.USER_NOT_FOUND);
+				}
+			});
+		}
+
+
 	});
 
 	router.get("json", "/:account/:project", function(req, res, params, err_callback) {

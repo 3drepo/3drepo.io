@@ -40,6 +40,9 @@ function createPackage(req, res, next) {
 
 	projectPackage = utils.writeCleanedBodyToModel(whitelist, req.body, projectPackage);
 
+	//creator is main contractor
+	projectPackage.user = req.session[C.REPO_SESSION_USER].username;
+
 	projectPackage.save().then(projectPackage => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, projectPackage);
 

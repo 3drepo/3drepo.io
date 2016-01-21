@@ -464,6 +464,37 @@ DBInterface.prototype.getUserDBList = function(username, callback) {
 	});
 };
 
+DBInterface.prototype.getUserBidInfo = function(username, callback) {
+	if(!username) {
+		return callback(responseCodes.USERNAME_NOT_SPECIFIED);
+	}
+
+	this.logger.logDebug("Getting user info bid for " + username);
+
+	var filter = {
+		user: username
+	};
+
+	var projection = {
+		"customData.bids" : 1
+	};
+
+	dbConn(this.logger).filterColl("admin", "system.users", filter, projection, function(err, coll) {
+		if(err.value) {
+			return callback(err);
+		}
+
+		if (coll[0])
+		{
+			var user = coll[0].customData && coll[0].customData.bids || [];
+
+			callback(responseCodes.OK, user);
+		} else {
+			callback(responseCodes.USER_NOT_FOUND, null);
+		}
+	});
+};
+
 DBInterface.prototype.getUserInfo = function(username, callback) {
 	if(!username) {
 		return callback(responseCodes.USERNAME_NOT_SPECIFIED);
@@ -641,7 +672,7 @@ DBInterface.prototype.checkUserPermission = function (username, account, project
             return callback(status);
         }
 
-        console.log(privileges, privileges);
+        //console.log(privileges, privileges);
         
         //Determine the access rights of a project via privileges on the history collection
         var collection = project + ".history";
