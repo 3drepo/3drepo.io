@@ -6,7 +6,7 @@ var utils = require('../utils');
 var middlewares = require('./middlewares');
 
 var ProjectPackage = require('../models/projectPackage');
-var resHelper = require('../response_codes');
+var responseCodes = require('../response_codes');
 var Bid = require('../models/bid');
 
 var dbInterface     = require("../db_interface.js");
@@ -41,11 +41,11 @@ function createPackage(req, res, next) {
 	projectPackage = utils.writeCleanedBodyToModel(whitelist, req.body, projectPackage);
 
 	projectPackage.save().then(projectPackage => {
-		resHelper.respond(place, req, res, next, resHelper.OK, projectPackage);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, projectPackage);
 
 	}).catch(err => {
 		let errCode = utils.mongoErrorToResCode(err);
-		resHelper.respond(place, req, res, next, errCode, err);
+		responseCodes.respond(place, req, res, next, errCode, err);
 
 	});
 
@@ -58,13 +58,13 @@ function findPackage(req, res, next){
 
 	ProjectPackage.findByName(getDbColOptions(req), req.params.packageName).then(projectPackage => {
 		if(projectPackage){
-			resHelper.respond(place, req, res, next, resHelper.OK, projectPackage);
+			responseCodes.respond(place, req, res, next, responseCodes.OK, projectPackage);
 		} else {
-			resHelper.respond(place, req, res, next, resHelper.PACKAGE_NOT_FOUND);
+			responseCodes.respond(place, req, res, next, responseCodes.PACKAGE_NOT_FOUND);
 		}
 	}).catch(err => {
 		let errCode = utils.mongoErrorToResCode(err);
-		resHelper.respond(place, req, res, next, errCode, err);
+		responseCodes.respond(place, req, res, next, errCode, err);
 
 	});
 	
@@ -76,10 +76,10 @@ function listPackages(req, res, next){
 	let place = '/:account/:project/packages.json GET';
 
 	ProjectPackage.find(getDbColOptions(req)).then(projectPackages => {
-		resHelper.respond(place, req, res, next, resHelper.OK, projectPackages);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, projectPackages);
 	}).catch(err => {
 		let errCode = utils.mongoErrorToResCode(err);
-		resHelper.respond(place, req, res, next, errCode, err);
+		responseCodes.respond(place, req, res, next, errCode, err);
 
 	});
 	
@@ -99,7 +99,7 @@ function hasReadPackageAccess(req, res, next){
 	}).then(() => {
 		next();
 	}).catch(resCode => {
-		resHelper.respond("Middleware: check has read access", req, res, next, resCode, null, req.params);
+		responseCodes.respond("Middleware: check has read access", req, res, next, resCode, null, req.params);
 	});
 }
 

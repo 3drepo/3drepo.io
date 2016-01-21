@@ -57,7 +57,7 @@ schema.methods.award = function(){
 
 		// mark other bids awarded: false
 
-		// unfortunately mongoose.update don't return promise so wipe it in promise
+		// unfortunately mongoose.update don't return promise so wrap it in promise
 		return new Promise((resolve, reject) => {
 			console.log(this._dbcolOptions);
 			Bid.update(this._dbcolOptions, { 

@@ -1,7 +1,7 @@
 // common middlewares / middleware helpers
 var dbInterface = require("../db_interface.js");
 var _ = require('lodash');
-var resHelper = require('../response_codes');
+var responseCodes = require('../response_codes');
 var C               = require("../constants");
 var Bid = require('../models/bid');
 
@@ -25,7 +25,7 @@ var middlewares = {
 				if(roles.length > 0){
 					resolve(_.map(roles, 'role'));
 				} else {
-					reject(resHelper.AUTH_ERROR);
+					reject(responseCodes.AUTH_ERROR);
 				}
 
 			});
@@ -37,7 +37,7 @@ var middlewares = {
         'use strict';
 
         if (!(req.session.hasOwnProperty(C.REPO_SESSION_USER))) {
-            resHelper.respond("Check logged in middleware", req, res, next, resHelper.AUTH_ERROR, null, req.params);
+            responseCodes.respond("Check logged in middleware", req, res, next, responseCodes.AUTH_ERROR, null, req.params);
         } else {
             next();
         }
@@ -47,7 +47,7 @@ var middlewares = {
 		middlewares.checkRole([C.REPO_ROLE_MAINCONTRACTOR], req).then(() => {
 			next();
 		}).catch(resCode => {
-			resHelper.respond("Middleware: check is main contractor", req, res, next, resCode, null, req.params);
+			responseCodes.respond("Middleware: check is main contractor", req, res, next, resCode, null, req.params);
 		});
 	},
 
@@ -61,7 +61,7 @@ var middlewares = {
 			if (count > 0) {
 				return Promise.resolve();
 			} else {
-				return Promise.reject(resHelper.AUTH_ERROR);
+				return Promise.reject(responseCodes.AUTH_ERROR);
 			}
 		});
 	},
@@ -70,7 +70,7 @@ var middlewares = {
 		middlewares.isSubContractorInvitedHelper(req).then(()=>{
 			next();
 		}).catch(resCode => {
-			resHelper.respond("Middleware: check is sub contractor invited", req, res, next, resCode, null, req.params);
+			responseCodes.respond("Middleware: check is sub contractor invited", req, res, next, resCode, null, req.params);
 		})
 	}
 }

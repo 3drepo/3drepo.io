@@ -20,7 +20,6 @@ var express = require("express");
 var responseCodes = require("./js/core/response_codes.js");
 var dbInterface = require("./js/core/db_interface.js");
 
-var express = require("express");
 
 var C = require("./js/core/constants");
 

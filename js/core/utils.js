@@ -16,7 +16,6 @@
  */
 var _ = require('lodash');
 var C = require("./constants");
-var resHelper = require('./response_codes');
 
 function Utils() {
     "use strict";

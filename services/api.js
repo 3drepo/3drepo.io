@@ -37,7 +37,7 @@ module.exports.app = function (sharedSession) {
 	var C = require("../js/core/constants");
 
 	let bodyParser = require("body-parser");
-	let resHelper = require('../js/core/response_codes');
+	let responseCodes = require('../js/core/response_codes');
 	let app = express();
 	
 	// put logger in req object
@@ -53,7 +53,7 @@ module.exports.app = function (sharedSession) {
 			require('../js/core/models/modelFactory').setDB(db);
 			next();
 		}).catch( err => {
-			resHelper.respond('Express Middleware', req, res, next, resHelper.DB_ERROR, err);
+			responseCodes.respond('Express Middleware', req, res, next, responseCodes.DB_ERROR, err);
 		});
 	});
 
