@@ -83,6 +83,7 @@
 
 		projectUserRolesPromise = NewIssuesService.getUserRolesForProject();
 		projectUserRolesPromise.then(function (data) {
+			console.log(data);
 			vm.projectUserRoles = data;
 		});
 

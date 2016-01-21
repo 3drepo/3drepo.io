@@ -1,14 +1,13 @@
-div(layout="row", ng-if="vm.userIsASubContractor")
+div(layout="row", ng-if="!vm.userIsAMainContractor")
 	.bidsList(flex=35)
 		md-content(layout-padding)
-			div
+			md-list(ng-repeat="project in vm.AccountData.projects")
+				md-subheader.md-no-sticky {{project.account}} - {{project.project}}
 				md-list-item.bidsListProject(
-						ng-repeat="invited in vm.invitedProjects"
-						ng-class="{selectedProject: invited.selected, unselectedProject: !invited.selected}"
-						ng-click="vm.selectProject($index)"
-					)
-					md-icon(ng-class="invited.statusIcon")
-					p {{invited.name}}
+					ng-repeat="package in project.packages"
+					ng-class="{selectedProject: invited.selected, unselectedProject: !invited.selected}"
+					ng-click="vm.selectProject($index)")
+					p(flex="20") {{package.name}}
 
 	.bidsContent(flex=45)
 		md-content(layout-padding)
@@ -40,16 +39,14 @@ div(layout="row", ng-if="vm.userIsASubContractor")
 						p(flex="20") Result
 						p(flex="80") {{vm.invitedProjects[vm.selectedProjectIndex].date_answered_pretty}}
 
-div(layout="row", ng-if="!vm.userIsASubContractor")
+div(layout="row", ng-if="vm.userIsAMainContractor")
 	.bidsList(flex=35)
 		md-content(layout-padding)
-			div
+			md-list(ng-repeat="project in vm.AccountData.projects")
+				md-subheader.md-no-sticky {{project.account}} - {{project.project}}
 				md-list-item.bidsListProject(
-					ng-repeat="invited in vm.invitedProjects"
+					ng-repeat="package in project.packages"
 					ng-class="{selectedProject: invited.selected, unselectedProject: !invited.selected}"
-				)
-					p(flex="20") {{invited.name}}
-					md-icon(flex="5", ng-class="invited.statusIcon")
-					span(flex="20")
-						md-button.md-accent(ng-click="vm.view($index)") View
+					ng-click="vm.selectProject($index)")
+					p(flex="20") {{package.name}}
 

@@ -32,73 +32,86 @@
 		};
 	}
 
-	BidCtrl.$inject = ["$scope", "$location", "StateManager", "Auth", "BidService"];
+	BidCtrl.$inject = ["$scope", "$location", "StateManager", "Auth", "BidService", "ProjectService"];
 
-	function BidCtrl($scope, $location, StateManager, Auth, BidService) {
-		console.log(Auth);
+	function BidCtrl($scope, $location, StateManager, Auth, BidService, ProjectService) {
 		var vm = this,
-			promise = null;
+			promise, projectUserRolesPromise;
 
 		vm.StateManager = StateManager;
 		vm.subContractors = [
-			{name: "Pinakin"},
-			{name: "Carmen"},
-			{name: "Henry"}
+			{user: "Pinakin"},
+			{user: "Carmen"},
+			{user: "Henry"}
 		];
+		vm.notInvitedSubContractors = JSON.parse(JSON.stringify(vm.subContractors));
 		vm.invitedSubContractors = [];
 		vm.addSubContractorDisabled = true;
-		vm.userRole = "mainContractor";
-		//vm.userRole = "subContractor";
-		vm.response = {
-			date_invited: 1464091380000,
-			date_responded: 1464091380000,
-			date_answered: 1464091380000,
-			status: "won"
-		};
 		vm.responded = false;
-		vm.packages = [];
+		vm.showStatus = false;
 
-		promise = BidService.getPackage();
-		promise.then(function (data) {
+		// Get type of role
+		projectUserRolesPromise = ProjectService.getUserRolesForProject();
+		projectUserRolesPromise.then(function (data) {
 			var i, length;
-			console.log(data);
-			vm.packages = data;
-			for (i = 0, length = vm.packages.length; i < length; i += 1) {
-				vm.packages[i].completedByPretty = prettyDate(new Date(vm.packages[i].completedBy));
+			for (i = 0, length = data.length; i < length; i += 1) {
+				if (data[i] === "MC") {
+					vm.userIsAMainContractor = true;
+					break;
+				}
+				else if (data[i] === "SC") {
+					vm.userIsAMainContractor = false;
+					break;
+				}
+				else {
+					vm.userIsAMainContractor = true;
+				}
+			}
+			if (vm.userIsAMainContractor) {
+				// Get all packages for project
+				promise = BidService.getPackage();
+				promise.then(function (response) {
+					var i, length;
+					vm.packages = response.data;
+					for (i = 0, length = vm.packages.length; i < length; i += 1) {
+						vm.packages[i].completedByPretty = prettyDate(new Date(vm.packages[i].completedBy));
+					}
+				});
+			}
+			else {
+				// Dummy code waiting for API
+				promise = BidService.getPackage();
+				promise.then(function (response) {
+					var packages = response.data;
+					promise = BidService.getBids(packages[0].name);
+					promise.then(function (response) {
+						vm.packages = [];
+						console.log(response);
+						for (i = 0, length = response.data.length; i < length; i += 1) {
+							vm.packages.push(packages[0]);
+							vm.packages[0].completedByPretty = prettyDate(new Date(vm.packages[0].completedBy));
+						}
+					});
+				});
 			}
 		});
 
-		$scope.$watch("vm.subContractor", function (newValue) {
+		$scope.$watch("vm.subContractorIndex", function (newValue) {
 			vm.addSubContractorDisabled = !angular.isDefined(newValue);
 		});
 
-		$scope.$watch("vm.userRole", function (newValue) {
-			if (newValue === "mainContractor") {
-				vm.userIsTheMainContractor = true;
-				vm.userIsASubContractor = false;
-				vm.summaryTitle = "Summary";
-				vm.inviteTitle = "Invite";
-				vm.showInput = true;
-			}
-			else if (newValue === "subContractor") {
-				vm.userIsTheMainContractor = false;
-				vm.userIsASubContractor = true;
-				vm.summaryTitle = "Summary";
-				vm.inviteTitle = "Bid Status";
-				vm.showInput = false;
-			}
-		});
-
-		$scope.$watch("vm.response", function () {
-			vm.response.statusIcon = getStatusIcon(vm.response.status);
-			vm.response.selected = false;
-			vm.response.completed_by_pretty = prettyDate(new Date(vm.response.completed_by));
-			vm.response.date_invited_pretty = prettyDate(new Date(vm.response.date_invited));
-			if (vm.response.date_responded !== null) {
-				vm.response.date_responded_pretty = prettyDate(new Date(vm.response.date_responded));
-			}
-			if (vm.response.date_answered !== null) {
-				vm.response.date_answered_pretty = prettyDate(new Date(vm.response.date_answered));
+		$scope.$watch("vm.userIsAMainContractor", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				if (newValue) {
+					vm.summaryTitle = "Summary";
+					vm.inviteTitle = "Invite";
+					vm.showInput = true;
+				}
+				else {
+					vm.summaryTitle = "Summary";
+					vm.inviteTitle = "Bid Status";
+					vm.showInput = false;
+				}
 			}
 		});
 
@@ -126,7 +139,6 @@
 			vm.saveDisabled = true;
 			promise = BidService.addPackage(data);
 			promise.then(function (response) {
-				console.log(response);
 				vm.showInfo = true;
 				vm.saveDisabled = (response.statusText === "OK");
 				if (vm.saveDisabled) {
@@ -140,18 +152,19 @@
 			});
 		};
 
-		vm.addSubContractor = function () {
-			var i, length, index;
-			for (i = 0, length = vm.subContractors.length; i < length; i += 1) {
-				if (vm.subContractors[i].name === vm.subContractor) {
-					index = i;
-					break;
+		vm.inviteSubContractor = function () {
+			var data = {
+				user: vm.subContractors[vm.subContractorIndex].name
+			};
+			promise = BidService.inviteSubContractor(vm.selectedPackage.name, data);
+			promise.then(function (response) {
+				if (response.statusText === "OK") {
+					vm.invitedSubContractors.push(vm.subContractors[vm.subContractorIndex]);
+					vm.invitedSubContractors[vm.invitedSubContractors.length - 1].invitedIcon = "fa fa-circle-thin";
+					vm.notInvitedSubContractors.splice(vm.subContractorIndex, 1);
+					vm.subContractor = undefined;
 				}
-			}
-			vm.invitedSubContractors.push(vm.subContractors[index]);
-			vm.invitedSubContractors[vm.invitedSubContractors.length - 1].invitedIcon = "fa fa-circle-thin";
-			vm.subContractors.splice(index, 1);
-			vm.subContractor = undefined;
+			});
 		};
 
 		vm.changeAssignIcon = function (index) {
@@ -167,32 +180,96 @@
 		};
 
 		vm.acceptInvite = function (accept) {
-			vm.responded = true;
-			vm.response = {
-				date_invited: 1464091380000,
-				date_responded: (new Date()),
-				date_answered: null,
-				status: accept ? "accepted" : "declined"
-			};
-		};
-
-		vm.acceptSubContractor = function (index) {
-			var i, length;
-			for (i = 0, length = vm.chosenSubContractors.length; i < length; i += 1) {
-				if (vm.chosenSubContractors[i].status === "accepted") {
-					vm.chosenSubContractors[i].statusIcon = (i === index) ? getStatusIcon("won") : getStatusIcon("lost");
-					vm.chosenSubContractors[i].accepted = false;
-				}
+			if (accept) {
+				promise = BidService.acceptInvite(vm.selectedPackage.name);
+				promise.then(function (response) {
+					if (response.statusText === "OK") {
+						console.log(response);
+						vm.responded = true;
+						vm.response = {
+							status: accept ? "accepted" : "declined"
+						};
+					}
+				});
 			}
 		};
 
+		vm.awardToSubContractor = function (index) {
+			var i, length;
+			promise = BidService.awardBid(vm.selectedPackage.name, vm.invitedSubContractors[index]._id);
+			promise.then(function (response) {
+				if (response.statusText === "OK") {
+					console.log(response);
+					for (i = 0, length = vm.invitedSubContractors.length; i < length; i += 1) {
+						if (vm.invitedSubContractors[i].status === "accepted") {
+							vm.invitedSubContractors[i].statusIcon = (i === index) ? getStatusIcon("won") : getStatusIcon("lost");
+							//vm.invitedSubContractors[i].accepted = false;
+						}
+					}
+				}
+			});
+		};
+
 		vm.showPackage = function (index) {
+			var i, j, lengthI, lengthJ;
 			vm.showInput = false;
+			vm.showSummary = true;
+			vm.showStatus = true;
+			vm.packageNotAwarded = true;
 			vm.selectedPackage = vm.packages[index];
+			if (vm.userIsAMainContractor) {
+				promise = BidService.getBids(vm.selectedPackage.name);
+				promise.then(function (response) {
+					if (response.statusText === "OK") {
+						vm.notInvitedSubContractors = JSON.parse(JSON.stringify(vm.subContractors));
+						vm.invitedSubContractors = response.data;
+						for (i = 0, lengthI = vm.invitedSubContractors.length; i < lengthI; i += 1) {
+
+							if (vm.invitedSubContractors[i].awarded) {
+								vm.packageNotAwarded = false;
+								vm.invitedSubContractors[i].invitedIcon = getStatusIcon("won");
+							}
+							else {
+								vm.invitedSubContractors[i].invitedIcon = getStatusIcon(vm.invitedSubContractors[i].accepted ? "accepted" : "declined");
+							}
+
+							for (j = 0, lengthJ = vm.notInvitedSubContractors.length; j < lengthJ; j += 1) {
+								if (vm.notInvitedSubContractors[j].user === vm.invitedSubContractors[i].user) {
+									vm.notInvitedSubContractors.splice(j, 1);
+									break;
+								}
+							}
+						}
+					}
+				});
+			}
+			else {
+				promise = BidService.getUserBids(vm.selectedPackage.name);
+				promise.then(function (response) {
+					var statusText, statusIcon;
+					if (response.statusText === "OK") {
+						console.log(response);
+						vm.responded = (response.data.accepted !== null);
+						if (response.data.awarded) {
+							statusIcon = getStatusIcon("won");
+							statusText = "Won";
+						}
+						else {
+							statusIcon = getStatusIcon(vm.invitedSubContractors[i].accepted ? "accepted" : "declined");
+							statusText = (response.data.accepted ? "Accepted" : "Declined");
+						}
+						vm.response = {
+							statusText: statusText,
+							statusIcon: statusIcon
+						};
+					}
+				});
+			}
 		};
 
 		vm.setupAddPackage = function () {
 			vm.showInput = true;
+			vm.showSummary = false;
 		};
 
 		function prettyDate (date) {

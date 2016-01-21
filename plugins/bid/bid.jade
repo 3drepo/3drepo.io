@@ -13,11 +13,11 @@
 			.md-toolbar-tools
 				h2 Packages
 				span(flex)
-				md-button.md-icon-button(aria-label="Add Package", ng-click="vm.setupAddPackage()")
+				md-button.md-icon-button(aria-label="Add Package", ng-click="vm.setupAddPackage()", ng-if="vm.userIsAMainContractor")
 					md-icon(class="fa fa-plus")
 		.bidPackageListContent
 			md-content(layout-padding)
-				md-list
+				md-list()
 					md-list-item(ng-repeat="package in vm.packages", ng-click="vm.showPackage($index)")
 						p {{package.name}}
 
@@ -46,7 +46,7 @@
 					.cardInfo(ng-if="vm.showInfo")
 						p {{vm.info}}
 
-				div(ng-if="!vm.showInput")
+				div(ng-if="vm.showSummary")
 					md-list
 						md-list-item
 							p(flex="30") Name
@@ -67,22 +67,23 @@
 				h2
 					span {{vm.inviteTitle}}
 		.bidInviteContent
-			md-content(layout-padding)
+			md-content(layout-padding, ng-if="vm.showStatus")
 				// Main Contractor
-				div(ng-if="vm.userIsTheMainContractor")
+				div(ng-if="vm.userIsAMainContractor")
 					div(ng-if="!vm.showInput")
-						div(layout="row" layout-align="space-between start")
+						div(layout="row" layout-align="space-between start", ng-if="vm.packageNotAwarded")
 							md-input-container.md-block(flex="80")
 								label Sub Contractors
-								md-select(ng-model="vm.subContractor")
-									md-option(ng-repeat="subContractor in vm.subContractors", value="{{subContractor.name}}")
-										| {{subContractor.name}}
-							md-button.md-accent(ng-click="vm.addSubContractor()", ng-disabled="vm.addSubContractorDisabled") Add
+								md-select(ng-model="vm.subContractorIndex")
+									md-option(ng-repeat="subContractor in vm.notInvitedSubContractors", value="{{$index}}")
+										| {{subContractor.user}}
+							md-button.md-accent(ng-click="vm.inviteSubContractor()", ng-disabled="vm.addSubContractorDisabled") Add
 						div
 							md-subheader.md-no-sticky Invited
 							md-list-item(ng-repeat="invited in vm.invitedSubContractors")
-								md-icon(ng-class="invited.invitedIcon")
-								//p(ng-click="vm.changeAssignIcon($index)") {{invited.name}}
+								md-icon(flex="5", ng-class="invited.invitedIcon")
+								p(flex="30") {{invited.user}}
+								md-button.md-accent(flex="10", ng-if="invited.accepted", ng-click="vm.awardToSubContractor($index)") Award
 					//div(ng-if="!vm.showInput")
 						md-list-item(ng-repeat="subContractor in vm.chosenSubContractors")
 							md-icon(flex="5", ng-class="subContractor.statusIcon")
@@ -90,19 +91,21 @@
 							md-button.md-accent(ng-if="subContractor.accepted", ng-click="vm.acceptSubContractor($index)") Accept
 
 				// Sub Contractor
-				div(ng-if="vm.userIsASubContractor")
+				div(ng-if="!vm.userIsAMainContractor")
 					div(ng-if="!vm.responded")
 						md-button.md-accent(ng-click="vm.acceptInvite(true)") Accept
 						md-button.md-accent(ng-click="vm.acceptInvite(false)") Decline
 
 					div(ng-if="vm.responded")
-						md-icon(ng-class="vm.response.statusIcon")
 						md-list-item
+							p(flex="20") {{vm.response.statusText}}
+							md-icon(ng-class="vm.response.statusIcon")
+						//md-list-item
 							p(flex="20") Invited
 							p(flex="80") {{vm.response.date_invited_pretty}}
-						md-list-item
+						//md-list-item
 							p(flex="20") Responded
 							p(flex="80") {{vm.response.date_responded_pretty}}
-						md-list-item
+						//md-list-item
 							p(flex="20") Result
 							p(flex="80") {{vm.response.date_answered_pretty}}

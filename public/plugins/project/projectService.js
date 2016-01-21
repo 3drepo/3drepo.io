@@ -21,9 +21,9 @@
 	angular.module('3drepo')
 		.factory('ProjectService', ProjectService);
 
-	ProjectService.$inject = ["$http", "$q", "StateManager", "serverConfig"];
+	ProjectService.$inject = ["$http", "$q", "StateManager", "serverConfig", "Auth"];
 
-	function ProjectService($http, $q, StateManager, serverConfig) {
+	function ProjectService($http, $q, StateManager, serverConfig, Auth) {
 		var state = StateManager.state;
 
 		var getRoles = function () {
@@ -43,8 +43,44 @@
 			return deferred.promise;
 		};
 
+		var getUserRolesForProject = function () {
+			var deferred = $q.defer(),
+				url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + Auth.username + "/userRolesForProject.json");
+
+			$http.get(url)
+				.then(
+					function(response) {
+						deferred.resolve(response.data);
+					},
+					function () {
+						deferred.resolve([]);
+					}
+				);
+
+			return deferred.promise;
+		};
+
+		var getUserRoles = function (account, project) {
+			var deferred = $q.defer(),
+				url = serverConfig.apiUrl(account + "/" + project + "/" + Auth.username + "/userRolesForProject.json");
+
+			$http.get(url)
+				.then(
+					function(response) {
+						deferred.resolve(response.data);
+					},
+					function () {
+						deferred.resolve([]);
+					}
+				);
+
+			return deferred.promise;
+		};
+
 		return {
-			getRoles: getRoles
+			getRoles: getRoles,
+			getUserRolesForProject: getUserRolesForProject,
+			getUserRoles: getUserRoles
 		};
 	}
 }());

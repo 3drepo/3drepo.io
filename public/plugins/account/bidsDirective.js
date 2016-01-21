@@ -32,66 +32,64 @@
 		};
 	}
 
-	BidsCtrl.$inject = ["$scope"];
+	BidsCtrl.$inject = ["$scope", "AccountData", "BidService", "ProjectService"];
 
-	function BidsCtrl($scope) {
-		var vm = this;
+	function BidsCtrl($scope, AccountData, BidService, ProjectService) {
+		var vm = this,
+			projectUserRolesPromise;
 
+		vm.AccountData = AccountData;
 		vm.userIsASubContractor = false;
-		vm.invitedProjects = [
-			{
-				name: "Revit_House",
-				status: "won",
-				budget: 45023,
-				site: "Wood Lane",
-				completed_by: 1464091380000,
-				date_invited: 1464091380000,
-				date_responded: 1464091380000,
-				date_answered: 1464091380000
-			},
-			{
-				name: "Camden_Hotel",
-				status: "lost",
-				budget: 105023,
-				site: "Camden Square",
-				completed_by: 1467460980000,
-				date_invited: 1467460980000,
-				date_responded: 1467460980000,
-				date_answered: 1467460980000
-			},
-			{
-				name: "Hollywood_Swimming_Pool",
-				status: "accepted",
-				budget: 905000,
-				site: "Hollywood",
-				completed_by: 1504353780000,
-				date_invited: 1504353780000,
-				date_responded: 1504353780000,
-				date_answered: null
-			},
-			{
-				name: "Mars_Settlement",
-				status: "declined",
-				budget: 905000,
-				site: "Mars",
-				completed_by: 1504353780000,
-				date_invited: 1504353780000,
-				date_responded: 1504353780000,
-				date_answered: null
-			},
-			{
-				name: "Mumbia_Ditch",
-				status: "invited",
-				budget: 5,
-				site: "Mumbai",
-				completed_by: 1455453720000,
-				date_invited: 1455453720000,
-				date_responded: null,
-				date_answered: null
-			}
-		];
 		vm.projectSelected = false;
 
+		$scope.$watch("vm.AccountData", function (newValue, oldValue) {
+			var i, length, promise;
+
+			if (newValue.projects.length !== oldValue.projects.length) {
+				// Get type of role
+				projectUserRolesPromise = ProjectService.getUserRoles(vm.AccountData.projects[0].account, vm.AccountData.projects[0].project);
+				projectUserRolesPromise.then(function (data) {
+					var i, length;
+					for (i = 0, length = data.length; i < length; i += 1) {
+						if (data[i] === "MC") {
+							vm.userIsAMainContractor = true;
+							break;
+						}
+						else if (data[i] === "SC") {
+							vm.userIsAMainContractor = false;
+							break;
+						}
+						else {
+							vm.userIsAMainContractor = true;
+						}
+					}
+					if (vm.userIsAMainContractor) {
+						promise = BidService.getProjectPackage(vm.AccountData.projects[0].account, vm.AccountData.projects[0].project);
+						promise.then(function (response) {
+							console.log(response);
+							vm.AccountData.projects[0].packages = response.data;
+						});
+					}
+					else {
+						// Dummy code waiting for API
+						vm.AccountData.projects[0].packages = [];
+						promise = BidService.getProjectPackage(vm.AccountData.projects[0].account, vm.AccountData.projects[0].project);
+						promise.then(function (response) {
+							var packages = response.data;
+							promise = BidService.getProjectUserBids(
+								vm.AccountData.projects[0].account,
+								vm.AccountData.projects[0].project,
+								packages[0].name);
+							promise.then(function (response) {
+								vm.AccountData.projects[0].packages.push({name: response.data.packageName});
+							});
+						});
+					}
+				});
+			}
+		}, true);
+
+		/*
 		$scope.$watch("vm.invitedProjects", function (newValue) {
 			var i, length, date;
 			for (i = 0, length = newValue.length; i < length; i += 1) {
@@ -141,6 +139,7 @@
 			vm.invitedProjects[vm.selectedProjectIndex].date_responded_pretty =
 				prettyDate(vm.invitedProjects[vm.selectedProjectIndex].date_responded);
 		};
+		 */
 
 		var prettyDate = function (date) {
 			return date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
