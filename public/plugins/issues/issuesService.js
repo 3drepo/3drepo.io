@@ -62,12 +62,15 @@
 						hours = 12;
 					}
 				}
-				prettyTime = hours + ":" + date.getMinutes() + postFix;
+
+				prettyTime = hours + ":" + ("0" + date.getMinutes).slice(-2) + postFix;
 			} else if (date.getFullYear() === currentDate.getFullYear()) {
 				prettyTime = date.getDate() + " " + monthToText[date.getMonth()];
 			} else {
-				prettyTime = monthToText[date.getMonth()] + " '" + (currentDate.getFullYear()).toString().slice(-2);
+				prettyTime = monthToText[date.getMonth()] + " '" + (date.getFullYear()).toString().slice(-2);
 			}
+
+
 
 			return prettyTime;
 		};
@@ -90,6 +93,8 @@
 									}
 								}
 							}
+
+							data.data[i].title = data.data[i].typePrefix + "." + data.data[i].number + " " + data.data[i].name;
 						}
 					},
 					function () {

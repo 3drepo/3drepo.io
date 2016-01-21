@@ -1604,78 +1604,90 @@ DBInterface.prototype.getIssues = function(dbName, project, branch, revision, on
 
 		// var sids = Object.keys(SIDMap);
 
-		self.getObjectIssues(dbName, project, null, null, onlyStubs, function (err, docs) {
-			if (err.value) {
+		self.getProjectSettings(dbName, project, function(err, settings) {
+			if (err.value)
+			{
 				return callback(err);
 			}
 
-			var collatedDocs = docs;
-
-			// Now search for all federated issues
-			self.getFederatedProjectList(dbName, project, branch, revision, function (err, refs) {
+			self.getObjectIssues(dbName, project, null, null, onlyStubs, settings[0].type, function (err, docs) {
 				if (err.value) {
 					return callback(err);
 				}
 
-				// If there are no federated projects
-				if (!refs.length)
-				{
-					return callback(responseCodes.OK, docs);
-				}
+				var collatedDocs = docs;
 
-				async.concat(refs, function (item, iter_callback) {
-					var childDbName  = item.owner ? item.owner : dbName;
-					var childProject = item.project;
-
-					var unique = ("unique" in item) ? item.unique : false;
-
-					var childRevision, childBranch;
-
-					if ("_rid" in item)
-					{
-						if (unique)
-						{
-							childRevision = uuidToString(item._rid);
-							childBranch   = null;
-						} else {
-							childRevision = null;
-							childBranch   = uuidToString(item._rid);
-						}
-					} else {
-						childBranch   = "master";
-						childRevision = null;
-					}
-
-					self.getSIDMap(childDbName, childProject, childBranch, childRevision, function (err) {
-						if (err.value) {
-							return iter_callback(err);
-						}
-
-						// var sids = Object.keys(SIDMap);
-
-						// For all federated child projects get a list of shared IDs
-						self.getObjectIssues(childDbName, childProject, null, null, onlyStubs, function (err, objIssues) {
-							if (err.value) {
-								return iter_callback(err);
-							}
-
-							iter_callback(null, objIssues);
-						});
-					});
-				},
-				function (err, results) {
-					if (err) {
+				// Now search for all federated issues
+				self.getFederatedProjectList(dbName, project, branch, revision, function (err, refs) {
+					if (err.value) {
 						return callback(err);
 					}
 
-					callback(responseCodes.OK, collatedDocs.concat(results));
+					// If there are no federated projects
+					if (!refs.length)
+					{
+						return callback(responseCodes.OK, docs);
+					}
+
+					async.concat(refs, function (item, iter_callback) {
+						var childDbName  = item.owner ? item.owner : dbName;
+						var childProject = item.project;
+
+						var unique = ("unique" in item) ? item.unique : false;
+
+						var childRevision, childBranch;
+
+						if ("_rid" in item)
+						{
+							if (unique)
+							{
+								childRevision = uuidToString(item._rid);
+								childBranch   = null;
+							} else {
+								childRevision = null;
+								childBranch   = uuidToString(item._rid);
+							}
+						} else {
+							childBranch   = "master";
+							childRevision = null;
+						}
+
+						self.getProjectSettings(childDbName, childProject, function (err, settings) {
+							if (err.value)
+							{
+								return callback(err);
+							}
+
+							self.getSIDMap(childDbName, childProject, childBranch, childRevision, function (err) {
+								if (err.value) {
+									return iter_callback(err);
+								}
+
+								// For all federated child projects get a list of shared IDs
+								self.getObjectIssues(childDbName, childProject, null, null, onlyStubs, settings[0].type, function (err, objIssues) {
+									if (err.value) {
+										return iter_callback(err);
+									}
+
+									iter_callback(null, objIssues);
+								});
+							});
+						})
+					},
+					function (err, results) {
+						if (err) {
+							return callback(err);
+						}
+
+						callback(responseCodes.OK, collatedDocs.concat(results));
+					});
 				});
 			});
 		});
 	});
 };
 
-DBInterface.prototype.getObjectIssues = function(dbName, project, sids, number, onlyStubs, callback) {
+DBInterface.prototype.getObjectIssues = function(dbName, project, sids, number, onlyStubs, typePrefix, callback) {
 	if (sids !== null && sids.constructor !== Array) {
 		sids = [sids];
 	}
@@ -1708,10 +1720,11 @@ DBInterface.prototype.getObjectIssues = function(dbName, project, sids, number, 
 		if (err.value) { return callback(err); }
 
 		for(var i = 0; i < docs.length; i++) {
-			docs[i]._id     = uuidToString(docs[i]._id);
-			docs[i].parent  = uuidToString(docs[i].parent);
-			docs[i].account = dbName;
-			docs[i].project = project;
+			docs[i]._id        = uuidToString(docs[i]._id);
+			docs[i].typePrefix = typePrefix;
+			docs[i].parent     = uuidToString(docs[i].parent);
+			docs[i].account    = dbName;
+			docs[i].project    = project;
 		}
 
 		return callback(responseCodes.OK, docs);
@@ -2479,6 +2492,33 @@ DBInterface.prototype.getRoleSettings = function(dbName, roles, callback)
 		return callback(responseCodes.OK, docs);
 	});
 };
+
+/*******************************************************************************
+ * Get settings for a particular project
+ *
+ * @param {string} dbName - Database name which holds the project
+ * @param {string} projectName - Name of the project you want settings for
+ * @param {function} callback - function to return the list of roles
+ ******************************************************************************/
+DBInterface.prototype.getProjectSettings = function(dbName, projectName, callback)
+{
+	"use strict";
+	var self = this;
+
+	var filter = {
+		"_id" : projectName
+	};
+
+	dbConn(self.logger).filterColl(dbName, "settings", filter, {}, function (err, settings) {
+		if (err.value)
+		{
+			return callback(err);
+		}
+
+		console.log(JSON.stringify(settings));
+		callback(responseCodes.OK, settings);
+	});
+}
 
 DBInterface.prototype.getUserRolesForProject = function(database, project, username, callback)
 {

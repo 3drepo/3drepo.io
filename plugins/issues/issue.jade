@@ -2,7 +2,7 @@
 	.issueHeader
 		md-list-item.md-2-line.issueTitle(ng-click="vm.toggleComments()")
 			div.md-list-item-text
-				h3 &#35;{{vm.data.number}} {{vm.data.name}}
+				h3 {{vm.data.title}}
 				.issueTitleInfo(layout="row" layout-align="space-between center")
 					p {{vm.data.owner}}
 					p {{vm.data.timeStamp}}
