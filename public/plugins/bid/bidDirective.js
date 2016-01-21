@@ -154,7 +154,7 @@
 
 		vm.inviteSubContractor = function () {
 			var data = {
-				user: vm.subContractors[vm.subContractorIndex].name
+				user: vm.notInvitedSubContractors[vm.subContractorIndex].user
 			};
 			promise = BidService.inviteSubContractor(vm.selectedPackage.name, data);
 			promise.then(function (response) {
@@ -230,7 +230,7 @@
 								vm.invitedSubContractors[i].invitedIcon = getStatusIcon("won");
 							}
 							else {
-								vm.invitedSubContractors[i].invitedIcon = getStatusIcon(vm.invitedSubContractors[i].accepted ? "accepted" : "declined");
+								vm.invitedSubContractors[i].invitedIcon = getStatusIcon(vm.invitedSubContractors[i].accepted ? "accepted" : "invited");
 							}
 
 							for (j = 0, lengthJ = vm.notInvitedSubContractors.length; j < lengthJ; j += 1) {
@@ -255,7 +255,7 @@
 							statusText = "Won";
 						}
 						else {
-							statusIcon = getStatusIcon(vm.invitedSubContractors[i].accepted ? "accepted" : "declined");
+							statusIcon = getStatusIcon(vm.invitedSubContractors[i].accepted ? "accepted" : "invited");
 							statusText = (response.data.accepted ? "Accepted" : "Declined");
 						}
 						vm.response = {
