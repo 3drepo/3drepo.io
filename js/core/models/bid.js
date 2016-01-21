@@ -65,13 +65,17 @@ schema.statics.findByUser = function(dbColOptions, user){
 	return Bid.findOne(dbColOptions, {user});
 }
 
+schema.methods.responded = function(){
+	return this.accepted !== null;
+}
+
 schema.methods.award = function(){
 
 	return Bid.count(this._dbcolOptions, { packageName: this.packageName, awarded: true }).then(count => {
 		if (count > 0){
 			return Promise.reject({ resCode: responseCode.PACKAGE_AWARDED});
 		} else if (!this.accepted) {
-			return Promise.reject({ resCode: responseCode.BID_NOT_ACCEPTED});
+			return Promise.reject({ resCode: responseCode.BID_NOT_ACCEPTED_OR_DECLINED});
 		} else {
 
 			this.awarded = true;

@@ -21,8 +21,10 @@ router.get('/bids.json', /*middlewares.isMainContractor, */ listBids);
 router.post('/bids/:id/award', /*middlewares.isMainContractor, */ awardBid);
 // get My bid (SC)
 router.get('/bids/mine.json', /*middlewares.isSubContractorInvited, */ findMyBid);
-// accept bid (sc)
+// accept bid (sc) //to be replaced by /bids/mine/invitation
 router.post('/bids/mine/accept', /*middlewares.isSubContractorInvited, */ acceptMyBid);
+// accept/decline bid (sc)
+router.post('/bids/mine/invitation', /*middlewares.isSubContractorInvited, */ replyMyBid);
 // update my bid (sc)
 router.put('/bids/mine.json', /*middlewares.isSubContractorInvited, */ updateMyBid);
 
@@ -140,8 +142,8 @@ function acceptMyBid(req, res, next){
 
 	_getMyBid(req).then(bid => {
 		
-		if(bid.accepted) {
-			return Promise.reject({ resCode: responseCodes.BID_ALREADY_ACCEPTED })
+		if(bid.responded()) {
+			return Promise.reject({ resCode: responseCodes.BID_ALREADY_ACCEPTED_OR_DECLINED })
 		} else {
 			bid.accepted = true;
 			bid.acceptedOn = new Date();
@@ -157,6 +159,34 @@ function acceptMyBid(req, res, next){
 
 }
 
+function replyMyBid(req, res, next){
+	'use strict';
+
+	let place = '/:account/:project/packages/:package/bids/mine/invitation POST';
+
+	_getMyBid(req).then(bid => {
+		
+		if(bid.responded()) {
+			return Promise.reject({ resCode: responseCodes.BID_ALREADY_ACCEPTED_OR_DECLINED })
+		} else {
+
+			if (typeof req.body.accept !== 'boolean'){
+				return Promise.reject({ resCode: responseCodes.MONGOOSE_VALIDATION_ERROR({ message: 'accept must be true or false'}) })
+			} else {
+				bid.accepted = req.body.accept;
+				bid.acceptedOn = new Date();
+				return bid.save();
+			}
+			
+		}
+
+	}).then(bid => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, bid);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
 
 function updateMyBid(req, res, next){
 	'use strict';
@@ -165,8 +195,8 @@ function updateMyBid(req, res, next){
 
 	_getMyBid(req).then(bid => {
 		
-		if (!bid.accepted){
-			return Promise.reject({ resCode: responseCodes.BID_NOT_ACCEPTED})
+		if (bid.responded()){
+			return Promise.reject({ resCode: responseCodes.BID_NOT_ACCEPTED_OR_DECLINED})
 		} else  {
 			let whitelist = ['budget'];
 			bid = utils.writeCleanedBodyToModel(whitelist, req.body, bid);

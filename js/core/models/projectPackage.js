@@ -53,6 +53,8 @@ schema.post('save', function(doc){
 
 var defaultProjection = { __v: 0, user: 0};
 
+schema.statics.defaultProjection = defaultProjection;
+
 // Model statics method
 schema.statics.findByName = function(dbColOptions, name){
 	return ProjectPackage.findOne(dbColOptions, {name}, defaultProjection);

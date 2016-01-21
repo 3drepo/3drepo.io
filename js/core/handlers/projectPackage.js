@@ -78,7 +78,7 @@ function listPackages(req, res, next){
 
 	let place = '/:account/:project/packages.json GET';
 
-	ProjectPackage.find(getDbColOptions(req)).then(projectPackages => {
+	ProjectPackage.find(getDbColOptions(req),{}, ProjectPackage.defaultProjection).then(projectPackages => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, projectPackages);
 	}).catch(err => {
 		let errCode = utils.mongoErrorToResCode(err);
