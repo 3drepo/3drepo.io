@@ -14,19 +14,19 @@ module.exports = router;
 router.use(middlewares.loggedIn);
 
 // Create a bid
-router.post('/bids.json', /*middlewares.isMainContractor, */ createBid);
+router.post('/bids.json', middlewares.isMainContractor,  createBid);
 // List bids
-router.get('/bids.json', /*middlewares.isMainContractor, */ listBids);
+router.get('/bids.json', middlewares.isMainContractor,  listBids);
 // Award bid
-router.post('/bids/:id/award', /*middlewares.isMainContractor, */ awardBid);
+router.post('/bids/:id/award', middlewares.isMainContractor,  awardBid);
 // get My bid (SC)
-router.get('/bids/mine.json', /*middlewares.isSubContractorInvited, */ findMyBid);
+router.get('/bids/mine.json', middlewares.isSubContractorInvited, findMyBid);
 // accept bid (sc) //to be replaced by /bids/mine/invitation
-router.post('/bids/mine/accept', /*middlewares.isSubContractorInvited, */ acceptMyBid);
+router.post('/bids/mine/accept', middlewares.isSubContractorInvited, acceptMyBid);
 // accept/decline bid (sc)
-router.post('/bids/mine/invitation', /*middlewares.isSubContractorInvited, */ replyMyBid);
+router.post('/bids/mine/invitation', middlewares.isSubContractorInvited, replyMyBid);
 // update my bid (sc)
-router.put('/bids/mine.json', /*middlewares.isSubContractorInvited, */ updateMyBid);
+router.put('/bids/mine.json', middlewares.isSubContractorInvited, updateMyBid);
 
 
 

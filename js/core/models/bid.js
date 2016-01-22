@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var ModelFactory = require('./modelFactory');
+var ModelFactory = require('./factory/modelFactory');
 var ProjectPackage = require('./projectPackage');
 var responseCode = require('../response_codes');
 var C = require('../constants.js');

@@ -2716,6 +2716,37 @@ DBInterface.prototype.getUserPrivileges = function (username, database, callback
 
 DBInterface.prototype.uuidToString = uuidToString;
 
+
+/* for test helper API */
+DBInterface.prototype.createMainContractorRole = function(targetDb, project){
+
+	return dbConn(this.logger).getDB(targetDb).then(db => {
+		return db.command({ 
+
+			createRole: "MainContractor",
+			privileges: [{
+				resource: { 
+					db: targetDb, collection:  `${project}.packages`
+				}, 
+				actions: [ "find", "update", "insert", "remove" ] 
+			}],
+			roles: []
+		});
+	});
+};
+
+/* for test helper API */
+DBInterface.prototype.grantUserMainContractorRole = function(user, targetDb){
+	
+	return dbConn(this.logger).getDB('admin').then(db => {
+		return db.command({ 
+
+			grantRolesToUser: user,
+			roles: [{ role: 'MainContractor', db: targetDb}]
+		});
+	});
+};
+
 module.exports = function(logger) {
 	"use strict";
 

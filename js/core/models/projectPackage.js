@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var ModelFactory = require('./modelFactory');
+var ModelFactory = require('./factory/modelFactory');
 var C = require('../constants.js');
 
 var schema = mongoose.Schema({

@@ -26,6 +26,7 @@ module.exports.app = function (sharedSession) {
 	let config = require("../js/core/config.js");
 	let compress = require("compression");
 
+	let systemLogger = log_iface.systemLogger;
 	// Attach the encoders to the router
 	require("../js/core/encoders/x3dom_encoder.js").route(routes);
 	require("../js/core/encoders/json_encoder.js").route(routes);
@@ -50,10 +51,11 @@ module.exports.app = function (sharedSession) {
 
 		DB.getDB('default').then( db => {
 			// set db to singleton modelFactory class
-			require('../js/core/models/modelFactory').setDB(db);
+			require('../js/core/models/factory/modelFactory').setDB(db);
 			next();
 		}).catch( err => {
-			responseCodes.respond('Express Middleware', req, res, next, responseCodes.DB_ERROR, err);
+			console.log(err);
+			responseCodes.respond('Express Middleware', req, res, next, responseCodes.PROCESS_ERROR(err), err);
 		});
 	});
 
@@ -96,10 +98,18 @@ module.exports.app = function (sharedSession) {
 	}
 
 	app.use(sharedSession);
+	// test helpers
+	if(config.test_helper_api){
+		systemLogger.logDebug("Adding Test helper API");
+		app.use('/tests', require('../js/core/handlers/testHelper'));
+	}
+	
+
 	// project package handlers
 	app.use('/:account/:project', require('../js/core/handlers/projectPackage'));
 	// bid hanlders
 	app.use('/:account/:project/packages/:packageName', require('../js/core/handlers/bid'));
+
 	app.use("/", routes.router);
 
 

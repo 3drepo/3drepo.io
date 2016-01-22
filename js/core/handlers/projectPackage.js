@@ -20,11 +20,11 @@ var getDbColOptions = function(req){
 router.use(middlewares.loggedIn);
 
 // Create a package
-router.post('/packages.json', /*middlewares.isMainContractor, */ createPackage);
+router.post('/packages.json', middlewares.isMainContractor,  createPackage);
 // Get all packages
-router.get('/packages.json', /*middlewares.isMainContractor, */ listPackages);
+router.get('/packages.json', middlewares.isMainContractor, listPackages);
 // Get a package by name
-router.get('/packages/:packageName.json', /*hasReadPackageAccess, */ findPackage);
+router.get('/packages/:packageName.json', hasReadPackageAccess, findPackage);
 
 
 
