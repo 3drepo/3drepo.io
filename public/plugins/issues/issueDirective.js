@@ -181,12 +181,18 @@
 		function setAssignedRolesColors () {
 			var i = 0, length = 0;
 
+            var pinColours = [];
+
 			vm.assignedRolesColors = [];
 			for (i = 0, length = vm.roles.length; i < length; i += 1) {
 				if (vm.data.assigned_roles.indexOf(vm.roles[i].role) !== -1) {
-					vm.assignedRolesColors.push(NewIssuesService.getRoleColor(vm.roles[i].role));
+                    var roleColour = NewIssuesService.getRoleColor(vm.roles[i].role);
+					vm.assignedRolesColors.push(roleColour);
+                    pinColours.push(NewIssuesService.hexToRgb(roleColour));
 				}
 			}
+
+            NewIssuesService.changePinColour(vm.data._id, pinColours);
 		}
 
 		// A user with the same role as the issue creator_role or

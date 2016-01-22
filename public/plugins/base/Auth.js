@@ -82,7 +82,7 @@ angular.module('3drepo')
 		})
 		.error(function(data, status) {
 			self.username = null;
-			self.userRoles = data.roles;
+			self.userRoles = null;
 			self.loggedIn = false;
 
 			if (status === 401)

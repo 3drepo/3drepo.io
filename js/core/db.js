@@ -57,7 +57,7 @@ var MongoDBObject = function()
 		if(err) {
 			var dbError = responseCodes.DB_ERROR(err);
 			systemLogger.logError(dbError);
-			throw Error(dbError);
+			throw Error(JSON.stringify(dbError));
 		}
 
 		self.authDB = dbConn;
@@ -484,15 +484,15 @@ MongoWrapper.prototype.getRolesByDatabase = function(dbName, readWriteAny, callb
 
 		for (var i = 0; i < docs.length; i++)
 		{
-			if (docs[i]["privileges"].length)
+			if (docs[i].privileges.length)
 			{
 				if (readWriteAny !== C.REPO_ANY)
 				{
-					var validActions= docs[i]["privileges"][0]["actions"];
+					var validActions= docs[i].privileges[0].actions;
 					var privilegeType = 0;
 
-					if (validActions.indexOf("find") !== -1) { privilegeType |= 1; };
-					if (validActions.indexOf("insert") !== -1) { privilegeType |= 2; };
+					if (validActions.indexOf("find") !== -1) { privilegeType |= 1; }
+					if (validActions.indexOf("insert") !== -1) { privilegeType |= 2; }
 
 					if (privilegeType === readWriteAny)
 					{
@@ -522,7 +522,7 @@ MongoWrapper.prototype.getRolesByProject = function(dbName, project, readWriteAn
 	var filter = {};
 
 	// Get all roles which have permissions on this project
-	filter["privileges"] = { $elemMatch : { "resource.collection" : project + ".history" } };
+	filter.privileges = { $elemMatch : { "resource.collection" : project + ".history" } };
 
 	self.filterColl(dbName, collection, filter, {}, function (err, docs) {
 		if (err.value)
@@ -534,15 +534,15 @@ MongoWrapper.prototype.getRolesByProject = function(dbName, project, readWriteAn
 
 		for (var i = 0; i < docs.length; i++)
 		{
-			if (docs[i]["privileges"].length)
+			if (docs[i].privileges.length)
 			{
 				if (readWriteAny !== C.REPO_ANY)
 				{
-					var validActions= docs[i]["privileges"][0]["actions"];
+					var validActions= docs[i].privileges[0].actions;
 					var privilegeType = 0;
 
-					if (validActions.indexOf("find") !== -1) { privilegeType |= 1; };
-					if (validActions.indexOf("insert") !== -1) { privilegeType |= 2; };
+					if (validActions.indexOf("find") !== -1) { privilegeType |= 1; }
+					if (validActions.indexOf("insert") !== -1) { privilegeType |= 2; }
 
 					if (privilegeType === readWriteAny)
 					{
@@ -598,10 +598,10 @@ MongoWrapper.prototype.getUserRolesForProject = function(database, project, user
 			return callback(err);
 		}
 
-		var projectRoleNames = projectRoles.map(function(projectRole) { return projectRole["_id"]; });
+		var projectRoleNames = projectRoles.map(function(projectRole) { return projectRole._id; });
 
 		self.getUserRoles(username, database, function(err, userRoles) {
-			var userRoleNames = userRoles.map(function(userRole) { return userRole["_id"]; });
+			var userRoleNames = userRoles.map(function(userRole) { return userRole._id; });
 			var rolesToReturn = [];
 
 			for(var i = 0; i < userRoleNames.length; i++)
@@ -632,9 +632,9 @@ MongoWrapper.prototype.getRoles = function (database, username, full, callback) 
 	var self = this;
 
 	var dbName = "admin";
-	var collName = "system.users";
-	var filter = {};
-	var rolesToReturn = [];
+	// var collName = "system.users";
+	// var filter = {};
+	// var rolesToReturn = [];
 
 	// If the username is supplied, start by getting the roles just for this user
 	if (username)
@@ -647,14 +647,14 @@ MongoWrapper.prototype.getRoles = function (database, username, full, callback) 
 			}
 
 			var roleNames = userRoles.map( function (userRole) {
-				return userRole["_id"].replace(".history", "");
+				return userRole._id.replace(".history", "");
 			});
 
 			self.getRoleSettings(database, roleNames, function(err, roleSettings)
 			{
 				for (var i = 0; i < roleNames.length; i++)
 				{
-					delete roleSettings[i]["_id"]; // Delete the ID attach to the settings
+					delete roleSettings[i]._id; // Delete the ID attach to the settings
 					_.extend(userRoles[i], roleSettings[i]);
 				}
 
@@ -670,14 +670,14 @@ MongoWrapper.prototype.getRoles = function (database, username, full, callback) 
 			}
 
 			var roleNames = dbRoles.map( function (dbRole) {
-				return dbRole["_id"].replace(".history", "");
+				return dbRole._id.replace(".history", "");
 			});
 
 			self.getRoleSettings(database, roleNames, function(err, roleSettings)
 			{
 				for (var i = 0; i < roleNames.length; i++)
 				{
-					delete roleSettings[i]["_id"]; // Delete the ID attach to the settings
+					delete roleSettings[i]._id; // Delete the ID attach to the settings
 					_.extend(dbRoles[i], roleSettings[i]);
 				}
 

@@ -11,6 +11,8 @@ certs
 public/dist/plugins.concat.js
 public/dist/plugins.min.js
 
+public/images/loginPage
+
 .DS_Store
 
 sessions

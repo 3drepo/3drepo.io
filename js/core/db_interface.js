@@ -665,7 +665,7 @@ DBInterface.prototype.getProjectUsers = function(account, project, callback) {
 };
 
 DBInterface.prototype.checkUserPermission = function (username, account, project, callback) {
-    
+
     // var self = this;
     dbConn(this.logger).getUserPrivileges(username, account, function (status, privileges) {
         if (status.value) {
@@ -1249,7 +1249,7 @@ DBInterface.prototype.getHeadOf = function(dbName, project, branch, getFunc, cal
 		if (!doc.length){
 			return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
 		}
-			
+
 
 		getFunc.call(self, dbName, project, uuidToString(doc[0]._id), function(err, doc) {
 			if(err.value) {
@@ -2378,15 +2378,15 @@ DBInterface.prototype.getRolesByDatabase = function(dbName, readWriteAny, callba
 
 		for (var i = 0; i < docs.length; i++)
 		{
-			if (docs[i]["privileges"].length)
+			if (docs[i].privileges.length)
 			{
 				if (readWriteAny !== C.REPO_ANY)
 				{
-					var validActions= docs[i]["privileges"][0]["actions"];
+					var validActions= docs[i].privileges[0].actions;
 					var privilegeType = 0;
 
-					if (validActions.indexOf("find") !== -1) { privilegeType |= 1; };
-					if (validActions.indexOf("insert") !== -1) { privilegeType |= 2; };
+					if (validActions.indexOf("find") !== -1) { privilegeType |= 1; }
+					if (validActions.indexOf("insert") !== -1) { privilegeType |= 2; }
 
 					if (privilegeType === readWriteAny)
 					{
@@ -2419,8 +2419,8 @@ DBInterface.prototype.getRolesByProject = function(dbName, project, readWriteAny
 
 	// Get all roles which have permissions on this project
 
-	filter["db"] = { $in : ["admin", dbName] };
-	filter["privileges"] = {
+	filter.db = { $in : ["admin", dbName] };
+	filter.privileges = {
 		$elemMatch : { "resource.collection" : project + ".history" }
 	};
 
@@ -2434,15 +2434,15 @@ DBInterface.prototype.getRolesByProject = function(dbName, project, readWriteAny
 
 		for (var i = 0; i < docs.length; i++)
 		{
-			if (docs[i]["privileges"].length)
+			if (docs[i].privileges.length)
 			{
 				if (readWriteAny !== C.REPO_ANY)
 				{
-					var validActions= docs[i]["privileges"][0]["actions"];
+					var validActions= docs[i].privileges[0].actions;
 					var privilegeType = 0;
 
-					if (validActions.indexOf("find") !== -1) { privilegeType |= 1; };
-					if (validActions.indexOf("insert") !== -1) { privilegeType |= 2; };
+					if (validActions.indexOf("find") !== -1) { privilegeType |= 1; }
+					if (validActions.indexOf("insert") !== -1) { privilegeType |= 2; }
 
 					if (privilegeType === readWriteAny)
 					{
@@ -2461,8 +2461,15 @@ DBInterface.prototype.getRolesByProject = function(dbName, project, readWriteAny
 			});
 			self.getRoleSettings(dbName, roles, function (err, roleSettings) {
 				if (roleSettings.length > 0) {
-					for (i = 0; i < roleSettings.length; i += 1) {
-						rolesToReturn[i].color = roleSettings[i].color;
+					var roleSettingsMap = {};
+
+					for(let i = 0; i < roleSettings.length; i++)
+					{
+						roleSettingsMap[roleSettings[i]._id] = roleSettings[i];
+					}
+
+					for (let i = 0; i < rolesToReturn.length; i++) {
+						rolesToReturn[i].color = roleSettingsMap[rolesToReturn[i].role].color;
 					}
 				}
 				return callback(responseCodes.OK, rolesToReturn);
@@ -2518,10 +2525,10 @@ DBInterface.prototype.getUserRolesForProject = function(database, project, usern
 			return callback(err);
 		}
 
-		var projectRoleNames = projectRoles.map(function(projectRole) { return projectRole["role"]; });
+		var projectRoleNames = projectRoles.map(function(projectRole) { return projectRole.role; });
 
 		self.getUserRoles(username, database, function(err, userRoles) {
-			var userRoleNames = userRoles.map(function(userRole) { return userRole["role"]; });
+			var userRoleNames = userRoles.map(function(userRole) { return userRole.role; });
 			var rolesToReturn = [];
 
 			for(var i = 0; i < userRoleNames.length; i++)
@@ -2552,9 +2559,9 @@ DBInterface.prototype.getRoles = function (database, username, full, callback) {
 	var self = this;
 
 	var dbName = "admin";
-	var collName = "system.users";
-	var filter = {};
-	var rolesToReturn = [];
+	// var collName = "system.users";
+	// var filter = {};
+	// var rolesToReturn = [];
 
 	// If the username is supplied, start by getting the roles just for this user
 	if (username)
@@ -2567,14 +2574,14 @@ DBInterface.prototype.getRoles = function (database, username, full, callback) {
 			}
 
 			var roleNames = userRoles.map( function (userRole) {
-				return userRole["_id"].replace(".history", "");
+				return userRole._id.replace(".history", "");
 			});
 
 			self.getRoleSettings(database, roleNames, function(err, roleSettings)
 			{
 				for (var i = 0; i < roleNames.length; i++)
 				{
-					delete roleSettings[i]["_id"]; // Delete the ID attach to the settings
+					delete roleSettings[i]._id; // Delete the ID attach to the settings
 					_.extend(userRoles[i], roleSettings[i]);
 				}
 
@@ -2590,14 +2597,14 @@ DBInterface.prototype.getRoles = function (database, username, full, callback) {
 			}
 
 			var roleNames = dbRoles.map( function (dbRole) {
-				return dbRole["_id"].replace(".history", "");
+				return dbRole._id.replace(".history", "");
 			});
 
 			self.getRoleSettings(database, roleNames, function(err, roleSettings)
 			{
 				for (var i = 0; i < roleNames.length; i++)
 				{
-					delete roleSettings[i]["_id"]; // Delete the ID attach to the settings
+					delete roleSettings[i]._id; // Delete the ID attach to the settings
 					_.extend(dbRoles[i], roleSettings[i]);
 				}
 
@@ -2622,7 +2629,7 @@ DBInterface.prototype.getUserRoles = function (username, database, callback) {
 	var self = this;
 
 	var dbName = "admin";
-	var collName = "system.users"
+	var collName = "system.users";
 	var filter = { "user" : username };
 
 	//only return roles in admin and the specified database, the rest are irrelevant.
@@ -2633,21 +2640,22 @@ DBInterface.prototype.getUserRoles = function (username, database, callback) {
 			return callback(err);
 		}
 
-		if (docs.length != 1) {
+		if (docs.length !== 1) {
 			self.logger.logError("Unexpected number of documents found in getUserRoles(). size:" + docs.length);
 			return callback(responseCodes.USER_NOT_FOUND, docs);
 		}
 
+		var roles;
 		if (database)
 		{
-			var roles = [];
-			for (let i = 0; i < docs[0]["roles"].length; i++) {
-				if (docs[0]["roles"][i]["db"] == dbName || docs[0]["roles"][i]["db"] == database) {
-					roles.push(docs[0]["roles"][i]);
+			roles = [];
+			for (let i = 0; i < docs[0].roles.length; i++) {
+				if (docs[0].roles[i].db === dbName || docs[0].roles[i].db === database) {
+					roles.push(docs[0].roles[i]);
 				}
 			}
 		} else {
-			roles = docs[0]["roles"];
+			roles = docs[0].roles;
 		}
 
 		callback(responseCodes.OK, roles);
@@ -2674,7 +2682,7 @@ DBInterface.prototype.getUserPrivileges = function (username, database, callback
                 return callback(responseCodes.DB_ERROR(status));
             }
 
-            if (!roles || roles.length == 0) {
+            if (!roles || roles.length === 0) {
                 //no roles under this user, no point trying to find privileges
                 return callback(responseCodes.OK, []);
         }
@@ -2687,16 +2695,16 @@ DBInterface.prototype.getUserPrivileges = function (username, database, callback
                     return callback(responseCodes.DB_ERROR(err));
                 }
 
-                if (!docs || docs["roles"].length == 0) {
+                if (!docs || docs.roles.length === 0) {
                     //No privileges return empty array
                     return callback(responseCodes.OK, []);
                 }
 
-                var rolesArr = docs["roles"];
+                var rolesArr = docs.roles;
                 var privileges = [];
 
                 for (i = 0; i < rolesArr.length; i++) {
-                    privileges = privileges.concat(rolesArr[i]["inheritedPrivileges"]);
+                    privileges = privileges.concat(rolesArr[i].inheritedPrivileges);
                 }
                 self.logger.logDebug(privileges.length + "privileges found.");
                 callback(responseCodes.OK, privileges);
