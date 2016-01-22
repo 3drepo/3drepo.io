@@ -2486,7 +2486,7 @@ DBInterface.prototype.getRoleSettings = function(dbName, roles, callback)
 	dbConn(self.logger).filterColl(dbName, "settings.roles", filter, {}, function (err, docs) {
 		if (err.value)
 		{
-			return callback(responseCodes.DB_ERROR(err), []);
+			return callback(err, []);
 		}
 
 		return callback(responseCodes.OK, docs);
@@ -2683,9 +2683,9 @@ DBInterface.prototype.getUserPrivileges = function (username, database, callback
     var adminDB = "admin";
 
     //First get all the roles this user is granted within the databases of interest
-     self.getUserRoles(username, database, function (status, roles) {
+     self.getUserRoles(username, database, function (err, roles) {
             if (status.value) {
-                return callback(responseCodes.DB_ERROR(status));
+                return callback(err);
             }
 
             if (!roles || roles.length === 0) {
