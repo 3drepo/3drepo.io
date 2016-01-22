@@ -29,3 +29,9 @@ home .logoutButton {
   margin: 0;
   color: rgba(0, 0, 0, 0.7);
 }
+.cardInfo md-icon {
+  margin: 0;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}

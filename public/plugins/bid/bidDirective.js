@@ -39,6 +39,7 @@
 			promise, projectUserRolesPromise;
 
 		vm.StateManager = StateManager;
+		vm.Auth = Auth;
 		vm.subContractors = [
 			{user: "Pinakin"},
 			{user: "Carmen"},
@@ -48,7 +49,8 @@
 		vm.invitedSubContractors = [];
 		vm.addSubContractorDisabled = true;
 		vm.responded = false;
-		vm.showStatus = false;
+		vm.packageSelected = false;
+		vm.statusInfo = "No package currently selected";
 
 		// Get type of role
 		projectUserRolesPromise = ProjectService.getUserRolesForProject();
@@ -73,8 +75,16 @@
 				promise.then(function (response) {
 					var i, length;
 					vm.packages = response.data;
-					for (i = 0, length = vm.packages.length; i < length; i += 1) {
-						vm.packages[i].completedByPretty = prettyDate(new Date(vm.packages[i].completedBy));
+					if (vm.packages.length === 0) {
+						vm.summaryInfo = "There are no packages for this project";
+						vm.statusInfo = "There are no packages for this project";
+					}
+					else {
+						vm.summaryInfo = "No packages currently selected";
+						vm.statusInfo = "No packages currently selected";
+						for (i = 0, length = vm.packages.length; i < length; i += 1) {
+							vm.packages[i].completedByPretty = prettyDate(new Date(vm.packages[i].completedBy));
+						}
 					}
 				});
 			}
@@ -86,10 +96,19 @@
 					promise = BidService.getBids(packages[0].name);
 					promise.then(function (response) {
 						vm.packages = [];
-						console.log(response);
 						for (i = 0, length = response.data.length; i < length; i += 1) {
-							vm.packages.push(packages[0]);
-							vm.packages[0].completedByPretty = prettyDate(new Date(vm.packages[0].completedBy));
+							if (Auth.username === response.data[i].user) {
+								vm.packages.push(packages[0]);
+								vm.packages[0].completedByPretty = prettyDate(new Date(vm.packages[0].completedBy));
+							}
+						}
+						if (vm.packages.length === 0) {
+							vm.summaryInfo = "There are no packages for this project";
+							vm.statusInfo = "There are no packages for this project";
+						}
+						else {
+							vm.summaryInfo = "No packages currently selected";
+							vm.statusInfo = "No packages currently selected";
 						}
 					});
 				});
@@ -153,15 +172,24 @@
 		};
 
 		vm.inviteSubContractor = function () {
+			var i, length, index;
+
+			for (i = 0, length = vm.notInvitedSubContractors.length; i < length; i += 1) {
+				if (vm.notInvitedSubContractors[i].user === vm.subContractors[vm.subContractorIndex].user) {
+					index = i;
+					break;
+				}
+			}
 			var data = {
-				user: vm.notInvitedSubContractors[vm.subContractorIndex].user
+				user: vm.notInvitedSubContractors[index].user
 			};
 			promise = BidService.inviteSubContractor(vm.selectedPackage.name, data);
 			promise.then(function (response) {
 				if (response.statusText === "OK") {
-					vm.invitedSubContractors.push(vm.subContractors[vm.subContractorIndex]);
+					vm.notInvitedSubContractors[index].accepted = null;
+					vm.invitedSubContractors.push(vm.notInvitedSubContractors[index]);
 					vm.invitedSubContractors[vm.invitedSubContractors.length - 1].invitedIcon = "fa fa-circle-thin";
-					vm.notInvitedSubContractors.splice(vm.subContractorIndex, 1);
+					vm.notInvitedSubContractors.splice(index, 1);
 					vm.subContractor = undefined;
 				}
 			});
@@ -184,7 +212,6 @@
 				promise = BidService.acceptInvite(vm.selectedPackage.name);
 				promise.then(function (response) {
 					if (response.statusText === "OK") {
-						console.log(response);
 						vm.responded = true;
 						vm.response = {
 							status: accept ? "accepted" : "declined"
@@ -199,10 +226,12 @@
 			promise = BidService.awardBid(vm.selectedPackage.name, vm.invitedSubContractors[index]._id);
 			promise.then(function (response) {
 				if (response.statusText === "OK") {
-					console.log(response);
+					vm.awarded = true;
+					vm.inviteTitle = "Status";
+					vm.invitedSubContractors[index].accepted = true;
 					for (i = 0, length = vm.invitedSubContractors.length; i < length; i += 1) {
-						if (vm.invitedSubContractors[i].status === "accepted") {
-							vm.invitedSubContractors[i].statusIcon = (i === index) ? getStatusIcon("won") : getStatusIcon("lost");
+						if (vm.invitedSubContractors[i].accepted) {
+							vm.invitedSubContractors[i].invitedIcon = (i === index) ? getStatusIcon("won") : getStatusIcon("lost");
 							//vm.invitedSubContractors[i].accepted = false;
 						}
 					}
@@ -214,23 +243,32 @@
 			var i, j, lengthI, lengthJ;
 			vm.showInput = false;
 			vm.showSummary = true;
-			vm.showStatus = true;
 			vm.packageNotAwarded = true;
 			vm.selectedPackage = vm.packages[index];
 			if (vm.userIsAMainContractor) {
 				promise = BidService.getBids(vm.selectedPackage.name);
 				promise.then(function (response) {
 					if (response.statusText === "OK") {
+						vm.packageSelected = true;
+						vm.awarded = false;
+						vm.inviteTitle = "Invite";
 						vm.notInvitedSubContractors = JSON.parse(JSON.stringify(vm.subContractors));
 						vm.invitedSubContractors = response.data;
 						for (i = 0, lengthI = vm.invitedSubContractors.length; i < lengthI; i += 1) {
 
-							if (vm.invitedSubContractors[i].awarded) {
-								vm.packageNotAwarded = false;
-								vm.invitedSubContractors[i].invitedIcon = getStatusIcon("won");
+							if (vm.invitedSubContractors[i].accepted === null) {
+								vm.invitedSubContractors[i].invitedIcon = getStatusIcon("invited");
 							}
 							else {
-								vm.invitedSubContractors[i].invitedIcon = getStatusIcon(vm.invitedSubContractors[i].accepted ? "accepted" : "invited");
+								if (vm.invitedSubContractors[i].awarded) {
+									vm.awarded = true;
+									vm.inviteTitle = "Status";
+									vm.packageNotAwarded = false;
+									vm.invitedSubContractors[i].invitedIcon = getStatusIcon("won");
+								}
+								else {
+									vm.invitedSubContractors[i].invitedIcon = getStatusIcon("lost");
+								}
 							}
 
 							for (j = 0, lengthJ = vm.notInvitedSubContractors.length; j < lengthJ; j += 1) {
@@ -248,26 +286,31 @@
 				promise.then(function (response) {
 					var statusText, statusIcon;
 					if (response.statusText === "OK") {
-						console.log(response);
-						vm.responded = (response.data.accepted !== null);
-						if (response.data.awarded) {
-							statusIcon = getStatusIcon("won");
-							statusText = "Won";
+						vm.packageSelected = true;
+						if (response.data.awarded === null) {
+							vm.awarded = false;
+						}
+						else if (response.data.awarded) {
+							vm.awarded = true;
+							vm.statusInfo = "This package has been awarded to you";
+							vm.awardIcon = getStatusIcon("won");
 						}
 						else {
-							statusIcon = getStatusIcon(vm.invitedSubContractors[i].accepted ? "accepted" : "invited");
-							statusText = (response.data.accepted ? "Accepted" : "Declined");
+							vm.awarded = true;
+							vm.statusInfo = "This package has been awarded";
+							vm.awardIcon = getStatusIcon("lost");
 						}
-						vm.response = {
-							statusText: statusText,
-							statusIcon: statusIcon
-						};
+
+						if (response.data.accepted !== null) {
+							vm.responded = true;
+						}
 					}
 				});
 			}
 		};
 
 		vm.setupAddPackage = function () {
+			vm.packageSelected = true; // Cheat :-)
 			vm.showInput = true;
 			vm.showSummary = false;
 		};

@@ -100,7 +100,7 @@ bid .bidInvite .bidInviteContent {
 bid .bidInvite .bidInviteContent md-list-item md-icon {
   font-size: 1.5em;
 }
-bid .bidInvite .bidInviteContent md-icon {
+bid .bidInvite .bidInviteIcon {
   font-size: 2em;
   margin: 15px;
 }
