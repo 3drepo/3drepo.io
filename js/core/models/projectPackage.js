@@ -16,18 +16,18 @@ schema.plugin(require('mongoose-timestamp'), {
 });
 
 schema.pre('save', function(next){
-	'use strict'
+	'use strict';
 
 	ProjectPackage.count(this._dbcolOptions, {name: this.name}).then(count => {
 		if(count > 0) {
 
 			let err = new Error('This package name has been taken');
-			err.name = 'ValidationError'
+			err.name = 'ValidationError';
 			next(err);
 		} else {
 			next();
 		}
-	})
+	});
 });
 
 schema.post('save', function(doc){
@@ -37,7 +37,7 @@ schema.post('save', function(doc){
 
 	let db = ModelFactory.db;
 	let database = 'admin';
-	let collection = 'system.users'
+	let collection = 'system.users';
 	let bid = {
 		role: C.REPO_ROLE_MAINCONTRACTOR,
 		account: doc._dbcolOptions.account,
@@ -62,7 +62,7 @@ schema.statics.defaultProjection = defaultProjection;
 // Model statics method
 schema.statics.findByName = function(dbColOptions, name){
 	return ProjectPackage.findOne(dbColOptions, {name}, defaultProjection);
-}
+};
 
 
 

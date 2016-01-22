@@ -21,12 +21,12 @@ schema.plugin(require('mongoose-timestamp'), {
 });
 
 schema.pre('save', function(next){
-	'use strict'
+	'use strict';
 	
 	ProjectPackage.count(this._dbcolOptions, {name: this.packageName}).then(count => {
 		if(count <= 0) {
 			let err = new Error('Package not found');
-			err.name = 'ValidationError'
+			err.name = 'ValidationError';
 
 			next(err);
 		} else {
@@ -47,7 +47,7 @@ schema.post('save', function(doc){
 
 	let db = ModelFactory.db;
 	let database = 'admin';
-	let collection = 'system.users'
+	let collection = 'system.users';
 	let bid = {
 		role: C.REPO_ROLE_SUBCONTRACTOR,
 		account: doc._dbcolOptions.account,
@@ -68,15 +68,15 @@ schema.post('save', function(doc){
 // Model statics method
 schema.statics.findByPackage = function(dbColOptions, packageName){
 	return Bid.find(dbColOptions, {packageName});
-}
+};
 
 schema.statics.findByUser = function(dbColOptions, user){
 	return Bid.findOne(dbColOptions, {user});
-}
+};
 
 schema.methods.responded = function(){
 	return this.accepted !== null;
-}
+};
 
 schema.methods.award = function(){
 
@@ -109,13 +109,13 @@ schema.methods.award = function(){
 				if (err){
 					reject(err);
 				} else {
-					resolve(bid)
+					resolve(bid);
 				}
 			});
 		});
 
 	});
-}
+};
 
 var Bid = ModelFactory.createClass(
 	'Bid', 

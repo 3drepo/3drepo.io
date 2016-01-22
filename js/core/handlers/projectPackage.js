@@ -1,20 +1,20 @@
 var express = require('express');
 var router = express.Router({mergeParams: true});
-var config = require("../config.js");
-var _ = require('lodash');
+// var config = require("../config.js");
+// var _ = require('lodash');
 var utils = require('../utils');
 var middlewares = require('./middlewares');
 
 var ProjectPackage = require('../models/projectPackage');
 var responseCodes = require('../response_codes');
-var Bid = require('../models/bid');
+// var Bid = require('../models/bid');
 
-var dbInterface     = require("../db_interface.js");
+// var dbInterface     = require("../db_interface.js");
 var C               = require("../constants");
 
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
-}
+};
 
 //Every API list below has to log in to access
 router.use(middlewares.loggedIn);

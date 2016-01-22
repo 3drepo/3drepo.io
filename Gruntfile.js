@@ -57,6 +57,7 @@ module.exports = function(grunt) {
                 varstmt: false,
                 strict: false,
                 esnext: true,
+                expr: true,
                 // options here to override JSHint defaults
                 globals: {
                     console: true,

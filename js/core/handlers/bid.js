@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router({mergeParams: true});
-var config = require("../config.js");
-var _ = require('lodash');
+// var config = require("../config.js");
+// var _ = require('lodash');
 var utils = require('../utils');
 var middlewares = require('./middlewares');
 
@@ -34,7 +34,7 @@ router.put('/bids/mine.json', /*middlewares.isSubContractorInvited, */ updateMyB
 
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
-}
+};
 
 function createBid(req, res, next) {
 	'use strict';
@@ -49,7 +49,7 @@ function createBid(req, res, next) {
 	}).then(count => {
 
 		if (count > 0) {
-			return Promise.reject({ resCode: responseCodes.USER_ALREADY_IN_BID})
+			return Promise.reject({ resCode: responseCodes.USER_ALREADY_IN_BID});
 		} else {
 
 			let bid = Bid.createInstance(getDbColOptions(req));
@@ -98,7 +98,7 @@ function awardBid(req, res, next){
 		responseCodes.respond(place, req, res, next, responseCodes.OK, bid);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	})
+	});
 
 }
 
@@ -143,7 +143,7 @@ function acceptMyBid(req, res, next){
 	_getMyBid(req).then(bid => {
 		
 		if(bid.responded()) {
-			return Promise.reject({ resCode: responseCodes.BID_ALREADY_ACCEPTED_OR_DECLINED })
+			return Promise.reject({ resCode: responseCodes.BID_ALREADY_ACCEPTED_OR_DECLINED });
 		} else {
 			bid.accepted = true;
 			bid.acceptedOn = new Date();
@@ -167,7 +167,7 @@ function replyMyBid(req, res, next){
 	_getMyBid(req).then(bid => {
 		
 		if(bid.responded()) {
-			return Promise.reject({ resCode: responseCodes.BID_ALREADY_ACCEPTED_OR_DECLINED })
+			return Promise.reject({ resCode: responseCodes.BID_ALREADY_ACCEPTED_OR_DECLINED });
 		} else {
 
 			// if (typeof req.body.accept !== 'boolean'){
@@ -196,7 +196,7 @@ function updateMyBid(req, res, next){
 	_getMyBid(req).then(bid => {
 		
 		if (bid.responded()){
-			return Promise.reject({ resCode: responseCodes.BID_NOT_ACCEPTED_OR_DECLINED})
+			return Promise.reject({ resCode: responseCodes.BID_NOT_ACCEPTED_OR_DECLINED});
 		} else  {
 			let whitelist = ['budget'];
 			bid = utils.writeCleanedBodyToModel(whitelist, req.body, bid);
@@ -211,8 +211,4 @@ function updateMyBid(req, res, next){
 
 }
 
-function checkPremission(req, res, next){
-
-	next();
-}
 

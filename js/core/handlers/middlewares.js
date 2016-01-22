@@ -7,7 +7,7 @@ var Bid = require('../models/bid');
 
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
-}
+};
 
 var middlewares = {
 
@@ -71,8 +71,8 @@ var middlewares = {
 			next();
 		}).catch(resCode => {
 			responseCodes.respond("Middleware: check is sub contractor invited", req, res, next, resCode, null, req.params);
-		})
+		});
 	}
-}
+};
 
 module.exports = middlewares;
