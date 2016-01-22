@@ -66,6 +66,8 @@ module.exports = {
 		callback_queue: 'callbackq',
 		upload_dir: 'uploads',
 		shared_storage: 'D:/sharedSpace/'
-	}
+	},
+
+	test_helper_api: false
 }
 

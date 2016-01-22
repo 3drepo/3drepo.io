@@ -64,7 +64,7 @@
 		vm.progressInfo = "Loading issues";
 		vm.showIssuesInfo = false;
 		vm.issuesInfo = "There are currently no open issues";
-		vm.avialableRoles = [];
+		vm.availableRoles = [];
 		vm.projectUserRoles = [];
 
 		promise = NewIssuesService.getIssues();
@@ -78,7 +78,7 @@
 
 		rolesPromise = NewIssuesService.getRoles();
 		rolesPromise.then(function (data) {
-			vm.avialableRoles = data;
+			vm.availableRoles = data;
 		});
 
 		projectUserRolesPromise = NewIssuesService.getUserRolesForProject();
@@ -396,57 +396,6 @@
 				vm.globalClickWatch = null;
 			}
 		}
-
-		/*
-		$(document).on("objectSelected", function(event, object, zoom) {
-			if (angular.isUndefined(object)) {
-				vm.selectedObjectId = null;
-				vm.pickedPos = null;
-				vm.pickedNorm = null;
-				NewIssuesService.removePin();
-			}
-			else {
-				if (object["multipart"])
-				{
-					var projectParts = object.id.split("__");
-
-					if (projectParts[0] === "model")
-					{
-						vm.pickedAccount = NewIssuesService.state.account;
-						vm.pickedProject = NewIssuesService.state.project;
-						vm.pickedTrans	 = $("#model__root")[0]._x3domNode.getCurrentTransform();
-					} else {
-						vm.pickedAccount = projectParts[0];
-						vm.pickedProject = projectParts[1];
-						vm.pickedTrans	 = $("#" + vm.pickedAccount + "__" + vm.pickedProject + "__root")[0]._x3domNode.getCurrentTransform();
-					}
-
-					vm.selectedObjectId = projectParts[projectParts.length - 1];
-				} else {
-					vm.selectedObjectId = object.getAttribute("DEF");
-				}
-			}
-		});
-		*/
-
-		$(document).on("partSelected", function(event, part, zoom) {
-			$scope.IssuesService.mapPromise.then(function () {
-				var projectParts = part.part.multiPart._xmlNode.id.split("__");
-
-				if (projectParts[0] === "model")
-				{
-					vm.pickedAccount = $scope.IssuesService.state.account;
-					vm.pickedProject = $scope.IssuesService.state.project;
-					vm.pickedTrans	 = $("#model__root")[0]._x3domNode.getCurrentTransform();
-				} else {
-					vm.pickedAccount = projectParts[0];
-					vm.pickedProject = projectParts[1];
-					vm.pickedTrans	 = $("#" + $scope.pickedAccount + "__" + $scope.pickedProject + "__root")[0]._x3domNode.getCurrentTransform();
-				}
-
-				vm.selectedObjectId = projectParts[projectParts.length - 1];
-			});
-		});
 
 		/*
 		 * When a pin is clicked that make sure the issue sidebar

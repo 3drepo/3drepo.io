@@ -1,12 +1,12 @@
 var express = require('express');
 var router = express.Router({mergeParams: true});
-var config = require("../config.js");
-var _ = require('lodash');
+// var config = require("../config.js");
+// var _ = require('lodash');
 var utils = require('../utils');
 var middlewares = require('./middlewares');
 
 var Bid = require('../models/bid');
-var resHelper = require('../response_codes');
+var responseCodes = require('../response_codes');
 var C = require("../constants");
 module.exports = router;
 
@@ -14,17 +14,19 @@ module.exports = router;
 router.use(middlewares.loggedIn);
 
 // Create a bid
-router.post('/bids.json', /*middlewares.isMainContractor, */ createBid);
+router.post('/bids.json', middlewares.isMainContractor,  createBid);
 // List bids
-router.get('/bids.json', /*middlewares.isMainContractor, */ listBids);
+router.get('/bids.json', middlewares.isMainContractor,  listBids);
 // Award bid
-router.post('/bids/:id/award', /*middlewares.isMainContractor, */ awardBid);
+router.post('/bids/:id/award', middlewares.isMainContractor,  awardBid);
 // get My bid (SC)
-router.get('/bids/mine.json', /*middlewares.isSubContractorInvited, */ findMyBid);
-// accept bid (sc)
-router.post('/bids/mine/accept', /*middlewares.isSubContractorInvited, */ acceptMyBid);
+router.get('/bids/mine.json', middlewares.isSubContractorInvited, findMyBid);
+// accept bid (sc) //to be replaced by /bids/mine/invitation
+router.post('/bids/mine/accept', middlewares.isSubContractorInvited, acceptMyBid);
+// accept/decline bid (sc)
+router.post('/bids/mine/invitation', middlewares.isSubContractorInvited, replyMyBid);
 // update my bid (sc)
-router.put('/bids/mine.json', /*middlewares.isSubContractorInvited, */ updateMyBid);
+router.put('/bids/mine.json', middlewares.isSubContractorInvited, updateMyBid);
 
 
 
@@ -32,7 +34,7 @@ router.put('/bids/mine.json', /*middlewares.isSubContractorInvited, */ updateMyB
 
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
-}
+};
 
 function createBid(req, res, next) {
 	'use strict';
@@ -47,7 +49,7 @@ function createBid(req, res, next) {
 	}).then(count => {
 
 		if (count > 0) {
-			return Promise.reject({ resCode: resHelper.USER_ALREADY_IN_BID})
+			return Promise.reject({ resCode: responseCodes.USER_ALREADY_IN_BID});
 		} else {
 
 			let bid = Bid.createInstance(getDbColOptions(req));
@@ -60,10 +62,10 @@ function createBid(req, res, next) {
 		}
 		
 	}).then(bid => {
-		resHelper.respond(place, req, res, next, resHelper.OK, bid);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, bid);
 
 	}).catch(err => {
-		resHelper.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 
 }
@@ -73,9 +75,9 @@ function listBids(req, res, next){
 	
 	let place = '/:account/:project/packages/:package/bids.json GET';
 	Bid.findByPackage(getDbColOptions(req), req.params.packageName).then(bids => {
-		resHelper.respond(place, req, res, next, resHelper.OK, bids);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, bids);
 	}).catch(err => {
-		resHelper.respond(place, req, res, next, utils.mongoErrorToResCode(err), err);
+		responseCodes.respond(place, req, res, next, utils.mongoErrorToResCode(err), err);
 	});
 }
 
@@ -87,16 +89,16 @@ function awardBid(req, res, next){
 
 	Bid.findById(getDbColOptions(req), req.params.id).then(bid => {
 		if (!bid){
-			return Promise.reject({ resCode: resHelper.BID_NOT_FOUND});
+			return Promise.reject({ resCode: responseCodes.BID_NOT_FOUND});
 		} else {
 			return bid.award();
 		}
 
 	}).then(bid => {
-		resHelper.respond(place, req, res, next, resHelper.OK, bid);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, bid);
 	}).catch(err => {
-		resHelper.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	})
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
 
 }
 
@@ -112,7 +114,7 @@ function _getMyBid(req){
 
 	return Bid.findByUser(getDbColOptions(req), username).then(bid => {
 		if (!bid) {
-			return Promise.reject({ resCode: resHelper.BID_NOT_FOUND});
+			return Promise.reject({ resCode: responseCodes.BID_NOT_FOUND});
 		} else {
 			return Promise.resolve(bid);
 		}
@@ -126,9 +128,9 @@ function findMyBid(req, res, next){
 
 
 	_getMyBid(req).then(bid => {
-		resHelper.respond(place, req, res, next, resHelper.OK, bid);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, bid);
 	}).catch(err => {
-		resHelper.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
 
@@ -140,8 +142,8 @@ function acceptMyBid(req, res, next){
 
 	_getMyBid(req).then(bid => {
 		
-		if(bid.accepted) {
-			return Promise.reject({ resCode: resHelper.BID_ALREADY_ACCEPTED })
+		if(bid.responded()) {
+			return Promise.reject({ resCode: responseCodes.BID_ALREADY_ACCEPTED_OR_DECLINED });
 		} else {
 			bid.accepted = true;
 			bid.acceptedOn = new Date();
@@ -150,11 +152,39 @@ function acceptMyBid(req, res, next){
 		}
 
 	}).then(bid => {
-		resHelper.respond(place, req, res, next, resHelper.OK, bid);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, bid);
 	}).catch(err => {
-		resHelper.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 
+}
+
+function replyMyBid(req, res, next){
+	'use strict';
+
+	let place = '/:account/:project/packages/:package/bids/mine/invitation POST';
+
+	_getMyBid(req).then(bid => {
+		
+		if(bid.responded()) {
+			return Promise.reject({ resCode: responseCodes.BID_ALREADY_ACCEPTED_OR_DECLINED });
+		} else {
+
+			// if (typeof req.body.accept !== 'boolean'){
+			// 	return Promise.reject({ resCode: responseCodes.MONGOOSE_VALIDATION_ERROR({ message: 'accept must be true or false'}) })
+			// } else {
+				bid.accepted = req.body.accept;
+				bid.acceptedOn = new Date();
+				return bid.save();
+			//}
+			
+		}
+
+	}).then(bid => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, bid);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
 }
 
 
@@ -165,8 +195,8 @@ function updateMyBid(req, res, next){
 
 	_getMyBid(req).then(bid => {
 		
-		if (!bid.accepted){
-			return Promise.reject({ resCode: resHelper.BID_NOT_ACCEPTED})
+		if (bid.responded()){
+			return Promise.reject({ resCode: responseCodes.BID_NOT_ACCEPTED_OR_DECLINED});
 		} else  {
 			let whitelist = ['budget'];
 			bid = utils.writeCleanedBodyToModel(whitelist, req.body, bid);
@@ -174,15 +204,11 @@ function updateMyBid(req, res, next){
 		}
 
 	}).then(bid => {
-		resHelper.respond(place, req, res, next, resHelper.OK, bid);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, bid);
 	}).catch(err => {
-		resHelper.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 
 }
 
-function checkPremission(req, res, next){
-
-	next();
-}
 

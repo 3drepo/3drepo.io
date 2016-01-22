@@ -1,30 +1,30 @@
 var express = require('express');
 var router = express.Router({mergeParams: true});
-var config = require("../config.js");
-var _ = require('lodash');
+// var config = require("../config.js");
+// var _ = require('lodash');
 var utils = require('../utils');
 var middlewares = require('./middlewares');
 
 var ProjectPackage = require('../models/projectPackage');
-var resHelper = require('../response_codes');
-var Bid = require('../models/bid');
+var responseCodes = require('../response_codes');
+// var Bid = require('../models/bid');
 
-var dbInterface     = require("../db_interface.js");
+// var dbInterface     = require("../db_interface.js");
 var C               = require("../constants");
 
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
-}
+};
 
 //Every API list below has to log in to access
 router.use(middlewares.loggedIn);
 
 // Create a package
-router.post('/packages.json', /*middlewares.isMainContractor, */ createPackage);
+router.post('/packages.json', middlewares.isMainContractor,  createPackage);
 // Get all packages
-router.get('/packages.json', /*middlewares.isMainContractor, */ listPackages);
+router.get('/packages.json', middlewares.isMainContractor, listPackages);
 // Get a package by name
-router.get('/packages/:packageName.json', /*hasReadPackageAccess, */ findPackage);
+router.get('/packages/:packageName.json', hasReadPackageAccess, findPackage);
 
 
 
@@ -40,12 +40,15 @@ function createPackage(req, res, next) {
 
 	projectPackage = utils.writeCleanedBodyToModel(whitelist, req.body, projectPackage);
 
+	//creator is main contractor
+	projectPackage.user = req.session[C.REPO_SESSION_USER].username;
+
 	projectPackage.save().then(projectPackage => {
-		resHelper.respond(place, req, res, next, resHelper.OK, projectPackage);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, projectPackage);
 
 	}).catch(err => {
 		let errCode = utils.mongoErrorToResCode(err);
-		resHelper.respond(place, req, res, next, errCode, err);
+		responseCodes.respond(place, req, res, next, errCode, err);
 
 	});
 
@@ -58,13 +61,13 @@ function findPackage(req, res, next){
 
 	ProjectPackage.findByName(getDbColOptions(req), req.params.packageName).then(projectPackage => {
 		if(projectPackage){
-			resHelper.respond(place, req, res, next, resHelper.OK, projectPackage);
+			responseCodes.respond(place, req, res, next, responseCodes.OK, projectPackage);
 		} else {
-			resHelper.respond(place, req, res, next, resHelper.PACKAGE_NOT_FOUND);
+			responseCodes.respond(place, req, res, next, responseCodes.PACKAGE_NOT_FOUND);
 		}
 	}).catch(err => {
 		let errCode = utils.mongoErrorToResCode(err);
-		resHelper.respond(place, req, res, next, errCode, err);
+		responseCodes.respond(place, req, res, next, errCode, err);
 
 	});
 	
@@ -75,11 +78,11 @@ function listPackages(req, res, next){
 
 	let place = '/:account/:project/packages.json GET';
 
-	ProjectPackage.find(getDbColOptions(req)).then(projectPackages => {
-		resHelper.respond(place, req, res, next, resHelper.OK, projectPackages);
+	ProjectPackage.find(getDbColOptions(req),{}, ProjectPackage.defaultProjection).then(projectPackages => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, projectPackages);
 	}).catch(err => {
 		let errCode = utils.mongoErrorToResCode(err);
-		resHelper.respond(place, req, res, next, errCode, err);
+		responseCodes.respond(place, req, res, next, errCode, err);
 
 	});
 	
@@ -99,7 +102,7 @@ function hasReadPackageAccess(req, res, next){
 	}).then(() => {
 		next();
 	}).catch(resCode => {
-		resHelper.respond("Middleware: check has read access", req, res, next, resCode, null, req.params);
+		responseCodes.respond("Middleware: check has read access", req, res, next, resCode, null, req.params);
 	});
 }
 

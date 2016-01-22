@@ -38,11 +38,11 @@ module.exports = {
 
 		this.__checkDb();
 
-		let model = mongoose.model(modelName);
+		let Model = mongoose.model(modelName);
 		
 		let data  = options && options.data || {};
 
-		let item = new model(data);
+		let item = new Model(data);
 		
 		item.collection = this.db.db(options.account).collection(this.__collectionName(modelName, options));
 
@@ -102,7 +102,7 @@ module.exports = {
 
 				// resetting the static collection
 				if (!options || !options.account){
-					throw new Error('account name (db) is missing')
+					throw new Error('account name (db) is missing');
 				}
 
 				let collection = self.db.db(options.account).collection(self.__collectionName(modelName, options));
@@ -128,7 +128,7 @@ module.exports = {
 
 					return Promise.resolve(items);
 				});
-			}
+			};
 		}
 
 		['find', 'findOne', 'count', 'distinct', 'where', 'findOneAndUpdate', 'findOneAndRemove'].forEach(staticFuncName => {
@@ -144,7 +144,7 @@ module.exports = {
 			args.unshift(options, { _id: id});
 
 			return mongooseModel.findOne.apply(mongooseModel, args);
-		}
+		};
 
 
 		let update = mongooseModel.update;
@@ -156,7 +156,7 @@ module.exports = {
 			args.shift();
 
 			update.apply(mongooseModel, args);
-		}
+		};
 
 		mongooseModel.prototype.model = modelName => {
 			let model = this.models[modelName].mongooseModel;

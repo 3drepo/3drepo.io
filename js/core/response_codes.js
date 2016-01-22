@@ -90,9 +90,9 @@ var responseCodes = {
 
 	PACKAGE_NOT_FOUND: {value: 43, message: 'Package not found', status: 404},
 	BID_NOT_FOUND: {value: 44, message: 'Bid not found', status: 404},
-	BID_ALREADY_ACCEPTED: {value : 45, message: 'Bid already accepted', status: 400},
+	BID_ALREADY_ACCEPTED_OR_DECLINED: {value : 45, message: 'Bid already accepted or declined', status: 400},
 	USER_ALREADY_IN_BID: {value: 46, message: 'User already has a bid created in this package', status: 400},
-	BID_NOT_ACCEPTED: {value: 47, message: 'Bid invitation is not yet accepted', status: 400},
+	BID_NOT_ACCEPTED_OR_DECLINED: {value: 47, message: 'Bid invitation is not yet accepted or is declined', status: 400},
 
 	PACKAGE_AWARDED :{ value: 48, message: 'This package has a winner already', status: 400},
 

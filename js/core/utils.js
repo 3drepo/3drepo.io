@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 var _ = require('lodash');
-var C = require("./constants");
-var resHelper = require('./response_codes');
 
 function Utils() {
     "use strict";
@@ -230,7 +228,7 @@ function Utils() {
       } else {
         return responseCodes.DB_ERROR(err);
       }
-    }
+    };
 
     /**
      * Clean req body and assign it to mongoose model
@@ -241,7 +239,6 @@ function Utils() {
      * @return {Object} updated mongoose model instance
      */
     this.writeCleanedBodyToModel = function(whitelist, dirtyBody, model){
-        'use strict';
 
         let cleanedReq = _.pick(dirtyBody, whitelist);
         _.forEach(cleanedReq, (value, key) => {
@@ -249,7 +246,7 @@ function Utils() {
         });
 
         return model;
-    }
+    };
 }
 
 module.exports = new Utils();
