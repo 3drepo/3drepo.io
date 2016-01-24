@@ -93,7 +93,7 @@ var responseCodes = {
 
 		return {
 			value: 1000,
-			message: mongoErr.toString(), //"[" + mongoErr["code"] + "] @ " + mongoErr["err"],
+			message: JSON.stringify(mongoErr),
 			dbErr: mongoErr,
 			status: 500
 		};

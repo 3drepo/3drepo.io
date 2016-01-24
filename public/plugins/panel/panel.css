@@ -31,8 +31,13 @@ panel #buttons .panelButtonGroup label {
 
 /** Panels ************************************************************************************************************/
 
+.active {
+	pointer-events: all;
+}
+
 #leftPanel {
   left: 0;
+  pointer-events: none;
 }
 #leftPanel #items {
   right: 0;
@@ -43,6 +48,7 @@ panel #buttons .panelButtonGroup label {
 
 #rightPanel {
   right: 0;
+  pointer-events: none;
 }
 #rightPanel #items {
   left: 0;
