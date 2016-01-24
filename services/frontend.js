@@ -47,11 +47,12 @@ module.exports.createApp = function(template)
 	let app = express();
 	let _ = require('lodash');
 
+	app.use(compress({level:9}));
+
 	app.use(bodyParser.urlencoded({
 		extended: true
 	}));
 	app.use(bodyParser.json());
-	app.use(compress());
 
 	app.set('views', './jade');
 	app.set('view_engine', 'jade');
@@ -211,7 +212,7 @@ module.exports.createApp = function(template)
 			params.pluginAngular[plugin].files	= [];
 
 			// Loop through the files to be loaded
-			
+
 			if(_.get(pluginConfig, 'files.jade'))
 			{
 				let nJadeFiles = pluginConfig.files.jade.length;
@@ -276,7 +277,7 @@ module.exports.createApp = function(template)
 					params.pluginCSS.push(cssFile);
 				}
 			}
-			
+
 
 			params.pluginLoaded.push(plugin);
 		}
