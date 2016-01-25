@@ -39,9 +39,11 @@ function($stateProvider, parentStates) {
 		return "login";
 	});
 }])
-.controller('LoginCtrl', ['$scope', 'StateManager', 'Auth', function($scope, StateManager, Auth)
+.controller('LoginCtrl', ['$scope', 'StateManager', 'Auth', 'serverConfig', function($scope, StateManager, Auth, serverConfig)
 {
 	$scope.user = { username: "", password: ""};
+
+	$scope.version = serverConfig.apiVersion;
 
 	$scope.login = function() {
 		Auth.login($scope.user.username, $scope.user.password).then(
