@@ -1742,124 +1742,136 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 			return callback(err);
 		}
 
-		if (!data._id) {
-			var newID = uuid.v1();
+		self.getProjectSettings(dbName, project, function(err, settings) {
+			if (err.value)
+			{
+				return callback(err);
+			}
 
-			self.logger.logDebug("Creating new issue " + newID + " for ID: " + id);
+			// Create new issue
+			if (!data._id) {
+				var newID = uuid.v1();
 
-			var projection = {};
-			projection[C.REPO_NODE_LABEL_SHARED_ID] = 1;
+				self.logger.logDebug("Creating new issue " + newID + " for ID: " + id);
 
-			self.getObject(dbName, project, id, null, null, false, projection, function(err, type, uid, fromStash, obj) {
-				if (err.value && err.value !== responseCodes.OBJECT_NOT_FOUND.value) {
-					return callback(err);
-				}
+				var projection = {};
+				projection[C.REPO_NODE_LABEL_SHARED_ID] = 1;
 
-				// TODO: Implement this using sequence counters
-				coll.count(function(err, numIssues) {
-					if (err) {
-						return callback(responseCodes.DB_ERROR(err));
+				self.getObject(dbName, project, id, null, null, false, projection, function(err, type, uid, fromStash, obj) {
+					if (err.value && err.value !== responseCodes.OBJECT_NOT_FOUND.value) {
+						return callback(err);
 					}
 
-					// This is a new issue
-					data._id     = stringToUUID(newID);
-					data.created = (new Date()).getTime();
-
-					if (obj)
-					{
-						data.parent  = obj.meshes[id][C.REPO_NODE_LABEL_SHARED_ID];
-					}
-
-					data.number  = numIssues + 1;
-
-					if (!data.name) {
-						data.name = "Issue" + data.number;
-					}
-
-					data.owner = owner;
-
-					coll.insert(data, function(err, count) {
+					// TODO: Implement this using sequence counters
+					coll.count(function(err, numIssues) {
 						if (err) {
 							return callback(responseCodes.DB_ERROR(err));
 						}
 
-						self.logger.logDebug("Updated " + count + " records.");
-						callback(responseCodes.OK, { account: dbName, project: project, issue_id : uuidToString(data._id), number : data.number, created : data.created, issue: data });
+						// This is a new issue
+						data._id     = stringToUUID(newID);
+						data.created = (new Date()).getTime();
+
+						if (obj)
+						{
+							data.parent  = obj.meshes[id][C.REPO_NODE_LABEL_SHARED_ID];
+						}
+
+						data.number  = numIssues + 1;
+
+						if (!data.name) {
+							data.name = "Issue" + data.number;
+						}
+
+						data.owner = owner;
+
+						coll.insert(data, function(err, count) {
+							if (err) {
+								return callback(responseCodes.DB_ERROR(err));
+							}
+
+							self.logger.logDebug("Updated " + count + " records.");
+
+							data.typePrefix  = settings[0].type;
+
+							callback(responseCodes.OK, { account: dbName, project: project, issue_id : uuidToString(data._id), number : data.number, created : data.created, issue: data });
+						});
 					});
 				});
-			});
-		} else {
-			self.logger.logDebug("Updating issue " + data._id);
+			} else {
+				self.logger.logDebug("Updating issue " + data._id);
 
-			data._id = stringToUUID(data._id);
+				data._id = stringToUUID(data._id);
 
-            timeStamp = (new Date()).getTime();
-			if (data.hasOwnProperty("comment")) {
-                if (data.hasOwnProperty("edit")) {
-                    updateQuery = {
-                        $set: {created: timeStamp}
-                    };
-                    updateQuery.$set["comments." + data.commentIndex + ".comment"] = data.comment;
-                }
-                else if (data.hasOwnProperty("delete")) {
-                    updateQuery = {
-                        $pull: {comments: {created: data.commentCreated}}
-                    };
-                }
-                else if (data.hasOwnProperty("set")) {
-                    updateQuery = {
-                        $set: {}
-                    };
-                    updateQuery.$set["comments." + data.commentIndex + ".set"] = true;
-                }
-                else {
-                    updateQuery = {
-                        $push: { comments: { owner: owner,  comment: data.comment, created: timeStamp} }
-                    };
-                }
-			}
-            else if (data.hasOwnProperty("closed")) {
-				if (data.closed) {
+				timeStamp = (new Date()).getTime();
+				if (data.hasOwnProperty("comment")) {
+					if (data.hasOwnProperty("edit")) {
+						updateQuery = {
+							$set: {created: timeStamp}
+						};
+						updateQuery.$set["comments." + data.commentIndex + ".comment"] = data.comment;
+					}
+					else if (data.hasOwnProperty("delete")) {
+						updateQuery = {
+							$pull: {comments: {created: data.commentCreated}}
+						};
+					}
+					else if (data.hasOwnProperty("set")) {
+						updateQuery = {
+							$set: {}
+						};
+						updateQuery.$set["comments." + data.commentIndex + ".set"] = true;
+					}
+					else {
+						updateQuery = {
+							$push: { comments: { owner: owner,  comment: data.comment, created: timeStamp} }
+						};
+					}
+				}
+				else if (data.hasOwnProperty("closed")) {
+					if (data.closed) {
+						updateQuery = {
+							$set: { closed: true, closed_time: (new Date()).getTime() }
+						};
+					}
+					else {
+						updateQuery = {
+							$set: { closed: false },
+							$unset: { closed_time: "" }
+						};
+					}
+				}
+				else if (data.hasOwnProperty("assigned_roles")) {
 					updateQuery = {
-						$set: { closed: true, closed_time: (new Date()).getTime() }
+						$set: { assigned_roles: data.assigned_roles}
 					};
 				}
 				else {
 					updateQuery = {
-						$set: { closed: false },
-						$unset: { closed_time: "" }
+						$set: { complete: data.complete, created: timeStamp }
 					};
 				}
-			}
-			else if (data.hasOwnProperty("assigned_roles")) {
-				updateQuery = {
-					$set: { assigned_roles: data.assigned_roles}
-				};
-			}
-			else {
-                updateQuery = {
-                    $set: { complete: data.complete, created: timeStamp }
-                };
-            }
 
-			coll.update({ _id : data._id}, updateQuery, function(err, count) {
-				if (err) { return callback(responseCodes.DB_ERROR(err)); }
+				coll.update({ _id : data._id}, updateQuery, function(err, count) {
+					if (err) { return callback(responseCodes.DB_ERROR(err)); }
 
-				self.logger.logDebug("Updated " + count + " records.");
-				callback(
-					responseCodes.OK,
-					{
-						account: dbName,
-						project: project,
-						issue: data,
-						issue_id : uuidToString(data._id),
-						number: data.number,
-						owner: owner,
-						created: timeStamp
-					}
-				);
-			});
-		}
+					self.logger.logDebug("Updated " + count + " records.");
+					callback(
+						responseCodes.OK,
+						{
+							account: dbName,
+							project: project,
+							issue: data,
+							issue_id : uuidToString(data._id),
+							number: data.number,
+							owner: owner,
+							typePrefix: settings.type,
+							created: timeStamp
+						}
+					);
+				});
+			}
+		});
 	});
 };
 
