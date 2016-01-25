@@ -63,16 +63,19 @@
 					}
 				}
 
-				prettyTime = hours + ":" + ("0" + date.getMinutes).slice(-2) + postFix;
+				prettyTime = hours + ":" + ("0" + date.getMinutes()).slice(-2) + postFix;
 			} else if (date.getFullYear() === currentDate.getFullYear()) {
 				prettyTime = date.getDate() + " " + monthToText[date.getMonth()];
 			} else {
 				prettyTime = monthToText[date.getMonth()] + " '" + (date.getFullYear()).toString().slice(-2);
 			}
 
-
-
 			return prettyTime;
+		};
+
+		var generateTitle = function(issue)
+		{
+			return issue.typePrefix + "." + issue.number + " " + issue.name;
 		};
 
 		var getIssues = function () {
@@ -94,7 +97,7 @@
 								}
 							}
 
-							data.data[i].title = data.data[i].typePrefix + "." + data.data[i].number + " " + data.data[i].name;
+							data.data[i].title = generateTitle(data.data[i]);
 						}
 					},
 					function () {
@@ -137,6 +140,7 @@
 					response.data.issue.timeStamp = getPrettyTime(response.data.issue.created);
 					response.data.issue.creator_role = issue.creator_role;
 
+					response.data.issue.title = generateTitle(response.data.issue);
 					removePin();
 					deferred.resolve(response.data.issue);
 				});
