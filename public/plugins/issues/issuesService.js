@@ -35,7 +35,8 @@
 			pinHeight = 1.0,
 			availableRoles = [],
 			userRoles = [],
-			shaderInitialized = false;
+			shaderInitialized = false,
+			highlightedPin = null;
 
 		// TODO: Internationalise and make globally accessible
 		var getPrettyTime = function(time) {
@@ -61,14 +62,20 @@
 						hours = 12;
 					}
 				}
-				prettyTime = hours + ":" + date.getMinutes() + postFix;
+
+				prettyTime = hours + ":" + ("0" + date.getMinutes()).slice(-2) + postFix;
 			} else if (date.getFullYear() === currentDate.getFullYear()) {
 				prettyTime = date.getDate() + " " + monthToText[date.getMonth()];
 			} else {
-				prettyTime = monthToText[date.getMonth()] + " '" + (currentDate.getFullYear()).toString().slice(-2);
+				prettyTime = monthToText[date.getMonth()] + " '" + (date.getFullYear()).toString().slice(-2);
 			}
 
 			return prettyTime;
+		};
+
+		var generateTitle = function(issue)
+		{
+			return issue.typePrefix + "." + issue.number + " " + issue.name;
 		};
 
 		var getIssues = function () {
@@ -89,6 +96,8 @@
 									}
 								}
 							}
+
+							data.data[i].title = generateTitle(data.data[i]);
 						}
 					},
 					function () {
@@ -131,6 +140,7 @@
 					response.data.issue.timeStamp = getPrettyTime(response.data.issue.created);
 					response.data.issue.creator_role = issue.creator_role;
 
+					response.data.issue.title = generateTitle(response.data.issue);
 					removePin();
 					deferred.resolve(response.data.issue);
 				});
@@ -202,7 +212,7 @@
 
             if ((typeof colours === "undefined") || (!colours.length))
             {
-                colours = [1.0, 1.0, 1.0];
+                colours = [0.5, 0.5, 0.5];
             }
 
 			if (typeof colours[0] === "number")
@@ -225,18 +235,46 @@
 			ghostMultiColoursField.setAttribute("value", colours.join(" "));
 		}
 
+		/*******************************************************************************
+		 * Highlight pin in the scene by ID
+		 *
+		 * @param {string} id - Unique ID of pin to highlight (null deselects all)
+		 ******************************************************************************/
+		function highlightPin(id) {
+			if (highlightedPin)
+			{
+				$("#" + highlightedPin + "_ishighlighted")[0].setAttribute("value", "false");
+				$("#" + highlightedPin + "_ghost_ishighlighted")[0].setAttribute("value", "false");
+				$("#" + highlightedPin + "_cone_ishighlighted")[0].setAttribute("value", "false");
+				$("#" + highlightedPin + "_cone_ghost_ishighlighted")[0].setAttribute("value", "false");
+
+				$("#" + highlightedPin + "_depth")[0].setAttribute("depthFunc", "LESS");
+				$("#" + highlightedPin + "_cone_depth")[0].setAttribute("depthFunc", "LESS");
+			}
+
+			if (id)
+			{
+				$("#" + id + "_ishighlighted")[0].setAttribute("value", "true");
+				$("#" + id + "_ghost_ishighlighted")[0].setAttribute("value", "true");
+				$("#" + id + "_cone_ishighlighted")[0].setAttribute("value", "true");
+				$("#" + id + "_cone_ghost_ishighlighted")[0].setAttribute("value", "true");
+
+				$("#" + id + "_depth")[0].setAttribute("depthFunc", "ALWAYS");
+				$("#" + id + "_cone_depth")[0].setAttribute("depthFunc", "ALWAYS");
+			}
+
+			highlightedPin = id;
+		}
+
 		function createBasicPinShape(id, parentElement, depthMode, colours, numColours, trans, radius, height, scale, ghostPin) {
+			var ORANGE_HIGHLIGHT = "1.0000 0.7 0.0";
+
 			var coneHeight = height - 2 * radius;
 			var pinshape = document.createElement("Group");
 			pinshape.setAttribute("onclick", "clickPin(event)");
 
 			var pinshapeapp = document.createElement("Appearance");
 			//pinshape.appendChild(pinshapeapp);
-
-			var pinshapedepth = document.createElement("DepthMode");
-			pinshapedepth.setAttribute("depthFunc", depthMode);
-			pinshapedepth.setAttribute("enableDepthTest", ghostPin);
-			pinshapeapp.appendChild(pinshapedepth);
 
 			var pinshapescale = document.createElement("Transform");
 			pinshapescale.setAttribute("scale", scale + " " + scale + " " + scale);
@@ -260,13 +298,50 @@
 
 			var coneApp = pinshapeapp.cloneNode(true);
 
+			var coneshader = document.createElement("ComposedShader");
+			coneApp.appendChild(coneshader);
+
 			var coneMat = document.createElement("Material");
 			coneMat.setAttribute("diffuseColor", "1.0 1.0 1.0");
-			coneMat.setAttribute("transparency", 1.0 - trans);
+			coneMat.setAttribute("transparency", trans);
 			coneApp.appendChild(coneMat);
 
-			pinshapeconeshape.appendChild(pinshapecone);
+			var conehighlight = document.createElement("field");
+			conehighlight.setAttribute("type", "SFVec3f");
+			conehighlight.setAttribute("name", "highlightColor");
+			conehighlight.setAttribute("value", ORANGE_HIGHLIGHT);
+			coneshader.appendChild(conehighlight);
+
+			var coneishighlighted = document.createElement("field");
+			coneishighlighted.setAttribute("id", id + "_cone" + (ghostPin ? "_ghost" : "") + "_ishighlighted");
+			coneishighlighted.setAttribute("type", "SFBool");
+			coneishighlighted.setAttribute("name", "highlightPin");
+			coneishighlighted.setAttribute("value", "false");
+			coneshader.appendChild(coneishighlighted);
+
+			var conevert = document.createElement("ShaderPart");
+			conevert.setAttribute("type","VERTEX");
+			conevert.setAttribute("USE", "noShadeVert");
+			coneshader.appendChild(conevert);
+
+			var conefrag = document.createElement("ShaderPart");
+			conefrag.setAttribute("type","FRAGMENT");
+			conefrag.setAttribute("USE", "noShadeFrag");
+			coneshader.appendChild(conefrag);
+
+			var conedepth = document.createElement("DepthMode");
+
+			if (!ghostPin)
+			{
+				conedepth.setAttribute("id", id + "_cone_depth");
+			}
+
+			conedepth.setAttribute("depthFunc", depthMode);
+			conedepth.setAttribute("enableDepthTest", !ghostPin);
+			coneApp.appendChild(conedepth);
+
 			pinshapeconeshape.appendChild(coneApp);
+			pinshapeconeshape.appendChild(pinshapecone);
 
 			var pinshapeballtrans = document.createElement("Transform");
 			pinshapeballtrans.setAttribute("translation", "0.0 " + (1.4 * coneHeight) + " 0.0");
@@ -283,8 +358,13 @@
 			pinshapeballshape.appendChild(pinshapeball);
 			pinshapeballshape.appendChild(ballApp);
 
+			var pinheadMat = document.createElement("Material");
+			pinheadMat.setAttribute("diffuseColor", "1.0 1.0 1.0");
+			pinheadMat.setAttribute("transparency", trans);
+			ballApp.appendChild(pinheadMat);
+
 			var pinshader = document.createElement("ComposedShader");
-			pinshapeapp.appendChild(pinshader);
+			ballApp.appendChild(pinshader);
 
 			var pinheadradius = document.createElement("field");
 			pinheadradius.setAttribute("type", "SFFloat");
@@ -299,18 +379,25 @@
 			pinheadncol.setAttribute("value", numColours);
 			pinshader.appendChild(pinheadncol);
 
-			var pinheadalpha = document.createElement("field");
-			pinheadalpha.setAttribute("type", "SFFloat");
-			pinheadalpha.setAttribute("name", "alpha");
-			pinheadalpha.setAttribute("value", trans);
-			pinshader.appendChild(pinheadalpha);
-
 			var pinheadcolor = document.createElement("field");
 			pinheadcolor.setAttribute("id", id + (ghostPin ? "_ghost" : "") + "_col");
 			pinheadcolor.setAttribute("type", "MFFloat");
 			pinheadcolor.setAttribute("name", "multicolours");
 			pinheadcolor.setAttribute("value", colours);
 			pinshader.appendChild(pinheadcolor);
+
+			var pinheadhighlight = document.createElement("field");
+			pinheadhighlight.setAttribute("type", "SFVec3f");
+			pinheadhighlight.setAttribute("name", "highlightColor");
+			pinheadhighlight.setAttribute("value", ORANGE_HIGHLIGHT);
+			pinshader.appendChild(pinheadhighlight);
+
+			var pinheadishighlighted = document.createElement("field");
+			pinheadishighlighted.setAttribute("id", id + (ghostPin ? "_ghost" : "") + "_ishighlighted");
+			pinheadishighlighted.setAttribute("type", "SFBool");
+			pinheadishighlighted.setAttribute("name", "highlightPin");
+			pinheadishighlighted.setAttribute("value", "false");
+			pinshader.appendChild(pinheadishighlighted);
 
 			var pinvert = document.createElement("ShaderPart");
 			pinvert.setAttribute("type","VERTEX");
@@ -322,7 +409,16 @@
 			pinfrag.setAttribute("USE", "multiFrag");
 			pinshader.appendChild(pinfrag);
 
-			ballApp.appendChild(pinshader);
+			var pinheaddepth = document.createElement("DepthMode");
+
+			if (!ghostPin)
+			{
+				pinheaddepth.setAttribute("id", id + "_depth");
+			}
+
+			pinheaddepth.setAttribute("depthFunc", depthMode);
+			pinheaddepth.setAttribute("enableDepthTest", !ghostPin);
+			ballApp.appendChild(pinheaddepth);
 
 			parentElement.appendChild(pinshape);
 		}
@@ -392,8 +488,8 @@
 			}
 
 			colours = colours.join(" ");
-			createBasicPinShape(id, modelTransform, "ALWAYS", colours, numColours, 0.1, radius, height, scale, false);
-			createBasicPinShape(id, modelTransform, "LESS", colours, numColours, 0.9, radius, height, scale, true);
+			createBasicPinShape(id, modelTransform, "ALWAYS", colours, numColours, 0.1, radius, height, scale, true);
+			createBasicPinShape(id, modelTransform, "LESS", colours, numColours, 0.9, radius, height, scale, false);
 
 			$("#model__root")[0].appendChild(parent);
 		}
@@ -523,12 +619,14 @@
 				fragSource += x3dom.shader.gammaCorrectionDecl({});
 				fragSource += "\nuniform float numColours;" +
 				"\nuniform float ambientIntensity;" +
+				"\nuniform float transparency;" +
 				"\nvarying float fragColourSelect;" +
 				"\nvarying vec3 fragNormal;" +
                 "\nvarying vec3 fragEyeVector;" +
 				"\nvarying vec3 fragPosition;" +
-				"\nuniform float alpha;" +
 				"\nuniform vec3 multicolours[20];" +
+				"\nuniform bool highlightPin;" +
+				"\nuniform vec3 highlightColor;" +
 				"\n" +
 				"\nvoid main()" +
 				"\n{" +
@@ -543,10 +641,13 @@
 				"\n\tvec3 pinColor = vec3(0.0,0.0,0.0);" +
 				"\n\tfor(int colidx = 0; colidx < 20; colidx++) {" +
 				"\n\t\tif(colidx == colourSelected) {" +
-				"\n\t\t\tpinColor = multicolours[colidx] * max(ambient + diffuse, 0.0);" +
+				"\n\t\t\tpinColor = multicolours[colidx];" + // * max(ambient + diffuse, 0.0);" +
 				"\n\t\t\tpinColor = clamp(pinColor, 0.0, 1.0);" +
-				"\n\t\t\tpinColor = gammaEncode(pinColor);" +
-				"\n\t\t\tgl_FragColor = vec4(pinColor, alpha);" +
+				"\n\t\t\tif (highlightPin) {" +
+				"\n\t\t\t\tpinColor = highlightColor;" +
+				"\n\t\t\t}" +
+				//"\n\t\t\tpinColor = gammaEncode(pinColor);" +
+				"\n\t\t\tgl_FragColor = vec4(pinColor, transparency);" +
 				"\n\t\t}" +
 				"\n\t}" +
 				"\n}";
@@ -554,9 +655,52 @@
 			pinfrag.textContent = fragSource;
 			pinheadshader.appendChild(pinfrag);
 
+			var coneshader = document.createElement("ComposedShader");
+			coneshader.setAttribute("id", "coneShader");
+
+			var conevert = document.createElement("ShaderPart");
+			conevert.setAttribute("type", "VERTEX");
+			conevert.setAttribute("DEF", "noShadeVert");
+			conevert.textContent = "attribute vec3 position;" +
+				"\nattribute vec3 normal;" +
+				"\n" +
+				"\nuniform mat4 modelViewMatrixInverse;" +
+				"\nuniform mat4 modelViewProjectionMatrix;" +
+				"\n" +
+				"\nvoid main()" +
+				"\n{" +
+				"\n\tgl_Position = modelViewProjectionMatrix * vec4(position, 1.0);" +
+				"\n}";
+			coneshader.appendChild(conevert);
+
+			var conefrag = document.createElement("ShaderPart");
+			conefrag.setAttribute("type", "FRAGMENT");
+			conefrag.setAttribute("DEF", "noShadeFrag");
+			conefrag.textContent = "#ifdef GL_FRAGMENT_PRECISION_HIGH" +
+				"\n\tprecision highp float;" +
+				"\n#else" +
+				"\n\tprecision mediump float;" +
+				"\n#endif" +
+				"\n" +
+				"\nuniform vec3 diffuseColor;" +
+				"\nuniform float transparency;" +
+				"\nuniform vec3 highlightColor;" +
+				"\nuniform bool highlightPin;" +
+				"\n" +
+				"\nvoid main()" +
+				"\n{" +
+				"\n\tvec3 diffuseColor = clamp(diffuseColor, 0.0, 1.0);" +
+				"\n\tif (highlightPin) {" +
+				"\n\t\tdiffuseColor = highlightColor;" +
+				"\n\t}" +
+				"\n\tgl_FragColor = vec4(diffuseColor, transparency);" +
+				"\n}";
+
+			coneshader.appendChild(conefrag);
 			shaderInitialized = true;
 
 			$("#model__root")[0].appendChild(pinheadshader);
+			$("#model__root")[0].appendChild(coneshader);
 		};
 
 		return {
@@ -570,6 +714,7 @@
 			deleteComment: deleteComment,
 			setComment: setComment,
             changePinColour: changePinColour,
+			highlightPin: highlightPin,
 			addPin: addPin,
 			fixPin: fixPin,
 			removePin: removePin,

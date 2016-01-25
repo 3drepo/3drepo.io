@@ -1604,78 +1604,90 @@ DBInterface.prototype.getIssues = function(dbName, project, branch, revision, on
 
 		// var sids = Object.keys(SIDMap);
 
-		self.getObjectIssues(dbName, project, null, null, onlyStubs, function (err, docs) {
-			if (err.value) {
+		self.getProjectSettings(dbName, project, function(err, settings) {
+			if (err.value)
+			{
 				return callback(err);
 			}
 
-			var collatedDocs = docs;
-
-			// Now search for all federated issues
-			self.getFederatedProjectList(dbName, project, branch, revision, function (err, refs) {
+			self.getObjectIssues(dbName, project, null, null, onlyStubs, settings[0].type, function (err, docs) {
 				if (err.value) {
 					return callback(err);
 				}
 
-				// If there are no federated projects
-				if (!refs.length)
-				{
-					return callback(responseCodes.OK, docs);
-				}
+				var collatedDocs = docs;
 
-				async.concat(refs, function (item, iter_callback) {
-					var childDbName  = item.owner ? item.owner : dbName;
-					var childProject = item.project;
-
-					var unique = ("unique" in item) ? item.unique : false;
-
-					var childRevision, childBranch;
-
-					if ("_rid" in item)
-					{
-						if (unique)
-						{
-							childRevision = uuidToString(item._rid);
-							childBranch   = null;
-						} else {
-							childRevision = null;
-							childBranch   = uuidToString(item._rid);
-						}
-					} else {
-						childBranch   = "master";
-						childRevision = null;
-					}
-
-					self.getSIDMap(childDbName, childProject, childBranch, childRevision, function (err) {
-						if (err.value) {
-							return iter_callback(err);
-						}
-
-						// var sids = Object.keys(SIDMap);
-
-						// For all federated child projects get a list of shared IDs
-						self.getObjectIssues(childDbName, childProject, null, null, onlyStubs, function (err, objIssues) {
-							if (err.value) {
-								return iter_callback(err);
-							}
-
-							iter_callback(null, objIssues);
-						});
-					});
-				},
-				function (err, results) {
-					if (err) {
+				// Now search for all federated issues
+				self.getFederatedProjectList(dbName, project, branch, revision, function (err, refs) {
+					if (err.value) {
 						return callback(err);
 					}
 
-					callback(responseCodes.OK, collatedDocs.concat(results));
+					// If there are no federated projects
+					if (!refs.length)
+					{
+						return callback(responseCodes.OK, docs);
+					}
+
+					async.concat(refs, function (item, iter_callback) {
+						var childDbName  = item.owner ? item.owner : dbName;
+						var childProject = item.project;
+
+						var unique = ("unique" in item) ? item.unique : false;
+
+						var childRevision, childBranch;
+
+						if ("_rid" in item)
+						{
+							if (unique)
+							{
+								childRevision = uuidToString(item._rid);
+								childBranch   = null;
+							} else {
+								childRevision = null;
+								childBranch   = uuidToString(item._rid);
+							}
+						} else {
+							childBranch   = "master";
+							childRevision = null;
+						}
+
+						self.getProjectSettings(childDbName, childProject, function (err, settings) {
+							if (err.value)
+							{
+								return callback(err);
+							}
+
+							self.getSIDMap(childDbName, childProject, childBranch, childRevision, function (err) {
+								if (err.value) {
+									return iter_callback(err);
+								}
+
+								// For all federated child projects get a list of shared IDs
+								self.getObjectIssues(childDbName, childProject, null, null, onlyStubs, settings[0].type, function (err, objIssues) {
+									if (err.value) {
+										return iter_callback(err);
+									}
+
+									iter_callback(null, objIssues);
+								});
+							});
+						})
+					},
+					function (err, results) {
+						if (err) {
+							return callback(err);
+						}
+
+						callback(responseCodes.OK, collatedDocs.concat(results));
+					});
 				});
 			});
 		});
 	});
 };
 
-DBInterface.prototype.getObjectIssues = function(dbName, project, sids, number, onlyStubs, callback) {
+DBInterface.prototype.getObjectIssues = function(dbName, project, sids, number, onlyStubs, typePrefix, callback) {
 	if (sids !== null && sids.constructor !== Array) {
 		sids = [sids];
 	}
@@ -1708,10 +1720,11 @@ DBInterface.prototype.getObjectIssues = function(dbName, project, sids, number, 
 		if (err.value) { return callback(err); }
 
 		for(var i = 0; i < docs.length; i++) {
-			docs[i]._id     = uuidToString(docs[i]._id);
-			docs[i].parent  = uuidToString(docs[i].parent);
-			docs[i].account = dbName;
-			docs[i].project = project;
+			docs[i]._id        = uuidToString(docs[i]._id);
+			docs[i].typePrefix = typePrefix;
+			docs[i].parent     = uuidToString(docs[i].parent);
+			docs[i].account    = dbName;
+			docs[i].project    = project;
 		}
 
 		return callback(responseCodes.OK, docs);
@@ -1729,124 +1742,136 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 			return callback(err);
 		}
 
-		if (!data._id) {
-			var newID = uuid.v1();
+		self.getProjectSettings(dbName, project, function(err, settings) {
+			if (err.value)
+			{
+				return callback(err);
+			}
 
-			self.logger.logDebug("Creating new issue " + newID + " for ID: " + id);
+			// Create new issue
+			if (!data._id) {
+				var newID = uuid.v1();
 
-			var projection = {};
-			projection[C.REPO_NODE_LABEL_SHARED_ID] = 1;
+				self.logger.logDebug("Creating new issue " + newID + " for ID: " + id);
 
-			self.getObject(dbName, project, id, null, null, false, projection, function(err, type, uid, fromStash, obj) {
-				if (err.value && err.value !== responseCodes.OBJECT_NOT_FOUND.value) {
-					return callback(err);
-				}
+				var projection = {};
+				projection[C.REPO_NODE_LABEL_SHARED_ID] = 1;
 
-				// TODO: Implement this using sequence counters
-				coll.count(function(err, numIssues) {
-					if (err) {
-						return callback(responseCodes.DB_ERROR(err));
+				self.getObject(dbName, project, id, null, null, false, projection, function(err, type, uid, fromStash, obj) {
+					if (err.value && err.value !== responseCodes.OBJECT_NOT_FOUND.value) {
+						return callback(err);
 					}
 
-					// This is a new issue
-					data._id     = stringToUUID(newID);
-					data.created = (new Date()).getTime();
-
-					if (obj)
-					{
-						data.parent  = obj.meshes[id][C.REPO_NODE_LABEL_SHARED_ID];
-					}
-
-					data.number  = numIssues + 1;
-
-					if (!data.name) {
-						data.name = "Issue" + data.number;
-					}
-
-					data.owner = owner;
-
-					coll.insert(data, function(err, count) {
+					// TODO: Implement this using sequence counters
+					coll.count(function(err, numIssues) {
 						if (err) {
 							return callback(responseCodes.DB_ERROR(err));
 						}
 
-						self.logger.logDebug("Updated " + count + " records.");
-						callback(responseCodes.OK, { account: dbName, project: project, issue_id : uuidToString(data._id), number : data.number, created : data.created, issue: data });
+						// This is a new issue
+						data._id     = stringToUUID(newID);
+						data.created = (new Date()).getTime();
+
+						if (obj)
+						{
+							data.parent  = obj.meshes[id][C.REPO_NODE_LABEL_SHARED_ID];
+						}
+
+						data.number  = numIssues + 1;
+
+						if (!data.name) {
+							data.name = "Issue" + data.number;
+						}
+
+						data.owner = owner;
+
+						coll.insert(data, function(err, count) {
+							if (err) {
+								return callback(responseCodes.DB_ERROR(err));
+							}
+
+							self.logger.logDebug("Updated " + count + " records.");
+
+							data.typePrefix  = settings[0].type;
+
+							callback(responseCodes.OK, { account: dbName, project: project, issue_id : uuidToString(data._id), number : data.number, created : data.created, issue: data });
+						});
 					});
 				});
-			});
-		} else {
-			self.logger.logDebug("Updating issue " + data._id);
+			} else {
+				self.logger.logDebug("Updating issue " + data._id);
 
-			data._id = stringToUUID(data._id);
+				data._id = stringToUUID(data._id);
 
-            timeStamp = (new Date()).getTime();
-			if (data.hasOwnProperty("comment")) {
-                if (data.hasOwnProperty("edit")) {
-                    updateQuery = {
-                        $set: {created: timeStamp}
-                    };
-                    updateQuery.$set["comments." + data.commentIndex + ".comment"] = data.comment;
-                }
-                else if (data.hasOwnProperty("delete")) {
-                    updateQuery = {
-                        $pull: {comments: {created: data.commentCreated}}
-                    };
-                }
-                else if (data.hasOwnProperty("set")) {
-                    updateQuery = {
-                        $set: {}
-                    };
-                    updateQuery.$set["comments." + data.commentIndex + ".set"] = true;
-                }
-                else {
-                    updateQuery = {
-                        $push: { comments: { owner: owner,  comment: data.comment, created: timeStamp} }
-                    };
-                }
-			}
-            else if (data.hasOwnProperty("closed")) {
-				if (data.closed) {
+				timeStamp = (new Date()).getTime();
+				if (data.hasOwnProperty("comment")) {
+					if (data.hasOwnProperty("edit")) {
+						updateQuery = {
+							$set: {created: timeStamp}
+						};
+						updateQuery.$set["comments." + data.commentIndex + ".comment"] = data.comment;
+					}
+					else if (data.hasOwnProperty("delete")) {
+						updateQuery = {
+							$pull: {comments: {created: data.commentCreated}}
+						};
+					}
+					else if (data.hasOwnProperty("set")) {
+						updateQuery = {
+							$set: {}
+						};
+						updateQuery.$set["comments." + data.commentIndex + ".set"] = true;
+					}
+					else {
+						updateQuery = {
+							$push: { comments: { owner: owner,  comment: data.comment, created: timeStamp} }
+						};
+					}
+				}
+				else if (data.hasOwnProperty("closed")) {
+					if (data.closed) {
+						updateQuery = {
+							$set: { closed: true, closed_time: (new Date()).getTime() }
+						};
+					}
+					else {
+						updateQuery = {
+							$set: { closed: false },
+							$unset: { closed_time: "" }
+						};
+					}
+				}
+				else if (data.hasOwnProperty("assigned_roles")) {
 					updateQuery = {
-						$set: { closed: true, closed_time: (new Date()).getTime() }
+						$set: { assigned_roles: data.assigned_roles}
 					};
 				}
 				else {
 					updateQuery = {
-						$set: { closed: false },
-						$unset: { closed_time: "" }
+						$set: { complete: data.complete, created: timeStamp }
 					};
 				}
-			}
-			else if (data.hasOwnProperty("assigned_roles")) {
-				updateQuery = {
-					$set: { assigned_roles: data.assigned_roles}
-				};
-			}
-			else {
-                updateQuery = {
-                    $set: { complete: data.complete, created: timeStamp }
-                };
-            }
 
-			coll.update({ _id : data._id}, updateQuery, function(err, count) {
-				if (err) { return callback(responseCodes.DB_ERROR(err)); }
+				coll.update({ _id : data._id}, updateQuery, function(err, count) {
+					if (err) { return callback(responseCodes.DB_ERROR(err)); }
 
-				self.logger.logDebug("Updated " + count + " records.");
-				callback(
-					responseCodes.OK,
-					{
-						account: dbName,
-						project: project,
-						issue: data,
-						issue_id : uuidToString(data._id),
-						number: data.number,
-						owner: owner,
-						created: timeStamp
-					}
-				);
-			});
-		}
+					self.logger.logDebug("Updated " + count + " records.");
+					callback(
+						responseCodes.OK,
+						{
+							account: dbName,
+							project: project,
+							issue: data,
+							issue_id : uuidToString(data._id),
+							number: data.number,
+							owner: owner,
+							typePrefix: settings.type,
+							created: timeStamp
+						}
+					);
+				});
+			}
+		});
 	});
 };
 
@@ -2473,12 +2498,39 @@ DBInterface.prototype.getRoleSettings = function(dbName, roles, callback)
 	dbConn(self.logger).filterColl(dbName, "settings.roles", filter, {}, function (err, docs) {
 		if (err.value)
 		{
-			return callback(responseCodes.DB_ERROR(err), []);
+			return callback(err, []);
 		}
 
 		return callback(responseCodes.OK, docs);
 	});
 };
+
+/*******************************************************************************
+ * Get settings for a particular project
+ *
+ * @param {string} dbName - Database name which holds the project
+ * @param {string} projectName - Name of the project you want settings for
+ * @param {function} callback - function to return the list of roles
+ ******************************************************************************/
+DBInterface.prototype.getProjectSettings = function(dbName, projectName, callback)
+{
+	"use strict";
+	var self = this;
+
+	var filter = {
+		"_id" : projectName
+	};
+
+	dbConn(self.logger).filterColl(dbName, "settings", filter, {}, function (err, settings) {
+		if (err.value)
+		{
+			return callback(err);
+		}
+
+		console.log(JSON.stringify(settings));
+		callback(responseCodes.OK, settings);
+	});
+}
 
 DBInterface.prototype.getUserRolesForProject = function(database, project, username, callback)
 {
@@ -2643,9 +2695,9 @@ DBInterface.prototype.getUserPrivileges = function (username, database, callback
     var adminDB = "admin";
 
     //First get all the roles this user is granted within the databases of interest
-     self.getUserRoles(username, database, function (status, roles) {
+     self.getUserRoles(username, database, function (err, roles) {
             if (status.value) {
-                return callback(responseCodes.DB_ERROR(status));
+                return callback(err);
             }
 
             if (!roles || roles.length === 0) {

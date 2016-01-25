@@ -18,6 +18,8 @@
 (function() {
 	"use strict";
 
+	const VERSION="1.0.0rc1";
+
 	var config = require('app-config').config;
 	var frontend_scripts = require('../../common_public_files.js');
 
@@ -181,6 +183,8 @@
 	config.logfile.filename      = coalesce(config.logfile.filename, "/var/log/3drepo.org");
 	config.logfile.console_level = coalesce(config.logfile.console_level, "info");
 	config.logfile.file_level    = coalesce(config.logfile.file_level, "info");
+
+	config.version = VERSION;
 
 	module.exports = config;
 })()

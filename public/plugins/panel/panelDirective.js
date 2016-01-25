@@ -46,6 +46,7 @@
 		vm.contentItems = [];
         vm.showPanel = true;
 		vm.window = $window;
+		vm.activate = true;
 
 		$scope.$watch("vm.window.innerHeight", function (newValue) {
 			sendWindowHeightChangeEvent(newValue);
@@ -88,6 +89,21 @@
 				}
 			}
 		}
+
+		angular.element(document).bind('mousedown', function (event) {
+			// If we have clicked on a canvas, we are probably
+			// moving the model around
+			if (event.target.tagName === "CANVAS")
+			{
+				vm.activate = false;
+				$scope.$apply();
+			}
+		});
+
+		angular.element(document).bind('mouseup', function (event) {
+			vm.activate = true;
+			$scope.$apply();
+		});
 
 		vm.buttonClick = function (contentType) {
             for (i = 0, length = vm.contentItems.length; i < length; i += 1) {
