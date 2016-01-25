@@ -27,7 +27,8 @@
 			templateUrl: "tree.html",
 			scope: {
 				filterText: "=",
-				height: "="
+				height: "=",
+				onSetContentHeight: "&"
 			},
 			controller: TreeCtrl,
 			controllerAs: "vm",
@@ -64,6 +65,23 @@
 			setupInfiniteScroll();
 		});
 
+		/**
+		 * Set the content height.
+		 * The height of a node is dependent on its name length and its level.
+		 */
+		function setContentHeight () {
+			var i, length, height = 50, maxNumNodes = 20, nodeMinHeight = 36,
+				maxStringLength = 35, maxStringLengthForLevel = 0, lineHeight = 18, levelOffset = 2;
+			for (i = 0, length = vm.nodesToShow.length; ((i < length) && (i < maxNumNodes)); i += 1) {
+				maxStringLengthForLevel = maxStringLength - (vm.nodesToShow[i].level * levelOffset);
+				height += nodeMinHeight + (lineHeight * Math.floor(vm.nodesToShow[i].name.length / maxStringLengthForLevel));
+			}
+			vm.onSetContentHeight({height: height});
+		}
+
+		/**
+		 * Initialise the tree nodes to show to the first node
+		 */
 		function initNodesToShow () {
 			vm.nodesToShow = [vm.allNodes[0]];
 			vm.nodesToShow[0].level = 0;
@@ -71,14 +89,16 @@
 			vm.nodesToShow[0].hasChildren = true;
 			vm.nodesToShow[0].selected = false;
 			vm.nodesToShow[0].toggleState = "visible";
+
+			setContentHeight();
 		}
 
+		/**
+		 * Expand a node to show its children.
+		 * @param _id
+		 */
 		vm.expand = function (_id) {
-			var i,
-				numChildren,
-				index = -1,
-				length,
-				endOfSplice = false;
+			var i = 0, numChildren = 0, index = -1, length = 0, endOfSplice = false;
 
 			for (i = 0, length = vm.nodesToShow.length; i < length; i += 1) {
 				if (vm.nodesToShow[i]._id === _id) {
@@ -111,8 +131,15 @@
 					vm.nodesToShow[index].expanded = !vm.nodesToShow[index].expanded;
 				}
 			}
+
+			setContentHeight();
 		};
 
+		/**
+		 * Expand the tree and highlight the node corresponding to the object selected in the viewer.
+		 * @param path
+		 * @param level
+		 */
 		function expandToSelection(path, level) {
 			var i,
 				j,
@@ -177,14 +204,7 @@
 		});
 
 		vm.toggleTreeNode = function (node) {
-			var i = 0,
-				j = 0,
-				k = 0,
-				nodesLength,
-				path,
-				parent = null,
-				nodeToggleState = "visible",
-				numInvisible = 0;
+			var i = 0, j = 0, k = 0, nodesLength, path, parent = null, nodeToggleState = "visible", numInvisible = 0;
 
 			vm.toggledNode = node;
 

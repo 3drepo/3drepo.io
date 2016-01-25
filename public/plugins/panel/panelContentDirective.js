@@ -47,7 +47,9 @@
 			changedHeight = 0,
 			contentHeightExtra = 20,
 			toggledContentHeight = 0,
-			minimized = false;
+			minimized = false,
+			maxHeight = vm.contentData.maxHeight,
+			atMaxHeight = false;
 
 		vm.issuesUrl = serverConfig.apiUrl(StateManager.state.account + "/" + StateManager.state.project + "/issues.html");
 
@@ -67,6 +69,7 @@
 						"show='vm.contentData.show' " +
 						"show-add='vm.addStatus' " +
 						"visible='vm.visibleStatus' " +
+						"on-set-content-height='vm.setContentHeight(height)' " +
 						"options='vm.contentData.options' " +
 						"selected-option='vm.selectedOption'>" +
 					"</" + vm.contentData.type + ">"
@@ -123,7 +126,7 @@
 		$scope.$watch(EventService.currentEvent, function (event) {
 			if ((event.type === EventService.EVENT.PANEL_CONTENT_CLICK) && (event.value.position === vm.position)) {
 				if (event.value.contentItem !== vm.contentData.type) {
-					vm.contentHeight = vm.contentData.maxHeight;
+					//vm.contentHeight = vm.contentData.maxHeight;
 				}
 			}
 			else if (event.type === EventService.EVENT.TOGGLE_HELP) {
@@ -154,15 +157,15 @@
 			}
 			else if (event.type === EventService.EVENT.WINDOW_HEIGHT_CHANGE) {
 				if (vm.contentData.hasOwnProperty("minHeight")) {
-					currentHeight = vm.contentData.maxHeight - changedHeight - event.value.change;
-					if (!minimized) {
+					if (!minimized && atMaxHeight) {
+						currentHeight = maxHeight - changedHeight - event.value.change;
 						vm.contentHeight = currentHeight;
 					}
 				}
 			}
 		});
 
-		vm.click = function () {
+		vm.toolbarClick = function () {
 			if (vm.contentData.hasOwnProperty("minHeight")) {
 				if (minimized) {
 					EventService.send(
@@ -236,6 +239,18 @@
 
 		vm.clearFilter = function () {
 			vm.filterInputText = "";
+		};
+
+		vm.setContentHeight = function (height) {
+			if (height < maxHeight) {
+				vm.contentHeight = height;
+				atMaxHeight = false;
+			}
+			else {
+				vm.contentHeight = maxHeight;
+				atMaxHeight = true;
+			}
+			currentHeight = vm.contentHeight;
 		};
 	}
 }());

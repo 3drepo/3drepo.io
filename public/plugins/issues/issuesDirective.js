@@ -30,7 +30,8 @@
 				height: "=",
 				showAdd: "=",
 				options: "=",
-				selectedOption: "="
+				selectedOption: "=",
+				onSetContentHeight: "&"
 			},
 			controller: IssuesCtrl,
 			controllerAs: 'vm',
@@ -202,6 +203,9 @@
 
 					// Un-expand any expanded issue
 					vm.commentsToggledIssueId = null;
+
+					// Set the height of the content
+					setContentHeight();
 				}
 			}
 		}
@@ -238,12 +242,6 @@
 							pin[0].setAttribute("render", "false");
 						}
 					}
-
-					/*
-					pinMaterial = angular.element(document.getElementById(vm.issues[i]._id + "_material"));
-					console.log(pinMaterial);
-					pinMaterial[0].setAttribute("diffuseColor", "0.0 1.0 1.0");
-					*/
 				}
 				else {
 					// New pin
@@ -473,5 +471,19 @@
 					.ok("OK")
 			);
 		};
+
+		/**
+		 * Set the content height.
+		 */
+		function setContentHeight () {
+			var i, length, height = 50, maxNumIssues = 12, issueMinHeight = 58, maxStringLength = 44, lineHeight = 18;
+			for (i = 0, length = vm.issuesToShow.length; ((i < length) && (i < maxNumIssues)); i += 1) {
+				height += issueMinHeight;
+				if (vm.issuesToShow[i].title.length > maxStringLength) {
+					height += lineHeight * Math.floor((vm.issuesToShow[i].title.length - maxStringLength) / maxStringLength);
+				}
+			}
+			vm.onSetContentHeight({height: height});
+		}
 	}
 }());
