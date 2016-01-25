@@ -78,7 +78,7 @@ module.exports.createApp = function(template)
 		params.config_js += '\nserver_config.backgroundImage = "' + config.backgroundImage + '";';
 		params.config_js += '\nserver_config.chatHost	= "' + config.api_server.chat_host + '";';
 		params.config_js += '\nserver_config.chatPath	= "' + config.api_server.chat_path + '";';
-
+		params.config_js += '\nserver_config.apiVersion = "' + config.version + '";';
 
 		params.config_js += '\nserver_config.return_path = "/";';
 
