@@ -218,7 +218,6 @@ var Viewer = function (name, handle, x3ddiv, manager) {
 				}
 			});
 
-			self.addAxes();
 			self.initialized = true;
 		}
 	}
@@ -229,7 +228,7 @@ var Viewer = function (name, handle, x3ddiv, manager) {
 	}
 
 	// This is called when the X3DOM runtime is initialized
-	this.initRuntime = function (x3domruntime) {
+	this.initRuntime = function () {
 		// If no manager, the calling object is the X3DOM runtime (this)
 		// otherwise we reference the one attached to the manager.
 
@@ -1327,60 +1326,6 @@ var Viewer = function (name, handle, x3ddiv, manager) {
 
 		event.position = newPos;
 		event.orientation = newOrient;
-	}
-
-	// TODO: Merge this function with the Viewer Manager
-	this.axesMove = function (origEvent, event) {
-		// Axes should rotate inversely to orientation
-		// of camera
-		event.orientation[1] = event.orientation[1] * -1;
-
-		// Fix transformation from viewpoint basis
-		self.transformEvent(event, event.target, false);
-
-		// Set rotation of the overlying group
-		self.axesGroup.setAttribute('rotation', event.orientation.toString());
-	}
-
-	this.linkAxes = function () {
-		self.onViewpointChanged(self.axesMove);
-	}
-
-	this.addAxes = function () {
-		var axesDiffColor = ['0.1 0.6 0.1', '0.7 0.1 0.1', '0.3 0.3 1.0'];
-		var axesEmissiveColor = ['0.05 0.2 0.05', '0.33 0.0 0.0', '0.1 0.1 0.33'];
-		var rotation = ['0.0 0.0 1.0 0.0', '0.0 0.0 1.0 -1.57079', '1.0 0.0 0.0 1.57079'];
-		var axisName = ['Y', 'X', 'Z'];
-
-		var coord = document.createElement('X3D');
-		coord.setAttribute('id', 'Axes');
-		coord.setAttribute('showStat', 'false');
-		coord.setAttribute('showLog', 'false');
-
-		self.x3ddiv.appendChild(coord);
-
-		var scene = document.createElement('scene');
-		coord.appendChild(scene);
-
-		var vp = document.createElement('Viewpoint');
-		vp.setAttribute('position', '0.76500 0.765 5.0');
-		scene.appendChild(vp);
-
-		self.axesScene = scene;
-
-		self.axesNav = document.createElement('navigationInfo');
-		self.axesNav.setAttribute('type', 'NONE');
-		scene.appendChild(self.axesNav);
-
-		self.axesGroup = document.createElement('Transform');
-		scene.appendChild(self.axesGroup);
-
-		var x3dFile = document.createElement('inline');
-		x3dFile.setAttribute('url', 'public/box.x3d');
-		self.axesGroup.appendChild(x3dFile);
-
-		self.reload();
-		self.linkAxes();
 	}
 
 	var clippingPlaneID = -1;
