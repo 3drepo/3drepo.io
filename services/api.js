@@ -104,7 +104,8 @@ module.exports.app = function (sharedSession) {
 		app.use('/tests', require('../js/core/handlers/testHelper'));
 	}
 	
-
+	//project handlers
+	app.use('/:account/:project', require('../js/core/handlers/project'));
 	// project package handlers
 	app.use('/:account/:project', require('../js/core/handlers/projectPackage'));
 	// bid hanlders

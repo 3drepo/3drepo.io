@@ -195,7 +195,7 @@ function updateMyBid(req, res, next){
 
 	_getMyBid(req).then(bid => {
 		
-		if (bid.responded()){
+		if (!bid.accepted){
 			return Promise.reject({ resCode: responseCodes.BID_NOT_ACCEPTED_OR_DECLINED});
 		} else  {
 			let whitelist = ['budget'];

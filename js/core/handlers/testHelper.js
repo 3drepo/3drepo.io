@@ -7,7 +7,7 @@ var C               = require("../constants");
 var dbInterface     = require("../db_interface.js");
 
 router.post('/roles/main-contractor',  createMCRole);
-router.post ('/users/:user/roles/main-contractor', grantUserRole);
+router.post ('/roles/main-contractor/grant', grantUserRole);
 
 module.exports = router;
 
@@ -22,7 +22,7 @@ function createMCRole(req, res){
 
 
 function grantUserRole(req, res){
-	dbInterface(req[C.REQ_REPO].logger).grantUserMainContractorRole(req.params.user, req.body.account).then(() => {
+	dbInterface(req[C.REQ_REPO].logger).grantUserMainContractorRole(req.body.user, req.body.account).then(() => {
 		res.status(200).json({status: 'OK'});
 	}).catch( err => {
 		res.status(500).json(err);

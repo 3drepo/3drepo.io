@@ -5,6 +5,9 @@ var C = require('../constants.js');
 var schema = mongoose.Schema({
 	name: { type: String, required: true },
 	site: { type: String, required: true },
+	code: String,
+	contact: String,
+	area: String,
 	budget: Number, 
 	completedBy: Date,
 	user: String

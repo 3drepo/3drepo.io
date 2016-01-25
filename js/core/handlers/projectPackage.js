@@ -18,7 +18,6 @@ var getDbColOptions = function(req){
 
 //Every API list below has to log in to access
 router.use(middlewares.loggedIn);
-
 // Create a package
 router.post('/packages.json', middlewares.isMainContractor,  createPackage);
 // Get all packages
@@ -36,7 +35,7 @@ function createPackage(req, res, next) {
 	// Instantiate a model
 	let projectPackage = ProjectPackage.createInstance(getDbColOptions(req));
 
-	let whitelist = ['name', 'site', 'budget', 'completedBy'];
+	let whitelist = ['name', 'site', 'budget', 'completedBy', 'code', 'contact', 'area'];
 
 	projectPackage = utils.writeCleanedBodyToModel(whitelist, req.body, projectPackage);
 
