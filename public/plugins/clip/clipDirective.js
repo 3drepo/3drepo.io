@@ -84,26 +84,16 @@
 			}
 		}
 
-		$scope.$watch("vm.show", function(newValue) {
+		$scope.$watch("vm.visible", function (newValue, oldValue) {
 			if (angular.isDefined(newValue))
 			{
-				vm.visible = vm.show;
-			}
-		});
+				vm.visible = newValue;
 
-		$scope.$watch("vm.visible", function (newValue) {
-			if (angular.isDefined(newValue))
-			{
-				if (vm.show)
+				if (newValue)
 				{
-					vm.visible = newValue;
-
-					if (newValue)
-					{
-						initClippingPlane();
-					} else {
-						ViewerService.defaultViewer.clearClippingPlanes();
-					}
+					initClippingPlane();
+				} else {
+					ViewerService.defaultViewer.clearClippingPlanes();
 				}
 			}
 		});
