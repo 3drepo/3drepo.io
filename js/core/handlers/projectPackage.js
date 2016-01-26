@@ -11,12 +11,13 @@ var responseCodes = require('../response_codes');
 
 // var dbInterface     = require("../db_interface.js");
 var C               = require("../constants");
+var multiparty = require('multiparty');
 
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
 };
 
-//Every API list below has to log in to access
+//Every API listed below has to log in to access
 router.use(middlewares.loggedIn);
 // Create a package
 router.post('/packages.json', middlewares.isMainContractor,  createPackage);
@@ -24,8 +25,10 @@ router.post('/packages.json', middlewares.isMainContractor,  createPackage);
 router.get('/packages.json', middlewares.isMainContractor, listPackages);
 // Get a package by name
 router.get('/packages/:packageName.json', hasReadPackageAccess, findPackage);
-
-
+//upload attachment
+router.post('/packages/:packageName/attachments', middlewares.isMainContractor, uploadAttachment);
+//download attachment
+router.get('/packages/:packageName/attachments/:id', middlewares.isMainContractor, downloadAttachment);
 
 function createPackage(req, res, next) {
 	'use strict';
@@ -53,23 +56,123 @@ function createPackage(req, res, next) {
 
 }
 
+function _getPackage(req){
+	return ProjectPackage.findByName(getDbColOptions(req), req.params.packageName).then(projectPackage => {
+		if(projectPackage){
+			return Promise.resolve(projectPackage);
+		} else {
+			return Promise.reject({ resCode: responseCodes.PACKAGE_NOT_FOUND });
+		}
+	})
+}
+
 function findPackage(req, res, next){
 	'use strict';
 
 	let place = '/:account/:project/packages/:packageName.json GET';
+	let projectPackage;
 
-	ProjectPackage.findByName(getDbColOptions(req), req.params.packageName).then(projectPackage => {
-		if(projectPackage){
-			responseCodes.respond(place, req, res, next, responseCodes.OK, projectPackage);
-		} else {
-			responseCodes.respond(place, req, res, next, responseCodes.PACKAGE_NOT_FOUND);
-		}
+	_getPackage(req).then(_projectPackage => {
+
+		projectPackage = _projectPackage;
+		return projectPackage.getAttachmentMeta();
+
+	}).then(attMeta => {
+		let obj = projectPackage.toJSON();
+		obj.attachmentMeta = attMeta;
+		responseCodes.respond(place, req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
-		let errCode = utils.mongoErrorToResCode(err);
-		responseCodes.respond(place, req, res, next, errCode, err);
-
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 	
+}
+
+function uploadAttachment(req, res, next){
+	'use strict';
+
+	let place = '/:account/:project/packages/:packageName/attachments POST';
+
+	_getPackage(req).then(projectPackage => {
+
+		var defer = require('deferred')();
+
+		let form = new multiparty.Form();
+		let partError;
+		// Parts are emitted when parsing the form
+		form.on('part', function(part) {
+
+			if (part.filename && part.name === 'attachment') {
+				return projectPackage.uploadAttachment(part, {
+					filename: part.filename,
+					contentType: part.headers['content-type'] || null,
+					metadata: { packageName: projectPackage.name }
+				}).then(() => {
+					part.resume();
+				}).catch(err => {
+					partError = err;
+					part.resume();
+				});
+			} else {
+				// reject any other fields or files
+				part.resume();
+			}
+
+			part.on('error', function(err) {
+				defer.reject({ resCode: responseCodes.PROCESS_ERROR(err)});
+			});
+		});
+
+		form.on('error', function(err) {
+			defer.reject({ resCode: responseCodes.PROCESS_ERROR(err)});
+		});
+
+		form.on('close', function() {
+			if(!partError){
+				defer.resolve();
+			} else {
+				defer.reject({ resCode: responseCodes.PROCESS_ERROR(partError)});
+			}
+			
+		});
+
+		form.parse(req);
+
+		return defer.promise;
+
+	}).then(() => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, {});
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+
+}
+
+function downloadAttachment(req, res, next){
+	'use strict';
+
+	let place = '/:account/:project/packages/:packageName/attachments/id GET';
+
+	_getPackage(req).then(projectPackage => {
+		return projectPackage.getAttachmentReadStream(req.params.id);
+	}).then(attachment => {
+
+		let headers = { 
+			'Content-Length': attachment.meta.length,
+			'Content-Disposition': 'inline;filename=' + attachment.meta.filename,
+		};
+
+		if(attachment.meta.contentType){
+			headers['Content-Type'] = attachment.meta.contentType;
+		}
+
+		res.writeHead(200, headers);
+		attachment.readStream.pipe(res);
+
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+
+	});
+
 }
 
 function listPackages(req, res, next){
