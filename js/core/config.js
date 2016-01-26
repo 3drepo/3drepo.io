@@ -30,8 +30,6 @@
 	  *******************************************************************************/
 	var coalesce = function(variable, value)
 	{
-		'use strict';
-
 		if (variable === null || variable === undefined) {
 			return value;
 		} else {
@@ -47,8 +45,6 @@
 	  *******************************************************************************/
 	var checkIP = function(str)
 	{
-		'use strict';
-
 		if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(str)){
 			return true;
 		} else {
@@ -116,7 +112,7 @@
 			}
 
 			serverObject.host_dir = "";
-		}
+		};
 
 		serverObject.base_url     = serverObject.public_protocol + "://" + serverObject.hostname + ":" + serverObject.public_port;
 		serverObject.location_url = "function(path) { return \"//\" + window.location.host + \"/\" + \"" + serverObject.host_dir + "\" + \"/\" + path; }";
@@ -187,4 +183,4 @@
 	config.version = VERSION;
 
 	module.exports = config;
-})()
+})();
