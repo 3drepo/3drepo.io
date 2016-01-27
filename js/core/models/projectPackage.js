@@ -120,18 +120,28 @@ schema.methods.uploadAttachment = function(readStream, meta){
 
 	readStream.pipe(uploadStream);
 
-	return new Promise((resolve, reject) => {
-		uploadStream.once('finish', function() {
-			resolve();
+	//check dup name and remove the old file id in attachments array
+	return bucket.find({filename: meta.filename}).toArray().then(files => {
+		files.forEach(fileMeta => {
+			this.attachments.pull(fileMeta._id);
 		});
 
-		uploadStream.once('error', function(err) {
-			reject(err);
+		return new Promise((resolve, reject) => {
+			uploadStream.once('finish', function(fileMeta) {
+				resolve(fileMeta);
+			});
+
+			uploadStream.once('error', function(err) {
+				reject(err);
+			});
 		});
-	}).then(() => {
+
+	}).then(fileMeta => {
 		//update the model's attachments array
 		this.attachments.push(uploadStream.id);
-		return this.save();
+		return this.save().then(() => {
+			return Promise.resolve(fileMeta);
+		});
 	});
 }
 

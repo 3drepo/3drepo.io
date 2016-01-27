@@ -78,8 +78,11 @@ function findPackage(req, res, next){
 		return projectPackage.getAttachmentMeta();
 
 	}).then(attMeta => {
+
 		let obj = projectPackage.toJSON();
-		obj.attachmentMeta = attMeta;
+		//populate attachments metadata
+		obj.attachments = attMeta;
+
 		responseCodes.respond(place, req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -91,6 +94,7 @@ function uploadAttachment(req, res, next){
 	'use strict';
 
 	let place = '/:account/:project/packages/:packageName/attachments POST';
+	let attachment;
 
 	_getPackage(req).then(projectPackage => {
 
@@ -98,27 +102,34 @@ function uploadAttachment(req, res, next){
 
 		let form = new multiparty.Form();
 		let partError;
+		let attFieldFound;
 		// Parts are emitted when parsing the form
 		form.on('part', function(part) {
 
 			if (part.filename && part.name === 'attachment') {
-				return projectPackage.uploadAttachment(part, {
+
+				attFieldFound = true;
+
+				projectPackage.uploadAttachment(part, {
+
 					filename: part.filename,
 					contentType: part.headers['content-type'] || null,
 					metadata: { packageName: projectPackage.name }
-				}).then(() => {
+
+				}).then(fileMeta => {
+					defer.resolve(fileMeta);
 					part.resume();
 				}).catch(err => {
-					partError = err;
-					part.resume();
+					defer.reject({ resCode: responseCodes.PROCESS_ERROR(partError)});
 				});
+				
 			} else {
 				// reject any other fields or files
 				part.resume();
 			}
 
 			part.on('error', function(err) {
-				defer.reject({ resCode: responseCodes.PROCESS_ERROR(err)});
+				partError = err
 			});
 		});
 
@@ -127,10 +138,11 @@ function uploadAttachment(req, res, next){
 		});
 
 		form.on('close', function() {
-			if(!partError){
-				defer.resolve();
-			} else {
+
+			if(partError){
 				defer.reject({ resCode: responseCodes.PROCESS_ERROR(partError)});
+			} else if(!attFieldFound) {
+				defer.reject({ resCode: responseCodes.ATTACHMENT_FIELD_NOT_FOUND });
 			}
 			
 		});
@@ -139,8 +151,8 @@ function uploadAttachment(req, res, next){
 
 		return defer.promise;
 
-	}).then(() => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, {});
+	}).then(fileMeta => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, fileMeta);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
