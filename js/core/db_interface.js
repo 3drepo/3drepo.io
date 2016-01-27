@@ -465,6 +465,8 @@ DBInterface.prototype.getUserDBList = function(username, callback) {
 };
 
 DBInterface.prototype.getUserInfo = function(username, callback) {
+	var self = this;
+
 	if(!username) {
 		return callback(responseCodes.USERNAME_NOT_SPECIFIED);
 	}
@@ -479,20 +481,51 @@ DBInterface.prototype.getUserInfo = function(username, callback) {
 		customData : 1,
 		"customData.firstName" : 1,
 		"customData.lastName" : 1,
-		"customData.email" : 1,
-		"customData.projects" : 1
+		"customData.email" : 1
 	};
 
-	dbConn(this.logger).filterColl("admin", "system.users", filter, projection, function(err, coll) {
+	dbConn(self.logger).filterColl("admin", "system.users", filter, projection, function(err, coll) {
 		if(err.value) {
 			return callback(err);
 		}
 
 		if (coll[0])
 		{
-			var user = coll[0].customData;
+			dbConn(self.logger).getUserPrivileges(username, null, function (err, privs) {
+				if (err.value)
+				{
+					return callback(err);
+				}
 
-			callback(responseCodes.OK, user);
+				var user = coll[0].customData;
+
+				// This is the collection that we check for
+				// when seeing if a project is viewable
+				var filterCollectionType = "history";
+				user.projects = [];
+
+				for(var i = 0; i < privs.length; i++)
+				{
+					if (privs[i].resource.db && privs[i].resource.collection && privs[i].resource.db !== "system")
+					{
+						if (privs[i].resource.collection.substr(-filterCollectionType.length) === filterCollectionType)
+						{
+							if (privs[i].actions.indexOf("find") !== -1)
+							{
+								var baseCollectionName = privs[i].resource.collection.substr(0, privs[i].resource.collection.length - filterCollectionType.length - 1);
+
+								user.projects.push({
+									"account" : privs[i].resource.db,
+									"project" : baseCollectionName
+								});
+							}
+						}
+					}
+				}
+
+				callback(responseCodes.OK, user);
+			});
+
 		} else {
 			callback(responseCodes.USER_NOT_FOUND, null);
 		}

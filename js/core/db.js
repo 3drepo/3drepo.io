@@ -721,7 +721,7 @@ MongoWrapper.prototype.getUserRoles = function (username, database, callback) {
 
 		var roles = [];
 		for (let i = 0; i < docs[0].roles.length; i++) {
-			if (docs[0].roles[i].db === dbName || docs[0].roles[i].db === database) {
+			if (docs[0].roles[i].db === dbName || docs[0].roles[i].db === database || !database) {
 				roles.push(docs[0].roles[i]);
 			}
 		}
