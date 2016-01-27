@@ -63,6 +63,7 @@
 			vm.idToPath = data.idToPath;
 			initNodesToShow();
 			setupInfiniteScroll();
+			setContentHeight();
 		});
 
 		/**
@@ -89,8 +90,6 @@
 			vm.nodesToShow[0].hasChildren = true;
 			vm.nodesToShow[0].selected = false;
 			vm.nodesToShow[0].toggleState = "visible";
-
-			setContentHeight();
 		}
 
 		/**
@@ -141,13 +140,7 @@
 		 * @param level
 		 */
 		function expandToSelection(path, level) {
-			var i,
-				j,
-				length,
-				childrenLength,
-				selectedId = path[path.length - 1],
-				selectedIndex = 0,
-				selectionFound = false;
+			var i, j, length, childrenLength, selectedId = path[path.length - 1], selectedIndex = 0, selectionFound = false;
 
 			for (i = 0, length = vm.nodesToShow.length; i < length; i += 1) {
 				if (vm.nodesToShow[i]._id === path[level]) {
@@ -179,6 +172,7 @@
 			} else if (level === (path.length - 2)) {
 				vm.topIndex = selectedIndex - 2;
 			}
+			setContentHeight();
 		}
 
 		$(document).on("objectSelected", function (event, object) {
@@ -300,7 +294,7 @@
 				},
 
 				getLength: function () {
-					return this.numLoaded_ + 5;
+					return this.numLoaded_ + 6;
 				},
 
 				fetchMoreItems_: function (index) {

@@ -3,7 +3,7 @@
 panel  {
   display: block;
   position: absolute;
-  top: 80px;
+  top: 20px;
   width: 420px;
 }
 
@@ -14,7 +14,7 @@ panel #items {
 
 panel #buttons {
   position: absolute;
-  top: 150px;
+  top: 50px;
 }
 panel #buttons .panelButtonGroup {
   margin-bottom: 20px;
@@ -65,16 +65,18 @@ panel-content {
 }
 
 panel-content md-content {
-  height: calc(100% - 48px);
+  /*height: calc(100% - 48px);*/
   overflow-x: hidden;
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
+  height: 100%;
 }
 
 panel-content .md-whiteframe-1dp {
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
+  background: white;
 }
 
 panel-content md-toolbar {

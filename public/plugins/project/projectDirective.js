@@ -85,7 +85,7 @@
 			help: "Model elements shown in a tree structure",
 			icon: "fa-sitemap",
 			hasFilter: true,
-            minHeight: 100,
+            minHeight: 120,
             maxHeight: 820
 		});
 
@@ -118,7 +118,7 @@
 					secondSelected: false
 				}
 			],
-            minHeight: 100,
+            minHeight: 120,
             maxHeight: 820
 		});
 		panelContent.right.push({
@@ -136,6 +136,7 @@
 			show: false,
 			help: "Documents",
 			icon: "fa-clone",
+			minHeight: 100,
 			maxHeight: 290
 		});
 
