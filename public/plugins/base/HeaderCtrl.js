@@ -123,16 +123,6 @@ angular.module('3drepo')
 		});
 	}
 
-	$scope.goAccount = function()
-	{
-		StateManager.setState({ "account" : Auth.username }, {"clearState" : true});
-		StateManager.updateState();
-	}
-
-	$scope.$on("notAuthorized", function(event, message) {
-		$scope.goAccount();
-	});
-
 	$scope.whereAmI = function()
 	{
 		$scope.CameraService.cameraSwitch = true;

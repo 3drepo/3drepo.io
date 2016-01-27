@@ -15,106 +15,117 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-angular.module('3drepo')
-.service('Auth', ['$injector', '$q', '$state', '$http', 'serverConfig', 'StateManager', function($injector, $q, $state, $http, serverConfig, StateManager) {
-	this.loggedIn = null;
-	this.username = null;
-	var self = this;
+(function() {
+	"use strict";
 
-	this.init = function() {
-		var deferred = $q.defer();
+	angular.module("3drepo")
+	.service("Auth", ["$injector", "$q", "$state", "$http", "serverConfig", "StateManager", "$rootScope", "$timeout", function($injector, $q, $state, $http, serverConfig, StateManager, $rootScope, $timeout) {
+		this.loggedIn = null;
+		this.username = null;
+		var self = this;
 
-		// If we are not logged in, check
-		// with the API server whether we
-		// are or not
-		if(self.loggedIn === null)
-		{
-			// Initialize
-			$http.get(serverConfig.apiUrl('login'))
-			.success(function(data, status) {
-				self.loggedIn = true;
-				self.username = data.username;
-				self.userRoles = data.roles;
+		this.init = function() {
+			var deferred = $q.defer();
+
+			// If we are not logged in, check
+			// with the API server whether we
+			// are or not
+			if(self.loggedIn === null)
+			{
+				// Initialize
+				$http.get(serverConfig.apiUrl("login"))
+				.success(function(data) {
+					self.loggedIn = true;
+					self.username = data.username;
+					self.userRoles = data.roles;
+					deferred.resolve(self.loggedIn);
+				}).error(function(data) {
+					self.loggedIn = false;
+					self.username = null;
+					self.userRoles = null;
+					deferred.resolve(self.loggedIn);
+				});
+			} else {
 				deferred.resolve(self.loggedIn);
-			}).error(function(data, status) {
-				self.loggedIn = false;
+			}
+
+			return deferred.promise;
+		};
+
+		this.loadProjectRoles = function(account, project)
+		{
+			var deferred = $q.defer();
+
+			$http.get(serverConfig.apiUrl(account + "/" + project + "/roles.json"))
+			.success(function(data) {
+				self.projectRoles = data;
+				deferred.resolve();
+			}).error(function() {
+				self.projectRoles = null;
+				deferred.resolve();
+			});
+
+			return deferred.promise;
+		};
+
+		this.getUsername = function() { return this.username; };
+
+		this.login = function(username, password) {
+			var deferred = $q.defer();
+
+			var postData = {username: username, password: password};
+			var http = $injector.get("$http");
+
+			http.post(serverConfig.apiUrl("login"), postData)
+			.success(function (data) {
+				self.username = username;
+				self.userRoles = data.roles;
+				self.loggedIn = true;
+
+				$timeout(function() {
+					if ($rootScope.requestState && $rootScope.requestParams)
+					{
+						$state.go($rootScope.requestState, $rootScope.requestParams);
+					}
+				});
+
+				deferred.resolve(username);
+			})
+			.error(function(data, status) {
 				self.username = null;
 				self.userRoles = null;
-				deferred.resolve(self.loggedIn);
+				self.loggedIn = false;
+
+				if (status === 401)
+				{
+					deferred.reject("Invalid username/password");
+				} else {
+					deferred.reject("Unable to connect to the API server");
+				}
 			});
-		} else {
-			deferred.resolve(self.loggedIn);
-		}
 
-		return deferred.promise;
-	};
+			return deferred.promise;
+		};
 
-	this.loadProjectRoles = function(account, project)
-	{
-		var deferred = $q.defer();
+		this.logout = function() {
+			var deferred = $q.defer();
+			var http = $injector.get("$http");
 
-		$http.get(serverConfig.apiUrl(account + '/' + project + '/roles.json'))
-		.success(function(data, status) {
-			self.projectRoles = data;
-			deferred.resolve();
-		}).error(function(data, status) {
-			self.projectRoles = null;
-			deferred.resolve();
-		});
+			http.post(serverConfig.apiUrl("logout"))
+			.success(function _authLogOutSuccess() {
+				self.username = null;
+				self.loggedIn = false;
 
-		return deferred.promise;
-	}
+				deferred.resolve();
+			})
+			.error(function _authLogOutFailure() {
+				self.username = null;
+				self.loggedIn = false;
 
-	this.getUsername = function() { return this.username; }
+				deferred.reject("Unable to logout.");
+			});
 
-	this.login = function(username, password) {
-		var deferred = $q.defer();
-
-		var postData = {username: username, password: password};
-		var http = $injector.get('$http');
-
-		http.post(serverConfig.apiUrl('login'), postData)
-		.success(function (data, status) {
-			self.username = username;
-			self.userRoles = data.roles;
-			self.loggedIn = true;
-			deferred.resolve(username);
-		})
-		.error(function(data, status) {
-			self.username = null;
-			self.userRoles = null;
-			self.loggedIn = false;
-
-			if (status === 401)
-			{
-				deferred.reject("Invalid username/password");
-			} else {
-				deferred.reject("Unable to connect to the API server");
-			}
-		});
-
-		return deferred.promise;
-	}
-
-	this.logout = function() {
-		var deferred = $q.defer();
-		var http = $injector.get('$http');
-
-		http.post(serverConfig.apiUrl('logout'))
-		.success(function _authLogOutSuccess() {
-			self.username = null;
-			self.loggedIn = false;
-
-			deferred.resolve();
-		})
-		.error(function _authLogOutFailure() {
-			self.username = null;
-			self.loggedIn = false;
-
-			deferred.reject("Unable to logout.");
-		});
-
-		return deferred.promise;
-	}
-}]);
-
+			return deferred.promise;
+		};
+	}]);
+})();

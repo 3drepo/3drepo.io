@@ -15,79 +15,83 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-angular.module('3drepo')
-.service('ViewerService', ['$window', 'StateManager', 'serverConfig', '$http', '$q', function($window, StateManager, serverConfig, $http, $q){
-	var self = this;
-	var readyQ = $q.defer();
+(function() {
+	"use strict";
 
-	self.ready = readyQ.promise;
+	angular.module("3drepo")
+	.service("ViewerService", ["$window", "StateManager", "serverConfig", "$http", "$q", function($window, StateManager, serverConfig, $http, $q){
+		var self = this;
+		var readyQ = $q.defer();
 
-	this.init = function(viewerManager, defaultViewer) {
-		// Viewer Manager controls layout of viewer
-		self.viewerManager = viewerManager;
-		self.defaultViewer = defaultViewer;
-		self.defaultViewer.enableClicking();
+		self.ready = readyQ.promise;
 
-		$window.viewer = self.defaultViewer;
+		this.init = function(viewerManager, defaultViewer) {
+			// Viewer Manager controls layout of viewer
+			self.viewerManager = viewerManager;
+			self.defaultViewer = defaultViewer;
+			self.defaultViewer.enableClicking();
 
-		// TODO: Move this so that the attachment is contained
-		// within the plugins themselves.
-		// Comes free with oculus support and gamepad support
-		self.oculus		= new Oculus(self.defaultViewer);
-		self.gamepad	= new Gamepad(self.defaultViewer);
-		self.gamepad.init();
+			$window.viewer = self.defaultViewer;
 
-		self.collision  = new Collision(self.defaultViewer);
+			// TODO: Move this so that the attachment is contained
+			// within the plugins themselves.
+			// Comes free with oculus support and gamepad support
+			self.oculus     = new Oculus(self.defaultViewer);
+			self.gamepad    = new Gamepad(self.defaultViewer);
+			self.gamepad.init();
 
-		self.defaultViewer.whenLoaded(function () {
-			readyQ.resolve();
-		});
-	}
+			self.collision  = new Collision(self.defaultViewer);
 
-	this.linkFunction = function (callback)
-	{
-		self.viewerManager.linkFunction(callback);
-	}
+			self.defaultViewer.whenLoaded(function () {
+				readyQ.resolve();
+			});
+		};
 
-	this.loadModel = function() {
-		var branch		= StateManager.state.branch ? StateManager.state.branch : "master";
-		var revision	= StateManager.state.revision ? StateManager.state.revision : "head";
-
-		var url = null;
-
-		if (revision == "head")
+		this.linkFunction = function (callback)
 		{
-			url = serverConfig.apiUrl(StateManager.state.account + '/' + StateManager.state.project + '/revision/' + branch + '/head.x3d.mp');
-		} else {
-			url = serverConfig.apiUrl(StateManager.state.account + '/' + StateManager.state.project + '/revision/' + revision + '.x3d.mp');
-		}
+			self.viewerManager.linkFunction(callback);
+		};
 
-		self.defaultViewer.loadURL(url);
-		self.defaultViewer.setCurrentViewpoint("model__" + StateManager.state.account + "_" + StateManager.state.project + "_origin");
-	}
+		this.loadModel = function() {
+			var branch		= StateManager.state.branch ? StateManager.state.branch : "master";
+			var revision	= StateManager.state.revision ? StateManager.state.revision : "head";
 
-	this.pickPoint = function(x,y)
-	{
-		self.defaultViewer.pickPoint(x,y);
-		return self.defaultViewer.pickObject;
-	}
+			var url = null;
 
-	this.switchVR = function()
-	{
-		if(self.oculus)
-			self.oculus.switchVR();
-	}
+			if (revision === "head")
+			{
+				url = serverConfig.apiUrl(StateManager.state.account + "/" + StateManager.state.project + "/revision/" + branch + "/head.x3d.mp");
+			} else {
+				url = serverConfig.apiUrl(StateManager.state.account + "/" + StateManager.state.project + "/revision/" + revision + ".x3d.mp");
+			}
 
-	this.close = function() {
-		// Close down oculus and gamepad support
-		delete $window.oculus;
-		delete $window.collision;
+			self.defaultViewer.loadURL(url);
+			self.defaultViewer.setCurrentViewpoint("model__" + StateManager.state.account + "_" + StateManager.state.project + "_origin");
+		};
 
-		// Close down the viewer manager
-		self.viewerManager.close();
-		delete $window.viewerManager;
-		self.defaultViewer = null;
-	}
+		this.pickPoint = function(x,y)
+		{
+			self.defaultViewer.pickPoint(x,y);
+			return self.defaultViewer.pickObject;
+		};
 
-}]);
+		this.switchVR = function()
+		{
+			if(self.oculus) {
+				self.oculus.switchVR();
+			}
+		};
+
+		this.close = function() {
+			// Close down oculus and gamepad support
+			delete $window.oculus;
+			delete $window.collision;
+
+			// Close down the viewer manager
+			self.viewerManager.close();
+			delete $window.viewerManager;
+			self.defaultViewer = null;
+		};
+	}]);
+})();
 
