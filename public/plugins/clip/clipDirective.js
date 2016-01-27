@@ -48,6 +48,7 @@
 		vm.clipPlane = null;
 		vm.axes = ["X", "Y", "Z"];
 		vm.selectedAxis = vm.axes[0];
+		vm.visible = false;
 
 		function initClippingPlane () {
 			$timeout(function () {
@@ -120,7 +121,7 @@
 			if (vm.clipPlane) {
 				moveClippingPlane(newValue);
 			} else {
-				vm.visible = true;
+				vm.visible = (vm.sliderPosition !== 0);
 			}
 		});
 
