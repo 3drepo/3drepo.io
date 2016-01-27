@@ -7,9 +7,8 @@
 		md-tooltip(md-direction="top") {{button.label}}
 		md-icon(md-font-icon="{{button.icon}}", class="fa")
 div
-	md-button.md-fab.md-primary(ng-click="bb.toggleElements()", aria-label="Show buttons", ng-hide="true")
-	compass
-rightButtons(ng-if="bb.showButtons")
+	compass(ng-click="bb.toggleElements()")
+#rightButtons(ng-if="bb.showButtons")
 	md-button.md-fab.md-mini.actionButton(
 		ng-repeat="button in bb.rightButtons track by $index"
 		ng-click="button.click()"
