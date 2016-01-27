@@ -29,6 +29,8 @@ router.get('/packages/:packageName.json', hasReadPackageAccess, findPackage);
 router.post('/packages/:packageName/attachments', middlewares.isMainContractor, uploadAttachment);
 //download attachment
 router.get('/packages/:packageName/attachments/:id', middlewares.isMainContractor, downloadAttachment);
+//delete attachment
+router.delete('/packages/:packageName/attachments/:id', middlewares.isMainContractor, deleteAttachment);
 
 function createPackage(req, res, next) {
 	'use strict';
@@ -122,7 +124,7 @@ function uploadAttachment(req, res, next){
 				}).catch(err => {
 					defer.reject({ resCode: responseCodes.PROCESS_ERROR(partError)});
 				});
-				
+
 			} else {
 				// reject any other fields or files
 				part.resume();
@@ -185,6 +187,20 @@ function downloadAttachment(req, res, next){
 
 	});
 
+}
+
+function deleteAttachment(req, res, next){
+	'use strict';
+
+	let place = '/:account/:project/packages/:packageName/attachments/id DELETE';
+
+	_getPackage(req).then(projectPackage => {
+		return projectPackage.deleteAttachment(req.params.id);
+	}).then(() => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, {"status": "success"});
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
 }
 
 function listPackages(req, res, next){

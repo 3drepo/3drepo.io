@@ -15,6 +15,7 @@ var schema = mongoose.Schema({
 	user: String,
 	attachments: [mongoose.Schema.Types.ObjectId]
 });
+var _ = require('lodash');
 
 schema.plugin(require('mongoose-timestamp'), {
   createdAt: 'createdOn',
@@ -91,6 +92,41 @@ schema.methods.getAttachmentMeta = function(){
 	return bucket.find({ _id: { '$in': this.attachments }}).toArray();
 }
 
+schema.methods._deleteAtth = function(id){
+	'use strict';
+
+	let bucket =  this._getGridFSBucket();
+
+	this.attachments.pull(id);
+	return bucket.delete(id);
+
+};
+
+schema.methods.deleteAttachment = function(ids, options){
+	'use strict';
+	
+	options = options || {};
+	let promiseList = [];
+	
+	if(Array.isArray(ids)){
+		ids.forEach(id => {
+			promiseList.push(this._deleteAtth(new ObjectID(id)));
+		})
+	} else {
+		let id = ids;
+		promiseList.push(this._deleteAtth(new ObjectID(id)));
+	}
+
+	return Promise.all(promiseList).then(() => {
+		if(!options.skipSave){
+			return this.save();
+		} else {
+			return Promise.resolve();
+		}
+	});
+
+}
+
 schema.methods.getAttachmentReadStream = function(id){
 	'use strict';
 
@@ -118,13 +154,16 @@ schema.methods.uploadAttachment = function(readStream, meta){
 	
 	let uploadStream = bucket.openUploadStream(meta.filename, meta);
 
+	let fileMeta, files;
+
 	readStream.pipe(uploadStream);
 
 	//check dup name and remove the old file id in attachments array
-	return bucket.find({filename: meta.filename}).toArray().then(files => {
-		files.forEach(fileMeta => {
-			this.attachments.pull(fileMeta._id);
-		});
+	
+	return bucket.find({filename: meta.filename}).toArray()
+	.then(_files => {
+
+		files = _files;
 
 		return new Promise((resolve, reject) => {
 			uploadStream.once('finish', function(fileMeta) {
@@ -135,9 +174,14 @@ schema.methods.uploadAttachment = function(readStream, meta){
 				reject(err);
 			});
 		});
+	
+	}).then(_fileMeta => {
+		
+		fileMeta = _fileMeta;
+		//delete all attachments with the same filename
+		return this.deleteAttachment(_.map(files, '_id'), { skipSave: true });
 
-	}).then(fileMeta => {
-		//update the model's attachments array
+	}).then(() => {	
 		this.attachments.push(uploadStream.id);
 		return this.save().then(() => {
 			return Promise.resolve(fileMeta);
