@@ -12,13 +12,13 @@ bottom-buttons {
 bottom-buttons #leftButtons {
   position: absolute;
   left: 0;
-  top: 5px;
+  top: 10px;
 }
 
 bottom-buttons #rightButtons {
   position: absolute;
   right: 0;
-  top: 5px;
+  top: 10px;
 }
 
 bottom-buttons #showButtonIcon {
@@ -26,10 +26,7 @@ bottom-buttons #showButtonIcon {
   margin-top: -5px;
 }
 
-bottom-buttons .actionButton {
-  background: #FFFFFF !important;
-}
-
 bottom-buttons .actionButton md-icon {
-  color: rgba(0, 0, 0, 0.6) !important;
+  color: #FFFFFF !important;
+  font-size: 25px;
 }

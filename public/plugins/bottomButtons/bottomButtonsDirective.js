@@ -90,15 +90,15 @@
 		};
 
         bb.leftButtons = [];
-		bb.leftButtons.push({label: "Home", icon: "fa-home", click: home});
-        bb.leftButtons.push({label: "Turntable", icon: "fa-mouse-pointer", click: turntable});
-        bb.leftButtons.push({label: "Helicopter", icon: "fa-arrows", click: helicopter});
-        bb.leftButtons.push({label: "Walk", icon: "fa-child", click: walk});
+		bb.leftButtons.push({label: "Home", icon: "fa fa-home", click: home});
+        bb.leftButtons.push({label: "Turntable", icon: "icon icon_turntable", click: turntable});
+        bb.leftButtons.push({label: "Helicopter", icon: "icon icon_helicopter", click: helicopter});
+        bb.leftButtons.push({label: "Walk", icon: "fa fa-child", click: walk});
 
         bb.rightButtons = [];
-        bb.rightButtons.push({label: "Help", icon: "fa-question", click: toggleHelp});
-        bb.rightButtons.push({label: "Full screen", icon: "fa-arrows-alt", click: enterFullScreen});
-		bb.rightButtons.push({label: "QR code", icon: "fa-qrcode", click: showQRCodeReader});
-		bb.rightButtons.push({label: "Oculus", icon: "fa-simplybuilt", click: enterOculusDisplay});
+        bb.rightButtons.push({label: "Help", icon: "fa fa-question", click: toggleHelp});
+        bb.rightButtons.push({label: "Full screen", icon: "fa fa-arrows-alt", click: enterFullScreen});
+		bb.rightButtons.push({label: "QR code", icon: "fa fa-qrcode", click: showQRCodeReader});
+		bb.rightButtons.push({label: "Oculus", icon: "icon icon_cardboard", click: enterOculusDisplay});
     }
 }());
