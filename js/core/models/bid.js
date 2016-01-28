@@ -3,6 +3,7 @@ var ModelFactory = require('./factory/modelFactory');
 var ProjectPackage = require('./projectPackage');
 var responseCode = require('../response_codes');
 var C = require('../constants.js');
+var termsAndCondsSchema = require('./sharedSchemas/termsAndConds');
 
 var schema = mongoose.Schema({
 	user: { type: String, required: true },
@@ -12,13 +13,17 @@ var schema = mongoose.Schema({
 	awarded: { type: Boolean, default: null },
 	awardedOn: Date,
 	invitedOn: Date,
-	packageName: { type: String, required: true }
+	submittedOn: Date,
+	packageName: { type: String, required: true },
+	termsAndConds: termsAndCondsSchema
 });
 
 schema.plugin(require('mongoose-timestamp'), {
   createdAt: 'createdOn',
   updatedAt: 'updatedOn'
 });
+
+var defaultProjection = { 'termsAndConds': 0};
 
 schema.pre('save', function(next){
 	'use strict';
@@ -66,12 +71,12 @@ schema.post('save', function(doc){
 });
 
 // Model statics method
-schema.statics.findByPackage = function(dbColOptions, packageName){
-	return Bid.find(dbColOptions, {packageName});
+schema.statics.findByPackage = function(dbColOptions, packageName, projection){
+	return Bid.find(dbColOptions, {packageName}, projection || defaultProjection);
 };
 
-schema.statics.findByUser = function(dbColOptions, user){
-	return Bid.findOne(dbColOptions, {user});
+schema.statics.findByUser = function(dbColOptions, user, projection){
+	return Bid.findOne(dbColOptions, {user}, projection || defaultProjection);
 };
 
 schema.methods.responded = function(){

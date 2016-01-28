@@ -181,7 +181,7 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 		
 		req[C.REQ_REPO].logger.logError(JSON.stringify(responseObject), req);
 		
-		res.status(resCode.status).json(responseObject);
+		res.status(resCode.status).send(responseObject);
 
 	} else {
 		if(Buffer.isBuffer(extraInfo))

@@ -21,10 +21,14 @@ var getDbColOptions = function(req){
 router.use(middlewares.loggedIn);
 // Create a package
 router.post('/packages.json', middlewares.isMainContractor,  createPackage);
+// Update a package
+router.put('/packages/:packageName.json', middlewares.isMainContractor,  updatePackage);
 // Get all packages
 router.get('/packages.json', middlewares.isMainContractor, listPackages);
 // Get a package by name
 router.get('/packages/:packageName.json', hasReadPackageAccess, findPackage);
+// Get a package by name
+//router.get('/packages/:packageName/termsAndConds.html', hasReadPackageAccess, showTermsAndCondsHTML);
 //upload attachment
 router.post('/packages/:packageName/attachments', middlewares.isMainContractor, uploadAttachment);
 //download attachment
@@ -58,6 +62,7 @@ function createPackage(req, res, next) {
 
 }
 
+
 function _getPackage(req){
 	return ProjectPackage.findByName(getDbColOptions(req), req.params.packageName).then(projectPackage => {
 		if(projectPackage){
@@ -66,6 +71,25 @@ function _getPackage(req){
 			return Promise.reject({ resCode: responseCodes.PACKAGE_NOT_FOUND });
 		}
 	})
+}
+
+function updatePackage(req, res, next){
+	'use strict';
+
+	let place = '/:account/:project/packages/:packageName.json PUT';
+
+	_getPackage(req).then(projectPackage => {
+
+		let whitelist = ['name', 'site', 'budget', 'completedBy', 'code', 'contact', 'area', 'termsAndConds'];
+		projectPackage = utils.writeCleanedBodyToModel(whitelist, req.body, projectPackage);
+		return projectPackage.save();
+
+	}).then(projectPackage => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, projectPackage);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+
 }
 
 function findPackage(req, res, next){
@@ -236,5 +260,16 @@ function hasReadPackageAccess(req, res, next){
 	});
 }
 
+function showTermsAndCondsHTML(req, res, next){
+	'use strict';
+
+	let place = '/:account/:project/packages/:packageName/termsAndConds.html GET';
+
+	_getPackage(req).then(projectPackage => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, projectPackage.getTermsAndCondsHTML());
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
 
 module.exports = router;

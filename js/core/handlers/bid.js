@@ -21,6 +21,10 @@ router.get('/bids.json', middlewares.isMainContractor,  listBids);
 router.post('/bids/:id/award', middlewares.isMainContractor,  awardBid);
 // get My bid (SC)
 router.get('/bids/mine.json', middlewares.isSubContractorInvited, findMyBid);
+// update bid tac
+router.put('/bids/mine/termsAndConds', middlewares.isSubContractorInvited, updateTermsAndCond);
+// get bid tac
+router.get('/bids/mine/termsAndConds', middlewares.isSubContractorInvited, getTermsAndCond);
 // accept bid (sc) //to be replaced by /bids/mine/invitation
 router.post('/bids/mine/accept', middlewares.isSubContractorInvited, acceptMyBid);
 // accept/decline bid (sc)
@@ -103,7 +107,7 @@ function awardBid(req, res, next){
 }
 
 // Get my bid helper
-function _getMyBid(req){
+function _getMyBid(req, projection){
 	'use strict';
 
 	let username;
@@ -112,7 +116,7 @@ function _getMyBid(req){
 		username = req.session[C.REPO_SESSION_USER].username;
 	}
 
-	return Bid.findByUser(getDbColOptions(req), username).then(bid => {
+	return Bid.findByUser(getDbColOptions(req), username, projection).then(bid => {
 		if (!bid) {
 			return Promise.reject({ resCode: responseCodes.BID_NOT_FOUND});
 		} else {
@@ -211,4 +215,32 @@ function updateMyBid(req, res, next){
 
 }
 
+function updateTermsAndCond(req, res, next){
+	'use strict';
 
+	let place = '/:account/:project/packages/:package/bids/mine/termsAndConds PUT';
+
+	_getMyBid(req).then(bid => {
+		
+		bid.termsAndConds = req.body;
+		bid.markModified('termsAndConds.items.values')
+		return bid.save();
+
+	}).then(bid => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, bid.termsAndConds);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function getTermsAndCond(req, res, next){
+	'use strict';
+
+	let place = '/:account/:project/packages/:package/bids/mine/termsAndConds GET';
+
+	_getMyBid(req, { termsAndConds: 1}).then(bid => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, bid.termsAndConds);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}

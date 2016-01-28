@@ -4,6 +4,7 @@ var C = require('../constants.js');
 var GridFSBucket = require('mongodb').GridFSBucket;
 var ObjectID  = require('mongodb').ObjectID;
 var responseCodes = require('../response_codes');
+
 var schema = mongoose.Schema({
 	name: { type: String, required: true },
 	site: { type: String, required: true },
@@ -13,8 +14,13 @@ var schema = mongoose.Schema({
 	budget: Number, 
 	completedBy: Date,
 	user: String,
-	attachments: [mongoose.Schema.Types.ObjectId]
+	attachments: [mongoose.Schema.Types.ObjectId],
+	// termsAndConds: [mongoose.Schema({
+	// 	title: String,   
+	// 	content: String,
+	// })]
 });
+
 var _ = require('lodash');
 
 schema.plugin(require('mongoose-timestamp'), {
@@ -159,12 +165,12 @@ schema.methods.uploadAttachment = function(readStream, meta){
 	readStream.pipe(uploadStream);
 
 	//check dup name and remove the old file id in attachments array
-	
 	return bucket.find({filename: meta.filename}).toArray()
 	.then(_files => {
 
 		files = _files;
 
+		//upload new file
 		return new Promise((resolve, reject) => {
 			uploadStream.once('finish', function(fileMeta) {
 				resolve(fileMeta);
@@ -182,6 +188,7 @@ schema.methods.uploadAttachment = function(readStream, meta){
 		return this.deleteAttachment(_.map(files, '_id'), { skipSave: true });
 
 	}).then(() => {	
+		// push new file id into array
 		this.attachments.push(uploadStream.id);
 		return this.save().then(() => {
 			return Promise.resolve(fileMeta);
@@ -189,6 +196,18 @@ schema.methods.uploadAttachment = function(readStream, meta){
 	});
 }
 
+schema.methods.getTermsAndCondsHTML = function(){
+	'use strict';
+
+	let rowTemplate = require('./templates/termsAndConds');
+	let html = "";
+
+	this.termsAndConds.forEach(row => {
+		html += rowTemplate(row);
+	})
+
+	return html;
+}
 
 var ProjectPackage = ModelFactory.createClass(
 	'Package', 
