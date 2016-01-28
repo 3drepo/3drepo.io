@@ -205,7 +205,15 @@
 					vm.commentsToggledIssueId = null;
 
 					// Set the height of the content
-					setContentHeight();
+					if (vm.issuesToShow.length === 0) {
+						vm.showIssuesInfo = true;
+						vm.issuesInfo = "There are no issues that contain the filter text";
+						vm.onSetContentHeight({height: 210});
+					}
+					else {
+						vm.showIssuesInfo = false;
+						setContentHeight();
+					}
 				}
 			}
 		}
@@ -347,6 +355,7 @@
 
 							setupIssuesToShow();
 							vm.showPins();
+							setContentHeight();
 						});
 					}
 				}
@@ -476,8 +485,8 @@
 		 * Set the content height.
 		 */
 		function setContentHeight () {
-			var i, length, height = 50, maxNumIssues = 12, issueMinHeight = 58, maxStringLength = 44, lineHeight = 18;
-			for (i = 0, length = vm.issuesToShow.length; ((i < length) && (i < maxNumIssues)); i += 1) {
+			var i, length, height = 50, issueMinHeight = 58, maxStringLength = 32, lineHeight = 18;
+			for (i = 0, length = vm.issuesToShow.length; (i < length); i += 1) {
 				height += issueMinHeight;
 				if (vm.issuesToShow[i].title.length > maxStringLength) {
 					height += lineHeight * Math.floor((vm.issuesToShow[i].title.length - maxStringLength) / maxStringLength);

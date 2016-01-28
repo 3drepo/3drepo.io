@@ -40,7 +40,6 @@
         var vm = this,
             i = 0,
             length = 0,
-			defaultWindowHeight = 917,  // The height of the window during dev
 			initialWindowHeight = $window.innerHeight;
 
 		vm.contentItems = [];
@@ -53,11 +52,11 @@
 		});
 
 		function sendWindowHeightChangeEvent (height) {
-			$element.css("height", (height - 97).toString() + "px");
+			$element.css("height", (height).toString() + "px");
 
 			EventService.send(
 				EventService.EVENT.WINDOW_HEIGHT_CHANGE,
-				{height: height, change: (defaultWindowHeight - height)}
+				{height: height, change: (initialWindowHeight - height)}
 			);
 		}
 
@@ -118,7 +117,7 @@
 							position: vm.position,
 							type: vm.contentItems[i].type,
 							show: vm.contentItems[i].show,
-							contentHeight: vm.contentItems[i].maxHeight
+							contentHeight: vm.contentItems[i].height
 						}
 					);
                 }

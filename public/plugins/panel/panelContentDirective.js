@@ -44,11 +44,11 @@
             currentSortIndex,
             filter = null,
 			currentHeight = 0,
-			changedHeight = 0,
 			contentHeightExtra = 20,
 			toggledContentHeight = 0,
 			minimized = false,
 			maxHeight,
+			maxPossibleHeight,
 			atMaxHeight = false,
 			heightChange = 0,
 			setHeight = 0, // The height set by the content
@@ -81,10 +81,8 @@
 				content.append(contentItem);
 				$compile(contentItem)($scope);
 
-				currentHeight = vm.contentData.maxHeight;
-				vm.contentHeight = vm.contentData.maxHeight;
-
 				// If the panel content appears by default inform other default panel contents
+				/*
 				if (vm.contentData.show) {
 					$timeout(function () {
 						EventService.send(
@@ -98,6 +96,7 @@
 						);
 					});
 				}
+				*/
 			}
 		});
 
@@ -128,12 +127,7 @@
 		});
 
 		$scope.$watch(EventService.currentEvent, function (event) {
-			if ((event.type === EventService.EVENT.PANEL_CONTENT_CLICK) && (event.value.position === vm.position)) {
-				if (event.value.contentItem !== vm.contentData.type) {
-					vm.contentHeight = vm.contentData.maxHeight;
-				}
-			}
-			else if (event.type === EventService.EVENT.TOGGLE_HELP) {
+			if (event.type === EventService.EVENT.TOGGLE_HELP) {
 				vm.showHelp = !vm.showHelp;
 			}
 			else if ((event.type === EventService.EVENT.PANEL_CONTENT_TOGGLED) &&
@@ -146,19 +140,17 @@
 					if (event.value.show)  {
 						// An other content is shown
 						otherContentHeight += toggledContentHeight;
-						if ((otherContentHeight + vm.contentHeight) > vm.contentData.maxHeight) {
-							changedHeight += toggledContentHeight;
+						if ((otherContentHeight + vm.contentHeight) > maxPossibleHeight) {
 							vm.contentHeight -= toggledContentHeight;
 						}
 					}
 					else {
 						// An other content is hidden
 						otherContentHeight -= toggledContentHeight;
-						if ((otherContentHeight + setHeight) < vm.contentData.maxHeight) {
+						if ((otherContentHeight + setHeight) < maxPossibleHeight) {
 							vm.contentHeight = setHeight;
 						}
 						else {
-							changedHeight -= toggledContentHeight;
 							if (vm.contentHeight !== vm.contentData.minHeight) {
 								vm.contentHeight += toggledContentHeight;
 							}
@@ -175,12 +167,17 @@
 			else if (event.type === EventService.EVENT.WINDOW_HEIGHT_CHANGE) {
 				if (event.value.change === 0) {
 					maxHeight = event.value.height - panelGap;
+					maxPossibleHeight = event.value.height - panelGap;
 				}
 				else if (vm.contentData.hasOwnProperty("minHeight")) {
 					heightChange = event.value.change;
-					if (!minimized && (setHeight >= (maxHeight - heightChange))) {
-						currentHeight = maxHeight - changedHeight - event.value.change;
-						vm.contentHeight = currentHeight;
+					if (!minimized) {
+						if ((setHeight >= (maxHeight - heightChange - otherContentHeight))) {
+							currentHeight = maxHeight - heightChange - otherContentHeight;
+							if (currentHeight > vm.contentData.minHeight) {
+								vm.contentHeight = currentHeight;
+							}
+						}
 					}
 				}
 			}
@@ -189,13 +186,6 @@
 		vm.toolbarClick = function () {
 			if (vm.contentData.hasOwnProperty("minHeight")) {
 				if (minimized) {
-					EventService.send(
-						EventService.EVENT.PANEL_CONTENT_CLICK,
-						{
-							position: vm.position,
-							contentItem: vm.contentData.type
-						}
-					);
 					vm.contentHeight = currentHeight;
 					minimized = false;
 				}

@@ -63,19 +63,19 @@
 			vm.idToPath = data.idToPath;
 			initNodesToShow();
 			setupInfiniteScroll();
-			setContentHeight();
+			setContentHeight(vm.nodesToShow);
 		});
 
 		/**
 		 * Set the content height.
 		 * The height of a node is dependent on its name length and its level.
 		 */
-		function setContentHeight () {
+		function setContentHeight (nodesToShow) {
 			var i, length, height = 50, maxNumNodes = 20, nodeMinHeight = 36,
 				maxStringLength = 35, maxStringLengthForLevel = 0, lineHeight = 18, levelOffset = 2;
-			for (i = 0, length = vm.nodesToShow.length; ((i < length) && (i < maxNumNodes)); i += 1) {
-				maxStringLengthForLevel = maxStringLength - (vm.nodesToShow[i].level * levelOffset);
-				height += nodeMinHeight + (lineHeight * Math.floor(vm.nodesToShow[i].name.length / maxStringLengthForLevel));
+			for (i = 0, length = nodesToShow.length; ((i < length) && (i < maxNumNodes)); i += 1) {
+				maxStringLengthForLevel = maxStringLength - (nodesToShow[i].level * levelOffset);
+				height += nodeMinHeight + (lineHeight * Math.floor(nodesToShow[i].name.length / maxStringLengthForLevel));
 			}
 			vm.onSetContentHeight({height: height});
 		}
@@ -131,7 +131,7 @@
 				}
 			}
 
-			setContentHeight();
+			setContentHeight(vm.nodesToShow);
 		};
 
 		/**
@@ -172,7 +172,7 @@
 			} else if (level === (path.length - 2)) {
 				vm.topIndex = selectedIndex - 2;
 			}
-			setContentHeight();
+			setContentHeight(vm.nodesToShow);
 		}
 
 		$(document).on("objectSelected", function (event, object) {
@@ -294,12 +294,12 @@
 				},
 
 				getLength: function () {
-					return this.numLoaded_ + 6;
+					return this.numLoaded_ + 50;
 				},
 
 				fetchMoreItems_: function (index) {
 					if (this.toLoad_ < index) {
-						this.toLoad_ += 500;
+						this.toLoad_ += 700;
 						$timeout(angular.noop, 300).then(angular.bind(this, function () {
 							this.numLoaded_ = this.toLoad_;
 						}));
@@ -329,8 +329,10 @@
 							vm.nodes[i].index = i;
 							vm.nodes[i].toggleState = "visible";
 							vm.nodes[i].class = "unselectedFilterItem";
+							vm.nodes[i].level = 0;
 						}
 						setupInfiniteItemsFilter();
+						setContentHeight(vm.nodes);
 					});
 				}
 			}
