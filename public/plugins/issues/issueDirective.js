@@ -40,9 +40,9 @@
 		};
 	}
 
-	IssueCtrl.$inject = ["$scope", "$timeout", "NewIssuesService", "ViewerService"];
+	IssueCtrl.$inject = ["$scope", "$timeout", "NewIssuesService", "ViewerService", "EventService"];
 
-	function IssueCtrl($scope, $timeout, NewIssuesService, ViewerService) {
+	function IssueCtrl($scope, $timeout, NewIssuesService, ViewerService, EventService) {
 		var vm = this,
 			promise = null,
 			originatorEv = null,
@@ -78,6 +78,12 @@
 		$scope.$watch("vm.commentsToggledIssueId", function (newValue) {
 			// If the comments is toggled on another comment, then close this one.
 			if (angular.isDefined(newValue)) {
+				// If the new value is null then all issues have been closed
+				if (!newValue)
+				{
+					NewIssuesService.highlightPin(null);
+				}
+
 				if (newValue !== vm.data._id) {
 					vm.showComments = false;
 
@@ -106,13 +112,8 @@
 							vm.data.viewpoint.up
 						);
 
-						if (vm.data.viewpoint.clippingPlanes) {
-							if (vm.data.viewpoint.clippingPlanes.length) {
-								ViewerService.defaultViewer.setClippingPlanes(vm.data.viewpoint.clippingPlanes);
-							} else {
-								ViewerService.defaultViewer.clearClippingPlanes();
-							}
-						}
+						NewIssuesService.highlightPin(newValue);
+						EventService.send(EventService.EVENT.SET_CLIPPING_PLANES, vm.data.viewpoint);
 					}
 				}
 			}

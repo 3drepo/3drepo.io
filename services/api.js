@@ -30,7 +30,7 @@ module.exports.app = function (sharedSession) {
 	// Attach the encoders to the router
 	require("../js/core/encoders/x3dom_encoder.js").route(routes);
 	require("../js/core/encoders/json_encoder.js").route(routes);
-	//var html_encoder = require("./js/core/encoders/html_encoder.js").route(routes);
+	require("../js/core/encoders/html_encoder.js").route(routes);
 	require("../js/core/encoders/src_encoder.js").route(routes);
 	require("../js/core/encoders/img_encoder.js").route(routes);
 	require("../js/core/encoders/bin_encoder.js").route(routes);
@@ -63,6 +63,8 @@ module.exports.app = function (sharedSession) {
 		extended: true
 	}));
 
+	app.set('views', './jade');
+	app.set('view_engine', 'jade');
 	app.use(bodyParser.json());
 
 	app.use(compress());

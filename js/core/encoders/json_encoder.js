@@ -770,14 +770,16 @@ exports.route = function(router)
 
 									vertsCount += numVertices;
 
+									// If the number of vertices for this mesh is
+									// in itself greater than the limit
 									if (numVertices > C.SRC_VERTEX_LIMIT)
 									{
 										vertsCount   = 0;
 
+										// We need to split the mesh into this many sub-meshes
 										var numMeshesRequired = Math.ceil(numVertices / C.SRC_VERTEX_LIMIT);
 
-										meshCounter += 1;
-
+										// Add an entry for all the created meshes
 										for(var j = 0; j < numMeshesRequired; j++)
 										{
 											map["name"]       = utils.uuidToString(subMeshKeys[i]) + "_" + j;
@@ -792,9 +794,11 @@ exports.route = function(router)
 											map = {};
 										}
 									} else {
+										// If this mesh pushes the combined mesh over the vertex limit
+										// then start a new supermesh
 										if (vertsCount > C.SRC_VERTEX_LIMIT) {
-											meshCounter += 1;
-											vertsCount = numVertices;
+											meshCounter += 1;         // Supermesh counter
+											vertsCount = numVertices; // New supermesh has this many vertices in
 										}
 
 										map["name"]       = utils.uuidToString(subMeshKeys[i]);

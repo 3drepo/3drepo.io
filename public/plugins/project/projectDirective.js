@@ -95,6 +95,7 @@
 			show: true,
 			help: "List current issues",
 			icon: "fa-map-marker",
+			canPrint: true,
 			hasFilter: true,
 			canAdd: true,
 			options: [
@@ -126,7 +127,8 @@
 			show: false,
 			help: "Clipping plane",
 			icon: "fa-object-group",
-            maxHeight: 190
+			maxHeight: 190,
+			showVisible: true
 		});
 		panelContent.right.push({
 			type: "docs",

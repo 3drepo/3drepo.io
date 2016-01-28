@@ -124,16 +124,61 @@
 					}
 
 					// Filter text
-					if (vm.filterText !== "") {
-						vm.issuesToShow = ($filter('filter')(vm.issuesToShow, vm.filterText));
+					if (angular.isDefined(vm.filterText) && vm.filterText !== "") {
+
+						// Helper function for searching strings
+						var stringSearch = function(superString, subString)
+						{
+							return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
+						};
+
+						vm.issuesToShow = ($filter('filter')(vm.issuesToShow, function(issue) {
+							// Required custom filter due to the fact that Angular
+							// does not allow compound OR filters
+							var i;
+
+							// Search the title
+							var show = stringSearch(issue.title, vm.filterText);
+							show = show || stringSearch(issue.timeStamp, vm.filterText);
+							show = show || stringSearch(issue.owner, vm.filterText);
+
+							// Search the list of assigned issues
+							if (!show && issue.hasOwnProperty("assigned_roles"))
+							{
+								i = 0;
+								while(!show && (i < issue.assigned_roles.length))
+								{
+									show = show || stringSearch(issue.assigned_roles[i], vm.filterText);
+									i += 1;
+								}
+							}
+
+							// Search the comments
+							if (!show && issue.hasOwnProperty("comments"))
+							{
+								i = 0;
+
+								while(!show && (i < issue.comments.length))
+								{
+									show = show || stringSearch(issue.comments[i].comment, vm.filterText);
+									show = show || stringSearch(issue.comments[i].owner, vm.filterText);
+									i += 1;
+								}
+							}
+
+							return show;
+						}));
+
+						//{title : vm.filterText} || {comments: { comment : vm.filterText }} ));
 					}
 
 					// Don't show issues assigned to certain roles
 					if (rolesToFilter.length > 0) {
-						for (i = (vm.issuesToShow.length - 1); i >= 0; i -= 1) {
+						i = 0;
+						while(i < vm.issuesToShow.length) {
 							roleAssigned = false;
 
-							if (vm.issuesToShow[i].hawOwnProperty("assigned_roles")) {
+							if (vm.issuesToShow[i].hasOwnProperty("assigned_roles")) {
 								for (j = 0, length = vm.issuesToShow[i].assigned_roles.length; j < length; j += 1) {
 									if (rolesToFilter.indexOf(vm.issuesToShow[i].assigned_roles[j]) !== -1) {
 										roleAssigned = true;
@@ -143,6 +188,8 @@
 
 							if (roleAssigned) {
 								vm.issuesToShow.splice(i, 1);
+							} else {
+								i += 1;
 							}
 						}
 					}
@@ -180,7 +227,7 @@
 					if (rolesToFilter.length > 0) {
 						roleAssigned = false;
 
-						if (vm.issuesToShow[i].hawOwnProperty("assigned_roles")) {
+						if (vm.issues[i].hasOwnProperty("assigned_roles")) {
 							for (j = 0, assignedRolesLength = vm.issues[i].assigned_roles.length; j < assignedRolesLength; j += 1) {
 								if (rolesToFilter.indexOf(vm.issues[i].assigned_roles[j]) !== -1) {
 									roleAssigned = true;

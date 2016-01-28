@@ -746,9 +746,9 @@ MongoWrapper.prototype.getUserPrivileges = function (username, database, callbac
     var adminDB = "admin";
 
     //First get all the roles this user is granted within the databases of interest
-     self.getUserRoles(username, database, function (status, roles) {
-            if (status.value) {
-                return callback(responseCodes.DB_ERROR(status));
+     self.getUserRoles(username, database, function (err, roles) {
+            if (err.value) {
+                return callback(err);
             }
 
             if (!roles || roles.length === 0) {

@@ -278,11 +278,13 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			newNode = xmlDoc.createElement('Inline');
 
 			var url_str = child['project'] + "." + mode + ".x3d";
+			var childRefAccount = child.hasOwnProperty('owner') ? child.owner : account;
 
-			if ('revision' in child)
-				var url_str = config.api_server.url + '/' + account + '/' + child['project'] + '/revision/master/' + child['revision'] + '.x3d.' + mode;
-			else
-				var url_str = config.api_server.url + '/' + account + '/' + child['project'] + '/revision/master/head.x3d.' + mode;
+			if ('revision' in child) {
+				var url_str = config.api_server.url + '/' + childRefAccount + '/' + child['project'] + '/revision/master/' + child['revision'] + '.x3d.' + mode;
+			} else {
+				var url_str = config.api_server.url + '/' + childRefAccount + '/' + child['project'] + '/revision/master/head.x3d.' + mode;
+			}
 
 			newNode.setAttribute('onload', 'onLoaded(event);');
 			newNode.setAttribute('url', url_str);
@@ -990,10 +992,9 @@ exports.route = function(router)
 
 						var currentMeshVFrom = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
 						var currentMeshVTo   = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO];
+						var currentMeshBBox  = currentMesh[C.REPO_NODE_LABEL_BOUNDING_BOX];
 
 						var currentMeshNumVertices = currentMeshVTo - currentMeshVFrom;
-
-						var currentMeshBBox   = currentMesh[C.REPO_NODE_LABEL_BOUNDING_BOX];
 
 						var numAddedMeshes = 0;
 
@@ -1031,7 +1032,7 @@ exports.route = function(router)
 
 						if ((runningVertTotal > C.SRC_VERTEX_LIMIT) || (currentMeshNumVertices > C.SRC_VERTEX_LIMIT)) {
 							runningVertTotal = currentMeshNumVertices;
-							maxSubMeshIDX += numAddedMeshes;
+							maxSubMeshIDX   += numAddedMeshes;
 
 							for(var j = 0; j < numAddedMeshes; j++)
 							{
@@ -1048,7 +1049,8 @@ exports.route = function(router)
 						subMeshBBoxes.push(bbox);
 					}
 
-					for(var subMeshIDX = 0; subMeshIDX < maxSubMeshIDX; subMeshIDX++)
+					// Loop through all IDs up to and including the maxSubMeshIDX
+					for(var subMeshIDX = 0; subMeshIDX <= maxSubMeshIDX; subMeshIDX++)
 					{
 						var subMeshName = mesh["id"] + "_" + subMeshIDX;
 

@@ -47,11 +47,12 @@ module.exports.createApp = function(template)
 	let app = express();
 	let _ = require('lodash');
 
+	app.use(compress({level:9}));
+
 	app.use(bodyParser.urlencoded({
 		extended: true
 	}));
 	app.use(bodyParser.json());
-	app.use(compress());
 
 	app.set('views', './jade');
 	app.set('view_engine', 'jade');
@@ -77,7 +78,7 @@ module.exports.createApp = function(template)
 		params.config_js += '\nserver_config.backgroundImage = "' + config.backgroundImage + '";';
 		params.config_js += '\nserver_config.chatHost	= "' + config.api_server.chat_host + '";';
 		params.config_js += '\nserver_config.chatPath	= "' + config.api_server.chat_path + '";';
-
+		params.config_js += '\nserver_config.apiVersion = "' + config.version + '";';
 
 		params.config_js += '\nserver_config.return_path = "/";';
 
@@ -216,7 +217,7 @@ module.exports.createApp = function(template)
 			params.pluginAngular[plugin].files	= [];
 
 			// Loop through the files to be loaded
-			
+
 			if(_.get(pluginConfig, 'files.jade'))
 			{
 				let nJadeFiles = pluginConfig.files.jade.length;
@@ -281,7 +282,7 @@ module.exports.createApp = function(template)
 					params.pluginCSS.push(cssFile);
 				}
 			}
-			
+
 
 			params.pluginLoaded.push(plugin);
 		}

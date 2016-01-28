@@ -5,10 +5,15 @@ div(id="vm.contentItem", layout="column", class="md-whiteframe-1dp", style="heig
 			span(class="fa", ng-class="vm.contentData.icon")
 			label(class="md-flex") {{vm.contentData.title}}
 			span(flex)
-			md-button.md-icon-button(aria-label="Add", ng-click="vm.toggleFilter($event)", ng-if="vm.contentData.hasFilter")
+			md-button.md-icon-button(aria-label="Print", ng-href="{{vm.issuesUrl}}", ng-click="vm.doPrint($event)", target="_blank", ng-if="vm.contentData.canPrint")
+				md-icon(class="fa fa-print")
+			md-button.md-icon-button(aria-label="Filter", ng-click="vm.toggleFilter($event)", ng-if="vm.contentData.hasFilter")
 				md-icon(class="fa fa-search")
 			md-button.md-icon-button(aria-label="Add", ng-click="vm.toggleAdd($event)", ng-if="vm.contentData.canAdd")
 				md-icon(class="fa fa-pencil")
+			md-button.md-icon-button(aria-label="Visibility", ng-click="vm.toggleVisible($event)", ng-if="vm.contentData.showVisible")
+				md-icon(class="fa fa-eye", ng-if="vm.visibleStatus")
+				md-icon(class="fa fa-eye-slash", ng-if="!vm.visibleStatus")
 
 			md-menu(md-position-mode="target-right target", ng-if="vm.hasOptions", md-offset="2 14")
 				md-button.md-icon-button(aria-label="Options", ng-click="$mdOpenMenu($event)")

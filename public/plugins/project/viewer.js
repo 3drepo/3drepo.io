@@ -1548,6 +1548,13 @@ var ClipPlane = function (id, viewer, axis, colour, distance, percentage, clipDi
 	var outlineCoords = document.createElement("Coordinate");
 
 	/**
+	 * Bounding box scale avoids flickering at edges
+	 * @private
+	 * @type {number}
+	 */
+	var BBOX_SCALE = 1.0001;
+
+	/**
 	 * Get my unique ID
 	 */
 	this.getID = function () {
@@ -1558,8 +1565,8 @@ var ClipPlane = function (id, viewer, axis, colour, distance, percentage, clipDi
 	 * Set the coordinates of the clipping plane outline
 	 */
 	var setOutlineCoordinates = function () {
-		var min = volume.min.toGL();
-		var max = volume.max.toGL();
+		var min = volume.min.multiply(BBOX_SCALE).toGL();
+		var max = volume.max.multiply(BBOX_SCALE).toGL();
 
 		var axisIDX = "XYZ".indexOf(self.axis);
 		var outline = [
@@ -1602,8 +1609,8 @@ var ClipPlane = function (id, viewer, axis, colour, distance, percentage, clipDi
 	this.movePlane = function (percentage) {
 		// Update the transform containing the clipping plane
 		var axisIDX = "XYZ".indexOf(this.axis);
-		var min = volume.min.toGL();
-		var max = volume.max.toGL();
+		var min = volume.min.multiply(BBOX_SCALE).toGL();
+		var max = volume.max.multiply(BBOX_SCALE).toGL();
 
 		self.percentage = percentage;
 		var distance = 0.0;
