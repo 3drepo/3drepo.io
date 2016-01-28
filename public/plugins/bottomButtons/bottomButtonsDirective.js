@@ -23,11 +23,11 @@
 
 	function bottomButtons () {
 		return {
-			restrict: 'E',
-			templateUrl: 'bottomButtons.html',
+			restrict: "E",
+			templateUrl: "bottomButtons.html",
 			scope: {},
 			controller: BottomButtonsCtrl,
-			controllerAs: 'bb',
+			controllerAs: "bb",
 			bindToController: true
 		};
 	}
@@ -40,10 +40,12 @@
 		bb.showButtons = true;
 		bb.fullScreen = false;
 
-		bb.toggleElements = function () {
-			EventService.send(EventService.EVENT.TOGGLE_ELEMENTS);
-			bb.showButtons = !bb.showButtons;
-		};
+        $scope.$watch(EventService.currentEvent, function (event) {
+            if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
+				bb.showButtons = !bb.showButtons;
+			}
+		});
+
 
 		var turntable = function () {
 			defaultViewer.setNavMode("TURNTABLE");
@@ -76,10 +78,10 @@
 				bb.fullScreen = false;
 			}
 		};
-		document.addEventListener('webkitfullscreenchange', exitFullScreen, false);
-		document.addEventListener('mozfullscreenchange', exitFullScreen, false);
-		document.addEventListener('fullscreenchange', exitFullScreen, false);
-		document.addEventListener('MSFullscreenChange', exitFullScreen, false);
+		document.addEventListener("webkitfullscreenchange", exitFullScreen, false);
+		document.addEventListener("mozfullscreenchange", exitFullScreen, false);
+		document.addEventListener("fullscreenchange", exitFullScreen, false);
+		document.addEventListener("MSFullscreenChange", exitFullScreen, false);
 
 		var showQRCodeReader = function () {
 			EventService.send(EventService.EVENT.SHOW_QR_CODE_READER);

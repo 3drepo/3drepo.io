@@ -1,6 +1,6 @@
-X3D#Axes(showStat="false", showLog="false")
+X3D#Axes(showStat="false", showLog="false", disableDoubleClick="true", mousedown="onMouseDown", mouseup="onMouseUp", viewpointchange="compassChange")
 	Scene
-		Viewpoint(position="0.765 0.765 5.0")
-		NavigationInfo("type"="NONE")
+		Viewpoint(position="0 0 3.3525")
+			NavigationInfo("type"="TURNTABLE", explorationMode="rotate", typeParams='-0.4 60.0 0 3.14 0.00001')
 		Transform#AxesTrans
 			Inline("url"="public/compass.x3d", onload="compassLoaded(event);")
