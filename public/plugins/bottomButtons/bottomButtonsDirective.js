@@ -16,70 +16,78 @@
  */
 
 (function () {
-    "use strict";
+	"use strict";
 
-    angular.module("3drepo")
-        .directive("bottomButtons", bottomButtons);
+	angular.module("3drepo")
+		.directive("bottomButtons", bottomButtons);
 
-    function bottomButtons () {
-        return {
-            restrict: 'E',
-            templateUrl: 'bottomButtons.html',
-            scope: {},
-            controller: BottomButtonsCtrl,
-            controllerAs: 'bb',
-            bindToController: true
-        };
-    }
+	function bottomButtons () {
+		return {
+			restrict: 'E',
+			templateUrl: 'bottomButtons.html',
+			scope: {},
+			controller: BottomButtonsCtrl,
+			controllerAs: 'vm',
+			bindToController: true
+		};
+	}
 
-    BottomButtonsCtrl.$inject = ["$scope", "EventService", "ViewerService"];
+	BottomButtonsCtrl.$inject = ["EventService", "ViewerService"];
 
-    function BottomButtonsCtrl ($scope, EventService, ViewerService) {
-        var bb = this,
-            defaultViewer = ViewerService.defaultViewer;
-        bb.showButtons = true;
-        bb.fullScreen = false;
+	function BottomButtonsCtrl (EventService, ViewerService) {
+		var vm = this,
+			defaultViewer = ViewerService.defaultViewer;
+		vm.showButtons = true;
+		vm.fullScreen = false;
+		vm.showViewingOptionButtons = false;
 
-        bb.toggleElements = function () {
-            EventService.send(EventService.EVENT.TOGGLE_ELEMENTS);
-            bb.showButtons = !bb.showButtons;
-        };
+		vm.toggleElements = function () {
+			EventService.send(EventService.EVENT.TOGGLE_ELEMENTS);
+			vm.showButtons = !vm.showButtons;
+		};
 
-        var turntable = function () {
-            defaultViewer.setNavMode("TURNTABLE");
-        };
+		var setViewingOption = function (index) {
+			if (angular.isDefined(index)) {
+				// Set the viewing mode
+				defaultViewer.setNavMode(vm.viewingOptions[index].mode);
 
-        var helicopter = function () {
-            defaultViewer.setNavMode("HELICOPTER");
-        };
+				// Replace this option with the current selected option
+				vm.otherViewingOptionsIndices[vm.otherViewingOptionsIndices.indexOf(index)] = vm.selectedViewingOptionIndex;
 
-        var walk = function () {
-            defaultViewer.setNavMode("WALK");
-        };
+				// Set up the new current selected option button
+				vm.selectedViewingOptionIndex = index;
+				vm.leftButtons[1] = vm.viewingOptions[index];
 
-        var home = function () {
-            defaultViewer.showAll();
-        };
+				vm.showViewingOptionButtons = false;
+			}
+			else {
+				vm.showViewingOptionButtons = !vm.showViewingOptionButtons;
+			}
+		};
 
-        var toggleHelp = function () {
-            EventService.send(EventService.EVENT.TOGGLE_HELP);
-        };
+		var home = function () {
+			defaultViewer.showAll();
+		};
 
-        var enterFullScreen = function () {
-            defaultViewer.switchFullScreen(null);
-            bb.fullScreen = true;
-        };
+		var toggleHelp = function () {
+			EventService.send(EventService.EVENT.TOGGLE_HELP);
+		};
 
-        var exitFullScreen = function() {
-            if (!document.webkitIsFullScreen && !document.msFullscreenElement && !document.mozFullScreen && bb.fullScreen) {
-                defaultViewer.switchFullScreen(null);
-                bb.fullScreen = false;
-            }
-        };
-        document.addEventListener('webkitfullscreenchange', exitFullScreen, false);
-        document.addEventListener('mozfullscreenchange', exitFullScreen, false);
-        document.addEventListener('fullscreenchange', exitFullScreen, false);
-        document.addEventListener('MSFullscreenChange', exitFullScreen, false);
+		var enterFullScreen = function () {
+			defaultViewer.switchFullScreen(null);
+			vm.fullScreen = true;
+		};
+
+		var exitFullScreen = function() {
+			if (!document.webkitIsFullScreen && !document.msFullscreenElement && !document.mozFullScreen && vm.fullScreen) {
+				defaultViewer.switchFullScreen(null);
+				vm.fullScreen = false;
+			}
+		};
+		document.addEventListener('webkitfullscreenchange', exitFullScreen, false);
+		document.addEventListener('mozfullscreenchange', exitFullScreen, false);
+		document.addEventListener('fullscreenchange', exitFullScreen, false);
+		document.addEventListener('MSFullscreenChange', exitFullScreen, false);
 
 		var showQRCodeReader = function () {
 			EventService.send(EventService.EVENT.SHOW_QR_CODE_READER);
@@ -89,16 +97,22 @@
 			ViewerService.switchVR();
 		};
 
-        bb.leftButtons = [];
-		bb.leftButtons.push({label: "Home", icon: "fa fa-home", click: home});
-        bb.leftButtons.push({label: "Turntable", icon: "icon icon_turntable", click: turntable});
-        bb.leftButtons.push({label: "Helicopter", icon: "icon icon_helicopter", click: helicopter});
-        bb.leftButtons.push({label: "Walk", icon: "fa fa-child", click: walk});
+		vm.viewingOptions = [
+			{mode: "TURNTABLE", label: "Turntable", icon: "icon icon_turntable", click: setViewingOption, index: 0},
+			{mode: "HELICOPTER", label: "Helicopter", icon: "icon icon_helicopter", click: setViewingOption, index: 1},
+			{mode: "WALK", label: "Walk", icon: "fa fa-child", click: setViewingOption, index: 2}
+		];
+		vm.selectedViewingOptionIndex = 0;
+		vm.otherViewingOptionsIndices = [2, 1];
 
-        bb.rightButtons = [];
-        bb.rightButtons.push({label: "Help", icon: "fa fa-question", click: toggleHelp});
-        bb.rightButtons.push({label: "Full screen", icon: "fa fa-arrows-alt", click: enterFullScreen});
-		bb.rightButtons.push({label: "QR code", icon: "fa fa-qrcode", click: showQRCodeReader});
-		bb.rightButtons.push({label: "Oculus", icon: "icon icon_cardboard", click: enterOculusDisplay});
-    }
+		vm.leftButtons = [];
+		vm.leftButtons.push({label: "Home", icon: "fa fa-home", click: home});
+		vm.leftButtons.push(vm.viewingOptions[vm.selectedViewingOptionIndex]);
+
+		vm.rightButtons = [];
+		//vm.rightButtons.push({label: "Full screen", icon: "fa fa-arrows-alt", click: enterFullScreen});
+		//vm.rightButtons.push({label: "QR code", icon: "fa fa-qrcode", click: showQRCodeReader});
+		vm.rightButtons.push({label: "Help", icon: "fa fa-question", click: toggleHelp});
+		vm.rightButtons.push({label: "Oculus", icon: "icon icon_cardboard", click: enterOculusDisplay});
+	}
 }());

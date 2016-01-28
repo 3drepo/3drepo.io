@@ -4,7 +4,7 @@ bottom-buttons {
   bottom: 10px;
   left: 0;
   right: 0;
-  width: 500px;
+  width: 280px;
   margin: auto;
   text-align: center;
 }
@@ -12,13 +12,13 @@ bottom-buttons {
 bottom-buttons #leftButtons {
   position: absolute;
   left: 0;
-  top: 10px;
+  top: 12px;
 }
 
 bottom-buttons #rightButtons {
   position: absolute;
   right: 0;
-  top: 10px;
+  top: 12px;
 }
 
 bottom-buttons #showButtonIcon {
@@ -29,4 +29,10 @@ bottom-buttons #showButtonIcon {
 bottom-buttons .actionButton md-icon {
   color: #FFFFFF !important;
   font-size: 25px;
+}
+
+bottom-buttons .viewingOptionButtons {
+  position: absolute;
+  right: 0;
+  top: -82px;
 }
