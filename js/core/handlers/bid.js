@@ -22,16 +22,17 @@ router.post('/bids/:id/award', middlewares.isMainContractor,  awardBid);
 // get My bid (SC)
 router.get('/bids/mine.json', middlewares.isSubContractorInvited, findMyBid);
 // update bid tac
-router.put('/bids/mine/termsAndConds', middlewares.isSubContractorInvited, updateTermsAndCond);
+router.put('/bids/mine/termsAndConds.json', middlewares.isSubContractorInvited, updateTermsAndCond);
 // get bid tac
-router.get('/bids/mine/termsAndConds', middlewares.isSubContractorInvited, getTermsAndCond);
+router.get('/bids/mine/termsAndConds.json', middlewares.isSubContractorInvited, getTermsAndCond);
 // accept bid (sc) //to be replaced by /bids/mine/invitation
 router.post('/bids/mine/accept', middlewares.isSubContractorInvited, acceptMyBid);
 // accept/decline bid (sc)
-router.post('/bids/mine/invitation', middlewares.isSubContractorInvited, replyMyBid);
+router.post('/bids/mine/invitation', middlewares.isSubContractorInvited, respondMyBid);
 // update my bid (sc)
 router.put('/bids/mine.json', middlewares.isSubContractorInvited, updateMyBid);
-
+//submit my bid
+router.post('/bids/mine/submit', middlewares.isSubContractorInvited, submitMyBid);
 
 
 
@@ -46,6 +47,7 @@ function createBid(req, res, next) {
 	let place = '/:account/:project/packages/:package/bids.json POST';
 
 	// Instantiate a model
+	// TO-DO: check req.body.user is a valid user in database
 
 	Bid.count(getDbColOptions(req), { 
 		packageName: req.params.packageName, 
@@ -106,6 +108,7 @@ function awardBid(req, res, next){
 
 }
 
+
 // Get my bid helper
 function _getMyBid(req, projection){
 	'use strict';
@@ -116,7 +119,14 @@ function _getMyBid(req, projection){
 		username = req.session[C.REPO_SESSION_USER].username;
 	}
 
-	return Bid.findByUser(getDbColOptions(req), username, projection).then(bid => {
+	let dbCol = getDbColOptions(req);
+	// original account
+	dbCol.packageAccount = dbCol.account;
+	// workspace account
+	dbCol.account = username;
+	dbCol.workspace = true;
+	
+	return Bid.findByUser(dbCol, username, projection).then(bid => {
 		if (!bid) {
 			return Promise.reject({ resCode: responseCodes.BID_NOT_FOUND});
 		} else {
@@ -141,49 +151,16 @@ function findMyBid(req, res, next){
 
 function acceptMyBid(req, res, next){
 	'use strict';
-
-	let place = '/:account/:project/packages/:package/bids/mine/accept POST';
-
-	_getMyBid(req).then(bid => {
-		
-		if(bid.responded()) {
-			return Promise.reject({ resCode: responseCodes.BID_ALREADY_ACCEPTED_OR_DECLINED });
-		} else {
-			bid.accepted = true;
-			bid.acceptedOn = new Date();
-
-			return bid.save();
-		}
-
-	}).then(bid => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, bid);
-	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
-
+	res.status(400).json({ "message": "This API is deprecated. Use /:account/:project/packages/:package/bids/mine/invitation instead"});
 }
 
-function replyMyBid(req, res, next){
+function respondMyBid(req, res, next){
 	'use strict';
 
 	let place = '/:account/:project/packages/:package/bids/mine/invitation POST';
 
 	_getMyBid(req).then(bid => {
-		
-		if(bid.responded()) {
-			return Promise.reject({ resCode: responseCodes.BID_ALREADY_ACCEPTED_OR_DECLINED });
-		} else {
-
-			// if (typeof req.body.accept !== 'boolean'){
-			// 	return Promise.reject({ resCode: responseCodes.MONGOOSE_VALIDATION_ERROR({ message: 'accept must be true or false'}) })
-			// } else {
-				bid.accepted = req.body.accept;
-				bid.acceptedOn = new Date();
-				return bid.save();
-			//}
-			
-		}
-
+		return bid.respond(req.body.accept);
 	}).then(bid => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, bid);
 	}).catch(err => {
@@ -201,6 +178,8 @@ function updateMyBid(req, res, next){
 		
 		if (!bid.accepted){
 			return Promise.reject({ resCode: responseCodes.BID_NOT_ACCEPTED_OR_DECLINED});
+		} else if (bid.submitted){
+			return Promise.reject({ resCode: responseCodes.BID_SUBMIITED});
 		} else  {
 			let whitelist = ['budget'];
 			bid = utils.writeCleanedBodyToModel(whitelist, req.body, bid);
@@ -222,13 +201,18 @@ function updateTermsAndCond(req, res, next){
 
 	_getMyBid(req).then(bid => {
 		
+		if(!bid.updateable()){
+			return Promise.reject({ resCode: responseCodes.BID_NOT_UPDATEABLE });
+		}
+
 		bid.termsAndConds = req.body;
-		bid.markModified('termsAndConds.items.values')
+		bid.markModified('termsAndConds.items.values');
 		return bid.save();
 
 	}).then(bid => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, bid.termsAndConds);
 	}).catch(err => {
+		console.log(err)
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
@@ -240,6 +224,23 @@ function getTermsAndCond(req, res, next){
 
 	_getMyBid(req, { termsAndConds: 1}).then(bid => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, bid.termsAndConds);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function submitMyBid(req, res, next){
+	'use strict';
+
+	let place = '/:account/:project/packages/:package/bids/mine/submit POST';
+	let projection = {};
+
+	// project on all fields as we have to move them to package space
+	_getMyBid(req, projection).then(bid => {
+		return bid.submit();
+	}).then(bid => {
+		bid.termsAndConds = undefined;
+		responseCodes.respond(place, req, res, next, responseCodes.OK, bid);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

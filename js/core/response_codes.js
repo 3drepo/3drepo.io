@@ -96,7 +96,10 @@ var responseCodes = {
 
 	PACKAGE_AWARDED :{ value: 48, message: 'This package has a winner already', status: 400},
 	ATTACHMENT_NOT_FOUND: {value:49, message: 'Attachment not found', status: 404},
-	ATTACHMENT_FIELD_NOT_FOUND: {value:50, message: 'attachment field not found in request body', status: 400},
+	ATTACHMENT_FIELD_NOT_FOUND: {value:50, message: 'Attachment field not found in request body', status: 400},
+
+	BID_SUBMIITED: { value: 51, message: 'Bid already submitted', status: 400},
+	BID_NOT_UPDATEABLE: {value: 52, message: 'Bid is not updateable since it is either submitted or declined', status: 400},
 
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {
@@ -111,7 +114,7 @@ var responseCodes = {
 
 		return {
 			value: 1000,
-			message: JSON.stringify(mongoErr),
+			message: mongoErr.message,
 			dbErr: mongoErr,
 			status: 500
 		};
@@ -149,7 +152,7 @@ var responseCodes = {
 };
 
 var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
-49,  50, 1000, 2000, 3000, 4000];
+49,  50, 51, 52, 1000, 2000, 3000, 4000];
 
 var mimeTypes = {
 	"src"  : "application/json",
