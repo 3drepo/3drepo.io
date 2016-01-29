@@ -52,9 +52,10 @@
 
 		function initClippingPlane () {
 			$timeout(function () {
-				vm.clipPlaneID = ViewerService.defaultViewer.addClippingPlane(translateAxis(vm.selectedAxis));
+				var initPosition = (vm.sliderMax - vm.sliderPosition) / vm.sliderMax;
+				ViewerService.defaultViewer.clearClippingPlanes();
+				vm.clipPlaneID = ViewerService.defaultViewer.addClippingPlane(translateAxis(vm.selectedAxis), 0, initPosition);
 				vm.clipPlane = ViewerService.defaultViewer.getClippingPlane(vm.clipPlaneID);
-				moveClippingPlane(vm.sliderPosition);
 			});
 		}
 
@@ -129,10 +130,7 @@
 			if (event.type === EventService.EVENT.SET_CLIPPING_PLANES) {
 				vm.clipPlane = null;
 
-				ViewerService.defaultViewer.clearClippingPlanes();
-
 				if (event.value.hasOwnProperty("clippingPlanes") && event.value.clippingPlanes.length) {
-					//ViewerService.defaultViewer.setClippingPlanes(event.value.clippingPlanes);
 					vm.selectedAxis   = translateAxis(event.value.clippingPlanes[0].axis);
 					vm.sliderPosition = (1.0 - event.value.clippingPlanes[0].percentage) * 100.0;
 					initClippingPlane();
