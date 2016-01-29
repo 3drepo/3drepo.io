@@ -71,7 +71,7 @@
 		 * The height of a node is dependent on its name length and its level.
 		 */
 		function setContentHeight (nodesToShow) {
-			var i, length, height = 50, maxNumNodes = 20, nodeMinHeight = 36,
+			var i, length, height = 0, maxNumNodes = 20, nodeMinHeight = 36,
 				maxStringLength = 35, maxStringLengthForLevel = 0, lineHeight = 18, levelOffset = 2;
 			for (i = 0, length = nodesToShow.length; ((i < length) && (i < maxNumNodes)); i += 1) {
 				maxStringLengthForLevel = maxStringLength - (nodesToShow[i].level * levelOffset);

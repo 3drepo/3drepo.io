@@ -127,6 +127,8 @@
 		});
 
 		$scope.$watch(EventService.currentEvent, function (event) {
+			var offset = 48;
+
 			if (event.type === EventService.EVENT.TOGGLE_HELP) {
 				vm.showHelp = !vm.showHelp;
 			}
@@ -166,8 +168,8 @@
 			}
 			else if (event.type === EventService.EVENT.WINDOW_HEIGHT_CHANGE) {
 				if (event.value.change === 0) {
-					maxHeight = event.value.height - panelGap;
-					maxPossibleHeight = event.value.height - panelGap;
+					maxHeight = event.value.height - panelGap - offset;
+					maxPossibleHeight = event.value.height - panelGap - offset;
 				}
 				else if (vm.contentData.hasOwnProperty("minHeight")) {
 					heightChange = event.value.change;
@@ -257,6 +259,7 @@
 		 * @param height
 		 */
 		vm.setContentHeight = function (height) {
+			console.log(vm.contentData.type, height);
 			if (height < (maxHeight - heightChange)) {
 				setHeight = height;
 				vm.contentHeight = height;

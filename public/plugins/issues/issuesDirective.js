@@ -485,7 +485,7 @@
 		 * Set the content height.
 		 */
 		function setContentHeight () {
-			var i, length, height = 50, issueMinHeight = 58, maxStringLength = 32, lineHeight = 18;
+			var i, length, height = 0, issueMinHeight = 58, maxStringLength = 32, lineHeight = 18;
 			for (i = 0, length = vm.issuesToShow.length; (i < length); i += 1) {
 				height += issueMinHeight;
 				if (vm.issuesToShow[i].title.length > maxStringLength) {

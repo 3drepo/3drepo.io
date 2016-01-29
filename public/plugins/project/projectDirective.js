@@ -118,7 +118,7 @@
 					secondSelected: false
 				}
 			],
-            minHeight: 120,
+            minHeight: 70,
 			height: 820
 		});
 		panelContent.right.push({
