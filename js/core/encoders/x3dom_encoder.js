@@ -945,7 +945,9 @@ exports.route = function(router)
 	{
         //find out what's the rid of head and try to fetch that from gridFS
         var rid = dbInterface(req[C.REQ_REPO].logger).getProjectBranchHeadRid(params.account, params.project, params.branch, function (rid) {
-            var gridfsURL = "/" + params.account + "/" + params.project + "/revision/" + rid;
+            var gridfsURL = "/" + params.account + "/" + params.project + "/revision/" + rid + "." + params.format;
+            if (params.subformat)
+                gridfsURL += "." + params.subformat;
             dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, gridfsURL, req.params[C.REPO_REST_API_FORMAT].toLowerCase(), function (callback) {
                 render(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.subformat, params.branch, null, err_callback);
             }, err_callback);
@@ -966,7 +968,9 @@ exports.route = function(router)
 	{
         //find out what's the rid of head and try to fetch that from gridFS
         var rid = dbInterface(req[C.REQ_REPO].logger).getProjectBranchHeadRid(params.account, paramx.project, params.branch, function (rid) {
-            var gridfsURL = "/" + params.account + "/" + params.project + "/revision/" + rid;
+            var gridfsURL = "/" + params.account + "/" + params.project + "/revision/" + rid + "." + params.format;
+            if (params.subformat)
+                gridfsURL += "." + params.subformat;
             dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, gridfsURL, req.params[C.REPO_REST_API_FORMAT].toLowerCase(), function (callback) {
                 render(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.subformat, params.branch, null, err_callback);
             }, err_callback);
