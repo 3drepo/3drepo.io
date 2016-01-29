@@ -98,21 +98,54 @@
 		};
 
 		vm.viewingOptions = [
-			{mode: "TURNTABLE", label: "Turntable", icon: "icon icon_turntable", click: setViewingOption, index: 0},
-			{mode: "HELICOPTER", label: "Helicopter", icon: "icon icon_orbit", click: setViewingOption, index: 1},
-			{mode: "WALK", label: "Walk", icon: "fa fa-child", click: setViewingOption, index: 2}
+			{
+				index: 0,
+				mode: "TURNTABLE",
+				label: "Turntable",
+				icon: "icon icon_turntable",
+				click: setViewingOption
+			},
+			{
+				index: 1,
+				mode: "HELICOPTER",
+				label: "Helicopter",
+				icon: "icon icon_helicopter",
+				click: setViewingOption,
+				iconClass: "bottomButtomIconHelicopter"
+			},
+			{
+				index: 2,
+				mode: "WALK",
+				label: "Walk",
+				icon: "fa fa-child",
+				click: setViewingOption,
+				iconClass: "bottomButtomIconWalk"
+			}
 		];
 		vm.selectedViewingOptionIndex = 0;
 		vm.otherViewingOptionsIndices = [2, 1];
 
 		vm.leftButtons = [];
-		vm.leftButtons.push({label: "Home", icon: "fa fa-home", click: home});
+		vm.leftButtons.push({
+			label: "Home",
+			icon: "fa fa-home",
+			click: home
+		});
 		vm.leftButtons.push(vm.viewingOptions[vm.selectedViewingOptionIndex]);
 
 		vm.rightButtons = [];
 		//vm.rightButtons.push({label: "Full screen", icon: "fa fa-arrows-alt", click: enterFullScreen});
 		//vm.rightButtons.push({label: "QR code", icon: "fa fa-qrcode", click: showQRCodeReader});
-		vm.rightButtons.push({label: "Help", icon: "fa fa-question", click: toggleHelp});
-		vm.rightButtons.push({label: "Oculus", icon: "icon icon_cardboard", click: enterOculusDisplay});
+		vm.rightButtons.push({
+			label: "Help",
+			icon: "fa fa-question",
+			click: toggleHelp
+		});
+		vm.rightButtons.push({
+			label: "Oculus",
+			icon: "icon icon_cardboard",
+			click: enterOculusDisplay,
+			iconClass: "bottomButtomIconCardboard"
+		});
 	}
 }());
