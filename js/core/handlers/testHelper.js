@@ -6,14 +6,25 @@ var router = express.Router({mergeParams: true});
 var C               = require("../constants");
 var dbInterface     = require("../db_interface.js");
 
-router.post('/roles/main-contractor',  createMCRole);
-router.post ('/roles/main-contractor/grant', grantUserRole);
+var log_iface = require("../logger.js");
+var systemLogger = log_iface.systemLogger;
+
+router.get('/roles/main-contractor',  createMCRole);
+router.get ('/roles/main-contractor/grant', grantUserRole);
 
 module.exports = router;
 
+systemLogger.logInfo(`
+	**********************************************************
+	*                                                        *
+	*         Warning: Test helper API is enabled            *
+	*                                                        *
+	**********************************************************
+`);
+
 function createMCRole(req, res){
 
-	dbInterface(req[C.REQ_REPO].logger).createMainContractorRole(req.body.account, req.body.project).then(() => {
+	dbInterface(req[C.REQ_REPO].logger).createMainContractorRole(req.query.account, req.query.project).then(() => {
 		res.status(200).json({status: 'OK'});
 	}).catch( err => {
 		res.status(500).json(err);
@@ -22,7 +33,7 @@ function createMCRole(req, res){
 
 
 function grantUserRole(req, res){
-	dbInterface(req[C.REQ_REPO].logger).grantUserMainContractorRole(req.body.user, req.body.account).then(() => {
+	dbInterface(req[C.REQ_REPO].logger).grantUserMainContractorRole(req.query.user, req.query.account).then(() => {
 		res.status(200).json({status: 'OK'});
 	}).catch( err => {
 		res.status(500).json(err);
