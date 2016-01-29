@@ -100,11 +100,11 @@ schema.statics.getPackageSpaceCollection  = function(account, project){
 };
 
 schema.methods.responded = function(){
-	return this.accepted !== null;
+	return this.accepted !== null || this.awarded !== null;
 };
 
 schema.methods.updateable = function(){
-	return this.accepted && !this.submitted;
+	return this.accepted && !this.submitted && this.awarded === null;
 };
 
 schema.methods.respond = function(accept){
@@ -145,12 +145,12 @@ schema.methods.submit = function() {
 
 	let bid;
 
-	if(!this.updateable()){
-		return Promise.reject({ resCode: responseCodes.BID_NOT_UPDATEABLE });
-	}
-
 	if(this.submitted) {
 		return Promise.reject({ resCode: responseCodes.BID_SUBMIITED });
+	}
+
+	if(!this.updateable()){
+		return Promise.reject({ resCode: responseCodes.BID_NOT_UPDATEABLE });
 	}
 
 	this.submitted = true;
@@ -171,11 +171,14 @@ schema.methods.submit = function() {
 
 schema.methods.award = function(){
 
+	//TO-DO: propogate the data back to sc workspace
 	return Bid.count(this._dbcolOptions, { packageName: this.packageName, awarded: true }).then(count => {
 		if (count > 0){
 			return Promise.reject({ resCode: responseCodes.PACKAGE_AWARDED});
 		} else if (!this.accepted) {
 			return Promise.reject({ resCode: responseCodes.BID_NOT_ACCEPTED_OR_DECLINED});
+		} else if (!this.submitted){
+			return Promise.reject({ resCode: responseCodes.BID_NOT_SUBMIITED });
 		} else {
 
 			this.awarded = true;

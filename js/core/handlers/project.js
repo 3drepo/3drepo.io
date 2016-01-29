@@ -81,19 +81,15 @@ function updateProjectSetting(req, res, next){
 }
 
 function hasReadProjectInfoAccess(req, res, next){
-	middlewares.checkRole([C.REPO_ROLE_SUBCONTRACTOR, C.REPO_ROLE_MAINCONTRACTOR], req).then((roles) => {
+	middlewares.checkRole([/*C.REPO_ROLE_SUBCONTRACTOR, */C.REPO_ROLE_MAINCONTRACTOR], req).then((roles) => {
 		// if role is maincontractor then no more check is needed
-
-		if(roles.indexOf(C.REPO_ROLE_MAINCONTRACTOR) !== -1){
-			return Promise.resolve();
-		} else {
-			return middlewares.isSubContractorInvitedHelper(req);
-		}
-
+		return Promise.resolve();
+	}).catch(() => {
+		return middlewares.isSubContractorInvitedHelper(req);
 	}).then(() => {
 		next();
 	}).catch(resCode => {
-		responseCodes.respond("Middleware: check has read project info access", req, res, next, resCode, null, req.params);
+		responseCodes.respond("Middleware: check has read access", req, res, next, resCode, null, req.params);
 	});
 }
 

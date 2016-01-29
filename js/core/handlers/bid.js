@@ -154,6 +154,7 @@ function acceptMyBid(req, res){
 	res.status(400).json({ "message": "This API is deprecated. Use /:account/:project/packages/:package/bids/mine/invitation instead"});
 }
 
+
 function respondMyBid(req, res, next){
 	'use strict';
 
@@ -176,10 +177,8 @@ function updateMyBid(req, res, next){
 
 	_getMyBid(req).then(bid => {
 		
-		if (!bid.accepted){
-			return Promise.reject({ resCode: responseCodes.BID_NOT_ACCEPTED_OR_DECLINED});
-		} else if (bid.submitted){
-			return Promise.reject({ resCode: responseCodes.BID_SUBMIITED});
+		if(!bid.updateable()){
+			return Promise.reject({ resCode: responseCodes.BID_NOT_UPDATEABLE });
 		} else  {
 			let whitelist = ['budget'];
 			bid = utils.writeCleanedBodyToModel(whitelist, req.body, bid);
@@ -193,6 +192,7 @@ function updateMyBid(req, res, next){
 	});
 
 }
+
 
 function updateTermsAndCond(req, res, next){
 	'use strict';
@@ -227,6 +227,7 @@ function getTermsAndCond(req, res, next){
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
+
 
 function submitMyBid(req, res, next){
 	'use strict';

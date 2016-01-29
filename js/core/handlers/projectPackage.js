@@ -32,7 +32,7 @@ router.get('/packages/:packageName.json', hasReadPackageAccess, findPackage);
 //upload attachment
 router.post('/packages/:packageName/attachments', middlewares.isMainContractor, uploadAttachment);
 //download attachment
-router.get('/packages/:packageName/attachments/:id', middlewares.isMainContractor, downloadAttachment);
+router.get('/packages/:packageName/attachments/:id', hasReadPackageAccess, downloadAttachment);
 //delete attachment
 router.delete('/packages/:packageName/attachments/:id', middlewares.isMainContractor, deleteAttachment);
 
@@ -243,15 +243,12 @@ function listPackages(req, res, next){
 
 // packages/* specific middlewares
 function hasReadPackageAccess(req, res, next){
-	middlewares.checkRole([C.REPO_ROLE_SUBCONTRACTOR, C.REPO_ROLE_MAINCONTRACTOR], req).then((roles) => {
+
+	middlewares.checkRole([/*C.REPO_ROLE_SUBCONTRACTOR, */C.REPO_ROLE_MAINCONTRACTOR], req).then((roles) => {
 		// if role is maincontractor then no more check is needed
-
-		if(roles.indexOf(C.REPO_ROLE_MAINCONTRACTOR) !== -1){
-			return Promise.resolve();
-		} else {
-			return middlewares.isSubContractorInvitedHelper(req);
-		}
-
+		return Promise.resolve();
+	}).catch(() => {
+		return middlewares.isSubContractorInvitedHelper(req);
 	}).then(() => {
 		next();
 	}).catch(resCode => {

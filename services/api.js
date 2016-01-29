@@ -26,6 +26,7 @@ module.exports.app = function (sharedSession) {
 	let config = require("../js/core/config.js");
 	let compress = require("compression");
 
+
 	//let systemLogger = log_iface.systemLogger;
 	// Attach the encoders to the router
 	require("../js/core/encoders/x3dom_encoder.js").route(routes);
