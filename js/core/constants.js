@@ -34,6 +34,8 @@ function define(name, value) {
 
 
 // Overall constants
+define("MASTER_BRANCH_NAME", "master");
+define("HEAD_REVISION_NAME", "revision");
 define("MASTER_BRANCH", "00000000-0000-0000-0000-000000000000");
 define("MASTER_UUID", utils.stringToUUID(module.exports.MASTER_BRANCH));
 

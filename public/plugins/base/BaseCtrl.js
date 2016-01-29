@@ -15,102 +15,132 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-angular.module('3drepo')
-.config([
-'$stateProvider',
-'$locationProvider',
-function($stateProvider, $locationProvider) {
-	$stateProvider.state('base', {
-		name : 'base',
-		resolve: {
-			StateManager: 'StateManager',
-			init : function(StateManager) { StateManager.refresh("base"); }
+(function() {
+	"use strict";
+
+	angular.module("3drepo")
+	.config([
+	"$stateProvider",
+	"$locationProvider",
+	function($stateProvider, $locationProvider) {
+		$stateProvider.state("base", {
+			name : "base",
+			resolve: {
+				StateManager: "StateManager",
+				init : function(StateManager) { StateManager.refresh("base"); }
+			}
+		});
+
+		// Removes Angular's # at the end of the URL
+		$locationProvider.html5Mode(true);
+	}])
+	.factory("BaseData", ["StateManager", "uiState", function(StateManager, uiState) {
+		var o = {};
+
+		o.refresh = function () {
+			// In the base we reset all the UI components
+			for (var uicomp in o.uiComps) {
+				if (StateManager.ui.hasOwnProperty(uicomp)) {
+					StateManager.ui[uicomp] = false;
+				}
+			}
+
+			for (var statevar in StateManager.state) {
+				if (StateManager.state.hasOwnProperty(statevar))
+				{
+					StateManager.state[statevar] = null;
+				}
+			}
+		};
+
+		o.uiComps = [];
+
+		for(var k in uiState)
+		{
+			if (k.hasOwnProperty(k)) {
+				for(var i = 0; i < uiState[k].length; i++)
+				{
+					var plugin = uiState[k][i];
+
+					if (o.uiComps.indexOf(plugin) === -1)
+					{
+						o.uiComps.push(plugin);
+					}
+				}
+			}
 		}
-	});
 
-	// Removes Angular's # at the end of the URL
-	$locationProvider.html5Mode(true);
-}])
-.factory('BaseData', ['StateManager', 'uiState', function(StateManager, uiState) {
-	var o = {};
-
-	o.refresh = function () {
-		// In the base we reset all the UI components
-		for (uicomp in o.uiComps)
-			if (uicomp in StateManager.ui)
-				StateManager.ui[uicomp] = false;
-
-		for (statevar in StateManager.state)
-			StateManager.state[statevar] = null;
-	};
-
-	o.uiComps = [];
-
-	for(k in uiState)
+		return o;
+	}])
+	.controller("BaseCtrl", ["$scope", "serverConfig", "StateManager", "Auth", "pageConfig", "$window", function($scope, serverConfig, StateManager, Auth, pageConfig, $window)
 	{
-		for(var i = 0; i < uiState[k].length; i++)
+		$scope.ui		= StateManager.ui;
+		$scope.Data		= StateManager.Data;
+		$scope.state	= StateManager.state;
+
+		// This is used to update the information in the Auth service
+		$scope.$watchGroup(["state.account", "state.project"], function() {
+			// If the project has changed then we need to update the list of groups
+			if ($scope.state.account && $scope.state.project)
+			{
+				Auth.loadProjectRoles($scope.state.account, $scope.state.project);
+			}
+		});
+
+		$window.logoClick = function()
 		{
-			var plugin = uiState[k][i];
+			pageConfig.goDefault();
+		};
 
-			if (o.uiComps.indexOf(plugin) == -1)
-				o.uiComps.push(plugin);
-		}
-	}
-
-	return o;
-}])
-.controller('BaseCtrl', ['$scope', 'serverConfig', 'StateManager', 'Auth', function($scope, serverConfig, StateManager, Auth)
-{
-	$scope.ui		= StateManager.ui;
-	$scope.Data		= StateManager.Data;
-	$scope.state	= StateManager.state;
-
-	// This is used to updte the information in the Auth service
-	$scope.$watchGroup(['state.account', 'state.project'], function(newValues) {
-		// If the project has changed then we need to update the list of groups
-		if ($scope.state.account && $scope.state.project)
+		$scope.goAccount = function()
 		{
-			Auth.loadProjectRoles($scope.state.account, $scope.state.project);
-		}
+			StateManager.setState({ "account" : Auth.username }, {"clearState" : true});
+			StateManager.updateState();
+		};
+
+		$scope.$on("notAuthorized", function() {
+			$scope.goAccount();
+		});
+
+
+		$scope.backgroundImage = serverConfig.backgroundImage;
+	}])
+	.run(["StateManager", function(StateManager) {
+		StateManager.registerPlugin("base", "BaseData", function () {
+			return "base"; // Always valid
+		});
+	}])
+
+	// Inspired by Ben Lesh"s answer - http://stackoverflow.com/a/12936046/782358
+	.factory("clickOutsideService", function ($document) {
+		return function($scope, expr) {
+			var clickCB = function() {
+				$scope.$apply(expr);
+			};
+
+			$document.on("click", clickCB);
+
+			$scope.$on("$destroy", function(){
+				$document.off("click", clickCB);
+			});
+		};
+	})
+
+	.directive("clickOutside", function ($document, clickOutsideService) {
+		return {
+			restrict: "A",
+			link: function(scope, element, attr) {
+				var clickCB = function(event) {
+					event.stopPropagation();
+				};
+				element.on("click", clickCB);
+
+				scope.$on("$destroy", function(){
+					element.off("click", clickCB);
+				});
+
+				clickOutsideService(scope, attr.clickOutside);
+			}
+		};
 	});
-
-	$scope.backgroundImage = serverConfig.backgroundImage;
-}])
-.run(['StateManager', function(StateManager) {
-	StateManager.registerPlugin('base', 'BaseData', function () {
-		return "base"; // Always valid
-	});
-}])
-
-// Inspired by Ben Lesh's answer - http://stackoverflow.com/a/12936046/782358
-.factory('clickOutsideService', function ($document) {
-    return function($scope, expr) {
-        var clickCB = function() {
-            $scope.$apply(expr);
-        };
-
-        $document.on('click', clickCB);
-
-        $scope.$on('$destroy', function(){
-            $document.off('click', clickCB);
-        });
-    };
-})
-
-.directive('clickOutside', function ($document, clickOutsideService) {
-    return {
-        restrict: 'A',
-        link: function(scope, element, attr) {
-            var clickCB = function(event) {
-                event.stopPropagation();
-            };
-            element.on('click', clickCB);
-
-            scope.$on('$destroy', function(){
-                element.off('click', clickCB);
-            });
-
-            clickOutsideService(scope, attr.clickOutside);
-        }
-    };
-});
+}());
