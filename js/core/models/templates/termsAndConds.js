@@ -5,4 +5,4 @@ module.exports = function(row){
 			<div class="tac-row-content">${row.content}</div>
 		</div>
 	`;
-}
+};

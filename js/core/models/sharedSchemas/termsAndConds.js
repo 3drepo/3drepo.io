@@ -18,5 +18,5 @@ var blockSchema = Schema({
 	items : [ itemSchema ]
 });
 
-var termsAndConds = [blockSchema]
+var termsAndConds = [blockSchema];
 module.exports = termsAndConds;

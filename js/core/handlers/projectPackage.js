@@ -70,7 +70,7 @@ function _getPackage(req){
 		} else {
 			return Promise.reject({ resCode: responseCodes.PACKAGE_NOT_FOUND });
 		}
-	})
+	});
 }
 
 function updatePackage(req, res, next){
@@ -120,7 +120,6 @@ function uploadAttachment(req, res, next){
 	'use strict';
 
 	let place = '/:account/:project/packages/:packageName/attachments POST';
-	let attachment;
 
 	_getPackage(req).then(projectPackage => {
 
@@ -146,7 +145,7 @@ function uploadAttachment(req, res, next){
 					defer.resolve(fileMeta);
 					part.resume();
 				}).catch(err => {
-					defer.reject({ resCode: responseCodes.PROCESS_ERROR(partError)});
+					defer.reject({ resCode: responseCodes.PROCESS_ERROR(err)});
 				});
 
 			} else {
@@ -155,7 +154,7 @@ function uploadAttachment(req, res, next){
 			}
 
 			part.on('error', function(err) {
-				partError = err
+				partError = err;
 			});
 		});
 
@@ -260,16 +259,16 @@ function hasReadPackageAccess(req, res, next){
 	});
 }
 
-function showTermsAndCondsHTML(req, res, next){
-	'use strict';
+// function showTermsAndCondsHTML(req, res, next){
+// 	'use strict';
 
-	let place = '/:account/:project/packages/:packageName/termsAndConds.html GET';
+// 	let place = '/:account/:project/packages/:packageName/termsAndConds.html GET';
 
-	_getPackage(req).then(projectPackage => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, projectPackage.getTermsAndCondsHTML());
-	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
-}
+// 	_getPackage(req).then(projectPackage => {
+// 		responseCodes.respond(place, req, res, next, responseCodes.OK, projectPackage.getTermsAndCondsHTML());
+// 	}).catch(err => {
+// 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+// 	});
+// }
 
 module.exports = router;

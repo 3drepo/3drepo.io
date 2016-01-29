@@ -81,7 +81,7 @@ schema.post('save', function(doc){
 var collectionNames = {
 	'packageSpace': project => `${project}.bids`,
 	'workspace': (packageAccount, project) => `${packageAccount}.${project}.mybid`,
-}
+};
 // Model statics method
 schema.statics.findByPackage = function(dbColOptions, packageName, projection){
 	return Bid.find(dbColOptions, {packageName}, projection || defaultProjection);
@@ -93,11 +93,11 @@ schema.statics.findByUser = function(dbColOptions, user, projection){
 
 schema.statics.getWorkspaceCollection = function(userAccount, packageAccount, project){
 	return ModelFactory.db.db(userAccount).collection(collectionNames.workspace(packageAccount, project));
-}
+};
 
 schema.statics.getPackageSpaceCollection  = function(account, project){
 	return ModelFactory.db.db(account).collection(collectionNames.packageSpace(project));
-}
+};
 
 schema.methods.responded = function(){
 	return this.accepted !== null;
@@ -105,7 +105,7 @@ schema.methods.responded = function(){
 
 schema.methods.updateable = function(){
 	return this.accepted && !this.submitted;
-}
+};
 
 schema.methods.respond = function(accept){
 	'use strict';
@@ -138,7 +138,7 @@ schema.methods.respond = function(accept){
 		return Promise.resolve(bid);
 	});
 	
-}
+};
 
 schema.methods.submit = function() {
 	'use strict';
@@ -167,7 +167,7 @@ schema.methods.submit = function() {
 	}).then(() => {
 		return Promise.resolve(bid);
 	});
-}
+};
 
 schema.methods.award = function(){
 

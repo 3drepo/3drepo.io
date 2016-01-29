@@ -89,14 +89,14 @@ schema.methods._getGridFSBucket = function(){
 		ModelFactory.db.db(this._dbcolOptions.account), 
 		{ bucketName:  collectionName(this._dbcolOptions) + '.attachments'}
 	);
-}
+};
 
 schema.methods.getAttachmentMeta = function(){
 	'use strict';
 
 	let bucket =  this._getGridFSBucket();
 	return bucket.find({ _id: { '$in': this.attachments }}).toArray();
-}
+};
 
 schema.methods._deleteAtth = function(id){
 	'use strict';
@@ -117,7 +117,7 @@ schema.methods.deleteAttachment = function(ids, options){
 	if(Array.isArray(ids)){
 		ids.forEach(id => {
 			promiseList.push(this._deleteAtth(new ObjectID(id)));
-		})
+		});
 	} else {
 		let id = ids;
 		promiseList.push(this._deleteAtth(new ObjectID(id)));
@@ -131,7 +131,7 @@ schema.methods.deleteAttachment = function(ids, options){
 		}
 	});
 
-}
+};
 
 schema.methods.getAttachmentReadStream = function(id){
 	'use strict';
@@ -149,9 +149,9 @@ schema.methods.getAttachmentReadStream = function(id){
 				meta: files[0]
 			});
 		}
-	})
+	});
 
-}
+};
 
 schema.methods.uploadAttachment = function(readStream, meta){
 	'use strict';
@@ -194,7 +194,7 @@ schema.methods.uploadAttachment = function(readStream, meta){
 			return Promise.resolve(fileMeta);
 		});
 	});
-}
+};
 
 schema.methods.getTermsAndCondsHTML = function(){
 	'use strict';
@@ -204,10 +204,10 @@ schema.methods.getTermsAndCondsHTML = function(){
 
 	this.termsAndConds.forEach(row => {
 		html += rowTemplate(row);
-	})
+	});
 
 	return html;
-}
+};
 
 var ProjectPackage = ModelFactory.createClass(
 	'Package', 

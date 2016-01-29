@@ -149,7 +149,7 @@ function findMyBid(req, res, next){
 }
 
 
-function acceptMyBid(req, res, next){
+function acceptMyBid(req, res){
 	'use strict';
 	res.status(400).json({ "message": "This API is deprecated. Use /:account/:project/packages/:package/bids/mine/invitation instead"});
 }
@@ -212,7 +212,6 @@ function updateTermsAndCond(req, res, next){
 	}).then(bid => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, bid.termsAndConds);
 	}).catch(err => {
-		console.log(err)
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }

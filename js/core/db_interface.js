@@ -1706,7 +1706,7 @@ DBInterface.prototype.getIssues = function(dbName, project, branch, revision, on
 									iter_callback(null, objIssues);
 								});
 							});
-						})
+						});
 					},
 					function (err, results) {
 						if (err) {
@@ -2564,7 +2564,7 @@ DBInterface.prototype.getProjectSettings = function(dbName, projectName, callbac
 		console.log(JSON.stringify(settings));
 		callback(responseCodes.OK, settings);
 	});
-}
+};
 
 DBInterface.prototype.getUserRolesForProject = function(database, project, username, callback)
 {
