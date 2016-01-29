@@ -77,6 +77,7 @@
 				maxStringLengthForLevel = maxStringLength - (nodesToShow[i].level * levelOffset);
 				height += nodeMinHeight + (lineHeight * Math.floor(nodesToShow[i].name.length / maxStringLengthForLevel));
 			}
+			console.log(nodesToShow.length);
 			vm.onSetContentHeight({height: height});
 		}
 
@@ -171,8 +172,8 @@
 				expandToSelection(path, (level + 1));
 			} else if (level === (path.length - 2)) {
 				vm.topIndex = selectedIndex - 2;
+				setContentHeight(vm.nodesToShow);
 			}
-			setContentHeight(vm.nodesToShow);
 		}
 
 		$(document).on("objectSelected", function (event, object) {
@@ -294,12 +295,12 @@
 				},
 
 				getLength: function () {
-					return this.numLoaded_ + 50;
+					return this.numLoaded_ + 5;
 				},
 
 				fetchMoreItems_: function (index) {
 					if (this.toLoad_ < index) {
-						this.toLoad_ += 700;
+						this.toLoad_ += 500;
 						$timeout(angular.noop, 300).then(angular.bind(this, function () {
 							this.numLoaded_ = this.toLoad_;
 						}));
