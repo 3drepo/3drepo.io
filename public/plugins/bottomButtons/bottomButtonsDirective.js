@@ -23,38 +23,46 @@
 
 	function bottomButtons () {
 		return {
-			restrict: "E",
-			templateUrl: "bottomButtons.html",
+			restrict: 'E',
+			templateUrl: 'bottomButtons.html',
 			scope: {},
 			controller: BottomButtonsCtrl,
-			controllerAs: "bb",
+			controllerAs: 'vm',
 			bindToController: true
 		};
 	}
 
-	BottomButtonsCtrl.$inject = ["$scope", "EventService", "ViewerService"];
+	BottomButtonsCtrl.$inject = ["EventService", "ViewerService"];
 
-	function BottomButtonsCtrl ($scope, EventService, ViewerService) {
-		var bb = this,
+	function BottomButtonsCtrl (EventService, ViewerService) {
+		var vm = this,
 			defaultViewer = ViewerService.defaultViewer;
-		bb.showButtons = true;
-		bb.fullScreen = false;
+		vm.showButtons = true;
+		vm.fullScreen = false;
+		vm.showViewingOptionButtons = false;
 
-		bb.toggleElements = function () {
+		vm.toggleElements = function () {
 			EventService.send(EventService.EVENT.TOGGLE_ELEMENTS);
-			bb.showButtons = !bb.showButtons;
+			vm.showButtons = !vm.showButtons;
 		};
 
-		var turntable = function () {
-			defaultViewer.setNavMode("TURNTABLE");
-		};
+		var setViewingOption = function (index) {
+			if (angular.isDefined(index)) {
+				// Set the viewing mode
+				defaultViewer.setNavMode(vm.viewingOptions[index].mode);
 
-		var helicopter = function () {
-			defaultViewer.setNavMode("HELICOPTER");
-		};
+				// Replace this option with the current selected option
+				vm.otherViewingOptionsIndices[vm.otherViewingOptionsIndices.indexOf(index)] = vm.selectedViewingOptionIndex;
 
-		var walk = function () {
-			defaultViewer.setNavMode("WALK");
+				// Set up the new current selected option button
+				vm.selectedViewingOptionIndex = index;
+				vm.leftButtons[1] = vm.viewingOptions[index];
+
+				vm.showViewingOptionButtons = false;
+			}
+			else {
+				vm.showViewingOptionButtons = !vm.showViewingOptionButtons;
+			}
 		};
 
 		var home = function () {
@@ -67,19 +75,19 @@
 
 		var enterFullScreen = function () {
 			defaultViewer.switchFullScreen(null);
-			bb.fullScreen = true;
+			vm.fullScreen = true;
 		};
 
 		var exitFullScreen = function() {
-			if (!document.webkitIsFullScreen && !document.msFullscreenElement && !document.mozFullScreen && bb.fullScreen) {
+			if (!document.webkitIsFullScreen && !document.msFullscreenElement && !document.mozFullScreen && vm.fullScreen) {
 				defaultViewer.switchFullScreen(null);
-				bb.fullScreen = false;
+				vm.fullScreen = false;
 			}
 		};
-		document.addEventListener("webkitfullscreenchange", exitFullScreen, false);
-		document.addEventListener("mozfullscreenchange", exitFullScreen, false);
-		document.addEventListener("fullscreenchange", exitFullScreen, false);
-		document.addEventListener("MSFullscreenChange", exitFullScreen, false);
+		document.addEventListener('webkitfullscreenchange', exitFullScreen, false);
+		document.addEventListener('mozfullscreenchange', exitFullScreen, false);
+		document.addEventListener('fullscreenchange', exitFullScreen, false);
+		document.addEventListener('MSFullscreenChange', exitFullScreen, false);
 
 		var showQRCodeReader = function () {
 			EventService.send(EventService.EVENT.SHOW_QR_CODE_READER);
@@ -89,16 +97,55 @@
 			ViewerService.switchVR();
 		};
 
-		bb.leftButtons = [];
-		bb.leftButtons.push({label: "Home", icon: "fa-home", click: home});
-		bb.leftButtons.push({label: "Turntable", icon: "fa-mouse-pointer", click: turntable});
-		bb.leftButtons.push({label: "Helicopter", icon: "fa-arrows", click: helicopter});
-		bb.leftButtons.push({label: "Walk", icon: "fa-child", click: walk});
+		vm.viewingOptions = [
+			{
+				index: 0,
+				mode: "TURNTABLE",
+				label: "Turntable",
+				icon: "icon icon_turntable",
+				click: setViewingOption
+			},
+			{
+				index: 1,
+				mode: "HELICOPTER",
+				label: "Helicopter",
+				icon: "icon icon_helicopter",
+				click: setViewingOption,
+				iconClass: "bottomButtomIconHelicopter"
+			},
+			{
+				index: 2,
+				mode: "WALK",
+				label: "Walk",
+				icon: "fa fa-child",
+				click: setViewingOption,
+				iconClass: "bottomButtomIconWalk"
+			}
+		];
+		vm.selectedViewingOptionIndex = 0;
+		vm.otherViewingOptionsIndices = [2, 1];
 
-		bb.rightButtons = [];
-		bb.rightButtons.push({label: "Help", icon: "fa-question", click: toggleHelp});
-		bb.rightButtons.push({label: "Full screen", icon: "fa-arrows-alt", click: enterFullScreen});
-		bb.rightButtons.push({label: "QR code", icon: "fa-qrcode", click: showQRCodeReader});
-		bb.rightButtons.push({label: "Oculus", icon: "fa-simplybuilt", click: enterOculusDisplay});
+		vm.leftButtons = [];
+		vm.leftButtons.push({
+			label: "Home",
+			icon: "fa fa-home",
+			click: home
+		});
+		vm.leftButtons.push(vm.viewingOptions[vm.selectedViewingOptionIndex]);
+
+		vm.rightButtons = [];
+		//vm.rightButtons.push({label: "Full screen", icon: "fa fa-arrows-alt", click: enterFullScreen});
+		//vm.rightButtons.push({label: "QR code", icon: "fa fa-qrcode", click: showQRCodeReader});
+		vm.rightButtons.push({
+			label: "Help",
+			icon: "fa fa-question",
+			click: toggleHelp
+		});
+		vm.rightButtons.push({
+			label: "Oculus",
+			icon: "icon icon_cardboard",
+			click: enterOculusDisplay,
+			iconClass: "bottomButtomIconCardboard"
+		});
 	}
 }());

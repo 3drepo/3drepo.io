@@ -61,3 +61,7 @@ create_node_user.js
 .idea/encodings.xml
 
 .idea/mongoSettings.xml
+
+public/css/fonts/three-d-repo.eot
+public/css/fonts/three-d-repo.ttf
+public/css/fonts/three-d-repo.woff
