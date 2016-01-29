@@ -493,13 +493,10 @@ DBInterface.prototype.getIssueStatsForProjectList = function(projectList, callba
 				project: project
 			});
 
-			self.logger.logInfo("LOOP #" + childrefs.length);
-
 			async.concat(childrefs, function (childref, ref_callback) {
 				var childDbName = childref.owner ? childref.owner : dbName;
 				var childProject = childref.project;
 
-				self.logger.logInfo(childDbName + " - " + childProject + " = BING");
 				dbConn(this.logger).collAggregation(childDbName, childProject + ".issues",
 					[ { $group : { _id: "$closed", count: { $sum : 1 }}} ],
 					function (err, result) {
@@ -507,7 +504,6 @@ DBInterface.prototype.getIssueStatsForProjectList = function(projectList, callba
 						{
 							// If there is an error return nothing, so the loop can continue
 							//self.logger.logError("Error computing stats for project list [" + JSON.stringify(err) + "]");
-							self.logger.logInfo(childDbName + " - " + childProject + " = BANGE");
 							return ref_callback(null, { closed: -100 , open: -100 });
 						}
 
@@ -529,8 +525,6 @@ DBInterface.prototype.getIssueStatsForProjectList = function(projectList, callba
 						}
 
 						issueCount.total = issueCount.open + issueCount.closed;
-
-						self.logger.logInfo(childDbName + " - " + childProject + " = BANG");
 
 						ref_callback(null, issueCount);
 					});
@@ -581,8 +575,6 @@ DBInterface.prototype.getUserInfo = function(username, callback) {
 		"customData.email" : 1
 	};
 
-	self.logger.logInfo("BEFORE");
-
 	dbConn(self.logger).filterColl("admin", "system.users", filter, projection, function(err, coll) {
 		if(err.value) {
 			return callback(err);
@@ -622,6 +614,7 @@ DBInterface.prototype.getUserInfo = function(username, callback) {
 					}
 				}
 
+				/*
 				self.getIssueStatsForProjectList(user.projects, function(err, projectStats) {
 					if (err.value)
 					{
@@ -631,6 +624,9 @@ DBInterface.prototype.getUserInfo = function(username, callback) {
 					user.projects = projectStats;
 					callback(responseCodes.OK, user);
 				});
+				*/
+
+				callback(responseCodes.OK, user);
 			});
 
 		} else {
@@ -1463,7 +1459,6 @@ DBInterface.prototype.getRevisions = function(dbName, project, branch, from, to,
 		}
 	}
 
-
 	var projection = null;
 
 	if (from && to)
@@ -1481,8 +1476,6 @@ DBInterface.prototype.getRevisions = function(dbName, project, branch, from, to,
 
 		projection._id = 1;
 	}
-
-	// var self = this;
 
 	dbConn(this.logger).filterColl(dbName, project + ".history", filter, projection, function(err, doc) {
 		if (err.value) {
