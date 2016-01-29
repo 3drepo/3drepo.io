@@ -6,7 +6,7 @@ var utils = require('../utils');
 var middlewares = require('./middlewares');
 var ProjectSetting = require('../models/projectSetting');
 var responseCodes = require('../response_codes');
-
+var C               = require("../constants");
 
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
@@ -15,7 +15,7 @@ var getDbColOptions = function(req){
 //Every API list below has to log in to access
 router.use(middlewares.loggedIn);
 
-router.get('/info.json', middlewares.isMainContractor, getProjectSetting);
+router.get('/info.json', hasReadProjectInfoAccess, getProjectSetting);
 
 // Update project info
 router.post('/info.json', middlewares.isMainContractor, updateProjectSetting);
@@ -77,6 +77,23 @@ function updateProjectSetting(req, res, next){
 		responseCodes.respond(place, req, res, next, responseCodes.OK, setting.info);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function hasReadProjectInfoAccess(req, res, next){
+	middlewares.checkRole([C.REPO_ROLE_SUBCONTRACTOR, C.REPO_ROLE_MAINCONTRACTOR], req).then((roles) => {
+		// if role is maincontractor then no more check is needed
+
+		if(roles.indexOf(C.REPO_ROLE_MAINCONTRACTOR) !== -1){
+			return Promise.resolve();
+		} else {
+			return middlewares.isSubContractorInvitedHelper(req);
+		}
+
+	}).then(() => {
+		next();
+	}).catch(resCode => {
+		responseCodes.respond("Middleware: check has read project info access", req, res, next, resCode, null, req.params);
 	});
 }
 

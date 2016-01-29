@@ -53,11 +53,16 @@ var middlewares = {
 
 
 	isSubContractorInvitedHelper: function(req){
+		'use strict';
 
-		return Bid.count(getDbColOptions(req), { 
-			packageName: req.params.packageName,
+		let filter = { 
 			user: req.session[C.REPO_SESSION_USER].username
-		}).then(count => {
+		};
+
+		if (req.params.packageName){
+			filter.packageName = req.params.packageName;
+		}
+		return Bid.count(getDbColOptions(req), filter).then(count => {
 			if (count > 0) {
 				return Promise.resolve();
 			} else {
