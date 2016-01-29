@@ -31,7 +31,7 @@ angular.module('3drepo')
 
 		var deferred = $q.defer();
 
-		if (username !== self.username && StateManager.state.project === undefined)
+		if (username !== self.username && !StateManager.state.project)
 		{
 			self.username  = username;
 			self.firstName = "";
