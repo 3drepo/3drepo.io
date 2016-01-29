@@ -99,7 +99,7 @@
 
 		vm.viewingOptions = [
 			{mode: "TURNTABLE", label: "Turntable", icon: "icon icon_turntable", click: setViewingOption, index: 0},
-			{mode: "HELICOPTER", label: "Helicopter", icon: "icon icon_helicopter", click: setViewingOption, index: 1},
+			{mode: "HELICOPTER", label: "Helicopter", icon: "icon icon_orbit", click: setViewingOption, index: 1},
 			{mode: "WALK", label: "Walk", icon: "fa fa-child", click: setViewingOption, index: 2}
 		];
 		vm.selectedViewingOptionIndex = 0;
