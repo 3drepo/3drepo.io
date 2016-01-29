@@ -42,12 +42,13 @@
 			promise;
 
 		vm.showDocsGetProgress = false;
-		vm.showDocsLoadInfo = false;
+		vm.showInfo = true;
+		vm.info = "No object currently selected";
 
 		function getObjectsDocs (object) {
 			if (vm.show) {
 				vm.docs = [];
-				vm.showDocsLoadInfo = false;
+				vm.showInfo = false;
 				vm.progressInfo = "Loading documents for " + object.name;
 				vm.showDocsGetProgress = true;
 				promise = DocsService.getDocs(object.id);
@@ -55,9 +56,9 @@
 				promise.then(function (data) {
 					vm.docs = data.meta;
 					vm.showDocsGetProgress = false;
-					vm.showDocsLoadInfo = (vm.docs.length === 0);
-					if (vm.showDocsLoadInfo) {
-						vm.docsLoadInfo = "No documents exist for " + object.name;
+					vm.showInfo = (vm.docs.length === 0);
+					if (vm.showInfo) {
+						vm.info = "No documents exist for object: " + object.name;
 					}
 				});
 			}
@@ -105,7 +106,8 @@
 			}
 			else {
 				vm.docs = [];
-				vm.showDocsLoadInfo = false;
+				vm.showInfo = true;
+				vm.info = "No object currently selected";
 			}
 		});
 	}

@@ -1,6 +1,6 @@
-div(id="vm.contentItem", layout="column", class="md-whiteframe-1dp", style="height:{{vm.contentHeight}}px")
+div(id="vm.contentItem", layout="column", class="md-whiteframe-1dp")
 
-	md-toolbar(class="md-primary", ng-click="vm.click()")
+	md-toolbar(class="md-primary", ng-click="vm.toolbarClick()")
 		div(class="md-toolbar-tools")
 			span(class="fa", ng-class="vm.contentData.icon")
 			label(class="md-flex") {{vm.contentData.title}}
@@ -36,7 +36,7 @@ div(id="vm.contentItem", layout="column", class="md-whiteframe-1dp", style="heig
 				md-button.md-icon-button(ng-click="vm.clearFilter()", aria-label="Clear filter")
 					md-icon(md-font-icon="fa-times-circle", class="fa")
 
-		md-content(id="content")
+		md-content(id="content", style="height:{{vm.contentHeight}}px")
 
 	div(ng-if="vm.showHelp")
 		md-button.md-fab.md-mini#helpButton(aria-label="Help")

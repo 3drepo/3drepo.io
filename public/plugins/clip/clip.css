@@ -1,7 +1,7 @@
 clip {
   display: block;
   width: 100%;
-  padding: 20px 10px 0 10px;
+  padding: 20px 10px 10px 10px;
 }
 
 clip md-radio-button {

@@ -133,12 +133,12 @@ var Viewer = function (name, handle, x3ddiv, manager) {
 
 			self.logo = document.createElement('div');
 			self.logo.setAttribute('id', 'viewer_logo');
-			self.logo.setAttribute('style', 'top: 0px; left: 60px; position: absolute; z-index:2;');
+			self.logo.setAttribute('style', 'top: 0px; left: 0; right: 0; position: absolute; z-index:2; margin: auto; width: 250px; margin-top: 10px');
 			self.logo.setAttribute("onclick", "logoClick()");
 
 			self.logoImage = document.createElement('img');
 			self.logoImage.setAttribute('src', logo_string);
-			self.logoImage.setAttribute('style', 'width: 150px;')
+			self.logoImage.setAttribute('style', 'width: 100%;');
 			self.logoImage.textContent = ' ';
 
 			self.logoLink = document.createElement('a');
@@ -149,7 +149,7 @@ var Viewer = function (name, handle, x3ddiv, manager) {
 				self.logoLink.setAttribute('href', 'https://3drepo.io');
 			}
 
-			self.logoLink.setAttribute('style', 'top: 0px; left: 0px; padding: 10px; position: absolute;')
+			//self.logoLink.setAttribute('style', 'top: 0px; left: 0px; padding: 10px; position: absolute;')
 			self.logoLink.appendChild(self.logoImage);
 
 			self.logo.appendChild(self.logoLink);

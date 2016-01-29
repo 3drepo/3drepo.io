@@ -2,7 +2,7 @@ div(layout="column", layout-align="start center")
 	div
 		| Axis:
 		md-radio-group(ng-model="vm.selectedAxis")
-			md-radio-button(ng-repeat="axis in vm.axes", value="{{axis}}") {{axis}}
+			md-radio-button(ng-repeat="axis in vm.axes", value="{{axis}}", ng-disabled="!vm.visible") {{axis}}
 
 	.clipSlider
 		div(layout="row", layout-align="start center")
@@ -13,6 +13,7 @@ div(layout="column", layout-align="start center")
 				min="{{vm.sliderMin}}"
 				max="{{vm.sliderMax}}"
 				aria-label="Position"
+				ng-disabled="!vm.visible"
 			)
 			div
 				input(
@@ -22,5 +23,6 @@ div(layout="column", layout-align="start center")
 					step="{{vm.sliderStep}}"
 					min="{{vm.sliderMin}}"
 					max="{{vm.sliderMax}}"
+					ng-disabled="!vm.visible"
 				)
 				| &nbsp;%
