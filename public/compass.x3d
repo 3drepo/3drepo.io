@@ -17,7 +17,7 @@
 			           rotation="1.000000 0.000000 0.000000 0.000000"
 			           >
 				<Group DEF="group_ME_Default_001">
-					<Shape onclick="toggleElements();">
+					<Shape>
 						<Appearance>
 							<Material DEF="MA_compass"
 							          diffuseColor="0.800 0.800 0.800"

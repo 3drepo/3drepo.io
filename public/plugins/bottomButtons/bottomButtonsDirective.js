@@ -40,12 +40,10 @@
 		bb.showButtons = true;
 		bb.fullScreen = false;
 
-        $scope.$watch(EventService.currentEvent, function (event) {
-            if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
-				bb.showButtons = !bb.showButtons;
-			}
-		});
-
+		bb.toggleElements = function () {
+			EventService.send(EventService.EVENT.TOGGLE_ELEMENTS);
+			bb.showButtons = !bb.showButtons;
+		};
 
 		var turntable = function () {
 			defaultViewer.setNavMode("TURNTABLE");
