@@ -1,10 +1,10 @@
 bottom-buttons {
   display: block;
   position: absolute;
-  bottom: 10px;
+  bottom: 80px;
   left: 0;
   right: 0;
-  width: 500px;
+  width: 550px;
   margin: auto;
   text-align: center;
 }
