@@ -15,40 +15,44 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-angular.module('3drepo')
-.factory('authInterceptor', ['$rootScope', '$q', function($rootScope, $q) {
-	return {
-		responseError: function(res)
-		{
-			if (res.status == 401) {
-				$rootScope.$broadcast("notAuthorized", null);
-			}
+(function() {
+	"use strict";
 
-			return $q.reject(res);
-		}
-	};
-}])
-.config(function ($httpProvider) {
-	var checkAuthorization = ['$q', '$location', function($q, $location) {
-		var onSuccess = function (res) { return res;}
-		var onError = function(res) {
-			if (res.status == 401 || res.status == 400) {
-				$location.path('/login');
+	angular.module("3drepo")
+	.factory("authInterceptor", ["$rootScope", "$q", function($rootScope, $q) {
+		return {
+			responseError: function(res)
+			{
+				if (res.status === 401) {
+					$rootScope.$broadcast("notAuthorized", null);
+				}
 
-				return $q.reject(res);
-			} else {
+				$rootScope.lastURL = res.config.url;
+
 				return $q.reject(res);
 			}
 		};
+	}])
+	.config(function ($httpProvider) {
+		var checkAuthorization = ["$q", "$location", function($q, $location) {
+			var onSuccess = function (res) { return res;};
+			var onError = function(res) {
+				if (res.status === 401 || res.status === 400) {
+					$location.path("/login");
 
-		return function (promise) {
-			return promise.then(onSuccess, onError);
-		};
-	}];
+					return $q.reject(res);
+				} else {
+					return $q.reject(res);
+				}
+			};
 
-	$httpProvider.interceptors.push(checkAuthorization);
-	$httpProvider.defaults.withCredentials = true;
-	$httpProvider.interceptors.push('authInterceptor');
-});
+			return function (promise) {
+				return promise.then(onSuccess, onError);
+			};
+		}];
 
-
+		$httpProvider.interceptors.push(checkAuthorization);
+		$httpProvider.defaults.withCredentials = true;
+		$httpProvider.interceptors.push("authInterceptor");
+	});
+})();
