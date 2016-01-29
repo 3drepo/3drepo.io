@@ -941,7 +941,9 @@ exports.route = function(router)
 
 	router.get('x3d', '/:account/:project/revision/:branch/head', function(req, res, params, err_callback)
 	{
-		render(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.subformat, params.branch, null, err_callback);
+        dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req, function (callback) {
+            render(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.subformat, params.branch, null, err_callback);
+        }, err_callback);
 	});
 
 	router.get('x3d', '/:account/:project/revision/:rid/:sid', function(req, res, params, err_callback)
