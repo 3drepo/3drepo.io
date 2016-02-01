@@ -4,7 +4,7 @@ bottom-buttons {
   bottom: 80px;
   left: 0;
   right: 0;
-  width: 310px;
+  width: 320px;
   margin: auto;
   text-align: center;
 }
@@ -29,12 +29,13 @@ bottom-buttons #showButtonIcon {
 bottom-buttons .actionButton md-icon {
   color: #FFFFFF !important;
   font-size: 25px;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
 }
 
 bottom-buttons .viewingOptionButtons {
   position: absolute;
   right: 0;
-  top: -90px;
+  top: -145px;
 }
 
 .bottomButtomIconCardboard {

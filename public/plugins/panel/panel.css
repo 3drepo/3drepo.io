@@ -25,8 +25,8 @@ panel #buttons .panelButtonGroup button {
   margin-bottom: 2px;
 }
 panel #buttons .panelButtonGroup label {
-  color: rgb(63, 81, 181);
-  text-shadow: 0 0 1px #FFFFFF;
+  color: #FFFFFF;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
 }
 
 /** Panels ************************************************************************************************************/
