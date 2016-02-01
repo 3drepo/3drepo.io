@@ -23,10 +23,7 @@ var schema = mongoose.Schema({
 
 var _ = require('lodash');
 
-schema.plugin(require('mongoose-timestamp'), {
-  createdAt: 'createdOn',
-  updatedAt: 'updatedOn'
-});
+schema.plugin(require('mongoose-timestamp'));
 
 schema.pre('save', function(next){
 	'use strict';

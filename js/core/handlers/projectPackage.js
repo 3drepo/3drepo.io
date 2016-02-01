@@ -1,11 +1,13 @@
 var express = require('express');
 var router = express.Router({mergeParams: true});
 // var config = require("../config.js");
-// var _ = require('lodash');
+var _ = require('lodash');
 var utils = require('../utils');
 var middlewares = require('./middlewares');
 
 var ProjectPackage = require('../models/projectPackage');
+var dbInterface = require("../db_interface.js");
+
 var responseCodes = require('../response_codes');
 // var Bid = require('../models/bid');
 
@@ -24,7 +26,7 @@ router.post('/packages.json', middlewares.isMainContractor,  createPackage);
 // Update a package
 router.put('/packages/:packageName.json', middlewares.isMainContractor,  updatePackage);
 // Get all packages
-router.get('/packages.json', middlewares.isMainContractor, listPackages);
+router.get('/packages.json', hasReadPackageAccess, listPackages);
 // Get a package by name
 router.get('/packages/:packageName.json', hasReadPackageAccess, findPackage);
 // Get a package by name
@@ -240,13 +242,37 @@ function listPackages(req, res, next){
 
 	let place = '/:account/:project/packages.json GET';
 
-	ProjectPackage.find(getDbColOptions(req),{}, ProjectPackage.defaultProjection).then(projectPackages => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, projectPackages);
-	}).catch(err => {
-		let errCode = utils.mongoErrorToResCode(err);
-		responseCodes.respond(place, req, res, next, errCode, err);
 
-	});
+	if(req.role === C.REPO_ROLE_MAINCONTRACTOR){
+		// Main contractor list all packages
+		ProjectPackage.find(getDbColOptions(req),{}, ProjectPackage.defaultProjection).then(projectPackages => {
+			responseCodes.respond(place, req, res, next, responseCodes.OK, projectPackages);
+		}).catch(err => {
+			let errCode = utils.mongoErrorToResCode(err);
+			responseCodes.respond(place, req, res, next, errCode, err);
+
+		});
+
+	} else if(req.role === C.REPO_ROLE_SUBCONTRACTOR) {
+		// Sub contractor list invited packages
+		dbInterface(req[C.REQ_REPO].logger).getUserBidInfo(req.session[C.REPO_SESSION_USER].username).then(bids => {
+
+			let filteredBids = _.filter(bids, { account : req.params.account, project: req.params.project});
+			let packages  = _.map(filteredBids, 'package');
+
+			return ProjectPackage.find(getDbColOptions(req), { name: {$in: packages}}, ProjectPackage.defaultProjection);
+
+		}).then(projectPackages => {
+			responseCodes.respond(place, req, res, next, responseCodes.OK, projectPackages);
+		}).catch(err => {
+			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+
+	} else {
+		// impossible path
+		responseCodes.respond(place, req, res, next, responseCodes.PROCESS_ERROR(`BUG: req.role is neither ${C.REPO_ROLE_MAINCONTRACTOR} nor ${C.REPO_ROLE_SUBCONTRACTOR}`));
+	}
+
 	
 }
 
@@ -255,8 +281,12 @@ function hasReadPackageAccess(req, res, next){
 
 	middlewares.checkRole([/*C.REPO_ROLE_SUBCONTRACTOR, */C.REPO_ROLE_MAINCONTRACTOR], req).then((/*roles*/) => {
 		// if role is maincontractor then no more check is needed
+		req.role = C.REPO_ROLE_MAINCONTRACTOR;
 		return Promise.resolve();
+	
 	}).catch(() => {
+
+		req.role = C.REPO_ROLE_SUBCONTRACTOR;
 		return middlewares.isSubContractorInvitedHelper(req);
 	}).then(() => {
 		next();

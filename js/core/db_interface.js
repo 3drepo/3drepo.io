@@ -479,20 +479,25 @@ DBInterface.prototype.getUserBidInfo = function(username, callback) {
 		"customData.bids" : 1
 	};
 
-	dbConn(this.logger).filterColl("admin", "system.users", filter, projection, function(err, coll) {
-		if(err.value) {
-			return callback(err);
-		}
+	return new Promise((resolve, reject) => {
+		dbConn(this.logger).filterColl("admin", "system.users", filter, projection, function(err, coll) {
+			if(err.value) {
+				reject(err);
+				return callback && callback(err);
+			}
 
-		if (coll[0])
-		{
-			var user = coll[0].customData && coll[0].customData.bids || [];
-
-			callback(responseCodes.OK, user);
-		} else {
-			callback(responseCodes.USER_NOT_FOUND, null);
-		}
+			if (coll[0])
+			{
+				var user = coll[0].customData && coll[0].customData.bids || [];
+				callback && callback(responseCodes.OK, user);
+				resolve(user);
+			} else {
+				callback && callback(responseCodes.USER_NOT_FOUND, null);
+				reject({ resCode: responseCodes.USER_NOT_FOUND });
+			}
+		});
 	});
+
 };
 
 DBInterface.prototype.getUserInfo = function(username, callback) {

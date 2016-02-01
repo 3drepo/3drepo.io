@@ -9,20 +9,17 @@ var schema = mongoose.Schema({
 	user: { type: String, required: true },
 	budget: String, 
 	accepted: { type: Boolean, default: null },
-	acceptedOn: Date,
+	acceptedAt: Date,
 	awarded: { type: Boolean, default: null },
-	awardedOn: Date,
-	invitedOn: Date,
+	awardedAt: Date,
+	invitedAt: Date,
 	submitted: { type: Boolean, default: false },
-	submittedOn: Date,
+	submittedAt: Date,
 	packageName: { type: String, required: true },
 	termsAndConds: termsAndCondsSchema
 });
 
-schema.plugin(require('mongoose-timestamp'), {
-	createdAt: 'createdOn',
-	updatedAt: 'updatedOn'
-});
+schema.plugin(require('mongoose-timestamp'));
 
 var defaultProjection = { 'termsAndConds': 0 };
 
@@ -31,7 +28,7 @@ schema.pre('save', function(next){
 	
 	if(this.isNew){
 		this.wasNew = this.isNew;
-		this.invitedOn = new Date();
+		this.invitedAt = new Date();
 		return ProjectPackage.count(this._dbcolOptions, {name: this.packageName}).then(count => {
 			if(count <= 0) {
 				let err = new Error('Package not found');
@@ -130,7 +127,7 @@ schema.methods.respond = function(accept){
 	}
 
 	this.accepted = accept;
-	this.acceptedOn = new Date();
+	this.acceptedAt = new Date();
 
 	return this.save().then(_bid => {
 		bid = _bid;
@@ -161,7 +158,7 @@ schema.methods.submit = function() {
 	}
 
 	this.submitted = true;
-	this.submittedOn = new Date();
+	this.submittedAt = new Date();
 
 	return this.save().then(_bid => {
 		bid = _bid;
@@ -191,7 +188,7 @@ schema.methods.award = function(){
 		} else {
 
 			this.awarded = true;
-			this.awardedOn = new Date();
+			this.awardedAt = new Date();
 			
 			return this.save();			
 		}
@@ -216,8 +213,8 @@ schema.methods.award = function(){
 					awarded: null 
 				}, { 
 					awarded: false, 
-					awardedOn: now,
-					updatedOn: now,
+					awardedAt: now,
+					updatedAt: now,
 				}, { multi: true }, function(err) {
 					if (err){
 						reject(err);
@@ -235,8 +232,8 @@ schema.methods.award = function(){
 		bids.forEach(item => {
 
 			let updatedDoc = {
-				updatedOn: now,
-				awardedOn: now
+				updatedAt: now,
+				awardedAt: now
 			};
 
 			if(item.user === bid.user){
