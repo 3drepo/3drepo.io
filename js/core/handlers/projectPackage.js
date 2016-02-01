@@ -129,24 +129,27 @@ function uploadAttachment(req, res, next){
 		let partError;
 		let attFieldFound;
 		// Parts are emitted when parsing the form
+		let promises = [];
 		form.on('part', function(part) {
 
 			if (part.filename && part.name === 'attachment') {
 
 				attFieldFound = true;
 
-				projectPackage.uploadAttachment(part, {
+				promises.push(projectPackage.uploadAttachment(part, {
 
 					filename: part.filename,
 					contentType: part.headers['content-type'] || null,
 					metadata: { packageName: projectPackage.name }
 
 				}).then(fileMeta => {
-					defer.resolve(fileMeta);
 					part.resume();
+					return Promise.resolve(fileMeta);
+					
 				}).catch(err => {
-					defer.reject({ resCode: responseCodes.PROCESS_ERROR(err)});
-				});
+					//defer.reject({ resCode: responseCodes.PROCESS_ERROR(err)});
+					return Promise.reject({ resCode: responseCodes.PROCESS_ERROR(err)});
+				}));
 
 			} else {
 				// reject any other fields or files
@@ -163,12 +166,18 @@ function uploadAttachment(req, res, next){
 		});
 
 		form.on('close', function() {
-
+			//console.log('form close');
 			if(partError){
 				defer.reject({ resCode: responseCodes.PROCESS_ERROR(partError)});
 			} else if(!attFieldFound) {
 				defer.reject({ resCode: responseCodes.ATTACHMENT_FIELD_NOT_FOUND });
 			}
+
+			Promise.all(promises).then(results => {
+				return defer.resolve(results);
+			}).catch(err => {
+				defer.reject(err);
+			});
 			
 		});
 

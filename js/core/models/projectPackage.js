@@ -189,6 +189,7 @@ schema.methods.uploadAttachment = function(readStream, meta){
 
 	}).then(() => {	
 		// push new file id into array
+		//console.log('push id to array', this.attachments, uploadStream.id);
 		this.attachments.push(uploadStream.id);
 		return this.save().then(() => {
 			return Promise.resolve(fileMeta);
