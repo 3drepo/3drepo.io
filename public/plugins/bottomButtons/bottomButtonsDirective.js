@@ -51,9 +51,6 @@
 				// Set the viewing mode
 				defaultViewer.setNavMode(vm.viewingOptions[index].mode);
 
-				// Replace this option with the current selected option
-				vm.otherViewingOptionsIndices[vm.otherViewingOptionsIndices.indexOf(index)] = vm.selectedViewingOptionIndex;
-
 				// Set up the new current selected option button
 				vm.selectedViewingOptionIndex = index;
 				vm.leftButtons[1] = vm.viewingOptions[index];
@@ -99,14 +96,13 @@
 
 		vm.viewingOptions = [
 			{
-				index: 0,
-				mode: "TURNTABLE",
-				label: "Turntable",
-				icon: "icon icon_turntable",
-				click: setViewingOption
+				mode: "WALK",
+				label: "Walk",
+				icon: "fa fa-child",
+				click: setViewingOption,
+				iconClass: "bottomButtomIconWalk"
 			},
 			{
-				index: 1,
 				mode: "HELICOPTER",
 				label: "Helicopter",
 				icon: "icon icon_helicopter",
@@ -114,16 +110,13 @@
 				iconClass: "bottomButtomIconHelicopter"
 			},
 			{
-				index: 2,
-				mode: "WALK",
-				label: "Walk",
-				icon: "fa fa-child",
-				click: setViewingOption,
-				iconClass: "bottomButtomIconWalk"
+				mode: "TURNTABLE",
+				label: "Turntable",
+				icon: "icon icon_turntable",
+				click: setViewingOption
 			}
 		];
-		vm.selectedViewingOptionIndex = 0;
-		vm.otherViewingOptionsIndices = [2, 1];
+		vm.selectedViewingOptionIndex = 2;
 
 		vm.leftButtons = [];
 		vm.leftButtons.push({
@@ -135,12 +128,18 @@
 
 		vm.rightButtons = [];
 		//vm.rightButtons.push({label: "Full screen", icon: "fa fa-arrows-alt", click: enterFullScreen});
-		//vm.rightButtons.push({label: "QR code", icon: "fa fa-qrcode", click: showQRCodeReader});
+		vm.rightButtons.push({
+			label: "QR code",
+			icon: "fa fa-qrcode",
+			click: showQRCodeReader
+		});
+		/*
 		vm.rightButtons.push({
 			label: "Help",
 			icon: "fa fa-question",
 			click: toggleHelp
 		});
+		*/
 		vm.rightButtons.push({
 			label: "Oculus",
 			icon: "icon icon_cardboard",
