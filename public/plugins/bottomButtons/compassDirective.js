@@ -30,7 +30,7 @@ var toggleElements;
 	{
 		// Axes should rotate inversely to orientation
 		// of camera
-		event.orientation[1] = event.orientation[1] * -1;
+		event.orientation[1] = -event.orientation[1];
 
 		// Fix transformation from viewpoint basis
 		viewer.transformEvent(event, event.target, false);
