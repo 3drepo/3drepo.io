@@ -1851,7 +1851,7 @@ DBInterface.prototype.getObjectIssues = function(dbName, project, sids, number, 
 		for(var i = 0; i < docs.length; i++) {
 			docs[i]._id		   = uuidToString(docs[i]._id);
 			docs[i].typePrefix = typePrefix;
-			docs[i].parent	   = uuidToString(docs[i].parent);
+			docs[i].parent	   = docs[i].parent ? uuidToString(docs[i].parent) : undefined;
 			docs[i].account    = dbName;
 			docs[i].project    = project;
 		}
