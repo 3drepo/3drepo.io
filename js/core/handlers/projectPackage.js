@@ -244,7 +244,7 @@ function listPackages(req, res, next){
 // packages/* specific middlewares
 function hasReadPackageAccess(req, res, next){
 
-	middlewares.checkRole([/*C.REPO_ROLE_SUBCONTRACTOR, */C.REPO_ROLE_MAINCONTRACTOR], req).then((roles) => {
+	middlewares.checkRole([/*C.REPO_ROLE_SUBCONTRACTOR, */C.REPO_ROLE_MAINCONTRACTOR], req).then((/*roles*/) => {
 		// if role is maincontractor then no more check is needed
 		return Promise.resolve();
 	}).catch(() => {
