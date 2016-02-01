@@ -136,7 +136,7 @@
 			show: false,
 			help: "Documents",
 			icon: "fa-clone",
-			height: 120
+			height: 150
 		});
 
 		// Add filtering options for the Issues panel
