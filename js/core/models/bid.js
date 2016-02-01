@@ -24,7 +24,7 @@ schema.plugin(require('mongoose-timestamp'), {
 	updatedAt: 'updatedOn'
 });
 
-var defaultProjection = { 'termsAndConds': 0};
+var defaultProjection = { 'termsAndConds': 0 };
 
 schema.pre('save', function(next){
 	'use strict';
@@ -54,7 +54,7 @@ schema.post('save', function(doc){
 	'use strict';
 
 	if(doc.wasNew){
-		console.log('was new!');
+
 		Bid.getWorkspaceCollection(doc.user, doc._dbcolOptions.account, doc._dbcolOptions.project).insertOne(doc.toObject());
 
 		// add to customData.bids for quick lookup 
@@ -104,6 +104,13 @@ schema.methods.responded = function(){
 };
 
 schema.methods.updateable = function(){
+
+	if(typeof this.accepted === 'undefined' ||
+		typeof this.submitted === 'undefined' ||
+		typeof this.awarded === 'undefined'){
+		throw new Error('To use updateable method you must project on accepted, submitted and awarded fields');
+	}
+
 	return this.accepted && !this.submitted && this.awarded === null;
 };
 
@@ -130,7 +137,7 @@ schema.methods.respond = function(accept){
 
 		// save the response to package bid space as well
 		return Bid.getPackageSpaceCollection(bid._dbcolOptions.packageAccount, bid._dbcolOptions.project)
-		.update({
+		.updateOne({
 			_id: bid._id,
 		}, bid.toObject()); 
 
@@ -160,7 +167,7 @@ schema.methods.submit = function() {
 		bid = _bid;
 		// save the response to package bid space as well
 		return Bid.getPackageSpaceCollection(bid._dbcolOptions.packageAccount, bid._dbcolOptions.project)
-		.update({
+		.updateOne({
 			_id: bid._id,
 		}, bid.toObject()); 
 
@@ -170,8 +177,10 @@ schema.methods.submit = function() {
 };
 
 schema.methods.award = function(){
+	'use strict';
 
-	//TO-DO: propogate the data back to sc workspace
+	let bid = this;
+
 	return Bid.count(this._dbcolOptions, { packageName: this.packageName, awarded: true }).then(count => {
 		if (count > 0){
 			return Promise.reject({ resCode: responseCodes.PACKAGE_AWARDED});
@@ -186,25 +195,69 @@ schema.methods.award = function(){
 			
 			return this.save();			
 		}
-	}).then(bid => {
+	}).then(() => {
 
-		// mark other bids awarded: false
-		// unfortunately mongoose.update don't return promise so wrap it in promise
-		return new Promise((resolve, reject) => {
+		return Bid.findByPackage(bid._dbcolOptions, bid.packageName, {user: 1});
 
-			Bid.update(this._dbcolOptions, { 
-				packageName: this.packageName, 
-				awarded: null 
-			}, { 
-				awarded: false, 
-				awardedOn: new Date() 
-			}, { multi: true }, function(err) {
-				if (err){
-					reject(err);
-				} else {
-					resolve(bid);
-				}
-			});
+	}).then(bids => {
+
+		var promises = [];
+		var now = new Date();
+
+
+		promises.push(
+	
+			// mark other bids awarded: false (package)
+			// unfortunately mongoose.update don't return promise so wrap it in promise
+			new Promise((resolve, reject) => {
+
+				Bid.update(this._dbcolOptions, { 
+					packageName: this.packageName, 
+					awarded: null 
+				}, { 
+					awarded: false, 
+					awardedOn: now,
+					updatedOn: now,
+				}, { multi: true }, function(err) {
+					if (err){
+						reject(err);
+					} else {
+						resolve(bid);
+					}
+				});
+			})
+
+		);
+
+		let o = bid._dbcolOptions;
+
+		// mark other bids awarded: false or true (in their workspace)
+		bids.forEach(item => {
+
+			let updatedDoc = {
+				updatedOn: now,
+				awardedOn: now
+			};
+
+			if(item.user === bid.user){
+				updatedDoc.awarded = true;
+			} else {
+				updatedDoc.awarded = false;
+			}
+
+			promises.push(
+				
+				Bid.getWorkspaceCollection(item.user, o.account, o.project).updateOne({ 
+					_id: item._id,
+				}, {
+					'$set': updatedDoc
+				})
+			);
+		});
+
+		return Promise.all(promises).then(res => {
+			//only return the awarded bid object
+			return Promise.resolve(res[0]);
 		});
 
 	});
