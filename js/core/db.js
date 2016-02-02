@@ -18,216 +18,262 @@
 // Inspired by
 // http://stackoverflow.com/questions/12037655/node-js-mongodb-native-driver-connection-sharing
 
-var config	  = require("./config.js");
-
-var responseCodes = require("./response_codes.js");
-
-var MongoClient = require("mongodb").MongoClient,
-	Server      = require("mongodb").Server,
-	Db          = require("mongodb").Db,
-	GridStore   = require("mongodb").GridStore,
-	Binary      = require("mongodb").Binary;
-
-var C = require("./constants.js");
-var systemLogger = require("./logger.js").systemLogger;
-
-// Create connection to Mongo
-// Main DB Object constructor
-var MongoDBObject = function()
-{
+(function() {
 	"use strict";
 
-	var self = this instanceof MongoDBObject ? this : Object.create(MongoDBObject.prototype);
+	var config	  = require("./config.js");
 
-	self.host = config.db.host;
-	self.port = config.db.port;
+	//var util      = require("util");
 
-	self.username = config.db.username;
-	self.password = config.db.password;
+	var responseCodes = require("./response_codes.js");
 
-	self.dbConns  = {};
+	var MongoClient = require("mongodb").MongoClient,
+		Server      = require("mongodb").Server,
+		Db          = require("mongodb").Db,
+		GridStore   = require("mongodb").GridStore,
+		Binary      = require("mongodb").Binary;
 
-	var authDBConn = new Db("admin", new Server(config.db.host, config.db.port,
-		{
-			auto_reconnect: true
-		}),
-	{ safe : false });
+	var C = require("./constants.js");
+	var systemLogger = require("./logger.js").systemLogger;
 
-	authDBConn.open(function(err, dbConn) {
-		if(err) {
-			var dbError = responseCodes.DB_ERROR(err);
-			systemLogger.logError(dbError);
-			throw Error(JSON.stringify(dbError));
-		}
-
-		self.authDB = dbConn;
-	});
-
-	return self;
-};
-
-MongoDBObject.prototype.getURL = function(database)
-{
-	"use strict";
-
-	return "mongodb://" + this.username + ":" + this.password + "@" + this.host + ":" + this.port + "/" + database + "?authSource=admin";
-};
-
-MongoDBObject.prototype.open = function(database, callback, forgetMe)
-{
-	"use strict";
-
-	var self = this;
-
-	forgetMe = (forgetMe === undefined) ? false : true;
-
-	if (this.dbConns[database])
+	// Create connection to Mongo
+	// Main DB Object constructor
+	var MongoDBObject = function()
 	{
-		callback(null, this.dbConns[database]);
-	} else {
-		MongoClient.connect(this.getURL(database), function(err, db) {
-			if (err) {
-				return callback(err, null);
-			}
+		var self = this instanceof MongoDBObject ? this : Object.create(MongoDBObject.prototype);
 
-			if (!forgetMe) {
-				self.dbConns[database] = db;
-			}
+		self.host = config.db.host;
+		self.port = config.db.port;
 
-			callback(null, db);
-		});
-	}
-};
+		self.username = config.db.username;
+		self.password = config.db.password;
 
-MongoDBObject.prototype.authenticateUser = function(username, password, callback)
-{
-	"use strict";
-	var self = this;
+		self.dbConns  = {};
 
-	self.authDB.admin().authenticate(username, password, function(err) {
-		if(err) {
-			return callback(responseCodes.DB_ERROR(err));
-		}
+		console.log("Constructing ....");
 
-		callback(responseCodes.OK);
-	});
-};
-
-var mongo = new MongoDBObject();
-
-var MongoWrapper = function(logger) {
-	"use strict";
-
-	var self = this instanceof MongoWrapper ? this : Object.create(MongoWrapper.prototype);
-
-	self.logger = logger;
-
-	return self;
-};
-
-/*******************************************************************************
- * Authenticate User against admin database
- *
- * @param {Error} err - err object
- * @param {string} username - username logging in
- * @param {string} password - corresponding password for username
- * @param {function} callback - has parameters (err, user) where
- *								user is the user object
- ******************************************************************************/
-MongoWrapper.prototype.authenticateUser = function(username, password, callback) {
-	"use strict";
-
-	// Create a separate admin database connection to avoid
-	// constantly switching between auth user and NodeJS
-	// user
-
-	var self = this;
-
-	self.logger.logInfo("Authenticating user");
-	mongo.authenticateUser(username, password, callback);
-};
-
-/*******************************************************************************
- * Open a database connection and pass it to the callback function
- *
- * @param {Error} err - err object
- * @param {string} dbName - Database name which to open
- * @param {function} callback - has parameters (err, dbConn) where
- *								dbConn is the returned database connection.
- ******************************************************************************/
-MongoWrapper.prototype.dbCallback = function(dbName, callback) {
-	"use strict";
-    // var self = this;
-    mongo.open(dbName, function (err, db) {
-
-        if (err) {
-			return callback(responseCodes.DB_ERROR(err));
-		}
-
-		callback(responseCodes.OK, db);
-	});
-};
-
-/*******************************************************************************
- * Run callbacks dependant on whether file exists or not
- *
- * @param {string} dbName     - Database name to get the file from
- * @param {string} collName   - Collection to get the file from
- * @param {string} fileName   - File name to retrieve
- * @param {function} callback - Callback function to run if file exists
- *
- ******************************************************************************/
-MongoWrapper.prototype.existsGridFSFile = function(dbName, collName, fileName, callback)
-{
-	"use strict";
-	var self = this;
-
-	self.dbCallback(dbName, function (err, dbConn) {
-		if (err.value) {
-			return callback(err);
-		}
-
-		// Verify that the file exists
-		GridStore.exist(dbConn, fileName, collName, function(err, result) {
-			if (!result)
+		var authDBConn = new Db("admin", new Server(config.db.host, config.db.port,
 			{
-				return callback(responseCodes.OK, false);
+				auto_reconnect: true
+			}),
+		{ safe : false });
+
+		authDBConn.open(function(err, dbConn) {
+			if(err) {
+				var dbError = responseCodes.DB_ERROR(err);
+				systemLogger.logError(dbError);
+				throw Error(JSON.stringify(dbError));
 			}
+
+			self.authDB = dbConn;
+		});
+
+		return self;
+	};
+
+	MongoDBObject.prototype.getURL = function(database)
+	{
+		return "mongodb://" + this.username + ":" + this.password + "@" + this.host + ":" + this.port + "/" + database + "?authSource=admin";
+	};
+
+	MongoDBObject.prototype.open = function(database, callback, forgetMe)
+	{
+		var self = this;
+
+		forgetMe = (forgetMe === undefined) ? false : true;
+
+		if (self.dbConns.hasOwnProperty(database))
+		{
+			callback(null, self.dbConns[database]);
+		} else {
+			MongoClient.connect(this.getURL(database), function(err, db) {
+				if (err) {
+					return callback(err, null);
+				}
+
+				if (!forgetMe) {
+					// Asynchronously another may have got here first
+					// if not, then store this connection for later use
+					// otherwise close it as a duplication.
+					if (!self.dbConns.hasOwnProperty(database)) {
+						self.dbConns[database] = db;
+					} else {
+						db.close();
+						db = self.dbConns[database];
+					}
+				}
+
+				callback(null, db);
+			});
+		}
+	};
+
+	MongoDBObject.prototype.authenticateUser = function(username, password, callback)
+	{
+		var self = this;
+
+		self.authDB.admin().authenticate(username, password, function(err) {
+			if(err) {
+				return callback(responseCodes.DB_ERROR(err));
+			}
+
+			callback(responseCodes.OK);
+		});
+	};
+
+	var mongo = new MongoDBObject();
+
+	var MongoWrapper = function(logger) {
+		var self = this instanceof MongoWrapper ? this : Object.create(MongoWrapper.prototype);
+
+		self.logger = logger;
+
+		return self;
+	};
+
+	/*******************************************************************************
+	 * Authenticate User against admin database
+	 *
+	 * @param {Error} err - err object
+	 * @param {string} username - username logging in
+	 * @param {string} password - corresponding password for username
+	 * @param {function} callback - has parameters (err, user) where
+	 *								user is the user object
+	 ******************************************************************************/
+	MongoWrapper.prototype.authenticateUser = function(username, password, callback) {
+		// Create a separate admin database connection to avoid
+		// constantly switching between auth user and NodeJS
+		// user
+
+		var self = this;
+
+		self.logger.logInfo("Authenticating user");
+		mongo.authenticateUser(username, password, callback);
+	};
+
+	/*******************************************************************************
+	 * Open a database connection and pass it to the callback function
+	 *
+	 * @param {Error} err - err object
+	 * @param {string} dbName - Database name which to open
+	 * @param {function} callback - has parameters (err, dbConn) where
+	 *								dbConn is the returned database connection.
+	 ******************************************************************************/
+	MongoWrapper.prototype.dbCallback = function(dbName, callback) {
+		// var self = this;
+		mongo.open(dbName, function (err, db) {
 
 			if (err) {
 				return callback(responseCodes.DB_ERROR(err));
 			}
 
-			callback(responseCodes.OK, true);
+			callback(responseCodes.OK, db);
 		});
-	});
-};
+	};
 
-/*******************************************************************************
- * Get a file from the Grid FS store
- *
- * @param {string} dbName     - Database name to get the file from
- * @param {string} collName   - Collection to get the file from
- * @param {string} fileName   - File name to retrieve
- * @param {function} callback - Callback function to return the file data
- *
- ******************************************************************************/
-MongoWrapper.prototype.getGridFSFile = function(dbName, collName, fileName, callback)
-{
-	"use strict";
-	var self = this;
+	/*******************************************************************************
+	 * Run callbacks dependant on whether file exists or not
+	 *
+	 * @param {string} dbName     - Database name to get the file from
+	 * @param {string} collName   - Collection to get the file from
+	 * @param {string} fileName   - File name to retrieve
+	 * @param {function} callback - Callback function to run if file exists
+	 *
+	 ******************************************************************************/
+	MongoWrapper.prototype.existsGridFSFile = function(dbName, collName, fileName, callback)
+	{
+		var self = this;
 
-	self.dbCallback(dbName, function (err, dbConn) {
-		if (err.value) {
-			return callback(err);
-		}
-
-		// Verify that the file exists
-		self.existsGridFSFile(dbName, collName, fileName, function(err, result) {
-			if (!result) {
-				return callback(responseCodes.FILE_DOESNT_EXIST);
+		self.dbCallback(dbName, function (err, dbConn) {
+			if (err.value) {
+				return callback(err);
 			}
 
+			// Verify that the file exists
+			GridStore.exist(dbConn, fileName, collName, function(err, result) {
+				if (!result)
+				{
+					return callback(responseCodes.OK, false);
+				}
+
+				if (err) {
+					return callback(responseCodes.DB_ERROR(err));
+				}
+
+				callback(responseCodes.OK, true);
+			});
+		});
+	};
+
+	/*******************************************************************************
+	 * Get a file from the Grid FS store
+	 *
+	 * @param {string} dbName     - Database name to get the file from
+	 * @param {string} collName   - Collection to get the file from
+	 * @param {string} fileName   - File name to retrieve
+	 * @param {function} callback - Callback function to return the file data
+	 *
+	 ******************************************************************************/
+	MongoWrapper.prototype.getGridFSFile = function(dbName, collName, fileName, callback)
+	{
+		var self = this;
+
+		self.dbCallback(dbName, function (err, dbConn) {
+			if (err.value) {
+				return callback(err);
+			}
+
+			// Verify that the file exists
+			self.existsGridFSFile(dbName, collName, fileName, function(err, result) {
+				if (!result) {
+					return callback(responseCodes.FILE_DOESNT_EXIST);
+				}
+
+				if (err.value) {
+					return callback(err);
+				}
+
+				var options = {
+					root : collName
+				};
+
+				var grid = new GridStore(dbConn, fileName, "r", options);
+
+				grid.open(function (err, gs) {
+					if (err) {
+						return callback(responseCodes.DB_ERROR(err));
+					}
+
+					gs.seek(0, function() {
+						gs.read(function(err, data) {
+							if (err) {
+								return callback(responseCodes.DB_ERROR(err));
+							}
+
+							callback(responseCodes.OK, new Binary(data));
+						});
+					});
+				});
+			});
+		});
+	};
+
+	/*******************************************************************************
+	 * Store a file in the Grid FS store
+	 *
+	 * @param {string} dbName     - Database name to get the file from
+	 * @param {string} collName   - Collection to get the file from
+	 * @param {string} fileName   - File name to retrieve
+	 * @param {Object} data       - Data to store in object
+	 * @param {boolean} overwrite - If true, will overwrite existing files
+	 * @param {function} callback - Callback function to return the file data
+	 *
+	 ******************************************************************************/
+	MongoWrapper.prototype.storeGridFSFile = function(dbName, collName, fileName, data, overwrite, callback)
+	{
+		var self = this;
+
+		self.dbCallback(dbName, function (err, dbConn) {
 			if (err.value) {
 				return callback(err);
 			}
@@ -236,589 +282,560 @@ MongoWrapper.prototype.getGridFSFile = function(dbName, collName, fileName, call
 				root : collName
 			};
 
-			var grid = new GridStore(dbConn, fileName, "r", options);
+			var storeFile = function () {
+				var gs = new GridStore(dbConn, fileName, "w", options);
 
-			grid.open(function (err, gs) {
-				if (err) {
-					return callback(responseCodes.DB_ERROR(err));
-				}
-
-				gs.seek(0, function() {
-					gs.read(function(err, data) {
-						if (err) {
-							return callback(responseCodes.DB_ERROR(err));
-						}
-
-						callback(responseCodes.OK, new Binary(data));
-					});
-				});
-			});
-		});
-	});
-};
-
-/*******************************************************************************
- * Store a file in the Grid FS store
- *
- * @param {string} dbName     - Database name to get the file from
- * @param {string} collName   - Collection to get the file from
- * @param {string} fileName   - File name to retrieve
- * @param {Object} data       - Data to store in object
- * @param {boolean} overwrite - If true, will overwrite existing files
- * @param {function} callback - Callback function to return the file data
- *
- ******************************************************************************/
-MongoWrapper.prototype.storeGridFSFile = function(dbName, collName, fileName, data, overwrite, callback)
-{
-	"use strict";
-	var self = this;
-
-	self.dbCallback(dbName, function (err, dbConn) {
-		if (err.value) {
-			return callback(err);
-		}
-
-		var options = {
-			root : collName
-		};
-
-		var storeFile = function () {
-			var gs = new GridStore(dbConn, fileName, "w", options);
-
-			gs.open(function (err, gs) {
-				if (err) {
-					return callback(responseCodes.DB_ERROR(err));
-				}
-
-				gs.write(data, function(err, gridStore) {
+				gs.open(function (err, gs) {
 					if (err) {
 						return callback(responseCodes.DB_ERROR(err));
 					}
 
-					gridStore.close(function(err) {
+					gs.write(data, function(err, gridStore) {
 						if (err) {
 							return callback(responseCodes.DB_ERROR(err));
 						}
 
-						callback(responseCodes.OK);
+						gridStore.close(function(err) {
+							if (err) {
+								return callback(responseCodes.DB_ERROR(err));
+							}
+
+							callback(responseCodes.OK);
+						});
 					});
 				});
-			});
-		};
+			};
 
-		if (overwrite)
+			if (overwrite)
+			{
+				// Verify that the file exists
+				self.existsGridFSFile(dbName, collName, fileName, function(err, result) {
+					if (err.value) {
+						return callback(err);
+					}
+
+					if (result) {
+						return callback(responseCodes.FILE_ALREADY_EXISTS);
+					}
+
+					storeFile();
+				});
+			} else {
+				storeFile();
+			}
+		});
+	};
+
+	/*******************************************************************************
+	 * Run callback on collection from the database
+	 *
+	 * @param {string} dbName - Database name containing collection
+	 * @param {string} collName - Collection name to run query on
+	 * @param {boolean} strict - Enable strict mode or not
+	 * @param {function} callback - get collection from database and pass to
+	 *								callback as parameter
+	 ******************************************************************************/
+	MongoWrapper.prototype.collCallback = function(dbName, collName, strict, callback) {
+		var self = this;
+		// First get database connection
+		self.dbCallback(dbName, function(err, dbConn) {
+			if (err.value) {
+				return callback(err);
+			}
+
+			// Get collection from database to act on
+			dbConn.collection(collName, {strict:strict}, function(err, coll) {
+				if (err) {
+					return callback(responseCodes.DB_ERROR(err));
+				}
+
+				callback(responseCodes.OK, coll);
+			});
+		});
+	};
+
+	/*******************************************************************************
+	 * Run callback on collection from the database
+	 *
+	 * @param {string} dbName - Database name containing collection
+	 * @param {string} collName - Collection name to run aggregation on
+	 * @param {array} aggregation - Aggregation query
+	 * @param {function} callback - get collection from database and pass to
+	 *								callback as parameter
+	 ******************************************************************************/
+	MongoWrapper.prototype.collAggregation = function(dbName, collName, aggregation, callback) {
+		var self = this;
+
+		// Get collection from database to act on
+		self.collCallback(dbName, collName, true, function(err, coll) {
+			if (err.value)
+			{
+				return callback(err);
+			}
+
+			coll.aggregate(
+				aggregation
+			).toArray(function(err, result) {
+				if (err) {
+					return callback(responseCodes.DB_ERROR(err));
+				}
+
+				callback(responseCodes.OK, result);
+			});
+		});
+	};
+
+	/*******************************************************************************
+	 * Get top result from query with latest timestamp
+	 *
+	 * @param {string} dbName - Database containing the collection for query
+	 * @param {string} collName - Collection to run the query on
+	 * @param {string} projection - Projection to use on results
+	 * @param {function} callback - get collection from database and pass to
+	 *								callback as parameter
+	 ******************************************************************************/
+	MongoWrapper.prototype.getLatest = function(dbName, collName, filter, projection, callback) {
+		var self = this;
+
+		// Run collection callback that first sorts by timestamp
+		// and then gets the top row.
+		self.collCallback(dbName, collName, true, function(err, coll) {
+			if (err.value) {
+				return callback(err);
+			}
+
+			var projStr = JSON.stringify(projection);
+			var filtStr = JSON.stringify(filter);
+
+			self.logger.logDebug("Getting latest for collection: " + dbName + "/" + collName);
+			self.logger.logDebug("FILTER: \"" + filtStr + "\"");
+			self.logger.logDebug("PROJECTION: \"" + projStr + "\"");
+
+			if (projection !== null)
+			{
+				coll.find(filter, projection).limit(1).sort({timestamp:-1}).toArray(function(err, docs) {
+					if (err) {
+						return callback(responseCodes.DB_ERROR(err));
+					}
+
+					self.logger.logDebug("Found " + docs.length + " result(s).");
+
+					callback(responseCodes.OK, docs);
+				});
+			} else {
+				coll.find(filter).limit(1).sort({timestamp:-1}).toArray(function(err, docs) {
+					if (err) {
+						return callback(responseCodes.DB_ERROR(err));
+					}
+
+					self.logger.logDebug("Found " + docs.length + " result(s).");
+
+					callback(responseCodes.OK, docs);
+				});
+			}
+		});
+	};
+
+	/*******************************************************************************
+	 * Get filtered collection from the database
+	 *
+	 * @param {string} dbName - Database name containing the collection
+	 * @param {string} collName - Collection to filter from the database
+	 * @param {JSON} filter - JSON containing filter query to run on collection
+	 * @param {JSON} projection - JSON containing projection for results
+	 * @param {function} callback - get filtered collection from database
+	 *								pass to callback as parameter
+	 ******************************************************************************/
+	MongoWrapper.prototype.filterColl = function(dbName, collName, filter, projection, callback) {
+		var self = this;
+
+		this.collCallback(dbName, collName, true, function(err, coll) {
+			if (err.value) {
+				return callback(err);
+			}
+
+			var projStr = JSON.stringify(projection);
+			var filtStr = JSON.stringify(filter);
+
+			self.logger.logDebug("Filter collection: " + dbName + "/" + collName);
+			self.logger.logDebug("FILTER: \"" + filtStr + "\"");
+			self.logger.logDebug("PROJECTION: \"" + projStr + "\"");
+
+			if (projection !== null) {
+				coll.find(filter, projection).toArray(function(err, docs) {
+					if (err) {
+						return callback(responseCodes.DB_ERROR(err));
+					}
+
+					self.logger.logDebug("Found " + docs.length + " result(s).");
+
+					callback(responseCodes.OK, docs);
+				});
+			} else {
+				coll.find(filter).toArray(function(err, docs) {
+					if (err) {
+						return callback(responseCodes.DB_ERROR(err));
+					}
+
+					self.logger.logDebug("Found " + docs.length + " result(s).");
+
+					callback(responseCodes.OK, docs);
+				});
+			}
+		});
+	};
+
+	/*******************************************************************************
+	 * Get list of roles by database
+	 *
+	 * @param {string} dbName - Database name which holds the project
+	 * @param {number} readWriteAny - Select what permissions the role should have
+	 * @param {function} callback - function to return the list of roles
+	 ******************************************************************************/
+	MongoWrapper.prototype.getRolesByDatabase = function(dbName, readWriteAny, callback)
+	{
+		var collection = "system.roles";
+
+		var filter = {};
+
+		self.filterColl(dbName, collection, filter, {}, function (err, docs) {
+			if (err.value)
+			{
+				return callback(err);
+			}
+
+			var rolesToReturn = [];
+
+			for (var i = 0; i < docs.length; i++)
+			{
+				if (docs[i].privileges.length)
+				{
+					if (readWriteAny !== C.REPO_ANY)
+					{
+						var validActions= docs[i].privileges[0].actions;
+						var privilegeType = 0;
+
+						if (validActions.indexOf("find") !== -1) { privilegeType |= 1; }
+						if (validActions.indexOf("insert") !== -1) { privilegeType |= 2; }
+
+						if (privilegeType === readWriteAny)
+						{
+							rolesToReturn.push(docs[i]);
+						}
+					}
+				}
+			}
+
+			return callback(responseCode.OK, rolesToReturn);
+		});
+	};
+
+	/*******************************************************************************
+	 * Get list of roles by project
+	 *
+	 * @param {string} dbName - Database name which holds the project
+	 * @param {string} project - Project to which the permissions apply
+	 * @param {number} readWriteAny - A permission type filter (see constants.js)
+	 * @param {function} callback - function to return the list of roles
+	 ******************************************************************************/
+	MongoWrapper.prototype.getRolesByProject = function(dbName, project, readWriteAny, callback)
+	{
+		var collection = "system.roles";
+
+		var filter = {};
+
+		// Get all roles which have permissions on this project
+		filter.privileges = { $elemMatch : { "resource.collection" : project + ".history" } };
+
+		self.filterColl(dbName, collection, filter, {}, function (err, docs) {
+			if (err.value)
+			{
+				return callback(err);
+			}
+
+			var rolesToReturn = [];
+
+			for (var i = 0; i < docs.length; i++)
+			{
+				if (docs[i].privileges.length)
+				{
+					if (readWriteAny !== C.REPO_ANY)
+					{
+						var validActions= docs[i].privileges[0].actions;
+						var privilegeType = 0;
+
+						if (validActions.indexOf("find") !== -1) { privilegeType |= 1; }
+						if (validActions.indexOf("insert") !== -1) { privilegeType |= 2; }
+
+						if (privilegeType === readWriteAny)
+						{
+							rolesToReturn.push(docs[i]);
+						}
+					}
+				}
+			}
+
+			return callback(responseCode.OK, rolesToReturn);
+		});
+	};
+
+	// Get list of roles to check permissions on a project
+	// Get a user's current role for a project
+	// Get a list of valid roles for a project and their associated role.
+
+	/*******************************************************************************
+	 * Get settings for a particular role
+	 *
+	 * @param {string} dbName - Database name which holds the project
+	 * @param {array} roles - list of role names
+	 * @param {function} callback - function to return the list of roles
+	 ******************************************************************************/
+	MongoWrapper.prototype.getRoleSettings = function(dbName, roles, callback)
+	{
+		if (roles.constructor !== Array)
 		{
-			// Verify that the file exists
-			self.existsGridFSFile(dbName, collName, fileName, function(err, result) {
+			roles = [roles];
+		}
+
+		var filter = { _id : { $in : roles}};
+
+		self.filterColl(database, "settings.roles", filter, {}, function (err, docs) {
+			if (err.value)
+			{
+				return callback(err);
+			}
+
+			return callback(docs);
+		});
+	};
+
+	MongoWrapper.prototype.getUserRolesForProject = function(database, project, username, callback)
+	{
+		self.getRolesByProject(database, project, C.REPO_ANY, function(err, projectRoles) {
+			if (err.value)
+			{
+				return callback(err);
+			}
+
+			var projectRoleNames = projectRoles.map(function(projectRole) { return projectRole._id; });
+
+			self.getUserRoles(username, database, function(err, userRoles) {
+				var userRoleNames = userRoles.map(function(userRole) { return userRole._id; });
+				var rolesToReturn = [];
+
+				for(var i = 0; i < userRoleNames.length; i++)
+				{
+					if(projectRoleNames.indexOf(userRoleNames[i]) !== -1)
+					{
+						rolesToReturn.push(userRoles[i]);
+					}
+				}
+
+				return callback(rolesToReturn);
+			});
+		});
+	};
+
+	/******************************************************************************
+	 * Get roles granted to a user within a specific database
+	 * The function will find all roles within the specified database and also
+	 * admin database and return this on the callback
+	 *
+	 * @param {string} username - username of the user
+	 * @param {string} database - database we are interested in
+	 * @param {function} callback - get filtered roles from database
+	 *								pass to callback as parameter
+	 ******************************************************************************/
+	MongoWrapper.prototype.getRoles = function (database, username, full, callback) {
+		var self = this;
+
+		var dbName = "admin";
+		// var collName = "system.users";
+		// var filter = {};
+		// var rolesToReturn = [];
+
+		// If the username is supplied, start by getting the roles just for this user
+		if (username)
+		{
+			self.getUserRoles(username, dbName, function (err, userRoles)
+			{
+				if (err.value)
+				{
+					return callback(err);
+				}
+
+				var roleNames = userRoles.map( function (userRole) {
+					return userRole._id.replace(".history", "");
+				});
+
+				self.getRoleSettings(database, roleNames, function(err, roleSettings)
+				{
+					for (var i = 0; i < roleNames.length; i++)
+					{
+						delete roleSettings[i]._id; // Delete the ID attach to the settings
+						_.extend(userRoles[i], roleSettings[i]);
+					}
+
+					return callback(responseCodes.OK, userRoles);
+				});
+
+			});
+		} else {
+			self.getRolesByDatabase(database, C.REPO_ANY, function(err, dbRoles) {
+				if (err.value)
+				{
+					return callback(err);
+				}
+
+				var roleNames = dbRoles.map( function (dbRole) {
+					return dbRole._id.replace(".history", "");
+				});
+
+				self.getRoleSettings(database, roleNames, function(err, roleSettings)
+				{
+					for (var i = 0; i < roleNames.length; i++)
+					{
+						delete roleSettings[i]._id; // Delete the ID attach to the settings
+						_.extend(dbRoles[i], roleSettings[i]);
+					}
+
+					return callback(responseCodes.OK, dbRoles);
+				});
+			});
+		}
+	};
+
+	/*******************************************************************************
+	 * Get roles granted to a user within a specific database
+	 * The function will find all roles within the specified database and also
+	 * admin database and return this on the callback
+	 *
+	 * @param {string} username - username of the user
+	 * @param {string} database - database we are interested in
+	 * @param {function} callback - get filtered roles from database
+	 *								pass to callback as parameter
+	 ******************************************************************************/
+	MongoWrapper.prototype.getUserRoles = function (username, database, callback) {
+		var self = this;
+
+		var dbName = "admin";
+		var collName = "system.users";
+		var filter = { "user" : username };
+
+		//only return roles in admin and the specified database, the rest are irrelevant.
+		var projection = { "roles" : 1};
+
+		self.filterColl(dbName, collName, filter, projection, function(err, docs) {
+			if (err.value) {
+				return callback(err);
+			}
+
+			if (docs.length !== 1) {
+				self.logger.logError("Unexpected number of documents found in getUserRoles(). size:" + docs.length);
+				return callback(responseCodes.USER_NOT_FOUND, docs);
+			}
+
+
+			var roles = [];
+			for (let i = 0; i < docs[0].roles.length; i++) {
+				if (docs[0].roles[i].db === dbName || docs[0].roles[i].db === database || !database) {
+					roles.push(docs[0].roles[i]);
+				}
+			}
+
+
+			callback(responseCodes.OK, roles);
+		});
+	};
+
+	/*******************************************************************************
+	 * Get the list of privileges the user has on the database
+	 *
+	 * @param {string} username - username of the user
+	 * @param {string} database - database we are interested in
+	 * @param {function} callback - get filtered privileges from database
+	 *								pass to callback as parameter
+	 ******************************************************************************/
+	MongoWrapper.prototype.getUserPrivileges = function (username, database, callback) {
+		var self = this;
+
+		var adminDB = "admin";
+
+		//First get all the roles this user is granted within the databases of interest
+		 self.getUserRoles(username, database, function (err, roles) {
 				if (err.value) {
 					return callback(err);
 				}
 
-				if (result) {
-					return callback(responseCodes.FILE_ALREADY_EXISTS);
-				}
-
-				storeFile();
-			});
-		} else {
-			storeFile();
-		}
-	});
-};
-
-/*******************************************************************************
- * Run callback on collection from the database
- *
- * @param {string} dbName - Database name to run the aggregation on
- * @param {string} collName - Collection to run the aggregation on
- * @param {boolean} strict - Enable strict mode or not
- * @param {function} callback - get collection from database and pass to
- *								callback as parameter
- ******************************************************************************/
-MongoWrapper.prototype.collCallback = function(dbName, collName, strict, callback) {
-	"use strict";
-
-	var self = this;
-    // First get database connection
-	self.dbCallback(dbName, function(err, dbConn) {
-		if (err.value) {
-			return callback(err);
-		}
-
-		// Get collection from database to act on
-		dbConn.collection(collName, {strict:strict}, function(err, coll) {
-			if (err) {
-				return callback(responseCodes.DB_ERROR(err));
+				if (!roles || roles.length === 0) {
+					//no roles under this user, no point trying to find privileges
+					return callback(responseCodes.OK, []);
 			}
 
-			callback(responseCodes.OK, coll);
-		});
-	});
-};
-
-/*******************************************************************************
- * Get top result from query with latest timestamp
- *
- * @param {string} dbName - Database containing the collection for query
- * @param {string} collName - Collection to run the query on
- * @param {string} projection - Projection to use on results
- * @param {function} callback - get collection from database and pass to
- *								callback as parameter
- ******************************************************************************/
-MongoWrapper.prototype.getLatest = function(dbName, collName, filter, projection, callback) {
-	"use strict";
-
-	var self = this;
-
-	// Run collection callback that first sorts by timestamp
-	// and then gets the top row.
-	self.collCallback(dbName, collName, true, function(err, coll) {
-		if (err.value) {
-			return callback(err);
-		}
-
-		var projStr = JSON.stringify(projection);
-		var filtStr = JSON.stringify(filter);
-
-		self.logger.logDebug("Getting latest for collection: " + dbName + "/" + collName);
-		self.logger.logDebug("FILTER: \"" + filtStr + "\"");
-		self.logger.logDebug("PROJECTION: \"" + projStr + "\"");
-
-		if (projection !== null)
-		{
-			coll.find(filter, projection).limit(1).sort({timestamp:-1}).toArray(function(err, docs) {
-				if (err) {
-					return callback(responseCodes.DB_ERROR(err));
-				}
-
-				self.logger.logDebug("Found " + docs.length + " result(s).");
-
-				callback(responseCodes.OK, docs);
-			});
-		} else {
-			coll.find(filter).limit(1).sort({timestamp:-1}).toArray(function(err, docs) {
-				if (err) {
-					return callback(responseCodes.DB_ERROR(err));
-				}
-
-				self.logger.logDebug("Found " + docs.length + " result(s).");
-
-				callback(responseCodes.OK, docs);
-			});
-		}
-	});
-};
-
-/*******************************************************************************
- * Get filtered collection from the database
- *
- * @param {string} dbName - Database name containing the collection
- * @param {string} collName - Collection to filter from the database
- * @param {JSON} filter - JSON containing filter query to run on collection
- * @param {JSON} projection - JSON containing projection for results
- * @param {function} callback - get filtered collection from database
- *								pass to callback as parameter
- ******************************************************************************/
-MongoWrapper.prototype.filterColl = function(dbName, collName, filter, projection, callback) {
-	"use strict";
-
-	var self = this;
-
-	this.collCallback(dbName, collName, true, function(err, coll) {
-		if (err.value) {
-			return callback(err);
-		}
-
-		var projStr = JSON.stringify(projection);
-		var filtStr = JSON.stringify(filter);
-
-		self.logger.logDebug("Filter collection: " + dbName + "/" + collName);
-		self.logger.logDebug("FILTER: \"" + filtStr + "\"");
-		self.logger.logDebug("PROJECTION: \"" + projStr + "\"");
-
-		if (projection !== null) {
-			coll.find(filter, projection).toArray(function(err, docs) {
-				if (err) {
-					return callback(responseCodes.DB_ERROR(err));
-				}
-
-				self.logger.logDebug("Found " + docs.length + " result(s).");
-
-				callback(responseCodes.OK, docs);
-			});
-		} else {
-			coll.find(filter).toArray(function(err, docs) {
-				if (err) {
-					return callback(responseCodes.DB_ERROR(err));
-				}
-
-				self.logger.logDebug("Found " + docs.length + " result(s).");
-
-				callback(responseCodes.OK, docs);
-			});
-		}
-	});
-};
-
-/*******************************************************************************
- * Get list of roles by database
- *
- * @param {string} dbName - Database name which holds the project
- * @param {number} readWriteAny - Select what permissions the role should have
- * @param {function} callback - function to return the list of roles
- ******************************************************************************/
-MongoWrapper.prototype.getRolesByDatabase = function(dbName, readWriteAny, callback)
-{
-	"use strict";
-	var collection = "system.roles";
-
-	var filter = {};
-
-	self.filterColl(dbName, collection, filter, {}, function (err, docs) {
-		if (err.value)
-		{
-			return callback(err);
-		}
-
-		var rolesToReturn = [];
-
-		for (var i = 0; i < docs.length; i++)
-		{
-			if (docs[i].privileges.length)
-			{
-				if (readWriteAny !== C.REPO_ANY)
-				{
-					var validActions= docs[i].privileges[0].actions;
-					var privilegeType = 0;
-
-					if (validActions.indexOf("find") !== -1) { privilegeType |= 1; }
-					if (validActions.indexOf("insert") !== -1) { privilegeType |= 2; }
-
-					if (privilegeType === readWriteAny)
-					{
-						rolesToReturn.push(docs[i]);
+			self.dbCallback(adminDB, function (err, dbConn) {
+				var command = { rolesInfo : roles, showPrivileges: true };
+				//Given the roles, get the privilege information
+				dbConn.command(command, function (err, docs) {
+					if (err) {
+						return callback(responseCodes.DB_ERROR(err));
 					}
-				}
-			}
-		}
 
-		return callback(responseCode.OK, rolesToReturn);
-	});
-};
 
-/*******************************************************************************
- * Get list of roles by project
- *
- * @param {string} dbName - Database name which holds the project
- * @param {string} project - Project to which the permissions apply
- * @param {number} readWriteAny - A permission type filter (see constants.js)
- * @param {function} callback - function to return the list of roles
- ******************************************************************************/
-MongoWrapper.prototype.getRolesByProject = function(dbName, project, readWriteAny, callback)
-{
-	"use strict";
-	var collection = "system.roles";
-
-	var filter = {};
-
-	// Get all roles which have permissions on this project
-	filter.privileges = { $elemMatch : { "resource.collection" : project + ".history" } };
-
-	self.filterColl(dbName, collection, filter, {}, function (err, docs) {
-		if (err.value)
-		{
-			return callback(err);
-		}
-
-		var rolesToReturn = [];
-
-		for (var i = 0; i < docs.length; i++)
-		{
-			if (docs[i].privileges.length)
-			{
-				if (readWriteAny !== C.REPO_ANY)
-				{
-					var validActions= docs[i].privileges[0].actions;
-					var privilegeType = 0;
-
-					if (validActions.indexOf("find") !== -1) { privilegeType |= 1; }
-					if (validActions.indexOf("insert") !== -1) { privilegeType |= 2; }
-
-					if (privilegeType === readWriteAny)
-					{
-						rolesToReturn.push(docs[i]);
+					if (!docs || docs.roles.length === 0) {
+						//No privileges return empty array
+						return callback(responseCodes.OK, []);
 					}
-				}
-			}
-		}
 
-		return callback(responseCode.OK, rolesToReturn);
-	});
-};
+					var rolesArr = docs.roles;
+					var privileges = [];
 
-// Get list of roles to check permissions on a project
-// Get a user's current role for a project
-// Get a list of valid roles for a project and their associated role.
-
-/*******************************************************************************
- * Get settings for a particular role
- *
- * @param {string} dbName - Database name which holds the project
- * @param {array} roles - list of role names
- * @param {function} callback - function to return the list of roles
- ******************************************************************************/
-MongoWrapper.prototype.getRoleSettings = function(dbName, roles, callback)
-{
-	"use strict";
-
-	if (roles.constructor !== Array)
-	{
-		roles = [roles];
-	}
-
-	var filter = { _id : { $in : roles}};
-
-	self.filterColl(database, "settings.roles", filter, {}, function (err, docs) {
-		if (err.value)
-		{
-			return callback(err);
-		}
-
-		return callback(docs);
-	});
-};
-
-MongoWrapper.prototype.getUserRolesForProject = function(database, project, username, callback)
-{
-	"use strict";
-
-	self.getRolesByProject(database, project, C.REPO_ANY, function(err, projectRoles) {
-		if (err.value)
-		{
-			return callback(err);
-		}
-
-		var projectRoleNames = projectRoles.map(function(projectRole) { return projectRole._id; });
-
-		self.getUserRoles(username, database, function(err, userRoles) {
-			var userRoleNames = userRoles.map(function(userRole) { return userRole._id; });
-			var rolesToReturn = [];
-
-			for(var i = 0; i < userRoleNames.length; i++)
-			{
-				if(projectRoleNames.indexOf(userRoleNames[i]) !== -1)
-				{
-					rolesToReturn.push(userRoles[i]);
-				}
-			}
-
-			return callback(rolesToReturn);
-		});
-	});
-};
-
-/******************************************************************************
- * Get roles granted to a user within a specific database
- * The function will find all roles within the specified database and also
- * admin database and return this on the callback
- *
- * @param {string} username - username of the user
- * @param {string} database - database we are interested in
- * @param {function} callback - get filtered roles from database
- *								pass to callback as parameter
- ******************************************************************************/
-MongoWrapper.prototype.getRoles = function (database, username, full, callback) {
-	"use strict";
-	var self = this;
-
-	var dbName = "admin";
-	// var collName = "system.users";
-	// var filter = {};
-	// var rolesToReturn = [];
-
-	// If the username is supplied, start by getting the roles just for this user
-	if (username)
-	{
-		self.getUserRoles(username, dbName, function (err, userRoles)
-		{
-			if (err.value)
-			{
-				return callback(err);
-			}
-
-			var roleNames = userRoles.map( function (userRole) {
-				return userRole._id.replace(".history", "");
-			});
-
-			self.getRoleSettings(database, roleNames, function(err, roleSettings)
-			{
-				for (var i = 0; i < roleNames.length; i++)
-				{
-					delete roleSettings[i]._id; // Delete the ID attach to the settings
-					_.extend(userRoles[i], roleSettings[i]);
-				}
-
-				return callback(responseCodes.OK, userRoles);
-			});
-
-		});
-	} else {
-		self.getRolesByDatabase(database, C.REPO_ANY, function(err, dbRoles) {
-			if (err.value)
-			{
-				return callback(err);
-			}
-
-			var roleNames = dbRoles.map( function (dbRole) {
-				return dbRole._id.replace(".history", "");
-			});
-
-			self.getRoleSettings(database, roleNames, function(err, roleSettings)
-			{
-				for (var i = 0; i < roleNames.length; i++)
-				{
-					delete roleSettings[i]._id; // Delete the ID attach to the settings
-					_.extend(dbRoles[i], roleSettings[i]);
-				}
-
-				return callback(responseCodes.OK, dbRoles);
+					for (let i = 0; i < rolesArr.length; i++) {
+						privileges = privileges.concat(rolesArr[i].inheritedPrivileges);
+					}
+					self.logger.logDebug(privileges.length + "privileges found.");
+					callback(responseCodes.OK, privileges);
+				});
 			});
 		});
-	}
-};
 
-/*******************************************************************************
- * Get roles granted to a user within a specific database
- * The function will find all roles within the specified database and also
- * admin database and return this on the callback
- *
- * @param {string} username - username of the user
- * @param {string} database - database we are interested in
- * @param {function} callback - get filtered roles from database
- *								pass to callback as parameter
- ******************************************************************************/
-MongoWrapper.prototype.getUserRoles = function (username, database, callback) {
-	"use strict";
-
-	var self = this;
-
-	var dbName = "admin";
-	var collName = "system.users";
-	var filter = { "user" : username };
-
-	//only return roles in admin and the specified database, the rest are irrelevant.
-	var projection = { "roles" : 1};
-
-		console.log('filter', filter);
-	self.filterColl(dbName, collName, filter, projection, function(err, docs) {
-		if (err.value) {
-			return callback(err);
-		}
-
-		if (docs.length !== 1) {
-			self.logger.logError("Unexpected number of documents found in getUserRoles(). size:" + docs.length);
-			return callback(responseCodes.USER_NOT_FOUND, docs);
-		}
-
-		var roles = [];
-		for (let i = 0; i < docs[0].roles.length; i++) {
-			if (docs[0].roles[i].db === dbName || docs[0].roles[i].db === database) {
-				roles.push(docs[0].roles[i]);
-			}
-		}
-
-		callback(responseCodes.OK, roles);
-	});
-};
-
-/*******************************************************************************
- * Get the list of privileges the user has on the database
- *
- * @param {string} username - username of the user
- * @param {string} database - database we are interested in
- * @param {function} callback - get filtered privileges from database
- *								pass to callback as parameter
- ******************************************************************************/
-MongoWrapper.prototype.getUserPrivileges = function (username, database, callback) {
-    "use strict";
-    var self = this;
-
-    var adminDB = "admin";
-
-    //First get all the roles this user is granted within the databases of interest
-     self.getUserRoles(username, database, function (err, roles) {
-            if (err.value) {
-                return callback(err);
-            }
-
-            if (!roles || roles.length === 0) {
-                //no roles under this user, no point trying to find privileges
-                return callback(responseCodes.OK, []);
-        }
-
-        self.dbCallback(adminDB, function (err, dbConn) {
-            var command = { rolesInfo : roles, showPrivileges: true };
-            //Given the roles, get the privilege information
-            dbConn.command(command, function (err, docs) {
-                if (err) {
-                    return callback(responseCodes.DB_ERROR(err));
-                }
-
-                if (!docs || docs.roles.length === 0) {
-                    //No privileges return empty array
-                    return callback(responseCodes.OK, []);
-                }
-
-                var rolesArr = docs.roles;
-                var privileges = [];
-
-                for (let i = 0; i < rolesArr.length; i++) {
-                    privileges = privileges.concat(rolesArr[i].inheritedPrivileges);
-                }
-                self.logger.logDebug(privileges.length + "privileges found.");
-                callback(responseCodes.OK, privileges);
-            });
-        });
-    });
-
-};
+	};
 
 
-/*******************************************************************************
- * Return signleton db connection
- *
- * @param {string} dbName - Database name
- * @param {function} callback - get db connection
- *								pass to callback as parameter
- * @return {promise} promise with db connection as resolved value 
- ******************************************************************************/
-MongoWrapper.prototype.getDB = function(dbName, callback) {
-	"use strict";
-    
-    if(this._db) {
 
-    	callback && callback(null, db);
-    	return Promise.resolve(this._db.db(dbName));
+	/*******************************************************************************
+	 * Return signleton db connection
+	 *
+	 * @param {string} dbName - Database name
+	 * @param {function} callback - get db connection
+	 *								pass to callback as parameter
+	 * @return {promise} promise with db connection as resolved value 
+	 ******************************************************************************/
+	MongoWrapper.prototype.getDB = function(dbName, callback) {
 
-    } else {
+		if(this._db) {
 
-    	return new Promise((resolve, reject) => {
-			mongo.open(dbName, (err, db) => {
-				callback && callback(err, db);
-				if(err){
-					return reject(err);
-				} else {
-					return resolve(db);
-				}
+			callback && callback(null, db);
+			return Promise.resolve(this._db.db(dbName));
+
+		} else {
+
+			return new Promise((resolve, reject) => {
+				mongo.open(dbName, (err, db) => {
+					callback && callback(err, db);
+					if(err){
+						return reject(err);
+					} else {
+						return resolve(db);
+					}
+				});
 			});
-    	});
 
-    }
-};
+		}
+	};
 
-module.exports = function(logger) {
-	"use strict";
 
-	return new MongoWrapper(logger);
-};
+	module.exports = function(logger) {
+		return new MongoWrapper(logger);
+	};
 
+}());
