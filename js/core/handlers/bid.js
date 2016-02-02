@@ -64,6 +64,10 @@ function createBid(req, res, next) {
 
 			bid = utils.writeCleanedBodyToModel(whitelist, req.body, bid);
 			bid.packageName = req.params.packageName;
+
+			//use default template for t&c
+			bid.termsAndConds = require('../models/templates/json/termsAndConds.json');
+			
 			return bid.save();
 		}
 		

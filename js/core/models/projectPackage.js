@@ -197,7 +197,7 @@ schema.methods.uploadAttachment = function(readStream, meta){
 schema.methods.getTermsAndCondsHTML = function(){
 	'use strict';
 
-	let rowTemplate = require('./templates/termsAndConds');
+	let rowTemplate = require('./templates/html/termsAndConds');
 	let html = "";
 
 	this.termsAndConds.forEach(row => {
