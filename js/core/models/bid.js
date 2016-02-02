@@ -19,6 +19,23 @@ var schema = mongoose.Schema({
 	termsAndConds: termsAndCondsSchema
 });
 
+//status = invited,accepted,declined,submitted,awarded,rejected
+schema.virtual('status').get(function () {
+	if(this.awarded === true){
+		return 'awarded';
+	} else if (this.awarded === false) {
+		return 'rejected';
+	} else if (this.submitted) {
+		return 'submitted';
+	} else if (this.accepted === false) {
+		return 'declined';
+	} else if (this.accepted === true) {
+		return 'accepted';
+	} else {
+		return 'invited';
+	}
+});
+
 schema.plugin(require('mongoose-timestamp'));
 
 var defaultProjection = { 'termsAndConds': 0 };

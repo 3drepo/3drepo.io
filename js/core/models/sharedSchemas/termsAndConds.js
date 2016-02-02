@@ -3,8 +3,8 @@ var Schema = mongoose.Schema;
 
 var keySchema = Schema({
 	name: {type: String, required: true},
-	datatype: {type: String, enum: ['string', 'boolean', 'date']},
-	control: {type: String, enum: ['checkbox', 'text', 'textarea']}
+	datatype: {type: String, enum: ['string', 'boolean', 'date'], default: 'string'},
+	control: {type: String, enum: ['checkbox', 'text', 'textarea', 'date'], default: 'text'}
 });
 
 var itemSchema = Schema({
