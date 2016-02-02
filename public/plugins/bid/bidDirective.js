@@ -32,14 +32,13 @@
 		};
 	}
 
-	BidCtrl.$inject = ["$scope", "$location", "StateManager", "Auth", "BidService", "ProjectService"];
+	BidCtrl.$inject = ["$scope", "$location", "StateManager", "BidService", "ProjectService"];
 
-	function BidCtrl($scope, $location, StateManager, Auth, BidService, ProjectService) {
+	function BidCtrl($scope, $location, StateManager, BidService, ProjectService) {
 		var vm = this,
 			promise, projectUserRolesPromise;
 
 		vm.StateManager = StateManager;
-		vm.Auth = Auth;
 		vm.subContractors = [
 			{user: "Pinakin"},
 			{user: "Carmen"},
@@ -57,11 +56,11 @@
 		projectUserRolesPromise.then(function (data) {
 			var i, length;
 			for (i = 0, length = data.length; i < length; i += 1) {
-				if (data[i] === "MC") {
+				if (data[i] === "MainContractor") {
 					vm.userIsAMainContractor = true;
 					break;
 				}
-				else if (data[i] === "SC") {
+				else if (data[i] === "SubContractor") {
 					vm.userIsAMainContractor = false;
 					break;
 				}
@@ -69,7 +68,9 @@
 					vm.userIsAMainContractor = true;
 				}
 			}
+			console.log(vm.userIsAMainContractor);
 			if (vm.userIsAMainContractor) {
+				vm.listTitle = "Packages";
 				// Get all packages for project
 				promise = BidService.getPackage();
 				promise.then(function (response) {
@@ -89,18 +90,18 @@
 				});
 			}
 			else {
-				// Dummy code waiting for API
+				vm.listTitle = "Bids";
 				promise = BidService.getPackage();
 				promise.then(function (response) {
+					console.log(response);
 					var packages = response.data;
-					promise = BidService.getBids(packages[0].name);
+					promise = BidService.getUserBid(packages[0].name);
 					promise.then(function (response) {
+						console.log(response);
 						vm.packages = [];
-						for (i = 0, length = response.data.length; i < length; i += 1) {
-							if (Auth.username === response.data[i].user) {
-								vm.packages.push(packages[0]);
-								vm.packages[0].completedByPretty = prettyDate(new Date(vm.packages[0].completedBy));
-							}
+						if (response.data !== null) {
+							vm.packages.push(response.data);
+							vm.packages[0].completedByPretty = prettyDate(new Date(vm.packages[0].completedBy));
 						}
 						if (vm.packages.length === 0) {
 							vm.summaryInfo = "There are no packages for this project";
@@ -143,10 +144,6 @@
 			);
 			vm.showInfo = false;
 		});
-
-		vm.home = function () {
-			$location.path("/" + Auth.username, "_self");
-		};
 
 		vm.save = function () {
 			var data = {
@@ -282,9 +279,8 @@
 				});
 			}
 			else {
-				promise = BidService.getUserBids(vm.selectedPackage.name);
+				promise = BidService.getUserBid(vm.selectedPackage.packageName);
 				promise.then(function (response) {
-					var statusText, statusIcon;
 					if (response.statusText === "OK") {
 						vm.packageSelected = true;
 						if (response.data.awarded === null) {

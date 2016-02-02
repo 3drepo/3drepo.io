@@ -43,19 +43,20 @@
 		vm.projectSelected = false;
 
 		$scope.$watch("vm.AccountData", function (newValue, oldValue) {
-			var i, length, promise;
+			var promise;
 
 			if (newValue.projects.length !== oldValue.projects.length) {
 				// Get type of role
 				projectUserRolesPromise = ProjectService.getUserRoles(vm.AccountData.projects[0].account, vm.AccountData.projects[0].project);
 				projectUserRolesPromise.then(function (data) {
+					// Determine is user is a main contractor or a sub contractor
 					var i, length;
 					for (i = 0, length = data.length; i < length; i += 1) {
-						if (data[i] === "MC") {
+						if (data[i] === "MainContractor") {
 							vm.userIsAMainContractor = true;
 							break;
 						}
-						else if (data[i] === "SC") {
+						else if (data[i] === "SubContractor") {
 							vm.userIsAMainContractor = false;
 							break;
 						}
@@ -71,7 +72,6 @@
 						});
 					}
 					else {
-						// Dummy code waiting for API
 						vm.AccountData.projects[0].packages = [];
 						promise = BidService.getProjectPackage(vm.AccountData.projects[0].account, vm.AccountData.projects[0].project);
 						promise.then(function (response) {

@@ -1,0 +1,11 @@
+div(flex, layout="column")
+	md-toolbar
+		.md-toolbar-tools
+			h2
+				span {{vm.StateManager.state.project}}
+			span(flex)
+			h2 ({{vm.Auth.username}})
+			md-button.md-icon-button(aria-label="Home", ng-click="vm.home($event)")
+				md-icon(class="fa fa-home")
+
+	md-content

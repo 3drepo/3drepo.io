@@ -19,30 +19,24 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("projectsList", projectsList);
+		.directive("bidImage", bidImage);
 
-	function projectsList() {
+	function bidImage() {
 		return {
-			restrict: "E",
-			templateUrl: "projectsList.html",
-			scope: {
-			},
-			controller: ProjectsListCtrl,
+			restrict: 'E',
+			templateUrl: 'bidImage.html',
+			scope: {},
+			controller: BidImageCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	ProjectsListCtrl.$inject = ["$location", "AccountData"];
+	BidImageCtrl.$inject = ["StateManager"];
 
-	function ProjectsListCtrl($location, AccountData) {
+	function BidImageCtrl(StateManager) {
 		var vm = this;
 
-		console.log(AccountData);
-		vm.AccountData = AccountData;
-
-		vm.b4f = function (account, project) {
-			$location.path("/" + account + "/" + project + "/bid", "_self");
-		};
+		vm.StateManager = StateManager;
 	}
 }());

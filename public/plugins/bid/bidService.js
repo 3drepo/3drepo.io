@@ -88,7 +88,7 @@
 		};
 
 		// Get user bids for a package
-		var getUserBids = function (packageName) {
+		var getUserBid = function (packageName) {
 			return doGet("packages/" + packageName + "/bids/mine.json");
 		};
 
@@ -105,7 +105,7 @@
 			getProjectPackage: getProjectPackage,
 			inviteSubContractor: inviteSubContractor,
 			getBids: getBids,
-			getUserBids: getUserBids,
+			getUserBid: getUserBid,
 			getProjectUserBids: getProjectUserBids,
 			acceptInvite: acceptInvite,
 			awardBid: awardBid

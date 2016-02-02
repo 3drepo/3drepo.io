@@ -9,8 +9,15 @@ bid {
   align-items: center;
   display: flex;
   justify-content: center;
-  padding: 40px;
   flex-direction: column;
+}
+
+.bidInfo {
+  width: 100%;
+  height: 100%;
+}
+.bidInfo.layout-margin {
+  margin: 100px;
 }
 
 bid md-toolbar {
@@ -103,4 +110,9 @@ bid .bidInvite .bidInviteContent md-list-item md-icon {
 bid .bidInvite .bidInviteIcon {
   font-size: 2em;
   margin: 15px;
+}
+
+/** Project Summary ***************************************************************************************************/
+bid-project-summary md-content {
+  /*height: 300px;*/
 }
