@@ -64,6 +64,10 @@ function createBid(req, res, next) {
 
 			bid = utils.writeCleanedBodyToModel(whitelist, req.body, bid);
 			bid.packageName = req.params.packageName;
+
+			//use default template for t&c
+			bid.termsAndConds = require('../models/templates/json/termsAndConds.json');
+			
 			return bid.save();
 		}
 		
@@ -81,6 +85,11 @@ function listBids(req, res, next){
 	
 	let place = '/:account/:project/packages/:package/bids.json GET';
 	Bid.findByPackage(getDbColOptions(req), req.params.packageName).then(bids => {
+
+		bids.forEach((bid, index) => {
+			bids[index] = bid.toJSON({virtuals : true });
+		});
+
 		responseCodes.respond(place, req, res, next, responseCodes.OK, bids);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, utils.mongoErrorToResCode(err), err);
@@ -142,7 +151,7 @@ function findMyBid(req, res, next){
 
 
 	_getMyBid(req).then(bid => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, bid);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, bid.toJSON({ virtuals : true }));
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

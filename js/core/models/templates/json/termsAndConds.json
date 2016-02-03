@@ -1,0 +1,127 @@
+[
+    {
+	    "block": "Project Summary",
+	    "items":[
+	        {
+	            "type": "keyvalue",
+	            "keys": [{ "name": "Client", "datatype": "string", "control": "text"}],
+	            "values": [""]
+	        },
+	        {
+	            "type": "keyvalue",
+	            "keys": [{ "name": "Principal Designer", "datatype": "string", "control": "text"}],
+	            "values": [""]
+	        },
+	        {
+	            "type": "keyvalue",
+	            "keys": [{ "name": "Main Contractor", "datatype": "string", "control": "text"}],
+	            "values": [""]
+	        },
+	        {
+	            "type": "keyvalue",
+	            "keys": [{ "name": "Quantity Surveyor", "datatype": "string", "control": "text"}],
+	            "values": [""]
+	        }
+	    ]
+    },
+    {
+	    "block": "Instruction to SC",
+	    "items":[
+	        {
+	            "type": "keyvalue",
+	            "keys": [{ "name": "General Requirements", "datatype": "string", "control": "text"}],
+	            "values": [""]
+	        },
+	        {
+	            "type": "keyvalue",
+	            "keys": [{ "name": "Training", "datatype": "string", "control": "text"}],
+	            "values": [""]
+	        },
+	        {
+	            "type": "keyvalue",
+	            "keys": [{ "name": "Site Rules", "datatype": "string", "control": "text"}],
+	            "values": [""]
+	        },
+	        {
+	            "type": "keyvalue",
+	            "keys": [{ "name": "Safety", "datatype": "string", "control": "text"}],
+	            "values": [""]
+	        },
+	        {
+	            "type": "keyvalue",
+	            "keys": [{ "name": "Material Resourcing", "datatype": "string", "control": "text"}],
+	            "values": [""]
+	        },
+	        {
+	            "type": "keyvalue",
+	            "keys": [{ "name": "Other", "datatype": "string", "control": "textarea"}],
+	            "values": [""]
+	        }
+	    ]
+    },
+    {
+	    "block": "Contract Particulars",
+	    "items":[
+	        {
+	            "type": "keyvalue",
+	            "keys": [{ "name": "Form of Contract", "datatype": "string", "control": "text"}],
+	            "values": [""]
+	        },
+	        {
+	            "type": "keyvalue",
+	            "keys": [{ "name": "Amendments", "datatype": "string", "control": "text"}],
+	            "values": [""]
+	        },
+	        {
+	            "type": "keyvalue",
+	            "keys": [{ "name": "Package Start Date", "datatype": "string", "control": "date"}],
+	            "values": [""]
+	        },
+	        {
+	            "type": "keyvalue",
+	            "keys": [{ "name": "Package Completion Date", "datatype": "string", "control": "date"}],
+	            "values": [""]
+	        },
+	        {
+	            "type": "keyvalue",
+	            "keys": [{ "name": "Duration", "datatype": "string", "control": "text"}],
+	            "values": [""]
+	        },
+	        {
+	            "type": "keyvalue",
+	            "keys": [{ "name": "LAD", "datatype": "string", "control": "text"}],
+	            "values": [""]
+	        },
+	        {
+	            "type": "keyvalue",
+	            "keys": [{ "name": "Defects Period", "datatype": "string", "control": "text"}],
+	            "values": [""]
+	        },
+	        {
+	            "type": "keyvalue",
+	            "keys": [{ "name": "Retention", "datatype": "string", "control": "text"}],
+	            "values": [""]
+	        },
+	        {
+	            "type": "keyvalue",
+	            "keys": [{ "name": "FSC/PEFC required", "datatype": "string", "control": "text"}],
+	            "values": [""]
+	        },
+	        {
+	            "type": "keyvalue",
+	            "keys": [{ "name": "Any Access Restrictions", "datatype": "string", "control": "text"}],
+	            "values": [""]
+	        },
+	        {
+	            "type": "keyvalue",
+	            "keys": [{ "name": "Sub Contract", "datatype": "string", "control": "text"}],
+	            "values": [""]
+	        },
+	        {
+	            "type": "keyvalue",
+	            "keys": [{ "name": "Retention Bond", "datatype": "string", "control": "text"}],
+	            "values": [""]
+	        }
+	    ]
+    }
+]
