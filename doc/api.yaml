@@ -1,0 +1,337 @@
+swagger: '2.0'
+info:
+  title: Bid4Free API
+  description: APIs for Bid4Free project
+  version: "0.0.1"
+# the domain of the service
+#host: example.org
+# array of all schemes that your API supports
+schemes:
+  - http
+# will be prefixed to all paths
+basePath: /api
+produces:
+  - application/json
+paths:
+  /login:
+    post:
+      tags: 
+        - Auth
+      summary: Login
+      description: Login
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+                description: username
+                example: abc
+              password:
+                type: string
+                description: password
+                example: '123456'
+      responses:
+        200:
+          schema:
+            type: object
+            properties:
+              account:
+                type: string
+                example: username
+              roles:
+               type: array
+               items:
+                 type: object
+                 properties: 
+                   role:
+                    type: string
+                    description: role name
+                    example: MainContractor
+                   db:
+                    type: string
+                    description: db of the role granted
+                    example: anotheraccount
+          description: Logged in and a list of user roles returned
+        401:
+          description: Wrong username or password
+  /logout:
+    post:
+      tags: 
+        - Auth
+      summary: Logout
+      description: Logout
+      responses:
+        200:
+          description: Logged out
+        401:
+          description: You are not logged in
+  /{account}/{project}/info.json:
+    get:
+      summary: Get project summary
+      description: |
+        This project info endpoint will return the summary of the project
+      parameters:
+        - $ref: "#/parameters/account"
+        - $ref: "#/parameters/project"
+      tags:
+        - Project
+      responses:
+        200:
+          description: An object of project summary
+          schema:
+              $ref: '#/definitions/Project'
+    post:
+      summary: Create or update project summary
+      description: |
+        This project info endpoints will create or update project summary and returns the saved project summary as response
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Project'
+        - $ref: "#/parameters/account"
+        - $ref: "#/parameters/project"
+      tags:
+        - Project
+      responses:
+        200:
+          description: An object of project summary
+          schema:
+              $ref: '#/definitions/Project'
+  /{account}/{project}/packages.json:
+    get:
+      summary: Get project packages
+      description: |
+        This endpoint returns list of packages for a project. For main contractors, it returns all packages and for sub contractors, it only returns packages that they are invited to.
+      parameters:
+        - $ref: "#/parameters/account"
+        - $ref: "#/parameters/project"
+      tags:
+        - Pacakge
+      responses:
+        200:
+          description: An array of package objects
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Package'
+    post:
+      summary: Create project package
+      consumes:
+        - application/json
+      description: |
+        This endpoint create a package. Only users with main contractor role in related db have access to this endpoint.
+      parameters:
+        - $ref: "#/parameters/account"
+        - $ref: "#/parameters/project"
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/PackageProto'
+      tags:
+        - Pacakge
+      responses:
+        200:
+          description: Package object created in database
+          schema:
+            $ref: '#/definitions/PackageNoAtt'
+  /{account}/{project}/packages/{packageName}.json:
+    get:
+      summary: Get a project package by name
+      description: |
+        This endpoint returns a package specified by name with attachment details hydrated
+      parameters:
+        - $ref: "#/parameters/account"
+        - $ref: "#/parameters/project"
+        - $ref: '#/parameters/packageName'
+      tags:
+        - Pacakge
+      responses:
+        200:
+          description: A package object with attachment details hydrated
+          schema:
+            $ref: '#/definitions/PackageWithAtt'
+          
+definitions:
+  Project:
+    type: object
+    properties:
+      name:
+        type: string
+        description: Project name
+        example: projectABC
+      site:
+        type: string
+        description: Project site
+        example: site
+      code:
+        type: string
+        example: 9099
+      client:
+        type: string
+        description: Client name
+        example: CWC
+      budget:
+        type: number
+        description: Project budget
+        example: 900000000000
+      completedBy:
+        type: string
+        format: date
+        description: Expected completion date
+        example: 2017-01-01
+      contact:
+        type: string
+        description: Contact person
+        example: Chris
+  ID: 
+    type: object
+    properties:
+      _id:
+        type: string
+        description: mongo ID in string format
+        example: '000000000000000000000000'
+  Audit:
+    type: object
+    properties:
+      createdAt:
+        type: string
+        description: object create date
+        format: time
+        example: '2017-01-01T00:00:00.000Z'
+      updatedAt:
+        type: string
+        format: time
+        example: '2017-01-01T00:00:00.000Z'
+        description: object update date
+        
+  PackageProto:
+    type: object
+    properties: 
+      budget:
+        type: number
+        example: 200000000
+      completedBy:
+        type: string
+        format: date
+        description: package expected completion date
+        example: '2017-01-01'
+      site:
+        type: string
+        description: site name
+        example: abc
+      name:
+        type: string
+        description: package name
+        example: windows
+        
+  PackageNoAtt:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ID'
+      - $ref: '#/definitions/Audit'
+      - $ref: '#/definitions/PackageProto'
+      - type: object
+        properties:
+          attachments:
+            type: array
+            description: list of attachment IDs
+            items:
+              type: string
+  Package:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ID'
+      - $ref: '#/definitions/Audit'
+      - $ref: '#/definitions/PackageProto'
+      - type: object
+        properties:
+          attachments:
+            type: array
+            description: list of attachment IDs
+            items:
+              $ref: '#/definitions/AttachmentId'
+  AttachmentId:
+    type: string
+    description: 'attachment id'
+    example: '56af99dc996e053137806dcb'
+
+  PackageWithAtt:
+   type: object
+   allOf:
+     - $ref: '#/definitions/Package'
+     - type: object
+       properties:
+         attachments:
+           type: array
+           description: list of attachments
+           items:
+             $ref: '#/definitions/Attachment'
+             
+  Attachment:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ID'
+      - type: object
+        properties:
+          length:
+            type: number
+            format: integer
+            example: 2046
+            description: File size in byte
+          chunkSize:
+            type: number
+            format: integer
+            example: 261120
+            description: chunck size in mongodb fsgrid
+          uplodateDate:
+            type: string
+            format: date
+            description: file upload date
+            example: '2017-01-01T00:00:00.000Z'
+          md5:
+            type: string
+            description: file md5
+            example: 04b269dc25a506eb7db721c63702d0b0
+          contentType:
+            type: string
+            description: file mine type
+            example: 'image/jpeg'
+          metadata:
+            type: object
+            description: other file metadata
+            properties:
+              packageName:
+                type: string
+                description: package the file belongs to
+                example: windows
+        
+parameters:
+  account:
+    name: account
+    in: path
+    description: account name of the project
+    required: true
+    type: string
+  project:
+    name: project
+    in: path
+    description: project name
+    required: true
+    type: string
+  packageName:
+    name: packageName
+    in: path
+    description: package name
+    required: true
+    type: string
