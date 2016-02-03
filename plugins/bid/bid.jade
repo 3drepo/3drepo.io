@@ -1,9 +1,17 @@
-.bidInfo(layout="column", layout-padding, flex)
-	div(layout="row", layout-padding, flex)
-		bid-project-summary(flex)
-		bid-image(flex)
+.bidInfo(layout="column")
+	div(ng-if="!vm.userIsAMainContractor", layout="column", flex)
+		div(layout="row", layout-padding, flex)
+			bid-project-summary(layout="column", flex)
+			bid-image(layout="column", flex)
+			bid-docs(layout="column", flex)
 
-	//.bidContent(layout="row", layout-align="space-between start")
+		div(layout="row", layout-padding, flex)
+			bid-list(layout="column", flex)
+			bid-summary(layout="column", flex)
+			bid-status(layout="column", flex)
+			bid-workspace(layout="column", flex)
+
+	//.bidContent(layout="row", layout-align="space-between start", ng-if="vm.userIsAMainContractor")
 		.bidPackageList.md-whiteframe-1dp(flex=15)
 			md-toolbar
 				.md-toolbar-tools
@@ -15,7 +23,7 @@
 				md-content(layout-padding)
 					md-list()
 						md-list-item(ng-repeat="package in vm.packages", ng-click="vm.showPackage($index)", aria-label="Package")
-							p {{package.packageName}}
+							p {{package.name}}
 
 		.bidSummary.md-whiteframe-1dp(flex=35)
 			md-toolbar

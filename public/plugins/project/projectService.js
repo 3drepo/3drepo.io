@@ -77,10 +77,37 @@
 			return deferred.promise;
 		};
 
+		function doPost(data, urlEnd) {
+			var deferred = $q.defer(),
+				url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + urlEnd),
+				config = {
+					withCredentials: true
+				};
+			$http.post(url, data, config)
+				.then(function (response) {
+					deferred.resolve(response);
+				});
+			return deferred.promise;
+		}
+
+		var createProjectSummary = function () {
+			var data = {
+				name: state.project,
+				site: "Wood Lane",
+				code: "X321-90-TRE5",
+				client: "The Freemasons",
+				budget: 9087654,
+				completedBy: new Date("2016-12-12"),
+				contact: "Superman"
+			};
+			return doPost(data, "info.json");
+		};
+
 		return {
 			getRoles: getRoles,
 			getUserRolesForProject: getUserRolesForProject,
-			getUserRoles: getUserRoles
+			getUserRoles: getUserRoles,
+			createProjectSummary: createProjectSummary
 		};
 	}
 }());

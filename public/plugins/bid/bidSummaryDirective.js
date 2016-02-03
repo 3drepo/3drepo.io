@@ -19,30 +19,24 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("bidProjectSummary", bidProjectSummary);
+		.directive("bidSummary", bidSummary);
 
-	function bidProjectSummary() {
+	function bidSummary() {
 		return {
 			restrict: 'E',
-			templateUrl: 'bidProjectSummary.html',
+			templateUrl: 'bidSummary.html',
 			scope: {},
-			controller: BidProjectSummaryCtrl,
+			controller: BidSummaryCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	BidProjectSummaryCtrl.$inject = ["$location", "StateManager", "Auth"];
+	BidSummaryCtrl.$inject = ["StateManager"];
 
-	function BidProjectSummaryCtrl($location, StateManager, Auth) {
+	function BidSummaryCtrl(StateManager) {
 		var vm = this;
 
 		vm.StateManager = StateManager;
-		vm.Auth = Auth;
-
-
-		vm.home = function () {
-			$location.path("/" + Auth.username, "_self");
-		};
 	}
 }());

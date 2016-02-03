@@ -10,14 +10,14 @@ bid {
   display: flex;
   justify-content: center;
   flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  padding-top: 20px;
 }
 
 .bidInfo {
   width: 100%;
   height: 100%;
-}
-.bidInfo.layout-margin {
-  margin: 100px;
 }
 
 bid md-toolbar {
@@ -50,13 +50,14 @@ bid md-list-item p {
   outline: none;
 }
 
-/** Packages **********************************************************************************************************/
-
-bid .bidPackageList {
+bid .md-whiteframe-1dp {
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
 }
+
+/** Packages **********************************************************************************************************/
+
 bid .bidPackageList .bidPackageListContent {
   width: 100%;
   height: 400px;
@@ -64,11 +65,6 @@ bid .bidPackageList .bidPackageListContent {
 
 /** Summary ***********************************************************************************************************/
 
-bid .bidSummary {
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
-}
 bid  .bidSummary .bidSummaryContent {
   width: 100%;
   min-height: 450px;
@@ -94,12 +90,6 @@ bid  .bidSummary .bidSummaryContent .projectDates {
 }
 
 /** Invite ************************************************************************************************************/
-
-bid .bidInvite {
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
-}
 bid .bidInvite .bidInviteContent {
   width: 100%;
   height: 400px;
@@ -113,6 +103,3 @@ bid .bidInvite .bidInviteIcon {
 }
 
 /** Project Summary ***************************************************************************************************/
-bid-project-summary md-content {
-  /*height: 300px;*/
-}

@@ -51,6 +51,14 @@
 		vm.packageSelected = false;
 		vm.statusInfo = "No package currently selected";
 
+		// Create a project summary
+		/*
+		promise = ProjectService.createProjectSummary();
+		promise.then(function (response) {
+			console.log(response);
+		});
+		*/
+
 		// Get type of role
 		projectUserRolesPromise = ProjectService.getUserRolesForProject();
 		projectUserRolesPromise.then(function (data) {
@@ -171,22 +179,24 @@
 		vm.inviteSubContractor = function () {
 			var i, length, index;
 
+			/*
 			for (i = 0, length = vm.notInvitedSubContractors.length; i < length; i += 1) {
 				if (vm.notInvitedSubContractors[i].user === vm.subContractors[vm.subContractorIndex].user) {
 					index = i;
 					break;
 				}
 			}
+			*/
 			var data = {
-				user: vm.notInvitedSubContractors[index].user
+				user: vm.notInvitedSubContractors[vm.subContractorIndex].user
 			};
 			promise = BidService.inviteSubContractor(vm.selectedPackage.name, data);
 			promise.then(function (response) {
 				if (response.statusText === "OK") {
-					vm.notInvitedSubContractors[index].accepted = null;
-					vm.invitedSubContractors.push(vm.notInvitedSubContractors[index]);
+					vm.notInvitedSubContractors[vm.subContractorIndex].accepted = null;
+					vm.invitedSubContractors.push(vm.notInvitedSubContractors[vm.subContractorIndex]);
 					vm.invitedSubContractors[vm.invitedSubContractors.length - 1].invitedIcon = "fa fa-circle-thin";
-					vm.notInvitedSubContractors.splice(index, 1);
+					vm.notInvitedSubContractors.splice(vm.subContractorIndex, 1);
 					vm.subContractor = undefined;
 				}
 			});

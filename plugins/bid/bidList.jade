@@ -1,0 +1,10 @@
+.md-whiteframe-1dp(flex)
+	md-toolbar
+		.md-toolbar-tools
+			h2
+				span List
+
+	md-content
+		md-list
+			md-list-item(ng-repeat="package in vm.packages", ng-click="vm.showPackage($index)", aria-label="Package")
+				p {{package.packageName}}
