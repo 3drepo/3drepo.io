@@ -103,11 +103,29 @@
 			return doPost(data, "info.json");
 		};
 
+		function doGet(urlEnd) {
+			var deferred = $q.defer(),
+				url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + urlEnd);
+			$http.get(url).then(
+				function (response) {
+					deferred.resolve(response);
+				},
+				function () {
+					deferred.resolve([]);
+				});
+			return deferred.promise;
+		}
+
+		var getProjectSummary = function () {
+			return doGet("info.json");
+		};
+
 		return {
 			getRoles: getRoles,
 			getUserRolesForProject: getUserRolesForProject,
 			getUserRoles: getUserRoles,
-			createProjectSummary: createProjectSummary
+			createProjectSummary: createProjectSummary,
+			getProjectSummary: getProjectSummary
 		};
 	}
 }());

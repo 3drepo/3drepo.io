@@ -1,4 +1,43 @@
-.md-whiteframe-1dp(flex)
+.md-whiteframe-1dp(layout="column", flex)
+	md-toolbar
+		.md-toolbar-tools
+			h2
+				span Project Summary
+			span(flex)
+			h2 ({{vm.Auth.username}})
+			md-button.md-icon-button(aria-label="Home", ng-click="vm.home($event)")
+				md-icon(class="fa fa-home")
+	md-content.bidInfoCardContent
+		md-list
+			md-list-item.md-1-line
+				p.bidInfoCardLabel(flex="40") Name
+				p {{vm.projectSummary.name}}
+			md-divider
+			md-list-item.md-1-line
+				p.bidInfoCardLabel(flex="40") Site
+				p {{vm.projectSummary.site}}
+			md-divider
+			md-list-item.md-1-line
+				p.bidInfoCardLabel(flex="40") Client
+				p {{vm.projectSummary.client}}
+			md-divider
+			md-list-item.md-1-line
+				p.bidInfoCardLabel(flex="40") Code
+				p {{vm.projectSummary.code}}
+			md-divider
+			md-list-item.md-1-line
+				p.bidInfoCardLabel(flex="40") Budget
+				p {{vm.projectSummary.budget}}
+			md-divider
+			md-list-item.md-1-line
+				p.bidInfoCardLabel(flex="40") Completed by
+				p {{vm.projectSummary.completedBy}}
+			md-divider
+			md-list-item.md-1-line
+				p.bidInfoCardLabel(flex="40") Contact
+				p {{vm.projectSummary.contact}}
+			md-divider
+//.md-whiteframe-1dp(flex)
 	md-toolbar
 		.md-toolbar-tools
 			h2
@@ -8,3 +47,25 @@
 			md-button.md-icon-button(aria-label="Home", ng-click="vm.home($event)")
 				md-icon(class="fa fa-home")
 	md-content
+		md-list
+			md-list-item.md-1-line
+				p(flex="30") Name:
+				p {{vm.projectSummary.name}}
+			md-list-item.md-1-line
+				p(flex="30") Site:
+				p {{vm.projectSummary.site}}
+			md-list-item.md-1-line
+				p(flex="30") Client:
+				p {{vm.projectSummary.client}}
+			md-list-item.md-1-line
+				p(flex="30") Code:
+				p {{vm.projectSummary.code}}
+			md-list-item.md-1-line
+				p(flex="30") Budget:
+				p {{vm.projectSummary.budget}}
+			md-list-item.md-1-line
+				p(flex="30") Completed by:
+				p {{vm.projectSummary.completedBy}}
+			md-list-item.md-1-line
+				p(flex="30") Contact:
+				p {{vm.projectSummary.contact}}

@@ -57,28 +57,7 @@
 					vm.userIsAMainContractor = true;
 				}
 			}
-			if (vm.userIsAMainContractor) {
-				vm.listTitle = "Packages";
-				// Get all packages for project
-				promise = BidService.getPackage();
-				promise.then(function (response) {
-					console.log(response);
-					var i, length;
-					vm.packages = response.data;
-					if (vm.packages.length === 0) {
-						vm.summaryInfo = "There are no packages for this project";
-						vm.statusInfo = "There are no packages for this project";
-					}
-					else {
-						vm.summaryInfo = "No packages currently selected";
-						vm.statusInfo = "No packages currently selected";
-						for (i = 0, length = vm.packages.length; i < length; i += 1) {
-							vm.packages[i].completedByPretty = prettyDate(new Date(vm.packages[i].completedBy));
-						}
-					}
-				});
-			}
-			else {
+			if (!vm.userIsAMainContractor) {
 				vm.listTitle = "Bids";
 				promise = BidService.getPackage();
 				promise.then(function (response) {
@@ -90,18 +69,14 @@
 							vm.packages.push(response.data);
 							vm.packages[0].completedByPretty = prettyDate(new Date(vm.packages[0].completedBy));
 						}
-						if (vm.packages.length === 0) {
-							vm.summaryInfo = "There are no packages for this project";
-							vm.statusInfo = "There are no packages for this project";
-						}
-						else {
-							vm.summaryInfo = "No packages currently selected";
-							vm.statusInfo = "No packages currently selected";
-						}
 					});
 				});
 			}
 		});
+
+		vm.showBid = function () {
+
+		};
 
 		function prettyDate (date) {
 			return date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();

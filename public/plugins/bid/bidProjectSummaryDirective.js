@@ -32,14 +32,21 @@
 		};
 	}
 
-	BidProjectSummaryCtrl.$inject = ["$location", "StateManager", "Auth"];
+	BidProjectSummaryCtrl.$inject = ["$location", "StateManager", "Auth", "ProjectService"];
 
-	function BidProjectSummaryCtrl($location, StateManager, Auth) {
-		var vm = this;
+	function BidProjectSummaryCtrl($location, StateManager, Auth, ProjectService) {
+		var vm = this,
+			promise;
 
 		vm.StateManager = StateManager;
 		vm.Auth = Auth;
 
+		// Get the project summar
+		promise = ProjectService.getProjectSummary();
+		promise.then(function (data) {
+			console.log(data);
+			vm.projectSummary = data.data;
+		});
 
 		vm.home = function () {
 			$location.path("/" + Auth.username, "_self");

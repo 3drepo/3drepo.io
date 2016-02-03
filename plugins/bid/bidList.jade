@@ -1,10 +1,10 @@
-.md-whiteframe-1dp(flex)
+.md-whiteframe-1dp(layout="column", flex)
 	md-toolbar
 		.md-toolbar-tools
 			h2
-				span List
+				span Bids
 
-	md-content
+	md-content.bidInfoCardContent
 		md-list
 			md-list-item(ng-repeat="package in vm.packages", ng-click="vm.showPackage($index)", aria-label="Package")
 				p {{package.packageName}}

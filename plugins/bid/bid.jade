@@ -1,11 +1,11 @@
-.bidInfo(layout="column")
-	div(ng-if="!vm.userIsAMainContractor", layout="column", flex)
-		div(layout="row", layout-padding, flex)
+.bidInfo
+	.bidInfoSubContractor(ng-if="!vm.userIsAMainContractor", layout="column")
+		div(layout="row", layout-padding, flex="50")
 			bid-project-summary(layout="column", flex)
 			bid-image(layout="column", flex)
 			bid-docs(layout="column", flex)
 
-		div(layout="row", layout-padding, flex)
+		div(layout="row", layout-padding, flex="50")
 			bid-list(layout="column", flex)
 			bid-summary(layout="column", flex)
 			bid-status(layout="column", flex)
@@ -115,3 +115,5 @@
 					div(ng-if="!vm.packageSelected")
 						.cardInfo
 							p {{vm.statusInfo}}
+
+		md-button(ng-click="vm.createProjectSummary()") Create Project Summary

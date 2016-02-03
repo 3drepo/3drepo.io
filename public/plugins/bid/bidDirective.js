@@ -51,14 +51,6 @@
 		vm.packageSelected = false;
 		vm.statusInfo = "No package currently selected";
 
-		// Create a project summary
-		/*
-		promise = ProjectService.createProjectSummary();
-		promise.then(function (response) {
-			console.log(response);
-		});
-		*/
-
 		// Get type of role
 		projectUserRolesPromise = ProjectService.getUserRolesForProject();
 		projectUserRolesPromise.then(function (data) {
@@ -320,6 +312,13 @@
 			vm.showInput = true;
 			vm.showSummary = false;
 		};
+
+		vm.createProjectSummary = function () {
+			promise = ProjectService.createProjectSummary();
+			promise.then(function (response) {
+				console.log(response);
+			});
+		}
 
 		function prettyDate (date) {
 			return date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
