@@ -23,8 +23,6 @@
 
 	var config	  = require("./config.js");
 
-	var util      = require("util");
-
 	var responseCodes = require("./response_codes.js");
 
 	var MongoClient = require("mongodb").MongoClient,

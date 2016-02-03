@@ -471,9 +471,6 @@ DBInterface.prototype.getIssueStatsForProjectList = function(projectList, callba
 
 	// Only works for master/head at the moment
 	var branch	 = C.MASTER_BRANCH_NAME;
-	var revision = C.HEAD_REVISION_NAME;
-
-	var outer_callback = callback;
 
 	async.concat(projectList, function (item, iter_callback) {
 		var dbName	= item.account;
@@ -488,7 +485,7 @@ DBInterface.prototype.getIssueStatsForProjectList = function(projectList, callba
 			}
 
 			// Add the project itself to the list
-			var childrefs = childrefs.concat({
+			childrefs = childrefs.concat({
 				account: dbName,
 				project: project
 			});
@@ -1802,7 +1799,7 @@ DBInterface.prototype.getIssues = function(dbName, project, branch, revision, on
 
 							iter_callback(null, objIssues);
 						});
-					})
+					});
 				},
 				function (err, results) {
 					if (err) {
@@ -2658,7 +2655,7 @@ DBInterface.prototype.getProjectSettings = function(dbName, projectName, callbac
 
 		callback(responseCodes.OK, settings);
 	});
-}
+};
 
 DBInterface.prototype.getUserRolesForProject = function(database, project, username, callback)
 {
