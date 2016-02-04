@@ -7,6 +7,7 @@
             {"template" : "bid/bidProjectSummary.jade", "id" : "bidProjectSummary.html" },
             {"template" : "bid/bidImage.jade", "id" : "bidImage.html" },
             {"template" : "bid/bidDocs.jade", "id" : "bidDocs.html" },
+            {"template" : "bid/bidDocsDialog.jade", "id" : "bidDocsDialog.html" },
             {"template" : "bid/bidList.jade", "id" : "bidList.html" },
             {"template" : "bid/bidSummary.jade", "id" : "bidSummary.html" },
             {"template" : "bid/bidStatus.jade", "id" : "bidStatus.html" },

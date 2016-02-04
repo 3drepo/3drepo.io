@@ -118,4 +118,43 @@ bid .bidInvite .bidInviteIcon {
   margin: 15px;
 }
 
-/** Project Summary ***************************************************************************************************/
+/** Bid Image *********************************************************************************************************/
+bid-image .bidThumbnailImage {
+  width: 100%;
+  border-radius: 4px;
+}
+
+/** Bid Docs *********************************************************************************************************/
+bid-docs md-icon {
+  font-size: 20px !important;
+  color: #9FA8DA;
+}
+
+.boqListTitles {
+  font-weight: bold;
+}
+
+.boqListRight {
+  text-align: right;
+}
+
+.bidDocsDialog {
+  min-width: 850px;
+  min-height: 600px;
+}
+
+.bidDocsDialog .bidDocsIcon {
+  margin-top: 22px;
+  margin-right: 10px;
+}
+
+.bidDocsDialog .bidDocsSow p {
+  max-width: 800px;
+}
+
+.bidDocsDialog .bidDocsUnderline {
+  text-decoration: underline;
+}
+.bidDocsDialog .bidDocsBold {
+  font-weight: bold;
+}

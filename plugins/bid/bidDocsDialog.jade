@@ -1,0 +1,25 @@
+md-dialog.bidDocsDialog(aria-label="Document",  ng-cloak)
+	md-toolbar
+		.md-toolbar-tools
+			md-icon.bidDocsIcon(md-font-icon="fa fa-file-pdf-o")
+			h2 {{vm.docs[vm.docIndex].title}}
+			span(flex)
+			md-button.md-icon-button
+				md-icon(md-font-icon="fa fa-download", aria-label="Download")
+			md-button.md-icon-button(ng-click="vm.closeDialog()")
+				md-icon(md-font-icon="fa fa-close", aria-label="Close dialog")
+
+	md-content(flex, layout-padding, ng-if="vm.docIndex===0")
+		md-list
+			md-list-item.md-1-line.boqListTitles
+				p(flex="40") Type
+				p.boqListRight(flex="15") Code
+				p.boqListRight(flex="15") Quantity
+			md-list-item.md-1-line(ng-repeat="item in vm.boq")
+				p(flex="40") {{item.type}}
+				p.boqListRight(flex="15") {{item.code}}
+				p.boqListRight(flex="15") {{item.quantity}}
+
+	md-content.bidDocsSow(flex, layout-padding, ng-if="vm.docIndex===1")
+		//p(ng-repeat="paragraph in vm.sowProcessed") {{paragraph}}
+		p(ng-bind-html="vm.sow")

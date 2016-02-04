@@ -32,11 +32,15 @@
 		};
 	}
 
-	BidImageCtrl.$inject = ["StateManager"];
+	BidImageCtrl.$inject = ["$window", "StateManager"];
 
-	function BidImageCtrl(StateManager) {
+	function BidImageCtrl($window, StateManager) {
 		var vm = this;
 
-		vm.StateManager = StateManager;
+		vm.thumbnailPath = "/public/images/bid4free_bid_thumbnail.png";
+
+		vm.showViewer = function () {
+			$window.open(StateManager.state.account + "/" + StateManager.state.project, '_blank');
+		};
 	}
 }());

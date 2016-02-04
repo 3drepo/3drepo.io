@@ -1,7 +1,11 @@
-.md-whiteframe-1dp(flex)
+.md-whiteframe-1dp(layout="column", flex)
 	md-toolbar
 		.md-toolbar-tools
 			h2
 				span Documents
 
-	md-content
+	md-content.bidInfoCardContent
+		md-list
+			md-list-item(ng-repeat="doc in vm.docs", ng-click="vm.showDoc($index)", aria-label="Doc")
+				md-icon(class="fa fa-file-pdf-o")
+				p {{doc.title}}

@@ -1,7 +1,12 @@
-.md-whiteframe-1dp(flex)
+.md-whiteframe-1dp(layout="column", flex)
 	md-toolbar
 		.md-toolbar-tools
 			h2
 				span 3D
+			span(flex)
+			md-button.md-icon-button(aria-label="Viewer", ng-click="vm.showViewer()")
+				md-icon(class="fa fa-share")
 
-	md-content
+	md-content.bidInfoCardContent(layout="row", layout-align="center center", flex)
+		div(flex="60")
+			img.md-card-image.bidThumbnailImage(ng-src="{{vm.thumbnailPath}}", alt="Thumbnail")
