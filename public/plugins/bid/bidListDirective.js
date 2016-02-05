@@ -32,54 +32,9 @@
 		};
 	}
 
-	BidListCtrl.$inject = ["StateManager", "ProjectService", "BidService"];
+	BidListCtrl.$inject = [];
 
-	function BidListCtrl(StateManager, ProjectService, BidService) {
-		var vm = this,
-			promise, projectUserRolesPromise;
-
-		vm.StateManager = StateManager;
-
-		// Get type of role
-		projectUserRolesPromise = ProjectService.getUserRolesForProject();
-		projectUserRolesPromise.then(function (data) {
-			var i, length;
-			for (i = 0, length = data.length; i < length; i += 1) {
-				if (data[i] === "MainContractor") {
-					vm.userIsAMainContractor = true;
-					break;
-				}
-				else if (data[i] === "SubContractor") {
-					vm.userIsAMainContractor = false;
-					break;
-				}
-				else {
-					vm.userIsAMainContractor = true;
-				}
-			}
-			if (!vm.userIsAMainContractor) {
-				vm.listTitle = "Bids";
-				promise = BidService.getPackage();
-				promise.then(function (response) {
-					var packages = response.data;
-					promise = BidService.getUserBid(packages[0].name);
-					promise.then(function (response) {
-						vm.packages = [];
-						if (response.data !== null) {
-							vm.packages.push(response.data);
-							vm.packages[0].completedByPretty = prettyDate(new Date(vm.packages[0].completedBy));
-						}
-					});
-				});
-			}
-		});
-
-		vm.showBid = function () {
-
-		};
-
-		function prettyDate (date) {
-			return date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
-		}
+	function BidListCtrl() {
+		var vm = this;
 	}
 }());

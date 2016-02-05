@@ -25,18 +25,49 @@
 		return {
 			restrict: 'E',
 			templateUrl: 'bidSummary.html',
-			scope: {},
+			scope: {
+				onSelectPackage: "&"
+			},
 			controller: BidSummaryCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	BidSummaryCtrl.$inject = ["StateManager"];
+	BidSummaryCtrl.$inject = ["$scope", "StateManager", "BidService"];
 
-	function BidSummaryCtrl(StateManager) {
-		var vm = this;
+	function BidSummaryCtrl($scope, StateManager, BidService) {
+		var vm = this,
+			promise;
 
 		vm.StateManager = StateManager;
+
+		promise = BidService.getPackage();
+		promise.then(function (response) {
+			vm.packages = [];
+			if (response.data !== null) {
+				vm.packages = response.data;
+				vm.packages[0].completedByPretty = prettyDate(new Date(vm.packages[0].completedBy));
+			}
+		});
+
+		$scope.$watch("vm.selectedPackageIndex", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				vm.packageSorted = [
+					{label: "Name", value: vm.packages[newValue].name},
+					{label: "Site", value: vm.packages[newValue].site},
+					{label: "Budget", value: vm.packages[newValue].budget},
+					{label: "Code", value: vm.packages[newValue].code},
+					{label: "Area", value: vm.packages[newValue].area},
+					{label: "Contact", value: vm.packages[newValue].contact},
+					{label: "Completed by", value: vm.packages[newValue].completedBy}
+				];
+				vm.onSelectPackage({packageName: vm.packages[newValue].name});
+			}
+		});
+
+		function prettyDate (date) {
+			return date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
+		}
 	}
 }());

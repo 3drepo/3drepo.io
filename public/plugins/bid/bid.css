@@ -72,6 +72,10 @@ bid .bidInfoCardContent .bidInfoCardLabel {
   margin-left: 5px;
 }
 
+bid .md-toolbar-tools {
+  color: #FFEB3B;
+}
+
 /** Packages **********************************************************************************************************/
 
 bid .bidPackageList .bidPackageListContent {
@@ -119,12 +123,19 @@ bid .bidInvite .bidInviteIcon {
 }
 
 /** Bid Image *********************************************************************************************************/
-bid-image .bidThumbnailImage {
-  width: 100%;
-  border-radius: 4px;
+bid-image md-content {
+  outline: none;
+  overflow: hidden;
+}
+bid-image md-content:hover {
+  cursor: pointer;
 }
 
-/** Bid Docs *********************************************************************************************************/
+bid-image .bidThumbnailImage {
+  width: 100%;
+}
+
+/** Bid Docs **********************************************************************************************************/
 bid-docs md-icon {
   font-size: 20px !important;
   color: #9FA8DA;
@@ -143,9 +154,14 @@ bid-docs md-icon {
   min-height: 600px;
 }
 
+.bidDocsDialog .md-toolbar-tools {
+  color: #FFEB3B;
+}
+
 .bidDocsDialog .bidDocsIcon {
   margin-top: 22px;
   margin-right: 10px;
+  color: #FFEB3B;
 }
 
 .bidDocsDialog .bidDocsSow p {
@@ -157,4 +173,9 @@ bid-docs md-icon {
 }
 .bidDocsDialog .bidDocsBold {
   font-weight: bold;
+}
+
+/** Bid Summary *******************************************************************************************************/
+bid-summary md-list {
+  overflow-y: scroll;
 }

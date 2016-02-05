@@ -25,18 +25,38 @@
 		return {
 			restrict: 'E',
 			templateUrl: 'bidStatus.html',
-			scope: {},
+			scope: {
+				packageName: "=",
+				onInviteAccepted: "&"
+			},
 			controller: BidStatusCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	BidStatusCtrl.$inject = ["StateManager"];
+	BidStatusCtrl.$inject = ["$scope", "BidService"];
 
-	function BidStatusCtrl(StateManager) {
-		var vm = this;
+	function BidStatusCtrl($scope, BidService) {
+		var vm = this,
+			promise;
 
-		vm.StateManager = StateManager;
+		$scope.$watch("vm.packageName", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				promise = BidService.getUserBid(newValue);
+				promise.then(function (response) {
+					if (response.statusText === "OK") {
+						vm.invited = (response.data.accepted === null);
+					}
+				});
+			}
+		});
+
+		vm.accept = function (accept) {
+			vm.invited = false;
+			if (accept) {
+				vm.onInviteAccepted();
+			}
+		};
 	}
 }());

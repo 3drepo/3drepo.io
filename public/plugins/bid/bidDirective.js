@@ -44,6 +44,15 @@
 			{user: "Carmen"},
 			{user: "Henry"}
 		];
+		vm.packageSummary = {
+			name: {label: "Name", type: "input", inputType: "text", value: undefined},
+			site: {label: "Site", type: "input", inputType: "text", value: undefined},
+			code: {label: "Code", type: "input", inputType: "text", value: undefined},
+			budget: {label: "Budget", type: "input", inputType: "number", value: undefined},
+			area: {label: "Area", type: "input", inputType: "text", value: undefined},
+			contact: {label: "Contact", type: "input", inputType: "text", value: undefined},
+			completedBy: {label: "Completed by", type: "date", value: undefined}
+		};
 		vm.notInvitedSubContractors = JSON.parse(JSON.stringify(vm.subContractors));
 		vm.invitedSubContractors = [];
 		vm.addSubContractorDisabled = true;
@@ -68,7 +77,6 @@
 					vm.userIsAMainContractor = true;
 				}
 			}
-			console.log(vm.userIsAMainContractor);
 			if (vm.userIsAMainContractor) {
 				vm.listTitle = "Packages";
 				// Get all packages for project
@@ -93,11 +101,9 @@
 				vm.listTitle = "Bids";
 				promise = BidService.getPackage();
 				promise.then(function (response) {
-					console.log(response);
 					var packages = response.data;
 					promise = BidService.getUserBid(packages[0].name);
 					promise.then(function (response) {
-						console.log(response);
 						vm.packages = [];
 						if (response.data !== null) {
 							vm.packages.push(response.data);
@@ -135,23 +141,29 @@
 			}
 		});
 
-		$scope.$watchGroup(["vm.name", "vm.site", "vm.budget", "vm.completedBy"], function (newValues) {
-			vm.saveDisabled = (
-				angular.isUndefined(newValues[0]) ||
-				angular.isUndefined(newValues[1]) ||
-				angular.isUndefined(newValues[2]) ||
-				angular.isUndefined(newValues[3])
-			);
-			vm.showInfo = false;
-		});
+		$scope.$watch("vm.packageSummary", function (newValue, oldValue) {
+			var input;
+			if (angular.isDefined(newValue)) {
+				if (JSON.stringify(newValue) !== JSON.stringify(oldValue)) {
+					vm.saveDisabled = false;
+					for (input in vm.packageSummary) {
+						if (vm.packageSummary.hasOwnProperty(input) && (angular.isUndefined(vm.packageSummary[input].value))) {
+							vm.saveDisabled = true;
+							break;
+						}
+					}
+					vm.showInfo = false;
+				}
+			}
+		}, true);
 
 		vm.save = function () {
-			var data = {
-				name: vm.name,
-				site: vm.site,
-				budget: vm.budget,
-				completedBy: new Date(vm.completedBy)
-			};
+			var data = {}, input;
+			for (input in vm.packageSummary) {
+				if (vm.packageSummary.hasOwnProperty(input)) {
+					data[input] = vm.packageSummary[input].value;
+				}
+			}
 			vm.saveDisabled = true;
 			promise = BidService.addPackage(data);
 			promise.then(function (response) {
@@ -169,16 +181,6 @@
 		};
 
 		vm.inviteSubContractor = function () {
-			var i, length, index;
-
-			/*
-			for (i = 0, length = vm.notInvitedSubContractors.length; i < length; i += 1) {
-				if (vm.notInvitedSubContractors[i].user === vm.subContractors[vm.subContractorIndex].user) {
-					index = i;
-					break;
-				}
-			}
-			*/
 			var data = {
 				user: vm.notInvitedSubContractors[vm.subContractorIndex].user
 			};
@@ -318,7 +320,15 @@
 			promise.then(function (response) {
 				console.log(response);
 			});
-		}
+		};
+
+		vm.selectPackage = function (packageName) {
+			vm.selectedPackageName = packageName;
+		};
+
+		vm.inviteAccepted = function () {
+			vm.packageInviteAccepted = true;
+		};
 
 		function prettyDate (date) {
 			return date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();

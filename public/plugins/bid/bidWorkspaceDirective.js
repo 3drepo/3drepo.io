@@ -25,18 +25,34 @@
 		return {
 			restrict: 'E',
 			templateUrl: 'bidWorkspace.html',
-			scope: {},
+			scope: {
+				inviteAccepted: "="
+			},
 			controller: BidWorkspaceCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	BidWorkspaceCtrl.$inject = ["StateManager"];
+	BidWorkspaceCtrl.$inject = ["$scope"];
 
-	function BidWorkspaceCtrl(StateManager) {
+	function BidWorkspaceCtrl($scope) {
 		var vm = this;
 
-		vm.StateManager = StateManager;
+		vm.items = [
+			"Bill of Quantities",
+			"Terms and Conditions",
+			"Scope of Works"
+		];
+
+		$scope.$watch("vm.inviteAccepted", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				vm.showItems = true;
+			}
+		});
+
+		vm.showInput = function () {
+
+		};
 	}
 }());

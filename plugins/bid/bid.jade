@@ -6,12 +6,11 @@
 			bid-docs(layout="column", flex)
 
 		div(layout="row", layout-padding, flex="50")
-			bid-list(layout="column", flex)
-			bid-summary(layout="column", flex)
-			bid-status(layout="column", flex)
-			bid-workspace(layout="column", flex)
+			bid-summary(layout="column", flex, on-select-package="vm.selectPackage(packageName)")
+			bid-status(layout="column", flex, package-name="vm.selectedPackageName", on-invite-accepted="vm.inviteAccepted()")
+			bid-workspace(layout="column", flex, invite-accepted="vm.packageInviteAccepted")
 
-	//.bidContent(layout="row", layout-align="space-between start", ng-if="vm.userIsAMainContractor")
+	.bidContent(layout="row", layout-align="space-between start", ng-if="vm.userIsAMainContractor")
 		.bidPackageList.md-whiteframe-1dp(flex=15)
 			md-toolbar
 				.md-toolbar-tools
@@ -33,18 +32,13 @@
 				md-content(layout-padding)
 					div(ng-if="vm.packageSelected")
 						div(ng-if="vm.showInput")
-							md-input-container.md-block
-								label Name
-								input(required name="name" ng-model="vm.name")
-							md-input-container.md-block
-								label Site
-								input(required name="site" ng-model="vm.site")
-							md-input-container.md-block
-								label Budget
-								input(required type="number" step="any" name="budget" ng-model="vm.budget")
-							.bidSummaryContentDatePicker
-								h5 Completed by
-								md-datepicker(ng-model="vm.completedBy", md-placeholder="Enter date")
+							span(ng-repeat="input in vm.packageSummary")
+								md-input-container.md-block(ng-if="input.type==='input'")
+									label {{input.label}}
+									input(required name="name" ng-model="input.value")
+								.bidSummaryContentDatePicker(ng-if="input.type==='date'")
+									h5 {{input.label}}
+									md-datepicker(ng-model="input.value", md-placeholder="Enter date")
 							md-divider
 							div(layout="row", layout-align="center center")
 								md-button.md-accent(ng-click="vm.save()", ng-disabled="vm.saveDisabled") Save
