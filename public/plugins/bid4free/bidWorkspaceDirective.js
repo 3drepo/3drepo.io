@@ -34,9 +34,9 @@
 		};
 	}
 
-	BidWorkspaceCtrl.$inject = ["$scope"];
+	BidWorkspaceCtrl.$inject = ["$scope", "$location", "BidService"];
 
-	function BidWorkspaceCtrl($scope) {
+	function BidWorkspaceCtrl($scope, $location, BidService) {
 		var vm = this;
 
 		vm.items = [
@@ -52,7 +52,7 @@
 		});
 
 		vm.showInput = function () {
-
+			$location.path($location.path() + "/bid4freeWorkspace", "_self").search({package: BidService.currentPackage.name});
 		};
 	}
 }());

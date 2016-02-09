@@ -24,7 +24,9 @@
 	BidService.$inject = ["$http", "$q", "StateManager", "serverConfig"];
 
 	function BidService($http, $q, StateManager, serverConfig) {
-		var state = StateManager.state;
+		var obj = {},
+			state = StateManager.state,
+			currentPackage;
 
 		function doPost(data, urlEnd) {
 			var deferred = $q.defer(),
@@ -39,22 +41,6 @@
 			return deferred.promise;
 		}
 
-		var addPackage = function (data) {
-			return doPost(data, "packages.json");
-		};
-
-		var inviteSubContractor = function (packageName, data) {
-			return doPost(data, "packages/" + packageName + "/bids.json");
-		};
-
-		var acceptInvite = function (packageName) {
-			return doPost({}, "packages/" + packageName + "/bids/mine/accept");
-		};
-
-		var awardBid = function (packageName, bidId) {
-			return doPost({}, "packages/" + packageName + "/bids/" + bidId + "/award");
-		};
-
 		function doGet(urlEnd) {
 			var deferred = $q.defer(),
 				url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + urlEnd);
@@ -68,14 +54,30 @@
 			return deferred.promise;
 		}
 
+		obj.addPackage = function (data) {
+			return doPost(data, "packages.json");
+		};
+
+		obj.inviteSubContractor = function (packageName, data) {
+			return doPost(data, "packages/" + packageName + "/bids.json");
+		};
+
+		obj.acceptInvite = function (packageName) {
+			return doPost({}, "packages/" + packageName + "/bids/mine/accept");
+		};
+
+		obj.awardBid = function (packageName, bidId) {
+			return doPost({}, "packages/" + packageName + "/bids/" + bidId + "/award");
+		};
+
 		// Get all or named package(s)
-		var getPackage = function (name) {
+		obj.getPackage = function (name) {
 			var part = angular.isDefined(name) ? ("/" + name) : "";
 			return doGet("packages" + part + ".json");
 		};
 
 		// Get all or named package(s)
-		var getProjectPackage = function (account, project, name) {
+		obj.getProjectPackage = function (account, project, name) {
 			state.account = account;
 			state.project = project;
 			var part = angular.isDefined(name) ? ("/" + name) : "";
@@ -83,32 +85,31 @@
 		};
 
 		// Get all bids for a package
-		var getBids = function (packageName) {
+		obj.getBids = function (packageName) {
 			return doGet("packages/" + packageName + "/bids.json");
 		};
 
 		// Get user bids for a package
-		var getUserBid = function (packageName) {
+		obj.getUserBid = function (packageName) {
 			return doGet("packages/" + packageName + "/bids/mine.json");
 		};
 
 		// Get user bids for a package
-		var getProjectUserBids = function (account, project, packageName) {
+		obj.getProjectUserBids = function (account, project, packageName) {
 			state.account = account;
 			state.project = project;
 			return doGet("packages/" + packageName + "/bids/mine.json");
 		};
 
-		return {
-			addPackage: addPackage,
-			getPackage: getPackage,
-			getProjectPackage: getProjectPackage,
-			inviteSubContractor: inviteSubContractor,
-			getBids: getBids,
-			getUserBid: getUserBid,
-			getProjectUserBids: getProjectUserBids,
-			acceptInvite: acceptInvite,
-			awardBid: awardBid
-		};
+		Object.defineProperty(
+			obj,
+			"currentPackage",
+			{
+				get: function () {return currentPackage;},
+				set: function (aPackage) {currentPackage = aPackage;}
+			}
+		);
+
+		return obj;
 	}
 }());

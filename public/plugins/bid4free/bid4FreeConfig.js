@@ -19,18 +19,18 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.config(bidConfig)
-		.run(bidRun);
+		.config(bid4FreeConfig)
+		.run(bid4FreeRun);
 
-	bidConfig.$inject = ['$stateProvider', 'parentStates'];
+	bid4FreeConfig.$inject = ['$stateProvider', 'parentStates'];
 
-	function bidConfig($stateProvider, parentStates) {
-		var states = parentStates.bid;
+	function bid4FreeConfig($stateProvider, parentStates) {
+		var states = parentStates.bid4free;
 
 		for (var i = 0; i < states.length; i++) {
 			$stateProvider
-				.state(states[i] + '.bid', {
-					url: '/:bid',
+				.state(states[i] + '.bid4free', {
+					url: '/:bid4free',
 					resolve: {
 						auth: function (Auth) {
 							return Auth.init();
@@ -39,30 +39,30 @@
 							StateManager.setStateVar("branch", "master");
 							StateManager.setStateVar("revision", "head");
 							StateManager.setState($stateParams, {});
-							StateManager.refresh("bid");
+							StateManager.refresh("bid4free");
 						}
 					},
 					views: {
 						"@" : {
-							templateUrl: 'bidPage.html'
+							templateUrl: 'bid4free.html'
 						}
 					}
 				});
 		}
 	}
 
-	bidRun.$inject = ['StateManager'];
+	bid4FreeRun.$inject = ['StateManager'];
 
-	function bidRun (StateManager) {
-		StateManager.registerPlugin('bid', 'BidData', function () {
-			if (StateManager.state.bid) {
-				return "bid";
+	function bid4FreeRun (StateManager) {
+		StateManager.registerPlugin('bid4free', 'Bid4FreeData', function () {
+			if (StateManager.state.bid4free) {
+				return "bid4free";
 			}
 			else {
 				return null;
 			}
 		});
 
-		StateManager.setClearStateVars("bid", ["bid"]);
+		StateManager.setClearStateVars("bid4free", ["bid4free"]);
 	}
 }());

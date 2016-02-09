@@ -53,6 +53,7 @@
 
 		$scope.$watch("vm.selectedPackageIndex", function (newValue) {
 			if (angular.isDefined(newValue)) {
+				BidService.currentPackage = vm.packages[newValue];
 				vm.packageSorted = [
 					{label: "Name", value: vm.packages[newValue].name},
 					{label: "Site", value: vm.packages[newValue].site},

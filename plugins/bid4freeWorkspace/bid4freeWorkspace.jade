@@ -1,0 +1,41 @@
+.md-whiteframe-1dp.bid4freeWorkspaceContainer(layout="column", flex)
+	md-toolbar
+		.md-toolbar-tools
+			h2
+				span {{vm.title}}
+
+	md-content(flex, layout="row", layout-align="start start")
+		md-tabs(md-dynamic-height, md-border-bottom, flex)
+			md-tab(label="Terms & Conditions")
+				md-content.md-padding
+					.sectionInput(layout="row", layout-align="start center")
+						md-input-container.md-block(flex="20")
+							label Section Title
+							input(ng-model="vm.sectionTitle", name="Section Title")
+						md-radio-group(ng-model="vm.sectionType")
+							md-radio-button(value="keyValue") Key/Value
+							md-radio-button(value="table") Table
+						md-button.md-accent(ng-disabled="!vm.sectionTitle", ng-click="vm.addSection()") Add Section
+
+					md-content.md-padding.bid4freeWorkspaceSection(ng-repeat="section in vm.sections")
+						.itemInput(layout="row", layout-align="start center")
+							label {{section.title}}
+							md-radio-group(ng-model="vm.sectionType", ng-if="section.type==='table'")
+								md-radio-button(value="text") Text
+								md-radio-button(value="checkbox") Check Box
+							md-button.md-accent(ng-click="vm.addItem($index)") Add Item
+
+						md-content(ng-repeat="item in vm.sections[$index].items track by $index", layout="row", layout-align="start center")
+							md-input-container.md-block(flex="20")
+								label Key
+								input(ng-model="item.title", name="Section Item Key")
+							md-input-container.md-block(flex)
+								label Description
+								input(ng-model="item.description", name="Section Item Description")
+
+			md-tab(label="Bill of Quantities")
+					md-content.md-padding
+				md-tab(label="Other")
+					md-content.md-padding
+
+		md-content

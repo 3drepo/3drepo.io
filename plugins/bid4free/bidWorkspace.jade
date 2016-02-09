@@ -4,7 +4,8 @@
 			h2
 				span Workspace
 
-	md-content.bidInfoCardContent(layout="column", flex layout-padding, ng-if="vm.showItems")
+	//md-content.bidInfoCardContent(layout="column", flex layout-padding, ng-if="vm.showItems")
+	md-content.bidInfoCardContent(layout="column", flex layout-padding, ng-if="true")
 		md-list
 			md-list-item(ng-repeat="item in vm.items", ng-click="vm.showInput()")
 				p(flex) {{item}}

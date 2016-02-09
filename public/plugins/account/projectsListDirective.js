@@ -38,11 +38,10 @@
 	function ProjectsListCtrl($location, AccountData) {
 		var vm = this;
 
-		console.log(AccountData);
 		vm.AccountData = AccountData;
 
 		vm.b4f = function (account, project) {
-			$location.path("/" + account + "/" + project + "/bid", "_self");
+			$location.path("/" + account + "/" + project + "/bid4free", "_self");
 		};
 	}
 }());

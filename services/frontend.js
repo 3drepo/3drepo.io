@@ -177,7 +177,12 @@ module.exports.createApp = function(template)
 								],
 								"children" : [
 									{
-										"plugin": "bid"
+										"plugin": "bid4free",
+										children: [
+											{
+												plugin: "bid4freeWorkspace"
+											}
+										]
 									}
 								]
 							}

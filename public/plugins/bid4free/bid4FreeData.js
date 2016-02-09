@@ -19,7 +19,7 @@
 	"use strict";
 
 	angular.module('3drepo')
-	.factory('BidData', ['$http', '$q', 'serverConfig', 'StateManager', function($http, $q, serverConfig, StateManager){
+	.factory('Bid4FreeData', ['$http', '$q', 'serverConfig', 'StateManager', function($http, $q, serverConfig, StateManager){
 		var o = {
 			project:		null,
 			name:			"",
