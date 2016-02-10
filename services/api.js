@@ -101,9 +101,12 @@ module.exports.app = function (sharedSession) {
 	}
 
 	app.use(sharedSession);
-	// test helpers
+	
 	if(config.test_helper_api){
+		// test helpers
 		app.use('/tests', require('../js/core/handlers/testHelper'));
+		// api doc console
+		app.use(express.static('doc'));
 	}
 	
 	//project handlers
