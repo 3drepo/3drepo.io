@@ -24,9 +24,11 @@
 	function viewerManager() {
 		return {
 			restrict: 'E',
+			scope: {},
 			controller : ViewerManagerCtrl,
 			template: '<viewer class="project-viewport viewport" handle="{{vm.defaultHandle}}" manager="vm.manager" />',
-			controllerAs: 'vm'
+			controllerAs: 'vm',
+			bindToController: true
 		};
 	}
 

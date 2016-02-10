@@ -23,5 +23,10 @@ bid4free-workspace {
     display: inline; }
   bid4free-workspace md-radio-button > * {
     padding-right: 20px; }
-  bid4free-workspace .sectionInput > *, bid4free-workspace .itemInput > * {
+  bid4free-workspace .sectionInput > md-input-container,
+  bid4free-workspace .sectionInput > md-radio-group,
+  bid4free-workspace .itemInput > label,
+  bid4free-workspace .itemInput > md-radio-group {
     padding-right: 40px; }
+  bid4free-workspace md-icon {
+    font-size: 25px !important; }

@@ -2,12 +2,13 @@
 	.bidInfoSubContractor(ng-if="!vm.userIsAMainContractor", layout="column")
 		div(layout="row", layout-padding, flex="50")
 			bid-project-summary(layout="column", flex)
-			bid-image(layout="column", flex)
-			bid-docs(layout="column", flex)
-
-		div(layout="row", layout-padding, flex="50")
 			bid-summary(layout="column", flex, on-select-package="vm.selectPackage(packageName)")
 			bid-status(layout="column", flex, package-name="vm.selectedPackageName", on-invite-accepted="vm.inviteAccepted()")
+
+
+		div(layout="row", layout-padding, flex="50")
+			bid-image(layout="column", flex)
+			bid-docs(layout="column", flex, package-name="vm.selectedPackageName")
 			bid-workspace(layout="column", flex, invite-accepted="vm.packageInviteAccepted")
 
 	.bidContent(layout="row", layout-align="space-between start", ng-if="vm.userIsAMainContractor")

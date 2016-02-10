@@ -47,6 +47,7 @@
 
 		$scope.$watch("vm.inviteAccepted", function (newValue) {
 			if (angular.isDefined(newValue)) {
+				console.log(newValue);
 				vm.showItems = true;
 			}
 		});

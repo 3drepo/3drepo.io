@@ -36,7 +36,7 @@
 
 	function Bid4freeWorkspaceCtrl($location, BidService) {
 		var vm = this,
-			promise;
+			promise, tcPromise;
 
 		vm.sections = [];
 		vm.sectionType = "keyValue";
@@ -46,10 +46,22 @@
 			vm.title = response.data.packageName;
 		});
 
+		tcPromise = BidService.getTermsAndConditions($location.search().package);
+		tcPromise.then(function (response) {
+			console.log(response);
+		});
+
+		/**
+		 * Add a section
+		 */
 		vm.addSection = function () {
 			vm.sections.push({title: vm.sectionTitle, type: vm.sectionType, items: []});
 		};
 
+		/**
+		 * Add an item to a section
+		 * @param sectionIndex
+		 */
 		vm.addItem = function (sectionIndex) {
 			if (vm.sections[sectionIndex].type === "keyValue") {
 				vm.sections[sectionIndex].items.push({key: "", description: ""});
@@ -57,6 +69,19 @@
 			else if (vm.sections[sectionIndex].type === "table") {
 				vm.sections[sectionIndex].items.push({key: "", description: ""});
 			}
+		};
+
+		/**
+		 * Save to database
+		 */
+		vm.save = function () {
+			var data = {
+
+			};
+			promise = BidService.updateTermsAndConditions($location.search().package, data);
+			promise.then(function (response) {
+				console.log(response);
+			});
 		};
 	}
 }());

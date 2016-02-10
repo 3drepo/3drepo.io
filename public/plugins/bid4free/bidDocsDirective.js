@@ -25,7 +25,9 @@
 		return {
 			restrict: 'E',
 			templateUrl: 'bidDocs.html',
-			scope: {},
+			scope: {
+				packageName: "="
+			},
 			controller: BidDocsCtrl,
 			controllerAs: "vm",
 			bindToController: true
@@ -49,6 +51,12 @@
 			{type: "M_Double-Flush: 1730 x 2134mm", code: 65, quantity: 1},
 			{type: "Curtain Wall Dbl Glass: Curtain Wall Dbl Glass", code: 68, quantity: 3}
 		];
+
+		$scope.$watch("vm.packageName", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				vm.showDocs = true;
+			}
+		});
 
 		vm.sow =
 			"<p><span class='bidDocsUnderline'>Scope of the Sub‐Contract Works</span></p>" +

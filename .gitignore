@@ -64,3 +64,6 @@ create_node_user.js
 
 #SASS map files
 *.css.map
+
+#WebStorm config files
+.idea/sasslintPlugin.xml

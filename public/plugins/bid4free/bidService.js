@@ -28,6 +28,12 @@
 			state = StateManager.state,
 			currentPackage;
 
+		/**
+		 * Handle POST requests
+		 * @param data
+		 * @param urlEnd
+		 * @returns {*}
+		 */
 		function doPost(data, urlEnd) {
 			var deferred = $q.defer(),
 				url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + urlEnd),
@@ -41,6 +47,11 @@
 			return deferred.promise;
 		}
 
+		/**
+		 * Handle GET requests
+		 * @param urlEnd
+		 * @returns {*}
+		 */
 		function doGet(urlEnd) {
 			var deferred = $q.defer(),
 				url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + urlEnd);
@@ -50,6 +61,25 @@
 				},
 				function () {
 					deferred.resolve([]);
+				});
+			return deferred.promise;
+		}
+
+		/**
+		 * Handle PUT requests
+		 * @param data
+		 * @param urlEnd
+		 * @returns {*}
+		 */
+		function doPut(data, urlEnd) {
+			var deferred = $q.defer(),
+				url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + urlEnd),
+				config = {
+					withCredentials: true
+				};
+			$http.put(url, data, config)
+				.then(function (response) {
+					deferred.resolve(response);
 				});
 			return deferred.promise;
 		}
@@ -70,13 +100,23 @@
 			return doPost({}, "packages/" + packageName + "/bids/" + bidId + "/award");
 		};
 
-		// Get all or named package(s)
+		/**
+		 * Get all or named package(s)
+		 * @param name
+		 * @returns {*}
+		 */
 		obj.getPackage = function (name) {
 			var part = angular.isDefined(name) ? ("/" + name) : "";
 			return doGet("packages" + part + ".json");
 		};
 
-		// Get all or named package(s)
+		/**
+		 * Get all or named package(s)
+		 * @param account
+		 * @param project
+		 * @param name
+		 * @returns {*}
+		 */
 		obj.getProjectPackage = function (account, project, name) {
 			state.account = account;
 			state.project = project;
@@ -84,21 +124,47 @@
 			return doGet("packages" + part + ".json");
 		};
 
-		// Get all bids for a package
+		/**
+		 * Get all bids for a package
+		 * @param packageName
+		 * @returns {*}
+		 */
 		obj.getBids = function (packageName) {
 			return doGet("packages/" + packageName + "/bids.json");
 		};
 
-		// Get user bids for a package
+		/**
+		 * Get user bids for a package
+		 * @param packageName
+		 * @returns {*}
+		 */
 		obj.getUserBid = function (packageName) {
 			return doGet("packages/" + packageName + "/bids/mine.json");
 		};
 
-		// Get user bids for a package
+		/**
+		 * Get user bids for a package
+		 * @param account
+		 * @param project
+		 * @param packageName
+		 * @returns {*}
+		 */
 		obj.getProjectUserBids = function (account, project, packageName) {
 			state.account = account;
 			state.project = project;
 			return doGet("packages/" + packageName + "/bids/mine.json");
+		};
+
+		/**
+		 * Get terms and conditions
+		 * @param packageName
+		 */
+		obj.getTermsAndConditions = function (packageName) {
+			return doGet("packages/" + packageName + "/bids/mine/termsAndConds.json");
+		};
+
+		obj.updateTermsAndConditions = function (packageName, data) {
+			return doPut(data, "packages/" + packageName + "/bids/mine/termsAndConds.json");
 		};
 
 		Object.defineProperty(

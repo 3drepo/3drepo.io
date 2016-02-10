@@ -26,7 +26,7 @@
 	function viewer($compile, StateManager) {
 		return {
 			restrict: "E",
-			scope: { 
+			scope: {
 				manager: "=",
 				handle:  "@"
 			},
@@ -39,19 +39,19 @@
 		function link (scope, element, attrs)
 		{
 
-			scope.account = angular.isUndefined(attrs.account) ? 
+			scope.account = angular.isUndefined(attrs.account) ?
 							StateManager.state.account :
 							attrs.account;
 
-			scope.project = angular.isUndefined(attrs.project) ? 
+			scope.project = angular.isUndefined(attrs.project) ?
 							StateManager.state.project :
 							attrs.project;
 
-			scope.branch  = angular.isUndefined(attrs.branch) ? 
+			scope.branch  = angular.isUndefined(attrs.branch) ?
 							StateManager.state.branch :
 							attrs.branch;
 
-			scope.revision = angular.isUndefined(attrs.revision) ? 
+			scope.revision = angular.isUndefined(attrs.revision) ?
 							StateManager.state.revision :
 							attrs.revision;
 
