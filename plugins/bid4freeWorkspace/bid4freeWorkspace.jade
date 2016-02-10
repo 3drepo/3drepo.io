@@ -3,43 +3,58 @@
 		.md-toolbar-tools
 			h2
 				span {{vm.title}}
+			span(flex)
+			md-button.md-accent(flex, ng-click="vm.init()", aria-label="Init")
 
 	md-content(flex, layout="row")
 		div(flex="50", layout="row", layout-align="start start")
 			md-tabs(md-dynamic-height, md-border-bottom, flex="90")
 				md-tab(label="Terms & Conditions")
 					md-content.md-padding
+						// Add new section
 						.sectionInput(layout="row", layout-align="start center")
 							md-input-container.md-block(flex="40")
 								label Section Title
 								input(ng-model="vm.sectionTitle", name="Section Title")
 							md-radio-group(ng-model="vm.sectionType")
-								md-radio-button(value="keyValue") Key/Value
+								md-radio-button(value="keyvalue") Key/Value
 								md-radio-button(value="table") Table
 							md-button.md-accent(ng-disabled="!vm.sectionTitle", ng-click="vm.addSection()") Add Section
 
-						md-content.md-padding.bid4freeWorkspaceSection(ng-repeat="section in vm.sections")
-							.itemInput(layout="row", layout-align="start center")
-								label {{section.title}}
-								md-radio-group(ng-model="vm.sectionType", ng-if="section.type==='table'")
-									md-radio-button(value="text") Text
-									md-radio-button(value="checkbox") Check Box
-								md-button.md-accent(ng-click="vm.addItem($index)") Add Item
+						// Show sections
+						.sections(layout="column", flex)
+							div.md-padding.bid4freeWorkspaceSection(ng-repeat="section in vm.sections")
+								// Section title
+								.itemInput(layout="row", layout-align="start center")
+									label {{section.block}}
+									md-radio-group(ng-model="vm.sectionType", ng-if="section.type==='table'")
+										md-radio-button(value="text") Text
+										md-radio-button(value="checkbox") Check Box
 
-							md-content(ng-repeat="item in vm.sections[$index].items track by $index", layout="row", layout-align="start center")
-								md-input-container.md-block(flex="20")
-									label Name
-									input(ng-model="item.title", name="Section Item Key")
-								md-input-container.md-block(flex)
-									label Description
-									input(ng-model="item.description", name="Section Item Description")
+								// Show items
+								md-content.items(ng-repeat="item in vm.sections[$index].items track by $index", layout="row", layout-align="start center")
+									label(flex="20") {{item.keys[0].name}}
+									label(flex) {{item.values[0]}}
+
+								// Add new item
+								div(layout="column", flex)
+									div(layout="row", layout-align="center")
+										md-button.md-accent(ng-click="vm.toggleItemInput($index)") New Item
+									div(ng-if="section.showInput", layout="row", flex, layout-align="start center")
+										md-input-container.md-block(flex="20")
+											label Name
+											input(ng-model="section.newItemName", name="Item Name")
+										md-input-container.md-block(flex="80")
+											label Description
+											input(ng-model="section.newItemDescription", name="Item Description")
+										md-button.md-accent(flex="10", ng-click="vm.addItem($index)") Add
 
 				md-tab(label="Bill of Quantities")
 						md-content.md-padding
 					md-tab(label="Other")
 						md-content.md-padding
 
-			md-button.md-accent(flex, ng-click="vm.save()")
+			md-button.md-accent(flex, ng-click="vm.save()", aria-label="Save")
 				md-icon(class="fa fa-floppy-o")
 
 		md-content(flex="50")

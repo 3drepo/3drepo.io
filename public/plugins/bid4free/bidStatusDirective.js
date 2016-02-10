@@ -46,17 +46,30 @@
 				promise = BidService.getUserBid(newValue);
 				promise.then(function (response) {
 					if (response.statusText === "OK") {
-						vm.invited = (response.data.accepted === null);
+						if (response.data.accepted === null) {
+							vm.invited = true;
+						}
+						else if (response.data.accepted) {
+							vm.accepted = true;
+						}
+						else {
+							vm.declined = true;
+						}
 					}
 				});
 			}
 		});
 
 		vm.accept = function (accept) {
-			vm.invited = false;
-			if (accept) {
-				vm.onInviteAccepted();
-			}
+			promise = BidService.acceptInvite(vm.packageName, accept);
+			promise.then(function (response) {
+				if (response.statusText === "OK") {
+					vm.invited = false;
+					if (accept) {
+						vm.onInviteAccepted();
+					}
+				}
+			});
 		};
 	}
 }());

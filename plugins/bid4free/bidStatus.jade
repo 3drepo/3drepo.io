@@ -9,3 +9,8 @@
 			h4 You have been invited to bid for this package. Please accept or decline the invitation after reading the documents.
 			md-button.md-accent(ng-click="vm.accept(true)") Accept
 			md-button.md-accent(ng-click="vm.accept(false)") Decline
+
+		div(ng-if="vm.accepted", flex, layout-padding)
+			h4 You have accepted the invitation to bid for this package.
+		div(ng-if="vm.declined", flex, layout-padding)
+			h4 You have declined the invitation to bid for this package.

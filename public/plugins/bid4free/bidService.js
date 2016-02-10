@@ -92,8 +92,13 @@
 			return doPost(data, "packages/" + packageName + "/bids.json");
 		};
 
-		obj.acceptInvite = function (packageName) {
-			return doPost({}, "packages/" + packageName + "/bids/mine/accept");
+		/**
+		 * Accept or decline a package bid invitation
+		 * @param packageName
+		 * @returns {*}
+		 */
+		obj.acceptInvite = function (packageName, accept) {
+			return doPost({accept: accept}, "packages/" + packageName + "/bids/mine/invitation");
 		};
 
 		obj.awardBid = function (packageName, bidId) {

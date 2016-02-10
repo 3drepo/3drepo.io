@@ -39,7 +39,7 @@
 			promise, tcPromise;
 
 		vm.sections = [];
-		vm.sectionType = "keyValue";
+		vm.sectionType = "keyvalue";
 
 		promise = BidService.getUserBid($location.search().package);
 		promise.then(function (response) {
@@ -48,14 +48,28 @@
 
 		tcPromise = BidService.getTermsAndConditions($location.search().package);
 		tcPromise.then(function (response) {
+			var i, length;
 			console.log(response);
+			vm.sections = response.data;
+			for (i = 0, length = vm.sections.length; i < length; i += 1) {
+				vm.sections[i].showInput = false;
+			}
 		});
 
 		/**
 		 * Add a section
 		 */
 		vm.addSection = function () {
-			vm.sections.push({title: vm.sectionTitle, type: vm.sectionType, items: []});
+			vm.sections.push(
+				{
+					block: vm.sectionTitle,
+					items: []
+				}
+			);
+		};
+
+		vm.toggleItemInput = function (index) {
+			vm.sections[index].showInput = !vm.sections[index].showInput;
 		};
 
 		/**
@@ -63,11 +77,29 @@
 		 * @param sectionIndex
 		 */
 		vm.addItem = function (sectionIndex) {
-			if (vm.sections[sectionIndex].type === "keyValue") {
-				vm.sections[sectionIndex].items.push({key: "", description: ""});
-			}
-			else if (vm.sections[sectionIndex].type === "table") {
-				vm.sections[sectionIndex].items.push({key: "", description: ""});
+			if (angular.isDefined(vm.sections[sectionIndex].newItemName) && angular.isDefined(vm.sections[sectionIndex].newItemDescription)) {
+				vm.sections[sectionIndex].items.push(
+					{
+						type: "keyvalue",
+						keys: [
+							{
+								name: vm.sections[sectionIndex].newItemName,
+								datatype: "string",
+								control: "text"
+							}
+						],
+						values: [
+							vm.sections[sectionIndex].newItemDescription
+						]
+					}
+				);
+				/*
+				if (vm.sections[sectionIndex].items[0].type === "keyvalue") {
+				}
+				else if (vm.sections[sectionIndex].type === "table") {
+					vm.sections[sectionIndex].items.push({key: "", description: ""});
+				}
+				*/
 			}
 		};
 
@@ -75,10 +107,34 @@
 		 * Save to database
 		 */
 		vm.save = function () {
-			var data = {
+			promise = BidService.updateTermsAndConditions($location.search().package, vm.sections);
+			promise.then(function (response) {
+				console.log(response);
+			});
+		};
 
-			};
-			promise = BidService.updateTermsAndConditions($location.search().package, data);
+		vm.init = function () {
+			vm.data = [
+				{
+					block: "Instruction to SC",
+					items: [
+						{
+							type: "keyvalue",
+							keys: [
+								{
+									name: "Test",
+									datatype: "string",
+									control: "text"
+								}
+							],
+							values: [
+								"Test description"
+							]
+						}
+					]
+				}
+			];
+			promise = BidService.updateTermsAndConditions($location.search().package, vm.data);
 			promise.then(function (response) {
 				console.log(response);
 			});

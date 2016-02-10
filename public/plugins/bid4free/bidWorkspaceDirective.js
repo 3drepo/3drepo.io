@@ -26,6 +26,7 @@
 			restrict: 'E',
 			templateUrl: 'bidWorkspace.html',
 			scope: {
+				packageName: "=",
 				inviteAccepted: "="
 			},
 			controller: BidWorkspaceCtrl,
@@ -37,7 +38,8 @@
 	BidWorkspaceCtrl.$inject = ["$scope", "$location", "BidService"];
 
 	function BidWorkspaceCtrl($scope, $location, BidService) {
-		var vm = this;
+		var vm = this,
+			promise;
 
 		vm.items = [
 			"Bill of Quantities",
@@ -49,6 +51,17 @@
 			if (angular.isDefined(newValue)) {
 				console.log(newValue);
 				vm.showItems = true;
+			}
+		});
+
+		$scope.$watch("vm.packageName", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				promise = BidService.getUserBid(newValue);
+				promise.then(function (response) {
+					if (response.statusText === "OK") {
+						vm.showItems = response.data.accepted;
+					}
+				});
 			}
 		});
 

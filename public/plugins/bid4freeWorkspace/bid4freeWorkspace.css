@@ -30,3 +30,9 @@ bid4free-workspace {
     padding-right: 40px; }
   bid4free-workspace md-icon {
     font-size: 25px !important; }
+  bid4free-workspace .sections {
+    overflow-y: scroll; }
+  bid4free-workspace .items label {
+    font-weight: normal;
+    color: rgba(0, 0, 0, 0.5);
+    padding: 10px 0 10px 0; }

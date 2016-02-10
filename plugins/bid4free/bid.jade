@@ -9,7 +9,7 @@
 		div(layout="row", layout-padding, flex="50")
 			bid-image(layout="column", flex)
 			bid-docs(layout="column", flex, package-name="vm.selectedPackageName")
-			bid-workspace(layout="column", flex, invite-accepted="vm.packageInviteAccepted")
+			bid-workspace(layout="column", flex, package-name="vm.selectedPackageName", invite-accepted="vm.packageInviteAccepted")
 
 	.bidContent(layout="row", layout-align="space-between start", ng-if="vm.userIsAMainContractor")
 		.bidPackageList.md-whiteframe-1dp(flex=15)
