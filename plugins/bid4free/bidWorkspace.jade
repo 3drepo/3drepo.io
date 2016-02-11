@@ -6,5 +6,5 @@
 
 	md-content.bidInfoCardContent(layout="column", flex layout-padding, ng-if="vm.showItems")
 		md-list
-			md-list-item(ng-repeat="item in vm.items", ng-click="vm.showInput()")
+			md-list-item(ng-repeat="item in vm.items", ng-click="vm.showInput($index)")
 				p(flex) {{item}}

@@ -34,25 +34,40 @@
 		};
 	}
 
-	BidSummaryCtrl.$inject = ["$scope", "StateManager", "BidService"];
+	BidSummaryCtrl.$inject = ["$scope", "$location", "StateManager", "BidService"];
 
-	function BidSummaryCtrl($scope, StateManager, BidService) {
+	function BidSummaryCtrl($scope, $location, StateManager, BidService) {
 		var vm = this,
 			promise;
 
 		vm.StateManager = StateManager;
+		vm.showSelectedPackage = false;
 
+		// Get all the packages
 		promise = BidService.getPackage();
 		promise.then(function (response) {
+			var i, length, passedPackageName;
 			vm.packages = [];
 			if (response.data !== null) {
 				vm.packages = response.data;
 				vm.packages[0].completedByPretty = prettyDate(new Date(vm.packages[0].completedBy));
+
+				// Select the passed package
+				if ($location.search().hasOwnProperty("package")) {
+					passedPackageName = $location.search().package;
+					for (i = 0, length = vm.packages.length; i < length; i += 1) {
+						if (vm.packages[i].name === passedPackageName) {
+							vm.selectedPackageIndex = i;
+							break;
+						}
+					}
+				}
 			}
 		});
 
 		$scope.$watch("vm.selectedPackageIndex", function (newValue) {
 			if (angular.isDefined(newValue)) {
+				vm.showSelectedPackage = true;
 				BidService.currentPackage = vm.packages[newValue];
 				vm.packageSorted = [
 					{label: "Name", value: vm.packages[newValue].name},

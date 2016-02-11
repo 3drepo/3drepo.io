@@ -42,9 +42,10 @@
 			promise;
 
 		vm.items = [
-			"Bill of Quantities",
 			"Terms and Conditions",
-			"Scope of Works"
+			"Bill of Quantities",
+			"Scope of Works",
+			"Other"
 		];
 
 		$scope.$watch("vm.inviteAccepted", function (newValue) {
@@ -65,8 +66,13 @@
 			}
 		});
 
-		vm.showInput = function () {
-			$location.path($location.path() + "/bid4freeWorkspace", "_self").search({package: BidService.currentPackage.name});
+		vm.showInput = function (index) {
+			$location
+				.path($location.path() + "/bid4freeWorkspace", "_self")
+				.search({
+					package: BidService.currentPackage.name,
+					tab: index
+				});
 		};
 	}
 }());

@@ -26,7 +26,8 @@
 	function BidService($http, $q, StateManager, serverConfig) {
 		var obj = {},
 			state = StateManager.state,
-			currentPackage;
+			currentPackage,
+			boq, boqTotal;
 
 		/**
 		 * Handle POST requests
@@ -178,6 +179,24 @@
 			{
 				get: function () {return currentPackage;},
 				set: function (aPackage) {currentPackage = aPackage;}
+			}
+		);
+
+		Object.defineProperty(
+			obj,
+			"boq",
+			{
+				get: function () {return boq;},
+				set: function (data) {boq = data;}
+			}
+		);
+
+		Object.defineProperty(
+			obj,
+			"boqTotal",
+			{
+				get: function () {return boqTotal;},
+				set: function (total) {boqTotal = total;}
 			}
 		);
 

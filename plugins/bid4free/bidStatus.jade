@@ -12,5 +12,8 @@
 
 		div(ng-if="vm.accepted", flex, layout-padding)
 			h4 You have accepted the invitation to bid for this package.
+			div(ng-if="vm.boqTotal")
+				p The Bill of Quantities total is {{vm.boqTotal}}
+
 		div(ng-if="vm.declined", flex, layout-padding)
 			h4 You have declined the invitation to bid for this package.

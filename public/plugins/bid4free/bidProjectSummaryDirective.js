@@ -49,7 +49,7 @@
 		});
 
 		vm.home = function () {
-			$location.path("/" + Auth.username, "_self");
+			$location.path("/" + Auth.username, "_self").search({});
 		};
 	}
 }());

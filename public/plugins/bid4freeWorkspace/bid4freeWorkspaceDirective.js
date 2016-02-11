@@ -32,28 +32,57 @@
 		};
 	}
 
-	Bid4freeWorkspaceCtrl.$inject = ["$location", "BidService"];
+	Bid4freeWorkspaceCtrl.$inject = ["$scope", "$location", "BidService", "StateManager"];
 
-	function Bid4freeWorkspaceCtrl($location, BidService) {
+	function Bid4freeWorkspaceCtrl($scope, $location, BidService, StateManager) {
 		var vm = this,
-			promise, tcPromise;
+			promise, tcPromise,
+			locationSearch = $location.search();
 
 		vm.sections = [];
 		vm.sectionType = "keyvalue";
+		vm.showSaveConfirmation = false;
+		if (angular.isDefined(BidService.boq)) {
+			vm.boq = BidService.boq;
+			setBoqTotal();
+		}
+		else {
+			vm.boq = [
+				{type: "Single-Flush: 800 x 2100", code: 3, quantity: 7},
+				{type: "Pocket_Slider_Door_5851: 2.027 x 0.945", code: 51, quantity: 3},
+				{type: "Entrance door: Entrance door", code: 60, quantity: 2},
+				{type: "M_Double-Flush: 1730 x 2134mm", code: 65, quantity: 1},
+				{type: "Curtain Wall Dbl Glass: Curtain Wall Dbl Glass", code: 68, quantity: 3}
+			];
+			BidService.boq = vm.boq;
+		}
 
+		// Get the user's bid information for the package
 		promise = BidService.getUserBid($location.search().package);
 		promise.then(function (response) {
-			vm.title = response.data.packageName;
+			vm.title = StateManager.state.project + " / " + response.data.packageName;
 		});
 
+		// Get Terms and Conditions
 		tcPromise = BidService.getTermsAndConditions($location.search().package);
 		tcPromise.then(function (response) {
 			var i, length;
-			console.log(response);
 			vm.sections = response.data;
 			for (i = 0, length = vm.sections.length; i < length; i += 1) {
 				vm.sections[i].showInput = false;
 			}
+		});
+
+		// Select the correct tab
+		vm.selectedTab = $location.search().tab;
+
+		// Todo - find a way to change the URL without loading the page
+		$scope.$watch("vm.selectedTab", function (newValue) {
+			// Need to find
+			/*
+			locationSearch.tab = newValue;
+			$location.search(locationSearch);
+			*/
 		});
 
 		/**
@@ -66,10 +95,20 @@
 					items: []
 				}
 			);
+			vm.showSaveConfirmation = false;
 		};
 
+		/**
+		 * Toggle new item input (clear the fields if toggled off)
+		 * @param index
+		 */
 		vm.toggleItemInput = function (index) {
 			vm.sections[index].showInput = !vm.sections[index].showInput;
+			if (!vm.sections[index].showInput) {
+				vm.sections[index].newItemName = undefined;
+				vm.sections[index].newItemDescription = undefined;
+			}
+			vm.showSaveConfirmation = false;
 		};
 
 		/**
@@ -93,13 +132,9 @@
 						]
 					}
 				);
-				/*
-				if (vm.sections[sectionIndex].items[0].type === "keyvalue") {
-				}
-				else if (vm.sections[sectionIndex].type === "table") {
-					vm.sections[sectionIndex].items.push({key: "", description: ""});
-				}
-				*/
+				vm.sections[sectionIndex].newItemName = undefined;
+				vm.sections[sectionIndex].newItemDescription = undefined;
+				vm.sections[sectionIndex].showInput = false;
 			}
 		};
 
@@ -109,8 +144,37 @@
 		vm.save = function () {
 			promise = BidService.updateTermsAndConditions($location.search().package, vm.sections);
 			promise.then(function (response) {
-				console.log(response);
+				vm.showSaveConfirmation = true;
 			});
+		};
+
+		/**
+		 * Handle rate change of BoQ item
+		 * @param index
+		 */
+		vm.boqRateChange = function (index) {
+			vm.boq[index].price = parseFloat(parseFloat(vm.boq[index].quantity) * parseFloat(vm.boq[index].rate)).toFixed(2);
+			setBoqTotal();
+		};
+
+		function setBoqTotal () {
+			var i, length, total = 0;
+			for (i = 0, length = vm.boq.length; i < length; i += 1) {
+				if (angular.isDefined(vm.boq[i].price)) {
+					total += parseFloat(vm.boq[i].price);
+				}
+			}
+			vm.boqTotal = total.toFixed(2);
+			BidService.boqTotal = vm.boqTotal;
+		};
+
+		/**
+		 * Go to the main Bid4Free page
+		 */
+		vm.goToMainPage = function () {
+			$location
+				.path(StateManager.state.account + "/" + StateManager.state.project + "/bid4free", "_self")
+				.search({package: $location.search().package});
 		};
 
 		vm.init = function () {

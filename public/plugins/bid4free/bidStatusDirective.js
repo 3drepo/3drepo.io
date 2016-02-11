@@ -51,6 +51,9 @@
 						}
 						else if (response.data.accepted) {
 							vm.accepted = true;
+							if (angular.isDefined(BidService.boqTotal)) {
+								vm.boqTotal = BidService.boqTotal;
+							}
 						}
 						else {
 							vm.declined = true;

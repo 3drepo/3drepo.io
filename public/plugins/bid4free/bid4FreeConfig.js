@@ -30,7 +30,7 @@
 		for (var i = 0; i < states.length; i++) {
 			$stateProvider
 				.state(states[i] + '.bid4free', {
-					url: '/:bid4free',
+					url: '/bid4free',
 					resolve: {
 						auth: function (Auth) {
 							return Auth.init();

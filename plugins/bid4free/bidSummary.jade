@@ -11,7 +11,7 @@
 				md-option(ng-repeat="package in vm.packages", value="{{$index}}")
 					| {{package.name}}
 
-		md-list(ng-if="vm.selectedPackageIndex")
+		md-list(ng-if="vm.showSelectedPackage")
 			md-list-item(ng-repeat="item in vm.packageSorted")
 				p(flex="30") {{item.label}}
 				p(flex) {{item.value}}

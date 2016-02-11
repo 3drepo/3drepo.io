@@ -111,4 +111,7 @@
 						.cardInfo
 							p {{vm.statusInfo}}
 
+	div(ng-if="vm.userIsAMainContractor", layout="column")
 		md-button(ng-click="vm.createProjectSummary()") Create Project Summary
+		form(enctype="multipart/form-data")
+			input(type="file", name="attachment", multiple="multiple")

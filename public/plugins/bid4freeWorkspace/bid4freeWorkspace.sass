@@ -1,5 +1,6 @@
 $bid4freeWorkspaceBackground: #E8EAF6
 $bid4freeWorkspaceSectionBorder: rgba(0,0,0,0.12)
+$bid4freeWorkspaceSaveConfirmationColor: #66BB6A
 
 bid4free-workspace
   padding: 30px 20px 20px 20px
@@ -25,14 +26,13 @@ bid4free-workspace
       border-bottom-right-radius: 4px
 
   .bid4freeWorkspaceSection
-    border: solid 1px $bid4freeWorkspaceSectionBorder
-    margin-bottom: 20px
+    border-bottom: solid 1px $bid4freeWorkspaceSectionBorder
 
   md-radio-button
     display: inline
 
   md-radio-button > *
-    padding-right: 20px
+    padding-right: 10px
 
   .sectionInput > md-input-container,
   .sectionInput > md-radio-group,
@@ -40,13 +40,50 @@ bid4free-workspace
   .itemInput > md-radio-group
     padding-right: 40px
 
-  md-icon
-    font-size: 25px !important
+  .sectionInput
+    .sectionInputRadioGroup
+      margin-top: -16px
+
+    .md-button
+      margin-top: -8px
+
+  .saveContainer
+    label
+      margin-top: 5px
+      color: $bid4freeWorkspaceSaveConfirmationColor
+    md-icon
+      font-size: 25px !important
 
   .sections
-    overflow-y: scroll
+    overflow-y: auto
+    overflow-x: hidden
+    border: 1px solid rgba(0,0,0,0.1)
+    height: 600px
 
   .items label
     font-weight: normal
     color: rgba(0, 0, 0, 0.5)
     padding: 10px 0 10px 0
+
+  .boqTotal
+    padding: 0 10px 20px
+
+    h3
+      padding: 0
+      margin: 0
+
+  .boqList
+    border: 1px solid rgba(0,0,0,0.1)
+    padding: 0
+
+  .boqListTitles
+    font-weight: bold
+    border-bottom: 1px solid rgba(0,0,0,0.1)
+
+  .boqListInput
+    margin: -12px 0 0 0
+    padding: 0
+    height: 20px
+
+    input
+      text-align: center
