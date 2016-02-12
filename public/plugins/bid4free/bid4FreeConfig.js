@@ -44,7 +44,7 @@
 					},
 					views: {
 						"@" : {
-							templateUrl: 'bid4free.html'
+							template: '<bid4free></bid4free>'
 						}
 					}
 				});

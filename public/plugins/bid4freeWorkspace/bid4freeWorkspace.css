@@ -45,6 +45,8 @@ bid4free-workspace {
     font-weight: normal;
     color: rgba(0, 0, 0, 0.5);
     padding: 10px 0 10px 0; }
+  bid4free-workspace .addNewItem {
+    margin-bottom: 20px; }
   bid4free-workspace .boqTotal {
     padding: 0 10px 20px; }
     bid4free-workspace .boqTotal h3 {

@@ -90,16 +90,8 @@
 			return deferred.promise;
 		}
 
-		var createProjectSummary = function () {
-			var data = {
-				name: state.project,
-				site: "Wood Lane",
-				code: "X321-90-TRE5",
-				client: "The Freemasons",
-				budget: 9087654,
-				completedBy: new Date("2016-12-12"),
-				contact: "Superman"
-			};
+		var createProjectSummary = function (data) {
+			data.name = state.project;
 			return doPost(data, "info.json");
 		};
 

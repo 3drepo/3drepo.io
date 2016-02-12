@@ -41,10 +41,9 @@
 		vm.StateManager = StateManager;
 		vm.Auth = Auth;
 
-		// Get the project summar
+		// Get the project summary
 		promise = ProjectService.getProjectSummary();
 		promise.then(function (data) {
-			console.log(data);
 			vm.projectSummary = data.data;
 		});
 

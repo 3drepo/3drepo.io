@@ -35,12 +35,15 @@
 		 * @param urlEnd
 		 * @returns {*}
 		 */
-		function doPost(data, urlEnd) {
+		function doPost(data, urlEnd, headers) {
 			var deferred = $q.defer(),
 				url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + urlEnd),
-				config = {
-					withCredentials: true
-				};
+				config = {withCredentials: true};
+
+			if (angular.isDefined(headers)) {
+				config.headers = headers;
+			}
+
 			$http.post(url, data, config)
 				.then(function (response) {
 					deferred.resolve(response);
@@ -53,15 +56,20 @@
 		 * @param urlEnd
 		 * @returns {*}
 		 */
-		function doGet(urlEnd) {
+		function doGet(urlEnd, blah) {
 			var deferred = $q.defer(),
 				url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + urlEnd);
-			$http.get(url).then(
+
+			var params = {};
+			if (angular.isDefined(blah)) {
+				params.responseType = "arraybuffer";
+			}
+			$http.get(url, params).then(
 				function (response) {
 					deferred.resolve(response);
 				},
-				function () {
-					deferred.resolve([]);
+				function (response) {
+					deferred.resolve(response);
 				});
 			return deferred.promise;
 		}
@@ -169,8 +177,32 @@
 			return doGet("packages/" + packageName + "/bids/mine/termsAndConds.json");
 		};
 
+		/**
+		 * Update terms and conditions
+		 * @param packageName
+		 * @param data
+		 * @returns {*}
+		 */
 		obj.updateTermsAndConditions = function (packageName, data) {
 			return doPut(data, "packages/" + packageName + "/bids/mine/termsAndConds.json");
+		};
+
+		/**
+		 * Save files to DB
+		 * @param packageName
+		 * @param files
+		 * @returns {*}
+		 */
+		obj.saveFiles = function (packageName, files) {
+			var i, length, data = new FormData();
+			for (i = 0, length = files.length; i < length; i += 1) {
+				data.append("attachment", files[i]);
+			}
+			return doPost(data, "/packages/" + packageName + "/attachments", {'Content-Type': undefined});
+		};
+
+		obj.getFile = function (packageName, fileId) {
+			return doGet("/packages/" + packageName + "/attachments/" + fileId, {});
 		};
 
 		Object.defineProperty(

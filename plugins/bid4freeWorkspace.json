@@ -2,7 +2,6 @@
     "name" : "bid4freeWorkspace",
     "files": {
         "jade" : [
-            {"template" : "bid4freeWorkspace/bid4freeWorkspacePage.jade", "id" : "bid4freeWorkspacePage.html" },
             {"template" : "bid4freeWorkspace/bid4freeWorkspace.jade", "id" : "bid4freeWorkspace.html" }
         ],
         "angular" : [

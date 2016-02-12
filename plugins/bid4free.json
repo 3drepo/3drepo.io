@@ -3,7 +3,6 @@
     "files": {
         "jade" : [
             {"template" : "bid4free/bid4free.jade", "id" : "bid4free.html" },
-            {"template" : "bid4free/bid.jade", "id" : "bid.html" },
             {"template" : "bid4free/bidProjectSummary.jade", "id" : "bidProjectSummary.html" },
             {"template" : "bid4free/bidImage.jade", "id" : "bidImage.html" },
             {"template" : "bid4free/bidDocs.jade", "id" : "bidDocs.html" },
@@ -16,7 +15,7 @@
         "angular" : [
             "bid4free/bid4FreeConfig.js",
             "bid4free/bid4FreeData.js",
-            "bid4free/bidDirective.js",
+            "bid4free/bid4freeDirective.js",
             "bid4free/bidService.js",
             "bid4free/bidProjectSummaryDirective.js",
             "bid4free/bidImageDirective.js",

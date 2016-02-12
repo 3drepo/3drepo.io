@@ -46,9 +46,10 @@
 		// Get all the packages
 		promise = BidService.getPackage();
 		promise.then(function (response) {
+			console.log(response);
 			var i, length, passedPackageName;
 			vm.packages = [];
-			if (response.data !== null) {
+			if ((response.statusText === "OK") && (response.data.length > 0)) {
 				vm.packages = response.data;
 				vm.packages[0].completedByPretty = prettyDate(new Date(vm.packages[0].completedBy));
 

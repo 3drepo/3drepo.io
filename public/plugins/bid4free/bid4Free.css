@@ -5,7 +5,7 @@
 
 /** Bid ***************************************************************************************************************/
 
-bid {
+bid4free {
   align-items: center;
   display: flex;
   justify-content: center;
@@ -16,38 +16,39 @@ bid {
   background: #E8EAF6;
 }
 
-bid .bidInfo {
+bid4free .bidInfo {
   width: 100%;
   height: 100%;
 }
 
-bid .bidInfo .bidInfoSubContractor {
+bid4free .bidInfo .bidInfoSubContractor {
   height: 100%;
 }
 
-bid md-toolbar {
+bid4free md-toolbar {
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
 }
 
-bid .bidHeader {
+bid4free .bidHeader {
   width: 100%;
   margin-bottom: 50px;
 }
-bid .bidHeader.md-whiteframe-1dp {
+bid4free .bidHeader.md-whiteframe-1dp {
   border-radius: 4px;
 }
-bid .bidHeader md-toolbar {
+bid4free .bidHeader md-toolbar {
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
 }
 
-bid .bidContent {
+bid4free .bidContent {
   width: 100%;
+  padding: 20px;
 }
 
-bid md-list-item p {
+bid4free md-list-item p {
   font-size: 1.6rem;
   font-weight: 400;
   letter-spacing: 0.010em;
@@ -55,69 +56,91 @@ bid md-list-item p {
   outline: none;
 }
 
-bid .md-whiteframe-1dp {
+bid4free .md-whiteframe-1dp {
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
   background: #FFFFFF;
 }
 
-bid .bidInfoCardContent {
+bid4free .bidInfoCardContent {
   overflow-y: auto;
   overflow-x: hidden;
 }
 
-bid .bidInfoCardContent .bidInfoCardLabel {
+bid4free .bidInfoCardContent .bidInfoCardLabel {
   color: rgba(0,0,0,0.5);
   margin-left: 5px;
 }
 
-bid .md-toolbar-tools {
+bid4free .md-toolbar-tools {
   color: #FFEB3B;
+}
+
+bid4free .packageContent {
+  width: 100%;
+  height: 560px;
+  padding: 10px;
+}
+
+bid4free .packageContent md-input-container {
+  margin: 20px 10px -15px 10px;
+}
+
+bid4free .packageContent .bidDatePicker {
+  margin: -20px 0 20px;
+}
+bid4free .packageContent .bidDatePicker h5 {
+  color: rgba(0,0,0,0.5);
 }
 
 /** Packages **********************************************************************************************************/
 
-bid .bidPackageList .bidPackageListContent {
+bid4free .bidPackageList .bidPackageListContent {
   width: 100%;
   height: 400px;
 }
 
 /** Summary ***********************************************************************************************************/
 
-bid  .bidSummary .bidSummaryContent {
+bid4free  .bidSummary .bidSummaryContent {
   width: 100%;
   min-height: 450px;
 }
-bid  .bidSummary .bidSummaryContent .bidSummaryContentDatePicker {
+bid4free  .bidSummary .bidSummaryContent .bidSummaryContentDatePicker {
   margin: -20px 0 20px;
 }
-bid  .bidSummary .bidSummaryContent .bidSummaryContentDatePicker h5 {
+bid4free  .bidSummary .bidSummaryContent .bidSummaryContentDatePicker h5 {
   color: rgba(0,0,0,0.5);
 }
 
-bid  .bidSummary .bidSummaryContent .projectTitle {
+bid4free  .bidSummary .bidSummaryContent .projectTitle {
   margin-bottom: 10px;
 }
-bid  .bidSummary .bidSummaryContent .projectTitle md-icon {
+bid4free  .bidSummary .bidSummaryContent .projectTitle md-icon {
   margin: 12px 0 0 20px;
   font-size: 1.7em;
 }
 
-bid  .bidSummary .bidSummaryContent .projectDates {
+bid4free  .bidSummary .bidSummaryContent .projectDates {
   margin-top: 10px;
   color: rgba(0,0,0,.5);
 }
 
+bid4free .packageContent .fileUploader {
+  margin-top: 40px;
+  padding-left: 20px;
+}
+
 /** Invite ************************************************************************************************************/
-bid .bidInvite .bidInviteContent {
+bid4free .bidInvite .bidInviteContent {
   width: 100%;
   height: 400px;
 }
-bid .bidInvite .bidInviteContent md-list-item md-icon {
+bid4free .bidInvite .bidInviteContent md-list-item md-icon {
   font-size: 1.5em;
 }
-bid .bidInvite .bidInviteIcon {
+bid4free .bidInvite .bidInviteIcon {
   font-size: 2em;
   margin: 15px;
 }
@@ -173,6 +196,12 @@ bid-docs md-icon {
 }
 .bidDocsDialog .bidDocsBold {
   font-weight: bold;
+}
+
+.bidDocsDialog iframe {
+  min-width: 850px;
+  min-height: 600px;
+  border: none;
 }
 
 /** Bid Summary *******************************************************************************************************/

@@ -19,24 +19,24 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("bid", bid);
+		.directive("bid4free", bid4free);
 
-	function bid() {
+	function bid4free() {
 		return {
 			restrict: 'E',
-			templateUrl: 'bid.html',
+			templateUrl: 'bid4free.html',
 			scope: {},
-			controller: BidCtrl,
+			controller: Bid4FreeCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	BidCtrl.$inject = ["$scope", "$location", "StateManager", "BidService", "ProjectService"];
+	Bid4FreeCtrl.$inject = ["$scope", "$element", "StateManager", "BidService", "ProjectService"];
 
-	function BidCtrl($scope, $location, StateManager, BidService, ProjectService) {
+	function Bid4FreeCtrl($scope, $element, StateManager, BidService, ProjectService) {
 		var vm = this,
-			promise, projectUserRolesPromise;
+			promise, projectUserRolesPromise, projectSummaryPromise;
 
 		vm.StateManager = StateManager;
 		vm.subContractors = [
@@ -44,6 +44,15 @@
 			{user: "Carmen"},
 			{user: "Henry"}
 		];
+
+		vm.projectSummary = {
+			site: {label: "Site", type: "input", inputType: "text", value: undefined},
+			code: {label: "Code", type: "input", inputType: "text", value: undefined},
+			client: {label: "Client", type: "input", inputType: "text", value: undefined},
+			budget: {label: "Budget", type: "input", inputType: "number", value: undefined},
+			contact: {label: "Contact", type: "input", inputType: "text", value: undefined},
+			completedBy: {label: "Completed by", type: "date", value: undefined}
+		};
 		vm.packageSummary = {
 			name: {label: "Name", type: "input", inputType: "text", value: undefined},
 			site: {label: "Site", type: "input", inputType: "text", value: undefined},
@@ -59,6 +68,24 @@
 		vm.responded = false;
 		vm.packageSelected = false;
 		vm.statusInfo = "No package currently selected";
+		vm.saveProjectSummaryDisabled = true;
+		vm.saveDisabled = true;
+		vm.showProjectSummaryInput = true;
+
+		// Get the project summary
+		projectSummaryPromise = ProjectService.getProjectSummary();
+		projectSummaryPromise.then(function (response) {
+			console.log(response);
+			if (response.hasOwnProperty("data")) {
+				vm.showProjectSummaryInput = false;
+				vm.projectSummary.name = {value: response.data.name};
+				vm.projectSummary.site.value = response.data.site;
+				vm.projectSummary.code.value = response.data.code;
+				vm.projectSummary.client.value = response.data.client;
+				vm.projectSummary.budget.value = response.data.budget;
+				vm.projectSummary.completedByPretty = prettyDate(new Date(response.data.completedBy));
+			}
+		});
 
 		// Get type of role
 		projectUserRolesPromise = ProjectService.getUserRolesForProject();
@@ -94,6 +121,8 @@
 						for (i = 0, length = vm.packages.length; i < length; i += 1) {
 							vm.packages[i].completedByPretty = prettyDate(new Date(vm.packages[i].completedBy));
 						}
+
+						vm.fileUploadAction = "/api/" + StateManager.state.account + "/" + StateManager.state.project + "/packages/" +  vm.packages[0].name + "/attachments";
 					}
 				});
 			}
@@ -129,17 +158,32 @@
 		$scope.$watch("vm.userIsAMainContractor", function (newValue) {
 			if (angular.isDefined(newValue)) {
 				if (newValue) {
-					vm.summaryTitle = "Summary";
+					vm.summaryTitle = "Package Summary";
 					vm.inviteTitle = "Invite";
 					vm.showInput = true;
 				}
 				else {
-					vm.summaryTitle = "Summary";
+					vm.summaryTitle = "Package Summary";
 					vm.inviteTitle = "Bid Status";
 					vm.showInput = false;
 				}
 			}
 		});
+
+		$scope.$watch("vm.projectSummary", function (newValue, oldValue) {
+			var input;
+			if (angular.isDefined(newValue)) {
+				if (JSON.stringify(newValue) !== JSON.stringify(oldValue)) {
+					vm.saveProjectSummaryDisabled = false;
+					for (input in vm.projectSummary) {
+						if (vm.projectSummary.hasOwnProperty(input) && (angular.isUndefined(vm.projectSummary[input].value))) {
+							vm.saveProjectSummaryDisabled = true;
+							break;
+						}
+					}
+				}
+			}
+		}, true);
 
 		$scope.$watch("vm.packageSummary", function (newValue, oldValue) {
 			var input;
@@ -156,6 +200,23 @@
 				}
 			}
 		}, true);
+
+		vm.saveProjectSummary = function () {
+			var data = {}, input;
+			for (input in vm.projectSummary) {
+				if (vm.projectSummary.hasOwnProperty(input)) {
+					data[input] = vm.projectSummary[input].value;
+				}
+			}
+			vm.saveProjectSummaryDisabled = true;
+			vm.showProjectSummaryInput = false;
+			promise = ProjectService.createProjectSummary(data);
+			promise.then(function (response) {
+				console.log(response);
+				vm.projectSummary.name = {value: response.data.name};
+				vm.projectSummary.completedByPretty = prettyDate(new Date(response.data.completedBy));
+			});
+		};
 
 		vm.save = function () {
 			var data = {}, input;
@@ -246,6 +307,7 @@
 			vm.showSummary = true;
 			vm.packageNotAwarded = true;
 			vm.selectedPackage = vm.packages[index];
+			console.log(vm.selectedPackage);
 			if (vm.userIsAMainContractor) {
 				promise = BidService.getBids(vm.selectedPackage.name);
 				promise.then(function (response) {
@@ -315,13 +377,6 @@
 			vm.showSummary = false;
 		};
 
-		vm.createProjectSummary = function () {
-			promise = ProjectService.createProjectSummary();
-			promise.then(function (response) {
-				console.log(response);
-			});
-		};
-
 		vm.selectPackage = function (packageName) {
 			vm.selectedPackageName = packageName;
 		};
@@ -353,5 +408,22 @@
 			}
 			return icon;
 		}
+
+		angular.element(document).ready(function () {
+			var fileUploader = $element[0].querySelector("#fileUploader");
+			if (fileUploader !== null) {
+				fileUploader.addEventListener(
+					"change",
+					function () {
+						var files = this.files;
+						console.log(files);
+						promise = BidService.saveFiles(vm.packages[0].name, files);
+						promise.then(function (response) {
+							console.log(response);
+						});
+					},
+					false);
+			}
+		});
 	}
 }());

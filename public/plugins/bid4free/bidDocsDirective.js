@@ -34,14 +34,15 @@
 		};
 	}
 
-	BidDocsCtrl.$inject = ["$scope", "$mdDialog"];
+	BidDocsCtrl.$inject = ["$scope", "$mdDialog", "$sce", "BidService"];
 
-	function BidDocsCtrl ($scope, $mdDialog) {
-		var vm = this;
+	function BidDocsCtrl ($scope, $mdDialog, $sce, BidService) {
+		var vm = this,
+			promise;
 
 		vm.docs = [
-			{title: "Bill of Quantities"},
-			{title: "Scope of Works"}
+			{title: "Bill of Quantities", id: ""},
+			{title: "Scope of Works", id: ""}
 		];
 
 		vm.boq = [
@@ -53,8 +54,27 @@
 		];
 
 		$scope.$watch("vm.packageName", function (newValue) {
+			var i, j, length, jLength, exists;
 			if (angular.isDefined(newValue)) {
 				vm.showDocs = true;
+				if (BidService.currentPackage.hasOwnProperty("attachments")) {
+					for (i = 0, length = BidService.currentPackage.attachments.length; i < length; i += 1) {
+						// Ignore duplicates
+						exists = false;
+						for (j = 0, jLength = vm.docs.length; j < jLength; j += 1) {
+							if (vm.docs[j].id === BidService.currentPackage.attachments[i]) {
+								exists = true;
+								break;
+							}
+						}
+						if (!exists) {
+							vm.docs.push({
+								title: "Drawing " + BidService.currentPackage.attachments[i],
+								id: BidService.currentPackage.attachments[i]
+							});
+						}
+					}
+				}
 			}
 		});
 
@@ -73,6 +93,20 @@
 
 		vm.showDoc = function (index) {
 			vm.docIndex = index;
+			if (index > 1) {
+				promise = BidService.getFile(BidService.currentPackage.name, vm.docs[index].id);
+				promise.then(function (response) {
+					var blob = new Blob([response.data], { type: 'application/pdf' });
+					vm.pdfUrl = URL.createObjectURL(blob);
+					showDialog();
+				});
+			}
+			else {
+				showDialog();
+			}
+		};
+
+		function showDialog () {
 			$mdDialog.show({
 				controller: bidDocsDialogController,
 				templateUrl: 'bidDocsDialog.html',
@@ -84,10 +118,18 @@
 				preserveScope: true,
 				onRemoving: removeDialog
 			});
+		}
+
+		vm.trustSrc = function(src) {
+			return $sce.trustAsResourceUrl(src);
 		};
 
 		vm.closeDialog = function () {
 			$mdDialog.cancel();
+
+			// Free the resources associated with the created url
+			var worker = new Worker(vm.pdfUrl);
+			URL.revokeObjectURL(vm.pdfUrl);
 		};
 
 		function removeDialog () {

@@ -23,3 +23,6 @@ md-dialog.bidDocsDialog(aria-label="Document",  ng-cloak)
 	md-content.bidDocsSow(flex, layout-padding, ng-if="vm.docIndex===1")
 		//p(ng-repeat="paragraph in vm.sowProcessed") {{paragraph}}
 		p(ng-bind-html="vm.sow")
+
+	div(flex, ng-if="vm.docIndex>1")
+		iframe(type="application/pdf", ng-src="{{vm.trustSrc(vm.pdfUrl)}}")

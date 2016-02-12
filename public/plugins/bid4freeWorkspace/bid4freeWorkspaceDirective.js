@@ -92,7 +92,8 @@
 			vm.sections.push(
 				{
 					block: vm.sectionTitle,
-					items: []
+					items: [],
+					type: vm.sectionType
 				}
 			);
 			vm.showSaveConfirmation = false;
@@ -117,21 +118,40 @@
 		 */
 		vm.addItem = function (sectionIndex) {
 			if (angular.isDefined(vm.sections[sectionIndex].newItemName) && angular.isDefined(vm.sections[sectionIndex].newItemDescription)) {
-				vm.sections[sectionIndex].items.push(
-					{
-						type: "keyvalue",
-						keys: [
-							{
-								name: vm.sections[sectionIndex].newItemName,
-								datatype: "string",
-								control: "text"
-							}
-						],
-						values: [
-							vm.sections[sectionIndex].newItemDescription
-						]
-					}
-				);
+				if (vm.sections[sectionIndex].type === "keyvalue") {
+					vm.sections[sectionIndex].items.push(
+						{
+							type: "keyvalue",
+							keys: [
+								{
+									name: vm.sections[sectionIndex].newItemName,
+									datatype: "string",
+									control: "text"
+								}
+							],
+							values: [
+								vm.sections[sectionIndex].newItemDescription
+							]
+						}
+					);
+				}
+				else {
+					vm.sections[sectionIndex].items.push(
+						{
+							type: "table",
+							keys: [
+								{
+									name: vm.sections[sectionIndex].newItemName,
+									datatype: "string",
+									control: "text"
+								}
+							],
+							values: [
+								vm.sections[sectionIndex].newItemDescription
+							]
+						}
+					);
+				}
 				vm.sections[sectionIndex].newItemName = undefined;
 				vm.sections[sectionIndex].newItemDescription = undefined;
 				vm.sections[sectionIndex].showInput = false;
