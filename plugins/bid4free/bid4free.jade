@@ -1,4 +1,5 @@
 .bidInfo
+	// Sub Contractor
 	.bidInfoSubContractor(ng-if="!vm.userIsAMainContractor", layout="column")
 		div(layout="row", layout-padding, flex="50")
 			bid-project-summary(layout="column", flex)
@@ -11,14 +12,16 @@
 			bid-docs(layout="column", flex, package-name="vm.selectedPackageName")
 			bid-workspace(layout="column", flex, package-name="vm.selectedPackageName", invite-accepted="vm.packageInviteAccepted")
 
+	// Main Contractor
 	.bidContent(layout="row", layout-align="space-between start", ng-if="vm.userIsAMainContractor")
-		.md-whiteframe-1dp(flex=20)
+		// Project Summary
+		.md-whiteframe-1dp(flex=25)
 			md-toolbar
 				.md-toolbar-tools
 					h2 Project Summary
 			.packageContent
 				md-content
-					div(ng-if="vm.showProjectSummaryInput")
+					.projectSummaryInput(ng-if="vm.showProjectSummaryInput")
 						span(ng-repeat="input in vm.projectSummary")
 							md-input-container.md-block(ng-if="input.type==='input'")
 								label {{input.label}}
@@ -33,45 +36,51 @@
 					div(ng-if="!vm.showProjectSummaryInput")
 						md-list
 							md-list-item
-								p(flex="50") Name
+								p.bidInfoListTitle(flex="50") Name
 								p(flex) {{vm.projectSummary.name.value}}
 							md-list-item
-								p(flex="50") Site
+								p.bidInfoListTitle(flex="50") Site
 								p(flex) {{vm.projectSummary.site.value}}
 							md-list-item
-								p(flex="50") Code
+								p.bidInfoListTitle(flex="50") Code
 								p(flex) {{vm.projectSummary.code.value}}
 							md-list-item
-								p(flex="50") Client
+								p.bidInfoListTitle(flex="50") Client
 								p(flex) {{vm.projectSummary.client.value}}
 							md-list-item
-								p(flex="50") Budget
+								p.bidInfoListTitle(flex="50") Budget
 								p(flex) {{vm.projectSummary.budget.value}}
 							md-list-item
-								p(flex="50") Completed by
+								p.bidInfoListTitle(flex="50") Completed by
 								p(flex) {{vm.projectSummary.completedByPretty}}
 
+		// Package List
 		.bidPackageList.md-whiteframe-1dp(flex=25)
 			md-toolbar
 				.md-toolbar-tools
 					h2 {{vm.listTitle}}
 					span(flex)
-					md-button.md-icon-button(aria-label="Add Package", ng-click="vm.setupAddPackage()", ng-if="vm.userIsAMainContractor")
+					md-button.md-icon-button(aria-label="Add Package", ng-click="vm.setupAddPackage()")
 						md-icon(class="fa fa-plus")
 			.packageContent
 				md-content
 					md-list()
-						md-list-item(ng-repeat="package in vm.packages", ng-click="vm.showPackage($index)", aria-label="Package")
+						md-list-item(
+							ng-repeat="package in vm.packages",
+							ng-click="vm.showPackage($index)",
+							aria-label="Package",
+							ng-class="{bidInfoPackageListSelected: package.selected, bidInfoPackageListUnselected: !package.selected}")
 							p {{package.name}}
 
-		.bidSummary.md-whiteframe-1dp(flex=30)
+		// Package Summary
+		.bidSummary.md-whiteframe-1dp(flex=25)
 			md-toolbar
 				.md-toolbar-tools
-					h2 {{vm.summaryTitle}}
+					h2 Package Summary
 			.packageContent
 				md-content
 					div(ng-if="vm.packageSelected")
-						div(ng-if="vm.showInput")
+						.packageSummaryInput(ng-if="vm.showInput")
 							span(ng-repeat="input in vm.packageSummary")
 								md-input-container.md-block(ng-if="input.type==='input'")
 									label {{input.label}}
@@ -81,32 +90,32 @@
 									md-datepicker(ng-model="input.value", md-placeholder="Enter date")
 							md-divider
 							div(layout="row", layout-align="center center")
-								md-button.md-accent(ng-click="vm.save()", ng-disabled="vm.saveDisabled") Save
+								md-button.md-accent(ng-click="vm.savePackage()", ng-disabled="vm.savePackageDisabled") Save
 						.cardInfo(ng-if="vm.showInfo")
 								p {{vm.info}}
 
 						div(ng-if="vm.showSummary")
 							md-list
 								md-list-item
-									p(flex="40") Name
+									p.bidInfoListTitle(flex="40") Name
 									p(flex) {{vm.selectedPackage.name}}
 								md-list-item
-									p(flex="40") Site
+									p.bidInfoListTitle(flex="40") Site
 									p(flex) {{vm.selectedPackage.site}}
 								md-list-item
-									p(flex="40") Code
+									p.bidInfoListTitle(flex="40") Code
 									p(flex) {{vm.selectedPackage.code}}
 								md-list-item
-									p(flex="40") Budget
+									p.bidInfoListTitle(flex="40") Budget
 									p(flex) {{vm.selectedPackage.budget}}
 								md-list-item
-									p(flex="40") Area
+									p.bidInfoListTitle(flex="40") Area
 									p(flex) {{vm.selectedPackage.area}}
 								md-list-item
-									p(flex="40") Contact
+									p.bidInfoListTitle(flex="40") Contact
 									p(flex) {{vm.selectedPackage.contact}}
 								md-list-item
-									p(flex="40") Completed by
+									p.bidInfoListTitle(flex="40") Completed by
 									p(flex) {{vm.selectedPackage.completedByPretty}}
 							md-divider
 							.fileUploader
@@ -117,51 +126,41 @@
 						.cardInfo
 							p {{vm.summaryInfo}}
 
+		// Package Invite
 		.bidInvite.md-whiteframe-1dp(flex=20)
 			md-toolbar
 				.md-toolbar-tools
 					h2
-						span {{vm.inviteTitle}}
+						span Sub Contractors
 			.packageContent
 				md-content
 					div(ng-if="vm.packageSelected")
-						div(ng-if="vm.userIsAMainContractor")
-							div(ng-if="!vm.showInput")
-								div(layout="row", layout-align="space-between start", ng-if="vm.packageNotAwarded")
-									md-input-container.md-block(flex="80")
-										label Sub Contractors
-										md-select(ng-model="vm.subContractorIndex")
-											md-option(ng-repeat="subContractor in vm.notInvitedSubContractors", value="{{$index}}")
-												| {{subContractor.user}}
-									md-button.md-accent(ng-click="vm.inviteSubContractor()", ng-disabled="vm.addSubContractorDisabled") Add
-								div
-									md-subheader.md-no-sticky Invited
-									md-list-item(ng-repeat="invited in vm.invitedSubContractors")
-										md-icon.bidInviteIcon(flex="5", ng-class="invited.invitedIcon")
-										p(flex="30") {{invited.user}}
-										span(flex="10")
-											md-button.md-accent(ng-if="invited.accepted && !vm.awarded", ng-click="vm.awardToSubContractor($index)") Award
-							div(ng-if="vm.showInput")
+						div(ng-if="!vm.showInput")
+							// Not invited selection
+							div(layout="row", layout-align="center center", ng-if="vm.packageNotAwarded")
+								md-input-container.md-block(flex="80")
+									label Select Sub Contractor
+									md-select(ng-model="vm.subContractorIndex")
+										md-option(ng-repeat="subContractor in vm.notInvitedSubContractors", value="{{$index}}")
+											| {{subContractor.user}}
+								md-button.md-accent(ng-click="vm.inviteSubContractor()", ng-disabled="vm.addSubContractorDisabled") Invite
+
+							// Invited list
+							div(ng-if="vm.subContractorsInvited")
+								md-subheader.md-no-sticky Invited
+								md-list-item(ng-repeat="invited in vm.invitedSubContractors")
+									md-icon.bidInviteIcon(flex="5", ng-class="invited.invitedIcon")
+									p(flex="30") {{invited.user}}
+									span(flex="10")
+										md-button.md-accent(ng-if="invited.accepted && !vm.awarded", ng-click="vm.awardToSubContractor($index)") Award
+							div(ng-if="!vm.subContractorsInvited")
 								.cardInfo
-									p {{vm.statusInfo}}
+									p There are currently no sub contractors invited
 
-						div(ng-if="!vm.userIsAMainContractor")
-							div(ng-if="!vm.awarded")
-								span(ng-if="!vm.responded")
-									md-button.md-accent(ng-click="vm.acceptInvite(true)") Accept
-									md-button.md-accent(ng-click="vm.acceptInvite(false)") Decline
-								span(ng-if="vm.responded")
-									.cardInfo(layout="row", layout-align="center center")
-										p(flex) Accepted invitation for package {{vm.selectedPackage.name}}
-
-							div(ng-if="vm.awarded")
-								.cardInfo(layout="row", layout-align="center center")
-									md-icon(flex="5", ng-class="vm.awardIcon")
-									p(flex) {{vm.statusInfo}}
+						div(ng-if="vm.showInput")
+							.cardInfo
+								p {{vm.statusInfo}}
 
 					div(ng-if="!vm.packageSelected")
 						.cardInfo
 							p {{vm.statusInfo}}
-
-	//div(ng-if="vm.userIsAMainContractor", layout="column", flex="10")
-		input(type="file", id="fileUploader", multiple="multiple")

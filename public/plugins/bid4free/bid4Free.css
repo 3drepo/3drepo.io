@@ -54,6 +54,7 @@ bid4free md-list-item p {
   letter-spacing: 0.010em;
   line-height: 1.6em;
   outline: none;
+  color: rgba(0, 0, 0, 0.7);
 }
 
 bid4free .md-whiteframe-1dp {
@@ -73,18 +74,15 @@ bid4free .bidInfoCardContent .bidInfoCardLabel {
   margin-left: 5px;
 }
 
-bid4free .md-toolbar-tools {
-  color: #FFEB3B;
+bid4free .md-toolbar-tools,
+bid4free .md-toolbar-tools md-icon{
+  color: #C5CAE9;
 }
 
 bid4free .packageContent {
   width: 100%;
   height: 560px;
   padding: 10px;
-}
-
-bid4free .packageContent md-input-container {
-  margin: 20px 10px -15px 10px;
 }
 
 bid4free .packageContent .bidDatePicker {
@@ -94,37 +92,29 @@ bid4free .packageContent .bidDatePicker h5 {
   color: rgba(0,0,0,0.5);
 }
 
-/** Packages **********************************************************************************************************/
-
-bid4free .bidPackageList .bidPackageListContent {
-  width: 100%;
-  height: 400px;
-}
-
-/** Summary ***********************************************************************************************************/
-
-bid4free  .bidSummary .bidSummaryContent {
-  width: 100%;
-  min-height: 450px;
-}
-bid4free  .bidSummary .bidSummaryContent .bidSummaryContentDatePicker {
-  margin: -20px 0 20px;
-}
-bid4free  .bidSummary .bidSummaryContent .bidSummaryContentDatePicker h5 {
+bid4free .bidInfoListTitle {
   color: rgba(0,0,0,0.5);
 }
 
-bid4free  .bidSummary .bidSummaryContent .projectTitle {
-  margin-bottom: 10px;
-}
-bid4free  .bidSummary .bidSummaryContent .projectTitle md-icon {
-  margin: 12px 0 0 20px;
-  font-size: 1.7em;
+/** Project Summary ***************************************************************************************************/
+
+.projectSummaryInput md-input-container {
+  margin: 20px 10px -15px 10px;
 }
 
-bid4free  .bidSummary .bidSummaryContent .projectDates {
-  margin-top: 10px;
-  color: rgba(0,0,0,.5);
+/** Packages **********************************************************************************************************/
+
+bid4free .bidInfoPackageListSelected {
+  background: #E8EAF6;
+}
+bid4free .bidInfoPackageListUnselected {
+  background: #FFFFFF;
+}
+
+/** Package Summary ***************************************************************************************************/
+
+.packageSummaryInput md-input-container {
+  margin: 20px 10px -15px 10px;
 }
 
 bid4free .packageContent .fileUploader {
@@ -141,7 +131,7 @@ bid4free .bidInvite .bidInviteContent md-list-item md-icon {
   font-size: 1.5em;
 }
 bid4free .bidInvite .bidInviteIcon {
-  font-size: 2em;
+  font-size: 1.5em;
   margin: 15px;
 }
 

@@ -68,8 +68,15 @@
 		tcPromise.then(function (response) {
 			var i, length;
 			vm.sections = response.data;
+			console.log(vm.sections);
 			for (i = 0, length = vm.sections.length; i < length; i += 1) {
 				vm.sections[i].showInput = false;
+				if (vm.sections[i].items.length > 0) {
+					vm.sections[i].type = vm.sections[i].items[0].type;
+				}
+				else {
+					vm.sections[i].type = "keyvalue";
+				}
 			}
 		});
 
@@ -85,17 +92,36 @@
 			*/
 		});
 
+		$scope.$watch("vm.sectionType", function (newValue) {
+			vm.showTableTitlesInput = (newValue.toString() === "table");
+		});
+
 		/**
 		 * Add a section
 		 */
 		vm.addSection = function () {
-			vm.sections.push(
-				{
-					block: vm.sectionTitle,
-					items: [],
-					type: vm.sectionType
-				}
-			);
+			var section = {
+				block: vm.sectionTitle,
+				items: [],
+				type: vm.sectionType
+			};
+
+			// Set the table titles
+			if (vm.sectionType === "table") {
+				section.items = [
+					{
+						type: "table",
+						keys: [
+							{name: vm.tableColumn1Title, datatype: "string", control: "text"},
+							{name: vm.tableColumn2Title, datatype: "string", control: "text"},
+							{name: vm.tableColumn3Title, datatype: "string", control: "text"}
+						],
+						values: []
+					}
+				];
+			}
+
+			vm.sections.push(section);
 			vm.showSaveConfirmation = false;
 		};
 
@@ -117,8 +143,8 @@
 		 * @param sectionIndex
 		 */
 		vm.addItem = function (sectionIndex) {
-			if (angular.isDefined(vm.sections[sectionIndex].newItemName) && angular.isDefined(vm.sections[sectionIndex].newItemDescription)) {
-				if (vm.sections[sectionIndex].type === "keyvalue") {
+			if (vm.sections[sectionIndex].type === "keyvalue") {
+				if (angular.isDefined(vm.sections[sectionIndex].newItemName) && angular.isDefined(vm.sections[sectionIndex].newItemDescription)) {
 					vm.sections[sectionIndex].items.push(
 						{
 							type: "keyvalue",
@@ -135,27 +161,22 @@
 						}
 					);
 				}
-				else {
-					vm.sections[sectionIndex].items.push(
-						{
-							type: "table",
-							keys: [
-								{
-									name: vm.sections[sectionIndex].newItemName,
-									datatype: "string",
-									control: "text"
-								}
-							],
-							values: [
-								vm.sections[sectionIndex].newItemDescription
-							]
-						}
-					);
-				}
-				vm.sections[sectionIndex].newItemName = undefined;
-				vm.sections[sectionIndex].newItemDescription = undefined;
-				vm.sections[sectionIndex].showInput = false;
 			}
+			else {
+				if (angular.isDefined(vm.sections[sectionIndex].column1) &&
+					angular.isDefined(vm.sections[sectionIndex].column2) &&
+					angular.isDefined(vm.sections[sectionIndex].column3)) {
+					vm.sections[sectionIndex].items[0].values.push([
+						vm.sections[sectionIndex].column1,
+						vm.sections[sectionIndex].column2,
+						vm.sections[sectionIndex].column3
+					]);
+				}
+			}
+			console.log(vm.sections);
+			vm.sections[sectionIndex].newItemName = undefined;
+			vm.sections[sectionIndex].newItemDescription = undefined;
+			vm.sections[sectionIndex].showInput = false;
 		};
 
 		/**
@@ -164,6 +185,7 @@
 		vm.save = function () {
 			promise = BidService.updateTermsAndConditions($location.search().package, vm.sections);
 			promise.then(function (response) {
+				console.log(response);
 				vm.showSaveConfirmation = true;
 			});
 		};
@@ -186,7 +208,7 @@
 			}
 			vm.boqTotal = total.toFixed(2);
 			BidService.boqTotal = vm.boqTotal;
-		};
+		}
 
 		/**
 		 * Go to the main Bid4Free page

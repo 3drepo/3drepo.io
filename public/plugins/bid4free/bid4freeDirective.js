@@ -32,19 +32,33 @@
 		};
 	}
 
-	Bid4FreeCtrl.$inject = ["$scope", "$element", "StateManager", "BidService", "ProjectService"];
+	Bid4FreeCtrl.$inject = ["$scope", "$element", "$timeout", "StateManager", "BidService", "ProjectService"];
 
-	function Bid4FreeCtrl($scope, $element, StateManager, BidService, ProjectService) {
+	function Bid4FreeCtrl($scope, $element, $timeout, StateManager, BidService, ProjectService) {
 		var vm = this,
-			promise, projectUserRolesPromise, projectSummaryPromise;
+			promise, projectUserRolesPromise, projectSummaryPromise,
+			currentSelectedPackageIndex;
 
+		// Init view/model vars
 		vm.StateManager = StateManager;
+		vm.invitedSubContractors = [];
+		vm.addSubContractorDisabled = true;
+		vm.responded = false;
+		vm.packageSelected = false;
+		vm.statusInfo = "No package currently selected";
+		vm.saveProjectSummaryDisabled = true;
+		vm.savePackageDisabled = true;
+		vm.showProjectSummaryInput = true;
+
+		// Setup sub contractors
 		vm.subContractors = [
 			{user: "Pinakin"},
 			{user: "Carmen"},
 			{user: "Henry"}
 		];
+		vm.notInvitedSubContractors = JSON.parse(JSON.stringify(vm.subContractors));
 
+		// Setup the project summary defaults
 		vm.projectSummary = {
 			site: {label: "Site", type: "input", inputType: "text", value: undefined},
 			code: {label: "Code", type: "input", inputType: "text", value: undefined},
@@ -53,6 +67,8 @@
 			contact: {label: "Contact", type: "input", inputType: "text", value: undefined},
 			completedBy: {label: "Completed by", type: "date", value: undefined}
 		};
+
+		// Setup the package summary defaults
 		vm.packageSummary = {
 			name: {label: "Name", type: "input", inputType: "text", value: undefined},
 			site: {label: "Site", type: "input", inputType: "text", value: undefined},
@@ -62,15 +78,6 @@
 			contact: {label: "Contact", type: "input", inputType: "text", value: undefined},
 			completedBy: {label: "Completed by", type: "date", value: undefined}
 		};
-		vm.notInvitedSubContractors = JSON.parse(JSON.stringify(vm.subContractors));
-		vm.invitedSubContractors = [];
-		vm.addSubContractorDisabled = true;
-		vm.responded = false;
-		vm.packageSelected = false;
-		vm.statusInfo = "No package currently selected";
-		vm.saveProjectSummaryDisabled = true;
-		vm.saveDisabled = true;
-		vm.showProjectSummaryInput = true;
 
 		// Get the project summary
 		projectSummaryPromise = ProjectService.getProjectSummary();
@@ -91,17 +98,11 @@
 		projectUserRolesPromise = ProjectService.getUserRolesForProject();
 		projectUserRolesPromise.then(function (data) {
 			var i, length;
+			vm.userIsAMainContractor = true;
 			for (i = 0, length = data.length; i < length; i += 1) {
-				if (data[i] === "MainContractor") {
-					vm.userIsAMainContractor = true;
-					break;
-				}
-				else if (data[i] === "SubContractor") {
+				if (data[i] === "SubContractor") {
 					vm.userIsAMainContractor = false;
 					break;
-				}
-				else {
-					vm.userIsAMainContractor = true;
 				}
 			}
 			if (vm.userIsAMainContractor) {
@@ -120,54 +121,17 @@
 						vm.statusInfo = "No packages currently selected";
 						for (i = 0, length = vm.packages.length; i < length; i += 1) {
 							vm.packages[i].completedByPretty = prettyDate(new Date(vm.packages[i].completedBy));
+							vm.packages[i].selected = false;
 						}
 
 						vm.fileUploadAction = "/api/" + StateManager.state.account + "/" + StateManager.state.project + "/packages/" +  vm.packages[0].name + "/attachments";
 					}
 				});
 			}
-			else {
-				vm.listTitle = "Bids";
-				promise = BidService.getPackage();
-				promise.then(function (response) {
-					var packages = response.data;
-					promise = BidService.getUserBid(packages[0].name);
-					promise.then(function (response) {
-						vm.packages = [];
-						if (response.data !== null) {
-							vm.packages.push(response.data);
-							vm.packages[0].completedByPretty = prettyDate(new Date(vm.packages[0].completedBy));
-						}
-						if (vm.packages.length === 0) {
-							vm.summaryInfo = "There are no packages for this project";
-							vm.statusInfo = "There are no packages for this project";
-						}
-						else {
-							vm.summaryInfo = "No packages currently selected";
-							vm.statusInfo = "No packages currently selected";
-						}
-					});
-				});
-			}
 		});
 
 		$scope.$watch("vm.subContractorIndex", function (newValue) {
 			vm.addSubContractorDisabled = !angular.isDefined(newValue);
-		});
-
-		$scope.$watch("vm.userIsAMainContractor", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				if (newValue) {
-					vm.summaryTitle = "Package Summary";
-					vm.inviteTitle = "Invite";
-					vm.showInput = true;
-				}
-				else {
-					vm.summaryTitle = "Package Summary";
-					vm.inviteTitle = "Bid Status";
-					vm.showInput = false;
-				}
-			}
 		});
 
 		$scope.$watch("vm.projectSummary", function (newValue, oldValue) {
@@ -189,10 +153,10 @@
 			var input;
 			if (angular.isDefined(newValue)) {
 				if (JSON.stringify(newValue) !== JSON.stringify(oldValue)) {
-					vm.saveDisabled = false;
+					vm.savePackageDisabled = false;
 					for (input in vm.packageSummary) {
 						if (vm.packageSummary.hasOwnProperty(input) && (angular.isUndefined(vm.packageSummary[input].value))) {
-							vm.saveDisabled = true;
+							vm.savePackageDisabled = true;
 							break;
 						}
 					}
@@ -201,6 +165,9 @@
 			}
 		}, true);
 
+		/**
+		 * Save the project summary
+		 */
 		vm.saveProjectSummary = function () {
 			var data = {}, input;
 			for (input in vm.projectSummary) {
@@ -218,19 +185,22 @@
 			});
 		};
 
-		vm.save = function () {
+		/**
+		 * Save a package
+		 */
+		vm.savePackage = function () {
 			var data = {}, input;
 			for (input in vm.packageSummary) {
 				if (vm.packageSummary.hasOwnProperty(input)) {
 					data[input] = vm.packageSummary[input].value;
 				}
 			}
-			vm.saveDisabled = true;
+			vm.savePackageDisabled = true;
 			promise = BidService.addPackage(data);
 			promise.then(function (response) {
 				vm.showInfo = true;
-				vm.saveDisabled = (response.statusText === "OK");
-				if (vm.saveDisabled) {
+				vm.savePackageDisabled = (response.statusText === "OK");
+				if (vm.savePackageDisabled) {
 					data.completedByPretty = prettyDate(new Date(data.completedBy));
 					vm.packages.push(data);
 					vm.info = "Package " + vm.name + " saved";
@@ -241,6 +211,9 @@
 			});
 		};
 
+		/**
+		 * Invite a sub contractor to bid for a package
+		 */
 		vm.inviteSubContractor = function () {
 			var data = {
 				user: vm.notInvitedSubContractors[vm.subContractorIndex].user
@@ -248,6 +221,7 @@
 			promise = BidService.inviteSubContractor(vm.selectedPackage.name, data);
 			promise.then(function (response) {
 				if (response.statusText === "OK") {
+					vm.subContractorsInvited = true;
 					vm.notInvitedSubContractors[vm.subContractorIndex].accepted = null;
 					vm.invitedSubContractors.push(vm.notInvitedSubContractors[vm.subContractorIndex]);
 					vm.invitedSubContractors[vm.invitedSubContractors.length - 1].invitedIcon = "fa fa-circle-thin";
@@ -257,32 +231,10 @@
 			});
 		};
 
-		vm.changeAssignIcon = function (index) {
-			if (vm.invitedSubContractors[index].invitedIcon === "fa fa-circle-thin") {
-				vm.invitedSubContractors[index].invitedIcon = "fa fa-check md-accent";
-			}
-			else if (vm.invitedSubContractors[index].invitedIcon === "fa fa-check md-accent") {
-				vm.invitedSubContractors[index].invitedIcon = "fa fa-remove md-warn";
-			}
-			else if (vm.invitedSubContractors[index].invitedIcon === "fa fa-remove md-warn") {
-				vm.invitedSubContractors[index].invitedIcon = "fa fa-circle-thin";
-			}
-		};
-
-		vm.acceptInvite = function (accept) {
-			if (accept) {
-				promise = BidService.acceptInvite(vm.selectedPackage.name);
-				promise.then(function (response) {
-					if (response.statusText === "OK") {
-						vm.responded = true;
-						vm.response = {
-							status: accept ? "accepted" : "declined"
-						};
-					}
-				});
-			}
-		};
-
+		/**
+		 * Award a package to a sub contractor
+		 * @param index
+		 */
 		vm.awardToSubContractor = function (index) {
 			var i, length;
 			promise = BidService.awardBid(vm.selectedPackage.name, vm.invitedSubContractors[index]._id);
@@ -301,6 +253,10 @@
 			});
 		};
 
+		/**
+		 * Show package summary and status
+		 * @param index
+		 */
 		vm.showPackage = function (index) {
 			var i, j, lengthI, lengthJ;
 			vm.showInput = false;
@@ -308,83 +264,81 @@
 			vm.packageNotAwarded = true;
 			vm.selectedPackage = vm.packages[index];
 			console.log(vm.selectedPackage);
-			if (vm.userIsAMainContractor) {
-				promise = BidService.getBids(vm.selectedPackage.name);
-				promise.then(function (response) {
-					if (response.statusText === "OK") {
-						vm.packageSelected = true;
-						vm.awarded = false;
-						vm.inviteTitle = "Invite";
-						vm.notInvitedSubContractors = JSON.parse(JSON.stringify(vm.subContractors));
-						vm.invitedSubContractors = response.data;
-						for (i = 0, lengthI = vm.invitedSubContractors.length; i < lengthI; i += 1) {
+			$timeout(function () {
+				setupFileUploader(); // timeout needed for uploader button to be available in in DOM
+			}, 500);
+			promise = BidService.getBids(vm.selectedPackage.name);
+			promise.then(function (response) {
+				if (response.statusText === "OK") {
+					vm.packageSelected = true;
 
-							if (vm.invitedSubContractors[i].accepted === null) {
-								vm.invitedSubContractors[i].invitedIcon = getStatusIcon("invited");
-							}
-							else {
-								if (vm.invitedSubContractors[i].awarded) {
-									vm.awarded = true;
-									vm.inviteTitle = "Status";
-									vm.packageNotAwarded = false;
-									vm.invitedSubContractors[i].invitedIcon = getStatusIcon("won");
-								}
-								else {
-									vm.invitedSubContractors[i].invitedIcon = getStatusIcon("lost");
-								}
-							}
-
-							for (j = 0, lengthJ = vm.notInvitedSubContractors.length; j < lengthJ; j += 1) {
-								if (vm.notInvitedSubContractors[j].user === vm.invitedSubContractors[i].user) {
-									vm.notInvitedSubContractors.splice(j, 1);
-									break;
-								}
-							}
-						}
+					if (angular.isDefined(currentSelectedPackageIndex)) {
+						vm.packages[currentSelectedPackageIndex].selected = false;
 					}
-				});
-			}
-			else {
-				promise = BidService.getUserBid(vm.selectedPackage.packageName);
-				promise.then(function (response) {
-					if (response.statusText === "OK") {
-						vm.packageSelected = true;
-						if (response.data.awarded === null) {
-							vm.awarded = false;
-						}
-						else if (response.data.awarded) {
-							vm.awarded = true;
-							vm.statusInfo = "This package has been awarded to you";
-							vm.awardIcon = getStatusIcon("won");
+					vm.packages[index].selected = true;
+					currentSelectedPackageIndex = index;
+
+					vm.awarded = false;
+					vm.inviteTitle = "Invite";
+					vm.notInvitedSubContractors = JSON.parse(JSON.stringify(vm.subContractors));
+					vm.invitedSubContractors = response.data;
+					console.log(vm.invitedSubContractors);
+					vm.subContractorsInvited = (vm.invitedSubContractors.length > 0);
+					for (i = 0, lengthI = vm.invitedSubContractors.length; i < lengthI; i += 1) {
+
+						// Show the correct status for an invited sub contractor
+						if (vm.invitedSubContractors[i].accepted === null) {
+							vm.invitedSubContractors[i].invitedIcon = getStatusIcon("invited");
 						}
 						else {
-							vm.awarded = true;
-							vm.statusInfo = "This package has been awarded";
-							vm.awardIcon = getStatusIcon("lost");
+							if (vm.invitedSubContractors[i].awarded === null) {
+								vm.invitedSubContractors[i].invitedIcon = getStatusIcon("accepted");
+							}
+							else if (vm.invitedSubContractors[i].awarded) {
+								vm.awarded = true;
+								vm.inviteTitle = "Status";
+								vm.packageNotAwarded = false;
+								vm.invitedSubContractors[i].invitedIcon = getStatusIcon("won");
+							}
+							else {
+								vm.invitedSubContractors[i].invitedIcon = getStatusIcon("lost");
+							}
 						}
 
-						if (response.data.accepted !== null) {
-							vm.responded = true;
+						// Set up the not invited sub contractors list
+						for (j = 0, lengthJ = vm.notInvitedSubContractors.length; j < lengthJ; j += 1) {
+							if (vm.notInvitedSubContractors[j].user === vm.invitedSubContractors[i].user) {
+								vm.notInvitedSubContractors.splice(j, 1);
+								break;
+							}
 						}
 					}
-				});
-			}
+				}
+			});
 		};
 
+		/**
+		 * Show inputs to add a package
+		 */
 		vm.setupAddPackage = function () {
 			vm.packageSelected = true; // Cheat :-)
 			vm.showInput = true;
 			vm.showSummary = false;
 		};
 
+		/**
+		 * Select a package
+		 * @param packageName
+		 */
 		vm.selectPackage = function (packageName) {
 			vm.selectedPackageName = packageName;
 		};
 
-		vm.inviteAccepted = function () {
-			vm.packageInviteAccepted = true;
-		};
-
+		/**
+		 * Convert a date to a readable version
+		 * @param date
+		 * @returns {string}
+		 */
 		function prettyDate (date) {
 			return date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
 		}
@@ -409,14 +363,13 @@
 			return icon;
 		}
 
-		angular.element(document).ready(function () {
+		function setupFileUploader () {
 			var fileUploader = $element[0].querySelector("#fileUploader");
 			if (fileUploader !== null) {
 				fileUploader.addEventListener(
 					"change",
 					function () {
 						var files = this.files;
-						console.log(files);
 						promise = BidService.saveFiles(vm.packages[0].name, files);
 						promise.then(function (response) {
 							console.log(response);
@@ -424,6 +377,6 @@
 					},
 					false);
 			}
-		});
+		}
 	}
 }());

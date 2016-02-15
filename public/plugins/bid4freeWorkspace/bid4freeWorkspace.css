@@ -31,6 +31,8 @@ bid4free-workspace {
     margin-top: -16px; }
   bid4free-workspace .sectionInput .md-button {
     margin-top: -8px; }
+  bid4free-workspace .sectionInput .tableTitlesInput {
+    margin-top: -20px; }
   bid4free-workspace .saveContainer label {
     margin-top: 5px;
     color: #66BB6A; }
@@ -41,6 +43,9 @@ bid4free-workspace {
     overflow-x: hidden;
     border: 1px solid rgba(0, 0, 0, 0.1);
     height: 600px; }
+    bid4free-workspace .sections .tableTitles {
+      margin-top: 20px;
+      color: rgba(0, 0, 0, 0.6); }
   bid4free-workspace .items label {
     font-weight: normal;
     color: rgba(0, 0, 0, 0.5);
