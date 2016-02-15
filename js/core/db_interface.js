@@ -667,9 +667,42 @@ DBInterface.prototype.getAvatar = function(username, callback) {
 	});
 };
 
+
+/*******************************************************************************
+	  * Obtain the revision ID head of a branch
+	  * @param {String} account - account name
+	  * @param {String} project - project name
+      * @param {String} branchID - branch ID in question
+      * @param {function} callback(string) - call back function with revision id as a string
+      * @param {function} err_callback(err) - callback when error occurs
+	  *******************************************************************************/
+DBInterface.prototype.getProjectBranchHeadRid = function(account, project, branch, callback, err_callback)
+{
+    var branch_id;
+    if (branch === "master") {
+        branch_id = masterUUID;
+    } else {
+        branch_id = stringToUUID(branch);
+    }
+    
+    historyQuery = {
+        shared_id: branch_id
+    };
+    
+    var historyProjection = {
+        _id: 1
+    };
+
+    dbConn(this.logger).getLatest(account, project + ".history", historyQuery, historyProjection, function (err, docs) {
+        if (err.value) return err_callback(err);
+        if (!docs.length) { return err_callback(responseCodes.PROJECT_HISTORY_NOT_FOUND); }
+        callback(uuidToString(docs[0]._id));
+    });
+}
 DBInterface.prototype.getProjectInfo = function(account, project, callback) {
 	if(!project){
 		return callback(responseCodes.PROJECT_NOT_SPECIFIED);
+
 	}
 
 	this.logger.logDebug("Getting project info for " + account + "/" + project);
@@ -2154,18 +2187,17 @@ DBInterface.prototype.appendMeshFiles = function(dbName, project, fromStash, uid
 	}
 };
 
-DBInterface.prototype.cacheFunction = function(dbName, collection, req, generate, callback)
+DBInterface.prototype.cacheFunction = function(dbName, collection, url, format, generate, callback)
 {
 	"use strict";
 	var self = this;
 
 	// Get the format of the file
-	var format = req.params[C.REPO_REST_API_FORMAT].toLowerCase();
 	var stashCollection = collection + "." + C.REPO_COLLECTION_STASH + "." + format;
 
 	if (!config.disableCache)
 	{
-		dbConn(self.logger).getGridFSFile(dbName, stashCollection, req.url, function(err, result) {
+		dbConn(self.logger).getGridFSFile(dbName, stashCollection, url, function(err, result) {
 			if (err.value === responseCodes.FILE_DOESNT_EXIST.value) {
 				self.logger.logInfo("Doesn't exist in stash, generating ...");
 
@@ -2176,7 +2208,7 @@ DBInterface.prototype.cacheFunction = function(dbName, collection, req, generate
 					}
 
 					self.logger.logInfo("Storing in " + dbName + " : " + stashCollection);
-					dbConn(self.logger).storeGridFSFile(dbName, stashCollection, req.url, data, false, function(stashErr) {
+					dbConn(self.logger).storeGridFSFile(dbName, stashCollection, url, data, false, function(stashErr) {
 						if (stashErr.value)
 						{
 							return callback(stashErr);
