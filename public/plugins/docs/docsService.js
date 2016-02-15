@@ -95,7 +95,7 @@
 			var i,
 				length,
 				deferred = $q.defer(),
-				url = serverConfig.apiUrl(StateManager.state.account + "/" + "pdf" + "/meta/" + objectId + ".json");
+				url = serverConfig.apiUrl(StateManager.state.account + "/" + StateManager.state.project + "/meta/" + objectId + ".json");
 
 			$http.get(url)
 				.then(
@@ -103,7 +103,7 @@
 					console.log(json);
 						// Set up the url for each PDF doc
 						for (i = 0, length = json.data.meta.length; i < length; i += 1) {
-							json.data.meta[i].url = serverConfig.apiUrl(StateManager.state.account + "/" + "pdf" + '/' + json.data.meta[i]._id + ".pdf");
+							json.data.meta[i].url = serverConfig.apiUrl(StateManager.state.account + "/" + StateManager.state.project + '/' + json.data.meta[i]._id + ".pdf");
 						}
 						deferred.resolve(json.data);
 					},

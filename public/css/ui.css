@@ -42,6 +42,7 @@ body {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+	overflow-y: hidden;
 }
 
 .fill {
@@ -1611,7 +1612,7 @@ ul.fancytree-container li {
 #Axes {
 	width: 100px;
 	height: 100px;
-  	left: 225px;
+  	left: 107px;
 	bottom: -80px;
 	position: absolute;
 	border: none;

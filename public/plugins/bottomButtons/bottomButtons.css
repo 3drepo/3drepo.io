@@ -4,7 +4,7 @@ bottom-buttons {
   bottom: 80px;
   left: 0;
   right: 0;
-  width: 550px;
+  width: 320px;
   margin: auto;
   text-align: center;
 }
@@ -12,13 +12,13 @@ bottom-buttons {
 bottom-buttons #leftButtons {
   position: absolute;
   left: 0;
-  top: 5px;
+  top: 8px;
 }
 
 bottom-buttons #rightButtons {
   position: absolute;
   right: 0;
-  top: 5px;
+  top: 8px;
 }
 
 bottom-buttons #showButtonIcon {
@@ -26,10 +26,26 @@ bottom-buttons #showButtonIcon {
   margin-top: -5px;
 }
 
-bottom-buttons .actionButton {
-  background: #FFFFFF !important;
+bottom-buttons .actionButton md-icon {
+  color: #FFFFFF !important;
+  font-size: 25px;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
 }
 
-bottom-buttons .actionButton md-icon {
-  color: rgba(0, 0, 0, 0.6) !important;
+bottom-buttons .viewingOptionButtons {
+  position: absolute;
+  right: 0;
+  top: -145px;
+}
+
+.bottomButtomIconCardboard {
+  font-size: 20px !important;
+  margin-top: 5px;
+}
+.bottomButtomIconWalk {
+  margin-left: -5px;
+}
+.bottomButtomIconHelicopter {
+  margin-left: -18px;
+  font-size: 22px !important;
 }
