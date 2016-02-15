@@ -2,7 +2,7 @@
 	md-icon(class="fa", md-font-icon="fa-file-pdf-o")
 	p {{doc.name}}
 
-.docsLoadInfo(ng-if="vm.showDocsLoadInfo")
-	p {{vm.docsLoadInfo}}
+.cardInfo(ng-if="vm.showInfo")
+	p {{vm.info}}
 
 tdr-progress(ng-if="vm.showDocsGetProgress", info="vm.progressInfo")

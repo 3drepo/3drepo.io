@@ -18,7 +18,7 @@
 (function() {
 	"use strict";
 
-	const VERSION="1.0.0rc1";
+	const VERSION="1.0.0rc2";
 
 	var config = require('app-config').config;
 	var frontend_scripts = require('../../common_public_files.js');
@@ -112,12 +112,12 @@
 			}
 
 			serverObject.host_dir = "";
-		};
+		}
 
 		serverObject.base_url     = serverObject.public_protocol + "://" + serverObject.hostname + ":" + serverObject.public_port;
 		serverObject.location_url = "function(path) { return \"//\" + window.location.host + \"/\" + \"" + serverObject.host_dir + "\" + \"/\" + path; }";
 		serverObject.url          = serverObject.base_url + "/" + serverObject.host_dir;
-	}
+	};
 
 	// Check for hostname and ip here
 	config.host        = coalesce(config.host, "127.0.0.1");

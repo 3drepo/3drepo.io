@@ -63,20 +63,20 @@ issue md-list-item .md-button .md-ripple-container {
 
 issue .issueHeader {
   position: relative;
-  height: 60px;
 }
 issue .issueHeader .issueTitle {
   min-height: 0;
   height: 100%;
+}
+issue .issueHeader .issueTitle h3 {
+  padding: 5px 0 0 0;
+  width: 250px;
 }
 issue .issueHeader .issueTitle .issueTitleInfo {
   position: relative;
+  padding: 2px 0 5px;
 }
 issue .issueHeader .issueTitle button {
-  min-height: 0;
-  height: 100%;
-}
-issue .issueHeader .issueTitle {
   min-height: 0;
   height: 100%;
 }
