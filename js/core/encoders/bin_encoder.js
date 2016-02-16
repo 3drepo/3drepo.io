@@ -74,8 +74,11 @@ exports.route = function(router)
 {
     router.get('bin', '/:account/:project/:uid', function(res, params, err_callback) {
 		var type = params.query.mode;
-
-        render(router.dbInterface, params.account, params.project, params.uid, null, null, type, err_callback);
+        
+        dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req.url, req.params[C.REPO_REST_API_FORMAT].toLowerCase(), function (callback) {
+            render(router.dbInterface, params.account, params.project, params.uid, null, null, type, err_callback);
+        }, err_callback);
+        
     });
 
 	router.get('bin', '/:account/:project/revision/:rid/:sid', function(res, params, err_callback) {
