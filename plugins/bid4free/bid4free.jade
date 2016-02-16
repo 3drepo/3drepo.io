@@ -97,30 +97,32 @@
 						div(ng-if="vm.showSummary")
 							md-list
 								md-list-item
-									p.bidInfoListTitle(flex="40") Name
+									p.bidInfoListTitle(flex="50") Name
 									p(flex) {{vm.selectedPackage.name}}
 								md-list-item
-									p.bidInfoListTitle(flex="40") Site
+									p.bidInfoListTitle(flex="50") Site
 									p(flex) {{vm.selectedPackage.site}}
 								md-list-item
-									p.bidInfoListTitle(flex="40") Code
+									p.bidInfoListTitle(flex="50") Code
 									p(flex) {{vm.selectedPackage.code}}
 								md-list-item
-									p.bidInfoListTitle(flex="40") Budget
+									p.bidInfoListTitle(flex="50") Budget
 									p(flex) {{vm.selectedPackage.budget}}
 								md-list-item
-									p.bidInfoListTitle(flex="40") Area
+									p.bidInfoListTitle(flex="50") Area
 									p(flex) {{vm.selectedPackage.area}}
 								md-list-item
-									p.bidInfoListTitle(flex="40") Contact
+									p.bidInfoListTitle(flex="50") Contact
 									p(flex) {{vm.selectedPackage.contact}}
 								md-list-item
-									p.bidInfoListTitle(flex="40") Completed by
+									p.bidInfoListTitle(flex="50") Completed by
 									p(flex) {{vm.selectedPackage.completedByPretty}}
 							md-divider
 							.fileUploader
 								p File upload
 								input(type="file", id="fileUploader", multiple="multiple")
+								.cardInfo(ng-if="vm.showFileUploadedInfo")
+									p Uploaded {{vm.uploadedFilename}}
 
 					div(ng-if="!vm.packageSelected")
 						.cardInfo
@@ -140,8 +142,8 @@
 							div(layout="row", layout-align="center center", ng-if="vm.packageNotAwarded")
 								md-input-container.md-block(flex="80")
 									label Select Sub Contractor
-									md-select(ng-model="vm.subContractorIndex")
-										md-option(ng-repeat="subContractor in vm.notInvitedSubContractors", value="{{$index}}")
+									md-select(ng-model="vm.subContractorUser")
+										md-option(ng-repeat="subContractor in vm.notInvitedSubContractors", value="{{subContractor.user}}")
 											| {{subContractor.user}}
 								md-button.md-accent(ng-click="vm.inviteSubContractor()", ng-disabled="vm.addSubContractorDisabled") Invite
 

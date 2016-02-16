@@ -130,7 +130,7 @@
 			}
 		});
 
-		$scope.$watch("vm.subContractorIndex", function (newValue) {
+		$scope.$watch("vm.subContractorUser", function (newValue) {
 			vm.addSubContractorDisabled = !angular.isDefined(newValue);
 		});
 
@@ -190,12 +190,13 @@
 		 */
 		vm.savePackage = function () {
 			var data = {}, input;
+			// Setup data to be saved
 			for (input in vm.packageSummary) {
 				if (vm.packageSummary.hasOwnProperty(input)) {
 					data[input] = vm.packageSummary[input].value;
 				}
 			}
-			vm.savePackageDisabled = true;
+			// Save data
 			promise = BidService.addPackage(data);
 			promise.then(function (response) {
 				vm.showInfo = true;
@@ -203,7 +204,7 @@
 				if (vm.savePackageDisabled) {
 					data.completedByPretty = prettyDate(new Date(data.completedBy));
 					vm.packages.push(data);
-					vm.info = "Package " + vm.name + " saved";
+					vm.info = "Package " + vm.packageSummary.name.value + " saved";
 				}
 				else {
 					vm.info = "Error saving package " + vm.name;
@@ -215,17 +216,24 @@
 		 * Invite a sub contractor to bid for a package
 		 */
 		vm.inviteSubContractor = function () {
+			var i, length, index;
+			for (i = 0, length = vm.notInvitedSubContractors.length; i < length; i += 1) {
+				if (vm.subContractorUser === vm.notInvitedSubContractors[i].user) {
+					index = i;
+					break;
+				}
+			}
 			var data = {
-				user: vm.notInvitedSubContractors[vm.subContractorIndex].user
+				user: vm.notInvitedSubContractors[index].user
 			};
 			promise = BidService.inviteSubContractor(vm.selectedPackage.name, data);
 			promise.then(function (response) {
 				if (response.statusText === "OK") {
 					vm.subContractorsInvited = true;
-					vm.notInvitedSubContractors[vm.subContractorIndex].accepted = null;
-					vm.invitedSubContractors.push(vm.notInvitedSubContractors[vm.subContractorIndex]);
+					//vm.notInvitedSubContractors[index].accepted = null;
+					vm.invitedSubContractors.push(vm.notInvitedSubContractors[index]);
 					vm.invitedSubContractors[vm.invitedSubContractors.length - 1].invitedIcon = "fa fa-circle-thin";
-					vm.notInvitedSubContractors.splice(vm.subContractorIndex, 1);
+					vm.notInvitedSubContractors.splice(index, 1);
 					vm.subContractor = undefined;
 				}
 			});
@@ -261,7 +269,10 @@
 			var i, j, lengthI, lengthJ;
 			vm.showInput = false;
 			vm.showSummary = true;
+			vm.showFileUploadedInfo = false;
 			vm.packageNotAwarded = true;
+			vm.subContractorUser = undefined;
+			vm.showInfo = false;
 			vm.selectedPackage = vm.packages[index];
 			console.log(vm.selectedPackage);
 			$timeout(function () {
@@ -373,6 +384,8 @@
 						promise = BidService.saveFiles(vm.packages[0].name, files);
 						promise.then(function (response) {
 							console.log(response);
+							vm.showFileUploadedInfo = true;
+							vm.uploadedFilename = response.data[0].filename;
 						});
 					},
 					false);
