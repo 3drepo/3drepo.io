@@ -58,13 +58,10 @@
 			if (angular.isDefined(newValue)) {
 				promise = BidService.getUserBid(newValue);
 				promise.then(function (response) {
-					console.log(response);
 					if (response.statusText === "OK") {
 						vm.bidInviteAccepted = response.data.accepted;
 					}
-					console.log(vm.bidInviteAccepted);
 					if (vm.bidInviteAccepted) {
-						console.log(222);
 						showDocs();
 					}
 				});
@@ -74,13 +71,11 @@
 		$scope.$watch("vm.inviteAccepted", function (newValue) {
 			if (angular.isDefined(newValue)) {
 				vm.bidInviteAccepted = true;
-				console.log(333);
 				showDocs();
 			}
 		});
 
 		function showDocs () {
-			console.log(111);
 			var i, j, length, jLength, exists;
 			vm.docs = [];
 			if (BidService.currentPackage.hasOwnProperty("attachments")) {
@@ -116,22 +111,26 @@
 
 		vm.sowProcessed = vm.sow.split("</p>");
 
-		vm.showDoc = function (index) {
+		vm.showPredefinedDocDialog = function (index) {
 			vm.docIndex = index;
-			if (index > 1) {
-				promise = BidService.getFile(BidService.currentPackage.name, vm.docs[index].id);
-				promise.then(function (response) {
-					var blob = new Blob([response.data], { type: 'application/pdf' });
-					vm.pdfUrl = URL.createObjectURL(blob);
-					showDialog();
-				});
-			}
-			else {
-				showDialog();
-			}
+			vm.showPredefinedDoc = true;
+			vm.showDoc = false;
+			showDialog();
 		};
 
-		function showDialog () {
+		vm.showDocDialog = function (index) {
+			vm.docIndex = index;
+			vm.showPredefinedDoc = false;
+			vm.showDoc = true;
+			promise = BidService.getFile(BidService.currentPackage.name, vm.docs[index].id);
+			promise.then(function (response) {
+				var blob = new Blob([response.data], { type: 'application/pdf' });
+				vm.pdfUrl = URL.createObjectURL(blob);
+				showDialog();
+			});
+		};
+
+		function showDialog (event) {
 			$mdDialog.show({
 				controller: bidDocsDialogController,
 				templateUrl: 'bidDocsDialog.html',
@@ -153,8 +152,10 @@
 			$mdDialog.cancel();
 
 			// Free the resources associated with the created url
-			var worker = new Worker(vm.pdfUrl);
-			URL.revokeObjectURL(vm.pdfUrl);
+			if (vm.showDoc) {
+				var worker = new Worker(vm.pdfUrl);
+				URL.revokeObjectURL(vm.pdfUrl);
+			}
 		};
 
 		function removeDialog () {

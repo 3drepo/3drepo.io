@@ -6,12 +6,12 @@
 
 	md-content.bidInfoCardContent
 		md-list
-			md-list-item(ng-repeat="doc in vm.predefinedDocs", ng-click="vm.showDoc($index)", aria-label="Doc")
+			md-list-item(ng-repeat="doc in vm.predefinedDocs", ng-click="vm.showPredefinedDocDialog($index)", aria-label="Doc")
 				md-icon(class="fa fa-file-pdf-o")
 				p {{doc.title}}
 
 		md-list(ng-if="vm.bidInviteAccepted")
-			md-list-item(ng-repeat="doc in vm.docs", ng-click="vm.showDoc($index)", aria-label="Doc")
+			md-list-item(ng-repeat="doc in vm.docs", ng-click="vm.showDocDialog($index)", aria-label="Doc")
 				md-icon(class="fa fa-file-pdf-o")
 				p {{doc.title}}
 

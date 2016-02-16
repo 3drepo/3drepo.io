@@ -46,6 +46,9 @@ bid4free-workspace {
     bid4free-workspace .sections .tableTitles {
       margin-top: 20px;
       color: rgba(0, 0, 0, 0.6); }
+    bid4free-workspace .sections .keyvalueValue {
+      margin: 10px 0 -10px 0;
+      overflow: hidden; }
   bid4free-workspace .items label {
     font-weight: normal;
     color: rgba(0, 0, 0, 0.5);

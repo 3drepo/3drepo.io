@@ -150,7 +150,7 @@
 		 */
 		vm.addItem = function (sectionIndex) {
 			if (vm.sections[sectionIndex].type === "keyvalue") {
-				if (angular.isDefined(vm.sections[sectionIndex].newItemName) && angular.isDefined(vm.sections[sectionIndex].newItemDescription)) {
+				if (angular.isDefined(vm.sections[sectionIndex].newItemName)) {
 					vm.sections[sectionIndex].items.push(
 						{
 							type: "keyvalue",
@@ -161,15 +161,13 @@
 									control: "text"
 								}
 							],
-							values: [
-								vm.sections[sectionIndex].newItemDescription
-							]
+							values: []
 						}
 					);
 
 					// Init inputs
 					vm.sections[sectionIndex].newItemName = undefined;
-					vm.sections[sectionIndex].newItemDescription = undefined;
+					//vm.sections[sectionIndex].newItemDescription = undefined;
 				}
 			}
 			else {
