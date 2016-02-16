@@ -17,6 +17,10 @@ home .logoutButton {
   right: 0;
   z-index: 1;
 }
+home .logoutButton md-icon {
+  color: #FFFFFF;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
 
 .cardInfo {
   text-align: center;
@@ -28,6 +32,7 @@ home .logoutButton {
 .cardInfo p {
   margin: 0;
   color: rgba(0, 0, 0, 0.7);
+  word-wrap: break-word;
 }
 .cardInfo md-icon {
   margin: 0;

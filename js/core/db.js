@@ -23,8 +23,6 @@
 
 	var config	  = require("./config.js");
 
-	//var util      = require("util");
-
 	var responseCodes = require("./response_codes.js");
 
 	var MongoClient = require("mongodb").MongoClient,
@@ -49,8 +47,6 @@
 		self.password = config.db.password;
 
 		self.dbConns  = {};
-
-		console.log("Constructing ....");
 
 		var authDBConn = new Db("admin", new Server(config.db.host, config.db.port,
 			{

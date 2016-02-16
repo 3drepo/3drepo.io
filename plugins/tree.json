@@ -3,14 +3,10 @@
     "files": {
         "angular" : [
             "tree/treeDirective.js",
-            "tree/treeService.js",
-            "tree/treeNodesDirective.js",
-            "tree/treeNodeDirective.js"
+            "tree/treeService.js"
         ],
         "jade": [
-            {"template" : "tree/tree.jade", "id" : "tree.html"},
-            {"template" : "tree/treeNodes.jade", "id" : "treeNodes.html"},
-            {"template" : "tree/treeNode.jade", "id" : "treeNode.html"}
+            {"template" : "tree/tree.jade", "id" : "tree.html"}
         ],
         "css" : [
             "tree/tree.css"

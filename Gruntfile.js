@@ -81,14 +81,29 @@ module.exports = function(grunt) {
             },
             src: ['test/**/*.js']
           }
-        }
+        },
+
+		webfont: {
+			icons: {
+				src: 'icons/*.svg',
+				dest: 'public/css/fonts',
+				destCss: 'public/css/external'
+			},
+			options: {
+				font: 'three-d-repo',
+				fontFilename: 'three-d-repo',
+				htmlDemo: false
+			}
+		}
     });
 
-    grunt.loadNpmTasks('grunt-contrib-concat');
-    grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-mocha-test');
 
-    grunt.registerTask('default', ['concat', 'uglify']);
-    grunt.registerTask('test', ['jshint:backend', 'mochaTest']);
+	grunt.loadNpmTasks('grunt-contrib-concat');
+	grunt.loadNpmTasks('grunt-contrib-uglify');
+	grunt.loadNpmTasks('grunt-contrib-jshint');
+	grunt.loadNpmTasks('grunt-mocha-test');
+	grunt.loadNpmTasks('grunt-webfont');
+
+	grunt.registerTask('default', ['concat', 'uglify', 'webfont']);
+	grunt.registerTask('test', ['jshint:backend', 'mochaTest']);
 };

@@ -85,8 +85,8 @@
 			help: "Model elements shown in a tree structure",
 			icon: "fa-sitemap",
 			hasFilter: true,
-            minHeight: 100,
-            maxHeight: 820
+            minHeight: 120,
+			height: 820
 		});
 
 		panelContent.right.push({
@@ -118,8 +118,8 @@
 					secondSelected: false
 				}
 			],
-            minHeight: 100,
-            maxHeight: 820
+            minHeight: 70,
+			height: 820
 		});
 		panelContent.right.push({
 			type: "clip",
@@ -127,7 +127,7 @@
 			show: false,
 			help: "Clipping plane",
 			icon: "fa-object-group",
-			maxHeight: 190,
+			height: 170,
 			showVisible: true
 		});
 		panelContent.right.push({
@@ -136,7 +136,7 @@
 			show: false,
 			help: "Documents",
 			icon: "fa-clone",
-			maxHeight: 290
+			height: 150
 		});
 
 		// Add filtering options for the Issues panel

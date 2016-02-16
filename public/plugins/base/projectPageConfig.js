@@ -18,6 +18,7 @@
 angular.module('3drepo')
 .config(["pageConfigProvider", "$urlRouterProvider", function(pageConfigProvider, $urlRouterProvider) {
 	pageConfigProvider.setStateFuncs( function(Auth, StateManager) {
+		StateManager.clearStateVars("project");
 		StateManager.state.account = Auth.username;
 		StateManager.updateState();
 	}, function(Auth, StateManager) {

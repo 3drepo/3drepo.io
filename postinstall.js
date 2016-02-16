@@ -79,7 +79,8 @@ var public_files = {
 		bootstrapcss: '/public/css/external/bootstrap.min.css',
 		slidercss: '/public/css/external/bootstrap-slider.css',
         angularmaterialcss: '/public/css/external/angular-material.min.css',
-		angularuitreecss: '/public/css/external/angular-ui-tree.min.css'
+		angularuitreecss: '/public/css/external/angular-ui-tree.min.css',
+		threedrepocss: "/public/css/external/three-d-repo.css"
 	}
 }
 

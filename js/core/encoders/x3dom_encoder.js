@@ -1006,10 +1006,8 @@ exports.route = function(router)
 							}
 
 							numAddedMeshes = Math.ceil(currentMeshNumVertices / C.SRC_VERTEX_LIMIT)
-							runningVertTotal = 0;
 							bbox = [[],[]];
-						} else {
-							runningVertTotal += currentMeshNumVertices;
+						} else if ((runningVertTotal + currentMeshNumVertices) > C.SRC_VERTEX_LIMIT) {
 							numAddedMeshes = 1;
 						}
 
@@ -1030,8 +1028,8 @@ exports.route = function(router)
 							}
 						}
 
-						if ((runningVertTotal > C.SRC_VERTEX_LIMIT) || (currentMeshNumVertices > C.SRC_VERTEX_LIMIT)) {
-							runningVertTotal = currentMeshNumVertices;
+						if (((runningVertTotal + currentMeshNumVertices) > C.SRC_VERTEX_LIMIT) || (currentMeshNumVertices > C.SRC_VERTEX_LIMIT)) {
+							runningVertTotal = (currentMeshNumVertices > C.SRC_VERTEX_LIMIT) ? 0 : currentMeshNumVertices;
 							maxSubMeshIDX   += numAddedMeshes;
 
 							for(var j = 0; j < numAddedMeshes; j++)
@@ -1040,6 +1038,8 @@ exports.route = function(router)
 							}
 
 							bbox = [[], []];
+						} else {
+							runningVertTotal += currentMeshNumVertices;
 						}
 					}
 
@@ -1050,7 +1050,7 @@ exports.route = function(router)
 					}
 
 					// Loop through all IDs up to and including the maxSubMeshIDX
-					for(var subMeshIDX = 0; subMeshIDX <= maxSubMeshIDX; subMeshIDX++)
+					for(var subMeshIDX = 0; subMeshIDX < maxSubMeshIDX; subMeshIDX++)
 					{
 						var subMeshName = mesh["id"] + "_" + subMeshIDX;
 

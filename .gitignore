@@ -11,7 +11,7 @@ certs
 public/dist/plugins.concat.js
 public/dist/plugins.min.js
 
-public/images/loginPage
+public/images/logos
 
 .DS_Store
 
@@ -67,3 +67,7 @@ create_node_user.js
 
 #WebStorm config files
 .idea/sasslintPlugin.xml
+
+public/css/fonts/three-d-repo.eot
+public/css/fonts/three-d-repo.ttf
+public/css/fonts/three-d-repo.woff

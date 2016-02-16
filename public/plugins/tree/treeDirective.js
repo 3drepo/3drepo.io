@@ -27,7 +27,8 @@
 			templateUrl: "tree.html",
 			scope: {
 				filterText: "=",
-				height: "="
+				height: "=",
+				onSetContentHeight: "&"
 			},
 			controller: TreeCtrl,
 			controllerAs: "vm",
@@ -62,8 +63,27 @@
 			vm.idToPath = data.idToPath;
 			initNodesToShow();
 			setupInfiniteScroll();
+			setContentHeight(vm.nodesToShow);
 		});
 
+		/**
+		 * Set the content height.
+		 * The height of a node is dependent on its name length and its level.
+		 */
+		function setContentHeight (nodesToShow) {
+			var i, length, height = 0, maxNumNodes = 20, nodeMinHeight = 36,
+				maxStringLength = 35, maxStringLengthForLevel = 0, lineHeight = 18, levelOffset = 2;
+			for (i = 0, length = nodesToShow.length; ((i < length) && (i < maxNumNodes)); i += 1) {
+				maxStringLengthForLevel = maxStringLength - (nodesToShow[i].level * levelOffset);
+				height += nodeMinHeight + (lineHeight * Math.floor(nodesToShow[i].name.length / maxStringLengthForLevel));
+			}
+			console.log(nodesToShow.length);
+			vm.onSetContentHeight({height: height});
+		}
+
+		/**
+		 * Initialise the tree nodes to show to the first node
+		 */
 		function initNodesToShow () {
 			vm.nodesToShow = [vm.allNodes[0]];
 			vm.nodesToShow[0].level = 0;
@@ -73,12 +93,12 @@
 			vm.nodesToShow[0].toggleState = "visible";
 		}
 
+		/**
+		 * Expand a node to show its children.
+		 * @param _id
+		 */
 		vm.expand = function (_id) {
-			var i,
-				numChildren,
-				index = -1,
-				length,
-				endOfSplice = false;
+			var i = 0, numChildren = 0, index = -1, length = 0, endOfSplice = false;
 
 			for (i = 0, length = vm.nodesToShow.length; i < length; i += 1) {
 				if (vm.nodesToShow[i]._id === _id) {
@@ -111,16 +131,17 @@
 					vm.nodesToShow[index].expanded = !vm.nodesToShow[index].expanded;
 				}
 			}
+
+			setContentHeight(vm.nodesToShow);
 		};
 
+		/**
+		 * Expand the tree and highlight the node corresponding to the object selected in the viewer.
+		 * @param path
+		 * @param level
+		 */
 		function expandToSelection(path, level) {
-			var i,
-				j,
-				length,
-				childrenLength,
-				selectedId = path[path.length - 1],
-				selectedIndex = 0,
-				selectionFound = false;
+			var i, j, length, childrenLength, selectedId = path[path.length - 1], selectedIndex = 0, selectionFound = false;
 
 			for (i = 0, length = vm.nodesToShow.length; i < length; i += 1) {
 				if (vm.nodesToShow[i]._id === path[level]) {
@@ -151,6 +172,7 @@
 				expandToSelection(path, (level + 1));
 			} else if (level === (path.length - 2)) {
 				vm.topIndex = selectedIndex - 2;
+				setContentHeight(vm.nodesToShow);
 			}
 		}
 
@@ -177,14 +199,7 @@
 		});
 
 		vm.toggleTreeNode = function (node) {
-			var i = 0,
-				j = 0,
-				k = 0,
-				nodesLength,
-				path,
-				parent = null,
-				nodeToggleState = "visible",
-				numInvisible = 0;
+			var i = 0, j = 0, k = 0, nodesLength, path, parent = null, nodeToggleState = "visible", numInvisible = 0;
 
 			vm.toggledNode = node;
 
@@ -315,8 +330,10 @@
 							vm.nodes[i].index = i;
 							vm.nodes[i].toggleState = "visible";
 							vm.nodes[i].class = "unselectedFilterItem";
+							vm.nodes[i].level = 0;
 						}
 						setupInfiniteItemsFilter();
+						setContentHeight(vm.nodes);
 					});
 				}
 			}
