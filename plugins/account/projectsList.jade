@@ -3,8 +3,9 @@
 		h3 {{account}}
 		.account-projects
 			div(ng-repeat="project in projects")
-				.project-line
-					i.fa.fa-cube.menu-icon
-					span.commit-number
-						a(ng-href="{{'/' + account + '/' + project}}") {{project}}
+				.project-line(flex, layout="row")
+					div(flex="20")
+						i.fa.fa-cube.menu-icon
+						span.commit-number
+							a(ng-href="{{'/' + account + '/' + project}}") {{project}}
 					md-button.md-accent(ng-click="vm.b4f(account, project)") B4F

@@ -26,7 +26,8 @@
 			restrict: 'E',
 			templateUrl: 'bidDocs.html',
 			scope: {
-				packageName: "="
+				packageName: "=",
+				inviteAccepted: "="
 			},
 			controller: BidDocsCtrl,
 			controllerAs: "vm",
@@ -40,7 +41,7 @@
 		var vm = this,
 			promise;
 
-		vm.docs = [
+		vm.predefinedDocs = [
 			{title: "Bill of Quantities", id: ""},
 			{title: "Scope of Works", id: ""}
 		];
@@ -54,29 +55,53 @@
 		];
 
 		$scope.$watch("vm.packageName", function (newValue) {
-			var i, j, length, jLength, exists;
 			if (angular.isDefined(newValue)) {
-				vm.showDocs = true;
-				if (BidService.currentPackage.hasOwnProperty("attachments")) {
-					for (i = 0, length = BidService.currentPackage.attachments.length; i < length; i += 1) {
-						// Ignore duplicates
-						exists = false;
-						for (j = 0, jLength = vm.docs.length; j < jLength; j += 1) {
-							if (vm.docs[j].id === BidService.currentPackage.attachments[i]) {
-								exists = true;
-								break;
-							}
+				promise = BidService.getUserBid(newValue);
+				promise.then(function (response) {
+					console.log(response);
+					if (response.statusText === "OK") {
+						vm.bidInviteAccepted = response.data.accepted;
+					}
+					console.log(vm.bidInviteAccepted);
+					if (vm.bidInviteAccepted) {
+						console.log(222);
+						showDocs();
+					}
+				});
+			}
+		});
+
+		$scope.$watch("vm.inviteAccepted", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				vm.bidInviteAccepted = true;
+				console.log(333);
+				showDocs();
+			}
+		});
+
+		function showDocs () {
+			console.log(111);
+			var i, j, length, jLength, exists;
+			vm.docs = [];
+			if (BidService.currentPackage.hasOwnProperty("attachments")) {
+				for (i = 0, length = BidService.currentPackage.attachments.length; i < length; i += 1) {
+					// Ignore duplicates
+					exists = false;
+					for (j = 0, jLength = vm.docs.length; j < jLength; j += 1) {
+						if (vm.docs[j].id === BidService.currentPackage.attachments[i]) {
+							exists = true;
+							break;
 						}
-						if (!exists) {
-							vm.docs.push({
-								title: "Drawing " + BidService.currentPackage.attachments[i],
-								id: BidService.currentPackage.attachments[i]
-							});
-						}
+					}
+					if (!exists) {
+						vm.docs.push({
+							title: "Drawing " + BidService.currentPackage.attachments[i],
+							id: BidService.currentPackage.attachments[i]
+						});
 					}
 				}
 			}
-		});
+		}
 
 		vm.sow =
 			"<p><span class='bidDocsUnderline'>Scope of the Sub‐Contract Works</span></p>" +

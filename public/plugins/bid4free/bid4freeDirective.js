@@ -346,6 +346,13 @@
 		};
 
 		/**
+		 * Package invite has been accepted by a sub contractor
+		 */
+		vm.inviteAccepted = function () {
+			vm.packageInviteAccepted = true;
+		};
+
+		/**
 		 * Convert a date to a readable version
 		 * @param date
 		 * @returns {string}

@@ -123,6 +123,12 @@
 
 			vm.sections.push(section);
 			vm.showSaveConfirmation = false;
+
+			// Init section inputs
+			vm.sectionTitle = undefined;
+			vm.tableColumn1Title = undefined;
+			vm.tableColumn2Title = undefined;
+			vm.tableColumn3Title = undefined;
 		};
 
 		/**
@@ -160,6 +166,10 @@
 							]
 						}
 					);
+
+					// Init inputs
+					vm.sections[sectionIndex].newItemName = undefined;
+					vm.sections[sectionIndex].newItemDescription = undefined;
 				}
 			}
 			else {
@@ -171,11 +181,14 @@
 						vm.sections[sectionIndex].column2,
 						vm.sections[sectionIndex].column3
 					]);
+
+					// Init inputs
+					vm.sections[sectionIndex].column1 = undefined;
+					vm.sections[sectionIndex].column2 = undefined;
+					vm.sections[sectionIndex].column3 = undefined;
 				}
 			}
 			console.log(vm.sections);
-			vm.sections[sectionIndex].newItemName = undefined;
-			vm.sections[sectionIndex].newItemDescription = undefined;
 			vm.sections[sectionIndex].showInput = false;
 		};
 

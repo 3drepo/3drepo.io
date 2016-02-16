@@ -35,9 +35,9 @@
 		};
 	}
 
-	BidStatusCtrl.$inject = ["$scope", "BidService"];
+	BidStatusCtrl.$inject = ["$scope", "$timeout", "BidService"];
 
-	function BidStatusCtrl($scope, BidService) {
+	function BidStatusCtrl($scope, $timeout, BidService) {
 		var vm = this,
 			promise;
 
@@ -70,9 +70,19 @@
 					vm.invited = false;
 					if (accept) {
 						vm.onInviteAccepted();
+						vm.accepted = true;
+					}
+					else {
+						vm.declined = true;
 					}
 				}
 			});
+		};
+
+		vm.submit = function () {
+			$timeout(function () {
+				vm.showSubmitResult = true;
+			}, 1000);
 		};
 	}
 }());

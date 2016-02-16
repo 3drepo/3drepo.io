@@ -40,6 +40,7 @@
 			i, length;
 
 		// Set up the tabs
+		/*
 		vm.tabs = [
 			{
 				name: "Projects",
@@ -50,6 +51,15 @@
 				name: "Bid 4 Free",
 				content: "bids",
 				tabOption: "bid4free"
+			}
+
+		];
+		*/
+		vm.tabs = [
+			{
+				name: "Projects",
+				content: "projects-list",
+				tabOption: null
 			}
 
 		];
