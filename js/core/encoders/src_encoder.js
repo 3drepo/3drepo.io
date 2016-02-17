@@ -212,6 +212,10 @@
 
 		var vertexPack = currentMeshNumVertices - totalVertexCount - splitMeshVertexCount;
 
+		if (useIDMap) {
+			addIDMapArray(subMeshArray, subMeshArray.length - 1, splitMeshVertexCount, runningIDX);
+		}
+
 		finishSubMesh(subMeshArray, subMeshArray.length - 1, splitMeshVertexCount, splitMeshFaceCount, vertexPack, splitMeshBBox, useIDMap);
 
 		return {
@@ -311,7 +315,11 @@
 					orig_idx_ptr += (num_comp + 1) * 4;
 				}
 
-				addIDMapArray(subMeshArray, subMeshIDX, currentMeshNumVertices, runningIDX);
+				if (useIDMap)
+				{
+					addIDMapArray(subMeshArray, subMeshIDX, currentMeshNumVertices, runningIDX);
+				}
+
 				runningIDX++;
 
 				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO] = currentMeshVTo;
@@ -339,11 +347,10 @@
 	 * @param {string} project - The name of the project containing the mesh
 	 * @param {RepoGraphScene} - Render all meshes contained in RepoGraphScene object.
 	 * @param {string} tex_uuid - A string representing the tex_uuid attached to the mesh
-	 * @param {boolean} embedded_texture - Determines whether or not the texture data is embedded in the SRC.
 	 * @param {string} subformat - Subformat, currently for Multipart
 	 * @param {Object} res - The http response object
 	 *******************************************************************************/
-	function render(project, scene, tex_uuid, embedded_texture, subformat, logger, result_callback) {
+	function render(project, scene, tex_uuid, subformat, logger, result_callback) {
 		logger.logDebug("Passed " + scene[C.REPO_SCENE_LABEL_MESHES_COUNT]);
 
 		var meshIDs = Object.keys(scene.meshes);
