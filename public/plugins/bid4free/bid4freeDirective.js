@@ -83,7 +83,7 @@
 		projectSummaryPromise = ProjectService.getProjectSummary();
 		projectSummaryPromise.then(function (response) {
 			console.log(response);
-			if (response.hasOwnProperty("data")) {
+			if ((response.hasOwnProperty("data")) && !((response.data === null) || (response.data === ""))) {
 				vm.showProjectSummaryInput = false;
 				vm.projectSummary.name = {value: response.data.name};
 				vm.projectSummary.site.value = response.data.site;
