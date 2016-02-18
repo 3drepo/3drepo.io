@@ -82,7 +82,6 @@
 			dbInterface(req[C.REQ_REPO].logger).authenticate(req.body.username, req.body.password, function(err, user)
 			{
 				req[C.REQ_REPO].logger.logDebug("User is logging in", req);
-						res.clearCookie("connect.sid", { path: "/" + config.api_server.host_dir });
 
 				expireSession(req, res, next, function(req, res, next) {
 					if(err.value) {
