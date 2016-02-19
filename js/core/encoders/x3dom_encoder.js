@@ -304,17 +304,20 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 		}
 		else if (child['type'] == 'camera')
 		{
-			newNode = xmlDoc.createElement('viewpoint');
+			newNode = xmlDoc.createElement('Viewpoint');
 
 			newNode.setAttribute('id', child['name']);
 			newNode.setAttribute('DEF',utils.uuidToString(child['shared_id']));
 			newNode.setAttribute('bind', false);
 
+            		newNode.textContent = ' ';
+
 			//if (child['fov'])
 			newNode.setAttribute('fieldOfView', 0.25 * Math.PI);
 
-			if (child['position'])
-				newNode.setAttribute('position', child['position'].join(','));
+			if (child['position']) {
+				newNode.setAttribute('position', child['position'].join(' '));
+            		}
 
 			//if (child['near'])
 			//	newNode.setAttribute('zNear', child['near']);
@@ -351,13 +354,13 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 
 			var det = mathjs.det(viewMat);
 
-			newNode.setAttribute('position', position.join(','));
+			newNode.setAttribute('position', position.join(' '));
 
 			var center = vecAdd(position, look_at);
-			newNode.setAttribute('centerOfRotation', center.join(','));
+			newNode.setAttribute('centerOfRotation', center.join(' '));
 
 			var orientation = axisangle(viewMat);
-			newNode.setAttribute('orientation', orientation.join(','));
+			newNode.setAttribute('orientation', orientation.join(' '));
 
 			xmlNode.appendChild(newNode);
 			X3D_AddChildren(xmlDoc, newNode, child, matrix, dbInterface, account, project, mode, logger);

@@ -400,10 +400,14 @@
 		self.collCallback(dbName, collName, true, function(err, coll) {
 			if (err.value) {
 				return callback(err);
-			}
+            }
 
+            var checkNull = {};
+            checkNull["$exists"] = false;
+
+            filter.incomplete = checkNull;
 			var projStr = JSON.stringify(projection);
-			var filtStr = JSON.stringify(filter);
+            var filtStr = JSON.stringify(filter);
 
 			self.logger.logDebug("Getting latest for collection: " + dbName + "/" + collName);
 			self.logger.logDebug("FILTER: \"" + filtStr + "\"");
