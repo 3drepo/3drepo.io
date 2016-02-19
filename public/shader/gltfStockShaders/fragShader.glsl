@@ -6,7 +6,7 @@ uniform float u_shininess;
 void main(void) {
 vec3 normal = normalize(v_normal);
 vec4 color = vec4(0., 0., 0., 0.);
-vec4 diffuse = vec4(0., 0., 0., 1.);
+vec4 diffuse = vec4(0., 0., 1., 1.);
 vec4 specular;
 diffuse = u_diffuse;
 specular = u_specular;

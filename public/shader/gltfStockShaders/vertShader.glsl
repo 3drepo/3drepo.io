@@ -1,12 +1,12 @@
 precision highp float;
-attribute vec3 a_position;
-attribute vec3 a_normal;
+attribute vec3 position;
+attribute vec3 normal;
 varying vec3 v_normal;
-uniform mat3 u_normalMatrix;
-uniform mat4 u_modelViewMatrix;
-uniform mat4 u_projectionMatrix;
+uniform mat4 normalMatrix;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
 void main(void) {
-vec4 pos = u_modelViewMatrix * vec4(a_position,1.0);
-v_normal = u_normalMatrix * a_normal;
-gl_Position = u_projectionMatrix * pos;
+vec4 pos = modelViewMatrix * vec4(position,1.0);
+v_normal = (normalMatrix * vec4(normal, 0.0)).xyz;
+gl_Position = projectionMatrix * pos;
 }
