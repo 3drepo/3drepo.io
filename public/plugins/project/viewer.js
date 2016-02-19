@@ -1046,7 +1046,10 @@ var Viewer = function (name, handle, x3ddiv, manager) {
 			self.nav._x3domNode._vf.typeParams[1] = x3domFrom.y;
 		}
 
-		self.getViewArea().animateTo(viewMatrix, currMatrix);
+		//self.getViewArea().animateTo(viewMatrix, currMatrix);
+
+		self.getCurrentViewpoint()._x3domNode._viewMatrix.setValues(viewMatrix);
+		self.getViewArea()._doc.needRender = true;
 
 		if (self.linked)
 			self.manager.switchMaster(self.handle);
