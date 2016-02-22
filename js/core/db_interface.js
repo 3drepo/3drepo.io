@@ -1775,8 +1775,6 @@ DBInterface.prototype.getIssues = function(dbName, project, branch, revision, on
 		{
 			return callback(err);
         }
-        
-        self.logger.logDebug("Settings : " + settings.toString());
 
 		self.getObjectIssues(dbName, project, null, null, onlyStubs, settings[0].type, function (err, docs) {
 			if (err.value) {
