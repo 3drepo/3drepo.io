@@ -692,7 +692,7 @@ DBInterface.prototype.getProjectBranchHeadRid = function(account, project, branc
         }
         if (!docs.length) { return err_callback(responseCodes.PROJECT_HISTORY_NOT_FOUND); }
         callback(uuidToString(docs[0]._id));
-    };);
+    });
 }
 DBInterface.prototype.getProjectInfo = function(account, project, callback) {
 	if(!project){
