@@ -48,8 +48,6 @@
 
 		self.dbConns  = {};
 
-		console.log("Constructing ....");
-
 		var authDBConn = new Db("admin", new Server(config.db.host, config.db.port,
 			{
 				auto_reconnect: true
