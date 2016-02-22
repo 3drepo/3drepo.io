@@ -402,8 +402,7 @@
 				return callback(err);
             }
 
-            var checkNull = {};
-            checkNull["$exists"] = false;
+            var checkNull = {$exists : false};
 
             filter.incomplete = checkNull;
 			var projStr = JSON.stringify(projection);

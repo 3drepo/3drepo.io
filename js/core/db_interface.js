@@ -669,8 +669,7 @@ DBInterface.prototype.getAvatar = function(username, callback) {
       * @param {function} callback(string) - call back function with revision id as a string
       * @param {function} err_callback(err) - callback when error occurs
 	  *******************************************************************************/
-DBInterface.prototype.getProjectBranchHeadRid = function(account, project, branch, callback, err_callback)
-{
+DBInterface.prototype.getProjectBranchHeadRid = function (account, project, branch, callback, err_callback) {
     var branch_id;
     if (branch === "master") {
         branch_id = masterUUID;
@@ -685,13 +684,15 @@ DBInterface.prototype.getProjectBranchHeadRid = function(account, project, branc
     var historyProjection = {
         _id: 1
     };
-
+    
     dbConn(this.logger).getLatest(account, project + ".history", historyQuery, historyProjection, function (err, docs) {
-        if (err.value) return err_callback(err);
+        if (err.value) {
+            return err_callback(err);
+        }
         if (!docs.length) { return err_callback(responseCodes.PROJECT_HISTORY_NOT_FOUND); }
         callback(uuidToString(docs[0]._id));
     });
-}
+};
 DBInterface.prototype.getProjectInfo = function(account, project, callback) {
 	if(!project){
 		return callback(responseCodes.PROJECT_NOT_SPECIFIED);
