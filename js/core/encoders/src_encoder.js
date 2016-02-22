@@ -697,6 +697,7 @@
 
 		var dataBuffer = Buffer.concat(dataBuffers);
 		var fullBuffer = Buffer.concat([headerBuffer, dataBuffer]);
+
 		result_callback(responseCodes.OK, fullBuffer);
 	}
 
@@ -706,7 +707,7 @@
 			// Get object based on UID, check whether or not it is a mesh
 			// and then output the result.
 
-			dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req, function (callback) {
+			dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req.url, req.params[C.REPO_REST_API_FORMAT].toLowerCase(), function (callback) {
 				dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, {}, function (err, type, uid, fromStash, obj) {
 					if (err.value) {
 						return callback(err);
@@ -737,7 +738,7 @@
 			// Get object based on revision rid, and object shared_id sid. Check
 			// whether or not it is a mesh and then output the result.
 
-			dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req, function (callback) {
+			dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req.url, req.params[C.REPO_REST_API_FORMAT].toLowerCase(), function (callback) {
 				dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, null, params.rid, params.sid, true, {}, function (err, type, uid, fromStash, obj) {
 					if (err.value) {
 						return callback(err);
