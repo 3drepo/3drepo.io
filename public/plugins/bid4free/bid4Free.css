@@ -166,6 +166,7 @@ bid-docs md-icon {
 .bidDocsDialog {
   min-width: 850px;
   min-height: 600px;
+  overflow: hidden;
 }
 
 .bidDocsDialog .md-toolbar-tools {
@@ -198,4 +199,8 @@ bid-docs md-icon {
 /** Bid Summary *******************************************************************************************************/
 bid-summary md-list {
   overflow-y: scroll;
+}
+
+bid-summary .bidSummaryPackageSelect {
+  margin: 30px 10px 20px 10px;
 }

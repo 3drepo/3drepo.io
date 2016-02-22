@@ -4,14 +4,20 @@
 			h2
 				span Package Summary
 
-	md-content.bidInfoCardContent(layout="column", flex layout-padding)
-		md-input-container.md-block
+	md-content.bidInfoCardContent(layout="column")
+		md-input-container.bidSummaryPackageSelect
 			label Packages
 			md-select(ng-model="vm.selectedPackageIndex")
 				md-option(ng-repeat="package in vm.packages", value="{{$index}}")
 					| {{package.name}}
 
-		md-list(ng-if="vm.showSelectedPackage")
+		//md-list(ng-if="vm.showSelectedPackage")
 			md-list-item(ng-repeat="item in vm.packageSorted")
 				p(flex="30") {{item.label}}
 				p(flex) {{item.value}}
+
+		md-list(ng-if="vm.showSelectedPackage")
+			md-list-item.md-2-line(ng-repeat="item in vm.packageSorted")
+				div.md-list-item-text
+					h3 {{item.label}}
+					p {{item.value}}

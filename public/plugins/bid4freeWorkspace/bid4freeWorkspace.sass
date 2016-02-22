@@ -21,12 +21,15 @@ bid4free-workspace
     border-top-right-radius: 4px
     height: 100%
 
-    md-content
-      border-bottom-left-radius: 4px
-      border-bottom-right-radius: 4px
+  md-content
+    border-bottom-left-radius: 4px
+    border-bottom-right-radius: 4px
 
-  .bid4freeWorkspaceSection
-    border-bottom: solid 1px $bid4freeWorkspaceSectionBorder
+  md-tabs
+    height: calc(100vh - 115px)
+
+  md-tab-content
+    overflow: hidden
 
   md-radio-button
     display: inline
@@ -40,6 +43,7 @@ bid4free-workspace
   .itemInput > md-radio-group
     padding-right: 40px
 
+  // ** Terms and Conditions ******************************************************************************************/
   .sectionInput
     .sectionInputRadioGroup
       margin-top: -16px
@@ -50,18 +54,18 @@ bid4free-workspace
     .tableTitlesInput
       margin-top: -20px
 
-  .saveContainer
-    label
-      margin-top: 5px
-      color: $bid4freeWorkspaceSaveConfirmationColor
-    md-icon
-      font-size: 25px !important
+    .saveSection
+      margin-top: -20px
+      margin-bottom: 10px
 
   .sections
     overflow-y: auto
     overflow-x: hidden
     border: 1px solid rgba(0,0,0,0.1)
-    height: 600px
+    height: calc(100vh - 310px)
+
+    .section
+      border-bottom: solid 1px $bid4freeWorkspaceSectionBorder
 
     .tableTitles
       margin-top: 20px
@@ -79,6 +83,7 @@ bid4free-workspace
   .addNewItem
     margin-bottom: 20px
 
+  // ** Bill of Quantities ********************************************************************************************/
   .boqTotal
     padding: 0 10px 20px
 
@@ -101,3 +106,11 @@ bid4free-workspace
 
     input
       text-align: center
+
+  // ** Save **********************************************************************************************************/
+  .saveContainer
+    label
+      margin-top: 5px
+      color: $bid4freeWorkspaceSaveConfirmationColor
+    md-icon
+      font-size: 25px !important
