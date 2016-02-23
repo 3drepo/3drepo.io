@@ -1,6 +1,6 @@
 .bidInfo
 	// Sub Contractor
-	.bidInfoSubContractor(ng-if="!vm.userIsAMainContractor", layout="column")
+	.bidInfoSubContractor(ng-if="vm.userIsASubContractor", layout="column")
 		div(layout="row", layout-padding, flex="50")
 			bid-project-summary(layout="column", flex)
 			bid-summary(layout="column", flex, on-select-package="vm.selectPackage(packageName)")
@@ -19,7 +19,7 @@
 			md-toolbar
 				.md-toolbar-tools
 					h2 Project Summary
-			.packageContent
+			.packageContent(flex)
 				md-content
 					.projectSummaryInput(ng-if="vm.showProjectSummaryInput")
 						span(ng-repeat="input in vm.projectSummary")
@@ -35,24 +35,30 @@
 
 					div(ng-if="!vm.showProjectSummaryInput")
 						md-list
-							md-list-item
-								p.bidInfoListTitle(flex="50") Name
-								p(flex) {{vm.projectSummary.name.value}}
-							md-list-item
-								p.bidInfoListTitle(flex="50") Site
-								p(flex) {{vm.projectSummary.site.value}}
-							md-list-item
-								p.bidInfoListTitle(flex="50") Code
-								p(flex) {{vm.projectSummary.code.value}}
-							md-list-item
-								p.bidInfoListTitle(flex="50") Client
-								p(flex) {{vm.projectSummary.client.value}}
-							md-list-item
-								p.bidInfoListTitle(flex="50") Budget
-								p(flex) {{vm.projectSummary.budget.value}}
-							md-list-item
-								p.bidInfoListTitle(flex="50") Completed by
-								p(flex) {{vm.projectSummary.completedByPretty}}
+							md-list-item.md-2-line
+								.md-list-item-text
+									h3 Name
+									p {{vm.projectSummary.name.value}}
+							md-list-item.md-2-line
+								.md-list-item-text
+									h3 Site
+									p {{vm.projectSummary.site.value}}
+							md-list-item.md-2-line
+								.md-list-item-text
+									h3 Code
+									p {{vm.projectSummary.code.value}}
+							md-list-item.md-2-line
+								.md-list-item-text
+									h3 Client
+									p {{vm.projectSummary.client.value}}
+							md-list-item.md-2-line
+								.md-list-item-text
+									h3 Budget
+									p {{vm.projectSummary.budget.value}}
+							md-list-item.md-2-line
+								.md-list-item-text
+									h3 Completed by
+									p {{vm.projectSummary.completedByPretty}}
 
 		// Package List
 		.bidPackageList.md-whiteframe-1dp(flex=20)
@@ -73,13 +79,13 @@
 							p {{package.name}}
 
 		// Package Summary
-		.bidSummary.md-whiteframe-1dp(flex=25)
+		.bidSummary.md-whiteframe-1dp(flex=25, layout="column")
 			md-toolbar
 				.md-toolbar-tools
 					h2 Package Summary
-			.packageContent
-				md-content
-					div(ng-if="vm.packageSelected")
+			.packageContent(layout="column", flex)
+				md-content(layout="column", flex)
+					div(ng-if="vm.packageSelected", flex, layout="column")
 						.packageSummaryInput(ng-if="vm.showInput")
 							span(ng-repeat="input in vm.packageSummary")
 								md-input-container.md-block(ng-if="input.type==='input'")
@@ -94,31 +100,39 @@
 						.cardInfo(ng-if="vm.showInfo")
 								p {{vm.info}}
 
-						div(ng-if="vm.showSummary")
-							md-list
-								md-list-item
-									p.bidInfoListTitle(flex="50") Name
-									p(flex) {{vm.selectedPackage.name}}
-								md-list-item
-									p.bidInfoListTitle(flex="50") Site
-									p(flex) {{vm.selectedPackage.site}}
-								md-list-item
-									p.bidInfoListTitle(flex="50") Code
-									p(flex) {{vm.selectedPackage.code}}
-								md-list-item
-									p.bidInfoListTitle(flex="50") Budget
-									p(flex) {{vm.selectedPackage.budget}}
-								md-list-item
-									p.bidInfoListTitle(flex="50") Area
-									p(flex) {{vm.selectedPackage.area}}
-								md-list-item
-									p.bidInfoListTitle(flex="50") Contact
-									p(flex) {{vm.selectedPackage.contact}}
-								md-list-item
-									p.bidInfoListTitle(flex="50") Completed by
-									p(flex) {{vm.selectedPackage.completedByPretty}}
+						div(ng-if="vm.showSummary", layout="column")
+							//div(style="background:green; height:500px; overflow:auto", flex="50", layout="column")
+							md-list.packageSummaryList(flex="40", layout="column")
+								md-list-item.md-2-line
+									.md-list-item-text
+										h3 Name
+										p {{vm.selectedPackage.name}}
+								md-list-item.md-2-line
+									.md-list-item-text
+										h3 Site
+										p {{vm.selectedPackage.site}}
+								md-list-item.md-2-line
+									.md-list-item-text
+										h3 Code
+										p {{vm.selectedPackage.code}}
+								md-list-item.md-2-line
+									.md-list-item-text
+										h3 Budget
+										p {{vm.selectedPackage.budget}}
+								md-list-item.md-2-line
+									.md-list-item-text
+										h3 Area
+										p {{vm.selectedPackage.area}}
+								md-list-item.md-2-line
+									.md-list-item-text
+										h3 Contact
+										p {{vm.selectedPackage.contact}}
+								md-list-item.md-2-line
+									.md-list-item-text
+										h3 Completed by
+										p {{vm.selectedPackage.completedByPretty}}
 							md-divider
-							.fileUploader
+							.fileUploader(flex="50", layout="column")
 								p File upload
 								input(type="file", id="fileUploader", multiple="multiple")
 								.cardInfo(ng-if="vm.showFileUploadedInfo")

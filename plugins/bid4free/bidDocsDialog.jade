@@ -9,7 +9,7 @@ md-dialog.bidDocsDialog(aria-label="Document",  ng-cloak)
 			md-button.md-icon-button(ng-click="vm.closeDialog()")
 				md-icon(md-font-icon="fa fa-close", aria-label="Close dialog")
 
-	div(ng-if="vm.showPredefinedDoc")
+	.predefinedDocs(ng-if="vm.showPredefinedDoc")
 		md-content(flex, layout-padding, ng-if="vm.docIndex===0")
 			md-list
 				md-list-item.md-1-line.boqListTitles

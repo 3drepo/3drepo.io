@@ -98,13 +98,14 @@
 		projectUserRolesPromise = ProjectService.getUserRolesForProject();
 		projectUserRolesPromise.then(function (data) {
 			var i, length;
-			vm.userIsAMainContractor = true;
+			vm.userIsASubContractor = false;
 			for (i = 0, length = data.length; i < length; i += 1) {
 				if (data[i] === "SubContractor") {
-					vm.userIsAMainContractor = false;
+					vm.userIsASubContractor = true;
 					break;
 				}
 			}
+			vm.userIsAMainContractor = !vm.userIsASubContractor;
 			if (vm.userIsAMainContractor) {
 				vm.listTitle = "Packages";
 				// Get all packages for project

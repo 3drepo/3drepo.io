@@ -12,9 +12,9 @@ bid4free {
   flex-direction: column;
   width: 100%;
   height: 100vh;
-  padding-top: 20px;
+  padding: 20px;
   background: #E8EAF6;
-  overflow-y: auto;
+  overflow-y: hidden;
 }
 
 bid4free .bidInfo {
@@ -46,7 +46,7 @@ bid4free .bidHeader md-toolbar {
 
 bid4free .bidContent {
   width: 100%;
-  padding: 20px;
+  height: calc(100vh - 40px);
 }
 
 bid4free md-list-item p {
@@ -82,8 +82,9 @@ bid4free .md-toolbar-tools md-icon{
 
 bid4free .packageContent {
   width: 100%;
-  height: 610px;
+  height: calc(100vh - 120px);
   padding: 10px;
+  overflow-y: auto;
 }
 
 bid4free .packageContent .bidDatePicker {
@@ -118,9 +119,14 @@ bid4free .bidInfoPackageListUnselected {
   margin: 20px 10px -15px 10px;
 }
 
+.packageSummaryList {
+  overflow-y: auto;
+}
+
 bid4free .packageContent .fileUploader {
   margin-top: 20px;
   padding-left: 20px;
+  height: 250px;
 }
 
 /** Invite ************************************************************************************************************/
@@ -194,6 +200,10 @@ bid-docs md-icon {
   min-width: 850px;
   min-height: 600px;
   border: none;
+}
+
+.bidDocsDialog .predefinedDocs {
+  overflow-y: auto;
 }
 
 /** Bid Summary *******************************************************************************************************/

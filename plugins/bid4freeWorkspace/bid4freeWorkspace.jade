@@ -58,7 +58,7 @@
 								// Key/Value
 								div(ng-if="section.type==='keyvalue'")
 									md-content.items(ng-repeat="item in vm.sections[$index].items track by $index", layout="row", layout-align="space-between center")
-										label(flex="25") {{item.keys[0].name}}
+										label(flex="30") {{item.keys[0].name}}
 										//label(flex) {{item.values[0]}}
 										md-input-container.md-block.keyvalueValue(flex="65")
 											label
@@ -80,7 +80,7 @@
 									div(ng-if="section.showInput")
 										// Key/Value
 										div(ng-if="section.type==='keyvalue'", layout="row", flex, layout-align="start center")
-											md-input-container.md-block(flex="20")
+											md-input-container.md-block(flex="50")
 												label Name
 												input(ng-model="section.newItemName", name="Item Name")
 											//md-input-container.md-block(flex="80")
