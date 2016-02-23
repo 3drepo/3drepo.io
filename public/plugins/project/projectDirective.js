@@ -92,7 +92,7 @@
 		panelContent.right.push({
 			type: "issues",
 			title: "Issues",
-			show: true,
+			show: false,
 			help: "List current issues",
 			icon: "fa-map-marker",
 			canPrint: true,
@@ -133,10 +133,10 @@
 		panelContent.right.push({
 			type: "docs",
 			title: "Docs",
-			show: false,
+			show: true,
 			help: "Documents",
 			icon: "fa-clone",
-			height: 150
+			height: 800
 		});
 
 		// Add filtering options for the Issues panel

@@ -77,7 +77,6 @@
 				maxStringLengthForLevel = maxStringLength - (nodesToShow[i].level * levelOffset);
 				height += nodeMinHeight + (lineHeight * Math.floor(nodesToShow[i].name.length / maxStringLengthForLevel));
 			}
-			console.log(nodesToShow.length);
 			vm.onSetContentHeight({height: height});
 		}
 

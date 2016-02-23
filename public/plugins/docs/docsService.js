@@ -27,7 +27,9 @@
 		var metadocs = {},
 			loadingPromise = null,
 			loading = false,
-			currentLoadingID = null;
+			currentLoadingID = null,
+			account = StateManager.state.account,
+			project = StateManager.state.project;
 
 		var getObjectMetaData = function (object)
 		{
@@ -94,21 +96,36 @@
 		var getDocs = function (objectId) {
 			var i,
 				length,
+				data = {},
 				deferred = $q.defer(),
-				url = serverConfig.apiUrl(StateManager.state.account + "/" + StateManager.state.project + "/meta/" + objectId + ".json");
+				url = serverConfig.apiUrl(account + "/" + project + "/meta/" + objectId + ".json");
 
 			$http.get(url)
 				.then(
 					function(json) {
-					console.log(json);
+						console.log(json);
+						var dataType;
 						// Set up the url for each PDF doc
 						for (i = 0, length = json.data.meta.length; i < length; i += 1) {
-							json.data.meta[i].url = serverConfig.apiUrl(StateManager.state.account + "/" + StateManager.state.project + '/' + json.data.meta[i]._id + ".pdf");
+							// Get data type
+							dataType = json.data.meta[i].hasOwnProperty("mime") ? json.data.meta[i].mime : "Meta Data";
+							if (dataType === "application/pdf") {
+								dataType = "PDF";
+							}
+
+							// Add data to type group
+							if (!data.hasOwnProperty(dataType)) {
+								data[dataType] = {data: []};
+							}
+							data[dataType].data.push(json.data.meta[i]);
+
+							// Setup PDF url
+							json.data.meta[i].url = serverConfig.apiUrl(account + "/" + project + '/' + json.data.meta[i]._id + ".pdf");
 						}
-						deferred.resolve(json.data);
+						deferred.resolve(data);
 					},
 					function () {
-						deferred.resolve({meta: []});
+						deferred.resolve(data);
 					}
 				);
 

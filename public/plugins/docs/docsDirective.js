@@ -54,12 +54,25 @@
 				promise = DocsService.getDocs(object.id);
 				//promise = DocsService.getDocs("55d6ae0c-5d62-4fe7-8bd5-5c84fb90df1c");
 				promise.then(function (data) {
-					vm.docs = data.meta;
+					console.log(data);
 					vm.showDocsGetProgress = false;
+					vm.docs = data;
+					vm.showInfo = (Object.keys(vm.docs).length === 0);
+					if (vm.showInfo) {
+						vm.info = "No documents exist for object: " + object.name;
+					}
+					else {
+						for (var x in vm.docs) {
+							vm.docs[x].show = true;
+						}
+					}
+					/*
+					vm.docs = data.meta;
 					vm.showInfo = (vm.docs.length === 0);
 					if (vm.showInfo) {
 						vm.info = "No documents exist for object: " + object.name;
 					}
+					*/
 				});
 			}
 		}
@@ -98,7 +111,12 @@
 		function docsDialogController($scope) {
 		}
 
+		vm.toggleItem = function (key) {
+			vm.docs[key].show = !vm.docs[key].show;
+		};
+
 		$(document).on("objectSelected", function(event, objectData) {
+			console.log(objectData);
 			var object = [];
 			if (angular.isDefined(objectData)) {
 				object = objectData.id.split("__");

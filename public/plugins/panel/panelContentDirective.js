@@ -259,7 +259,6 @@
 		 * @param height
 		 */
 		vm.setContentHeight = function (height) {
-			console.log(vm.contentData.type, height);
 			if (height < (maxHeight - heightChange)) {
 				setHeight = height;
 				vm.contentHeight = height;

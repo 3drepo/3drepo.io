@@ -1,5 +1,9 @@
 docs {
-  height: 95px;
+  height: 400px;
+}
+
+docs .typesList {
+  padding: 0;
 }
 
 docs .docList {
@@ -19,9 +23,24 @@ docs md-icon {
 docs .docsLoadInfo {
   padding: 15px;
 }
+
+docs .dataItem {
+  padding: 0 20px 0 20px;
+  outline: none;
+}
+
+docs .metadataKey,
+docs .metadataValue {
+  word-wrap: break-word;
+}
+docs .metadataKey {
+  color: rgba(0,0,0,0.5);
+}
+
 .docsDialog {
   min-width: 850px;
   min-height: 664px;
+  overflow: hidden;
 }
 
 .docsDialog .docIcon {
