@@ -399,7 +399,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 		} else if(child['type'] == 'material') {
 			 var appearance = xmlDoc.createElement('Appearance');
 
-				newNode = xmlDoc.createElement('TwoSidedMaterial');
+				newNode = xmlDoc.createElement('Material');
 
 				var ambient_intensity = 1;
 
@@ -627,7 +627,7 @@ function X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, mesh, subM
 
 			var externalGeometry = xmlDoc.createElement('ExternalGeometry');
 
-			//externalGeometry.setAttribute('solid', 'true');
+			externalGeometry.setAttribute('solid', 'true');
 
 			var suffix = "";
 
@@ -849,7 +849,7 @@ function X3D_AddGroundPlane(xmlDoc, bbox)
 
 	groundPlane.setAttribute('size', bboxsz.join(','));
 
-	var mat = xmlDoc.createElement('Material');
+	var mat = xmlDoc.createElement('TwoSidedMaterial');
 
 	mat.setAttribute('emissiveColor', '0.3333 0.7373 0.3137');
 	mat.textContent = ' ';
@@ -1033,10 +1033,8 @@ exports.route = function(router)
 							}
 
 							numAddedMeshes = Math.ceil(currentMeshNumVertices / C.SRC_VERTEX_LIMIT)
-							runningVertTotal = 0;
 							bbox = [[],[]];
-						} else {
-							runningVertTotal += currentMeshNumVertices;
+						} else if ((runningVertTotal + currentMeshNumVertices) > C.SRC_VERTEX_LIMIT) {
 							numAddedMeshes = 1;
 						}
 
@@ -1057,8 +1055,8 @@ exports.route = function(router)
 							}
 						}
 
-						if ((runningVertTotal > C.SRC_VERTEX_LIMIT) || (currentMeshNumVertices > C.SRC_VERTEX_LIMIT)) {
-							runningVertTotal = currentMeshNumVertices;
+						if (((runningVertTotal + currentMeshNumVertices) > C.SRC_VERTEX_LIMIT) || (currentMeshNumVertices > C.SRC_VERTEX_LIMIT)) {
+							runningVertTotal = (currentMeshNumVertices > C.SRC_VERTEX_LIMIT) ? 0 : currentMeshNumVertices;
 							maxSubMeshIDX   += numAddedMeshes;
 
 							for(var j = 0; j < numAddedMeshes; j++)
@@ -1067,6 +1065,8 @@ exports.route = function(router)
 							}
 
 							bbox = [[], []];
+						} else {
+							runningVertTotal += currentMeshNumVertices;
 						}
 					}
 
@@ -1077,7 +1077,7 @@ exports.route = function(router)
 					}
 
 					// Loop through all IDs up to and including the maxSubMeshIDX
-					for(var subMeshIDX = 0; subMeshIDX <= maxSubMeshIDX; subMeshIDX++)
+					for(var subMeshIDX = 0; subMeshIDX < maxSubMeshIDX; subMeshIDX++)
 					{
 						var subMeshName = mesh["id"] + "_" + subMeshIDX;
 
@@ -1092,7 +1092,7 @@ exports.route = function(router)
 						shape.setAttribute('bboxSize', bbox.size);
 
 						var app = xmlDoc.createElement('Appearance');
-						var mat = xmlDoc.createElement('Material');
+						var mat = xmlDoc.createElement('TwoSidedMaterial');
 						mat.textContent = ' ';
 						app.appendChild(mat);
 						shape.appendChild(app);
@@ -1100,6 +1100,7 @@ exports.route = function(router)
 						var eg  = xmlDoc.createElement('ExternalGeometry');
 						eg.setAttribute('url', config.api_server.url + '/' + params.account + '/' + params.project + '/' + params.uid + '.src.mpc#' + subMeshName);
 						eg.textContent = ' ';
+						eg.setAttribute("solid", "true");
 						shape.appendChild(eg);
 
 						sceneRoot.root.appendChild(shape);
