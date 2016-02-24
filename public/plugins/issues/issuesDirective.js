@@ -103,6 +103,12 @@
 			}
 		});
 
+		function escapeCSSCharacters(string)
+		{
+			// Taken from http://stackoverflow.com/questions/2786538/need-to-escape-a-special-character-in-a-jquery-selector-string
+			return string.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, "\\$&");
+		}
+
 		function setupIssuesToShow () {
 			var i = 0, j = 0, length = 0, roleAssigned;
 
@@ -340,12 +346,13 @@
 						promise.then(function (data) {
 							vm.issues.push(data);
 
-							vm.title = "";
+							vm.title         = "";
 							vm.pickedAccount = null;
 							vm.pickedProject = null;
-							vm.pickedTrans	 = null;
-							vm.pickedPos = null;
-							vm.pickedNorm = null;
+							vm.pickedTrans   = null;
+							vm.pickedPos     = null;
+							vm.pickedNorm    = null;
+
 							if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
 								vm.saveCommentWithIssue(data, vm.comment);
 								vm.comment = "";
@@ -414,11 +421,13 @@
 							{
 								vm.pickedAccount = NewIssuesService.state.account;
 								vm.pickedProject = NewIssuesService.state.project;
-								vm.pickedTrans	 = $("#model__root")[0]._x3domNode.getCurrentTransform();
+								vm.pickedTrans   = $("#model__root")[0]._x3domNode.getCurrentTransform();
 							} else {
 								vm.pickedAccount = projectParts[0];
 								vm.pickedProject = projectParts[1];
-								vm.pickedTrans	 = $("#" + vm.pickedAccount + "__" + vm.pickedProject + "__root")[0]._x3domNode.getCurrentTransform();
+
+								var rootTransName = escapeCSSCharacters(vm.pickedAccount + "__" + vm.pickedProject + "__root");
+								vm.pickedTrans   = $("#" + rootTransName)[0]._x3domNode.getCurrentTransform();
 							}
 
 							vm.pickedNorm = vm.pickedTrans.transpose().multMatrixVec(pickObj.pickNorm);
