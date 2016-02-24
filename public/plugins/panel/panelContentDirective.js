@@ -63,6 +63,31 @@
 		vm.visibleStatus = false;
 		vm.showClearFilterButton = false;
 
+		/**
+		 * Sets the height of the content from the content's directive.
+		 * @param height
+		 */
+		vm.setContentHeight = function (height) {
+			if (height < (maxHeight - heightChange)) {
+				setHeight = height;
+				vm.contentHeight = height;
+				atMaxHeight = false;
+			}
+			else {
+				setHeight = maxHeight;
+				vm.contentHeight = (maxHeight - heightChange);
+				atMaxHeight = true;
+			}
+			currentHeight = vm.contentHeight;
+		};
+
+		// Set content initially to min height if it exists
+		/*
+		if (vm.contentData.hasOwnProperty("minHeight")) {
+			vm.setContentHeight(vm.contentData.minHeight);
+		}
+		*/
+
 		$scope.$watch("vm.contentData.type", function (newValue) {
 			if (angular.isDefined(newValue)) {
 				content = angular.element($element[0].querySelector('#content'));
@@ -252,24 +277,6 @@
 
 		vm.clearFilter = function () {
 			vm.filterInputText = "";
-		};
-
-		/**
-		 * Sets the height of the content from the content's directive.
-		 * @param height
-		 */
-		vm.setContentHeight = function (height) {
-			if (height < (maxHeight - heightChange)) {
-				setHeight = height;
-				vm.contentHeight = height;
-				atMaxHeight = false;
-			}
-			else {
-				setHeight = maxHeight;
-				vm.contentHeight = (maxHeight - heightChange);
-				atMaxHeight = true;
-			}
-			currentHeight = vm.contentHeight;
 		};
 	}
 }());
