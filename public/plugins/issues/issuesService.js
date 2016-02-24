@@ -75,7 +75,11 @@
 
 		var generateTitle = function(issue)
 		{
-			return issue.typePrefix + "." + issue.number + " " + issue.name;
+			if (issue.typePrefix) {
+				return issue.typePrefix + "." + issue.number + " " + issue.name;
+			} else {
+				return issue.number + " " + issue.name;
+			}
 		};
 
 		var getIssues = function () {
