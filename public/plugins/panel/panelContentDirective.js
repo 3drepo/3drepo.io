@@ -27,7 +27,8 @@
             templateUrl: 'panelContent.html',
             scope: {
                 position: "=",
-                contentData: "="
+                contentData: "=",
+				onHeightRequest: "&"
             },
             controller: PanelContentCtrl,
             controllerAs: 'vm',
@@ -46,7 +47,6 @@
 			currentHeight = 0,
 			contentHeightExtra = 20,
 			toggledContentHeight = 0,
-			minimized = false,
 			maxHeight,
 			maxPossibleHeight,
 			atMaxHeight = false,
@@ -63,31 +63,6 @@
 		vm.visibleStatus = false;
 		vm.showClearFilterButton = false;
 
-		/**
-		 * Sets the height of the content from the content's directive.
-		 * @param height
-		 */
-		vm.setContentHeight = function (height) {
-			if (height < (maxHeight - heightChange)) {
-				setHeight = height;
-				vm.contentHeight = height;
-				atMaxHeight = false;
-			}
-			else {
-				setHeight = maxHeight;
-				vm.contentHeight = (maxHeight - heightChange);
-				atMaxHeight = true;
-			}
-			currentHeight = vm.contentHeight;
-		};
-
-		// Set content initially to min height if it exists
-		/*
-		if (vm.contentData.hasOwnProperty("minHeight")) {
-			vm.setContentHeight(vm.contentData.minHeight);
-		}
-		*/
-
 		$scope.$watch("vm.contentData.type", function (newValue) {
 			if (angular.isDefined(newValue)) {
 				content = angular.element($element[0].querySelector('#content'));
@@ -100,6 +75,7 @@
 						"visible='vm.visibleStatus' " +
 						"on-set-content-height='vm.setContentHeight(height)' " +
 						"options='vm.contentData.options' " +
+						"on-content-height-request='vm.onContentHeightRequest(height)' " +
 						"selected-option='vm.selectedOption'>" +
 					"</" + vm.contentData.type + ">"
 				);
@@ -198,30 +174,15 @@
 				}
 				else if (vm.contentData.hasOwnProperty("minHeight")) {
 					heightChange = event.value.change;
-					if (!minimized) {
-						if ((setHeight >= (maxHeight - heightChange - otherContentHeight))) {
-							currentHeight = maxHeight - heightChange - otherContentHeight;
-							if (currentHeight > vm.contentData.minHeight) {
-								vm.contentHeight = currentHeight;
-							}
+					if ((setHeight >= (maxHeight - heightChange - otherContentHeight))) {
+						currentHeight = maxHeight - heightChange - otherContentHeight;
+						if (currentHeight > vm.contentData.minHeight) {
+							vm.contentHeight = currentHeight;
 						}
 					}
 				}
 			}
 		});
-
-		vm.toolbarClick = function () {
-			if (vm.contentData.hasOwnProperty("minHeight")) {
-				if (minimized) {
-					vm.contentHeight = currentHeight;
-					minimized = false;
-				}
-				else {
-					vm.contentHeight = vm.contentData.minHeight;
-					minimized = true;
-				}
-			}
-		};
 
 		vm.toggleAdd = function (event) {
 			event.stopPropagation();
@@ -277,6 +238,32 @@
 
 		vm.clearFilter = function () {
 			vm.filterInputText = "";
+		};
+
+		/**
+		 * Sets the height of the content from the content's directive.
+		 * @param height
+		 */
+		vm.setContentHeight = function (height) {
+			if (height < (maxHeight - heightChange)) {
+				setHeight = height;
+				vm.contentHeight = height;
+				atMaxHeight = false;
+			}
+			else {
+				setHeight = maxHeight;
+				vm.contentHeight = (maxHeight - heightChange);
+				atMaxHeight = true;
+			}
+			currentHeight = vm.contentHeight;
+		};
+
+		/**
+		 * A content item is requesting a height change
+		 * @param height
+		 */
+		vm.onContentHeightRequest = function (height) {
+			vm.onHeightRequest({contentItem: vm.contentData, height: height});
 		};
 	}
 }());

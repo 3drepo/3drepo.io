@@ -36,7 +36,7 @@ div(id="vm.contentItem", layout="column", class="md-whiteframe-1dp")
 				md-button.md-icon-button(ng-click="vm.clearFilter()", aria-label="Clear filter")
 					md-icon(md-font-icon="fa-times-circle", class="fa")
 
-		md-content(id="content", style="height:{{vm.contentHeight}}px")
+		md-content(id="content", style="height:{{vm.contentData.height}}px")
 
 	div(ng-if="vm.showHelp")
 		md-button.md-fab.md-mini#helpButton(aria-label="Help")

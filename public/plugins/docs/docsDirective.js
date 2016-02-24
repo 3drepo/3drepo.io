@@ -27,7 +27,8 @@
 			templateUrl: 'docs.html',
 			scope: {
 				show: "=",
-				onSetContentHeight: "&"
+				onSetContentHeight: "&",
+				onContentHeightRequest: "&"
 			},
 			controller: DocsCtrl,
 			controllerAs: 'vm',
@@ -75,7 +76,8 @@
 							}
 						}
 						// Set the content height
-						vm.onSetContentHeight({height: allDocTypesHeight});
+						//vm.onSetContentHeight({height: allDocTypesHeight});
+						vm.onContentHeightRequest({height: allDocTypesHeight});
 					}
 				});
 			}
@@ -122,7 +124,7 @@
 		 */
 		vm.toggleItem = function (docType) {
 			var itemsHeight,
-				metaDataItemHeight = 24; // It could be higher for items with long text but ignore that
+				metaDataItemHeight = 30; // It could be higher for items with long text but ignore that
 
 			if (currentOpenDocType === null) {
 				// No doc type is open so open this doc type
@@ -152,7 +154,8 @@
 				if (currentOpenDocType === "Meta Data") {
 					itemsHeight = Object.keys(vm.docs[currentOpenDocType].data[0].metadata).length * metaDataItemHeight;
 				}
-				vm.onSetContentHeight({height: allDocTypesHeight + itemsHeight});
+				//vm.onSetContentHeight({height: allDocTypesHeight + itemsHeight});
+				vm.onContentHeightRequest({height: allDocTypesHeight + itemsHeight});
 			}
 		};
 

@@ -31,7 +31,8 @@
 				showAdd: "=",
 				options: "=",
 				selectedOption: "=",
-				onSetContentHeight: "&"
+				onSetContentHeight: "&",
+				onContentHeightRequest: "&"
 			},
 			controller: IssuesCtrl,
 			controllerAs: 'vm',
@@ -501,7 +502,8 @@
 					height += lineHeight * Math.floor((vm.issuesToShow[i].title.length - maxStringLength) / maxStringLength);
 				}
 			}
-			vm.onSetContentHeight({height: height});
+			//vm.onSetContentHeight({height: height});
+			vm.onContentHeightRequest({height: height});
 		}
 	}
 }());

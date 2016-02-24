@@ -40,7 +40,10 @@
         var vm = this,
             i = 0,
             length = 0,
-			initialWindowHeight = $window.innerHeight;
+			initialWindowHeight = $window.innerHeight,
+			maxPanelHeight = $window.innerHeight - 90,
+			numPanelsShowing = 0,
+			fixedContentHeightTotal = 0;
 
 		vm.contentItems = [];
         vm.showPanel = true;
@@ -68,6 +71,13 @@
 				$timeout(function () {
 					sendWindowHeightChangeEvent(initialWindowHeight);
 				});
+
+				for (var i = 0; i < vm.contentItems.length; i += 1) {
+					//vm.contentItems[i].height = 200;
+					if (vm.contentItems[i].show) {
+						numPanelsShowing += 1;
+					}
+				}
             }
             else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
                 vm.showPanel = !vm.showPanel;
@@ -90,8 +100,7 @@
 		}
 
 		angular.element(document).bind('mousedown', function (event) {
-			// If we have clicked on a canvas, we are probably
-			// moving the model around
+			// If we have clicked on a canvas, we are probably moving the model around
 			if (event.target.tagName === "CANVAS")
 			{
 				vm.activate = false;
@@ -104,13 +113,29 @@
 			$scope.$apply();
 		});
 
+		/**
+		 * Panel toggle button clicked
+		 * @param contentType
+		 */
 		vm.buttonClick = function (contentType) {
+			var contentItem;
+
+			// Get the content item
             for (i = 0, length = vm.contentItems.length; i < length; i += 1) {
                 if (contentType === vm.contentItems[i].type) {
+					contentItem = vm.contentItems[i];
+
+					// Toggle panel show and update number of panels shwoing count
                     vm.contentItems[i].show = !vm.contentItems[i].show;
-					if (!vm.contentItems[i].show) {
+					if (vm.contentItems[i].show) {
+						numPanelsShowing += 1;
+					}
+					else {
+						numPanelsShowing -= 1;
 						vm.contentItems[i].showGap = false;
 					}
+
+					// Send an event with the content item show status
 					EventService.send(
 						EventService.EVENT.PANEL_CONTENT_TOGGLED,
 						{
@@ -120,9 +145,64 @@
 							contentHeight: vm.contentItems[i].height
 						}
 					);
+
+					// Do a height request if showing
+					if (contentItem.show) {
+						vm.heightRequest(contentItem, contentItem.height);
+					}
+
+					// Update fixed height content total
+					/*
+					if (contentItem.fixedHeight) {
+						fixedContentHeightTotal += contentItem.height;
+					}
+					*/
+
+					break;
                 }
             }
 			hideLastItemGap();
         };
+
+		/**
+		 * A panel content is requesting a height change
+		 * Change the heights of any shown panels if necessary§
+		 * @param contentItem
+		 * @param height
+		 */
+		vm.heightRequest = function (contentItem, height) {
+			var i, length,
+				itemGap = 30,
+				maxContentItemHeight = Math.floor(maxPanelHeight / numPanelsShowing) - ((numPanelsShowing - 1) * itemGap) - fixedContentHeightTotal;
+			console.log(height, maxContentItemHeight);
+			//contentItem.height = height;
+
+			for (i = 0, length = vm.contentItems.length; i < length; i += 1) {
+				if (vm.contentItems[i].show) {
+					// Only consider shown items
+					if (vm.contentItems[i].type !== contentItem.type) {
+						// Other shown content
+						if (vm.contentItems[i].height > maxContentItemHeight) {
+							// Reduce height of any other content with a height greater than the average maximum
+							vm.contentItems[i].height = maxContentItemHeight;
+						}
+					}
+					else {
+						// Content requesting
+						if (contentItem.fixedHeight) {
+							contentItem.height = height;
+						}
+						else {
+							if (height > maxContentItemHeight) {
+								contentItem.height = maxContentItemHeight;
+							}
+							else {
+								contentItem.height = height;
+							}
+						}
+					}
+				}
+			}
+		};
     }
 }());
