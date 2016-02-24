@@ -79,7 +79,7 @@ function X3D_CreateScene(xmlDoc, rootNode) {
 
 	xmlDoc.firstChild.appendChild(scene);
 
-	var rootGroup = xmlDoc.createElement("group");
+	var rootGroup = xmlDoc.createElement("Group");
 
 	rootGroup.setAttribute('onload', 'onLoaded(event);');
 	rootGroup.setAttribute('id', 'root');
