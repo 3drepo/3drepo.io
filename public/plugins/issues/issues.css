@@ -11,6 +11,9 @@ issues #issuesAddContainer .md-dialog-container {
 issues #issuesAddContainer .md-dialog-backdrop {
   height: 205px !important;
 }
+issues #issuesAddContainer md-input-container {
+  margin: 0;
+}
 
 issues textarea {
   min-height: 70px !important;

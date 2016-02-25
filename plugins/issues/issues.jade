@@ -3,10 +3,10 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 
 div(ng-show="vm.showAdd")
 	#issuesAddContainer
-		md-input-container(md-no-float="")
+		md-input-container.md-block(md-no-float="")
 			input(placeholder="Title", ng-model="vm.title")
 
-		md-input-container(md-no-float="")
+		md-input-container.md-block(md-no-float="")
 			textarea(placeholder="Comment", ng-model="vm.comment")
 
 		md-button.md-raised.md-accent(ng-click="vm.saveIssue()", ng-disabled="vm.saveIssueDisabled") Save

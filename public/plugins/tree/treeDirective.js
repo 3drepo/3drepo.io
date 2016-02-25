@@ -27,8 +27,7 @@
 			templateUrl: "tree.html",
 			scope: {
 				filterText: "=",
-				height: "=",
-				onSetContentHeight: "&"
+				onContentHeightRequest: "&"
 			},
 			controller: TreeCtrl,
 			controllerAs: "vm",
@@ -36,9 +35,9 @@
 		};
 	}
 
-	TreeCtrl.$inject = ["$scope", "$timeout", "$element", "TreeService", "ViewerService", "EventService"];
+	TreeCtrl.$inject = ["$scope", "$timeout", "TreeService", "ViewerService", "EventService"];
 
-	function TreeCtrl($scope, $timeout, $element, TreeService, ViewerService, EventService) {
+	function TreeCtrl($scope, $timeout, TreeService, ViewerService, EventService) {
 		var vm = this,
 			promise = null,
 			i = 0,
@@ -77,7 +76,7 @@
 				maxStringLengthForLevel = maxStringLength - (nodesToShow[i].level * levelOffset);
 				height += nodeMinHeight + (lineHeight * Math.floor(nodesToShow[i].name.length / maxStringLengthForLevel));
 			}
-			vm.onSetContentHeight({height: height});
+			vm.onContentHeightRequest({height: height});
 		}
 
 		/**
@@ -131,7 +130,7 @@
 				}
 			}
 
-			setContentHeight(vm.nodesToShow);
+			//setContentHeight(vm.nodesToShow);
 		};
 
 		/**
@@ -310,7 +309,7 @@
 
 		$scope.$watch("vm.filterText", function (newValue) {
 			if (angular.isDefined(newValue)) {
-				if (newValue === "") {
+				if (newValue.toString() === "") {
 					vm.showTree = true;
 					vm.showFilterList = false;
 					vm.nodes = vm.allNodes;

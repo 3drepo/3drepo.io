@@ -85,7 +85,6 @@
 			help: "Model elements shown in a tree structure",
 			icon: "fa-sitemap",
 			hasFilter: true,
-			height: 820,
 			fixedHeight: false
 		});
 
@@ -118,7 +117,6 @@
 					secondSelected: false
 				}
 			],
-			height: 820,
 			fixedHeight: false
 		});
 		panelContent.right.push({
@@ -127,7 +125,7 @@
 			show: false,
 			help: "Clipping plane",
 			icon: "fa-object-group",
-			height: 170,
+			height: 120,
 			fixedHeight: true,
 			showVisible: true
 		});
@@ -137,7 +135,6 @@
 			show: false,
 			help: "Documents",
 			icon: "fa-clone",
-			height: 80,
 			fixedHeight: false
 		});
 

@@ -118,6 +118,10 @@ panel-content .panelContentContainer {
 panel-content .panelContentFilter {
   background: #E8EAF6;
   padding: 5px 10px 0 10px;
-  height: 60px;
+  height: 50px;
   border-bottom: solid 1px #C5CAE9;
+}
+
+panel-content .panelContentFilter md-input-container {
+  margin: 0;
 }

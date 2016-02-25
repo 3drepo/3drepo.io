@@ -27,7 +27,6 @@
 			templateUrl: 'docs.html',
 			scope: {
 				show: "=",
-				onSetContentHeight: "&",
 				onContentHeightRequest: "&"
 			},
 			controller: DocsCtrl,
@@ -76,7 +75,6 @@
 							}
 						}
 						// Set the content height
-						//vm.onSetContentHeight({height: allDocTypesHeight});
 						vm.onContentHeightRequest({height: allDocTypesHeight});
 					}
 				});
@@ -148,19 +146,17 @@
 			// Set the content height
 			if (currentOpenDocType === null) {
 				// No currently open doc type
-				vm.onSetContentHeight({height: allDocTypesHeight});
+				vm.onContentHeightRequest({height: allDocTypesHeight});
 			}
 			else {
 				if (currentOpenDocType === "Meta Data") {
 					itemsHeight = Object.keys(vm.docs[currentOpenDocType].data[0].metadata).length * metaDataItemHeight;
 				}
-				//vm.onSetContentHeight({height: allDocTypesHeight + itemsHeight});
 				vm.onContentHeightRequest({height: allDocTypesHeight + itemsHeight});
 			}
 		};
 
 		$(document).on("objectSelected", function(event, objectData) {
-			console.log(objectData);
 			var object = [];
 			if (angular.isDefined(objectData)) {
 				object = objectData.id.split("__");

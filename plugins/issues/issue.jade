@@ -31,7 +31,7 @@
 						.issueCommentInfo(layout="row" layout-align="space-between center")
 							p {{comment.owner}}
 							p(class="issueTimeStamp") {{comment.timeStamp}}
-				md-input-container(md-no-float="", ng-if="vm.issueIsOpen")
+				md-input-container.md-block(md-no-float="", ng-if="vm.issueIsOpen")
 					textarea(placeholder="New comment", ng-model="vm.comment")
 
 			.issueCommentsFooter
