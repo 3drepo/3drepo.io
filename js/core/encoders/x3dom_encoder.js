@@ -399,7 +399,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 		} else if(child['type'] == 'material') {
 			 var appearance = xmlDoc.createElement('Appearance');
 
-				newNode = xmlDoc.createElement('Material');
+				newNode = xmlDoc.createElement('TwoSidedMaterial');
 
 				var ambient_intensity = 1;
 
@@ -510,7 +510,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 				mp.setAttribute('url', config.api_server.url + '/' + account + '/' + project + '/' + child['id'] + '.x3d.mpc');
 				mp.setAttribute('urlIDMap', config.api_server.url + '/' + account + '/' + project + '/' + child['id'] + '.json.mpc');
 				mp.setAttribute('onclick', 'clickObject(event);');
-				mp.setAttribute('solid', 'false');
+				mp.setAttribute('solid', 'true');
 				mp.setAttribute('onmouseover', 'onMouseOver(event);');
 				mp.setAttribute('onmousemove', 'onMouseMove(event);');
 				mp.setAttribute('nameSpaceName', child['id']);
@@ -531,6 +531,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 					shape.setAttribute('id', childUniqueID);
 					shape.setAttribute('DEF', childUniqueID); //dbInterface.uuidToString(child["shared_id"]));
 					shape.setAttribute('onclick', 'clickObject(event);');
+					shape.setAttribute('solid', 'true');
 					shape.setAttribute('onmouseover', 'onMouseOver(event);');
 					shape.setAttribute('onmousemove', 'onMouseMove(event);');
 
@@ -754,7 +755,7 @@ function X3D_AddMeasurer(xmlDoc) {
 	shape.setAttribute('isPickable', 'false');
 
 	var app   = xmlDoc.createElement('Appearance');
-	var mat   = xmlDoc.createElement('Material');
+	var mat   = xmlDoc.createElement('TwoSidedMaterial');
 	mat.setAttribute('emissiveColor', '1 0 0');
 
 	var dm	  = xmlDoc.createElement('DepthMode');
