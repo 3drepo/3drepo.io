@@ -2,7 +2,7 @@ div(id="vm.contentItem", layout="column", class="md-whiteframe-1dp")
 
 	md-toolbar(class="md-primary", ng-click="vm.toolbarClick()")
 		div(class="md-toolbar-tools")
-			span(class="fa", ng-class="vm.contentData.icon")
+			span.statusIcon(class="fa", ng-class="vm.statusIcon", ng-click="vm.hideItem()")
 			label(class="md-flex") {{vm.contentData.title}}
 			span(flex)
 			md-button.md-icon-button(aria-label="Print", ng-href="{{vm.issuesUrl}}", ng-click="vm.doPrint($event)", target="_blank", ng-if="vm.contentData.canPrint")

@@ -125,3 +125,8 @@ panel-content .panelContentFilter {
 panel-content .panelContentFilter md-input-container {
   margin: 0;
 }
+
+panel-content .statusIcon {
+  outline: none;
+  width: 18px;
+}

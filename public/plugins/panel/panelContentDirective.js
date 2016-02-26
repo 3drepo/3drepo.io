@@ -54,6 +54,7 @@
 		vm.addStatus = false;
 		vm.visibleStatus = false;
 		vm.showClearFilterButton = false;
+		vm.hideItem = true;
 
 		$scope.$watch("vm.contentData.type", function (newValue) {
 			if (angular.isDefined(newValue)) {
@@ -66,11 +67,15 @@
 						"visible='vm.visibleStatus' " +
 						"options='vm.contentData.options' " +
 						"on-content-height-request='vm.onContentHeightRequest(height)' " +
+						"on-show-item='vm.showItem()' " +
+						"hide-item='vm.hideSelectedItem' " +
 						"selected-option='vm.selectedOption'>" +
 					"</" + vm.contentData.type + ">"
 				);
 				content.append(contentItem);
 				$compile(contentItem)($scope);
+
+				vm.statusIcon = vm.contentData.icon;
 			}
 		});
 
@@ -173,6 +178,22 @@
 		vm.onContentHeightRequest = function (height) {
 			contentHeight = height;
 			vm.onHeightRequest({contentItem: vm.contentData, height: contentHeight});
+		};
+
+		/**
+		 * Content wants to show an individual item
+		 */
+		vm.showItem = function () {
+			vm.statusIcon = "fa-arrow-left";
+			vm.hideSelectedItem = false;
+		};
+
+		/**
+		 * Content wants to show it's main content
+		 */
+		vm.hideItem = function () {
+			vm.statusIcon = vm.contentData.icon;
+			vm.hideSelectedItem = true;
 		};
 	}
 }());

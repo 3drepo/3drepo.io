@@ -1,6 +1,6 @@
 .issue(style="background:{{vm.backgroundColor}}")
 	.issueHeader
-		md-list-item.md-2-line.issueTitle(ng-click="vm.toggleComments()")
+		md-list-item.md-2-line.issueTitle
 			div.md-list-item-text
 				h3 {{vm.data.title}}
 				.issueTitleInfo(layout="row" layout-align="space-between center")
@@ -19,24 +19,30 @@
 
 	div(ng-show="vm.showComments", ng-class="{issueComments: vm.showComments}", comments-height, num-new-comments="vm.numNewComments")
 		.issueCommentsContainer
+			// Comments list
 			md-list
 				md-list-item.md-2-line(ng-repeat="comment in vm.data.comments")
 					div.md-list-item-text
 						div(layout="row" layout-align="space-between center")
 							h3(ng-bind-html="comment.comment | linky:'_blank'") {{comment.comment}}
-							//md-button.md-icon-button.commentDeleteButton(aria-label="Delete comment", flex="15", ng-if="comment.canDelete", ng-click="vm.deleteComment($index)")
 							.commentModify(layout="row" layout-align="center center", ng-if="vm.issueIsOpen")
 								md-icon.md-accent.commentModifyButton(class="fa fa-pencil", ng-if="comment.canDelete", ng-click="vm.toggleEditComment($index)")
 								md-icon.md-accent.commentModifyButton(class="fa fa-times-circle", ng-if="comment.canDelete", ng-click="vm.deleteComment($index)")
 						.issueCommentInfo(layout="row" layout-align="space-between center")
 							p {{comment.owner}}
 							p(class="issueTimeStamp") {{comment.timeStamp}}
-				md-input-container.md-block(md-no-float="", ng-if="vm.issueIsOpen")
-					textarea(placeholder="New comment", ng-model="vm.comment")
 
+			// New comment input
+			md-input-container.md-block(md-no-float="", ng-if="vm.issueIsOpen")
+				textarea(placeholder="New comment", ng-model="vm.comment")
+
+			// Issue footer
 			.issueCommentsFooter
 				div(ng-if="vm.issueIsOpen",layout="row", layout-align="start center")
+					// Save comment
 					md-button.md-raised.md-accent(ng-click="vm.saveComment()", ng-disabled="vm.saveCommentDisabled") Save
+
+					// Assign role
 					md-menu(md-position-mode="target-right target", ng-if="vm.canModifyIssue")
 						md-button.md-primary(ng-click="vm.openAssignedRolesMenu($mdOpenMenu, $event)") Assign
 						md-menu-content(width="4")
@@ -46,8 +52,8 @@
 										.issueAssignColourMarker(style="background:{{role.color}}")
 										| {{role.role}}
 									md-checkbox.md-secondary(ng-model="role.assigned", aria-label="Issue Assign")
+
+					// Close/Open issue
 					md-button.md-primary.md-accent(ng-click="vm.toggleCloseIssue()", ng-if="vm.canModifyIssue") Close
 				.issueOpenContainer(ng-if="!vm.issueIsOpen")
 					md-button.md-primary.md-accent(ng-click="vm.toggleCloseIssue()", ng-if="vm.canModifyIssue") Open
-
-	md-divider

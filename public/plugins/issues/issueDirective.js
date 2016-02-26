@@ -45,10 +45,9 @@
 	function IssueCtrl($scope, $timeout, NewIssuesService, ViewerService, EventService) {
 		var vm = this,
 			promise = null,
-			originatorEv = null,
-			pinColour;
+			originatorEv = null;
 
-		vm.showComments = false;
+		vm.showComments = true;
 		vm.numNewComments = 0;
 		vm.saveCommentDisabled = true;
 		vm.backgroundColor = "#FFFFFF";
@@ -85,8 +84,6 @@
 				}
 
 				if (newValue !== vm.data._id) {
-					vm.showComments = false;
-
 					// If we are editing the comment, then clear it.
 					if (vm.editingComment) {
 						vm.comment = "";
@@ -98,23 +95,18 @@
 						}
 					}
 				} else {
-					vm.showComments = !vm.showComments;
+					var pinGroup = $("#" + vm.data._id)[0].getElementsByTagName("group");
+					$(document).trigger("pinClick", { fromViewer : false, object: pinGroup[0] } );
 
-					if (vm.showComments)
-					{
-						var pinGroup = $("#" + vm.data._id)[0].getElementsByTagName("group");
-						$(document).trigger("pinClick", { fromViewer : false, object: pinGroup[0] } );
+					// Set the camera position
+					ViewerService.defaultViewer.setCamera(
+						vm.data.viewpoint.position,
+						vm.data.viewpoint.view_dir,
+						vm.data.viewpoint.up
+					);
 
-						// Set the camera position
-						ViewerService.defaultViewer.setCamera(
-							vm.data.viewpoint.position,
-							vm.data.viewpoint.view_dir,
-							vm.data.viewpoint.up
-						);
-
-						NewIssuesService.highlightPin(newValue);
-						EventService.send(EventService.EVENT.SET_CLIPPING_PLANES, vm.data.viewpoint);
-					}
+					NewIssuesService.highlightPin(newValue);
+					EventService.send(EventService.EVENT.SET_CLIPPING_PLANES, vm.data.viewpoint);
 				}
 			}
 		});

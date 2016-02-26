@@ -30,7 +30,9 @@
 				showAdd: "=",
 				options: "=",
 				selectedOption: "=",
-				onContentHeightRequest: "&"
+				onContentHeightRequest: "&",
+				onShowItem : "&",
+				hideItem: "="
 			},
 			controller: IssuesCtrl,
 			controllerAs: 'vm',
@@ -64,8 +66,10 @@
 		vm.showProgress = true;
 		vm.progressInfo = "Loading issues";
 		vm.showIssuesInfo = false;
+		vm.showIssueList = false;
+		vm.showIssue = false;
 		vm.issuesInfo = "There are currently no open issues";
-		vm.availableRoles = [];
+		vm.availableRoles = null;
 		vm.projectUserRoles = [];
 
 		/* Get all the Issues */
@@ -74,8 +78,10 @@
 			vm.showProgress = false;
 			vm.issues = data;
 			vm.showIssuesInfo = (vm.issues.length === 0);
+			vm.showIssueList = (vm.issues.length !== 0);
 			setupIssuesToShow();
 			vm.showPins();
+			setAssignedRolesColors();
 		});
 
 		/* Get all the available roles for the project */
@@ -83,6 +89,24 @@
 		rolesPromise.then(function (data) {
 			vm.availableRoles = data;
 		});
+
+		function setAssignedRolesColors () {
+			var i, j, iLength, jLength,
+				roleColour;
+
+			for (i = 0, iLength = vm.issues.length; i < iLength; i += 1) {
+				vm.issues[i].assignedRolesColors = [];
+				/*
+				for (j = 0, jLength = vm.issues[i].assigned_roles.length; j < jLength; j += 1) {
+					if (vm.data.assigned_roles.indexOf(vm.issues[i].roles[j].role) !== -1) {
+						roleColour = NewIssuesService.getRoleColor(vm.issues[i].roles[j].role);
+						vm.issues[i].assignedRolesColors.push(roleColour);
+					}
+				}
+				*/
+			}
+			console.log(vm.issues);
+		}
 
 		/* Get the user roles for the project */
 		projectUserRolesPromise = NewIssuesService.getUserRolesForProject();
@@ -330,12 +354,41 @@
 			}
 		});
 
+		/*
+		 * Handle parent notice to hide the selected issue
+		 */
+		$scope.$watch("vm.hideItem", function (newValue) {
+			if (angular.isDefined(newValue) && newValue) {
+				vm.showIssueList = true;
+				vm.showIssue = false;
+			}
+		});
+
 		vm.commentsToggled = function (issueId) {
 			if (issueId === vm.commentsToggledIssueId)
 			{
 				vm.commentsToggledIssueId = null;
 			} else {
 				vm.commentsToggledIssueId = issueId;
+			}
+		};
+
+		/**
+		 * Make the selected issue fill the content and notify the parent
+		 *
+		 * @param index
+		 */
+		vm.showSelectedIssue = function (index) {
+			vm.showIssueList = false;
+			vm.showIssue = true;
+			vm.selectedIssue = vm.issuesToShow[index];
+			vm.onShowItem();
+
+			if (vm.issuesToShow[index]._id === vm.commentsToggledIssueId)
+			{
+				vm.commentsToggledIssueId = null;
+			} else {
+				vm.commentsToggledIssueId = vm.issuesToShow[index]._id;
 			}
 		};
 
@@ -491,8 +544,16 @@
 				var issueId = clickInfo.object ? clickInfo.object.parentElement.parentElement.getAttribute("id") : null;
 
 				if (clickInfo.fromViewer) {
+					/*
 					vm.commentsToggled(issueId);
 					$rootScope.$apply();
+					*/
+					for (var i = 0; i < vm.issuesToShow.length; i += 1) {
+						if (vm.issuesToShow[i]._id === issueId) {
+							vm.showSelectedIssue(i);
+							break;
+						}
+					}
 				}
 			});
 		});
