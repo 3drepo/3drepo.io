@@ -96,7 +96,7 @@
 		 * @param _id
 		 */
 		vm.expand = function (_id) {
-			var i = 0, numChildren = 0, index = -1, length = 0, endOfSplice = false;
+			var i, numChildren = 0, index = -1, length, endOfSplice = false;
 
 			for (i = 0, length = vm.nodesToShow.length; i < length; i += 1) {
 				if (vm.nodesToShow[i]._id === _id) {
@@ -130,7 +130,7 @@
 				}
 			}
 
-			//setContentHeight(vm.nodesToShow);
+			setContentHeight(vm.nodesToShow);
 		};
 
 		/**

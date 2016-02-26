@@ -135,6 +135,7 @@
 			show: false,
 			help: "Documents",
 			icon: "fa-clone",
+			height: 80,
 			fixedHeight: false
 		});
 
