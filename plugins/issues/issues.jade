@@ -23,7 +23,7 @@ md-list(ng-if="vm.showIssueList")
 						p {{issue.owner}}
 						p {{issue.timeStamp}}
 			.issueRoleMarkers(layout="column")
-				div(ng-repeat="roleColor in vm.assignedRolesColors", style="background:{{roleColor}};", flex)
+				div(ng-repeat="roleColor in issue.assignedRolesColors", style="background:{{roleColor}};", flex)
 		md-divider
 	//issue(
 		ng-repeat="issue in vm.issuesToShow",
@@ -35,7 +35,14 @@ md-list(ng-if="vm.showIssueList")
 		project-user-roles="vm.projectUserRoles"
 		on-issue-assign-change="vm.showPins()")
 
-issue(ng-if="vm.showIssue", data="vm.selectedIssue", comments-toggled-issue-id="vm.commentsToggledIssueId")
+issue(
+	ng-if="vm.showIssue"
+	data="vm.selectedIssue"
+	comments-toggled-issue-id="vm.commentsToggledIssueId"
+	available-roles="vm.availableRoles"
+	project-user-roles="vm.projectUserRoles",
+	on-issue-assign-change="vm.issueAssignChange()"
+	)
 
 .issuesInfo(ng-if="vm.showIssuesInfo")
 	p {{vm.issuesInfo}}

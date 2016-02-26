@@ -79,33 +79,47 @@
 			vm.issues = data;
 			vm.showIssuesInfo = (vm.issues.length === 0);
 			vm.showIssueList = (vm.issues.length !== 0);
+			setAllIssuesAssignedRolesColors();
 			setupIssuesToShow();
 			vm.showPins();
-			setAssignedRolesColors();
 		});
 
 		/* Get all the available roles for the project */
 		rolesPromise = NewIssuesService.getRoles();
 		rolesPromise.then(function (data) {
 			vm.availableRoles = data;
+			setAllIssuesAssignedRolesColors();
 		});
 
-		function setAssignedRolesColors () {
-			var i, j, iLength, jLength,
-				roleColour;
-
-			for (i = 0, iLength = vm.issues.length; i < iLength; i += 1) {
-				vm.issues[i].assignedRolesColors = [];
-				/*
-				for (j = 0, jLength = vm.issues[i].assigned_roles.length; j < jLength; j += 1) {
-					if (vm.data.assigned_roles.indexOf(vm.issues[i].roles[j].role) !== -1) {
-						roleColour = NewIssuesService.getRoleColor(vm.issues[i].roles[j].role);
-						vm.issues[i].assignedRolesColors.push(roleColour);
-					}
+		/**
+		 * Define the assigned role colors for each issue
+		 */
+		function setAllIssuesAssignedRolesColors () {
+			var i, length;
+			if (vm.availableRoles !== null) {
+				for (i = 0, length = vm.issues.length; i < length; i += 1) {
+					setIssueAssignedRolesColors(vm.issues[i]);
 				}
-				*/
 			}
-			console.log(vm.issues);
+		}
+
+		/**
+		 * Define the assigned role colors for an issue
+		 * Also set the pin colors
+		 *
+		 * @param issue
+		 */
+		function setIssueAssignedRolesColors (issue) {
+			var i, length, roleColour, pinColours = [];
+
+			issue.assignedRolesColors = [];
+			for (i = 0, length = issue.assigned_roles.length; i < length; i += 1) {
+				roleColour = NewIssuesService.getRoleColor(issue.assigned_roles[i]);
+				issue.assignedRolesColors.push(roleColour);
+				pinColours.push(NewIssuesService.hexToRgb(roleColour));
+			}
+
+			//NewIssuesService.changePinColour(issue._id, pinColours);
 		}
 
 		/* Get the user roles for the project */
@@ -263,6 +277,11 @@
 				}
 			}
 		}
+
+		vm.issueAssignChange = function () {
+			setIssueAssignedRolesColors(vm.selectedIssue);
+			vm.showPins();
+		};
 
 		vm.showPins = function () {
 			var i, j, length, assignedRolesLength,

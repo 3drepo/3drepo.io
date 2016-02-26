@@ -7,7 +7,7 @@
 					p {{vm.data.owner}}
 					p {{vm.data.timeStamp}}
 		.issueRoleMarkers(layout="column")
-			div(ng-repeat="roleColor in vm.assignedRolesColors", style="background:{{roleColor}};", flex)
+			div(ng-repeat="roleColor in vm.data.assignedRolesColors", style="background:{{roleColor}};", flex)
 
 	.issueInfo(ng-if="vm.showInfo", layout="row" layout-align="start center")
 			div(flex)

@@ -152,7 +152,7 @@
 					}
 
 					promise = NewIssuesService.assignIssue(vm.data);
-					promise.then(function (data) {
+					promise.then(function () {
 						setAssignedRolesColors();
 						vm.onIssueAssignChange();
 					});
@@ -172,7 +172,7 @@
 		}
 
 		function setAssignedRolesColors () {
-			var i = 0, length = 0;
+			var i, length;
 
             var pinColours = [];
 
