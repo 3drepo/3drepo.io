@@ -277,7 +277,7 @@
 						else {
 							pinColor = [1.0, 1.0, 1.0];
 						}
-						NewIssuesService.fixPin(pinData, pinColor);
+						NewIssuesService.addPin(pinData, pinColor);
 					}
 				}
 			}
@@ -399,7 +399,9 @@
 			});
 		};
 
+		
 		function setupGlobalClickWatch () {
+			/*
 			if (vm.globalClickWatch === null) {
 				vm.globalClickWatch = $scope.$watch(EventService.currentEvent, function (event, oldEvent) {
 					if ((event.type === EventService.EVENT.GLOBAL_CLICK) &&
@@ -450,6 +452,7 @@
 					}
 				});
 			}
+			*/
 		}
 
 		function cancelGlobalClickWatch () {

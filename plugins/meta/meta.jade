@@ -1,9 +1,0 @@
-.metaview(ng-controller='MetaCtrl')
-	#metadata
-		table.metadata-table(ng-repeat="doc in MetaService.metadocs['metadata']")
-			tr
-				th.metadata-title(colspan="2") {{doc.name}}
-			tr(ng-repeat="(key,value) in doc['metadata']")
-				td.metadata-row {{key}}
-				td.metadata-row {{value}}
-

@@ -30,9 +30,11 @@
         };
 
         function link (scope, element) {
+			/*
             element.bind('click', function (event){
                 EventService.send(EventService.EVENT.GLOBAL_CLICK, event);
             });
+			*/
         }
     }
 }());

@@ -188,7 +188,7 @@ function getTree(dbInterface, account, project, branch, revision, sid, namespace
 	}
 };
 
-function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, json, callback) {
+function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, parentProject, json, callback) {
 	var currentSID = current;
 
 	if (current[C.REPO_NODE_LABEL_CHILDREN])
@@ -200,6 +200,7 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, jso
 			var child    = sceneGraph.all[childSID]; // Get object from sceneGraph
 			var account  = utils.coalesce(child["owner"], parentAccount);
 			var project  = child["project"];
+			project      = ((project === undefined) || (project === null)) ? parentProject : project;
 			var refName  = (account === parentAccount) ? project : (account + "/" + project);
 
 			if (child[C.REPO_NODE_LABEL_TYPE] === C.REPO_NODE_TYPE_REF)
@@ -224,7 +225,8 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, jso
 					"_id"       : childID,
 					"shared_id" : childSID,
 					"children"  : [],
-					"project"	: ((project === undefined) || (project === null)) ? null : project
+					"account"	: account,
+					"project"	: project
 				};
 
 				getFullTree(dbInterface, account, project, branch, revision, childRefJSON.path, function(err, refJSON) {
@@ -246,12 +248,13 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, jso
 					"_id"       : childID,
 					"shared_id" : childSID,
 					"children"  : [],
-					"project"	: ((project === undefined) || (project === null)) ? null : project
+					"account"	: account,
+					"project"	: project
 				};
 
 	            child.path = childTreeJSON.path;
 
-				getFullTreeRecurse(dbInterface, sceneGraph, child, account, childTreeJSON, function(err, recurseJSON) {
+				getFullTreeRecurse(dbInterface, sceneGraph, child, account, project, childTreeJSON, function(err, recurseJSON) {
 					if (err.value) {
 						return loopCallback(err);
 					}
@@ -320,6 +323,8 @@ function getFullTree(dbInterface, account, project, branch, revision, path, call
 		}
 
 		var rootJSON = {
+			"account"   : account,
+			"project"   : project,
 			"name"      : root.hasOwnProperty(C.REPO_NODE_LABEL_NAME) ? root[C.REPO_NODE_LABEL_NAME] : uuidToString(root[C.REPO_NODE_LABEL_ID]),
             "path"      : ((path !== null) ? (path + "__") : "") + uuidToString(root[C.REPO_NODE_LABEL_ID]),
 			"_id"       : uuidToString(root[C.REPO_NODE_LABEL_ID]),
@@ -332,7 +337,7 @@ function getFullTree(dbInterface, account, project, branch, revision, path, call
 		// Deals with async errors
 		var treeError = responseCodes.OK;
 
-		getFullTreeRecurse(dbInterface, sceneGraph, root, account, rootJSON, function(err, fullJSON) {
+		getFullTreeRecurse(dbInterface, sceneGraph, root, account, project, rootJSON, function(err, fullJSON) {
 			if (!treeError.value)
 			{
 				if (err.value) {
@@ -341,7 +346,6 @@ function getFullTree(dbInterface, account, project, branch, revision, path, call
 					return callback(err);
 				}
 
-				dbInterface.logger.logInfo("Complete.");
 				callback(responseCodes.OK, fullJSON);
 			}
 		});
@@ -668,93 +672,93 @@ exports.route = function(router)
                     if (err.value) {
                         return err_callback(err);
                     }
-                    
+
                     if (type == "mesh") {
                         var mesh = scene.meshes[params.uid];
                         var meshCounter = 0;
                         var vertsCount = 0;
-                        
+
                         if (mesh) {
                             if (mesh[C.REPO_NODE_LABEL_COMBINED_MAP]) {
                                 // First sort the combined map in order of vertex ID
                                 mesh[C.REPO_NODE_LABEL_COMBINED_MAP].sort(repoNodeMesh.mergeMapSort);
-                                
+
                                 var subMeshes = mesh[C.REPO_NODE_LABEL_COMBINED_MAP];
                                 var subMeshKeys = mesh[C.REPO_NODE_LABEL_COMBINED_MAP].map(function (item) {
                                     return item[C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]
                                 });
-                                
+
                                 var outJSON = {};
-                                
+
                                 outJSON["numberOfIDs"] = subMeshKeys.length;
                                 outJSON["maxGeoCount"] = subMeshKeys.length;
-                                
+
                                 dbInterface(req[C.REQ_REPO].logger).getChildrenByUID(params.account, params.project, params.uid, false, function (err, docs) {
                                     if (err.value) {
                                         return err_callback(err);
                                     }
-                                    
+
                                     var children = repoGraphScene(req[C.REQ_REPO].logger).decode(docs);
-                                    
+
                                     outJSON["appearance"] = [];
-                                    
+
                                     if (children.materials_count) {
                                         for (var i = 0; i < children.materials_count; i++) {
                                             var childID = Object.keys(children.materials)[i];
                                             var child = children.materials[childID];
-                                            
+
                                             var app = {};
                                             app["name"] = childID;
-                                            
+
                                             var material = {};
-                                            
+
                                             if ("diffuse" in child) {
                                                 material["diffuseColor"] = child["diffuse"].join(" ");
                                             }
-                                            
+
                                             if ("emissive" in child) {
                                                 material["emissiveColor"] = child["emissive"].join(" ");
                                             }
-                                            
+
                                             if ("shininess" in child) {
                                                 material["shininess"] = child["shininess"];
                                             }
-                                            
+
                                             if ("specular" in child) {
                                                 material["specularColor"] = child["specular"].join(" ");
                                             }
-                                            
+
                                             if ("opacity" in child) {
                                                 material["transparency"] = 1.0 - child["opacity"];
                                             }
-                                            
+
                                             app["material"] = material;
-                                            
+
                                             outJSON["appearance"].push(app);
                                         }
                                     }
-                                    
+
                                     var bbox = repoNodeMesh.extractBoundingBox(mesh);
                                     outJSON["mapping"] = [];
-                                    
+
                                     for (var i = 0; i < subMeshKeys.length; i++) {
                                         var map = {};
-                                        
+
                                         var currentMesh = mesh[C.REPO_NODE_LABEL_COMBINED_MAP][i];
                                         var currentMeshVFrom = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
                                         var currentMeshVTo = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO];
                                         var numVertices = currentMeshVTo - currentMeshVFrom;
-                                        
+
                                         vertsCount += numVertices;
-                                        
+
                                         // If the number of vertices for this mesh is
                                         // in itself greater than the limit
                                         if (numVertices > C.SRC_VERTEX_LIMIT) {
                                             vertsCount = 0;
-                                            
+
                                             // We need to split the mesh into this many sub-meshes
                                             var numMeshesRequired = Math.ceil(numVertices / C.SRC_VERTEX_LIMIT);
-                                            
+
                                             // Add an entry for all the created meshes
                                             for (var j = 0; j < numMeshesRequired; j++) {
                                                 map["name"] = utils.uuidToString(subMeshKeys[i]) + "_" + j;
@@ -762,9 +766,9 @@ exports.route = function(router)
                                                 map["min"] = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][0].join(" ");
                                                 map["max"] = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][1].join(" ");
                                                 map["usage"] = [params.uid + "_" + meshCounter]
-                                                
+
                                                 meshCounter += 1;
-                                                
+
                                                 outJSON["mapping"].push(map);
                                                 map = {};
                                             }
@@ -775,17 +779,17 @@ exports.route = function(router)
                                                 meshCounter += 1;         // Supermesh counter
                                                 vertsCount = numVertices; // New supermesh has this many vertices in
                                             }
-                                            
+
                                             map["name"] = utils.uuidToString(subMeshKeys[i]);
                                             map["appearance"] = utils.uuidToString(subMeshes[i]["mat_id"]);
                                             map["min"] = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][0].join(" ");
                                             map["max"] = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][1].join(" ");
                                             map["usage"] = [params.uid + "_" + meshCounter]
-                                            
+
                                             outJSON["mapping"].push(map);
                                         }
                                     }
-                                    
+
                                     return err_callback(responseCodes.OK, outJSON);
                                 });
                             }

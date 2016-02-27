@@ -2,13 +2,19 @@
 	"name" : "project",
 	"files": {
 		"js" : [
-			"project/viewermanager.js",
-			"project/viewer.js",
-			"project/gamepad.js",
-			"project/collision.js"
+            "project/threed/logo.js",
+			"project/threed/pinShader.js",
+			"project/threed/pin.js",
+			"project/threed/gamepad.js",
+			"project/threed/collision.js",
+            "project/threed/clipplane.js",
+			"project/threed/viewerutil.js",
+			"project/threed/viewermanager.js",
+			"project/threed/viewer.js"
 		],
 		"jade" : [
 			{"template" : "project/project.jade", "id" : "project.html" },
+			{"template" : "project/viewermanager.jade", "id" : "viewermanager.html" },
 			{"template" : "project/home.jade", "id" : "home.html" }
 		],
 		"angular" : [

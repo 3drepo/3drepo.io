@@ -193,7 +193,11 @@
 				}
 			}
 
-            NewIssuesService.changePinColour(vm.data._id, pinColours);
+			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR,
+			{
+				id: vm.data._id,
+				colours: pinColours
+			});
 		}
 
 		// A user with the same role as the issue creator_role or

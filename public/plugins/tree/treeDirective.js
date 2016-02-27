@@ -175,26 +175,17 @@
 			}
 		}
 
-		$(document).on("objectSelected", function (event, object) {
-			$timeout(function () {
-				if (angular.isUndefined(object)) {
-					vm.viewerSelectedObject = null;
-					vm.filterText = "";
-				} else {
-					var idParts = null;
-					var path;
-
-					if (object["multipart"]) {
-						idParts = object.id.split("__");
-					} else {
-						idParts = object.getAttribute("id").split("__");
-					}
-					path = vm.idToPath[idParts[idParts.length - 1]].split("__");
-
+		$scope.$watch(EventService.currentEvent, function(event) {
+			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+				if (event.value.source !== "tree")
+				{
+					var objectID = event.value.id;
+					var path = vm.idToPath[objectID].split("__");
+					
 					initNodesToShow();
 					expandToSelection(path, 0);
 				}
-			});
+			}
 		});
 
 		vm.toggleTreeNode = function (node) {
@@ -256,23 +247,16 @@
 				}
 			}
 
-			ViewerService.defaultViewer.setVisibilityByID(map, (node.toggleState === "visible"));
+			EventService.send(EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY, {
+				source: "tree",
+				account: node.account,
+				project: node.project, 
+				state: (node.toggleState === "visible"),
+				id: node._id, 
+				name: node.name, 
+				ids : map 
+			});
 		};
-
-		vm.nodeSelected = function (node) {
-			var map = [];
-			var pathArr = [];
-			for (var obj in vm.idToPath) {
-				if (vm.idToPath.hasOwnProperty(obj) && (vm.idToPath[obj].indexOf(node._id) !== -1)) {
-					pathArr = vm.idToPath[obj].split("__");
-					map.push(pathArr[pathArr.length - 1]);
-				}
-			}
-			ViewerService.defaultViewer.selectPartsByID(map, false);
-
-			EventService.send(EventService.EVENT.OBJECT_SELECTED, {id: node._id, name: node.name});
-		};
-
 
 		function setupInfiniteScroll() {
 			// Infinite items
@@ -338,6 +322,26 @@
 			}
 		});
 
+		vm.selectNode = function (node) {
+			var map = [];
+			var pathArr = [];
+			for (var obj in vm.idToPath) {
+				if (vm.idToPath.hasOwnProperty(obj) && (vm.idToPath[obj].indexOf(node._id) !== -1)) {
+					pathArr = vm.idToPath[obj].split("__");
+					map.push(pathArr[pathArr.length - 1]);
+				}
+			}
+			
+			EventService.send(EventService.EVENT.VIEWER.OBJECT_SELECTED, {
+				source: "tree",
+				account: node.account,
+				project: node.project, 
+				id: node._id, 
+				name: node.name, 
+				ids : map 
+			});
+		};
+		
 		vm.filterItemSelected = function (item) {
 			if (vm.currentFilterItemSelected === null) {
 				vm.nodes[item.index].class = "selectedFilterItem";
@@ -350,7 +354,10 @@
 				vm.nodes[item.index].class = "selectedFilterItem";
 				vm.currentFilterItemSelected = item;
 			}
-			TreeService.selectNode(vm.nodes[item.index]._id);
+			
+			var selectedNode = vm.nodes[item.index];
+			
+			vm.selectNode(selectedNode);
 		};
 
 		vm.toggleFilterNode = function (item) {
