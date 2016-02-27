@@ -217,20 +217,15 @@
 			});
 		};
 
-		function highlightPin(id) {
-			EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_PIN, {
-				id: id
-			});
-		}
-
-		function addPin(pin, colours) {
+		function addPin(pin, colours, viewpoint) {
 			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
 				id: pin.id,
 				account: pin.account,
 				project: pin.project,
 				position: pin.position,
 				norm: pin.norm,
-				colours: colours
+				colours: colours,
+				viewpoint: viewpoint
 			});
 
 			//createPinShape("pinPlacement", pin, pinRadius, pinHeight, colours);
@@ -352,7 +347,6 @@
 			deleteComment: deleteComment,
 			setComment: setComment,
 			addPin: addPin,
-			highlightPin: highlightPin,
 			fixPin: fixPin,
 			removePin: removePin,
 			state: state,

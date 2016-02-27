@@ -26,11 +26,7 @@ function clickObject(event) {
 };
 
 function clickPin(event) {
-	var pinGroupObject = event.hitObject.parentElement.parentElement.parentElement;
-	$.event.trigger("pinClick", {
-		fromViewer: true,
-		object: pinGroupObject
-	});
+	$.event.trigger("pinClick", event);
 }
 
 function onMouseOver(event) {
@@ -600,7 +596,11 @@ var Viewer = {};
 		*/
 
 		$(document).on("pinClick", function(event, clickInfo) {
-			self.setApp(clickInfo.object, self.SELECT_COLOUR.EMISSIVE);
+			var pinID = clickInfo.target.parentElement.parentElement.parentElement.parentElement.parentElement.id;
+			callback(self.EVENT.CLICK_PIN,
+			{
+				id : pinID
+			});
 		});
 
 		$(document).on("onMouseDown", function(event, mouseEvent) {
@@ -1062,7 +1062,7 @@ var Viewer = {};
 		};
 
 		this.setCamera = function(pos, viewDir, upDir, animate) {
-			self.updateCamera(pos, upDir, viewDir);
+			self.updateCamera(pos, upDir, viewDir, animate);
 		};
 
 		this.updateCamera = function(pos, up, viewDir, animate) {
@@ -1070,7 +1070,7 @@ var Viewer = {};
 			x3domView.setValueByStr(viewDir.join(","));
 
 			var x3domUp = new x3dom.fields.SFVec3f();
-			x3domUp.setValueByStr(normalize(up).join(","));
+			x3domUp.setValueByStr(ViewerUtil.normalize(up).join(","));
 
 			var x3domFrom = new x3dom.fields.SFVec3f();
 			x3domFrom.setValueByStr(pos.join(","));
@@ -1473,7 +1473,7 @@ var Viewer = {};
 		 ****************************************************************************/
 		self.pins = {};
 
-		this.addPin = function(account, project, id, position, norm, colours) {
+		this.addPin = function(account, project, id, position, norm, colours, viewpoint) {
 			if (self.pins.hasOwnProperty(id)) {
 				errCallback(self.ERROR.PIN_ID_TAKEN);
 			} else {
@@ -1487,10 +1487,28 @@ var Viewer = {};
 					trans = projectInline._x3domNode.getCurrentTransform();
 				}
 
-				self.pins[id] = new Pin(id, self.getScene(), trans, position, norm, self.pinSize, colours);
+				self.pins[id] = new Pin(id, self.getScene(), trans, position, norm, self.pinSize, colours, viewpoint);
 			}
 		};
-
+		
+		this.clickPin = function(id) {
+			if (self.pins.hasOwnProperty(id)) {
+				var pin = self.pins[id];
+				
+				self.highlightPin(id);
+				
+				callback(self.EVENT.SET_CAMERA, {
+					position : pin.viewpoint.position,
+					view_dir : pin.viewpoint.view_dir,
+					up: pin.viewpoint.up
+				}); 
+				
+				callback(self.EVENT.SET_CLIPPING_PLANES, {
+					clippingPlanes: pin.viewpoint.clippingPlanes
+				});
+			}
+		};
+		
 		this.removePin = function(id) {
 			if (self.pins.hasOwnProperty(id)) {
 				delete self.pins[id];
@@ -1501,7 +1519,7 @@ var Viewer = {};
 		this.highlightPin = function(id) {
 			// If a pin was previously highlighted
 			// switch it off
-			if (self.previousHighlightedPin) {
+			if (self.previousHighLightedPin) {
 				self.previousHighLightedPin.highlight();
 				self.previousHighLightedPin = null;
 			}
@@ -1561,9 +1579,10 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	ADD_CLIPPING_PLANE: "VIEWER_ADD_CLIPPING_PLANE",
 	MOVE_CLIPPING_PLANE: "VIEWER_MOVE_CLIPPING_PLANE",
 	CLIPPING_PLANE_READY: "VIEWER_CLIPPING_PLANE_READY",
+	SET_CLIPPING_PLANES: "VIEWER_SET_CLIPPING_PLANES",
 
 	// Pin events
-	HIGHLIGHT_PIN: "VIEWER_HIGHLIGHT_PIN",
+	CLICK_PIN: "VIEWER_CLICK_PIN",
 	CHANGE_PIN_COLOUR: "VIEWER_CHANGE_PIN_COLOUR",
 	REMOVE_PIN: "VIEWER_REMOVE_PIN",
 	ADD_PIN: "VIEWER_ADD_PIN",

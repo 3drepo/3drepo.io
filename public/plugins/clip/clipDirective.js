@@ -124,7 +124,7 @@
 		});
 
 		$scope.$watch(EventService.currentEvent, function (event) {
-			if (event.type === EventService.EVENT.SET_CLIPPING_PLANES) {
+			if (event.type === EventService.EVENT.VIEWER.SET_CLIPPING_PLANES) {
 				vm.clipPlane = null;
 
 				if (event.value.hasOwnProperty("clippingPlanes") && event.value.clippingPlanes.length) {

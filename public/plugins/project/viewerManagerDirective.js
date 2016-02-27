@@ -92,7 +92,8 @@
 								event.value.id,
 								event.value.position,
 								event.value.norm,
-								event.value.colours);
+								event.value.colours,
+								event.value.viewpoint);
 						} else if (event.type === EventService.EVENT.VIEWER.REMOVE_PIN) {
 							vm.manager.getCurrentViewer().removePin(
 								event.value.id
@@ -102,8 +103,8 @@
 								event.value.id,
 								event.value.colours
 							);
-						} else if (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_PIN) {
-							vm.manager.getCurrentViewer().highlightPin(event.value.id);
+						} else if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
+							vm.manager.getCurrentViewer().clickPin(event.value.id);
 						} else if (event.type === EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES) {
 							vm.manager.getCurrentViewer().clearClippingPlanes();
 						} else if (event.type === EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE) {
@@ -136,8 +137,8 @@
 								event.value.position,
 								event.value.view_dir,
 								event.value.up,
-								event.value.animate
-							)
+								event.value.animate ? event.value.animate : true
+							);
 						}
 					});
 				}

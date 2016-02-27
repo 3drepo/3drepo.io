@@ -277,7 +277,8 @@
 						else {
 							pinColor = [1.0, 1.0, 1.0];
 						}
-						NewIssuesService.addPin(pinData, pinColor);
+						
+						NewIssuesService.addPin(pinData, pinColor, vm.issues[i].viewpoint);
 					}
 				}
 			}

@@ -41,7 +41,7 @@ var Pin = {};
 	 * @param {number} percentage - Percentage along the bounding box to clip
 	 * @param {number} clipDirection - Direction of clipping (-1 or 1)
 	 */
-	Pin = function(id, element, trans, position, norm, scale, colours) {
+	Pin = function(id, element, trans, position, norm, scale, colours, viewpoint) {
 		var self = this;
 		
 		self.id = id;
@@ -51,6 +51,7 @@ var Pin = {};
 		self.element = element;
 		self.trans = trans;
 		self.scale = scale;
+		self.viewpoint = viewpoint;
 
 		self.ghostConeIsHighlighted = null;
 		self.coneIsHighlighted = null;
@@ -129,8 +130,10 @@ var Pin = {};
 	{
 		var self = this;
 		
-		var depthMode = self.highlighted ? "LESS" : "ALWAYS";
-		var highlighted = (!self.highlighted).toString();
+		self.highlighted = !self.highlighted;
+		
+		var depthMode = self.highlighted ? "ALWAYS" : "LESS" ;
+		var highlighted = self.highlighted.toString();
 		
 		self.pinHeadIsHighlighted.setAttribute("value", highlighted);
 		self.ghostPinHeadIsHighlighted.setAttribute("value", highlighted);
