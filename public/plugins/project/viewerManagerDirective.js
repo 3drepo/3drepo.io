@@ -32,8 +32,6 @@
 		};
 	}
 
-	ViewerManagerCtrl.$inject = ["$element"];
-
 	ViewerManagerCtrl.$inject = ["$scope", "$q", "$element", "EventService"];
 
 	function ViewerManagerCtrl($scope, $q, $element, EventService) {

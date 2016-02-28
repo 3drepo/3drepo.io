@@ -35,35 +35,20 @@
 			bindToController: true
 		};
 
-		function coalesceWithState(scope, attrs, name)
-		{
-			if (attrs[name] === "")
-			{
-				scope.fromState[name] = true;
-				scope[name] = StateManager.state[name];
-			} else {
-				scope[name] = attrs[name];	
-			}
-		}
-
 		function link (scope, element, attrs)
-		{
-			scope.fromState = {};
+		{			
+			scope.account  = attrs.account;
+			scope.project  = attrs.project;
+			scope.branch   = attrs.branch;
+			scope.revision = attrs.revision;
 			
-			coalesceWithState(scope, attrs, "account");
-			coalesceWithState(scope, attrs, "project");
-			coalesceWithState(scope, attrs, "branch");
-			coalesceWithState(scope, attrs, "revision");
-
 			scope.name     = attrs.name;
-
-			scope.init();
 		}
 	}
 
-	ViewerCtrl.$inject = ["$scope", "$element", "StateManager", "EventService"];
+	ViewerCtrl.$inject = ["$scope", "$element", "EventService"];
 
-	function ViewerCtrl ($scope, $element, StateManager, EventService)
+	function ViewerCtrl ($scope, $element, EventService)
 	{
 		var v = this;
 		
@@ -98,29 +83,6 @@
 			
 			$scope.reload();
 		};
-
-		$scope.state = StateManager.state;
-
-		var watchGroup = [];
-		
-		for(var stateVar in $scope.fromState)
-		{
-			if ($scope.fromState.hasOwnProperty(stateVar)) {
-				watchGroup.push("state." + stateVar);
-			}
-		}
-		
-		$scope.$watchGroup(watchGroup, function(oldValue, newValue) {
-			if (newValue.length)
-			{
-				$scope.account = $scope.fromState.account ? StateManager.state.account : $scope.account;
-				$scope.project = $scope.fromState.project ? StateManager.state.project : $scope.project;
-				$scope.branch = $scope.fromState.branch ? StateManager.state.branch : $scope.branch;			
-				$scope.revision = $scope.fromState.revision ? StateManager.state.revision : $scope.revision;
-			
-				$scope.reload();
-			}	
-		});
 				
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if (event.type === EventService.EVENT.PROJECT_SETTINGS_READY)

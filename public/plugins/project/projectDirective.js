@@ -173,7 +173,13 @@
 			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelContent);
 			
 			// No parameters means load from state variables
-			EventService.send(EventService.EVENT.CREATE_VIEWER, {name: "default"});
+			EventService.send(EventService.EVENT.CREATE_VIEWER, {
+				name: "default",
+				account: StateManager.state.account,
+				project: StateManager.state.project,
+				branch: StateManager.state.branch,
+				revision: StateManager.state.revision
+			});
 		});
 	}
 }());
