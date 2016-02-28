@@ -15,288 +15,334 @@
  **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-var Oculus = function(viewer) {
-	var self = this;
+var Oculus = {};
 
-	this.rtLeft		= null;
-	this.rtRight	= null;
+(function() {
+	"use strict";
 
-	this.lastW		= null;
-	this.lastH		= null;
+	Oculus = function(viewer) {
+		var self = this;
 
-	this.vrHMD		= null;
-	this.vrSensor	= null;
+		this.rtLeft		= null;
+		this.rtRight	= null;
 
-	this.IPD		= 0.0064;
+		this.lastW		= null;
+		this.lastH		= null;
 
-	this.enabled	= false;
+		this.vrHMD		= null;
+		this.vrSensor	= null;
 
-	this.oculus		= null;
+		this.IPD		= 0.0064;
 
-	this.viewer		= viewer;
+		this.enabled	= false;
 
-	this.switchVR = function()
-	{
-		var scene = self.viewer.scene;
+		this.oculus		= null;
 
-		if (!this.enabled)
+		this.viewer		= viewer;
+
+		this.switchVR = function()
 		{
-			// Add oculus eyes
-			var eyeGroup = document.createElement('group');
-			eyeGroup.setAttribute('def', 'oculus');
-			eyeGroup.setAttribute('render', 'true');
-			this.oculus = eyeGroup;
+			var scene = self.viewer.scene;
 
-			var leftEye = document.createElement('group');
-			leftEye.setAttribute('def', 'left');
-			leftEye.setAttribute('render', 'false');
-			eyeGroup.appendChild(leftEye);
+			if (!this.enabled)
+			{
+				// Add oculus eyes
+				var eyeGroup = document.createElement("group");
+				eyeGroup.setAttribute("def", "oculus");
+				eyeGroup.setAttribute("render", "true");
+				this.oculus = eyeGroup;
 
-			var leftShape = document.createElement('shape');
-			leftShape.setAttribute('isPickable', 'false');
-			leftEye.appendChild(leftShape);
+				var leftEye = document.createElement("group");
+				leftEye.setAttribute("def", "left");
+				leftEye.setAttribute("render", "false");
+				eyeGroup.appendChild(leftEye);
 
-			var leftApp = document.createElement('appearance');
-			leftShape.appendChild(leftApp);
+				var leftShape = document.createElement("shape");
+				leftShape.setAttribute("isPickable", "false");
+				leftEye.appendChild(leftShape);
 
-			var leftTex = document.createElement('renderedtexture');
-			leftTex.setAttribute('id', 'rtLeft');
-			leftTex.setAttribute('stereoMode', 'LEFT_EYE');
-			leftTex.setAttribute('update', 'ALWAYS');
-			leftTex.setAttribute('oculusRiftVersion', '2');
-			leftTex.setAttribute('dimensions', '980 1080 3');
-			leftTex.setAttribute('repeatS', 'false');
-			leftTex.setAttribute('repeatT', 'false');
-			leftTex.setAttribute('interpupillaryDistance', this.IPD);
-			leftApp.appendChild(leftTex);
+				var leftApp = document.createElement("appearance");
+				leftShape.appendChild(leftApp);
 
-			var leftVP = document.createElement('viewpoint');
-			if (self.viewer.getCurrentViewpoint() !== null) {
-				leftVP.setAttribute('use', self.viewer.getCurrentViewpoint().getAttribute('id'));
+				var leftTex = document.createElement("renderedtexture");
+				leftTex.setAttribute("id", "rtLeft");
+				leftTex.setAttribute("stereoMode", "LEFT_EYE");
+				leftTex.setAttribute("update", "ALWAYS");
+				leftTex.setAttribute("oculusRiftVersion", "2");
+				//leftTex.setAttribute("dimensions", "980 1080 3");
+				leftTex.setAttribute("repeatS", "false");
+				leftTex.setAttribute("repeatT", "false");
+				leftTex.setAttribute("interpupillaryDistance", this.IPD);
+				leftApp.appendChild(leftTex);
+
+				var leftVP = document.createElement("viewpoint");
+				if (self.viewer.getCurrentViewpoint() !== null) {
+					leftVP.setAttribute("use", self.viewer.getCurrentViewpoint().getAttribute("id"));
+				}
+				leftVP.setAttribute("containerfield", "viewpoint");
+				leftVP.textContent = " ";
+				leftTex.appendChild(leftVP);
+
+				var leftBground = document.createElement("background");
+				leftBground.setAttribute("use", "viewer_bground");
+				leftBground.setAttribute("containerfield", "background");
+				leftBground.textContent = " ";
+				leftTex.appendChild(leftBground);
+
+				var leftScene = document.createElement("group");
+				leftScene.setAttribute("use", "model__root");
+				leftScene.setAttribute("containerfield", "scene");
+				leftTex.appendChild(leftScene);
+
+				var leftPlane = document.createElement("plane");
+				leftPlane.setAttribute("solid", "false");
+				leftShape.appendChild(leftPlane);
+
+				// Right eye
+				var rightEye = document.createElement("group");
+				rightEye.setAttribute("def", "right");
+				rightEye.setAttribute("render", "false");
+				eyeGroup.appendChild(rightEye);
+
+				var rightShape = document.createElement("shape");
+				rightShape.setAttribute("isPickable", "false");
+				rightEye.appendChild(rightShape);
+
+				var rightApp = document.createElement("appearance");
+				rightShape.appendChild(rightApp);
+
+				var rightTex = document.createElement("renderedtexture");
+				rightTex.setAttribute("id", "rtRight");
+				rightTex.setAttribute("stereoMode", "RIGHT_EYE");
+				rightTex.setAttribute("update", "ALWAYS");
+				rightTex.setAttribute("oculusRiftVersion", "2");
+				//rightTex.setAttribute("dimensions", "980 1080 3");
+				rightTex.setAttribute("repeatS", "false");
+				rightTex.setAttribute("repeatT", "false");
+				rightTex.setAttribute("interpupillaryDistance", this.IPD);
+				rightApp.appendChild(rightTex);
+
+				var rightPlane = document.createElement("plane");
+				rightPlane.setAttribute("solid", "false");
+				rightShape.appendChild(rightPlane);
+
+				var rightVP = document.createElement("viewpoint");
+				if (self.viewer.getCurrentViewpoint() !== null) {
+					rightVP.setAttribute("use", self.viewer.getCurrentViewpoint().getAttribute("id"));
+				}
+				rightVP.setAttribute("containerfield", "viewpoint");
+				rightVP.textContent = " ";
+				rightTex.appendChild(rightVP);
+
+				var rightBground = document.createElement("background");
+				rightBground.setAttribute("use", "viewer_bground");
+				rightBground.setAttribute("containerfield", "background");
+				rightBground.textContent = " ";
+				rightTex.appendChild(rightBground);
+
+				var rightScene = document.createElement("group");
+				rightScene.setAttribute("use", "model__root");
+				rightScene.setAttribute("containerfield", "scene");
+				rightScene.textContent = " ";
+				rightTex.appendChild(rightScene);
+
+				scene.appendChild(eyeGroup);
+
+				// Should this be in a setTimeout
+				leftShape._x3domNode._graph.needCulling = false;
+				rightShape._x3domNode._graph.needCulling = false;
+				eyeGroup._x3domNode._graph.needCulling = false;
+				//leftPlane._x3domNode._graph.needCulling = false;
+				//rightPlane._x3domNode._graph.needCulling = false;
+
+				self.viewer.setGyroscopeStart();
+				self.startVR();
+
+				// Enable EXAMINE mode for compatibility with gyro
+				self.oldNavMode = self.viewer.nav.getAttribute("type");
+				self.viewer.nav.setAttribute("type", "EXAMINE");
+
+				self.viewer.switchFullScreen(self.vrHMD);
+
+				this.enabled = true;
+			} else {
+				this.oculus.parentNode.removeChild(this.oculus);
+
+				this.rtLeft		= null;
+				this.rtRight	= null;
+
+				this.lastW		= null;
+				this.lastH		= null;
+
+				//this.vrHMD		= null;
+				//this.vrSensor	= null;
+
+				this.IPD		= 0.0064;
+
+				this.enabled	= false;
+
+				this.oculus		= null;
+
+				this.enabled = false;
+
+				self.viewer.runtime.enterFrame = function () {};
+				self.viewer.runtime.exitFrame = function () {};
+
+				self.viewer.getViewArea().skipSceneRender = null;
+
+				self.viewer.switchFullScreen(self.vrHMD);
+
+				self.viewer.nav.setAttribute("type", self.oldNavMode);
+				self.oldNavMode = null;
+
+				self.viewer.createBackground();
 			}
-			leftVP.setAttribute('containerfield', 'viewpoint');
-			leftVP.textContent = ' ';
-			leftTex.appendChild(leftVP);
+		};
 
-			var leftBground = document.createElement('background');
-			leftBground.setAttribute('use', 'viewer_bground');
-			leftBground.setAttribute('containerfield', 'background');
-			leftBground.textContent = ' ';
-			leftTex.appendChild(leftBground);
+		this.startVR = function () {
+			self.rtLeft		= $("#rtLeft")[0];
+			self.rtRight	= $("#rtRight")[0];
 
-			var leftScene = document.createElement('group');
-			leftScene.setAttribute('use', 'model__root');
-			leftScene.setAttribute('containerfield', 'scene');
-			leftTex.appendChild(leftScene);
+			self.lastW		= self.viewer.runtime.getWidth();
+			self.lastH		= self.viewer.runtime.getHeight();
 
-			var leftPlane = document.createElement('plane');
-			leftPlane.setAttribute('solid', 'false');
-			leftShape.appendChild(leftPlane);
+			self.viewpoint	= self.viewer.viewpoint;
 
-			// Right eye
-			var rightEye = document.createElement('group');
-			rightEye.setAttribute('def', 'right');
-			rightEye.setAttribute('render', 'false');
-			eyeGroup.appendChild(rightEye);
+			self.viewer.getViewArea().skipSceneRender = true;
 
-			var rightShape = document.createElement('shape');
-			rightShape.setAttribute('isPickable', 'false');
-			rightEye.appendChild(rightShape);
+			self.gyroOrientation = null;
 
-			var rightApp = document.createElement('appearance');
-			rightShape.appendChild(rightApp);
-
-			var rightTex = document.createElement('renderedtexture');
-			rightTex.setAttribute('id', 'rtRight');
-			rightTex.setAttribute('stereoMode', 'RIGHT_EYE');
-			rightTex.setAttribute('update', 'ALWAYS');
-			rightTex.setAttribute('oculusRiftVersion', '2');
-			rightTex.setAttribute('dimensions', '980 1080 3');
-			rightTex.setAttribute('repeatS', 'false');
-			rightTex.setAttribute('repeatT', 'false');
-			rightTex.setAttribute('interpupillaryDistance', this.IPD);
-			rightApp.appendChild(rightTex);
-
-			var rightPlane = document.createElement('plane');
-			rightPlane.setAttribute('solid', 'false');
-			rightShape.appendChild(rightPlane);
-
-			var rightVP = document.createElement('viewpoint');
-			if (self.viewer.getCurrentViewpoint() !== null) {
-				rightVP.setAttribute('use', self.viewer.getCurrentViewpoint().getAttribute('id'));
+			// This code handles gyroscopic sensors on a phone
+			if(window.DeviceOrientationEvent){
+				window.addEventListener("deviceorientation", function (event) {
+					self.gyroOrientation = event;
+				}, false);
 			}
-			rightVP.setAttribute('containerfield', 'viewpoint');
-			rightVP.textContent = ' ';
-			rightTex.appendChild(rightVP);
 
-			var rightBground = document.createElement('background');
-			rightBground.setAttribute('use', 'viewer_bground');
-			rightBground.setAttribute('containerfield', 'background');
-			rightBground.textContent = ' ';
-			rightTex.appendChild(rightBground);
+			self.viewer.runtime.enterFrame = function () {
+				if (self.gyroOrientation)
+				{
+					self.viewer.gyroscope(
+						self.gyroOrientation.alpha,
+						self.gyroOrientation.beta,
+						self.gyroOrientation.gamma
+					);
 
-			var rightScene = document.createElement('group');
-			rightScene.setAttribute('use', 'model__root');
-			rightScene.setAttribute('containerfield', 'scene');
-			rightScene.textContent = ' ';
-			rightTex.appendChild(rightScene);
+					self.gyroOrientation = null;
+				} else if (self.vrSensor) {
+					var state = self.vrSensor.getState();
+					var h     = state.orientation;
 
-			scene.appendChild(eyeGroup);
+					if (h)
+					{
+						var vp     = self.viewer.getCurrentViewpoint()._x3domNode;
+						var flyMat = vp.getViewMatrix().inverse();
+						var q      = new x3dom.fields.Quaternion(h.x, h.y, h.z, h.w);
 
-			// Should this be in a setTimeout
-			leftShape._x3domNode._graph.needCulling = false;
-			rightShape._x3domNode._graph.needCulling = false;
-			eyeGroup._x3domNode._graph.needCulling = false;
-			//leftPlane._x3domNode._graph.needCulling = false;
-			//rightPlane._x3domNode._graph.needCulling = false;
+						flyMat.setRotate(q);
+						vp.setView(flyMat.inverse());
+					}
+				}
+			};
 
-			this.startVR();
+			self.viewer.runtime.exitFrame = function ()
+			{
+				var w = self.viewer.runtime.getWidth() * (window.devicePixelRatio ? window.devicePixelRatio : 1);
+				var h = self.viewer.runtime.getHeight() * (window.devicePixelRatio ? window.devicePixelRatio : 1);
 
-			self.viewer.switchFullScreen(self.vrHMD);
+				// The image should be split across the longest dimension of the screen
+				var rotate = (h > w);
 
-			this.enabled = true;
-		} else {
-			this.oculus.parentNode.removeChild(this.oculus);
+				if (rotate)
+				{
+					self.viewer.runtime.canvas.doc.ctx.stateManager.viewport(0,h / 2.0,w,h);
+					self.viewer.viewer.runtime.canvas.doc._scene._fgnd._webgl.render(self.viewer.viewer.runtime.canvas.doc.ctx.ctx3d, self.rtLeft._x3domNode._webgl.fbo.tex);
 
-			this.rtLeft		= null;
-			this.rtRight	= null;
+					self.viewer.runtime.canvas.doc.ctx.stateManager.viewport(0,0,w,h / 2.0);
+					self.viewer.viewer.runtime.canvas.doc._scene._fgnd._webgl.render(self.viewer.viewer.runtime.canvas.doc.ctx.ctx3d, self.rtRight._x3domNode._webgl.fbo.tex);
+				} else {
+					self.viewer.runtime.canvas.doc.ctx.stateManager.viewport(0,0,w / 2.0,h);
+					self.viewer.viewer.runtime.canvas.doc._scene._fgnd._webgl.render(self.viewer.viewer.runtime.canvas.doc.ctx.ctx3d, self.rtLeft._x3domNode._webgl.fbo.tex);
 
-			this.lastW		= null;
-			this.lastH		= null;
+					self.viewer.runtime.canvas.doc.ctx.stateManager.viewport(w / 2,0,w / 2,h);
+					self.viewer.viewer.runtime.canvas.doc._scene._fgnd._webgl.render(self.viewer.viewer.runtime.canvas.doc.ctx.ctx3d, self.rtRight._x3domNode._webgl.fbo.tex);
+				}
 
-			//this.vrHMD		= null;
-			//this.vrSensor	= null;
+				if (w !== self.lastW || h !== self.lastH)
+				{
+					var half = 0;
 
-			this.IPD		= 0.0064;
+					half = Math.round(w / 2);
 
-			this.enabled	= false;
+					self.rtLeft.setAttribute("dimensions", half + " " + h + " 4");
+					self.rtRight.setAttribute("dimensions", half + " " + h + " 4");
 
-			this.oculus		= null;
+					self.lastW = w;
+					self.lastH = h;
+				}
 
-			this.enabled = false;
+				self.viewer.runtime.triggerRedraw();
+			};
+		};
 
-			self.viewer.runtime.enterFrame = function () {};
-			self.viewer.runtime.exitFrame = function () {};
+		this.changeIPD = function(newIPD) {
+			self.rtLeft.setAttribute("interpupillaryDistance", newIPD);
+			self.rtRight.setAttribute("interpupillaryDistance", newIPD);
+		};
 
-			self.viewer.getViewArea().skipSceneRender = null;
+		this.peturbIPD = function(peturbation) {
+			var oldDistance = parseFloat(self.rtLeft.getAttribute("interpupillaryDistance"));
+			this.changeIPD(oldDistance + peturbation);
+		};
 
-			self.viewer.switchFullScreen(self.vrHMD);
+		this.exitFullscreen = function() {
+			if (!document.webkitIsFullScreen && !document.msFullscreenElement && !document.mozFullScreen && self.enabled) {
+				self.switchVR();
+			}
+		};
 
-			self.viewer.createBackground();
-		}
-	}
+		this.createFullscreenExit = function () {
+			document.addEventListener("webkitfullscreenchange", self.exitFullscreen, false);
+			document.addEventListener("mozfullscreenchange", self.exitFullscreen, false);
+			document.addEventListener("fullscreenchange", self.exitFullscreen, false);
+			document.addEventListener("MSFullscreenChange", self.exitFullscreen, false);
+		};
 
-	this.startVR = function () {
-		self.rtLeft		= $("#rtLeft")[0];
-		self.rtRight	= $("#rtRight")[0];
+		this.init = function(vrdevs) {
+			var i;
 
-		self.lastW		= self.viewer.runtime.getWidth();
-		self.lastH		= self.viewer.runtime.getHeight();
+			// First, find a HMD -- just use the first one we find
+			for (i = 0; i < vrdevs.length; ++i) {
+				if (vrdevs[i] instanceof HMDVRDevice) {
+					self.vrHMD = vrdevs[i];
+					break;
+				}
+			}
 
-		self.viewpoint	= self.viewer.viewpoint;
-
-		self.viewer.getViewArea().skipSceneRender = true;
-
-		self.viewer.runtime.enterFrame = function () {
-			if (!self.vrSensor)
+			if (!self.vrHMD)
 				return;
 
-			var state	= self.vrSensor.getState();
-			var h		= state.orientation;
+			// Then, find that HMD"s position sensor
+			for (i = 0; i < vrdevs.length; ++i) {
+				if (vrdevs[i] instanceof PositionSensorVRDevice &&
+					vrdevs[i].hardwareUnitId === self.vrHMD.hardwareUnitId) {
+					self.vrSensor = vrdevs[i];
+					break;
+				}
+			}
 
-			if (h)
-			{
-				var vp = self.viewer.getCurrentViewpoint()._x3domNode;
-				var flyMat	= vp.getViewMatrix().inverse();
-				var q	= new x3dom.fields.Quaternion(h.x, h.y, h.z, h.w);
-
-				flyMat.setRotate(q);
-				vp.setView(flyMat.inverse());
+			if (!self.vrHMD || !self.vrSensor) {
+				console.error("No HMD found");
+				return;
 			}
 		};
 
-		self.viewer.runtime.exitFrame = function ()
-		{
-			var w = self.viewer.runtime.getWidth();
-			var h = self.viewer.runtime.getHeight();
-
-			self.viewer.runtime.canvas.doc.ctx.stateManager.viewport(0,0,w / 2,h);
-			self.viewer.viewer.runtime.canvas.doc._scene._fgnd._webgl.render(self.viewer.viewer.runtime.canvas.doc.ctx.ctx3d, self.rtLeft._x3domNode._webgl.fbo.tex);
-
-			self.viewer.runtime.canvas.doc.ctx.stateManager.viewport(w / 2,0,w / 2,h);
-			self.viewer.viewer.runtime.canvas.doc._scene._fgnd._webgl.render(self.viewer.viewer.runtime.canvas.doc.ctx.ctx3d, self.rtRight._x3domNode._webgl.fbo.tex);
-
-			if (w != self.lastW || h != self.lastH)
-			{
-				var half = Math.round(w / 2);
-				self.rtLeft.setAttribute('dimensions',  half + ' ' + h + ' 4');
-				self.rtRight.setAttribute('dimensions', half + ' ' + h + ' 4');
-
-				self.lastW = w;
-				self.lastH = h;
-			}
-
-			self.viewer.runtime.triggerRedraw();
-		};
-	}
-
-	this.changeIPD = function(newIPD) {
-		self.rtLeft.setAttribute("interpupillaryDistance", newIPD);
-		self.rtRight.setAttribute("interpupillaryDistance", newIPD);
-	}
-
-	this.peturbIPD = function(perturbation) {
-		var oldDistance = parseFloat(self.rtLeft.getAttribute("interpupillaryDistance"));
-		this.changeIPD(oldDistance + peturbation);
-	}
-
-	this.exitFullscreen = function() {
-		if (!document.webkitIsFullScreen && !document.msFullscreenElement && !document.mozFullScreen && self.enabled) {
-            self.switchVR();
-        }
-	}
-
-	this.createFullscreenExit = function () {
-		document.addEventListener('webkitfullscreenchange', self.exitFullscreen, false);
-		document.addEventListener('mozfullscreenchange', self.exitFullscreen, false);
-		document.addEventListener('fullscreenchange', self.exitFullscreen, false);
-		document.addEventListener('MSFullscreenChange', self.exitFullscreen, false);
-	}
-
-	this.init = function(vrdevs) {
-		var i;
-
-		// First, find a HMD -- just use the first one we find
-		for (i = 0; i < vrdevs.length; ++i) {
-			if (vrdevs[i] instanceof HMDVRDevice) {
-				self.vrHMD = vrdevs[i];
-				break;
-			}
+		if (navigator.getVRDevices) {
+			navigator.getVRDevices().then(this.init);
 		}
 
-		if (!self.vrHMD)
-			return;
-
-		// Then, find that HMD's position sensor
-		for (i = 0; i < vrdevs.length; ++i) {
-			if (vrdevs[i] instanceof PositionSensorVRDevice &&
-				vrdevs[i].hardwareUnitId == self.vrHMD.hardwareUnitId) {
-				self.vrSensor = vrdevs[i];
-				break;
-			}
-		}
-
-		if (!self.vrHMD || !self.vrSensor) {
-			alert("Didn't find a HMD and sensor!");
-			return;
-		}
-
-	}
-
-	if (navigator.getVRDevices)
-		navigator.getVRDevices().then(this.init);
-
-	this.createFullscreenExit();
-	//http://blog.tojicode.com/2014/07/bringing-vr-to-chrome.html
-	//http://blog.bitops.com/blog/2014/08/20/updated-firefox-vr-builds/
-};
+		this.createFullscreenExit();
+		//http://blog.tojicode.com/2014/07/bringing-vr-to-chrome.html
+		//http://blog.bitops.com/blog/2014/08/20/updated-firefox-vr-builds/
+	};
+}());
