@@ -15,58 +15,44 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(function () {
+(function() {
 	"use strict";
 
 	angular.module('3drepo')
 		.factory('TreeService', TreeService);
 
-	TreeService.$inject = ["$http", "$q", "StateManager", "ViewerService", "serverConfig"];
+	TreeService.$inject = ["$http", "$q", "StateManager", "EventService", "serverConfig"];
 
-	function TreeService($http, $q, StateManager, ViewerService, serverConfig) {
-		var state = StateManager.state,
-			currentSelectedNodeId = null;
+	function TreeService($http, $q, StateManager, EventService, serverConfig) {
+		var state = StateManager.state;
 
-		var init = function () {
+		var init = function() {
 			var deferred = $q.defer(),
 				url = "/" + state.account + "/" + state.project + "/revision/" + state.branch + "/head/fulltree.json";
 
 			$http.get(serverConfig.apiUrl(url))
-				.then(function (json) {
+				.then(function(json) {
 					deferred.resolve(json.data);
 				});
 
 			return deferred.promise;
 		};
 
-		var search = function (searchString) {
+		var search = function(searchString) {
 			var deferred = $q.defer(),
 				url = "/" + state.account + "/" + state.project + "/revision/" + state.branch + "/head/" + searchString + "/searchtree.json";
 
 			$http.get(serverConfig.apiUrl(url))
-				.then(function (json) {
+				.then(function(json) {
 					deferred.resolve(json);
 				});
 
 			return deferred.promise;
 		};
 
-		var selectNode = function (nodeId) {
-			console.log(nodeId);
-			if (nodeId === currentSelectedNodeId) {
-				currentSelectedNodeId = null;
-				$(document).trigger("objectSelected", [undefined, true]);
-			} else {
-				var rootObj = document.getElementById("model__" + nodeId);
-				currentSelectedNodeId = nodeId;
-				$(document).trigger("objectSelected", [rootObj, true]);
-			}
-		};
-
 		return {
 			init: init,
-			search: search,
-			selectNode: selectNode
+			search: search
 		};
 	}
 }());

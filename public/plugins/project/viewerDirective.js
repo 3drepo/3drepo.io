@@ -21,59 +21,77 @@
 	angular.module("3drepo")
 	.directive("viewer", viewer);
 
-	viewer.$inject = ["$compile", "StateManager"];
+	viewer.$inject = ["StateManager"];
 
-	function viewer($compile, StateManager) {
+	function viewer(StateManager) {
 		return {
 			restrict: "E",
 			scope: { 
-				manager: "=",
-				handle:  "@"
+				manager: "="
 			},
 			link: link,
 			controller: ViewerCtrl,
-			controllerAs: 'v',
+			controllerAs: "v",
 			bindToController: true
 		};
 
 		function link (scope, element, attrs)
-		{
-
-			scope.account = angular.isUndefined(attrs.account) ? 
-							StateManager.state.account :
-							attrs.account;
-
-			scope.project = angular.isUndefined(attrs.project) ? 
-							StateManager.state.project :
-							attrs.project;
-
-			scope.branch  = angular.isUndefined(attrs.branch) ? 
-							StateManager.state.branch :
-							attrs.branch;
-
-			scope.revision = angular.isUndefined(attrs.revision) ? 
-							StateManager.state.revision :
-							attrs.revision;
-
-			scope.name     = angular.isUndefined(attrs.name) ?
-							"viewer" : attrs.name;
-
+		{			
+			scope.account  = attrs.account;
+			scope.project  = attrs.project;
+			scope.branch   = attrs.branch;
+			scope.revision = attrs.revision;
+			
+			scope.name     = attrs.name;
 		}
 	}
 
-	ViewerCtrl.$inject = ["$scope", "$element", "StateManager", "ViewerService"];
+	ViewerCtrl.$inject = ["$scope", "$element", "EventService"];
 
-	function ViewerCtrl ($scope, $element, StateManager, ViewerService)
+	function ViewerCtrl ($scope, $element, EventService)
 	{
 		var v = this;
-		var state = StateManager.state;
+		
+		function errCallback(errorType, errorValue)
+		{
+			EventService.sendError(errorType, errorValue);
+		}
+		
+		function eventCallback(type, value)
+		{
+			EventService.send(type, value);
+		}
+		
+		$scope.reload = function() {
+			v.viewer.loadModel($scope.account, $scope.project, $scope.branch, $scope.revision);
+		};
+		
+		$scope.init = function() {
+			v.viewer = new Viewer($scope.name, $element[0], v.manager, eventCallback, errCallback);
+			
+			// TODO: Move this so that the attachment is contained
+			// within the plugins themselves.
+			// Comes free with oculus support and gamepad support
+			v.oculus     = new Oculus(v.viewer);
+			v.gamepad    = new Gamepad(v.viewer);
+						
+			v.gamepad.init();
 
-		$scope.viewer = v.manager.getDefaultViewer();
-		ViewerService.init(v.manager, $scope.viewer);
+			v.collision  = new Collision(v.viewer);
 
-		$scope.$watchGroup(["state.branch", "state.revision"], function() {
-			ViewerService.loadModel();
+			v.viewer.init();
+			
+			$scope.reload();
+		};
+				
+		$scope.$watch(EventService.currentEvent, function(event) {
+			if (event.type === EventService.EVENT.PROJECT_SETTINGS_READY)
+			{
+				if (event.value.account === $scope.account && event.value.project === $scope.project)
+				{
+					v.viewer.updateSettings(event.value.settings);
+				}
+			}
 		});
-
 	}
 }());

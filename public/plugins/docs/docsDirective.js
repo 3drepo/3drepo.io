@@ -26,8 +26,8 @@
 			restrict: 'EA',
 			templateUrl: 'docs.html',
 			scope: {
-				height: "=",
-				show: "="
+				show: "=",
+				onSetContentHeight: "&"
 			},
 			controller: DocsCtrl,
 			controllerAs: 'vm',
@@ -35,11 +35,14 @@
 		};
 	}
 
-	DocsCtrl.$inject = ["$scope", "$mdDialog", "EventService", "DocsService"];
+	DocsCtrl.$inject = ["$scope", "$mdDialog", "$timeout", "EventService", "DocsService"];
 
-	function DocsCtrl($scope, $mdDialog, EventService, DocsService) {
+	function DocsCtrl($scope, $mdDialog, $timeout, EventService, DocsService) {
 		var vm = this,
-			promise;
+			promise,
+			docTypeHeight = 50,
+			allDocTypesHeight,
+			currentOpenDocType = null;
 
 		vm.showDocsGetProgress = false;
 		vm.showInfo = true;
@@ -51,22 +54,36 @@
 				vm.showInfo = false;
 				vm.progressInfo = "Loading documents for " + object.name;
 				vm.showDocsGetProgress = true;
-				promise = DocsService.getDocs(object.id);
+				promise = DocsService.getDocs(object.account, object.project, object.id);
 				//promise = DocsService.getDocs("55d6ae0c-5d62-4fe7-8bd5-5c84fb90df1c");
 				promise.then(function (data) {
-					vm.docs = data.meta;
+					var docType;
+					console.log(data);
 					vm.showDocsGetProgress = false;
-					vm.showInfo = (vm.docs.length === 0);
+					vm.docs = data;
+					vm.showInfo = (Object.keys(vm.docs).length === 0);
 					if (vm.showInfo) {
 						vm.info = "No documents exist for object: " + object.name;
+					}
+					else {
+						allDocTypesHeight = 0;
+						// Collapse all doc types initially
+						for (docType in vm.docs) {
+							if (vm.docs.hasOwnProperty(docType)) {
+								vm.docs[docType].show = false;
+								allDocTypesHeight += docTypeHeight;
+							}
+						}
+						// Set the content height
+						vm.onSetContentHeight({height: allDocTypesHeight});
 					}
 				});
 			}
 		}
 
-		$scope.$watch(EventService.currentEvent, function (newValue) {
-			if (newValue.type === EventService.EVENT.OBJECT_SELECTED) {
-				getObjectsDocs(newValue.value);
+		$scope.$watch(EventService.currentEvent, function (event) {
+			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+				getObjectsDocs(event.value);
 			}
 		});
 
@@ -76,7 +93,7 @@
 			vm.showDocLoadProgress = true;
 			$mdDialog.show({
 				controller: docsDialogController,
-				templateUrl: 'docsDialog.html',
+				templateUrl: "docsDialog.html",
 				parent: angular.element(document.body),
 				targetEvent: event,
 				clickOutsideToClose:true,
@@ -95,20 +112,48 @@
 			$scope.closeDialog();
 		}
 
-		function docsDialogController($scope) {
+		function docsDialogController() {
 		}
 
-		$(document).on("objectSelected", function(event, objectData) {
-			var object = [];
-			if (angular.isDefined(objectData)) {
-				object = objectData.id.split("__");
-				getObjectsDocs({id: object[object.length - 1], name: object[object.length - 2]});
+		/**
+		 * Open and close doc types, allowing only one doc type open at a time
+		 *
+		 * @param docType
+		 */
+		vm.toggleItem = function (docType) {
+			var itemsHeight,
+				metaDataItemHeight = 24; // It could be higher for items with long text but ignore that
+
+			if (currentOpenDocType === null) {
+				// No doc type is open so open this doc type
+				vm.docs[docType].show = true;
+				currentOpenDocType = docType;
 			}
 			else {
-				vm.docs = [];
-				vm.showInfo = true;
-				vm.info = "No object currently selected";
+				// Close the current doc type
+				vm.docs[currentOpenDocType].show = false;
+				if (currentOpenDocType === docType) {
+					// No doc type currently open
+					currentOpenDocType = null;
+				}
+				else {
+					// Open this doc type and set the currently open doc type
+					vm.docs[docType].show = true;
+					currentOpenDocType = docType;
+				}
 			}
-		});
+
+			// Set the content height
+			if (currentOpenDocType === null) {
+				// No currently open doc type
+				vm.onSetContentHeight({height: allDocTypesHeight});
+			}
+			else {
+				if (currentOpenDocType === "Meta Data") {
+					itemsHeight = Object.keys(vm.docs[currentOpenDocType].data[0].metadata).length * metaDataItemHeight;
+				}
+				vm.onSetContentHeight({height: allDocTypesHeight + itemsHeight});
+			}
+		};
 	}
 }());

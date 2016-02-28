@@ -1,0 +1,10 @@
+div(ng-repeat="(name, viewer) in vm.viewers")
+	viewer(
+		node="node"
+		account = "{{viewer.account}}"
+		project = "{{viewer.project}}"
+		branch = "{{viewer.branch}}"
+		revision = "{{viewer.revision}}"
+		manager = "vm.manager"
+	)
+		
