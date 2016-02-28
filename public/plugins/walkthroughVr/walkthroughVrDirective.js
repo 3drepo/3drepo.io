@@ -31,9 +31,9 @@
 		};
 	}
 
-	WalkthroughVrCtrl.$inject = ["$http", "$interval", "ViewerService"];
+	WalkthroughVrCtrl.$inject = ["$http", "$interval", "EventService"];
 
-	function WalkthroughVrCtrl($http, $interval, ViewerService) {
+	function WalkthroughVrCtrl($http, $interval, EventService) {
 		var vm = this;
 
 		// Get the exported frames
@@ -41,8 +41,7 @@
 			.then(function (response) {
 				var lines, line,
 					i, length,
-					frames = [], frame, numFrames,
-					defaultViewer = ViewerService.defaultViewer;
+					frames = [], frame, numFrames;
 
 				// Convert the frames to viewer frames
 				lines = response.data.split("\n");
@@ -55,18 +54,21 @@
 						up: [parseFloat(line[6]), parseFloat(line[8]), -1 * parseFloat(line[7])]
 					});
 				}
-				console.log(frames);
+				//console.log(frames);
 
 				// Loop through the viewer frames
 				frame = 0;
 				numFrames = frames.length;
 				$interval(function () {
-					console.log(frames[frame].position);
-					defaultViewer.updateCamera(
-						frames[frame].position,
-						frames[frame].up,
-						frames[frame].view_dir
-					);
+					//console.log(frames[frame].position);
+					EventService.send(EventService.EVENT.VIEWER.SET_CAMERA,
+					{
+						position: frames[frame].position,
+						up:       frames[frame].up,
+						view_dir: frames[frame].view_dir,
+						animate: false
+					});
+
 					if (frame === (numFrames - 1)) {
 						frame = 0;
 					}
@@ -74,6 +76,7 @@
 						frame += 1;
 					}
 				}, 33);
+				
 			});
 	}
 }());

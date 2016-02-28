@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 	.directive("viewer", viewer);
 
-	viewer.$inject = ["StateManager"];
 
-	function viewer(StateManager) {
+
+	function viewer() {
 		return {
 			restrict: "E",
 			scope: { 
@@ -43,6 +43,16 @@
 			scope.revision = attrs.revision;
 			
 			scope.name     = attrs.name;
+			
+			if (angular.isDefined(attrs.autoInit))
+			{
+				scope.init();
+			
+				if (angular.isDefined(attrs.vrMode))
+				{
+					scope.enterVR();
+				}
+			}
 		}
 	}
 
@@ -82,6 +92,10 @@
 			v.viewer.init();
 			
 			$scope.reload();
+		};
+		
+		$scope.enterVR = function() {
+			v.oculus.switchVR();	
 		};
 				
 		$scope.$watch(EventService.currentEvent, function(event) {

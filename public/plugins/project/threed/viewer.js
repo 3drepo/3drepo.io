@@ -171,14 +171,14 @@ var Viewer = {};
 				self.viewer.className = "viewer";
 
 				self.element.appendChild(self.viewer);
-				
+
 				self.scene = document.createElement("Scene");
 				self.scene.setAttribute("onbackgroundclicked", "bgroundClick(event);");
 				self.scene.setAttribute("dopickpass", false);
 				self.viewer.appendChild(self.scene);
 
 				self.pinShader = new PinShader(self.scene);
-				
+
 				self.bground = null;
 				self.currentNavMode = null;
 
@@ -568,12 +568,12 @@ var Viewer = {};
 			obj.multipart = true;
 			obj.id = part.multiPart._nameSpace.name + "__" + part.partID;
 
-			
+
 			callback(self.EVENT.OBJECT_SELECTED, {
 				account: ,
-				project: 
+				project:
 			})
-			
+
 
 			$(document).trigger("objectSelected", obj);
 		});
@@ -1089,7 +1089,8 @@ var Viewer = {};
 			{
 				self.getViewArea().animateTo(viewMatrix, currMatrix);
 			} else {
-				// TODO: Fill this in here
+				self.getCurrentViewpoint()._x3domNode._viewMatrix.setValues(viewMatrix);
+				self.getViewArea()._doc.needRender = true;
 			}
 
 			if (self.linked) {
@@ -1478,11 +1479,11 @@ var Viewer = {};
 				errCallback(self.ERROR.PIN_ID_TAKEN);
 			} else {
 
-				var trans = null;				
+				var trans = null;
 				var projectNameSpace = account + "__" + project;
 
 				if (self.inlineRoots.hasOwnProperty(projectNameSpace))
-				{				
+				{
 					var projectInline = self.inlineRoots[account + "__" + project];
 					trans = projectInline._x3domNode.getCurrentTransform();
 				}
@@ -1490,25 +1491,25 @@ var Viewer = {};
 				self.pins[id] = new Pin(id, self.getScene(), trans, position, norm, self.pinSize, colours, viewpoint);
 			}
 		};
-		
+
 		this.clickPin = function(id) {
 			if (self.pins.hasOwnProperty(id)) {
 				var pin = self.pins[id];
-				
+
 				self.highlightPin(id);
-				
+
 				callback(self.EVENT.SET_CAMERA, {
 					position : pin.viewpoint.position,
 					view_dir : pin.viewpoint.view_dir,
 					up: pin.viewpoint.up
-				}); 
-				
+				});
+
 				callback(self.EVENT.SET_CLIPPING_PLANES, {
 					clippingPlanes: pin.viewpoint.clippingPlanes
 				});
 			}
 		};
-		
+
 		this.removePin = function(id) {
 			if (self.pins.hasOwnProperty(id)) {
 				delete self.pins[id];
@@ -1547,7 +1548,7 @@ var Viewer = {};
 	};
 }());
 
-// Constants and enums 
+// Constants and enums
 var VIEWER_NAV_MODES = Viewer.prototype.NAV_MODES = {
 	HELICOPTER: "HELICOPTER",
 	WALK: "WALK",
