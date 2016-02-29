@@ -27,11 +27,10 @@
 			templateUrl: 'issues.html',
 			scope: {
 				filterText: "=",
-				height: "=",
 				showAdd: "=",
 				options: "=",
 				selectedOption: "=",
-				onSetContentHeight: "&"
+				onContentHeightRequest: "&"
 			},
 			controller: IssuesCtrl,
 			controllerAs: 'vm',
@@ -50,7 +49,8 @@
 			sortOldestFirst = true,
 			showClosed = false,
 			issue,
-			rolesToFilter = [];
+			rolesToFilter = [],
+			issuesHeight;
 
 		vm.pickedAccount = null;
 		vm.pickedProject = null;
@@ -68,6 +68,7 @@
 		vm.availableRoles = [];
 		vm.projectUserRoles = [];
 
+		/* Get all the Issues */
 		promise = NewIssuesService.getIssues();
 		promise.then(function (data) {
 			vm.showProgress = false;
@@ -77,38 +78,54 @@
 			vm.showPins();
 		});
 
+		/* Get all the available roles for the project */
 		rolesPromise = NewIssuesService.getRoles();
 		rolesPromise.then(function (data) {
 			vm.availableRoles = data;
 		});
 
+		/* Get the user roles for the project */
 		projectUserRolesPromise = NewIssuesService.getUserRolesForProject();
 		projectUserRolesPromise.then(function (data) {
 			vm.projectUserRoles = data;
 		});
 
+		/* Handle toggle of adding a new issue */
 		$scope.$watch("vm.showAdd", function (newValue) {
+			var addIssueHeight = 225;
 			if (newValue) {
 				setupGlobalClickWatch();
+				vm.onContentHeightRequest({height: issuesHeight + addIssueHeight});
 			}
 			else {
 				cancelGlobalClickWatch();
 				NewIssuesService.removePin();
+				vm.onContentHeightRequest({height: issuesHeight});
 			}
 		});
 
+		/* Handle input to the title field of a new issue */
 		$scope.$watch("vm.title", function (newValue) {
 			if (angular.isDefined(newValue)) {
-				vm.saveIssueDisabled = (newValue === "");
+				vm.saveIssueDisabled = (newValue.toString() === "");
 			}
 		});
 
+		/**
+		 * Escape CSS characters in string
+		 *
+		 * @param string
+		 * @returns {*}
+		 */
 		function escapeCSSCharacters(string)
 		{
 			// Taken from http://stackoverflow.com/questions/2786538/need-to-escape-a-special-character-in-a-jquery-selector-string
 			return string.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, "\\$&");
 		}
 
+		/**
+		 * Setup the issues to show
+		 */
 		function setupIssuesToShow () {
 			var i = 0, j = 0, length = 0, roleAssigned;
 
@@ -214,7 +231,6 @@
 					if (vm.issuesToShow.length === 0) {
 						vm.showIssuesInfo = true;
 						vm.issuesInfo = "There are no issues that contain the filter text";
-						vm.onSetContentHeight({height: 210});
 					}
 					else {
 						vm.showIssuesInfo = false;
@@ -324,6 +340,9 @@
 			}
 		};
 
+		/**
+		 * Save an issue
+		 */
 		vm.saveIssue = function () {
 			if (vm.projectUserRoles.length === 0) {
 				vm.showAlert("You do not have permission to save an issue");
@@ -359,11 +378,10 @@
 								vm.comment = "";
 							}
 
-							vm.showAdd = false;
-
 							setupIssuesToShow();
 							vm.showPins();
-							setContentHeight();
+
+							vm.showAdd = false;
 						});
 					}
 				}
@@ -498,14 +516,16 @@
 		 * Set the content height.
 		 */
 		function setContentHeight () {
-			var i, length, height = 0, issueMinHeight = 58, maxStringLength = 32, lineHeight = 18;
+			var i, length, issueMinHeight = 56, maxStringLength = 32, lineHeight = 18;
+
+			issuesHeight = 0;
 			for (i = 0, length = vm.issuesToShow.length; (i < length); i += 1) {
-				height += issueMinHeight;
+				issuesHeight += issueMinHeight;
 				if (vm.issuesToShow[i].title.length > maxStringLength) {
-					height += lineHeight * Math.floor((vm.issuesToShow[i].title.length - maxStringLength) / maxStringLength);
+					issuesHeight += lineHeight * Math.floor((vm.issuesToShow[i].title.length - maxStringLength) / maxStringLength);
 				}
 			}
-			vm.onSetContentHeight({height: height});
+			vm.onContentHeightRequest({height: issuesHeight});
 		}
 	}
 }());

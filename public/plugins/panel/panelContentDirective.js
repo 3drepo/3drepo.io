@@ -27,7 +27,9 @@
             templateUrl: 'panelContent.html',
             scope: {
                 position: "=",
-                contentData: "="
+                contentData: "=",
+				onHeightRequest: "&",
+				onShowFilter: "&"
             },
             controller: PanelContentCtrl,
             controllerAs: 'vm',
@@ -43,17 +45,7 @@
             contentItem = "",
             currentSortIndex,
             filter = null,
-			currentHeight = 0,
-			contentHeightExtra = 20,
-			toggledContentHeight = 0,
-			minimized = false,
-			maxHeight,
-			maxPossibleHeight,
-			atMaxHeight = false,
-			heightChange = 0,
-			setHeight = 0, // The height set by the content
-			otherContentHeight = 0, // The height of all the other panel contents
-			panelGap = 40; // The total of the top and bottom gap for the panel in the page
+			contentHeight;
 
 		vm.issuesUrl = serverConfig.apiUrl(StateManager.state.account + "/" + StateManager.state.project + "/issues.html");
 
@@ -63,65 +55,22 @@
 		vm.visibleStatus = false;
 		vm.showClearFilterButton = false;
 
-		/**
-		 * Sets the height of the content from the content's directive.
-		 * @param height
-		 */
-		vm.setContentHeight = function (height) {
-			if (height < (maxHeight - heightChange)) {
-				setHeight = height;
-				vm.contentHeight = height;
-				atMaxHeight = false;
-			}
-			else {
-				setHeight = maxHeight;
-				vm.contentHeight = (maxHeight - heightChange);
-				atMaxHeight = true;
-			}
-			currentHeight = vm.contentHeight;
-		};
-
-		// Set content initially to min height if it exists
-		/*
-		if (vm.contentData.hasOwnProperty("minHeight")) {
-			vm.setContentHeight(vm.contentData.minHeight);
-		}
-		*/
-
 		$scope.$watch("vm.contentData.type", function (newValue) {
 			if (angular.isDefined(newValue)) {
 				content = angular.element($element[0].querySelector('#content'));
 				contentItem = angular.element(
 					"<" + vm.contentData.type + " " +
 						"filter-text='vm.filterText' " +
-						"height='vm.contentHeight' " +
 						"show='vm.contentData.show' " +
 						"show-add='vm.addStatus' " +
 						"visible='vm.visibleStatus' " +
-						"on-set-content-height='vm.setContentHeight(height)' " +
 						"options='vm.contentData.options' " +
+						"on-content-height-request='vm.onContentHeightRequest(height)' " +
 						"selected-option='vm.selectedOption'>" +
 					"</" + vm.contentData.type + ">"
 				);
 				content.append(contentItem);
 				$compile(contentItem)($scope);
-
-				// If the panel content appears by default inform other default panel contents
-				/*
-				if (vm.contentData.show) {
-					$timeout(function () {
-						EventService.send(
-							EventService.EVENT.PANEL_CONTENT_TOGGLED,
-							{
-								position: vm.position,
-								type: vm.contentData.type,
-								show: vm.contentData.show,
-								contentHeight: vm.contentData.maxHeight
-							}
-						);
-					});
-				}
-				*/
 			}
 		});
 
@@ -152,76 +101,10 @@
 		});
 
 		$scope.$watch(EventService.currentEvent, function (event) {
-			var offset = 48;
-
 			if (event.type === EventService.EVENT.TOGGLE_HELP) {
 				vm.showHelp = !vm.showHelp;
 			}
-			else if ((event.type === EventService.EVENT.PANEL_CONTENT_TOGGLED) &&
-					 (event.value.position === vm.position) &&
-					 (event.value.type !== vm.contentData.type)) {
-				// Calculate the height of the content when other content is toggled
-				if (vm.contentData.hasOwnProperty("minHeight")) {
-					toggledContentHeight = event.value.contentHeight + contentHeightExtra; // The height of some other content toggled
-
-					if (event.value.show)  {
-						// An other content is shown
-						otherContentHeight += toggledContentHeight;
-						if ((otherContentHeight + vm.contentHeight) > maxPossibleHeight) {
-							vm.contentHeight -= toggledContentHeight;
-						}
-					}
-					else {
-						// An other content is hidden
-						otherContentHeight -= toggledContentHeight;
-						if ((otherContentHeight + setHeight) < maxPossibleHeight) {
-							vm.contentHeight = setHeight;
-						}
-						else {
-							if (vm.contentHeight !== vm.contentData.minHeight) {
-								vm.contentHeight += toggledContentHeight;
-							}
-						}
-					}
-
-					if (vm.contentHeight < vm.contentData.minHeight) {
-						vm.contentHeight = vm.contentData.minHeight;
-					}
-
-					currentHeight = vm.contentHeight;
-				}
-			}
-			else if (event.type === EventService.EVENT.WINDOW_HEIGHT_CHANGE) {
-				if (event.value.change === 0) {
-					maxHeight = event.value.height - panelGap - offset;
-					maxPossibleHeight = event.value.height - panelGap - offset;
-				}
-				else if (vm.contentData.hasOwnProperty("minHeight")) {
-					heightChange = event.value.change;
-					if (!minimized) {
-						if ((setHeight >= (maxHeight - heightChange - otherContentHeight))) {
-							currentHeight = maxHeight - heightChange - otherContentHeight;
-							if (currentHeight > vm.contentData.minHeight) {
-								vm.contentHeight = currentHeight;
-							}
-						}
-					}
-				}
-			}
 		});
-
-		vm.toolbarClick = function () {
-			if (vm.contentData.hasOwnProperty("minHeight")) {
-				if (minimized) {
-					vm.contentHeight = currentHeight;
-					minimized = false;
-				}
-				else {
-					vm.contentHeight = vm.contentData.minHeight;
-					minimized = true;
-				}
-			}
-		};
 
 		vm.toggleAdd = function (event) {
 			event.stopPropagation();
@@ -231,6 +114,7 @@
 		vm.toggleFilter = function (event) {
 			event.stopPropagation();
 			vm.showFilter = !vm.showFilter;
+			vm.onShowFilter({show: vm.showFilter});
 		};
 
 		vm.toggleVisible = function (event) {
@@ -275,8 +159,20 @@
 			});
 		};
 
+		/**
+		 * Clear the filter text input
+		 */
 		vm.clearFilter = function () {
 			vm.filterInputText = "";
+		};
+
+		/**
+		 * A content item is requesting a height change
+		 * @param height
+		 */
+		vm.onContentHeightRequest = function (height) {
+			contentHeight = height;
+			vm.onHeightRequest({contentItem: vm.contentData, height: contentHeight});
 		};
 	}
 }());

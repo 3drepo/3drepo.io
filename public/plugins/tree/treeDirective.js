@@ -27,8 +27,7 @@
 			templateUrl: "tree.html",
 			scope: {
 				filterText: "=",
-				height: "=",
-				onSetContentHeight: "&"
+				onContentHeightRequest: "&"
 			},
 			controller: TreeCtrl,
 			controllerAs: "vm",
@@ -36,9 +35,9 @@
 		};
 	}
 
-	TreeCtrl.$inject = ["$scope", "$timeout", "$element", "TreeService", "ViewerService", "EventService"];
+	TreeCtrl.$inject = ["$scope", "$timeout", "TreeService", "ViewerService", "EventService"];
 
-	function TreeCtrl($scope, $timeout, $element, TreeService, ViewerService, EventService) {
+	function TreeCtrl($scope, $timeout, TreeService, ViewerService, EventService) {
 		var vm = this,
 			promise = null,
 			i = 0,
@@ -77,7 +76,7 @@
 				maxStringLengthForLevel = maxStringLength - (nodesToShow[i].level * levelOffset);
 				height += nodeMinHeight + (lineHeight * Math.floor(nodesToShow[i].name.length / maxStringLengthForLevel));
 			}
-			vm.onSetContentHeight({height: height});
+			vm.onContentHeightRequest({height: height});
 		}
 
 		/**
@@ -97,7 +96,7 @@
 		 * @param _id
 		 */
 		vm.expand = function (_id) {
-			var i = 0, numChildren = 0, index = -1, length = 0, endOfSplice = false;
+			var i, numChildren = 0, index = -1, length, endOfSplice = false;
 
 			for (i = 0, length = vm.nodesToShow.length; i < length; i += 1) {
 				if (vm.nodesToShow[i]._id === _id) {
@@ -294,7 +293,7 @@
 
 		$scope.$watch("vm.filterText", function (newValue) {
 			if (angular.isDefined(newValue)) {
-				if (newValue === "") {
+				if (newValue.toString() === "") {
 					vm.showTree = true;
 					vm.showFilterList = false;
 					vm.nodes = vm.allNodes;
