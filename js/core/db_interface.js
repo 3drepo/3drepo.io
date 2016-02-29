@@ -359,8 +359,13 @@ DBInterface.prototype.searchTree = function(dbName, project, branch, revision, s
 	filter = {
 		name: new RegExp(regexStr)
 	};
+	
+	var projection = {
+		_id : 1,
+		name: 1
+	};
 
-	self.filterFederatedProject(dbName, project, branch, revision, filter, function(err, docs) {
+	self.filterFederatedProject(dbName, project, branch, revision, filter, projection, true, function(err, docs) {
 		if (err.value) {
 			return callback(err);
 		}
@@ -1536,7 +1541,7 @@ DBInterface.prototype.getRevisions = function(dbName, project, branch, from, to,
 };
 
 
-DBInterface.prototype.filterFederatedProject = function(dbName, project, branch, revision, filter, callback) {
+DBInterface.prototype.filterFederatedProject = function(dbName, project, branch, revision, filter, projection, populateProjectName, callback) {
 	'use strict';
 
 	var historyQuery = null;
@@ -1578,7 +1583,7 @@ DBInterface.prototype.filterFederatedProject = function(dbName, project, branch,
 		filter._id = { $in : docs[0].current };
 
 		// First find the list of nodes that match the filter in the project.
-		dbConn(self.logger).filterColl(dbName, project + ".scene", filter, {}, function(err, nodes) {
+		dbConn(self.logger).filterColl(dbName, project + ".scene", filter, projection, function(err, nodes) {
 			if (err.value)
 			{
 				return err;
@@ -1596,6 +1601,15 @@ DBInterface.prototype.filterFederatedProject = function(dbName, project, branch,
 				project: 1,
 				unique: 1
 			};
+			
+			if (populateProjectName)
+			{
+				for(var i = 0; i < nodes.length; i++)
+				{
+					nodes[i].account = dbName;
+					nodes[i].project = project;
+				}
+			}			
 
 			dbConn(self.logger).filterColl(dbName, project + ".scene", refFilter, projection, function(err, refs) {
 				// Asynchronously loop over all references.
@@ -1621,8 +1635,11 @@ DBInterface.prototype.filterFederatedProject = function(dbName, project, branch,
 						childBranch   = "master";
 						childRevision = null;
 					}
+					
+					item.account = dbName;
+					item.name = childProject;
 
-					self.filterFederatedProject(childDbName, childProject, childBranch, childRevision, filter, function (err, childNodes) {
+					self.filterFederatedProject(childDbName, childProject, childBranch, childRevision, filter, projection, populateProjectName, function (err, childNodes) {
 						if (err.value) {
 							return iter_callback(err);
 						}
@@ -1633,7 +1650,7 @@ DBInterface.prototype.filterFederatedProject = function(dbName, project, branch,
 				function (err, results) {
 					// TODO: Deal with errors here
 
-					callback(responseCodes.OK, nodes.concat(results));
+					callback(responseCodes.OK, nodes.concat(results).concat(refs));
 				});
 			});
 		});

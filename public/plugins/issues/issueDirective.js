@@ -15,7 +15,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(function () {
+(function() {
 	"use strict";
 
 	angular.module("3drepo")
@@ -29,7 +29,7 @@
 				data: "=",
 				onCommentsToggled: "&",
 				commentsToggledIssueId: "=",
-				onToggleCloseIssue : "&",
+				onToggleCloseIssue: "&",
 				availableRoles: "=",
 				projectUserRoles: "=",
 				onIssueAssignChange: "&"
@@ -52,12 +52,13 @@
 		vm.saveCommentDisabled = true;
 		vm.backgroundColor = "#FFFFFF";
 		vm.autoSaveComment = false;
-		vm.showInfo		   = false;
-		vm.editingComment  = false;
+		vm.showInfo = false;
+		vm.editingComment = false;
 		vm.assignedRolesColors = [];
 
-		$scope.$watch("vm.availableRoles", function (newValue) {
-			var i = 0, length = 0;
+		$scope.$watch("vm.availableRoles", function(newValue) {
+			var i = 0,
+				length = 0;
 
 			if (angular.isDefined(newValue)) {
 				// Create a local copy of the available roles
@@ -74,13 +75,14 @@
 			}
 		});
 
-		$scope.$watch("vm.commentsToggledIssueId", function (newValue) {
+		$scope.$watch("vm.commentsToggledIssueId", function(newValue) {
 			// If the comments is toggled on another comment, then close this one.
 			if (angular.isDefined(newValue)) {
 				// If the new value is null then all issues have been closed
-				if (!newValue)
-				{
-					NewIssuesService.highlightPin(null);
+				if (!newValue) {
+					EventService.send(EventService.EVENT.VIEWER.CLICK_PIN, {
+						id: null
+					});
 				}
 
 				if (newValue !== vm.data._id) {
@@ -95,6 +97,7 @@
 						}
 					}
 				} else {
+					/*
 					var pinGroup = $("#" + vm.data._id)[0].getElementsByTagName("group");
 					$(document).trigger("pinClick", { fromViewer : false, object: pinGroup[0] } );
 
@@ -107,23 +110,32 @@
 
 					NewIssuesService.highlightPin(newValue);
 					EventService.send(EventService.EVENT.SET_CLIPPING_PLANES, vm.data.viewpoint);
+					*/
+					vm.showComments = !vm.showComments;
+
+					if (vm.showComments) {
+						EventService.send(EventService.EVENT.VIEWER.CLICK_PIN, {
+							id: vm.data._id
+						});
+					}
 				}
 			}
 		});
 
-		$scope.$watch("vm.comment", function (newValue) {
+		$scope.$watch("vm.comment", function(newValue) {
 			if (angular.isDefined(newValue)) {
 				vm.saveCommentDisabled = (newValue === "");
 			}
 		});
 
-		$scope.$watch("vm.data", function (newValue) {
-			var i = 0, length = 0;
+		$scope.$watch("vm.data", function(newValue) {
+			var i = 0,
+				length = 0;
 
 			if (angular.isDefined(newValue)) {
 				vm.backgroundColor = "#FFFFFF";
 				vm.issueIsOpen = true;
-				if ( newValue.hasOwnProperty("closed")) {
+				if (newValue.hasOwnProperty("closed")) {
 					vm.backgroundColor = newValue.closed ? "#E0E0E0" : "#FFFFFF";
 					vm.issueIsOpen = !newValue.closed;
 				}
@@ -138,9 +150,10 @@
 			}
 		}, true);
 
-		function setupRolesWatch () {
-			$scope.$watch("vm.roles", function (newValue, oldValue) {
-				var i = 0,  length = 0;
+		function setupRolesWatch() {
+			$scope.$watch("vm.roles", function(newValue, oldValue) {
+				var i = 0,
+					length = 0;
 
 				// Ignore initial setup of roles
 				if (JSON.stringify(newValue) !== JSON.stringify(oldValue)) {
@@ -160,8 +173,9 @@
 			}, true);
 		}
 
-		function initAssignedRolesDisplay () {
-			var i = 0, length = 0;
+		function initAssignedRolesDisplay() {
+			var i = 0,
+				length = 0;
 
 			if (angular.isDefined(vm.roles) && angular.isDefined(vm.data) && vm.data.hasOwnProperty("assigned_roles")) {
 				for (i = 0, length = vm.roles.length; i < length; i += 1) {
@@ -174,24 +188,28 @@
 		function setAssignedRolesColors () {
 			var i, length;
 
-            var pinColours = [];
+			var pinColours = [];
 
 			vm.assignedRolesColors = [];
 			for (i = 0, length = vm.roles.length; i < length; i += 1) {
 				if (vm.data.assigned_roles.indexOf(vm.roles[i].role) !== -1) {
-                    var roleColour = NewIssuesService.getRoleColor(vm.roles[i].role);
+					var roleColour = NewIssuesService.getRoleColor(vm.roles[i].role);
 					vm.assignedRolesColors.push(roleColour);
-                    pinColours.push(NewIssuesService.hexToRgb(roleColour));
+					pinColours.push(NewIssuesService.hexToRgb(roleColour));
 				}
 			}
 
-            NewIssuesService.changePinColour(vm.data._id, pinColours);
+			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, {
+				id: vm.data._id,
+				colours: pinColours
+			});
 		}
 
 		// A user with the same role as the issue creator_role or
 		// a role that is one of the roles that the issues has been assigned to can modify the issue
-		function setupCanModifyIssue () {
-			var i = 0, length = 0;
+		function setupCanModifyIssue() {
+			var i = 0,
+				length = 0;
 
 			vm.canModifyIssue = false;
 			if (angular.isDefined(vm.projectUserRoles) && angular.isDefined(vm.data) && vm.data.hasOwnProperty("assigned_roles")) {
@@ -207,24 +225,25 @@
 			}
 		}
 
-		vm.toggleComments = function () {
-			vm.onCommentsToggled({issueId: vm.data._id});
+		vm.toggleComments = function() {
+			vm.onCommentsToggled({
+				issueId: vm.data._id
+			});
 			vm.showAssignedRoles = false;
 		};
 
-		vm.saveComment = function () {
+		vm.saveComment = function() {
 			if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
 				if (vm.editingComment) {
 					promise = NewIssuesService.editComment(vm.data, vm.comment, vm.editingCommentIndex);
-					promise.then(function (data) {
+					promise.then(function(data) {
 						vm.data.comments[vm.editingCommentIndex].comment = vm.comment;
 						vm.data.comments[vm.editingCommentIndex].timeStamp = NewIssuesService.getPrettyTime(data.created);
 						vm.comment = "";
 					});
-				}
-				else {
+				} else {
 					promise = NewIssuesService.saveComment(vm.data, vm.comment);
-					promise.then(function (data) {
+					promise.then(function(data) {
 						if (!vm.data.hasOwnProperty("comments")) {
 							vm.data.comments = [];
 						}
@@ -241,7 +260,7 @@
 							vm.autoSaveComment = false;
 							vm.showInfo = true;
 							vm.infoText = "Comment on issue #" + vm.data.number + " auto-saved";
-							vm.infoTimeout = $timeout(function () {
+							vm.infoTimeout = $timeout(function() {
 								vm.showInfo = false;
 							}, 4000);
 						}
@@ -249,7 +268,7 @@
 						// Mark previous comment as 'set' - no longer deletable or editable
 						if (vm.data.comments.length > 1) {
 							promise = NewIssuesService.setComment(vm.data, (vm.data.comments.length - 2));
-							promise.then(function (data) {
+							promise.then(function(data) {
 								vm.data.comments[vm.data.comments.length - 2].set = true;
 							});
 						}
@@ -258,9 +277,9 @@
 			}
 		};
 
-		vm.deleteComment = function (index) {
+		vm.deleteComment = function(index) {
 			promise = NewIssuesService.deleteComment(vm.data, index);
-			promise.then(function (data) {
+			promise.then(function(data) {
 				vm.data.comments.splice(index, 1);
 				vm.numNewComments -= 1; // This is used to reduce the height of the comments list
 				vm.comment = "";
@@ -268,27 +287,28 @@
 			});
 		};
 
-		vm.toggleEditComment = function (index) {
+		vm.toggleEditComment = function(index) {
 			vm.editingComment = !vm.editingComment;
 			vm.editingCommentIndex = index;
 			if (vm.editingComment) {
 				vm.comment = vm.data.comments[vm.data.comments.length - 1].comment;
-			}
-			else {
+			} else {
 				vm.comment = "";
 			}
 		};
 
-		vm.toggleCloseIssue = function () {
-			vm.onToggleCloseIssue({issue: vm.data});
+		vm.toggleCloseIssue = function() {
+			vm.onToggleCloseIssue({
+				issue: vm.data
+			});
 		};
 
-		vm.hideInfo = function () {
+		vm.hideInfo = function() {
 			vm.showInfo = false;
 			$timeout.cancel(vm.infoTimeout);
 		};
 
-		vm.openAssignedRolesMenu = function ($mdOpenMenu, ev) {
+		vm.openAssignedRolesMenu = function($mdOpenMenu, ev) {
 			originatorEv = ev;
 			$mdOpenMenu(ev);
 		};
@@ -297,10 +317,10 @@
 	angular.module("3drepo")
 		.animation(".issueComments", issueComments);
 
-	function issueComments () {
+	function issueComments() {
 		var height;
 		return {
-			addClass: function (element, className, done) {
+			addClass: function(element, className, done) {
 				if (className === "issueComments") {
 					jQuery(element)
 						.css({
@@ -315,7 +335,7 @@
 					done();
 				}
 			},
-			removeClass: function (element, className, done) {
+			removeClass: function(element, className, done) {
 				height = element[0].children[0].offsetHeight;
 				if (className === "issueComments") {
 					jQuery(element)
@@ -330,7 +350,7 @@
 				} else {
 					done();
 				}
-		   }
+			}
 		};
 	}
 
@@ -346,15 +366,14 @@
 			link: link
 		};
 
-		function link (scope, element, attrs) {
+		function link(scope, element, attrs) {
 			var commentHeight = 75,
 				height = "0";
-			scope.$watch("numNewComments", function (newValue, oldValue) {
+			scope.$watch("numNewComments", function(newValue, oldValue) {
 				if (angular.isDefined(newValue)) {
 					if (newValue > oldValue) {
 						height = (element[0].offsetHeight + commentHeight).toString();
-					}
-					else if (newValue < oldValue) {
+					} else if (newValue < oldValue) {
 						height = (element[0].offsetHeight - commentHeight).toString();
 					}
 					element.css("height", height + "px");

@@ -54,7 +54,7 @@
 				vm.showInfo = false;
 				vm.progressInfo = "Loading documents for " + object.name;
 				vm.showDocsGetProgress = true;
-				promise = DocsService.getDocs(object.id);
+				promise = DocsService.getDocs(object.account, object.project, object.id);
 				//promise = DocsService.getDocs("55d6ae0c-5d62-4fe7-8bd5-5c84fb90df1c");
 				promise.then(function (data) {
 					var docType;
@@ -81,9 +81,9 @@
 			}
 		}
 
-		$scope.$watch(EventService.currentEvent, function (newValue) {
-			if (newValue.type === EventService.EVENT.OBJECT_SELECTED) {
-				getObjectsDocs(newValue.value);
+		$scope.$watch(EventService.currentEvent, function (event) {
+			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+				getObjectsDocs(event.value);
 			}
 		});
 
@@ -93,7 +93,7 @@
 			vm.showDocLoadProgress = true;
 			$mdDialog.show({
 				controller: docsDialogController,
-				templateUrl: 'docsDialog.html',
+				templateUrl: "docsDialog.html",
 				parent: angular.element(document.body),
 				targetEvent: event,
 				clickOutsideToClose:true,
@@ -112,7 +112,7 @@
 			$scope.closeDialog();
 		}
 
-		function docsDialogController($scope) {
+		function docsDialogController() {
 		}
 
 		/**
@@ -155,18 +155,5 @@
 				vm.onContentHeightRequest({height: allDocTypesHeight + itemsHeight});
 			}
 		};
-
-		$(document).on("objectSelected", function(event, objectData) {
-			var object = [];
-			if (angular.isDefined(objectData)) {
-				object = objectData.id.split("__");
-				getObjectsDocs({id: object[object.length - 1], name: object[object.length - 2]});
-			}
-			else {
-				vm.docs = [];
-				vm.showInfo = true;
-				vm.info = "No object currently selected";
-			}
-		});
 	}
 }());

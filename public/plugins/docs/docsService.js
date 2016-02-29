@@ -24,76 +24,7 @@
 	DocsService.$inject = ["$http", "$q", "StateManager", "serverConfig"];
 
 	function DocsService($http, $q, StateManager, serverConfig) {
-		var metadocs = {},
-			loadingPromise = null,
-			loading = false,
-			currentLoadingID = null,
-			account = StateManager.state.account,
-			project = StateManager.state.project;
-
-		var getObjectMetaData = function (object)
-		{
-			// TODO: Will break when the account is not same, as part of a federation.
-			var account = StateManager.state.account;
-
-			var objectIDParts = object.id.split("__");
-			var numIDParts    = objectIDParts.length;
-
-			var project = objectIDParts[numIDParts - 2];
-
-			if (project === "model") {
-				project = StateManager.state.project;
-			}
-
-			var uid = objectIDParts[numIDParts - 1];
-			var baseUrl = serverConfig.apiUrl(account + "/" + project + "/meta/" + uid + ".json");
-
-			if (!loading)
-			{
-				loading = true;
-				currentLoadingID = uid;
-				var deferred = $q.defer();
-
-				loadingPromise = deferred.promise;
-
-				metadocs = {};
-
-				$http.get(baseUrl)
-					.then(function(json) {
-						var meta = json.data.meta;
-
-						for(var i = 0; i < meta.length; i++)
-						{
-							var subtype = meta[i].mime ? meta[i].mime : "metadata";
-
-							if (!metadocs[subtype]) {
-								metadocs[subtype] = [];
-							}
-
-							meta[i].url = serverConfig.apiUrl(account + "/" + project + "/" + meta[i]._id + ".pdf");
-
-							metadocs[subtype].push(meta[i]);
-						}
-
-						loading = false;
-						currentLoadingID = null;
-						deferred.resolve();
-					}, function() {
-						loading = false;
-						currentLoadingID = null;
-						deferred.resolve();
-					});
-			} else {
-				if (uid !== currentLoadingID)
-				{
-					loadingPromise.then(function () {
-						getObjectMetaData(object);
-					});
-				}
-			}
-		};
-
-		var getDocs = function (objectId) {
+		var getDocs = function (account, project, objectId) {
 			var i,
 				length,
 				data = {},

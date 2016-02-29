@@ -53,13 +53,11 @@ var toggleElements;
 		};
 	}
 
-	CompassCtrl.$inject = ["$scope", "ViewerService"];
+	CompassCtrl.$inject = ["EventService"];
 
-	function CompassCtrl ($scope, ViewerService)
+	function CompassCtrl (EventService)
 	{
-		var cc = this, defaultViewer = ViewerService.defaultViewer;
-
-		ViewerService.defaultViewer.onViewpointChanged(compassMove);
-	};
+		EventService.send(EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK, { callback: compassMove });
+	}
 }());
 

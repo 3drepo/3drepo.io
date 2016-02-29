@@ -161,11 +161,18 @@
 		StateManager.updateState();		// Want to preserve URL structure
 
 		StateManager.Data.ProjectData.loadingPromise.promise.then(function() {
-			ViewerService.defaultViewer.updateSettings(StateManager.Data.ProjectData.settings);
+			EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
+				account: StateManager.state.account,
+				project: StateManager.state.project,
+				settings: StateManager.Data.ProjectData.settings
+			});
 		});
 
 		$timeout(function () {
 			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelContent);
+			
+			// No parameters means load from state variables
+			EventService.send(EventService.EVENT.CREATE_VIEWER, {name: "default"});
 		});
 	}
 }());
