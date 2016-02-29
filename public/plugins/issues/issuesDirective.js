@@ -40,9 +40,9 @@
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$rootScope", "$element", "$timeout", "$mdDialog", "$filter", "EventService", "NewIssuesService", "ViewerService"];
+	IssuesCtrl.$inject = ["$scope", "$element", "$timeout", "$mdDialog", "$filter", "NewIssuesService", "EventService"];
 
-	function IssuesCtrl($scope, $rootScope, $element, $timeout, $mdDialog, $filter, EventService, NewIssuesService, ViewerService) {
+	function IssuesCtrl($scope, $element, $timeout, $mdDialog, $filter, NewIssuesService, EventService) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -71,14 +71,20 @@
 		vm.issuesInfo = "There are currently no open issues";
 		vm.availableRoles = null;
 		vm.projectUserRoles = [];
+		vm.selectedIssue = null;
+		vm.autoSaveComment = false;
 
 		/* Get all the Issues */
 		promise = NewIssuesService.getIssues();
 		promise.then(function (data) {
+			var i, length;
 			vm.showProgress = false;
 			vm.issues = data;
 			vm.showIssuesInfo = (vm.issues.length === 0);
 			vm.showIssueList = (vm.issues.length !== 0);
+			for (i = 0, length = vm.issues.length; i < length; i += 1) {
+				vm.issues[i].showInfo = false;
+			}
 			setAllIssuesAssignedRolesColors();
 			setupIssuesToShow();
 			vm.showPins();
@@ -130,15 +136,25 @@
 
 		/* Handle toggle of adding a new issue */
 		$scope.$watch("vm.showAdd", function (newValue) {
-			var addIssueHeight = 225;
-			if (newValue) {
-				setupGlobalClickWatch();
-				vm.onContentHeightRequest({height: issuesHeight + addIssueHeight});
-			}
-			else {
-				cancelGlobalClickWatch();
-				NewIssuesService.removePin();
-				vm.onContentHeightRequest({height: issuesHeight});
+			if (angular.isDefined(newValue) && newValue) {
+				var addHeight = 200;
+				vm.showIssue = false;
+				vm.showIssueList = false;
+				vm.showAddIssue = true;
+				vm.onShowItem();
+				vm.onContentHeightRequest({height: issuesHeight + addHeight});
+				/*
+				 else {
+				 vm.showIssueList = true;
+				 vm.showAdd = false;
+				 vm.onContentHeightRequest({height: issuesHeight});
+				 }
+				 */
+				/*
+				 else {
+				 NewIssuesService.removePin();
+				 }
+				 */
 			}
 		});
 
@@ -149,17 +165,20 @@
 			}
 		});
 
-		/**
-		 * Escape CSS characters in string
-		 *
-		 * @param string
-		 * @returns {*}
+		/*
+		 * Handle Events
 		 */
-		function escapeCSSCharacters(string)
-		{
-			// Taken from http://stackoverflow.com/questions/2786538/need-to-escape-a-special-character-in-a-jquery-selector-string
-			return string.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, "\\$&");
-		}
+		$scope.$watch(EventService.currentEvent, function (event) {
+			var i, length;
+			if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
+				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
+					if (event.value.id === vm.issuesToShow[i]._id) {
+						vm.showSelectedIssue(i);
+						break;
+					}
+				}
+			}
+		});
 
 		/**
 		 * Setup the issues to show
@@ -261,9 +280,6 @@
 							vm.issuesToShow.splice(i, 1);
 						}
 					}
-
-					// Un-expand any expanded issue
-					vm.commentsToggledIssueId = null;
 
 					// Set the height of the content
 					if (vm.issuesToShow.length === 0) {
@@ -369,29 +385,28 @@
 
 		$scope.$watch("vm.filterText", function (newValue) {
 			if (angular.isDefined(newValue)) {
-				vm.commentsToggledIssueId = null;
 				setupIssuesToShow();
 			}
 		});
 
 		/*
-		 * Handle parent notice to hide the selected issue
+		 * Handle parent notice to hide a selected issue or add issue
 		 */
 		$scope.$watch("vm.hideItem", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
-				vm.showIssueList = true;
-				vm.showIssue = false;
+				vm.autoSaveComment = true; // Auto save a comment if needed
+				$timeout(function () {
+					vm.showIssue = false;
+					vm.showIssueList = true;
+					vm.showAddIssue = false;
+					//vm.selectedIssue = null;
+					vm.onContentHeightRequest({height: issuesHeight});
+
+					// Deselect any selected pin
+					EventService.send(EventService.EVENT.VIEWER.CLICK_PIN, {id: null});
+				});
 			}
 		});
-
-		vm.commentsToggled = function (issueId) {
-			if (issueId === vm.commentsToggledIssueId)
-			{
-				vm.commentsToggledIssueId = null;
-			} else {
-				vm.commentsToggledIssueId = issueId;
-			}
-		};
 
 		/**
 		 * Make the selected issue fill the content and notify the parent
@@ -399,16 +414,19 @@
 		 * @param index
 		 */
 		vm.showSelectedIssue = function (index) {
-			vm.showIssueList = false;
-			vm.showIssue = true;
-			vm.selectedIssue = vm.issuesToShow[index];
-			vm.onShowItem();
+			if ((vm.selectedIssue === null) || (vm.issuesToShow[index]._id !== vm.selectedIssue._id)) {
+				var issueHeight = 200;
+				vm.showIssueList = false;
+				vm.showIssue = true;
+				vm.showAddIssue = false;
+				vm.autoSaveComment = false;
+				vm.selectedIssue = vm.issuesToShow[index];
+				vm.selectedIssue.showInfo = false;
+				vm.onShowItem();
+				vm.onContentHeightRequest({height: issuesHeight + issueHeight});
 
-			if (vm.issuesToShow[index]._id === vm.commentsToggledIssueId)
-			{
-				vm.commentsToggledIssueId = null;
-			} else {
-				vm.commentsToggledIssueId = vm.issuesToShow[index]._id;
+				// Select the pin
+				EventService.send(EventService.EVENT.VIEWER.CLICK_PIN, {id: vm.issuesToShow[index]._id});
 			}
 		};
 
@@ -453,7 +471,7 @@
 							setupIssuesToShow();
 							vm.showPins();
 
-							vm.showAdd = false;
+							//vm.showAddIssue = false;
 						});
 					}
 				}
@@ -490,69 +508,6 @@
 			});
 		};
 
-		
-		function setupGlobalClickWatch () {
-			/*
-			if (vm.globalClickWatch === null) {
-				vm.globalClickWatch = $scope.$watch(EventService.currentEvent, function (event, oldEvent) {
-					if ((event.type === EventService.EVENT.GLOBAL_CLICK) &&
-						(event.value.target.className === "x3dom-canvas") &&
-						(!((event.value.clientX === oldEvent.value.clientX) &&
-						   (event.value.clientY === oldEvent.value.clientY)))) {
-
-						var dragEndX = event.value.clientX;
-						var dragEndY = event.value.clientY;
-						var pickObj = ViewerService.pickPoint(dragEndX, dragEndY);
-
-						if (pickObj.pickObj !== null) {
-							vm.showInput = true;
-							vm.selectedObjectId = pickObj.partID ? pickObj.partID : pickObj.pickObj._xmlNode.getAttribute("DEF");
-
-							var projectParts = pickObj.pickObj._xmlNode.getAttribute("id").split("__");
-
-							if (projectParts[0] === "model")
-							{
-								vm.pickedAccount = NewIssuesService.state.account;
-								vm.pickedProject = NewIssuesService.state.project;
-								vm.pickedTrans   = $("#model__root")[0]._x3domNode.getCurrentTransform();
-							} else {
-								vm.pickedAccount = projectParts[0];
-								vm.pickedProject = projectParts[1];
-
-								var rootTransName = escapeCSSCharacters(vm.pickedAccount + "__" + vm.pickedProject + "__root");
-								vm.pickedTrans   = $("#" + rootTransName)[0]._x3domNode.getCurrentTransform();
-							}
-
-							vm.pickedNorm = vm.pickedTrans.transpose().multMatrixVec(pickObj.pickNorm);
-							vm.pickedPos = vm.pickedTrans.inverse().multMatrixVec(pickObj.pickPos);
-
-							NewIssuesService.addPin(
-								{
-									id: undefined,
-									account: vm.pickedAccount,
-									project: vm.pickedProject,
-									position: vm.pickedPos.toGL(),
-									norm: vm.pickedNorm.toGL()
-								},
-								NewIssuesService.hexToRgb(NewIssuesService.getRoleColor(vm.projectUserRoles[0]))
-							);
-						}
-						else {
-							NewIssuesService.removePin();
-						}
-					}
-				});
-			}
-			*/
-		}
-
-		function cancelGlobalClickWatch () {
-			if (typeof vm.globalClickWatch === "function") {
-				vm.globalClickWatch();
-				vm.globalClickWatch = null;
-			}
-		}
-
 		/*
 		 * When a pin is clicked that make sure the issue sidebar
 		 * also reflects the updated state
@@ -567,10 +522,6 @@
 				var issueId = clickInfo.object ? clickInfo.object.parentElement.parentElement.getAttribute("id") : null;
 
 				if (clickInfo.fromViewer) {
-					/*
-					vm.commentsToggled(issueId);
-					$rootScope.$apply();
-					*/
 					for (var i = 0; i < vm.issuesToShow.length; i += 1) {
 						if (vm.issuesToShow[i]._id === issueId) {
 							vm.showSelectedIssue(i);
@@ -590,6 +541,26 @@
 					.ariaLabel("Pin alert")
 					.ok("OK")
 			);
+		};
+
+		/**
+		 * A comment has been auto saved
+		 */
+		vm.commentAutoSaved = function () {
+			console.log(vm.selectedIssue)
+			vm.infoText = "Comment on issue #" + vm.selectedIssue.title + " auto-saved";
+			vm.selectedIssue.showInfo = true;
+			vm.infoTimeout = $timeout(function() {
+				vm.selectedIssue.showInfo = false;
+			}, 4000);
+		};
+
+		/**
+		 * Hide issue info
+		 */
+		vm.hideInfo = function() {
+			vm.selectedIssue.showInfo = false;
+			$timeout.cancel(vm.infoTimeout);
 		};
 
 		/**

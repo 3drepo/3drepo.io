@@ -27,8 +27,8 @@
 			templateUrl: "issue.html",
 			scope: {
 				data: "=",
-				onCommentsToggled: "&",
-				commentsToggledIssueId: "=",
+				autoSaveComment: "=",
+				onCommentAutoSaved: "&",
 				onToggleCloseIssue: "&",
 				availableRoles: "=",
 				projectUserRoles: "=",
@@ -75,49 +75,12 @@
 			}
 		});
 
-		$scope.$watch("vm.commentsToggledIssueId", function(newValue) {
-			// If the comments is toggled on another comment, then close this one.
-			if (angular.isDefined(newValue)) {
-				// If the new value is null then all issues have been closed
-				if (!newValue) {
-					EventService.send(EventService.EVENT.VIEWER.CLICK_PIN, {
-						id: null
-					});
-				}
-
-				if (newValue !== vm.data._id) {
-					// If we are editing the comment, then clear it.
-					if (vm.editingComment) {
-						vm.comment = "";
-					} else {
-						// Auto-save a comment
-						if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
-							vm.autoSaveComment = true;
-							vm.saveComment();
-						}
-					}
-				} else {
-					/*
-					var pinGroup = $("#" + vm.data._id)[0].getElementsByTagName("group");
-					$(document).trigger("pinClick", { fromViewer : false, object: pinGroup[0] } );
-
-					// Set the camera position
-					ViewerService.defaultViewer.setCamera(
-						vm.data.viewpoint.position,
-						vm.data.viewpoint.view_dir,
-						vm.data.viewpoint.up
-					);
-
-					NewIssuesService.highlightPin(newValue);
-					EventService.send(EventService.EVENT.SET_CLIPPING_PLANES, vm.data.viewpoint);
-					*/
-					vm.showComments = !vm.showComments;
-
-					if (vm.showComments) {
-						EventService.send(EventService.EVENT.VIEWER.CLICK_PIN, {
-							id: vm.data._id
-						});
-					}
+		$scope.$watch("vm.autoSaveComment", function(newValue) {
+			console.log(newValue);
+			if (angular.isDefined(newValue) && newValue && !vm.editingComment) {
+				if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
+					vm.autoSaveComment = true;
+					vm.saveComment();
 				}
 			}
 		});
@@ -225,13 +188,9 @@
 			}
 		}
 
-		vm.toggleComments = function() {
-			vm.onCommentsToggled({
-				issueId: vm.data._id
-			});
-			vm.showAssignedRoles = false;
-		};
-
+		/**
+		 * Save a comment
+		 */
 		vm.saveComment = function() {
 			if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
 				if (vm.editingComment) {
@@ -257,12 +216,15 @@
 						vm.numNewComments += 1; // This is used to increase the height of the comments list
 
 						if (vm.autoSaveComment) {
+							vm.onCommentAutoSaved();
 							vm.autoSaveComment = false;
+							/*
 							vm.showInfo = true;
 							vm.infoText = "Comment on issue #" + vm.data.number + " auto-saved";
 							vm.infoTimeout = $timeout(function() {
 								vm.showInfo = false;
 							}, 4000);
+							*/
 						}
 
 						// Mark previous comment as 'set' - no longer deletable or editable

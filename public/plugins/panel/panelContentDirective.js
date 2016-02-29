@@ -54,7 +54,6 @@
 		vm.addStatus = false;
 		vm.visibleStatus = false;
 		vm.showClearFilterButton = false;
-		vm.hideItem = true;
 
 		$scope.$watch("vm.contentData.type", function (newValue) {
 			if (angular.isDefined(newValue)) {
@@ -95,10 +94,6 @@
 			}
 		});
 
-		$scope.$watch("vm.contentData.minHeight", function (newValue) {
-			vm.contentHeight = newValue;
-		});
-
 		$scope.$watch("vm.filterText", function (newValue) {
 			if (angular.isDefined(newValue)) {
 				vm.filterInputText = newValue;
@@ -111,9 +106,9 @@
 			}
 		});
 
-		vm.toggleAdd = function (event) {
+		vm.showAdd = function (event) {
 			event.stopPropagation();
-			vm.addStatus = !vm.addStatus;
+			vm.addStatus = true;
 		};
 
 		vm.toggleFilter = function (event) {
@@ -185,7 +180,7 @@
 		 */
 		vm.showItem = function () {
 			vm.statusIcon = "fa-arrow-left";
-			vm.hideSelectedItem = false;
+			vm.hideSelectedItem = false; // So that a change to this value is propagated
 		};
 
 		/**
@@ -194,6 +189,7 @@
 		vm.hideItem = function () {
 			vm.statusIcon = vm.contentData.icon;
 			vm.hideSelectedItem = true;
+			vm.addStatus = false;
 		};
 	}
 }());
