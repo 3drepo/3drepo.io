@@ -1,4 +1,5 @@
 .issue(style="background:{{vm.backgroundColor}}")
+	// Header
 	.issueHeader
 		md-list-item.md-2-line.issueTitle
 			div.md-list-item-text
@@ -9,16 +10,9 @@
 		.issueRoleMarkers(layout="column")
 			div(ng-repeat="roleColor in vm.data.assignedRolesColors", style="background:{{roleColor}};", flex)
 
-	.issueInfo(ng-if="vm.showInfo", layout="row" layout-align="start center")
-			div(flex)
-				h5 {{vm.infoText}}
-			div(flex="15")
-				md-button.md-icon-button(ng-click="vm.hideInfo()", aria-label="Hide info")
-					md-icon(md-font-icon="fa-times-circle", class="fa")
-
-
+	// Comments
 	div(ng-show="vm.showComments", ng-class="{issueComments: vm.showComments}", comments-height, num-new-comments="vm.numNewComments")
-		.issueCommentsContainer
+		.issueCommentsContainer(style="background:{{vm.backgroundColor}}")
 			// Comments list
 			md-list
 				md-list-item.md-2-line(ng-repeat="comment in vm.data.comments")

@@ -42,6 +42,15 @@ issues .issuesInfo p {
 issues .issueHeader {
   position: relative;
 }
+issues .selectedIssue {
+  background: #E8EAF6;
+}
+issues .notSelectedIssue {
+  background: #ffffff;
+}
+issues .closedIssue {
+  background: #E0E0E0;
+}
 issues .issueHeader .issueTitle {
   min-height: 0;
   height: 100%;

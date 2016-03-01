@@ -19,11 +19,11 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.factory("NewIssuesService", NewIssuesService);
+		.factory("IssuesService", IssuesService);
 
-	NewIssuesService.$inject = ["$http", "$q", "StateManager", "serverConfig", "EventService", "Auth"];
+	IssuesService.$inject = ["$http", "$q", "StateManager", "serverConfig", "EventService", "Auth", "ViewerService"];
 
-	function NewIssuesService($http, $q, StateManager, serverConfig, EventService, Auth) {
+	function IssuesService($http, $q, StateManager, serverConfig, EventService, Auth, ViewerService) {
 		var state = StateManager.state,
 			url = "",
 			data = {},
@@ -32,10 +32,13 @@
 			numIssues = 0,
 			numComments = 0,
 			availableRoles = [],
-			userRoles = [];
+			userRoles = [],
+			obj = {},
+			selectedIssue,
+			commentHasBeenAutoSaved = false;
 
 		// TODO: Internationalise and make globally accessible
-		var getPrettyTime = function(time) {
+		obj.getPrettyTime = function(time) {
 			var date = new Date(time),
 				currentDate = new Date(),
 				prettyTime,
@@ -77,8 +80,9 @@
 			}
 		};
 
-		var getIssues = function() {
-			var deferred = $q.defer();
+		obj.getIssues = function() {
+			var self = this,
+				deferred = $q.defer();
 			url = serverConfig.apiUrl(state.account + '/' + state.project + '/issues.json');
 
 			$http.get(url)
@@ -86,12 +90,12 @@
 					function(data) {
 						deferred.resolve(data.data);
 						for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
-							data.data[i].timeStamp = getPrettyTime(data.data[i].created);
+							data.data[i].timeStamp = self.getPrettyTime(data.data[i].created);
 
 							if (data.data[i].hasOwnProperty("comments")) {
 								for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
 									if (data.data[i].comments[j].hasOwnProperty("created")) {
-										data.data[i].comments[j].timeStamp = getPrettyTime(data.data[i].comments[j].created);
+										data.data[i].comments[j].timeStamp = self.getPrettyTime(data.data[i].comments[j].created);
 									}
 								}
 							}
@@ -107,8 +111,9 @@
 			return deferred.promise;
 		};
 
-		var saveIssue = function(issue) {
-			var dataToSend,
+		obj.saveIssue = function(issue) {
+			var self = this,
+				dataToSend,
 				deferred = $q.defer();
 
 			url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue.objectId);
@@ -138,11 +143,11 @@
 					response.data.issue._id = response.data.issue_id;
 					response.data.issue.account = issue.account;
 					response.data.issue.project = issue.project;
-					response.data.issue.timeStamp = getPrettyTime(response.data.issue.created);
+					response.data.issue.timeStamp = self.getPrettyTime(response.data.issue.created);
 					response.data.issue.creator_role = issue.creator_role;
 
 					response.data.issue.title = generateTitle(response.data.issue);
-					removePin();
+					self.removePin();
 					deferred.resolve(response.data.issue);
 				});
 
@@ -165,7 +170,7 @@
 			return deferred.promise;
 		}
 
-		var toggleCloseIssue = function(issue) {
+		obj.toggleCloseIssue = function(issue) {
 			var closed = true;
 			if (issue.hasOwnProperty("closed")) {
 				closed = !issue.closed;
@@ -176,21 +181,21 @@
 			});
 		};
 
-		var assignIssue = function(issue) {
+		obj.assignIssue = function(issue) {
 			return doPost(issue, {
 				assigned_roles: issue.assigned_roles,
 				number: issue.number
 			});
 		};
 
-		var saveComment = function(issue, comment) {
+		obj.saveComment = function(issue, comment) {
 			return doPost(issue, {
 				comment: comment,
 				number: issue.number
 			});
 		};
 
-		var editComment = function(issue, comment, commentIndex) {
+		obj.editComment = function(issue, comment, commentIndex) {
 			return doPost(issue, {
 				comment: comment,
 				number: issue.number,
@@ -199,7 +204,7 @@
 			});
 		};
 
-		var deleteComment = function(issue, index) {
+		obj.deleteComment = function(issue, index) {
 			return doPost(issue, {
 				comment: "",
 				number: issue.number,
@@ -208,7 +213,7 @@
 			});
 		};
 
-		var setComment = function(issue, commentIndex) {
+		obj.setComment = function(issue, commentIndex) {
 			return doPost(issue, {
 				comment: "",
 				number: issue.number,
@@ -217,7 +222,7 @@
 			});
 		};
 
-		function addPin(pin, colours, viewpoint) {
+		obj.addPin = function (pin, colours, viewpoint) {
 			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
 				id: pin.id,
 				account: pin.account,
@@ -229,9 +234,9 @@
 			});
 
 			//createPinShape("pinPlacement", pin, pinRadius, pinHeight, colours);
-		}
+		};
 
-		function removePin() {
+		obj.removePin = function () {
 			EventService.send(EventService.EVENT.VIEWER.REMOVE_PIN, {
 				id: "pinPlacement"
 			});
@@ -242,10 +247,11 @@
 			   pinPlacement.parentElement.removeChild(pinPlacement);
 			}
 			*/
-		}
+		};
 
-		function fixPin(pin, colours) {
-			removePin();
+		obj.fixPin = function (pin, colours) {
+			var self = this;
+			self.removePin();
 
 			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
 				id: "pinPlacement",
@@ -255,9 +261,9 @@
 			});
 
 			//createPinShape(pin.id, pin, pinRadius, pinHeight, colours);
-		}
+		};
 
-		var getRoles = function() {
+		obj.getRoles = function() {
 			var deferred = $q.defer();
 			url = serverConfig.apiUrl(state.account + '/' + state.project + '/roles.json');
 
@@ -275,7 +281,7 @@
 			return deferred.promise;
 		};
 
-		var getUserRolesForProject = function() {
+		obj.getUserRolesForProject = function() {
 			var deferred = $q.defer();
 			url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + Auth.username + "/userRolesForProject.json");
 
@@ -293,7 +299,7 @@
 			return deferred.promise;
 		};
 
-		var hexToRgb = function(hex) {
+		obj.hexToRgb = function(hex) {
 			// If nothing comes end, then send nothing out.
 			if (typeof hex === "undefined") {
 				return undefined;
@@ -320,7 +326,7 @@
 			return [(parseInt(hexColours[0], 16) / 255.0), (parseInt(hexColours[1], 16) / 255.0), (parseInt(hexColours[2], 16) / 255.0)];
 		};
 
-		var getRoleColor = function(role) {
+		obj.getRoleColor = function(role) {
 			var i = 0,
 				length = 0,
 				roleColor;
@@ -336,24 +342,6 @@
 			return roleColor;
 		};
 
-		return {
-			getPrettyTime: getPrettyTime,
-			getIssues: getIssues,
-			saveIssue: saveIssue,
-			toggleCloseIssue: toggleCloseIssue,
-			assignIssue: assignIssue,
-			saveComment: saveComment,
-			editComment: editComment,
-			deleteComment: deleteComment,
-			setComment: setComment,
-			addPin: addPin,
-			fixPin: fixPin,
-			removePin: removePin,
-			state: state,
-			getRoles: getRoles,
-			getUserRolesForProject: getUserRolesForProject,
-			hexToRgb: hexToRgb,
-			getRoleColor: getRoleColor
-		};
+		return obj;
 	}
 }());

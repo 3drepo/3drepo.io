@@ -40,9 +40,9 @@
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$element", "$timeout", "$mdDialog", "$filter", "NewIssuesService", "EventService"];
+	IssuesCtrl.$inject = ["$scope", "$element", "$timeout", "$mdDialog", "$filter", "IssuesService", "EventService"];
 
-	function IssuesCtrl($scope, $element, $timeout, $mdDialog, $filter, NewIssuesService, EventService) {
+	function IssuesCtrl($scope, $element, $timeout, $mdDialog, $filter, IssuesService, EventService) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -60,7 +60,6 @@
 		vm.pickedNorm = null;
 		vm.pickedTrans = null;
 		vm.selectedObjectId = null;
-		vm.globalClickWatch = null;
 		vm.saveIssueDisabled = true;
 		vm.issues = [];
 		vm.showProgress = true;
@@ -74,8 +73,10 @@
 		vm.selectedIssue = null;
 		vm.autoSaveComment = false;
 
-		/* Get all the Issues */
-		promise = NewIssuesService.getIssues();
+		/*
+		 * Get all the Issues
+		 */
+		promise = IssuesService.getIssues();
 		promise.then(function (data) {
 			var i, length;
 			vm.showProgress = false;
@@ -84,14 +85,18 @@
 			vm.showIssueList = (vm.issues.length !== 0);
 			for (i = 0, length = vm.issues.length; i < length; i += 1) {
 				vm.issues[i].showInfo = false;
+				vm.issues[i].selected = false;
 			}
 			setAllIssuesAssignedRolesColors();
 			setupIssuesToShow();
+			setContentHeight();
 			vm.showPins();
 		});
 
-		/* Get all the available roles for the project */
-		rolesPromise = NewIssuesService.getRoles();
+		/*
+		 * Get all the available roles for the project
+		 */
+		rolesPromise = IssuesService.getRoles();
 		rolesPromise.then(function (data) {
 			vm.availableRoles = data;
 			setAllIssuesAssignedRolesColors();
@@ -120,45 +125,38 @@
 
 			issue.assignedRolesColors = [];
 			for (i = 0, length = issue.assigned_roles.length; i < length; i += 1) {
-				roleColour = NewIssuesService.getRoleColor(issue.assigned_roles[i]);
+				roleColour = IssuesService.getRoleColor(issue.assigned_roles[i]);
 				issue.assignedRolesColors.push(roleColour);
-				pinColours.push(NewIssuesService.hexToRgb(roleColour));
+				pinColours.push(IssuesService.hexToRgb(roleColour));
 			}
 
-			//NewIssuesService.changePinColour(issue._id, pinColours);
+			//IssuesService.changePinColour(issue._id, pinColours);
 		}
 
-		/* Get the user roles for the project */
-		projectUserRolesPromise = NewIssuesService.getUserRolesForProject();
+		/*
+		 * Get the user roles for the project
+		 */
+		projectUserRolesPromise = IssuesService.getUserRolesForProject();
 		projectUserRolesPromise.then(function (data) {
 			vm.projectUserRoles = data;
 		});
 
-		/* Handle toggle of adding a new issue */
+		/*
+		 * Handle toggle of adding a new issue
+		 */
 		$scope.$watch("vm.showAdd", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
-				var addHeight = 200;
 				vm.showIssue = false;
 				vm.showIssueList = false;
 				vm.showAddIssue = true;
 				vm.onShowItem();
-				vm.onContentHeightRequest({height: issuesHeight + addHeight});
-				/*
-				 else {
-				 vm.showIssueList = true;
-				 vm.showAdd = false;
-				 vm.onContentHeightRequest({height: issuesHeight});
-				 }
-				 */
-				/*
-				 else {
-				 NewIssuesService.removePin();
-				 }
-				 */
+				setContentHeight();
 			}
 		});
 
-		/* Handle input to the title field of a new issue */
+		/*
+		 * Handle input to the title field of a new issue
+		 */
 		$scope.$watch("vm.title", function (newValue) {
 			if (angular.isDefined(newValue)) {
 				vm.saveIssueDisabled = (newValue.toString() === "");
@@ -173,7 +171,7 @@
 			if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
 				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
 					if (event.value.id === vm.issuesToShow[i]._id) {
-						vm.showSelectedIssue(i);
+						vm.showSelectedIssue(i, true);
 						break;
 					}
 				}
@@ -280,25 +278,21 @@
 							vm.issuesToShow.splice(i, 1);
 						}
 					}
-
-					// Set the height of the content
-					if (vm.issuesToShow.length === 0) {
-						vm.showIssuesInfo = true;
-						vm.issuesInfo = "There are no issues that contain the filter text";
-					}
-					else {
-						vm.showIssuesInfo = false;
-						setContentHeight();
-					}
 				}
 			}
 		}
 
+		/**
+		 * The roles assigned to the issue have been changed
+		 */
 		vm.issueAssignChange = function () {
 			setIssueAssignedRolesColors(vm.selectedIssue);
 			vm.showPins();
 		};
 
+		/**
+		 * Add issue pins to the viewer
+		 */
 		vm.showPins = function () {
 			var i, j, length, assignedRolesLength,
 				pin, pinData, pinColor, pinMaterial,
@@ -347,18 +341,21 @@
 							};
 
 						if (vm.issues[i].hasOwnProperty("assigned_roles") && vm.issues[i].assigned_roles.length > 0) {
-							pinColor = NewIssuesService.hexToRgb(NewIssuesService.getRoleColor(vm.issues[i].assigned_roles[0]));
+							pinColor = IssuesService.hexToRgb(IssuesService.getRoleColor(vm.issues[i].assigned_roles[0]));
 						}
 						else {
 							pinColor = [1.0, 1.0, 1.0];
 						}
 						
-						NewIssuesService.addPin(pinData, pinColor, vm.issues[i].viewpoint);
+						IssuesService.addPin(pinData, pinColor, vm.issues[i].viewpoint);
 					}
 				}
 			}
 		};
 
+		/*
+		 * Handle changes to the options
+		 */
 		$scope.$watch("vm.selectedOption", function (newValue) {
 			var role, roleIndex;
 			if (angular.isDefined(newValue)) {
@@ -379,13 +376,27 @@
 					}
 				}
 				setupIssuesToShow();
+				setContentHeight();
 				vm.showPins();
 			}
 		});
 
+		/*
+		 * Handle changes to the filter input
+		 */
 		$scope.$watch("vm.filterText", function (newValue) {
 			if (angular.isDefined(newValue)) {
 				setupIssuesToShow();
+
+				// Set the height of the content
+				if (vm.issuesToShow.length === 0) {
+					vm.showIssuesInfo = true;
+					vm.issuesInfo = "There are no issues that contain the filter text";
+				}
+				else {
+					vm.showIssuesInfo = false;
+					setContentHeight();
+				}
 			}
 		});
 
@@ -395,12 +406,15 @@
 		$scope.$watch("vm.hideItem", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
 				vm.autoSaveComment = true; // Auto save a comment if needed
+
 				$timeout(function () {
+					// Hide and show layers
 					vm.showIssue = false;
 					vm.showIssueList = true;
 					vm.showAddIssue = false;
-					//vm.selectedIssue = null;
-					vm.onContentHeightRequest({height: issuesHeight});
+
+					// Set the content height
+					setContentHeight();
 
 					// Deselect any selected pin
 					EventService.send(EventService.EVENT.VIEWER.CLICK_PIN, {id: null});
@@ -411,21 +425,33 @@
 		/**
 		 * Make the selected issue fill the content and notify the parent
 		 *
-		 * @param index
+		 * @param {Number} index
+		 * @param {Boolean} pinSelect - whether called by a pin selection or not
 		 */
-		vm.showSelectedIssue = function (index) {
-			if ((vm.selectedIssue === null) || (vm.issuesToShow[index]._id !== vm.selectedIssue._id)) {
-				var issueHeight = 200;
-				vm.showIssueList = false;
-				vm.showIssue = true;
-				vm.showAddIssue = false;
-				vm.autoSaveComment = false;
-				vm.selectedIssue = vm.issuesToShow[index];
-				vm.selectedIssue.showInfo = false;
-				vm.onShowItem();
-				vm.onContentHeightRequest({height: issuesHeight + issueHeight});
+		vm.showSelectedIssue = function (index, pinSelect) {
+			// Hide and show layers
+			vm.showIssueList = false;
+			vm.showIssue = true;
+			vm.showAddIssue = false;
 
-				// Select the pin
+			// Selected issue
+			if (vm.selectedIssue !== null) {
+				vm.selectedIssue.selected = false;
+			}
+			vm.selectedIssue = vm.issuesToShow[index];
+			vm.selectedIssue.selected = true;
+			vm.selectedIssue.showInfo = false;
+
+			vm.autoSaveComment = false; // So that the request to auto save a comment will fire
+
+			// Show the issue
+			vm.onShowItem();
+
+			// Set the content height
+			setContentHeight();
+
+			// Select the pin
+			if (!pinSelect) {
 				EventService.send(EventService.EVENT.VIEWER.CLICK_PIN, {id: vm.issuesToShow[index]._id});
 			}
 		};
@@ -452,7 +478,7 @@
 							pickedNorm: vm.pickedNorm,
 							creator_role: vm.projectUserRoles[0]
 						};
-						promise = NewIssuesService.saveIssue(issue);
+						promise = IssuesService.saveIssue(issue);
 						promise.then(function (data) {
 							vm.issues.push(data);
 
@@ -464,11 +490,12 @@
 							vm.pickedNorm    = null;
 
 							if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
-								vm.saveCommentWithIssue(data, vm.comment);
+								saveCommentWithIssue(data, vm.comment);
 								vm.comment = "";
 							}
 
 							setupIssuesToShow();
+							setContentHeight();
 							vm.showPins();
 
 							//vm.showAddIssue = false;
@@ -478,10 +505,17 @@
 			}
 		};
 
+		/**
+		 * Toggle the closed status of an issue
+		 *
+		 * @param {Object} issue
+		 */
 		vm.toggleCloseIssue = function (issue) {
-			var i = 0, length = 0;
+			var i = 0,
+				length = 0,
+				footerHeight;
 
-			promise = NewIssuesService.toggleCloseIssue(issue);
+			promise = IssuesService.toggleCloseIssue(issue);
 			promise.then(function (data) {
 				for (i = 0, length = vm.issues.length; i < length; i += 1) {
 					if (issue._id === vm.issues[i]._id) {
@@ -492,21 +526,28 @@
 				}
 				setupIssuesToShow();
 				vm.showPins();
+				setContentHeight();
 			});
 		};
 
-		vm.saveCommentWithIssue = function (issue, comment) {
-			promise = NewIssuesService.saveComment(issue, comment);
+		/**
+		 * Save a comment at the same time as creating a new issue
+		 *
+		 * @param {Object} issue
+		 * @param {String} comment
+		 */
+		function saveCommentWithIssue (issue, comment) {
+			promise = IssuesService.saveComment(issue, comment);
 			promise.then(function (data) {
 				vm.issues[vm.issues.length - 1].comments = [
 					{
 						owner: data.owner,
 						comment: comment,
-						timeStamp: NewIssuesService.getPrettyTime(data.created)
+						timeStamp: IssuesService.getPrettyTime(data.created)
 					}
 				];
 			});
-		};
+		}
 
 		/*
 		 * When a pin is clicked that make sure the issue sidebar
@@ -524,7 +565,7 @@
 				if (clickInfo.fromViewer) {
 					for (var i = 0; i < vm.issuesToShow.length; i += 1) {
 						if (vm.issuesToShow[i]._id === issueId) {
-							vm.showSelectedIssue(i);
+							vm.showSelectedIssue(i, true);
 							break;
 						}
 					}
@@ -532,6 +573,11 @@
 			});
 		});
 
+		/**
+		 * Show an issue alert
+		 *
+		 * @param {String} title
+		 */
 		vm.showAlert = function(title) {
 			$mdDialog.show(
 				$mdDialog.alert()
@@ -547,7 +593,6 @@
 		 * A comment has been auto saved
 		 */
 		vm.commentAutoSaved = function () {
-			console.log(vm.selectedIssue)
 			vm.infoText = "Comment on issue #" + vm.selectedIssue.title + " auto-saved";
 			vm.selectedIssue.showInfo = true;
 			vm.infoTimeout = $timeout(function() {
@@ -567,16 +612,40 @@
 		 * Set the content height.
 		 */
 		function setContentHeight () {
-			var i, length, issueMinHeight = 56, maxStringLength = 32, lineHeight = 18;
+			var i,
+				length,
+				issueMinHeight = 56,
+				maxStringLength = 32,
+				lineHeight = 18,
+				footerHeight,
+				addHeight = 260,
+				commentHeight = 80,
+				headerHeight = 53,
+				openIssueFooterHeight = 163,
+				closedIssueFooterHeight = 48;
 
-			issuesHeight = 0;
-			for (i = 0, length = vm.issuesToShow.length; (i < length); i += 1) {
-				issuesHeight += issueMinHeight;
-				if (vm.issuesToShow[i].title.length > maxStringLength) {
-					issuesHeight += lineHeight * Math.floor((vm.issuesToShow[i].title.length - maxStringLength) / maxStringLength);
+			if (vm.showIssueList) {
+				issuesHeight = 0;
+				for (i = 0, length = vm.issuesToShow.length; (i < length); i += 1) {
+					issuesHeight += issueMinHeight;
+					if (vm.issuesToShow[i].title.length > maxStringLength) {
+						issuesHeight += lineHeight * Math.floor((vm.issuesToShow[i].title.length - maxStringLength) / maxStringLength);
+					}
 				}
+				vm.onContentHeightRequest({height: issuesHeight});
 			}
-			vm.onContentHeightRequest({height: issuesHeight});
+			else if (vm.showIssue) {
+				if (vm.selectedIssue.closed) {
+					footerHeight = closedIssueFooterHeight;
+				}
+				else {
+					footerHeight = openIssueFooterHeight;
+				}
+				vm.onContentHeightRequest({height: headerHeight + (vm.selectedIssue.comments.length * commentHeight) + footerHeight});
+			}
+			else if (vm.showAddIssue) {
+				vm.onContentHeightRequest({height: addHeight});
+			}
 		}
 	}
 }());
