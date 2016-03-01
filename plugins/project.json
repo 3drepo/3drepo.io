@@ -14,8 +14,7 @@
 		],
 		"jade" : [
 			{"template" : "project/project.jade", "id" : "project.html" },
-			{"template" : "project/viewermanager.jade", "id" : "viewermanager.html" },
-			{"template" : "project/home.jade", "id" : "home.html" }
+			{"template" : "project/viewermanager.jade", "id" : "viewermanager.html" }
 		],
 		"angular" : [
 			"project/homeDirective.js",
@@ -27,9 +26,6 @@
             "project/projectService.js",
 			"project/viewerDirective.js",
 			"project/viewerManagerDirective.js"
-		],
-		"css" : [
-			"project/home.css"
 		]
 	}
 }

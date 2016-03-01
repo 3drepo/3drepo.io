@@ -37,7 +37,6 @@
     function home() {
         return {
             restrict: 'E',
-            templateUrl: 'home.html',
             scope: {},
             controller: HomeCtrl,
             controllerAs: 'vm',
@@ -45,24 +44,10 @@
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "Auth", "StateManager"];
+    HomeCtrl.$inject = [];
 
-    function HomeCtrl($scope, Auth, StateManager) {
+    function HomeCtrl() {
         var vm = this;
-
-        vm.logout = function () {
-            Auth.logout().then(
-                function _logoutCtrlLogoutSuccess () {
-                    $scope.errorMessage = null;
-                    StateManager.state.account = null;
-                    StateManager.updateState();
-                },
-                function _logoutCtrlLogoutFailure (reason) {
-                    $scope.errorMessage = reason;
-                    StateManager.updateState();
-                }
-            );
-        };
     }
 }());
 

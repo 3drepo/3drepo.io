@@ -29,6 +29,12 @@ panel #buttons .panelButtonGroup label {
   text-shadow: 0 0 2px rgba(0,0,0,0.5);
 }
 
+panel .md-mini md-icon,
+panel .md-icon-button md-icon{
+  font-size: 20px;
+  outline: none;
+}
+
 /** Panels ************************************************************************************************************/
 
 .active {
@@ -120,4 +126,11 @@ panel-content .panelContentFilter {
   padding: 5px 10px 0 10px;
   height: 60px;
   border-bottom: solid 1px #C5CAE9;
+}
+
+panel-content #helpButton {
+  position: absolute;
+  top: -20px;
+  right: -36px;
+  opacity: 0.75;
 }
