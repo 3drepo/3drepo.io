@@ -79,6 +79,7 @@ module.exports.app = function (sharedSession) {
 	}
 
 	app.use(sharedSession);
+	app.use('/os',require('../js/core/handlers/osBuilding'));
 	app.use("/", routes.router);
 
 	return app;
