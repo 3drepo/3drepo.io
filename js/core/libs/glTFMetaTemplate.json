@@ -1,0 +1,68 @@
+{
+    "accessors": {
+    },
+    "animations": {},
+    "asset": {
+        "generator": "3D Repo glTF generator",
+        "version": "0.1"
+    },
+    "bufferViews": {
+    },
+    "buffers": {
+    },
+    "extensionsUsed": [
+        "KHR_materials_common"
+    ],
+    "materials": {
+        "Effect-White": {
+            "extensions": {
+                "KHR_materials_common": {
+                    "doubleSided": false,
+                    "jointCount": 0,
+                    "technique": "PHONG",
+                    "transparent": false,
+                    "values": {
+                        "ambient": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "diffuse": [
+                            0.8,
+                            0.8,
+                            0.8,
+                            1
+                        ],
+                        "emission": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "shininess": 256,
+                        "specular": [
+                            0.1,
+                            0.1,
+                            0.1,
+                            1
+                        ]
+                    }
+                }
+            },
+            "name": "White"
+        }
+    },
+    "meshes": {
+    },
+    "nodes": {
+    },
+    "scene": "defaultScene",
+    "scenes": {
+        "defaultScene": {
+            "nodes": [
+            ]
+        }
+    },
+    "skins": {}
+}
