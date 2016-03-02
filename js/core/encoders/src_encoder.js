@@ -659,8 +659,7 @@
 			}
 
 			// Output optional texture bits
-			if (tex_uuid !== null) {
-
+			if (tex_uuid !== null && typeof mesh.uv_channels != "undefined") {				
 				mesh.uv_channels.buffer.copy(dataBuffers[idx], bufPos);
 				bufPos += mesh.uv_channels.buffer.length;
 			}
