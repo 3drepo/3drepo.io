@@ -17,7 +17,8 @@
 			"base/BaseCtrl.js",
 			"base/StateManager.js",
 			"base/projectPageConfig.js",
-			"base/DialogCtrl.js"
+			"base/DialogCtrl.js",
+            "base/homeDirective.js"
 		]
 	}
 }

@@ -5,7 +5,11 @@
 			{"template" : "login/login.jade", "id": "login.html"}
 		],
 		"angular": [
-			"login/LoginCtrl.js"
-		]
+			"login/LoginCtrl.js",
+            "login/loginDirective.js"
+		],
+        "css" : [
+            "login/login.css"
+        ]
 	}
 }

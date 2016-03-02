@@ -17,7 +17,6 @@
 			{"template" : "project/viewermanager.jade", "id" : "viewermanager.html" }
 		],
 		"angular" : [
-			"project/homeDirective.js",
 			"project/globalDirective.js",
 			"project/eventService.js",
 			"project/ProjectData.js",

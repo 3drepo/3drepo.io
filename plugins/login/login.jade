@@ -1,4 +1,4 @@
-.container-fluid#loginPage(ng-style="{'background-size': contain, 'background-image':'url(' + backgroundImage + ')'}")
+//.container-fluid(ng-style="{'background-image':'url(' + vm.backgroundImage + ')'}")
 	.row
 		.col-md-4.col-md-offset-2
 			h1 3D BIM ver­sion con­trol
@@ -6,12 +6,31 @@
 		.col-md-4
 			#credentials-box(ng-controller='LoginCtrl')
 				h5.version.top-gap Version: {{version}}
-				form.signin(ng-submit='login()')
-					input(type='text', ng-model='user.username', class='form-control top-gap', placeholder='Username', required, autofocus)
-					input(type='password', ng-model='user.password', class='form-control top-gap', placeholder='Password', required)
+				form.signin(ng-submit='vm.login()')
+					input(type='text', ng-model='vm.user.username', class='form-control top-gap', placeholder='Username', required, autofocus)
+					input(type='password', ng-model='vm.user.password', class='form-control top-gap', placeholder='Password', required)
 					button(class='btn btn-success top-gap pull-right', type='submit') Log In
 					button(class='btn btn-success top-gap pull-right', type='submit') Sign Up
 					span.clearfix
 				#message
-					h4.text-center.error {{errorMessage}}
+					h4.text-center.error {{vm.errorMessage}}
 
+#login(ng-style="{'background-image':'url(' + vm.backgroundImage + ')'}", layout="column", flex)
+	#loginContent(layout="row")
+		span(flex="20")
+		div(flex="40", layout="column", layout-align="start start")
+			h1.md-display-1 3D BIM version control
+			h2.md-headline scalable, open platform
+		#loginInput(flex="20", layout="column")
+			div(layout="column", flex)
+				md-input-container.md-block(md-no-float)
+					input(type='text', ng-model='vm.user.username', placeholder='Username', ng-required, autofocus)
+				md-input-container(md-no-float)
+					input(type='password', ng-model='vm.user.password', placeholder='Password', ng-required)
+			div(layout="row", layout-align="space-between")
+				md-button.md-accent.md-raised(ng-click="vm.login()") Log In
+			h2.md-subhead Version: {{vm.version}}
+			//span.clearfix
+			//#message
+				h4.text-center.error {{vm.errorMessage}}
+		span(flex="20")
