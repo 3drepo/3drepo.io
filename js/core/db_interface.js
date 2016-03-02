@@ -669,8 +669,7 @@ DBInterface.prototype.getAvatar = function(username, callback) {
       * @param {function} callback(string) - call back function with revision id as a string
       * @param {function} err_callback(err) - callback when error occurs
 	  *******************************************************************************/
-DBInterface.prototype.getProjectBranchHeadRid = function(account, project, branch, callback, err_callback)
-{
+DBInterface.prototype.getProjectBranchHeadRid = function (account, project, branch, callback, err_callback) {
     var branch_id;
     if (branch === "master") {
         branch_id = masterUUID;
@@ -685,13 +684,15 @@ DBInterface.prototype.getProjectBranchHeadRid = function(account, project, branc
     var historyProjection = {
         _id: 1
     };
-
+    
     dbConn(this.logger).getLatest(account, project + ".history", historyQuery, historyProjection, function (err, docs) {
-        if (err.value) return err_callback(err);
+        if (err.value) {
+            return err_callback(err);
+        }
         if (!docs.length) { return err_callback(responseCodes.PROJECT_HISTORY_NOT_FOUND); }
         callback(uuidToString(docs[0]._id));
     });
-}
+};
 DBInterface.prototype.getProjectInfo = function(account, project, callback) {
 	if(!project){
 		return callback(responseCodes.PROJECT_NOT_SPECIFIED);
@@ -1824,8 +1825,10 @@ DBInterface.prototype.getIssues = function(dbName, project, branch, revision, on
 							return callback(err);
 						}
 
+						var projectType = settings.length ? settings[0].type : undefined;
+
 						// For all federated child projects get a list of shared IDs
-						self.getObjectIssues(childDbName, childProject, null, null, onlyStubs, settings[0].type, function (err, objIssues) {
+						self.getObjectIssues(childDbName, childProject, null, null, onlyStubs, projectType, function (err, objIssues) {
 							if (err.value) {
 								return iter_callback(err);
 							}
@@ -1951,7 +1954,7 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 
 							self.logger.logDebug("Updated " + count + " records.");
 
-							data.typePrefix  = settings[0].type;
+							data.typePrefix  = settings.length ? settings[0].type : undefined;
 
 							callback(responseCodes.OK, { account: dbName, project: project, issue_id : uuidToString(data._id), number : data.number, created : data.created, issue: data });
 						});
@@ -2014,6 +2017,8 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 				coll.update({ _id : data._id}, updateQuery, function(err, count) {
 					if (err) { return callback(responseCodes.DB_ERROR(err)); }
 
+					var typePrefix = settings.length ? settings[0].type : undefined;
+
 					self.logger.logDebug("Updated " + count + " records.");
 					callback(
 						responseCodes.OK,
@@ -2024,7 +2029,7 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 							issue_id : uuidToString(data._id),
 							number: data.number,
 							owner: owner,
-							typePrefix: settings.type,
+							typePrefix: typePrefix,
 							created: timeStamp
 						}
 					);

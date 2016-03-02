@@ -32,7 +32,8 @@ module.exports.app = function (sharedSession) {
 	require("../js/core/encoders/html_encoder.js").route(routes);
 	require("../js/core/encoders/src_encoder.js").route(routes);
 	require("../js/core/encoders/img_encoder.js").route(routes);
-	require("../js/core/encoders/bin_encoder.js").route(routes);
+    require("../js/core/encoders/bin_encoder.js").route(routes);
+    require("../js/core/encoders/gltf_encoder.js").route(routes);
 
 	let bodyParser = require("body-parser");
 

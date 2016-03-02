@@ -52,7 +52,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 			script(type="text/ng-template", id=j.id)
 				!= renderMe('./plugins/' + j.template, locals)
 				
-		.container-fluid
+		#accountpage.container-fluid
 			//.row.mainrow
 				ng-include(src="'header.html'")
 			.row

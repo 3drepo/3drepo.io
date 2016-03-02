@@ -320,7 +320,7 @@ function getFullTree(dbInterface, account, project, branch, revision, path, call
 		}
 
 		var rootJSON = {
-			"name"      : root[C.REPO_NODE_LABEL_NAME],
+			"name"      : root.hasOwnProperty(C.REPO_NODE_LABEL_NAME) ? root[C.REPO_NODE_LABEL_NAME] : uuidToString(root[C.REPO_NODE_LABEL_ID]),
             "path"      : ((path !== null) ? (path + "__") : "") + uuidToString(root[C.REPO_NODE_LABEL_ID]),
 			"_id"       : uuidToString(root[C.REPO_NODE_LABEL_ID]),
 			"shared_id" : uuidToString(root[C.REPO_NODE_LABEL_SHARED_ID]),
