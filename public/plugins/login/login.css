@@ -11,19 +11,18 @@ login #loginContent {
   background: rgba(63,81,181,0.7);
 }
 
-login h1 {
+login #loginTitle {
   color: #ffffff;
+  margin: 50px 0 -10px 0;
 }
-login h2 {
+
+login #loginSubTitle,
+login #loginVersion{
   color: rgba(255,255,255,0.6);
 }
 
-login #loginInput {
-  margin-top: 25px;
-}
-
 login md-input-container {
-  margin: 0%;
+  margin: 0;
 }
 
 login md-input-container input {
@@ -31,4 +30,8 @@ login md-input-container input {
   margin-bottom: -15px;
   height: 35px !important;
   background: #ffffff !important;
+}
+
+login #loginError {
+  color: #F44336;
 }

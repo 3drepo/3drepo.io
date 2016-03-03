@@ -8,6 +8,7 @@
 		"angular": [
 			"account/AccountData.js",
 			"account/AccountCtrl.js",
+            "account/accountDirective.js",
             "account/logoutDirective.js"
 		],
         "css" : [

@@ -1,5 +1,5 @@
 /**
- *	Copyright (C) 2015 3D Repo Ltd
+ *	Copyright (C) 2016 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU Affero General Public License as
@@ -40,6 +40,7 @@
 		vm.user = { username: "", password: ""};
 		vm.version = serverConfig.apiVersion;
 		vm.backgroundImage = serverConfig.backgroundImage;
+		vm.logo = "/public/images/3drepo-logo-white.png";
 
 		vm.login = function() {
 			Auth.login(vm.user.username, vm.user.password).then(
