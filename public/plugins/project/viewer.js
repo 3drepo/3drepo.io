@@ -711,13 +711,15 @@ var Viewer = function (name, handle, x3ddiv, manager) {
 
 			return;
 		}
-
 		self.loadViewpoint = id;
 	}
 
 	this.updateSettings = function (settings) {
 		if (settings)
+		{			
 			self.settings = settings;
+			self.applySettings();
+		}
 	}
 
 	this.applySettings = function () {
