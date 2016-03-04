@@ -171,9 +171,9 @@ var repoGetHandler = function(router, checkAccess){
 
 	// Get object with specific uid in a specific format
 	self.getInternal("/:account/:project/meta/:uid.:format.:subformat?");
-	self.getInternal("/:account/:project/issue/:uid.:format");
-	self.getInternal("/:account/:project/issues/:sid.:format");
-	self.getInternal("/:account/:project/issues.:format");
+	// self.getInternal("/:account/:project/issue/:uid.:format");
+	// self.getInternal("/:account/:project/issues/:sid.:format");
+	// self.getInternal("/:account/:project/issues.:format");
 
 	// Get map from object id to path in tree for multipart
 	self.getInternal("/:account/:project/revision/:branch/head/tree/multimap.:format.:subformat?");

@@ -88,6 +88,14 @@ var responseCodes = {
 	IMAGE_CONVERSION_FAILED : { value: 40, message: "Image conversion failed", status: 500},
 	ROLE_SETTINGS_NOT_FOUND : { value: 41, message: "Role settings not found", status: 500 },
 
+	MONGOOSE_VALIDATION_ERROR: function(err){
+		return {
+			value: 42, 
+			status: 400 ,
+			message: err.message || 'Validation failed'
+		};
+	},
+
 	DB_ERROR: function(mongoErr) {
 		"use strict";
 
@@ -193,7 +201,7 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 		}
 	}
 
-	next();
+	//next();
 };
 
 // On error respond with error code and errInfo (containing helpful information)

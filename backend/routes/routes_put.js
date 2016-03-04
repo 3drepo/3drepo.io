@@ -20,10 +20,10 @@
 ****************************************************************************/
 
 var schemaValidator = require('./js/core/db_schema.js')();
-var log_iface = require('./js/core/logger.js');
-var logger = log_iface.logger;
+//var log_iface = require('./js/core/logger.js');
+//var logger = log_iface.logger;
 var responseCodes = require('./js/core/response_codes.js');
-var config = require('./js/core/config.js');
+//var config = require('./js/core/config.js');
 
 module.exports = function(router, dbInterface, checkAccess){
 	this.putMap = [];
@@ -37,9 +37,11 @@ module.exports = function(router, dbInterface, checkAccess){
 		var data = JSON.parse(req.body.data);
 
 		this.dbInterface.hasReadAccessToProject(req.session.user.username, req.params.account, req.params.project, function(err) {
-			if (err.value) return callback(err);
+			if (err.value) {
+				return callback(err);
+			}
 
-			this.dbInterface.updateIssue(req.params["account"], req.params["project"], req.params["sid"], req.session.user.username, data, function(err, result) {
+			this.dbInterface.updateIssue(req.params.account, req.params.project, req.params.sid, req.session.user.username, data, function(err, result) {
 				responseCodes.onError(responsePlace, err, res, result);
 			});
 		});
@@ -48,16 +50,19 @@ module.exports = function(router, dbInterface, checkAccess){
 	// Register handlers with Express Router
 	for(var idx in this.putMap)
 	{
-		var item = this.putMap[idx];
+		if(this.putMap.hasOwnProperty(idx)){
+			var item = this.putMap[idx];
 
-		console.log('debug', 'Adding PUT call for ' + item['regex']);
+			console.log('debug', 'Adding PUT call for ' + item.regex);
 
-		var resFunction = schemaValidator.validate(item.regex);
+			var resFunction = schemaValidator.validate(item.regex);
 
-		if (item.shouldCheckAccess)
-			router.put(item.regex.toString(), resFunction, checkAccess, item.callback);
-		else
-			router.put(item.regex, resFunction, item.callback);
+			if (item.shouldCheckAccess){
+				router.put(item.regex.toString(), resFunction, checkAccess, item.callback);
+			} else {
+				router.put(item.regex, resFunction, item.callback);
+			}
+		}
 	}
 
 	return this;

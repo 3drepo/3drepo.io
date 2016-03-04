@@ -1,4 +1,4 @@
-var dbInterface = require("../db_interface.js");
+var dbInterface = require("../db/db_interface.js");
 //var _ = require('lodash');
 var responseCodes = require('../response_codes');
 var C               = require("../constants");

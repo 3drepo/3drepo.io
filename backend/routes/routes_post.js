@@ -234,16 +234,16 @@
 			});
 		});
 
-		self.post("/:account/:project/issues/:id", true, function(req, res, next) {
-			var responsePlace = "Adding or updating an issue";
-			var data = JSON.parse(req.body.data);
+		// self.post("/:account/:project/issues/:id", true, function(req, res, next) {
+		// 	var responsePlace = "Adding or updating an issue";
+		// 	var data = JSON.parse(req.body.data);
 
-			req[C.REQ_REPO].logger.logDebug("Upserting an issues for object " + req.params[C.REPO_REST_API_SID] + " in " + req.params[C.REPO_REST_API_ACCOUNT] + "/" + req.params[C.REPO_REST_API_PROJECT], req);
+		// 	req[C.REQ_REPO].logger.logDebug("Upserting an issues for object " + req.params[C.REPO_REST_API_SID] + " in " + req.params[C.REPO_REST_API_ACCOUNT] + "/" + req.params[C.REPO_REST_API_PROJECT], req);
 
-			dbInterface(req[C.REQ_REPO].logger).storeIssue(req.params[C.REPO_REST_API_ACCOUNT], req.params[C.REPO_REST_API_PROJECT], req.params[C.REPO_REST_API_ID], req.session.user.username, data, function(err, result) {
-				responseCodes.onError(responsePlace, req, res, next, err, result);
-			});
-		});
+		// 	dbInterface(req[C.REQ_REPO].logger).storeIssue(req.params[C.REPO_REST_API_ACCOUNT], req.params[C.REPO_REST_API_PROJECT], req.params[C.REPO_REST_API_ID], req.session.user.username, data, function(err, result) {
+		// 		responseCodes.onError(responsePlace, req, res, next, err, result);
+		// 	});
+		// });
 
 		var checkProcessed = function (callback) {
 			return function(req, res, next) {

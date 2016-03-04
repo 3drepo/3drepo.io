@@ -1660,96 +1660,105 @@ DBInterface.prototype.filterFederatedProject = function(dbName, project, branch,
 DBInterface.prototype.getFederatedProjectList = function(dbName, project, branch, revision, callback) {
 	"use strict";
 
-	var historyQuery = null;
+	return new Promise((resolve, reject) => {
 
-	if (revision !== null)
-	{
-		historyQuery = {
-			_id: stringToUUID(revision)
-		};
-	} else {
-		let branch_id;
+		var historyQuery = null;
 
-		if (branch === "master") {
-			branch_id = masterUUID;
+		if (revision !== null)
+		{
+			historyQuery = {
+				_id: stringToUUID(revision)
+			};
 		} else {
-			branch_id = stringToUUID(branch);
-		}
+			let branch_id;
 
-		historyQuery = {
-			shared_id:	branch_id
-		};
-	}
-
-	var self = this;
-
-	dbConn(this.logger).getLatest(dbName, project + ".history", historyQuery, null, function(err, docs)
-	{
-		if (err.value) {
-			return callback(err);
-		}
-
-		if (!docs.length) {
-			return callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
-		}
-
-		var filter = {
-			type: "ref",
-			_id: { $in: docs[0].current }
-		};
-
-		// var projection = {
-		//	_rid : 1,
-		//	owner: 1,
-		//	project: 1,
-		//	unique: 1
-		// };
-
-		dbConn(self.logger).filterColl(dbName, project + ".scene", filter, {}, function(err, refs) {
-			if (err.value) {
-				return callback(err);
+			if (branch === "master") {
+				branch_id = masterUUID;
+			} else {
+				branch_id = stringToUUID(branch);
 			}
 
-			async.concat(refs, function (item, iter_callback) {
-				var childDbName  = item.owner ? item.owner : dbName;
-				var childProject = item.project;
+			historyQuery = {
+				shared_id:	branch_id
+			};
+		}
 
-				var unique = ("unique" in item) ? item.unique : false;
+		var self = this;
 
-				var childRevision, childBranch ;
-				if ("_rid" in item)
-				{
-					if (unique)
+		dbConn(this.logger).getLatest(dbName, project + ".history", historyQuery, null, function(err, docs)
+		{
+			if (err.value) {
+				reject(err);
+				return callback && callback(err);
+			}
+
+			if (!docs.length) {
+				reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+				return callback && callback(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+			}
+
+			var filter = {
+				type: "ref",
+				_id: { $in: docs[0].current }
+			};
+
+			// var projection = {
+			//	_rid : 1,
+			//	owner: 1,
+			//	project: 1,
+			//	unique: 1
+			// };
+
+			dbConn(self.logger).filterColl(dbName, project + ".scene", filter, {}, function(err, refs) {
+				if (err.value) {
+					reject(err);
+					return callback && callback(err);
+				}
+
+				async.concat(refs, function (item, iter_callback) {
+					var childDbName  = item.owner ? item.owner : dbName;
+					var childProject = item.project;
+
+					var unique = ("unique" in item) ? item.unique : false;
+
+					var childRevision, childBranch ;
+					if ("_rid" in item)
 					{
-						childRevision = uuidToString(item._rid);
-						childBranch   = null;
+						if (unique)
+						{
+							childRevision = uuidToString(item._rid);
+							childBranch   = null;
+						} else {
+							childRevision = null;
+							childBranch   = uuidToString(item._rid);
+						}
 					} else {
+						childBranch   = "master";
 						childRevision = null;
-						childBranch   = uuidToString(item._rid);
-					}
-				} else {
-					childBranch   = "master";
-					childRevision = null;
-				}
-
-				self.getFederatedProjectList(childDbName, childProject, childBranch, childRevision, function (err, childrefs) {
-					if (err.value) {
-						return iter_callback(err);
 					}
 
-					iter_callback(null, childrefs);
+					self.getFederatedProjectList(childDbName, childProject, childBranch, childRevision, function (err, childrefs) {
+						if (err.value) {
+							return iter_callback(err);
+						}
+
+						iter_callback(null, childrefs);
+					});
+				},
+				function (err, results) {
+					if (err)
+					{
+						reject(err);
+						return callback && callback(err);
+					}
+
+					resolve(refs.concat(results));
+					callback && callback(responseCodes.OK, refs.concat(results));
 				});
-			},
-			function (err, results) {
-				if (err)
-				{
-					return callback(err);
-				}
-
-				callback(responseCodes.OK, refs.concat(results));
 			});
 		});
 	});
+
 };
 
 DBInterface.prototype.getIssue = function(dbName, project, uid, onlyStubs, callback) {
@@ -1821,6 +1830,7 @@ DBInterface.prototype.getIssues = function(dbName, project, branch, revision, on
 
 					var childRevision, childBranch;
 
+					//TO-ASK-TIM: childRevision and childBranch defined but never used
 					if ("_rid" in item)
 					{
 						if (unique)
@@ -1888,6 +1898,7 @@ DBInterface.prototype.getObjectIssues = function(dbName, project, sids, number, 
 
 	var projection = {};
 
+	//TO-ASK-TIM: projection defined but never use?
 	if (onlyStubs)
 	{
 		projection = {

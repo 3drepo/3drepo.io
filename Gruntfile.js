@@ -57,6 +57,7 @@ module.exports = function(grunt) {
                 varstmt: false,
                 strict: false,
                 esnext: true,
+                expr: true,
                 // options here to override JSHint defaults
                 globals: {
                     console: true,
@@ -66,7 +67,13 @@ module.exports = function(grunt) {
             },
 
             backend:{
-                files: { src: ['js/core/**/*.js', 'services/*.js']},
+                files: { src: [
+                    'backend/db/*.js', 
+                    'backend/services/*.js', 
+                    'backend/routes/*.js',
+                    'backend/models/*.js',
+                    'backend/*.js'
+                ]},
             }
 
         },

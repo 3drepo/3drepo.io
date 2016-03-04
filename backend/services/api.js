@@ -19,12 +19,14 @@
 module.exports.app = function (sharedSession) {
 	"use strict";
 
-	//let log_iface = require("../js/core/logger.js");
+	let log_iface = require("../logger.js");
 
 	let express = require("express");
 	let routes = require("../routes/routes.js")();
 	let config = require("../config.js");
 	let compress = require("compression");
+
+	let C = require("../constants");
 
 	// Attach the encoders to the router
 	require("../encoders/x3dom_encoder.js").route(routes);
@@ -38,6 +40,24 @@ module.exports.app = function (sharedSession) {
 	let bodyParser = require("body-parser");
 
 	let app = express();
+
+	// put logger in req object
+	app.use(log_iface.startRequest);
+
+	// init the singleton db connection for modelFactory
+	app.use((req, res, next) => {
+		// init the singleton db connection
+		let DB = require('../db/db')(req[C.REQ_REPO].logger);
+
+		DB.getDB('default').then( db => {
+			// set db to singleton modelFactory class
+			require('../models/factory/modelFactory').setDB(db);
+			next();
+		}).catch( err => {
+			console.log(err);
+			responseCodes.respond('Express Middleware', req, res, next, responseCodes.PROCESS_ERROR(err), err);
+		});
+	});
 
 	app.use(bodyParser.urlencoded({
 		extended: true
@@ -80,6 +100,9 @@ module.exports.app = function (sharedSession) {
 	}
 
 	app.use(sharedSession);
+
+	//issues handlers
+	app.use('/:account/:project', require('../routes/issue'));
 	app.use("/", routes.router);
 
 	return app;
