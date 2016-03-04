@@ -31,7 +31,7 @@ module.exports.app = function (sharedSession) {
 	// Attach the encoders to the router
 	require("../encoders/x3dom_encoder.js").route(routes);
 	require("../encoders/json_encoder.js").route(routes);
-	require("../encoders/html_encoder.js").route(routes);
+	//require("../encoders/html_encoder.js").route(routes);
 	require("../encoders/src_encoder.js").route(routes);
 	require("../encoders/img_encoder.js").route(routes);
     require("../encoders/bin_encoder.js").route(routes);
