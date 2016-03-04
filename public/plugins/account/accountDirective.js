@@ -32,13 +32,12 @@
 		};
 	}
 
-	AccountCtrl.$inject = ["$location", "StateManager"];
+	AccountCtrl.$inject = ["$scope", "StateManager"];
 
-	function AccountCtrl($location, StateManager) {
+	function AccountCtrl($scope, StateManager) {
 		var vm = this;
 
 		vm.Data = StateManager.Data;
-		console.log(vm.Data);
 		vm.defaultView = "projects";
 		vm.view = vm.defaultView;
 		vm.passwords = {};
@@ -48,6 +47,15 @@
 		vm.errors.oldPassword = "";
 		vm.errors.newPassword = "";
 		vm.projectsShowList = true;
+
+		/*
+		 * Handle changes to the state manager Data
+		 */
+		$scope.$watch("vm.Data", function () {
+			console.log(vm.Data);
+			vm.name = vm.Data.AccountData.firstName + " " + vm.Data.AccountData.lastName;
+			vm.email = vm.Data.AccountData.email;
+		}, true);
 
 		vm.setView = function(view){
 			vm.view = view;
@@ -63,36 +71,8 @@
 			return vm.view === view;
 		};
 
-
-		vm.updateUser = function() {
-			vm.Data.UserData.updateUser()
-				.success(function() {
-					vm.setView(vm.defaultView);
-				}).error(function(message) {
-				vm.updateUserError = "[" + message.message + "]";
-			});
-		};
-
-		vm.changePassword = function() {
-			vm.Data.AccountData.updatePassword(vm.passwords.oldPassword, vm.passwords.newPassword)
-				.success(function() {
-					vm.setView(vm.defaultView);
-				}).error(function(message) {
-				vm.errors.changePasswordError = "[" + message.message + "]";
-			});
-		};
-
 		vm.toggleProjectsView = function() {
 			vm.projectsShowList = !vm.projectsShowList;
-		};
-
-		/**
-		 * Go to the project viewer
-		 *
-		 * @param {{String}} project
-		 */
-		vm.goToProject = function (account, project) {
-			$location.path("/" + account + "/" + project, "_self");
 		};
 	}
 }());
