@@ -19,11 +19,11 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("autoLogin", autoLogin);
+		.directive("autoProject", autoProject);
 
-	autoLogin.$inject = ["Auth"];
+	autoProject.$inject = ["EventService"];
 
-	function autoLogin(Auth) {
+	function autoProject(EventService) {
 		return {
 			restrict: "E",
 			link: link,
@@ -31,8 +31,14 @@
 		};
 		
 		function link (scope, element, attrs)
-		{			
-			Auth.login(attrs.account, attrs.password);
+		{		
+			EventService.send(EventService.EVENT.CREATE_VIEWER, {
+				name: "default",
+				account: attrs.account,
+				project: attrs.project,
+				branch:  attrs.branch,
+				revision: attrs.revision
+			});
 		}
 	}
 }());

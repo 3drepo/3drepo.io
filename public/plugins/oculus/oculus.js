@@ -155,7 +155,7 @@ var Oculus = {};
 				//leftPlane._x3domNode._graph.needCulling = false;
 				//rightPlane._x3domNode._graph.needCulling = false;
 
-				self.viewer.setGyroscopeStart();
+				//self.viewer.setGyroscopeStart();
 				self.startVR();
 
 				// Enable EXAMINE mode for compatibility with gyro
