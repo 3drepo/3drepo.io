@@ -103,6 +103,8 @@
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
 							vm.manager.getCurrentViewer().clickPin(event.value.id);
+						} else if (event.type === EventService.EVENT.VIEWER.SET_PIN_VISIBILITY) {
+							vm.manager.getCurrentViewer().setPinVisibility(event.value.id, event.value.visibility);							
 						} else if (event.type === EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES) {
 							vm.manager.getCurrentViewer().clearClippingPlanes();
 						} else if (event.type === EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE) {

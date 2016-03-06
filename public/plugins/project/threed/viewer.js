@@ -369,6 +369,40 @@ var Viewer = {};
 
 		this.onMouseDown = function(functionToBind) {
 			$(self.viewer).on("onMouseDown", functionToBind);
+			
+			var pickingInfo = self.viewArea()._pickingInfo;
+			
+			if (pickingInfo.pickObj)
+			{
+				var account, project;
+				
+				var objectID = pickingInfo.pickObj.partID ? 
+					pickingInfo.pickObj.partID : 
+					pickingInfo.pickObj.pickObj._xmlNode.getAttribute("DEF");
+
+				var projectParts = pickingInfo.pickObj._xmlNode.getAttribute("id").split("__");
+
+				account = projectParts[0];
+				project = projectParts[1];
+				
+				var inlineTransName = ViewerUtil.escapeCSSCharacters(account + "__" + project);
+				var projectInline = self.inlineRoots[inlineTransName];
+				var trans = projectInline._x3domNode.getCurrentTransform();
+
+				callback(self.EVENT.PICK_POINT, {
+					id: objectID, 
+					position: pickingInfo.pickPos,
+					normal: pickingInfo.pickNorm,
+					object: pickingInfo.pickObj,
+					trans: trans
+				});
+			} else {
+				callback(self.EVENT.PICK_POINT, 
+				{
+					position: pickingInfo.pickPos,
+					normal: pickingInfo.pickNorm
+				})
+			}
 		};
 
 		this.onViewpointChanged = function(functionToBind) {
@@ -1509,6 +1543,15 @@ var Viewer = {};
 			}
 		};
 		
+		this.setPinVisibility = function(id, visibility)
+		{
+			if (self.pins.hasOwnProperty(id)) {
+				var pin = self.pins[id];
+				
+				pin.setAttribute("render", visibility.toString());
+			}
+		};
+		
 		this.removePin = function(id) {
 			if (self.pins.hasOwnProperty(id)) {
 				delete self.pins[id];
@@ -1572,6 +1615,7 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
 	SWITCH_OBJECT_VISIBILITY: "VIEWER_SWITCH_OBJECT_VISIBILITY",
 
+	PICK_POINT: "VIEWER_PICK_POINT",
 	SET_CAMERA: "VIEWER_SET_CAMERA",
 
 	// Clipping plane events

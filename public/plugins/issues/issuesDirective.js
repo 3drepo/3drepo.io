@@ -94,12 +94,13 @@
 		$scope.$watch("vm.showAdd", function (newValue) {
 			var addIssueHeight = 225;
 			if (newValue) {
-				setupGlobalClickWatch();
 				vm.onContentHeightRequest({height: issuesHeight + addIssueHeight});
-			}
-			else {
-				cancelGlobalClickWatch();
-				NewIssuesService.removePin();
+			} else {
+				EventService.send(EventService.EVENT.VIEWER.REMOVE_PIN,
+				{
+					id: "newIssuePin"	
+				});
+				
 				vm.onContentHeightRequest({height: issuesHeight});
 			}
 		});
@@ -110,18 +111,6 @@
 				vm.saveIssueDisabled = (newValue.toString() === "");
 			}
 		});
-
-		/**
-		 * Escape CSS characters in string
-		 *
-		 * @param string
-		 * @returns {*}
-		 */
-		function escapeCSSCharacters(string)
-		{
-			// Taken from http://stackoverflow.com/questions/2786538/need-to-escape-a-special-character-in-a-jquery-selector-string
-			return string.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, "\\$&");
-		}
 
 		/**
 		 * Setup the issues to show
@@ -418,68 +407,35 @@
 			});
 		};
 
-		
-		function setupGlobalClickWatch () {
-			/*
-			if (vm.globalClickWatch === null) {
-				vm.globalClickWatch = $scope.$watch(EventService.currentEvent, function (event, oldEvent) {
-					if ((event.type === EventService.EVENT.GLOBAL_CLICK) &&
-						(event.value.target.className === "x3dom-canvas") &&
-						(!((event.value.clientX === oldEvent.value.clientX) &&
-						   (event.value.clientY === oldEvent.value.clientY)))) {
-
-						var dragEndX = event.value.clientX;
-						var dragEndY = event.value.clientY;
-						var pickObj = ViewerService.pickPoint(dragEndX, dragEndY);
-
-						if (pickObj.pickObj !== null) {
-							vm.showInput = true;
-							vm.selectedObjectId = pickObj.partID ? pickObj.partID : pickObj.pickObj._xmlNode.getAttribute("DEF");
-
-							var projectParts = pickObj.pickObj._xmlNode.getAttribute("id").split("__");
-
-							if (projectParts[0] === "model")
-							{
-								vm.pickedAccount = NewIssuesService.state.account;
-								vm.pickedProject = NewIssuesService.state.project;
-								vm.pickedTrans   = $("#model__root")[0]._x3domNode.getCurrentTransform();
-							} else {
-								vm.pickedAccount = projectParts[0];
-								vm.pickedProject = projectParts[1];
-
-								var rootTransName = escapeCSSCharacters(vm.pickedAccount + "__" + vm.pickedProject + "__root");
-								vm.pickedTrans   = $("#" + rootTransName)[0]._x3domNode.getCurrentTransform();
-							}
-
-							vm.pickedNorm = vm.pickedTrans.transpose().multMatrixVec(pickObj.pickNorm);
-							vm.pickedPos = vm.pickedTrans.inverse().multMatrixVec(pickObj.pickPos);
-
-							NewIssuesService.addPin(
-								{
-									id: undefined,
-									account: vm.pickedAccount,
-									project: vm.pickedProject,
-									position: vm.pickedPos.toGL(),
-									norm: vm.pickedNorm.toGL()
-								},
-								NewIssuesService.hexToRgb(NewIssuesService.getRoleColor(vm.projectUserRoles[0]))
-							);
-						}
-						else {
-							NewIssuesService.removePin();
-						}
+		$scope.$watch(EventService.currentEvent, function(event) {
+			if (event.type === EventService.EVENT.VIEWER.PICK_POINT)
+			{
+				if (event.value.pickObj !== null)
+				{
+					NewIssuesService.addPin(
+					{
+						id: "newIssueId",
+						account: vm.pickedAccount,
+						project: vm.pickedProject,
+						position: vm.pickedPos.toGL(),
+						norm: vm.pickedNorm.toGL()
+					},
+						NewIssuesService.hexToRgb(NewIssuesService.getRoleColor(vm.projectUserRoles[0]))
+					);				
+				} else {
+					NewIssuesService.removePin();
+				}
+			} else if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
+				// If there has been a pin selected then switch
+				// that issue
+				$timeout(function() {
+					if (event.value.source === "viewer") {
+						vm.commentsToggled(event.value.id);
+						$rootScope.$apply();
 					}
 				});
 			}
-			*/
-		}
-
-		function cancelGlobalClickWatch () {
-			if (typeof vm.globalClickWatch === "function") {
-				vm.globalClickWatch();
-				vm.globalClickWatch = null;
-			}
-		}
+		});
 
 		/*
 		 * When a pin is clicked that make sure the issue sidebar
@@ -489,16 +445,7 @@
 		 * @param {object} clickInfo - Contains object and information about the source of the click
 		 */
 		$(document).on("pinClick", function (event, clickInfo) {
-			// If there has been a pin selected then switch
-			// that issue
-			$timeout(function() {
-				var issueId = clickInfo.object ? clickInfo.object.parentElement.parentElement.getAttribute("id") : null;
 
-				if (clickInfo.fromViewer) {
-					vm.commentsToggled(issueId);
-					$rootScope.$apply();
-				}
-			});
 		});
 
 		vm.showAlert = function(title) {
