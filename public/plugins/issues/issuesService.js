@@ -33,9 +33,7 @@
 			numComments = 0,
 			availableRoles = [],
 			userRoles = [],
-			obj = {},
-			selectedIssue,
-			commentHasBeenAutoSaved = false;
+			obj = {};
 
 		// TODO: Internationalise and make globally accessible
 		obj.getPrettyTime = function(time) {
@@ -141,8 +139,8 @@
 			$http.post(url, dataToSend, config)
 				.then(function successCallback(response) {
 					response.data.issue._id = response.data.issue_id;
-					response.data.issue.account = issue.account;
-					response.data.issue.project = issue.project;
+					response.data.issue.account = state.account;
+					response.data.issue.project = state.project;
 					response.data.issue.timeStamp = self.getPrettyTime(response.data.issue.created);
 					response.data.issue.creator_role = issue.creator_role;
 
@@ -225,28 +223,19 @@
 		obj.addPin = function (pin, colours, viewpoint) {
 			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
 				id: pin.id,
-				account: pin.account,
-				project: pin.project,
+				account: state.account,
+				project: state.project,
 				position: pin.position,
 				norm: pin.norm,
 				colours: colours,
 				viewpoint: viewpoint
 			});
-
-			//createPinShape("pinPlacement", pin, pinRadius, pinHeight, colours);
 		};
 
-		obj.removePin = function () {
+		obj.removePin = function (id) {
 			EventService.send(EventService.EVENT.VIEWER.REMOVE_PIN, {
-				id: "pinPlacement"
+				id: id
 			});
-
-			/*			
-			var pinPlacement = document.getElementById();
-			if (pinPlacement !== null) {
-			   pinPlacement.parentElement.removeChild(pinPlacement);
-			}
-			*/
 		};
 
 		obj.fixPin = function (pin, colours) {
@@ -254,13 +243,11 @@
 			self.removePin();
 
 			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
-				id: "pinPlacement",
+				id: "newIssuePin",
 				position: pin.position,
 				norm: pin.norm,
 				colours: colours
 			});
-
-			//createPinShape(pin.id, pin, pinRadius, pinHeight, colours);
 		};
 
 		obj.getRoles = function() {

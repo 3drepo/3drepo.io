@@ -27,46 +27,25 @@
 		return {
 			restrict: "E",
 			scope: { 
-				manager: "="
+				manager: "=",
+				name: "=",
+				account: "=",
+				project: "=",
+				branch: "=",
+				revision: "="
 			},
-			link: link,
 			controller: ViewerCtrl,
 			controllerAs: "v",
 			bindToController: true
 		};
-
-		function coalesceWithState(scope, attrs, name)
-		{
-			if (attrs[name] === "")
-			{
-				scope.fromState[name] = true;
-				scope[name] = StateManager.state[name];
-			} else {
-				scope[name] = attrs[name];	
-			}
-		}
-
-		function link (scope, element, attrs)
-		{
-			scope.fromState = {};
-			
-			coalesceWithState(scope, attrs, "account");
-			coalesceWithState(scope, attrs, "project");
-			coalesceWithState(scope, attrs, "branch");
-			coalesceWithState(scope, attrs, "revision");
-
-			scope.name     = attrs.name;
-
-			scope.init();
-		}
 	}
 
-	ViewerCtrl.$inject = ["$scope", "$element", "StateManager", "EventService"];
+	ViewerCtrl.$inject = ["$scope", "$element", "EventService"];
 
-	function ViewerCtrl ($scope, $element, StateManager, EventService)
+	function ViewerCtrl ($scope, $element, EventService)
 	{
 		var v = this;
-		
+
 		function errCallback(errorType, errorValue)
 		{
 			EventService.sendError(errorType, errorValue);
@@ -78,11 +57,11 @@
 		}
 		
 		$scope.reload = function() {
-			v.viewer.loadModel($scope.account, $scope.project, $scope.branch, $scope.revision);
+			v.viewer.loadModel(v.account, v.project, v.branch, v.revision);
 		};
 		
 		$scope.init = function() {
-			v.viewer = new Viewer($scope.name, $element[0], v.manager, eventCallback, errCallback);
+			v.viewer = new Viewer(v.name, $element[0], v.manager, eventCallback, errCallback);
 			
 			// TODO: Move this so that the attachment is contained
 			// within the plugins themselves.
@@ -98,34 +77,12 @@
 			
 			$scope.reload();
 		};
+		$scope.init();
 
-		$scope.state = StateManager.state;
-
-		var watchGroup = [];
-		
-		for(var stateVar in $scope.fromState)
-		{
-			if ($scope.fromState.hasOwnProperty(stateVar)) {
-				watchGroup.push("state." + stateVar);
-			}
-		}
-		
-		$scope.$watchGroup(watchGroup, function(oldValue, newValue) {
-			if (newValue.length)
-			{
-				$scope.account = $scope.fromState.account ? StateManager.state.account : $scope.account;
-				$scope.project = $scope.fromState.project ? StateManager.state.project : $scope.project;
-				$scope.branch = $scope.fromState.branch ? StateManager.state.branch : $scope.branch;			
-				$scope.revision = $scope.fromState.revision ? StateManager.state.revision : $scope.revision;
-			
-				$scope.reload();
-			}	
-		});
-				
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if (event.type === EventService.EVENT.PROJECT_SETTINGS_READY)
 			{
-				if (event.value.account === $scope.account && event.value.project === $scope.project)
+				if (event.value.account === v.account && event.value.project === v.project)
 				{
 					v.viewer.updateSettings(event.value.settings);
 				}

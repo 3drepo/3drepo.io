@@ -1,10 +1,11 @@
 div(ng-repeat="(name, viewer) in vm.viewers")
 	viewer(
 		node="node"
-		account = "{{viewer.account}}"
-		project = "{{viewer.project}}"
-		branch = "{{viewer.branch}}"
-		revision = "{{viewer.revision}}"
+		name="viewer.name"
+		account = "viewer.account"
+		project = "viewer.project"
+		branch = "viewer.branch"
+		revision = "viewer.revision"
 		manager = "vm.manager"
 	)
 		

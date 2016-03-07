@@ -40,9 +40,9 @@
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$element", "$timeout", "$mdDialog", "$filter", "IssuesService", "EventService"];
+	IssuesCtrl.$inject = ["$scope", "$rootScope", "$element", "$timeout", "$mdDialog", "$filter", "IssuesService", "EventService"];
 
-	function IssuesCtrl($scope, $element, $timeout, $mdDialog, $filter, IssuesService, EventService) {
+	function IssuesCtrl($scope, $rootScope, $element, $timeout, $mdDialog, $filter, IssuesService, EventService) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -62,6 +62,7 @@
 		vm.selectedObjectId = null;
 		vm.saveIssueDisabled = true;
 		vm.issues = [];
+		vm.issuesToShow = [];
 		vm.showProgress = true;
 		vm.progressInfo = "Loading issues";
 		vm.showIssuesInfo = false;
@@ -145,11 +146,20 @@
 		 * Handle toggle of adding a new issue
 		 */
 		$scope.$watch("vm.showAdd", function (newValue) {
-			if (angular.isDefined(newValue) && newValue) {
+			if (angular.isDefined(newValue)) {
 				vm.showIssue = false;
-				vm.showIssueList = false;
-				vm.showAddIssue = true;
-				vm.onShowItem();
+				if (newValue) {
+					vm.showIssueList = false;
+					vm.showAddIssue = true;
+					vm.onShowItem();
+				} else {
+					vm.showIssueList = true;
+					vm.showAddIssue = false;
+					EventService.send(EventService.EVENT.VIEWER.REMOVE_PIN,
+						{
+							id: "newIssuePin"
+						});
+				}
 				setContentHeight();
 			}
 		});
@@ -164,11 +174,57 @@
 		});
 
 		/*
-		 * Handle Events
-		 */
 		$scope.$watch(EventService.currentEvent, function (event) {
 			var i, length;
 			if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
+				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
+					if (event.value.id === vm.issuesToShow[i]._id) {
+						vm.showSelectedIssue(i, true);
+						break;
+					}
+				}
+			}
+		});
+		*/
+
+		/*
+		 * Handle Events
+		 */
+		$scope.$watch(EventService.currentEvent, function(event) {
+			var i, length,
+				position = [], normal = [],
+				newIssueId = "newIssueId",
+				test = new x3dom.fields.SFVec3f(0,0,0);
+
+			if (event.type === EventService.EVENT.VIEWER.PICK_POINT)
+			{
+				console.log(event.value.position);
+				if (event.value.pickObj !== null)
+				{
+					// Remove pin from last position if it exists
+					IssuesService.removePin(newIssueId);
+
+					// Convert data to arrays
+					angular.forEach(event.value.position, function(value, key) {
+						position.push(value);
+					});
+					angular.forEach(event.value.normal, function(value, key) {
+						normal.push(value);
+					});
+
+					// Add pin
+					IssuesService.addPin(
+						{
+							id: newIssueId,
+							position: position,
+							norm: normal
+						},
+						IssuesService.hexToRgb(IssuesService.getRoleColor(vm.projectUserRoles[0]))
+					);
+				} else {
+					IssuesService.removePin(newIssueId);
+				}
+			} else if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
 				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
 					if (event.value.id === vm.issuesToShow[i]._id) {
 						vm.showSelectedIssue(i, true);
@@ -470,8 +526,6 @@
 					}
 					else {
 						issue = {
-							account: vm.pickedAccount,
-							project: vm.pickedProject,
 							name: vm.title,
 							objectId: vm.selectedObjectId,
 							pickedPos: vm.pickedPos,
@@ -512,8 +566,7 @@
 		 */
 		vm.toggleCloseIssue = function (issue) {
 			var i = 0,
-				length = 0,
-				footerHeight;
+				length = 0;
 
 			promise = IssuesService.toggleCloseIssue(issue);
 			promise.then(function (data) {
@@ -548,30 +601,6 @@
 				];
 			});
 		}
-
-		/*
-		 * When a pin is clicked that make sure the issue sidebar
-		 * also reflects the updated state
-		 * @listens pinClick
-		 * @param {event} event - Originating event
-		 * @param {object} clickInfo - Contains object and information about the source of the click
-		 */
-		$(document).on("pinClick", function (event, clickInfo) {
-			// If there has been a pin selected then switch
-			// that issue
-			$timeout(function() {
-				var issueId = clickInfo.object ? clickInfo.object.parentElement.parentElement.getAttribute("id") : null;
-
-				if (clickInfo.fromViewer) {
-					for (var i = 0; i < vm.issuesToShow.length; i += 1) {
-						if (vm.issuesToShow[i]._id === issueId) {
-							vm.showSelectedIssue(i, true);
-							break;
-						}
-					}
-				}
-			});
-		});
 
 		/**
 		 * Show an issue alert

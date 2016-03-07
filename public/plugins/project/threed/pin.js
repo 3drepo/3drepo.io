@@ -73,7 +73,7 @@ var Pin = {};
 		self.numColours = 0;
 
 		if (typeof colours === "undefined") {
-			self.numColours = 1;
+			self.numColours = 1;removeChild
 			colours = [1.0, 0.0, 0.0];
 		} else if (typeof colours[0] === "number") {
 			self.numColours = 1;
@@ -101,6 +101,13 @@ var Pin = {};
 		this.createBasicPinShape(self.modelTransform, "LESS", OPAQUE_OPACITY, false);
 
 		self.element.appendChild(parent);
+	};
+
+	Pin.prototype.remove = function(id) {
+		var pinPlacement = document.getElementById(id);
+		if (pinPlacement !== null) {
+			pinPlacement.parentElement.removeChild(pinPlacement);
+		}
 	};
 
 	Pin.prototype.changeColour = function(colours) {
