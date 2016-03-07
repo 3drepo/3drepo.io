@@ -254,6 +254,17 @@ var Viewer = {};
 				});
 			}
 
+			self.runtime.enterFrame = function () {
+					if (self.gyroOrientation)
+					{
+							self.gyroscope(
+									self.gyroOrientation.alpha,
+									self.gyroOrientation.beta,
+									self.gyroOrientation.gamma
+							);
+					}
+			};
+
 			self.showAll = function() {
 				self.runtime.fitAll();
 
@@ -326,6 +337,50 @@ var Viewer = {};
 			self.bground.textContent = " ";
 
 			self.scene.appendChild(self.bground);
+		};
+
+		this.gyroscope = function (alpha, beta, gamma) {
+			var degToRad = Math.PI / 180.0;
+			
+			var b = (alpha ? alpha : 0);
+			var a = (beta  ? beta : 0);
+			var g = -(gamma ? gamma : 0);
+			
+			a *= degToRad; b *= degToRad; g *= degToRad;
+
+			var cA = Math.cos(a / 2.0);
+			var cB = Math.cos(b / 2.0);
+			var cG = Math.cos(g / 2.0);
+			var sA = Math.sin(a / 2.0);
+			var sB = Math.sin(b / 2.0);
+			var sG = Math.sin(g / 2.0);
+
+			/*
+			var w = cB * cG * cA - sB * sG * sA;
+			var x = sB * cG * cA - cB * sG * sA;
+			var y = cB * sG * cA  sB * cG * sA;
+			var z = cB * cG * sA  sB * sG * cA;
+			*/
+
+			var x = sA * cB * cG + cA * sB * sG;
+			var y = cA * sB * cG - sA * cB * sG;
+			var z = cA * cB * sG - sA * sB * cG;
+			var w = cA * cB * cG + sA * sB * sG;
+
+			var vp     = self.getCurrentViewpoint()._x3domNode;
+			var flyMat = vp.getViewMatrix().inverse();
+
+			var q           = new x3dom.fields.Quaternion(x,y,z,w);
+			var screenAngle = (self.screenOrientation ? self.screenOrientation : 0) * degToRad * -1;
+			var screenQuat  = x3dom.fields.Quaternion.axisAngle(new x3dom.fields.SFVec3f(0,0,1),screenAngle);
+			var viewQuat    = new x3dom.fields.Quaternion.axisAngle(new x3dom.fields.SFVec3f(1,0,0), -Math.PI * 0.5);
+
+			//q = self.gyroStart.multiply(q);
+			q = q.multiply(viewQuat);
+			q = q.multiply(screenQuat);
+
+			flyMat.setRotate(q);
+			vp.setView(flyMat.inverse());
 		};
 
 		/*
