@@ -172,50 +172,50 @@ DBInterface.prototype.updateUser = function(username, data, callback) {
 	});
 };
 
-DBInterface.prototype.updatePassword = function(username, passwords, callback) {
-	"use strict";
+// DBInterface.prototype.updatePassword = function(username, passwords, callback) {
+// 	"use strict";
 
-	var oldPassword = passwords.oldPassword;
-	var newPassword = passwords.newPassword;
+// 	var oldPassword = passwords.oldPassword;
+// 	var newPassword = passwords.newPassword;
 
-	var self = this;
+// 	var self = this;
 
-	if(!(oldPassword && newPassword))
-	{
-		return callback(responseCodes.INVALID_INPUTS_TO_PASSWORD_UPDATE);
-	}
+// 	if(!(oldPassword && newPassword))
+// 	{
+// 		return callback(responseCodes.INVALID_INPUTS_TO_PASSWORD_UPDATE);
+// 	}
 
-	self.authenticate(username, oldPassword, function(err) {
-		if(err.value) {
-			return callback(err);
-		}
+// 	self.authenticate(username, oldPassword, function(err) {
+// 		if(err.value) {
+// 			return callback(err);
+// 		}
 
-		dbConn(self.logger).dbCallback("admin", function(err, db) {
-			if (err.value) {
-				return callback(err);
-			}
+// 		dbConn(self.logger).dbCallback("admin", function(err, db) {
+// 			if (err.value) {
+// 				return callback(err);
+// 			}
 
-			self.getUserInfo(username, function(err, oldCustomData) {
-				if(err.value) {
-					return callback(err);
-				}
+// 			self.getUserInfo(username, function(err, oldCustomData) {
+// 				if(err.value) {
+// 					return callback(err);
+// 				}
 
-				var user = { "updateUser" : username };
-				user.pwd = newPassword;
-				user.customData = oldCustomData;
+// 				var user = { "updateUser" : username };
+// 				user.pwd = newPassword;
+// 				user.customData = oldCustomData;
 
-				db.command(user, function(err) {
-					// TODO: Should move this to db.js
-					if(err) {
-						callback(responseCodes.DB_ERROR(err));
-					} else {
-						callback(responseCodes.OK);
-					}
-				});
-			});
-		});
-	});
-};
+// 				db.command(user, function(err) {
+// 					// TODO: Should move this to db.js
+// 					if(err) {
+// 						callback(responseCodes.DB_ERROR(err));
+// 					} else {
+// 						callback(responseCodes.OK);
+// 					}
+// 				});
+// 			});
+// 		});
+// 	});
+// };
 
 DBInterface.prototype.getWayfinderInfo = function(dbName, project, uniqueIDs, callback) {
 	"use strict";

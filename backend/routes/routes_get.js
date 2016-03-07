@@ -40,13 +40,13 @@ var repoGetHandler = function(router, checkAccess){
 	self.checkAccess = checkAccess; // Store access checking function
 
 	// Checks whether or not the user is logged in.
-	self.getInternal("/login", {}, function(req, res, next) {
-		if (!req.session.user) {
-			responseCodes.respond("/login GET", req, res, next, responseCodes.NOT_LOGGED_IN, {});
-		} else {
-			responseCodes.respond("/login GET", req, res, next, responseCodes.OK, {username: req.session.user.username});
-		}
-	});
+	// self.getInternal("/login", {}, function(req, res, next) {
+	// 	if (!req.session.user) {
+	// 		responseCodes.respond("/login GET", req, res, next, responseCodes.NOT_LOGGED_IN, {});
+	// 	} else {
+	// 		responseCodes.respond("/login GET", req, res, next, responseCodes.OK, {username: req.session.user.username});
+	// 	}
+	// });
 
 	// TODO: Move these two functions to the JSON encoder
 	self.getInternal("/:account/:project/wayfinder.:format", {}, function(req, res, next) {

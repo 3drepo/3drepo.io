@@ -221,6 +221,7 @@ function Utils() {
      * @return {Object} our defined response code 
      */
     this.mongoErrorToResCode = function(err){
+
       let responseCodes = require('./response_codes');
       if(err.name === 'ValidationError'){
         return responseCodes.MONGOOSE_VALIDATION_ERROR(err);
@@ -233,7 +234,7 @@ function Utils() {
      * Clean req body and assign it to mongoose model
      *
      * @param {Array} list of accepted keys
-     * @param {dirtyBody} express req.body
+     * @param {Object} express req.body
      * @param {Object} mongoose model instance to be updated
      * @return {Object} updated mongoose model instance
      */
@@ -245,6 +246,16 @@ function Utils() {
         });
 
         return model;
+    };
+
+    /**
+     * Return API method and pathname, no more hardcoding for something like '/login POST' in logging. Happy days
+     *
+     * @param {Object} this request object given by express.js
+     * @return {String} string describing an API's method and pathname
+     */
+    this.APIInfo = function(req){
+        return `${req.method} ${req._parsedUrl.pathname}`;
     };
 }
 

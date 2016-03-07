@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router({mergeParams: true});
 var middlewares = require('./middlewares');
 var dbInterface = require("../db/db_interface.js");
+
 var C = require("../constants");
 var responseCodes = require('../response_codes.js');
 var Issue = require('../models/issue');
@@ -12,7 +13,6 @@ router.get('/issues.json', middlewares.hasReadAccessToProject, listIssues);
 router.get('/issues/:sid.json', middlewares.hasReadAccessToProject, listIssuesBySID);
 router.get("/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
 router.post('/issues/:id', middlewares.hasWriteAccessToProject, storeIssue);
-
 
 
 function listIssues(req, res, next) {
@@ -97,7 +97,7 @@ function storeIssue(req, res, next){
 }
 
 function renderIssuesHTML(req, res, next){
-	'use strict'
+	'use strict';
 
 	let place = '/issues.json GET';
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};

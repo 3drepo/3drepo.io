@@ -100,9 +100,11 @@ module.exports.app = function (sharedSession) {
 	}
 
 	app.use(sharedSession);
-
-	//issues handlers
+	//auth handler
+	app.use('/', require('../routes/auth'));
+	//issues handler
 	app.use('/:account/:project', require('../routes/issue'));
+	
 	app.use("/", routes.router);
 
 	return app;

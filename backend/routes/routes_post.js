@@ -31,41 +31,41 @@
 	var responseCodes   = require("../response_codes.js");
 	var C               = require("../constants");
 
-	function createSession(place, req, res, next, user)
-	{
-		req.session.regenerate(function(err) {
-			if(err) {
-				responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {account: user.username});
-			} else {
-				systemLogger.logDebug("Authenticated user and signed token.", req);
+	// function createSession(place, req, res, next, user)
+	// {
+	// 	req.session.regenerate(function(err) {
+	// 		if(err) {
+	// 			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {account: user.username});
+	// 		} else {
+	// 			systemLogger.logDebug("Authenticated user and signed token.", req);
 
-				req.session[C.REPO_SESSION_USER] = user;
+	// 			req.session[C.REPO_SESSION_USER] = user;
 
-				if (config.cookie.maxAge)
-				{
-					req.session.cookie.maxAge = config.cookie.maxAge;
-				}
+	// 			if (config.cookie.maxAge)
+	// 			{
+	// 				req.session.cookie.maxAge = config.cookie.maxAge;
+	// 			}
 
-				responseCodes.respond(place, req, res, next, responseCodes.OK, {account: user.username, roles: user.roles});
-			}
-		});
-	}
+	// 			responseCodes.respond(place, req, res, next, responseCodes.OK, {account: user.username, roles: user.roles});
+	// 		}
+	// 	});
+	// }
 
-	function expireSession(req, res, next, callback) {
-		req.session.cookie.expires = new Date(0);
-		req.session.cookie.maxAge = 0;
+	// function expireSession(req, res, next, callback) {
+	// 	req.session.cookie.expires = new Date(0);
+	// 	req.session.cookie.maxAge = 0;
 
-		return callback(req, res, next);
-	}
+	// 	return callback(req, res, next);
+	// }
 
-	function destroySession(req, res, next, callback) {
-		req.session.destroy(function() {
-			req[C.REQ_REPO].logger.logDebug("User has logged out.", req);
-			res.clearCookie("connect.sid", { path: "/" + config.api_server.host_dir });
+	// function destroySession(req, res, next, callback) {
+	// 	req.session.destroy(function() {
+	// 		req[C.REQ_REPO].logger.logDebug("User has logged out.", req);
+	// 		res.clearCookie("connect.sid", { path: "/" + config.api_server.host_dir });
 
-			return callback(req, res, next);
-		});
-	}
+	// 		return callback(req, res, next);
+	// 	});
+	// }
 
 	var repoPostHandler = function(router, checkAccess){
 		var self = this instanceof repoPostHandler ? this : Object.create(repoPostHandler.prototype);
@@ -76,89 +76,89 @@
 		};
 
 		// Log the user into the API
-		self.post("/login", false, function(req, res, next) {
-			var responsePlace = "Login POST";
+		// self.post("/login", false, function(req, res, next) {
+		// 	var responsePlace = "Login POST";
 
-			dbInterface(req[C.REQ_REPO].logger).authenticate(req.body.username, req.body.password, function(err, user)
-			{
-				req[C.REQ_REPO].logger.logDebug("User is logging in", req);
+		// 	dbInterface(req[C.REQ_REPO].logger).authenticate(req.body.username, req.body.password, function(err, user)
+		// 	{
+		// 		req[C.REQ_REPO].logger.logDebug("User is logging in", req);
 
-				expireSession(req, res, next, function(req, res, next) {
-					if(err.value) {
-						if (err.dbErr.code === C.MONGO_AUTH_FAILED)
-						{
-							responseCodes.respond(responsePlace, req, res, next, responseCodes.NOT_AUTHORIZED, {account: req.body.username});
-						} else {
-							responseCodes.respond(responsePlace, req, res, next, err, {account: req.body.username});
-						}
-					} else {
-						if(user)
-						{
-							createSession(responsePlace, req, res, next, user);
-						} else {
-							responseCodes.respond(responsePlace, req, res, next, responseCodes.USER_NOT_FOUND, {account: req.body.username});
-						}
-					}
-				});
-			});
-		});
+		// 		expireSession(req, res, next, function(req, res, next) {
+		// 			if(err.value) {
+		// 				if (err.dbErr.code === C.MONGO_AUTH_FAILED)
+		// 				{
+		// 					responseCodes.respond(responsePlace, req, res, next, responseCodes.NOT_AUTHORIZED, {account: req.body.username});
+		// 				} else {
+		// 					responseCodes.respond(responsePlace, req, res, next, err, {account: req.body.username});
+		// 				}
+		// 			} else {
+		// 				if(user)
+		// 				{
+		// 					createSession(responsePlace, req, res, next, user);
+		// 				} else {
+		// 					responseCodes.respond(responsePlace, req, res, next, responseCodes.USER_NOT_FOUND, {account: req.body.username});
+		// 				}
+		// 			}
+		// 		});
+		// 	});
+		// });
 
 		// Log the user out of the API
-		self.post("/logout", false, function(req, res, next) {
-			if(!req.session.user)
-			{
-				return responseCodes.respond("Logout POST", req, res, next, responseCodes.NOT_LOGGED_IN, {});
-			}
+		// self.post("/logout", false, function(req, res, next) {
+		// 	if(!req.session.user)
+		// 	{
+		// 		return responseCodes.respond("Logout POST", req, res, next, responseCodes.NOT_LOGGED_IN, {});
+		// 	}
 
-			var username = req.session.user.username;
+		// 	var username = req.session.user.username;
 
-			destroySession(req, res, next, function(req, res, next) {
-				responseCodes.respond("Logout POST", req, res, next, responseCodes.OK, {account: username});
-			});
-		});
+		// 	destroySession(req, res, next, function(req, res, next) {
+		// 		responseCodes.respond("Logout POST", req, res, next, responseCodes.OK, {account: username});
+		// 	});
+		// });
 
 		// Update or create a user's account
-		self.post("/:account", false, function(req, res, next) {
-			var responsePlace = "Account POST";
+		// self.post("/:account", false, function(req, res, next) {
+		// 	var responsePlace = "Account POST";
 
-			req[C.REQ_REPO].logger.logDebug("Updating user", req);
+		// 	req[C.REQ_REPO].logger.logDebug("Updating user", req);
 
-			dbInterface(req[C.REQ_REPO].logger).getUserInfo( req.params[C.REPO_REST_API_ACCOUNT], function (err, user)
-			{
-				if (!user)
-				{
-					// Trying to sign-up
-					req[C.REQ_REPO].logger.logDebug("Attempting to add user: " + req.params[C.REPO_REST_API_ACCOUNT], req);
-					dbInterface(req[C.REQ_REPO].logger).createUser(req.params[C.REPO_REST_API_ACCOUNT], req.body.password, req.body.email, function() {
-						createSession(responsePlace, req, res, next, req.params[C.REPO_REST_API_ACCOUNT]);
-					});
-				} else {
-					if(!req.session.user)
-					{
-						return responseCodes.respond(responsePlace, responseCodes.NOT_LOGGED_IN, res, {});
-					}
+		// 	dbInterface(req[C.REQ_REPO].logger).getUserInfo( req.params[C.REPO_REST_API_ACCOUNT], function (err, user)
+		// 	{
+		// 		if (!user)
+		// 		{
+		// 			// Trying to sign-up
+		// 			req[C.REQ_REPO].logger.logDebug("Attempting to add user: " + req.params[C.REPO_REST_API_ACCOUNT], req);
+		// 			dbInterface(req[C.REQ_REPO].logger).createUser(req.params[C.REPO_REST_API_ACCOUNT], req.body.password, req.body.email, function() {
+		// 				createSession(responsePlace, req, res, next, req.params[C.REPO_REST_API_ACCOUNT]);
+		// 			});
+		// 		} else {
+		// 			if(!req.session.user)
+		// 			{
+		// 				return responseCodes.respond(responsePlace, responseCodes.NOT_LOGGED_IN, res, {});
+		// 			}
 
-					if (req.session.user.username !== req.params[C.REPO_REST_API_ACCOUNT])
-					{
-						responseCodes.respond(responsePlace, req, res, next, err, responseCodes.NOT_AUTHORIZED, {account: req.params[C.REPO_REST_API_ACCOUNT]});
-					} else {
-						// Modify account here
-						req[C.REQ_REPO].logger.logDebug("Updating account", req);
+		// 			if (req.session.user.username !== req.params[C.REPO_REST_API_ACCOUNT])
+		// 			{
+		// 				responseCodes.respond(responsePlace, req, res, next, err, responseCodes.NOT_AUTHORIZED, {account: req.params[C.REPO_REST_API_ACCOUNT]});
+		// 			} else {
+		// 				// Modify account here
+		// 				req[C.REQ_REPO].logger.logDebug("Updating account", req);
 
-						if (req.body.oldPassword)
-						{
-							dbInterface(req[C.REQ_REPO].logger).updatePassword(req.params[C.REPO_REST_API_ACCOUNT], req.body, function(err) {
-								responseCodes.onError(responsePlace, req, res, next, err, {account: req.params[C.REPO_REST_API_ACCOUNT]});
-							});
-						} else {
-							dbInterface(req[C.REQ_REPO].logger).updateUser(req.params[C.REPO_REST_API_ACCOUNT], req.body, function(err) {
-								responseCodes.onError(responsePlace, req, res, next, err, {account: req.params[C.REPO_REST_API_ACCOUNT]});
-							});
-						}
-					}
-				}
-			});
-		});
+		// 				if (req.body.oldPassword)
+		// 				{
+		// 					dbInterface(req[C.REQ_REPO].logger).updatePassword(req.params[C.REPO_REST_API_ACCOUNT], req.body, function(err) {
+		// 						responseCodes.onError(responsePlace, req, res, next, err, {account: req.params[C.REPO_REST_API_ACCOUNT]});
+		// 					});
+		// 				} else {
+		// 					dbInterface(req[C.REQ_REPO].logger).updateUser(req.params[C.REPO_REST_API_ACCOUNT], req.body, function(err) {
+		// 						responseCodes.onError(responsePlace, req, res, next, err, {account: req.params[C.REPO_REST_API_ACCOUNT]});
+		// 					});
+		// 				}
+		// 			}
+		// 		}
+		// 	});
+		// });
 
 		//upload and import file into repo world
 		self.post("/:account/:project/upload", true, function (req, res) {
