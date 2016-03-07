@@ -90,9 +90,66 @@ var Oculus = {};
 				leftTex.appendChild(leftBground);
 
 				var leftScene = document.createElement("group");
-				leftScene.setAttribute("use", "model__root");
+				leftScene.setAttribute("USE", "test__vrdemo__root");
 				leftScene.setAttribute("containerfield", "scene");
 				leftTex.appendChild(leftScene);
+
+				var leftShader = document.createElement("ComposedShader");
+				var leftTexField = document.createElement("field");
+				leftTexField.setAttribute("name", "tex");
+				leftTexField.setAttribute("type", "SFInt32");
+				leftTexField.setAttribute("value", "0");
+				leftShader.appendChild(leftTexField);
+
+				var leftvert = document.createElement("ShaderPart");
+				leftvert.setAttribute("type", "VERTEX");
+				leftvert.textContent = "attribute vec3 position;" +
+				"\nattribute vec2 texcoord;" +
+				"\n" +
+				"\nuniform mat4 modelViewProjectionMatrix;" +
+				"\nvarying vec2 fragTexCoord;" +
+				"\n" +
+				"\nvoid main()" +
+				"\n{" +
+				"\n\tvec2 pos = sign(position.xy);" +
+				"\n\tfragTexCoord = texcoord;" +
+				"\n" +
+				"\n\tgl_Position = vec4((pos.x - 1.0) / 2.0, pos.y, 0.0, 1.0);" +
+				"\n}";
+				leftShader.appendChild(leftvert);
+
+				var leftfrag = document.createElement("ShaderPart");
+				leftfrag.setAttribute("DEF", "vrfrag");
+				leftfrag.setAttribute("type", "FRAGMENT");
+				leftfrag.textContent = "#ifdef GL_ES" +
+				"\n\tprecision highp float;" +
+				"\n#endif" +
+				"\n" +
+				"\nuniform sampler2D tex;" +
+				"\nuniform float leftEye;" +
+				"\nvarying vec2 fragTexCoord;" +
+				"\n" +
+				"\nvoid main()" +
+				"\n{" +
+				"\n\tfloat distortionScale = 0.7;" +
+				"\n\tvec2 lensCenter = vec2(0.151976495726, 0.0);" +
+				"\n\tif (leftEye == 0.0) {" +
+				"\n\t\tlensCenter.x *= -1.0;" +
+				"\n\t}" +
+				"\n\tvec2 theta = (fragTexCoord * 2.0) - 1.0;" +
+				"\n\tfloat rSq = theta.x * theta.x + theta.y * theta.y;" +
+				"\n\tvec2 rvec = theta * (1.0 + 0.22 * rSq + 0.24 * rSq * rSq);" +
+				"\n\tvec2 texCoord = (distortionScale*rvec+(1.0-distortionScale)*lensCenter + 1.0) / 2.0;" +
+				"\n\n\tif (any(notEqual(clamp(texCoord, vec2(0.0, 0.0), vec2(1.0, 1.0)) - texCoord,vec2(0.0, 0.0)))) {" +
+				"\n\t\tdiscard;" +
+				"\n\t} else {" +
+				"\n\t\tvec3 col = texture2D(tex, texCoord).rgb;" +
+				"\n\t\tgl_FragColor = vec4(col, 1.0);" +
+				"\n\t}" +
+				"\n}";
+				leftShader.appendChild(leftfrag);
+
+				leftApp.appendChild(leftShader);
 
 				var leftPlane = document.createElement("plane");
 				leftPlane.setAttribute("solid", "false");
@@ -145,6 +202,37 @@ var Oculus = {};
 				rightScene.setAttribute("containerfield", "scene");
 				rightScene.textContent = " ";
 				rightTex.appendChild(rightScene);
+
+				var rightShader = document.createElement("ComposedShader");
+				var rightTexField = document.createElement("field");
+				rightTexField.setAttribute("name", "tex");
+				rightTexField.setAttribute("type", "SFInt32");
+				rightTexField.setAttribute("value", "0");
+				rightShader.appendChild(rightTexField);
+
+				var rightvert = document.createElement("shaderPart");
+				rightvert.setAttribute("type", "VERTEX");
+				rightvert.textContent = "attribute vec3 position;" +
+				"\nattribute vec2 texcoord;" +
+				"\n" +
+				"\nuniform mat4 modelViewProjectionMatrix;" +
+				"\nvarying vec2 fragTexCoord;" +
+				"\n" +
+				"\nvoid main()" +
+				"\n{" +
+				"\n\tvec2 pos = sign(position.xy);" +
+				"\n\tfragTexCoord = texcoord;" +
+				"\n" +
+				"\n\tgl_Position = vec4((pos.x + 1.0) / 2.0, pos.y, 0.0, 1.0);" +
+				"\n}";
+				rightShader.appendChild(rightvert);
+
+				var rightfrag = document.createElement("shaderPart");
+				rightfrag.setAttribute("USE", "vrfrag");
+				rightfrag.setAttribute("type", "FRAGMENT");
+				rightShader.appendChild(rightfrag);
+
+				rightApp.appendChild(rightShader);
 
 				scene.appendChild(eyeGroup);
 
@@ -247,9 +335,11 @@ var Oculus = {};
 
 			self.viewer.runtime.exitFrame = function ()
 			{
+
 				var w = self.viewer.runtime.getWidth() * (window.devicePixelRatio ? window.devicePixelRatio : 1);
 				var h = self.viewer.runtime.getHeight() * (window.devicePixelRatio ? window.devicePixelRatio : 1);
 
+				/*
 				// The image should be split across the longest dimension of the screen
 				var rotate = (h > w);
 
@@ -267,6 +357,7 @@ var Oculus = {};
 					self.viewer.runtime.canvas.doc.ctx.stateManager.viewport(w / 2,0,w / 2,h);
 					self.viewer.viewer.runtime.canvas.doc._scene._fgnd._webgl.render(self.viewer.viewer.runtime.canvas.doc.ctx.ctx3d, self.rtRight._x3domNode._webgl.fbo.tex);
 				}
+				*/
 
 				if (w !== self.lastW || h !== self.lastH)
 				{
@@ -281,7 +372,9 @@ var Oculus = {};
 					self.lastH = h;
 				}
 
+
 				self.viewer.runtime.triggerRedraw();
+
 			};
 		};
 
@@ -319,13 +412,13 @@ var Oculus = {};
 				}
 			}
 
-			if (!self.vrHMD)
+			if (!self.vrHMD) {
 				return;
+			}
 
 			// Then, find that HMD"s position sensor
 			for (i = 0; i < vrdevs.length; ++i) {
-				if (vrdevs[i] instanceof PositionSensorVRDevice &&
-					vrdevs[i].hardwareUnitId === self.vrHMD.hardwareUnitId) {
+				if (vrdevs[i] instanceof PositionSensorVRDevice && vrdevs[i].hardwareUnitId === self.vrHMD.hardwareUnitId) {
 					self.vrSensor = vrdevs[i];
 					break;
 				}

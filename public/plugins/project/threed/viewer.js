@@ -173,6 +173,7 @@ var Viewer = {};
 				self.element.appendChild(self.viewer);
 
 				self.scene = document.createElement("Scene");
+				self.scene.setAttribute("DEF", self.name + "_scene");
 				self.scene.setAttribute("onbackgroundclicked", "bgroundClick(event);");
 				self.scene.setAttribute("dopickpass", false);
 				self.viewer.appendChild(self.scene);
