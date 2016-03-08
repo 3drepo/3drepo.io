@@ -2221,6 +2221,7 @@ DBInterface.prototype.cacheFunction = function(dbName, collection, url, format, 
 
 	if (!config.disableCache)
 	{
+		console.log(url);
 		dbConn(self.logger).getGridFSFile(dbName, stashCollection, url, function(err, result) {
 			if (err.value === responseCodes.FILE_DOESNT_EXIST.value) {
 				self.logger.logInfo("Doesn't exist in stash, generating ...");
@@ -2285,7 +2286,7 @@ DBInterface.prototype.getObject = function(dbName, project, uid, rid, sid, needF
 		query = {
 			_id: stringToUUID(uid)
 		};
-
+		//TO-ASK-TIM: what is .stash.3drepo
 		dbConn(self.logger).filterColl(dbName, project + ".stash.3drepo", query, projection, function(err, obj) {
 			if (err.value || !obj.length)
 			{
