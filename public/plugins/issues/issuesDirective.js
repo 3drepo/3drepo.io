@@ -26,6 +26,7 @@
 			restrict: 'EA',
 			templateUrl: 'issues.html',
 			scope: {
+				show: "=",
 				filterText: "=",
 				showAdd: "=",
 				options: "=",
@@ -40,9 +41,9 @@
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$rootScope", "$element", "$timeout", "$mdDialog", "$filter", "IssuesService", "EventService"];
+	IssuesCtrl.$inject = ["$scope", "$element", "$timeout", "$mdDialog", "$filter", "IssuesService", "EventService"];
 
-	function IssuesCtrl($scope, $rootScope, $element, $timeout, $mdDialog, $filter, IssuesService, EventService) {
+	function IssuesCtrl($scope, $element, $timeout, $mdDialog, $filter, IssuesService, EventService) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -52,14 +53,12 @@
 			showClosed = false,
 			issue,
 			rolesToFilter = [],
-			issuesHeight;
+			issuesHeight,
+			eventWatch,
+			selectedObjectId = null,
+			pickedPos = null,
+			pickedNorm = null;
 
-		vm.pickedAccount = null;
-		vm.pickedProject = null;
-		vm.pickedPos = null;
-		vm.pickedNorm = null;
-		vm.pickedTrans = null;
-		vm.selectedObjectId = null;
 		vm.saveIssueDisabled = true;
 		vm.issues = [];
 		vm.issuesToShow = [];
@@ -155,10 +154,7 @@
 				} else {
 					vm.showIssueList = true;
 					vm.showAddIssue = false;
-					EventService.send(EventService.EVENT.VIEWER.REMOVE_PIN,
-						{
-							id: "newIssuePin"
-						});
+					removeAddPin();
 				}
 				setContentHeight();
 			}
@@ -174,65 +170,82 @@
 		});
 
 		/*
-		$scope.$watch(EventService.currentEvent, function (event) {
-			var i, length;
-			if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
-				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
-					if (event.value.id === vm.issuesToShow[i]._id) {
-						vm.showSelectedIssue(i, true);
-						break;
-					}
-				}
-			}
-		});
-		*/
-
-		/*
-		 * Handle Events
+		 * Only watch for events when shown
 		 */
-		$scope.$watch(EventService.currentEvent, function(event) {
-			var i, length,
-				position = [], normal = [],
-				newIssueId = "newIssueId",
-				test = new x3dom.fields.SFVec3f(0,0,0);
-
-			if (event.type === EventService.EVENT.VIEWER.PICK_POINT)
-			{
-				console.log(event.value.position);
-				if (event.value.pickObj !== null)
-				{
-					// Remove pin from last position if it exists
-					IssuesService.removePin(newIssueId);
-
-					// Convert data to arrays
-					angular.forEach(event.value.position, function(value, key) {
-						position.push(value);
-					});
-					angular.forEach(event.value.normal, function(value, key) {
-						normal.push(value);
-					});
-
-					// Add pin
-					IssuesService.addPin(
-						{
-							id: newIssueId,
-							position: position,
-							norm: normal
-						},
-						IssuesService.hexToRgb(IssuesService.getRoleColor(vm.projectUserRoles[0]))
-					);
-				} else {
-					IssuesService.removePin(newIssueId);
+		$scope.$watch("vm.show", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				if (newValue) {
+					setupEventWatch();
 				}
-			} else if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
-				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
-					if (event.value.id === vm.issuesToShow[i]._id) {
-						vm.showSelectedIssue(i, true);
-						break;
-					}
+				else if (angular.isDefined(eventWatch)) {
+					eventWatch(); // Cancel event watching
 				}
 			}
 		});
+
+		/**
+		 * Set up event watching
+		 */
+		function setupEventWatch () {
+			eventWatch = $scope.$watch(EventService.currentEvent, function(event) {
+				var i, length,
+					position = [], normal = [];
+
+				if ((event.type === EventService.EVENT.VIEWER.PICK_POINT) && vm.showAdd)
+				{
+					if (event.value.hasOwnProperty("id"))
+					{
+						// Remove pin from last position if it exists
+						removeAddPin();
+
+						selectedObjectId = event.value.id;
+
+						// Convert data to arrays
+						angular.forEach(event.value.position, function(value) {
+							pickedPos = event.value.position;
+							position.push(value);
+						});
+						angular.forEach(event.value.normal, function(value) {
+							pickedNorm = event.value.normal;
+							normal.push(value);
+						});
+
+
+						// Add pin
+						IssuesService.addPin(
+							{
+								id: IssuesService.newPinId,
+								position: position,
+								norm: normal
+							},
+							IssuesService.hexToRgb(IssuesService.getRoleColor(vm.projectUserRoles[0]))
+						);
+					} else {
+						removeAddPin();
+					}
+				} else if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
+					removeAddPin();
+
+					// Show the selected issue
+					for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
+						if (event.value.id === vm.issuesToShow[i]._id) {
+							vm.showSelectedIssue(i, true);
+							break;
+						}
+					}
+				}
+			});
+		}
+
+		/**
+		 * Remove the temporary pin used for adding an issue
+		 */
+		function removeAddPin () {
+			IssuesService.removePin(IssuesService.newPinId);
+			selectedObjectId = null;
+			pickedPos = null;
+			pickedNorm = null;
+		}
 
 		/**
 		 * Setup the issues to show
@@ -390,8 +403,6 @@
 						pinData =
 							{
 								id: vm.issues[i]._id,
-								account: vm.issues[i].account,
-								project: vm.issues[i].project,
 								position: vm.issues[i].position,
 								norm: vm.issues[i].norm
 							};
@@ -521,27 +532,25 @@
 			}
 			else {
 				if (angular.isDefined(vm.title) && (vm.title !== "")) {
-					if (vm.pickedPos === null) {
+					if (selectedObjectId === null) {
 						vm.showAlert("Add a pin before saving");
 					}
 					else {
 						issue = {
 							name: vm.title,
-							objectId: vm.selectedObjectId,
-							pickedPos: vm.pickedPos,
-							pickedNorm: vm.pickedNorm,
+							objectId: selectedObjectId,
+							pickedPos: pickedPos,
+							pickedNorm: pickedNorm,
 							creator_role: vm.projectUserRoles[0]
 						};
 						promise = IssuesService.saveIssue(issue);
 						promise.then(function (data) {
 							vm.issues.push(data);
 
-							vm.title         = "";
-							vm.pickedAccount = null;
-							vm.pickedProject = null;
-							vm.pickedTrans   = null;
-							vm.pickedPos     = null;
-							vm.pickedNorm    = null;
+							vm.title = "";
+							selectedObjectId = null;
+							pickedPos = null;
+							pickedNorm = null;
 
 							if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
 								saveCommentWithIssue(data, vm.comment);

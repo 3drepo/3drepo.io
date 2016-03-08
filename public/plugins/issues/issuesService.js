@@ -33,7 +33,8 @@
 			numComments = 0,
 			availableRoles = [],
 			userRoles = [],
-			obj = {};
+			obj = {},
+			newPinId = "newPinId";
 
 		// TODO: Internationalise and make globally accessible
 		obj.getPrettyTime = function(time) {
@@ -116,6 +117,7 @@
 
 			url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue.objectId);
 
+			//console.log()
 			data = {
 				name: issue.name,
 				viewpoint: ViewerService.defaultViewer.getCurrentViewpointInfo(),
@@ -243,7 +245,7 @@
 			self.removePin();
 
 			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
-				id: "newIssuePin",
+				id: newPinId,
 				position: pin.position,
 				norm: pin.norm,
 				colours: colours
@@ -328,6 +330,14 @@
 			}
 			return roleColor;
 		};
+
+		Object.defineProperty(
+			obj,
+			"newPinId",
+			{
+				get: function () {return newPinId;}
+			}
+		);
 
 		return obj;
 	}

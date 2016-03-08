@@ -165,8 +165,8 @@ var Viewer = {};
 				self.viewer.setAttribute("id", self.name);
 				self.viewer.setAttribute("xmlns", "http://www.web3d.org/specification/x3d-namespace");
 				self.viewer.setAttribute("keysEnabled", "true");
-				self.viewer.addEventListener("mousedown", self.onMouseDown);
-				self.viewer.addEventListener("mouseup",  self.onMouseUp);
+				self.viewer.addEventListener("mousedown", onMouseDown);
+				self.viewer.addEventListener("mouseup",  onMouseUp);
 				self.viewer.style["pointer-events"] = "all";
 				self.viewer.className = "viewer";
 
@@ -364,27 +364,38 @@ var Viewer = {};
 		};
 
 		this.onMouseUp = function(functionToBind) {
-			$(self.viewer).on("onMouseUp", functionToBind);
+			$(document).on("onMouseUp", functionToBind);
 		};
 
 		this.onMouseDown = function(functionToBind) {
-			$(self.viewer).on("onMouseDown", functionToBind);
-			
+			$(document).on("onMouseDown", functionToBind);
+		}
+
+		this.mouseDownPickPoint = function(event, pickEvent)
+		{
 			var pickingInfo = self.getViewArea()._pickingInfo;
-			
+
+			// Hack until double click problem solved
+			self.pickPoint(); // This updates self.pickObject
+			if (self.pickObject.pickObj !== null) {
+				pickingInfo.pickObj = self.pickObject;
+			}
+
 			if (pickingInfo.pickObj)
 			{
 				var account, project;
-				
-				var objectID = pickingInfo.pickObj.partID ? 
-					pickingInfo.pickObj.partID : 
-					pickingInfo.pickObj.pickObj._xmlNode.getAttribute("DEF");
 
-				var projectParts = pickingInfo.pickObj._xmlNode.getAttribute("id").split("__");
+				var projectParts = pickingInfo.pickObj._xmlNode ?
+					pickingInfo.pickObj._xmlNode.getAttribute("id").split("__") :
+					pickingInfo.pickObj.pickObj._xmlNode.getAttribute("id").split("__");
+
+				var objectID = pickingInfo.pickObj.partID ? 
+					pickingInfo.pickObj.partID :
+					projectParts[2];
 
 				account = projectParts[0];
 				project = projectParts[1];
-				
+
 				var inlineTransName = ViewerUtil.escapeCSSCharacters(account + "__" + project);
 				var projectInline = self.inlineRoots[inlineTransName];
 				var trans = projectInline._x3domNode.getCurrentTransform();
@@ -393,17 +404,53 @@ var Viewer = {};
 					id: objectID, 
 					position: pickingInfo.pickPos,
 					normal: pickingInfo.pickNorm,
+					trans: trans
+				});
+			} else {
+				callback(self.EVENT.PICK_POINT, {
+					position: pickingInfo.pickPos,
+					normal: pickingInfo.pickNorm
+				});
+			}
+
+			/*
+			var pickingInfo = self.getViewArea()._pickingInfo;
+
+			if (pickingInfo.pickObj)
+			{
+				var account, project;
+
+				var objectID = pickingInfo.pickObj.partID ?
+					pickingInfo.pickObj.partID :
+					pickingInfo.pickObj.pickObj._xmlNode.getAttribute("DEF");
+
+				var projectParts = pickingInfo.pickObj._xmlNode.getAttribute("id").split("__");
+
+				account = projectParts[0];
+				project = projectParts[1];
+
+				var inlineTransName = ViewerUtil.escapeCSSCharacters(account + "__" + project);
+				var projectInline = self.inlineRoots[inlineTransName];
+				var trans = projectInline._x3domNode.getCurrentTransform();
+
+				callback(self.EVENT.PICK_POINT, {
+					id: objectID,
+					position: pickingInfo.pickPos,
+					normal: pickingInfo.pickNorm,
 					object: pickingInfo.pickObj,
 					trans: trans
 				});
 			} else {
-				callback(self.EVENT.PICK_POINT, 
-				{
-					position: pickingInfo.pickPos,
-					normal: pickingInfo.pickNorm
-				})
+				callback(self.EVENT.PICK_POINT,
+					{
+						position: pickingInfo.pickPos,
+						normal: pickingInfo.pickNorm
+					})
 			}
+			*/
 		};
+
+		this.onMouseDown(this.mouseDownPickPoint);
 
 		this.onViewpointChanged = function(functionToBind) {
 			$(self.viewer).on("myViewpointHasChanged", functionToBind);
@@ -1615,6 +1662,7 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	OBJECT_SELECTED: "VIEWER_OBJECT_SELECTED",
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
 	SWITCH_OBJECT_VISIBILITY: "VIEWER_SWITCH_OBJECT_VISIBILITY",
+	SET_PIN_VISIBILITY: "VIEWER_SET_PIN_VISIBILITY",
 
 	PICK_POINT: "VIEWER_PICK_POINT",
 	SET_CAMERA: "VIEWER_SET_CAMERA",

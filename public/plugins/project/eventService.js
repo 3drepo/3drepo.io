@@ -61,6 +61,7 @@
 		var currentError = {};
 
         var send = function (type, value) {
+			console.log(value);
 			$timeout(function() {
 				if (angular.isUndefined(type))
 				{

@@ -73,7 +73,7 @@ var Pin = {};
 		self.numColours = 0;
 
 		if (typeof colours === "undefined") {
-			self.numColours = 1;removeChild
+			self.numColours = 1;
 			colours = [1.0, 0.0, 0.0];
 		} else if (typeof colours[0] === "number") {
 			self.numColours = 1;
