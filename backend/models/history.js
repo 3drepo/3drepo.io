@@ -15,7 +15,12 @@ var schema = mongoose.Schema({
 	current: [Buffer],
 	paths: [],
 	added: [Buffer],
-	deleted: [Buffer]
+	deleted: [Buffer],
+	modified: [Buffer],
+	unmodified: [Buffer],
+	timestamp: Number,
+	tag: String,
+	message: String
 });
 
 var latest = {timestamp: -1};

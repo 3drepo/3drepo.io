@@ -354,6 +354,7 @@
 		logger.logDebug("Passed " + scene[C.REPO_SCENE_LABEL_MESHES_COUNT]);
 
 		var meshIDs = Object.keys(scene.meshes);
+		console.log(meshIDs);
 		var meshIDX = 0;
 		var srcJSON = {};
 
@@ -698,9 +699,12 @@
 		var dataBuffer = Buffer.concat(dataBuffers);
 		var fullBuffer = Buffer.concat([headerBuffer, dataBuffer]);
 
-		result_callback(responseCodes.OK, fullBuffer);
+		result_callback && result_callback(responseCodes.OK, fullBuffer);
+
+		return fullBuffer;
 	}
 
+	exports.render = render;
 	// Set up REST routing calls
 	exports.route = function (router) {
 		router.get("src", "/:account/:project/:uid", function (req, res, params, err_callback) {
@@ -709,6 +713,7 @@
 
 			dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req.url, req.params[C.REPO_REST_API_FORMAT].toLowerCase(), function (callback) {
 				dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, {}, function (err, type, uid, fromStash, obj) {
+					//console.log('sorry, no cache')
 					if (err.value) {
 						return callback(err);
 					}
@@ -724,7 +729,7 @@
 							if (err.value) {
 								return callback(err);
 							}
-
+							//console.log('renderedObj', renderedObj);
 							callback(responseCodes.OK, renderedObj);
 						});
 					} else {
