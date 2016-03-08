@@ -27,6 +27,8 @@ panel #buttons .panelButtonGroup button {
 panel #buttons .panelButtonGroup label {
   color: #FFFFFF;
   text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  font-weight: bold;
+  font-size: 14px;
 }
 
 panel .md-mini md-icon,
@@ -65,12 +67,12 @@ panel .md-icon-button md-icon{
 
 /** Panel Content *****************************************************************************************************/
 
-panel-content {
+panel-card {
   display: block;
   position: relative;
 }
 
-panel-content md-content {
+panel-card md-content {
   overflow-x: hidden;
   overflow-y: auto;
   border-bottom-left-radius: 4px;
@@ -78,14 +80,14 @@ panel-content md-content {
   height: 100%;
 }
 
-panel-content .md-whiteframe-1dp {
+panel-card .md-whiteframe-1dp {
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
   background: white;
 }
 
-panel-content md-toolbar {
+panel-card md-toolbar {
   min-height: 48px;
   height: 48px;
   outline: none;
@@ -95,40 +97,41 @@ panel-content md-toolbar {
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
 }
-panel-content md-toolbar span {
+panel-card md-toolbar span {
   font-size: 18px;
 }
-panel-content md-toolbar label {
-  font-size: medium;
+panel-card md-toolbar label {
+  font-size: 20px;
   margin-left: 10px;
+  font-weight: bold;
 }
-panel-content md-toolbar button {
+panel-card md-toolbar button {
   margin: 0 !important;
 }
 
-panel-content .md-button.md-raised:not([disabled]) {
+panel-card .md-button.md-raised:not([disabled]) {
   box-shadow: none;
 }
 
-panel-content .md-menu {
+panel-card .md-menu {
   padding: 0;
 }
 
-panel-content .panelContentContainer {
+panel-card .panelCardContainer {
   overflow-x: hidden;
   overflow-y: auto;
   width: 100%;
   height: 100%;
 }
 
-panel-content .panelContentFilter {
+panel-card .panelCardFilter {
   background: #E8EAF6;
   padding: 5px 10px 0 10px;
   height: 60px;
   border-bottom: solid 1px #C5CAE9;
 }
 
-panel-content #helpButton {
+panel-card #helpButton {
   position: absolute;
   top: -20px;
   right: -36px;

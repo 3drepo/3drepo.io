@@ -1,0 +1,54 @@
+div(layout="column", class="md-whiteframe-1dp")
+
+	// Tool bar
+	md-toolbar(class="md-primary", ng-click="vm.toolbarClick()")
+		div(class="md-toolbar-tools")
+			span(class="fa", ng-class="vm.contentData.icon")
+			label(class="md-flex") {{vm.contentData.title}}
+			span(flex)
+
+			// Options
+			//div
+				md-button.md-icon-button(aria-label="Print", ng-href="{{vm.issuesUrl}}", ng-click="vm.doPrint($event)", target="_blank", ng-if="vm.contentData.canPrint")
+					md-icon(class="fa fa-print")
+				md-button.md-icon-button(aria-label="Filter", ng-click="vm.toggleFilter($event)", ng-if="vm.contentData.hasFilter")
+					md-icon(class="fa fa-search")
+				md-button.md-icon-button(aria-label="Add", ng-click="vm.toggleAdd($event)", ng-if="vm.contentData.canAdd")
+					md-icon(class="fa fa-pencil")
+				md-button.md-icon-button(aria-label="Visibility", ng-click="vm.toggleVisible($event)", ng-if="vm.contentData.showVisible")
+					md-icon(class="fa fa-eye", ng-if="vm.visibleStatus")
+					md-icon(class="fa fa-eye-slash", ng-if="!vm.visibleStatus")
+
+				md-menu(md-position-mode="target-right target", ng-if="vm.menu", md-offset="2 14")
+					md-button.md-icon-button(aria-label="Menu", ng-click="$mdOpenMenu($event)")
+						md-icon(class="fa fa-ellipsis-v")
+					md-menu-content(width="4")
+						md-menu-item(ng-repeat="menuItem in vm.contentData.menu")
+							md-button(ng-click="vm.menuItemSelected($index)")
+								div(layout="row")
+									md-icon(md-font-icon="fa-check", class="fa", ng-if="menuItem.selected")
+									p(flex="") {{menuItem.label}}
+									md-icon(md-font-icon="{{menuItem.firstSelectedIcon}}", class="fa", ng-if="menuItem.firstSelected")
+									md-icon(md-font-icon="{{menuItem.secondSelectedIcon}}", class="fa", ng-if="menuItem.secondSelected")
+			#options
+
+	// Card content
+	.panelCardContainer
+		// Filter
+		#filterContainer
+		//.panelCardFilter(ng-if="vm.showFilter", layout="row")
+			div(flex="85")
+				md-input-container(md-no-float="")
+					input(type="text", ng-model="vm.filterInputText", placeholder="Filter")
+			div(flex="15", ng-if="vm.showClearFilterButton")
+				md-button.md-icon-button(ng-click="vm.clearFilter()", aria-label="Clear filter")
+					md-icon(md-font-icon="fa-times-circle", class="fa")
+
+		// Content
+		md-content(id="content", style="height:{{vm.contentHeight}}px")
+
+	// Help icon and tool tip
+	div(ng-if="vm.showHelp")
+		md-button.md-fab.md-mini#helpButton(aria-label="Help")
+			md-icon(md-font-icon="fa-question", class="fa")
+			md-tooltip(md-direction="top") {{vm.contentData.help}}
