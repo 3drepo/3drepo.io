@@ -27,50 +27,37 @@
 		return {
 			restrict: "E",
 			scope: { 
-				manager: "="
+				manager: "=",
+				account: "@",
+				project: "@",
+				branch: "@",
+				revision: "@",
+				name: "@",
+				autoInit: "@",
+				vrMode: "@",
+				eventService: "@"
 			},
-			link: link,
 			controller: ViewerCtrl,
 			controllerAs: "v",
 			bindToController: true
 		};
-
-		function link (scope, element, attrs)
-		{			
-			scope.account  = attrs.account;
-			scope.project  = attrs.project;
-			scope.branch   = attrs.branch;
-			scope.revision = attrs.revision;
-			
-			scope.name     = attrs.name;
-			
-			if (angular.isDefined(attrs.eventService))
-			{
-				scope.EventService = attrs.eventService;
-			}
-						
-			if (angular.isDefined(attrs.autoInit))
-			{
-				scope.init();
-			
-				if (angular.isDefined(attrs.vrMode))
-				{
-					scope.enterVR();
-				}
-			}
-		}
 	}
 
-	ViewerCtrl.$inject = ["$scope", "$q", "$element", "EventService"];
+	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService"];
 
-	function ViewerCtrl ($scope, $q, $element, EventService)
+	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService)
 	{
 		var v = this;
 		
 		v.initialised = $q.defer();
 		v.loaded      = $q.defer();
 		
-		$scope.EventService = EventService;
+		if (angular.isDefined(v.eventService))
+		{
+			$scope.EventService = v.eventService;
+		} else {
+			$scope.EventService = EventService;
+		}
 		
 		function errCallback(errorType, errorValue)
 		{
@@ -83,29 +70,44 @@
 		}
 		
 		$scope.reload = function() {
-			v.viewer.loadModel($scope.account, $scope.project, $scope.branch, $scope.revision);
+			v.viewer.loadModel(v.account, v.project, v.branch, v.revision);
 		};
 		
 		$scope.init = function() {
-			v.viewer = new Viewer($scope.name, $element[0], v.manager, eventCallback, errCallback);
+			v.viewer = new Viewer(v.name, $element[0], v.manager, eventCallback, errCallback);
 			
-			// TODO: Move this so that the attachment is contained
-			// within the plugins themselves.
-			// Comes free with oculus support and gamepad support
-			v.oculus     = new Oculus(v.viewer);
-			v.gamepad    = new Gamepad(v.viewer);
-						
-			v.gamepad.init();
-
-			v.collision  = new Collision(v.viewer);
-
 			v.viewer.init();
 			
+			$http.get(serverConfig.apiUrl(v.account + "/" + v.project + ".json")).success(
+				function(json, status) {
+					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
+						account: v.account,
+						project: v.project,
+						settings: json.properties
+					});					
+				});
+				
 			$scope.reload();
+						
+			v.loaded.promise.then(function() {
+				// TODO: Move this so that the attachment is contained
+				// within the plugins themselves.
+				// Comes free with oculus support and gamepad support
+				v.oculus     = new Oculus(v.viewer);
+				v.gamepad    = new Gamepad(v.viewer);
+							
+				v.gamepad.init();
+
+				v.collision  = new Collision(v.viewer);
+				
+			});
+			
 		};
 		
 		$scope.enterVR = function() {
-			v.oculus.switchVR();	
+			v.loaded.promise.then(function() {
+				v.oculus.switchVR();
+			});	
 		};
 
 		$scope.$watch($scope.EventService.currentEvent, function(event) {
@@ -118,14 +120,14 @@
 					v.initialised.promise.then(function() {
 						if (event.type === $scope.EventService.EVENT.VIEWER.GO_HOME) {
 							v.viewer.showAll();
-						} else if (event.type === $scope.EventService.EVENT.VIEWER.ENTER_FULLSCREEN) {
+						} else if (event.type === $scope.EventService.EVENT.VIEWER.SWITCH_FULLSCREEN) {
 							v.viewer.switchFullScreen(null);
 						} else if (event.type === $scope.EventService.EVENT.VIEWER.ENTER_VR) {
 							v.viewer.switchVR();
 						} else if (event.type === $scope.EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK) {
 							v.viewer.onViewpointChanged(event.value.callback);
 						} else if (event.type === $scope.EventService.EVENT.PROJECT_SETTINGS_READY) {
-							if (event.value.account === $scope.account && event.value.project === $scope.project)
+							if (event.value.account === v.account && event.value.project === v.project)
 							{
 								v.viewer.updateSettings(event.value.settings);
 							}
@@ -185,12 +187,21 @@
 								event.value.position,
 								event.value.view_dir,
 								event.value.up,
-								event.value.animate ? event.value.animate : true
+								angular.isDefined(event.value.animate) ? event.value.animate : true
 							);
 						}
 					});
 				}
 			}
 		});
+
+		if (angular.isDefined(v.autoInit)) {
+			$scope.init();
+			
+			if (angular.isDefined(v.vrMode))
+			{
+				$scope.enterVR();
+			}	
+		}
 	}
 }());

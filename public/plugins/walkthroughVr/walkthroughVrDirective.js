@@ -24,59 +24,96 @@
 	function walkthroughVr() {
 		return {
 			restrict: "EA",
-			scope: {},
+			scope: {
+				account: "@",
+				project: "@"
+			},
 			controller: WalkthroughVrCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	WalkthroughVrCtrl.$inject = ["$http", "$interval", "EventService"];
+	WalkthroughVrCtrl.$inject = ["$scope", "$q", "$http", "$interval", "EventService"];
 
-	function WalkthroughVrCtrl($http, $interval, EventService) {
+	function WalkthroughVrCtrl($scope, $q, $http, $interval, EventService) {
 		var vm = this;
+		
+		vm.initialized = false;
+		vm.frames = [];
+		
+		vm.loading = null;
+		vm.frame = 0;
+		
+		var FRAMES_PER_SECOND = 30;
+		var MILLISECONDS_PER_FRAME = Math.floor(1000 / FRAMES_PER_SECOND);
 
-		// Get the exported frames
-		$http.get("/public/plugins/walkthroughVr/frames.csv")
-			.then(function (response) {
-				var lines, line,
-					i, length,
-					frames = [], frame, numFrames;
+		vm.tickFunction = function() {
+			vm.loading.promise.then(function() {
+				EventService.send(EventService.EVENT.VIEWER.SET_CAMERA,
+				{
+					position: vm.frames[vm.frame].position,
+					//up:       frames[frame].up,
+					//view_dir: frames[frame].view_dir,
+					animate: false
+				});
 
-				// Convert the frames to viewer frames
-				lines = response.data.split("\n");
-				lines.splice(lines.length - 1);
-				for(i = 0, length = lines.length; i < length; i += 1) {
-					line = lines[i].split(",");
-					frames.push({
-						position: [parseFloat(line[0]), parseFloat(line[2]), -1 * parseFloat(line[1])],
-						view_dir: [parseFloat(line[3]), parseFloat(line[5]), -1 * parseFloat(line[4])],
-						up: [parseFloat(line[6]), parseFloat(line[8]), -1 * parseFloat(line[7])]
-					});
+				if (vm.frame === (vm.numFrames - 1)) {
+					vm.frame = 0;
 				}
-				//console.log(frames);
-
-				// Loop through the viewer frames
-				frame = 0;
-				numFrames = frames.length;
-				$interval(function () {
-					//console.log(frames[frame].position);
-					EventService.send(EventService.EVENT.VIEWER.SET_CAMERA,
-					{
-						position: frames[frame].position,
-						up:       frames[frame].up,
-						view_dir: frames[frame].view_dir,
-						animate: false
-					});
-
-					if (frame === (numFrames - 1)) {
-						frame = 0;
-					}
-					else {
-						frame += 1;
-					}
-				}, 33);
-				
+				else {
+					vm.frame += 1;
+				}
 			});
+		};
+
+		vm.startWalkthrough = function() {
+			if (!vm.initialized)
+			{
+				vm.initialized = true;				
+				vm.numFrames = vm.frames.length;
+				
+				// Loop through the viewer frames
+				vm.frame = 0;
+				vm.intervalPromise = $interval(vm.tickFunction, MILLISECONDS_PER_FRAME);	
+			}
+		};
+
+		vm.loadFrames = function () {
+			var url = "/public/plugins/walkthroughVr/" + vm.account + "/" + vm.project + "/frames.csv";
+			
+			vm.loading = $q.defer();
+			// Get the exported frames
+			$http.get(url)
+				.then(function (response) {
+					var lines, line,
+						i, length;
+						
+					vm.frames = [];
+
+					// Convert the frames to viewer frames
+					lines = response.data.split("\n");
+					lines.splice(lines.length - 1);
+					for(i = 0, length = lines.length; i < length; i += 1) {
+						line = lines[i].split(",");
+						vm.frames.push({
+							position: [parseFloat(line[0]), parseFloat(line[2]), -1 * parseFloat(line[1])],
+							view_dir: [parseFloat(line[3]), parseFloat(line[5]), -1 * parseFloat(line[4])],
+							up: [parseFloat(line[6]), parseFloat(line[8]), -1 * parseFloat(line[7])]
+						});
+					}
+					
+					vm.loading.resolve();
+			});			
+		};
+		
+		$scope.$watchGroup(["account", "project"], function(newValue) {
+			vm.loadFrames();
+			vm.startWalkthrough();
+		});
+		
+		$scope.$on("$destroy", function handler() {
+			$interval.cancel(vm.intervalPromise);
+		});
 	}
 }());

@@ -23,8 +23,8 @@ var Oculus = {};
 	Oculus = function(viewer) {
 		var self = this;
 
-		this.rtLeft		= null;
-		this.rtRight	= null;
+		this.leftTex	= null;
+		this.rightTex	= null;
 
 		this.lastW		= null;
 		this.lastH		= null;
@@ -32,13 +32,35 @@ var Oculus = {};
 		this.vrHMD		= null;
 		this.vrSensor	= null;
 
-		this.IPD		= 0.0064;
+		this.IPD		= 0.01;
 
 		this.enabled	= false;
 
 		this.oculus		= null;
 
 		this.viewer		= viewer;
+		
+		this.addInstructions = function() {
+			
+			var instruction = document.createElement("div");
+			instruction.setAttribute("id", "instructionCircle");
+			self.viewer.element.appendChild(instruction);
+	
+			instruction.addEventListener("click", function() {
+				self.viewer.switchFullScreen(self.vrHMD);
+				instruction.style.display = "none";
+			});
+			
+			var instructionImage = document.createElement("img");
+			instructionImage.setAttribute("id", "instructionImage");
+			instructionImage.setAttribute("src", "public/plugins/walkthroughVr/instruction_trans.gif");
+			instruction.appendChild(instructionImage);
+			
+			var instructionOK = document.createElement("div");
+			instructionOK.setAttribute("id", "instructionOK");
+			instructionOK.textContent = "OK";		
+			instruction.appendChild(instructionOK);
+		};
 
 		this.switchVR = function()
 		{
@@ -46,15 +68,17 @@ var Oculus = {};
 
 			if (!this.enabled)
 			{
+				self.addInstructions();
+				
 				// Add oculus eyes
 				var eyeGroup = document.createElement("group");
 				eyeGroup.setAttribute("def", "oculus");
-				eyeGroup.setAttribute("render", "true");
+				eyeGroup.setAttribute("render", "false");
 				this.oculus = eyeGroup;
 
 				var leftEye = document.createElement("group");
 				leftEye.setAttribute("def", "left");
-				leftEye.setAttribute("render", "false");
+				//leftEye.setAttribute("render", "false");
 				eyeGroup.appendChild(leftEye);
 
 				var leftShape = document.createElement("shape");
@@ -64,16 +88,16 @@ var Oculus = {};
 				var leftApp = document.createElement("appearance");
 				leftShape.appendChild(leftApp);
 
-				var leftTex = document.createElement("renderedtexture");
-				leftTex.setAttribute("id", "rtLeft");
-				leftTex.setAttribute("stereoMode", "LEFT_EYE");
-				leftTex.setAttribute("update", "ALWAYS");
-				leftTex.setAttribute("oculusRiftVersion", "2");
+				self.leftTex = document.createElement("renderedtexture");
+				self.leftTex.setAttribute("id", "rtLeft");
+				self.leftTex.setAttribute("stereoMode", "LEFT_EYE");
+				self.leftTex.setAttribute("update", "ALWAYS");
+				self.leftTex.setAttribute("oculusRiftVersion", "2");
 				//leftTex.setAttribute("dimensions", "980 1080 3");
-				leftTex.setAttribute("repeatS", "false");
-				leftTex.setAttribute("repeatT", "false");
-				leftTex.setAttribute("interpupillaryDistance", this.IPD);
-				leftApp.appendChild(leftTex);
+				self.leftTex.setAttribute("repeatS", "false");
+				self.leftTex.setAttribute("repeatT", "false");
+				self.leftTex.setAttribute("interpupillaryDistance", this.IPD);
+				leftApp.appendChild(self.leftTex);
 
 				var leftVP = document.createElement("viewpoint");
 				if (self.viewer.getCurrentViewpoint() !== null) {
@@ -81,75 +105,18 @@ var Oculus = {};
 				}
 				leftVP.setAttribute("containerfield", "viewpoint");
 				leftVP.textContent = " ";
-				leftTex.appendChild(leftVP);
+				self.leftTex.appendChild(leftVP);
 
 				var leftBground = document.createElement("background");
 				leftBground.setAttribute("use", "viewer_bground");
 				leftBground.setAttribute("containerfield", "background");
 				leftBground.textContent = " ";
-				leftTex.appendChild(leftBground);
+				self.leftTex.appendChild(leftBground);
 
 				var leftScene = document.createElement("group");
-				leftScene.setAttribute("USE", "test__vrdemo__root");
+				leftScene.setAttribute("USE", "root");
 				leftScene.setAttribute("containerfield", "scene");
-				leftTex.appendChild(leftScene);
-
-				var leftShader = document.createElement("ComposedShader");
-				var leftTexField = document.createElement("field");
-				leftTexField.setAttribute("name", "tex");
-				leftTexField.setAttribute("type", "SFInt32");
-				leftTexField.setAttribute("value", "0");
-				leftShader.appendChild(leftTexField);
-
-				var leftvert = document.createElement("ShaderPart");
-				leftvert.setAttribute("type", "VERTEX");
-				leftvert.textContent = "attribute vec3 position;" +
-				"\nattribute vec2 texcoord;" +
-				"\n" +
-				"\nuniform mat4 modelViewProjectionMatrix;" +
-				"\nvarying vec2 fragTexCoord;" +
-				"\n" +
-				"\nvoid main()" +
-				"\n{" +
-				"\n\tvec2 pos = sign(position.xy);" +
-				"\n\tfragTexCoord = texcoord;" +
-				"\n" +
-				"\n\tgl_Position = vec4((pos.x - 1.0) / 2.0, pos.y, 0.0, 1.0);" +
-				"\n}";
-				leftShader.appendChild(leftvert);
-
-				var leftfrag = document.createElement("ShaderPart");
-				leftfrag.setAttribute("DEF", "vrfrag");
-				leftfrag.setAttribute("type", "FRAGMENT");
-				leftfrag.textContent = "#ifdef GL_ES" +
-				"\n\tprecision highp float;" +
-				"\n#endif" +
-				"\n" +
-				"\nuniform sampler2D tex;" +
-				"\nuniform float leftEye;" +
-				"\nvarying vec2 fragTexCoord;" +
-				"\n" +
-				"\nvoid main()" +
-				"\n{" +
-				"\n\tfloat distortionScale = 0.7;" +
-				"\n\tvec2 lensCenter = vec2(0.151976495726, 0.0);" +
-				"\n\tif (leftEye == 0.0) {" +
-				"\n\t\tlensCenter.x *= -1.0;" +
-				"\n\t}" +
-				"\n\tvec2 theta = (fragTexCoord * 2.0) - 1.0;" +
-				"\n\tfloat rSq = theta.x * theta.x + theta.y * theta.y;" +
-				"\n\tvec2 rvec = theta * (1.0 + 0.22 * rSq + 0.24 * rSq * rSq);" +
-				"\n\tvec2 texCoord = (distortionScale*rvec+(1.0-distortionScale)*lensCenter + 1.0) / 2.0;" +
-				"\n\n\tif (any(notEqual(clamp(texCoord, vec2(0.0, 0.0), vec2(1.0, 1.0)) - texCoord,vec2(0.0, 0.0)))) {" +
-				"\n\t\tdiscard;" +
-				"\n\t} else {" +
-				"\n\t\tvec3 col = texture2D(tex, texCoord).rgb;" +
-				"\n\t\tgl_FragColor = vec4(col, 1.0);" +
-				"\n\t}" +
-				"\n}";
-				leftShader.appendChild(leftfrag);
-
-				leftApp.appendChild(leftShader);
+				self.leftTex.appendChild(leftScene);
 
 				var leftPlane = document.createElement("plane");
 				leftPlane.setAttribute("solid", "false");
@@ -158,7 +125,7 @@ var Oculus = {};
 				// Right eye
 				var rightEye = document.createElement("group");
 				rightEye.setAttribute("def", "right");
-				rightEye.setAttribute("render", "false");
+				//rightEye.setAttribute("render", "false");
 				eyeGroup.appendChild(rightEye);
 
 				var rightShape = document.createElement("shape");
@@ -168,16 +135,16 @@ var Oculus = {};
 				var rightApp = document.createElement("appearance");
 				rightShape.appendChild(rightApp);
 
-				var rightTex = document.createElement("renderedtexture");
-				rightTex.setAttribute("id", "rtRight");
-				rightTex.setAttribute("stereoMode", "RIGHT_EYE");
-				rightTex.setAttribute("update", "ALWAYS");
-				rightTex.setAttribute("oculusRiftVersion", "2");
+				self.rightTex = document.createElement("renderedtexture");
+				self.rightTex.setAttribute("id", "rtRight");
+				self.rightTex.setAttribute("stereoMode", "RIGHT_EYE");
+				self.rightTex.setAttribute("update", "ALWAYS");
+				self.rightTex.setAttribute("oculusRiftVersion", "2");
 				//rightTex.setAttribute("dimensions", "980 1080 3");
-				rightTex.setAttribute("repeatS", "false");
-				rightTex.setAttribute("repeatT", "false");
-				rightTex.setAttribute("interpupillaryDistance", this.IPD);
-				rightApp.appendChild(rightTex);
+				self.rightTex.setAttribute("repeatS", "false");
+				self.rightTex.setAttribute("repeatT", "false");
+				self.rightTex.setAttribute("interpupillaryDistance", this.IPD);
+				rightApp.appendChild(self.rightTex);
 
 				var rightPlane = document.createElement("plane");
 				rightPlane.setAttribute("solid", "false");
@@ -189,50 +156,19 @@ var Oculus = {};
 				}
 				rightVP.setAttribute("containerfield", "viewpoint");
 				rightVP.textContent = " ";
-				rightTex.appendChild(rightVP);
+				self.rightTex.appendChild(rightVP);
 
 				var rightBground = document.createElement("background");
 				rightBground.setAttribute("use", "viewer_bground");
 				rightBground.setAttribute("containerfield", "background");
 				rightBground.textContent = " ";
-				rightTex.appendChild(rightBground);
+				self.rightTex.appendChild(rightBground);
 
 				var rightScene = document.createElement("group");
-				rightScene.setAttribute("use", "model__root");
+				rightScene.setAttribute("use", "root");
 				rightScene.setAttribute("containerfield", "scene");
 				rightScene.textContent = " ";
-				rightTex.appendChild(rightScene);
-
-				var rightShader = document.createElement("ComposedShader");
-				var rightTexField = document.createElement("field");
-				rightTexField.setAttribute("name", "tex");
-				rightTexField.setAttribute("type", "SFInt32");
-				rightTexField.setAttribute("value", "0");
-				rightShader.appendChild(rightTexField);
-
-				var rightvert = document.createElement("shaderPart");
-				rightvert.setAttribute("type", "VERTEX");
-				rightvert.textContent = "attribute vec3 position;" +
-				"\nattribute vec2 texcoord;" +
-				"\n" +
-				"\nuniform mat4 modelViewProjectionMatrix;" +
-				"\nvarying vec2 fragTexCoord;" +
-				"\n" +
-				"\nvoid main()" +
-				"\n{" +
-				"\n\tvec2 pos = sign(position.xy);" +
-				"\n\tfragTexCoord = texcoord;" +
-				"\n" +
-				"\n\tgl_Position = vec4((pos.x + 1.0) / 2.0, pos.y, 0.0, 1.0);" +
-				"\n}";
-				rightShader.appendChild(rightvert);
-
-				var rightfrag = document.createElement("shaderPart");
-				rightfrag.setAttribute("USE", "vrfrag");
-				rightfrag.setAttribute("type", "FRAGMENT");
-				rightShader.appendChild(rightfrag);
-
-				rightApp.appendChild(rightShader);
+				self.rightTex.appendChild(rightScene);
 
 				scene.appendChild(eyeGroup);
 
@@ -249,15 +185,20 @@ var Oculus = {};
 				// Enable EXAMINE mode for compatibility with gyro
 				self.oldNavMode = self.viewer.nav.getAttribute("type");
 				self.viewer.nav.setAttribute("type", "EXAMINE");
+				
+				self.viewer.getScene()._x3domNode._nameSpace.doc.canvas.isMulti = true;
 
-				self.viewer.switchFullScreen(self.vrHMD);
-
+				this.oldNavMode = self.viewer.currentNavMode;
+				self.viewer.setNavMode(self.viewer.NAV_MODES.FLY);
+				
 				this.enabled = true;
+				
+				self.viewer.removeLogo();
 			} else {
 				this.oculus.parentNode.removeChild(this.oculus);
 
-				this.rtLeft		= null;
-				this.rtRight	= null;
+				this.leftTex	= null;
+				this.rightTex	= null;
 
 				this.lastW		= null;
 				this.lastH		= null;
@@ -278,19 +219,18 @@ var Oculus = {};
 
 				self.viewer.getViewArea().skipSceneRender = null;
 
-				self.viewer.switchFullScreen(self.vrHMD);
-
 				self.viewer.nav.setAttribute("type", self.oldNavMode);
 				self.oldNavMode = null;
-
+				
+				self.viewer.getScene()._x3domNode._nameSpace.doc.canvas.isMulti = false;
 				self.viewer.createBackground();
+				self.viewer.setNavMode(this.oldNavMode);
+				
+				self.viewer.addLogo();
 			}
 		};
 
 		this.startVR = function () {
-			self.rtLeft		= $("#rtLeft")[0];
-			self.rtRight	= $("#rtRight")[0];
-
 			self.lastW		= self.viewer.runtime.getWidth();
 			self.lastH		= self.viewer.runtime.getHeight();
 
@@ -339,34 +279,33 @@ var Oculus = {};
 				var w = self.viewer.runtime.getWidth() * (window.devicePixelRatio ? window.devicePixelRatio : 1);
 				var h = self.viewer.runtime.getHeight() * (window.devicePixelRatio ? window.devicePixelRatio : 1);
 
-				/*
+				
 				// The image should be split across the longest dimension of the screen
 				var rotate = (h > w);
 
 				if (rotate)
 				{
 					self.viewer.runtime.canvas.doc.ctx.stateManager.viewport(0,h / 2.0,w,h);
-					self.viewer.viewer.runtime.canvas.doc._scene._fgnd._webgl.render(self.viewer.viewer.runtime.canvas.doc.ctx.ctx3d, self.rtLeft._x3domNode._webgl.fbo.tex);
+					self.viewer.viewer.runtime.canvas.doc._scene._fgnd._webgl.render(self.viewer.viewer.runtime.canvas.doc.ctx.ctx3d, self.leftTex._x3domNode._webgl.fbo.tex);
 
 					self.viewer.runtime.canvas.doc.ctx.stateManager.viewport(0,0,w,h / 2.0);
-					self.viewer.viewer.runtime.canvas.doc._scene._fgnd._webgl.render(self.viewer.viewer.runtime.canvas.doc.ctx.ctx3d, self.rtRight._x3domNode._webgl.fbo.tex);
+					self.viewer.viewer.runtime.canvas.doc._scene._fgnd._webgl.render(self.viewer.viewer.runtime.canvas.doc.ctx.ctx3d, self.rightTex._x3domNode._webgl.fbo.tex);
 				} else {
 					self.viewer.runtime.canvas.doc.ctx.stateManager.viewport(0,0,w / 2.0,h);
-					self.viewer.viewer.runtime.canvas.doc._scene._fgnd._webgl.render(self.viewer.viewer.runtime.canvas.doc.ctx.ctx3d, self.rtLeft._x3domNode._webgl.fbo.tex);
+					self.viewer.viewer.runtime.canvas.doc._scene._fgnd._webgl.render(self.viewer.viewer.runtime.canvas.doc.ctx.ctx3d, self.leftTex._x3domNode._webgl.fbo.tex);
 
 					self.viewer.runtime.canvas.doc.ctx.stateManager.viewport(w / 2,0,w / 2,h);
-					self.viewer.viewer.runtime.canvas.doc._scene._fgnd._webgl.render(self.viewer.viewer.runtime.canvas.doc.ctx.ctx3d, self.rtRight._x3domNode._webgl.fbo.tex);
+					self.viewer.viewer.runtime.canvas.doc._scene._fgnd._webgl.render(self.viewer.viewer.runtime.canvas.doc.ctx.ctx3d, self.rightTex._x3domNode._webgl.fbo.tex);
 				}
-				*/
-
+				
 				if (w !== self.lastW || h !== self.lastH)
 				{
 					var half = 0;
 
 					half = Math.round(w / 2);
 
-					self.rtLeft.setAttribute("dimensions", half + " " + h + " 4");
-					self.rtRight.setAttribute("dimensions", half + " " + h + " 4");
+					self.leftTex.setAttribute("dimensions", half + " " + h + " 4");
+					self.rightTex.setAttribute("dimensions", half + " " + h + " 4");
 
 					self.lastW = w;
 					self.lastH = h;
@@ -379,19 +318,22 @@ var Oculus = {};
 		};
 
 		this.changeIPD = function(newIPD) {
-			self.rtLeft.setAttribute("interpupillaryDistance", newIPD);
-			self.rtRight.setAttribute("interpupillaryDistance", newIPD);
+			self.leftTex.setAttribute("interpupillaryDistance", newIPD);
+			self.rightTex.setAttribute("interpupillaryDistance", newIPD);
 		};
 
 		this.peturbIPD = function(peturbation) {
-			var oldDistance = parseFloat(self.rtLeft.getAttribute("interpupillaryDistance"));
+			var oldDistance = parseFloat(self.leftTex.getAttribute("interpupillaryDistance"));
 			this.changeIPD(oldDistance + peturbation);
 		};
 
 		this.exitFullscreen = function() {
+			//self.instruction.style.display = "none";			
+			/*
 			if (!document.webkitIsFullScreen && !document.msFullscreenElement && !document.mozFullScreen && self.enabled) {
 				self.switchVR();
 			}
+			*/
 		};
 
 		this.createFullscreenExit = function () {

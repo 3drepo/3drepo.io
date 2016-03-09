@@ -127,6 +127,71 @@ var Viewer = {};
 			this.handle = handle;
 		};
 
+		this.logos    = [];
+		
+		this.addLogo = function() {
+			if (!self.logoGroup)
+			{
+				self.logoGroup = document.createElement("div");
+				self.logoGroup.style.width = "100%";
+				self.element.appendChild(self.logoGroup);
+			}
+			
+			var numLogos = this.logos.length + 1;
+			var perLogo  = Math.floor(100 / numLogos);
+			var widthPercentage = perLogo + "%";
+			
+			var logo = document.createElement("div");
+			logo.style.position       = "absolute";
+			logo.style["z-index"]     = 2;
+			logo.style["text-align"]  = "center";
+			logo.style.width          = widthPercentage;
+			logo.style["margin-top"]  = "10px";
+			logo.style.left = perLogo * (numLogos - 1) + "%";
+			
+			logo.setAttribute("onclick", "logoClick()");
+
+			var logoImage = document.createElement("img");
+			logoImage.setAttribute("src", logo_string);
+			logoImage.setAttribute("style", "width: 250px;");
+			logoImage.textContent = " ";
+
+			var logoLink = document.createElement("a");
+
+			if (server_config.return_path) {
+				logoLink.setAttribute("href", server_config.return_path);
+			} else {
+				logoLink.setAttribute("href", "https://www.3drepo.io");
+			}
+			
+			logoLink.appendChild(logoImage);
+			logo.appendChild(logoLink);
+			
+			self.updateLogoWidth(widthPercentage);
+						
+			self.logoGroup.appendChild(logo);
+			self.logos.push(logo);	
+		};
+		
+		this.removeLogo = function () {
+			var numLogos = this.logos.length - 1;
+			var widthPercentage = Math.floor(100 / numLogos) + "%";
+						
+			self.logos[numLogos].parentNode.removeChild(self.logos[numLogos]);
+			
+			self.logos.splice(numLogos,1);
+			
+			self.updateLogoWidth(widthPercentage);
+		};
+		
+		this.updateLogoWidth = function(widthPercentage) {
+			for(var i = 0; i < self.logos.length; i++)
+			{
+				
+				self.logos[i].style.width = widthPercentage;
+			}
+		};
+
 		this.init = function() {
 			if (!self.initialized) {
 				// If we have a viewer manager then it
@@ -134,31 +199,7 @@ var Viewer = {};
 				// else we'll do it ourselves
 				x3dom.runtime.ready = self.initRuntime;
 
-				self.logo = document.createElement("div");
-				self.logo.setAttribute("id", "viewer_logo");
-				self.logo.setAttribute("style", "top: 0px; left: 0; right: 0; position: absolute; z-index:2; margin: auto; width: 250px; margin-top: 10px");
-				self.logo.setAttribute("onclick", "logoClick()");
-
-				self.logoImage = document.createElement("img");
-				self.logoImage.setAttribute("src", logo_string);
-				self.logoImage.setAttribute("style", "width: 100%;");
-				self.logoImage.textContent = " ";
-
-				self.logoLink = document.createElement("a");
-
-				if (server_config.return_path) {
-					self.logoLink.setAttribute("href", server_config.return_path);
-				} else {
-					self.logoLink.setAttribute("href", "https://www.3drepo.io");
-				}
-
-				//self.logoLink.setAttribute("style", "top: 0px; left: 0px; padding: 10px; position: absolute;")
-				self.logoLink.appendChild(self.logoImage);
-
-				self.logo.appendChild(self.logoLink);
-
-				//self.logo.setAttribute("style", "top: 0px; left: 0px; padding: 10px; position: absolute; z-index:10000;")
-				self.element.appendChild(self.logo);
+				self.addLogo();
 
 				// Set up the DOM elements
 				self.viewer = document.createElement("x3d");
@@ -173,7 +214,6 @@ var Viewer = {};
 				self.element.appendChild(self.viewer);
 
 				self.scene = document.createElement("Scene");
-				self.scene.setAttribute("DEF", self.name + "_scene");
 				self.scene.setAttribute("onbackgroundclicked", "bgroundClick(event);");
 				self.scene.setAttribute("dopickpass", false);
 				self.viewer.appendChild(self.scene);
@@ -190,17 +230,11 @@ var Viewer = {};
 				self.environ.setAttribute("smallFeatureCulling", "true");
 				self.environ.setAttribute("smallFeatureThreshold", 5);
 				self.environ.setAttribute("occlusionCulling", "true");
-				self.environ.setAttribute("sorttrans", "false");
+				self.environ.setAttribute("sorttrans", "true");
+				self.environ.setAttribute("gammaCorrectionDefault", "linear");
 				self.scene.appendChild(self.environ);
 
-				self.light = document.createElement("directionallight");
-				//self.light.setAttribute("intensity", "0.5");
-				self.light.setAttribute("color", "0.714, 0.910, 0.953");
-				self.light.setAttribute("direction", "0, -0.9323, -0.362");
-				self.light.setAttribute("global", "true");
-				self.light.setAttribute("ambientIntensity", "0.8");
-				self.light.setAttribute("shadowIntensity", 0.0);
-				self.scene.appendChild(self.light);
+				self.setAmbientLight();
 
 				self.createViewpoint(self.name + "_default");
 
@@ -215,7 +249,7 @@ var Viewer = {};
 					if (e.charCode === "r".charCodeAt(0)) {
 						self.reset();
 						self.setApp(null);
-						self.setNavMode("WALK");
+						self.setNavMode(self.NAV_MODES.WALK);
 						self.disableClicking();
 					} else if (e.charCode === "a".charCodeAt(0)) {
 						self.showAll();
@@ -323,21 +357,85 @@ var Viewer = {};
 			});
 		};
 
-		this.createBackground = function() {
-			if (self.bground) {
-				self.bground.parentNode.removeChild(self.bground);
+		this.setAmbientLight = function(lightDescription) {
+			if (self.light) {
+				var i = 0;
+				var attributeNames = [];
+				
+				for(i = 0; i < self.light.attributes.length; i++)
+				{
+					attributeNames.push(self.light.attributes[i].name);
+				}
+				
+				for(i = 0; i < attributeNames.length; i++)
+				{
+					self.light.removeAttribute(attributeNames[i]);	
+				}
+			} else {
+				self.light = document.createElement("directionallight");
+				self.scene.appendChild(self.light);
 			}
 
-			self.bground = document.createElement("background");
+			if (!lightDescription)
+			{
+				//self.light.setAttribute("intensity", "0.5");
+				self.light.setAttribute("color", "0.714, 0.910, 0.953");
+				self.light.setAttribute("direction", "0, -0.9323, -0.362");
+				self.light.setAttribute("global", "true");
+				self.light.setAttribute("ambientIntensity", "0.8");
+				self.light.setAttribute("shadowIntensity", 0.0);
+			} else {
+				for (var attr in lightDescription)
+				{					
+					if (lightDescription.hasOwnProperty(attr))
+					{
+						self.light.setAttribute(attr, lightDescription[attr]);
+					}
+				}				
+			}
+			
+		};
 
-			self.bground.setAttribute("DEF", name + "_bground");
-			self.bground.setAttribute("skyangle", "0.9 1.5 1.57");
-			self.bground.setAttribute("skycolor", "0.21 0.18 0.66 0.2 0.44 0.85 0.51 0.81 0.95 0.83 0.93 1");
-			self.bground.setAttribute("groundangle", "0.9 1.5 1.57");
-			self.bground.setAttribute("groundcolor", "0.65 0.65 0.65 0.73 0.73 0.73 0.81 0.81 0.81 0.91 0.91 0.91");
-			self.bground.textContent = " ";
+		this.createBackground = function(colourDescription) {
+			if (self.bground) {
+				var i = 0;
+				var attributeNames = [];
+				
+				for(i = 0; i < self.bground.attributes.length; i++)
+				{
+					attributeNames.push(self.bground.attributes[i].name);
+				}
+				
+				for(i = 0; i < attributeNames.length; i++)
+				{
+					self.bground.removeAttribute(attributeNames[i]);
+				}
+			} else {
+				self.bground = document.createElement("background");
+				self.scene.appendChild(self.bground);				
+			}
 
-			self.scene.appendChild(self.bground);
+			if (!colourDescription)
+			{
+				self.bground.setAttribute("DEF", self.name + "_bground");
+				self.bground.setAttribute("skyangle", "0.9 1.5 1.57");
+				self.bground.setAttribute("skycolor", "0.21 0.18 0.66 0.2 0.44 0.85 0.51 0.81 0.95 0.83 0.93 1");
+				self.bground.setAttribute("groundangle", "0.9 1.5 1.57");
+				self.bground.setAttribute("groundcolor", "0.65 0.65 0.65 0.73 0.73 0.73 0.81 0.81 0.81 0.91 0.91 0.91");
+				self.bground.textContent = " ";
+			
+			} else {
+				self.bground.setAttribute("DEF", self.name + "_bground");
+	
+				for (var attr in colourDescription)
+				{
+					if (colourDescription.hasOwnProperty(attr))
+					{
+						self.bground.setAttribute(attr, colourDescription[attr]);
+					}
+				}
+			}
+
 		};
 
 		this.gyroscope = function (alpha, beta, gamma) {
@@ -372,7 +470,7 @@ var Viewer = {};
 			var flyMat = vp.getViewMatrix().inverse();
 
 			var q           = new x3dom.fields.Quaternion(x,y,z,w);
-			var screenAngle = (self.screenOrientation ? self.screenOrientation : 0) * degToRad * -1;
+			var screenAngle = (window.orientation ? window.orientation : 0) * degToRad * -1;
 			var screenQuat  = x3dom.fields.Quaternion.axisAngle(new x3dom.fields.SFVec3f(0,0,1),screenAngle);
 			var viewQuat    = new x3dom.fields.Quaternion.axisAngle(new x3dom.fields.SFVec3f(1,0,0), -Math.PI * 0.5);
 
@@ -381,23 +479,9 @@ var Viewer = {};
 			q = q.multiply(screenQuat);
 
 			flyMat.setRotate(q);
-			vp.setView(flyMat.inverse());
+			
+			vp._viewMatrix.setValues(flyMat.inverse());
 		};
-
-		/*
-		this.displayMessage = function(text, textColor, timeout) {
-			self.messageBoxMessage.innerHTML = text;
-			self.messageBox.style["display"] = "";
-
-			// Construct RGBA string
-			var rgbstr = "RGB(" + textColor[0] + ", " + textColor[1] + ", " + textColor[2] + ")";
-			self.messageBoxMessage.style["text-color"] = rgbstr;
-
-			setTimeout( function() {
-				self.messageBox.style["display"] = "none";
-			}, timeout);
-		}
-		*/
 
 		this.switchDebug = function() {
 			self.getViewArea()._visDbgBuf = !self.getViewArea()._visDbgBuf;
@@ -659,7 +743,7 @@ var Viewer = {};
 			});
 		});
 
-		$(document).on("onMouseDown", function(event, mouseEvent) {
+		$(document).on("onMouseDown", function(event, mouseEvent) {			
 			$("body")[0].style["pointer-events"] = "none";
 		});
 
@@ -869,8 +953,7 @@ var Viewer = {};
 				self.runtime.resetExamin();
 
 				self.applySettings();
-
-
+				
 				if (id === (self.name + "_default")) {
 					if (self.defaultShowAll) {
 						self.runtime.fitAll();
@@ -888,6 +971,7 @@ var Viewer = {};
 		this.updateSettings = function(settings) {
 			if (settings) {
 				self.settings = settings;
+				self.applySettings();
 			}
 		};
 
@@ -925,6 +1009,14 @@ var Viewer = {};
 				if (self.settings.hasOwnProperty("zNear")) {
 					self.currentViewpoint._xmlNode.setAttribute("zNear", self.settings.zNear);
 				}
+				
+				if (self.settings.hasOwnProperty("background")) {
+					self.createBackground(self.settings.background);
+				}
+				
+				if (self.settings.hasOwnProperty("ambientLight")) {
+					self.setAmbientLight(self.settings.ambientLight);
+				}				
 			}
 		};
 
@@ -1122,33 +1214,39 @@ var Viewer = {};
 		};
 
 		this.updateCamera = function(pos, up, viewDir, animate) {
-			var x3domView = new x3dom.fields.SFVec3f();
-			x3domView.setValueByStr(viewDir.join(","));
+			
+			if (!viewDir)
+			{
+				viewDir = self.getCurrentViewpointInfo()["view_dir"];
+			}
+			
+			if (!up)
+			{
+				up = self.getCurrentViewpointInfo()["up"];
+			}
+			up = ViewerUtil.normalize(up);
+							
+			var x3domView = new x3dom.fields.SFVec3f(viewDir[0], viewDir[1], viewDir[2]);
+			var x3domUp   = new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
+			var x3domFrom = new x3dom.fields.SFVec3f(pos[0], pos[1], pos[2]);
+			var x3domAt   = x3domFrom.add(x3domView);
 
-			var x3domUp = new x3dom.fields.SFVec3f();
-			x3domUp.setValueByStr(ViewerUtil.normalize(up).join(","));
-
-			var x3domFrom = new x3dom.fields.SFVec3f();
-			x3domFrom.setValueByStr(pos.join(","));
-
-			var x3domAt = x3domFrom.add(x3domView);
-
-			var viewMatrix = x3dom.fields.SFMatrix4f.lookAt(x3domFrom, x3domAt, x3domUp).inverse();
-			var currMatrix = self.getCurrentViewpoint()._x3domNode;
+			var viewMatrix    = x3dom.fields.SFMatrix4f.lookAt(x3domFrom, x3domAt, x3domUp).inverse();
+			var currViewpoint = self.getCurrentViewpoint()._x3domNode;
 
 			if (self.currentNavMode === self.NAV_MODES.HELICOPTER) {
 				self.nav._x3domNode._vf.typeParams[0] = Math.asin(x3domView.y);
 				self.nav._x3domNode._vf.typeParams[1] = x3domFrom.y;
 			}
-
+			
 			if (animate)
 			{
-				self.getViewArea().animateTo(viewMatrix, currMatrix);
+				self.getViewArea().animateTo(viewMatrix, currViewpoint);
 			} else {
 				self.getCurrentViewpoint()._x3domNode._viewMatrix.setValues(viewMatrix);
 				self.getViewArea()._doc.needRender = true;
 			}
-
+			
 			if (self.linked) {
 				self.manager.switchMaster(self.handle);
 			}
@@ -1609,7 +1707,8 @@ var VIEWER_NAV_MODES = Viewer.prototype.NAV_MODES = {
 	HELICOPTER: "HELICOPTER",
 	WALK: "WALK",
 	TURNTABLE: "TURNTABLE",
-	WAYFINDER: "WAYFINDER"
+	WAYFINDER: "WAYFINDER",
+	FLY: "FLY"
 };
 
 var VIEWER_EVENTS = Viewer.prototype.EVENT = {
