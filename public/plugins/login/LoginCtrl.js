@@ -38,8 +38,5 @@ function($stateProvider, parentStates) {
 	StateManager.registerPlugin('login', null, function () {
 		return "login";
 	});
-}])
-.controller('LoginCtrl', function()
-{
-});
+}]);
 

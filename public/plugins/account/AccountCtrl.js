@@ -37,30 +37,27 @@ function($stateProvider, parentStates) {
 						$stateParams["account"] = null;
 
 					StateManager.setState($stateParams, {});
-					StateManager.refresh("account");
 				}
 			},
 			views: {
 				"@" : {
-					template: '<account-dir></account-dir>',
-					controller: 'AccountCtrl'
+					template: '<account-dir></account-dir>'
 				}
 			}
 		})
 	}
 }])
 .run(['StateManager', function(StateManager) {
-	StateManager.registerPlugin('account', 'AccountData', function () {
-		if(StateManager.state.account)
+	StateManager.registerPlugin('account', null, function () {
+		if (StateManager.state.account) {
 			return "account";
-		else
+		}
+		else {
 			return null;
+		}
 	});
 
 	StateManager.setClearStateVars("account", ["account"]);
-}])
-.controller('AccountCtrl', function()
-{
-});
+}]);
 
 

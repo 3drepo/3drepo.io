@@ -25,34 +25,34 @@
 		return {
 			restrict: 'EA',
 			templateUrl: 'accountProjects.html',
-			scope: {},
+			scope: {
+				projectsGrouped: "="
+			},
 			controller: AccountProjectsCtrl,
 			controllerAs: 'vm',
 			bindToController: true
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "StateManager"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location"];
 
-	function AccountProjectsCtrl($scope, $location, StateManager) {
+	function AccountProjectsCtrl($scope, $location) {
 		var vm = this;
-
-		vm.Data = StateManager.Data;
 
 		/*
 		 * Handle changes to the state manager Data
 		 * Reformat the grouped projects to enable toggling of projects list
 		 */
-		$scope.$watch("vm.Data", function () {
+		$scope.$watch("vm.projectsGrouped", function () {
 			vm.accounts = [];
-			angular.forEach(vm.Data.AccountData.projectsGrouped, function(value, key) {
+			angular.forEach(vm.projectsGrouped, function(value, key) {
 				vm.accounts.push({
 					name: key,
 					projects: value,
 					showProjects: false
 				});
 			});
-		}, true);
+		});
 
 		/**
 		 * Go to the project viewer

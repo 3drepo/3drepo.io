@@ -214,12 +214,12 @@ logout
 			#noAvatarIcon(flex, layout="row")
 				md-icon(ng-if="!vm.Data.AccountData.hasAvatar", class="fa fa-user")
 		#userinfo(layout="column")
-			p {{vm.name}}
+			p {{vm.firstName}} {{vm.lastName}}
 			p {{vm.email}}
 
 	span(flex="5")
-	md-tabs(md-border-bottom, flex)
+	md-tabs(md-border-bottom, flex="50")
 		md-tab(label="Projects")
-			account-projects(flex)
+			account-projects(flex projects-grouped='vm.projectsGrouped')
 		md-tab(label="Profile")
-			account-profile
+			account-profile(username="vm.username" first-name="vm.firstName" last-name="vm.lastName" email="vm.email")

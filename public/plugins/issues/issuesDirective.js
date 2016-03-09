@@ -29,8 +29,7 @@
 				filterText: "=",
 				height: "=",
 				showAdd: "=",
-				options: "=",
-				selectedOption: "=",
+				selectedMenuOption: "=",
 				onSetContentHeight: "&"
 			},
 			controller: IssuesCtrl,
@@ -284,7 +283,7 @@
 			}
 		};
 
-		$scope.$watch("vm.selectedOption", function (newValue) {
+		$scope.$watch("vm.selectedMenuOption", function (newValue) {
 			var role, roleIndex;
 			if (angular.isDefined(newValue)) {
 				if (newValue.value === "sortByDate") {

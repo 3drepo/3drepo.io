@@ -21,16 +21,50 @@
 	angular.module("3drepo")
 		.factory("AccountService", AccountService);
 
-	AccountService.$inject = ["$http", "$q", "serverConfig"];
+	AccountService.$inject = ["$http", "$q", "serverConfig", "StateManager"];
 
-	function AccountService($http, $q, serverConfig) {
+	function AccountService($http, $q, serverConfig, StateManager) {
 		var obj = {},
 			deferred;
 
+		/**
+		 * Get account data
+		 */
+		obj.getData = function () {
+			deferred = $q.defer();
+			$http.get(serverConfig.apiUrl(StateManager.state.account + '.json'))
+				.then(function (response) {
+					var i, length,
+						project, projectsGrouped;
+					console.log(response);
+
+					// Groups projects under accounts
+					projectsGrouped = {};
+					for (i = 0, length = response.data.projects.length; i < length; i += 1) {
+						project = response.data.projects[i];
+						if (!(project.account in projectsGrouped)) {
+							projectsGrouped[project.account] = [];
+						}
+						projectsGrouped[project.account].push(project.project);
+					}
+					response.data.projectsGrouped = projectsGrouped;
+
+					deferred.resolve(response);
+				});
+			return deferred.promise;
+		};
+
+		/**
+		 * Update the user info
+		 *
+		 * @param {String} username
+		 * @param {Object} info
+		 * @returns {*}
+		 */
 		obj.updateInfo = function (username, info) {
 			deferred = $q.defer();
 			$http.post(serverConfig.apiUrl(username), info)
-				.then(function successCallback(response) {
+				.then(function (response) {
 					console.log(response);
 					deferred.resolve(response);
 				});
@@ -38,10 +72,17 @@
 			return deferred.promise;
 		};
 
+		/**
+		 * Update the user password
+		 *
+		 * @param {String} username
+		 * @param {Object} passwords
+		 * @returns {*}
+		 */
 		obj.updatePassword = function (username, passwords) {
 			deferred = $q.defer();
 			$http.post(serverConfig.apiUrl(username), passwords)
-				.then(function successCallback(response) {
+				.then(function (response) {
 					console.log(response);
 					deferred.resolve(response);
 				});

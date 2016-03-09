@@ -19,37 +19,27 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountDir", accountDir);
+		.directive("panelCardOptionAdd", panelCardOptionAdd);
 
-	function accountDir() {
+	function panelCardOptionAdd() {
 		return {
-			restrict: 'EA',
-			templateUrl: 'account.html',
-			scope: {},
-			controller: AccountCtrl,
+			restrict: 'E',
+			templateUrl: 'panelCardOptionAdd.html',
+			scope: {
+				showAdd: "="
+			},
+			controller: PanelCardOptionAddCtrl,
 			controllerAs: 'vm',
 			bindToController: true
 		};
 	}
 
-	AccountCtrl.$inject = ["AccountService"];
+	function PanelCardOptionAddCtrl() {
+		var vm = this;
 
-	function AccountCtrl(AccountService) {
-		var vm = this,
-			promise;
-
-		/*
-		 * Get the account data
-		 */
-		promise = AccountService.getData();
-		promise.then(function (data) {
-			if (data.statusText === "OK") {
-				vm.username = data.data.username;
-				vm.firstName = data.data.firstName;
-				vm.lastName = data.data.lastName;
-				vm.email = data.data.email;
-				vm.projectsGrouped = data.data.projectsGrouped;
-			}
-		});
+		vm.toggleAdd = function (event) {
+			event.stopPropagation();
+			vm.showAdd = !vm.showAdd;
+		};
 	}
 }());

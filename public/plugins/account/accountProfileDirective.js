@@ -25,32 +25,27 @@
 		return {
 			restrict: 'EA',
 			templateUrl: 'accountProfile.html',
-			scope: {},
+			scope: {
+				username: "=",
+				firstName: "=",
+				lastName: "=",
+				email: "="
+			},
 			controller: AccountProfileCtrl,
 			controllerAs: 'vm',
 			bindToController: true
 		};
 	}
 
-	AccountProfileCtrl.$inject = ["$scope", "StateManager", "AccountService"];
+	AccountProfileCtrl.$inject = ["AccountService"];
 
-	function AccountProfileCtrl($scope, StateManager, AccountService) {
+	function AccountProfileCtrl(AccountService) {
 		var vm = this,
 			promise;
 
-		vm.Data = StateManager.Data;
-
-		/*
-		 * Handle changes to the state manager Data
+		/**
+		 * Update the user info
 		 */
-		$scope.$watch("vm.Data", function () {
-			console.log(vm.Data);
-			vm.username = vm.Data.AccountData.username;
-			vm.firstName = vm.Data.AccountData.firstName;
-			vm.lastName = vm.Data.AccountData.lastName;
-			vm.email = vm.Data.AccountData.email;
-		}, true);
-
 		vm.updateInfo = function () {
 			promise = AccountService.updateInfo(vm.username, {
 				email: vm.email,
@@ -67,6 +62,9 @@
 			});
 		};
 
+		/**
+		 * Update the user password
+		 */
 		vm.updatePassword = function () {
 			promise = AccountService.updatePassword(vm.username, {
 				oldPassword: vm.oldPassword,

@@ -1,5 +1,5 @@
-md-content(layout-padding, flex="50")
-	.dataContainer
+md-content(flex layout="row" layout-align="space-between")
+	.dataContainer(flex="45")
 		div
 			md-input-container.md-block
 				label Username
@@ -19,7 +19,7 @@ md-content(layout-padding, flex="50")
 			md-button.md-accent(ng-click="vm.updateInfo()") Update
 			p {{vm.infoSaveInfo}}
 
-	.dataContainer
+	.dataContainer(flex="45")
 		div
 			md-input-container.md-block
 				label Old password

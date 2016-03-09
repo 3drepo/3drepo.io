@@ -139,6 +139,8 @@
 								event.value.up,
 								event.value.animate ? event.value.animate : true
 							);
+						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
+							vm.manager.getCurrentViewer().setNavMode(event.value.mode);
 						}
 					});
 				}

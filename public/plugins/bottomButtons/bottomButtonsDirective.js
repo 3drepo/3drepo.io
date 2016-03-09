@@ -39,6 +39,7 @@
 		vm.showButtons = true;
 		vm.fullScreen = false;
 		vm.showViewingOptionButtons = false;
+		console.log(EventService);
 
 		vm.toggleElements = function () {
 			EventService.send(EventService.EVENT.TOGGLE_ELEMENTS);
@@ -49,7 +50,7 @@
 			if (angular.isDefined(index)) {
 				// Set the viewing mode
 				
-				EventService.send(EventService.VIEWER.SET_NAV_MODE, 
+				EventService.send(EventService.EVENT.VIEWER.SET_NAV_MODE,
 					{mode: vm.viewingOptions[index].mode});
 			
 				// Set up the new current selected option button

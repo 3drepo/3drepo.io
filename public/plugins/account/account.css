@@ -13,7 +13,7 @@ account-dir #logo {
 }
 
 account-dir #noAvatarIcon {
-  background: #C5CAE9;
+  background: #E8EAF6;
 }
 account-dir #noAvatarIcon md-icon {
   font-size: 100px;
@@ -28,12 +28,18 @@ account-dir #userinfo {
 }
 account-dir #userinfo p {
   font-size: 15px;
+  margin: 5px 0;
+  color: rgba(0,0,0,0.7);
 }
 
 account-dir .dataContainer {
-  border: solid 1px rgba(0,0,0,0.3);
+  border: solid 1px rgba(0,0,0,0.2);
   margin-top: 20px;
   padding: 20px;
+}
+
+account-dir md-tabs-canvas {
+  background: #E8EAF6;
 }
 
 /** Account Projects **************************************************************************************************/

@@ -39,7 +39,6 @@
 
     function PanelCardCtrl($scope, $element, $compile, $timeout, $window, serverConfig, EventService, StateManager) {
         var vm = this,
-            currentSortIndex,
             filter = null,
 			currentHeight = 0,
 			contentHeightExtra = 20,
@@ -165,55 +164,42 @@
 			}
 		};
 
-		vm.menuItemSelected = function (index) {
-			if (vm.contentData.options[index].toggle) {
-				vm.contentData.options[index].selected = !vm.contentData.options[index].selected;
-				vm.selectedOption = vm.contentData.options[index];
-			}
-			else {
-				if (index !== currentSortIndex) {
-					if (angular.isDefined(currentSortIndex)) {
-						vm.contentData.options[currentSortIndex].selected = false;
-						vm.contentData.options[currentSortIndex].firstSelected = false;
-						vm.contentData.options[currentSortIndex].secondSelected = false;
-					}
-					currentSortIndex = index;
-					vm.contentData.options[currentSortIndex].selected = true;
-					vm.contentData.options[currentSortIndex].firstSelected = true;
-				}
-				else {
-					vm.contentData.options[currentSortIndex].firstSelected = !vm.contentData.options[currentSortIndex].firstSelected;
-					vm.contentData.options[currentSortIndex].secondSelected = !vm.contentData.options[currentSortIndex].secondSelected;
-				}
-				vm.selectedOption = vm.contentData.options[currentSortIndex];
-			}
-
-			// 'Reset' vm.selectedOption so that selecting the same option can be registered down the line
-			$timeout(function () {
-				vm.selectedOption = undefined;
-			});
-		};
-
-
 		/**
 		 * Create the card content
 		 */
 		function createCardContent () {
-			var content = angular.element($element[0].querySelector('#content')),
-				contentItem;
+			var i, length,
+				content = angular.element($element[0].querySelector('#content')),
+				contentItem,
+				element;
 
-			contentItem = angular.element(
+			element =
 				"<" + vm.contentData.type + " " +
-				"filter-text='vm.filterText' " +
-				"height='vm.contentHeight' " +
 				"show='vm.contentData.show' " +
-				"show-add='vm.addStatus' " +
-				"visible='vm.visibleStatus' " +
 				"on-set-content-height='vm.setContentHeight(height)' " +
-				"options='vm.contentData.options' " +
-				"selected-option='vm.selectedOption'>" +
-				"</" + vm.contentData.type + ">"
-			);
+				"height='vm.contentHeight' ";
+
+			// Only add attributes when needed
+			for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
+				switch (vm.contentData.options[i]) {
+					case "filter":
+						element += "filter-text='vm.filterText' ";
+						break;
+					case "add":
+						element += "show-add='vm.showAdd' ";
+						break;
+					case "visible":
+						element += "visible='vm.visible' ";
+						break;
+					case "menu":
+						element += "selected-menu-option='vm.selectedMenuOption' ";
+						break;
+				}
+			}
+
+			element += "></" + vm.contentData.type + ">";
+
+			contentItem = angular.element(element);
 			content.append(contentItem);
 			$compile(contentItem)($scope);
 		}
@@ -227,99 +213,42 @@
 				options = angular.element($element[0].querySelector('#options')),
 				option;
 
-			console.log(vm.contentData);
 			for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
-				// Filter
-				if (vm.contentData.options[i] === "filter") {
-					// Element
-					option = angular.element(
-						"<md-button class='md-icon-button' aria-label='Filter' ng-click='vm.toggleFilter($event)'>" +
-						"<md-icon class='fa fa-search'></md-icon>" +
-						"</md-button>"
-					);
-					options.append(option);
-					$compile(option)($scope);
-					// Function
-					vm.toggleFilter = function (event) {
-						event.stopPropagation();
-						vm.showFilter = !vm.showFilter;
-					};
+				option = null;
+				switch (vm.contentData.options[i]) {
+					case "filter":
+						option = angular.element(
+							"<panel-card-option-filter show-filter='vm.showFilter'></panel-card-option-filter>"
+						);
+						break;
+
+					case "add":
+						option = angular.element(
+							"<panel-card-option-add show-add='vm.showAdd'></panel-card-option-add>"
+						);
+						break;
+
+					case "print":
+						option = angular.element(
+							"<panel-card-option-print></panel-card-option-print>"
+						);
+						break;
+
+					case "visible":
+						option = angular.element(
+							"<panel-card-option-visible visible='vm.visible'></panel-card-option-visible>"
+						);
+						break;
+
+					case "menu":
+						option = angular.element(
+							"<panel-card-option-menu menu='vm.contentData.menu' selected-menu-option='vm.selectedMenuOption'></panel-card-option-menu>"
+						);
+						break;
 				}
 
-				// Add
-				else if (vm.contentData.options[i] === "add") {
-					// Element
-					option = angular.element(
-						"<md-button class='md-icon-button' aria-label='Add' ng-click='vm.toggleAdd($event)'>" +
-						"<md-icon class='fa fa-pencil'></md-icon>" +
-						"</md-button>"
-					);
-					options.append(option);
-					$compile(option)($scope);
-					// Function
-					vm.toggleAdd = function (event) {
-						event.stopPropagation();
-						vm.addStatus = !vm.addStatus;
-					};
-				}
-
-				// Print
-				else if (vm.contentData.options[i] === "print") {
-					// Element
-					option = angular.element(
-						"<md-button class='md-icon-button' aria-label='Print' ng-click='vm.doPrint($event)'>" +
-						"<md-icon class='fa fa-print'></md-icon>" +
-						"</md-button>"
-					);
-					options.append(option);
-					$compile(option)($scope);
-					// Function
-					vm.doPrint = function(event) {
-						event.stopPropagation();
-						$window.open(serverConfig.apiUrl(StateManager.state.account + "/" + StateManager.state.project + "/issues.html"), "_blank");
-					};
-				}
-
-				// Visible
-				else if (vm.contentData.options[i] === "visible") {
-					// Element
-					option = angular.element(
-						"<md-button class='md-icon-button' aria-label='Visibility' ng-click='vm.toggleVisible($event)'>" +
-						"<md-icon class='fa fa-eye' ng-if='vm.visibleStatus'></md-icon>" +
-						"<md-icon class='fa fa-eye-slash' ng-if='!vm.visibleStatus'></md-icon>" +
-						"</md-button>"
-					);
-					options.append(option);
-					$compile(option)($scope);
-					// Function
-					vm.toggleVisible = function (event) {
-						event.stopPropagation();
-						vm.visibleStatus = !vm.visibleStatus;
-					};
-				}
-
-				// Menu
-				else if (vm.contentData.options[i] === "menu") {
-					// Element
-					option = angular.element(
-						"<md-menu md-position-mode='target-right target' md-offset='2 14'>" +
-							"<md-button class='md-icon-button' aria-label='Menu' ng-click='$mdOpenMenu($event)'>" +
-								"<md-icon class='fa fa-ellipsis-v'></md-icon>" +
-							"</md-button>" +
-							"<md-menu-content width='4'>" +
-								"<md-menu-item ng-repeat='menuItem in vm.contentData.menu'>" +
-									"<md-button ng-click='vm.menuItemSelected($index)'>" +
-										"<div layout='row'>" +
-											"<md-icon class='fa fa-check' ng-if='menuItem.selected'></md-icon>" +
-											"<p flex=''>{{menuItem.label}}</p>" +
-											"<md-icon class='fa {{menuItem.firstSelectedIcon}}' ng-if='menuItem.firstSelected'></md-icon>" +
-											"<md-icon class='fa {{menuItem.secondSelectedIcon}}' ng-if='menuItem.secondSelected'></md-icon>" +
-										"</div>" +
-									"</md-button>" +
-								"</md-menu-item>" +
-							"</md-menu-content>" +
-						"</md-menu>"
-					);
+				// Create the element
+				if (option !== null) {
 					options.append(option);
 					$compile(option)($scope);
 				}
@@ -333,48 +262,11 @@
 			var filterContainer = angular.element($element[0].querySelector('#filterContainer')),
 				filter;
 			if (vm.contentData.options.indexOf("filter") !== -1) {
-				// Element
 				filter = angular.element(
-					"<div class='panelCardFilter' layout='row' ng-if='vm.showFilter'>" +
-						"<div flex='85'>" +
-							"<md-input-container md-no-float=''>" +
-								"<input type='text' ng-model='vm.filterInputText' placeholder='Filter'>" +
-							"</md-input-container>" +
-						"</div>" +
-						"<div flex='15' ng-if='vm.showClearFilterButton'>" +
-							"<md-button class='md-icon-button' ng-click='vm.clearFilter()' aria-label='Clear filter'>" +
-								"<md-icon class='fa fa-times-circle'></md-icon>" +
-							"</md-button>" +
-							"</md-input-container>" +
-						"</div>" +
-					"</div>"
+					"<panel-card-filter show-filter='vm.showFilter' filter-text='vm.filterText'></panel-card-filter>"
 				);
 				filterContainer.append(filter);
 				$compile(filter)($scope);
-
-				// Functions and watches
-				vm.clearFilter = function () {
-					vm.filterInputText = "";
-				};
-
-				$scope.$watch("vm.filterInputText", function (newValue) {
-					if (angular.isDefined(newValue)) {
-						if (filter !== null) {
-							$timeout.cancel(filter);
-						}
-						filter = $timeout(function() {
-							vm.filterText = vm.filterInputText;
-							vm.showClearFilterButton = (vm.filterInputText !== "");
-						}, 500);
-					}
-				});
-
-				$scope.$watch("vm.filterText", function (newValue) {
-					if (angular.isDefined(newValue)) {
-						vm.filterInputText = newValue;
-					}
-				});
-
 			}
 		}
 	}
