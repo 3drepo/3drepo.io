@@ -73,7 +73,7 @@ var textureSchema = Schema(
 var transformationSchema = Schema(
 	_.extend({}, repoBase, {
 		matrix: [[Number]]
-	}
+	})
 );
 
 

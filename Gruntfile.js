@@ -68,10 +68,11 @@ module.exports = function(grunt) {
 
             backend:{
                 files: { src: [
-                    'backend/db/*.js', 
-                    'backend/services/*.js', 
-                    'backend/routes/*.js',
-                    'backend/models/*.js',
+                    'backend/db/**/*.js', 
+                    'backend/services/**/*.js', 
+                    'backend/routes/**/*.js',
+
+                    'backend/models/**/*.js',
                     'backend/*.js'
                 ]},
             }

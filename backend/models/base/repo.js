@@ -1,6 +1,7 @@
 var repoGraphScene = require("../../repo/repoGraphScene.js");
 var GridFSBucket = require('mongodb').GridFSBucket;
 var ModelFactory = require('../factory/modelFactory');
+var Revision = require('../revision');
 
 var attrs = {
 	_id: Buffer,
@@ -13,7 +14,7 @@ var attrs = {
 };
 
 var statics = {};
-var methods = {};
+//var methods = {};
 
 statics._getGridFSBucket = function(dbCol, format){
 	return new GridFSBucket(
@@ -30,11 +31,11 @@ statics.findStashByFilename = function(dbCol, format, filename){
 	//console.log(filename)
 	return bucket.find({ filename }).toArray().then(files => {
 		if(!files.length){
-			console.log('no stash found');
+			//console.log('no stash found');
 			return Promise.resolve(false);
 		} else {
-			console.log('stash found!');
-			return new Promise((resolve, reject) => {
+			//console.log('stash found!');
+			return new Promise((resolve) => {
 
 				let downloadStream = bucket.openDownloadStreamByName(filename);
 				let bufs = [];
@@ -47,21 +48,24 @@ statics.findStashByFilename = function(dbCol, format, filename){
 			});
 
 		}
-	})
+	});
 	
-}
+};
 
 statics.findByUID = function(dbCol, uid, options){
 	'use strict';
 
 	let projection = options && options.projection || {};
 
-	let _find = () => {
-		let filter = { _id: stringToUUID(uid) };
-		return this.findById(dbCol, stringToUUID(uid), projection).then(obj => {
-			return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj.toObject()]));
-		});
-	}
+	let _find = () => this.findById(dbCol, stringToUUID(uid), projection).then(obj => {
+
+		if(!obj){
+			return Promise.reject({resCode: responseCodes.OBJECT_NOT_FOUND});
+		}
+
+		return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj.toObject()]));
+	});
+
 
 	if(options && options.stash){
 		//find obj from stash
@@ -76,7 +80,39 @@ statics.findByUID = function(dbCol, uid, options){
 	} else {
 		return _find();
 	}
-}
+};
+
+statics.findByRevision = function(dbCol, rid, sid, options){
+	'use strict';
+
+	let projection = options && options.projection || {};
+
+	let _find = () => Revision.findById(dbCol, stringToUUID(rid)).then( rev => {
+		rev = rev.toObject();
+		return this.findOne(dbCol, { _id: { '$in': rev.current }, shared_id: stringToUUID(sid) }, projection).then(obj => {
+
+			if(!obj){
+				return Promise.reject({resCode: responseCodes.OBJECT_NOT_FOUND});
+			}
+
+			return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj.toObject()]));
+		});
+	});
+
+	if(options && options.stash){
+		//find obj from stash
+		return this.findStashByFilename(dbCol, options.stash.format, options.stash.filename).then(buffer => {
+			if(!buffer){
+				return _find();
+			} else {
+				return Promise.resolve(buffer);
+			}
+		});
+
+	} else {
+		return _find();
+	}
+};
 
 
 module.exports = {attrs, statics};

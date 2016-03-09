@@ -7,7 +7,7 @@ var stringToUUID = utils.stringToUUID;
 
 var schema = mongoose.Schema({
 	_id : Buffer,
-	shared_id: Buffer,
+	shared_id: Buffer, // means brand id in revision context :(
 	type: String,
 	api: String,
 	author: String,
@@ -25,13 +25,6 @@ var schema = mongoose.Schema({
 
 var latest = {timestamp: -1};
 
-schema.statics.getLatestByRevId = function(dbColOptions, revId){
-	'use strict';
-
-	revId = stringToUUID(revId);
-	return this.findOne(dbColOptions, {_id: revId}, {}, { 'sort': latest});
-};
-
 schema.statics.getLatestBySharedId = function(dbColOptions, sharedId){
 	'use strict';
 
@@ -41,18 +34,16 @@ schema.statics.getLatestBySharedId = function(dbColOptions, sharedId){
 		sharedId = stringToUUID(sharedId);
 	}
 
-	return this.findOne(dbColOptions, {shared_id: sharedId}, {}, { 'sort': latest});
+	return this.findOne(dbColOptions, {shared_id: sharedId}, {}, { 'sort': latest });
 };
 
 
-var History = ModelFactory.createClass(
-	'History', 
+var Revision = ModelFactory.createClass(
+	'Revision', 
 	schema, 
 	arg => { 
 		return `${arg.project}.history`;
 	}
 );
 
-
-
-module.exports = History;
+module.exports = Revision;

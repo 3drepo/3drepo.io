@@ -2341,11 +2341,15 @@ DBInterface.prototype.getObject = function(dbName, project, uid, rid, sid, needF
 				return callback(responseCodes.OBJECT_NOT_FOUND);
 			}
 
+			console.log(obj);
+			var type = obj[0].type;
+			var uid = uuidToString(obj[0]._id);
+
 			if ((type === "mesh") && needFiles)
 			{
-				self.appendMeshFiles(dbName, project, fromStash, uid, obj, callback);
+				self.appendMeshFiles(dbName, project, fromStash, uid, obj[0], callback);
 			} else {
-				return callback(responseCodes.OK, type, uid, fromStash, repoGraphScene(this.logger).decode(obj));
+				return callback(responseCodes.OK, type, uid, fromStash, repoGraphScene(self.logger).decode(obj));
 			}
 		});
 	} else {
