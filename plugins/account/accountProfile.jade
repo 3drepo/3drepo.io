@@ -4,11 +4,11 @@ md-content(flex layout="row" layout-align="space-between")
 			md-input-container.md-block
 				label Username
 				input(ng-model="vm.username" ng-disabled="true")
-		div(layout="row")
-			md-input-container.md-block(flex)
+		div(layout="row" layout-align="space-between")
+			md-input-container.md-block(flex="45")
 				label First name
 				input(ng-model="vm.firstName")
-			md-input-container.md-block(flex)
+			md-input-container.md-block(flex="45")
 				label Last name
 				input(ng-model="vm.lastName")
 		div
