@@ -66,7 +66,7 @@
 				{
 					console.trace("UNDEFINED EVENT TYPE");			
 				} else {
-					console.log(type + " : " + JSON.stringify(value));
+					//console.log(type + " : " + JSON.stringify(value));
 					currentEvent = {type: type, value: value};
 				}
 			});
@@ -77,7 +77,7 @@
 			{
 				console.trace("UNDEFINED ERROR TYPE");			
 			} else {
-				console.log(type + " : " + JSON.stringify(value));
+				//console.log(type + " : " + JSON.stringify(value));
             	currentError = {type: type, value: value};
 			}
 		};

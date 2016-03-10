@@ -19,117 +19,188 @@
 	"use strict";
 
 	angular.module("3drepo")
-	.directive("viewer", viewer);
+		.directive("viewer", viewer);
 
-	viewer.$inject = ["StateManager"];
-
-	function viewer(StateManager) {
+	viewer.$inject = ["EventService"];
+	
+	function viewer(EventService) {
 		return {
 			restrict: "E",
 			scope: { 
-				manager: "="
+				manager: "=",
+				account: "@",
+				project: "@",
+				branch: "@",
+				revision: "@",
+				name: "@",
+				autoInit: "@",
+				vrMode: "@",
+				eventService: "="
 			},
-			link: link,
 			controller: ViewerCtrl,
 			controllerAs: "v",
 			bindToController: true
 		};
-
-		function coalesceWithState(scope, attrs, name)
-		{
-			if (attrs[name] === "")
-			{
-				scope.fromState[name] = true;
-				scope[name] = StateManager.state[name];
-			} else {
-				scope[name] = attrs[name];	
-			}
-		}
-
-		function link (scope, element, attrs)
-		{
-			scope.fromState = {};
-			
-			coalesceWithState(scope, attrs, "account");
-			coalesceWithState(scope, attrs, "project");
-			coalesceWithState(scope, attrs, "branch");
-			coalesceWithState(scope, attrs, "revision");
-
-			scope.name     = attrs.name;
-
-			scope.init();
-		}
 	}
 
-	ViewerCtrl.$inject = ["$scope", "$element", "StateManager", "EventService"];
+	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService"];
 
-	function ViewerCtrl ($scope, $element, StateManager, EventService)
+	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService)
 	{
 		var v = this;
 		
+		v.initialised = $q.defer();
+		v.loaded      = $q.defer();
+		
+		if (angular.isDefined(v.eventService))
+		{
+			$scope.EventService = v.eventService;
+		} else {
+			$scope.EventService = EventService;
+		}
+		
 		function errCallback(errorType, errorValue)
 		{
-			EventService.sendError(errorType, errorValue);
+			$scope.EventService.sendError(errorType, errorValue);
 		}
 		
 		function eventCallback(type, value)
 		{
-			EventService.send(type, value);
+			$scope.EventService.send(type, value);
 		}
 		
 		$scope.reload = function() {
-			v.viewer.loadModel($scope.account, $scope.project, $scope.branch, $scope.revision);
+			v.viewer.loadModel(v.account, v.project, v.branch, v.revision);
 		};
 		
 		$scope.init = function() {
-			v.viewer = new Viewer($scope.name, $element[0], v.manager, eventCallback, errCallback);
+			v.viewer = new Viewer(v.name, $element[0], v.manager, eventCallback, errCallback);
 			
-			// TODO: Move this so that the attachment is contained
-			// within the plugins themselves.
-			// Comes free with oculus support and gamepad support
-			v.oculus     = new Oculus(v.viewer);
-			v.gamepad    = new Gamepad(v.viewer);
-						
-			v.gamepad.init();
-
-			v.collision  = new Collision(v.viewer);
-
 			v.viewer.init();
 			
+			$http.get(serverConfig.apiUrl(v.account + "/" + v.project + ".json")).success(
+				function(json, status) {
+					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
+						account: v.account,
+						project: v.project,
+						settings: json.properties
+					});					
+				});
+				
 			$scope.reload();
+						
+			v.loaded.promise.then(function() {
+				// TODO: Move this so that the attachment is contained
+				// within the plugins themselves.
+				// Comes free with oculus support and gamepad support
+				v.oculus     = new Oculus(v.viewer);
+				v.gamepad    = new Gamepad(v.viewer);
+							
+				v.gamepad.init();
+
+				v.collision  = new Collision(v.viewer);
+				
+			});
+			
+		};
+		
+		$scope.enterVR = function() {
+			v.loaded.promise.then(function() {
+				v.oculus.switchVR();
+			});	
 		};
 
-		$scope.state = StateManager.state;
+		$scope.$watch($scope.EventService.currentEvent, function(event) {
+			if (angular.isDefined(event) && angular.isDefined(event.type)) {
+				if (event.type === $scope.EventService.EVENT.VIEWER.START_LOADING) {
+					v.initialised.resolve();
+				} else if (event.type === $scope.EventService.EVENT.VIEWER.LOADED) {
+					v.loaded.resolve();
+				} else {
+					v.initialised.promise.then(function() {
+						if (event.type === $scope.EventService.EVENT.VIEWER.GO_HOME) {
+							v.viewer.showAll();
+						} else if (event.type === $scope.EventService.EVENT.VIEWER.SWITCH_FULLSCREEN) {
+							v.viewer.switchFullScreen(null);
+						} else if (event.type === $scope.EventService.EVENT.VIEWER.ENTER_VR) {
+							v.viewer.switchVR();
+						} else if (event.type === $scope.EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK) {
+							v.viewer.onViewpointChanged(event.value.callback);
+						} else if (event.type === $scope.EventService.EVENT.PROJECT_SETTINGS_READY) {
+							if (event.value.account === v.account && event.value.project === v.project)
+							{
+								v.viewer.updateSettings(event.value.settings);
+							}
+						}
+					});
 
-		var watchGroup = [];
-		
-		for(var stateVar in $scope.fromState)
-		{
-			if ($scope.fromState.hasOwnProperty(stateVar)) {
-				watchGroup.push("state." + stateVar);
-			}
-		}
-		
-		$scope.$watchGroup(watchGroup, function(oldValue, newValue) {
-			if (newValue.length)
-			{
-				$scope.account = $scope.fromState.account ? StateManager.state.account : $scope.account;
-				$scope.project = $scope.fromState.project ? StateManager.state.project : $scope.project;
-				$scope.branch = $scope.fromState.branch ? StateManager.state.branch : $scope.branch;			
-				$scope.revision = $scope.fromState.revision ? StateManager.state.revision : $scope.revision;
-			
-				$scope.reload();
-			}	
-		});
-				
-		$scope.$watch(EventService.currentEvent, function(event) {
-			if (event.type === EventService.EVENT.PROJECT_SETTINGS_READY)
-			{
-				if (event.value.account === $scope.account && event.value.project === $scope.project)
-				{
-					v.viewer.updateSettings(event.value.settings);
+					v.loaded.promise.then(function() {
+						if (event.type === $scope.EventService.EVENT.VIEWER.ADD_PIN) {
+							v.viewer.addPin(
+								event.value.account,
+								event.value.project,
+								event.value.id,
+								event.value.position,
+								event.value.norm,
+								event.value.colours,
+								event.value.viewpoint);
+						} else if (event.type === $scope.EventService.EVENT.VIEWER.REMOVE_PIN) {
+							v.viewer.removePin(
+								event.value.id
+							);
+						} else if (event.type === $scope.EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR) {
+							v.viewer.changePinColours(
+								event.value.id,
+								event.value.colours
+							);
+						} else if (event.type === $scope.EventService.EVENT.VIEWER.CLICK_PIN) {
+							v.viewer.clickPin(event.value.id);
+						} else if (event.type === $scope.EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES) {
+							v.viewer.clearClippingPlanes();
+						} else if (event.type === $scope.EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE) {
+							v.viewer.addClippingPlane(
+								event.value.axis,
+								event.value.distance ? event.value.distance : 0,
+								event.value.percentage ? event.value.percentage : 0,
+								event.value.clipDirection ? event.value.clipDirection : -1);
+						} else if (event.type === $scope.EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE) {
+							v.viewer.moveClippingPlane(event.value.percentage);
+						} else if (event.type === $scope.EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+							v.viewer.highlightObjects(
+								event.value.account,
+								event.value.project,
+								event.value.id,
+								event.value.ids ? event.value.ids : [event.value.id]
+							);
+						} else if (event.type === $scope.EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
+							v.viewer.highlightObjects();
+						} else if (event.type === $scope.EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY) {
+							v.viewer.switchObjectVisibility(
+								event.value.account,
+								event.value.project,
+								event.value.id,
+								event.value.ids ? event.value.ids : [event.value.id],
+								event.value.state
+							);
+						} else if (event.type === $scope.EventService.EVENT.VIEWER.SET_CAMERA) {
+							v.viewer.setCamera(
+								event.value.position,
+								event.value.view_dir,
+								event.value.up,
+								angular.isDefined(event.value.animate) ? event.value.animate : true,
+								event.value.rollerCoasterMode
+							);
+						}
+					});
 				}
 			}
 		});
+
+		$scope.init();
+
+		if (angular.isDefined(v.vrMode))
+		{
+				$scope.enterVR();
+		}
 	}
 }());
