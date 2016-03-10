@@ -53,8 +53,9 @@
 				EventService.send(EventService.EVENT.VIEWER.SET_CAMERA,
 				{
 					position: vm.frames[vm.frame].position,
-					//up:       frames[frame].up,
-					//view_dir: frames[frame].view_dir,
+					up:       vm.frames[vm.frame].up,
+					view_dir: vm.frames[vm.frame].view_dir,
+					rollerCoasterMode: true,
 					animate: false
 				});
 
@@ -70,12 +71,11 @@
 		vm.startWalkthrough = function() {
 			if (!vm.initialized)
 			{
-				vm.initialized = true;				
-				vm.numFrames = vm.frames.length;
-				
+				vm.initialized = true;
+
 				// Loop through the viewer frames
 				vm.frame = 0;
-				vm.intervalPromise = $interval(vm.tickFunction, MILLISECONDS_PER_FRAME);	
+				vm.intervalPromise = $interval(vm.tickFunction, MILLISECONDS_PER_FRAME);
 			}
 		};
 
@@ -102,7 +102,8 @@
 							up: [parseFloat(line[6]), parseFloat(line[8]), -1 * parseFloat(line[7])]
 						});
 					}
-					
+
+					vm.numFrames = vm.frames.length;
 					vm.loading.resolve();
 			});			
 		};

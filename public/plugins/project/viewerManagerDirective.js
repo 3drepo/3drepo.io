@@ -61,6 +61,7 @@
 		vm.viewerLoaded = $q.defer();
 				
 		$scope.$watch(EventService.currentEvent, function(event) {
+			if (angular.isDefined(event.type) && angular.isDefined(event.type)) {
 				if (event.type === EventService.EVENT.CREATE_VIEWER) {
 					// If a viewer with the same name exists already then
 					// throw an error, otherwise add it
@@ -81,6 +82,7 @@
 				} else {
 					vm.vmservice.send(event.type, event.value);
 				}
+			}
 		});
 	}
 }());

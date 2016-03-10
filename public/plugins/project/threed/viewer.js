@@ -206,6 +206,7 @@ var Viewer = {};
 				self.viewer.setAttribute("id", self.name);
 				self.viewer.setAttribute("xmlns", "http://www.web3d.org/specification/x3d-namespace");
 				self.viewer.setAttribute("keysEnabled", "true");
+				self.viewer.setAttribute("disableTouch", "true");
 				self.viewer.addEventListener("mousedown", onMouseDown);
 				self.viewer.addEventListener("mouseup", onMouseUp);
 				self.viewer.style["pointer-events"] = "all";
@@ -466,9 +467,6 @@ var Viewer = {};
 			var z = cA * cB * sG - sA * sB * cG;
 			var w = cA * cB * cG + sA * sB * sG;
 
-			var vp     = self.getCurrentViewpoint()._x3domNode;
-			var flyMat = vp.getViewMatrix().inverse();
-
 			var q           = new x3dom.fields.Quaternion(x,y,z,w);
 			var screenAngle = (window.orientation ? window.orientation : 0) * degToRad * -1;
 			var screenQuat  = x3dom.fields.Quaternion.axisAngle(new x3dom.fields.SFVec3f(0,0,1),screenAngle);
@@ -478,9 +476,21 @@ var Viewer = {};
 			q = q.multiply(viewQuat);
 			q = q.multiply(screenQuat);
 
-			flyMat.setRotate(q);
-			
-			vp._viewMatrix.setValues(flyMat.inverse());
+			var flyMat = null;
+			var vp     = self.getCurrentViewpoint()._x3domNode;	
+							
+			if (self.rollerCoasterMatrix)
+			{
+				var qMat = q.toMatrix();
+				flyMat = qMat.transpose().mult(self.rollerCoasterMatrix.inverse());
+			} else {
+		
+				flyMat = vp.getViewMatrix().inverse();
+				flyMat.setRotate(q);
+				flyMat = flyMat.inverse();
+			}
+
+			vp._viewMatrix.setValues(flyMat);
 		};
 
 		this.switchDebug = function() {
@@ -1209,20 +1219,19 @@ var Viewer = {};
 			self.updateCamera(currentPos, upDir, viewDir);
 		};
 
-		this.setCamera = function(pos, viewDir, upDir, animate) {
-			self.updateCamera(pos, upDir, viewDir, animate);
+		this.setCamera = function(pos, viewDir, upDir, animate, rollerCoasterMode) {
+			self.updateCamera(pos, upDir, viewDir, animate, rollerCoasterMode);
 		};
 
-		this.updateCamera = function(pos, up, viewDir, animate) {
-			
+		this.updateCamera = function(pos, up, viewDir, animate, rollerCoasterMode) {		
 			if (!viewDir)
 			{
-				viewDir = self.getCurrentViewpointInfo()["view_dir"];
+				viewDir = self.getCurrentViewpointInfo().view_dir;
 			}
 			
 			if (!up)
 			{
-				up = self.getCurrentViewpointInfo()["up"];
+				up = self.getCurrentViewpointInfo().up;
 			}
 			up = ViewerUtil.normalize(up);
 							
@@ -1231,7 +1240,8 @@ var Viewer = {};
 			var x3domFrom = new x3dom.fields.SFVec3f(pos[0], pos[1], pos[2]);
 			var x3domAt   = x3domFrom.add(x3domView);
 
-			var viewMatrix    = x3dom.fields.SFMatrix4f.lookAt(x3domFrom, x3domAt, x3domUp).inverse();
+			var viewMatrix = x3dom.fields.SFMatrix4f.lookAt(x3domFrom, x3domAt, x3domUp);
+			
 			var currViewpoint = self.getCurrentViewpoint()._x3domNode;
 
 			if (self.currentNavMode === self.NAV_MODES.HELICOPTER) {
@@ -1241,10 +1251,15 @@ var Viewer = {};
 			
 			if (animate)
 			{
-				self.getViewArea().animateTo(viewMatrix, currViewpoint);
+				self.getViewArea().animateTo(viewMatrix.inverse(), currViewpoint);
 			} else {
-				self.getCurrentViewpoint()._x3domNode._viewMatrix.setValues(viewMatrix);
-				self.getViewArea()._doc.needRender = true;
+				if (rollerCoasterMode)
+				{
+					self.rollerCoasterMatrix = viewMatrix;
+				} else {
+					self.getCurrentViewpoint()._x3domNode._viewMatrix.setValues(viewMatrix.inverse());
+					self.getViewArea()._doc.needRender = true;
+				}
 			}
 			
 			if (self.linked) {

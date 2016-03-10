@@ -35,7 +35,7 @@
 				name: "@",
 				autoInit: "@",
 				vrMode: "@",
-				eventService: "@"
+				eventService: "="
 			},
 			controller: ViewerCtrl,
 			controllerAs: "v",
@@ -111,7 +111,7 @@
 		};
 
 		$scope.$watch($scope.EventService.currentEvent, function(event) {
-			if (angular.isDefined(event)) {
+			if (angular.isDefined(event) && angular.isDefined(event.type)) {
 				if (event.type === $scope.EventService.EVENT.VIEWER.START_LOADING) {
 					v.initialised.resolve();
 				} else if (event.type === $scope.EventService.EVENT.VIEWER.LOADED) {
@@ -187,7 +187,8 @@
 								event.value.position,
 								event.value.view_dir,
 								event.value.up,
-								angular.isDefined(event.value.animate) ? event.value.animate : true
+								angular.isDefined(event.value.animate) ? event.value.animate : true,
+								event.value.rollerCoasterMode
 							);
 						}
 					});
@@ -195,13 +196,11 @@
 			}
 		});
 
-		if (angular.isDefined(v.autoInit)) {
-			$scope.init();
-			
-			if (angular.isDefined(v.vrMode))
-			{
+		$scope.init();
+
+		if (angular.isDefined(v.vrMode))
+		{
 				$scope.enterVR();
-			}	
 		}
 	}
 }());
