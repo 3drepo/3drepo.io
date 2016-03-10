@@ -196,6 +196,18 @@ var ViewerUtil = {};
 	ViewerUtil.prototype.vecSub = function(a, b) {
 		return this.vecAdd(a, this.scale(b, -1));
 	};
-
+	
+	/**
+	 * Escape CSS characters in string
+	 *
+		* @param string
+		* @returns {*}
+		*/
+	ViewerUtil.prototype.escapeCSSCharacters = function(string)
+	{
+		// Taken from http://stackoverflow.com/questions/2786538/need-to-escape-a-special-character-in-a-jquery-selector-string
+		return string.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, "\\$&");
+	};
+		
 	ViewerUtil = new ViewerUtil();
 }());

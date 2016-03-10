@@ -31,15 +31,15 @@
 			bindToController: true
 		};
 	}
-	
+
 	function ViewerManagerService() {
 		this.currentEvent = {};
 		this.currentError = {};
-		
+
 		this.send = function (type, value) {
 			this.currentEvent = {type: type, value: value};
 		};
-		
+
 		this.sendError = function(type, value) {
 			this.currentError = {type: type, value: value};
 		};
@@ -49,17 +49,17 @@
 
 	function ViewerManagerCtrl($scope, $q, $element, EventService) {
 		var vm = this;
-		
+
 		vm.manager = new ViewerManager($element[0]);
 		vm.vmservice = new ViewerManagerService();
-		
+
 		vm.viewers = {};
 
 		$scope.manager = vm.manager;
 
 		vm.viewerInit = $q.defer();
 		vm.viewerLoaded = $q.defer();
-				
+
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if (angular.isDefined(event.type) && angular.isDefined(event.type)) {
 				if (event.type === EventService.EVENT.CREATE_VIEWER) {

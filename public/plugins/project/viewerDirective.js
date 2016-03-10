@@ -22,11 +22,11 @@
 		.directive("viewer", viewer);
 
 	viewer.$inject = ["EventService"];
-	
+
 	function viewer(EventService) {
 		return {
 			restrict: "E",
-			scope: { 
+			scope: {
 				manager: "=",
 				account: "@",
 				project: "@",
@@ -48,66 +48,66 @@
 	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService)
 	{
 		var v = this;
-		
+
 		v.initialised = $q.defer();
 		v.loaded      = $q.defer();
-		
+
 		if (angular.isDefined(v.eventService))
 		{
 			$scope.EventService = v.eventService;
 		} else {
 			$scope.EventService = EventService;
 		}
-		
+
 		function errCallback(errorType, errorValue)
 		{
 			$scope.EventService.sendError(errorType, errorValue);
 		}
-		
+
 		function eventCallback(type, value)
 		{
 			$scope.EventService.send(type, value);
 		}
-		
+
 		$scope.reload = function() {
 			v.viewer.loadModel(v.account, v.project, v.branch, v.revision);
 		};
-		
+
 		$scope.init = function() {
 			v.viewer = new Viewer(v.name, $element[0], v.manager, eventCallback, errCallback);
-			
+
 			v.viewer.init();
-			
+
 			$http.get(serverConfig.apiUrl(v.account + "/" + v.project + ".json")).success(
 				function(json, status) {
 					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
 						account: v.account,
 						project: v.project,
 						settings: json.properties
-					});					
+					});
 				});
-				
+
 			$scope.reload();
-						
+
 			v.loaded.promise.then(function() {
 				// TODO: Move this so that the attachment is contained
 				// within the plugins themselves.
 				// Comes free with oculus support and gamepad support
 				v.oculus     = new Oculus(v.viewer);
 				v.gamepad    = new Gamepad(v.viewer);
-							
+
 				v.gamepad.init();
 
 				v.collision  = new Collision(v.viewer);
-				
+
 			});
-			
+
 		};
-		
+
 		$scope.enterVR = function() {
 			v.loaded.promise.then(function() {
 				v.oculus.switchVR();
-			});	
+			});
 		};
 
 		$scope.$watch($scope.EventService.currentEvent, function(event) {
@@ -155,6 +155,8 @@
 							);
 						} else if (event.type === $scope.EventService.EVENT.VIEWER.CLICK_PIN) {
 							v.viewer.clickPin(event.value.id);
+						} else if (event.type === $scope.EventService.EVENT.VIEWER.SET_PIN_VISIBILITY) {
+							v.viewer.setPinVisibility(event.value.id, event.value.visibility);
 						} else if (event.type === $scope.EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES) {
 							v.viewer.clearClippingPlanes();
 						} else if (event.type === $scope.EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE) {

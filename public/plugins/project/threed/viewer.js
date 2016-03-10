@@ -128,7 +128,7 @@ var Viewer = {};
 		};
 
 		this.logos    = [];
-		
+
 		this.addLogo = function() {
 			if (!self.logoGroup)
 			{
@@ -136,11 +136,11 @@ var Viewer = {};
 				self.logoGroup.style.width = "100%";
 				self.element.appendChild(self.logoGroup);
 			}
-			
+
 			var numLogos = this.logos.length + 1;
 			var perLogo  = Math.floor(100 / numLogos);
 			var widthPercentage = perLogo + "%";
-			
+
 			var logo = document.createElement("div");
 			logo.style.position       = "absolute";
 			logo.style["z-index"]     = 2;
@@ -148,7 +148,7 @@ var Viewer = {};
 			logo.style.width          = widthPercentage;
 			logo.style["margin-top"]  = "10px";
 			logo.style.left = perLogo * (numLogos - 1) + "%";
-			
+
 			logo.setAttribute("onclick", "logoClick()");
 
 			var logoImage = document.createElement("img");
@@ -163,31 +163,31 @@ var Viewer = {};
 			} else {
 				logoLink.setAttribute("href", "https://www.3drepo.io");
 			}
-			
+
 			logoLink.appendChild(logoImage);
 			logo.appendChild(logoLink);
-			
+
 			self.updateLogoWidth(widthPercentage);
-						
+
 			self.logoGroup.appendChild(logo);
-			self.logos.push(logo);	
+			self.logos.push(logo);
 		};
-		
+
 		this.removeLogo = function () {
 			var numLogos = this.logos.length - 1;
 			var widthPercentage = Math.floor(100 / numLogos) + "%";
-						
+
 			self.logos[numLogos].parentNode.removeChild(self.logos[numLogos]);
-			
+
 			self.logos.splice(numLogos,1);
-			
+
 			self.updateLogoWidth(widthPercentage);
 		};
-		
+
 		this.updateLogoWidth = function(widthPercentage) {
 			for(var i = 0; i < self.logos.length; i++)
 			{
-				
+
 				self.logos[i].style.width = widthPercentage;
 			}
 		};
@@ -362,15 +362,15 @@ var Viewer = {};
 			if (self.light) {
 				var i = 0;
 				var attributeNames = [];
-				
+
 				for(i = 0; i < self.light.attributes.length; i++)
 				{
 					attributeNames.push(self.light.attributes[i].name);
 				}
-				
+
 				for(i = 0; i < attributeNames.length; i++)
 				{
-					self.light.removeAttribute(attributeNames[i]);	
+					self.light.removeAttribute(attributeNames[i]);
 				}
 			} else {
 				self.light = document.createElement("directionallight");
@@ -387,33 +387,33 @@ var Viewer = {};
 				self.light.setAttribute("shadowIntensity", 0.0);
 			} else {
 				for (var attr in lightDescription)
-				{					
+				{
 					if (lightDescription.hasOwnProperty(attr))
 					{
 						self.light.setAttribute(attr, lightDescription[attr]);
 					}
-				}				
+				}
 			}
-			
+
 		};
 
 		this.createBackground = function(colourDescription) {
 			if (self.bground) {
 				var i = 0;
 				var attributeNames = [];
-				
+
 				for(i = 0; i < self.bground.attributes.length; i++)
 				{
 					attributeNames.push(self.bground.attributes[i].name);
 				}
-				
+
 				for(i = 0; i < attributeNames.length; i++)
 				{
 					self.bground.removeAttribute(attributeNames[i]);
 				}
 			} else {
 				self.bground = document.createElement("background");
-				self.scene.appendChild(self.bground);				
+				self.scene.appendChild(self.bground);
 			}
 
 			if (!colourDescription)
@@ -424,10 +424,10 @@ var Viewer = {};
 				self.bground.setAttribute("groundangle", "0.9 1.5 1.57");
 				self.bground.setAttribute("groundcolor", "0.65 0.65 0.65 0.73 0.73 0.73 0.81 0.81 0.81 0.91 0.91 0.91");
 				self.bground.textContent = " ";
-			
+
 			} else {
 				self.bground.setAttribute("DEF", self.name + "_bground");
-	
+
 				for (var attr in colourDescription)
 				{
 					if (colourDescription.hasOwnProperty(attr))
@@ -441,11 +441,11 @@ var Viewer = {};
 
 		this.gyroscope = function (alpha, beta, gamma) {
 			var degToRad = Math.PI / 180.0;
-			
+
 			var b = (alpha ? alpha : 0);
 			var a = (beta  ? beta : 0);
 			var g = -(gamma ? gamma : 0);
-			
+
 			a *= degToRad; b *= degToRad; g *= degToRad;
 
 			var cA = Math.cos(a / 2.0);
@@ -477,14 +477,14 @@ var Viewer = {};
 			q = q.multiply(screenQuat);
 
 			var flyMat = null;
-			var vp     = self.getCurrentViewpoint()._x3domNode;	
-							
+			var vp     = self.getCurrentViewpoint()._x3domNode;
+
 			if (self.rollerCoasterMatrix)
 			{
 				var qMat = q.toMatrix();
 				flyMat = qMat.transpose().mult(self.rollerCoasterMatrix.inverse());
 			} else {
-		
+
 				flyMat = vp.getViewMatrix().inverse();
 				flyMat.setRotate(q);
 				flyMat = flyMat.inverse();
@@ -519,6 +519,40 @@ var Viewer = {};
 
 		this.onMouseDown = function(functionToBind) {
 			$(self.viewer).on("onMouseDown", functionToBind);
+
+			var pickingInfo = self.viewArea()._pickingInfo;
+
+			if (pickingInfo.pickObj)
+			{
+				var account, project;
+
+				var objectID = pickingInfo.pickObj.partID ?
+					pickingInfo.pickObj.partID :
+					pickingInfo.pickObj.pickObj._xmlNode.getAttribute("DEF");
+
+				var projectParts = pickingInfo.pickObj._xmlNode.getAttribute("id").split("__");
+
+				account = projectParts[0];
+				project = projectParts[1];
+
+				var inlineTransName = ViewerUtil.escapeCSSCharacters(account + "__" + project);
+				var projectInline = self.inlineRoots[inlineTransName];
+				var trans = projectInline._x3domNode.getCurrentTransform();
+
+				callback(self.EVENT.PICK_POINT, {
+					id: objectID,
+					position: pickingInfo.pickPos,
+					normal: pickingInfo.pickNorm,
+					object: pickingInfo.pickObj,
+					trans: trans
+				});
+			} else {
+				callback(self.EVENT.PICK_POINT,
+				{
+					position: pickingInfo.pickPos,
+					normal: pickingInfo.pickNorm
+				})
+			}
 		};
 
 		this.onViewpointChanged = function(functionToBind) {
@@ -753,7 +787,7 @@ var Viewer = {};
 			});
 		});
 
-		$(document).on("onMouseDown", function(event, mouseEvent) {			
+		$(document).on("onMouseDown", function(event, mouseEvent) {
 			$("body")[0].style["pointer-events"] = "none";
 		});
 
@@ -963,7 +997,7 @@ var Viewer = {};
 				self.runtime.resetExamin();
 
 				self.applySettings();
-				
+
 				if (id === (self.name + "_default")) {
 					if (self.defaultShowAll) {
 						self.runtime.fitAll();
@@ -1019,14 +1053,14 @@ var Viewer = {};
 				if (self.settings.hasOwnProperty("zNear")) {
 					self.currentViewpoint._xmlNode.setAttribute("zNear", self.settings.zNear);
 				}
-				
+
 				if (self.settings.hasOwnProperty("background")) {
 					self.createBackground(self.settings.background);
 				}
-				
+
 				if (self.settings.hasOwnProperty("ambientLight")) {
 					self.setAmbientLight(self.settings.ambientLight);
-				}				
+				}
 			}
 		};
 
@@ -1223,32 +1257,32 @@ var Viewer = {};
 			self.updateCamera(pos, upDir, viewDir, animate, rollerCoasterMode);
 		};
 
-		this.updateCamera = function(pos, up, viewDir, animate, rollerCoasterMode) {		
+		this.updateCamera = function(pos, up, viewDir, animate, rollerCoasterMode) {
 			if (!viewDir)
 			{
 				viewDir = self.getCurrentViewpointInfo().view_dir;
 			}
-			
+
 			if (!up)
 			{
 				up = self.getCurrentViewpointInfo().up;
 			}
 			up = ViewerUtil.normalize(up);
-							
+
 			var x3domView = new x3dom.fields.SFVec3f(viewDir[0], viewDir[1], viewDir[2]);
 			var x3domUp   = new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
 			var x3domFrom = new x3dom.fields.SFVec3f(pos[0], pos[1], pos[2]);
 			var x3domAt   = x3domFrom.add(x3domView);
 
 			var viewMatrix = x3dom.fields.SFMatrix4f.lookAt(x3domFrom, x3domAt, x3domUp);
-			
+
 			var currViewpoint = self.getCurrentViewpoint()._x3domNode;
 
 			if (self.currentNavMode === self.NAV_MODES.HELICOPTER) {
 				self.nav._x3domNode._vf.typeParams[0] = Math.asin(x3domView.y);
 				self.nav._x3domNode._vf.typeParams[1] = x3domFrom.y;
 			}
-			
+
 			if (animate)
 			{
 				self.getViewArea().animateTo(viewMatrix.inverse(), currViewpoint);
@@ -1261,7 +1295,7 @@ var Viewer = {};
 					self.getViewArea()._doc.needRender = true;
 				}
 			}
-			
+
 			if (self.linked) {
 				self.manager.switchMaster(self.handle);
 			}
@@ -1679,6 +1713,15 @@ var Viewer = {};
 			}
 		};
 
+		this.setPinVisibility = function(id, visibility)
+		{
+			if (self.pins.hasOwnProperty(id)) {
+				var pin = self.pins[id];
+
+				pin.setAttribute("render", visibility.toString());
+			}
+		};
+
 		this.removePin = function(id) {
 			if (self.pins.hasOwnProperty(id)) {
 				delete self.pins[id];
@@ -1743,6 +1786,7 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
 	SWITCH_OBJECT_VISIBILITY: "VIEWER_SWITCH_OBJECT_VISIBILITY",
 
+	PICK_POINT: "VIEWER_PICK_POINT",
 	SET_CAMERA: "VIEWER_SET_CAMERA",
 
 	// Clipping plane events

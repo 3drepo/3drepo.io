@@ -27,11 +27,10 @@
 			templateUrl: 'issues.html',
 			scope: {
 				filterText: "=",
-				height: "=",
 				showAdd: "=",
 				options: "=",
 				selectedOption: "=",
-				onSetContentHeight: "&"
+				onContentHeightRequest: "&"
 			},
 			controller: IssuesCtrl,
 			controllerAs: 'vm',
@@ -50,7 +49,8 @@
 			sortOldestFirst = true,
 			showClosed = false,
 			issue,
-			rolesToFilter = [];
+			rolesToFilter = [],
+			issuesHeight;
 
 		vm.pickedAccount = null;
 		vm.pickedProject = null;
@@ -68,6 +68,7 @@
 		vm.availableRoles = [];
 		vm.projectUserRoles = [];
 
+		/* Get all the Issues */
 		promise = NewIssuesService.getIssues();
 		promise.then(function (data) {
 			vm.showProgress = false;
@@ -77,38 +78,43 @@
 			vm.showPins();
 		});
 
+		/* Get all the available roles for the project */
 		rolesPromise = NewIssuesService.getRoles();
 		rolesPromise.then(function (data) {
 			vm.availableRoles = data;
 		});
 
+		/* Get the user roles for the project */
 		projectUserRolesPromise = NewIssuesService.getUserRolesForProject();
 		projectUserRolesPromise.then(function (data) {
 			vm.projectUserRoles = data;
 		});
 
+		/* Handle toggle of adding a new issue */
 		$scope.$watch("vm.showAdd", function (newValue) {
+			var addIssueHeight = 225;
 			if (newValue) {
-				setupGlobalClickWatch();
-			}
-			else {
-				cancelGlobalClickWatch();
-				NewIssuesService.removePin();
+				vm.onContentHeightRequest({height: issuesHeight + addIssueHeight});
+			} else {
+				EventService.send(EventService.EVENT.VIEWER.REMOVE_PIN,
+				{
+					id: "newIssuePin"	
+				});
+				
+				vm.onContentHeightRequest({height: issuesHeight});
 			}
 		});
 
+		/* Handle input to the title field of a new issue */
 		$scope.$watch("vm.title", function (newValue) {
 			if (angular.isDefined(newValue)) {
-				vm.saveIssueDisabled = (newValue === "");
+				vm.saveIssueDisabled = (newValue.toString() === "");
 			}
 		});
 
-		function escapeCSSCharacters(string)
-		{
-			// Taken from http://stackoverflow.com/questions/2786538/need-to-escape-a-special-character-in-a-jquery-selector-string
-			return string.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, "\\$&");
-		}
-
+		/**
+		 * Setup the issues to show
+		 */
 		function setupIssuesToShow () {
 			var i = 0, j = 0, length = 0, roleAssigned;
 
@@ -214,7 +220,6 @@
 					if (vm.issuesToShow.length === 0) {
 						vm.showIssuesInfo = true;
 						vm.issuesInfo = "There are no issues that contain the filter text";
-						vm.onSetContentHeight({height: 210});
 					}
 					else {
 						vm.showIssuesInfo = false;
@@ -324,6 +329,9 @@
 			}
 		};
 
+		/**
+		 * Save an issue
+		 */
 		vm.saveIssue = function () {
 			if (vm.projectUserRoles.length === 0) {
 				vm.showAlert("You do not have permission to save an issue");
@@ -359,11 +367,10 @@
 								vm.comment = "";
 							}
 
-							vm.showAdd = false;
-
 							setupIssuesToShow();
 							vm.showPins();
-							setContentHeight();
+
+							vm.showAdd = false;
 						});
 					}
 				}
@@ -400,68 +407,35 @@
 			});
 		};
 
-		
-		function setupGlobalClickWatch () {
-			/*
-			if (vm.globalClickWatch === null) {
-				vm.globalClickWatch = $scope.$watch(EventService.currentEvent, function (event, oldEvent) {
-					if ((event.type === EventService.EVENT.GLOBAL_CLICK) &&
-						(event.value.target.className === "x3dom-canvas") &&
-						(!((event.value.clientX === oldEvent.value.clientX) &&
-						   (event.value.clientY === oldEvent.value.clientY)))) {
-
-						var dragEndX = event.value.clientX;
-						var dragEndY = event.value.clientY;
-						var pickObj = ViewerService.pickPoint(dragEndX, dragEndY);
-
-						if (pickObj.pickObj !== null) {
-							vm.showInput = true;
-							vm.selectedObjectId = pickObj.partID ? pickObj.partID : pickObj.pickObj._xmlNode.getAttribute("DEF");
-
-							var projectParts = pickObj.pickObj._xmlNode.getAttribute("id").split("__");
-
-							if (projectParts[0] === "model")
-							{
-								vm.pickedAccount = NewIssuesService.state.account;
-								vm.pickedProject = NewIssuesService.state.project;
-								vm.pickedTrans   = $("#model__root")[0]._x3domNode.getCurrentTransform();
-							} else {
-								vm.pickedAccount = projectParts[0];
-								vm.pickedProject = projectParts[1];
-
-								var rootTransName = escapeCSSCharacters(vm.pickedAccount + "__" + vm.pickedProject + "__root");
-								vm.pickedTrans   = $("#" + rootTransName)[0]._x3domNode.getCurrentTransform();
-							}
-
-							vm.pickedNorm = vm.pickedTrans.transpose().multMatrixVec(pickObj.pickNorm);
-							vm.pickedPos = vm.pickedTrans.inverse().multMatrixVec(pickObj.pickPos);
-
-							NewIssuesService.addPin(
-								{
-									id: undefined,
-									account: vm.pickedAccount,
-									project: vm.pickedProject,
-									position: vm.pickedPos.toGL(),
-									norm: vm.pickedNorm.toGL()
-								},
-								NewIssuesService.hexToRgb(NewIssuesService.getRoleColor(vm.projectUserRoles[0]))
-							);
-						}
-						else {
-							NewIssuesService.removePin();
-						}
+		$scope.$watch(EventService.currentEvent, function(event) {
+			if (event.type === EventService.EVENT.VIEWER.PICK_POINT)
+			{
+				if (event.value.pickObj !== null)
+				{
+					NewIssuesService.addPin(
+					{
+						id: "newIssueId",
+						account: vm.pickedAccount,
+						project: vm.pickedProject,
+						position: vm.pickedPos.toGL(),
+						norm: vm.pickedNorm.toGL()
+					},
+						NewIssuesService.hexToRgb(NewIssuesService.getRoleColor(vm.projectUserRoles[0]))
+					);				
+				} else {
+					NewIssuesService.removePin();
+				}
+			} else if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
+				// If there has been a pin selected then switch
+				// that issue
+				$timeout(function() {
+					if (event.value.source === "viewer") {
+						vm.commentsToggled(event.value.id);
+						$rootScope.$apply();
 					}
 				});
 			}
-			*/
-		}
-
-		function cancelGlobalClickWatch () {
-			if (typeof vm.globalClickWatch === "function") {
-				vm.globalClickWatch();
-				vm.globalClickWatch = null;
-			}
-		}
+		});
 
 		/*
 		 * When a pin is clicked that make sure the issue sidebar
@@ -471,16 +445,7 @@
 		 * @param {object} clickInfo - Contains object and information about the source of the click
 		 */
 		$(document).on("pinClick", function (event, clickInfo) {
-			// If there has been a pin selected then switch
-			// that issue
-			$timeout(function() {
-				var issueId = clickInfo.object ? clickInfo.object.parentElement.parentElement.getAttribute("id") : null;
 
-				if (clickInfo.fromViewer) {
-					vm.commentsToggled(issueId);
-					$rootScope.$apply();
-				}
-			});
 		});
 
 		vm.showAlert = function(title) {
@@ -498,14 +463,16 @@
 		 * Set the content height.
 		 */
 		function setContentHeight () {
-			var i, length, height = 0, issueMinHeight = 58, maxStringLength = 32, lineHeight = 18;
+			var i, length, issueMinHeight = 56, maxStringLength = 32, lineHeight = 18;
+
+			issuesHeight = 0;
 			for (i = 0, length = vm.issuesToShow.length; (i < length); i += 1) {
-				height += issueMinHeight;
+				issuesHeight += issueMinHeight;
 				if (vm.issuesToShow[i].title.length > maxStringLength) {
-					height += lineHeight * Math.floor((vm.issuesToShow[i].title.length - maxStringLength) / maxStringLength);
+					issuesHeight += lineHeight * Math.floor((vm.issuesToShow[i].title.length - maxStringLength) / maxStringLength);
 				}
 			}
-			vm.onSetContentHeight({height: height});
+			vm.onContentHeightRequest({height: issuesHeight});
 		}
 	}
 }());

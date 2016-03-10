@@ -248,7 +248,7 @@
 			removePin();
 
 			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
-				id: "pinPlacement",
+				id: "newIssuePin",
 				position: pin.position,
 				norm: pin.norm,
 				colours: colours
