@@ -195,7 +195,7 @@ var repoGetHandler = function(router, checkAccess){
 	self.getInternal("/:account/log.:format");
 
 	// Get object with specific uid in a specific format
-	self.getInternal("/:account/:project/:uid.:format.:subformat?");
+	//self.getInternal("/:account/:project/:uid.:format.:subformat?");
 
 	// Get object with specific uid in a specific format
 	self.getInternal("/:account/:project/:uid.:format.:subformat?");

@@ -32,7 +32,7 @@ module.exports.app = function (sharedSession) {
 	require("../encoders/x3dom_encoder.js").route(routes);
 	require("../encoders/json_encoder.js").route(routes);
 	//require("../encoders/html_encoder.js").route(routes);
-	require("../encoders/src_encoder.js").route(routes);
+	//require("../encoders/src_encoder.js").route(routes);
 	require("../encoders/img_encoder.js").route(routes);
     require("../encoders/bin_encoder.js").route(routes);
     require("../encoders/gltf_encoder.js").route(routes);
@@ -104,7 +104,9 @@ module.exports.app = function (sharedSession) {
 	app.use('/', require('../routes/auth'));
 	//issues handler
 	app.use('/:account/:project', require('../routes/issue'));
-	
+	//repo object handler
+	app.use('/:account/:project', require('../routes/repo'));
+
 	app.use("/", routes.router);
 
 	return app;

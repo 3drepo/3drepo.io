@@ -2181,6 +2181,7 @@ DBInterface.prototype.getMetadata = function(dbName, project, branch, revision, 
 	}
 };
 
+//TO-ASK-TIM: what is this? and what is _extRef
 DBInterface.prototype.appendMeshFiles = function(dbName, project, fromStash, uid, obj, callback)
 {
 	var self = this;
@@ -2220,6 +2221,7 @@ DBInterface.prototype.cacheFunction = function(dbName, collection, url, format, 
 
 	if (!config.disableCache)
 	{
+		console.log(url);
 		dbConn(self.logger).getGridFSFile(dbName, stashCollection, url, function(err, result) {
 			if (err.value === responseCodes.FILE_DOESNT_EXIST.value) {
 				self.logger.logInfo("Doesn't exist in stash, generating ...");
@@ -2284,13 +2286,13 @@ DBInterface.prototype.getObject = function(dbName, project, uid, rid, sid, needF
 		query = {
 			_id: stringToUUID(uid)
 		};
-
+		//TO-ASK-TIM: what is .stash.3drepo
 		dbConn(self.logger).filterColl(dbName, project + ".stash.3drepo", query, projection, function(err, obj) {
 			if (err.value || !obj.length)
 			{
 				// TODO: At this point we should generate the scene graph
 				// There is no stash so just pass back the unoptimized scene graph
-
+				
 				dbConn(self.logger).filterColl(dbName, project + ".scene", query, projection, function(err, obj) {
 					if (err.value) { return callback(err); }
 
@@ -2303,6 +2305,7 @@ DBInterface.prototype.getObject = function(dbName, project, uid, rid, sid, needF
 
 					if ((type === "mesh") && needFiles)
 					{
+						//console.log(obj)
 						self.appendMeshFiles(dbName, project, false, uid, obj[0], callback);
 					} else {
 						return callback(responseCodes.OK, type, uid, false, repoGraphScene(self.logger).decode(obj));
@@ -2338,11 +2341,15 @@ DBInterface.prototype.getObject = function(dbName, project, uid, rid, sid, needF
 				return callback(responseCodes.OBJECT_NOT_FOUND);
 			}
 
+			console.log(obj);
+			var type = obj[0].type;
+			var uid = uuidToString(obj[0]._id);
+
 			if ((type === "mesh") && needFiles)
 			{
-				self.appendMeshFiles(dbName, project, fromStash, uid, obj, callback);
+				self.appendMeshFiles(dbName, project, fromStash, uid, obj[0], callback);
 			} else {
-				return callback(responseCodes.OK, type, uid, fromStash, repoGraphScene(this.logger).decode(obj));
+				return callback(responseCodes.OK, type, uid, fromStash, repoGraphScene(self.logger).decode(obj));
 			}
 		});
 	} else {
@@ -2651,7 +2658,10 @@ DBInterface.prototype.getRolesByProject = function(dbName, project, readWriteAny
 					}
 
 					for (let i = 0; i < rolesToReturn.length; i++) {
-						rolesToReturn[i].color = roleSettingsMap[rolesToReturn[i].role].color;
+						if(roleSettingsMap[rolesToReturn[i].role]){
+							rolesToReturn[i].color = roleSettingsMap[rolesToReturn[i].role].color;
+						}
+						
 					}
 				}
 				return callback(responseCodes.OK, rolesToReturn);

@@ -19,7 +19,7 @@ function listIssues(req, res, next) {
 	'use strict';
 
 	//let params = req.params;
-	let place = '/issues.json GET';
+	let place = utils.APIInfo(req);
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
 
 	Issue.findByProjectName(dbCol, "master", null).then(issues => {
@@ -28,21 +28,13 @@ function listIssues(req, res, next) {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 	
-	// old handler
-	// dbInterface(req[C.REQ_REPO].logger).getIssues(params.account, params.project, "master", null, true, function(err, issueList) {
-	// 	if(err.value) {
-	// 		responseCodes.respond(place, req, res, next, err);
-	// 	} else {
-	// 		responseCodes.respond(place, req, res, next, responseCodes.OK, issueList);
-	// 	}
-	// });
 }
 
 function listIssuesBySID(req, res, next) {
 	'use strict';
 
 	let params = req.params;
-	let place = '/issues/:sid.json GET';
+	let place = utils.APIInfo(req);
 	let dbCol =  {account: req.params.account, project: req.params.project};
 
 	Issue.findBySharedId(dbCol, params.sid, req.query.number).then(issues => {
@@ -51,21 +43,13 @@ function listIssuesBySID(req, res, next) {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 	
-	//old handlers
-	// dbInterface(req[C.REQ_REPO].logger).getObjectIssues(params.account, params.project, params.sid, params.number, false, function(err, issueList) {
-	// 	if(err.value) {
-	// 		responseCodes.respond(place, req, res, next, err);
-	// 	} else {
-	// 		responseCodes.respond(place, req, res, next, responseCodes.OK, issueList);
-	// 	}
-	// });
 }
 
 function findIssueById(req, res, next) {
 	'use strict';
 
 	let params = req.params;
-	let place = '/issue/:uid.json GET';
+	let place = utils.APIInfo(req);
 	let dbCol =  {account: req.params.account, project: req.params.project};
 
 	Issue.findByUID(dbCol, params.uid).then(issue => {
@@ -73,33 +57,34 @@ function findIssueById(req, res, next) {
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
-	// old handlers
-	// dbInterface(req[C.REQ_REPO].logger).getIssue(params.account, params.project, params.uid, false, function(err, issueList) {
-	// 	if(err.value){
-	// 		responseCodes.respond(place, req, res, next, err);
-	// 	} else {
-	// 		responseCodes.respond(place, req, res, next, responseCodes.OK, issueList);
-	// 	}
-	// });
+
 }
 
 function storeIssue(req, res, next){
+	'use strict';
 
-	var responsePlace = "Adding or updating an issue";
-	var data = JSON.parse(req.body.data);
+	let place = utils.APIInfo(req);
+	let data = JSON.parse(req.body.data);
 
-	// TO-DO: use mongoose to save/update
 	req[C.REQ_REPO].logger.logDebug("Upserting an issues for object " + req.params[C.REPO_REST_API_SID] + " in " + req.params[C.REPO_REST_API_ACCOUNT] + "/" + req.params[C.REPO_REST_API_PROJECT], req);
 
-	dbInterface(req[C.REQ_REPO].logger).storeIssue(req.params[C.REPO_REST_API_ACCOUNT], req.params[C.REPO_REST_API_PROJECT], req.params[C.REPO_REST_API_ID], req.session.user.username, data, function(err, result) {
-		responseCodes.onError(responsePlace, req, res, next, err, result);
-	});
+	// since there is a incompatible attribute in issue model ('set' in comments) with mongoose, need to fall back native mongo api call.
+	dbInterface(req[C.REQ_REPO].logger).storeIssue(
+		req.params[C.REPO_REST_API_ACCOUNT], 
+		req.params[C.REPO_REST_API_PROJECT], 
+		req.params[C.REPO_REST_API_ID], 
+		req.session.user.username, 
+		data, 
+		function(err, result) {
+			responseCodes.onError(place, req, res, next, err, result);
+		}
+	);
 }
 
 function renderIssuesHTML(req, res, next){
 	'use strict';
 
-	let place = '/issues.json GET';
+	let place = utils.APIInfo(req);
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
 
 	Issue.findByProjectName(dbCol, "master", null).then(issues => {

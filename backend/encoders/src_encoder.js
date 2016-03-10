@@ -354,6 +354,7 @@
 		logger.logDebug("Passed " + scene[C.REPO_SCENE_LABEL_MESHES_COUNT]);
 
 		var meshIDs = Object.keys(scene.meshes);
+		console.log(meshIDs);
 		var meshIDX = 0;
 		var srcJSON = {};
 
@@ -698,72 +699,76 @@
 		var dataBuffer = Buffer.concat(dataBuffers);
 		var fullBuffer = Buffer.concat([headerBuffer, dataBuffer]);
 
-		result_callback(responseCodes.OK, fullBuffer);
+		result_callback && result_callback(responseCodes.OK, fullBuffer);
+
+		return fullBuffer;
 	}
 
+	exports.render = render;
 	// Set up REST routing calls
 	exports.route = function (router) {
-		router.get("src", "/:account/:project/:uid", function (req, res, params, err_callback) {
-			// Get object based on UID, check whether or not it is a mesh
-			// and then output the result.
+		// router.get("src", "/:account/:project/:uid", function (req, res, params, err_callback) {
+		// 	// Get object based on UID, check whether or not it is a mesh
+		// 	// and then output the result.
 
-			dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req.url, req.params[C.REPO_REST_API_FORMAT].toLowerCase(), function (callback) {
-				dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, {}, function (err, type, uid, fromStash, obj) {
-					if (err.value) {
-						return callback(err);
-					}
+		// 	dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req.url, req.params[C.REPO_REST_API_FORMAT].toLowerCase(), function (callback) {
+		// 		dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, {}, function (err, type, uid, fromStash, obj) {
+		// 			//console.log('sorry, no cache')
+		// 			if (err.value) {
+		// 				return callback(err);
+		// 			}
 
-					if (type === C.REPO_NODE_TYPE_MESH) {
-						var tex_uuid = null;
+		// 			if (type === C.REPO_NODE_TYPE_MESH) {
+		// 				var tex_uuid = null;
 
-						if ("tex_uuid" in params.query) {
-							tex_uuid = params.query.tex_uuid;
-						}
+		// 				if ("tex_uuid" in params.query) {
+		// 					tex_uuid = params.query.tex_uuid;
+		// 				}
 
-						render(params.project, obj, tex_uuid, params.subformat, req[C.REQ_REPO].logger, function (err, renderedObj) {
-							if (err.value) {
-								return callback(err);
-							}
+		// 				render(params.project, obj, tex_uuid, params.subformat, req[C.REQ_REPO].logger, function (err, renderedObj) {
+		// 					if (err.value) {
+		// 						return callback(err);
+		// 					}
+		// 					//console.log('renderedObj', renderedObj);
+		// 					callback(responseCodes.OK, renderedObj);
+		// 				});
+		// 			} else {
+		// 				callback(responseCodes.OBJECT_TYPE_NOT_SUPPORTED);
+		// 			}
+		// 		});
+		// 	}, err_callback);
+		// });
 
-							callback(responseCodes.OK, renderedObj);
-						});
-					} else {
-						callback(responseCodes.OBJECT_TYPE_NOT_SUPPORTED);
-					}
-				});
-			}, err_callback);
-		});
+		// router.get("src", "/:account/:project/revision/:rid/:sid", function (req, res, params, err_callback) {
+		// 	// Get object based on revision rid, and object shared_id sid. Check
+		// 	// whether or not it is a mesh and then output the result.
 
-		router.get("src", "/:account/:project/revision/:rid/:sid", function (req, res, params, err_callback) {
-			// Get object based on revision rid, and object shared_id sid. Check
-			// whether or not it is a mesh and then output the result.
+		// 	dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req.url, req.params[C.REPO_REST_API_FORMAT].toLowerCase(), function (callback) {
+		// 		dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, null, params.rid, params.sid, true, {}, function (err, type, uid, fromStash, obj) {
+		// 			if (err.value) {
+		// 				return callback(err);
+		// 			}
 
-			dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req.url, req.params[C.REPO_REST_API_FORMAT].toLowerCase(), function (callback) {
-				dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, null, params.rid, params.sid, true, {}, function (err, type, uid, fromStash, obj) {
-					if (err.value) {
-						return callback(err);
-					}
+		// 			if (type === C.REPO_NODE_TYPE_MESH) {
+		// 				var tex_uuid = null;
 
-					if (type === C.REPO_NODE_TYPE_MESH) {
-						var tex_uuid = null;
+		// 				if ("tex_uuid" in params.query) {
+		// 					tex_uuid = params.query.tex_uuid;
+		// 				}
 
-						if ("tex_uuid" in params.query) {
-							tex_uuid = params.query.tex_uuid;
-						}
+		// 				render(params.project, obj, tex_uuid, params.subformat, req[C.REQ_REPO].logger, function (err, renderedObj) {
+		// 					if (err.value) {
+		// 						return err_callback(err);
+		// 					}
 
-						render(params.project, obj, tex_uuid, false, params.subformat, req[C.REQ_REPO].logger, function (err, renderedObj) {
-							if (err.value) {
-								return err_callback(err);
-							}
-
-							callback(responseCodes.OK, renderedObj);
-						});
-					} else {
-						callback(responseCodes.OBJECT_TYPE_NOT_SUPPORTED);
-					}
-				});
-			}, err_callback);
-		});
+		// 					callback(responseCodes.OK, renderedObj);
+		// 				});
+		// 			} else {
+		// 				callback(responseCodes.OBJECT_TYPE_NOT_SUPPORTED);
+		// 			}
+		// 		});
+		// 	}, err_callback);
+		// });
 	};
 
 }());

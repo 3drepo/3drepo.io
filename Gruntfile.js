@@ -68,10 +68,11 @@ module.exports = function(grunt) {
 
             backend:{
                 files: { src: [
-                    'backend/db/*.js', 
-                    'backend/services/*.js', 
-                    'backend/routes/*.js',
-                    'backend/models/*.js',
+                    'backend/db/**/*.js', 
+                    'backend/services/**/*.js', 
+                    'backend/routes/**/*.js',
+
+                    'backend/models/**/*.js',
                     'backend/*.js'
                 ]},
             }
@@ -85,7 +86,7 @@ module.exports = function(grunt) {
               quiet: false, // Optionally suppress output to standard out (defaults to false)
               clearRequireCache: false // Optionally clear the require cache before running tests (defaults to false)
             },
-            src: ['test/**/*.js']
+            src: ['test/**/*.js', 'backend/test/**/*.js']
           }
         },
 
