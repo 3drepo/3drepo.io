@@ -14,6 +14,10 @@ issues #issuesAddContainer .md-dialog-backdrop {
 issues #issuesAddContainer md-input-container {
   margin: 0;
 }
+issues #issuesAddContainer h4 {
+  margin-left: 4px;
+  color: rgba(0, 0, 0, 0.6);
+}
 
 issues textarea {
   min-height: 70px !important;
@@ -35,18 +39,63 @@ issues .issuesInfo p {
   color: rgba(0, 0, 0, 0.7);
 }
 
+issues .issueHeader {
+  position: relative;
+}
+issues .selectedIssue {
+  background: #E8EAF6;
+}
+issues .notSelectedIssue {
+  background: #ffffff;
+}
+issues .closedIssue {
+  background: #E0E0E0;
+}
+issues .issueHeader .issueTitle {
+  min-height: 0;
+  height: 100%;
+}
+issues .issueHeader .issueTitle h3 {
+  padding: 5px 0 0 0;
+  width: 250px;
+}
+issues .issueHeader .issueTitle .issueTitleInfo {
+  position: relative;
+  padding: 2px 0 5px;
+}
+issues .issueHeader .issueTitle button {
+  min-height: 0;
+  height: 100%;
+}
+issues .issueHeader .issueRoleMarkers {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 100%;
+}
+issues .issueHeader .issueInfo {
+  position: absolute;
+  top: 0;
+  background: #E8F5E9;
+  padding: 0 5px 0 10px;
+  width: 100%;
+  height: 100%;
+}
+issues .issueHeader .issueInfo h5 {
+  color: rgba(0, 0, 0, 0.7);
+  margin-left: 5px;
+}
+
+
 /** Issue *************************************************************************************************************/
 
 issue {
   display: block;
 }
 
-issue .issueTitle h3 {
-  margin-left: 5px !important;
-}
 issue .issueTitle p {
   color: rgba(0,0,0,0.35) !important;
-  margin-left: 5px !important;
 }
 
 .issueOpenBackground {
@@ -56,53 +105,9 @@ issue .issueTitle p {
   background: #E0E0E0;
 }
 
-.issueComments {
-}
-
 issue md-list-item .md-button,
 issue md-list-item .md-button .md-ripple-container {
   border-radius: 0;
-}
-
-issue .issueHeader {
-  position: relative;
-}
-issue .issueHeader .issueTitle {
-  min-height: 0;
-  height: 100%;
-}
-issue .issueHeader .issueTitle h3 {
-  padding: 5px 0 0 0;
-  width: 250px;
-}
-issue .issueHeader .issueTitle .issueTitleInfo {
-  position: relative;
-  padding: 2px 0 5px;
-}
-issue .issueHeader .issueTitle button {
-  min-height: 0;
-  height: 100%;
-}
-
-issue .issueHeader .issueRoleMarkers {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 10px;
-  height: 100%;
-}
-
-issue .issueHeader .issueInfo {
-  position: absolute;
-  top: 0;
-  background: #E8F5E9;
-  padding: 0 5px 0 10px;
-  width: 100%;
-  height: 100%;
-}
-issue .issueHeader .issueInfo h5 {
-  color: rgba(0, 0, 0, 0.7);
-  margin-left: 5px;
 }
 
 issue h3,
@@ -112,14 +117,12 @@ issue h4 {
 }
 
 issue .issueCommentsContainer {
-  padding: 0 20px 0 20px
+  padding: 0 15px 0 25px
 }
 issue .issueCommentsContainer md-list-item {
-  padding: 10px;
+  padding: 0 !important;
 }
-issue .issueCommentsContainer .commentModify {
 
-}
 issue .issueCommentsContainer md-list-item .commentModifyButton {
   width: 20px;
   height: 20px;

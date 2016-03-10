@@ -28,10 +28,11 @@
 			restrict: "E",
 			scope: {
 				manager: "=",
-				account: "@",
-				project: "@",
-				branch: "@",
-				revision: "@",
+				name: "=",
+				account: "=",
+				project: "=",
+				branch: "=",
+				revision: "=",
 				name: "@",
 				autoInit: "@",
 				vrMode: "@",
@@ -75,6 +76,16 @@
 
 		$scope.init = function() {
 			v.viewer = new Viewer(v.name, $element[0], v.manager, eventCallback, errCallback);
+
+			// TODO: Move this so that the attachment is contained
+			// within the plugins themselves.
+			// Comes free with oculus support and gamepad support
+			v.oculus     = new Oculus(v.viewer);
+			v.gamepad    = new Gamepad(v.viewer);
+
+			v.gamepad.init();
+
+			v.collision  = new Collision(v.viewer);
 
 			v.viewer.init();
 

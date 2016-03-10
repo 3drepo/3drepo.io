@@ -66,11 +66,15 @@
 						"visible='vm.visibleStatus' " +
 						"options='vm.contentData.options' " +
 						"on-content-height-request='vm.onContentHeightRequest(height)' " +
+						"on-show-item='vm.showItem()' " +
+						"hide-item='vm.hideSelectedItem' " +
 						"selected-option='vm.selectedOption'>" +
 					"</" + vm.contentData.type + ">"
 				);
 				content.append(contentItem);
 				$compile(contentItem)($scope);
+
+				vm.statusIcon = vm.contentData.icon;
 			}
 		});
 
@@ -90,10 +94,6 @@
 			}
 		});
 
-		$scope.$watch("vm.contentData.minHeight", function (newValue) {
-			vm.contentHeight = newValue;
-		});
-
 		$scope.$watch("vm.filterText", function (newValue) {
 			if (angular.isDefined(newValue)) {
 				vm.filterInputText = newValue;
@@ -106,9 +106,9 @@
 			}
 		});
 
-		vm.toggleAdd = function (event) {
+		vm.showAdd = function (event) {
 			event.stopPropagation();
-			vm.addStatus = !vm.addStatus;
+			vm.addStatus = true;
 		};
 
 		vm.toggleFilter = function (event) {
@@ -173,6 +173,23 @@
 		vm.onContentHeightRequest = function (height) {
 			contentHeight = height;
 			vm.onHeightRequest({contentItem: vm.contentData, height: contentHeight});
+		};
+
+		/**
+		 * Content wants to show an individual item
+		 */
+		vm.showItem = function () {
+			vm.statusIcon = "fa-arrow-left";
+			vm.hideSelectedItem = false; // So that a change to this value is propagated
+		};
+
+		/**
+		 * Content wants to show it's main content
+		 */
+		vm.hideItem = function () {
+			vm.statusIcon = vm.contentData.icon;
+			vm.hideSelectedItem = true;
+			vm.addStatus = false;
 		};
 	}
 }());

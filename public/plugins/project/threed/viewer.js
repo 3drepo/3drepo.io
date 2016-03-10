@@ -208,7 +208,7 @@ var Viewer = {};
 				self.viewer.setAttribute("keysEnabled", "true");
 				self.viewer.setAttribute("disableTouch", "true");
 				self.viewer.addEventListener("mousedown", onMouseDown);
-				self.viewer.addEventListener("mouseup", onMouseUp);
+				self.viewer.addEventListener("mouseup",  onMouseUp);
 				self.viewer.style["pointer-events"] = "all";
 				self.viewer.className = "viewer";
 
@@ -514,23 +514,34 @@ var Viewer = {};
 		};
 
 		this.onMouseUp = function(functionToBind) {
-			$(self.viewer).on("onMouseUp", functionToBind);
+			$(document).on("onMouseUp", functionToBind);
 		};
 
 		this.onMouseDown = function(functionToBind) {
-			$(self.viewer).on("onMouseDown", functionToBind);
+			$(document).on("onMouseDown", functionToBind);
+		}
 
-			var pickingInfo = self.viewArea()._pickingInfo;
+		this.mouseDownPickPoint = function(event, pickEvent)
+		{
+			var pickingInfo = self.getViewArea()._pickingInfo;
+
+			// Hack until double click problem solved
+			self.pickPoint(); // This updates self.pickObject
+			if (self.pickObject.pickObj !== null) {
+				pickingInfo.pickObj = self.pickObject;
+			}
 
 			if (pickingInfo.pickObj)
 			{
 				var account, project;
 
+				var projectParts = pickingInfo.pickObj._xmlNode ?
+					pickingInfo.pickObj._xmlNode.getAttribute("id").split("__") :
+					pickingInfo.pickObj.pickObj._xmlNode.getAttribute("id").split("__");
+
 				var objectID = pickingInfo.pickObj.partID ?
 					pickingInfo.pickObj.partID :
-					pickingInfo.pickObj.pickObj._xmlNode.getAttribute("DEF");
-
-				var projectParts = pickingInfo.pickObj._xmlNode.getAttribute("id").split("__");
+					projectParts[2];
 
 				account = projectParts[0];
 				project = projectParts[1];
@@ -543,17 +554,17 @@ var Viewer = {};
 					id: objectID,
 					position: pickingInfo.pickPos,
 					normal: pickingInfo.pickNorm,
-					object: pickingInfo.pickObj,
 					trans: trans
 				});
 			} else {
-				callback(self.EVENT.PICK_POINT,
-				{
+				callback(self.EVENT.PICK_POINT, {
 					position: pickingInfo.pickPos,
 					normal: pickingInfo.pickNorm
-				})
+				});
 			}
 		};
+
+		this.onMouseDown(this.mouseDownPickPoint);
 
 		this.onViewpointChanged = function(functionToBind) {
 			$(self.viewer).on("myViewpointHasChanged", functionToBind);
@@ -1724,6 +1735,7 @@ var Viewer = {};
 
 		this.removePin = function(id) {
 			if (self.pins.hasOwnProperty(id)) {
+				self.pins[id].remove(id);
 				delete self.pins[id];
 			}
 		};
@@ -1785,6 +1797,7 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	OBJECT_SELECTED: "VIEWER_OBJECT_SELECTED",
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
 	SWITCH_OBJECT_VISIBILITY: "VIEWER_SWITCH_OBJECT_VISIBILITY",
+	SET_PIN_VISIBILITY: "VIEWER_SET_PIN_VISIBILITY",
 
 	PICK_POINT: "VIEWER_PICK_POINT",
 	SET_CAMERA: "VIEWER_SET_CAMERA",
