@@ -7,6 +7,7 @@ let mockgoose = require('mockgoose');
 let _ = require('lodash');
 
 mockgoose(mongoose);
+
 let proxyquire = require('proxyquire');
 let modelFactoryMock = proxyquire('../../models/factory/modelFactory', { 
 	'mongoose': mongoose, 
@@ -112,7 +113,18 @@ describe('User', function(){
 			return User.updatePassword(username, oldPassword, newPassword).then(() => {
 				sinon.assert.calledWith(stub, username, oldPassword);
 			});
+
+			stub.restore();
 		})
+	})
+
+	after(function(done){
+		mockgoose.reset(function() {
+			mongoose.unmock(function(){
+				done();
+			});
+		});
+
 	})
 });
 

@@ -1,3 +1,4 @@
+
 var mongoose = require('mongoose');
 var ModelFactory = require('./factory/modelFactory');
 var Schema = mongoose.Schema;
@@ -6,7 +7,6 @@ var utils = require('../utils');
 var stringToUUID = utils.stringToUUID;
 var uuidToString = utils.uuidToString;
 var dbInterface = require('../db/db_interface');
-
 var schema = Schema({
 	_id: Buffer,
 	name: { type: String, required: true },
@@ -79,7 +79,7 @@ schema.statics.findByProjectName = function(dbColOptions, branch, rev){
 		);
 		
 	}).then(refs => {
-		console.log(refs);
+		//console.log(refs);
 		if(!refs.length){
 			return Promise.resolve(issues);
 		} else {
@@ -111,7 +111,7 @@ schema.statics.findBySharedId = function(dbColOptions, sid, number) {
 		filter.number = number;
 	}
 
-	console.log(filter);
+	//console.log(filter);
 
 	return this._find(dbColOptions, filter);
 };
