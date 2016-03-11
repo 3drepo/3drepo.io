@@ -1,7 +1,17 @@
 module.exports = function(grunt) {
 
     grunt.initConfig({
+
         pkg: grunt.file.readJSON('package.json'),
+
+        env : {
+            options : {
+            //Shared Options Hash
+            },
+            test : {
+                NODE_ENV : 'test'
+            }
+        },
 
         concat: {
             build: {
@@ -119,8 +129,9 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-mocha-test');
 	grunt.loadNpmTasks('grunt-webfont');
+    grunt.loadNpmTasks('grunt-env');
 
 	grunt.registerTask('default', ['concat', 'uglify', 'webfont']);
 	grunt.registerTask('test', ['jshint:backend', 'mochaTest:unit']);
-    grunt.registerTask('test-integrated', ['mochaTest:integrated']);
+    grunt.registerTask('test-integrated', ['env:test', 'mochaTest:integrated']);
 };

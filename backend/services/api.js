@@ -54,7 +54,7 @@ module.exports.app = function (sharedSession) {
 			require('../models/factory/modelFactory').setDB(db);
 			next();
 		}).catch( err => {
-			console.log(err);
+			//console.log(err);
 			responseCodes.respond('Express Middleware', req, res, next, responseCodes.PROCESS_ERROR(err), err);
 		});
 	});
