@@ -3,14 +3,14 @@ node_js:
     - "4.1"
 services: mongodb
 before_install: 
-	- npm install -g grunt-cli
-	- sleep 15
-	- cd backend/test/integrated/
-	- mongorestore
+    - npm install -g grunt-cli
+    - sleep 15
+    - cd backend/test/integrated/
+    - mongorestore
 install: npm install
 script:
-	- npm test
-	- grunt test-integrated
+    - npm test
+    - grunt test-integrated
 notifications:
     email: 
         recipients:
