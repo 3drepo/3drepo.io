@@ -9,8 +9,8 @@ var Mesh = require('../models/mesh');
 var utils = require('../utils');
 var srcEncoder = require('../encoders/src_encoder');
 
-router.get('/:uid.src', middlewares.hasReadAccessToProject, findByUID);
-router.get('/revision/:rid/:sid.src', middlewares.hasReadAccessToProject, findByRevision);
+router.get('/:uid.src.:subformat?', middlewares.hasReadAccessToProject, findByUID);
+router.get('/revision/:rid/:sid.src.:subformat?', middlewares.hasReadAccessToProject, findByRevision);
 
 function _getStashOptions(dbCol, format, url){
 

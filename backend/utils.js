@@ -213,7 +213,7 @@ function Utils() {
     };
 
     /**
-     * Map mongoose error to our defined error codes
+     * Map http promise error to our defined error codes
      *
      * @param {Object} err object from mongoose
      * @param {number} channelsCount Number of channels, 1 for now
@@ -221,10 +221,12 @@ function Utils() {
      * @return {Object} our defined response code 
      */
     this.mongoErrorToResCode = function(err){
-
+      let _ = require('lodash');
       let responseCodes = require('./response_codes');
       if(err.name === 'ValidationError'){
         return responseCodes.MONGOOSE_VALIDATION_ERROR(err);
+      } else if(_.isEqual(JSON.stringify(err), '{}')) {
+        return responseCodes.PROCESS_ERROR(err.toString());
       } else {
         return responseCodes.DB_ERROR(err);
       }

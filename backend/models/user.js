@@ -50,6 +50,10 @@ schema.statics.updatePassword = function(username, oldPassword, newPassword){
 	});
 };
 
+schema.methods.getAvatar = function(){
+	return this.customData && this.customData.avatar || null;
+};
+
 schema.methods.updateInfo = function(updateObj){
 	'use strict';
 
