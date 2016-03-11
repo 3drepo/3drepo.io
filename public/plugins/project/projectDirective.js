@@ -66,9 +66,9 @@
         };
     }
 
-	ProjectCtrl.$inject = ["$timeout", "EventService", "ViewerService", "StateManager", "ProjectService"];
+	ProjectCtrl.$inject = ["$timeout", "EventService", "StateManager", "ProjectService"];
 
-	function ProjectCtrl($timeout, EventService, ViewerService, StateManager, ProjectService) {
+	function ProjectCtrl($timeout, EventService, StateManager, ProjectService) {
 		var panelContent = {
 			left: [],
 			right: []

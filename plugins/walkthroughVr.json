@@ -2,7 +2,7 @@
     "name" : "walkthroughVr",
     "files": {
         "angular" : [
-            "walkthroughVr/WalkthroughVrDirective.js"
+            "walkthroughVr/walkthroughVrDirective.js"
         ]
     }
 }
