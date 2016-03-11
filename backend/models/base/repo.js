@@ -2,6 +2,10 @@ var repoGraphScene = require("../../repo/repoGraphScene.js");
 var GridFSBucket = require('mongodb').GridFSBucket;
 var ModelFactory = require('../factory/modelFactory');
 var Revision = require('../revision');
+var utils = require("../../utils");
+
+stringToUUID = utils.stringToUUID;
+uuidToString = utils.uuidToString;
 
 var attrs = {
 	_id: Buffer,

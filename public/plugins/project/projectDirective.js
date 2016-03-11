@@ -85,8 +85,8 @@
 			show: true,
 			help: "Model elements shown in a tree structure",
 			icon: "fa-sitemap",
-            minHeight: 120,
 			height: 820,
+			fixedHeight: false,
 			options: [
 				"filter"
 			]
@@ -118,8 +118,8 @@
 					secondSelected: false
 				}
 			],
-            minHeight: 70,
 			height: 820,
+			fixedHeight: false,
 			options: [
 				"print",
 				"add",
@@ -133,8 +133,8 @@
 			show: false,
 			help: "Clipping plane",
 			icon: "fa-object-group",
-			height: 170,
-			showVisible: true,
+			height: 120,
+			fixedHeight: true,
 			options: [
 				"visible"
 			]
@@ -145,8 +145,8 @@
 			show: false,
 			help: "Documents",
 			icon: "fa-clone",
-			minHeight: 80,
-			height: 120,
+			height: 80,
+			fixedHeight: false,
 			options: []
 		});
 
@@ -183,7 +183,13 @@
 			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelCard);
 			
 			// No parameters means load from state variables
-			EventService.send(EventService.EVENT.CREATE_VIEWER, {name: "default"});
+			EventService.send(EventService.EVENT.CREATE_VIEWER, {
+				name: "default",
+				account: StateManager.state.account,
+				project: StateManager.state.project,
+				branch: StateManager.state.branch,
+				revision: StateManager.state.revision
+			});
 		});
 	}
 }());

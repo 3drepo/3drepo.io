@@ -32,14 +32,26 @@
 		};
 	}
 
-	ViewerManagerCtrl.$inject = ["$element"];
+	function ViewerManagerService() {
+		this.currentEvent = {};
+		this.currentError = {};
+
+		this.send = function (type, value) {
+			this.currentEvent = {type: type, value: value};
+		};
+
+		this.sendError = function(type, value) {
+			this.currentError = {type: type, value: value};
+		};
+	}
 
 	ViewerManagerCtrl.$inject = ["$scope", "$q", "$element", "EventService"];
 
 	function ViewerManagerCtrl($scope, $q, $element, EventService) {
 		var vm = this;
-		
+
 		vm.manager = new ViewerManager($element[0]);
+		vm.vmservice = new ViewerManagerService();
 
 		vm.viewers = {};
 
@@ -47,9 +59,9 @@
 
 		vm.viewerInit = $q.defer();
 		vm.viewerLoaded = $q.defer();
-		
+
 		$scope.$watch(EventService.currentEvent, function(event) {
-			if (angular.isDefined(event)) {
+			if (angular.isDefined(event.type) && angular.isDefined(event.type)) {
 				if (event.type === EventService.EVENT.CREATE_VIEWER) {
 					// If a viewer with the same name exists already then
 					// throw an error, otherwise add it
@@ -67,10 +79,6 @@
 					}
 				} else if (event.type === EventService.EVENT.VIEWER.READY) {
 					window.viewer = vm.manager.getCurrentViewer();
-				} else if (event.type === EventService.EVENT.VIEWER.START_LOADING) {
-					vm.viewerInit.resolve();
-				} else if (event.type === EventService.EVENT.VIEWER.LOADED) {
-					vm.viewerLoaded.resolve();
 				} else {
 					vm.viewerInit.promise.then(function() {
 						if (event.type === EventService.EVENT.VIEWER.GO_HOME) {
@@ -143,9 +151,9 @@
 							vm.manager.getCurrentViewer().setNavMode(event.value.mode);
 						}
 					});
+					vm.vmservice.send(event.type, event.value);
 				}
 			}
 		});
 	}
-
 }());

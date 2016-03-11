@@ -27,7 +27,9 @@
             templateUrl: 'panelCard.html',
             scope: {
                 position: "=",
-                contentData: "="
+                contentData: "=",
+				onHeightRequest: "&",
+				onShowFilter: "&"
             },
             controller: PanelCardCtrl,
             controllerAs: 'vm',
@@ -40,42 +42,13 @@
     function PanelCardCtrl($scope, $element, $compile, $timeout, $window, serverConfig, EventService, StateManager) {
         var vm = this,
             filter = null,
-			currentHeight = 0,
-			contentHeightExtra = 20,
-			toggledContentHeight = 0,
-			minimized = false,
-			maxHeight,
-			maxPossibleHeight,
-			atMaxHeight = false,
-			heightChange = 0,
-			setHeight = 0, // The height set by the content
-			otherContentHeight = 0, // The height of all the other panel contents
-			panelGap = 40; // The total of the top and bottom gap for the panel in the page
-
+			contentHeight;
 
         vm.showHelp = false;
 		vm.showFilter = false;
 		vm.addStatus = false;
 		vm.visibleStatus = false;
 		vm.showClearFilterButton = false;
-
-		/**
-		 * Sets the height of the content from the content's directive.
-		 * @param height
-		 */
-		vm.setContentHeight = function (height) {
-			if (height < (maxHeight - heightChange)) {
-				setHeight = height;
-				vm.contentHeight = height;
-				atMaxHeight = false;
-			}
-			else {
-				setHeight = maxHeight;
-				vm.contentHeight = (maxHeight - heightChange);
-				atMaxHeight = true;
-			}
-			currentHeight = vm.contentHeight;
-		};
 
 		/*
 		 * Watch type on contentData to create content and tool bar options
@@ -87,82 +60,6 @@
 				createFilter();
 			}
 		});
-
-		$scope.$watch("vm.contentData.minHeight", function (newValue) {
-			vm.contentHeight = newValue;
-		});
-
-		$scope.$watch(EventService.currentEvent, function (event) {
-			var offset = 48;
-
-			if (event.type === EventService.EVENT.TOGGLE_HELP) {
-				vm.showHelp = !vm.showHelp;
-			}
-			else if ((event.type === EventService.EVENT.PANEL_CONTENT_TOGGLED) &&
-					 (event.value.position === vm.position) &&
-					 (event.value.type !== vm.contentData.type)) {
-				// Calculate the height of the content when other content is toggled
-				if (vm.contentData.hasOwnProperty("minHeight")) {
-					toggledContentHeight = event.value.contentHeight + contentHeightExtra; // The height of some other content toggled
-
-					if (event.value.show)  {
-						// An other content is shown
-						otherContentHeight += toggledContentHeight;
-						if ((otherContentHeight + vm.contentHeight) > maxPossibleHeight) {
-							vm.contentHeight -= toggledContentHeight;
-						}
-					}
-					else {
-						// An other content is hidden
-						otherContentHeight -= toggledContentHeight;
-						if ((otherContentHeight + setHeight) < maxPossibleHeight) {
-							vm.contentHeight = setHeight;
-						}
-						else {
-							if (vm.contentHeight !== vm.contentData.minHeight) {
-								vm.contentHeight += toggledContentHeight;
-							}
-						}
-					}
-
-					if (vm.contentHeight < vm.contentData.minHeight) {
-						vm.contentHeight = vm.contentData.minHeight;
-					}
-
-					currentHeight = vm.contentHeight;
-				}
-			}
-			else if (event.type === EventService.EVENT.WINDOW_HEIGHT_CHANGE) {
-				if (event.value.change === 0) {
-					maxHeight = event.value.height - panelGap - offset;
-					maxPossibleHeight = event.value.height - panelGap - offset;
-				}
-				else if (vm.contentData.hasOwnProperty("minHeight")) {
-					heightChange = event.value.change;
-					if (!minimized) {
-						if ((setHeight >= (maxHeight - heightChange - otherContentHeight))) {
-							currentHeight = maxHeight - heightChange - otherContentHeight;
-							if (currentHeight > vm.contentData.minHeight) {
-								vm.contentHeight = currentHeight;
-							}
-						}
-					}
-				}
-			}
-		});
-
-		vm.toolbarClick = function () {
-			if (vm.contentData.hasOwnProperty("minHeight")) {
-				if (minimized) {
-					vm.contentHeight = currentHeight;
-					minimized = false;
-				}
-				else {
-					vm.contentHeight = vm.contentData.minHeight;
-					minimized = true;
-				}
-			}
-		};
 
 		/**
 		 * Create the card content
@@ -176,8 +73,7 @@
 			element =
 				"<" + vm.contentData.type + " " +
 				"show='vm.contentData.show' " +
-				"on-set-content-height='vm.setContentHeight(height)' " +
-				"height='vm.contentHeight' ";
+				"on-content-height-request='vm.onContentHeightRequest(height)' ";
 
 			// Only add attributes when needed
 			for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
@@ -269,5 +165,32 @@
 				$compile(filter)($scope);
 			}
 		}
+
+		/**
+		 * A content item is requesting a height change
+		 * @param height
+		 */
+		vm.onContentHeightRequest = function (height) {
+			console.log(height);
+			contentHeight = height;
+			vm.onHeightRequest({contentItem: vm.contentData, height: contentHeight});
+		};
+
+		/**
+		 * Content wants to show an individual item
+		 */
+		vm.showItem = function () {
+			vm.statusIcon = "fa-arrow-left";
+			vm.hideSelectedItem = false; // So that a change to this value is propagated
+		};
+
+		/**
+		 * Content wants to show it's main content
+		 */
+		vm.hideItem = function () {
+			vm.statusIcon = vm.contentData.icon;
+			vm.hideSelectedItem = true;
+			vm.addStatus = false;
+		};
 	}
 }());

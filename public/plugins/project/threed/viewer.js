@@ -127,6 +127,71 @@ var Viewer = {};
 			this.handle = handle;
 		};
 
+		this.logos    = [];
+
+		this.addLogo = function() {
+			if (!self.logoGroup)
+			{
+				self.logoGroup = document.createElement("div");
+				self.logoGroup.style.width = "100%";
+				self.element.appendChild(self.logoGroup);
+			}
+
+			var numLogos = this.logos.length + 1;
+			var perLogo  = Math.floor(100 / numLogos);
+			var widthPercentage = perLogo + "%";
+
+			var logo = document.createElement("div");
+			logo.style.position       = "absolute";
+			logo.style["z-index"]     = 2;
+			logo.style["text-align"]  = "center";
+			logo.style.width          = widthPercentage;
+			logo.style["margin-top"]  = "10px";
+			logo.style.left = perLogo * (numLogos - 1) + "%";
+
+			logo.setAttribute("onclick", "logoClick()");
+
+			var logoImage = document.createElement("img");
+			logoImage.setAttribute("src", logo_string);
+			logoImage.setAttribute("style", "width: 250px;");
+			logoImage.textContent = " ";
+
+			var logoLink = document.createElement("a");
+
+			if (server_config.return_path) {
+				logoLink.setAttribute("href", server_config.return_path);
+			} else {
+				logoLink.setAttribute("href", "https://www.3drepo.io");
+			}
+
+			logoLink.appendChild(logoImage);
+			logo.appendChild(logoLink);
+
+			self.updateLogoWidth(widthPercentage);
+
+			self.logoGroup.appendChild(logo);
+			self.logos.push(logo);
+		};
+
+		this.removeLogo = function () {
+			var numLogos = this.logos.length - 1;
+			var widthPercentage = Math.floor(100 / numLogos) + "%";
+
+			self.logos[numLogos].parentNode.removeChild(self.logos[numLogos]);
+
+			self.logos.splice(numLogos,1);
+
+			self.updateLogoWidth(widthPercentage);
+		};
+
+		this.updateLogoWidth = function(widthPercentage) {
+			for(var i = 0; i < self.logos.length; i++)
+			{
+
+				self.logos[i].style.width = widthPercentage;
+			}
+		};
+
 		this.init = function() {
 			if (!self.initialized) {
 				// If we have a viewer manager then it
@@ -134,51 +199,28 @@ var Viewer = {};
 				// else we'll do it ourselves
 				x3dom.runtime.ready = self.initRuntime;
 
-				self.logo = document.createElement("div");
-				self.logo.setAttribute("id", "viewer_logo");
-				self.logo.setAttribute("style", "top: 0px; left: 0; right: 0; position: absolute; z-index:2; margin: auto; width: 250px; margin-top: 10px");
-				self.logo.setAttribute("onclick", "logoClick()");
-
-				self.logoImage = document.createElement("img");
-				self.logoImage.setAttribute("src", logo_string);
-				self.logoImage.setAttribute("style", "width: 100%;");
-				self.logoImage.textContent = " ";
-
-				self.logoLink = document.createElement("a");
-
-				if (server_config.return_path) {
-					self.logoLink.setAttribute("href", server_config.return_path);
-				} else {
-					self.logoLink.setAttribute("href", "https://www.3drepo.io");
-				}
-
-				//self.logoLink.setAttribute("style", "top: 0px; left: 0px; padding: 10px; position: absolute;")
-				self.logoLink.appendChild(self.logoImage);
-
-				self.logo.appendChild(self.logoLink);
-
-				//self.logo.setAttribute("style", "top: 0px; left: 0px; padding: 10px; position: absolute; z-index:10000;")
-				self.element.appendChild(self.logo);
+				self.addLogo();
 
 				// Set up the DOM elements
 				self.viewer = document.createElement("x3d");
 				self.viewer.setAttribute("id", self.name);
 				self.viewer.setAttribute("xmlns", "http://www.web3d.org/specification/x3d-namespace");
 				self.viewer.setAttribute("keysEnabled", "true");
+				self.viewer.setAttribute("disableTouch", "true");
 				self.viewer.addEventListener("mousedown", onMouseDown);
-				self.viewer.addEventListener("mouseup", onMouseUp);
+				self.viewer.addEventListener("mouseup",  onMouseUp);
 				self.viewer.style["pointer-events"] = "all";
 				self.viewer.className = "viewer";
 
 				self.element.appendChild(self.viewer);
-				
+
 				self.scene = document.createElement("Scene");
 				self.scene.setAttribute("onbackgroundclicked", "bgroundClick(event);");
 				self.scene.setAttribute("dopickpass", false);
 				self.viewer.appendChild(self.scene);
 
 				self.pinShader = new PinShader(self.scene);
-				
+
 				self.bground = null;
 				self.currentNavMode = null;
 
@@ -189,17 +231,11 @@ var Viewer = {};
 				self.environ.setAttribute("smallFeatureCulling", "true");
 				self.environ.setAttribute("smallFeatureThreshold", 5);
 				self.environ.setAttribute("occlusionCulling", "true");
-				self.environ.setAttribute("sorttrans", "false");
+				self.environ.setAttribute("sorttrans", "true");
+				self.environ.setAttribute("gammaCorrectionDefault", "linear");
 				self.scene.appendChild(self.environ);
 
-				self.light = document.createElement("directionallight");
-				//self.light.setAttribute("intensity", "0.5");
-				self.light.setAttribute("color", "0.714, 0.910, 0.953");
-				self.light.setAttribute("direction", "0, -0.9323, -0.362");
-				self.light.setAttribute("global", "true");
-				self.light.setAttribute("ambientIntensity", "0.8");
-				self.light.setAttribute("shadowIntensity", 0.0);
-				self.scene.appendChild(self.light);
+				self.setAmbientLight();
 
 				self.createViewpoint(self.name + "_default");
 
@@ -214,7 +250,7 @@ var Viewer = {};
 					if (e.charCode === "r".charCodeAt(0)) {
 						self.reset();
 						self.setApp(null);
-						self.setNavMode("WALK");
+						self.setNavMode(self.NAV_MODES.WALK);
 						self.disableClicking();
 					} else if (e.charCode === "a".charCodeAt(0)) {
 						self.showAll();
@@ -253,6 +289,17 @@ var Viewer = {};
 					name: self.name
 				});
 			}
+
+			self.runtime.enterFrame = function () {
+					if (self.gyroOrientation)
+					{
+							self.gyroscope(
+									self.gyroOrientation.alpha,
+									self.gyroOrientation.beta,
+									self.gyroOrientation.gamma
+							);
+					}
+			};
 
 			self.showAll = function() {
 				self.runtime.fitAll();
@@ -311,37 +358,140 @@ var Viewer = {};
 			});
 		};
 
-		this.createBackground = function() {
-			if (self.bground) {
-				self.bground.parentNode.removeChild(self.bground);
+		this.setAmbientLight = function(lightDescription) {
+			if (self.light) {
+				var i = 0;
+				var attributeNames = [];
+
+				for(i = 0; i < self.light.attributes.length; i++)
+				{
+					attributeNames.push(self.light.attributes[i].name);
+				}
+
+				for(i = 0; i < attributeNames.length; i++)
+				{
+					self.light.removeAttribute(attributeNames[i]);
+				}
+			} else {
+				self.light = document.createElement("directionallight");
+				self.scene.appendChild(self.light);
 			}
 
-			self.bground = document.createElement("background");
+			if (!lightDescription)
+			{
+				//self.light.setAttribute("intensity", "0.5");
+				self.light.setAttribute("color", "0.714, 0.910, 0.953");
+				self.light.setAttribute("direction", "0, -0.9323, -0.362");
+				self.light.setAttribute("global", "true");
+				self.light.setAttribute("ambientIntensity", "0.8");
+				self.light.setAttribute("shadowIntensity", 0.0);
+			} else {
+				for (var attr in lightDescription)
+				{
+					if (lightDescription.hasOwnProperty(attr))
+					{
+						self.light.setAttribute(attr, lightDescription[attr]);
+					}
+				}
+			}
 
-			self.bground.setAttribute("DEF", name + "_bground");
-			self.bground.setAttribute("skyangle", "0.9 1.5 1.57");
-			self.bground.setAttribute("skycolor", "0.21 0.18 0.66 0.2 0.44 0.85 0.51 0.81 0.95 0.83 0.93 1");
-			self.bground.setAttribute("groundangle", "0.9 1.5 1.57");
-			self.bground.setAttribute("groundcolor", "0.65 0.65 0.65 0.73 0.73 0.73 0.81 0.81 0.81 0.91 0.91 0.91");
-			self.bground.textContent = " ";
-
-			self.scene.appendChild(self.bground);
 		};
 
-		/*
-		this.displayMessage = function(text, textColor, timeout) {
-			self.messageBoxMessage.innerHTML = text;
-			self.messageBox.style["display"] = "";
+		this.createBackground = function(colourDescription) {
+			if (self.bground) {
+				var i = 0;
+				var attributeNames = [];
 
-			// Construct RGBA string
-			var rgbstr = "RGB(" + textColor[0] + ", " + textColor[1] + ", " + textColor[2] + ")";
-			self.messageBoxMessage.style["text-color"] = rgbstr;
+				for(i = 0; i < self.bground.attributes.length; i++)
+				{
+					attributeNames.push(self.bground.attributes[i].name);
+				}
 
-			setTimeout( function() {
-				self.messageBox.style["display"] = "none";
-			}, timeout);
-		}
-		*/
+				for(i = 0; i < attributeNames.length; i++)
+				{
+					self.bground.removeAttribute(attributeNames[i]);
+				}
+			} else {
+				self.bground = document.createElement("background");
+				self.scene.appendChild(self.bground);
+			}
+
+			if (!colourDescription)
+			{
+				self.bground.setAttribute("DEF", self.name + "_bground");
+				self.bground.setAttribute("skyangle", "0.9 1.5 1.57");
+				self.bground.setAttribute("skycolor", "0.21 0.18 0.66 0.2 0.44 0.85 0.51 0.81 0.95 0.83 0.93 1");
+				self.bground.setAttribute("groundangle", "0.9 1.5 1.57");
+				self.bground.setAttribute("groundcolor", "0.65 0.65 0.65 0.73 0.73 0.73 0.81 0.81 0.81 0.91 0.91 0.91");
+				self.bground.textContent = " ";
+
+			} else {
+				self.bground.setAttribute("DEF", self.name + "_bground");
+
+				for (var attr in colourDescription)
+				{
+					if (colourDescription.hasOwnProperty(attr))
+					{
+						self.bground.setAttribute(attr, colourDescription[attr]);
+					}
+				}
+			}
+
+		};
+
+		this.gyroscope = function (alpha, beta, gamma) {
+			var degToRad = Math.PI / 180.0;
+
+			var b = (alpha ? alpha : 0);
+			var a = (beta  ? beta : 0);
+			var g = -(gamma ? gamma : 0);
+
+			a *= degToRad; b *= degToRad; g *= degToRad;
+
+			var cA = Math.cos(a / 2.0);
+			var cB = Math.cos(b / 2.0);
+			var cG = Math.cos(g / 2.0);
+			var sA = Math.sin(a / 2.0);
+			var sB = Math.sin(b / 2.0);
+			var sG = Math.sin(g / 2.0);
+
+			/*
+			var w = cB * cG * cA - sB * sG * sA;
+			var x = sB * cG * cA - cB * sG * sA;
+			var y = cB * sG * cA  sB * cG * sA;
+			var z = cB * cG * sA  sB * sG * cA;
+			*/
+
+			var x = sA * cB * cG + cA * sB * sG;
+			var y = cA * sB * cG - sA * cB * sG;
+			var z = cA * cB * sG - sA * sB * cG;
+			var w = cA * cB * cG + sA * sB * sG;
+
+			var q           = new x3dom.fields.Quaternion(x,y,z,w);
+			var screenAngle = (window.orientation ? window.orientation : 0) * degToRad * -1;
+			var screenQuat  = x3dom.fields.Quaternion.axisAngle(new x3dom.fields.SFVec3f(0,0,1),screenAngle);
+			var viewQuat    = new x3dom.fields.Quaternion.axisAngle(new x3dom.fields.SFVec3f(1,0,0), -Math.PI * 0.5);
+
+			//q = self.gyroStart.multiply(q);
+			q = q.multiply(viewQuat);
+			q = q.multiply(screenQuat);
+
+			var flyMat = null;
+			var vp     = self.getCurrentViewpoint()._x3domNode;
+
+			if (self.rollerCoasterMatrix)
+			{
+				var qMat = q.toMatrix();
+				flyMat = qMat.transpose().mult(self.rollerCoasterMatrix.inverse());
+			} else {
+
+				flyMat = vp.getViewMatrix().inverse();
+				flyMat.setRotate(q);
+				flyMat = flyMat.inverse();
+			}
+
+			vp._viewMatrix.setValues(flyMat);
+		};
 
 		this.switchDebug = function() {
 			self.getViewArea()._visDbgBuf = !self.getViewArea()._visDbgBuf;
@@ -364,12 +514,57 @@ var Viewer = {};
 		};
 
 		this.onMouseUp = function(functionToBind) {
-			$(self.viewer).on("onMouseUp", functionToBind);
+			$(document).on("onMouseUp", functionToBind);
 		};
 
 		this.onMouseDown = function(functionToBind) {
-			$(self.viewer).on("onMouseDown", functionToBind);
+			$(document).on("onMouseDown", functionToBind);
+		}
+
+		this.mouseDownPickPoint = function(event, pickEvent)
+		{
+			var pickingInfo = self.getViewArea()._pickingInfo;
+
+			// Hack until double click problem solved
+			self.pickPoint(); // This updates self.pickObject
+			if (self.pickObject.pickObj !== null) {
+				pickingInfo.pickObj = self.pickObject;
+			}
+
+			if (pickingInfo.pickObj)
+			{
+				var account, project;
+
+				var projectParts = pickingInfo.pickObj._xmlNode ?
+					pickingInfo.pickObj._xmlNode.getAttribute("id").split("__") :
+					pickingInfo.pickObj.pickObj._xmlNode.getAttribute("id").split("__");
+
+				var objectID = pickingInfo.pickObj.partID ?
+					pickingInfo.pickObj.partID :
+					projectParts[2];
+
+				account = projectParts[0];
+				project = projectParts[1];
+
+				var inlineTransName = ViewerUtil.escapeCSSCharacters(account + "__" + project);
+				var projectInline = self.inlineRoots[inlineTransName];
+				var trans = projectInline._x3domNode.getCurrentTransform();
+
+				callback(self.EVENT.PICK_POINT, {
+					id: objectID,
+					position: pickingInfo.pickPos,
+					normal: pickingInfo.pickNorm,
+					trans: trans
+				});
+			} else {
+				callback(self.EVENT.PICK_POINT, {
+					position: pickingInfo.pickPos,
+					normal: pickingInfo.pickNorm
+				});
+			}
 		};
+
+		this.onMouseDown(this.mouseDownPickPoint);
 
 		this.onViewpointChanged = function(functionToBind) {
 			$(self.viewer).on("myViewpointHasChanged", functionToBind);
@@ -568,12 +763,12 @@ var Viewer = {};
 			obj.multipart = true;
 			obj.id = part.multiPart._nameSpace.name + "__" + part.partID;
 
-			
+
 			callback(self.EVENT.OBJECT_SELECTED, {
 				account: ,
-				project: 
+				project:
 			})
-			
+
 
 			$(document).trigger("objectSelected", obj);
 		});
@@ -814,7 +1009,6 @@ var Viewer = {};
 
 				self.applySettings();
 
-
 				if (id === (self.name + "_default")) {
 					if (self.defaultShowAll) {
 						self.runtime.fitAll();
@@ -832,6 +1026,7 @@ var Viewer = {};
 		this.updateSettings = function(settings) {
 			if (settings) {
 				self.settings = settings;
+				self.applySettings();
 			}
 		};
 
@@ -868,6 +1063,14 @@ var Viewer = {};
 
 				if (self.settings.hasOwnProperty("zNear")) {
 					self.currentViewpoint._xmlNode.setAttribute("zNear", self.settings.zNear);
+				}
+
+				if (self.settings.hasOwnProperty("background")) {
+					self.createBackground(self.settings.background);
+				}
+
+				if (self.settings.hasOwnProperty("ambientLight")) {
+					self.setAmbientLight(self.settings.ambientLight);
 				}
 			}
 		};
@@ -1061,24 +1264,30 @@ var Viewer = {};
 			self.updateCamera(currentPos, upDir, viewDir);
 		};
 
-		this.setCamera = function(pos, viewDir, upDir, animate) {
-			self.updateCamera(pos, upDir, viewDir, animate);
+		this.setCamera = function(pos, viewDir, upDir, animate, rollerCoasterMode) {
+			self.updateCamera(pos, upDir, viewDir, animate, rollerCoasterMode);
 		};
 
-		this.updateCamera = function(pos, up, viewDir, animate) {
-			var x3domView = new x3dom.fields.SFVec3f();
-			x3domView.setValueByStr(viewDir.join(","));
+		this.updateCamera = function(pos, up, viewDir, animate, rollerCoasterMode) {
+			if (!viewDir)
+			{
+				viewDir = self.getCurrentViewpointInfo().view_dir;
+			}
 
-			var x3domUp = new x3dom.fields.SFVec3f();
-			x3domUp.setValueByStr(ViewerUtil.normalize(up).join(","));
+			if (!up)
+			{
+				up = self.getCurrentViewpointInfo().up;
+			}
+			up = ViewerUtil.normalize(up);
 
-			var x3domFrom = new x3dom.fields.SFVec3f();
-			x3domFrom.setValueByStr(pos.join(","));
+			var x3domView = new x3dom.fields.SFVec3f(viewDir[0], viewDir[1], viewDir[2]);
+			var x3domUp   = new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
+			var x3domFrom = new x3dom.fields.SFVec3f(pos[0], pos[1], pos[2]);
+			var x3domAt   = x3domFrom.add(x3domView);
 
-			var x3domAt = x3domFrom.add(x3domView);
+			var viewMatrix = x3dom.fields.SFMatrix4f.lookAt(x3domFrom, x3domAt, x3domUp);
 
-			var viewMatrix = x3dom.fields.SFMatrix4f.lookAt(x3domFrom, x3domAt, x3domUp).inverse();
-			var currMatrix = self.getCurrentViewpoint()._x3domNode;
+			var currViewpoint = self.getCurrentViewpoint()._x3domNode;
 
 			if (self.currentNavMode === self.NAV_MODES.HELICOPTER) {
 				self.nav._x3domNode._vf.typeParams[0] = Math.asin(x3domView.y);
@@ -1087,9 +1296,15 @@ var Viewer = {};
 
 			if (animate)
 			{
-				self.getViewArea().animateTo(viewMatrix, currMatrix);
+				self.getViewArea().animateTo(viewMatrix.inverse(), currViewpoint);
 			} else {
-				// TODO: Fill this in here
+				if (rollerCoasterMode)
+				{
+					self.rollerCoasterMatrix = viewMatrix;
+				} else {
+					self.getCurrentViewpoint()._x3domNode._viewMatrix.setValues(viewMatrix.inverse());
+					self.getViewArea()._doc.needRender = true;
+				}
 			}
 
 			if (self.linked) {
@@ -1478,11 +1693,11 @@ var Viewer = {};
 				errCallback(self.ERROR.PIN_ID_TAKEN);
 			} else {
 
-				var trans = null;				
+				var trans = null;
 				var projectNameSpace = account + "__" + project;
 
 				if (self.inlineRoots.hasOwnProperty(projectNameSpace))
-				{				
+				{
 					var projectInline = self.inlineRoots[account + "__" + project];
 					trans = projectInline._x3domNode.getCurrentTransform();
 				}
@@ -1490,27 +1705,37 @@ var Viewer = {};
 				self.pins[id] = new Pin(id, self.getScene(), trans, position, norm, self.pinSize, colours, viewpoint);
 			}
 		};
-		
+
 		this.clickPin = function(id) {
 			if (self.pins.hasOwnProperty(id)) {
 				var pin = self.pins[id];
-				
+
 				self.highlightPin(id);
-				
+
 				callback(self.EVENT.SET_CAMERA, {
 					position : pin.viewpoint.position,
 					view_dir : pin.viewpoint.view_dir,
 					up: pin.viewpoint.up
-				}); 
-				
+				});
+
 				callback(self.EVENT.SET_CLIPPING_PLANES, {
 					clippingPlanes: pin.viewpoint.clippingPlanes
 				});
 			}
 		};
-		
+
+		this.setPinVisibility = function(id, visibility)
+		{
+			if (self.pins.hasOwnProperty(id)) {
+				var pin = self.pins[id];
+
+				pin.setAttribute("render", visibility.toString());
+			}
+		};
+
 		this.removePin = function(id) {
 			if (self.pins.hasOwnProperty(id)) {
+				self.pins[id].remove(id);
 				delete self.pins[id];
 			}
 		};
@@ -1547,12 +1772,13 @@ var Viewer = {};
 	};
 }());
 
-// Constants and enums 
+// Constants and enums
 var VIEWER_NAV_MODES = Viewer.prototype.NAV_MODES = {
 	HELICOPTER: "HELICOPTER",
 	WALK: "WALK",
 	TURNTABLE: "TURNTABLE",
-	WAYFINDER: "WAYFINDER"
+	WAYFINDER: "WAYFINDER",
+	FLY: "FLY"
 };
 
 var VIEWER_EVENTS = Viewer.prototype.EVENT = {
@@ -1571,7 +1797,9 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	OBJECT_SELECTED: "VIEWER_OBJECT_SELECTED",
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
 	SWITCH_OBJECT_VISIBILITY: "VIEWER_SWITCH_OBJECT_VISIBILITY",
+	SET_PIN_VISIBILITY: "VIEWER_SET_PIN_VISIBILITY",
 
+	PICK_POINT: "VIEWER_PICK_POINT",
 	SET_CAMERA: "VIEWER_SET_CAMERA",
 
 	// Clipping plane events

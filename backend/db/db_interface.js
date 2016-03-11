@@ -2936,6 +2936,6 @@ DBInterface.prototype.uuidToString = uuidToString;
 
 module.exports = function(logger) {
 	"use strict";
-
+	
 	return new DBInterface(logger);
 };

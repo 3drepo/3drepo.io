@@ -12,6 +12,7 @@ var User = require('../models/user');
 router.post('/login', login);
 router.get('/login', checkLogin);
 router.post('/logout', logout);
+// router.get('/:account.jpg', middlewares.loggedIn, getAvatar);
 router.post('/:account', middlewares.loggedIn, updateUser);
 
 function expireSession(req) {
@@ -69,7 +70,7 @@ function checkLogin(req, res, next){
 function logout(req, res, next){
 
 	if(!req.session.user){
-		return responseCodes.respond(Utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, {});
+		return responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, {});
 	}
 
 	var username = req.session.user.username;
@@ -113,4 +114,13 @@ function updateUser(req, res, next){
 
 
 }
+
+
+// function getAvatar(req, res, next){
+// 	User.getAvatar(req.params.account).then(img => {
+// 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, img);
+// 	}).catch(err => {
+// 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+// 	});
+// }
 module.exports = router;

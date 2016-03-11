@@ -54,6 +54,54 @@ var ViewerUtil = {};
 		return new x3dom.fields.Quarternion(x,y,z,w);
 	};
 
+	ViewerUtil.prototype.rotationBetween = function(prevUp, prevView, currUp, currView)
+	{
+		/*
+		prevView = this.normalize(prevView);
+		currView = this.normalize(currView);
+		
+		var prevRight = this.normalize(this.crossProduct(prevUp, prevView));
+		var currRight = this.normalize(this.crossProduct(currUp, currView));
+		
+		prevUp = this.normalize(this.crossProduct(prevRight, prevView));
+		currUp = this.crossProduct(currRight, currView);
+
+		var prevMat = new x3dom.fields.SFMatrix4f();
+		*/
+
+		var x3domPrevView = new x3dom.fields.SFVec3f(prevView[0], prevView[1], prevView[2]);
+		var x3domPrevUp   = new x3dom.fields.SFVec3f(prevUp[0], prevUp[1], prevUp[2]);
+		var x3domPrevFrom = new x3dom.fields.SFVec3f(0, 0, 0);
+		var x3domPrevAt   = x3domPrevFrom.add(x3domPrevView);
+
+		var prevMat    = x3dom.fields.SFMatrix4f.lookAt(x3domPrevFrom, x3domPrevAt, x3domPrevUp);
+		/*
+		prevMat.setFromArray([
+				prevRight[0], prevUp[0], prevView[0], 0,
+				prevRight[1], prevUp[1], prevView[1], 0,
+				prevRight[2], prevUp[2], prevView[2], 0,
+				0, 0, 0, 1]);
+
+		
+		var currMat = new x3dom.fields.SFMatrix4f();
+
+		currMat.setFromArray([
+				currRight[0], currUp[0], currView[0], 0,
+				currRight[1], currUp[1], currView[1], 0,
+				currRight[2], currUp[2], currView[2], 0,
+				0, 0, 0, 1]);
+		*/
+
+		var x3domCurrView = new x3dom.fields.SFVec3f(currView[0], currView[1], currView[2]);
+		var x3domCurrUp   = new x3dom.fields.SFVec3f(currUp[0], currUp[1], currUp[2]);
+		var x3domCurrFrom = new x3dom.fields.SFVec3f(0, 0, 0);
+		var x3domCurrAt   = x3domCurrFrom.add(x3domCurrView);
+		
+		var currMat    = x3dom.fields.SFMatrix4f.lookAt(x3domCurrFrom, x3domCurrAt, x3domCurrUp);
+		
+		return currMat.mult(prevMat.inverse());
+	};
+
 	// TODO: Should move this to somewhere more general (utils ? )
 	ViewerUtil.prototype.axisAngleToMatrix = function(axis, angle) {
 		var mat = new x3dom.fields.SFMatrix4f();
@@ -148,6 +196,18 @@ var ViewerUtil = {};
 	ViewerUtil.prototype.vecSub = function(a, b) {
 		return this.vecAdd(a, this.scale(b, -1));
 	};
-
+	
+	/**
+	 * Escape CSS characters in string
+	 *
+		* @param string
+		* @returns {*}
+		*/
+	ViewerUtil.prototype.escapeCSSCharacters = function(string)
+	{
+		// Taken from http://stackoverflow.com/questions/2786538/need-to-escape-a-special-character-in-a-jquery-selector-string
+		return string.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, "\\$&");
+	};
+		
 	ViewerUtil = new ViewerUtil();
 }());

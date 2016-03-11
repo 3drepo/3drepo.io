@@ -21,10 +21,10 @@
     angular.module('3drepo')
         .service('WalkthroughService', WalkthroughService);
 
-    WalkthroughService.$inject = ["$interval", "$timeout", "$http", "ViewerService", "StateManager", "serverConfig"];
+    WalkthroughService.$inject = ["$interval", "$timeout", "$http", "StateManager", "serverConfig"];
 
-    function WalkthroughService($interval, $timeout, $http, ViewerService, StateManager, serverConfig) {
-        var defaultViewer = ViewerService.defaultViewer,
+    function WalkthroughService($interval, $timeout, $http, StateManager, serverConfig) {
+        var defaultViewer = null, // Was ViewerService.defaultViewer
             recordingInterval = null,
             playingInterval = null,
             position = 0,

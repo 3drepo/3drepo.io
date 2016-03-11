@@ -13,11 +13,9 @@
 			"base/Auth.js",
 			"base/pageConfigProvider.js",
 			"base/httpProvider.js",
-			"base/HeaderCtrl.js",
 			"base/BaseCtrl.js",
 			"base/StateManager.js",
 			"base/projectPageConfig.js",
-			"base/DialogCtrl.js",
             "base/homeDirective.js"
 		]
 	}

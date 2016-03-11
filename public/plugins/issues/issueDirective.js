@@ -27,8 +27,8 @@
 			templateUrl: "issue.html",
 			scope: {
 				data: "=",
-				onCommentsToggled: "&",
-				commentsToggledIssueId: "=",
+				autoSaveComment: "=",
+				onCommentAutoSaved: "&",
 				onToggleCloseIssue: "&",
 				availableRoles: "=",
 				projectUserRoles: "=",
@@ -40,15 +40,17 @@
 		};
 	}
 
-	IssueCtrl.$inject = ["$scope", "$timeout", "NewIssuesService", "ViewerService", "EventService"];
+	IssueCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService"];
 
-	function IssueCtrl($scope, $timeout, NewIssuesService, ViewerService, EventService) {
+	function IssueCtrl($scope, $timeout, IssuesService, EventService) {
 		var vm = this,
 			promise = null,
-			originatorEv = null,
-			pinColour;
+			originatorEv = null;
 
-		vm.showComments = false;
+		/*
+		 * Initialise view vars
+		 */
+		vm.showComments = true;
 		vm.numNewComments = 0;
 		vm.saveCommentDisabled = true;
 		vm.backgroundColor = "#FFFFFF";
@@ -57,6 +59,9 @@
 		vm.editingComment = false;
 		vm.assignedRolesColors = [];
 
+		/*
+		 * Handle the list of available roles
+		 */
 		$scope.$watch("vm.availableRoles", function(newValue) {
 			var i = 0,
 				length = 0;
@@ -76,47 +81,30 @@
 			}
 		});
 
-		$scope.$watch("vm.commentsToggledIssueId", function(newValue) {
-			// If the comments is toggled on another comment, then close this one.
-			if (angular.isDefined(newValue)) {
-				// If the new value is null then all issues have been closed
-				if (!newValue) {
-					EventService.send(EventService.EVENT.VIEWER.CLICK_PIN, {
-						id: null
-					});
-				}
-
-				if (newValue !== vm.data._id) {
-					vm.showComments = false;
-
-					// If we are editing the comment, then clear it.
-					if (vm.editingComment) {
-						vm.comment = "";
-					} else {
-						// Auto-save a comment
-						if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
-							vm.autoSaveComment = true;
-							vm.saveComment();
-						}
-					}
-				} else {
-					vm.showComments = !vm.showComments;
-
-					if (vm.showComments) {
-						EventService.send(EventService.EVENT.VIEWER.CLICK_PIN, {
-							id: vm.data._id
-						});
-					}
+		/*
+		 * Handle a request to do a comment auto save from the issue list
+		 */
+		$scope.$watch("vm.autoSaveComment", function(newValue) {
+			if (angular.isDefined(newValue) && newValue && !vm.editingComment) {
+				if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
+					vm.autoSaveComment = true;
+					vm.saveComment();
 				}
 			}
 		});
 
+		/*
+		 * Handle change to comment input
+		 */
 		$scope.$watch("vm.comment", function(newValue) {
 			if (angular.isDefined(newValue)) {
 				vm.saveCommentDisabled = (newValue === "");
 			}
 		});
 
+		/*
+		 * Do some initialisation
+		 */
 		$scope.$watch("vm.data", function(newValue) {
 			var i = 0,
 				length = 0;
@@ -139,6 +127,9 @@
 			}
 		}, true);
 
+		/**
+		 * Handle changes to the assigned roles for the issue
+		 */
 		function setupRolesWatch() {
 			$scope.$watch("vm.roles", function(newValue, oldValue) {
 				var i = 0,
@@ -153,8 +144,8 @@
 						}
 					}
 
-					promise = NewIssuesService.assignIssue(vm.data);
-					promise.then(function(data) {
+					promise = IssuesService.assignIssue(vm.data);
+					promise.then(function () {
 						setAssignedRolesColors();
 						vm.onIssueAssignChange();
 					});
@@ -162,6 +153,9 @@
 			}, true);
 		}
 
+		/**
+		 * Get the initial assigned roles for the issue
+		 */
 		function initAssignedRolesDisplay() {
 			var i = 0,
 				length = 0;
@@ -174,18 +168,20 @@
 			}
 		}
 
-		function setAssignedRolesColors() {
-			var i = 0,
-				length = 0;
+		/**
+		 * Set up the assigned role colors for the issue
+		 */
+		function setAssignedRolesColors () {
+			var i, length;
 
 			var pinColours = [];
 
 			vm.assignedRolesColors = [];
 			for (i = 0, length = vm.roles.length; i < length; i += 1) {
 				if (vm.data.assigned_roles.indexOf(vm.roles[i].role) !== -1) {
-					var roleColour = NewIssuesService.getRoleColor(vm.roles[i].role);
+					var roleColour = IssuesService.getRoleColor(vm.roles[i].role);
 					vm.assignedRolesColors.push(roleColour);
-					pinColours.push(NewIssuesService.hexToRgb(roleColour));
+					pinColours.push(IssuesService.hexToRgb(roleColour));
 				}
 			}
 
@@ -195,8 +191,10 @@
 			});
 		}
 
-		// A user with the same role as the issue creator_role or
-		// a role that is one of the roles that the issues has been assigned to can modify the issue
+		/**
+		 * A user with the same role as the issue creator_role or
+		 * a role that is one of the roles that the issues has been assigned to can modify the issue
+		 */
 		function setupCanModifyIssue() {
 			var i = 0,
 				length = 0;
@@ -215,24 +213,20 @@
 			}
 		}
 
-		vm.toggleComments = function() {
-			vm.onCommentsToggled({
-				issueId: vm.data._id
-			});
-			vm.showAssignedRoles = false;
-		};
-
+		/**
+		 * Save a comment
+		 */
 		vm.saveComment = function() {
 			if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
 				if (vm.editingComment) {
-					promise = NewIssuesService.editComment(vm.data, vm.comment, vm.editingCommentIndex);
+					promise = IssuesService.editComment(vm.data, vm.comment, vm.editingCommentIndex);
 					promise.then(function(data) {
 						vm.data.comments[vm.editingCommentIndex].comment = vm.comment;
-						vm.data.comments[vm.editingCommentIndex].timeStamp = NewIssuesService.getPrettyTime(data.created);
+						vm.data.comments[vm.editingCommentIndex].timeStamp = IssuesService.getPrettyTime(data.created);
 						vm.comment = "";
 					});
 				} else {
-					promise = NewIssuesService.saveComment(vm.data, vm.comment);
+					promise = IssuesService.saveComment(vm.data, vm.comment);
 					promise.then(function(data) {
 						if (!vm.data.hasOwnProperty("comments")) {
 							vm.data.comments = [];
@@ -241,23 +235,19 @@
 							owner: data.owner,
 							comment: vm.comment,
 							created: data.created,
-							timeStamp: NewIssuesService.getPrettyTime(data.created)
+							timeStamp: IssuesService.getPrettyTime(data.created)
 						});
 						vm.comment = "";
 						vm.numNewComments += 1; // This is used to increase the height of the comments list
 
 						if (vm.autoSaveComment) {
+							vm.onCommentAutoSaved(); // Tell the issue list a comment auto save has been done
 							vm.autoSaveComment = false;
-							vm.showInfo = true;
-							vm.infoText = "Comment on issue #" + vm.data.number + " auto-saved";
-							vm.infoTimeout = $timeout(function() {
-								vm.showInfo = false;
-							}, 4000);
 						}
 
 						// Mark previous comment as 'set' - no longer deletable or editable
 						if (vm.data.comments.length > 1) {
-							promise = NewIssuesService.setComment(vm.data, (vm.data.comments.length - 2));
+							promise = IssuesService.setComment(vm.data, (vm.data.comments.length - 2));
 							promise.then(function(data) {
 								vm.data.comments[vm.data.comments.length - 2].set = true;
 							});
@@ -267,8 +257,13 @@
 			}
 		};
 
+		/**
+		 * Delete a comment
+		 *
+		 * @param index
+		 */
 		vm.deleteComment = function(index) {
-			promise = NewIssuesService.deleteComment(vm.data, index);
+			promise = IssuesService.deleteComment(vm.data, index);
 			promise.then(function(data) {
 				vm.data.comments.splice(index, 1);
 				vm.numNewComments -= 1; // This is used to reduce the height of the comments list
@@ -277,6 +272,11 @@
 			});
 		};
 
+		/**
+		 * Toggle the editing of a comment
+		 *
+		 * @param index
+		 */
 		vm.toggleEditComment = function(index) {
 			vm.editingComment = !vm.editingComment;
 			vm.editingCommentIndex = index;
@@ -287,22 +287,30 @@
 			}
 		};
 
+		/**
+		 * Toggle the closed status of an issue
+		 */
 		vm.toggleCloseIssue = function() {
 			vm.onToggleCloseIssue({
 				issue: vm.data
 			});
 		};
 
-		vm.hideInfo = function() {
-			vm.showInfo = false;
-			$timeout.cancel(vm.infoTimeout);
-		};
-
-		vm.openAssignedRolesMenu = function($mdOpenMenu, ev) {
-			originatorEv = ev;
-			$mdOpenMenu(ev);
+		/**
+		 * Open the menu to assign roles
+		 *
+		 * @param $mdOpenMenu
+		 * @param event
+		 */
+		vm.openAssignedRolesMenu = function($mdOpenMenu, event) {
+			originatorEv = event;
+			$mdOpenMenu(event);
 		};
 	}
+
+	/*
+	 * Below is for setting up the animation to show and hide comments
+	 */
 
 	angular.module("3drepo")
 		.animation(".issueComments", issueComments);

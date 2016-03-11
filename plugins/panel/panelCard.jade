@@ -16,10 +16,11 @@ div(layout="column", class="md-whiteframe-1dp")
 		#filterContainer
 
 		// Content
-		md-content(id="content", style="height:{{vm.contentHeight}}px")
+		md-content(id="content", style="height:{{vm.contentData.height}}px")
 
 	// Help icon and tool tip
 	div(ng-if="vm.showHelp")
 		md-button.md-fab.md-mini#helpButton(aria-label="Help")
 			md-icon(md-font-icon="fa-question", class="fa")
 			md-tooltip(md-direction="top") {{vm.contentData.help}}
+z
