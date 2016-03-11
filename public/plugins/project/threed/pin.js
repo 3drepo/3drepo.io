@@ -103,6 +103,13 @@ var Pin = {};
 		self.element.appendChild(parent);
 	};
 
+	Pin.prototype.remove = function(id) {
+		var pinPlacement = document.getElementById(id);
+		if (pinPlacement !== null) {
+			pinPlacement.parentElement.removeChild(pinPlacement);
+		}
+	};
+
 	Pin.prototype.changeColour = function(colours) {
 		var self = this;
 		// Find both the material for the ghosted pin and the opaque pin

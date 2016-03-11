@@ -36,9 +36,9 @@
 		};
 	}
 
-	ClipCtrl.$inject = ["$scope", "$timeout", "ViewerService", "EventService"];
+	ClipCtrl.$inject = ["$scope", "$timeout", "EventService"];
 
-	function ClipCtrl($scope, $timeout, ViewerService, EventService) {
+	function ClipCtrl($scope, $timeout, EventService) {
 		var vm = this;
 
 		vm.sliderMin = 0;

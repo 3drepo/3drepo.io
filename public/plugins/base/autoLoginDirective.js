@@ -15,22 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-angular.module('3drepo')
-.factory('SelectorData', ['$http', '$q', 'serverConfig', 'StateManager', 'Branches', function($http, $q, serverConfig, StateManager, Branches){
-	var o = {
-		Branches:			Branches
-	};
+(function() {
+	"use strict";
 
-	o.genStateName = function() {
-		return null;
+	angular.module("3drepo")
+		.directive("autoLogin", autoLogin);
+
+	autoLogin.$inject = ["Auth"];
+
+	function autoLogin(Auth) {
+		return {
+			restrict: "E",
+			link: link,
+			scope: { }
+		};
+		
+		function link (scope, element, attrs)
+		{			
+			Auth.login(attrs.account, attrs.password);
+		}
 	}
-
-	o.refresh = function() {
-		var self = this;
-
-		self.Branches.refresh();
-	}
-
-	return o;
-}]);
-
+}());

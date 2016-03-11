@@ -22,7 +22,6 @@
 			"project/globalDirective.js",
 			"project/eventService.js",
 			"project/ProjectData.js",
-			"project/ViewerService.js",
 			"project/projectDirective.js",
             "project/projectService.js",
 			"project/viewerDirective.js",

@@ -66,9 +66,9 @@
         };
     }
 
-	ProjectCtrl.$inject = ["$timeout", "EventService", "ViewerService", "StateManager", "ProjectService"];
+	ProjectCtrl.$inject = ["$timeout", "EventService", "StateManager", "ProjectService"];
 
-	function ProjectCtrl($timeout, EventService, ViewerService, StateManager, ProjectService) {
+	function ProjectCtrl($timeout, EventService, StateManager, ProjectService) {
 		var panelContent = {
 			left: [],
 			right: []
@@ -85,8 +85,7 @@
 			help: "Model elements shown in a tree structure",
 			icon: "fa-sitemap",
 			hasFilter: true,
-            minHeight: 120,
-			height: 820
+			fixedHeight: false
 		});
 
 		panelContent.right.push({
@@ -118,8 +117,7 @@
 					secondSelected: false
 				}
 			],
-            minHeight: 70,
-			height: 820
+			fixedHeight: false
 		});
 		panelContent.right.push({
 			type: "clip",
@@ -127,7 +125,8 @@
 			show: false,
 			help: "Clipping plane",
 			icon: "fa-object-group",
-			height: 170,
+			height: 120,
+			fixedHeight: true,
 			showVisible: true
 		});
 		panelContent.right.push({
@@ -136,8 +135,8 @@
 			show: false,
 			help: "Documents",
 			icon: "fa-clone",
-			minHeight: 80,
-			height: 120
+			height: 80,
+			fixedHeight: false
 		});
 
 		// Add filtering options for the Issues panel
@@ -173,7 +172,13 @@
 			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelContent);
 			
 			// No parameters means load from state variables
-			EventService.send(EventService.EVENT.CREATE_VIEWER, {name: "default"});
+			EventService.send(EventService.EVENT.CREATE_VIEWER, {
+				name: "default",
+				account: StateManager.state.account,
+				project: StateManager.state.project,
+				branch: StateManager.state.branch,
+				revision: StateManager.state.revision
+			});
 		});
 	}
 }());

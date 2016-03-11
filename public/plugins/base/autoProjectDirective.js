@@ -15,16 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-angular.module('3drepo')
-.controller('DialogCtrl', function ($scope, $modalInstance, params) {
-	$scope.params = params;
+(function() {
+	"use strict";
 
-	$scope.ok = function () {
-		$modalInstance.close($scope.params);
-	};
+	angular.module("3drepo")
+		.directive("autoProject", autoProject);
 
-	$scope.cancel = function () {
-		$modalInstance.dismiss('cancel');
-	};
+	autoProject.$inject = ["EventService"];
 
-});
+	function autoProject(EventService) {
+		return {
+			restrict: "E",
+			link: link,
+			scope: { }
+		};
+		
+		function link (scope, element, attrs)
+		{		
+			EventService.send(EventService.EVENT.CREATE_VIEWER, {
+				name: "default",
+				account: attrs.account,
+				project: attrs.project,
+				branch:  attrs.branch,
+				revision: attrs.revision
+			});
+		}
+	}
+}());

@@ -173,7 +173,8 @@ module.exports.createApp = function(template)
 									"bottomButtons",
 									"qrCodeReader",
 									"docs",
-									"utils"
+									"utils",
+									"walkthroughVr"
 								]
 							}
 						]

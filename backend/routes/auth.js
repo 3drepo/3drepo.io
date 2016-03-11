@@ -70,7 +70,7 @@ function checkLogin(req, res, next){
 function logout(req, res, next){
 
 	if(!req.session.user){
-		return responseCodes.respond(Utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, {});
+		return responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, {});
 	}
 
 	var username = req.session.user.username;
