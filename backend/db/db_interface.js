@@ -2295,7 +2295,7 @@ DBInterface.prototype.getObject = function(dbName, project, uid, rid, sid, needF
 				
 				dbConn(self.logger).filterColl(dbName, project + ".scene", query, projection, function(err, obj) {
 					if (err.value) { return callback(err); }
-
+					
 					if (!obj.length) {
 						return callback(responseCodes.OBJECT_NOT_FOUND);
 					}

@@ -724,7 +724,7 @@
 		// 				if ("tex_uuid" in params.query) {
 		// 					tex_uuid = params.query.tex_uuid;
 		// 				}
-
+				
 		// 				render(params.project, obj, tex_uuid, params.subformat, req[C.REQ_REPO].logger, function (err, renderedObj) {
 		// 					if (err.value) {
 		// 						return callback(err);

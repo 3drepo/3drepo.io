@@ -14,4 +14,9 @@ DB.prototype.collection = function() { return this; };
 
 DB.prototype.command = function() { return this; };
 
+DB.prototype.find = function() { return this; };
+
+DB.prototype.next = function() { return Promise.resolve(); };
+
+DB.prototype.limit = function() { return this; };
 module.exports = DB;

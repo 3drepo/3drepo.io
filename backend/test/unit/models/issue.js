@@ -10,7 +10,7 @@ mockgoose(mongoose);
 
 let proxyquire = require('proxyquire');
 
-let modelFactoryMock = proxyquire('../../models/factory/modelFactory', { 
+let modelFactoryMock = proxyquire('../../../models/factory/modelFactory', { 
 	'mongoose': mongoose, 
 });
 
