@@ -39,7 +39,7 @@ let Mesh = proxyquire('../../models/mesh', {
 });
 
 
-describe('Mesh', function(){
+describe('Mesh and Object extended from repo base', function(){
 
 	before(function(done) {
 

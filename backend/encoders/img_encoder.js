@@ -74,6 +74,7 @@ module.exports.transcode = function (fromFormat, toFormat, buffer, callback) {
 var createHeightMap = function(format, buffer, callback) {
 	"use strict";
 
+
 	if (!module.exports.isImage(format)) {
 		return callback(new Error("Invalid image format"));
 	}
@@ -99,43 +100,45 @@ var createHeightMap = function(format, buffer, callback) {
 	});
 };
 
+module.exports.createHeightMap = createHeightMap;
+
 module.exports.route = function(router)
 {
 	"use strict";
 
-	var imgObject = function(req, res, params, err_callback) {
-		dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, {}, function(err, type, uid, fromStash, obj)
-		{
-			if(err.value) {
-				return err_callback(err);
-			}
+	// var imgObject = function(req, res, params, err_callback) {
+	// 	dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, {}, function(err, type, uid, fromStash, obj)
+	// 	{
+	// 		if(err.value) {
+	// 			return err_callback(err);
+	// 		}
 
-			if (type === "texture")
-			{
-				if (params.subformat === "heightmap")
-				{
-					createHeightMap(params.format, obj.textures[params.uid].data.buffer, function(err, grayImage) {
-						if (err.value) {
-							return err_callback(err);
-						}
+	// 		if (type === "texture")
+	// 		{
+	// 			if (params.subformat === "heightmap")
+	// 			{
+	// 				createHeightMap(params.format, obj.textures[params.uid].data.buffer, function(err, grayImage) {
+	// 					if (err.value) {
+	// 						return err_callback(err);
+	// 					}
 
-						res.write(grayImage);
-						res.end();
-					});
-				} else {
-					res.write(obj.textures[params.uid].data.buffer);
-					res.end();
-				}
-			} else {
-				err_callback(responseCodes.OBJECT_TYPE_NOT_SUPPORTED);
-			}
-		});
-	};
+	// 					res.write(grayImage);
+	// 					res.end();
+	// 				});
+	// 			} else {
+	// 				res.write(obj.textures[params.uid].data.buffer);
+	// 				res.end();
+	// 			}
+	// 		} else {
+	// 			err_callback(responseCodes.OBJECT_TYPE_NOT_SUPPORTED);
+	// 		}
+	// 	});
+	// };
 
-	router.get("jpg", "/:account/:project/:uid", imgObject);
-	router.get("png", "/:account/:project/:uid", imgObject);
-	router.get("bmp", "/:account/:project/:uid", imgObject);
-	router.get("gif", "/:account/:project/:uid", imgObject);
+	// router.get("jpg", "/:account/:project/:uid", imgObject);
+	// router.get("png", "/:account/:project/:uid", imgObject);
+	// router.get("bmp", "/:account/:project/:uid", imgObject);
+	// router.get("gif", "/:account/:project/:uid", imgObject);
 
 	router.get("pdf", "/:account/:project/:uid", function(req, res, params, err_callback) {
 		dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, {}, function(err, type, uid, fromStash, obj)
@@ -153,42 +156,42 @@ module.exports.route = function(router)
 	});
 
 	// Get Avatar image
-	router.get("jpg", "/:account", function(req, res, params, err_callback) {
-		dbInterface(req[C.REQ_REPO].logger).getAvatar(params.account, function(err, avatar) {
-			if (err.value) {
-				return err_callback(err);
-			}
+	// router.get("jpg", "/:account", function(req, res, params, err_callback) {
+	// 	dbInterface(req[C.REQ_REPO].logger).getAvatar(params.account, function(err, avatar) {
+	// 		if (err.value) {
+	// 			return err_callback(err);
+	// 		}
 
-			if(!avatar) {
-				return err_callback(responseCodes.USER_DOES_NOT_HAVE_AVATAR);
-			}
+	// 		if(!avatar) {
+	// 			return err_callback(responseCodes.USER_DOES_NOT_HAVE_AVATAR);
+	// 		}
 
-			var type = null;
+	// 		var type = null;
 
-			if (avatar.media_type) {
-				type = avatar.media_type;
-			} else if (avatar.mime) {
-				type = avatar.mime;
-			}
+	// 		if (avatar.media_type) {
+	// 			type = avatar.media_type;
+	// 		} else if (avatar.mime) {
+	// 			type = avatar.mime;
+	// 		}
 
-			if(!type) {
-				return err_callback(responseCodes.AVATAR_INVALID_IMAGE_TYPE);
-			}
+	// 		if(!type) {
+	// 			return err_callback(responseCodes.AVATAR_INVALID_IMAGE_TYPE);
+	// 		}
 
-			var imageTokens = type.split(/\//);
+	// 		var imageTokens = type.split(/\//);
 
-			if (imageTokens[0] !== "image") {
-				return err_callback(responseCodes.AVATAR_IS_NOT_AN_IMAGE);
-			}
+	// 		if (imageTokens[0] !== "image") {
+	// 			return err_callback(responseCodes.AVATAR_IS_NOT_AN_IMAGE);
+	// 		}
 
-			if (imageTokens[1] !== "jpeg") {
-				return err_callback(responseCodes.AVATAR_IS_NOT_A_JPEG);
-			}
+	// 		if (imageTokens[1] !== "jpeg") {
+	// 			return err_callback(responseCodes.AVATAR_IS_NOT_A_JPEG);
+	// 		}
 
-			res.write(avatar.data.buffer);
-			res.end();
-		});
-	});
+	// 		res.write(avatar.data.buffer);
+	// 		res.end();
+	// 	});
+	// });
 };
 
 

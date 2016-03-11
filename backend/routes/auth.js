@@ -12,7 +12,7 @@ var User = require('../models/user');
 router.post('/login', login);
 router.get('/login', checkLogin);
 router.post('/logout', logout);
-// router.get('/:account.jpg', middlewares.loggedIn, getAvatar);
+router.get('/:account.jpg', middlewares.loggedIn, getAvatar);
 router.post('/:account', middlewares.loggedIn, updateUser);
 
 function expireSession(req) {
@@ -116,11 +116,30 @@ function updateUser(req, res, next){
 }
 
 
-// function getAvatar(req, res, next){
-// 	User.getAvatar(req.params.account).then(img => {
-// 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, img);
-// 	}).catch(err => {
-// 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-// 	});
-// }
+function getAvatar(req, res, next){
+	'use strict';
+
+	let responsePlace = utils.APIInfo(req);
+
+	// Update user info
+	User.findByUserName(req.params[C.REPO_REST_API_ACCOUNT]).then(user => {
+		
+
+		if(!user.getAvatar()){
+			return Promise.reject({resCode: responseCodes.USER_DOES_NOT_HAVE_AVATAR });
+		}
+
+		return Promise.resolve(user.getAvatar());
+
+	}).then(avatar => {
+
+		res.write(avatar.buffer);
+		res.end();
+
+	}).catch(err => {
+		//.console.log(err);
+		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
 module.exports = router;

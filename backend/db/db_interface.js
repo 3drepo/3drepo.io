@@ -637,33 +637,33 @@ DBInterface.prototype.getUserInfo = function(username, callback) {
 	});
 };
 
-DBInterface.prototype.getAvatar = function(username, callback) {
-	if(!username){
-		return callback(responseCodes.USER_NOT_SPECIFIED);
-	}
+// DBInterface.prototype.getAvatar = function(username, callback) {
+// 	if(!username){
+// 		return callback(responseCodes.USER_NOT_SPECIFIED);
+// 	}
 
-	this.logger.logDebug("Getting user avatar for " + username);
+// 	this.logger.logDebug("Getting user avatar for " + username);
 
-	var filter = {
-		user: username
-	};
+// 	var filter = {
+// 		user: username
+// 	};
 
-	var projection = {
-		"customData" : 1
-	};
+// 	var projection = {
+// 		"customData" : 1
+// 	};
 
-	dbConn(this.logger).filterColl("admin", "system.users", filter, projection, function(err, coll) {
-		if(err.value) {
-			return callback(err);
-		}
+// 	dbConn(this.logger).filterColl("admin", "system.users", filter, projection, function(err, coll) {
+// 		if(err.value) {
+// 			return callback(err);
+// 		}
 
-		if (coll.length) {
-			callback(responseCodes.OK, coll[0].customData.avatar);
-		} else {
-			callback(responseCodes.USER_NOT_FOUND, null);
-		}
-	});
-};
+// 		if (coll.length) {
+// 			callback(responseCodes.OK, coll[0].customData.avatar);
+// 		} else {
+// 			callback(responseCodes.USER_NOT_FOUND, null);
+// 		}
+// 	});
+// };
 
 
 /*******************************************************************************
