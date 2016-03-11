@@ -523,6 +523,7 @@ var Viewer = {};
 
 		this.mouseDownPickPoint = function(event, pickEvent)
 		{
+			console.log(123);
 			var pickingInfo = self.getViewArea()._pickingInfo;
 
 			// Hack until double click problem solved
@@ -550,6 +551,7 @@ var Viewer = {};
 				var projectInline = self.inlineRoots[inlineTransName];
 				var trans = projectInline._x3domNode.getCurrentTransform();
 
+				console.log(123);
 				callback(self.EVENT.PICK_POINT, {
 					id: objectID,
 					position: pickingInfo.pickPos,
@@ -1689,6 +1691,7 @@ var Viewer = {};
 		self.pins = {};
 
 		this.addPin = function(account, project, id, position, norm, colours, viewpoint) {
+			console.log(333);
 			if (self.pins.hasOwnProperty(id)) {
 				errCallback(self.ERROR.PIN_ID_TAKEN);
 			} else {

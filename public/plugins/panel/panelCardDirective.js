@@ -37,9 +37,9 @@
         };
     }
 
-    PanelCardCtrl.$inject = ["$scope", "$element", "$compile", "$timeout", "$window", "serverConfig", "EventService", "StateManager"];
+    PanelCardCtrl.$inject = ["$scope", "$element", "$compile"];
 
-    function PanelCardCtrl($scope, $element, $compile, $timeout, $window, serverConfig, EventService, StateManager) {
+    function PanelCardCtrl($scope, $element, $compile) {
         var vm = this,
             filter = null,
 			contentHeight;

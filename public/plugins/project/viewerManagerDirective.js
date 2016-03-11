@@ -33,15 +33,22 @@
 	}
 
 	function ViewerManagerService() {
-		this.currentEvent = {};
-		this.currentError = {};
+		var currentEvent = {};
+		var currentError = {};
 
-		this.send = function (type, value) {
-			this.currentEvent = {type: type, value: value};
+		var send = function (type, value) {
+			currentEvent = {type: type, value: value};
 		};
 
-		this.sendError = function(type, value) {
-			this.currentError = {type: type, value: value};
+		var sendError = function(type, value) {
+			currentError = {type: type, value: value};
+		};
+
+		return {
+			currentEvent: function() {return currentEvent;},
+			currentError: function() {return currentError;},
+			send: send,
+			sendError: sendError
 		};
 	}
 
@@ -51,7 +58,7 @@
 		var vm = this;
 
 		vm.manager = new ViewerManager($element[0]);
-		vm.vmservice = new ViewerManagerService();
+		vm.vmservice = ViewerManagerService();
 
 		vm.viewers = {};
 
@@ -72,6 +79,7 @@
 					}
 
 					vm.viewers[event.value.name] = event.value;
+					console.log(vm.viewers);
 				} else if (event.type === EventService.EVENT.CLOSE_VIEWER) {
 					// If the viewer exists in the list then delete it
 					if (vm.viewers.hasOwnProperty(event.value.name)) {
@@ -80,77 +88,6 @@
 				} else if (event.type === EventService.EVENT.VIEWER.READY) {
 					window.viewer = vm.manager.getCurrentViewer();
 				} else {
-					vm.viewerInit.promise.then(function() {
-						if (event.type === EventService.EVENT.VIEWER.GO_HOME) {
-							vm.manager.getCurrentViewer().showAll();
-						} else if (event.type === EventService.EVENT.VIEWER.ENTER_FULLSCREEN) {
-							vm.manager.getCurrentViewer().switchFullScreen(null);
-						} else if (event.type === EventService.EVENT.VIEWER.ENTER_VR) {
-							vm.manager.getCurrentViewer().switchVR();
-						} else if (event.type === EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK) {
-							vm.manager.getCurrentViewer().onViewpointChanged(event.value.callback);
-						}
-					});
-
-					vm.viewerLoaded.promise.then(function() {
-						if (event.type === EventService.EVENT.VIEWER.ADD_PIN) {
-							vm.manager.getCurrentViewer().addPin(
-								event.value.account,
-								event.value.project,
-								event.value.id,
-								event.value.position,
-								event.value.norm,
-								event.value.colours,
-								event.value.viewpoint);
-						} else if (event.type === EventService.EVENT.VIEWER.REMOVE_PIN) {
-							vm.manager.getCurrentViewer().removePin(
-								event.value.id
-							);
-						} else if (event.type === EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR) {
-							vm.manager.getCurrentViewer().changePinColours(
-								event.value.id,
-								event.value.colours
-							);
-						} else if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
-							vm.manager.getCurrentViewer().clickPin(event.value.id);
-						} else if (event.type === EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES) {
-							vm.manager.getCurrentViewer().clearClippingPlanes();
-						} else if (event.type === EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE) {
-							vm.manager.getCurrentViewer().addClippingPlane(
-								event.value.axis,
-								event.value.distance ? event.value.distance : 0,
-								event.value.percentage ? event.value.percentage : 0,
-								event.value.clipDirection ? event.value.clipDirection : -1);
-						} else if (event.type === EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE) {
-							vm.manager.getCurrentViewer().moveClippingPlane(event.value.percentage);
-						} else if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
-							vm.manager.getCurrentViewer().highlightObjects(
-								event.value.account,
-								event.value.project,
-								event.value.id,
-								event.value.ids ? event.value.ids : [event.value.id]
-							);
-						} else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
-							vm.manager.getCurrentViewer().highlightObjects();
-						} else if (event.type === EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY) {
-							vm.manager.getCurrentViewer().switchObjectVisibility(
-								event.value.account,
-								event.value.project,
-								event.value.id,
-								event.value.ids ? event.value.ids : [event.value.id],
-								event.value.state
-							);
-						} else if (event.type === EventService.EVENT.VIEWER.SET_CAMERA) {
-							vm.manager.getCurrentViewer().setCamera(
-								event.value.position,
-								event.value.view_dir,
-								event.value.up,
-								event.value.animate ? event.value.animate : true
-							);
-						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
-							vm.manager.getCurrentViewer().setNavMode(event.value.mode);
-						}
-					});
 					vm.vmservice.send(event.type, event.value);
 				}
 			}
