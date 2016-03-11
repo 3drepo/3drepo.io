@@ -37,9 +37,9 @@
 	function PanelCardOptionAddCtrl() {
 		var vm = this;
 
-		vm.toggleAdd = function (event) {
+		vm.showAddElement = function (event) {
 			event.stopPropagation();
-			vm.showAdd = !vm.showAdd;
+			vm.showAdd = true;
 		};
 	}
 }());

@@ -30,7 +30,9 @@
 				filterText: "=",
 				showAdd: "=",
 				selectedMenuOption: "=",
-				onContentHeightRequest: "&"
+				onContentHeightRequest: "&",
+				onShowItem : "&",
+				hideItem: "="
 			},
 			controller: IssuesCtrl,
 			controllerAs: 'vm',
@@ -417,6 +419,9 @@
 			}
 		};
 
+		/*
+		 * Selecting a menu option
+		 */
 		$scope.$watch("vm.selectedMenuOption", function (newValue) {
 			var role, roleIndex;
 			if (angular.isDefined(newValue)) {
@@ -473,6 +478,7 @@
 					vm.showIssue = false;
 					vm.showIssueList = true;
 					vm.showAddIssue = false;
+					vm.showAdd = false; // So that showing add works
 
 					// Set the content height
 					setContentHeight();

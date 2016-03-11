@@ -137,3 +137,8 @@ panel-card #helpButton {
   right: -36px;
   opacity: 0.75;
 }
+
+panel-card .statusIcon {
+  outline: none;
+  width: 18px;
+}

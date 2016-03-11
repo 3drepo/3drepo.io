@@ -58,6 +58,7 @@
 				createCardContent();
 				createToolbarOptions();
 				createFilter();
+				vm.statusIcon = vm.contentData.icon;
 			}
 		});
 
@@ -73,7 +74,9 @@
 			element =
 				"<" + vm.contentData.type + " " +
 				"show='vm.contentData.show' " +
-				"on-content-height-request='vm.onContentHeightRequest(height)' ";
+				"on-content-height-request='vm.onContentHeightRequest(height)' " +
+				"on-show-item='vm.showItem()' " +
+				"hide-item='vm.hideSelectedItem' ";
 
 			// Only add attributes when needed
 			for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
@@ -171,7 +174,6 @@
 		 * @param height
 		 */
 		vm.onContentHeightRequest = function (height) {
-			console.log(height);
 			contentHeight = height;
 			vm.onHeightRequest({contentItem: vm.contentData, height: contentHeight});
 		};
