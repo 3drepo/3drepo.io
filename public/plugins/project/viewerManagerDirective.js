@@ -15,28 +15,74 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(function () {
+(function() {
 	"use strict";
 
 	angular.module("3drepo")
-	.directive("viewermanager", viewerManager);
+		.directive("viewermanager", viewerManager);
 
 	function viewerManager() {
 		return {
-			restrict: 'E',
-			controller : ViewerManagerCtrl,
-			template: '<viewer class="project-viewport viewport" handle="{{vm.defaultHandle}}" manager="vm.manager" />',
-			controllerAs: 'vm'
+			restrict: "E",
+			controller: ViewerManagerCtrl,
+			scope: true,
+			templateUrl: "viewermanager.html",
+			controllerAs: "vm",
+			bindToController: true
 		};
 	}
 
-	ViewerManagerCtrl.$inject = ["$element"];
+	function ViewerManagerService() {
+		this.currentEvent = {};
+		this.currentError = {};
 
-	function ViewerManagerCtrl ($element)
-	{
-		var vm = this;
-		vm.manager = new ViewerManager($element[0]);
-		vm.defaultHandle = vm.manager.defaultViewerHandle;
+		this.send = function (type, value) {
+			this.currentEvent = {type: type, value: value};
+		};
+
+		this.sendError = function(type, value) {
+			this.currentError = {type: type, value: value};
+		};
 	}
 
+	ViewerManagerCtrl.$inject = ["$scope", "$q", "$element", "EventService"];
+
+	function ViewerManagerCtrl($scope, $q, $element, EventService) {
+		var vm = this;
+
+		vm.manager = new ViewerManager($element[0]);
+		vm.vmservice = new ViewerManagerService();
+
+		vm.viewers = {};
+
+		$scope.manager = vm.manager;
+
+		vm.viewerInit = $q.defer();
+		vm.viewerLoaded = $q.defer();
+
+		$scope.$watch(EventService.currentEvent, function(event) {
+			if (angular.isDefined(event.type) && angular.isDefined(event.type)) {
+				if (event.type === EventService.EVENT.CREATE_VIEWER) {
+					// If a viewer with the same name exists already then
+					// throw an error, otherwise add it
+					if (vm.viewers.hasOwnProperty(event.value.name)) {
+						EventService.sendError(EventService.ERROR.DUPLICATE_VIEWER_NAME, {
+							name: event.value.name
+						});
+					}
+
+					vm.viewers[event.value.name] = event.value;
+				} else if (event.type === EventService.EVENT.CLOSE_VIEWER) {
+					// If the viewer exists in the list then delete it
+					if (vm.viewers.hasOwnProperty(event.value.name)) {
+						delete vm.viewers[event.value.name];
+					}
+				} else if (event.type === EventService.EVENT.VIEWER.READY) {
+					window.viewer = vm.manager.getCurrentViewer();
+				} else {
+					vm.vmservice.send(event.type, event.value);
+				}
+			}
+		});
+	}
 }());

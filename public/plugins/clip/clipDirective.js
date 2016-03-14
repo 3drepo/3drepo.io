@@ -23,8 +23,8 @@
 
 	function clip() {
 		return {
-			restrict: 'EA',
-			templateUrl: 'clip.html',
+			restrict: "EA",
+			templateUrl: "clip.html",
 			scope: {
 				height: "=",
 				show: "=",
@@ -36,9 +36,9 @@
 		};
 	}
 
-	ClipCtrl.$inject = ["$scope", "$timeout", "ViewerService", "EventService"];
+	ClipCtrl.$inject = ["$scope", "$timeout", "EventService"];
 
-	function ClipCtrl($scope, $timeout, ViewerService, EventService) {
+	function ClipCtrl($scope, $timeout, EventService) {
 		var vm = this;
 
 		vm.sliderMin = 0;
@@ -53,14 +53,21 @@
 		function initClippingPlane () {
 			$timeout(function () {
 				var initPosition = (vm.sliderMax - vm.sliderPosition) / vm.sliderMax;
-				ViewerService.defaultViewer.clearClippingPlanes();
-				vm.clipPlaneID = ViewerService.defaultViewer.addClippingPlane(translateAxis(vm.selectedAxis), 0, initPosition);
-				vm.clipPlane = ViewerService.defaultViewer.getClippingPlane(vm.clipPlaneID);
+				
+				EventService.send(EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES);
+				EventService.send(EventService.EVENT.VIEWER.ADD_CLIPPING_PLANE, 
+				{
+					axis: translateAxis(vm.selectedAxis),
+					percentage: initPosition
+				});
 			});
 		}
 
 		function moveClippingPlane(sliderPosition) {
-			vm.clipPlane.movePlane((vm.sliderMax - sliderPosition) / vm.sliderMax);
+			EventService.send(EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE, 
+			{
+				percentage: (vm.sliderMax - sliderPosition) / vm.sliderMax
+			});
 		}
 
 		$scope.$watch("vm.show", function (newValue) {
@@ -95,7 +102,7 @@
 				{
 					initClippingPlane();
 				} else {
-					ViewerService.defaultViewer.clearClippingPlanes();
+					EventService.send(EventService.EVENT.VIEWER.CLEAR_CLIPPING_PLANES);
 				}
 			}
 		});
@@ -117,7 +124,7 @@
 		});
 
 		$scope.$watch(EventService.currentEvent, function (event) {
-			if (event.type === EventService.EVENT.SET_CLIPPING_PLANES) {
+			if (event.type === EventService.EVENT.VIEWER.SET_CLIPPING_PLANES) {
 				vm.clipPlane = null;
 
 				if (event.value.hasOwnProperty("clippingPlanes") && event.value.clippingPlanes.length) {

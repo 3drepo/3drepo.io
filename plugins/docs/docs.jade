@@ -1,6 +1,26 @@
-.docList(layout="row", layout-align="start center", ng-repeat="doc in vm.docs", ng-click="vm.showDoc(doc)", ng-if="!vm.showDocsGetProgress")
+//.docList(layout="row", layout-align="start center", ng-repeat="doc in vm.docs", ng-click="vm.showDoc(doc)", ng-if="!vm.showDocsGetProgress")
 	md-icon(class="fa", md-font-icon="fa-file-pdf-o")
 	p {{doc.name}}
+
+md-list.typesList(ng-if="!vm.showInfo")
+	div(ng-repeat="(key, value) in vm.docs")
+		md-list-item.md-1-line(ng-click="vm.toggleItem(key)")
+			.md-list-item-text
+				h4 {{key}}
+		div(ng-if="value.show")
+			// Meta data
+			div(ng-if="key==='Meta Data'")
+				.dataItem(ng-repeat="metadataItem in value.data", layout="column", flex)
+					div(ng-repeat="(mKey, mValue) in metadataItem.metadata", layout="row", layout-align="space-between start")
+						p.metadataKey(flex="45") {{mKey}}
+						p.metadataValue(flex="45") {{mValue}}
+
+			// PDF
+			div(ng-if="key==='PDF'")
+				.dataItem(ng-repeat="pdfItem in value.data", layout="row", layout-align="start center", flex, ng-click="vm.showDoc(pdfItem)")
+					md-icon(class="fa", md-font-icon="fa-file-pdf-o")
+					p {{pdfItem.name}}
+		md-divider
 
 .cardInfo(ng-if="vm.showInfo")
 	p {{vm.info}}

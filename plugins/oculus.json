@@ -3,12 +3,6 @@
 	"files": {
 		"js" : [
 			"oculus/oculus.js"
-		],
-		"angular": [
-			"oculus/OculusCtrl.js"
-		],
-		"ui": [
-			{"name": "oculus", "template" : "oculus/oculus.jade", "position" : "icons"}
 		]
 	}
 }

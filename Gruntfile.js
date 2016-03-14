@@ -1,7 +1,17 @@
 module.exports = function(grunt) {
 
     grunt.initConfig({
+
         pkg: grunt.file.readJSON('package.json'),
+
+        env : {
+            options : {
+            //Shared Options Hash
+            },
+            test : {
+                NODE_ENV : 'test'
+            }
+        },
 
         concat: {
             build: {
@@ -57,6 +67,7 @@ module.exports = function(grunt) {
                 varstmt: false,
                 strict: false,
                 esnext: true,
+                expr: true,
                 // options here to override JSHint defaults
                 globals: {
                     console: true,
@@ -66,19 +77,35 @@ module.exports = function(grunt) {
             },
 
             backend:{
-                files: { src: ['js/core/**/*.js', 'services/*.js']},
+                files: { src: [
+                    'backend/db/**/*.js', 
+                    'backend/services/**/*.js', 
+                    'backend/routes/**/*.js',
+                    'backend/libs/**/*.js',
+                    'backend/models/**/*.js',
+                    'backend/*.js'
+                ]},
             }
 
         },
 
         mochaTest: {
-          test: {
+          unit: {
             options: {
               reporter: 'spec',
               quiet: false, // Optionally suppress output to standard out (defaults to false)
               clearRequireCache: false // Optionally clear the require cache before running tests (defaults to false)
             },
-            src: ['test/**/*.js']
+            src: ['test/**/*.js', 'backend/test/unit/**/*.js']
+          },
+
+          integrated: {
+            options: {
+              reporter: 'spec',
+              quiet: false, // Optionally suppress output to standard out (defaults to false)
+              clearRequireCache: false // Optionally clear the require cache before running tests (defaults to false)
+            },
+            src: ['test/**/*.js', 'backend/test/integrated/**/*.js']
           }
         },
 
@@ -102,7 +129,9 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-mocha-test');
 	grunt.loadNpmTasks('grunt-webfont');
+    grunt.loadNpmTasks('grunt-env');
 
 	grunt.registerTask('default', ['concat', 'uglify', 'webfont']);
-	grunt.registerTask('test', ['jshint:backend', 'mochaTest']);
+	grunt.registerTask('test', ['jshint:backend', 'mochaTest:unit']);
+    grunt.registerTask('test-integrated', ['env:test', 'mochaTest:integrated']);
 };
