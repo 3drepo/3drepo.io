@@ -500,6 +500,7 @@
 			vm.showIssueList = false;
 			vm.showIssue = true;
 			vm.showAddIssue = false;
+			vm.showAdd = false; // So that showing add works
 
 			// Selected issue
 			if (vm.selectedIssue !== null) {

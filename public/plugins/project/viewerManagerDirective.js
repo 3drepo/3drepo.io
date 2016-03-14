@@ -32,23 +32,35 @@
 		};
 	}
 
-	function ViewerManagerService() {
+	function ViewerManagerService(nextEventService) {
 		var currentEvent = {};
 		var currentError = {};
 
+		var sendInternal = function(type, value) {
+			currentEvent = {type:type, value: value};
+		};
+
 		var send = function (type, value) {
-			currentEvent = {type: type, value: value};
+			sendInternal(type, value);
+			nextEventService.send(type, value);
+		};
+
+		var sendErrorInternal = function(type, value) {
+			currentError = {type: type, value: value};
 		};
 
 		var sendError = function(type, value) {
-			currentError = {type: type, value: value};
+			sendErrorInternal(type, value);
+			nextEventService.sendError(type, value);
 		};
 
 		return {
 			currentEvent: function() {return currentEvent;},
 			currentError: function() {return currentError;},
 			send: send,
-			sendError: sendError
+			sendInternal: sendInternal,
+			sendError: sendError,
+			sendErrorInternal: sendErrorInternal
 		};
 	}
 
@@ -58,7 +70,7 @@
 		var vm = this;
 
 		vm.manager = new ViewerManager($element[0]);
-		vm.vmservice = ViewerManagerService();
+		vm.vmservice = ViewerManagerService(EventService);
 
 		vm.viewers = {};
 
@@ -68,6 +80,7 @@
 		vm.viewerLoaded = $q.defer();
 
 		$scope.$watch(EventService.currentEvent, function(event) {
+			console.log(event);
 			if (angular.isDefined(event.type) && angular.isDefined(event.type)) {
 				if (event.type === EventService.EVENT.CREATE_VIEWER) {
 					// If a viewer with the same name exists already then
@@ -79,7 +92,6 @@
 					}
 
 					vm.viewers[event.value.name] = event.value;
-					console.log(vm.viewers);
 				} else if (event.type === EventService.EVENT.CLOSE_VIEWER) {
 					// If the viewer exists in the list then delete it
 					if (vm.viewers.hasOwnProperty(event.value.name)) {
@@ -88,7 +100,7 @@
 				} else if (event.type === EventService.EVENT.VIEWER.READY) {
 					window.viewer = vm.manager.getCurrentViewer();
 				} else {
-					vm.vmservice.send(event.type, event.value);
+					vm.vmservice.sendInternal(event.type, event.value);
 				}
 			}
 		});

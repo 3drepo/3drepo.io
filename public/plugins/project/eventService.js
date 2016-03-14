@@ -66,7 +66,7 @@
 				{
 					console.trace("UNDEFINED EVENT TYPE");			
 				} else {
-					//console.log(type + " : " + JSON.stringify(value));
+					console.log("SEND: " + type + " : " + JSON.stringify(value));
 					currentEvent = {type: type, value: value};
 				}
 			});

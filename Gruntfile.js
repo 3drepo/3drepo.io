@@ -29,7 +29,21 @@ module.exports = function(grunt) {
                     'public/plugins/viewing/*.js'
                 ],
                 dest: 'public/dist/plugins.concat.js'
-            }
+            },
+
+			frontendAllJS: {
+				src: [
+					'frontend/**/*.js'
+				],
+				dest: 'public/all/frontend_all.concat.js'
+			},
+
+			frontendAllCSS: {
+				src: [
+					'frontend/**/*.css'
+				],
+				dest: 'public/all/frontend_all.css'
+			}
         },
 
         uglify: {
@@ -40,8 +54,14 @@ module.exports = function(grunt) {
                 files: {
                     'public/dist/plugins.min.js' : ['public/dist/plugins.concat.js']
                 }
-            }
-        },
+            },
+
+			frontendAllJS: {
+				files: {
+					'public/all/frontend_all.min.js': ['public/all/frontend_all.concat.js']
+				}
+			}
+		},
 
         jshint: {
             files: ['js/core/**/*.js', 'public/plugins/**/*.js', 'services/*.js', 'public/js/*.js'],
@@ -101,6 +121,18 @@ module.exports = function(grunt) {
 				fontFilename: 'three-d-repo',
 				htmlDemo: false
 			}
+		},
+
+		cssmin: {
+			options: {
+				shorthandCompacting: false,
+				roundingPrecision: -1
+			},
+			frontendAllCSS: {
+				files: {
+					'public/all/frontend_all.min.css': ['public/all/frontend_all.css']
+				}
+			}
 		}
     });
 
@@ -110,7 +142,9 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-mocha-test');
 	grunt.loadNpmTasks('grunt-webfont');
+	grunt.loadNpmTasks('grunt-contrib-cssmin');
 
 	grunt.registerTask('default', ['concat', 'uglify', 'webfont']);
 	grunt.registerTask('test', ['jshint:backend', 'mochaTest']);
+	grunt.registerTask('frontend', ['concat:frontendAllJS','concat:frontendAllCSS', 'uglify:frontendAllJS', 'cssmin:frontendAllCSS']);
 };

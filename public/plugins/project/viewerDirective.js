@@ -72,7 +72,6 @@
 		};
 
 		$scope.init = function() {
-			console.log(1);
 			v.viewer = new Viewer(v.name, $element[0], v.manager, eventCallback, errCallback);
 
 			// TODO: Move this so that the attachment is contained
@@ -99,7 +98,6 @@
 			$scope.reload();
 
 			v.loaded.promise.then(function() {
-				console.log(2);
 				// TODO: Move this so that the attachment is contained
 				// within the plugins themselves.
 				// Comes free with oculus support and gamepad support
@@ -121,7 +119,6 @@
 		};
 
 		$scope.$watch(v.eventService.currentEvent, function(event) {
-			console.log(event);
 			if (angular.isDefined(event) && angular.isDefined(event.type)) {
 				if (event.type === EventService.EVENT.VIEWER.START_LOADING) {
 					v.initialised.resolve();
