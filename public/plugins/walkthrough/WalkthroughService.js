@@ -27,7 +27,7 @@
         var walkthroughs = {},
             //userControlTimeout = null,
 			loading = null;
-		
+
         function getWalkthroughs(account, project, index) {
 			var projectKey = account + "__" + project;
 
@@ -35,14 +35,14 @@
 			{
 				index = "all";
 			}
-			
+
             var url = "/" + account + "/" + project + "/walkthrough/" + index + ".json",
                 i = 0,
                 length = 0;
 
 			loading = $q.defer();
 			var needLoading = false;
-			
+
 			if (!walkthroughs.hasOwnProperty(projectKey))
 			{
 				walkthroughs[projectKey] = [];
@@ -53,7 +53,7 @@
 					needLoading = true;
 				}
 			}
-			
+
 			if (needLoading)
 			{
 				$http.get(serverConfig.apiUrl(url))
@@ -61,28 +61,28 @@
 						for (i = 0, length = data.data.length; i < length; i++) {
 							walkthroughs[projectKey][data.data[i].index] = data.data[i].cameraData;
 						}
-						
+
 						loading.resolve(walkthroughs[projectKey][index]);
 					});
 			} else {
 				loading.resolve(walkthroughs[projectKey][index]);
-			}		
-			
+			}
+
 			return loading.promise;
         }
-		
+
 		var saveRecording = function (account, project, index, recording) {
             var postUrl = "/" + account + "/" + project + "/walkthrough";
 			var projectKey = account + "__" + project;
-			
+
 			walkthroughs[projectKey][index] = recording;
-			
+
             $http.post(serverConfig.apiUrl(postUrl), {index: index, cameraData: recording})
                 .then(function() {
                     //console.log(json);
                 });
-        };		
-	
+        };
+
         return {
             saveRecording: saveRecording,
             getWalkthroughs: getWalkthroughs

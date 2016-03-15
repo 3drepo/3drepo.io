@@ -15,7 +15,8 @@
 			"base/httpProvider.js",
 			"base/BaseCtrl.js",
 			"base/StateManager.js",
-			"base/projectPageConfig.js"
+			"base/projectPageConfig.js",
+            "base/homeDirective.js"
 		]
 	}
 }

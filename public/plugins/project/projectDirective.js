@@ -30,7 +30,7 @@
 			.state(states[i] + '.project', {
 				url: '/:project',
 				resolve: {
-					auth: function authCheck(Auth) { return Auth.init(); },
+					auth: function (Auth) { return Auth.init(); },
 					init: function(StateManager, $stateParams) {
 						StateManager.setStateVar("branch", "master");
 						StateManager.setStateVar("revision", "head");
@@ -43,15 +43,17 @@
 						templateUrl: 'project.html'
 					}
 				}
-			})
+			});
 		}
 	}])
 	.run(['StateManager', function(StateManager) {
 		StateManager.registerPlugin('project', 'ProjectData', function () {
-			if (StateManager.state.project)
+			if (StateManager.state.project) {
 				return "project";
-			else
+			}
+			else {
 				return null;
+			}
 		});
 
 		StateManager.setClearStateVars("project", ["project"]);
@@ -69,35 +71,34 @@
 	ProjectCtrl.$inject = ["$timeout", "EventService", "StateManager", "ProjectService"];
 
 	function ProjectCtrl($timeout, EventService, StateManager, ProjectService) {
-		var panelContent = {
+		var panelCard = {
 			left: [],
 			right: []
 		};
 
-		var state = StateManager.state,
-			promise,
+		var promise,
 			i, length;
 
-		panelContent.left.push({
+		panelCard.left.push({
 			type: "tree",
 			title: "Tree",
 			show: true,
 			help: "Model elements shown in a tree structure",
 			icon: "fa-sitemap",
-			hasFilter: true,
-			fixedHeight: false
+			height: 820,
+			fixedHeight: false,
+			options: [
+				"filter"
+			]
 		});
 
-		panelContent.right.push({
+		panelCard.right.push({
 			type: "issues",
 			title: "Issues",
 			show: true,
 			help: "List current issues",
 			icon: "fa-map-marker",
-			canPrint: true,
-			hasFilter: true,
-			canAdd: true,
-			options: [
+			menu: [
 				{
 					value: "sortByDate",
 					label: "Sort by Date",
@@ -117,9 +118,16 @@
 					secondSelected: false
 				}
 			],
-			fixedHeight: false
+			height: 820,
+			fixedHeight: false,
+			options: [
+				"print",
+				"add",
+				"filter",
+				"menu"
+			]
 		});
-		panelContent.right.push({
+		panelCard.right.push({
 			type: "clip",
 			title: "Clip",
 			show: false,
@@ -127,23 +135,26 @@
 			icon: "fa-object-group",
 			height: 120,
 			fixedHeight: true,
-			showVisible: true
+			options: [
+				"visible"
+			]
 		});
-		panelContent.right.push({
+		panelCard.right.push({
 			type: "docs",
 			title: "Docs",
 			show: false,
 			help: "Documents",
 			icon: "fa-clone",
 			height: 80,
-			fixedHeight: false
+			fixedHeight: false,
+			options: []
 		});
 
-		// Add filtering options for the Issues panel
+		// Add filtering options for the Issues card menu
 		promise = ProjectService.getRoles();
 		promise.then(function (data) {
 			for (i = 0, length = data.length; i < length; i += 1) {
-				panelContent.right[0].options.push(
+				panelCard.right[0].menu.push(
 					{
 						value: "filterRole_" + data[i].role,
 						label: data[i].role,
@@ -169,7 +180,7 @@
 		});
 
 		$timeout(function () {
-			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelContent);
+			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelCard);
 			
 			// No parameters means load from state variables
 			EventService.send(EventService.EVENT.CREATE_VIEWER, {

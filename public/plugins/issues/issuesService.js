@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.factory("IssuesService", IssuesService);
 
-	IssuesService.$inject = ["$http", "$q", "StateManager", "serverConfig", "EventService", "Auth", "ViewerService"];
+	IssuesService.$inject = ["$http", "$q", "StateManager", "serverConfig", "EventService", "Auth"];
 
-	function IssuesService($http, $q, StateManager, serverConfig, EventService, Auth, ViewerService) {
+	function IssuesService($http, $q, StateManager, serverConfig, EventService, Auth) {
 		var state = StateManager.state,
 			url = "",
 			data = {},
@@ -117,10 +117,10 @@
 
 			url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue.objectId);
 
-			//console.log()
+			// viewpoint previously was set to ViewerService.defaultViewer.getCurrentViewpointInfo()
 			data = {
 				name: issue.name,
-				viewpoint: ViewerService.defaultViewer.getCurrentViewpointInfo(),
+				viewpoint: null,
 				scale: 1.0,
 				creator_role: issue.creator_role,
 				assigned_roles: userRoles

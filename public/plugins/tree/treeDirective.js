@@ -35,9 +35,9 @@
 		};
 	}
 
-	TreeCtrl.$inject = ["$scope", "$timeout", "TreeService", "ViewerService", "EventService"];
+	TreeCtrl.$inject = ["$scope", "$timeout", "TreeService", "EventService"];
 
-	function TreeCtrl($scope, $timeout, TreeService, ViewerService, EventService) {
+	function TreeCtrl($scope, $timeout, TreeService, EventService) {
 		var vm = this,
 			promise = null,
 			i = 0,

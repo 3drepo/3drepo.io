@@ -2,11 +2,22 @@
 	"name" : "account",
 	"files": {
 		"jade" : [
-			{"template" : "account/account.jade", "id" : "account.html"}
-		],
+			{"template" : "account/account.jade", "id" : "account.html"},
+            {"template" : "account/accountProjects.jade", "id" : "accountProjects.html"},
+            {"template" : "account/accountProfile.jade", "id" : "accountProfile.html"},
+            {"template" : "account/logout.jade", "id" : "logout.html" }
+        ],
 		"angular": [
 			"account/AccountData.js",
-			"account/AccountCtrl.js"
-		]
+			"account/AccountCtrl.js",
+            "account/accountDirective.js",
+            "account/accountService.js",
+            "account/accountProjectsDirective.js",
+            "account/accountProfileDirective.js",
+            "account/logoutDirective.js"
+		],
+        "css" : [
+            "account/account.css"
+        ]
 	}
 }

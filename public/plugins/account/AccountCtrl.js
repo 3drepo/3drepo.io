@@ -26,7 +26,6 @@ function($stateProvider, parentStates) {
 		$stateProvider
 		.state(states[i] + '.account', {
 			url: ':account',
-			templateUrl: 'account.html',
 			resolve: {
 				auth: function authCheck(Auth) {
 					return Auth.init();
@@ -34,82 +33,31 @@ function($stateProvider, parentStates) {
 				init: function(StateManager, auth, $stateParams) {
 					// On the login page the account variable is set to ""
 					// we must override this.
-					if ($stateParams["account"] == "")
+					if ($stateParams["account"] === "")
 						$stateParams["account"] = null;
 
 					StateManager.setState($stateParams, {});
-					StateManager.refresh("account");
 				}
 			},
 			views: {
 				"@" : {
-					templateUrl: 'account.html',
-					controller: 'AccountCtrl'
+					template: '<account-dir></account-dir>'
 				}
 			}
 		})
 	}
 }])
 .run(['StateManager', function(StateManager) {
-	StateManager.registerPlugin('account', 'AccountData', function () {
-		if(StateManager.state.account)
+	StateManager.registerPlugin('account', null, function () {
+		if (StateManager.state.account) {
 			return "account";
-		else
+		}
+		else {
 			return null;
+		}
 	});
 
 	StateManager.setClearStateVars("account", ["account"]);
-}])
-.controller('AccountCtrl', ['$scope', 'StateManager', function($scope, StateManager)
-{
-	$scope.defaultView = "projects";
-	$scope.view = $scope.defaultView;
-
-	$scope.setView = function(view){
-		$scope.view = view;
-	}
-
-	$scope.goProject = function(account, project){
-		StateManager.setStateVar("account", account);
-		StateManager.setStateVar("project", project);
-		StateManager.updateState();
-	}
-
-	$scope.isView = function(view){
-		return $scope.view == view;
-	}
-
-	$scope.passwords = {};
-	$scope.passwords.updateUserError = "";
-	$scope.passwords.changePasswordError = "";
-
-	$scope.errors = {};
-	$scope.errors.oldPassword = "";
-	$scope.errors.newPassword = "";
-
-	$scope.updateUser = function() {
-		$scope.Data.UserData.updateUser()
-		.success(function(data, status) {
-			$scope.setView($scope.defaultView);
-		}).error(function(message, status) {
-			$scope.updateUserError = "[" + message.message + "]";
-		});
-	};
-
-	$scope.changePassword = function() {
-		$scope.Data.AccountData.updatePassword($scope.passwords.oldPassword, $scope.passwords.newPassword)
-		.success(function(data, status) {
-			$scope.setView($scope.defaultView);
-		}).error(function(message, status) {
-			$scope.errors.changePasswordError = "[" + message.message + "]";
-		});
-	};
-
-	$scope.projectsShowList = true;
-	$scope.toggleProjectsView = function() {
-		$scope.projectsShowList = !$scope.projectsShowList;
-	};
-
 }]);
 
 

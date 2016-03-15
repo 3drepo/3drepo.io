@@ -29,8 +29,7 @@
 				show: "=",
 				filterText: "=",
 				showAdd: "=",
-				options: "=",
-				selectedOption: "=",
+				selectedMenuOption: "=",
 				onContentHeightRequest: "&",
 				onShowItem : "&",
 				hideItem: "="
@@ -421,9 +420,9 @@
 		};
 
 		/*
-		 * Handle changes to the options
+		 * Selecting a menu option
 		 */
-		$scope.$watch("vm.selectedOption", function (newValue) {
+		$scope.$watch("vm.selectedMenuOption", function (newValue) {
 			var role, roleIndex;
 			if (angular.isDefined(newValue)) {
 				if (newValue.value === "sortByDate") {
@@ -479,6 +478,7 @@
 					vm.showIssue = false;
 					vm.showIssueList = true;
 					vm.showAddIssue = false;
+					vm.showAdd = false; // So that showing add works
 
 					// Set the content height
 					setContentHeight();
@@ -500,6 +500,7 @@
 			vm.showIssueList = false;
 			vm.showIssue = true;
 			vm.showAddIssue = false;
+			vm.showAdd = false; // So that showing add works
 
 			// Selected issue
 			if (vm.selectedIssue !== null) {

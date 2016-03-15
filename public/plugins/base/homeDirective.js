@@ -25,7 +25,7 @@
 			if ($injector.has("$mdThemingProvider"))
 			{
 				var mdThemingProvider = $injector.get("$mdThemingProvider");
-				
+
 				mdThemingProvider.theme("default")
                 .primaryPalette("indigo", {
                     "default": "500",
@@ -44,12 +44,12 @@
         return {
             restrict: "E",
             template: "<div ng-if='!hm.loggedIn')>" +
-			          "<div ng-include='hm.getLoggedOutUrl()'></div>" + 
-					  "</div>" + 
-					  "<div ng-if='hm.loggedIn'>" + 
+			          "<div ng-include='hm.getLoggedOutUrl()'></div>" +
+					  "</div>" +
+					  "<div ng-if='hm.loggedIn'>" +
 					  "<div ng-include='hm.getLoggedInUrl()'></div>" +
 					  "</div>",
-			scope: { 
+			scope: {
 				account: "@",
 				password: "@",
 				loggedInUrl: "@",
@@ -61,13 +61,13 @@
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "Auth", "StateManager"];
+    HomeCtrl.$inject = [];
 
     function HomeCtrl($scope, Auth, StateManager) {
         var hm = this;
-		
+
 		hm.loggedIn = false;
-		
+
 		hm.getLoggedInUrl = function() {
 			return hm.loggedInUrl;
 		};
@@ -75,7 +75,7 @@
 		hm.getLoggedOutUrl = function() {
 			return hm.loggedOutUrl;
 		};
-		
+
 		if (angular.isDefined(hm.account) && angular.isDefined(hm.password))
 		{
 			Auth.login(hm.account, hm.password).then( function () {

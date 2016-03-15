@@ -32,16 +32,35 @@
 		};
 	}
 
-	function ViewerManagerService() {
-		this.currentEvent = {};
-		this.currentError = {};
+	function ViewerManagerService(nextEventService) {
+		var currentEvent = {};
+		var currentError = {};
 
-		this.send = function (type, value) {
-			this.currentEvent = {type: type, value: value};
+		var sendInternal = function(type, value) {
+			currentEvent = {type:type, value: value};
 		};
 
-		this.sendError = function(type, value) {
-			this.currentError = {type: type, value: value};
+		var send = function (type, value) {
+			sendInternal(type, value);
+			nextEventService.send(type, value);
+		};
+
+		var sendErrorInternal = function(type, value) {
+			currentError = {type: type, value: value};
+		};
+
+		var sendError = function(type, value) {
+			sendErrorInternal(type, value);
+			nextEventService.sendError(type, value);
+		};
+
+		return {
+			currentEvent: function() {return currentEvent;},
+			currentError: function() {return currentError;},
+			send: send,
+			sendInternal: sendInternal,
+			sendError: sendError,
+			sendErrorInternal: sendErrorInternal
 		};
 	}
 
@@ -50,8 +69,8 @@
 	function ViewerManagerCtrl($scope, $q, $element, EventService) {
 		var vm = this;
 
-		vm.manager   = new ViewerManager($element[0]);
-		vm.vmservice = new ViewerManagerService();
+		vm.manager = new ViewerManager($element[0]);
+		vm.vmservice = ViewerManagerService(EventService);
 
 		vm.viewers = {};
 
@@ -80,7 +99,7 @@
 				} else if (event.type === EventService.EVENT.VIEWER.READY) {
 					window.viewer = vm.manager.getCurrentViewer();
 				} else {
-					vm.vmservice.send(event.type, event.value);
+					vm.vmservice.sendInternal(event.type, event.value);
 				}
 			}
 		});

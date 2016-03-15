@@ -146,16 +146,17 @@ var Viewer = {};
 			logo.style.position       = "absolute";
 			logo.style["z-index"]     = 2;
 			logo.style["text-align"]  = "center";
-			logo.style.width          = widthPercentage;
-			logo.style["margin-top"]  = "10px";
-			logo.style.left = perLogo * (numLogos - 1) + "%";
-
-			logo.setAttribute("onclick", "logoClick()");
+			logo.style.width          = "250px";
+			logo.style["top"]  		  = "10px";
+			logo.style.left 		  = 0;
+			logo.style.right 		  = 0;
+			logo.style.margin 		  = "auto";
 
 			var logoImage = document.createElement("img");
 			logoImage.setAttribute("src", logo_string);
-			logoImage.setAttribute("style", "width: 250px;");
+			logoImage.setAttribute("style", "width: 100%;");
 			logoImage.textContent = " ";
+			logoImage.setAttribute("onclick", "logoClick()");
 
 			var logoLink = document.createElement("a");
 

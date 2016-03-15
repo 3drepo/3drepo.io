@@ -28,38 +28,15 @@ function($stateProvider, parentStates) {
 			url: '/',
 			views: {
 				"@" : {
-					templateUrl: 'login.html'
+					template: '<login></login>'
 				}
 			}
 		})
 	}
 }])
-.run(['StateManager', 'Auth', function(StateManager, Auth) {
+.run(['StateManager', function(StateManager) {
 	StateManager.registerPlugin('login', null, function () {
 		return "login";
 	});
-}])
-.controller('LoginCtrl', ['$scope', 'StateManager', 'Auth', 'serverConfig', function($scope, StateManager, Auth, serverConfig)
-{
-	$scope.user = { username: "", password: ""};
-
-	$scope.version = serverConfig.apiVersion;
-
-	$scope.login = function() {
-		Auth.login($scope.user.username, $scope.user.password).then(
-			function _loginCtrlLoginSuccess(username) {
-				$scope.errorMessage = null;
-				$scope.user.username = null;
-				$scope.user.password = null;
-				StateManager.setStateVar("account", username);
-				StateManager.updateState();
-			}, function _loginCtrlLoginFailure(reason) {
-				$scope.errorMessage = reason;
-				$scope.user.password = null;
-				StateManager.setStateVar("account", null);
-				StateManager.updateState();
-			}
-		);
-	};
 }]);
 

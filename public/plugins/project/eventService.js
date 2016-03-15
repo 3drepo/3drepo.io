@@ -61,13 +61,12 @@
 		var currentError = {};
 
         var send = function (type, value) {
-			console.log(value);
 			$timeout(function() {
 				if (angular.isUndefined(type))
 				{
 					console.trace("UNDEFINED EVENT TYPE");			
 				} else {
-					//console.log(type + " : " + JSON.stringify(value));
+					console.log("SEND: " + type + " : " + JSON.stringify(value));
 					currentEvent = {type: type, value: value};
 				}
 			});

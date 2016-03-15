@@ -35,11 +35,11 @@
         };
     }
 
-    ViewpointsCtrl.$inject = ["$scope", "ViewerService", "StateManager", "serverConfig"];
+    ViewpointsCtrl.$inject = ["$scope"];
 
-    function ViewpointsCtrl($scope, ViewerService, StateManager, serverConfig) {
+    function ViewpointsCtrl($scope) {
         var vp = this,
-            defaultViewer = ViewerService.defaultViewer,
+            defaultViewer = null, //ViewerService.defaultViewer,
             currentViewpointInfo = {};
         vp.viewpoints = [];
         vp.inputState = false;
