@@ -24,5 +24,13 @@ module.exports = function(osConfig){
 			return httpsGet(osConfig.endpoints.bbox, buildQueryString(queries));
 		},
 
+		map: (params, queries) => {
+			params = params || {};
+			queries = queries || {};
+			queries.key = osConfig.keys.map;
+			//console.log(buildQueryString(queries));
+			return httpsGet(osConfig.endpoints.map(params), buildQueryString(queries));
+		}
+
 	};
 };

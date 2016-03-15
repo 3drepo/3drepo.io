@@ -10,6 +10,17 @@ var config = require('../config.js');
 // wrapper for os get apis
 var OSGet = require('../libs/OSGet')(config.os);
 
+router.get('/buildings.gltf', function(req, res, next){
+	genglX('gltf', req, res, next);
+});
+
+router.get('/buildings.bin', function(req, res, next){
+	genglX('bin', req, res, next);
+});
+
+router.get('/map-images/:style/:z/:x/:y.png', getMapTiles);
+
+
 function extendObject(a, b){
 	
 	if (b) {
@@ -288,12 +299,36 @@ function genglX(format, req, res){
 
 }
 
-router.get('/buildings.gltf', function(req, res, next){
-	genglX('gltf', req, res, next);
-});
+function getMapTiles(req, res){
+	'use strict';
 
-router.get('/buildings.bin', function(req, res, next){
-	genglX('bin', req, res, next);
-});
+	let x, y, z;
+	x = req.params.x;
+	y = req.params.y;
+	z = req.params.z;
+
+	OSGet.map({
+		tileMatrixSet: 'EPSG:3857', 
+		layer: `${req.params.style} 3857`, 
+		z, x, y
+	}).then(r => {
+
+		res.writeHead(200, {'Content-Type': 'image/png' });
+		res.write(r);
+		res.end();
+
+	}).catch(err => {
+		console.error(err);
+		if(err.message){
+			res.status(500).json({ message: err.message});
+		} else {
+			res.status(500).send(err);
+		}
+		
+	});
+
+
+
+}
 
 module.exports = router;
