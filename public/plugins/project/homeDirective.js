@@ -20,27 +20,43 @@
 
     angular.module("3drepo")
         .directive("home", home)
-        .config(function($mdThemingProvider) {
-            $mdThemingProvider.theme('default')
-                .primaryPalette('indigo', {
-                    'default': '500',
-                    'hue-1': '400',
-                    'hue-2': '200',
-                    'hue-3': '50'
+        .config(function($injector)
+		{
+			if ($injector.has("$mdThemingProvider"))
+			{
+				var mdThemingProvider = $injector.get("$mdThemingProvider");
+				
+				mdThemingProvider.theme("default")
+                .primaryPalette("indigo", {
+                    "default": "500",
+                    "hue-1": "400",
+                    "hue-2": "200",
+                    "hue-3": "50"
                 })
-                .accentPalette('green', {
-                    'default': '600'
+                .accentPalette("green", {
+                    "default": "600"
                 })
-                .warnPalette('red');
+                .warnPalette("red");
+			}
         });
 
     function home() {
         return {
-            restrict: 'E',
-            templateUrl: 'home.html',
-            scope: {},
+            restrict: "E",
+            template: "<div ng-if='!hm.loggedIn')>" +
+			          "<div ng-include='hm.getLoggedOutUrl()'></div>" + 
+					  "</div>" + 
+					  "<div ng-if='hm.loggedIn'>" + 
+					  "<div ng-include='hm.getLoggedInUrl()'></div>" +
+					  "</div>",
+			scope: { 
+				account: "@",
+				password: "@",
+				loggedInUrl: "@",
+				loggedOutUrl: "@"
+			},
             controller: HomeCtrl,
-            controllerAs: 'vm',
+            controllerAs: "hm",
             bindToController: true
         };
     }
@@ -48,9 +64,26 @@
     HomeCtrl.$inject = ["$scope", "Auth", "StateManager"];
 
     function HomeCtrl($scope, Auth, StateManager) {
-        var vm = this;
+        var hm = this;
+		
+		hm.loggedIn = false;
+		
+		hm.getLoggedInUrl = function() {
+			return hm.loggedInUrl;
+		};
 
-        vm.logout = function () {
+		hm.getLoggedOutUrl = function() {
+			return hm.loggedOutUrl;
+		};
+		
+		if (angular.isDefined(hm.account) && angular.isDefined(hm.password))
+		{
+			Auth.login(hm.account, hm.password).then( function () {
+				hm.loggedIn = true;
+			});
+		}
+
+        hm.logout = function () {
             Auth.logout().then(
                 function _logoutCtrlLogoutSuccess () {
                     $scope.errorMessage = null;

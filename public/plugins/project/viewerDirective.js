@@ -29,10 +29,10 @@
 			scope: {
 				manager: "=",
 				name: "=",
-				account: "=",
-				project: "=",
-				branch: "=",
-				revision: "=",
+				account: "@",
+				project: "@",
+				branch: "@",
+				revision: "@",
 				name: "@",
 				autoInit: "@",
 				vrMode: "@",
@@ -203,6 +203,10 @@
 								angular.isDefined(event.value.animate) ? event.value.animate : true,
 								event.value.rollerCoasterMode
 							);
+						} else if (event.type === $scope.EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT) {
+							if (angular.isDefined(event.value.promise)) {
+								event.value.promise.resolve(v.viewer.getCurrentViewpointInfo());	
+							}
 						}
 					});
 				}

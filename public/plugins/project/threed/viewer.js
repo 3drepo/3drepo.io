@@ -76,11 +76,12 @@ var Viewer = {};
 		}
 
 		callback = !callback ? function(type, value) {
-			console.log(type + ": " + value);
+			// TODO: Move event handling here
+			// console.log(type + ": " + value);
 		} : callback;
 
 		errCallback = !errCallback ? function(type, value) {
-			console.error(type + ": " + value);
+			//console.error(type + ": " + value);
 		} : errCallback;
 
 		// If not given the tag by the manager create here
@@ -1798,6 +1799,8 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
 	SWITCH_OBJECT_VISIBILITY: "VIEWER_SWITCH_OBJECT_VISIBILITY",
 	SET_PIN_VISIBILITY: "VIEWER_SET_PIN_VISIBILITY",
+		
+	GET_CURRENT_VIEWPOINT: "VIEWER_GET_CURRENT_VIEWPOINT",
 
 	PICK_POINT: "VIEWER_PICK_POINT",
 	SET_CAMERA: "VIEWER_SET_CAMERA",
