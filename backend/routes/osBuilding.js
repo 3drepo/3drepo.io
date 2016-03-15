@@ -25,6 +25,15 @@ function extendObject(a, b){
 function genglX(format, req, res){
 	'use strict';
 
+	let acceptedClassCode = ['CE', 'C', 'R']; //commerial, education and residential
+
+	//color scheme
+	let materialMapping = {
+		'C': 'Effect-Blue',
+		'CE': 'Effect-Red',
+		'R': 'Effect-Green'
+	};
+
 	var methodNames = {
 		'RADIUS': 'radius',
 		'BBOX': 'bbox'
@@ -133,6 +142,48 @@ function genglX(format, req, res){
 		let promises = [];
 		let cleanedBuildingCount = 0;
 
+		let found;
+
+		buildings.sort((a, b) => {
+			
+			a.DPA.classCode = a.DPA.CLASSIFICATION_CODE.substring(0, 2);
+			b.DPA.classCode = b.DPA.CLASSIFICATION_CODE.substring(0, 2);
+
+			found = false;
+			acceptedClassCode.forEach(code => {
+
+				if(!found && a.DPA.classCode.startsWith(code)){
+					found = true;
+					a.DPA.classCode = code;
+				}
+			});
+
+			if(!found){
+				a.DPA.classCode = '';
+			}
+
+			found = false;
+			acceptedClassCode.forEach(code => {
+
+				if(!found && b.DPA.classCode.startsWith(code)){
+					found = true;
+					b.DPA.classCode = code;
+				}
+			});
+
+			if(!found){
+				b.DPA.classCode = '';
+			}
+
+			if (a.DPA.classCode > b.DPA.classCode){
+				return 1;
+			} else if (a.DPA.classCode < b.DPA.classCode){
+				return -1;
+			} else {
+				return 0;
+			}
+		});
+
 		buildings.forEach(building => {
 
 			building = building.DPA;
@@ -149,7 +200,10 @@ function genglX(format, req, res){
 				lastCoors = { x: building.X_COORDINATE, y: building.Y_COORDINATE };
 				// get building dimension
 				if(draw){
-					promises.push(OSGet.dimensions({ uprn: building.UPRN }));
+					promises.push(OSGet.dimensions({ uprn: building.UPRN }).then(dimension => {
+						dimension.classCode = building.classCode;
+						return Promise.resolve(dimension);
+					}));
 				}
 
 				cleanedBuildingCount++;
@@ -164,7 +218,7 @@ function genglX(format, req, res){
 			console.log('draw');
 			return Promise.all(promises);
 		} else {
-			return Promise.reject({ message: 'Please put draw=1 n query string if you wish to generate glTF'});
+			return Promise.reject({ message: 'Please put draw=1 in query string if you wish to generate glTF'});
 		}
 
 
@@ -179,10 +233,12 @@ function genglX(format, req, res){
 
 		console.log('refPoint', refPoint);
 
-		let meshes = [];
+		// let meshes = [];
+		let meshesByGroup = {};
 
 		dimensions.forEach(dimension => {
 
+			let classCode = dimension.classCode;
 			//let uri = dimension.header.uri;
 			dimension = dimension.results[0];
 			//console.log(dimension.geometry.coordinates)
@@ -192,7 +248,11 @@ function genglX(format, req, res){
 				heightlessBuildingCount++;
 				//dimension.relativeHeightToMax = 1;
 			} else {
-				meshes = meshes.concat(
+				if (!meshesByGroup[classCode]){
+					meshesByGroup[classCode] = [];
+				}
+
+				meshesByGroup[classCode] = meshesByGroup[classCode].concat(
 					generateMeshes(
 						dimension.geometry.coordinates, 
 						dimension.relativeHeightToMax, 
@@ -207,7 +267,7 @@ function genglX(format, req, res){
 		//console.log(meshesArray);
 		console.log('Heightless building count', heightlessBuildingCount);
 
-		let glTF = generateglTF(meshes, 'buildings');
+		let glTF = generateglTF(meshesByGroup, 'buildings', materialMapping);
 
 		if(format === 'bin') {
 			res.status(200).send(glTF.buffer);

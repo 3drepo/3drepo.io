@@ -51,6 +51,120 @@
                 }
             },
             "name": "White"
+        },
+        "Effect-Red": {
+            "extensions": {
+                "KHR_materials_common": {
+                    "doubleSided": false,
+                    "jointCount": 0,
+                    "technique": "PHONG",
+                    "transparent": false,
+                    "values": {
+                        "ambient": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "diffuse": [
+                            0.8,
+                            0,
+                            0,
+                            1
+                        ],
+                        "emission": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "shininess": 256,
+                        "specular": [
+                            0.1,
+                            0.1,
+                            0.1,
+                            1
+                        ]
+                    }
+                }
+            },
+            "name": "Red"
+        },
+        "Effect-Green": {
+            "extensions": {
+                "KHR_materials_common": {
+                    "doubleSided": false,
+                    "jointCount": 0,
+                    "technique": "PHONG",
+                    "transparent": false,
+                    "values": {
+                        "ambient": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "diffuse": [
+                            0,
+                            0.8,
+                            0,
+                            1
+                        ],
+                        "emission": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "shininess": 256,
+                        "specular": [
+                            0.1,
+                            0.1,
+                            0.1,
+                            1
+                        ]
+                    }
+                }
+            },
+            "name": "Green"
+        },
+        "Effect-Blue": {
+            "extensions": {
+                "KHR_materials_common": {
+                    "doubleSided": false,
+                    "jointCount": 0,
+                    "technique": "PHONG",
+                    "transparent": false,
+                    "values": {
+                        "ambient": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "diffuse": [
+                            0,
+                            0,
+                            0.8,
+                            1
+                        ],
+                        "emission": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "shininess": 256,
+                        "specular": [
+                            0.1,
+                            0.1,
+                            0.1,
+                            1
+                        ]
+                    }
+                }
+            },
+            "name": "Blue"
         }
     },
     "meshes": {
