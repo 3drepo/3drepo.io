@@ -1,0 +1,9 @@
+extends ../jade/dialog.jade
+
+block title
+	span Scan QR Code
+
+block content
+	div(ng-controller='HeaderCtrl')
+		video#videocamera.dialogs(autoplay, capture='captureQRCode', camera-switch='{{CameraService.cameraSwitch}}')
+

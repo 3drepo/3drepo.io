@@ -1,0 +1,33 @@
+md-content(flex layout="row" layout-align="space-between")
+	.dataContainer(flex="45")
+		div
+			md-input-container.md-block
+				label Username
+				input(ng-model="vm.username" ng-disabled="true")
+		div(layout="row" layout-align="space-between")
+			md-input-container.md-block(flex="45")
+				label First name
+				input(ng-model="vm.firstName")
+			md-input-container.md-block(flex="45")
+				label Last name
+				input(ng-model="vm.lastName")
+		div
+			md-input-container.md-block
+				label Email
+				input(ng-model="vm.email", type="email")
+		div(layout="row", layout-align="start center")
+			md-button.md-accent(ng-click="vm.updateInfo()") Update
+			p {{vm.infoSaveInfo}}
+
+	.dataContainer(flex="45")
+		div
+			md-input-container.md-block
+				label Old password
+				input(ng-model="vm.oldPassword", type="password")
+		div
+			md-input-container.md-block
+				label New password
+				input(ng-model="vm.newPassword", type="password")
+		div(layout="row", layout-align="start center")
+			md-button.md-accent(ng-click="vm.updatePassword()") Update
+			p {{vm.passwordSaveInfo}}
