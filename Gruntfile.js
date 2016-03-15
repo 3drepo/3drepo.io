@@ -1,7 +1,17 @@
 module.exports = function(grunt) {
 
     grunt.initConfig({
+
         pkg: grunt.file.readJSON('package.json'),
+
+        env : {
+            options : {
+            //Shared Options Hash
+            },
+            test : {
+                NODE_ENV : 'test'
+            }
+        },
 
         concat: {
             build: {
@@ -100,13 +110,22 @@ module.exports = function(grunt) {
         },
 
         mochaTest: {
-          test: {
+          unit: {
             options: {
               reporter: 'spec',
               quiet: false, // Optionally suppress output to standard out (defaults to false)
               clearRequireCache: false // Optionally clear the require cache before running tests (defaults to false)
             },
-            src: ['test/**/*.js', 'backend/test/**/*.js']
+            src: ['test/**/*.js', 'backend/test/unit/**/*.js']
+          },
+
+          integrated: {
+            options: {
+              reporter: 'spec',
+              quiet: false, // Optionally suppress output to standard out (defaults to false)
+              clearRequireCache: false // Optionally clear the require cache before running tests (defaults to false)
+            },
+            src: ['test/**/*.js', 'backend/test/integrated/**/*.js']
           }
         },
 
@@ -143,8 +162,10 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-mocha-test');
 	grunt.loadNpmTasks('grunt-webfont');
 	grunt.loadNpmTasks('grunt-contrib-cssmin');
+	grunt.loadNpmTasks('grunt-env');
 
 	grunt.registerTask('default', ['concat', 'uglify', 'webfont']);
-	grunt.registerTask('test', ['jshint:backend', 'mochaTest']);
+	grunt.registerTask('test', ['jshint:backend', 'mochaTest:unit']);
 	grunt.registerTask('frontend', ['concat:frontendAllJS','concat:frontendAllCSS', 'uglify:frontendAllJS', 'cssmin:frontendAllCSS']);
+	grunt.registerTask('test-integrated', ['env:test', 'mochaTest:integrated']);
 };

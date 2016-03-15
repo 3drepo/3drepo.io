@@ -10,7 +10,7 @@ mockgoose(mongoose);
 
 let proxyquire = require('proxyquire');
 
-let modelFactoryMock = proxyquire('../../models/factory/modelFactory', { 
+let modelFactoryMock = proxyquire('../../../models/factory/modelFactory', { 
 	'mongoose': mongoose, 
 });
 
@@ -20,17 +20,18 @@ let topLvStubs = [];
 let sinon = require('sinon');
 
 
-let repoBaseMock = proxyquire('../../models/base/repo', { 
+let repoBaseMock = proxyquire('../../../models/base/repo', { 
 	'../../repo/repoGraphScene.js': repoGraphSceneMock, 
-	'../../utils': utils
+	'../../utils': utils,
+	'../factory/modelFactory': modelFactoryMock
 });
 
-let Revision = require('../../models/revision');
+let Revision = require('../../../models/revision');
 
 
 let DB = require('../mock/db');
 
-let Mesh = proxyquire('../../models/mesh', { 
+let Mesh = proxyquire('../../../models/mesh', { 
 	'mongoose': mongoose, 
 	'./factory/modelFactory':  modelFactoryMock,
 	'../revision': Revision,
@@ -43,7 +44,8 @@ describe('Mesh and Object extended from repo base', function(){
 
 	before(function(done) {
 
-		modelFactoryMock.setDB(new DB());
+		let db = new DB();
+		modelFactoryMock.setDB(db);
 
 	    mongoose.connect('mongodb://doesnt.matter/whatdb-it-is-mock', function(err) {
 	        done(err);

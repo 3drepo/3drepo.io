@@ -29,12 +29,13 @@ function findByUID(req, res, next){
 	let place = utils.APIInfo(req);
 	let options = {};
 	options.stash = _getStashOptions(dbCol, 'src', req.url);
+	options.filename = `/${dbCol.account}/${dbCol.project}${req.url}`;
 
 	Mesh.findByUID(dbCol, req.params.uid, options).then(mesh => {
 		
 		req.params.format = 'src';
 		let renderedObj = mesh;
-
+		//console.log('mesh', mesh)
 		if(!options.stash){
 			// generate src format if obj not from stash
 			renderedObj = srcEncoder.render(req.params.project, mesh, req.query.tex_uuid || null, req.params.subformat, req[C.REQ_REPO].logger);

@@ -9,7 +9,7 @@ let _ = require('lodash');
 mockgoose(mongoose);
 
 let proxyquire = require('proxyquire');
-let modelFactoryMock = proxyquire('../../models/factory/modelFactory', { 
+let modelFactoryMock = proxyquire('../../../models/factory/modelFactory', { 
 	'mongoose': mongoose, 
 });
 
@@ -17,7 +17,7 @@ let sinon = require('sinon');
 let DB = require('../mock/db')
 
 
-let User = proxyquire('../../models/user', { 
+let User = proxyquire('../../../models/user', { 
 	'mongoose': mongoose, 
 	'./factory/modelFactory':  modelFactoryMock
 });

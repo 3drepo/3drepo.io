@@ -69,6 +69,7 @@
 
 	MongoDBObject.prototype.getURL = function(database)
 	{
+		//console.log("mongodb://" + this.username + ":" + this.password + "@" + this.host + ":" + this.port + "/" + database + "?authSource=admin")
 		return "mongodb://" + this.username + ":" + this.password + "@" + this.host + ":" + this.port + "/" + database + "?authSource=admin";
 	};
 

@@ -25,6 +25,7 @@ module.exports.app = function (sharedSession) {
 	let routes = require("../routes/routes.js")();
 	let config = require("../config.js");
 	let compress = require("compression");
+	let responseCodes = require('../response_codes');
 
 	let C = require("../constants");
 
@@ -54,8 +55,8 @@ module.exports.app = function (sharedSession) {
 			require('../models/factory/modelFactory').setDB(db);
 			next();
 		}).catch( err => {
-			console.log(err);
-			responseCodes.respond('Express Middleware', req, res, next, responseCodes.PROCESS_ERROR(err), err);
+			//console.log(err);
+			responseCodes.respond('Express Middleware', req, res, next, responseCodes.DB_ERROR(err), err);
 		});
 	});
 

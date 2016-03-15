@@ -3,6 +3,7 @@ var GridFSBucket = require('mongodb').GridFSBucket;
 var ModelFactory = require('../factory/modelFactory');
 var Revision = require('../revision');
 var utils = require("../../utils");
+var responseCodes = require('../../response_codes.js');
 
 stringToUUID = utils.stringToUUID;
 uuidToString = utils.uuidToString;
@@ -21,6 +22,7 @@ var statics = {};
 //var methods = {};
 
 statics._getGridFSBucket = function(dbCol, format){
+
 	return new GridFSBucket(
 		ModelFactory.db.db(dbCol.account), 
 		{ bucketName:  `${dbCol.project}.stash.${format}`}
@@ -32,7 +34,6 @@ statics.findStashByFilename = function(dbCol, format, filename){
 
 	let bucket = this._getGridFSBucket(dbCol, format);
 	
-	//console.log(filename)
 	return bucket.find({ filename }).toArray().then(files => {
 		if(!files.length){
 			//console.log('no stash found');
@@ -61,14 +62,24 @@ statics.findByUID = function(dbCol, uid, options){
 
 	let projection = options && options.projection || {};
 
-	let _find = () => this.findById(dbCol, stringToUUID(uid), projection).then(obj => {
+	let _find = () => ModelFactory.db.db(dbCol.account).collection(`${dbCol.project}.stash.3drepo`).find({_id: stringToUUID(uid)}).limit(1).next().then(obj => {
 
+		if(!obj) {
+			return this.findById(dbCol, stringToUUID(uid), projection);
+		}
+
+		obj.toObject = () => obj;
+		return Promise.resolve(obj);
+
+	}).then(obj =>{
+		
 		if(!obj){
 			return Promise.reject({resCode: responseCodes.OBJECT_NOT_FOUND});
 		}
 
 		return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj.toObject()]));
 	});
+
 
 
 	if(options && options.stash){

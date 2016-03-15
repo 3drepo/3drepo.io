@@ -23,6 +23,8 @@ module.exports = {
 
 	models: {},
 
+	db: null,
+
 	setDB: function(db){	
 		this.db = db;
 	},
