@@ -89,7 +89,7 @@
 							name: event.value.name
 						});
 					}
-
+					
 					vm.viewers[event.value.name] = event.value;
 				} else if (event.type === EventService.EVENT.CLOSE_VIEWER) {
 					// If the viewer exists in the list then delete it

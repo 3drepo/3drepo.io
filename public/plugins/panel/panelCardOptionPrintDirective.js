@@ -25,21 +25,24 @@
 		return {
 			restrict: 'E',
 			templateUrl: 'panelCardOptionPrint.html',
-			scope: {},
+			scope: {
+				account: "=",
+				project: "="
+			},
 			controller: PanelCardOptionPrintCtrl,
 			controllerAs: 'vm',
 			bindToController: true
 		};
 	}
 
-	PanelCardOptionPrintCtrl.$inject = ["$window", "StateManager", "serverConfig"];
+	PanelCardOptionPrintCtrl.$inject = ["$window", "serverConfig"];
 
-	function PanelCardOptionPrintCtrl ($window, StateManager, serverConfig) {
+	function PanelCardOptionPrintCtrl ($window, serverConfig) {
 		var vm = this;
 
 		vm.doPrint = function(event) {
 			event.stopPropagation();
-			$window.open(serverConfig.apiUrl(StateManager.state.account + "/" + StateManager.state.project + "/issues.html"), "_blank");
+			$window.open(serverConfig.apiUrl(vm.account + "/" + vm.project + "/issues.html"), "_blank");
 		};
 	}
 }());

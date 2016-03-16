@@ -8,7 +8,7 @@
 						md-icon(ng-if="account.showProjects", md-font-icon="fa fa-folder-open-o")
 					p {{account.name}}
 				md-list.projects(ng-if="account.showProjects")
-					md-list-item.md-1-line(ng-repeat="project in account.projects", ng-click="vm.goToProject(account.name, account.projects)")
+					md-list-item.md-1-line(ng-repeat="project in account.projects", ng-click="vm.goToProject(account.name, project)")
 						md-icon(md-font-icon="fa fa-cube")
 						p {{project}}
 			md-divider

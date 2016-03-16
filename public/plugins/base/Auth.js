@@ -19,7 +19,7 @@
 	"use strict";
 
 	angular.module("3drepo")
-	.service("Auth", ["$injector", "$q", "$state", "$http", "serverConfig", "StateManager", "$rootScope", "$timeout", function($injector, $q, $state, $http, serverConfig, StateManager, $rootScope, $timeout) {
+	.service("Auth", ["$injector", "$q", "$http", "serverConfig", "EventService", function($injector, $q, $http, serverConfig, EventService) {
 		this.loggedIn = null;
 		this.username = null;
 		var self = this;
@@ -38,14 +38,27 @@
 					self.loggedIn = true;
 					self.username = data.username;
 					self.userRoles = data.roles;
+									
+					EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: data.username });
+					
 					deferred.resolve(self.loggedIn);
-				}).error(function(data) {
+				}).error(function() {
 					self.loggedIn = false;
 					self.username = null;
 					self.userRoles = null;
+					
+					EventService.send(EventService.EVENT.USER_LOGGED_OUT);
+					
 					deferred.resolve(self.loggedIn);
 				});
 			} else {
+				if (self.loggedIn)
+				{
+					EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: self.username });
+				} else {
+					EventService.send(EventService.EVENT.USER_LOGGED_OUT);
+				}
+				
 				deferred.resolve(self.loggedIn);
 			}
 
@@ -80,28 +93,11 @@
 			.success(function (data) {
 				self.username = username;
 				self.userRoles = data.roles;
-				self.loggedIn = true;
-
-				$timeout(function() {
-					if ($rootScope.requestState && $rootScope.requestParams)
-					{
-						$state.go($rootScope.requestState, $rootScope.requestParams);
-					}
-				});
-
-				deferred.resolve(username);
+				
+				EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: username });
 			})
-			.error(function(data, status) {
-				self.username = null;
-				self.userRoles = null;
-				self.loggedIn = false;
-
-				if (status === 401)
-				{
-					deferred.reject("Invalid username/password");
-				} else {
-					deferred.reject("Unable to connect to the API server");
-				}
+			.error(function(data) {
+				EventService.send(EventService.EVENT.USER_LOGGED_OUT);
 			});
 
 			return deferred.promise;
@@ -114,15 +110,11 @@
 			http.post(serverConfig.apiUrl("logout"))
 			.success(function _authLogOutSuccess() {
 				self.username = null;
-				self.loggedIn = false;
-
-				deferred.resolve();
+				EventService.send(EventService.EVENT.USER_LOGGED_OUT);
 			})
 			.error(function _authLogOutFailure() {
 				self.username = null;
-				self.loggedIn = false;
-
-				deferred.reject("Unable to logout.");
+				EventService.send(EventService.EVENT.USER_LOGGED_OUT);
 			});
 
 			return deferred.promise;

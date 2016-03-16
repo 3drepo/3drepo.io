@@ -21,18 +21,21 @@
 	angular.module("3drepo")
 		.factory("AccountService", AccountService);
 
-	AccountService.$inject = ["$http", "$q", "serverConfig", "StateManager"];
+	AccountService.$inject = ["$http", "$q", "serverConfig"];
 
-	function AccountService($http, $q, serverConfig, StateManager) {
+	function AccountService($http, $q, serverConfig) {
 		var obj = {},
 			deferred;
-
+			
 		/**
 		 * Get account data
 		 */
-		obj.getData = function () {
+		obj.getData = function (username) {
 			deferred = $q.defer();
-			$http.get(serverConfig.apiUrl(StateManager.state.account + '.json'))
+			
+			var accountData = {};
+			
+			$http.get(serverConfig.apiUrl(username + ".json"))
 				.then(function (response) {
 					var i, length,
 						project, projectsGrouped;
@@ -47,10 +50,23 @@
 						}
 						projectsGrouped[project.account].push(project.project);
 					}
-					response.data.projectsGrouped = projectsGrouped;
+					
+					accountData = response.data;
+					accountData.projectsGrouped = projectsGrouped;
 
-					deferred.resolve(response);
+					if (response.data.avatarURL) {
+						$http.get(response.data.avatarURL).then(function() {
+							accountData.hasAvatar = true;
+							deferred.resolve(accountData);
+						}, function() {
+							accountData.hasAvatar = false;
+							deferred.resolve(accountData);
+						});
+					} else {
+						deferred.resolve(accountData);
+					}
 				});
+			
 			return deferred.promise;
 		};
 

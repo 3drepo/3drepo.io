@@ -129,6 +129,10 @@ var Viewer = {};
 		};
 
 		this.logos    = [];
+		
+		this.logoClick = function() {
+			callback(self.EVENT.LOGO_CLICK);
+		};
 
 		this.addLogo = function() {
 			if (!self.logoGroup)
@@ -151,23 +155,14 @@ var Viewer = {};
 			logo.style.left 		  = 0;
 			logo.style.right 		  = 0;
 			logo.style.margin 		  = "auto";
+			
+			logo.addEventListener("click", self.logoClick);
 
 			var logoImage = document.createElement("img");
 			logoImage.setAttribute("src", logo_string);
 			logoImage.setAttribute("style", "width: 100%;");
 			logoImage.textContent = " ";
-			logoImage.setAttribute("onclick", "logoClick()");
-
-			var logoLink = document.createElement("a");
-
-			if (server_config.return_path) {
-				logoLink.setAttribute("href", server_config.return_path);
-			} else {
-				logoLink.setAttribute("href", "https://www.3drepo.io");
-			}
-
-			logoLink.appendChild(logoImage);
-			logo.appendChild(logoLink);
+			logo.appendChild(logoImage);
 
 			self.updateLogoWidth(widthPercentage);
 
@@ -1805,6 +1800,8 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 
 	PICK_POINT: "VIEWER_PICK_POINT",
 	SET_CAMERA: "VIEWER_SET_CAMERA",
+	
+	LOGO_CLICK: "VIEWER_LOGO_CLICK",
 
 	// Clipping plane events
 	CLEAR_CLIPPING_PLANES: "VIEWER_CLEAR_CLIPPING_PLANES",

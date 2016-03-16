@@ -43,12 +43,7 @@
     function home() {
         return {
             restrict: "E",
-            template: "<div ng-if='!hm.loggedIn')>" +
-			          "<div ng-include='hm.getLoggedOutUrl()'></div>" +
-					  "</div>" +
-					  "<div ng-if='hm.loggedIn'>" +
-					  "<div ng-include='hm.getLoggedInUrl()'></div>" +
-					  "</div>",
+            templateUrl: "home.html",
 			scope: {
 				account: "@",
 				password: "@",
@@ -61,12 +56,13 @@
         };
     }
 
-    HomeCtrl.$inject = [];
+    HomeCtrl.$inject = ["$scope", "Auth", "StateManager", "EventService"];
 
-    function HomeCtrl($scope, Auth, StateManager) {
+    function HomeCtrl($scope, Auth, StateManager, EventService) {
         var hm = this;
-
 		hm.loggedIn = false;
+		
+		hm.state = {};
 
 		hm.getLoggedInUrl = function() {
 			return hm.loggedInUrl;
@@ -78,24 +74,37 @@
 
 		if (angular.isDefined(hm.account) && angular.isDefined(hm.password))
 		{
-			Auth.login(hm.account, hm.password).then( function () {
-				hm.loggedIn = true;
-			});
+			Auth.login(hm.account, hm.password);
 		}
 
         hm.logout = function () {
-            Auth.logout().then(
-                function _logoutCtrlLogoutSuccess () {
-                    $scope.errorMessage = null;
-                    StateManager.state.account = null;
-                    StateManager.updateState();
-                },
-                function _logoutCtrlLogoutFailure (reason) {
-                    $scope.errorMessage = reason;
-                    StateManager.updateState();
-                }
-            );
+            Auth.logout();
         };
+		
+		Auth.init();
+		
+		$scope.$watch(EventService.currentEvent, function(event) {
+			if (angular.isDefined(event) && angular.isDefined(event.type)) {
+				if (event.type === EventService.EVENT.USER_LOGGED_IN)
+				{
+					var account = StateManager.state.account ? StateManager.state.account : event.value.username;
+					EventService.send(EventService.EVENT.SET_STATE, { loggedIn: true, account: account });
+				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
+					EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
+				} else if ((event.type === EventService.EVENT.NOT_AUTHORIZED) || (event.type === EventService.EVENT.VIEWER.LOGO_CLICK)) {
+					StateManager.clearState();
+					Auth.init();
+				} else if (event.type === EventService.EVENT.STATE_CHANGED) {
+					for(var key in event.value)
+					{
+						if (event.value.hasOwnProperty(key))
+						{
+							hm.state[key] = event.value[key];
+						}
+					}
+				}
+			}
+		});
     }
 }());
 

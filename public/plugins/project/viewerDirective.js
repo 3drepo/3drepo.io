@@ -52,6 +52,9 @@
 
 		v.initialised = $q.defer();
 		v.loaded      = $q.defer();
+		
+		v.branch   = v.branch ? v.branch : "master";
+		v.revision = v.revision ? v.revision : "head";  
 
 		if (!angular.isDefined(v.eventService))
 		{
@@ -201,7 +204,7 @@
 								angular.isDefined(event.value.animate) ? event.value.animate : true,
 								event.value.rollerCoasterMode
 							);
-						} else if (event.type === $scope.EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT) {
+						} else if (event.type === EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT) {
 							if (angular.isDefined(event.value.promise)) {
 								event.value.promise.resolve(v.viewer.getCurrentViewpointInfo());
 							}

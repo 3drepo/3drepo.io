@@ -26,6 +26,10 @@
 			restrict: "EA",
 			templateUrl: "tree.html",
 			scope: {
+				account:  "=",
+				project:  "=",
+				branch:   "=",
+				revision: "=",				
 				filterText: "=",
 				onContentHeightRequest: "&"
 			},
@@ -51,7 +55,7 @@
 		vm.showProgress = true;
 		vm.progressInfo = "Loading full tree structure";
 
-		promise = TreeService.init();
+		promise = TreeService.init(vm.account, vm.project, vm.branch, vm.revision);
 		promise.then(function (data) {
 			vm.allNodes = [];
 			vm.allNodes.push(data.nodes);
