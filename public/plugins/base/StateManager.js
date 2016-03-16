@@ -19,7 +19,56 @@
 	"use strict";
 
 	angular.module("3drepo")
-	.run(["$rootScope", "uiState", "StateManager", function($rootScope, uiState, StateManager) {
+	.config([
+	"$stateProvider", "$urlRouterProvider", "$locationProvider", "structure",
+	function($stateProvider, $urlRouterProvider, $locationProvider, structure) {
+		
+		$locationProvider.html5Mode(true);
+		
+		$stateProvider.state("home", {
+			name: "home",
+			url: "/"
+		});
+		
+		var stateStack       = [structure];
+		var stateNameStack   = ["home"];
+		
+		while (stateStack.length > 0)
+		{
+			var stackLength      = stateStack.length;
+			var parentState      = stateStack[stackLength - 1];
+			var parentStateName  = stateNameStack[stackLength - 1]; 
+			
+			if (parentState.children)
+			{
+				for (var i = 0; i < parentState.children.length; i++)
+				{
+					var childState     = parentState.children[i];
+					var childStateName = parentStateName + "." + childState.plugin;
+					
+					stateNameStack.push(childStateName);
+					stateStack.push(parentState.children[i]);
+					
+					$stateProvider.state(childStateName, {
+						name: parentState.children[i].plugin,
+						url: (parentStateName !== "home" ? "/" : "") + ":" + childState.plugin,
+						resolve: {
+							init: function(StateManager, $stateParams)
+							{
+								StateManager.setState($stateParams, {});
+							}
+						}
+					});
+				}
+			}
+			
+			stateStack.splice(0,1);
+			stateNameStack.splice(0,1);
+		}
+		
+		$urlRouterProvider.otherwise("");
+	}])
+	.run(["$rootScope", "$state", "uiState", "StateManager", function($rootScope, $state, uiState, StateManager) {
 		$rootScope.$on("$stateChangeStart", function (event, toState, toParams, fromState, fromParams)
 		{
 			if (!$rootScope.requestState && !$rootScope.requestParams)
@@ -32,14 +81,17 @@
 		});
 
 		$rootScope.$on("$stateChangeSuccess",function(event, toState, toParams, fromState, fromParams){
-			console.log("$stateChangeSuccess to "+JSON.stringify(toState)+"- fired when the transition finishes. toState,toParams : \n",toState, toParams);
+			// console.log("$stateChangeSuccess to "+JSON.stringify(toState)+"- fired when the transition finishes. toState,toParams : \n",toState, toParams);
 
-			var uiComps = uiState[toState.name];
+			// var uiComps = uiState[toState.name];
 
 			// Split the list of states separated by dots
-			var toStates    = toState.name.split(".");
-			var fromStates  = fromState.name.split(".");
+			// var toStates    = toState.name.split(".");
+			// var fromStates  = fromState.name.split(".");
+			
+			StateManager.handleStateChange(fromParams, toParams);
 
+			/*
 			var i = 0;
 
 			for(i = 0; i < fromStates.length; i++) {
@@ -63,7 +115,9 @@
 					StateManager.ui[uiComps[i]] = true;
 				}
 			}
-
+			*/
+			
+			/*
 			if ($rootScope.requestState.name === toState.name)
 			{
 				// We have successfully made it, after a number
@@ -71,28 +125,30 @@
 				$rootScope.requestState = null;
 				$rootScope.requestParams = null;
 			}
+			*/
 		});
 	}])
-	.service("StateManager", ["$injector", "$state", "structure", function($injector, $state, structure) {
+	.service("StateManager", ["$state", "$rootScope", "structure", "EventService", function($state, $rootScope, structure, EventService) {
 		var self = this;
-
-		// Stores the Data factories associated with each plugin
-		this.Data       = {};
 
 		// Stores the state, required as ui-router does not allow inherited
 		// stateParams, and we need to dynamically generate state diagram.
 		// One day this might change.
 		// https://github.com/angular-ui/ui-router/wiki/URL-Routing
 		this.state      = {};
+		
+		this.structure   = structure;
 
-		// Ui components to switch on and off
-		this.ui         = {};
+		this.destroy = function()  {
+			delete this.state;
+			this.state = {};
 
-		// Link between plugins and data factories
-		this.pluginData = {};
+			delete this.ui;
+			this.ui = {};
 
-		// Link between plugin names and state changes
-		this.pluginState = {};
+			delete this.Data;
+			this.Data = {};
+		};
 
 		// Has a state variable changed. Is this necessary ?
 		this.changed     = {};
@@ -106,78 +162,104 @@
 			}
 		};
 
-		this.destroy = function()  {
-			delete this.state;
-			this.state = {};
-
-			delete this.ui;
-			this.ui = {};
-
-			delete this.Data;
-			this.Data = {};
-		};
-
 		self.clearChanged();
 
-		this.registerPlugin = function(plugin, dataFactory, stateFunc)
-		{
-			// Inject the data factory for a plugin
-			if (dataFactory) {
-				this.Data[dataFactory] = $injector.get(dataFactory);
-
-				if (plugin) {
-					if (!(plugin in this.pluginData))
-						this.pluginData[plugin] = [];
-
-					this.pluginData[plugin].push(this.Data[dataFactory]);
+		this.handleStateChange = function(fromParams, toParams) {
+			var param;
+			
+			// Switch off all parameters that we came from
+			// but are not the same as where we are going to
+			for (param in fromParams)
+			{
+				if (fromParams.hasOwnProperty(param))
+				{
+					if (!toParams.hasOwnProperty(param))
+					{
+						self.setStateVar(param, null);
+					}
 				}
 			}
-
-			if (stateFunc)
-				this.pluginState[plugin] = stateFunc;
+			
+			for (param in toParams)
+			{
+				if (toParams.hasOwnProperty(param))
+				{
+					if (fromParams.hasOwnProperty(param))
+					{
+						if (fromParams[param] !== toParams[param])
+						{
+							self.setStateVar(param, toParams[param]);
+						}
+					}
+				}
+			}
+			
+			// Loop through structure. If a parent is null, then we must clear
+			// it's children
+			var currentChildren = self.structure.children;
+			
+			var stateStack       = [structure];
+			var stateNameStack   = ["home"];
+			var clearBelow       = false;
+			
+			while (stateStack.length > 0)
+			{
+				var stackLength      = stateStack.length;
+				var parentState      = stateStack[stackLength - 1];
+				var parentStateName  = stateNameStack[stackLength - 1]; 
+				
+				if (parentStateName !== "home" && !self.state[parentStateName])
+				{
+					clearBelow = true;
+				}
+				
+				if (parentState.children)
+				{
+					for (var i = 0; i < parentState.children.length; i++)
+					{
+						var childStateName = parentState.children[i].plugin;
+						
+						stateNameStack.push(childStateName);
+						stateStack.push(parentState.children[i]);
+						
+						if (clearBelow)
+						{
+							self.setStateVar(childStateName, null);	
+						}
+					}
+				}
+			
+				stateStack.splice(0,1);
+				stateNameStack.splice(0,1);				
+			}			
+							
+			self.updateState();	
 		};
 
 		this.stateVars    = {};
-		this.setClearStateVars = function(state, stateVars) {
-			self.stateVars[state] = stateVars;
-		};
 
-		this.clearStateVars = function(state) {
-			var myStateVars = self.stateVars[state];
-
-			if (myStateVars) {
-				for(var i = 0; i < myStateVars.length; i++) {
-					self.state[myStateVars[i]] = null;
-				}
+		this.clearState = function(state) {
+			for (var state in self.state)
+			{
+				self.setStateVar(state, null);
 			}
-		};
-
-		this.refresh = function(plugin)
-		{
-			var dataFactories = this.pluginData[plugin];
-
-			for(var i = 0; i < dataFactories.length; i++)
-				dataFactories[i].refresh();
 		};
 
 		this.genStateName = function ()
 		{
-			var notFinished		= true;
-			var currentChildren	= structure.children;
+			var currentChildren	= self.structure.children;
 			var childidx 		= 0;
-			var stateName 		= "base.";	// Assume that the base state is there.
+			var stateName 		= "home.";	// Assume that the base state is there.
 
 			while(childidx < currentChildren.length)
 			{
 				var child  = currentChildren[childidx];
 				var plugin = child.plugin;
-
-				var pluginStateName = this.pluginState[plugin](this);
-
-				if (pluginStateName)
+				
+				if (self.state.hasOwnProperty(plugin))
 				{
-					stateName += pluginStateName + ".";
-
+					stateName += plugin + ".";
+					
 					if (child.children) {
 						currentChildren = child.children;
 					} else {
@@ -186,24 +268,20 @@
 
 					childidx = -1;
 				}
-
+				
 				childidx += 1;
 			}
 
 			return stateName.substring(0, stateName.length - 1);
 		};
 
-		this.createStateVar = function(varName, value)
-		{
-			// TODO: Check for duplication
-			this.state.varName = value;
-		};
-
-		// TODO: Remove this function at some point
 		this.setStateVar = function(varName, value)
 		{
 			if (self.state[varName] !== value) {
-				self.changed[varName] = true;
+				var stateChangedObject = {};
+				stateChangedObject[varName] = value;
+				
+				EventService.send(EventService.EVENT.STATE_CHANGED, stateChangedObject);
 			}
 
 			self.state[varName] = value;
@@ -211,29 +289,15 @@
 
 		this.setState = function(stateParams, extraParams)
 		{
-			var stateObj = $.extend(stateParams, extraParams);
-
 			console.log("Setting state - " + JSON.stringify(stateParams));
 
 			// Copy all state parameters and extra parameters
 			// to the state
-			for(var i in stateObj)
+			for(var state in stateParams)
 			{
-				var currentStateParams = Object.keys(self.state);
-				if (currentStateParams.indexOf(i) === -1) {
-					self.createStateVar(i, stateObj[i]);
-				}
-
-				self.setStateVar(i, stateObj[i]);
-			}
-
-			// Clear out anything that hasn't been set
-			if (extraParams.clearState) {
-				var objectKeys = Object.keys(stateObj);
-				for(var i in self.state) {
-					if (objectKeys.indexOf(i) === -1) {
-						delete self.state[i];
-					}
+				if (stateParams.hasOwnProperty(state))
+				{
+					self.setStateVar(state, stateParams[state]);
 				}
 			}
 		};
@@ -245,6 +309,22 @@
 			var updateLocation = !dontUpdateLocation ? true: false; // In case of null
 			$state.transitionTo(self.genStateName(), self.state, { location: updateLocation });
 		};
+		
+		$rootScope.$watch(EventService.currentEvent, function(event) {
+			if (angular.isDefined(event) && angular.isDefined(event.type)) {
+				if (event.type === EventService.EVENT.SET_STATE) {
+					for (var key in event.value)
+					{
+						if (event.value.hasOwnProperty(key))
+						{
+							self.setStateVar(key, event.value[key]);
+						}
+					}
+					
+					self.updateState();
+				}
+			}
+		});
 	}]);
 
 })();

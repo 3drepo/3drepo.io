@@ -23,18 +23,18 @@
 
 	function login() {
 		return {
-			restrict: 'EA',
-			templateUrl: 'login.html',
+			restrict: "EA",
+			templateUrl: "login.html",
 			scope: {},
 			controller: LoginCtrl,
-			controllerAs: 'vm',
+			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	LoginCtrl.$inject = ["StateManager", "Auth", "serverConfig"];
+	LoginCtrl.$inject = ["Auth", "EventService", "serverConfig"];
 
-	function LoginCtrl(StateManager, Auth, serverConfig) {
+	function LoginCtrl(Auth, EventService, serverConfig) {
 		var vm = this;
 
 		vm.user = { username: "", password: ""};
@@ -48,13 +48,13 @@
 					vm.errorMessage = null;
 					vm.user.username = null;
 					vm.user.password = null;
-					StateManager.setStateVar("account", username);
-					StateManager.updateState();
+					
+					EventService.send(EventService.EVENT.USER_LOGGED_IN, { loggedIn: true, username: username });
 				}, function (reason) {
 					vm.errorMessage = reason;
 					vm.user.password = null;
-					StateManager.setStateVar("account", null);
-					StateManager.updateState();
+					
+					EventService.send(EventService.EVENT.USER_LOGGED_IN, { loggedIn: false, errorMessage: reason });
 				}
 			);
 		};

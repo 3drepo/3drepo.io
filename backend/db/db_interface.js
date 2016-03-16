@@ -359,7 +359,7 @@ DBInterface.prototype.searchTree = function(dbName, project, branch, revision, s
 	filter = {
 		name: new RegExp(regexStr)
 	};
-	
+
 	var projection = {
 		_id : 1,
 		name: 1
@@ -584,7 +584,7 @@ DBInterface.prototype.getUserInfo = function(username, callback) {
 
 		if (coll[0])
 		{
-			dbConn(self.logger).getUserPrivileges(username, null, function (err, privs) {
+			self.getUserPrivileges(username, null, function (err, privs) {
 				if (err.value)
 				{
 					return callback(err);
@@ -681,15 +681,15 @@ DBInterface.prototype.getProjectBranchHeadRid = function (account, project, bran
     } else {
         branch_id = stringToUUID(branch);
     }
-    
+
     historyQuery = {
         shared_id: branch_id
     };
-    
+
     var historyProjection = {
         _id: 1
     };
-    
+
     dbConn(this.logger).getLatest(account, project + ".history", historyQuery, historyProjection, function (err, docs) {
         if (err.value) {
             return err_callback(err);
@@ -806,9 +806,9 @@ DBInterface.prototype.getProjectUsers = function(account, project, callback) {
 };
 
 DBInterface.prototype.checkUserPermission = function (username, account, project, callback) {
+	var self = this;
 
-	// var self = this;
-	dbConn(this.logger).getUserPrivileges(username, account, function (status, privileges) {
+	self.getUserPrivileges(username, account, function (status, privileges) {
 		if (status.value) {
 			return callback(status);
 		}
@@ -1601,7 +1601,7 @@ DBInterface.prototype.filterFederatedProject = function(dbName, project, branch,
 				project: 1,
 				unique: 1
 			};
-			
+
 			if (populateProjectName)
 			{
 				for(var i = 0; i < nodes.length; i++)
@@ -1609,7 +1609,7 @@ DBInterface.prototype.filterFederatedProject = function(dbName, project, branch,
 					nodes[i].account = dbName;
 					nodes[i].project = project;
 				}
-			}			
+			}
 
 			dbConn(self.logger).filterColl(dbName, project + ".scene", refFilter, projection, function(err, refs) {
 				// Asynchronously loop over all references.
@@ -1635,7 +1635,7 @@ DBInterface.prototype.filterFederatedProject = function(dbName, project, branch,
 						childBranch   = "master";
 						childRevision = null;
 					}
-					
+
 					item.account = dbName;
 					item.name = childProject;
 
@@ -2292,10 +2292,10 @@ DBInterface.prototype.getObject = function(dbName, project, uid, rid, sid, needF
 			{
 				// TODO: At this point we should generate the scene graph
 				// There is no stash so just pass back the unoptimized scene graph
-				
+
 				dbConn(self.logger).filterColl(dbName, project + ".scene", query, projection, function(err, obj) {
 					if (err.value) { return callback(err); }
-					
+
 					if (!obj.length) {
 						return callback(responseCodes.OBJECT_NOT_FOUND);
 					}
@@ -2661,7 +2661,7 @@ DBInterface.prototype.getRolesByProject = function(dbName, project, readWriteAny
 						if(roleSettingsMap[rolesToReturn[i].role]){
 							rolesToReturn[i].color = roleSettingsMap[rolesToReturn[i].role].color;
 						}
-						
+
 					}
 				}
 				return callback(responseCodes.OK, rolesToReturn);
@@ -2859,7 +2859,7 @@ DBInterface.prototype.getUserRoles = function (username, database, callback) {
 		}
 
 		if (docs.length !== 1) {
-			self.logger.logError("Unexpected number of documents found in getUserRoles(). size:" + docs.length);
+			self.logger.logError("Unexpected number of documents found in getUserRoles() for USER=" + username + " size:" + docs.length);
 			return callback(responseCodes.USER_NOT_FOUND, docs);
 		}
 
@@ -2867,7 +2867,7 @@ DBInterface.prototype.getUserRoles = function (username, database, callback) {
 		if (database)
 		{
 			roles = [];
-			for (i = 0; i < docs[0].roles.length; i++) {
+			for (var i = 0; i < docs[0].roles.length; i++) {
 				if (docs[0].roles[i].db === dbName || docs[0].roles[i].db === database) {
 					roles.push(docs[0].roles[i]);
 				}
@@ -2896,7 +2896,7 @@ DBInterface.prototype.getUserPrivileges = function (username, database, callback
 
 	//First get all the roles this user is granted within the databases of interest
 	 self.getUserRoles(username, database, function (err, roles) {
-		if (status.value) {
+		if (err.value) {
 			return callback(err);
 		}
 
@@ -2908,7 +2908,7 @@ DBInterface.prototype.getUserPrivileges = function (username, database, callback
 		dbConn(self.logger).dbCallback(adminDB, function (err, dbConn) {
 			var command = { rolesInfo : roles, showPrivileges: true };
 			//Given the roles, get the privilege information
-			dbConn(self.logger).command(command, function (err, docs) {
+			dbConn.command(command, function (err, docs) {
 				if (err) {
 					return callback(responseCodes.DB_ERROR(err));
 				}
@@ -2921,7 +2921,7 @@ DBInterface.prototype.getUserPrivileges = function (username, database, callback
 				var rolesArr = docs.roles;
 				var privileges = [];
 
-				for (i = 0; i < rolesArr.length; i++) {
+				for (var i = 0; i < rolesArr.length; i++) {
 					privileges = privileges.concat(rolesArr[i].inheritedPrivileges);
 				}
 				self.logger.logDebug(privileges.length + " privileges found.");
@@ -2936,6 +2936,6 @@ DBInterface.prototype.uuidToString = uuidToString;
 
 module.exports = function(logger) {
 	"use strict";
-	
+
 	return new DBInterface(logger);
 };

@@ -19,65 +19,34 @@
 	"use strict";
 
 	angular.module("3drepo")
-	.config([
-	'$stateProvider',
-	'parentStates',
-	function($stateProvider, parentStates) {
-		var states = parentStates["project"];
-
-		for(var i = 0; i < states.length; i++) {
-			$stateProvider
-			.state(states[i] + '.project', {
-				url: '/:project',
-				resolve: {
-					auth: function (Auth) { return Auth.init(); },
-					init: function(StateManager, $stateParams) {
-						StateManager.setStateVar("branch", "master");
-						StateManager.setStateVar("revision", "head");
-						StateManager.setState($stateParams, {});
-						StateManager.refresh("project");
-					}
-				},
-				views: {
-					"@" : {
-						templateUrl: 'project.html'
-					}
-				}
-			});
-		}
-	}])
-	.run(['StateManager', function(StateManager) {
-		StateManager.registerPlugin('project', 'ProjectData', function () {
-			if (StateManager.state.project) {
-				return "project";
-			}
-			else {
-				return null;
-			}
-		});
-
-		StateManager.setClearStateVars("project", ["project"]);
-	}])
 	.directive("project", project);
 
     function project() {
         return {
-            restrict: 'E',
-            scope: {},
-            controller: ProjectCtrl
+            restrict: "E",
+            scope: {
+				account:  "=",
+				project:  "=",
+				branch:   "=",
+				revision: "=",
+				state:    "="
+			},
+			templateUrl: "project.html",
+            controller: ProjectCtrl,
+			controllerAs: "pm",
+			bindToController: true			
         };
     }
 
-	ProjectCtrl.$inject = ["$timeout", "EventService", "StateManager", "ProjectService"];
+	ProjectCtrl.$inject = ["$timeout", "$scope", "EventService", "ProjectService"];
 
-	function ProjectCtrl($timeout, EventService, StateManager, ProjectService) {
+	function ProjectCtrl($timeout, $scope, EventService, ProjectService) {
 		var panelCard = {
 			left: [],
 			right: []
 		};
 
-		var promise,
-			i, length;
+		var i, length, pm = this;
 
 		panelCard.left.push({
 			type: "tree",
@@ -150,33 +119,33 @@
 			options: []
 		});
 
-		// Add filtering options for the Issues card menu
-		promise = ProjectService.getRoles();
-		promise.then(function (data) {
-			for (i = 0, length = data.length; i < length; i += 1) {
-				panelCard.right[0].menu.push(
-					{
-						value: "filterRole_" + data[i].role,
-						label: data[i].role,
-						toggle: true,
-						selected: true,
-						firstSelected: false,
-						secondSelected: false
+		$scope.$watchGroup(["pm.account","pm.project"], function()
+		{
+			if (angular.isDefined(pm.account) && angular.isDefined(pm.project)) {
+				// Add filtering options for the Issues card menu
+				ProjectService.getRoles(pm.account, pm.project).then(function (data) {
+					for (i = 0, length = data.length; i < length; i += 1) {
+						panelCard.right[0].menu.push(
+							{
+								value: "filterRole_" + data[i].role,
+								label: data[i].role,
+								toggle: true,
+								selected: true,
+								firstSelected: false,
+								secondSelected: false
+							}
+						);
 					}
-				);
+				});
+				
+				ProjectService.getProjectInfo(pm.account, pm.project).then(function (data) {
+					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
+						account: data.account,
+						project: data.project,
+						settings: data.settings
+					});
+				});
 			}
-		});
-
-		StateManager.setStateVar("branch", "master");
-		StateManager.setStateVar("revision", "head");
-		StateManager.updateState();		// Want to preserve URL structure
-
-		StateManager.Data.ProjectData.loadingPromise.promise.then(function() {
-			EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
-				account: StateManager.state.account,
-				project: StateManager.state.project,
-				settings: StateManager.Data.ProjectData.settings
-			});
 		});
 
 		$timeout(function () {
@@ -185,10 +154,10 @@
 			// No parameters means load from state variables
 			EventService.send(EventService.EVENT.CREATE_VIEWER, {
 				name: "default",
-				account: StateManager.state.account,
-				project: StateManager.state.project,
-				branch: StateManager.state.branch,
-				revision: StateManager.state.revision
+				account:  pm.account,
+				project:  pm.project,
+				branch:   pm.branch,
+				revision: pm.revision
 			});
 		});
 	}

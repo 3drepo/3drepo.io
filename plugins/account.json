@@ -8,8 +8,6 @@
             {"template" : "account/logout.jade", "id" : "logout.html" }
         ],
 		"angular": [
-			"account/AccountData.js",
-			"account/AccountCtrl.js",
             "account/accountDirective.js",
             "account/accountService.js",
             "account/accountProjectsDirective.js",

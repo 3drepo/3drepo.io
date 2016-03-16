@@ -152,31 +152,26 @@ module.exports.createApp = function(template)
 
 
 	var pluginStructure = {
-		"plugin" : "base",
+		"plugin" : "home",
 		"children" : [
 			{
-				"plugin": "login",
+				"plugin": "account",
 				"children": [
 					{
-						"plugin": "account",
-						"children": [
-							{
-								"plugin": "project",
-								"friends" : [
-									"panel",
-									"filter",
-									"tree",
-									"viewpoints",
-									"issues",
-									"oculus",
-									"clip",
-									"bottomButtons",
-									"qrCodeReader",
-									"docs",
-									"utils",
-									"walkthroughVr"
-								]
-							}
+						"plugin": "project",
+						"friends" : [
+							"panel",
+							"filter",
+							"tree",
+							"viewpoints",
+							"issues",
+							"oculus",
+							"clip",
+							"bottomButtons",
+							"qrCodeReader",
+							"docs",
+							"utils",
+							"walkthroughVr"
 						]
 					}
 				]
@@ -438,8 +433,8 @@ module.exports.createApp = function(template)
 		//params["pluginLevelsJSON"]	= JSON.stringify(params["pluginLevelsJSON"]);
 		params.uistate = JSON.stringify(params.uistate);
 
-		setupJade(params);
-		console.log("frontendJade: ", params.frontendJade);
+		//setupJade(params);
+		//console.log("frontendJade: ", params.frontendJade);
 
 		res.render(template, params);
 	});

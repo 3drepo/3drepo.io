@@ -1,0 +1,8 @@
+div(ng-if="!hm.state.loggedIn")
+	div(ng-if="hm.getLoggedOutUrl()" ng-include="hm.getLoggedOutUrl()")
+	div(ng-if="!hm.getLoggedOutUrl()")
+		login
+div(ng-if="hm.state.loggedIn")
+	div(ng-if="hm.getLoggedInUrl()" ng-include="hm.getLoggedInUrl()")
+	div(ng-if="!hm.getLoggedInUrl()")
+		account-dir(account="hm.state.account", state="hm.state")

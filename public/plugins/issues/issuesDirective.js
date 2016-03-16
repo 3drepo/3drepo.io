@@ -23,9 +23,13 @@
 
 	function issues() {
 		return {
-			restrict: 'EA',
-			templateUrl: 'issues.html',
+			restrict: "EA",
+			templateUrl: "issues.html",
 			scope: {
+				account: "=",
+				project: "=",
+				branch:  "=",
+				revision: "=",
 				show: "=",
 				filterText: "=",
 				showAdd: "=",
@@ -40,9 +44,9 @@
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$element", "$timeout", "$mdDialog", "$filter", "IssuesService", "EventService"];
+	IssuesCtrl.$inject = ["$scope", "$element", "$timeout", "$mdDialog", "$filter", "IssuesService", "EventService", "Auth"];
 
-	function IssuesCtrl($scope, $element, $timeout, $mdDialog, $filter, IssuesService, EventService) {
+	function IssuesCtrl($scope, $element, $timeout, $mdDialog, $filter, IssuesService, EventService, Auth) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -75,7 +79,7 @@
 		/*
 		 * Get all the Issues
 		 */
-		promise = IssuesService.getIssues();
+		promise = IssuesService.getIssues(vm.account, vm.project);
 		promise.then(function (data) {
 			var i, length;
 			vm.showProgress = false;
@@ -95,7 +99,7 @@
 		/*
 		 * Get all the available roles for the project
 		 */
-		rolesPromise = IssuesService.getRoles();
+		rolesPromise = IssuesService.getRoles(vm.account, vm.project);
 		rolesPromise.then(function (data) {
 			vm.availableRoles = data;
 			setAllIssuesAssignedRolesColors();
@@ -135,7 +139,7 @@
 		/*
 		 * Get the user roles for the project
 		 */
-		projectUserRolesPromise = IssuesService.getUserRolesForProject();
+		projectUserRolesPromise = IssuesService.getUserRolesForProject(vm.account, vm.project, Auth.username);
 		projectUserRolesPromise.then(function (data) {
 			vm.projectUserRoles = data;
 		});

@@ -28,10 +28,10 @@
 			restrict: "E",
 			scope: {
 				manager: "=",
-				account: "=",
-				project: "=",
-				branch: "=",
-				revision: "=",
+				account: "@",
+				project: "@",
+				branch: "@",
+				revision: "@",
 				name: "@",
 				autoInit: "@",
 				vrMode: "@",
@@ -51,6 +51,9 @@
 
 		v.initialised = $q.defer();
 		v.loaded      = $q.defer();
+		
+		v.branch   = v.branch ? v.branch : "master";
+		v.revision = v.revision ? v.revision : "head";  
 
 		if (!angular.isDefined(v.eventService))
 		{
@@ -131,7 +134,7 @@
 						} else if (event.type === EventService.EVENT.VIEWER.SWITCH_FULLSCREEN) {
 							v.viewer.switchFullScreen(null);
 						} else if (event.type === EventService.EVENT.VIEWER.ENTER_VR) {
-							v.viewer.switchVR();
+							v.oculus.switchVR();
 						} else if (event.type === EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK) {
 							v.viewer.onViewpointChanged(event.value.callback);
 						} else if (event.type === EventService.EVENT.PROJECT_SETTINGS_READY) {
@@ -174,6 +177,7 @@
 								event.value.percentage ? event.value.percentage : 0,
 								event.value.clipDirection ? event.value.clipDirection : -1);
 						} else if (event.type === EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE) {
+							console.log(event);
 							v.viewer.moveClippingPlane(event.value.percentage);
 						} else if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
 							v.viewer.highlightObjects(
@@ -200,8 +204,12 @@
 								angular.isDefined(event.value.animate) ? event.value.animate : true,
 								event.value.rollerCoasterMode
 							);
+						} else if (event.type === EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT) {
+							if (angular.isDefined(event.value.promise)) {
+								event.value.promise.resolve(v.viewer.getCurrentViewpointInfo());
+							}
 						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
-							vm.manager.getCurrentViewer().setNavMode(event.value.mode);
+							v.manager.getCurrentViewer().setNavMode(event.value.mode);
 						}
 					});
 				}

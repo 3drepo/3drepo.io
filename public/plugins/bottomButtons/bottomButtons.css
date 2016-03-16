@@ -4,21 +4,27 @@ bottom-buttons {
   bottom: 80px;
   left: 0;
   right: 0;
-  width: 320px;
+  width: 360px;
   margin: auto;
   text-align: center;
 }
 
 bottom-buttons #leftButtons {
   position: absolute;
-  left: 0;
+  left: -35px;
   top: 8px;
+}
+bottom-buttons #leftButtons span {
+  outline: none;
 }
 
 bottom-buttons #rightButtons {
   position: absolute;
   right: 0;
   top: 8px;
+}
+bottom-buttons #rightButtons span {
+  outline: none;
 }
 
 bottom-buttons #showButtonIcon {
@@ -34,8 +40,18 @@ bottom-buttons .actionButton md-icon {
 
 bottom-buttons .viewingOptionButtons {
   position: absolute;
-  right: 0;
-  top: -145px;
+  right: 20px;
+  top: -130px;
+}
+
+bottom-buttons label {
+  color: #FFFFFF;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  font-weight: bold;
+  font-size: 14px;
+}
+bottom-buttons label:hover {
+  cursor: pointer;
 }
 
 .bottomButtomIconCardboard {

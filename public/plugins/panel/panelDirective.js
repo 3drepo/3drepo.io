@@ -23,13 +23,17 @@
 
     function panel () {
         return {
-            restrict: 'E',
-            templateUrl: 'panel.html',
+            restrict: "E",
+            templateUrl: "panel.html",
             scope: {
+				account:  "=",
+				project:  "=",
+				branch:   "=",
+				revision: "=",				
                 position: "@"
             },
             controller: PanelCtrl,
-            controllerAs: 'vm',
+            controllerAs: "vm",
             bindToController: true
         };
     }

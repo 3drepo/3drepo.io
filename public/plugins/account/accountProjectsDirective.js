@@ -49,7 +49,7 @@
 				vm.accounts.push({
 					name: key,
 					projects: value,
-					showProjects: false
+					showProjects: true
 				});
 			});
 		});

@@ -87,7 +87,7 @@ var repoGetHandler = function(router, checkAccess){
 		}
 	});
 
-    self.getInternal("/:account/:project/:index/walkthrough.:format?", {}, function(req, res, next) {
+    self.getInternal("/:account/:project/walkthrough/:index.:format?", {}, function(req, res, next) {
         var responsePlace = "/:account/:project/walkthrough GET";
 
         if (!("user" in req.session)) {

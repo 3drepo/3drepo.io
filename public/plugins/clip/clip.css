@@ -4,8 +4,8 @@ clip {
   padding: 20px 10px 10px 10px;
 }
 
-clip md-radio-button {
-  display: inline;
+clip md-radio-button .md-label {
+  margin-right: 30px;
 }
 
 .clipSlider {
@@ -18,3 +18,4 @@ clip md-radio-button {
 .clipSlider input {
   width: 50px;
 }
+

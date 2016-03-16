@@ -2,6 +2,10 @@ div(ng-show="vm.showPanel")
 	div#items(ng-class="{ active : vm.activate }")
 		div(ng-repeat="contentItem in vm.contentItems")
 			panel-card(
+				account="vm.account"
+				project="vm.project"
+				branch="vm.branch"
+				revision="vm.revision"
 				position="vm.position"
 				content-data='contentItem'
 				ng-show='contentItem.show',

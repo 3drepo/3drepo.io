@@ -45,12 +45,12 @@
 		vm.sliderMax = 100;
 		vm.sliderStep = 0.1;
 		vm.sliderPosition = vm.sliderMin;
-		vm.clipPlane = null;
 		vm.axes = ["X", "Y", "Z"];
 		vm.selectedAxis = vm.axes[0];
 		vm.visible = false;
 
 		function initClippingPlane () {
+			console.log(123);
 			$timeout(function () {
 				var initPosition = (vm.sliderMax - vm.sliderPosition) / vm.sliderMax;
 				
@@ -64,23 +64,27 @@
 		}
 
 		function moveClippingPlane(sliderPosition) {
-			EventService.send(EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE, 
+			EventService.send(EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE,
 			{
 				percentage: (vm.sliderMax - sliderPosition) / vm.sliderMax
 			});
 		}
 
+		/*
+		 * Watch for show/hide of card
+		 */
 		$scope.$watch("vm.show", function (newValue) {
 			if (angular.isDefined(newValue)) {
-				if (newValue) {
-					if (!vm.clipPlane)
-					{
-						initClippingPlane();
-					}
-				}
+				vm.visible = newValue;
 			}
 		});
 
+		/**
+		 * Swap Y and Z axes
+		 *
+		 * @param {String} axis
+		 * @returns {String}
+		 */
 		function translateAxis(axis)
 		{
 			if (axis === "Y")
@@ -93,7 +97,10 @@
 			}
 		}
 
-		$scope.$watch("vm.visible", function (newValue, oldValue) {
+		/*
+		 * Toggle the clipping plane
+		 */
+		$scope.$watch("vm.visible", function (newValue) {
 			if (angular.isDefined(newValue))
 			{
 				vm.visible = newValue;
@@ -107,26 +114,27 @@
 			}
 		});
 
+		/*
+		 * Change the clipping plane axis
+		 */
 		$scope.$watch("vm.selectedAxis", function (newValue) {
-			if ((angular.isDefined(newValue) && vm.clipPlane)) {
-				// Swap Y and Z axes
-				vm.clipPlane.changeAxis(translateAxis(newValue));
+			if (angular.isDefined(newValue) && vm.show) {
+				initClippingPlane();
 				vm.sliderPosition = vm.sliderMin;
 			}
 		});
 
+		/*
+		 * Watch the slider position
+		 */
 		$scope.$watch("vm.sliderPosition", function (newValue) {
-			if (vm.clipPlane) {
+			if (angular.isDefined(newValue) && vm.show) {
 				moveClippingPlane(newValue);
-			} else {
-				vm.visible = (vm.sliderPosition !== 0);
 			}
 		});
 
 		$scope.$watch(EventService.currentEvent, function (event) {
 			if (event.type === EventService.EVENT.VIEWER.SET_CLIPPING_PLANES) {
-				vm.clipPlane = null;
-
 				if (event.value.hasOwnProperty("clippingPlanes") && event.value.clippingPlanes.length) {
 					vm.selectedAxis   = translateAxis(event.value.clippingPlanes[0].axis);
 					vm.sliderPosition = (1.0 - event.value.clippingPlanes[0].percentage) * 100.0;

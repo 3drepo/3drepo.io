@@ -23,16 +23,20 @@
 
     function panelCard() {
         return {
-            restrict: 'E',
-            templateUrl: 'panelCard.html',
+            restrict: "E",
+            templateUrl: "panelCard.html",
             scope: {
+				account: "=",
+				project: "=",
+				branch: "=",
+				revision: "=",
                 position: "=",
                 contentData: "=",
 				onHeightRequest: "&",
 				onShowFilter: "&"
             },
             controller: PanelCardCtrl,
-            controllerAs: 'vm',
+            controllerAs: "vm",
             bindToController: true
         };
     }
@@ -76,7 +80,11 @@
 				"show='vm.contentData.show' " +
 				"on-content-height-request='vm.onContentHeightRequest(height)' " +
 				"on-show-item='vm.showItem()' " +
-				"hide-item='vm.hideSelectedItem' ";
+				"hide-item='vm.hideSelectedItem' " +
+				"account='vm.account' " +
+				"project='vm.project' " +
+				"branch='vm.branch' " +
+				"revision='vm.revision' ";
 
 			// Only add attributes when needed
 			for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
@@ -129,7 +137,7 @@
 
 					case "print":
 						option = angular.element(
-							"<panel-card-option-print></panel-card-option-print>"
+							"<panel-card-option-print account='vm.account' project='vm.project'></panel-card-option-print>"
 						);
 						break;
 

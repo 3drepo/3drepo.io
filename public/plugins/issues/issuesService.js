@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.factory("IssuesService", IssuesService);
 
-	IssuesService.$inject = ["$http", "$q", "StateManager", "serverConfig", "EventService", "Auth"];
+	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService", "StateManager"];
 
-	function IssuesService($http, $q, StateManager, serverConfig, EventService, Auth) {
+	function IssuesService($http, $q,  serverConfig, EventService, StateManager) {
 		var state = StateManager.state,
 			url = "",
 			data = {},
@@ -79,10 +79,10 @@
 			}
 		};
 
-		obj.getIssues = function() {
+		obj.getIssues = function(account, project) {
 			var self = this,
 				deferred = $q.defer();
-			url = serverConfig.apiUrl(state.account + '/' + state.project + '/issues.json');
+			url = serverConfig.apiUrl(account + "/" + project + "/issues.json");
 
 			$http.get(url)
 				.then(
@@ -252,9 +252,9 @@
 			});
 		};
 
-		obj.getRoles = function() {
+		obj.getRoles = function(account, project) {
 			var deferred = $q.defer();
-			url = serverConfig.apiUrl(state.account + '/' + state.project + '/roles.json');
+			url = serverConfig.apiUrl(account + '/' + project + '/roles.json');
 
 			$http.get(url)
 				.then(
@@ -270,9 +270,9 @@
 			return deferred.promise;
 		};
 
-		obj.getUserRolesForProject = function() {
+		obj.getUserRolesForProject = function(account, project, username) {
 			var deferred = $q.defer();
-			url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + Auth.username + "/userRolesForProject.json");
+			url = serverConfig.apiUrl(account + "/" +project + "/" + username + "/userRolesForProject.json");
 
 			$http.get(url)
 				.then(
