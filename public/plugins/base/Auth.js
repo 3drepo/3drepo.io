@@ -81,6 +81,10 @@
 			{
 				// Initialize
 				$http.get(serverConfig.apiUrl("login")).success(self.loginSuccess).error(self.loginFailure);
+				
+				self.authPromise.then(function() {
+					initPromise.resolve();
+				});
 			} else {
 				if (self.loggedIn)
 				{

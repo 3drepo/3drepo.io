@@ -60,6 +60,8 @@
 
     function HomeCtrl($scope, Auth, StateManager, EventService) {
         var hm = this;
+		
+		hm.changingState = true;
 		hm.loggedIn = false;
 		
 		hm.state = {};
@@ -81,8 +83,6 @@
             Auth.logout();
         };
 		
-		Auth.init();
-		
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if (angular.isDefined(event) && angular.isDefined(event.type)) {
 				if (event.type === EventService.EVENT.USER_LOGGED_IN)
@@ -92,7 +92,9 @@
 					{
 						EventService.send(EventService.EVENT.SET_STATE, { loggedIn: true, account: account });
 					} else {
-						EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false });
+						hm.loggedIn = false;
+						hm.changingState = false;
+						//EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false });
 					}						
 				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
 					EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
@@ -100,6 +102,8 @@
 					StateManager.clearState();
 					Auth.init();
 				} else if (event.type === EventService.EVENT.STATE_CHANGED) {
+					hm.changingState = true;
+					
 					for(var key in event.value)
 					{
 						if (event.value.hasOwnProperty(key))
@@ -107,6 +111,8 @@
 							hm.state[key] = event.value[key];
 						}
 					}
+					
+					hm.changingState = false;
 				}
 			}
 		});

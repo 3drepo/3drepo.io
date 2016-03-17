@@ -27,7 +27,18 @@
 		
 		$stateProvider.state("home", {
 			name: "home",
-			url: "/"
+			url: "/",
+			resolve: {
+				init: function(Auth, StateManager, $stateParams)
+				{
+					Auth.init().then(function(loggedIn) {
+						if (!loggedIn)
+						{
+							StateManager.destParams = $stateParams;
+						}
+					});
+				}
+			}			
 		});
 		
 		var stateStack       = [structure];
@@ -69,66 +80,29 @@
 		$urlRouterProvider.otherwise("");
 	}])
 	.run(["$rootScope", "$state", "uiState", "StateManager", function($rootScope, $state, uiState, StateManager) {
-		$rootScope.$on("$stateChangeStart", function (event, toState, toParams, fromState, fromParams)
-		{
-			if (!$rootScope.requestState && !$rootScope.requestParams)
-			{
-				// Record the request URL so that if something
-				// goes wrong we can log back into it.
-				$rootScope.requestState = toState;
-				$rootScope.requestParams = toParams;
-			}
+		$rootScope.$on("$stateChangeStart",function(event, toState, toParams, fromState, fromParams){				
+			var stateChangeObject = {
+				toState    : toState,
+				toParams   : toParams,
+				fromState  : fromState,
+				fromParams : fromParams 
+			};
+			
+			StateManager.startStateChange(stateChangeObject);
 		});
-
+				
 		$rootScope.$on("$stateChangeSuccess",function(event, toState, toParams, fromState, fromParams){
-			// console.log("$stateChangeSuccess to "+JSON.stringify(toState)+"- fired when the transition finishes. toState,toParams : \n",toState, toParams);
-
-			// var uiComps = uiState[toState.name];
-
-			// Split the list of states separated by dots
-			// var toStates    = toState.name.split(".");
-			// var fromStates  = fromState.name.split(".");
-			
-			StateManager.handleStateChange(fromParams, toParams);
-
-			/*
-			var i = 0;
-
-			for(i = 0; i < fromStates.length; i++) {
-				// Loop through all the states and clear all the variables of ones,
-				// we are not using
-				if (toStates.indexOf(fromStates[i]) === -1) {
-					StateManager.clearStateVars(fromStates[i]);
-				}
-			}
-
-			// Turn off all UI components
-			for (var uicomp in StateManager.ui) {
-				if (StateManager.ui.hasOwnProperty(uicomp)) {
-					StateManager.ui[uicomp] = false;
-				}
-			}
-
-			// Turn on the required UI components
-			if (uiComps) {
-				for (i = 0; i < uiComps.length; i++) {
-					StateManager.ui[uiComps[i]] = true;
-				}
-			}
-			*/
-			
-			/*
-			if ($rootScope.requestState.name === toState.name)
-			{
-				// We have successfully made it, after a number
-				// of tries
-				$rootScope.requestState = null;
-				$rootScope.requestParams = null;
-			}
-			*/
+			var stateChangeObject = {
+				toState    : toState,
+				toParams   : toParams,
+				fromState  : fromState,
+				fromParams : fromParams 
+			};
+						
+			StateManager.handleStateChange(stateChangeObject);
 		});
 	}])
-	.service("StateManager", ["$state", "$rootScope", "structure", "EventService", function($state, $rootScope, structure, EventService) {
+	.service("StateManager", ["$q", "$state", "$rootScope", "structure", "EventService", function($q, $state, $rootScope, structure, EventService) {
 		var self = this;
 
 		// Stores the state, required as ui-router does not allow inherited
@@ -165,9 +139,26 @@
 		};
 
 		self.clearChanged();
+		
+		this.stateChangeQueue = [];
+		
+		var compareStateChangeObjects = function(stateChangeA, stateChangeB)
+		{
+			return 	(stateChangeA.toState    === stateChangeB.toState) && 
+					(stateChangeA.toParams   === stateChangeB.toParams) && 
+					(stateChangeA.fromState  === stateChangeB.fromState) && 
+					(stateChangeA.fromParams === stateChangeB.fromParams);
+		};
+		
+		this.startStateChange = function(stateChangeObject) {
+			self.stateChangeQueue.push(stateChangeObject);
+		};
 
-		this.handleStateChange = function(fromParams, toParams) {
+		this.handleStateChange = function(stateChangeObject) {
 			var param;
+			
+			var fromParams = stateChangeObject.fromParams;
+			var toParams   = stateChangeObject.toParams;
 			
 			// Switch off all parameters that we came from
 			// but are not the same as where we are going to
@@ -192,6 +183,8 @@
 						{
 							self.setStateVar(param, toParams[param]);
 						}
+					} else {
+						self.setStateVar(param, toParams[param]);	
 					}
 				}
 			}
@@ -234,8 +227,15 @@
 				stateStack.splice(0,1);
 				stateNameStack.splice(0,1);				
 			}			
-							
-			self.updateState();	
+			
+			if (compareStateChangeObjects(stateChangeObject, self.stateChangeQueue[0]))
+			{
+				self.stateChangeQueue.pop();
+				self.updateState();
+			} else {
+				self.stateChangeQueue.pop();
+				self.handleStateChange(self.stateChangeQueue[self.stateChangeQueue.length - 1]);
+			}
 		};
 
 		this.stateVars    = {};
@@ -243,7 +243,10 @@
 		this.clearState = function(state) {
 			for (var state in self.state)
 			{
-				self.setStateVar(state, null);
+				if (self.state.hasOwnProperty(state))
+				{
+					self.setStateVar(state, null);
+				}
 			}
 		};
 
@@ -280,7 +283,11 @@
 		this.setStateVar = function(varName, value)
 		{
 			if (self.state[varName] !== value) {
+				//var changedStateObject = {};
+				//changedStateObject[varName] = value;
 				self.changedState[varName] = value;
+				
+				//EventService.send(EventService.EVENT.STATE_CHANGED, changedStateObject);
 			}
 
 			self.state[varName] = value;
