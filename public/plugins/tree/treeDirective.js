@@ -49,6 +49,9 @@
 			currentSelectedNode = null,
 			currentScrolledToNode = null;
 
+		/*
+		 * Init
+		 */
 		vm.nodes = [];
 		vm.showTree = true;
 		vm.showFilterList = false;
@@ -57,6 +60,9 @@
 		vm.showProgress = true;
 		vm.progressInfo = "Loading full tree structure";
 
+		/*
+		 * Get all the tree nodes
+		 */
 		promise = TreeService.init(vm.account, vm.project, vm.branch, vm.revision);
 		promise.then(function (data) {
 			vm.allNodes = [];

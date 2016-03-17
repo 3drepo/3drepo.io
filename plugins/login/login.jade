@@ -3,44 +3,23 @@
 	#loginContent(layout="row" flex="50")
 		span(flex="25")
 		div(flex="35" layout="column")
-			div(style="background:yellow" flex="10" layout-fill)
+			div(flex)
 				img(ng-src="{{vm.logo}}", flex-gt-sm="30", flex-sm="50", flex="80")
 				h2.md-subhead#loginVersion Version: {{vm.version}}
-			div(flex="20" style="background:green")
+			div(flex)
 				h1.md-display-1#loginTitle 3D BIM version control
 				h2.md-headline#loginSubTitle A scalable, open platform
 
 		div(flex="15", layout="column")
 			div(layout="column", flex)
 				md-input-container.md-block(md-no-float)
-					input(type='text', ng-model='vm.user.username', placeholder='Username', ng-required, autofocus)
+					input(type='text', ng-model='vm.user.username', placeholder='Username', ng-required, autofocus ng-keypress="vm.login($event)")
 				md-input-container(md-no-float)
-					input(type='password', ng-model='vm.user.password', placeholder='Password', ng-required)
+					input(type='password', ng-model='vm.user.password', placeholder='Password', ng-required ng-keypress="vm.login($event)")
 				div(layout="row", layout-align="start" flex="none")
 					md-button.md-accent.md-raised(ng-click="vm.login()") Log In
 				h2#loginError {{vm.errorMessage}}
 		span(flex="25")
 	div(layout="row" layout-align="center center" flex="50")
 		div
-			img(src="./public/images/balfour-beatty-logo.jpg" flex style="max-width:100%; height: auto")
-		//div(flex)
-			img(src="./public/images/balfour-beatty-logo.jpg")
-
-	//#loginContent(layout="row" flex="50")
-		span(flex="25")
-		div(flex="35", layout="column")
-			div(flex)
-				img(ng-src="{{vm.logo}}", flex-gt-sm="30", flex-sm="50", flex="80")
-			h1.md-display-1#loginTitle 3D BIM version control
-			h2.md-headline#loginSubTitle A scalable, open platform
-		div(flex="15", layout="column")
-			div(layout="column", flex)
-				md-input-container.md-block(md-no-float)
-					input(type='text', ng-model='vm.user.username', placeholder='Username', ng-required, autofocus)
-				md-input-container(md-no-float)
-					input(type='password', ng-model='vm.user.password', placeholder='Password', ng-required)
-			div(layout="row", layout-align="start")
-				md-button.md-accent.md-raised(ng-click="vm.login()") Log In
-			h2#loginError {{vm.errorMessage}}
-			h2.md-subhead#loginVersion Version: {{vm.version}}
-		span(flex="25")
+			img(ng-src="{{vm.enterpriseLogo}}" flex style="max-width:100%; height: auto")

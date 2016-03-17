@@ -160,6 +160,7 @@
 								event.value.id
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR) {
+							console.log(event);
 							v.viewer.changePinColours(
 								event.value.id,
 								event.value.colours

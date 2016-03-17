@@ -45,7 +45,8 @@
 	function IssueCtrl($scope, $timeout, IssuesService, EventService) {
 		var vm = this,
 			promise = null,
-			originatorEv = null;
+			originatorEv = null,
+			initWatch;
 
 		/*
 		 * Initialise view vars
@@ -105,7 +106,7 @@
 		/*
 		 * Do some initialisation
 		 */
-		$scope.$watch("vm.data", function(newValue) {
+		initWatch = $scope.$watch("vm.data", function(newValue) {
 			var i = 0,
 				length = 0;
 
@@ -125,6 +126,7 @@
 				}
 				initAssignedRolesDisplay();
 			}
+			initWatch(); // Cancel the watch
 		}, true);
 
 		/**
@@ -184,11 +186,6 @@
 					pinColours.push(IssuesService.hexToRgb(roleColour));
 				}
 			}
-
-			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, {
-				id: vm.data._id,
-				colours: pinColours
-			});
 		}
 
 		/**

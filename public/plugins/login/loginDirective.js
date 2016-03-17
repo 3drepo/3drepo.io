@@ -32,18 +32,48 @@
 		};
 	}
 
-	LoginCtrl.$inject = ["Auth", "EventService", "serverConfig"];
+	LoginCtrl.$inject = ["$scope", "Auth", "EventService", "serverConfig"];
 
-	function LoginCtrl(Auth, EventService, serverConfig) {
+	function LoginCtrl($scope, Auth, EventService, serverConfig) {
 		var vm = this;
 
+		/*
+		 * Init
+		 */
 		vm.user = { username: "", password: ""};
 		vm.version = serverConfig.apiVersion;
 		vm.backgroundImage = serverConfig.backgroundImage;
 		vm.logo = "/public/images/3drepo-logo-white.png";
+		//vm.enterpriseLogo = "/public/images/balfour-beatty-logo.jpg";
 
-		vm.login = function() {
-			Auth.login(vm.user.username, vm.user.password);
+		/**
+		 * Attempt to login
+		 *
+		 * @param {Object} event
+		 */
+		vm.login = function(event) {
+			var enterKey = 13;
+
+			if (angular.isDefined(event)) {
+				if (event.which === enterKey) {
+					Auth.login(vm.user.username, vm.user.password);
+				}
+			}
+			else {
+				Auth.login(vm.user.username, vm.user.password);
+			}
 		};
+
+		/*
+		 * Event watch
+		 */
+		$scope.$watch(EventService.currentEvent, function(event) {
+			if (event.type === EventService.EVENT.USER_LOGGED_IN) {
+				// Show an error message for incorrect login
+				if (event.value.hasOwnProperty("error") && (event.value.error.place.indexOf("POST") !== -1)) {
+					vm.errorMessage = event.value.error.message;
+				}
+			}
+		});
 	}
 }());
