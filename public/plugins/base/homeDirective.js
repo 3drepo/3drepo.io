@@ -61,10 +61,10 @@
     function HomeCtrl($scope, Auth, StateManager, EventService) {
         var hm = this;
 		
-		hm.changingState = true;
 		hm.loggedIn = false;
+		hm.state = StateManager.state;
 		
-		hm.state = {};
+		hm.changingState = StateManager.changingState;
 
 		hm.getLoggedInUrl = function() {
 			return hm.loggedInUrl;
@@ -101,18 +101,6 @@
 				} else if ((event.type === EventService.EVENT.NOT_AUTHORIZED) || (event.type === EventService.EVENT.VIEWER.LOGO_CLICK)) {
 					StateManager.clearState();
 					Auth.init();
-				} else if (event.type === EventService.EVENT.STATE_CHANGED) {
-					hm.changingState = true;
-					
-					for(var key in event.value)
-					{
-						if (event.value.hasOwnProperty(key))
-						{
-							hm.state[key] = event.value[key];
-						}
-					}
-					
-					hm.changingState = false;
 				}
 			}
 		});

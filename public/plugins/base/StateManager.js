@@ -80,7 +80,9 @@
 		$urlRouterProvider.otherwise("");
 	}])
 	.run(["$rootScope", "$state", "uiState", "StateManager", function($rootScope, $state, uiState, StateManager) {
-		$rootScope.$on("$stateChangeStart",function(event, toState, toParams, fromState, fromParams){				
+		$rootScope.$on("$stateChangeStart",function(event, toState, toParams, fromState, fromParams){
+			StateManager.state.changing = true;
+							
 			var stateChangeObject = {
 				toState    : toState,
 				toParams   : toParams,
@@ -109,7 +111,9 @@
 		// stateParams, and we need to dynamically generate state diagram.
 		// One day this might change.
 		// https://github.com/angular-ui/ui-router/wiki/URL-Routing
-		this.state      = {};
+		this.state      = {
+			changing: true
+		};
 		
 		this.changedState = {};
 		
@@ -232,6 +236,8 @@
 			{
 				self.stateChangeQueue.pop();
 				self.updateState();
+				
+				self.state.changing = false;
 			} else {
 				self.stateChangeQueue.pop();
 				self.handleStateChange(self.stateChangeQueue[self.stateChangeQueue.length - 1]);

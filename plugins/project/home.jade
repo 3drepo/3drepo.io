@@ -1,4 +1,4 @@
-div(ng-if="!hm.changingState")
+div(ng-if="!hm.state.changing")
 	div(ng-if="!hm.state.loggedIn")
 		div(ng-if="hm.getLoggedOutUrl()" ng-include="hm.getLoggedOutUrl()")
 		div(ng-if="!hm.getLoggedOutUrl()")
