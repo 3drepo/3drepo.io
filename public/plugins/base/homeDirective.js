@@ -61,10 +61,7 @@
     function HomeCtrl($scope, Auth, StateManager, EventService) {
         var hm = this;
 		
-		hm.loggedIn = false;
 		hm.state = StateManager.state;
-		
-		hm.changingState = StateManager.changingState;
 
 		hm.getLoggedInUrl = function() {
 			return hm.loggedInUrl;
@@ -90,12 +87,11 @@
 					var account = StateManager.state.account ? StateManager.state.account : event.value.username;
 					if (!event.value.error)
 					{
-						EventService.send(EventService.EVENT.SET_STATE, { loggedIn: true, account: account });
-					} else {
-						hm.loggedIn = false;
-						hm.state.changing = false;
-						//EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false });
-					}						
+						if (!event.value.initialiser)
+						{
+							EventService.send(EventService.EVENT.SET_STATE, { loggedIn: true, account: account });
+						}	
+					}					
 				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
 					EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
 				} else if ((event.type === EventService.EVENT.NOT_AUTHORIZED) || (event.type === EventService.EVENT.VIEWER.LOGO_CLICK)) {

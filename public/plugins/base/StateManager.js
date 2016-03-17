@@ -29,14 +29,16 @@
 			name: "home",
 			url: "/",
 			resolve: {
-				init: function(Auth, StateManager, $stateParams)
+				init: function(Auth, StateManager, $q)
 				{
-					Auth.init().then(function(loggedIn) {
-						if (!loggedIn)
-						{
-							StateManager.destParams = $stateParams;
-						}
+					StateManager.state.changing = true;
+					
+					Auth.init().then(function (loggedIn) {
+						StateManager.state.loggedIn = loggedIn;
+						finishedAuth.resolve();
 					});
+					
+					return finishedAuth.promise;
 				}
 			}			
 		});
