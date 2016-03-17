@@ -137,6 +137,8 @@
 		// https://github.com/angular-ui/ui-router/wiki/URL-Routing
 		this.state      = {};
 		
+		this.changedState = {};
+		
 		this.structure   = structure;
 
 		this.destroy = function()  {
@@ -256,7 +258,7 @@
 				var child  = currentChildren[childidx];
 				var plugin = child.plugin;
 				
-				if (self.state.hasOwnProperty(plugin))
+				if (self.state.hasOwnProperty(plugin) && self.state[plugin])
 				{
 					stateName += plugin + ".";
 					
@@ -278,10 +280,7 @@
 		this.setStateVar = function(varName, value)
 		{
 			if (self.state[varName] !== value) {
-				var stateChangedObject = {};
-				stateChangedObject[varName] = value;
-				
-				EventService.send(EventService.EVENT.STATE_CHANGED, stateChangedObject);
+				self.changedState[varName] = value;
 			}
 
 			self.state[varName] = value;
@@ -304,10 +303,18 @@
 
 		this.updateState = function(dontUpdateLocation)
 		{
-			console.log("Moving to " + self.genStateName() + " ...");
+			var newStateName = self.genStateName();
+			
+			console.log("Moving to " + newStateName + " ...");
 
+			if (Object.keys(self.changedState).length)
+			{
+				EventService.send(EventService.EVENT.STATE_CHANGED, self.changedState);
+				self.changedState = {};
+			}
+			
 			var updateLocation = !dontUpdateLocation ? true: false; // In case of null
-			$state.transitionTo(self.genStateName(), self.state, { location: updateLocation });
+			$state.transitionTo(newStateName, self.state, { location: updateLocation });
 		};
 		
 		$rootScope.$watch(EventService.currentEvent, function(event) {
