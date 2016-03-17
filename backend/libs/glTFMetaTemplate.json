@@ -3,166 +3,244 @@
     },
     "animations": {},
     "asset": {
-        "generator": "3D Repo glTF generator",
+        "generator": "3D Repo Node.js glTF generator",
         "version": "0.1"
     },
     "bufferViews": {
     },
     "buffers": {
     },
-    "extensionsUsed": [
-        "KHR_materials_common"
-    ],
-    "materials": {
-        "Effect-White": {
-            "extensions": {
-                "KHR_materials_common": {
-                    "doubleSided": false,
-                    "jointCount": 0,
-                    "technique": "PHONG",
-                    "transparent": false,
-                    "values": {
-                        "ambient": [
-                            0,
-                            0,
-                            0,
-                            1
-                        ],
-                        "diffuse": [
-                            0.8,
-                            0.8,
-                            0.8,
-                            1
-                        ],
-                        "emission": [
-                            0,
-                            0,
-                            0,
-                            1
-                        ],
-                        "shininess": 256,
-                        "specular": [
-                            0.1,
-                            0.1,
-                            0.1,
-                            1
-                        ]
+    "techniques": {
+        "default_technique": {
+            "parameters": {
+                "modelViewMatrix": {
+                    "semantic": "MODELVIEW",
+                    "type": 35676
+                },
+                "normal": {
+                    "semantic": "NORMAL",
+                    "type": 35665
+                },
+                "normalMatrix": {
+                    "semantic": "MODELVIEWINVERSETRANSPOSE",
+                    "type": 35676
+                },
+                "position": {
+                    "semantic": "POSITION",
+                    "type": 35665
+                },
+                "texcoord0": {
+                    "semantic": "TEXCOORD_0",
+                    "type": 35664
+                },
+                "projectionMatrix": {
+                    "semantic": "PROJECTION",
+                    "type": 35676
+                },
+                "shininess": {
+                    "type": 5126,
+                    "value": 50
+                },
+                "diffuse": {
+                    "type": 35666
+                },
+                "specular": {
+                    "type": 35666,
+                    "value": [
+                        0,
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            },
+            "program": "default_program",
+            "states": {
+                "enable": [
+                    2929,
+                    2884
+                ]
+            },
+            "uniforms": {
+                "u_diffuse": "diffuse",
+                "modelViewMatrix": "modelViewMatrix",
+                "normalMatrix": "normalMatrix",
+                "projectionMatrix": "projectionMatrix",
+                "u_shininess": "shininess",
+                "u_specular": "specular"
+            },
+            "attributes": {
+                "normal": "normal",
+                "position": "position",
+                "a_texcoord0": "texcoord0"
+            },
+            "extras": {
+                "varyings": {
+                    "v_normal": {
+                        "type": 35665
                     }
                 }
+            }
+        }
+    },
+    "programs": {
+        "default_program": {
+            "attributes": [
+                "normal",
+                "position"
+            ],
+            "fragmentShader": "default_fshader",
+            "vertexShader": "default_vshader"
+        }
+    },
+    "shaders": {
+        "default_fshader": {
+            "type": 35632,
+            "uri": "fragShader.glsl",
+            "extras": {
+                "x3domShaderFunction": {
+                    "uri": "x3domFragShader.glsl",
+                    "name": "x3dmain",
+                    "parameters": [
+                        "v_normal",
+                        "u_diffuse",
+                        "u_specular",
+                        "u_shininess"
+                    ],
+                    "returns": "gl_FragColor"
+                }
+            }
+        },
+        "default_vshader": {
+            "type": 35633,
+            "uri": "vertShader.glsl",
+            "extras": {
+                "x3domShaderFunction": {
+                    "uri": "x3domVertShader.glsl",
+                    "name": "x3dmain",
+                    "parameters": [
+                        "position",
+                        "normal",
+                        "v_normal",
+                        "normalMatrix",
+                        "modelViewMatrix",
+                        "projectionMatrix"
+                    ],
+                    "returns": "gl_Position"
+                }
+            }
+        }
+    },
+    "materials": {
+        "Effect-White": {
+            "technique": "default_technique",
+            "extras": {
+                "x3dmaterial": {
+                    "diffuseColor": "0.8 0.8 0.8",
+                    "specularColor": "0.00341605395 0.00294117653 0.00205269619",
+                    "shininess": 64,
+                    "transparency": 0
+                }
+            },
+            "values": {
+                "diffuse": [
+                    0.8,
+                    0.8,
+                    0.8,
+                    1
+                ],
+                "specular": [
+                    0.00341605395,
+                    0.00294117653,
+                    0.00205269619,
+                    1
+                ],
+                "shininess": 64,
+                "transparency": 0
             },
             "name": "White"
         },
         "Effect-Red": {
-            "extensions": {
-                "KHR_materials_common": {
-                    "doubleSided": false,
-                    "jointCount": 0,
-                    "technique": "PHONG",
-                    "transparent": false,
-                    "values": {
-                        "ambient": [
-                            0,
-                            0,
-                            0,
-                            1
-                        ],
-                        "diffuse": [
-                            0.8,
-                            0,
-                            0,
-                            1
-                        ],
-                        "emission": [
-                            0,
-                            0,
-                            0,
-                            1
-                        ],
-                        "shininess": 256,
-                        "specular": [
-                            0.1,
-                            0.1,
-                            0.1,
-                            1
-                        ]
-                    }
+            "technique": "default_technique",
+            "extras": {
+                "x3dmaterial": {
+                    "diffuseColor": "0.8 0 0",
+                    "specularColor": "0.00341605395 0.00294117653 0.00205269619",
+                    "shininess": 64,
+                    "transparency": 0
                 }
+            },
+            "values": {
+                "diffuse": [
+                    0.8,
+                    0,
+                    0,
+                    1
+                ],
+                "specular": [
+                    0.00341605395,
+                    0.00294117653,
+                    0.00205269619,
+                    1
+                ],
+                "shininess": 64,
+                "transparency": 0
             },
             "name": "Red"
         },
         "Effect-Green": {
-            "extensions": {
-                "KHR_materials_common": {
-                    "doubleSided": false,
-                    "jointCount": 0,
-                    "technique": "PHONG",
-                    "transparent": false,
-                    "values": {
-                        "ambient": [
-                            0,
-                            0,
-                            0,
-                            1
-                        ],
-                        "diffuse": [
-                            0,
-                            0.8,
-                            0,
-                            1
-                        ],
-                        "emission": [
-                            0,
-                            0,
-                            0,
-                            1
-                        ],
-                        "shininess": 256,
-                        "specular": [
-                            0.1,
-                            0.1,
-                            0.1,
-                            1
-                        ]
-                    }
+            "technique": "default_technique",
+            "extras": {
+                "x3dmaterial": {
+                    "diffuseColor": "0 0.8 0",
+                    "specularColor": "0.00341605395 0.00294117653 0.00205269619",
+                    "shininess": 64,
+                    "transparency": 0
                 }
+            },
+            "values": {
+                "diffuse": [
+                    0,
+                    0.8,
+                    0,
+                    1
+                ],
+                "specular": [
+                    0.00341605395,
+                    0.00294117653,
+                    0.00205269619,
+                    1
+                ],
+                "shininess": 64,
+                "transparency": 0
             },
             "name": "Green"
         },
         "Effect-Blue": {
-            "extensions": {
-                "KHR_materials_common": {
-                    "doubleSided": false,
-                    "jointCount": 0,
-                    "technique": "PHONG",
-                    "transparent": false,
-                    "values": {
-                        "ambient": [
-                            0,
-                            0,
-                            0,
-                            1
-                        ],
-                        "diffuse": [
-                            0,
-                            0,
-                            0.8,
-                            1
-                        ],
-                        "emission": [
-                            0,
-                            0,
-                            0,
-                            1
-                        ],
-                        "shininess": 256,
-                        "specular": [
-                            0.1,
-                            0.1,
-                            0.1,
-                            1
-                        ]
-                    }
+            "technique": "default_technique",
+            "extras": {
+                "x3dmaterial": {
+                    "diffuseColor": "0 0 0.8",
+                    "specularColor": "0.00341605395 0.00294117653 0.00205269619",
+                    "shininess": 64,
+                    "transparency": 0
                 }
+            },
+            "values": {
+                "diffuse": [
+                    0,
+                    0,
+                    0.8,
+                    1
+                ],
+                "specular": [
+                    0.00341605395,
+                    0.00294117653,
+                    0.00205269619,
+                    1
+                ],
+                "shininess": 64,
+                "transparency": 0
             },
             "name": "Blue"
         }

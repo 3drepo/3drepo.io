@@ -108,12 +108,15 @@ module.exports.app = function (sharedSession) {
 	app.use('/', require('../routes/auth'));
 	// os api handler
 	app.use('/os',require('../routes/osBuilding'));
+	//project setting handler
+	app.use('/:account/:project', require('../routes/projectSetting'));
 	//issues handler
 	app.use('/:account/:project', require('../routes/issue'));
 	//mesh handler
 	app.use('/:account/:project', require('../routes/mesh'));
 	//texture handler
 	app.use('/:account/:project', require('../routes/texture'));
+
 
 	app.use("/", routes.router);
 

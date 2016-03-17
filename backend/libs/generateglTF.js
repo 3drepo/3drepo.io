@@ -120,7 +120,7 @@ var normalVec = require('./normalVec');
 // }
 
 
-function generateglTFJSONGroup(byteOffsets, binName, options){
+function generateglTFJSONGroup(byteOffsets, binUri, options){
 	'use strict';
 	// glTF const
 	const ELEMENT_ARRAY_BUFFER = 34963;
@@ -137,14 +137,15 @@ function generateglTFJSONGroup(byteOffsets, binName, options){
 	json = JSON.parse(JSON.stringify(json));
 
 	// bin info
+	let binId = 'buffer1';
 	if(options && options.forGlb){
 		json.extensionsUsed.push(KHR_BINARY_GLTF);
-		binName = KHR_BINARY_GLTF;
+		binId = KHR_BINARY_GLTF;
 	} else {
-		json.buffers[binName] = {
+		json.buffers[binId] = {
 			"byteLength": byteOffsets.totalBytes,
 			"type": "arraybuffer",
-			"uri": binName + ".bin"
+			"uri": binUri
 		};
 	}
 
@@ -154,7 +155,7 @@ function generateglTFJSONGroup(byteOffsets, binName, options){
 	let indexAccessorName = 'accessor_indices';
 
 	json.bufferViews[indexBufferViewName] = {
-		"buffer": binName,
+		"buffer": binId,
 		"byteLength": indexInfo.componentByte * indexInfo.componentCount * indexInfo.count,
 		"byteOffset": 0,
 		"target": ELEMENT_ARRAY_BUFFER
@@ -183,7 +184,7 @@ function generateglTFJSONGroup(byteOffsets, binName, options){
 	let vertexAccessorName = 'accessor_vertices';
 
 	json.bufferViews[vertexBufferViewName] = {
-		"buffer": binName,
+		"buffer": binId,
 		"byteLength": vertexInfo.componentByte * vertexInfo.componentCount * vertexInfo.count,
 		"byteOffset": vertexInfo.offset,
 		"target": ARRAY_BUFFER
@@ -213,7 +214,7 @@ function generateglTFJSONGroup(byteOffsets, binName, options){
 	let normalAccessorName = 'accessor_normals';
 
 	json.bufferViews[normalBufferViewName] = {
-		"buffer": binName,
+		"buffer": binId,
 		"byteLength": normalInfo.componentByte * normalInfo.componentCount * normalInfo.count,
 		"byteOffset": normalInfo.offset,
 		"target": ARRAY_BUFFER
