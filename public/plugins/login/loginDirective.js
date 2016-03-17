@@ -43,20 +43,7 @@
 		vm.logo = "/public/images/3drepo-logo-white.png";
 
 		vm.login = function() {
-			Auth.login(vm.user.username, vm.user.password).then(
-				function (username) {
-					vm.errorMessage = null;
-					vm.user.username = null;
-					vm.user.password = null;
-					
-					EventService.send(EventService.EVENT.USER_LOGGED_IN, { loggedIn: true, username: username });
-				}, function (reason) {
-					vm.errorMessage = reason;
-					vm.user.password = null;
-					
-					EventService.send(EventService.EVENT.USER_LOGGED_IN, { loggedIn: false, errorMessage: reason });
-				}
-			);
+			Auth.login(vm.user.username, vm.user.password);
 		};
 	}
 }());

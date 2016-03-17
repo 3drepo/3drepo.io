@@ -88,7 +88,12 @@
 				if (event.type === EventService.EVENT.USER_LOGGED_IN)
 				{
 					var account = StateManager.state.account ? StateManager.state.account : event.value.username;
-					EventService.send(EventService.EVENT.SET_STATE, { loggedIn: true, account: account });
+					if (!event.value.error)
+					{
+						EventService.send(EventService.EVENT.SET_STATE, { loggedIn: true, account: account });
+					} else {
+						EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false });
+					}						
 				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
 					EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
 				} else if ((event.type === EventService.EVENT.NOT_AUTHORIZED) || (event.type === EventService.EVENT.VIEWER.LOGO_CLICK)) {

@@ -20,12 +20,59 @@
 
 	angular.module("3drepo")
 	.service("Auth", ["$injector", "$q", "$http", "serverConfig", "EventService", function($injector, $q, $http, serverConfig, EventService) {
-		this.loggedIn = null;
-		this.username = null;
+
 		var self = this;
+		
+		self.authPromise = $q.defer();
+		self.loggedIn = null;
+		self.username = null;
+			
+		this.loginSuccess = function(data)
+		{
+			self.loggedIn = true;
+			self.username = data.username;
+			self.userRoles = data.roles;
+							
+			EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: data.username });
+			
+			self.authPromise.resolve(self.loggedIn);
+		};
+		
+		this.loginFailure = function(reason)
+		{
+			self.loggedIn = false;
+			self.username = null;
+			self.userRoles = null;
+				
+			EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: null, error: reason });
+			
+			self.authPromise.resolve(self.loggedIn);
+		};
+		
+		this.logoutSuccess = function()
+		{
+			self.loggedIn  = false;
+			self.username  = null;
+			self.userRoles = null;
+							
+			EventService.send(EventService.EVENT.USER_LOGGED_OUT);
+			
+			self.authPromise.resolve(self.loggedIn);
+		};
+		
+		this.logoutFailure = function(reason)
+		{
+			self.loggedIn  = false;
+			self.username  = null;
+			self.userRoles = null;
+				
+			EventService.send(EventService.EVENT.USER_LOGGED_OUT, { error: reason });
+			
+			self.authPromise.resolve(self.loggedIn);
+		};		
 
 		this.init = function() {
-			var deferred = $q.defer();
+			var initPromise = $q.defer();
 
 			// If we are not logged in, check
 			// with the API server whether we
@@ -33,24 +80,7 @@
 			if(self.loggedIn === null)
 			{
 				// Initialize
-				$http.get(serverConfig.apiUrl("login"))
-				.success(function(data) {
-					self.loggedIn = true;
-					self.username = data.username;
-					self.userRoles = data.roles;
-									
-					EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: data.username });
-					
-					deferred.resolve(self.loggedIn);
-				}).error(function() {
-					self.loggedIn = false;
-					self.username = null;
-					self.userRoles = null;
-					
-					EventService.send(EventService.EVENT.USER_LOGGED_OUT);
-					
-					deferred.resolve(self.loggedIn);
-				});
+				$http.get(serverConfig.apiUrl("login")).success(self.loginSuccess).error(self.loginFailure);
 			} else {
 				if (self.loggedIn)
 				{
@@ -59,65 +89,46 @@
 					EventService.send(EventService.EVENT.USER_LOGGED_OUT);
 				}
 				
-				deferred.resolve(self.loggedIn);
+				initPromise.resolve(self.loggedIn);
 			}
 
-			return deferred.promise;
+			return initPromise.promise;
 		};
 
 		this.loadProjectRoles = function(account, project)
 		{
-			var deferred = $q.defer();
-
+			var rolesPromise = $q.defer();
+			
 			$http.get(serverConfig.apiUrl(account + "/" + project + "/roles.json"))
 			.success(function(data) {
 				self.projectRoles = data;
-				deferred.resolve();
+				rolesPromise.resolve();
 			}).error(function() {
 				self.projectRoles = null;
-				deferred.resolve();
+				rolesPromise.resolve();
 			});
 
-			return deferred.promise;
+			return rolesPromise.promise;
 		};
 
 		this.getUsername = function() { return this.username; };
 
 		this.login = function(username, password) {
-			var deferred = $q.defer();
+			self.authPromise = $q.defer();
 
 			var postData = {username: username, password: password};
-			var http = $injector.get("$http");
 
-			http.post(serverConfig.apiUrl("login"), postData)
-			.success(function (data) {
-				self.username = username;
-				self.userRoles = data.roles;
-				
-				EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: username });
-			})
-			.error(function(data) {
-				EventService.send(EventService.EVENT.USER_LOGGED_OUT);
-			});
+			$http.post(serverConfig.apiUrl("login"), postData).success(self.loginSuccess).error(self.loginFailure);
 
-			return deferred.promise;
+			return self.authPromise.promise;
 		};
 
 		this.logout = function() {
-			var deferred = $q.defer();
-			var http = $injector.get("$http");
+			self.authPromise = $q.defer();
 
-			http.post(serverConfig.apiUrl("logout"))
-			.success(function _authLogOutSuccess() {
-				self.username = null;
-				EventService.send(EventService.EVENT.USER_LOGGED_OUT);
-			})
-			.error(function _authLogOutFailure() {
-				self.username = null;
-				EventService.send(EventService.EVENT.USER_LOGGED_OUT);
-			});
+			$http.post(serverConfig.apiUrl("logout")).success(self.logoutSuccess).error(self.logoutFailure);
 
-			return deferred.promise;
+			return self.authPromise.promise;
 		};
 	}]);
 })();
