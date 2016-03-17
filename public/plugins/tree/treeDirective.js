@@ -26,9 +26,12 @@
 			restrict: "EA",
 			templateUrl: "tree.html",
 			scope: {
+				account:  "=",
+				project:  "=",
+				branch:   "=",
+				revision: "=",				
 				filterText: "=",
-				height: "=",
-				onSetContentHeight: "&"
+				onContentHeightRequest: "&"
 			},
 			controller: TreeCtrl,
 			controllerAs: "vm",
@@ -36,9 +39,9 @@
 		};
 	}
 
-	TreeCtrl.$inject = ["$scope", "$timeout", "$element", "TreeService", "ViewerService", "EventService"];
+	TreeCtrl.$inject = ["$scope", "$timeout", "TreeService", "EventService"];
 
-	function TreeCtrl($scope, $timeout, $element, TreeService, ViewerService, EventService) {
+	function TreeCtrl($scope, $timeout, TreeService, EventService) {
 		var vm = this,
 			promise = null,
 			i = 0,
@@ -52,7 +55,7 @@
 		vm.showProgress = true;
 		vm.progressInfo = "Loading full tree structure";
 
-		promise = TreeService.init();
+		promise = TreeService.init(vm.account, vm.project, vm.branch, vm.revision);
 		promise.then(function (data) {
 			vm.allNodes = [];
 			vm.allNodes.push(data.nodes);
@@ -77,8 +80,7 @@
 				maxStringLengthForLevel = maxStringLength - (nodesToShow[i].level * levelOffset);
 				height += nodeMinHeight + (lineHeight * Math.floor(nodesToShow[i].name.length / maxStringLengthForLevel));
 			}
-			console.log(nodesToShow.length);
-			vm.onSetContentHeight({height: height});
+			vm.onContentHeightRequest({height: height});
 		}
 
 		/**
@@ -98,7 +100,7 @@
 		 * @param _id
 		 */
 		vm.expand = function (_id) {
-			var i = 0, numChildren = 0, index = -1, length = 0, endOfSplice = false;
+			var i, numChildren = 0, index = -1, length, endOfSplice = false;
 
 			for (i = 0, length = vm.nodesToShow.length; i < length; i += 1) {
 				if (vm.nodesToShow[i]._id === _id) {
@@ -176,26 +178,17 @@
 			}
 		}
 
-		$(document).on("objectSelected", function (event, object) {
-			$timeout(function () {
-				if (angular.isUndefined(object)) {
-					vm.viewerSelectedObject = null;
-					vm.filterText = "";
-				} else {
-					var idParts = null;
-					var path;
-
-					if (object["multipart"]) {
-						idParts = object.id.split("__");
-					} else {
-						idParts = object.getAttribute("id").split("__");
-					}
-					path = vm.idToPath[idParts[idParts.length - 1]].split("__");
-
+		$scope.$watch(EventService.currentEvent, function(event) {
+			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+				if (event.value.source !== "tree")
+				{
+					var objectID = event.value.id;
+					var path = vm.idToPath[objectID].split("__");
+					
 					initNodesToShow();
 					expandToSelection(path, 0);
 				}
-			});
+			}
 		});
 
 		vm.toggleTreeNode = function (node) {
@@ -257,23 +250,16 @@
 				}
 			}
 
-			ViewerService.defaultViewer.setVisibilityByID(map, (node.toggleState === "visible"));
+			EventService.send(EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY, {
+				source: "tree",
+				account: node.account,
+				project: node.project, 
+				state: (node.toggleState === "visible"),
+				id: node._id, 
+				name: node.name, 
+				ids : map 
+			});
 		};
-
-		vm.nodeSelected = function (node) {
-			var map = [];
-			var pathArr = [];
-			for (var obj in vm.idToPath) {
-				if (vm.idToPath.hasOwnProperty(obj) && (vm.idToPath[obj].indexOf(node._id) !== -1)) {
-					pathArr = vm.idToPath[obj].split("__");
-					map.push(pathArr[pathArr.length - 1]);
-				}
-			}
-			ViewerService.defaultViewer.selectPartsByID(map, false);
-
-			EventService.send(EventService.EVENT.OBJECT_SELECTED, {id: node._id, name: node.name});
-		};
-
 
 		function setupInfiniteScroll() {
 			// Infinite items
@@ -311,7 +297,7 @@
 
 		$scope.$watch("vm.filterText", function (newValue) {
 			if (angular.isDefined(newValue)) {
-				if (newValue === "") {
+				if (newValue.toString() === "") {
 					vm.showTree = true;
 					vm.showFilterList = false;
 					vm.nodes = vm.allNodes;
@@ -339,6 +325,26 @@
 			}
 		});
 
+		vm.selectNode = function (node) {
+			var map = [];
+			var pathArr = [];
+			for (var obj in vm.idToPath) {
+				if (vm.idToPath.hasOwnProperty(obj) && (vm.idToPath[obj].indexOf(node._id) !== -1)) {
+					pathArr = vm.idToPath[obj].split("__");
+					map.push(pathArr[pathArr.length - 1]);
+				}
+			}
+			
+			EventService.send(EventService.EVENT.VIEWER.OBJECT_SELECTED, {
+				source: "tree",
+				account: node.account,
+				project: node.project, 
+				id: node._id, 
+				name: node.name, 
+				ids : map 
+			});
+		};
+		
 		vm.filterItemSelected = function (item) {
 			if (vm.currentFilterItemSelected === null) {
 				vm.nodes[item.index].class = "selectedFilterItem";
@@ -351,7 +357,10 @@
 				vm.nodes[item.index].class = "selectedFilterItem";
 				vm.currentFilterItemSelected = item;
 			}
-			TreeService.selectNode(vm.nodes[item.index]._id);
+			
+			var selectedNode = vm.nodes[item.index];
+			
+			vm.selectNode(selectedNode);
 		};
 
 		vm.toggleFilterNode = function (item) {

@@ -21,6 +21,7 @@ tree p {
   word-wrap: break-word;
   line-height: 18px;
   margin: 0;
+  font-size: 14px;
 }
 tree p:hover {
   cursor: pointer;
@@ -60,6 +61,9 @@ tree .treeButton md-icon  .treeIconDot {
 }
 tree .treeButton .treeButtonDisabled {
   color: #CCCCCC;
+}
+tree .treeButton:hover {
+  cursor: pointer;
 }
 
 /** Tree Node *********************************************************************************************************/

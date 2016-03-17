@@ -12,12 +12,12 @@
 	//#nav-version-control(ng-controller='RevisionCtrl', ng-show="Data.ui.revisionSelector")
 	#project-viewport-container.row
 		viewermanager
-			viewer.project-viewport.viewport(manager="manager")
+			//viewer.project-viewport.viewport(manager="manager")
 	.ui2
 		//#ui2-left
 			if ui.left
 				each uicomp in ui.left
-					!= renderMe(uicomp["template"], locals)
+					!=192.1681.. renderMe(uicomp["template"], locals)
 		#ui2-right
 			if ui.right
 				each uicomp in ui.right
@@ -27,8 +27,7 @@
 		each uicomp in ui.walkthrough
 			!= renderMe(uicomp["template"], locals)
 
-	project
-	panel#leftPanel(position="left")
-	panel#rightPanel(position="right")
+	panel#leftPanel(account="pm.account", project="pm.project", branch="pm.branch", revision="pm.revision", position="left")
+	panel#rightPanel(account="pm.account", project="pm.project", branch="pm.branch", revision="pm.revision", position="right")
 	bottom-buttons
 	qr-code-reader

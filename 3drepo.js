@@ -19,14 +19,14 @@ var express = require("express"),
 	fs = require("fs"),
 	constants = require("constants");
 
-var log_iface = require("./js/core/logger.js");
+var log_iface = require("./backend/logger.js");
 var systemLogger = log_iface.systemLogger;
 
-var config = require("./js/core/config.js");
+var config = require("./backend/config.js");
 
-var session = require("./services/session.js").session;
-var apiApp = require("./services/api.js").app(session);
-var chatServer = require("./services/chat.js");
+var session = require("./backend/services/session.js").session;
+var apiApp = require("./backend/services/api.js").app(session);
+var chatServer = require("./backend/services/chat.js");
 
 var https = require("https");
 var http = require("http");
@@ -89,7 +89,7 @@ if (config.vhost)
 
 	for(var i = 0; i < config.servers.length; i++)
 	{
-		var frontApp    = require("./services/frontend.js").createApp(config.servers[i].template);
+		var frontApp    = require("./backend/services/frontend.js").createApp(config.servers[i].template);
 		var frontServer = config.hasOwnProperty("ssl") ? https.createServer(ssl_options, frontApp) : http.createServer(frontApp);
 
 		var serverPort = config.servers[i].port;
@@ -113,7 +113,7 @@ if (config.vhost)
 
 	for(var i = 0; i < config.servers.length; i++)
 	{
-		var frontApp = require("./services/frontend.js").createApp(config.servers[i].template);
+		var frontApp = require("./backend/services/frontend.js").createApp(config.servers[i].template);
 		app.use("/", frontApp);
 	}
 
@@ -136,7 +136,7 @@ if (config.vhost)
 
 	for(var i = 0; i < config.servers.length; i++)
 	{
-		var frontApp = require("./services/frontend.js").createApp(config.servers[i].template);
+		var frontApp = require("./backend/services/frontend.js").createApp(config.servers[i].template);
 		systemLogger.logInfo("Starting VHOST for " + config.servers[i].hostname);
 		vhostApp.use(vhost(config.servers[i].hostname, frontApp));
 

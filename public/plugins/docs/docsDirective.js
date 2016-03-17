@@ -26,8 +26,8 @@
 			restrict: 'EA',
 			templateUrl: 'docs.html',
 			scope: {
-				height: "=",
-				show: "="
+				show: "=",
+				onContentHeightRequest: "&"
 			},
 			controller: DocsCtrl,
 			controllerAs: 'vm',
@@ -35,48 +35,104 @@
 		};
 	}
 
-	DocsCtrl.$inject = ["$scope", "$mdDialog", "EventService", "DocsService"];
+	DocsCtrl.$inject = ["$scope", "$mdDialog", "$timeout", "EventService", "DocsService"];
 
-	function DocsCtrl($scope, $mdDialog, EventService, DocsService) {
+	function DocsCtrl($scope, $mdDialog, $timeout, EventService, DocsService) {
 		var vm = this,
-			promise;
+			promise,
+			docTypeHeight = 50,
+			allDocTypesHeight,
+			currentOpenDocType = null,
+			eventWatch;
 
 		vm.showDocsGetProgress = false;
 		vm.showInfo = true;
 		vm.info = "No object currently selected";
 
+		/**
+		 * Get any documents associated with an object
+		 *
+		 * @param object
+		 */
 		function getObjectsDocs (object) {
-			if (vm.show) {
-				vm.docs = [];
-				vm.showInfo = false;
-				vm.progressInfo = "Loading documents for " + object.name;
-				vm.showDocsGetProgress = true;
-				promise = DocsService.getDocs(object.id);
-				//promise = DocsService.getDocs("55d6ae0c-5d62-4fe7-8bd5-5c84fb90df1c");
-				promise.then(function (data) {
-					vm.docs = data.meta;
-					vm.showDocsGetProgress = false;
-					vm.showInfo = (vm.docs.length === 0);
-					if (vm.showInfo) {
-						vm.info = "No documents exist for object: " + object.name;
+			var noDocumentsHeight = 140; // Make it large enough for long object names
+
+			vm.docs = [];
+			vm.showInfo = false;
+			vm.progressInfo = "Loading documents for " + object.name;
+			vm.showDocsGetProgress = true;
+			currentOpenDocType = null;
+			promise = DocsService.getDocs(object.account, object.project, object.id);
+			promise.then(function (data) {
+				var docType;
+				vm.showDocsGetProgress = false;
+				vm.docs = data;
+				vm.showInfo = (Object.keys(vm.docs).length === 0);
+				if (vm.showInfo) {
+					vm.info = "No documents exist for object: " + object.name;
+					vm.onContentHeightRequest({height: noDocumentsHeight});
+				}
+				else {
+					allDocTypesHeight = 0;
+					// Collapse all doc types initially
+					for (docType in vm.docs) {
+						if (vm.docs.hasOwnProperty(docType)) {
+							vm.docs[docType].show = false;
+							allDocTypesHeight += docTypeHeight;
+						}
 					}
-				});
-			}
+					// Set the content height
+					vm.onContentHeightRequest({height: allDocTypesHeight});
+				}
+			});
 		}
 
-		$scope.$watch(EventService.currentEvent, function (newValue) {
-			if (newValue.type === EventService.EVENT.OBJECT_SELECTED) {
-				getObjectsDocs(newValue.value);
+		/**
+		 * Set up event watching
+		 */
+		function setupEventWatch () {
+			var noObjectSelectedHeight = 80;
+
+			eventWatch = $scope.$watch(EventService.currentEvent, function (event) {
+				if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+					getObjectsDocs(event.value);
+				}
+				else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
+					vm.docs = [];
+					vm.showInfo = true;
+					vm.info = "No object currently selected";
+					vm.onContentHeightRequest({height: noObjectSelectedHeight});
+					currentOpenDocType = null;
+				}
+			});
+		}
+
+		/*
+		 * Only watch for events when shown
+		 */
+		$scope.$watch("vm.show", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				if (newValue) {
+					setupEventWatch();
+				}
+				else if (angular.isDefined(eventWatch)) {
+					eventWatch(); // Cancel event watching
+				}
 			}
 		});
 
+		/**
+		 * Show a document in a dialog
+		 *
+		 * @param {Object} doc
+		 */
 		vm.showDoc = function (doc) {
 			$scope.pdfUrl = doc.url;
 			vm.progressInfo = "Loading document " + doc.name;
 			vm.showDocLoadProgress = true;
 			$mdDialog.show({
 				controller: docsDialogController,
-				templateUrl: 'docsDialog.html',
+				templateUrl: "docsDialog.html",
 				parent: angular.element(document.body),
 				targetEvent: event,
 				clickOutsideToClose:true,
@@ -87,28 +143,62 @@
 			});
 		};
 
+		/**
+		 * Close the dialog
+		 */
 		$scope.closeDialog = function() {
 			$mdDialog.cancel();
 		};
 
+		/**
+		 * Close the dialog by not clicking the close button
+		 */
 		function removeDialog () {
 			$scope.closeDialog();
 		}
 
-		function docsDialogController($scope) {
+		function docsDialogController() {
 		}
 
-		$(document).on("objectSelected", function(event, objectData) {
-			var object = [];
-			if (angular.isDefined(objectData)) {
-				object = objectData.id.split("__");
-				getObjectsDocs({id: object[object.length - 1], name: object[object.length - 2]});
+		/**
+		 * Open and close doc types, allowing only one doc type open at a time
+		 *
+		 * @param docType
+		 */
+		vm.toggleItem = function (docType) {
+			var itemsHeight,
+				metaDataItemHeight = 30; // It could be higher for items with long text but ignore that
+
+			if (currentOpenDocType === null) {
+				// No doc type is open so open this doc type
+				vm.docs[docType].show = true;
+				currentOpenDocType = docType;
 			}
 			else {
-				vm.docs = [];
-				vm.showInfo = true;
-				vm.info = "No object currently selected";
+				// Close the current doc type
+				vm.docs[currentOpenDocType].show = false;
+				if (currentOpenDocType === docType) {
+					// No doc type currently open
+					currentOpenDocType = null;
+				}
+				else {
+					// Open this doc type and set the currently open doc type
+					vm.docs[docType].show = true;
+					currentOpenDocType = docType;
+				}
 			}
-		});
+
+			// Set the content height
+			if (currentOpenDocType === null) {
+				// No currently open doc type
+				vm.onContentHeightRequest({height: allDocTypesHeight});
+			}
+			else {
+				if (currentOpenDocType === "Meta Data") {
+					itemsHeight = Object.keys(vm.docs[currentOpenDocType].data[0].metadata).length * metaDataItemHeight;
+				}
+				vm.onContentHeightRequest({height: allDocTypesHeight + itemsHeight});
+			}
+		};
 	}
 }());

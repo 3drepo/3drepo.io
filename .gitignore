@@ -3,7 +3,9 @@ common_public_files.js
 
 /public/css/*.css~
 /*.log
-config
+config/*
+!config/test/
+
 bower_components
 
 certs

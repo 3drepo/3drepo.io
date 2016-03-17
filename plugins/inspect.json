@@ -1,9 +1,0 @@
-{
-	"name" : "viewpoints",
-	"files": {
-		"angular": [
-			"inspect/InspectCtrl.js"
-		]
-	}
-}
-

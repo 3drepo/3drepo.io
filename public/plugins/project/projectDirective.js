@@ -19,86 +19,55 @@
 	"use strict";
 
 	angular.module("3drepo")
-	.config([
-	'$stateProvider',
-	'parentStates',
-	function($stateProvider, parentStates) {
-		var states = parentStates["project"];
-
-		for(var i = 0; i < states.length; i++) {
-			$stateProvider
-			.state(states[i] + '.project', {
-				url: '/:project',
-				resolve: {
-					auth: function authCheck(Auth) { return Auth.init(); },
-					init: function(StateManager, $stateParams) {
-						StateManager.setStateVar("branch", "master");
-						StateManager.setStateVar("revision", "head");
-						StateManager.setState($stateParams, {});
-						StateManager.refresh("project");
-					}
-				},
-				views: {
-					"@" : {
-						templateUrl: 'project.html'
-					}
-				}
-			})
-		}
-	}])
-	.run(['StateManager', function(StateManager) {
-		StateManager.registerPlugin('project', 'ProjectData', function () {
-			if (StateManager.state.project)
-				return "project";
-			else
-				return null;
-		});
-
-		StateManager.setClearStateVars("project", ["project"]);
-	}])
 	.directive("project", project);
 
     function project() {
         return {
-            restrict: 'E',
-            scope: {},
-            controller: ProjectCtrl
+            restrict: "E",
+            scope: {
+				account:  "=",
+				project:  "=",
+				branch:   "=",
+				revision: "=",
+				state:    "="
+			},
+			templateUrl: "project.html",
+            controller: ProjectCtrl,
+			controllerAs: "pm",
+			bindToController: true			
         };
     }
 
-	ProjectCtrl.$inject = ["$timeout", "EventService", "ViewerService", "StateManager", "ProjectService"];
+	ProjectCtrl.$inject = ["$timeout", "$scope", "EventService", "ProjectService"];
 
-	function ProjectCtrl($timeout, EventService, ViewerService, StateManager, ProjectService) {
-		var panelContent = {
+	function ProjectCtrl($timeout, $scope, EventService, ProjectService) {
+		var panelCard = {
 			left: [],
 			right: []
 		};
 
-		var state = StateManager.state,
-			promise,
-			i, length;
+		var i, length, pm = this;
 
-		panelContent.left.push({
+		panelCard.left.push({
 			type: "tree",
 			title: "Tree",
 			show: true,
 			help: "Model elements shown in a tree structure",
 			icon: "fa-sitemap",
-			hasFilter: true,
-            minHeight: 120,
-			height: 820
+			height: 820,
+			fixedHeight: false,
+			options: [
+				"filter"
+			]
 		});
 
-		panelContent.right.push({
+		panelCard.right.push({
 			type: "issues",
 			title: "Issues",
 			show: true,
 			help: "List current issues",
 			icon: "fa-map-marker",
-			canPrint: true,
-			hasFilter: true,
-			canAdd: true,
-			options: [
+			menu: [
 				{
 					value: "sortByDate",
 					label: "Sort by Date",
@@ -118,54 +87,77 @@
 					secondSelected: false
 				}
 			],
-            minHeight: 70,
-			height: 820
+			height: 820,
+			fixedHeight: false,
+			options: [
+				"print",
+				"add",
+				"filter",
+				"menu"
+			]
 		});
-		panelContent.right.push({
+		panelCard.right.push({
 			type: "clip",
 			title: "Clip",
 			show: false,
 			help: "Clipping plane",
 			icon: "fa-object-group",
-			height: 170,
-			showVisible: true
+			height: 120,
+			fixedHeight: true,
+			options: [
+				"visible"
+			]
 		});
-		panelContent.right.push({
+		panelCard.right.push({
 			type: "docs",
 			title: "Docs",
 			show: false,
 			help: "Documents",
 			icon: "fa-clone",
-			height: 150
+			height: 80,
+			fixedHeight: false,
+			options: []
 		});
 
-		// Add filtering options for the Issues panel
-		promise = ProjectService.getRoles();
-		promise.then(function (data) {
-			for (i = 0, length = data.length; i < length; i += 1) {
-				panelContent.right[0].options.push(
-					{
-						value: "filterRole_" + data[i].role,
-						label: data[i].role,
-						toggle: true,
-						selected: true,
-						firstSelected: false,
-						secondSelected: false
+		$scope.$watchGroup(["pm.account","pm.project"], function()
+		{
+			if (angular.isDefined(pm.account) && angular.isDefined(pm.project)) {
+				// Add filtering options for the Issues card menu
+				ProjectService.getRoles(pm.account, pm.project).then(function (data) {
+					for (i = 0, length = data.length; i < length; i += 1) {
+						panelCard.right[0].menu.push(
+							{
+								value: "filterRole_" + data[i].role,
+								label: data[i].role,
+								toggle: true,
+								selected: true,
+								firstSelected: false,
+								secondSelected: false
+							}
+						);
 					}
-				);
+				});
+				
+				ProjectService.getProjectInfo(pm.account, pm.project).then(function (data) {
+					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
+						account: data.account,
+						project: data.project,
+						settings: data.settings
+					});
+				});
 			}
 		});
 
-		StateManager.setStateVar("branch", "master");
-		StateManager.setStateVar("revision", "head");
-		StateManager.updateState();		// Want to preserve URL structure
-
-		StateManager.Data.ProjectData.loadingPromise.promise.then(function() {
-			ViewerService.defaultViewer.updateSettings(StateManager.Data.ProjectData.settings);
-		});
-
 		$timeout(function () {
-			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelContent);
+			EventService.send(EventService.EVENT.CREATE_VIEWER, {
+				name: "default",
+				account:  pm.account,
+				project:  pm.project,
+				branch:   pm.branch,
+				revision: pm.revision
+			});
+						
+			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelCard);
 		});
 	}
 }());
