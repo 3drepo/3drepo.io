@@ -93,7 +93,7 @@
 						EventService.send(EventService.EVENT.SET_STATE, { loggedIn: true, account: account });
 					} else {
 						hm.loggedIn = false;
-						hm.changingState = false;
+						hm.state.changing = false;
 						//EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false });
 					}						
 				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
