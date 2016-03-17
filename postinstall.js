@@ -34,21 +34,14 @@ var public_files = {
 		jqueryuijs : '/public/js/external/jquery-ui.js',
 		angularutilsjs: '/public/js/external/angular-ui-utils.min.js',
 		angularrouterjs: '/public/js/external/angular-ui-router.js',
-		bootstrapjs: '/public/js/external/bootstrap.min.js',
-		bootstrapdialog: '/public/js/external/bootstrap-dialog.min.js',
-		uibootstrap: '/public/js/external/ui-bootstrap-tpls-0.12.0.min.js',
 		momentjs: '/public/js/external/moment.js',
 		showdownjs: '/public/js/external/showdown.min.js',
-		jqueryfancytree: '/public/js/external/jquery.fancytree-all.js',
-		typeaheadjs: '/public/js/external/typeahead.bundle.js',
-		sliderjs: '/public/js/external/bootstrap-slider.js',
 		angularsliderjs: '/public/js/external/slider.js',
 		socketio: '/public/js/external/socket.io.js',
         angularmaterialjs: '/public/js/external/angular-material.min.js',
         angularanimatejs: '/public/js/external/angular-animate.min.js',
         angularariajs: '/public/js/external/angular-aria.min.js',
 		angularsanitizejs: '/public/js/external/angular-sanitize.min.js',
-		angularuitreejs: '/public/js/external/angular-ui-tree.min.js',
 
 		// QR Code stuff
 		qrgrid: '/public/js/external/qrcode/grid.js',
@@ -73,13 +66,9 @@ var public_files = {
 	css : {
 		x3domcss : '/public/css/external/x3dom.css',
 		fontawesomecss: '/public/css/external/font-awesome.min.css',
-		fancytreecss: '/public/css/external/ui.fancytree.min.css',
 		jqueryuicss: '/public/css/external/jquery-ui.css',
 		repouicss : '/public/css/ui.css',
-		bootstrapcss: '/public/css/external/bootstrap.min.css',
-		slidercss: '/public/css/external/bootstrap-slider.css',
         angularmaterialcss: '/public/css/external/angular-material.min.css',
-		angularuitreecss: '/public/css/external/angular-ui-tree.min.css',
 		threedrepocss: "/public/css/external/three-d-repo.css"
 	}
 }
@@ -112,10 +101,6 @@ var internal_files = {
 	'bower_components/angular/angular.js',
 	'bower_components/angular/angular.min.js.map',
 	'bower_components/angular-ui-router/release/angular-ui-router.js',
-	'bower_components/seiyria-bootstrap-slider/dist/css/bootstrap-slider.css',
-	'bower_components/seiyria-bootstrap-slider/js/bootstrap-slider.js',
-	'bower_components/angular-bootstrap-slider/slider.js',
-	'bower_components/fancytree/dist/jquery.fancytree-all.js',
 	'bower_components/jquery/dist/jquery.js',
 	'bower_components/jquery-ui/jquery-ui.js',
 	'bower_components/masonry/masonry.js',
@@ -126,8 +111,6 @@ var internal_files = {
     'bower_components/angular-material/angular-material.min.css',
     'bower_components/angular-animate/angular-animate.min.js',
     'bower_components/angular-aria/angular-aria.min.js',
-	'bower_components/angular-ui-tree/dist/angular-ui-tree.min.js',
-	'bower_components/angular-ui-tree/dist/angular-ui-tree.min.css',
 	'bower_components/angular-sanitize/angular-sanitize.min.js'
 	],
 

@@ -24,7 +24,7 @@ function createSession(place, req, res, next, user){
 
 	req.session.regenerate(function(err) {
 		if(err) {
-			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {account: user.username});
+			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {username: user.username});
 		} else {
 			systemLogger.logDebug("Authenticated user and signed token.", req);
 
@@ -34,7 +34,7 @@ function createSession(place, req, res, next, user){
 			{
 				req.session.cookie.maxAge = config.cookie.maxAge;
 			}
-			responseCodes.respond(place, req, res, next, responseCodes.OK, {account: user.username, roles: user.roles});
+			responseCodes.respond(place, req, res, next, responseCodes.OK, {username: user.username, roles: user.roles});
 		}
 	});
 }
@@ -54,7 +54,7 @@ function login(req, res, next){
 
 	}).catch(err => {
 		console.log(err);
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.NOT_AUTHORIZED, {account: req.body.username});
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.NOT_AUTHORIZED, {username: req.body.username});
 	});
 
 }
@@ -79,7 +79,7 @@ function logout(req, res, next){
 		req[C.REQ_REPO].logger.logDebug("User has logged out.", req);
 		res.clearCookie("connect.sid", { path: "/" + config.api_server.host_dir });
 
-		responseCodes.respond("Logout POST", req, res, next, responseCodes.OK, {account: username});
+		responseCodes.respond("Logout POST", req, res, next, responseCodes.OK, {username: username});
 	});
 		
 }

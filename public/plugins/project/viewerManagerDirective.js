@@ -32,16 +32,35 @@
 		};
 	}
 
-	function ViewerManagerService() {
-		this.currentEvent = {};
-		this.currentError = {};
+	function ViewerManagerService(nextEventService) {
+		var currentEvent = {};
+		var currentError = {};
 
-		this.send = function (type, value) {
-			this.currentEvent = {type: type, value: value};
+		var sendInternal = function(type, value) {
+			currentEvent = {type:type, value: value};
 		};
 
-		this.sendError = function(type, value) {
-			this.currentError = {type: type, value: value};
+		var send = function (type, value) {
+			sendInternal(type, value);
+			nextEventService.send(type, value);
+		};
+
+		var sendErrorInternal = function(type, value) {
+			currentError = {type: type, value: value};
+		};
+
+		var sendError = function(type, value) {
+			sendErrorInternal(type, value);
+			nextEventService.sendError(type, value);
+		};
+
+		return {
+			currentEvent: function() {return currentEvent;},
+			currentError: function() {return currentError;},
+			send: send,
+			sendInternal: sendInternal,
+			sendError: sendError,
+			sendErrorInternal: sendErrorInternal
 		};
 	}
 
@@ -51,17 +70,17 @@
 		var vm = this;
 
 		vm.manager = new ViewerManager($element[0]);
-		vm.vmservice = new ViewerManagerService();
+		vm.vmservice = ViewerManagerService(EventService);
 
 		vm.viewers = {};
 
 		$scope.manager = vm.manager;
 
-		vm.viewerInit = $q.defer();
+		vm.viewerInit   = $q.defer();
 		vm.viewerLoaded = $q.defer();
 
 		$scope.$watch(EventService.currentEvent, function(event) {
-			if (angular.isDefined(event.type) && angular.isDefined(event.type)) {
+			if (angular.isDefined(event.type) && angular.isDefined(event.value)) {
 				if (event.type === EventService.EVENT.CREATE_VIEWER) {
 					// If a viewer with the same name exists already then
 					// throw an error, otherwise add it
@@ -69,9 +88,9 @@
 						EventService.sendError(EventService.ERROR.DUPLICATE_VIEWER_NAME, {
 							name: event.value.name
 						});
+					} else {
+						vm.viewers[event.value.name] = event.value;
 					}
-
-					vm.viewers[event.value.name] = event.value;
 				} else if (event.type === EventService.EVENT.CLOSE_VIEWER) {
 					// If the viewer exists in the list then delete it
 					if (vm.viewers.hasOwnProperty(event.value.name)) {
@@ -80,7 +99,7 @@
 				} else if (event.type === EventService.EVENT.VIEWER.READY) {
 					window.viewer = vm.manager.getCurrentViewer();
 				} else {
-					vm.vmservice.send(event.type, event.value);
+					vm.vmservice.sendInternal(event.type, event.value);
 				}
 			}
 		});

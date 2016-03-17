@@ -76,11 +76,12 @@ var Viewer = {};
 		}
 
 		callback = !callback ? function(type, value) {
-			console.log(type + ": " + value);
+			// TODO: Move event handling here
+			// console.log(type + ": " + value);
 		} : callback;
 
 		errCallback = !errCallback ? function(type, value) {
-			console.error(type + ": " + value);
+			//console.error(type + ": " + value);
 		} : errCallback;
 
 		// If not given the tag by the manager create here
@@ -128,6 +129,10 @@ var Viewer = {};
 		};
 
 		this.logos    = [];
+		
+		this.logoClick = function() {
+			callback(self.EVENT.LOGO_CLICK);
+		};
 
 		this.addLogo = function() {
 			if (!self.logoGroup)
@@ -145,27 +150,19 @@ var Viewer = {};
 			logo.style.position       = "absolute";
 			logo.style["z-index"]     = 2;
 			logo.style["text-align"]  = "center";
-			logo.style.width          = widthPercentage;
-			logo.style["margin-top"]  = "10px";
-			logo.style.left = perLogo * (numLogos - 1) + "%";
-
-			logo.setAttribute("onclick", "logoClick()");
+			logo.style.width          = "250px";
+			logo.style["top"]  		  = "10px";
+			logo.style.left 		  = 0;
+			logo.style.right 		  = 0;
+			logo.style.margin 		  = "auto";
+			
+			logo.addEventListener("click", self.logoClick);
 
 			var logoImage = document.createElement("img");
 			logoImage.setAttribute("src", logo_string);
-			logoImage.setAttribute("style", "width: 250px;");
+			logoImage.setAttribute("style", "width: 100%;");
 			logoImage.textContent = " ";
-
-			var logoLink = document.createElement("a");
-
-			if (server_config.return_path) {
-				logoLink.setAttribute("href", server_config.return_path);
-			} else {
-				logoLink.setAttribute("href", "https://www.3drepo.io");
-			}
-
-			logoLink.appendChild(logoImage);
-			logo.appendChild(logoLink);
+			logo.appendChild(logoImage);
 
 			self.updateLogoWidth(widthPercentage);
 
@@ -1798,9 +1795,13 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
 	SWITCH_OBJECT_VISIBILITY: "VIEWER_SWITCH_OBJECT_VISIBILITY",
 	SET_PIN_VISIBILITY: "VIEWER_SET_PIN_VISIBILITY",
+		
+	GET_CURRENT_VIEWPOINT: "VIEWER_GET_CURRENT_VIEWPOINT",
 
 	PICK_POINT: "VIEWER_PICK_POINT",
 	SET_CAMERA: "VIEWER_SET_CAMERA",
+	
+	LOGO_CLICK: "VIEWER_LOGO_CLICK",
 
 	// Clipping plane events
 	CLEAR_CLIPPING_PLANES: "VIEWER_CLEAR_CLIPPING_PLANES",

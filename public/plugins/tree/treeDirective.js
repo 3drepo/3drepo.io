@@ -26,6 +26,10 @@
 			restrict: "EA",
 			templateUrl: "tree.html",
 			scope: {
+				account:  "=",
+				project:  "=",
+				branch:   "=",
+				revision: "=",				
 				filterText: "=",
 				onContentHeightRequest: "&"
 			},
@@ -35,9 +39,9 @@
 		};
 	}
 
-	TreeCtrl.$inject = ["$scope", "$timeout", "TreeService", "ViewerService", "EventService"];
+	TreeCtrl.$inject = ["$scope", "$timeout", "TreeService", "EventService"];
 
-	function TreeCtrl($scope, $timeout, TreeService, ViewerService, EventService) {
+	function TreeCtrl($scope, $timeout, TreeService, EventService) {
 		var vm = this,
 			promise = null,
 			i = 0,
@@ -51,7 +55,7 @@
 		vm.showProgress = true;
 		vm.progressInfo = "Loading full tree structure";
 
-		promise = TreeService.init();
+		promise = TreeService.init(vm.account, vm.project, vm.branch, vm.revision);
 		promise.then(function (data) {
 			vm.allNodes = [];
 			vm.allNodes.push(data.nodes);

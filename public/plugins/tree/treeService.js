@@ -21,14 +21,26 @@
 	angular.module('3drepo')
 		.factory('TreeService', TreeService);
 
-	TreeService.$inject = ["$http", "$q", "StateManager", "EventService", "serverConfig"];
+	TreeService.$inject = ["$http", "$q", "EventService", "serverConfig"];
 
-	function TreeService($http, $q, StateManager, EventService, serverConfig) {
-		var state = StateManager.state;
-
-		var init = function() {
+	function TreeService($http, $q, EventService, serverConfig) {
+		var ts = this;
+		
+		var init = function(account, project, branch, revision) {
+			ts.account  = account;
+			ts.project  = project;
+			ts.branch   = branch ? branch : "master";
+			ts.revision = revision ? revision : "head";
+		
+			if (ts.branch === "master")
+			{
+				ts.baseURL = "/" + account + "/" + project + "/revision/master/head/";
+			} else {
+				ts.baseURL = "/" + account + "/" + project + "/revision/" + revision + "/";
+			}
+			
 			var deferred = $q.defer(),
-				url = "/" + state.account + "/" + state.project + "/revision/" + state.branch + "/head/fulltree.json";
+				url = ts.baseURL + "fulltree.json";
 
 			$http.get(serverConfig.apiUrl(url))
 				.then(function(json) {
@@ -40,7 +52,7 @@
 
 		var search = function(searchString) {
 			var deferred = $q.defer(),
-				url = "/" + state.account + "/" + state.project + "/revision/" + state.branch + "/head/" + searchString + "/searchtree.json";
+				url = ts.baseURL + "searchtree.json";
 
 			$http.get(serverConfig.apiUrl(url))
 				.then(function(json) {

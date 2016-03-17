@@ -18,17 +18,38 @@
 (function () {
 	"use strict";
 
-	angular.module('3drepo')
-		.factory('ProjectService', ProjectService);
+	angular.module("3drepo")
+		.factory("ProjectService", ProjectService);
 
-	ProjectService.$inject = ["$http", "$q", "StateManager", "serverConfig"];
+	ProjectService.$inject = ["$http", "$q", "serverConfig"];
 
-	function ProjectService($http, $q, StateManager, serverConfig) {
-		var state = StateManager.state;
-
-		var getRoles = function () {
+	function ProjectService($http, $q, serverConfig) {
+		var getProjectInfo = function (account, project) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(state.account + '/' + state.project + '/roles.json');
+				url = serverConfig.apiUrl(account + "/" + project + ".json");
+			
+			$http.get(url).then(
+				function(json) {
+					deferred.resolve({
+						account     : account,
+						project		: project,
+						name        : name,
+						owner		: json.owner,
+						description	: json.desc,
+						type		: json.type,
+						settings 	: json.properties
+					});
+				},
+				function () {
+					deferred.resolve([]);
+				});
+			
+			return deferred.promise;
+		};
+		
+		var getRoles = function (account, project) {
+			var deferred = $q.defer(),
+				url = serverConfig.apiUrl(account + "/" + project + "/roles.json");
 
 			$http.get(url)
 				.then(
@@ -44,6 +65,7 @@
 		};
 
 		return {
+			getProjectInfo: getProjectInfo,
 			getRoles: getRoles
 		};
 	}

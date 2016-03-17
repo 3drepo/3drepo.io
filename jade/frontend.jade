@@ -15,6 +15,9 @@ html(lang="en" ng-app="3drepo").ng-scope
 		each val, key in cssfiles
 			link(rel='stylesheet', type='text/css', href=val)
 
+		// All CSS minified
+		link(rel='stylesheet', type='text/css', href='/public/all/frontend_all.min.css')
+
 		// JS Files
 		each val, key in jsfiles
 			script(type="text/javascript", src=val)
@@ -28,8 +31,8 @@ html(lang="en" ng-app="3drepo").ng-scope
 			.constant('uiState', !{uistate});
 
 		// Plugin JS and Angular files
-
 		//script(type="text/javascript", src='/public/dist/plugins.min.js')
+		script(type="text/javascript", src='/public/all/frontend_all.min.js')
 
 		// Plugin JS Files
 		each val in pluginJS
@@ -44,17 +47,16 @@ html(lang="en" ng-app="3drepo").ng-scope
 		each css in pluginCSS
 			link(href=css, rel='stylesheet', type="text/css")
 
-	body(ng-controller='BaseCtrl')
-		home
+	body
 
 		// Plugin JADE Files
 		each j in pluginJade
 			script(type="text/ng-template", id=j.id)
 				!= renderMe('./plugins/' + j.template, locals)
-				
-		#accountpage.container-fluid
-			//.row.mainrow
-				ng-include(src="'header.html'")
-			.row
-				div(ui-view='')
 
+		// Frontend plugin JADE Files
+		each j in frontendJade
+			script(type="text/ng-template", id=j.id)
+				!= renderMe(j.path, locals)
+
+		home

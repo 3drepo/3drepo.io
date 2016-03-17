@@ -23,14 +23,17 @@
 
 	function issues() {
 		return {
-			restrict: 'EA',
-			templateUrl: 'issues.html',
+			restrict: "EA",
+			templateUrl: "issues.html",
 			scope: {
+				account: "=",
+				project: "=",
+				branch:  "=",
+				revision: "=",
 				show: "=",
 				filterText: "=",
 				showAdd: "=",
-				options: "=",
-				selectedOption: "=",
+				selectedMenuOption: "=",
 				onContentHeightRequest: "&",
 				onShowItem : "&",
 				hideItem: "="
@@ -41,9 +44,9 @@
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$element", "$timeout", "$mdDialog", "$filter", "IssuesService", "EventService"];
+	IssuesCtrl.$inject = ["$scope", "$element", "$timeout", "$mdDialog", "$filter", "IssuesService", "EventService", "Auth"];
 
-	function IssuesCtrl($scope, $element, $timeout, $mdDialog, $filter, IssuesService, EventService) {
+	function IssuesCtrl($scope, $element, $timeout, $mdDialog, $filter, IssuesService, EventService, Auth) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -76,7 +79,7 @@
 		/*
 		 * Get all the Issues
 		 */
-		promise = IssuesService.getIssues();
+		promise = IssuesService.getIssues(vm.account, vm.project);
 		promise.then(function (data) {
 			var i, length;
 			vm.showProgress = false;
@@ -96,7 +99,7 @@
 		/*
 		 * Get all the available roles for the project
 		 */
-		rolesPromise = IssuesService.getRoles();
+		rolesPromise = IssuesService.getRoles(vm.account, vm.project);
 		rolesPromise.then(function (data) {
 			vm.availableRoles = data;
 			setAllIssuesAssignedRolesColors();
@@ -136,7 +139,7 @@
 		/*
 		 * Get the user roles for the project
 		 */
-		projectUserRolesPromise = IssuesService.getUserRolesForProject();
+		projectUserRolesPromise = IssuesService.getUserRolesForProject(vm.account, vm.project, Auth.username);
 		projectUserRolesPromise.then(function (data) {
 			vm.projectUserRoles = data;
 		});
@@ -421,9 +424,9 @@
 		};
 
 		/*
-		 * Handle changes to the options
+		 * Selecting a menu option
 		 */
-		$scope.$watch("vm.selectedOption", function (newValue) {
+		$scope.$watch("vm.selectedMenuOption", function (newValue) {
 			var role, roleIndex;
 			if (angular.isDefined(newValue)) {
 				if (newValue.value === "sortByDate") {
@@ -479,6 +482,7 @@
 					vm.showIssue = false;
 					vm.showIssueList = true;
 					vm.showAddIssue = false;
+					vm.showAdd = false; // So that showing add works
 
 					// Set the content height
 					setContentHeight();
@@ -500,6 +504,7 @@
 			vm.showIssueList = false;
 			vm.showIssue = true;
 			vm.showAddIssue = false;
+			vm.showAdd = false; // So that showing add works
 
 			// Selected issue
 			if (vm.selectedIssue !== null) {

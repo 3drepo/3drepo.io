@@ -152,34 +152,38 @@ module.exports.createApp = function(template)
 
 
 	var pluginStructure = {
-		"plugin" : "base",
+		"plugin" : "home",
 		"children" : [
 			{
-				"plugin": "login",
+				"plugin": "account",
 				"children": [
 					{
-						"plugin": "account",
-						"children": [
-							{
-								"plugin": "project",
-								"friends" : [
-									"panel",
-									"filter",
-									"tree",
-									"viewpoints",
-									"issues",
-									"oculus",
-									"clip",
-									"bottomButtons",
-									"qrCodeReader",
-									"docs",
-									"utils",
-									"walkthroughVr"
-								]
-							}
+						"plugin": "project",
+						"friends" : [
+							"panel",
+							"filter",
+							"tree",
+							"viewpoints",
+							"issues",
+							"oculus",
+							"clip",
+							"bottomButtons",
+							"qrCodeReader",
+							"docs",
+							"utils",
+							"walkthroughVr"
 						]
 					}
 				]
+			}
+		]
+	};
+
+	var frontendPluginStructure = {
+		"plugin" : "blah",
+		"children" : [
+			{
+				"plugin": "yah"
 			}
 		]
 	};
@@ -305,14 +309,7 @@ module.exports.createApp = function(template)
 			stateName += ".";
 		}
 
-
-		let pluginConfig = {};
-		if (plugin.indexOf("AM_") !== -1) {
-			pluginConfig = JSON.parse(fs.readFileSync("./plugins/AM_/" + plugin.substring(3) + ".json", "utf8"));
-		} else {
-			pluginConfig = JSON.parse(fs.readFileSync("./plugins/" + plugin + ".json", "utf8"));
-		}
-
+		let pluginConfig = JSON.parse(fs.readFileSync("./plugins/" + plugin + ".json", "utf8"));
 
 		let states = pluginConfig.states || [plugin];
 
@@ -340,6 +337,67 @@ module.exports.createApp = function(template)
 		return params;
 	}
 
+	/**
+	 * Setup loading only required jade
+	 */
+	function setupRequiredJade (allPlugins, requiredPlugin, pathToPlugins, params) {
+		var i, length,
+			pluginFiles,
+			pluginDir,
+			fileSplit;
+
+		if (allPlugins.indexOf(requiredPlugin.plugin) !== -1) {
+			pluginDir = pathToPlugins + "/" + requiredPlugin.plugin;
+			pluginFiles = fs.readdirSync(pluginDir);
+			pluginFiles.forEach( function (file){
+				fileSplit = file.split(".");
+				if (fileSplit[1] === "jade") {
+					params.frontendJade.push({
+						id: fileSplit[0] + ".html",
+						path: pluginDir + "/" + file
+					});
+				}
+			});
+
+			// Recurse for children
+			if (requiredPlugin.hasOwnProperty("children")) {
+				for (i = 0, length = requiredPlugin.children.length; i < length; i += 1) {
+					setupRequiredJade(allPlugins, requiredPlugin.children[i], pathToPlugins, params);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Setup jade
+	 */
+	function setupJade (params) {
+		var frontendDir = "./frontend",
+			plugins;
+
+		// Get all available plugins
+		plugins = fs.readdirSync(frontendDir);
+		// Setup for loading only the required plugins
+		setupRequiredJade(plugins, frontendPluginStructure, frontendDir, params);
+		console.log(params.frontendJade);
+
+		/*
+		plugins.forEach( function (plugin) {
+			pluginDir = frontendDir + "/" + plugin;
+			pluginFiles = fs.readdirSync(pluginDir);
+			pluginFiles.forEach( function (file){
+				fileSplit = file.split(".");
+				if (fileSplit[1] === "jade") {
+					params.frontendJade.push({
+						id: fileSplit[0] + ".html",
+						path: pluginDir + "/" + file
+					});
+				}
+			});
+		});
+		*/
+	}
+
 	app.get('*', function(req, res) {
 
 		// let hasChildren = true;
@@ -362,16 +420,17 @@ module.exports.createApp = function(template)
 			"uistate": {},
 			"pluginCSS": [],
 			"renderMe": jade.renderFile,
-			"structure": JSON.stringify(pluginStructure)
-
+			"structure": JSON.stringify(pluginStructure),
+			"frontendJade": []
 		});
 
 		params.parentStateJSON	= JSON.stringify(params.parentStateJSON);
 		//params["pluginLevelsJSON"]	= JSON.stringify(params["pluginLevelsJSON"]);
 		params.uistate = JSON.stringify(params.uistate);
 
-		res.render(template, params);
+		setupJade(params);
 
+		res.render(template, params);
 	});
 
 	return app;

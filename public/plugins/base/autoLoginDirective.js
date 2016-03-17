@@ -21,18 +21,29 @@
 	angular.module("3drepo")
 		.directive("autoLogin", autoLogin);
 
-	autoLogin.$inject = ["Auth"];
-
-	function autoLogin(Auth) {
+	function autoLogin() {
 		return {
 			restrict: "E",
-			link: link,
-			scope: { }
+			scope: { 
+				account: "@",
+				password: "@"
+			},
+			controller: AutoLoginCtrl,
+			controllerAs: "al",
+			bindToController: true			
+		};	
+	}
+	
+	AutoLoginCtrl.$inject = ["Auth"];
+	
+	function AutoLoginCtrl(Auth) {
+		var al = this;
+		
+		al.getTemplateUrl = function() {
+			return al.templateUrl;
 		};
 		
-		function link (scope, element, attrs)
-		{			
-			Auth.login(attrs.account, attrs.password);
-		}
+		Auth.login(al.account, al.password);
 	}
+
 }());

@@ -21,11 +21,10 @@
 	angular.module("3drepo")
 		.factory("IssuesService", IssuesService);
 
-	IssuesService.$inject = ["$http", "$q", "StateManager", "serverConfig", "EventService", "Auth", "ViewerService"];
+	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService", "Auth"];
 
-	function IssuesService($http, $q, StateManager, serverConfig, EventService, Auth, ViewerService) {
-		var state = StateManager.state,
-			url = "",
+	function IssuesService($http, $q,  serverConfig, EventService, Auth) {
+		var url = "",
 			data = {},
 			config = {},
 			i, j = 0,
@@ -79,10 +78,10 @@
 			}
 		};
 
-		obj.getIssues = function() {
+		obj.getIssues = function(account, project) {
 			var self = this,
 				deferred = $q.defer();
-			url = serverConfig.apiUrl(state.account + '/' + state.project + '/issues.json');
+			url = serverConfig.apiUrl(account + "/" + project + "/issues.json");
 
 			$http.get(url)
 				.then(
@@ -117,10 +116,10 @@
 
 			url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue.objectId);
 
-			//console.log()
+			// viewpoint previously was set to ViewerService.defaultViewer.getCurrentViewpointInfo()
 			data = {
 				name: issue.name,
-				viewpoint: ViewerService.defaultViewer.getCurrentViewpointInfo(),
+				viewpoint: null,
 				scale: 1.0,
 				creator_role: issue.creator_role,
 				assigned_roles: userRoles
@@ -222,11 +221,11 @@
 			});
 		};
 
-		obj.addPin = function (pin, colours, viewpoint) {
+		obj.addPin = function (account, project, pin, colours, viewpoint) {
 			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
 				id: pin.id,
-				account: state.account,
-				project: state.project,
+				account: account,
+				project: project,
 				position: pin.position,
 				norm: pin.norm,
 				colours: colours,
@@ -252,9 +251,9 @@
 			});
 		};
 
-		obj.getRoles = function() {
+		obj.getRoles = function(account, project) {
 			var deferred = $q.defer();
-			url = serverConfig.apiUrl(state.account + '/' + state.project + '/roles.json');
+			url = serverConfig.apiUrl(account + '/' + project + '/roles.json');
 
 			$http.get(url)
 				.then(
@@ -270,9 +269,9 @@
 			return deferred.promise;
 		};
 
-		obj.getUserRolesForProject = function() {
+		obj.getUserRolesForProject = function(account, project, username) {
 			var deferred = $q.defer();
-			url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + Auth.username + "/userRolesForProject.json");
+			url = serverConfig.apiUrl(account + "/" +project + "/" + username + "/userRolesForProject.json");
 
 			$http.get(url)
 				.then(

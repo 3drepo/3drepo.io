@@ -18,138 +18,73 @@
 (function () {
     "use strict";
 
-    angular.module('3drepo')
-        .service('WalkthroughService', WalkthroughService);
+    angular.module("3drepo")
+        .factory("WalkthroughService", WalkthroughService);
 
-    WalkthroughService.$inject = ["$interval", "$timeout", "$http", "ViewerService", "StateManager", "serverConfig"];
+    WalkthroughService.$inject = ["$interval", "$timeout", "$q", "$http", "serverConfig"];
 
-    function WalkthroughService($interval, $timeout, $http, ViewerService, StateManager, serverConfig) {
-        var defaultViewer = ViewerService.defaultViewer,
-            recordingInterval = null,
-            playingInterval = null,
-            position = 0,
-            recording = false,
-            playing = false,
-            walkthroughs = new Array(5),
-            currentWalkthrough = -1,
-            state = StateManager.state,
-            userControlTimeout = null,
-            inUserControl = false;
+    function WalkthroughService($interval, $timeout, $q, $http, serverConfig) {
+        var walkthroughs = {},
+            //userControlTimeout = null,
+			loading = null;
 
-        function getWalkthroughData(index) {
-            var url = "/" + state.account + "/" + state.project + "/" + index + "/walkthrough.json",
+        function getWalkthroughs(account, project, index) {
+			var projectKey = account + "__" + project;
+
+			if (angular.isUndefined(index))
+			{
+				index = "all";
+			}
+
+            var url = "/" + account + "/" + project + "/walkthrough/" + index + ".json",
                 i = 0,
                 length = 0;
 
-            $http.get(serverConfig.apiUrl(url))
-                .then(function(data) {
-                    for (i = 0, length = data.data.length; i < length; i++) {
-                        walkthroughs[data.data[i].index] = data.data[i].cameraData;
-                    }
-                });
+			loading = $q.defer();
+			var needLoading = false;
+
+			if (!walkthroughs.hasOwnProperty(projectKey))
+			{
+				walkthroughs[projectKey] = [];
+				needLoading = true;
+			} else {
+				if (!walkthroughs[projectKey].hasOwnProperty(index))
+				{
+					needLoading = true;
+				}
+			}
+
+			if (needLoading)
+			{
+				$http.get(serverConfig.apiUrl(url))
+					.then(function(data) {
+						for (i = 0, length = data.data.length; i < length; i++) {
+							walkthroughs[projectKey][data.data[i].index] = data.data[i].cameraData;
+						}
+
+						loading.resolve(walkthroughs[projectKey][index]);
+					});
+			} else {
+				loading.resolve(walkthroughs[projectKey][index]);
+			}
+
+			return loading.promise;
         }
-        getWalkthroughData("all");
 
-        var startRecording = function () {
-            var viewpoint = {};
-            if (currentWalkthrough !== -1) {
-                recording = true;
-                walkthroughs[currentWalkthrough] = [];
-                recordingInterval = $interval(function () {
-                    viewpoint = defaultViewer.getCurrentViewpointInfo();
-                    walkthroughs[currentWalkthrough].push({
-                        position: viewpoint.position,
-                        up: viewpoint.up,
-                        view_dir: viewpoint.view_dir
-                    });
-                }, 250);
-            }
-        };
+		var saveRecording = function (account, project, index, recording) {
+            var postUrl = "/" + account + "/" + project + "/walkthrough";
+			var projectKey = account + "__" + project;
 
-        var stopRecording = function () {
-            var postUrl = "/" + state.account + "/" + state.project + "/walkthrough";
+			walkthroughs[projectKey][index] = recording;
 
-            recording = false;
-            $interval.cancel(recordingInterval);
-
-            $http.post(serverConfig.apiUrl(postUrl), {index: currentWalkthrough, cameraData: walkthroughs[currentWalkthrough]})
-                .then(function(json) {
+            $http.post(serverConfig.apiUrl(postUrl), {index: index, cameraData: recording})
+                .then(function() {
                     //console.log(json);
                 });
         };
 
-        var play = function () {
-            var numCameraPositions = 0;
-
-            if ((currentWalkthrough !== -1) && angular.isDefined(walkthroughs[currentWalkthrough])) {
-                numCameraPositions = walkthroughs[currentWalkthrough].length;
-                playing = true;
-                playingInterval = $interval(function () {
-                    defaultViewer.updateCamera(
-                        walkthroughs[currentWalkthrough][position].position,
-                        walkthroughs[currentWalkthrough][position].up,
-                        walkthroughs[currentWalkthrough][position].view_dir
-                    );
-                    if (position === (numCameraPositions - 1)) {
-                        position = 0;
-                    }
-                    else {
-                        position += 1;
-                    }
-                }, 500);
-            }
-        };
-
-        var stop = function () {
-            playing = false;
-            $interval.cancel(playingInterval);
-            $timeout.cancel(userControlTimeout);
-        };
-
-        var userInControl = function () {
-            if (playing) {
-                $interval.cancel(playingInterval);
-                $timeout.cancel(userControlTimeout);
-                userControlTimeout = $timeout(function () {
-                    play();
-                }, 60000);
-            }
-        };
-
-        var isRecording = function () {
-            return recording;
-        };
-
-        var setCurrentWalkthrough = function(index) {
-            currentWalkthrough = index;
-            stop();
-            // Go to the start position of the selected walkthrough if it exists
-            if (angular.isDefined(walkthroughs[currentWalkthrough])) {
-                position = 0;
-                play();
-            }
-            else {
-                getWalkthroughData(currentWalkthrough);
-            }
-        };
-
-        var getCurrentWalkthrough = function () {
-            return currentWalkthrough;
-        };
-
-        var getWalkthroughs = function () {
-            return walkthroughs;
-        };
-
         return {
-            isRecording: isRecording,
-            startRecording: startRecording,
-            stopRecording: stopRecording,
-            play: play,
-            stop: stop,
-            userInControl: userInControl,
-            setCurrentWalkthrough: setCurrentWalkthrough,
-            getCurrentWalkthrough: getCurrentWalkthrough,
+            saveRecording: saveRecording,
             getWalkthroughs: getWalkthroughs
         };
     }

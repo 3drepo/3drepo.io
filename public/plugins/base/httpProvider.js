@@ -19,15 +19,13 @@
 	"use strict";
 
 	angular.module("3drepo")
-	.factory("authInterceptor", ["$rootScope", "$q", function($rootScope, $q) {
+	.factory("authInterceptor", ["EventService", "$q", function(EventService, $q) {
 		return {
 			responseError: function(res)
 			{
 				if (res.status === 401) {
-					$rootScope.$broadcast("notAuthorized", null);
+					EventService.send(EventService.EVENT.USER_NOT_AUTHORIZED);
 				}
-
-				$rootScope.lastURL = res.config.url;
 
 				return $q.reject(res);
 			}
