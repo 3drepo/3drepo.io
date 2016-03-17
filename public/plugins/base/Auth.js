@@ -43,8 +43,11 @@
 			self.loggedIn = false;
 			self.username = null;
 			self.userRoles = null;
+			
+			var initialiser = reason.initialiser;
+			reason.initialiser = undefined;
 				
-			EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: null, initialiser: data.initialiser, error: reason });
+			EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: null, initialiser: initialiser, error: reason });
 			
 			self.authPromise.resolve(self.loggedIn);
 		};
@@ -84,10 +87,10 @@
 					{
 						data.initialiser = true;
 						self.loginSuccess(data);
-					}).error(function _initFailure(data)
+					}).error(function _initFailure(reason)
 					{
-						data.initialiser = true;
-						self.loginFailure(data);
+						reason.initialiser = true;
+						self.loginFailure(reason);
 					});
 				
 				self.authPromise.promise.then(function() {

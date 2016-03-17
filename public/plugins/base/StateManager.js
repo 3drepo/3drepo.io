@@ -31,6 +31,8 @@
 			resolve: {
 				init: function(Auth, StateManager, $q)
 				{
+					var finishedAuth = $q.defer();
+					
 					StateManager.state.changing = true;
 					
 					Auth.init().then(function (loggedIn) {
