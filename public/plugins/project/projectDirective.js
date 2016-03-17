@@ -149,9 +149,6 @@
 		});
 
 		$timeout(function () {
-			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelCard);
-			
-			// No parameters means load from state variables
 			EventService.send(EventService.EVENT.CREATE_VIEWER, {
 				name: "default",
 				account:  pm.account,
@@ -159,6 +156,8 @@
 				branch:   pm.branch,
 				revision: pm.revision
 			});
+						
+			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelCard);
 		});
 	}
 }());

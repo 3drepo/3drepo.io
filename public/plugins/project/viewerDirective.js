@@ -77,6 +77,7 @@
 		$scope.init = function() {
 			v.viewer = new Viewer(v.name, $element[0], v.manager, eventCallback, errCallback);
 
+			v.viewer.init();
 			// TODO: Move this so that the attachment is contained
 			// within the plugins themselves.
 			// Comes free with oculus support and gamepad support
@@ -87,16 +88,6 @@
 
 			v.collision  = new Collision(v.viewer);
 
-			v.viewer.init();
-
-			$http.get(serverConfig.apiUrl(v.account + "/" + v.project + ".json")).success(
-				function(json, status) {
-					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
-						account: v.account,
-						project: v.project,
-						settings: json.properties
-					});
-				});
 
 			$scope.reload();
 
@@ -112,6 +103,15 @@
 				v.collision  = new Collision(v.viewer);
 
 			});
+		
+			$http.get(serverConfig.apiUrl(v.account + "/" + v.project + ".json")).success(
+				function(json, status) {
+					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
+						account: v.account,
+						project: v.project,
+						settings: json.properties
+					});
+				});			
 
 		};
 

@@ -88,9 +88,9 @@
 						EventService.sendError(EventService.ERROR.DUPLICATE_VIEWER_NAME, {
 							name: event.value.name
 						});
+					} else {
+						vm.viewers[event.value.name] = event.value;
 					}
-					
-					vm.viewers[event.value.name] = event.value;
 				} else if (event.type === EventService.EVENT.CLOSE_VIEWER) {
 					// If the viewer exists in the list then delete it
 					if (vm.viewers.hasOwnProperty(event.value.name)) {
