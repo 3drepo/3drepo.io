@@ -3,20 +3,19 @@
 	"files": {
 		"jade" : [
 			{"template" : "account/account.jade", "id" : "account.html"},
-            {"template" : "account/dashboard.jade", "id" : "dashboard.html"},
-            {"template" : "account/projectsList.jade", "id" : "projectsList.html"},
-            {"template" : "account/bids.jade", "id" : "bids.html"}
-		],
+            {"template" : "account/accountProjects.jade", "id" : "accountProjects.html"},
+            {"template" : "account/accountProfile.jade", "id" : "accountProfile.html"},
+            {"template" : "account/logout.jade", "id" : "logout.html" }
+        ],
 		"angular": [
-			"account/AccountData.js",
-			"account/AccountCtrl.js",
-            "account/dashboardDirective.js",
-            "account/projectsListDirective.js",
-            "account/bidsDirective.js"
+            "account/accountDirective.js",
+            "account/accountService.js",
+            "account/accountProjectsDirective.js",
+            "account/accountProfileDirective.js",
+            "account/logoutDirective.js"
 		],
         "css" : [
-            "account/dashboard.css",
-            "account/bids.css"
+            "account/account.css"
         ]
 	}
 }

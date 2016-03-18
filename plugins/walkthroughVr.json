@@ -1,0 +1,8 @@
+{
+    "name" : "walkthroughVr",
+    "files": {
+        "angular" : [
+            "walkthroughVr/VRDemoCtrl.js"
+        ]
+    }
+}

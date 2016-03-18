@@ -32,14 +32,14 @@
 		};
 	}
 
-	BottomButtonsCtrl.$inject = ["EventService", "ViewerService"];
+	BottomButtonsCtrl.$inject = ["EventService"];
 
-	function BottomButtonsCtrl (EventService, ViewerService) {
-		var vm = this,
-			defaultViewer = ViewerService.defaultViewer;
+	function BottomButtonsCtrl (EventService) {
+		var vm = this;
 		vm.showButtons = true;
 		vm.fullScreen = false;
 		vm.showViewingOptionButtons = false;
+		console.log(EventService);
 
 		vm.toggleElements = function () {
 			EventService.send(EventService.EVENT.TOGGLE_ELEMENTS);
@@ -49,8 +49,10 @@
 		var setViewingOption = function (index) {
 			if (angular.isDefined(index)) {
 				// Set the viewing mode
-				defaultViewer.setNavMode(vm.viewingOptions[index].mode);
-
+				
+				EventService.send(EventService.EVENT.VIEWER.SET_NAV_MODE,
+					{mode: vm.viewingOptions[index].mode});
+			
 				// Set up the new current selected option button
 				vm.selectedViewingOptionIndex = index;
 				vm.leftButtons[1] = vm.viewingOptions[index];
@@ -63,7 +65,7 @@
 		};
 
 		var home = function () {
-			defaultViewer.showAll();
+			EventService.send(EventService.EVENT.VIEWER.GO_HOME);
 		};
 
 		var toggleHelp = function () {
@@ -71,13 +73,12 @@
 		};
 
 		var enterFullScreen = function () {
-			defaultViewer.switchFullScreen(null);
+			EventService.send(EventService.VIEWER.SWITCH_FULLSCREEN);
 			vm.fullScreen = true;
 		};
 
 		var exitFullScreen = function() {
 			if (!document.webkitIsFullScreen && !document.msFullscreenElement && !document.mozFullScreen && vm.fullScreen) {
-				defaultViewer.switchFullScreen(null);
 				vm.fullScreen = false;
 			}
 		};
@@ -91,26 +92,26 @@
 		};
 
 		var enterOculusDisplay = function () {
-			ViewerService.switchVR();
+			EventService.send(EventService.EVENT.VIEWER.ENTER_VR);
 		};
 
 		vm.viewingOptions = [
 			{
-				mode: "WALK",
+				mode: VIEWER_NAV_MODES.WALK,
 				label: "Walk",
 				icon: "fa fa-child",
 				click: setViewingOption,
 				iconClass: "bottomButtomIconWalk"
 			},
 			{
-				mode: "HELICOPTER",
+				mode: VIEWER_NAV_MODES.HELICOPTER,
 				label: "Helicopter",
 				icon: "icon icon_helicopter",
 				click: setViewingOption,
 				iconClass: "bottomButtomIconHelicopter"
 			},
 			{
-				mode: "TURNTABLE",
+				mode: VIEWER_NAV_MODES.TURNTABLE,
 				label: "Turntable",
 				icon: "icon icon_turntable",
 				click: setViewingOption

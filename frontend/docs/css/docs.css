@@ -1,0 +1,77 @@
+/** Docs **************************************************************************************************************/
+docs .typesList {
+  padding: 0;
+}
+
+docs .docList {
+  padding: 15px 15px 5px 15px;
+  outline: none;
+}
+docs div:hover {
+  cursor: pointer;
+}
+
+docs md-icon {
+  margin: 0 10px 2px 0 !important;
+  font-size: large !important;
+  color: #7986CB;
+}
+
+docs .docsLoadInfo {
+  padding: 15px;
+}
+
+docs .dataItem {
+  padding: 0 20px 0 20px;
+  outline: none;
+}
+
+docs .metadataKey,
+docs .metadataValue {
+  word-wrap: break-word;
+}
+docs .metadataKey {
+  color: rgba(0,0,0,0.5);
+}
+
+docs .cardInfo {
+  text-align: center;
+  padding: 15px;
+  background: #E8EAF6;
+  margin: 15px;
+  border-radius: 4px;
+}
+docs .cardInfo p {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.7);
+  word-wrap: break-word;
+}
+docs .cardInfo md-icon {
+  margin: 0;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+/** Docs Dialog *******************************************************************************************************/
+.docsDialog {
+  min-width: 850px;
+  min-height: 664px;
+  overflow: hidden;
+}
+
+.docsDialog .docIcon {
+  margin-top: 22px;
+  margin-right: 10px;
+}
+
+.docsDialog .documentContainer {
+  position: absolute;
+  top: 64px;
+}
+
+.docsDialog iframe {
+  border-style: none;
+  min-width: 850px;
+  min-height: 600px;
+}

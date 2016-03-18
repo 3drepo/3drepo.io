@@ -20,7 +20,9 @@ tree p {
   word-break: break-all;
   word-wrap: break-word;
   line-height: 18px;
-  margin: 0;
+  margin: -2px 0 0 0;
+  font-size: 14px;
+  padding: 2px;
 }
 tree p:hover {
   cursor: pointer;
@@ -61,6 +63,15 @@ tree .treeButton md-icon  .treeIconDot {
 tree .treeButton .treeButtonDisabled {
   color: #CCCCCC;
 }
+tree .treeButton:hover {
+  cursor: pointer;
+}
+
+tree .treeNodeSelected {
+  background: #C5CAE9;
+  padding: 2px;
+  border-radius: 4px;
+}
 
 /** Tree Node *********************************************************************************************************/
 
@@ -83,7 +94,6 @@ tree .treeButton .treeButtonDisabled {
 .tree-node .md-button {
   border-radius: 0;
 }
-
 
 /** Tree filter list **************************************************************************************************/
 

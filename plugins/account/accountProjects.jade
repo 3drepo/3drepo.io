@@ -1,0 +1,15 @@
+.dataContainer(layout="column", flex)
+	md-list(flex)
+		md-list-item(ng-repeat="account in vm.accounts")
+			.accounts(flex)
+				md-list-item(ng-click="vm.toggleProjectsList($index)")
+					md-button.md-icon-button(aria-label="Folder")
+						md-icon(ng-if="!account.showProjects", md-font-icon="fa fa-folder-o")
+						md-icon(ng-if="account.showProjects", md-font-icon="fa fa-folder-open-o")
+					p {{account.name}}
+				md-list.projects(ng-if="account.showProjects")
+					md-list-item.md-1-line(ng-repeat="project in account.projects", ng-click="vm.goToProject(account.name, project)")
+						md-icon(md-font-icon="fa fa-cube")
+						p {{project}}
+						md-button.md-accent(ng-click="vm.b4f(account.name, project)") B4F
+			md-divider

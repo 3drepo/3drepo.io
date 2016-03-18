@@ -15,30 +15,93 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(function () {
+(function() {
 	"use strict";
 
 	angular.module("3drepo")
-	.directive("viewermanager", viewerManager);
+		.directive("viewermanager", viewerManager);
 
 	function viewerManager() {
 		return {
-			restrict: 'E',
-			scope: {},
-			controller : ViewerManagerCtrl,
-			template: '<viewer class="project-viewport viewport" handle="{{vm.defaultHandle}}" manager="vm.manager" />',
-			controllerAs: 'vm',
+			restrict: "E",
+			controller: ViewerManagerCtrl,
+			scope: true,
+			templateUrl: "viewermanager.html",
+			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	ViewerManagerCtrl.$inject = ["$element"];
+	function ViewerManagerService(nextEventService) {
+		var currentEvent = {};
+		var currentError = {};
 
-	function ViewerManagerCtrl ($element)
-	{
-		var vm = this;
-		vm.manager = new ViewerManager($element[0]);
-		vm.defaultHandle = vm.manager.defaultViewerHandle;
+		var sendInternal = function(type, value) {
+			currentEvent = {type:type, value: value};
+		};
+
+		var send = function (type, value) {
+			sendInternal(type, value);
+			nextEventService.send(type, value);
+		};
+
+		var sendErrorInternal = function(type, value) {
+			currentError = {type: type, value: value};
+		};
+
+		var sendError = function(type, value) {
+			sendErrorInternal(type, value);
+			nextEventService.sendError(type, value);
+		};
+
+		return {
+			currentEvent: function() {return currentEvent;},
+			currentError: function() {return currentError;},
+			send: send,
+			sendInternal: sendInternal,
+			sendError: sendError,
+			sendErrorInternal: sendErrorInternal
+		};
 	}
 
+	ViewerManagerCtrl.$inject = ["$scope", "$q", "$element", "EventService"];
+
+	function ViewerManagerCtrl($scope, $q, $element, EventService) {
+		var vm = this;
+
+		vm.manager = new ViewerManager($element[0]);
+		vm.vmservice = ViewerManagerService(EventService);
+
+		vm.viewers = {};
+
+		$scope.manager = vm.manager;
+
+		vm.viewerInit   = $q.defer();
+		vm.viewerLoaded = $q.defer();
+
+		$scope.$watch(EventService.currentEvent, function(event) {
+			if (angular.isDefined(event.type)) {
+				if (event.type === EventService.EVENT.CREATE_VIEWER) {
+					// If a viewer with the same name exists already then
+					// throw an error, otherwise add it
+					if (vm.viewers.hasOwnProperty(event.value.name)) {
+						EventService.sendError(EventService.ERROR.DUPLICATE_VIEWER_NAME, {
+							name: event.value.name
+						});
+					} else {
+						vm.viewers[event.value.name] = event.value;
+					}
+				} else if (event.type === EventService.EVENT.CLOSE_VIEWER) {
+					// If the viewer exists in the list then delete it
+					if (vm.viewers.hasOwnProperty(event.value.name)) {
+						delete vm.viewers[event.value.name];
+					}
+				} else if (event.type === EventService.EVENT.VIEWER.READY) {
+					window.viewer = vm.manager.getCurrentViewer();
+				} else {
+					vm.vmservice.sendInternal(event.type, event.value);
+				}
+			}
+		});
+	}
 }());

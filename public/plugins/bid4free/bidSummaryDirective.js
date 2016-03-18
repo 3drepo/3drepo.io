@@ -34,13 +34,12 @@
 		};
 	}
 
-	BidSummaryCtrl.$inject = ["$scope", "$location", "StateManager", "BidService"];
+	BidSummaryCtrl.$inject = ["$scope", "$location", "BidService"];
 
-	function BidSummaryCtrl($scope, $location, StateManager, BidService) {
+	function BidSummaryCtrl($scope, $location, BidService) {
 		var vm = this,
 			promise;
 
-		vm.StateManager = StateManager;
 		vm.showSelectedPackage = false;
 
 		// Get all the packages

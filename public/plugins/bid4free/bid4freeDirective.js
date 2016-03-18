@@ -25,22 +25,27 @@
 		return {
 			restrict: 'E',
 			templateUrl: 'bid4free.html',
-			scope: {},
+			scope: {
+				account:  "=",
+				project:  "=",
+				branch:   "=",
+				revision: "=",
+				state:    "="
+			},
 			controller: Bid4FreeCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	Bid4FreeCtrl.$inject = ["$scope", "$element", "$timeout", "StateManager", "BidService", "ProjectService"];
+	Bid4FreeCtrl.$inject = ["$scope", "$element", "$timeout", "BidService", "ProjectService"];
 
-	function Bid4FreeCtrl($scope, $element, $timeout, StateManager, BidService, ProjectService) {
+	function Bid4FreeCtrl($scope, $element, $timeout, BidService, ProjectService) {
 		var vm = this,
 			promise, projectUserRolesPromise, projectSummaryPromise,
 			currentSelectedPackageIndex;
 
 		// Init view/model vars
-		vm.StateManager = StateManager;
 		vm.invitedSubContractors = [];
 		vm.addSubContractorDisabled = true;
 		vm.responded = false;
@@ -49,6 +54,8 @@
 		vm.saveProjectSummaryDisabled = true;
 		vm.savePackageDisabled = true;
 		vm.showProjectSummaryInput = true;
+
+		BidService.setAccountAndProject(vm.account, vm.project);
 
 		// Setup sub contractors
 		vm.subContractors = [
@@ -111,6 +118,7 @@
 				// Get all packages for project
 				promise = BidService.getPackage();
 				promise.then(function (response) {
+					console.log(response);
 					var i, length;
 					vm.packages = response.data;
 					if (vm.packages.length === 0) {
@@ -125,7 +133,7 @@
 							vm.packages[i].selected = false;
 						}
 
-						vm.fileUploadAction = "/api/" + StateManager.state.account + "/" + StateManager.state.project + "/packages/" +  vm.packages[0].name + "/attachments";
+						vm.fileUploadAction = "/api/" + vm.account + "/" + vm.project + "/packages/" +  vm.packages[0].name + "/attachments";
 					}
 				});
 			}

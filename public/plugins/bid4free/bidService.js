@@ -27,7 +27,8 @@
 		var obj = {},
 			state = StateManager.state,
 			currentPackage,
-			boq, boqTotal;
+			boq, boqTotal,
+			self = this;
 
 		/**
 		 * Handle POST requests
@@ -37,7 +38,7 @@
 		 */
 		function doPost(data, urlEnd, headers) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + urlEnd),
+				url = serverConfig.apiUrl(self.account + "/" + self.project + "/" + urlEnd),
 				config = {withCredentials: true};
 
 			if (angular.isDefined(headers)) {
@@ -56,12 +57,12 @@
 		 * @param urlEnd
 		 * @returns {*}
 		 */
-		function doGet(urlEnd, blah) {
+		function doGet(urlEnd, param) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + urlEnd);
+				url = serverConfig.apiUrl(self.account + "/" + self.project + "/" + urlEnd);
 
 			var params = {};
-			if (angular.isDefined(blah)) {
+			if (angular.isDefined(param)) {
 				params.responseType = "arraybuffer";
 			}
 			$http.get(url, params).then(
@@ -82,7 +83,7 @@
 		 */
 		function doPut(data, urlEnd) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + urlEnd),
+				url = serverConfig.apiUrl(self.account + "/" + self.project + "/" + urlEnd),
 				config = {
 					withCredentials: true
 				};
@@ -92,6 +93,11 @@
 				});
 			return deferred.promise;
 		}
+		
+		obj.setAccountAndProject = function (account, project) {
+			self.account = account;
+			self.project = project;
+		};
 
 		obj.addPackage = function (data) {
 			return doPost(data, "packages.json");

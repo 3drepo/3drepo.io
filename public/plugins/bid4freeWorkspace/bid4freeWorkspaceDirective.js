@@ -25,16 +25,20 @@
 		return {
 			restrict: 'E',
 			templateUrl: 'bid4freeWorkspace.html',
-			scope: {},
+			scope: {
+				packageName: "=",
+				account: "=",
+				project: "="
+			},
 			controller: Bid4freeWorkspaceCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	Bid4freeWorkspaceCtrl.$inject = ["$scope", "$location", "BidService", "StateManager"];
+	Bid4freeWorkspaceCtrl.$inject = ["$scope", "$location", "BidService"];
 
-	function Bid4freeWorkspaceCtrl($scope, $location, BidService, StateManager) {
+	function Bid4freeWorkspaceCtrl($scope, $location, BidService) {
 		var vm = this,
 			promise, tcPromise,
 			locationSearch = $location.search();
@@ -58,17 +62,16 @@
 		}
 
 		// Get the user's bid information for the package
-		promise = BidService.getUserBid($location.search().package);
+		promise = BidService.getUserBid(vm.packageName);
 		promise.then(function (response) {
-			vm.title = StateManager.state.project + " / " + response.data.packageName;
+			vm.title = vm.project + " / " + response.data.packageName;
 		});
 
 		// Get Terms and Conditions
-		tcPromise = BidService.getTermsAndConditions($location.search().package);
+		tcPromise = BidService.getTermsAndConditions(vm.packageName);
 		tcPromise.then(function (response) {
 			var i, length;
 			vm.sections = response.data;
-			console.log(vm.sections);
 			for (i = 0, length = vm.sections.length; i < length; i += 1) {
 				vm.sections[i].showInput = false;
 				if (vm.sections[i].items.length > 0) {
@@ -194,7 +197,7 @@
 		 * Save to database
 		 */
 		vm.save = function () {
-			promise = BidService.updateTermsAndConditions($location.search().package, vm.sections);
+			promise = BidService.updateTermsAndConditions(vm.packageName, vm.sections);
 			promise.then(function (response) {
 				console.log(response);
 				vm.showSaveConfirmation = true;
@@ -226,8 +229,8 @@
 		 */
 		vm.goToMainPage = function () {
 			$location
-				.path(StateManager.state.account + "/" + StateManager.state.project + "/bid4free", "_self")
-				.search({package: $location.search().package});
+				.path(vm.account + "/" + vm.project + "/bid4free", "_self")
+				.search({package: vm.packageName});
 		};
 
 		vm.init = function () {
@@ -251,7 +254,7 @@
 					]
 				}
 			];
-			promise = BidService.updateTermsAndConditions($location.search().package, vm.data);
+			promise = BidService.updateTermsAndConditions(vm.packageName, vm.data);
 			promise.then(function (response) {
 				console.log(response);
 			});

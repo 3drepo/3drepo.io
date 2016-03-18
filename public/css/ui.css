@@ -1700,3 +1700,48 @@ ul.fancytree-container li {
 	height: inherit;
 	overflow-y: scroll;
 }
+
+/** VR Demo ***********************************************************************************************************/
+#instructionCircle {
+	position: absolute;
+	z-index: 4;
+	text-align: center;
+	left: 0;
+	right: 0;
+	top: 50%;
+	height: auto;
+	width: 40%;
+	transform: translateY(-50%);
+	border-radius: 50%;
+	margin: auto;
+	padding-bottom: 10%;
+	background-color: rgb(255, 255, 255);
+	
+}
+
+#instructionImage {
+	width: 80%;
+	margin-top: 15%;
+}
+
+#instructionOK {
+	font-size: 400%;
+	font-variant: small-caps;
+	margin-top: 10%;
+	margin-bottom: -20%;
+}
+
+.VRDemoMenuItem {
+	height: 50%;
+	text-align: center;
+	vertical-align: middle;
+	transform: translateY(50%);
+	font-size: 400%;
+	cursor: pointer;
+	font-variant: small-caps;
+}
+
+.fullheight {
+	margin: auto;
+	height: 100%;
+}

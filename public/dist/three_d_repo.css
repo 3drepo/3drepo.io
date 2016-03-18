@@ -1,0 +1,777 @@
+/** Account ***********************************************************************************************************/
+account-dir #account {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+  padding: 20px;
+}
+
+account-dir #logo {
+  background: #3F51B5;
+}
+
+account-dir #noAvatarIcon {
+  background: #E8EAF6;
+}
+account-dir #noAvatarIcon md-icon {
+  font-size: 100px;
+  width: 100px;
+  height: 100px;
+}
+
+account-dir #userinfo {
+  border: solid 1px #C5CAE9;
+  border-top: none;
+  padding: 20px;
+}
+account-dir #userinfo p {
+  font-size: 15px;
+  margin: 5px 0;
+  color: rgba(0,0,0,0.7);
+}
+
+account-dir .dataContainer {
+  border: solid 1px rgba(0,0,0,0.2);
+  margin-top: 20px;
+}
+
+account-dir md-tabs-canvas {
+  background: #E8EAF6;
+}
+
+/** Account Projects **************************************************************************************************/
+account-projects .dataContainer {
+  height: 500px;
+}
+
+account-projects md-list {
+  padding: 0;
+}
+
+account-projects .accounts p,
+account-projects .accounts md-icon {
+  font-size: 20px;
+  color: rgba(0,0,0,0.6);
+}
+
+account-projects .projects {
+  margin-left: 40px;
+}
+
+account-projects .projects p,
+account-projects .projects md-icon {
+  font-size: 15px;
+  color: #4CAF50;
+}
+account-projects .projects p {
+  font-size: 14px;
+  margin: 0;
+}
+account-projects .projects md-icon {
+  margin-right: 10px !important;
+}
+
+/** Account Profile ***************************************************************************************************/
+account-profile .dataContainer {
+  padding: 10px;
+}
+
+account-profile md-input-container {
+  margin: 10px 0;
+}
+account-profile md-input-container input,
+account-profile md-input-container label {
+  font-size: initial;
+  color: rgba(0,0,0,0.7) !important;
+}
+
+account-profile p {
+  font-size: 14px;
+  color: rgba(0,0,0,0.6);
+}
+
+/** Logout button *****************************************************************************************************/
+logout {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+}
+logout md-icon {
+  color: #FFFFFF;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  font-size: 20px !important;
+  outline: none;
+}
+
+bottom-buttons {
+  display: block;
+  position: absolute;
+  bottom: 80px;
+  left: 0;
+  right: 0;
+  width: 320px;
+  margin: auto;
+  text-align: center;
+}
+
+bottom-buttons #leftButtons {
+  position: absolute;
+  left: 0;
+  top: 8px;
+}
+
+bottom-buttons #rightButtons {
+  position: absolute;
+  right: 0;
+  top: 8px;
+}
+
+bottom-buttons #showButtonIcon {
+  font-size: 25px;
+  margin-top: -5px;
+}
+
+bottom-buttons .actionButton md-icon {
+  color: #FFFFFF !important;
+  font-size: 25px;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
+
+bottom-buttons .viewingOptionButtons {
+  position: absolute;
+  right: 0;
+  top: -145px;
+}
+
+.bottomButtomIconCardboard {
+  font-size: 20px !important;
+  margin-top: 5px;
+}
+.bottomButtomIconWalk {
+  margin-left: -5px;
+}
+.bottomButtomIconHelicopter {
+  margin-left: -18px;
+  font-size: 22px !important;
+}
+clip {
+  display: block;
+  width: 100%;
+  padding: 20px 10px 10px 10px;
+}
+
+clip md-radio-button {
+  display: inline;
+}
+
+.clipSlider {
+  margin-top: 20px;
+}
+.clipSlider md-slider {
+  width: 200px;
+  padding-right: 20px;
+}
+.clipSlider input {
+  width: 50px;
+}
+
+/** Docs **************************************************************************************************************/
+docs .typesList {
+  padding: 0;
+}
+
+docs .docList {
+  padding: 15px 15px 5px 15px;
+  outline: none;
+}
+docs div:hover {
+  cursor: pointer;
+}
+
+docs md-icon {
+  margin: 0 10px 2px 0 !important;
+  font-size: large !important;
+  color: #7986CB;
+}
+
+docs .docsLoadInfo {
+  padding: 15px;
+}
+
+docs .dataItem {
+  padding: 0 20px 0 20px;
+  outline: none;
+}
+
+docs .metadataKey,
+docs .metadataValue {
+  word-wrap: break-word;
+}
+docs .metadataKey {
+  color: rgba(0,0,0,0.5);
+}
+
+docs .cardInfo {
+  text-align: center;
+  padding: 15px;
+  background: #E8EAF6;
+  margin: 15px;
+  border-radius: 4px;
+}
+docs .cardInfo p {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.7);
+  word-wrap: break-word;
+}
+docs .cardInfo md-icon {
+  margin: 0;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+/** Docs Dialog *******************************************************************************************************/
+.docsDialog {
+  min-width: 850px;
+  min-height: 664px;
+  overflow: hidden;
+}
+
+.docsDialog .docIcon {
+  margin-top: 22px;
+  margin-right: 10px;
+}
+
+.docsDialog .documentContainer {
+  position: absolute;
+  top: 64px;
+}
+
+.docsDialog iframe {
+  border-style: none;
+  min-width: 850px;
+  min-height: 600px;
+}
+
+filter {
+  display: block;
+  padding: 10px 10px 0;
+}
+/** Issues ************************************************************************************************************/
+
+issues #issuesAddContainer {
+  position: relative;
+  margin: 10px;
+}
+issues #issuesAddContainer .md-dialog-container {
+  top: 0 !important;
+  height: 200px !important;
+}
+issues #issuesAddContainer .md-dialog-backdrop {
+  height: 205px !important;
+}
+issues #issuesAddContainer md-input-container {
+  margin: 0;
+}
+issues #issuesAddContainer h4 {
+  margin-left: 4px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+issues textarea {
+  min-height: 70px !important;
+}
+
+issues md-list {
+  padding: 0;
+}
+
+issues .issuesInfo {
+  text-align: center;
+  padding: 15px;
+  background: #E8EAF6;
+  margin: 15px;
+  border-radius: 4px;
+}
+issues .issuesInfo p {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+issues .issueHeader {
+  position: relative;
+}
+issues .selectedIssue {
+  background: #E8EAF6;
+}
+issues .notSelectedIssue {
+  background: #ffffff;
+}
+issues .closedIssue {
+  background: #E0E0E0;
+}
+issues .issueHeader .issueTitle {
+  min-height: 0;
+  height: 100%;
+}
+issues .issueHeader .issueTitle h3 {
+  padding: 5px 0 0 0;
+  width: 250px;
+}
+issues .issueHeader .issueTitle .issueTitleInfo {
+  position: relative;
+  padding: 2px 0 5px;
+}
+issues .issueHeader .issueTitle button {
+  min-height: 0;
+  height: 100%;
+}
+issues .issueHeader .issueRoleMarkers {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 100%;
+}
+issues .issueHeader .issueInfo {
+  position: absolute;
+  top: 0;
+  background: #E8F5E9;
+  padding: 0 5px 0 10px;
+  width: 100%;
+  height: 100%;
+}
+issues .issueHeader .issueInfo h5 {
+  color: rgba(0, 0, 0, 0.7);
+  margin-left: 5px;
+}
+
+
+/** Issue *************************************************************************************************************/
+
+issue {
+  display: block;
+}
+
+issue .issueTitle p {
+  color: rgba(0,0,0,0.35) !important;
+}
+
+.issueOpenBackground {
+  background: #FFFFFF;
+}
+.issueClosedBackground {
+  background: #E0E0E0;
+}
+
+issue md-list-item .md-button,
+issue md-list-item .md-button .md-ripple-container {
+  border-radius: 0;
+}
+
+issue h3,
+issue h4 {
+  word-wrap: break-word;
+  white-space: normal !important;
+}
+
+issue .issueCommentsContainer {
+  padding: 0 15px 0 25px
+}
+issue .issueCommentsContainer md-list-item {
+  padding: 0 !important;
+}
+
+issue .issueCommentsContainer md-list-item .commentModifyButton {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  margin: 0 0 0 20px;
+  outline: none;
+}
+issue .issueCommentsContainer .issueCommentInfo {
+  position: relative;
+}
+issue .issueCommentsContainer .issueCommentInfo p {
+  color: rgba(0,0,0,0.35) !important;
+}
+issue .issueCommentsContainer .issueCommentsFooter {
+  margin-top: -15px;
+  padding-bottom: 10px;
+  /*border-bottom: 1px solid rgba(0, 0, 0, 0.12);*/
+}
+
+md-list-item.issueRole {
+  padding: 0;
+}
+md-list-item .issueAssignColourMarker {
+  display: block;
+  width: 10px;
+  height: 25px;
+  margin-right: 10px;
+}
+
+issue .issueOpenContainer {
+  margin-top: 10px;
+}
+issue .issueOpenContainer button {
+  margin-left: 220px;
+}
+login #login {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+}
+
+login #loginContent {
+  padding-top: 50px;
+  background: rgba(63,81,181,0.7);
+}
+
+login #loginTitle {
+  color: #ffffff;
+  margin: 50px 0 -10px 0;
+}
+
+login #loginSubTitle,
+login #loginVersion{
+  color: rgba(255,255,255,0.6);
+}
+
+login md-input-container {
+  margin: 0;
+}
+
+login md-input-container input {
+  padding: 5px !important;
+  margin-bottom: -15px;
+  height: 35px !important;
+  background: #ffffff !important;
+}
+
+login #loginError {
+  color: #F44336;
+}
+/** Panel *************************************************************************************************************/
+
+panel  {
+  display: block;
+  position: absolute;
+  top: 20px;
+  width: 420px;
+}
+
+panel #items {
+  position: absolute;
+  width: 350px;
+}
+
+panel #buttons {
+  position: absolute;
+  top: 50px;
+}
+panel #buttons .panelButtonGroup {
+  margin-bottom: 20px;
+  text-align: center;
+}
+panel #buttons .panelButtonGroup button {
+  display: block;
+  margin-bottom: 2px;
+}
+panel #buttons .panelButtonGroup label {
+  color: #FFFFFF;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  font-weight: bold;
+  font-size: 14px;
+}
+
+panel .md-mini md-icon,
+panel .md-icon-button md-icon{
+  font-size: 20px;
+  outline: none;
+}
+
+/** Panels ************************************************************************************************************/
+
+.active {
+	pointer-events: all;
+}
+
+#leftPanel {
+  left: 0;
+  pointer-events: none;
+}
+#leftPanel #items {
+  right: 0;
+}
+#leftPanel #buttons {
+  left: 0;
+}
+
+#rightPanel {
+  right: 0;
+  pointer-events: none;
+}
+#rightPanel #items {
+  left: 0;
+}
+#rightPanel #buttons {
+  right: 0;
+}
+
+/** Panel Content *****************************************************************************************************/
+
+panel-card {
+  display: block;
+  position: relative;
+}
+
+panel-card md-content {
+  overflow-x: hidden;
+  overflow-y: auto;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  height: 100%;
+}
+
+panel-card .md-whiteframe-1dp {
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  background: white;
+}
+
+panel-card md-toolbar {
+  min-height: 48px;
+  height: 48px;
+  outline: none;
+  /*-webkit-box-shadow: 0 8px 10px 1px rgba(0,0,0,0.15);
+  -moz-box-shadow: 0 8px 10px 1px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 10px 1px rgba(0,0,0,0.15);*/
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+panel-card md-toolbar span {
+  font-size: 18px;
+}
+panel-card md-toolbar label {
+  font-size: 20px;
+  margin-left: 10px;
+  font-weight: bold;
+}
+panel-card md-toolbar button {
+  margin: 0 !important;
+}
+
+panel-card .md-button.md-raised:not([disabled]) {
+  box-shadow: none;
+}
+
+panel-card .md-menu {
+  padding: 0;
+}
+
+panel-card .panelCardContainer {
+  overflow-x: hidden;
+  overflow-y: auto;
+  width: 100%;
+  height: 100%;
+}
+
+panel-card .panelCardFilter {
+  background: #E8EAF6;
+  padding: 5px 10px 0 10px;
+  height: 50px;
+  border-bottom: solid 1px #C5CAE9;
+}
+
+panel-card #helpButton {
+  position: absolute;
+  top: -20px;
+  right: -36px;
+  opacity: 0.75;
+}
+
+panel-card .statusIcon {
+  outline: none;
+  width: 18px;
+}
+md-dialog.qrCodeReaderDialog {
+  max-height: 90%;
+}
+
+md-dialog.qrCodeReaderDialog .qrCodeReaderIcon {
+  margin-top: 22px;
+  margin-right: 10px;
+}
+
+tree {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+tree span {
+  outline: none;
+  margin: 0;
+}
+tree span .fa {
+  color: #5C6BC0;
+  font-size: 14px;
+  padding: 0 2px 0 0;
+}
+
+tree p {
+  outline: none;
+  width: 100%;
+  word-break: break-all;
+  word-wrap: break-word;
+  line-height: 18px;
+  margin: 0;
+  font-size: 14px;
+}
+tree p:hover {
+  cursor: pointer;
+}
+
+tree md-checkbox {
+  margin-right: 8px !important;
+}
+
+.angular-ui-tree-handle {
+  cursor: default;
+  display: inline-block;
+  font-weight: normal;
+}
+
+tree .treeButton {
+  outline: none;
+  width: 45px;
+  text-align: center;
+  padding-top: 1px;
+}
+tree .treeButton md-icon {
+  font-size: 20px;
+  position: relative;
+}
+tree .treeButton md-icon .treeIconCheck {
+  position: absolute;
+  left: 3px;
+  font-size: 11px;
+  top: 5px;
+}
+tree .treeButton md-icon  .treeIconDot {
+  position: absolute;
+  left: 6px;
+  font-size: 6px;
+  top: 7px;
+}
+tree .treeButton .treeButtonDisabled {
+  color: #CCCCCC;
+}
+tree .treeButton:hover {
+  cursor: pointer;
+}
+
+/** Tree Node *********************************************************************************************************/
+
+.tree-node-unselected {
+  background: #FFFFFF;
+}
+.tree-node-selected {
+  background: #E8EAF6;
+}
+.tree-node:hover {
+  cursor: default;
+}
+.tree-node span {
+  padding-right: 5px;
+}
+
+.tree-node button {
+  padding: 0;
+}
+.tree-node .md-button {
+  border-radius: 0;
+}
+
+
+/** Tree filter list **************************************************************************************************/
+
+tree .virtualRepeatInfiniteScroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+}
+
+tree .virtualRepeatInfiniteScroll .vertical-container {
+  height: 100%;
+  width: 350px;
+}
+
+tree .virtualRepeatInfiniteScroll .repeated-item {
+  cursor: default;
+  padding: 8px 0 8px;
+}
+
+.selectedFilterItem {
+  background: #E8EAF6;
+}
+.unselectedFilterItem {
+  background: #FFFFFF;
+}
+
+#treeFilterItemName {
+  margin-left: 20px;
+}
+
+.viewerSelected {
+  color: #F00;
+}
+
+/** TDR Progress ******************************************************************************************************/
+tdr-progress {
+  display: block;
+  padding: 20px 40px 0 40px;
+}
+
+tdr-progress p {
+  margin-top: 10px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+viewpoints {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+viewpoints .minHeight {
+  height: 100px;
+}
+viewpoints .maxHeight {
+  height: 500px;
+}
+
+.viewpoint {
+  display: block;
+  border-bottom: 1px solid #C5CAE9;
+  cursor: default;
+  padding: 6px 0 4px;
+  height: 31px;
+  outline: none;
+  color: #3F51B5;
+  font-weight: normal;
+}
+.viewpoint:hover {
+  background: #E8EAF6;
+  cursor: pointer;
+}
+
+/*# sourceMappingURL=three_d_repo.css.map */

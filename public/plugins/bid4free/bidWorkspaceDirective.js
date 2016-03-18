@@ -27,7 +27,9 @@
 			templateUrl: 'bidWorkspace.html',
 			scope: {
 				packageName: "=",
-				inviteAccepted: "="
+				inviteAccepted: "=",
+				account: "=",
+				project: "="
 			},
 			controller: BidWorkspaceCtrl,
 			controllerAs: "vm",
@@ -50,7 +52,6 @@
 
 		$scope.$watch("vm.inviteAccepted", function (newValue) {
 			if (angular.isDefined(newValue)) {
-				console.log(newValue);
 				vm.showItems = true;
 			}
 		});
@@ -68,7 +69,7 @@
 
 		vm.showInput = function (index) {
 			$location
-				.path($location.path() + "/bid4freeWorkspace", "_self")
+				.path(vm.account + "/" + vm.project + "/bid4free/bid4freeWorkspace", "_self")
 				.search({
 					package: BidService.currentPackage.name,
 					tab: index

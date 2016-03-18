@@ -1,4 +1,4 @@
-.bidInfo
+.bidInfo(ng-if="!vm.state.bid4freeWorkspace")
 	// Sub Contractor
 	.bidInfoSubContractor(ng-if="vm.userIsASubContractor", layout="column")
 		div(layout="row", layout-padding, flex="50")
@@ -8,9 +8,9 @@
 
 
 		div(layout="row", layout-padding, flex="50")
-			bid-image(layout="column", flex)
+			bid-image(layout="column", flex account="vm.account" project="vm.project")
 			bid-docs(layout="column", flex, package-name="vm.selectedPackageName", invite-accepted="vm.packageInviteAccepted")
-			bid-workspace(layout="column", flex, package-name="vm.selectedPackageName", invite-accepted="vm.packageInviteAccepted")
+			bid-workspace(layout="column", flex, package-name="vm.selectedPackageName", invite-accepted="vm.packageInviteAccepted" account="vm.account" project="vm.project")
 
 	// Main Contractor
 	.bidContent(layout="row", layout-align="space-between start", ng-if="vm.userIsAMainContractor")
@@ -180,3 +180,6 @@
 					div(ng-if="!vm.packageSelected")
 						.cardInfo
 							p {{vm.statusInfo}}
+
+div(ng-if="vm.state.bid4freeWorkspace" layout-fill)
+	bid4free-workspace(package-name="vm.selectedPackageName" account="vm.account" project="vm.project")

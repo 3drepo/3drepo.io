@@ -15,58 +15,56 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(function () {
+(function() {
 	"use strict";
 
 	angular.module('3drepo')
 		.factory('TreeService', TreeService);
 
-	TreeService.$inject = ["$http", "$q", "StateManager", "ViewerService", "serverConfig"];
+	TreeService.$inject = ["$http", "$q", "EventService", "serverConfig"];
 
-	function TreeService($http, $q, StateManager, ViewerService, serverConfig) {
-		var state = StateManager.state,
-			currentSelectedNodeId = null;
-
-		var init = function () {
+	function TreeService($http, $q, EventService, serverConfig) {
+		var ts = this;
+		
+		var init = function(account, project, branch, revision) {
+			ts.account  = account;
+			ts.project  = project;
+			ts.branch   = branch ? branch : "master";
+			ts.revision = revision ? revision : "head";
+		
+			if (ts.branch === "master")
+			{
+				ts.baseURL = "/" + account + "/" + project + "/revision/master/head/";
+			} else {
+				ts.baseURL = "/" + account + "/" + project + "/revision/" + revision + "/";
+			}
+			
 			var deferred = $q.defer(),
-				url = "/" + state.account + "/" + state.project + "/revision/" + state.branch + "/head/fulltree.json";
+				url = ts.baseURL + "fulltree.json";
 
 			$http.get(serverConfig.apiUrl(url))
-				.then(function (json) {
+				.then(function(json) {
 					deferred.resolve(json.data);
 				});
 
 			return deferred.promise;
 		};
 
-		var search = function (searchString) {
+		var search = function(searchString) {
 			var deferred = $q.defer(),
-				url = "/" + state.account + "/" + state.project + "/revision/" + state.branch + "/head/" + searchString + "/searchtree.json";
+				url = ts.baseURL + "searchtree.json";
 
 			$http.get(serverConfig.apiUrl(url))
-				.then(function (json) {
+				.then(function(json) {
 					deferred.resolve(json);
 				});
 
 			return deferred.promise;
 		};
 
-		var selectNode = function (nodeId) {
-			console.log(nodeId);
-			if (nodeId === currentSelectedNodeId) {
-				currentSelectedNodeId = null;
-				$(document).trigger("objectSelected", [undefined, true]);
-			} else {
-				var rootObj = document.getElementById("model__" + nodeId);
-				currentSelectedNodeId = nodeId;
-				$(document).trigger("objectSelected", [rootObj, true]);
-			}
-		};
-
 		return {
 			init: init,
-			search: search,
-			selectNode: selectNode
+			search: search
 		};
 	}
 }());

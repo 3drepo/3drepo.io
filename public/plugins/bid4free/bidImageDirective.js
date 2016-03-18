@@ -25,22 +25,25 @@
 		return {
 			restrict: 'E',
 			templateUrl: 'bidImage.html',
-			scope: {},
+			scope: {
+				account: "=",
+				project: "="
+			},
 			controller: BidImageCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	BidImageCtrl.$inject = ["$window", "StateManager"];
+	BidImageCtrl.$inject = ["$window"];
 
-	function BidImageCtrl($window, StateManager) {
+	function BidImageCtrl($window) {
 		var vm = this;
 
 		vm.thumbnailPath = "/public/images/bid4free_bid_thumbnail.png";
 
 		vm.showViewer = function () {
-			$window.open(StateManager.state.account + "/" + StateManager.state.project, '_blank');
+			$window.open(vm.account + "/" + vm.project, '_blank');
 		};
 	}
 }());

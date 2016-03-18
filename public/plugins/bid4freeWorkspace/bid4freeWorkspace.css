@@ -1,9 +1,7 @@
 bid4free-workspace {
-  padding: 30px 20px 20px 20px;
   display: block;
-  width: 100%;
-  height: 100vh;
-  background: #E8EAF6; }
+  background: #E8EAF6;
+  margin: 20px; }
   bid4free-workspace .md-whiteframe-1dp {
     border-radius: 4px; }
   bid4free-workspace md-toolbar {

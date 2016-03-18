@@ -13,8 +13,6 @@
             {"template" : "bid4free/bidWorkspace.jade", "id" : "bidWorkspace.html" }
         ],
         "angular" : [
-            "bid4free/bid4FreeConfig.js",
-            "bid4free/bid4FreeData.js",
             "bid4free/bid4freeDirective.js",
             "bid4free/bidService.js",
             "bid4free/bidProjectSummaryDirective.js",

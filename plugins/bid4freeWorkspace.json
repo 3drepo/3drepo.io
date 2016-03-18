@@ -5,8 +5,6 @@
             {"template" : "bid4freeWorkspace/bid4freeWorkspace.jade", "id" : "bid4freeWorkspace.html" }
         ],
         "angular" : [
-            "bid4freeWorkspace/bid4freeWorkspaceConfig.js",
-            "bid4freeWorkspace/bid4freeWorkspaceData.js",
             "bid4freeWorkspace/bid4freeWorkspaceDirective.js"
         ],
         "css" : [

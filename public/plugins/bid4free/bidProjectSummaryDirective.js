@@ -32,13 +32,12 @@
 		};
 	}
 
-	BidProjectSummaryCtrl.$inject = ["$location", "StateManager", "Auth", "ProjectService"];
+	BidProjectSummaryCtrl.$inject = ["$location", "Auth", "ProjectService"];
 
-	function BidProjectSummaryCtrl($location, StateManager, Auth, ProjectService) {
+	function BidProjectSummaryCtrl($location, Auth, ProjectService) {
 		var vm = this,
 			promise;
 
-		vm.StateManager = StateManager;
 		vm.Auth = Auth;
 
 		// Get the project summary
