@@ -1758,6 +1758,13 @@ var Viewer = {};
 				self.pins[id].changeColour(colours);
 			}
 		};
+
+		this.addMapTile = function(osGridRef){
+			console.log('Hello World');
+			var gltf = document.createElement('gltf');
+			gltf.setAttribute('url', '/api/os/buildings.gltf?method=osgrid&osgridref=' + osGridRef + '&draw=1');
+			self.getScene().appendChild(gltf);
+		}
 	};
 
 	Viewer.prototype.SELECT_COLOUR = {
