@@ -13,13 +13,13 @@
 		"angular": [
 			"base/serverConfig.js",
 			"base/Auth.js",
-			"base/pageConfigProvider.js",
 			"base/httpProvider.js",
-			"base/BaseCtrl.js",
 			"base/StateManager.js",
-			"base/projectPageConfig.js",
             "base/homeDirective.js",
             "login/loginDirective.js"			
-		]
+		],
+        "css" : [
+            "login/login.css"
+        ]
 	}
 }

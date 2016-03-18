@@ -1707,7 +1707,12 @@ var Viewer = {};
 			if (self.pins.hasOwnProperty(id)) {
 				var pin = self.pins[id];
 
-				self.highlightPin(id);
+				//self.highlightPin(id); This was preventing changing the colour of the pin
+				// Replace with
+				callback(self.EVENT.CHANGE_PIN_COLOUR, {
+					id: id,
+					colours: [[1.0, 0.7, 0.0]]
+				});
 
 				callback(self.EVENT.SET_CAMERA, {
 					position : pin.viewpoint.position,
@@ -1755,6 +1760,7 @@ var Viewer = {};
 
 		this.changePinColours = function(id, colours) {
 			if (self.pins.hasOwnProperty(id)) {
+				console.log(id, colours);
 				self.pins[id].changeColour(colours);
 			}
 		};

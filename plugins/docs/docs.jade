@@ -12,7 +12,7 @@ md-list.typesList(ng-if="!vm.showInfo")
 			div(ng-if="key==='Meta Data'")
 				.dataItem(ng-repeat="metadataItem in value.data", layout="column", flex)
 					div(ng-repeat="(mKey, mValue) in metadataItem.metadata", layout="row", layout-align="space-between start")
-						p.metadataKey(flex="45") {{mKey}}
+						p.metadataKey(flex="50") {{mKey}}
 						p.metadataValue(flex="45") {{mValue}}
 
 			// PDF

@@ -41,9 +41,15 @@ account-dir md-tabs-canvas {
   background: #E8EAF6;
 }
 
+/* This access the div under the md-tab-content */
+account-dir md-tab-content div:first-child {
+  height: calc(100% - 20px);
+}
+
 /** Account Projects **************************************************************************************************/
 account-projects .dataContainer {
-  height: 500px;
+  height: calc(100% - 20px);
+  overflow: auto;
 }
 
 account-projects md-list {

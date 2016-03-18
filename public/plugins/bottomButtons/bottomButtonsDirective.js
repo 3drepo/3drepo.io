@@ -65,7 +65,7 @@
 		};
 
 		var home = function () {
-			EventService.send(EventService.VIEWER.GO_HOME);
+			EventService.send(EventService.EVENT.VIEWER.GO_HOME);
 		};
 
 		var toggleHelp = function () {

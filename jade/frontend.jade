@@ -16,7 +16,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 			link(rel='stylesheet', type='text/css', href=val)
 
 		// All CSS minified
-		link(rel='stylesheet', type='text/css', href='/public/all/frontend_all.min.css')
+		//link(rel='stylesheet', type='text/css', href='/public/dist/three_d_repo.min.css')
 
 		// JS Files
 		each val, key in jsfiles
@@ -32,7 +32,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 
 		// Plugin JS and Angular files
 		//script(type="text/javascript", src='/public/dist/plugins.min.js')
-		script(type="text/javascript", src='/public/all/frontend_all.min.js')
+		//script(type="text/javascript", src='/public/dist/three_d_repo.min.js')
 
 		// Plugin JS Files
 		each val in pluginJS
@@ -55,7 +55,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 				!= renderMe('./plugins/' + j.template, locals)
 
 		// Frontend plugin JADE Files
-		each j in frontendJade
+		//each j in frontendJade
 			script(type="text/ng-template", id=j.id)
 				!= renderMe(j.path, locals)
 

@@ -179,16 +179,6 @@ module.exports.createApp = function(template)
 		]
 	};
 
-	var frontendPluginStructure = {
-		"plugin" : "blah",
-		"children" : [
-			{
-				"plugin": "yah"
-			}
-		]
-	};
-
-
 	function loadPlugin(plugin, stateName, uistates, params)
 	{
 		let cssFile = "";
@@ -338,64 +328,79 @@ module.exports.createApp = function(template)
 	}
 
 	/**
-	 * Setup loading only required jade
+	 * Get the jade files for the required state or plugin
+	 *
+	 * @param required
+	 * @param pathToStatesAndPlugins
+	 * @param params
 	 */
-	function setupRequiredJade (allPlugins, requiredPlugin, pathToPlugins, params) {
-		var i, length,
-			pluginFiles,
-			pluginDir,
+	function getJadeFiles (required, pathToStatesAndPlugins, params) {
+		var requiredFiles,
+			requiredDir,
 			fileSplit;
 
-		if (allPlugins.indexOf(requiredPlugin.plugin) !== -1) {
-			pluginDir = pathToPlugins + "/" + requiredPlugin.plugin;
-			pluginFiles = fs.readdirSync(pluginDir);
-			pluginFiles.forEach( function (file){
+		requiredDir = pathToStatesAndPlugins + "/" + required + "/jade";
+		try {
+			fs.accessSync(requiredDir, fs.F_OK); // Throw for fail
+
+			requiredFiles = fs.readdirSync(requiredDir);
+			requiredFiles.forEach(function (file) {
 				fileSplit = file.split(".");
-				if (fileSplit[1] === "jade") {
-					params.frontendJade.push({
-						id: fileSplit[0] + ".html",
-						path: pluginDir + "/" + file
-					});
-				}
+				params.frontendJade.push({
+					id: fileSplit[0] + ".html",
+					path: requiredDir + "/" + file
+				});
 			});
+		} catch (e) {
+			// Jade files don't exist
+		}
+	}
+
+	/**
+	 * Setup loading only the required states and plugins jade files
+	 *
+	 * @param statesAndPlugins
+	 * @param required
+	 * @param pathToStatesAndPlugins
+	 * @param params
+	 */
+	function setupRequiredJade (statesAndPlugins, required, pathToStatesAndPlugins, params) {
+		var i, length;
+
+		if (statesAndPlugins.indexOf(required.plugin) !== -1) {
+			getJadeFiles(required.plugin, pathToStatesAndPlugins, params);
+
+			// Friends
+			if (required.hasOwnProperty("friends")) {
+				for (i = 0, length = required.friends.length; i < length; i += 1) {
+					if (statesAndPlugins.indexOf(required.friends[i]) !== -1) {
+						getJadeFiles(required.friends[i], pathToStatesAndPlugins, params);
+					}
+				}
+			}
 
 			// Recurse for children
-			if (requiredPlugin.hasOwnProperty("children")) {
-				for (i = 0, length = requiredPlugin.children.length; i < length; i += 1) {
-					setupRequiredJade(allPlugins, requiredPlugin.children[i], pathToPlugins, params);
+			if (required.hasOwnProperty("children")) {
+				for (i = 0, length = required.children.length; i < length; i += 1) {
+					setupRequiredJade(statesAndPlugins, required.children[i], pathToStatesAndPlugins, params);
 				}
 			}
 		}
 	}
 
 	/**
-	 * Setup jade
+	 * Get all available states and plugins
+	 *
+	 * @param params
 	 */
 	function setupJade (params) {
-		var frontendDir = "./frontend",
-			plugins;
+		var pathToStatesAndPlugins = "./frontend",
+			statesAndPlugins;
 
-		// Get all available plugins
-		plugins = fs.readdirSync(frontendDir);
-		// Setup for loading only the required plugins
-		setupRequiredJade(plugins, frontendPluginStructure, frontendDir, params);
-		console.log(params.frontendJade);
+		// Get all available states and plugins in the file system
+		statesAndPlugins = fs.readdirSync(pathToStatesAndPlugins);
 
-		/*
-		plugins.forEach( function (plugin) {
-			pluginDir = frontendDir + "/" + plugin;
-			pluginFiles = fs.readdirSync(pluginDir);
-			pluginFiles.forEach( function (file){
-				fileSplit = file.split(".");
-				if (fileSplit[1] === "jade") {
-					params.frontendJade.push({
-						id: fileSplit[0] + ".html",
-						path: pluginDir + "/" + file
-					});
-				}
-			});
-		});
-		*/
+		setupRequiredJade(statesAndPlugins, pluginStructure, pathToStatesAndPlugins, params);
 	}
 
 	app.get('*', function(req, res) {
@@ -428,7 +433,8 @@ module.exports.createApp = function(template)
 		//params["pluginLevelsJSON"]	= JSON.stringify(params["pluginLevelsJSON"]);
 		params.uistate = JSON.stringify(params.uistate);
 
-		setupJade(params);
+		//setupJade(params);
+		//console.log("frontendJade: ", params.frontendJade);
 
 		res.render(template, params);
 	});

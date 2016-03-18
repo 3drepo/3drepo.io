@@ -45,8 +45,13 @@
 		var vm = this,
 			promise = null,
 			i = 0,
-			length = 0;
+			length = 0,
+			currentSelectedNode = null,
+			currentScrolledToNode = null;
 
+		/*
+		 * Init
+		 */
 		vm.nodes = [];
 		vm.showTree = true;
 		vm.showFilterList = false;
@@ -55,6 +60,9 @@
 		vm.showProgress = true;
 		vm.progressInfo = "Loading full tree structure";
 
+		/*
+		 * Get all the tree nodes
+		 */
 		promise = TreeService.init(vm.account, vm.project, vm.branch, vm.revision);
 		promise.then(function (data) {
 			vm.allNodes = [];
@@ -161,6 +169,12 @@
 						vm.nodesToShow[i].children[j].hasChildren = vm.nodesToShow[i].children[j].children.length > 0;
 						if (vm.nodesToShow[i].children[j].selected) {
 							selectionFound = true;
+
+							// This is a hack to get around the double click event issue
+							currentScrolledToNode = vm.nodesToShow[i].children[j];
+							$timeout(function () {
+								currentSelectedNode = currentScrolledToNode;
+							});
 						}
 						if ((level === (path.length - 2)) && !selectionFound) {
 							selectedIndex += 1;
@@ -187,6 +201,13 @@
 					
 					initNodesToShow();
 					expandToSelection(path, 0);
+				}
+			}
+			else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
+				// Remove highlight from any selected node in the tree
+				if (currentSelectedNode !== null) {
+					currentSelectedNode.selected = false;
+					currentSelectedNode = null;
 				}
 			}
 		});
@@ -325,24 +346,52 @@
 			}
 		});
 
+		/**
+		 * Selected a node in the tree
+		 *
+		 * @param node
+		 */
 		vm.selectNode = function (node) {
-			var map = [];
-			var pathArr = [];
-			for (var obj in vm.idToPath) {
-				if (vm.idToPath.hasOwnProperty(obj) && (vm.idToPath[obj].indexOf(node._id) !== -1)) {
-					pathArr = vm.idToPath[obj].split("__");
-					map.push(pathArr[pathArr.length - 1]);
+			// Remove highlight from the current selection and highlight this node if not the same
+			console.log(currentSelectedNode);
+			if (currentSelectedNode !== null) {
+				currentSelectedNode.selected = false;
+				if (currentSelectedNode._id === node._id) {
+					currentSelectedNode = null;
+				}
+				else {
+					node.selected = true;
+					currentSelectedNode = node;
 				}
 			}
-			
-			EventService.send(EventService.EVENT.VIEWER.OBJECT_SELECTED, {
-				source: "tree",
-				account: node.account,
-				project: node.project, 
-				id: node._id, 
-				name: node.name, 
-				ids : map 
-			});
+			else {
+				node.selected = true;
+				currentSelectedNode = node;
+			}
+
+			// Remove highlight from the current selection in the viewer and highlight this object if not the same
+			if (currentSelectedNode === null) {
+				EventService.send(EventService.EVENT.VIEWER.BACKGROUND_SELECTED);
+			}
+			else {
+				var map = [];
+				var pathArr = [];
+				for (var obj in vm.idToPath) {
+					if (vm.idToPath.hasOwnProperty(obj) && (vm.idToPath[obj].indexOf(node._id) !== -1)) {
+						pathArr = vm.idToPath[obj].split("__");
+						map.push(pathArr[pathArr.length - 1]);
+					}
+				}
+
+				EventService.send(EventService.EVENT.VIEWER.OBJECT_SELECTED, {
+					source: "tree",
+					account: node.account,
+					project: node.project,
+					id: node._id,
+					name: node.name,
+					ids : map
+				});
+			}
 		};
 		
 		vm.filterItemSelected = function (item) {

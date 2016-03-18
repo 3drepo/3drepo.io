@@ -210,7 +210,7 @@
 		$scope.$watchGroup(["account", "project"], function() {
 			wt.currentWalkthrough = 0;
 			wt.loading = WalkthroughService.getWalkthroughs(wt.account, wt.project);
-			wt.play();
+			//wt.play();
 		});
 		
 		$scope.$watch(["fps"], function (newFPS) {
