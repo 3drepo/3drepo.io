@@ -14,6 +14,10 @@ module.exports = function(grunt) {
         },
 
         concat: {
+			options : {
+				sourceMap :true
+			},
+
             build: {
                 src: [
                     'public/plugins/base/*.js',
@@ -41,24 +45,25 @@ module.exports = function(grunt) {
                 dest: 'public/dist/plugins.concat.js'
             },
 
-			frontendAllJS: {
+			allJS: {
 				src: [
 					'frontend/**/*.js'
 				],
-				dest: 'public/all/frontend_all.concat.js'
+				dest: 'public/dist/three_d_repo.js'
 			},
 
-			frontendAllCSS: {
+			allCSS: {
 				src: [
 					'frontend/**/*.css'
 				],
-				dest: 'public/all/frontend_all.css'
+				dest: 'public/dist/three_d_repo.css'
 			}
         },
 
         uglify: {
             options: {
-                mangle: false
+				sourceMap : true,
+				mangle: false
             },
             build: {
                 files: {
@@ -66,9 +71,9 @@ module.exports = function(grunt) {
                 }
             },
 
-			frontendAllJS: {
+			allJS: {
 				files: {
-					'public/all/frontend_all.min.js': ['public/all/frontend_all.concat.js']
+					'public/dist/three_d_repo.min.js': ['public/dist/three_d_repo.js']
 				}
 			}
 		},
@@ -144,12 +149,13 @@ module.exports = function(grunt) {
 
 		cssmin: {
 			options: {
+				sourceMap : true,
 				shorthandCompacting: false,
 				roundingPrecision: -1
 			},
-			frontendAllCSS: {
+			allCSS: {
 				files: {
-					'public/all/frontend_all.min.css': ['public/all/frontend_all.css']
+					'public/dist/three_d_repo.min.css': ['public/dist/three_d_repo.css']
 				}
 			}
 		}
@@ -166,6 +172,6 @@ module.exports = function(grunt) {
 
 	grunt.registerTask('default', ['concat', 'uglify', 'webfont']);
 	grunt.registerTask('test', ['jshint:backend', 'mochaTest:unit']);
-	grunt.registerTask('frontend', ['concat:frontendAllJS','concat:frontendAllCSS', 'uglify:frontendAllJS', 'cssmin:frontendAllCSS']);
 	grunt.registerTask('test-integrated', ['env:test', 'mochaTest:integrated']);
+	grunt.registerTask('frontend', ['concat:allJS','concat:allCSS', 'uglify:allJS', 'cssmin:allCSS']);
 };

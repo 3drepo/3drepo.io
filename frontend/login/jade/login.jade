@@ -1,0 +1,19 @@
+#login(ng-style="{'background-image':'url(' + vm.backgroundImage + ')'}", layout="column", flex)
+	#loginContent(layout="row")
+		span(flex="25")
+		div(flex="35", layout="column")
+			div(flex)
+				img(ng-src="{{vm.logo}}", flex-gt-sm="30", flex-sm="50", flex="80")
+			h1.md-display-1#loginTitle 3D BIM version control
+			h2.md-headline#loginSubTitle A scalable, open platform
+		div(flex="15", layout="column")
+			div(layout="column", flex)
+				md-input-container.md-block(md-no-float)
+					input(type='text', ng-model='vm.user.username', placeholder='Username', ng-required, autofocus)
+				md-input-container(md-no-float)
+					input(type='password', ng-model='vm.user.password', placeholder='Password', ng-required)
+			div(layout="row", layout-align="start")
+				md-button.md-accent.md-raised(ng-click="vm.login()") Log In
+			h2#loginError {{vm.errorMessage}}
+			h2.md-subhead#loginVersion Version: {{vm.version}}
+		span(flex="25")

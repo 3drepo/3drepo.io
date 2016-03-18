@@ -42,6 +42,7 @@ var Pin = {};
 	 * @param {number} clipDirection - Direction of clipping (-1 or 1)
 	 */
 	Pin = function(id, element, trans, position, norm, scale, colours, viewpoint) {
+		console.log(id);
 		var self = this;
 		
 		self.id = id;
@@ -125,6 +126,7 @@ var Pin = {};
 		}
 		
 		self.colours = colours;
+		console.log(colours);
 
 		self.pinHeadNCol.setAttribute("value", self.numColours);
 		self.pinHeadColour.setAttribute("value", self.colours.join(" "));

@@ -21,10 +21,11 @@
 	angular.module("3drepo")
 		.factory("IssuesService", IssuesService);
 
-	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService", "Auth"];
+	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService", "StateManager"];
 
-	function IssuesService($http, $q,  serverConfig, EventService, Auth) {
-		var url = "",
+	function IssuesService($http, $q,  serverConfig, EventService, StateManager) {
+		var state = StateManager.state,
+			url = "",
 			data = {},
 			config = {},
 			i, j = 0,
@@ -221,11 +222,11 @@
 			});
 		};
 
-		obj.addPin = function (account, project, pin, colours, viewpoint) {
+		obj.addPin = function (pin, colours, viewpoint) {
 			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
 				id: pin.id,
-				account: account,
-				project: project,
+				account: state.account,
+				project: state.project,
 				position: pin.position,
 				norm: pin.norm,
 				colours: colours,

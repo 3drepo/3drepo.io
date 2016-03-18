@@ -2,6 +2,11 @@
 docs .typesList {
   padding: 0;
 }
+docs .typesList h4 {
+  font-size: 20px;
+  margin: 0;
+  color: rgba(0,0,0,0.6);
+}
 
 docs .docList {
   padding: 15px 15px 5px 15px;
@@ -29,6 +34,7 @@ docs .dataItem {
 docs .metadataKey,
 docs .metadataValue {
   word-wrap: break-word;
+  font-size: 14px;
 }
 docs .metadataKey {
   color: rgba(0,0,0,0.5);

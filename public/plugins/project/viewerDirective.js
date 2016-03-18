@@ -28,7 +28,6 @@
 			restrict: "E",
 			scope: {
 				manager: "=",
-				name: "=",
 				account: "@",
 				project: "@",
 				branch: "@",
@@ -135,7 +134,7 @@
 						} else if (event.type === EventService.EVENT.VIEWER.SWITCH_FULLSCREEN) {
 							v.viewer.switchFullScreen(null);
 						} else if (event.type === EventService.EVENT.VIEWER.ENTER_VR) {
-							v.viewer.switchVR();
+							v.oculus.switchVR();
 						} else if (event.type === EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK) {
 							v.viewer.onViewpointChanged(event.value.callback);
 						} else if (event.type === EventService.EVENT.PROJECT_SETTINGS_READY) {
@@ -161,6 +160,7 @@
 								event.value.id
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR) {
+							console.log(event);
 							v.viewer.changePinColours(
 								event.value.id,
 								event.value.colours
@@ -178,6 +178,7 @@
 								event.value.percentage ? event.value.percentage : 0,
 								event.value.clipDirection ? event.value.clipDirection : -1);
 						} else if (event.type === EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE) {
+							console.log(event);
 							v.viewer.moveClippingPlane(event.value.percentage);
 						} else if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
 							v.viewer.highlightObjects(
@@ -209,7 +210,7 @@
 								event.value.promise.resolve(v.viewer.getCurrentViewpointInfo());
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
-							vm.manager.getCurrentViewer().setNavMode(event.value.mode);
+							v.manager.getCurrentViewer().setNavMode(event.value.mode);
 						}
 					});
 				}
