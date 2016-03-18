@@ -76,12 +76,11 @@
 
 		$scope.manager = vm.manager;
 
-		vm.viewerInit = $q.defer();
+		vm.viewerInit   = $q.defer();
 		vm.viewerLoaded = $q.defer();
 
 		$scope.$watch(EventService.currentEvent, function(event) {
-			console.log(event);
-			if (angular.isDefined(event.type) && angular.isDefined(event.type)) {
+			if (angular.isDefined(event.type)) {
 				if (event.type === EventService.EVENT.CREATE_VIEWER) {
 					// If a viewer with the same name exists already then
 					// throw an error, otherwise add it
@@ -89,9 +88,9 @@
 						EventService.sendError(EventService.ERROR.DUPLICATE_VIEWER_NAME, {
 							name: event.value.name
 						});
+					} else {
+						vm.viewers[event.value.name] = event.value;
 					}
-
-					vm.viewers[event.value.name] = event.value;
 				} else if (event.type === EventService.EVENT.CLOSE_VIEWER) {
 					// If the viewer exists in the list then delete it
 					if (vm.viewers.hasOwnProperty(event.value.name)) {

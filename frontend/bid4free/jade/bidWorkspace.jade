@@ -1,0 +1,10 @@
+.md-whiteframe-1dp(layout="column", flex)
+	md-toolbar
+		.md-toolbar-tools
+			h2
+				span Workspace
+
+	md-content.bidInfoCardContent(layout="column", flex layout-padding, ng-if="vm.showItems")
+		md-list
+			md-list-item(ng-repeat="item in vm.items", ng-click="vm.showInput($index)")
+				p(flex) {{item}}

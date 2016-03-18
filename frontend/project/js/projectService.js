@@ -18,17 +18,40 @@
 (function () {
 	"use strict";
 
-	angular.module('3drepo')
-		.factory('ProjectService', ProjectService);
+	angular.module("3drepo")
+		.factory("ProjectService", ProjectService);
 
-	ProjectService.$inject = ["$http", "$q", "StateManager", "serverConfig"];
+	ProjectService.$inject = ["$http", "$q", "StateManager", "serverConfig", "Auth"];
 
-	function ProjectService($http, $q, StateManager, serverConfig) {
+	function ProjectService($http, $q, StateManager, serverConfig, Auth) {
 		var state = StateManager.state;
 
-		var getRoles = function () {
+		var getProjectInfo = function (account, project) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(state.account + '/' + state.project + '/roles.json');
+				url = serverConfig.apiUrl(account + "/" + project + ".json");
+			
+			$http.get(url).then(
+				function(json) {
+					deferred.resolve({
+						account     : account,
+						project		: project,
+						name        : name,
+						owner		: json.owner,
+						description	: json.desc,
+						type		: json.type,
+						settings 	: json.properties
+					});
+				},
+				function () {
+					deferred.resolve([]);
+				});
+			
+			return deferred.promise;
+		};
+		
+		var getRoles = function (account, project) {
+			var deferred = $q.defer(),
+				url = serverConfig.apiUrl(account + "/" + project + "/roles.json");
 
 			$http.get(url)
 				.then(
@@ -43,8 +66,82 @@
 			return deferred.promise;
 		};
 
+		var getUserRolesForProject = function () {
+			var deferred = $q.defer(),
+				url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + Auth.username + "/userRolesForProject.json");
+
+			$http.get(url)
+				.then(
+					function(response) {
+						deferred.resolve(response.data);
+					},
+					function () {
+						deferred.resolve([]);
+					}
+				);
+
+			return deferred.promise;
+		};
+
+		var getUserRoles = function (account, project) {
+			var deferred = $q.defer(),
+				url = serverConfig.apiUrl(account + "/" + project + "/" + Auth.username + "/userRolesForProject.json");
+
+			$http.get(url)
+				.then(
+					function(response) {
+						deferred.resolve(response.data);
+					},
+					function () {
+						deferred.resolve([]);
+					}
+				);
+
+			return deferred.promise;
+		};
+
+		function doPost(data, urlEnd) {
+			var deferred = $q.defer(),
+				url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + urlEnd),
+				config = {
+					withCredentials: true
+				};
+			$http.post(url, data, config)
+				.then(function (response) {
+					deferred.resolve(response);
+				});
+			return deferred.promise;
+		}
+
+		var createProjectSummary = function (data) {
+			data.name = state.project;
+			return doPost(data, "info.json");
+		};
+
+		function doGet(urlEnd) {
+			var deferred = $q.defer(),
+				url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + urlEnd);
+			$http.get(url).then(
+				function (response) {
+					deferred.resolve(response);
+				},
+				function () {
+					deferred.resolve([]);
+				});
+			return deferred.promise;
+		}
+
+		var getProjectSummary = function () {
+			return doGet("info.json");
+		};
+
 		return {
-			getRoles: getRoles
+			getRoles: getRoles,
+			getUserRolesForProject: getUserRolesForProject,
+			getUserRoles: getUserRoles,
+			createProjectSummary: createProjectSummary,
+			getProjectSummary: getProjectSummary,
+			getProjectInfo: getProjectInfo
 		};
 	}
 }());

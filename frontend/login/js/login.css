@@ -1,0 +1,41 @@
+login #login {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+}
+
+login #loginContent {
+  padding-top: 50px;
+  background: #004594;
+}
+
+login #loginTitle {
+  color: #ffffff;
+  margin-bottom: -15px;
+}
+
+login #loginSubTitle,
+login #loginVersion{
+  color: rgba(255,255,255,0.6);
+}
+
+login md-input-container {
+  margin: 0;
+}
+
+login md-input-container input {
+  padding: 5px !important;
+  margin-bottom: -15px;
+  height: 35px !important;
+  background: #ffffff !important;
+}
+
+login #loginError {
+  color: #F44336;
+}
+
+login .md-button {
+  margin: 0 0 0 2px;
+}

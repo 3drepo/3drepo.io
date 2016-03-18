@@ -5,6 +5,7 @@ panel  {
   position: absolute;
   top: 20px;
   width: 420px;
+  z-index: 2;
 }
 
 panel #items {

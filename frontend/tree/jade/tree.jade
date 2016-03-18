@@ -9,12 +9,16 @@ div(ng-cloak="", class="virtualRepeatInfiniteScroll", ng-show="vm.showTree")
 				.treeButton(ng-click="vm.expand(item._id)")
 					md-icon.md-accent(md-font-icon="fa-plus-square-o", class="fa", ng-if="!item.expanded", ng-class="{treeButtonDisabled: !item.hasChildren}")
 					md-icon.md-accent(md-font-icon="fa-minus-square-o", class="fa", ng-if="item.expanded")
-				p(ng-click="vm.selectNode(item)", ng-class="{viewerSelected: item.selected}") {{item.name}}
+				p(ng-click="vm.selectNode(item)", ng-class="{treeNodeSelected: item.selected}") {{item.name}}
 				.treeButton(ng-click="vm.toggleTreeNode(item)")
-					md-icon.md-accent(md-font-icon="fa-circle-thin", class="fa", ng-if="item.toggleState==='visible'")
+					md-icon.md-accent(class="fa fa-eye", ng-if="item.toggleState==='visible'")
+					md-icon.md-accent(class="fa fa-eye-slash", ng-if="item.toggleState==='invisible'")
+					md-icon(md-font-icon="fa fa-eye-slash", class="fa", ng-if="item.toggleState==='parentOfInvisible'")
+
+					//md-icon.md-accent(md-font-icon="fa-circle-thin", class="fa", ng-if="item.toggleState==='visible'")
 						.treeIconCheck(class="fa fa-check")
-					md-icon.md-accent(md-font-icon="fa-circle-thin", class="fa", ng-if="item.toggleState==='invisible'")
-					md-icon(md-font-icon="fa-circle-thin", class="fa", ng-if="item.toggleState==='parentOfInvisible'")
+					//md-icon.md-accent(md-font-icon="fa-circle-thin", class="fa", ng-if="item.toggleState==='invisible'")
+					//md-icon(md-font-icon="fa-circle-thin", class="fa", ng-if="item.toggleState==='parentOfInvisible'")
 						.treeIconDot(class="fa fa-circle")
 
 // Filter list

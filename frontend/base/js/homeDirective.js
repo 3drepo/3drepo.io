@@ -20,34 +20,86 @@
 
     angular.module("3drepo")
         .directive("home", home)
-        .config(function($mdThemingProvider) {
-            $mdThemingProvider.theme('default')
-                .primaryPalette('indigo', {
-                    'default': '500',
-                    'hue-1': '400',
-                    'hue-2': '200',
-                    'hue-3': '50'
+        .config(function($injector)
+		{
+			if ($injector.has("$mdThemingProvider"))
+			{
+				var mdThemingProvider = $injector.get("$mdThemingProvider");
+
+				mdThemingProvider.theme("default")
+                .primaryPalette("indigo", {
+                    "default": "500",
+                    "hue-1": "400",
+                    "hue-2": "200",
+                    "hue-3": "50"
                 })
-                .accentPalette('green', {
-                    'default': '600'
+                .accentPalette("green", {
+                    "default": "600"
                 })
-                .warnPalette('red');
+                .warnPalette("red");
+			}
         });
 
     function home() {
         return {
-            restrict: 'E',
-            scope: {},
+            restrict: "E",
+            templateUrl: "home.html",
+			scope: {
+				account: "@",
+				password: "@",
+				loggedInUrl: "@",
+				loggedOutUrl: "@"
+			},
             controller: HomeCtrl,
-            controllerAs: 'vm',
+            controllerAs: "hm",
             bindToController: true
         };
     }
 
-    HomeCtrl.$inject = [];
+    HomeCtrl.$inject = ["$scope", "Auth", "StateManager", "EventService"];
 
-    function HomeCtrl() {
-        var vm = this;
+    function HomeCtrl($scope, Auth, StateManager, EventService) {
+        var hm = this;
+		
+		hm.state = StateManager.state;
+
+		hm.getLoggedInUrl = function() {
+			return hm.loggedInUrl;
+		};
+
+		hm.getLoggedOutUrl = function() {
+			return hm.loggedOutUrl;
+		};
+
+		if (angular.isDefined(hm.account) && angular.isDefined(hm.password))
+		{
+			Auth.login(hm.account, hm.password);
+		}
+
+        hm.logout = function () {
+            Auth.logout();
+        };
+		
+		$scope.$watch(EventService.currentEvent, function(event) {
+			if (angular.isDefined(event) && angular.isDefined(event.type)) {
+				if (event.type === EventService.EVENT.USER_LOGGED_IN)
+				{
+					var account = StateManager.state.account ? StateManager.state.account : event.value.username;
+					if (!event.value.error)
+					{
+						if (!event.value.initialiser)
+						{
+							EventService.send(EventService.EVENT.SET_STATE, { loggedIn: true, account: account });
+						}	
+					}					
+				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
+					EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
+				} else if ((event.type === EventService.EVENT.NOT_AUTHORIZED) || (event.type === EventService.EVENT.VIEWER.LOGO_CLICK)) {
+					StateManager.clearState();
+					Auth.init();
+				}
+			}
+		});
     }
 }());
 
