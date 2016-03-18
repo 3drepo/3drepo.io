@@ -153,6 +153,9 @@ module.exports.createApp = function(template)
 
 	var pluginStructure = {
 		"plugin" : "home",
+		"friends" : [
+			"login"
+		],
 		"children" : [
 			{
 				"plugin": "account",
@@ -165,7 +168,6 @@ module.exports.createApp = function(template)
 							"tree",
 							"viewpoints",
 							"issues",
-							"oculus",
 							"clip",
 							"bottomButtons",
 							"qrCodeReader",
@@ -443,8 +445,8 @@ module.exports.createApp = function(template)
 		//params["pluginLevelsJSON"]	= JSON.stringify(params["pluginLevelsJSON"]);
 		params.uistate = JSON.stringify(params.uistate);
 
-		//setupJade(params);
-		//console.log("frontendJade: ", params.frontendJade);
+		setupJade(params);
+		console.log("frontendJade: ", params.frontendJade);
 
 		res.render(template, params);
 	});

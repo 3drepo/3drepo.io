@@ -15,7 +15,6 @@ module.exports = function(grunt) {
 
         concat: {
 			options : {
-				sourceMap :true
 			},
 
             build: {
@@ -149,7 +148,6 @@ module.exports = function(grunt) {
 
 		cssmin: {
 			options: {
-				sourceMap : true,
 				shorthandCompacting: false,
 				roundingPrecision: -1
 			},
