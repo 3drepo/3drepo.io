@@ -73,3 +73,6 @@ create_node_user.js
 public/css/fonts/three-d-repo.eot
 public/css/fonts/three-d-repo.ttf
 public/css/fonts/three-d-repo.woff
+
+#Distribution files
+public/dist

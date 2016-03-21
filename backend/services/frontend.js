@@ -173,7 +173,8 @@ module.exports.createApp = function(template)
 							"qrCodeReader",
 							"docs",
 							"utils",
-							"walkthroughVr"
+							"walkthroughVr",
+							"oculus"
 						],
 						"children" : [
 							{
