@@ -1,9 +1,0 @@
-{
-	"name" : "oculus",
-	"files": {
-		"js" : [
-			"oculus/oculus.js"
-		]
-	}
-}
-
