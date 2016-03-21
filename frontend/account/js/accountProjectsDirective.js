@@ -40,6 +40,11 @@
 		var vm = this;
 
 		/*
+		 * Init
+		 */
+		vm.bif4FreeEnabled = false;
+
+		/*
 		 * Handle changes to the state manager Data
 		 * Reformat the grouped projects to enable toggling of projects list
 		 */

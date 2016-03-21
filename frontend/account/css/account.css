@@ -42,7 +42,7 @@ account-dir md-tabs-canvas {
 }
 
 /* This access the div under the md-tab-content */
-account-dir md-tab-content div:first-child {
+account-dir #account md-tab-content div:first-child {
   height: calc(100% - 20px);
 }
 

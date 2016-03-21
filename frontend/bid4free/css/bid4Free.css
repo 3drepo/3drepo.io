@@ -48,16 +48,19 @@ bid4free .bidContent {
   height: calc(100vh - 40px);
 }
 
-bid4free md-list-item {
+bid4free md-list-item.md-2-line {
   min-height: 0 !important;
   margin-top: 20px;
 }
 
+bid4free md-list-item.md-1-line {
+  margin-top: 0;
+}
+
 bid4free md-list-item p {
-  font-size: 1.6rem;
+  font-size: 16px;
   font-weight: 400;
   letter-spacing: 0.010em;
-  line-height: 1.6em;
   outline: none;
   color: rgba(0, 0, 0, 0.7);
 }

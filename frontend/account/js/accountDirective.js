@@ -41,8 +41,6 @@
 		var vm = this,
 			promise;
 
-		console.log(vm);
-
 		/*
 		 * Get the account data
 		 */

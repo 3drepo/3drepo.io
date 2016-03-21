@@ -28,7 +28,9 @@
 			scope: {
 				packageName: "=",
 				account: "=",
-				project: "="
+				project: "=",
+				branch: "=",
+				revision: "="
 			},
 			controller: Bid4freeWorkspaceCtrl,
 			controllerAs: "vm",
@@ -36,9 +38,9 @@
 		};
 	}
 
-	Bid4freeWorkspaceCtrl.$inject = ["$scope", "$location", "BidService"];
+	Bid4freeWorkspaceCtrl.$inject = ["$scope", "$location", "BidService", "EventService"];
 
-	function Bid4freeWorkspaceCtrl($scope, $location, BidService) {
+	function Bid4freeWorkspaceCtrl($scope, $location, BidService, EventService) {
 		var vm = this,
 			promise, tcPromise,
 			locationSearch = $location.search();
@@ -60,6 +62,15 @@
 			];
 			BidService.boq = vm.boq;
 		}
+
+		// Create a default viewer
+		EventService.send(EventService.EVENT.CREATE_VIEWER, {
+			name: "default",
+			account:  vm.account,
+			project:  vm.project,
+			branch:   vm.branch,
+			revision: vm.revision
+		});
 
 		// Get the user's bid information for the package
 		promise = BidService.getUserBid(vm.packageName);

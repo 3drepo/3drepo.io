@@ -15,22 +15,6 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-// Credit goes to http://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
-// function escapeHtml(text) {
-// 	'use strict';
-
-// 	let map = {
-// 		'&': '&amp;',
-// 		'<': '&lt;',
-// 		'>': '&gt;',
-// 		'"': '&quot;',
-// 		"'": '&#039;'
-// 	};
-
-// 	return text.replace(/[&<>"']/g, function(m) { return map[m]; });
-// }
-
 module.exports.createApp = function(template)
 {
 	'use strict';
@@ -91,66 +75,6 @@ module.exports.createApp = function(template)
 	app.use('/public', express.static(__dirname + '/../../public'));
 
 	// TODO: Replace with user based plugin selection
-	/*
-	var pluginStructure = {
-		"plugins" : ["base"],
-		"child" : {
-			"plugins" : ["user"],
-			"child" : {
-				"plugins" : ["project"],
-				"child" : { "plugins" : ["revision"],
-							"child" : {
-								"plugins": ["diff", "wayfinder"]
-							}
-						}
-			}
-		}
-	};
-	*/
-
-	/*
-	var pluginStructure = {
-		"plugin" : "base",
-		"children" : [
-			{
-				"plugin": "login",
-				"children": [
-					{
-						"plugin": "account",
-						"children" : [
-							{
-								"plugin": "accountView"
-							},
-							{
-								"plugin": "project",
-								"children": [
-									{
-										"plugin" : "revision",
-										"children" : [
-											{
-												"plugin": "view",
-												"friends": ["tree", "meta"],
-												"children": [
-													{
-														"plugin": "diff"
-													}
-												]
-											},
-											{
-												"plugin": "wayfinder"
-											}
-										]
-									}
-								]
-							}
-						]
-					}
-				]
-		]
-	};
-	*/
-
-
 	var pluginStructure = {
 		"plugin" : "home",
 		"friends" : [
@@ -306,6 +230,7 @@ module.exports.createApp = function(template)
 
 	function buildParams(currentLevel, levelNum, stateName, uistates, params)
 	{
+		/*
 		let plugin = currentLevel.plugin;
 
 		if (stateName){
@@ -336,6 +261,7 @@ module.exports.createApp = function(template)
 			}
 
 		}
+		*/
 
 		return params;
 	}
@@ -417,14 +343,9 @@ module.exports.createApp = function(template)
 	}
 
 	app.get('*', function(req, res) {
-
-		// let hasChildren = true;
-		// let levelStructure = pluginStructure;
 		let parentState = "";
 
-
 		// Generate the list of files to load for the plugins
-
 		let params = buildParams(pluginStructure, 0, parentState, [], {
 
 			"jsfiles": config.external.js,
@@ -443,7 +364,6 @@ module.exports.createApp = function(template)
 		});
 
 		params.parentStateJSON	= JSON.stringify(params.parentStateJSON);
-		//params["pluginLevelsJSON"]	= JSON.stringify(params["pluginLevelsJSON"]);
 		params.uistate = JSON.stringify(params.uistate);
 
 		setupJade(params);

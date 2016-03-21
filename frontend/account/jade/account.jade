@@ -14,7 +14,7 @@ div(ng-if="!vm.state.project")
 
 		span(flex="5")
 		md-tabs(md-border-bottom, flex="50")
-			md-tab(label="Projects")
+			md-tab#accountProjectsTab(label="Projects")
 				account-projects(flex projects-grouped='vm.projectsGrouped')
 			md-tab(label="Profile")
 				account-profile(username="vm.username" first-name="vm.firstName" last-name="vm.lastName" email="vm.email")

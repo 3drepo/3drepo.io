@@ -26,7 +26,7 @@ bid4free-workspace {
   bid4free-workspace .sectionInput > md-radio-group,
   bid4free-workspace .itemInput > label,
   bid4free-workspace .itemInput > md-radio-group {
-    padding-right: 40px; }
+    font-size: 16px; }
   bid4free-workspace .sectionInput .sectionInputRadioGroup {
     margin-top: -16px; }
   bid4free-workspace .sectionInput .md-button {
@@ -52,7 +52,7 @@ bid4free-workspace {
   bid4free-workspace .items label {
     font-weight: normal;
     color: rgba(0, 0, 0, 0.5);
-    padding: 10px 0 10px 0; }
+    font-size: 14px; }
   bid4free-workspace .addNewItem {
     margin-bottom: 20px; }
   bid4free-workspace .boqTotal {
