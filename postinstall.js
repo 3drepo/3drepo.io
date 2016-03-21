@@ -30,8 +30,6 @@ var public_files = {
 		x3domjs: '/public/js/external/x3dom.js',
 		angularjs: '/public/js/external/angular.js',
 		ammojs: '/public/js/external/ammo.js',
-		jqueryjs : '/public/js/external/jquery.js',
-		jqueryuijs : '/public/js/external/jquery-ui.js',
 		angularutilsjs: '/public/js/external/angular-ui-utils.min.js',
 		angularrouterjs: '/public/js/external/angular-ui-router.js',
 		momentjs: '/public/js/external/moment.js',
@@ -66,7 +64,6 @@ var public_files = {
 	css : {
 		x3domcss : '/public/css/external/x3dom.css',
 		fontawesomecss: '/public/css/external/font-awesome.min.css',
-		jqueryuicss: '/public/css/external/jquery-ui.css',
 		repouicss : '/public/css/ui.css',
         angularmaterialcss: '/public/css/external/angular-material.min.css',
 		threedrepocss: "/public/css/external/three-d-repo.css"
@@ -101,8 +98,6 @@ var internal_files = {
 	'bower_components/angular/angular.js',
 	'bower_components/angular/angular.min.js.map',
 	'bower_components/angular-ui-router/release/angular-ui-router.js',
-	'bower_components/jquery/dist/jquery.js',
-	'bower_components/jquery-ui/jquery-ui.js',
 	'bower_components/masonry/masonry.js',
 	'bower_components/moment/moment.js',
 	'bower_components/socket.io-client/socket.io.js',
