@@ -49,7 +49,6 @@ function findByUID(format, req, res, next){
 		}
 
 	}).catch(err => {
-		console.log(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 

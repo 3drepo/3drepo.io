@@ -40,7 +40,7 @@ router.delete('/packages/:packageName/attachments/:id', middlewares.isMainContra
 
 function createPackage(req, res, next) {
 	'use strict';
-	
+
 	let place = '/:account/:project/packages.json POST';
 
 	// Instantiate a model
@@ -115,7 +115,7 @@ function findPackage(req, res, next){
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
-	
+
 }
 
 function uploadAttachment(req, res, next){
@@ -147,7 +147,7 @@ function uploadAttachment(req, res, next){
 				}).then(fileMeta => {
 					part.resume();
 					return Promise.resolve(fileMeta);
-					
+
 				}).catch(err => {
 					//defer.reject({ resCode: responseCodes.PROCESS_ERROR(err)});
 					return Promise.reject({ resCode: responseCodes.PROCESS_ERROR(err)});
@@ -168,7 +168,6 @@ function uploadAttachment(req, res, next){
 		});
 
 		form.on('close', function() {
-			//console.log('form close');
 			if(partError){
 				defer.reject({ resCode: responseCodes.PROCESS_ERROR(partError)});
 			} else if(!attFieldFound) {
@@ -180,7 +179,7 @@ function uploadAttachment(req, res, next){
 			}).catch(err => {
 				defer.reject(err);
 			});
-			
+
 		});
 
 		form.parse(req);
@@ -204,7 +203,7 @@ function downloadAttachment(req, res, next){
 		return projectPackage.getAttachmentReadStream(req.params.id);
 	}).then(attachment => {
 
-		let headers = { 
+		let headers = {
 			'Content-Length': attachment.meta.length,
 			'Content-Disposition': 'inline;filename=' + attachment.meta.filename,
 		};
@@ -273,7 +272,7 @@ function listPackages(req, res, next){
 		responseCodes.respond(place, req, res, next, responseCodes.PROCESS_ERROR(`BUG: req.role is neither ${C.REPO_ROLE_MAINCONTRACTOR} nor ${C.REPO_ROLE_SUBCONTRACTOR}`));
 	}
 
-	
+
 }
 
 // packages/* specific middlewares
@@ -283,7 +282,7 @@ function hasReadPackageAccess(req, res, next){
 		// if role is maincontractor then no more check is needed
 		req.role = C.REPO_ROLE_MAINCONTRACTOR;
 		return Promise.resolve();
-	
+
 	}).catch(() => {
 
 		req.role = C.REPO_ROLE_SUBCONTRACTOR;

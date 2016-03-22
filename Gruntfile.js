@@ -20,6 +20,8 @@ module.exports = function(grunt) {
 				},
 
 				src: [
+					'frontend/project/js/threed/viewerutil.js',
+					'frontend/project/js/threed/*.js',
 					'frontend/**/*.js'
 				],
 

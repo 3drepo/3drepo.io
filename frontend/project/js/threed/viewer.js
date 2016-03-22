@@ -17,45 +17,10 @@
 
 // --------------------- Control Interface ---------------------
 
-function bgroundClick(event) {
-	$.event.trigger("bgroundClicked", event);
-};
-
-function clickObject(event) {
-	$.event.trigger("clickObject", event);
-};
-
-function clickPin(event) {
-	$.event.trigger("pinClick", event);
-}
-
-function onMouseOver(event) {
-	$.event.trigger("onMouseOver", event);
-}
-
-function onMouseDown(event) {
-	$.event.trigger("onMouseDown", event);
-}
-
-function onMouseUp(event) {
-	$.event.trigger("onMouseUp", event);
-}
-
-function onMouseMove(event) {
-	$.event.trigger("onMouseMove", event);
-}
-
-function onViewpointChange(event) {
-	$.event.trigger("onViewpointChange", event);
-}
-
-function onLoaded(event) {
-	$.event.trigger("onLoaded", event);
-}
-
-function runtimeReady() {
-	$.event.trigger("runtimeReady");
-}
+// Global functions to be passed to X3DOM elements
+var bgroundClick, clickObject, clickPin, onMouseOver,
+	onMouseDown, onMouseUp, onMouseMove, onViewpointChange,
+	onLoaded, runtimeReady;
 
 x3dom.runtime.ready = runtimeReady;
 
@@ -64,6 +29,17 @@ var Viewer = {};
 
 (function() {
 	"use strict";
+
+	bgroundClick      = ViewerUtil.eventFactory("bgroundClicked");
+	clickObject       = ViewerUtil.eventFactory("clickObject");
+	clickPin          = ViewerUtil.eventFactory("pinClick");
+	onMouseOver       = ViewerUtil.eventFactory("onMouseOver");
+	onMouseDown       = ViewerUtil.eventFactory("onMouseDown");
+	onMouseUp         = ViewerUtil.eventFactory("onMouseUp");
+	onMouseMove       = ViewerUtil.eventFactory("onMouseMove");
+	onViewpointChange = ViewerUtil.eventFactory("onViewpointChange");
+	onLoaded          = ViewerUtil.eventFactory("onLoaded");
+	runtimeReady      = ViewerUtil.eventFactory("runtimeReady");
 
 	Viewer = function(name, element, manager, callback, errCallback) {
 		// Properties
@@ -75,12 +51,12 @@ var Viewer = {};
 			this.name = name;
 		}
 
-		callback = !callback ? function(type, value) {
+		callback = !callback ? function() {
 			// TODO: Move event handling here
-			// console.log(type + ": " + value);
+			//console.log(type + ": " + value);
 		} : callback;
 
-		errCallback = !errCallback ? function(type, value) {
+		errCallback = !errCallback ? function() {
 			//console.error(type + ": " + value);
 		} : errCallback;
 
@@ -129,7 +105,7 @@ var Viewer = {};
 		};
 
 		this.logos    = [];
-		
+
 		this.logoClick = function() {
 			callback(self.EVENT.LOGO_CLICK);
 		};
@@ -155,7 +131,7 @@ var Viewer = {};
 			logo.style.left 		  = 0;
 			logo.style.right 		  = 0;
 			logo.style.margin 		  = "auto";
-			
+
 			logo.addEventListener("click", self.logoClick);
 
 			var logoImage = document.createElement("img");
@@ -309,7 +285,7 @@ var Viewer = {};
 
 			self.getCurrentViewpoint().addEventListener("viewpointChanged", self.viewPointChanged);
 
-			$(document).on("onLoaded", function(event, objEvent) {
+			ViewerUtil.onEvent("onLoaded", function(objEvent) {
 				if (self.loadViewpoint) {
 					self.setCurrentViewpoint(self.loadViewpoint);
 				}
@@ -511,14 +487,14 @@ var Viewer = {};
 		};
 
 		this.onMouseUp = function(functionToBind) {
-			$(document).on("onMouseUp", functionToBind);
+			ViewerUtil.onEvent("onMouseUp", functionToBind);
 		};
 
 		this.onMouseDown = function(functionToBind) {
-			$(document).on("onMouseDown", functionToBind);
-		}
+			ViewerUtil.onEvent("onMouseDown", functionToBind);
+		};
 
-		this.mouseDownPickPoint = function(event, pickEvent)
+		this.mouseDownPickPoint = function()
 		{
 			var pickingInfo = self.getViewArea()._pickingInfo;
 
@@ -564,11 +540,11 @@ var Viewer = {};
 		this.onMouseDown(this.mouseDownPickPoint);
 
 		this.onViewpointChanged = function(functionToBind) {
-			$(self.viewer).on("myViewpointHasChanged", functionToBind);
+			ViewerUtil.onEvent("myViewpointHasChanged", functionToBind);
 		};
 
 		this.offViewpointChanged = function(functionToBind) {
-			$(self.viewer).off("myViewpointHasChanged", functionToBind);
+			ViewerUtil.offEvent("myViewpointHasChanged", functionToBind);
 		};
 
 		this.viewPointChanged = function(event) {
@@ -581,37 +557,39 @@ var Viewer = {};
 				self.nav._x3domNode._vf.typeParams[1] = eye[1];
 			}
 
-			$(self.viewer).trigger("myViewpointHasChanged", event);
+			ViewerUtil.triggerEvent("myViewpointHasChanged", event);
 		};
 
 		this.onBackgroundClicked = function(functionToBind) {
-			$(document).on("bgroundClicked", functionToBind);
+			ViewerUtil.onEvent("bgroundClicked", functionToBind);
 		};
 
 		this.offBackgroundClicked = function(functionToBind) {
-			$(document).off("bgroundClicked", functionToBind);
+			ViewerUtil.offEvent("bgroundClicked", functionToBind);
 		};
 
 		this.selectParts = function(part, zoom) {
+			var i;
+
 			if (!Array.isArray(part)) {
 				part = [part];
 			}
 
 			if (zoom) {
-				for (var i = 0; i < part.length; i++) {
+				for (i = 0; i < part.length; i++) {
 					part[i].fit();
 				}
 			}
 
 			if (self.oldPart) {
-				for (var i = 0; i < self.oldPart.length; i++) {
+				for (i = 0; i < self.oldPart.length; i++) {
 					self.oldPart[i].resetColor();
 				}
 			}
 
 			self.oldPart = part;
 
-			for (var i = 0; i < part.length; i++) {
+			for (i = 0; i < part.length; i++) {
 				part[i].setEmissiveColor(self.SELECT_COLOUR.EMISSIVE, "front");
 			}
 		};
@@ -679,7 +657,7 @@ var Viewer = {};
 				self.selectParts(fullPartsList, zoom);
 			}
 
-			var object = $("[id$=" + id + "]");
+			var object = document.querySelectorAll("[id$=" + id + "]");
 
 			if (object[0]) {
 				self.setApp(object[0]);
@@ -743,7 +721,7 @@ var Viewer = {};
 				}
 			}
 
-			var object = $("[id$=" + id + "]");
+			var object = document.querySelectorAll("[id$=" + id + "]");
 
 			if (object[0]) {
 				object[0].setAttribute("render", state.toString());
@@ -751,43 +729,7 @@ var Viewer = {};
 			}
 		};
 
-
-		/*
-		$(document).on("partSelected", function(event, part, zoom) {
-			self.selectParts(part, zoom);
-
-			var obj = {};
-			obj.multipart = true;
-			obj.id = part.multiPart._nameSpace.name + "__" + part.partID;
-
-
-			callback(self.EVENT.OBJECT_SELECTED, {
-				account: ,
-				project:
-			})
-
-
-			$(document).trigger("objectSelected", obj);
-		});
-
-		$(document).on("objectSelected", function(event, object, zoom) {
-			if (object !== undefined) {
-				if (!object.hasOwnProperty("multipart")) {
-					if (zoom) {
-						if (object.getAttribute("render") !== "false") {
-							self.lookAtObject(object);
-						}
-					}
-				}
-			} else {
-				self.selectParts([], false);
-			}
-
-			self.setApp(object);
-		});
-		*/
-
-		$(document).on("pinClick", function(event, clickInfo) {
+		ViewerUtil.onEvent("pinClick", function(clickInfo) {
 			var pinID = clickInfo.target.parentElement.parentElement.parentElement.parentElement.parentElement.id;
 			callback(self.EVENT.CLICK_PIN,
 			{
@@ -795,88 +737,21 @@ var Viewer = {};
 			});
 		});
 
-		$(document).on("onMouseDown", function(event, mouseEvent) {
-			$("body")[0].style["pointer-events"] = "none";
+		ViewerUtil.onEvent("onMouseDown", function() {
+			document.body.style["pointer-events"] = "none";
 		});
 
-		$(document).on("onMouseUp", function(event, mouseEvent) {
-			$("body")[0].style["pointer-events"] = "all";
+		ViewerUtil.onEvent("onMouseUp", function() {
+			document.body.style["pointer-events"] = "all";
 		});
 
 		this.onClickObject = function(functionToBind) {
-			$(document).on("clickObject", functionToBind);
+			ViewerUtil.onEvent("clickObject", functionToBind);
 		};
 
 		this.offClickObject = function(functionToBind) {
-			$(document).off("clickObject", functionToBind);
+			offEvent("clickObject", functionToBind);
 		};
-
-		if (0) {
-			this.moveScale = 1.0;
-
-			self.element.addEventListener("keypress", function(e) {
-				var mapPos = $("#model__mapPosition")[0];
-				var oldTrans = mapPos.getAttribute("translation").split(",").map(
-					function(res) {
-						return parseFloat(res);
-					});
-
-				if (e.charCode === "q".charCodeAt(0)) {
-					oldTrans[0] = oldTrans[0] + 0.5 * self.moveScale;
-					mapPos.setAttribute("translation", oldTrans.join(","));
-				}
-
-				if (e.charCode === "w".charCodeAt(0)) {
-					oldTrans[0] = oldTrans[0] - 0.5 * self.moveScale;
-					mapPos.setAttribute("translation", oldTrans.join(","));
-				}
-
-				if (e.charCode === "e".charCodeAt(0)) {
-					oldTrans[2] = oldTrans[2] + 0.5 * self.moveScale;
-					mapPos.setAttribute("translation", oldTrans.join(","));
-				}
-
-				if (e.charCode === "f".charCodeAt(0)) {
-					oldTrans[2] = oldTrans[2] - 0.5 * self.moveScale;
-					mapPos.setAttribute("translation", oldTrans.join(","));
-				}
-
-				var mapRotation = $("#model__mapRotation")[0];
-				var oldRotation = mapRotation.getAttribute("rotation").split(",").map(
-					function(res) {
-						return parseFloat(res);
-					});
-
-				if (e.charCode === "g".charCodeAt(0)) {
-					oldRotation[3] = oldRotation[3] + 0.01 * self.moveScale;
-					mapRotation.setAttribute("rotation", oldRotation.join(","));
-				}
-
-				if (e.charCode === "h".charCodeAt(0)) {
-					oldRotation[3] = oldRotation[3] - 0.01 * self.moveScale;
-					mapRotation.setAttribute("rotation", oldRotation.join(","));
-				}
-
-				var oldScale = mapPos.getAttribute("scale").split(",").map(
-					function(res) {
-						return parseFloat(res);
-					});
-
-				if (e.charCode === "j".charCodeAt(0)) {
-					oldScale[0] = oldScale[0] + 0.01 * self.moveScale;
-					oldScale[2] = oldScale[2] + 0.01 * self.moveScale;
-
-					mapPos.setAttribute("scale", oldScale.join(","));
-				}
-
-				if (e.charCode === "k".charCodeAt(0)) {
-					oldScale[0] = oldScale[0] - 0.01 * self.moveScale;
-					oldScale[2] = oldScale[2] - 0.01 * self.moveScale;
-
-					mapPos.setAttribute("scale", oldScale.join(","));
-				}
-			});
-		}
 
 		this.viewpoints = {};
 		this.viewpointsNames = {};
@@ -929,7 +804,7 @@ var Viewer = {};
 		};
 
 		this.loadViewpoints = function() {
-			var viewpointList = $("Viewpoint");
+			var viewpointList = document.getElementsByTagName("Viewpoint");
 
 			for (var v = 0; v < viewpointList.length; v++) {
 				if (viewpointList[v].hasAttribute("id")) {
@@ -1108,7 +983,7 @@ var Viewer = {};
 
 		this.pickObject = {};
 
-		this.pickPoint = function(x, y) {
+		this.pickPoint = function() {
 			var viewArea = self.getViewArea();
 			var scene = viewArea._scene;
 
@@ -1555,13 +1430,13 @@ var Viewer = {};
 							// TODO: Improve, with graph, to use appearance under  _cf rather than DOM.
 							obj = defMapSearch[self.diffColors.added[i]];
 							if (obj) {
-								mat = $(obj._xmlNode).find("Material");
+								mat = obj._xmlNode.getElementsByTagName("Material");
 
 								if (mat.length) {
 									self.applyApp(mat, 0.5, "0.0 1.0 0.0", false);
 									self.diffColorAdded.push(mat[0]);
 								} else {
-									mat = $(obj._xmlNode).find("TwoSidedMaterial");
+									mat = obj._xmlNode.getElementsByTagName("TwoSidedMaterial");
 									self.applyApp(mat, 0.5, "0.0 1.0 0.0", false);
 
 									self.diffColorAdded.push(mat[0]);
@@ -1576,13 +1451,13 @@ var Viewer = {};
 							// TODO: Improve, with graph, to use appearance under  _cf rather than DOM.
 							obj = defMapSearch[self.diffColors.deleted[i]];
 							if (obj) {
-								mat = $(obj._xmlNode).find("Material");
+								mat = obj._xmlNode.getElementsByTagName("Material");
 
 								if (mat.length) {
 									self.applyApp(mat, 0.5, "1.0 0.0 0.0", false);
 									self.diffColorDeleted.push(mat[0]);
 								} else {
-									mat = $(obj._xmlNode).find("TwoSidedMaterial");
+									mat = obj._xmlNode.getElementsByTagName("TwoSidedMaterial");
 									self.applyApp(mat, 0.5, "1.0 0.0 0.0", false);
 
 									self.diffColorDeleted.push(mat[0]);
@@ -1801,12 +1676,12 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
 	SWITCH_OBJECT_VISIBILITY: "VIEWER_SWITCH_OBJECT_VISIBILITY",
 	SET_PIN_VISIBILITY: "VIEWER_SET_PIN_VISIBILITY",
-		
+
 	GET_CURRENT_VIEWPOINT: "VIEWER_GET_CURRENT_VIEWPOINT",
 
 	PICK_POINT: "VIEWER_PICK_POINT",
 	SET_CAMERA: "VIEWER_SET_CAMERA",
-	
+
 	LOGO_CLICK: "VIEWER_LOGO_CLICK",
 
 	// Clipping plane events

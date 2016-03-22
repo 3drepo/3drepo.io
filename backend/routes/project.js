@@ -28,7 +28,7 @@ function _getProject(req){
 			return Promise.reject({ resCode: responseCodes.PROJECT_INFO_NOT_FOUND});
 		} else {
 			return Promise.resolve(setting);
-		} 
+		}
 	});
 }
 
@@ -36,7 +36,6 @@ function getProjectSetting(req, res, next){
 	'use strict';
 
 	let place = '/:account/:project/info.json GET';
-	console.log(place);
 	_getProject(req).then(setting => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, setting.info);
 	}).catch(err => {
@@ -58,7 +57,7 @@ function updateProjectSetting(req, res, next){
 		return Promise.resolve(setting);
 
 	}).then(setting => {
-			
+
 		let whitelist = [
 			'name',
 			'site',
@@ -72,7 +71,7 @@ function updateProjectSetting(req, res, next){
 		setting.info = setting.info || {};
 		setting.info = utils.writeCleanedBodyToModel(whitelist, req.body, setting.info);
 		return setting.save();
-		
+
 	}).then(setting => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, setting.info);
 	}).catch(err => {
@@ -90,8 +89,6 @@ function hasReadProjectInfoAccess(req, res, next){
 	}).then(() => {
 		next();
 	}).catch(resCode => {
-		console.log('rescode', resCode)
-		console.log(resCode.stack)
 		responseCodes.respond("Middleware: check has read access", req, res, next, resCode, null, req.params);
 	});
 }

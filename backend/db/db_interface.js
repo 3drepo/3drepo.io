@@ -2260,7 +2260,6 @@ DBInterface.prototype.cacheFunction = function(dbName, collection, url, format, 
 
 	if (!config.disableCache)
 	{
-		console.log(url);
 		dbConn(self.logger).getGridFSFile(dbName, stashCollection, url, function(err, result) {
 			if (err.value === responseCodes.FILE_DOESNT_EXIST.value) {
 				self.logger.logInfo("Doesn't exist in stash, generating ...");
@@ -2344,7 +2343,6 @@ DBInterface.prototype.getObject = function(dbName, project, uid, rid, sid, needF
 
 					if ((type === "mesh") && needFiles)
 					{
-						//console.log(obj)
 						self.appendMeshFiles(dbName, project, false, uid, obj[0], callback);
 					} else {
 						return callback(responseCodes.OK, type, uid, false, repoGraphScene(self.logger).decode(obj));
@@ -2380,7 +2378,6 @@ DBInterface.prototype.getObject = function(dbName, project, uid, rid, sid, needF
 				return callback(responseCodes.OBJECT_NOT_FOUND);
 			}
 
-			console.log(obj);
 			var type = obj[0].type;
 			var uid = uuidToString(obj[0]._id);
 
@@ -2883,8 +2880,7 @@ DBInterface.prototype.getRoles = function (database, username, full, callback) {
  ******************************************************************************/
 DBInterface.prototype.getUserRoles = function (username, database, callback) {
 	"use strict";
-	
-	console.log(username, database)
+
 	var self = this;
 
 	var dbName = "admin";
@@ -2908,7 +2904,7 @@ DBInterface.prototype.getUserRoles = function (username, database, callback) {
 		if (database)
 		{
 			roles = [];
-			
+
 			for (let i = 0; i < docs[0].roles.length; i++) {
 				if (docs[0].roles[i].db === dbName || docs[0].roles[i].db === database) {
 					roles.push(docs[0].roles[i]);
@@ -2981,14 +2977,14 @@ DBInterface.prototype.uuidToString = uuidToString;
 DBInterface.prototype.createMainContractorRole = function(targetDb, project){
 
 	return dbConn(this.logger).getDB(targetDb).then(db => {
-		return db.command({ 
+		return db.command({
 
 			createRole: "MainContractor",
 			privileges: [{
-				resource: { 
+				resource: {
 					db: targetDb, collection:  `${project}.packages`
-				}, 
-				actions: [ "find", "update", "insert", "remove" ] 
+				},
+				actions: [ "find", "update", "insert", "remove" ]
 			}],
 			roles: []
 		});
@@ -2997,9 +2993,9 @@ DBInterface.prototype.createMainContractorRole = function(targetDb, project){
 
 /* for test helper API */
 DBInterface.prototype.grantUserMainContractorRole = function(user, targetDb){
-	
+
 	return dbConn(this.logger).getDB('admin').then(db => {
-		return db.command({ 
+		return db.command({
 
 			grantRolesToUser: user,
 			roles: [{ role: 'MainContractor', db: targetDb}]

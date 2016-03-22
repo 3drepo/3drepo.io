@@ -19,12 +19,12 @@ function _getStashOptions(dbCol, format, url){
 	} else {
 		return { format, filename: `/${dbCol.account}/${dbCol.project}${url}` };
 	}
-	
+
 }
 
 function findByUID(req, res, next){
 	'use strict';
-	
+
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
 	let place = utils.APIInfo(req);
 	let options = {};
@@ -32,10 +32,10 @@ function findByUID(req, res, next){
 	options.filename = `/${dbCol.account}/${dbCol.project}${req.url}`;
 
 	Mesh.findByUID(dbCol, req.params.uid, options).then(mesh => {
-		
+
 		req.params.format = 'src';
 		let renderedObj = mesh;
-		//console.log('mesh', mesh)
+
 		if(!options.stash){
 			// generate src format if obj not from stash
 			renderedObj = srcEncoder.render(req.params.project, mesh, req.query.tex_uuid || null, req.params.subformat, req[C.REQ_REPO].logger);
@@ -44,7 +44,6 @@ function findByUID(req, res, next){
 		responseCodes.respond(place, req, res, next, responseCodes.OK, renderedObj);
 
 	}).catch(err => {
-		console.log(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
@@ -68,7 +67,6 @@ function findByRevision(req, res, next){
 
 		responseCodes.respond(place, req, res, next, responseCodes.OK, renderedObj);
 	}).catch(err => {
-		console.log(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }

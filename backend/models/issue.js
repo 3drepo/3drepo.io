@@ -52,7 +52,7 @@ schema.statics._find = function(dbColOptions, filter, projection){
 
 	return ProjectSetting.findById(dbColOptions, dbColOptions.project).then(_settings => {
 		settings = _settings;
-		return this.find(dbColOptions, filter, projection);	
+		return this.find(dbColOptions, filter, projection);
 	}).then(_issues => {
 
 		issues = _issues;
@@ -77,13 +77,12 @@ schema.statics.findByProjectName = function(dbColOptions, branch, rev){
 			branch,
 			rev
 		);
-		
+
 	}).then(refs => {
-		//console.log(refs);
 		if(!refs.length){
 			return Promise.resolve(issues);
 		} else {
-			
+
 			let promises = [];
 			refs.forEach(ref => {
 				let childDbName = ref.owner || dbColOptions.account;
@@ -110,8 +109,6 @@ schema.statics.findBySharedId = function(dbColOptions, sid, number) {
 	if(number){
 		filter.number = number;
 	}
-
-	//console.log(filter);
 
 	return this._find(dbColOptions, filter);
 };
@@ -152,9 +149,9 @@ schema.methods.clean = function(typePrefix){
 
 
 var Issue = ModelFactory.createClass(
-	'Issue', 
-	schema, 
-	arg => { 
+	'Issue',
+	schema,
+	arg => {
 		return `${arg.project}.issues`;
 	}
 );

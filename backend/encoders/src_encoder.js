@@ -354,7 +354,6 @@
 		logger.logDebug("Passed " + scene[C.REPO_SCENE_LABEL_MESHES_COUNT]);
 
 		var meshIDs = Object.keys(scene.meshes);
-		console.log(meshIDs);
 		var meshIDX = 0;
 		var srcJSON = {};
 
@@ -660,7 +659,7 @@
 			}
 
 			// Output optional texture bits
-			if (tex_uuid !== null && typeof mesh.uv_channels != "undefined") {				
+			if (tex_uuid !== null && typeof mesh.uv_channels != "undefined") {
 				mesh.uv_channels.buffer.copy(dataBuffers[idx], bufPos);
 				bufPos += mesh.uv_channels.buffer.length;
 			}
@@ -723,7 +722,7 @@
 		// 				if ("tex_uuid" in params.query) {
 		// 					tex_uuid = params.query.tex_uuid;
 		// 				}
-				
+
 		// 				render(params.project, obj, tex_uuid, params.subformat, req[C.REQ_REPO].logger, function (err, renderedObj) {
 		// 					if (err.value) {
 		// 						return callback(err);

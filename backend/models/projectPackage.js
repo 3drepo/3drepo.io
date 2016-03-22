@@ -11,12 +11,12 @@ var schema = mongoose.Schema({
 	code: String,
 	contact: String,
 	area: String,
-	budget: Number, 
+	budget: Number,
 	completedBy: Date,
 	user: String,
 	attachments: [mongoose.Schema.Types.ObjectId],
 	// termsAndConds: [mongoose.Schema({
-	// 	title: String,   
+	// 	title: String,
 	// 	content: String,
 	// })]
 });
@@ -43,7 +43,7 @@ schema.pre('save', function(next){
 schema.post('save', function(doc){
 	'use strict';
 
-	// add to customData.bids for quick lookup 
+	// add to customData.bids for quick lookup
 
 	let db = ModelFactory.db;
 	let database = 'admin';
@@ -57,9 +57,9 @@ schema.post('save', function(doc){
 
 	db.db(database)
 	.collection(collection)
-	.findOneAndUpdate({ 
-		user: doc.user 
-	},{'$addToSet':{ 
+	.findOneAndUpdate({
+		user: doc.user
+	},{'$addToSet':{
 		'customData.bids': bid
 	}});
 
@@ -77,13 +77,13 @@ schema.statics.findByName = function(dbColOptions, name){
 
 
 
-var collectionName = arg => { 
+var collectionName = arg => {
 	return `${arg.project}.packages`;
 };
 
 schema.methods._getGridFSBucket = function(){
 	return new GridFSBucket(
-		ModelFactory.db.db(this._dbcolOptions.account), 
+		ModelFactory.db.db(this._dbcolOptions.account),
 		{ bucketName:  collectionName(this._dbcolOptions) + '.attachments'}
 	);
 };
@@ -107,10 +107,10 @@ schema.methods._deleteAtth = function(id){
 
 schema.methods.deleteAttachment = function(ids, options){
 	'use strict';
-	
+
 	options = options || {};
 	let promiseList = [];
-	
+
 	if(Array.isArray(ids)){
 		ids.forEach(id => {
 			promiseList.push(this._deleteAtth(new ObjectID(id)));
@@ -134,7 +134,7 @@ schema.methods.getAttachmentReadStream = function(id){
 	'use strict';
 
 	id = new ObjectID(id);
-	
+
 	let bucket =  this._getGridFSBucket();
 	//check existence and get metadata
 	return bucket.find({ _id: id}).toArray().then(files => {
@@ -154,7 +154,7 @@ schema.methods.uploadAttachment = function(readStream, meta){
 	'use strict';
 
 	let bucket =  this._getGridFSBucket();
-	
+
 	let uploadStream = bucket.openUploadStream(meta.filename, meta);
 
 	let fileMeta, files;
@@ -177,16 +177,15 @@ schema.methods.uploadAttachment = function(readStream, meta){
 				reject(err);
 			});
 		});
-	
+
 	}).then(_fileMeta => {
-		
+
 		fileMeta = _fileMeta;
 		//delete all attachments with the same filename
 		return this.deleteAttachment(_.map(files, '_id'), { skipSave: true });
 
-	}).then(() => {	
+	}).then(() => {
 		// push new file id into array
-		//console.log('push id to array', this.attachments, uploadStream.id);
 		this.attachments.push(uploadStream.id);
 		return this.save().then(() => {
 			return Promise.resolve(fileMeta);
@@ -208,8 +207,8 @@ schema.methods.getTermsAndCondsHTML = function(){
 };
 
 var ProjectPackage = ModelFactory.createClass(
-	'Package', 
-	schema, 
+	'Package',
+	schema,
 	collectionName
 );
 

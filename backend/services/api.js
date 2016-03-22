@@ -40,10 +40,10 @@ module.exports.app = function (sharedSession) {
 	require("../encoders/img_encoder.js").route(routes);
     require("../encoders/bin_encoder.js").route(routes);
     require("../encoders/gltf_encoder.js").route(routes);
-	
+
 	let bodyParser = require("body-parser");
 	let app = express();
-	
+
 	// put logger in req object
 	app.use(log_iface.startRequest);
 
@@ -57,7 +57,6 @@ module.exports.app = function (sharedSession) {
 			require('../models/factory/modelFactory').setDB(db);
 			next();
 		}).catch( err => {
-			//console.log(err);
 			responseCodes.respond('Express Middleware', req, res, next, responseCodes.DB_ERROR(err), err);
 		});
 	});
@@ -110,7 +109,7 @@ module.exports.app = function (sharedSession) {
 		// api doc console
 		app.use(express.static('doc'));
 	}
-	
+
 
 
 	//auth handler

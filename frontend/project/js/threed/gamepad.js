@@ -94,7 +94,7 @@ var Gamepad = function(viewer) {
 		/* Chrome Linux */
 		if ((self.platform === 'Linux') && (self.browser === 'Chrome'))
 		{
-			$.event.trigger("gamepadMove",
+			ViewerUtil.eventTrigger("gamepadMove",
 				{
 					xaxis: self.gamepad.axes[0],
 					yaxis: self.gamepad.axes[1],
@@ -109,7 +109,7 @@ var Gamepad = function(viewer) {
 		else if ((self.platform === 'Win32') && (self.browser === 'Chrome'))
 		{
 			button_idx = 3;
-			$.event.trigger("gamepadMove",
+			ViewerUtil.eventTrigger("gamepadMove",
 				{
 					xaxis: self.gamepad.buttons[15].value - self.gamepad.buttons[14].value,
 					yaxis: self.gamepad.buttons[13].value - self.gamepad.buttons[12].value,
@@ -123,7 +123,7 @@ var Gamepad = function(viewer) {
 		/* Firefox Windows */
 		else if ((self.platform === 'Win32') && (self.browser === 'Firefox'))
 		{
-			$.event.trigger("gamepadMove",
+			ViewerUtil.eventTrigger("gamepadMove",
 				{
 					xaxis: self.gamepad.axes[0],
 					yaxis: self.gamepad.axes[1],

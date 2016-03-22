@@ -24,7 +24,7 @@ var statics = {};
 statics._getGridFSBucket = function(dbCol, format){
 
 	return new GridFSBucket(
-		ModelFactory.db.db(dbCol.account), 
+		ModelFactory.db.db(dbCol.account),
 		{ bucketName:  `${dbCol.project}.stash.${format}`}
 	);
 };
@@ -33,13 +33,11 @@ statics.findStashByFilename = function(dbCol, format, filename){
 	'use strict';
 
 	let bucket = this._getGridFSBucket(dbCol, format);
-	
+
 	return bucket.find({ filename }).toArray().then(files => {
 		if(!files.length){
-			//console.log('no stash found');
 			return Promise.resolve(false);
 		} else {
-			//console.log('stash found!');
 			return new Promise((resolve) => {
 
 				let downloadStream = bucket.openDownloadStreamByName(filename);
@@ -54,7 +52,7 @@ statics.findStashByFilename = function(dbCol, format, filename){
 
 		}
 	});
-	
+
 };
 
 statics.findByUID = function(dbCol, uid, options){
@@ -72,7 +70,7 @@ statics.findByUID = function(dbCol, uid, options){
 		return Promise.resolve(obj);
 
 	}).then(obj =>{
-		
+
 		if(!obj){
 			return Promise.reject({resCode: responseCodes.OBJECT_NOT_FOUND});
 		}

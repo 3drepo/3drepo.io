@@ -17,19 +17,16 @@
 
 module.exports.createApp = function(template)
 {
-	'use strict';
+	"use strict";
 
-	let express = require('express');
-	let config = require('../config.js');
-	let bodyParser = require('body-parser');
-	let compress = require('compression');
-	let fs = require('fs');
-	let jade = require('jade');
-
-	let systemLogger = require('../logger.js').systemLogger;
+	let express = require("express");
+	let config = require("../config.js");
+	let bodyParser = require("body-parser");
+	let compress = require("compression");
+	let fs = require("fs");
+	let jade = require("jade");
 
 	let app = express();
-	let _ = require('lodash');
 
 	app.use(compress({level:9}));
 
@@ -38,41 +35,41 @@ module.exports.createApp = function(template)
 	}));
 	app.use(bodyParser.json());
 
-	app.set('views', './jade');
-	app.set('view_engine', 'jade');
+	app.set("views", "./jade");
+	app.set("view_engine", "jade");
 	app.locals.pretty = true;
 
-	app.get('/public/plugins/base/config.js', function(req, res) {
+	app.get("/public/plugins/base/config.js", function(req, res) {
 		let params = {};
 
 		if (config.api_server.use_location) {
-			params.config_js = 'var server_config = {}; server_config.apiUrl = ' + config.api_server.location_url;
+			params.config_js = "var server_config = {}; server_config.apiUrl = " + config.api_server.location_url;
 		} else {
-			params.config_js = 'var server_config = {}; server_config.apiUrl = function(path) { return "' + config.api_server.url + '/" + path; };';
+			params.config_js = "var server_config = {}; server_config.apiUrl = function(path) { return '" + config.api_server.url + "/" + path + "'; };";
 		}
 
 		if("wayfinder" in config)
 		{
 			// TODO: Make a public section in config for vars to be revealed
-			params.config_js += '\nserver_config.democompany = "' + config.wayfinder.democompany + '";';
-			params.config_js += '\nserver_config.demoproject = "' + config.wayfinder.demoproject + '";';
+			params.config_js += "\nserver_config.democompany = '" + config.wayfinder.democompany + "';";
+			params.config_js += "\nserver_config.demoproject = '" + config.wayfinder.demoproject + "';";
 		}
 
 
-		params.config_js += '\nserver_config.backgroundImage = "' + config.backgroundImage + '";';
-		params.config_js += '\nserver_config.chatHost	= "' + config.api_server.chat_host + '";';
-		params.config_js += '\nserver_config.chatPath	= "' + config.api_server.chat_path + '";';
-		params.config_js += '\nserver_config.apiVersion = "' + config.version + '";';
+		params.config_js += "\nserver_config.backgroundImage = '" + config.backgroundImage + "';";
+		params.config_js += "\nserver_config.chatHost	= '" + config.api_server.chat_host + "';";
+		params.config_js += "\nserver_config.chatPath	= '" + config.api_server.chat_path + "';";
+		params.config_js += "\nserver_config.apiVersion = '" + config.version + "';";
 
-		params.config_js += '\nserver_config.return_path = "/";';
+		params.config_js += "\nserver_config.return_path = '/';";
 
-		params.config_js += '\n\nvar realOpen = XMLHttpRequest.prototype.open;\n\nXMLHttpRequest.prototype.open = function(method, url, async, unk1, unk2) {\n if(async) this.withCredentials = true;\nrealOpen.apply(this, arguments);\n};';
+		params.config_js += "\n\nvar realOpen = XMLHttpRequest.prototype.open;\n\nXMLHttpRequest.prototype.open = function(method, url, async, unk1, unk2) {\n if(async) this.withCredentials = true;\nrealOpen.apply(this, arguments);\n};";
 
-		res.header('Content-Type', 'text/javascript');
-		res.render('config.jade', params);
+		res.header("Content-Type", "text/javascript");
+		res.render("config.jade", params);
 	});
 
-	app.use('/public', express.static(__dirname + '/../../public'));
+	app.use("/public", express.static(__dirname + "/../../public"));
 
 	// TODO: Replace with user based plugin selection
 	var pluginStructure = {
@@ -116,156 +113,6 @@ module.exports.createApp = function(template)
 		]
 	};
 
-	function loadPlugin(plugin, stateName, uistates, params)
-	{
-		let cssFile = "";
-
-		if (!(plugin in params.parentStateJSON)) {
-			params.parentStateJSON[plugin] = [];
-		}
-
-		let stateTok = stateName.split(".");
-		let parentState = stateTok.slice(0, -1).join('.');
-
-		if (params.parentStateJSON[plugin].indexOf(parentState) === -1) {
-			params.parentStateJSON[plugin].push(parentState);
-		}
-
-		// TODO: Check whether or not it doesn't exist
-		let pluginConfig = {};
-		pluginConfig = JSON.parse(fs.readFileSync("./plugins/" + plugin + ".json", "utf8"));
-
-		if (params.pluginLoaded.indexOf(plugin) === -1)
-		{
-			systemLogger.logInfo('Loading plugin ' + plugin + ' ...');
-
-			params.pluginAngular[plugin]				= {};
-			params.pluginAngular[plugin].plugin	= plugin;
-			params.pluginAngular[plugin].files	= [];
-
-			// Loop through the files to be loaded
-
-			if(_.get(pluginConfig, 'files.jade'))
-			{
-				let nJadeFiles = pluginConfig.files.jade.length;
-
-				for(let fileidx = 0; fileidx < nJadeFiles; fileidx++)
-				{
-					let jadeFile = pluginConfig.files.jade[fileidx];
-					params.pluginJade.push(jadeFile);
-				}
-			}
-
-			if (_.get(pluginConfig, 'files.js'))
-			{
-				let nJSFiles = pluginConfig.files.js.length;
-
-				for(let fileidx = 0; fileidx < nJSFiles; fileidx++)
-				{
-					let jsFile = '/public/plugins/' + pluginConfig.files.js[fileidx];
-					params.pluginJS.push(jsFile);
-				}
-			}
-
-			if (_.get(pluginConfig, 'files.angular'))
-			{
-				let nAngularFiles = pluginConfig.files.angular.length;
-
-				for(let fileidx = 0; fileidx < nAngularFiles; fileidx++)
-				{
-					let angularFile = '/public/plugins/' + pluginConfig.files.angular[fileidx];
-					params.pluginAngular[plugin].files.push(angularFile);
-				}
-			}
-
-			if (_.get(pluginConfig, 'files.ui'))
-			{
-				let nUIComponents = pluginConfig.files.ui.length;
-
-				for(let uiidx = 0; uiidx < nUIComponents; uiidx++)
-				{
-					let uicomp = pluginConfig.files.ui[uiidx];
-
-					if (!(uicomp.position in params.ui)){
-						params.ui[uicomp.position] = [];
-					}
-
-					params.ui[uicomp.position].push(
-						{
-							"name" : uicomp.name,
-							"template" : './plugins/' + uicomp.template
-						}
-					);
-
-				}
-			}
-
-			if (_.get(pluginConfig, 'files.css'))
-			{
-				let nCSSFiles = pluginConfig.files.css.length;
-				for (let fileidx = 0; fileidx < nCSSFiles; fileidx++)
-				{
-					cssFile = '/public/plugins/' + pluginConfig.files.css[fileidx];
-					params.pluginCSS.push(cssFile);
-				}
-			}
-
-
-			params.pluginLoaded.push(plugin);
-		}
-
-		if ("ui" in pluginConfig.files)
-		{
-			let nUIComponents = pluginConfig.files.ui.length;
-
-			for(let uiidx = 0; uiidx < nUIComponents; uiidx++)
-			{
-				let uicomp = pluginConfig.files.ui[uiidx];
-				uistates.push(uicomp.name);
-			}
-
-			params.uistate[stateName] = uistates.slice(0);
-		}
-	}
-
-	function buildParams(currentLevel, levelNum, stateName, uistates, params)
-	{
-		/*
-		let plugin = currentLevel.plugin;
-
-		if (stateName){
-			stateName += ".";
-		}
-
-		let pluginConfig = JSON.parse(fs.readFileSync("./plugins/" + plugin + ".json", "utf8"));
-
-		let states = pluginConfig.states || [plugin];
-
-		for(let stateidx = 0; stateidx < states.length; stateidx++)
-		{
-			loadPlugin(plugin, stateName + states[stateidx], uistates, params);
-
-			if ("friends" in currentLevel)
-			{
-				for(let i = 0; i < currentLevel.friends.length; i++)
-				{
-					plugin = currentLevel.friends[i];
-					loadPlugin(plugin, stateName + states[stateidx], uistates, params);
-				}
-			}
-
-			if ("children" in currentLevel){
-				for(let i = 0; i < currentLevel.children.length; i++){
-					buildParams(currentLevel.children[i], levelNum + 1, stateName + states[stateidx], uistates.slice(0), params);
-				}
-			}
-
-		}
-		*/
-
-		return params;
-	}
-
 	/**
 	 * Get the jade files for the required state or plugin
 	 *
@@ -291,7 +138,7 @@ module.exports.createApp = function(template)
 				});
 			});
 		} catch (e) {
-			// Jade files don't exist
+			// Jade files don"t exist
 		}
 	}
 
@@ -342,12 +189,9 @@ module.exports.createApp = function(template)
 		setupRequiredJade(statesAndPlugins, pluginStructure, pathToStatesAndPlugins, params);
 	}
 
-	app.get('*', function(req, res) {
-		let parentState = "";
-
+	app.get("*", function(req, res) {
 		// Generate the list of files to load for the plugins
-		let params = buildParams(pluginStructure, 0, parentState, [], {
-
+		let params = {
 			"jsfiles": config.external.js,
 			"cssfiles": config.external.css,
 			"pluginLoaded": [],
@@ -361,7 +205,7 @@ module.exports.createApp = function(template)
 			"renderMe": jade.renderFile,
 			"structure": JSON.stringify(pluginStructure),
 			"frontendJade": []
-		});
+		};
 
 		params.parentStateJSON	= JSON.stringify(params.parentStateJSON);
 		params.uistate = JSON.stringify(params.uistate);

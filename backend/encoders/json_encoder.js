@@ -298,7 +298,7 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, par
 };
 
 function getFullTree(dbInterface, account, project, branch, revision, path, callback) {
-	// TODO: Check permisssions here
+	// TODO: Check permissions here
 
 	dbInterface.logger.logInfo("Obtaining full tree for [" + account + ", " + project + ", " + branch + ", " + revision + "]");
 
@@ -390,9 +390,9 @@ exports.route = function(router)
 				if(err.value) {
 					err_callback(err);
 				} else {
-		
+
 					err_callback(responseCodes.OK, bids);
-				
+
 				}
 			});
 

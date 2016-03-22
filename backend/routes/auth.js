@@ -53,7 +53,6 @@ function login(req, res, next){
 		createSession(responsePlace, req, res, next, {username: user.user, roles: user.roles});
 
 	}).catch(err => {
-		console.log(err);
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.NOT_AUTHORIZED, {username: req.body.username});
 	});
 
@@ -81,7 +80,7 @@ function logout(req, res, next){
 
 		responseCodes.respond("Logout POST", req, res, next, responseCodes.OK, {username: username});
 	});
-		
+
 }
 
 function updateUser(req, res, next){
@@ -90,7 +89,7 @@ function updateUser(req, res, next){
 	let responsePlace = utils.APIInfo(req);
 
 	if(req.body.oldPassword){
-		
+
 		// Update password
 		User.updatePassword(req.params[C.REPO_REST_API_ACCOUNT], req.body.oldPassword, req.body.newPassword).then(() => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
@@ -121,7 +120,7 @@ function getAvatar(req, res, next){
 
 	// Update user info
 	User.findByUserName(req.params[C.REPO_REST_API_ACCOUNT]).then(user => {
-		
+
 
 		if(!user.getAvatar()){
 			return Promise.reject({resCode: responseCodes.USER_DOES_NOT_HAVE_AVATAR });

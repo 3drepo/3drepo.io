@@ -93,7 +93,7 @@ var middlewares = {
 	hasWriteAccessToProject: function(req, res, next){
 		checkAccess(req, res, next, _hasWriteAccessToProject);
 	},
-	
+
     loggedIn: function(req, res, next){
         'use strict';
 
@@ -143,20 +143,15 @@ var middlewares = {
 	checkRole: function(acceptedRoles, req){
 		'use strict';
 		var dbCol = getDbColOptions(req);
-		console.log(dbCol);
-		console.log(req.session)
 		return new Promise((resolve, reject) => {
 			dbInterface(req[C.REQ_REPO].logger).getUserRoles(req.session[C.REPO_SESSION_USER].username, dbCol.account, function(err, roles){
-				console.log(roles)
-				console.log(_.filter, _.map)
 				roles = _.filter(roles, item => {
 					return acceptedRoles.indexOf(item.role) !== -1;
 				});
-				console.log(roles)
+
 				if(roles.length > 0){
 					resolve(_.map(roles, 'role'));
 				} else {
-					console.log('err', responseCodes.AUTH_ERROR)
 					reject(responseCodes.AUTH_ERROR);
 				}
 
