@@ -334,27 +334,27 @@ module.exports.createApp = function(template)
 	 * @param pathToStatesAndPlugins
 	 * @param params
 	 */
-	function getJadeFiles (required, pathToStatesAndPlugins, params) {
-		var requiredFiles,
-			requiredDir,
-			fileSplit;
+	// function getJadeFiles (required, pathToStatesAndPlugins, params) {
+	// 	var requiredFiles,
+	// 		requiredDir,
+	// 		fileSplit;
 
-		requiredDir = pathToStatesAndPlugins + "/" + required + "/jade";
-		try {
-			fs.accessSync(requiredDir, fs.F_OK); // Throw for fail
+	// 	requiredDir = pathToStatesAndPlugins + "/" + required + "/jade";
+	// 	try {
+	// 		fs.accessSync(requiredDir, fs.F_OK); // Throw for fail
 
-			requiredFiles = fs.readdirSync(requiredDir);
-			requiredFiles.forEach(function (file) {
-				fileSplit = file.split(".");
-				params.frontendJade.push({
-					id: fileSplit[0] + ".html",
-					path: requiredDir + "/" + file
-				});
-			});
-		} catch (e) {
-			// Jade files don't exist
-		}
-	}
+	// 		requiredFiles = fs.readdirSync(requiredDir);
+	// 		requiredFiles.forEach(function (file) {
+	// 			fileSplit = file.split(".");
+	// 			params.frontendJade.push({
+	// 				id: fileSplit[0] + ".html",
+	// 				path: requiredDir + "/" + file
+	// 			});
+	// 		});
+	// 	} catch (e) {
+	// 		// Jade files don't exist
+	// 	}
+	// }
 
 	/**
 	 * Setup loading only the required states and plugins jade files
@@ -364,44 +364,44 @@ module.exports.createApp = function(template)
 	 * @param pathToStatesAndPlugins
 	 * @param params
 	 */
-	function setupRequiredJade (statesAndPlugins, required, pathToStatesAndPlugins, params) {
-		var i, length;
+	// function setupRequiredJade (statesAndPlugins, required, pathToStatesAndPlugins, params) {
+	// 	var i, length;
 
-		if (statesAndPlugins.indexOf(required.plugin) !== -1) {
-			getJadeFiles(required.plugin, pathToStatesAndPlugins, params);
+	// 	if (statesAndPlugins.indexOf(required.plugin) !== -1) {
+	// 		getJadeFiles(required.plugin, pathToStatesAndPlugins, params);
 
-			// Friends
-			if (required.hasOwnProperty("friends")) {
-				for (i = 0, length = required.friends.length; i < length; i += 1) {
-					if (statesAndPlugins.indexOf(required.friends[i]) !== -1) {
-						getJadeFiles(required.friends[i], pathToStatesAndPlugins, params);
-					}
-				}
-			}
+	// 		// Friends
+	// 		if (required.hasOwnProperty("friends")) {
+	// 			for (i = 0, length = required.friends.length; i < length; i += 1) {
+	// 				if (statesAndPlugins.indexOf(required.friends[i]) !== -1) {
+	// 					getJadeFiles(required.friends[i], pathToStatesAndPlugins, params);
+	// 				}
+	// 			}
+	// 		}
 
-			// Recurse for children
-			if (required.hasOwnProperty("children")) {
-				for (i = 0, length = required.children.length; i < length; i += 1) {
-					setupRequiredJade(statesAndPlugins, required.children[i], pathToStatesAndPlugins, params);
-				}
-			}
-		}
-	}
+	// 		// Recurse for children
+	// 		if (required.hasOwnProperty("children")) {
+	// 			for (i = 0, length = required.children.length; i < length; i += 1) {
+	// 				setupRequiredJade(statesAndPlugins, required.children[i], pathToStatesAndPlugins, params);
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	/**
 	 * Get all available states and plugins
 	 *
 	 * @param params
 	 */
-	function setupJade (params) {
-		var pathToStatesAndPlugins = "./frontend",
-			statesAndPlugins;
+	// function setupJade (params) {
+	// 	var pathToStatesAndPlugins = "./frontend",
+	// 		statesAndPlugins;
 
-		// Get all available states and plugins in the file system
-		statesAndPlugins = fs.readdirSync(pathToStatesAndPlugins);
+	// 	// Get all available states and plugins in the file system
+	// 	statesAndPlugins = fs.readdirSync(pathToStatesAndPlugins);
 
-		setupRequiredJade(statesAndPlugins, pluginStructure, pathToStatesAndPlugins, params);
-	}
+	// 	setupRequiredJade(statesAndPlugins, pluginStructure, pathToStatesAndPlugins, params);
+	// }
 
 	app.get('*', function(req, res) {
 

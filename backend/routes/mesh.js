@@ -35,7 +35,7 @@ function findByUID(req, res, next){
 		
 		req.params.format = 'src';
 		let renderedObj = mesh;
-		//console.log('mesh', mesh)
+		
 		if(!options.stash){
 			// generate src format if obj not from stash
 			renderedObj = srcEncoder.render(req.params.project, mesh, req.query.tex_uuid || null, req.params.subformat, req[C.REQ_REPO].logger);
