@@ -15,15 +15,6 @@ router.get('/revision/:rid/:sid.src.:subformat?', middlewares.hasReadAccessToPro
 
 // function _getStashOptions(dbCol, format, url){
 
-<<<<<<< HEAD
-	if(config.disableCache){
-		return false;
-	} else {
-		return { format, filename: `/${dbCol.account}/${dbCol.project}${url}` };
-	}
-
-}
-=======
 // 	if(config.disableCache){
 // 		return false;
 // 	} else {
@@ -31,7 +22,6 @@ router.get('/revision/:rid/:sid.src.:subformat?', middlewares.hasReadAccessToPro
 // 	}
 
 // }
->>>>>>> origin/ISSUE_186
 
 function findByUID(req, res, next){
 	'use strict';
@@ -68,6 +58,7 @@ function findByUID(req, res, next){
 	}).then(data => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, data);
 	}).catch(err => {
+		console.log(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 
@@ -108,6 +99,7 @@ function findByRevision(req, res, next){
 	}).then(data => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, data);
 	}).catch(err => {
+		console.log(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 

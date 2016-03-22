@@ -70,6 +70,7 @@ statics.findByUID = function(dbCol, uid, options){
 
 		//from3DRepoStash = true;
 		obj.toObject = () => obj;
+
 		return Promise.resolve(obj);
 
 	}).then(obj =>{
@@ -80,7 +81,7 @@ statics.findByUID = function(dbCol, uid, options){
 
 		// load extRef if _.extRef is defined
 		if(obj.type === 'mesh' && obj._extRef){
-			
+
 			let promises = [];
 
 			obj = obj.toObject();
@@ -93,7 +94,7 @@ statics.findByUID = function(dbCol, uid, options){
 					})
 				);
 			});
-			
+
 			return Promise.all(promises).then( () => {
 				return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj]));
 			});
@@ -101,8 +102,6 @@ statics.findByUID = function(dbCol, uid, options){
 		} else {
 			return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj.toObject()]));
 		}
-
-		
 	});
 
 	return _find();
@@ -120,6 +119,7 @@ statics.findByUID = function(dbCol, uid, options){
 	// } else {
 	//	return _find();
 	//}
+
 };
 
 statics.findByRevision = function(dbCol, rid, sid, options){
@@ -129,6 +129,7 @@ statics.findByRevision = function(dbCol, rid, sid, options){
 
 	let _find = () => Revision.findById(dbCol, stringToUUID(rid)).then( rev => {
 		rev = rev.toObject();
+
 		return this.findOne(dbCol, { _id: { '$in': rev.current }, shared_id: stringToUUID(sid) }, projection).then(obj => {
 
 			if(!obj){
@@ -137,7 +138,7 @@ statics.findByRevision = function(dbCol, rid, sid, options){
 
 			// load extRef if _.extRef is defined
 			if(obj.type === 'mesh' && obj._extRef){
-				
+
 				let promises = [];
 
 				obj = obj.toObject();
@@ -150,7 +151,7 @@ statics.findByRevision = function(dbCol, rid, sid, options){
 						})
 					);
 				});
-				
+
 				return Promise.all(promises).then( () => {
 					return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj]));
 				});
@@ -162,7 +163,7 @@ statics.findByRevision = function(dbCol, rid, sid, options){
 	});
 
 	return _find();
-	
+
 	// if(options && options.stash){
 	// 	//find obj from stash
 	// 	return this.findStashByFilename(dbCol, options.stash.format, options.stash.filename).then(buffer => {
