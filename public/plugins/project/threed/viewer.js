@@ -1844,13 +1844,13 @@ var Viewer = {};
 			for (var x = startX; x <= endX; x+=step){
 				for (var z = startZ; z <= endZ; z+=step){
 					mapTileCount++;
-					console.log(x, z);
+					//console.log(x, z);
 					var osref = new OsGridRef(self.fakeOriginInBNG.easting + x, self.fakeOriginInBNG.northing + z);
 					var osrefno = osref.toString().split(' ');
 					osrefno[1] = osrefno[1].substring(0, 3);
 					osrefno[2] = osrefno[2].substring(0, 3);
 					osrefno = osrefno.join('');
-					console.log(osrefno);
+					//console.log(osrefno);
 
 					if(draw){
 						self.addMapTile(osrefno);
@@ -1861,112 +1861,7 @@ var Viewer = {};
 
 
 			console.log('map tile count', mapTileCount);
-			/*
-			var Ax = camera[0] + near * view_dir[0] 
-						+ Math.tan(fov / 2) * near * right[0]
-						+ up[0] * ( (Math.tan(fov / 2) * near) / ratio);
 
-			var Ay = camera[1] + near * view_dir[1] 
-						- Math.tan(fov / 2) * near * right[1]
-						+ up[1] * ( (Math.tan(fov / 2) * near) / ratio);
-
-			var Az = camera[2] + near * view_dir[2] 
-						- Math.tan(fov / 2) * near * right[2]
-						+ up[2] * ( (Math.tan(fov / 2) * near) / ratio);
-
-
-			console.log('nearA', Ax, Ay, Az);
-
-			var K = camera[1] / (camera[1] - Ay);
-
-			var planeAx = camera[0] + K * (Ax - camera[0]);
-			var planeAy = camera[1] + K * (Ay - camera[1]);
-			var planeAz = camera[2] + K * (Az - camera[2]);
-
-			console.log('A', planeAx, planeAy, planeAz);
-
-
-			var Bx = camera[0] + near * view_dir[0] 
-						+ Math.tan(fov / 2) * near * right[0]
-						+ up[0] * ( (Math.tan(fov / 2) * near) / ratio);
-
-			var By = camera[1] + near * view_dir[1] 
-						+ Math.tan(fov / 2) * near * right[1]
-						+ up[1] * ( (Math.tan(fov / 2) * near) / ratio);
-
-			var Bz = camera[2] + near * view_dir[2] 
-						+ Math.tan(fov / 2) * near * right[2]
-						+ up[2] * ( (Math.tan(fov / 2) * near) / ratio);
-
-
-			console.log('nearB', Bx, By, Bz);
-
-			K = camera[1] / (camera[1] - By);
-
-			var planeBx = camera[0] + K * (Bx - camera[0]);
-			var planeBy = camera[1] + K * (By - camera[1]);
-			var planeBz = camera[2] + K * (Bz - camera[2]);
-
-			console.log('B', planeBx, planeBy, planeBz);
-
-
-
-			var Cx = camera[0] + near * view_dir[0] 
-						- Math.tan(fov / 2) * near * right[0]
-						- up[0] * ( (Math.tan(fov / 2) * near) / ratio);
-
-			var Cy = camera[1] + near * view_dir[1] 
-						- Math.tan(fov / 2) * near * right[1]
-						- up[1] * ( (Math.tan(fov / 2) * near) / ratio);
-
-			var Cz = camera[2] + near * view_dir[2] 
-						- Math.tan(fov / 2) * near * right[2]
-						- up[2] * ( (Math.tan(fov / 2) * near) / ratio);
-
-
-			console.log('nearC', Cx, Cy, Cz);
-
-			K = camera[1] / (camera[1] - Cy);
-
-			var planeCx = camera[0] + K * (Cx - camera[0]);
-			var planeCy = camera[1] + K * (Cy - camera[1]);
-			var planeCz = camera[2] + K * (Cz - camera[2]);
-
-			console.log('C', planeCx, planeCy, planeCz);
-
-
-			var Dx = camera[0] + near * view_dir[0] 
-						+ Math.tan(fov / 2) * near * right[0]
-						- up[0] * ( (Math.tan(fov / 2) * near) / ratio);
-
-			var Dy = camera[1] + near * view_dir[1] 
-						+ Math.tan(fov / 2) * near * right[1]
-						- up[1] * ( (Math.tan(fov / 2) * near) / ratio);
-
-			var Dz = camera[2] + near * view_dir[2] 
-						+ Math.tan(fov / 2) * near * right[2]
-						- up[2] * ( (Math.tan(fov / 2) * near) / ratio);
-
-
-			console.log('nearD', Dx, Dy, Dz);
-
-			K = camera[1] / (camera[1] - Dy);
-
-			var planeDx = camera[0] + K * (Dx - camera[0]);
-			var planeDy = camera[1] + K * (Dy - camera[1]);
-			var planeDz = camera[2] + K * (Dz - camera[2]);
-
-			console.log('D', planeDx, planeDy, planeDz);
-			*/
-
-			// var x = Math.min(planeAx, planeBx, planeCx, planeDx);
-			// var endX = Math.max(planeAx, planeBx, planeCx, planeDx);
-
-			// var z = Math.min(planeAz, planeBz, planeCz, planeDz);
-			// var endZ = Math.max(planeAz, planeBz, planeCz, planeDz);
-
-			// x = Math.ceil(x / step) * step;
-			// z = Math.ceil(z / step) * step;
 
 
 
@@ -2024,9 +1919,18 @@ var Viewer = {};
 				
 			self.fakeOriginInBNG = new OsGridRef(509400, 428800);
 
+			self.addedTileRefs =  self.addedTileRefs || [];
+
 			if (!self.fakeOriginInBNG){
 				self.fakeOriginInBNG = OsGridRef.parse(osGridRef);
 			}
+
+			if(self.addedTileRefs.indexOf(osGridRef) !== -1) {
+				console.log(osGridRef + ' has already been added');
+				return;
+			}
+
+			self.addedTileRefs.push(osGridRef);
 
 			console.log(self.fakeOriginInBNG);
 

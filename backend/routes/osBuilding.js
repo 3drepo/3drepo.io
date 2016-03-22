@@ -363,7 +363,8 @@ function genglX(format, req, res){
 			return Promise.resolve({ json: json, buffer: bin});
 		} else {
 			console.log('stash not found');
-			return getBuildingsAndGenerate();
+			return Promise.reject({ message: 'No stash and we are not going to bother os api server today so no data for you, sorry.'})
+			//return getBuildingsAndGenerate();
 		}
 	}).then(glTF => {
 		if(format === 'bin') {
