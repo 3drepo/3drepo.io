@@ -256,6 +256,9 @@ function genglX(format, req, res){
 						promises.push(OSGet.dimensions({ uprn: building.UPRN }).then(dimension => {
 							dimension.classCode = building.classCode;
 							return Promise.resolve(dimension);
+						}).catch(err => {
+							console.log(err);
+							return Promise.resolve({ results: [{}]});
 						}));
 					}
 
@@ -278,11 +281,23 @@ function genglX(format, req, res){
 		}).then(dimensions => {
 			
 			let heightlessBuildingCount = 0;
+			let refPoint;
 
-			let refPoint = [
-				dimensions[0].results[0].geometry.coordinates[0][0][0],
-				dimensions[0].results[0].geometry.coordinates[0][0][1]
-			];
+			// if(dimensions.length){
+			// 	refPoint = [
+			// 		dimensions[0].results[0].geometry.coordinates[0][0][0],
+			// 		dimensions[0].results[0].geometry.coordinates[0][0][1]
+			// 	];
+			// }
+
+			
+			if (method === methodNames.RADIUS){
+				// use center point as ref point
+				refPoint = [grid.easting, grid.northing];
+			} else {
+				// use south east point as ref point (lower left)
+				refPoint = [lowerLeftGrid.easting, lowerLeftGrid.northing];
+			}
 
 			console.log('refPoint', refPoint);
 
@@ -321,7 +336,7 @@ function genglX(format, req, res){
 			console.log('Heightless building count', heightlessBuildingCount);
 
 
-			let glTF = generateglTF(meshesByGroup, `http://example.org/api/os${req.url.replace('.gltf', '.bin')}`, materialMapping);
+			let glTF = generateglTF(meshesByGroup, `/api/os${req.url.replace('.gltf', '.bin')}`, materialMapping);
 
 			console.log('saving to stash and dont wait for response');
 

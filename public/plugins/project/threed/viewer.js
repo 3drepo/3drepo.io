@@ -572,6 +572,8 @@ var Viewer = {};
 		};
 
 		this.viewPointChanged = function(event) {
+
+			//console.log('view point changed')
 			var vpInfo = self.getCurrentViewpointInfo();
 			var eye = vpInfo.position;
 			var viewDir = vpInfo.view_dir;
@@ -583,6 +585,7 @@ var Viewer = {};
 
 			$(self.viewer).trigger("myViewpointHasChanged", event);
 		};
+
 
 		this.onBackgroundClicked = function(functionToBind) {
 			$(document).on("bgroundClicked", functionToBind);
@@ -1765,12 +1768,284 @@ var Viewer = {};
 			}
 		};
 
+		// Append building models to 
+		// TO-DO: get project settings lat and lon, convert it to British National Grid System
+		// (lat, lon) from project settings is the lat and lon of the scene's origin point i.e. (0, 0, 0)
+		this.planeArea = function(draw){
+
+			var vpInfo = self.getCurrentViewpointInfo();
+			var fov = vpInfo.fov;
+			var camera = vpInfo.position;
+			var view_dir = vpInfo.view_dir;
+			var near = vpInfo.near;
+			var ratio = vpInfo.aspect_ratio; //(w/h) 
+			var up = vpInfo.up;
+			var right = vpInfo.right;
+
+			self.fakeOriginInBNG = new OsGridRef(509400, 428800);
+
+			console.log('camera', camera);
+			console.log('near', near);
+			console.log('view_dir', view_dir);
+			console.log('fov', fov);
+			console.log('up', up);
+			console.log('right', right);			
+			console.log('ratio', ratio);
+
+			var tanHalfFOV = Math.tan(fov / 2);
+			var planeOffsetX = [1, -1, 1, -1];
+			var planeOffsetY = [1, 1, -1, -1];
+			var coords = [];
+			var intersection = {};
+
+			for(var i = 0; i < planeOffsetX.length; i++)
+			{
+				var X = planeOffsetX[i];
+				var Y = planeOffsetY[i];
+
+				var rayDirection = [];
+
+				for (var c = 0; c < 3; c++)
+				{
+					rayDirection[c] = view_dir[c] + X * tanHalfFOV * right[c] + Y * (ratio / tanHalfFOV) * up[c];
+				}
+
+				var gamma = camera[1] / -rayDirection[1];
+
+				console.log("G: ", gamma);
+
+				coords[i] = [];
+
+				for (var c = 0; c < 3; c++)
+				{
+					coords[i][c] = camera[c] + gamma * rayDirection[c];
+				}
+			}
+
+			console.log(JSON.stringify(coords));
+
+			var step = 100;
+			var roundUpPlace = 10;
+
+			self.fakeOriginInBNG = new OsGridRef(509400, 428800);
+
+			var coordsX = [coords[0][0], coords[1][0], coords[2][0], coords[3][0]];
+			var coordsZ = [coords[0][2], coords[1][2], coords[2][2], coords[3][2]];
+
+			var startX = Math.ceil(Math.min.apply(Math, coordsX) / roundUpPlace) * roundUpPlace;
+			var endX = Math.ceil(Math.max.apply(Math, coordsX) / roundUpPlace) * roundUpPlace;
+			console.log('startX, endX', startX, endX);
+
+			var startZ = Math.ceil(Math.min.apply(Math, coordsZ) / roundUpPlace) * roundUpPlace;
+			var endZ = Math.ceil(Math.max.apply(Math, coordsZ) / roundUpPlace) * roundUpPlace;
+			console.log('startZ, endZ', startZ, endZ);
+
+			var mapTileCount = 0;
+			for (var x = startX; x <= endX; x+=step){
+				for (var z = startZ; z <= endZ; z+=step){
+					mapTileCount++;
+					console.log(x, z);
+					var osref = new OsGridRef(self.fakeOriginInBNG.easting + x, self.fakeOriginInBNG.northing + z);
+					var osrefno = osref.toString().split(' ');
+					osrefno[1] = osrefno[1].substring(0, 3);
+					osrefno[2] = osrefno[2].substring(0, 3);
+					osrefno = osrefno.join('');
+					console.log(osrefno);
+
+					if(draw){
+						self.addMapTile(osrefno);
+					}
+					
+				}
+			}
+
+
+			console.log('map tile count', mapTileCount);
+			/*
+			var Ax = camera[0] + near * view_dir[0] 
+						+ Math.tan(fov / 2) * near * right[0]
+						+ up[0] * ( (Math.tan(fov / 2) * near) / ratio);
+
+			var Ay = camera[1] + near * view_dir[1] 
+						- Math.tan(fov / 2) * near * right[1]
+						+ up[1] * ( (Math.tan(fov / 2) * near) / ratio);
+
+			var Az = camera[2] + near * view_dir[2] 
+						- Math.tan(fov / 2) * near * right[2]
+						+ up[2] * ( (Math.tan(fov / 2) * near) / ratio);
+
+
+			console.log('nearA', Ax, Ay, Az);
+
+			var K = camera[1] / (camera[1] - Ay);
+
+			var planeAx = camera[0] + K * (Ax - camera[0]);
+			var planeAy = camera[1] + K * (Ay - camera[1]);
+			var planeAz = camera[2] + K * (Az - camera[2]);
+
+			console.log('A', planeAx, planeAy, planeAz);
+
+
+			var Bx = camera[0] + near * view_dir[0] 
+						+ Math.tan(fov / 2) * near * right[0]
+						+ up[0] * ( (Math.tan(fov / 2) * near) / ratio);
+
+			var By = camera[1] + near * view_dir[1] 
+						+ Math.tan(fov / 2) * near * right[1]
+						+ up[1] * ( (Math.tan(fov / 2) * near) / ratio);
+
+			var Bz = camera[2] + near * view_dir[2] 
+						+ Math.tan(fov / 2) * near * right[2]
+						+ up[2] * ( (Math.tan(fov / 2) * near) / ratio);
+
+
+			console.log('nearB', Bx, By, Bz);
+
+			K = camera[1] / (camera[1] - By);
+
+			var planeBx = camera[0] + K * (Bx - camera[0]);
+			var planeBy = camera[1] + K * (By - camera[1]);
+			var planeBz = camera[2] + K * (Bz - camera[2]);
+
+			console.log('B', planeBx, planeBy, planeBz);
+
+
+
+			var Cx = camera[0] + near * view_dir[0] 
+						- Math.tan(fov / 2) * near * right[0]
+						- up[0] * ( (Math.tan(fov / 2) * near) / ratio);
+
+			var Cy = camera[1] + near * view_dir[1] 
+						- Math.tan(fov / 2) * near * right[1]
+						- up[1] * ( (Math.tan(fov / 2) * near) / ratio);
+
+			var Cz = camera[2] + near * view_dir[2] 
+						- Math.tan(fov / 2) * near * right[2]
+						- up[2] * ( (Math.tan(fov / 2) * near) / ratio);
+
+
+			console.log('nearC', Cx, Cy, Cz);
+
+			K = camera[1] / (camera[1] - Cy);
+
+			var planeCx = camera[0] + K * (Cx - camera[0]);
+			var planeCy = camera[1] + K * (Cy - camera[1]);
+			var planeCz = camera[2] + K * (Cz - camera[2]);
+
+			console.log('C', planeCx, planeCy, planeCz);
+
+
+			var Dx = camera[0] + near * view_dir[0] 
+						+ Math.tan(fov / 2) * near * right[0]
+						- up[0] * ( (Math.tan(fov / 2) * near) / ratio);
+
+			var Dy = camera[1] + near * view_dir[1] 
+						+ Math.tan(fov / 2) * near * right[1]
+						- up[1] * ( (Math.tan(fov / 2) * near) / ratio);
+
+			var Dz = camera[2] + near * view_dir[2] 
+						+ Math.tan(fov / 2) * near * right[2]
+						- up[2] * ( (Math.tan(fov / 2) * near) / ratio);
+
+
+			console.log('nearD', Dx, Dy, Dz);
+
+			K = camera[1] / (camera[1] - Dy);
+
+			var planeDx = camera[0] + K * (Dx - camera[0]);
+			var planeDy = camera[1] + K * (Dy - camera[1]);
+			var planeDz = camera[2] + K * (Dz - camera[2]);
+
+			console.log('D', planeDx, planeDy, planeDz);
+			*/
+
+			// var x = Math.min(planeAx, planeBx, planeCx, planeDx);
+			// var endX = Math.max(planeAx, planeBx, planeCx, planeDx);
+
+			// var z = Math.min(planeAz, planeBz, planeCz, planeDz);
+			// var endZ = Math.max(planeAz, planeBz, planeCz, planeDz);
+
+			// x = Math.ceil(x / step) * step;
+			// z = Math.ceil(z / step) * step;
+
+
+
+		};
+
+		this.addMapTilesByViewPoint = function(){
+
+			self.fakeOriginInBNG = new OsGridRef(509400, 428800);
+
+			var nearA, nearB, farA, farB;
+
+			var vpInfo = self.getCurrentViewpointInfo();
+			var camera = vpInfo.position;
+			var fov = vpInfo.fov;
+
+			var nearZLen = vpInfo.near - camera[2];
+			var nearAdj = Math.sqrt(Math.pow(nearZLen, 2)  + Math.pow(camera[1], 2));
+			var nearL = nearAdj * Math.tan(fov/2);
+
+			nearA = [camera[0] - nearL ,vpInfo.near];
+			nearB = [camera[0] + nearL ,vpInfo.near];
+
+			var farZLen = vpInfo.far - camera[2];
+			var farAdj = Math.sqrt(Math.pow(farZLen, 2), Math.pow(camera[1], 2));
+			var farL = farAdj * Math.tan(fov/2);
+
+			farA = [camera[0] - farL, vpInfo.far];
+			farB = [camera[0] + farL, vpInfo.far];
+
+			console.log('near', nearA, nearB);
+			console.log('far', farA, farB);
+
+			var step = 100;
+
+			var endX = Math.ceil(farB[0] / step) * step;
+			var endY = Math.ceil(farA[1] / step) * step;
+			
+			for (var x = Math.ceil(farA[0] / step) * step; x <= endX; x+=step){
+				for (var y = Math.ceil(nearA[1] / step) * step; y <= endY; y+=step){
+					console.log(x, y);
+					var osref = new OsGridRef(self.fakeOriginInBNG.easting + x, self.fakeOriginInBNG.northing + y);
+					var osrefno = osref.toString().split(' ');
+					osrefno[1] = osrefno[1].substring(0, 3);
+					osrefno[2] = osrefno[2].substring(0, 3);
+					osrefno = osrefno.join('');
+
+					self.addMapTile(osrefno);
+				}
+			}
+
+		};
+
+
 		this.addMapTile = function(osGridRef){
-			console.log('Hello World');
+				
+			self.fakeOriginInBNG = new OsGridRef(509400, 428800);
+
+			if (!self.fakeOriginInBNG){
+				self.fakeOriginInBNG = OsGridRef.parse(osGridRef);
+			}
+
+			console.log(self.fakeOriginInBNG);
+
 			var gltf = document.createElement('gltf');
 			gltf.setAttribute('url', '/api/os/buildings.gltf?method=osgrid&osgridref=' + osGridRef + '&draw=1');
-			self.getScene().appendChild(gltf);
-		}
+
+			var translate = [0, 0, 0];
+			var osCoor = OsGridRef.parse(osGridRef);
+			translate[0] = osCoor.easting - self.fakeOriginInBNG.easting;
+			translate[2] = self.fakeOriginInBNG.northing - osCoor.northing;
+
+			var transform = document.createElement('transform');
+			transform.setAttribute('translation', translate.join(' '));
+
+			transform.appendChild(gltf);
+			self.getScene().appendChild(transform);
+
+			return transform;
+		};
 	};
 
 	Viewer.prototype.SELECT_COLOUR = {

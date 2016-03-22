@@ -48,11 +48,12 @@ function generateMeshes(coors, height, refPoint){
 			vertices[triangulateCoors[i+2]]   
 		]);
 
+		//https://www.opengl.org/wiki/Face_Culling
 		//upper plane
 		meshes.push([ 
-			vertices[triangulateCoors[i] + coors.length],
+			vertices[triangulateCoors[i+2] + coors.length],
 			vertices[triangulateCoors[i+1] + coors.length],
-			vertices[triangulateCoors[i+2] +coors.length]   
+			vertices[triangulateCoors[i] + coors.length]   
 		]);
 	}
 
