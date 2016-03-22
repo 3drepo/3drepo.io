@@ -31,7 +31,7 @@
 		GridStore   = require("mongodb").GridStore,
 		Binary      = require("mongodb").Binary;
 
-	var C = require("../constants.js");
+	//var C = require("../constants.js");
 	var systemLogger = require("../logger.js").systemLogger;
 
 	// Create connection to Mongo
