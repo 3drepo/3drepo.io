@@ -8,19 +8,20 @@ var responseCodes = require('../response_codes.js');
 var Mesh = require('../models/mesh');
 var utils = require('../utils');
 var srcEncoder = require('../encoders/src_encoder');
+var stash = require('../models/helper/stash');
 
 router.get('/:uid.src.:subformat?', middlewares.hasReadAccessToProject, findByUID);
 router.get('/revision/:rid/:sid.src.:subformat?', middlewares.hasReadAccessToProject, findByRevision);
 
-function _getStashOptions(dbCol, format, url){
+// function _getStashOptions(dbCol, format, url){
 
-	if(config.disableCache){
-		return false;
-	} else {
-		return { format, filename: `/${dbCol.account}/${dbCol.project}${url}` };
-	}
+// 	if(config.disableCache){
+// 		return false;
+// 	} else {
+// 		return { format, filename: `/${dbCol.account}/${dbCol.project}${url}` };
+// 	}
 	
-}
+// }
 
 function findByUID(req, res, next){
 	'use strict';
@@ -28,25 +29,41 @@ function findByUID(req, res, next){
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
 	let place = utils.APIInfo(req);
 	let options = {};
-	options.stash = _getStashOptions(dbCol, 'src', req.url);
-	options.filename = `/${dbCol.account}/${dbCol.project}${req.url}`;
+	//options.stash = _getStashOptions(dbCol, 'src', req.url);
+	//options.filename = `/${dbCol.account}/${dbCol.project}${req.url}`;
 
-	Mesh.findByUID(dbCol, req.params.uid, options).then(mesh => {
-		
-		req.params.format = 'src';
-		let renderedObj = mesh;
-		
-		if(!options.stash){
-			// generate src format if obj not from stash
-			renderedObj = srcEncoder.render(req.params.project, mesh, req.query.tex_uuid || null, req.params.subformat, req[C.REQ_REPO].logger);
+	let filename = `/${dbCol.account}/${dbCol.project}${req.url}`;
+
+	let start = Promise.resolve(false);
+
+	if(!config.disableCache){
+		start = stash.findStashByFilename(dbCol, 'src', filename);
+	}
+
+
+	start.then(buffer => {
+
+		if(!buffer) {
+			return Mesh.findByUID(dbCol, req.params.uid, options).then(mesh => {
+				
+				req.params.format = 'src';
+				let renderedObj = srcEncoder.render(req.params.project, mesh, req.query.tex_uuid || null, req.params.subformat, req[C.REQ_REPO].logger);
+				
+				return Promise.resolve(renderedObj);
+			});
+
+		} else {
+			return Promise.resolve(buffer);
 		}
 
-		responseCodes.respond(place, req, res, next, responseCodes.OK, renderedObj);
-
+	}).then(data => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, data);
 	}).catch(err => {
 		console.log(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
+
+
 }
 
 function findByRevision(req, res, next){
@@ -55,22 +72,54 @@ function findByRevision(req, res, next){
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
 	let place = utils.APIInfo(req);
 	let options = {};
-	options.stash = _getStashOptions(dbCol, 'src', req.url);
+	// options.stash = _getStashOptions(dbCol, 'src', req.url);
+	let filename = `/${dbCol.account}/${dbCol.project}${req.url}`;
+	let start = Promise.resolve(false);
 
-	Mesh.findByRevision(dbCol, req.params.rid, req.params.sid, options).then(mesh => {
+	if(!config.disableCache){
+		start = stash.findStashByFilename(dbCol, 'src', filename);
+	}
 
-		req.params.format = 'src';
-		let renderedObj = mesh;
-		if(!options.stash){
-			// generate src format if obj not from stash
-			renderedObj = srcEncoder.render(req.params.project, mesh, req.query.tex_uuid || null, req.params.subformat, req[C.REQ_REPO].logger);
+
+	start.then(buffer => {
+
+		if(!buffer) {
+
+			return Mesh.findByRevision(dbCol, req.params.rid, req.params.sid, options).then(mesh => {
+				
+				req.params.format = 'src';
+				let renderedObj = srcEncoder.render(req.params.project, mesh, req.query.tex_uuid || null, req.params.subformat, req[C.REQ_REPO].logger);
+				
+				return Promise.resolve(renderedObj);
+			});
+
+		} else {
+			return Promise.resolve(buffer);
 		}
 
-		responseCodes.respond(place, req, res, next, responseCodes.OK, renderedObj);
+	}).then(data => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, data);
 	}).catch(err => {
 		console.log(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
+
+
+
+	// Mesh.findByRevision(dbCol, req.params.rid, req.params.sid, options).then(mesh => {
+
+	// 	req.params.format = 'src';
+	// 	let renderedObj = mesh;
+	// 	if(!options.stash){
+	// 		// generate src format if obj not from stash
+	// 		renderedObj = srcEncoder.render(req.params.project, mesh, req.query.tex_uuid || null, req.params.subformat, req[C.REQ_REPO].logger);
+	// 	}
+
+	// 	responseCodes.respond(place, req, res, next, responseCodes.OK, renderedObj);
+	// }).catch(err => {
+	// 	console.log(err.stack);
+	// 	responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	// });
 }
 
 module.exports = router;

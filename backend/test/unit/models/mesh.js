@@ -59,17 +59,17 @@ describe('Mesh and Object extended from repo base', function(){
 		});
 
 	
-		it('should return from stash if found', function(){
+		// it('should return from stash if found', function(){
 
-			let stashData = { 'a': 1 };
-			let stub = sinon.stub(Mesh, 'findStashByFilename').returns(Promise.resolve(stashData));
+		// 	let stashData = { 'a': 1 };
+		// 	let stub = sinon.stub(Mesh, 'findStashByFilename').returns(Promise.resolve(stashData));
 			
-			return Mesh.findByUID({}, '1234567890', { stash: {} }).then(data => {
+		// 	return Mesh.findByUID({}, '1234567890', { stash: {} }).then(data => {
 
-				expect(data).to.deep.equal(stashData);
-				stub.restore();
-			});
-		});
+		// 		expect(data).to.deep.equal(stashData);
+		// 		stub.restore();
+		// 	});
+		// });
 
 		it('should return from collection and decode if not found from stash', function(){
 
@@ -78,14 +78,14 @@ describe('Mesh and Object extended from repo base', function(){
 
 			let stub = sinon.stub(Mesh, 'findById').returns(Promise.resolve(dbData));
 			// mock no stash found
-			let stashStub = sinon.stub(Mesh, 'findStashByFilename').returns(Promise.resolve(false));
+			//let stashStub = sinon.stub(Mesh, 'findStashByFilename').returns(Promise.resolve(false));
 
 
 			return Mesh.findByUID({}, 'id', { stash: {} }).then(data => {
 
 				expect(data).to.deep.equal(dbData);
 				stub.restore();
-				stashStub.restore();
+				//stashStub.restore();
 
 			});
 		});
@@ -96,17 +96,17 @@ describe('Mesh and Object extended from repo base', function(){
 			expect(Mesh).to.have.property('findByRevision');
 		});
 
-		it('should return from stash if found', function(){
+		// it('should return from stash if found', function(){
 
-			let stashData = { 'a': 1 };
-			let stub = sinon.stub(Mesh, 'findStashByFilename').returns(Promise.resolve(stashData));
+		// 	let stashData = { 'a': 1 };
+		// 	let stub = sinon.stub(Mesh, 'findStashByFilename').returns(Promise.resolve(stashData));
 			
-			return Mesh.findByRevision({}, 'rid', 'sid', { stash: {} }).then(data => {
+		// 	return Mesh.findByRevision({}, 'rid', 'sid', { stash: {} }).then(data => {
 
-				expect(data).to.deep.equal(stashData);
-				stub.restore();
-			});
-		});
+		// 		expect(data).to.deep.equal(stashData);
+		// 		stub.restore();
+		// 	});
+		// });
 
 		it('should return from collection and decode if not found from stash', function(){
 
@@ -118,7 +118,7 @@ describe('Mesh and Object extended from repo base', function(){
 
 			let RevStub = sinon.stub(Revision, 'findById').returns(Promise.resolve(revisionObj));
 			// mock no stash found
-			let stashStub = sinon.stub(Mesh, 'findStashByFilename').returns(Promise.resolve(false));
+			//let stashStub = sinon.stub(Mesh, 'findStashByFilename').returns(Promise.resolve(false));
 			let meshStub = sinon.stub(Mesh, 'findOne').returns(Promise.resolve(dbData));
 
 			let dbCol = {};
@@ -133,7 +133,7 @@ describe('Mesh and Object extended from repo base', function(){
 				
 				RevStub.restore();
 				meshStub.restore();
-				stashStub.restore();
+				//stashStub.restore();
 
 			});
 		});
