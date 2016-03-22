@@ -1,0 +1,20 @@
+groups md-list {
+  padding: 0;
+}
+
+groups #addGroupTitle {
+  margin: 20px 0 20px 10px;
+}
+
+groups md-list-item button {
+  padding: 0 !important;
+}
+
+groups md-list-item p {
+  margin: 10px 20px !important;
+}
+
+groups .groupColourBar {
+  background: green;
+  width: 10px;
+}

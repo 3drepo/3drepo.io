@@ -1,0 +1,20 @@
+// Add group
+div(ng-if="vm.showAdd" layout-margin)
+	h4#addGroupTitle Add a new group
+	md-input-container.md-block(md-no-float="")
+		input(placeholder="Name", ng-model="vm.name")
+
+	md-button.md-raised.md-accent(ng-click="vm.saveGroup()", ng-disabled="vm.saveDisabled") Save
+
+// Groups list
+div(ng-if="vm.showGroups")
+	md-list
+		md-list-item.md-1-line(ng-repeat="group in vm.groups" ng-click="vm.showGroup($index)")
+			div(layout="row" layout-align="start" flex)
+				.groupColourBar(flex="none")
+				div(flex)
+					p {{group.name}}
+					md-divider
+
+// Group
+div(ng-if="vm.showGroup")

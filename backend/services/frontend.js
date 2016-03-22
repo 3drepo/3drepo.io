@@ -45,7 +45,7 @@ module.exports.createApp = function(template)
 		if (config.api_server.use_location) {
 			params.config_js = "var server_config = {}; server_config.apiUrl = " + config.api_server.location_url;
 		} else {
-			params.config_js = "var server_config = {}; server_config.apiUrl = function(path) { return '" + config.api_server.url + "/" + path + "'; };";
+			params.config_js = "var server_config = {}; server_config.apiUrl = function(path) { return '" + config.api_server.url + "/' + path; };";
 		}
 
 		if("wayfinder" in config)
@@ -95,7 +95,8 @@ module.exports.createApp = function(template)
 							"docs",
 							"utils",
 							"walkthroughVr",
-							"oculus"
+							"oculus",
+							"groups"
 						],
 						"children" : [
 							{

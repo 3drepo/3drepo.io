@@ -118,7 +118,7 @@ panel-card .md-menu {
   padding: 0;
 }
 
-panel-card .panelCardContainer {
+panel-card #panelCardContainer {
   overflow-x: hidden;
   overflow-y: auto;
   width: 100%;
@@ -142,4 +142,16 @@ panel-card #helpButton {
 panel-card .statusIcon {
   outline: none;
   width: 18px;
+}
+
+/** Panel Card Add ****************************************************************************************************/
+panel-card-add {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+panel-card-add md-icon {
+  font-size: 22px !important;
+  margin-top: 1px;
 }

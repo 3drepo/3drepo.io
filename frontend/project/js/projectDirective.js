@@ -50,13 +50,26 @@
 		panelCard.left.push({
 			type: "tree",
 			title: "Tree",
-			show: true,
+			show: false,
 			help: "Model elements shown in a tree structure",
 			icon: "fa-sitemap",
 			height: 820,
 			fixedHeight: false,
 			options: [
 				"filter"
+			]
+		});
+
+		panelCard.left.push({
+			type: "groups",
+			title: "Groups",
+			show: true,
+			help: "groups of objects",
+			icon: "fa-cubes",
+			height: 100,
+			fixedHeight: false,
+			options: [
+				"add"
 			]
 		});
 
