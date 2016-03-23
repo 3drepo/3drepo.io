@@ -194,7 +194,6 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 		// responseObject.status  = resCode.status;
 		// responseObject.message = resCode.message;
 
-
 		req[C.REQ_REPO].logger.logError(JSON.stringify(responseObject), req);
 
 		res.status(resCode.status).send(responseObject);

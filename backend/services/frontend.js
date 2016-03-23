@@ -139,7 +139,7 @@ module.exports.createApp = function(template)
 				});
 			});
 		} catch (e) {
-			// Jade files don"t exist
+			// Jade files don't exist
 		}
 	}
 

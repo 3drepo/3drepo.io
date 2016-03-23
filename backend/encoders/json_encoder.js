@@ -254,13 +254,15 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, par
 
 	            child.path = childTreeJSON.path;
 
-				getFullTreeRecurse(dbInterface, sceneGraph, child, account, project, childTreeJSON, function(err, recurseJSON) {
-					if (err.value) {
-						return loopCallback(err);
-					}
+				setTimeout( function () {
+					getFullTreeRecurse(dbInterface, sceneGraph, child, account, project, childTreeJSON, function(err, recurseJSON) {
+						if (err.value) {
+							return loopCallback(err);
+						}
 
-					loopCallback(null, recurseJSON);
-				});
+						loopCallback(null, recurseJSON);
+					});
+				}, 0);
 			}
 		}, function (err, children) {
 			if (err)
