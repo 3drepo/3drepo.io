@@ -6,6 +6,15 @@ div(ng-switch="vm.toShow")
 		md-input-container.md-block(md-no-float="")
 			input(placeholder="Name", ng-model="vm.name")
 
+		md-menu(md-position-mode="target-right target")
+			md-button.md-primary(ng-click="vm.openColoursMenu($mdOpenMenu, $event)") Assign colour
+			md-menu-content(width="3")
+				md-menu-item(ng-repeat="colour in vm.groupColours")
+					md-list-item
+						div(layout="row", layout-align="start center")
+							.groupsColourBar(style="background:{{colour.colour}}")
+							md-checkbox.md-secondary(ng-model="colour.assigned", aria-label="Colour Assign" ng-disabled="true")
+
 		md-button.md-raised.md-accent(ng-click="vm.saveGroup()", ng-disabled="vm.saveDisabled") Save
 
 	// Groups list

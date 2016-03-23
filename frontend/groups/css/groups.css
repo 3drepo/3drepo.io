@@ -26,3 +26,8 @@ groups #groupHeader {
 groups #groupHeader p {
   margin: 19px 20px;
 }
+
+.groupsColourBar {
+  width: 75px;
+  height: 15px;
+}

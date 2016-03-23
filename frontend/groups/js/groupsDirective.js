@@ -50,6 +50,14 @@
 		vm.toShow = "showGroups";
 		vm.saveDisabled = true;
 		vm.canAdd = true;
+		vm.groupColours = [
+			{colour: "#ff4000"},
+			{colour: "#ffbf00"},
+			{colour: "#80ff00"},
+			{colour: "#00ffff"},
+			{colour: "#0040ff"},
+			{colour: "#bf00ff"}
+		];
 		vm.groups = [
 			{name: "Doors"},
 			{name: "Toilets"},
@@ -123,5 +131,15 @@
 
 			vm.onContentHeightRequest({height: contentHeight});
 		}
+
+		/**
+		 * Open the menu to assign a colour
+		 *
+		 * @param $mdOpenMenu
+		 * @param event
+		 */
+		vm.openColoursMenu = function($mdOpenMenu, event) {
+			$mdOpenMenu(event);
+		};
 	}
 }());
