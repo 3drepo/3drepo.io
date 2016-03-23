@@ -269,6 +269,7 @@ var Viewer = {};
 					name: self.name,
 					model: self.modelString
 				});
+
 			}
 		};
 
@@ -352,6 +353,35 @@ var Viewer = {};
 				if (!self.downloadsLeft) {
 					callback(self.EVENT.LOADED);
 				}
+
+
+				// // add map tiles only when mouse down -> move -> mouse up
+				// self.onMouseDown(function(){
+				// 	//console.log('mouse down and try to move');
+
+				// 	var changed = false;
+
+				// 	var viewChangeHandler = function(){
+				// 		changed = true;
+				// 	};
+
+				// 	self.onViewpointChanged(viewChangeHandler);
+
+				// 	var mouseUpHandler = function(){
+				// 		if(changed){
+				// 			self.addMapTileByViewPoint();
+				// 		}
+						
+				// 		self.offViewpointChanged(viewChangeHandler);
+				// 		self.offMouseUp(mouseUpHandler);
+				// 	};
+
+				// 	self.onMouseUp(mouseUpHandler);
+				// });
+
+				// // init add map tiles
+				// self.addMapTileByViewPoint();
+				
 			});
 		};
 
@@ -514,9 +544,13 @@ var Viewer = {};
 			$(document).on("onMouseUp", functionToBind);
 		};
 
+		this.offMouseUp = function(functionToBind) {
+			$(document).off("onMouseUp", functionToBind);
+		};
+
 		this.onMouseDown = function(functionToBind) {
 			$(document).on("onMouseDown", functionToBind);
-		}
+		};
 
 		this.mouseDownPickPoint = function(event, pickEvent)
 		{
@@ -1771,7 +1805,7 @@ var Viewer = {};
 		// Append building models to 
 		// TO-DO: get project settings lat and lon, convert it to British National Grid System
 		// (lat, lon) from project settings is the lat and lon of the scene's origin point i.e. (0, 0, 0)
-		this.planeArea = function(draw){
+		this.addMapTileByViewPoint = function(noDraw){
 
 			var vpInfo = self.getCurrentViewpointInfo();
 			var fov = vpInfo.fov;
@@ -1812,7 +1846,7 @@ var Viewer = {};
 
 				var gamma = camera[1] / -rayDirection[1];
 
-				console.log("G: ", gamma);
+				//console.log("G: ", gamma);
 
 				coords[i] = [];
 
@@ -1822,7 +1856,7 @@ var Viewer = {};
 				}
 			}
 
-			console.log(JSON.stringify(coords));
+			//console.log(JSON.stringify(coords));
 
 			var step = 100;
 			var roundUpPlace = 10;
@@ -1841,79 +1875,44 @@ var Viewer = {};
 			console.log('startZ, endZ', startZ, endZ);
 
 			var mapTileCount = 0;
-			for (var x = startX; x <= endX; x+=step){
-				for (var z = startZ; z <= endZ; z+=step){
-					mapTileCount++;
-					//console.log(x, z);
-					var osref = new OsGridRef(self.fakeOriginInBNG.easting + x, self.fakeOriginInBNG.northing + z);
-					var osrefno = osref.toString().split(' ');
-					osrefno[1] = osrefno[1].substring(0, 3);
-					osrefno[2] = osrefno[2].substring(0, 3);
-					osrefno = osrefno.join('');
-					//console.log(osrefno);
+			var tileDists = [];
 
-					if(draw){
-						self.addMapTile(osrefno);
-					}
-					
+			for (var x = startX; x <= endX; x+=step) {
+				for (var z = startZ; z <= endZ; z+=step) {
+					mapTileCount++;
+					var dist = Math.sqrt(Math.pow(x - camera[0], 2) + Math.pow(z - camera[2], 2));
+					tileDists.push({ 'dist': dist, tile: [x, z]});
 				}
 			}
 
+			//sort tile by distance from camera
+			tileDists.sort(function(a, b){
+				return a.dist - b.dist;
+			});
 
-			console.log('map tile count', mapTileCount);
 
+			//console.log(tileDists);
+			//console.log('map tile count', mapTileCount);
 
+			//only render first 10 tiles
+			for(var i=0; i<tileDists.length && i < 10; i++) {
+				
+				var tile = tileDists[i].tile;
 
+				var osref = new OsGridRef(self.fakeOriginInBNG.easting + tile[0], self.fakeOriginInBNG.northing + tile[1]);
+				var osrefno = osref.toString().split(' ');
+				osrefno[1] = osrefno[1].substring(0, 3);
+				osrefno[2] = osrefno[2].substring(0, 3);
+				osrefno = osrefno.join('');
+				//console.log(osrefno);
 
-		};
-
-		this.addMapTilesByViewPoint = function(){
-
-			self.fakeOriginInBNG = new OsGridRef(509400, 428800);
-
-			var nearA, nearB, farA, farB;
-
-			var vpInfo = self.getCurrentViewpointInfo();
-			var camera = vpInfo.position;
-			var fov = vpInfo.fov;
-
-			var nearZLen = vpInfo.near - camera[2];
-			var nearAdj = Math.sqrt(Math.pow(nearZLen, 2)  + Math.pow(camera[1], 2));
-			var nearL = nearAdj * Math.tan(fov/2);
-
-			nearA = [camera[0] - nearL ,vpInfo.near];
-			nearB = [camera[0] + nearL ,vpInfo.near];
-
-			var farZLen = vpInfo.far - camera[2];
-			var farAdj = Math.sqrt(Math.pow(farZLen, 2), Math.pow(camera[1], 2));
-			var farL = farAdj * Math.tan(fov/2);
-
-			farA = [camera[0] - farL, vpInfo.far];
-			farB = [camera[0] + farL, vpInfo.far];
-
-			console.log('near', nearA, nearB);
-			console.log('far', farA, farB);
-
-			var step = 100;
-
-			var endX = Math.ceil(farB[0] / step) * step;
-			var endY = Math.ceil(farA[1] / step) * step;
-			
-			for (var x = Math.ceil(farA[0] / step) * step; x <= endX; x+=step){
-				for (var y = Math.ceil(nearA[1] / step) * step; y <= endY; y+=step){
-					console.log(x, y);
-					var osref = new OsGridRef(self.fakeOriginInBNG.easting + x, self.fakeOriginInBNG.northing + y);
-					var osrefno = osref.toString().split(' ');
-					osrefno[1] = osrefno[1].substring(0, 3);
-					osrefno[2] = osrefno[2].substring(0, 3);
-					osrefno = osrefno.join('');
-
+				if(!noDraw){
 					self.addMapTile(osrefno);
 				}
 			}
 
-		};
 
+		};
 
 		this.addMapTile = function(osGridRef){
 				

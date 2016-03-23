@@ -30,7 +30,6 @@ var meshSchema = Schema(
 // extend statics method
 _.extend(meshSchema.statics, repoBase.statics);
 
-
 var Mesh = ModelFactory.createClass(
 	'Mesh', 
 	meshSchema, 

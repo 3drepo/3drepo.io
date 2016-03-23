@@ -60,6 +60,8 @@ statics.findStashByFilename = function(dbCol, format, filename){
 statics.findByUID = function(dbCol, uid, options){
 	'use strict';
 
+	//let from3DRepoStash = false;
+
 	let projection = options && options.projection || {};
 
 	let _find = () => ModelFactory.db.db(dbCol.account).collection(`${dbCol.project}.stash.3drepo`).find({_id: stringToUUID(uid)}).limit(1).next().then(obj => {
@@ -68,6 +70,7 @@ statics.findByUID = function(dbCol, uid, options){
 			return this.findById(dbCol, stringToUUID(uid), projection);
 		}
 
+		//from3DRepoStash = true;
 		obj.toObject = () => obj;
 		return Promise.resolve(obj);
 
@@ -77,24 +80,48 @@ statics.findByUID = function(dbCol, uid, options){
 			return Promise.reject({resCode: responseCodes.OBJECT_NOT_FOUND});
 		}
 
-		return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj.toObject()]));
+		// load extRef if _.extRef is defined
+		if(obj.type === 'mesh' && obj._extRef){
+			
+			let promises = [];
+
+			obj = obj.toObject();
+
+			Object.keys(obj._extRef).forEach(type => {
+				let filename = obj._extRef[type];
+				promises.push(
+					this.findStashByFilename(dbCol, '3drepo', filename).then(data => {
+						obj[type] = { buffer: data };
+					})
+				);
+			});
+			
+			return Promise.all(promises).then( () => {
+				return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj]));
+			});
+
+		} else {
+			return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj.toObject()]));
+		}
+
+		
 	});
 
+	return _find();
 
+	// if(options && options.stash){
+	// 	//find obj from stash
+	// 	return this.findStashByFilename(dbCol, options.stash.format, options.stash.filename).then(buffer => {
+	// 		if(!buffer){
+	// 			return _find();
+	// 		} else {
+	// 			return Promise.resolve(buffer);
+	// 		}
+	// 	});
 
-	if(options && options.stash){
-		//find obj from stash
-		return this.findStashByFilename(dbCol, options.stash.format, options.stash.filename).then(buffer => {
-			if(!buffer){
-				return _find();
-			} else {
-				return Promise.resolve(buffer);
-			}
-		});
-
-	} else {
-		return _find();
-	}
+	// } else {
+	//	return _find();
+	//}
 };
 
 statics.findByRevision = function(dbCol, rid, sid, options){
@@ -110,23 +137,47 @@ statics.findByRevision = function(dbCol, rid, sid, options){
 				return Promise.reject({resCode: responseCodes.OBJECT_NOT_FOUND});
 			}
 
-			return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj.toObject()]));
+			// load extRef if _.extRef is defined
+			if(obj.type === 'mesh' && obj._extRef){
+				
+				let promises = [];
+
+				obj = obj.toObject();
+
+				Object.keys(obj._extRef).forEach(type => {
+					let filename = obj._extRef[type];
+					promises.push(
+						this.findStashByFilename(dbCol, '3drepo', filename).then(data => {
+							obj[type] = { buffer: data };
+						})
+					);
+				});
+				
+				return Promise.all(promises).then( () => {
+					return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj]));
+				});
+
+			} else {
+				return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj.toObject()]));
+			}
 		});
 	});
 
-	if(options && options.stash){
-		//find obj from stash
-		return this.findStashByFilename(dbCol, options.stash.format, options.stash.filename).then(buffer => {
-			if(!buffer){
-				return _find();
-			} else {
-				return Promise.resolve(buffer);
-			}
-		});
+	return _find();
+	
+	// if(options && options.stash){
+	// 	//find obj from stash
+	// 	return this.findStashByFilename(dbCol, options.stash.format, options.stash.filename).then(buffer => {
+	// 		if(!buffer){
+	// 			return _find();
+	// 		} else {
+	// 			return Promise.resolve(buffer);
+	// 		}
+	// 	});
 
-	} else {
-		return _find();
-	}
+	// } else {
+	// 	return _find();
+	// }
 };
 
 

@@ -378,11 +378,11 @@ function genglX(format, req, res){
 			res.status(200).json(glTF.json);
 		}
 	}).catch(err => {
-		console.error(err.stack);
+		console.log(err.stack);
 		if(err.message){
 			res.status(500).json({ message: err.message});
 		} else {
-			res.status(500).send(err);
+			res.status(500).send(err.toString());
 		}
 	});
 
