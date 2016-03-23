@@ -18,3 +18,11 @@ groups .groupColourBar {
   background: green;
   width: 10px;
 }
+
+groups #groupHeader {
+  height: 56px;
+}
+
+groups #groupHeader p {
+  margin: 19px 20px;
+}

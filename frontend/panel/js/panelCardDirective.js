@@ -95,7 +95,7 @@
 							element += "filter-text='vm.filterText' ";
 							break;
 						case "add":
-							element += "show-add='vm.showAdd' ";
+							element += "show-add='vm.showAdd' can-add='vm.canAdd'";
 							break;
 						case "visible":
 							element += "visible='vm.visible' ";
@@ -192,7 +192,7 @@
 				add;
 			if (vm.contentData.hasOwnProperty("options") && vm.contentData.options.indexOf("add") !== -1) {
 				add = angular.element(
-					"<panel-card-add show-add='vm.showAdd' ng-if='!vm.showAdd'></panel-card-add>"
+					"<panel-card-add show-add='vm.showAdd' ng-if='vm.canAdd'></panel-card-add>"
 				);
 				panelCardContainer.append(add);
 				$compile(add)($scope);

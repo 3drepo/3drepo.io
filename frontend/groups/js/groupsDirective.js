@@ -28,6 +28,7 @@
 			scope: {
 				show: "=",
 				showAdd: "=",
+				canAdd: "=",
 				onContentHeightRequest: "&",
 				onShowItem : "&",
 				hideItem: "="
@@ -46,8 +47,9 @@
 		/*
 		 * Init
 		 */
-		vm.showGroups = true;
+		vm.toShow = "showGroups";
 		vm.saveDisabled = true;
+		vm.canAdd = true;
 		vm.groups = [
 			{name: "Doors"},
 			{name: "Toilets"},
@@ -60,8 +62,9 @@
 		 */
 		$scope.$watch("vm.showAdd", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
-				vm.showGroups = false;
+				vm.toShow = "showAdd";
 				vm.onShowItem();
+				vm.canAdd = false;
 				setContentHeight();
 			}
 		});
@@ -71,8 +74,9 @@
 		 */
 		$scope.$watch("vm.hideItem", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
-				vm.showGroups = true;
+				vm.toShow = "showGroups";
 				vm.showAdd = false;
+				vm.canAdd = true;
 				setContentHeight();
 			}
 		});
@@ -92,7 +96,10 @@
 		 * @param index
 		 */
 		vm.showGroup = function (index) {
-
+			vm.selectedGroup = vm.groups[index];
+			vm.toShow = "showGroup";
+			vm.onShowItem();
+			vm.canAdd = false;
 		};
 
 		/**
@@ -103,13 +110,15 @@
 				groupHeaderHeight = 60, // It could be higher for items with long text but ignore that
 				addHeight = 190;
 
-			if (vm.showAdd) {
-				contentHeight = addHeight;
-			}
-			else if (vm.showGroups) {
-				angular.forEach(vm.groups, function() {
-					contentHeight += groupHeaderHeight;
-				});
+			switch (vm.toShow) {
+				case "showGroups":
+					angular.forEach(vm.groups, function() {
+						contentHeight += groupHeaderHeight;
+					});
+					break;
+				case "showAdd":
+					contentHeight = addHeight;
+					break;
 			}
 
 			vm.onContentHeightRequest({height: contentHeight});
