@@ -39,10 +39,11 @@
 		};
 	}
 
-	GroupsCtrl.$inject = ["$scope"];
+	GroupsCtrl.$inject = ["$scope", "EventService"];
 
-	function GroupsCtrl ($scope) {
-		var vm = this;
+	function GroupsCtrl ($scope, EventService) {
+		var vm = this,
+			eventWatch = null;
 		
 		/*
 		 * Init
@@ -50,18 +51,13 @@
 		vm.toShow = "showGroups";
 		vm.saveDisabled = true;
 		vm.canAdd = true;
-		vm.groupColours = [
-			{colour: "#ff4000"},
-			{colour: "#ffbf00"},
-			{colour: "#80ff00"},
-			{colour: "#00ffff"},
-			{colour: "#0040ff"},
-			{colour: "#bf00ff"}
-		];
+		vm.selectedGroup = null;
+		vm.editingGroup = false;
+		vm.editingText = "Start";
 		vm.groups = [
-			{name: "Doors"},
-			{name: "Toilets"},
-			{name: "Windows"}
+			{name: "Doors", colour: [255, 0, 0]},
+			{name: "Toilets", colour: [0, 255, 0]},
+			{name: "Windows", colour: [0, 0, 255]}
 		];
 		setContentHeight();
 
@@ -73,6 +69,8 @@
 				vm.toShow = "showAdd";
 				vm.onShowItem();
 				vm.canAdd = false;
+				vm.selectedGroup = null;
+				vm.name = "";
 				setContentHeight();
 			}
 		});
@@ -85,6 +83,7 @@
 				vm.toShow = "showGroups";
 				vm.showAdd = false;
 				vm.canAdd = true;
+				vm.selectedGroup = null;
 				setContentHeight();
 			}
 		});
@@ -98,6 +97,30 @@
 			}
 		});
 
+		/*
+		 * Toggle editing of group
+		 */
+		$scope.$watch("vm.editingGroup", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				vm.editingText = newValue ? "Stop" : "Start";
+			}
+		});
+
+
+		/*
+		 * Only watch for events when shown
+		 */
+		$scope.$watch("vm.show", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				if (newValue) {
+					setupEventWatch();
+				}
+				else if (angular.isDefined(eventWatch)) {
+					eventWatch(); // Cancel event watching
+				}
+			}
+		});
+
 		/**
 		 * Show the group details and highlight the group objects
 		 *
@@ -108,6 +131,75 @@
 			vm.toShow = "showGroup";
 			vm.onShowItem();
 			vm.canAdd = false;
+			vm.editingGroup = false;
+			setContentHeight();
+		};
+
+		/**
+		 * Callback to get the colour picker colour
+		 * 
+		 * @param colour
+		 */
+		vm.colourPickerChange = function (colour) {
+			vm.colourPickerColour = colour;
+			if (vm.selectedGroup !== null) {
+				vm.selectedGroup.colour = colour;
+			}
+		};
+
+		/**
+		 * Convert colour array to rgb string
+		 * 
+		 * @param {Array} colour
+		 * @returns {string}
+		 */
+		vm.colourToString = function (colour) {
+			return "rgb(" + colour.join(",") + ")";
+		};
+
+		/**
+		 * Delete the selected group
+		 */
+		vm.deleteGroup = function () {
+			var i, length;
+
+			for (i = 0, length = vm.groups.length; i < length; i += 1) {
+				if (vm.groups[i].name === vm.selectedGroup.name) {
+					vm.groups.splice(i, 1);
+					vm.selectedGroup = null;
+					vm.toShow = "showGroups";
+					vm.canAdd = true;
+					setContentHeight();
+					break;
+				}
+			}
+		};
+
+		/**
+		 * Save a group
+		 */
+		vm.saveGroup = function () {
+			var i, length, nameExists = false;
+
+			// Cannot have groups with duplicate names
+			for (i = 0, length = vm.groups.length; i < length; i += 1) {
+				if (vm.groups[i].name === vm.name) {
+					nameExists = true;
+					break;
+				}
+			}
+
+			if (!nameExists) {
+				vm.groups.push({
+					name: vm.name,
+					colour: vm.colourPickerColour
+				});
+				vm.selectedGroup = null;
+				vm.toShow = "showGroups";
+				vm.canAdd = true;
+				vm.showAdd = false;
+				setContentHeight();
+			}
 		};
 
 		/**
@@ -116,13 +208,17 @@
 		function setContentHeight () {
 			var contentHeight = 0,
 				groupHeaderHeight = 60, // It could be higher for items with long text but ignore that
-				addHeight = 190;
+				baseGroupHeight = 260,
+				addHeight = 250;
 
 			switch (vm.toShow) {
 				case "showGroups":
 					angular.forEach(vm.groups, function() {
 						contentHeight += groupHeaderHeight;
 					});
+					break;
+				case "showGroup":
+					contentHeight = baseGroupHeight;
 					break;
 				case "showAdd":
 					contentHeight = addHeight;
@@ -133,13 +229,15 @@
 		}
 
 		/**
-		 * Open the menu to assign a colour
-		 *
-		 * @param $mdOpenMenu
-		 * @param event
+		 * Set up event watching
 		 */
-		vm.openColoursMenu = function($mdOpenMenu, event) {
-			$mdOpenMenu(event);
-		};
+		function setupEventWatch () {
+			eventWatch = $scope.$watch(EventService.currentEvent, function (event) {
+				console.log("Groups:", event);
+				if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+					console.log(event.value);
+				}
+			});
+		}
 	}
 }());

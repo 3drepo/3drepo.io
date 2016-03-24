@@ -594,7 +594,7 @@ var Viewer = {};
 			}
 		};
 
-		this.clickObject = function(event, objEvent) {
+		this.clickObject = function(objEvent) {
 			var account = null;
 			var project = null;
 			var id = null;

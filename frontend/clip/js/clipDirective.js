@@ -50,7 +50,6 @@
 		vm.visible = false;
 
 		function initClippingPlane () {
-			console.log(123);
 			$timeout(function () {
 				var initPosition = (vm.sliderMax - vm.sliderPosition) / vm.sliderMax;
 				

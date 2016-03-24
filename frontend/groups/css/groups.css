@@ -2,8 +2,14 @@ groups md-list {
   padding: 0;
 }
 
-groups #addGroupTitle {
-  margin: 20px 0 20px 10px;
+groups #groupsAdd #addGroupTitle {
+  margin: 10px 0 20px 5px;
+}
+groups #groupsAdd md-input-container {
+  margin: 0;
+}
+groups #groupsAdd #groupsSave {
+  margin: 20px 0;
 }
 
 groups md-list-item button {
@@ -14,8 +20,11 @@ groups md-list-item p {
   margin: 10px 20px !important;
 }
 
+groups #groupsList ._md-list-item-inner {
+  padding: 0;
+}
+
 groups .groupColourBar {
-  background: green;
   width: 10px;
 }
 
@@ -27,7 +36,27 @@ groups #groupHeader p {
   margin: 19px 20px;
 }
 
-.groupsColourBar {
-  width: 75px;
-  height: 15px;
+groups #groupColour {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  border: 1px solid #DDDDDD;
+}
+
+groups #groupsGroup md-switch {
+  margin-left: 15px;
+}
+
+groups #groupsGroup #deleteGroup {
+  margin: 20px 0 0 10px;
+}
+
+groups #groupsGroup #deleteGroupButton {
+  margin: 0;
+}
+
+groups #groupsGroup #deleteGroup p {
+  margin-top: 5px;
+  color: rgba(0,0,0,0.5);
+  font-size: 14px;
 }
