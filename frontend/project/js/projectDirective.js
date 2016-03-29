@@ -53,7 +53,7 @@
 			show: false,
 			help: "Model elements shown in a tree structure",
 			icon: "fa-sitemap",
-			height: 820,
+			minHeight: 80,
 			fixedHeight: false,
 			options: [
 				"filter"
@@ -66,7 +66,7 @@
 			show: true,
 			help: "groups of objects",
 			icon: "fa-cubes",
-			height: 100,
+			minHeight: 80,
 			fixedHeight: false,
 			options: [
 				"add"
@@ -99,7 +99,7 @@
 					secondSelected: false
 				}
 			],
-			height: 820,
+			minHeight: 80,
 			fixedHeight: false,
 			options: [
 				"print",
@@ -114,7 +114,6 @@
 			show: false,
 			help: "Clipping plane",
 			icon: "fa-object-group",
-			height: 120,
 			fixedHeight: true,
 			options: [
 				"visible"
@@ -126,7 +125,7 @@
 			show: false,
 			help: "Documents",
 			icon: "fa-clone",
-			height: 80,
+			minHeight: 80,
 			fixedHeight: false,
 			options: []
 		});

@@ -45,9 +45,13 @@
 			currentOpenDocTypes = [],
 			eventWatch;
 
+		/*
+		 * Init
+		 */
 		vm.showDocsGetProgress = false;
 		vm.showInfo = true;
 		vm.info = "No object currently selected";
+		vm.onContentHeightRequest({height: 80});
 
 		/**
 		 * Get any documents associated with an object

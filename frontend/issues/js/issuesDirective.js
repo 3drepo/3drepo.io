@@ -79,6 +79,7 @@
 		vm.projectUserRoles = [];
 		vm.selectedIssue = null;
 		vm.autoSaveComment = false;
+		vm.onContentHeightRequest({height: 0});
 
 		/*
 		 * Get all the Issues

@@ -38,12 +38,10 @@
         };
     }
 
-    PanelCtrl.$inject = ["$scope", "$window", "EventService"];
+    PanelCtrl.$inject = ["$scope", "$window", "$timeout", "EventService"];
 
-    function PanelCtrl ($scope, $window, EventService) {
+    function PanelCtrl ($scope, $window, $timeout, EventService) {
         var vm = this,
-            i = 0,
-            length = 0,
 			lastWindowHeight = $window.innerHeight,
 			panelTopBottomGap = 40,
 			maxHeightAvailable = $window.innerHeight - panelTopBottomGap,
@@ -54,7 +52,8 @@
 			panelToolbarHeight = 48,
 			numFiltersShown = 0,
 			filterHeight = 50,
-			totalOccupiedHeight = 0;
+			totalOccupiedHeight = 0,
+			contentItemsShown = [];
 
 		vm.contentItems = [];
         vm.showPanel = true;
@@ -62,12 +61,14 @@
 		vm.activate = true;
 
         $scope.$watch(EventService.currentEvent, function (event) {
+			var i;
             if (event.type === EventService.EVENT.PANEL_CONTENT_SETUP) {
 				vm.contentItems = (event.value[vm.position]);
 				hideLastItemGap();
 
-				for (var i = 0; i < vm.contentItems.length; i += 1) {
+				for (i = 0; i < vm.contentItems.length; i += 1) {
 					if (vm.contentItems[i].show) {
+						contentItemsShown.push(vm.contentItems[i]);
 						numPanelsShowing += 1;
 						if (!vm.contentItems[i].fixedHeight) {
 							numNonFixedHeightPanelsShowing += 1;
@@ -82,6 +83,7 @@
 
 		// The last card should not have a gap so that scrolling in resized window works correctly
 		function hideLastItemGap () {
+			var i;
 			var lastFound = false;
 			for (i = (vm.contentItems.length - 1); i >= 0; i -= 1) {
 				if (vm.contentItems[i].show) {
@@ -104,7 +106,7 @@
 			}
 		});
 
-		angular.element(document).bind('mouseup', function (event) {
+		angular.element(document).bind('mouseup', function () {
 			vm.activate = true;
 			$scope.$apply();
 		});
@@ -115,7 +117,7 @@
 		 * @param contentType
 		 */
 		vm.buttonClick = function (contentType) {
-			var contentItem;
+			var i, j, length, contentItem;
 
 			// Get the content item
             for (i = 0, length = vm.contentItems.length; i < length; i += 1) {
@@ -127,182 +129,117 @@
 
 					// Resize any shown panel contents
 					if (vm.contentItems[i].show) {
-						numPanelsShowing += 1;
-						if (vm.contentItems[i].fixedHeight) {
-							fixedContentHeightTotal += contentItem.height;
-						}
-						else {
-							numNonFixedHeightPanelsShowing += 1;
-						}
-
-						vm.heightRequest(contentItem, contentItem.height);
+						contentItemsShown.push(vm.contentItems[i]);
+						calculateContentHeights();
 					}
 					else {
-						numPanelsShowing -= 1;
-						if (vm.contentItems[i].fixedHeight) {
-							fixedContentHeightTotal -= contentItem.height;
+						for (j = (contentItemsShown.length - 1); j >= 0; j -= 1) {
+							if (contentItemsShown[j].type === contentType) {
+								contentItemsShown.splice(j, 1);
+							}
 						}
-						else {
-							numNonFixedHeightPanelsShowing -= 1;
-						}
-
 						vm.contentItems[i].showGap = false;
-
-						resizeShownPanelContents();
+						calculateContentHeights();
 					}
-
 					break;
                 }
             }
+
 			hideLastItemGap();
         };
 
 		/**
-		 * A panel content is requesting a height change
-		 * Change the heights of any shown panels if necessary
+		 * A panel content is requesting a height change - change the heights of any shown panels
 		 *
-		 * @param contentItem
-		 * @param height
+		 * @param {Object} contentItem
+		 * @param {Number} height
 		 */
 		vm.heightRequest = function (contentItem, height) {
-			var i, length,
-				maxNonFixedContentItemHeight = getMaxNonFixedContentItemHeight();
-
-			// Keep a note of the requested height to use when a panel content is hidden
-			contentItem.requestedHeight = height;
-
-			for (i = 0, length = vm.contentItems.length; i < length; i += 1) {
-				// Only consider shown items
-				if (vm.contentItems[i].show) {
-					// Other shown content
-					if (vm.contentItems[i].type !== contentItem.type) {
-						if (vm.contentItems[i].height > maxNonFixedContentItemHeight) {
-							// Reduce height of any other content with a height greater than the average maximum
-							vm.contentItems[i].height = maxNonFixedContentItemHeight;
-						}
-					}
-					else {
-						// Content requesting
-						if (contentItem.fixedHeight) {
-							contentItem.height = height;
-						}
-						else {
-							if (height > maxNonFixedContentItemHeight) {
-								contentItem.height = maxNonFixedContentItemHeight;
-							}
-							else {
-								contentItem.height = height;
-							}
-						}
-					}
-				}
-			}
+			contentItem.requestedHeight = height; // Keep a note of the requested height
+			contentItem.height = height; // Initially set the height to the requested height
+			calculateContentHeights();
 		};
 
 		/**
-		 * Resize shown panel contents after a panel content is hidden
+		 * Start the recursive calculation of the content heghts
 		 */
-		function resizeShownPanelContents () {
-			var i, length,
-				maxNonFixedContentItemHeight = getMaxNonFixedContentItemHeight();
+		function calculateContentHeights() {
+			var tempContentItemsShown = angular.copy(contentItemsShown);
+			assignHeights(maxHeightAvailable, tempContentItemsShown, null);
+			$timeout(function () {
+				$scope.$apply();
+			});
+		}
 
-			for (i = 0, length = vm.contentItems.length; i < length; i += 1) {
-				if (vm.contentItems[i].show && !vm.contentItems[i].fixedHeight) {
-					if (vm.contentItems[i].requestedHeight > maxNonFixedContentItemHeight) {
-						vm.contentItems[i].height = maxNonFixedContentItemHeight;
+		/**
+		 * Recursively calculate the heights for each content item
+		 *
+		 * @param {Number} heightAvailable
+		 * @param {Array} contentItems
+		 * @param {Array} previousContentItems
+		 */
+		function assignHeights(heightAvailable, contentItems, previousContentItems) {
+			var i,
+				availableHeight = heightAvailable,
+				maxContentItemHeight = (availableHeight - (panelToolbarHeight * contentItems.length)) / contentItems.length,
+				prev = null,
+				contentItem;
+
+			if (Array.isArray(previousContentItems) && (previousContentItems.length === contentItems.length)) {
+				// End the recurse by dividing out the remaining space to remaining content
+				for (i = (contentItems.length - 1); i >= 0; i-= 1) {
+					contentItem = getContentItemShownFromType(contentItems[i].type);
+					contentItem.height = maxContentItemHeight;
+				}
+			}
+			else {
+				// Let content have requested height if less than max available for each
+				prev = contentItems;
+				for (i = (contentItems.length - 1); i >= 0; i-= 1) {
+					if ((contentItems[i].requestedHeight < maxContentItemHeight) ||
+						(contentItems[i].fixedHeight)) {
+						contentItem = getContentItemShownFromType(contentItems[i].type);
+						contentItem.height = contentItems[i].requestedHeight;
+						console.log(contentItems[i].type, contentItem.height);
+						availableHeight -= contentItem.height + panelToolbarHeight + itemGap;
+						contentItems.splice(i, 1);
 					}
-					else {
-						vm.contentItems[i].height = vm.contentItems[i].requestedHeight;
+					else if (!contentItems[i].fixedHeight && contentItems[i].minHeight >= maxContentItemHeight) {
+						contentItem = getContentItemShownFromType(contentItems[i].type);
+						contentItem.height = maxContentItemHeight;
+						availableHeight -= contentItem.height + panelToolbarHeight + itemGap;
+						contentItems.splice(i, 1);
 					}
+				}
+
+				if (contentItems.length > 0) {
+					assignHeights(availableHeight, contentItems, prev);
 				}
 			}
 		}
 
 		/**
-		 * Get the maximum height for non fixed height panel content
 		 *
-		 * maxHeightAvailable - maximum available screen height
-		 * numPanelsShowing - total number of panel contents to show
-		 * panelToolbarHeight - height of the tool bar of a panel content
-		 * itemGap - gap between each panel content
-		 * fixedContentHeightTotal - total height of all panel content with fixed height
-		 * numNonFixedHeightPanelsShowing  - total number of panel contents with non fixed height
+		 * Get the shown content item with the passed type
 		 *
-		 * @returns {number}
+		 * @param type
+		 * @returns {Object}
 		 */
-		function getMaxNonFixedContentItemHeight () {
-			return (
-				maxHeightAvailable -
-				(numPanelsShowing * panelToolbarHeight) -
-				((numPanelsShowing - 1) * itemGap) -
-				fixedContentHeightTotal -
-				numFiltersShown * filterHeight
-				) /
-				numNonFixedHeightPanelsShowing;
-		}
-
-		/**
-		 * Get the total height occupied by the shown panel contents
-		 *
-		 * @returns {number}
-		 */
-		function getTotalOccupiedHeight () {
+		function getContentItemShownFromType (type) {
 			var i, length;
-
-			totalOccupiedHeight = 0;
-
-			for (i = 0, length = vm.contentItems.length; i < length; i += 1) {
-				if (vm.contentItems[i].show) {
-					totalOccupiedHeight += panelToolbarHeight + vm.contentItems[i].height;
-					if (i !== 0) {
-						totalOccupiedHeight += itemGap;
-					}
+			for (i = 0, length = contentItemsShown.length; i < length; i += 1) {
+				if (contentItemsShown[i].type === type) {
+					return contentItemsShown[i];
 				}
 			}
-
-			return totalOccupiedHeight;
 		}
 
 		/*
-		 * Handle changes to the browser screen height
-	  	 */
-		$scope.$watch("vm.window.innerHeight", function (newValue) {
-			if (getTotalOccupiedHeight() >= maxHeightAvailable) {
-				resizeShownPanelContentsOnWindowResize(newValue - lastWindowHeight);
-			}
-			lastWindowHeight = newValue;
-
-			maxHeightAvailable = newValue - panelTopBottomGap;
+		 * Watch for screen resize
+		 */
+		angular.element($window).bind("resize", function() {
+			maxHeightAvailable = $window.innerHeight - panelTopBottomGap;
+			calculateContentHeights();
 		});
-
-		/**
-		 * Resize all shown non fixed height panel contents when the browser height changes
-		 *
-		 * @param heightChange
-		 */
-		function resizeShownPanelContentsOnWindowResize (heightChange) {
-			var i, length,
-				nonFixedHeightPanelContentHeightChange = heightChange / numNonFixedHeightPanelsShowing;
-
-			for (i = 0, length = vm.contentItems.length; i < length; i += 1) {
-				if (vm.contentItems[i].show && !vm.contentItems[i].fixedHeight) {
-					vm.contentItems[i].height += nonFixedHeightPanelContentHeightChange;
-
-					if (vm.contentItems[i].height > vm.contentItems[i].requestedHeight) {
-						vm.contentItems[i].height = vm.contentItems[i].requestedHeight;
-					}
-				}
-			}
-		}
-
-		/**
-		 * Keep a count of all panel content filters shown
-		 *
-		 * @param show
-		 */
-		vm.showFilter = function (show) {
-			numFiltersShown += show ? 1 : -1;
-			resizeShownPanelContents();
-		};
 	}
 }());
