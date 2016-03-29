@@ -189,24 +189,30 @@
 				// End the recurse by dividing out the remaining space to remaining content
 				for (i = (contentItems.length - 1); i >= 0; i-= 1) {
 					contentItem = getContentItemShownFromType(contentItems[i].type);
-					contentItem.height = maxContentItemHeight;
+					// Flexible content shouldn't have a size smaller than its minHeight
+					// or a requested height that is less than the minHeight
+					if (maxContentItemHeight < contentItem.minHeight) {
+						if (contentItem.requestedHeight < contentItem.minHeight) {
+							contentItem.height = contentItem.requestedHeight;
+						}
+						else {
+							contentItem.height = contentItem.minHeight;
+						}
+					}
+					else {
+						contentItem.height = maxContentItemHeight;
+					}
 				}
 			}
 			else {
 				// Let content have requested height if less than max available for each
-				prev = contentItems;
+				prev = angular.copy(contentItems);
 				for (i = (contentItems.length - 1); i >= 0; i-= 1) {
 					if ((contentItems[i].requestedHeight < maxContentItemHeight) ||
 						(contentItems[i].fixedHeight)) {
 						contentItem = getContentItemShownFromType(contentItems[i].type);
 						contentItem.height = contentItems[i].requestedHeight;
-						console.log(contentItems[i].type, contentItem.height);
-						availableHeight -= contentItem.height + panelToolbarHeight + itemGap;
-						contentItems.splice(i, 1);
-					}
-					else if (!contentItems[i].fixedHeight && contentItems[i].minHeight >= maxContentItemHeight) {
-						contentItem = getContentItemShownFromType(contentItems[i].type);
-						contentItem.height = maxContentItemHeight;
+						console.log(11111);
 						availableHeight -= contentItem.height + panelToolbarHeight + itemGap;
 						contentItems.splice(i, 1);
 					}
@@ -219,7 +225,6 @@
 		}
 
 		/**
-		 *
 		 * Get the shown content item with the passed type
 		 *
 		 * @param type
