@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 var ModelFactory = require('./factory/modelFactory');
 var responseCodes = require('../response_codes.js');
 var _ = require('lodash');
-
+var DB = require('../db/db');
 var schema = mongoose.Schema({
 	_id : String,
 	user: String,
@@ -11,10 +11,15 @@ var schema = mongoose.Schema({
 	roles: {}
 });
 
-schema.statics.authenticate = function(username, password){
+schema.statics.authenticate = function(logger, username, password){
 	'use strict';
 
-	let adminDB = ModelFactory.db.admin();
+	let adminDB = DB(logger).getAuthDB();
+
+	if(!username || !password){
+		return Promise.reject();
+	}
+
 	return adminDB.authenticate(username, password).then(() => {
 		return this.findByUserName(username);
 	}).then(user => {
