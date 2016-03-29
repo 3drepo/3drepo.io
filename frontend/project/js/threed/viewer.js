@@ -301,18 +301,21 @@ var Viewer = {};
 				if (objEvent.target.tagName.toUpperCase() === "INLINE") {
 					self.inlineRoots[objEvent.target.nameSpaceName] = objEvent.target;
 				} else if (objEvent.target.tagName.toUpperCase() === "MULTIPART") {
-					var nameSpaceName = objEvent.target._x3domNode._nameSpace.name;
-					if (!self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-						self.multipartNodesByProject[nameSpaceName] = {};
+					if (self.multipartNodes.indexOf(objEvent.target) === -1)
+					{
+						var nameSpaceName = objEvent.target._x3domNode._nameSpace.name;
+						if (!self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
+							self.multipartNodesByProject[nameSpaceName] = {};
+						}
+
+						var multipartName = objEvent.target.getAttribute("id");
+						var multipartNameParts = multipartName.split("__");
+						var multipartID = multipartNameParts[multipartNameParts.length - 1];
+
+						self.multipartNodesByProject[nameSpaceName][multipartID] = objEvent.target;
+
+						self.multipartNodes.push(objEvent.target);
 					}
-
-					var multipartName = objEvent.target.getAttribute("id");
-					var multipartNameParts = multipartName.split("__");
-					var multipartID = multipartNameParts[multipartNameParts.length - 1];
-
-					self.multipartNodesByProject[nameSpaceName][multipartID] = objEvent.target;
-
-					self.multipartNodes.push(objEvent.target);
 				}
 
 				self.downloadsLeft += (objEvent.target.querySelectorAll("[load]").length - 1);
@@ -498,12 +501,6 @@ var Viewer = {};
 		{
 			var pickingInfo = self.getViewArea()._pickingInfo;
 
-			// Hack until double click problem solved
-			self.pickPoint(); // This updates self.pickObject
-			if (self.pickObject.pickObj !== null) {
-				pickingInfo.pickObj = self.pickObject;
-			}
-
 			if (pickingInfo.pickObj)
 			{
 				var account, project;
@@ -590,11 +587,11 @@ var Viewer = {};
 			self.oldPart = part;
 
 			for (i = 0; i < part.length; i++) {
-				part[i].setEmissiveColor(self.SELECT_COLOUR.EMISSIVE, "front");
+				part[i].setEmissiveColor(self.SELECT_COLOUR.EMISSIVE, "both");
 			}
 		};
 
-		this.clickObject = function(event, objEvent) {
+		this.clickObject = function(objEvent) {
 			var account = null;
 			var project = null;
 			var id = null;
@@ -657,7 +654,7 @@ var Viewer = {};
 				self.selectParts(fullPartsList, zoom);
 			}
 
-			var object = document.querySelectorAll("[id$=" + id + "]");
+			var object = document.querySelectorAll("[id$='" + id + "']");
 
 			if (object[0]) {
 				self.setApp(object[0]);
@@ -676,6 +673,8 @@ var Viewer = {};
 			}
 
 			if (!ids) {
+
+
 				ids = [];
 			}
 
@@ -694,12 +693,10 @@ var Viewer = {};
 				}
 
 				for (i = 0; i < self.switchedOldParts.length; i++) {
-					if (ids.indexOf(self.switchedOldParts[i]) > -1) {
-						self.switchedOldParts[i].setVisibility(state);
-						delete self.switchOldParts[i];
-						i--;
-					}
+					self.switchedOldParts[i].setVisibility(true);
 				}
+
+				self.switchedOldParts = [];
 
 				for (var multipartNodeName in nsMultipartNodes) {
 					if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
@@ -714,18 +711,16 @@ var Viewer = {};
 			}
 
 			for (i = 0; i < self.switchedObjects.length; i++) {
-				if (ids.indexOf(self.switchedObjects[i]) > -1) {
-					self.switchedObjects[i].setAttribute("render", state.toString());
-					delete self.switchOldParts[i];
-					i--;
-				}
+				self.switchedObjects[i].setAttribute("render", "true");
 			}
 
-			var object = document.querySelectorAll("[id$=" + id + "]");
+			self.switchedObjects = [];
+
+			var object = document.querySelectorAll("[id$='" + id + "']");
 
 			if (object[0]) {
 				object[0].setAttribute("render", state.toString());
-				self.switchedObjects.push(id);
+				self.switchedObjects.push(object[0]);
 			}
 		};
 
@@ -991,13 +986,11 @@ var Viewer = {};
 			scene._vf.pickMode = "idbuf";
 			scene._vf.pickMode = oldPickMode;
 
-			self.pickObject.pickPos = viewArea._pickingInfo.pickPos;
-			self.pickObject.pickNorm = viewArea._pickingInfo.pickNorm;
-			self.pickObject.pickObj = viewArea._pickingInfo.pickObj;
+			self.pickObject = ViewerUtil.cloneObject(viewArea._pickingInfo);
 			self.pickObject.part = null;
 			self.pickObject.partID = null;
 
-			var objId = viewArea._pickingInfo.shadowObjectId;
+			var objId = self.pickObject.shadowObjectId;
 
 			if (scene._multiPartMap) {
 				for (var mpi = 0; mpi < scene._multiPartMap.multiParts.length; mpi++) {

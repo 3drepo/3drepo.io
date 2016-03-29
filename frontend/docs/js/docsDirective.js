@@ -68,7 +68,7 @@
 				vm.docs = data;
 				vm.showInfo = (Object.keys(vm.docs).length === 0);
 				if (vm.showInfo) {
-					vm.info = "No documents exist for object: " + object.name;
+					vm.info = "No documents exist for selected object";
 					vm.onContentHeightRequest({height: noDocumentsHeight});
 				}
 				else {
