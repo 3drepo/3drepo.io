@@ -355,33 +355,33 @@ var Viewer = {};
 				}
 
 
-				// // add map tiles only when mouse down -> move -> mouse up
-				// self.onMouseDown(function(){
-				// 	//console.log('mouse down and try to move');
+				// add map tiles only when mouse down -> move -> mouse up
+				self.onMouseDown(function(){
+					//console.log('mouse down and try to move');
 
-				// 	var changed = false;
+					var changed = false;
 
-				// 	var viewChangeHandler = function(){
-				// 		changed = true;
-				// 	};
+					var viewChangeHandler = function(){
+						changed = true;
+					};
 
-				// 	self.onViewpointChanged(viewChangeHandler);
+					self.onViewpointChanged(viewChangeHandler);
 
-				// 	var mouseUpHandler = function(){
-				// 		if(changed){
-				// 			self.addMapTileByViewPoint();
-				// 		}
+					var mouseUpHandler = function(){
+						if(changed){
+							self.addMapTileByViewPoint();
+						}
 						
-				// 		self.offViewpointChanged(viewChangeHandler);
-				// 		self.offMouseUp(mouseUpHandler);
-				// 	};
+						self.offViewpointChanged(viewChangeHandler);
+						self.offMouseUp(mouseUpHandler);
+					};
 
-				// 	self.onMouseUp(mouseUpHandler);
-				// });
+					self.onMouseUp(mouseUpHandler);
+				});
 
-				// // init add map tiles
-				// self.addMapTileByViewPoint();
-				
+				// init add map tiles
+				self.addMapTileByViewPoint();
+
 			});
 		};
 
@@ -1106,6 +1106,12 @@ var Viewer = {};
 				if (self.settings.hasOwnProperty("ambientLight")) {
 					self.setAmbientLight(self.settings.ambientLight);
 				}
+
+				if(self.settings.hasOwnProperty("mapTile")){
+					
+					self.originBNG = OsGridRef.latLonToOsGrid(new LatLon(self.settings.mapTile.lat, self.settings.mapTile.lon));
+
+				}
 			}
 		};
 
@@ -1807,6 +1813,10 @@ var Viewer = {};
 		// (lat, lon) from project settings is the lat and lon of the scene's origin point i.e. (0, 0, 0)
 		this.addMapTileByViewPoint = function(noDraw){
 
+			if(!self.originBNG){
+				return console.log('No origin BNG coors set, no map tiles can be added.');
+			}
+
 			var vpInfo = self.getCurrentViewpointInfo();
 			var fov = vpInfo.fov;
 			var camera = vpInfo.position;
@@ -1816,7 +1826,7 @@ var Viewer = {};
 			var up = vpInfo.up;
 			var right = vpInfo.right;
 
-			self.fakeOriginInBNG = new OsGridRef(509400, 428800);
+			// self.fakeOriginInBNG = new OsGridRef(509400, 428800);
 
 			console.log('camera', camera);
 			console.log('near', near);
@@ -1861,7 +1871,7 @@ var Viewer = {};
 			var step = 100;
 			var roundUpPlace = 10;
 
-			self.fakeOriginInBNG = new OsGridRef(509400, 428800);
+			// self.fakeOriginInBNG = new OsGridRef(509400, 428800);
 
 			var coordsX = [coords[0][0], coords[1][0], coords[2][0], coords[3][0]];
 			var coordsZ = [coords[0][2], coords[1][2], coords[2][2], coords[3][2]];
@@ -1899,11 +1909,8 @@ var Viewer = {};
 				
 				var tile = tileDists[i].tile;
 
-				var osref = new OsGridRef(self.fakeOriginInBNG.easting + tile[0], self.fakeOriginInBNG.northing + tile[1]);
-				var osrefno = osref.toString().split(' ');
-				osrefno[1] = osrefno[1].substring(0, 3);
-				osrefno[2] = osrefno[2].substring(0, 3);
-				osrefno = osrefno.join('');
+				var osRef = new OsGridRef(self.originBNG.easting + tile[0], self.originBNG.northing + tile[1]);
+				var osrefno = self._OSRefNo(osRef, 3);
 				//console.log(osrefno);
 
 				if(!noDraw){
@@ -1914,15 +1921,34 @@ var Viewer = {};
 
 		};
 
+		//length 1 = 1m, 2 = 10m, 3 = 100m, 4 = 1km, 5 = 10km
+		this._OSRefNo = function(osRef, length){
+			
+			if (length < 1 || length > 5){
+				return console.log('length must be in range [1 - 5]');
+			}
+
+			var osrefno = osRef.toString().split(' ');
+			osrefno[1] = osrefno[1].substring(0, length);
+			osrefno[2] = osrefno[2].substring(0, length);
+			osrefno = osrefno.join('');
+
+			return osrefno;
+		};
+
 		this.addMapTile = function(osGridRef){
 				
-			self.fakeOriginInBNG = new OsGridRef(509400, 428800);
+			// self.fakeOriginInBNG = new OsGridRef(509400, 428800);
+
+			if(!self.originBNG){
+				return console.log('No origin BNG coors set, no map tiles can be added.');
+			}
 
 			self.addedTileRefs =  self.addedTileRefs || [];
 
-			if (!self.fakeOriginInBNG){
-				self.fakeOriginInBNG = OsGridRef.parse(osGridRef);
-			}
+			// if (!self.fakeOriginInBNG){
+			// 	self.fakeOriginInBNG = OsGridRef.parse(osGridRef);
+			// }
 
 			if(self.addedTileRefs.indexOf(osGridRef) !== -1) {
 				console.log(osGridRef + ' has already been added');
@@ -1931,15 +1957,15 @@ var Viewer = {};
 
 			self.addedTileRefs.push(osGridRef);
 
-			console.log(self.fakeOriginInBNG);
+			//console.log(self.fakeOriginInBNG);
 
 			var gltf = document.createElement('gltf');
 			gltf.setAttribute('url', '/api/os/buildings.gltf?method=osgrid&osgridref=' + osGridRef + '&draw=1');
 
 			var translate = [0, 0, 0];
 			var osCoor = OsGridRef.parse(osGridRef);
-			translate[0] = osCoor.easting - self.fakeOriginInBNG.easting;
-			translate[2] = self.fakeOriginInBNG.northing - osCoor.northing;
+			translate[0] = osCoor.easting - self.originBNG.easting;
+			translate[2] = self.originBNG.northing - osCoor.northing;
 
 			var transform = document.createElement('transform');
 			transform.setAttribute('translation', translate.join(' '));
@@ -1948,6 +1974,19 @@ var Viewer = {};
 			self.getScene().appendChild(transform);
 
 			return transform;
+		};
+
+		//http://stackoverflow.com/questions/22032270/how-to-retrieve-layerpoint-x-y-from-latitude-and-longitude-coordinates-using
+		this.getSlippyTileLayerPoints = function (lat_deg, lng_deg, zoom) {
+			var x = (Math.floor((lng_deg + 180) / 360 * Math.pow(2, zoom)));
+			var y = (Math.floor((1 - Math.log(Math.tan(lat_deg * Math.PI / 180) + 1 / Math.cos(lat_deg * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom)));
+
+			var layerPoint = {
+				x: x,
+				y: y
+			};
+
+			return layerPoint;
 		};
 	};
 

@@ -7,6 +7,7 @@ var generateMeshes = require('../libs/generateMeshes');
 var generateglTF = require('../libs/generateglTF');
 var config = require('../config.js');
 var stash = require('../models/helper/stash');
+var C = require('../constants');
 
 // wrapper for os get apis
 var OSGet = require('../libs/OSGet')(config.os);
@@ -60,7 +61,7 @@ function genglX(format, req, res){
 	};
 
 	//TO-DO: hard coded account for stashing 3d building grids
-	let dbCol =  {account: 'ordnancesurvey', project: 'properties_dimensions'};
+	let dbCol =  {account: 'ordnancesurvey', project: 'properties_dimensions', logger: req[C.REQ_REPO].logger};
 
 	var method = req.query.method;
 
@@ -271,7 +272,7 @@ function genglX(format, req, res){
 			console.log('Building count (cleaned)', cleanedBuildingCount);
 			
 			if(draw){
-				console.log('draw');
+				//console.log('draw');
 				return Promise.all(promises);
 			} else {
 				return Promise.reject({ message: 'Please put draw=1 in query string if you wish to generate glTF'});
@@ -363,9 +364,14 @@ function genglX(format, req, res){
 			return Promise.resolve({ json: json, buffer: bin});
 		} else {
 			console.log('stash not found');
-			return Promise.reject({ message: 'No stash and we are not going to bother os api server today so no data for you, sorry.'})
-			//return getBuildingsAndGenerate();
+
+			if(true){
+				return Promise.reject({ message: 'No stash and we are not going to bother os api server today so no data for you, sorry.'});
+			} else {
+				return getBuildingsAndGenerate();
+			}
 		}
+
 	}).then(glTF => {
 		if(format === 'bin') {
 			res.status(200).send(glTF.buffer);
