@@ -45,7 +45,9 @@ function login(req, res, next){
 	let responsePlace = utils.APIInfo(req);
 
 	req[C.REQ_REPO].logger.logInfo('Authenticating user', req.body.username);
-	User.authenticate(req.body.username, req.body.password).then(user => {
+
+
+	User.authenticate(req[C.REQ_REPO].logger, req.body.username, req.body.password).then(user => {
 
 		req[C.REQ_REPO].logger.logInfo("User is logged in", req.body.username);
 
