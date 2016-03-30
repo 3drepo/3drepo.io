@@ -661,66 +661,63 @@ var Viewer = {};
 			}
 		};
 
-		this.switchedOldParts = [];
-		this.switchedObjects = [];
+		//this.switchedOldParts = [];
+		//this.switchedObjects = [];
 
-		this.switchObjectVisibility = function(account, project, id, ids, state) {
+		this.__processSwitchVisibility = function(nameSpaceName, ids, state)
+		{
+			if (ids && ids.length) {
+				// Is this a multipart project
+				if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
+					var nsMultipartNodes;
+
+					// If account and project have been specified
+					// this helps narrow the search
+					if (nameSpaceName) {
+						nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
+					} else {
+						// Otherwise iterate over everything
+						nsMultipartNodes = self.multipartNodes;
+					}
+
+					for (var multipartNodeName in nsMultipartNodes) {
+						if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
+							var parts = nsMultipartNodes[multipartNodeName].getParts(ids);
+
+							if (parts && parts.ids.length > 0) {
+								parts.setVisibility(state);
+							}
+						}
+					}
+				}
+
+				for(var i = 0; i < ids.length; i++)
+				{
+					var id = ids[i];
+					var object = document.querySelectorAll("[id$='" + id + "']");
+
+					if (object[0]) {
+						object[0].setAttribute("render", state.toString());
+					}
+				}
+			}
+		};
+
+		this.switchObjectVisibility = function(account, project, visible_ids, invisible_ids) {
 			var nameSpaceName = null;
-			var i;
 
 			if (account && project) {
 				nameSpaceName = account + "__" + project;
 			}
 
-			if (!ids) {
-
-
-				ids = [];
+			if (visible_ids)
+			{
+				self.__processSwitchVisibility(nameSpaceName, visible_ids, true);
 			}
 
-			// Is this a multipart project
-			if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-				var fullPartsList = [];
-				var nsMultipartNodes;
-
-				// If account and project have been specified
-				// this helps narrow the search
-				if (nameSpaceName) {
-					nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
-				} else {
-					// Otherwise iterate over everything
-					nsMultipartNodes = self.multipartNodes;
-				}
-
-				for (i = 0; i < self.switchedOldParts.length; i++) {
-					self.switchedOldParts[i].setVisibility(true);
-				}
-
-				self.switchedOldParts = [];
-
-				for (var multipartNodeName in nsMultipartNodes) {
-					if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
-						var parts = nsMultipartNodes[multipartNodeName].getParts(ids);
-
-						if (parts && parts.ids.length > 0) {
-							self.switchedOldParts = self.switchedOldParts.concat(parts.ids);
-							parts.setVisibility(state);
-						}
-					}
-				}
-			}
-
-			for (i = 0; i < self.switchedObjects.length; i++) {
-				self.switchedObjects[i].setAttribute("render", "true");
-			}
-
-			self.switchedObjects = [];
-
-			var object = document.querySelectorAll("[id$='" + id + "']");
-
-			if (object[0]) {
-				object[0].setAttribute("render", state.toString());
-				self.switchedObjects.push(object[0]);
+			if (invisible_ids)
+			{
+				 self.__processSwitchVisibility(nameSpaceName, invisible_ids, false);
 			}
 		};
 
