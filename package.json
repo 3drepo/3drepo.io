@@ -14,7 +14,7 @@
   "dependencies": {
     "amqplib": "latest",
     "app-config": "latest",
-    "async": "latest",
+    "async": "1.5.2",
     "body-parser": "latest",
     "bower": "latest",
     "compression": "latest",
