@@ -212,7 +212,6 @@
 						(contentItems[i].fixedHeight)) {
 						contentItem = getContentItemShownFromType(contentItems[i].type);
 						contentItem.height = contentItems[i].requestedHeight;
-						console.log(11111);
 						availableHeight -= contentItem.height + panelToolbarHeight + itemGap;
 						contentItems.splice(i, 1);
 					}
