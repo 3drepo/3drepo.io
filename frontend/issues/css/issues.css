@@ -87,6 +87,25 @@ issues .issueHeader .issueInfo h5 {
   margin-left: 5px;
 }
 
+issues #addAlert {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+issues #addAlert #addAlertBackground {
+  background: rgba(0, 0, 0, 0.6);
+  padding: 40px;
+}
+issues #addAlert #addAlertBackground #addAlertInfo {
+  background: #FFFFFF;
+  border-radius: 4px;
+}
+issues #addAlert #addAlertBackground #addAlertInfo .md-button {
+  background: #EEEEEE;
+}
+
 
 /** Issue *************************************************************************************************************/
 
