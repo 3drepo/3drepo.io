@@ -16,9 +16,10 @@
  */
 
 
-module.exports.app = function (sharedSession) {
+module.exports.createApp = function (serverConfig) {
 	"use strict";
 
+	let sharedSession = serverConfig.session;
 
 	let log_iface = require("../logger.js");
 
@@ -26,10 +27,9 @@ module.exports.app = function (sharedSession) {
 	let routes = require("../routes/routes.js")();
 	let config = require("../config.js");
 	let compress = require("compression");
-	let responseCodes = require('../response_codes');
+	let responseCodes = require("../response_codes");
 
 	let C = require("../constants");
-
 
 	//let systemLogger = log_iface.systemLogger;
 	// Attach the encoders to the router
@@ -50,14 +50,14 @@ module.exports.app = function (sharedSession) {
 	// init the singleton db connection for modelFactory
 	app.use((req, res, next) => {
 		// init the singleton db connection
-		let DB = require('../db/db')(req[C.REQ_REPO].logger);
+		let DB = require("../db/db")(req[C.REQ_REPO].logger);
 
-		DB.getDB('default').then( db => {
+		DB.getDB("default").then( db => {
 			// set db to singleton modelFactory class
-			require('../models/factory/modelFactory').setDB(db);
+			require("../models/factory/modelFactory").setDB(db);
 			next();
 		}).catch( err => {
-			responseCodes.respond('Express Middleware', req, res, next, responseCodes.DB_ERROR(err), err);
+			responseCodes.respond("Express Middleware", req, res, next, responseCodes.DB_ERROR(err), err);
 		});
 	});
 
@@ -65,67 +65,65 @@ module.exports.app = function (sharedSession) {
 		extended: true
 	}));
 
-	app.set('views', './jade');
-	app.set('view_engine', 'jade');
+	app.set("views", "./jade");
+	app.set("view_engine", "jade");
 	app.use(bodyParser.json());
+
+	app.use(sharedSession);
 
 	app.use(compress());
 
 	// Allow cross origin requests to the API server
-	if (config.crossOrigin)
+	if (serverConfig.allowedOrigins)
 	{
 		let allowCrossDomain = function(req, res, next) {
-			res.header("Access-Control-Allow-Origin", req.get("origin"));
-			res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
-			res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, Content-Length, X-Requested-With");
-			res.header("Access-Control-Allow-Credentials", true);
-			//res.header("Cache-Control", "public, max-age=3600");
 
-			// intercept OPTIONS method
-			if ("OPTIONS" === req.method) {
-				res.sendStatus(200);
-			} else {
-				next();
+			var origin = req.headers.origin;
+
+			if (serverConfig.allowedOrigins.indexOf(origin) > -1) {
+				res.header("Access-Control-Allow-Origin", origin);
+				res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
+				res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, Content-Length, X-Requested-With");
+				res.header("Access-Control-Allow-Credentials", true);
+				//res.header("Cache-Control", "public, max-age=3600");
 			}
+
+			next();
 		};
 
 		app.use(allowCrossDomain);
-	} else {
-		app.use(function(req, res, next) {
-			// intercept OPTIONS method
-			if ("OPTIONS" === req.method) {
-				res.sendStatus(200);
-			} else {
-				next();
-			}
-		});
 	}
 
-	app.use(sharedSession);
+	app.use(function(req, res, next) {
+		// intercept OPTIONS method
+		if ("OPTIONS" === req.method) {
+			res.sendStatus(200);
+		} else {
+			next();
+		}
+	});
 
 	if(config.test_helper_api){
 		// test helpers
-		app.use('/tests', require('../js/core/handlers/testHelper'));
+		app.use("/tests", require("../js/core/handlers/testHelper"));
 		// api doc console
-		app.use(express.static('doc'));
+		app.use(express.static("doc"));
 	}
 
-
-
 	//auth handler
-	app.use('/', require('../routes/auth'));
+	app.use("/", require("../routes/auth"));
 	//project handlers
-	app.use('/:account/:project', require('../routes/project'));
+	app.use("/:account/:project", require("../routes/project"));
 	// project package handlers
-	app.use('/:account/:project', require('../routes/projectPackage'));
+	app.use("/:account/:project", require("../routes/projectPackage"));
 	// bid hanlders
-	app.use('/:account/:project/packages/:packageName', require('../routes/bid'));
+	app.use("/:account/:project/packages/:packageName", require("../routes/bid"));
 	//issues handler
-	app.use('/:account/:project', require('../routes/issue'));
+	app.use("/:account/:project", require("../routes/issue"));
 	//mesh handler
-	app.use('/:account/:project', require('../routes/mesh'));
+	app.use("/:account/:project", require("../routes/mesh"));
 	//texture handler
-	app.use('/:account/:project', require('../routes/texture'));
+	app.use("/:account/:project", require("../routes/texture"));
 
 
 	app.use("/", routes.router);

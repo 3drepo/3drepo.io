@@ -15,7 +15,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-module.exports.createApp = function(template)
+module.exports.createApp = function(serverConfig)
 {
 	"use strict";
 
@@ -25,6 +25,7 @@ module.exports.createApp = function(template)
 	let compress = require("compression");
 	let fs = require("fs");
 	let jade = require("jade");
+	let systemLogger = require("../logger.js").systemLogger;
 
 	let app = express();
 
@@ -55,11 +56,14 @@ module.exports.createApp = function(template)
 			params.config_js += "\nserver_config.demoproject = '" + config.wayfinder.demoproject + "';";
 		}
 
-
-		params.config_js += "\nserver_config.backgroundImage = '" + config.backgroundImage + "';";
 		params.config_js += "\nserver_config.chatHost	= '" + config.api_server.chat_host + "';";
 		params.config_js += "\nserver_config.chatPath	= '" + config.api_server.chat_path + "';";
 		params.config_js += "\nserver_config.apiVersion = '" + config.version + "';";
+
+		if (serverConfig.backgroundImage)
+		{
+			params.config_js += "\nserver_config.backgroundImage = '" + serverConfig.backgroundImage + "'";
+		}
 
 		params.config_js += "\nserver_config.return_path = '/';";
 
@@ -71,8 +75,7 @@ module.exports.createApp = function(template)
 
 	app.use("/public", express.static(__dirname + "/../../public"));
 
-	// TODO: Replace with user based plugin selection
-	var pluginStructure = {
+	var DEFAULT_PLUGIN_STRUCTURE = {
 		"plugin" : "home",
 		"friends" : [
 			"login"
@@ -96,22 +99,22 @@ module.exports.createApp = function(template)
 							"utils",
 							"walkthroughVr",
 							"oculus"
-						],
-						"children" : [
-							{
-								"plugin": "bid4free",
-								children: [
-									{
-										plugin: "bid4freeWorkspace"
-									}
-								]
-							}
 						]
 					}
 				]
 			}
 		]
 	};
+
+	// TODO: Replace with user based plugin selection
+	var pluginStructure = {};
+
+	if (serverConfig.pluginStructure)
+	{
+		pluginStructure = require("../../" + serverConfig.pluginStructure);
+	} else {
+		pluginStructure = DEFAULT_PLUGIN_STRUCTURE;
+	}
 
 	/**
 	 * Get the jade files for the required state or plugin
@@ -211,9 +214,7 @@ module.exports.createApp = function(template)
 		params.uistate = JSON.stringify(params.uistate);
 
 		setupJade(params);
-		console.log("frontendJade: ", params.frontendJade);
-
-		res.render(template, params);
+		res.render(serverConfig.template, params);
 	});
 
 	return app;
