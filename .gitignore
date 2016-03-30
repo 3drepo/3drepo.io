@@ -13,6 +13,9 @@ certs
 public/dist/plugins.concat.js
 public/dist/plugins.min.js
 
+public/dist/three_d_repo.min.js
+public/dist/three_d_repo.min.js.map
+
 public/images/logos
 
 .DS_Store
