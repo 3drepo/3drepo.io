@@ -50,7 +50,7 @@
 		panelCard.left.push({
 			type: "tree",
 			title: "Tree",
-			show: false,
+			show: true,
 			help: "Model elements shown in a tree structure",
 			icon: "fa-sitemap",
 			minHeight: 80,
