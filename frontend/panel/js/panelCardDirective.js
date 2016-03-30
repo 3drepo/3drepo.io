@@ -133,14 +133,6 @@
 							);
 							break;
 
-						/*
-						case "add":
-							option = angular.element(
-								"<panel-card-option-add show-add='vm.showAdd'></panel-card-option-add>"
-							);
-							break;
-						*/
-
 						case "print":
 							option = angular.element(
 								"<panel-card-option-print account='vm.account' project='vm.project'></panel-card-option-print>"

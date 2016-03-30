@@ -66,7 +66,7 @@ panel .md-icon-button md-icon{
   right: 0;
 }
 
-/** Panel Content *****************************************************************************************************/
+/** Panel Card ********************************************************************************************************/
 
 panel-card {
   display: block;
@@ -126,10 +126,15 @@ panel-card #panelCardContainer {
 }
 
 panel-card .panelCardFilter {
-  background: #E8EAF6;
-  padding: 5px 10px 0 10px;
-  height: 50px;
-  border-bottom: solid 1px #C5CAE9;
+  margin-left: 10px;
+  opacity: 0.7;
+}
+panel-card .panelCardFilter md-icon {
+  margin-left: 12px;
+  outline: none;
+}
+panel-card .panelCardFilter md-icon:hover {
+  cursor: pointer;
 }
 
 panel-card #helpButton {
@@ -142,6 +147,10 @@ panel-card #helpButton {
 panel-card .statusIcon {
   outline: none;
   width: 18px;
+}
+
+panel-card #filterContainer {
+  max-width: 50%;
 }
 
 /** Panel Card Add ****************************************************************************************************/
