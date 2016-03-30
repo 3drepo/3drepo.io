@@ -186,7 +186,7 @@ function generateglTFJSONGroup(byteOffsets, binUri, options){
 	return json;
 }
 
-function generateBuffer(meshesByGroup, binName, materialMapping){
+function generateBuffer(meshesByBuilding, binName, materialMapping){
 	'use strict';
 	
 	let GLBYTE = {
