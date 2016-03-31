@@ -29,7 +29,7 @@
 				account:  "=",
 				project:  "=",
 				branch:   "=",
-				revision: "=",				
+				revision: "=",
 				filterText: "=",
 				onContentHeightRequest: "&"
 			},
@@ -104,6 +104,50 @@
 			vm.nodesToShow[0].toggleState = "visible";
 		}
 
+		vm.visible   = [];
+		vm.invisible = [];
+
+		/**
+		 * Set the toggle state of a node
+		 * @param node Node to change the visibility for
+		 * @param String visibility Visibility to change to
+		 */
+		vm.setToggleState = function(node, visibility)
+		{
+			var idx = -1;
+
+			// TODO: This function is probably in-efficient
+			if (visibility === "invisible")
+			{
+				if ((idx = vm.invisible.indexOf(node._id)) !== -1)
+				{
+					vm.invisible.splice(idx,1);
+				} else {
+					vm.invisible.push(node._id);
+				}
+
+				if ((idx = vm.visible.indexOf(node._id)) !== -1)
+				{
+					vm.visible.splice(idx, 1);
+				}
+			} else {
+				if ((idx = vm.visible.indexOf(node._id)) !== -1)
+				{
+					vm.visible.splice(idx,1);
+				} else {
+					vm.visible.push(node._id);
+				}
+
+				if ((idx = vm.invisible.indexOf(node._id)) !== -1)
+				{
+					vm.invisible.splice(idx, 1);
+				}
+
+			}
+
+			node.toggleState = visibility;
+		};
+
 		/**
 		 * Expand a node to show its children.
 		 * @param _id
@@ -131,9 +175,9 @@
 						numChildren = vm.nodesToShow[index].children.length;
 						for (i = 0; i < numChildren; i += 1) {
 							vm.nodesToShow[index].children[i].expanded = false;
-							if (!vm.nodesToShow[index].children[i].hasOwnProperty("toggleState")) {
-								vm.nodesToShow[index].children[i].toggleState = vm.nodesToShow[index].toggleState;
-							}
+
+							vm.setToggleState(vm.nodesToShow[index].children[i], vm.nodesToShow[index].toggleState);
+
 							vm.nodesToShow[index].children[i].level = vm.nodesToShow[index].level + 1;
 							vm.nodesToShow[index].children[i].hasChildren = vm.nodesToShow[index].children[i].children.length > 0;
 							vm.nodesToShow.splice(index + i + 1, 0, vm.nodesToShow[index].children[i]);
@@ -166,7 +210,9 @@
 
 					for (j = 0; j < childrenLength; j += 1) {
 						vm.nodesToShow[i].children[j].selected = (vm.nodesToShow[i].children[j]._id === selectedId);
-						vm.nodesToShow[i].children[j].toggleState = "visible";
+
+						vm.setToggleState(vm.nodesToShow[i].children[j], "visible");
+
 						vm.nodesToShow[i].children[j].hasChildren = vm.nodesToShow[i].children[j].children.length > 0;
 						if (vm.nodesToShow[i].children[j].selected) {
 							selectionFound = true;
@@ -199,7 +245,7 @@
 				{
 					var objectID = event.value.id;
 					var path = vm.idToPath[objectID].split("__");
-					
+
 					initNodesToShow();
 					expandToSelection(path, 0);
 				}
@@ -224,12 +270,12 @@
 			for (i = 0, nodesLength = vm.nodesToShow.length; i < nodesLength; i += 1) {
 				// Set node toggle state
 				if (vm.nodesToShow[i]._id === node._id) {
-					vm.nodesToShow[i].toggleState = (vm.nodesToShow[i].toggleState === "visible") ? "invisible" : "visible";
+					vm.setToggleState(vm.nodesToShow[i], (vm.nodesToShow[i].toggleState === "visible") ? "invisible" : "visible");
 					nodeToggleState = vm.nodesToShow[i].toggleState;
 				}
 				// Set children to node toggle state
 				else if (vm.nodesToShow[i].path.indexOf(node._id) !== -1) {
-					vm.nodesToShow[i].toggleState = nodeToggleState;
+					vm.setToggleState(vm.nodesToShow[i], nodeToggleState);
 				}
 				// Get node parent
 				if (vm.nodesToShow[i]._id === path[path.length - 1]) {
@@ -242,18 +288,20 @@
 				for (i = (path.length - 1); i >= 0; i -= 1) {
 					for (j = 0, nodesLength = vm.nodesToShow.length; j < nodesLength; j += 1) {
 						if (vm.nodesToShow[j]._id === path[i]) {
-							vm.nodesToShow[j].toggleState = "visible";
 							numInvisible = 0;
 							for (k = 0; k < vm.nodesToShow[j].children.length; k += 1) {
-								if (vm.nodesToShow[j].children[k].toggleState === "invisible") {
+								if ((vm.nodesToShow[j].children[k].toggleState === "invisible") || (vm.nodesToShow[j].children[k].toggleState === "parentOfInvisible"))
+								{
 									numInvisible += 1;
-									vm.nodesToShow[j].toggleState = "parentOfInvisible";
-								} else if (vm.nodesToShow[j].children[k].toggleState === "parentOfInvisible") {
-									vm.nodesToShow[j].toggleState = "parentOfInvisible";
 								}
 							}
+
 							if (numInvisible === vm.nodesToShow[j].children.length) {
-								vm.nodesToShow[j].toggleState = "invisible";
+								vm.setToggleState(vm.nodesToShow[j], "invisible");
+							} else if (numInvisible > 0) {
+								vm.setToggleState(vm.nodesToShow[j], "parentOfInvisible");
+							} else {
+								vm.setToggleState(vm.nodesToShow[j], "visible");
 							}
 						}
 					}
@@ -275,11 +323,10 @@
 			EventService.send(EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY, {
 				source: "tree",
 				account: node.account,
-				project: node.project, 
-				state: (node.toggleState === "visible"),
-				id: node._id, 
-				name: node.name, 
-				ids : map 
+				project: node.project,
+				name: node.name,
+				visible_ids: vm.visible,
+				invisible_ids: vm.invisible
 			});
 		};
 
@@ -384,17 +431,25 @@
 					}
 				}
 
+				// Select the parent node in the group for cards and viewer
 				EventService.send(EventService.EVENT.VIEWER.OBJECT_SELECTED, {
 					source: "tree",
 					account: node.account,
 					project: node.project,
-					id: node._id,
+					ids: node._id,
 					name: node.name,
-					ids : map
+				});
+
+				// Separately highlight the children
+				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, {
+					source: "tree",
+					account: node.account,
+					project: node.project,
+					ids: map
 				});
 			}
 		};
-		
+
 		vm.filterItemSelected = function (item) {
 			if (vm.currentFilterItemSelected === null) {
 				vm.nodes[item.index].class = "selectedFilterItem";
@@ -407,14 +462,14 @@
 				vm.nodes[item.index].class = "selectedFilterItem";
 				vm.currentFilterItemSelected = item;
 			}
-			
+
 			var selectedNode = vm.nodes[item.index];
-			
+
 			vm.selectNode(selectedNode);
 		};
 
 		vm.toggleFilterNode = function (item) {
-			item.toggleState = (item.toggleState === "visible") ? "invisible" : "visible";
+			vm.setToggleState(item, (item.toggleState === "visible") ? "invisible" : "visible");
 			item.path = item._id;
 			toggleNode(item);
 		};

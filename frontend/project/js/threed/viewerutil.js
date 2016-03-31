@@ -24,6 +24,24 @@ var ViewerUtil;
 
 	var eventElement = document;
 
+	ViewerUtil.prototype.cloneObject = function(obj)
+	{
+    	if (!obj || typeof obj !== 'object') {
+        	return obj;
+    	}
+
+		var retObject = new obj.constructor();
+
+		for (var key in obj) {
+			if (obj.hasOwnProperty(key))
+			{
+				retObject[key] = this.cloneObject(obj[key]);
+			}
+		}
+
+    	return retObject;
+	};
+
 	// Definition of global functions
 	ViewerUtil.prototype.triggerEvent = function(name, event)
 	{

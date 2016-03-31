@@ -610,6 +610,15 @@
 		}
 	};
 
+	/*******************************************************************************
+	 * Return auth db connection
+	 *
+	 * @param {string} dbName - Database name
+	 * @return {object}  auth db
+	 ******************************************************************************/
+	MongoWrapper.prototype.getAuthDB = function(){
+		return mongo.authDB;
+	};
 
 	module.exports = function(logger) {
 		return new MongoWrapper(logger);

@@ -14,7 +14,7 @@
   "dependencies": {
     "amqplib": "latest",
     "app-config": "latest",
-    "async": "latest",
+    "async": "1.5.2",
     "body-parser": "latest",
     "bower": "latest",
     "compression": "latest",
@@ -29,8 +29,8 @@
     "mathjs": "^1.6.0",
     "minify": "^1.4.19",
     "mocha": "latest",
-    "mongodb": "latest",
-    "mongoose": "^4.4.6",
+    "mongodb": "2.1.7",
+    "mongoose": "4.4.6",
     "multer": "latest",
     "multiparty": "^4.1.2",
     "node-static": "latest",
@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
-	"grunt": "0.4.5",
+    "grunt": "0.4.5",
     "grunt-contrib-concat": "^0.5.1",
     "grunt-contrib-cssmin": "^1.0.0",
     "grunt-contrib-jshint": "^0.11.3",

@@ -51,9 +51,9 @@
 
 		v.initialised = $q.defer();
 		v.loaded      = $q.defer();
-		
+
 		v.branch   = v.branch ? v.branch : "master";
-		v.revision = v.revision ? v.revision : "head";  
+		v.revision = v.revision ? v.revision : "head";
 
 		if (!angular.isDefined(v.eventService))
 		{
@@ -103,7 +103,7 @@
 				v.collision  = new Collision(v.viewer);
 
 			});
-		
+
 			$http.get(serverConfig.apiUrl(v.account + "/" + v.project + ".json")).success(
 				function(json, status) {
 					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
@@ -111,7 +111,7 @@
 						project: v.project,
 						settings: json.properties
 					});
-				});			
+				});
 
 		};
 
@@ -160,7 +160,6 @@
 								event.value.id
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR) {
-							console.log(event);
 							v.viewer.changePinColours(
 								event.value.id,
 								event.value.colours
@@ -178,14 +177,14 @@
 								event.value.percentage ? event.value.percentage : 0,
 								event.value.clipDirection ? event.value.clipDirection : -1);
 						} else if (event.type === EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE) {
-							console.log(event);
 							v.viewer.moveClippingPlane(event.value.percentage);
-						} else if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) || (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS)) {
 							v.viewer.highlightObjects(
 								event.value.account,
 								event.value.project,
-								event.value.id,
-								event.value.ids ? event.value.ids : [event.value.id]
+								event.value.ids,
+								event.value.zoom,
+								event.value.colour
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 							v.viewer.highlightObjects();
@@ -193,9 +192,8 @@
 							v.viewer.switchObjectVisibility(
 								event.value.account,
 								event.value.project,
-								event.value.id,
-								event.value.ids ? event.value.ids : [event.value.id],
-								event.value.state
+								event.value.visible_ids,
+								event.value.invisible_ids
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.SET_CAMERA) {
 							v.viewer.setCamera(

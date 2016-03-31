@@ -29,6 +29,15 @@ function Utils() {
     * @param {string} uuid - String representation of a UUID
     * @returns {Buffer} binuuid - Binary representation of a UUID
     *******************************************************************************/
+    this.uuidToMongoBuf3 = function(buf) {
+        return mongo.Binary(buf, 3);
+    };
+
+    /*******************************************************************************
+    * Convert a string to a UUID
+    * @param {string} uuid - String representation of a UUID
+    * @returns {Buffer} binuuid - Binary representation of a UUID
+    *******************************************************************************/
     this.stringToUUID = function(uuid) {
         let bytes = nodeuuid.parse(uuid);
         let buf   = new Buffer(bytes);

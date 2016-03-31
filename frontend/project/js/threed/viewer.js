@@ -301,18 +301,21 @@ var Viewer = {};
 				if (objEvent.target.tagName.toUpperCase() === "INLINE") {
 					self.inlineRoots[objEvent.target.nameSpaceName] = objEvent.target;
 				} else if (objEvent.target.tagName.toUpperCase() === "MULTIPART") {
-					var nameSpaceName = objEvent.target._x3domNode._nameSpace.name;
-					if (!self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-						self.multipartNodesByProject[nameSpaceName] = {};
+					if (self.multipartNodes.indexOf(objEvent.target) === -1)
+					{
+						var nameSpaceName = objEvent.target._x3domNode._nameSpace.name;
+						if (!self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
+							self.multipartNodesByProject[nameSpaceName] = {};
+						}
+
+						var multipartName = objEvent.target.getAttribute("id");
+						var multipartNameParts = multipartName.split("__");
+						var multipartID = multipartNameParts[multipartNameParts.length - 1];
+
+						self.multipartNodesByProject[nameSpaceName][multipartID] = objEvent.target;
+
+						self.multipartNodes.push(objEvent.target);
 					}
-
-					var multipartName = objEvent.target.getAttribute("id");
-					var multipartNameParts = multipartName.split("__");
-					var multipartID = multipartNameParts[multipartNameParts.length - 1];
-
-					self.multipartNodesByProject[nameSpaceName][multipartID] = objEvent.target;
-
-					self.multipartNodes.push(objEvent.target);
 				}
 
 				self.downloadsLeft += (objEvent.target.querySelectorAll("[load]").length - 1);
@@ -498,12 +501,6 @@ var Viewer = {};
 		{
 			var pickingInfo = self.getViewArea()._pickingInfo;
 
-			// Hack until double click problem solved
-			self.pickPoint(); // This updates self.pickObject
-			if (self.pickObject.pickObj !== null) {
-				pickingInfo.pickObj = self.pickObject;
-			}
-
 			if (pickingInfo.pickObj)
 			{
 				var account, project;
@@ -568,8 +565,10 @@ var Viewer = {};
 			ViewerUtil.offEvent("bgroundClicked", functionToBind);
 		};
 
-		this.selectParts = function(part, zoom) {
+		this.selectParts = function(part, zoom, colour) {
 			var i;
+
+			colour = colour ? colour : self.SELECT_COLOUR.EMISSIVE;
 
 			if (!Array.isArray(part)) {
 				part = [part];
@@ -590,7 +589,7 @@ var Viewer = {};
 			self.oldPart = part;
 
 			for (i = 0; i < part.length; i++) {
-				part[i].setEmissiveColor(self.SELECT_COLOUR.EMISSIVE, "front");
+				part[i].setEmissiveColor(colour, "both");
 			}
 		};
 
@@ -612,12 +611,12 @@ var Viewer = {};
 			callback(self.EVENT.OBJECT_SELECTED, {
 				account: account,
 				project: project,
-				id: id,
+				ids: id,
 				source: "viewer"
 			});
 		};
 
-		this.highlightObjects = function(account, project, id, ids, zoom) {
+		this.highlightObjects = function(account, project, ids, zoom, colour) {
 			var nameSpaceName = null;
 
 			/*
@@ -625,6 +624,11 @@ var Viewer = {};
 				nameSpaceName = account + "__" + project;
 			}
 			*/
+
+			// If we pass in a single id, then we might be selecting
+			// an old-style Group in X3DOM rather than multipart.
+			var id = !Array.isArray(ids) ? ids : null;
+			ids = Array.isArray(ids) ? ids: [ids];
 
 			if (!ids) {
 				ids = [];
@@ -654,78 +658,73 @@ var Viewer = {};
 					}
 				}
 
-				self.selectParts(fullPartsList, zoom);
+				self.selectParts(fullPartsList, zoom, colour);
 			}
 
-			var object = document.querySelectorAll("[id$=" + id + "]");
+			var object = document.querySelectorAll("[id$='" + id + "']");
 
 			if (object[0]) {
-				self.setApp(object[0]);
+				self.setApp(object[0], colour);
 			}
 		};
 
-		this.switchedOldParts = [];
-		this.switchedObjects = [];
+		//this.switchedOldParts = [];
+		//this.switchedObjects = [];
 
-		this.switchObjectVisibility = function(account, project, id, ids, state) {
+		this.__processSwitchVisibility = function(nameSpaceName, ids, state)
+		{
+			if (ids && ids.length) {
+				// Is this a multipart project
+				if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
+					var nsMultipartNodes;
+
+					// If account and project have been specified
+					// this helps narrow the search
+					if (nameSpaceName) {
+						nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
+					} else {
+						// Otherwise iterate over everything
+						nsMultipartNodes = self.multipartNodes;
+					}
+
+					for (var multipartNodeName in nsMultipartNodes) {
+						if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
+							var parts = nsMultipartNodes[multipartNodeName].getParts(ids);
+
+							if (parts && parts.ids.length > 0) {
+								parts.setVisibility(state);
+							}
+						}
+					}
+				}
+
+				for(var i = 0; i < ids.length; i++)
+				{
+					var id = ids[i];
+					var object = document.querySelectorAll("[id$='" + id + "']");
+
+					if (object[0]) {
+						object[0].setAttribute("render", state.toString());
+					}
+				}
+			}
+		};
+
+		this.switchObjectVisibility = function(account, project, visible_ids, invisible_ids) {
 			var nameSpaceName = null;
-			var i;
 
 			if (account && project) {
 				nameSpaceName = account + "__" + project;
 			}
 
-			if (!ids) {
-				ids = [];
+			if (visible_ids)
+			{
+				self.__processSwitchVisibility(nameSpaceName, visible_ids, true);
 			}
 
-			// Is this a multipart project
-			if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-				var fullPartsList = [];
-				var nsMultipartNodes;
-
-				// If account and project have been specified
-				// this helps narrow the search
-				if (nameSpaceName) {
-					nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
-				} else {
-					// Otherwise iterate over everything
-					nsMultipartNodes = self.multipartNodes;
-				}
-
-				for (i = 0; i < self.switchedOldParts.length; i++) {
-					if (ids.indexOf(self.switchedOldParts[i]) > -1) {
-						self.switchedOldParts[i].setVisibility(state);
-						delete self.switchOldParts[i];
-						i--;
-					}
-				}
-
-				for (var multipartNodeName in nsMultipartNodes) {
-					if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
-						var parts = nsMultipartNodes[multipartNodeName].getParts(ids);
-
-						if (parts && parts.ids.length > 0) {
-							self.switchedOldParts = self.switchedOldParts.concat(parts.ids);
-							parts.setVisibility(state);
-						}
-					}
-				}
-			}
-
-			for (i = 0; i < self.switchedObjects.length; i++) {
-				if (ids.indexOf(self.switchedObjects[i]) > -1) {
-					self.switchedObjects[i].setAttribute("render", state.toString());
-					delete self.switchOldParts[i];
-					i--;
-				}
-			}
-
-			var object = document.querySelectorAll("[id$=" + id + "]");
-
-			if (object[0]) {
-				object[0].setAttribute("render", state.toString());
-				self.switchedObjects.push(id);
+			if (invisible_ids)
+			{
+				 self.__processSwitchVisibility(nameSpaceName, invisible_ids, false);
 			}
 		};
 
@@ -991,13 +990,11 @@ var Viewer = {};
 			scene._vf.pickMode = "idbuf";
 			scene._vf.pickMode = oldPickMode;
 
-			self.pickObject.pickPos = viewArea._pickingInfo.pickPos;
-			self.pickObject.pickNorm = viewArea._pickingInfo.pickNorm;
-			self.pickObject.pickObj = viewArea._pickingInfo.pickObj;
+			self.pickObject = ViewerUtil.cloneObject(viewArea._pickingInfo);
 			self.pickObject.part = null;
 			self.pickObject.partID = null;
 
-			var objId = viewArea._pickingInfo.shadowObjectId;
+			var objId = self.pickObject.shadowObjectId;
 
 			if (scene._multiPartMap) {
 				for (var mpi = 0; mpi < scene._multiPartMap.multiParts.length; mpi++) {
@@ -1674,6 +1671,7 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	REGISTER_VIEWPOINT_CALLBACK: "VIEWER_REGISTER_VIEWPOINT_CALLBACK",
 	OBJECT_SELECTED: "VIEWER_OBJECT_SELECTED",
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
+	HIGHLIGHT_OBJECTS: "VIEWER_HIGHLIGHT_OBJECTS",
 	SWITCH_OBJECT_VISIBILITY: "VIEWER_SWITCH_OBJECT_VISIBILITY",
 	SET_PIN_VISIBILITY: "VIEWER_SET_PIN_VISIBILITY",
 

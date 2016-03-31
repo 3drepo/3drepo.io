@@ -403,6 +403,31 @@ DBInterface.prototype.addToCurrentList = function(dbName, project, branch, objUU
 	});
 };
 
+// TODO: Remove this, as it shouldn"t exist
+DBInterface.prototype.removeFromCurrentList = function(dbName, project, branch, objUUID, callback) {
+	"use strict";
+
+	var self = this;
+
+	self.getHeadUUID(dbName, project, branch, function(err, uuid) {
+		dbConn(self.logger).collCallback(dbName, project + ".history", true, function(err, coll) {
+			if(err.value) { return callback(err); }
+
+			var uniqueID = {
+				"_id" : uuid.uuid
+			};
+
+			coll.update(uniqueID, { $pull: {"current" : objUUID} }, {}, function(err) {
+				if (err) { return callback(responseCodes.DB_ERROR(err)); }
+
+				self.logger.logDebug("Pulling " + uuidToString(objUUID) + " to current list of " + uuidToString(uuid.uuid));
+
+				callback(responseCodes.OK);
+			});
+		});
+	});
+};
+
 DBInterface.prototype.storeViewpoint = function(dbName, project, branch, username, parentSharedID, data, callback) {
 	"use strict";
 
@@ -1633,7 +1658,7 @@ DBInterface.prototype.filterFederatedProject = function(dbName, project, branch,
 				_id: { $in: docs[0].current}
 			};
 
-			var projection = {
+			var refProjection = {
 				_rid : 1,
 				owner: 1,
 				project: 1,
@@ -1649,7 +1674,7 @@ DBInterface.prototype.filterFederatedProject = function(dbName, project, branch,
 				}
 			}
 
-			dbConn(self.logger).filterColl(dbName, project + ".scene", refFilter, projection, function(err, refs) {
+			dbConn(self.logger).filterColl(dbName, project + ".scene", refFilter, refProjection, function(err, refs) {
 				// Asynchronously loop over all references.
 				async.concat(refs, function (item, iter_callback) {
 					var childDbName  = item.owner ? item.owner : dbName;
@@ -1688,7 +1713,7 @@ DBInterface.prototype.filterFederatedProject = function(dbName, project, branch,
 				function (err, results) {
 					// TODO: Deal with errors here
 
-					callback(responseCodes.OK, nodes.concat(results).concat(refs));
+					callback(responseCodes.OK, nodes.concat(results));
 				});
 			});
 		});
@@ -1881,7 +1906,7 @@ DBInterface.prototype.getIssues = function(dbName, project, branch, revision, on
 						}
 					} else {
 						childBranch   = "master";
-						childRevision = null;
+				 		childRevision = null;
 					}
 
 

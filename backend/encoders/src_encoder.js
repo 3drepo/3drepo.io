@@ -24,8 +24,6 @@
 
 	var utils = require("../utils.js");
 
-	var dbInterface = require("../db/db_interface.js");
-
 	function startSubMesh(mesh_id, subMeshArray, subMeshIDX, startVertIDX, startFaceIDX, useIDMap) {
 		if (subMeshIDX > -1) // If there is a valid sub mesh ID
 		{
@@ -94,6 +92,7 @@
 
 		// The new vertex buffer will contain a list of
 		var newVertices = [];
+		var newNormals  = [];
 
 		var currentMeshVFrom = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
 		var currentMeshVTo = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO];
@@ -115,9 +114,7 @@
 			[],
 			[]
 		];
-
-		var max_i = 0;
-
+		
 		// Perform quick and dirty splitting algorithm
 		// Loop over all faces in the giant mesh
 		for (var face_idx = 0; face_idx < currentMeshNumFaces; face_idx++) {
@@ -141,13 +138,15 @@
 
 						finishSubMesh(subMeshArray, subMeshIDX, splitMeshVertexCount, splitMeshFaceCount, 0, splitMeshBBox, useIDMap);
 
-						runningIDX++;
 						subMeshIDX++;
+						runningIDX++;
 					}
 
-					startSubMesh(mesh.id, subMeshArray, subMeshIDX, totalVertexCount, totalFaceCount, useIDMap);
-
 					totalVertexCount += splitMeshVertexCount;
+					totalFaceCount   += splitMeshFaceCount;
+					
+					startSubMesh(mesh.id, subMeshArray, subMeshIDX, totalVertexCount, totalFaceCount, useIDMap);
+					
 					splitMeshVertexCount = 0;
 					splitMeshFaceCount = 0;
 					splitMeshBBox = [
@@ -155,7 +154,6 @@
 						[]
 					];
 					reindexMap = {};
-					max_i = 0;
 
 					startedLargeMeshSplit = true;
 				}
@@ -169,8 +167,7 @@
 
 					if (!reindexMap.hasOwnProperty(idx_val)) {
 						reindexMap[idx_val] = splitMeshVertexCount;
-						faceBuf.push(reindexMap[idx_val]);
-
+						
 						// Loop over all the vertex components and copy them
 						for (var v_idx = 0; v_idx < 3; v_idx++) {
 							var vertComp = mesh.vertices.buffer.readFloatLE(idx_val * 4 * 3 + v_idx * 4);
@@ -189,18 +186,20 @@
 							}
 
 							newVertices.push(vertComp);
+							
+							if (mesh.normals)
+							{
+								var normComp = mesh.normals.buffer.readFloatLE(idx_val * 4 * 3 + v_idx * 4);
+								
+								newNormals.push(normComp);
+							}
 						}
 
 						splitMeshVertexCount++;
-					} else {
-						faceBuf.push(reindexMap[idx_val]);
 					}
-
-					if (reindexMap[idx_val] > max_i) {
-						max_i = reindexMap[idx_val];
-					}
+					
+					faceBuf.push(reindexMap[idx_val]);
 				}
-
 				splitMeshFaceCount++;
 			}
 
@@ -210,17 +209,30 @@
 		var newVerticesBuffer = new Buffer(new Float32Array(newVertices).buffer);
 		newVerticesBuffer.copy(mesh.vertices.buffer, currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] * 3 * 4);
 
-		var vertexPack = currentMeshNumVertices - totalVertexCount - splitMeshVertexCount;
+		if (mesh.normals)
+		{
+			var newNormalsBuffer = new Buffer(new Float32Array(newNormals).buffer);
+			newNormalsBuffer.copy(mesh.normals.buffer, currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] * 3 * 4);
+		}
+
 
 		if (useIDMap) {
 			addIDMapArray(subMeshArray, subMeshArray.length - 1, splitMeshVertexCount, runningIDX);
 		}
 
+		totalVertexCount += splitMeshVertexCount;
+		totalFaceCount += splitMeshFaceCount;
+
+		var vertexPack = currentMeshNumVertices - totalVertexCount;
+		
 		finishSubMesh(subMeshArray, subMeshArray.length - 1, splitMeshVertexCount, splitMeshFaceCount, vertexPack, splitMeshBBox, useIDMap);
 
 		return {
 			bufferPointer: bufferPointer,
-			subMeshIDX: subMeshIDX
+			subMeshIDX: subMeshIDX,
+			runningIDX: runningIDX,
+			totalVertexCount: totalVertexCount,
+			totalFaceCount: totalFaceCount
 		};
 	}
 
@@ -246,8 +258,6 @@
 
 		// Loop through all of the meshes in the multipart map
 		for (var i = 0; i < mesh[C.REPO_NODE_LABEL_COMBINED_MAP].length; i++) {
-			logger.logTrace("Running m_map #" + i);
-
 			var currentMesh = mesh[C.REPO_NODE_LABEL_COMBINED_MAP][i];
 
 			var currentMeshVFrom = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
@@ -285,7 +295,10 @@
 				var largeSplitReturn = splitLargeMesh(currentMesh, mesh, faceBuf, orig_idx_ptr, subMeshArray, subMeshIDX, runningIDX, useIDMap, logger);
 
 				subMeshIDX = largeSplitReturn.subMeshIDX;
+				runningIDX = largeSplitReturn.runningIDX + 1;
 				orig_idx_ptr = largeSplitReturn.bufferPointer;
+				totalVertexCount += largeSplitReturn.totalVertexCount;
+				totalFaceCount += largeSplitReturn.totalFaceCount;
 
 				finishedSubMesh = true; // Indicate that we've need a new subMesh
 			} else {
@@ -317,18 +330,18 @@
 
 				if (useIDMap)
 				{
-					addIDMapArray(subMeshArray, subMeshIDX, currentMeshNumVertices, runningIDX);
+					addIDMapArray(subMeshArray, subMeshIDX, currentMeshNumVertices, runningIDX);				
 				}
 
 				runningIDX++;
-
-				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO] = currentMeshVTo;
-				subMeshArray[subMeshIDX][C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO] = currentMeshTTo;
 
 				bbox = currentMesh[C.REPO_NODE_LABEL_BOUNDING_BOX];
 
 				subMeshVertexCount += currentMeshNumVertices;
 				subMeshFaceCount += currentMeshNumFaces;
+				
+				totalVertexCount += currentMeshNumVertices;
+				totalFaceCount += currentMeshNumFaces;
 			}
 		}
 
@@ -442,6 +455,8 @@
 			var uvWritePosition = bufPos;
 			var numSubMeshes = subMeshArray.length;
 
+			var vc = 0;
+				
 			// Loop through a set of possible submeshes
 			logger.logTrace("Looping through submeshes");
 			for (var subMesh = 0; subMesh < numSubMeshes; subMesh++) {
@@ -490,6 +505,8 @@
 				var subMeshVerticesCount = subMeshArray[subMesh][C.REPO_NODE_LABEL_VERTICES_COUNT];
 				var subMeshVertexPack = subMeshArray[subMesh].pack;
 				var subMeshFacesCount = subMeshArray[subMesh][C.REPO_NODE_LABEL_FACES_COUNT];
+				
+				vc += subMeshVerticesCount;
 
 				// Vertices
 				if (mesh[C.REPO_NODE_LABEL_VERTICES]) {
@@ -527,16 +544,16 @@
 					srcJSON.accessors.attributeViews[normalAttributeView].decodeOffset = [0, 0, 0];
 					srcJSON.accessors.attributeViews[normalAttributeView].decodeScale = [1, 1, 1];
 
-					srcJSON.meshes[meshID].attributes.normal = normalAttributeView;
-
 					srcJSON.bufferChunks[normalBufferChunk] = {};
 					srcJSON.bufferChunks[normalBufferChunk].byteOffset = normalWritePosition;
 					srcJSON.bufferChunks[normalBufferChunk].byteLength = subMeshVerticesCount * 3 * 4;
 
+					normalWritePosition += (subMeshVerticesCount + subMeshVertexPack) * 3 * 4;
+					
 					srcJSON.bufferViews[normalBufferView] = {};
 					srcJSON.bufferViews[normalBufferView].chunks = [normalBufferChunk];
 
-					normalWritePosition += srcJSON.bufferChunks[normalBufferChunk].byteLength;
+					srcJSON.meshes[meshID].attributes.normal = normalAttributeView;
 				}
 
 				// Index View

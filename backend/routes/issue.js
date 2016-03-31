@@ -27,7 +27,7 @@ function listIssues(req, res, next) {
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
-	
+
 }
 
 function listIssuesBySID(req, res, next) {
@@ -42,7 +42,7 @@ function listIssuesBySID(req, res, next) {
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
-	
+
 }
 
 function findIssueById(req, res, next) {
@@ -68,13 +68,15 @@ function storeIssue(req, res, next){
 
 	req[C.REQ_REPO].logger.logDebug("Upserting an issues for object " + req.params[C.REPO_REST_API_SID] + " in " + req.params[C.REPO_REST_API_ACCOUNT] + "/" + req.params[C.REPO_REST_API_PROJECT], req);
 
+	console.log(data);
+
 	// since there is a incompatible attribute in issue model ('set' in comments) with mongoose, need to fall back native mongo api call.
 	dbInterface(req[C.REQ_REPO].logger).storeIssue(
-		req.params[C.REPO_REST_API_ACCOUNT], 
-		req.params[C.REPO_REST_API_PROJECT], 
-		req.params[C.REPO_REST_API_ID], 
-		req.session.user.username, 
-		data, 
+		req.params[C.REPO_REST_API_ACCOUNT],
+		req.params[C.REPO_REST_API_PROJECT],
+		req.params[C.REPO_REST_API_ID],
+		req.session.user.username,
+		data,
 		function(err, result) {
 			responseCodes.onError(place, req, res, next, err, result);
 		}

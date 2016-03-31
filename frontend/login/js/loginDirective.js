@@ -42,9 +42,12 @@
 		 */
 		vm.user = { username: "", password: ""};
 		vm.version = serverConfig.apiVersion;
-		vm.backgroundImage = serverConfig.backgroundImage;
 		vm.logo = "/public/images/3drepo-logo-white.png";
-		//vm.enterpriseLogo = "/public/images/balfour-beatty-logo.jpg";
+
+		if (angular.isDefined(serverConfig.backgroundImage))
+		{
+			vm.enterpriseLogo = serverConfig.backgroundImage;
+		}
 
 		/**
 		 * Attempt to login
