@@ -611,12 +611,12 @@ var Viewer = {};
 			callback(self.EVENT.OBJECT_SELECTED, {
 				account: account,
 				project: project,
-				id: id,
+				ids: id,
 				source: "viewer"
 			});
 		};
 
-		this.highlightObjects = function(account, project, id, child_ids, zoom, colour) {
+		this.highlightObjects = function(account, project, ids, zoom, colour) {
 			var nameSpaceName = null;
 
 			/*
@@ -625,8 +625,13 @@ var Viewer = {};
 			}
 			*/
 
-			if (!child_ids) {
-				child_ids = [];
+			// If we pass in a single id, then we might be selecting
+			// an old-style Group in X3DOM rather than multipart.
+			var id = !Array.isArray(ids) ? ids : null;
+			ids = Array.isArray(ids) ? ids: [ids];
+
+			if (!ids) {
+				ids = [];
 			}
 
 			// Is this a multipart project
@@ -645,7 +650,7 @@ var Viewer = {};
 
 				for (var multipartNodeName in nsMultipartNodes) {
 					if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
-						var parts = nsMultipartNodes[multipartNodeName].getParts(child_ids);
+						var parts = nsMultipartNodes[multipartNodeName].getParts(ids);
 
 						if (parts && parts.ids.length > 0) {
 							fullPartsList.push(parts);
@@ -1666,6 +1671,7 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	REGISTER_VIEWPOINT_CALLBACK: "VIEWER_REGISTER_VIEWPOINT_CALLBACK",
 	OBJECT_SELECTED: "VIEWER_OBJECT_SELECTED",
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
+	HIGHLIGHT_OBJECTS: "VIEWER_HIGHLIGHT_OBJECTS",
 	SWITCH_OBJECT_VISIBILITY: "VIEWER_SWITCH_OBJECT_VISIBILITY",
 	SET_PIN_VISIBILITY: "VIEWER_SET_PIN_VISIBILITY",
 

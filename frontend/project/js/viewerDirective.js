@@ -178,12 +178,11 @@
 								event.value.clipDirection ? event.value.clipDirection : -1);
 						} else if (event.type === EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE) {
 							v.viewer.moveClippingPlane(event.value.percentage);
-						} else if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) || (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS)) {
 							v.viewer.highlightObjects(
 								event.value.account,
 								event.value.project,
-								event.value.id,
-								event.value.child_ids ? event.value.child_ids : [event.value.id],
+								event.value.ids,
 								event.value.zoom,
 								event.value.colour
 							);

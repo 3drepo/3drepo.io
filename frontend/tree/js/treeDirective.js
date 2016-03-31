@@ -431,13 +431,21 @@
 					}
 				}
 
+				// Select the parent node in the group for cards and viewer
 				EventService.send(EventService.EVENT.VIEWER.OBJECT_SELECTED, {
 					source: "tree",
 					account: node.account,
 					project: node.project,
-					id: node._id,
+					ids: node._id,
 					name: node.name,
-					child_ids : map
+				});
+
+				// Separately highlight the children
+				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, {
+					source: "tree",
+					account: node.account,
+					project: node.project,
+					ids: map
 				});
 			}
 		};
