@@ -92,9 +92,8 @@ schema.statics.findByProjectName = function(dbColOptions, branch, rev){
 			});
 
 			return Promise.all(promises).then(refIssues => {
-				//console.log(refIssues);
 				refIssues.forEach(refIssue => {
-					issues.push(refIssue);
+					issues = issues.concat(refIssue);
 				});
 
 				return Promise.resolve(issues);
