@@ -133,11 +133,13 @@
 							);
 							break;
 
+						/*
 						case "print":
 							option = angular.element(
 								"<panel-card-option-print account='vm.account' project='vm.project'></panel-card-option-print>"
 							);
 							break;
+						*/
 
 						case "visible":
 							option = angular.element(

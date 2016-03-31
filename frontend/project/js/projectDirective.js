@@ -81,6 +81,14 @@
 			icon: "fa-map-marker",
 			menu: [
 				{
+					value: "print",
+					label: "Print",
+					selected: false,
+					noToggle: true,
+					icon: "fa-print",
+					divider: true
+				},
+				{
 					value: "sortByDate",
 					label: "Sort by Date",
 					firstSelectedIcon: "fa-sort-amount-desc",

@@ -1,13 +1,14 @@
 .issue(style="background:{{vm.backgroundColor}}")
 	// Header
-	.issueHeader
-		md-list-item.md-2-line.issueTitle
+	issue-header(issue-data="vm.data")
+		//md-list-item.md-2-line.issueTitle
 			div.md-list-item-text
 				h3 {{vm.data.title}}
 				.issueTitleInfo(layout="row" layout-align="space-between center")
 					p {{vm.data.owner}}
 					p {{vm.data.timeStamp}}
-		.issueRoleMarkers(layout="column")
+
+		//.issueRoleMarkers(layout="column")
 			div(ng-repeat="roleColor in vm.data.assignedRolesColors", style="background:{{roleColor}};", flex)
 
 	// Comments

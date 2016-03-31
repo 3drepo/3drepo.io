@@ -19,6 +19,14 @@ issues #issuesAddContainer h4 {
   color: rgba(0, 0, 0, 0.6);
 }
 
+issues .issueHeader {
+  position: relative;
+}
+issues .issueHeader:hover {
+  background-color: #EEEEEE;
+  cursor: pointer;
+}
+
 issues textarea {
   min-height: 70px !important;
 }
@@ -37,54 +45,6 @@ issues .issuesInfo {
 issues .issuesInfo p {
   margin: 0;
   color: rgba(0, 0, 0, 0.7);
-}
-
-issues .issueHeader {
-  position: relative;
-}
-issues .selectedIssue {
-  background: #E8EAF6;
-}
-issues .notSelectedIssue {
-  background: #ffffff;
-}
-issues .closedIssue {
-  background: #E0E0E0;
-}
-issues .issueHeader .issueTitle {
-  min-height: 0;
-  height: 100%;
-}
-issues .issueHeader .issueTitle h3 {
-  padding: 5px 0 0 0;
-  width: 250px;
-}
-issues .issueHeader .issueTitle .issueTitleInfo {
-  position: relative;
-  padding: 2px 0 5px;
-}
-issues .issueHeader .issueTitle button {
-  min-height: 0;
-  height: 100%;
-}
-issues .issueHeader .issueRoleMarkers {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 10px;
-  height: 100%;
-}
-issues .issueHeader .issueInfo {
-  position: absolute;
-  top: 0;
-  background: #E8F5E9;
-  padding: 0 5px 0 10px;
-  width: 100%;
-  height: 100%;
-}
-issues .issueHeader .issueInfo h5 {
-  color: rgba(0, 0, 0, 0.7);
-  margin-left: 5px;
 }
 
 issues #addAlert {
@@ -106,22 +66,9 @@ issues #addAlert #addAlertBackground #addAlertInfo .md-button {
   background: #EEEEEE;
 }
 
-
 /** Issue *************************************************************************************************************/
-
 issue {
   display: block;
-}
-
-issue .issueTitle p {
-  color: rgba(0,0,0,0.35) !important;
-}
-
-.issueOpenBackground {
-  background: #FFFFFF;
-}
-.issueClosedBackground {
-  background: #E0E0E0;
 }
 
 issue md-list-item .md-button,
@@ -176,4 +123,66 @@ issue .issueOpenContainer {
 }
 issue .issueOpenContainer button {
   margin-left: 220px;
+}
+
+/** Issue Header ******************************************************************************************************/
+issue-header {
+  margin: 0;
+  padding: 0;
+}
+
+issue-header p {
+  margin: 0;
+  padding: 0;
+  line-height: 32px;
+}
+
+issue-header .issueTitle {
+  margin-left: 35px;
+  outline: none;
+}
+
+issue-header .issueTitle .issueTitleInfo {
+  margin-top: -10px;
+}
+issue-header .issueTitle .issueTitleInfo p {
+  color: rgba(0,0,0,0.35);
+  font-size: 14px;
+}
+
+issue-header .issueTitle button {
+  min-height: 0;
+  height: 100%;
+}
+issue-header .issueRoleMarkers {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 100%;
+}
+
+issue-header .issueStatusMarker {
+  position: absolute;
+  top: 10px;
+  left: 16px;
+}
+issue-header .issueStatusMarker .issueOpen {
+  color: #4CAF50;
+}
+issue-header .issueStatusMarker .issueClosed {
+  color: #F44336;
+}
+
+issue-header .issueInfo {
+  position: absolute;
+  top: 0;
+  background: #E8F5E9;
+  padding: 0 5px 0 10px;
+  width: 100%;
+  height: 100%;
+}
+issue-header h5 {
+  color: rgba(0, 0, 0, 0.7);
+  margin-left: 5px;
 }

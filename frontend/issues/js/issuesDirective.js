@@ -45,9 +45,9 @@
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$element", "$timeout", "$mdDialog", "$filter", "IssuesService", "EventService", "Auth"];
+	IssuesCtrl.$inject = ["$scope", "$element", "$timeout", "$mdDialog", "$filter", "$window", "IssuesService", "EventService", "Auth", "serverConfig"];
 
-	function IssuesCtrl($scope, $element, $timeout, $mdDialog, $filter, IssuesService, EventService, Auth) {
+	function IssuesCtrl($scope, $element, $timeout, $mdDialog, $filter, $window, IssuesService, EventService, Auth, serverConfig) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -464,6 +464,9 @@
 						rolesToFilter.push(role);
 					}
 				}
+				else if (newValue.value === "print") {
+					$window.open(serverConfig.apiUrl(vm.account + "/" + vm.project + "/issues.html"), "_blank");
+				}
 				setupIssuesToShow();
 				setContentHeight();
 				vm.showPins();
@@ -537,6 +540,7 @@
 				vm.selectedIssue.selected = false;
 			}
 			vm.selectedIssue = vm.issuesToShow[index];
+			vm.selectedIndex = index;
 			vm.selectedIssue.selected = true;
 			vm.selectedIssue.showInfo = false;
 
@@ -674,7 +678,7 @@
 			/* Closing the dialog takes a long time so using user made dialog for the moment
 			$mdDialog.show(
 				$mdDialog.alert()
-					.parent(angular.element(document.querySelector("#addAlert")))
+					.parent(angular.element($element[0].querySelector("#addAlert")))
 					.clickOutsideToClose(true)
 					.title(title)
 					.ariaLabel("Pin alert")
@@ -696,11 +700,12 @@
 		/**
 		 * A comment has been auto saved
 		 */
-		vm.commentAutoSaved = function () {
-			vm.infoText = "Comment on issue #" + vm.selectedIssue.title + " auto-saved";
-			vm.selectedIssue.showInfo = true;
+		vm.commentAutoSaved = function (index) {
+			vm.selectedIndex = index;
+			vm.infoText = "Comment on issue #" + vm.issuesToShow[vm.selectedIndex].title + " auto-saved";
+			vm.issuesToShow[vm.selectedIndex].showInfo = true;
 			vm.infoTimeout = $timeout(function() {
-				vm.selectedIssue.showInfo = false;
+				vm.issuesToShow[vm.selectedIndex].showInfo = false;
 			}, 4000);
 		};
 
@@ -708,7 +713,7 @@
 		 * Hide issue info
 		 */
 		vm.hideInfo = function() {
-			vm.selectedIssue.showInfo = false;
+			vm.issuesToShow[vm.selectedIndex].showInfo = false;
 			$timeout.cancel(vm.infoTimeout);
 		};
 
@@ -726,7 +731,7 @@
 				commentHeight = 80,
 				headerHeight = 53,
 				openIssueFooterHeight = 180,
-				closedIssueFooterHeight = 48;
+				closedIssueFooterHeight = 53;
 
 			switch (vm.toShow) {
 				case "showIssues":
