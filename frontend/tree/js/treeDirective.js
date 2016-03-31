@@ -243,7 +243,7 @@
 			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
 				if (event.value.source !== "tree")
 				{
-					var objectID = event.value.id;
+					var objectID = event.value.ids;
 					var path = vm.idToPath[objectID].split("__");
 
 					initNodesToShow();
