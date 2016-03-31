@@ -565,8 +565,10 @@ var Viewer = {};
 			ViewerUtil.offEvent("bgroundClicked", functionToBind);
 		};
 
-		this.selectParts = function(part, zoom) {
+		this.selectParts = function(part, zoom, colour) {
 			var i;
+
+			colour = colour ? colour : self.SELECT_COLOUR.EMISSIVE;
 
 			if (!Array.isArray(part)) {
 				part = [part];
@@ -587,7 +589,7 @@ var Viewer = {};
 			self.oldPart = part;
 
 			for (i = 0; i < part.length; i++) {
-				part[i].setEmissiveColor(self.SELECT_COLOUR.EMISSIVE, "both");
+				part[i].setEmissiveColor(colour, "both");
 			}
 		};
 
@@ -614,7 +616,7 @@ var Viewer = {};
 			});
 		};
 
-		this.highlightObjects = function(account, project, id, ids, zoom) {
+		this.highlightObjects = function(account, project, id, child_ids, zoom, colour) {
 			var nameSpaceName = null;
 
 			/*
@@ -623,8 +625,8 @@ var Viewer = {};
 			}
 			*/
 
-			if (!ids) {
-				ids = [];
+			if (!child_ids) {
+				child_ids = [];
 			}
 
 			// Is this a multipart project
@@ -643,7 +645,7 @@ var Viewer = {};
 
 				for (var multipartNodeName in nsMultipartNodes) {
 					if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
-						var parts = nsMultipartNodes[multipartNodeName].getParts(ids);
+						var parts = nsMultipartNodes[multipartNodeName].getParts(child_ids);
 
 						if (parts && parts.ids.length > 0) {
 							fullPartsList.push(parts);
@@ -651,13 +653,13 @@ var Viewer = {};
 					}
 				}
 
-				self.selectParts(fullPartsList, zoom);
+				self.selectParts(fullPartsList, zoom, colour);
 			}
 
 			var object = document.querySelectorAll("[id$='" + id + "']");
 
 			if (object[0]) {
-				self.setApp(object[0]);
+				self.setApp(object[0], colour);
 			}
 		};
 

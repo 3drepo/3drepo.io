@@ -747,7 +747,9 @@
 					else {
 						footerHeight = openIssueFooterHeight;
 					}
-					vm.onContentHeightRequest({height: headerHeight + (vm.selectedIssue.comments.length * commentHeight) + footerHeight});
+
+					var numberComments = vm.selectedIssue.hasOwnProperty("comments") ? vm.selectedIssue.comments.length : 0;
+					vm.onContentHeightRequest({height: headerHeight + (numberComments * commentHeight) + footerHeight});
 					break;
 
 				case "showAdd":

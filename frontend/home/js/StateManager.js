@@ -22,9 +22,9 @@
 	.config([
 	"$stateProvider", "$urlRouterProvider", "$locationProvider", "structure",
 	function($stateProvider, $urlRouterProvider, $locationProvider, structure) {
-		
+
 		$locationProvider.html5Mode(true);
-		
+
 		$stateProvider.state("home", {
 			name: "home",
 			url: "/",
@@ -32,38 +32,38 @@
 				init: function(Auth, StateManager, $q)
 				{
 					var finishedAuth = $q.defer();
-					
+
 					StateManager.state.changing = true;
-					
+
 					Auth.init().then(function (loggedIn) {
 						StateManager.state.loggedIn = loggedIn;
 						finishedAuth.resolve();
 					});
-					
+
 					return finishedAuth.promise;
 				}
-			}			
+			}
 		});
-		
+
 		var stateStack       = [structure];
 		var stateNameStack   = ["home"];
-		
+
 		while (stateStack.length > 0)
 		{
 			var stackLength      = stateStack.length;
 			var parentState      = stateStack[stackLength - 1];
-			var parentStateName  = stateNameStack[stackLength - 1]; 
-			
+			var parentStateName  = stateNameStack[stackLength - 1];
+
 			if (parentState.children)
 			{
 				for (var i = 0; i < parentState.children.length; i++)
 				{
 					var childState     = parentState.children[i];
 					var childStateName = parentStateName + "." + childState.plugin;
-					
+
 					stateNameStack.push(childStateName);
 					stateStack.push(parentState.children[i]);
-					
+
 					$stateProvider.state(childStateName, {
 						name: parentState.children[i].plugin,
 						url: (parentStateName !== "home" ? "/" : "") + ":" + childState.plugin,
@@ -76,35 +76,35 @@
 					});
 				}
 			}
-			
+
 			stateStack.splice(0,1);
 			stateNameStack.splice(0,1);
 		}
-		
+
 		$urlRouterProvider.otherwise("");
 	}])
 	.run(["$rootScope", "$state", "uiState", "StateManager", function($rootScope, $state, uiState, StateManager) {
 		$rootScope.$on("$stateChangeStart",function(event, toState, toParams, fromState, fromParams){
 			StateManager.state.changing = true;
-							
+
 			var stateChangeObject = {
 				toState    : toState,
 				toParams   : toParams,
 				fromState  : fromState,
-				fromParams : fromParams 
+				fromParams : fromParams
 			};
-			
+
 			StateManager.startStateChange(stateChangeObject);
 		});
-				
+
 		$rootScope.$on("$stateChangeSuccess",function(event, toState, toParams, fromState, fromParams){
 			var stateChangeObject = {
 				toState    : toState,
 				toParams   : toParams,
 				fromState  : fromState,
-				fromParams : fromParams 
+				fromParams : fromParams
 			};
-						
+
 			StateManager.handleStateChange(stateChangeObject);
 		});
 	}])
@@ -118,9 +118,9 @@
 		this.state      = {
 			changing: true
 		};
-		
+
 		this.changedState = {};
-		
+
 		this.structure   = structure;
 
 		this.destroy = function()  {
@@ -147,27 +147,27 @@
 		};
 
 		self.clearChanged();
-		
+
 		this.stateChangeQueue = [];
-		
+
 		var compareStateChangeObjects = function(stateChangeA, stateChangeB)
 		{
-			return 	(stateChangeA.toState    === stateChangeB.toState) && 
-					(stateChangeA.toParams   === stateChangeB.toParams) && 
-					(stateChangeA.fromState  === stateChangeB.fromState) && 
+			return 	(stateChangeA.toState    === stateChangeB.toState) &&
+					(stateChangeA.toParams   === stateChangeB.toParams) &&
+					(stateChangeA.fromState  === stateChangeB.fromState) &&
 					(stateChangeA.fromParams === stateChangeB.fromParams);
 		};
-		
+
 		this.startStateChange = function(stateChangeObject) {
 			self.stateChangeQueue.push(stateChangeObject);
 		};
 
 		this.handleStateChange = function(stateChangeObject) {
 			var param;
-			
+
 			var fromParams = stateChangeObject.fromParams;
 			var toParams   = stateChangeObject.toParams;
-			
+
 			// Switch off all parameters that we came from
 			// but are not the same as where we are going to
 			for (param in fromParams)
@@ -180,7 +180,7 @@
 					}
 				}
 			}
-			
+
 			for (param in toParams)
 			{
 				if (toParams.hasOwnProperty(param))
@@ -192,56 +192,54 @@
 							self.setStateVar(param, toParams[param]);
 						}
 					} else {
-						self.setStateVar(param, toParams[param]);	
+						self.setStateVar(param, toParams[param]);
 					}
 				}
 			}
-			
+
 			// Loop through structure. If a parent is null, then we must clear
 			// it's children
 			var currentChildren = self.structure.children;
-			
+
 			var stateStack       = [structure];
 			var stateNameStack   = ["home"];
 			var clearBelow       = false;
-			
+
 			while (stateStack.length > 0)
 			{
 				var stackLength      = stateStack.length;
 				var parentState      = stateStack[stackLength - 1];
-				var parentStateName  = stateNameStack[stackLength - 1]; 
-				
+				var parentStateName  = stateNameStack[stackLength - 1];
+
 				if (parentStateName !== "home" && !self.state[parentStateName])
 				{
 					clearBelow = true;
 				}
-				
+
 				if (parentState.children)
 				{
 					for (var i = 0; i < parentState.children.length; i++)
 					{
 						var childStateName = parentState.children[i].plugin;
-						
+
 						stateNameStack.push(childStateName);
 						stateStack.push(parentState.children[i]);
-						
+
 						if (clearBelow)
 						{
-							self.setStateVar(childStateName, null);	
+							self.setStateVar(childStateName, null);
 						}
 					}
 				}
-			
+
 				stateStack.splice(0,1);
-				stateNameStack.splice(0,1);				
-			}			
-			
+				stateNameStack.splice(0,1);
+			}
+
 			if (compareStateChangeObjects(stateChangeObject, self.stateChangeQueue[0]))
 			{
 				self.stateChangeQueue.pop();
 				self.updateState();
-				
-				self.state.changing = false;
 			} else {
 				self.stateChangeQueue.pop();
 				self.handleStateChange(self.stateChangeQueue[self.stateChangeQueue.length - 1]);
@@ -253,7 +251,7 @@
 		this.clearState = function(state) {
 			for (var state in self.state)
 			{
-				if (self.state.hasOwnProperty(state))
+				if ((state !== "changing") && self.state.hasOwnProperty(state))
 				{
 					self.setStateVar(state, null);
 				}
@@ -270,11 +268,11 @@
 			{
 				var child  = currentChildren[childidx];
 				var plugin = child.plugin;
-				
+
 				if (self.state.hasOwnProperty(plugin) && self.state[plugin])
 				{
 					stateName += plugin + ".";
-					
+
 					if (child.children) {
 						currentChildren = child.children;
 					} else {
@@ -283,7 +281,7 @@
 
 					childidx = -1;
 				}
-				
+
 				childidx += 1;
 			}
 
@@ -293,11 +291,8 @@
 		this.setStateVar = function(varName, value)
 		{
 			if (self.state[varName] !== value) {
-				//var changedStateObject = {};
-				//changedStateObject[varName] = value;
+				self.state.changing = true;
 				self.changedState[varName] = value;
-				
-				//EventService.send(EventService.EVENT.STATE_CHANGED, changedStateObject);
 			}
 
 			self.state[varName] = value;
@@ -321,7 +316,7 @@
 		this.updateState = function(dontUpdateLocation)
 		{
 			var newStateName = self.genStateName();
-			
+
 			console.log("Moving to " + newStateName + " ...");
 
 			if (Object.keys(self.changedState).length)
@@ -329,11 +324,13 @@
 				EventService.send(EventService.EVENT.STATE_CHANGED, self.changedState);
 				self.changedState = {};
 			}
-			
+
 			var updateLocation = !dontUpdateLocation ? true: false; // In case of null
 			$state.transitionTo(newStateName, self.state, { location: updateLocation });
+
+			self.state.changing = false;
 		};
-		
+
 		$rootScope.$watch(EventService.currentEvent, function(event) {
 			if (angular.isDefined(event) && angular.isDefined(event.type)) {
 				if (event.type === EventService.EVENT.SET_STATE) {
@@ -344,7 +341,7 @@
 							self.setStateVar(key, event.value[key]);
 						}
 					}
-					
+
 					self.updateState();
 				}
 			}

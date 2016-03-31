@@ -437,7 +437,7 @@
 					project: node.project,
 					id: node._id,
 					name: node.name,
-					ids : map
+					child_ids : map
 				});
 			}
 		};
@@ -461,7 +461,7 @@
 		};
 
 		vm.toggleFilterNode = function (item) {
-			item.toggleState = (item.toggleState === "visible") ? "invisible" : "visible";
+			vm.setToggleState(item, (item.toggleState === "visible") ? "invisible" : "visible");
 			item.path = item._id;
 			toggleNode(item);
 		};
