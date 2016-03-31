@@ -59,7 +59,7 @@
 		vm.viewerSelectedObject = null;
 		vm.showProgress = true;
 		vm.progressInfo = "Loading full tree structure";
-		vm.onContentHeightRequest({height: 0});
+		vm.onContentHeightRequest({height: 70}); // To show the loading progress
 
 		/*
 		 * Get all the tree nodes
@@ -331,37 +331,39 @@
 		};
 
 		function setupInfiniteScroll() {
-			// Infinite items
-			vm.infiniteItemsTree = {
-				numLoaded_: 0,
-				toLoad_: 0,
+			$timeout(function () {
+				// Infinite items
+				vm.infiniteItemsTree = {
+					numLoaded_: 0,
+					toLoad_: 0,
 
-				getItemAtIndex: function (index) {
-					if (index > this.numLoaded_) {
-						this.fetchMoreItems_(index);
-						return null;
+					getItemAtIndex: function (index) {
+						if (index > this.numLoaded_) {
+							this.fetchMoreItems_(index);
+							return null;
+						}
+
+						if (index < vm.nodesToShow.length) {
+							return vm.nodesToShow[index];
+						} else {
+							return null;
+						}
+					},
+
+					getLength: function () {
+						return this.numLoaded_ + 5;
+					},
+
+					fetchMoreItems_: function (index) {
+						if (this.toLoad_ < index) {
+							this.toLoad_ += 500;
+							$timeout(angular.noop, 300).then(angular.bind(this, function () {
+								this.numLoaded_ = this.toLoad_;
+							}));
+						}
 					}
-
-					if (index < vm.nodesToShow.length) {
-						return vm.nodesToShow[index];
-					} else {
-						return null;
-					}
-				},
-
-				getLength: function () {
-					return this.numLoaded_ + 5;
-				},
-
-				fetchMoreItems_: function (index) {
-					if (this.toLoad_ < index) {
-						this.toLoad_ += 500;
-						$timeout(angular.noop, 300).then(angular.bind(this, function () {
-							this.numLoaded_ = this.toLoad_;
-						}));
-					}
-				}
-			};
+				};
+			}, 100);
 		}
 
 		$scope.$watch("vm.filterText", function (newValue) {
@@ -437,7 +439,7 @@
 					account: node.account,
 					project: node.project,
 					ids: node._id,
-					name: node.name,
+					name: node.name
 				});
 
 				// Separately highlight the children
@@ -447,6 +449,15 @@
 					project: node.project,
 					ids: map
 				});
+				/*
+				 EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, {
+				 source: "tree",
+				 account: node.account,
+				 project: node.project,
+				 ids: map,
+				 colour: "1.0 0.0 0.0"
+				 });
+				 */
 			}
 		};
 
@@ -475,33 +486,35 @@
 		};
 
 		function setupInfiniteItemsFilter() {
-			vm.infiniteItemsFilter = {
-				numLoaded_: 0,
-				toLoad_: 0,
-				getItemAtIndex: function (index) {
-					if (index > this.numLoaded_) {
-						this.fetchMoreItems_(index);
-						return null;
-					}
+			$timeout(function () {
+				vm.infiniteItemsFilter = {
+					numLoaded_: 0,
+					toLoad_: 0,
+					getItemAtIndex: function (index) {
+						if (index > this.numLoaded_) {
+							this.fetchMoreItems_(index);
+							return null;
+						}
 
-					if (index < vm.nodes.length) {
-						return vm.nodes[index];
-					} else {
-						return null;
+						if (index < vm.nodes.length) {
+							return vm.nodes[index];
+						} else {
+							return null;
+						}
+					},
+					getLength: function () {
+						return this.numLoaded_ + 5;
+					},
+					fetchMoreItems_: function (index) {
+						if (this.toLoad_ < index) {
+							this.toLoad_ += 20;
+							$timeout(angular.noop, 300).then(angular.bind(this, function () {
+								this.numLoaded_ = this.toLoad_;
+							}));
+						}
 					}
-				},
-				getLength: function () {
-					return this.numLoaded_ + 5;
-				},
-				fetchMoreItems_: function (index) {
-					if (this.toLoad_ < index) {
-						this.toLoad_ += 20;
-						$timeout(angular.noop, 300).then(angular.bind(this, function () {
-							this.numLoaded_ = this.toLoad_;
-						}));
-					}
-				}
-			};
+				};
+			}, 100);
 		}
 	}
 }());

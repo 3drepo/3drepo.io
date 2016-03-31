@@ -26,6 +26,8 @@
 			restrict: 'EA',
 			templateUrl: 'groups.html',
 			scope: {
+				account: "=",
+				project: "=",
 				show: "=",
 				showAdd: "=",
 				canAdd: "=",
@@ -39,27 +41,46 @@
 		};
 	}
 
-	GroupsCtrl.$inject = ["$scope", "EventService"];
+	GroupsCtrl.$inject = ["$scope", "EventService", "GroupsService"];
 
-	function GroupsCtrl ($scope, EventService) {
+	function GroupsCtrl ($scope, EventService, GroupsService) {
 		var vm = this,
-			eventWatch = null;
+			eventWatch = null,
+			promise;
 		
 		/*
 		 * Init
 		 */
-		vm.toShow = "showGroups";
 		vm.saveDisabled = true;
 		vm.canAdd = true;
 		vm.selectedGroup = null;
 		vm.editingGroup = false;
 		vm.editingText = "Start";
+		vm.colourPickerColour = [255, 255, 255];
+		/*
 		vm.groups = [
 			{name: "Doors", colour: [255, 0, 0]},
 			{name: "Toilets", colour: [0, 255, 0]},
 			{name: "Windows", colour: [0, 0, 255]}
 		];
-		setContentHeight();
+		*/
+		GroupsService.init(vm.account, vm.project);
+
+		promise = GroupsService.getGroups();
+		promise.then(function (data) {
+			vm.groups = data.data;
+			console.log(1111111, vm.groups);
+			if (vm.groups.length > 0) {
+				for (var i = 0; i < vm.groups.length; i += 1) {
+					vm.groups[i].colour = [255, 0, 255];
+				}
+				vm.toShow = "showGroups";
+			}
+			else {
+				vm.toShow = "showInfo";
+			}
+			setContentHeight();
+		});
 
 		/*
 		 * Handle showing of adding a new issue
@@ -190,15 +211,19 @@
 			}
 
 			if (!nameExists) {
-				vm.groups.push({
-					name: vm.name,
-					colour: vm.colourPickerColour
+				promise = GroupsService.createGroup(vm.name);
+				promise.then(function (data) {
+					console.log(data);
+					vm.groups.push({
+						name: vm.name,
+						colour: vm.colourPickerColour
+					});
+					vm.selectedGroup = null;
+					vm.toShow = "showGroups";
+					vm.canAdd = true;
+					vm.showAdd = false;
+					setContentHeight();
 				});
-				vm.selectedGroup = null;
-				vm.toShow = "showGroups";
-				vm.canAdd = true;
-				vm.showAdd = false;
-				setContentHeight();
 			}
 		};
 
@@ -209,7 +234,8 @@
 			var contentHeight = 0,
 				groupHeaderHeight = 60, // It could be higher for items with long text but ignore that
 				baseGroupHeight = 260,
-				addHeight = 250;
+				addHeight = 250,
+				infoHeight = 80;
 
 			switch (vm.toShow) {
 				case "showGroups":
@@ -217,11 +243,17 @@
 						contentHeight += groupHeaderHeight;
 					});
 					break;
+
 				case "showGroup":
 					contentHeight = baseGroupHeight;
 					break;
+
 				case "showAdd":
 					contentHeight = addHeight;
+					break;
+
+				case "showInfo":
+					contentHeight = infoHeight;
 					break;
 			}
 

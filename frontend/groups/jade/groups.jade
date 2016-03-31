@@ -33,3 +33,8 @@ div(ng-switch="vm.toShow")
 		#deleteGroup(layout="column" layout-align="start start")
 			md-button.md-raised.md-warn#deleteGroupButton(ng-click="vm.deleteGroup()") Delete group
 			p This will not delete the objects
+
+	// Info
+	#groupsInfo(ng-switch-when="showInfo" layout="column")
+		.cardInfo
+			p There are currently no groups

@@ -82,7 +82,7 @@
 		vm.autoSaveComment = false;
 		vm.canAdd = true;
 		vm.toShow = "showIssues";
-		vm.onContentHeightRequest({height: 0});
+		vm.onContentHeightRequest({height: 70}); // To show the loading progress
 
 		/*
 		 * Get all the Issues
