@@ -1633,7 +1633,7 @@ DBInterface.prototype.filterFederatedProject = function(dbName, project, branch,
 				_id: { $in: docs[0].current}
 			};
 
-			var projection = {
+			var refProjection = {
 				_rid : 1,
 				owner: 1,
 				project: 1,
@@ -1649,7 +1649,7 @@ DBInterface.prototype.filterFederatedProject = function(dbName, project, branch,
 				}
 			}
 
-			dbConn(self.logger).filterColl(dbName, project + ".scene", refFilter, projection, function(err, refs) {
+			dbConn(self.logger).filterColl(dbName, project + ".scene", refFilter, refProjection, function(err, refs) {
 				// Asynchronously loop over all references.
 				async.concat(refs, function (item, iter_callback) {
 					var childDbName  = item.owner ? item.owner : dbName;
@@ -1688,7 +1688,7 @@ DBInterface.prototype.filterFederatedProject = function(dbName, project, branch,
 				function (err, results) {
 					// TODO: Deal with errors here
 
-					callback(responseCodes.OK, nodes.concat(results).concat(refs));
+					callback(responseCodes.OK, nodes.concat(results));
 				});
 			});
 		});
@@ -1881,7 +1881,7 @@ DBInterface.prototype.getIssues = function(dbName, project, branch, revision, on
 						}
 					} else {
 						childBranch   = "master";
-						childRevision = null;
+				 		childRevision = null;
 					}
 
 

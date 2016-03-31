@@ -87,7 +87,7 @@
 		promise.then(function (data) {
 			var i, length;
 			vm.showProgress = false;
-			vm.issues = data;
+			vm.issues = (data === "") ? [] : data;
 			vm.showIssuesInfo = (vm.issues.length === 0);
 			vm.showIssueList = (vm.issues.length !== 0);
 			for (i = 0, length = vm.issues.length; i < length; i += 1) {

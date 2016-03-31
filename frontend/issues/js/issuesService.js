@@ -114,7 +114,7 @@
 				dataToSend,
 				deferred = $q.defer();
 
-			url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue.objectId);
+			url = serverConfig.apiUrl(account + "/" + project + "/issues/" + issue.objectId);
 
 			// viewpoint previously was set to ViewerService.defaultViewer.getCurrentViewpointInfo()
 			data = {

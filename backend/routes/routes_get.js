@@ -101,7 +101,7 @@ var repoGetHandler = function(router, checkAccess){
     });
 
     // Retrieve all tree elements with a name containing the search string
-    self.getInternal("/:account/:project/revision/:branch/head/:searchstring/searchtree.:format");
+    self.getInternal("/:account/:project/revision/:branch/head/searchtree.:format");
 
 	// Account information
 	self.getInternal("/search.:format");
@@ -173,7 +173,7 @@ var repoGetHandler = function(router, checkAccess){
 	self.getInternal("/:account/:project/meta/:uid.:format.:subformat?");
 	// self.getInternal("/:account/:project/issue/:uid.:format");
 	// self.getInternal("/:account/:project/issues/:sid.:format");
-	// self.getInternal("/:account/:project/issues.:format");
+	//self.getInternal("/:account/:project/issues.:format");
 
 	// Get map from object id to path in tree for multipart
 	self.getInternal("/:account/:project/revision/:branch/head/tree/multimap.:format.:subformat?");
