@@ -117,7 +117,9 @@ module.exports.createApp = function (serverConfig) {
 	// project package handlers
 	app.use("/:account/:project", require("../routes/projectPackage"));
 	// bid hanlders
-	app.use("/:account/:project/packages/:packageName", require("../routes/bid"));
+	app.use('/:account/:project/packages/:packageName', require('../routes/bid'));
+	//groups handler
+	app.use('/:account/:project/groups', require('../routes/group'));
 	//issues handler
 	app.use("/:account/:project", require("../routes/issue"));
 	//mesh handler

@@ -54,7 +54,6 @@
 
 			expireSession(req);
 			createSession(responsePlace, req, res, next, {username: user.user, roles: user.roles});
-
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.NOT_AUTHORIZED, {username: req.body.username});
 		});
