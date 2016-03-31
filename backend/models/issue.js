@@ -79,7 +79,7 @@ schema.statics.findByProjectName = function(dbColOptions, branch, rev){
 		);
 		
 	}).then(refs => {
-		console.log(refs);
+		//console.log(refs);
 		if(!refs.length){
 			return Promise.resolve(issues);
 		} else {
@@ -95,8 +95,10 @@ schema.statics.findByProjectName = function(dbColOptions, branch, rev){
 			return Promise.all(promises).then(refIssues => {
 				//console.log(refIssues);
 				refIssues.forEach(refIssue => {
-					issues.push(refIssue);
+					issues = issues.concat(refIssue);
 				});
+
+				//issues = issues.concat([]);
 
 				return Promise.resolve(issues);
 			});
