@@ -112,7 +112,12 @@
 				}
 			}
 
-			mainApp.use(vhost(subdomain + "." + config.host, subDomainApp));
+			if (subdomain !== "null")
+			{
+				mainApp.use(vhost(subdomain + "." + config.host, subDomainApp));
+			} else {
+				mainApp.use(vhost(config.host, subDomainApp));
+			}
 		}
 	}
 
