@@ -10,12 +10,21 @@ var Schema = mongoose.Schema;
 var groupSchema = Schema(
 	_.extend({}, repoBase.attrs, {
 		// no extra attributes
-		type: { type: String, default: 'group'}
+		_id: Object,
+		type: { type: String, default: 'group'},
+		parents: [],
 	})
 );
 
 
 groupSchema.statics = {};
+groupSchema.methods = {};
+
+
+groupSchema.statics.findByUID = function(dbCol, uid){
+	'use strict';
+	return this.findOne(dbCol, { _id: utils.stringToUUID(uid), type: 'group' });
+};
 
 groupSchema.statics.listGroups = function(dbCol){
 	'use strict';
@@ -23,7 +32,26 @@ groupSchema.statics.listGroups = function(dbCol){
 	//TO-DO : get head history-> current, and do type: group, _id: {$in: current}
 
 	return this.find(dbCol, { type : 'group'});
-}
+};
+
+groupSchema.methods.updateAttrs = function(data){
+	'use strict';
+
+	let parents = data.parents;
+
+	if(parents){
+		parents.forEach((p, index) => {
+			parents[index] = stringToUUID(p);
+		});
+	}
+
+
+	this.name = data.name || this.name;
+	this.parents = parents || this.parents;
+
+	this.markModified('parents');
+
+};
 
 groupSchema.statics.createGroup = function(dbCol, data){
 	'use strict';
@@ -33,26 +61,21 @@ groupSchema.statics.createGroup = function(dbCol, data){
 		project: dbCol.project
 	});
 
-	let parents = data.parents;
 
-	parents.forEach((p, index) => {
-		parents[index] = stringToUUID(p);
-	});
-
-	group._id = utils.uuidToMongoBuf3(uuid.v4());
-	group.shared_id = utils.uuidToMongoBuf3(uuid.v4());
+	group._id = stringToUUID(uuid.v1());
+	group.shared_id = stringToUUID(uuid.v1());
 	group.api = 1;
 
-	group.name = data.name
-	group.parents = parents;
+	group.updateAttrs(data);
 	
 	return group;
 };
 
 // extend statics method
-_.extend(groupSchema.statics, repoBase.statics);
+groupSchema.statics = _.extend(repoBase.statics, groupSchema.statics);
+
 // extend instance method
-_.extend(groupSchema.methods, repoBase.methods);
+groupSchema.methods = _.extend(repoBase.methods, groupSchema.methods);
 
 var Group = ModelFactory.createClass(
 	'Group', 

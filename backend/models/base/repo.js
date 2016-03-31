@@ -79,7 +79,6 @@ statics.findByUID = function(dbCol, uid, options){
 		if(!obj){
 			return Promise.reject({resCode: responseCodes.OBJECT_NOT_FOUND});
 		}
-
 		// load extRef if _.extRef is defined
 		if(obj.type === 'mesh' && obj._extRef){
 
@@ -134,7 +133,7 @@ methods.clean = function(){
 	});
 
 	return cleaned;
-}
+};
 
 statics.findByRevision = function(dbCol, rid, sid, options){
 	'use strict';

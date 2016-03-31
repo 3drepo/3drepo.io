@@ -54,7 +54,7 @@ function login(req, res, next){
 		expireSession(req);
 		createSession(responsePlace, req, res, next, {username: user.user, roles: user.roles});
 
-	}).catch(err => {
+	}).catch(() => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.NOT_AUTHORIZED, {username: req.body.username});
 	});
 
