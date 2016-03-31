@@ -98,7 +98,18 @@ module.exports.createApp = function(serverConfig)
 							"docs",
 							"utils",
 							"walkthroughVr",
-							"oculus"
+							"oculus",
+							"groups"
+						],
+						"children" : [
+							{
+								"plugin": "bid4free",
+								children: [
+									{
+										plugin: "bid4freeWorkspace"
+									}
+								]
+							}
 						]
 					}
 				]

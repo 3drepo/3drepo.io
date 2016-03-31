@@ -68,7 +68,7 @@ var public_files = {
         angularmaterialcss: '/public/css/external/angular-material.min.css',
 		threedrepocss: "/public/css/external/three-d-repo.css"
 	}
-}
+};
 
 /*
  * This is a set of scripts that needs to be minified(if appropriate), symlinked to the public folder
@@ -111,9 +111,10 @@ var internal_files = {
 
 	x3dom_files: [
 	'submodules/x3dom/dist/ammo.js',
-	'submodules/x3dom/dist/x3dom.js'
+	'submodules/x3dom/dist/x3dom.js',
+	'submodules/x3dom/dist/x3dom.css'
 	]
-}
+};
 
 var public_dir_js	= path.normalize("public/js/external");
 var public_dir_css	= path.normalize("public/css/external");
@@ -126,7 +127,7 @@ install_x3dom();
  * install bower components and publicize the relevant files.
  */
 function install_bower(){
-	var public_qr_dir = path.join(public_dir_js, 'qrcode')
+	var public_qr_dir = path.join(public_dir_js, 'qrcode');
 	fs.stat(public_qr_dir, function(err, stat){
 		if(err !== null){
 			//create qr folder in $public_dir_js if it doesn't exist

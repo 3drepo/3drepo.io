@@ -109,46 +109,46 @@
 			return deferred.promise;
 		};
 
-		obj.saveIssue = function(issue, account, project) {
+		obj.saveIssue = function (issue) {
 			var self = this,
 				dataToSend,
-				deferred = $q.defer();
+				deferred = $q.defer(),
+				viewpointPromise = $q.defer();
 
 			url = serverConfig.apiUrl(account + "/" + project + "/issues/" + issue.objectId);
 
-			// viewpoint previously was set to ViewerService.defaultViewer.getCurrentViewpointInfo()
-			data = {
-				name: issue.name,
-				viewpoint: null,
-				scale: 1.0,
-				creator_role: issue.creator_role,
-				assigned_roles: userRoles
-			};
-			config = {
-				withCredentials: true
-			};
+			EventService.send(EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, {promise: viewpointPromise});
 
-			if (issue.pickedPos !== null) {
-				data.position = issue.pickedPos.toGL();
-				data.norm = issue.pickedNorm.toGL();
-			}
+			viewpointPromise.promise.then(function (viewpoint) {
+				data = {
+					name: issue.name,
+					viewpoint: viewpoint,
+					scale: 1.0,
+					creator_role: issue.creator_role,
+					assigned_roles: userRoles
+				};
+				config = {withCredentials: true};
 
-			dataToSend = {
-				data: JSON.stringify(data)
-			};
+				if (issue.pickedPos !== null) {
+					data.position = issue.pickedPos.toGL();
+					data.norm = issue.pickedNorm.toGL();
+				}
 
-			$http.post(url, dataToSend, config)
-				.then(function successCallback(response) {
-					response.data.issue._id = response.data.issue_id;
-					response.data.issue.account = account;
-					response.data.issue.project = project;
-					response.data.issue.timeStamp = self.getPrettyTime(response.data.issue.created);
-					response.data.issue.creator_role = issue.creator_role;
+				dataToSend = {data: JSON.stringify(data)};
 
-					response.data.issue.title = generateTitle(response.data.issue);
-					self.removePin();
-					deferred.resolve(response.data.issue);
-				});
+				$http.post(url, dataToSend, config)
+					.then(function successCallback(response) {
+						response.data.issue._id = response.data.issue_id;
+						response.data.issue.account = issue.account;
+						response.data.issue.project = issue.project;
+						response.data.issue.timeStamp = self.getPrettyTime(response.data.issue.created);
+						response.data.issue.creator_role = issue.creator_role;
+
+						response.data.issue.title = generateTitle(response.data.issue);
+						self.removePin();
+						deferred.resolve(response.data.issue);
+					});
+			});
 
 			return deferred.promise;
 		};

@@ -26,9 +26,9 @@
 			restrict: "EA",
 			templateUrl: "clip.html",
 			scope: {
-				height: "=",
 				show: "=",
-				visible: "="
+				visible: "=",
+				onContentHeightRequest: "&"
 			},
 			controller: ClipCtrl,
 			controllerAs: 'vm',
@@ -41,6 +41,9 @@
 	function ClipCtrl($scope, $timeout, EventService) {
 		var vm = this;
 
+		/*
+		 * Init
+		 */
 		vm.sliderMin = 0;
 		vm.sliderMax = 100;
 		vm.sliderStep = 0.1;
@@ -48,9 +51,9 @@
 		vm.axes = ["X", "Y", "Z"];
 		vm.selectedAxis = vm.axes[0];
 		vm.visible = false;
+		vm.onContentHeightRequest({height: 120});
 
 		function initClippingPlane () {
-			console.log(123);
 			$timeout(function () {
 				var initPosition = (vm.sliderMax - vm.sliderPosition) / vm.sliderMax;
 				

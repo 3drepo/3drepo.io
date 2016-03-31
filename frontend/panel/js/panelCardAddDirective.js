@@ -19,42 +19,28 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("panelCardFilter", panelCardFilter);
+		.directive("panelCardAdd", panelCardAdd);
 
-	function panelCardFilter() {
+	function panelCardAdd() {
 		return {
-			restrict: 'E',
-			templateUrl: 'panelCardFilter.html',
+			restrict: 'EA',
+			templateUrl: 'panelCardAdd.html',
 			scope: {
-				showFilter: "=",
-				filterText: "="
+				showAdd: "="
 			},
-			controller: PanelCardFilterCtrl,
+			controller: PanelCardAddCtrl,
 			controllerAs: 'vm',
 			bindToController: true
 		};
 	}
 
-	PanelCardFilterCtrl.$inject = ["$scope", "$timeout"];
+	PanelCardAddCtrl.$inject = [];
 
-	function PanelCardFilterCtrl ($scope, $timeout) {
-		var vm = this,
-			filterTimeout = null;
+	function PanelCardAddCtrl() {
+		var vm = this;
 
-		vm.clearFilter = function () {
-			vm.filterInputText = "";
+		vm.add = function () {
+			vm.showAdd = true;
 		};
-
-		$scope.$watch("vm.filterInputText", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				if (filterTimeout !== null) {
-					$timeout.cancel(filterTimeout);
-				}
-				filterTimeout = $timeout(function() {
-					vm.filterText = vm.filterInputText;
-					vm.showClearFilterButton = (vm.filterInputText !== "");
-				}, 500);
-			}
-		});
 	}
 }());

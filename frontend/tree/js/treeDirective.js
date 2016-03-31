@@ -59,6 +59,7 @@
 		vm.viewerSelectedObject = null;
 		vm.showProgress = true;
 		vm.progressInfo = "Loading full tree structure";
+		vm.onContentHeightRequest({height: 0});
 
 		/*
 		 * Get all the tree nodes
