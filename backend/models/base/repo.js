@@ -19,6 +19,7 @@ var attrs = {
 };
 
 var statics = {};
+var methods = {};
 //var methods = {};
 
 statics._getGridFSBucket = function(dbCol, format){
@@ -122,6 +123,19 @@ statics.findByUID = function(dbCol, uid, options){
 
 };
 
+methods.clean = function(){
+	'use strict';
+
+	let cleaned = this.toObject();
+	cleaned._id = uuidToString(cleaned._id);
+	cleaned.shared_id = uuidToString(cleaned.shared_id);
+	cleaned.parents.forEach((parent, i) => {
+		cleaned.parents[i] = uuidToString(parent);
+	});
+
+	return cleaned;
+}
+
 statics.findByRevision = function(dbCol, rid, sid, options){
 	'use strict';
 
@@ -180,4 +194,4 @@ statics.findByRevision = function(dbCol, rid, sid, options){
 };
 
 
-module.exports = {attrs, statics};
+module.exports = {attrs, statics, methods};

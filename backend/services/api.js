@@ -120,6 +120,8 @@ module.exports.app = function (sharedSession) {
 	app.use('/:account/:project', require('../routes/projectPackage'));
 	// bid hanlders
 	app.use('/:account/:project/packages/:packageName', require('../routes/bid'));
+	//groups handler
+	app.use('/:account/:project/groups', require('../routes/group'));
 	//issues handler
 	app.use('/:account/:project', require('../routes/issue'));
 	//mesh handler

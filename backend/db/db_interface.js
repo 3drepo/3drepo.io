@@ -403,6 +403,31 @@ DBInterface.prototype.addToCurrentList = function(dbName, project, branch, objUU
 	});
 };
 
+// TODO: Remove this, as it shouldn"t exist
+DBInterface.prototype.removeFromCurrentList = function(dbName, project, branch, objUUID, callback) {
+	"use strict";
+
+	var self = this;
+
+	self.getHeadUUID(dbName, project, branch, function(err, uuid) {
+		dbConn(self.logger).collCallback(dbName, project + ".history", true, function(err, coll) {
+			if(err.value) { return callback(err); }
+
+			var uniqueID = {
+				"_id" : uuid.uuid
+			};
+
+			coll.update(uniqueID, { $pull: {"current" : objUUID} }, {}, function(err) {
+				if (err) { return callback(responseCodes.DB_ERROR(err)); }
+
+				self.logger.logDebug("Pulling " + uuidToString(objUUID) + " to current list of " + uuidToString(uuid.uuid));
+
+				callback(responseCodes.OK);
+			});
+		});
+	});
+};
+
 DBInterface.prototype.storeViewpoint = function(dbName, project, branch, username, parentSharedID, data, callback) {
 	"use strict";
 
