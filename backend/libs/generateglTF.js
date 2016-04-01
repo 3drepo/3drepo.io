@@ -186,7 +186,171 @@ function generateglTFJSONGroup(byteOffsets, binUri, options){
 	return json;
 }
 
-function generateBuffer(meshesByBuilding, binName, materialMapping){
+function generateglTFJSON(bufferInfos, binUri, materialMapping){
+	'use strict';
+	// glTF const
+	const ELEMENT_ARRAY_BUFFER = 34963;
+	const ARRAY_BUFFER = 34962;
+	const UNSIGNED_SHORT = 5123;
+	const FLOAT = 5126;
+	const SCALAR = 'SCALAR';
+	const VEC3 = 'VEC3';
+	const IDENTITY_MATRIX = [ 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
+	const PRIMITIVE_MODE_TRIANGLES = 4;
+	const KHR_BINARY_GLTF = 'KHR_binary_glTF';
+
+	let json = require('./glTFMetaTemplate.json');
+	json = JSON.parse(JSON.stringify(json));
+
+	// bin info
+	let binId = 'buffer1';
+	if(options && options.forGlb){
+		json.extensionsUsed.push(KHR_BINARY_GLTF);
+		binId = KHR_BINARY_GLTF;
+	} else {
+		json.buffers[binId] = {
+			"byteLength": byteOffsets.totalBytes,
+			"type": "arraybuffer",
+			"uri": binUri
+		};
+	}
+
+	
+}
+
+function generateBufferNew(meshesByBuilding, binName, materialMapping){
+	'use strict';
+	
+	let GLBYTE = {
+		FLOAT: 4,
+		UINT: 2
+	};
+
+
+	// var to keep track of byteOffsets info
+	let bufferInfos = [];
+
+	let buildingIndex = 0;
+	//all building buffers
+	let buffers = [];
+
+	Object.keys(meshesByBuilding).forEach(id => {
+		// each building
+
+		let building = meshesByBuilding[id];
+
+		let vertexIndex = -1;
+
+		let glIndices = [];
+		let glVertices = [];
+		let glNormals = [];
+		let idMaps = [];
+
+		building.meshes.forEach(mesh => {
+
+			let normal = normalVec(mesh[0], mesh[1], mesh[2]);
+
+			glNormals.push(normal, normal, normal);
+			glVertices.push(mesh[0], mesh[1], mesh[2]);
+			glIndices.push(++vertexIndex, ++vertexIndex, ++vertexIndex);
+			idMaps.push(buildingIndex, buildingIndex, buildingIndex);
+
+		});
+
+		let totalBytes = 
+			( glVertices.length * 3 ) * GLBYTE.FLOAT +
+			( glNormals.length * 3 ) * GLBYTE.FLOAT +
+			glIndices.length * GLBYTE.UINT +
+			idMaps.length *GLBYTE.FLOAT;
+
+		//console.log('totalBytes', totalBytes);
+
+		let bufferInfo = {
+			id: id,
+			totalBytes: totalBytes,
+			classCode: building.classCode
+		};
+
+		let buffer = new Buffer(totalBytes);
+		let bufferOffset = 0;
+		let min = [0,0,0];
+		let max = [0,0,0];
+
+		if (glVertices.length){
+			min = [glVertices[0][0], glVertices[0][1], glVertices[0][2]];
+			max = [glVertices[0][0], glVertices[0][1], glVertices[0][2]];
+		}
+
+		/*** vertices ***/
+
+		bufferInfo.verticesOffset = bufferOffset;
+
+		glVertices.forEach(vertex => {
+			// vertex = [x,y,z]
+			vertex.forEach((val, i) => {
+				buffer.writeFloatLE(val, bufferOffset);
+				bufferOffset = bufferOffset + GLBYTE.FLOAT;
+
+				if (vertex[i] < min[i]){
+					min[i] = vertex[i];
+				} else if (vertex[i] > max[i]){
+					max[i] = vertex[i];
+				}
+			});
+		});
+
+		bufferInfo.verticesLength = ( glVertices.length * 3 ) * GLBYTE.FLOAT;
+
+
+		/*** normals ***/
+
+		bufferInfo.normalsOffset = bufferOffset;
+
+		glNormals.forEach(vertex => {
+			// vertex = [x,y,z]
+			vertex.forEach(val => {
+				buffer.writeFloatLE(val, bufferOffset);
+				bufferOffset = bufferOffset + GLBYTE.FLOAT;
+			});
+		});
+
+		bufferInfo.normalsLength = ( glNormals.length * 3 ) * GLBYTE.FLOAT;
+
+
+		/*** indices ***/
+
+		bufferInfo.indicesOffset = bufferOffset;
+
+		glIndices.forEach(index => {
+			buffer.writeUInt16LE(index, bufferOffset);
+			bufferOffset = bufferOffset + GLBYTE.UINT;
+		});
+
+		bufferInfo.indicesLength = glIndices.length * GLBYTE.UINT;
+
+		/*** idMap ***/
+
+		bufferInfo.idMapOffset = bufferOffset;
+
+		idMaps.forEach(val => {
+			buffer.writeFloatLE(val, bufferOffset);
+			bufferOffset = bufferOffset + GLBYTE.FLOAT;
+		});
+
+		bufferInfo.idMapLength = idMaps.length * GLBYTE.FLOAT;
+
+		buffers.push(buffer);
+		bufferInfos.push(bufferInfo);
+
+		buildingIndex++;
+	});
+
+	console.log(bufferInfos);
+
+	let json = generateglTFJSON(bufferInfos, binName, materialMapping);
+}
+
+function generateBuffer(meshesByGroup, binName, materialMapping){
 	'use strict';
 	
 	let GLBYTE = {
@@ -362,5 +526,5 @@ function generateBuffer(meshesByBuilding, binName, materialMapping){
 }
 
 
-module.exports = generateBuffer;
+module.exports = generateBufferNew;
 

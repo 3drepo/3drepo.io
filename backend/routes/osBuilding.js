@@ -357,9 +357,9 @@ function genglX(format, req, res){
 
 			console.log('saving to stash and dont wait for response');
 
-			stash.saveStashByFileName(dbCol, 'gltf', gltfUrl, new Buffer(JSON.stringify(glTF.json)));
+			//stash.saveStashByFileName(dbCol, 'gltf', gltfUrl, new Buffer(JSON.stringify(glTF.json)));
 			//bin file should also in .stash.gltf but with .bin as filename extension
-			stash.saveStashByFileName(dbCol, 'gltf', binUrl, glTF.buffer);
+			//stash.saveStashByFileName(dbCol, 'gltf', binUrl, glTF.buffer);
 			
 
 			return Promise.resolve(glTF);
@@ -381,7 +381,7 @@ function genglX(format, req, res){
 		} else {
 			console.log('stash not found');
 
-			if(true){
+			if(false){
 				return Promise.reject({ message: 'No stash and we are not going to bother os api server today so no data for you, sorry.'});
 			} else {
 				return getBuildingsAndGenerate();
@@ -393,11 +393,12 @@ function genglX(format, req, res){
 			res.status(200).send(glTF.buffer);
 		} else {
 			//json from stash is a Buffer
-			if (glTF.json instanceof Buffer) {
-				glTF.json = JSON.parse(glTF.json.toString());
-			}
-
-			res.status(200).json(glTF.json);
+			// if (glTF.json instanceof Buffer) {
+			// 	glTF.json = JSON.parse(glTF.json.toString());
+			// }
+			console.log(glTF);
+			//res.status(200).json(glTF.json);
+			res.status(200).send();
 		}
 	}).catch(err => {
 		console.log(err.stack);
