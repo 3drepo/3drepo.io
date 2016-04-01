@@ -26,15 +26,15 @@
 	function AccountService($http, $q, serverConfig) {
 		var obj = {},
 			deferred;
-			
+
 		/**
 		 * Get account data
 		 */
 		obj.getData = function (username) {
 			deferred = $q.defer();
-			
+
 			var accountData = {};
-			
+
 			$http.get(serverConfig.apiUrl(username + ".json"))
 				.then(function (response) {
 					var i, length,
@@ -50,23 +50,14 @@
 						}
 						projectsGrouped[project.account].push(project.project);
 					}
-					
+
 					accountData = response.data;
 					accountData.projectsGrouped = projectsGrouped;
 
-					if (response.data.avatarURL) {
-						$http.get(response.data.avatarURL).then(function() {
-							accountData.hasAvatar = true;
-							deferred.resolve(accountData);
-						}, function() {
-							accountData.hasAvatar = false;
-							deferred.resolve(accountData);
-						});
-					} else {
-						deferred.resolve(accountData);
-					}
+					accountData.avatarURL = serverConfig.apiUrl(username + ".jpg");
+					deferred.resolve(accountData);
 				});
-			
+
 			return deferred.promise;
 		};
 

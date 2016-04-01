@@ -636,7 +636,8 @@ DBInterface.prototype.getUserInfo = function(username, callback) {
 		customData : 1,
 		"customData.firstName" : 1,
 		"customData.lastName" : 1,
-		"customData.email" : 1
+		"customData.email" : 1,
+		"customData.avatar" : 1
 	};
 
 	dbConn(self.logger).filterColl("admin", "system.users", filter, projection, function(err, coll) {
@@ -677,6 +678,12 @@ DBInterface.prototype.getUserInfo = function(username, callback) {
 						}
 					}
 				}
+
+				if (user.avatar) {
+					user.hasAvatar = true;
+				}
+
+				user.avatar = undefined;
 
 				/*
 				self.getIssueStatsForProjectList(user.projects, function(err, projectStats) {

@@ -34,7 +34,7 @@
 			templateUrl: "project.html",
             controller: ProjectCtrl,
 			controllerAs: "vm",
-			bindToController: true			
+			bindToController: true
         };
     }
 
@@ -60,6 +60,7 @@
 			]
 		});
 
+		/*
 		panelCard.left.push({
 			type: "groups",
 			title: "Groups",
@@ -72,6 +73,7 @@
 				"add"
 			]
 		});
+		*/
 
 		panelCard.right.push({
 			type: "issues",
@@ -148,7 +150,7 @@
 						);
 					}
 				});
-				
+
 				ProjectService.getProjectInfo(vm.account, vm.project).then(function (data) {
 					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
 						account: data.account,
@@ -167,7 +169,7 @@
 				branch:   vm.branch,
 				revision: vm.revision
 			});
-						
+
 			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelCard);
 		});
 	}

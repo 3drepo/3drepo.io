@@ -125,7 +125,7 @@
 
 		}).then(avatar => {
 
-			res.write(avatar.buffer);
+			res.write(avatar.data.buffer);
 			res.end();
 
 		}).catch(err => {
