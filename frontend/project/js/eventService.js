@@ -16,7 +16,7 @@
  */
 
 (function () {
-    "use strict";
+	"use strict";
 
     angular.module("3drepo")
         .factory("EventService", EventService);
@@ -82,13 +82,15 @@
         };
 		
 		var sendError = function(type, value) {
-			if (angular.isUndefined(type))
-			{
-				console.trace("UNDEFINED ERROR TYPE");			
-			} else {
-				//console.log(type + " : " + JSON.stringify(value));
-            	currentError = {type: type, value: value};
-			}
+			$timeout(function() {
+				if (angular.isUndefined(type))
+				{
+					console.trace("UNDEFINED ERROR TYPE");
+				} else {
+					//console.log(type + " : " + JSON.stringify(value));
+					currentError = {type: type, value: value};
+				}
+			});
 		};
 
         return {

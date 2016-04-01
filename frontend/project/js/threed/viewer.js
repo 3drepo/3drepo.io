@@ -672,7 +672,6 @@ var Viewer = {};
 
 			if (ids.length === 0)
 			{
-				console.log("LENGTH: " + ids.length);
 				self.setApp(null);
 			}
 		};
@@ -1641,7 +1640,6 @@ var Viewer = {};
 
 		this.changePinColours = function(id, colours) {
 			if (self.pins.hasOwnProperty(id)) {
-				console.log(id, colours);
 				self.pins[id].changeColour(colours);
 			}
 		};
