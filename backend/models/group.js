@@ -13,6 +13,7 @@ var groupSchema = Schema(
 		_id: Object,
 		type: { type: String, default: 'group'},
 		parents: [],
+		color: [Number]
 	})
 );
 
@@ -48,6 +49,7 @@ groupSchema.methods.updateAttrs = function(data){
 
 	this.name = data.name || this.name;
 	this.parents = parents || this.parents;
+	this.color = data.color || this.color;
 
 	this.markModified('parents');
 
@@ -72,10 +74,10 @@ groupSchema.statics.createGroup = function(dbCol, data){
 };
 
 // extend statics method
-groupSchema.statics = _.extend(repoBase.statics, groupSchema.statics);
+groupSchema.statics = _.extend({}, repoBase.statics, groupSchema.statics);
 
 // extend instance method
-groupSchema.methods = _.extend(repoBase.methods, groupSchema.methods);
+groupSchema.methods = _.extend({}, repoBase.methods, groupSchema.methods);
 
 var Group = ModelFactory.createClass(
 	'Group', 
