@@ -23,13 +23,13 @@ router.get('/buildings.bin', function(req, res, next){
 router.get('/map-images/:style/:z/:x/:y.png', getMapTiles);
 
 //TO-DO: dirty quick fix to be deleted later
-router.get('/:shader.glsl', function(req, res){ 
+router.get('/:shader.glsl', function(req, res){
 	//console.log(__dirname);
 	res.sendFile(require('path').resolve(__dirname + '../../../public/shader/gltfStockShaders/' + req.params.shader + '.glsl'));
 });
 
 function extendObject(a, b){
-	
+
 	if (b) {
 		Object.keys(b).forEach(key => {
 			a[key] = b[key];
@@ -67,7 +67,7 @@ function genglX(format, req, res){
 
 	let gltfUrl;
 	let binUrl;
-	
+
 	if(format === 'gltf'){
 		gltfUrl = `/${dbCol.account}/${dbCol.project}${req.url}`;
 		binUrl  = gltfUrl.replace('gltf', 'bin');
@@ -153,7 +153,7 @@ function genglX(format, req, res){
 	function getBuildingsAndGenerate(){
 		return getBuildings().then(json => {
 
-			// get total numbers of building and do subsequent API calls. 
+			// get total numbers of building and do subsequent API calls.
 			// max items returned from API are 100 each
 			let total = json.header.totalresults;
 			console.log('total buildings (dup)', total);
@@ -167,7 +167,7 @@ function genglX(format, req, res){
 			console.log('offset call count', callCount);
 
 			for (let i=1; i <= callCount; i++){
-				
+
 				if (total !== i * maxresults){
 					//let offset = maxresults * callCount;
 
@@ -179,9 +179,9 @@ function genglX(format, req, res){
 			return Promise.all(callPromises);
 
 		}).then(results => {
-			
+
 			let lastCoors;
-			
+
 			results.forEach(result => {
 				buildings = buildings.concat(result.results);
 			});
@@ -197,7 +197,7 @@ function genglX(format, req, res){
 
 			//sort buildings by their classification code
 			buildings.sort((a, b) => {
-				
+
 				a.DPA.classCode = a.DPA.CLASSIFICATION_CODE.substring(0, 2);
 				b.DPA.classCode = b.DPA.CLASSIFICATION_CODE.substring(0, 2);
 
@@ -242,7 +242,7 @@ function genglX(format, req, res){
 
 				building = building.DPA;
 
-				if(lastCoors && 
+				if(lastCoors &&
 					Math.abs(lastCoors.x - building.X_COORDINATE) < Number.EPSILON &&
 					Math.abs(lastCoors.y - building.Y_COORDINATE) < Number.EPSILON){
 					// skip generate geometry for duplicated building
@@ -266,11 +266,11 @@ function genglX(format, req, res){
 					cleanedBuildingCount++;
 
 				}
-				
+
 			});
 
 			console.log('Building count (cleaned)', cleanedBuildingCount);
-			
+
 			if(draw){
 				//console.log('draw');
 				return Promise.all(promises);
@@ -280,7 +280,7 @@ function genglX(format, req, res){
 
 
 		}).then(dimensions => {
-			
+
 			let heightlessBuildingCount = 0;
 			let refPoint;
 
@@ -291,7 +291,7 @@ function genglX(format, req, res){
 			// 	];
 			// }
 
-			
+
 			if (method === methodNames.RADIUS){
 				// use center point as ref point
 				refPoint = [grid.easting, grid.northing];
@@ -323,8 +323,8 @@ function genglX(format, req, res){
 
 					meshesByGroup[classCode] = meshesByGroup[classCode].concat(
 						generateMeshes(
-							dimension.geometry.coordinates, 
-							dimension.relativeHeightToMax, 
+							dimension.geometry.coordinates,
+							dimension.relativeHeightToMax,
 							refPoint
 						)
 					);
@@ -341,10 +341,10 @@ function genglX(format, req, res){
 
 			console.log('saving to stash and dont wait for response');
 
-			stash.saveStashByFileName(dbCol, 'gltf', gltfUrl, new Buffer(JSON.stringify(glTF.json)));
+			stash.saveStashByFilename(dbCol, 'gltf', gltfUrl, new Buffer(JSON.stringify(glTF.json)));
 			//bin file should also in .stash.gltf but with .bin as filename extension
-			stash.saveStashByFileName(dbCol, 'gltf', binUrl, glTF.buffer);
-			
+			stash.saveStashByFilename(dbCol, 'gltf', binUrl, glTF.buffer);
+
 
 			return Promise.resolve(glTF);
 
@@ -365,7 +365,7 @@ function genglX(format, req, res){
 		} else {
 			console.log('stash not found');
 
-			if(true){
+			if(false){
 				return Promise.reject({ message: 'No stash and we are not going to bother os api server today so no data for you, sorry.'});
 			} else {
 				return getBuildingsAndGenerate();
@@ -403,8 +403,8 @@ function getMapTiles(req, res){
 	z = req.params.z;
 
 	OSGet.map({
-		tileMatrixSet: 'EPSG:3857', 
-		layer: `${req.params.style} 3857`, 
+		tileMatrixSet: 'EPSG:3857',
+		layer: `${req.params.style} 3857`,
 		z, x, y
 	}).then(r => {
 
@@ -419,7 +419,7 @@ function getMapTiles(req, res){
 		} else {
 			res.status(500).send(err);
 		}
-		
+
 	});
 
 

@@ -331,6 +331,33 @@ var Viewer = {};
 				if (!self.downloadsLeft) {
 					callback(self.EVENT.LOADED);
 				}
+
+				// add map tiles only when mouse down -> move -> mouse up
+				self.onMouseDown(function(){
+					//console.log('mouse down and try to move');
+
+					var changed = false;
+
+					var viewChangeHandler = function(){
+						changed = true;
+					};
+
+					self.onViewpointChanged(viewChangeHandler);
+
+					var mouseUpHandler = function(){
+						if(changed){
+							self.addMapTileByViewPoint();
+						}
+
+						self.offViewpointChanged(viewChangeHandler);
+						self.offMouseUp(mouseUpHandler);
+					};
+
+					self.onMouseUp(mouseUpHandler);
+				});
+
+				// init add map tiles
+				self.addMapTileByViewPoint();
 			});
 		};
 
@@ -490,6 +517,10 @@ var Viewer = {};
 		};
 
 		this.onMouseUp = function(functionToBind) {
+			ViewerUtil.onEvent("onMouseUp", functionToBind);
+		};
+
+		this.offMouseUp = function(functionToBind) {
 			ViewerUtil.onEvent("onMouseUp", functionToBind);
 		};
 
@@ -950,6 +981,11 @@ var Viewer = {};
 
 				if (self.settings.hasOwnProperty("ambientLight")) {
 					self.setAmbientLight(self.settings.ambientLight);
+				}
+
+				if(self.settings.hasOwnProperty("mapTile")){
+					// set origin BNG
+					self.originBNG = OsGridRef.latLonToOsGrid(new LatLon(self.settings.mapTile.lat, self.settings.mapTile.lon));
 				}
 			}
 		};
@@ -1642,6 +1678,287 @@ var Viewer = {};
 			if (self.pins.hasOwnProperty(id)) {
 				self.pins[id].changeColour(colours);
 			}
+		};
+
+		// Append building models
+		this.addMapTileByViewPoint = function(noDraw){
+
+			if(!self.originBNG){
+				return console.log('No origin BNG coors set, no map tiles can be added.');
+			}
+
+			var vpInfo = self.getCurrentViewpointInfo();
+			var fov = vpInfo.fov;
+			var camera = vpInfo.position;
+			var view_dir = vpInfo.view_dir;
+			var near = vpInfo.near;
+			var ratio = vpInfo.aspect_ratio; //(w/h)
+			var up = vpInfo.up;
+			var right = vpInfo.right;
+
+			// console.log('camera', camera);
+			// console.log('near', near);
+			// console.log('view_dir', view_dir);
+			// console.log('fov', fov);
+			// console.log('up', up);
+			// console.log('right', right);
+			// console.log('ratio', ratio);
+
+			var tanHalfFOV = Math.tan(fov / 2);
+			var planeOffsetX = [1, -1, 1, -1];
+			var planeOffsetY = [1, 1, -1, -1];
+			var coords = [];
+			var intersection = {};
+
+			for(var i = 0; i < planeOffsetX.length; i++)
+			{
+				var X = planeOffsetX[i];
+				var Y = planeOffsetY[i];
+
+				var rayDirection = [];
+
+				for (var c = 0; c < 3; c++)
+				{
+					rayDirection[c] = view_dir[c] + X * tanHalfFOV * right[c] + Y * (ratio / tanHalfFOV) * up[c];
+				}
+
+				var gamma = camera[1] / -rayDirection[1];
+
+				//console.log("G: ", gamma);
+
+				coords[i] = [];
+
+				for (var c = 0; c < 3; c++)
+				{
+					coords[i][c] = camera[c] + gamma * rayDirection[c];
+				}
+			}
+
+			var step = 100;
+			var roundUpPlace = 10;
+
+
+			var coordsX = [coords[0][0], coords[1][0], coords[2][0], coords[3][0]];
+			var coordsZ = [coords[0][2], coords[1][2], coords[2][2], coords[3][2]];
+
+			var startX = Math.ceil(Math.min.apply(Math, coordsX) / roundUpPlace) * roundUpPlace;
+			var endX = Math.ceil(Math.max.apply(Math, coordsX) / roundUpPlace) * roundUpPlace;
+			// console.log('startX, endX', startX, endX);
+
+			var startZ = Math.ceil(Math.min.apply(Math, coordsZ) / roundUpPlace) * roundUpPlace;
+			var endZ = Math.ceil(Math.max.apply(Math, coordsZ) / roundUpPlace) * roundUpPlace;
+			// console.log('startZ, endZ', startZ, endZ);
+
+			var mapTileCount = 0;
+			var tileDists = [];
+
+			for (var x = startX; x <= endX; x+=step) {
+				for (var z = startZ; z <= endZ; z+=step) {
+					mapTileCount++;
+					var dist = Math.sqrt(Math.pow(x - camera[0], 2) + Math.pow(z - camera[2], 2));
+					tileDists.push({ 'dist': dist, tile: [x, z]});
+				}
+			}
+
+			//sort tile by distance from camera
+			tileDists.sort(function(a, b){
+				return a.dist - b.dist;
+			});
+
+			// http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Resolution_and_Scale
+			// set the size of a 256 map image tile. 1px = 1m
+			var mapImgsize = 1.1943 * Math.cos(self._degToRad(self.settings.mapTile.lat)) * 256;
+			var mapImgStep = mapImgsize;
+
+			var mapImgTileDists = [];
+
+			for (var x = startX; x <= endX; x+=mapImgStep) {
+				for (var z = startZ; z <= endZ; z+=mapImgStep) {
+
+					var mapImgX = Math.floor( x / mapImgStep );
+					var mapImgZ = Math.floor( z / mapImgStep );
+
+					var dist = Math.sqrt(Math.pow(x - camera[0], 2) + Math.pow(z - camera[2], 2));
+					mapImgTileDists.push({ 'dist': dist, tile: [mapImgX, mapImgZ]});
+				}
+			}
+
+			mapImgTileDists.sort(function(a, b){
+				return a.dist - b.dist;
+			});
+
+			// add map tiles, only the first 15
+			for(var i=0; i<mapImgTileDists.length && i < 15; i++) {
+
+				var tile = mapImgTileDists[i].tile;
+				self.appendMapImage(mapImgsize, tile[0], tile[1]);
+
+			}
+
+
+			//add 3d model tiles, only render first 10 tiles
+			for(var i=0; i<tileDists.length && i < 10; i++) {
+
+				var tile = tileDists[i].tile;
+
+				var osRef = new OsGridRef(self.originBNG.easting + tile[0], self.originBNG.northing + tile[1]);
+				var osrefno = self._OSRefNo(osRef, 3);
+				//console.log(osrefno);
+
+				if(!noDraw){
+					self.addMapTile(osrefno);
+				}
+			}
+
+		};
+
+		// TO-DO: Move helper functions to somewhere else?
+		//length 1 = 1m, 2 = 10m, 3 = 100m, 4 = 1km, 5 = 10km
+		this._OSRefNo = function(osRef, length){
+
+			if (length < 1 || length > 5){
+				return console.log('length must be in range [1 - 5]');
+			}
+
+			var osrefno = osRef.toString().split(' ');
+			osrefno[1] = osrefno[1].substring(0, length);
+			osrefno[2] = osrefno[2].substring(0, length);
+			osrefno = osrefno.join('');
+
+			return osrefno;
+		};
+
+		this._tile2long = function (x, z) {
+			return (x/Math.pow(2,z)*360-180);
+		}
+
+		this._tile2lat = function (y, z) {
+			var n=Math.PI-2*Math.PI*y/Math.pow(2,z);
+			return (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n))));
+		}
+
+		this._degToRad = function(degrees) {
+			return degrees * Math.PI / 180;
+		};
+
+		//http://stackoverflow.com/questions/22032270/how-to-retrieve-layerpoint-x-y-from-latitude-and-longitude-coordinates-using
+		this._getSlippyTileLayerPoints = function (lat_deg, lng_deg, zoom) {
+			var x = (Math.floor((lng_deg + 180) / 360 * Math.pow(2, zoom)));
+			var y = (Math.floor((1 - Math.log(Math.tan(lat_deg * Math.PI / 180) + 1 / Math.cos(lat_deg * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom)));
+
+			var layerPoint = {
+				x: x,
+				y: y
+			};
+
+			return layerPoint;
+		};
+
+		this.addMapTile = function(osGridRef){
+
+			if(!self.originBNG){
+				return console.log('No origin BNG coors set, no map tiles can be added.');
+			}
+
+			self.addedTileRefs =  self.addedTileRefs || [];
+
+			if(self.addedTileRefs.indexOf(osGridRef) !== -1) {
+				//console.log(osGridRef + ' has already been added');
+				return;
+			}
+
+			self.addedTileRefs.push(osGridRef);
+
+			//console.log(self.fakeOriginInBNG);
+
+			var gltf = document.createElement('gltf');
+			gltf.setAttribute('url', '/api/os/buildings.gltf?method=osgrid&osgridref=' + osGridRef + '&draw=1');
+
+			var translate = [0, 0, 0];
+			var osCoor = OsGridRef.parse(osGridRef);
+			translate[0] = osCoor.easting - self.originBNG.easting;
+			translate[2] = self.originBNG.northing - osCoor.northing;
+
+			var transform = document.createElement('transform');
+			transform.setAttribute('translation', translate.join(' '));
+
+			transform.appendChild(gltf);
+			self.getScene().appendChild(transform);
+
+			return transform;
+		};
+
+
+		this.createMapImageTile = function(size, x, y, t){
+
+			var shape = document.createElement("Shape");
+
+			var app = document.createElement('Appearance');
+
+			var it = document.createElement('ImageTexture');
+			it.setAttribute("url", server_config.apiUrl('os/map-images/Outdoor/17/' + x + '/' + y + '.png'));
+
+			app.appendChild(it);
+
+			shape.appendChild(app);
+
+			var plane = document.createElement('Plane');
+			plane.setAttribute('center', '0, 0');
+			plane.setAttribute('size', [size, size].join(','));
+			plane.setAttribute('solid', false);
+			plane.setAttribute('lit', false);
+
+			shape.appendChild(plane);
+
+			var rotate = document.createElement('Transform');
+			// rotate 270Deg around x
+			rotate.setAttribute('rotation', '1,0,0,4.7124');
+			rotate.appendChild(shape);
+
+			var translate = document.createElement('Transform');
+			translate.setAttribute('translation', t.join(' '));
+
+			translate.appendChild(rotate);
+			return translate;
+		};
+
+		this.appendMapImage = function(size, ox, oy){
+
+			var zoomLevel = 17;
+
+			var slippyPoints = self._getSlippyTileLayerPoints(self.settings.mapTile.lat, self.settings.mapTile.lon, zoomLevel);
+
+			var x = slippyPoints.x;
+			var y = slippyPoints.y;
+
+			//console.log('slippyPoints', x, y);
+			//console.log(self._tile2lat(y, zoomLevel), self._tile2long(x ,zoomLevel));
+			var osGridRef = OsGridRef.latLonToOsGrid(new LatLon(self._tile2lat(y, zoomLevel), self._tile2long(x ,zoomLevel)));
+
+			//console.log('map images osgridref', osGridRef);
+			var offsetX = osGridRef.easting - self.originBNG.easting + size / 2;
+			var offsetY = self.originBNG.northing - osGridRef.northing + size / 2;
+
+			//console.log('offset', offsetX, offsetY);
+
+			if (!self.addedMapImages) {
+				self.addedMapImages = {};
+			}
+
+			if(!self.addedMapImages[ox + ',' + oy]){
+				self.getScene().appendChild(self.createMapImageTile(size, x + ox, y + oy, [offsetX + size * ox, 0, offsetY + size * oy]));
+				self.addedMapImages[ox + ',' + oy] = 1;
+			} else {
+				//console.log('map image already in the scene');
+			}
+
+
+		};
+
+		this.removeMapImages = function(){
+			self.mts.forEach(function(mt){
+				self.getScene().removeChild(mt);
+			});
 		};
 	};
 
