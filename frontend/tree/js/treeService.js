@@ -25,20 +25,20 @@
 
 	function TreeService($http, $q, EventService, serverConfig) {
 		var ts = this;
-		
+
 		var init = function(account, project, branch, revision) {
 			ts.account  = account;
 			ts.project  = project;
 			ts.branch   = branch ? branch : "master";
 			ts.revision = revision ? revision : "head";
-		
+
 			if (ts.branch === "master")
 			{
 				ts.baseURL = "/" + account + "/" + project + "/revision/master/head/";
 			} else {
 				ts.baseURL = "/" + account + "/" + project + "/revision/" + revision + "/";
 			}
-			
+
 			var deferred = $q.defer(),
 				url = ts.baseURL + "fulltree.json";
 
@@ -52,7 +52,7 @@
 
 		var search = function(searchString) {
 			var deferred = $q.defer(),
-				url = ts.baseURL + "searchtree.json";
+				url = ts.baseURL + "searchtree.json?searchString=" + searchString;
 
 			$http.get(serverConfig.apiUrl(url))
 				.then(function(json) {

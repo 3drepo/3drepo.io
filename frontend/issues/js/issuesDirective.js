@@ -33,6 +33,7 @@
 				show: "=",
 				filterText: "=",
 				showAdd: "=",
+				canAdd: "=",
 				selectedMenuOption: "=",
 				onContentHeightRequest: "&",
 				onShowItem : "&",
@@ -79,6 +80,9 @@
 		vm.projectUserRoles = [];
 		vm.selectedIssue = null;
 		vm.autoSaveComment = false;
+		vm.canAdd = true;
+		vm.toShow = "showIssues";
+		vm.onContentHeightRequest({height: 0});
 
 		/*
 		 * Get all the Issues
@@ -87,7 +91,7 @@
 		promise.then(function (data) {
 			var i, length;
 			vm.showProgress = false;
-			vm.issues = data;
+			vm.issues = (data === "") ? [] : data;
 			vm.showIssuesInfo = (vm.issues.length === 0);
 			vm.showIssueList = (vm.issues.length !== 0);
 			for (i = 0, length = vm.issues.length; i < length; i += 1) {
@@ -150,7 +154,6 @@
 		 */
 		projectUserRolesPromise = IssuesService.getUserRolesForProject(vm.account, vm.project, Auth.username);
 		projectUserRolesPromise.then(function (data) {
-			console.log(data);
 			vm.projectUserRoles = data;
 		});
 
@@ -160,23 +163,14 @@
 		$scope.$watch("vm.showAdd", function (newValue) {
 			if (angular.isDefined(newValue)) {
 				if (newValue) {
-					vm.showIssue = false;
-					vm.showIssueList = false;
-					vm.showAddIssue = true;
+					vm.toShow = "showAdd";
 					vm.onShowItem();
+					vm.canAdd = false;
 					setContentHeight();
 					setPinToAssignedRoleColours(vm.selectedIssue);
 				}
 			}
 		});
-
-		/**
-		 * Hide the add issue element
-		 */
-		function hideAdd () {
-			vm.showAddIssue = false;
-			vm.showAdd = false; // So that showing add works
-		}
 
 		/*
 		 * Handle input to the title field of a new issue
@@ -504,12 +498,12 @@
 
 				$timeout(function () {
 					// Hide and show layers
-					vm.showIssue = false;
-					vm.showIssueList = true;
-					if (vm.showAdd) {
+					if (vm.toShow === "showAdd") {
 						removeAddPin();
 					}
-					hideAdd();
+					vm.toShow = "showIssues";
+					vm.showAdd = false; // So that showing add works
+					vm.canAdd = true;
 
 					// Set the content height
 					setContentHeight();
@@ -530,14 +524,13 @@
 		 * @param {Boolean} pinSelect - whether called by a pin selection or not
 		 */
 		vm.showSelectedIssue = function (index, pinSelect) {
-			console.log(456);
 			// Hide and show layers
-			vm.showIssueList = false;
-			vm.showIssue = true;
-			if (vm.showAdd) {
+			if (vm.toShow === "showAdd") {
 				removeAddPin();
 			}
-			hideAdd();
+			vm.toShow = "showIssue";
+			vm.showAdd = false; // So that showing add works
+			vm.canAdd = false;
 
 			// Selected issue
 			if (vm.selectedIssue !== null) {
@@ -592,27 +585,37 @@
 							objectId: selectedObjectId,
 							pickedPos: pickedPos,
 							pickedNorm: pickedNorm,
-							creator_role: vm.projectUserRoles[0]
+							creator_role: vm.projectUserRoles[0],
+							account: vm.account,
+							project: vm.project
 						};
-						promise = IssuesService.saveIssue(issue, vm.account, vm.project);
+						promise = IssuesService.saveIssue(issue);
 						promise.then(function (data) {
+							// Set the role colour
+							data.assignedRolesColors = [];
+							data.assignedRolesColors.push(IssuesService.getRoleColor(vm.projectUserRoles[0]));
 							vm.issues.push(data);
 
+							// Init
 							vm.title = "";
 							selectedObjectId = null;
 							pickedPos = null;
 							pickedNorm = null;
 
+							// Save issue with a comment
 							if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
 								saveCommentWithIssue(data, vm.comment);
 								vm.comment = "";
 							}
 
+							// Show issues
+							vm.toShow = "showIssues";
+							vm.showAdd = false;
+							vm.canAdd = true;
+
 							setupIssuesToShow();
 							setContentHeight();
 							vm.showPins();
-
-							//vm.showAddIssue = false;
 						});
 					}
 				}
@@ -668,14 +671,26 @@
 		 * @param {String} title
 		 */
 		vm.showAlert = function(title) {
+			/* Closing the dialog takes a long time so using user made dialog for the moment
 			$mdDialog.show(
 				$mdDialog.alert()
-					.parent(angular.element($element[0].querySelector("#issuesAddContainer")))
+					.parent(angular.element(document.querySelector("#addAlert")))
 					.clickOutsideToClose(true)
 					.title(title)
 					.ariaLabel("Pin alert")
 					.ok("OK")
 			);
+			*/
+			vm.showAddAlert = true;
+			vm.addAlertText = title;
+		};
+
+		/**
+		 * Close the add alert
+		 */
+		vm.closeAddAlert = function () {
+			vm.showAddAlert = false;
+			vm.addAlertText = "";
 		};
 
 		/**
@@ -707,34 +722,41 @@
 				maxStringLength = 32,
 				lineHeight = 18,
 				footerHeight,
-				addHeight = 260,
+				addHeight = 280,
 				commentHeight = 80,
 				headerHeight = 53,
-				openIssueFooterHeight = 163,
+				openIssueFooterHeight = 180,
 				closedIssueFooterHeight = 48;
 
-			if (vm.showIssueList) {
-				issuesHeight = 0;
-				for (i = 0, length = vm.issuesToShow.length; (i < length); i += 1) {
-					issuesHeight += issueMinHeight;
-					if (vm.issuesToShow[i].title.length > maxStringLength) {
-						issuesHeight += lineHeight * Math.floor((vm.issuesToShow[i].title.length - maxStringLength) / maxStringLength);
+			switch (vm.toShow) {
+				case "showIssues":
+					issuesHeight = 0;
+					for (i = 0, length = vm.issuesToShow.length; (i < length); i += 1) {
+						issuesHeight += issueMinHeight;
+						if (vm.issuesToShow[i].title.length > maxStringLength) {
+							issuesHeight += lineHeight * Math.floor((vm.issuesToShow[i].title.length - maxStringLength) / maxStringLength);
+						}
 					}
-				}
-				vm.onContentHeightRequest({height: issuesHeight});
+					vm.onContentHeightRequest({height: issuesHeight});
+					break;
+
+				case "showIssue":
+					if (vm.selectedIssue.closed) {
+						footerHeight = closedIssueFooterHeight;
+					}
+					else {
+						footerHeight = openIssueFooterHeight;
+					}
+
+					var numberComments = vm.selectedIssue.hasOwnProperty("comments") ? vm.selectedIssue.comments.length : 0;
+					vm.onContentHeightRequest({height: headerHeight + (numberComments * commentHeight) + footerHeight});
+					break;
+
+				case "showAdd":
+					vm.onContentHeightRequest({height: addHeight});
+					break;
 			}
-			else if (vm.showIssue) {
-				if (vm.selectedIssue.closed) {
-					footerHeight = closedIssueFooterHeight;
-				}
-				else {
-					footerHeight = openIssueFooterHeight;
-				}
-				vm.onContentHeightRequest({height: headerHeight + (vm.selectedIssue.comments.length * commentHeight) + footerHeight});
-			}
-			else if (vm.showAddIssue) {
-				vm.onContentHeightRequest({height: addHeight});
-			}
+
 		}
 
 		function setPinToAssignedRoleColours (issue) {

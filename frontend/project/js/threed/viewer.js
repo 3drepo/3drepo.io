@@ -565,8 +565,10 @@ var Viewer = {};
 			ViewerUtil.offEvent("bgroundClicked", functionToBind);
 		};
 
-		this.selectParts = function(part, zoom) {
+		this.selectParts = function(part, zoom, colour) {
 			var i;
+
+			colour = colour ? colour : self.SELECT_COLOUR.EMISSIVE;
 
 			if (!Array.isArray(part)) {
 				part = [part];
@@ -587,7 +589,7 @@ var Viewer = {};
 			self.oldPart = part;
 
 			for (i = 0; i < part.length; i++) {
-				part[i].setEmissiveColor(self.SELECT_COLOUR.EMISSIVE, "both");
+				part[i].setEmissiveColor(colour, "both");
 			}
 		};
 
@@ -609,12 +611,12 @@ var Viewer = {};
 			callback(self.EVENT.OBJECT_SELECTED, {
 				account: account,
 				project: project,
-				id: id,
+				ids: id,
 				source: "viewer"
 			});
 		};
 
-		this.highlightObjects = function(account, project, id, ids, zoom) {
+		this.highlightObjects = function(account, project, ids, zoom, colour) {
 			var nameSpaceName = null;
 
 			/*
@@ -622,6 +624,11 @@ var Viewer = {};
 				nameSpaceName = account + "__" + project;
 			}
 			*/
+
+			// If we pass in a single id, then we might be selecting
+			// an old-style Group in X3DOM rather than multipart.
+			var id = !Array.isArray(ids) ? ids : null;
+			ids = Array.isArray(ids) ? ids: [ids];
 
 			if (!ids) {
 				ids = [];
@@ -651,13 +658,13 @@ var Viewer = {};
 					}
 				}
 
-				self.selectParts(fullPartsList, zoom);
+				self.selectParts(fullPartsList, zoom, colour);
 			}
 
 			var object = document.querySelectorAll("[id$='" + id + "']");
 
 			if (object[0]) {
-				self.setApp(object[0]);
+				self.setApp(object[0], colour);
 			}
 		};
 
@@ -1664,6 +1671,7 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	REGISTER_VIEWPOINT_CALLBACK: "VIEWER_REGISTER_VIEWPOINT_CALLBACK",
 	OBJECT_SELECTED: "VIEWER_OBJECT_SELECTED",
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
+	HIGHLIGHT_OBJECTS: "VIEWER_HIGHLIGHT_OBJECTS",
 	SWITCH_OBJECT_VISIBILITY: "VIEWER_SWITCH_OBJECT_VISIBILITY",
 	SET_PIN_VISIBILITY: "VIEWER_SET_PIN_VISIBILITY",
 

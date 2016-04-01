@@ -59,6 +59,7 @@
 		vm.viewerSelectedObject = null;
 		vm.showProgress = true;
 		vm.progressInfo = "Loading full tree structure";
+		vm.onContentHeightRequest({height: 0});
 
 		/*
 		 * Get all the tree nodes
@@ -242,7 +243,7 @@
 			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
 				if (event.value.source !== "tree")
 				{
-					var objectID = event.value.id;
+					var objectID = event.value.ids;
 					var path = vm.idToPath[objectID].split("__");
 
 					initNodesToShow();
@@ -430,13 +431,21 @@
 					}
 				}
 
+				// Select the parent node in the group for cards and viewer
 				EventService.send(EventService.EVENT.VIEWER.OBJECT_SELECTED, {
 					source: "tree",
 					account: node.account,
 					project: node.project,
-					id: node._id,
+					ids: node._id,
 					name: node.name,
-					ids : map
+				});
+
+				// Separately highlight the children
+				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, {
+					source: "tree",
+					account: node.account,
+					project: node.project,
+					ids: map
 				});
 			}
 		};
@@ -460,7 +469,7 @@
 		};
 
 		vm.toggleFilterNode = function (item) {
-			item.toggleState = (item.toggleState === "visible") ? "invisible" : "visible";
+			vm.setToggleState(item, (item.toggleState === "visible") ? "invisible" : "visible");
 			item.path = item._id;
 			toggleNode(item);
 		};

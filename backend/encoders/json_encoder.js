@@ -505,6 +505,8 @@ exports.route = function(router)
 	});
 
 	router.get("json", "/:account/:project/issues", function(req, res, params, err_callback) {
+		console.log("GET ISSUES");
+
 		dbInterface(req[C.REQ_REPO].logger).getIssues(params.account, params.project, "master", null, true, function(err, issueList) {
 			if(err.value)
 				err_callback(err);
@@ -779,43 +781,43 @@ exports.route = function(router)
                                         // in itself greater than the limit
                                         if (numVertices > C.SRC_VERTEX_LIMIT) {
                                             vertsCount = 0;
-				
+
 						var numActualVertices = 0;
 						var reindexMap = {};
-				
+
 						for (var face_idx = 0; face_idx < numFaces; face_idx++) {
 							// Get number of components in the next face
 							var num_comp = mesh.faces.buffer.readInt32LE(bufferPosition);
-														
+
 							if (num_comp !== 3) {
 								logger.logError("Non triangulated face with " + num_comp + " vertices.");
-							} else {												
+							} else {
 								// Re-index faces
 								for (var vert_comp = 0; vert_comp < num_comp; vert_comp++) {
 									// First int32 is number of sides (i.e. 3 = Triangle)]
 									// After that there Int32 for each index (0..2)
 									var byte_position = bufferPosition + (vert_comp + 1) * 4;
 									var idx_val = mesh.faces.buffer.readInt32LE(byte_position);
-							
+
 									if (!reindexMap.hasOwnProperty(idx_val)) {
 										reindexMap[idx_val] = true;
 										numActualVertices++;
 									}
 								}
 							}
-					
+
 							bufferPosition += (num_comp + 1) * 4;
 						}
-				
+
                                             // We need to split the mesh into this many sub-meshes
                                             var numMeshesRequired = Math.ceil(numActualVertices / C.SRC_VERTEX_LIMIT);
-											
+
 											console.log("NMR: " + numMeshesRequired);
-																	
+
                                             // Add an entry for all the created meshes
                                             for (var j = 0; j < numMeshesRequired; j++) {
                                                 meshCounter += 1;
-												
+
                                                 map["name"] = utils.uuidToString(subMeshKeys[i]) + "_" + j;
                                                 map["appearance"] = utils.uuidToString(subMeshes[i]["mat_id"]);
                                                 map["min"] = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][0].join(" ");
@@ -826,7 +828,7 @@ exports.route = function(router)
                                                 outJSON["mapping"].push(map);
                                                 map = {};
                                             }
-											
+
 						meshCounter += 1;
                                         } else {
                                             // If this mesh pushes the combined mesh over the vertex limit
@@ -843,7 +845,7 @@ exports.route = function(router)
                                             map["usage"] = [params.uid + "_" + meshCounter]
 
                                             outJSON["mapping"].push(map);
-											
+
 						bufferPosition += numFaces * 4 * 4;
                                         }
                                     }
@@ -866,8 +868,8 @@ exports.route = function(router)
         walkthrough(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.index, err_callback);
     });
 
-    router.get('json', '/:account/:project/revision/:branch/head/:searchstring/searchtree', function(req, res, params, err_callback) {
-        searchTree(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.branch, null, params.searchstring, err_callback);
+    router.get('json', '/:account/:project/revision/:branch/head/searchtree', function(req, res, params, err_callback) {
+        searchTree(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.branch, null, params.query.searchString, err_callback);
     });
 
 	router.get("json", "/:account/:project/roles", function( req, res, params, err_callback ) {

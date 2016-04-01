@@ -56,13 +56,5 @@
 				}, 500);
 			}
 		});
-
-		/*
-		$scope.$watch("vm.filterText", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				vm.filterInputText = newValue;
-			}
-		});
-		*/
 	}
 }());

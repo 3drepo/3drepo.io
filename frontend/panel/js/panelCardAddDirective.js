@@ -1,5 +1,5 @@
 /**
- *	Copyright (C) 2014 3D Repo Ltd
+ *	Copyright (C) 2016 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU Affero General Public License as
@@ -15,32 +15,32 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// This file contains the session shared between various services
-// TODO: Currently this stores everything on the filesystem,
-// but it needs to be changed.
-(function(){
+(function () {
 	"use strict";
 
-	let expressSession = require("express-session");
-	let FileStore = require("session-file-store")(expressSession);
+	angular.module("3drepo")
+		.directive("panelCardAdd", panelCardAdd);
 
-	module.exports.session = function(config) {
-		var sessionConfig = expressSession({
-			secret: config.cookie.secret,
-			resave: false,
-			saveUninitialized: true,
-			cookie: {
-				domain: config.api_server.hostname,
-				path: config.api_server.host_dir,
-				secure: config.using_ssl,
-				httpOnly: false
+	function panelCardAdd() {
+		return {
+			restrict: 'EA',
+			templateUrl: 'panelCardAdd.html',
+			scope: {
+				showAdd: "="
 			},
-			store: new FileStore()
-		});
+			controller: PanelCardAddCtrl,
+			controllerAs: 'vm',
+			bindToController: true
+		};
+	}
 
-		return sessionConfig;
-	};
+	PanelCardAddCtrl.$inject = [];
 
-})();
+	function PanelCardAddCtrl() {
+		var vm = this;
 
-
+		vm.add = function () {
+			vm.showAdd = true;
+		};
+	}
+}());
