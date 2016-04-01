@@ -2055,7 +2055,8 @@ var Viewer = {};
 		};
 
 		this.appendMapImage = function(size, ox, oy){
-			return;
+
+			//return;
 			var zoomLevel = 17;
 
 			var slippyPoints = self._getSlippyTileLayerPoints(self.settings.mapTile.lat, self.settings.mapTile.lon, zoomLevel);
