@@ -64,7 +64,6 @@ statics.findByUID = function(dbCol, uid, options){
 	let projection = options && options.projection || {};
 
 	let _find = () => ModelFactory.db.db(dbCol.account).collection(`${dbCol.project}.stash.3drepo`).find({_id: stringToUUID(uid)}).limit(1).next().then(obj => {
-
 		if(!obj) {
 			return this.findById(dbCol, stringToUUID(uid), projection);
 		}

@@ -32,12 +32,14 @@
 		};
 	}
 
-	function ViewerManagerService(nextEventService) {
+	function ViewerManagerService($timeout, nextEventService) {
 		var currentEvent = {};
 		var currentError = {};
 
 		var sendInternal = function(type, value) {
-			currentEvent = {type:type, value: value};
+			$timeout(function() {
+				currentEvent = {type:type, value: value};
+			});
 		};
 
 		var send = function (type, value) {
@@ -46,7 +48,9 @@
 		};
 
 		var sendErrorInternal = function(type, value) {
-			currentError = {type: type, value: value};
+			$timeout(function() {
+				currentError = {type: type, value: value};
+			});
 		};
 
 		var sendError = function(type, value) {
@@ -64,13 +68,13 @@
 		};
 	}
 
-	ViewerManagerCtrl.$inject = ["$scope", "$q", "$element", "EventService"];
+	ViewerManagerCtrl.$inject = ["$scope", "$q", "$element", "$timeout", "EventService"];
 
-	function ViewerManagerCtrl($scope, $q, $element, EventService) {
+	function ViewerManagerCtrl($scope, $q, $element, $timeout, EventService) {
 		var vm = this;
 
 		vm.manager = new ViewerManager($element[0]);
-		vm.vmservice = ViewerManagerService(EventService);
+		vm.vmservice = ViewerManagerService($timeout, EventService);
 
 		vm.viewers = {};
 
@@ -82,7 +86,6 @@
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if (angular.isDefined(event.type)) {
 				if (event.type === EventService.EVENT.CREATE_VIEWER) {
-					console.log(123);
 					// If a viewer with the same name exists already then
 					// throw an error, otherwise add it
 					if (vm.viewers.hasOwnProperty(event.value.name)) {

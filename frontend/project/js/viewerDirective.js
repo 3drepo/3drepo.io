@@ -183,7 +183,7 @@
 							v.viewer.highlightObjects(
 								event.value.account,
 								event.value.project,
-								event.value.ids,
+								event.value.id ? [event.value.id] : event.value.ids,
 								event.value.zoom,
 								event.value.colour
 							);

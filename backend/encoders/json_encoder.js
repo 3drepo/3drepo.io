@@ -244,7 +244,7 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, par
 
 				var childTreeJSON = {
 					"name"      : childName,
-	                "path"      : current.path + "__" + childID,
+					"path"      : current.path + "__" + childID,
 					"_id"       : childID,
 					"shared_id" : childSID,
 					"children"  : [],
@@ -252,7 +252,7 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, par
 					"project"	: project
 				};
 
-	            child.path = childTreeJSON.path;
+				child.path = childTreeJSON.path;
 
 				setTimeout( function () {
 					getFullTreeRecurse(dbInterface, sceneGraph, child, account, project, childTreeJSON, function(err, recurseJSON) {
@@ -811,8 +811,6 @@ exports.route = function(router)
 
                                             // We need to split the mesh into this many sub-meshes
                                             var numMeshesRequired = Math.ceil(numActualVertices / C.SRC_VERTEX_LIMIT);
-
-											console.log("NMR: " + numMeshesRequired);
 
                                             // Add an entry for all the created meshes
                                             for (var j = 0; j < numMeshesRequired; j++) {
