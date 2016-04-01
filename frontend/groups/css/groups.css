@@ -60,3 +60,7 @@ groups #groupsGroup #deleteGroup p {
   color: rgba(0,0,0,0.5);
   font-size: 14px;
 }
+
+groups #groupsGroup md-checkbox {
+  margin: 0;
+}

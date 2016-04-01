@@ -26,6 +26,7 @@
 			restrict: 'EA',
 			templateUrl: 'accountProjects.html',
 			scope: {
+				account: "=",
 				projectsGrouped: "="
 			},
 			controller: AccountProjectsCtrl,
@@ -34,15 +35,23 @@
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "AccountService"];
 
-	function AccountProjectsCtrl($scope, $location) {
-		var vm = this;
+	function AccountProjectsCtrl($scope, $location, AccountService) {
+		var vm = this,
+			promise;
 
 		/*
 		 * Init
 		 */
 		vm.bif4FreeEnabled = false;
+
+		/*
+		promise = AccountService.getProjectsBid4FreeStatus(vm.account);
+		promise.then(function (data) {
+			console.log(2222, data);
+		});
+		*/
 
 		/*
 		 * Handle changes to the state manager Data

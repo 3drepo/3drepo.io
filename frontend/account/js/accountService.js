@@ -106,6 +106,14 @@
 			return deferred.promise;
 		};
 
+		obj.getProjectsBid4FreeStatus = function (username) {
+			deferred = $q.defer();
+			$http.get(serverConfig.apiUrl(username + ".json?bid"))
+				.then(function (response) {
+				});
+			return deferred.promise;
+		};
+
 		return obj;
 	}
 }());

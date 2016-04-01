@@ -69,7 +69,16 @@
 			minHeight: 80,
 			fixedHeight: false,
 			options: [
-				"add"
+				"add",
+				"menu"
+			],
+			menu: [
+				{
+					value: "hideAll",
+					label: "Hide All",
+					selected: false,
+					toggle: true
+				}
 			]
 		});
 

@@ -33,7 +33,9 @@
 				canAdd: "=",
 				onContentHeightRequest: "&",
 				onShowItem : "&",
-				hideItem: "="
+				hideItem: "=",
+				selectedMenuOption: "="
+
 			},
 			controller: GroupsCtrl,
 			controllerAs: 'vm',
@@ -47,7 +49,8 @@
 		var vm = this,
 			eventWatch,
 			promise,
-			colourChangeTimeout = null;
+			colourChangeTimeout = null,
+			hideAll = false;
 		
 		/*
 		 * Init
@@ -92,6 +95,8 @@
 		 */
 		$scope.$watch("vm.hideItem", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
+				setSelectedGroupHighlightStatus(false);
+				setGroupsVisibleStatus([vm.selectedGroup], true);
 				vm.toShow = "showGroups";
 				vm.showAdd = false;
 				vm.canAdd = true;
@@ -117,13 +122,11 @@
 				vm.editingText = newValue ? "Stop" : "Start";
 				if (newValue) {
 					setupEventWatch();
-				}
-				else if (angular.isDefined(eventWatch)) {
+				} else if (angular.isDefined(eventWatch)) {
 					eventWatch(); // Cancel event watching
 				}
 			}
 		});
-
 
 		/*
 		 * Only watch for events when shown
@@ -132,6 +135,27 @@
 			if (angular.isDefined(newValue)) {
 				if (!newValue) {
 					vm.editingGroup = false; // To stop any event watching
+				}
+			}
+		});
+
+		/*
+		 * Watch showing of selected group's objects
+		 */
+		$scope.$watch("vm.showObjects", function (newValue) {
+			if (angular.isDefined(newValue) && (vm.selectedGroup !== null)) {
+				setGroupsVisibleStatus([vm.selectedGroup], newValue);
+			}
+		});
+
+		/*
+		 * Selecting a menu option
+		 */
+		$scope.$watch("vm.selectedMenuOption", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				if (newValue.value === "hideAll") {
+					hideAll = !hideAll;
+					setGroupsVisibleStatus(vm.groups, !hideAll);
 				}
 			}
 		});
@@ -147,17 +171,9 @@
 			vm.onShowItem();
 			vm.canAdd = false;
 			vm.editingGroup = false;
+			vm.showObjects = true;
 			setContentHeight();
-
-			if (vm.selectedGroup.parents.length > 0) {
-				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, {
-					source: "tree",
-					account: vm.account,
-					project: vm.project,
-					ids: vm.selectedGroup.parents,
-					colour: vm.selectedGroup.color.join(" ")
-				});
-			}
+			setSelectedGroupHighlightStatus(true);
 		};
 
 		/**
@@ -176,6 +192,7 @@
 					promise = GroupsService.updateGroup(vm.selectedGroup);
 					promise.then(function (data) {
 						console.log(data);
+						setSelectedGroupHighlightStatus(true);
 					});
 				}, 500);
 			}
@@ -236,16 +253,15 @@
 			if (!nameExists) {
 				promise = GroupsService.createGroup(vm.name, vm.colourPickerColour);
 				promise.then(function (data) {
-					console.log(data);
-					vm.groups.push({
-						name: vm.name,
-						colour: vm.colourPickerColour
-					});
-					vm.selectedGroup = null;
-					vm.toShow = "showGroups";
-					vm.canAdd = true;
-					vm.showAdd = false;
-					setContentHeight();
+					if (data.statusText === "OK") {
+						console.log(data);
+						vm.groups.push(data.data);
+						vm.selectedGroup = null;
+						vm.toShow = "showGroups";
+						vm.canAdd = true;
+						vm.showAdd = false;
+						setContentHeight();
+					}
 				});
 			}
 		};
@@ -291,28 +307,77 @@
 
 			eventWatch = $scope.$watch(EventService.currentEvent, function (event) {
 				if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
-					index = vm.selectedGroup.parents.indexOf(event.value.ids);
+					index = vm.selectedGroup.parents.indexOf(event.value.id);
 					if (index !== -1) {
 						vm.selectedGroup.parents.splice(index, 1);
 					} else {
-						vm.selectedGroup.parents.push(event.value.ids);
+						vm.selectedGroup.parents.push(event.value.id);
 					}
 
 					promise = GroupsService.updateGroup(vm.selectedGroup);
 					promise.then(function (data) {
 						console.log(data);
-						if (vm.selectedGroup.parents.length > 0) {
-							EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, {
-								source: "tree",
-								account: vm.account,
-								project: vm.project,
-								ids: vm.selectedGroup.parents,
-								colour: vm.selectedGroup.color.join(" ")
-							});
-						}
+						setSelectedGroupHighlightStatus(true);
 					});
 				}
 			});
+		}
+
+		/**
+		 * Set the highlight status of the selected group in its colour
+		 *
+		 * @param {Boolean} highlight
+		 */
+		function setSelectedGroupHighlightStatus (highlight) {
+			var data;
+			if (vm.selectedGroup.parents.length > 0) {
+				data = {
+					source: "tree",
+					account: vm.account,
+					project: vm.project
+				};
+				if (highlight) {
+					data.ids = vm.selectedGroup.parents;
+					data.colour = vm.selectedGroup.color.map(function(item) {return (item / 255.0);}).join(" ");
+				}
+				else {
+					data.ids = [];
+				}
+				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
+			}
+		}
+
+		/**
+		 * Set the visible status of the selected group in its colour
+		 *
+		 * @param {Array} groups
+		 * @param {Boolean} visible
+		 */
+		function setGroupsVisibleStatus (groups, visible) {
+			var i, length,
+				data,
+				ids = [];
+
+			// Get all the object IDs
+			for (i = 0, length = groups.length; i < length; i += 1) {
+				if (groups[i].parents.length > 0) {
+					ids = ids.concat(groups[i].parents);
+				}
+			}
+
+			if (ids.length > 0) {
+				data = {
+					source: "tree",
+					account: vm.account,
+					project: vm.project
+				};
+				if (visible) {
+					data.visible_ids = ids;
+				} else {
+					data.invisible_ids = ids;
+				}
+				EventService.send(EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY, data);
+			}
 		}
 	}
 }());

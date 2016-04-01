@@ -30,7 +30,12 @@ div(ng-switch="vm.toShow")
 				p {{vm.selectedGroup.name}}
 		div(layout="row" layout-align="start center" flex)
 			md-switch(ng-model="vm.editingGroup" aria-label="Edit group" flex="30") {{vm.editingText}}
-			tdr-colour-picker(title="Change Colour" on-colour-change="vm.colourPickerChange(colour)" offset="20 0" colour="vm.selectedGroup.color")
+			tdr-colour-picker(
+				title="Change Colour"
+				on-colour-change="vm.colourPickerChange(colour)"
+				offset="20 0" colour="vm.selectedGroup.color"
+				flex="60")
+			md-checkbox(ng-model="vm.showObjects" aria-label="Show" flex="30") Show
 		#deleteGroup(layout="column" layout-align="start start")
 			md-button.md-raised.md-warn#deleteGroupButton(ng-click="vm.deleteGroup()") Delete group
 			p This will not delete the objects
