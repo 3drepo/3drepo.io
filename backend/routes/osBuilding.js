@@ -255,8 +255,12 @@ function genglX(format, req, res){
 					// get building dimension
 					if(draw){
 						promises.push(OSGet.dimensions({ uprn: building.UPRN }).then(dimension => {
+
 							dimension.classCode = building.classCode;
+							dimension.uprn = building.UPRN;
+
 							return Promise.resolve(dimension);
+
 						}).catch(err => {
 							console.log(err);
 							return Promise.resolve({ results: [{}]});
@@ -303,11 +307,14 @@ function genglX(format, req, res){
 			console.log('refPoint', refPoint);
 
 			// let meshes = [];
-			let meshesByGroup = {};
+			//let meshesByGroup = {};
+			let meshesByBuilding = {};
 
 			dimensions.forEach(dimension => {
 
 				let classCode = dimension.classCode;
+				let uprn = dimension.uprn;
+
 				//let uri = dimension.header.uri;
 				dimension = dimension.results[0];
 				//console.log(dimension.geometry.coordinates)
@@ -317,17 +324,26 @@ function genglX(format, req, res){
 					heightlessBuildingCount++;
 					//dimension.relativeHeightToMax = 1;
 				} else {
-					if (!meshesByGroup[classCode]){
-						meshesByGroup[classCode] = [];
-					}
+					// if (!meshesByGroup[classCode]){
+					// 	meshesByGroup[classCode] = [];
+					// }
 
-					meshesByGroup[classCode] = meshesByGroup[classCode].concat(
-						generateMeshes(
+					// meshesByGroup[classCode] = meshesByGroup[classCode].concat(
+					// 	generateMeshes(
+					// 		dimension.geometry.coordinates,
+					// 		dimension.relativeHeightToMax,
+					// 		refPoint
+					// 	)
+					// );
+
+					meshesByBuilding[uprn] = {
+						meshes: generateMeshes(
 							dimension.geometry.coordinates,
 							dimension.relativeHeightToMax,
 							refPoint
-						)
-					);
+						),
+						classCode: classCode
+					};
 				}
 
 
@@ -337,7 +353,7 @@ function genglX(format, req, res){
 			console.log('Heightless building count', heightlessBuildingCount);
 
 
-			let glTF = generateglTF(meshesByGroup, `/api/os${req.url.replace('.gltf', '.bin')}`, materialMapping);
+			let glTF = generateglTF(meshesByBuilding, `${req.url.replace('.gltf', '.bin').substr(1)}`, materialMapping);
 
 			console.log('saving to stash and dont wait for response');
 
@@ -380,8 +396,9 @@ function genglX(format, req, res){
 			if (glTF.json instanceof Buffer) {
 				glTF.json = JSON.parse(glTF.json.toString());
 			}
-
+			//console.log(glTF);
 			res.status(200).json(glTF.json);
+			//res.status(200).send();
 		}
 	}).catch(err => {
 		console.log(err.stack);
