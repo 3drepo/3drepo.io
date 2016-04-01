@@ -61,7 +61,7 @@
 		serverObject.host_dir = serverObject.subdirectory ? ("/" + serverObject.subdirectory) : "/";
 
 		serverObject.base_url     = serverObject.public_protocol + "://" + serverObject.hostname + ":" + serverObject.public_port;
-		serverObject.location_url = "function(path) { return \"//\" + window.location.host + \"" + serverObject.host_dir + "\" + path; }";
+		serverObject.location_url = "function(path) { return \"//\" + window.location.host + \"" + serverObject.host_dir + "/\" + path; }";
 		serverObject.url          = serverObject.base_url + serverObject.host_dir;
 	};
 
