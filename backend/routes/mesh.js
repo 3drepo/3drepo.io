@@ -44,11 +44,17 @@ function findByUID(req, res, next){
 
 		if(!buffer) {
 			return Mesh.findByUID(dbCol, req.params.uid, options).then(mesh => {
-
 				req.params.format = 'src';
 				let renderedObj = srcEncoder.render(req.params.project, mesh, req.query.tex_uuid || null, req.params.subformat, req[C.REQ_REPO].logger);
 
-				return Promise.resolve(renderedObj);
+				if (!config.disableStash)
+				{
+					return stash.saveStashByFilename(dbCol, 'src', filename, renderedObj).then(() => {
+						return Promise.resolve(renderedObj);
+					});
+				} else {
+					return Promise.resolve(renderedObj);
+				}
 			});
 
 		} else {
@@ -89,7 +95,9 @@ function findByRevision(req, res, next){
 				req.params.format = 'src';
 				let renderedObj = srcEncoder.render(req.params.project, mesh, req.query.tex_uuid || null, req.params.subformat, req[C.REQ_REPO].logger);
 
-				return Promise.resolve(renderedObj);
+				stash.saveStashByFilename(dbCol, 'src', filename, renderedObj).then(() => {
+					return Promise.resolve(renderedObj);
+				});
 			});
 
 		} else {

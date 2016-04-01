@@ -611,7 +611,7 @@ var Viewer = {};
 			callback(self.EVENT.OBJECT_SELECTED, {
 				account: account,
 				project: project,
-				ids: id,
+				id: id,
 				source: "viewer"
 			});
 		};
@@ -625,14 +625,13 @@ var Viewer = {};
 			}
 			*/
 
-			// If we pass in a single id, then we might be selecting
-			// an old-style Group in X3DOM rather than multipart.
-			var id = !Array.isArray(ids) ? ids : null;
-			ids = Array.isArray(ids) ? ids: [ids];
-
 			if (!ids) {
 				ids = [];
 			}
+
+			// If we pass in a single id, then we might be selecting
+			// an old-style Group in X3DOM rather than multipart.
+			ids = Array.isArray(ids) ? ids: [ids];
 
 			// Is this a multipart project
 			if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
@@ -661,10 +660,20 @@ var Viewer = {};
 				self.selectParts(fullPartsList, zoom, colour);
 			}
 
-			var object = document.querySelectorAll("[id$='" + id + "']");
+			for(var i = 0; i < ids.length; i++)
+			{
+				var id = ids[i];
+				var object = document.querySelectorAll("[id$='" + id + "']");
 
-			if (object[0]) {
-				self.setApp(object[0], colour);
+				if (object[0]) {
+					self.setApp(object[0], colour);
+				}
+			}
+
+			if (ids.length === 0)
+			{
+				console.log("LENGTH: " + ids.length);
+				self.setApp(null);
 			}
 		};
 
