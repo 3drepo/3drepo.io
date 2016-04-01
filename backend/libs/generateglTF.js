@@ -42,13 +42,6 @@ function generateglTFJSONGroup(byteOffsets, binUri, options){
 		"target": ELEMENT_ARRAY_BUFFER
 	};
 
-	// json.accessors[indexAccessorName] = {
-	// 	"bufferView": indexBufferViewName,
-	// 	"byteOffset": 0,
-	// 	"componentType": UNSIGNED_SHORT,
-	// 	"count": indexInfo.count,
-	// 	"type": SCALAR
-	// };
 	byteOffsets.indicesGroup.forEach((byteInfo, index) => {
 		json.accessors[indexAccessorName + '_' + index] = {
 			"bufferView": indexBufferViewName,
@@ -85,16 +78,6 @@ function generateglTFJSONGroup(byteOffsets, binUri, options){
 	}
 
 
-	// byteOffsets.verticesGroup.forEach((byteInfo, index) => {
-	// 	json.accessors[vertexAccessorName + '_' + index] = {
-	// 		"bufferView": vertexBufferViewName,
-	// 		"byteOffset": byteInfo.offset - vertexInfo.offset,
-	// 		"componentType": FLOAT,
-	// 		"count": byteInfo.count,
-	// 		"type": VEC3
-	// 	};
-	// });
-
 	//normals meta
 	let normalInfo = byteOffsets.normals;
 	let normalBufferViewName = 'bufferView_normals';
@@ -114,34 +97,6 @@ function generateglTFJSONGroup(byteOffsets, binUri, options){
 		"count": normalInfo.count,
 		"type": VEC3
 	};
-
-	// byteOffsets.normalsGroup.forEach((byteInfo, index) => {
-	// 	json.accessors[normalAccessorName + '_' + index] = {
-	// 		"bufferView": normalBufferViewName,
-	// 		"byteOffset": byteInfo.offset - normalInfo.offset,
-	// 		"componentType": FLOAT,
-	// 		"count": byteInfo.count,
-	// 		"type": VEC3
-	// 	};
-	// });
-
-	// let meshName = 'mesh_1';
-	// let defaultEffectName = 'Effect-White';
-
-	// json.meshes[meshName] = {
-	// 	name: meshName,
-	// 	"primitives": [
-	// 		{
-	// 			"attributes": {
-	// 				"NORMAL": normalAccessorName,
-	// 				"POSITION": vertexAccessorName
-	// 			},
-	// 			"indices": indexAccessorName,
-	// 			"material": defaultEffectName,
-	// 			"mode": PRIMITIVE_MODE_TRIANGLES
-	// 		}
-	// 	]
-	// };
 
 	let meshName = 'mesh_';
 
@@ -186,7 +141,7 @@ function generateglTFJSONGroup(byteOffsets, binUri, options){
 	return json;
 }
 
-function generateglTFJSON(bufferInfos, binUri, materialMapping){
+function generateglTFJSON(bufferInfos, binUri, options){
 	'use strict';
 	// glTF const
 	const ELEMENT_ARRAY_BUFFER = 34963;
@@ -203,19 +158,159 @@ function generateglTFJSON(bufferInfos, binUri, materialMapping){
 	json = JSON.parse(JSON.stringify(json));
 
 	// bin info
+	let buffertotalBytes = 0;
+
+	bufferInfos.forEach(bufferInfo => {
+		buffertotalBytes += bufferInfo.totalBytes;
+	});
+
 	let binId = 'buffer1';
 	if(options && options.forGlb){
 		json.extensionsUsed.push(KHR_BINARY_GLTF);
 		binId = KHR_BINARY_GLTF;
 	} else {
 		json.buffers[binId] = {
-			"byteLength": byteOffsets.totalBytes,
+			"byteLength": buffertotalBytes,
 			"type": "arraybuffer",
 			"uri": binUri
 		};
 	}
-
 	
+	let bufferOffset = 0;
+
+	let nodeName = 'node_1';
+	let meshName = 'mesh_1';
+
+	json.meshes[meshName] = {
+		'name': meshName,
+		"primitives": []
+	}
+
+	json.nodes[nodeName] = {
+		"children": [],
+		"matrix": IDENTITY_MATRIX,
+		"meshes": [meshName],
+		"name": nodeName,
+		"extras" : { "multipart" : "true" }
+	};
+
+
+
+	bufferInfos.forEach(bufferInfo => {
+		
+		// generate gltf meta for each building
+
+		let vertexBufferViewName = `vertex_buffer_${bufferInfo.id}`;
+		let vertexAccessorName = `vertex_accessor_${bufferInfo.id}`;
+
+		json.bufferViews[vertexBufferViewName] = {
+			"buffer": binId,
+			"byteLength": bufferInfo.verticesLength,
+			"byteOffset": bufferOffset + bufferInfo.verticesOffset,
+			"target": ARRAY_BUFFER
+		};
+
+		json.accessors[vertexAccessorName] = {
+			"bufferView": vertexBufferViewName,
+			"byteOffset": 0,
+			"componentType": FLOAT,
+			"count": bufferInfo.verticesCount,
+			"min": bufferInfo.verticesMin,
+			"max": bufferInfo.verticesMax,
+			"type": VEC3
+		};
+
+
+
+		let normalBufferViewName = `normal_buffer_${bufferInfo.id}`;
+		let normalAccessorName = `normal_accessor_${bufferInfo.id}`;
+
+		json.bufferViews[normalBufferViewName] = {
+			"buffer": binId,
+			"byteLength": bufferInfo.normalsLength,
+			"byteOffset": bufferOffset + bufferInfo.normalsOffset,
+			"target": ARRAY_BUFFER
+		};
+
+		json.accessors[normalAccessorName] = {
+			"bufferView": normalBufferViewName,
+			"byteOffset": 0,
+			"componentType": FLOAT,
+			"count": bufferInfo.normalsCount,
+			"type": VEC3,
+			"min": bufferInfo.normalsMin,
+			"max": bufferInfo.normalsMax
+		};
+
+
+		let indexBufferViewName = `index_buffer_${bufferInfo.id}`;
+		let indexAccessorName = `index_accessor_${bufferInfo.id}`;
+
+		json.bufferViews[indexBufferViewName] = {
+			"buffer": binId,
+			"byteLength": bufferInfo.indicesLength,
+			"byteOffset": bufferOffset + bufferInfo.indicesOffset,
+			"target": ELEMENT_ARRAY_BUFFER
+		}
+
+		json.accessors[indexAccessorName] = {
+			"bufferView": indexBufferViewName,
+			"byteOffset": 0,
+			"componentType": UNSIGNED_SHORT,
+			"count": bufferInfo.indicesCount,
+			"type": SCALAR,
+			"min": bufferInfo.indicesMin,
+			"max": bufferInfo.indicesMax
+		};
+
+
+		let idMapBufferViewName = `idMap_buffer_${bufferInfo.id}`;
+		let idMapAccessorName = `idMap_accessor_${bufferInfo.id}`;
+
+		json.bufferViews[idMapBufferViewName] = {
+			"buffer": binId,
+			"byteLength": bufferInfo.idMapLength,
+			"byteOffset": bufferOffset + bufferInfo.idMapOffset,
+			"target": ARRAY_BUFFER
+		}
+
+		json.accessors[idMapAccessorName] = {
+			"bufferView": idMapBufferViewName,
+			"byteOffset": 0,
+			"componentType": FLOAT,
+			"count": bufferInfo.idMapCount,
+			"type": SCALAR,
+			"min": bufferInfo.idMapMin,
+			"max": bufferInfo.idMapMax
+		};
+
+		let effect = 'Effect-White';
+
+		if(options && options.materialMapping && options.materialMapping[bufferInfo.classCode]){
+			effect = options.materialMapping[bufferInfo.classCode];
+		}
+
+		json.meshes[meshName].primitives.push({
+			"attributes": {
+				"NORMAL": normalAccessorName,
+				"POSITION": vertexAccessorName,
+				"IDMAP": idMapAccessorName
+			},
+			"extras":{
+				"refID": bufferInfo.id
+			},
+			"indices": indexAccessorName,
+			"material": effect,
+			"mode": PRIMITIVE_MODE_TRIANGLES
+		});
+
+		bufferOffset += bufferInfo.totalBytes;
+
+	});
+
+	json.scenes.defaultScene.nodes = [nodeName];
+
+	return json;
 }
 
 function generateBufferNew(meshesByBuilding, binName, materialMapping){
@@ -257,6 +352,8 @@ function generateBufferNew(meshesByBuilding, binName, materialMapping){
 
 		});
 
+		console.log('Debug Info: Indices', id , glIndices);
+		console.log('Debug Info: idMaps', id , idMaps);
 		let totalBytes = 
 			( glVertices.length * 3 ) * GLBYTE.FLOAT +
 			( glNormals.length * 3 ) * GLBYTE.FLOAT +
@@ -268,20 +365,26 @@ function generateBufferNew(meshesByBuilding, binName, materialMapping){
 		let bufferInfo = {
 			id: id,
 			totalBytes: totalBytes,
-			classCode: building.classCode
+			classCode: building.classCode,
+			verticesCount: glVertices.length,
+			normalsCount: glNormals.length,
+			indicesCount: glIndices.length,
+			idMapCount: idMaps.length
 		};
 
 		let buffer = new Buffer(totalBytes);
 		let bufferOffset = 0;
-		let min = [0,0,0];
-		let max = [0,0,0];
+		let min, max;
+
+		/*** vertices ***/
+
+		min = [0,0,0];
+		max = [0,0,0];
 
 		if (glVertices.length){
 			min = [glVertices[0][0], glVertices[0][1], glVertices[0][2]];
 			max = [glVertices[0][0], glVertices[0][1], glVertices[0][2]];
 		}
-
-		/*** vertices ***/
 
 		bufferInfo.verticesOffset = bufferOffset;
 
@@ -300,26 +403,50 @@ function generateBufferNew(meshesByBuilding, binName, materialMapping){
 		});
 
 		bufferInfo.verticesLength = ( glVertices.length * 3 ) * GLBYTE.FLOAT;
-
+		bufferInfo.verticesMin = min;
+		bufferInfo.verticesMax = max;
 
 		/*** normals ***/
+
+		min = [0,0,0];
+		max = [0,0,0];
+
+		if (glNormals.length){
+			min = [glNormals[0][0], glNormals[0][1], glNormals[0][2]];
+			max = [glNormals[0][0], glNormals[0][1], glNormals[0][2]];
+		}
 
 		bufferInfo.normalsOffset = bufferOffset;
 
 		glNormals.forEach(vertex => {
 			// vertex = [x,y,z]
-			vertex.forEach(val => {
+			vertex.forEach((val, i) => {
 				buffer.writeFloatLE(val, bufferOffset);
 				bufferOffset = bufferOffset + GLBYTE.FLOAT;
+
+				if (vertex[i] < min[i]){
+					min[i] = vertex[i];
+				} else if (vertex[i] > max[i]){
+					max[i] = vertex[i];
+				}
 			});
 		});
 
 		bufferInfo.normalsLength = ( glNormals.length * 3 ) * GLBYTE.FLOAT;
-
+		bufferInfo.normalsMin = min;
+		bufferInfo.normalsMax = max;
 
 		/*** indices ***/
 
 		bufferInfo.indicesOffset = bufferOffset;
+
+		min = [0];
+		max = [0];
+
+		if (glIndices.length){
+			min = [glIndices[0]];
+			max = [glIndices[glIndices.length - 1]];
+		}
 
 		glIndices.forEach(index => {
 			buffer.writeUInt16LE(index, bufferOffset);
@@ -327,8 +454,18 @@ function generateBufferNew(meshesByBuilding, binName, materialMapping){
 		});
 
 		bufferInfo.indicesLength = glIndices.length * GLBYTE.UINT;
+		bufferInfo.indicesMin = min;
+		bufferInfo.indicesMax = max;
 
 		/*** idMap ***/
+
+		min = [0];
+		max = [0];
+
+		if (idMaps.length){
+			min = [idMaps[0]];
+			max = [idMaps[0]];
+		}
 
 		bufferInfo.idMapOffset = bufferOffset;
 
@@ -338,6 +475,10 @@ function generateBufferNew(meshesByBuilding, binName, materialMapping){
 		});
 
 		bufferInfo.idMapLength = idMaps.length * GLBYTE.FLOAT;
+		bufferInfo.idMapMin = min;
+		bufferInfo.idMapMax = max;
+
+
 
 		buffers.push(buffer);
 		bufferInfos.push(bufferInfo);
@@ -347,7 +488,9 @@ function generateBufferNew(meshesByBuilding, binName, materialMapping){
 
 	console.log(bufferInfos);
 
-	let json = generateglTFJSON(bufferInfos, binName, materialMapping);
+	let json = generateglTFJSON(bufferInfos, binName, { materialMapping });
+
+	return { buffer: Buffer.concat(buffers), json };
 }
 
 function generateBuffer(meshesByGroup, binName, materialMapping){

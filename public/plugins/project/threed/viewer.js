@@ -1982,7 +1982,7 @@ var Viewer = {};
 			return layerPoint;
 		};
 
-		this.addMapTile = function(osGridRef){
+		this.addMapTile = function(osGridRef, testAdd){
 
 			if(!self.originBNG){
 				return console.log('No origin BNG coors set, no map tiles can be added.');
@@ -2006,6 +2006,10 @@ var Viewer = {};
 			var osCoor = OsGridRef.parse(osGridRef);
 			translate[0] = osCoor.easting - self.originBNG.easting;
 			translate[2] = self.originBNG.northing - osCoor.northing;
+
+			if (testAdd){
+				translate = [0,0,0];
+			}
 
 			var transform = document.createElement('transform');
 			transform.setAttribute('translation', translate.join(' '));
@@ -2051,7 +2055,7 @@ var Viewer = {};
 		};
 
 		this.appendMapImage = function(size, ox, oy){
-
+			return;
 			var zoomLevel = 17;
 
 			var slippyPoints = self._getSlippyTileLayerPoints(self.settings.mapTile.lat, self.settings.mapTile.lon, zoomLevel);

@@ -353,13 +353,13 @@ function genglX(format, req, res){
 			console.log('Heightless building count', heightlessBuildingCount);
 
 
-			let glTF = generateglTF(meshesByBuilding, `/api/os${req.url.replace('.gltf', '.bin')}`, materialMapping);
+			let glTF = generateglTF(meshesByBuilding, `${req.url.replace('.gltf', '.bin').substr(1)}`, materialMapping);
 
 			console.log('saving to stash and dont wait for response');
 
-			//stash.saveStashByFileName(dbCol, 'gltf', gltfUrl, new Buffer(JSON.stringify(glTF.json)));
+			stash.saveStashByFileName(dbCol, 'gltf', gltfUrl, new Buffer(JSON.stringify(glTF.json)));
 			//bin file should also in .stash.gltf but with .bin as filename extension
-			//stash.saveStashByFileName(dbCol, 'gltf', binUrl, glTF.buffer);
+			stash.saveStashByFileName(dbCol, 'gltf', binUrl, glTF.buffer);
 			
 
 			return Promise.resolve(glTF);
@@ -393,12 +393,12 @@ function genglX(format, req, res){
 			res.status(200).send(glTF.buffer);
 		} else {
 			//json from stash is a Buffer
-			// if (glTF.json instanceof Buffer) {
-			// 	glTF.json = JSON.parse(glTF.json.toString());
-			// }
-			console.log(glTF);
-			//res.status(200).json(glTF.json);
-			res.status(200).send();
+			if (glTF.json instanceof Buffer) {
+				glTF.json = JSON.parse(glTF.json.toString());
+			}
+			//console.log(glTF);
+			res.status(200).json(glTF.json);
+			//res.status(200).send();
 		}
 	}).catch(err => {
 		console.log(err.stack);
