@@ -1,29 +1,39 @@
-#leftButtons(ng-if="vm.showButtons")
-	md-button.md-icon-button.actionButton(
-	ng-repeat="button in vm.leftButtons"
-	ng-click="button.click()"
-	aria-label="{{button.label}}"
-	)
-		//md-tooltip(md-direction="top") {{button.label}}
-		md-icon(md-font-icon="{{button.icon}}", ng-class="button.iconClass")
+//div
+	#leftButtons(ng-if="vm.showButtons", layout="row")
+		span(layout="column" ng-repeat="button in vm.leftButtons", ng-click="button.click()" )
+			md-button.md-icon-button.actionButton(aria-label="{{button.label}}")
+				md-icon(md-font-icon="{{button.icon}}", ng-class="button.iconClass")
+			label {{button.label}}
 
-	.viewingOptionButtons(layout="column", ng-if="vm.showViewingOptionButtons")
-		md-button.md-icon-button.actionButton(
-		ng-repeat="option in vm.viewingOptions"
-		ng-click="vm.viewingOptions[$index].click($index)"
-		aria-label="{{vm.viewingOptions[$index].label}}"
-		)
-			//md-tooltip(md-direction="top") {{vm.viewingOptions[index].label}}
-			md-icon(md-font-icon="{{vm.viewingOptions[$index].icon}}", ng-class="vm.viewingOptions[$index].iconClass")
+		.viewingOptionButtons(layout="column", ng-if="vm.showViewingOptionButtons")
+			md-button.md-icon-button.actionButton(ng-repeat="option in vm.viewingOptions" ng-click="vm.viewingOptions[$index].click($index)" aria-label="{{vm.viewingOptions[$index].label}}")
+				md-icon(md-font-icon="{{vm.viewingOptions[$index].icon}}", ng-class="vm.viewingOptions[$index].iconClass")
 
-div
-	compass(ng-click="vm.toggleElements()")
+	div
+		compass(ng-click="vm.toggleElements()")
 
-#rightButtons(ng-if="vm.showButtons")
-	md-button.md-icon-button.actionButton(
-	ng-repeat="button in vm.rightButtons"
-	ng-click="button.click()"
-	aria-label="{{button.label}}"
-	)
-		//md-tooltip(md-direction="top") {{button.label}}
-		md-icon(md-font-icon="{{button.icon}}", ng-class="button.iconClass")
+	#rightButtons(ng-if="vm.showButtons", layout="row")
+		span(layout="column" ng-repeat="button in vm.rightButtons", ng-click="button.click()" )
+			md-button.md-icon-button.actionButton(aria-label="{{button.label}}")
+				md-icon(md-font-icon="{{button.icon}}", ng-class="button.iconClass")
+			label {{button.label}}
+
+div(layout="row" flex)
+	#leftButtons(ng-if="vm.showButtons", layout="row" layout-align="space-between" flex="40")
+		span(ng-repeat="button in vm.leftButtons", ng-click="button.click()" )
+			md-button.md-icon-button.actionButton(aria-label="{{button.label}}")
+				md-icon(md-font-icon="{{button.icon}}", ng-class="button.iconClass")
+			label {{button.label}}
+
+		.viewingOptionButtons(layout="column", ng-if="vm.showViewingOptionButtons")
+			md-button.md-icon-button.actionButton(ng-repeat="option in vm.viewingOptions" ng-click="vm.viewingOptions[$index].click($index)" aria-label="{{vm.viewingOptions[$index].label}}")
+				md-icon(md-font-icon="{{vm.viewingOptions[$index].icon}}", ng-class="vm.viewingOptions[$index].iconClass")
+
+	div(layout="row" layout-align="center center" flex="20")
+		compass(ng-click="vm.toggleElements()")
+
+	#rightButtons(ng-if="vm.showButtons", layout="row" layout-align="space-between" flex="40")
+		span(ng-repeat="button in vm.rightButtons", ng-click="button.click()" )
+			md-button.md-icon-button.actionButton(aria-label="{{button.label}}")
+				md-icon(md-font-icon="{{button.icon}}", ng-class="button.iconClass")
+			label {{button.label}}

@@ -28,10 +28,10 @@
 			restrict: "E",
 			scope: {
 				manager: "=",
-				account: "=",
-				project: "=",
-				branch: "=",
-				revision: "=",
+				account: "@",
+				project: "@",
+				branch: "@",
+				revision: "@",
 				name: "@",
 				autoInit: "@",
 				vrMode: "@",
@@ -51,6 +51,9 @@
 
 		v.initialised = $q.defer();
 		v.loaded      = $q.defer();
+
+		v.branch   = v.branch ? v.branch : "master";
+		v.revision = v.revision ? v.revision : "head";
 
 		if (!angular.isDefined(v.eventService))
 		{
@@ -74,6 +77,7 @@
 		$scope.init = function() {
 			v.viewer = new Viewer(v.name, $element[0], v.manager, eventCallback, errCallback);
 
+			v.viewer.init();
 			// TODO: Move this so that the attachment is contained
 			// within the plugins themselves.
 			// Comes free with oculus support and gamepad support
@@ -84,16 +88,6 @@
 
 			v.collision  = new Collision(v.viewer);
 
-			v.viewer.init();
-
-			$http.get(serverConfig.apiUrl(v.account + "/" + v.project + ".json")).success(
-				function(json, status) {
-					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
-						account: v.account,
-						project: v.project,
-						settings: json.properties
-					});
-				});
 
 			$scope.reload();
 
@@ -109,6 +103,15 @@
 				v.collision  = new Collision(v.viewer);
 
 			});
+
+			$http.get(serverConfig.apiUrl(v.account + "/" + v.project + ".json")).success(
+				function(json, status) {
+					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
+						account: v.account,
+						project: v.project,
+						settings: json.properties
+					});
+				});
 
 		};
 
@@ -131,7 +134,7 @@
 						} else if (event.type === EventService.EVENT.VIEWER.SWITCH_FULLSCREEN) {
 							v.viewer.switchFullScreen(null);
 						} else if (event.type === EventService.EVENT.VIEWER.ENTER_VR) {
-							v.viewer.switchVR();
+							v.oculus.switchVR();
 						} else if (event.type === EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK) {
 							v.viewer.onViewpointChanged(event.value.callback);
 						} else if (event.type === EventService.EVENT.PROJECT_SETTINGS_READY) {
@@ -175,12 +178,13 @@
 								event.value.clipDirection ? event.value.clipDirection : -1);
 						} else if (event.type === EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE) {
 							v.viewer.moveClippingPlane(event.value.percentage);
-						} else if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) || (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS)) {
 							v.viewer.highlightObjects(
 								event.value.account,
 								event.value.project,
-								event.value.id,
-								event.value.ids ? event.value.ids : [event.value.id]
+								event.value.id ? [event.value.id] : event.value.ids,
+								event.value.zoom,
+								event.value.colour
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 							v.viewer.highlightObjects();
@@ -188,9 +192,8 @@
 							v.viewer.switchObjectVisibility(
 								event.value.account,
 								event.value.project,
-								event.value.id,
-								event.value.ids ? event.value.ids : [event.value.id],
-								event.value.state
+								event.value.visible_ids,
+								event.value.invisible_ids
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.SET_CAMERA) {
 							v.viewer.setCamera(
@@ -200,8 +203,12 @@
 								angular.isDefined(event.value.animate) ? event.value.animate : true,
 								event.value.rollerCoasterMode
 							);
+						} else if (event.type === EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT) {
+							if (angular.isDefined(event.value.promise)) {
+								event.value.promise.resolve(v.viewer.getCurrentViewpointInfo());
+							}
 						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
-							vm.manager.getCurrentViewer().setNavMode(event.value.mode);
+							v.manager.getCurrentViewer().setNavMode(event.value.mode);
 						}
 					});
 				}

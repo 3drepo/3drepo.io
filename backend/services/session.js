@@ -19,24 +19,27 @@
 // TODO: Currently this stores everything on the filesystem,
 // but it needs to be changed.
 (function(){
-	'use strict';
+	"use strict";
 
-	let expressSession = require('express-session');
-	let FileStore = require('session-file-store')(expressSession);
-	let config = require('../config.js');
+	let expressSession = require("express-session");
+	let FileStore = require("session-file-store")(expressSession);
 
-	module.exports.session = expressSession({
-		secret: config.cookie.secret,
-		resave: false,
-		saveUninitialized: true,
-		cookie: {
-			domain: config.api_server.hostname,
-			path: "/" + config.api_server.host_dir,
-			secure: config.using_ssl,
-			httpOnly: false
-		},
-		store: new FileStore()
-	});
+	module.exports.session = function(config) {
+		var sessionConfig = expressSession({
+			secret: config.cookie.secret,
+			resave: false,
+			saveUninitialized: true,
+			cookie: {
+				domain: config.api_server.hostname,
+				path: config.api_server.host_dir,
+				secure: config.using_ssl,
+				httpOnly: false
+			},
+			store: new FileStore()
+		});
+
+		return sessionConfig;
+	};
 
 })();
 

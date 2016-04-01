@@ -19,12 +19,13 @@ var attrs = {
 };
 
 var statics = {};
+var methods = {};
 //var methods = {};
 
 statics._getGridFSBucket = function(dbCol, format){
 
 	return new GridFSBucket(
-		ModelFactory.db.db(dbCol.account), 
+		ModelFactory.db.db(dbCol.account),
 		{ bucketName:  `${dbCol.project}.stash.${format}`}
 	);
 };
@@ -33,13 +34,11 @@ statics.findStashByFilename = function(dbCol, format, filename){
 	'use strict';
 
 	let bucket = this._getGridFSBucket(dbCol, format);
-	
+
 	return bucket.find({ filename }).toArray().then(files => {
 		if(!files.length){
-			//console.log('no stash found');
 			return Promise.resolve(false);
 		} else {
-			//console.log('stash found!');
 			return new Promise((resolve) => {
 
 				let downloadStream = bucket.openDownloadStreamByName(filename);
@@ -54,7 +53,7 @@ statics.findStashByFilename = function(dbCol, format, filename){
 
 		}
 	});
-	
+
 };
 
 statics.findByUID = function(dbCol, uid, options){
@@ -65,24 +64,23 @@ statics.findByUID = function(dbCol, uid, options){
 	let projection = options && options.projection || {};
 
 	let _find = () => ModelFactory.db.db(dbCol.account).collection(`${dbCol.project}.stash.3drepo`).find({_id: stringToUUID(uid)}).limit(1).next().then(obj => {
-
 		if(!obj) {
 			return this.findById(dbCol, stringToUUID(uid), projection);
 		}
 
 		//from3DRepoStash = true;
 		obj.toObject = () => obj;
+
 		return Promise.resolve(obj);
 
 	}).then(obj =>{
-		
+
 		if(!obj){
 			return Promise.reject({resCode: responseCodes.OBJECT_NOT_FOUND});
 		}
-
 		// load extRef if _.extRef is defined
 		if(obj.type === 'mesh' && obj._extRef){
-			
+
 			let promises = [];
 
 			obj = obj.toObject();
@@ -95,7 +93,7 @@ statics.findByUID = function(dbCol, uid, options){
 					})
 				);
 			});
-			
+
 			return Promise.all(promises).then( () => {
 				return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj]));
 			});
@@ -103,8 +101,6 @@ statics.findByUID = function(dbCol, uid, options){
 		} else {
 			return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj.toObject()]));
 		}
-
-		
 	});
 
 	return _find();
@@ -122,6 +118,20 @@ statics.findByUID = function(dbCol, uid, options){
 	// } else {
 	//	return _find();
 	//}
+
+};
+
+methods.clean = function(){
+	'use strict';
+
+	let cleaned = this.toObject();
+	cleaned._id = uuidToString(cleaned._id);
+	cleaned.shared_id = uuidToString(cleaned.shared_id);
+	cleaned.parents.forEach((parent, i) => {
+		cleaned.parents[i] = uuidToString(parent);
+	});
+
+	return cleaned;
 };
 
 statics.findByRevision = function(dbCol, rid, sid, options){
@@ -131,6 +141,7 @@ statics.findByRevision = function(dbCol, rid, sid, options){
 
 	let _find = () => Revision.findById(dbCol, stringToUUID(rid)).then( rev => {
 		rev = rev.toObject();
+
 		return this.findOne(dbCol, { _id: { '$in': rev.current }, shared_id: stringToUUID(sid) }, projection).then(obj => {
 
 			if(!obj){
@@ -139,7 +150,7 @@ statics.findByRevision = function(dbCol, rid, sid, options){
 
 			// load extRef if _.extRef is defined
 			if(obj.type === 'mesh' && obj._extRef){
-				
+
 				let promises = [];
 
 				obj = obj.toObject();
@@ -152,7 +163,7 @@ statics.findByRevision = function(dbCol, rid, sid, options){
 						})
 					);
 				});
-				
+
 				return Promise.all(promises).then( () => {
 					return Promise.resolve(repoGraphScene(dbCol.logger).decode([obj]));
 				});
@@ -164,7 +175,7 @@ statics.findByRevision = function(dbCol, rid, sid, options){
 	});
 
 	return _find();
-	
+
 	// if(options && options.stash){
 	// 	//find obj from stash
 	// 	return this.findStashByFilename(dbCol, options.stash.format, options.stash.filename).then(buffer => {
@@ -181,4 +192,4 @@ statics.findByRevision = function(dbCol, rid, sid, options){
 };
 
 
-module.exports = {attrs, statics};
+module.exports = {attrs, statics, methods};

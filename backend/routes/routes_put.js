@@ -52,9 +52,6 @@ module.exports = function(router, dbInterface, checkAccess){
 	{
 		if(this.putMap.hasOwnProperty(idx)){
 			var item = this.putMap[idx];
-
-			console.log('debug', 'Adding PUT call for ' + item.regex);
-
 			var resFunction = schemaValidator.validate(item.regex);
 
 			if (item.shouldCheckAccess){

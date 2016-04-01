@@ -17,45 +17,10 @@
 
 // --------------------- Control Interface ---------------------
 
-function bgroundClick(event) {
-	$.event.trigger("bgroundClicked", event);
-};
-
-function clickObject(event) {
-	$.event.trigger("clickObject", event);
-};
-
-function clickPin(event) {
-	$.event.trigger("pinClick", event);
-}
-
-function onMouseOver(event) {
-	$.event.trigger("onMouseOver", event);
-}
-
-function onMouseDown(event) {
-	$.event.trigger("onMouseDown", event);
-}
-
-function onMouseUp(event) {
-	$.event.trigger("onMouseUp", event);
-}
-
-function onMouseMove(event) {
-	$.event.trigger("onMouseMove", event);
-}
-
-function onViewpointChange(event) {
-	$.event.trigger("onViewpointChange", event);
-}
-
-function onLoaded(event) {
-	$.event.trigger("onLoaded", event);
-}
-
-function runtimeReady() {
-	$.event.trigger("runtimeReady");
-}
+// Global functions to be passed to X3DOM elements
+var bgroundClick, clickObject, clickPin, onMouseOver,
+	onMouseDown, onMouseUp, onMouseMove, onViewpointChange,
+	onLoaded, runtimeReady;
 
 x3dom.runtime.ready = runtimeReady;
 
@@ -64,6 +29,17 @@ var Viewer = {};
 
 (function() {
 	"use strict";
+
+	bgroundClick      = ViewerUtil.eventFactory("bgroundClicked");
+	clickObject       = ViewerUtil.eventFactory("clickObject");
+	clickPin          = ViewerUtil.eventFactory("pinClick");
+	onMouseOver       = ViewerUtil.eventFactory("onMouseOver");
+	onMouseDown       = ViewerUtil.eventFactory("onMouseDown");
+	onMouseUp         = ViewerUtil.eventFactory("onMouseUp");
+	onMouseMove       = ViewerUtil.eventFactory("onMouseMove");
+	onViewpointChange = ViewerUtil.eventFactory("onViewpointChange");
+	onLoaded          = ViewerUtil.eventFactory("onLoaded");
+	runtimeReady      = ViewerUtil.eventFactory("runtimeReady");
 
 	Viewer = function(name, element, manager, callback, errCallback) {
 		// Properties
@@ -75,12 +51,13 @@ var Viewer = {};
 			this.name = name;
 		}
 
-		callback = !callback ? function(type, value) {
-			console.log(type + ": " + value);
+		callback = !callback ? function() {
+			// TODO: Move event handling here
+			//console.log(type + ": " + value);
 		} : callback;
 
-		errCallback = !errCallback ? function(type, value) {
-			console.error(type + ": " + value);
+		errCallback = !errCallback ? function() {
+			//console.error(type + ": " + value);
 		} : errCallback;
 
 		// If not given the tag by the manager create here
@@ -129,6 +106,10 @@ var Viewer = {};
 
 		this.logos    = [];
 
+		this.logoClick = function() {
+			callback(self.EVENT.LOGO_CLICK);
+		};
+
 		this.addLogo = function() {
 			if (!self.logoGroup)
 			{
@@ -151,22 +132,13 @@ var Viewer = {};
 			logo.style.right 		  = 0;
 			logo.style.margin 		  = "auto";
 
+			logo.addEventListener("click", self.logoClick);
+
 			var logoImage = document.createElement("img");
 			logoImage.setAttribute("src", logo_string);
 			logoImage.setAttribute("style", "width: 100%;");
 			logoImage.textContent = " ";
-			logoImage.setAttribute("onclick", "logoClick()");
-
-			var logoLink = document.createElement("a");
-
-			if (server_config.return_path) {
-				logoLink.setAttribute("href", server_config.return_path);
-			} else {
-				logoLink.setAttribute("href", "https://www.3drepo.io");
-			}
-
-			logoLink.appendChild(logoImage);
-			logo.appendChild(logoLink);
+			logo.appendChild(logoImage);
 
 			self.updateLogoWidth(widthPercentage);
 
@@ -313,7 +285,7 @@ var Viewer = {};
 
 			self.getCurrentViewpoint().addEventListener("viewpointChanged", self.viewPointChanged);
 
-			$(document).on("onLoaded", function(event, objEvent) {
+			ViewerUtil.onEvent("onLoaded", function(objEvent) {
 				if (self.loadViewpoint) {
 					self.setCurrentViewpoint(self.loadViewpoint);
 				}
@@ -329,18 +301,21 @@ var Viewer = {};
 				if (objEvent.target.tagName.toUpperCase() === "INLINE") {
 					self.inlineRoots[objEvent.target.nameSpaceName] = objEvent.target;
 				} else if (objEvent.target.tagName.toUpperCase() === "MULTIPART") {
-					var nameSpaceName = objEvent.target._x3domNode._nameSpace.name;
-					if (!self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-						self.multipartNodesByProject[nameSpaceName] = {};
+					if (self.multipartNodes.indexOf(objEvent.target) === -1)
+					{
+						var nameSpaceName = objEvent.target._x3domNode._nameSpace.name;
+						if (!self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
+							self.multipartNodesByProject[nameSpaceName] = {};
+						}
+
+						var multipartName = objEvent.target.getAttribute("id");
+						var multipartNameParts = multipartName.split("__");
+						var multipartID = multipartNameParts[multipartNameParts.length - 1];
+
+						self.multipartNodesByProject[nameSpaceName][multipartID] = objEvent.target;
+
+						self.multipartNodes.push(objEvent.target);
 					}
-
-					var multipartName = objEvent.target.getAttribute("id");
-					var multipartNameParts = multipartName.split("__");
-					var multipartID = multipartNameParts[multipartNameParts.length - 1];
-
-					self.multipartNodesByProject[nameSpaceName][multipartID] = objEvent.target;
-
-					self.multipartNodes.push(objEvent.target);
 				}
 
 				self.downloadsLeft += (objEvent.target.querySelectorAll("[load]").length - 1);
@@ -515,22 +490,16 @@ var Viewer = {};
 		};
 
 		this.onMouseUp = function(functionToBind) {
-			$(document).on("onMouseUp", functionToBind);
+			ViewerUtil.onEvent("onMouseUp", functionToBind);
 		};
 
 		this.onMouseDown = function(functionToBind) {
-			$(document).on("onMouseDown", functionToBind);
-		}
+			ViewerUtil.onEvent("onMouseDown", functionToBind);
+		};
 
-		this.mouseDownPickPoint = function(event, pickEvent)
+		this.mouseDownPickPoint = function()
 		{
 			var pickingInfo = self.getViewArea()._pickingInfo;
-
-			// Hack until double click problem solved
-			self.pickPoint(); // This updates self.pickObject
-			if (self.pickObject.pickObj !== null) {
-				pickingInfo.pickObj = self.pickObject;
-			}
 
 			if (pickingInfo.pickObj)
 			{
@@ -568,11 +537,11 @@ var Viewer = {};
 		this.onMouseDown(this.mouseDownPickPoint);
 
 		this.onViewpointChanged = function(functionToBind) {
-			$(self.viewer).on("myViewpointHasChanged", functionToBind);
+			ViewerUtil.onEvent("myViewpointHasChanged", functionToBind);
 		};
 
 		this.offViewpointChanged = function(functionToBind) {
-			$(self.viewer).off("myViewpointHasChanged", functionToBind);
+			ViewerUtil.offEvent("myViewpointHasChanged", functionToBind);
 		};
 
 		this.viewPointChanged = function(event) {
@@ -585,42 +554,46 @@ var Viewer = {};
 				self.nav._x3domNode._vf.typeParams[1] = eye[1];
 			}
 
-			$(self.viewer).trigger("myViewpointHasChanged", event);
+			ViewerUtil.triggerEvent("myViewpointHasChanged", event);
 		};
 
 		this.onBackgroundClicked = function(functionToBind) {
-			$(document).on("bgroundClicked", functionToBind);
+			ViewerUtil.onEvent("bgroundClicked", functionToBind);
 		};
 
 		this.offBackgroundClicked = function(functionToBind) {
-			$(document).off("bgroundClicked", functionToBind);
+			ViewerUtil.offEvent("bgroundClicked", functionToBind);
 		};
 
-		this.selectParts = function(part, zoom) {
+		this.selectParts = function(part, zoom, colour) {
+			var i;
+
+			colour = colour ? colour : self.SELECT_COLOUR.EMISSIVE;
+
 			if (!Array.isArray(part)) {
 				part = [part];
 			}
 
 			if (zoom) {
-				for (var i = 0; i < part.length; i++) {
+				for (i = 0; i < part.length; i++) {
 					part[i].fit();
 				}
 			}
 
 			if (self.oldPart) {
-				for (var i = 0; i < self.oldPart.length; i++) {
+				for (i = 0; i < self.oldPart.length; i++) {
 					self.oldPart[i].resetColor();
 				}
 			}
 
 			self.oldPart = part;
 
-			for (var i = 0; i < part.length; i++) {
-				part[i].setEmissiveColor(self.SELECT_COLOUR.EMISSIVE, "front");
+			for (i = 0; i < part.length; i++) {
+				part[i].setEmissiveColor(colour, "both");
 			}
 		};
 
-		this.clickObject = function(event, objEvent) {
+		this.clickObject = function(objEvent) {
 			var account = null;
 			var project = null;
 			var id = null;
@@ -643,7 +616,7 @@ var Viewer = {};
 			});
 		};
 
-		this.highlightObjects = function(account, project, id, ids, zoom) {
+		this.highlightObjects = function(account, project, ids, zoom, colour) {
 			var nameSpaceName = null;
 
 			/*
@@ -655,6 +628,10 @@ var Viewer = {};
 			if (!ids) {
 				ids = [];
 			}
+
+			// If we pass in a single id, then we might be selecting
+			// an old-style Group in X3DOM rather than multipart.
+			ids = Array.isArray(ids) ? ids: [ids];
 
 			// Is this a multipart project
 			if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
@@ -680,118 +657,86 @@ var Viewer = {};
 					}
 				}
 
-				self.selectParts(fullPartsList, zoom);
+				self.selectParts(fullPartsList, zoom, colour);
 			}
 
-			var object = $("[id$=" + id + "]");
+			for(var i = 0; i < ids.length; i++)
+			{
+				var id = ids[i];
+				var object = document.querySelectorAll("[id$='" + id + "']");
 
-			if (object[0]) {
-				self.setApp(object[0]);
+				if (object[0]) {
+					self.setApp(object[0], colour);
+				}
+			}
+
+			if (ids.length === 0)
+			{
+				self.setApp(null);
 			}
 		};
 
-		this.switchedOldParts = [];
-		this.switchedObjects = [];
+		//this.switchedOldParts = [];
+		//this.switchedObjects = [];
 
-		this.switchObjectVisibility = function(account, project, id, ids, state) {
+		this.__processSwitchVisibility = function(nameSpaceName, ids, state)
+		{
+			if (ids && ids.length) {
+				// Is this a multipart project
+				if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
+					var nsMultipartNodes;
+
+					// If account and project have been specified
+					// this helps narrow the search
+					if (nameSpaceName) {
+						nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
+					} else {
+						// Otherwise iterate over everything
+						nsMultipartNodes = self.multipartNodes;
+					}
+
+					for (var multipartNodeName in nsMultipartNodes) {
+						if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
+							var parts = nsMultipartNodes[multipartNodeName].getParts(ids);
+
+							if (parts && parts.ids.length > 0) {
+								parts.setVisibility(state);
+							}
+						}
+					}
+				}
+
+				for(var i = 0; i < ids.length; i++)
+				{
+					var id = ids[i];
+					var object = document.querySelectorAll("[id$='" + id + "']");
+
+					if (object[0]) {
+						object[0].setAttribute("render", state.toString());
+					}
+				}
+			}
+		};
+
+		this.switchObjectVisibility = function(account, project, visible_ids, invisible_ids) {
 			var nameSpaceName = null;
-			var i;
 
 			if (account && project) {
 				nameSpaceName = account + "__" + project;
 			}
 
-			if (!ids) {
-				ids = [];
+			if (visible_ids)
+			{
+				self.__processSwitchVisibility(nameSpaceName, visible_ids, true);
 			}
 
-			// Is this a multipart project
-			if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-				var fullPartsList = [];
-				var nsMultipartNodes;
-
-				// If account and project have been specified
-				// this helps narrow the search
-				if (nameSpaceName) {
-					nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
-				} else {
-					// Otherwise iterate over everything
-					nsMultipartNodes = self.multipartNodes;
-				}
-
-				for (i = 0; i < self.switchedOldParts.length; i++) {
-					if (ids.indexOf(self.switchedOldParts[i]) > -1) {
-						self.switchedOldParts[i].setVisibility(state);
-						delete self.switchOldParts[i];
-						i--;
-					}
-				}
-
-				for (var multipartNodeName in nsMultipartNodes) {
-					if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
-						var parts = nsMultipartNodes[multipartNodeName].getParts(ids);
-
-						if (parts && parts.ids.length > 0) {
-							self.switchedOldParts = self.switchedOldParts.concat(parts.ids);
-							parts.setVisibility(state);
-						}
-					}
-				}
-			}
-
-			for (i = 0; i < self.switchedObjects.length; i++) {
-				if (ids.indexOf(self.switchedObjects[i]) > -1) {
-					self.switchedObjects[i].setAttribute("render", state.toString());
-					delete self.switchOldParts[i];
-					i--;
-				}
-			}
-
-			var object = $("[id$=" + id + "]");
-
-			if (object[0]) {
-				object[0].setAttribute("render", state.toString());
-				self.switchedObjects.push(id);
+			if (invisible_ids)
+			{
+				 self.__processSwitchVisibility(nameSpaceName, invisible_ids, false);
 			}
 		};
 
-
-		/*
-		$(document).on("partSelected", function(event, part, zoom) {
-			self.selectParts(part, zoom);
-
-			var obj = {};
-			obj.multipart = true;
-			obj.id = part.multiPart._nameSpace.name + "__" + part.partID;
-
-
-			callback(self.EVENT.OBJECT_SELECTED, {
-				account: ,
-				project:
-			})
-
-
-			$(document).trigger("objectSelected", obj);
-		});
-
-		$(document).on("objectSelected", function(event, object, zoom) {
-			if (object !== undefined) {
-				if (!object.hasOwnProperty("multipart")) {
-					if (zoom) {
-						if (object.getAttribute("render") !== "false") {
-							self.lookAtObject(object);
-						}
-					}
-				}
-			} else {
-				self.selectParts([], false);
-			}
-
-			self.setApp(object);
-		});
-		*/
-
-		$(document).on("pinClick", function(event, clickInfo) {
+		ViewerUtil.onEvent("pinClick", function(clickInfo) {
 			var pinID = clickInfo.target.parentElement.parentElement.parentElement.parentElement.parentElement.id;
 			callback(self.EVENT.CLICK_PIN,
 			{
@@ -799,88 +744,21 @@ var Viewer = {};
 			});
 		});
 
-		$(document).on("onMouseDown", function(event, mouseEvent) {
-			$("body")[0].style["pointer-events"] = "none";
+		ViewerUtil.onEvent("onMouseDown", function() {
+			document.body.style["pointer-events"] = "none";
 		});
 
-		$(document).on("onMouseUp", function(event, mouseEvent) {
-			$("body")[0].style["pointer-events"] = "all";
+		ViewerUtil.onEvent("onMouseUp", function() {
+			document.body.style["pointer-events"] = "all";
 		});
 
 		this.onClickObject = function(functionToBind) {
-			$(document).on("clickObject", functionToBind);
+			ViewerUtil.onEvent("clickObject", functionToBind);
 		};
 
 		this.offClickObject = function(functionToBind) {
-			$(document).off("clickObject", functionToBind);
+			offEvent("clickObject", functionToBind);
 		};
-
-		if (0) {
-			this.moveScale = 1.0;
-
-			self.element.addEventListener("keypress", function(e) {
-				var mapPos = $("#model__mapPosition")[0];
-				var oldTrans = mapPos.getAttribute("translation").split(",").map(
-					function(res) {
-						return parseFloat(res);
-					});
-
-				if (e.charCode === "q".charCodeAt(0)) {
-					oldTrans[0] = oldTrans[0] + 0.5 * self.moveScale;
-					mapPos.setAttribute("translation", oldTrans.join(","));
-				}
-
-				if (e.charCode === "w".charCodeAt(0)) {
-					oldTrans[0] = oldTrans[0] - 0.5 * self.moveScale;
-					mapPos.setAttribute("translation", oldTrans.join(","));
-				}
-
-				if (e.charCode === "e".charCodeAt(0)) {
-					oldTrans[2] = oldTrans[2] + 0.5 * self.moveScale;
-					mapPos.setAttribute("translation", oldTrans.join(","));
-				}
-
-				if (e.charCode === "f".charCodeAt(0)) {
-					oldTrans[2] = oldTrans[2] - 0.5 * self.moveScale;
-					mapPos.setAttribute("translation", oldTrans.join(","));
-				}
-
-				var mapRotation = $("#model__mapRotation")[0];
-				var oldRotation = mapRotation.getAttribute("rotation").split(",").map(
-					function(res) {
-						return parseFloat(res);
-					});
-
-				if (e.charCode === "g".charCodeAt(0)) {
-					oldRotation[3] = oldRotation[3] + 0.01 * self.moveScale;
-					mapRotation.setAttribute("rotation", oldRotation.join(","));
-				}
-
-				if (e.charCode === "h".charCodeAt(0)) {
-					oldRotation[3] = oldRotation[3] - 0.01 * self.moveScale;
-					mapRotation.setAttribute("rotation", oldRotation.join(","));
-				}
-
-				var oldScale = mapPos.getAttribute("scale").split(",").map(
-					function(res) {
-						return parseFloat(res);
-					});
-
-				if (e.charCode === "j".charCodeAt(0)) {
-					oldScale[0] = oldScale[0] + 0.01 * self.moveScale;
-					oldScale[2] = oldScale[2] + 0.01 * self.moveScale;
-
-					mapPos.setAttribute("scale", oldScale.join(","));
-				}
-
-				if (e.charCode === "k".charCodeAt(0)) {
-					oldScale[0] = oldScale[0] - 0.01 * self.moveScale;
-					oldScale[2] = oldScale[2] - 0.01 * self.moveScale;
-
-					mapPos.setAttribute("scale", oldScale.join(","));
-				}
-			});
-		}
 
 		this.viewpoints = {};
 		this.viewpointsNames = {};
@@ -933,7 +811,7 @@ var Viewer = {};
 		};
 
 		this.loadViewpoints = function() {
-			var viewpointList = $("Viewpoint");
+			var viewpointList = document.getElementsByTagName("Viewpoint");
 
 			for (var v = 0; v < viewpointList.length; v++) {
 				if (viewpointList[v].hasAttribute("id")) {
@@ -1112,7 +990,7 @@ var Viewer = {};
 
 		this.pickObject = {};
 
-		this.pickPoint = function(x, y) {
+		this.pickPoint = function() {
 			var viewArea = self.getViewArea();
 			var scene = viewArea._scene;
 
@@ -1120,13 +998,11 @@ var Viewer = {};
 			scene._vf.pickMode = "idbuf";
 			scene._vf.pickMode = oldPickMode;
 
-			self.pickObject.pickPos = viewArea._pickingInfo.pickPos;
-			self.pickObject.pickNorm = viewArea._pickingInfo.pickNorm;
-			self.pickObject.pickObj = viewArea._pickingInfo.pickObj;
+			self.pickObject = ViewerUtil.cloneObject(viewArea._pickingInfo);
 			self.pickObject.part = null;
 			self.pickObject.partID = null;
 
-			var objId = viewArea._pickingInfo.shadowObjectId;
+			var objId = self.pickObject.shadowObjectId;
 
 			if (scene._multiPartMap) {
 				for (var mpi = 0; mpi < scene._multiPartMap.multiParts.length; mpi++) {
@@ -1559,13 +1435,13 @@ var Viewer = {};
 							// TODO: Improve, with graph, to use appearance under  _cf rather than DOM.
 							obj = defMapSearch[self.diffColors.added[i]];
 							if (obj) {
-								mat = $(obj._xmlNode).find("Material");
+								mat = obj._xmlNode.getElementsByTagName("Material");
 
 								if (mat.length) {
 									self.applyApp(mat, 0.5, "0.0 1.0 0.0", false);
 									self.diffColorAdded.push(mat[0]);
 								} else {
-									mat = $(obj._xmlNode).find("TwoSidedMaterial");
+									mat = obj._xmlNode.getElementsByTagName("TwoSidedMaterial");
 									self.applyApp(mat, 0.5, "0.0 1.0 0.0", false);
 
 									self.diffColorAdded.push(mat[0]);
@@ -1580,13 +1456,13 @@ var Viewer = {};
 							// TODO: Improve, with graph, to use appearance under  _cf rather than DOM.
 							obj = defMapSearch[self.diffColors.deleted[i]];
 							if (obj) {
-								mat = $(obj._xmlNode).find("Material");
+								mat = obj._xmlNode.getElementsByTagName("Material");
 
 								if (mat.length) {
 									self.applyApp(mat, 0.5, "1.0 0.0 0.0", false);
 									self.diffColorDeleted.push(mat[0]);
 								} else {
-									mat = $(obj._xmlNode).find("TwoSidedMaterial");
+									mat = obj._xmlNode.getElementsByTagName("TwoSidedMaterial");
 									self.applyApp(mat, 0.5, "1.0 0.0 0.0", false);
 
 									self.diffColorDeleted.push(mat[0]);
@@ -1711,7 +1587,12 @@ var Viewer = {};
 			if (self.pins.hasOwnProperty(id)) {
 				var pin = self.pins[id];
 
-				self.highlightPin(id);
+				//self.highlightPin(id); This was preventing changing the colour of the pin
+				// Replace with
+				callback(self.EVENT.CHANGE_PIN_COLOUR, {
+					id: id,
+					colours: [[1.0, 0.7, 0.0]]
+				});
 
 				callback(self.EVENT.SET_CAMERA, {
 					position : pin.viewpoint.position,
@@ -1797,11 +1678,16 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	REGISTER_VIEWPOINT_CALLBACK: "VIEWER_REGISTER_VIEWPOINT_CALLBACK",
 	OBJECT_SELECTED: "VIEWER_OBJECT_SELECTED",
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
+	HIGHLIGHT_OBJECTS: "VIEWER_HIGHLIGHT_OBJECTS",
 	SWITCH_OBJECT_VISIBILITY: "VIEWER_SWITCH_OBJECT_VISIBILITY",
 	SET_PIN_VISIBILITY: "VIEWER_SET_PIN_VISIBILITY",
 
+	GET_CURRENT_VIEWPOINT: "VIEWER_GET_CURRENT_VIEWPOINT",
+
 	PICK_POINT: "VIEWER_PICK_POINT",
 	SET_CAMERA: "VIEWER_SET_CAMERA",
+
+	LOGO_CLICK: "VIEWER_LOGO_CLICK",
 
 	// Clipping plane events
 	CLEAR_CLIPPING_PLANES: "VIEWER_CLEAR_CLIPPING_PLANES",

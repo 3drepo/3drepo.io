@@ -8,7 +8,17 @@ var schema = mongoose.Schema({
 	desc: String,
 	type: String,
 	permissions: [Number],
-	properties: {} // TO-DO: ask tim/carmen for full properties and update this schema
+	properties: {}, // TO-DO: ask tim/carmen for full properties and update this schema
+	info: mongoose.Schema({
+
+		name: String,
+		site: String,
+		code: String,
+		client: String,
+		budget: Number,
+		completedBy: Date,
+		contact: String
+	})
 });
 
 schema.statics.mapTilesProp = ['lat', 'lon', 'width', 'height'];
@@ -34,9 +44,9 @@ schema.methods.updateMapTileCoors = function(updateObj){
 };
 
 var ProjectSetting = ModelFactory.createClass(
-	'ProjectSetting', 
-	schema, 
-	() => { 
+	'ProjectSetting',
+	schema,
+	() => {
 		return 'settings';
 	}
 );

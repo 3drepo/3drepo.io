@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+var _ = require('lodash');
 
 function Utils() {
     "use strict";
@@ -22,6 +23,15 @@ function Utils() {
     let mongo    = require("mongodb");
 
     let self = this;
+
+    /*******************************************************************************
+    * Convert a string to a UUID
+    * @param {string} uuid - String representation of a UUID
+    * @returns {Buffer} binuuid - Binary representation of a UUID
+    *******************************************************************************/
+    this.uuidToMongoBuf3 = function(buf) {
+        return mongo.Binary(buf, 3);
+    };
 
     /*******************************************************************************
     * Convert a string to a UUID
@@ -221,6 +231,7 @@ function Utils() {
      * @return {Object} our defined response code 
      */
     this.mongoErrorToResCode = function(err){
+
       let _ = require('lodash');
       let responseCodes = require('./response_codes');
       if(err.name === 'ValidationError'){
@@ -259,6 +270,7 @@ function Utils() {
     this.APIInfo = function(req){
         return `${req.method} ${req._parsedUrl.pathname}`;
     };
+
 }
 
 module.exports = new Utils();

@@ -133,7 +133,7 @@ module.exports = {
 			};
 		}
 
-		['find', 'findOne', 'count', 'distinct', 'where', 'findOneAndUpdate', 'findOneAndRemove'].forEach(staticFuncName => {
+		['find', 'findOne', 'count', 'distinct', 'where', 'findOneAndUpdate', 'findOneAndRemove', 'remove'].forEach(staticFuncName => {
 			mongooseModel[staticFuncName] = staticFunctionProxy(staticFuncName);
 		});
 

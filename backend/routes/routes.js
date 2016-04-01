@@ -20,7 +20,6 @@ var express = require("express");
 var responseCodes = require("../response_codes.js");
 var dbInterface = require("../db/db_interface.js");
 
-var express = require("express");
 
 var C = require("../constants");
 
@@ -115,7 +114,7 @@ var repoRouter = function() {
 		};
 	};
 
-	self.router.use(log_iface.startRequest);
+	//self.router.use(log_iface.startRequest); // moved to api.js
 	self.getHandler  = require("./routes_get")(self.router, self.checkAccess(hasReadAccessToProject));
 	self.postHandler = require("./routes_post")(self.router, self.checkAccess(hasWriteAccessToProject));
 	self.router.use(log_iface.endRequest);

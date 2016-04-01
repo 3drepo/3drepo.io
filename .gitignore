@@ -70,6 +70,15 @@ create_node_user.js
 
 .idea/mongoSettings.xml
 
+#SASS map files
+*.css.map
+
+#WebStorm config files
+.idea/sasslintPlugin.xml
+
 public/css/fonts/three-d-repo.eot
 public/css/fonts/three-d-repo.ttf
 public/css/fonts/three-d-repo.woff
+
+#Distribution files
+public/dist

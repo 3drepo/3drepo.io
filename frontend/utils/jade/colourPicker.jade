@@ -1,0 +1,15 @@
+md-menu(md-offset="{{vm.offset}}")
+	md-button.md-primary(ng-click="vm.open($mdOpenMenu, $event)") {{vm.title}}
+	md-menu-content(width="5")
+		div(layout="row" flex)
+			.tdrColourPickerColour(style="background:rgb({{vm.red}},{{vm.green}},{{vm.blue}})" flex="15" layout-margin)
+			md-content(flex="80")
+				div(layout="row")
+					p.tdrColourPickerLabel R
+					md-slider.tdrColourPickerSlider(flex="75" min="0" max="255" ng-model="vm.red" aria-label="red" id="red-slider")
+				div(layout="row")
+					p.tdrColourPickerLabel G
+					md-slider.tdrColourPickerSlider(flex="75" min="0" max="255" ng-model="vm.green" aria-label="green" id="green-slider")
+				div(layout="row")
+					p.tdrColourPickerLabel B
+					md-slider.tdrColourPickerSlider(flex="75" min="0" max="255" ng-model="vm.blue" aria-label="blue" id="blue-slider")

@@ -23,16 +23,20 @@
 
     function panelCard() {
         return {
-            restrict: 'E',
-            templateUrl: 'panelCard.html',
+            restrict: "E",
+            templateUrl: "panelCard.html",
             scope: {
+				account: "=",
+				project: "=",
+				branch: "=",
+				revision: "=",
                 position: "=",
                 contentData: "=",
 				onHeightRequest: "&",
 				onShowFilter: "&"
             },
             controller: PanelCardCtrl,
-            controllerAs: 'vm',
+            controllerAs: "vm",
             bindToController: true
         };
     }
@@ -58,6 +62,7 @@
 				createCardContent();
 				createToolbarOptions();
 				createFilter();
+				createAdd();
 				vm.statusIcon = vm.contentData.icon;
 			}
 		});
@@ -76,23 +81,29 @@
 				"show='vm.contentData.show' " +
 				"on-content-height-request='vm.onContentHeightRequest(height)' " +
 				"on-show-item='vm.showItem()' " +
-				"hide-item='vm.hideSelectedItem' ";
+				"hide-item='vm.hideSelectedItem' " +
+				"account='vm.account' " +
+				"project='vm.project' " +
+				"branch='vm.branch' " +
+				"revision='vm.revision' ";
 
 			// Only add attributes when needed
-			for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
-				switch (vm.contentData.options[i]) {
-					case "filter":
-						element += "filter-text='vm.filterText' ";
-						break;
-					case "add":
-						element += "show-add='vm.showAdd' ";
-						break;
-					case "visible":
-						element += "visible='vm.visible' ";
-						break;
-					case "menu":
-						element += "selected-menu-option='vm.selectedMenuOption' ";
-						break;
+			if (vm.contentData.hasOwnProperty("options")) {
+				for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
+					switch (vm.contentData.options[i]) {
+						case "filter":
+							element += "filter-text='vm.filterText' ";
+							break;
+						case "add":
+							element += "show-add='vm.showAdd' can-add='vm.canAdd'";
+							break;
+						case "visible":
+							element += "visible='vm.visible' ";
+							break;
+						case "menu":
+							element += "selected-menu-option='vm.selectedMenuOption' ";
+							break;
+					}
 				}
 			}
 
@@ -112,44 +123,40 @@
 				options = angular.element($element[0].querySelector('#options')),
 				option;
 
-			for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
-				option = null;
-				switch (vm.contentData.options[i]) {
-					case "filter":
-						option = angular.element(
-							"<panel-card-option-filter show-filter='vm.showFilter'></panel-card-option-filter>"
-						);
-						break;
+			if (vm.contentData.hasOwnProperty("options")) {
+				for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
+					option = null;
+					switch (vm.contentData.options[i]) {
+						case "filter":
+							option = angular.element(
+								"<panel-card-option-filter show-filter='vm.showFilter'></panel-card-option-filter>"
+							);
+							break;
 
-					case "add":
-						option = angular.element(
-							"<panel-card-option-add show-add='vm.showAdd'></panel-card-option-add>"
-						);
-						break;
+						case "print":
+							option = angular.element(
+								"<panel-card-option-print account='vm.account' project='vm.project'></panel-card-option-print>"
+							);
+							break;
 
-					case "print":
-						option = angular.element(
-							"<panel-card-option-print></panel-card-option-print>"
-						);
-						break;
+						case "visible":
+							option = angular.element(
+								"<panel-card-option-visible visible='vm.visible'></panel-card-option-visible>"
+							);
+							break;
 
-					case "visible":
-						option = angular.element(
-							"<panel-card-option-visible visible='vm.visible'></panel-card-option-visible>"
-						);
-						break;
+						case "menu":
+							option = angular.element(
+								"<panel-card-option-menu menu='vm.contentData.menu' selected-menu-option='vm.selectedMenuOption'></panel-card-option-menu>"
+							);
+							break;
+					}
 
-					case "menu":
-						option = angular.element(
-							"<panel-card-option-menu menu='vm.contentData.menu' selected-menu-option='vm.selectedMenuOption'></panel-card-option-menu>"
-						);
-						break;
-				}
-
-				// Create the element
-				if (option !== null) {
-					options.append(option);
-					$compile(option)($scope);
+					// Create the element
+					if (option !== null) {
+						options.append(option);
+						$compile(option)($scope);
+					}
 				}
 			}
 		}
@@ -160,12 +167,27 @@
 		function createFilter () {
 			var filterContainer = angular.element($element[0].querySelector('#filterContainer')),
 				filter;
-			if (vm.contentData.options.indexOf("filter") !== -1) {
+			if (vm.contentData.hasOwnProperty("options") && vm.contentData.options.indexOf("filter") !== -1) {
 				filter = angular.element(
 					"<panel-card-filter show-filter='vm.showFilter' filter-text='vm.filterText'></panel-card-filter>"
 				);
 				filterContainer.append(filter);
 				$compile(filter)($scope);
+			}
+		}
+
+		/**
+		 * Create the add button
+		 */
+		function createAdd () {
+			var panelCardContainer = angular.element($element[0].querySelector('#panelCardContainer')),
+				add;
+			if (vm.contentData.hasOwnProperty("options") && vm.contentData.options.indexOf("add") !== -1) {
+				add = angular.element(
+					"<panel-card-add show-add='vm.showAdd' ng-if='vm.canAdd'></panel-card-add>"
+				);
+				panelCardContainer.append(add);
+				$compile(add)($scope);
 			}
 		}
 

@@ -21,51 +21,48 @@ var https_port = 443;
 
 module.exports = {
 	host: hostname,
-	api_server: {
-		name: "api",
-		subdomain_or_subdir : 1,
-		http_port: http_port,
-		https_port: https_port,
-		public_port: http_port,
-		public_protocol: "http"
-	},
 	cookie: {
 		secret: "A secret",
 		parser_secret : "Another secret",
 		maxAge: 3600,
 	},
-	default_format: "html",
 	servers: [
 		{
-			hostname:   hostname,
-			http_port:  http_port,
-			https_port: https_port,
+			service: "api",
+			subdirectory: "api",
+			public_port: http_port,
+			public_protocol: "http"
+		},
+		{
+			service: "frontend",
 			template:   "frontend.jade"
 		}
 	],
-	js_debug_level: 'debug',
+	js_debug_level: "debug",
 	logfile: {
-		filename: '/var/log/3drepo.log',
-		console_level: 'debug',
-		file_level: 'debug'
+		filename: "/var/log/3drepo.log",
+		console_level: "debug",
+		file_level: "debug"
 	},
 	db: {
-		host: 'localhost',
+		host: "localhost",
 		port: 27017,
-		username: 'username',
-		password: 'password'
+		username: "username",
+		password: "password"
 	},
 	ssl: {
-		key: 'my_key.pem',
-		cert:'my_server.crt',
-		ca: 'my_server.ca'
+		key: "my_key.pem",
+		cert:"my_server.crt",
+		ca: "my_server.ca"
 	},
 	cn_queue: {
-		host: 'amqp://localhost:5672',
-		worker_queue: 'jobq',
-		callback_queue: 'callbackq',
-		upload_dir: 'uploads',
-		shared_storage: 'D:/sharedSpace/'
-	}
+		host: "amqp://localhost:5672",
+		worker_queue: "jobq",
+		callback_queue: "callbackq",
+		upload_dir: "uploads",
+		shared_storage: "D:/sharedSpace/"
+	},
+
+	test_helper_api: false
 }
 

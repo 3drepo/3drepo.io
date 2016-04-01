@@ -15,18 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var toggleElements;
-
 (function () {
 	"use strict";
 
 	function compassLoaded(event)
 	{
 		// Zoom in on compass
-		$("#Axes")[0].runtime.showAll();
-	};
+		document.getElementById("Axes").runtime.showAll();
+	}
 
-	function compassMove(origEvent, event)
+	function compassMove(event)
 	{
 		// Axes should rotate inversely to orientation
 		// of camera
@@ -36,7 +34,7 @@ var toggleElements;
 		viewer.transformEvent(event, event.target, false);
 
 		// Set rotation of the overlying group
-		$("#AxesTrans")[0].setAttribute("rotation", event.orientation.toString());
+		document.getElementById("AxesTrans").setAttribute("rotation", event.orientation.toString());
 	}
 
 	angular.module("3drepo")

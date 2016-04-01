@@ -75,74 +75,6 @@ exports.decode = function(bson, materials) {
         bson.vertices_count = bson.vertices.buffer.length / 12;
     }
 
-    /*
-    if (bson[C.REPO_NODE_LABEL_VERTEX_MAP]) {
-        bson[C.REPO_NODE_LABEL_COMBINED_MAP] = {};
-
-        var vertexMapIDs = Object.keys(bson[C.REPO_NODE_LABEL_VERTEX_MAP][myUUID]);
-
-        for (var i = 0; i < vertexMapIDs.length; ++i) {
-            var currentVertObj = bson[C.REPO_NODE_LABEL_VERTEX_MAP][myUUID][vertexMapIDs[i]];
-            var vertexMeshID = UUID.unparse(currentVertObj[C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID].buffer);
-
-            if (!bson[C.REPO_NODE_LABEL_COMBINED_MAP][vertexMeshID])
-                bson[C.REPO_NODE_LABEL_COMBINED_MAP][vertexMeshID] = [];
-
-            var tmpMapObj = {};
-            tmpMapObj[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] = currentVertObj[C.REPO_NODE_LABEL_MERGE_MAP_FROM];
-            tmpMapObj[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO]   = currentVertObj[C.REPO_NODE_LABEL_MERGE_MAP_TO];
-
-            bson[C.REPO_NODE_LABEL_COMBINED_MAP][vertexMeshID].push(tmpMapObj);
-        }
-
-        delete bson[C.REPO_NODE_LABEL_VERTEX_MAP];
-    }
-
-    if (bson[C.REPO_NODE_LABEL_TRIANGLE_MAP]) {
-        var triangleMapIDs = Object.keys(bson[C.REPO_NODE_LABEL_TRIANGLE_MAP][myUUID]);
-
-        for (var i = 0; i < triangleMapIDs.length; ++i) {
-            var currentTriObj = bson[C.REPO_NODE_LABEL_TRIANGLE_MAP][myUUID][triangleMapIDs[i]];
-            var triangleMeshID = UUID.unparse(currentTriObj[C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID].buffer);
-            var matchingVertexMap = {};
-
-            if (!bson[C.REPO_NODE_LABEL_COMBINED_MAP][triangleMeshID])
-            {
-                console.log("No matching vertex map");
-            } else {
-                var offset = currentTriObj[C.REPO_NODE_LABEL_MERGE_MAP_OFFSET];
-
-                var numVertexMaps = bson[C.REPO_NODE_LABEL_COMBINED_MAP][triangleMeshID].length;
-                var foundMatch = false;
-
-                for(var v = 0; v < numVertexMaps; v++)
-                {
-                    //console.log(bson[C.REPO_NODE_LABEL_COMBINED_MAP][triangleMeshID]);
-
-                    if (bson[C.REPO_NODE_LABEL_COMBINED_MAP][triangleMeshID][v][C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM] == offset)
-                    {
-                        matchingVertexMap = bson[C.REPO_NODE_LABEL_COMBINED_MAP][triangleMeshID][v];
-                        foundMatch = true;
-                        break;
-                    }
-                }
-
-                if (!foundMatch)
-                {
-                        matchingVertexMap = new Object();
-                        bson[C.REPO_NODE_LABEL_COMBINED_MAP][triangleMeshID].push(matchingVertexMap);
-                }
-            }
-
-            matchingVertexMap[C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_FROM] = currentTriObj[C.REPO_NODE_LABEL_MERGE_MAP_FROM];
-            matchingVertexMap[C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO]   = currentTriObj[C.REPO_NODE_LABEL_MERGE_MAP_TO];
-            matchingVertexMap[C.REPO_NODE_LABEL_MERGE_MAP_OFFSET]        = currentTriObj[C.REPO_NODE_LABEL_MERGE_MAP_OFFSET];
-        }
-
-        delete bson[C.REPO_NODE_LABEL_TRIANGLE_MAP];
-    }
-    */
-
     return bson;
 };
 
@@ -288,7 +220,7 @@ exports.mergeMapSort = function(left, right) {
  */
 // function toArrayBuffer(binaryBuffer) {
 //     "use strict";
-    
+
 //     var arrayBuffer = new ArrayBuffer(binaryBuffer.length);
 //     var view = new Uint8Array(arrayBuffer);
 //     for (var i = 0; i < binaryBuffer.length; ++i) {

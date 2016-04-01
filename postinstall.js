@@ -30,8 +30,6 @@ var public_files = {
 		x3domjs: '/public/js/external/x3dom.js',
 		angularjs: '/public/js/external/angular.js',
 		ammojs: '/public/js/external/ammo.js',
-		jqueryjs : '/public/js/external/jquery.js',
-		jqueryuijs : '/public/js/external/jquery-ui.js',
 		angularutilsjs: '/public/js/external/angular-ui-utils.min.js',
 		angularrouterjs: '/public/js/external/angular-ui-router.js',
 		momentjs: '/public/js/external/moment.js',
@@ -72,12 +70,11 @@ var public_files = {
 	css : {
 		x3domcss : '/public/css/external/x3dom.css',
 		fontawesomecss: '/public/css/external/font-awesome.min.css',
-		jqueryuicss: '/public/css/external/jquery-ui.css',
 		repouicss : '/public/css/ui.css',
         angularmaterialcss: '/public/css/external/angular-material.min.css',
 		threedrepocss: "/public/css/external/three-d-repo.css"
 	}
-}
+};
 
 /*
  * This is a set of scripts that needs to be minified(if appropriate), symlinked to the public folder
@@ -107,8 +104,6 @@ var internal_files = {
 	'bower_components/angular/angular.js',
 	'bower_components/angular/angular.min.js.map',
 	'bower_components/angular-ui-router/release/angular-ui-router.js',
-	'bower_components/jquery/dist/jquery.js',
-	'bower_components/jquery-ui/jquery-ui.js',
 	'bower_components/masonry/masonry.js',
 	'bower_components/moment/moment.js',
 	'bower_components/socket.io-client/socket.io.js',
@@ -127,9 +122,10 @@ var internal_files = {
 
 	x3dom_files: [
 	'submodules/x3dom/dist/ammo.js',
-	'submodules/x3dom/dist/x3dom.js'
+	'submodules/x3dom/dist/x3dom.js',
+	'submodules/x3dom/dist/x3dom.css'
 	]
-}
+};
 
 var public_dir_js	= path.normalize("public/js/external");
 var public_dir_css	= path.normalize("public/css/external");
@@ -142,7 +138,7 @@ install_x3dom();
  * install bower components and publicize the relevant files.
  */
 function install_bower(){
-	var public_qr_dir = path.join(public_dir_js, 'qrcode')
+	var public_qr_dir = path.join(public_dir_js, 'qrcode');
 	fs.stat(public_qr_dir, function(err, stat){
 		if(err !== null){
 			//create qr folder in $public_dir_js if it doesn't exist

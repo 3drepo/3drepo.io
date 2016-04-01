@@ -15,12 +15,59 @@
  **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-var ViewerUtil = {};
+var ViewerUtil;
 
 (function() {
 	"use strict";
 
 	ViewerUtil = function() {};
+
+	var eventElement = document;
+
+	ViewerUtil.prototype.cloneObject = function(obj)
+	{
+    	if (!obj || typeof obj !== 'object') {
+        	return obj;
+    	}
+
+		var retObject = new obj.constructor();
+
+		for (var key in obj) {
+			if (obj.hasOwnProperty(key))
+			{
+				retObject[key] = this.cloneObject(obj[key]);
+			}
+		}
+
+    	return retObject;
+	};
+
+	// Definition of global functions
+	ViewerUtil.prototype.triggerEvent = function(name, event)
+	{
+		var e = new CustomEvent(name, { detail: event });
+		eventElement.dispatchEvent(e);
+	};
+
+	ViewerUtil.prototype.onEvent = function(name, callback)
+	{
+		eventElement.addEventListener(name, function(event) {
+			callback(event.detail);
+		});
+	};
+
+	ViewerUtil.prototype.offEvent = function(name, callback)
+	{
+		eventElement.removeEventListener(name, function(event) {
+			callback(event.detail);
+		});
+	};
+
+	ViewerUtil.prototype.eventFactory = function(name)
+	{
+		var self = this;
+		return function(event) { self.triggerEvent(name, event); };
+	};
 
 	ViewerUtil.prototype.getAxisAngle = function(from, at, up) {
 		var x3dfrom = new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
@@ -36,7 +83,7 @@ var ViewerUtil = {};
 
 		return Array.prototype.concat(q[0].toGL(), q[1]);
 	};
-	
+
 	ViewerUtil.prototype.quatLookAt = function (up, forward)
 	{
 		forward.normalize();
@@ -59,10 +106,10 @@ var ViewerUtil = {};
 		/*
 		prevView = this.normalize(prevView);
 		currView = this.normalize(currView);
-		
+
 		var prevRight = this.normalize(this.crossProduct(prevUp, prevView));
 		var currRight = this.normalize(this.crossProduct(currUp, currView));
-		
+
 		prevUp = this.normalize(this.crossProduct(prevRight, prevView));
 		currUp = this.crossProduct(currRight, currView);
 
@@ -82,7 +129,7 @@ var ViewerUtil = {};
 				prevRight[2], prevUp[2], prevView[2], 0,
 				0, 0, 0, 1]);
 
-		
+
 		var currMat = new x3dom.fields.SFMatrix4f();
 
 		currMat.setFromArray([
@@ -96,9 +143,9 @@ var ViewerUtil = {};
 		var x3domCurrUp   = new x3dom.fields.SFVec3f(currUp[0], currUp[1], currUp[2]);
 		var x3domCurrFrom = new x3dom.fields.SFVec3f(0, 0, 0);
 		var x3domCurrAt   = x3domCurrFrom.add(x3domCurrView);
-		
+
 		var currMat    = x3dom.fields.SFMatrix4f.lookAt(x3domCurrFrom, x3domCurrAt, x3domCurrUp);
-		
+
 		return currMat.mult(prevMat.inverse());
 	};
 
@@ -196,7 +243,7 @@ var ViewerUtil = {};
 	ViewerUtil.prototype.vecSub = function(a, b) {
 		return this.vecAdd(a, this.scale(b, -1));
 	};
-	
+
 	/**
 	 * Escape CSS characters in string
 	 *
@@ -208,6 +255,6 @@ var ViewerUtil = {};
 		// Taken from http://stackoverflow.com/questions/2786538/need-to-escape-a-special-character-in-a-jquery-selector-string
 		return string.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, "\\$&");
 	};
-		
+
 	ViewerUtil = new ViewerUtil();
 }());

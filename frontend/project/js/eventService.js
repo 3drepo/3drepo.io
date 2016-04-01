@@ -16,7 +16,7 @@
  */
 
 (function () {
-    "use strict";
+	"use strict";
 
     angular.module("3drepo")
         .factory("EventService", EventService);
@@ -48,11 +48,20 @@
 			VIEWER: VIEWER_EVENTS,
 			
 			// Ready signals
-			PROJECT_SETTINGS_READY: "EVENT_PROJECT_SETTINGS_READY"
+			PROJECT_SETTINGS_READY: "EVENT_PROJECT_SETTINGS_READY",
+			
+			// User logs in and out
+			USER_LOGGED_IN: "EVENT_USER_LOGGED_IN", 
+			USER_LOGGED_OUT: "EVENT_USER_LOGGED_OUT",
+			
+			// Not authorized
+			USER_NOT_AUTHORIZED: "EVENT_USER_NOT_AUTHORIZED",
+			
+			// State changes
+			SET_STATE: "EVENT_SET_STATE",
+			STATE_CHANGED: "EVENT_STATE_CHANGED"
         };
 		
-		console.log(JSON.stringify(EVENT));
-
 		var ERROR = {
 			DUPLICATE_VIEWER_NAME: "ERROR_DUPLICATE_VIEWER_NAME"
 		};
@@ -73,13 +82,15 @@
         };
 		
 		var sendError = function(type, value) {
-			if (angular.isUndefined(type))
-			{
-				console.trace("UNDEFINED ERROR TYPE");			
-			} else {
-				//console.log(type + " : " + JSON.stringify(value));
-            	currentError = {type: type, value: value};
-			}
+			$timeout(function() {
+				if (angular.isUndefined(type))
+				{
+					console.trace("UNDEFINED ERROR TYPE");
+				} else {
+					//console.log(type + " : " + JSON.stringify(value));
+					currentError = {type: type, value: value};
+				}
+			});
 		};
 
         return {
