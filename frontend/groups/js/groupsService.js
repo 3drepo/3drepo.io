@@ -92,6 +92,22 @@
 		}
 
 		/**
+		 * Handle DELETE requests
+		 *
+		 * @param urlEnd
+		 * @returns {Object}
+		 */
+		function doDelete(urlEnd) {
+			var deferred = $q.defer(),
+				url = serverConfig.apiUrl(self.account + "/" + self.project + "/" + urlEnd);
+			$http.delete(url)
+				.then(function (response) {
+					deferred.resolve(response);
+				});
+			return deferred.promise;
+		}
+
+		/**
 		 * Setup the account and project info
 		 *
 		 * @param {String} account
@@ -104,13 +120,42 @@
 
 		/**
 		 * Get all the groups
+		 *
+		 * @return {Object}
 		 */
 		obj.getGroups = function () {
 			return doGet("groups");
 		};
 
-		obj.createGroup = function (name) {
-			return doPost({name: name, parents: []}, "groups");
+		/**
+		 * Create a group
+		 *
+		 * @param name
+		 * @param color
+		 * @returns {Object}
+		 */
+		obj.createGroup = function (name, color) {
+			return doPost({name: name, color: color, parents: []}, "groups");
+		};
+
+		/**
+		 * Delete a group
+		 *
+		 * @param {String} groupId
+		 * @returns {Object}
+		 */
+		obj.deleteGroup = function (groupId) {
+			return doDelete("groups/" + groupId);
+		};
+
+		/**
+		 * Update the group
+		 *
+		 * @param {Object} group
+		 * @returns {Object}
+		 */
+		obj.updateGroup = function (group) {
+			return doPut(group, "groups/" + group._id);
 		};
 
 		return obj;

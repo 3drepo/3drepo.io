@@ -41,12 +41,13 @@
 		};
 	}
 
-	GroupsCtrl.$inject = ["$scope", "EventService", "GroupsService"];
+	GroupsCtrl.$inject = ["$scope", "$timeout", "EventService", "GroupsService"];
 
-	function GroupsCtrl ($scope, EventService, GroupsService) {
+	function GroupsCtrl ($scope, $timeout, EventService, GroupsService) {
 		var vm = this,
-			eventWatch = null,
-			promise;
+			eventWatch,
+			promise,
+			colourChangeTimeout = null;
 		
 		/*
 		 * Init
@@ -57,13 +58,6 @@
 		vm.editingGroup = false;
 		vm.editingText = "Start";
 		vm.colourPickerColour = [255, 255, 255];
-		/*
-		vm.groups = [
-			{name: "Doors", colour: [255, 0, 0]},
-			{name: "Toilets", colour: [0, 255, 0]},
-			{name: "Windows", colour: [0, 0, 255]}
-		];
-		*/
 		GroupsService.init(vm.account, vm.project);
 
 		promise = GroupsService.getGroups();
@@ -71,9 +65,6 @@
 			vm.groups = data.data;
 			console.log(1111111, vm.groups);
 			if (vm.groups.length > 0) {
-				for (var i = 0; i < vm.groups.length; i += 1) {
-					vm.groups[i].colour = [255, 0, 255];
-				}
 				vm.toShow = "showGroups";
 			}
 			else {
@@ -124,6 +115,12 @@
 		$scope.$watch("vm.editingGroup", function (newValue) {
 			if (angular.isDefined(newValue)) {
 				vm.editingText = newValue ? "Stop" : "Start";
+				if (newValue) {
+					setupEventWatch();
+				}
+				else if (angular.isDefined(eventWatch)) {
+					eventWatch(); // Cancel event watching
+				}
 			}
 		});
 
@@ -133,11 +130,8 @@
 		 */
 		$scope.$watch("vm.show", function (newValue) {
 			if (angular.isDefined(newValue)) {
-				if (newValue) {
-					setupEventWatch();
-				}
-				else if (angular.isDefined(eventWatch)) {
-					eventWatch(); // Cancel event watching
+				if (!newValue) {
+					vm.editingGroup = false; // To stop any event watching
 				}
 			}
 		});
@@ -154,23 +148,42 @@
 			vm.canAdd = false;
 			vm.editingGroup = false;
 			setContentHeight();
+
+			if (vm.selectedGroup.parents.length > 0) {
+				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, {
+					source: "tree",
+					account: vm.account,
+					project: vm.project,
+					ids: vm.selectedGroup.parents,
+					colour: vm.selectedGroup.color.join(" ")
+				});
+			}
 		};
 
 		/**
 		 * Callback to get the colour picker colour
-		 * 
+		 *
 		 * @param colour
 		 */
 		vm.colourPickerChange = function (colour) {
 			vm.colourPickerColour = colour;
 			if (vm.selectedGroup !== null) {
-				vm.selectedGroup.colour = colour;
+				if (colourChangeTimeout !== null) {
+					$timeout.cancel(colourChangeTimeout);
+				}
+				colourChangeTimeout = $timeout(function() {
+					vm.selectedGroup.color = colour;
+					promise = GroupsService.updateGroup(vm.selectedGroup);
+					promise.then(function (data) {
+						console.log(data);
+					});
+				}, 500);
 			}
 		};
 
 		/**
 		 * Convert colour array to rgb string
-		 * 
+		 *
 		 * @param {Array} colour
 		 * @returns {string}
 		 */
@@ -186,11 +199,21 @@
 
 			for (i = 0, length = vm.groups.length; i < length; i += 1) {
 				if (vm.groups[i].name === vm.selectedGroup.name) {
-					vm.groups.splice(i, 1);
-					vm.selectedGroup = null;
-					vm.toShow = "showGroups";
-					vm.canAdd = true;
-					setContentHeight();
+					promise = GroupsService.deleteGroup(vm.selectedGroup._id);
+					promise.then(function (data) {
+						console.log(data);
+						if (data.statusText === "OK") {
+							vm.groups.splice(i, 1);
+							vm.selectedGroup = null;
+							if (vm.groups.length > 0) {
+								vm.toShow = "showGroups";
+							} else {
+								vm.toShow = "showInfo";
+							}
+							vm.canAdd = true;
+							setContentHeight();
+						}
+					});
 					break;
 				}
 			}
@@ -211,7 +234,7 @@
 			}
 
 			if (!nameExists) {
-				promise = GroupsService.createGroup(vm.name);
+				promise = GroupsService.createGroup(vm.name, vm.colourPickerColour);
 				promise.then(function (data) {
 					console.log(data);
 					vm.groups.push({
@@ -233,7 +256,7 @@
 		function setContentHeight () {
 			var contentHeight = 0,
 				groupHeaderHeight = 60, // It could be higher for items with long text but ignore that
-				baseGroupHeight = 260,
+				baseGroupHeight = 210,
 				addHeight = 250,
 				infoHeight = 80;
 
@@ -264,10 +287,30 @@
 		 * Set up event watching
 		 */
 		function setupEventWatch () {
+			var index;
+
 			eventWatch = $scope.$watch(EventService.currentEvent, function (event) {
-				console.log("Groups:", event);
 				if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
-					console.log(event.value);
+					index = vm.selectedGroup.parents.indexOf(event.value.ids);
+					if (index !== -1) {
+						vm.selectedGroup.parents.splice(index, 1);
+					} else {
+						vm.selectedGroup.parents.push(event.value.ids);
+					}
+
+					promise = GroupsService.updateGroup(vm.selectedGroup);
+					promise.then(function (data) {
+						console.log(data);
+						if (vm.selectedGroup.parents.length > 0) {
+							EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, {
+								source: "tree",
+								account: vm.account,
+								project: vm.project,
+								ids: vm.selectedGroup.parents,
+								colour: vm.selectedGroup.color.join(" ")
+							});
+						}
+					});
 				}
 			});
 		}
