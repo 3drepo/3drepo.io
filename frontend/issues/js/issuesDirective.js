@@ -75,13 +75,11 @@
 		vm.showIssuesInfo = false;
 		vm.showIssueList = false;
 		vm.showIssue = false;
-		vm.issuesInfo = "There are currently no open issues";
 		vm.availableRoles = null;
 		vm.projectUserRoles = [];
 		vm.selectedIssue = null;
 		vm.autoSaveComment = false;
 		vm.canAdd = true;
-		vm.toShow = "showIssues";
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
 
 		/*
@@ -92,16 +90,21 @@
 			var i, length;
 			vm.showProgress = false;
 			vm.issues = (data === "") ? [] : data;
-			vm.showIssuesInfo = (vm.issues.length === 0);
-			vm.showIssueList = (vm.issues.length !== 0);
-			for (i = 0, length = vm.issues.length; i < length; i += 1) {
-				vm.issues[i].showInfo = false;
-				vm.issues[i].selected = false;
+			if (vm.issues.length > 0) {
+				vm.toShow = "showIssues";
+				for (i = 0, length = vm.issues.length; i < length; i += 1) {
+					vm.issues[i].showInfo = false;
+					vm.issues[i].selected = false;
+				}
+				setAllIssuesAssignedRolesColors();
+				setupIssuesToShow();
+				vm.showPins();
 			}
-			setAllIssuesAssignedRolesColors();
-			setupIssuesToShow();
+			else {
+				vm.toShow = "showInfo";
+				vm.issuesInfo = "There are currently no open issues";
+			}
 			setContentHeight();
-			vm.showPins();
 		});
 
 		/*
@@ -723,6 +726,7 @@
 		function setContentHeight () {
 			var i,
 				length,
+				height = 0,
 				issueMinHeight = 56,
 				maxStringLength = 32,
 				lineHeight = 18,
@@ -731,7 +735,8 @@
 				commentHeight = 80,
 				headerHeight = 53,
 				openIssueFooterHeight = 180,
-				closedIssueFooterHeight = 53;
+				closedIssueFooterHeight = 53,
+				infoHeight = 80;
 
 			switch (vm.toShow) {
 				case "showIssues":
@@ -742,7 +747,7 @@
 							issuesHeight += lineHeight * Math.floor((vm.issuesToShow[i].title.length - maxStringLength) / maxStringLength);
 						}
 					}
-					vm.onContentHeightRequest({height: issuesHeight});
+					height = issuesHeight;
 					break;
 
 				case "showIssue":
@@ -754,14 +759,19 @@
 					}
 
 					var numberComments = vm.selectedIssue.hasOwnProperty("comments") ? vm.selectedIssue.comments.length : 0;
-					vm.onContentHeightRequest({height: headerHeight + (numberComments * commentHeight) + footerHeight});
+					height = headerHeight + (numberComments * commentHeight) + footerHeight;
 					break;
 
 				case "showAdd":
-					vm.onContentHeightRequest({height: addHeight});
+					height = addHeight;
+					break;
+
+				case "showInfo":
+					height = infoHeight;
 					break;
 			}
 
+			vm.onContentHeightRequest({height: height});
 		}
 
 		function setPinToAssignedRoleColours (issue) {

@@ -68,5 +68,5 @@ div(ng-switch="vm.toShow")
 		md-button.md-raised.md-accent(ng-click="vm.saveIssue()", ng-disabled="vm.saveIssueDisabled") Save
 
 	// Info
-	.issuesInfo(ng-if="vm.showIssuesInfo")
+	.cardInfo(ng-switch-when="showInfo")
 		p {{vm.issuesInfo}}

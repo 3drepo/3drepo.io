@@ -95,13 +95,13 @@
 		 */
 		$scope.$watch("vm.hideItem", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
-				setSelectedGroupHighlightStatus(false);
-				setGroupsVisibleStatus([vm.selectedGroup], true);
 				vm.toShow = "showGroups";
 				vm.showAdd = false;
 				vm.canAdd = true;
-				vm.selectedGroup = null;
 				setContentHeight();
+				setSelectedGroupHighlightStatus(false);
+				vm.selectedGroup = null;
+				doHideAll(hideAll);
 			}
 		});
 
@@ -155,7 +155,7 @@
 			if (angular.isDefined(newValue)) {
 				if (newValue.value === "hideAll") {
 					hideAll = !hideAll;
-					setGroupsVisibleStatus(vm.groups, !hideAll);
+					doHideAll(hideAll);
 				}
 			}
 		});
@@ -173,6 +173,7 @@
 			vm.editingGroup = false;
 			vm.showObjects = true;
 			setContentHeight();
+			doHideAll(hideAll);
 			setSelectedGroupHighlightStatus(true);
 		};
 
@@ -271,7 +272,7 @@
 		 */
 		function setContentHeight () {
 			var contentHeight = 0,
-				groupHeaderHeight = 60, // It could be higher for items with long text but ignore that
+				groupHeaderHeight = 54, // It could be higher for items with long text but ignore that
 				baseGroupHeight = 210,
 				addHeight = 250,
 				infoHeight = 80;
@@ -377,6 +378,28 @@
 					data.invisible_ids = ids;
 				}
 				EventService.send(EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY, data);
+			}
+		}
+
+		/**
+		 * "Hide All" when showing groups should hide all the groups
+		 * "Hide All" when showing a group should hide all groups except the selected group
+		 *
+		 * @param {Boolean} hideAllStatus
+		 */
+		function doHideAll (hideAllStatus) {
+			var i, length, groups = [];
+			if (vm.toShow === "showGroups") {
+				setGroupsVisibleStatus(vm.groups, !hideAllStatus);
+			}
+			else if (vm.toShow === "showGroup") {
+				for (i = 0, length = vm.groups.length; i < length; i += 1) {
+					if (vm.groups[i]._id !== vm.selectedGroup._id) {
+						groups.push(vm.groups[i]);
+						setGroupsVisibleStatus(groups, !hideAll);
+					}
+					setGroupsVisibleStatus([vm.selectedGroup], true);
+				}
 			}
 		}
 	}

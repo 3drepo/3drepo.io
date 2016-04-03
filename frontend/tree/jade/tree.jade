@@ -5,15 +5,15 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 div(ng-cloak="", class="virtualRepeatInfiniteScroll", ng-show="vm.showTree")
 	md-virtual-repeat-container.vertical-container(md-top-index="vm.topIndex")
 		div(md-virtual-repeat="item in vm.infiniteItemsTree", md-on-demand="", class="repeated-item", flex="")
-			div(style="margin-left:{{item.level * 20}}px", ng-if="item", layout="row")
+			div(style="margin-left:{{item.level * 20}}px" ng-if="item", layout="row")
 				.treeButton(ng-click="vm.expand(item._id)")
-					md-icon.md-accent(md-font-icon="fa-plus-square-o", class="fa", ng-if="!item.expanded", ng-class="{treeButtonDisabled: !item.hasChildren}")
-					md-icon.md-accent(md-font-icon="fa-minus-square-o", class="fa", ng-if="item.expanded")
+					md-icon.md-accent(md-font-icon="fa-plus-square-o", class="fa" ng-if="!item.expanded", ng-class="{treeButtonDisabled: !item.hasChildren}")
+					md-icon.md-accent(md-font-icon="fa-minus-square-o", class="fa" ng-if="item.expanded")
 				p(ng-click="vm.selectNode(item)", ng-class="{treeNodeSelected: item.selected}") {{item.name}}
 				.treeButton(ng-click="vm.toggleTreeNode(item)")
 					md-icon.md-accent(class="fa fa-eye", ng-if="item.toggleState==='visible'")
 					md-icon.md-accent(class="fa fa-eye-slash", ng-if="item.toggleState==='invisible'")
-					md-icon(md-font-icon="fa fa-eye-slash", class="fa", ng-if="item.toggleState==='parentOfInvisible'")
+					md-icon(md-font-icon="fa fa-eye-slash", class="fa" ng-if="item.toggleState==='parentOfInvisible'")
 
 					//md-icon.md-accent(md-font-icon="fa-circle-thin", class="fa", ng-if="item.toggleState==='visible'")
 						.treeIconCheck(class="fa fa-check")
@@ -22,20 +22,19 @@ div(ng-cloak="", class="virtualRepeatInfiniteScroll", ng-show="vm.showTree")
 						.treeIconDot(class="fa fa-circle")
 
 // Filter list
-div(ng-cloak="", class="virtualRepeatInfiniteScroll", ng-if="vm.showFilterList")
-	md-content(layout="column")
-		md-virtual-repeat-container.vertical-container
-			div(
-				md-virtual-repeat="item in vm.infiniteItemsFilter"
-				md-on-demand=""
-				class="repeated-item"
-				flex=""
-				ng-class="item.class"
-				layout="row"
-			)
-				p#treeFilterItemName(ng-click="vm.filterItemSelected(item)") {{item.name}}
+div(ng-cloak="", class="virtualRepeatInfiniteScroll", ng-if="vm.filterItemsFound")
+	md-virtual-repeat-container.vertical-container
+		div(
+			md-virtual-repeat="item in vm.infiniteItemsFilter"
+			md-on-demand=""
+			class="repeated-item"
+			flex=""
+			layout="row")
 
-				.treeButton(ng-click="vm.toggleFilterNode(item)")
-					md-icon.md-accent(md-font-icon="fa-circle-thin", class="fa", ng-if="item.toggleState==='visible'")
-						.treeIconCheck(class="fa fa-check")
-					md-icon.md-accent(md-font-icon="fa-circle-thin", class="fa", ng-if="item.toggleState==='invisible'")
+			p#treeFilterItemName(ng-click="vm.filterItemSelected(item)" ng-class="item.class") {{item.name}}
+			.treeButton(ng-click="vm.toggleFilterNode(item)")
+				md-icon.md-accent(class="fa fa-eye", ng-if="item.toggleState==='visible'")
+				md-icon.md-accent(class="fa fa-eye-slash" ng-if="item.toggleState==='invisible'")
+
+.cardInfo(ng-if="vm.showFilterList && !vm.filterItemsFound")
+	p No items found

@@ -88,7 +88,6 @@ module.exports.createApp = function(serverConfig)
 						"plugin": "project",
 						"friends" : [
 							"panel",
-							"filter",
 							"tree",
 							"viewpoints",
 							"issues",

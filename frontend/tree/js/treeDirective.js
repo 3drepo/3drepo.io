@@ -395,11 +395,14 @@
 		}
 
 		$scope.$watch("vm.filterText", function (newValue) {
+			var noFilterItemsFoundHeight = 82;
+
 			if (angular.isDefined(newValue)) {
 				if (newValue.toString() === "") {
 					vm.showTree = true;
 					vm.showFilterList = false;
 					vm.nodes = vm.allNodes;
+					setContentHeight(vm.nodes);
 				} else {
 					vm.showTree = false;
 					vm.showFilterList = false;
@@ -411,14 +414,21 @@
 						vm.showFilterList = true;
 						vm.showProgress = false;
 						vm.nodes = json.data;
-						for (i = 0, length = vm.nodes.length; i < length; i += 1) {
-							vm.nodes[i].index = i;
-							vm.nodes[i].toggleState = "visible";
-							vm.nodes[i].class = "unselectedFilterItem";
-							vm.nodes[i].level = 0;
+						if (vm.nodes.length > 0) {
+							vm.filterItemsFound = true;
+							for (i = 0, length = vm.nodes.length; i < length; i += 1) {
+								vm.nodes[i].index = i;
+								vm.nodes[i].toggleState = "visible";
+								vm.nodes[i].class = "unselectedFilterItem";
+								vm.nodes[i].level = 0;
+							}
+							setupInfiniteItemsFilter();
+							setContentHeight(vm.nodes);
 						}
-						setupInfiniteItemsFilter();
-						setContentHeight(vm.nodes);
+						else {
+							vm.filterItemsFound = false;
+							vm.onContentHeightRequest({height: noFilterItemsFoundHeight});
+						}
 					});
 				}
 			}
@@ -486,14 +496,14 @@
 
 		vm.filterItemSelected = function (item) {
 			if (vm.currentFilterItemSelected === null) {
-				vm.nodes[item.index].class = "selectedFilterItem";
+				vm.nodes[item.index].class = "treeNodeSelected";
 				vm.currentFilterItemSelected = item;
 			} else if (item.index === vm.currentFilterItemSelected.index) {
-				vm.nodes[item.index].class = "unselectedFilterItem";
+				vm.nodes[item.index].class = "";
 				vm.currentFilterItemSelected = null;
 			} else {
-				vm.nodes[vm.currentFilterItemSelected.index].class = "unselectedFilterItem";
-				vm.nodes[item.index].class = "selectedFilterItem";
+				vm.nodes[vm.currentFilterItemSelected.index].class = "";
+				vm.nodes[item.index].class = "treeNodeSelected";
 				vm.currentFilterItemSelected = item;
 			}
 
