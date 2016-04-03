@@ -25,7 +25,8 @@
 
 	function AccountService($http, $q, serverConfig) {
 		var obj = {},
-			deferred;
+			deferred,
+			bid4free;
 			
 		/**
 		 * Get account data
@@ -107,11 +108,12 @@
 		};
 
 		obj.getProjectsBid4FreeStatus = function (username) {
-			deferred = $q.defer();
-			$http.get(serverConfig.apiUrl(username + ".json?bid"))
+			bid4free = $q.defer();
+			$http.get(serverConfig.apiUrl(username + ".json"), {params: {bid: true}})
 				.then(function (response) {
+					bid4free.resolve(response);
 				});
-			return deferred.promise;
+			return bid4free.promise;
 		};
 
 		return obj;

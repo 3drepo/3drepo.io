@@ -44,18 +44,9 @@ bid4free .bidHeader md-toolbar {
 }
 
 bid4free .bidContent {
-  width: 100%;
-  height: calc(100vh - 40px);
+  padding: 20px;
 }
 
-bid4free md-list-item.md-2-line {
-  min-height: 0 !important;
-  margin-top: 20px;
-}
-
-bid4free md-list-item.md-1-line {
-  margin-top: 0;
-}
 
 bid4free md-list-item p {
   font-size: 16px;
@@ -92,9 +83,6 @@ bid4free .md-toolbar-tools md-icon {
 }
 
 bid4free .packageContent {
-  width: 100%;
-  height: calc(100vh - 120px);
-  padding: 10px;
   overflow-y: auto;
 }
 
@@ -109,6 +97,25 @@ bid4free .bidInfoListTitle {
   color: rgba(0,0,0,0.5);
 }
 
+bid4free .cardInfo {
+  text-align: center;
+  padding: 15px;
+  background: #E8EAF6;
+  margin: 15px;
+  border-radius: 4px;
+}
+bid4free .cardInfo p {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.7);
+  word-wrap: break-word;
+}
+bid4free .cardInfo md-icon {
+  margin: 0;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
 /** Project Summary ***************************************************************************************************/
 
 .projectSummaryInput md-input-container {
@@ -117,17 +124,10 @@ bid4free .bidInfoListTitle {
 
 /** Packages **********************************************************************************************************/
 
-bid4free .bidInfoPackageListSelected {
-  background: #E8EAF6;
-}
-bid4free .bidInfoPackageListUnselected {
-  background: #FFFFFF;
-}
-
 /** Package Summary ***************************************************************************************************/
 
-.packageSummaryInput md-input-container {
-  margin: 20px 10px -15px 10px;
+bid4free .packageSummaryInput {
+  padding: 0 10px;
 }
 
 .packageSummaryList {
@@ -135,8 +135,8 @@ bid4free .bidInfoPackageListUnselected {
 }
 
 bid4free .packageContent .fileUploader {
-  margin-top: 20px;
-  padding-left: 20px;
+  margin-top: 10px;
+  padding: 0 20px;
   height: 250px;
 }
 
@@ -151,6 +151,10 @@ bid4free .bidInvite .bidInviteContent md-list-item md-icon {
 bid4free .bidInvite .bidInviteIcon {
   font-size: 1.5em;
   margin: 15px;
+}
+
+bid4free .packageInvite {
+  padding: 0 20px;
 }
 
 /** Bid Image *********************************************************************************************************/

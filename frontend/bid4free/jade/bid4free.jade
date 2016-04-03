@@ -13,7 +13,7 @@
 			bid-workspace(layout="column", flex, package-name="vm.selectedPackageName", invite-accepted="vm.packageInviteAccepted" account="vm.account" project="vm.project")
 
 	// Main Contractor
-	.bidContent(layout="row", layout-align="space-between start", ng-if="vm.userIsAMainContractor")
+	.bidContent(layout="row" layout-align="space-between" ng-if="vm.userIsAMainContractor" flex layout-fill)
 		// Project Summary
 		.md-whiteframe-1dp(flex=25)
 			md-toolbar
@@ -70,12 +70,11 @@
 						md-icon(class="fa fa-plus")
 			.packageContent
 				md-content
-					md-list()
+					md-list
 						md-list-item(
-							ng-repeat="package in vm.packages",
-							ng-click="vm.showPackage($index)",
-							aria-label="Package",
-							ng-class="{bidInfoPackageListSelected: package.selected, bidInfoPackageListUnselected: !package.selected}")
+							ng-repeat="package in vm.packages"
+							ng-click="vm.showPackage($index)"
+							aria-label="Package")
 							p {{package.name}}
 
 		// Package Summary
@@ -148,7 +147,7 @@
 				.md-toolbar-tools
 					h2
 						span Sub Contractors
-			.packageContent
+			.packageContent.packageInvite
 				md-content
 					div(ng-if="vm.packageSelected")
 						div(ng-if="!vm.showInput")

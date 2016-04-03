@@ -46,12 +46,10 @@
 		 */
 		vm.bif4FreeEnabled = false;
 
-		/*
 		promise = AccountService.getProjectsBid4FreeStatus(vm.account);
 		promise.then(function (data) {
 			console.log(2222, data);
 		});
-		*/
 
 		/*
 		 * Handle changes to the state manager Data
