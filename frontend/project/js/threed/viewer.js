@@ -532,14 +532,6 @@ var Viewer = {};
 
 					var account, project;
 					var projectParts = null;
-					console.log('picking', pickingInfo.pickObj);
-					console.log('partId', pickingInfo.pickObj.partID);
-
-					callback(self.EVENT.OS_BUILDING_CLICK,
-					{
-						//id: pickingInfo.pickObj.partID
-						id : '21071441'
-					});
 
 					if (pickingInfo.pickObj._xmlNode)
 					{
@@ -653,6 +645,13 @@ var Viewer = {};
 
 				}
 			}
+
+
+			callback(self.EVENT.OS_BUILDING_CLICK,
+			{
+				//id: pickingInfo.pickObj.partID
+				id : id
+			});
 
 			callback(self.EVENT.OBJECT_SELECTED, {
 				account: account,
