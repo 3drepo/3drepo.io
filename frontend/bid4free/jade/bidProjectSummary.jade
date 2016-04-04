@@ -1,0 +1,39 @@
+.md-whiteframe-1dp(layout="column", flex)
+	md-toolbar
+		.md-toolbar-tools
+			h2
+				span Project Summary
+			span(flex)
+			h2 ({{vm.Auth.username}})
+			md-button.md-icon-button(aria-label="Home", ng-click="vm.home($event)")
+				md-icon(class="fa fa-home")
+	md-content
+		md-list
+			md-list-item.md-2-line
+				div.md-list-item-text
+					h3 Name
+					p {{vm.projectSummary.name}}
+			md-list-item.md-2-line
+				div.md-list-item-text
+					h3 Site
+					p {{vm.projectSummary.site}}
+			md-list-item.md-2-line
+				div.md-list-item-text
+					h3 Client
+					p {{vm.projectSummary.client}}
+			md-list-item.md-2-line
+				div.md-list-item-text
+					h3 Code
+					p {{vm.projectSummary.code}}
+			md-list-item.md-2-line
+				div.md-list-item-text
+					h3 Budget
+					p {{vm.projectSummary.budget}}
+			md-list-item.md-2-line
+				div.md-list-item-text
+					h3 Completed by
+					p {{vm.projectSummary.completedBy}}
+			md-list-item.md-2-line
+				div.md-list-item-text
+					h3 Contact
+					p {{vm.projectSummary.contact}}

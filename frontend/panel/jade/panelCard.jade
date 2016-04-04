@@ -1,19 +1,21 @@
 div(layout="column", class="md-whiteframe-1dp")
 
 	// Tool bar
-	md-toolbar(class="md-primary", ng-click="vm.toolbarClick()")
-		div(class="md-toolbar-tools")
-			span.statusIcon(class="fa", ng-class="vm.statusIcon", ng-click="vm.hideItem()")
-			label(class="md-flex") {{vm.contentData.title}}
+	md-toolbar(class="md-primary" flex)
+		div(class="md-toolbar-tools" flex)
+			span.statusIcon(class="fa", ng-class="vm.statusIcon", ng-click="vm.hideItem()" flex="none")
+			span(ng-if="!vm.showFilter" flex="50")
+				label(class="md-flex") {{vm.contentData.title}}
+			#filterContainer
 			span(flex)
 
 			// Options
 			#options
 
 	// Card content
-	.panelCardContainer
+	#panelCardContainer
 		// Filter
-		#filterContainer
+		// #filterContainer
 
 		// Content
 		md-content(id="content", style="height:{{vm.contentData.height}}px")
@@ -23,4 +25,3 @@ div(layout="column", class="md-whiteframe-1dp")
 		md-button.md-fab.md-mini#helpButton(aria-label="Help")
 			md-icon(md-font-icon="fa-question", class="fa")
 			md-tooltip(md-direction="top") {{vm.contentData.help}}
-z

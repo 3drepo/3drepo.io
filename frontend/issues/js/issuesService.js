@@ -21,11 +21,10 @@
 	angular.module("3drepo")
 		.factory("IssuesService", IssuesService);
 
-	IssuesService.$inject = ["$http", "$q", "StateManager", "serverConfig", "EventService", "Auth"];
+	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService"];
 
-	function IssuesService($http, $q, StateManager, serverConfig, EventService, Auth) {
-		var state = StateManager.state,
-			url = "",
+	function IssuesService($http, $q,  serverConfig, EventService) {
+		var url = "",
 			data = {},
 			config = {},
 			i, j = 0,
@@ -79,10 +78,10 @@
 			}
 		};
 
-		obj.getIssues = function() {
+		obj.getIssues = function(account, project) {
 			var self = this,
 				deferred = $q.defer();
-			url = serverConfig.apiUrl(state.account + '/' + state.project + '/issues.json');
+			url = serverConfig.apiUrl(account + "/" + project + "/issues.json");
 
 			$http.get(url)
 				.then(
@@ -110,46 +109,46 @@
 			return deferred.promise;
 		};
 
-		obj.saveIssue = function(issue) {
+		obj.saveIssue = function (issue) {
 			var self = this,
 				dataToSend,
-				deferred = $q.defer();
+				deferred = $q.defer(),
+				viewpointPromise = $q.defer();
 
 			url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue.objectId);
 
-			// viewpoint previously was set to ViewerService.defaultViewer.getCurrentViewpointInfo()
-			data = {
-				name: issue.name,
-				viewpoint: null,
-				scale: 1.0,
-				creator_role: issue.creator_role,
-				assigned_roles: userRoles
-			};
-			config = {
-				withCredentials: true
-			};
+			EventService.send(EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, {promise: viewpointPromise});
 
-			if (issue.pickedPos !== null) {
-				data.position = issue.pickedPos.toGL();
-				data.norm = issue.pickedNorm.toGL();
-			}
+			viewpointPromise.promise.then(function (viewpoint) {
+				data = {
+					name: issue.name,
+					viewpoint: viewpoint,
+					scale: 1.0,
+					creator_role: issue.creator_role,
+					assigned_roles: userRoles
+				};
+				config = {withCredentials: true};
 
-			dataToSend = {
-				data: JSON.stringify(data)
-			};
+				if (issue.pickedPos !== null) {
+					data.position = issue.pickedPos.toGL();
+					data.norm = issue.pickedNorm.toGL();
+				}
 
-			$http.post(url, dataToSend, config)
-				.then(function successCallback(response) {
-					response.data.issue._id = response.data.issue_id;
-					response.data.issue.account = state.account;
-					response.data.issue.project = state.project;
-					response.data.issue.timeStamp = self.getPrettyTime(response.data.issue.created);
-					response.data.issue.creator_role = issue.creator_role;
+				dataToSend = {data: JSON.stringify(data)};
 
-					response.data.issue.title = generateTitle(response.data.issue);
-					self.removePin();
-					deferred.resolve(response.data.issue);
-				});
+				$http.post(url, dataToSend, config)
+					.then(function successCallback(response) {
+						response.data.issue._id = response.data.issue_id;
+						response.data.issue.account = issue.account;
+						response.data.issue.project = issue.project;
+						response.data.issue.timeStamp = self.getPrettyTime(response.data.issue.created);
+						response.data.issue.creator_role = issue.creator_role;
+
+						response.data.issue.title = generateTitle(response.data.issue);
+						self.removePin();
+						deferred.resolve(response.data.issue);
+					});
+			});
 
 			return deferred.promise;
 		};
@@ -225,8 +224,8 @@
 		obj.addPin = function (pin, colours, viewpoint) {
 			EventService.send(EventService.EVENT.VIEWER.ADD_PIN, {
 				id: pin.id,
-				account: state.account,
-				project: state.project,
+				account: pin.account,
+				project: pin.project,
 				position: pin.position,
 				norm: pin.norm,
 				colours: colours,
@@ -252,9 +251,9 @@
 			});
 		};
 
-		obj.getRoles = function() {
+		obj.getRoles = function(account, project) {
 			var deferred = $q.defer();
-			url = serverConfig.apiUrl(state.account + '/' + state.project + '/roles.json');
+			url = serverConfig.apiUrl(account + '/' + project + '/roles.json');
 
 			$http.get(url)
 				.then(
@@ -270,9 +269,9 @@
 			return deferred.promise;
 		};
 
-		obj.getUserRolesForProject = function() {
+		obj.getUserRolesForProject = function(account, project, username) {
 			var deferred = $q.defer();
-			url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + Auth.username + "/userRolesForProject.json");
+			url = serverConfig.apiUrl(account + "/" +project + "/" + username + "/userRolesForProject.json");
 
 			$http.get(url)
 				.then(

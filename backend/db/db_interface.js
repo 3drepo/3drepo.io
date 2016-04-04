@@ -403,6 +403,31 @@ DBInterface.prototype.addToCurrentList = function(dbName, project, branch, objUU
 	});
 };
 
+// TODO: Remove this, as it shouldn"t exist
+DBInterface.prototype.removeFromCurrentList = function(dbName, project, branch, objUUID, callback) {
+	"use strict";
+
+	var self = this;
+
+	self.getHeadUUID(dbName, project, branch, function(err, uuid) {
+		dbConn(self.logger).collCallback(dbName, project + ".history", true, function(err, coll) {
+			if(err.value) { return callback(err); }
+
+			var uniqueID = {
+				"_id" : uuid.uuid
+			};
+
+			coll.update(uniqueID, { $pull: {"current" : objUUID} }, {}, function(err) {
+				if (err) { return callback(responseCodes.DB_ERROR(err)); }
+
+				self.logger.logDebug("Pulling " + uuidToString(objUUID) + " to current list of " + uuidToString(uuid.uuid));
+
+				callback(responseCodes.OK);
+			});
+		});
+	});
+};
+
 DBInterface.prototype.storeViewpoint = function(dbName, project, branch, username, parentSharedID, data, callback) {
 	"use strict";
 
@@ -470,6 +495,43 @@ DBInterface.prototype.getUserDBList = function(username, callback) {
 		callback(responseCodes.OK, user.projects);
 	});
 };
+
+
+DBInterface.prototype.getUserBidInfo = function(username, callback) {
+	if(!username) {
+		return callback(responseCodes.USERNAME_NOT_SPECIFIED);
+	}
+
+	this.logger.logDebug("Getting user info bid for " + username);
+
+	var filter = {
+		user: username
+	};
+
+	var projection = {
+		"customData.bids" : 1
+	};
+
+	return new Promise((resolve, reject) => {
+		dbConn(this.logger).filterColl("admin", "system.users", filter, projection, function(err, coll) {
+			if(err.value) {
+				reject(err);
+				return callback && callback(err);
+			}
+
+			if (coll[0])
+			{
+				var user = coll[0].customData && coll[0].customData.bids || [];
+				callback && callback(responseCodes.OK, user);
+				resolve(user);
+			} else {
+				callback && callback(responseCodes.USER_NOT_FOUND, null);
+				reject({ resCode: responseCodes.USER_NOT_FOUND });
+			}
+		});
+	});
+};
+
 
 DBInterface.prototype.getIssueStatsForProjectList = function(projectList, callback) {
 	var self = this;
@@ -574,7 +636,8 @@ DBInterface.prototype.getUserInfo = function(username, callback) {
 		customData : 1,
 		"customData.firstName" : 1,
 		"customData.lastName" : 1,
-		"customData.email" : 1
+		"customData.email" : 1,
+		"customData.avatar" : 1
 	};
 
 	dbConn(self.logger).filterColl("admin", "system.users", filter, projection, function(err, coll) {
@@ -615,6 +678,12 @@ DBInterface.prototype.getUserInfo = function(username, callback) {
 						}
 					}
 				}
+
+				if (user.avatar) {
+					user.hasAvatar = true;
+				}
+
+				user.avatar = undefined;
 
 				/*
 				self.getIssueStatsForProjectList(user.projects, function(err, projectStats) {
@@ -830,6 +899,7 @@ DBInterface.prototype.checkUserPermission = function (username, account, project
 
 		callback(responseCodes.OK, permissionFlag);
 	});
+
 };
 
 DBInterface.prototype.getAccessToProject = function(username, account, project, callback) {
@@ -1595,7 +1665,7 @@ DBInterface.prototype.filterFederatedProject = function(dbName, project, branch,
 				_id: { $in: docs[0].current}
 			};
 
-			var projection = {
+			var refProjection = {
 				_rid : 1,
 				owner: 1,
 				project: 1,
@@ -1611,7 +1681,7 @@ DBInterface.prototype.filterFederatedProject = function(dbName, project, branch,
 				}
 			}
 
-			dbConn(self.logger).filterColl(dbName, project + ".scene", refFilter, projection, function(err, refs) {
+			dbConn(self.logger).filterColl(dbName, project + ".scene", refFilter, refProjection, function(err, refs) {
 				// Asynchronously loop over all references.
 				async.concat(refs, function (item, iter_callback) {
 					var childDbName  = item.owner ? item.owner : dbName;
@@ -1650,7 +1720,7 @@ DBInterface.prototype.filterFederatedProject = function(dbName, project, branch,
 				function (err, results) {
 					// TODO: Deal with errors here
 
-					callback(responseCodes.OK, nodes.concat(results).concat(refs));
+					callback(responseCodes.OK, nodes.concat(results));
 				});
 			});
 		});
@@ -1843,8 +1913,9 @@ DBInterface.prototype.getIssues = function(dbName, project, branch, revision, on
 						}
 					} else {
 						childBranch   = "master";
-						childRevision = null;
+				 		childRevision = null;
 					}
+
 
 					self.getProjectSettings(childDbName, childProject, function (err, settings) {
 						if (err.value)
@@ -2221,7 +2292,6 @@ DBInterface.prototype.cacheFunction = function(dbName, collection, url, format, 
 
 	if (!config.disableCache)
 	{
-		console.log(url);
 		dbConn(self.logger).getGridFSFile(dbName, stashCollection, url, function(err, result) {
 			if (err.value === responseCodes.FILE_DOESNT_EXIST.value) {
 				self.logger.logInfo("Doesn't exist in stash, generating ...");
@@ -2305,7 +2375,6 @@ DBInterface.prototype.getObject = function(dbName, project, uid, rid, sid, needF
 
 					if ((type === "mesh") && needFiles)
 					{
-						//console.log(obj)
 						self.appendMeshFiles(dbName, project, false, uid, obj[0], callback);
 					} else {
 						return callback(responseCodes.OK, type, uid, false, repoGraphScene(self.logger).decode(obj));
@@ -2341,7 +2410,6 @@ DBInterface.prototype.getObject = function(dbName, project, uid, rid, sid, needF
 				return callback(responseCodes.OBJECT_NOT_FOUND);
 			}
 
-			console.log(obj);
 			var type = obj[0].type;
 			var uid = uuidToString(obj[0]._id);
 
@@ -2844,6 +2912,7 @@ DBInterface.prototype.getRoles = function (database, username, full, callback) {
  ******************************************************************************/
 DBInterface.prototype.getUserRoles = function (username, database, callback) {
 	"use strict";
+
 	var self = this;
 
 	var dbName = "admin";
@@ -2867,7 +2936,8 @@ DBInterface.prototype.getUserRoles = function (username, database, callback) {
 		if (database)
 		{
 			roles = [];
-			for (var i = 0; i < docs[0].roles.length; i++) {
+
+			for (let i = 0; i < docs[0].roles.length; i++) {
 				if (docs[0].roles[i].db === dbName || docs[0].roles[i].db === database) {
 					roles.push(docs[0].roles[i]);
 				}
@@ -2933,6 +3003,37 @@ DBInterface.prototype.getUserPrivileges = function (username, database, callback
 };
 
 DBInterface.prototype.uuidToString = uuidToString;
+
+
+/* for test helper API */
+DBInterface.prototype.createMainContractorRole = function(targetDb, project){
+
+	return dbConn(this.logger).getDB(targetDb).then(db => {
+		return db.command({
+
+			createRole: "MainContractor",
+			privileges: [{
+				resource: {
+					db: targetDb, collection:  `${project}.packages`
+				},
+				actions: [ "find", "update", "insert", "remove" ]
+			}],
+			roles: []
+		});
+	});
+};
+
+/* for test helper API */
+DBInterface.prototype.grantUserMainContractorRole = function(user, targetDb){
+
+	return dbConn(this.logger).getDB('admin').then(db => {
+		return db.command({
+
+			grantRolesToUser: user,
+			roles: [{ role: 'MainContractor', db: targetDb}]
+		});
+	});
+};
 
 module.exports = function(logger) {
 	"use strict";

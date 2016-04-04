@@ -8,3 +8,18 @@ tdr-progress p {
   margin-top: 10px;
   color: rgba(0, 0, 0, 0.7);
 }
+
+/** Colour Picker *****************************************************************************************************/
+.tdrColourPickerColour {
+  display: block;
+  border-radius: 4px;
+  border: 1px solid #DDD;
+}
+
+.tdrColourPickerLabel {
+  margin-left: 10px;
+}
+
+.tdrColourPickerSlider {
+  margin-left: 20px;
+}

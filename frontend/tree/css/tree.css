@@ -20,8 +20,9 @@ tree p {
   word-break: break-all;
   word-wrap: break-word;
   line-height: 18px;
-  margin: 0;
+  margin: -2px 0 0 0;
   font-size: 14px;
+  padding: 2px;
 }
 tree p:hover {
   cursor: pointer;
@@ -66,6 +67,12 @@ tree .treeButton:hover {
   cursor: pointer;
 }
 
+tree .treeNodeSelected {
+  background: #C5CAE9;
+  padding: 2px;
+  border-radius: 4px;
+}
+
 /** Tree Node *********************************************************************************************************/
 
 .tree-node-unselected {
@@ -87,7 +94,6 @@ tree .treeButton:hover {
 .tree-node .md-button {
   border-radius: 0;
 }
-
 
 /** Tree filter list **************************************************************************************************/
 

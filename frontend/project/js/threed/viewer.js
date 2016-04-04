@@ -17,45 +17,10 @@
 
 // --------------------- Control Interface ---------------------
 
-function bgroundClick(event) {
-	$.event.trigger("bgroundClicked", event);
-};
-
-function clickObject(event) {
-	$.event.trigger("clickObject", event);
-};
-
-function clickPin(event) {
-	$.event.trigger("pinClick", event);
-}
-
-function onMouseOver(event) {
-	$.event.trigger("onMouseOver", event);
-}
-
-function onMouseDown(event) {
-	$.event.trigger("onMouseDown", event);
-}
-
-function onMouseUp(event) {
-	$.event.trigger("onMouseUp", event);
-}
-
-function onMouseMove(event) {
-	$.event.trigger("onMouseMove", event);
-}
-
-function onViewpointChange(event) {
-	$.event.trigger("onViewpointChange", event);
-}
-
-function onLoaded(event) {
-	$.event.trigger("onLoaded", event);
-}
-
-function runtimeReady() {
-	$.event.trigger("runtimeReady");
-}
+// Global functions to be passed to X3DOM elements
+var bgroundClick, clickObject, clickPin, onMouseOver,
+	onMouseDown, onMouseUp, onMouseMove, onViewpointChange,
+	onLoaded, runtimeReady;
 
 x3dom.runtime.ready = runtimeReady;
 
@@ -64,6 +29,17 @@ var Viewer = {};
 
 (function() {
 	"use strict";
+
+	bgroundClick      = ViewerUtil.eventFactory("bgroundClicked");
+	clickObject       = ViewerUtil.eventFactory("clickObject");
+	clickPin          = ViewerUtil.eventFactory("pinClick");
+	onMouseOver       = ViewerUtil.eventFactory("onMouseOver");
+	onMouseDown       = ViewerUtil.eventFactory("onMouseDown");
+	onMouseUp         = ViewerUtil.eventFactory("onMouseUp");
+	onMouseMove       = ViewerUtil.eventFactory("onMouseMove");
+	onViewpointChange = ViewerUtil.eventFactory("onViewpointChange");
+	onLoaded          = ViewerUtil.eventFactory("onLoaded");
+	runtimeReady      = ViewerUtil.eventFactory("runtimeReady");
 
 	Viewer = function(name, element, manager, callback, errCallback) {
 		// Properties
@@ -75,12 +51,13 @@ var Viewer = {};
 			this.name = name;
 		}
 
-		callback = !callback ? function(type, value) {
-			console.log(type + ": " + value);
+		callback = !callback ? function() {
+			// TODO: Move event handling here
+			//console.log(type + ": " + value);
 		} : callback;
 
-		errCallback = !errCallback ? function(type, value) {
-			console.error(type + ": " + value);
+		errCallback = !errCallback ? function() {
+			//console.error(type + ": " + value);
 		} : errCallback;
 
 		// If not given the tag by the manager create here
@@ -129,6 +106,10 @@ var Viewer = {};
 
 		this.logos    = [];
 
+		this.logoClick = function() {
+			callback(self.EVENT.LOGO_CLICK);
+		};
+
 		this.addLogo = function() {
 			if (!self.logoGroup)
 			{
@@ -151,22 +132,13 @@ var Viewer = {};
 			logo.style.right 		  = 0;
 			logo.style.margin 		  = "auto";
 
+			logo.addEventListener("click", self.logoClick);
+
 			var logoImage = document.createElement("img");
 			logoImage.setAttribute("src", logo_string);
 			logoImage.setAttribute("style", "width: 100%;");
 			logoImage.textContent = " ";
-			logoImage.setAttribute("onclick", "logoClick()");
-
-			var logoLink = document.createElement("a");
-
-			if (server_config.return_path) {
-				logoLink.setAttribute("href", server_config.return_path);
-			} else {
-				logoLink.setAttribute("href", "https://www.3drepo.io");
-			}
-
-			logoLink.appendChild(logoImage);
-			logo.appendChild(logoLink);
+			logo.appendChild(logoImage);
 
 			self.updateLogoWidth(widthPercentage);
 
@@ -313,7 +285,7 @@ var Viewer = {};
 
 			self.getCurrentViewpoint().addEventListener("viewpointChanged", self.viewPointChanged);
 
-			$(document).on("onLoaded", function(event, objEvent) {
+			ViewerUtil.onEvent("onLoaded", function(objEvent) {
 				if (self.loadViewpoint) {
 					self.setCurrentViewpoint(self.loadViewpoint);
 				}
@@ -329,18 +301,21 @@ var Viewer = {};
 				if (objEvent.target.tagName.toUpperCase() === "INLINE") {
 					self.inlineRoots[objEvent.target.nameSpaceName] = objEvent.target;
 				} else if (objEvent.target.tagName.toUpperCase() === "MULTIPART") {
-					var nameSpaceName = objEvent.target._x3domNode._nameSpace.name;
-					if (!self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-						self.multipartNodesByProject[nameSpaceName] = {};
+					if (self.multipartNodes.indexOf(objEvent.target) === -1)
+					{
+						var nameSpaceName = objEvent.target._x3domNode._nameSpace.name;
+						if (!self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
+							self.multipartNodesByProject[nameSpaceName] = {};
+						}
+
+						var multipartName = objEvent.target.getAttribute("id");
+						var multipartNameParts = multipartName.split("__");
+						var multipartID = multipartNameParts[multipartNameParts.length - 1];
+
+						self.multipartNodesByProject[nameSpaceName][multipartID] = objEvent.target;
+
+						self.multipartNodes.push(objEvent.target);
 					}
-
-					var multipartName = objEvent.target.getAttribute("id");
-					var multipartNameParts = multipartName.split("__");
-					var multipartID = multipartNameParts[multipartNameParts.length - 1];
-
-					self.multipartNodesByProject[nameSpaceName][multipartID] = objEvent.target;
-
-					self.multipartNodes.push(objEvent.target);
 				}
 
 				self.downloadsLeft += (objEvent.target.querySelectorAll("[load]").length - 1);
@@ -356,6 +331,31 @@ var Viewer = {};
 				if (!self.downloadsLeft) {
 					callback(self.EVENT.LOADED);
 				}
+
+				//add map tiles only when mouse down -> move -> mouse up
+				var changed = false;
+				var viewChangeHandler = function(){
+					changed = true;
+				};
+
+				self.onViewpointChanged(viewChangeHandler);
+
+				self.onMouseDown(function(){
+					console.log('mouse down and try to move');
+
+					
+
+					var mouseUpHandler = function(){
+						console.log('mouse up');
+						self.offMouseUp(mouseUpHandler);
+					};
+
+					self.onMouseUp(mouseUpHandler);
+				});
+
+				// init add map tiles
+				setTimeout(self.addMapTileByViewPoint, 2000);
+			
 			});
 		};
 
@@ -515,26 +515,27 @@ var Viewer = {};
 		};
 
 		this.onMouseUp = function(functionToBind) {
-			$(document).on("onMouseUp", functionToBind);
+			ViewerUtil.onEvent("onMouseUp", functionToBind);
+		};
+
+		this.offMouseUp = function(functionToBind) {
+			ViewerUtil.offEvent("onMouseUp", functionToBind);
 		};
 
 		this.onMouseDown = function(functionToBind) {
-			$(document).on("onMouseDown", functionToBind);
-		}
+			ViewerUtil.onEvent("onMouseDown", functionToBind);
+		};
 
-		this.mouseDownPickPoint = function(event, pickEvent)
+		this.mouseDownPickPoint = function()
 		{
 			var pickingInfo = self.getViewArea()._pickingInfo;
-
-			// Hack until double click problem solved
-			self.pickPoint(); // This updates self.pickObject
-			if (self.pickObject.pickObj !== null) {
-				pickingInfo.pickObj = self.pickObject;
-			}
 
 			if (pickingInfo.pickObj)
 			{
 				var account, project;
+
+				console.log('picking', pickingInfo.pickObj);
+				console.log('partId', pickingInfo.pickObj.partID);
 
 				var projectParts = pickingInfo.pickObj._xmlNode ?
 					pickingInfo.pickObj._xmlNode.getAttribute("id").split("__") :
@@ -568,14 +569,15 @@ var Viewer = {};
 		this.onMouseDown(this.mouseDownPickPoint);
 
 		this.onViewpointChanged = function(functionToBind) {
-			$(self.viewer).on("myViewpointHasChanged", functionToBind);
+			ViewerUtil.onEvent("myViewpointHasChanged", functionToBind);
 		};
 
 		this.offViewpointChanged = function(functionToBind) {
-			$(self.viewer).off("myViewpointHasChanged", functionToBind);
+			ViewerUtil.offEvent("myViewpointHasChanged", functionToBind);
 		};
 
 		this.viewPointChanged = function(event) {
+			console.log('vp changed');
 			var vpInfo = self.getCurrentViewpointInfo();
 			var eye = vpInfo.position;
 			var viewDir = vpInfo.view_dir;
@@ -585,42 +587,46 @@ var Viewer = {};
 				self.nav._x3domNode._vf.typeParams[1] = eye[1];
 			}
 
-			$(self.viewer).trigger("myViewpointHasChanged", event);
+			ViewerUtil.triggerEvent("myViewpointHasChanged", event);
 		};
 
 		this.onBackgroundClicked = function(functionToBind) {
-			$(document).on("bgroundClicked", functionToBind);
+			ViewerUtil.onEvent("bgroundClicked", functionToBind);
 		};
 
 		this.offBackgroundClicked = function(functionToBind) {
-			$(document).off("bgroundClicked", functionToBind);
+			ViewerUtil.offEvent("bgroundClicked", functionToBind);
 		};
 
-		this.selectParts = function(part, zoom) {
+		this.selectParts = function(part, zoom, colour) {
+			var i;
+
+			colour = colour ? colour : self.SELECT_COLOUR.EMISSIVE;
+
 			if (!Array.isArray(part)) {
 				part = [part];
 			}
 
 			if (zoom) {
-				for (var i = 0; i < part.length; i++) {
+				for (i = 0; i < part.length; i++) {
 					part[i].fit();
 				}
 			}
 
 			if (self.oldPart) {
-				for (var i = 0; i < self.oldPart.length; i++) {
+				for (i = 0; i < self.oldPart.length; i++) {
 					self.oldPart[i].resetColor();
 				}
 			}
 
 			self.oldPart = part;
 
-			for (var i = 0; i < part.length; i++) {
-				part[i].setEmissiveColor(self.SELECT_COLOUR.EMISSIVE, "front");
+			for (i = 0; i < part.length; i++) {
+				part[i].setEmissiveColor(colour, "both");
 			}
 		};
 
-		this.clickObject = function(event, objEvent) {
+		this.clickObject = function(objEvent) {
 			var account = null;
 			var project = null;
 			var id = null;
@@ -643,7 +649,7 @@ var Viewer = {};
 			});
 		};
 
-		this.highlightObjects = function(account, project, id, ids, zoom) {
+		this.highlightObjects = function(account, project, ids, zoom, colour) {
 			var nameSpaceName = null;
 
 			/*
@@ -655,6 +661,10 @@ var Viewer = {};
 			if (!ids) {
 				ids = [];
 			}
+
+			// If we pass in a single id, then we might be selecting
+			// an old-style Group in X3DOM rather than multipart.
+			ids = Array.isArray(ids) ? ids: [ids];
 
 			// Is this a multipart project
 			if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
@@ -680,118 +690,86 @@ var Viewer = {};
 					}
 				}
 
-				self.selectParts(fullPartsList, zoom);
+				self.selectParts(fullPartsList, zoom, colour);
 			}
 
-			var object = $("[id$=" + id + "]");
+			for(var i = 0; i < ids.length; i++)
+			{
+				var id = ids[i];
+				var object = document.querySelectorAll("[id$='" + id + "']");
 
-			if (object[0]) {
-				self.setApp(object[0]);
+				if (object[0]) {
+					self.setApp(object[0], colour);
+				}
+			}
+
+			if (ids.length === 0)
+			{
+				self.setApp(null);
 			}
 		};
 
-		this.switchedOldParts = [];
-		this.switchedObjects = [];
+		//this.switchedOldParts = [];
+		//this.switchedObjects = [];
 
-		this.switchObjectVisibility = function(account, project, id, ids, state) {
+		this.__processSwitchVisibility = function(nameSpaceName, ids, state)
+		{
+			if (ids && ids.length) {
+				// Is this a multipart project
+				if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
+					var nsMultipartNodes;
+
+					// If account and project have been specified
+					// this helps narrow the search
+					if (nameSpaceName) {
+						nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
+					} else {
+						// Otherwise iterate over everything
+						nsMultipartNodes = self.multipartNodes;
+					}
+
+					for (var multipartNodeName in nsMultipartNodes) {
+						if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
+							var parts = nsMultipartNodes[multipartNodeName].getParts(ids);
+
+							if (parts && parts.ids.length > 0) {
+								parts.setVisibility(state);
+							}
+						}
+					}
+				}
+
+				for(var i = 0; i < ids.length; i++)
+				{
+					var id = ids[i];
+					var object = document.querySelectorAll("[id$='" + id + "']");
+
+					if (object[0]) {
+						object[0].setAttribute("render", state.toString());
+					}
+				}
+			}
+		};
+
+		this.switchObjectVisibility = function(account, project, visible_ids, invisible_ids) {
 			var nameSpaceName = null;
-			var i;
 
 			if (account && project) {
 				nameSpaceName = account + "__" + project;
 			}
 
-			if (!ids) {
-				ids = [];
+			if (visible_ids)
+			{
+				self.__processSwitchVisibility(nameSpaceName, visible_ids, true);
 			}
 
-			// Is this a multipart project
-			if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-				var fullPartsList = [];
-				var nsMultipartNodes;
-
-				// If account and project have been specified
-				// this helps narrow the search
-				if (nameSpaceName) {
-					nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
-				} else {
-					// Otherwise iterate over everything
-					nsMultipartNodes = self.multipartNodes;
-				}
-
-				for (i = 0; i < self.switchedOldParts.length; i++) {
-					if (ids.indexOf(self.switchedOldParts[i]) > -1) {
-						self.switchedOldParts[i].setVisibility(state);
-						delete self.switchOldParts[i];
-						i--;
-					}
-				}
-
-				for (var multipartNodeName in nsMultipartNodes) {
-					if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
-						var parts = nsMultipartNodes[multipartNodeName].getParts(ids);
-
-						if (parts && parts.ids.length > 0) {
-							self.switchedOldParts = self.switchedOldParts.concat(parts.ids);
-							parts.setVisibility(state);
-						}
-					}
-				}
-			}
-
-			for (i = 0; i < self.switchedObjects.length; i++) {
-				if (ids.indexOf(self.switchedObjects[i]) > -1) {
-					self.switchedObjects[i].setAttribute("render", state.toString());
-					delete self.switchOldParts[i];
-					i--;
-				}
-			}
-
-			var object = $("[id$=" + id + "]");
-
-			if (object[0]) {
-				object[0].setAttribute("render", state.toString());
-				self.switchedObjects.push(id);
+			if (invisible_ids)
+			{
+				 self.__processSwitchVisibility(nameSpaceName, invisible_ids, false);
 			}
 		};
 
-
-		/*
-		$(document).on("partSelected", function(event, part, zoom) {
-			self.selectParts(part, zoom);
-
-			var obj = {};
-			obj.multipart = true;
-			obj.id = part.multiPart._nameSpace.name + "__" + part.partID;
-
-
-			callback(self.EVENT.OBJECT_SELECTED, {
-				account: ,
-				project:
-			})
-
-
-			$(document).trigger("objectSelected", obj);
-		});
-
-		$(document).on("objectSelected", function(event, object, zoom) {
-			if (object !== undefined) {
-				if (!object.hasOwnProperty("multipart")) {
-					if (zoom) {
-						if (object.getAttribute("render") !== "false") {
-							self.lookAtObject(object);
-						}
-					}
-				}
-			} else {
-				self.selectParts([], false);
-			}
-
-			self.setApp(object);
-		});
-		*/
-
-		$(document).on("pinClick", function(event, clickInfo) {
+		ViewerUtil.onEvent("pinClick", function(clickInfo) {
 			var pinID = clickInfo.target.parentElement.parentElement.parentElement.parentElement.parentElement.id;
 			callback(self.EVENT.CLICK_PIN,
 			{
@@ -799,88 +777,21 @@ var Viewer = {};
 			});
 		});
 
-		$(document).on("onMouseDown", function(event, mouseEvent) {
-			$("body")[0].style["pointer-events"] = "none";
+		ViewerUtil.onEvent("onMouseDown", function() {
+			document.body.style["pointer-events"] = "none";
 		});
 
-		$(document).on("onMouseUp", function(event, mouseEvent) {
-			$("body")[0].style["pointer-events"] = "all";
+		ViewerUtil.onEvent("onMouseUp", function() {
+			document.body.style["pointer-events"] = "all";
 		});
 
 		this.onClickObject = function(functionToBind) {
-			$(document).on("clickObject", functionToBind);
+			ViewerUtil.onEvent("clickObject", functionToBind);
 		};
 
 		this.offClickObject = function(functionToBind) {
-			$(document).off("clickObject", functionToBind);
+			offEvent("clickObject", functionToBind);
 		};
-
-		if (0) {
-			this.moveScale = 1.0;
-
-			self.element.addEventListener("keypress", function(e) {
-				var mapPos = $("#model__mapPosition")[0];
-				var oldTrans = mapPos.getAttribute("translation").split(",").map(
-					function(res) {
-						return parseFloat(res);
-					});
-
-				if (e.charCode === "q".charCodeAt(0)) {
-					oldTrans[0] = oldTrans[0] + 0.5 * self.moveScale;
-					mapPos.setAttribute("translation", oldTrans.join(","));
-				}
-
-				if (e.charCode === "w".charCodeAt(0)) {
-					oldTrans[0] = oldTrans[0] - 0.5 * self.moveScale;
-					mapPos.setAttribute("translation", oldTrans.join(","));
-				}
-
-				if (e.charCode === "e".charCodeAt(0)) {
-					oldTrans[2] = oldTrans[2] + 0.5 * self.moveScale;
-					mapPos.setAttribute("translation", oldTrans.join(","));
-				}
-
-				if (e.charCode === "f".charCodeAt(0)) {
-					oldTrans[2] = oldTrans[2] - 0.5 * self.moveScale;
-					mapPos.setAttribute("translation", oldTrans.join(","));
-				}
-
-				var mapRotation = $("#model__mapRotation")[0];
-				var oldRotation = mapRotation.getAttribute("rotation").split(",").map(
-					function(res) {
-						return parseFloat(res);
-					});
-
-				if (e.charCode === "g".charCodeAt(0)) {
-					oldRotation[3] = oldRotation[3] + 0.01 * self.moveScale;
-					mapRotation.setAttribute("rotation", oldRotation.join(","));
-				}
-
-				if (e.charCode === "h".charCodeAt(0)) {
-					oldRotation[3] = oldRotation[3] - 0.01 * self.moveScale;
-					mapRotation.setAttribute("rotation", oldRotation.join(","));
-				}
-
-				var oldScale = mapPos.getAttribute("scale").split(",").map(
-					function(res) {
-						return parseFloat(res);
-					});
-
-				if (e.charCode === "j".charCodeAt(0)) {
-					oldScale[0] = oldScale[0] + 0.01 * self.moveScale;
-					oldScale[2] = oldScale[2] + 0.01 * self.moveScale;
-
-					mapPos.setAttribute("scale", oldScale.join(","));
-				}
-
-				if (e.charCode === "k".charCodeAt(0)) {
-					oldScale[0] = oldScale[0] - 0.01 * self.moveScale;
-					oldScale[2] = oldScale[2] - 0.01 * self.moveScale;
-
-					mapPos.setAttribute("scale", oldScale.join(","));
-				}
-			});
-		}
 
 		this.viewpoints = {};
 		this.viewpointsNames = {};
@@ -933,7 +844,7 @@ var Viewer = {};
 		};
 
 		this.loadViewpoints = function() {
-			var viewpointList = $("Viewpoint");
+			var viewpointList = document.getElementsByTagName("Viewpoint");
 
 			for (var v = 0; v < viewpointList.length; v++) {
 				if (viewpointList[v].hasAttribute("id")) {
@@ -1073,6 +984,11 @@ var Viewer = {};
 				if (self.settings.hasOwnProperty("ambientLight")) {
 					self.setAmbientLight(self.settings.ambientLight);
 				}
+
+				if(self.settings.hasOwnProperty("mapTile")){
+					// set origin BNG
+					self.originBNG = OsGridRef.latLonToOsGrid(new LatLon(self.settings.mapTile.lat, self.settings.mapTile.lon));
+				}
 			}
 		};
 
@@ -1112,7 +1028,7 @@ var Viewer = {};
 
 		this.pickObject = {};
 
-		this.pickPoint = function(x, y) {
+		this.pickPoint = function() {
 			var viewArea = self.getViewArea();
 			var scene = viewArea._scene;
 
@@ -1120,13 +1036,11 @@ var Viewer = {};
 			scene._vf.pickMode = "idbuf";
 			scene._vf.pickMode = oldPickMode;
 
-			self.pickObject.pickPos = viewArea._pickingInfo.pickPos;
-			self.pickObject.pickNorm = viewArea._pickingInfo.pickNorm;
-			self.pickObject.pickObj = viewArea._pickingInfo.pickObj;
+			self.pickObject = ViewerUtil.cloneObject(viewArea._pickingInfo);
 			self.pickObject.part = null;
 			self.pickObject.partID = null;
 
-			var objId = viewArea._pickingInfo.shadowObjectId;
+			var objId = self.pickObject.shadowObjectId;
 
 			if (scene._multiPartMap) {
 				for (var mpi = 0; mpi < scene._multiPartMap.multiParts.length; mpi++) {
@@ -1559,13 +1473,13 @@ var Viewer = {};
 							// TODO: Improve, with graph, to use appearance under  _cf rather than DOM.
 							obj = defMapSearch[self.diffColors.added[i]];
 							if (obj) {
-								mat = $(obj._xmlNode).find("Material");
+								mat = obj._xmlNode.getElementsByTagName("Material");
 
 								if (mat.length) {
 									self.applyApp(mat, 0.5, "0.0 1.0 0.0", false);
 									self.diffColorAdded.push(mat[0]);
 								} else {
-									mat = $(obj._xmlNode).find("TwoSidedMaterial");
+									mat = obj._xmlNode.getElementsByTagName("TwoSidedMaterial");
 									self.applyApp(mat, 0.5, "0.0 1.0 0.0", false);
 
 									self.diffColorAdded.push(mat[0]);
@@ -1580,13 +1494,13 @@ var Viewer = {};
 							// TODO: Improve, with graph, to use appearance under  _cf rather than DOM.
 							obj = defMapSearch[self.diffColors.deleted[i]];
 							if (obj) {
-								mat = $(obj._xmlNode).find("Material");
+								mat = obj._xmlNode.getElementsByTagName("Material");
 
 								if (mat.length) {
 									self.applyApp(mat, 0.5, "1.0 0.0 0.0", false);
 									self.diffColorDeleted.push(mat[0]);
 								} else {
-									mat = $(obj._xmlNode).find("TwoSidedMaterial");
+									mat = obj._xmlNode.getElementsByTagName("TwoSidedMaterial");
 									self.applyApp(mat, 0.5, "1.0 0.0 0.0", false);
 
 									self.diffColorDeleted.push(mat[0]);
@@ -1711,7 +1625,12 @@ var Viewer = {};
 			if (self.pins.hasOwnProperty(id)) {
 				var pin = self.pins[id];
 
-				self.highlightPin(id);
+				//self.highlightPin(id); This was preventing changing the colour of the pin
+				// Replace with
+				callback(self.EVENT.CHANGE_PIN_COLOUR, {
+					id: id,
+					colours: [[1.0, 0.7, 0.0]]
+				});
 
 				callback(self.EVENT.SET_CAMERA, {
 					position : pin.viewpoint.position,
@@ -1762,6 +1681,333 @@ var Viewer = {};
 				self.pins[id].changeColour(colours);
 			}
 		};
+
+		// Append building models 
+		this.addMapTileByViewPoint = function(noDraw){
+
+			if(!self.originBNG){
+				return console.log('No origin BNG coors set, no map tiles can be added.');
+			}
+
+			var vpInfo = self.getCurrentViewpointInfo();
+			var fov = vpInfo.fov;
+			var camera = vpInfo.position;
+			var view_dir = vpInfo.view_dir;
+			var near = vpInfo.near;
+			var ratio = vpInfo.aspect_ratio; //(w/h) 
+			var up = vpInfo.up;
+			var right = vpInfo.right;
+
+			//console.log('camera', camera);
+			//console.log('near', near);
+			//console.log('view_dir', view_dir);
+			//console.log('fov', fov);
+			//console.log('up', up);
+			//console.log('right', right);
+			//console.log('ratio', ratio);
+
+			var tanHalfFOV = Math.tan(fov / 2);
+			var planeOffsetX = [1, -1, 1, -1];
+			var planeOffsetY = [1, 1, -1, -1];
+			var coords = [];
+			var intersection = {};
+
+			for(var i = 0; i < planeOffsetX.length; i++)
+			{
+				var X = planeOffsetX[i];
+				var Y = planeOffsetY[i];
+
+				var rayDirection = [];
+
+				for (var c = 0; c < 3; c++)
+				{
+					rayDirection[c] = view_dir[c] + X * tanHalfFOV * right[c] + Y * (ratio / tanHalfFOV) * up[c];
+				}
+
+				var gamma = camera[1] / -rayDirection[1];
+
+				//console.log("G: ", gamma);
+
+				coords[i] = [];
+
+				for (var c = 0; c < 3; c++)
+				{
+					coords[i][c] = camera[c] + gamma * rayDirection[c];
+				}
+			}
+
+			var step = 100;
+			var roundUpPlace = 10;
+
+
+			var coordsX = [coords[0][0], coords[1][0], coords[2][0], coords[3][0]];
+			var coordsZ = [coords[0][2], coords[1][2], coords[2][2], coords[3][2]];
+
+			//console.log('xx', coordsX);
+			//console.log('zz', coordsZ);
+
+			var lookingToInf = (camera[2] > 0 && coordsZ[2] < coordsZ[0] || camera[2] < 0 && coordsZ[2] > coordsZ[0]);
+			if(lookingToInf){
+				
+				console.log('Looking to inf');
+				coordsZ[0] = 600;
+				coordsZ[1] = 600;
+				coordsZ[2] = -600;
+				coordsZ[3] = -600;
+			
+			}
+
+
+			var mapImgPosInfo = self._getMapImagePosInfo();
+			var mapImgsize = mapImgPosInfo.mapImgsize;
+
+
+			var startX = Math.ceil(Math.min.apply(Math, coordsX) / roundUpPlace) * roundUpPlace;
+			var endX = Math.ceil(Math.max.apply(Math, coordsX) / roundUpPlace) * roundUpPlace;
+			// console.log('startX, endX', startX, endX);
+
+			var startZ = Math.ceil(Math.min.apply(Math, coordsZ) / roundUpPlace) * roundUpPlace;
+			var endZ = Math.ceil(Math.max.apply(Math, coordsZ) / roundUpPlace) * roundUpPlace;
+			// console.log('startZ, endZ', startZ, endZ);
+
+			var mapTileCount = 0;
+			var tileDists = [];
+
+
+			for (var x = startX; x <= endX; x+=step) {
+				for (var z = startZ; z <= endZ; z+=step) {
+					mapTileCount++;
+					var dist = Math.sqrt(Math.pow(x - camera[0], 2) + Math.pow(z - camera[2], 2));
+					tileDists.push({ 'dist': dist, tile: [x, z]});
+				}
+			}
+
+			//sort tile by distance from camera
+			tileDists.sort(function(a, b){
+				return a.dist - b.dist;
+			});
+
+			var mapImgStep = mapImgsize;
+			//console.log('mapImgStep', mapImgStep);
+
+			var mapImgTileDists = [];
+
+			for (var x = startX + mapImgPosInfo.offsetX; x <= endX + mapImgPosInfo.offsetX; x+=mapImgStep) {
+				for (var z = startZ + mapImgPosInfo.offsetY; z <= endZ + mapImgPosInfo.offsetY; z+=mapImgStep) {
+					
+					var mapImgX = Math.floor( x / mapImgStep );
+					var mapImgZ = Math.floor( z / mapImgStep );
+
+					var dist = Math.sqrt(Math.pow(x - camera[0], 2) + Math.pow(z - camera[2], 2));
+					mapImgTileDists.push({ 'dist': dist, tile: [mapImgX, mapImgZ]});
+				}
+			}
+
+			mapImgTileDists.sort(function(a, b){
+				return a.dist - b.dist;
+			});
+
+			//console.log('maptilecount max', mapImgTileDists.length);
+
+			// add map tiles, only the first 15
+			for(var i=0; i<mapImgTileDists.length && i < 30; i++) {
+				
+				var tile = mapImgTileDists[i].tile;
+				self.appendMapImage(mapImgsize, tile[0], tile[1]);
+
+			}
+
+
+			//add 3d model tiles, only render first 10 tiles
+			for(var i=0; i<tileDists.length && i < 10; i++) {
+				
+				var tile = tileDists[i].tile;
+
+				var osRef = new OsGridRef(self.originBNG.easting + tile[0], self.originBNG.northing + tile[1]);
+				var osrefno = self._OSRefNo(osRef, 3);
+				//console.log(osrefno);
+
+				if(!noDraw){
+					self.addMapTile(osrefno);
+				}
+			}
+
+		};
+
+		// TO-DO: Move helper functions to somewhere else?
+		//length 1 = 1m, 2 = 10m, 3 = 100m, 4 = 1km, 5 = 10km
+		this._OSRefNo = function(osRef, length){
+			
+			if (length < 1 || length > 5){
+				return console.log('length must be in range [1 - 5]');
+			}
+
+			var osrefno = osRef.toString().split(' ');
+			osrefno[1] = osrefno[1].substring(0, length);
+			osrefno[2] = osrefno[2].substring(0, length);
+			osrefno = osrefno.join('');
+
+			return osrefno;
+		};
+
+		this._tile2long = function (x, z) {
+			return (x/Math.pow(2,z)*360-180);
+		}
+
+		this._tile2lat = function (y, z) {
+			var n=Math.PI-2*Math.PI*y/Math.pow(2,z);
+			return (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n))));
+		}
+
+		this._degToRad = function(degrees) {
+			return degrees * Math.PI / 180;
+		};
+
+		//http://stackoverflow.com/questions/22032270/how-to-retrieve-layerpoint-x-y-from-latitude-and-longitude-coordinates-using
+		this._getSlippyTileLayerPoints = function (lat_deg, lng_deg, zoom) {
+			var x = (Math.floor((lng_deg + 180) / 360 * Math.pow(2, zoom)));
+			var y = (Math.floor((1 - Math.log(Math.tan(lat_deg * Math.PI / 180) + 1 / Math.cos(lat_deg * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom)));
+
+			var layerPoint = {
+				x: x,
+				y: y
+			};
+
+			return layerPoint;
+		};
+
+		this.addMapTile = function(osGridRef, testAdd){
+
+			if(!self.originBNG){
+				return console.log('No origin BNG coors set, no map tiles can be added.');
+			}
+
+			self.addedTileRefs =  self.addedTileRefs || [];
+
+			if(self.addedTileRefs.indexOf(osGridRef) !== -1) {
+				//console.log(osGridRef + ' has already been added');
+				return;
+			}
+
+			self.addedTileRefs.push(osGridRef);
+
+			//console.log(self.fakeOriginInBNG);
+
+			var gltf = document.createElement('gltf');
+			gltf.setAttribute('url', '/api/os/buildings.gltf?method=osgrid&osgridref=' + osGridRef + '&draw=1');
+
+			var translate = [0, 0, 0];
+			var osCoor = OsGridRef.parse(osGridRef);
+			translate[0] = osCoor.easting - self.originBNG.easting;
+			translate[2] = self.originBNG.northing - osCoor.northing;
+
+			if (testAdd){
+				translate = [0,0,0];
+			}
+
+			var transform = document.createElement('transform');
+			transform.setAttribute('translation', translate.join(' '));
+
+			transform.appendChild(gltf);
+			self.getScene().appendChild(transform);
+
+			return transform;
+		};
+
+
+		this.createMapImageTile = function(size, x, y, t){
+
+			var shape = document.createElement("Shape");
+
+			var app = document.createElement('Appearance');
+
+			var it = document.createElement('ImageTexture');
+			it.setAttribute("url", '/api/os/map-images/Outdoor/17/' + x + '/' + y + '.png');
+
+			app.appendChild(it);
+
+			shape.appendChild(app);
+
+			var plane = document.createElement('Plane');
+			plane.setAttribute('center', '0, 0');
+			plane.setAttribute('size', [size, size].join(','));
+			plane.setAttribute('solid', false);
+			plane.setAttribute('lit', false);
+
+			shape.appendChild(plane);
+
+			var rotate = document.createElement('Transform');
+			// rotate 270Deg around x
+			rotate.setAttribute('rotation', '1,0,0,4.7124');
+			rotate.appendChild(shape);
+
+			var translate = document.createElement('Transform');
+			translate.setAttribute('translation', t.join(' '));
+
+			translate.appendChild(rotate);
+			return translate;
+		};
+
+		this._getMapImagePosInfo = function(){
+
+			// http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Resolution_and_Scale
+			// set the size of a 256 map image tile. 1px = 1m
+			var mapImgsize = 1.1943 * Math.cos(self._degToRad(self.settings.mapTile.lat)) * 256;
+			var zoomLevel = 17;
+
+			var slippyPoints = self._getSlippyTileLayerPoints(self.settings.mapTile.lat, self.settings.mapTile.lon, zoomLevel);
+
+			var x = slippyPoints.x;
+			var y = slippyPoints.y;
+
+			//console.log('slippyPoints', x, y);
+			//console.log(self._tile2lat(y, zoomLevel), self._tile2long(x ,zoomLevel));
+			var osGridRef = OsGridRef.latLonToOsGrid(new LatLon(self._tile2lat(y, zoomLevel), self._tile2long(x ,zoomLevel)));
+			
+			//console.log('map images osgridref', osGridRef);
+			var offsetX = osGridRef.easting - self.originBNG.easting + mapImgsize / 2;
+			var offsetY = self.originBNG.northing - osGridRef.northing + mapImgsize / 2;
+
+			return {
+				x: x,
+				y: y,
+				offsetX: offsetX,
+				offsetY: offsetY,
+				zoomLevel: zoomLevel,
+				mapImgsize: mapImgsize,
+				osGridRef: osGridRef
+			};
+
+		}
+
+		this.appendMapImage = function(size, ox, oy){
+
+			var posInfo = self._getMapImagePosInfo();
+
+			var x = posInfo.x;
+			var y = posInfo.y;
+			var offsetX = posInfo.offsetX;
+			var offsetY = posInfo.offsetY;
+
+			if (!self.addedMapImages) {
+				self.addedMapImages = {};
+			} 
+
+			if(!self.addedMapImages[ox + ',' + oy]){
+				self.getScene().appendChild(self.createMapImageTile(size, x + ox, y + oy, [offsetX + size * ox, 0, offsetY + size * oy]));
+				self.addedMapImages[ox + ',' + oy] = 1;
+			} else {
+				//console.log('map image already in the scene');
+			}
+			
+
+		};
+
+		this.removeMapImages = function(){
+			self.mts.forEach(function(mt){
+				self.getScene().removeChild(mt);
+			});
+		};
 	};
 
 	Viewer.prototype.SELECT_COLOUR = {
@@ -1797,11 +2043,16 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	REGISTER_VIEWPOINT_CALLBACK: "VIEWER_REGISTER_VIEWPOINT_CALLBACK",
 	OBJECT_SELECTED: "VIEWER_OBJECT_SELECTED",
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
+	HIGHLIGHT_OBJECTS: "VIEWER_HIGHLIGHT_OBJECTS",
 	SWITCH_OBJECT_VISIBILITY: "VIEWER_SWITCH_OBJECT_VISIBILITY",
 	SET_PIN_VISIBILITY: "VIEWER_SET_PIN_VISIBILITY",
 
+	GET_CURRENT_VIEWPOINT: "VIEWER_GET_CURRENT_VIEWPOINT",
+
 	PICK_POINT: "VIEWER_PICK_POINT",
 	SET_CAMERA: "VIEWER_SET_CAMERA",
+
+	LOGO_CLICK: "VIEWER_LOGO_CLICK",
 
 	// Clipping plane events
 	CLEAR_CLIPPING_PLANES: "VIEWER_CLEAR_CLIPPING_PLANES",

@@ -1,35 +1,11 @@
-logout
-.container-fluid(global)
-	//#ui2-header
-		#nav-version-control
-			//div.nav-project-title  <b>{{Data.ProjectData.name}}</b>
-			if ui.header
-				each uicomp in ui.header
-					!= renderMe(uicomp["template"], locals)
-	//if ui.viewing
-		each uicomp in ui.viewing
-			!= renderMe(uicomp["template"], locals)
-
-	//#nav-version-control(ng-controller='RevisionCtrl', ng-show="Data.ui.revisionSelector")
+.container-fluid(global ng-if="!vm.state.bid4free")
 	#project-viewport-container.row
 		viewermanager
-			//viewer.project-viewport.viewport(manager="manager")
-	.ui2
-		//#ui2-left
-			if ui.left
-				each uicomp in ui.left
-					!= renderMe(uicomp["template"], locals)
-		#ui2-right
-			if ui.right
-				each uicomp in ui.right
-					!= renderMe(uicomp["template"], locals)
 
-	//if ui.walkthrough
-		each uicomp in ui.walkthrough
-			!= renderMe(uicomp["template"], locals)
-
-	project
-	panel#leftPanel(position="left")
-	panel#rightPanel(position="right")
+	panel#leftPanel(account="vm.account", project="vm.project", branch="vm.branch", revision="vm.revision", position="left")
+	panel#rightPanel(account="vm.account", project="vm.project", branch="vm.branch", revision="vm.revision", position="right")
 	bottom-buttons
 	qr-code-reader
+
+div(ng-if="vm.state.bid4free")
+	bid4free(account="vm.state.account" project="vm.state.project" branch="vm.state.branch" revision="vm.state.revision" state="vm.state")

@@ -1,0 +1,35 @@
+div(ng-switch="vm.toShow")
+
+	// Add group
+	#groupsAdd(ng-switch-when="showAdd" layout-margin)
+		div(layout="column")
+			h4#addGroupTitle Add a new group
+			md-input-container.md-block(md-no-float="")
+				input(placeholder="Name", ng-model="vm.name")
+			div(layout="row")
+				#groupColour(style="background:{{vm.colourToString(vm.colourPickerColour)}}")
+				tdr-colour-picker(title="Change Colour" on-colour-change="vm.colourPickerChange(colour)" offset="10 -20")
+			div(layout="row" layout-align="start")
+				md-button.md-raised.md-accent#groupsSave(ng-click="vm.saveGroup()", ng-disabled="vm.saveDisabled") Save
+
+	// Groups list
+	#groupsList(ng-switch-when="showGroups")
+		md-list
+			md-list-item.md-1-line(ng-repeat="group in vm.groups" ng-click="vm.showGroup($index)")
+				div(layout="row" layout-align="start" flex)
+					.groupColourBar(flex="none", style="background:{{vm.colourToString(group.colour)}}")
+					div(flex)
+						p {{group.name}}
+						md-divider
+
+	// Group
+	#groupsGroup(ng-switch-when="showGroup" layout="column")
+		#groupHeader(layout="row" layout-align="start" flex)
+			.groupColourBar(flex="none", style="background:{{vm.colourToString(vm.selectedGroup.colour)}}")
+			div(flex)
+				p {{vm.selectedGroup.name}}
+		md-switch(ng-model="vm.editingGroup" aria-label="Edit group") {{vm.editingText}}
+		tdr-colour-picker(title="Change Colour" on-colour-change="vm.colourPickerChange(colour)" offset="20 0" colour="vm.selectedGroup.colour")
+		#deleteGroup(layout="column" layout-align="start start")
+			md-button.md-raised.md-warn#deleteGroupButton(ng-click="vm.deleteGroup()") Delete group
+			p This will not delete the objects

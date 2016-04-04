@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.factory("DocsService", DocsService);
 
-	DocsService.$inject = ["$http", "$q", "StateManager", "serverConfig"];
+	DocsService.$inject = ["$http", "$q", "serverConfig"];
 
-	function DocsService($http, $q, StateManager, serverConfig) {
+	function DocsService($http, $q, serverConfig) {
 		var getDocs = function (account, project, objectId) {
 			var i,
 				length,

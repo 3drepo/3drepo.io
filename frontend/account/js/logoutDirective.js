@@ -23,32 +23,22 @@
 
 	function logout() {
 		return {
-			restrict: 'EA',
-			templateUrl: 'logout.html',
+			restrict: "EA",
+			templateUrl: "logout.html",
 			scope: {},
 			controller: LogoutCtrl,
-			controllerAs: 'vm',
+			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	LogoutCtrl.$inject = ["$scope", "Auth", "StateManager"];
+	LogoutCtrl.$inject = ["Auth"];
 
-	function LogoutCtrl ($scope, Auth, StateManager) {
+	function LogoutCtrl (Auth) {
 		var vm = this;
 
 		vm.logout = function () {
-			Auth.logout().then(
-				function _logoutCtrlLogoutSuccess () {
-					$scope.errorMessage = null;
-					StateManager.state.account = null;
-					StateManager.updateState();
-				},
-				function _logoutCtrlLogoutFailure (reason) {
-					$scope.errorMessage = reason;
-					StateManager.updateState();
-				}
-			);
+			Auth.logout();
 		};
 	}
 }());

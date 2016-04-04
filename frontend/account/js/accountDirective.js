@@ -23,32 +23,47 @@
 
 	function accountDir() {
 		return {
-			restrict: 'EA',
-			templateUrl: 'account.html',
-			scope: {},
+			restrict: "EA",
+			templateUrl: "account.html",
+			scope: {
+				state: "=",
+				account: "="
+			},
 			controller: AccountCtrl,
-			controllerAs: 'vm',
+			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	AccountCtrl.$inject = ["AccountService"];
+	AccountCtrl.$inject = ["$scope", "AccountService"];
 
-	function AccountCtrl(AccountService) {
+	function AccountCtrl($scope, AccountService) {
 		var vm = this,
 			promise;
 
 		/*
 		 * Get the account data
 		 */
-		promise = AccountService.getData();
-		promise.then(function (data) {
-			if (data.statusText === "OK") {
-				vm.username = data.data.username;
-				vm.firstName = data.data.firstName;
-				vm.lastName = data.data.lastName;
-				vm.email = data.data.email;
-				vm.projectsGrouped = data.data.projectsGrouped;
+		$scope.$watch("vm.account", function()
+		{
+			if (vm.account)
+			{
+				promise = AccountService.getData(vm.account);
+				promise.then(function (data) {
+					vm.username        = data.username;
+					vm.firstName       = data.firstName;
+					vm.lastName        = data.lastName;
+					vm.email           = data.email;
+					vm.hasAvatar       = data.hasAvatar;
+					vm.avatarURL       = data.avatarURL;
+					vm.projectsGrouped = data.projectsGrouped;
+				});
+			} else {
+				vm.username        = null;
+				vm.firstName       = null;
+				vm.lastName        = null;
+				vm.email           = null;
+				vm.projectsGrouped = null;
 			}
 		});
 	}

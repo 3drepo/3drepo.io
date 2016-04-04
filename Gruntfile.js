@@ -14,41 +14,17 @@ module.exports = function(grunt) {
         },
 
         concat: {
-			options : {
-				sourceMap :true
-			},
-
-            build: {
-                src: [
-                    'public/plugins/base/*.js',
-                    'public/plugins/login/*.js',
-                    'public/plugins/account/*.js',
-                    'public/plugins/project/*.js',
-                    'public/plugins/oculus/*.js',
-                    'public/plugins/navigation/*.js',
-                    'public/plugins/viewpoints/*.js',
-                    'public/plugins/inspect/*.js',
-                    'public/plugins/revision/*.js',
-                    'public/plugins/panels/*.js',
-                    'public/plugins/tree/*.js',
-                    'public/plugins/meta/*.js',
-                    'public/plugins/issues/*.js',
-                    'public/plugins/revisionselector/*.js',
-                    'public/plugins/diffselector/*.js',
-                    'public/plugins/clip/*.js',
-                    'public/plugins/diff/*.js',
-                    'public/plugins/view/*.js',
-                    'public/plugins/sid/*.js',
-                    'public/plugins/walkthrough/*.js',
-                    'public/plugins/viewing/*.js'
-                ],
-                dest: 'public/dist/plugins.concat.js'
-            },
-
 			allJS: {
+				options : {
+					sourceMap: true
+				},
+
 				src: [
+					'frontend/project/js/threed/viewerutil.js',
+					'frontend/project/js/threed/*.js',
 					'frontend/**/*.js'
 				],
+
 				dest: 'public/dist/three_d_repo.js'
 			},
 
@@ -56,6 +32,7 @@ module.exports = function(grunt) {
 				src: [
 					'frontend/**/*.css'
 				],
+
 				dest: 'public/dist/three_d_repo.css'
 			}
         },
@@ -64,11 +41,6 @@ module.exports = function(grunt) {
             options: {
 				sourceMap : true,
 				mangle: false
-            },
-            build: {
-                files: {
-                    'public/dist/plugins.min.js' : ['public/dist/plugins.concat.js']
-                }
             },
 
 			allJS: {
@@ -149,7 +121,6 @@ module.exports = function(grunt) {
 
 		cssmin: {
 			options: {
-				sourceMap : true,
 				shorthandCompacting: false,
 				roundingPrecision: -1
 			},
@@ -170,7 +141,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-cssmin');
 	grunt.loadNpmTasks('grunt-env');
 
-	grunt.registerTask('default', ['concat', 'uglify', 'webfont']);
+	grunt.registerTask('default', ['concat', 'uglify', 'webfont', 'concat:allJS','concat:allCSS', 'uglify:allJS', 'cssmin:allCSS']);
 	grunt.registerTask('test', ['jshint:backend', 'mochaTest:unit']);
 	grunt.registerTask('test-integrated', ['env:test', 'mochaTest:integrated']);
 	grunt.registerTask('frontend', ['concat:allJS','concat:allCSS', 'uglify:allJS', 'cssmin:allCSS']);

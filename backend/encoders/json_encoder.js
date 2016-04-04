@@ -244,7 +244,7 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, par
 
 				var childTreeJSON = {
 					"name"      : childName,
-	                "path"      : current.path + "__" + childID,
+					"path"      : current.path + "__" + childID,
 					"_id"       : childID,
 					"shared_id" : childSID,
 					"children"  : [],
@@ -252,15 +252,17 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, par
 					"project"	: project
 				};
 
-	            child.path = childTreeJSON.path;
+				child.path = childTreeJSON.path;
 
-				getFullTreeRecurse(dbInterface, sceneGraph, child, account, project, childTreeJSON, function(err, recurseJSON) {
-					if (err.value) {
-						return loopCallback(err);
-					}
+				setTimeout( function () {
+					getFullTreeRecurse(dbInterface, sceneGraph, child, account, project, childTreeJSON, function(err, recurseJSON) {
+						if (err.value) {
+							return loopCallback(err);
+						}
 
-					loopCallback(null, recurseJSON);
-				});
+						loopCallback(null, recurseJSON);
+					});
+				}, 0);
 			}
 		}, function (err, children) {
 			if (err)
@@ -298,7 +300,7 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, par
 };
 
 function getFullTree(dbInterface, account, project, branch, revision, path, callback) {
-	// TODO: Check permisssions here
+	// TODO: Check permissions here
 
 	dbInterface.logger.logInfo("Obtaining full tree for [" + account + ", " + project + ", " + branch + ", " + revision + "]");
 
@@ -383,20 +385,37 @@ exports.route = function(router)
 	});
 
 	router.get("json", "/:account", function(req, res, params, err_callback) {
-		dbInterface(req[C.REQ_REPO].logger).getUserInfo(params.account, function(err, user)
-		{
-			if(err.value) {
-				err_callback(err);
-			} else {
-				if(user)
-				{
-					user.username = params.account;
-					err_callback(responseCodes.OK, user);
+
+		if (req.query.hasOwnProperty('bids')){
+			dbInterface(req[C.REQ_REPO].logger).getUserBidInfo(params.account, function(err, bids)
+			{
+				if(err.value) {
+					err_callback(err);
+				} else {
+
+					err_callback(responseCodes.OK, bids);
+
 				}
-				else
-					err_callback(responseCodes.USER_NOT_FOUND);
-			}
-		});
+			});
+
+		} else {
+			dbInterface(req[C.REQ_REPO].logger).getUserInfo(params.account, function(err, user)
+			{
+				if(err.value) {
+					err_callback(err);
+				} else {
+					if(user)
+					{
+						user.username = params.account;
+						err_callback(responseCodes.OK, user);
+					}
+					else
+						err_callback(responseCodes.USER_NOT_FOUND);
+				}
+			});
+		}
+
+
 	});
 
 	router.get("json", "/:account/:project", function(req, res, params, err_callback) {
@@ -486,6 +505,8 @@ exports.route = function(router)
 	});
 
 	router.get("json", "/:account/:project/issues", function(req, res, params, err_callback) {
+		console.log("GET ISSUES");
+
 		dbInterface(req[C.REQ_REPO].logger).getIssues(params.account, params.project, "master", null, true, function(err, issueList) {
 			if(err.value)
 				err_callback(err);
@@ -668,7 +689,7 @@ exports.route = function(router)
     router.get("json", "/:account/:project/:uid", function (req, res, params, err_callback) {
         if (params.subformat == "mpc") {
             dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req.url, "json_mpc", function (callback) {
-                dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, false, {}, function (err, type, uid, fromStash, scene) {
+                dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, {}, function (err, type, uid, fromStash, scene) {
                     if (err.value) {
                         return err_callback(err);
                     }
@@ -677,6 +698,7 @@ exports.route = function(router)
                         var mesh = scene.meshes[params.uid];
                         var meshCounter = 0;
                         var vertsCount = 0;
+			var bufferPosition = 0;
 
                         if (mesh) {
                             if (mesh[C.REPO_NODE_LABEL_COMBINED_MAP]) {
@@ -749,6 +771,10 @@ exports.route = function(router)
                                         var currentMeshVTo = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO];
                                         var numVertices = currentMeshVTo - currentMeshVFrom;
 
+                                        var currentMeshTFrom = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_FROM];
+                                        var currentMeshTTo = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO];
+                                        var numFaces = currentMeshTTo - currentMeshTFrom;
+
                                         vertsCount += numVertices;
 
                                         // If the number of vertices for this mesh is
@@ -756,22 +782,52 @@ exports.route = function(router)
                                         if (numVertices > C.SRC_VERTEX_LIMIT) {
                                             vertsCount = 0;
 
+						var numActualVertices = 0;
+						var reindexMap = {};
+
+						for (var face_idx = 0; face_idx < numFaces; face_idx++) {
+							// Get number of components in the next face
+							var num_comp = mesh.faces.buffer.readInt32LE(bufferPosition);
+
+							if (num_comp !== 3) {
+								logger.logError("Non triangulated face with " + num_comp + " vertices.");
+							} else {
+								// Re-index faces
+								for (var vert_comp = 0; vert_comp < num_comp; vert_comp++) {
+									// First int32 is number of sides (i.e. 3 = Triangle)]
+									// After that there Int32 for each index (0..2)
+									var byte_position = bufferPosition + (vert_comp + 1) * 4;
+									var idx_val = mesh.faces.buffer.readInt32LE(byte_position);
+
+									if (!reindexMap.hasOwnProperty(idx_val)) {
+										reindexMap[idx_val] = true;
+										numActualVertices++;
+									}
+								}
+							}
+
+							bufferPosition += (num_comp + 1) * 4;
+						}
+
                                             // We need to split the mesh into this many sub-meshes
-                                            var numMeshesRequired = Math.ceil(numVertices / C.SRC_VERTEX_LIMIT);
+                                            var numMeshesRequired = Math.ceil(numActualVertices / C.SRC_VERTEX_LIMIT);
 
                                             // Add an entry for all the created meshes
                                             for (var j = 0; j < numMeshesRequired; j++) {
+                                                meshCounter += 1;
+
                                                 map["name"] = utils.uuidToString(subMeshKeys[i]) + "_" + j;
                                                 map["appearance"] = utils.uuidToString(subMeshes[i]["mat_id"]);
                                                 map["min"] = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][0].join(" ");
                                                 map["max"] = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][1].join(" ");
                                                 map["usage"] = [params.uid + "_" + meshCounter]
 
-                                                meshCounter += 1;
 
                                                 outJSON["mapping"].push(map);
                                                 map = {};
                                             }
+
+						meshCounter += 1;
                                         } else {
                                             // If this mesh pushes the combined mesh over the vertex limit
                                             // then start a new supermesh
@@ -787,6 +843,8 @@ exports.route = function(router)
                                             map["usage"] = [params.uid + "_" + meshCounter]
 
                                             outJSON["mapping"].push(map);
+
+						bufferPosition += numFaces * 4 * 4;
                                         }
                                     }
 
@@ -808,8 +866,8 @@ exports.route = function(router)
         walkthrough(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.index, err_callback);
     });
 
-    router.get('json', '/:account/:project/revision/:branch/head/:searchstring/searchtree', function(req, res, params, err_callback) {
-        searchTree(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.branch, null, params.searchstring, err_callback);
+    router.get('json', '/:account/:project/revision/:branch/head/searchtree', function(req, res, params, err_callback) {
+        searchTree(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.branch, null, params.query.searchString, err_callback);
     });
 
 	router.get("json", "/:account/:project/roles", function( req, res, params, err_callback ) {

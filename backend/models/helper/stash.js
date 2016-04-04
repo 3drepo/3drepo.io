@@ -7,7 +7,7 @@ function _getGridFSBucket (dbCol, format){
 	'use strict';
 
 	return new GridFSBucket(
-		ModelFactory.db.db(dbCol.account), 
+		ModelFactory.db.db(dbCol.account),
 		{ bucketName:  `${dbCol.project}.stash.${format}`}
 	);
 }
@@ -16,15 +16,13 @@ function findStashByFilename(dbCol, format, filename){
 	'use strict';
 
 	let bucket = _getGridFSBucket(dbCol, format);
-	
+
 	return bucket.find({ filename }).toArray().then(files => {
 		if(!files.length){
-			//console.log('no stash found');
 			dbCol.logger.logInfo(filename + " - Attempt to retrieved from stash but not found");
 			return Promise.resolve(false);
 			
 		} else {
-			//console.log('stash found!');
 			dbCol.logger.logInfo(filename + " - Retrieved from stash");
 
 			return new Promise((resolve) => {
@@ -43,7 +41,7 @@ function findStashByFilename(dbCol, format, filename){
 	});
 }
 
-function saveStashByFileName(dbCol, format, filename, buffer){
+function saveStashByFilename(dbCol, format, filename, buffer){
 	'use strict';
 
 	let bucket = _getGridFSBucket(dbCol, format);
@@ -67,5 +65,5 @@ function saveStashByFileName(dbCol, format, filename, buffer){
 
 module.exports = {
 	findStashByFilename: findStashByFilename,
-	saveStashByFileName: saveStashByFileName
+	saveStashByFilename: saveStashByFilename
 };

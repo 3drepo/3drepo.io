@@ -86,8 +86,6 @@ repoLogger.prototype.logMessage = function(type, msg)
 {
 	"use strict";
 
-    //console.log(type + ": " + (new Date()).toString() + "\t" + this.uid + "\t" + msg);
-
     var currentTime  = (new Date()).getTime();
     var timeDiff     = currentTime - this.startTime;
 

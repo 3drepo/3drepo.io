@@ -1,60 +1,59 @@
 // Progress
 tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 
-// Issues list
-md-list(ng-show="vm.showIssueList")
-	div(ng-repeat="issue in vm.issuesToShow")
-		.issueHeader(ng-class="{selectedIssue: issue.selected, notSelectedIssue: !issue.selected, closedIssue: issue.closed}")
-			md-list-item.md-2-line.issueTitle(ng-click="vm.showSelectedIssue($index, false)")
-				div.md-list-item-text
-					h3 {{issue.title}}
-					.issueTitleInfo(layout="row" layout-align="space-between center")
-						p {{issue.owner}}
-						p {{issue.timeStamp}}
-			.issueRoleMarkers(layout="column")
-				div(ng-repeat="roleColor in issue.assignedRolesColors", style="background:{{roleColor}};", flex)
+// Add alert hook
+#addAlert(ng-if="vm.showAddAlert" flex)
+	#addAlertBackground(flex layout-fill)
+		#addAlertInfo(layout="column" flex layout-fill layout-align="center center")
+			h3 {{vm.addAlertText}}
+			md-button.md-primary(ng-click="vm.closeAddAlert()") OK
 
-			.issueInfo(ng-if="issue.showInfo", layout="row" layout-align="start center")
-				div(flex)
-					h5 {{vm.infoText}}
-				div(flex="15")
-					md-button.md-icon-button(ng-click="vm.hideInfo($index)", aria-label="Hide info")
-						md-icon(md-font-icon="fa-times-circle", class="fa")
+div(ng-switch="vm.toShow")
+	// Issues list
+	md-list(ng-switch-when="showIssues")
+		div(ng-repeat="issue in vm.issuesToShow")
+			.issueHeader(ng-class="{closedIssue: issue.closed}")
+				md-list-item.md-2-line.issueTitle(ng-click="vm.showSelectedIssue($index, false)")
+					div.md-list-item-text
+						h3 {{issue.title}}
+						.issueTitleInfo(layout="row" layout-align="start")
+							p(flex="60") {{issue.owner}}
+							span(flex="30" layout="row" layout-align="end")
+								p {{issue.timeStamp}}
+				.issueRoleMarkers(layout="column")
+					div(ng-repeat="roleColor in issue.assignedRolesColors", style="background:{{roleColor}};", flex)
 
-		md-divider
-	//issue(
-		ng-repeat="issue in vm.issuesToShow",
-		data="issue",
-		on-comments-toggled="vm.commentsToggled(issueId)"
-		comments-toggled-issue-id="vm.commentsToggledIssueId"
-		on-toggle-close-issue="vm.toggleCloseIssue(issue)"
+				.issueInfo(ng-if="issue.showInfo", layout="row" layout-align="start center")
+					div(flex)
+						h5 {{vm.infoText}}
+					div(flex="15")
+						md-button.md-icon-button(ng-click="vm.hideInfo($index)", aria-label="Hide info")
+							md-icon(md-font-icon="fa-times-circle", class="fa")
+
+			md-divider
+
+	// Issue
+	issue(
+		ng-switch-when="showIssue"
+		data="vm.selectedIssue"
+		auto-save-comment="vm.autoSaveComment"
+		on-comment-auto-saved="vm.commentAutoSaved()"
 		available-roles="vm.availableRoles"
-		project-user-roles="vm.projectUserRoles"
-		on-issue-assign-change="vm.showPins()")
+		project-user-roles="vm.projectUserRoles",
+		on-issue-assign-change="vm.issueAssignChange()"
+		on-toggle-close-issue="vm.toggleCloseIssue(issue)")
 
-// Issue
-issue(
-	ng-if="vm.showIssue"
-	data="vm.selectedIssue"
-	auto-save-comment="vm.autoSaveComment"
-	on-comment-auto-saved="vm.commentAutoSaved()"
-	available-roles="vm.availableRoles"
-	project-user-roles="vm.projectUserRoles",
-	on-issue-assign-change="vm.issueAssignChange()"
-	on-toggle-close-issue="vm.toggleCloseIssue(issue)")
+	// Add issue
+	#issuesAddContainer(ng-switch-when="showAdd")
+		h4 Add Issue
+		md-input-container.md-block(md-no-float="")
+			input(placeholder="Title", ng-model="vm.title")
 
-// Add issue
-#issuesAddContainer(ng-if="vm.showAddIssue")
-	h4 Add Issue
-	md-input-container.md-block(md-no-float="")
-		input(placeholder="Title", ng-model="vm.title")
+		md-input-container.md-block(md-no-float="")
+			textarea(placeholder="Comment", ng-model="vm.comment")
 
-	md-input-container.md-block(md-no-float="")
-		textarea(placeholder="Comment", ng-model="vm.comment")
-
-	md-button.md-raised.md-accent(ng-click="vm.saveIssue()", ng-disabled="vm.saveIssueDisabled") Save
+		md-button.md-raised.md-accent(ng-click="vm.saveIssue()", ng-disabled="vm.saveIssueDisabled") Save
 
 // Info
 .issuesInfo(ng-if="vm.showIssuesInfo")
 	p {{vm.issuesInfo}}
-

@@ -40,6 +40,11 @@
 		var vm = this;
 
 		/*
+		 * Init
+		 */
+		vm.bif4FreeEnabled = false;
+
+		/*
 		 * Handle changes to the state manager Data
 		 * Reformat the grouped projects to enable toggling of projects list
 		 */
@@ -49,7 +54,7 @@
 				vm.accounts.push({
 					name: key,
 					projects: value,
-					showProjects: false
+					showProjects: true
 				});
 			});
 		});
@@ -71,6 +76,11 @@
 		vm.toggleProjectsList = function (index) {
 			vm.accounts[index].showProjects = !vm.accounts[index].showProjects;
 			vm.accounts[index].showProjectsIcon = vm.accounts[index].showProjects ? "fa fa-folder-open-o" : "fa fa-folder-open-o";
+		};
+		
+		vm.b4f = function (account, project) {
+			console.log(account, project);
+			$location.path("/" + account + "/" + project + "/bid4free", "_self");
 		};
 	}
 }());
