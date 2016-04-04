@@ -333,24 +333,21 @@ var Viewer = {};
 				}
 
 				//add map tiles only when mouse down -> move -> mouse up
-				var changed = false;
-				var viewChangeHandler = function(){
-					changed = true;
-				};
+				// var changed = false;
+				// var viewChangeHandler = function(){
+				// 	changed = true;
+				// };
 
-				self.onViewpointChanged(viewChangeHandler);
+				// self.onViewpointChanged(viewChangeHandler);
 
-				self.onMouseDown(function(){
-					console.log('mouse down and try to move');
+				// var addTileMouseDown = false;
 
-					
+				// self.onMouseDown(function(){
+				// 	addTileMouseDown = true;
+				// });
 
-					var mouseUpHandler = function(){
-						console.log('mouse up');
-						self.offMouseUp(mouseUpHandler);
-					};
-
-					self.onMouseUp(mouseUpHandler);
+				self.onMouseUp(function(){
+					self.addMapTileByViewPoint();
 				});
 
 				// init add map tiles
@@ -577,7 +574,7 @@ var Viewer = {};
 		};
 
 		this.viewPointChanged = function(event) {
-			console.log('vp changed');
+			//console.log('vp changed');
 			var vpInfo = self.getCurrentViewpointInfo();
 			var eye = vpInfo.position;
 			var viewDir = vpInfo.view_dir;

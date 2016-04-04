@@ -16,15 +16,19 @@
  **/
 
 var ViewerUtil;
-
+	var ViewerUtilListeners = [];
+	var ViewerUtilMyListeners = [];
+	
 (function() {
 	"use strict";
 
-	ViewerUtilClass = function() {};
+	ViewerUtil = function() {};
+
+
 
 	var eventElement = document;
 
-	ViewerUtilClass.prototype.cloneObject = function(obj)
+	ViewerUtil.prototype.cloneObject = function(obj)
 	{
     	if (!obj || typeof obj !== 'object') {
         	return obj;
@@ -43,48 +47,49 @@ var ViewerUtil;
 	};
 
 	// Definition of global functions
-	ViewerUtilClass.prototype.triggerEvent = function(name, event)
+	ViewerUtil.prototype.triggerEvent = function(name, event)
 	{
 		var e = new CustomEvent(name, { detail: event });
 		eventElement.dispatchEvent(e);
 	};
 
-	ViewerUtilClass.listeners = [];
-	ViewerUtilClass.myListeners = [];
 
-	ViewerUtilClass.prototype.onEvent = function(name, callback)
+	ViewerUtil.prototype.onEvent = function(name, callback)
 	{
-		ViewerUtilClass.listeners.push(callback);
+		ViewerUtilListeners.push(callback);
 
 		var myListener= function(event) {
 			callback(event.detail);
 		};
 
-		ViewerUtilClass.myListeners.push(myListener);
+		ViewerUtilMyListeners.push(myListener);
 
-		eventElement.addEventListener(name, myListener);
+		eventElement.addEventListener(name, function(event) {
+			callback(event.detail);
+		});
 	};
 
-	ViewerUtilClass.prototype.offEvent = function(name, callback)
+	ViewerUtil.prototype.offEvent = function(name, callback)
 	{
-		var index = ViewerUtilClass.listeners.indexOf(callback);
+		var index = ViewerUtilListeners.indexOf(callback);
 		if (index === -1){
 			return;
 		}
 
-		eventElement.removeEventListener(name, ViewerUtilClass.myListeners[index]);
-		ViewerUtilClass.listeners.splice(index, 1);
-		ViewerUtilClass.myListeners.splice(index, 1);
+		eventElement.removeEventListener(name, ViewerUtilMyListeners[index]);
+
+		ViewerUtilListeners.splice(index, 1);
+		ViewerUtilMyListeners.splice(index, 1);
 
 	};
 
-	ViewerUtilClass.prototype.eventFactory = function(name)
+	ViewerUtil.prototype.eventFactory = function(name)
 	{
 		var self = this;
 		return function(event) { self.triggerEvent(name, event); };
 	};
 
-	ViewerUtilClass.prototype.getAxisAngle = function(from, at, up) {
+	ViewerUtil.prototype.getAxisAngle = function(from, at, up) {
 		var x3dfrom = new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
 		var x3dat = new x3dom.fields.SFVec3f(at[0], at[1], at[2]);
 		var x3dup = new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
@@ -99,7 +104,7 @@ var ViewerUtil;
 		return Array.prototype.concat(q[0].toGL(), q[1]);
 	};
 
-	ViewerUtilClass.prototype.quatLookAt = function (up, forward)
+	ViewerUtil.prototype.quatLookAt = function (up, forward)
 	{
 		forward.normalize();
 		up.normalize();
@@ -116,7 +121,7 @@ var ViewerUtil;
 		return new x3dom.fields.Quarternion(x,y,z,w);
 	};
 
-	ViewerUtilClass.prototype.rotationBetween = function(prevUp, prevView, currUp, currView)
+	ViewerUtil.prototype.rotationBetween = function(prevUp, prevView, currUp, currView)
 	{
 		/*
 		prevView = this.normalize(prevView);
@@ -165,7 +170,7 @@ var ViewerUtil;
 	};
 
 	// TODO: Should move this to somewhere more general (utils ? )
-	ViewerUtilClass.prototype.axisAngleToMatrix = function(axis, angle) {
+	ViewerUtil.prototype.axisAngleToMatrix = function(axis, angle) {
 		var mat = new x3dom.fields.SFMatrix4f();
 
 		var cosAngle = Math.cos(angle);
@@ -192,19 +197,19 @@ var ViewerUtil;
 		return mat;
 	};
 
-	ViewerUtilClass.prototype.evDist = function(evt, posA) {
+	ViewerUtil.prototype.evDist = function(evt, posA) {
 		return Math.sqrt(Math.pow(posA[0] - evt.position.x, 2) +
 			Math.pow(posA[1] - evt.position.y, 2) +
 			Math.pow(posA[2] - evt.position.z, 2));
 	};
 
-	ViewerUtilClass.prototype.dist = function(posA, posB) {
+	ViewerUtil.prototype.dist = function(posA, posB) {
 		return Math.sqrt(Math.pow(posA[0] - posB[0], 2) +
 			Math.pow(posA[1] - posB[1], 2) +
 			Math.pow(posA[2] - posB[2], 2));
 	};
 
-	ViewerUtilClass.prototype.rotToRotation = function(from, to) {
+	ViewerUtil.prototype.rotToRotation = function(from, to) {
 		var vecFrom = new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
 		var vecTo = new x3dom.fields.SFVec3f(to[0], to[1], to[2]);
 
@@ -215,7 +220,7 @@ var ViewerUtil;
 		return crossVec.x + " " + crossVec.y + " " + crossVec.z + " " + Math.acos(dot);
 	};
 
-	ViewerUtilClass.prototype.rotAxisAngle = function(from, to) {
+	ViewerUtil.prototype.rotAxisAngle = function(from, to) {
 		var vecFrom = new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
 		var vecTo = new x3dom.fields.SFVec3f(to[0], to[1], to[2]);
 
@@ -230,20 +235,20 @@ var ViewerUtil;
 	};
 
 	// TODO: Shift these to some sort of Matrix/Vec library
-	ViewerUtilClass.prototype.scale = function(v, s) {
+	ViewerUtil.prototype.scale = function(v, s) {
 		return [v[0] * s, v[1] * s, v[2] * s];
 	};
 
-	ViewerUtilClass.prototype.normalize = function(v) {
+	ViewerUtil.prototype.normalize = function(v) {
 		var sz = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
 		return this.scale(v, 1 / sz);
 	};
 
-	ViewerUtilClass.prototype.dotProduct = function(a, b) {
+	ViewerUtil.prototype.dotProduct = function(a, b) {
 		return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 	};
 
-	ViewerUtilClass.prototype.crossProduct = function(a, b) {
+	ViewerUtil.prototype.crossProduct = function(a, b) {
 		var x = a[1] * b[2] - a[2] * b[1];
 		var y = a[2] * b[0] - a[0] * b[2];
 		var z = a[0] * b[1] - a[1] * b[0];
@@ -251,11 +256,11 @@ var ViewerUtil;
 		return [x, y, z];
 	};
 
-	ViewerUtilClass.prototype.vecAdd = function(a, b) {
+	ViewerUtil.prototype.vecAdd = function(a, b) {
 		return [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
 	};
 
-	ViewerUtilClass.prototype.vecSub = function(a, b) {
+	ViewerUtil.prototype.vecSub = function(a, b) {
 		return this.vecAdd(a, this.scale(b, -1));
 	};
 
@@ -265,11 +270,11 @@ var ViewerUtil;
 		* @param string
 		* @returns {*}
 		*/
-	ViewerUtilClass.prototype.escapeCSSCharacters = function(string)
+	ViewerUtil.prototype.escapeCSSCharacters = function(string)
 	{
 		// Taken from http://stackoverflow.com/questions/2786538/need-to-escape-a-special-character-in-a-jquery-selector-string
 		return string.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, "\\$&");
 	};
 
-	ViewerUtil = new ViewerUtilClass();
+	ViewerUtil = new ViewerUtil();
 }());

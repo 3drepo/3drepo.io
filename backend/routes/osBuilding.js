@@ -295,9 +295,9 @@ function genglX(format, req, res){
 
 			console.log('saving to stash and dont wait for response');
 
-			stash.saveStashByFileName(dbCol, 'gltf', gltfUrl, new Buffer(JSON.stringify(glTF.json)));
+			stash.saveStashByFilename(dbCol, 'gltf', gltfUrl, new Buffer(JSON.stringify(glTF.json)));
 			//bin file should also in .stash.gltf but with .bin as filename extension
-			stash.saveStashByFileName(dbCol, 'gltf', binUrl, glTF.buffer);
+			stash.saveStashByFilename(dbCol, 'gltf', binUrl, glTF.buffer);
 			
 
 			return Promise.resolve(glTF);
@@ -378,7 +378,7 @@ function getMapTiles(req, res){
 				layer: `${req.params.style} 3857`, 
 				z, x, y
 			}).then(image => {
-				stash.saveStashByFileName(dbCol, 'png', filename, image);
+				stash.saveStashByFilename(dbCol, 'png', filename, image);
 				return Promise.resolve(image);
 			});
 		}
@@ -391,7 +391,8 @@ function getMapTiles(req, res){
 		res.end();
 
 	}).catch(err => {
-		console.error(err);
+		console.log(stash)
+		console.error(err.stack);
 		if(err.message){
 			res.status(500).json({ message: err.message});
 		} else {
