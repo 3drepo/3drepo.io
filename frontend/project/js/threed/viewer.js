@@ -646,12 +646,12 @@ var Viewer = {};
 				}
 			}
 
-
-			callback(self.EVENT.OS_BUILDING_CLICK,
-			{
-				//id: pickingInfo.pickObj.partID
-				id : id
-			});
+			//TO-DO: use proper way to check os building id
+			if(id.indexOf('-') === -1){
+				callback(self.EVENT.OS_BUILDING_CLICK,{
+					id : id
+				});
+			}
 
 			callback(self.EVENT.OBJECT_SELECTED, {
 				account: account,
@@ -1710,9 +1710,9 @@ var Viewer = {};
 			var up = vpInfo.up;
 			var right = vpInfo.right;
 
-			//console.log('camera', camera);
+			console.log('camera', camera);
 			//console.log('near', near);
-			//console.log('view_dir', view_dir);
+			console.log('view_dir', view_dir);
 			//console.log('fov', fov);
 			//console.log('up', up);
 			//console.log('right', right);
@@ -1758,16 +1758,16 @@ var Viewer = {};
 			//console.log('xx', coordsX);
 			//console.log('zz', coordsZ);
 
-			var lookingToInf = (camera[2] > 0 && coordsZ[2] < coordsZ[0] || camera[2] < 0 && coordsZ[2] > coordsZ[0]);
-			if(lookingToInf){
+			// var lookingToInf = (camera[2] > 0 && coordsZ[2] < coordsZ[0] || camera[2] < 0 && coordsZ[2] > coordsZ[0]);
+			// if(lookingToInf){
 
-				console.log('Looking to inf');
-				coordsZ[0] = 600;
-				coordsZ[1] = 600;
-				coordsZ[2] = -600;
-				coordsZ[3] = -600;
+			// 	console.log('Looking to inf');
+			// 	coordsZ[0] = camera[2] + 600;
+			// 	coordsZ[1] = camera[2] + 600;
+			// 	coordsZ[2] = camera[2] - 600;
+			// 	coordsZ[3] = camera[2] - 600;
 
-			}
+			// }
 
 
 			var mapImgPosInfo = self._getMapImagePosInfo();
@@ -1776,11 +1776,11 @@ var Viewer = {};
 
 			var startX = Math.ceil(Math.min.apply(Math, coordsX) / roundUpPlace) * roundUpPlace;
 			var endX = Math.ceil(Math.max.apply(Math, coordsX) / roundUpPlace) * roundUpPlace;
-			// console.log('startX, endX', startX, endX);
+			console.log('startX, endX', startX, endX);
 
 			var startZ = Math.ceil(Math.min.apply(Math, coordsZ) / roundUpPlace) * roundUpPlace;
 			var endZ = Math.ceil(Math.max.apply(Math, coordsZ) / roundUpPlace) * roundUpPlace;
-			// console.log('startZ, endZ', startZ, endZ);
+			console.log('startZ, endZ', startZ, endZ);
 
 			var mapTileCount = 0;
 			var tileDists = [];
@@ -1798,6 +1798,8 @@ var Viewer = {};
 			tileDists.sort(function(a, b){
 				return a.dist - b.dist;
 			});
+
+			console.log('tileDists Len', tileDists.length);
 
 			var mapImgStep = mapImgsize;
 			//console.log('mapImgStep', mapImgStep);
@@ -1819,10 +1821,10 @@ var Viewer = {};
 				return a.dist - b.dist;
 			});
 
-			//console.log('maptilecount max', mapImgTileDists.length);
-
+			console.log('maptilecount max', mapImgTileDists.length);
+			console.log(mapImgTileDists);
 			// add map tiles, only the first 15
-			for(var i=0; i<mapImgTileDists.length && i < 30; i++) {
+			for(var i=0; i<mapImgTileDists.length && i < 100; i++) {
 
 				var tile = mapImgTileDists[i].tile;
 				self.appendMapImage(mapImgsize, tile[0], tile[1]);
@@ -1831,7 +1833,7 @@ var Viewer = {};
 
 
 			//add 3d model tiles, only render first 10 tiles
-			for(var i=0; i<tileDists.length && i < 10; i++) {
+			for(var i=0; i<tileDists.length && i < 30; i++) {
 
 				var tile = tileDists[i].tile;
 
@@ -1897,7 +1899,7 @@ var Viewer = {};
 			self.addedTileRefs =  self.addedTileRefs || [];
 
 			if(self.addedTileRefs.indexOf(osGridRef) !== -1) {
-				//console.log(osGridRef + ' has already been added');
+				console.log(osGridRef + ' has already been added');
 				return;
 			}
 
