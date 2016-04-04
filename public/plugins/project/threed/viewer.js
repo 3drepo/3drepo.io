@@ -380,7 +380,7 @@ var Viewer = {};
 				});
 
 				// init add map tiles
-				self.addMapTileByViewPoint();
+				setTimeout(self.addMapTileByViewPoint, 2000);
 
 			});
 		};
@@ -565,6 +565,13 @@ var Viewer = {};
 			if (pickingInfo.pickObj)
 			{
 				var account, project;
+				
+				console.log(pickingInfo.pickObj.partID);
+				//TO-DO: change to a proper way to decide 3d model generated from ordsuy source
+				if (pickingInfo.pickObj.partID && pickingInfo.pickObj.partID.indexOf('-') === -1){
+					$.getJSON('/api/os/building-meta/' + pickingInfo.pickObj.partID, function(json) { console.log(json)});
+				}
+				
 
 				var projectParts = pickingInfo.pickObj._xmlNode ?
 					pickingInfo.pickObj._xmlNode.getAttribute("id").split("__") :
@@ -1824,13 +1831,13 @@ var Viewer = {};
 			var up = vpInfo.up;
 			var right = vpInfo.right;
 
-			// console.log('camera', camera);
-			// console.log('near', near);
-			// console.log('view_dir', view_dir);
-			// console.log('fov', fov);
-			// console.log('up', up);
-			// console.log('right', right);			
-			// console.log('ratio', ratio);
+			console.log('camera', camera);
+			//console.log('near', near);
+			console.log('view_dir', view_dir);
+			//console.log('fov', fov);
+			//console.log('up', up);
+			//console.log('right', right);
+			//console.log('ratio', ratio);
 
 			var tanHalfFOV = Math.tan(fov / 2);
 			var planeOffsetX = [1, -1, 1, -1];
@@ -1869,6 +1876,25 @@ var Viewer = {};
 			var coordsX = [coords[0][0], coords[1][0], coords[2][0], coords[3][0]];
 			var coordsZ = [coords[0][2], coords[1][2], coords[2][2], coords[3][2]];
 
+			console.log('xx', coordsX);
+			console.log('zz', coordsZ);
+
+			var lookingToInf = (camera[2] > 0 && coordsZ[2] < coordsZ[0] || camera[2] < 0 && coordsZ[2] > coordsZ[0]);
+			if(lookingToInf){
+				
+				console.log('Looking to inf');
+				coordsZ[0] = 600;
+				coordsZ[1] = 600;
+				coordsZ[2] = -600;
+				coordsZ[3] = -600;
+			
+			}
+
+
+			var mapImgPosInfo = self._getMapImagePosInfo();
+			var mapImgsize = mapImgPosInfo.mapImgsize;
+
+
 			var startX = Math.ceil(Math.min.apply(Math, coordsX) / roundUpPlace) * roundUpPlace;
 			var endX = Math.ceil(Math.max.apply(Math, coordsX) / roundUpPlace) * roundUpPlace;
 			// console.log('startX, endX', startX, endX);
@@ -1879,6 +1905,7 @@ var Viewer = {};
 
 			var mapTileCount = 0;
 			var tileDists = [];
+
 
 			for (var x = startX; x <= endX; x+=step) {
 				for (var z = startZ; z <= endZ; z+=step) {
@@ -1893,15 +1920,13 @@ var Viewer = {};
 				return a.dist - b.dist;
 			});
 
-			// http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Resolution_and_Scale
-			// set the size of a 256 map image tile. 1px = 1m
-			var mapImgsize = 1.1943 * Math.cos(self._degToRad(self.settings.mapTile.lat)) * 256;
 			var mapImgStep = mapImgsize;
+			//console.log('mapImgStep', mapImgStep);
 
 			var mapImgTileDists = [];
 
-			for (var x = startX; x <= endX; x+=mapImgStep) {
-				for (var z = startZ; z <= endZ; z+=mapImgStep) {
+			for (var x = startX + mapImgPosInfo.offsetX; x <= endX + mapImgPosInfo.offsetX; x+=mapImgStep) {
+				for (var z = startZ + mapImgPosInfo.offsetY; z <= endZ + mapImgPosInfo.offsetY; z+=mapImgStep) {
 					
 					var mapImgX = Math.floor( x / mapImgStep );
 					var mapImgZ = Math.floor( z / mapImgStep );
@@ -1915,8 +1940,10 @@ var Viewer = {};
 				return a.dist - b.dist;
 			});
 
+			//console.log('maptilecount max', mapImgTileDists.length);
+
 			// add map tiles, only the first 15
-			for(var i=0; i<mapImgTileDists.length && i < 15; i++) {
+			for(var i=0; i<mapImgTileDists.length && i < 30; i++) {
 				
 				var tile = mapImgTileDists[i].tile;
 				self.appendMapImage(mapImgsize, tile[0], tile[1]);
@@ -2028,7 +2055,7 @@ var Viewer = {};
 			var app = document.createElement('Appearance');
 
 			var it = document.createElement('ImageTexture');
-			it.setAttribute("url", 'http://example.org/api/os/map-images/Outdoor/17/' + x + '/' + y + '.png');
+			it.setAttribute("url", '/api/os/map-images/Outdoor/17/' + x + '/' + y + '.png');
 
 			app.appendChild(it);
 
@@ -2054,9 +2081,11 @@ var Viewer = {};
 			return translate;
 		};
 
-		this.appendMapImage = function(size, ox, oy){
+		this._getMapImagePosInfo = function(){
 
-			//return;
+			// http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Resolution_and_Scale
+			// set the size of a 256 map image tile. 1px = 1m
+			var mapImgsize = 1.1943 * Math.cos(self._degToRad(self.settings.mapTile.lat)) * 256;
 			var zoomLevel = 17;
 
 			var slippyPoints = self._getSlippyTileLayerPoints(self.settings.mapTile.lat, self.settings.mapTile.lon, zoomLevel);
@@ -2069,10 +2098,29 @@ var Viewer = {};
 			var osGridRef = OsGridRef.latLonToOsGrid(new LatLon(self._tile2lat(y, zoomLevel), self._tile2long(x ,zoomLevel)));
 			
 			//console.log('map images osgridref', osGridRef);
-			var offsetX = osGridRef.easting - self.originBNG.easting + size / 2;
-			var offsetY = self.originBNG.northing - osGridRef.northing + size / 2;
+			var offsetX = osGridRef.easting - self.originBNG.easting + mapImgsize / 2;
+			var offsetY = self.originBNG.northing - osGridRef.northing + mapImgsize / 2;
 
-			//console.log('offset', offsetX, offsetY);
+			return {
+				x: x,
+				y: y,
+				offsetX: offsetX,
+				offsetY: offsetY,
+				zoomLevel: zoomLevel,
+				mapImgsize: mapImgsize,
+				osGridRef: osGridRef
+			};
+
+		}
+
+		this.appendMapImage = function(size, ox, oy){
+
+			var posInfo = self._getMapImagePosInfo();
+
+			var x = posInfo.x;
+			var y = posInfo.y;
+			var offsetX = posInfo.offsetX;
+			var offsetY = posInfo.offsetY;
 
 			if (!self.addedMapImages) {
 				self.addedMapImages = {};

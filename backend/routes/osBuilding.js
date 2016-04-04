@@ -22,6 +22,8 @@ router.get('/buildings.bin', function(req, res, next){
 
 router.get('/map-images/:style/:z/:x/:y.png', getMapTiles);
 
+router.get('/building-meta/:uprn', getUPRN);
+
 //TO-DO: dirty quick fix to be deleted later
 router.get('/:shader.glsl', function(req, res){ 
 	//console.log(__dirname);
@@ -195,49 +197,6 @@ function genglX(format, req, res){
 
 			let found;
 
-			//sort buildings by their classification code
-			buildings.sort((a, b) => {
-				
-				a.DPA.classCode = a.DPA.CLASSIFICATION_CODE.substring(0, 2);
-				b.DPA.classCode = b.DPA.CLASSIFICATION_CODE.substring(0, 2);
-
-				found = false;
-
-				// sanitize classification code
-				acceptedClassCode.forEach(code => {
-
-					if(!found && a.DPA.classCode.startsWith(code)){
-						found = true;
-						a.DPA.classCode = code;
-					}
-				});
-
-				if(!found){
-					a.DPA.classCode = '';
-				}
-
-				found = false;
-				acceptedClassCode.forEach(code => {
-
-					if(!found && b.DPA.classCode.startsWith(code)){
-						found = true;
-						b.DPA.classCode = code;
-					}
-				});
-
-				if(!found){
-					b.DPA.classCode = '';
-				}
-
-				if (a.DPA.classCode > b.DPA.classCode){
-					return 1;
-				} else if (a.DPA.classCode < b.DPA.classCode){
-					return -1;
-				} else {
-					return 0;
-				}
-			});
-
 			buildings.forEach(building => {
 
 				building = building.DPA;
@@ -288,13 +247,6 @@ function genglX(format, req, res){
 			let heightlessBuildingCount = 0;
 			let refPoint;
 
-			// if(dimensions.length){
-			// 	refPoint = [
-			// 		dimensions[0].results[0].geometry.coordinates[0][0][0],
-			// 		dimensions[0].results[0].geometry.coordinates[0][0][1]
-			// 	];
-			// }
-
 			
 			if (method === methodNames.RADIUS){
 				// use center point as ref point
@@ -315,26 +267,12 @@ function genglX(format, req, res){
 				let classCode = dimension.classCode;
 				let uprn = dimension.uprn;
 
-				//let uri = dimension.header.uri;
 				dimension = dimension.results[0];
-				//console.log(dimension.geometry.coordinates)
-				//console.log('offset: ' + vCountOffset);
 
 				if (!dimension.relativeHeightToMax){
 					heightlessBuildingCount++;
-					//dimension.relativeHeightToMax = 1;
-				} else {
-					// if (!meshesByGroup[classCode]){
-					// 	meshesByGroup[classCode] = [];
-					// }
 
-					// meshesByGroup[classCode] = meshesByGroup[classCode].concat(
-					// 	generateMeshes(
-					// 		dimension.geometry.coordinates, 
-					// 		dimension.relativeHeightToMax, 
-					// 		refPoint
-					// 	)
-					// );
+				} else {
 
 					meshesByBuilding[uprn] = {
 						meshes: generateMeshes(
@@ -381,7 +319,7 @@ function genglX(format, req, res){
 		} else {
 			console.log('stash not found');
 
-			if(true){
+			if(false){
 				return Promise.reject({ message: 'No stash and we are not going to bother os api server today so no data for you, sorry.'});
 			} else {
 				return getBuildingsAndGenerate();
@@ -389,6 +327,7 @@ function genglX(format, req, res){
 		}
 
 	}).then(glTF => {
+
 		if(format === 'bin') {
 			res.status(200).send(glTF.buffer);
 		} else {
@@ -396,10 +335,9 @@ function genglX(format, req, res){
 			if (glTF.json instanceof Buffer) {
 				glTF.json = JSON.parse(glTF.json.toString());
 			}
-			//console.log(glTF);
 			res.status(200).json(glTF.json);
-			//res.status(200).send();
 		}
+
 	}).catch(err => {
 		console.log(err.stack);
 		if(err.message){
@@ -419,14 +357,37 @@ function getMapTiles(req, res){
 	y = req.params.y;
 	z = req.params.z;
 
-	OSGet.map({
-		tileMatrixSet: 'EPSG:3857', 
-		layer: `${req.params.style} 3857`, 
-		z, x, y
-	}).then(r => {
+	//TO-DO: hard coded account for stashing map images
+	let dbCol =  {account: 'ordnancesurvey', project: 'map_images', logger: req[C.REQ_REPO].logger};
+	
+	let filename = `${req.params.style}/${z}/${x}/${y}.png`;
+
+
+	stash.findStashByFilename(dbCol, 'png', filename).then( image => {
+		
+		if(image) {
+
+			console.log('Map tile images found from stash');
+			return Promise.resolve(image);
+
+		} else {
+
+			console.log('Map tile images NOT found from stash, getting from ordnance survey');
+			return OSGet.map({
+				tileMatrixSet: 'EPSG:3857', 
+				layer: `${req.params.style} 3857`, 
+				z, x, y
+			}).then(image => {
+				stash.saveStashByFileName(dbCol, 'png', filename, image);
+				return Promise.resolve(image);
+			});
+		}
+
+	}).then(image => {
+
 
 		res.writeHead(200, {'Content-Type': 'image/png' });
-		res.write(r);
+		res.write(image);
 		res.end();
 
 	}).catch(err => {
@@ -438,9 +399,25 @@ function getMapTiles(req, res){
 		}
 		
 	});
+}
 
+function getUPRN(req, res, next){
+	'use strict';
 
+	OSGet.uprn({ uprn: req.params.uprn}).then(r => {
+		if(r.header.totalresults <= 0){
+			res.status(404).json({ message: `Building with uprn ${req.params.uprn} not found`})
+		} else {
+			res.status(200).json(r.results[0].DPA);
+		}
 
+	}).catch( err => {
+		if(err.message){
+			res.status(500).json({ message: err.message});
+		} else {
+			res.status(500).send(err);
+		}
+	})
 }
 
 module.exports = router;

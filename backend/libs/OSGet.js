@@ -30,6 +30,12 @@ module.exports = function(osConfig){
 			queries.key = osConfig.keys.map;
 			//console.log(buildQueryString(queries));
 			return httpsGet(osConfig.endpoints.map(params), buildQueryString(queries));
+		},
+
+		uprn: queries => {
+			queries = queries || {};
+			queries.key = osConfig.keys.place;
+			return httpsGet(osConfig.endpoints.uprn, buildQueryString(queries));
 		}
 
 	};
