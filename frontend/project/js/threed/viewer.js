@@ -534,6 +534,12 @@ var Viewer = {};
 				console.log('picking', pickingInfo.pickObj);
 				console.log('partId', pickingInfo.pickObj.partID);
 
+				callback(self.EVENT.OS_BUILDING_CLICK,
+				{
+					//id: pickingInfo.pickObj.partID
+					id : '21071441'
+				});
+
 				var projectParts = pickingInfo.pickObj._xmlNode ?
 					pickingInfo.pickObj._xmlNode.getAttribute("id").split("__") :
 					pickingInfo.pickObj.pickObj._xmlNode.getAttribute("id").split("__");
@@ -2063,5 +2069,8 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	CHANGE_PIN_COLOUR: "VIEWER_CHANGE_PIN_COLOUR",
 	REMOVE_PIN: "VIEWER_REMOVE_PIN",
 	ADD_PIN: "VIEWER_ADD_PIN",
-	MOVE_PIN: "VIEWER_MOVE_PIN"
+	MOVE_PIN: "VIEWER_MOVE_PIN",
+
+	//OS BUILDING CLICK
+	OS_BUILDING_CLICK: 'VIEWER_OS_BUILDING_CLICK'
 };

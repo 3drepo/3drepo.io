@@ -319,7 +319,7 @@ function genglX(format, req, res){
 		} else {
 			console.log('stash not found');
 
-			if(true){
+			if(false){
 				return Promise.reject({ message: 'No stash and we are not going to bother os api server today so no data for you, sorry.'});
 			} else {
 				return getBuildingsAndGenerate();

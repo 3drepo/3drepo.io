@@ -93,6 +93,7 @@ module.exports.createApp = function(serverConfig)
 							"viewpoints",
 							"issues",
 							"clip",
+							"building",
 							"bottomButtons",
 							"qrCodeReader",
 							"docs",
