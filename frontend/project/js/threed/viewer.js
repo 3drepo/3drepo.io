@@ -352,7 +352,7 @@ var Viewer = {};
 
 				// init add map tiles
 				setTimeout(self.addMapTileByViewPoint, 2000);
-			
+
 			});
 		};
 
@@ -529,43 +529,53 @@ var Viewer = {};
 
 			if (pickingInfo.pickObj)
 			{
-				var account, project;
 
-				console.log('picking', pickingInfo.pickObj);
-				console.log('partId', pickingInfo.pickObj.partID);
+					var account, project;
+					var projectParts = null;
+					console.log('picking', pickingInfo.pickObj);
+					console.log('partId', pickingInfo.pickObj.partID);
 
-				callback(self.EVENT.OS_BUILDING_CLICK,
-				{
-					//id: pickingInfo.pickObj.partID
-					id : '21071441'
-				});
+					callback(self.EVENT.OS_BUILDING_CLICK,
+					{
+						//id: pickingInfo.pickObj.partID
+						id : '21071441'
+					});
 
-				var projectParts = pickingInfo.pickObj._xmlNode ?
-					pickingInfo.pickObj._xmlNode.getAttribute("id").split("__") :
-					pickingInfo.pickObj.pickObj._xmlNode.getAttribute("id").split("__");
+					if (pickingInfo.pickObj._xmlNode)
+					{
+						if (pickingInfo.pickObj._xmlNode.hasAttribute("id"))
+						{
+							projectParts = pickingInfo.pickObj._xmlNode.getAttribute("id");
+						}
+					} else {
+						projectParts = pickingInfo.pickObj.pickObj._xmlNode.getAttribute("id").split("__");
+					}
 
-				var objectID = pickingInfo.pickObj.partID ?
-					pickingInfo.pickObj.partID :
-					projectParts[2];
+					if (projectParts)
+					{
+						var objectID = pickingInfo.pickObj.partID ?
+							pickingInfo.pickObj.partID :
+							projectParts[2];
 
-				account = projectParts[0];
-				project = projectParts[1];
+						account = projectParts[0];
+						project = projectParts[1];
 
-				var inlineTransName = ViewerUtil.escapeCSSCharacters(account + "__" + project);
-				var projectInline = self.inlineRoots[inlineTransName];
-				var trans = projectInline._x3domNode.getCurrentTransform();
+						var inlineTransName = ViewerUtil.escapeCSSCharacters(account + "__" + project);
+						var projectInline = self.inlineRoots[inlineTransName];
+						var trans = projectInline._x3domNode.getCurrentTransform();
 
-				callback(self.EVENT.PICK_POINT, {
-					id: objectID,
-					position: pickingInfo.pickPos,
-					normal: pickingInfo.pickNorm,
-					trans: trans
-				});
-			} else {
-				callback(self.EVENT.PICK_POINT, {
-					position: pickingInfo.pickPos,
-					normal: pickingInfo.pickNorm
-				});
+						callback(self.EVENT.PICK_POINT, {
+							id: objectID,
+							position: pickingInfo.pickPos,
+							normal: pickingInfo.pickNorm,
+							trans: trans
+						});
+					} else {
+						callback(self.EVENT.PICK_POINT, {
+							position: pickingInfo.pickPos,
+							normal: pickingInfo.pickNorm
+						});
+					}
 			}
 		};
 
@@ -1685,7 +1695,7 @@ var Viewer = {};
 			}
 		};
 
-		// Append building models 
+		// Append building models
 		this.addMapTileByViewPoint = function(noDraw){
 
 			if(!self.originBNG){
@@ -1697,7 +1707,7 @@ var Viewer = {};
 			var camera = vpInfo.position;
 			var view_dir = vpInfo.view_dir;
 			var near = vpInfo.near;
-			var ratio = vpInfo.aspect_ratio; //(w/h) 
+			var ratio = vpInfo.aspect_ratio; //(w/h)
 			var up = vpInfo.up;
 			var right = vpInfo.right;
 
@@ -1751,13 +1761,13 @@ var Viewer = {};
 
 			var lookingToInf = (camera[2] > 0 && coordsZ[2] < coordsZ[0] || camera[2] < 0 && coordsZ[2] > coordsZ[0]);
 			if(lookingToInf){
-				
+
 				console.log('Looking to inf');
 				coordsZ[0] = 600;
 				coordsZ[1] = 600;
 				coordsZ[2] = -600;
 				coordsZ[3] = -600;
-			
+
 			}
 
 
@@ -1797,7 +1807,7 @@ var Viewer = {};
 
 			for (var x = startX + mapImgPosInfo.offsetX; x <= endX + mapImgPosInfo.offsetX; x+=mapImgStep) {
 				for (var z = startZ + mapImgPosInfo.offsetY; z <= endZ + mapImgPosInfo.offsetY; z+=mapImgStep) {
-					
+
 					var mapImgX = Math.floor( x / mapImgStep );
 					var mapImgZ = Math.floor( z / mapImgStep );
 
@@ -1814,7 +1824,7 @@ var Viewer = {};
 
 			// add map tiles, only the first 15
 			for(var i=0; i<mapImgTileDists.length && i < 30; i++) {
-				
+
 				var tile = mapImgTileDists[i].tile;
 				self.appendMapImage(mapImgsize, tile[0], tile[1]);
 
@@ -1823,7 +1833,7 @@ var Viewer = {};
 
 			//add 3d model tiles, only render first 10 tiles
 			for(var i=0; i<tileDists.length && i < 10; i++) {
-				
+
 				var tile = tileDists[i].tile;
 
 				var osRef = new OsGridRef(self.originBNG.easting + tile[0], self.originBNG.northing + tile[1]);
@@ -1840,7 +1850,7 @@ var Viewer = {};
 		// TO-DO: Move helper functions to somewhere else?
 		//length 1 = 1m, 2 = 10m, 3 = 100m, 4 = 1km, 5 = 10km
 		this._OSRefNo = function(osRef, length){
-			
+
 			if (length < 1 || length > 5){
 				return console.log('length must be in range [1 - 5]');
 			}
@@ -1897,6 +1907,7 @@ var Viewer = {};
 			//console.log(self.fakeOriginInBNG);
 
 			var gltf = document.createElement('gltf');
+			gltf.setAttribute('onclick', 'clickObject(event)');
 			gltf.setAttribute('url', '/api/os/buildings.gltf?method=osgrid&osgridref=' + osGridRef + '&draw=1');
 
 			var translate = [0, 0, 0];
@@ -1966,7 +1977,7 @@ var Viewer = {};
 			//console.log('slippyPoints', x, y);
 			//console.log(self._tile2lat(y, zoomLevel), self._tile2long(x ,zoomLevel));
 			var osGridRef = OsGridRef.latLonToOsGrid(new LatLon(self._tile2lat(y, zoomLevel), self._tile2long(x ,zoomLevel)));
-			
+
 			//console.log('map images osgridref', osGridRef);
 			var offsetX = osGridRef.easting - self.originBNG.easting + mapImgsize / 2;
 			var offsetY = self.originBNG.northing - osGridRef.northing + mapImgsize / 2;
@@ -1994,7 +2005,7 @@ var Viewer = {};
 
 			if (!self.addedMapImages) {
 				self.addedMapImages = {};
-			} 
+			}
 
 			if(!self.addedMapImages[ox + ',' + oy]){
 				self.getScene().appendChild(self.createMapImageTile(size, x + ox, y + oy, [offsetX + size * ox, 0, offsetY + size * oy]));
@@ -2002,7 +2013,7 @@ var Viewer = {};
 			} else {
 				//console.log('map image already in the scene');
 			}
-			
+
 
 		};
 
