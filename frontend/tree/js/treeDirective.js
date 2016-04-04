@@ -359,39 +359,37 @@
 		};
 
 		function setupInfiniteScroll() {
-			$timeout(function () {
-				// Infinite items
-				vm.infiniteItemsTree = {
-					numLoaded_: 0,
-					toLoad_: 0,
+			// Infinite items
+			vm.infiniteItemsTree = {
+				numLoaded_: 0,
+				toLoad_: 0,
 
-					getItemAtIndex: function (index) {
-						if (index > this.numLoaded_) {
-							this.fetchMoreItems_(index);
-							return null;
-						}
-
-						if (index < vm.nodesToShow.length) {
-							return vm.nodesToShow[index];
-						} else {
-							return null;
-						}
-					},
-
-					getLength: function () {
-						return this.numLoaded_ + 5;
-					},
-
-					fetchMoreItems_: function (index) {
-						if (this.toLoad_ < index) {
-							this.toLoad_ += 500;
-							$timeout(angular.noop, 300).then(angular.bind(this, function () {
-								this.numLoaded_ = this.toLoad_;
-							}));
-						}
+				getItemAtIndex: function (index) {
+					if (index > this.numLoaded_) {
+						this.fetchMoreItems_(index);
+						return null;
 					}
-				};
-			}, 100);
+
+					if (index < vm.nodesToShow.length) {
+						return vm.nodesToShow[index];
+					} else {
+						return null;
+					}
+				},
+
+				getLength: function () {
+					return this.numLoaded_ + 5;
+				},
+
+				fetchMoreItems_: function (index) {
+					if (this.toLoad_ < index) {
+						this.toLoad_ += 500;
+						$timeout(angular.noop, 300).then(angular.bind(this, function () {
+							this.numLoaded_ = this.toLoad_;
+						}));
+					}
+				}
+			};
 		}
 
 		$scope.$watch("vm.filterText", function (newValue) {
@@ -519,35 +517,33 @@
 		};
 
 		function setupInfiniteItemsFilter() {
-			$timeout(function () {
-				vm.infiniteItemsFilter = {
-					numLoaded_: 0,
-					toLoad_: 0,
-					getItemAtIndex: function (index) {
-						if (index > this.numLoaded_) {
-							this.fetchMoreItems_(index);
-							return null;
-						}
-
-						if (index < vm.nodes.length) {
-							return vm.nodes[index];
-						} else {
-							return null;
-						}
-					},
-					getLength: function () {
-						return this.numLoaded_ + 5;
-					},
-					fetchMoreItems_: function (index) {
-						if (this.toLoad_ < index) {
-							this.toLoad_ += 20;
-							$timeout(angular.noop, 300).then(angular.bind(this, function () {
-								this.numLoaded_ = this.toLoad_;
-							}));
-						}
+			vm.infiniteItemsFilter = {
+				numLoaded_: 0,
+				toLoad_: 0,
+				getItemAtIndex: function (index) {
+					if (index > this.numLoaded_) {
+						this.fetchMoreItems_(index);
+						return null;
 					}
-				};
-			}, 100);
+
+					if (index < vm.nodes.length) {
+						return vm.nodes[index];
+					} else {
+						return null;
+					}
+				},
+				getLength: function () {
+					return this.numLoaded_ + 5;
+				},
+				fetchMoreItems_: function (index) {
+					if (this.toLoad_ < index) {
+						this.toLoad_ += 20;
+						$timeout(angular.noop, 300).then(angular.bind(this, function () {
+							this.numLoaded_ = this.toLoad_;
+						}));
+					}
+				}
+			};
 		}
 	}
 }());

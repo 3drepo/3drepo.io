@@ -34,9 +34,9 @@
 		};
 	}
 
-	BidSummaryCtrl.$inject = ["$scope", "$location", "BidService"];
+	BidSummaryCtrl.$inject = ["$scope", "BidService"];
 
-	function BidSummaryCtrl($scope, $location, BidService) {
+	function BidSummaryCtrl($scope, BidService) {
 		var vm = this,
 			promise;
 
@@ -45,18 +45,16 @@
 		// Get all the packages
 		promise = BidService.getPackage();
 		promise.then(function (response) {
-			console.log(response);
-			var i, length, passedPackageName;
+			var i, length;
 			vm.packages = [];
 			if ((response.statusText === "OK") && (response.data.length > 0)) {
 				vm.packages = response.data;
 				vm.packages[0].completedByPretty = prettyDate(new Date(vm.packages[0].completedBy));
 
-				// Select the passed package
-				if ($location.search().hasOwnProperty("package")) {
-					passedPackageName = $location.search().package;
+				// Select the current package
+				if (angular.isDefined(BidService.currentPackage)) {
 					for (i = 0, length = vm.packages.length; i < length; i += 1) {
-						if (vm.packages[i].name === passedPackageName) {
+						if (vm.packages[i].name === BidService.currentPackage.name) {
 							vm.selectedPackageIndex = i;
 							break;
 						}
@@ -76,7 +74,7 @@
 					{label: "Code", value: vm.packages[newValue].code},
 					{label: "Area", value: vm.packages[newValue].area},
 					{label: "Contact", value: vm.packages[newValue].contact},
-					{label: "Completed by", value: vm.packages[newValue].completedBy}
+					{label: "Completed by", value: BidService.prettyDate(new Date(vm.packages[newValue].completedBy))}
 				];
 				vm.onSelectPackage({packageName: vm.packages[newValue].name});
 			}

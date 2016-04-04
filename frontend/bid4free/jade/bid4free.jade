@@ -1,25 +1,25 @@
 .bidInfo(ng-if="!vm.state.bid4freeWorkspace")
 	// Sub Contractor
-	.bidInfoSubContractor(ng-if="vm.userIsASubContractor", layout="column")
-		div(layout="row", layout-padding, flex="50")
-			bid-project-summary(layout="column", flex)
-			bid-summary(layout="column", flex, on-select-package="vm.selectPackage(packageName)")
-			bid-status(layout="column", flex, package-name="vm.selectedPackageName", on-invite-accepted="vm.inviteAccepted()")
+	.bidInfoSubContractor(ng-if="vm.userIsASubContractor" layout="column" layout-align="space-between")
+		div(layout="row" flex="45" layout-align="space-between")
+			bid-project-summary(layout="column" flex="30")
+			bid-summary(layout="column" flex="30" on-select-package="vm.selectPackage(packageName)")
+			bid-status(layout="column" flex="30" package-name="vm.selectedPackageName" on-invite-accepted="vm.inviteAccepted()")
 
 
-		div(layout="row", layout-padding, flex="50")
-			bid-image(layout="column", flex account="vm.account" project="vm.project")
-			bid-docs(layout="column", flex, package-name="vm.selectedPackageName", invite-accepted="vm.packageInviteAccepted")
-			bid-workspace(layout="column", flex, package-name="vm.selectedPackageName", invite-accepted="vm.packageInviteAccepted" account="vm.account" project="vm.project")
+		div(layout="row" flex="45" layout-align="space-between")
+			bid-image(layout="column" flex="30" account="vm.account" project="vm.project")
+			bid-docs(layout="column" flex="30" package-name="vm.selectedPackageName" invite-accepted="vm.packageInviteAccepted")
+			bid-workspace(layout="column" flex="30" package-name="vm.selectedPackageName" invite-accepted="vm.packageInviteAccepted" account="vm.account" project="vm.project")
 
 	// Main Contractor
 	.bidContent(layout="row" layout-align="space-between" ng-if="vm.userIsAMainContractor" flex layout-fill)
 		// Project Summary
-		.md-whiteframe-1dp(flex=25)
+		.md-whiteframe-1dp(flex=25 layout="column")
 			md-toolbar
 				.md-toolbar-tools
 					h2 Project Summary
-			.packageContent(flex)
+			.packageContent
 				md-content
 					.projectSummaryInput(ng-if="vm.showProjectSummaryInput")
 						span(ng-repeat="input in vm.projectSummary")
@@ -35,6 +35,10 @@
 
 					div(ng-if="!vm.showProjectSummaryInput")
 						md-list
+							md-list-item.md-2-line
+								.md-list-item-text
+									h3 Site
+									p {{vm.projectSummary.site.value}}
 							md-list-item.md-2-line
 								.md-list-item-text
 									h3 Name
@@ -78,13 +82,13 @@
 							p {{package.name}}
 
 		// Package Summary
-		.bidSummary.md-whiteframe-1dp(flex=25, layout="column")
+		.bidSummary.md-whiteframe-1dp(flex=25 layout="column")
 			md-toolbar
 				.md-toolbar-tools
 					h2 Package Summary
-			.packageContent(layout="column", flex)
-				md-content(layout="column", flex)
-					div(ng-if="vm.packageSelected", flex, layout="column")
+			.packageContent
+				md-content
+					div(ng-if="vm.packageSelected")
 						.packageSummaryInput(ng-if="vm.showInput")
 							span(ng-repeat="input in vm.packageSummary")
 								md-input-container.md-block(ng-if="input.type==='input'")

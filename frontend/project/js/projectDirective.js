@@ -75,7 +75,7 @@
 			menu: [
 				{
 					value: "hideAll",
-					label: "Hide All",
+					label: "Hide Groups",
 					selected: false,
 					toggle: true
 				}

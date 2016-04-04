@@ -23,6 +23,7 @@ bid4free .bidInfo {
 
 bid4free .bidInfo .bidInfoSubContractor {
   height: 100%;
+  padding: 30px 20px 20px;
 }
 
 bid4free md-toolbar {
@@ -44,9 +45,8 @@ bid4free .bidHeader md-toolbar {
 }
 
 bid4free .bidContent {
-  padding: 20px;
+  padding: 30px 20px 20px;
 }
-
 
 bid4free md-list-item p {
   font-size: 16px;
@@ -118,8 +118,8 @@ bid4free .cardInfo md-icon {
 
 /** Project Summary ***************************************************************************************************/
 
-.projectSummaryInput md-input-container {
-  margin: 20px 10px -15px 10px;
+.projectSummaryInput {
+  padding: 0 10px;
 }
 
 /** Packages **********************************************************************************************************/

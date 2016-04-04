@@ -32,9 +32,9 @@
 		};
 	}
 
-	BidProjectSummaryCtrl.$inject = ["$location", "Auth", "ProjectService"];
+	BidProjectSummaryCtrl.$inject = ["$location", "Auth", "ProjectService", "BidService"];
 
-	function BidProjectSummaryCtrl($location, Auth, ProjectService) {
+	function BidProjectSummaryCtrl($location, Auth, ProjectService, BidService) {
 		var vm = this,
 			promise;
 
@@ -44,6 +44,7 @@
 		promise = ProjectService.getProjectSummary();
 		promise.then(function (data) {
 			vm.projectSummary = data.data;
+			vm.projectSummary.completedByPretty = BidService.prettyDate(new Date(vm.projectSummary.completedBy));
 		});
 
 		vm.home = function () {

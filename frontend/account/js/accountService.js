@@ -109,7 +109,7 @@
 
 		obj.getProjectsBid4FreeStatus = function (username) {
 			bid4free = $q.defer();
-			$http.get(serverConfig.apiUrl(username + ".json"), {params: {bid: true}})
+			$http.get(serverConfig.apiUrl(username + ".json"), {params: {bids: true}})
 				.then(function (response) {
 					bid4free.resolve(response);
 				});

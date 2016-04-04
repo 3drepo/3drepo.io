@@ -308,6 +308,7 @@
 
 			eventWatch = $scope.$watch(EventService.currentEvent, function (event) {
 				if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+					console.log(event.value);
 					index = vm.selectedGroup.parents.indexOf(event.value.id);
 					if (index !== -1) {
 						vm.selectedGroup.parents.splice(index, 1);

@@ -4,7 +4,7 @@
 
 	.issueStatusMarker(flex="none")
 		md-icon(class="fa fa-circle-o issueOpen" ng-if="!vm.issueData.closed")
-		md-icon(class="fa fa-circle-o issueClosed" ng-if="vm.issueData.closed")
+		md-icon(class="fa fa-dot-circle-o issueClosed" ng-if="vm.issueData.closed")
 
 	.issueHeaderText(layout="column" flex)
 		p {{vm.issueData.title}}
