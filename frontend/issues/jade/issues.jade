@@ -12,18 +12,30 @@ div(ng-switch="vm.toShow")
 	// Issues list
 	md-list(ng-switch-when="showIssues")
 		div(ng-repeat="issue in vm.issuesToShow")
-			.issueHeader(ng-class="{closedIssue: issue.closed}")
-				md-list-item.md-2-line.issueTitle(ng-click="vm.showSelectedIssue($index, false)")
-					div.md-list-item-text
-						h3 {{issue.title}}
+			.issueHeader
+				issue-header(
+					index="$index"
+					issue-data="issue"
+					on-click="vm.showSelectedIssue(index, pinSelect)"
+					show-info="issue.showInfo"
+					info-text="vm.infoText"
+					on-hide-info="vm.hideInfo()")
+				//md-list-item.md-2-line.issueTitle(ng-click="vm.showSelectedIssue($index, false)")
+					.issueHeaderText(layout="column" flex)
+						p {{issue.title}}
 						.issueTitleInfo(layout="row" layout-align="start")
 							p(flex="60") {{issue.owner}}
-							span(flex="30" layout="row" layout-align="end")
+							span(flex="25" layout="row" layout-align="end")
 								p {{issue.timeStamp}}
-				.issueRoleMarkers(layout="column")
+
+				//.issueRoleMarkers(layout="column")
 					div(ng-repeat="roleColor in issue.assignedRolesColors", style="background:{{roleColor}};", flex)
 
-				.issueInfo(ng-if="issue.showInfo", layout="row" layout-align="start center")
+				//.issueStatusMarker
+					md-icon(class="fa fa-circle-o issueOpen" ng-if="!issue.closed")
+					md-icon(class="fa fa-circle-o issueClosed" ng-if="issue.closed")
+
+				//.issueInfo(ng-if="issue.showInfo", layout="row" layout-align="start center")
 					div(flex)
 						h5 {{vm.infoText}}
 					div(flex="15")
@@ -35,9 +47,10 @@ div(ng-switch="vm.toShow")
 	// Issue
 	issue(
 		ng-switch-when="showIssue"
+		index="vm.selectedIndex"
 		data="vm.selectedIssue"
 		auto-save-comment="vm.autoSaveComment"
-		on-comment-auto-saved="vm.commentAutoSaved()"
+		on-comment-auto-saved="vm.commentAutoSaved(index)"
 		available-roles="vm.availableRoles"
 		project-user-roles="vm.projectUserRoles",
 		on-issue-assign-change="vm.issueAssignChange()"
@@ -54,6 +67,6 @@ div(ng-switch="vm.toShow")
 
 		md-button.md-raised.md-accent(ng-click="vm.saveIssue()", ng-disabled="vm.saveIssueDisabled") Save
 
-// Info
-.issuesInfo(ng-if="vm.showIssuesInfo")
-	p {{vm.issuesInfo}}
+	// Info
+	.cardInfo(ng-switch-when="showInfo")
+		p {{vm.issuesInfo}}

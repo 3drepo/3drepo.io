@@ -15,9 +15,8 @@ groups #groupsAdd #groupsSave {
 groups md-list-item button {
   padding: 0 !important;
 }
-
 groups md-list-item p {
-  margin: 10px 20px !important;
+  margin: 8px 20px !important;
 }
 
 groups #groupsList ._md-list-item-inner {
@@ -29,11 +28,11 @@ groups .groupColourBar {
 }
 
 groups #groupHeader {
-  height: 56px;
+  height: 52px;
 }
 
 groups #groupHeader p {
-  margin: 19px 20px;
+  margin: 17px 20px;
 }
 
 groups #groupColour {
@@ -59,4 +58,8 @@ groups #groupsGroup #deleteGroup p {
   margin-top: 5px;
   color: rgba(0,0,0,0.5);
   font-size: 14px;
+}
+
+groups #groupsGroup md-checkbox {
+  margin: 0;
 }

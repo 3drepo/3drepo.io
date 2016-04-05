@@ -153,6 +153,26 @@ panel-card #filterContainer {
   max-width: 50%;
 }
 
+panel-card .cardInfo {
+  text-align: center;
+  padding: 15px;
+  background: #E8EAF6;
+  margin: 15px;
+  border-radius: 4px;
+}
+panel-card .cardInfo p {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.7);
+  word-wrap: break-word;
+}
+panel-card .cardInfo md-icon {
+  margin: 0;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+
 /** Panel Card Add ****************************************************************************************************/
 panel-card-add {
   position: absolute;

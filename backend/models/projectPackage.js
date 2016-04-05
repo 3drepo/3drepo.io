@@ -4,6 +4,8 @@ var C = require('../constants.js');
 var GridFSBucket = require('mongodb').GridFSBucket;
 var ObjectID  = require('mongodb').ObjectID;
 var responseCodes = require('../response_codes');
+var DB = require('../db/db');
+
 
 var schema = mongoose.Schema({
 	name: { type: String, required: true },
@@ -44,28 +46,60 @@ schema.post('save', function(doc){
 	'use strict';
 
 	// add to customData.bids for quick lookup
+	console.log('post save');
 
-	let db = ModelFactory.db;
-	let database = 'admin';
-	let collection = 'system.users';
-	let bid = {
-		role: C.REPO_ROLE_MAINCONTRACTOR,
-		account: doc._dbcolOptions.account,
-		project : doc._dbcolOptions.project,
-		package: doc.name,
-	};
+	DB({}).dbCallback("admin", function(err, db) {
+		// let database = 'admin';
+		// let collection = 'system.users';
+		let bid = {
+			role: C.REPO_ROLE_MAINCONTRACTOR,
+			account: doc._dbcolOptions.account,
+			project : doc._dbcolOptions.project,
+			package: doc.name,
+		};
 
-	db.db(database)
-	.collection(collection)
-	.findOneAndUpdate({
-		user: doc.user
-	},{'$addToSet':{
-		'customData.bids': bid
-	}});
+		// console.log('post save')
+		// db.db(database)
+		// .collection(collection)
+		// .findOneAndUpdate({
+		// 	user: doc.user
+		// },{'$addToSet':{
+		// 	'customData.bids': bid
+		// }}).then().catch(err => { console.log(err)});
+		console.log(doc.user)
+		db.collection('system.users').findOne({ user: doc.user}).then(user => {
+			console.log('user found', user);
+			if (user.customData && user.customData.bids && _.findIndex(user.customData.bids, bid) === -1){
+		
+					user.customData.bids.push(bid);
+				
+			} else if (!user.customData) {
+				
+				user.customData = {
+					bids: [bid]
+				};
+
+			} else if (!user.customData.bids){
+				user.customData.bids = [bid];
+			}
+
+			console.log('new custom data', user.customData);
+			var updateUserCmd = {
+				updateUser: doc.user,
+				customData: user.customData
+			};
+
+			return db.command(updateUserCmd);
+
+		}).catch(err => {
+			console.log(err);
+		})
+	});
+
 
 });
 
-var defaultProjection = { __v: 0, user: 0};
+var defaultProjection = { __v: 0 };
 
 schema.statics.defaultProjection = defaultProjection;
 

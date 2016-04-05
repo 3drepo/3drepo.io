@@ -45,9 +45,9 @@
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$element", "$timeout", "$mdDialog", "$filter", "IssuesService", "EventService", "Auth"];
+	IssuesCtrl.$inject = ["$scope", "$element", "$timeout", "$mdDialog", "$filter", "$window", "IssuesService", "EventService", "Auth", "serverConfig"];
 
-	function IssuesCtrl($scope, $element, $timeout, $mdDialog, $filter, IssuesService, EventService, Auth) {
+	function IssuesCtrl($scope, $element, $timeout, $mdDialog, $filter, $window, IssuesService, EventService, Auth, serverConfig) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -75,14 +75,12 @@
 		vm.showIssuesInfo = false;
 		vm.showIssueList = false;
 		vm.showIssue = false;
-		vm.issuesInfo = "There are currently no open issues";
 		vm.availableRoles = null;
 		vm.projectUserRoles = [];
 		vm.selectedIssue = null;
 		vm.autoSaveComment = false;
 		vm.canAdd = true;
-		vm.toShow = "showIssues";
-		vm.onContentHeightRequest({height: 0});
+		vm.onContentHeightRequest({height: 70}); // To show the loading progress
 
 		/*
 		 * Get all the Issues
@@ -92,16 +90,21 @@
 			var i, length;
 			vm.showProgress = false;
 			vm.issues = (data === "") ? [] : data;
-			vm.showIssuesInfo = (vm.issues.length === 0);
-			vm.showIssueList = (vm.issues.length !== 0);
-			for (i = 0, length = vm.issues.length; i < length; i += 1) {
-				vm.issues[i].showInfo = false;
-				vm.issues[i].selected = false;
+			if (vm.issues.length > 0) {
+				vm.toShow = "showIssues";
+				for (i = 0, length = vm.issues.length; i < length; i += 1) {
+					vm.issues[i].showInfo = false;
+					vm.issues[i].selected = false;
+				}
+				setAllIssuesAssignedRolesColors();
+				setupIssuesToShow();
+				vm.showPins();
 			}
-			setAllIssuesAssignedRolesColors();
-			setupIssuesToShow();
+			else {
+				vm.toShow = "showInfo";
+				vm.issuesInfo = "There are currently no open issues";
+			}
 			setContentHeight();
-			vm.showPins();
 		});
 
 		/*
@@ -464,6 +467,9 @@
 						rolesToFilter.push(role);
 					}
 				}
+				else if (newValue.value === "print") {
+					$window.open(serverConfig.apiUrl(vm.account + "/" + vm.project + "/issues.html"), "_blank");
+				}
 				setupIssuesToShow();
 				setContentHeight();
 				vm.showPins();
@@ -537,6 +543,7 @@
 				vm.selectedIssue.selected = false;
 			}
 			vm.selectedIssue = vm.issuesToShow[index];
+			vm.selectedIndex = index;
 			vm.selectedIssue.selected = true;
 			vm.selectedIssue.showInfo = false;
 
@@ -674,7 +681,7 @@
 			/* Closing the dialog takes a long time so using user made dialog for the moment
 			$mdDialog.show(
 				$mdDialog.alert()
-					.parent(angular.element(document.querySelector("#addAlert")))
+					.parent(angular.element($element[0].querySelector("#addAlert")))
 					.clickOutsideToClose(true)
 					.title(title)
 					.ariaLabel("Pin alert")
@@ -696,11 +703,12 @@
 		/**
 		 * A comment has been auto saved
 		 */
-		vm.commentAutoSaved = function () {
-			vm.infoText = "Comment on issue #" + vm.selectedIssue.title + " auto-saved";
-			vm.selectedIssue.showInfo = true;
+		vm.commentAutoSaved = function (index) {
+			vm.selectedIndex = index;
+			vm.infoText = "Comment on issue #" + vm.issuesToShow[vm.selectedIndex].title + " auto-saved";
+			vm.issuesToShow[vm.selectedIndex].showInfo = true;
 			vm.infoTimeout = $timeout(function() {
-				vm.selectedIssue.showInfo = false;
+				vm.issuesToShow[vm.selectedIndex].showInfo = false;
 			}, 4000);
 		};
 
@@ -708,7 +716,7 @@
 		 * Hide issue info
 		 */
 		vm.hideInfo = function() {
-			vm.selectedIssue.showInfo = false;
+			vm.issuesToShow[vm.selectedIndex].showInfo = false;
 			$timeout.cancel(vm.infoTimeout);
 		};
 
@@ -718,6 +726,7 @@
 		function setContentHeight () {
 			var i,
 				length,
+				height = 0,
 				issueMinHeight = 56,
 				maxStringLength = 32,
 				lineHeight = 18,
@@ -726,7 +735,8 @@
 				commentHeight = 80,
 				headerHeight = 53,
 				openIssueFooterHeight = 180,
-				closedIssueFooterHeight = 48;
+				closedIssueFooterHeight = 53,
+				infoHeight = 80;
 
 			switch (vm.toShow) {
 				case "showIssues":
@@ -737,7 +747,7 @@
 							issuesHeight += lineHeight * Math.floor((vm.issuesToShow[i].title.length - maxStringLength) / maxStringLength);
 						}
 					}
-					vm.onContentHeightRequest({height: issuesHeight});
+					height = issuesHeight;
 					break;
 
 				case "showIssue":
@@ -749,14 +759,19 @@
 					}
 
 					var numberComments = vm.selectedIssue.hasOwnProperty("comments") ? vm.selectedIssue.comments.length : 0;
-					vm.onContentHeightRequest({height: headerHeight + (numberComments * commentHeight) + footerHeight});
+					height = headerHeight + (numberComments * commentHeight) + footerHeight;
 					break;
 
 				case "showAdd":
-					vm.onContentHeightRequest({height: addHeight});
+					height = addHeight;
+					break;
+
+				case "showInfo":
+					height = infoHeight;
 					break;
 			}
 
+			vm.onContentHeightRequest({height: height});
 		}
 
 		function setPinToAssignedRoleColours (issue) {

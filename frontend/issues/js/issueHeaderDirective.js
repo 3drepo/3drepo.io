@@ -19,36 +19,35 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("bidProjectSummary", bidProjectSummary);
+		.directive("issueHeader", issueHeader);
 
-	function bidProjectSummary() {
+	function issueHeader() {
 		return {
-			restrict: 'E',
-			templateUrl: 'bidProjectSummary.html',
-			scope: {},
-			controller: BidProjectSummaryCtrl,
-			controllerAs: "vm",
+			restrict: "EA",
+			templateUrl: "issueHeader.html",
+			scope: {
+				index: "=",
+				issueData: "=",
+				onClick: "&",
+				showInfo: "=",
+				infoText: "=",
+				onHideInfo: "&"
+			},
+			controller: IssueHeaderCtrl,
+			controllerAs: 'vm',
 			bindToController: true
 		};
 	}
 
-	BidProjectSummaryCtrl.$inject = ["$location", "Auth", "ProjectService", "BidService"];
+	IssueHeaderCtrl.$inject = [];
 
-	function BidProjectSummaryCtrl($location, Auth, ProjectService, BidService) {
-		var vm = this,
-			promise;
+	function IssueHeaderCtrl() {
+		var vm = this;
 
-		vm.Auth = Auth;
-
-		// Get the project summary
-		promise = ProjectService.getProjectSummary();
-		promise.then(function (data) {
-			vm.projectSummary = data.data;
-			vm.projectSummary.completedByPretty = BidService.prettyDate(new Date(vm.projectSummary.completedBy));
-		});
-
-		vm.home = function () {
-			$location.path("/" + Auth.username, "_self").search({});
+		vm.click = function () {
+			if (angular.isDefined(vm.onClick)) {
+				vm.onClick({index: vm.index, pinSelect: false});
+			}
 		};
 	}
 }());

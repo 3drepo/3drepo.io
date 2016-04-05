@@ -35,16 +35,22 @@
 		};
 	}
 
-	PanelCardFilterCtrl.$inject = ["$scope", "$timeout"];
+	PanelCardFilterCtrl.$inject = ["$scope", "$timeout", "$element"];
 
-	function PanelCardFilterCtrl ($scope, $timeout) {
+	function PanelCardFilterCtrl ($scope, $timeout, $element) {
 		var vm = this,
 			filterTimeout = null;
 
+		/**
+		 * Reset the filter text
+		 */
 		vm.clearFilter = function () {
 			vm.filterInputText = "";
 		};
 
+		/*
+		 * Watch the filter input text
+		 */
 		$scope.$watch("vm.filterInputText", function (newValue) {
 			if (angular.isDefined(newValue)) {
 				if (filterTimeout !== null) {
@@ -54,6 +60,17 @@
 					vm.filterText = vm.filterInputText;
 					vm.showClearFilterButton = (vm.filterInputText !== "");
 				}, 500);
+			}
+		});
+
+		/*
+		 * Watch the showing of the filter and set the focus to it
+		 */
+		$scope.$watch("vm.showFilter", function (newValue) {
+			if (angular.isDefined(newValue) && newValue) {
+				$timeout(function () {
+					angular.element($element[0].querySelector("#panelCardFilterInput")).focus();
+				});
 			}
 		});
 	}

@@ -26,6 +26,7 @@
 			restrict: "EA",
 			templateUrl: "issue.html",
 			scope: {
+				index: "=",
 				data: "=",
 				autoSaveComment: "=",
 				onCommentAutoSaved: "&",
@@ -48,13 +49,14 @@
 			originatorEv = null,
 			initWatch;
 
+		console.log(vm.index);
+
 		/*
 		 * Initialise view vars
 		 */
 		vm.showComments = true;
 		vm.numNewComments = 0;
 		vm.saveCommentDisabled = true;
-		vm.backgroundColor = "#FFFFFF";
 		vm.autoSaveComment = false;
 		vm.showInfo = false;
 		vm.editingComment = false;
@@ -111,10 +113,8 @@
 				length = 0;
 
 			if (angular.isDefined(newValue)) {
-				vm.backgroundColor = "#FFFFFF";
 				vm.issueIsOpen = true;
 				if (newValue.hasOwnProperty("closed")) {
-					vm.backgroundColor = newValue.closed ? "#E0E0E0" : "#FFFFFF";
 					vm.issueIsOpen = !newValue.closed;
 				}
 
@@ -238,7 +238,7 @@
 						vm.numNewComments += 1; // This is used to increase the height of the comments list
 
 						if (vm.autoSaveComment) {
-							vm.onCommentAutoSaved(); // Tell the issue list a comment auto save has been done
+							vm.onCommentAutoSaved({index: vm.index}); // Tell the issue list a comment auto save has been done
 							vm.autoSaveComment = false;
 						}
 

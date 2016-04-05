@@ -17,7 +17,7 @@ div(ng-switch="vm.toShow")
 		md-list
 			md-list-item.md-1-line(ng-repeat="group in vm.groups" ng-click="vm.showGroup($index)")
 				div(layout="row" layout-align="start" flex)
-					.groupColourBar(flex="none", style="background:{{vm.colourToString(group.colour)}}")
+					.groupColourBar(flex="none", style="background:{{vm.colourToString(group.color)}}")
 					div(flex)
 						p {{group.name}}
 						md-divider
@@ -25,11 +25,26 @@ div(ng-switch="vm.toShow")
 	// Group
 	#groupsGroup(ng-switch-when="showGroup" layout="column")
 		#groupHeader(layout="row" layout-align="start" flex)
-			.groupColourBar(flex="none", style="background:{{vm.colourToString(vm.selectedGroup.colour)}}")
+			.groupColourBar(flex="none", style="background:{{vm.colourToString(vm.selectedGroup.color)}}")
 			div(flex)
 				p {{vm.selectedGroup.name}}
-		md-switch(ng-model="vm.editingGroup" aria-label="Edit group") {{vm.editingText}}
-		tdr-colour-picker(title="Change Colour" on-colour-change="vm.colourPickerChange(colour)" offset="20 0" colour="vm.selectedGroup.colour")
+		div(layout="row" layout-align="start center" flex)
+			md-switch(ng-model="vm.editingGroup" aria-label="Edit group" flex="30") {{vm.editingText}}
+			tdr-colour-picker(
+				title="Change Colour"
+				on-colour-change="vm.colourPickerChange(colour)"
+				offset="20 0" colour="vm.selectedGroup.color"
+				flex="60")
+			md-checkbox(ng-model="vm.showObjects" aria-label="Show" flex="30") Show
 		#deleteGroup(layout="column" layout-align="start start")
 			md-button.md-raised.md-warn#deleteGroupButton(ng-click="vm.deleteGroup()") Delete group
 			p This will not delete the objects
+
+	// Info
+	#groupsInfo(ng-switch-when="showInfo" layout="column")
+		.cardInfo
+			p There are currently no groups
+
+	// Loading
+	div(ng-switch-when="showLoading")
+		tdr-progress(info="vm.loadingInfo")

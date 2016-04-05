@@ -142,7 +142,7 @@
 		});
 		*/
 		vm.rightButtons.push({
-			label: "Oculus",
+			label: "VR",
 			icon: "icon icon_cardboard",
 			click: enterOculusDisplay,
 			iconClass: "bottomButtomIconCardboard"

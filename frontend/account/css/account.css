@@ -78,6 +78,9 @@ account-projects .projects p {
 account-projects .projects md-icon {
   margin-right: 10px !important;
 }
+account-projects .projects .md-button {
+  margin-right: 20px !important;
+}
 
 /** Account Profile ***************************************************************************************************/
 account-profile .dataContainer {

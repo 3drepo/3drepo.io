@@ -26,12 +26,16 @@
 			restrict: 'EA',
 			templateUrl: 'groups.html',
 			scope: {
+				account: "=",
+				project: "=",
 				show: "=",
 				showAdd: "=",
 				canAdd: "=",
 				onContentHeightRequest: "&",
 				onShowItem : "&",
-				hideItem: "="
+				hideItem: "=",
+				selectedMenuOption: "="
+
 			},
 			controller: GroupsCtrl,
 			controllerAs: 'vm',
@@ -39,27 +43,40 @@
 		};
 	}
 
-	GroupsCtrl.$inject = ["$scope", "EventService"];
+	GroupsCtrl.$inject = ["$scope", "$timeout", "EventService", "GroupsService"];
 
-	function GroupsCtrl ($scope, EventService) {
+	function GroupsCtrl ($scope, $timeout, EventService, GroupsService) {
 		var vm = this,
-			eventWatch = null;
+			eventWatch,
+			promise,
+			colourChangeTimeout = null,
+			hideAll = false;
 		
 		/*
 		 * Init
 		 */
-		vm.toShow = "showGroups";
 		vm.saveDisabled = true;
 		vm.canAdd = true;
 		vm.selectedGroup = null;
 		vm.editingGroup = false;
 		vm.editingText = "Start";
-		vm.groups = [
-			{name: "Doors", colour: [255, 0, 0]},
-			{name: "Toilets", colour: [0, 255, 0]},
-			{name: "Windows", colour: [0, 0, 255]}
-		];
+		vm.colourPickerColour = [255, 255, 255];
+		vm.toShow = "showLoading";
+		vm.loadingInfo = "Loading groups";
 		setContentHeight();
+		GroupsService.init(vm.account, vm.project);
+
+		promise = GroupsService.getGroups();
+		promise.then(function (data) {
+			vm.groups = data.data;
+			if (vm.groups.length > 0) {
+				vm.toShow = "showGroups";
+			}
+			else {
+				vm.toShow = "showInfo";
+			}
+			setContentHeight();
+		});
 
 		/*
 		 * Handle showing of adding a new issue
@@ -83,8 +100,10 @@
 				vm.toShow = "showGroups";
 				vm.showAdd = false;
 				vm.canAdd = true;
-				vm.selectedGroup = null;
 				setContentHeight();
+				setSelectedGroupHighlightStatus(false);
+				vm.selectedGroup = null;
+				doHideAll(hideAll);
 			}
 		});
 
@@ -103,20 +122,42 @@
 		$scope.$watch("vm.editingGroup", function (newValue) {
 			if (angular.isDefined(newValue)) {
 				vm.editingText = newValue ? "Stop" : "Start";
+				if (newValue) {
+					setupEventWatch();
+				} else if (angular.isDefined(eventWatch)) {
+					eventWatch(); // Cancel event watching
+				}
 			}
 		});
-
 
 		/*
 		 * Only watch for events when shown
 		 */
 		$scope.$watch("vm.show", function (newValue) {
 			if (angular.isDefined(newValue)) {
-				if (newValue) {
-					setupEventWatch();
+				if (!newValue) {
+					vm.editingGroup = false; // To stop any event watching
 				}
-				else if (angular.isDefined(eventWatch)) {
-					eventWatch(); // Cancel event watching
+			}
+		});
+
+		/*
+		 * Watch showing of selected group's objects
+		 */
+		$scope.$watch("vm.showObjects", function (newValue) {
+			if (angular.isDefined(newValue) && (vm.selectedGroup !== null)) {
+				setGroupsVisibleStatus([vm.selectedGroup], newValue);
+			}
+		});
+
+		/*
+		 * Selecting a menu option
+		 */
+		$scope.$watch("vm.selectedMenuOption", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				if (newValue.value === "hideAll") {
+					hideAll = !hideAll;
+					doHideAll(hideAll);
 				}
 			}
 		});
@@ -132,24 +173,37 @@
 			vm.onShowItem();
 			vm.canAdd = false;
 			vm.editingGroup = false;
+			vm.showObjects = true;
 			setContentHeight();
+			doHideAll(hideAll);
+			setSelectedGroupHighlightStatus(true);
 		};
 
 		/**
 		 * Callback to get the colour picker colour
-		 * 
+		 *
 		 * @param colour
 		 */
 		vm.colourPickerChange = function (colour) {
 			vm.colourPickerColour = colour;
 			if (vm.selectedGroup !== null) {
-				vm.selectedGroup.colour = colour;
+				if (colourChangeTimeout !== null) {
+					$timeout.cancel(colourChangeTimeout);
+				}
+				colourChangeTimeout = $timeout(function() {
+					vm.selectedGroup.color = colour;
+					promise = GroupsService.updateGroup(vm.selectedGroup);
+					promise.then(function (data) {
+						console.log(data);
+						setSelectedGroupHighlightStatus(true);
+					});
+				}, 500);
 			}
 		};
 
 		/**
 		 * Convert colour array to rgb string
-		 * 
+		 *
 		 * @param {Array} colour
 		 * @returns {string}
 		 */
@@ -165,11 +219,21 @@
 
 			for (i = 0, length = vm.groups.length; i < length; i += 1) {
 				if (vm.groups[i].name === vm.selectedGroup.name) {
-					vm.groups.splice(i, 1);
-					vm.selectedGroup = null;
-					vm.toShow = "showGroups";
-					vm.canAdd = true;
-					setContentHeight();
+					promise = GroupsService.deleteGroup(vm.selectedGroup._id);
+					promise.then(function (data) {
+						console.log(data);
+						if (data.statusText === "OK") {
+							vm.groups.splice(i, 1);
+							vm.selectedGroup = null;
+							if (vm.groups.length > 0) {
+								vm.toShow = "showGroups";
+							} else {
+								vm.toShow = "showInfo";
+							}
+							vm.canAdd = true;
+							setContentHeight();
+						}
+					});
 					break;
 				}
 			}
@@ -190,15 +254,18 @@
 			}
 
 			if (!nameExists) {
-				vm.groups.push({
-					name: vm.name,
-					colour: vm.colourPickerColour
+				promise = GroupsService.createGroup(vm.name, vm.colourPickerColour);
+				promise.then(function (data) {
+					if (data.statusText === "OK") {
+						console.log(data);
+						vm.groups.push(data.data);
+						vm.selectedGroup = null;
+						vm.toShow = "showGroups";
+						vm.canAdd = true;
+						vm.showAdd = false;
+						setContentHeight();
+					}
 				});
-				vm.selectedGroup = null;
-				vm.toShow = "showGroups";
-				vm.canAdd = true;
-				vm.showAdd = false;
-				setContentHeight();
 			}
 		};
 
@@ -207,9 +274,11 @@
 		 */
 		function setContentHeight () {
 			var contentHeight = 0,
-				groupHeaderHeight = 60, // It could be higher for items with long text but ignore that
-				baseGroupHeight = 260,
-				addHeight = 250;
+				groupHeaderHeight = 54, // It could be higher for items with long text but ignore that
+				baseGroupHeight = 210,
+				addHeight = 250,
+				infoHeight = 80,
+				loadingHeight = 80;
 
 			switch (vm.toShow) {
 				case "showGroups":
@@ -217,11 +286,21 @@
 						contentHeight += groupHeaderHeight;
 					});
 					break;
+
 				case "showGroup":
 					contentHeight = baseGroupHeight;
 					break;
+
 				case "showAdd":
 					contentHeight = addHeight;
+					break;
+
+				case "showInfo":
+					contentHeight = infoHeight;
+					break;
+
+				case "showLoading":
+					contentHeight = loadingHeight;
 					break;
 			}
 
@@ -232,12 +311,104 @@
 		 * Set up event watching
 		 */
 		function setupEventWatch () {
+			var index;
+
 			eventWatch = $scope.$watch(EventService.currentEvent, function (event) {
-				console.log("Groups:", event);
 				if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
 					console.log(event.value);
+					index = vm.selectedGroup.parents.indexOf(event.value.id);
+					if (index !== -1) {
+						vm.selectedGroup.parents.splice(index, 1);
+					} else {
+						vm.selectedGroup.parents.push(event.value.id);
+					}
+
+					promise = GroupsService.updateGroup(vm.selectedGroup);
+					promise.then(function (data) {
+						console.log(data);
+						setSelectedGroupHighlightStatus(true);
+					});
 				}
 			});
+		}
+
+		/**
+		 * Set the highlight status of the selected group in its colour
+		 *
+		 * @param {Boolean} highlight
+		 */
+		function setSelectedGroupHighlightStatus (highlight) {
+			var data;
+			if (vm.selectedGroup.parents.length > 0) {
+				data = {
+					source: "tree",
+					account: vm.account,
+					project: vm.project
+				};
+				if (highlight) {
+					data.ids = vm.selectedGroup.parents;
+					data.colour = vm.selectedGroup.color.map(function(item) {return (item / 255.0);}).join(" ");
+				}
+				else {
+					data.ids = [];
+				}
+				EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
+			}
+		}
+
+		/**
+		 * Set the visible status of the selected group in its colour
+		 *
+		 * @param {Array} groups
+		 * @param {Boolean} visible
+		 */
+		function setGroupsVisibleStatus (groups, visible) {
+			var i, length,
+				data,
+				ids = [];
+
+			// Get all the object IDs
+			for (i = 0, length = groups.length; i < length; i += 1) {
+				if (groups[i].parents.length > 0) {
+					ids = ids.concat(groups[i].parents);
+				}
+			}
+
+			if (ids.length > 0) {
+				data = {
+					source: "tree",
+					account: vm.account,
+					project: vm.project
+				};
+				if (visible) {
+					data.visible_ids = ids;
+				} else {
+					data.invisible_ids = ids;
+				}
+				EventService.send(EventService.EVENT.VIEWER.SWITCH_OBJECT_VISIBILITY, data);
+			}
+		}
+
+		/**
+		 * "Hide All" when showing groups should hide all the groups
+		 * "Hide All" when showing a group should hide all groups except the selected group
+		 *
+		 * @param {Boolean} hideAllStatus
+		 */
+		function doHideAll (hideAllStatus) {
+			var i, length, groups = [];
+			if (vm.toShow === "showGroups") {
+				setGroupsVisibleStatus(vm.groups, !hideAllStatus);
+			}
+			else if (vm.toShow === "showGroup") {
+				for (i = 0, length = vm.groups.length; i < length; i += 1) {
+					if (vm.groups[i]._id !== vm.selectedGroup._id) {
+						groups.push(vm.groups[i]);
+						setGroupsVisibleStatus(groups, !hideAll);
+					}
+					setGroupsVisibleStatus([vm.selectedGroup], true);
+				}
+			}
 		}
 	}
 }());

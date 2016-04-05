@@ -70,7 +70,16 @@
 			minHeight: 80,
 			fixedHeight: false,
 			options: [
-				"add"
+				"add",
+				"menu"
+			],
+			menu: [
+				{
+					value: "hideAll",
+					label: "Hide Groups",
+					selected: false,
+					toggle: true
+				}
 			]
 		});
 		*/
@@ -82,6 +91,14 @@
 			help: "List current issues",
 			icon: "fa-map-marker",
 			menu: [
+				{
+					value: "print",
+					label: "Print",
+					selected: false,
+					noToggle: true,
+					icon: "fa-print",
+					divider: true
+				},
 				{
 					value: "sortByDate",
 					label: "Sort by Date",
