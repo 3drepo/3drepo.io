@@ -128,7 +128,7 @@
 			res.write(avatar.buffer);
 			res.end();
 
-		}).catch(err => {
+		}).catch(() => {
 
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
