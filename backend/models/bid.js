@@ -4,6 +4,8 @@ var ProjectPackage = require('./projectPackage');
 var responseCodes = require('../response_codes');
 var C = require('../constants.js');
 var termsAndCondsSchema = require('./sharedSchemas/termsAndConds');
+var DB = require('../db/db');
+var _ = require('lodash');
 
 var schema = mongoose.Schema({
 	user: { type: String, required: true },
@@ -72,23 +74,70 @@ schema.post('save', function(doc){
 		Bid.getWorkspaceCollection(doc.user, doc._dbcolOptions.account, doc._dbcolOptions.project).insertOne(doc.toObject());
 
 		// add to customData.bids for quick lookup 
-		let db = ModelFactory.db;
-		let database = 'admin';
-		let collection = 'system.users';
-		let bid = {
-			role: C.REPO_ROLE_SUBCONTRACTOR,
-			account: doc._dbcolOptions.account,
-			project : doc._dbcolOptions.project,
-			package: doc.packageName,
-		};
+		// let db = ModelFactory.db;
+		// let database = 'admin';
+		// let collection = 'system.users';
+		// let bid = {
+		// 	role: C.REPO_ROLE_SUBCONTRACTOR,
+		// 	account: doc._dbcolOptions.account,
+		// 	project : doc._dbcolOptions.project,
+		// 	package: doc.packageName,
+		// };
 
-		db.db(database)
-		.collection(collection)
-		.findOneAndUpdate({ 
-			user: doc.user 
-		},{'$addToSet':{ 
-			'customData.bids': bid
-		}});
+		// db.db(database)
+		// .collection(collection)
+		// .findOneAndUpdate({ 
+		// 	user: doc.user 
+		// },{'$addToSet':{ 
+		// 	'customData.bids': bid
+		// }});
+
+		DB({}).dbCallback("admin", function(err, db) {
+			// let database = 'admin';
+			// let collection = 'system.users';
+			let bid = {
+				role: C.REPO_ROLE_SUBCONTRACTOR,
+				account: doc._dbcolOptions.account,
+				project : doc._dbcolOptions.project,
+				package: doc.packageName,
+			};
+
+			console.log('bid', bid);
+
+			db.collection('system.users').findOne({ user: doc.user}).then(user => {
+				console.log('user found', user.customData);
+
+				console.log('find bid', _.findIndex(user.customData.bids, bid));
+				if (user.customData && user.customData.bids && _.findIndex(user.customData.bids, bid) === -1){
+			
+					console.log('push bid');
+					user.customData.bids.push(bid);
+					
+				} else if (!user.customData) {
+					
+					user.customData = {
+						bids: [bid]
+					};
+
+				} else if (!user.customData.bids){
+					user.customData.bids = [bid];
+				}
+
+				console.log('new custom data', user.customData);
+
+				var updateUserCmd = {
+					updateUser: doc.user,
+					customData: user.customData
+				};
+
+				return db.command(updateUserCmd);
+
+			}).catch(err => {
+				console.log(err);
+			})
+		});
+
+
 	}
 });
 
