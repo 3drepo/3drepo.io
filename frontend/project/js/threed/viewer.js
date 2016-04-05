@@ -1822,7 +1822,7 @@ var Viewer = {};
 			});
 
 			console.log('maptilecount max', mapImgTileDists.length);
-			console.log(mapImgTileDists);
+			//console.log(mapImgTileDists);
 			// add map tiles, only the first 15
 			for(var i=0; i<mapImgTileDists.length && i < 100; i++) {
 
@@ -1833,7 +1833,7 @@ var Viewer = {};
 
 
 			//add 3d model tiles, only render first 10 tiles
-			for(var i=0; i<tileDists.length && i < 30; i++) {
+			for(var i=0; i<tileDists.length && i < 100; i++) {
 
 				var tile = tileDists[i].tile;
 
