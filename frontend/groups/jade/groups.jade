@@ -44,3 +44,7 @@ div(ng-switch="vm.toShow")
 	#groupsInfo(ng-switch-when="showInfo" layout="column")
 		.cardInfo
 			p There are currently no groups
+
+	// Loading
+	div(ng-switch-when="showLoading")
+		tdr-progress(info="vm.loadingInfo")

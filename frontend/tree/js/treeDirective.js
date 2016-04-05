@@ -41,6 +41,14 @@
 
 	TreeCtrl.$inject = ["$scope", "$timeout", "TreeService", "EventService"];
 
+	/**
+	 *
+	 * @param $scope
+	 * @param $timeout
+	 * @param TreeService
+	 * @param EventService
+	 * @constructor
+	 */
 	function TreeCtrl($scope, $timeout, TreeService, EventService) {
 		var vm = this,
 			promise = null,
@@ -81,11 +89,17 @@
 		/**
 		 * Set the content height.
 		 * The height of a node is dependent on its name length and its level.
+		 *
+		 * @param (Number} nodesToShow
 		 */
 		function setContentHeight (nodesToShow) {
-			var i, length, height = 0, maxNumNodes = 20, nodeMinHeight = 36,
-				maxStringLength = 35, maxStringLengthForLevel = 0, lineHeight = 18, levelOffset = 2;
-			for (i = 0, length = nodesToShow.length; ((i < length) && (i < maxNumNodes)); i += 1) {
+			var i, length,
+				height = 0,
+				nodeMinHeight = 36,
+				maxStringLength = 35, maxStringLengthForLevel = 0,
+				lineHeight = 18, levelOffset = 2;
+
+			for (i = 0, length = nodesToShow.length; i < length ; i += 1) {
 				maxStringLengthForLevel = maxStringLength - (nodesToShow[i].level * levelOffset);
 				height += nodeMinHeight + (lineHeight * Math.floor(nodesToShow[i].name.length / maxStringLengthForLevel));
 			}

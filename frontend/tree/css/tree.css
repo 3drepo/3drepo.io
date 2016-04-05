@@ -8,7 +8,7 @@ tree span .fa {
   padding: 0 2px 0 0;
 }
 
-tree p {
+tree .treeNodes p {
   outline: none;
   width: 100%;
   word-break: break-all;
@@ -18,7 +18,7 @@ tree p {
   font-size: 14px;
   padding: 2px;
 }
-tree p:hover {
+tree .treeNodes p:hover {
   cursor: pointer;
 }
 

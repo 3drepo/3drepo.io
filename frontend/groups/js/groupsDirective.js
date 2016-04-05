@@ -61,12 +61,14 @@
 		vm.editingGroup = false;
 		vm.editingText = "Start";
 		vm.colourPickerColour = [255, 255, 255];
+		vm.toShow = "showLoading";
+		vm.loadingInfo = "Loading groups";
+		setContentHeight();
 		GroupsService.init(vm.account, vm.project);
 
 		promise = GroupsService.getGroups();
 		promise.then(function (data) {
 			vm.groups = data.data;
-			console.log(1111111, vm.groups);
 			if (vm.groups.length > 0) {
 				vm.toShow = "showGroups";
 			}
@@ -275,7 +277,8 @@
 				groupHeaderHeight = 54, // It could be higher for items with long text but ignore that
 				baseGroupHeight = 210,
 				addHeight = 250,
-				infoHeight = 80;
+				infoHeight = 80,
+				loadingHeight = 80;
 
 			switch (vm.toShow) {
 				case "showGroups":
@@ -294,6 +297,10 @@
 
 				case "showInfo":
 					contentHeight = infoHeight;
+					break;
+
+				case "showLoading":
+					contentHeight = loadingHeight;
 					break;
 			}
 
