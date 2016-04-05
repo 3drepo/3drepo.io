@@ -60,7 +60,6 @@
 			]
 		});
 
-		/*
 		panelCard.left.push({
 			type: "groups",
 			title: "Groups",
@@ -82,7 +81,6 @@
 				}
 			]
 		});
-		*/
 
 		panelCard.right.push({
 			type: "issues",
