@@ -37,6 +37,8 @@ var dbInterface  = require('../db/db_interface.js');
 
 var utils       = require('../utils.js');
 
+var deferred    = require("deferred");
+
 function getChild(parent, type, n) {
 	if ((parent == null) || !('children' in parent))
 		return null;
@@ -255,90 +257,113 @@ function det(mat) {
  * @param {xmlNode} xmlNode - The node to append the children to
  * @param {JSON} node - The node loaded from repoGraphScene
  * @param {Matrix} matrix - Current transformation matrix
+ * @param {Array} globalCoordOffset - New origin for federated models
  * @param {dbInterface} dbInterface - Database interface object
  * @param {string} account - Name of the account containing the project
  * @param {string} project - Name of the project
  * @param {string} mode - Type of X3D being rendered
  *******************************************************************************/
-function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, project, mode, logger)
+function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globalCoordPromise, dbInterface, account, project, mode, logger)
 {
-	if (!('children' in node))
-		return;
+	if (!node.hasOwnProperty("children")) {
+		return globalCoordOffset;
+	}
 
-	for(var ch_idx = 0; ch_idx < node['children'].length; ch_idx++)
+	for(var ch_idx = 0; ch_idx < node.children.length; ch_idx++)
 	{
-		var child = node['children'][ch_idx];
+		var child = node.children[ch_idx];
 		var newNode = null;
 
-		if (!child)
+		if (!child) {
 			continue;
-
-		if (child['type'] == 'ref')
-		{
-			newNode = xmlDoc.createElement('Inline');
-
-			var url_str = child['project'] + "." + mode + ".x3d";
-			var childRefAccount = child.hasOwnProperty('owner') ? child.owner : account;
-
-			if ('revision' in child) {
-				var url_str = config.api_server.url + '/' + childRefAccount + '/' + child['project'] + '/revision/master/' + child['revision'] + '.x3d.' + mode;
-			} else {
-				var url_str = config.api_server.url + '/' + childRefAccount + '/' + child['project'] + '/revision/master/head.x3d.' + mode;
-			}
-
-			newNode.setAttribute('onload', 'onLoaded(event);');
-			newNode.setAttribute('url', url_str);
-			newNode.setAttribute('id', child['id']);
-			newNode.setAttribute('DEF', utils.uuidToString(child["shared_id"]));
-			newNode.setAttribute('nameSpaceName', account + '__' + child['project']);
-
-			if ('bounding_box' in child)
-			{
-				var bbox = repoNodeMesh.extractBoundingBox(child);
-				newNode.setAttribute('bboxCenter', bbox.center);
-				newNode.setAttribute('bboxSize', bbox.size);
-			}
-			xmlNode.appendChild(newNode);
-
-			X3D_AddChildren(xmlDoc, newNode, child, matrix, dbInterface, account, project, mode, logger);
 		}
-		else if (child['type'] == 'camera')
+
+		if (child.type === "ref")
 		{
-			newNode = xmlDoc.createElement('Viewpoint');
+			var childRefAccount = child.hasOwnProperty("owner") ? child.owner : account;
 
-			newNode.setAttribute('id', child['name']);
-			newNode.setAttribute('DEF',utils.uuidToString(child['shared_id']));
-			newNode.setAttribute('bind', false);
+			if (!globalCoordOffset)
+			{
+				globalCoordPromise.resolve(child.coordOffset);
+				globalCoordOffset = child.coordOffset;
+			}
 
-            		newNode.textContent = ' ';
+			globalCoordPromise.promise.then((globalCoordOffset) => {
+				var adjustedOffset = vecSub(child.coordOffset, globalCoordOffset);
+				var federateTransformNode = xmlDoc.createElement("Transform");
+				federateTransformNode.setAttribute("translation", adjustedOffset.join(" "));
+
+				var inlineNode = xmlDoc.createElement("Inline");
+
+				var url_str = child.project + "." + mode + ".x3d";
+
+				if (child.hasOwnProperty("revision")) {
+					url_str = config.api_server.url + "/" + childRefAccount + "/" + child.project + "/revision/" + child.revision + ".x3d." + mode;
+				} else {
+					url_str = config.api_server.url + "/" + childRefAccount + "/" + child.project + "/revision/master/head.x3d." + mode;
+				}
+
+				inlineNode.setAttribute("onload", "onLoaded(event);");
+				inlineNode.setAttribute("url", url_str);
+				inlineNode.setAttribute("id", child.id);
+				inlineNode.setAttribute("DEF", utils.uuidToString(child.shared_id));
+				inlineNode.setAttribute("nameSpaceName", account + "__" + child.project);
+
+				if (child.hasOwnProperty("bounding_box"))
+				{
+					var bbox = repoNodeMesh.extractBoundingBox(child);
+					inlineNode.setAttribute("bboxCenter", bbox.center);
+					inlineNode.setAttribute("bboxSize", bbox.size);
+				}
+
+				federateTransformNode.appendChild(inlineNode);
+				xmlNode.appendChild(federateTransformNode);
+
+				var childGlobalCoordPromise = deferred();
+
+				X3D_AddChildren(xmlDoc, inlineNode, child, matrix, null, childGlobalCoordPromise, dbInterface, account, project, mode, logger);
+			});
+		}
+		else if (child.type == "camera")
+		{
+			newNode = xmlDoc.createElement("Viewpoint");
+
+			newNode.setAttribute("id", child.name);
+			newNode.setAttribute("DEF", utils.uuidToString(child.shared_id));
+			newNode.setAttribute("bind", false);
+
+			newNode.textContent = " ";
 
 			//if (child['fov'])
-			newNode.setAttribute('fieldOfView', 0.25 * Math.PI);
+			newNode.setAttribute("fieldOfView", 0.25 * Math.PI);
 
-			if (child['position']) {
-				newNode.setAttribute('position', child['position'].join(' '));
+			if (child.position) {
+				newNode.setAttribute("position", child.position.join(" "));
             		}
 
 			//if (child['near'])
 			//	newNode.setAttribute('zNear', child['near']);
 			//else
-				newNode.setAttribute('zNear', -1);
+			newNode.setAttribute("zNear", -1);
 
 			//if (child['far'])
 			//	newNode.setAttribute('zFar', child['far']);
 			//else
-				newNode.setAttribute('zFar', -1);
+			newNode.setAttribute("zFar", -1);
 
-			var position = child["position"] ? child["position"] : [0,0,0];
-			var look_at = child["look_at"] ? child["look_at"] : [0,0,-1];
+			var position = child.position ? child.position : [0,0,0];
+			var look_at = child.look_at ? child.look_at : [0,0,-1];
 
-			if (length(look_at) == 0)
+			if (length(look_at) == 0) {
 				look_at = [0,0,-1];
+			}
 
-			if (length(look_at) == 0) look_at = [0,0,1];
+			if (length(look_at) == 0) {
+				look_at = [0,0,1];
+			}
 
 			// X3DOM has right-hand coordinate
-			var up = child["up"] ? child["up"] : [0,1,0];
+			var up = child.up ? child.up : [0,1,0];
 			forward = normalize(scale(look_at,-1)); // scale(look_at,-1)); // Forward, z-axis comes out of screen
 			up = normalize(up);
 
@@ -354,25 +379,25 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 
 			var det = mathjs.det(viewMat);
 
-			newNode.setAttribute('position', position.join(' '));
+			newNode.setAttribute("position", position.join(' '));
 
 			var center = vecAdd(position, look_at);
-			newNode.setAttribute('centerOfRotation', center.join(' '));
+			newNode.setAttribute("centerOfRotation", center.join(' '));
 
 			var orientation = axisangle(viewMat);
-			newNode.setAttribute('orientation', orientation.join(' '));
+			newNode.setAttribute("orientation", orientation.join(' '));
 
 			xmlNode.appendChild(newNode);
-			X3D_AddChildren(xmlDoc, newNode, child, matrix, dbInterface, account, project, mode, logger);
+			globalCoordOffset = X3D_AddChildren(xmlDoc, newNode, child, matrix, globalCoordOffset, globalCoordPromise, dbInterface, account, project, mode, logger);
 		}
-		else if (child['type'] == 'transformation')
+		else if (child.type == "transformation")
 		{
 			var mat_str = "";
 			for(var mat_col = 0; mat_col < 4; mat_col++)
 			{
 				for(var mat_row = 0; mat_row < 4; mat_row++)
 				{
-					mat_str += child['matrix'][mat_row][mat_col];
+					mat_str += child.matrix[mat_row][mat_col];
 
 					if (!((mat_row == 3) && (mat_col == 3)))
 						mat_str += ',';
@@ -381,32 +406,32 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 
 			if (mat_str == "1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1")
 			{
-				newNode = xmlDoc.createElement('Group');
+				newNode = xmlDoc.createElement("Group");
 			} else {
-				newNode = xmlDoc.createElement('MatrixTransform');
-				newNode.setAttribute('matrix', mat_str);
+				newNode = xmlDoc.createElement("MatrixTransform");
+				newNode.setAttribute("matrix", mat_str);
 			}
 
-			newNode.setAttribute("id", child['id']);
-			newNode.setAttribute('DEF', utils.uuidToString(child["shared_id"]));
+			newNode.setAttribute("id", child.id);
+			newNode.setAttribute("DEF", utils.uuidToString(child.shared_id));
 			xmlNode.appendChild(newNode);
 
 			var newMatrix = matrix.clone();
 			var transMatrix  = mathjs.matrix(child['matrix']);
 			newMatrix = mathjs.multiply(transMatrix, newMatrix);
 
-			X3D_AddChildren(xmlDoc, newNode, child, newMatrix, dbInterface, account, project, mode, logger);
-		} else if(child['type'] == 'material') {
-			 var appearance = xmlDoc.createElement('Appearance');
+			globalCoordOffset = X3D_AddChildren(xmlDoc, newNode, child, newMatrix, globalCoordOffset, globalCoordPromise, dbInterface, account, project, mode, logger);
+		} else if(child.type === "material") {
+			 var appearance = xmlDoc.createElement("Appearance");
 
-				newNode = xmlDoc.createElement('TwoSidedMaterial');
+				newNode = xmlDoc.createElement("TwoSidedMaterial");
 
 				var ambient_intensity = 1;
 
-				if (('ambient' in child) && ('diffuse' in child)) {
+				if (("ambient" in child) && ("diffuse" in child)) {
 					for (var i = 0; i < 3; i++) {
-						if (child['diffuse'][i] != 0) {
-							ambient_intensity = child['ambient'][i] / child['diffuse'][i];
+						if (child.diffuse[i] != 0) {
+							ambient_intensity = child.ambient[i] / child.diffuse[i];
 							break;
 						}
 					}
@@ -458,7 +483,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 				newNode.setAttribute('DEF', utils.uuidToString(child["shared_id"]));
 				appearance.appendChild(newNode);
 				xmlNode.appendChild(appearance);
-				X3D_AddChildren(xmlDoc, appearance, child, matrix, dbInterface, account, project, mode, logger);
+				globalCoordOffset = X3D_AddChildren(xmlDoc, appearance, child, matrix, globalCoordOffset, globalCoordPromise, dbInterface, account, project, mode, logger);
 		} else if (child['type'] == 'texture') {
 			newNode = xmlDoc.createElement('ImageTexture');
 			newNode.setAttribute('url', config.api_server.url + '/' + account + '/' + project + '/' + child['id'] + '.' + child['extension']);
@@ -472,7 +497,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			texProperties.setAttribute('generateMipMaps', 'true');
 			newNode.appendChild(texProperties);
 
-			X3D_AddChildren(xmlDoc, newNode, child, matrix, dbInterface, account, project, mode, logger);
+			globalCoordOffset = X3D_AddChildren(xmlDoc, newNode, child, matrix, globalCoordOffset, globalCoordPromise, dbInterface, account, project, mode, logger);
 		} else if (child['type'] == 'map') {
 			if(!child['maptype'])
 				child['maptype'] = 'satellite';
@@ -541,7 +566,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 						shape.setAttribute('bboxSize', bbox.size);
 					}
 
-					X3D_AddChildren(xmlDoc, shape, child, matrix, dbInterface, account, project, mode, logger);
+					globalCoordOffset = X3D_AddChildren(xmlDoc, shape, child, matrix, globalCoordOffset, globalCoordPromise, dbInterface, account, project, mode, logger);
 
 					X3D_AddToShape(xmlDoc, shape, dbInterface, account, project, child, subMeshKeys[i],mode, logger);
 
@@ -550,6 +575,8 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, dbInterface, account, pr
 			}
 		}
 	}
+
+	return globalCoordOffset;
 }
 
 /*******************************************************************************
@@ -897,7 +924,10 @@ function render(dbInterface, account, project, subFormat, branch, revision, call
 		var dummyRoot = { children: [doc.mRootNode] };
 
 		var mat = mathjs.eye(4);
-		X3D_AddChildren(xmlDoc, sceneRoot.root, dummyRoot, mat, dbInterface, account, project, subFormat, dbInterface.logger);
+		var globalCoordOffset = null;
+		var globalCoordPromise = deferred();
+
+		X3D_AddChildren(xmlDoc, sceneRoot.root, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, subFormat, dbInterface.logger);
 
 		/*
 		// Compute the scene bounding box.
@@ -938,48 +968,24 @@ function render(dbInterface, account, project, subFormat, branch, revision, call
 
 exports.route = function(router)
 {
-	router.get('x3d', '/:account/:project/revision/:rid', function(req, res, params, err_callback)
+	router.get('x3d', '/:account/:project/revision/:rid', function(req, res, params, callback)
 	{
-        dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req.url, req.params[C.REPO_REST_API_FORMAT].toLowerCase(), function (callback) {
-            render(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.subformat, null, params.rid, err_callback);
-        }, err_callback);
+		render(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.subformat, null, params.rid, callback);
 	});
 
-	router.get('x3d', '/:account/:project/revision/:branch/head', function(req, res, params, err_callback)
+	router.get('x3d', '/:account/:project/revision/:branch/head', function(req, res, params, callback)
 	{
-        //find out what's the rid of head and try to fetch that from gridFS
-        var rid = dbInterface(req[C.REQ_REPO].logger).getProjectBranchHeadRid(params.account, params.project, params.branch, function (rid) {
-            var gridfsURL = "/" + params.account + "/" + params.project + "/revision/" + rid + "." + params.format;
-            if (params.subformat)
-                gridfsURL += "." + params.subformat;
-            dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, gridfsURL, req.params[C.REPO_REST_API_FORMAT].toLowerCase(), function (callback) {
-                render(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.subformat, params.branch, null, err_callback);
-            }, err_callback);
-
-        } , err_callback);
-
+		render(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.subformat, params.branch, null, callback);
 	});
 
 	router.get('x3d', '/:account/:project/revision/:rid/:sid', function(req, res, params, err_callback)
 	{
-        var gridfsURL = req.url.slice(0, str.length - 5);
-        dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, gridfsURL, req.params[C.REPO_REST_API_FORMAT].toLowerCase(), function (callback) {
-            render(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.subformat, null, params.rid, err_callback);
-        }, err_callback);
+		render(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.subformat, null, params.rid, callback);
 	});
 
 	router.get('x3d', '/:account/:project/revision/:branch/head/:sid', function(req, res, params, err_callback)
 	{
-        //find out what's the rid of head and try to fetch that from gridFS
-        var rid = dbInterface(req[C.REQ_REPO].logger).getProjectBranchHeadRid(params.account, paramx.project, params.branch, function (rid) {
-            var gridfsURL = "/" + params.account + "/" + params.project + "/revision/" + rid + "." + params.format;
-            if (params.subformat)
-                gridfsURL += "." + params.subformat;
-            dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, gridfsURL, req.params[C.REPO_REST_API_FORMAT].toLowerCase(), function (callback) {
-                render(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.subformat, params.branch, null, err_callback);
-            }, err_callback);
-
-        } , err_callback);
+		render(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.subformat, params.branch, null, err_callback);
 	});
 
 	router.get('x3d', '/:account/:project/:uid', function(req, res, params, err_callback)
@@ -995,121 +1001,119 @@ exports.route = function(router)
 			var runningFaceTotal = 0;
 
 			// TODO: Only needs the shell not the whole thing
-			dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req.url, req.params[C.REPO_REST_API_FORMAT].toLowerCase(), function(callback) {
-				dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, false, projection, function(err, type, uid, fromStash, objs)
+			dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, false, projection, function(err, type, uid, fromStash, objs)
+			{
+				if (err.value) {
+					return callback(err);
+				}
+
+				var xmlDoc      = X3D_Header();
+				var sceneRoot	= X3D_CreateScene(xmlDoc);
+
+				var mesh = objs.meshes[params.uid];
+				var maxSubMeshIDX = 0;
+
+				// First sort the combined map in order of vertex ID
+				mesh[C.REPO_NODE_LABEL_COMBINED_MAP].sort(repoNodeMesh.mergeMapSort);
+
+				var subMeshBBoxes = [];
+				var bbox = [[],[]];
+
+				for(var i = 0; i < mesh[C.REPO_NODE_LABEL_COMBINED_MAP].length; i++)
 				{
-					if (err.value) {
-						return callback(err);
-					}
+					var currentMesh      = mesh[C.REPO_NODE_LABEL_COMBINED_MAP][i];
 
-					var xmlDoc      = X3D_Header();
-					var sceneRoot	= X3D_CreateScene(xmlDoc);
+					var currentMeshVFrom = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
+					var currentMeshVTo   = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO];
+					var currentMeshBBox  = currentMesh[C.REPO_NODE_LABEL_BOUNDING_BOX];
 
-					var mesh = objs.meshes[params.uid];
-					var maxSubMeshIDX = 0;
+					var currentMeshNumVertices = currentMeshVTo - currentMeshVFrom;
 
-					// First sort the combined map in order of vertex ID
-					mesh[C.REPO_NODE_LABEL_COMBINED_MAP].sort(repoNodeMesh.mergeMapSort);
+					var numAddedMeshes = 0;
 
-					var subMeshBBoxes = [];
-					var bbox = [[],[]];
-
-					for(var i = 0; i < mesh[C.REPO_NODE_LABEL_COMBINED_MAP].length; i++)
-					{
-						var currentMesh      = mesh[C.REPO_NODE_LABEL_COMBINED_MAP][i];
-
-						var currentMeshVFrom = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
-						var currentMeshVTo   = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO];
-						var currentMeshBBox  = currentMesh[C.REPO_NODE_LABEL_BOUNDING_BOX];
-
-						var currentMeshNumVertices = currentMeshVTo - currentMeshVFrom;
-
-						var numAddedMeshes = 0;
-
-						if (currentMeshNumVertices > C.SRC_VERTEX_LIMIT) {
-							// Cut the previous off short
-							if (bbox[0].length) {
-								maxSubMeshIDX += 1;
-								subMeshBBoxes.push(bbox);
-							}
-
-							numAddedMeshes = Math.ceil(currentMeshNumVertices / C.SRC_VERTEX_LIMIT)
-							bbox = [[],[]];
-						} else if ((runningVertTotal + currentMeshNumVertices) > C.SRC_VERTEX_LIMIT) {
-							numAddedMeshes = 1;
+					if (currentMeshNumVertices > C.SRC_VERTEX_LIMIT) {
+						// Cut the previous off short
+						if (bbox[0].length) {
+							maxSubMeshIDX += 1;
+							subMeshBBoxes.push(bbox);
 						}
 
-						for(var v_idx = 0; v_idx < 3; v_idx++)
+						numAddedMeshes = Math.ceil(currentMeshNumVertices / C.SRC_VERTEX_LIMIT)
+						bbox = [[],[]];
+					} else if ((runningVertTotal + currentMeshNumVertices) > C.SRC_VERTEX_LIMIT) {
+						numAddedMeshes = 1;
+					}
+
+					for(var v_idx = 0; v_idx < 3; v_idx++)
+					{
+						if (v_idx >= bbox[0].length)
 						{
-							if (v_idx >= bbox[0].length)
-							{
-								bbox[0][v_idx] = currentMeshBBox[0][v_idx];
-								bbox[1][v_idx] = currentMeshBBox[1][v_idx];
-							} else {
-								if (bbox[0][v_idx] > currentMeshBBox[0][v_idx]) {
-									bbox[0][v_idx] = currentMeshBBox[0][v_idx];
-								}
-
-								if (bbox[1][v_idx] < currentMeshBBox[1][v_idx]) {
-									bbox[1][v_idx] = currentMeshBBox[1][v_idx];
-								}
-							}
-						}
-
-						if (((runningVertTotal + currentMeshNumVertices) > C.SRC_VERTEX_LIMIT) || (currentMeshNumVertices > C.SRC_VERTEX_LIMIT)) {
-							runningVertTotal = (currentMeshNumVertices > C.SRC_VERTEX_LIMIT) ? 0 : currentMeshNumVertices;
-							maxSubMeshIDX   += numAddedMeshes;
-
-							for(var j = 0; j < numAddedMeshes; j++)
-							{
-								subMeshBBoxes.push(bbox);
-							}
-
-							bbox = [[], []];
+							bbox[0][v_idx] = currentMeshBBox[0][v_idx];
+							bbox[1][v_idx] = currentMeshBBox[1][v_idx];
 						} else {
-							runningVertTotal += currentMeshNumVertices;
+							if (bbox[0][v_idx] > currentMeshBBox[0][v_idx]) {
+								bbox[0][v_idx] = currentMeshBBox[0][v_idx];
+							}
+
+							if (bbox[1][v_idx] < currentMeshBBox[1][v_idx]) {
+								bbox[1][v_idx] = currentMeshBBox[1][v_idx];
+							}
 						}
 					}
 
-					// Cut the previous off short
-					if (bbox[0].length) {
-						maxSubMeshIDX += 1;
-						subMeshBBoxes.push(bbox);
+					if (((runningVertTotal + currentMeshNumVertices) > C.SRC_VERTEX_LIMIT) || (currentMeshNumVertices > C.SRC_VERTEX_LIMIT)) {
+						runningVertTotal = (currentMeshNumVertices > C.SRC_VERTEX_LIMIT) ? 0 : currentMeshNumVertices;
+						maxSubMeshIDX   += numAddedMeshes;
+
+						for(var j = 0; j < numAddedMeshes; j++)
+						{
+							subMeshBBoxes.push(bbox);
+						}
+
+						bbox = [[], []];
+					} else {
+						runningVertTotal += currentMeshNumVertices;
 					}
+				}
 
-					// Loop through all IDs up to and including the maxSubMeshIDX
-					for(var subMeshIDX = 0; subMeshIDX < maxSubMeshIDX; subMeshIDX++)
-					{
-						var subMeshName = mesh["id"] + "_" + subMeshIDX;
+				// Cut the previous off short
+				if (bbox[0].length) {
+					maxSubMeshIDX += 1;
+					subMeshBBoxes.push(bbox);
+				}
 
-						var shape = xmlDoc.createElement('Shape');
-						shape.setAttribute('DEF', subMeshName);
+				// Loop through all IDs up to and including the maxSubMeshIDX
+				for(var subMeshIDX = 0; subMeshIDX < maxSubMeshIDX; subMeshIDX++)
+				{
+					var subMeshName = mesh["id"] + "_" + subMeshIDX;
 
-						var fakeMesh = {};
-						fakeMesh[C.REPO_NODE_LABEL_BOUNDING_BOX] = subMeshBBoxes[subMeshIDX];
-						var bbox = repoNodeMesh.extractBoundingBox(fakeMesh);
+					var shape = xmlDoc.createElement('Shape');
+					shape.setAttribute('DEF', subMeshName);
 
-						shape.setAttribute('bboxCenter', bbox.center);
-						shape.setAttribute('bboxSize', bbox.size);
+					var fakeMesh = {};
+					fakeMesh[C.REPO_NODE_LABEL_BOUNDING_BOX] = subMeshBBoxes[subMeshIDX];
+					var bbox = repoNodeMesh.extractBoundingBox(fakeMesh);
 
-						var app = xmlDoc.createElement('Appearance');
-						var mat = xmlDoc.createElement('TwoSidedMaterial');
-						mat.textContent = ' ';
-						app.appendChild(mat);
-						shape.appendChild(app);
+					shape.setAttribute('bboxCenter', bbox.center);
+					shape.setAttribute('bboxSize', bbox.size);
 
-						var eg  = xmlDoc.createElement('ExternalGeometry');
-						eg.setAttribute('url', config.api_server.url + '/' + params.account + '/' + params.project + '/' + params.uid + '.src.mpc#' + subMeshName);
-						eg.textContent = ' ';
-						eg.setAttribute("solid", "true");
-						shape.appendChild(eg);
+					var app = xmlDoc.createElement('Appearance');
+					var mat = xmlDoc.createElement('TwoSidedMaterial');
+					mat.textContent = ' ';
+					app.appendChild(mat);
+					shape.appendChild(app);
 
-						sceneRoot.root.appendChild(shape);
-					}
+					var eg  = xmlDoc.createElement('ExternalGeometry');
+					eg.setAttribute('url', config.api_server.url + '/' + params.account + '/' + params.project + '/' + params.uid + '.src.mpc#' + subMeshName);
+					eg.textContent = ' ';
+					eg.setAttribute("solid", "true");
+					shape.appendChild(eg);
 
-					return callback(responseCodes.OK, new xmlSerial().serializeToString(xmlDoc));
-				});
-			}, err_callback);
+					sceneRoot.root.appendChild(shape);
+				}
+
+				return err_callback(responseCodes.OK, new xmlSerial().serializeToString(xmlDoc));
+			});
 		} else {
 			return err_callback(responseCodes.FORMAT_NOT_SUPPORTED);
 		}

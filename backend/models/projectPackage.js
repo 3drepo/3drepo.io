@@ -66,15 +66,14 @@ schema.post('save', function(doc){
 		// },{'$addToSet':{
 		// 	'customData.bids': bid
 		// }}).then().catch(err => { console.log(err)});
-		console.log(doc.user)
 		db.collection('system.users').findOne({ user: doc.user}).then(user => {
 			console.log('user found', user);
 			if (user.customData && user.customData.bids && _.findIndex(user.customData.bids, bid) === -1){
-		
+
 					user.customData.bids.push(bid);
-				
+
 			} else if (!user.customData) {
-				
+
 				user.customData = {
 					bids: [bid]
 				};
@@ -93,7 +92,7 @@ schema.post('save', function(doc){
 
 		}).catch(err => {
 			console.log(err);
-		})
+		});
 	});
 
 

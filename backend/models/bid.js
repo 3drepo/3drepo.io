@@ -9,7 +9,7 @@ var _ = require('lodash');
 
 var schema = mongoose.Schema({
 	user: { type: String, required: true },
-	budget: String, 
+	budget: String,
 	accepted: { type: Boolean, default: null },
 	acceptedAt: Date,
 	awarded: { type: Boolean, default: null },
@@ -44,7 +44,7 @@ var defaultProjection = { 'termsAndConds': 0 };
 
 schema.pre('save', function(next){
 	'use strict';
-	
+
 	if(this.isNew){
 		this.wasNew = this.isNew;
 		this.invitedAt = new Date();
@@ -63,7 +63,7 @@ schema.pre('save', function(next){
 		next();
 	}
 
-	
+
 });
 
 schema.post('save', function(doc){
@@ -73,7 +73,7 @@ schema.post('save', function(doc){
 
 		Bid.getWorkspaceCollection(doc.user, doc._dbcolOptions.account, doc._dbcolOptions.project).insertOne(doc.toObject());
 
-		// add to customData.bids for quick lookup 
+		// add to customData.bids for quick lookup
 		// let db = ModelFactory.db;
 		// let database = 'admin';
 		// let collection = 'system.users';
@@ -86,9 +86,9 @@ schema.post('save', function(doc){
 
 		// db.db(database)
 		// .collection(collection)
-		// .findOneAndUpdate({ 
-		// 	user: doc.user 
-		// },{'$addToSet':{ 
+		// .findOneAndUpdate({
+		// 	user: doc.user
+		// },{'$addToSet':{
 		// 	'customData.bids': bid
 		// }});
 
@@ -109,12 +109,12 @@ schema.post('save', function(doc){
 
 				console.log('find bid', _.findIndex(user.customData.bids, bid));
 				if (user.customData && user.customData.bids && _.findIndex(user.customData.bids, bid) === -1){
-			
+
 					console.log('push bid');
 					user.customData.bids.push(bid);
-					
+
 				} else if (!user.customData) {
-					
+
 					user.customData = {
 						bids: [bid]
 					};
@@ -134,7 +134,7 @@ schema.post('save', function(doc){
 
 			}).catch(err => {
 				console.log(err);
-			})
+			});
 		});
 
 
@@ -188,8 +188,8 @@ schema.methods.respond = function(accept){
 	}
 
 	if (typeof accept !== 'boolean'){
-		return Promise.reject({ 
-			resCode: responseCodes.MONGOOSE_VALIDATION_ERROR({ message: 'accept must be true or false'}) 
+		return Promise.reject({
+			resCode: responseCodes.MONGOOSE_VALIDATION_ERROR({ message: 'accept must be true or false'})
 		});
 	}
 
@@ -205,12 +205,12 @@ schema.methods.respond = function(accept){
 			_id: bid._id,
 		}, bid.toObject()).catch(err => {
 			console.log(err);
-		}); 
+		});
 
 	}).then(() => {
 		return Promise.resolve(bid);
 	});
-	
+
 };
 
 schema.methods.submit = function() {
@@ -235,7 +235,7 @@ schema.methods.submit = function() {
 		return Bid.getPackageSpaceCollection(bid._dbcolOptions.packageAccount, bid._dbcolOptions.project)
 		.updateOne({
 			_id: bid._id,
-		}, bid.toObject()); 
+		}, bid.toObject());
 
 	}).then(() => {
 		return Promise.resolve(bid);
@@ -258,8 +258,8 @@ schema.methods.award = function(){
 
 			this.awarded = true;
 			this.awardedAt = new Date();
-			
-			return this.save();			
+
+			return this.save();
 		}
 	}).then(() => {
 
@@ -272,16 +272,16 @@ schema.methods.award = function(){
 
 
 		promises.push(
-	
+
 			// mark other bids awarded: false (package)
 			// unfortunately mongoose.update don't return promise so wrap it in promise
 			new Promise((resolve, reject) => {
 
-				Bid.update(this._dbcolOptions, { 
-					packageName: this.packageName, 
-					awarded: null 
-				}, { 
-					awarded: false, 
+				Bid.update(this._dbcolOptions, {
+					packageName: this.packageName,
+					awarded: null
+				}, {
+					awarded: false,
 					awardedAt: now,
 					updatedAt: now,
 				}, { multi: true }, function(err) {
@@ -312,8 +312,8 @@ schema.methods.award = function(){
 			}
 
 			promises.push(
-				
-				Bid.getWorkspaceCollection(item.user, o.account, o.project).updateOne({ 
+
+				Bid.getWorkspaceCollection(item.user, o.account, o.project).updateOne({
 					_id: item._id,
 				}, {
 					'$set': updatedDoc
@@ -330,8 +330,8 @@ schema.methods.award = function(){
 };
 
 var Bid = ModelFactory.createClass(
-	'Bid', 
-	schema, 
+	'Bid',
+	schema,
 	arg => {
 		if(arg.workspace){
 			return collectionNames.workspace(arg.packageAccount, arg.project);
