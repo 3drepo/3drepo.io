@@ -135,7 +135,7 @@ function _getMyBid(req, projection){
 	dbCol.account = username;
 	dbCol.workspace = true;
 	
-	return Bid.findByUser(dbCol, username, projection).then(bid => {
+	return Bid.findByUser(dbCol, username, req.params.packageName, projection).then(bid => {
 		if (!bid) {
 			return Promise.reject({ resCode: responseCodes.BID_NOT_FOUND});
 		} else {
