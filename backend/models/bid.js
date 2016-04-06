@@ -150,8 +150,9 @@ schema.statics.findByPackage = function(dbColOptions, packageName, projection){
 	return Bid.find(dbColOptions, {packageName}, projection || defaultProjection);
 };
 
-schema.statics.findByUser = function(dbColOptions, user, projection){
-	return Bid.findOne(dbColOptions, {user}, projection || defaultProjection);
+schema.statics.findByUser = function(dbColOptions, user, packageName, projection){
+	console.log('packageName', packageName);
+	return Bid.findOne(dbColOptions, {user, packageName}, projection || defaultProjection);
 };
 
 schema.statics.getWorkspaceCollection = function(userAccount, packageAccount, project){
@@ -202,7 +203,9 @@ schema.methods.respond = function(accept){
 		return Bid.getPackageSpaceCollection(bid._dbcolOptions.packageAccount, bid._dbcolOptions.project)
 		.updateOne({
 			_id: bid._id,
-		}, bid.toObject()); 
+		}, bid.toObject()).catch(err => {
+			console.log(err);
+		}); 
 
 	}).then(() => {
 		return Promise.resolve(bid);
