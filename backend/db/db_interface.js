@@ -813,7 +813,7 @@ DBInterface.prototype.getCoordOffset = function(account, project, branch, revisi
 			}
 		}
 	});
-}
+};
 
 DBInterface.prototype.getProjectInfo = function(account, project, callback) {
 	if(!project){
