@@ -8,7 +8,7 @@ module.exports = function httpsGet(url, qs){
 
 	return new Promise((resolve, reject) => {
 		https.get(url + qs, result => {
-			console.log(url + qs);
+			//console.log(url + qs);
 			// Buffer the body entirely for processing as a whole.
 
 			//console.log(result.headers);

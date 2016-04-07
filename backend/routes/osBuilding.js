@@ -105,7 +105,7 @@ function genglX(format, req, res){
 		lowerLeftLon = parseFloat(req.query.lowerLeftLon);
 		grid = OsGridRef.latLonToOsGrid(new LatLon(lat, lon));
 		lowerLeftGrid = OsGridRef.latLonToOsGrid(new LatLon(lowerLeftLat, lowerLeftLon));
-		console.log(lowerLeftGrid, grid);
+		//console.log(lowerLeftGrid, grid);
 
 	} else if (method === methodNames.OSGRID) {
 
@@ -123,7 +123,7 @@ function genglX(format, req, res){
 		grid = { easting: osgrid.easting + size, northing: osgrid.northing + size };
 		lowerLeftGrid = { easting: osgrid.easting , northing: osgrid.northing};
 
-		console.log(lowerLeftGrid, grid);
+		//console.log(lowerLeftGrid, grid);
 	} else {
 		return res.status(400).json({ message: 'method must be either radius, bbox or osgrid'});
 	}
@@ -293,8 +293,6 @@ function genglX(format, req, res){
 
 			let glTF = generateglTF(meshesByBuilding, `${req.url.replace('.gltf', '.bin').substr(1)}`, materialMapping);
 
-			console.log('saving to stash and dont wait for response');
-
 			stash.saveStashByFilename(dbCol, 'gltf', gltfUrl, new Buffer(JSON.stringify(glTF.json)));
 			//bin file should also in .stash.gltf but with .bin as filename extension
 			stash.saveStashByFilename(dbCol, 'gltf', binUrl, glTF.buffer);
@@ -367,12 +365,12 @@ function getMapTiles(req, res){
 		
 		if(image) {
 
-			console.log('Map tile images found from stash');
+			req[C.REQ_REPO].logger.logDebug('Map tile images found from stash');
 			return Promise.resolve(image);
 
 		} else {
 
-			console.log('Map tile images NOT found from stash, getting from ordnance survey');
+			req[C.REQ_REPO].logger.logDebug('Map tile images NOT found from stash, getting from ordnance survey');
 			return OSGet.map({
 				tileMatrixSet: 'EPSG:3857', 
 				layer: `${req.params.style} 3857`, 
@@ -391,7 +389,7 @@ function getMapTiles(req, res){
 		res.end();
 
 	}).catch(err => {
-		console.log(stash)
+
 		console.error(err.stack);
 		if(err.message){
 			res.status(500).json({ message: err.message});

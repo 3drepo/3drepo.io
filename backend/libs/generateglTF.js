@@ -215,8 +215,8 @@ function generateBuffer(meshesByBuilding, binName, materialMapping){
 
 		});
 
-		console.log('Debug Info: Indices', id , glIndices);
-		console.log('Debug Info: idMaps', id , idMaps);
+		// console.log('Debug Info: Indices', id , glIndices);
+		// console.log('Debug Info: idMaps', id , idMaps);
 		let totalBytes = 
 			( glVertices.length * 3 ) * GLBYTE.FLOAT +
 			( glNormals.length * 3 ) * GLBYTE.FLOAT +
@@ -366,7 +366,7 @@ function generateBuffer(meshesByBuilding, binName, materialMapping){
 		buildingIndex++;
 	});
 
-	console.log(bufferInfos);
+	//console.log(bufferInfos);
 
 	let vBuffer = Buffer.concat(verticesBuffers);
 	let nBuffer = Buffer.concat(normalsBuffers);
