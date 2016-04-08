@@ -47,7 +47,17 @@ function genglX(format, req, res){
 
 	//console.log(req);
 
-	let acceptedClassCode = ['CE', 'C', 'R']; //commerial, education and residential
+	let acceptedClassCodes = ['CE', 'C', 'R']; //commerial, education and residential
+	let convertClassCode = function(classCode){
+		
+		for(let i=0; i<acceptedClassCodes.length; i++){
+			if(classCode.startWith(acceptedClassCodes[i])){
+				return acceptedClassCodes[i];
+			}
+		}
+
+		return classCode;
+	};
 
 	//color scheme
 	let materialMapping = {
@@ -195,7 +205,7 @@ function genglX(format, req, res){
 			let promises = [];
 			let cleanedBuildingCount = 0;
 
-			let found;
+			//let found;
 
 			buildings.forEach(building => {
 
@@ -215,7 +225,8 @@ function genglX(format, req, res){
 					if(draw){
 						promises.push(OSGet.dimensions({ uprn: building.UPRN }).then(dimension => {
 
-							dimension.classCode = building.classCode;
+
+							dimension.classCode = convertClassCode(building.classCode);
 							dimension.uprn = building.UPRN;
 
 							return Promise.resolve(dimension);
@@ -400,12 +411,12 @@ function getMapTiles(req, res){
 	});
 }
 
-function getUPRN(req, res, next){
+function getUPRN(req, res){
 	'use strict';
 
 	OSGet.uprn({ uprn: req.params.uprn}).then(r => {
 		if(r.header.totalresults <= 0){
-			res.status(404).json({ message: `Building with uprn ${req.params.uprn} not found`})
+			res.status(404).json({ message: `Building with uprn ${req.params.uprn} not found`});
 		} else {
 			res.status(200).json(r.results[0].DPA);
 		}
@@ -416,7 +427,7 @@ function getUPRN(req, res, next){
 		} else {
 			res.status(500).send(err);
 		}
-	})
+	});
 }
 
 module.exports = router;

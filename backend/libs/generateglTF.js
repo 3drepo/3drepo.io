@@ -36,7 +36,7 @@ function generateglTFJSON(totalBufferInfo, buildingBufferInfos, binUri, options)
 	json.meshes[meshName] = {
 		'name': meshName,
 		"primitives": []
-	}
+	};
 
 	json.nodes[nodeName] = {
 		"children": [],
@@ -71,7 +71,7 @@ function generateglTFJSON(totalBufferInfo, buildingBufferInfos, binUri, options)
 		"byteLength": totalBufferInfo.indicesLength,
 		"byteOffset": totalBufferInfo.indicesOffset,
 		"target": ELEMENT_ARRAY_BUFFER
-	}
+	};
 
 	let idMapBufferViewName = `idMap_buffer`;
 
@@ -80,7 +80,7 @@ function generateglTFJSON(totalBufferInfo, buildingBufferInfos, binUri, options)
 		"byteLength": totalBufferInfo.idMapsLength,
 		"byteOffset": totalBufferInfo.idMapsOffset,
 		"target": ARRAY_BUFFER
-	}
+	};
 
 	buildingBufferInfos.forEach(bufferInfo => {
 		
