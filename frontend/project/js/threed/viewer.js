@@ -1000,8 +1000,6 @@ var Viewer = {};
 				if(self.settings.hasOwnProperty("mapTile")){
 					// set origin BNG
 					//hard code lat/lon for setting
-					self.settings.mapTile.lat=53.7426315;
-					self.settings.mapTile.lon=-0.3570778
 					self.originBNG = OsGridRef.latLonToOsGrid(new LatLon(self.settings.mapTile.lat, self.settings.mapTile.lon));
 					self.slippyPoints = self.slippyPoints || self._getSlippyTileLayerPoints(self.settings.mapTile.lat, self.settings.mapTile.lon, 17);
 					self.mapSizes = [];
@@ -1776,16 +1774,15 @@ var Viewer = {};
 
 
 			var mapImgPosInfo = self._getMapImagePosInfo();
-			var mapImgsize = mapImgPosInfo.mapImgsize;
 
 
 			var startX = Math.ceil(Math.min.apply(Math, coordsX) / roundUpPlace) * roundUpPlace;
 			var endX = Math.ceil(Math.max.apply(Math, coordsX) / roundUpPlace) * roundUpPlace;
-			console.log('startX, endX', startX, endX);
+			//console.log('startX, endX', startX, endX);
 
 			var startZ = Math.ceil(Math.min.apply(Math, coordsZ) / roundUpPlace) * roundUpPlace;
 			var endZ = Math.ceil(Math.max.apply(Math, coordsZ) / roundUpPlace) * roundUpPlace;
-			console.log('startZ, endZ', startZ, endZ);
+			//console.log('startZ, endZ', startZ, endZ);
 
 			var mapTileCount = 0;
 			var tileDists = [];
@@ -1807,8 +1804,9 @@ var Viewer = {};
 			console.log('tileDists Len', tileDists.length);
 
 			//first step
-			var n = Math.floor( startZ + mapImgPosInfo.offsetY / mapImgStep );
-			var mapImgStep = self.getSumSize(n+1) - self.getSumSize(n);
+			var n = self.findMapTileNoByPos(startZ + mapImgPosInfo.offsetY);
+			var nextN = n >= 0 ? n + 1: n - 1;
+			var mapImgStep = Math.abs(self.getSumSize(nextN) - self.getSumSize(n)) ;
 
 			var mapImgTileDists = [];
 
@@ -1820,7 +1818,9 @@ var Viewer = {};
 
 					var dist = Math.sqrt(Math.pow(x - camera[0], 2) + Math.pow(z - camera[2], 2));
 					mapImgTileDists.push({ 'dist': dist, tile: [mapImgX, mapImgZ]});
-					mapImgStep = self.getSumSize(z+1) - self.getSumSize(z);
+
+					var nextZ = mapImgZ >=0 ? mapImgZ + 1 : mapImgZ - 1;
+					mapImgStep = Math.abs(self.getSumSize(nextZ) - self.getSumSize(mapImgZ));
 				}
 			}
 
@@ -1920,10 +1920,29 @@ var Viewer = {};
 
 			var translate = [0, 0, 0];
 			var osCoor = OsGridRef.parse(osGridRef);
-			translate[0] = osCoor.easting - self.originBNG.easting;
-			translate[2] = self.originBNG.northing - osCoor.northing;
+
+			//translate[0] = osCoor.easting - self.originBNG.easting;
+			//translate[2] = self.originBNG.northing - osCoor.northing;
+
+			var tileLatLon = OsGridRef.osGridToLatLon(osCoor);
+			var corMapTile = self._getSlippyTileLayerPoints(tileLatLon.lat, tileLatLon.lon, 17)
+
+			var y = corMapTile.y - self.slippyPoints.y;
+			var nextY = corMapTile.y >= 0 ? y + 1 : y - 1;
+			var mapSize = self.getSumSize(nextY) - self.getSumSize(y);
+			
+			var corMapTileBNG = OsGridRef.latLonToOsGrid(new LatLon(self._tile2lat(corMapTile.y, 17), self._tile2long(corMapTile.x, 17)));
+			var ox = osCoor.easting - (corMapTileBNG.easting + mapSize / 2);
+			var oy = (corMapTileBNG.northing - mapSize / 2) - osCoor.northing;
 
 
+
+			var info = self._getMapImagePosInfo();
+
+
+
+			translate[0] = (corMapTile.x - self.slippyPoints.x) * mapSize + ox + info.offsetX 
+			translate[2] = (corMapTile.y - self.slippyPoints.y) * mapSize + oy + info.offsetY 
 			if (testAdd){
 				translate = [0,0,0];
 			}
@@ -1982,50 +2001,72 @@ var Viewer = {};
 
 
 
-		this.getSumSizeAppr = function(n){
+		//appr. version
+		this.getSumSize= function(n){
 			return 1.1943 * Math.cos(self._degToRad(self._tile2lat(self.slippyPoints.y, 17))) * 256 * n;
 		}
 
-		this.getSumSize = function(n){
-			//base case
-
-			console.log('getSumSize', n);
-			if(n === 0){
-
-				return 0;
-
-			} else if (n === 1) {
-
-				self.mapSizes[0] = self.mapSizes[0] || 1.1943 * Math.cos(self._degToRad(self._tile2lat(self.slippyPoints.y, 17))) * 256;
-				return self.mapSizes[0];
-
-			} else {
-
-				if(!self.mapSizes[n-1]){
-
-					var lat = self._tile2lat(self.slippyPoints.y + n, 17);
-					self.mapSizes[n-1] = 1.1943 * Math.cos(self._degToRad(lat)) * 256;
-				}
-
-				return self.mapSizes[n-1] + self.getSumSize(n-1);
-
-			}
-
+		//appr. version
+		this.findMapTileNoByPos = function(pos){
+			return Math.floor(pos / self.getSumSize(1));
 		}
 
-		this._getMapImagePosInfoNew = function(ox, oy){
-			// get origin x,y number
+		// this.getSumSize = function(n){
 
-			var x = self.slippyPoints.x;
-			var y = self.slippyPoints.y;
+		// 	if(n === 0){
 
-			self.mapImageOsGridRef = self.mapImageOsGridRef || OsGridRef.latLonToOsGrid(new LatLon(self._tile2lat(y, zoomLevel), self._tile2long(x ,zoomLevel)));
+		// 		return 0;
 
-			var offsetX = osGridRef.easting - self.originBNG.easting + self.mapSizes[0] / 2;
-			var offsetY = self.originBNG.northing - osGridRef.northing + self.mapSizes[0] / 2;
+		// 	} else if (n === 1 || n === -1) {
 
+		// 		self.mapSizes[0] = self.mapSizes[0] || 1.1943 * Math.cos(self._degToRad(self._tile2lat(self.slippyPoints.y, 17))) * 256;
+		// 		return self.mapSizes[0] * n;
 
-		}
+		// 	} else {
+
+		// 		var nextN;
+		// 		n >= 0 ? nextN = n - 1 : nextN = n + 1;
+
+		// 		if(!self.mapSizes[nextN]){
+
+		// 			var lat = self._tile2lat(self.slippyPoints.y + n, 17);
+		// 			self.mapSizes[nextN] = 1.1943 * Math.cos(self._degToRad(lat)) * 256;
+		// 		}
+
+		// 		return (n >= 0 ? 1 : -1) * self.mapSizes[nextN] + self.getSumSize(nextN);
+
+		// 	}
+
+		// }
+
+		// this.findMapTileNoByPos = function(pos){
+
+		// 	var n;
+
+		// 	var mapSize_0 = self.getSumSize(1) - self.getSumSize(0);
+		// 	var mapSize_1 = self.getSumSize(2) - self.getSumSize(1);
+
+		// 	if(mapSize_1 > mapSize_0 && pos > 0){
+		// 		//+ve direction
+		// 		var n = 0;
+		// 		while(true){
+		// 			if(self.getSumSize(n) <= pos && pos < self.getSumSize(n+1)){
+		// 				break;
+		// 			} 
+		// 			n++;
+		// 		}
+		// 	} else {
+		// 		var n = 0;
+		// 		while(true){
+		// 			if(self.getSumSize(n) <= pos && pos < self.getSumSize(n+1)){
+		// 				break;
+		// 			} 
+		// 			n--;
+		// 		}
+		// 	}
+
+		// 	return n;
+		// }
 
 		this._getMapImagePosInfo = function(){
 
@@ -2051,6 +2092,8 @@ var Viewer = {};
 				var offsetX = osGridRef.easting - self.originBNG.easting + mapImgsize / 2;
 				var offsetY = self.originBNG.northing - osGridRef.northing + mapImgsize / 2;
 
+				//offsetX = 0;
+				//offsetY = 0;
 				self.mapPosInfo = {
 					x: x,
 					y: y,
@@ -2074,7 +2117,8 @@ var Viewer = {};
 			var offsetX = posInfo.offsetX;
 			var offsetY = posInfo.offsetY;
 
-			var size =  self.getSumSize(oy + 1) - self.getSumSize(oy);
+			var nextOy = oy >= 0 ? oy + 1 : oy - 1;
+			var size =  Math.abs(self.getSumSize(nextOy) - self.getSumSize(oy));
 
 			if (!self.addedMapImages) {
 				self.addedMapImages = {};
