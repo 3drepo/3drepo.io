@@ -1003,7 +1003,7 @@ var Viewer = {};
 					// self.settings.mapTile.lat=53.741735;
 					// self.settings.mapTile.lon=-0.359564;
 					self.originBNG = OsGridRef.latLonToOsGrid(new LatLon(self.settings.mapTile.lat, self.settings.mapTile.lon));
-					self.meterPerPixel = 1;
+					self.meterPerPixel = 12;
 					self.mapSizes = [];
 				}
 			}
