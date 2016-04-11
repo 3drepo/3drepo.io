@@ -499,6 +499,7 @@ var Viewer = {};
 
 		this.mouseDownPickPoint = function()
 		{
+			console.log(self.getViewArea());
 			var pickingInfo = self.getViewArea()._pickingInfo;
 
 			if (pickingInfo.pickObj)
@@ -1643,6 +1644,66 @@ var Viewer = {};
 				self.pins[id].changeColour(colours);
 			}
 		};
+		
+		this.measureMode = function (on) {
+			var element = document.getElementById("x3dom-default-canvas");
+			if (on) {
+				element.style.cursor = "crosshair";
+			}
+			else {
+				this.deleteMeasureLine();
+				element.style.cursor = "-webkit-grab";
+			}
+		}
+		
+		this.drawMeasureLine = function (coords) {
+			var line,
+				lineCoords,
+				lineMat,
+				lineDepth,
+				lineApp,
+				shape,
+				transform;
+			
+			line = document.createElement("LineSet");
+			line.setAttribute("vertexCount", 2);
+			
+			lineCoords = document.createElement("Coordinate");
+			lineCoords.setAttribute("point", coords[0].x + " " + coords[0].y + " " + coords[0].z + ", " + coords[1].x + " " + coords[1].y + " " + coords[1].z);
+			line.appendChild(lineCoords);
+			
+			lineMat = document.createElement("Material");
+			lineMat.setAttribute("emissiveColor", "1 1 1");
+			
+			lineDepth = document.createElement("DepthMode");
+			lineDepth.setAttribute("depthFunc", "ALWAYS");
+			
+			lineApp = document.createElement("Appearance");
+			lineApp.appendChild(lineMat);
+			lineApp.appendChild(lineDepth);
+			
+			shape = document.createElement("Shape");
+			shape.appendChild(lineApp);
+			shape.appendChild(line);
+			
+			transform = document.createElement("Transform");
+			transform.setAttribute("id", "measureLine");
+			transform.appendChild(shape);
+			
+			self.scene.appendChild(transform);
+		};
+		
+		this.deleteMeasureLine = function () {
+			var measureLine = document.getElementById("measureLine");
+			if (measureLine !== null) {
+				measureLine.parentElement.removeChild(measureLine);
+			}
+		}
+		
+		this.showDistance = function (coords) {
+			console.log(coords);
+			console.log(Math.sqrt(Math.pow(coords[1].x - coords[0].x, 2) + Math.pow(coords[1].y - coords[0].y, 2) + Math.pow(coords[1].z - coords[0].z, 2)));
+		}
 	};
 
 	Viewer.prototype.SELECT_COLOUR = {

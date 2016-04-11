@@ -97,7 +97,8 @@ module.exports.createApp = function(serverConfig)
 							"utils",
 							"walkthroughVr",
 							"oculus",
-							"groups"
+							"groups",
+							"measure"
 						],
 						"children" : [
 							{

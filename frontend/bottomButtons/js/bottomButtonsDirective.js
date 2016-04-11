@@ -35,11 +35,13 @@
 	BottomButtonsCtrl.$inject = ["EventService"];
 
 	function BottomButtonsCtrl (EventService) {
-		var vm = this;
+		var vm = this,
+			measureMode = false;
+
+
 		vm.showButtons = true;
 		vm.fullScreen = false;
 		vm.showViewingOptionButtons = false;
-		console.log(EventService);
 
 		vm.toggleElements = function () {
 			EventService.send(EventService.EVENT.TOGGLE_ELEMENTS);
@@ -95,6 +97,14 @@
 			EventService.send(EventService.EVENT.VIEWER.ENTER_VR);
 		};
 
+		/**
+		 * Enter pinakin mode
+		 */
+		var setMeasureMode = function () {
+			measureMode = !measureMode;
+			EventService.send(EventService.EVENT.MEASURE_MODE, measureMode);
+		};
+
 		vm.viewingOptions = [
 			{
 				mode: VIEWER_NAV_MODES.WALK,
@@ -129,12 +139,12 @@
 
 		vm.rightButtons = [];
 		//vm.rightButtons.push({label: "Full screen", icon: "fa fa-arrows-alt", click: enterFullScreen});
+		/*
 		vm.rightButtons.push({
 			label: "QR code",
 			icon: "fa fa-qrcode",
 			click: showQRCodeReader
 		});
-		/*
 		vm.rightButtons.push({
 			label: "Help",
 			icon: "fa fa-question",
@@ -146,6 +156,11 @@
 			icon: "icon icon_cardboard",
 			click: enterOculusDisplay,
 			iconClass: "bottomButtomIconCardboard"
+		});
+		vm.rightButtons.push({
+			label: "Measure",
+			icon: "fa fa-arrows-v",
+			click: setMeasureMode
 		});
 	}
 }());
