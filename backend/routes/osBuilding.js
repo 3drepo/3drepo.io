@@ -44,14 +44,14 @@ function extendObject(a, b){
 
 function genglX(format, req, res){
 	'use strict';
-
+	//return res.status(404).send('tmp no avail');
 	//console.log(req);
 
 	let acceptedClassCodes = ['CE', 'C', 'R']; //commerial, education and residential
 	let convertClassCode = function(classCode){
 		
 		for(let i=0; i<acceptedClassCodes.length; i++){
-			if(classCode.startWith(acceptedClassCodes[i])){
+			if(classCode.startsWith(acceptedClassCodes[i])){
 				return acceptedClassCodes[i];
 			}
 		}
@@ -225,8 +225,8 @@ function genglX(format, req, res){
 					if(draw){
 						promises.push(OSGet.dimensions({ uprn: building.UPRN }).then(dimension => {
 
-
-							dimension.classCode = convertClassCode(building.classCode);
+							console.log('classCode', building.CLASSIFICATION_CODE);
+							dimension.classCode = convertClassCode(building.CLASSIFICATION_CODE);
 							dimension.uprn = building.UPRN;
 
 							return Promise.resolve(dimension);
@@ -315,8 +315,8 @@ function genglX(format, req, res){
 	}
 
 	Promise.all([
-			stash.findStashByFilename(dbCol, 'gltf', gltfUrl),
-			stash.findStashByFilename(dbCol, 'gltf', binUrl)
+		stash.findStashByFilename(dbCol, 'gltf', gltfUrl),
+		stash.findStashByFilename(dbCol, 'gltf', binUrl)
 	]).then(buffers => {
 
 		let json = buffers[0];
