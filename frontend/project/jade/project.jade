@@ -1,4 +1,4 @@
-.container-fluid(global ng-if="!vm.state.bid4free")
+.container-fluid#project(global ng-if="!vm.state.bid4free")
 	#project-viewport-container.row
 		viewermanager
 
@@ -6,7 +6,6 @@
 	panel#rightPanel(account="vm.account", project="vm.project", branch="vm.branch", revision="vm.revision", position="right")
 	bottom-buttons
 	qr-code-reader
-	measure
 
 div(ng-if="vm.state.bid4free")
 	bid4free(account="vm.state.account" project="vm.state.project" branch="vm.state.branch" revision="vm.state.revision" state="vm.state")

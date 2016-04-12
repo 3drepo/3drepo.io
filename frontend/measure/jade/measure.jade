@@ -1,1 +1,6 @@
-| Hello!
+.md-whiteframe-1dp(ng-if="vm.show")
+    md-toolbar
+    md-content(layout="column")
+        p P1: ({{vm.p1}})
+        p(ng-if="vm.p2") P2: ({{vm.p2}})
+        p(ng-if="vm.distance") Distance: {{vm.distance}}

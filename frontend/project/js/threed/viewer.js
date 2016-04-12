@@ -182,6 +182,7 @@ var Viewer = {};
 				self.viewer.setAttribute("disableTouch", "true");
 				self.viewer.addEventListener("mousedown", onMouseDown);
 				self.viewer.addEventListener("mouseup",  onMouseUp);
+				self.viewer.addEventListener("mousemove",  onMouseMove);
 				self.viewer.style["pointer-events"] = "all";
 				self.viewer.className = "viewer";
 
@@ -497,10 +498,14 @@ var Viewer = {};
 			ViewerUtil.onEvent("onMouseDown", functionToBind);
 		};
 
+		this.onMouseMove = function(functionToBind) {
+			ViewerUtil.onEvent("onMouseMove", functionToBind);
+		};
+
 		this.mouseDownPickPoint = function()
 		{
-			console.log(self.getViewArea());
-			var pickingInfo = self.getViewArea()._pickingInfo;
+			var viewArea = self.getViewArea();
+			var pickingInfo = viewArea._pickingInfo;
 
 			if (pickingInfo.pickObj)
 			{
@@ -525,7 +530,8 @@ var Viewer = {};
 					id: objectID,
 					position: pickingInfo.pickPos,
 					normal: pickingInfo.pickNorm,
-					trans: trans
+					trans: trans,
+					screenPos: [viewArea._pressX, viewArea._pressY]
 				});
 			} else {
 				callback(self.EVENT.PICK_POINT, {
@@ -536,6 +542,19 @@ var Viewer = {};
 		};
 
 		this.onMouseDown(this.mouseDownPickPoint);
+		
+		this.mouseMovePoint = function (event) {
+			if (event.hasOwnProperty("target")) {
+				console.log(event.hitPnt);
+			}
+			else {
+				console.log(event.clientX, event.clientY);
+				var viewArea = self.getViewArea();
+				viewArea._scene._nameSpace.doc.ctx.pickValue(viewArea, event.clientX, event.clientY, 1);
+			}
+		}
+
+		this.onMouseMove(this.mouseMovePoint);
 
 		this.onViewpointChanged = function(functionToBind) {
 			ViewerUtil.onEvent("myViewpointHasChanged", functionToBind);
@@ -1699,11 +1718,6 @@ var Viewer = {};
 				measureLine.parentElement.removeChild(measureLine);
 			}
 		}
-		
-		this.showDistance = function (coords) {
-			console.log(coords);
-			console.log(Math.sqrt(Math.pow(coords[1].x - coords[0].x, 2) + Math.pow(coords[1].y - coords[0].y, 2) + Math.pow(coords[1].z - coords[0].z, 2)));
-		}
 	};
 
 	Viewer.prototype.SELECT_COLOUR = {
@@ -1746,6 +1760,7 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	GET_CURRENT_VIEWPOINT: "VIEWER_GET_CURRENT_VIEWPOINT",
 
 	PICK_POINT: "VIEWER_PICK_POINT",
+	MOVE_POINT: "VIEWER_MOVE_POINT",
 	SET_CAMERA: "VIEWER_SET_CAMERA",
 
 	LOGO_CLICK: "VIEWER_LOGO_CLICK",

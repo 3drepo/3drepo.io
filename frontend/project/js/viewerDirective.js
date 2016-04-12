@@ -245,8 +245,6 @@
 									else if (measureCoords[1] === null) {
 										measureCoords[1] = currentPickPoint;
 										v.viewer.drawMeasureLine(measureCoords);
-										v.viewer.showDistance(measureCoords);
-										//EventService.send(EventService.EVENT.MEASURE_DISTANCE, )
 									}
 									else {
 										v.viewer.deleteMeasureLine();
