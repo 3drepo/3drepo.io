@@ -1718,7 +1718,7 @@ var Viewer = {};
 
 			//console.log('camera', camera);
 			//console.log('near', near);
-			//console.log('view_dir', view_dir);
+			console.log('view_dir', view_dir);
 			//console.log('fov', fov);
 			//console.log('up', up);
 			//console.log('right', right);
@@ -1761,19 +1761,21 @@ var Viewer = {};
 			var coordsX = [coords[0][0], coords[1][0], coords[2][0], coords[3][0]];
 			var coordsZ = [coords[0][2], coords[1][2], coords[2][2], coords[3][2]];
 
-			//console.log('xx', coordsX);
-			//console.log('zz', coordsZ);
+			console.log('xx', coordsX);
+			console.log('zz', coordsZ);
 
-			// var lookingToInf = (camera[2] > 0 && coordsZ[2] < coordsZ[0] || camera[2] < 0 && coordsZ[2] > coordsZ[0]);
-			// if(lookingToInf){
+			var farVec = [coords[1][0] - coords[0][0], coords[1][2] - coords[0][2]];
+			console.log('Far Vec', farVec, Math.atan(farVec[1]/farVec[0]));
+			var nearVec = [coords[3][0] - coords[2][0], coords[3][2] - coords[2][2]];
+			console.log('Near Vec', nearVec, Math.atan(nearVec[1]/nearVec[0]));
 
-			// 	console.log('Looking to inf');
-			// 	coordsZ[0] = camera[2] + 600;
-			// 	coordsZ[1] = camera[2] + 600;
-			// 	coordsZ[2] = camera[2] - 600;
-			// 	coordsZ[3] = camera[2] - 600;
 
-			// }
+			var lookingToInf = !(self._hasSameSign(farVec[0], nearVec[0]) && self._hasSameSign(farVec[1], nearVec[1]));
+			if(lookingToInf){
+				console.log('Looking to inf');
+
+			}
+
 
 
 			var mapImgPosInfo = self._getMapImagePosInfo();
@@ -1781,12 +1783,12 @@ var Viewer = {};
 
 			var startX = Math.ceil(Math.min.apply(Math, coordsX) / roundUpPlace) * roundUpPlace;
 			var endX = Math.ceil(Math.max.apply(Math, coordsX) / roundUpPlace) * roundUpPlace;
-			console.log('startX, endX', startX, endX);
+			//console.log('startX, endX', startX, endX);
 
 			var startZ = Math.ceil(Math.min.apply(Math, coordsZ) / roundUpPlace) * roundUpPlace;
 			var endZ = Math.ceil(Math.max.apply(Math, coordsZ) / roundUpPlace) * roundUpPlace;
 			console.log('startZ, endZ', startZ, endZ);
-			console.log('camera', camera);
+			//console.log('camera', camera);
 
 
 
@@ -1794,10 +1796,10 @@ var Viewer = {};
 			var sqrtOfMax = 10;
 			var tileSize = 100 * self.meterPerPixel;
 
-			var xCount = Math.round((endX - startX) / maxTiles);
-			var zCount = Math.round((endZ - startZ) / maxTiles);
-			console.log('xCount', xCount);
-			console.log('zCount', zCount);
+			var xCount = Math.ceil((endX - startX) / tileSize);
+			var zCount = Math.ceil((endZ - startZ) / tileSize);
+			//console.log('xCount', xCount);
+			//console.log('zCount', zCount);
 
 			if(xCount * zCount > maxTiles){
 				if(xCount > sqrtOfMax && zCount > sqrtOfMax){
@@ -1811,15 +1813,15 @@ var Viewer = {};
 			}
 
 
-			//var xMidPoint = this._roundUpToTen((startX + endX) / 2);
-			var xMidPoint = this._roundUpToTen(camera[0]);
-			console.log('xMidPoint', xMidPoint);
+			var xMidPoint = this._roundUpToTen((startX + endX) / 2);
+			//var xMidPoint = this._roundUpToTen(camera[0]);
+			//console.log('xMidPoint', xMidPoint);
 			var boundedStartX = xMidPoint - Math.ceil(xCount / 2) * tileSize;
 			var boundedEndX = xMidPoint + Math.ceil(xCount / 2) * tileSize
 
-			//var zMidPoint = this._roundUpToTen((startZ + endZ) / 2);
-			var zMidPoint = this._roundUpToTen(camera[2]);
-			console.log('zMidPoint', zMidPoint);
+			var zMidPoint = this._roundUpToTen((startZ + endZ) / 2);
+			//var zMidPoint = this._roundUpToTen(camera[2]);
+			//console.log('zMidPoint', zMidPoint);
 			var boundedStartZ = zMidPoint - Math.ceil(zCount / 2) * tileSize;
 			var boundedEndZ = zMidPoint + Math.ceil(zCount / 2) * tileSize
 
@@ -1842,10 +1844,33 @@ var Viewer = {};
 
 			// map images
 			//first step
+
 			var n = self.findMapTileNoByPos(boundedStartZ + mapImgPosInfo.offsetY);
 			var nextN = n >= 0 ? n + 1: n - 1;
 			var mapImgStep = Math.abs(self.getSumSize(nextN) - self.getSumSize(n)) ;
 
+			xCount = Math.ceil((endX - startX) / mapImgStep);
+			zCount = Math.ceil((endZ - startZ) / mapImgStep);
+			console.log('xCount', xCount);
+			console.log('zCount', zCount);
+
+			if(xCount * zCount > maxTiles){
+				if(xCount > sqrtOfMax && zCount > sqrtOfMax){
+					xCount = sqrtOfMax;
+					zCount = sqrtOfMax;
+				} else if(zCount > sqrtOfMax){
+					zCount = Math.ceil(maxTiles / xCount);
+				} else if (xCount > sqrtOfMax) {
+					xCount = Math.ceil(maxTiles / zCount);
+				}
+			}
+
+			boundedStartX = xMidPoint - Math.ceil(xCount / 2) * mapImgStep;
+			boundedEndX = xMidPoint + Math.ceil(xCount / 2) * mapImgStep
+
+			boundedStartZ = zMidPoint - Math.ceil(zCount / 2) * mapImgStep;
+			boundedEndZ = zMidPoint + Math.ceil(zCount / 2) * mapImgStep;
+			
 			for (var x = boundedStartX + mapImgPosInfo.offsetX; x <= boundedEndX + mapImgPosInfo.offsetX; x+=mapImgStep) {
 				for (var z = boundedStartZ + mapImgPosInfo.offsetY; z <= boundedEndZ + mapImgPosInfo.offsetY; z+=mapImgStep) {
 
@@ -1861,6 +1886,10 @@ var Viewer = {};
 
 		};
 
+
+		this._hasSameSign = function(a, b){
+			return a <= 0 && b <= 0 || a >=0 && b >= 0
+		};
 
 		this._roundUpToTen = function(n){
 			var roundUpPlace = 10;
@@ -2016,80 +2045,101 @@ var Viewer = {};
 			return translate;
 		};
 
+		this.translateTo = function(lat, lon, height){
+			if(!self.originBNG){
+				return console.log('Translation aborted due to no origin lat,lon defined');
+			}
 
+			var to = OsGridRef.latLonToOsGrid(new LatLon(lat, lon));
+			var x = to.easting -  self.originBNG.easting;
+			var y = self.originBNG.northing - to.northing;
 
-		//appr. version
-		this.getSumSize= function(n){
+			self.setCamera([x,height,y],[0,-1,0],[0,0,-1]);
+			self.appendMapTileByViewPoint()
+		};
+
+		// //appr. version
+		// this.getSumSize= function(n){
+		// 	var mapImagePosInfo = self._getMapImagePosInfo();
+		// 	var mapPerPxZoomLevel = mapImagePosInfo.mPerPxTable[mapImagePosInfo.zoomLevel];
+		// 	var lat = self._tile2lat(mapImagePosInfo.slippyPoints.y, mapImagePosInfo.zoomLevel);
+		// 	return mapPerPxZoomLevel * Math.cos(self._degToRad(lat)) * 256 * n * self.meterPerPixel;
+		// }
+
+		// //appr. version
+		// this.findMapTileNoByPos = function(pos){
+		// 	return Math.floor(pos / self.getSumSize(1));
+		// }
+
+		// //appr. version
+		// this.getSumSizeForXRow  = this.getSumSize;
+
+		this.getSumSizeForXRow = function(n, y){
 			var mapImagePosInfo = self._getMapImagePosInfo();
 			var mapPerPxZoomLevel = mapImagePosInfo.mPerPxTable[mapImagePosInfo.zoomLevel];
-			var lat = self._tile2lat(mapImagePosInfo.slippyPoints.y, mapImagePosInfo.zoomLevel);
+			var lat = self._tile2lat(mapImagePosInfo.slippyPoints.y + y, mapImagePosInfo.zoomLevel);
 			return mapPerPxZoomLevel * Math.cos(self._degToRad(lat)) * 256 * n * self.meterPerPixel;
 		}
 
-		//appr. version
-		this.findMapTileNoByPos = function(pos){
-			return Math.floor(pos / self.getSumSize(1));
+		this.getSumSize = function(n){
+
+			var mapImagePosInfo = self._getMapImagePosInfo();
+		 	var mapPerPxZoomLevel = mapImagePosInfo.mPerPxTable[mapImagePosInfo.zoomLevel];
+			if(n === 0){
+
+				return 0;
+
+			} else if (n === 1 || n === -1) {
+
+				var lat = self._tile2lat(mapImagePosInfo.slippyPoints.y, mapImagePosInfo.zoomLevel);
+				self.mapSizes[0] = self.mapSizes[0] || mapPerPxZoomLevel * Math.cos(self._degToRad(lat)) * 256  * self.meterPerPixel;
+				return self.mapSizes[0] * n;
+
+			} else {
+
+				var nextN;
+				n >= 0 ? nextN = n - 1 : nextN = n + 1;
+
+				if(!self.mapSizes[nextN]){
+
+					var lat = self._tile2lat(mapImagePosInfo.slippyPoints.y + n, mapImagePosInfo.zoomLevel);
+					self.mapSizes[nextN] = mapPerPxZoomLevel * Math.cos(self._degToRad(lat)) * 256  * self.meterPerPixel;
+				}
+
+				return (n >= 0 ? 1 : -1) * self.mapSizes[nextN] + self.getSumSize(nextN);
+
+			}
+
 		}
 
-		// this.getSumSize = function(n){
+		this.findMapTileNoByPos = function(pos){
 
-		// 	var mapImagePosInfo = self._getMapImagePosInfo();
-		//  var mapPerPxZoomLevel = mapImagePosInfo.mPerPxTable[mapImagePosInfo.zoomLevel];
-		// 	if(n === 0){
+			var n;
 
-		// 		return 0;
+			var mapSize_0 = self.getSumSize(1) - self.getSumSize(0);
+			var mapSize_1 = self.getSumSize(2) - self.getSumSize(1);
 
-		// 	} else if (n === 1 || n === -1) {
+			if(mapSize_1 > mapSize_0 && pos > 0){
+				//+ve direction
+				var n = 0;
+				while(true){
+					if(self.getSumSize(n) <= pos && pos < self.getSumSize(n+1)){
+						break;
+					} 
+					n++;
+				}
+			} else {
+				var n = 0;
+				while(true){
+					if(self.getSumSize(n) <= pos && pos < self.getSumSize(n+1)){
+						break;
+					} 
+					n--;
+				}
+			}
 
-		// 		var lat = self._tile2lat(mapImagePosInfo.slippyPoints.y, mapImagePosInfo.zoomLevel);
-		// 		self.mapSizes[0] = self.mapSizes[0] || mapPerPxZoomLevel * Math.cos(self._degToRad(lat)) * 256;
-		// 		return self.mapSizes[0] * n;
-
-		// 	} else {
-
-		// 		var nextN;
-		// 		n >= 0 ? nextN = n - 1 : nextN = n + 1;
-
-		// 		if(!self.mapSizes[nextN]){
-
-		// 			var lat = self._tile2lat(mapImagePosInfo.slippyPoints.y + n, 17);
-		// 			self.mapSizes[nextN] = mapPerPxZoomLevel * Math.cos(self._degToRad(lat)) * 256;
-		// 		}
-
-		// 		return (n >= 0 ? 1 : -1) * self.mapSizes[nextN] + self.getSumSize(nextN);
-
-		// 	}
-
-		// }
-
-		// this.findMapTileNoByPos = function(pos){
-
-		// 	var n;
-
-		// 	var mapSize_0 = self.getSumSize(1) - self.getSumSize(0);
-		// 	var mapSize_1 = self.getSumSize(2) - self.getSumSize(1);
-
-		// 	if(mapSize_1 > mapSize_0 && pos > 0){
-		// 		//+ve direction
-		// 		var n = 0;
-		// 		while(true){
-		// 			if(self.getSumSize(n) <= pos && pos < self.getSumSize(n+1)){
-		// 				break;
-		// 			} 
-		// 			n++;
-		// 		}
-		// 	} else {
-		// 		var n = 0;
-		// 		while(true){
-		// 			if(self.getSumSize(n) <= pos && pos < self.getSumSize(n+1)){
-		// 				break;
-		// 			} 
-		// 			n--;
-		// 		}
-		// 	}
-
-		// 	return n;
-		// }
+			return n;
+		}
 
 		this._getMapImagePosInfo = function(){
 
@@ -2099,7 +2149,7 @@ var Viewer = {};
 			if (!self.mapPosInfo){
 
 				
-				var zoomLevel = 17;
+				var zoomLevel = 11;
 
 				var mPerPxTable = {
 					0:	156543.03,
@@ -2155,6 +2205,51 @@ var Viewer = {};
 
 		}
 
+		//secret little functions to help in-browser alignment
+		this._moveStep = 10;
+		this._startMoveImages = function(){
+			
+			self._moveImagesListener = function(e){
+				if(e.code === 'ArrowUp'){
+					self._moveMapImages(0, -self._moveStep);
+				} else if(e.code === 'ArrowLeft'){
+					self._moveMapImages(-self._moveStep, 0);
+				} else if(e.code === 'ArrowDown'){
+					self._moveMapImages(0, self._moveStep);
+				} else if(e.code === 'ArrowRight'){
+					self._moveMapImages(self._moveStep, 0);
+				}
+			};
+
+			document.addEventListener('keyup', self._moveImagesListener);
+		};
+
+		this._stopMoveImages = function(){
+			document.removeEventListener('keyup', self._moveImagesListener);
+		};
+
+
+		this._moveMapImages = function(dx, dy){
+
+			self.sumD = self.sumD || [0, 0];
+			self.imagesDoms.forEach(function(dom){
+				
+				var t = dom.getAttribute('translation').split(' ');
+				
+				t.forEach(function(number, i){
+					t[i] = parseFloat(number);
+				});
+
+				t[0] += dx;
+				t[2] += dy;
+
+				dom.setAttribute('translation', t.join(' '));
+			});
+
+			self.sumD[0] += dx;
+			self.sumD[1] += dy;
+		}
+
 		this.appendMapImage = function(ox, oy){
 
 			var posInfo = self._getMapImagePosInfo();
@@ -2178,7 +2273,7 @@ var Viewer = {};
 
 			if(!self.addedMapImages[ox + ',' + oy]){
 				
-				var dom = self.createMapImageTile(size, x + ox, y + oy, [offsetX + self.getSumSize(ox), mapHeight, offsetY + self.getSumSize(oy)]);
+				var dom = self.createMapImageTile(size, x + ox, y + oy, [offsetX + self.getSumSizeForXRow(ox, oy), mapHeight, offsetY + self.getSumSize(oy)]);
 				self.imagesDoms.push(dom);
 				self.getScene().appendChild(dom);
 				self.addedMapImages[ox + ',' + oy] = 1;
