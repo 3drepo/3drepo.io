@@ -181,3 +181,32 @@ issue-header h5 {
   color: rgba(0, 0, 0, 0.7);
   margin-left: 5px;
 }
+
+/** Issue Area ********************************************************************************************************/
+issue-area {
+  position: fixed;
+  top: 100px;
+  left: 450px;
+  width: calc(100vw - 900px);
+  height: calc(100vh - 200px);
+  background: rgba(0,0,0,0.5);
+  border-radius: 8px;
+}
+
+issue-area #issueAreaCanvas {
+  position: absolute;
+  border-radius: 8px;
+}
+
+issue-area #issueAreaCentre {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: -20px 0 0 -20px;
+}
+
+issue-area #issueAreaButtons md-icon {
+  font-size: 30px;
+  margin-top: -7px;
+  margin-left: -4px;
+}
