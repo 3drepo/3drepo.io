@@ -350,6 +350,7 @@ var Viewer = {};
 					self.appendMapTileByViewPoint();
 				});
 
+				self.viewer.translateTo(53.258206, -2.516448,20000);
 				// init add map tiles
 				//setTimeout(self.appendMapTileByViewPoint, 2000);
 
