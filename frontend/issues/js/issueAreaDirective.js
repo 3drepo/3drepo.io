@@ -25,48 +25,59 @@
         return {
             restrict: "EA",
             templateUrl: "issueArea.html",
-            scope: { },
+            scope: {},
             controller: IssueAreaCtrl,
             controllerAs: "vm",
             bindToController: true
         };
     }
 
-    IssueAreaCtrl.$inject = ["$element", "$timeout"];
+    IssueAreaCtrl.$inject = ["$element", "$window", "$timeout", "EventService"];
 
-    function IssueAreaCtrl($element, $timeout) {
+    function IssueAreaCtrl($element, $window, $timeout, EventService) {
         var vm = this,
-            canvasColour = "rgba(0 ,0 ,0, 0)";
+            canvas = angular.element($element[0].querySelector('#issueAreaCanvas')),
+            canvasColour = "rgba(255 ,255 ,255, 0.2)",
+            myCanvas = document.getElementById("issueAreaCanvas"),
+            mouse_drag_x = 0, mouse_drag_y = 0,
+            last_mouse_drag_x = -1, last_mouse_drag_y = -1,
+            mouse_button = 0,
+            mouse_dragging = false,
+            pen_col = "#FF0000",
+            pen_size = 4;
 
-        var canvas = angular.element($element[0].querySelector('#issueAreaCanvas'));
-        canvas.attr("width", $element[0].offsetWidth);
-        canvas.attr("height", $element[0].offsetHeight);
+        /*
+         * Init
+         */
+        $timeout(function () {
+            vm.buttonDrawClass = "md-hue-2";
+            vm.pointerEvents = "auto";
+            vm.drawMode = true;
+            resizeCanvas();
+            initCanvas(myCanvas);
+            document.getElementById("dl").addEventListener('click', dlCanvas, false);
+        });
 
-        var myCanvas = document.getElementById("issueAreaCanvas");
+        /**
+         * Make the canvas the same size as the area
+         */
+        function resizeCanvas () {
+            canvas.attr("width", $element[0].offsetWidth);
+            canvas.attr("height", $element[0].offsetHeight);
+        }
 
-        var mouse_drag_x = 0, mouse_drag_y = 0;
-        var last_mouse_drag_x = -1, last_mouse_drag_y = -1;
-        var mouse_button = 0;
-        var mouse_dragging = false;
-
-        var pen_col = "#FFFFFF";
-        var pen_size = 1;
-        var bg_col = "#000000";
-
-        initCanvas(myCanvas);
-
-        // redraw the canvas...
-        var context = myCanvas.getContext("2d");
-        context.fillStyle = canvasColour;
-        context.fillRect(0, 0, myCanvas.width, myCanvas.height);
-        context.lineCap = "round";
-
-        // add event listeners
+        /**
+         * Setup canvas and event listeners
+         * 
+         * @param canvas
+         */
         function initCanvas(canvas)
         {
             // These offsets are needed because the element uses 'position:fixed'
-            var layerXOffset = 1508,
-                layerYOffset = 88;
+            var layerXOffset = 0,
+                layerYOffset = 0;
+            
+            clearCanvas();
 
             canvas.addEventListener('mousedown', function (evt) {
                 switch(evt.button) {
@@ -89,6 +100,9 @@
                 evt.preventDefault();
                 evt.stopPropagation();
                 evt.returnValue = false;
+
+                EventService.send(EventService.EVENT.TOGGLE_SCRIBBLE, {on: true});
+                vm.pointerEvents = "none";
             }, false);
 
             canvas.addEventListener('mouseup', function (evt) {
@@ -102,6 +116,9 @@
                 evt.preventDefault();
                 evt.stopPropagation();
                 evt.returnValue = false;
+
+                EventService.send(EventService.EVENT.TOGGLE_SCRIBBLE, {on: false});
+                vm.pointerEvents = "auto";
             }, false);
 
             canvas.addEventListener('mouseout', function (evt) {
@@ -115,6 +132,9 @@
                 evt.preventDefault();
                 evt.stopPropagation();
                 evt.returnValue = false;
+
+                EventService.send(EventService.EVENT.TOGGLE_SCRIBBLE, {on: false});
+                vm.pointerEvents = "auto";
             }, false);
 
             canvas.addEventListener('mousemove', function (evt) {
@@ -139,6 +159,11 @@
             }, false);
         }
 
+        /**
+         * Update the canvas
+         * 
+         * @param canvas
+         */
         function updateImage(canvas)
         {
             var context = canvas.getContext("2d");
@@ -156,10 +181,9 @@
             // redraw the canvas...
             context.lineWidth = pen_size;
 
+            // Draw line
             context.beginPath();
             context.strokeStyle = pen_col;
-
-            // Draw a line
             context.moveTo(last_mouse_drag_x, last_mouse_drag_y);
             context.lineTo(mouse_drag_x, mouse_drag_y);
             context.stroke();
@@ -168,28 +192,61 @@
             last_mouse_drag_y = mouse_drag_y;
         }
 
-        vm.setupPin = function () {
-            vm.buttonPinClass = "md-hue-2";
-            vm.buttonDrawClass = "default";
-        };
-
-        vm.erase = function () {
-            vm.buttonPinClass = "default";
-            vm.buttonDrawClass = "default";
-
-            // redraw the canvas...
+        /**
+         * Clear the canvas
+         */
+        function clearCanvas () {
             var context = myCanvas.getContext("2d");
             context.clearRect(0, 0, myCanvas.width, myCanvas.height);
             context.fillStyle = canvasColour;
             context.fillRect(0, 0, myCanvas.width, myCanvas.height);
-
-            context.lineWidth = 1.0;
             context.lineCap = "round";
+        }
+
+        /**
+         * Set up placing of the pin
+         */
+        vm.setupPin = function () {
+            vm.buttonPinClass = "md-hue-2";
+            vm.buttonDrawClass = "default";
+            vm.drawMode = false;
         };
 
+        /**
+         * Erase the canvas
+         */
+        vm.erase = function () {
+            vm.buttonPinClass = "default";
+            vm.buttonDrawClass = "md-hue-2";
+            vm.drawMode = true;
+            clearCanvas();
+        };
+
+        /**
+         * Set up drawing
+         */
         vm.setupDraw = function () {
             vm.buttonPinClass = "default";
             vm.buttonDrawClass = "md-hue-2";
+            vm.drawMode = true;
         };
+
+        /*
+         * Watch for screen resize
+         */
+        angular.element($window).bind("resize", function() {
+            //resizeCanvas();
+        });
+
+        function dlCanvas() {
+            var dt = myCanvas.toDataURL('image/png');
+            /* Change MIME type to trick the browser to downlaod the file instead of displaying it */
+            dt = dt.replace(/^data:image\/[^;]*/, 'data:application/octet-stream');
+
+            /* In addition to <a>'s "download" attribute, you can define HTTP-style headers */
+            dt = dt.replace(/^data:application\/octet-stream/, 'data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=Canvas.png');
+
+            this.href = dt;
+        }
     }
 }());

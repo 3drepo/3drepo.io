@@ -38,14 +38,25 @@
         };
     }
 
-	ProjectCtrl.$inject = ["$timeout", "$scope", "EventService", "ProjectService"];
+	ProjectCtrl.$inject = ["$timeout", "$scope", "$element", "$compile", "EventService", "ProjectService"];
 
-	function ProjectCtrl($timeout, $scope, EventService, ProjectService) {
+	function ProjectCtrl($timeout, $scope, $element, $compile, EventService, ProjectService) {
 		var vm = this, i, length,
 			panelCard = {
 				left: [],
 				right: []
-			};
+			},
+			projectUI,
+			issueArea;
+
+		vm.pointerEvents = "auto";
+
+		/*
+		 * Get the project element
+		 */
+		$timeout(function () {
+			projectUI = angular.element($element[0].querySelector('#projectUI'));
+		});
 
 		panelCard.left.push({
 			type: "tree",
@@ -187,5 +198,24 @@
 
 			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelCard);
 		});
+
+		/*
+		 * Watch for events
+		 */
+		$scope.$watch(EventService.currentEvent, function (event) {
+			if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) {
+				if (event.value.on) {
+					issueArea = angular.element("<issue-area></issue-area>");
+					projectUI.prepend(issueArea);
+					$compile(issueArea)($scope);
+				}
+				else {
+					issueArea.remove();
+				}
+			}
+			else if (event.type === EventService.EVENT.TOGGLE_SCRIBBLE) {
+				vm.pointerEvents = event.value.on ? "none" : "auto";
+			}
+		})
 	}
 }());

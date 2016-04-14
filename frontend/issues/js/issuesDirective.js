@@ -171,6 +171,7 @@
 					vm.canAdd = false;
 					setContentHeight();
 					setPinToAssignedRoleColours(vm.selectedIssue);
+					EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true});
 				}
 			}
 		});
@@ -506,6 +507,7 @@
 					// Hide and show layers
 					if (vm.toShow === "showAdd") {
 						removeAddPin();
+						EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
 					}
 					vm.toShow = "showIssues";
 					vm.showAdd = false; // So that showing add works
@@ -533,6 +535,7 @@
 			// Hide and show layers
 			if (vm.toShow === "showAdd") {
 				removeAddPin();
+				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
 			}
 			vm.toShow = "showIssue";
 			vm.showAdd = false; // So that showing add works

@@ -11,11 +11,13 @@ panel  {
 panel #items {
   position: absolute;
   width: 350px;
+  pointer-events: inherit;
 }
 
 panel #buttons {
   position: absolute;
   top: 50px;
+  pointer-events: inherit;
 }
 panel #buttons .panelButtonGroup {
   margin-bottom: 20px;

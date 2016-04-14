@@ -184,18 +184,17 @@ issue-header h5 {
 
 /** Issue Area ********************************************************************************************************/
 issue-area {
-  position: fixed;
-  top: 100px;
-  left: 450px;
-  width: calc(100vw - 900px);
-  height: calc(100vh - 200px);
-  background: rgba(0,0,0,0.5);
-  border-radius: 8px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
 }
 
 issue-area #issueAreaCanvas {
   position: absolute;
-  border-radius: 8px;
+  pointer-events: auto;
 }
 
 issue-area #issueAreaCentre {
@@ -203,8 +202,14 @@ issue-area #issueAreaCentre {
   left: 50%;
   top: 50%;
   margin: -20px 0 0 -20px;
+  pointer-events: none;
 }
 
+issue-area #issueAreaButtons {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
 issue-area #issueAreaButtons md-icon {
   font-size: 30px;
   margin-top: -7px;

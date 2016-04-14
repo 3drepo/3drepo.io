@@ -67,8 +67,6 @@ div(ng-switch="vm.toShow")
 
 		md-button.md-raised.md-accent(ng-click="vm.saveIssue()", ng-disabled="vm.saveIssueDisabled") Save
 
-		issue-area
-
 	// Info
 	.cardInfo(ng-switch-when="showInfo")
 		p {{vm.issuesInfo}}
