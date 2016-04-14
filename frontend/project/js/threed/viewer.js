@@ -165,14 +165,19 @@ var Viewer = {};
 			}
 		};
 
-		this.init = function() {
+		this.init = function(options) {
 			if (!self.initialized) {
+
+				// Set option param from viewerDirective
+				self.options = options;
+
 				// If we have a viewer manager then it
 				// will take care of initializing the runtime
 				// else we'll do it ourselves
 				x3dom.runtime.ready = self.initRuntime;
 
 				self.addLogo();
+
 
 				// Set up the DOM elements
 				self.viewer = document.createElement("x3d");
@@ -254,7 +259,9 @@ var Viewer = {};
 		};
 
 		// This is called when the X3DOM runtime is initialized
+		// member of x3dom.runtime instance
 		this.initRuntime = function() {
+
 			if (this.doc.id === self.name) {
 				self.runtime = this;
 
@@ -326,12 +333,27 @@ var Viewer = {};
 					self.pinSize = sceneSize / 20;
 				}
 
-				self.showAll();
+				//console.log('my op', options);
+
+				var options = self.options;
+				if(!self.initTranslated && options && options.lat && options.lon){
+	
+					self.initTranslated = true;
+
+					setTimeout(function(){
+						self.translateTo(options.lat, options.lon, 20000);
+					}, 2000);
+
+				} else {
+					self.showAll();
+				}
 
 				if (!self.downloadsLeft) {
 					callback(self.EVENT.LOADED);
+					var options = self.options;
 				}
 
+	
 				//add map tiles only when mouse down -> move -> mouse up
 				// var changed = false;
 				// var viewChangeHandler = function(){
@@ -349,8 +371,7 @@ var Viewer = {};
 				self.onMouseUp(function(){
 					self.appendMapTileByViewPoint();
 				});
-
-				self.viewer.translateTo(53.258206, -2.516448,20000);
+				
 				// init add map tiles
 				//setTimeout(self.appendMapTileByViewPoint, 2000);
 
@@ -1000,9 +1021,6 @@ var Viewer = {};
 
 				if(self.settings.hasOwnProperty("mapTile")){
 					// set origin BNG
-					//hard code lat/lon for setting
-					//self.settings.mapTile.lat=53.42029696961515;
-					//self.settings.mapTile.lon=-2.3474550417649303;
 					self.originBNG = OsGridRef.latLonToOsGrid(new LatLon(self.settings.mapTile.lat, self.settings.mapTile.lon));
 					self.meterPerPixel = 1;
 					self.mapSizes = [];

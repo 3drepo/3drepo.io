@@ -43,9 +43,9 @@
 		};
 	}
 
-	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService"];
+	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "$location", "serverConfig", "EventService"];
 
-	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService)
+	function ViewerCtrl ($scope, $q, $http, $element, $location, serverConfig, EventService)
 	{
 		var v = this;
 
@@ -75,15 +75,22 @@
 		};
 
 		$scope.init = function() {
+
 			v.viewer = new Viewer(v.name, $element[0], v.manager, eventCallback, errCallback);
 
-			v.viewer.init();
+			var options = {};
+			var startLatLon = $location.search().at && $location.search().at.split(',');
+			if(startLatLon){
+				options.lat = startLatLon[0],
+				options.lon = startLatLon[1]
+			}
+
+			v.viewer.init(options);
 			// TODO: Move this so that the attachment is contained
 			// within the plugins themselves.
 			// Comes free with oculus support and gamepad support
 			v.oculus     = new Oculus(v.viewer);
 			v.gamepad    = new Gamepad(v.viewer);
-
 			v.gamepad.init();
 
 			v.collision  = new Collision(v.viewer);
@@ -110,8 +117,8 @@
 						account: v.account,
 						project: v.project,
 						settings: json.properties
-					});
 				});
+			});
 
 		};
 
