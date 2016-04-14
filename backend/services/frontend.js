@@ -102,12 +102,15 @@ module.exports.createApp = function(serverConfig)
 							"oculus",
 							"groups"
 						],
+						'url': '/:project?at',
 						"children" : [
 							{
 								"plugin": "bid4free",
+								'url': '/bid4free',
 								children: [
 									{
-										plugin: "bid4freeWorkspace"
+										plugin: "bid4freeWorkspace",
+										url: '/bid4freeWorkspace'
 									}
 								]
 							}
