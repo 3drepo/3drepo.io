@@ -72,28 +72,6 @@
 		});
 
 		panelCard.left.push({
-			type: "groups",
-			title: "Groups",
-			show: true,
-			help: "groups of objects",
-			icon: "fa-cubes",
-			minHeight: 80,
-			fixedHeight: false,
-			options: [
-				"add",
-				"menu"
-			],
-			menu: [
-				{
-					value: "hideAll",
-					label: "Hide Groups",
-					selected: false,
-					toggle: true
-				}
-			]
-		});
-
-		panelCard.right.push({
 			type: "issues",
 			title: "Issues",
 			show: true,
@@ -136,7 +114,30 @@
 				"menu"
 			]
 		});
-		panelCard.right.push({
+
+		panelCard.left.push({
+			type: "groups",
+			title: "Groups",
+			show: true,
+			help: "groups of objects",
+			icon: "fa-cubes",
+			minHeight: 80,
+			fixedHeight: false,
+			options: [
+				"add",
+				"menu"
+			],
+			menu: [
+				{
+					value: "hideAll",
+					label: "Hide Groups",
+					selected: false,
+					toggle: true
+				}
+			]
+		});
+
+		panelCard.left.push({
 			type: "clip",
 			title: "Clip",
 			show: false,
@@ -147,7 +148,9 @@
 				"visible"
 			]
 		});
-		panelCard.right.push({
+
+		/*
+		panelCard.left.push({
 			type: "docs",
 			title: "Docs",
 			show: false,
@@ -157,6 +160,7 @@
 			fixedHeight: false,
 			options: []
 		});
+		*/
 
 		$scope.$watchGroup(["vm.account","vm.project"], function()
 		{
@@ -164,7 +168,7 @@
 				// Add filtering options for the Issues card menu
 				ProjectService.getRoles(vm.account, vm.project).then(function (data) {
 					for (i = 0, length = data.length; i < length; i += 1) {
-						panelCard.right[0].menu.push(
+						panelCard.left[1].menu.push(
 							{
 								value: "filterRole_" + data[i].role,
 								label: data[i].role,

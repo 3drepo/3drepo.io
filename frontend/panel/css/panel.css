@@ -183,6 +183,7 @@ panel-card-add {
 }
 
 panel-card-add md-icon {
-  font-size: 22px !important;
-  margin-top: 1px;
+  font-size: 30px!important;
+  margin-top: -8px;
+  margin-left: -6px;
 }

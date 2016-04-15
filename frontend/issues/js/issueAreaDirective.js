@@ -37,14 +37,19 @@
     function IssueAreaCtrl($element, $window, $timeout, EventService) {
         var vm = this,
             canvas = angular.element($element[0].querySelector('#issueAreaCanvas')),
-            canvasColour = "rgba(255 ,255 ,255, 0.2)",
+            canvasColour = "rgba(0 ,0 ,0, 0)",
             myCanvas = document.getElementById("issueAreaCanvas"),
+            penIndicator = angular.element($element[0].querySelector("#issueAreaPenIndicator")),
             mouse_drag_x = 0, mouse_drag_y = 0,
             last_mouse_drag_x = -1, last_mouse_drag_y = -1,
             mouse_button = 0,
             mouse_dragging = false,
             pen_col = "#FF0000",
-            pen_size = 4;
+            initialPenSize = 4,
+            pen_size = initialPenSize,
+            initialPenIndicatorSize = 20,
+            penIndicatorSize = initialPenIndicatorSize,
+            mouseWheelDirectionUp = null;
 
         /*
          * Init
@@ -53,6 +58,8 @@
             vm.buttonDrawClass = "md-hue-2";
             vm.pointerEvents = "auto";
             vm.drawMode = true;
+            vm.showPenIndicator = false;
+            canvas.css("background", "rgba(255, 255, 255, 0.1");
             resizeCanvas();
             initCanvas(myCanvas);
             document.getElementById("dl").addEventListener('click', dlCanvas, false);
@@ -74,9 +81,6 @@
         function initCanvas(canvas)
         {
             // These offsets are needed because the element uses 'position:fixed'
-            var layerXOffset = 0,
-                layerYOffset = 0;
-            
             clearCanvas();
 
             canvas.addEventListener('mousedown', function (evt) {
@@ -86,8 +90,8 @@
                     case 2:  mouse_button = 2; break;	//right
                     default: mouse_button = 0; break;
                 }
-                mouse_drag_x = evt.layerX + layerXOffset;
-                mouse_drag_y = evt.layerY + layerYOffset;
+                mouse_drag_x = evt.layerX;
+                mouse_drag_y = evt.layerY;
                 mouse_dragging = true;
 
                 if (evt.shiftKey) { mouse_button = 1; }
@@ -138,24 +142,57 @@
             }, false);
 
             canvas.addEventListener('mousemove', function (evt) {
-                window.status='MOVE: '+evt.layerX+", "+evt.layerY;
+                window.status='MOVE: ' + evt.layerX + ", " + evt.layerY;
+                mouse_drag_x = evt.layerX;
+                mouse_drag_y = evt.layerY;
 
-                if (!mouse_dragging) {
-                    return;
+                if (!mouse_dragging && !vm.showPenIndicator) {
+                    $timeout(function () {
+                        vm.showPenIndicator = true;
+                    })
                 }
-
-                mouse_drag_x = evt.layerX + layerXOffset;
-                mouse_drag_y = evt.layerY + layerYOffset;
-
-                if (evt.shiftKey) { mouse_button = 1; }
-                if (evt.ctrlKey)  { mouse_button = 4; }
-                if (evt.altKey)   { mouse_button = 2; }
-
-                updateImage(canvas);
+                else {
+                    /*
+                    if (evt.shiftKey) { mouse_button = 1; }
+                    if (evt.ctrlKey)  { mouse_button = 4; }
+                    if (evt.altKey)   { mouse_button = 2; }
+                    */
+                    updateImage(canvas);
+                }
 
                 evt.preventDefault();
                 evt.stopPropagation();
                 evt.returnValue = false;
+                setPenIndicatorPosition(mouse_drag_x, mouse_drag_y);
+            }, false);
+
+            canvas.addEventListener('wheel', function (evt) {
+                var penToIndicatorRation = 0.7;
+
+                if (evt.deltaY === 0) {
+                    mouseWheelDirectionUp = null;
+                    initialPenIndicatorSize = penIndicatorSize;
+                    initialPenSize = pen_size;
+                }
+                else if ((evt.deltaY === 1) && (mouseWheelDirectionUp === null)) {
+                    mouseWheelDirectionUp = false;
+                    penIndicatorSize = initialPenIndicatorSize;
+                    pen_size = initialPenSize;
+                }
+                else if ((evt.deltaY === -1) && (mouseWheelDirectionUp === null)) {
+                    mouseWheelDirectionUp = true;
+                    penIndicatorSize = initialPenIndicatorSize;
+                    pen_size = initialPenSize;
+                }
+                else {
+                    penIndicatorSize += mouseWheelDirectionUp ? 1 : -1;
+                    penIndicatorSize = (penIndicatorSize < 0) ? 0 : penIndicatorSize;
+                    penIndicator.css("font-size", penIndicatorSize + "px");
+                    setPenIndicatorPosition(evt.layerX, evt.layerY);
+
+                    pen_size += mouseWheelDirectionUp ? penToIndicatorRation : -penToIndicatorRation;
+                    pen_size = (pen_size < 0) ? 0 : pen_size;
+                }
             }, false);
         }
 
@@ -209,7 +246,9 @@
         vm.setupPin = function () {
             vm.buttonPinClass = "md-hue-2";
             vm.buttonDrawClass = "default";
+            vm.buttonEraseClass = "default";
             vm.drawMode = false;
+            canvas.css("background", "rgba(255, 255, 255, 0.0");
         };
 
         /**
@@ -217,9 +256,14 @@
          */
         vm.erase = function () {
             vm.buttonPinClass = "default";
-            vm.buttonDrawClass = "md-hue-2";
+            vm.buttonDrawClass = "default";
+            vm.buttonEraseClass = "md-hue-2";
             vm.drawMode = true;
-            clearCanvas();
+            canvas.css("background", "rgba(255, 255, 255, 0.1)");
+            //clearCanvas();
+            var context = myCanvas.getContext("2d");
+            context.globalCompositeOperation = "destination-out";
+            pen_col = "rgba(0, 0, 0, 1)";
         };
 
         /**
@@ -228,7 +272,12 @@
         vm.setupDraw = function () {
             vm.buttonPinClass = "default";
             vm.buttonDrawClass = "md-hue-2";
+            vm.buttonEraseClass = "default";
             vm.drawMode = true;
+            canvas.css("background", "rgba(255, 255, 255, 0.1)");
+            var context = myCanvas.getContext("2d");
+            context.globalCompositeOperation = "source-over";
+            pen_col = "#FF0000";
         };
 
         /*
@@ -247,6 +296,17 @@
             dt = dt.replace(/^data:application\/octet-stream/, 'data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=Canvas.png');
 
             this.href = dt;
+        }
+
+        /**
+         * Move the pen indicator
+         * @param x
+         * @param y
+         */
+        function setPenIndicatorPosition (x, y) {
+            var positionFactor = 2.2;
+            penIndicator.css("left", (x - (penIndicatorSize / positionFactor)) + "px");
+            penIndicator.css("top", (y - (penIndicatorSize / positionFactor)) + "px");
         }
     }
 }());

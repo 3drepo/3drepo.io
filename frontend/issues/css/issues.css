@@ -215,3 +215,11 @@ issue-area #issueAreaButtons md-icon {
   margin-top: -7px;
   margin-left: -4px;
 }
+
+issue-area #issueAreaPenIndicator {
+  position: absolute;
+  display: block;
+  color: #FFFFFF;
+  opacity: 0.9;
+  font-size: 20px;
+}

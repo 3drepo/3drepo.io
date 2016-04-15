@@ -1,4 +1,5 @@
 canvas#issueAreaCanvas(ng-show="vm.drawMode")
+md-icon#issueAreaPenIndicator(class="fa fa-circle-thin", ng-show="vm.showPenIndicator")
 
 svg#issueAreaCentre(height="40", width="40")
     line(x1="0", y1="20", x2="40", y2="20", style="stroke:rgb(255,255,255);stroke-width:2")
@@ -8,7 +9,7 @@ svg#issueAreaCentre(height="40", width="40")
     a(id="dl", download="Canvas.png", href="#") Download
     md-button.md-fab(aria-label="Draw", ng-class="vm.buttonDrawClass", ng-click="vm.setupDraw()")
         md-icon(class="fa fa-pencil-square-o")
-    md-button.md-fab(aria-label="Erase", ng-click="vm.erase()")
+    md-button.md-fab(aria-label="Erase", ng-class="vm.buttonEraseClass", ng-click="vm.erase()")
         md-icon(class="fa fa-eraser")
     md-button.md-fab.md-accent(aria-label="Pin", ng-class="vm.buttonPinClass", ng-click="vm.setupPin()")
         md-icon(class="fa fa-map-pin")
