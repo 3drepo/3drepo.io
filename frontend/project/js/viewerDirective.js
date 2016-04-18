@@ -82,7 +82,8 @@
 			var startLatLon = $location.search().at && $location.search().at.split(',');
 			if(startLatLon){
 				options.lat = startLatLon[0],
-				options.lon = startLatLon[1]
+				options.lon = startLatLon[1],
+				options.y = parseInt(startLatLon[2])
 			}
 
 			v.viewer.init(options);
