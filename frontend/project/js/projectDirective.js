@@ -209,7 +209,13 @@
 		$scope.$watch(EventService.currentEvent, function (event) {
 			if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) {
 				if (event.value.on) {
-					issueArea = angular.element("<issue-area></issue-area>");
+					if (event.value.hasOwnProperty("issue")) {
+						vm.issue = event.value.issue;
+						issueArea = angular.element("<issue-area data='vm.issue'></issue-area>");
+					}
+					else {
+						issueArea = angular.element("<issue-area></issue-area>");
+					}
 					projectUI.prepend(issueArea);
 					$compile(issueArea)($scope);
 				}

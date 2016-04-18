@@ -223,3 +223,19 @@ issue-area #issueAreaPenIndicator {
   opacity: 0.9;
   font-size: 20px;
 }
+
+issue-area #scribbleDisplay {
+  position:absolute;
+  width:100%;
+  height:100%;
+  overflow:hidden
+}
+/* Influenced by Itay answer - http://stackoverflow.com/a/18674144/782358 */
+issue-area #scribbleDisplay img {
+  position: absolute;
+  margin: auto;
+  height: 100%;
+  width: auto;
+  left: -200%;
+  right: -200%;
+}

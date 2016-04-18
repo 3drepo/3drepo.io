@@ -504,10 +504,8 @@
 				vm.autoSaveComment = true; // Auto save a comment if needed
 
 				$timeout(function () {
-					// Hide and show layers
 					if (vm.toShow === "showAdd") {
 						removeAddPin();
-						EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
 					}
 					vm.toShow = "showIssues";
 					vm.showAdd = false; // So that showing add works
@@ -521,6 +519,9 @@
 
 					// No selected issue
 					vm.selectedIssue = null;
+
+					// Hide issue area
+					EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
 				});
 			}
 		});
@@ -575,6 +576,8 @@
 					clippingPlanes: vm.selectedIssue.viewpoint.clippingPlanes
 				});
 			}
+
+			EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, issue: vm.selectedIssue});
 		};
 
 		/**
@@ -734,7 +737,7 @@
 				maxStringLength = 32,
 				lineHeight = 18,
 				footerHeight,
-				addHeight = 280,
+				addHeight = 230,
 				commentHeight = 80,
 				headerHeight = 53,
 				openIssueFooterHeight = 180,

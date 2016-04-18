@@ -25,7 +25,9 @@
         return {
             restrict: "EA",
             templateUrl: "issueArea.html",
-            scope: {},
+            scope: {
+                data: "="
+            },
             controller: IssueAreaCtrl,
             controllerAs: "vm",
             bindToController: true
@@ -36,10 +38,10 @@
 
     function IssueAreaCtrl($element, $window, $timeout, EventService) {
         var vm = this,
-            canvas = angular.element($element[0].querySelector('#issueAreaCanvas')),
+            canvas,
             canvasColour = "rgba(0 ,0 ,0, 0)",
-            myCanvas = document.getElementById("issueAreaCanvas"),
-            penIndicator = angular.element($element[0].querySelector("#issueAreaPenIndicator")),
+            myCanvas,
+            penIndicator,
             mouse_drag_x = 0, mouse_drag_y = 0,
             last_mouse_drag_x = -1, last_mouse_drag_y = -1,
             mouse_button = 0,
@@ -55,10 +57,14 @@
          * Init
          */
         $timeout(function () {
+            canvas = angular.element($element[0].querySelector('#issueAreaCanvas')),
+            myCanvas = document.getElementById("issueAreaCanvas"),
+            penIndicator = angular.element($element[0].querySelector("#issueAreaPenIndicator")),
             vm.buttonDrawClass = "md-hue-2";
             vm.pointerEvents = "auto";
             vm.drawMode = true;
             vm.showPenIndicator = false;
+            vm.scribble = "/public/images/scribble_test.png";
             canvas.css("background", "rgba(255, 255, 255, 0.1");
             resizeCanvas();
             initCanvas(myCanvas);

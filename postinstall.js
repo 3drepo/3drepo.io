@@ -200,6 +200,13 @@ function make_symlink(file, target_dir){
 	else if(platform === 'linux' || platform === 'darwin'){
 		var numberofdirs = target_dir.match(/\//g).length + 1;
 		var inversedir = Array.apply(null, new Array(numberofdirs)).map(function() { return "..";} ).join('/') + "/";
+		
+		// Create target directory if it doesn't exist
+		try {
+			fs.accessSync(target_dir, fs.F_OK); // Throw for fail
+		} catch (e) {
+			fs.mkdirSync(target_dir);
+		}
 
 		exec('ln -sf ' + (inversedir + fname) + ' ' + target_dir, standard_callback);
 	}
