@@ -109,6 +109,13 @@ var internal_files = {
 	'bower_components/angular-sanitize/angular-sanitize.min.js'
 	],
 
+	bower_font_files: [
+		'bower_components/material-design-icons/iconfont/MaterialIcons-Regular.eot',
+		'bower_components/material-design-icons/iconfont/MaterialIcons-Regular.ttf',
+		'bower_components/material-design-icons/iconfont/MaterialIcons-Regular.woff',
+		'bower_components/material-design-icons/iconfont/MaterialIcons-Regular.woff2'
+	],
+
 	x3dom_files: [
 	'submodules/x3dom/dist/ammo.js',
 	'submodules/x3dom/dist/x3dom.js',
@@ -118,6 +125,7 @@ var internal_files = {
 
 var public_dir_js	= path.normalize("public/js/external");
 var public_dir_css	= path.normalize("public/css/external");
+var public_dir_font	= path.normalize("public/fonts/external");
 
 install_bower();
 write_common_files_list();
@@ -148,7 +156,8 @@ function install_bower(){
 				publicize_files(internal_files.bower_qr_files, public_qr_dir, public_dir_css);
 				//FIXME: if we ever need to minify an x3dom file this might cause a problem. Ideally we should split it like js.
 				//minify_css();
-			});
+				publicize_files(internal_files.bower_font_files, public_qr_dir, public_dir_css, public_dir_font);
+		});
 	});
 }
 
@@ -265,12 +274,23 @@ function minify_css(){
  * publicize_files(flist, target_dir)
  * Publicize a list of given files(flist), and their minified version where appropriate, in target_dir.
  */
-function publicize_files(flist, target_dir_js, target_dir_css){
+function publicize_files(flist, target_dir_js, target_dir_css, target_dir_font){
 	var index;
 	for (index = 0; index < flist.length; index++){
-		var target_dir = path.extname(flist[index]) === '.css' ? target_dir_css : target_dir_js;
-		make_symlink(flist[index], target_dir);
-		//minify(flist[index], target_dir);
+		var target_dir = null;
+		
+		if (path.extname(flist[index]) === '.css') {
+			target_dir = target_dir_css;
+		} else if ((path.extname(flist[index]) === '.js') || (path.extname(flist[index]) === '.map')) {
+			target_dir = target_dir_js;
+		} else {
+			target_dir = target_dir_font;
+		}
+		
+		if (target_dir !== null) {
+			make_symlink(flist[index], target_dir);
+			//minify(flist[index], target_dir);
+		}
 	}
 
 }
