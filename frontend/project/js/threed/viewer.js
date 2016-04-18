@@ -342,12 +342,7 @@ var Viewer = {};
 
 				var options = self.options;
 				if(!self.initTranslated && options && options.lat && options.lon){
-	
-					self.initTranslated = true;
-
-					setTimeout(function(){
-						self.translateTo(options.lat, options.lon, options.y);
-					}, 2000);
+					//moved to updateSettings since action required project settings loaded first
 
 				} else {
 					self.showAll();
@@ -955,6 +950,12 @@ var Viewer = {};
 			if (settings) {
 				self.settings = settings;
 				self.applySettings();
+
+				self.initTranslated = true;
+				var options = self.options;
+				setTimeout(function(){
+					self.translateTo(options.lat, options.lon, options.y)
+				}, 2000);
 			}
 		};
 
@@ -2241,6 +2242,10 @@ var Viewer = {};
 				return console.log('Translation aborted due to no origin lat,lon defined');
 			}
 
+			lat = parseFloat(lat);
+			lon = parseFloat(lon);
+
+			console.log('translateTo', lat, lon, height)
 			var to = OsGridRef.latLonToOsGrid(new LatLon(lat, lon));
 			var x = to.easting -  self.originBNG.easting;
 			var y = self.originBNG.northing - to.northing;
