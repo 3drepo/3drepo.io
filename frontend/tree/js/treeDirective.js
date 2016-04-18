@@ -230,8 +230,10 @@
 						vm.nodesToShow[i].children[j].selected = (vm.nodesToShow[i].children[j]._id === selectedId);
 
 						vm.setToggleState(vm.nodesToShow[i].children[j], "visible");
-
-						vm.nodesToShow[i].children[j].hasChildren = vm.nodesToShow[i].children[j].children.length > 0;
+						if("children" in vm.nodesToShow[i].children[j])
+							vm.nodesToShow[i].children[j].hasChildren = vm.nodesToShow[i].children[j].children.length > 0;
+						else
+							vm.nodesToShow[i].children[j].hasChildren = false;
 						if (vm.nodesToShow[i].children[j].selected) {
 							selectionFound = true;
 
