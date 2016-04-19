@@ -11,7 +11,7 @@ bottom-buttons {
 
 bottom-buttons #leftButtons {
   position: absolute;
-  left: -35px;
+  left: -15px;
   top: 8px;
 }
 bottom-buttons #leftButtons span {
@@ -20,7 +20,7 @@ bottom-buttons #leftButtons span {
 
 bottom-buttons #rightButtons {
   position: absolute;
-  right: 0;
+  right: 35px;
   top: 8px;
 }
 bottom-buttons #rightButtons span {
@@ -40,8 +40,8 @@ bottom-buttons .actionButton md-icon {
 
 bottom-buttons .viewingOptionButtons {
   position: absolute;
-  right: 20px;
-  top: -130px;
+  left: 40px;
+  top: -120px;
 }
 
 bottom-buttons label {
@@ -56,13 +56,12 @@ bottom-buttons label:hover {
 
 .bottomButtomIconCardboard {
   font-size: 20px !important;
-  margin-top: 5px;
   margin-left: -4px;
 }
 .bottomButtomIconWalk {
-  margin-left: -5px;
+  margin-left: 0;
 }
 .bottomButtomIconHelicopter {
-  margin-left: -18px;
+  margin-left: -5px;
   font-size: 22px !important;
 }

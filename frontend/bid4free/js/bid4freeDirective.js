@@ -61,7 +61,22 @@
 		vm.subContractors = [
 			{user: "Pinakin"},
 			{user: "Carmen"},
-			{user: "Henry"}
+			{user: "Henry"},
+			{user: "B4F_su8C0n_01"},
+			{user: "B4F_su8C0n_02"},
+			{user: "B4F_su8C0n_03"},
+			{user: "B4F_su8C0n_04"},
+			{user: "B4F_su8C0n_05"},
+			{user: "B4F_su8C0n_06"},
+			{user: "B4F_su8C0n_07"},
+			{user: "B4F_su8C0n_08"},
+			{user: "B4F_su8C0n_09"},
+			{user: "B4F_su8C0n_10"},
+			{user: "B4F_su8C0n_11"},
+			{user: "B4F_su8C0n_12"},
+			{user: "B4F_su8C0n_13"},
+			{user: "B4F_su8C0n_14"},
+			{user: "B4F_su8C0n_15"}
 		];
 		vm.notInvitedSubContractors = JSON.parse(JSON.stringify(vm.subContractors));
 

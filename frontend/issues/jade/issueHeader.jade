@@ -1,0 +1,21 @@
+.issueTitle(ng-click="vm.click()" layout="row" layout-align="start" flex)
+	.issueRoleMarkers(layout="column" flex="none")
+		div(ng-repeat="roleColor in vm.issueData.assignedRolesColors", style="background:{{roleColor}};" flex)
+
+	.issueStatusMarker(flex="none")
+		md-icon(class="fa fa-circle-o issueOpen" ng-if="!vm.issueData.closed")
+		md-icon(class="fa fa-dot-circle-o issueClosed" ng-if="vm.issueData.closed")
+
+	.issueHeaderText(layout="column" flex)
+		p {{vm.issueData.title}}
+		.issueTitleInfo(layout="row" layout-align="start")
+			p(flex="60") {{vm.issueData.owner}}
+			span(flex="35" layout="row" layout-align="end")
+				p {{vm.issueData.timeStamp}}
+
+.issueInfo(ng-if="vm.issueData.showInfo", layout="row" layout-align="start center")
+	div(flex)
+		h5 {{vm.infoText}}
+	div(flex="15")
+		md-button.md-icon-button(ng-click="vm.onHideInfo()", aria-label="Hide info")
+			md-icon(md-font-icon="fa-times-circle", class="fa")

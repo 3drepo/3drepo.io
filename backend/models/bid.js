@@ -4,10 +4,12 @@ var ProjectPackage = require('./projectPackage');
 var responseCodes = require('../response_codes');
 var C = require('../constants.js');
 var termsAndCondsSchema = require('./sharedSchemas/termsAndConds');
+var DB = require('../db/db');
+var _ = require('lodash');
 
 var schema = mongoose.Schema({
 	user: { type: String, required: true },
-	budget: String, 
+	budget: String,
 	accepted: { type: Boolean, default: null },
 	acceptedAt: Date,
 	awarded: { type: Boolean, default: null },
@@ -42,7 +44,7 @@ var defaultProjection = { 'termsAndConds': 0 };
 
 schema.pre('save', function(next){
 	'use strict';
-	
+
 	if(this.isNew){
 		this.wasNew = this.isNew;
 		this.invitedAt = new Date();
@@ -61,7 +63,7 @@ schema.pre('save', function(next){
 		next();
 	}
 
-	
+
 });
 
 schema.post('save', function(doc){
@@ -71,24 +73,71 @@ schema.post('save', function(doc){
 
 		Bid.getWorkspaceCollection(doc.user, doc._dbcolOptions.account, doc._dbcolOptions.project).insertOne(doc.toObject());
 
-		// add to customData.bids for quick lookup 
-		let db = ModelFactory.db;
-		let database = 'admin';
-		let collection = 'system.users';
-		let bid = {
-			role: C.REPO_ROLE_SUBCONTRACTOR,
-			account: doc._dbcolOptions.account,
-			project : doc._dbcolOptions.project,
-			package: doc.packageName,
-		};
+		// add to customData.bids for quick lookup
+		// let db = ModelFactory.db;
+		// let database = 'admin';
+		// let collection = 'system.users';
+		// let bid = {
+		// 	role: C.REPO_ROLE_SUBCONTRACTOR,
+		// 	account: doc._dbcolOptions.account,
+		// 	project : doc._dbcolOptions.project,
+		// 	package: doc.packageName,
+		// };
 
-		db.db(database)
-		.collection(collection)
-		.findOneAndUpdate({ 
-			user: doc.user 
-		},{'$addToSet':{ 
-			'customData.bids': bid
-		}});
+		// db.db(database)
+		// .collection(collection)
+		// .findOneAndUpdate({
+		// 	user: doc.user
+		// },{'$addToSet':{
+		// 	'customData.bids': bid
+		// }});
+
+		DB({}).dbCallback("admin", function(err, db) {
+			// let database = 'admin';
+			// let collection = 'system.users';
+			let bid = {
+				role: C.REPO_ROLE_SUBCONTRACTOR,
+				account: doc._dbcolOptions.account,
+				project : doc._dbcolOptions.project,
+				package: doc.packageName,
+			};
+
+			console.log('bid', bid);
+
+			db.collection('system.users').findOne({ user: doc.user}).then(user => {
+				console.log('user found', user.customData);
+
+				console.log('find bid', _.findIndex(user.customData.bids, bid));
+				if (user.customData && user.customData.bids && _.findIndex(user.customData.bids, bid) === -1){
+
+					console.log('push bid');
+					user.customData.bids.push(bid);
+
+				} else if (!user.customData) {
+
+					user.customData = {
+						bids: [bid]
+					};
+
+				} else if (!user.customData.bids){
+					user.customData.bids = [bid];
+				}
+
+				console.log('new custom data', user.customData);
+
+				var updateUserCmd = {
+					updateUser: doc.user,
+					customData: user.customData
+				};
+
+				return db.command(updateUserCmd);
+
+			}).catch(err => {
+				console.log(err);
+			});
+		});
+
+
 	}
 });
 
@@ -101,8 +150,9 @@ schema.statics.findByPackage = function(dbColOptions, packageName, projection){
 	return Bid.find(dbColOptions, {packageName}, projection || defaultProjection);
 };
 
-schema.statics.findByUser = function(dbColOptions, user, projection){
-	return Bid.findOne(dbColOptions, {user}, projection || defaultProjection);
+schema.statics.findByUser = function(dbColOptions, user, packageName, projection){
+	console.log('packageName', packageName);
+	return Bid.findOne(dbColOptions, {user, packageName}, projection || defaultProjection);
 };
 
 schema.statics.getWorkspaceCollection = function(userAccount, packageAccount, project){
@@ -138,8 +188,8 @@ schema.methods.respond = function(accept){
 	}
 
 	if (typeof accept !== 'boolean'){
-		return Promise.reject({ 
-			resCode: responseCodes.MONGOOSE_VALIDATION_ERROR({ message: 'accept must be true or false'}) 
+		return Promise.reject({
+			resCode: responseCodes.MONGOOSE_VALIDATION_ERROR({ message: 'accept must be true or false'})
 		});
 	}
 
@@ -153,12 +203,14 @@ schema.methods.respond = function(accept){
 		return Bid.getPackageSpaceCollection(bid._dbcolOptions.packageAccount, bid._dbcolOptions.project)
 		.updateOne({
 			_id: bid._id,
-		}, bid.toObject()); 
+		}, bid.toObject()).catch(err => {
+			console.log(err);
+		});
 
 	}).then(() => {
 		return Promise.resolve(bid);
 	});
-	
+
 };
 
 schema.methods.submit = function() {
@@ -183,7 +235,7 @@ schema.methods.submit = function() {
 		return Bid.getPackageSpaceCollection(bid._dbcolOptions.packageAccount, bid._dbcolOptions.project)
 		.updateOne({
 			_id: bid._id,
-		}, bid.toObject()); 
+		}, bid.toObject());
 
 	}).then(() => {
 		return Promise.resolve(bid);
@@ -206,8 +258,8 @@ schema.methods.award = function(){
 
 			this.awarded = true;
 			this.awardedAt = new Date();
-			
-			return this.save();			
+
+			return this.save();
 		}
 	}).then(() => {
 
@@ -220,16 +272,16 @@ schema.methods.award = function(){
 
 
 		promises.push(
-	
+
 			// mark other bids awarded: false (package)
 			// unfortunately mongoose.update don't return promise so wrap it in promise
 			new Promise((resolve, reject) => {
 
-				Bid.update(this._dbcolOptions, { 
-					packageName: this.packageName, 
-					awarded: null 
-				}, { 
-					awarded: false, 
+				Bid.update(this._dbcolOptions, {
+					packageName: this.packageName,
+					awarded: null
+				}, {
+					awarded: false,
 					awardedAt: now,
 					updatedAt: now,
 				}, { multi: true }, function(err) {
@@ -260,8 +312,8 @@ schema.methods.award = function(){
 			}
 
 			promises.push(
-				
-				Bid.getWorkspaceCollection(item.user, o.account, o.project).updateOne({ 
+
+				Bid.getWorkspaceCollection(item.user, o.account, o.project).updateOne({
 					_id: item._id,
 				}, {
 					'$set': updatedDoc
@@ -278,8 +330,8 @@ schema.methods.award = function(){
 };
 
 var Bid = ModelFactory.createClass(
-	'Bid', 
-	schema, 
+	'Bid',
+	schema,
 	arg => {
 		if(arg.workspace){
 			return collectionNames.workspace(arg.packageAccount, arg.project);

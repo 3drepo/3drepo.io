@@ -26,6 +26,7 @@
 			restrict: 'EA',
 			templateUrl: 'accountProjects.html',
 			scope: {
+				account: "=",
 				projectsGrouped: "="
 			},
 			controller: AccountProjectsCtrl,
@@ -34,35 +35,60 @@
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "AccountService"];
 
-	function AccountProjectsCtrl($scope, $location) {
-		var vm = this;
+	function AccountProjectsCtrl($scope, $location, AccountService) {
+		var vm = this,
+			promise,
+			bid4FreeProjects = null;
 
 		/*
 		 * Init
 		 */
 		vm.bif4FreeEnabled = false;
 
+		promise = AccountService.getProjectsBid4FreeStatus(vm.account);
+		promise.then(function (data) {
+			if (data.data.length > 0) {
+				bid4FreeProjects = [];
+				angular.forEach(data.data, function (value) {
+					if (bid4FreeProjects.indexOf(value.project) === -1) {
+						bid4FreeProjects.push(value.project);
+					}
+				});
+				setupBid4FreeAccess();
+			}
+		});
+
 		/*
 		 * Handle changes to the state manager Data
 		 * Reformat the grouped projects to enable toggling of projects list
 		 */
 		$scope.$watch("vm.projectsGrouped", function () {
+			var account;
 			vm.accounts = [];
 			angular.forEach(vm.projectsGrouped, function(value, key) {
-				vm.accounts.push({
+				account = {
 					name: key,
-					projects: value,
+					projects: [],
 					showProjects: true
+				};
+				angular.forEach(value, function(name) {
+					account.projects.push({
+						name: name,
+						bif4FreeEnabled: false
+					});
 				});
+				vm.accounts.push(account);
 			});
+			setupBid4FreeAccess();
 		});
 
 		/**
 		 * Go to the project viewer
 		 *
-		 * @param {{String}} project
+		 * @param {String} account
+		 * @param {String} project
 		 */
 		vm.goToProject = function (account, project) {
 			$location.path("/" + account + "/" + project, "_self");
@@ -82,5 +108,15 @@
 			console.log(account, project);
 			$location.path("/" + account + "/" + project + "/bid4free", "_self");
 		};
+
+		function setupBid4FreeAccess () {
+			if ((vm.accounts.length > 0) && (bid4FreeProjects !== null)) {
+				angular.forEach(vm.accounts, function(account) {
+					angular.forEach(account.projects, function(project) {
+						project.bif4FreeEnabled = (bid4FreeProjects.indexOf(project.name) !== -1);
+					});
+				});
+			}
+		}
 	}
 }());

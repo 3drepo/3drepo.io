@@ -743,7 +743,7 @@ DBInterface.prototype.getUserInfo = function(username, callback) {
       * @param {function} callback(string) - call back function with revision id as a string
       * @param {function} err_callback(err) - callback when error occurs
 	  *******************************************************************************/
-DBInterface.prototype.getProjectBranchHeadRid = function (account, project, branch, callback, err_callback) {
+DBInterface.prototype.getProjectBranchHeadRid = function (account, project, branch, callback) {
     var branch_id;
     if (branch === "master") {
         branch_id = masterUUID;
@@ -761,12 +761,60 @@ DBInterface.prototype.getProjectBranchHeadRid = function (account, project, bran
 
     dbConn(this.logger).getLatest(account, project + ".history", historyQuery, historyProjection, function (err, docs) {
         if (err.value) {
-            return err_callback(err);
+            return callback(err);
         }
         if (!docs.length) { return err_callback(responseCodes.PROJECT_HISTORY_NOT_FOUND); }
-        callback(uuidToString(docs[0]._id));
+        callback(responseCodes.OK, uuidToString(docs[0]._id));
     });
 };
+
+DBInterface.prototype.getCoordOffset = function(account, project, branch, revision, callback) {
+	"use strict";
+
+	var historyQuery = null;
+
+	if (revision)
+	{
+		historyQuery = {
+			_id: stringToUUID(revision)
+		};
+	} else {
+
+		let branch_id;
+
+		if (branch === "master") {
+			branch_id = masterUUID;
+		} else {
+			branch_id = stringToUUID(branch);
+		}
+
+		historyQuery = {
+			shared_id: branch_id
+		};
+	}
+
+	var historyProjection = {
+		coordOffset: 1
+	};
+
+	dbConn(this.logger).getLatest(account, project + ".history", historyQuery, historyProjection, function (err, docs) {
+		if (err.value) {
+			return callback(err);
+		}
+
+		if (!docs.length) {
+			return callback(responseCodes.OK, [0,0,0]);
+		} else {
+			if (docs[0].coordOffset)
+			{
+				return callback(responseCodes.OK, docs[0].coordOffset);
+			} else {
+				return callback(responseCodes.OK, [0,0,0]);
+			}
+		}
+	});
+};
+
 DBInterface.prototype.getProjectInfo = function(account, project, callback) {
 	if(!project){
 		return callback(responseCodes.PROJECT_NOT_SPECIFIED);
@@ -2303,6 +2351,7 @@ DBInterface.prototype.cacheFunction = function(dbName, collection, url, format, 
 					}
 
 					self.logger.logInfo("Storing in " + dbName + " : " + stashCollection);
+
 					dbConn(self.logger).storeGridFSFile(dbName, stashCollection, url, data, false, function(stashErr) {
 						if (stashErr.value)
 						{
@@ -2426,8 +2475,7 @@ DBInterface.prototype.getObject = function(dbName, project, uid, rid, sid, needF
 };
 
 DBInterface.prototype.getScene = function(dbName, project, branch, revision, full, callback) {
-
-	var projection ;
+	var projection;
 
 	if (!full)
 	{
@@ -2445,7 +2493,32 @@ DBInterface.prototype.getScene = function(dbName, project, branch, revision, ful
 	var self = this;
 
 	self.queryScene(dbName, project, branch, revision, {}, projection, function(err, fromStash, coll) {
-		callback(responseCodes.OK, repoGraphScene(self.logger).decode(coll));
+		async.concat(coll, function(item, iter_callback){
+			if (item.type === "ref")
+			{
+				var childRefAccount = item.hasOwnProperty("owner") ? item.owner : dbName;
+
+				self.getCoordOffset(childRefAccount, item.project, "master", item.revision, function(err, coordOffset) {
+					if (err.value)
+					{
+						return iter_callback(null, item);
+					}
+
+					item.coordOffset = coordOffset;
+
+					iter_callback(null, item);
+				});
+			} else {
+				iter_callback(null, item);
+			}
+		}, function(err, coll) {
+			if (err)
+			{
+				return callback(err);
+			}
+
+			callback(responseCodes.OK, repoGraphScene(self.logger).decode(coll));
+		});
 	});
 };
 

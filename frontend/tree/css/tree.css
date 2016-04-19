@@ -1,9 +1,3 @@
-tree {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
 tree span {
   outline: none;
   margin: 0;
@@ -14,7 +8,7 @@ tree span .fa {
   padding: 0 2px 0 0;
 }
 
-tree p {
+tree .treeNodes p {
   outline: none;
   width: 100%;
   word-break: break-all;
@@ -24,7 +18,7 @@ tree p {
   font-size: 14px;
   padding: 2px;
 }
-tree p:hover {
+tree .treeNodes p:hover {
   cursor: pointer;
 }
 
@@ -111,13 +105,6 @@ tree .virtualRepeatInfiniteScroll .vertical-container {
 tree .virtualRepeatInfiniteScroll .repeated-item {
   cursor: default;
   padding: 8px 0 8px;
-}
-
-.selectedFilterItem {
-  background: #E8EAF6;
-}
-.unselectedFilterItem {
-  background: #FFFFFF;
 }
 
 #treeFilterItemName {

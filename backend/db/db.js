@@ -287,12 +287,12 @@
 						return callback(responseCodes.DB_ERROR(err));
 					}
 
-					gs.write(data, function(err, gridStore) {
+					gs.write(data, function(err, gs) {
 						if (err) {
 							return callback(responseCodes.DB_ERROR(err));
 						}
 
-						gridStore.close(function(err) {
+						gs.close(function(err) {
 							if (err) {
 								return callback(responseCodes.DB_ERROR(err));
 							}
@@ -303,9 +303,9 @@
 				});
 			};
 
-			if (overwrite)
+			if (!overwrite)
 			{
-				// Verify that the file exists
+				// Check whether the file exists
 				self.existsGridFSFile(dbName, collName, fileName, function(err, result) {
 					if (err.value) {
 						return callback(err);

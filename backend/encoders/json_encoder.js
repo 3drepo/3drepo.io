@@ -1,18 +1,18 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *	Copyright (C) 2014 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 var repoGraphScene = require("../repo/repoGraphScene.js");
 var async = require("async");
@@ -35,11 +35,11 @@ function escapeHtml(text) {
 	"use strict";
 
   var map = {
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    "'": "&quot;",
-    "\"": "&#039;"
+	"&": "&amp;",
+	"<": "&lt;",
+	">": "&gt;",
+	"'": "&quot;",
+	"\"": "&#039;"
   };
 
   return text.replace(/[&<>""]/g, function(m) { return map[m]; });
@@ -80,21 +80,21 @@ function processChild(child, branch, revision, account, project, selected, names
 	// a mesh or a group (transformation) then add it as a normal node.
 	if ((child["type"] == "mesh") || (child["type"] == "transformation") || child["type"] == "map")
 	{
-		var uuid      = utils.uuidToString(child["_id"]);
+		var uuid	  = utils.uuidToString(child["_id"]);
 		var shared_id = utils.uuidToString(child["shared_id"]);
-		var name      = "";
+		var name	  = "";
 
 		if("name" in child)
 			name = child["name"];
 		else
 			name = uuid;
 
-		childNode["key"]       = shared_id;
-		childNode["title"]     = htmlMode ? escapeHtml(name) : name;
+		childNode["key"]	   = shared_id;
+		childNode["title"]	   = htmlMode ? escapeHtml(name) : name;
 		childNode["tooltip"]   = childNode["title"];
-		childNode["uuid"]      = uuid;
+		childNode["uuid"]	   = uuid;
 		childNode["folder"]    = ("children" in child);
-		childNode["lazy"]      = true;
+		childNode["lazy"]	   = true;
 		childNode["selected"]  = (selected == "true");
 		childNode["namespace"] = namespace;
 		childNode["dbname"]    = project;
@@ -105,20 +105,20 @@ function processChild(child, branch, revision, account, project, selected, names
 
 		childNode["account"]   = account;
 		childNode["project"]   = child["project"];
-		childNode["title"]     = htmlMode ? escapeHtml(child["project"]) : child["project"];
+		childNode["title"]	   = htmlMode ? escapeHtml(child["project"]) : child["project"];
 		childNode["tooltip"]   = childNode["title"];
 
 		// FIXME: Currently only federation within the same account is supported
 		// Otherwise, account needs to be on the child
 		childNode["namespace"] = account + "__" + child["project"] + "__";
-		childNode["uuid"]      = uuid;
+		childNode["uuid"]	   = uuid;
 		childNode["folder"]    = true;
-		childNode["lazy"]      = true;
+		childNode["lazy"]	   = true;
 		childNode["selected"]  = (selected == "true");
 		childNode["dbname"]    = child["project"];
 		childNode["branch"]    = branch;   // TODO: Find better way rather than duplicating
 		childNode["revision"]  = revision;
-		childNode["key"]       = utils.uuidToString(child["shared_id"]);
+		childNode["key"]	   = utils.uuidToString(child["shared_id"]);
 	}
 
 	return childNode;
@@ -153,15 +153,15 @@ function getTree(dbInterface, account, project, branch, revision, sid, namespace
 				return err_callback(responseCodes.ROOT_NODE_NOT_FOUND);
 			}
 
-			head[0]["title"]     = project;
-			head[0]["key"]       = htmlMode ? escapeHtml(utils.uuidToString(node["shared_id"])) : utils.uuidToString(node["shared_id"]);
-			head[0]["folder"]    = true;
-			head[0]["lazy"]      = true;
+			head[0]["title"]	 = project;
+			head[0]["key"]		 = htmlMode ? escapeHtml(utils.uuidToString(node["shared_id"])) : utils.uuidToString(node["shared_id"]);
+			head[0]["folder"]	 = true;
+			head[0]["lazy"]		 = true;
 			head[0]["selected"]  = true;
-			head[0]["uuid"]      = node["id"];
+			head[0]["uuid"]		 = node["id"];
 			head[0]["namespace"] = ((namespace != null) ? namespace : "model__");
-			head[0]["dbname"]    = project;
-			head[0]["branch"]    = branch;
+			head[0]["dbname"]	 = project;
+			head[0]["branch"]	 = branch;
 			head[0]["revision"]  = revision;
 
 			if (!("children" in node))
@@ -197,34 +197,34 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, par
 		{
 			var childID  = uuidToString(childJSON[C.REPO_NODE_LABEL_ID]);
 			var childSID = uuidToString(childJSON[C.REPO_NODE_LABEL_SHARED_ID]);
-			var child    = sceneGraph.all[childSID]; // Get object from sceneGraph
+			var child	 = sceneGraph.all[childSID]; // Get object from sceneGraph
 			var account  = utils.coalesce(child["owner"], parentAccount);
 			var project  = child["project"];
-			project      = ((project === undefined) || (project === null)) ? parentProject : project;
+			project		 = ((project === undefined) || (project === null)) ? parentProject : project;
 			var refName  = (account === parentAccount) ? project : (account + "/" + project);
 
 			if (child[C.REPO_NODE_LABEL_TYPE] === C.REPO_NODE_TYPE_REF)
 			{
-				var branch        = null;
-				var revision      = null;
+				var branch		  = null;
+				var revision	  = null;
 
 				if (child['unique']) {
 					revision = uuidToString(child["_rid"]);
 				} else {
 					if (child["_rid"])
 					{
-						branch   = uuidToString(child["_rid"]);
+						branch	 = uuidToString(child["_rid"]);
 					} else {
-						branch   = uuidToString(C.MASTER_UUID);
+						branch	 = uuidToString(C.MASTER_UUID);
 					}
 				}
 
 				var childRefJSON = {
-					"name"      : refName,
-					"path"      : current.path + "__" + childID,
-					"_id"       : childID,
+					"name"		: refName,
+					"path"		: current.path + "__" + childID,
+					"_id"		: childID,
 					"shared_id" : childSID,
-					"children"  : [],
+					"children"	: [],
 					"account"	: account,
 					"project"	: project
 				};
@@ -243,11 +243,11 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, par
 				var childName = utils.coalesce(childJSON[C.REPO_NODE_LABEL_NAME], uuidToString(child[C.REPO_NODE_LABEL_ID]));
 
 				var childTreeJSON = {
-					"name"      : childName,
-					"path"      : current.path + "__" + childID,
-					"_id"       : childID,
+					"name"		: childName,
+					"path"		: current.path + "__" + childID,
+					"_id"		: childID,
 					"shared_id" : childSID,
-					"children"  : [],
+					"children"	: [],
 					"account"	: account,
 					"project"	: project
 				};
@@ -272,7 +272,7 @@ function getFullTreeRecurse(dbInterface, sceneGraph, current, parentAccount, par
 
 			var idToPath = {};
 			var idToName = {};
-			var nodes    = [];
+			var nodes	 = [];
 
 			for(var i = 0; i < children.length; i++)
 			{
@@ -318,23 +318,23 @@ function getFullTree(dbInterface, account, project, branch, revision, path, call
 			return callback(err);
 		}
 
-		var root       = sceneGraph["mRootNode"];
+		var root	   = sceneGraph["mRootNode"];
 
 		if (!root) {
 			return callback(responseCodes.ROOT_NODE_NOT_FOUND);
 		}
 
 		var rootJSON = {
-			"account"   : account,
-			"project"   : project,
-			"name"      : root.hasOwnProperty(C.REPO_NODE_LABEL_NAME) ? root[C.REPO_NODE_LABEL_NAME] : uuidToString(root[C.REPO_NODE_LABEL_ID]),
-            "path"      : ((path !== null) ? (path + "__") : "") + uuidToString(root[C.REPO_NODE_LABEL_ID]),
-			"_id"       : uuidToString(root[C.REPO_NODE_LABEL_ID]),
+			"account"	: account,
+			"project"	: project,
+			"name"		: root.hasOwnProperty(C.REPO_NODE_LABEL_NAME) ? root[C.REPO_NODE_LABEL_NAME] : uuidToString(root[C.REPO_NODE_LABEL_ID]),
+			"path"		: ((path !== null) ? (path + "__") : "") + uuidToString(root[C.REPO_NODE_LABEL_ID]),
+			"_id"		: uuidToString(root[C.REPO_NODE_LABEL_ID]),
 			"shared_id" : uuidToString(root[C.REPO_NODE_LABEL_SHARED_ID]),
-			"children"  : []
+			"children"	: []
 		};
 
-        root.path = rootJSON.path;
+		root.path = rootJSON.path;
 
 		// Deals with async errors
 		var treeError = responseCodes.OK;
@@ -356,20 +356,20 @@ function getFullTree(dbInterface, account, project, branch, revision, path, call
 
 function walkthrough(dbInterface, account, index, callback) {
 
-    dbInterface.getWalkthroughInfo(account, project, index, function(err, data) {
-        if (err.value) {
-            return callback(err);
-        }
-        callback(responseCodes.OK, data);
-    });
+	dbInterface.getWalkthroughInfo(account, project, index, function(err, data) {
+		if (err.value) {
+			return callback(err);
+		}
+		callback(responseCodes.OK, data);
+	});
 }
 
 function searchTree(dbInterface, account, project, branch, revision, searchstring, callback) {
-    dbInterface.searchTree(account, project, branch, revision, searchstring, function(err, sceneGraph) {
-        if (err.value) return callback(err);
+	dbInterface.searchTree(account, project, branch, revision, searchstring, function(err, sceneGraph) {
+		if (err.value) return callback(err);
 
-        callback(responseCodes.OK, sceneGraph);
-    });
+		callback(responseCodes.OK, sceneGraph);
+	});
 }
 
 exports.route = function(router)
@@ -397,7 +397,6 @@ exports.route = function(router)
 
 				}
 			});
-
 		} else {
 			dbInterface(req[C.REQ_REPO].logger).getUserInfo(params.account, function(err, user)
 			{
@@ -414,8 +413,6 @@ exports.route = function(router)
 				}
 			});
 		}
-
-
 	});
 
 	router.get("json", "/:account/:project", function(req, res, params, err_callback) {
@@ -613,12 +610,22 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account/:project/revision/:branch/head/fulltree", function(req, res, params, err_callback) {
-		getFullTree(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.branch, null, null, err_callback);
+    router.get("json", "/:account/:project/revision/:branch/head/fulltree", function (req, res, params, err_callback) {
+        //See if it is in the stash first, which requires the head revision id
+        var rid = dbInterface(req[C.REQ_REPO].logger).getProjectBranchHeadRid(params.account, params.project, params.branch, function (err, rid) {
+            var gridfsURL = "/" + params.account + "/" + params.project + "/revision/" + rid + "/fulltree." + params.format;
+            dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, gridfsURL, "json_mpc", function (callback) {
+                getFullTree(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.branch, null, null, err_callback);
+            }, err_callback);
+        }, err_callback);
 	});
 
-	router.get("json", "/:account/:project/revision/:rid/fulltree", function(req, res, params, err_callback) {
-		getFullTree(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, null, params.rid, null, err_callback);
+    router.get("json", "/:account/:project/revision/:rid/fulltree", function (req, res, params, err_callback) {
+        
+        dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req.url, "json_mpc", function (callback) {
+            getFullTree(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, null, params.rid, null, err_callback);
+        }, err_callback);
+		
 	});
 
 	router.get("json", "/:account/:project/revision/:branch/head/map", function(req, res, params, err_callback) {
@@ -686,189 +693,189 @@ exports.route = function(router)
 		getMultiMap(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.branch, null, req[C.REQ_REPO].logger, err_callback);
 	});
 
-    router.get("json", "/:account/:project/:uid", function (req, res, params, err_callback) {
-        if (params.subformat == "mpc") {
-            dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req.url, "json_mpc", function (callback) {
-                dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, {}, function (err, type, uid, fromStash, scene) {
-                    if (err.value) {
-                        return err_callback(err);
-                    }
+	router.get("json", "/:account/:project/:uid", function (req, res, params, err_callback) {
+		if (params.subformat == "mpc") {
+			dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req.url, "json_mpc", function (callback) {
+				dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, true, {}, function (err, type, uid, fromStash, scene) {
+					if (err.value) {
+						return callback(err);
+					}
 
-                    if (type == "mesh") {
-                        var mesh = scene.meshes[params.uid];
-                        var meshCounter = 0;
-                        var vertsCount = 0;
-			var bufferPosition = 0;
+					if (type == "mesh") {
+						var mesh = scene.meshes[params.uid];
+						var meshCounter = 0;
+						var vertsCount = 0;
+						var bufferPosition = 0;
 
-                        if (mesh) {
-                            if (mesh[C.REPO_NODE_LABEL_COMBINED_MAP]) {
-                                // First sort the combined map in order of vertex ID
-                                mesh[C.REPO_NODE_LABEL_COMBINED_MAP].sort(repoNodeMesh.mergeMapSort);
+						if (mesh) {
+							if (mesh[C.REPO_NODE_LABEL_COMBINED_MAP]) {
+								// First sort the combined map in order of vertex ID
+								mesh[C.REPO_NODE_LABEL_COMBINED_MAP].sort(repoNodeMesh.mergeMapSort);
 
-                                var subMeshes = mesh[C.REPO_NODE_LABEL_COMBINED_MAP];
-                                var subMeshKeys = mesh[C.REPO_NODE_LABEL_COMBINED_MAP].map(function (item) {
-                                    return item[C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]
-                                });
+								var subMeshes = mesh[C.REPO_NODE_LABEL_COMBINED_MAP];
+								var subMeshKeys = mesh[C.REPO_NODE_LABEL_COMBINED_MAP].map(function (item) {
+									return item[C.REPO_NODE_LABEL_MERGE_MAP_MESH_ID]
+								});
 
-                                var outJSON = {};
+								var outJSON = {};
 
-                                outJSON["numberOfIDs"] = subMeshKeys.length;
-                                outJSON["maxGeoCount"] = subMeshKeys.length;
+								outJSON["numberOfIDs"] = subMeshKeys.length;
+								outJSON["maxGeoCount"] = subMeshKeys.length;
 
-                                dbInterface(req[C.REQ_REPO].logger).getChildrenByUID(params.account, params.project, params.uid, false, function (err, docs) {
-                                    if (err.value) {
-                                        return err_callback(err);
-                                    }
-
-                                    var children = repoGraphScene(req[C.REQ_REPO].logger).decode(docs);
-
-                                    outJSON["appearance"] = [];
-
-                                    if (children.materials_count) {
-                                        for (var i = 0; i < children.materials_count; i++) {
-                                            var childID = Object.keys(children.materials)[i];
-                                            var child = children.materials[childID];
-
-                                            var app = {};
-                                            app["name"] = childID;
-
-                                            var material = {};
-
-                                            if ("diffuse" in child) {
-                                                material["diffuseColor"] = child["diffuse"].join(" ");
-                                            }
-
-                                            if ("emissive" in child) {
-                                                material["emissiveColor"] = child["emissive"].join(" ");
-                                            }
-
-                                            if ("shininess" in child) {
-                                                material["shininess"] = child["shininess"];
-                                            }
-
-                                            if ("specular" in child) {
-                                                material["specularColor"] = child["specular"].join(" ");
-                                            }
-
-                                            if ("opacity" in child) {
-                                                material["transparency"] = 1.0 - child["opacity"];
-                                            }
-
-                                            app["material"] = material;
-
-                                            outJSON["appearance"].push(app);
-                                        }
-                                    }
-
-                                    var bbox = repoNodeMesh.extractBoundingBox(mesh);
-                                    outJSON["mapping"] = [];
-
-                                    for (var i = 0; i < subMeshKeys.length; i++) {
-                                        var map = {};
-
-                                        var currentMesh = mesh[C.REPO_NODE_LABEL_COMBINED_MAP][i];
-                                        var currentMeshVFrom = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
-                                        var currentMeshVTo = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO];
-                                        var numVertices = currentMeshVTo - currentMeshVFrom;
-
-                                        var currentMeshTFrom = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_FROM];
-                                        var currentMeshTTo = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO];
-                                        var numFaces = currentMeshTTo - currentMeshTFrom;
-
-                                        vertsCount += numVertices;
-
-                                        // If the number of vertices for this mesh is
-                                        // in itself greater than the limit
-                                        if (numVertices > C.SRC_VERTEX_LIMIT) {
-                                            vertsCount = 0;
-
-						var numActualVertices = 0;
-						var reindexMap = {};
-
-						for (var face_idx = 0; face_idx < numFaces; face_idx++) {
-							// Get number of components in the next face
-							var num_comp = mesh.faces.buffer.readInt32LE(bufferPosition);
-
-							if (num_comp !== 3) {
-								logger.logError("Non triangulated face with " + num_comp + " vertices.");
-							} else {
-								// Re-index faces
-								for (var vert_comp = 0; vert_comp < num_comp; vert_comp++) {
-									// First int32 is number of sides (i.e. 3 = Triangle)]
-									// After that there Int32 for each index (0..2)
-									var byte_position = bufferPosition + (vert_comp + 1) * 4;
-									var idx_val = mesh.faces.buffer.readInt32LE(byte_position);
-
-									if (!reindexMap.hasOwnProperty(idx_val)) {
-										reindexMap[idx_val] = true;
-										numActualVertices++;
+								dbInterface(req[C.REQ_REPO].logger).getChildrenByUID(params.account, params.project, params.uid, false, function (err, docs) {
+									if (err.value) {
+										return err_callback(err);
 									}
-								}
+
+									var children = repoGraphScene(req[C.REQ_REPO].logger).decode(docs);
+
+									outJSON["appearance"] = [];
+
+									if (children.materials_count) {
+										for (var i = 0; i < children.materials_count; i++) {
+											var childID = Object.keys(children.materials)[i];
+											var child = children.materials[childID];
+
+											var app = {};
+											app["name"] = childID;
+
+											var material = {};
+
+											if ("diffuse" in child) {
+												material["diffuseColor"] = child["diffuse"].join(" ");
+											}
+
+											if ("emissive" in child) {
+												material["emissiveColor"] = child["emissive"].join(" ");
+											}
+
+											if ("shininess" in child) {
+												material["shininess"] = child["shininess"];
+											}
+
+											if ("specular" in child) {
+												material["specularColor"] = child["specular"].join(" ");
+											}
+
+											if ("opacity" in child) {
+												material["transparency"] = 1.0 - child["opacity"];
+											}
+
+											app["material"] = material;
+
+											outJSON["appearance"].push(app);
+										}
+									}
+
+									var bbox = repoNodeMesh.extractBoundingBox(mesh);
+									outJSON["mapping"] = [];
+
+									for (var i = 0; i < subMeshKeys.length; i++) {
+										var map = {};
+
+										var currentMesh = mesh[C.REPO_NODE_LABEL_COMBINED_MAP][i];
+										var currentMeshVFrom = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_FROM];
+										var currentMeshVTo = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_VERTEX_TO];
+										var numVertices = currentMeshVTo - currentMeshVFrom;
+
+										var currentMeshTFrom = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_FROM];
+										var currentMeshTTo = currentMesh[C.REPO_NODE_LABEL_MERGE_MAP_TRIANGLE_TO];
+										var numFaces = currentMeshTTo - currentMeshTFrom;
+
+										vertsCount += numVertices;
+
+										// If the number of vertices for this mesh is
+										// in itself greater than the limit
+										if (numVertices > C.SRC_VERTEX_LIMIT) {
+											vertsCount = 0;
+
+											var numActualVertices = 0;
+											var reindexMap = {};
+
+											for (var face_idx = 0; face_idx < numFaces; face_idx++) {
+												// Get number of components in the next face
+												var num_comp = mesh.faces.buffer.readInt32LE(bufferPosition);
+
+												if (num_comp !== 3) {
+													logger.logError("Non triangulated face with " + num_comp + " vertices.");
+												} else {
+													// Re-index faces
+													for (var vert_comp = 0; vert_comp < num_comp; vert_comp++) {
+														// First int32 is number of sides (i.e. 3 = Triangle)]
+														// After that there Int32 for each index (0..2)
+														var byte_position = bufferPosition + (vert_comp + 1) * 4;
+														var idx_val = mesh.faces.buffer.readInt32LE(byte_position);
+
+														if (!reindexMap.hasOwnProperty(idx_val)) {
+															reindexMap[idx_val] = true;
+															numActualVertices++;
+														}
+													}
+												}
+
+												bufferPosition += (num_comp + 1) * 4;
+											}
+
+										// We need to split the mesh into this many sub-meshes
+										var numMeshesRequired = Math.ceil(numActualVertices / C.SRC_VERTEX_LIMIT);
+
+										// Add an entry for all the created meshes
+										for (var j = 0; j < numMeshesRequired; j++) {
+											meshCounter += 1;
+
+											map["name"] = utils.uuidToString(subMeshKeys[i]) + "_" + j;
+											map["appearance"] = utils.uuidToString(subMeshes[i]["mat_id"]);
+											map["min"] = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][0].join(" ");
+											map["max"] = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][1].join(" ");
+											map["usage"] = [params.uid + "_" + meshCounter]
+
+
+											outJSON["mapping"].push(map);
+											map = {};
+										}
+
+										meshCounter += 1;
+									} else {
+										// If this mesh pushes the combined mesh over the vertex limit
+										// then start a new supermesh
+										if (vertsCount > C.SRC_VERTEX_LIMIT) {
+											meshCounter += 1;		  // Supermesh counter
+											vertsCount = numVertices; // New supermesh has this many vertices in
+										}
+
+										map["name"] = utils.uuidToString(subMeshKeys[i]);
+										map["appearance"] = utils.uuidToString(subMeshes[i]["mat_id"]);
+										map["min"] = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][0].join(" ");
+										map["max"] = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][1].join(" ");
+										map["usage"] = [params.uid + "_" + meshCounter]
+
+										outJSON["mapping"].push(map);
+
+										bufferPosition += numFaces * 4 * 4;
+										}
+									}
+
+									return callback(responseCodes.OK, JSON.stringify(outJSON));
+								});
 							}
-
-							bufferPosition += (num_comp + 1) * 4;
+						} else {
+							return callback(responseCodes.OBJECT_NOT_FOUND);
 						}
-
-                                            // We need to split the mesh into this many sub-meshes
-                                            var numMeshesRequired = Math.ceil(numActualVertices / C.SRC_VERTEX_LIMIT);
-
-                                            // Add an entry for all the created meshes
-                                            for (var j = 0; j < numMeshesRequired; j++) {
-                                                meshCounter += 1;
-
-                                                map["name"] = utils.uuidToString(subMeshKeys[i]) + "_" + j;
-                                                map["appearance"] = utils.uuidToString(subMeshes[i]["mat_id"]);
-                                                map["min"] = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][0].join(" ");
-                                                map["max"] = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][1].join(" ");
-                                                map["usage"] = [params.uid + "_" + meshCounter]
-
-
-                                                outJSON["mapping"].push(map);
-                                                map = {};
-                                            }
-
-						meshCounter += 1;
-                                        } else {
-                                            // If this mesh pushes the combined mesh over the vertex limit
-                                            // then start a new supermesh
-                                            if (vertsCount > C.SRC_VERTEX_LIMIT) {
-                                                meshCounter += 1;         // Supermesh counter
-                                                vertsCount = numVertices; // New supermesh has this many vertices in
-                                            }
-
-                                            map["name"] = utils.uuidToString(subMeshKeys[i]);
-                                            map["appearance"] = utils.uuidToString(subMeshes[i]["mat_id"]);
-                                            map["min"] = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][0].join(" ");
-                                            map["max"] = subMeshes[i][C.REPO_NODE_LABEL_BOUNDING_BOX][1].join(" ");
-                                            map["usage"] = [params.uid + "_" + meshCounter]
-
-                                            outJSON["mapping"].push(map);
-
-						bufferPosition += numFaces * 4 * 4;
-                                        }
-                                    }
-
-                                    return err_callback(responseCodes.OK, outJSON);
-                                });
-                            }
-                        } else {
-                            return err_callback(responseCodes.OBJECT_NOT_FOUND);
-                        }
-                    }
-                });
-            }, err_callback);
-        } else {
-            err_callback(responseCodes.FORMAT_NOT_SUPPORTED);
-        }
+					}
+				});
+			}, err_callback);
+		} else {
+			err_callback(responseCodes.FORMAT_NOT_SUPPORTED);
+		}
 	});
 
-    router.get('json', '/:account/:project/:index/walkthrough', function(req, res, params, err_callback) {
-        walkthrough(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.index, err_callback);
-    });
+	router.get('json', '/:account/:project/:index/walkthrough', function(req, res, params, err_callback) {
+		walkthrough(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.index, err_callback);
+	});
 
-    router.get('json', '/:account/:project/revision/:branch/head/searchtree', function(req, res, params, err_callback) {
-        searchTree(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.branch, null, params.query.searchString, err_callback);
-    });
+	router.get('json', '/:account/:project/revision/:branch/head/searchtree', function(req, res, params, err_callback) {
+		searchTree(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.branch, null, params.query.searchString, err_callback);
+	});
 
 	router.get("json", "/:account/:project/roles", function( req, res, params, err_callback ) {
 		dbInterface(req[C.REQ_REPO].logger).getRolesByProject(params.account, params.project, C.REPO_ANY, function (err, roles) {

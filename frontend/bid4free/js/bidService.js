@@ -211,6 +211,15 @@
 			return doGet("/packages/" + packageName + "/attachments/" + fileId, {});
 		};
 
+		/**
+		 * Convert a date to a readable version
+		 * @param date
+		 * @returns {string}
+		 */
+		obj.prettyDate = function (date) {
+			return date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
+		};
+
 		Object.defineProperty(
 			obj,
 			"currentPackage",

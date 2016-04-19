@@ -60,7 +60,6 @@
 			]
 		});
 
-		/*
 		panelCard.left.push({
 			type: "groups",
 			title: "Groups",
@@ -70,10 +69,18 @@
 			minHeight: 80,
 			fixedHeight: false,
 			options: [
-				"add"
+				"add",
+				"menu"
+			],
+			menu: [
+				{
+					value: "hideAll",
+					label: "Hide Groups",
+					selected: false,
+					toggle: true
+				}
 			]
 		});
-		*/
 
 		panelCard.right.push({
 			type: "issues",
@@ -82,6 +89,14 @@
 			help: "List current issues",
 			icon: "fa-map-marker",
 			menu: [
+				{
+					value: "print",
+					label: "Print",
+					selected: false,
+					noToggle: true,
+					icon: "fa-print",
+					divider: true
+				},
 				{
 					value: "sortByDate",
 					label: "Sort by Date",

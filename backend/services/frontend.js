@@ -25,7 +25,9 @@ module.exports.createApp = function(serverConfig)
 	let compress = require("compression");
 	let fs = require("fs");
 	let jade = require("jade");
+
 	//let systemLogger = require("../logger.js").systemLogger;
+
 
 	let app = express();
 
@@ -88,7 +90,6 @@ module.exports.createApp = function(serverConfig)
 						"plugin": "project",
 						"friends" : [
 							"panel",
-							"filter",
 							"tree",
 							"viewpoints",
 							"issues",

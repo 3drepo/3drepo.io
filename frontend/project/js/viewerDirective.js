@@ -187,6 +187,7 @@
 						} else if (event.type === EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE) {
 							v.viewer.moveClippingPlane(event.value.percentage);
 						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) || (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS)) {
+							console.log(event.value);
 							v.viewer.highlightObjects(
 								event.value.account,
 								event.value.project,

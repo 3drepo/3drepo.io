@@ -42,17 +42,12 @@
 
     function PanelCtrl ($scope, $window, $timeout, EventService) {
         var vm = this,
-			lastWindowHeight = $window.innerHeight,
 			panelTopBottomGap = 40,
 			maxHeightAvailable = $window.innerHeight - panelTopBottomGap,
 			numPanelsShowing = 0,
 			numNonFixedHeightPanelsShowing = 0,
-			fixedContentHeightTotal = 0,
 			itemGap = 20,
 			panelToolbarHeight = 48,
-			numFiltersShown = 0,
-			filterHeight = 50,
-			totalOccupiedHeight = 0,
 			contentItemsShown = [];
 
 		vm.contentItems = [];
@@ -181,7 +176,7 @@
 		function assignHeights(heightAvailable, contentItems, previousContentItems) {
 			var i,
 				availableHeight = heightAvailable,
-				maxContentItemHeight = (availableHeight - (panelToolbarHeight * contentItems.length)) / contentItems.length,
+				maxContentItemHeight = (availableHeight - (panelToolbarHeight * contentItems.length) - (itemGap * (contentItems.length - 1))) / contentItems.length,
 				prev = null,
 				contentItem;
 
