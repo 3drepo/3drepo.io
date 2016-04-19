@@ -63,7 +63,7 @@
 			title: "Tree",
 			show: true,
 			help: "Model elements shown in a tree structure",
-			icon: "fa-sitemap",
+			icon: "device_hub",
 			minHeight: 80,
 			fixedHeight: false,
 			options: [
@@ -76,7 +76,7 @@
 			title: "Issues",
 			show: true,
 			help: "List current issues",
-			icon: "fa-map-marker",
+			icon: "place",
 			menu: [
 				{
 					value: "print",
@@ -120,7 +120,7 @@
 			title: "Groups",
 			show: true,
 			help: "groups of objects",
-			icon: "fa-cubes",
+			icon: "view_comfy",
 			minHeight: 80,
 			fixedHeight: false,
 			options: [
@@ -142,7 +142,7 @@
 			title: "Clip",
 			show: false,
 			help: "Clipping plane",
-			icon: "fa-object-group",
+			icon: "crop_original",
 			fixedHeight: true,
 			options: [
 				"visible"

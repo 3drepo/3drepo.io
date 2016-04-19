@@ -4,13 +4,13 @@ panel  {
   display: block;
   position: absolute;
   top: 20px;
-  width: 420px;
+  width: 470px;
   z-index: 2;
 }
 
 panel #items {
   position: absolute;
-  width: 350px;
+  width: 400px;
   pointer-events: inherit;
 }
 
@@ -21,10 +21,8 @@ panel #buttons {
 }
 panel #buttons .panelButtonGroup {
   margin-bottom: 20px;
-  text-align: center;
 }
 panel #buttons .panelButtonGroup button {
-  display: block;
   margin-bottom: 2px;
 }
 panel #buttons .panelButtonGroup label {
@@ -32,12 +30,6 @@ panel #buttons .panelButtonGroup label {
   text-shadow: 0 0 2px rgba(0,0,0,0.5);
   font-weight: bold;
   font-size: 14px;
-}
-
-panel .md-mini md-icon,
-panel .md-icon-button md-icon{
-  font-size: 20px;
-  outline: none;
 }
 
 /** Panels ************************************************************************************************************/
@@ -91,8 +83,8 @@ panel-card .md-whiteframe-1dp {
 }
 
 panel-card md-toolbar {
-  min-height: 48px;
-  height: 48px;
+  min-height: 40px;
+  height: 40px;
   outline: none;
   /*-webkit-box-shadow: 0 8px 10px 1px rgba(0,0,0,0.15);
   -moz-box-shadow: 0 8px 10px 1px rgba(0,0,0,0.15);
@@ -100,16 +92,10 @@ panel-card md-toolbar {
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
 }
-panel-card md-toolbar span {
-  font-size: 18px;
-}
-panel-card md-toolbar label {
+panel-card md-toolbar .md-mini md-icon.fa,
+panel-card md-toolbar .md-icon-button md-icon.fa{
   font-size: 20px;
-  margin-left: 10px;
-  font-weight: bold;
-}
-panel-card md-toolbar button {
-  margin: 0 !important;
+  outline: none;
 }
 
 panel-card .md-button.md-raised:not([disabled]) {
@@ -128,7 +114,6 @@ panel-card #panelCardContainer {
 }
 
 panel-card .panelCardFilter {
-  margin-left: 10px;
   opacity: 0.7;
 }
 panel-card .panelCardFilter md-icon {
@@ -148,7 +133,7 @@ panel-card #helpButton {
 
 panel-card .statusIcon {
   outline: none;
-  width: 18px;
+  width: 30px;
 }
 
 panel-card #filterContainer {
@@ -180,10 +165,4 @@ panel-card-add {
   position: absolute;
   bottom: 0;
   right: 0;
-}
-
-panel-card-add md-icon {
-  font-size: 30px!important;
-  margin-top: -8px;
-  margin-left: -6px;
 }

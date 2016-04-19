@@ -58,7 +58,6 @@
 			issue,
 			rolesToFilter = [],
 			issuesHeight,
-			eventWatch,
 			selectedObjectId = null,
 			pickedPos = null,
 			pickedNorm = null,
@@ -164,15 +163,14 @@
 		 * Handle showing of adding a new issue
 		 */
 		$scope.$watch("vm.showAdd", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				if (newValue) {
-					vm.toShow = "showAdd";
-					vm.onShowItem();
-					vm.canAdd = false;
-					setContentHeight();
-					setPinToAssignedRoleColours(vm.selectedIssue);
-					EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true});
-				}
+			if (angular.isDefined(newValue) && newValue) {
+				vm.toShow = "showAdd";
+				vm.onShowItem();
+				vm.canAdd = false;
+				setContentHeight();
+				setPinToAssignedRoleColours(vm.selectedIssue);
+				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true});
+				EventService.send(EventService.EVENT.ADD_CARD_OPTIONS, ["pin", "scribble", "erase"]);
 			}
 		});
 
@@ -185,87 +183,79 @@
 			}
 		});
 
-		/*
-		 * Only watch for events when shown
-		 */
-		$scope.$watch("vm.show", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				if (newValue) {
-					setupEventWatch();
-				}
-				else if (angular.isDefined(eventWatch)) {
-					eventWatch(); // Cancel event watching
-				}
-			}
-		});
-
 		/**
 		 * Set up event watching
 		 */
-		function setupEventWatch () {
-			eventWatch = $scope.$watch(EventService.currentEvent, function(event) {
-				var i, length,
-					position = [], normal = [];
+		$scope.$watch(EventService.currentEvent, function(event) {
+			var i, length,
+				position = [], normal = [];
 
-				if ((event.type === EventService.EVENT.VIEWER.PICK_POINT) && vm.showAdd)
+			if ((event.type === EventService.EVENT.VIEWER.PICK_POINT) && vm.showAdd)
+			{
+				if (event.value.hasOwnProperty("id"))
 				{
-					if (event.value.hasOwnProperty("id"))
-					{
-						// Remove pin from last position if it exists
-						removeAddPin();
+					// Remove pin from last position if it exists
+					removeAddPin();
 
-						selectedObjectId = event.value.id;
+					selectedObjectId = event.value.id;
 
-						// Convert data to arrays
-						angular.forEach(event.value.position, function(value) {
-							pickedPos = event.value.position;
-							position.push(value);
-						});
-						angular.forEach(event.value.normal, function(value) {
-							pickedNorm = event.value.normal;
-							normal.push(value);
-						});
+					// Convert data to arrays
+					angular.forEach(event.value.position, function(value) {
+						pickedPos = event.value.position;
+						position.push(value);
+					});
+					angular.forEach(event.value.normal, function(value) {
+						pickedNorm = event.value.normal;
+						normal.push(value);
+					});
 
 
-						// Add pin
-						IssuesService.addPin(
-							{
-								id: IssuesService.newPinId,
-								position: position,
-								norm: normal,
-								account: vm.account,
-								project: vm.project
-							},
-							IssuesService.hexToRgb(IssuesService.getRoleColor(vm.projectUserRoles[0]))
-						);
-					} else {
-						removeAddPin();
-					}
-				} else if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
-					if (vm.showAdd) {
-						removeAddPin();
-					}
+					// Add pin
+					IssuesService.addPin(
+						{
+							id: IssuesService.newPinId,
+							position: position,
+							norm: normal,
+							account: vm.account,
+							project: vm.project
+						},
+						IssuesService.hexToRgb(IssuesService.getRoleColor(vm.projectUserRoles[0]))
+					);
+				} else {
+					removeAddPin();
+				}
+			} else if ((event.type === EventService.EVENT.VIEWER.CLICK_PIN) && vm.show) {
+				if (vm.showAdd) {
+					removeAddPin();
+				}
 
-					// Show or hide the selected issue
-					for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
-						if (event.value.id === vm.issuesToShow[i]._id) {
-							if (vm.selectedIssue === null) {
-								vm.showSelectedIssue(i, true);
+				// Show or hide the selected issue
+				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
+					if (event.value.id === vm.issuesToShow[i]._id) {
+						if (vm.selectedIssue === null) {
+							vm.showSelectedIssue(i, true);
+						}
+						else {
+							if (vm.selectedIssue._id === vm.issuesToShow[i]._id) {
+								vm.hideItem = true;
 							}
 							else {
-								if (vm.selectedIssue._id === vm.issuesToShow[i]._id) {
-									vm.hideItem = true;
-								}
-								else {
-									vm.showSelectedIssue(i, true);
-								}
+								vm.showSelectedIssue(i, true);
 							}
-							break;
 						}
+						break;
 					}
 				}
-			});
-		}
+			} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_ADD) {
+				if (event.value.on) {
+					vm.show = true;
+					vm.showAdd = true;
+				}
+				else {
+					vm.hideItem = true;
+				}
+			}
+		});
 
 		/**
 		 * Remove the temporary pin used for adding an issue
@@ -506,6 +496,7 @@
 				$timeout(function () {
 					if (vm.toShow === "showAdd") {
 						removeAddPin();
+						EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: false});
 					}
 					vm.toShow = "showIssues";
 					vm.showAdd = false; // So that showing add works
@@ -522,6 +513,9 @@
 
 					// Hide issue area
 					EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
+					
+					// Remove options
+					EventService.send(EventService.EVENT.REMOVE_CARD_OPTIONS, ["pin", "scribble", "erase"]);
 				});
 			}
 		});
@@ -537,6 +531,7 @@
 			if (vm.toShow === "showAdd") {
 				removeAddPin();
 				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
+				EventService.send(EventService.EVENT.REMOVE_CARD_OPTIONS, ["pin", "scribble", "erase"]);
 			}
 			vm.toShow = "showIssue";
 			vm.showAdd = false; // So that showing add works

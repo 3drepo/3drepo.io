@@ -2,10 +2,12 @@ div(layout="column", class="md-whiteframe-1dp")
 
 	// Tool bar
 	md-toolbar(class="md-primary" flex)
-		div(class="md-toolbar-tools" flex)
-			span.statusIcon(class="fa", ng-class="vm.statusIcon", ng-click="vm.hideItem()" flex="none")
+		.md-toolbar-tools
+			md-button.md-icon-button(aria-label="Status", ng-click="vm.hideItem()")
+				md-icon.angular-material-icons( flex="none") {{vm.statusIcon}}
 			span(ng-if="!vm.showFilter" flex="50")
-				label(class="md-flex") {{vm.contentData.title}}
+				h2
+					span {{vm.contentData.title}}
 			#filterContainer
 			span(flex)
 

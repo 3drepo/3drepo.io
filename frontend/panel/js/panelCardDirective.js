@@ -41,12 +41,13 @@
         };
     }
 
-    PanelCardCtrl.$inject = ["$scope", "$element", "$compile"];
+    PanelCardCtrl.$inject = ["$scope", "$element", "$compile", "EventService"];
 
-    function PanelCardCtrl($scope, $element, $compile) {
+    function PanelCardCtrl($scope, $element, $compile, EventService) {
         var vm = this,
             filter = null,
-			contentHeight;
+			contentHeight,
+			options = angular.element($element[0].querySelector('#options'));
 
         vm.showHelp = false;
 		vm.showFilter = false;
@@ -64,6 +65,17 @@
 				createFilter();
 				createAdd();
 				vm.statusIcon = vm.contentData.icon;
+			}
+		});
+
+		/*
+		 * Setup event watch
+		 */
+		$scope.$watch(EventService.currentEvent, function(event) {
+			if ((event.type === EventService.EVENT.ADD_CARD_OPTIONS) && (vm.contentData.type === "issues")) {
+				addToolbarOptions(event.value);
+			}
+			else if ((event.type === EventService.EVENT.REMOVE_CARD_OPTIONS) && (vm.contentData.type === "issues")) {
 			}
 		});
 
@@ -120,7 +132,6 @@
 		function createToolbarOptions () {
 			var i,
 				length,
-				options = angular.element($element[0].querySelector('#options')),
 				option;
 
 			if (vm.contentData.hasOwnProperty("options")) {
@@ -159,6 +170,23 @@
 						options.append(option);
 						$compile(option)($scope);
 					}
+				}
+			}
+		}
+
+		/**
+		 * Create the tool bar options
+		 */
+		function addToolbarOptions (addOptions) {
+			var i, length, option;
+
+			for (i = 0, length = addOptions.length; i < length; i += 1) {
+				option = angular.element(
+					"<panel-card-option-" + addOptions[i] + "></panel-card-option-" + options[i] + ">"
+				);
+				if (option !== null) {
+					options.append(option);
+					$compile(option)($scope);
 				}
 			}
 		}
@@ -206,7 +234,7 @@
 		 * Content wants to show an individual item
 		 */
 		vm.showItem = function () {
-			vm.statusIcon = "fa-arrow-left";
+			vm.statusIcon = "arrow_back";
 			vm.hideSelectedItem = false; // So that a change to this value is propagated
 		};
 

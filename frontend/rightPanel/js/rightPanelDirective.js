@@ -32,30 +32,88 @@
         };
     }
 
-    RightPanelCtrl.$inject = ["EventService"];
+    RightPanelCtrl.$inject = ["$scope", "EventService"];
 
-    function RightPanelCtrl (EventService) {
-        var vm = this;
+    function RightPanelCtrl ($scope, EventService) {
+        var vm = this,
+            addingScribbleIssue = false,
+            addingPinIssue = false,
+            selectedColour = "#FBC02D",
+            unselectedColour = "#FFFFFF",
+            selectedButtonIndex = null;
 
-        function setupAddIssueWithScribble () {
-            EventService.send(EventService.EVENT.SETUP_ISSUE_ADD, "scribble");
-        }
-
-        function setupAddIssueWithPin () {
-            EventService.send(EventService.EVENT.SETUP_ISSUE_ADD, "pin");
-        }
-
+        /*
+         * Init
+         */
         vm.buttons = [
-            {			
+            {
                 label: "Scribble",
                 icon: "gesture",
-                click: setupAddIssueWithScribble
+                iconColour: unselectedColour,
+                click: buttonClick
             },
             {
                 label: "Pin",
                 icon: "pin_drop",
-                click: setupAddIssueWithPin
+                iconColour: unselectedColour,
+                click: buttonClick
             }
-        ]
+        ];
+
+        /*
+         * Setup event watch
+         */
+        $scope.$watch(EventService.currentEvent, function(event) {
+            if ((event.type === EventService.EVENT.TOGGLE_ISSUE_ADD) && (!event.value.on)) {
+                addingPinIssue = false;
+                addingScribbleIssue = false;
+            }
+        });
+
+        /**
+         * Set up adding an issue with scribble
+         */
+        function setupAddIssueWithScribble () {
+            addingScribbleIssue = !addingScribbleIssue;
+            addingPinIssue = false;
+            EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: addingScribbleIssue, type: "scribble"});
+        }
+
+        /**
+         * Set up adding an issue with a pin
+         */
+        function setupAddIssueWithPin () {
+            addingPinIssue = !addingPinIssue;
+            addingScribbleIssue = false;
+            EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: addingPinIssue, type: "pin"});
+        }
+        
+        function buttonClick (index) {
+            // Change button icon colours
+            if (selectedButtonIndex === null) {
+                selectedButtonIndex = index;
+                vm.buttons[index].iconColour = selectedColour;
+            }
+            else if (index !== selectedButtonIndex) {
+                vm.buttons[selectedButtonIndex].iconColour = unselectedColour;
+                selectedButtonIndex = index;
+                vm.buttons[selectedButtonIndex].iconColour = selectedColour;
+            }
+            else {
+                vm.buttons[selectedButtonIndex].iconColour = unselectedColour;
+                selectedButtonIndex = null;
+            }
+
+            // Call button functions
+            switch (vm.buttons[index].label) {
+                case "Scribble" :
+                    setupAddIssueWithScribble();
+                    break;
+
+                case "Pin" :
+                    setupAddIssueWithPin();
+                    break;
+            }
+        }
     }
 }());
