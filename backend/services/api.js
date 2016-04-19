@@ -80,7 +80,7 @@ module.exports.createApp = function (serverConfig) {
 
 			var origin = req.headers.origin;
 
-			if (serverConfig.allowedOrigins.indexOf(origin) > -1) {
+			if ((serverConfig.allowedOrigins.indexOf("*") > -1) || (serverConfig.allowedOrigins.indexOf(origin) > -1)) {
 				res.header("Access-Control-Allow-Origin", origin);
 				res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
 				res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, Content-Length, X-Requested-With");
