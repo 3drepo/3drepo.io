@@ -246,7 +246,6 @@ var Viewer = {};
 
 				self.enableClicking();
 
-				console.log('init');
 				self.onMouseUp(function(){
 					self.appendMapTileByViewPoint();
 				});
@@ -1047,15 +1046,23 @@ var Viewer = {};
 
 		this.pickObject = {};
 
-		this.pickPoint = function() {
+		this.pickPoint = function(x,y) {
 			var viewArea = self.getViewArea();
 			var scene = viewArea._scene;
+
+			if ((typeof x !== "undefined") && (typeof y !== "undefined"))
+			{
+				var viewMatrix = self.getViewArea().getViewMatrix();
+				var projMatrix = self.getViewArea().getProjectionMatrix();
+
+				viewArea._doc.ctx.pickValue(viewArea, x, y, 0, viewMatrix, projMatrix.mult(viewMatrix));
+			}
 
 			var oldPickMode = scene._vf.pickMode.toLowerCase();
 			scene._vf.pickMode = "idbuf";
 			scene._vf.pickMode = oldPickMode;
 
-			self.pickObject = ViewerUtil.cloneObject(viewArea._pickingInfo);
+			self.pickObject = viewArea._pickingInfo;
 			self.pickObject.part = null;
 			self.pickObject.partID = null;
 
@@ -1193,16 +1200,16 @@ var Viewer = {};
 			self.setCameraPosition(currentPos);
 		};
 
-		this.setCameraViewDir = function(viewDir, upDir) {
+		this.setCameraViewDir = function(viewDir, upDir, centerOfRotation) {
 			var currentPos = self.getCurrentViewpointInfo().position;
-			self.updateCamera(currentPos, upDir, viewDir);
+			self.updateCamera(currentPos, upDir, viewDir, centerOfRotation);
 		};
 
-		this.setCamera = function(pos, viewDir, upDir, animate, rollerCoasterMode) {
-			self.updateCamera(pos, upDir, viewDir, animate, rollerCoasterMode);
+		this.setCamera = function(pos, viewDir, upDir, centerOfRotation, animate, rollerCoasterMode) {
+			self.updateCamera(pos, upDir, viewDir, centerOfRotation, animate, rollerCoasterMode);
 		};
 
-		this.updateCamera = function(pos, up, viewDir, animate, rollerCoasterMode) {
+		this.updateCamera = function(pos, up, viewDir, centerOfRotation, animate, rollerCoasterMode) {
 			if (!viewDir)
 			{
 				viewDir = self.getCurrentViewpointInfo().view_dir;
@@ -1240,6 +1247,21 @@ var Viewer = {};
 					self.getViewArea()._doc.needRender = true;
 				}
 			}
+
+			var x3domCenter = null;
+
+			if (!centerOfRotation)
+			{
+				var canvasWidth  = self.getViewArea()._doc.canvas.width;
+				var canvasHeight = self.getViewArea()._doc.canvas.height;
+
+				self.pickPoint(canvasWidth / 2, canvasHeight / 2);
+				x3domCenter = self.pickObject.pickPos;
+			} else {
+				x3domCenter = new x3dom.fields.SFVec3f(centerOfRotation[0], centerOfRotation[1], centerOfRotation[2]);
+			}
+
+			currViewpoint.setCenterOfRotation(x3domCenter);
 
 			if (self.linked) {
 				self.manager.switchMaster(self.handle);
@@ -2250,7 +2272,7 @@ var Viewer = {};
 			var x = to.easting -  self.originBNG.easting;
 			var y = self.originBNG.northing - to.northing;
 
-			self.setCamera([x,height,y],[0,-1,0],[0,0,-1]);
+			self.setCamera([x,height,y],[0,-1,0],[0,0,-1], [x,0,y]);
 			self.appendMapTileByViewPoint()
 		};
 
