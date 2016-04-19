@@ -217,6 +217,9 @@
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
 							v.manager.getCurrentViewer().setNavMode(event.value.mode);
+						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_URL){
+							//console.log('update url!!');
+							$location.path("/" + v.account + '/' + v.project).search({at: event.value.at});
 						}
 					});
 				}
