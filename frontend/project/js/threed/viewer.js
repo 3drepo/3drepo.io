@@ -1758,38 +1758,20 @@ var Viewer = {};
 
 		}
 
-		// Append building models and map tile images
-		this.appendMapTileByViewPoint = function(noDraw){
-
-			console.log('appendMapTileByViewPoint');
-
-			if(!self.originBNG){
-				//console.log('originBNG not found');
-				return;
-			}
+		this.getViewAreaOnZPlane = function(){
 
 			var vpInfo = self.getCurrentViewpointInfo();
 			var fov = vpInfo.fov;
 			var camera = vpInfo.position;
 			var view_dir = vpInfo.view_dir;
-			var near = vpInfo.near;
 			var ratio = vpInfo.aspect_ratio; //(w/h)
 			var up = vpInfo.up;
 			var right = vpInfo.right;
 
-			console.log('camera', camera);
-			//console.log('near', near);
-			console.log('view_dir', view_dir);
-			//console.log('fov', fov);
-			//console.log('up', up);
-			//console.log('right', right);
-			//console.log('ratio', ratio);
-
 			var tanHalfFOV = Math.tan(fov / 2);
 			var planeOffsetX = [1, -1, 1, -1];
 			var planeOffsetY = [1, 1, -1, -1];
-			var coords = [];
-			var intersection = {};
+			var viewAreaCoors = [];
 
 			for(var i = 0; i < planeOffsetX.length; i++)
 			{
@@ -1807,40 +1789,53 @@ var Viewer = {};
 
 				//console.log("G: ", gamma);
 
-				coords[i] = [];
+				viewAreaCoors[i] = [];
 
 				for (var c = 0; c < 3; c++)
 				{
-					coords[i][c] = camera[c] + gamma * rayDirection[c];
+					viewAreaCoors[i][c] = camera[c] + gamma * rayDirection[c];
 				}
 			}
 
+			return viewAreaCoors;
+		}
 
-			var roundUpPlace = 10;
+		this.centreOfVecs = function(vectors){
+			
+			var centre = [];
 
-			var zoomLevel = self.getZoomLevel(vpInfo.look_at, camera);
+			vectors[0].forEach(function(value, i){
+				centre[i] = 0;
+			});
 
-			if(self.zoomLevel !== zoomLevel){
-				self.removeMapImages();
-				self._clearMapImagePosInfo();
-				self.zoomLevel= zoomLevel;
-			}
+			vectors.forEach(function(vector){
+				vector.forEach(function(value, i){
+					centre[i] += value;
+				});
+			});
 
-			var coordsX = [coords[0][0], coords[1][0], coords[2][0], coords[3][0]];
-			var coordsZ = [coords[0][2], coords[1][2], coords[2][2], coords[3][2]];
+			centre.forEach(function(value, i){
+				centre[i] = value / vectors.length;
+			});
 
+			return centre;
+		}
 
+		this.isLookingToInf = function(viewAreaCoors){
 
-			var farVec = [coords[1][0] - coords[0][0], coords[1][2] - coords[0][2]];
-			//console.log('Far Vec', farVec, Math.atan(farVec[1]/farVec[0]));
-			var nearVec = [coords[3][0] - coords[2][0], coords[3][2] - coords[2][2]];
-			//console.log('Near Vec', nearVec, Math.atan(nearVec[1]/nearVec[0]));
+			var farVec = [viewAreaCoors[1][0] - viewAreaCoors[0][0], viewAreaCoors[1][2] - viewAreaCoors[0][2]];
+			var nearVec = [viewAreaCoors[3][0] - viewAreaCoors[2][0], viewAreaCoors[3][2] - viewAreaCoors[2][2]];
 
-			var centrePoint = [
-				(coords[0][0] + coords[1][0] + coords[2][0] + coords[3][0]) / 4,
-				(coords[0][2] + coords[1][2] + coords[2][2] + coords[3][2]) / 4
-			];
+			return !(self._hasSameSign(farVec[0], nearVec[0]) && self._hasSameSign(farVec[1], nearVec[1]));
 
+		};
+
+		//transform centre of the view area to lat,lon
+		this.getLatLonOfViewArea = function(viewAreaCoors){
+
+			var centrePoint = this.centreOfVecs(viewAreaCoors);
+			//make it 2d
+			centrePoint = [centrePoint[0], centrePoint[2]];
 
 			// var p = self._drawPlaneOnZ([
 				
@@ -1855,7 +1850,8 @@ var Viewer = {};
 
 			var mapImgPosInfo = self._getMapImagePosInfo();
 
-			console.log('centrePoint', centrePoint);
+			//console.log('centrePoint', centrePoint);
+
 			//convert centre point back to lat, long
 			var mapXY = [
 				self.findMapTileNoByPos(centrePoint[0] - mapImgPosInfo.offsetX), 
@@ -1863,159 +1859,60 @@ var Viewer = {};
 			];
 
 
-			console.log('mapXY', mapXY);
-			console.log('zxy', [mapXY[0] + mapImgPosInfo.slippyPoints.x, mapXY[1] + mapImgPosInfo.slippyPoints.y]);
-			console.log('z', self.getCurrentViewpointInfo().position[1]);
-			console.log(
-				self._tile2lat(mapXY[1] + mapImgPosInfo.slippyPoints.y, self.zoomLevel), 
-				self._tile2long(mapXY[0] + mapImgPosInfo.slippyPoints.x, self.zoomLevel)
-			);
+			//console.log('mapXY', mapXY);
+			//console.log('zxy', [mapXY[0] + mapImgPosInfo.slippyPoints.x, mapXY[1] + mapImgPosInfo.slippyPoints.y]);
+			//console.log('z', self.getCurrentViewpointInfo().position[1]);
+			
+			var latlon = {				
+				lat: self._tile2lat(mapXY[1] + mapImgPosInfo.slippyPoints.y, self.zoomLevel), 
+				lon: self._tile2long(mapXY[0] + mapImgPosInfo.slippyPoints.x, self.zoomLevel)
+			};
+
+			//console.log(latlon);
+
+			return latlon;
+		}
+
+		// trigger update URL event
+		this.triggerUpdateURLEvent = function(lat, lon, height){
 
 			callback(self.EVENT.UPDATE_URL ,{
-				'at': [
-				self._tile2lat(mapXY[1] + mapImgPosInfo.slippyPoints.y, self.zoomLevel)
-				,self._tile2long(mapXY[0] + mapImgPosInfo.slippyPoints.x, self.zoomLevel)
-				,self.getCurrentViewpointInfo().position[1]].join(',')
+				'at': [lat, lon, height].join(',')
 			});
+		};
 
-			var lookingToInf = !(self._hasSameSign(farVec[0], nearVec[0]) && self._hasSameSign(farVec[1], nearVec[1]));
-			if(lookingToInf){
-				console.log('Looking to inf');
+		// Append building models and map tile images
+		this.appendMapTileByViewPoint = function(noDraw){
+
+			console.log('appendMapTileByViewPoint');
+
+			if(!self.originBNG){
+				//console.log('originBNG not found');
+				return;
 			}
 
+			var vpInfo = self.getCurrentViewpointInfo();
+			var camera = vpInfo.position;
 
+			console.log('camera', camera);
 
-			var startX = Math.ceil(Math.min.apply(Math, coordsX) / roundUpPlace) * roundUpPlace;
-			var endX = Math.ceil(Math.max.apply(Math, coordsX) / roundUpPlace) * roundUpPlace;
-			//console.log('startX, endX', startX, endX);
+			var mapImgPosInfo = self._getMapImagePosInfo();
 
-			var startZ = Math.ceil(Math.min.apply(Math, coordsZ) / roundUpPlace) * roundUpPlace;
-			var endZ = Math.ceil(Math.max.apply(Math, coordsZ) / roundUpPlace) * roundUpPlace;
-			//console.log('startZ, endZ', startZ, endZ);
-			//console.log('camera', camera);
+			var zoomLevel = self.getZoomLevel(vpInfo.look_at, camera);
 
-			var maxTiles = 100;
-			var sqrtOfMax = 10;
-			var tileSize = 100 * self.meterPerPixel;
-
-			var xCount = Math.ceil((endX - startX) / tileSize);
-			var zCount = Math.ceil((endZ - startZ) / tileSize);
-			//console.log('xCount', xCount);
-			//console.log('zCount', zCount);
-
-			if(xCount * zCount > maxTiles){
-				if(xCount > sqrtOfMax && zCount > sqrtOfMax){
-					xCount = sqrtOfMax;
-					zCount = sqrtOfMax;
-				} else if(zCount > sqrtOfMax){
-					zCount = Math.ceil(maxTiles / xCount);
-				} else if (xCount > sqrtOfMax) {
-					xCount = Math.ceil(maxTiles / zCount);
-				}
+			if(self.zoomLevel !== zoomLevel){
+				self.removeMapImages();
+				self._clearMapImagePosInfo();
+				self.zoomLevel= zoomLevel;
 			}
 
+			var viewAreaCoors = this.getViewAreaOnZPlane();
 
-			//var xMidPoint = this._roundUpToTen((startX + endX) / 2);
-			var xMidPoint = this._roundUpToTen(camera[0]);
-			//console.log('xMidPoint', xMidPoint);
-			var boundedStartX = xMidPoint - Math.ceil(xCount / 2) * tileSize;
-			var boundedEndX = xMidPoint + Math.ceil(xCount / 2) * tileSize
+			var lookingToInf = this.isLookingToInf(viewAreaCoors);
 
-			//var zMidPoint = this._roundUpToTen((startZ + endZ) / 2);
-			var zMidPoint = this._roundUpToTen(camera[2]);
-			//console.log('zMidPoint', zMidPoint);
-			var boundedStartZ = zMidPoint - Math.ceil(zCount / 2) * tileSize;
-			var boundedEndZ = zMidPoint + Math.ceil(zCount / 2) * tileSize
-
-			//console.log('bouned x', boundedStartX, boundedEndX);
-			//console.log('bouned z', boundedStartZ, boundedEndZ);
-
-			// 3d models
-			if(!noDraw && self.zoomLevel >= 17){
-				for (var x = boundedStartX; x <= boundedEndX; x+=tileSize) {
-					for (var z = boundedStartZ; z <= boundedEndZ; z+=tileSize) {
-
-						var osRef = new OsGridRef(self.originBNG.easting + (x / self.meterPerPixel), self.originBNG.northing - (z / self.meterPerPixel));
-						var osrefno = self._OSRefNo(osRef, 3);
-						
-						self.appendMapTile(osrefno);
-					}
-				}
-			}
-
-
-
-			// map images
-			//first step
-
-			var n = self.findMapTileNoByPos(boundedStartZ + mapImgPosInfo.offsetY);
-			var nextN = n >= 0 ? n + 1: n - 1;
-			var mapImgStep = Math.abs(self.getSumSize(nextN) - self.getSumSize(n)) ;
-
-			xCount = Math.ceil((endX - startX) / mapImgStep);
-			zCount = Math.ceil((endZ - startZ) / mapImgStep);
-			//console.log('xCount', xCount);
-			//console.log('zCount', zCount);
-
-			if(xCount * zCount > maxTiles){
-				if(xCount > sqrtOfMax && zCount > sqrtOfMax){
-					xCount = sqrtOfMax;
-					zCount = sqrtOfMax;
-				} else if(zCount > sqrtOfMax){
-					zCount = Math.ceil(maxTiles / xCount);
-				} else if (xCount > sqrtOfMax) {
-					xCount = Math.ceil(maxTiles / zCount);
-				}
-			}
-
-			boundedStartX = xMidPoint - Math.ceil(xCount / 2) * mapImgStep;
-			boundedEndX = xMidPoint + Math.ceil(xCount / 2) * mapImgStep
-
-			boundedStartZ = zMidPoint - Math.ceil(zCount / 2) * mapImgStep;
-			boundedEndZ = zMidPoint + Math.ceil(zCount / 2) * mapImgStep;
-
-			// var p = self._drawPlaneOnZ([
-			// 	[coords[0][0], 200, coords[0][2]],
-			// 	[coords[1][0], 200, coords[1][2]],
-			// 	[coords[2][0], 200, coords[2][2]],
-			// 	[coords[3][0], 200, coords[3][2]],
-			// ], [1, 0, 0]);
-
-
-			// // var p2 = self._drawPlaneOnZ([
-			// // 	[boundedStartX, 4, boundedStartZ],
-			// // 	[boundedEndX, 4, boundedStartZ],
-			// // 	[boundedStartX, 4, boundedEndZ],
-			// // 	[boundedEndX, 4, boundedEndZ],
-			// // ], [0, 1, 0]);
-
-
-			// // var p3 = self._drawPlaneOnZ([
-			// // 	[startX, 8, startZ],
-			// // 	[endX, 8, startZ],
-			// // 	[startX, 8, endZ],
-			// // 	[endX, 8, endZ],
-			// // ], [0, 0, 1]);
-
-			
-			// if(self._testP){
-			// 	self._testP.forEach(function(p){
-			// 		self.getScene().removeChild(p);
-			// 	});
-			// }
-			// self._testP = [];
-
-
-			// if(false){
-				
-			// 	self._testP.push(p);
-			// 	// self._testP.push(p2);
-			// 	// self._testP.push(p3);
-			// 	self.getScene().appendChild(p);
-			// 	// self.getScene().appendChild(p2);
-			// 	// self.getScene().appendChild(p3);
-			// }
-
+			// update url with current lat,lon at centre of the view area
+			var viewAreaLatLon = this.getLatLonOfViewArea(viewAreaCoors);
+			this.triggerUpdateURLEvent(viewAreaLatLon.lat, viewAreaLatLon.lon, vpInfo.position[1]);
 
 			// variables named according to this polygon and coordinate variables
 			// c------d
@@ -2024,10 +1921,10 @@ var Viewer = {};
 
 			var a, b, c, d;
 			
-			a = coords[3];
-			b = coords[2];
-			c = coords[1];
-			d = coords[0];
+			a = viewAreaCoors[3];
+			b = viewAreaCoors[2];
+			c = viewAreaCoors[1];
+			d = viewAreaCoors[0];
 
 			if(lookingToInf){
 				// flip c & d
@@ -2076,72 +1973,91 @@ var Viewer = {};
 				];
 			}
 
+			function getStep(yCoor, vecLen){
+				var imageSize = self.getMapSizeByYCoor(yCoor);
+				return imageSize / vecLen / 2;
+			}
 
 
-			var testCount = 0;
+			var mapImagesCount = 0;
+			var maxImageCount = 200;
 
-			var n = self.findMapTileNoByPos(a[2] + mapImgPosInfo.offsetY);
-			var nextN = n < 0 ? n + 1 : n - 1;
-			var imageSize = Math.abs(self.getSumSize(nextN) - self.getSumSize(n));
 			var horVecLen = LenVec2D([a[0], a[2]], [c[0], c[2]]);
-			var stepY = imageSize / horVecLen / 2;
+			//first step y 
+			var stepY = getStep(a[2] + mapImgPosInfo.offsetY, horVecLen);
 
-			for(var ky = -stepY; ky <= 1+stepY && testCount < 200; ky += stepY){
+			for(var ky = -stepY; ky <= 1 + stepY && mapImagesCount < maxImageCount; ky += stepY){
 
 				var startCoor = getCoorVertical(0, ky);
 				var endCoor = getCoorVertical(1, ky);
 				var vertVecLen = LenVec2D(endCoor, startCoor);
+				//get first step x
+				var stepX = getStep(startCoor[1] + mapImgPosInfo.offsetY, vertVecLen);
 
-				n = self.findMapTileNoByPos(startCoor[1] + mapImgPosInfo.offsetY);
-				nextN = n < 0 ? n + 1 : n - 1;
-				imageSize = Math.abs(self.getSumSize(nextN) - self.getSumSize(n));
-				var stepX = imageSize / vertVecLen / 2;
 
-				for(var kx = -stepX; kx <= 1 + stepX && testCount < 200 ; kx += stepX){
+				for(var kx = -stepX; kx <= 1 + stepX && mapImagesCount < maxImageCount ; kx += stepX){
 					
 					var coor = getCoorVertical(kx, ky);
 					//console.log('coor', coor);
+					coor[0] = coor[0] + mapImgPosInfo.offsetX;
+					coor[1] = coor[1] + mapImgPosInfo.offsetY;
 
+					var imageSize = self.getMapSizeByYCoor(coor[1]);
 
-					var mapImgX = Math.floor( (coor[0] + mapImgPosInfo.offsetX) / imageSize );
-					var mapImgZ = Math.floor( (coor[1] + mapImgPosInfo.offsetY) / imageSize );
+					var mapImgX = Math.floor( coor[0] / imageSize );
+					var mapImgZ = Math.floor( coor[1] / imageSize );
 
-					var appened = self.appendMapImage(mapImgX, mapImgZ);
+					var appended = self.appendMapImage(mapImgX, mapImgZ);
 
-					if(appened){
-						testCount++;
+					if(appended){
+						mapImagesCount++;
 					}
 
-					n = self.findMapTileNoByPos(coor[1] + mapImgPosInfo.offsetY);
-					nextN = n < 0 ? n + 1 : n - 1;
-					imageSize = Math.abs(self.getSumSize(nextN) - self.getSumSize(n));
-					var stepX = imageSize / vertVecLen / 2;
+					stepX = getStep(coor[1], vertVecLen)
 				}
 
-				n = self.findMapTileNoByPos(startCoor[1] + mapImgPosInfo.offsetY);
-				nextN = n < 0 ? n + 1 : n - 1;
-				imageSize = Math.abs(self.getSumSize(nextN) - self.getSumSize(n));
-				stepY = imageSize / horVecLen;
+				stepY = getStep(startCoor[1] + mapImgPosInfo.offsetY, horVecLen)
 			}
-			console.log(testCount);
 
+			console.log(mapImagesCount);
 
+			if(!noDraw && self.shouldDraw3DBuildings(self.zoomLevel)){
+				//3d models
+				var tileCount = 0;
+				var maxTileCount = 100;
+				var tileSize = 100 * self.meterPerPixel;
+				var stepY = tileSize / horVecLen / 2;
 
-			// for (var x = boundedStartX + mapImgPosInfo.offsetX; x <= boundedEndX + mapImgPosInfo.offsetX; x+=mapImgStep) {
-			// 	for (var z = boundedStartZ + mapImgPosInfo.offsetY; z <= boundedEndZ + mapImgPosInfo.offsetY; z+=mapImgStep) {
+				for(var ky = -stepY; ky <= 1 + stepY && tileCount < maxTileCount; ky += stepY){
 
-			// 		var mapImgX = Math.floor( x / mapImgStep );
-			// 		var mapImgZ = Math.floor( z / mapImgStep );
+					var startCoor = getCoorVertical(0, ky);
+					var endCoor = getCoorVertical(1, ky);
+					var vertVecLen = LenVec2D(endCoor, startCoor);
+					var stepX = tileSize / vertVecLen / 2;
 
-			// 		self.appendMapImage(mapImgX, mapImgZ);
+					for(var kx = -stepX; kx <= 1 + stepX && tileCount < maxTileCount ; kx += stepX){
 
-			// 		var nextZ = mapImgZ >=0 ? mapImgZ + 1 : mapImgZ - 1;
-			// 		mapImgStep = Math.abs(self.getSumSize(nextZ) - self.getSumSize(mapImgZ));
-			// 	}
-			// }
+						var coor = getCoorVertical(kx, ky);
+						var osRef = new OsGridRef(self.originBNG.easting + (coor[0] / self.meterPerPixel), self.originBNG.northing - (coor[1] / self.meterPerPixel));
+						var osrefno = self._OSRefNo(osRef, 3);
+						
+						var appended = self.appendMapTile(osrefno);
 
+						if(appended){
+							tileCount++;
+						}
+					}
+
+				}
+
+				console.log(tileCount);
+			}
 		};
 
+
+		this.shouldDraw3DBuildings = function(zoomLevel){
+			return zoomLevel >= 17;
+		};
 
 		this._hasSameSign = function(a, b){
 			return a <= 0 && b <= 0 || a >=0 && b >= 0
@@ -2204,7 +2120,7 @@ var Viewer = {};
 
 			if(self.addedTileRefs.indexOf(osGridRef) !== -1) {
 				//console.log(osGridRef + ' has already been added');
-				return;
+				return false;
 			}
 
 			self.addedTileRefs.push(osGridRef);
@@ -2242,6 +2158,17 @@ var Viewer = {};
 			translate[0] = (correspondingMapTile.x - mapImagePosInfo.slippyPoints.x) * mapSize + dx + mapImagePosInfo.offsetX 
 			translate[2] = (correspondingMapTile.y - mapImagePosInfo.slippyPoints.y) * mapSize + dy + mapImagePosInfo.offsetY 
 
+
+			// var p = self._drawPlaneOnZ([
+				
+			// 	[translate[0] + 100, 10, translate[2] + 100],
+			// 	[translate[0] - 100, 10, translate[2] + 100],
+			// 	[translate[0] - 100, 10, translate[2] - 100],
+			// 	[translate[0] + 100, 10, translate[2] - 100],
+				
+			// ], [1, 0, 0]);
+
+			// self.getScene().appendChild(p);
 
 			// if(!self.gltfDoms){
 			// 	self.gltfDoms = [];
@@ -2317,6 +2244,10 @@ var Viewer = {};
 			lat = parseFloat(lat);
 			lon = parseFloat(lon);
 
+			if (!height || height < 0){
+				height = 500;
+			}
+
 			console.log('translateTo', lat, lon, height)
 			// var to = OsGridRef.latLonToOsGrid(new LatLon(lat, lon));
 			// var x = to.easting -  self.originBNG.easting;
@@ -2368,9 +2299,13 @@ var Viewer = {};
 			return mapPerPxZoomLevel * Math.cos(self._degToRad(lat)) * 256 * n * self.meterPerPixel;
 		}
 
+		this.getMapSizeByYCoor = function(yCoor){
+			return this.getMapSize(self.findMapTileNoByPos(yCoor));
+		}
+
 		this.getMapSize = function(n){
 			var preN = n > 0 ? n - 1 : n + 1;
-			return this.getSumSize(n) - this.getSumSize(preN); 
+			return Math.abs(this.getSumSize(n) - this.getSumSize(preN)); 
 		}
 
 		//appr. version
@@ -2460,6 +2395,7 @@ var Viewer = {};
 			if (!self.mapPosInfo){
 
 				console.log(self.getCurrentViewpointInfo());
+
 				var zoomLevel = self.getZoomLevel(
 					self.getCurrentViewpointInfo().look_at,
 					self.getCurrentViewpointInfo().position
@@ -2564,7 +2500,19 @@ var Viewer = {};
 
 			self.sumD[0] += dx;
 			self.sumD[1] += dy;
-		}
+		};
+
+		this._newOrigin = function(){
+
+			var sumD = self.sumD;
+
+			return OsGridRef.osGridToLatLon(
+				OsGridRef(
+					self.viewer.originBNG.easting - sumD[0]
+					,self.viewer.originBNG.northing + sumD[1]
+				)
+			);
+		};
 
 		this._drawPlaneOnZ = function(coords, color){
 
