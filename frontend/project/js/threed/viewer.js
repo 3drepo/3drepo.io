@@ -1915,9 +1915,9 @@ var Viewer = {};
 			this.triggerUpdateURLEvent(viewAreaLatLon.lat, viewAreaLatLon.lon, vpInfo.position[1]);
 
 			// variables named according to this polygon and coordinate variables
-			// c------d
+			// c------d  <-- far
 			// \      /
-			//  a----b
+			//  a----b  <-- near
 
 			var a, b, c, d;
 			
@@ -1973,35 +1973,58 @@ var Viewer = {};
 				];
 			}
 
-			function getStep(yCoor, vecLen){
-				var imageSize = self.getMapSizeByYCoor(yCoor);
-				return imageSize / vecLen / 2;
-			}
+			//iterate every point(x,y) in view area
+			function viewAreaIterate(options){
 
+				var genStepX = options.genStepX;
+				var genStepY = options.genStepY;
+				var yCond = options.yCond;
+				var xCond = options.xCond;
+				var callback = options.callback;
+
+				var horVecLen = LenVec2D([a[0], a[2]], [c[0], c[2]]);
+				var stepY = genStepY(a, horVecLen);
+
+				for(var ky = -stepY; ky <= 1 + stepY && yCond(); ky += stepY){
+
+					var startCoor = getCoorVertical(0, ky);
+					var endCoor = getCoorVertical(1, ky);
+					var vertVecLen = LenVec2D(endCoor, startCoor);
+
+					var stepX = genStepX(startCoor, vertVecLen);
+					
+					for(var kx = -stepX; kx <= 1 + stepX && xCond(); kx += stepX){
+						
+						var coor = getCoorVertical(kx, ky);
+						callback(coor);
+						stepX = genStepX(coor, vertVecLen);
+					}
+
+					stepY = genStepY(startCoor, horVecLen);
+				}
+			}
 
 			var mapImagesCount = 0;
 			var maxImageCount = 200;
 
-			var horVecLen = LenVec2D([a[0], a[2]], [c[0], c[2]]);
-			//first step y 
-			var stepY = getStep(a[2] + mapImgPosInfo.offsetY, horVecLen);
+			
+			var getStep = function (coor, vecLen){
+				var yCoor = coor[1];
+				var imageSize = self.getMapSizeByYCoor(yCoor);
+				return imageSize / vecLen / 2;
+			};
 
-			for(var ky = -stepY; ky <= 1 + stepY && mapImagesCount < maxImageCount; ky += stepY){
+			var cond = function(){
+				return mapImagesCount < maxImageCount;
+			};
 
-				var startCoor = getCoorVertical(0, ky);
-				var endCoor = getCoorVertical(1, ky);
-				var vertVecLen = LenVec2D(endCoor, startCoor);
-				//get first step x
-				var stepX = getStep(startCoor[1] + mapImgPosInfo.offsetY, vertVecLen);
-
-
-				for(var kx = -stepX; kx <= 1 + stepX && mapImagesCount < maxImageCount ; kx += stepX){
-					
-					var coor = getCoorVertical(kx, ky);
-					//console.log('coor', coor);
-					coor[0] = coor[0] + mapImgPosInfo.offsetX;
-					coor[1] = coor[1] + mapImgPosInfo.offsetY;
-
+			// append map images
+			viewAreaIterate({
+				genStepY: getStep,
+				genStepX: getStep,
+				yCond: cond,
+				xCond: cond,
+				callback: function(coor){
 					var imageSize = self.getMapSizeByYCoor(coor[1]);
 
 					var mapImgX = Math.floor( coor[0] / imageSize );
@@ -2012,33 +2035,40 @@ var Viewer = {};
 					if(appended){
 						mapImagesCount++;
 					}
-
-					stepX = getStep(coor[1], vertVecLen)
 				}
-
-				stepY = getStep(startCoor[1] + mapImgPosInfo.offsetY, horVecLen)
-			}
+				
+			});
 
 			console.log(mapImagesCount);
 
+
+
+			var tileCount = 0;
+			var maxTileCount = 100;
+
+			var genStep = function(coor, vecLen){
+				var tileSize = 100 * self.meterPerPixel
+				return tileSize / vecLen / 2;
+			};
+
+			cond = function(){
+
+				return tileCount < maxTileCount;
+			};
+			// append 3d models
 			if(!noDraw && self.shouldDraw3DBuildings(self.zoomLevel)){
-				//3d models
-				var tileCount = 0;
-				var maxTileCount = 100;
-				var tileSize = 100 * self.meterPerPixel;
-				var stepY = tileSize / horVecLen / 2;
+				
+				viewAreaIterate({
+					genStepY: genStep,
+					genStepX: genStep,
+					yCond: cond,
+					xCond: cond,
+					callback: function(coor){
 
-				for(var ky = -stepY; ky <= 1 + stepY && tileCount < maxTileCount; ky += stepY){
-
-					var startCoor = getCoorVertical(0, ky);
-					var endCoor = getCoorVertical(1, ky);
-					var vertVecLen = LenVec2D(endCoor, startCoor);
-					var stepX = tileSize / vertVecLen / 2;
-
-					for(var kx = -stepX; kx <= 1 + stepX && tileCount < maxTileCount ; kx += stepX){
-
-						var coor = getCoorVertical(kx, ky);
-						var osRef = new OsGridRef(self.originBNG.easting + (coor[0] / self.meterPerPixel), self.originBNG.northing - (coor[1] / self.meterPerPixel));
+						var osRef = new OsGridRef(
+							self.originBNG.easting + (coor[0] / self.meterPerPixel), 
+							self.originBNG.northing - (coor[1] / self.meterPerPixel)
+						);
 						var osrefno = self._OSRefNo(osRef, 3);
 						
 						var appended = self.appendMapTile(osrefno);
@@ -2047,11 +2077,11 @@ var Viewer = {};
 							tileCount++;
 						}
 					}
-
-				}
+				});
 
 				console.log(tileCount);
 			}
+
 		};
 
 
@@ -2286,8 +2316,6 @@ var Viewer = {};
 			
 			self.appendMapTileByViewPoint();
 
-			self.setCamera([x,height,y],[0,-1,0],[0,0,-1], [x,0,y]);
-			self.appendMapTileByViewPoint()
 
 		};
 
