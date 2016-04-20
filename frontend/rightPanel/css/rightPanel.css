@@ -3,3 +3,7 @@ right-panel {
     top: 70px;
     right: 0;
 }
+
+right-panel #rightPanelButtons .md-button {
+    margin-bottom: 15px;
+}

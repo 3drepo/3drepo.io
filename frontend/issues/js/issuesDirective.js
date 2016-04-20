@@ -170,7 +170,6 @@
 				setContentHeight();
 				setPinToAssignedRoleColours(vm.selectedIssue);
 				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true});
-				EventService.send(EventService.EVENT.ADD_CARD_OPTIONS, ["pin", "scribble", "erase"]);
 			}
 		});
 
@@ -513,9 +512,6 @@
 
 					// Hide issue area
 					EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
-					
-					// Remove options
-					EventService.send(EventService.EVENT.REMOVE_CARD_OPTIONS, ["pin", "scribble", "erase"]);
 				});
 			}
 		});
@@ -531,7 +527,6 @@
 			if (vm.toShow === "showAdd") {
 				removeAddPin();
 				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
-				EventService.send(EventService.EVENT.REMOVE_CARD_OPTIONS, ["pin", "scribble", "erase"]);
 			}
 			vm.toShow = "showIssue";
 			vm.showAdd = false; // So that showing add works
@@ -616,10 +611,8 @@
 								vm.comment = "";
 							}
 
-							// Show issues
-							vm.toShow = "showIssues";
-							vm.showAdd = false;
-							vm.canAdd = true;
+							// Get out of add mode and show issues
+							vm.hideItem = true;
 
 							setupIssuesToShow();
 							setContentHeight();
@@ -628,6 +621,13 @@
 					}
 				}
 			}
+		};
+
+		/**
+		 * Cancel adding an issue
+		 */
+		vm.cancelAddIssue = function () {
+			vm.hideItem = true;
 		};
 
 		/**

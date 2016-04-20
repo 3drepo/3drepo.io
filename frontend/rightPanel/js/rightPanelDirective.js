@@ -38,27 +38,32 @@
         var vm = this,
             addingScribbleIssue = false,
             addingPinIssue = false,
-            selectedColour = "#FBC02D",
-            unselectedColour = "#FFFFFF",
-            selectedButtonIndex = null;
+            eraseButton;
 
         /*
          * Init
          */
         vm.buttons = [
             {
-                label: "Scribble",
-                icon: "gesture",
-                iconColour: unselectedColour,
-                click: buttonClick
+                type: "scribble",
+                icon: "border_color",
+                click: scribble,
+                disabled: false
             },
             {
-                label: "Pin",
+                type: "erase",
+                icon: "texture",
+                click: erase,
+                disabled: true
+            },
+            {
+                type: "pin",
                 icon: "pin_drop",
-                iconColour: unselectedColour,
-                click: buttonClick
+                click: pin,
+                disabled: false
             }
         ];
+        eraseButton = vm.buttons[1];
 
         /*
          * Setup event watch
@@ -67,53 +72,35 @@
             if ((event.type === EventService.EVENT.TOGGLE_ISSUE_ADD) && (!event.value.on)) {
                 addingPinIssue = false;
                 addingScribbleIssue = false;
+                eraseButton.disabled = true;
             }
         });
 
         /**
          * Set up adding an issue with scribble
          */
-        function setupAddIssueWithScribble () {
+        function scribble () {
             addingScribbleIssue = !addingScribbleIssue;
             addingPinIssue = false;
+            eraseButton.disabled = false;
             EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: addingScribbleIssue, type: "scribble"});
+        }
+
+        /**
+         * Set add issue to erase mode
+         */
+        function erase () {
+            EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, "erase");
         }
 
         /**
          * Set up adding an issue with a pin
          */
-        function setupAddIssueWithPin () {
+        function pin () {
             addingPinIssue = !addingPinIssue;
             addingScribbleIssue = false;
+            eraseButton.disabled = false;
             EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: addingPinIssue, type: "pin"});
-        }
-        
-        function buttonClick (index) {
-            // Change button icon colours
-            if (selectedButtonIndex === null) {
-                selectedButtonIndex = index;
-                vm.buttons[index].iconColour = selectedColour;
-            }
-            else if (index !== selectedButtonIndex) {
-                vm.buttons[selectedButtonIndex].iconColour = unselectedColour;
-                selectedButtonIndex = index;
-                vm.buttons[selectedButtonIndex].iconColour = selectedColour;
-            }
-            else {
-                vm.buttons[selectedButtonIndex].iconColour = unselectedColour;
-                selectedButtonIndex = null;
-            }
-
-            // Call button functions
-            switch (vm.buttons[index].label) {
-                case "Scribble" :
-                    setupAddIssueWithScribble();
-                    break;
-
-                case "Pin" :
-                    setupAddIssueWithPin();
-                    break;
-            }
         }
     }
 }());

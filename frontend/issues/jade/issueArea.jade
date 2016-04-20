@@ -6,7 +6,7 @@ div(ng-if="!vm.data")
         line(x1="0", y1="20", x2="40", y2="20", style="stroke:rgb(255,255,255);stroke-width:2")
         line(x1="20", y1="0", x2="20", y2="40", style="stroke:rgb(255,255,255);stroke-width:2")
 
-    #issueAreaButtons(flex, layout="column", layout-align="end end", layout-margin, style="pointer-events:{{vm.pointerEvents}}")
+    //#issueAreaButtons(flex, layout="column", layout-align="end end", layout-margin, style="pointer-events:{{vm.pointerEvents}}")
         a(id="dl", download="Canvas.png", href="#") Download
         md-button.md-fab(aria-label="Draw", ng-class="vm.buttonDrawClass", ng-click="vm.setupDraw()")
             md-icon(class="fa fa-pencil-square-o")

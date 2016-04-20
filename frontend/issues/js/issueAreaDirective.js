@@ -34,9 +34,9 @@
         };
     }
 
-    IssueAreaCtrl.$inject = ["$element", "$window", "$timeout", "EventService"];
+    IssueAreaCtrl.$inject = ["$scope", "$element", "$window", "$timeout", "EventService"];
 
-    function IssueAreaCtrl($element, $window, $timeout, EventService) {
+    function IssueAreaCtrl($scope, $element, $window, $timeout, EventService) {
         var vm = this,
             canvas,
             canvasColour = "rgba(0 ,0 ,0, 0)",
@@ -57,9 +57,9 @@
          * Init
          */
         $timeout(function () {
-            canvas = angular.element($element[0].querySelector('#issueAreaCanvas')),
-            myCanvas = document.getElementById("issueAreaCanvas"),
-            penIndicator = angular.element($element[0].querySelector("#issueAreaPenIndicator")),
+            canvas = angular.element($element[0].querySelector('#issueAreaCanvas'));
+            myCanvas = document.getElementById("issueAreaCanvas");
+            penIndicator = angular.element($element[0].querySelector("#issueAreaPenIndicator"));
             vm.buttonDrawClass = "md-hue-2";
             vm.pointerEvents = "auto";
             vm.drawMode = true;
@@ -68,7 +68,24 @@
             canvas.css("background", "rgba(255, 255, 255, 0.1");
             resizeCanvas();
             initCanvas(myCanvas);
-            document.getElementById("dl").addEventListener('click', dlCanvas, false);
+            //document.getElementById("dl").addEventListener('click', dlCanvas, false);
+        });
+
+        /*
+         * Setup event watch
+         */
+        $scope.$watch(EventService.currentEvent, function(event) {
+            if (event.type === EventService.EVENT.SET_ISSUE_AREA_MODE) {
+                if (event.value === "scribble") {
+                    setupScribble();
+                }
+                else if (event.value === "erase") {
+                    setupErase();
+                }
+                else if (event.value === "pin") {
+                    setupPin();
+                }
+            }
         });
 
         /**
@@ -90,19 +107,9 @@
             clearCanvas();
 
             canvas.addEventListener('mousedown', function (evt) {
-                switch(evt.button) {
-                    case 0:  mouse_button = 1; break;	//left
-                    case 1:  mouse_button = 4; break;	//middle
-                    case 2:  mouse_button = 2; break;	//right
-                    default: mouse_button = 0; break;
-                }
                 mouse_drag_x = evt.layerX;
                 mouse_drag_y = evt.layerY;
                 mouse_dragging = true;
-
-                if (evt.shiftKey) { mouse_button = 1; }
-                if (evt.ctrlKey)  { mouse_button = 4; }
-                if (evt.altKey)   { mouse_button = 2; }
 
                 updateImage(canvas);
 
@@ -158,11 +165,6 @@
                     })
                 }
                 else {
-                    /*
-                    if (evt.shiftKey) { mouse_button = 1; }
-                    if (evt.ctrlKey)  { mouse_button = 4; }
-                    if (evt.altKey)   { mouse_button = 2; }
-                    */
                     updateImage(canvas);
                 }
 
@@ -249,7 +251,7 @@
         /**
          * Set up placing of the pin
          */
-        vm.setupPin = function () {
+        function setupPin () {
             vm.buttonPinClass = "md-hue-2";
             vm.buttonDrawClass = "default";
             vm.buttonEraseClass = "default";
@@ -260,7 +262,7 @@
         /**
          * Erase the canvas
          */
-        vm.erase = function () {
+        function setupErase () {
             vm.buttonPinClass = "default";
             vm.buttonDrawClass = "default";
             vm.buttonEraseClass = "md-hue-2";
@@ -275,7 +277,7 @@
         /**
          * Set up drawing
          */
-        vm.setupDraw = function () {
+        function setupScribble () {
             vm.buttonPinClass = "default";
             vm.buttonDrawClass = "md-hue-2";
             vm.buttonEraseClass = "default";

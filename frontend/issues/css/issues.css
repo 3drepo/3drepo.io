@@ -190,6 +190,7 @@ issue-area {
   width: 100vw;
   height: 100vh;
   pointer-events: none;
+  overflow: hidden;
 }
 
 issue-area #issueAreaCanvas {

@@ -67,7 +67,7 @@
 			minHeight: 80,
 			fixedHeight: false,
 			options: [
-				"filter"
+				{type: "filter", visible: true}
 			]
 		});
 
@@ -108,11 +108,13 @@
 			minHeight: 80,
 			fixedHeight: false,
 			options: [
-				"print",
-				"add",
-				"filter",
-				"menu"
-			]
+				{type: "menu", visible: true},
+				{type: "filter", visible: true},
+				{type: "pin", visible: false},
+				{type: "erase", visible: false},
+				{type: "scribble", visible: false}
+			],
+			add: true
 		});
 
 		panelCard.left.push({
@@ -124,8 +126,7 @@
 			minHeight: 80,
 			fixedHeight: false,
 			options: [
-				"add",
-				"menu"
+				{type: "menu", visible: true}
 			],
 			menu: [
 				{
@@ -134,7 +135,8 @@
 					selected: false,
 					toggle: true
 				}
-			]
+			],
+			add: true
 		});
 
 		panelCard.left.push({
@@ -145,7 +147,7 @@
 			icon: "crop_original",
 			fixedHeight: true,
 			options: [
-				"visible"
+				{type: "visible", visible: true}
 			]
 		});
 

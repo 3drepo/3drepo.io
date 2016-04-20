@@ -1,5 +1,5 @@
-div(layout="column")
-	div(ng-repeat="button in vm.buttons", layout="column", layout-align="start center")
-		md-button.md-accent.md-fab.md-mini(aria-label="{{button.label}}", ng-click="button.click($index)")
-			md-icon.angular-material-icons(style="color: {{button.iconColour}}") {{button.icon}}
-		//label {{button.label}}
+#rightPanelButtons(layout="column")
+	div(ng-repeat="button in vm.buttons")
+		md-button.md-accent.md-fab.md-mini(aria-label="{{button.label}}", ng-click="button.click($index)", ng-disabled="button.disabled")
+			md-tooltip(md-direction="left") {{button.type}}
+			md-icon.angular-material-icons {{button.icon}}

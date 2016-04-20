@@ -92,14 +92,11 @@ panel-card md-toolbar {
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
 }
-panel-card md-toolbar .md-mini md-icon.fa,
-panel-card md-toolbar .md-icon-button md-icon.fa{
-  font-size: 20px;
-  outline: none;
+panel-card md-toolbar .md-toolbar-tools {
+  padding-right: 0;
 }
-
-panel-card .md-button.md-raised:not([disabled]) {
-  box-shadow: none;
+panel-card md-toolbar #options .md-button {
+  margin: 0 4px;
 }
 
 panel-card .md-menu {

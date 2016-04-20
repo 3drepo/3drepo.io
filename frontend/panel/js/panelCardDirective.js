@@ -69,13 +69,31 @@
 		});
 
 		/*
-		 * Setup event watch
+		 * Change toolbar options when toggling add functionality
 		 */
-		$scope.$watch(EventService.currentEvent, function(event) {
-			if ((event.type === EventService.EVENT.ADD_CARD_OPTIONS) && (vm.contentData.type === "issues")) {
-				addToolbarOptions(event.value);
+		$scope.$watch("vm.showAdd", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				if (newValue) {
+					if (vm.contentData.type === "issues") {
+						showToolbarOptions(["filter", "menu"], false);
+						showToolbarOptions(["pin", "scribble", "erase"], true);
+					}
+				}
+				else {
+					if (vm.contentData.type === "issues") {
+						showToolbarOptions(["pin", "scribble", "erase"], false);
+						showToolbarOptions(["filter", "menu"], true);
+					}
+				}
 			}
-			else if ((event.type === EventService.EVENT.REMOVE_CARD_OPTIONS) && (vm.contentData.type === "issues")) {
+		});
+
+		/*
+		 * Watch for content item to hide itself
+		 */
+		$scope.$watch("vm.hideSelectedItem", function (newValue) {
+			if (angular.isDefined(newValue) && newValue) {
+				vm.statusIcon = vm.contentData.icon;
 			}
 		});
 
@@ -102,12 +120,9 @@
 			// Only add attributes when needed
 			if (vm.contentData.hasOwnProperty("options")) {
 				for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
-					switch (vm.contentData.options[i]) {
+					switch (vm.contentData.options[i].type) {
 						case "filter":
 							element += "filter-text='vm.filterText' ";
-							break;
-						case "add":
-							element += "show-add='vm.showAdd' can-add='vm.canAdd'";
 							break;
 						case "visible":
 							element += "visible='vm.visible' ";
@@ -117,6 +132,9 @@
 							break;
 					}
 				}
+			}
+			if (vm.contentData.hasOwnProperty("add") && vm.contentData.add) {
+				element += "show-add='vm.showAdd' can-add='vm.canAdd'";
 			}
 
 			element += "></" + vm.contentData.type + ">";
@@ -130,44 +148,36 @@
 		 * Create the tool bar options
 		 */
 		function createToolbarOptions () {
-			var i,
-				length,
-				option;
+			var i, length,
+				option, optionElement;
 
 			if (vm.contentData.hasOwnProperty("options")) {
 				for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
 					option = null;
-					switch (vm.contentData.options[i]) {
-						case "filter":
-							option = angular.element(
-								"<panel-card-option-filter show-filter='vm.showFilter'></panel-card-option-filter>"
-							);
-							break;
+					optionElement = "<panel-card-option-" + vm.contentData.options[i].type;
+					optionElement += " id='panal_card_option_" + vm.contentData.options[i].type + "'";
+					optionElement += " ng-if='vm.contentData.options[" + i + "].visible'";
 
-						/*
-						case "print":
-							option = angular.element(
-								"<panel-card-option-print account='vm.account' project='vm.project'></panel-card-option-print>"
-							);
+					switch (vm.contentData.options[i].type) {
+						case "filter":
+							optionElement += " show-filter='vm.showFilter'";
 							break;
-						*/
 
 						case "visible":
-							option = angular.element(
-								"<panel-card-option-visible visible='vm.visible'></panel-card-option-visible>"
-							);
+							optionElement += " visible='vm.visible'";
 							break;
 
 						case "menu":
-							option = angular.element(
-								"<panel-card-option-menu menu='vm.contentData.menu' selected-menu-option='vm.selectedMenuOption'></panel-card-option-menu>"
-							);
+							optionElement += "menu='vm.contentData.menu' selected-menu-option='vm.selectedMenuOption'";
 							break;
 					}
 
+					optionElement += "><panel-card-option-" + vm.contentData.options[i].type + ">";
+					option = angular.element(optionElement);
+
 					// Create the element
 					if (option !== null) {
-						options.append(option);
+						options.prepend(option);
 						$compile(option)($scope);
 					}
 				}
@@ -175,18 +185,13 @@
 		}
 
 		/**
-		 * Create the tool bar options
+		 * Add tool bar options
 		 */
-		function addToolbarOptions (addOptions) {
-			var i, length, option;
-
-			for (i = 0, length = addOptions.length; i < length; i += 1) {
-				option = angular.element(
-					"<panel-card-option-" + addOptions[i] + "></panel-card-option-" + options[i] + ">"
-				);
-				if (option !== null) {
-					options.append(option);
-					$compile(option)($scope);
+		function showToolbarOptions (addOptions, show) {
+			var i, length;
+			for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
+				if (addOptions.indexOf(vm.contentData.options[i].type) !== -1) {
+					vm.contentData.options[i].visible = show;
 				}
 			}
 		}
@@ -212,7 +217,7 @@
 		function createAdd () {
 			var panelCardContainer = angular.element($element[0].querySelector('#panelCardContainer')),
 				add;
-			if (vm.contentData.hasOwnProperty("options") && vm.contentData.options.indexOf("add") !== -1) {
+			if (vm.contentData.hasOwnProperty("add") && vm.contentData.add) {
 				add = angular.element(
 					"<panel-card-add show-add='vm.showAdd' ng-if='vm.canAdd'></panel-card-add>"
 				);
