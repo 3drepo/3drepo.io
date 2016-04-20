@@ -1726,7 +1726,20 @@ var Viewer = {};
 			}
 		};
 
-		this.getZoomLevel = function(look_at, camera){
+		this.getZoomLevel = function(viewAreaCoors, camera){
+
+			//console.log(self.centreOfVecs(viewAreaCoors));
+			//console.log(camera);
+
+			var centre = self.centreOfVecs(viewAreaCoors);
+			var lenToCentreVec = [
+				camera[0] - centre[0],
+				camera[1] - centre[1],
+				camera[2] - centre[2]
+			];
+
+			var len = self._vec3Len(lenToCentreVec);
+			//console.log('zoomlevel', len);
 			var yToZoomLevel = [
 				{y: 500000, zoomLevel: 7},
 				{y: 300000, zoomLevel: 8},
@@ -1748,7 +1761,7 @@ var Viewer = {};
 
 			for(var i=0; i < yToZoomLevel.length; i++){
 				
-				if(camera[1] >= yToZoomLevel[i].y){
+				if(len >= yToZoomLevel[i].y){
 					zoomLevel = yToZoomLevel[i].zoomLevel;
 					break;
 				}
@@ -1894,21 +1907,20 @@ var Viewer = {};
 			var vpInfo = self.getCurrentViewpointInfo();
 			var camera = vpInfo.position;
 
-			console.log('camera', camera);
+			//console.log('camera', camera);
 
 			var mapImgPosInfo = self._getMapImagePosInfo();
 
-			var zoomLevel = self.getZoomLevel(vpInfo.look_at, camera);
+			var viewAreaCoors = this.getViewAreaOnZPlane();
+			var lookingToInf = this.isLookingToInf(viewAreaCoors);
+
+			var zoomLevel = self.getZoomLevel(viewAreaCoors, camera);
 
 			if(self.zoomLevel !== zoomLevel){
 				self.removeMapImages();
 				self._clearMapImagePosInfo();
 				self.zoomLevel= zoomLevel;
 			}
-
-			var viewAreaCoors = this.getViewAreaOnZPlane();
-
-			var lookingToInf = this.isLookingToInf(viewAreaCoors);
 
 			// update url with current lat,lon at centre of the view area
 			var viewAreaLatLon = this.getLatLonOfViewArea(viewAreaCoors);
@@ -2159,7 +2171,7 @@ var Viewer = {};
 
 			var gltf = document.createElement('gltf');
 			gltf.setAttribute('onclick', 'clickObject(event)');
-			gltf.setAttribute('url', '/api/os/buildings.gltf?method=osgrid&osgridref=' + osGridRef + '&draw=1');
+			gltf.setAttribute('url', server_config.apiUrl('os/buildings.gltf?method=osgrid&osgridref=' + osGridRef + '&draw=1'));
 
 			var translate = [0, 0, 0];
 			var osCoor = OsGridRef.parse(osGridRef);
@@ -2231,8 +2243,7 @@ var Viewer = {};
 
 			var mapImagePosInfo = self._getMapImagePosInfo();
 
-			it.setAttribute("url", '/api/os/map-images/Outdoor/' + mapImagePosInfo.zoomLevel + '/' + x + '/' + y + '.png');
-
+			it.setAttribute("url", server_config.apiUrl('/os/map-images/Outdoor/' + mapImagePosInfo.zoomLevel + '/' + x + '/' + y + '.png'));
 
 			app.appendChild(it);
 
@@ -2265,6 +2276,8 @@ var Viewer = {};
 				+ Math.pow(vec[2], 2)
 			);
 		}
+
+
 
 		this.translateTo = function(lat, lon, height){
 			if(!self.originBNG){
@@ -2422,10 +2435,9 @@ var Viewer = {};
 			
 			if (!self.mapPosInfo){
 
-				console.log(self.getCurrentViewpointInfo());
-
+				console.log('zz',self.getViewAreaOnZPlane());
 				var zoomLevel = self.getZoomLevel(
-					self.getCurrentViewpointInfo().look_at,
+					self.getViewAreaOnZPlane(),
 					self.getCurrentViewpointInfo().position
 				);
 
