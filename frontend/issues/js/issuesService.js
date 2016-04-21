@@ -115,17 +115,19 @@
 				deferred = $q.defer(),
 				viewpointPromise = $q.defer();
 
-			url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue.objectId);
+			url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues.json");
 
 			EventService.send(EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, {promise: viewpointPromise});
 
 			viewpointPromise.promise.then(function (viewpoint) {
 				data = {
+					object_id: issue.objectId,
 					name: issue.name,
 					viewpoint: viewpoint,
 					scale: 1.0,
 					creator_role: issue.creator_role,
-					assigned_roles: userRoles
+					assigned_roles: userRoles,
+					scribble: issue.scribble
 				};
 				config = {withCredentials: true};
 
@@ -138,11 +140,13 @@
 
 				$http.post(url, dataToSend, config)
 					.then(function successCallback(response) {
+						console.log(response);
 						response.data.issue._id = response.data.issue_id;
 						response.data.issue.account = issue.account;
 						response.data.issue.project = issue.project;
 						response.data.issue.timeStamp = self.getPrettyTime(response.data.issue.created);
 						response.data.issue.creator_role = issue.creator_role;
+						response.data.issue.scribble = issue.scribble;
 
 						response.data.issue.title = generateTitle(response.data.issue);
 						self.removePin();

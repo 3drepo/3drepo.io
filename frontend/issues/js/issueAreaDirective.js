@@ -35,9 +35,9 @@
         };
     }
 
-    IssueAreaCtrl.$inject = ["$scope", "$element", "$window", "$timeout", "EventService"];
+    IssueAreaCtrl.$inject = ["$scope", "$element", "$window", "$timeout", "$q", "EventService"];
 
-    function IssueAreaCtrl($scope, $element, $window, $timeout, EventService) {
+    function IssueAreaCtrl($scope, $element, $window, $timeout, $q, EventService) {
         var vm = this,
             canvas,
             canvasColour = "rgba(0 ,0 ,0, 0)",
@@ -54,25 +54,27 @@
             penIndicatorSize = initialPenIndicatorSize,
             mouseWheelDirectionUp = null;
 
-
         /*
          * Init
          */
         $timeout(function () {
-            canvas = angular.element($element[0].querySelector('#issueAreaCanvas'));
-            myCanvas = document.getElementById("issueAreaCanvas");
-            penIndicator = angular.element($element[0].querySelector("#issueAreaPenIndicator"));
-            vm.buttonDrawClass = "md-hue-2";
-            vm.pointerEvents = "auto";
-            vm.drawMode = true;
-            vm.showPenIndicator = false;
-            vm.scribble = "/public/images/scribble_test.png";
-            resizeCanvas();
-            initCanvas(myCanvas);
-            if (angular.isDefined(vm.type)) {
-                vm.canvasPointerEvents = (vm.type === "pin") ? "none" : "auto";
+            if (angular.isDefined(vm.data)) {
+                vm.scribble = 'data:image/png;base64,' + vm.data.scribble;
+                //vm.scribble = "/public/images/scribble_test.png";
             }
-            //document.getElementById("dl").addEventListener('click', dlCanvas, false);
+            else {
+                canvas = angular.element($element[0].querySelector('#issueAreaCanvas'));
+                myCanvas = document.getElementById("issueAreaCanvas");
+                penIndicator = angular.element($element[0].querySelector("#issueAreaPenIndicator"));
+                vm.pointerEvents = "auto";
+                vm.drawMode = true;
+                vm.showPenIndicator = false;
+                resizeCanvas();
+                initCanvas(myCanvas);
+                if (angular.isDefined(vm.type)) {
+                    vm.canvasPointerEvents = (vm.type === "pin") ? "none" : "auto";
+                }
+            }
         });
 
         /*
@@ -89,6 +91,12 @@
                 else if (event.value === "pin") {
                     setupPin();
                 }
+            }
+            else if (event.type === EventService.EVENT.GET_ISSUE_AREA_PNG) {
+                var png = myCanvas.toDataURL('image/png');
+                // Remove base64 header text
+                png = png.substring(png.indexOf(",") + 1);
+                event.value.promise.resolve(png);
             }
         });
 
@@ -108,7 +116,7 @@
         function initCanvas(canvas)
         {
             // These offsets are needed because the element uses 'position:fixed'
-            clearCanvas();
+            //clearCanvas();
 
             canvas.addEventListener('mousedown', function (evt) {
                 mouse_drag_x = evt.layerX;
@@ -288,17 +296,6 @@
         angular.element($window).bind("resize", function() {
             //resizeCanvas();
         });
-
-        function dlCanvas() {
-            var dt = myCanvas.toDataURL('image/png');
-            /* Change MIME type to trick the browser to downlaod the file instead of displaying it */
-            dt = dt.replace(/^data:image\/[^;]*/, 'data:application/octet-stream');
-
-            /* In addition to <a>'s "download" attribute, you can define HTTP-style headers */
-            dt = dt.replace(/^data:application\/octet-stream/, 'data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=Canvas.png');
-
-            this.href = dt;
-        }
 
         /**
          * Move the pen indicator

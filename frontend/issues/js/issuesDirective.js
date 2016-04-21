@@ -45,9 +45,9 @@
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$element", "$timeout", "$mdDialog", "$filter", "$window", "IssuesService", "EventService", "Auth", "serverConfig"];
+	IssuesCtrl.$inject = ["$scope", "$timeout", "$filter", "$window", "$q", "IssuesService", "EventService", "Auth", "serverConfig"];
 
-	function IssuesCtrl($scope, $element, $timeout, $mdDialog, $filter, $window, IssuesService, EventService, Auth, serverConfig) {
+	function IssuesCtrl($scope, $timeout, $filter, $window, $q, IssuesService, EventService, Auth, serverConfig) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -250,7 +250,11 @@
 					vm.show = true;
 					vm.showAdd = true;
 					// Override the show add toggle issue area Todo: improve this
-					EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: event.value.type});
+					if (event.value.type !== "scribble") {
+						$timeout(function () {
+							EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: event.value.type});
+						});
+					}
 				}
 				else {
 					vm.hideItem = true;
@@ -389,39 +393,41 @@
 				roleAssigned;
 
 			for (i = 0, length = vm.issues.length; i < length; i += 1) {
-				pin = angular.element(document.getElementById(vm.issues[i]._id));
-				if (pin.length > 0) {
-					// Existing pin
-					pin[0].setAttribute("render", "true");
+				if (vm.issues[i].position !== null) {
+					console.log(vm.issues[i].position);
+					pin = angular.element(document.getElementById(vm.issues[i]._id));
+					if (pin.length > 0) {
+						// Existing pin
+						pin[0].setAttribute("render", "true");
 
-					// Closed
-					if (!showClosed && vm.issues[i].hasOwnProperty("closed") && vm.issues[i].closed) {
-						pin[0].setAttribute("render", "false");
-					}
-
-					// Role filter
-					if (rolesToFilter.length > 0) {
-						roleAssigned = false;
-
-						if (vm.issues[i].hasOwnProperty("assigned_roles")) {
-							for (j = 0, assignedRolesLength = vm.issues[i].assigned_roles.length; j < assignedRolesLength; j += 1) {
-								if (rolesToFilter.indexOf(vm.issues[i].assigned_roles[j]) !== -1) {
-									roleAssigned = true;
-								}
-							}
-						}
-
-						if (roleAssigned) {
+						// Closed
+						if (!showClosed && vm.issues[i].hasOwnProperty("closed") && vm.issues[i].closed) {
 							pin[0].setAttribute("render", "false");
 						}
+
+						// Role filter
+						if (rolesToFilter.length > 0) {
+							roleAssigned = false;
+
+							if (vm.issues[i].hasOwnProperty("assigned_roles")) {
+								for (j = 0, assignedRolesLength = vm.issues[i].assigned_roles.length; j < assignedRolesLength; j += 1) {
+									if (rolesToFilter.indexOf(vm.issues[i].assigned_roles[j]) !== -1) {
+										roleAssigned = true;
+									}
+								}
+							}
+
+							if (roleAssigned) {
+								pin[0].setAttribute("render", "false");
+							}
+						}
 					}
-				}
-				else {
-					// New pin
-					if (!vm.issues[i].hasOwnProperty("closed") ||
-						(vm.issues[i].hasOwnProperty("closed") && !vm.issues[i].closed) ||
-						(showClosed && vm.issues[i].hasOwnProperty("closed") && vm.issues[i].closed)) {
-						pinData =
+					else {
+						// New pin
+						if (!vm.issues[i].hasOwnProperty("closed") ||
+							(vm.issues[i].hasOwnProperty("closed") && !vm.issues[i].closed) ||
+							(showClosed && vm.issues[i].hasOwnProperty("closed") && vm.issues[i].closed)) {
+							pinData =
 							{
 								id: vm.issues[i]._id,
 								position: vm.issues[i].position,
@@ -430,8 +436,9 @@
 								project: vm.project
 							};
 
-						IssuesService.addPin(pinData, [[1.0, 1.0, 1.0]], vm.issues[i].viewpoint);
-						setPinToAssignedRoleColours(vm.issues[i]);
+							IssuesService.addPin(pinData, [[1.0, 1.0, 1.0]], vm.issues[i].viewpoint);
+							setPinToAssignedRoleColours(vm.issues[i]);
+						}
 					}
 				}
 			}
@@ -581,19 +588,25 @@
 			}
 			else {
 				if (angular.isDefined(vm.title) && (vm.title !== "")) {
-					if (selectedObjectId === null) {
-						vm.showAlert("Add a pin before saving");
-					}
-					else {
+					var issueAreaPngPromise = $q.defer();
+					EventService.send(EventService.EVENT.GET_ISSUE_AREA_PNG, {promise: issueAreaPngPromise});
+					issueAreaPngPromise.promise.then(function (png) {
+						console.log(png);
 						issue = {
 							name: vm.title,
-							objectId: selectedObjectId,
-							pickedPos: pickedPos,
-							pickedNorm: pickedNorm,
+							objectId: null,
+							pickedPos: null,
+							pickedNorm: null,
 							creator_role: vm.projectUserRoles[0],
 							account: vm.account,
-							project: vm.project
+							project: vm.project,
+							scribble: png
 						};
+						if (selectedObjectId !== null) {
+							issue.objectId = selectedObjectId;
+							issue.pickedPos = pickedPos;
+							issue.pickedNorm = pickedNorm;
+						}
 						promise = IssuesService.saveIssue(issue);
 						promise.then(function (data) {
 							// Set the role colour
@@ -620,7 +633,7 @@
 							setContentHeight();
 							vm.showPins();
 						});
-					}
+					});
 				}
 			}
 		};
@@ -681,16 +694,6 @@
 		 * @param {String} title
 		 */
 		vm.showAlert = function(title) {
-			/* Closing the dialog takes a long time so using user made dialog for the moment
-			$mdDialog.show(
-				$mdDialog.alert()
-					.parent(angular.element($element[0].querySelector("#addAlert")))
-					.clickOutsideToClose(true)
-					.title(title)
-					.ariaLabel("Pin alert")
-					.ok("OK")
-			);
-			*/
 			vm.showAddAlert = true;
 			vm.addAlertText = title;
 		};
