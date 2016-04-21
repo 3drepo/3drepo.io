@@ -169,7 +169,7 @@
 				vm.canAdd = false;
 				setContentHeight();
 				setPinToAssignedRoleColours(vm.selectedIssue);
-				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true});
+				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: "scribble"});
 			}
 		});
 
@@ -249,6 +249,8 @@
 				if (event.value.on) {
 					vm.show = true;
 					vm.showAdd = true;
+					// Override the show add toggle issue area Todo: improve this
+					EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: event.value.type});
 				}
 				else {
 					vm.hideItem = true;

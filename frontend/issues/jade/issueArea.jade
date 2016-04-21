@@ -1,5 +1,5 @@
 div(ng-if="!vm.data")
-    canvas#issueAreaCanvas(ng-show="vm.drawMode")
+    canvas#issueAreaCanvas(style="pointer-events:{{vm.canvasPointerEvents}}")
     md-icon#issueAreaPenIndicator(class="fa fa-circle-thin", ng-show="vm.showPenIndicator")
 
     svg#issueAreaCentre(height="40", width="40")

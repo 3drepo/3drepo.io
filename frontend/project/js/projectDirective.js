@@ -211,12 +211,14 @@
 		$scope.$watch(EventService.currentEvent, function (event) {
 			if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) {
 				if (event.value.on) {
+					issueArea = angular.element("<issue-area></issue-area>");
 					if (event.value.hasOwnProperty("issue")) {
-						vm.issue = event.value.issue;
-						issueArea = angular.element("<issue-area data='vm.issue'></issue-area>");
+						vm.issueAreaIssue = event.value.issue;
+						issueArea = angular.element("<issue-area data='vm.issueAreaIssue'></issue-area>");
 					}
-					else {
-						issueArea = angular.element("<issue-area></issue-area>");
+					else if (event.value.hasOwnProperty("type")) {
+						vm.issueAreaType = event.value.type;
+						issueArea = angular.element("<issue-area type='vm.issueAreaType'></issue-area>");
 					}
 					projectUI.prepend(issueArea);
 					$compile(issueArea)($scope);
@@ -225,7 +227,7 @@
 					issueArea.remove();
 				}
 			}
-			else if (event.type === EventService.EVENT.TOGGLE_SCRIBBLE) {
+			else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
 				vm.pointerEvents = event.value.on ? "none" : "auto";
 			}
 		})

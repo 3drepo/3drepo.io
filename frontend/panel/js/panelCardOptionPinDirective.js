@@ -32,10 +32,13 @@
         };
     }
 
-    function PanelCardOptionPinCtrl () {
+    PanelCardOptionPinCtrl.$inject = ["EventService"];
+
+    function PanelCardOptionPinCtrl (EventService) {
         var vm = this;
 
         vm.setupPinMode = function() {
+            EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, "pin");
         };
     }
 }());

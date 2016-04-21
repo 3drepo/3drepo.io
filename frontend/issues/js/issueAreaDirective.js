@@ -26,7 +26,8 @@
             restrict: "EA",
             templateUrl: "issueArea.html",
             scope: {
-                data: "="
+                data: "=",
+                type: "="
             },
             controller: IssueAreaCtrl,
             controllerAs: "vm",
@@ -53,6 +54,7 @@
             penIndicatorSize = initialPenIndicatorSize,
             mouseWheelDirectionUp = null;
 
+
         /*
          * Init
          */
@@ -65,9 +67,11 @@
             vm.drawMode = true;
             vm.showPenIndicator = false;
             vm.scribble = "/public/images/scribble_test.png";
-            canvas.css("background", "rgba(255, 255, 255, 0.1");
             resizeCanvas();
             initCanvas(myCanvas);
+            if (angular.isDefined(vm.type)) {
+                vm.canvasPointerEvents = (vm.type === "pin") ? "none" : "auto";
+            }
             //document.getElementById("dl").addEventListener('click', dlCanvas, false);
         });
 
@@ -252,41 +256,31 @@
          * Set up placing of the pin
          */
         function setupPin () {
-            vm.buttonPinClass = "md-hue-2";
-            vm.buttonDrawClass = "default";
-            vm.buttonEraseClass = "default";
             vm.drawMode = false;
-            canvas.css("background", "rgba(255, 255, 255, 0.0");
-        };
+            vm.canvasPointerEvents = "none";
+        }
 
         /**
          * Erase the canvas
          */
         function setupErase () {
-            vm.buttonPinClass = "default";
-            vm.buttonDrawClass = "default";
-            vm.buttonEraseClass = "md-hue-2";
             vm.drawMode = true;
-            canvas.css("background", "rgba(255, 255, 255, 0.1)");
-            //clearCanvas();
             var context = myCanvas.getContext("2d");
             context.globalCompositeOperation = "destination-out";
             pen_col = "rgba(0, 0, 0, 1)";
-        };
+            vm.canvasPointerEvents = "auto";
+        }
 
         /**
          * Set up drawing
          */
         function setupScribble () {
-            vm.buttonPinClass = "default";
-            vm.buttonDrawClass = "md-hue-2";
-            vm.buttonEraseClass = "default";
             vm.drawMode = true;
-            canvas.css("background", "rgba(255, 255, 255, 0.1)");
             var context = myCanvas.getContext("2d");
             context.globalCompositeOperation = "source-over";
             pen_col = "#FF0000";
-        };
+            vm.canvasPointerEvents = "auto";
+        }
 
         /*
          * Watch for screen resize

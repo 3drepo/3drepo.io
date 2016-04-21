@@ -32,10 +32,13 @@
         };
     }
 
-    function PanelCardOptionEraseCtrl () {
+    PanelCardOptionEraseCtrl.$inject = ["EventService"];
+
+    function PanelCardOptionEraseCtrl (EventService) {
         var vm = this;
 
         vm.setupEraseMode = function() {
+            EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, "erase");
         };
     }
 }());
