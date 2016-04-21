@@ -340,10 +340,8 @@ var Viewer = {};
 				//console.log('my op', options);
 
 				var options = self.options;
-				if(!self.initTranslated && options && options.lat && options.lon){
-					//moved to updateSettings since action required project settings loaded first
-
-				} else {
+				// don't show all if lat,lon,height is set in URL
+				if(!(options && options.lat && options.lon)){
 					self.showAll();
 				}
 
