@@ -1761,7 +1761,12 @@ var Viewer = {};
 
 			];
 
+			yToZoomLevel.forEach(function(map){
+				map.y *= self.meterPerPixel
+			});
+
 			var zoomLevel;
+
 
 			for(var i=0; i < yToZoomLevel.length; i++){
 				
@@ -1873,7 +1878,8 @@ var Viewer = {};
 
 			var imageSceneCoor = [mapImgPosInfo.offsetX + self.getSumSizeForXRow(mapXY[0], mapXY[1]), 0, mapImgPosInfo.offsetY + self.getSumSize(mapXY[1])];
 
-			var dx = centrePoint[0] - self.getSumSizeForXRow(mapXY[0]) - mapImgPosInfo.offsetX;
+
+			var dx = centrePoint[0] - self.getSumSizeForXRow(mapXY[0], mapXY[1]) - mapImgPosInfo.offsetX;
 			var dy = centrePoint[2] - self.getSumSize(mapXY[1]) - mapImgPosInfo.offsetY;
 
 
@@ -1883,9 +1889,10 @@ var Viewer = {};
 				self._tile2long(mapXY[0] + mapImgPosInfo.slippyPoints.x, self.zoomLevel)
 			));
 
+			var k = self.meterPerPixel;
 			var latlon = OsGridRef.osGridToLatLon(OsGridRef(
-				dx + osImagePoint.easting + mapSize / 2,
-				osImagePoint.northing - mapSize / 2 - dy
+				(dx + osImagePoint.easting * k  + mapSize / 2) / k,
+				(osImagePoint.northing * k - mapSize / 2 - dy) / k
 			));
 
 			return latlon;
@@ -2327,7 +2334,7 @@ var Viewer = {};
 			var dx = osTargetPoint.easting * self.meterPerPixel - (osImagePoint.easting  * self.meterPerPixel + mapSize / 2);
 			var dy = (osImagePoint.northing * self.meterPerPixel - mapSize / 2) - osTargetPoint.northing * self.meterPerPixel;
 
-			self.setCamera([self.getSumSize(nx) + mapImagePosInfo.offsetX + dx, height ,self.getSumSize(ny) + mapImagePosInfo.offsetY + dy],[0,-1,0],[0,0,-1]);
+			self.setCamera([self.getSumSizeForXRow(nx, ny) + mapImagePosInfo.offsetX + dx, height ,self.getSumSize(ny) + mapImagePosInfo.offsetY + dy],[0,-1,0],[0,0,-1]);
 			
 			self.appendMapTileByViewPoint();
 
@@ -2465,7 +2472,6 @@ var Viewer = {};
 					17:	1.1943,
 					18:	0.5972		
 				};
-
 
 				var slippyPoints = self._getSlippyTileLayerPoints(self.settings.mapTile.lat, self.settings.mapTile.lon, zoomLevel);
 
