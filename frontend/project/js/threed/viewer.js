@@ -1726,12 +1726,10 @@ var Viewer = {};
 			}
 		};
 
-		this.getZoomLevel = function(viewAreaCoors, camera){
-
-			//console.log(self.centreOfVecs(viewAreaCoors));
-			//console.log(camera);
+		this.getLenFromCamToCentre = function(viewAreaCoors, camera){
 
 			var centre = self.centreOfVecs(viewAreaCoors);
+
 			var lenToCentreVec = [
 				camera[0] - centre[0],
 				camera[1] - centre[1],
@@ -1739,7 +1737,13 @@ var Viewer = {};
 			];
 
 			var len = self._vec3Len(lenToCentreVec);
-			//console.log('zoomlevel', len);
+
+			return len;
+		};
+
+		this.getZoomLevel = function(height){
+
+
 			var yToZoomLevel = [
 				{y: 500000, zoomLevel: 7},
 				{y: 300000, zoomLevel: 8},
@@ -1761,7 +1765,7 @@ var Viewer = {};
 
 			for(var i=0; i < yToZoomLevel.length; i++){
 				
-				if(len >= yToZoomLevel[i].y){
+				if(height >= yToZoomLevel[i].y){
 					zoomLevel = yToZoomLevel[i].zoomLevel;
 					break;
 				}
@@ -1769,7 +1773,7 @@ var Viewer = {};
 
 			return zoomLevel;
 
-		}
+		};
 
 		this.getViewAreaOnZPlane = function(){
 
@@ -1848,37 +1852,30 @@ var Viewer = {};
 
 			var centrePoint = this.centreOfVecs(viewAreaCoors);
 
-			var p = self._drawPlaneOnZ([
+			// var p = self._drawPlaneOnZ([
 				
-				[centrePoint[0] + 10, 10, centrePoint[2] + 10],
-				[centrePoint[0] - 10, 10, centrePoint[2] + 10],
-				[centrePoint[0] - 10, 10, centrePoint[2] - 10],
-				[centrePoint[0] + 10, 10, centrePoint[2] - 10],
+			// 	[centrePoint[0] + 10, 10, centrePoint[2] + 10],
+			// 	[centrePoint[0] - 10, 10, centrePoint[2] + 10],
+			// 	[centrePoint[0] - 10, 10, centrePoint[2] - 10],
+			// 	[centrePoint[0] + 10, 10, centrePoint[2] - 10],
 				
-			], [1, 0, 0]);
+			// ], [1, 0, 0]);
 
-			self.getScene().appendChild(p);
+			// self.getScene().appendChild(p);
 
 			var mapImgPosInfo = self._getMapImagePosInfo();
 
-			console.log('centrePoint', centrePoint);
-
 			//convert centre point back to lat, long
 			var mapXY = [
-				self.findMapTileNoByPos(centrePoint[0] - mapImgPosInfo.offsetX), 
-				self.findMapTileNoByPos(centrePoint[2]  - mapImgPosInfo.offsetY)
+				self.findMapTileNoByPos(centrePoint[0]), 
+				self.findMapTileNoByPos(centrePoint[2])
 			];
 
-
-			console.log('mapXY number', mapXY);
-			console.log('zxy', [mapXY[0] + mapImgPosInfo.slippyPoints.x, mapXY[1] + mapImgPosInfo.slippyPoints.y]);
 			var imageSceneCoor = [mapImgPosInfo.offsetX + self.getSumSizeForXRow(mapXY[0], mapXY[1]), 0, mapImgPosInfo.offsetY + self.getSumSize(mapXY[1])];
-			console.log('imageSceneCoor', imageSceneCoor);
 
 			var dx = centrePoint[0] - self.getSumSizeForXRow(mapXY[0]) - mapImgPosInfo.offsetX;
 			var dy = centrePoint[2] - self.getSumSize(mapXY[1]) - mapImgPosInfo.offsetY;
 
-			console.log('dxdy', dx, dy)
 
 			var mapSize = self.getMapSize(mapXY[1]);
 			var osImagePoint = OsGridRef.latLonToOsGrid(new LatLon(
@@ -1886,14 +1883,10 @@ var Viewer = {};
 				self._tile2long(mapXY[0] + mapImgPosInfo.slippyPoints.x, self.zoomLevel)
 			));
 
-			console.log('myosimagepoint', osImagePoint);
-
 			var latlon = OsGridRef.osGridToLatLon(OsGridRef(
-				dx + osImagePoint.easting - mapSize / 2,
+				dx + osImagePoint.easting + mapSize / 2,
 				osImagePoint.northing - mapSize / 2 - dy
 			));
-			
-			console.log('mylatlon', latlon.lat+','+latlon.lon);
 
 			return latlon;
 		}
@@ -1933,7 +1926,8 @@ var Viewer = {};
 			var viewAreaCoors = this.getViewAreaOnZPlane();
 			var lookingToInf = this.isLookingToInf(viewAreaCoors);
 
-			var zoomLevel = self.getZoomLevel(viewAreaCoors, camera);
+			var len = self.getLenFromCamToCentre(viewAreaCoors, camera);
+			var zoomLevel = self.getZoomLevel(len);
 
 			if(self.zoomLevel !== zoomLevel){
 				self.removeMapImages();
@@ -1943,7 +1937,7 @@ var Viewer = {};
 
 			// update url with current lat,lon at centre of the view area
 			var viewAreaLatLon = this.getLatLonOfViewArea(viewAreaCoors);
-			//this.triggerUpdateURLEvent(viewAreaLatLon.lat, viewAreaLatLon.lon, vpInfo.position[1]);
+			this.triggerUpdateURLEvent(viewAreaLatLon.lat, viewAreaLatLon.lon, len);
 
 			// variables named according to this polygon and coordinate variables
 			// c------d  <-- far
@@ -2318,7 +2312,7 @@ var Viewer = {};
 
 			//get the xy number of the map tile image contains the target
 			var mapXY = self._getSlippyTileLayerPoints(lat, lon, mapImagePosInfo.zoomLevel);
-			console.log('translteTo mapXY', mapXY);
+
 
 			var nx = mapXY.x - mapImagePosInfo.slippyPoints.x
 			var ny = mapXY.y - mapImagePosInfo.slippyPoints.y
@@ -2329,13 +2323,9 @@ var Viewer = {};
 			var osImagePoint =  OsGridRef.latLonToOsGrid(mapImageCentreLatLon);
 
 			var mapSize = self.getMapSize(ny);
-			console.log('osTargetPoint', osTargetPoint);
-			console.log('osImagePoint', osImagePoint);
 
 			var dx = osTargetPoint.easting * self.meterPerPixel - (osImagePoint.easting  * self.meterPerPixel + mapSize / 2);
 			var dy = (osImagePoint.northing * self.meterPerPixel - mapSize / 2) - osTargetPoint.northing * self.meterPerPixel;
-
-			console.log('dxdy', dx, dy);
 
 			self.setCamera([self.getSumSize(nx) + mapImagePosInfo.offsetX + dx, height ,self.getSumSize(ny) + mapImagePosInfo.offsetY + dy],[0,-1,0],[0,0,-1]);
 			
@@ -2446,10 +2436,13 @@ var Viewer = {};
 			// set the size of a 256 map image tile. 1px = 1m
 			
 			if (!self.mapPosInfo){
-				var zoomLevel = self.getZoomLevel(
+
+				var height = self.getLenFromCamToCentre(
 					self.getViewAreaOnZPlane(),
 					self.getCurrentViewpointInfo().position
 				);
+
+				var zoomLevel = self.getZoomLevel(height);
 
 				var mPerPxTable = {
 					0:	156543.03,
