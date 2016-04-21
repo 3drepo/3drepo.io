@@ -2040,7 +2040,7 @@ DBInterface.prototype.getObjectIssues = function(dbName, project, sids, number, 
 	});
 };
 
-DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, callback) {
+DBInterface.prototype.storeIssue = function(dbName, project, owner, issueId, data, callback) {
 	var self = this,
 		timeStamp = null,
 		updateQuery = {};
@@ -2058,18 +2058,20 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 			}
 
 			// Create new issue
-			if (!data._id) {
+			if (!issueId) {
 				var newID = uuid.v1();
 
-				self.logger.logDebug("Creating new issue " + newID + " for ID: " + id);
+				self.logger.logDebug("Creating new issue " + newID);
 
 				var projection = {};
 				projection[C.REPO_NODE_LABEL_SHARED_ID] = 1;
 
+				var id = data.object_id;
+
 				self.getObject(dbName, project, id, null, null, false, projection, function(err, type, uid, fromStash, obj) {
-					if (err.value && err.value !== responseCodes.OBJECT_NOT_FOUND.value) {
-						return callback(err);
-					}
+					// if (err.value && err.value !== responseCodes.OBJECT_NOT_FOUND.value) {
+					// 	return callback(err);
+					// }
 
 					// TODO: Implement this using sequence counters
 					coll.count(function(err, numIssues) {
@@ -2094,6 +2096,11 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 
 						data.owner = owner;
 
+						if(data.scribble){
+							var scribbleBase64 = data.scribble;
+							data.scribble = new Buffer(data.scribble, 'base64');
+						}
+
 						coll.insert(data, function(err, count) {
 							if (err) {
 								return callback(responseCodes.DB_ERROR(err));
@@ -2102,15 +2109,25 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 							self.logger.logDebug("Updated " + count + " records.");
 
 							data.typePrefix  = settings.length ? settings[0].type : undefined;
-
-							callback(responseCodes.OK, { account: dbName, project: project, issue_id : uuidToString(data._id), number : data.number, created : data.created, issue: data });
+							//return base64 version
+							data.scribble = scribbleBase64;
+							callback(responseCodes.OK, { 
+								_id: uuidToString(data._id),
+								account: dbName, 
+								project: project, 
+								issue_id : uuidToString(data._id), 
+								number : data.number, 
+								created : data.created, 
+								scribble: scribbleBase64,
+								issue: data,
+							});
 						});
 					});
 				});
 			} else {
-				self.logger.logDebug("Updating issue " + data._id);
+				self.logger.logDebug("Updating issue " + issueId);
 
-				data._id = stringToUUID(data._id);
+				issueId = stringToUUID(issueId);
 
 				timeStamp = (new Date()).getTime();
 				if (data.hasOwnProperty("comment")) {
@@ -2161,7 +2178,7 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 					};
 				}
 
-				coll.update({ _id : data._id}, updateQuery, function(err, count) {
+				coll.update({ _id : issueId}, updateQuery, function(err, count) {
 					if (err) { return callback(responseCodes.DB_ERROR(err)); }
 
 					var typePrefix = settings.length ? settings[0].type : undefined;
@@ -2170,10 +2187,11 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 					callback(
 						responseCodes.OK,
 						{
+							_id: uuidToString(issueId),
 							account: dbName,
 							project: project,
 							issue: data,
-							issue_id : uuidToString(data._id),
+							issue_id : uuidToString(issueId),
 							number: data.number,
 							owner: owner,
 							typePrefix: typePrefix,
