@@ -2585,11 +2585,38 @@ var Viewer = {};
 
 			return OsGridRef.osGridToLatLon(
 				OsGridRef(
-					self.viewer.originBNG.easting - sumD[0]
-					,self.viewer.originBNG.northing + sumD[1]
+					self.originBNG.easting - sumD[0]
+					,self.originBNG.northing + sumD[1]
 				)
 			);
 		};
+
+		this._setNewOrigin = function(){
+
+			var sumD = self.sumD;
+			self.viewer.originBNG = OsGridRef(
+				self.originBNG.easting - sumD[0]
+				,self.originBNG.northing + sumD[1]
+			);
+			self.mapPosInfo = null;
+			self.sumD = [0,0];
+		}
+
+		this._moveMapImagesY = function (y){
+
+			self.viewer.imagesDoms.forEach(function(dom){
+				
+				var t = dom.getAttribute('translation').split(' ');
+				
+				t.forEach(function(number, i){
+					t[i] = parseFloat(number);
+				});
+
+				t[1] = y;
+
+				dom.setAttribute('translation', t.join(' '));
+			});
+		}
 
 		this._clearAllPlanes = function(){
 
