@@ -1911,6 +1911,31 @@ var Viewer = {};
 			});
 		};
 
+		this.rotatePloygon = function(viewAreaCoors, centre, deg){
+
+			//clone
+			viewAreaCoors = JSON.parse(JSON.stringify(viewAreaCoors));
+
+			viewAreaCoors.forEach(function(coor){
+
+				// move centre to origin
+				coor.forEach(function(value, i){
+					coor[i] = coor[i] - centre[i];
+				});
+
+				coor[0] = coor[0] * Math.cos(Math.PI) - coor[2] * Math.sin(deg);
+				coor[2] = coor[0] * Math.sin(Math.PI) + coor[2] * Math.cos(deg);
+
+				//move back
+				coor.forEach(function(value, i){
+					coor[i] = coor[i] + centre[i];
+				});
+			});
+
+			return viewAreaCoors;
+
+		};
+
 		// Append building models and map tile images
 		this.appendMapTileByViewPoint = function(noDraw){
 
@@ -1950,22 +1975,28 @@ var Viewer = {};
 			//  a----b  <-- near
 
 			var a, b, c, d;
-			
+
+			//self._clearAllPlanes();
 			a = viewAreaCoors[3];
 			b = viewAreaCoors[2];
 			c = viewAreaCoors[1];
 			d = viewAreaCoors[0];
 
 			if(lookingToInf){
-				// flip c & d
-				[c, d].forEach(function(vec){
-					vec.forEach(function(value, i){
-						vec[i] = -vec[i];
-					})
-				})
+				//rotate 180 deg around top center of the polygon
+				var rotatedViewAreaCoors = this.rotatePloygon(
+					viewAreaCoors, 
+					this.centreOfVecs([a,b]), 
+					Math.PI
+				);
+
+				// when looking to inf ray shooting backwards, c,d position is flipped
+				a = rotatedViewAreaCoors[3];
+				b = rotatedViewAreaCoors[2];
+				c = rotatedViewAreaCoors[0];
+				d = rotatedViewAreaCoors[1];
 			}
 
-			//console.log(c, d);
 
 			function LenVec2D(vecA, vecB){
 				return Math.sqrt(
@@ -2560,40 +2591,57 @@ var Viewer = {};
 			);
 		};
 
+		this._clearAllPlanes = function(){
+
+			if(self._planes){
+				self._planes.forEach(function(p){
+					self.getScene().removeChild(p);
+				});
+			}
+
+			self._planes = [];
+		}
+
+		this._appendPlane = function(p){
+			self._planes = self.planes || [];
+			self._planes.push(p);
+			self.getScene().appendChild(p);
+		}
+
 		this._drawPlaneOnZ = function(coords, color){
 
 			var coordIndex = '';
 
-			// var center = [0, 0, 0];
-			// center[0] = (coords[0][0] + coords[1][0], + coords[2][0] + coords[3][0]) / 4;
-			// center[2] = (coords[0][2] + coords[1][2], + coords[2][2] + coords[3][2]) / 4;
+			var center = [0, 0, 0];
+			center[0] = (coords[0][0] + coords[1][0], + coords[2][0] + coords[3][0]) / 4;
+			center[2] = (coords[0][2] + coords[1][2], + coords[2][2] + coords[3][2]) / 4;
 
-			// function less(a, b){
-			//     if (a[0] - center[0] >= 0 && b[0] - center[0] < 0)
-			//         return true;
-			//     if (a[0] - center[0] < 0 && b[0] - center[0] >= 0)
-			//         return false;
-			//     if (a[0] - center[0] == 0 && b[0] - center[0] == 0) {
-			//         if (a[2] - center[2] >= 0 || b[2] - center[2] >= 0)
-			//             return a[2] > b[2];
-			//         return b[2] > a[2];
-			//     }
+			function less(a, b){
+			    if (a[0] - center[0] >= 0 && b[0] - center[0] < 0)
+			        return true;
+			    if (a[0] - center[0] < 0 && b[0] - center[0] >= 0)
+			        return false;
+			    if (a[0] - center[0] == 0 && b[0] - center[0] == 0) {
+			        if (a[2] - center[2] >= 0 || b[2] - center[2] >= 0)
+			            return a[2] > b[2];
+			        return b[2] > a[2];
+			    }
 
-			//     // compute the cross product of vectors (center -> a) x (center -> b)
-			//     var det = (a[0] - center[0]) * (b[2] - center[2]) - (b[0] - center[0]) * (a[2] - center[2]);
-			//     if (det < 0)
-			//         return true;
-			//     if (det > 0)
-			//         return false;
+			    // compute the cross product of vectors (center -> a) x (center -> b)
+			    var det = (a[0] - center[0]) * (b[2] - center[2]) - (b[0] - center[0]) * (a[2] - center[2]);
+			    if (det < 0)
+			        return true;
+			    if (det > 0)
+			        return false;
 
-			//     // points a and b are on the same line from the center
-			//     // check which point is closer to the center
-			//     var d1 = (a[0] - center[0]) * (a[0] - center[0]) + (a[2] - center[2]) * (a[2] - center[2]);
-			//     var d2 = (b[0] - center[0]) * (b[0] - center[0]) + (b[2] - center[2]) * (b[2] - center[2]);
-			//     return d1 > d2;
-			// }
+			    // points a and b are on the same line from the center
+			    // check which point is closer to the center
+			    var d1 = (a[0] - center[0]) * (a[0] - center[0]) + (a[2] - center[2]) * (a[2] - center[2]);
+			    var d2 = (b[0] - center[0]) * (b[0] - center[0]) + (b[2] - center[2]) * (b[2] - center[2]);
+			    return d1 > d2;
+			}
 
-			// coords.sort(less);
+			coords.sort(less);
 
 			for(var i=0; i < coords.length; i++){
 				coordIndex += ' ' + i;
