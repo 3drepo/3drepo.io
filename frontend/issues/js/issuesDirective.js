@@ -164,11 +164,7 @@
 		 */
 		$scope.$watch("vm.showAdd", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
-				vm.toShow = "showAdd";
-				vm.onShowItem();
-				vm.canAdd = false;
-				setContentHeight();
-				setPinToAssignedRoleColours(vm.selectedIssue);
+				setupAdd();
 				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: "scribble"});
 			}
 		});
@@ -189,7 +185,7 @@
 			var i, length,
 				position = [], normal = [];
 
-			if ((event.type === EventService.EVENT.VIEWER.PICK_POINT) && vm.showAdd)
+			if ((event.type === EventService.EVENT.VIEWER.PICK_POINT) && (vm.toShow === "showAdd"))
 			{
 				if (event.value.hasOwnProperty("id"))
 				{
@@ -224,7 +220,7 @@
 					removeAddPin();
 				}
 			} else if ((event.type === EventService.EVENT.VIEWER.CLICK_PIN) && vm.show) {
-				if (vm.showAdd) {
+				if (vm.toShow === "showAdd") {
 					removeAddPin();
 				}
 
@@ -247,14 +243,8 @@
 				}
 			} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_ADD) {
 				if (event.value.on) {
-					vm.show = true;
-					vm.showAdd = true;
-					// Override the show add toggle issue area Todo: improve this
-					if (event.value.type !== "scribble") {
-						$timeout(function () {
-							EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: event.value.type});
-						});
-					}
+					setupAdd();
+					EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: event.value.type});
 				}
 				else {
 					vm.hideItem = true;
@@ -794,6 +784,17 @@
 					colours: pinColours
 				});
 			}
+		}
+
+		/**
+		 * Set up adding an issue
+		 */
+		function setupAdd () {
+			vm.toShow = "showAdd";
+			vm.onShowItem();
+			vm.canAdd = false;
+			setContentHeight();
+			setPinToAssignedRoleColours(vm.selectedIssue);
 		}
 	}
 }());

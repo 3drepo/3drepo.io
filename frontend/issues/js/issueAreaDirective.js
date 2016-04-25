@@ -130,7 +130,7 @@
                 evt.stopPropagation();
                 evt.returnValue = false;
 
-                EventService.send(EventService.EVENT.TOGGLE_SCRIBBLE, {on: true});
+                EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: true});
                 vm.pointerEvents = "none";
             }, false);
 
@@ -146,7 +146,7 @@
                 evt.stopPropagation();
                 evt.returnValue = false;
 
-                EventService.send(EventService.EVENT.TOGGLE_SCRIBBLE, {on: false});
+                EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
                 vm.pointerEvents = "auto";
             }, false);
 
@@ -162,7 +162,7 @@
                 evt.stopPropagation();
                 evt.returnValue = false;
 
-                EventService.send(EventService.EVENT.TOGGLE_SCRIBBLE, {on: false});
+                EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
                 vm.pointerEvents = "auto";
             }, false);
 
@@ -236,6 +236,7 @@
             }
 
             // redraw the canvas...
+            console.log(pen_size);
             context.lineWidth = pen_size;
 
             // Draw line

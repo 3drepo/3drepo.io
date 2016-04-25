@@ -73,18 +73,16 @@
 		 */
 		$scope.$watch("vm.showAdd", function (newValue) {
 			if (angular.isDefined(newValue)) {
-				if (newValue) {
-					if (vm.contentData.type === "issues") {
-						showToolbarOptions(["filter", "menu"], false);
-						showToolbarOptions(["pin", "scribble", "erase"], true);
-					}
-				}
-				else {
-					if (vm.contentData.type === "issues") {
-						showToolbarOptions(["pin", "scribble", "erase"], false);
-						showToolbarOptions(["filter", "menu"], true);
-					}
-				}
+				toggleAdd(newValue);
+			}
+		});
+
+		/*
+		 * Set up event watching
+		 */
+		$scope.$watch(EventService.currentEvent, function(event) {
+			if (event.type === EventService.EVENT.TOGGLE_ISSUE_ADD) {
+				toggleAdd(event.value.on);
 			}
 		});
 
@@ -96,6 +94,32 @@
 				vm.statusIcon = vm.contentData.icon;
 			}
 		});
+
+		/**
+		 * A content item is requesting a height change
+		 * @param height
+		 */
+		vm.onContentHeightRequest = function (height) {
+			contentHeight = height;
+			vm.onHeightRequest({contentItem: vm.contentData, height: contentHeight});
+		};
+
+		/**
+		 * Content wants to show an individual item
+		 */
+		vm.showItem = function () {
+			vm.statusIcon = "arrow_back";
+			vm.hideSelectedItem = false; // So that a change to this value is propagated
+		};
+
+		/**
+		 * Content wants to show it's main content
+		 */
+		vm.hideItem = function () {
+			vm.statusIcon = vm.contentData.icon;
+			vm.hideSelectedItem = true;
+			vm.addStatus = false;
+		};
 
 		/**
 		 * Create the card content
@@ -227,29 +251,24 @@
 		}
 
 		/**
-		 * A content item is requesting a height change
-		 * @param height
-		 */
-		vm.onContentHeightRequest = function (height) {
-			contentHeight = height;
-			vm.onHeightRequest({contentItem: vm.contentData, height: contentHeight});
-		};
+		 * Handle adding content
+		 * 
+		 * @param {Boolean} on
+         */
+		function toggleAdd (on) {
+			if (on) {
+				if (vm.contentData.type === "issues") {
+					showToolbarOptions(["filter", "menu"], false);
+					showToolbarOptions(["pin", "scribble", "erase"], true);
+				}
+			}
+			else {
+				if (vm.contentData.type === "issues") {
+					showToolbarOptions(["pin", "scribble", "erase"], false);
+					showToolbarOptions(["filter", "menu"], true);
+				}
+			}
 
-		/**
-		 * Content wants to show an individual item
-		 */
-		vm.showItem = function () {
-			vm.statusIcon = "arrow_back";
-			vm.hideSelectedItem = false; // So that a change to this value is propagated
-		};
-
-		/**
-		 * Content wants to show it's main content
-		 */
-		vm.hideItem = function () {
-			vm.statusIcon = vm.contentData.icon;
-			vm.hideSelectedItem = true;
-			vm.addStatus = false;
-		};
+		}
 	}
 }());
