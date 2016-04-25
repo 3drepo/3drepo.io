@@ -1939,7 +1939,7 @@ var Viewer = {};
 		// Append building models and map tile images
 		this.appendMapTileByViewPoint = function(noDraw){
 
-			//console.log('appendMapTileByViewPoint');
+			//console.log('appendMapTileByViewPoint', self.originBNG);
 
 			if(!self.originBNG){
 				//console.log('originBNG not found');
@@ -2204,7 +2204,7 @@ var Viewer = {};
 		this.appendMapTile = function(osGridRef){
 
 			if(!self.originBNG){
-				return console.log('No origin BNG coors set, no map tiles can be added.');
+				//return console.log('No origin BNG coors set, no map tiles can be added.');
 			}
 
 			self.addedTileRefs =  self.addedTileRefs || [];
@@ -2234,8 +2234,10 @@ var Viewer = {};
 			var correspondingMapTile = self._getSlippyTileLayerPoints(tileLatLon.lat, tileLatLon.lon, mapImagePosInfo.zoomLevel)
 
 			var y = correspondingMapTile.y - mapImagePosInfo.slippyPoints.y;
-			var nextY = correspondingMapTile.y >= 0 ? y + 1 : y - 1;
-			var mapSize = self.getSumSize(nextY) - self.getSumSize(y);
+			// var nextY = correspondingMapTile.y >= 0 ? y + 1 : y - 1;
+			// var mapSize = self.getSumSize(nextY) - self.getSumSize(y);
+
+			var mapSize = self.getMapSize(y);
 
 			var corMapTileBNG = OsGridRef.latLonToOsGrid(new LatLon(
 				self._tile2lat(correspondingMapTile.y, mapImagePosInfo.zoomLevel), 
@@ -2292,8 +2294,8 @@ var Viewer = {};
 
 			var mapImagePosInfo = self._getMapImagePosInfo();
 
-			it.setAttribute("url", server_config.apiUrl('/os/map-images/Outdoor/' + mapImagePosInfo.zoomLevel + '/' + x + '/' + y + '.png'));
-
+			//it.setAttribute("url", server_config.apiUrl('os/map-images/Outdoor/' + mapImagePosInfo.zoomLevel + '/' + x + '/' + y + '.png'));
+			it.setAttribute("url", server_config.getUrl(server_config.subdomains.mapImg, 'os/map-images/Outdoor/' + mapImagePosInfo.zoomLevel + '/' + x + '/' + y + '.png'));
 			app.appendChild(it);
 
 			shape.appendChild(app);
@@ -2370,6 +2372,15 @@ var Viewer = {};
 
 		};
 
+		this.getMapSizeByYCoor = function(yCoor){
+			return this.getMapSize(self.findMapTileNoByPos(yCoor));
+		}
+
+		this.getMapSize = function(n){
+			var nextN = n < 0 ? n - 1 : n + 1;
+			return Math.abs(this.getSumSize(nextN) - this.getSumSize(n)); 
+		}
+
 		//appr. version
 		this.getSumSize= function(n){
 			var mapImagePosInfo = self._getMapImagePosInfo();
@@ -2378,14 +2389,6 @@ var Viewer = {};
 			return mapPerPxZoomLevel * Math.cos(self._degToRad(lat)) * 256 * n * self.meterPerPixel;
 		}
 
-		this.getMapSizeByYCoor = function(yCoor){
-			return this.getMapSize(self.findMapTileNoByPos(yCoor));
-		}
-
-		this.getMapSize = function(n){
-			var preN = n > 0 ? n - 1 : n + 1;
-			return Math.abs(this.getSumSize(n) - this.getSumSize(preN)); 
-		}
 
 		//appr. version
 		this.findMapTileNoByPos = function(pos){
@@ -2413,7 +2416,7 @@ var Viewer = {};
 		// 	} else if (n === 1 || n === -1) {
 
 		// 		var lat = self._tile2lat(mapImagePosInfo.slippyPoints.y, mapImagePosInfo.zoomLevel);
-		// 		self.mapSizes[0] = self.mapSizes[0] || mapPerPxZoomLevel * Math.cos(self._degToRad(lat)) * 256  * self.meterPerPixel;
+		// 		self.mapSizes[0] = self.mapSizes[0] || mapPerPxZoomLevel * Math.cos(self._degToRad(lat)) * 256 * self.meterPerPixel;
 		// 		return self.mapSizes[0] * n;
 
 		// 	} else {
@@ -2423,7 +2426,7 @@ var Viewer = {};
 
 		// 		if(!self.mapSizes[nextN]){
 
-		// 			var lat = self._tile2lat(mapImagePosInfo.slippyPoints.y + n, mapImagePosInfo.zoomLevel);
+		// 			var lat = self._tile2lat(mapImagePosInfo.slippyPoints.y + nextN, mapImagePosInfo.zoomLevel);
 		// 			self.mapSizes[nextN] = mapPerPxZoomLevel * Math.cos(self._degToRad(lat)) * 256  * self.meterPerPixel;
 		// 		}
 
@@ -2706,8 +2709,10 @@ var Viewer = {};
 			var offsetY = posInfo.offsetY;
 
 			var mapHeight = self.settings.mapTile.y ? self.settings.mapTile.y : 0;
-			var nextOy = oy >= 0 ? oy + 1 : oy - 1;
-			var size =  Math.abs(self.getSumSize(nextOy) - self.getSumSize(oy));
+			// var nextOy = oy >= 0 ? oy + 1 : oy - 1;
+			// var size =  Math.abs(self.getSumSize(nextOy) - self.getSumSize(oy));
+
+			var size = self.getMapSize(oy);
 
 			if (!self.addedMapImages) {
 				self.addedMapImages = {};
@@ -2719,7 +2724,16 @@ var Viewer = {};
 
 			if(!self.addedMapImages[ox + ',' + oy]){
 				
-				var dom = self.createMapImageTile(size, x + ox, y + oy, [offsetX + self.getSumSizeForXRow(ox, oy), mapHeight, offsetY + self.getSumSize(oy)]);
+				//console.log('ox, oy', ox, oy);
+				//console.log('size', size);
+				//console.log('getSumSizeForXRow', self.getSumSizeForXRow(ox, oy))
+				//console.log('size form sum size', self.getSumSizeForXRow(ox, oy) / ox);
+				var dom = self.createMapImageTile(size, x + ox, y + oy, [
+					offsetX + self.getSumSizeForXRow(ox, oy), 
+					mapHeight, 
+					offsetY + self.getSumSize(oy)
+				]);
+
 				self.imagesDoms.push(dom);
 				self.getScene().appendChild(dom);
 				self.addedMapImages[ox + ',' + oy] = 1;
