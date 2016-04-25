@@ -36,71 +36,54 @@
 
     function RightPanelCtrl ($scope, EventService) {
         var vm = this,
-            addingScribbleIssue = false,
-            addingPinIssue = false,
-            eraseButton;
+            addIssueMode = null;
 
         /*
          * Init
          */
-        vm.buttons = [
+        vm.issueButtons = [
             {
                 type: "scribble",
                 icon: "border_color",
-                click: scribble,
-                disabled: false
+                click: issueButtonClick
             },
             {
                 type: "erase",
                 icon: "texture",
-                click: erase,
-                disabled: true
+                click: issueButtonClick
             },
             {
                 type: "pin",
                 icon: "pin_drop",
-                click: pin,
-                disabled: false
+                click: issueButtonClick
             }
         ];
-        eraseButton = vm.buttons[1];
 
         /*
          * Setup event watch
          */
         $scope.$watch(EventService.currentEvent, function(event) {
-            if ((event.type === EventService.EVENT.TOGGLE_ISSUE_ADD) && (!event.value.on)) {
-                addingPinIssue = false;
-                addingScribbleIssue = false;
-                eraseButton.disabled = true;
+            if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) {
+                addIssueMode = event.value.on ? event.value.type : null;
             }
         });
 
         /**
          * Set up adding an issue with scribble
          */
-        function scribble () {
-            addingScribbleIssue = !addingScribbleIssue;
-            addingPinIssue = false;
-            eraseButton.disabled = false;
-            EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: addingScribbleIssue, type: "scribble"});
-        }
-
-        /**
-         * Set add issue to erase mode
-         */
-        function erase () {
-            EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, "erase");
-        }
-
-        /**
-         * Set up adding an issue with a pin
-         */
-        function pin () {
-            addingPinIssue = !addingPinIssue;
-            addingScribbleIssue = false;
-            eraseButton.disabled = false;
-            EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: addingPinIssue, type: "pin"});
+        function issueButtonClick (buttonType) {
+            if (addIssueMode === null) {
+                addIssueMode = buttonType;
+                EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: true, type: buttonType});
+            }
+            else if (addIssueMode === buttonType) {
+                addIssueMode = null;
+                EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: false});
+            }
+            else {
+                addIssueMode = buttonType;
+                EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, buttonType);
+            }
         }
     }
 }());

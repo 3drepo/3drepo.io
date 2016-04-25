@@ -102,7 +102,7 @@
 					}
 				} else if (event.type === EventService.EVENT.VIEWER.READY) {
 					window.viewer = vm.manager.getCurrentViewer();
-				}  else if (event.type === EventService.EVENT.TOGGLE_SCRIBBLE) {
+				}  else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
 					vm.pointerEvents = event.value.on ? "none" : "auto";
 				} else {
 					vm.vmservice.sendInternal(event.type, event.value);

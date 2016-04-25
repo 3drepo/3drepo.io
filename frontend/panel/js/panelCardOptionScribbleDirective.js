@@ -32,10 +32,13 @@
         };
     }
 
-    function PanelCardOptionScribbleCtrl () {
+    PanelCardOptionScribbleCtrl.$inject = ["EventService"];
+
+    function PanelCardOptionScribbleCtrl (EventService) {
         var vm = this;
 
         vm.setupScribbleMode = function() {
+            EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, "scribble");
         };
     }
 }());

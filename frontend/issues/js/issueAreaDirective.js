@@ -26,7 +26,8 @@
             restrict: "EA",
             templateUrl: "issueArea.html",
             scope: {
-                data: "="
+                data: "=",
+                type: "="
             },
             controller: IssueAreaCtrl,
             controllerAs: "vm",
@@ -34,9 +35,9 @@
         };
     }
 
-    IssueAreaCtrl.$inject = ["$scope", "$element", "$window", "$timeout", "EventService"];
+    IssueAreaCtrl.$inject = ["$scope", "$element", "$window", "$timeout", "$q", "EventService"];
 
-    function IssueAreaCtrl($scope, $element, $window, $timeout, EventService) {
+    function IssueAreaCtrl($scope, $element, $window, $timeout, $q, EventService) {
         var vm = this,
             canvas,
             canvasColour = "rgba(0 ,0 ,0, 0)",
@@ -57,18 +58,23 @@
          * Init
          */
         $timeout(function () {
-            canvas = angular.element($element[0].querySelector('#issueAreaCanvas'));
-            myCanvas = document.getElementById("issueAreaCanvas");
-            penIndicator = angular.element($element[0].querySelector("#issueAreaPenIndicator"));
-            vm.buttonDrawClass = "md-hue-2";
-            vm.pointerEvents = "auto";
-            vm.drawMode = true;
-            vm.showPenIndicator = false;
-            vm.scribble = "/public/images/scribble_test.png";
-            canvas.css("background", "rgba(255, 255, 255, 0.1");
-            resizeCanvas();
-            initCanvas(myCanvas);
-            //document.getElementById("dl").addEventListener('click', dlCanvas, false);
+            if (angular.isDefined(vm.data)) {
+                vm.scribble = 'data:image/png;base64,' + vm.data.scribble;
+                //vm.scribble = "/public/images/scribble_test.png";
+            }
+            else {
+                canvas = angular.element($element[0].querySelector('#issueAreaCanvas'));
+                myCanvas = document.getElementById("issueAreaCanvas");
+                penIndicator = angular.element($element[0].querySelector("#issueAreaPenIndicator"));
+                vm.pointerEvents = "auto";
+                vm.drawMode = true;
+                vm.showPenIndicator = false;
+                resizeCanvas();
+                initCanvas(myCanvas);
+                if (angular.isDefined(vm.type)) {
+                    vm.canvasPointerEvents = (vm.type === "pin") ? "none" : "auto";
+                }
+            }
         });
 
         /*
@@ -85,6 +91,12 @@
                 else if (event.value === "pin") {
                     setupPin();
                 }
+            }
+            else if (event.type === EventService.EVENT.GET_ISSUE_AREA_PNG) {
+                var png = myCanvas.toDataURL('image/png');
+                // Remove base64 header text
+                png = png.substring(png.indexOf(",") + 1);
+                event.value.promise.resolve(png);
             }
         });
 
@@ -104,7 +116,7 @@
         function initCanvas(canvas)
         {
             // These offsets are needed because the element uses 'position:fixed'
-            clearCanvas();
+            //clearCanvas();
 
             canvas.addEventListener('mousedown', function (evt) {
                 mouse_drag_x = evt.layerX;
@@ -118,7 +130,7 @@
                 evt.stopPropagation();
                 evt.returnValue = false;
 
-                EventService.send(EventService.EVENT.TOGGLE_SCRIBBLE, {on: true});
+                EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: true});
                 vm.pointerEvents = "none";
             }, false);
 
@@ -134,7 +146,7 @@
                 evt.stopPropagation();
                 evt.returnValue = false;
 
-                EventService.send(EventService.EVENT.TOGGLE_SCRIBBLE, {on: false});
+                EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
                 vm.pointerEvents = "auto";
             }, false);
 
@@ -150,7 +162,7 @@
                 evt.stopPropagation();
                 evt.returnValue = false;
 
-                EventService.send(EventService.EVENT.TOGGLE_SCRIBBLE, {on: false});
+                EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
                 vm.pointerEvents = "auto";
             }, false);
 
@@ -224,6 +236,7 @@
             }
 
             // redraw the canvas...
+            console.log(pen_size);
             context.lineWidth = pen_size;
 
             // Draw line
@@ -252,41 +265,31 @@
          * Set up placing of the pin
          */
         function setupPin () {
-            vm.buttonPinClass = "md-hue-2";
-            vm.buttonDrawClass = "default";
-            vm.buttonEraseClass = "default";
             vm.drawMode = false;
-            canvas.css("background", "rgba(255, 255, 255, 0.0");
-        };
+            vm.canvasPointerEvents = "none";
+        }
 
         /**
          * Erase the canvas
          */
         function setupErase () {
-            vm.buttonPinClass = "default";
-            vm.buttonDrawClass = "default";
-            vm.buttonEraseClass = "md-hue-2";
             vm.drawMode = true;
-            canvas.css("background", "rgba(255, 255, 255, 0.1)");
-            //clearCanvas();
             var context = myCanvas.getContext("2d");
             context.globalCompositeOperation = "destination-out";
             pen_col = "rgba(0, 0, 0, 1)";
-        };
+            vm.canvasPointerEvents = "auto";
+        }
 
         /**
          * Set up drawing
          */
         function setupScribble () {
-            vm.buttonPinClass = "default";
-            vm.buttonDrawClass = "md-hue-2";
-            vm.buttonEraseClass = "default";
             vm.drawMode = true;
-            canvas.css("background", "rgba(255, 255, 255, 0.1)");
             var context = myCanvas.getContext("2d");
             context.globalCompositeOperation = "source-over";
             pen_col = "#FF0000";
-        };
+            vm.canvasPointerEvents = "auto";
+        }
 
         /*
          * Watch for screen resize
@@ -294,17 +297,6 @@
         angular.element($window).bind("resize", function() {
             //resizeCanvas();
         });
-
-        function dlCanvas() {
-            var dt = myCanvas.toDataURL('image/png');
-            /* Change MIME type to trick the browser to downlaod the file instead of displaying it */
-            dt = dt.replace(/^data:image\/[^;]*/, 'data:application/octet-stream');
-
-            /* In addition to <a>'s "download" attribute, you can define HTTP-style headers */
-            dt = dt.replace(/^data:application\/octet-stream/, 'data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=Canvas.png');
-
-            this.href = dt;
-        }
 
         /**
          * Move the pen indicator

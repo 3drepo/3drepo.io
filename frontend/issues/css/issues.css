@@ -195,7 +195,7 @@ issue-area {
 
 issue-area #issueAreaCanvas {
   position: absolute;
-  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 issue-area #issueAreaCentre {
