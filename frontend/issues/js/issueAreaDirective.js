@@ -110,13 +110,12 @@
 
         /**
          * Setup canvas and event listeners
-         * 
+         *
          * @param canvas
          */
         function initCanvas(canvas)
         {
-            // These offsets are needed because the element uses 'position:fixed'
-            //clearCanvas();
+            clearCanvas();
 
             canvas.addEventListener('mousedown', function (evt) {
                 mouse_drag_x = evt.layerX;
@@ -218,7 +217,7 @@
 
         /**
          * Update the canvas
-         * 
+         *
          * @param canvas
          */
         function updateImage(canvas)

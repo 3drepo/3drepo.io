@@ -173,6 +173,27 @@
 			return deferred.promise;
 		}
 
+		/**
+		 * Handle PUT requests
+		 * @param issue
+		 * @param data
+		 * @param urlEnd
+		 * @returns {*}
+		 */
+		function doPut(issue, data, urlEnd) {
+			var deferred = $q.defer(),
+				url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/" + urlEnd),
+				config = {
+					withCredentials: true
+				};
+			$http.put(url, {data: JSON.stringify(data)}, config)
+				.then(function (response) {
+					console.log(response);
+					deferred.resolve(response);
+				});
+			return deferred.promise;
+		}
+
 		obj.toggleCloseIssue = function(issue) {
 			var closed = true;
 			if (issue.hasOwnProperty("closed")) {
@@ -185,10 +206,13 @@
 		};
 
 		obj.assignIssue = function(issue) {
-			return doPost(issue, {
-				assigned_roles: issue.assigned_roles,
-				number: issue.number
-			});
+			return doPut(
+				issue,
+				{
+					assigned_roles: issue.assigned_roles,
+					number: issue.number
+				},
+				"issues/" + issue._id + ".json");
 		};
 
 		obj.saveComment = function(issue, comment) {

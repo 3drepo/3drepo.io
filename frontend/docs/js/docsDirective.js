@@ -35,22 +35,19 @@
 		};
 	}
 
-	DocsCtrl.$inject = ["$scope", "$mdDialog", "EventService", "DocsService"];
+	DocsCtrl.$inject = ["$scope", "$mdDialog", "$timeout", "EventService", "DocsService"];
 
-	function DocsCtrl($scope, $mdDialog, EventService, DocsService) {
+	function DocsCtrl($scope, $mdDialog, $timeout, EventService, DocsService) {
 		var vm = this,
 			promise,
 			docTypeHeight = 50,
 			allDocTypesHeight,
-			currentOpenDocTypes = [],
-			eventWatch;
+			currentOpenDocTypes = [];
 
 		/*
 		 * Init
 		 */
 		vm.showDocsGetProgress = false;
-		vm.showInfo = true;
-		vm.info = "No object currently selected";
 		vm.onContentHeightRequest({height: 80});
 
 		/**
@@ -91,37 +88,36 @@
 			});
 		}
 
-		/**
+		/*
 		 * Set up event watching
 		 */
-		function setupEventWatch () {
-			var noObjectSelectedHeight = 80;
-
-			eventWatch = $scope.$watch(EventService.currentEvent, function (event) {
-				if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
-					getObjectsDocs(event.value);
-				}
-				else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
-					vm.docs = [];
-					vm.showInfo = true;
-					vm.info = "No object currently selected";
-					vm.onContentHeightRequest({height: noObjectSelectedHeight});
-					currentOpenDocTypes = [];
-				}
-			});
-		}
-
-		/*
-		 * Only watch for events when shown
-		 */
-		$scope.$watch("vm.show", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				if (newValue) {
-					setupEventWatch();
-				}
-				else if (angular.isDefined(eventWatch)) {
-					eventWatch(); // Cancel event watching
-				}
+		$scope.$watch(EventService.currentEvent, function (event) {
+			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+				var object = event.value;
+				promise = DocsService.getDocs(object.account, object.project, object.id);
+				promise.then(function (data) {
+					if (Object.keys(data).length > 0) {
+						vm.show = true;
+						$timeout(function () {
+							vm.docs = data;
+							allDocTypesHeight = 0;
+							// Open all doc types initially
+							for (var docType in vm.docs) {
+								if (vm.docs.hasOwnProperty(docType)) {
+									vm.docs[docType].show = true;
+									allDocTypesHeight += docTypeHeight;
+								}
+							}
+							setContentHeight();
+						});
+					}
+					else {
+						vm.show = false;
+					}
+				});
+			}
+			else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
+				vm.show = false;
 			}
 		});
 
@@ -180,7 +176,7 @@
 		function setContentHeight () {
 			var contentHeight = 0,
 				itemsHeight,
-				metaDataItemHeight = 30; // It could be higher for items with long text but ignore that
+				metaDataItemHeight = 50; // It could be higher for items with long text but ignore that
 
 			angular.forEach(vm.docs, function(value, key) {
 				contentHeight += docTypeHeight;

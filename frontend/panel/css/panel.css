@@ -149,6 +149,7 @@ panel-card .cardInfo p {
   color: rgba(0, 0, 0, 0.7);
   word-wrap: break-word;
 }
+
 panel-card .cardInfo md-icon {
   margin: 0;
   font-size: 16px;
@@ -156,10 +157,14 @@ panel-card .cardInfo md-icon {
   height: 16px;
 }
 
-
 /** Panel Card Add ****************************************************************************************************/
 panel-card-add {
   position: absolute;
   bottom: 0;
   right: 0;
+}
+
+/** Panel Card Option Erase *******************************************************************************************/
+panel-card-option-erase md-icon {
+  font-size: 24px !important;
 }

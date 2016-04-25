@@ -243,6 +243,7 @@
 				}
 			} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_ADD) {
 				if (event.value.on) {
+					vm.show = true;
 					setupAdd();
 					EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: event.value.type});
 				}

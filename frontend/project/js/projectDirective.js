@@ -151,18 +151,16 @@
 			]
 		});
 
-		/*
-		panelCard.left.push({
+		panelCard.right.push({
 			type: "docs",
 			title: "Docs",
 			show: false,
 			help: "Documents",
-			icon: "fa-clone",
+			icon: "content_copy",
 			minHeight: 80,
 			fixedHeight: false,
 			options: []
 		});
-		*/
 
 		$scope.$watchGroup(["vm.account","vm.project"], function()
 		{

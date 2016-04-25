@@ -49,7 +49,7 @@
             },
             {
                 type: "erase",
-                icon: "texture",
+                faIcon: "fa fa-eraser",
                 click: issueButtonClick
             },
             {
