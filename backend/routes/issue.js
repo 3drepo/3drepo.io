@@ -103,7 +103,7 @@ function updateIssue(req, res, next){
 	//console.log(data);
 
 	// since there is an incompatible attribute in issue model ('set' in comments) with mongoose, need to fall back to native mongo api call.
-	dbInterfacec(req[C.REQ_REPO].logger).storeIssue(
+	dbInterface(req[C.REQ_REPO].logger).storeIssue(
 		req.params[C.REPO_REST_API_ACCOUNT],
 		req.params[C.REPO_REST_API_PROJECT],
 		req.session.user.username,
