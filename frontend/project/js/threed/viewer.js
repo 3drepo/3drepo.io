@@ -2294,10 +2294,21 @@ var Viewer = {};
 
 			var mapImagePosInfo = self._getMapImagePosInfo();
 
+
+			var material = document.createElement('material');
+
+			// var color = [51 / 255, 165  / 255, 255  / 255];
+			// material.setAttribute('emissiveColor', color.join(' '));
+			// material.setAttribute('transparency', 0.7)
+			// app.appendChild(material);
+
+
 			//it.setAttribute("url", server_config.apiUrl('os/map-images/Outdoor/' + mapImagePosInfo.zoomLevel + '/' + x + '/' + y + '.png'));
 			it.setAttribute("url", server_config.getUrl(server_config.subdomains.mapImg, 'os/map-images/Outdoor/' + mapImagePosInfo.zoomLevel + '/' + x + '/' + y + '.png'));
+			it.setAttribute("crossOrigin", "use-credentials");
+			
 			app.appendChild(it);
-
+			
 			shape.appendChild(app);
 
 			var plane = document.createElement('Plane');

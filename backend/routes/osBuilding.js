@@ -13,17 +13,17 @@ var middlewares = require("./middlewares");
 // wrapper for os get apis
 var OSGet = require('../libs/OSGet')(config.os);
 
-router.get('/buildings.gltf', function(req, res, next){
+router.get('/buildings.gltf', middlewares.loggedIn, function(req, res, next){
 	genglX('gltf', req, res, next);
 });
 
-router.get('/buildings.bin', function(req, res, next){
+router.get('/buildings.bin', middlewares.loggedIn, function(req, res, next){
 	genglX('bin', req, res, next);
 });
 
-router.get('/map-images/:style/:z/:x/:y.png', getMapTiles);
+router.get('/map-images/:style/:z/:x/:y.png', middlewares.loggedIn, getMapTiles);
 
-router.get('/building-meta/:uprn', getUPRN);
+router.get('/building-meta/:uprn', middlewares.loggedIn, getUPRN);
 
 //TO-DO: dirty quick fix to be deleted later
 router.get('/:shader.glsl', function(req, res){ 
