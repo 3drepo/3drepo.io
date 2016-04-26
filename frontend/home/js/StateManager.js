@@ -48,32 +48,46 @@
 		var stateStack       = [structure];
 		var stateNameStack   = ["home"];
 
+		//console.log('stateStack', stateStack);
 		while (stateStack.length > 0)
 		{
 			var stackLength      = stateStack.length;
 			var parentState      = stateStack[stackLength - 1];
 			var parentStateName  = stateNameStack[stackLength - 1];
 
+			//console.log('parentState', parentState);
 			if (parentState.children)
 			{
 				for (var i = 0; i < parentState.children.length; i++)
 				{
 					var childState     = parentState.children[i];
 					var childStateName = parentStateName + "." + childState.plugin;
-
+					//console.log('childStateName', childStateName);
+					//console.log('myUrl', childState.url);
+					
 					stateNameStack.push(childStateName);
 					stateStack.push(parentState.children[i]);
 
-					$stateProvider.state(childStateName, {
-						name: parentState.children[i].plugin,
-						url: (parentStateName !== "home" ? "/" : "") + ":" + childState.plugin,
-						resolve: {
-							init: function(StateManager, $stateParams)
-							{
-								StateManager.setState($stateParams, {});
+					//console.log('url', (parentStateName !== "home" ? "/" : "") + ":" + childState.plugin);
+
+					(function(childState){
+						$stateProvider.state(childStateName, {
+							name: parentState.children[i].plugin,
+							url: childState.url || (parentStateName !== "home" ? "/" : "") + ":" + childState.plugin,
+							resolve: {
+								init: function(StateManager, $stateParams)
+								{
+									//console.log('init', childState.plugin, $stateParams);
+									if(!$stateParams.hasOwnProperty(childState.plugin)){
+										$stateParams[childState.plugin] = true;
+									}
+
+									StateManager.setState($stateParams, {});
+								}
 							}
-						}
-					});
+						});
+					})(childState);
+
 				}
 			}
 

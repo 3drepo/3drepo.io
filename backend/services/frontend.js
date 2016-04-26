@@ -26,6 +26,9 @@ module.exports.createApp = function(serverConfig)
 	let fs = require("fs");
 	let jade = require("jade");
 
+	//let systemLogger = require("../logger.js").systemLogger;
+
+
 	let app = express();
 
 	app.use(compress({level:9}));
@@ -91,6 +94,7 @@ module.exports.createApp = function(serverConfig)
 							"viewpoints",
 							"issues",
 							"clip",
+							"building",
 							"bottomButtons",
 							"qrCodeReader",
 							"docs",
@@ -100,12 +104,15 @@ module.exports.createApp = function(serverConfig)
 							"groups",
 							"measure"
 						],
+						'url': '/:project?at',
 						"children" : [
 							{
 								"plugin": "bid4free",
+								'url': '/bid4free',
 								children: [
 									{
-										plugin: "bid4freeWorkspace"
+										plugin: "bid4freeWorkspace",
+										url: '/bid4freeWorkspace'
 									}
 								]
 							}

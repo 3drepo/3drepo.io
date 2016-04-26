@@ -193,7 +193,11 @@
 							vm.setToggleState(vm.nodesToShow[index].children[i], vm.nodesToShow[index].toggleState);
 
 							vm.nodesToShow[index].children[i].level = vm.nodesToShow[index].level + 1;
-							vm.nodesToShow[index].children[i].hasChildren = vm.nodesToShow[index].children[i].children.length > 0;
+							if("children" in vm.nodesToShow[index].children[i])
+								vm.nodesToShow[index].children[i].hasChildren = vm.nodesToShow[index].children[i].children.length > 0;
+							else
+								vm.nodesToShow[index].children[i].hasChildren = false;
+
 							vm.nodesToShow.splice(index + i + 1, 0, vm.nodesToShow[index].children[i]);
 						}
 					}
@@ -226,8 +230,10 @@
 						vm.nodesToShow[i].children[j].selected = (vm.nodesToShow[i].children[j]._id === selectedId);
 
 						vm.setToggleState(vm.nodesToShow[i].children[j], "visible");
-
-						vm.nodesToShow[i].children[j].hasChildren = vm.nodesToShow[i].children[j].children.length > 0;
+						if("children" in vm.nodesToShow[i].children[j])
+							vm.nodesToShow[i].children[j].hasChildren = vm.nodesToShow[i].children[j].children.length > 0;
+						else
+							vm.nodesToShow[i].children[j].hasChildren = false;
 						if (vm.nodesToShow[i].children[j].selected) {
 							selectionFound = true;
 

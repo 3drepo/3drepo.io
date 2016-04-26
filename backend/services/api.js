@@ -80,7 +80,7 @@ module.exports.createApp = function (serverConfig) {
 
 			var origin = req.headers.origin;
 
-			if (serverConfig.allowedOrigins.indexOf(origin) > -1) {
+			if ((serverConfig.allowedOrigins.indexOf("*") > -1) || (serverConfig.allowedOrigins.indexOf(origin) > -1)) {
 				res.header("Access-Control-Allow-Origin", origin);
 				res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
 				res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, Content-Length, X-Requested-With");
@@ -93,6 +93,13 @@ module.exports.createApp = function (serverConfig) {
 
 		app.use(allowCrossDomain);
 	}
+
+	//auth handler
+	app.use('/', require('../routes/auth'));
+	// os api handler
+	app.use('/os',require('../routes/osBuilding'));
+	//project setting handler
+	app.use('/:account/:project', require('../routes/projectSetting'));
 
 	app.use(function(req, res, next) {
 		// intercept OPTIONS method
@@ -110,8 +117,6 @@ module.exports.createApp = function (serverConfig) {
 		app.use(express.static("doc"));
 	}
 
-	//auth handler
-	app.use("/", require("../routes/auth"));
 	//project handlers
 	app.use("/:account/:project", require("../routes/project"));
 	// project package handlers
@@ -120,12 +125,14 @@ module.exports.createApp = function (serverConfig) {
 	app.use('/:account/:project/packages/:packageName', require('../routes/bid'));
 	//groups handler
 	app.use('/:account/:project/groups', require('../routes/group'));
+
 	//issues handler
 	app.use("/:account/:project", require("../routes/issue"));
 	//mesh handler
 	app.use("/:account/:project", require("../routes/mesh"));
 	//texture handler
 	app.use("/:account/:project", require("../routes/texture"));
+
 
 
 	app.use("/", routes.router);

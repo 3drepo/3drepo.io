@@ -6,7 +6,7 @@
 ![3drepoio_1a](https://cloud.githubusercontent.com/assets/3008807/12302435/09590660-ba1d-11e5-8bab-c95de3f788c5.jpg)
 
 ### Latest Releases
-* [3drepo.io 1.0a](https://github.com/3drepo/3drepo.io/releases/tag/1.0a)
+* [3drepo.io 1.0b](https://github.com/3drepo/3drepo.io/releases/tag/v1.0.0b)
 
 ## Licenses
 This project is Copyright of [3D Repo Ltd](http://3drepo.org), a company registered in England and Wales No. 09014101, and is released under the open source [GNU Affero General Public License v3](http://www.gnu.org/licenses/agpl-3.0.en.html). Should you require a commercial license, please contact [support@3drepo.org](mailto:support@3drepo.org). All contributors are required to sign either the [3D Repo Individual](https://gist.github.com/jozefdobos/e177af804c9bcd217b73) or the [3D Repo Entity](https://gist.github.com/jozefdobos/c7c4c1c18cfb211c45d2) [Contributor License Agreement (CLA)](https://en.wikipedia.org/wiki/Contributor_License_Agreement).
@@ -30,10 +30,13 @@ Note: If using windows, please ensure cmd.exe was invoked as administrator (i.e.
 
 1. Clone the repository: `git clone https://github.com/3drepo/3drepo.io.git`
 2. Change directory: `cd 3drepo.io`
-3. Update submodules: `git submodule update --init`
-4. Configure the system as below.
-5. Ensure [Python v2](https://www.python.org/) and [Node.js](https://nodejs.org/) are installed.
-5. Install the required dependencies: `npm install`  
+3. Check out latest release: `git checkout tags/v1.0.0b`
+4. Update submodules: `git submodule update --init`
+5. Configure the system as below.
+6. Ensure [Python v2](https://www.python.org/) and [Node.js](https://nodejs.org/) are installed.
+7. Install the required dependencies: `npm install`  
+8. Install the client dependencies: `bower install`  
+9. Compile the frontend: `grunt frontend`
 
 Configuration
 -------------

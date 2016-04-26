@@ -147,6 +147,17 @@
 			options: []
 		});
 
+		panelCard.right.push({
+			type: "building",
+			title: "Building",
+			show: false,
+			help: "Building",
+			icon: "fa-cubes",
+			fixedHeight: true,
+			options: [
+			]
+		});
+
 		$scope.$watchGroup(["vm.account","vm.project"], function()
 		{
 			if (angular.isDefined(vm.account) && angular.isDefined(vm.project)) {

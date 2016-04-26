@@ -17,10 +17,45 @@
 
 // --------------------- Control Interface ---------------------
 
-// Global functions to be passed to X3DOM elements
-var bgroundClick, clickObject, clickPin, onMouseOver,
-	onMouseDown, onMouseUp, onMouseMove, onViewpointChange,
-	onLoaded, runtimeReady;
+function bgroundClick(event) {
+	$.event.trigger("bgroundClicked", event);
+};
+
+function clickObject(event) {
+	$.event.trigger("clickObject", event);
+};
+
+function clickPin(event) {
+	$.event.trigger("pinClick", event);
+}
+
+function onMouseOver(event) {
+	$.event.trigger("onMouseOver", event);
+}
+
+function onMouseDown(event) {
+	$.event.trigger("onMouseDown", event);
+}
+
+function onMouseUp(event) {
+	$.event.trigger("onMouseUp", event);
+}
+
+function onMouseMove(event) {
+	$.event.trigger("onMouseMove", event);
+}
+
+function onViewpointChange(event) {
+	$.event.trigger("onViewpointChange", event);
+}
+
+function onLoaded(event) {
+	$.event.trigger("onLoaded", event);
+}
+
+function runtimeReady() {
+	$.event.trigger("runtimeReady");
+}
 
 x3dom.runtime.ready = runtimeReady;
 
@@ -29,17 +64,6 @@ var Viewer = {};
 
 (function() {
 	"use strict";
-
-	bgroundClick      = ViewerUtil.eventFactory("bgroundClicked");
-	clickObject       = ViewerUtil.eventFactory("clickObject");
-	clickPin          = ViewerUtil.eventFactory("pinClick");
-	onMouseOver       = ViewerUtil.eventFactory("onMouseOver");
-	onMouseDown       = ViewerUtil.eventFactory("onMouseDown");
-	onMouseUp         = ViewerUtil.eventFactory("onMouseUp");
-	onMouseMove       = ViewerUtil.eventFactory("onMouseMove");
-	onViewpointChange = ViewerUtil.eventFactory("onViewpointChange");
-	onLoaded          = ViewerUtil.eventFactory("onLoaded");
-	runtimeReady      = ViewerUtil.eventFactory("runtimeReady");
 
 	Viewer = function(name, element, manager, callback, errCallback) {
 		// Properties
@@ -51,12 +75,12 @@ var Viewer = {};
 			this.name = name;
 		}
 
-		callback = !callback ? function() {
+		callback = !callback ? function(type, value) {
 			// TODO: Move event handling here
-			//console.log(type + ": " + value);
+			// console.log(type + ": " + value);
 		} : callback;
 
-		errCallback = !errCallback ? function() {
+		errCallback = !errCallback ? function(type, value) {
 			//console.error(type + ": " + value);
 		} : errCallback;
 
@@ -105,7 +129,7 @@ var Viewer = {};
 		};
 
 		this.logos    = [];
-
+		
 		this.logoClick = function() {
 			callback(self.EVENT.LOGO_CLICK);
 		};
@@ -131,7 +155,7 @@ var Viewer = {};
 			logo.style.left 		  = 0;
 			logo.style.right 		  = 0;
 			logo.style.margin 		  = "auto";
-
+			
 			logo.addEventListener("click", self.logoClick);
 
 			var logoImage = document.createElement("img");
@@ -165,19 +189,14 @@ var Viewer = {};
 			}
 		};
 
-		this.init = function(options) {
+		this.init = function() {
 			if (!self.initialized) {
-
-				// Set option param from viewerDirective
-				self.options = options;
-
 				// If we have a viewer manager then it
 				// will take care of initializing the runtime
 				// else we'll do it ourselves
 				x3dom.runtime.ready = self.initRuntime;
 
 				self.addLogo();
-
 
 				// Set up the DOM elements
 				self.viewer = document.createElement("x3d");
@@ -187,7 +206,6 @@ var Viewer = {};
 				self.viewer.setAttribute("disableTouch", "true");
 				self.viewer.addEventListener("mousedown", onMouseDown);
 				self.viewer.addEventListener("mouseup",  onMouseUp);
-				self.viewer.addEventListener("mousemove",  onMouseMove);
 				self.viewer.style["pointer-events"] = "all";
 				self.viewer.className = "viewer";
 
@@ -247,14 +265,11 @@ var Viewer = {};
 
 				self.enableClicking();
 
-				self.onMouseUp(function(){
-					self.appendMapTileByViewPoint();
-				});
-
 				callback(self.EVENT.READY, {
 					name: self.name,
 					model: self.modelString
 				});
+
 			}
 		};
 
@@ -264,9 +279,7 @@ var Viewer = {};
 		};
 
 		// This is called when the X3DOM runtime is initialized
-		// member of x3dom.runtime instance
 		this.initRuntime = function() {
-
 			if (this.doc.id === self.name) {
 				self.runtime = this;
 
@@ -297,7 +310,7 @@ var Viewer = {};
 
 			self.getCurrentViewpoint().addEventListener("viewpointChanged", self.viewPointChanged);
 
-			ViewerUtil.onEvent("onLoaded", function(objEvent) {
+			$(document).on("onLoaded", function(event, objEvent) {
 				if (self.loadViewpoint) {
 					self.setCurrentViewpoint(self.loadViewpoint);
 				}
@@ -313,21 +326,18 @@ var Viewer = {};
 				if (objEvent.target.tagName.toUpperCase() === "INLINE") {
 					self.inlineRoots[objEvent.target.nameSpaceName] = objEvent.target;
 				} else if (objEvent.target.tagName.toUpperCase() === "MULTIPART") {
-					if (self.multipartNodes.indexOf(objEvent.target) === -1)
-					{
-						var nameSpaceName = objEvent.target._x3domNode._nameSpace.name;
-						if (!self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-							self.multipartNodesByProject[nameSpaceName] = {};
-						}
-
-						var multipartName = objEvent.target.getAttribute("id");
-						var multipartNameParts = multipartName.split("__");
-						var multipartID = multipartNameParts[multipartNameParts.length - 1];
-
-						self.multipartNodesByProject[nameSpaceName][multipartID] = objEvent.target;
-
-						self.multipartNodes.push(objEvent.target);
+					var nameSpaceName = objEvent.target._x3domNode._nameSpace.name;
+					if (!self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
+						self.multipartNodesByProject[nameSpaceName] = {};
 					}
+
+					var multipartName = objEvent.target.getAttribute("id");
+					var multipartNameParts = multipartName.split("__");
+					var multipartID = multipartNameParts[multipartNameParts.length - 1];
+
+					self.multipartNodesByProject[nameSpaceName][multipartID] = objEvent.target;
+
+					self.multipartNodes.push(objEvent.target);
 				}
 
 				self.downloadsLeft += (objEvent.target.querySelectorAll("[load]").length - 1);
@@ -338,19 +348,39 @@ var Viewer = {};
 					self.pinSize = sceneSize / 20;
 				}
 
-				//console.log('my op', options);
-
-				var options = self.options;
-				if(!self.initTranslated && options && options.lat && options.lon){
-					//moved to updateSettings since action required project settings loaded first
-
-				} else {
-					self.showAll();
-				}
+				self.showAll();
 
 				if (!self.downloadsLeft) {
 					callback(self.EVENT.LOADED);
 				}
+
+
+				// add map tiles only when mouse down -> move -> mouse up
+				self.onMouseDown(function(){
+					//console.log('mouse down and try to move');
+
+					var changed = false;
+
+					var viewChangeHandler = function(){
+						changed = true;
+					};
+
+					self.onViewpointChanged(viewChangeHandler);
+
+					var mouseUpHandler = function(){
+						if(changed){
+							self.addMapTileByViewPoint();
+						}
+						
+						self.offViewpointChanged(viewChangeHandler);
+						self.offMouseUp(mouseUpHandler);
+					};
+
+					self.onMouseUp(mouseUpHandler);
+				});
+
+				// init add map tiles
+				setTimeout(self.addMapTileByViewPoint, 2000);
 
 			});
 		};
@@ -511,96 +541,80 @@ var Viewer = {};
 		};
 
 		this.onMouseUp = function(functionToBind) {
-			ViewerUtil.onEvent("onMouseUp", functionToBind);
+			$(document).on("onMouseUp", functionToBind);
 		};
 
 		this.offMouseUp = function(functionToBind) {
-			ViewerUtil.offEvent("onMouseUp", functionToBind);
+			$(document).off("onMouseUp", functionToBind);
 		};
 
 		this.onMouseDown = function(functionToBind) {
-			ViewerUtil.onEvent("onMouseDown", functionToBind);
+			$(document).on("onMouseDown", functionToBind);
 		};
 
-		this.onMouseMove = function(functionToBind) {
-			ViewerUtil.onEvent("onMouseMove", functionToBind);
-		};
-
-		this.mouseDownPickPoint = function()
+		this.mouseDownPickPoint = function(event, pickEvent)
 		{
-			var viewArea = self.getViewArea();
-			var pickingInfo = viewArea._pickingInfo;
+			var pickingInfo = self.getViewArea()._pickingInfo;
+
+			// Hack until double click problem solved
+			self.pickPoint(); // This updates self.pickObject
+			if (self.pickObject.pickObj !== null) {
+				pickingInfo.pickObj = self.pickObject;
+			}
 
 			if (pickingInfo.pickObj)
 			{
+				var account, project;
+				
+				console.log(pickingInfo.pickObj.partID);
+				//TO-DO: change to a proper way to decide 3d model generated from ordsuy source
+				if (pickingInfo.pickObj.partID && pickingInfo.pickObj.partID.indexOf('-') === -1){
+					$.getJSON('/api/os/building-meta/' + pickingInfo.pickObj.partID, function(json) { console.log(json)});
+				}
+				
 
-					var account, project;
-					var projectParts = null;
+				var projectParts = pickingInfo.pickObj._xmlNode ?
+					pickingInfo.pickObj._xmlNode.getAttribute("id").split("__") :
+					pickingInfo.pickObj.pickObj._xmlNode.getAttribute("id").split("__");
 
-					if (pickingInfo.pickObj._xmlNode)
-					{
-						if (pickingInfo.pickObj._xmlNode.hasAttribute("id"))
-						{
-							projectParts = pickingInfo.pickObj._xmlNode.getAttribute("id");
-						}
-					} else {
-						projectParts = pickingInfo.pickObj.pickObj._xmlNode.getAttribute("id").split("__");
-					}
+				var objectID = pickingInfo.pickObj.partID ?
+					pickingInfo.pickObj.partID :
+					projectParts[2];
 
-					if (projectParts)
-					{
-						var objectID = pickingInfo.pickObj.partID ?
-							pickingInfo.pickObj.partID :
-							projectParts[2];
+				account = projectParts[0];
+				project = projectParts[1];
 
-						account = projectParts[0];
-						project = projectParts[1];
+				var inlineTransName = ViewerUtil.escapeCSSCharacters(account + "__" + project);
+				var projectInline = self.inlineRoots[inlineTransName];
+				var trans = projectInline._x3domNode.getCurrentTransform();
 
-						var inlineTransName = ViewerUtil.escapeCSSCharacters(account + "__" + project);
-						var projectInline = self.inlineRoots[inlineTransName];
-						var trans = projectInline._x3domNode.getCurrentTransform();
-
-						callback(self.EVENT.PICK_POINT, {
-							id: objectID,
-							position: pickingInfo.pickPos,
-							normal: pickingInfo.pickNorm,
-							trans: trans,
-							screenPos: [viewArea._pressX, viewArea._pressY]
-						});
-					} else {
-						callback(self.EVENT.PICK_POINT, {
-							position: pickingInfo.pickPos,
-							normal: pickingInfo.pickNorm
-						});
-					}
+				callback(self.EVENT.PICK_POINT, {
+					id: objectID,
+					position: pickingInfo.pickPos,
+					normal: pickingInfo.pickNorm,
+					trans: trans
+				});
+			} else {
+				callback(self.EVENT.PICK_POINT, {
+					position: pickingInfo.pickPos,
+					normal: pickingInfo.pickNorm
+				});
 			}
 		};
 
 		this.onMouseDown(this.mouseDownPickPoint);
 
-		this.mouseMovePoint = function (event) {
-			if (event.hasOwnProperty("target")) {
-				console.log(event.hitPnt);
-			}
-			else {
-				console.log(event.clientX, event.clientY);
-				var viewArea = self.getViewArea();
-				viewArea._scene._nameSpace.doc.ctx.pickValue(viewArea, event.clientX, event.clientY, 1);
-			}
-		}
-
-		this.onMouseMove(this.mouseMovePoint);
-
 		this.onViewpointChanged = function(functionToBind) {
-			ViewerUtil.onEvent("myViewpointHasChanged", functionToBind);
+			$(self.viewer).on("myViewpointHasChanged", functionToBind);
 		};
 
 		this.offViewpointChanged = function(functionToBind) {
-			ViewerUtil.offEvent("myViewpointHasChanged", functionToBind);
+			$(self.viewer).off("myViewpointHasChanged", functionToBind);
 		};
 
 		this.viewPointChanged = function(event) {
-			//console.log('vp changed');
+
+			//console.log('view point changed')
 			var vpInfo = self.getCurrentViewpointInfo();
 			var eye = vpInfo.position;
 			var viewDir = vpInfo.view_dir;
@@ -610,46 +624,43 @@ var Viewer = {};
 				self.nav._x3domNode._vf.typeParams[1] = eye[1];
 			}
 
-			ViewerUtil.triggerEvent("myViewpointHasChanged", event);
+			$(self.viewer).trigger("myViewpointHasChanged", event);
 		};
 
+
 		this.onBackgroundClicked = function(functionToBind) {
-			ViewerUtil.onEvent("bgroundClicked", functionToBind);
+			$(document).on("bgroundClicked", functionToBind);
 		};
 
 		this.offBackgroundClicked = function(functionToBind) {
-			ViewerUtil.offEvent("bgroundClicked", functionToBind);
+			$(document).off("bgroundClicked", functionToBind);
 		};
 
-		this.selectParts = function(part, zoom, colour) {
-			var i;
-
-			colour = colour ? colour : self.SELECT_COLOUR.EMISSIVE;
-
+		this.selectParts = function(part, zoom) {
 			if (!Array.isArray(part)) {
 				part = [part];
 			}
 
 			if (zoom) {
-				for (i = 0; i < part.length; i++) {
+				for (var i = 0; i < part.length; i++) {
 					part[i].fit();
 				}
 			}
 
 			if (self.oldPart) {
-				for (i = 0; i < self.oldPart.length; i++) {
+				for (var i = 0; i < self.oldPart.length; i++) {
 					self.oldPart[i].resetColor();
 				}
 			}
 
 			self.oldPart = part;
 
-			for (i = 0; i < part.length; i++) {
-				part[i].setEmissiveColor(colour, "both");
+			for (var i = 0; i < part.length; i++) {
+				part[i].setEmissiveColor(self.SELECT_COLOUR.EMISSIVE, "front");
 			}
 		};
 
-		this.clickObject = function(objEvent) {
+		this.clickObject = function(event, objEvent) {
 			var account = null;
 			var project = null;
 			var id = null;
@@ -664,13 +675,6 @@ var Viewer = {};
 				}
 			}
 
-			//TO-DO: use proper way to check os building id
-			if(id.indexOf('-') === -1){
-				callback(self.EVENT.OS_BUILDING_CLICK,{
-					id : id
-				});
-			}
-
 			callback(self.EVENT.OBJECT_SELECTED, {
 				account: account,
 				project: project,
@@ -679,7 +683,7 @@ var Viewer = {};
 			});
 		};
 
-		this.highlightObjects = function(account, project, ids, zoom, colour) {
+		this.highlightObjects = function(account, project, id, ids, zoom) {
 			var nameSpaceName = null;
 
 			/*
@@ -691,10 +695,6 @@ var Viewer = {};
 			if (!ids) {
 				ids = [];
 			}
-
-			// If we pass in a single id, then we might be selecting
-			// an old-style Group in X3DOM rather than multipart.
-			ids = Array.isArray(ids) ? ids: [ids];
 
 			// Is this a multipart project
 			if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
@@ -720,86 +720,118 @@ var Viewer = {};
 					}
 				}
 
-				self.selectParts(fullPartsList, zoom, colour);
+				self.selectParts(fullPartsList, zoom);
 			}
 
-			for(var i = 0; i < ids.length; i++)
-			{
-				var id = ids[i];
-				var object = document.querySelectorAll("[id$='" + id + "']");
+			var object = $("[id$=" + id + "]");
 
-				if (object[0]) {
-					self.setApp(object[0], colour);
-				}
-			}
-
-			if (ids.length === 0)
-			{
-				self.setApp(null);
+			if (object[0]) {
+				self.setApp(object[0]);
 			}
 		};
 
-		//this.switchedOldParts = [];
-		//this.switchedObjects = [];
+		this.switchedOldParts = [];
+		this.switchedObjects = [];
 
-		this.__processSwitchVisibility = function(nameSpaceName, ids, state)
-		{
-			if (ids && ids.length) {
-				// Is this a multipart project
-				if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
-					var nsMultipartNodes;
-
-					// If account and project have been specified
-					// this helps narrow the search
-					if (nameSpaceName) {
-						nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
-					} else {
-						// Otherwise iterate over everything
-						nsMultipartNodes = self.multipartNodes;
-					}
-
-					for (var multipartNodeName in nsMultipartNodes) {
-						if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
-							var parts = nsMultipartNodes[multipartNodeName].getParts(ids);
-
-							if (parts && parts.ids.length > 0) {
-								parts.setVisibility(state);
-							}
-						}
-					}
-				}
-
-				for(var i = 0; i < ids.length; i++)
-				{
-					var id = ids[i];
-					var object = document.querySelectorAll("[id$='" + id + "']");
-
-					if (object[0]) {
-						object[0].setAttribute("render", state.toString());
-					}
-				}
-			}
-		};
-
-		this.switchObjectVisibility = function(account, project, visible_ids, invisible_ids) {
+		this.switchObjectVisibility = function(account, project, id, ids, state) {
 			var nameSpaceName = null;
+			var i;
 
 			if (account && project) {
 				nameSpaceName = account + "__" + project;
 			}
 
-			if (visible_ids)
-			{
-				self.__processSwitchVisibility(nameSpaceName, visible_ids, true);
+			if (!ids) {
+				ids = [];
 			}
 
-			if (invisible_ids)
-			{
-				 self.__processSwitchVisibility(nameSpaceName, invisible_ids, false);
+			// Is this a multipart project
+			if (!nameSpaceName || self.multipartNodesByProject.hasOwnProperty(nameSpaceName)) {
+				var fullPartsList = [];
+				var nsMultipartNodes;
+
+				// If account and project have been specified
+				// this helps narrow the search
+				if (nameSpaceName) {
+					nsMultipartNodes = self.multipartNodesByProject[nameSpaceName];
+				} else {
+					// Otherwise iterate over everything
+					nsMultipartNodes = self.multipartNodes;
+				}
+
+				for (i = 0; i < self.switchedOldParts.length; i++) {
+					if (ids.indexOf(self.switchedOldParts[i]) > -1) {
+						self.switchedOldParts[i].setVisibility(state);
+						delete self.switchOldParts[i];
+						i--;
+					}
+				}
+
+				for (var multipartNodeName in nsMultipartNodes) {
+					if (nsMultipartNodes.hasOwnProperty(multipartNodeName)) {
+						var parts = nsMultipartNodes[multipartNodeName].getParts(ids);
+
+						if (parts && parts.ids.length > 0) {
+							self.switchedOldParts = self.switchedOldParts.concat(parts.ids);
+							parts.setVisibility(state);
+						}
+					}
+				}
+			}
+
+			for (i = 0; i < self.switchedObjects.length; i++) {
+				if (ids.indexOf(self.switchedObjects[i]) > -1) {
+					self.switchedObjects[i].setAttribute("render", state.toString());
+					delete self.switchOldParts[i];
+					i--;
+				}
+			}
+
+			var object = $("[id$=" + id + "]");
+
+			if (object[0]) {
+				object[0].setAttribute("render", state.toString());
+				self.switchedObjects.push(id);
 			}
 		};
 
-		ViewerUtil.onEvent("pinClick", function(clickInfo) {
+
+		/*
+		$(document).on("partSelected", function(event, part, zoom) {
+			self.selectParts(part, zoom);
+
+			var obj = {};
+			obj.multipart = true;
+			obj.id = part.multiPart._nameSpace.name + "__" + part.partID;
+
+
+			callback(self.EVENT.OBJECT_SELECTED, {
+				account: ,
+				project:
+			})
+
+
+			$(document).trigger("objectSelected", obj);
+		});
+
+		$(document).on("objectSelected", function(event, object, zoom) {
+			if (object !== undefined) {
+				if (!object.hasOwnProperty("multipart")) {
+					if (zoom) {
+						if (object.getAttribute("render") !== "false") {
+							self.lookAtObject(object);
+						}
+					}
+				}
+			} else {
+				self.selectParts([], false);
+			}
+
+			self.setApp(object);
+		});
+		*/
+
+		$(document).on("pinClick", function(event, clickInfo) {
 			var pinID = clickInfo.target.parentElement.parentElement.parentElement.parentElement.parentElement.id;
 			callback(self.EVENT.CLICK_PIN,
 			{
@@ -807,21 +839,88 @@ var Viewer = {};
 			});
 		});
 
-		ViewerUtil.onEvent("onMouseDown", function() {
-			document.body.style["pointer-events"] = "none";
+		$(document).on("onMouseDown", function(event, mouseEvent) {
+			$("body")[0].style["pointer-events"] = "none";
 		});
 
-		ViewerUtil.onEvent("onMouseUp", function() {
-			document.body.style["pointer-events"] = "all";
+		$(document).on("onMouseUp", function(event, mouseEvent) {
+			$("body")[0].style["pointer-events"] = "all";
 		});
 
 		this.onClickObject = function(functionToBind) {
-			ViewerUtil.onEvent("clickObject", functionToBind);
+			$(document).on("clickObject", functionToBind);
 		};
 
 		this.offClickObject = function(functionToBind) {
-			offEvent("clickObject", functionToBind);
+			$(document).off("clickObject", functionToBind);
 		};
+
+		if (0) {
+			this.moveScale = 1.0;
+
+			self.element.addEventListener("keypress", function(e) {
+				var mapPos = $("#model__mapPosition")[0];
+				var oldTrans = mapPos.getAttribute("translation").split(",").map(
+					function(res) {
+						return parseFloat(res);
+					});
+
+				if (e.charCode === "q".charCodeAt(0)) {
+					oldTrans[0] = oldTrans[0] + 0.5 * self.moveScale;
+					mapPos.setAttribute("translation", oldTrans.join(","));
+				}
+
+				if (e.charCode === "w".charCodeAt(0)) {
+					oldTrans[0] = oldTrans[0] - 0.5 * self.moveScale;
+					mapPos.setAttribute("translation", oldTrans.join(","));
+				}
+
+				if (e.charCode === "e".charCodeAt(0)) {
+					oldTrans[2] = oldTrans[2] + 0.5 * self.moveScale;
+					mapPos.setAttribute("translation", oldTrans.join(","));
+				}
+
+				if (e.charCode === "f".charCodeAt(0)) {
+					oldTrans[2] = oldTrans[2] - 0.5 * self.moveScale;
+					mapPos.setAttribute("translation", oldTrans.join(","));
+				}
+
+				var mapRotation = $("#model__mapRotation")[0];
+				var oldRotation = mapRotation.getAttribute("rotation").split(",").map(
+					function(res) {
+						return parseFloat(res);
+					});
+
+				if (e.charCode === "g".charCodeAt(0)) {
+					oldRotation[3] = oldRotation[3] + 0.01 * self.moveScale;
+					mapRotation.setAttribute("rotation", oldRotation.join(","));
+				}
+
+				if (e.charCode === "h".charCodeAt(0)) {
+					oldRotation[3] = oldRotation[3] - 0.01 * self.moveScale;
+					mapRotation.setAttribute("rotation", oldRotation.join(","));
+				}
+
+				var oldScale = mapPos.getAttribute("scale").split(",").map(
+					function(res) {
+						return parseFloat(res);
+					});
+
+				if (e.charCode === "j".charCodeAt(0)) {
+					oldScale[0] = oldScale[0] + 0.01 * self.moveScale;
+					oldScale[2] = oldScale[2] + 0.01 * self.moveScale;
+
+					mapPos.setAttribute("scale", oldScale.join(","));
+				}
+
+				if (e.charCode === "k".charCodeAt(0)) {
+					oldScale[0] = oldScale[0] - 0.01 * self.moveScale;
+					oldScale[2] = oldScale[2] - 0.01 * self.moveScale;
+
+					mapPos.setAttribute("scale", oldScale.join(","));
+				}
+			});
+		}
 
 		this.viewpoints = {};
 		this.viewpointsNames = {};
@@ -874,7 +973,7 @@ var Viewer = {};
 		};
 
 		this.loadViewpoints = function() {
-			var viewpointList = document.getElementsByTagName("Viewpoint");
+			var viewpointList = $("Viewpoint");
 
 			for (var v = 0; v < viewpointList.length; v++) {
 				if (viewpointList[v].hasAttribute("id")) {
@@ -969,15 +1068,6 @@ var Viewer = {};
 			if (settings) {
 				self.settings = settings;
 				self.applySettings();
-
-				var options = self.options;
-				if(options && options.lat && options.lon && options.y){
-					self.initTranslated = true;
-					setTimeout(function(){
-						self.translateTo(options.lat, options.lon, options.y)
-					}, 3000);
-				}
-
 			}
 		};
 
@@ -1025,10 +1115,9 @@ var Viewer = {};
 				}
 
 				if(self.settings.hasOwnProperty("mapTile")){
-					// set origin BNG
+					// set origin BNG 
 					self.originBNG = OsGridRef.latLonToOsGrid(new LatLon(self.settings.mapTile.lat, self.settings.mapTile.lon));
-					self.meterPerPixel = 1;
-					self.mapSizes = [];
+
 				}
 			}
 		};
@@ -1069,27 +1158,21 @@ var Viewer = {};
 
 		this.pickObject = {};
 
-		this.pickPoint = function(x,y) {
+		this.pickPoint = function(x, y) {
 			var viewArea = self.getViewArea();
 			var scene = viewArea._scene;
-
-			if ((typeof x !== "undefined") && (typeof y !== "undefined"))
-			{
-				var viewMatrix = self.getViewArea().getViewMatrix();
-				var projMatrix = self.getViewArea().getProjectionMatrix();
-
-				viewArea._doc.ctx.pickValue(viewArea, x, y, 0, viewMatrix, projMatrix.mult(viewMatrix));
-			}
 
 			var oldPickMode = scene._vf.pickMode.toLowerCase();
 			scene._vf.pickMode = "idbuf";
 			scene._vf.pickMode = oldPickMode;
 
-			self.pickObject = viewArea._pickingInfo;
+			self.pickObject.pickPos = viewArea._pickingInfo.pickPos;
+			self.pickObject.pickNorm = viewArea._pickingInfo.pickNorm;
+			self.pickObject.pickObj = viewArea._pickingInfo.pickObj;
 			self.pickObject.part = null;
 			self.pickObject.partID = null;
 
-			var objId = self.pickObject.shadowObjectId;
+			var objId = viewArea._pickingInfo.shadowObjectId;
 
 			if (scene._multiPartMap) {
 				for (var mpi = 0; mpi < scene._multiPartMap.multiParts.length; mpi++) {
@@ -1223,16 +1306,16 @@ var Viewer = {};
 			self.setCameraPosition(currentPos);
 		};
 
-		this.setCameraViewDir = function(viewDir, upDir, centerOfRotation) {
+		this.setCameraViewDir = function(viewDir, upDir) {
 			var currentPos = self.getCurrentViewpointInfo().position;
-			self.updateCamera(currentPos, upDir, viewDir, centerOfRotation);
+			self.updateCamera(currentPos, upDir, viewDir);
 		};
 
-		this.setCamera = function(pos, viewDir, upDir, centerOfRotation, animate, rollerCoasterMode) {
-			self.updateCamera(pos, upDir, viewDir, centerOfRotation, animate, rollerCoasterMode);
+		this.setCamera = function(pos, viewDir, upDir, animate, rollerCoasterMode) {
+			self.updateCamera(pos, upDir, viewDir, animate, rollerCoasterMode);
 		};
 
-		this.updateCamera = function(pos, up, viewDir, centerOfRotation, animate, rollerCoasterMode) {
+		this.updateCamera = function(pos, up, viewDir, animate, rollerCoasterMode) {
 			if (!viewDir)
 			{
 				viewDir = self.getCurrentViewpointInfo().view_dir;
@@ -1270,21 +1353,6 @@ var Viewer = {};
 					self.getViewArea()._doc.needRender = true;
 				}
 			}
-
-			var x3domCenter = null;
-
-			if (!centerOfRotation)
-			{
-				var canvasWidth  = self.getViewArea()._doc.canvas.width;
-				var canvasHeight = self.getViewArea()._doc.canvas.height;
-
-				self.pickPoint(canvasWidth / 2, canvasHeight / 2);
-				x3domCenter = self.pickObject.pickPos;
-			} else {
-				x3domCenter = new x3dom.fields.SFVec3f(centerOfRotation[0], centerOfRotation[1], centerOfRotation[2]);
-			}
-
-			currViewpoint.setCenterOfRotation(x3domCenter);
 
 			if (self.linked) {
 				self.manager.switchMaster(self.handle);
@@ -1537,13 +1605,13 @@ var Viewer = {};
 							// TODO: Improve, with graph, to use appearance under  _cf rather than DOM.
 							obj = defMapSearch[self.diffColors.added[i]];
 							if (obj) {
-								mat = obj._xmlNode.getElementsByTagName("Material");
+								mat = $(obj._xmlNode).find("Material");
 
 								if (mat.length) {
 									self.applyApp(mat, 0.5, "0.0 1.0 0.0", false);
 									self.diffColorAdded.push(mat[0]);
 								} else {
-									mat = obj._xmlNode.getElementsByTagName("TwoSidedMaterial");
+									mat = $(obj._xmlNode).find("TwoSidedMaterial");
 									self.applyApp(mat, 0.5, "0.0 1.0 0.0", false);
 
 									self.diffColorAdded.push(mat[0]);
@@ -1558,13 +1626,13 @@ var Viewer = {};
 							// TODO: Improve, with graph, to use appearance under  _cf rather than DOM.
 							obj = defMapSearch[self.diffColors.deleted[i]];
 							if (obj) {
-								mat = obj._xmlNode.getElementsByTagName("Material");
+								mat = $(obj._xmlNode).find("Material");
 
 								if (mat.length) {
 									self.applyApp(mat, 0.5, "1.0 0.0 0.0", false);
 									self.diffColorDeleted.push(mat[0]);
 								} else {
-									mat = obj._xmlNode.getElementsByTagName("TwoSidedMaterial");
+									mat = $(obj._xmlNode).find("TwoSidedMaterial");
 									self.applyApp(mat, 0.5, "1.0 0.0 0.0", false);
 
 									self.diffColorDeleted.push(mat[0]);
@@ -1742,105 +1810,16 @@ var Viewer = {};
 
 		this.changePinColours = function(id, colours) {
 			if (self.pins.hasOwnProperty(id)) {
+				console.log(id, colours);
 				self.pins[id].changeColour(colours);
 			}
 		};
 
-		this.measureMode = function (on) {
-			var element = document.getElementById("x3dom-default-canvas");
-			if (on) {
-				element.style.cursor = "crosshair";
-			}
-			else {
-				this.deleteMeasureLine();
-				element.style.cursor = "-webkit-grab";
-			}
-		}
-
-		this.drawMeasureLine = function (coords) {
-			var line,
-				lineCoords,
-				lineMat,
-				lineDepth,
-				lineApp,
-				shape,
-				transform;
-
-			line = document.createElement("LineSet");
-			line.setAttribute("vertexCount", 2);
-
-			lineCoords = document.createElement("Coordinate");
-			lineCoords.setAttribute("point", coords[0].x + " " + coords[0].y + " " + coords[0].z + ", " + coords[1].x + " " + coords[1].y + " " + coords[1].z);
-			line.appendChild(lineCoords);
-
-			lineMat = document.createElement("Material");
-			lineMat.setAttribute("emissiveColor", "1 1 1");
-
-			lineDepth = document.createElement("DepthMode");
-			lineDepth.setAttribute("depthFunc", "ALWAYS");
-
-			lineApp = document.createElement("Appearance");
-			lineApp.appendChild(lineMat);
-			lineApp.appendChild(lineDepth);
-
-			shape = document.createElement("Shape");
-			shape.appendChild(lineApp);
-			shape.appendChild(line);
-
-			transform = document.createElement("Transform");
-			transform.setAttribute("id", "measureLine");
-			transform.appendChild(shape);
-
-			self.scene.appendChild(transform);
-		};
-
-		this.deleteMeasureLine = function () {
-			var measureLine = document.getElementById("measureLine");
-			if (measureLine !== null) {
-				measureLine.parentElement.removeChild(measureLine);
-			}
-		}
-
-		this.getZoomLevel = function(look_at, camera){
-			var yToZoomLevel = [
-				{y: 500000, zoomLevel: 7},
-				{y: 300000, zoomLevel: 8},
-				{y: 109000, zoomLevel: 9},
-				{y: 58800, zoomLevel: 10},
-				{y: 30709, zoomLevel: 11},
-				{y: 16800, zoomLevel: 12},
-				{y: 8000, zoomLevel: 13},
-				{y: 4500, zoomLevel: 14},
-				{y: 2000, zoomLevel: 15},
-				{y: 1000, zoomLevel: 16},
-				{y: 500, zoomLevel: 17},
-				{y: 250, zoomLevel: 18},
-				{y: 0, zoomLevel: 18},
-
-			];
-
-			var zoomLevel;
-
-			for(var i=0; i < yToZoomLevel.length; i++){
-
-				if(camera[1] >= yToZoomLevel[i].y){
-					zoomLevel = yToZoomLevel[i].zoomLevel;
-					break;
-				}
-			}
-
-			return zoomLevel;
-
-		}
-
-		// Append building models and map tile images
-		this.appendMapTileByViewPoint = function(noDraw){
-
-			console.log('appendMapTileByViewPoint');
+		// Append building models 
+		this.addMapTileByViewPoint = function(noDraw){
 
 			if(!self.originBNG){
-				//console.log('originBNG not found');
-				return;
+				return console.log('No origin BNG coors set, no map tiles can be added.');
 			}
 
 			var vpInfo = self.getCurrentViewpointInfo();
@@ -1848,7 +1827,7 @@ var Viewer = {};
 			var camera = vpInfo.position;
 			var view_dir = vpInfo.view_dir;
 			var near = vpInfo.near;
-			var ratio = vpInfo.aspect_ratio; //(w/h)
+			var ratio = vpInfo.aspect_ratio; //(w/h) 
 			var up = vpInfo.up;
 			var right = vpInfo.right;
 
@@ -1890,347 +1869,108 @@ var Viewer = {};
 				}
 			}
 
-
+			var step = 100;
 			var roundUpPlace = 10;
 
-			var zoomLevel = self.getZoomLevel(vpInfo.look_at, camera);
-
-			if(self.zoomLevel !== zoomLevel){
-				self.removeMapImages();
-				self._clearMapImagePosInfo();
-				self.zoomLevel= zoomLevel;
-			}
 
 			var coordsX = [coords[0][0], coords[1][0], coords[2][0], coords[3][0]];
 			var coordsZ = [coords[0][2], coords[1][2], coords[2][2], coords[3][2]];
 
+			console.log('xx', coordsX);
+			console.log('zz', coordsZ);
 
-
-			var farVec = [coords[1][0] - coords[0][0], coords[1][2] - coords[0][2]];
-			//console.log('Far Vec', farVec, Math.atan(farVec[1]/farVec[0]));
-			var nearVec = [coords[3][0] - coords[2][0], coords[3][2] - coords[2][2]];
-			//console.log('Near Vec', nearVec, Math.atan(nearVec[1]/nearVec[0]));
-
-			var centrePoint = [
-				(coords[0][0] + coords[1][0] + coords[2][0] + coords[3][0]) / 4,
-				(coords[0][2] + coords[1][2] + coords[2][2] + coords[3][2]) / 4
-			];
-
-
-			// var p = self._drawPlaneOnZ([
-
-			// 	[centrePoint[0] + 100, 10, centrePoint[1] + 100],
-			// 	[centrePoint[0] - 100, 10, centrePoint[1] + 100],
-			// 	[centrePoint[0] - 100, 10, centrePoint[1] - 100],
-			// 	[centrePoint[0] + 100, 10, centrePoint[1] - 100],
-
-			// ], [1, 0, 0]);
-
-			// self.getScene().appendChild(p);
-
-			var mapImgPosInfo = self._getMapImagePosInfo();
-
-			console.log('centrePoint', centrePoint);
-			//convert centre point back to lat, long
-			var mapXY = [
-				self.findMapTileNoByPos(centrePoint[0] - mapImgPosInfo.offsetX),
-				self.findMapTileNoByPos(centrePoint[1]  - mapImgPosInfo.offsetY)
-			];
-
-
-			console.log('mapXY', mapXY);
-			console.log('zxy', [mapXY[0] + mapImgPosInfo.slippyPoints.x, mapXY[1] + mapImgPosInfo.slippyPoints.y]);
-			console.log('z', self.getCurrentViewpointInfo().position[1]);
-			console.log(
-				self._tile2lat(mapXY[1] + mapImgPosInfo.slippyPoints.y, self.zoomLevel),
-				self._tile2long(mapXY[0] + mapImgPosInfo.slippyPoints.x, self.zoomLevel)
-			);
-
-			callback(self.EVENT.UPDATE_URL ,{
-				'at': [
-				self._tile2lat(mapXY[1] + mapImgPosInfo.slippyPoints.y, self.zoomLevel)
-				,self._tile2long(mapXY[0] + mapImgPosInfo.slippyPoints.x, self.zoomLevel)
-				,self.getCurrentViewpointInfo().position[1]].join(',')
-			});
-
-			var lookingToInf = !(self._hasSameSign(farVec[0], nearVec[0]) && self._hasSameSign(farVec[1], nearVec[1]));
+			var lookingToInf = (camera[2] > 0 && coordsZ[2] < coordsZ[0] || camera[2] < 0 && coordsZ[2] > coordsZ[0]);
 			if(lookingToInf){
+				
 				console.log('Looking to inf');
+				coordsZ[0] = 600;
+				coordsZ[1] = 600;
+				coordsZ[2] = -600;
+				coordsZ[3] = -600;
+			
 			}
 
+
+			var mapImgPosInfo = self._getMapImagePosInfo();
+			var mapImgsize = mapImgPosInfo.mapImgsize;
 
 
 			var startX = Math.ceil(Math.min.apply(Math, coordsX) / roundUpPlace) * roundUpPlace;
 			var endX = Math.ceil(Math.max.apply(Math, coordsX) / roundUpPlace) * roundUpPlace;
-			//console.log('startX, endX', startX, endX);
+			// console.log('startX, endX', startX, endX);
 
 			var startZ = Math.ceil(Math.min.apply(Math, coordsZ) / roundUpPlace) * roundUpPlace;
 			var endZ = Math.ceil(Math.max.apply(Math, coordsZ) / roundUpPlace) * roundUpPlace;
-			//console.log('startZ, endZ', startZ, endZ);
-			//console.log('camera', camera);
+			// console.log('startZ, endZ', startZ, endZ);
 
-			var maxTiles = 100;
-			var sqrtOfMax = 10;
-			var tileSize = 100 * self.meterPerPixel;
+			var mapTileCount = 0;
+			var tileDists = [];
 
-			var xCount = Math.ceil((endX - startX) / tileSize);
-			var zCount = Math.ceil((endZ - startZ) / tileSize);
-			//console.log('xCount', xCount);
-			//console.log('zCount', zCount);
 
-			if(xCount * zCount > maxTiles){
-				if(xCount > sqrtOfMax && zCount > sqrtOfMax){
-					xCount = sqrtOfMax;
-					zCount = sqrtOfMax;
-				} else if(zCount > sqrtOfMax){
-					zCount = Math.ceil(maxTiles / xCount);
-				} else if (xCount > sqrtOfMax) {
-					xCount = Math.ceil(maxTiles / zCount);
+			for (var x = startX; x <= endX; x+=step) {
+				for (var z = startZ; z <= endZ; z+=step) {
+					mapTileCount++;
+					var dist = Math.sqrt(Math.pow(x - camera[0], 2) + Math.pow(z - camera[2], 2));
+					tileDists.push({ 'dist': dist, tile: [x, z]});
 				}
 			}
 
+			//sort tile by distance from camera
+			tileDists.sort(function(a, b){
+				return a.dist - b.dist;
+			});
 
-			//var xMidPoint = this._roundUpToTen((startX + endX) / 2);
-			var xMidPoint = this._roundUpToTen(camera[0]);
-			//console.log('xMidPoint', xMidPoint);
-			var boundedStartX = xMidPoint - Math.ceil(xCount / 2) * tileSize;
-			var boundedEndX = xMidPoint + Math.ceil(xCount / 2) * tileSize
+			var mapImgStep = mapImgsize;
+			//console.log('mapImgStep', mapImgStep);
 
-			//var zMidPoint = this._roundUpToTen((startZ + endZ) / 2);
-			var zMidPoint = this._roundUpToTen(camera[2]);
-			//console.log('zMidPoint', zMidPoint);
-			var boundedStartZ = zMidPoint - Math.ceil(zCount / 2) * tileSize;
-			var boundedEndZ = zMidPoint + Math.ceil(zCount / 2) * tileSize
+			var mapImgTileDists = [];
 
-			//console.log('bouned x', boundedStartX, boundedEndX);
-			//console.log('bouned z', boundedStartZ, boundedEndZ);
+			for (var x = startX + mapImgPosInfo.offsetX; x <= endX + mapImgPosInfo.offsetX; x+=mapImgStep) {
+				for (var z = startZ + mapImgPosInfo.offsetY; z <= endZ + mapImgPosInfo.offsetY; z+=mapImgStep) {
+					
+					var mapImgX = Math.floor( x / mapImgStep );
+					var mapImgZ = Math.floor( z / mapImgStep );
 
-			// 3d models
-			if(!noDraw && self.zoomLevel >= 17){
-				for (var x = boundedStartX; x <= boundedEndX; x+=tileSize) {
-					for (var z = boundedStartZ; z <= boundedEndZ; z+=tileSize) {
-
-						var osRef = new OsGridRef(self.originBNG.easting + (x / self.meterPerPixel), self.originBNG.northing - (z / self.meterPerPixel));
-						var osrefno = self._OSRefNo(osRef, 3);
-
-						self.appendMapTile(osrefno);
-					}
+					var dist = Math.sqrt(Math.pow(x - camera[0], 2) + Math.pow(z - camera[2], 2));
+					mapImgTileDists.push({ 'dist': dist, tile: [mapImgX, mapImgZ]});
 				}
 			}
 
+			mapImgTileDists.sort(function(a, b){
+				return a.dist - b.dist;
+			});
+
+			//console.log('maptilecount max', mapImgTileDists.length);
+
+			// add map tiles, only the first 15
+			for(var i=0; i<mapImgTileDists.length && i < 30; i++) {
+				
+				var tile = mapImgTileDists[i].tile;
+				self.appendMapImage(mapImgsize, tile[0], tile[1]);
+
+			}
 
 
-			// map images
-			//first step
+			//add 3d model tiles, only render first 10 tiles
+			for(var i=0; i<tileDists.length && i < 10; i++) {
+				
+				var tile = tileDists[i].tile;
 
-			var n = self.findMapTileNoByPos(boundedStartZ + mapImgPosInfo.offsetY);
-			var nextN = n >= 0 ? n + 1: n - 1;
-			var mapImgStep = Math.abs(self.getSumSize(nextN) - self.getSumSize(n)) ;
+				var osRef = new OsGridRef(self.originBNG.easting + tile[0], self.originBNG.northing + tile[1]);
+				var osrefno = self._OSRefNo(osRef, 3);
+				//console.log(osrefno);
 
-			xCount = Math.ceil((endX - startX) / mapImgStep);
-			zCount = Math.ceil((endZ - startZ) / mapImgStep);
-			//console.log('xCount', xCount);
-			//console.log('zCount', zCount);
-
-			if(xCount * zCount > maxTiles){
-				if(xCount > sqrtOfMax && zCount > sqrtOfMax){
-					xCount = sqrtOfMax;
-					zCount = sqrtOfMax;
-				} else if(zCount > sqrtOfMax){
-					zCount = Math.ceil(maxTiles / xCount);
-				} else if (xCount > sqrtOfMax) {
-					xCount = Math.ceil(maxTiles / zCount);
+				if(!noDraw){
+					self.addMapTile(osrefno);
 				}
 			}
-
-			boundedStartX = xMidPoint - Math.ceil(xCount / 2) * mapImgStep;
-			boundedEndX = xMidPoint + Math.ceil(xCount / 2) * mapImgStep
-
-			boundedStartZ = zMidPoint - Math.ceil(zCount / 2) * mapImgStep;
-			boundedEndZ = zMidPoint + Math.ceil(zCount / 2) * mapImgStep;
-
-			// var p = self._drawPlaneOnZ([
-			// 	[coords[0][0], 200, coords[0][2]],
-			// 	[coords[1][0], 200, coords[1][2]],
-			// 	[coords[2][0], 200, coords[2][2]],
-			// 	[coords[3][0], 200, coords[3][2]],
-			// ], [1, 0, 0]);
-
-
-			// // var p2 = self._drawPlaneOnZ([
-			// // 	[boundedStartX, 4, boundedStartZ],
-			// // 	[boundedEndX, 4, boundedStartZ],
-			// // 	[boundedStartX, 4, boundedEndZ],
-			// // 	[boundedEndX, 4, boundedEndZ],
-			// // ], [0, 1, 0]);
-
-
-			// // var p3 = self._drawPlaneOnZ([
-			// // 	[startX, 8, startZ],
-			// // 	[endX, 8, startZ],
-			// // 	[startX, 8, endZ],
-			// // 	[endX, 8, endZ],
-			// // ], [0, 0, 1]);
-
-
-			// if(self._testP){
-			// 	self._testP.forEach(function(p){
-			// 		self.getScene().removeChild(p);
-			// 	});
-			// }
-			// self._testP = [];
-
-
-			// if(false){
-
-			// 	self._testP.push(p);
-			// 	// self._testP.push(p2);
-			// 	// self._testP.push(p3);
-			// 	self.getScene().appendChild(p);
-			// 	// self.getScene().appendChild(p2);
-			// 	// self.getScene().appendChild(p3);
-			// }
-
-
-			// variables named according to this polygon and coordinate variables
-			// c------d
-			// \      /
-			//  a----b
-
-			var a, b, c, d;
-
-			a = coords[3];
-			b = coords[2];
-			c = coords[1];
-			d = coords[0];
-
-			if(lookingToInf){
-				// flip c & d
-				[c, d].forEach(function(vec){
-					vec.forEach(function(value, i){
-						vec[i] = -vec[i];
-					})
-				})
-			}
-
-			//console.log(c, d);
-
-			function LenVec2D(vecA, vecB){
-				return Math.sqrt(
-					Math.pow(vecA[0] - vecB[0], 2) +
-					Math.pow(vecA[1] - vecB[1], 2)
-				);
-			}
-
-			// get coordinate on a->c vector
-			function getCoorOnAC(k){
-				return [
-					a[0] + k * (c[0] - a[0]),
-					a[2] + k * (c[2] - a[2])
-				];
-			}
-
-			// get coordinate on b->d vector
-			function getCoorOnBD(k){
-				return [
-					b[0] + k * (d[0] - b[0]),
-					b[2] + k * (d[2] - b[2])
-				];
-			}
-
-			// get vecrtical coordinate, direction parallels to a->b , if ky = 0, it is euqal to get coordinate on a->b vector
-			function getCoorVertical(kx, ky){
-
-				var start, end;
-				start = getCoorOnAC(ky);
-				end = getCoorOnBD(ky);
-
-				return [
-					start[0] + kx *(end[0] - start[0]),
-					start[1] + kx *(end[1] - start[1])
-				];
-			}
-
-
-
-			var testCount = 0;
-
-			var n = self.findMapTileNoByPos(a[2] + mapImgPosInfo.offsetY);
-			var nextN = n < 0 ? n + 1 : n - 1;
-			var imageSize = Math.abs(self.getSumSize(nextN) - self.getSumSize(n));
-			var horVecLen = LenVec2D([a[0], a[2]], [c[0], c[2]]);
-			var stepY = imageSize / horVecLen / 2;
-
-			for(var ky = -stepY; ky <= 1+stepY && testCount < 200; ky += stepY){
-
-				var startCoor = getCoorVertical(0, ky);
-				var endCoor = getCoorVertical(1, ky);
-				var vertVecLen = LenVec2D(endCoor, startCoor);
-
-				n = self.findMapTileNoByPos(startCoor[1] + mapImgPosInfo.offsetY);
-				nextN = n < 0 ? n + 1 : n - 1;
-				imageSize = Math.abs(self.getSumSize(nextN) - self.getSumSize(n));
-				var stepX = imageSize / vertVecLen / 2;
-
-				for(var kx = -stepX; kx <= 1 + stepX && testCount < 200 ; kx += stepX){
-
-					var coor = getCoorVertical(kx, ky);
-					//console.log('coor', coor);
-
-
-					var mapImgX = Math.floor( (coor[0] + mapImgPosInfo.offsetX) / imageSize );
-					var mapImgZ = Math.floor( (coor[1] + mapImgPosInfo.offsetY) / imageSize );
-
-					var appened = self.appendMapImage(mapImgX, mapImgZ);
-
-					if(appened){
-						testCount++;
-					}
-
-					n = self.findMapTileNoByPos(coor[1] + mapImgPosInfo.offsetY);
-					nextN = n < 0 ? n + 1 : n - 1;
-					imageSize = Math.abs(self.getSumSize(nextN) - self.getSumSize(n));
-					var stepX = imageSize / vertVecLen / 2;
-				}
-
-				n = self.findMapTileNoByPos(startCoor[1] + mapImgPosInfo.offsetY);
-				nextN = n < 0 ? n + 1 : n - 1;
-				imageSize = Math.abs(self.getSumSize(nextN) - self.getSumSize(n));
-				stepY = imageSize / horVecLen;
-			}
-			console.log(testCount);
-
-
-
-			// for (var x = boundedStartX + mapImgPosInfo.offsetX; x <= boundedEndX + mapImgPosInfo.offsetX; x+=mapImgStep) {
-			// 	for (var z = boundedStartZ + mapImgPosInfo.offsetY; z <= boundedEndZ + mapImgPosInfo.offsetY; z+=mapImgStep) {
-
-			// 		var mapImgX = Math.floor( x / mapImgStep );
-			// 		var mapImgZ = Math.floor( z / mapImgStep );
-
-			// 		self.appendMapImage(mapImgX, mapImgZ);
-
-			// 		var nextZ = mapImgZ >=0 ? mapImgZ + 1 : mapImgZ - 1;
-			// 		mapImgStep = Math.abs(self.getSumSize(nextZ) - self.getSumSize(mapImgZ));
-			// 	}
-			// }
 
 		};
-
-
-		this._hasSameSign = function(a, b){
-			return a <= 0 && b <= 0 || a >=0 && b >= 0
-		};
-
-		this._roundUpToTen = function(n){
-			var roundUpPlace = 10;
-			return Math.ceil(n / roundUpPlace) * roundUpPlace;
-		}
 
 		// TO-DO: Move helper functions to somewhere else?
 		//length 1 = 1m, 2 = 10m, 3 = 100m, 4 = 1km, 5 = 10km
 		this._OSRefNo = function(osRef, length){
-
+			
 			if (length < 1 || length > 5){
 				return console.log('length must be in range [1 - 5]');
 			}
@@ -2269,7 +2009,7 @@ var Viewer = {};
 			return layerPoint;
 		};
 
-		this.appendMapTile = function(osGridRef){
+		this.addMapTile = function(osGridRef, testAdd){
 
 			if(!self.originBNG){
 				return console.log('No origin BNG coors set, no map tiles can be added.');
@@ -2287,52 +2027,21 @@ var Viewer = {};
 			//console.log(self.fakeOriginInBNG);
 
 			var gltf = document.createElement('gltf');
-			gltf.setAttribute('onclick', 'clickObject(event)');
 			gltf.setAttribute('url', '/api/os/buildings.gltf?method=osgrid&osgridref=' + osGridRef + '&draw=1');
 
 			var translate = [0, 0, 0];
 			var osCoor = OsGridRef.parse(osGridRef);
+			translate[0] = osCoor.easting - self.originBNG.easting;
+			translate[2] = self.originBNG.northing - osCoor.northing;
 
-			//translate[0] = osCoor.easting - self.originBNG.easting;
-			//translate[2] = self.originBNG.northing - osCoor.northing;
-
-			var mapImagePosInfo = self._getMapImagePosInfo();
-
-			var tileLatLon = OsGridRef.osGridToLatLon(osCoor);
-			var correspondingMapTile = self._getSlippyTileLayerPoints(tileLatLon.lat, tileLatLon.lon, mapImagePosInfo.zoomLevel)
-
-			var y = correspondingMapTile.y - mapImagePosInfo.slippyPoints.y;
-			var nextY = correspondingMapTile.y >= 0 ? y + 1 : y - 1;
-			var mapSize = self.getSumSize(nextY) - self.getSumSize(y);
-
-			var corMapTileBNG = OsGridRef.latLonToOsGrid(new LatLon(
-				self._tile2lat(correspondingMapTile.y, mapImagePosInfo.zoomLevel),
-				self._tile2long(correspondingMapTile.x, mapImagePosInfo.zoomLevel)
-			));
-
-			//dx,dy of 3dmap tiles to map image tiles
-			var dx = osCoor.easting * self.meterPerPixel - (corMapTileBNG.easting  * self.meterPerPixel + mapSize / 2);
-			var dy = (corMapTileBNG.northing * self.meterPerPixel - mapSize / 2) - osCoor.northing * self.meterPerPixel;
-
-			translate[0] = (correspondingMapTile.x - mapImagePosInfo.slippyPoints.x) * mapSize + dx + mapImagePosInfo.offsetX
-			translate[2] = (correspondingMapTile.y - mapImagePosInfo.slippyPoints.y) * mapSize + dy + mapImagePosInfo.offsetY
-
-
-			// if(!self.gltfDoms){
-			// 	self.gltfDoms = [];
-			// }
-
-			var scale = document.createElement('Transform');
-			var mPerPx = self.meterPerPixel;
-			scale.setAttribute('scale', [mPerPx, mPerPx, mPerPx].join(','));
-			scale.appendChild(gltf);
+			if (testAdd){
+				translate = [0,0,0];
+			}
 
 			var transform = document.createElement('transform');
 			transform.setAttribute('translation', translate.join(' '));
 
-
-			transform.appendChild(scale);
-			//self.gltfDoms.push(transform);
+			transform.appendChild(gltf);
 			self.getScene().appendChild(transform);
 
 			return transform;
@@ -2346,11 +2055,7 @@ var Viewer = {};
 			var app = document.createElement('Appearance');
 
 			var it = document.createElement('ImageTexture');
-
-			var mapImagePosInfo = self._getMapImagePosInfo();
-
-			it.setAttribute("url", '/api/os/map-images/Outdoor/' + mapImagePosInfo.zoomLevel + '/' + x + '/' + y + '.png');
-
+			it.setAttribute("url", '/api/os/map-images/Outdoor/17/' + x + '/' + y + '.png');
 
 			app.appendChild(it);
 
@@ -2371,338 +2076,44 @@ var Viewer = {};
 
 			var translate = document.createElement('Transform');
 			translate.setAttribute('translation', t.join(' '));
-			translate.appendChild(rotate);
 
+			translate.appendChild(rotate);
 			return translate;
 		};
-
-		this._vec3Len = function(vec){
-			return Math.sqrt(
-				Math.pow(vec[0], 2)
-				+ Math.pow(vec[1], 2)
-				+ Math.pow(vec[2], 2)
-			);
-		}
-
-		this.translateTo = function(lat, lon, height){
-			if(!self.originBNG){
-				return console.log('Translation aborted due to no origin lat,lon defined');
-			}
-
-			lat = parseFloat(lat);
-			lon = parseFloat(lon);
-
-			console.log('translateTo', lat, lon, height)
-			// var to = OsGridRef.latLonToOsGrid(new LatLon(lat, lon));
-			// var x = to.easting -  self.originBNG.easting;
-			// var y = self.originBNG.northing - to.northing;
-			// self.setCamera([x,height,y],[0,-1,0],[0,0,-1]);
-
-			self.setCamera([0, height, 0], [0,-1,0],[0,0,-1]);
-			// lat,lon to mapImage XY system
-			var mapImagePosInfo = self._getMapImagePosInfo();
-			console.log(mapImagePosInfo);
-
-			//get the xy number of the map tile image contains the target
-			var mapXY = self._getSlippyTileLayerPoints(lat, lon, mapImagePosInfo.zoomLevel);
-			console.log('translateXYZ', mapXY)
-			var nx = mapXY.x - mapImagePosInfo.slippyPoints.x
-			var ny = mapXY.y - mapImagePosInfo.slippyPoints.y
-			console.log('translateMapXY', [nx, ny]);
-
-
-
-			//cal offset of the target point to the nearest map tile image
-			var osTargetPoint = OsGridRef.latLonToOsGrid(new LatLon(lat, lon));
-			var mapImageCentreLatLon = new LatLon(self._tile2lat(mapXY.y, mapImagePosInfo.zoomLevel) , self._tile2long(mapXY.x, mapImagePosInfo.zoomLevel) );
-			var osImagePoint =  OsGridRef.latLonToOsGrid(mapImageCentreLatLon);
-
-			//var mapSize = self.getMapSize(ny);
-			console.log('osTargetPoint', osTargetPoint);
-			console.log('osImagePoint', osImagePoint);
-			var dx = osTargetPoint.easting * self.meterPerPixel - (osImagePoint.easting  * self.meterPerPixel);
-			var dy = (osImagePoint.northing * self.meterPerPixel) - osTargetPoint.northing * self.meterPerPixel;
-
-			console.log('dxdy', dx, dy);
-
-
-			self.setCamera([self.getSumSize(nx) + mapImagePosInfo.offsetX + dx , height ,self.getSumSize(ny) + mapImagePosInfo.offsetY + dy],[0,-1,0],[0,0,-1]);
-
-			self.appendMapTileByViewPoint();
-
-			self.setCamera([x,height,y],[0,-1,0],[0,0,-1], [x,0,y]);
-			self.appendMapTileByViewPoint()
-
-		};
-
-		//appr. version
-		this.getSumSize= function(n){
-			var mapImagePosInfo = self._getMapImagePosInfo();
-			var mapPerPxZoomLevel = mapImagePosInfo.mPerPxTable[mapImagePosInfo.zoomLevel];
-			var lat = self._tile2lat(mapImagePosInfo.slippyPoints.y, mapImagePosInfo.zoomLevel);
-			return mapPerPxZoomLevel * Math.cos(self._degToRad(lat)) * 256 * n * self.meterPerPixel;
-		}
-
-		this.getMapSize = function(n){
-			var preN = n > 0 ? n - 1 : n + 1;
-			return this.getSumSize(n) - this.getSumSize(preN);
-		}
-
-		//appr. version
-		this.findMapTileNoByPos = function(pos){
-			return Math.floor(pos / self.getSumSize(1));
-		}
-
-		//appr. version
-		this.getSumSizeForXRow  = this.getSumSize;
-
-		// this.getSumSizeForXRow = function(n, y){
-		// 	var mapImagePosInfo = self._getMapImagePosInfo();
-		// 	var mapPerPxZoomLevel = mapImagePosInfo.mPerPxTable[mapImagePosInfo.zoomLevel];
-		// 	var lat = self._tile2lat(mapImagePosInfo.slippyPoints.y + y, mapImagePosInfo.zoomLevel);
-		// 	return mapPerPxZoomLevel * Math.cos(self._degToRad(lat)) * 256 * n * self.meterPerPixel;
-		// }
-
-		// this.getSumSize = function(n){
-
-		// 	var mapImagePosInfo = self._getMapImagePosInfo();
-		//  	var mapPerPxZoomLevel = mapImagePosInfo.mPerPxTable[mapImagePosInfo.zoomLevel];
-		// 	if(n === 0){
-
-		// 		return 0;
-
-		// 	} else if (n === 1 || n === -1) {
-
-		// 		var lat = self._tile2lat(mapImagePosInfo.slippyPoints.y, mapImagePosInfo.zoomLevel);
-		// 		self.mapSizes[0] = self.mapSizes[0] || mapPerPxZoomLevel * Math.cos(self._degToRad(lat)) * 256  * self.meterPerPixel;
-		// 		return self.mapSizes[0] * n;
-
-		// 	} else {
-
-		// 		var nextN;
-		// 		n >= 0 ? nextN = n - 1 : nextN = n + 1;
-
-		// 		if(!self.mapSizes[nextN]){
-
-		// 			var lat = self._tile2lat(mapImagePosInfo.slippyPoints.y + n, mapImagePosInfo.zoomLevel);
-		// 			self.mapSizes[nextN] = mapPerPxZoomLevel * Math.cos(self._degToRad(lat)) * 256  * self.meterPerPixel;
-		// 		}
-
-		// 		return (n >= 0 ? 1 : -1) * self.mapSizes[nextN] + self.getSumSize(nextN);
-
-		// 	}
-
-		// }
-
-		// this.findMapTileNoByPos = function(pos){
-
-		// 	var n;
-
-		// 	var mapSize_0 = self.getSumSize(1) - self.getSumSize(0);
-		// 	var mapSize_1 = self.getSumSize(2) - self.getSumSize(1);
-
-		// 	if(mapSize_1 > mapSize_0 && pos > 0){
-		// 		//+ve direction
-		// 		var n = 0;
-		// 		while(true){
-		// 			if(self.getSumSize(n) <= pos && pos < self.getSumSize(n+1)){
-		// 				break;
-		// 			}
-		// 			n++;
-		// 		}
-		// 	} else {
-		// 		var n = 0;
-		// 		while(true){
-		// 			if(self.getSumSize(n) <= pos && pos < self.getSumSize(n+1)){
-		// 				break;
-		// 			}
-		// 			n--;
-		// 		}
-		// 	}
-
-		// 	return n;
-		// }
-
-		this._clearMapImagePosInfo = function(){
-			self.mapPosInfo = null;
-		}
 
 		this._getMapImagePosInfo = function(){
 
 			// http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Resolution_and_Scale
 			// set the size of a 256 map image tile. 1px = 1m
+			var mapImgsize = 1.1943 * Math.cos(self._degToRad(self.settings.mapTile.lat)) * 256;
+			var zoomLevel = 17;
 
-			if (!self.mapPosInfo){
+			var slippyPoints = self._getSlippyTileLayerPoints(self.settings.mapTile.lat, self.settings.mapTile.lon, zoomLevel);
 
-				console.log(self.getCurrentViewpointInfo());
-				var zoomLevel = self.getZoomLevel(
-					self.getCurrentViewpointInfo().look_at,
-					self.getCurrentViewpointInfo().position
-				);
+			var x = slippyPoints.x;
+			var y = slippyPoints.y;
 
-				var mPerPxTable = {
-					0:	156543.03,
-					1:	78271.52,
-					2:	39135.76,
-					3:	19567.88,
-					4:	9783.94	,
-					5:	4891.97	,
-					6:	2445.98,
-					7:	1222.99	,
-					8:	611.50	,
-					9:	305.75	,
-					10:	152.87,
-					11:	76.437,
-					12:	38.219,
-					13:	19.109,
-					14:	9.5546,
-					15:	4.7773,
-					16:	2.3887,
-					17:	1.1943,
-					18:	0.5972
-				};
+			//console.log('slippyPoints', x, y);
+			//console.log(self._tile2lat(y, zoomLevel), self._tile2long(x ,zoomLevel));
+			var osGridRef = OsGridRef.latLonToOsGrid(new LatLon(self._tile2lat(y, zoomLevel), self._tile2long(x ,zoomLevel)));
+			
+			//console.log('map images osgridref', osGridRef);
+			var offsetX = osGridRef.easting - self.originBNG.easting + mapImgsize / 2;
+			var offsetY = self.originBNG.northing - osGridRef.northing + mapImgsize / 2;
 
-				console.log('getmapinfo - settings', self.settings);
-
-				var slippyPoints = self._getSlippyTileLayerPoints(self.settings.mapTile.lat, self.settings.mapTile.lon, zoomLevel);
-
-				var x = slippyPoints.x;
-				var y = slippyPoints.y;
-
-				var mapImgsize = mPerPxTable[zoomLevel] * Math.cos(self._degToRad(self._tile2lat(y, zoomLevel))) * 256 * self.meterPerPixel;
-				//console.log('slippyPoints', x, y);
-				//console.log(self._tile2lat(y, zoomLevel), self._tile2long(x ,zoomLevel));
-				var osGridRef = OsGridRef.latLonToOsGrid(new LatLon(self._tile2lat(y, zoomLevel), self._tile2long(x ,zoomLevel)));
-
-				//console.log('map images osgridref', osGridRef);
-				var offsetX = (osGridRef.easting - self.originBNG.easting) * self.meterPerPixel + mapImgsize / 2;
-				var offsetY = (self.originBNG.northing - osGridRef.northing) * self.meterPerPixel + mapImgsize / 2;
-
-				//offsetX = 0;
-				//offsetY = 0;
-				self.mapPosInfo = {
-					x: x,
-					y: y,
-					offsetX: offsetX,
-					offsetY: offsetY,
-					zoomLevel: zoomLevel,
-					slippyPoints: slippyPoints,
-					mPerPxTable: mPerPxTable
-				};
-			}
-
-
-			return self.mapPosInfo;
-
-		}
-
-		//secret little functions to help in-browser alignment
-		this._moveStep = 10;
-		this._startMoveImages = function(){
-
-			self._moveImagesListener = function(e){
-				if(e.code === 'ArrowUp'){
-					self._moveMapImages(0, -self._moveStep);
-				} else if(e.code === 'ArrowLeft'){
-					self._moveMapImages(-self._moveStep, 0);
-				} else if(e.code === 'ArrowDown'){
-					self._moveMapImages(0, self._moveStep);
-				} else if(e.code === 'ArrowRight'){
-					self._moveMapImages(self._moveStep, 0);
-				}
+			return {
+				x: x,
+				y: y,
+				offsetX: offsetX,
+				offsetY: offsetY,
+				zoomLevel: zoomLevel,
+				mapImgsize: mapImgsize,
+				osGridRef: osGridRef
 			};
 
-			document.addEventListener('keyup', self._moveImagesListener);
-		};
-
-		this._stopMoveImages = function(){
-			document.removeEventListener('keyup', self._moveImagesListener);
-		};
-
-
-		this._moveMapImages = function(dx, dy){
-
-			self.sumD = self.sumD || [0, 0];
-			self.imagesDoms.forEach(function(dom){
-
-				var t = dom.getAttribute('translation').split(' ');
-
-				t.forEach(function(number, i){
-					t[i] = parseFloat(number);
-				});
-
-				t[0] += dx;
-				t[2] += dy;
-
-				dom.setAttribute('translation', t.join(' '));
-			});
-
-			self.sumD[0] += dx;
-			self.sumD[1] += dy;
 		}
 
-		this._drawPlaneOnZ = function(coords, color){
-
-			var coordIndex = '';
-
-			// var center = [0, 0, 0];
-			// center[0] = (coords[0][0] + coords[1][0], + coords[2][0] + coords[3][0]) / 4;
-			// center[2] = (coords[0][2] + coords[1][2], + coords[2][2] + coords[3][2]) / 4;
-
-			// function less(a, b){
-			//     if (a[0] - center[0] >= 0 && b[0] - center[0] < 0)
-			//         return true;
-			//     if (a[0] - center[0] < 0 && b[0] - center[0] >= 0)
-			//         return false;
-			//     if (a[0] - center[0] == 0 && b[0] - center[0] == 0) {
-			//         if (a[2] - center[2] >= 0 || b[2] - center[2] >= 0)
-			//             return a[2] > b[2];
-			//         return b[2] > a[2];
-			//     }
-
-			//     // compute the cross product of vectors (center -> a) x (center -> b)
-			//     var det = (a[0] - center[0]) * (b[2] - center[2]) - (b[0] - center[0]) * (a[2] - center[2]);
-			//     if (det < 0)
-			//         return true;
-			//     if (det > 0)
-			//         return false;
-
-			//     // points a and b are on the same line from the center
-			//     // check which point is closer to the center
-			//     var d1 = (a[0] - center[0]) * (a[0] - center[0]) + (a[2] - center[2]) * (a[2] - center[2]);
-			//     var d2 = (b[0] - center[0]) * (b[0] - center[0]) + (b[2] - center[2]) * (b[2] - center[2]);
-			//     return d1 > d2;
-			// }
-
-			// coords.sort(less);
-
-			for(var i=0; i < coords.length; i++){
-				coordIndex += ' ' + i;
-			}
-
-			coordIndex += ' -1';
-
-			var coordsFlatten = [];
-
-			coords.forEach(function(coord){
-				coordsFlatten = coordsFlatten.concat(coord);
-			});
-
-			var containerNode = document.createElement('div');
-			containerNode.innerHTML = "" +
-			"	<shape>" +
-			"		<appearance>" +
-			"			<material diffuseColor='" + color.join(' ') + "' transparency='0.7'></material>" +
-			"		</appearance>" +
-			"		<IndexedFaceSet ccw='true' colorPerVertex='false' solid='false' coordIndex='" + coordIndex + "'>" +
-			"			<coordinate point='" +  coordsFlatten.join(' ') + "'></coordinate>" +
-			"		</IndexedFaceSet>" +
-			"	</shape>";
-
-			return containerNode.children[0];
-		};
-
-		this.appendMapImage = function(ox, oy){
+		this.appendMapImage = function(size, ox, oy){
 
 			var posInfo = self._getMapImagePosInfo();
 
@@ -2711,46 +2122,26 @@ var Viewer = {};
 			var offsetX = posInfo.offsetX;
 			var offsetY = posInfo.offsetY;
 
-			var mapHeight = self.settings.mapTile.y ? self.settings.mapTile.y : 0;
-			var nextOy = oy >= 0 ? oy + 1 : oy - 1;
-			var size =  Math.abs(self.getSumSize(nextOy) - self.getSumSize(oy));
-
 			if (!self.addedMapImages) {
 				self.addedMapImages = {};
-			}
-
-			if(!self.imagesDoms){
-				self.imagesDoms = [];
-			}
+			} 
 
 			if(!self.addedMapImages[ox + ',' + oy]){
-
-				var dom = self.createMapImageTile(size, x + ox, y + oy, [offsetX + self.getSumSizeForXRow(ox, oy), mapHeight, offsetY + self.getSumSize(oy)]);
-				self.imagesDoms.push(dom);
-				self.getScene().appendChild(dom);
+				self.getScene().appendChild(self.createMapImageTile(size, x + ox, y + oy, [offsetX + size * ox, 0, offsetY + size * oy]));
 				self.addedMapImages[ox + ',' + oy] = 1;
-
-				return true;
 			} else {
 				//console.log('map image already in the scene');
-				return false;
 			}
-
+			
 
 		};
 
 		this.removeMapImages = function(){
+			self.mts.forEach(function(mt){
+				self.getScene().removeChild(mt);
+			});
+		};
 
-			if(self.imagesDoms){
-				self.imagesDoms.forEach(function(dom){
-					self.getScene().removeChild(dom);
-				});
-			}
-			self.imagesDoms = [];
-			self.addedMapImages = {};
-			self.mapSizes = [];
-
-		}
 
 	};
 
@@ -2787,16 +2178,14 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	REGISTER_VIEWPOINT_CALLBACK: "VIEWER_REGISTER_VIEWPOINT_CALLBACK",
 	OBJECT_SELECTED: "VIEWER_OBJECT_SELECTED",
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
-	HIGHLIGHT_OBJECTS: "VIEWER_HIGHLIGHT_OBJECTS",
 	SWITCH_OBJECT_VISIBILITY: "VIEWER_SWITCH_OBJECT_VISIBILITY",
 	SET_PIN_VISIBILITY: "VIEWER_SET_PIN_VISIBILITY",
-
+		
 	GET_CURRENT_VIEWPOINT: "VIEWER_GET_CURRENT_VIEWPOINT",
 
 	PICK_POINT: "VIEWER_PICK_POINT",
-	MOVE_POINT: "VIEWER_MOVE_POINT",
 	SET_CAMERA: "VIEWER_SET_CAMERA",
-
+	
 	LOGO_CLICK: "VIEWER_LOGO_CLICK",
 
 	// Clipping plane events
@@ -2811,9 +2200,5 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	CHANGE_PIN_COLOUR: "VIEWER_CHANGE_PIN_COLOUR",
 	REMOVE_PIN: "VIEWER_REMOVE_PIN",
 	ADD_PIN: "VIEWER_ADD_PIN",
-	MOVE_PIN: "VIEWER_MOVE_PIN",
-
-	//OS BUILDING CLICK
-	OS_BUILDING_CLICK: 'VIEWER_OS_BUILDING_CLICK',
-	UPDATE_URL: 'VIEWER_UPDATE_URL'
+	MOVE_PIN: "VIEWER_MOVE_PIN"
 };
