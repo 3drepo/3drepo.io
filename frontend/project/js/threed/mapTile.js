@@ -64,8 +64,8 @@ var MapTile = {};
 		var lat = options.lat;
 		var lon = options.lon;
 		var height = options.y;
-		var view = options.view || [0,-1,0];
-		var up = options.up || [0,0,-1]; 
+		var view = options.view || [0.00028736474304142756,-0.9987502603949663,-0.0499783431347178];
+		var up = options.up || [0.005742504650018704,0.04997916927067853,-0.9987337514469797]; 
 
 		if (!height || height < 0){
 			height = 500;
