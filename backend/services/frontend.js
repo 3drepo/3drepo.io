@@ -112,7 +112,7 @@ module.exports.createApp = function(serverConfig)
 							"oculus",
 							"groups"
 						],
-						'url': '/:project?at',
+						'url': '/:project?at&up&view',
 						"children" : [
 							{
 								"plugin": "bid4free",

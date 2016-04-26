@@ -79,12 +79,30 @@
 			v.viewer = new Viewer(v.name, $element[0], v.manager, eventCallback, errCallback);
 
 			var options = {};
-			var startLatLon = $location.search().at && $location.search().at.split(',');
+			var querystring = $location.search();
+			var startLatLon = querystring.at && querystring.at.split(',');
+			
+			var view = querystring.view && querystring.view.split(',');
+			view && view.forEach(function(val, i){
+				view[i] = parseFloat(val);
+			});
+
+			options.view = view;
+
+			var up = querystring.up && querystring.up.split(',');
+			up && up.forEach(function(val, i){
+				up[i] = parseFloat(val);
+			});
+
+			options.up = up;
+
 			if(startLatLon){
-				options.lat = startLatLon[0],
-				options.lon = startLatLon[1],
-				options.y = parseInt(startLatLon[2])
+				options.lat = parseFloat(startLatLon[0]),
+				options.lon = parseFloat(startLatLon[1]),
+				options.y = parseFloat(startLatLon[2])
 			}
+
+
 
 			v.viewer.init(options);
 			// TODO: Move this so that the attachment is contained
@@ -220,7 +238,11 @@
 							v.manager.getCurrentViewer().setNavMode(event.value.mode);
 						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_URL){
 							//console.log('update url!!');
-							$location.path("/" + v.account + '/' + v.project).search({at: event.value.at});
+							$location.path("/" + v.account + '/' + v.project).search({
+								at: event.value.at,
+								view: event.value.view,
+								up: event.value.up
+							});
 						}
 					});
 				}
