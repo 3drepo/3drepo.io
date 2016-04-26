@@ -96,15 +96,23 @@
 
 			options.up = up;
 
+			var showAll = true;
+
 			if(startLatLon){
+				showAll = false;
 				options.lat = parseFloat(startLatLon[0]),
 				options.lon = parseFloat(startLatLon[1]),
 				options.y = parseFloat(startLatLon[2])
 			}
 
 
-
-			v.viewer.init(options);
+			v.mapTile = new MapTile(v.viewer, eventCallback, options);
+			v.viewer.init({
+				showAll : showAll,
+				plugins: {
+					'mapTile': v.mapTile
+				}
+			});
 			// TODO: Move this so that the attachment is contained
 			// within the plugins themselves.
 			// Comes free with oculus support and gamepad support
@@ -113,7 +121,6 @@
 			v.gamepad.init();
 
 			v.collision  = new Collision(v.viewer);
-
 
 			$scope.reload();
 
@@ -167,6 +174,7 @@
 							if (event.value.account === v.account && event.value.project === v.project)
 							{
 								v.viewer.updateSettings(event.value.settings);
+								v.mapTile.updateSettings(event.value.settings);
 							}
 						}
 					});
@@ -253,7 +261,7 @@
 
 		if (angular.isDefined(v.vrMode))
 		{
-				$scope.enterVR();
+			$scope.enterVR();
 		}
 	}
 }());
