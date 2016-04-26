@@ -47,10 +47,7 @@
 
 	function ViewerCtrl ($scope, $q, $http, $element, $location, serverConfig, EventService)
 	{
-		var v = this,
-			measureMode = false,
-			measureCoords = [null, null],
-			currentPickPoint;
+		var v = this, currentPickPoint;
 
 		v.initialised = $q.defer();
 		v.loaded      = $q.defer();
@@ -70,9 +67,7 @@
 
 		function eventCallback(type, value)
 		{
-			if (!(measureMode && (type === EventService.EVENT.VIEWER.OBJECT_SELECTED))) {
-				v.eventService.send(type, value);
-			}
+			v.eventService.send(type, value);
 		}
 
 		$scope.reload = function() {
@@ -191,7 +186,7 @@
 								event.value.clipDirection ? event.value.clipDirection : -1);
 						} else if (event.type === EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE) {
 							v.viewer.moveClippingPlane(event.value.percentage);
-						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED && !measureMode)) {
+						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
 							v.viewer.highlightObjects(
 								event.value.account,
 								event.value.project,
@@ -231,39 +226,7 @@
 						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
 							v.manager.getCurrentViewer().setNavMode(event.value.mode);
 						} else if (event.type === EventService.EVENT.MEASURE_MODE) {
-							measureMode = event.value;
-							if (measureMode) {
-								v.viewer.measureMode(true);
-							}
-							else {
-								measureCoords = [null, null];
-								v.viewer.measureMode(false);
-							}
-						} else if (event.type === EventService.EVENT.VIEWER.PICK_POINT) {
-							if (measureMode && event.value.hasOwnProperty("id")) {
-								// The check against currentPickPoint is due to the PICK_POINT event being called twice
-								if (angular.isUndefined(currentPickPoint) ||
-									(!((currentPickPoint.x === event.value.position.x) &&
-									   (currentPickPoint.y === event.value.position.y) &&
-									   (currentPickPoint.z === event.value.position.z)))) {
-									currentPickPoint = event.value.position;
-									if (measureCoords[0] === null) {
-										measureCoords[0] = currentPickPoint;
-									}
-									else if (measureCoords[1] === null) {
-										measureCoords[1] = currentPickPoint;
-										v.viewer.drawMeasureLine(measureCoords);
-									}
-									else {
-										v.viewer.deleteMeasureLine();
-										measureCoords[0] = currentPickPoint;
-										measureCoords[1] = null;
-									}
-								}
-							}
-						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_URL){
-							//console.log('update url!!');
-							$location.path("/" + v.account + '/' + v.project).search({at: event.value.at});
+							v.viewer.measureMode(event.value);
 						}
 					});
 				}

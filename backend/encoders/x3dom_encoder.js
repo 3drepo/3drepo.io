@@ -77,7 +77,7 @@ function X3D_Header() {
 function X3D_CreateScene(xmlDoc, rootNode) {
 	var scene = xmlDoc.createElement('Scene');
 	scene.setAttribute('id', 'scene');
-	scene.setAttribute('dopickpass', 'false');
+	//scene.setAttribute('dopickpass', 'false');
 
 	xmlDoc.firstChild.appendChild(scene);
 
@@ -534,10 +534,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
 				mp.setAttribute('id', child['id']);
 				mp.setAttribute('url', config.api_server.url + '/' + account + '/' + project + '/' + child['id'] + '.x3d.mpc');
 				mp.setAttribute('urlIDMap', config.api_server.url + '/' + account + '/' + project + '/' + child['id'] + '.json.mpc');
-				mp.setAttribute('onclick', 'clickObject(event);');
 				mp.setAttribute('solid', 'true');
-				mp.setAttribute('onmouseover', 'onMouseOver(event);');
-				mp.setAttribute('onmousemove', 'onMouseMove(event);');
 				mp.setAttribute('nameSpaceName', child['id']);
 
 				if (bbox)
@@ -555,10 +552,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
 
 					shape.setAttribute('id', childUniqueID);
 					shape.setAttribute('DEF', childUniqueID); //dbInterface.uuidToString(child["shared_id"]));
-					shape.setAttribute('onclick', 'clickObject(event);');
 					shape.setAttribute('solid', 'true');
-					shape.setAttribute('onmouseover', 'onMouseOver(event);');
-					shape.setAttribute('onmousemove', 'onMouseMove(event);');
 
 					if (bbox)
 					{

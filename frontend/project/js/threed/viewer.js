@@ -195,7 +195,7 @@ var Viewer = {};
 
 				self.scene = document.createElement("Scene");
 				self.scene.setAttribute("onbackgroundclicked", "bgroundClick(event);");
-				self.scene.setAttribute("dopickpass", false);
+				//self.scene.setAttribute("dopickpass", false);
 				self.viewer.appendChild(self.scene);
 
 				self.pinShader = new PinShader(self.scene);
@@ -522,11 +522,32 @@ var Viewer = {};
 			ViewerUtil.onEvent("onMouseDown", functionToBind);
 		};
 
+		this.offMouseDown = function(functionToBind) {
+			ViewerUtil.offEvent("onMouseDown", functionToBind);
+		};
+
 		this.onMouseMove = function(functionToBind) {
 			ViewerUtil.onEvent("onMouseMove", functionToBind);
 		};
 
-		this.mouseDownPickPoint = function()
+		this.offMouseMove = function(functionToBind) {
+			ViewerUtil.offEvent("offMouseMove", functionToBind);
+		};
+
+		this.pickPoint = function(x, y, fireEvent)
+		{
+			fireEvent = (typeof fireEvent === undefined) ? false : fireEvent;
+
+			self.getViewArea()._doc.ctx.pickValue(self.getViewArea(), x,y);
+
+			if (fireEvent)
+			{
+				// Simulate a mouse down pick point
+				self.mouseDownPickPoint({offsetX: x, offsetY: y});
+			}
+		};
+
+		this.mouseDownPickPoint = function(event)
 		{
 			var viewArea = self.getViewArea();
 			var pickingInfo = viewArea._pickingInfo;
@@ -565,7 +586,7 @@ var Viewer = {};
 							position: pickingInfo.pickPos,
 							normal: pickingInfo.pickNorm,
 							trans: trans,
-							screenPos: [viewArea._pressX, viewArea._pressY]
+							screenPos: [event.offsetX, event.offsetY]
 						});
 					} else {
 						callback(self.EVENT.PICK_POINT, {
@@ -587,7 +608,7 @@ var Viewer = {};
 				var viewArea = self.getViewArea();
 				viewArea._scene._nameSpace.doc.ctx.pickValue(viewArea, event.clientX, event.clientY, 1);
 			}
-		}
+		};
 
 		this.onMouseMove(this.mouseMovePoint);
 
@@ -1746,58 +1767,126 @@ var Viewer = {};
 			}
 		};
 
+		this.lineStarted       = false;
+		this.measureCoords     = [null, null];
+		this.measureLine       = null;
+		this.measureLineCoords = null;
+
+		this.measureMouseMove = function(event)
+		{
+			//self.pickPoint(event.offsetX, event.offsetY, false);
+
+			var viewArea = self.getViewArea();
+			var pickingInfo = viewArea._pickingInfo;
+
+			self.measureCoords[1] = pickingInfo.pickPos;
+			self.updateMeasureLine();
+		};
+
+		this.measureMouseDown = function(event)
+		{
+			var viewArea = self.getViewArea();
+			var pickingInfo = viewArea._pickingInfo;
+
+			if (!self.lineStarted)
+			{
+				self.measureCoords[0] = pickingInfo.pickPos;
+				self.lineStarted      = true;
+
+				self.createMeasureLine();
+				self.onMouseMove(self.measureMouseMove);
+			} else {
+				self.measureCoords[1] = pickingInfo.pickPos;
+				self.lineStarted      = false;
+
+				self.offMouseMove(self.measureMouseMove);
+			}
+		};
+
 		this.measureMode = function (on) {
 			var element = document.getElementById("x3dom-default-canvas");
 			if (on) {
+				self.inMeasureMode   = true;
 				element.style.cursor = "crosshair";
-			}
-			else {
-				this.deleteMeasureLine();
-				element.style.cursor = "-webkit-grab";
-			}
-		}
+				self.onMouseDown(self.measureMouseDown);
 
-		this.drawMeasureLine = function (coords) {
-			var line,
-				lineCoords,
-				lineMat,
-				lineDepth,
+				self.highlightObjects();
+
+				// Switch off the pick point functionality
+				self.offMouseDown(self.mouseDownPickPoint);
+			} else {
+				self.inMeasureMode   = false;
+				self.deleteMeasureLine();
+				element.style.cursor = "-webkit-grab";
+				self.offMouseDown(self.measureMouseDown);
+				self.offMouseMove(self.measureMouseMove);
+
+				// Restore the previous functionality
+				self.onMouseDown(self.mouseDownPickPoint);
+			}
+		};
+
+		this.createMeasureLine = function() {
+			if (self.measureLine !== null)
+			{
+				self.deleteMeasureLine();
+			}
+
+			var lineDepth,
 				lineApp,
-				shape,
-				transform;
+				line,
+				colors;
 
 			line = document.createElement("LineSet");
-			line.setAttribute("vertexCount", 2);
+			line.setAttribute("vertexCount", 8);
 
-			lineCoords = document.createElement("Coordinate");
-			lineCoords.setAttribute("point", coords[0].x + " " + coords[0].y + " " + coords[0].z + ", " + coords[1].x + " " + coords[1].y + " " + coords[1].z);
-			line.appendChild(lineCoords);
+			self.measureLineCoords = document.createElement("Coordinate");
+			self.measureLineCoords.setAttribute("point", "0 0 0,0 0 0,0 0 0,0 0 0,0 0 0,0 0 0,0 0 0,0 0 0");
+			line.appendChild(self.measureLineCoords);
 
-			lineMat = document.createElement("Material");
-			lineMat.setAttribute("emissiveColor", "1 1 1");
+			colors = document.createElement("Color");
+			colors.setAttribute("color", "1 0 0,1 0 0,0 1 0,0 1 0,0 0 1,0 0 1, 1 1 1, 1 1 1");
+			line.appendChild(colors);
 
-			lineDepth = document.createElement("DepthMode");
-			lineDepth.setAttribute("depthFunc", "ALWAYS");
+			self.measureLine = document.createElement("Shape");
+			self.measureLine.appendChild(lineApp);
+			self.measureLine.appendChild(line);
 
-			lineApp = document.createElement("Appearance");
-			lineApp.appendChild(lineMat);
-			lineApp.appendChild(lineDepth);
+			self.scene.appendChild(self.measureLine);
+		};
 
-			shape = document.createElement("Shape");
-			shape.appendChild(lineApp);
-			shape.appendChild(line);
+		this.updateMeasureLine = function()
+		{
+			if (self.lineStarted)
+			{
+				var coordString = "";
 
-			transform = document.createElement("Transform");
-			transform.setAttribute("id", "measureLine");
-			transform.appendChild(shape);
+				if (self.measureCoords[0] !== null && self.measureCoords[1] !== null)
+				{
+					var startCoordArray = self.measureCoords[0].toGL();
+					var endCoordArray   = self.measureCoords[1].toGL();
 
-			self.scene.appendChild(transform);
+					coordString += startCoordArray.join(" ") + ",";
+					coordString += startCoordArray[0] + " " + startCoordArray[1] + " " + endCoordArray[2] + ",";
+					coordString += startCoordArray[0] + " " + startCoordArray[1] + " " + endCoordArray[2] + ",";
+					coordString += endCoordArray[0] + " " + startCoordArray[1] + " " + endCoordArray[2] + ",";
+					coordString += endCoordArray[0] + " " + startCoordArray[1] + " " + endCoordArray[2] + ",";
+					coordString += endCoordArray.join(" ") + ",";
+					coordString += endCoordArray.join(" ") + ",";
+					coordString += startCoordArray.join(" ");
+
+					console.log("CS: " + coordString);
+
+					self.measureLineCoords.setAttribute("point", coordString);
+				}
+			}
 		};
 
 		this.deleteMeasureLine = function () {
-			var measureLine = document.getElementById("measureLine");
-			if (measureLine !== null) {
-				measureLine.parentElement.removeChild(measureLine);
+			if (self.measureLine !== null) {
+				self.measureLine.parentElement.removeChild(self.measureLine);
+				self.measureLine = null;
+				self.measureLineCoords = null;
 			}
 		}
 
@@ -1831,7 +1920,7 @@ var Viewer = {};
 
 			return zoomLevel;
 
-		}
+		};
 
 		// Append building models and map tile images
 		this.appendMapTileByViewPoint = function(noDraw){
@@ -1958,8 +2047,6 @@ var Viewer = {};
 				console.log('Looking to inf');
 			}
 
-
-
 			var startX = Math.ceil(Math.min.apply(Math, coordsX) / roundUpPlace) * roundUpPlace;
 			var endX = Math.ceil(Math.max.apply(Math, coordsX) / roundUpPlace) * roundUpPlace;
 			//console.log('startX, endX', startX, endX);
@@ -1989,7 +2076,6 @@ var Viewer = {};
 				}
 			}
 
-
 			//var xMidPoint = this._roundUpToTen((startX + endX) / 2);
 			var xMidPoint = this._roundUpToTen(camera[0]);
 			//console.log('xMidPoint', xMidPoint);
@@ -2017,8 +2103,6 @@ var Viewer = {};
 					}
 				}
 			}
-
-
 
 			// map images
 			//first step
@@ -2219,13 +2303,13 @@ var Viewer = {};
 
 
 		this._hasSameSign = function(a, b){
-			return a <= 0 && b <= 0 || a >=0 && b >= 0
+			return a <= 0 && b <= 0 || a >=0 && b >= 0;
 		};
 
 		this._roundUpToTen = function(n){
 			var roundUpPlace = 10;
 			return Math.ceil(n / roundUpPlace) * roundUpPlace;
-		}
+		};
 
 		// TO-DO: Move helper functions to somewhere else?
 		//length 1 = 1m, 2 = 10m, 3 = 100m, 4 = 1km, 5 = 10km
@@ -2245,12 +2329,12 @@ var Viewer = {};
 
 		this._tile2long = function (x, z) {
 			return (x/Math.pow(2,z)*360-180);
-		}
+		};
 
 		this._tile2lat = function (y, z) {
 			var n=Math.PI-2*Math.PI*y/Math.pow(2,z);
 			return (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n))));
-		}
+		};
 
 		this._degToRad = function(degrees) {
 			return degrees * Math.PI / 180;
@@ -2382,7 +2466,7 @@ var Viewer = {};
 				+ Math.pow(vec[1], 2)
 				+ Math.pow(vec[2], 2)
 			);
-		}
+		};
 
 		this.translateTo = function(lat, lon, height){
 			if(!self.originBNG){
