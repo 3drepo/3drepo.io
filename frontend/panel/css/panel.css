@@ -110,17 +110,6 @@ panel-card #panelCardContainer {
   height: 100%;
 }
 
-panel-card .panelCardFilter {
-  opacity: 0.7;
-}
-panel-card .panelCardFilter md-icon {
-  margin-left: 12px;
-  outline: none;
-}
-panel-card .panelCardFilter md-icon:hover {
-  cursor: pointer;
-}
-
 panel-card #helpButton {
   position: absolute;
   top: -20px;
@@ -156,6 +145,26 @@ panel-card .cardInfo md-icon {
   width: 16px;
   height: 16px;
 }
+
+/** Panel Card Filter ****************************************************************************************************/
+panel-card-filter input {
+  background: rgb(63,81,181);
+  border: none;
+  color: white;
+  border-bottom: 1px solid white;
+  outline: none;
+  margin-top: -5px;
+  font-size: 18px;
+}
+panel-card-filter md-icon {
+  margin-left: -16px;
+  font-size: 18px !important;
+  outline: none;
+}
+panel-card-filter md-icon:hover {
+  cursor: pointer;
+}
+
 
 /** Panel Card Add ****************************************************************************************************/
 panel-card-add {

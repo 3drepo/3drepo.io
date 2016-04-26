@@ -52,22 +52,23 @@
             pen_size = initialPenSize,
             initialPenIndicatorSize = 20,
             penIndicatorSize = initialPenIndicatorSize,
-            mouseWheelDirectionUp = null;
+            mouseWheelDirectionUp = null,
+            hasDrawnOnCanvas = false;
 
         /*
          * Init
          */
         $timeout(function () {
             if (angular.isDefined(vm.data)) {
-                vm.scribble = 'data:image/png;base64,' + vm.data.scribble;
-                //vm.scribble = "/public/images/scribble_test.png";
+                if (vm.data.hasOwnProperty("scribble")) {
+                    vm.scribble = 'data:image/png;base64,' + vm.data.scribble;
+                }
             }
             else {
                 canvas = angular.element($element[0].querySelector('#issueAreaCanvas'));
                 myCanvas = document.getElementById("issueAreaCanvas");
                 penIndicator = angular.element($element[0].querySelector("#issueAreaPenIndicator"));
                 vm.pointerEvents = "auto";
-                vm.drawMode = true;
                 vm.showPenIndicator = false;
                 resizeCanvas();
                 initCanvas(myCanvas);
@@ -93,9 +94,12 @@
                 }
             }
             else if (event.type === EventService.EVENT.GET_ISSUE_AREA_PNG) {
-                var png = myCanvas.toDataURL('image/png');
-                // Remove base64 header text
-                png = png.substring(png.indexOf(",") + 1);
+                var png = null;
+                if (hasDrawnOnCanvas) {
+                    png = myCanvas.toDataURL('image/png');
+                    // Remove base64 header text
+                    png = png.substring(png.indexOf(",") + 1);
+                }
                 event.value.promise.resolve(png);
             }
         });
@@ -176,6 +180,9 @@
                     })
                 }
                 else {
+                    if ((last_mouse_drag_x !== -1) && (!hasDrawnOnCanvas)) {
+                        hasDrawnOnCanvas = true;
+                    }
                     updateImage(canvas);
                 }
 
@@ -235,7 +242,6 @@
             }
 
             // redraw the canvas...
-            console.log(pen_size);
             context.lineWidth = pen_size;
 
             // Draw line
@@ -264,7 +270,7 @@
          * Set up placing of the pin
          */
         function setupPin () {
-            vm.drawMode = false;
+            console.log(1);
             vm.canvasPointerEvents = "none";
         }
 
@@ -272,7 +278,6 @@
          * Erase the canvas
          */
         function setupErase () {
-            vm.drawMode = true;
             var context = myCanvas.getContext("2d");
             context.globalCompositeOperation = "destination-out";
             pen_col = "rgba(0, 0, 0, 1)";
@@ -283,7 +288,6 @@
          * Set up drawing
          */
         function setupScribble () {
-            vm.drawMode = true;
             var context = myCanvas.getContext("2d");
             context.globalCompositeOperation = "source-over";
             pen_col = "#FF0000";

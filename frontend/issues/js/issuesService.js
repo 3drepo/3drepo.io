@@ -157,39 +157,21 @@
 			return deferred.promise;
 		};
 
-		function doPost(issue, data) {
-			var deferred = $q.defer();
-			url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue.parent);
-			config = {
-				withCredentials: true
-			};
-			data._id = issue._id;
-			$http.post(url, {
-					data: JSON.stringify(data)
-				}, config)
-				.then(function(response) {
-					deferred.resolve(response.data);
-				});
-			return deferred.promise;
-		}
-
 		/**
 		 * Handle PUT requests
 		 * @param issue
 		 * @param data
-		 * @param urlEnd
 		 * @returns {*}
 		 */
-		function doPut(issue, data, urlEnd) {
+		function doPut(issue, data) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/" + urlEnd),
+				url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue._id + ".json"),
 				config = {
 					withCredentials: true
 				};
 			$http.put(url, {data: JSON.stringify(data)}, config)
 				.then(function (response) {
-					console.log(response);
-					deferred.resolve(response);
+					deferred.resolve(response.data);
 				});
 			return deferred.promise;
 		}
@@ -199,7 +181,7 @@
 			if (issue.hasOwnProperty("closed")) {
 				closed = !issue.closed;
 			}
-			return doPost(issue, {
+			return doPut(issue, {
 				closed: closed,
 				number: issue.number
 			});
@@ -211,19 +193,19 @@
 				{
 					assigned_roles: issue.assigned_roles,
 					number: issue.number
-				},
-				"issues/" + issue._id + ".json");
+				}
+			);
 		};
 
 		obj.saveComment = function(issue, comment) {
-			return doPost(issue, {
+			return doPut(issue, {
 				comment: comment,
 				number: issue.number
 			});
 		};
 
 		obj.editComment = function(issue, comment, commentIndex) {
-			return doPost(issue, {
+			return doPut(issue, {
 				comment: comment,
 				number: issue.number,
 				edit: true,
@@ -232,7 +214,7 @@
 		};
 
 		obj.deleteComment = function(issue, index) {
-			return doPost(issue, {
+			return doPut(issue, {
 				comment: "",
 				number: issue.number,
 				delete: true,
@@ -241,7 +223,7 @@
 		};
 
 		obj.setComment = function(issue, commentIndex) {
-			return doPost(issue, {
+			return doPut(issue, {
 				comment: "",
 				number: issue.number,
 				set: true,

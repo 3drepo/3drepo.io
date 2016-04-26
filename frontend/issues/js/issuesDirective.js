@@ -30,7 +30,6 @@
 				project: "=",
 				branch:  "=",
 				revision: "=",
-				show: "=",
 				filterText: "=",
 				showAdd: "=",
 				canAdd: "=",
@@ -45,9 +44,9 @@
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$timeout", "$filter", "$window", "$q", "IssuesService", "EventService", "Auth", "serverConfig"];
+	IssuesCtrl.$inject = ["$scope", "$timeout", "$filter", "$window", "$q", "$element", "IssuesService", "EventService", "Auth", "serverConfig"];
 
-	function IssuesCtrl($scope, $timeout, $filter, $window, $q, IssuesService, EventService, Auth, serverConfig) {
+	function IssuesCtrl($scope, $timeout, $filter, $window, $q, $element, IssuesService, EventService, Auth, serverConfig) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -164,8 +163,7 @@
 		 */
 		$scope.$watch("vm.showAdd", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
-				setupAdd();
-				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: "scribble"});
+				setupAdd("scribble");
 			}
 		});
 
@@ -244,8 +242,7 @@
 			} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_ADD) {
 				if (event.value.on) {
 					vm.show = true;
-					setupAdd();
-					EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: event.value.type});
+					setupAdd(event.value.type);
 				}
 				else {
 					vm.hideItem = true;
@@ -383,9 +380,9 @@
 				pin, pinData,
 				roleAssigned;
 
+			console.log(vm.issues);
 			for (i = 0, length = vm.issues.length; i < length; i += 1) {
-				if (vm.issues[i].position !== null) {
-					console.log(vm.issues[i].position);
+				if (vm.issues[i].object_id !== null) {
 					pin = angular.element(document.getElementById(vm.issues[i]._id));
 					if (pin.length > 0) {
 						// Existing pin
@@ -475,13 +472,13 @@
 
 				// Set the height of the content
 				if (vm.issuesToShow.length === 0) {
-					vm.showIssuesInfo = true;
+					vm.toShow = "showInfo";
 					vm.issuesInfo = "There are no issues that contain the filter text";
 				}
 				else {
-					vm.showIssuesInfo = false;
-					setContentHeight();
+					vm.toShow = "showIssues";
 				}
+				setContentHeight();
 			}
 		});
 
@@ -582,7 +579,6 @@
 					var issueAreaPngPromise = $q.defer();
 					EventService.send(EventService.EVENT.GET_ISSUE_AREA_PNG, {promise: issueAreaPngPromise});
 					issueAreaPngPromise.promise.then(function (png) {
-						console.log(png);
 						issue = {
 							name: vm.title,
 							objectId: null,
@@ -654,6 +650,7 @@
 						break;
 					}
 				}
+				vm.toShow = "showIssues";
 				setupIssuesToShow();
 				vm.showPins();
 				setContentHeight();
@@ -790,12 +787,21 @@
 		/**
 		 * Set up adding an issue
 		 */
-		function setupAdd () {
+		function setupAdd (issueAreaType) {
 			vm.toShow = "showAdd";
 			vm.onShowItem();
 			vm.canAdd = false;
 			setContentHeight();
 			setPinToAssignedRoleColours(vm.selectedIssue);
+
+			// Set default issue title and select it
+			vm.title = "Issue " + (vm.issues.length + 1);
+			$timeout(function () {
+				($element[0].querySelector("#issueAddTitle")).select();
+			});
+
+			// Show the issue area
+			EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: issueAreaType});
 		}
 	}
 }());

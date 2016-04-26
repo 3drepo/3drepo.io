@@ -37,7 +37,7 @@ div(ng-switch="vm.toShow")
 	// Add issue
 	#issuesAddContainer(ng-switch-when="showAdd")
 		md-input-container.md-block(md-no-float="")
-			input(placeholder="Title", ng-model="vm.title")
+			input#issueAddTitle(placeholder="Title", ng-model="vm.title")
 		md-input-container.md-block(md-no-float="")
 			textarea(placeholder="Comment", ng-model="vm.comment")
 		div(layout="row")
