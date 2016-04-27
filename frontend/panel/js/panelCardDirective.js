@@ -145,6 +145,7 @@
 
 			element =
 				"<" + vm.contentData.type + " " +
+				"show='vm.contentData.show' " +
 				"on-content-height-request='vm.onContentHeightRequest(height)' " +
 				"on-show-item='vm.showItem()' " +
 				"hide-item='vm.hideSelectedItem' " +

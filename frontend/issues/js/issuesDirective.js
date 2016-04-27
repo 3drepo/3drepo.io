@@ -31,6 +31,7 @@
 				branch:  "=",
 				revision: "=",
 				filterText: "=",
+				show: "=",
 				showAdd: "=",
 				canAdd: "=",
 				selectedMenuOption: "=",
