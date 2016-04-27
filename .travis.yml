@@ -11,6 +11,7 @@ addons:
       - g++-4.8
 services: mongodb
 before_install: 
+    - mongod --version
     - npm install -g grunt-cli
     - sleep 15
     - cd backend/test/integrated/
