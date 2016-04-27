@@ -1,3 +1,2 @@
 md-button.md-icon-button(aria-label="Visibility", ng-click="vm.toggleVisible($event)")
-	md-icon.angular-material-icons(ng-if='vm.visible') visibility
-	md-icon.angular-material-icons(ng-if='!vm.visible') visibility_off
+	md-icon.angular-material-icons {{vm.icon}}

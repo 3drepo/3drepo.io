@@ -222,7 +222,9 @@
 					$compile(issueArea)($scope);
 				}
 				else {
-					issueArea.remove();
+					if (angular.isDefined(issueArea)) {
+						issueArea.remove();
+					}
 				}
 			}
 			else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
