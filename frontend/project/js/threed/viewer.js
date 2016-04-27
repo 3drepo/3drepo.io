@@ -554,46 +554,45 @@ var Viewer = {};
 
 			if (pickingInfo.pickObj)
 			{
+				var account, project;
+				var projectParts = null;
 
-					var account, project;
-					var projectParts = null;
-
-					if (pickingInfo.pickObj._xmlNode)
+				if (pickingInfo.pickObj._xmlNode)
+				{
+					if (pickingInfo.pickObj._xmlNode.hasAttribute("id"))
 					{
-						if (pickingInfo.pickObj._xmlNode.hasAttribute("id"))
-						{
-							projectParts = pickingInfo.pickObj._xmlNode.getAttribute("id");
-						}
-					} else {
-						projectParts = pickingInfo.pickObj.pickObj._xmlNode.getAttribute("id").split("__");
+						projectParts = pickingInfo.pickObj._xmlNode.getAttribute("id").split("__");
 					}
+				} else {
+					projectParts = pickingInfo.pickObj.pickObj._xmlNode.getAttribute("id").split("__");
+				}
 
-					if (projectParts)
-					{
-						var objectID = pickingInfo.pickObj.partID ?
-							pickingInfo.pickObj.partID :
-							projectParts[2];
+				if (projectParts)
+				{
+					var objectID = pickingInfo.pickObj.partID ?
+						pickingInfo.pickObj.partID :
+						projectParts[2];
 
-						account = projectParts[0];
-						project = projectParts[1];
+					account = projectParts[0];
+					project = projectParts[1];
 
-						var inlineTransName = ViewerUtil.escapeCSSCharacters(account + "__" + project);
-						var projectInline = self.inlineRoots[inlineTransName];
-						var trans = projectInline._x3domNode.getCurrentTransform();
+					var inlineTransName = ViewerUtil.escapeCSSCharacters(account + "__" + project);
+					var projectInline = self.inlineRoots[inlineTransName];
+					var trans = projectInline._x3domNode.getCurrentTransform();
 
-						callback(self.EVENT.PICK_POINT, {
-							id: objectID,
-							position: pickingInfo.pickPos,
-							normal: pickingInfo.pickNorm,
-							trans: trans,
-							screenPos: [event.offsetX, event.offsetY]
-						});
-					} else {
-						callback(self.EVENT.PICK_POINT, {
-							position: pickingInfo.pickPos,
-							normal: pickingInfo.pickNorm
-						});
-					}
+					callback(self.EVENT.PICK_POINT, {
+						id: objectID,
+						position: pickingInfo.pickPos,
+						normal: pickingInfo.pickNorm,
+						trans: trans,
+						screenPos: [event.offsetX, event.offsetY]
+					});
+				} else {
+					callback(self.EVENT.PICK_POINT, {
+						position: pickingInfo.pickPos,
+						normal: pickingInfo.pickNorm
+					});
+				}
 			}
 		};
 
@@ -1772,37 +1771,6 @@ var Viewer = {};
 		this.measureLine       = null;
 		this.measureLineCoords = null;
 
-		this.measureMouseMove = function(event)
-		{
-			//self.pickPoint(event.offsetX, event.offsetY, false);
-
-			var viewArea = self.getViewArea();
-			var pickingInfo = viewArea._pickingInfo;
-
-			self.measureCoords[1] = pickingInfo.pickPos;
-			self.updateMeasureLine();
-		};
-
-		this.measureMouseDown = function(event)
-		{
-			var viewArea = self.getViewArea();
-			var pickingInfo = viewArea._pickingInfo;
-
-			if (!self.lineStarted)
-			{
-				self.measureCoords[0] = pickingInfo.pickPos;
-				self.lineStarted      = true;
-
-				self.createMeasureLine();
-				self.onMouseMove(self.measureMouseMove);
-			} else {
-				self.measureCoords[1] = pickingInfo.pickPos;
-				self.lineStarted      = false;
-
-				self.offMouseMove(self.measureMouseMove);
-			}
-		};
-
 		this.measureMode = function (on) {
 			var element = document.getElementById("x3dom-default-canvas");
 			if (on) {
@@ -1848,6 +1816,12 @@ var Viewer = {};
 			colors.setAttribute("color", "1 0 0,1 0 0,0 1 0,0 1 0,0 0 1,0 0 1, 1 1 1, 1 1 1");
 			line.appendChild(colors);
 
+			lineDepth = document.createElement("DepthMode");
+			lineDepth.setAttribute("depthFunc", "ALWAYS");
+
+			lineApp = document.createElement("Appearance");
+			lineApp.appendChild(lineDepth);
+
 			self.measureLine = document.createElement("Shape");
 			self.measureLine.appendChild(lineApp);
 			self.measureLine.appendChild(line);
@@ -1881,6 +1855,39 @@ var Viewer = {};
 				}
 			}
 		};
+
+		this.measureMouseMove = function(event)
+		{
+			//self.pickPoint(event.offsetX, event.offsetY, false);
+
+			var viewArea = self.getViewArea();
+			var pickingInfo = viewArea._pickingInfo;
+
+			self.measureCoords[1] = pickingInfo.pickPos;
+			self.updateMeasureLine();
+		};
+
+		this.measureMouseDown = function(event)
+		{
+			var viewArea = self.getViewArea();
+			var pickingInfo = viewArea._pickingInfo;
+
+			if (!self.lineStarted)
+			{
+				self.measureCoords[0] = pickingInfo.pickPos;
+				self.lineStarted      = true;
+
+				self.createMeasureLine();
+				self.onMouseMove(self.measureMouseMove);
+			} else {
+				self.measureCoords[1] = pickingInfo.pickPos;
+				self.lineStarted      = false;
+
+				self.offMouseMove(self.measureMouseMove);
+			}
+		};
+
+
 
 		this.deleteMeasureLine = function () {
 			if (self.measureLine !== null) {
