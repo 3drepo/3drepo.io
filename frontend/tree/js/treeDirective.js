@@ -55,7 +55,8 @@
 			i = 0,
 			length = 0,
 			currentSelectedNode = null,
-			currentScrolledToNode = null;
+			currentScrolledToNode = null,
+			highlightSelectedViewerObject = true;
 
 		/*
 		 * Init
@@ -255,7 +256,8 @@
 
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
-				if (event.value.source !== "tree")
+				console.log(event);
+				if ((event.value.source !== "tree") && highlightSelectedViewerObject)
 				{
 					var objectID = event.value.id;
 					var path = vm.idToPath[objectID].split("__");
@@ -270,6 +272,11 @@
 					currentSelectedNode.selected = false;
 					currentSelectedNode = null;
 				}
+			}
+			else if ((event.type === EventService.EVENT.PANEL_CARD_ADD_MODE) ||
+					 (event.type === EventService.EVENT.PANEL_CARD_EDIT_MODE)) {
+				// If another card is in modify mode don't show a node if an object is clicked in the viewer
+				highlightSelectedViewerObject = !event.value.on;
 			}
 		});
 

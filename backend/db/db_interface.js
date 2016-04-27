@@ -696,8 +696,34 @@ DBInterface.prototype.getUserInfo = function(username, callback) {
 					callback(responseCodes.OK, user);
 				});
 				*/
+				
+				// get project timestamp (if any)
+				var promises = [];
+				user.projects.forEach(project => {
+					promises.push(new Promise((resolve) => {
+						self.getHeadRevision(project.account, project.project, 'master', (res, doc) => {
+							project.timestamp = doc ? doc[0].timestamp : null;
+							resolve();
+						});
+					}));
+				});
 
-				callback(responseCodes.OK, user);
+				//sort project by timestamp
+				user.projects.sort(function(a, b){
+					if(!a.timestamp) {
+						return 1;
+					} else if(!b.timestamp) {
+						return 0;
+					} else {
+						return b.timestamp - a.timestamp;
+					}
+				});
+
+				Promise.all(promises).then(() => {
+					callback(responseCodes.OK, user);
+				});
+
+				// callback(responseCodes.OK, user);
 			});
 
 		} else {

@@ -30,6 +30,7 @@
 				project: "=",
 				show: "=",
 				showAdd: "=",
+				showEdit: "=",
 				canAdd: "=",
 				onContentHeightRequest: "&",
 				onShowItem : "&",
@@ -98,8 +99,9 @@
 		$scope.$watch("vm.hideItem", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showGroups";
-				vm.showAdd = false;
+				vm.showAdd = false; // So that showing add works
 				vm.canAdd = true;
+				vm.showEdit = false; // So that closing edit works
 				setContentHeight();
 				setSelectedGroupHighlightStatus(false);
 				vm.selectedGroup = null;
@@ -174,6 +176,7 @@
 			vm.canAdd = false;
 			vm.editingGroup = false;
 			vm.showObjects = true;
+			vm.showEdit = true;
 			setContentHeight();
 			doHideAll(hideAll);
 			setSelectedGroupHighlightStatus(true);

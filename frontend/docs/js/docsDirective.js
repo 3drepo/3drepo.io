@@ -50,49 +50,12 @@
 		vm.showDocsGetProgress = false;
 		vm.onContentHeightRequest({height: 80});
 
-		/**
-		 * Get any documents associated with an object
-		 *
-		 * @param object
-		 */
-		function getObjectsDocs (object) {
-			var noDocumentsHeight = 140; // Make it large enough for long object names
-
-			vm.docs = [];
-			vm.showInfo = false;
-			vm.progressInfo = "Loading documents for " + object.name;
-			vm.showDocsGetProgress = true;
-			promise = DocsService.getDocs(object.account, object.project, object.id);
-			promise.then(function (data) {
-				var docType;
-				vm.showDocsGetProgress = false;
-				vm.docs = data;
-				vm.showInfo = (Object.keys(vm.docs).length === 0);
-				if (vm.showInfo) {
-					vm.info = "No documents exist for selected object";
-					vm.onContentHeightRequest({height: noDocumentsHeight});
-				}
-				else {
-					allDocTypesHeight = 0;
-					// Open all doc types initially
-					for (docType in vm.docs) {
-						if (vm.docs.hasOwnProperty(docType)) {
-							vm.docs[docType].show = true;
-							allDocTypesHeight += docTypeHeight;
-						}
-					}
-					// Set the content height
-					//vm.onContentHeightRequest({height: allDocTypesHeight});
-					setContentHeight();
-				}
-			});
-		}
-
 		/*
 		 * Set up event watching
 		 */
 		$scope.$watch(EventService.currentEvent, function (event) {
 			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+				// Get any documents associated with an object
 				var object = event.value;
 				promise = DocsService.getDocs(object.account, object.project, object.id);
 				promise.then(function (data) {

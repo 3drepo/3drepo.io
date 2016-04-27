@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.factory("AccountService", AccountService);
 
-	AccountService.$inject = ["$http", "$q", "serverConfig"];
+	AccountService.$inject = ["$http", "$q", "serverConfig", "UtilsService"];
 
-	function AccountService($http, $q, serverConfig) {
+	function AccountService($http, $q, serverConfig, UtilsService) {
 		var obj = {},
 			deferred,
 			bid4free;
@@ -40,7 +40,6 @@
 				.then(function (response) {
 					var i, length,
 						project, projectsGrouped;
-					console.log(response);
 
 					// Groups projects under accounts
 					projectsGrouped = {};
@@ -49,7 +48,12 @@
 						if (!(project.account in projectsGrouped)) {
 							projectsGrouped[project.account] = [];
 						}
-						projectsGrouped[project.account].push(project.project);
+						projectsGrouped[project.account].push(
+							{
+								name: project.project,
+								timestamp: UtilsService.formatTimestamp(project.timestamp)
+							}
+						);
 					}
 
 					accountData = response.data;

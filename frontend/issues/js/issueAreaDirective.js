@@ -94,11 +94,15 @@
                 }
             }
             else if (event.type === EventService.EVENT.GET_ISSUE_AREA_PNG) {
+                console.log(111111111111);
                 var png = null;
                 if (hasDrawnOnCanvas) {
+                    /*
                     png = myCanvas.toDataURL('image/png');
                     // Remove base64 header text
                     png = png.substring(png.indexOf(",") + 1);
+                    */
+                    png = new Date();
                 }
                 event.value.promise.resolve(png);
             }

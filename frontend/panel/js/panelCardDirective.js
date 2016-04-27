@@ -86,15 +86,25 @@
 		});
 
 		/*
+		 * Watch for card in edit mode
+		 */
+		$scope.$watch("vm.showEdit", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				EventService.send(EventService.EVENT.PANEL_CARD_EDIT_MODE, {on: newValue, type: vm.contentData.type});
+			}
+		});
+
+		/*
 		 * Set up event watching
 		 */
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if ((event.type === EventService.EVENT.TOGGLE_ISSUE_ADD) && (vm.contentData.type === "issues")) {
 				toggleAdd(event.value.on);
 			}
-			else if (event.type === EventService.EVENT.PANEL_CARD_IN_ADD_MODE) {
-				// Only one card can be in add mode at a time
-				if (event.value !== vm.contentData.type) {
+			else if ((event.type === EventService.EVENT.PANEL_CARD_ADD_MODE) ||
+					 (event.type === EventService.EVENT.PANEL_CARD_EDIT_MODE)) {
+				// Only one card can be in modify mode at a time
+				if (event.value.on && (event.value.type !== vm.contentData.type)) {
 					vm.hideItem();
 				}
 			}
@@ -149,6 +159,7 @@
 				"on-content-height-request='vm.onContentHeightRequest(height)' " +
 				"on-show-item='vm.showItem()' " +
 				"hide-item='vm.hideSelectedItem' " +
+				"show-edit='vm.showEdit' " +
 				"account='vm.account' " +
 				"project='vm.project' " +
 				"branch='vm.branch' " +
@@ -280,15 +291,15 @@
 					showToolbarOptions(["filter", "menu"], false);
 					showToolbarOptions(["pin", "scribble", "erase"], true);
 				}
-				EventService.send(EventService.EVENT.PANEL_CARD_IN_ADD_MODE, vm.contentData.type);
+				EventService.send(EventService.EVENT.PANEL_CARD_ADD_MODE, {on: true, type: vm.contentData.type});
 			}
 			else {
 				if (vm.contentData.type === "issues") {
 					showToolbarOptions(["pin", "scribble", "erase"], false);
 					showToolbarOptions(["filter", "menu"], true);
 				}
+				EventService.send(EventService.EVENT.PANEL_CARD_ADD_MODE, {on: false});
 			}
-
 		}
 	}
 }());

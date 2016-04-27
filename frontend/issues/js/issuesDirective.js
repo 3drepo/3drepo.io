@@ -33,6 +33,7 @@
 				filterText: "=",
 				show: "=",
 				showAdd: "=",
+				showEdit: "=",
 				canAdd: "=",
 				selectedMenuOption: "=",
 				onContentHeightRequest: "&",
@@ -498,6 +499,7 @@
 					vm.toShow = "showIssues";
 					vm.showAdd = false; // So that showing add works
 					vm.canAdd = true;
+					vm.showEdit = false; // So that closing edit works
 
 					// Set the content height
 					setContentHeight();
@@ -529,6 +531,7 @@
 			vm.toShow = "showIssue";
 			vm.showAdd = false; // So that showing add works
 			vm.canAdd = false;
+			vm.showEdit = true;
 
 			// Selected issue
 			if (vm.selectedIssue !== null) {
