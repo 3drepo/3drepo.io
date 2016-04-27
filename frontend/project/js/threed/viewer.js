@@ -535,7 +535,7 @@ var Viewer = {};
 					{
 						if (pickingInfo.pickObj._xmlNode.hasAttribute("id"))
 						{
-							projectParts = pickingInfo.pickObj._xmlNode.getAttribute("id");
+							projectParts = pickingInfo.pickObj._xmlNode.getAttribute("id").split("__");
 						}
 					} else {
 						projectParts = pickingInfo.pickObj.pickObj._xmlNode.getAttribute("id").split("__");
@@ -1747,7 +1747,7 @@ var Viewer = {};
 			var zoomLevel;
 
 			for(var i=0; i < yToZoomLevel.length; i++){
-				
+
 				if(camera[1] >= yToZoomLevel[i].y){
 					zoomLevel = yToZoomLevel[i].zoomLevel;
 					break;
@@ -1843,12 +1843,12 @@ var Viewer = {};
 
 
 			// var p = self._drawPlaneOnZ([
-				
+
 			// 	[centrePoint[0] + 100, 10, centrePoint[1] + 100],
 			// 	[centrePoint[0] - 100, 10, centrePoint[1] + 100],
 			// 	[centrePoint[0] - 100, 10, centrePoint[1] - 100],
 			// 	[centrePoint[0] + 100, 10, centrePoint[1] - 100],
-				
+
 			// ], [1, 0, 0]);
 
 			// self.getScene().appendChild(p);
@@ -1858,7 +1858,7 @@ var Viewer = {};
 			console.log('centrePoint', centrePoint);
 			//convert centre point back to lat, long
 			var mapXY = [
-				self.findMapTileNoByPos(centrePoint[0] - mapImgPosInfo.offsetX), 
+				self.findMapTileNoByPos(centrePoint[0] - mapImgPosInfo.offsetX),
 				self.findMapTileNoByPos(centrePoint[1]  - mapImgPosInfo.offsetY)
 			];
 
@@ -1867,7 +1867,7 @@ var Viewer = {};
 			console.log('zxy', [mapXY[0] + mapImgPosInfo.slippyPoints.x, mapXY[1] + mapImgPosInfo.slippyPoints.y]);
 			console.log('z', self.getCurrentViewpointInfo().position[1]);
 			console.log(
-				self._tile2lat(mapXY[1] + mapImgPosInfo.slippyPoints.y, self.zoomLevel), 
+				self._tile2lat(mapXY[1] + mapImgPosInfo.slippyPoints.y, self.zoomLevel),
 				self._tile2long(mapXY[0] + mapImgPosInfo.slippyPoints.x, self.zoomLevel)
 			);
 
@@ -1937,7 +1937,7 @@ var Viewer = {};
 
 						var osRef = new OsGridRef(self.originBNG.easting + (x / self.meterPerPixel), self.originBNG.northing - (z / self.meterPerPixel));
 						var osrefno = self._OSRefNo(osRef, 3);
-						
+
 						self.appendMapTile(osrefno);
 					}
 				}
@@ -1997,7 +1997,7 @@ var Viewer = {};
 			// // 	[endX, 8, endZ],
 			// // ], [0, 0, 1]);
 
-			
+
 			// if(self._testP){
 			// 	self._testP.forEach(function(p){
 			// 		self.getScene().removeChild(p);
@@ -2007,7 +2007,7 @@ var Viewer = {};
 
 
 			// if(false){
-				
+
 			// 	self._testP.push(p);
 			// 	// self._testP.push(p2);
 			// 	// self._testP.push(p3);
@@ -2023,7 +2023,7 @@ var Viewer = {};
 			//  a----b
 
 			var a, b, c, d;
-			
+
 			a = coords[3];
 			b = coords[2];
 			c = coords[1];
@@ -2042,7 +2042,7 @@ var Viewer = {};
 
 			function LenVec2D(vecA, vecB){
 				return Math.sqrt(
-					Math.pow(vecA[0] - vecB[0], 2) + 
+					Math.pow(vecA[0] - vecB[0], 2) +
 					Math.pow(vecA[1] - vecB[1], 2)
 				);
 			}
@@ -2098,7 +2098,7 @@ var Viewer = {};
 				var stepX = imageSize / vertVecLen / 2;
 
 				for(var kx = -stepX; kx <= 1 + stepX && testCount < 200 ; kx += stepX){
-					
+
 					var coor = getCoorVertical(kx, ky);
 					//console.log('coor', coor);
 
@@ -2231,16 +2231,16 @@ var Viewer = {};
 			var mapSize = self.getSumSize(nextY) - self.getSumSize(y);
 
 			var corMapTileBNG = OsGridRef.latLonToOsGrid(new LatLon(
-				self._tile2lat(correspondingMapTile.y, mapImagePosInfo.zoomLevel), 
+				self._tile2lat(correspondingMapTile.y, mapImagePosInfo.zoomLevel),
 				self._tile2long(correspondingMapTile.x, mapImagePosInfo.zoomLevel)
 			));
 
 			//dx,dy of 3dmap tiles to map image tiles
 			var dx = osCoor.easting * self.meterPerPixel - (corMapTileBNG.easting  * self.meterPerPixel + mapSize / 2);
 			var dy = (corMapTileBNG.northing * self.meterPerPixel - mapSize / 2) - osCoor.northing * self.meterPerPixel;
- 
-			translate[0] = (correspondingMapTile.x - mapImagePosInfo.slippyPoints.x) * mapSize + dx + mapImagePosInfo.offsetX 
-			translate[2] = (correspondingMapTile.y - mapImagePosInfo.slippyPoints.y) * mapSize + dy + mapImagePosInfo.offsetY 
+
+			translate[0] = (correspondingMapTile.x - mapImagePosInfo.slippyPoints.x) * mapSize + dx + mapImagePosInfo.offsetX
+			translate[2] = (correspondingMapTile.y - mapImagePosInfo.slippyPoints.y) * mapSize + dy + mapImagePosInfo.offsetY
 
 
 			// if(!self.gltfDoms){
@@ -2334,7 +2334,7 @@ var Viewer = {};
 			var nx = mapXY.x - mapImagePosInfo.slippyPoints.x
 			var ny = mapXY.y - mapImagePosInfo.slippyPoints.y
 			console.log('translateMapXY', [nx, ny]);
-			
+
 
 
 			//cal offset of the target point to the nearest map tile image
@@ -2352,7 +2352,7 @@ var Viewer = {};
 
 
 			self.setCamera([self.getSumSize(nx) + mapImagePosInfo.offsetX + dx , height ,self.getSumSize(ny) + mapImagePosInfo.offsetY + dy],[0,-1,0],[0,0,-1]);
-			
+
 			self.appendMapTileByViewPoint();
 
 			self.setCamera([x,height,y],[0,-1,0],[0,0,-1], [x,0,y]);
@@ -2370,7 +2370,7 @@ var Viewer = {};
 
 		this.getMapSize = function(n){
 			var preN = n > 0 ? n - 1 : n + 1;
-			return this.getSumSize(n) - this.getSumSize(preN); 
+			return this.getSumSize(n) - this.getSumSize(preN);
 		}
 
 		//appr. version
@@ -2432,7 +2432,7 @@ var Viewer = {};
 		// 		while(true){
 		// 			if(self.getSumSize(n) <= pos && pos < self.getSumSize(n+1)){
 		// 				break;
-		// 			} 
+		// 			}
 		// 			n++;
 		// 		}
 		// 	} else {
@@ -2440,7 +2440,7 @@ var Viewer = {};
 		// 		while(true){
 		// 			if(self.getSumSize(n) <= pos && pos < self.getSumSize(n+1)){
 		// 				break;
-		// 			} 
+		// 			}
 		// 			n--;
 		// 		}
 		// 	}
@@ -2456,7 +2456,7 @@ var Viewer = {};
 
 			// http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Resolution_and_Scale
 			// set the size of a 256 map image tile. 1px = 1m
-			
+
 			if (!self.mapPosInfo){
 
 				console.log(self.getCurrentViewpointInfo());
@@ -2484,7 +2484,7 @@ var Viewer = {};
 					15:	4.7773,
 					16:	2.3887,
 					17:	1.1943,
-					18:	0.5972		
+					18:	0.5972
 				};
 
 				console.log('getmapinfo - settings', self.settings);
@@ -2516,7 +2516,7 @@ var Viewer = {};
 				};
 			}
 
-			
+
 			return self.mapPosInfo;
 
 		}
@@ -2524,7 +2524,7 @@ var Viewer = {};
 		//secret little functions to help in-browser alignment
 		this._moveStep = 10;
 		this._startMoveImages = function(){
-			
+
 			self._moveImagesListener = function(e){
 				if(e.code === 'ArrowUp'){
 					self._moveMapImages(0, -self._moveStep);
@@ -2549,9 +2549,9 @@ var Viewer = {};
 
 			self.sumD = self.sumD || [0, 0];
 			self.imagesDoms.forEach(function(dom){
-				
+
 				var t = dom.getAttribute('translation').split(' ');
-				
+
 				t.forEach(function(number, i){
 					t[i] = parseFloat(number);
 				});
@@ -2623,7 +2623,7 @@ var Viewer = {};
 			"			<coordinate point='" +  coordsFlatten.join(' ') + "'></coordinate>" +
 			"		</IndexedFaceSet>" +
 			"	</shape>";
-	
+
 			return containerNode.children[0];
 		};
 
@@ -2649,7 +2649,7 @@ var Viewer = {};
 			}
 
 			if(!self.addedMapImages[ox + ',' + oy]){
-				
+
 				var dom = self.createMapImageTile(size, x + ox, y + oy, [offsetX + self.getSumSizeForXRow(ox, oy), mapHeight, offsetY + self.getSumSize(oy)]);
 				self.imagesDoms.push(dom);
 				self.getScene().appendChild(dom);
