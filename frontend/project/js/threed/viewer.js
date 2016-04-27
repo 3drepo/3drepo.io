@@ -644,13 +644,6 @@ var Viewer = {};
 				}
 			}
 
-			//TO-DO: use proper way to check os building id
-			if(id.indexOf('-') === -1){
-				callback(self.EVENT.OS_BUILDING_CLICK,{
-					id : id
-				});
-			}
-
 			callback(self.EVENT.OBJECT_SELECTED, {
 				account: account,
 				project: project,
@@ -1770,7 +1763,4 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	ADD_PIN: "VIEWER_ADD_PIN",
 	MOVE_PIN: "VIEWER_MOVE_PIN",
 
-	//OS BUILDING CLICK
-	OS_BUILDING_CLICK: 'VIEWER_OS_BUILDING_CLICK',
-	UPDATE_URL: 'VIEWER_UPDATE_URL'
 };

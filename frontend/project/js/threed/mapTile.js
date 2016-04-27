@@ -16,6 +16,8 @@
  */
 
 var MapTile = {};
+// Global functions to be passed to X3DOM elements
+var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 (function() {
 	"use strict";
@@ -24,6 +26,12 @@ var MapTile = {};
 		this.viewer = viewer;
 		this.options = options;
 		this.eventCallback = eventCallback;
+
+		// add new event name to viewer
+		this.viewer.EVENT.OS_BUILDING_CLICK = 'VIEWER_OS_BUILDING_CLICK';
+		this.viewer.EVENT.UPDATE_URL = 'VIEWER_UPDATE_URL';
+
+		ViewerUtil.onEvent("os_clickBuildingObject", this.os_clickBuildingObject.bind(this));
 	}
 
 	MapTile.prototype.initCallback = function(viewer){
@@ -997,6 +1005,15 @@ var MapTile = {};
 		return layerPoint;
 	};
 
+	MapTile.prototype.os_clickBuildingObject = function(objEvent){
+
+		if (objEvent.partID) {
+			this.eventCallback(this.viewer.EVENT.OS_BUILDING_CLICK,{
+				id : objEvent.partID
+			});
+		}
+	}
+
 	MapTile.prototype.appendMapTile = function(osGridRef){
 
 		if(!this.originBNG){
@@ -1013,7 +1030,7 @@ var MapTile = {};
 		this.addedTileRefs.push(osGridRef);
 
 		var gltf = document.createElement('gltf');
-		gltf.setAttribute('onclick', 'clickObject(event)');
+		gltf.setAttribute('onclick', 'os_clickBuildingObject(event)');
 		gltf.setAttribute('url', server_config.apiUrl('os/buildings.gltf?method=osgrid&osgridref=' + osGridRef + '&draw=1'));
 
 		var translate = [0, 0, 0];
