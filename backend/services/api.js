@@ -31,6 +31,8 @@ module.exports.createApp = function (serverConfig) {
 
 	let C = require("../constants");
 
+	let cors = require("cors");
+
 	//let systemLogger = log_iface.systemLogger;
 	// Attach the encoders to the router
 	require("../encoders/x3dom_encoder.js").route(routes);
@@ -43,6 +45,8 @@ module.exports.createApp = function (serverConfig) {
 
 	let bodyParser = require("body-parser");
 	let app = express();
+
+	app.use(cors({origin:true, credentials: true}));
 
 	// put logger in req object
 	app.use(log_iface.startRequest);
@@ -73,6 +77,7 @@ module.exports.createApp = function (serverConfig) {
 
 	app.use(compress());
 
+	/*
 	// Allow cross origin requests to the API server
 	if (serverConfig.allowedOrigins)
 	{
@@ -93,6 +98,7 @@ module.exports.createApp = function (serverConfig) {
 
 		app.use(allowCrossDomain);
 	}
+	*/
 
 	//auth handler
 	app.use('/', require('../routes/auth'));
