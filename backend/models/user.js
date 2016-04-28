@@ -14,13 +14,13 @@ var schema = mongoose.Schema({
 schema.statics.authenticate = function(logger, username, password){
 	'use strict';
 
-	let adminDB = DB(logger).getAuthDB();
+	let authDB = DB(logger).getAuthDB();
 
 	if(!username || !password){
 		return Promise.reject();
 	}
 
-	return adminDB.authenticate(username, password).then(() => {
+	return authDB.authenticate(username, password).then(() => {
 		return this.findByUserName(username);
 	}).then(user => {
 		return Promise.resolve(user);
@@ -37,14 +37,14 @@ schema.statics.findByUserName = function(user){
 };
 
 //updatePassword is static because it doesn't need a full user object, so save a db call
-schema.statics.updatePassword = function(username, oldPassword, newPassword){
+schema.statics.updatePassword = function(logger, username, oldPassword, newPassword){
 	'use strict';
 
 	if(!(oldPassword && newPassword)){
 		return Promise.reject(responseCodes.INVALID_INPUTS_TO_PASSWORD_UPDATE);
 	}
 
-	return this.authenticate(username, oldPassword).then(() => {
+	return this.authenticate(logger, username, oldPassword).then(() => {
 
 		let updateUserCmd = { 
 			'updateUser' : username,
@@ -53,6 +53,20 @@ schema.statics.updatePassword = function(username, oldPassword, newPassword){
 
 		 return ModelFactory.db.admin().command(updateUserCmd);
 	});
+};
+
+schema.statics.createUser = function(logger, username, password, customData){
+	'use strict';
+	let adminDB = ModelFactory.db.admin();
+	
+	let cleanedCustomData = {};
+	['firstName', 'lastName', 'email'].forEach(key => {
+		if (customData[key]){
+			cleanedCustomData[key] = customData[key];
+		}
+	});
+
+	return adminDB.addUser(username, password, {customData: cleanedCustomData, roles: []});
 };
 
 schema.methods.getAvatar = function(){
@@ -76,6 +90,7 @@ schema.methods.updateInfo = function(updateObj){
 
 	return this.save();
 };
+
 
 var User = ModelFactory.createClass(
 	'User', 

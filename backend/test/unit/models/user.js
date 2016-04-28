@@ -117,12 +117,40 @@ describe('User', function(){
 
 			let stub = sinon.stub(User, 'authenticate').returns(Promise.resolve({username}));
 
-			return User.updatePassword(username, oldPassword, newPassword).then(() => {
-				sinon.assert.calledWith(stub, username, oldPassword);
+			return User.updatePassword({}, username, oldPassword, newPassword).then(() => {
+				sinon.assert.calledWith(stub, {}, username, oldPassword);
+				stub.restore();
 			});
 
-			stub.restore();
+		
 		})
+	});
+
+	describe('#createUser', function(){
+		it('should have createUser static method', function(){
+			expect(User.createUser).to.exist;
+		});
+
+		it('should have called addUser', function(){
+			let spy = sinon.spy(modelFactoryMock.db, 'addUser');
+			let username = 'user';
+			let password = '123';
+			let options = {
+				'rubbish': 'should not be inserted into database',
+				'firstName': '123'
+			};
+
+			let expectedCallWithOptions = {
+				customData: { firstName : options.firstName},
+				roles: []
+			}
+
+			return User.createUser({}, username, password, options).then(() => {
+				sinon.assert.calledWith(spy, username, password, expectedCallWithOptions);
+				spy.restore();
+			});
+		});
+
 	})
 
 	after(function(done){

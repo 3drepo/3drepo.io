@@ -8,6 +8,10 @@ DB.prototype.authenticate = (username, password) => {
 	return Promise.resolve({username, password});
 }
 
+DB.prototype.addUser = (username, password, options) => {
+	return Promise.resolve(username, password, options);
+}
+
 DB.prototype.db = function() { return this; };
 
 DB.prototype.collection = function() { return this; };

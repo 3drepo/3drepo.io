@@ -15,7 +15,8 @@
 	router.get("/login", checkLogin);
 	router.post("/logout", logout);
 	router.get("/:account.jpg", middlewares.loggedIn, getAvatar);
-	router.post("/:account", middlewares.loggedIn, updateUser);
+	router.post('/:account', signUp);
+	router.put("/:account", middlewares.loggedIn, updateUser);
 
 	function expireSession(req) {
 		req.session.cookie.expires = new Date(0);
@@ -89,7 +90,7 @@
 		if(req.body.oldPassword){
 
 			// Update password
-			User.updatePassword(req.params[C.REPO_REST_API_ACCOUNT], req.body.oldPassword, req.body.newPassword).then(() => {
+			User.updatePassword(req[C.REQ_REPO].logger, req.params[C.REPO_REST_API_ACCOUNT], req.body.oldPassword, req.body.newPassword).then(() => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 			}).catch(err => {
 				responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -108,6 +109,28 @@
 		}
 
 
+	}
+
+	function signUp(req, res, next){
+		let responsePlace = utils.APIInfo(req);
+
+		if(!req.body.password){
+			let err = responseCodes.SIGN_UP_PASSWORD_MISSING;
+			return responseCodes.respond(responsePlace, req, res, next, err, err);
+		}
+
+		User.createUser(req[C.REQ_REPO].logger, req.params.account, req.body.password, {
+			email: req.body.email,
+			firstName: req.body.firstName,
+			lastName: req.body.lastName
+		}).then( () => {
+			// to login handler
+			req.body.username = req.params.account;
+			login(req, res, next);
+
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
 	}
 
 	function getAvatar(req, res, next){

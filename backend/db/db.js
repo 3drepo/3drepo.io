@@ -83,6 +83,8 @@
 		{
 			callback(null, self.dbConns[database]);
 		} else {
+			//console.log(this.getURL(database));
+
 			MongoClient.connect(this.getURL(database), function(err, db) {
 				if (err) {
 					return callback(err, null);
