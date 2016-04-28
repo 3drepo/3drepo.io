@@ -235,6 +235,7 @@
 								event.value.position,
 								event.value.view_dir,
 								event.value.up,
+								event.value.look_at,
 								angular.isDefined(event.value.animate) ? event.value.animate : true,
 								event.value.rollerCoasterMode
 							);

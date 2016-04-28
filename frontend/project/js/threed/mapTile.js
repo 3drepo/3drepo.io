@@ -73,7 +73,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		var lon = options.lon;
 		var height = options.y;
 		var view = options.view || [0.00028736474304142756,-0.9987502603949663,-0.0499783431347178];
-		var up = options.up || [0.005742504650018704,0.04997916927067853,-0.9987337514469797]; 
+		var up = options.up || [0.005742504650018704,0.04997916927067853,-0.9987337514469797];
 
 		if (!height || height < 0){
 			height = 500;
@@ -102,15 +102,16 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		var dx = osTargetPoint.easting * this.meterPerPixel - (osImagePoint.easting  * this.meterPerPixel + mapSize / 2);
 		var dy = (osImagePoint.northing * this.meterPerPixel - mapSize / 2) - osTargetPoint.northing * this.meterPerPixel;
 
+		var camX = this.getSumSizeForXRow(nx, ny) + mapImagePosInfo.offsetX + dx;
+		var camY = this.getSumSize(ny) + mapImagePosInfo.offsetY + dy;
+
 		this.viewer.setCamera(
-			[
-				this.getSumSizeForXRow(nx, ny) + mapImagePosInfo.offsetX + dx, height ,
-				this.getSumSize(ny) + mapImagePosInfo.offsetY + dy
-			],
+			[ camX, height, camY ],
 			view,
-			up
+			up,
+			[ camX, 0, camY ]
 		);
-		
+
 		this.appendMapTileByViewPoint();
 
 	};
@@ -122,7 +123,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 	MapTile.prototype.getMapSize = function(n){
 		var nextN = n < 0 ? n - 1 : n + 1;
-		return Math.abs(this.getSumSize(nextN) - this.getSumSize(n)); 
+		return Math.abs(this.getSumSize(nextN) - this.getSumSize(n));
 	}
 
 	var scaleMapImages = false;
@@ -180,7 +181,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 				while(true){
 					if(this.getSumSize(n) <= pos && pos < this.getSumSize(n+1)){
 						break;
-					} 
+					}
 					n++;
 				}
 			} else {
@@ -188,7 +189,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 				while(true){
 					if(this.getSumSize(n) <= pos && pos < this.getSumSize(n+1)){
 						break;
-					} 
+					}
 					n--;
 				}
 			}
@@ -225,7 +226,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 			// http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Resolution_and_Scale
 			// set the size of a 256 map image tile. 1px = 1m
-			
+
 			if (!this.mapPosInfo){
 
 				var height = this.getLenFromCamToCentre(
@@ -254,7 +255,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 					15:	4.7773,
 					16:	2.3887,
 					17:	1.1943,
-					18:	0.5972		
+					18:	0.5972
 				};
 
 				var slippyPoints = this._getSlippyTileLayerPoints(this.settings.mapTile.lat, this.settings.mapTile.lon, zoomLevel);
@@ -280,7 +281,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 				};
 			}
 
-			
+
 			return this.mapPosInfo;
 
 		}
@@ -288,7 +289,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 	//secret little functions to help in-browser alignment
 
 	MapTile.prototype._startMoveImages = function(){
-		
+
 		this._moveStep = 10;
 		var self = this;
 
@@ -316,9 +317,9 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 		this.sumD = this.sumD || [0, 0];
 		this.imagesDoms.forEach(function(dom){
-			
+
 			var t = dom.getAttribute('translation').split(' ');
-			
+
 			t.forEach(function(number, i){
 				t[i] = parseFloat(number);
 			});
@@ -359,9 +360,9 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 	MapTile.prototype._moveMapImagesY = function (y){
 
 		this.viewer.imagesDoms.forEach(function(dom){
-			
+
 			var t = dom.getAttribute('translation').split(' ');
-			
+
 			t.forEach(function(number, i){
 				t[i] = parseFloat(number);
 			});
@@ -473,15 +474,15 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		}
 
 		if(!this.addedMapImages[ox + ',' + oy]){
-			
+
 			// console.log('ox, oy', ox, oy);
 			// console.log('size', size);
 			// console.log('getSumSizeForXRow', self.getSumSizeForXRow(ox, oy))
 			// console.log('size form sum size', self.getSumSizeForXRow(ox, oy) / ox);
 
 			var dom = this.createMapImageTile(size, x + ox, y + oy, [
-				offsetX + this.getSumSizeForXRow(ox, oy), 
-				mapHeight, 
+				offsetX + this.getSumSizeForXRow(ox, oy),
+				mapHeight,
 				offsetY + this.getSumSize(oy)
 			]);
 
@@ -555,7 +556,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 
 		for(var i=0; i < yToZoomLevel.length; i++){
-			
+
 			if(height >= yToZoomLevel[i].y){
 				zoomLevel = yToZoomLevel[i].zoomLevel;
 				break;
@@ -609,7 +610,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 	}
 
 	MapTile.prototype.centreOfVecs = function(vectors){
-		
+
 		var centre = [];
 
 		vectors[0].forEach(function(value, i){
@@ -646,12 +647,12 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		var centrePoint = this.viewer.getCurrentViewpointInfo().position;
 
 		// var p = self._drawPlaneOnZ([
-			
+
 		// 	[centrePoint[0] + 10, 10, centrePoint[2] + 10],
 		// 	[centrePoint[0] - 10, 10, centrePoint[2] + 10],
 		// 	[centrePoint[0] - 10, 10, centrePoint[2] - 10],
 		// 	[centrePoint[0] + 10, 10, centrePoint[2] - 10],
-			
+
 		// ], [1, 0, 0]);
 
 		// self.getScene().appendChild(p);
@@ -660,7 +661,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 		//convert centre point back to lat, long
 		var mapXY = [
-			this.findMapTileNoByPos(centrePoint[0]), 
+			this.findMapTileNoByPos(centrePoint[0]),
 			this.findMapTileNoByPos(centrePoint[2])
 		];
 
@@ -766,9 +767,9 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 
 		this.triggerUpdateURLEvent(
-			viewAreaLatLon.lat, 
-			viewAreaLatLon.lon, 
-			camera[1], 
+			viewAreaLatLon.lat,
+			viewAreaLatLon.lon,
+			camera[1],
 			view_dir.join(','),
 			up.join(',')
 		);
@@ -789,8 +790,8 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		if(lookingToInf){
 			//rotate 180 deg around top center of the polygon
 			var rotatedViewAreaCoors = this.rotatePloygon(
-				viewAreaCoors, 
-				this.centreOfVecs([a,b]), 
+				viewAreaCoors,
+				this.centreOfVecs([a,b]),
 				Math.PI
 			);
 
@@ -804,7 +805,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 		function LenVec2D(vecA, vecB){
 			return Math.sqrt(
-				Math.pow(vecA[0] - vecB[0], 2) + 
+				Math.pow(vecA[0] - vecB[0], 2) +
 				Math.pow(vecA[1] - vecB[1], 2)
 			);
 		}
@@ -857,9 +858,9 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 				var vertVecLen = LenVec2D(endCoor, startCoor);
 
 				var stepX = genStepX(startCoor, vertVecLen);
-				
+
 				for(var kx = -stepX; kx <= 1 + stepX && xCond(); kx += stepX){
-					
+
 					var coor = getCoorVertical(kx, ky);
 					callback(coor);
 					stepX = genStepX(coor, vertVecLen);
@@ -872,7 +873,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		var mapImagesCount = 0;
 		var maxImageCount = 200;
 
-		
+
 		var getStep = function (coor, vecLen){
 			var yCoor = coor[1];
 			var imageSize = self.getMapSizeByYCoor(yCoor);
@@ -901,7 +902,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 					mapImagesCount++;
 				}
 			}
-			
+
 		});
 
 		//console.log(mapImagesCount);
@@ -922,7 +923,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		};
 		// append 3d models
 		if(!noDraw && this.shouldDraw3DBuildings(this.zoomLevel)){
-			
+
 			viewAreaIterate({
 				genStepY: genStep,
 				genStepX: genStep,
@@ -931,11 +932,11 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 				callback: function(coor){
 
 					var osRef = new OsGridRef(
-						self.originBNG.easting + (coor[0] / self.meterPerPixel), 
+						self.originBNG.easting + (coor[0] / self.meterPerPixel),
 						self.originBNG.northing - (coor[1] / self.meterPerPixel)
 					);
 					var osrefno = self._OSRefNo(osRef, 3);
-					
+
 					var appended = self.appendMapTile(osrefno);
 
 					if(appended){
@@ -1051,7 +1052,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		var mapSize = this.getMapSize(y);
 
 		var corMapTileBNG = OsGridRef.latLonToOsGrid(new LatLon(
-			this._tile2lat(correspondingMapTile.y, mapImagePosInfo.zoomLevel), 
+			this._tile2lat(correspondingMapTile.y, mapImagePosInfo.zoomLevel),
 			this._tile2long(correspondingMapTile.x, mapImagePosInfo.zoomLevel)
 		));
 
@@ -1059,17 +1060,17 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		var dx = osCoor.easting * this.meterPerPixel - (corMapTileBNG.easting  * this.meterPerPixel + mapSize / 2);
 		var dy = (corMapTileBNG.northing * this.meterPerPixel - mapSize / 2) - osCoor.northing * this.meterPerPixel;
 
-		translate[0] = (correspondingMapTile.x - mapImagePosInfo.slippyPoints.x) * mapSize + dx + mapImagePosInfo.offsetX 
-		translate[2] = (correspondingMapTile.y - mapImagePosInfo.slippyPoints.y) * mapSize + dy + mapImagePosInfo.offsetY 
+		translate[0] = (correspondingMapTile.x - mapImagePosInfo.slippyPoints.x) * mapSize + dx + mapImagePosInfo.offsetX
+		translate[2] = (correspondingMapTile.y - mapImagePosInfo.slippyPoints.y) * mapSize + dy + mapImagePosInfo.offsetY
 
 
 		// this._appendPlane(this._drawPlaneOnZ([
-			
+
 		// 	[translate[0] + 100, 10, translate[2] + 100],
 		// 	[translate[0] - 100, 10, translate[2] + 100],
 		// 	[translate[0] - 100, 10, translate[2] - 100],
 		// 	[translate[0] + 100, 10, translate[2] - 100],
-			
+
 		// ], [1, 0, 0]));
 
 		// if(!this.gltfDoms){
@@ -1115,9 +1116,9 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		//it.setAttribute("url", server_config.apiUrl('os/map-images/Outdoor/' + mapImagePosInfo.zoomLevel + '/' + x + '/' + y + '.png'));
 		it.setAttribute("url", server_config.getUrl(server_config.subdomains.mapImg, 'os/map-images/Outdoor/' + mapImagePosInfo.zoomLevel + '/' + x + '/' + y + '.png'));
 		it.setAttribute("crossOrigin", "use-credentials");
-		
+
 		app.appendChild(it);
-		
+
 		shape.appendChild(app);
 
 		var plane = document.createElement('Plane');

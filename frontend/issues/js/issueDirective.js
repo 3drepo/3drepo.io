@@ -317,7 +317,7 @@
 		return {
 			addClass: function(element, className, done) {
 				if (className === "issueComments") {
-					jQuery(element)
+					angular.element(element)
 						.css({
 							height: 0,
 							opacity: 0
@@ -333,7 +333,7 @@
 			removeClass: function(element, className, done) {
 				height = element[0].children[0].offsetHeight;
 				if (className === "issueComments") {
-					jQuery(element)
+					angular.element(element)
 						.css({
 							height: height,
 							opacity: 1
