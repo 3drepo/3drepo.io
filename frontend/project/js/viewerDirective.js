@@ -79,14 +79,40 @@
 			v.viewer = new Viewer(v.name, $element[0], v.manager, eventCallback, errCallback);
 
 			var options = {};
-			var startLatLon = $location.search().at && $location.search().at.split(',');
+			var querystring = $location.search();
+			var startLatLon = querystring.at && querystring.at.split(',');
+			
+			var view = querystring.view && querystring.view.split(',');
+			view && view.forEach(function(val, i){
+				view[i] = parseFloat(val);
+			});
+
+			options.view = view;
+
+			var up = querystring.up && querystring.up.split(',');
+			up && up.forEach(function(val, i){
+				up[i] = parseFloat(val);
+			});
+
+			options.up = up;
+
+			var showAll = true;
+
 			if(startLatLon){
-				options.lat = startLatLon[0],
-				options.lon = startLatLon[1],
-				options.y = parseInt(startLatLon[2])
+				showAll = false;
+				options.lat = parseFloat(startLatLon[0]),
+				options.lon = parseFloat(startLatLon[1]),
+				options.y = parseFloat(startLatLon[2])
 			}
 
-			v.viewer.init(options);
+
+			v.mapTile = new MapTile(v.viewer, eventCallback, options);
+			v.viewer.init({
+				showAll : showAll,
+				plugins: {
+					'mapTile': v.mapTile
+				}
+			});
 			// TODO: Move this so that the attachment is contained
 			// within the plugins themselves.
 			// Comes free with oculus support and gamepad support
@@ -95,7 +121,6 @@
 			v.gamepad.init();
 
 			v.collision  = new Collision(v.viewer);
-
 
 			$scope.reload();
 
@@ -149,6 +174,7 @@
 							if (event.value.account === v.account && event.value.project === v.project)
 							{
 								v.viewer.updateSettings(event.value.settings);
+								v.mapTile.updateSettings(event.value.settings);
 							}
 						}
 					});
@@ -220,7 +246,11 @@
 							v.manager.getCurrentViewer().setNavMode(event.value.mode);
 						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_URL){
 							//console.log('update url!!');
-							$location.path("/" + v.account + '/' + v.project).search({at: event.value.at});
+							$location.path("/" + v.account + '/' + v.project).search({
+								at: event.value.at,
+								view: event.value.view,
+								up: event.value.up
+							});
 						}
 					});
 				}
@@ -231,7 +261,7 @@
 
 		if (angular.isDefined(v.vrMode))
 		{
-				$scope.enterVR();
+			$scope.enterVR();
 		}
 	}
 }());
