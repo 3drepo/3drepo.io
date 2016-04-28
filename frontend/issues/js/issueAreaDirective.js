@@ -29,6 +29,12 @@
                 data: "=",
                 type: "="
             },
+            link: function (scope, element) {
+                // Cleanup when destroyed
+                element.on('$destroy', function(){
+                    scope.vm.eventsWatch(); // Disable events watch
+                })
+            },
             controller: IssueAreaCtrl,
             controllerAs: "vm",
             bindToController: true
@@ -81,7 +87,7 @@
         /*
          * Setup event watch
          */
-        $scope.$watch(EventService.currentEvent, function(event) {
+        vm.eventsWatch = $scope.$watch(EventService.currentEvent, function(event) {
             if (event.type === EventService.EVENT.SET_ISSUE_AREA_MODE) {
                 if (event.value === "scribble") {
                     setupScribble();
@@ -94,15 +100,11 @@
                 }
             }
             else if (event.type === EventService.EVENT.GET_ISSUE_AREA_PNG) {
-                console.log(111111111111);
                 var png = null;
                 if (hasDrawnOnCanvas) {
-                    /*
                     png = myCanvas.toDataURL('image/png');
                     // Remove base64 header text
                     png = png.substring(png.indexOf(",") + 1);
-                    */
-                    png = new Date();
                 }
                 event.value.promise.resolve(png);
             }
