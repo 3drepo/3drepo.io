@@ -231,6 +231,9 @@
 		function expandToSelection(path, level) {
 			var i, j, length, childrenLength, selectedId = path[path.length - 1], selectedIndex = 0, selectionFound = false;
 
+			// Force a redraw of the tree to get round the display problem
+			vm.showNodes = false;
+
 			for (i = 0, length = vm.nodesToShow.length; i < length; i += 1) {
 				if (vm.nodesToShow[i]._id === path[level]) {
 					vm.nodesToShow[i].expanded = true;
@@ -268,6 +271,10 @@
 				expandToSelection(path, (level + 1));
 			} else if (level === (path.length - 2)) {
 				vm.topIndex = selectedIndex - 2;
+				// Redraw the tree
+				$timeout(function () {
+					vm.showNodes = true;
+				});
 				setContentHeight(vm.nodesToShow);
 			}
 		}
