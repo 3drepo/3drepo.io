@@ -8,12 +8,13 @@ login #login {
 
 login #loginContent {
   padding-top: 50px;
-  background: rgba(63,81,181,0.7);
+  background: #004594;
 }
 
-login #loginTitle {
-  color: #ffffff;
-  margin: 50px 0 -10px 0;
+login h1,
+login h2,
+login h3 {
+  color: #FFFFFF;
 }
 
 login #loginSubTitle,
@@ -34,4 +35,46 @@ login md-input-container input {
 
 login #loginError {
   color: #F44336;
+}
+
+login .md-button {
+  margin: 0 0 0 2px;
+}
+
+login .loginTitle {
+  margin: -5px 0 10px;
+}
+
+login #loginDivider {
+  width: 1px;
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+login md-checkbox {
+  color: rgba(255, 255, 255, 0.7);
+}
+login md-checkbox ._md-icon {
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+login #tcCheckBox {
+  margin-left: 2px;
+}
+login #tcButton {
+  margin: -15px 0 10px -6px;
+}
+
+login #loginCaptcha {
+  margin: -5px 0 10px;
+}
+
+/** Terms and Conditions Dialog ***************************************************************************************/
+.tcDialog {
+  min-width: 850px;
+  min-height: 664px;
+  overflow: hidden;
+}
+
+.tcDialog #tcIcon {
+  margin-right: 10px;
 }

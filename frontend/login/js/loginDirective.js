@@ -32,15 +32,19 @@
 		};
 	}
 
-	LoginCtrl.$inject = ["$scope", "Auth", "EventService", "serverConfig"];
+	LoginCtrl.$inject = ["$scope", "$mdDialog", "Auth", "EventService", "serverConfig"];
 
-	function LoginCtrl($scope, Auth, EventService, serverConfig) {
-		var vm = this;
+	function LoginCtrl($scope, $mdDialog, Auth, EventService, serverConfig) {
+		var vm = this,
+			enterKey = 13;
+		
+		vm.captchaKey = "6LfSDR8TAAAAACBaw6FY5WdnqOP0nfv3z8­cALAI";
 
 		/*
 		 * Init
 		 */
-		vm.user = { username: "", password: ""};
+		vm.user = {username: "", password: ""};
+		vm.register = {username: "", email: "", password: ""};
 		vm.version = serverConfig.apiVersion;
 		vm.logo = "/public/images/3drepo-logo-white.png";
 
@@ -55,8 +59,6 @@
 		 * @param {Object} event
 		 */
 		vm.login = function(event) {
-			var enterKey = 13;
-
 			if (angular.isDefined(event)) {
 				if (event.which === enterKey) {
 					Auth.login(vm.user.username, vm.user.password);
@@ -66,6 +68,56 @@
 				Auth.login(vm.user.username, vm.user.password);
 			}
 		};
+		
+		/**
+		 * Attempt to register
+		 *
+		 * @param {Object} event
+		 */
+		vm.register = function(event) {
+			/*
+			if (angular.isDefined(event)) {
+				if (event.which === enterKey) {
+					Auth.register(vm.register.username, vm.register.email, vm.register.password);
+				}
+			}
+			else {
+				Auth.register(vm.register.username, vm.register.email, vm.register.password);
+			}
+			*/
+		};
+
+		vm.showTC = function () {
+			
+			$mdDialog.show({
+				controller: tcDialogController,
+				templateUrl: "tcDialog.html",
+				parent: angular.element(document.body),
+				targetEvent: event,
+				clickOutsideToClose:true,
+				fullscreen: true,
+				scope: $scope,
+				preserveScope: true,
+				onRemoving: removeDialog
+			});
+		};
+
+		/**
+		 * Close the dialog
+		 */
+		$scope.closeDialog = function() {
+			$mdDialog.cancel();
+		};
+
+		/**
+		 * Close the dialog by not clicking the close button
+		 */
+		function removeDialog () {
+			$scope.closeDialog();
+		}
+
+		function tcDialogController() {
+		}
 
 		/*
 		 * Event watch

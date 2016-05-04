@@ -33,7 +33,8 @@
     "angular-animate": "~1.4.7",
     "angular-aria": "~1.4.7",
     "angular-sanitize": "~1.4.8",
-    "material-design-icons": "^2.2.3"
+    "material-design-icons": "^2.2.3",
+    "angular-recaptcha": "^3.0.3"
   },
   "resolutions": {
     "angular": "~1.3.15"

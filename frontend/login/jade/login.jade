@@ -1,25 +1,51 @@
-//#login(ng-style="{'background-image':'url(' + vm.backgroundImage + ')'}", layout="column", flex)
 #login(layout="column" flex)
 	#loginContent(layout="row" flex="50")
 		span(flex="25")
-		div(flex="35" layout="column")
+
+		// Info
+		div(flex="25" layout="column")
 			div(flex)
-				img(ng-src="{{vm.logo}}", flex-gt-sm="30", flex-sm="50", flex="80")
+				img(ng-src="{{vm.logo}}", flex-gt-sm="50", flex-sm="70", flex="100")
 				h2.md-subhead#loginVersion Version: {{vm.version}}
 			div(flex)
 				h1.md-display-1#loginTitle 3D BIM version control
 				h2.md-headline#loginSubTitle A scalable, open platform
 
-		div(flex="15", layout="column")
+		// Register or login
+		div(flex="25", layout="row", layout-fill)
+			// Login
 			div(layout="column", flex)
+				h3.loginTitle Log in
 				md-input-container.md-block(md-no-float)
-					input(type='text', ng-model='vm.user.username', placeholder='Username', ng-required, autofocus ng-keypress="vm.login($event)")
+					input(type='text', ng-model='vm.user.username', placeholder='Username', ng-required, autofocus, ng-keypress="vm.login($event)")
 				md-input-container(md-no-float)
-					input(type='password', ng-model='vm.user.password', placeholder='Password', ng-required ng-keypress="vm.login($event)")
+					input(type='password', ng-model='vm.user.password', placeholder='Password', ng-required, ng-keypress="vm.login($event)")
 				div(layout="row", layout-align="start" flex="none")
 					md-button.md-accent.md-raised(ng-click="vm.login()") Log In
-				h2#loginError {{vm.errorMessage}}
+				h4#loginError {{vm.errorMessage}}
+
+			div(flex="5", layout="column", layout-align="center center")
+				#loginDivider(flex)
+
+			// Register
+			div(layout="column", flex)
+				h3.loginTitle Register
+				md-input-container.md-block(md-no-float)
+					input(type='text', ng-model='vm.register.username', placeholder='Username', ng-required, ng-keypress="vm.register($event)")
+				md-input-container(md-no-float)
+					input(type='email', ng-model='vm.register.email', placeholder='Email', ng-required, ng-keypress="vm.register($event)")
+				md-input-container(md-no-float)
+					input(type='password', ng-model='vm.register.password', placeholder='Password', ng-required ng-keypress="vm.register($event)")
+				div(layout="column", layout-align="start")
+					md-checkbox#tcCheckBox(ng-model="vm.tcAgreed" aria-label="Terms and conditions Checkbox") I agree to the Terms and Conditions
+					#tcButton(layout="row", layout-align="start")
+						md-button.md-accent(ng-click="vm.showTC()") Terms and Conditions
+				#loginCaptcha(vc-recaptcha, key="vm.captchaKey")
+				div(layout="row", layout-align="start")
+					md-button.md-accent.md-raised(ng-click="vm.register()") Register
+
 		span(flex="25")
+
 	div(layout="row" layout-align="center center" flex="50")
 		div
 			img(ng-src="{{vm.enterpriseLogo}}" flex style="max-width:100%; height: auto")
