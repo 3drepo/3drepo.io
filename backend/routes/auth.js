@@ -16,6 +16,7 @@
 	router.post("/logout", logout);
 	router.get("/:account.jpg", middlewares.loggedIn, getAvatar);
 	router.post('/:account', signUp);
+	router.post('/:account/verify', verify);
 	router.put("/:account", middlewares.loggedIn, updateUser);
 
 	function expireSession(req) {
@@ -129,6 +130,18 @@
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode, err.resCode ? {} : err);
 		});
+	}
+
+	function verify(req, res, next){
+		
+		let responsePlace = utils.APIInfo(req);
+
+		User.verify(req.params[C.REPO_REST_API_ACCOUNT], req.body.token).then(() => {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || err , err.resCode ? err.resCode : err);
+		});
+
 	}
 
 	function getAvatar(req, res, next){

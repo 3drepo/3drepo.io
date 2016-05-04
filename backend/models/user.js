@@ -85,6 +85,30 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	});
 };
 
+schema.statics.verify = function(username, token){
+	return this.findByUserName(username).then(user => {
+		
+		var tokenData = user.customData.emailVerifyToken;
+
+		if(!user.customData.inactive){
+			return Promise.reject({ resCode: responseCodes.ALREADY_VERIFIED});
+
+		} else if(tokenData.token === token && tokenData.expiredAt > new Date()){
+
+			delete user.customData.inactive;
+			delete user.customData.emailVerifyToken;
+			user.markModified('customData');
+
+			return user.save(() => {
+				return Promise.resolve(true);
+			});
+		
+		} else {
+			return Promise.reject({ resCode: responseCodes.TOKEN_INVALID});
+		}
+	});
+};
+
 schema.methods.getAvatar = function(){
 	return this.customData && this.customData.avatar || null;
 };
