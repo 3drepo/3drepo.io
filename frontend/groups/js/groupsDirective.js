@@ -98,7 +98,12 @@
 		 */
 		$scope.$watch("vm.hideItem", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
-				vm.toShow = "showGroups";
+				if (vm.groups.length > 0) {
+					vm.toShow = "showGroups";
+				}
+				else {
+					vm.toShow = "showInfo";
+				}
 				vm.showAdd = false; // So that showing add works
 				vm.canAdd = true;
 				vm.showEdit = false; // So that closing edit works
