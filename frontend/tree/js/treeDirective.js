@@ -62,6 +62,7 @@
 		 * Init
 		 */
 		vm.nodes = [];
+		vm.showNodes = true;
 		vm.showTree = true;
 		vm.showFilterList = false;
 		vm.currentFilterItemSelected = null;
@@ -168,7 +169,11 @@
 		 * @param _id
 		 */
 		vm.expand = function (_id) {
-			var i, numChildren = 0, index = -1, length, endOfSplice = false;
+			var i, length,
+				numChildren = 0,
+				index = -1,
+				endOfSplice = false,
+				numChildrenToForceRedraw = 10;
 
 			for (i = 0, length = vm.nodesToShow.length; i < length; i += 1) {
 				if (vm.nodesToShow[i]._id === _id) {
@@ -188,6 +193,12 @@
 						}
 					} else {
 						numChildren = vm.nodesToShow[index].children.length;
+
+						// If the node has a large number of children then force a redraw of the tree to get round the display problem
+						if (numChildren >= numChildrenToForceRedraw) {
+							vm.showNodes = false;
+						}
+
 						for (i = 0; i < numChildren; i += 1) {
 							vm.nodesToShow[index].children[i].expanded = false;
 
@@ -196,6 +207,13 @@
 							vm.nodesToShow[index].children[i].level = vm.nodesToShow[index].level + 1;
 							vm.nodesToShow[index].children[i].hasChildren = vm.nodesToShow[index].children[i].children.length > 0;
 							vm.nodesToShow.splice(index + i + 1, 0, vm.nodesToShow[index].children[i]);
+						}
+
+						// Redraw the tree if needed
+						if (!vm.showNodes) {
+							$timeout(function () {
+								vm.showNodes = true;
+							});
 						}
 					}
 					vm.nodesToShow[index].expanded = !vm.nodesToShow[index].expanded;
