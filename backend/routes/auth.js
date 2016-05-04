@@ -17,7 +17,9 @@
 	router.get("/:account.jpg", middlewares.loggedIn, getAvatar);
 	router.post('/:account', signUp);
 	router.post('/:account/verify', verify);
+	router.post('/:account/forgot-password', forgotPassword);
 	router.put("/:account", middlewares.loggedIn, updateUser);
+	router.put("/:account/password", resetPassword);
 
 	function expireSession(req) {
 		req.session.cookie.expires = new Date(0);
@@ -91,10 +93,10 @@
 		if(req.body.oldPassword){
 
 			// Update password
-			User.updatePassword(req[C.REQ_REPO].logger, req.params[C.REPO_REST_API_ACCOUNT], req.body.oldPassword, req.body.newPassword).then(() => {
+			User.updatePassword(req[C.REQ_REPO].logger, req.params[C.REPO_REST_API_ACCOUNT], req.body.oldPassword, null, req.body.newPassword).then(() => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 			}).catch(err => {
-				responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+				responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
 			});
 
 		} else {
@@ -144,6 +146,18 @@
 
 	}
 
+	function forgotPassword(req, res, next){
+		let responsePlace = utils.APIInfo(req);
+
+		User.getForgotPasswordToken(req.params[C.REPO_REST_API_ACCOUNT], req.body.email, config.tokenExpiry.forgotPassword).then(token => {
+			// send email
+			console.log(token);
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || err , err.resCode ? err.resCode : err);
+		});
+	}
+
 	function getAvatar(req, res, next){
 		let responsePlace = utils.APIInfo(req);
 
@@ -165,6 +179,16 @@
 		}).catch(() => {
 
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+	}
+
+	function resetPassword(req, res, next){
+		let responsePlace = utils.APIInfo(req);
+
+		User.updatePassword(req[C.REQ_REPO].logger, req.params[C.REPO_REST_API_ACCOUNT], null, req.body.token, req.body.newPassword).then(() => {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
 		});
 	}
 

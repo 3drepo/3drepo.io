@@ -44,15 +44,35 @@ schema.statics.findByUserName = function(user){
 	return this.findOne({account: 'admin'}, { user });
 };
 
-//updatePassword is static because it doesn't need a full user object, so save a db call
-schema.statics.updatePassword = function(logger, username, oldPassword, newPassword){
+
+schema.statics.updatePassword = function(logger, username, oldPassword, token, newPassword){
 	'use strict';
 
-	if(!(oldPassword && newPassword)){
-		return Promise.reject(responseCodes.INVALID_INPUTS_TO_PASSWORD_UPDATE);
+	if(!((oldPassword || token) && newPassword)){
+		return Promise.reject({ resCode: responseCodes.INVALID_INPUTS_TO_PASSWORD_UPDATE});
 	}
 
-	return this.authenticate(logger, username, oldPassword).then(() => {
+	var checkUser;
+	var user;
+
+	if(oldPassword){
+		checkUser = this.authenticate(logger, username, oldPassword);
+	} else if (token){
+
+		checkUser = this.findByUserName(username).then(_user => {
+
+			user = _user;
+
+			var tokenData = user.customData.resetPasswordToken;
+			if(tokenData && tokenData.token === token && tokenData.expiredAt > new Date()){
+				return Promise.resolve();
+			} else {
+				return Promise.reject({ resCode: responseCodes.TOKEN_INVALID });
+			}
+		});
+	}
+
+	return checkUser.then(() => {
 
 		let updateUserCmd = { 
 			'updateUser' : username,
@@ -60,7 +80,21 @@ schema.statics.updatePassword = function(logger, username, oldPassword, newPassw
 		 };
 
 		 return ModelFactory.db.admin().command(updateUserCmd);
+
+	}).then(() => {
+
+		if(user){
+			delete user.customData.resetPasswordToken;
+			user.markModified('customData');
+			return user.save().then(() => Promise.resolve());
+		} 
+
+		return Promise.resolve();
+
+	}).catch( err => {
+		return Promise.reject(err.resCode ? err : {resCode: utils.mongoErrorToResCode(err)});
 	});
+
 };
 
 schema.statics.createUser = function(logger, username, password, customData, tokenExpiryTime){
@@ -136,6 +170,33 @@ schema.methods.updateInfo = function(updateObj){
 	return this.save();
 };
 
+schema.statics.getForgotPasswordToken = function(username, email, tokenExpiryTime){
+
+	var expiryAt = new Date();
+	expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
+
+	var resetPasswordToken = {
+		token: crypto.randomBytes(64).toString('hex'),
+		expiredAt: expiryAt
+	};
+
+	return this.findByUserName(username).then(user => {
+
+		if(user.customData.email !== email){
+			return Promise.reject({ resCode: responseCodes.USER_EMAIL_NOT_MATCH});
+		}
+
+		user.customData.resetPasswordToken = resetPasswordToken;
+		user.markModified('customData');
+
+		return user.save();
+	
+	}).then(() => {
+		return Promise.resolve(resetPasswordToken);
+	});
+
+
+};
 
 var User = ModelFactory.createClass(
 	'User', 

@@ -117,7 +117,7 @@ describe('User', function(){
 
 			let stub = sinon.stub(User, 'authenticate').returns(Promise.resolve({username}));
 
-			return User.updatePassword({}, username, oldPassword, newPassword).then(() => {
+			return User.updatePassword({}, username, oldPassword, null, newPassword).then(() => {
 				sinon.assert.calledWith(stub, {}, username, oldPassword);
 				stub.restore();
 			});
