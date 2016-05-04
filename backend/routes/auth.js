@@ -6,7 +6,7 @@
 	var responseCodes = require("../response_codes.js");
 	var C = require("../constants");
 	var middlewares = require("./middlewares");
-	var config = require("app-config").config;
+	var config = require('../config');
 	var systemLogger    = require("../logger.js").systemLogger;
 	var utils = require("../utils");
 	var User = require("../models/user");
@@ -112,6 +112,7 @@
 	}
 
 	function signUp(req, res, next){
+
 		let responsePlace = utils.APIInfo(req);
 
 		if(!req.body.password){
@@ -123,13 +124,10 @@
 			email: req.body.email,
 			firstName: req.body.firstName,
 			lastName: req.body.lastName
-		}).then( () => {
-			// to login handler
-			req.body.username = req.params.account;
-			login(req, res, next);
-
+		}, config.tokenExpiry.emailVerify).then( data => {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, data);
 		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+			responseCodes.respond(responsePlace, req, res, next, err.resCode, err.resCode ? {} : err);
 		});
 	}
 

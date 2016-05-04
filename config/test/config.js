@@ -68,11 +68,11 @@ module.exports = {
 		username: 'admintesting',
 		password: 'admintesting'
 	},
-	ssl: {
-		key: "my_key.pem",
-		cert:"my_server.crt",
-		ca: "my_server.ca"
-	},
+	// ssl: {
+	// 	key: "my_key.pem",
+	// 	cert:"my_server.crt",
+	// 	ca: "my_server.ca"
+	// },
 	os: {
 		keys: {
 			'property': '<your key>',
@@ -93,7 +93,10 @@ module.exports = {
 		upload_dir: "uploads",
 		shared_storage: "D:/sharedSpace/"
 	},
-
+	tokenExpiry: {
+		emailVerify: 336,
+		forgotPassword: 24
+	},
 	crossOrigin: true,
 	test_helper_api: false
 }

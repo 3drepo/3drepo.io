@@ -3,6 +3,9 @@ var ModelFactory = require('./factory/modelFactory');
 var responseCodes = require('../response_codes.js');
 var _ = require('lodash');
 var DB = require('../db/db');
+var crypto = require('crypto');
+var utils = require("../utils");
+
 var schema = mongoose.Schema({
 	_id : String,
 	user: String,
@@ -55,7 +58,7 @@ schema.statics.updatePassword = function(logger, username, oldPassword, newPassw
 	});
 };
 
-schema.statics.createUser = function(logger, username, password, customData){
+schema.statics.createUser = function(logger, username, password, customData, tokenExpiryTime){
 	'use strict';
 	let adminDB = ModelFactory.db.admin();
 	
@@ -66,7 +69,20 @@ schema.statics.createUser = function(logger, username, password, customData){
 		}
 	});
 
-	return adminDB.addUser(username, password, {customData: cleanedCustomData, roles: []});
+	var expiryAt = new Date();
+	expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
+
+	cleanedCustomData.inactive = true;
+	cleanedCustomData.emailVerifyToken = {
+		token: crypto.randomBytes(64).toString('hex'),
+		expiredAt: expiryAt
+	};
+
+	return adminDB.addUser(username, password, {customData: cleanedCustomData, roles: []}).then( () => {
+		return Promise.resolve(cleanedCustomData.emailVerifyToken);
+	}).catch(err => {
+		return utils.mongoErrorToResCode(err);
+	});
 };
 
 schema.methods.getAvatar = function(){

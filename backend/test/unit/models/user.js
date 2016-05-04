@@ -141,11 +141,12 @@ describe('User', function(){
 			};
 
 			let expectedCallWithOptions = {
-				customData: { firstName : options.firstName},
+				customData: { firstName : options.firstName, inactive: true},
 				roles: []
 			}
 
-			return User.createUser({}, username, password, options).then(() => {
+			return User.createUser({}, username, password, options, 1).then(res => {
+				expectedCallWithOptions.customData.emailVerifyToken = res;
 				sinon.assert.calledWith(spy, username, password, expectedCallWithOptions);
 				spy.restore();
 			});
