@@ -26,7 +26,12 @@ schema.statics.authenticate = function(logger, username, password){
 	return authDB.authenticate(username, password).then(() => {
 		return this.findByUserName(username);
 	}).then(user => {
+		if(user.customData && user.customData.inactive) {
+			return Promise.reject({resCode: responseCodes.USER_NOT_VERIFIED});
+		} 
 		return Promise.resolve(user);
+	}).catch( err => {
+		return Promise.reject(err.resCode ? err : {resCode: utils.mongoErrorToResCode(err)});
 	});
 };
 
@@ -81,7 +86,7 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	return adminDB.addUser(username, password, {customData: cleanedCustomData, roles: []}).then( () => {
 		return Promise.resolve(cleanedCustomData.emailVerifyToken);
 	}).catch(err => {
-		return utils.mongoErrorToResCode(err);
+		return Promise.reject({resCode : utils.mongoErrorToResCode(err)});
 	});
 };
 

@@ -110,6 +110,7 @@ var responseCodes = {
 	SIGN_UP_PASSWORD_MISSING: {value: 56, message: 'Password is missing', status: 400},
 	TOKEN_INVALID: {value: 58, message: 'Token is invalid or expired', status: 400},
 	ALREADY_VERIFIED: {value: 60, message: 'Already verified', status: 400},
+	USER_NOT_VERIFIED: {value: 61, message: 'User not yet verified', status: 400},
 
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {
@@ -124,8 +125,9 @@ var responseCodes = {
 
 		if(mongoErr.code === 11000){
 			return this.USER_EXISTS;
+		} else if (mongoErr.code === 18) {
+			return this.INCORRECT_USERNAME_OR_PASSWORD;
 		}
-
 		//other error
 		return {
 			value: 1000,
@@ -167,7 +169,7 @@ var responseCodes = {
 };
 
 var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
-49,  50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 1000, 2000, 3000, 4000];
+49,  50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 1000, 2000, 3000, 4000];
 
 var mimeTypes = {
 	"src"  : "application/json",

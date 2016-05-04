@@ -56,8 +56,8 @@
 
 			expireSession(req);
 			createSession(responsePlace, req, res, next, {username: user.user, roles: user.roles});
-		}).catch(() => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.NOT_AUTHORIZED, {username: req.body.username});
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
 		});
 
 	}
@@ -128,7 +128,7 @@
 		}, config.tokenExpiry.emailVerify).then( data => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, data);
 		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode, err.resCode ? {} : err);
+			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
 		});
 	}
 
