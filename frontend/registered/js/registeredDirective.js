@@ -19,31 +19,35 @@
     "use strict";
 
     angular.module("3drepo")
-        .directive("user", user);
+        .directive("registered", registered);
 
-    function user() {
+    function registered() {
         return {
             restrict: "E",
             scope: {
                 state: "="
             },
-            templateUrl: "user.html",
-            controller: UserCtrl,
+            templateUrl: "registered.html",
+            controller: RegisteredCtrl,
             controllerAs: "vm",
             bindToController: true
         };
     }
 
-    UserCtrl.$inject = ["$scope"];
+    RegisteredCtrl.$inject = ["$scope", "$location", "$window"];
 
-    function UserCtrl ($scope) {
+    function RegisteredCtrl ($scope, $location, $window) {
         var vm = this;
-        
+
         /*
          * Watch state
          */
         $scope.$watch("vm.state", function (newValue) {
             console.log(newValue);
         });
+
+        vm.goToLoginPage = function () {
+            $window.location.href = "/";
+        };
     }
 }());

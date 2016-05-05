@@ -63,6 +63,10 @@
 
 		hm.state = StateManager.state;
 
+		$scope.$watch("hm.state", function (newValue) {
+			console.log(newValue);
+		}, true);
+
 		hm.getLoggedInUrl = function() {
 			return hm.loggedInUrl;
 		};

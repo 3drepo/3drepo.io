@@ -1,6 +1,6 @@
 logout
 
-div(ng-switch="vm.toShow")
+div(ng-switch="vm.toShow", layout-fill)
 	div(ng-switch-when="showProfile")
 		#account(layout="row")
 			div(layout="column", layout-fill, flex="20")
@@ -23,7 +23,3 @@ div(ng-switch="vm.toShow")
 
 	div(ng-switch-when="showProject")
 		project(account="vm.state.account" project="vm.state.project" branch="vm.state.branch" revision="vm.state.revision" state="vm.state")
-
-
-	div(ng-switch-when="showUser")
-		user(state="vm.state")

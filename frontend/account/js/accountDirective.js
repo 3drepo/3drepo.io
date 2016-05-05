@@ -75,16 +75,7 @@
 		});
 
 		/*
-		 * Get user
-		 */
-		$scope.$watch("vm.state.user", function (newValue) {
-			if (angular.isDefined(newValue) && (newValue !== null)) {
-				vm.toShow = "showUser";
-			}
-		});
-
-		/*
-		 * Get project
+		 * Determine if showing a project
 		 */
 		$scope.$watch("vm.state.project", function (newValue) {
 			if (angular.isDefined(newValue) && (newValue !== null)) {
