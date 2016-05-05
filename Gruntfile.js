@@ -78,7 +78,7 @@ module.exports = function(grunt) {
                     'backend/db/**/*.js', 
                     'backend/services/**/*.js', 
                     'backend/routes/**/*.js',
-
+                    'backend/libs/**/*.js',
                     'backend/models/**/*.js',
                     'backend/*.js'
                 ]},

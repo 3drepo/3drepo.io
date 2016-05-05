@@ -610,12 +610,22 @@ exports.route = function(router)
 		});
 	});
 
-	router.get("json", "/:account/:project/revision/:branch/head/fulltree", function(req, res, params, err_callback) {
-		getFullTree(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.branch, null, null, err_callback);
+    router.get("json", "/:account/:project/revision/:branch/head/fulltree", function (req, res, params, err_callback) {
+        //See if it is in the stash first, which requires the head revision id
+        var rid = dbInterface(req[C.REQ_REPO].logger).getProjectBranchHeadRid(params.account, params.project, params.branch, function (err, rid) {
+            var gridfsURL = "/" + params.account + "/" + params.project + "/revision/" + rid + "/fulltree." + params.format;
+            dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, gridfsURL, "json_mpc", function (callback) {
+                getFullTree(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.branch, null, null, err_callback);
+            }, err_callback);
+        }, err_callback);
 	});
 
-	router.get("json", "/:account/:project/revision/:rid/fulltree", function(req, res, params, err_callback) {
-		getFullTree(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, null, params.rid, null, err_callback);
+    router.get("json", "/:account/:project/revision/:rid/fulltree", function (req, res, params, err_callback) {
+        
+        dbInterface(req[C.REQ_REPO].logger).cacheFunction(params.account, params.project, req.url, "json_mpc", function (callback) {
+            getFullTree(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, null, params.rid, null, err_callback);
+        }, err_callback);
+		
 	});
 
 	router.get("json", "/:account/:project/revision/:branch/head/map", function(req, res, params, err_callback) {

@@ -26,6 +26,9 @@ module.exports.createApp = function(serverConfig)
 	let fs = require("fs");
 	let jade = require("jade");
 
+	//let systemLogger = require("../logger.js").systemLogger;
+
+
 	let app = express();
 
 	app.use(compress({level:9}));
@@ -47,6 +50,15 @@ module.exports.createApp = function(serverConfig)
 		} else {
 			params.config_js = "var server_config = {}; server_config.apiUrl = function(path) { return '" + config.api_server.url + "/' + path; };";
 		}
+
+		params.config_js += `\nserver_config.subdomains = ${JSON.stringify(config.api_server.subdomains)};`;
+
+ 
+
+		params.config_js += `
+		server_config.getUrl = function(subdomain, path) {
+			return '${config.api_server.public_protocol}://' + subdomain + '.${config.api_server.hostname}:${config.api_server.public_port}${config.api_server.host_dir}/' + path;
+		};`;
 
 		if("wayfinder" in config)
 		{
@@ -91,6 +103,7 @@ module.exports.createApp = function(serverConfig)
 							"viewpoints",
 							"issues",
 							"clip",
+							"building",
 							"bottomButtons",
 							"qrCodeReader",
 							"docs",
@@ -99,12 +112,15 @@ module.exports.createApp = function(serverConfig)
 							"oculus",
 							"groups"
 						],
+						'url': '/:project?at&up&view',
 						"children" : [
 							{
 								"plugin": "bid4free",
+								'url': '/bid4free',
 								children: [
 									{
-										plugin: "bid4freeWorkspace"
+										plugin: "bid4freeWorkspace",
+										url: '/bid4freeWorkspace'
 									}
 								]
 							}

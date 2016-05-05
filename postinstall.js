@@ -59,7 +59,13 @@ var public_files = {
 		qrqrcode: '/public/js/external/qrcode/qrcode.js',
 		qrfindpat: '/public/js/external/qrcode/findpat.js',
 		qralignpat: '/public/js/external/qrcode/alignpat.js',
-		qrdatabr: '/public/js/external/qrcode/databr.js'
+		qrdatabr: '/public/js/external/qrcode/databr.js',
+
+		//geodesy stuff (latlon to osgrid)
+		dms: '/public/js/external/dms.js',
+		vector3d: '/public/js/external/vector3d.js',
+		'latlon-ellipsoidal': '/public/js/external/latlon-ellipsoidal.js',
+		osgridref: '/public/js/external/osgridref.js',
 	},
 
 	css : {
@@ -108,6 +114,10 @@ var internal_files = {
     'bower_components/angular-animate/angular-animate.min.js',
     'bower_components/angular-aria/angular-aria.min.js',
 	'bower_components/angular-sanitize/angular-sanitize.min.js',
+	'bower_components/geodesy/dms.js',
+	'bower_components/geodesy/vector3d.js',
+	'bower_components/geodesy/latlon-ellipsoidal.js',
+	'bower_components/geodesy/osgridref.js',
 	'bower_components/angular-recaptcha/release/angular-recaptcha.min.js'
 	],
 
@@ -169,6 +179,7 @@ function install_bower(){
 function install_x3dom(){
 
 	exec('cd ' + path.normalize('submodules/x3dom') + ' && python manage.py --build && cd '+ path.normalize('../../'),
+			{maxBuffer: 1024 * 500},
 			function (error, stdout, stderr) {
 				if (error !== null) {
 					console.log(error);
@@ -374,7 +385,7 @@ function obj_to_string(obj, name, convert_to_min){
 
                 	//replace all \ to / as \ is an escape character...
                 	file = file.replace(/\\/g, '/');
-                	output_str += '\t\t\t' + memlv2 + ': "' + file + '"';
+                	output_str += '\t\t\t\'' + memlv2 + '\': "' + file + '"';
 
                 }
             }

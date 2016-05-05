@@ -16,11 +16,15 @@
  **/
 
 var ViewerUtil;
-
+	var ViewerUtilListeners = [];
+	var ViewerUtilMyListeners = [];
+	
 (function() {
 	"use strict";
 
 	ViewerUtil = function() {};
+
+
 
 	var eventElement = document;
 
@@ -49,8 +53,17 @@ var ViewerUtil;
 		eventElement.dispatchEvent(e);
 	};
 
+
 	ViewerUtil.prototype.onEvent = function(name, callback)
 	{
+		ViewerUtilListeners.push(callback);
+
+		var myListener= function(event) {
+			callback(event.detail);
+		};
+
+		ViewerUtilMyListeners.push(myListener);
+
 		eventElement.addEventListener(name, function(event) {
 			callback(event.detail);
 		});
@@ -58,9 +71,16 @@ var ViewerUtil;
 
 	ViewerUtil.prototype.offEvent = function(name, callback)
 	{
-		eventElement.removeEventListener(name, function(event) {
-			callback(event.detail);
-		});
+		var index = ViewerUtilListeners.indexOf(callback);
+		if (index === -1){
+			return;
+		}
+
+		eventElement.removeEventListener(name, ViewerUtilMyListeners[index]);
+
+		ViewerUtilListeners.splice(index, 1);
+		ViewerUtilMyListeners.splice(index, 1);
+
 	};
 
 	ViewerUtil.prototype.eventFactory = function(name)

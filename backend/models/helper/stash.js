@@ -21,8 +21,10 @@ function findStashByFilename(dbCol, format, filename){
 		if(!files.length){
 			dbCol.logger.logInfo(filename + " - Attempt to retrieved from stash but not found");
 			return Promise.resolve(false);
+			
 		} else {
 			dbCol.logger.logInfo(filename + " - Retrieved from stash");
+
 			return new Promise((resolve) => {
 
 				let downloadStream = bucket.openDownloadStreamByName(filename);
