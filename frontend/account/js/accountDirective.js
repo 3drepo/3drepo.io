@@ -41,6 +41,13 @@
 		var vm = this,
 			promise;
 
+		console.log(vm.state);
+		
+		/*
+		 * Init
+		 */
+		vm.toShow = "showProfile";
+
 		/*
 		 * Get the account data
 		 */
@@ -64,6 +71,24 @@
 				vm.lastName        = null;
 				vm.email           = null;
 				vm.projectsGrouped = null;
+			}
+		});
+
+		/*
+		 * Get user
+		 */
+		$scope.$watch("vm.state.user", function (newValue) {
+			if (angular.isDefined(newValue) && (newValue !== null)) {
+				vm.toShow = "showUser";
+			}
+		});
+
+		/*
+		 * Get project
+		 */
+		$scope.$watch("vm.state.project", function (newValue) {
+			if (angular.isDefined(newValue) && (newValue !== null)) {
+				vm.toShow = "showProject";
 			}
 		});
 	}

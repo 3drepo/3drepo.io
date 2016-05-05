@@ -38,8 +38,6 @@
 		var vm = this,
 			enterKey = 13;
 		
-		vm.captchaKey = "6LfSDR8TAAAAACBaw6FY5WdnqOP0nfv3z8­cALAI";
-
 		/*
 		 * Init
 		 */
@@ -47,11 +45,22 @@
 		vm.register = {username: "", email: "", password: ""};
 		vm.version = serverConfig.apiVersion;
 		vm.logo = "/public/images/3drepo-logo-white.png";
+		vm.captchaKey = "6LfSDR8TAAAAACBaw6FY5WdnqOP0nfv3z8-cALAI";
 
+		// Logo
 		if (angular.isDefined(serverConfig.backgroundImage))
 		{
 			vm.enterpriseLogo = serverConfig.backgroundImage;
 		}
+
+		/*
+		 * Watch for the reCaptcha response
+		 */
+		$scope.$watch("vm.recaptchaResponse", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				console.log(newValue);
+			}
+		});
 
 		/**
 		 * Attempt to login

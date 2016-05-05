@@ -40,7 +40,7 @@
 					md-checkbox#tcCheckBox(ng-model="vm.tcAgreed" aria-label="Terms and conditions Checkbox") I agree to the Terms and Conditions
 					#tcButton(layout="row", layout-align="start")
 						md-button.md-accent(ng-click="vm.showTC()") Terms and Conditions
-				#loginCaptcha(vc-recaptcha, key="vm.captchaKey")
+				#loginCaptcha(vc-recaptcha, key="vm.captchaKey", ng-model="vm.recaptchaResponse")
 				div(layout="row", layout-align="start")
 					md-button.md-accent.md-raised(ng-click="vm.register()") Register
 
