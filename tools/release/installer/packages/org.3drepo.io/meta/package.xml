@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<Package>
+    <DisplayName>3drepo.io</DisplayName>
+    <Description>3DRepo Web Interface</Description>
+    <Version>1.0.0</Version>
+    <ReleaseDate>2016-05-06</ReleaseDate>
+    <Name>org.3drepo.io</Name>
+    <Default>true</Default>
+    <Licenses>
+        <License name="License Agreement" file="license.txt" />
+    </Licenses>
+    <Script>installscript.qs</Script>
+    <UserInterfaces>
+        <UserInterface>mongoConfig.ui</UserInterface>
+    </UserInterfaces>
+</Package>
