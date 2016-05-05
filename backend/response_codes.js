@@ -163,7 +163,7 @@ var responseCodes = {
 
 		 return {
 			value: 4000,
-			message: JSON.stringify(message),
+			message: typeof message === 'string' ? message : JSON.stringify(message),
 			status: 500
 		};
 	}

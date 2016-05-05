@@ -79,6 +79,26 @@ module.exports = {
 		emailVerify: 336,
 		forgotPassword: 24
 	},
+
+	mail: {
+		smtpConfig: {
+			host: '',
+			port: 465,
+			secure: true, // use SSL
+			auth: {
+				user: '',
+				pass: ''
+			}
+		},
+
+		sender: '"3D Repo" <support@3drepo.org>',
+
+		urls: {
+			'forgotPassword': token => `https://3drepo.io/users/abcdefg?token=${token}`,
+			'verify': token => `https://3drepo.io/users/confirm?token=${token}`
+		}
+	},
+
 	test_helper_api: false
 }
 

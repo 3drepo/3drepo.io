@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var ModelFactory = require('./factory/modelFactory');
 var responseCodes = require('../response_codes.js');
-var _ = require('lodash');
+//var _ = require('lodash');
 var DB = require('../db/db');
 var crypto = require('crypto');
 var utils = require("../utils");
@@ -36,9 +36,9 @@ schema.statics.authenticate = function(logger, username, password){
 };
 
 
-schema.statics.filterRoles = function(roles, database){
-	return  database ? _.filter(users, { 'db': database }) : roles;
-};
+// schema.statics.filterRoles = function(roles, database){
+// 	return  database ? _.filter(users, { 'db': database }) : roles;
+// };
 
 schema.statics.findByUserName = function(user){
 	return this.findOne({account: 'admin'}, { user });

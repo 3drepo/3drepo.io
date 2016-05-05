@@ -10,6 +10,7 @@
 	var systemLogger    = require("../logger.js").systemLogger;
 	var utils = require("../utils");
 	var User = require("../models/user");
+	var Mailer = require("../mailer/mailer");
 
 	router.post("/login", login);
 	router.get("/login", checkLogin);
@@ -128,7 +129,20 @@
 			firstName: req.body.firstName,
 			lastName: req.body.lastName
 		}, config.tokenExpiry.emailVerify).then( data => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, data);
+			//send verification email
+			return Mailer.sendVerifyUserEmail(req.body.email, {
+				token : data.token,
+				email: req.body.email
+			}).catch( err => {
+				// catch email error instead of returning to client
+				systemLogger.logDebug(`Email error - ${err.message}`, req);
+				return Promise.reject(responseCodes.PROCESS_ERROR('Internal Email Error'));
+			});
+
+		}).then(emailRes => {
+
+			systemLogger.logInfo('Email info - ' + JSON.stringify(emailRes), req);
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
 		});
@@ -149,11 +163,24 @@
 	function forgotPassword(req, res, next){
 		let responsePlace = utils.APIInfo(req);
 
-		User.getForgotPasswordToken(req.params[C.REPO_REST_API_ACCOUNT], req.body.email, config.tokenExpiry.forgotPassword).then(token => {
-			// send email
-			console.log(token);
+		User.getForgotPasswordToken(req.params[C.REPO_REST_API_ACCOUNT], req.body.email, config.tokenExpiry.forgotPassword).then(data => {
+
+			//send forgot password email
+			return Mailer.sendResetPasswordEmail(req.body.email, {
+				token : data.token,
+				email: req.body.email
+			}).catch( err => {
+				// catch email error instead of returning to client
+				systemLogger.logDebug(`Email error - ${err.message}`, req);
+				return Promise.reject(responseCodes.PROCESS_ERROR('Internal Email Error'));
+			});
+		
+		}).then(emailRes => {
+			
+			systemLogger.logInfo('Email info - ' + JSON.stringify(emailRes), req);
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
 		}).catch(err => {
+			console.log(err);
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || err , err.resCode ? err.resCode : err);
 		});
 	}
