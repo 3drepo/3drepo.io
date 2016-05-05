@@ -6,7 +6,7 @@
 ![3drepoio_1a](https://cloud.githubusercontent.com/assets/3008807/12302435/09590660-ba1d-11e5-8bab-c95de3f788c5.jpg)
 
 ### Latest Releases
-* 19 Apr 2016 [3drepo.io 1.0b](https://github.com/3drepo/3drepo.io/releases/tag/untagged-4ae1b60b25db006d3d40)
+* 19 Apr 2016 [3drepo.io 1.0b](https://github.com/3drepo/3drepo.io/releases/tag/v1.0.0b)
 * 15 Feb 2016 [3drepo.io 1.0rc2](https://github.com/3drepo/3drepo.io/releases/tag/v1.0.0-rc2)
 * 15 Feb 2016 [3drepo.io 1.0rc1](https://github.com/3drepo/3drepo.io/releases/tag/v1.0.0-rc1)
 * 08 Jan 2016 [3drepo.io 1.0a](https://github.com/3drepo/3drepo.io/releases/tag/1.0a)
