@@ -185,7 +185,8 @@
 			//send forgot password email
 			return Mailer.sendResetPasswordEmail(req.body.email, {
 				token : data.token,
-				email: req.body.email
+				email: req.body.email,
+				username: req.params[C.REPO_REST_API_ACCOUNT]
 			}).catch( err => {
 				// catch email error instead of returning to client
 				systemLogger.logDebug(`Email error - ${err.message}`, req);

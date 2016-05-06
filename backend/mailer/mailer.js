@@ -69,7 +69,7 @@ function getURL(urlName, params){
 function sendVerifyUserEmail(to, data){
 	'use strict';
 
-	data.url = getURL('verify', data.token);
+	data.url = getURL('verify', {token: data.token});
 
 	if(!data.url){
 		return rejectNoUrl('verify');
@@ -83,7 +83,7 @@ function sendVerifyUserEmail(to, data){
 function sendResetPasswordEmail(to, data){
 	'use strict';
 
-	data.url = getURL('forgotPassword', data.token);
+	data.url = getURL('forgotPassword', {token: data.token, username: data.username});
 
 	if(!data.url){
 		return rejectNoUrl('forgotPassword');
