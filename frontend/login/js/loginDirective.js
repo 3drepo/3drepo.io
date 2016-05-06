@@ -117,6 +117,10 @@
 			});
 		};
 
+		vm.forgotPassword = function () {
+			$window.location.href = "/passwordForgot";
+		};
+
 		/*
 		 * Event watch
 		 */
@@ -163,7 +167,7 @@
 			promise.then(function (response) {
 				console.log(response);
 				if (response.status === 200) {
-					$window.location.href = "/registered";
+					$window.location.href = "/registerRequest";
 				}
 				else {
 					vm.registerErrorMessage = "Error with registration";

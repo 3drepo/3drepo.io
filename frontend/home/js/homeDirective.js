@@ -56,16 +56,23 @@
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "Auth", "StateManager", "EventService"];
+    HomeCtrl.$inject = ["$scope", "$location", "Auth", "StateManager", "EventService"];
 
-    function HomeCtrl($scope, Auth, StateManager, EventService) {
+    function HomeCtrl($scope, $location, Auth, StateManager, EventService) {
         var vm = this;
 
 		vm.state = StateManager.state;
 
-		$scope.$watch("vm.state", function (newValue) {
-			if (angular.isDefined(vm.state.registered) && (vm.state.registered !== null)) {
-				vm.notLoggedInToShow = "showRegistered";
+		$scope.$watch("vm.state", function () {
+			if (angular.isDefined(vm.state.registerRequest) && (vm.state.registered !== null)) {
+				vm.notLoggedInToShow = "showRegisterRequest";
+			}
+			else if (angular.isDefined(vm.state.registerVerify) && (vm.state.registerVerify !== null)) {
+				vm.registerVerifyToken = vm.state.token;
+				vm.notLoggedInToShow = "showRegisterVerify";
+			}
+			else if (angular.isDefined(vm.state.passwordForgot) && (vm.state.registered !== null)) {
+				vm.notLoggedInToShow = "showPasswordForgot";
 			}
 			else if (angular.isDefined(vm.state.passwordChange) && (vm.state.registered !== null)) {
 				vm.notLoggedInToShow = "showPasswordChange";

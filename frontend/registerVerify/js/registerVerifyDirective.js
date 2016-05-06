@@ -19,30 +19,30 @@
     "use strict";
 
     angular.module("3drepo")
-        .directive("registered", registered);
+        .directive("registerVerify", registerVerify);
 
-    function registered() {
+    function registerVerify() {
         return {
             restrict: "E",
             scope: {
-                state: "="
+                token: "="
             },
-            templateUrl: "registered.html",
-            controller: RegisteredCtrl,
+            templateUrl: "registerVerify.html",
+            controller: RegisterVerifyCtrl,
             controllerAs: "vm",
             bindToController: true
         };
     }
 
-    RegisteredCtrl.$inject = ["$scope", "$location", "$window"];
+    RegisterVerifyCtrl.$inject = ["$scope", "$location", "$window"];
 
-    function RegisteredCtrl ($scope, $location, $window) {
+    function RegisterVerifyCtrl ($scope, $location, $window) {
         var vm = this;
 
         /*
-         * Watch state
+         * Watch the token value
          */
-        $scope.$watch("vm.state", function (newValue) {
+        $scope.$watch("vm.token", function (newValue) {
             console.log(newValue);
         });
 
