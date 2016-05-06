@@ -147,6 +147,11 @@
 	config.logfile.console_level = coalesce(config.logfile.console_level, "info");
 	config.logfile.file_level    = coalesce(config.logfile.file_level, "info");
 
+	// Token expiry length
+	config.tokenExpiry  = coalesce(config.tokenExpiry, {});
+	config.tokenExpiry.emailVerify = coalesce(config.tokenExpiry.emailVerify, 14 * 24); // 2 weeks
+	config.tokenExpiry.forgotPassword = coalesce(config.tokenExpiry.forgotPassword, 24); // 24 hours
+
 	config.version = VERSION;
 
 	module.exports = config;

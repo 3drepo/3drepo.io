@@ -38,6 +38,7 @@
     "multiparty": "4.1.2",
     "node-static": "0.7.7",
     "node-uuid": "1.4.7",
+    "nodemailer": "^2.3.2",
     "session-file-store": "0.0.18",
     "shortid": "2.2.4",
     "socket.io": "1.4.5",

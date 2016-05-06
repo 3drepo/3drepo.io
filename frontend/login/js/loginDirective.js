@@ -84,16 +84,21 @@
 		 * @param {Object} event
 		 */
 		vm.register = function(event) {
-			/*
-			if (angular.isDefined(event)) {
-				if (event.which === enterKey) {
-					Auth.register(vm.register.username, vm.register.email, vm.register.password);
+			if ((angular.isDefined(vm.register.username)) &&
+				(angular.isDefined(vm.register.email)) &&
+				(angular.isDefined(vm.register.password))) {
+				if (angular.isDefined(event)) {
+					if (event.which === enterKey) {
+						Auth.login(vm.user.username, vm.user.password);
+					}
+				}
+				else {
+					Auth.login(vm.user.username, vm.user.password);
 				}
 			}
 			else {
-				Auth.register(vm.register.username, vm.register.email, vm.register.password);
+				vm.registerErrorMessage = "Please fill all fields";
 			}
-			*/
 		};
 
 		vm.showTC = function () {

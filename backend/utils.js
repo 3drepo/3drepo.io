@@ -232,14 +232,14 @@ function Utils() {
      */
     this.mongoErrorToResCode = function(err){
 
-      let _ = require('lodash');
+      //let _ = require('lodash');
       let responseCodes = require('./response_codes');
       if(err.name === 'ValidationError'){
         return responseCodes.MONGOOSE_VALIDATION_ERROR(err);
-      } else if(_.isEqual(JSON.stringify(err), '{}')) {
-        return responseCodes.PROCESS_ERROR(err.toString());
-      } else {
+      } else if(err.name === 'MongoError') {
         return responseCodes.DB_ERROR(err);
+      } else {
+        return responseCodes.PROCESS_ERROR(err);
       }
     };
 

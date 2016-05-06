@@ -33,8 +33,9 @@ login md-input-container input {
   background: #ffffff !important;
 }
 
-login #loginError {
+login .loginError {
   color: #F44336;
+  margin: 5px 0 0 2px;
 }
 
 login .md-button {
@@ -43,6 +44,10 @@ login .md-button {
 
 login .loginTitle {
   margin: -5px 0 10px;
+}
+
+login #forgotPasswordButton {
+  margin-left: -5px;
 }
 
 login #loginDivider {

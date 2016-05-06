@@ -15,35 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var _ = require('lodash');
-var repoBase = require('./base/repo');
-var mongoose = require('mongoose');
-var ModelFactory = require('./factory/modelFactory');
+var html = data => `
+	Hi there,<br>
+	<br>
+	Let's confirm your email address.<br>
+	By clicking on the following link, you are confirming your email address ${data.email} 
+	and agreeing to 3DRepo's Terms of Service.<br> 
+	<br>
+	<a href="${data.url}">Confirm Email Address</a>
+`;
 
-var Schema = mongoose.Schema;
-
-var textureSchema = Schema(
-	_.extend({}, repoBase.attrs, {
-		width: Number,
-		height: Number,
-		data: Buffer,
-		data_byte_count: Number,
-		extension: String
-	})
-);
-
-
-// extend statics method
-_.extend(textureSchema.statics, repoBase.statics);
-
-
-var Texture = ModelFactory.createClass(
-	'Texture', 
-	textureSchema, 
-	arg => { 
-		return `${arg.project}.scene`;
-	}
-);
-
-
-module.exports = Texture;
+module.exports =  {
+	html: html,
+	subject: 'Welcome To 3DRepo! Verify Your Email‏'
+};

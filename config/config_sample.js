@@ -90,7 +90,32 @@ module.exports = {
 			map: params => { return `https://api2.ordnancesurvey.co.uk/mapping_api/v1/service/zxy/${params.tileMatrixSet}/${params.layer}/${params.z}/${params.x}/${params.y}.png` }
 		}
 	},
+
 	crossOrigin: true,
 	test_helper_api: false,
-	disableCache: true
+	disableCache: true,
+
+	tokenExpiry: {
+		emailVerify: 336,
+		forgotPassword: 24
+	},
+
+	mail: {
+		smtpConfig: {
+			host: '',
+			port: 465,
+			secure: true, // use SSL
+			auth: {
+				user: '',
+				pass: ''
+			}
+		},
+
+		sender: '"3D Repo" <support@3drepo.org>',
+
+		urls: {
+			'forgotPassword': token => `https://3drepo.io/passwordChange?username=${username}&token=${token}`,
+			'verify': token => `https://3drepo.io/registered?token=${token}`
+		}
+	}
 }

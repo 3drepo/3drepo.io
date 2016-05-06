@@ -15,35 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var _ = require('lodash');
-var repoBase = require('./base/repo');
-var mongoose = require('mongoose');
-var ModelFactory = require('./factory/modelFactory');
 
-var Schema = mongoose.Schema;
+var html = data => `
+	Hi there,<br>
+	<br>
+	You've requested to reset your password, please click on the following link to reset your password.<br>
+	<br>
+	<a href="${data.url}">Reset My Password</a>
+`;
 
-var textureSchema = Schema(
-	_.extend({}, repoBase.attrs, {
-		width: Number,
-		height: Number,
-		data: Buffer,
-		data_byte_count: Number,
-		extension: String
-	})
-);
-
-
-// extend statics method
-_.extend(textureSchema.statics, repoBase.statics);
-
-
-var Texture = ModelFactory.createClass(
-	'Texture', 
-	textureSchema, 
-	arg => { 
-		return `${arg.project}.scene`;
-	}
-);
-
-
-module.exports = Texture;
+module.exports =  {
+	html: html,
+	subject: 'Reset your password'
+};
