@@ -32,11 +32,12 @@
 		};
 	}
 
-	LoginCtrl.$inject = ["$scope", "$mdDialog", "Auth", "EventService", "serverConfig"];
+	LoginCtrl.$inject = ["$scope", "$mdDialog", "$window", "Auth", "EventService", "serverConfig", "LoginService"];
 
-	function LoginCtrl($scope, $mdDialog, Auth, EventService, serverConfig) {
+	function LoginCtrl($scope, $mdDialog, $window, Auth, EventService, serverConfig, LoginService) {
 		var vm = this,
-			enterKey = 13;
+			enterKey = 13,
+			promise;
 		
 		/*
 		 * Init
@@ -89,11 +90,11 @@
 				(angular.isDefined(vm.register.password))) {
 				if (angular.isDefined(event)) {
 					if (event.which === enterKey) {
-						Auth.login(vm.user.username, vm.user.password);
+						doRegister();
 					}
 				}
 				else {
-					Auth.login(vm.user.username, vm.user.password);
+					doRegister();
 				}
 			}
 			else {
@@ -116,6 +117,18 @@
 			});
 		};
 
+		/*
+		 * Event watch
+		 */
+		$scope.$watch(EventService.currentEvent, function(event) {
+			if (event.type === EventService.EVENT.USER_LOGGED_IN) {
+				// Show an error message for incorrect login
+				if (event.value.hasOwnProperty("error") && (event.value.error.place.indexOf("POST") !== -1)) {
+					vm.errorMessage = event.value.error.message;
+				}
+			}
+		});
+
 		/**
 		 * Close the dialog
 		 */
@@ -130,19 +143,32 @@
 			$scope.closeDialog();
 		}
 
+		/**
+		 * Dialog controller
+		 */
 		function tcDialogController() {
 		}
 
-		/*
-		 * Event watch
+		/**
+		 * Do the user registration
 		 */
-		$scope.$watch(EventService.currentEvent, function(event) {
-			if (event.type === EventService.EVENT.USER_LOGGED_IN) {
-				// Show an error message for incorrect login
-				if (event.value.hasOwnProperty("error") && (event.value.error.place.indexOf("POST") !== -1)) {
-					vm.errorMessage = event.value.error.message;
+		function doRegister() {
+			promise = LoginService.register(
+				vm.register.username,
+				{
+					email: vm.register.email,
+					password: vm.register.password
 				}
-			}
-		});
+			);
+			promise.then(function (response) {
+				console.log(response);
+				if (response.status === 200) {
+					$window.location.href = "/registered";
+				}
+				else {
+					vm.registerErrorMessage = "Error with registration";
+				}
+			});
+		}
 	}
 }());

@@ -19,24 +19,24 @@
     "use strict";
 
     angular.module("3drepo")
-        .directive("passwordChange", passwordChange);
+        .directive("passwordForgot", passwordForgot);
 
-    function passwordChange() {
+    function passwordForgot() {
         return {
             restrict: "E",
             scope: {
                 state: "="
             },
-            templateUrl: "passwordChange.html",
-            controller: PasswordChangeCtrl,
+            templateUrl: "passwordForgot.html",
+            controller: PasswordForgotCtrl,
             controllerAs: "vm",
             bindToController: true
         };
     }
 
-    PasswordChangeCtrl.$inject = ["$scope", "$location", "$window"];
+    PasswordForgotCtrl.$inject = ["$scope", "$location", "$window"];
 
-    function PasswordChangeCtrl ($scope, $location, $window) {
+    function PasswordForgotCtrl ($scope, $location, $window) {
         var vm = this;
 
         /*

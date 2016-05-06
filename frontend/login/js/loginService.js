@@ -24,8 +24,7 @@
     LoginService.$inject = ["$http", "$q", "serverConfig"];
 
     function LoginService($http, $q, serverConfig) {
-        var self = this,
-            obj = {};
+        var obj = {};
 
         /**
          * Handle POST requests
@@ -35,7 +34,7 @@
          */
         function doPost(data, urlEnd) {
             var deferred = $q.defer(),
-                url = serverConfig.apiUrl("/" + urlEnd),
+                url = serverConfig.apiUrl(urlEnd),
                 config = {withCredentials: true};
 
             $http.post(url, data, config)

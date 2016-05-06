@@ -51,7 +51,7 @@
 				loggedOutUrl: "@"
 			},
             controller: HomeCtrl,
-            controllerAs: "hm",
+            controllerAs: "vm",
             bindToController: true
         };
     }
@@ -59,28 +59,36 @@
     HomeCtrl.$inject = ["$scope", "Auth", "StateManager", "EventService"];
 
     function HomeCtrl($scope, Auth, StateManager, EventService) {
-        var hm = this;
+        var vm = this;
 
-		hm.state = StateManager.state;
+		vm.state = StateManager.state;
 
-		$scope.$watch("hm.state", function (newValue) {
-			console.log(newValue);
+		$scope.$watch("vm.state", function (newValue) {
+			if (angular.isDefined(vm.state.registered) && (vm.state.registered !== null)) {
+				vm.notLoggedInToShow = "showRegistered";
+			}
+			else if (angular.isDefined(vm.state.passwordChange) && (vm.state.registered !== null)) {
+				vm.notLoggedInToShow = "showPasswordChange";
+			}
+			else {
+				vm.notLoggedInToShow = "showLogin";
+			}
 		}, true);
 
-		hm.getLoggedInUrl = function() {
-			return hm.loggedInUrl;
+		vm.getLoggedInUrl = function() {
+			return vm.loggedInUrl;
 		};
 
-		hm.getLoggedOutUrl = function() {
-			return hm.loggedOutUrl;
+		vm.getLoggedOutUrl = function() {
+			return vm.loggedOutUrl;
 		};
 
-		if (angular.isDefined(hm.account) && angular.isDefined(hm.password))
+		if (angular.isDefined(vm.account) && angular.isDefined(vm.password))
 		{
-			Auth.login(hm.account, hm.password);
+			Auth.login(vm.account, vm.password);
 		}
 
-        hm.logout = function () {
+        vm.logout = function () {
             Auth.logout();
         };
 
