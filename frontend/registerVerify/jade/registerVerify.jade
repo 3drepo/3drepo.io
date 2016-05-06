@@ -3,5 +3,7 @@ md-content.md-whiteframe-1dp(aria-label="Registered")
 		.md-toolbar-tools
 			h2 Registered for 3D Repo
 	.userContent(layout="column", layout-align="start center")
-		h3 Congratulations. You have successfully registered for 3D Repo. You may now login to you account.
-		md-button.md-raised.md-accent(ng-click="vm.goToLoginPage()") Go To Login Page
+		h3(ng-if="!vm.verified") Please wait
+		div(ng-if="vm.verified", layout="column", layout-align="start center")
+			h3 Congratulations. You have successfully registered for 3D Repo. You may now login to you account.
+			md-button.md-raised.md-accent(ng-click="vm.goToLoginPage()") Go To Login Page

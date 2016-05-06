@@ -19,11 +19,11 @@
     "use strict";
 
     angular.module("3drepo")
-        .factory("RegisterVerifyService", RegisterVerifyService);
+        .factory("PasswordChangeService", PasswordChangeService);
 
-    RegisterVerifyService.$inject = ["$http", "$q", "serverConfig"];
+    PasswordChangeService.$inject = ["$http", "$q", "serverConfig"];
 
-    function RegisterVerifyService($http, $q, serverConfig) {
+    function PasswordChangeService($http, $q, serverConfig) {
         var obj = {};
 
         /**
@@ -32,20 +32,20 @@
          * @param urlEnd
          * @returns {*}
          */
-        function doPost(data, urlEnd) {
+        function doPut(data, urlEnd) {
             var deferred = $q.defer(),
                 url = serverConfig.apiUrl(urlEnd),
                 config = {withCredentials: true};
 
-            $http.post(url, data, config)
+            $http.put(url, data, config)
                 .then(function (response) {
                     deferred.resolve(response);
                 });
             return deferred.promise;
         }
 
-        obj.verify = function (username, data) {
-            return doPost(data, username + "/verify");
+        obj.passwordChange = function (username, data) {
+            return doPut(data, username + "/password");
         };
 
         return obj;

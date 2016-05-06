@@ -19,11 +19,11 @@
     "use strict";
 
     angular.module("3drepo")
-        .factory("RegisterVerifyService", RegisterVerifyService);
+        .factory("PasswordForgotService", PasswordForgotService);
 
-    RegisterVerifyService.$inject = ["$http", "$q", "serverConfig"];
+    PasswordForgotService.$inject = ["$http", "$q", "serverConfig"];
 
-    function RegisterVerifyService($http, $q, serverConfig) {
+    function PasswordForgotService($http, $q, serverConfig) {
         var obj = {};
 
         /**
@@ -44,8 +44,8 @@
             return deferred.promise;
         }
 
-        obj.verify = function (username, data) {
-            return doPost(data, username + "/verify");
+        obj.forgot = function (username, data) {
+            return doPost(data, username + "/forgot-password");
         };
 
         return obj;

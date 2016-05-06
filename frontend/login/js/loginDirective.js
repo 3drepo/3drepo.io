@@ -43,10 +43,11 @@
 		 * Init
 		 */
 		vm.user = {username: "", password: ""};
-		vm.register = {username: "", email: "", password: ""};
+		vm.newUser = {username: "", email: "", password: "", tcAgreed: false};
 		vm.version = serverConfig.apiVersion;
 		vm.logo = "/public/images/3drepo-logo-white.png";
 		vm.captchaKey = "6LfSDR8TAAAAACBaw6FY5WdnqOP0nfv3z8-cALAI";
+		vm.tcAgreed = false;
 
 		// Logo
 		if (angular.isDefined(serverConfig.backgroundImage))
@@ -62,6 +63,15 @@
 				console.log(newValue);
 			}
 		});
+
+		/*
+		 * Watch changes to register fields to clear warning message
+		 */
+		$scope.$watch("vm.newUser", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				vm.registerErrorMessage = "";
+			}
+		}, true);
 
 		/**
 		 * Attempt to login
@@ -85,20 +95,13 @@
 		 * @param {Object} event
 		 */
 		vm.register = function(event) {
-			if ((angular.isDefined(vm.register.username)) &&
-				(angular.isDefined(vm.register.email)) &&
-				(angular.isDefined(vm.register.password))) {
-				if (angular.isDefined(event)) {
-					if (event.which === enterKey) {
-						doRegister();
-					}
-				}
-				else {
+			if (angular.isDefined(event)) {
+				if (event.which === enterKey) {
 					doRegister();
 				}
 			}
 			else {
-				vm.registerErrorMessage = "Please fill all fields";
+				doRegister();
 			}
 		};
 
@@ -157,22 +160,34 @@
 		 * Do the user registration
 		 */
 		function doRegister() {
-			promise = LoginService.register(
-				vm.register.username,
-				{
-					email: vm.register.email,
-					password: vm.register.password
-				}
-			);
-			promise.then(function (response) {
-				console.log(response);
-				if (response.status === 200) {
-					$window.location.href = "/registerRequest";
+			if ((angular.isDefined(vm.newUser.username)) &&
+				(angular.isDefined(vm.newUser.email)) &&
+				(angular.isDefined(vm.newUser.password))) {
+				if (vm.newUser.tcAgreed) {
+					promise = LoginService.register(
+						vm.newUser.username,
+						{
+							email: vm.newUser.email,
+							password: vm.newUser.password
+						}
+					);
+					promise.then(function (response) {
+						console.log(response);
+						if (response.status === 200) {
+							$window.location.href = "/registerRequest";
+						}
+						else {
+							vm.registerErrorMessage = "Error with registration";
+						}
+					});
 				}
 				else {
-					vm.registerErrorMessage = "Error with registration";
+					vm.registerErrorMessage = "You must agree to the terms and conditions";
 				}
-			});
+			}
+			else {
+				vm.registerErrorMessage = "Please fill all fields";
+			}
 		}
 	}
 }());

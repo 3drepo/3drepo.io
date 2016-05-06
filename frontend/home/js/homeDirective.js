@@ -56,9 +56,9 @@
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "$location", "Auth", "StateManager", "EventService"];
+    HomeCtrl.$inject = ["$scope", "Auth", "StateManager", "EventService"];
 
-    function HomeCtrl($scope, $location, Auth, StateManager, EventService) {
+    function HomeCtrl($scope, Auth, StateManager, EventService) {
         var vm = this;
 
 		vm.state = StateManager.state;
@@ -68,13 +68,16 @@
 				vm.notLoggedInToShow = "showRegisterRequest";
 			}
 			else if (angular.isDefined(vm.state.registerVerify) && (vm.state.registerVerify !== null)) {
-				vm.registerVerifyToken = vm.state.token;
+				vm.username = vm.state.username;
+				vm.token = vm.state.token;
 				vm.notLoggedInToShow = "showRegisterVerify";
 			}
 			else if (angular.isDefined(vm.state.passwordForgot) && (vm.state.registered !== null)) {
 				vm.notLoggedInToShow = "showPasswordForgot";
 			}
 			else if (angular.isDefined(vm.state.passwordChange) && (vm.state.registered !== null)) {
+				vm.username = vm.state.username;
+				vm.token = vm.state.token;
 				vm.notLoggedInToShow = "showPasswordChange";
 			}
 			else {

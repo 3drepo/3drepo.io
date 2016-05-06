@@ -25,6 +25,7 @@
         return {
             restrict: "E",
             scope: {
+                username: "=",
                 token: "="
             },
             templateUrl: "registerVerify.html",
@@ -34,16 +35,32 @@
         };
     }
 
-    RegisterVerifyCtrl.$inject = ["$scope", "$location", "$window"];
+    RegisterVerifyCtrl.$inject = ["$scope", "$window", "RegisterVerifyService"];
 
-    function RegisterVerifyCtrl ($scope, $location, $window) {
-        var vm = this;
+    function RegisterVerifyCtrl ($scope, $window, RegisterVerifyService) {
+        var vm = this,
+            promise;
+
+        /*
+         * Init
+         */
+        vm.verified = false;
 
         /*
          * Watch the token value
          */
-        $scope.$watch("vm.token", function (newValue) {
-            console.log(newValue);
+        $scope.$watchGroup(["vm.username", "vm.token"], function () {
+            if (angular.isDefined(vm.username) && angular.isDefined(vm.token)) {
+                promise = RegisterVerifyService.verify(vm.username, {token: vm.token});
+                promise.then(function (response) {
+                    if (response.status === 200) {
+                        vm.verified = true;
+                    }
+                    else {
+                        vm.registerErrorMessage = "Error with verification";
+                    }
+                });
+            }
         });
 
         vm.goToLoginPage = function () {

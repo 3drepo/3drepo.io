@@ -35,3 +35,10 @@ home password-forgot .userContent,
 home password-change .userContent {
     padding: 20px;
 }
+
+home register-request .userContent h3,
+home register-verify .userContent h3,
+home password-forgot .userContent h3,
+home password-change .userContent h3 {
+    color: rgba(0, 0, 0, 0.7);
+}

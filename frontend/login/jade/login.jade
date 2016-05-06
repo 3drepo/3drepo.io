@@ -1,5 +1,5 @@
 #login(layout="column" flex)
-	#loginContent(layout="row" flex="50")
+	#loginContent(layout="row" flex="60")
 		span(flex="25")
 
 		// Info
@@ -33,13 +33,13 @@
 			div(layout="column", flex)
 				h3.loginTitle Register
 				md-input-container.md-block(md-no-float)
-					input(type='text', ng-model='vm.register.username', placeholder='Username', ng-required, ng-keypress="vm.register($event)")
+					input(type='text', ng-model='vm.newUser.username', placeholder='Username', ng-required, ng-keypress="vm.register($event)")
 				md-input-container(md-no-float)
-					input(type='email', ng-model='vm.register.email', placeholder='Email', ng-required, ng-keypress="vm.register($event)")
+					input(type='email', ng-model='vm.newUser.email', placeholder='Email', ng-required, ng-keypress="vm.register($event)")
 				md-input-container(md-no-float)
-					input(type='password', ng-model='vm.register.password', placeholder='Password', ng-required ng-keypress="vm.register($event)")
+					input(type='password', ng-model='vm.newUser.password', placeholder='Password', ng-required ng-keypress="vm.register($event)")
 				div(layout="column", layout-align="start")
-					md-checkbox#tcCheckBox(ng-model="vm.tcAgreed" aria-label="Terms and conditions Checkbox") I agree to the Terms and Conditions
+					md-checkbox#tcCheckBox(ng-model="vm.newUser.tcAgreed" aria-label="Terms and conditions Checkbox") I agree to the Terms and Conditions
 					#tcButton(layout="row", layout-align="start")
 						md-button.md-accent(ng-click="vm.showTC()") Terms and Conditions
 				#loginCaptcha(vc-recaptcha, key="vm.captchaKey", ng-model="vm.recaptchaResponse")
@@ -49,6 +49,6 @@
 
 		span(flex="25")
 
-	div(layout="row" layout-align="center center" flex="50")
+	div(layout="row" layout-align="center center" flex="40")
 		div
 			img(ng-src="{{vm.enterpriseLogo}}" flex style="max-width:100%; height: auto")

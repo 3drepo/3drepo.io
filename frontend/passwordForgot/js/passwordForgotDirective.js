@@ -24,9 +24,7 @@
     function passwordForgot() {
         return {
             restrict: "E",
-            scope: {
-                state: "="
-            },
+            scope: {},
             templateUrl: "passwordForgot.html",
             controller: PasswordForgotCtrl,
             controllerAs: "vm",
@@ -34,20 +32,41 @@
         };
     }
 
-    PasswordForgotCtrl.$inject = ["$scope", "$location", "$window"];
+    PasswordForgotCtrl.$inject = ["$scope", "PasswordForgotService"];
 
-    function PasswordForgotCtrl ($scope, $location, $window) {
-        var vm = this;
+    function PasswordForgotCtrl ($scope, PasswordForgotService) {
+        var vm = this,
+            promise;
 
         /*
-         * Watch state
+         * Watch inputs to clear any message
          */
-        $scope.$watch("vm.state", function (newValue) {
-            console.log(newValue);
+        $scope.$watchGroup(["vm.username", "vm.email"], function () {
+            vm.message = "";
         });
 
-        vm.goToLoginPage = function () {
-            $window.location.href = "/";
+        /**
+         * Process forgotten password recovery
+         */
+        vm.requestPasswordChange = function () {
+            if (angular.isDefined(vm.username) && angular.isDefined(vm.email)) {
+                promise = PasswordForgotService.forgot(vm.username, {email: vm.email});
+                promise.then(function (response) {
+                    if (response.status === 200) {
+                        vm.verified = true;
+                        vm.messageColor = "rgba(0, 0, 0, 0.7)";
+                        vm.message = "Thank you. You will receive an email shortly with a link to change your password";
+                    }
+                    else {
+                        vm.messageColor = "#F44336";
+                        vm.message = "Error with with one or more fields";
+                    }
+                });
+            }
+            else {
+                vm.messageColor = "#F44336";
+                vm.message = "All fields must be filled";
+            }
         };
     }
 }());
