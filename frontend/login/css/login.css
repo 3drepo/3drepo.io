@@ -49,6 +49,9 @@ login .loginTitle {
 login #forgotPasswordButton {
   margin-left: -5px;
 }
+login #forgotPasswordButton .md-button {
+  font-size: 12px;
+}
 
 login #loginDivider {
   width: 1px;
@@ -62,11 +65,14 @@ login md-checkbox ._md-icon {
   border-color: rgba(255, 255, 255, 0.7);
 }
 
-login #tcCheckBox {
-  margin-left: 2px;
+login #tc {
+  margin-bottom: 10px;
 }
-login #tcButton {
-  margin: -15px 0 10px -6px;
+login #tc md-checkbox {
+  margin : 0 0 0 2px;
+}
+login #tc .md-button {
+  font-size: 12px;
 }
 
 login #loginCaptcha {

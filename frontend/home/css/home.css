@@ -6,39 +6,24 @@ home {
     height: 100%;
 }
 
-home register-request,
-home register-verify,
-home password-forgot,
-home password-change {
+home .homeUserContent {
     padding: 40px;
-    display: block;
 }
 
-home register-request .md-whiteframe-1dp,
-home register-verify .md-whiteframe-1dp,
-home password-forgot .md-whiteframe-1dp,
-home password-change .md-whiteframe-1dp {
+home .homeUserContent .md-whiteframe-1dp {
     border-radius: 4px;
 }
 
-home register-request md-toolbar,
-home register-verify md-toolbar,
-home password-forgot md-toolbar,
-home password-change md-toolbar {
+home .homeUserContent md-toolbar {
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
 }
 
-home register-request .userContent,
-home register-verify .userContent,
-home password-forgot .userContent,
-home password-change .userContent {
+home .homeUserContent .userContent {
     padding: 20px;
 }
 
-home register-request .userContent h3,
-home register-verify .userContent h3,
-home password-forgot .userContent h3,
-home password-change .userContent h3 {
+home .homeUserContent .userContent h3 {
     color: rgba(0, 0, 0, 0.7);
+    text-align: center;
 }

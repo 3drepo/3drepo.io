@@ -89,14 +89,15 @@
                         }
                     );
                     promise.then(function (response) {
-                        if (response.status === 200) {
+                        console.log(response);
+                        if (response.status === 400) {
+                            vm.messageColor = "#F44336";
+                            vm.message = "Error changing password";
+                        }
+                        else {
                             vm.passwordChanged = true;
                             vm.messageColor = "rgba(0, 0, 0, 0.7)";
                             vm.message = "Your password has been reset. Please go to the login page.";
-                        }
-                        else {
-                            vm.messageColor = "#F44336";
-                            vm.message = "Error changing password";
                         }
                     });
                 }
