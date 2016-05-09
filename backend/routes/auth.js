@@ -137,6 +137,10 @@
 
 		let responsePlace = utils.APIInfo(req);
 
+		if(!config.auth.register){
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.REGISTER_DISABLE, responseCodes.REGISTER_DISABLE);
+		}
+
 		if(!req.body.password){
 			let err = responseCodes.SIGN_UP_PASSWORD_MISSING;
 			return responseCodes.respond(responsePlace, req, res, next, err, err);

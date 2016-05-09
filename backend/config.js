@@ -145,6 +145,11 @@
 	config.tokenExpiry.emailVerify = coalesce(config.tokenExpiry.emailVerify, 14 * 24); // 2 weeks
 	config.tokenExpiry.forgotPassword = coalesce(config.tokenExpiry.forgotPassword, 24); // 24 hours
 
+	//default auth settings
+	config.auth  = coalesce(config.auth, {});
+	config.auth.captcha  = coalesce(config.auth.captcha, {});
+	config.auth.register  = coalesce(config.auth.register, {});
+
 	config.version = VERSION;
 
 	module.exports = config;

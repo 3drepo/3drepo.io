@@ -87,7 +87,7 @@ function makePostData(obj){
 	var params = [];
 	
 	Object.keys(obj).forEach( key => {
-		params.push(`${key}=${encodeURIComponent(obj[key])}`)
+		params.push(`${key}=${encodeURIComponent(obj[key])}`);
 	});
 
 	return params.join('&');
@@ -120,6 +120,7 @@ function post(url, obj, type){
 		}
 	};
 
+	//console.log(stringifiedData);
 	return new Promise((resolve, reject) => {
 
 		let req = https.request(options, (res) => {
