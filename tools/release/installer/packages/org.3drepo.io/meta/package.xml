@@ -1,16 +1,19 @@
 <?xml version="1.0"?>
 <Package>
-    <DisplayName>3drepo.io</DisplayName>
-    <Description>3DRepo Web Interface</Description>
+    <DisplayName>3D Repo IO</DisplayName>
+    <Description>3D Repo Web and REST API Service</Description>
     <Version>1.0.0</Version>
     <ReleaseDate>2016-05-06</ReleaseDate>
     <Name>org.3drepo.io</Name>
-    <Default>true</Default>
+    <SortingPriority>3</SortingPriority>
     <Licenses>
-        <License name="License Agreement" file="license.txt" />
+	    <License name="3D Repo GUI License Agreement" file="GNU AGPL v3.txt" />
     </Licenses>
+    <Default>true</Default>
+    <Essential>true</Essential>
+    <ForcedInstallation>true</ForcedInstallation>
     <Script>installscript.qs</Script>
     <UserInterfaces>
-        <UserInterface>mongoConfig.ui</UserInterface>
+        <UserInterface>endingcheckboxform.ui</UserInterface>
     </UserInterfaces>
 </Package>
