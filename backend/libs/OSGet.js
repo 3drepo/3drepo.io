@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var httpsGet = require('./httpsGet');
+var httpsGet = require('./httpsReq').get;
 var buildQueryString = require('./buildQueryString');
 
 module.exports = function(osConfig){

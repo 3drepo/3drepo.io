@@ -80,6 +80,8 @@ module.exports.createApp = function(serverConfig)
 
 		params.config_js += "\n\nvar realOpen = XMLHttpRequest.prototype.open;\n\nXMLHttpRequest.prototype.open = function(method, url, async, unk1, unk2) {\n if(async) this.withCredentials = true;\nrealOpen.apply(this, arguments);\n};";
 
+		params.config_js += "\n\nserver_config.auth = " + JSON.stringify(config.auth) + ";";
+
 		res.header("Content-Type", "text/javascript");
 		res.render("config.jade", params);
 	});
@@ -93,8 +95,22 @@ module.exports.createApp = function(serverConfig)
 		],
 		"children" : [
 			{
+				"plugin": "registered",
+				"url": 'registered'
+			},
+			{
 				"plugin": "account",
 				"children": [
+					{
+						"plugin": "user",
+						"url": "/user",
+						"children": [
+							{
+								"plugin": "confirmed",
+								"url": '/confirmed'
+							}
+						]
+					},
 					{
 						"plugin": "project",
 						"friends" : [
@@ -126,7 +142,8 @@ module.exports.createApp = function(serverConfig)
 							}
 						]
 					}
-				]
+				],
+				"url": ":account"
 			}
 		]
 	};
