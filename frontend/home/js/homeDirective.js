@@ -26,13 +26,33 @@
 			{
 				var mdThemingProvider = $injector.get("$mdThemingProvider");
 
+				mdThemingProvider.definePalette('three_d_repo_primary', {
+					'50': '004594',
+					'100': '004594',
+					'200': '004594',
+					'300': '004594',
+					'400': '004594',
+					'500': '004594',
+					'600': '004594',
+					'700': '004594',
+					'800': '004594',
+					'900': '004594',
+					'A100': '004594',
+					'A200': '004594',
+					'A400': '004594',
+					'A700': '004594',
+					'contrastDefaultColor': 'light',
+					'contrastDarkColors': ['50', '100', '200', '300', '400', 'A100'],
+					'contrastLightColors': undefined
+				});
+
 				mdThemingProvider.theme("default")
-                .primaryPalette("indigo", {
-                    "default": "500",
-                    "hue-1": "400",
-                    "hue-2": "200",
-                    "hue-3": "50"
-                })
+                .primaryPalette("three_d_repo_primary", {
+					"default": "500",
+					"hue-1": "400",
+					"hue-2": "200",
+					"hue-3": "50"
+				})
                 .accentPalette("green", {
                     "default": "600"
                 })

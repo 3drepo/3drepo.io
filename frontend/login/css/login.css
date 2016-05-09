@@ -1,4 +1,4 @@
-login #login {
+login {
   position: absolute;
   top: 0;
   width: 100%;
@@ -6,9 +6,9 @@ login #login {
   background-size: contain;
 }
 
-login #loginContent {
-  padding-top: 50px;
-  background: #004594;
+login .homeUserContent md-toolbar {
+  height: 20px;
+  min-height: 20px;
 }
 
 login h1,
@@ -44,6 +44,7 @@ login .md-button {
 
 login .loginTitle {
   margin: -5px 0 10px;
+  color: rgba(0, 0, 0, 0.5) !important;
 }
 
 login #forgotPasswordButton {
@@ -55,14 +56,7 @@ login #forgotPasswordButton .md-button {
 
 login #loginDivider {
   width: 1px;
-  background-color: rgba(255, 255, 255, 0.5);
-}
-
-login md-checkbox {
-  color: rgba(255, 255, 255, 0.7);
-}
-login md-checkbox ._md-icon {
-  border-color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 login #tc {
@@ -71,12 +65,19 @@ login #tc {
 login #tc md-checkbox {
   margin : 0 0 0 2px;
 }
+login #tc md-checkbox ._md-icon {
+  border-color: rgba(0, 0, 0, 0.4);
+}
 login #tc .md-button {
   font-size: 12px;
 }
 
 login #loginCaptcha {
-  margin: -5px 0 10px;
+  margin: -5px 0 10px 2px;
+}
+
+login #loginRegister {
+  margin-right: 30px;
 }
 
 /** Terms and Conditions Dialog ***************************************************************************************/

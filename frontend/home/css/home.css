@@ -6,12 +6,34 @@ home {
     height: 100%;
 }
 
+home #homeBackground {
+    position:absolute;
+    width:100%;
+    height:100%;
+    top:0
+}
+
+home #homeLogo {
+    position: absolute;
+    z-index: 2;
+    text-align: center;
+    width: 250px;
+    top: 10px;
+    left: 0px;
+    right: 0px;
+    margin: auto;
+}
+home #homeLogo img {
+    width: inherit;
+}
+
 home .homeUserContent {
-    padding: 40px;
+    padding-top: 120px;
 }
 
 home .homeUserContent .md-whiteframe-1dp {
     border-radius: 4px;
+    background: #FFF;
 }
 
 home .homeUserContent md-toolbar {

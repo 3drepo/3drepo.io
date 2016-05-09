@@ -1,3 +1,7 @@
+img#homeBackground(src="/public/images/viewer_background.jpg")
+#homeLogo
+	img(src="/public/images/3drepo-logo-white.png")
+
 div(ng-if="!vm.state.changing")
 	div(ng-if="!vm.state.loggedIn")
 		div(ng-if="vm.getLoggedOutUrl()" ng-include="vm.getLoggedOutUrl()")

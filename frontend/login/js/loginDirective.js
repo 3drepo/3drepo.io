@@ -48,6 +48,7 @@
 		vm.logo = "/public/images/3drepo-logo-white.png";
 		vm.captchaKey = "6LfSDR8TAAAAACBaw6FY5WdnqOP0nfv3z8-cALAI";
 		vm.tcAgreed = false;
+		vm.showRegister = true;
 
 		// Logo
 		if (angular.isDefined(serverConfig.backgroundImage))
