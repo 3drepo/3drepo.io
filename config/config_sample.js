@@ -94,11 +94,21 @@ module.exports = {
 		sender: '"3D Repo" <support@3drepo.org>',
 
 		urls: {
-			'forgotPassword': token => `https://3drepo.io/users/abcdefg?token=${token}`,
-			'verify': token => `https://3drepo.io/users/confirm?token=${token}`
+			'forgotPassword': data => `https://3drepo.io/users/abcdefg?username=${data.username}&token=${data.token}`,
+			'verify': data => `https://3drepo.io/users/confirm?username=${data.username}&token=${data.token}`
 		}
 	},
+	
+	captcha: {
+		'validateUrl': 'https://www.google.com/recaptcha/api/siteverify',
+		'secretKey': ''
+	},
 
+	auth: {
+		captcha: true,
+		register: true
+	},
+	
 	test_helper_api: false
 }
 

@@ -28,6 +28,7 @@
 	var utils = require("../utils");
 	var User = require("../models/user");
 	var Mailer = require("../mailer/mailer");
+	var httpsPost = require("../libs/httpsReq").post;
 
 	router.post("/login", login);
 	router.get("/login", checkLogin);
@@ -141,11 +142,30 @@
 			return responseCodes.respond(responsePlace, req, res, next, err, err);
 		}
 
-		User.createUser(req[C.REQ_REPO].logger, req.params.account, req.body.password, {
-			email: req.body.email,
-			firstName: req.body.firstName,
-			lastName: req.body.lastName
-		}, config.tokenExpiry.emailVerify).then( data => {
+		//check if captcha is enabled
+		let checkCaptcha = config.auth.captcha ? httpsPost(config.captcha.validateUrl, {
+			secret: config.captcha.secretKey,
+			response: req.body.captcha
+
+		}) : Promise.resolve({
+			success: true
+		});
+
+		checkCaptcha.then(resBody => {
+
+			if(resBody.success){
+				return User.createUser(req[C.REQ_REPO].logger, req.params.account, req.body.password, {
+					email: req.body.email,
+					firstName: req.body.firstName,
+					lastName: req.body.lastName
+				}, config.tokenExpiry.emailVerify);
+			} else {
+				console.log(resBody);
+				return Promise.reject({ resCode: responseCodes.INVALID_CAPTCHA_RES});
+			}
+
+
+		}).then( data => {
 			//send verification email
 			return Mailer.sendVerifyUserEmail(req.body.email, {
 				token : data.token,
