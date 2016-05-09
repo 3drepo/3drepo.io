@@ -19,8 +19,8 @@ home #homeLogo {
     text-align: center;
     width: 250px;
     top: 10px;
-    left: 0px;
-    right: 0px;
+    left: 0;
+    right: 0;
     margin: auto;
 }
 home #homeLogo img {
@@ -48,4 +48,5 @@ home .homeUserContent .userContent {
 home .homeUserContent .userContent h3 {
     color: rgba(0, 0, 0, 0.7);
     text-align: center;
+    font-weight: normal;
 }

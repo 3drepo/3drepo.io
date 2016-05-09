@@ -28,6 +28,8 @@ angular.module('3drepo')
 	this.apiVersion  = server_config.apiVersion;
 
 	this.backgroundImage = server_config.backgroundImage;
+
+	this.auth = server_config.auth;
 });
 
 

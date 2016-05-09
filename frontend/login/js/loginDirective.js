@@ -38,7 +38,7 @@
 		var vm = this,
 			enterKey = 13,
 			promise;
-		
+
 		/*
 		 * Init
 		 */
@@ -48,22 +48,26 @@
 		vm.logo = "/public/images/3drepo-logo-white.png";
 		vm.captchaKey = "6LfSDR8TAAAAACBaw6FY5WdnqOP0nfv3z8-cALAI";
 		vm.tcAgreed = false;
-		vm.showRegister = true;
+		vm.useReCapthca = false;
+		vm.useRegister = false;
+
+		/*
+		 * Auth stuff
+		 */
+		if (serverConfig.hasOwnProperty("auth")) {
+			if (serverConfig.auth.hasOwnProperty("register") && (serverConfig.auth.register)) {
+				vm.useRegister = true;
+				if (serverConfig.auth.hasOwnProperty("captcha") && (serverConfig.auth.captcha)) {
+					vm.useReCapthca = true;
+				}
+			}
+		}
 
 		// Logo
 		if (angular.isDefined(serverConfig.backgroundImage))
 		{
 			vm.enterpriseLogo = serverConfig.backgroundImage;
 		}
-
-		/*
-		 * Watch for the reCaptcha response
-		 */
-		$scope.$watch("vm.recaptchaResponse", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				console.log(newValue);
-			}
-		});
 
 		/*
 		 * Watch changes to register fields to clear warning message
@@ -161,21 +165,27 @@
 		 * Do the user registration
 		 */
 		function doRegister() {
+			var data;
+
 			if ((angular.isDefined(vm.newUser.username)) &&
 				(angular.isDefined(vm.newUser.email)) &&
 				(angular.isDefined(vm.newUser.password))) {
 				if (vm.newUser.tcAgreed) {
-					promise = LoginService.register(
-						vm.newUser.username,
-						{
-							email: vm.newUser.email,
-							password: vm.newUser.password
-						}
-					);
+					data = {
+						email: vm.newUser.email,
+						password: vm.newUser.password
+					};
+					if (vm.useReCapthca) {
+						data.captcha = vm.reCaptchaResponse;
+					}
+					promise = LoginService.register(vm.newUser.username, data);
 					promise.then(function (response) {
 						console.log(response);
 						if (response.status === 200) {
 							$window.location.href = "/registerRequest";
+						}
+						else if (response.data.value === 62) {
+							vm.registerErrorMessage = "Prove you're not a robot";
 						}
 						else {
 							vm.registerErrorMessage = "Error with registration";

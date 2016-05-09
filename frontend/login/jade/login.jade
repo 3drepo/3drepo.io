@@ -31,7 +31,7 @@
 						md-button.md-accent(ng-click="vm.forgotPassword()") Forgot password?
 					h4.loginError {{vm.errorMessage}}
 
-				div(ng-if="vm.showRegister", layout="row")
+				div(ng-if="vm.useRegister", layout="row")
 					div(flex="10", layout="column", layout-align="center center")
 						#loginDivider(flex)
 
@@ -48,7 +48,7 @@
 							md-checkbox.md-accent(ng-model="vm.newUser.tcAgreed" aria-label="Terms and conditions Checkbox")
 							div(layout="row", layout-align="start")
 								md-button.md-accent(ng-click="vm.showTC()") I agree to the Terms and Conditions
-						#loginCaptcha(vc-recaptcha, key="vm.captchaKey", ng-model="vm.recaptchaResponse")
+						#loginCaptcha(vc-recaptcha, key="vm.captchaKey", ng-model="vm.reCaptchaResponse", ng-if="vm.useReCapthca")
 						div(layout="row", layout-align="start")
 							md-button.md-accent.md-raised(ng-click="vm.register()") Register
 						h4.loginError {{vm.registerErrorMessage}}

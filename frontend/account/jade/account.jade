@@ -15,7 +15,8 @@ div(ng-switch="vm.toShow", layout-fill)
 					p {{vm.email}}
 
 			span(flex="5")
-			md-tabs(md-border-bottom, flex="50")
+			account-projects(account="vm.account", projects-grouped='vm.projectsGrouped', flex="50")
+			//md-tabs(md-border-bottom, flex="50")
 				md-tab#accountProjectsTab(label="Projects")
 					account-projects(flex account="vm.account" projects-grouped='vm.projectsGrouped')
 				md-tab(label="Profile")
