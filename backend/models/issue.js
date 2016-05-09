@@ -23,7 +23,9 @@ var ProjectSetting = require('./projectSetting');
 var utils = require('../utils');
 var stringToUUID = utils.stringToUUID;
 var uuidToString = utils.uuidToString;
-var dbInterface = require('../db/db_interface');
+var History = require('./history');
+var Ref = require('./ref');
+
 var schema = Schema({
 	_id: Buffer,
 	name: { type: String, required: true },
@@ -81,6 +83,78 @@ schema.statics._find = function(dbColOptions, filter, projection){
 	});
 };
 
+schema.statics.getFederatedProjectList = function(dbColOptions, branch, revision){
+	'use strict';
+
+	var allRefs = [];
+
+	function _get(dbColOptions, branch, revision){
+
+		let getHistory;
+
+
+		if(branch) {
+			getHistory = History.findByBranch(dbColOptions, branch);
+		} else if (revision) {
+			getHistory = History.findByUID(dbColOptions, revision);
+		}
+
+		return getHistory.then(history => {
+
+			let filter = {
+				type: "ref",
+				_id: { $in: history.current }
+			};
+
+
+			return Ref.find(dbColOptions, filter);
+		}).then(refs => {
+
+
+
+			var promises = [];
+
+			refs.forEach(ref => {
+				var childDbName  = ref.owner ? ref.owner : dbColOptions.account;
+				var childProject = ref.project;
+
+				var unique = ref.unique;
+
+				var childRevision, childBranch;
+				if (ref._rid){
+					if (unique){
+						childRevision = uuidToString(ref._rid);
+					} else {
+						childBranch   = uuidToString(ref._rid);
+					}
+				} else {
+					childBranch   = "master";
+				}
+
+				let dbCol = {
+					account: childDbName,
+					project: childProject
+				};
+
+				promises.push(_get(dbCol, childBranch, childRevision));
+
+			});
+
+			//console.log('some refs', refs)
+			allRefs = allRefs.concat(refs);
+
+			return Promise.all(promises);
+
+		});
+	}
+
+	return _get(dbColOptions, branch, revision).then(() => {
+		//console.log('finial allRefs', allRefs);
+		return Promise.resolve(allRefs);
+	});
+
+};
+
 schema.statics.findByProjectName = function(dbColOptions, branch, rev){
 	'use strict';
 	let issues;
@@ -88,18 +162,19 @@ schema.statics.findByProjectName = function(dbColOptions, branch, rev){
 
 	return this._find(dbColOptions, {}).then(_issues => {
 		issues = _issues;
-		return dbInterface(dbColOptions.logger).getFederatedProjectList(
-			dbColOptions.account,
-			dbColOptions.project,
+		return self.getFederatedProjectList(
+			dbColOptions,
 			branch,
 			rev
 		);
 
 	}).then(refs => {
+
 		if(!refs.length){
 			return Promise.resolve(issues);
 		} else {
 
+			//console.log('refs', refs.length);
 			let promises = [];
 			refs.forEach(ref => {
 				let childDbName = ref.owner || dbColOptions.account;
