@@ -145,6 +145,11 @@
 	config.tokenExpiry.emailVerify = coalesce(config.tokenExpiry.emailVerify, 14 * 24); // 2 weeks
 	config.tokenExpiry.forgotPassword = coalesce(config.tokenExpiry.forgotPassword, 24); // 24 hours
 
+	//captcha
+	config.captcha = coalesce(config.captcha, {});
+	config.captcha.validateUrl = coalesce(config.captcha.validateUrl, 'https://www.google.com/recaptcha/api/siteverify');
+	config.captcha.secretKey = coalesce(config.captcha.secretKey, '');
+
 	//default auth settings
 	config.auth  = coalesce(config.auth, {});
 	config.auth.captcha  = coalesce(config.auth.captcha, {});
