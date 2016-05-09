@@ -8,6 +8,8 @@
     <SortingPriority>3</SortingPriority>
     <Licenses>
 	    <License name="3D Repo GUI License Agreement" file="GNU AGPL v3.txt" />
+	    <License name="Library Dependencies' License Agreement(MIT)" file="MIT.txt" />
+	    <License name="Library Dependencies' License Agreement(Apache)" file="Apache-2.0.txt" />
     </Licenses>
     <Default>true</Default>
     <Essential>true</Essential>
