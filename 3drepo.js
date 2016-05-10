@@ -18,26 +18,52 @@
 (function() {
 	"use strict";
 
-	var express = require("express"),
+	const express = require("express"),
 		fs = require("fs"),
 		constants = require("constants");
 
-	var cluster = require("cluster");
+	const cluster = require("cluster");
 
-	var log_iface = require("./backend/logger.js");
-	var systemLogger = log_iface.systemLogger;
+	const log_iface = require("./backend/logger.js");
+	const systemLogger = log_iface.systemLogger;
 
-	var config = require("./backend/config.js");
+	const config = require("./backend/config.js");
 
-	var https = require("https");
-	var http = require("http");
+	const https = require("https");
+	const http = require("http");
+	const tls  = require("tls");
+	const vhost = require("vhost");
 
-	var vhost = require("vhost");
+	let certs   = {};
+	let certMap = {};
+	let ssl_options = {};
 
 	if ("ssl" in config) {
-		var ssl_options = {
-			key: fs.readFileSync(config.ssl.key, "utf8"),
-			cert: fs.readFileSync(config.ssl.cert, "utf8"),
+		let ssl_certs = {};
+
+		for (let certGroup in config.ssl)
+		{
+			let certGroupOptions = {};
+
+			certGroupOptions.key = fs.readFileSync(config.ssl[certGroup].key, "utf8");
+			certGroupOptions.cert = fs.readFileSync(config.ssl[certGroup].cert, "utf8");
+
+			if (config.ssl[certGroup].ca)
+			{
+				certGroupOptions.ca = fs.readFileSync(config.ssl[certGroup].ca, "utf8");
+			}
+
+			certs[certGroup] = tls.createSecureContext(certGroupOptions);
+		}
+
+		ssl_options = {
+			SNICallback: function(domain, callback)
+			{
+				let certGroup = certMap[domain];
+				callback(null, certs[certGroup]);
+			},
+			key: fs.readFileSync(config.ssl["default"].key, "utf8"),
+			cert: fs.readFileSync(config.ssl["default"].cert, "utf8"),
 			ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256|ECDHE-ECDSA-AES256-SHA:!RC4:!aNULL",
 			//ciphers: "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:!aNULL:!eNULL:!EXPORT:!DSS:!DES:!RC4:!3DES:!MD5:!PS:!SSLv3",
 			honorCipherOrder: true,
@@ -46,34 +72,35 @@
 		};
 
 		// This is the optional certificate authority
-		if (config.ssl.ca) {
-			ssl_options.ca = fs.readFileSync(config.ssl.ca, "utf8");
+		if (config.ssl["default"].ca) {
+			ssl_options.ca = fs.readFileSync(config.ssl["default"].ca, "utf8");
 		}
 
-		/*
-		var http_app = express();
+		if (config.HTTPSredirect)
+		{
+			let http_app = express();
 
-		// If someone tries to access the site through http redirect to the encrypted site.
-		http_app.get("*", function(req, res) {
-			res.redirect("https://" + req.headers.host + req.url);
-		});
+			// If someone tries to access the site through http redirect to the encrypted site.
+			http_app.get("*", function(req, res) {
+				res.redirect("https://" + req.headers.host + req.url);
+			});
 
-		http.createServer(http_app).listen(config.servers[0].http_port, config.servers[0].hostname, function() {
-			systemLogger.logInfo("Starting routing HTTP for " + config.servers[0].hostname + " service on port " + config.servers[0].http_port);
-		});
-		*/
+			http.createServer(http_app).listen(config.servers[0].http_port, config.servers[0].hostname, function() {
+				systemLogger.logInfo("Starting routing HTTP for " + config.servers[0].hostname + " service on port " + config.servers[0].http_port);
+			});
+		}
 	}
 
-	var serverStartFunction = function(serverHost, serverPort) {
+	let serverStartFunction = function(serverHost, serverPort) {
 		return function() {
 			systemLogger.logInfo("Starting server on " + serverHost + " port " + serverPort);
 		};
 	};
 
-	var mainApp = express();
+	let mainApp = express();
 
 	if (cluster.isMaster) {
-		for(var i = 0; i < config.numThreads; i++)
+		for(let i = 0; i < config.numThreads; i++)
 		{
 			cluster.fork();
 		}
@@ -82,13 +109,17 @@
 		{
 			if (config.subdomains.hasOwnProperty(subdomain))
 			{
-				var subDomainApp = express();
+				let subDomainApp = express();
 
 				let subdomainServers = config.subdomains[subdomain];
 
 				for(let s_idx = 0; s_idx < subdomainServers.length; s_idx++)
 				{
 					let serverConfig = subdomainServers[s_idx];
+
+					// My certificate group
+					let myCertGroup = serverConfig.certificate ? serverConfig.certificate : "default";
+					certMap[serverConfig.hostname] = myCertGroup;
 
 					systemLogger.logInfo("Loading " + serverConfig.service + " on " + serverConfig.hostname + serverConfig.host_dir);
 
@@ -104,10 +135,10 @@
 					if (serverConfig.redirect)
 					{
 						mainApp.all(/.*/, function(req, res, next) {
-							var host = req.header("host");
-							var redirect = Array.isArray(serverConfig.redirect) ? serverConfig.redirect : [serverConfig.redirect];
+							let host = req.header("host");
+							let redirect = Array.isArray(serverConfig.redirect) ? serverConfig.redirect : [serverConfig.redirect];
 
-							for(var i = 0; i < redirect.length; i++)
+							for(let i = 0; i < redirect.length; i++)
 							{
 								if (host.match(redirect[i]))
 								{
@@ -129,7 +160,7 @@
 			}
 		}
 
-		var server = config.using_ssl ? https.createServer(ssl_options, mainApp) : http.createServer(mainApp);
+		let server = config.using_ssl ? https.createServer(ssl_options, mainApp) : http.createServer(mainApp);
 		server.listen(config.port, "0.0.0.0", serverStartFunction("0.0.0.0", config.port));
 	}
 }());

@@ -75,8 +75,9 @@
 	};
 
 	// Check for hostname and ip here
-	config.host        = coalesce(config.host, "127.0.0.1");
-	config.numThreads  = coalesce(config.numThreads, 1);
+	config.host          = coalesce(config.host, "127.0.0.1");
+	config.numThreads    = coalesce(config.numThreads, 1);
+	config.HTTPSredirect = coalesce(config.HTTPSredirect, false);
 
 	// Global config variable used in the function above
 	let default_http_port  = coalesce(config.http_port, 80); // Default http port
