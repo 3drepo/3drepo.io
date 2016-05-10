@@ -104,8 +104,6 @@ module.exports.createApp = function (serverConfig) {
 	app.use('/', require('../routes/auth'));
 	// os api handler
 	app.use('/os',require('../routes/osBuilding'));
-	//project setting handler
-	app.use('/:account/:project', require('../routes/projectSetting'));
 
 	app.use(function(req, res, next) {
 		// intercept OPTIONS method
@@ -124,7 +122,7 @@ module.exports.createApp = function (serverConfig) {
 	}
 
 	//project handlers
-	app.use("/:account/:project", require("../routes/project"));
+	app.use("/:account", require("../routes/project"));
 	// project package handlers
 	app.use("/:account/:project", require("../routes/projectPackage"));
 	// bid hanlders

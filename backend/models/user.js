@@ -215,6 +215,34 @@ schema.statics.getForgotPasswordToken = function(username, email, tokenExpiryTim
 
 };
 
+schema.statics.grantRoleToUser = function(username, db, role){
+	'use strict';
+
+	return this.findByUserName(username).then(user => {
+		
+		let dup = false;
+		user.roles.forEach(_role => {
+			if(_role.role === role && _role.db === db){
+				dup = true;
+			}
+		});
+
+		if(!dup){
+			user.roles.push({ role, db});
+
+			let grantRoleCmd = { 
+				grantRolesToUser: username,
+				roles: user.roles
+			};
+
+			return ModelFactory.db.admin().command(grantRoleCmd);
+		}
+
+		return Promise.reject({resCode: responseCodes.PROJECT_EXIST});
+
+	});
+};
+
 var User = ModelFactory.createClass(
 	'User', 
 	schema, 

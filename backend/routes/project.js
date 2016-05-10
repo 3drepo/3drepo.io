@@ -24,6 +24,8 @@ var middlewares = require('./middlewares');
 var ProjectSetting = require('../models/projectSetting');
 var responseCodes = require('../response_codes');
 var C               = require("../constants");
+var Role = require('../models/role');
+var User = require('../models/user');
 
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
@@ -32,10 +34,34 @@ var getDbColOptions = function(req){
 //Every API list below has to log in to access
 router.use(middlewares.loggedIn);
 
-router.get('/info.json', hasReadProjectInfoAccess, getProjectSetting);
+// bid4free exclusive api get project info
+router.get('/:project/info.json', hasReadProjectInfoAccess, B4F_getProjectSetting);
+//  bid4free exclusive api update project info
+router.post('/:project/info.json', middlewares.isMainContractor, B4F_updateProjectSetting);
 
-// Update project info
-router.post('/info.json', middlewares.isMainContractor, updateProjectSetting);
+// Get projection info
+router.get('/:project.json', middlewares.hasReadAccessToProject, getProjectSetting);
+
+router.put('/:project/settings/map-tile', middlewares.hasWriteAccessToProject, updateMapTileSettings);
+
+router.post('/:project', middlewares.canCreateProject, createProject);
+
+function updateMapTileSettings(req, res, next){
+	'use strict';
+
+
+	let place = utils.APIInfo(req);
+	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
+
+	return ProjectSetting.findById(dbCol, req.params.project).then(projectSetting => {
+		return projectSetting.updateMapTileCoors(req.body);
+	}).then(projectSetting => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, projectSetting);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
 
 function _getProject(req){
 	'use strict';
@@ -49,7 +75,7 @@ function _getProject(req){
 	});
 }
 
-function getProjectSetting(req, res, next){
+function B4F_getProjectSetting(req, res, next){
 	'use strict';
 
 	let place = '/:account/:project/info.json GET';
@@ -60,7 +86,7 @@ function getProjectSetting(req, res, next){
 	});
 }
 
-function updateProjectSetting(req, res, next){
+function B4F_updateProjectSetting(req, res, next){
 	'use strict';
 
 	let place = '/:account/:project/info.json POST';
@@ -109,5 +135,69 @@ function hasReadProjectInfoAccess(req, res, next){
 		responseCodes.respond("Middleware: check has read access", req, res, next, resCode, null, req.params);
 	});
 }
+
+function getProjectSetting(req, res, next){
+	'use strict';
+
+	let place = utils.APIInfo(req);
+	_getProject(req).then(setting => {
+
+		let whitelist = ['owner', 'desc', 'type', 'permissions', 'properties'];
+		let resObj = {};
+		
+		whitelist.forEach(key => {
+			resObj[key] = setting[key];
+		});
+
+		responseCodes.respond(place, req, res, next, responseCodes.OK, resObj);
+		
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function createProject(req, res, next){
+	'use strict';
+	
+	let responsePlace = utils.APIInfo(req);
+	let project = req.params.project;
+	let account = req.params.account;
+	var roleId = `${account}.${project}`;
+
+
+	Role.findByRoleID(roleId).then(role =>{
+		
+		if(role){
+			return Promise.resolve();
+		} else {
+			return Role.createRole(account, project);
+		}
+
+	}).then(() => {
+
+		return User.grantRoleToUser(account, account, project);
+
+	}).then(() => {
+
+		let setting = ProjectSetting.createInstance(getDbColOptions(req));
+		
+		setting._id = req.params.project;
+		setting.owner = account;
+		setting.desc = req.body.desc;
+		setting.type = req.body.type;
+		
+		return setting.save();
+
+	}).then(() => {
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
+	}).catch( err => {
+		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+// function uploadProject(req, res, next){
+
+
+// }
 
 module.exports = router;

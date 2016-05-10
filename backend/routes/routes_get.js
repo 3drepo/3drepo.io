@@ -108,7 +108,7 @@ var repoGetHandler = function(router, checkAccess){
 	self.getInternal("/:account.:format.:subformat?");
 
 	// Project information
-	self.getInternal("/:account/:project.:format.:subformat?");
+	//self.getInternal("/:account/:project.:format.:subformat?");
 
 	// Project revision list
 	self.getInternal("/:account/:project/revisions.:format.:subformat?",

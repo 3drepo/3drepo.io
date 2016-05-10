@@ -47,7 +47,7 @@ function _hasReadAccessToProject(req, account, project, callback)
 	if (req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
 		username = req.session[C.REPO_SESSION_USER].username;
 	}
-
+	
 	dbInterface(req[C.REQ_REPO].logger).hasReadAccessToProject(username, account, project, callback);
 }
 
@@ -101,7 +101,20 @@ function checkAccess(req, res, next, accessFunc) {
 	}
 }
 
+function canCreateProject(req, res, next){
+	"use strict";
+	
+	if (req.params.account === req.session[C.REPO_SESSION_USER].username){
+		next();
+	} else {
+		responseCodes.respond("Check account access", req, res, responseCodes.NOT_AUTHORIZED, null, req.params);
+	}
+}
+	
+
 var middlewares = {
+
+	canCreateProject: canCreateProject,
 
 	hasReadAccessToProject: function(req, res, next){
 		checkAccess(req, res, next, _hasReadAccessToProject);
