@@ -33,7 +33,7 @@ print os.getcwd();
 x3domDir = os.path.join("submodules", "x3dom")
 print x3domDir
 os.chdir(x3domDir)
-#os.system("python manage.py --build")
+os.system("python manage.py --build")
 #remove everything apart from the distribution
 for dirname, subDirList, flist in os.walk('.'):
 	for subdirName in subDirList:
