@@ -64,11 +64,13 @@ module.exports = {
 		username: '',
 		password: ''
 	},
-	// ssl: {
-	// 	key: 'my_key.pem',
-	// 	cert:'my_server.crt',
-	// 	ca: 'my_server.ca'
-	// },
+	ssl: {
+		default: {
+			key: 'my_key.pem',
+			cert:'my_server.crt',
+			ca: 'my_server.ca'
+		}
+	},
 	cn_queue: {
 		host: 'amqp://localhost:5672',
 		worker_queue: 'jobq',
