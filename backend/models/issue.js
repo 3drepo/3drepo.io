@@ -57,9 +57,30 @@ var schema = Schema({
 		created: Number,
 		//TO-DO Error: `set` may not be used as a schema pathname
 		//set: Boolean
+		sealed: Boolean
 	}],
 	assigned_roles: [Schema.Types.Mixed]
 });
+
+//post find hook
+
+function postFind(docs){
+	docs && docs.forEach(doc => {
+		 postFindOne(doc);
+	})
+
+}
+
+function postFindOne(doc){
+	doc.comments && doc.comments.forEach(comment => {
+		comment.sealed = comment.sealed || comment.set;
+	});
+}
+
+// compatibility with old comments with set attr
+schema.post('find', postFind);
+schema.post('findById', postFindOne);
+schema.post('findOne', postFindOne);
 
 // Model statics method
 //internal helper _find
