@@ -17,5 +17,7 @@
     <Script>installscript.qs</Script>
     <UserInterfaces>
         <UserInterface>endingcheckboxform.ui</UserInterface>
+        <UserInterface>alterConfig.ui</UserInterface>
+        <UserInterface>hostRedirect.ui</UserInterface>
     </UserInterfaces>
 </Package>

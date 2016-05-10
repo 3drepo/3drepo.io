@@ -10,44 +10,55 @@
     <height>179</height>
    </rect>
   </property>
+  <property name="windowTitle">
+   <string>Installing dependencies</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>0</number>
-   </property>
    <item>
-    <widget class="QCheckBox" name="nodeCheckBox">
+    <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>Install NodeJS</string>
+      <string>Before we proceed, ensure the following programs are installed:</string>
      </property>
-     <property name="checked">
-      <bool>false</bool>
-     </property>
-     <property name="tristate">
-      <bool>false</bool>
+     <property name="wordWrap">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="mongoCheckBox">
-     <property name="text">
-      <string>Install MongoDB</string>
-     </property>
-     <property name="checked">
-      <bool>false</bool>
-     </property>
-     <property name="tristate">
-      <bool>false</bool>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Node JS (64bit)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="installNodeButton">
+       <property name="text">
+        <string>Install Now</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>MongoDB (64bit)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="installMongoButton">
+       <property name="text">
+        <string>Install Now</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
