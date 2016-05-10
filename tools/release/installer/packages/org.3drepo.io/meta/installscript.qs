@@ -1,7 +1,5 @@
 function Component()
 {
-   // installer.installationFinished.connect(this, Component.prototype.installationFinishedPageIsShown);
-   // installer.finishButtonClicked.connect(this, Component.prototype.installationFinished);
 	if (installer.isInstaller()){
 		component.loaded.connect(this, Component.prototype.installerLoaded);
 	
@@ -9,8 +7,24 @@ function Component()
 }
 
 Component.prototype.installerLoaded = function () {
-    installer.addWizardPage(component, "HostRedirectWidget",  QInstaller.InstallationFinished);
-    installer.addWizardPage(component, "AlterConfigFileWidget",  QInstaller.InstallationFinished);
+    if(installer.addWizardPage(component, "HostRedirectWidget",  QInstaller.InstallationFinished))
+	{
+		var widget = gui.pageWidgetByObjectName("DynamicHostRedirectWidget");
+		if(widget != null)
+		{
+			widget.openHostFileButton.clicked.connect(this, Component.prototype.openHostFile);
+		}
+	}
+    if(installer.addWizardPage(component, "AlterConfigFileWidget",  QInstaller.InstallationFinished))
+	{
+		var widget = gui.pageWidgetByObjectName("DynamicAlterConfigFileWidget");
+		if(widget != null)
+		{
+			widget.launchConfigButton.clicked.connect(this, Component.prototype.openConfigFile);
+			var configFile = installer.value("TargetDir") + "\\config\\prod\\config.js";
+			widget.descLabel.text += configFile.replace("/", "\\"); 
+		}
+	}
     if(installer.addWizardPage(component, "LaunchDependenciesForm", QInstaller.InstallationFinished ))
 	{
 		var widget = gui.pageWidgetByObjectName("DynamicLaunchDependenciesForm");
@@ -23,13 +37,29 @@ Component.prototype.installerLoaded = function () {
 
 }
 
+Component.prototype.openHostFile = function()
+{
+	//Open host file with notepad
+	var hostFile = "C:\\Windows\\System32\\Drivers\\etc\\hosts";
+	installer.execute("notepad.exe", hostFile);
+}
+
+Component.prototype.openConfigFile = function()
+{
+	//Open config file with notepad
+	var configFile = installer.value("TargetDir") + "\\config\\prod\\config.js";
+	installer.execute("notepad.exe", configFile.replace("/", "\\"));
+}
+
 Component.prototype.launchMongoInstall = function()
 {
+    //Open link to mongo db installation page
 	QDesktopServices.openUrl("file:///" + installer.value("TargetDir") + "/Downloads - MongoDB.url");
 }
 
 Component.prototype.launchNodeInstall = function()
 {
+    //Open link to node js installation page
 	QDesktopServices.openUrl("file:///" + installer.value("TargetDir") + "/Downloads - NodeJS.url");
 }
 
@@ -38,30 +68,3 @@ Component.prototype.createOperations = function()
     component.createOperations();
 }
 
-/*Component.prototype.installationFinishedPageIsShown = function()
-{
-    try {
-        if (installer.isInstaller() && installer.status == QInstaller.Success) {
-        }
-    } catch(e) {
-        console.log(e);
-    }
-}
-
-Component.prototype.installationFinished = function()
-{
-    try {
-        if (installer.isInstaller() && installer.status == QInstaller.Success) {
-            var isMongoCheckBoxChecked = component.userInterface( "LaunchDependenciesForm" ).mongoCheckBox.checked;
-            var isNodeCheckBoxChecked = component.userInterface( "LaunchDependenciesForm" ).nodeCheckBox.checked;
-            if (isMongoCheckBoxChecked) {
-                QDesktopServices.openUrl("file:///" + installer.value("TargetDir") + "/Downloads - MongoDB.url");
-            }
-            if (isNodeCheckBoxChecked) {
-                QDesktopServices.openUrl("file:///" + installer.value("TargetDir") + "/Downloads - NodeJS.url");
-            }
-        }
-    } catch(e) {
-        console.log(e);
-    }
-}*/

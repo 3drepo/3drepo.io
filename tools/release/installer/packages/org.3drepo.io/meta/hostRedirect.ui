@@ -29,7 +29,7 @@
    <item>
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>3D Repo IO requires cookies and therefore cannot be run under local host. Set up a host redirection with the configured hostname (default is "example.org") by opening C:\Windows\System32\Drivers\etc\hosts as adminstrator and add the following line:
+      <string>3D Repo IO requires cookies and therefore cannot be run under local host. Set up a host redirection with the configured hostname (default is &quot;example.org&quot;) by opening C:\Windows\System32\Drivers\etc\hosts as adminstrator and add the following line:
 
 127.0.0.1 localhost example.org</string>
      </property>
@@ -50,6 +50,13 @@
       </size>
      </property>
     </spacer>
+   </item>
+   <item>
+    <widget class="QPushButton" name="openHostFileButton">
+     <property name="text">
+      <string>Open host file</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

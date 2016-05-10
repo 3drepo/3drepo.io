@@ -27,11 +27,11 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="label_2">
+    <widget class="QLabel" name="descLabel">
      <property name="text">
       <string>Your 3D Repo IO service will require a Mongo DB User account with admin rights to run.  Please setup an account in Mongo DB and alter the configuration file as necessary.
 
-The configuration file can be found in {installation folder}/config/prod/config.js</string>
+The configuration file can be found in </string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
@@ -50,6 +50,13 @@ The configuration file can be found in {installation folder}/config/prod/config.
       </size>
      </property>
     </spacer>
+   </item>
+   <item>
+    <widget class="QPushButton" name="launchConfigButton">
+     <property name="text">
+      <string>Open config file</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
