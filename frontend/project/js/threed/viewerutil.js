@@ -16,15 +16,13 @@
  **/
 
 var ViewerUtil;
-	var ViewerUtilListeners = [];
-	var ViewerUtilMyListeners = [];
-	
+	var ViewerUtilListeners = {};
+	var ViewerUtilMyListeners = {};
+
 (function() {
 	"use strict";
 
 	ViewerUtil = function() {};
-
-
 
 	var eventElement = document;
 
@@ -56,31 +54,49 @@ var ViewerUtil;
 
 	ViewerUtil.prototype.onEvent = function(name, callback)
 	{
-		ViewerUtilListeners.push(callback);
+		if (!ViewerUtilListeners.hasOwnProperty(name))
+		{
+			ViewerUtilListeners[name] = [];
+			ViewerUtilMyListeners[name] = [];
+		}
+
+		ViewerUtilListeners[name].push(callback);
 
 		var myListener= function(event) {
 			callback(event.detail);
 		};
 
-		ViewerUtilMyListeners.push(myListener);
+		ViewerUtilMyListeners[name].push(myListener);
 
-		eventElement.addEventListener(name, function(event) {
-			callback(event.detail);
-		});
+		eventElement.addEventListener(name, myListener);
 	};
 
 	ViewerUtil.prototype.offEvent = function(name, callback)
 	{
-		var index = ViewerUtilListeners.indexOf(callback);
+		var index = ViewerUtilListeners[name].indexOf(callback);
 		if (index === -1){
 			return;
 		}
 
-		eventElement.removeEventListener(name, ViewerUtilMyListeners[index]);
+		eventElement.removeEventListener(name, ViewerUtilMyListeners[name][index]);
 
-		ViewerUtilListeners.splice(index, 1);
-		ViewerUtilMyListeners.splice(index, 1);
+		ViewerUtilListeners[name].splice(index, 1);
+		ViewerUtilMyListeners[name].splice(index, 1);
 
+	};
+
+	ViewerUtil.prototype.offEventAll = function()
+	{
+		for(var eventType in ViewerUtilMyListeners)
+		{
+			for(var i = 0; i < ViewerUtilMyListeners[eventType].length; i++)
+			{
+				eventElement.removeEventListener(eventType, ViewerUtilMyListeners[eventType][i]);
+			}
+		}
+
+		ViewerUtilListeners   = {};
+		ViewerUtilMyListeners = {};
 	};
 
 	ViewerUtil.prototype.eventFactory = function(name)

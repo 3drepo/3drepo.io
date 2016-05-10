@@ -37,6 +37,12 @@
 				vrMode: "@",
 				eventService: "="
 			},
+			link: function (scope, element) {
+				// Cleanup when destroyed
+				element.on('$destroy', function(){
+					scope.v.viewer.destroy(); // Remove events watch
+				});
+			},
 			controller: ViewerCtrl,
 			controllerAs: "v",
 			bindToController: true
