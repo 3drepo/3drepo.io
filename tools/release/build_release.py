@@ -55,6 +55,8 @@ os.system("mkdir " + config_dir)
 configFileMaster = os.path.join(rootDir, "extras", "config.js");
 configDestFile = os.path.join(config_dir, "config.js")
 os.system("cp \"" + configFileMaster  + "\" " + configDestFile)
+cmdFile = os.path.join(rootDir,"extras", "launch3DRepoIO.cmd");
+os.system("cp \"" + cmdFile + "\" launch3DRepoIO.cmd")
 
 os.chdir(rootDir)
 #move 3drepo.io into the installer

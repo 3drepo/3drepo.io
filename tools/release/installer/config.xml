@@ -7,4 +7,5 @@
     <StartMenuDir>3DRepo</StartMenuDir>
 	<TargetDir>@RootDir@/Program Files/3D Repo/3D Repo IO</TargetDir>
     <ProductUrl>http://3drepo.org</ProductUrl>
+	<RunProgram>@RootDir@/Program Files/3D Repo/3D Repo IO/launch3DRepoIO.cmd</RunProgram>
 </Installer>

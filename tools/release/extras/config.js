@@ -60,7 +60,7 @@ module.exports = {
 		host: dbAddress,
 		port: dbPort,
 		username: dbUser,
-		password: dbPwd'
+		password: dbPwd
 	},
 /*	ssl: {
 		key: "my_key.pem",
