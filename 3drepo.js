@@ -50,6 +50,7 @@
 			ssl_options.ca = fs.readFileSync(config.ssl.ca, "utf8");
 		}
 
+		/*
 		var http_app = express();
 
 		// If someone tries to access the site through http redirect to the encrypted site.
@@ -60,6 +61,7 @@
 		http.createServer(http_app).listen(config.servers[0].http_port, config.servers[0].hostname, function() {
 			systemLogger.logInfo("Starting routing HTTP for " + config.servers[0].hostname + " service on port " + config.servers[0].http_port);
 		});
+		*/
 	}
 
 	var serverStartFunction = function(serverHost, serverPort) {
