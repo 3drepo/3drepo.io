@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>RunMongoWidget</class>
- <widget class="QWidget" name="RunMongoWidget">
+ <class>runMongoWidget</class>
+ <widget class="QWidget" name="runMongoWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -23,13 +23,17 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Setting up and running your MongoDB service</string>
+   <string>Configure and launching your MongoDB Service</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="label_2">
+    <widget class="QLabel" name="descLabel">
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;3D Repo IO uses MongoDB as its backend database service. Before you launch 3D Repo IO you must ensure that you have a Mongo service running with a valid admin user account.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Details on how to set up your Mongo database can be found on &lt;a href=&quot;https://docs.mongodb.com/manual/tutorial/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;MongoDB Tutorial page&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+		 <string>3D Repo IO Requires a running MongoDB service to function. Start your MongoDB service and create a user account in admin database with admin privileges for 3D Repo IO.
+
+Instructions on how to setup your MongoDB environment can be found in MongoDB website. 
+	
+Please ensure you have a running MongoDB service with an admin account created before proceeding.</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
@@ -49,6 +53,7 @@
      </property>
     </spacer>
    </item>
+
   </layout>
  </widget>
  <resources/>

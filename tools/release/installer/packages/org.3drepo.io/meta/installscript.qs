@@ -25,7 +25,10 @@ Component.prototype.installerLoaded = function () {
 			widget.descLabel.text += configFile.replace("/", "\\"); 
 		}
 	}
-    if(installer.addWizardPage(component, "LaunchDependenciesForm", QInstaller.InstallationFinished ))
+    
+	installer.addWizardPage(component, "runMongoWidget", QInstaller.InstallationFinished );
+    
+	if(installer.addWizardPage(component, "LaunchDependenciesForm", QInstaller.InstallationFinished ))
 	{
 		var widget = gui.pageWidgetByObjectName("DynamicLaunchDependenciesForm");
 		if(widget != null)

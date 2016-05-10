@@ -19,5 +19,6 @@
         <UserInterface>endingcheckboxform.ui</UserInterface>
         <UserInterface>alterConfig.ui</UserInterface>
         <UserInterface>hostRedirect.ui</UserInterface>
+        <UserInterface>runMongo.ui</UserInterface>
     </UserInterfaces>
 </Package>
