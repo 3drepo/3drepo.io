@@ -40,6 +40,7 @@ var public_files = {
         angularanimatejs: '/public/js/external/angular-animate.min.js',
         angularariajs: '/public/js/external/angular-aria.min.js',
 		angularsanitizejs: '/public/js/external/angular-sanitize.min.js',
+		angularrecaptcha: '/public/js/external/angular-recaptcha.min.js',
 
 		// QR Code stuff
 		qrgrid: '/public/js/external/qrcode/grid.js',
@@ -116,8 +117,15 @@ var internal_files = {
 	'bower_components/geodesy/dms.js',
 	'bower_components/geodesy/vector3d.js',
 	'bower_components/geodesy/latlon-ellipsoidal.js',
-	'bower_components/geodesy/osgridref.js'
+	'bower_components/geodesy/osgridref.js',
+	'bower_components/angular-recaptcha/release/angular-recaptcha.min.js'
+	],
 
+	bower_font_files: [
+		'bower_components/material-design-icons/iconfont/MaterialIcons-Regular.eot',
+		'bower_components/material-design-icons/iconfont/MaterialIcons-Regular.ttf',
+		'bower_components/material-design-icons/iconfont/MaterialIcons-Regular.woff',
+		'bower_components/material-design-icons/iconfont/MaterialIcons-Regular.woff2'
 	],
 
 	x3dom_files: [
@@ -129,6 +137,7 @@ var internal_files = {
 
 var public_dir_js	= path.normalize("public/js/external");
 var public_dir_css	= path.normalize("public/css/external");
+var public_dir_font	= path.normalize("public/fonts/external");
 
 install_bower();
 write_common_files_list();
@@ -159,7 +168,8 @@ function install_bower(){
 				publicize_files(internal_files.bower_qr_files, public_qr_dir, public_dir_css);
 				//FIXME: if we ever need to minify an x3dom file this might cause a problem. Ideally we should split it like js.
 				//minify_css();
-			});
+				publicize_files(internal_files.bower_font_files, public_qr_dir, public_dir_css, public_dir_font);
+		});
 	});
 }
 
@@ -203,6 +213,13 @@ function make_symlink(file, target_dir){
 	else if(platform === 'linux' || platform === 'darwin'){
 		var numberofdirs = target_dir.match(/\//g).length + 1;
 		var inversedir = Array.apply(null, new Array(numberofdirs)).map(function() { return "..";} ).join('/') + "/";
+		
+		// Create target directory if it doesn't exist
+		try {
+			fs.accessSync(target_dir, fs.F_OK); // Throw for fail
+		} catch (e) {
+			fs.mkdirSync(target_dir);
+		}
 
 		exec('ln -sf ' + (inversedir + fname) + ' ' + target_dir, standard_callback);
 	}
@@ -277,12 +294,23 @@ function minify_css(){
  * publicize_files(flist, target_dir)
  * Publicize a list of given files(flist), and their minified version where appropriate, in target_dir.
  */
-function publicize_files(flist, target_dir_js, target_dir_css){
+function publicize_files(flist, target_dir_js, target_dir_css, target_dir_font){
 	var index;
 	for (index = 0; index < flist.length; index++){
-		var target_dir = path.extname(flist[index]) === '.css' ? target_dir_css : target_dir_js;
-		make_symlink(flist[index], target_dir);
-		//minify(flist[index], target_dir);
+		var target_dir = null;
+		
+		if (path.extname(flist[index]) === '.css') {
+			target_dir = target_dir_css;
+		} else if ((path.extname(flist[index]) === '.js') || (path.extname(flist[index]) === '.map')) {
+			target_dir = target_dir_js;
+		} else {
+			target_dir = target_dir_font;
+		}
+		
+		if (target_dir !== null) {
+			make_symlink(flist[index], target_dir);
+			//minify(flist[index], target_dir);
+		}
 	}
 
 }

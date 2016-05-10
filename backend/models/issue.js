@@ -59,7 +59,8 @@ var schema = Schema({
 		//set: Boolean
 		sealed: Boolean
 	}],
-	assigned_roles: [Schema.Types.Mixed]
+	assigned_roles: [Schema.Types.Mixed],
+	scribble: Object
 });
 
 //post find hook
@@ -219,13 +220,21 @@ schema.statics.findByProjectName = function(dbColOptions, branch, rev){
 schema.statics.findBySharedId = function(dbColOptions, sid, number) {
 	'use strict';
 
-	let filter = { parent: stringToUUID(sid),	};
+	let filter = { parent: stringToUUID(sid) };
 
 	if(number){
 		filter.number = number;
 	}
 
-	return this._find(dbColOptions, filter);
+	return this._find(dbColOptions, filter).then(issues => {
+		issues.forEach((issue, i) => {
+			if(issue.scribble){
+				issues[i] = issue.scribble.toString('base64');
+			}
+		});
+
+		return Promise.resolve(issues);
+	});
 };
 
 schema.statics.findByUID = function(dbColOptions, uid, onlyStubs){
@@ -258,6 +267,10 @@ schema.methods.clean = function(typePrefix){
 	cleaned.parent = cleaned.parent ? uuidToString(cleaned.parent) : undefined;
 	cleaned.account = this._dbcolOptions.account;
 	cleaned.project = this._dbcolOptions.project;
+
+	if(cleaned.scribble){
+		cleaned.scribble = cleaned.scribble.toString('base64');
+	}
 
 	return cleaned;
 };

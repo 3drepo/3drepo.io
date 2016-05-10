@@ -44,42 +44,40 @@
         var vm = this,
 			panelTopBottomGap = 40,
 			maxHeightAvailable = $window.innerHeight - panelTopBottomGap,
-			numPanelsShowing = 0,
-			numNonFixedHeightPanelsShowing = 0,
 			itemGap = 20,
-			panelToolbarHeight = 48,
+			panelToolbarHeight = 40,
 			contentItemsShown = [];
 
+		/*
+		 * Init
+		 */
 		vm.contentItems = [];
         vm.showPanel = true;
 		vm.window = $window;
 		vm.activate = true;
 
+		/*
+		 * Watch for events
+		 */
         $scope.$watch(EventService.currentEvent, function (event) {
 			var i;
             if (event.type === EventService.EVENT.PANEL_CONTENT_SETUP) {
 				vm.contentItems = (event.value[vm.position]);
+				setupShownCards();
 				hideLastItemGap();
-
-				for (i = 0; i < vm.contentItems.length; i += 1) {
-					if (vm.contentItems[i].show) {
-						contentItemsShown.push(vm.contentItems[i]);
-						numPanelsShowing += 1;
-						if (!vm.contentItems[i].fixedHeight) {
-							numNonFixedHeightPanelsShowing += 1;
-						}
-					}
-				}
-            }
+				setupContentItemsWatch();
+			}
             else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
                 vm.showPanel = !vm.showPanel;
             }
         });
 
-		// The last card should not have a gap so that scrolling in resized window works correctly
+		/**
+		 * The last card should not have a gap so that scrolling in resized window works correctly
+		 */
 		function hideLastItemGap () {
-			var i;
-			var lastFound = false;
+			var i, lastFound = false;
+
 			for (i = (vm.contentItems.length - 1); i >= 0; i -= 1) {
 				if (vm.contentItems[i].show) {
 					if (!lastFound) {
@@ -92,6 +90,9 @@
 			}
 		}
 
+		/*
+		 * Mouse down
+		 */
 		angular.element(document).bind('mousedown', function (event) {
 			// If we have clicked on a canvas, we are probably moving the model around
 			if (event.target.tagName === "CANVAS")
@@ -101,6 +102,9 @@
 			}
 		});
 
+		/*
+		 * Mouse up
+		 */
 		angular.element(document).bind('mouseup', function () {
 			vm.activate = true;
 			$scope.$apply();
@@ -231,6 +235,37 @@
 					return contentItemsShown[i];
 				}
 			}
+		}
+
+		/**
+		 * Setup the cards to show
+		 */
+		function setupShownCards () {
+			var i, length;
+
+			contentItemsShown = [];
+			for (i = 0, length = vm.contentItems.length; i < length; i += 1) {
+				if (vm.contentItems[i].show) {
+					contentItemsShown.push(vm.contentItems[i]);
+				}
+			}
+		}
+
+		/*
+		 * Watch vm.contentItems for any cards shown or hidden
+		 */
+		function setupContentItemsWatch() {
+			var i, length;
+
+			$scope.$watch("vm.contentItems", function (newValue, oldValue) {
+				for (i = 0, length = newValue.length; i < length; i += 1) {
+					if (newValue[i].show !== oldValue[i].show) {
+						setupShownCards();
+						hideLastItemGap();
+						break;
+					}
+				}
+			}, true);
 		}
 
 		/*

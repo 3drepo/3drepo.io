@@ -1,0 +1,10 @@
+div(ng-if="!vm.data")
+    canvas#issueAreaCanvas(style="pointer-events:{{vm.canvasPointerEvents}}")
+    md-icon#issueAreaPenIndicator(class="fa fa-circle-thin", ng-show="vm.showPenIndicator")
+
+    svg#issueAreaCentre(height="40", width="40")
+        line(x1="0", y1="20", x2="40", y2="20", style="stroke:rgb(255,255,255);stroke-width:2")
+        line(x1="20", y1="0", x2="20", y2="40", style="stroke:rgb(255,255,255);stroke-width:2")
+
+#scribbleDisplay(ng-if="vm.data")
+    img(ng-src="{{vm.scribble}}")

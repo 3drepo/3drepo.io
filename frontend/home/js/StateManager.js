@@ -52,8 +52,8 @@
 		while (stateStack.length > 0)
 		{
 			var stackLength      = stateStack.length;
-			var parentState      = stateStack[stackLength - 1];
-			var parentStateName  = stateNameStack[stackLength - 1];
+			var parentState      = stateStack[0];
+			var parentStateName  = stateNameStack[0];
 
 			//console.log('parentState', parentState);
 			if (parentState.children)

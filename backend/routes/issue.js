@@ -25,11 +25,12 @@ var responseCodes = require('../response_codes.js');
 var Issue = require('../models/issue');
 var utils = require('../utils');
 
-router.get('/issue/:uid.json', middlewares.hasReadAccessToProject, findIssueById);
+router.get('/issues/:uid.json', middlewares.hasReadAccessToProject, findIssueById);
 router.get('/issues.json', middlewares.hasReadAccessToProject, listIssues);
-router.get('/issues/:sid.json', middlewares.hasReadAccessToProject, listIssuesBySID);
+//router.get('/issues/:sid.json', middlewares.hasReadAccessToProject, listIssuesBySID);
 router.get("/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
-router.post('/issues/:id', middlewares.hasWriteAccessToProject, storeIssue);
+router.post('/issues.json', middlewares.hasWriteAccessToProject, storeIssue);
+router.put('/issues/:issueId.json', middlewares.hasWriteAccessToProject, updateIssue);
 
 
 function listIssues(req, res, next) {
@@ -39,7 +40,14 @@ function listIssues(req, res, next) {
 	let place = utils.APIInfo(req);
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
 
-	Issue.findByProjectName(dbCol, "master", null).then(issues => {
+	var findIssue;
+	if(req.query.shared_id){
+		findIssue = Issue.findBySharedId(dbCol, req.query.shared_id, req.query.number);
+	} else {
+		findIssue = Issue.findByProjectName(dbCol, "master", null);
+	}
+
+	findIssue.then(issues => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, issues);
 	}).catch(err => {
 		console.log(err);
@@ -48,20 +56,20 @@ function listIssues(req, res, next) {
 
 }
 
-function listIssuesBySID(req, res, next) {
-	'use strict';
+// function listIssuesBySID(req, res, next) {
+// 	'use strict';
 
-	let params = req.params;
-	let place = utils.APIInfo(req);
-	let dbCol =  {account: req.params.account, project: req.params.project};
+// 	let params = req.params;
+// 	let place = utils.APIInfo(req);
+// 	let dbCol =  {account: req.params.account, project: req.params.project};
 
-	Issue.findBySharedId(dbCol, params.sid, req.query.number).then(issues => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, issues);
-	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
+// 	Issue.findBySharedId(dbCol, params.sid, req.query.number).then(issues => {
+// 		responseCodes.respond(place, req, res, next, responseCodes.OK, issues);
+// 	}).catch(err => {
+// 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+// 	});
 
-}
+// }
 
 function findIssueById(req, res, next) {
 	'use strict';
@@ -82,18 +90,42 @@ function storeIssue(req, res, next){
 	'use strict';
 
 	let place = utils.APIInfo(req);
+	console.log(req.body.data);
 	let data = JSON.parse(req.body.data);
 
-	req[C.REQ_REPO].logger.logDebug("Upserting an issues for object " + req.params[C.REPO_REST_API_SID] + " in " + req.params[C.REPO_REST_API_ACCOUNT] + "/" + req.params[C.REPO_REST_API_PROJECT], req);
+	req[C.REQ_REPO].logger.logDebug("Creating an issues for object in " + req.params[C.REPO_REST_API_ACCOUNT] + "/" + req.params[C.REPO_REST_API_PROJECT], req);
 
-	console.log(data);
+	//console.log(data);
 
-	// since there is a incompatible attribute in issue model ('set' in comments) with mongoose, need to fall back native mongo api call.
+	// since there is an incompatible attribute in issue model ('set' in comments) with mongoose, need to fall back to native mongo api call.
 	dbInterface(req[C.REQ_REPO].logger).storeIssue(
 		req.params[C.REPO_REST_API_ACCOUNT],
 		req.params[C.REPO_REST_API_PROJECT],
-		req.params[C.REPO_REST_API_ID],
 		req.session.user.username,
+		null,
+		data,
+		function(err, result) {
+			responseCodes.onError(place, req, res, next, err, result);
+		}
+	);
+}
+
+function updateIssue(req, res, next){
+	'use strict';
+
+	let place = utils.APIInfo(req);
+	let data = JSON.parse(req.body.data);
+
+	req[C.REQ_REPO].logger.logDebug("Updating an issues with id " +  req.params.issueId + " for object in " +  req.params[C.REPO_REST_API_ACCOUNT] + "/" + req.params[C.REPO_REST_API_PROJECT], req);
+
+	//console.log(data);
+
+	// since there is an incompatible attribute in issue model ('set' in comments) with mongoose, need to fall back to native mongo api call.
+	dbInterface(req[C.REQ_REPO].logger).storeIssue(
+		req.params[C.REPO_REST_API_ACCOUNT],
+		req.params[C.REPO_REST_API_PROJECT],
+		req.session.user.username,
+		req.params.issueId,
 		data,
 		function(err, result) {
 			responseCodes.onError(place, req, res, next, err, result);

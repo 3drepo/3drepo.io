@@ -37,9 +37,12 @@
 	function PanelCardOptionVisibleCtrl() {
 		var vm = this;
 
+		vm.icon = "visibility";
+
 		vm.toggleVisible = function (event) {
 			event.stopPropagation();
 			vm.visible = !vm.visible;
+			vm.icon = vm.visible ? "visibility" : "visibility_off";
 		};
 	}
 }());

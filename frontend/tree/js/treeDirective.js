@@ -55,12 +55,14 @@
 			i = 0,
 			length = 0,
 			currentSelectedNode = null,
-			currentScrolledToNode = null;
+			currentScrolledToNode = null,
+			highlightSelectedViewerObject = true;
 
 		/*
 		 * Init
 		 */
 		vm.nodes = [];
+		vm.showNodes = true;
 		vm.showTree = true;
 		vm.showFilterList = false;
 		vm.currentFilterItemSelected = null;
@@ -167,7 +169,11 @@
 		 * @param _id
 		 */
 		vm.expand = function (_id) {
-			var i, numChildren = 0, index = -1, length, endOfSplice = false;
+			var i, length,
+				numChildren = 0,
+				index = -1,
+				endOfSplice = false,
+				numChildrenToForceRedraw = 10;
 
 			for (i = 0, length = vm.nodesToShow.length; i < length; i += 1) {
 				if (vm.nodesToShow[i]._id === _id) {
@@ -187,6 +193,12 @@
 						}
 					} else {
 						numChildren = vm.nodesToShow[index].children.length;
+
+						// If the node has a large number of children then force a redraw of the tree to get round the display problem
+						if (numChildren >= numChildrenToForceRedraw) {
+							vm.showNodes = false;
+						}
+
 						for (i = 0; i < numChildren; i += 1) {
 							vm.nodesToShow[index].children[i].expanded = false;
 
@@ -199,6 +211,13 @@
 								vm.nodesToShow[index].children[i].hasChildren = false;
 
 							vm.nodesToShow.splice(index + i + 1, 0, vm.nodesToShow[index].children[i]);
+						}
+
+						// Redraw the tree if needed
+						if (!vm.showNodes) {
+							$timeout(function () {
+								vm.showNodes = true;
+							});
 						}
 					}
 					vm.nodesToShow[index].expanded = !vm.nodesToShow[index].expanded;
@@ -215,6 +234,9 @@
 		 */
 		function expandToSelection(path, level) {
 			var i, j, length, childrenLength, selectedId = path[path.length - 1], selectedIndex = 0, selectionFound = false;
+
+			// Force a redraw of the tree to get round the display problem
+			vm.showNodes = false;
 
 			for (i = 0, length = vm.nodesToShow.length; i < length; i += 1) {
 				if (vm.nodesToShow[i]._id === path[level]) {
@@ -255,13 +277,18 @@
 				expandToSelection(path, (level + 1));
 			} else if (level === (path.length - 2)) {
 				vm.topIndex = selectedIndex - 2;
+				// Redraw the tree
+				$timeout(function () {
+					vm.showNodes = true;
+				});
 				setContentHeight(vm.nodesToShow);
 			}
 		}
 
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
-				if (event.value.source !== "tree")
+				console.log(event);
+				if ((event.value.source !== "tree") && highlightSelectedViewerObject)
 				{
 					var objectID = event.value.id;
 					var path = vm.idToPath[objectID].split("__");
@@ -276,6 +303,11 @@
 					currentSelectedNode.selected = false;
 					currentSelectedNode = null;
 				}
+			}
+			else if ((event.type === EventService.EVENT.PANEL_CARD_ADD_MODE) ||
+					 (event.type === EventService.EVENT.PANEL_CARD_EDIT_MODE)) {
+				// If another card is in modify mode don't show a node if an object is clicked in the viewer
+				highlightSelectedViewerObject = !event.value.on;
 			}
 		});
 

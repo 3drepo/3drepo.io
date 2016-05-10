@@ -65,6 +65,7 @@
 		 * Reformat the grouped projects to enable toggling of projects list
 		 */
 		$scope.$watch("vm.projectsGrouped", function () {
+			console.log(vm.projectsGrouped);
 			var account;
 			vm.accounts = [];
 			angular.forEach(vm.projectsGrouped, function(value, key) {
@@ -73,9 +74,10 @@
 					projects: [],
 					showProjects: true
 				};
-				angular.forEach(value, function(name) {
+				angular.forEach(value, function(project) {
 					account.projects.push({
-						name: name,
+						name: project.name,
+						timestamp: project.timestamp,
 						bif4FreeEnabled: false
 					});
 				});

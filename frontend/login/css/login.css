@@ -1,4 +1,4 @@
-login #login {
+login {
   position: absolute;
   top: 0;
   width: 100%;
@@ -6,14 +6,15 @@ login #login {
   background-size: contain;
 }
 
-login #loginContent {
-  padding-top: 50px;
-  background: rgba(63,81,181,0.7);
+login .homeUserContent md-toolbar {
+  height: 20px;
+  min-height: 20px;
 }
 
-login #loginTitle {
-  color: #ffffff;
-  margin: 50px 0 -10px 0;
+login h1,
+login h2,
+login h3 {
+  color: #FFFFFF;
 }
 
 login #loginSubTitle,
@@ -32,6 +33,60 @@ login md-input-container input {
   background: #ffffff !important;
 }
 
-login #loginError {
+login .loginError {
   color: #F44336;
+  margin: 5px 0 0 2px;
+}
+
+login .md-button {
+  margin: 0 0 0 2px;
+}
+
+login .loginTitle {
+  margin: -5px 0 10px;
+  color: rgba(0, 0, 0, 0.5) !important;
+}
+
+login #forgotPasswordButton {
+  margin-left: -5px;
+}
+login #forgotPasswordButton .md-button {
+  font-size: 12px;
+}
+
+login #loginDivider {
+  width: 1px;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+login #tc {
+  margin-bottom: 10px;
+}
+login #tc md-checkbox {
+  margin : 0 0 0 2px;
+}
+login #tc md-checkbox ._md-icon {
+  border-color: rgba(0, 0, 0, 0.4);
+}
+login #tc .md-button {
+  font-size: 12px;
+}
+
+login #loginCaptcha {
+  margin: -5px 0 10px 2px;
+}
+
+login #loginRegister {
+  margin-right: 30px;
+}
+
+/** Terms and Conditions Dialog ***************************************************************************************/
+.tcDialog {
+  min-width: 850px;
+  min-height: 664px;
+  overflow: hidden;
+}
+
+.tcDialog #tcIcon {
+  margin-right: 10px;
 }

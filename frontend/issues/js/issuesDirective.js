@@ -30,9 +30,10 @@
 				project: "=",
 				branch:  "=",
 				revision: "=",
-				show: "=",
 				filterText: "=",
+				show: "=",
 				showAdd: "=",
+				showEdit: "=",
 				canAdd: "=",
 				selectedMenuOption: "=",
 				onContentHeightRequest: "&",
@@ -45,9 +46,9 @@
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$element", "$timeout", "$mdDialog", "$filter", "$window", "IssuesService", "EventService", "Auth", "serverConfig"];
+	IssuesCtrl.$inject = ["$scope", "$timeout", "$filter", "$window", "$q", "$element", "IssuesService", "EventService", "Auth", "serverConfig"];
 
-	function IssuesCtrl($scope, $element, $timeout, $mdDialog, $filter, $window, IssuesService, EventService, Auth, serverConfig) {
+	function IssuesCtrl($scope, $timeout, $filter, $window, $q, $element, IssuesService, EventService, Auth, serverConfig) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -58,7 +59,6 @@
 			issue,
 			rolesToFilter = [],
 			issuesHeight,
-			eventWatch,
 			selectedObjectId = null,
 			pickedPos = null,
 			pickedNorm = null,
@@ -164,14 +164,8 @@
 		 * Handle showing of adding a new issue
 		 */
 		$scope.$watch("vm.showAdd", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				if (newValue) {
-					vm.toShow = "showAdd";
-					vm.onShowItem();
-					vm.canAdd = false;
-					setContentHeight();
-					setPinToAssignedRoleColours(vm.selectedIssue);
-				}
+			if (angular.isDefined(newValue) && newValue) {
+				setupAdd("scribble");
 			}
 		});
 
@@ -184,87 +178,79 @@
 			}
 		});
 
-		/*
-		 * Only watch for events when shown
-		 */
-		$scope.$watch("vm.show", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				if (newValue) {
-					setupEventWatch();
-				}
-				else if (angular.isDefined(eventWatch)) {
-					eventWatch(); // Cancel event watching
-				}
-			}
-		});
-
 		/**
 		 * Set up event watching
 		 */
-		function setupEventWatch () {
-			eventWatch = $scope.$watch(EventService.currentEvent, function(event) {
-				var i, length,
-					position = [], normal = [];
+		$scope.$watch(EventService.currentEvent, function(event) {
+			var i, length,
+				position = [], normal = [];
 
-				if ((event.type === EventService.EVENT.VIEWER.PICK_POINT) && vm.showAdd)
+			if ((event.type === EventService.EVENT.VIEWER.PICK_POINT) && (vm.toShow === "showAdd"))
+			{
+				if (event.value.hasOwnProperty("id"))
 				{
-					if (event.value.hasOwnProperty("id"))
-					{
-						// Remove pin from last position if it exists
-						removeAddPin();
+					// Remove pin from last position if it exists
+					removeAddPin();
 
-						selectedObjectId = event.value.id;
+					selectedObjectId = event.value.id;
 
-						// Convert data to arrays
-						angular.forEach(event.value.position, function(value) {
-							pickedPos = event.value.position;
-							position.push(value);
-						});
-						angular.forEach(event.value.normal, function(value) {
-							pickedNorm = event.value.normal;
-							normal.push(value);
-						});
+					// Convert data to arrays
+					angular.forEach(event.value.position, function(value) {
+						pickedPos = event.value.position;
+						position.push(value);
+					});
+					angular.forEach(event.value.normal, function(value) {
+						pickedNorm = event.value.normal;
+						normal.push(value);
+					});
 
 
-						// Add pin
-						IssuesService.addPin(
-							{
-								id: IssuesService.newPinId,
-								position: position,
-								norm: normal,
-								account: vm.account,
-								project: vm.project
-							},
-							IssuesService.hexToRgb(IssuesService.getRoleColor(vm.projectUserRoles[0]))
-						);
-					} else {
-						removeAddPin();
-					}
-				} else if (event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
-					if (vm.showAdd) {
-						removeAddPin();
-					}
+					// Add pin
+					IssuesService.addPin(
+						{
+							id: IssuesService.newPinId,
+							position: position,
+							norm: normal,
+							account: vm.account,
+							project: vm.project
+						},
+						IssuesService.hexToRgb(IssuesService.getRoleColor(vm.projectUserRoles[0]))
+					);
+				} else {
+					removeAddPin();
+				}
+			} else if ((event.type === EventService.EVENT.VIEWER.CLICK_PIN) && vm.show) {
+				if (vm.toShow === "showAdd") {
+					removeAddPin();
+				}
 
-					// Show or hide the selected issue
-					for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
-						if (event.value.id === vm.issuesToShow[i]._id) {
-							if (vm.selectedIssue === null) {
-								vm.showSelectedIssue(i, true);
+				// Show or hide the selected issue
+				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
+					if (event.value.id === vm.issuesToShow[i]._id) {
+						if (vm.selectedIssue === null) {
+							vm.showSelectedIssue(i, true);
+						}
+						else {
+							if (vm.selectedIssue._id === vm.issuesToShow[i]._id) {
+								vm.hideItem = true;
 							}
 							else {
-								if (vm.selectedIssue._id === vm.issuesToShow[i]._id) {
-									vm.hideItem = true;
-								}
-								else {
-									vm.showSelectedIssue(i, true);
-								}
+								vm.showSelectedIssue(i, true);
 							}
-							break;
 						}
+						break;
 					}
 				}
-			});
-		}
+			} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_ADD) {
+				if (event.value.on) {
+					vm.show = true;
+					setupAdd(event.value.type);
+				}
+				else {
+					vm.hideItem = true;
+				}
+			}
+		});
 
 		/**
 		 * Remove the temporary pin used for adding an issue
@@ -396,40 +382,42 @@
 				pin, pinData,
 				roleAssigned;
 
+			console.log(vm.issues);
 			for (i = 0, length = vm.issues.length; i < length; i += 1) {
-				pin = angular.element(document.getElementById(vm.issues[i]._id));
-				if (pin.length > 0) {
-					// Existing pin
-					pin[0].setAttribute("render", "true");
+				if (vm.issues[i].object_id !== null) {
+					pin = angular.element(document.getElementById(vm.issues[i]._id));
+					if (pin.length > 0) {
+						// Existing pin
+						pin[0].setAttribute("render", "true");
 
-					// Closed
-					if (!showClosed && vm.issues[i].hasOwnProperty("closed") && vm.issues[i].closed) {
-						pin[0].setAttribute("render", "false");
-					}
-
-					// Role filter
-					if (rolesToFilter.length > 0) {
-						roleAssigned = false;
-
-						if (vm.issues[i].hasOwnProperty("assigned_roles")) {
-							for (j = 0, assignedRolesLength = vm.issues[i].assigned_roles.length; j < assignedRolesLength; j += 1) {
-								if (rolesToFilter.indexOf(vm.issues[i].assigned_roles[j]) !== -1) {
-									roleAssigned = true;
-								}
-							}
-						}
-
-						if (roleAssigned) {
+						// Closed
+						if (!showClosed && vm.issues[i].hasOwnProperty("closed") && vm.issues[i].closed) {
 							pin[0].setAttribute("render", "false");
 						}
+
+						// Role filter
+						if (rolesToFilter.length > 0) {
+							roleAssigned = false;
+
+							if (vm.issues[i].hasOwnProperty("assigned_roles")) {
+								for (j = 0, assignedRolesLength = vm.issues[i].assigned_roles.length; j < assignedRolesLength; j += 1) {
+									if (rolesToFilter.indexOf(vm.issues[i].assigned_roles[j]) !== -1) {
+										roleAssigned = true;
+									}
+								}
+							}
+
+							if (roleAssigned) {
+								pin[0].setAttribute("render", "false");
+							}
+						}
 					}
-				}
-				else {
-					// New pin
-					if (!vm.issues[i].hasOwnProperty("closed") ||
-						(vm.issues[i].hasOwnProperty("closed") && !vm.issues[i].closed) ||
-						(showClosed && vm.issues[i].hasOwnProperty("closed") && vm.issues[i].closed)) {
-						pinData =
+					else {
+						// New pin
+						if (!vm.issues[i].hasOwnProperty("closed") ||
+							(vm.issues[i].hasOwnProperty("closed") && !vm.issues[i].closed) ||
+							(showClosed && vm.issues[i].hasOwnProperty("closed") && vm.issues[i].closed)) {
+							pinData =
 							{
 								id: vm.issues[i]._id,
 								position: vm.issues[i].position,
@@ -438,8 +426,9 @@
 								project: vm.project
 							};
 
-						IssuesService.addPin(pinData, [[1.0, 1.0, 1.0]], vm.issues[i].viewpoint);
-						setPinToAssignedRoleColours(vm.issues[i]);
+							IssuesService.addPin(pinData, [[1.0, 1.0, 1.0]], vm.issues[i].viewpoint);
+							setPinToAssignedRoleColours(vm.issues[i]);
+						}
 					}
 				}
 			}
@@ -485,13 +474,13 @@
 
 				// Set the height of the content
 				if (vm.issuesToShow.length === 0) {
-					vm.showIssuesInfo = true;
+					vm.toShow = "showInfo";
 					vm.issuesInfo = "There are no issues that contain the filter text";
 				}
 				else {
-					vm.showIssuesInfo = false;
-					setContentHeight();
+					vm.toShow = "showIssues";
 				}
+				setContentHeight();
 			}
 		});
 
@@ -503,13 +492,14 @@
 				vm.autoSaveComment = true; // Auto save a comment if needed
 
 				$timeout(function () {
-					// Hide and show layers
 					if (vm.toShow === "showAdd") {
 						removeAddPin();
+						EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: false});
 					}
 					vm.toShow = "showIssues";
 					vm.showAdd = false; // So that showing add works
 					vm.canAdd = true;
+					vm.showEdit = false; // So that closing edit works
 
 					// Set the content height
 					setContentHeight();
@@ -519,6 +509,9 @@
 
 					// No selected issue
 					vm.selectedIssue = null;
+
+					// Hide issue area
+					EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
 				});
 			}
 		});
@@ -533,10 +526,12 @@
 			// Hide and show layers
 			if (vm.toShow === "showAdd") {
 				removeAddPin();
+				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
 			}
 			vm.toShow = "showIssue";
 			vm.showAdd = false; // So that showing add works
 			vm.canAdd = false;
+			vm.showEdit = true;
 
 			// Selected issue
 			if (vm.selectedIssue !== null) {
@@ -572,6 +567,8 @@
 					clippingPlanes: vm.selectedIssue.viewpoint.clippingPlanes
 				});
 			}
+
+			EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, issue: vm.selectedIssue});
 		};
 
 		/**
@@ -583,19 +580,24 @@
 			}
 			else {
 				if (angular.isDefined(vm.title) && (vm.title !== "")) {
-					if (selectedObjectId === null) {
-						vm.showAlert("Add a pin before saving");
-					}
-					else {
+					var issueAreaPngPromise = $q.defer();
+					EventService.send(EventService.EVENT.GET_ISSUE_AREA_PNG, {promise: issueAreaPngPromise});
+					issueAreaPngPromise.promise.then(function (png) {
 						issue = {
 							name: vm.title,
-							objectId: selectedObjectId,
-							pickedPos: pickedPos,
-							pickedNorm: pickedNorm,
+							objectId: null,
+							pickedPos: null,
+							pickedNorm: null,
 							creator_role: vm.projectUserRoles[0],
 							account: vm.account,
-							project: vm.project
+							project: vm.project,
+							scribble: png
 						};
+						if (selectedObjectId !== null) {
+							issue.objectId = selectedObjectId;
+							issue.pickedPos = pickedPos;
+							issue.pickedNorm = pickedNorm;
+						}
 						promise = IssuesService.saveIssue(issue);
 						promise.then(function (data) {
 							// Set the role colour
@@ -615,18 +617,23 @@
 								vm.comment = "";
 							}
 
-							// Show issues
-							vm.toShow = "showIssues";
-							vm.showAdd = false;
-							vm.canAdd = true;
+							// Get out of add mode and show issues
+							vm.hideItem = true;
 
 							setupIssuesToShow();
 							setContentHeight();
 							vm.showPins();
 						});
-					}
+					});
 				}
 			}
+		};
+
+		/**
+		 * Cancel adding an issue
+		 */
+		vm.cancelAddIssue = function () {
+			vm.hideItem = true;
 		};
 
 		/**
@@ -647,6 +654,7 @@
 						break;
 					}
 				}
+				vm.toShow = "showIssues";
 				setupIssuesToShow();
 				vm.showPins();
 				setContentHeight();
@@ -678,16 +686,6 @@
 		 * @param {String} title
 		 */
 		vm.showAlert = function(title) {
-			/* Closing the dialog takes a long time so using user made dialog for the moment
-			$mdDialog.show(
-				$mdDialog.alert()
-					.parent(angular.element($element[0].querySelector("#addAlert")))
-					.clickOutsideToClose(true)
-					.title(title)
-					.ariaLabel("Pin alert")
-					.ok("OK")
-			);
-			*/
 			vm.showAddAlert = true;
 			vm.addAlertText = title;
 		};
@@ -731,7 +729,7 @@
 				maxStringLength = 32,
 				lineHeight = 18,
 				footerHeight,
-				addHeight = 280,
+				addHeight = 230,
 				commentHeight = 80,
 				headerHeight = 53,
 				openIssueFooterHeight = 180,
@@ -788,6 +786,26 @@
 					colours: pinColours
 				});
 			}
+		}
+
+		/**
+		 * Set up adding an issue
+		 */
+		function setupAdd (issueAreaType) {
+			vm.toShow = "showAdd";
+			vm.onShowItem();
+			vm.canAdd = false;
+			setContentHeight();
+			setPinToAssignedRoleColours(vm.selectedIssue);
+
+			// Set default issue title and select it
+			vm.title = "Issue " + (vm.issues.length + 1);
+			$timeout(function () {
+				($element[0].querySelector("#issueAddTitle")).select();
+			});
+
+			// Show the issue area
+			EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: issueAreaType});
 		}
 	}
 }());

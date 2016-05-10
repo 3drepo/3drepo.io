@@ -6,7 +6,10 @@
 ![3drepoio_1a](https://cloud.githubusercontent.com/assets/3008807/12302435/09590660-ba1d-11e5-8bab-c95de3f788c5.jpg)
 
 ### Latest Releases
-* [3drepo.io 1.0b](https://github.com/3drepo/3drepo.io/releases/tag/v1.0.0b)
+* 19 Apr 2016 [3drepo.io 1.0b draft](https://github.com/3drepo/3drepo.io/releases/tag/untagged-4ae1b60b25db006d3d40)
+* 15 Feb 2016 [3drepo.io 1.0rc2](https://github.com/3drepo/3drepo.io/releases/tag/v1.0.0-rc2)
+* 15 Feb 2016 [3drepo.io 1.0rc1](https://github.com/3drepo/3drepo.io/releases/tag/v1.0.0-rc1)
+* 08 Jan 2016 [3drepo.io 1.0a](https://github.com/3drepo/3drepo.io/releases/tag/1.0a)
 
 ## Licenses
 This project is Copyright of [3D Repo Ltd](http://3drepo.org), a company registered in England and Wales No. 09014101, and is released under the open source [GNU Affero General Public License v3](http://www.gnu.org/licenses/agpl-3.0.en.html). Should you require a commercial license, please contact [support@3drepo.org](mailto:support@3drepo.org). All contributors are required to sign either the [3D Repo Individual](https://gist.github.com/jozefdobos/e177af804c9bcd217b73) or the [3D Repo Entity](https://gist.github.com/jozefdobos/c7c4c1c18cfb211c45d2) [Contributor License Agreement (CLA)](https://en.wikipedia.org/wiki/Contributor_License_Agreement).

@@ -26,13 +26,33 @@
 			{
 				var mdThemingProvider = $injector.get("$mdThemingProvider");
 
+				mdThemingProvider.definePalette('three_d_repo_primary', {
+					'50': '004594',
+					'100': '004594',
+					'200': '004594',
+					'300': '004594',
+					'400': '004594',
+					'500': '004594',
+					'600': '004594',
+					'700': '004594',
+					'800': '004594',
+					'900': '004594',
+					'A100': '004594',
+					'A200': '004594',
+					'A400': '004594',
+					'A700': '004594',
+					'contrastDefaultColor': 'light',
+					'contrastDarkColors': ['50', '100', '200', '300', '400', 'A100'],
+					'contrastLightColors': undefined
+				});
+
 				mdThemingProvider.theme("default")
-                .primaryPalette("indigo", {
-                    "default": "500",
-                    "hue-1": "400",
-                    "hue-2": "200",
-                    "hue-3": "50"
-                })
+                .primaryPalette("three_d_repo_primary", {
+					"default": "500",
+					"hue-1": "400",
+					"hue-2": "200",
+					"hue-3": "50"
+				})
                 .accentPalette("green", {
                     "default": "600"
                 })
@@ -51,7 +71,7 @@
 				loggedOutUrl: "@"
 			},
             controller: HomeCtrl,
-            controllerAs: "hm",
+            controllerAs: "vm",
             bindToController: true
         };
     }
@@ -59,24 +79,46 @@
     HomeCtrl.$inject = ["$scope", "Auth", "StateManager", "EventService"];
 
     function HomeCtrl($scope, Auth, StateManager, EventService) {
-        var hm = this;
+        var vm = this;
 
-		hm.state = StateManager.state;
+		vm.state = StateManager.state;
 
-		hm.getLoggedInUrl = function() {
-			return hm.loggedInUrl;
+		$scope.$watch("vm.state", function () {
+			if (angular.isDefined(vm.state.registerRequest) && (vm.state.registered !== null)) {
+				vm.notLoggedInToShow = "showRegisterRequest";
+			}
+			else if (angular.isDefined(vm.state.registerVerify) && (vm.state.registerVerify !== null)) {
+				vm.username = vm.state.username;
+				vm.token = vm.state.token;
+				vm.notLoggedInToShow = "showRegisterVerify";
+			}
+			else if (angular.isDefined(vm.state.passwordForgot) && (vm.state.registered !== null)) {
+				vm.notLoggedInToShow = "showPasswordForgot";
+			}
+			else if (angular.isDefined(vm.state.passwordChange) && (vm.state.registered !== null)) {
+				vm.username = vm.state.username;
+				vm.token = vm.state.token;
+				vm.notLoggedInToShow = "showPasswordChange";
+			}
+			else {
+				vm.notLoggedInToShow = "showLogin";
+			}
+		}, true);
+
+		vm.getLoggedInUrl = function() {
+			return vm.loggedInUrl;
 		};
 
-		hm.getLoggedOutUrl = function() {
-			return hm.loggedOutUrl;
+		vm.getLoggedOutUrl = function() {
+			return vm.loggedOutUrl;
 		};
 
-		if (angular.isDefined(hm.account) && angular.isDefined(hm.password))
+		if (angular.isDefined(vm.account) && angular.isDefined(vm.password))
 		{
-			Auth.login(hm.account, hm.password);
+			Auth.login(vm.account, vm.password);
 		}
 
-        hm.logout = function () {
+        vm.logout = function () {
             Auth.logout();
         };
 

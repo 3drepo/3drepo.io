@@ -1,4 +1,22 @@
-md-content(flex layout="row" layout-align="space-between")
+.homeUserContent
+	md-content.md-whiteframe-1dp(aria-label="Projects", flex)
+		md-toolbar
+			.md-toolbar-tools
+				h2 Profile
+
+		div(layout="column")
+			div(layout="row", flex=)
+				img.account-avatar-image(ng-if="vm.hasAvatar", ng-src='{{vm.avatarURL}}')
+				#noAvatarIcon(flex, layout="row")
+					md-icon(ng-if="!vm.hasAvatar", class="fa fa-user")
+			div
+				md-list
+					md-list-item.md-2-line
+						div.md-list-item-text
+							h3 {{vm.firstName}} {{vm.lastName}}
+							p {{vm.email}}
+
+//md-content(flex layout="row" layout-align="space-between")
 	.dataContainer(flex="45")
 		div
 			md-input-container.md-block

@@ -115,17 +115,19 @@
 				deferred = $q.defer(),
 				viewpointPromise = $q.defer();
 
-			url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue.objectId);
+			url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues.json");
 
 			EventService.send(EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, {promise: viewpointPromise});
 
 			viewpointPromise.promise.then(function (viewpoint) {
 				data = {
+					object_id: issue.objectId,
 					name: issue.name,
 					viewpoint: viewpoint,
 					scale: 1.0,
 					creator_role: issue.creator_role,
-					assigned_roles: userRoles
+					assigned_roles: userRoles,
+					scribble: issue.scribble
 				};
 				config = {withCredentials: true};
 
@@ -138,11 +140,13 @@
 
 				$http.post(url, dataToSend, config)
 					.then(function successCallback(response) {
+						console.log(response);
 						response.data.issue._id = response.data.issue_id;
 						response.data.issue.account = issue.account;
 						response.data.issue.project = issue.project;
 						response.data.issue.timeStamp = self.getPrettyTime(response.data.issue.created);
 						response.data.issue.creator_role = issue.creator_role;
+						response.data.issue.scribble = issue.scribble;
 
 						response.data.issue.title = generateTitle(response.data.issue);
 						self.removePin();
@@ -153,17 +157,20 @@
 			return deferred.promise;
 		};
 
-		function doPost(issue, data) {
-			var deferred = $q.defer();
-			url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue.parent);
-			config = {
-				withCredentials: true
-			};
-			data._id = issue._id;
-			$http.post(url, {
-					data: JSON.stringify(data)
-				}, config)
-				.then(function(response) {
+		/**
+		 * Handle PUT requests
+		 * @param issue
+		 * @param data
+		 * @returns {*}
+		 */
+		function doPut(issue, data) {
+			var deferred = $q.defer(),
+				url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue._id + ".json"),
+				config = {
+					withCredentials: true
+				};
+			$http.put(url, {data: JSON.stringify(data)}, config)
+				.then(function (response) {
 					deferred.resolve(response.data);
 				});
 			return deferred.promise;
@@ -174,28 +181,31 @@
 			if (issue.hasOwnProperty("closed")) {
 				closed = !issue.closed;
 			}
-			return doPost(issue, {
+			return doPut(issue, {
 				closed: closed,
 				number: issue.number
 			});
 		};
 
 		obj.assignIssue = function(issue) {
-			return doPost(issue, {
-				assigned_roles: issue.assigned_roles,
-				number: issue.number
-			});
+			return doPut(
+				issue,
+				{
+					assigned_roles: issue.assigned_roles,
+					number: issue.number
+				}
+			);
 		};
 
 		obj.saveComment = function(issue, comment) {
-			return doPost(issue, {
+			return doPut(issue, {
 				comment: comment,
 				number: issue.number
 			});
 		};
 
 		obj.editComment = function(issue, comment, commentIndex) {
-			return doPost(issue, {
+			return doPut(issue, {
 				comment: comment,
 				number: issue.number,
 				edit: true,
@@ -204,7 +214,7 @@
 		};
 
 		obj.deleteComment = function(issue, index) {
-			return doPost(issue, {
+			return doPut(issue, {
 				comment: "",
 				number: issue.number,
 				delete: true,
@@ -213,7 +223,7 @@
 		};
 
 		obj.setComment = function(issue, commentIndex) {
-			return doPost(issue, {
+			return doPut(issue, {
 				comment: "",
 				number: issue.number,
 				set: true,

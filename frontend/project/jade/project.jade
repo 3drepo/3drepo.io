@@ -1,11 +1,25 @@
-.container-fluid(global ng-if="!vm.state.bid4free")
+.container-fluid#project(global ng-if="!vm.state.bid4free")
 	#project-viewport-container.row
 		viewermanager
 
-	panel#leftPanel(account="vm.account", project="vm.project", branch="vm.branch", revision="vm.revision", position="left")
-	panel#rightPanel(account="vm.account", project="vm.project", branch="vm.branch", revision="vm.revision", position="right")
-	bottom-buttons
-	qr-code-reader
+	#projectUI
+		panel#leftPanel(
+			account="vm.account"
+			project="vm.project"
+			branch="vm.branch"
+			revision="vm.revision"
+			position="left"
+			style="pointer-events:{{vm.pointerEvents}}")
+		panel#rightPanel(
+			account="vm.account"
+			project="vm.project"
+			branch="vm.branch"
+			revision="vm.revision"
+			position="right"
+			style="pointer-events:{{vm.pointerEvents}}")
+		right-panel(style="pointer-events:{{vm.pointerEvents}}")
+		bottom-buttons(style="pointer-events:{{vm.pointerEvents}}")
+		qr-code-reader
 
 div(ng-if="vm.state.bid4free")
 	bid4free(account="vm.state.account" project="vm.state.project" branch="vm.state.branch" revision="vm.state.revision" state="vm.state")

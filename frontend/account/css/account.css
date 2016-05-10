@@ -5,7 +5,6 @@ account-dir #account {
   width: 100%;
   height: 100%;
   background-size: contain;
-  padding: 20px;
 }
 
 account-dir #logo {
@@ -66,10 +65,13 @@ account-projects .projects {
   margin-left: 40px;
 }
 
-account-projects .projects p,
+account-projects .projects .projectName,
 account-projects .projects md-icon {
   font-size: 15px;
   color: #4CAF50;
+}
+account-projects .projects .projectTimestamp {
+  color: rgba(0, 0, 0, 0.3);
 }
 account-projects .projects p {
   font-size: 14px;
@@ -78,11 +80,12 @@ account-projects .projects p {
 account-projects .projects md-icon {
   margin-right: 10px !important;
 }
-account-projects .projects .md-button {
-  margin-right: 20px !important;
-}
 
 /** Account Profile ***************************************************************************************************/
+account-profile {
+  padding-left: 40px;
+}
+
 account-profile .dataContainer {
   padding: 10px;
 }

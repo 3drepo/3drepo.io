@@ -1,25 +1,60 @@
-//#login(ng-style="{'background-image':'url(' + vm.backgroundImage + ')'}", layout="column", flex)
-#login(layout="column" flex)
-	#loginContent(layout="row" flex="50")
-		span(flex="25")
-		div(flex="35" layout="column")
+//div(layout="column" flex)
+	div(layout="row" flex="60")
+		span(flex="35")
+
+		// Info
+		//div(flex="25" layout="column")
 			div(flex)
-				img(ng-src="{{vm.logo}}", flex-gt-sm="30", flex-sm="50", flex="80")
+				img(ng-src="{{vm.logo}}", flex-gt-sm="50", flex-sm="70", flex="100")
 				h2.md-subhead#loginVersion Version: {{vm.version}}
 			div(flex)
 				h1.md-display-1#loginTitle 3D BIM version control
 				h2.md-headline#loginSubTitle A scalable, open platform
 
-		div(flex="15", layout="column")
-			div(layout="column", flex)
-				md-input-container.md-block(md-no-float)
-					input(type='text', ng-model='vm.user.username', placeholder='Username', ng-required, autofocus ng-keypress="vm.login($event)")
-				md-input-container(md-no-float)
-					input(type='password', ng-model='vm.user.password', placeholder='Password', ng-required ng-keypress="vm.login($event)")
-				div(layout="row", layout-align="start" flex="none")
-					md-button.md-accent.md-raised(ng-click="vm.login()") Log In
-				h2#loginError {{vm.errorMessage}}
-		span(flex="25")
-	div(layout="row" layout-align="center center" flex="50")
+.homeUserContent(layout="row", layout-align="center", flex)
+	md-content.md-whiteframe-1dp(aria-label="Registered")
+		md-toolbar
+		.userContent(layout="column")
+
+			// Register or login
+			div(layout="row")
+				// Login
+				div(layout="column", flex)
+					h3.loginTitle Log in
+					md-input-container.md-block(md-no-float)
+						input(type='text', ng-model='vm.user.username', placeholder='Username', ng-required, autofocus, ng-keypress="vm.login($event)")
+					md-input-container(md-no-float)
+						input(type='password', ng-model='vm.user.password', placeholder='Password', ng-required, ng-keypress="vm.login($event)")
+					div(layout="row", layout-align="start" flex="none")
+						md-button.md-accent.md-raised(ng-click="vm.login()") Log In
+					#forgotPasswordButton(layout="row", layout-align="start" flex="none")
+						md-button.md-accent(ng-click="vm.forgotPassword()") Forgot password?
+					h4.loginError {{vm.errorMessage}}
+
+				div(ng-if="vm.useRegister", layout="row")
+					div(flex="10", layout="column", layout-align="center center")
+						#loginDivider(flex)
+
+					// Register
+					#loginRegister(layout="column", flex)
+						h3.loginTitle Register
+						md-input-container.md-block(md-no-float)
+							input(type='text', ng-model='vm.newUser.username', placeholder='Username', ng-required, ng-keypress="vm.register($event)")
+						md-input-container(md-no-float)
+							input(type='email', ng-model='vm.newUser.email', placeholder='Email', ng-required, ng-keypress="vm.register($event)")
+						md-input-container(md-no-float)
+							input(type='password', ng-model='vm.newUser.password', placeholder='Password', ng-required ng-keypress="vm.register($event)")
+						#tc(layout="row", layout-align="start center", flex)
+							md-checkbox.md-accent(ng-model="vm.newUser.tcAgreed" aria-label="Terms and conditions Checkbox")
+							div(layout="row", layout-align="start")
+								md-button.md-accent(ng-click="vm.showTC()") I agree to the Terms and Conditions
+						#loginCaptcha(vc-recaptcha, key="vm.captchaKey", ng-model="vm.reCaptchaResponse", ng-if="vm.useReCapthca")
+						div(layout="row", layout-align="start")
+							md-button.md-accent.md-raised(ng-click="vm.register()") Register
+						h4.loginError {{vm.registerErrorMessage}}
+
+		//span(flex="35")
+
+	//div(layout="row" layout-align="center center" flex="40")
 		div
 			img(ng-src="{{vm.enterpriseLogo}}" flex style="max-width:100%; height: auto")

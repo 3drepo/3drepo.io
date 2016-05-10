@@ -1,15 +1,23 @@
-.dataContainer(layout="column", flex)
-	md-list(flex)
-		md-list-item(ng-repeat="account in vm.accounts")
-			.accounts(flex)
-				md-list-item(ng-click="vm.toggleProjectsList($index)")
-					md-button.md-icon-button(aria-label="Folder")
-						md-icon(ng-if="!account.showProjects", md-font-icon="fa fa-folder-o")
-						md-icon(ng-if="account.showProjects", md-font-icon="fa fa-folder-open-o")
-					p {{account.name}}
-				md-list.projects(ng-if="account.showProjects")
-					md-list-item.md-1-line(ng-repeat="project in account.projects" ng-click="vm.goToProject(account.name, project.name)")
-						md-icon(md-font-icon="fa fa-cube")
-						p {{project.name}}
-						md-button.md-accent(ng-click="vm.b4f(account.name, project.name)" ng-if="project.bif4FreeEnabled") B4F
-			md-divider
+.homeUserContent
+	md-content.md-whiteframe-1dp(aria-label="Projects", flex)
+		md-toolbar
+			.md-toolbar-tools
+				h2 Projects
+
+		div(layout="column")
+			md-list(flex)
+				md-list-item(ng-repeat="account in vm.accounts")
+					.accounts(flex)
+						md-list-item(ng-click="vm.toggleProjectsList($index)")
+							md-button.md-icon-button(aria-label="Folder")
+								md-icon(ng-if="!account.showProjects", md-font-icon="fa fa-folder-o")
+								md-icon(ng-if="account.showProjects", md-font-icon="fa fa-folder-open-o")
+							p {{account.name}}
+						md-list.projects(ng-if="account.showProjects")
+							md-list-item.md-1-line(ng-repeat="project in account.projects" ng-click="vm.goToProject(account.name, project.name)")
+								div(layout="row", flex="100", layout-align="start")
+									md-icon(md-font-icon="fa fa-cube")
+									p.projectName(flex) {{project.name}}
+									p.projectTimestamp(flex="20") {{project.timestamp}}
+									md-button.md-accent(ng-click="vm.b4f(account.name, project.name)" ng-if="project.bif4FreeEnabled") B4F
+					md-divider

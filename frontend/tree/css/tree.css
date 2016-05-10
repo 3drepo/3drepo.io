@@ -99,7 +99,7 @@ tree .virtualRepeatInfiniteScroll {
 
 tree .virtualRepeatInfiniteScroll .vertical-container {
   height: 100%;
-  width: 350px;
+  width: 100%;
 }
 
 tree .virtualRepeatInfiniteScroll .repeated-item {
