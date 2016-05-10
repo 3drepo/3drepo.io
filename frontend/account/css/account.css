@@ -82,6 +82,10 @@ account-projects .projects md-icon {
 }
 
 /** Account Profile ***************************************************************************************************/
+account-profile {
+  padding-left: 40px;
+}
+
 account-profile .dataContainer {
   padding: 10px;
 }

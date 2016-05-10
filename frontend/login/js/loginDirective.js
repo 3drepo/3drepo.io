@@ -32,9 +32,9 @@
 		};
 	}
 
-	LoginCtrl.$inject = ["$scope", "$mdDialog", "$window", "Auth", "EventService", "serverConfig", "LoginService"];
+	LoginCtrl.$inject = ["$scope", "$mdDialog", "$window", "$location", "Auth", "EventService", "serverConfig", "LoginService"];
 
-	function LoginCtrl($scope, $mdDialog, $window, Auth, EventService, serverConfig, LoginService) {
+	function LoginCtrl($scope, $mdDialog, $window, $location, Auth, EventService, serverConfig, LoginService) {
 		var vm = this,
 			enterKey = 13,
 			promise;
@@ -127,6 +127,7 @@
 
 		vm.forgotPassword = function () {
 			$window.location.href = "/passwordForgot";
+			//$location.path("/passwordForgot");
 		};
 
 		/*

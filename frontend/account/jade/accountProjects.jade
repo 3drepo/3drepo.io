@@ -1,10 +1,10 @@
-.homeUserContent(layout="row", layout-align="center", flex)
-	md-content.md-whiteframe-1dp(aria-label="Projects")
+.homeUserContent
+	md-content.md-whiteframe-1dp(aria-label="Projects", flex)
 		md-toolbar
 			.md-toolbar-tools
 				h2 Projects
 
-		.userContent(layout="column")
+		div(layout="column")
 			md-list(flex)
 				md-list-item(ng-repeat="account in vm.accounts")
 					.accounts(flex)
