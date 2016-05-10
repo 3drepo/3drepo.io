@@ -75,10 +75,6 @@
 		{
 			cluster.fork();
 		}
-
-		cluster.on("exit", function(worker, code, signal) {
-			console.log("EXIT!!!!!");
-		});
 	} else {
 		for(let subdomain in config.subdomains)
 		{
@@ -121,8 +117,6 @@
 						});
 					}
 				}
-
-				console.log("SD: " + subdomain);
 
 				if (subdomain !== "undefined")
 				{
