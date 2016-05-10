@@ -1296,9 +1296,9 @@ var Viewer = {};
 			var url = "";
 
 			if (revision === "head") {
-				url = server_config.apiUrl(account + "/" + project + "/revision/" + branch + "/head.x3d.mp");
+				url = server_config.apiUrl(server_config.GET_API, account + "/" + project + "/revision/" + branch + "/head.x3d.mp");
 			} else {
-				url = server_config.apiUrl(account + "/" + project + "/revision/" + revision + ".x3d.mp");
+				url = server_config.apiUrl(server_config.GET_API, account + "/" + project + "/revision/" + revision + ".x3d.mp");
 			}
 
 			self.account = account;

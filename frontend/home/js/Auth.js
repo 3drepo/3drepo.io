@@ -22,57 +22,57 @@
 	.service("Auth", ["$injector", "$q", "$http", "serverConfig", "EventService", function($injector, $q, $http, serverConfig, EventService) {
 
 		var self = this;
-		
+
 		self.authPromise = $q.defer();
 		self.loggedIn = null;
 		self.username = null;
-			
+
 		this.loginSuccess = function(data)
 		{
 			self.loggedIn = true;
 			self.username = data.username;
 			self.userRoles = data.roles;
-							
+
 			EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: data.username, initialiser: data.initialiser });
-			
+
 			self.authPromise.resolve(self.loggedIn);
 		};
-		
+
 		this.loginFailure = function(reason)
 		{
 			self.loggedIn = false;
 			self.username = null;
 			self.userRoles = null;
-			
+
 			var initialiser = reason.initialiser;
 			reason.initialiser = undefined;
-				
+
 			EventService.send(EventService.EVENT.USER_LOGGED_IN, { username: null, initialiser: initialiser, error: reason });
-			
+
 			self.authPromise.resolve(self.loggedIn);
 		};
-		
+
 		this.logoutSuccess = function()
 		{
 			self.loggedIn  = false;
 			self.username  = null;
 			self.userRoles = null;
-							
+
 			EventService.send(EventService.EVENT.USER_LOGGED_OUT);
-			
+
 			self.authPromise.resolve(self.loggedIn);
 		};
-		
+
 		this.logoutFailure = function(reason)
 		{
 			self.loggedIn  = false;
 			self.username  = null;
 			self.userRoles = null;
-				
+
 			EventService.send(EventService.EVENT.USER_LOGGED_OUT, { error: reason });
-			
+
 			self.authPromise.resolve(self.loggedIn);
-		};		
+		};
 
 		this.init = function() {
 			var initPromise = $q.defer();
@@ -83,7 +83,7 @@
 			if(self.loggedIn === null)
 			{
 				// Initialize
-				$http.get(serverConfig.apiUrl("login")).success(function _initSuccess(data)
+				$http.get(serverConfig.apiUrl(serverConfig.GET_API, "login")).success(function _initSuccess(data)
 					{
 						data.initialiser = true;
 						self.loginSuccess(data);
@@ -92,7 +92,7 @@
 						reason.initialiser = true;
 						self.loginFailure(reason);
 					});
-				
+
 				self.authPromise.promise.then(function() {
 					initPromise.resolve(self.loggedIn);
 				});
@@ -103,7 +103,7 @@
 				} else {
 					EventService.send(EventService.EVENT.USER_LOGGED_OUT);
 				}
-				
+
 				initPromise.resolve(self.loggedIn);
 			}
 
@@ -113,8 +113,8 @@
 		this.loadProjectRoles = function(account, project)
 		{
 			var rolesPromise = $q.defer();
-			
-			$http.get(serverConfig.apiUrl(account + "/" + project + "/roles.json"))
+
+			$http.get(serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/roles.json"))
 			.success(function(data) {
 				self.projectRoles = data;
 				rolesPromise.resolve();
@@ -133,7 +133,7 @@
 
 			var postData = {username: username, password: password};
 
-			$http.post(serverConfig.apiUrl("login"), postData).success(self.loginSuccess).error(self.loginFailure);
+			$http.post(serverConfig.apiUrl(serverConfig.POST_API, "login"), postData).success(self.loginSuccess).error(self.loginFailure);
 
 			return self.authPromise.promise;
 		};
@@ -141,7 +141,7 @@
 		this.logout = function() {
 			self.authPromise = $q.defer();
 
-			$http.post(serverConfig.apiUrl("logout")).success(self.logoutSuccess).error(self.logoutFailure);
+			$http.post(serverConfig.apiUrl(serverConfig.POST_API, "logout")).success(self.logoutSuccess).error(self.logoutFailure);
 
 			return self.authPromise.promise;
 		};

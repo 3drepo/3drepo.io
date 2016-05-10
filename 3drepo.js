@@ -22,12 +22,12 @@
 		fs = require("fs"),
 		constants = require("constants");
 
+	var cluster = require("cluster");
+
 	var log_iface = require("./backend/logger.js");
 	var systemLogger = log_iface.systemLogger;
 
 	var config = require("./backend/config.js");
-
-	var chatServer = require("./backend/services/chat.js");
 
 	var https = require("https");
 	var http = require("http");
@@ -70,58 +70,70 @@
 
 	var mainApp = express();
 
-	for(let subdomain in config.subdomains)
-	{
-		if (config.subdomains.hasOwnProperty(subdomain))
+	if (cluster.isMaster) {
+		for(var i = 0; i < config.numThreads; i++)
 		{
-			var subDomainApp = express();
+			cluster.fork();
+		}
 
-			let subdomainServers = config.subdomains[subdomain];
-
-			for(let s_idx = 0; s_idx < subdomainServers.length; s_idx++)
+		cluster.on("exit", function(worker, code, signal) {
+			console.log("EXIT!!!!!");
+		});
+	} else {
+		for(let subdomain in config.subdomains)
+		{
+			if (config.subdomains.hasOwnProperty(subdomain))
 			{
-				let serverConfig = subdomainServers[s_idx];
+				var subDomainApp = express();
 
-				systemLogger.logInfo("Loading " + serverConfig.service + " on " + serverConfig.hostname + serverConfig.host_dir);
+				let subdomainServers = config.subdomains[subdomain];
 
-				if (!serverConfig.external)
+				for(let s_idx = 0; s_idx < subdomainServers.length; s_idx++)
 				{
-					let app = require("./backend/services/" + serverConfig.service + ".js").createApp(serverConfig);
+					let serverConfig = subdomainServers[s_idx];
 
-					subDomainApp.use(serverConfig.host_dir, app);
-				}
+					systemLogger.logInfo("Loading " + serverConfig.service + " on " + serverConfig.hostname + serverConfig.host_dir);
 
-				// If the configuration specifies a redirect then apply
-				// it at this point
-				if (serverConfig.redirect)
-				{
-					mainApp.all(/.*/, function(req, res, next) {
-						var host = req.header("host");
-						var redirect = Array.isArray(serverConfig.redirect) ? serverConfig.redirect : [serverConfig.redirect];
+					if (!serverConfig.external)
+					{
+						let app = require("./backend/services/" + serverConfig.service + ".js").createApp(serverConfig);
 
-						for(var i = 0; i < redirect.length; i++)
-						{
-							if (host.match(redirect[i]))
+						subDomainApp.use(serverConfig.host_dir, app);
+					}
+
+					// If the configuration specifies a redirect then apply
+					// it at this point
+					if (serverConfig.redirect)
+					{
+						mainApp.all(/.*/, function(req, res, next) {
+							var host = req.header("host");
+							var redirect = Array.isArray(serverConfig.redirect) ? serverConfig.redirect : [serverConfig.redirect];
+
+							for(var i = 0; i < redirect.length; i++)
 							{
-								res.redirect(301, serverConfig.base_url);
-							} else {
-								next();
+								if (host.match(redirect[i]))
+								{
+									res.redirect(301, serverConfig.base_url);
+								} else {
+									next();
+								}
 							}
-						}
-					});
+						});
+					}
 				}
-			}
 
-			if (subdomain !== "null")
-			{
-				mainApp.use(vhost(subdomain + "." + config.host, subDomainApp));
-			} else {
-				mainApp.use(vhost(config.host, subDomainApp));
+				console.log("SD: " + subdomain);
+
+				if (subdomain !== "undefined")
+				{
+					mainApp.use(vhost(subdomain + "." + config.host, subDomainApp));
+				} else {
+					mainApp.use(vhost(config.host, subDomainApp));
+				}
 			}
 		}
+
+		var server = config.using_ssl ? https.createServer(ssl_options, mainApp) : http.createServer(mainApp);
+		server.listen(config.port, "0.0.0.0", serverStartFunction("0.0.0.0", config.port));
 	}
-
-	var server = config.using_ssl ? https.createServer(ssl_options, mainApp) : http.createServer(mainApp);
-	server.listen(config.port, "0.0.0.0", serverStartFunction("0.0.0.0", config.port));
-
 }());
