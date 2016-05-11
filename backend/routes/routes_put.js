@@ -19,48 +19,48 @@
 *  @file Contains the POST routes
 ****************************************************************************/
 
-var schemaValidator = require('./js/core/db_schema.js')();
+// var schemaValidator = require('./js/core/db_schema.js')();
 //var log_iface = require('./js/core/logger.js');
 //var logger = log_iface.logger;
-var responseCodes = require('./js/core/response_codes.js');
+// var responseCodes = require('./js/core/response_codes.js');
 //var config = require('./js/core/config.js');
 
-module.exports = function(router, dbInterface, checkAccess){
-	// this.putMap = [];
+// module.exports = function(router, dbInterface, checkAccess){
+// 	// this.putMap = [];
 
-	// this.put = function(regex, shouldCheckAccess, callback) {
-	// 	this.putMap.push({regex: regex, shouldCheckAccess: shouldCheckAccess, callback: callback});
-	// };
+// 	// this.put = function(regex, shouldCheckAccess, callback) {
+// 	// 	this.putMap.push({regex: regex, shouldCheckAccess: shouldCheckAccess, callback: callback});
+// 	// };
 
-	// this.put('/:account/:project/issues/:sid', false, function(req, res) {
-	// 	var responsePlace = 'Updating an issue';
-	// 	var data = JSON.parse(req.body.data);
+// 	// this.put('/:account/:project/issues/:sid', false, function(req, res) {
+// 	// 	var responsePlace = 'Updating an issue';
+// 	// 	var data = JSON.parse(req.body.data);
 
-	// 	this.dbInterface.hasReadAccessToProject(req.session.user.username, req.params.account, req.params.project, function(err) {
-	// 		if (err.value) {
-	// 			return callback(err);
-	// 		}
+// 	// 	this.dbInterface.hasReadAccessToProject(req.session.user.username, req.params.account, req.params.project, function(err) {
+// 	// 		if (err.value) {
+// 	// 			return callback(err);
+// 	// 		}
 
-	// 		this.dbInterface.updateIssue(req.params.account, req.params.project, req.params.sid, req.session.user.username, data, function(err, result) {
-	// 			responseCodes.onError(responsePlace, err, res, result);
-	// 		});
-	// 	});
-	// });
+// 	// 		this.dbInterface.updateIssue(req.params.account, req.params.project, req.params.sid, req.session.user.username, data, function(err, result) {
+// 	// 			responseCodes.onError(responsePlace, err, res, result);
+// 	// 		});
+// 	// 	});
+// 	// });
 
-	// // Register handlers with Express Router
-	// for(var idx in this.putMap)
-	// {
-	// 	if(this.putMap.hasOwnProperty(idx)){
-	// 		var item = this.putMap[idx];
-	// 		var resFunction = schemaValidator.validate(item.regex);
+// 	// // Register handlers with Express Router
+// 	// for(var idx in this.putMap)
+// 	// {
+// 	// 	if(this.putMap.hasOwnProperty(idx)){
+// 	// 		var item = this.putMap[idx];
+// 	// 		var resFunction = schemaValidator.validate(item.regex);
 
-	// 		if (item.shouldCheckAccess){
-	// 			router.put(item.regex.toString(), resFunction, checkAccess, item.callback);
-	// 		} else {
-	// 			router.put(item.regex, resFunction, item.callback);
-	// 		}
-	// 	}
-	// }
+// 	// 		if (item.shouldCheckAccess){
+// 	// 			router.put(item.regex.toString(), resFunction, checkAccess, item.callback);
+// 	// 		} else {
+// 	// 			router.put(item.regex, resFunction, item.callback);
+// 	// 		}
+// 	// 	}
+// 	// }
 
-	// return this;
-};
+// 	// return this;
+// };

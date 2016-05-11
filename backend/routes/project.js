@@ -17,7 +17,7 @@
 
 var express = require('express');
 var router = express.Router({mergeParams: true});
-// var config = require("../config.js");
+var config = require("../config.js");
 // var _ = require('lodash');
 var utils = require('../utils');
 var middlewares = require('./middlewares');
@@ -26,6 +26,8 @@ var responseCodes = require('../response_codes');
 var C               = require("../constants");
 var Role = require('../models/role');
 var User = require('../models/user');
+var importQueue = require('../services/queue');
+var multer = require("multer");
 
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
@@ -45,6 +47,8 @@ router.get('/:project.json', middlewares.hasReadAccessToProject, getProjectSetti
 router.put('/:project/settings/map-tile', middlewares.hasWriteAccessToProject, updateMapTileSettings);
 
 router.post('/:project', middlewares.canCreateProject, createProject);
+
+router.post('/:project/upload', middlewares.hasWriteAccessToProject, uploadProject);
 
 function updateMapTileSettings(req, res, next){
 	'use strict';
@@ -142,7 +146,7 @@ function getProjectSetting(req, res, next){
 	let place = utils.APIInfo(req);
 	_getProject(req).then(setting => {
 
-		let whitelist = ['owner', 'desc', 'type', 'permissions', 'properties'];
+		let whitelist = ['owner', 'desc', 'type', 'permissions', 'properties', 'status'];
 		let resObj = {};
 		
 		whitelist.forEach(key => {
@@ -162,6 +166,8 @@ function createProject(req, res, next){
 	let responsePlace = utils.APIInfo(req);
 	let project = req.params.project;
 	let account = req.params.account;
+	let username = req.session.user.username;
+
 	var roleId = `${account}.${project}`;
 
 
@@ -175,14 +181,14 @@ function createProject(req, res, next){
 
 	}).then(() => {
 
-		return User.grantRoleToUser(account, account, project);
+		return User.grantRoleToUser(username, account, project);
 
 	}).then(() => {
 
 		let setting = ProjectSetting.createInstance(getDbColOptions(req));
 		
 		setting._id = req.params.project;
-		setting.owner = account;
+		setting.owner = username;
 		setting.desc = req.body.desc;
 		setting.type = req.body.type;
 		
@@ -195,9 +201,105 @@ function createProject(req, res, next){
 	});
 }
 
-// function uploadProject(req, res, next){
+/*******************************************************************************
+ * Converts error code from repobouncerclient to a response error object
+ * @param {errCode} - error code referenced in error_codes.h
+ *******************************************************************************/
+function convertToErrorCode(errCode){
 
+    var errObj;
 
-// }
+    switch (errCode) {
+        case 0:
+            errObj = responseCodes.OK;
+            break;
+        case 1:
+            errObj = responseCodes.FILE_IMPORT_INVALID_ARGS;
+            break;
+        case 2:
+            errObj = responseCodes.NOT_AUTHORIZED;
+            break;
+        case 3:
+            errObj = responseCodes.FILE_IMPORT_UNKNOWN_CMD;
+            break;
+        case 5:
+            errObj = responseCodes.FILE_IMPORT_PROCESS_ERR;
+            break;
+        default:
+            errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
+            break;
+
+    }
+    return errObj;
+}
+
+function uploadProject(req, res, next){
+	'use strict';
+
+	let responsePlace = utils.APIInfo(req);
+	if (config.cn_queue) {
+
+		var upload = multer({ dest: config.cn_queue.upload_dir });
+		upload.single("file")(req, res, function (err) {
+			if (err) {
+				return responseCodes.respond(responsePlace, req, res, next, responseCodes.FILE_IMPORT_PROCESS_ERR, {});
+			} else {
+
+				let projectSetting;
+
+				_getProject(req).then(setting => {
+
+					projectSetting = setting;
+					projectSetting.status = 'processing';
+					return projectSetting.save();
+
+				}).then(() => {
+
+					// api respond once the file is uploaded
+
+					responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: 'uploaded'});
+
+					return importQueue.importFile(
+						req.file.path, 
+						req.file.originalname, 
+						req.params.account,
+						req.params.project,
+						req.session.user.username
+					)
+					.then(corID => Promise.resolve(corID))
+					.catch(errCode => {
+						//catch here to provide custom error message
+						return Promise.reject(convertToErrorCode(errCode));
+					});
+
+				}).then(corID => {
+
+					req[C.REQ_REPO].logger.logInfo(`Job ${corID} imported without error`);
+
+					//mark project ready
+					projectSetting.status = 'ok';
+					return projectSetting.save();
+
+				}).catch(err => {
+					// import failed for some reason(s)...
+					console.log(err);
+					req[C.REQ_REPO].logger.logDebug(JSON.stringify(err));
+				});
+				
+
+			}
+		});
+
+	} else {
+		responseCodes.onError(
+			responsePlace, 
+			responseCodes.QUEUE_NO_CONFIG, 
+			res, 
+			{ "user": req.session.user.username, "database" : req.params[C.REPO_REST_API_ACCOUNT], "project": req.params[C.REPO_REST_API_PROJECT] 
+		});
+	}
+}
 
 module.exports = router;
+
+

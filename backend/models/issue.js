@@ -68,12 +68,12 @@ var schema = Schema({
 function postFind(docs){
 	docs && docs.forEach(doc => {
 		 postFindOne(doc);
-	})
+	});
 
 }
 
 function postFindOne(doc){
-	doc.comments && doc.comments.forEach(comment => {
+	doc && doc.comments && doc.comments.forEach(comment => {
 		comment.sealed = comment.sealed || comment.set;
 	});
 }
