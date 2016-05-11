@@ -112,7 +112,6 @@ module.exports.createApp = function(serverConfig)
 	      },
 	      {
 	         "plugin": "account",
-	         'url': '/:project?at&up&view',
 	         "children": [
 	            {
 	               "plugin": "project",
@@ -134,6 +133,7 @@ module.exports.createApp = function(serverConfig)
 	                  "rightPanel",
 	                  "building"
 	               ],
+	               'url': '/:project?at&up&view',
 	               "children" : [
 	                  {
 	                     "plugin": "bid4free",

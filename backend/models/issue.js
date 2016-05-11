@@ -74,7 +74,8 @@ function postFind(docs){
 
 function postFindOne(doc){
 	doc && doc.comments && doc.comments.forEach(comment => {
-		comment.sealed = comment.sealed || comment.set;
+		var set = comment.toObject().set;
+		comment.sealed = comment.sealed || set;
 	});
 }
 

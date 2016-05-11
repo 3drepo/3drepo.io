@@ -226,7 +226,7 @@
 			return doPut(issue, {
 				comment: "",
 				number: issue.number,
-				set: true,
+				sealed: true,
 				commentIndex: commentIndex
 			});
 		};

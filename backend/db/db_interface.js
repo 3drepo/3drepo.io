@@ -2168,11 +2168,11 @@ DBInterface.prototype.storeIssue = function(dbName, project, owner, issueId, dat
 							$pull: {comments: {created: data.commentCreated}}
 						};
 					}
-					else if (data.hasOwnProperty("set")) {
+					else if (data.hasOwnProperty("sealed")) {
 						updateQuery = {
 							$set: {}
 						};
-						updateQuery.$set["comments." + data.commentIndex + ".set"] = true;
+						updateQuery.$set["comments." + data.commentIndex + ".sealed"] = true;
 					}
 					else {
 						updateQuery = {
