@@ -72,7 +72,6 @@
 		 * Reformat the grouped projects to enable toggling of projects list
 		 */
 		$scope.$watch("vm.projectsGrouped", function () {
-			console.log(vm.projectsGrouped);
 			var account;
 			vm.accounts = [];
 			angular.forEach(vm.projectsGrouped, function(value, key) {
@@ -141,13 +140,29 @@
 		 * Bring up dialog to add a new project
 		 */
 		vm.newProject = function () {
+			vm.projectDialogToShow = "newProject";
 			vm.newProjectData = {
 				account: vm.account,
 				type: vm.projectTypes[0]
 			};
 			$mdDialog.show({
 				controller: function () {},
-				templateUrl: "newProjectDialog.html",
+				templateUrl: "projectDialog.html",
+				parent: angular.element(document.body),
+				targetEvent: event,
+				clickOutsideToClose:true,
+				fullscreen: true,
+				scope: $scope,
+				preserveScope: true,
+				onRemoving: function () {$scope.closeDialog();}
+			});
+		};
+		
+		vm.uploadModel = function () {
+			vm.projectDialogToShow = "uploadModel";
+			$mdDialog.show({
+				controller: function () {},
+				templateUrl: "projectDialog.html",
 				parent: angular.element(document.body),
 				targetEvent: event,
 				clickOutsideToClose:true,

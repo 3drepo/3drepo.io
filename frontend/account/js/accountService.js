@@ -36,20 +36,14 @@
 		 * @returns {*|promise}
 		 */
 		function doPost(data, urlEnd) {
-			console.log(data, urlEnd);
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(urlEnd),
-				config = {
-					withCredentials: true
-				};
-			$http.post(url, data, config)
+				url = serverConfig.apiUrl(urlEnd);
+			$http.post(url, data)
 				.then(
 					function (response) {
-						console.log(response);
 						deferred.resolve(response);
 					},
 					function (error) {
-						console.log(error);
 						deferred.resolve(error);
 					}
 				);
@@ -67,7 +61,8 @@
 			$http.get(serverConfig.apiUrl(username + ".json"))
 				.then(function (response) {
 					var i, length,
-						project, projectsGrouped;
+						project, projectsGrouped,
+						data;
 
 					// Groups projects under accounts
 					projectsGrouped = {};
@@ -76,12 +71,11 @@
 						if (!(project.account in projectsGrouped)) {
 							projectsGrouped[project.account] = [];
 						}
-						projectsGrouped[project.account].push(
-							{
-								name: project.project,
-								timestamp: UtilsService.formatTimestamp(project.timestamp)
-							}
-						);
+						data = {
+							name: project.project,
+							timestamp: (project.timestamp !== null) ? UtilsService.formatTimestamp(project.timestamp) : ""
+						};
+						projectsGrouped[project.account].push(data);
 					}
 
 					accountData = response.data;
@@ -139,12 +133,22 @@
 			return bid4free.promise;
 		};
 
+		/**
+		 * Create a new project
+		 *
+		 * @param projectData
+		 * @returns {*|promise}
+		 */
 		obj.newProject = function (projectData) {
 			var data = {
 				desc: "",
 				type: (projectData.type === "Other") ? projectData.otherType : projectData.type
 			};
 			return doPost(data, projectData.account + "/" + projectData.name);
+		};
+
+		obj.uploadModel = function () {
+
 		};
 
 		return obj;

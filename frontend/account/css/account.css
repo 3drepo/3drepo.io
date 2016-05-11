@@ -59,20 +59,18 @@ account-projects .projects {
   margin-left: 40px;
 }
 
+account-projects .projects .projectName {
+  margin-left: 10px;
+}
 account-projects .projects .projectName,
 account-projects .projects md-icon {
-  font-size: 15px;
   color: #4CAF50;
 }
 account-projects .projects .projectTimestamp {
   color: rgba(0, 0, 0, 0.3);
 }
 account-projects .projects p {
-  font-size: 14px;
   margin: 0;
-}
-account-projects .projects md-icon {
-  margin-right: 10px !important;
 }
 
 /** Account Profile ***************************************************************************************************/

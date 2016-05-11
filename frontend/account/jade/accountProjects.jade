@@ -18,10 +18,14 @@
 								md-icon.angular-material-icons add
 
 						md-list.projects(ng-if="account.showProjects")
-							md-list-item.md-1-line(ng-repeat="project in account.projects" ng-click="vm.goToProject(account.name, project.name)")
-								div(layout="row", flex="100", layout-align="start")
-									md-icon(md-font-icon="fa fa-cube")
-									p.projectName(flex) {{project.name}}
-									p.projectTimestamp(flex="20") {{project.timestamp}}
-									md-button.md-accent(ng-click="vm.b4f(account.name, project.name)" ng-if="project.bif4FreeEnabled") B4F
+							div(layout="row", layout-align="space-between")
+								md-list-item.md-1-line(ng-repeat="project in account.projects" ng-click="vm.goToProject(account.name, project.name)")
+									div(layout="row", flex="100", layout-align="start")
+										md-icon(md-font-icon="fa fa-cube")
+										p.projectName(flex) {{project.name}}
+										//p.projectTimestamp(flex="20") {{project.timestamp}}
+										//md-button.md-accent(ng-click="vm.b4f(account.name, project.name)" ng-if="project.bif4FreeEnabled") B4F
+								md-button.md-accent.md-fab.md-mini(aria-label="Upload" ng-click="vm.uploadModel()")
+									md-icon.angular-material-icons backup
+
 					md-divider
