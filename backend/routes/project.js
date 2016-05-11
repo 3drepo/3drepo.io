@@ -48,7 +48,7 @@ router.put('/:project/settings/map-tile', middlewares.hasWriteAccessToProject, u
 
 router.post('/:project', middlewares.canCreateProject, createProject);
 
-router.post('/:project/upload', middlewares.hasWriteAccessToProject, uploadProject);
+router.post('/:project/upload', middlewares.canCreateProject, uploadProject);
 
 function updateMapTileSettings(req, res, next){
 	'use strict';
@@ -160,19 +160,13 @@ function getProjectSetting(req, res, next){
 	});
 }
 
-function createProject(req, res, next){
+function _createAndAssignRole(project, account, username, desc, type) {
 	'use strict';
-	
-	let responsePlace = utils.APIInfo(req);
-	let project = req.params.project;
-	let account = req.params.account;
-	let username = req.session.user.username;
 
-	var roleId = `${account}.${project}`;
+	let roleId = `${account}.${project}`;
 
-
-	Role.findByRoleID(roleId).then(role =>{
-		
+	return Role.findByRoleID(roleId).then(role =>{
+			
 		if(role){
 			return Promise.resolve();
 		} else {
@@ -185,16 +179,30 @@ function createProject(req, res, next){
 
 	}).then(() => {
 
-		let setting = ProjectSetting.createInstance(getDbColOptions(req));
+		let setting = ProjectSetting.createInstance({
+			account: account, 
+			project: project
+		});
 		
-		setting._id = req.params.project;
+		setting._id = project;
 		setting.owner = username;
-		setting.desc = req.body.desc;
-		setting.type = req.body.type;
+		setting.desc = desc;
+		setting.type = type;
 		
 		return setting.save();
 
-	}).then(() => {
+	});
+}
+
+function createProject(req, res, next){
+	'use strict';
+	
+	let responsePlace = utils.APIInfo(req);
+	let project = req.params.project;
+	let account = req.params.account;
+	let username = req.session.user.username;
+
+	_createAndAssignRole(project, account, username, req.body.desc, req.body.type).then(() => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -247,7 +255,20 @@ function uploadProject(req, res, next){
 
 				let projectSetting;
 
-				_getProject(req).then(setting => {
+				let project = req.params.project;
+				let account = req.params.account;
+				let username = req.session.user.username;
+
+				_createAndAssignRole(project, account, username, req.body.desc, req.body.type).then(setting => {
+					//console.log('setting', setting);
+					return Promise.resolve(setting);
+				}).catch(err => {
+					if (err && err.resCode && err.resCode.value === responseCodes.PROJECT_EXIST.value){
+						return _getProject(req);
+					} else {
+						return Promise.reject(err);
+					}
+				}).then(setting => {
 
 					projectSetting = setting;
 					projectSetting.status = 'processing';
@@ -282,8 +303,15 @@ function uploadProject(req, res, next){
 
 				}).catch(err => {
 					// import failed for some reason(s)...
-					console.log(err);
+					//console.log(err);
+					//mark project ready
+					projectSetting && (projectSetting.status = 'failed');
+					projectSetting && projectSetting.save();
+
 					req[C.REQ_REPO].logger.logDebug(JSON.stringify(err));
+
+		
+
 				});
 				
 

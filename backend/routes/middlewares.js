@@ -107,7 +107,7 @@ function canCreateProject(req, res, next){
 	if (req.params.account === req.session[C.REPO_SESSION_USER].username){
 		next();
 	} else {
-		responseCodes.respond("Check account access", req, res, next, responseCodes.NOT_AUTHORIZED, req.params);
+		middlewares.hasWriteAccessToProject(req, res, next);
 	}
 }
 	
