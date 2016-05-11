@@ -33,12 +33,14 @@
 	router.post("/login", login);
 	router.get("/login", checkLogin);
 	router.post("/logout", logout);
+	router.get("/:account.json", middlewares.hasReadAccessToProject, listUserInfo);
 	router.get("/:account.jpg", middlewares.loggedIn, getAvatar);
 	router.post('/:account', signUp);
 	router.post('/:account/verify', verify);
 	router.post('/:account/forgot-password', forgotPassword);
 	router.put("/:account", middlewares.loggedIn, updateUser);
 	router.put("/:account/password", resetPassword);
+
 
 	function expireSession(req) {
 		req.session.cookie.expires = new Date(0);
@@ -259,6 +261,29 @@
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
+		});
+	}
+
+	function listUserInfo(req, res, next){
+		let responsePlace = utils.APIInfo(req);
+		let user;
+		User.findByUserName(req.session.user.username).then(_user => {
+
+			if(!_user){
+				return Promise.reject({resCode: responseCodes.USER_NOT_FOUND});
+			}
+
+			user = _user;
+			return user.listProjects();
+		}).then(projects => {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
+				projects: projects,
+				firstName: user.customData.firstName,
+				lastName: user.customData.lastName,
+				email: user.customData.email
+			});
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
 	}
 

@@ -22,6 +22,8 @@ var responseCodes = require('../response_codes.js');
 var DB = require('../db/db');
 var crypto = require('crypto');
 var utils = require("../utils");
+var History = require('./history');
+var projectSetting = require('./projectSetting');
 
 var schema = mongoose.Schema({
 	_id : String,
@@ -240,6 +242,89 @@ schema.statics.grantRoleToUser = function(username, db, role){
 
 		return Promise.reject({resCode: responseCodes.PROJECT_EXIST});
 
+	});
+};
+
+// list project readable by this user
+schema.methods.listProjects = function(){
+	'use strict';
+
+	let viewRolesCmd = { rolesInfo : this.roles, showPrivileges: true };
+	return ModelFactory.db.admin().command(viewRolesCmd).then(docs => {
+
+
+		let privs = [];
+		if (docs && docs.roles.length) {
+			let rolesArr = docs.roles;
+			for (let i = 0; i < rolesArr.length; i++) {
+				privs = privs.concat(rolesArr[i].inheritedPrivileges);
+			}
+		}
+
+		// This is the collection that we check for
+		// when seeing if a project is viewable
+		let filterCollectionType = "history";
+		let projects = [];
+
+		for(var i = 0; i < privs.length; i++){
+			if (privs[i].resource.db && privs[i].resource.collection && privs[i].resource.db !== "system"){
+				if (privs[i].resource.collection.substr(-filterCollectionType.length) === filterCollectionType){
+					if (privs[i].actions.indexOf("find") !== -1){
+						var baseCollectionName = privs[i].resource.collection.substr(0, privs[i].resource.collection.length - filterCollectionType.length - 1);
+
+						projects.push({
+							"account" : privs[i].resource.db,
+							"project" : baseCollectionName
+						});
+					}
+				}
+			}
+		}
+
+		return Promise.resolve(projects);
+
+	}).then(projects => {
+
+		//get timestamp for project
+		let promises = [];
+		projects.forEach((project, index) => {
+			promises.push(
+				History.findByBranch(project, 'master').then(history => {
+
+					if(history){
+						projects[index].timestamp = history.timestamp;
+					} else {
+						projects[index].timestamp = null;
+					}
+
+					return Promise.resolve();
+					
+				}).catch(() => Promise.resolve())
+			);
+		});
+
+		return Promise.all(promises).then(() => Promise.resolve(projects));
+	
+	}).then(projects => {
+
+		//get status for project
+		let promises = [];
+
+		projects.forEach((project, index) => {
+			promises.push(
+				projectSetting.findById(project, project.project).then(setting => {
+
+					if(setting){
+						projects[index].status = setting.status;
+					}
+
+					return Promise.resolve();
+					
+				}).catch(() => Promise.resolve())
+			);
+		});
+
+		return Promise.all(promises).then(() => Promise.resolve(projects));
 	});
 };
 
