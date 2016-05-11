@@ -25,6 +25,7 @@ var schema = mongoose.Schema({
 	users: [String],
 	desc: String,
 	type: String,
+	status: {type: String, default: 'ok'},
 	permissions: [Number],
 	properties: {}, // TO-DO: ask tim/carmen for full properties and update this schema
 	info: mongoose.Schema({

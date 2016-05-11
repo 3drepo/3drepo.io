@@ -89,63 +89,67 @@ module.exports.createApp = function(serverConfig)
 	app.use("/public", express.static(__dirname + "/../../public"));
 
 	var DEFAULT_PLUGIN_STRUCTURE = {
-		"plugin" : "home",
-		"friends" : [
-			"login"
-		],
-		"children" : [
-			{
-				"plugin": "registered",
-				"url": 'registered'
-			},
-			{
-				"plugin": "account",
-				"children": [
-					{
-						"plugin": "user",
-						"url": "/user",
-						"children": [
-							{
-								"plugin": "confirmed",
-								"url": '/confirmed'
-							}
-						]
-					},
-					{
-						"plugin": "project",
-						"friends" : [
-							"panel",
-							"tree",
-							"viewpoints",
-							"issues",
-							"clip",
-							"building",
-							"bottomButtons",
-							"qrCodeReader",
-							"docs",
-							"utils",
-							"walkthroughVr",
-							"oculus",
-							"groups"
-						],
-						'url': '/:project?at&up&view',
-						"children" : [
-							{
-								"plugin": "bid4free",
-								'url': '/bid4free',
-								children: [
-									{
-										plugin: "bid4freeWorkspace",
-										url: '/bid4freeWorkspace'
-									}
-								]
-							}
-						]
-					}
-				],
-				"url": ":account"
-			}
-		]
+	   "plugin" : "home",
+	   "friends" : [
+	      "login"
+	   ],
+	   "children" : [
+	      {
+	         "plugin": "registerRequest",
+	         "url": "registerRequest"
+	      },
+	      {
+	         "plugin": "registerVerify",
+	         "url": "registerVerify?username&token"
+	      },
+	      {
+	         "plugin": "passwordForgot",
+	         "url": "passwordForgot"
+	      },
+	      {
+	         "plugin": "passwordChange",
+	         "url": "passwordChange?username&token"
+	      },
+	      {
+	         "plugin": "account",
+	         'url': '/:project?at&up&view',
+	         "children": [
+	            {
+	               "plugin": "project",
+	               "friends" : [
+	                  "panel",
+	                  "filter",
+	                  "tree",
+	                  "viewpoints",
+	                  "issues",
+	                  "clip",
+	                  "bottomButtons",
+	                  "qrCodeReader",
+	                  "docs",
+	                  "utils",
+	                  "walkthroughVr",
+	                  "oculus",
+	                  "groups",
+	                  "measure",
+	                  "rightPanel",
+	                  "building"
+	               ],
+	               "children" : [
+	                  {
+	                     "plugin": "bid4free",
+	                     "url": "/bid4free",
+	                     "children": [
+	                        {
+	                           "plugin": "bid4freeWorkspace",
+	                           "url": "/bid4freeWorkspace"
+	                        }
+	                     ]
+	                  }
+	               ]
+	            }
+	         ]
+	      }
+	   ]
 	};
 
 	// TODO: Replace with user based plugin selection

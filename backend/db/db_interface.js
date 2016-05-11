@@ -3087,6 +3087,8 @@ DBInterface.prototype.getUserPrivileges = function (username, database, callback
 			return callback(err);
 		}
 
+		console.log(roles);
+
 		if (!roles || roles.length === 0) {
 			//no roles under this user, no point trying to find privileges
 			return callback(responseCodes.OK, []);
@@ -3095,6 +3097,7 @@ DBInterface.prototype.getUserPrivileges = function (username, database, callback
 		dbConn(self.logger).dbCallback(adminDB, function (err, dbConn) {
 			var command = { rolesInfo : roles, showPrivileges: true };
 			//Given the roles, get the privilege information
+			console.log(command);
 			dbConn.command(command, function (err, docs) {
 				if (err) {
 					return callback(responseCodes.DB_ERROR(err));
@@ -3112,6 +3115,9 @@ DBInterface.prototype.getUserPrivileges = function (username, database, callback
 					privileges = privileges.concat(rolesArr[i].inheritedPrivileges);
 				}
 				self.logger.logDebug(privileges.length + " privileges found.");
+
+				console.log(privileges);
+
 				callback(responseCodes.OK, privileges);
 			});
 		});

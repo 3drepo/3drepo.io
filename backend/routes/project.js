@@ -17,13 +17,17 @@
 
 var express = require('express');
 var router = express.Router({mergeParams: true});
-// var config = require("../config.js");
+var config = require("../config.js");
 // var _ = require('lodash');
 var utils = require('../utils');
 var middlewares = require('./middlewares');
 var ProjectSetting = require('../models/projectSetting');
 var responseCodes = require('../response_codes');
 var C               = require("../constants");
+var Role = require('../models/role');
+var User = require('../models/user');
+var importQueue = require('../services/queue');
+var multer = require("multer");
 
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
@@ -32,10 +36,36 @@ var getDbColOptions = function(req){
 //Every API list below has to log in to access
 router.use(middlewares.loggedIn);
 
-router.get('/info.json', hasReadProjectInfoAccess, getProjectSetting);
+// bid4free exclusive api get project info
+router.get('/:project/info.json', hasReadProjectInfoAccess, B4F_getProjectSetting);
+//  bid4free exclusive api update project info
+router.post('/:project/info.json', middlewares.isMainContractor, B4F_updateProjectSetting);
 
-// Update project info
-router.post('/info.json', middlewares.isMainContractor, updateProjectSetting);
+// Get projection info
+router.get('/:project.json', middlewares.hasReadAccessToProject, getProjectSetting);
+
+router.put('/:project/settings/map-tile', middlewares.hasWriteAccessToProject, updateMapTileSettings);
+
+router.post('/:project', middlewares.canCreateProject, createProject);
+
+router.post('/:project/upload', middlewares.canCreateProject, uploadProject);
+
+function updateMapTileSettings(req, res, next){
+	'use strict';
+
+
+	let place = utils.APIInfo(req);
+	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
+
+	return ProjectSetting.findById(dbCol, req.params.project).then(projectSetting => {
+		return projectSetting.updateMapTileCoors(req.body);
+	}).then(projectSetting => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, projectSetting);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
 
 function _getProject(req){
 	'use strict';
@@ -49,7 +79,7 @@ function _getProject(req){
 	});
 }
 
-function getProjectSetting(req, res, next){
+function B4F_getProjectSetting(req, res, next){
 	'use strict';
 
 	let place = '/:account/:project/info.json GET';
@@ -60,7 +90,7 @@ function getProjectSetting(req, res, next){
 	});
 }
 
-function updateProjectSetting(req, res, next){
+function B4F_updateProjectSetting(req, res, next){
 	'use strict';
 
 	let place = '/:account/:project/info.json POST';
@@ -110,4 +140,194 @@ function hasReadProjectInfoAccess(req, res, next){
 	});
 }
 
+function getProjectSetting(req, res, next){
+	'use strict';
+
+	let place = utils.APIInfo(req);
+	_getProject(req).then(setting => {
+
+		let whitelist = ['owner', 'desc', 'type', 'permissions', 'properties', 'status'];
+		let resObj = {};
+		
+		whitelist.forEach(key => {
+			resObj[key] = setting[key];
+		});
+
+		responseCodes.respond(place, req, res, next, responseCodes.OK, resObj);
+		
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function _createAndAssignRole(project, account, username, desc, type) {
+	'use strict';
+
+	let roleId = `${account}.${project}`;
+
+	return Role.findByRoleID(roleId).then(role =>{
+			
+		if(role){
+			return Promise.resolve();
+		} else {
+			return Role.createRole(account, project);
+		}
+
+	}).then(() => {
+
+		return User.grantRoleToUser(username, account, project);
+
+	}).then(() => {
+
+		let setting = ProjectSetting.createInstance({
+			account: account, 
+			project: project
+		});
+		
+		setting._id = project;
+		setting.owner = username;
+		setting.desc = desc;
+		setting.type = type;
+		
+		return setting.save();
+
+	});
+}
+
+function createProject(req, res, next){
+	'use strict';
+	
+	let responsePlace = utils.APIInfo(req);
+	let project = req.params.project;
+	let account = req.params.account;
+	let username = req.session.user.username;
+
+	_createAndAssignRole(project, account, username, req.body.desc, req.body.type).then(() => {
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
+	}).catch( err => {
+		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+/*******************************************************************************
+ * Converts error code from repobouncerclient to a response error object
+ * @param {errCode} - error code referenced in error_codes.h
+ *******************************************************************************/
+function convertToErrorCode(errCode){
+
+    var errObj;
+
+    switch (errCode) {
+        case 0:
+            errObj = responseCodes.OK;
+            break;
+        case 1:
+            errObj = responseCodes.FILE_IMPORT_INVALID_ARGS;
+            break;
+        case 2:
+            errObj = responseCodes.NOT_AUTHORIZED;
+            break;
+        case 3:
+            errObj = responseCodes.FILE_IMPORT_UNKNOWN_CMD;
+            break;
+        case 5:
+            errObj = responseCodes.FILE_IMPORT_PROCESS_ERR;
+            break;
+        default:
+            errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
+            break;
+
+    }
+    return errObj;
+}
+
+function uploadProject(req, res, next){
+	'use strict';
+
+	let responsePlace = utils.APIInfo(req);
+	if (config.cn_queue) {
+
+		var upload = multer({ dest: config.cn_queue.upload_dir });
+		upload.single("file")(req, res, function (err) {
+			if (err) {
+				return responseCodes.respond(responsePlace, req, res, next, responseCodes.FILE_IMPORT_PROCESS_ERR, {});
+			} else {
+
+				let projectSetting;
+
+				let project = req.params.project;
+				let account = req.params.account;
+				let username = req.session.user.username;
+
+				_createAndAssignRole(project, account, username, req.body.desc, req.body.type).then(setting => {
+					//console.log('setting', setting);
+					return Promise.resolve(setting);
+				}).catch(err => {
+					if (err && err.resCode && err.resCode.value === responseCodes.PROJECT_EXIST.value){
+						return _getProject(req);
+					} else {
+						return Promise.reject(err);
+					}
+				}).then(setting => {
+
+					projectSetting = setting;
+					projectSetting.status = 'processing';
+					return projectSetting.save();
+
+				}).then(() => {
+
+					// api respond once the file is uploaded
+
+					responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: 'uploaded'});
+
+					return importQueue.importFile(
+						req.file.path, 
+						req.file.originalname, 
+						req.params.account,
+						req.params.project,
+						req.session.user.username
+					)
+					.then(corID => Promise.resolve(corID))
+					.catch(errCode => {
+						//catch here to provide custom error message
+						return Promise.reject(convertToErrorCode(errCode));
+					});
+
+				}).then(corID => {
+
+					req[C.REQ_REPO].logger.logInfo(`Job ${corID} imported without error`);
+
+					//mark project ready
+					projectSetting.status = 'ok';
+					return projectSetting.save();
+
+				}).catch(err => {
+					// import failed for some reason(s)...
+					//console.log(err);
+					//mark project ready
+					projectSetting && (projectSetting.status = 'failed');
+					projectSetting && projectSetting.save();
+
+					req[C.REQ_REPO].logger.logDebug(JSON.stringify(err));
+
+		
+
+				});
+				
+
+			}
+		});
+
+	} else {
+		responseCodes.onError(
+			responsePlace, 
+			responseCodes.QUEUE_NO_CONFIG, 
+			res, 
+			{ "user": req.session.user.username, "database" : req.params[C.REPO_REST_API_ACCOUNT], "project": req.params[C.REPO_REST_API_PROJECT] 
+		});
+	}
+}
+
 module.exports = router;
+
+
