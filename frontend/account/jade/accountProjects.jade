@@ -8,11 +8,15 @@
 			md-list(flex)
 				md-list-item(ng-repeat="account in vm.accounts")
 					.accounts(flex)
-						md-list-item(ng-click="vm.toggleProjectsList($index)")
-							md-button.md-icon-button(aria-label="Folder")
-								md-icon(ng-if="!account.showProjects", md-font-icon="fa fa-folder-o")
-								md-icon(ng-if="account.showProjects", md-font-icon="fa fa-folder-open-o")
-							p {{account.name}}
+						div(layout="row", layout-align="space-between")
+							md-list-item(ng-click="vm.toggleProjectsList($index)", flex)
+								md-button.md-icon-button(aria-label="Folder")
+									md-icon(ng-if="!account.showProjects", md-font-icon="fa fa-folder-o")
+									md-icon(ng-if="account.showProjects", md-font-icon="fa fa-folder-open-o")
+								p {{account.name}}
+							md-button.md-accent.md-fab.md-mini(aria-label="New Project" ng-click="vm.newProject()")
+								md-icon.angular-material-icons add
+
 						md-list.projects(ng-if="account.showProjects")
 							md-list-item.md-1-line(ng-repeat="project in account.projects" ng-click="vm.goToProject(account.name, project.name)")
 								div(layout="row", flex="100", layout-align="start")

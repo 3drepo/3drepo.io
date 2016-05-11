@@ -29,6 +29,34 @@
 			bid4free;
 
 		/**
+		 * Do POST
+		 *
+		 * @param data
+		 * @param urlEnd
+		 * @returns {*|promise}
+		 */
+		function doPost(data, urlEnd) {
+			console.log(data, urlEnd);
+			var deferred = $q.defer(),
+				url = serverConfig.apiUrl(urlEnd),
+				config = {
+					withCredentials: true
+				};
+			$http.post(url, data, config)
+				.then(
+					function (response) {
+						console.log(response);
+						deferred.resolve(response);
+					},
+					function (error) {
+						console.log(error);
+						deferred.resolve(error);
+					}
+				);
+			return deferred.promise;
+		}
+
+		/**
 		 * Get account data
 		 */
 		obj.getData = function (username) {
@@ -109,6 +137,14 @@
 					bid4free.resolve(response);
 				});
 			return bid4free.promise;
+		};
+
+		obj.newProject = function (projectData) {
+			var data = {
+				desc: "",
+				type: (projectData.type === "Other") ? projectData.otherType : projectData.type
+			};
+			return doPost(data, projectData.account + "/" + projectData.name);
 		};
 
 		return obj;

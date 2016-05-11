@@ -35,9 +35,9 @@
         };
     }
 
-    RegisterVerifyCtrl.$inject = ["$scope", "$window", "RegisterVerifyService"];
+    RegisterVerifyCtrl.$inject = ["$scope", "$location", "RegisterVerifyService"];
 
-    function RegisterVerifyCtrl ($scope, $window, RegisterVerifyService) {
+    function RegisterVerifyCtrl ($scope, $location, RegisterVerifyService) {
         var vm = this,
             promise;
 
@@ -64,7 +64,7 @@
         });
 
         vm.goToLoginPage = function () {
-            $window.location.href = "/";
+            $location.path("/", "_self");
         };
     }
 }());

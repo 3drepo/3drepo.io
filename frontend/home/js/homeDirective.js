@@ -79,29 +79,48 @@
     HomeCtrl.$inject = ["$scope", "Auth", "StateManager", "EventService"];
 
     function HomeCtrl($scope, Auth, StateManager, EventService) {
-        var vm = this;
+        var vm = this,
+			i, length,
+			loggedInUserPages = ["account"],
+			loggedOutUserPages = ["registerRequest", "registerVerify", "passwordForgot", "passwordChange"],
+			goToUserPage;
 
 		vm.state = StateManager.state;
 
+		/*
+		 * Watch the state to handle user pages
+		 */
 		$scope.$watch("vm.state", function () {
-			if (angular.isDefined(vm.state.registerRequest) && (vm.state.registered !== null)) {
-				vm.notLoggedInToShow = "showRegisterRequest";
-			}
-			else if (angular.isDefined(vm.state.registerVerify) && (vm.state.registerVerify !== null)) {
-				vm.username = vm.state.username;
-				vm.token = vm.state.token;
-				vm.notLoggedInToShow = "showRegisterVerify";
-			}
-			else if (angular.isDefined(vm.state.passwordForgot) && (vm.state.registered !== null)) {
-				vm.notLoggedInToShow = "showPasswordForgot";
-			}
-			else if (angular.isDefined(vm.state.passwordChange) && (vm.state.registered !== null)) {
-				vm.username = vm.state.username;
-				vm.token = vm.state.token;
-				vm.notLoggedInToShow = "showPasswordChange";
-			}
-			else {
-				vm.notLoggedInToShow = "showLogin";
+			if (vm.state.hasOwnProperty("loggedIn")) {
+				if (!vm.state.loggedIn) {
+					goToUserPage = false;
+					for (i = 0, length = loggedOutUserPages.length; i < length; i += 1) {
+						if (angular.isDefined(vm.state[loggedOutUserPages[i]])) {
+							// 'true' when going to page and 'null' when going back to home page
+							if (vm.state[loggedOutUserPages[i]]) {
+								goToUserPage = true;
+								// username and token only required for some pages
+								vm.username = vm.state.username;
+								vm.token = vm.state.token;
+								vm.notLoggedInToShow = loggedOutUserPages[i];
+								break;
+							}
+						}
+					}
+					if (!goToUserPage) {
+						vm.notLoggedInToShow = "login";
+					}
+				}
+				else {
+					for (i = 0, length = loggedInUserPages.length; i < length; i += 1) {
+						if (angular.isDefined(vm.state[loggedInUserPages[i]])) {
+							if (vm.state[loggedInUserPages[i]] === null) {
+								vm.logout(); // Going back to the login page should logout the user
+								break;
+							}
+						}
+					}
+				}
 			}
 		}, true);
 

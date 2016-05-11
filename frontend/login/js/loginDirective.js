@@ -32,9 +32,9 @@
 		};
 	}
 
-	LoginCtrl.$inject = ["$scope", "$mdDialog", "$window", "$location", "Auth", "EventService", "serverConfig", "LoginService"];
+	LoginCtrl.$inject = ["$scope", "$mdDialog", "$location", "Auth", "EventService", "serverConfig", "LoginService"];
 
-	function LoginCtrl($scope, $mdDialog, $window, $location, Auth, EventService, serverConfig, LoginService) {
+	function LoginCtrl($scope, $mdDialog, $location, Auth, EventService, serverConfig, LoginService) {
 		var vm = this,
 			enterKey = 13,
 			promise;
@@ -50,6 +50,7 @@
 		vm.tcAgreed = false;
 		vm.useReCapthca = false;
 		vm.useRegister = false;
+		vm.registering = false;
 
 		/*
 		 * Auth stuff
@@ -126,7 +127,6 @@
 		};
 
 		vm.forgotPassword = function () {
-			//$window.location.href = "/passwordForgot";
 			$location.path("/passwordForgot", "_self");
 		};
 
@@ -179,11 +179,11 @@
 					if (vm.useReCapthca) {
 						data.captcha = vm.reCaptchaResponse;
 					}
+					vm.registering = true;
 					promise = LoginService.register(vm.newUser.username, data);
 					promise.then(function (response) {
-						console.log(response);
 						if (response.status === 200) {
-							$window.location.href = "/registerRequest";
+							$location.path("/registerRequest", "_self");
 						}
 						else if (response.data.value === 62) {
 							vm.registerErrorMessage = "Prove you're not a robot";
@@ -191,6 +191,7 @@
 						else {
 							vm.registerErrorMessage = "Error with registration";
 						}
+						vm.registering = false;
 					});
 				}
 				else {

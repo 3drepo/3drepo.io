@@ -181,6 +181,16 @@
 
 			var fromParams = stateChangeObject.fromParams;
 			var toParams   = stateChangeObject.toParams;
+			
+			// Handle going back to the home page, because fromParams will be empty
+			if (stateChangeObject.toState.url === "/") {
+				var fromState = stateChangeObject.fromState.name.split(".");
+				fromParams = {};
+				for (i = 1; i < fromState.length; i += 1) {
+					fromParams[fromState[i]] = true;
+				}
+				toParams = {};
+			}
 
 			// Switch off all parameters that we came from
 			// but are not the same as where we are going to

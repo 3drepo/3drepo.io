@@ -79,6 +79,12 @@ login #loginCaptcha {
 login #loginRegister {
   margin-right: 30px;
 }
+login #loginRegister #registerWait p {
+  margin: 0 10px;
+}
+login #loginRegister #registerWait svg {
+  width: 30px !important;
+}
 
 /** Terms and Conditions Dialog ***************************************************************************************/
 .tcDialog {

@@ -35,7 +35,8 @@
     "angular-sanitize": "~1.4.8",
     "material-design-icons": "^2.2.3",
     "angular-recaptcha": "^3.0.3",
-    "geodesy": "https://github.com/chrisveness/geodesy.git#1.0.2"
+    "geodesy": "https://github.com/chrisveness/geodesy.git#1.0.2",
+    "ng-file-upload": "^12.0.4"
   },
   "resolutions": {
     "angular": "1.5.5"

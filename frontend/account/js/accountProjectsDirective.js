@@ -35,9 +35,9 @@
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "AccountService"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$mdDialog", "AccountService"];
 
-	function AccountProjectsCtrl($scope, $location, AccountService) {
+	function AccountProjectsCtrl($scope, $location, $mdDialog, AccountService) {
 		var vm = this,
 			promise,
 			bid4FreeProjects = null;
@@ -46,6 +46,13 @@
 		 * Init
 		 */
 		vm.bif4FreeEnabled = false;
+		vm.projectTypes = [
+			"Architectural",
+			"Structural",
+			"Mechanical",
+			"GIS",
+			"Other"
+		];
 
 		promise = AccountService.getProjectsBid4FreeStatus(vm.account);
 		promise.then(function (data) {
@@ -86,6 +93,30 @@
 			setupBid4FreeAccess();
 		});
 
+		/*
+		 * Watch the new project type
+		 */
+		$scope.$watch("vm.newProjectData.type", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				vm.showProjectTypeOtherInput = (newValue.toString() === "Other");
+			}
+		});
+
+		/*
+		 * Watch new project data
+		 */
+		$scope.$watch("vm.newProjectData", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				vm.newProjectButtonDisabled =
+					(angular.isUndefined(newValue.name) || (angular.isDefined(newValue.name) && (newValue.name === "")));
+				
+				if (!vm.newProjectButtonDisabled && (newValue.type === "Other")) {
+					vm.newProjectButtonDisabled =
+						(angular.isUndefined(newValue.otherType) || (angular.isDefined(newValue.otherType) && (newValue.otherType === "")));
+				}
+			}
+		}, true);
+
 		/**
 		 * Go to the project viewer
 		 *
@@ -105,7 +136,45 @@
 			vm.accounts[index].showProjects = !vm.accounts[index].showProjects;
 			vm.accounts[index].showProjectsIcon = vm.accounts[index].showProjects ? "fa fa-folder-open-o" : "fa fa-folder-open-o";
 		};
-		
+
+		/**
+		 * Bring up dialog to add a new project
+		 */
+		vm.newProject = function () {
+			vm.newProjectData = {
+				account: vm.account,
+				type: vm.projectTypes[0]
+			};
+			$mdDialog.show({
+				controller: function () {},
+				templateUrl: "newProjectDialog.html",
+				parent: angular.element(document.body),
+				targetEvent: event,
+				clickOutsideToClose:true,
+				fullscreen: true,
+				scope: $scope,
+				preserveScope: true,
+				onRemoving: function () {$scope.closeDialog();}
+			});
+		};
+
+		/**
+		 * Close the dialog
+		 */
+		vm.closeDialog = function() {
+			$mdDialog.cancel();
+		};
+
+		/**
+		 * Save a new project
+		 */
+		vm.saveNewProject = function () {
+			promise = AccountService.newProject(vm.newProjectData);
+			promise.then(function (response) {
+				console.log(response);
+			});
+		};
+
 		vm.b4f = function (account, project) {
 			console.log(account, project);
 			$location.path("/" + account + "/" + project + "/bid4free", "_self");

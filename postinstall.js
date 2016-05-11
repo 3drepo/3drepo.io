@@ -41,6 +41,7 @@ var public_files = {
         angularariajs: '/public/js/external/angular-aria.min.js',
 		angularsanitizejs: '/public/js/external/angular-sanitize.min.js',
 		angularrecaptcha: '/public/js/external/angular-recaptcha.min.js',
+		ngfileupload: '/public/js/external/ng-file-upload.min.js',
 
 		// QR Code stuff
 		qrgrid: '/public/js/external/qrcode/grid.js',
@@ -82,43 +83,44 @@ var public_files = {
  */
 var internal_files = {
 	bower_qr_files: [
-	'bower_components/jsqrcode/src/grid.js',
-	'bower_components/jsqrcode/src/version.js',
-	'bower_components/jsqrcode/src/detector.js',
-	'bower_components/jsqrcode/src/formatinf.js',
-	'bower_components/jsqrcode/src/errorlevel.js',
-	'bower_components/jsqrcode/src/bitmat.js',
-	'bower_components/jsqrcode/src/datablock.js',
-	'bower_components/jsqrcode/src/bmparser.js',
-	'bower_components/jsqrcode/src/datamask.js',
-	'bower_components/jsqrcode/src/rsdecoder.js',
-	'bower_components/jsqrcode/src/gf256poly.js',
-	'bower_components/jsqrcode/src/gf256.js',
-	'bower_components/jsqrcode/src/decoder.js',
-	'bower_components/jsqrcode/src/qrcode.js',
-	'bower_components/jsqrcode/src/findpat.js',
-	'bower_components/jsqrcode/src/alignpat.js',
-	'bower_components/jsqrcode/src/databr.js'
+		'bower_components/jsqrcode/src/grid.js',
+		'bower_components/jsqrcode/src/version.js',
+		'bower_components/jsqrcode/src/detector.js',
+		'bower_components/jsqrcode/src/formatinf.js',
+		'bower_components/jsqrcode/src/errorlevel.js',
+		'bower_components/jsqrcode/src/bitmat.js',
+		'bower_components/jsqrcode/src/datablock.js',
+		'bower_components/jsqrcode/src/bmparser.js',
+		'bower_components/jsqrcode/src/datamask.js',
+		'bower_components/jsqrcode/src/rsdecoder.js',
+		'bower_components/jsqrcode/src/gf256poly.js',
+		'bower_components/jsqrcode/src/gf256.js',
+		'bower_components/jsqrcode/src/decoder.js',
+		'bower_components/jsqrcode/src/qrcode.js',
+		'bower_components/jsqrcode/src/findpat.js',
+		'bower_components/jsqrcode/src/alignpat.js',
+		'bower_components/jsqrcode/src/databr.js'
 	],
 
 	bower_files: [
-	'bower_components/angular/angular.js',
-	'bower_components/angular/angular.min.js.map',
-	'bower_components/angular-ui-router/release/angular-ui-router.js',
-	'bower_components/masonry/masonry.js',
-	'bower_components/moment/moment.js',
-	'bower_components/socket.io-client/socket.io.js',
-	'bower_components/font-awesome/css/font-awesome.min.css',
-    'bower_components/angular-material/angular-material.min.js',
-    'bower_components/angular-material/angular-material.min.css',
-    'bower_components/angular-animate/angular-animate.min.js',
-    'bower_components/angular-aria/angular-aria.min.js',
-	'bower_components/angular-sanitize/angular-sanitize.min.js',
-	'bower_components/geodesy/dms.js',
-	'bower_components/geodesy/vector3d.js',
-	'bower_components/geodesy/latlon-ellipsoidal.js',
-	'bower_components/geodesy/osgridref.js',
-	'bower_components/angular-recaptcha/release/angular-recaptcha.min.js'
+		'bower_components/angular/angular.js',
+		'bower_components/angular/angular.min.js.map',
+		'bower_components/angular-ui-router/release/angular-ui-router.js',
+		'bower_components/masonry/masonry.js',
+		'bower_components/moment/moment.js',
+		'bower_components/socket.io-client/socket.io.js',
+		'bower_components/font-awesome/css/font-awesome.min.css',
+		'bower_components/angular-material/angular-material.min.js',
+		'bower_components/angular-material/angular-material.min.css',
+		'bower_components/angular-animate/angular-animate.min.js',
+		'bower_components/angular-aria/angular-aria.min.js',
+		'bower_components/angular-sanitize/angular-sanitize.min.js',
+		'bower_components/geodesy/dms.js',
+		'bower_components/geodesy/vector3d.js',
+		'bower_components/geodesy/latlon-ellipsoidal.js',
+		'bower_components/geodesy/osgridref.js',
+		'bower_components/angular-recaptcha/release/angular-recaptcha.min.js',
+		'bower_components/ng-file-upload/ng-file-upload.min.js'
 	],
 
 	bower_font_files: [
@@ -129,9 +131,9 @@ var internal_files = {
 	],
 
 	x3dom_files: [
-	'submodules/x3dom/dist/ammo.js',
-	'submodules/x3dom/dist/x3dom.js',
-	'submodules/x3dom/dist/x3dom.css'
+		'submodules/x3dom/dist/ammo.js',
+		'submodules/x3dom/dist/x3dom.js',
+		'submodules/x3dom/dist/x3dom.css'
 	]
 };
 
