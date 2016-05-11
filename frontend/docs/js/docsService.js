@@ -29,7 +29,7 @@
 				length,
 				data = {},
 				deferred = $q.defer(),
-				url = serverConfig.apiUrl(account + "/" + project + "/meta/" + objectId + ".json");
+				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/meta/" + objectId + ".json");
 
 			$http.get(url)
 				.then(
@@ -51,7 +51,7 @@
 							data[dataType].data.push(json.data.meta[i]);
 
 							// Setup PDF url
-							json.data.meta[i].url = serverConfig.apiUrl(account + "/" + project + '/' + json.data.meta[i]._id + ".pdf");
+							json.data.meta[i].url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + '/' + json.data.meta[i]._id + ".pdf");
 						}
 						deferred.resolve(data);
 					},

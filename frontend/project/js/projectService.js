@@ -28,8 +28,8 @@
 
 		var getProjectInfo = function (account, project) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(account + "/" + project + ".json");
-			
+				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + ".json");
+
 			$http.get(url).then(
 				function(json) {
 					deferred.resolve({
@@ -45,13 +45,13 @@
 				function () {
 					deferred.resolve([]);
 				});
-			
+
 			return deferred.promise;
 		};
-		
+
 		var getRoles = function (account, project) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(account + "/" + project + "/roles.json");
+				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/roles.json");
 
 			$http.get(url)
 				.then(
@@ -68,7 +68,7 @@
 
 		var getUserRolesForProject = function () {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + Auth.username + "/userRolesForProject.json");
+				url = serverConfig.apiUrl(serverConfig.GET_API, state.account + "/" + state.project + "/" + Auth.username + "/userRolesForProject.json");
 
 			$http.get(url)
 				.then(
@@ -85,7 +85,7 @@
 
 		var getUserRoles = function (account, project) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(account + "/" + project + "/" + Auth.username + "/userRolesForProject.json");
+				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/" + Auth.username + "/userRolesForProject.json");
 
 			$http.get(url)
 				.then(
@@ -102,7 +102,7 @@
 
 		function doPost(data, urlEnd) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + urlEnd),
+				url = serverConfig.apiUrl(serverConfig.POST_API, state.account + "/" + state.project + "/" + urlEnd),
 				config = {
 					withCredentials: true
 				};
@@ -120,7 +120,7 @@
 
 		function doGet(urlEnd) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(state.account + "/" + state.project + "/" + urlEnd);
+				url = serverConfig.apiUrl(serverConfig.GET_API, state.account + "/" + state.project + "/" + urlEnd);
 			$http.get(url).then(
 				function (response) {
 					deferred.resolve(response);

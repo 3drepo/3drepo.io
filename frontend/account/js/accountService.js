@@ -36,7 +36,7 @@
 
 			var accountData = {};
 
-			$http.get(serverConfig.apiUrl(username + ".json"))
+			$http.get(serverConfig.apiUrl(serverConfig.GET_API, username + ".json"))
 				.then(function (response) {
 					var i, length,
 						project, projectsGrouped;
@@ -55,7 +55,7 @@
 					accountData = response.data;
 					accountData.projectsGrouped = projectsGrouped;
 
-					accountData.avatarURL = serverConfig.apiUrl(username + ".jpg");
+					accountData.avatarURL = serverConfig.apiUrl(serverConfig.GET_API, username + ".jpg");
 					deferred.resolve(accountData);
 				});
 
@@ -71,7 +71,7 @@
 		 */
 		obj.updateInfo = function (username, info) {
 			deferred = $q.defer();
-			$http.post(serverConfig.apiUrl(username), info)
+			$http.post(serverConfig.apiUrl(serverConfig.POST_API, username), info)
 				.then(function (response) {
 					console.log(response);
 					deferred.resolve(response);
@@ -89,7 +89,7 @@
 		 */
 		obj.updatePassword = function (username, passwords) {
 			deferred = $q.defer();
-			$http.post(serverConfig.apiUrl(username), passwords)
+			$http.post(serverConfig.apiUrl(serverConfig.POST_API, username), passwords)
 				.then(function (response) {
 					console.log(response);
 					deferred.resolve(response);
@@ -100,7 +100,7 @@
 
 		obj.getProjectsBid4FreeStatus = function (username) {
 			bid4free = $q.defer();
-			$http.get(serverConfig.apiUrl(username + ".json"), {params: {bids: true}})
+			$http.get(serverConfig.apiUrl(serverConfig.GET_API, username + ".json"), {params: {bids: true}})
 				.then(function (response) {
 					bid4free.resolve(response);
 				});
