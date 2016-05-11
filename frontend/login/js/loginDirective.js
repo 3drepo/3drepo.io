@@ -126,8 +126,8 @@
 		};
 
 		vm.forgotPassword = function () {
-			$window.location.href = "/passwordForgot";
-			//$location.path("/passwordForgot");
+			//$window.location.href = "/passwordForgot";
+			$location.path("/passwordForgot", "_self");
 		};
 
 		/*
