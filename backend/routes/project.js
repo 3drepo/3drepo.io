@@ -166,7 +166,7 @@ function _createAndAssignRole(project, account, username, desc, type) {
 	let roleId = `${account}.${project}`;
 
 	return Role.findByRoleID(roleId).then(role =>{
-			
+		
 		if(role){
 			return Promise.resolve();
 		} else {
@@ -179,17 +179,24 @@ function _createAndAssignRole(project, account, username, desc, type) {
 
 	}).then(() => {
 
-		let setting = ProjectSetting.createInstance({
-			account: account, 
-			project: project
+		return ProjectSetting.findById({account, project}, project).then(setting => {
+
+			if(setting){
+				return Promise.reject({resCode: responseCodes.PROJECT_EXIST});
+			}
+
+			setting = ProjectSetting.createInstance({
+				account: account, 
+				project: project
+			});
+			
+			setting._id = project;
+			setting.owner = username;
+			setting.desc = desc;
+			setting.type = type;
+			
+			return setting.save();
 		});
-		
-		setting._id = project;
-		setting.owner = username;
-		setting.desc = desc;
-		setting.type = type;
-		
-		return setting.save();
 
 	});
 }
@@ -263,6 +270,7 @@ function uploadProject(req, res, next){
 					//console.log('setting', setting);
 					return Promise.resolve(setting);
 				}).catch(err => {
+
 					if (err && err.resCode && err.resCode.value === responseCodes.PROJECT_EXIST.value){
 						return _getProject(req);
 					} else {
@@ -303,7 +311,7 @@ function uploadProject(req, res, next){
 
 				}).catch(err => {
 					// import failed for some reason(s)...
-					//console.log(err);
+					console.log(err);
 					//mark project ready
 					projectSetting && (projectSetting.status = 'failed');
 					projectSetting && projectSetting.save();
@@ -319,12 +327,12 @@ function uploadProject(req, res, next){
 		});
 
 	} else {
-		responseCodes.onError(
+		responseCodes.respond(
 			responsePlace, 
+			req, res, next, 
 			responseCodes.QUEUE_NO_CONFIG, 
-			res, 
-			{ "user": req.session.user.username, "database" : req.params[C.REPO_REST_API_ACCOUNT], "project": req.params[C.REPO_REST_API_PROJECT] 
-		});
+			{}
+		);
 	}
 }
 

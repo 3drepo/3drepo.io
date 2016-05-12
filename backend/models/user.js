@@ -240,7 +240,7 @@ schema.statics.grantRoleToUser = function(username, db, role){
 			return ModelFactory.db.admin().command(grantRoleCmd);
 		}
 
-		return Promise.reject({resCode: responseCodes.PROJECT_EXIST});
+		return Promise.resolve();
 
 	});
 };

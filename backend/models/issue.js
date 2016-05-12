@@ -63,26 +63,6 @@ var schema = Schema({
 	scribble: Object
 });
 
-//post find hook
-
-function postFind(docs){
-	docs && docs.forEach(doc => {
-		 postFindOne(doc);
-	});
-
-}
-
-function postFindOne(doc){
-	doc && doc.comments && doc.comments.forEach(comment => {
-		var set = comment.toObject().set;
-		comment.sealed = comment.sealed || set;
-	});
-}
-
-// compatibility with old comments with set attr
-schema.post('find', postFind);
-schema.post('findById', postFindOne);
-schema.post('findOne', postFindOne);
 
 // Model statics method
 //internal helper _find
