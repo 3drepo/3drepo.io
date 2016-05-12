@@ -17,5 +17,5 @@ md-dialog.newProjectDialog(aria-label="New project")
 			md-input-container(ng-if="vm.showProjectTypeOtherInput")
 				input(placeholder="Other project type", ng-model="vm.newProjectData.otherType")
 			md-input-container
-				md-button.md-accent(type="file", ngf-select="uploadFiles($file, $invalidFiles)", accept="*", ngf-max-height="1000", ngf-max-size="1MB") Upload File
+				md-button.md-accent(ng-click="vm.uploadFile()") Upload File
 				md-button.md-raised.md-accent(ng-disabled="vm.newProjectButtonDisabled", ng-click="vm.saveNewProject()") Save

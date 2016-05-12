@@ -6,30 +6,28 @@ input(type="file", id="fileUploader")
 				h2 Projects
 				span(flex)
 				div(layout="row", layout-align="start center")
-					md-button.md-accent.md-fab.md-mini(aria-label="New Project" ng-click="vm.newProject()")
+					md-button.md-accent.md-fab.md-mini(aria-label="New Project" ng-click="vm.newProject($event)")
 						md-icon.angular-material-icons add
 
 		md-list#accountList(flex)
-			md-list-item(ng-repeat="account in vm.accounts")
-				.accounts(flex)
-					md-list-item(ng-click="vm.toggleProjectsList($index)", flex)
-						md-button.md-icon-button(aria-label="Folder")
-							md-icon.angular-material-icons {{account.showProjectsIcon}}
-						p {{account.name}}
+			.accounts(ng-repeat="account in vm.accounts", flex)
+				md-list-item(ng-click="vm.toggleProjectsList($index)", flex)
+					md-button.md-icon-button(aria-label="Folder")
+						md-icon.angular-material-icons {{account.showProjectsIcon}}
+					p {{account.name}}
 
-					md-list.projects(ng-if="account.showProjects")
-						div(layout="row", ng-repeat="project in account.projects", layout-align="start center")
-							md-list-item.md-1-line(ng-click="vm.goToProject(account.name, project.name)", flex)
-								div(layout="row", flex)
-									div(layout="row", layout-align="start center")
-										md-icon.angular-material-icons dashboard
-										p.projectName(flex) {{project.name}}
-							p.projectTimestamp(flex="20") {{project.timestamp}}
+				md-list.projects(ng-if="account.showProjects")
+					div(layout="row", ng-repeat="project in account.projects", layout-align="start center", flex)
+						md-list-item.md-1-line(ng-click="vm.goToProject(account.name, project.name)", flex)
+							md-icon.angular-material-icons dashboard
+							p.projectName(flex) {{project.name}}
+						.projectRight
+							p.projectTimestamp {{project.timestamp}}
 							//md-button.md-accent(ng-click="vm.b4f(account.name, project.name)" ng-if="project.bif4FreeEnabled") B4F
-							md-button.md-accent.md-icon-button.projectUploadButton(
+							md-button.md-accent.md-icon-button(
 								aria-label="Upload"
-								ng-click="vm.setupFileUpload(project.name)"
+								ng-click="vm.uploadModel(project.name)"
 								ng-if="project.canUpload")
 								md-icon.angular-material-icons cloud_upload
 
-					md-divider
+				md-divider

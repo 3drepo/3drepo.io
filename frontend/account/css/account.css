@@ -66,6 +66,9 @@ account-projects .projects .projectName,
 account-projects .projects md-icon {
   color: #4CAF50;
 }
+account-projects .projects md-icon {
+  margin: 0 !important;
+}
 account-projects .projects .projectTimestamp {
   color: rgba(0, 0, 0, 0.3);
 }
@@ -82,8 +85,8 @@ account-projects #fileUploader {
   z-index: -1;
 }
 
-account-projects .projectUploadButton {
-  margin-right: 25px !important;
+account-projects .projectRight {
+  margin-right: 20px !important;
 }
 
 /** Account Profile ***************************************************************************************************/

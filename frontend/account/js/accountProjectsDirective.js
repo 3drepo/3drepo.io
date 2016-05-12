@@ -41,7 +41,8 @@
 		var vm = this,
 			promise,
 			bid4FreeProjects = null,
-			userAccount;
+			userAccount,
+			fileUploader = $element[0].querySelector("#fileUploader");
 
 		/*
 		 * Init
@@ -54,9 +55,6 @@
 			"GIS",
 			"Other"
 		];
-		$timeout(function () {
-			setupFileUploader();
-		}, 500);
 
 		promise = AccountService.getProjectsBid4FreeStatus(vm.account);
 		promise.then(function (data) {
@@ -151,11 +149,12 @@
 		/**
 		 * Bring up dialog to add a new project
 		 */
-		vm.newProject = function () {
+		vm.newProject = function (event) {
 			vm.newProjectData = {
 				account: vm.account,
 				type: vm.projectTypes[0]
 			};
+			vm.uploadedFile = null;
 			$mdDialog.show({
 				controller: function () {},
 				templateUrl: "projectDialog.html",
@@ -183,36 +182,74 @@
 		 * Save a new project
 		 */
 		vm.saveNewProject = function () {
+			var projectData;
+
 			promise = AccountService.newProject(vm.newProjectData);
 			promise.then(function (response) {
 				console.log(response);
+				// Save model to project
+				if (vm.uploadedFile !== null) {
+					projectData = response.data;
+					projectData.uploadFile = vm.uploadedFile;
+					promise = AccountService.uploadModel(projectData);
+					promise.then(function (response) {
+						console.log(response);
+					});
+				}
 			});
 		};
 
-		vm.setupFileUpload = function (project) {
-			var fileUploader = $element[0].querySelector("#fileUploader");
-			fileUploader.click();
+		/**
+		 *
+		 * @param {String} project
+		 */
+		vm.uploadModel = function (project) {
 			vm.projectData = {
 				account: vm.account,
 				project: project
 			};
+			setupFileUploader(
+				function (file) {
+					vm.projectData.uploadFile = file;
+					promise = AccountService.uploadModel(vm.projectData);
+					promise.then(function (response) {
+						console.log(response);
+					});
+				}
+			);
+			fileUploader.click();
 		};
 
-		function setupFileUploader () {
-			var fileUploader = $element[0].querySelector("#fileUploader");
-			if (fileUploader !== null) {
-				fileUploader.addEventListener(
-					"change",
-					function () {
-						vm.projectData.uploadFile = this.files[0];
-						promise = AccountService.uploadModel(vm.projectData);
-						promise.then(function (response) {
-							console.log(response);
-						});
-					},
-					false);
-			}
+		/**
+		 * Upload a file
+		 */
+		vm.uploadFile = function () {
+			setupFileUploader(
+				function (file) {
+					vm.uploadedFile = file;
+				}
+			);
+			fileUploader.click();
+		};
+
+		/**
+		 * Set up action on file upload
+		 *
+		 * @param {Function} callback
+		 */
+		function setupFileUploader (callback) {
+			fileUploader.addEventListener(
+				"change",
+				function (event) {
+					callback(this.files[0]);
+				},
+				false
+			);
 		}
+
+		vm.test = function () {
+			console.log(123);
+		};
 
 		vm.b4f = function (account, project) {
 			console.log(account, project);
