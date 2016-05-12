@@ -41,7 +41,6 @@ var public_files = {
         angularariajs: '/public/js/external/angular-aria.min.js',
 		angularsanitizejs: '/public/js/external/angular-sanitize.min.js',
 		angularrecaptcha: '/public/js/external/angular-recaptcha.min.js',
-		ngfileupload: '/public/js/external/ng-file-upload.min.js',
 
 		// QR Code stuff
 		qrgrid: '/public/js/external/qrcode/grid.js',
@@ -119,8 +118,7 @@ var internal_files = {
 		'bower_components/geodesy/vector3d.js',
 		'bower_components/geodesy/latlon-ellipsoidal.js',
 		'bower_components/geodesy/osgridref.js',
-		'bower_components/angular-recaptcha/release/angular-recaptcha.min.js',
-		'bower_components/ng-file-upload/ng-file-upload.min.js'
+		'bower_components/angular-recaptcha/release/angular-recaptcha.min.js'
 	],
 
 	bower_font_files: [

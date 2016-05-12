@@ -33,12 +33,19 @@
 		 *
 		 * @param data
 		 * @param urlEnd
+		 * @param headers
 		 * @returns {*|promise}
 		 */
-		function doPost(data, urlEnd) {
+		function doPost(data, urlEnd, headers) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(urlEnd);
-			$http.post(url, data)
+				url = serverConfig.apiUrl(urlEnd),
+				config = {withCredentials: true};
+
+			if (angular.isDefined(headers)) {
+				config.headers = headers;
+			}
+
+			$http.post(url, data, config)
 				.then(
 					function (response) {
 						deferred.resolve(response);
@@ -147,8 +154,11 @@
 			return doPost(data, projectData.account + "/" + projectData.name);
 		};
 
-		obj.uploadModel = function () {
-
+		obj.uploadModel = function (projectData) {
+			console.log(projectData);
+			var data = new FormData();
+			data.append("file", projectData.uploadFile);
+			return doPost(data, projectData.account + "/" + projectData.project + "/upload", {'Content-Type': undefined});
 		};
 
 		return obj;

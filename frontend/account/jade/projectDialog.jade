@@ -7,19 +7,15 @@ md-dialog.newProjectDialog(aria-label="New project")
 			md-button.md-icon-button(ng-click="vm.closeDialog()")
 				md-icon.angular-material-icons(aria-label="Close dialog") close
 	md-content(layout-margin)
-		div(ng-switch="vm.projectDialogToShow")
-			div(layout="column", ng-switch-when="newProject")
-				md-input-container
-					input(placeholder="Project name", autofocus, ng-model="vm.newProjectData.name")
-				md-input-container
-					label Project type
-					md-select(ng-model="vm.newProjectData.type")
-						md-option(ng-repeat="projectType in vm.projectTypes", value="{{projectType}}") {{projectType}}
-				md-input-container(ng-if="vm.showProjectTypeOtherInput")
-					input(placeholder="Other project type", ng-model="vm.newProjectData.otherType")
-				md-input-container
-					md-button.md-accent(type="file", ngf-select="uploadFiles($file, $invalidFiles)", accept="*", ngf-max-height="1000", ngf-max-size="1MB") Upload File
-					md-button.md-raised.md-accent(ng-disabled="vm.newProjectButtonDisabled", ng-click="vm.saveNewProject()") Save
-
-			div(layout="column", ng-switch-when="uploadModel")
-				p Upload model
+		div(layout="column")
+			md-input-container
+				input(placeholder="Project name", autofocus, ng-model="vm.newProjectData.name")
+			md-input-container
+				label Project type
+				md-select(ng-model="vm.newProjectData.type")
+					md-option(ng-repeat="projectType in vm.projectTypes", value="{{projectType}}") {{projectType}}
+			md-input-container(ng-if="vm.showProjectTypeOtherInput")
+				input(placeholder="Other project type", ng-model="vm.newProjectData.otherType")
+			md-input-container
+				md-button.md-accent(type="file", ngf-select="uploadFiles($file, $invalidFiles)", accept="*", ngf-max-height="1000", ngf-max-size="1MB") Upload File
+				md-button.md-raised.md-accent(ng-disabled="vm.newProjectButtonDisabled", ng-click="vm.saveNewProject()") Save

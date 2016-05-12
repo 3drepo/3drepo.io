@@ -46,8 +46,8 @@ account-dir #account md-tab-content div:first-child {
 }
 
 /** Account Projects **************************************************************************************************/
-account-projects .dataContainer {
-  height: calc(100% - 20px);
+account-projects #accountList {
+  max-height: calc(100vh - 200px);
   overflow: auto;
 }
 
@@ -71,6 +71,19 @@ account-projects .projects .projectTimestamp {
 }
 account-projects .projects p {
   margin: 0;
+}
+
+account-projects #fileUploader {
+  width: 0;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+
+account-projects .projectUploadButton {
+  margin-right: 25px !important;
 }
 
 /** Account Profile ***************************************************************************************************/

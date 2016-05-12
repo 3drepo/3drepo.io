@@ -35,12 +35,13 @@
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$mdDialog", "AccountService"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$mdDialog", "$element", "$timeout", "AccountService"];
 
-	function AccountProjectsCtrl($scope, $location, $mdDialog, AccountService) {
+	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, $timeout, AccountService) {
 		var vm = this,
 			promise,
-			bid4FreeProjects = null;
+			bid4FreeProjects = null,
+			userAccount;
 
 		/*
 		 * Init
@@ -53,6 +54,9 @@
 			"GIS",
 			"Other"
 		];
+		$timeout(function () {
+			setupFileUploader();
+		}, 500);
 
 		promise = AccountService.getProjectsBid4FreeStatus(vm.account);
 		promise.then(function (data) {
@@ -72,22 +76,30 @@
 		 * Reformat the grouped projects to enable toggling of projects list
 		 */
 		$scope.$watch("vm.projectsGrouped", function () {
-			var account;
+			var account,
+				data;
 			vm.accounts = [];
 			angular.forEach(vm.projectsGrouped, function(value, key) {
 				account = {
 					name: key,
 					projects: [],
-					showProjects: true
+					showProjects: true,
+					showProjectsIcon: "folder_open"
 				};
 				angular.forEach(value, function(project) {
-					account.projects.push({
+					data = {
 						name: project.name,
 						timestamp: project.timestamp,
 						bif4FreeEnabled: false
-					});
+					};
+					data.canUpload = (account.name === vm.account);
+					account.projects.push(data);
 				});
 				vm.accounts.push(account);
+				if (account.name === vm.account) {
+					userAccount = vm.accounts[vm.accounts.length - 1];
+					console.log(userAccount);
+				}
 			});
 			setupBid4FreeAccess();
 		});
@@ -133,14 +145,13 @@
 		 */
 		vm.toggleProjectsList = function (index) {
 			vm.accounts[index].showProjects = !vm.accounts[index].showProjects;
-			vm.accounts[index].showProjectsIcon = vm.accounts[index].showProjects ? "fa fa-folder-open-o" : "fa fa-folder-open-o";
+			vm.accounts[index].showProjectsIcon = vm.accounts[index].showProjects ? "folder_open" : "folder";
 		};
 
 		/**
 		 * Bring up dialog to add a new project
 		 */
 		vm.newProject = function () {
-			vm.projectDialogToShow = "newProject";
 			vm.newProjectData = {
 				account: vm.account,
 				type: vm.projectTypes[0]
@@ -159,18 +170,6 @@
 		};
 		
 		vm.uploadModel = function () {
-			vm.projectDialogToShow = "uploadModel";
-			$mdDialog.show({
-				controller: function () {},
-				templateUrl: "projectDialog.html",
-				parent: angular.element(document.body),
-				targetEvent: event,
-				clickOutsideToClose:true,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true,
-				onRemoving: function () {$scope.closeDialog();}
-			});
 		};
 
 		/**
@@ -189,6 +188,31 @@
 				console.log(response);
 			});
 		};
+
+		vm.setupFileUpload = function (project) {
+			var fileUploader = $element[0].querySelector("#fileUploader");
+			fileUploader.click();
+			vm.projectData = {
+				account: vm.account,
+				project: project
+			};
+		};
+
+		function setupFileUploader () {
+			var fileUploader = $element[0].querySelector("#fileUploader");
+			if (fileUploader !== null) {
+				fileUploader.addEventListener(
+					"change",
+					function () {
+						vm.projectData.uploadFile = this.files[0];
+						promise = AccountService.uploadModel(vm.projectData);
+						promise.then(function (response) {
+							console.log(response);
+						});
+					},
+					false);
+			}
+		}
 
 		vm.b4f = function (account, project) {
 			console.log(account, project);
