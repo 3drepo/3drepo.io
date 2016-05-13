@@ -55,10 +55,19 @@ account-projects md-list {
   padding: 0;
 }
 
+account-projects .account,
+account-projects .project {
+  outline: none;
+}
+account-projects .account:hover,
+account-projects .project:hover {
+  cursor: pointer;
+  background: #EEE;
+}
+
 account-projects .projects {
   margin-left: 40px;
 }
-
 account-projects .projects .projectName {
   margin-left: 10px;
 }

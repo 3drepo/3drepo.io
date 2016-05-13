@@ -11,16 +11,19 @@ input(type="file", id="fileUploader")
 
 		md-list#accountList(flex)
 			.accounts(ng-repeat="account in vm.accounts", flex)
-				md-list-item(ng-click="vm.toggleProjectsList($index)", flex)
-					md-button.md-icon-button(aria-label="Folder")
-						md-icon.angular-material-icons {{account.showProjectsIcon}}
-					p {{account.name}}
+				md-list-item
+					.account(ng-click="vm.toggleProjectsList($index)", flex, layout="row", md-ink-ripple)
+						md-button.md-icon-button(aria-label="Folder")
+							md-icon.angular-material-icons {{account.showProjectsIcon}}
+						p {{account.name}}
 
 				md-list.projects(ng-if="account.showProjects")
 					div(layout="row", ng-repeat="project in account.projects", layout-align="start center", flex)
-						md-list-item.md-1-line(ng-click="vm.goToProject(account.name, project.name)", flex)
-							md-icon.angular-material-icons dashboard
-							p.projectName(flex) {{project.name}}
+						md-list-item(flex, layout-fill)
+							.project(ng-click="vm.goToProject(account.name, project.name)", layout="row", md-ink-ripple, layout-align="start center", layout-fill)
+								md-button.md-icon-button(aria-label="Dashboard")
+									md-icon.angular-material-icons dashboard
+								p.projectName(flex) {{project.name}}
 						.projectRight
 							p.projectTimestamp {{project.timestamp}}
 							//md-button.md-accent(ng-click="vm.b4f(account.name, project.name)" ng-if="project.bif4FreeEnabled") B4F
