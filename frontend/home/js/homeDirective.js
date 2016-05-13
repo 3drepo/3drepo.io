@@ -76,49 +76,71 @@
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "Auth", "StateManager", "EventService"];
+    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "Auth", "StateManager", "EventService", "UtilsService"];
 
-    function HomeCtrl($scope, Auth, StateManager, EventService) {
+    function HomeCtrl($scope, $element, $timeout, $compile, Auth, StateManager, EventService, UtilsService) {
         var vm = this,
-			i, length,
-			loggedInUserPages = ["account"],
-			loggedOutUserPages = ["registerRequest", "registerVerify", "passwordForgot", "passwordChange"],
-			goToUserPage;
+			goToUserPage,
+			homeLoggedOut,
+			notLoggedInElement,
+			element,
+			state;
 
 		vm.state = StateManager.state;
 
 		/*
-		 * Watch the state to handle user pages
+		 * Watch the state to handle moving to and from the login page
 		 */
 		$scope.$watch("vm.state", function () {
+			console.log(vm.state);
 			if (vm.state.hasOwnProperty("loggedIn")) {
 				if (!vm.state.loggedIn) {
-					goToUserPage = false;
-					for (i = 0, length = loggedOutUserPages.length; i < length; i += 1) {
-						if (angular.isDefined(vm.state[loggedOutUserPages[i]])) {
-							// 'true' when going to page and 'null' when going back to home page
-							if (vm.state[loggedOutUserPages[i]]) {
-								goToUserPage = true;
-								// username and token only required for some pages
-								vm.username = vm.state.username;
-								vm.token = vm.state.token;
-								vm.notLoggedInToShow = loggedOutUserPages[i];
-								break;
+					$timeout(function () {
+						homeLoggedOut = angular.element($element[0].querySelector('#homeLoggedOut'));
+						homeLoggedOut.empty();
+
+						goToUserPage = false;
+						for (state in vm.state) {
+							if (vm.state.hasOwnProperty(state)) {
+								if (vm.state[state] === true) {
+									goToUserPage = true;
+									// username and token only required for some pages
+									vm.username = vm.state.username;
+									vm.token = vm.state.token;
+									// Create element
+									element = "<" + UtilsService.snake_case(state, "-") +
+										" username='vm.username'" +
+										" token='vm.token'>" +
+										"</" + UtilsService.snake_case(state, "-") + ">";
+									notLoggedInElement = angular.element(element);
+									homeLoggedOut.append(notLoggedInElement);
+									$compile(notLoggedInElement)($scope);
+									break;
+								}
 							}
 						}
-					}
-					if (!goToUserPage) {
-						vm.notLoggedInToShow = "login";
-					}
+
+						if (!goToUserPage) {
+							// Create login element
+							notLoggedInElement = angular.element("<login></login>");
+							homeLoggedOut.append(notLoggedInElement);
+							$compile(notLoggedInElement)($scope);
+						}
+					});
 				}
 				else {
-					for (i = 0, length = loggedInUserPages.length; i < length; i += 1) {
-						if (angular.isDefined(vm.state[loggedInUserPages[i]])) {
-							if (vm.state[loggedInUserPages[i]] === null) {
-								vm.logout(); // Going back to the login page should logout the user
+					// If none of the states is truthy the user is going back to the login page
+					goToUserPage = true;
+					for (state in vm.state) {
+						if (vm.state.hasOwnProperty(state)) {
+							if ((state !== "loggedIn") && (typeof vm.state[state] === "string")) {
+								goToUserPage = false;
 								break;
 							}
 						}
+					}
+					if (goToUserPage) {
+						vm.logout(); // Going back to the login page should logout the user
 					}
 				}
 			}

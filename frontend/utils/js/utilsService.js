@@ -39,6 +39,14 @@
                 ((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1) + "-" +
                 date.getFullYear();
         };
+        
+        obj.snake_case = function snake_case(name, separator) {
+            var SNAKE_CASE_REGEXP = /[A-Z]/g;
+            separator = separator || '_';
+            return name.replace(SNAKE_CASE_REGEXP, function(letter, pos) {
+                return (pos ? separator : '') + letter.toLowerCase();
+            });
+        };
 
         return obj;
     }

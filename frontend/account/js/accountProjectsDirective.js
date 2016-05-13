@@ -35,9 +35,9 @@
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$mdDialog", "$element", "$timeout", "AccountService"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$mdDialog", "$element", "AccountService"];
 
-	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, $timeout, AccountService) {
+	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, AccountService) {
 		var vm = this,
 			promise,
 			bid4FreeProjects = null,
@@ -96,7 +96,6 @@
 				vm.accounts.push(account);
 				if (account.name === vm.account) {
 					userAccount = vm.accounts[vm.accounts.length - 1];
-					console.log(userAccount);
 				}
 			});
 			setupBid4FreeAccess();
@@ -187,6 +186,13 @@
 			promise = AccountService.newProject(vm.newProjectData);
 			promise.then(function (response) {
 				console.log(response);
+				// Add project to list
+				userAccount.projects.push({
+					name: response.data.project,
+					canUpload: true,
+					timestamp: "",
+					bif4FreeEnabled: false
+				});
 				// Save model to project
 				if (vm.uploadedFile !== null) {
 					projectData = response.data;
@@ -196,6 +202,7 @@
 						console.log(response);
 					});
 				}
+				vm.closeDialog();
 			});
 		};
 

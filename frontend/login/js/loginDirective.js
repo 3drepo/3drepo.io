@@ -188,6 +188,9 @@
 						else if (response.data.value === 62) {
 							vm.registerErrorMessage = "Prove you're not a robot";
 						}
+						else if (response.data.value === 55) {
+							vm.registerErrorMessage = "Username already in use";
+						}
 						else {
 							vm.registerErrorMessage = "Error with registration";
 						}
