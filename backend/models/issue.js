@@ -280,7 +280,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 	});
 
-}
+};
 
 schema.methods.updateComment = function(commentIndex, data){
 	'use strict';
@@ -291,7 +291,7 @@ schema.methods.updateComment = function(commentIndex, data){
 			owner: data.owner,	
 			comment: data.comment, 
 			created: timeStamp
-		})
+		});
 	} else {
 
 		let commentObj = this.comments[commentIndex];
@@ -305,30 +305,30 @@ schema.methods.updateComment = function(commentIndex, data){
 	}
 
 	return this.save();
-}
+};
 
 schema.methods.removeComment = function(commentIndex){
 	'use strict';
 
 	this.comments[commentIndex].remove();
 	return this.save();
-}
+};
 
 schema.methods.closeIssue = function(){
 	'use strict';
 
-	this.closed = true
+	this.closed = true;
 	this.closed_time = (new Date()).getTime();
 	return this.save();
-}
+};
 
 schema.methods.reopenIssue = function(){
 	'use strict';
 
-	this.closed = false
+	this.closed = false;
 	this.closed_time = null;
 	return this.save();
-}
+};
 
 //Model method
 schema.methods.clean = function(typePrefix){

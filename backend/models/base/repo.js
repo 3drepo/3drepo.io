@@ -97,7 +97,7 @@ statics.getSharedId = function(dbCol, uid){
 
 	});
 
-}
+};
 
 statics.findByUID = function(dbCol, uid, options){
 	'use strict';

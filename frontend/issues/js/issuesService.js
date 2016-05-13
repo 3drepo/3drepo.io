@@ -218,7 +218,8 @@
 				comment: "",
 				number: issue.number,
 				delete: true,
-				commentCreated: issue.comments[index].created
+				commentIndex: index
+				// commentCreated: issue.comments[index].created
 			});
 		};
 

@@ -18,13 +18,11 @@
 var express = require('express');
 var router = express.Router({mergeParams: true});
 var middlewares = require('./middlewares');
-var dbInterface = require("../db/db_interface.js");
 
 var C = require("../constants");
 var responseCodes = require('../response_codes.js');
 var Issue = require('../models/issue');
 var utils = require('../utils');
-var stringToUUID = utils.stringToUUID;
 var uuidToString = utils.uuidToString;
 
 
@@ -130,7 +128,7 @@ function updateIssue(req, res, next){
 	}).catch(err => {
 		console.log(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	})
+	});
 }
 
 function listIssues(req, res, next) {
@@ -185,53 +183,6 @@ function findIssueById(req, res, next) {
 	});
 
 }
-
-// function _storeIssue(req, res, next){
-// 	'use strict';
-
-// 	let place = utils.APIInfo(req);
-// 	console.log(req.body.data);
-// 	let data = JSON.parse(req.body.data);
-
-// 	req[C.REQ_REPO].logger.logDebug("Creating an issues for object in " + req.params[C.REPO_REST_API_ACCOUNT] + "/" + req.params[C.REPO_REST_API_PROJECT], req);
-
-// 	//console.log(data);
-
-// 	// since there is an incompatible attribute in issue model ('set' in comments) with mongoose, need to fall back to native mongo api call.
-// 	dbInterface(req[C.REQ_REPO].logger).storeIssue(
-// 		req.params[C.REPO_REST_API_ACCOUNT],
-// 		req.params[C.REPO_REST_API_PROJECT],
-// 		req.session.user.username,
-// 		null,
-// 		data,
-// 		function(err, result) {
-// 			responseCodes.onError(place, req, res, next, err, result);
-// 		}
-// 	);
-// }
-
-// function _updateIssue(req, res, next){
-// 	'use strict';
-
-// 	let place = utils.APIInfo(req);
-// 	let data = JSON.parse(req.body.data);
-
-// 	req[C.REQ_REPO].logger.logDebug("Updating an issues with id " +  req.params.issueId + " for object in " +  req.params[C.REPO_REST_API_ACCOUNT] + "/" + req.params[C.REPO_REST_API_PROJECT], req);
-
-// 	//console.log(data);
-
-// 	// since there is an incompatible attribute in issue model ('set' in comments) with mongoose, need to fall back to native mongo api call.
-// 	dbInterface(req[C.REQ_REPO].logger).storeIssue(
-// 		req.params[C.REPO_REST_API_ACCOUNT],
-// 		req.params[C.REPO_REST_API_PROJECT],
-// 		req.session.user.username,
-// 		req.params.issueId,
-// 		data,
-// 		function(err, result) {
-// 			responseCodes.onError(place, req, res, next, err, result);
-// 		}
-// 	);
-// }
 
 function renderIssuesHTML(req, res, next){
 	'use strict';
