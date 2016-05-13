@@ -12,7 +12,7 @@ input(type="file", id="fileUploader")
 		md-list#accountList(flex)
 			.accounts(ng-repeat="account in vm.accounts", flex)
 				md-list-item
-					.account(ng-click="vm.toggleProjectsList($index)", flex, layout="row", md-ink-ripple)
+					.account(ng-click="vm.toggleProjectsList($index)", flex, layout="row", layout-align="start center" md-ink-ripple)
 						md-button.md-icon-button(aria-label="Folder")
 							md-icon.angular-material-icons {{account.showProjectsIcon}}
 						p {{account.name}}

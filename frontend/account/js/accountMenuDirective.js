@@ -25,9 +25,7 @@
 		return {
 			restrict: "EA",
 			templateUrl: "accountMenu.html",
-			scope: {
-				account: "="
-			},
+			scope: {},
 			controller: AccountMenuCtrl,
 			controllerAs: "vm",
 			bindToController: true
@@ -39,15 +37,26 @@
 	function AccountMenuCtrl ($location, Auth) {
 		var vm = this;
 
+		/**
+		 * Open menu
+		 *
+		 * @param $mdOpenMenu
+		 * @param ev
+		 */
 		vm.openMenu = function ($mdOpenMenu, ev) {
 			$mdOpenMenu(ev);
 		};
 
+		/**
+		 * Show user projects
+		 */
 		vm.showProjects = function () {
-			console.log(vm.account)
-			$location.path("/" + vm.account, "_self");
+			$location.path("/" + Auth.getUsername(), "_self");
 		};
 
+		/**
+		 * Logout
+		 */
 		vm.logout = function () {
 			Auth.logout();
 		};

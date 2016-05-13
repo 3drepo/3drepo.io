@@ -58,6 +58,7 @@ account-projects md-list {
 account-projects .account,
 account-projects .project {
   outline: none;
+  padding-left: 10px;
 }
 account-projects .account:hover,
 account-projects .project:hover {
@@ -67,9 +68,6 @@ account-projects .project:hover {
 
 account-projects .projects {
   margin-left: 40px;
-}
-account-projects .projects .projectName {
-  margin-left: 10px;
 }
 account-projects .projects .projectName,
 account-projects .projects md-icon {
