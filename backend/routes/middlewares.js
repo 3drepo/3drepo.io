@@ -126,7 +126,7 @@ var middlewares = {
 
     loggedIn: function(req, res, next){
         'use strict';
-
+        
         if (!(req.session.hasOwnProperty(C.REPO_SESSION_USER))) {
             responseCodes.respond("Check logged in middleware", req, res, next, responseCodes.AUTH_ERROR, null, req.params);
         } else {

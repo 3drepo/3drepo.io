@@ -25,7 +25,7 @@ schema.statics.createRole = function(account, project){
 					"collection" : `${project}.history`
 				},
 				"actions" : [ 
-					"find"
+					"find", "insert", "update"
 				]
 			},
 			{

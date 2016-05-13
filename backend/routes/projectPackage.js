@@ -36,8 +36,7 @@ var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
 };
 
-//Every API listed below has to log in to access
-router.use(middlewares.loggedIn);
+
 // Create a package
 router.post('/packages.json', middlewares.isMainContractor,  createPackage);
 // Update a package

@@ -33,15 +33,12 @@ var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
 };
 
-//Every API list below has to log in to access
-router.use(middlewares.loggedIn);
-
 // bid4free exclusive api get project info
 router.get('/:project/info.json', hasReadProjectInfoAccess, B4F_getProjectSetting);
 //  bid4free exclusive api update project info
 router.post('/:project/info.json', middlewares.isMainContractor, B4F_updateProjectSetting);
 
-// Get projection info
+// Get project info
 router.get('/:project.json', middlewares.hasReadAccessToProject, getProjectSetting);
 
 router.put('/:project/settings/map-tile', middlewares.hasWriteAccessToProject, updateMapTileSettings);
