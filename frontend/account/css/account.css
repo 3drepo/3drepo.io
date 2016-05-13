@@ -140,6 +140,20 @@ logout md-icon {
   outline: none;
 }
 
+/** Account Menu *****************************************************************************************************/
+account-menu {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+}
+account-menu md-icon {
+  color: #FFFFFF;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  font-size: 20px !important;
+  outline: none;
+}
+
 /** New Project Dialog ************************************************************************************************/
 .newProjectDialog {
   min-width: 350px;
