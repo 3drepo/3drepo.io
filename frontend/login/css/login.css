@@ -45,6 +45,7 @@ login .md-button {
 login .loginTitle {
   margin: -5px 0 10px;
   color: rgba(0, 0, 0, 0.5) !important;
+  text-align: center;
 }
 
 login #forgotPasswordButton {

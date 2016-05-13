@@ -1,10 +1,10 @@
-md-menu(md-position-mode="target-right target")
+md-menu#accountMenu(md-position-mode="target-right target")
 	md-button.md-icon-button(aria-label="Account Menu", ng-click="vm.openMenu($mdOpenMenu, $event)")
-		md-icon.angular-material-icons account_circle
-	md-menu-content(width="4")
+		md-icon.angular-material-icons(md-menu-origin) account_circle
+	md-menu-content#accountMenuContent(width="3")
 		md-menu-item
 			md-button(ng-click="vm.showProjects()")
-				md-icon.angular-material-icons view_list
+				md-icon.angular-material-icons(md-menu-align-target) view_list
 				| Projects
 		md-menu-item
 			md-button(ng-click="vm.logout()")

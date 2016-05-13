@@ -154,6 +154,10 @@ account-menu md-icon {
   outline: none;
 }
 
+#accountMenuContent {
+  border-radius: 4px;
+}
+
 /** New Project Dialog ************************************************************************************************/
 .newProjectDialog {
   min-width: 350px;
