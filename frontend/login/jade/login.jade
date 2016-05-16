@@ -1,16 +1,3 @@
-//div(layout="column" flex)
-	div(layout="row" flex="60")
-		span(flex="35")
-
-		// Info
-		//div(flex="25" layout="column")
-			div(flex)
-				img(ng-src="{{vm.logo}}", flex-gt-sm="50", flex-sm="70", flex="100")
-				h2.md-subhead#loginVersion Version: {{vm.version}}
-			div(flex)
-				h1.md-display-1#loginTitle 3D BIM version control
-				h2.md-headline#loginSubTitle A scalable, open platform
-
 .homeUserContent(layout="row", layout-align="center", flex)
 	md-content.md-whiteframe-1dp(aria-label="Registered")
 		md-toolbar
@@ -51,14 +38,9 @@
 								a(href="", ng-click="vm.showTC()") Terms and Conditions
 						#loginCaptcha(vc-recaptcha, key="vm.captchaKey", ng-model="vm.reCaptchaResponse", ng-if="vm.useReCapthca")
 						div(layout="row", layout-align="start center")
-							md-button.md-accent.md-raised(ng-click="vm.register()", ng-disabled="vm.registering") Register For Free
+							md-button.md-accent.md-raised(ng-click="vm.register()", ng-disabled="vm.registering", flex="none") Register For Free
 							#registerWait(ng-if="vm.registering", layout="row", layout-align="start center")
-								p Please wait...
+								p Registering...
 								md-progress-circular(md-mode="indeterminate")
+							a#loginPricing(href="", ng-if="!vm.registering") Pricing
 						h4.loginError {{vm.registerErrorMessage}}
-
-		//span(flex="35")
-
-	//div(layout="row" layout-align="center center" flex="40")
-		div
-			img(ng-src="{{vm.enterpriseLogo}}" flex style="max-width:100%; height: auto")

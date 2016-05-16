@@ -92,8 +92,15 @@ account-projects #fileUploader {
   z-index: -1;
 }
 
+account-projects .accountRight,
 account-projects .projectRight {
   margin-right: 20px !important;
+}
+
+account-projects #newProjectButton {
+  position: absolute;
+  bottom: 0;
+  right: 0;
 }
 
 /** Account Profile ***************************************************************************************************/

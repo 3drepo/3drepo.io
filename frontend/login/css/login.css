@@ -38,7 +38,7 @@ login md-input-container input {
 
 login .loginError {
   color: #F44336;
-  margin: 5px 0 0 2px;
+  margin: 5px 0 0 8px;
 }
 
 login .loginTitle {
@@ -74,19 +74,30 @@ login #tc p {
   font-size: 14px;
   color: rgba(0, 0, 0, 0.7);
 }
+login #tc a {
+  outline: none;
+}
 
 login #loginCaptcha {
-  margin: -5px 0 10px 7px;
+  margin: -5px 30px 10px 7px;
 }
 
-login #loginRegister {
-  margin-right: 30px;
+login #loginRegister #registerWait {
+  height: 30px;
 }
 login #loginRegister #registerWait p {
-  margin: 0 10px;
+  margin: 0 10px 0 0;
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 14px;
 }
+login #loginRegister #registerWait md-progress-circular,
 login #loginRegister #registerWait svg {
-  width: 30px !important;
+  width: 20px !important;
+}
+login #loginRegister #loginPricing {
+  font-size: 14px;
+  margin-left: 30px;
+  outline: none;
 }
 
 /** Terms and Conditions Dialog ***************************************************************************************/

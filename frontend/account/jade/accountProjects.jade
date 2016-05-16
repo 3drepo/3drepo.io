@@ -3,19 +3,21 @@ input(type="file", id="fileUploader")
 	md-content.md-whiteframe-1dp(aria-label="Projects", flex)
 		md-toolbar
 			.md-toolbar-tools
-				h2 Projects
+				h2 Repos
 				span(flex)
-				div(layout="row", layout-align="start center")
-					md-button.md-accent.md-fab.md-mini(aria-label="New Project" ng-click="vm.newProject($event)")
-						md-icon.angular-material-icons add
 
 		md-list#accountList(flex)
 			.accounts(ng-repeat="account in vm.accounts", flex)
-				md-list-item
-					.account(ng-click="vm.toggleProjectsList($index)", flex, layout="row", layout-align="start center" md-ink-ripple)
-						md-button.md-icon-button(aria-label="Folder")
-							md-icon.angular-material-icons {{account.showProjectsIcon}}
-						p {{account.name}}
+				div(layout="row", layout-align="start center")
+					md-list-item(flex="100", layout-fill)
+						.account(ng-click="vm.toggleProjectsList($index)", layout="row", layout-align="start center", md-ink-ripple, layout-fill)
+							md-button.md-icon-button(aria-label="Folder")
+								md-icon.angular-material-icons {{account.showProjectsIcon}}
+							p {{account.name}}
+					spen(flex)
+					.accountRight
+						md-button.md-icon-button(aria-label="New project", ng-click="vm.newProject($event)")
+							md-icon.angular-material-icons.md-accent playlist_add
 
 				md-list.projects(ng-if="account.showProjects")
 					div(layout="row", ng-repeat="project in account.projects", layout-align="start center", flex)
@@ -34,3 +36,6 @@ input(type="file", id="fileUploader")
 								md-icon.angular-material-icons cloud_upload
 
 				md-divider
+
+		md-button.md-accent.md-fab.md-mini#newProjectButton(aria-label="New Project", ng-click="vm.newProject($event)")
+			md-icon.angular-material-icons add
