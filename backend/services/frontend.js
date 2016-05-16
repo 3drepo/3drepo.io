@@ -78,9 +78,9 @@ module.exports.createApp = function(serverConfig)
 			return this.apiUrls[type][functionIndex](path);
 		};\n`;
 
-		params.config_js += "server_config.GET_API = \"all\";\n";
-		params.config_js += "server_config.POST_API = \"post\";\n";
-		params.config_js += "server_config.MAP_API = \"map\";\n";
+		params.config_js += "server_config.GET_API =  \"all\"\n";
+		params.config_js += "server_config.POST_API = (\"post\" in server_config.apiUrls) ? \"post\" : server_config.GET_API;\n";
+		params.config_js += "server_config.MAP_API = (\"map\" in server_config.apiUrls) ? \"map\" : server_config.GET_API;\n";
 
 		if("wayfinder" in config)
 		{
@@ -130,7 +130,6 @@ module.exports.createApp = function(serverConfig)
 							"clip",
 							"building",
 							"bottomButtons",
-							"qrCodeReader",
 							"docs",
 							"utils",
 							"walkthroughVr",
