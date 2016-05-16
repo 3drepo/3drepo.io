@@ -17,9 +17,12 @@ login h3 {
   color: #FFFFFF;
 }
 
-login #loginSubTitle,
 login #loginVersion{
-  color: rgba(255,255,255,0.6);
+  color: rgba(0, 0, 0 , 0.3);
+  font-size: 14px;
+  position: absolute;
+  bottom: 10px;
+  left: 25px;
 }
 
 login md-input-container {
@@ -38,21 +41,14 @@ login .loginError {
   margin: 5px 0 0 2px;
 }
 
-login .md-button {
-  margin: 0 0 0 2px;
-}
-
 login .loginTitle {
-  margin: -5px 0 10px;
+  margin: -5px 0 10px 7px;
   color: rgba(0, 0, 0, 0.5) !important;
-  text-align: center;
 }
 
-login #forgotPasswordButton {
-  margin-left: -5px;
-}
-login #forgotPasswordButton .md-button {
-  font-size: 12px;
+login #forgotPassword {
+  font-size: 14px;
+  margin: 5px 8px;
 }
 
 login #loginDivider {
@@ -62,6 +58,7 @@ login #loginDivider {
 
 login #tc {
   margin-bottom: 10px;
+  margin-left: 5px;
 }
 login #tc md-checkbox {
   margin : 0 0 0 2px;
@@ -69,12 +66,17 @@ login #tc md-checkbox {
 login #tc md-checkbox ._md-icon {
   border-color: rgba(0, 0, 0, 0.4);
 }
-login #tc .md-button {
-  font-size: 12px;
+login #tc a {
+  font-size: 14px;
+  margin-left: 5px;
+}
+login #tc p {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.7);
 }
 
 login #loginCaptcha {
-  margin: -5px 0 10px 2px;
+  margin: -5px 0 10px 7px;
 }
 
 login #loginRegister {

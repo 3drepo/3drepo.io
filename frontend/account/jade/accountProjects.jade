@@ -24,7 +24,7 @@ input(type="file", id="fileUploader")
 								md-button.md-icon-button(aria-label="Dashboard")
 									md-icon.angular-material-icons dashboard
 								p.projectName(flex) {{project.name}}
-						.projectRight
+						.projectRight(layout="row", layout-align="start center")
 							p.projectTimestamp {{project.timestamp}}
 							//md-button.md-accent(ng-click="vm.b4f(account.name, project.name)" ng-if="project.bif4FreeEnabled") B4F
 							md-button.md-accent.md-icon-button(

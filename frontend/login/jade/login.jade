@@ -27,9 +27,9 @@
 						input(type='password', ng-model='vm.user.password', placeholder='Password', ng-required, ng-keypress="vm.login($event)")
 					div(layout="row", layout-align="start" flex="none")
 						md-button.md-accent.md-raised(ng-click="vm.login()") Log In
-					#forgotPasswordButton(layout="row", layout-align="start" flex="none")
-						md-button.md-accent(ng-click="vm.forgotPassword()") Forgot password?
+					a#forgotPassword(href="", ng-click="vm.forgotPassword()") Forgot password?
 					h4.loginError {{vm.errorMessage}}
+					h2.md-subhead#loginVersion Version: {{vm.version}}
 
 				div(ng-if="vm.useRegister", layout="row")
 					div(flex="10", layout="column", layout-align="center center")
@@ -46,11 +46,12 @@
 							input(type='password', ng-model='vm.newUser.password', placeholder='Password', ng-required ng-keypress="vm.register($event)")
 						#tc(layout="row", layout-align="start center", flex)
 							md-checkbox.md-accent(ng-model="vm.newUser.tcAgreed" aria-label="Terms and conditions Checkbox")
-							div(layout="row", layout-align="start")
-								md-button.md-accent(ng-click="vm.showTC()") I agree to the Terms and Conditions
+							div(layout="row", layout-align="start center")
+								p I agree to the
+								a(href="", ng-click="vm.showTC()") Terms and Conditions
 						#loginCaptcha(vc-recaptcha, key="vm.captchaKey", ng-model="vm.reCaptchaResponse", ng-if="vm.useReCapthca")
 						div(layout="row", layout-align="start center")
-							md-button.md-accent.md-raised(ng-click="vm.register()", ng-disabled="vm.registering") Register
+							md-button.md-accent.md-raised(ng-click="vm.register()", ng-disabled="vm.registering") Register For Free
 							#registerWait(ng-if="vm.registering", layout="row", layout-align="start center")
 								p Please wait...
 								md-progress-circular(md-mode="indeterminate")
