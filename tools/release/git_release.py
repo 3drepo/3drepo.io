@@ -56,5 +56,5 @@ os.system("git push origin :refs/tags/latest")
 os.system("git tag -fa latest -m \"Update latest\"")
 os.system("git push origin --tags")
 
-#os.system("git push")
+os.system("git push")
 
