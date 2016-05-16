@@ -47,7 +47,7 @@ function getAccessToProject(username, account, project){
 		//console.log(privileges);
 		for (let i = 0; i < privileges.length; i++) {
 			if (privileges[i].resource.db === account) {
-				console.log(privileges[i]);
+				//console.log(privileges[i]);
 				if (privileges[i].resource.collection === "" || privileges[i].resource.collection === collection) {
 					readPermission |= privileges[i].actions.indexOf("find") > -1;
 					writePermission |= privileges[i].actions.indexOf("insert") > -1;
@@ -189,15 +189,18 @@ function isSubContractorInvited(req, res, next){
 
 var middlewares = {
 
-	canCreateProject,
-	hasReadAccessToProject,
-	hasWriteAccessToProject,
-    loggedIn,
-    hasReadAccessToAccount,
-    hasWriteAccessToAccount,
-	isMainContractor,
+	// Real middlewares taking req, res, next
+	canCreateProject: [loggedIn, canCreateProject],
+	hasReadAccessToProject: [loggedIn, hasReadAccessToProject],
+	hasWriteAccessToProject: [loggedIn, hasWriteAccessToProject],
+    hasReadAccessToAccount: [loggedIn, hasReadAccessToAccount],
+    hasWriteAccessToAccount: [loggedIn, hasWriteAccessToAccount],
+	isMainContractor: [loggedIn, isMainContractor],
+	isSubContractorInvited: [loggedIn,isSubContractorInvited],
+	
+	// Helpers
 	isSubContractorInvitedHelper,
-	isSubContractorInvited,
+	loggedIn,
 	checkRole
 };
 

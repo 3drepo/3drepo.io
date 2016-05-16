@@ -193,6 +193,14 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 	if (!resCode || valid_values.indexOf(resCode.value) === -1) {
 
 		//throw Error("Unspecified error code [" + JSON.stringify(resCode) + " @ " + place + "]");
+		if(resCode && resCode.stack){
+			req[C.REQ_REPO].logger.logError(resCode.stack, req);
+		} else if (resCode && resCode.message) {
+			req[C.REQ_REPO].logger.logError(resCode.message, req);
+		} else {
+			req[C.REQ_REPO].logger.logError(JSON.stringify(resCode), req);
+		}
+
 		resCode = responseCodes.PROCESS_ERROR(resCode);
 	}
 
