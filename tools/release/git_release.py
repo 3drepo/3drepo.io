@@ -44,12 +44,17 @@ if code:
 
 os.system("git commit -m \"Version " + tagName + "\"")
 
-print("sed -i.bak 's/const VERSION=\"[^ ]*\"/const VERSION=\"" + tagName + "\"/' backend/config.js")
+os.system("sed -i.bak 's/const VERSION=\"[^ ]*\"/const VERSION=\"" + tagName + "\"/' backend/config.js")
+
+os.system("git add backend")
+os.system("git clean -f -d")
+
+os.system("git commit -m \"Version string update\"")
 
 os.system("git tag -a " + tagName + " -m \" Version " + tagName + " \"")
 os.system("git push origin :refs/tags/latest")
 os.system("git tag -fa latest -m \"Update latest\"")
 os.system("git push origin --tags")
 
-#os.system("git push")
+os.system("git push")
 
