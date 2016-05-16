@@ -107,7 +107,7 @@ var Viewer = {};
 		this.logos    = [];
 
 		this.logoClick = function() {
-			callback(self.EVENT.LOGO_CLICK);
+			//callback(self.EVENT.LOGO_CLICK);
 		};
 
 		this.addLogo = function() {
