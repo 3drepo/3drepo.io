@@ -286,6 +286,10 @@ schema.methods.updateComment = function(commentIndex, data){
 	'use strict';
 	let timeStamp = (new Date()).getTime();
 
+	if(this.closed || (this.comments[commentIndex] && this.comments[commentIndex].sealed)){
+		return Promise.reject({ message: 'An attempt to edit a sealed comment or a closed issue.'});
+	}
+
 	if(!commentIndex){
 		this.comments.push({ 
 			owner: data.owner,	
@@ -309,6 +313,10 @@ schema.methods.updateComment = function(commentIndex, data){
 
 schema.methods.removeComment = function(commentIndex){
 	'use strict';
+
+	if(this.closed || this.comments[commentIndex].sealed){
+		return Promise.reject({ message: 'An attempt to remove a sealed comment or a closed issue.'});
+	}
 
 	this.comments[commentIndex].remove();
 	return this.save();

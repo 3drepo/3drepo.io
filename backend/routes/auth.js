@@ -19,7 +19,6 @@
 	"use strict";
 	var express = require("express");
 	var router = express.Router({mergeParams: true});
-	// var dbInterface = require("../db/db_interface.js");
 	var responseCodes = require("../response_codes.js");
 	var C = require("../constants");
 	var middlewares = require("./middlewares");
@@ -33,13 +32,13 @@
 	router.post("/login", login);
 	router.get("/login", checkLogin);
 	router.post("/logout", logout);
-	router.get("/:account.json", middlewares.hasReadAccessToProject, listUserInfo);
-	router.get("/:account.jpg", middlewares.loggedIn, getAvatar);
+	router.get("/:account.json", middlewares.hasReadAccessToAccount, listInfo);
+	router.get("/:account.jpg", middlewares.hasReadAccessToAccount, getAvatar);
 	router.post('/:account', signUp);
 	router.post('/:account/verify', verify);
 	router.post('/:account/forgot-password', forgotPassword);
-	router.put("/:account", middlewares.loggedIn, updateUser);
-	router.put("/:account/password", resetPassword);
+	router.put("/:account", middlewares.hasWriteAccessToAccount, updateUser);
+	router.put("/:account/password", middlewares.hasWriteAccessToAccount, resetPassword);
 
 
 	function expireSession(req) {
@@ -264,9 +263,29 @@
 		});
 	}
 
+	function listUserBid(req, res, next){
+
+		let responsePlace = utils.APIInfo(req);
+		//let user;
+
+		User.findByUserName(req.session.user.username).then(user => {
+
+			if(!user){
+				return Promise.reject({resCode: responseCodes.USER_NOT_FOUND});
+			}
+
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, user.customData.bids);
+		
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+
+	}
+
 	function listUserInfo(req, res, next){
 		let responsePlace = utils.APIInfo(req);
 		let user;
+
 		User.findByUserName(req.session.user.username).then(_user => {
 
 			if(!_user){
@@ -275,17 +294,29 @@
 
 			user = _user;
 			return user.listProjects();
+
 		}).then(projects => {
+
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
 				projects: projects,
 				firstName: user.customData.firstName,
 				lastName: user.customData.lastName,
 				email: user.customData.email
 			});
+
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
 	}
 
+	function listInfo(req, res, next){
+		if(req.query.hasOwnProperty('bids')){
+			listUserBid(req, res, next);
+		} else {
+			listUserInfo(req, res, next);
+		}
+	}
+
 	module.exports = router;
+
 }());

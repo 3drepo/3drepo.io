@@ -246,7 +246,7 @@ schema.statics.grantRoleToUser = function(username, db, role){
 };
 
 // list project readable by this user
-schema.methods.listProjects = function(){
+schema.methods.getPrivileges = function(){
 	'use strict';
 
 	let viewRolesCmd = { rolesInfo : this.roles, showPrivileges: true };
@@ -260,6 +260,16 @@ schema.methods.listProjects = function(){
 				privs = privs.concat(rolesArr[i].inheritedPrivileges);
 			}
 		}
+
+		return Promise.resolve(privs);
+	});
+
+};
+
+schema.methods.listProjects = function(){
+	'use strict';
+
+	return this.getPrivileges().then(privs => {
 
 		// This is the collection that we check for
 		// when seeing if a project is viewable

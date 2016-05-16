@@ -79,8 +79,6 @@ function updateIssue(req, res, next){
 
 	Issue.findByUID(dbCol, issueId, false, true).then(issue => {
 
-		console.log(issue.updateComment);
-
 		if(data.hasOwnProperty('comment') && data.edit){
 			action = issue.updateComment(data.commentIndex, data);
 

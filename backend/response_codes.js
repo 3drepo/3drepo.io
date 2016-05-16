@@ -189,9 +189,11 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 {
 	"use strict";
 
+
 	if (!resCode || valid_values.indexOf(resCode.value) === -1) {
 
-		throw Error("Unspecified error code [" + JSON.stringify(resCode) + " @ " + place + "]");
+		//throw Error("Unspecified error code [" + JSON.stringify(resCode) + " @ " + place + "]");
+		resCode = responseCodes.PROCESS_ERROR(resCode);
 	}
 
 	if (resCode.value) // Prepare error response
