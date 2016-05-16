@@ -57,7 +57,7 @@
 		serverObject.public_port       = coalesce(serverObject.public_port, serverObject.port);
 		serverObject.public_protocol   = coalesce(serverObject.public_protocol, using_ssl ? "https" : "http");
 
-		serverObject.hostname = serverObject.subdomain ? (serverObject.subdomain + "." + host) : host;
+		serverObject.hostname = coalesce(serverObject.hostname, serverObject.subdomain ? (serverObject.subdomain + "." + host) : host);
 		serverObject.host_dir = serverObject.subdirectory ? ("/" + serverObject.subdirectory) : "/";
 
 		serverObject.base_url     = serverObject.public_protocol + "://" + serverObject.hostname + ":" + serverObject.public_port;

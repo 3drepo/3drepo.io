@@ -653,7 +653,12 @@ DBInterface.prototype.getUserInfo = function(username, callback) {
 					return callback(err);
 				}
 
-				var user = coll[0].customData;
+				var user = {};
+
+				if (coll[0].customData)
+				{
+					user = coll[0].customData;
+				}
 
 				// This is the collection that we check for
 				// when seeing if a project is viewable
