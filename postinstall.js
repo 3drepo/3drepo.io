@@ -41,25 +41,6 @@ var public_files = {
         angularariajs: '/public/js/external/angular-aria.min.js',
 		angularsanitizejs: '/public/js/external/angular-sanitize.min.js',
 
-		// QR Code stuff
-		qrgrid: '/public/js/external/qrcode/grid.js',
-		qrversion: '/public/js/external/qrcode/version.js',
-		qrdetector: '/public/js/external/qrcode/detector.js',
-		qrformatinf: '/public/js/external/qrcode/formatinf.js',
-		qrerrorlevel: '/public/js/external/qrcode/errorlevel.js',
-		qrbitmat: '/public/js/external/qrcode/bitmat.js',
-		qrdatablock: '/public/js/external/qrcode/datablock.js',
-		qrbmparser: '/public/js/external/qrcode/bmparser.js',
-		qrdatamask: '/public/js/external/qrcode/datamask.js',
-		qrrsdecoder: '/public/js/external/qrcode/rsdecoder.js',
-		qrgf256poly: '/public/js/external/qrcode/gf256poly.js',
-		qrgf256: '/public/js/external/qrcode/gf256.js',
-		qrdecoder: '/public/js/external/qrcode/decoder.js',
-		qrqrcode: '/public/js/external/qrcode/qrcode.js',
-		qrfindpat: '/public/js/external/qrcode/findpat.js',
-		qralignpat: '/public/js/external/qrcode/alignpat.js',
-		qrdatabr: '/public/js/external/qrcode/databr.js',
-
 		//geodesy stuff (latlon to osgrid)
 		dms: '/public/js/external/dms.js',
 		vector3d: '/public/js/external/vector3d.js',
@@ -80,26 +61,6 @@ var public_files = {
  * This is a set of scripts that needs to be minified(if appropriate), symlinked to the public folder
  */
 var internal_files = {
-	bower_qr_files: [
-	'bower_components/jsqrcode/src/grid.js',
-	'bower_components/jsqrcode/src/version.js',
-	'bower_components/jsqrcode/src/detector.js',
-	'bower_components/jsqrcode/src/formatinf.js',
-	'bower_components/jsqrcode/src/errorlevel.js',
-	'bower_components/jsqrcode/src/bitmat.js',
-	'bower_components/jsqrcode/src/datablock.js',
-	'bower_components/jsqrcode/src/bmparser.js',
-	'bower_components/jsqrcode/src/datamask.js',
-	'bower_components/jsqrcode/src/rsdecoder.js',
-	'bower_components/jsqrcode/src/gf256poly.js',
-	'bower_components/jsqrcode/src/gf256.js',
-	'bower_components/jsqrcode/src/decoder.js',
-	'bower_components/jsqrcode/src/qrcode.js',
-	'bower_components/jsqrcode/src/findpat.js',
-	'bower_components/jsqrcode/src/alignpat.js',
-	'bower_components/jsqrcode/src/databr.js'
-	],
-
 	bower_files: [
 	'bower_components/angular/angular.js',
 	'bower_components/angular/angular.min.js.map',
@@ -138,14 +99,7 @@ install_x3dom();
  * install bower components and publicize the relevant files.
  */
 function install_bower(){
-	var public_qr_dir = path.join(public_dir_js, 'qrcode');
-	fs.stat(public_qr_dir, function(err, stat){
-		if(err !== null){
-			//create qr folder in $public_dir_js if it doesn't exist
-			exec('mkdir ' + public_qr_dir , standard_callback);
-
-		}
-
+	fs.stat(public_dir_js, function(err, stat){
 		exec(path.normalize('node_modules/.bin/bower') + ' --allow-root install', function (error, stdout, stderr) {
 			  if (error !== null) {
 			    console.log(error);
@@ -155,8 +109,6 @@ function install_bower(){
 
 				//create symlinks on callback to ensure the files exist (or windows will be unhappy)
 				publicize_files(internal_files.bower_files, public_dir_js, public_dir_css);
-				//qr files are in a separate list as they need to be put inside $public_dir_js/qrcode
-				publicize_files(internal_files.bower_qr_files, public_qr_dir, public_dir_css);
 				//FIXME: if we ever need to minify an x3dom file this might cause a problem. Ideally we should split it like js.
 				//minify_css();
 			});
