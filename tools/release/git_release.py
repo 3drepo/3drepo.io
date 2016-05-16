@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys
+import os
 
 def fatalError(message):
     print message
@@ -11,7 +12,7 @@ numArguments = len(sys.argv)
 if numArguments < 1:
     fatalError("Please specify release tag name")
 
-tagName = sys.argv[0]
+tagName = sys.argv[1]
 
 os.system("cd ../..")
 
@@ -43,12 +44,12 @@ if code:
 
 os.system("git commit -m \"Version " + tagName + "\"")
 
-os.system("sed -i.bak 's/const VERSION=\"[^ ]*\"/const VERSION=\"" + tagName + "\"/' backend/config.js")
+print("sed -i.bak 's/const VERSION=\"[^ ]*\"/const VERSION=\"" + tagName + "\"/' backend/config.js")
 
 os.system("git tag -a " + tagName + " -m \" Version " + tagName + " \"")
 os.system("git push origin :refs/tags/latest")
-os.system("git tag -fa latest")
+os.system("git tag -fa latest -m \"Update latest\"")
 os.system("git push origin --tags")
 
-os.system("git push")
+#os.system("git push")
 
