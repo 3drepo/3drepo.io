@@ -144,11 +144,12 @@ account-menu {
   top: 0;
   right: 0;
   z-index: 1;
+  padding-right: 6px;
 }
 account-menu md-icon {
   color: #FFFFFF;
   text-shadow: 0 0 2px rgba(0,0,0,0.5);
-  font-size: 20px !important;
+  font-size: 30px !important;
   outline: none;
 }
 

@@ -32,9 +32,9 @@
 		};
 	}
 
-	AccountMenuCtrl.$inject = ["$location", "Auth"];
+	AccountMenuCtrl.$inject = ["Auth", "EventService"];
 
-	function AccountMenuCtrl ($location, Auth) {
+	function AccountMenuCtrl (Auth, EventService) {
 		var vm = this;
 
 		/**
@@ -51,7 +51,7 @@
 		 * Show user projects
 		 */
 		vm.showProjects = function () {
-			$location.path("/" + Auth.getUsername(), "_self");
+			EventService.send(EventService.EVENT.SHOW_PROJECTS);
 		};
 
 		/**

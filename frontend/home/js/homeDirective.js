@@ -177,8 +177,7 @@
 					}
 				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
 					EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
-				} else if (event.type === EventService.EVENT.VIEWER.LOGO_CLICK) {
-					console.log("Click logo");
+				} else if (event.type === EventService.EVENT.SHOW_PROJECTS) {
 					StateManager.clearState();
 					Auth.init();
 				}
