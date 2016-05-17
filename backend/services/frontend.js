@@ -120,23 +120,43 @@ module.exports.createApp = function(serverConfig)
 		],
 		"children" : [
 			{
+				"plugin": "registerRequest",
+				"url": "registerRequest"
+			},
+			{
+				"plugin": "registerVerify",
+				"url": "registerVerify?username&token"
+			},
+			{
+				"plugin": "passwordForgot",
+				"url": "passwordForgot"
+			},
+			{
+				"plugin": "passwordChange",
+				"url": "passwordChange?username&token"
+			},
+			{
 				"plugin": "account",
 				"children": [
 					{
 						"plugin": "project",
 						"friends" : [
 							"panel",
+							"filter",
 							"tree",
 							"viewpoints",
 							"issues",
 							"clip",
-							"building",
 							"bottomButtons",
+							"qrCodeReader",
 							"docs",
 							"utils",
 							"walkthroughVr",
 							"oculus",
-							"groups"
+							"groups",
+							"measure",
+							"rightPanel",
+							"building"
 						],
 						'url': '/:project?at&up&view',
 						"children" : [

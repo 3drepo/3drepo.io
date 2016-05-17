@@ -5,7 +5,8 @@
 				h2 Registered for 3D Repo
 		.userContent(layout="column")
 			h3(ng-if="!vm.verified") Please wait...
-			div(ng-if="vm.verified", layout="column", layout-align="start center")
+			div(ng-if="vm.verified", layout="column", layout-align="start")
 				h3 Congratulations.
 				h3 You have successfully registered for 3D Repo. You may now login to you account.
-				md-button.md-raised.md-accent(ng-click="vm.goToLoginPage()") Go To Login Page
+				div(layout="row")
+					md-button.md-raised.md-accent(ng-click="vm.goToLoginPage()") Go To Login Page
