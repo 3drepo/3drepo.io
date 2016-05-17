@@ -28,6 +28,7 @@
 	var User = require("../models/user");
 	var Mailer = require("../mailer/mailer");
 	var httpsPost = require("../libs/httpsReq").post;
+	var Role = require('../models/role');
 
 	router.post("/login", login);
 	router.get("/login", checkLogin);
@@ -35,6 +36,7 @@
 	router.get("/:account.json", middlewares.hasReadAccessToAccount, listInfo);
 	router.get("/:account.jpg", middlewares.hasReadAccessToAccount, getAvatar);
 	router.post('/:account', signUp);
+	router.post('/:account/database', createDatabase);
 	router.post('/:account/verify', verify);
 	router.post('/:account/forgot-password', forgotPassword);
 	router.put("/:account", middlewares.hasWriteAccessToAccount, updateUser);
@@ -315,6 +317,16 @@
 		} else {
 			listUserInfo(req, res, next);
 		}
+	}
+
+	function createDatabase(req, res, next){
+		// let responsePlace = utils.APIInfo(req);
+
+		// Role.createAndAssignRole(req.params.account, req.params.projects, req.session.user.username).then(() => {
+		// 	responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params.account,  });
+		// }).catch(err => {
+		// 	responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		// })
 	}
 
 	module.exports = router;

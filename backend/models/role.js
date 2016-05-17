@@ -1,5 +1,7 @@
 var mongoose = require('mongoose');
 var ModelFactory = require('./factory/modelFactory');
+var User = require('./user');
+var _ = require('lodash');
 
 var schema = mongoose.Schema({
 	_id : String,
@@ -43,6 +45,32 @@ schema.statics.createRole = function(account, project){
 
 	return ModelFactory.db.db(account).command(createRoleCmd);
 };
+
+schema.statics.createAndAssignRole = function(account, project, username){
+	'use strict';
+
+	let roleId = `${account}.${project}`;
+
+	return this.findByRoleID(roleId).then(role =>{
+
+		if(role){
+			return Promise.resolve();
+		} else {
+			return this.createRole(account, project);
+		}
+
+	}).then(() => {
+
+		return User.grantRoleToUser(username, account, project);
+
+	});
+};
+
+schema.statics.checkExisitingDB = function(){
+	this.find({ account: 'admin'}).then(roles => {
+		console.log(_.uniq(_.map(roles, role => role.toObject().db )));
+	})
+}
 
 var Role = ModelFactory.createClass(
 	'Role', 

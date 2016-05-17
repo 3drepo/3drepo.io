@@ -58,12 +58,19 @@ function rejectNoUrl(name){
 }
 
 function getURL(urlName, params){
+	'use strict';
 
 	if(!config.mail || !config.mail.urls || !config.mail.urls[urlName]){
 		return null;
 	}
 
-	return config.mail.urls[urlName](params);
+	let port = '';
+	if(config.using_ssl && config.port !== 443 || !config.using_ssl && config.port !== 80){
+		port = ':' + config.port
+	}
+
+	let baseUrl = (config.using_ssl ? 'https://' : 'http://') + config.host + port;
+	return baseUrl + config.mail.urls[urlName](params);
 }
 
 function sendVerifyUserEmail(to, data){

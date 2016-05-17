@@ -117,7 +117,7 @@ function canCreateProject(req, res, next){
 	if (req.params.account === req.session[C.REPO_SESSION_USER].username){
 		next();
 	} else {
-		middlewares.hasWriteAccessToProject(req, res, next);
+		hasWriteAccessToProject(req, res, next);
 	}
 }
 	
@@ -180,7 +180,7 @@ function isSubContractorInvitedHelper(req){
 }
 
 function isSubContractorInvited(req, res, next){
-	middlewares.isSubContractorInvitedHelper(req).then(()=>{
+	isSubContractorInvitedHelper(req).then(()=>{
 		next();
 	}).catch(resCode => {
 		responseCodes.respond("Middleware: check is sub contractor invited", req, res, next, resCode, null, req.params);
@@ -193,10 +193,10 @@ var middlewares = {
 	canCreateProject: [loggedIn, canCreateProject],
 	hasReadAccessToProject: [loggedIn, hasReadAccessToProject],
 	hasWriteAccessToProject: [loggedIn, hasWriteAccessToProject],
-    hasReadAccessToAccount: [loggedIn, hasReadAccessToAccount],
-    hasWriteAccessToAccount: [loggedIn, hasWriteAccessToAccount],
+	hasReadAccessToAccount: [loggedIn, hasReadAccessToAccount],
+	hasWriteAccessToAccount: [loggedIn, hasWriteAccessToAccount],
 	isMainContractor: [loggedIn, isMainContractor],
-	isSubContractorInvited: [loggedIn,isSubContractorInvited],
+	isSubContractorInvited: [loggedIn, isSubContractorInvited],
 	
 	// Helpers
 	isSubContractorInvitedHelper,

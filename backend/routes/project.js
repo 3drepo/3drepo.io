@@ -163,7 +163,7 @@ function _createAndAssignRole(project, account, username, desc, type) {
 	let roleId = `${account}.${project}`;
 
 	return Role.findByRoleID(roleId).then(role =>{
-		
+
 		if(role){
 			return Promise.resolve();
 		} else {
