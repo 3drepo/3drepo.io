@@ -187,6 +187,14 @@ function isSubContractorInvited(req, res, next){
 	});
 }
 
+function canCreateDatabase(req, res, next){
+	if (req.params.account === req.session[C.REPO_SESSION_USER].username){
+		next();
+	} else {
+		responseCodes.respond("Middleware: canCreateDatabase", req, res, next, responseCodes.AUTH_ERROR, null, req.params);
+	}
+}
+
 var middlewares = {
 
 	// Real middlewares taking req, res, next
@@ -197,7 +205,10 @@ var middlewares = {
 	hasWriteAccessToAccount: [loggedIn, hasWriteAccessToAccount],
 	isMainContractor: [loggedIn, isMainContractor],
 	isSubContractorInvited: [loggedIn, isSubContractorInvited],
-	
+	canCreateDatabase: [loggedIn, canCreateDatabase],
+
+
+
 	// Helpers
 	isSubContractorInvitedHelper,
 	loggedIn,

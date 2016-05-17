@@ -28,7 +28,8 @@
 	var User = require("../models/user");
 	var Mailer = require("../mailer/mailer");
 	var httpsPost = require("../libs/httpsReq").post;
-	var Role = require('../models/role');
+	//var Role = require('../models/role');
+	var crypto = require('crypto');
 
 	router.post("/login", login);
 	router.get("/login", checkLogin);
@@ -36,7 +37,7 @@
 	router.get("/:account.json", middlewares.hasReadAccessToAccount, listInfo);
 	router.get("/:account.jpg", middlewares.hasReadAccessToAccount, getAvatar);
 	router.post('/:account', signUp);
-	router.post('/:account/database', createDatabase);
+	router.post('/:account/database', middlewares.canCreateDatabase, createDatabase);
 	router.post('/:account/verify', verify);
 	router.post('/:account/forgot-password', forgotPassword);
 	router.put("/:account", middlewares.hasWriteAccessToAccount, updateUser);
@@ -285,6 +286,7 @@
 	}
 
 	function listUserInfo(req, res, next){
+
 		let responsePlace = utils.APIInfo(req);
 		let user;
 
@@ -307,7 +309,7 @@
 			});
 
 		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);
 		});
 	}
 
@@ -320,13 +322,28 @@
 	}
 
 	function createDatabase(req, res, next){
-		// let responsePlace = utils.APIInfo(req);
 
-		// Role.createAndAssignRole(req.params.account, req.params.projects, req.session.user.username).then(() => {
-		// 	responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params.account,  });
-		// }).catch(err => {
-		// 	responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		// })
+		let responsePlace = utils.APIInfo(req);
+		let password = crypto.randomBytes(64).toString('hex');
+
+		return User.createUser(req[C.REQ_REPO].logger, req.body.database, password, {}, 0).then(() => {
+			return User.grantRoleToUser(req.session.user.username, req.body.database, 'readWrite');
+
+		}).catch(err => {
+			//change user exists error message to database exists
+			if(err.resCode && err.resCode.value === 55){
+				return Promise.reject({ resCode: responseCodes.DATABASE_EXIST });
+			} else {
+				return Promise.reject(err);
+			}
+
+		}).then(()=>{
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
+				account: req.body.database
+			});
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
 	}
 
 	module.exports = router;
