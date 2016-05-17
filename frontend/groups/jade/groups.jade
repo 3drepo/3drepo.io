@@ -18,8 +18,8 @@ div(ng-switch="vm.toShow")
 			md-list-item(ng-repeat="group in vm.groups", layout-fill)
 				.group(layout="row" layout-align="start", flex, ng-click="vm.showGroup($index)", md-ink-ripple, layout-fill)
 					.groupColourBar(flex="none", style="background:{{vm.colourToString(group.color)}}")
-					div(flex)
-						div(layout="row", layout-align="start center", layout-fill)
+					div(flex, layout="column")
+						div(layout="row", layout-align="start center", flex)
 							p {{group.name}}
 						md-divider
 

@@ -120,7 +120,7 @@ function install_bower(){
 				publicize_files(internal_files.bower_files, public_dir_js, public_dir_css);
 				//FIXME: if we ever need to minify an x3dom file this might cause a problem. Ideally we should split it like js.
 				//minify_css();
-				publicize_files(internal_files.bower_font_files, public_qr_dir, public_dir_css, public_dir_font);
+				publicize_files(internal_files.bower_font_files, public_dir_js, public_dir_css, public_dir_font);
 		});
 	});
 }

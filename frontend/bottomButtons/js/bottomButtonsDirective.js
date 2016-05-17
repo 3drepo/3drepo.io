@@ -130,12 +130,12 @@
 			icon: "fa fa-question",
 			click: toggleHelp
 		});
-		*/
 		vm.rightButtons.push({
 			label: "VR",
 			icon: "icon icon_cardboard",
 			click: enterOculusDisplay,
 			iconClass: "bottomButtomIconCardboard"
 		});
+		 */
 	}
 }());
