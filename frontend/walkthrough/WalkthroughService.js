@@ -56,7 +56,7 @@
 
 			if (needLoading)
 			{
-				$http.get(serverConfig.apiUrl(url))
+				$http.get(serverConfig.apiUrl(serverConfig.GET_API, url))
 					.then(function(data) {
 						for (i = 0, length = data.data.length; i < length; i++) {
 							walkthroughs[projectKey][data.data[i].index] = data.data[i].cameraData;
@@ -77,7 +77,7 @@
 
 			walkthroughs[projectKey][index] = recording;
 
-            $http.post(serverConfig.apiUrl(postUrl), {index: index, cameraData: recording})
+            $http.post(serverConfig.apiUrl(serverConfig.POST_API, postUrl), {index: index, cameraData: recording})
                 .then(function() {
                     //console.log(json);
                 });

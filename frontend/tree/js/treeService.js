@@ -42,7 +42,7 @@
 			var deferred = $q.defer(),
 				url = ts.baseURL + "fulltree.json";
 
-			$http.get(serverConfig.apiUrl(url))
+			$http.get(serverConfig.apiUrl(serverConfig.GET_API, url))
 				.then(function(json) {
 					deferred.resolve(json.data);
 				});
@@ -54,7 +54,7 @@
 			var deferred = $q.defer(),
 				url = ts.baseURL + "searchtree.json?searchString=" + searchString;
 
-			$http.get(serverConfig.apiUrl(url))
+			$http.get(serverConfig.apiUrl(serverConfig.GET_API, url))
 				.then(function(json) {
 					deferred.resolve(json);
 				});

@@ -38,7 +38,7 @@
 		 */
 		function doPost(data, urlEnd, headers) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(self.account + "/" + self.project + "/" + urlEnd),
+				url = serverConfig.apiUrl(serverConfig.POST_API, self.account + "/" + self.project + "/" + urlEnd),
 				config = {withCredentials: true};
 
 			if (angular.isDefined(headers)) {
@@ -59,7 +59,7 @@
 		 */
 		function doGet(urlEnd, param) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(self.account + "/" + self.project + "/" + urlEnd);
+				url = serverConfig.apiUrl(serverConfig.GET_API, self.account + "/" + self.project + "/" + urlEnd);
 
 			var params = {};
 			if (angular.isDefined(param)) {
@@ -83,7 +83,7 @@
 		 */
 		function doPut(data, urlEnd) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(self.account + "/" + self.project + "/" + urlEnd),
+				url = serverConfig.apiUrl(serverConfig.POST_API, self.account + "/" + self.project + "/" + urlEnd),
 				config = {
 					withCredentials: true
 				};
@@ -93,7 +93,7 @@
 				});
 			return deferred.promise;
 		}
-		
+
 		obj.setAccountAndProject = function (account, project) {
 			self.account = account;
 			self.project = project;

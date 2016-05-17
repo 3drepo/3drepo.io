@@ -45,20 +45,44 @@ module.exports.createApp = function(serverConfig)
 	app.get("/public/plugins/base/config.js", function(req, res) {
 		let params = {};
 
-		if (config.api_server.use_location) {
-			params.config_js = "var server_config = {}; server_config.apiUrl = " + config.api_server.location_url;
-		} else {
-			params.config_js = "var server_config = {}; server_config.apiUrl = function(path) { return '" + config.api_server.url + "/' + path; };";
+		params.config_js = "var server_config = {};";
+
+		params.config_js += "server_config.apiUrls = {";
+
+		for (var k in config.apiUrls)
+		{
+			params.config_js += "\"" + k + "\" : [";
+			params.config_js += config.apiUrls[k].join(",");
+			params.config_js += "],";
 		}
 
-		params.config_js += `\nserver_config.subdomains = ${JSON.stringify(config.api_server.subdomains)};`;
+		params.config_js += "};\n";
 
- 
+		var numApiUrlTypes = Object.keys(config.apiUrls).length;
 
-		params.config_js += `
-		server_config.getUrl = function(subdomain, path) {
-			return '${config.api_server.public_protocol}://' + subdomain + '.${config.api_server.hostname}:${config.api_server.public_port}${config.api_server.host_dir}/' + path;
-		};`;
+		params.config_js += "server_config.apiUrlCounter = {";
+
+		for (var k in config.apiUrls)
+		{
+			params.config_js += "\"" + k + "\" : 0,";
+		}
+
+		params.config_js += "};\n";
+
+		params.config_js += `server_config.apiUrl = function(type, path) {
+			console.log("type: " + type);
+			console.log("server_config.apiUrls: " + server_config.apiUrls);
+			var typeFunctions = server_config.apiUrls[type];
+			var functionIndex = this.apiUrlCounter[type] % typeFunctions.length;
+
+			this.apiUrlCounter[type] += 1;
+
+			return this.apiUrls[type][functionIndex](path);
+		};\n`;
+
+		params.config_js += "server_config.GET_API =  \"all\"\n";
+		params.config_js += "server_config.POST_API = (\"post\" in server_config.apiUrls) ? \"post\" : server_config.GET_API;\n";
+		params.config_js += "server_config.MAP_API = (\"map\" in server_config.apiUrls) ? \"map\" : server_config.GET_API;\n";
 
 		if("wayfinder" in config)
 		{
@@ -76,6 +100,9 @@ module.exports.createApp = function(serverConfig)
 			params.config_js += "\nserver_config.backgroundImage = '" + serverConfig.backgroundImage + "'";
 		}
 
+		params.config_js += "\nwindow.hostAlias = {};\n";
+		params.config_js += "\nwindow.hostAlias[\"3drepo_api\"] = function(path) { return server_config.apiUrl(server_config.GET_API, path); }\n";
+
 		params.config_js += "\nserver_config.return_path = '/';";
 
 		params.config_js += "\n\nvar realOpen = XMLHttpRequest.prototype.open;\n\nXMLHttpRequest.prototype.open = function(method, url, async, unk1, unk2) {\n if(async) this.withCredentials = true;\nrealOpen.apply(this, arguments);\n};";
@@ -89,67 +116,47 @@ module.exports.createApp = function(serverConfig)
 	app.use("/public", express.static(__dirname + "/../../public"));
 
 	var DEFAULT_PLUGIN_STRUCTURE = {
-	   "plugin" : "home",
-	   "friends" : [
-	      "login"
-	   ],
-	   "children" : [
-	      {
-	         "plugin": "registerRequest",
-	         "url": "registerRequest"
-	      },
-	      {
-	         "plugin": "registerVerify",
-	         "url": "registerVerify?username&token"
-	      },
-	      {
-	         "plugin": "passwordForgot",
-	         "url": "passwordForgot"
-	      },
-	      {
-	         "plugin": "passwordChange",
-	         "url": "passwordChange?username&token"
-	      },
-	      {
-	         "plugin": "account",
-	         'url': '/:project?at&up&view',
-	         "children": [
-	            {
-	               "plugin": "project",
-	               "friends" : [
-	                  "panel",
-	                  "filter",
-	                  "tree",
-	                  "viewpoints",
-	                  "issues",
-	                  "clip",
-	                  "bottomButtons",
-	                  "qrCodeReader",
-	                  "docs",
-	                  "utils",
-	                  "walkthroughVr",
-	                  "oculus",
-	                  "groups",
-	                  "measure",
-	                  "rightPanel",
-	                  "building"
-	               ],
-	               "children" : [
-	                  {
-	                     "plugin": "bid4free",
-	                     "url": "/bid4free",
-	                     "children": [
-	                        {
-	                           "plugin": "bid4freeWorkspace",
-	                           "url": "/bid4freeWorkspace"
-	                        }
-	                     ]
-	                  }
-	               ]
-	            }
-	         ]
-	      }
-	   ]
+		"plugin" : "home",
+		"friends" : [
+			"login"
+		],
+		"children" : [
+			{
+				"plugin": "account",
+				"children": [
+					{
+						"plugin": "project",
+						"friends" : [
+							"panel",
+							"tree",
+							"viewpoints",
+							"issues",
+							"clip",
+							"building",
+							"bottomButtons",
+							"docs",
+							"utils",
+							"walkthroughVr",
+							"oculus",
+							"groups"
+						],
+						'url': '/:project?at&up&view',
+						"children" : [
+							{
+								"plugin": "bid4free",
+								'url': '/bid4free',
+								children: [
+									{
+										plugin: "bid4freeWorkspace",
+										url: '/bid4freeWorkspace'
+									}
+								]
+							}
+						]
+					}
+				]
+			}
+		]
 	};
 
 	// TODO: Replace with user based plugin selection

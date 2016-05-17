@@ -40,12 +40,6 @@ module.exports = {
 			subdirectory: "api",
 			public_port: http_port,
 			public_protocol: "http",
-			subdomains: {
-				// host without subdomain name
-				'default': null,
-				// map-img.example.org
-				'mapImg': 'map-img'
-			}
 		},
 		{
 			service: "frontend",
@@ -64,11 +58,13 @@ module.exports = {
 		username: '',
 		password: ''
 	},
-	// ssl: {
-	// 	key: 'my_key.pem',
-	// 	cert:'my_server.crt',
-	// 	ca: 'my_server.ca'
-	// },
+	ssl: {
+		default: {
+			key: 'my_key.pem',
+			cert:'my_server.crt',
+			ca: 'my_server.ca'
+		}
+	},
 	cn_queue: {
 		host: 'amqp://localhost:5672',
 		worker_queue: 'jobq',

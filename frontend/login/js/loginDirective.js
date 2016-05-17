@@ -55,6 +55,7 @@
 		/*
 		 * Auth stuff
 		 */
+		console.log(serverConfig);
 		if (serverConfig.hasOwnProperty("auth")) {
 			if (serverConfig.auth.hasOwnProperty("register") && (serverConfig.auth.register)) {
 				vm.useRegister = true;

@@ -42,7 +42,7 @@
 
 		vm.doPrint = function(event) {
 			event.stopPropagation();
-			$window.open(serverConfig.apiUrl(vm.account + "/" + vm.project + "/issues.html"), "_blank");
+			$window.open(serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.project + "/issues.html"), "_blank");
 		};
 	}
 }());

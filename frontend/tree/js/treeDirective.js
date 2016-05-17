@@ -291,10 +291,14 @@
 				if ((event.value.source !== "tree") && highlightSelectedViewerObject)
 				{
 					var objectID = event.value.id;
-					var path = vm.idToPath[objectID].split("__");
 
-					initNodesToShow();
-					expandToSelection(path, 0);
+					if (objectID)
+					{
+						var path = vm.idToPath[objectID].split("__");
+
+						initNodesToShow();
+						expandToSelection(path, 0);
+					}
 				}
 			}
 			else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {

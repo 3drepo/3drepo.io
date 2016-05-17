@@ -37,6 +37,12 @@
 				vrMode: "@",
 				eventService: "="
 			},
+			link: function (scope, element) {
+				// Cleanup when destroyed
+				element.on('$destroy', function(){
+					scope.v.viewer.destroy(); // Remove events watch
+				});
+			},
 			controller: ViewerCtrl,
 			controllerAs: "v",
 			bindToController: true
@@ -83,7 +89,7 @@
 			var options = {};
 			var querystring = $location.search();
 			var startLatLon = querystring.at && querystring.at.split(',');
-			
+
 			var view = querystring.view && querystring.view.split(',');
 			view && view.forEach(function(val, i){
 				view[i] = parseFloat(val);
@@ -139,7 +145,7 @@
 
 			});
 
-			$http.get(serverConfig.apiUrl(v.account + "/" + v.project + ".json")).success(
+			$http.get(serverConfig.apiUrl(serverConfig.GET_API, v.account + "/" + v.project + ".json")).success(
 				function(json, status) {
 					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
 						account: v.account,
