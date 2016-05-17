@@ -39,6 +39,8 @@ home .homeUserContent .md-whiteframe-1dp {
 home .homeUserContent md-toolbar {
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
+    height: 40px;
+    min-height: 40px;
 }
 
 home .homeUserContent .userContent {

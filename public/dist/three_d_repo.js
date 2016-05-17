@@ -2907,7 +2907,9 @@ var Viewer = {};
 		};
 
 		this.destroy = function() {
-			self.currentViewpoint._xmlNode.removeEventListener("viewpointChanged", self.viewPointChanged);
+			if (self.currentViewpoint) {
+				self.currentViewpoint._xmlNode.removeEventListener("viewpointChanged", self.viewPointChanged);
+			}
 			self.viewer.removeEventListener("mousedown", self.managerSwitchMaster);
 
 			self.removeLogo();

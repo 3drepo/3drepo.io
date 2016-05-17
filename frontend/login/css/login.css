@@ -7,8 +7,8 @@ login {
 }
 
 login .homeUserContent md-toolbar {
-  height: 20px;
-  min-height: 20px;
+  height: 40px;
+  min-height: 40px;
 }
 
 login h1,

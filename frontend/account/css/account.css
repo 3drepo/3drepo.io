@@ -103,6 +103,17 @@ account-projects #newProjectButton {
   right: 0;
 }
 
+account-projects .md-whiteframe-1dp {
+  border-radius: 4px;
+  background: #FFF;
+}
+account-projects md-toolbar {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  height: 40px;
+  min-height: 40px;
+}
+
 /** Account Profile ***************************************************************************************************/
 account-profile {
   padding-left: 40px;
