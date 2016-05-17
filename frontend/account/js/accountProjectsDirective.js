@@ -41,7 +41,6 @@
 		var vm = this,
 			promise,
 			bid4FreeProjects = null,
-			userAccount,
 			fileUploader = $element[0].querySelector("#fileUploader");
 
 		/*
@@ -55,6 +54,7 @@
 			"GIS",
 			"Other"
 		];
+		vm.accounts = [];
 
 		promise = AccountService.getProjectsBid4FreeStatus(vm.account);
 		promise.then(function (data) {
@@ -75,30 +75,46 @@
 		 */
 		$scope.$watch("vm.projectsGrouped", function () {
 			var account,
-				data;
-			vm.accounts = [];
-			angular.forEach(vm.projectsGrouped, function(value, key) {
-				account = {
-					name: key,
-					projects: [],
-					showProjects: true,
-					showProjectsIcon: "folder_open"
-				};
-				angular.forEach(value, function(project) {
-					data = {
-						name: project.name,
-						timestamp: project.timestamp,
-						bif4FreeEnabled: false
+				project;
+			if (angular.isDefined(vm.projectsGrouped)) {
+				vm.accounts = [];
+				vm.projectsExist = !((Object.keys(vm.projectsGrouped).length === 0) && (vm.projectsGrouped.constructor === Object));
+				angular.forEach(vm.projectsGrouped, function(value, key) {
+					angular.forEach(value, function(project) {
+						project = {
+							name: project.name,
+							timestamp: project.timestamp,
+							bif4FreeEnabled: false
+						};
+						project.canUpload = (key === vm.account);
+						updateAccountProjects(key, project);
+						//account.projects.push(data);
+					});
+					/*
+					account = {
+						name: key,
+						projects: [],
+						showProjects: true,
+						showProjectsIcon: "folder_open"
 					};
-					data.canUpload = (account.name === vm.account);
-					account.projects.push(data);
+					angular.forEach(value, function(project) {
+						data = {
+							name: project.name,
+							timestamp: project.timestamp,
+							bif4FreeEnabled: false
+						};
+						data.canUpload = (account.name === vm.account);
+						account.projects.push(data);
+					});
+					vm.accounts.push(account);
+					if (account.name === vm.account) {
+						userAccount = vm.accounts[vm.accounts.length - 1];
+						console.log(userAccount);
+					}
+					*/
 				});
-				vm.accounts.push(account);
-				if (account.name === vm.account) {
-					userAccount = vm.accounts[vm.accounts.length - 1];
-				}
-			});
-			setupBid4FreeAccess();
+				setupBid4FreeAccess();
+			}
 		});
 
 		/*
@@ -181,18 +197,21 @@
 		 * Save a new project
 		 */
 		vm.saveNewProject = function () {
-			var projectData;
+			var projectData,
+				project;
 
 			promise = AccountService.newProject(vm.newProjectData);
 			promise.then(function (response) {
 				console.log(response);
+				vm.projectsExist = true;
 				// Add project to list
-				userAccount.projects.push({
+				project = {
 					name: response.data.project,
 					canUpload: true,
 					timestamp: "",
 					bif4FreeEnabled: false
-				});
+				};
+				updateAccountProjects (response.data.account, project);
 				// Save model to project
 				if (vm.uploadedFile !== null) {
 					projectData = response.data;
@@ -254,9 +273,34 @@
 			);
 		}
 
-		vm.test = function () {
-			console.log(123);
-		};
+		/**
+		 * Add a project to an existing or create newly created account
+		 *
+		 * @param account
+		 * @param project
+		 */
+		function updateAccountProjects (account, project) {
+			var i, length,
+				accountToUpdate;
+
+			for (i = 0, length = vm.accounts.length; i < length; i += 1) {
+				if (vm.accounts[i].name === account) {
+					accountToUpdate = vm.accounts[i];
+					accountToUpdate.projects.push(project);
+					break;
+				}
+			}
+			if (angular.isUndefined(accountToUpdate)) {
+				accountToUpdate = {
+					name: account,
+					projects: [project],
+					showProjects: true,
+					showProjectsIcon: "folder_open"
+				};
+				accountToUpdate.canUpload = (account.name === vm.account);
+				vm.accounts.push(accountToUpdate);
+			}
+		}
 
 		vm.b4f = function (account, project) {
 			console.log(account, project);

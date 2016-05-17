@@ -49,3 +49,22 @@ home .homeUserContent .userContent h3 {
     color: rgba(0, 0, 0, 0.7);
     font-weight: normal;
 }
+
+home .cardInfo {
+    text-align: center;
+    padding: 15px;
+    background: #E8EAF6;
+    margin: 15px;
+    border-radius: 4px;
+}
+home .cardInfo p {
+    margin: 0;
+    color: rgba(0, 0, 0, 0.7);
+    word-wrap: break-word;
+}
+home .cardInfo md-icon {
+    margin: 0;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}

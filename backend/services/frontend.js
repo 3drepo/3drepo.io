@@ -70,8 +70,6 @@ module.exports.createApp = function(serverConfig)
 		params.config_js += "};\n";
 
 		params.config_js += `server_config.apiUrl = function(type, path) {
-			console.log("type: " + type);
-			console.log("server_config.apiUrls: " + server_config.apiUrls);
 			var typeFunctions = server_config.apiUrls[type];
 			var functionIndex = this.apiUrlCounter[type] % typeFunctions.length;
 

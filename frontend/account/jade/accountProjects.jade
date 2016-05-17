@@ -6,7 +6,7 @@ input(type="file", id="fileUploader")
 				h2 Repos
 				span(flex)
 
-		md-list#accountList(flex)
+		md-list#accountList(flex, ng-if="vm.projectsExist")
 			.accounts(ng-repeat="account in vm.accounts", flex)
 				div(layout="row", layout-align="start center")
 					md-list-item(flex="100", layout-fill)
@@ -36,6 +36,10 @@ input(type="file", id="fileUploader")
 								md-icon.angular-material-icons cloud_upload
 
 				md-divider
+
+		div(ng-if="!vm.projectsExist")
+			.cardInfo
+				p There currently no projects
 
 		md-button.md-accent.md-fab.md-mini#newProjectButton(aria-label="New Project", ng-click="vm.newProject($event)")
 			md-icon.angular-material-icons add
