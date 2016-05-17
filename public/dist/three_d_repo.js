@@ -5145,7 +5145,7 @@ var ViewerManager = {};
 					showProjects: true,
 					showProjectsIcon: "folder_open"
 				};
-				accountToUpdate.canUpload = (account.name === vm.account);
+				accountToUpdate.canUpload = (account === vm.account);
 				vm.accounts.push(accountToUpdate);
 			}
 		}
