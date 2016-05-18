@@ -31,7 +31,8 @@ home .homeUserContent {
     padding-top: 120px;
 }
 
-home .homeUserContent .md-whiteframe-1dp {
+home .homeUserContent .md-whiteframe-1dp,
+home .homeUserContent .md-whiteframe-8dp {
     border-radius: 4px;
     background: #FFF;
 }

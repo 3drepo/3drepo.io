@@ -14,7 +14,7 @@
 						input(type='password', ng-model='vm.user.password', placeholder='Password', ng-required, ng-keypress="vm.login($event)")
 					div(layout="row", layout-align="start" flex="none")
 						md-button.md-accent.md-raised(ng-click="vm.login()") Log In
-					a#forgotPassword(href="", ng-click="vm.forgotPassword()") Forgot password?
+					a#forgotPassword(href="", ng-click="vm.showPage('passwordForgot')") Forgot password?
 					h4.loginError {{vm.errorMessage}}
 					h2.md-subhead#loginVersion Version: {{vm.version}}
 
@@ -42,5 +42,5 @@
 							#registerWait(ng-if="vm.registering", layout="row", layout-align="start center")
 								p Registering...
 								md-progress-circular(md-mode="indeterminate")
-							a#loginPricing(href="", ng-if="!vm.registering") Pricing
+							a#loginPricing(href="", ng-if="!vm.registering", ng-click="vm.showPage('pricing')") Pricing
 						h4.loginError {{vm.registerErrorMessage}}

@@ -1,0 +1,34 @@
+.homeUserContent(layout="row", layout-align="center", flex, layout-fill)
+	md-content.md-whiteframe-1dp(aria-label="Registered", flex="15", layout-fill)
+		md-toolbar
+			.md-toolbar-tools(layout-align="center center")
+				h2 Basic
+		.userContent(layout="column", layout-align="start center")
+			div(flex="20")
+				h3.md-display-2.pricingPrice Free
+			div(layout="column", layout-align="start center")
+				md-button.md-raised.md-accent(ng-click="vm.passwordChange()") Sign Up
+				h4(style="color:{{vm.messageColor}}") {{vm.message}}
+
+	md-content.md-whiteframe-8dp(aria-label="Registered", flex="15")
+		md-toolbar
+			.md-toolbar-tools(layout-align="center center")
+				h2#pricingMiddlePanelTitle Advanced
+		.userContent(layout="column", layout-align="start center")
+			div(flex="20", layout="column", layout-align="start center")
+				h3.md-display-2.pricingPrice £100
+				h3.md-subhead.pricingPriceSubtitle Per Month
+			div(layout="column", layout-align="start center")
+				md-button.md-raised.md-accent(ng-click="vm.passwordChange()") Sign Up
+				h4(style="color:{{vm.messageColor}}") {{vm.message}}
+
+	md-content.md-whiteframe-1dp(aria-label="Registered", flex="15")
+		md-toolbar
+			.md-toolbar-tools(layout-align="center center")
+				h2 Enterprise
+		.userContent(layout="column", layout-align="start center")
+			h3.md-display-2.pricingPrice Custom
+			h3.md-subhead.pricingPriceSubtitle
+			div(layout="column", layout-align="start center")
+				md-button.md-raised.md-accent(ng-click="vm.passwordChange()") GET IN TOUCH
+				h4(style="color:{{vm.messageColor}}") {{vm.message}}

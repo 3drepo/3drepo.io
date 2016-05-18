@@ -819,7 +819,8 @@ home .homeUserContent {
     padding-top: 120px;
 }
 
-home .homeUserContent .md-whiteframe-1dp {
+home .homeUserContent .md-whiteframe-1dp,
+home .homeUserContent .md-whiteframe-8dp {
     border-radius: 4px;
     background: #FFF;
 }
@@ -1394,6 +1395,26 @@ panel-card-add {
 /** Panel Card Option Erase *******************************************************************************************/
 panel-card-option-erase md-icon {
   font-size: 24px !important;
+}
+pricing md-content.md-whiteframe-1dp,
+pricing md-content.md-whiteframe-8dp {
+    margin: 0 20px;
+}
+
+pricing md-toolbar h2 {
+    font-weight: bold !important;
+}
+
+pricing #pricingMiddlePanelTitle {
+    color: #FFFFFF;
+}
+
+pricing .pricingPrice {
+    margin: 20px 0;
+}
+
+pricing .pricingPriceSubtitle {
+    margin-top: -30px;
 }
 md-dialog.qrCodeReaderDialog {
   max-height: 90%;

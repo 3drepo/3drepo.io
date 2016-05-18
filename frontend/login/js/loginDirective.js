@@ -127,8 +127,8 @@
 			});
 		};
 
-		vm.forgotPassword = function () {
-			$location.path("/passwordForgot", "_self");
+		vm.showPage = function (page) {
+			$location.path("/" + page, "_self");
 		};
 
 		/*
@@ -184,7 +184,7 @@
 					promise = LoginService.register(vm.newUser.username, data);
 					promise.then(function (response) {
 						if (response.status === 200) {
-							$location.path("/registerRequest", "_self");
+							vm.showPage("registerRequest");
 						}
 						else if (response.data.value === 62) {
 							vm.registerErrorMessage = "Prove you're not a robot";

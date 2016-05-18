@@ -136,6 +136,10 @@ module.exports.createApp = function(serverConfig)
 				"url": "passwordChange?username&token"
 			},
 			{
+				"plugin": "pricing",
+				"url": "pricing"
+			},
+			{
 				"plugin": "account",
 				"children": [
 					{
