@@ -124,12 +124,7 @@ module.exports.createApp = function (serverConfig) {
 		app.use(allowCrossDomain);
 	}
 	*/
-
-	//auth handler
-	app.use('/', require('../routes/auth'));
-	// os api handler
-	app.use('/os',require('../routes/osBuilding'));
-
+	
 	app.use(function(req, res, next) {
 		// intercept OPTIONS method
 		if ("OPTIONS" === req.method) {
@@ -138,6 +133,13 @@ module.exports.createApp = function (serverConfig) {
 			next();
 		}
 	});
+
+	//auth handler
+	app.use('/', require('../routes/auth'));
+	// os api handler
+	app.use('/os',require('../routes/osBuilding'));
+	// payment api header
+	app.use('/payment', require('../routes/payment'));
 
 	if(config.test_helper_api){
 		// test helpers

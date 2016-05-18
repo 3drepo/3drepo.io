@@ -99,7 +99,7 @@ function hasAccessToAccount(req, res, next){
 	if(username === req.params.account){
 		next();
 	} else {
-		responseCodes.respond("Middleware: check has access to project", req, res, next, responseCodes.NOT_AUTHORIZED , null, {});
+		responseCodes.respond("Middleware: check has access to account", req, res, next, responseCodes.NOT_AUTHORIZED , null, {});
 	}
 }
 

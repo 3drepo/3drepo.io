@@ -18,7 +18,7 @@
 var mongoose = require('mongoose');
 var ModelFactory = require('./factory/modelFactory');
 var responseCodes = require('../response_codes.js');
-//var _ = require('lodash');
+var _ = require('lodash');
 var DB = require('../db/db');
 var crypto = require('crypto');
 var utils = require("../utils");
@@ -29,8 +29,50 @@ var schema = mongoose.Schema({
 	_id : String,
 	user: String,
 	//db: String,
-	customData: {},
-	roles: {}
+	customData: {
+
+		bids: [{
+			package: String,
+			project: String,
+			account: String,
+			role: String
+		}],
+
+		projects: [{
+			account: String,
+			project: String
+		}],
+
+		firstName: String,
+		lastName: String,
+		email: String,
+		inactive: Boolean,
+		resetPasswordToken: {
+			expiredAt: Date,
+			token: String
+		},
+		emailVerifyToken: {
+			expiredAt: Date,
+			token: String
+		},
+		subscriptions: [{
+			active: Boolean,
+			updatedAt: Date,
+			createdAt: Date,
+			billingUser: String,
+			expiredAt: Date,
+			limits: {},
+			token: String,
+			plan: String,
+			database: String,
+			payments: [{
+				gateway: String,
+				raw: {}
+			}]
+		}],
+		avatar: Object
+	},
+	roles: [{}]
 });
 
 schema.statics.authenticate = function(logger, username, password){
@@ -103,8 +145,7 @@ schema.statics.updatePassword = function(logger, username, oldPassword, token, n
 	}).then(() => {
 
 		if(user){
-			delete user.customData.resetPasswordToken;
-			user.markModified('customData');
+			user.customData.resetPasswordToken = undefined;
 			return user.save().then(() => Promise.resolve());
 		} 
 
@@ -153,9 +194,8 @@ schema.statics.verify = function(username, token){
 
 		} else if(tokenData.token === token && tokenData.expiredAt > new Date()){
 
-			delete user.customData.inactive;
-			delete user.customData.emailVerifyToken;
-			user.markModified('customData');
+			user.customData.inactive = undefined;
+			user.customData.emailVerifyToken = undefined;
 
 			return user.save(() => {
 				return Promise.resolve(true);
@@ -184,7 +224,6 @@ schema.methods.updateInfo = function(updateObj){
 		}
 	});
 
-	this.markModified('customData');
 
 	return this.save();
 };
@@ -206,7 +245,6 @@ schema.statics.getForgotPasswordToken = function(username, email, tokenExpiryTim
 		}
 
 		user.customData.resetPasswordToken = resetPasswordToken;
-		user.markModified('customData');
 
 		return user.save();
 	
@@ -337,6 +375,98 @@ schema.methods.listProjects = function(){
 		return Promise.all(promises).then(() => Promise.resolve(projects));
 	});
 };
+
+
+
+//TO-DO: we have only one plan now so it is hardcoded
+var subscriptions = {
+	'THE-100-QUID-PLAN': {
+		plan: 'THE-100-QUID-PLAN',
+		limits: {
+			spaceLimit: 10737418240, //bytes
+			collaboratorLimit: 5,
+		},
+		db: this.user,
+		billingCycle: 1, //month
+	}
+};
+
+function getSubscription(plan){
+	return subscriptions[plan];
+}
+
+//TO-DO: payment, subscription activation methods, move to somewhere instead of staying in user.js
+schema.methods.createSubscriptionToken = function(plan, billingUser){
+	'use strict';
+
+	if(plan === 'THE-100-QUID-PLAN'){
+
+		let token = crypto.randomBytes(64).toString('hex');
+
+		this.customData.subscriptions = this.customData.subscriptions || [];
+		let subscriptions = this.customData.subscriptions;
+
+		var now = new Date();
+
+		let subscription = {
+			token: token,
+			plan: plan,
+			db: this.user,
+			billingUser: billingUser,
+			createdAt: now,
+			updatedAt: now,
+			active: false,
+			payments: []
+
+		};
+
+		subscriptions.push(subscription);
+
+		return this.save().then(() => {
+			return Promise.resolve(subscription);
+		});
+
+	} else {
+
+		return Promise.reject({ message: 'Unknown subscription plan'});
+	}
+};
+
+schema.statics.activateSubscription = function(token, paymentInfo){
+	'use strict';
+	
+	let query = {'customData.subscriptions.token': token};
+	let projection = { 'customData.subscriptions.$' : 1};
+	return this.findOne({account: 'admin'}, query,  projection).then(user => {
+
+		if(!user){
+			return Promise.reject({ message: 'Token not found'});
+		}
+
+		let subscription = _.find(user.customData.subscriptions, subscription => subscription.token === token);
+
+		var now = new Date();
+
+		var expiryAt = new Date(now.valueOf());
+		expiryAt.setMonth(expiryAt.getMonth() + getSubscription(subscription.plan).billingCycle);
+
+		subscription.limits = getSubscription(subscription.plan).limits;
+		subscription.expiredAt = expiryAt;
+		subscription.active = true;
+		subscription.payments.push({
+			raw: paymentInfo,
+			gateway: 'PAYPAL'
+		});
+
+		return user.save().then(() => {
+			return Promise.resolve(subscription);
+		});
+		
+	});
+
+};
+
+
 
 var User = ModelFactory.createClass(
 	'User', 

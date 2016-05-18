@@ -40,6 +40,7 @@
 	router.post('/:account/database', middlewares.canCreateDatabase, createDatabase);
 	router.post('/:account/verify', verify);
 	router.post('/:account/forgot-password', forgotPassword);
+	router.post('/:account/subscription-token', middlewares.hasReadAccessToAccount, createSubscriptionToken);
 	router.put("/:account", middlewares.hasWriteAccessToAccount, updateUser);
 	router.put("/:account/password", middlewares.hasWriteAccessToAccount, resetPassword);
 
@@ -344,6 +345,28 @@
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
+	}
+
+	function createSubscriptionToken(req, res, next){
+		//database(ghost user), billing user
+		//req.body.database
+		//find db user
+		let responsePlace = utils.APIInfo(req);
+
+		User.findByUserName(req.body.database).then( dbUser => {
+			let billingUser = req.session.user.username;
+			return dbUser.createSubscriptionToken(req.body.plan, billingUser);
+		}).then(token => {
+
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
+				database: req.body.database,
+				token: token.token
+			});
+
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+
 	}
 
 	module.exports = router;

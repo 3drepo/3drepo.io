@@ -165,9 +165,15 @@ var responseCodes = {
 	PROCESS_ERROR: function(message) {
 		 "use strict";
 
+		 if (typeof message !== 'string' && typeof message.message !== 'string'){
+		 	message = JSON.stringify(message);
+		 } else if (typeof message !== 'string' && typeof message.message === 'string'){
+		 	message = message.message;
+		 }
+
 		 return {
 			value: 4000,
-			message: typeof message === 'string' ? message : JSON.stringify(message),
+			message: message,
 			status: 500
 		};
 	}
