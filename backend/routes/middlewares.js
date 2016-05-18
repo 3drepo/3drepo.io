@@ -195,6 +195,24 @@ function canCreateDatabase(req, res, next){
 	}
 }
 
+
+
+function freeSpace(account){
+	'use strict';
+
+	let limits;
+
+	return User.findByUserName(account).then( dbUser => {
+
+		limits = dbUser.getSubscriptionLimits();
+		return User.dbStats(account);
+
+	}).then(stats => {
+		return Promise.resolve(limits.spaceLimit - stats.storageSize);
+	});
+
+}
+
 var middlewares = {
 
 	// Real middlewares taking req, res, next
@@ -207,9 +225,8 @@ var middlewares = {
 	isSubContractorInvited: [loggedIn, isSubContractorInvited],
 	canCreateDatabase: [loggedIn, canCreateDatabase],
 
-
-
 	// Helpers
+	freeSpace,
 	isSubContractorInvitedHelper,
 	loggedIn,
 	checkRole

@@ -75,6 +75,11 @@ var schema = mongoose.Schema({
 	roles: [{}]
 });
 
+schema.statics.dbStats = function(dbName){
+	'use strict';
+	 return ModelFactory.db.db(dbName).stats();
+};
+
 schema.statics.authenticate = function(logger, username, password){
 	'use strict';
 
@@ -436,8 +441,8 @@ schema.statics.activateSubscription = function(token, paymentInfo){
 	'use strict';
 	
 	let query = {'customData.subscriptions.token': token};
-	let projection = { 'customData.subscriptions.$' : 1};
-	return this.findOne({account: 'admin'}, query,  projection).then(user => {
+
+	return this.findOne({account: 'admin'}, query).then(user => {
 
 		if(!user){
 			return Promise.reject({ message: 'Token not found'});
@@ -466,7 +471,27 @@ schema.statics.activateSubscription = function(token, paymentInfo){
 
 };
 
+schema.methods.getSubscriptionLimits = function(){
+	'use strict';
 
+	let now = new Date();
+	let subscriptions = _.filter(
+		this.customData.subscriptions, 
+		subscription => subscription.active && subscription.expiredAt > now
+	);
+
+	let sumLimits = {
+		spaceLimit: 0,
+		collaboratorLimit: 0
+	};
+
+	subscriptions.forEach(sub => {
+		sumLimits.spaceLimit += sub.limits.spaceLimit;
+		sumLimits.collaboratorLimit += sub.limits.collaboratorLimit;
+	});
+
+	return sumLimits;
+};
 
 var User = ModelFactory.createClass(
 	'User', 

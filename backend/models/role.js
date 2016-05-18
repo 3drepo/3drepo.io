@@ -18,7 +18,7 @@ schema.statics.findByRoleID = function(id){
 schema.statics.createRole = function(account, project){
 	'use strict';
 
-	let createRoleCmd = { 
+	let createRoleCmd = {
 		'createRole' : project,
 		'privileges': [
 			{

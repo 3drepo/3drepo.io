@@ -33,6 +33,7 @@ var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
 };
 
+
 // bid4free exclusive api get project info
 router.get('/:project/info.json', hasReadProjectInfoAccess, B4F_getProjectSetting);
 //  bid4free exclusive api update project info
@@ -46,6 +47,15 @@ router.put('/:project/settings/map-tile', middlewares.hasWriteAccessToProject, u
 router.post('/:project', middlewares.canCreateProject, createProject);
 
 router.post('/:project/upload', middlewares.canCreateProject, uploadProject);
+
+
+function estimateImportedSize(format, size){
+	if(format === 'obj'){
+		return size * 5;
+	} else {
+		return size * 3;
+	}
+}
 
 function updateMapTileSettings(req, res, next){
 	'use strict';
@@ -249,12 +259,36 @@ function uploadProject(req, res, next){
 	'use strict';
 
 	let responsePlace = utils.APIInfo(req);
+
+	//check space
+	function fileFilter(req, file, cb){
+
+		middlewares.freeSpace(req.params.account).then(space => {
+			let format = file.originalname.split('.').splice(-1)[0];
+			let size = estimateImportedSize(format, parseInt(req.headers['content-length']));
+
+			console.log('format', format);
+			console.log('est size', size);
+
+			if(size > space){
+				cb({ resCode: responseCodes.SIZE_LIMIT });
+			} else {
+				cb(null, false);
+			}
+		});
+
+	}
+
 	if (config.cn_queue) {
 
-		var upload = multer({ dest: config.cn_queue.upload_dir });
+		var upload = multer({ 
+			dest: config.cn_queue.upload_dir,
+			fileFilter: fileFilter
+		});
+
 		upload.single("file")(req, res, function (err) {
 			if (err) {
-				return responseCodes.respond(responsePlace, req, res, next, responseCodes.FILE_IMPORT_PROCESS_ERR, {});
+				return responseCodes.respond(responsePlace, req, res, next, err.resCode || responseCodes.FILE_IMPORT_PROCESS_ERR, {});
 			} else {
 
 				let projectSetting;
