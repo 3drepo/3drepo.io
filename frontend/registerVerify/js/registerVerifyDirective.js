@@ -51,13 +51,19 @@
          */
         $scope.$watchGroup(["vm.username", "vm.token"], function () {
             if (angular.isDefined(vm.username) && angular.isDefined(vm.token)) {
+                vm.verifyErrorMessage = "Verifying. Please wait...";
                 promise = RegisterVerifyService.verify(vm.username, {token: vm.token});
                 promise.then(function (response) {
                     if (response.status === 200) {
                         vm.verified = true;
+                        vm.verifySuccessMessage = "Congratulations. You have successfully registered for 3D Repo. You may now login to you account.";
+                    }
+                    else if (response.data.value === 60) {
+                        vm.verified = true;
+                        vm.verifySuccessMessage = "You have already verified your account successfully. You may now login to your account.";
                     }
                     else {
-                        vm.registerErrorMessage = "Error with verification";
+                        vm.verifyErrorMessage = "Error with verification";
                     }
                 });
             }

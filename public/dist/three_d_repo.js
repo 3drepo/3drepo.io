@@ -11084,8 +11084,8 @@ angular.module('3drepo')
 			});
 		};
 
-		vm.forgotPassword = function () {
-			$location.path("/passwordForgot", "_self");
+		vm.showPage = function (page) {
+			$location.path("/" + page, "_self");
 		};
 
 		/*
@@ -11141,7 +11141,7 @@ angular.module('3drepo')
 					promise = LoginService.register(vm.newUser.username, data);
 					promise.then(function (response) {
 						if (response.status === 200) {
-							$location.path("/registerRequest", "_self");
+							vm.showPage("registerRequest");
 						}
 						else if (response.data.value === 62) {
 							vm.registerErrorMessage = "Prove you're not a robot";
@@ -13028,6 +13028,47 @@ var Oculus = {};
     }
 }());
 /**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("pricing", pricing);
+
+	function pricing() {
+		return {
+			restrict: "E",
+			scope: {},
+			templateUrl: "pricing.html",
+			controller: PricingCtrl,
+			controllerAs: "vm",
+			bindToController: true
+		};
+	}
+
+	PricingCtrl.$inject = [];
+
+	function PricingCtrl () {
+		var vm = this;
+	}
+}());
+
+/**
  *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -14290,13 +14331,19 @@ var Oculus = {};
          */
         $scope.$watchGroup(["vm.username", "vm.token"], function () {
             if (angular.isDefined(vm.username) && angular.isDefined(vm.token)) {
+                vm.verifyErrorMessage = "Verifying. Please wait...";
                 promise = RegisterVerifyService.verify(vm.username, {token: vm.token});
                 promise.then(function (response) {
                     if (response.status === 200) {
                         vm.verified = true;
+                        vm.verifySuccessMessage = "Congratulations. You have successfully registered for 3D Repo. You may now login to you account.";
+                    }
+                    else if (response.data.value === 60) {
+                        vm.verified = true;
+                        vm.verifySuccessMessage = "You have already verified your account successfully. You may now login to your account.";
                     }
                     else {
-                        vm.registerErrorMessage = "Error with verification";
+                        vm.verifyErrorMessage = "Error with verification";
                     }
                 });
             }
@@ -14348,9 +14395,14 @@ var Oculus = {};
                 config = {withCredentials: true};
 
             $http.post(url, data, config)
-                .then(function (response) {
-                    deferred.resolve(response);
-                });
+                .then(
+                    function (response) {
+                        deferred.resolve(response);
+                    },
+                    function (error) {
+                        deferred.resolve(error);
+                    }
+                );
             return deferred.promise;
         }
 
