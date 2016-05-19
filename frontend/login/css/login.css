@@ -59,6 +59,7 @@ login #loginDivider {
 login #tc {
   margin-bottom: 10px;
   margin-left: 5px;
+  width: 300px;
 }
 login #tc md-checkbox {
   margin : 0 0 0 2px;
