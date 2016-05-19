@@ -11,10 +11,11 @@ function activateSubscription(req, res, next){
 	// some logic to check the ipn message here then activate the subscription
 	// respond HTTP 200 with OK string
 	let responsePlace = utils.APIInfo(req);
-	let token = '04606524a4d0600a80d06b173b3eb4c1e6e199f035133876abffaf2e49f7f830a085933dd28057344016ccbfccceda8357c2767043aa6635866a457352de457a';
+	let token = '0de82081d2a72303d781cc778a9b33bfede8dd5b972ffb3a9bed3ca3d877ebc5ddc638c66992adb1b359bbd4e29ed46f0da5017e3d43da36cabc7f40fec7b7ca';
 	let paymentInfo = { test : true };
 	
 	User.activateSubscription(token, paymentInfo).catch(err => {
+		console.log(err.stack);
 		console.log(err);
 	});
 

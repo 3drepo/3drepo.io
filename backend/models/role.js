@@ -15,11 +15,11 @@ schema.statics.findByRoleID = function(id){
 	return this.findOne({ account: 'admin'}, { _id: id});
 };
 
-schema.statics.createRole = function(account, project){
+schema.statics.createCollaboratorRole = function(account, project){
 	'use strict';
 
 	let createRoleCmd = {
-		'createRole' : project,
+		'createRole' : `${project}.collaborator`,
 		'privileges': [
 			{
 				"resource" : {
@@ -27,7 +27,7 @@ schema.statics.createRole = function(account, project){
 					"collection" : `${project}.history`
 				},
 				"actions" : [ 
-					"find", "insert", "update"
+					"find", "insert"
 				]
 			},
 			{
@@ -40,31 +40,57 @@ schema.statics.createRole = function(account, project){
 				]
 			}, 
 		],
+		roles: [{ role: `${project}.viewer`, db: account}]
+	};
+
+	return ModelFactory.db.db(account).command(createRoleCmd);
+};
+
+schema.statics.createViewerRole = function(account, project){
+	'use strict';
+
+	let createRoleCmd = {
+		'createRole' : `${project}.viewer`,
+		'privileges': [
+			{
+				"resource" : {
+					"db" : account,
+					"collection" : `${project}.history`
+				},
+				"actions" : [ 
+					"find",
+				]
+			},
+			{
+				"resource" : {
+					"db" : account,
+					"collection" : `${project}.issues`
+				},
+				"actions" : [ 
+					"find"
+				]
+			}, 
+		],
 		roles: []
 	};
 
 	return ModelFactory.db.db(account).command(createRoleCmd);
 };
 
-// schema.statics.createAndAssignRole = function(account, project, username){
-// 	'use strict';
+schema.statics.createAdminRole = function(account){
+	'use strict';
 
-// 	let roleId = `${account}.${project}`;
+	console.log(account);
 
-// 	return this.findByRoleID(roleId).then(role =>{
+	let createRoleCmd = {
+		'createRole' : 'admin',
+		'privileges': [],
+		roles: [{ role: 'readWrite', db: account}]
+	};
 
-// 		if(role){
-// 			return Promise.resolve();
-// 		} else {
-// 			return this.createRole(account, project);
-// 		}
+	return ModelFactory.db.db(account).command(createRoleCmd);	
+};
 
-// 	}).then(() => {
-
-// 		return User.grantRoleToUser(username, account, project);
-
-// 	});
-// };
 
 
 var Role = ModelFactory.createClass(

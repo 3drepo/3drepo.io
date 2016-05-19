@@ -37,10 +37,9 @@
 	router.get("/:account.json", middlewares.hasReadAccessToAccount, listInfo);
 	router.get("/:account.jpg", middlewares.hasReadAccessToAccount, getAvatar);
 	router.post('/:account', signUp);
-	router.post('/:account/database', middlewares.canCreateDatabase, createDatabase);
+	router.post('/:account/database', middlewares.hasWriteAccessToAccount, createDatabase);
 	router.post('/:account/verify', verify);
 	router.post('/:account/forgot-password', forgotPassword);
-	router.post('/:account/subscription-token', middlewares.hasReadAccessToAccount, createSubscriptionToken);
 	router.put("/:account", middlewares.hasWriteAccessToAccount, updateUser);
 	router.put("/:account/password", middlewares.hasWriteAccessToAccount, resetPassword);
 
@@ -327,8 +326,17 @@
 		let responsePlace = utils.APIInfo(req);
 		let password = crypto.randomBytes(64).toString('hex');
 
-		return User.createUser(req[C.REQ_REPO].logger, req.body.database, password, {}, 0).then(() => {
-			return User.grantRoleToUser(req.session.user.username, req.body.database, 'readWrite');
+		//first create the ghost user
+		let checkPlan = User.getSubscription(req.body.plan) ? 
+			Promise.resolve() : Promise.reject({ resCode: responseCodes.INVALID_SUBSCRIPTION_PLAN });
+
+		return checkPlan.then(() => {
+			return User.createUser(req[C.REQ_REPO].logger, req.body.database, password, {}, 0);
+
+		}).then(() => {
+
+			return User.findByUserName(req.body.database);
+
 
 		}).catch(err => {
 			//change user exists error message to database exists
@@ -338,24 +346,12 @@
 				return Promise.reject(err);
 			}
 
-		}).then(()=>{
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
-				account: req.body.database
-			});
-		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
-	}
-
-	function createSubscriptionToken(req, res, next){
-		//database(ghost user), billing user
-		//req.body.database
-		//find db user
-		let responsePlace = utils.APIInfo(req);
-
-		User.findByUserName(req.body.database).then( dbUser => {
+		}).then(dbUser => {
+			
+			//create a subscription token in this ghost user
 			let billingUser = req.session.user.username;
 			return dbUser.createSubscriptionToken(req.body.plan, billingUser);
+
 		}).then(token => {
 
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
@@ -366,8 +362,8 @@
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
-
 	}
+
 
 	module.exports = router;
 

@@ -24,6 +24,7 @@ var crypto = require('crypto');
 var utils = require("../utils");
 var History = require('./history');
 var projectSetting = require('./projectSetting');
+var Role = require('./role');
 
 var schema = mongoose.Schema({
 	_id : String,
@@ -401,6 +402,10 @@ function getSubscription(plan){
 }
 
 //TO-DO: payment, subscription activation methods, move to somewhere instead of staying in user.js
+schema.statics.getSubscription = function(plan) {
+	return subscriptions[plan];
+};
+
 schema.methods.createSubscriptionToken = function(plan, billingUser){
 	'use strict';
 
@@ -433,7 +438,7 @@ schema.methods.createSubscriptionToken = function(plan, billingUser){
 
 	} else {
 
-		return Promise.reject({ message: 'Unknown subscription plan'});
+		return Promise.reject({ resCode: responseCodes.INVALID_SUBSCRIPTION_PLAN });
 	}
 };
 
@@ -441,14 +446,29 @@ schema.statics.activateSubscription = function(token, paymentInfo){
 	'use strict';
 	
 	let query = {'customData.subscriptions.token': token};
+	let subscription;
+	let account;
+	let dbUser;
 
 	return this.findOne({account: 'admin'}, query).then(user => {
 
-		if(!user){
+		dbUser =  user;
+
+		if(!dbUser){
 			return Promise.reject({ message: 'Token not found'});
 		}
 
-		let subscription = _.find(user.customData.subscriptions, subscription => subscription.token === token);
+		subscription = _.find(dbUser.customData.subscriptions, subscription => subscription.token === token);
+		account = dbUser.user;
+
+		return Role.createAdminRole(account);
+
+	}).then(() => {
+
+		let adminRoleName = 'admin';
+		return User.grantRoleToUser(subscription.billingUser, account, adminRoleName);
+
+	}).then(() => {
 
 		var now = new Date();
 
@@ -463,7 +483,7 @@ schema.statics.activateSubscription = function(token, paymentInfo){
 			gateway: 'PAYPAL'
 		});
 
-		return user.save().then(() => {
+		return dbUser.save().then(() => {
 			return Promise.resolve(subscription);
 		});
 		

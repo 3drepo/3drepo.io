@@ -170,19 +170,30 @@ function getProjectSetting(req, res, next){
 function _createAndAssignRole(project, account, username, desc, type) {
 	'use strict';
 
-	let roleId = `${account}.${project}`;
 
-	return Role.findByRoleID(roleId).then(role =>{
+	return Role.findByRoleID(`${account}.${project}.viewer`).then(role =>{
 
 		if(role){
 			return Promise.resolve();
 		} else {
-			return Role.createRole(account, project);
+			return Role.createViewerRole(account, project);
 		}
 
 	}).then(() => {
 
-		return User.grantRoleToUser(username, account, project);
+		return Role.findByRoleID(`${account}.${project}.collaborator`);
+
+	}).then(role => {
+
+		if(role){
+			return Promise.resolve();
+		} else {
+			return Role.createCollaboratorRole(account, project);
+		}
+
+	}).then(() => {
+
+		return User.grantRoleToUser(username, account, `${project}.collaborator`);
 
 	}).then(() => {
 
