@@ -106,7 +106,15 @@ function post(url, obj, type){
 		stringify = JSON.stringify;
 	}
 
-	let stringifiedData = stringify(obj);
+	let stringifiedData;
+
+	if(typeof obj === 'string'){
+		stringifiedData = obj;
+	} else {
+		stringifiedData = stringify(obj);
+	}
+
+
 	let parsedUrl = parseUrl(url);
 
 	let options = {
@@ -120,7 +128,6 @@ function post(url, obj, type){
 		}
 	};
 
-	//console.log(stringifiedData);
 	return new Promise((resolve, reject) => {
 
 		let req = https.request(options, (res) => {
@@ -135,7 +142,10 @@ function post(url, obj, type){
 
 				if(res.headers['content-type'].startsWith('application/json')){
 					body = JSON.parse(body);
+				} else {
+					body = body.toString();
 				}
+
 
 				if([200, 201].indexOf(res.statusCode) === -1){
 					reject(body);
@@ -157,7 +167,8 @@ function post(url, obj, type){
 
 module.exports = {
 	get: get, 
-	post: post
+	post: post,
+	querystring: makePostData
 };
 
 

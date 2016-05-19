@@ -80,8 +80,6 @@ schema.statics.createViewerRole = function(account, project){
 schema.statics.createAdminRole = function(account){
 	'use strict';
 
-	console.log(account);
-
 	let createRoleCmd = {
 		'createRole' : 'admin',
 		'privileges': [],

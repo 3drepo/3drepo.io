@@ -461,7 +461,15 @@ schema.statics.activateSubscription = function(token, paymentInfo){
 		subscription = _.find(dbUser.customData.subscriptions, subscription => subscription.token === token);
 		account = dbUser.user;
 
-		return Role.createAdminRole(account);
+		return Role.findByRoleID(`${account}.admin`);
+
+	}).then(role => {
+
+		if(!role){
+			return Role.createAdminRole(account);
+		} else {
+			return Promise.resolve();
+		}
 
 	}).then(() => {
 

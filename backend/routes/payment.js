@@ -3,22 +3,59 @@ var router = express.Router({mergeParams: true});
 var responseCodes = require("../response_codes.js");
 var utils = require("../utils");
 var User = require('../models/user');
+var httpsPost = require('../libs/httpsReq').post;
+var querystring = require('../libs/httpsReq').querystring;
+
 // endpoints for paypal IPN message
 router.post("/paypal/food", activateSubscription);
 
 function activateSubscription(req, res, next){
 	'use strict';
-	// some logic to check the ipn message here then activate the subscription
-	// respond HTTP 200 with OK string
+
 	let responsePlace = utils.APIInfo(req);
-	let token = '0de82081d2a72303d781cc778a9b33bfede8dd5b972ffb3a9bed3ca3d877ebc5ddc638c66992adb1b359bbd4e29ed46f0da5017e3d43da36cabc7f40fec7b7ca';
-	let paymentInfo = { test : true };
 	
-	User.activateSubscription(token, paymentInfo).catch(err => {
-		console.log(err.stack);
+	let paymentInfo = req.body;
+	let token = paymentInfo.custom;
+	let isPaymentIPN = paymentInfo.txn_type === 'subscr_payment';
+
+
+	let url = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
+
+	let qs = querystring(req.body);
+	qs = 'cmd=_notify-validate&' + qs;
+
+	//first verify this message is genuinely coming from paypal
+	httpsPost(url, qs).then(resData => {
+
+		if(resData === 'VERIFIED') {
+			return Promise.resolve();
+		} else {
+			return Promise.reject({ message: 'ipn message validation failed'});
+		}
+
+	}).then(() => {
+
+		if(isPaymentIPN && paymentInfo.payment_status === 'Completed'){
+
+			return User.activateSubscription(token, paymentInfo);
+
+		} else {
+
+			return Promise.reject({ 
+				message: 'handlers for payment status other than "Completed" are not yet implemented',
+				body: req.body
+			});
+		}
+
+	}).then(subscription => {
+		console.log(subscription, 'payment confirmed and subscription activated');
+	}).catch( err => {
+		console.log('error:');
 		console.log(err);
 	});
 
+
+	//always respond 200 with OK to paypal 
 	responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, 'OK');
 }
 
