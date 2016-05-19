@@ -1,34 +1,77 @@
-.homeUserContent(layout="row", layout-align="center", flex, layout-fill)
-	md-content.md-whiteframe-1dp(aria-label="Registered", flex="15", layout-fill)
+.homeUserContent(layout="row", layout-align="center", flex)
+	md-content.md-whiteframe-1dp(aria-label="Registered", flex="15")
 		md-toolbar
 			.md-toolbar-tools(layout-align="center center")
 				h2 Basic
-		.userContent(layout="column", layout-align="start center")
-			div(flex="20")
-				h3.md-display-2.pricingPrice Free
-			div(layout="column", layout-align="start center")
+		.userContent(layout="column", layout-align="start center", layout-fill)
+			md-icon.angular-material-icons.pricingIcon account_circle
+			.pricingPrice(flex)
+				h3.md-display-2.pricingPriceTitle Free
+			md-divider(layout-fill)
+			.pricingInfo(layout="column", layout-align="start")
+				.pricingInfoLine(layout="column", layout-align="start center")
+					md-icon.angular-material-icons stars
+					h3 Demo Project
+				.pricingInfoLine(layout="column", layout-align="start center")
+					md-icon.angular-material-icons stars
+					h3 Collaborate
+			md-divider(layout-fill)
+			div(layout="row", layout-align="center center", layout-fill)
 				md-button.md-raised.md-accent(ng-click="vm.passwordChange()") Sign Up
-				h4(style="color:{{vm.messageColor}}") {{vm.message}}
 
 	md-content.md-whiteframe-8dp(aria-label="Registered", flex="15")
 		md-toolbar
 			.md-toolbar-tools(layout-align="center center")
 				h2#pricingMiddlePanelTitle Advanced
 		.userContent(layout="column", layout-align="start center")
-			div(flex="20", layout="column", layout-align="start center")
-				h3.md-display-2.pricingPrice £100
+			md-icon.angular-material-icons.pricingIcon grade
+			.pricingPrice(layout="column", layout-align="start center")
+				div(layout="row", layout-align="center center")
+					h3.md-display-2.pricingPriceTitle £100
 				h3.md-subhead.pricingPriceSubtitle Per Month
-			div(layout="column", layout-align="start center")
+			md-divider(layout-fill)
+			.pricingInfo(layout="column", layout-align="start")
+				.pricingInfoLine(layout="column", layout-align="start center")
+					md-icon.angular-material-icons stars
+					h3 10Gb Server Space
+				.pricingInfoLine(layout="column", layout-align="start center")
+					md-icon.angular-material-icons stars
+					h3 5 Collaborators Per Project
+				.pricingInfoLine(layout="column", layout-align="start center")
+					md-icon.angular-material-icons stars
+					h3 Unlimited Projects
+				.pricingInfoLine(layout="column", layout-align="start center")
+					md-icon.angular-material-icons stars
+					h3 Collaborate
+			md-divider(layout-fill)
+			div(layout="row", layout-align="center center", layout-fill)
 				md-button.md-raised.md-accent(ng-click="vm.passwordChange()") Sign Up
-				h4(style="color:{{vm.messageColor}}") {{vm.message}}
 
 	md-content.md-whiteframe-1dp(aria-label="Registered", flex="15")
 		md-toolbar
 			.md-toolbar-tools(layout-align="center center")
 				h2 Enterprise
 		.userContent(layout="column", layout-align="start center")
-			h3.md-display-2.pricingPrice Custom
-			h3.md-subhead.pricingPriceSubtitle
-			div(layout="column", layout-align="start center")
+			md-icon.angular-material-icons.pricingIcon language
+			.pricingPrice
+				h3.md-display-2.pricingPriceTitle Custom
+			md-divider(layout-fill)
+			.pricingInfo(layout="column", layout-align="start")
+				.pricingInfoLine(layout="column", layout-align="start center")
+					md-icon.angular-material-icons stars
+					h3 Private Cloud
+				.pricingInfoLine(layout="column", layout-align="start center")
+					md-icon.angular-material-icons stars
+					h3 Private Domain
+				.pricingInfoLine(layout="column", layout-align="start center")
+					md-icon.angular-material-icons stars
+					h3 Unlimited Projects
+				.pricingInfoLine(layout="column", layout-align="start center")
+					md-icon.angular-material-icons stars
+					h3 Unlimited Collaborators
+				.pricingInfoLine(layout="column", layout-align="start center")
+					md-icon.angular-material-icons stars
+					h3 Custom Development
+			md-divider(layout-fill)
+			div(layout="row", layout-align="center center", layout-fill)
 				md-button.md-raised.md-accent(ng-click="vm.passwordChange()") GET IN TOUCH
-				h4(style="color:{{vm.messageColor}}") {{vm.message}}
