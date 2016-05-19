@@ -40,12 +40,6 @@ module.exports = {
 			subdirectory: "api",
 			public_port: http_port,
 			public_protocol: "http",
-			subdomains: {
-				// host without subdomain name
-				'default': null,
-				// map-img.example.org
-				'mapImg': 'map-img'
-			}
 		},
 		{
 			service: "frontend",
