@@ -38,8 +38,9 @@ input(type="file", id="fileUploader")
 				md-divider
 
 		div(ng-if="!vm.projectsExist")
-			.cardInfo
-				p There currently no projects
+			.cardInfo(layout="row", layout-align="center center")
+				p {{vm.info}}
+				md-progress-circular(md-diameter="20px", ng-if="vm.showProgress", md-mode="indeterminate")
 
 		md-button.md-accent.md-fab.md-mini#newProjectButton(aria-label="New Project", ng-click="vm.newProject($event)")
 			md-icon.angular-material-icons add

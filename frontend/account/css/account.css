@@ -114,6 +114,10 @@ account-projects md-toolbar {
   min-height: 40px;
 }
 
+account-projects md-progress-circular {
+  margin-left: 5px;
+}
+
 /** Account Profile ***************************************************************************************************/
 account-profile {
   padding-left: 40px;

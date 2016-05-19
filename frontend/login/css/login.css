@@ -91,10 +91,6 @@ login #loginRegister #registerWait p {
   color: rgba(0, 0, 0, 0.7);
   font-size: 14px;
 }
-login #loginRegister #registerWait md-progress-circular,
-login #loginRegister #registerWait svg {
-  width: 20px !important;
-}
 login #loginRegister #loginPricing {
   font-size: 14px;
   margin-left: 30px;

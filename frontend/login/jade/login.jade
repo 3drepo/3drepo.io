@@ -41,6 +41,6 @@
 							md-button.md-accent.md-raised(ng-click="vm.register()", ng-disabled="vm.registering", flex="none") Register For Free
 							#registerWait(ng-if="vm.registering", layout="row", layout-align="start center")
 								p Registering...
-								md-progress-circular(md-mode="indeterminate")
+								md-progress-circular(md-mode="indeterminate", md-diameter="20px")
 							a#loginPricing(href="", ng-if="!vm.registering") Pricing
 						h4.loginError {{vm.registerErrorMessage}}

@@ -114,6 +114,10 @@ account-projects md-toolbar {
   min-height: 40px;
 }
 
+account-projects md-progress-circular {
+  margin-left: 5px;
+}
+
 /** Account Profile ***************************************************************************************************/
 account-profile {
   padding-left: 40px;
@@ -1197,10 +1201,6 @@ login #loginRegister #registerWait p {
   color: rgba(0, 0, 0, 0.7);
   font-size: 14px;
 }
-login #loginRegister #registerWait md-progress-circular,
-login #loginRegister #registerWait svg {
-  width: 20px !important;
-}
 login #loginRegister #loginPricing {
   font-size: 14px;
   margin-left: 30px;
@@ -1397,6 +1397,12 @@ panel-card-add {
 /** Panel Card Option Erase *******************************************************************************************/
 panel-card-option-erase md-icon {
   font-size: 24px !important;
+}
+password-change md-progress-circular {
+    margin-left: 5px;
+}
+password-forgot md-progress-circular {
+    margin-left: 5px;
 }
 md-dialog.qrCodeReaderDialog {
   max-height: 90%;

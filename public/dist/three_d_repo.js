@@ -4903,6 +4903,8 @@ var ViewerManager = {};
 			"Other"
 		];
 		vm.accounts = [];
+		vm.info = "Retrieving projects..,";
+		vm.showProgress = true;
 
 		promise = AccountService.getProjectsBid4FreeStatus(vm.account);
 		promise.then(function (data) {
@@ -4922,11 +4924,11 @@ var ViewerManager = {};
 		 * Reformat the grouped projects to enable toggling of projects list
 		 */
 		$scope.$watch("vm.projectsGrouped", function () {
-			var account,
-				project;
 			if (angular.isDefined(vm.projectsGrouped)) {
+				vm.showProgress = false;
 				vm.accounts = [];
 				vm.projectsExist = !((Object.keys(vm.projectsGrouped).length === 0) && (vm.projectsGrouped.constructor === Object));
+				vm.info = vm.projectsExist ? "" : "There currently no projects";
 				angular.forEach(vm.projectsGrouped, function(value, key) {
 					angular.forEach(value, function(project) {
 						project = {
@@ -4936,30 +4938,7 @@ var ViewerManager = {};
 						};
 						project.canUpload = (key === vm.account);
 						updateAccountProjects(key, project);
-						//account.projects.push(data);
 					});
-					/*
-					account = {
-						name: key,
-						projects: [],
-						showProjects: true,
-						showProjectsIcon: "folder_open"
-					};
-					angular.forEach(value, function(project) {
-						data = {
-							name: project.name,
-							timestamp: project.timestamp,
-							bif4FreeEnabled: false
-						};
-						data.canUpload = (account.name === vm.account);
-						account.projects.push(data);
-					});
-					vm.accounts.push(account);
-					if (account.name === vm.account) {
-						userAccount = vm.accounts[vm.accounts.length - 1];
-						console.log(userAccount);
-					}
-					*/
 				});
 				setupBid4FreeAccess();
 			}
@@ -12773,12 +12752,15 @@ var Oculus = {};
     function PasswordChangeCtrl ($scope, $window, PasswordChangeService) {
         var vm = this,
             enterKey = 13,
-            promise;
+            promise,
+            messageColour = "rgba(0, 0, 0, 0.7)",
+            messageErrorColour = "#F44336";
         
         /*
          * Init
          */
         vm.passwordChanged = false;
+        vm.showProgress = false;
 
         /*
          * Watch inputs to clear any message
@@ -12813,7 +12795,10 @@ var Oculus = {};
          */
         function doPasswordChange() {
             if (angular.isDefined(vm.username) && angular.isDefined(vm.token)) {
-                if (angular.isDefined(vm.newPassword)) {
+                if (angular.isDefined(vm.newPassword) && (vm.newPassword !== "")) {
+                    vm.messageColor = messageColour;
+                    vm.message = "Please wait...";
+                    vm.showProgress = true;
                     promise = PasswordChangeService.passwordChange(
                         vm.username,
                         {
@@ -12822,20 +12807,20 @@ var Oculus = {};
                         }
                     );
                     promise.then(function (response) {
-                        console.log(response);
+                        vm.showProgress = false;
                         if (response.status === 400) {
-                            vm.messageColor = "#F44336";
+                            vm.messageColor = messageErrorColour;
                             vm.message = "Error changing password";
                         }
                         else {
                             vm.passwordChanged = true;
-                            vm.messageColor = "rgba(0, 0, 0, 0.7)";
+                            vm.messageColor = messageColour;
                             vm.message = "Your password has been reset. Please go to the login page.";
                         }
                     });
                 }
                 else {
-                    vm.messageColor = "#F44336";
+                    vm.messageColor = messageErrorColour;
                     vm.message = "A new password must be entered";
                 }
             }
@@ -12939,7 +12924,14 @@ var Oculus = {};
 
     function PasswordForgotCtrl ($scope, PasswordForgotService) {
         var vm = this,
-            promise;
+            promise,
+            messageColour = "rgba(0, 0, 0, 0.7)",
+            messageErrorColour = "#F44336";
+        
+        /*
+         * Init
+         */
+        vm.showProgress = false;
 
         /*
          * Watch inputs to clear any message
@@ -12953,21 +12945,25 @@ var Oculus = {};
          */
         vm.requestPasswordChange = function () {
             if (angular.isDefined(vm.username) && angular.isDefined(vm.email)) {
+                vm.messageColor = messageColour;
+                vm.message = "Please wait...";
+                vm.showProgress = true;
                 promise = PasswordForgotService.forgot(vm.username, {email: vm.email});
                 promise.then(function (response) {
+                    vm.showProgress = false;
                     if (response.status === 200) {
                         vm.verified = true;
-                        vm.messageColor = "rgba(0, 0, 0, 0.7)";
+                        vm.messageColor = messageColour;
                         vm.message = "Thank you. You will receive an email shortly with a link to change your password";
                     }
                     else {
-                        vm.messageColor = "#F44336";
+                        vm.messageColor = messageErrorColour;
                         vm.message = "Error with with one or more fields";
                     }
                 });
             }
             else {
-                vm.messageColor = "#F44336";
+                vm.messageColor = messageErrorColour;
                 vm.message = "All fields must be filled";
             }
         };
@@ -13014,9 +13010,14 @@ var Oculus = {};
                 config = {withCredentials: true};
 
             $http.post(url, data, config)
-                .then(function (response) {
-                    deferred.resolve(response);
-                });
+                .then(
+                    function (response) {
+                        deferred.resolve(response);
+                    },
+                    function (error) {
+                        deferred.resolve(error);
+                    }
+                );
             return deferred.promise;
         }
 

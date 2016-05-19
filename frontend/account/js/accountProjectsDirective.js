@@ -55,6 +55,8 @@
 			"Other"
 		];
 		vm.accounts = [];
+		vm.info = "Retrieving projects..,";
+		vm.showProgress = true;
 
 		promise = AccountService.getProjectsBid4FreeStatus(vm.account);
 		promise.then(function (data) {
@@ -74,11 +76,11 @@
 		 * Reformat the grouped projects to enable toggling of projects list
 		 */
 		$scope.$watch("vm.projectsGrouped", function () {
-			var account,
-				project;
 			if (angular.isDefined(vm.projectsGrouped)) {
+				vm.showProgress = false;
 				vm.accounts = [];
 				vm.projectsExist = !((Object.keys(vm.projectsGrouped).length === 0) && (vm.projectsGrouped.constructor === Object));
+				vm.info = vm.projectsExist ? "" : "There currently no projects";
 				angular.forEach(vm.projectsGrouped, function(value, key) {
 					angular.forEach(value, function(project) {
 						project = {
@@ -88,30 +90,7 @@
 						};
 						project.canUpload = (key === vm.account);
 						updateAccountProjects(key, project);
-						//account.projects.push(data);
 					});
-					/*
-					account = {
-						name: key,
-						projects: [],
-						showProjects: true,
-						showProjectsIcon: "folder_open"
-					};
-					angular.forEach(value, function(project) {
-						data = {
-							name: project.name,
-							timestamp: project.timestamp,
-							bif4FreeEnabled: false
-						};
-						data.canUpload = (account.name === vm.account);
-						account.projects.push(data);
-					});
-					vm.accounts.push(account);
-					if (account.name === vm.account) {
-						userAccount = vm.accounts[vm.accounts.length - 1];
-						console.log(userAccount);
-					}
-					*/
 				});
 				setupBid4FreeAccess();
 			}
