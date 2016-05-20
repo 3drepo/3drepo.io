@@ -116,7 +116,7 @@ var responseCodes = {
 	REGISTER_DISABLE: {value: 63, message: 'Sign up function is disabled', status: 400},
 	PROJECT_EXIST: {value: 64, message: 'Project already exists', status: 400},
 	DATABASE_EXIST: {value: 65, message: 'Database already exists', status: 400 },
-	SIZE_LIMIT: {value: 66, message: 'Run of out database spaces. Please pay for more spaces.', status: 400},
+	SIZE_LIMIT: {value: 66, message: 'Run of out database space. Please pay for more space.', status: 400},
 	INVALID_SUBSCRIPTION_PLAN: {value: 67, message: 'Invalid subscription plan', status: 400},
 
 	MONGOOSE_VALIDATION_ERROR: function(err){

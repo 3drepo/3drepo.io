@@ -205,10 +205,18 @@ function freeSpace(account){
 	return User.findByUserName(account).then( dbUser => {
 
 		limits = dbUser.getSubscriptionLimits();
-		return User.dbStats(account);
+		return User.historyChunksStats(account);
 
 	}).then(stats => {
-		return Promise.resolve(limits.spaceLimit - stats.storageSize);
+		
+		let totalSize = 0;
+
+		stats.forEach(stat => {
+			console.log(stat.storageSize);
+			totalSize += stat.storageSize; 
+		});
+
+		return Promise.resolve(limits.spaceLimit - totalSize);
 	});
 
 }

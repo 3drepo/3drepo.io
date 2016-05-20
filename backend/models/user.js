@@ -80,9 +80,23 @@ var schema = mongoose.Schema({
 	roles: [{}]
 });
 
-schema.statics.dbStats = function(dbName){
+schema.statics.historyChunksStats = function(dbName){
 	'use strict';
-	 return ModelFactory.db.db(dbName).stats();
+
+	return ModelFactory.db.db(dbName).listCollections().toArray().then(collections => {
+
+		let historyChunks = _.filter(collections, collection => collection.name.endsWith('.history.chunks'));
+		let promises = [];
+		
+		historyChunks.forEach(collection => {
+			promises.push(ModelFactory.db.db(dbName).collection(collection.name).stats());
+		});
+
+		return Promise.all(promises);
+
+	});
+
+	
 };
 
 schema.statics.authenticate = function(logger, username, password){

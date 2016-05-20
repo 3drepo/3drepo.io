@@ -50,11 +50,12 @@ router.post('/:project/upload', middlewares.canCreateProject, uploadProject);
 
 
 function estimateImportedSize(format, size){
-	if(format === 'obj'){
-		return size * 5;
-	} else {
-		return size * 3;
-	}
+	// if(format === 'obj'){
+	// 	return size * 5;
+	// } else {
+	// 	return size * 3;
+	// }
+	return size;
 }
 
 function updateMapTileSettings(req, res, next){
@@ -274,17 +275,19 @@ function uploadProject(req, res, next){
 	//check space
 	function fileFilter(req, file, cb){
 
+		console.log(file);
 		middlewares.freeSpace(req.params.account).then(space => {
+
 			let format = file.originalname.split('.').splice(-1)[0];
 			let size = estimateImportedSize(format, parseInt(req.headers['content-length']));
 
-			console.log('format', format);
-			console.log('est size', size);
+			console.log('est upload file size', size);
+			console.log('space left', space);
 
 			if(size > space){
 				cb({ resCode: responseCodes.SIZE_LIMIT });
 			} else {
-				cb(null, false);
+				cb(null, true);
 			}
 		});
 
@@ -353,7 +356,7 @@ function uploadProject(req, res, next){
 
 				}).catch(err => {
 					// import failed for some reason(s)...
-					console.log(err);
+					console.log(err.stack);
 					//mark project ready
 					projectSetting && (projectSetting.status = 'failed');
 					projectSetting && projectSetting.save();
