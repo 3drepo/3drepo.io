@@ -1,39 +1,94 @@
+#!/bin/bash
+import os, shutil, urllib, sys, zipfile, re
+
 #github repository
 githubRepo = "https://github.com/3drepo/3drepo.io"
 
-#Release tag 
-release_tag = "v1.0.0b"
+#Release tag
+release_tag = "latest"
 
-#QT installer directory
-qtInstallerexe = "c:\\Qt\\QtIFW2.0.1\\bin\\binarycreator.exe"
+_platform = sys.platform
+
+#QT installer binary
+if _platform == "linux" or _platform == "linux2":
+   qtInstaller = "binarycreator"
+elif _platform == "darwin":
+   # MAC OS X
+   qtInstaller = "binarycreator"
+elif _platform == "win32":
+   # Windows
+   qtInstaller = "c:\\users\\timot\\Desktop\\installer-framework\\bin\\binarycreator.exe"
+   #qtInstaller = "c:\\Qt\\QtIFW2.0.1\\bin\\binarycreator.exe"
 
 #-------------------- SCRIPT BEGINS -----------------------------
-import os
-import shutil
 
-rootDir = os.getcwd();
-tmpDir = "tmp"
+releaseDir = os.getcwd()
+tmpDir = "."
 installerDir = os.path.join(tmpDir , "installer")
-repoioDir = os.path.join(tmpDir , "3drepo.io")
 
-os.system("mkdir  " + tmpDir);
-os.system("mkdir  " + installerDir);
+destDir = os.path.join(installerDir, "packages", "org.3drepo.io", "data")
+repoioDir = os.path.join(destDir, "3drepo.io")
+configDir = os.path.join(repoioDir, "config", "prod")
+x3domDir = os.path.join(repoioDir, "submodules", "x3dom")
+
+if os.path.exists(repoioDir):
+    print "Removing tmp directory"
+    shutil.rmtree(repoioDir)
+
+print "Creating tmp directory"
+
+#os.makedirs(tmpDir)
 
 #copy the installer into /tmp
-os.system("xcopy installer " + installerDir + " /s /e")
+print "Copying installer directory"
+#shutil.copytree("installer",installerDir)
 
 #clone and setup 3drepo.io
-os.chdir(tmpDir)
-os.system("git clone -b "  + release_tag + " --single-branch " + githubRepo);
-os.chdir("3drepo.io")
 
-#clone + compile x3dom 
-os.system("git submodule update --init");
-print os.getcwd();
-x3domDir = os.path.join("submodules", "x3dom")
-print x3domDir
+#Download latest release zipball
+print "Downloading 3drepo zip file"
+#urllib.urlretrieve("http://github.com/3drepo/3drepo.io/zipball/latest", "3drepo.zip")
+
+# Extract web server
+print "Extracting 3drepo zip file"
+repoFile = zipfile.ZipFile("3drepo.zip")
+repoFile.extractall(destDir)
+
+repoUnpackDir = [f for f in os.listdir(destDir) if re.match(r'3drepo-.*', f)]
+shutil.move(os.path.join(destDir, repoUnpackDir[0]), repoioDir)
+
+##create configuration file
+print "Creating configuration file"
+config_dir = os.path.join(repoioDir, "config", "prod")
+os.makedirs(config_dir)
+configFileMaster = os.path.join("extras", "config.js")
+configDestFile = os.path.join(config_dir, "config.js")
+
+shutil.copy(configFileMaster, configDestFile)
+
+cmdFile = os.path.join("extras", "launch3DRepoIO.cmd")
+shutil.copy(cmdFile, os.path.join(repoioDir, "launch3DRepoIO.cmd"))
+
+
+print "Downloading x3dom zip file"
+#rllib.urlretrieve("http://github.com/3drepo/x3dom/zipball/latest", "x3dom.zip")
+
+# Extract x3dom
+print "Extracting x3dom zip file"
+repoFile = zipfile.ZipFile("x3dom.zip")
+repoFile.extractall(repoioDir)
+
+x3domUnpackDir = [f for f in os.listdir(repoioDir) if re.match(r'3drepo-x3dom-.*', f)]
+
+shutil.rmtree(x3domDir)
+shutil.move(os.path.join(repoioDir, x3domUnpackDir[0]), x3domDir)
+
 os.chdir(x3domDir)
+
+print "Building x3dom"
 os.system("python manage.py --build")
+
+print "Cleaning x3dom"
 #remove everything apart from the distribution
 for dirname, subDirList, flist in os.walk('.'):
 	for subdirName in subDirList:
@@ -43,40 +98,18 @@ for dirname, subDirList, flist in os.walk('.'):
 		os.remove(fileName)
 	break
 
-os.chdir("..\\..\\")
+os.chdir(os.path.join("..",".."))
 
 #npm install
+print "NPM install"
 os.system("npm install --production")
 os.system("grunt frontend")
 
-#create configuration file
-config_dir = os.path.join("config", "prod")
-os.system("mkdir " + config_dir)
-configFileMaster = os.path.join(rootDir, "extras", "config.js");
-configDestFile = os.path.join(config_dir, "config.js")
-os.system("cp \"" + configFileMaster  + "\" " + configDestFile)
-cmdFile = os.path.join(rootDir,"extras", "launch3DRepoIO.cmd");
-os.system("cp \"" + cmdFile + "\" launch3DRepoIO.cmd")
-
-os.chdir(rootDir)
-#move 3drepo.io into the installer
-dataDir = os.path.join(installerDir, "packages", "org.3drepo.io", "data")
-for dirname, subDirList, flist in os.walk(repoioDir):
-	for subdirName in subDirList:
-		if not ".git" in subdirName:
-			pathToSrc = os.path.join(repoioDir, subdirName)
-			shutil.move(pathToSrc, dataDir)
-	for fileName in flist:
-		if not ".git" in subdirName:
-			pathToSrc = os.path.join(repoioDir, fileName)
-			shutil.move(pathToSrc, dataDir)
-	break
-	
+os.chdir(os.path.join("..","..","..",".."))
 
 #create the installer
+print "Creating installer"
 installerConfig = os.path.join(installerDir, "config.xml")
 packageDir = os.path.join(installerDir, "packages")
-os.system(qtInstallerexe + " -c "+installerConfig+" -p " + packageDir + " 3DRepoIO.exe")
-
-
+os.system(qtInstaller + " -c "+installerConfig+" -p " + packageDir + " 3DRepoIO.exe")
 

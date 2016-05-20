@@ -4,8 +4,8 @@
     <Version>1.0.0</Version>
     <Title>3D Repo Web Server</Title>
 	<Publisher>3D Repo Ltd</Publisher>
-    <StartMenuDir>3DRepo</StartMenuDir>
-	<TargetDir>@RootDir@/Program Files/3D Repo/3D Repo IO</TargetDir>
+	<StartMenuDir>3DRepo</StartMenuDir>
+	<TargetDir>@ApplicationsDir@/3DRepo/3DRepoIO</TargetDir>
     <ProductUrl>http://3drepo.org</ProductUrl>
-	<RunProgram>@RootDir@/Program Files/3D Repo/3D Repo IO/launch3DRepoIO.cmd</RunProgram>
+	<RunProgram>@TargetDir@/launch3DRepoIO.cmd</RunProgram>
 </Installer>
