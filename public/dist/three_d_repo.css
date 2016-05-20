@@ -834,9 +834,11 @@ home #homeLogo {
     left: 0;
     right: 0;
     margin: auto;
+    pointer-events: none;
 }
 home #homeLogo img {
     width: inherit;
+    pointer-events: inherit;
 }
 
 home .homeUserContent {
