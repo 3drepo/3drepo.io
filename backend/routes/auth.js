@@ -180,7 +180,9 @@
 			return Mailer.sendVerifyUserEmail(req.body.email, {
 				token : data.token,
 				email: req.body.email,
-				username: req.params.account
+				username: req.params.account,
+				pay: req.body.pay
+				
 			}).catch( err => {
 				// catch email error instead of returning to client
 				systemLogger.logDebug(`Email error - ${err.message}`, req);

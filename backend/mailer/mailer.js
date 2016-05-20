@@ -76,7 +76,7 @@ function getURL(urlName, params){
 function sendVerifyUserEmail(to, data){
 	'use strict';
 
-	data.url = getURL('verify', {token: data.token, username: data.username});
+	data.url = getURL('verify', {token: data.token, username: data.username, pay: data.pay});
 
 	if(!data.url){
 		return rejectNoUrl('verify');
