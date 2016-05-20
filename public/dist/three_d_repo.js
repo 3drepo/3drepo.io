@@ -4670,6 +4670,11 @@ var ViewerManager = {};
 			promise;
 
 		/*
+		 * Init
+		 */
+		vm.itemToShow = "repos";
+
+		/*
 		 * Get the account data
 		 */
 		$scope.$watch("vm.account", function()
@@ -4678,7 +4683,7 @@ var ViewerManager = {};
 			{
 				promise = AccountService.getData(vm.account);
 				promise.then(function (data) {
-					vm.username        = data.username;
+					vm.username        = vm.account;
 					vm.firstName       = data.firstName;
 					vm.lastName        = data.lastName;
 					vm.email           = data.email;
@@ -4694,6 +4699,61 @@ var ViewerManager = {};
 				vm.projectsGrouped = null;
 			}
 		});
+		
+		vm.showItem = function (item) {
+			vm.itemToShow = item;
+		};
+	}
+}());
+
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("accountInfo", accountInfo);
+
+	function accountInfo() {
+		return {
+			restrict: 'E',
+			templateUrl: 'accountInfo.html',
+			scope: {
+				username: "=",
+				firstName: "=",
+				lastName: "=",
+				email: "=",
+				onShowItem: "&"
+			},
+			controller: AccountInfoCtrl,
+			controllerAs: 'vm',
+			bindToController: true
+		};
+	}
+
+	AccountInfoCtrl.$inject = [];
+
+	function AccountInfoCtrl() {
+		var vm = this;
+
+		vm.showItem = function (item) {
+			vm.onShowItem({item: item});
+		};
 	}
 }());
 
@@ -5206,6 +5266,29 @@ var ViewerManager = {};
 		}
 
 		/**
+		 * Handle PUT requests
+		 * @param data
+		 * @param urlEnd
+		 * @returns {*}
+		 */
+		function doPut(data, urlEnd) {
+			var deferred = $q.defer(),
+				url = serverConfig.apiUrl(serverConfig.POST_API, urlEnd),
+				config = {withCredentials: true};
+
+			$http.put(url, data, config)
+				.then(
+					function (response) {
+						deferred.resolve(response);
+					},
+					function (error) {
+						deferred.resolve(error);
+					}
+				);
+			return deferred.promise;
+		}
+
+		/**
 		 * Get account data
 		 */
 		obj.getData = function (username) {
@@ -5251,14 +5334,7 @@ var ViewerManager = {};
 		 * @returns {*}
 		 */
 		obj.updateInfo = function (username, info) {
-			deferred = $q.defer();
-			$http.post(serverConfig.apiUrl(serverConfig.POST_API, username), info)
-				.then(function (response) {
-					console.log(response);
-					deferred.resolve(response);
-				});
-
-			return deferred.promise;
+			return doPut(info, username);
 		};
 
 		/**
@@ -5269,6 +5345,8 @@ var ViewerManager = {};
 		 * @returns {*}
 		 */
 		obj.updatePassword = function (username, passwords) {
+			return doPut(passwords, username);
+			/*
 			deferred = $q.defer();
 			$http.post(serverConfig.apiUrl(serverConfig.POST_API, username), passwords)
 				.then(function (response) {
@@ -5277,6 +5355,7 @@ var ViewerManager = {};
 				});
 
 			return deferred.promise;
+			*/
 		};
 
 		obj.getProjectsBid4FreeStatus = function (username) {

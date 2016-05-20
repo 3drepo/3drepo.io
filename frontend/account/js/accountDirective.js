@@ -42,6 +42,11 @@
 			promise;
 
 		/*
+		 * Init
+		 */
+		vm.itemToShow = "repos";
+
+		/*
 		 * Get the account data
 		 */
 		$scope.$watch("vm.account", function()
@@ -50,7 +55,7 @@
 			{
 				promise = AccountService.getData(vm.account);
 				promise.then(function (data) {
-					vm.username        = data.username;
+					vm.username        = vm.account;
 					vm.firstName       = data.firstName;
 					vm.lastName        = data.lastName;
 					vm.email           = data.email;
@@ -66,5 +71,9 @@
 				vm.projectsGrouped = null;
 			}
 		});
+		
+		vm.showItem = function (item) {
+			vm.itemToShow = item;
+		};
 	}
 }());

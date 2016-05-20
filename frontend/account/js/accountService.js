@@ -58,6 +58,29 @@
 		}
 
 		/**
+		 * Handle PUT requests
+		 * @param data
+		 * @param urlEnd
+		 * @returns {*}
+		 */
+		function doPut(data, urlEnd) {
+			var deferred = $q.defer(),
+				url = serverConfig.apiUrl(serverConfig.POST_API, urlEnd),
+				config = {withCredentials: true};
+
+			$http.put(url, data, config)
+				.then(
+					function (response) {
+						deferred.resolve(response);
+					},
+					function (error) {
+						deferred.resolve(error);
+					}
+				);
+			return deferred.promise;
+		}
+
+		/**
 		 * Get account data
 		 */
 		obj.getData = function (username) {
@@ -103,14 +126,7 @@
 		 * @returns {*}
 		 */
 		obj.updateInfo = function (username, info) {
-			deferred = $q.defer();
-			$http.post(serverConfig.apiUrl(serverConfig.POST_API, username), info)
-				.then(function (response) {
-					console.log(response);
-					deferred.resolve(response);
-				});
-
-			return deferred.promise;
+			return doPut(info, username);
 		};
 
 		/**
@@ -121,6 +137,8 @@
 		 * @returns {*}
 		 */
 		obj.updatePassword = function (username, passwords) {
+			return doPut(passwords, username);
+			/*
 			deferred = $q.defer();
 			$http.post(serverConfig.apiUrl(serverConfig.POST_API, username), passwords)
 				.then(function (response) {
@@ -129,6 +147,7 @@
 				});
 
 			return deferred.promise;
+			*/
 		};
 
 		obj.getProjectsBid4FreeStatus = function (username) {

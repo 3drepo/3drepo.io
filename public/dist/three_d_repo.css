@@ -119,24 +119,41 @@ account-projects md-progress-circular {
 }
 
 /** Account Profile ***************************************************************************************************/
-account-profile {
-  padding-left: 40px;
+account-profile #accountList {
+  max-height: calc(100vh - 200px);
+  overflow: auto;
 }
 
-account-profile .dataContainer {
+account-profile .profile {
   padding: 10px;
 }
 
-account-profile md-input-container {
+account-profile #profileDivider {
+  display: block;
+  background: rgba(0,0,0,0.2);
+  width: 1px;
+  height: 380px;
+}
+
+/** Account Info ******************************************************************************************************/
+account-info {
+  padding-left: 40px;
+}
+
+account-info .dataContainer {
+  padding: 10px;
+}
+
+account-info md-input-container {
   margin: 10px 0;
 }
-account-profile md-input-container input,
-account-profile md-input-container label {
+account-info md-input-container input,
+account-info md-input-container label {
   font-size: initial;
   color: rgba(0,0,0,0.7) !important;
 }
 
-account-profile p {
+account-info p {
   font-size: 14px;
   color: rgba(0,0,0,0.6);
 }

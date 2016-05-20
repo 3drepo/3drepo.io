@@ -7,7 +7,7 @@ input(type="file", id="fileUploader")
 				span(flex)
 
 		md-list#accountList(flex, ng-if="vm.projectsExist")
-			.accounts(ng-repeat="account in vm.accounts", flex)
+			div(ng-repeat="account in vm.accounts", flex)
 				div(layout="row", layout-align="start center")
 					md-list-item(flex="100", layout-fill)
 						.account(ng-click="vm.toggleProjectsList($index)", layout="row", layout-align="start center", md-ink-ripple, layout-fill)
