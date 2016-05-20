@@ -25,6 +25,7 @@ var utils = require("../utils");
 var History = require('./history');
 var projectSetting = require('./projectSetting');
 var Role = require('./role');
+var Mailer = require('../mailer/mailer');
 
 var schema = mongoose.Schema({
 	_id : String,
@@ -68,7 +69,10 @@ var schema = mongoose.Schema({
 			database: String,
 			payments: [{
 				gateway: String,
-				raw: {}
+				raw: {},
+				createdAt: Date,
+				currency: String,
+				amount: String
 			}]
 		}],
 		avatar: Object
@@ -402,6 +406,7 @@ function getSubscription(plan){
 }
 
 //TO-DO: payment, subscription activation methods, move to somewhere instead of staying in user.js
+// maybe something like schema.statics.subscriptions = require('...')
 schema.statics.getSubscription = function(plan) {
 	return subscriptions[plan];
 };
@@ -442,7 +447,7 @@ schema.methods.createSubscriptionToken = function(plan, billingUser){
 	}
 };
 
-schema.statics.activateSubscription = function(token, paymentInfo){
+schema.statics.activateSubscription = function(token, paymentInfo, disableEmail){
 	'use strict';
 	
 	let query = {'customData.subscriptions.token': token};
@@ -478,21 +483,47 @@ schema.statics.activateSubscription = function(token, paymentInfo){
 
 	}).then(() => {
 
-		var now = new Date();
+		let now = new Date();
 
-		var expiryAt = new Date(now.valueOf());
+		let expiryAt = new Date(now.valueOf());
 		expiryAt.setMonth(expiryAt.getMonth() + getSubscription(subscription.plan).billingCycle);
+
+		let payment = {
+			raw: paymentInfo,
+			gateway: 'PAYPAL',
+			createdAt: new Date(),
+			currency: paymentInfo.mc_currency,
+			amount: paymentInfo.mc_gross
+		};
 
 		subscription.limits = getSubscription(subscription.plan).limits;
 		subscription.expiredAt = expiryAt;
 		subscription.active = true;
-		subscription.payments.push({
-			raw: paymentInfo,
-			gateway: 'PAYPAL'
-		});
+		subscription.payments.push(payment);
+
+		if(!disableEmail){
+
+			//send verification email
+			let amount = payment.amount;
+			let currency = payment.currency;
+			if(currency === 'GBP'){
+				currency = '£';
+			}
+
+			User.findByUserName(subscription.billingUser).then(user => {
+				return Mailer.sendPaymentReceivedEmail(user.customData.email, {
+					account: account,
+					amount: currency + amount
+
+				});
+			}).catch(err => {
+				console.log('Email Error', err);
+			});
+
+		}
 
 		return dbUser.save().then(() => {
-			return Promise.resolve(subscription);
+			return Promise.resolve({subscription, account, payment});
 		});
 		
 	});
@@ -519,6 +550,46 @@ schema.methods.getSubscriptionLimits = function(){
 	});
 
 	return sumLimits;
+};
+
+schema.statics.findSubscriptionsByBillingUser = function(billingUser){
+	'use strict';
+
+	let subscriptions = [];
+
+	return this.find({account: 'admin'}, { 
+		'customData.subscriptions.billingUser': billingUser, 
+	}).then( dbUsers => {
+
+		dbUsers.forEach(dbUser => {
+	
+			let dbSubs = _.filter(dbUser.customData.subscriptions, subscription => subscription.billingUser === billingUser);
+			dbSubs.forEach(dbSub => {
+
+				dbSub = dbSub.toObject();
+				dbSub.db = dbUser.user;
+				subscriptions.push(dbSub);
+			});
+			
+		});
+
+		return Promise.resolve(subscriptions);
+
+	});
+};
+
+schema.statics.findSubscriptionByToken = function(billingUser, token){
+	'use strict';
+
+	return this.findOne({account: 'admin'}, { 
+		'customData.subscriptions.billingUser': billingUser, 
+		'customData.subscriptions.token': token
+	}, {
+		'customData.subscriptions.$': 1
+	}).then( dbUser => {
+
+		return Promise.resolve(dbUser.customData.subscriptions[0]);
+	});
 };
 
 var User = ModelFactory.createClass(

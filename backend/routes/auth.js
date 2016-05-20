@@ -36,6 +36,8 @@
 	router.post("/logout", logout);
 	router.get("/:account.json", middlewares.hasReadAccessToAccount, listInfo);
 	router.get("/:account.jpg", middlewares.hasReadAccessToAccount, getAvatar);
+	router.get("/:account/subscriptions", middlewares.hasReadAccessToAccount, listSubscriptions);
+	router.get("/:account/subscriptions/:token", middlewares.hasReadAccessToAccount, findSubscriptionByToken);
 	router.post('/:account', signUp);
 	router.post('/:account/database', middlewares.hasWriteAccessToAccount, createDatabase);
 	router.post('/:account/verify', verify);
@@ -364,6 +366,29 @@
 		});
 	}
 
+	function listSubscriptions(req, res, next){
+
+		let responsePlace = utils.APIInfo(req);
+		User.findSubscriptionsByBillingUser(req.params.account).then(subscriptions => {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscriptions);
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+	}
+
+	function findSubscriptionByToken(req, res, next){
+
+		let responsePlace = utils.APIInfo(req);
+		let billingUser = req.params.account;
+		let token = req.params.token;
+
+		User.findSubscriptionByToken(billingUser, token).then(subscription => {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+
+	}
 
 	module.exports = router;
 

@@ -47,8 +47,10 @@ function activateSubscription(req, res, next){
 			});
 		}
 
-	}).then(subscription => {
-		console.log(subscription, 'payment confirmed and subscription activated');
+	}).then(resData => {
+		console.log(resData.subscription, 'payment confirmed and subscription activated');
+
+
 	}).catch( err => {
 		console.log('error:');
 		console.log(err);

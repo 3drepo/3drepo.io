@@ -100,7 +100,15 @@ function sendResetPasswordEmail(to, data){
 	return sendEmail(template, to, data);
 }
 
+function sendPaymentReceivedEmail(to, data){
+	'use strict';
+
+	let template = require('./templates/paymentReceived');
+	return sendEmail(template, to, data);
+}
+
 module.exports = {
 	sendVerifyUserEmail,
-	sendResetPasswordEmail
+	sendResetPasswordEmail,
+	sendPaymentReceivedEmail
 }

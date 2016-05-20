@@ -26,7 +26,8 @@ let User = proxyquire('../../../models/user', {
 		};
 	}, 
 	'mongoose': mongoose, 
-	'./factory/modelFactory':  modelFactoryMock
+	'./factory/modelFactory':  modelFactoryMock,
+	'../mailer/mailer': {}
 });
 
 
