@@ -1,0 +1,44 @@
+register-form #tc {
+    margin-bottom: 10px;
+    margin-left: 5px;
+    width: 300px;
+}
+register-form #tc md-checkbox {
+    margin : 0 0 0 2px;
+}
+register-form #tc md-checkbox ._md-icon {
+    border-color: rgba(0, 0, 0, 0.4);
+}
+register-form #tc a {
+    font-size: 14px;
+    margin-left: 5px;
+}
+register-form #tc p {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.7);
+}
+register-form #tc a {
+    outline: none;
+}
+
+register-form #loginCaptcha {
+    margin: -5px 30px 10px 7px;
+}
+
+register-form #registerWait {
+    height: 30px;
+}
+register-form #registerWait p {
+    margin: 0 10px 0 0;
+    color: rgba(0, 0, 0, 0.7);
+    font-size: 14px;
+}
+register-form #registerWait md-progress-circular,
+register-form #registerWait svg {
+    width: 20px !important;
+}
+register-form #loginPricing {
+    font-size: 14px;
+    margin-left: 30px;
+    outline: none;
+}

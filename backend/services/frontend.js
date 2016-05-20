@@ -140,6 +140,14 @@ module.exports.createApp = function(serverConfig)
 				"url": "pricing"
 			},
 			{
+				"plugin": "register",
+				"url": "register"
+			},
+			{
+				"plugin": "contact",
+				"url": "contact"
+			},
+			{
 				"plugin": "account",
 				"children": [
 					{

@@ -177,19 +177,26 @@
 		};
 
 		this.handleStateChange = function(stateChangeObject) {
-			var param;
+			var param,
+				fromState = stateChangeObject.fromState.name.split(".");
 
 			var fromParams = stateChangeObject.fromParams;
 			var toParams   = stateChangeObject.toParams;
-			
-			// Handle going back to the home page, because fromParams will be empty
+
 			if (stateChangeObject.toState.url === "/") {
-				var fromState = stateChangeObject.fromState.name.split(".");
+				// Handle going back to the home page, because fromParams will be empty
 				fromParams = {};
 				for (i = 1; i < fromState.length; i += 1) {
 					fromParams[fromState[i]] = true;
 				}
 				toParams = {};
+			}
+			else if (stateChangeObject.toState.url.indexOf("/") === -1) {
+				// Handle going from one home sub page to another, because fromParams will be empty
+				fromParams = {};
+				for (i = 1; i < fromState.length; i += 1) {
+					fromParams[fromState[i]] = true;
+				}
 			}
 
 			// Switch off all parameters that we came from

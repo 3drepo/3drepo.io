@@ -19,22 +19,24 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("login", login);
+		.directive("registerForm", registerForm);
 
-	function login() {
+	function registerForm() {
 		return {
 			restrict: "EA",
-			templateUrl: "login.html",
-			scope: {},
-			controller: LoginCtrl,
+			templateUrl: "registerForm.html",
+			scope: {
+				buttonLabel: "@"
+			},
+			controller: RegisterFormCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	LoginCtrl.$inject = ["$scope", "$mdDialog", "$location", "Auth", "EventService", "serverConfig"];
+	RegisterFormCtrl.$inject = ["$scope", "$mdDialog", "$location", "serverConfig", "RegisterFormService"];
 
-	function LoginCtrl($scope, $mdDialog, $location, Auth, EventService, serverConfig) {
+	function RegisterFormCtrl($scope, $mdDialog, $location, serverConfig, RegisterFormService) {
 		var vm = this,
 			enterKey = 13,
 			promise;
@@ -55,7 +57,6 @@
 		/*
 		 * Auth stuff
 		 */
-		console.log(serverConfig);
 		if (serverConfig.hasOwnProperty("auth")) {
 			if (serverConfig.auth.hasOwnProperty("register") && (serverConfig.auth.register)) {
 				vm.useRegister = true;
@@ -63,12 +64,6 @@
 					vm.useReCapthca = true;
 				}
 			}
-		}
-
-		// Logo
-		if (angular.isDefined(serverConfig.backgroundImage))
-		{
-			vm.enterpriseLogo = serverConfig.backgroundImage;
 		}
 
 		/*
@@ -80,22 +75,6 @@
 			}
 		}, true);
 
-		/**
-		 * Attempt to login
-		 *
-		 * @param {Object} event
-		 */
-		vm.login = function(event) {
-			if (angular.isDefined(event)) {
-				if (event.which === enterKey) {
-					Auth.login(vm.user.username, vm.user.password);
-				}
-			}
-			else {
-				Auth.login(vm.user.username, vm.user.password);
-			}
-		};
-		
 		/**
 		 * Attempt to register
 		 *
@@ -129,18 +108,6 @@
 		vm.showPage = function (page) {
 			$location.path("/" + page, "_self");
 		};
-
-		/*
-		 * Event watch
-		 */
-		$scope.$watch(EventService.currentEvent, function(event) {
-			if (event.type === EventService.EVENT.USER_LOGGED_IN) {
-				// Show an error message for incorrect login
-				if (event.value.hasOwnProperty("error") && (event.value.error.place.indexOf("POST") !== -1)) {
-					vm.errorMessage = event.value.error.message;
-				}
-			}
-		});
 
 		/**
 		 * Close the dialog
@@ -180,7 +147,7 @@
 						data.captcha = vm.reCaptchaResponse;
 					}
 					vm.registering = true;
-					promise = LoginService.register(vm.newUser.username, data);
+					promise = RegisterFormService.register(vm.newUser.username, data);
 					promise.then(function (response) {
 						if (response.status === 200) {
 							vm.showPage("registerRequest");

@@ -19,31 +19,22 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("pricing", pricing);
+		.directive("contact", contact);
 
-	function pricing() {
+	function contact() {
 		return {
 			restrict: "E",
 			scope: {},
-			templateUrl: "pricing.html",
-			controller: PricingCtrl,
+			templateUrl: "contact.html",
+			controller: ContactCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	PricingCtrl.$inject = ["$location"];
+	ContactCtrl.$inject = ["$location"];
 
-	function PricingCtrl ($location) {
+	function ContactCtrl ($location) {
 		var vm = this;
-
-		/**
-		 * Go to a sub page
-		 * 
-		 * @param page
-		 */
-		vm.showPage = function (page) {
-			$location.path("/" + page, "_self");
-		};
 	}
 }());

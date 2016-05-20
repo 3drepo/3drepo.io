@@ -23,7 +23,7 @@
 						#loginDivider(flex)
 
 					// Register
-					#loginRegister(layout="column", flex)
+					//#loginRegister(layout="column", flex)
 						h3.loginTitle Register
 						md-input-container.md-block(md-no-float)
 							input(type='text', ng-model='vm.newUser.username', placeholder='Username', ng-required, ng-keypress="vm.register($event)")
@@ -44,3 +44,7 @@
 								md-progress-circular(md-mode="indeterminate")
 							a#loginPricing(href="", ng-if="!vm.registering", ng-click="vm.showPage('pricing')") Pricing
 						h4.loginError {{vm.registerErrorMessage}}
+
+					#loginRegister(layout="column", flex)
+						h3.loginTitle Register
+						register-form(button-label="register For Free")

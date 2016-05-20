@@ -21,9 +21,12 @@ pricing .pricingIcon {
     margin-bottom: 10px;
     width: 40px;
 }
+pricing .pricingIcon#pricingAdvancedIcon {
+    color: #FF9800;
+}
 
 pricing .pricingPrice {
-    height: 110px;
+    height: 100px;
 }
 pricing .pricingPriceTitle {
     margin: 10px 0;
@@ -35,7 +38,7 @@ pricing .pricingPriceSubtitle {
 }
 
 pricing .pricingInfo {
-    height: 340px;
+    height: 350px;
 }
 pricing .pricingInfo .pricingInfoLine {
     margin: 10px 0;

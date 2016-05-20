@@ -1,0 +1,11 @@
+.homeUserContent(layout="row", layout-align="center")
+	md-content.md-whiteframe-1dp(aria-label="Register", flex="20")
+		md-toolbar
+			.md-toolbar-tools(layout-align="center center")
+				h2 Contact Us
+		.userContent(layout="column", layout-align="start center", layout-fill)
+			md-input-container.md-block(md-no-float, layout-fill)
+				textarea(ng-model='vm.info', placeholder='Contact information')
+			md-button.md-accent.md-raised(ng-click="vm.send()") Send
+			h3 Or
+			h3 Call us on (44) 207 123 4567

@@ -1,5 +1,6 @@
-.homeUserContent(layout="row", layout-align="center", flex)
-	md-content.md-whiteframe-1dp(aria-label="Registered", flex="15")
+.homeUserContent(layout="row", layout-align="center")
+	// Basic
+	md-content.md-whiteframe-1dp(aria-label="Basic", flex="15")
 		md-toolbar
 			.md-toolbar-tools(layout-align="center center")
 				h2 Basic
@@ -17,14 +18,15 @@
 					h3 Collaborate
 			md-divider(layout-fill)
 			div(layout="row", layout-align="center center", layout-fill)
-				md-button.md-raised.md-accent(ng-click="vm.passwordChange()") Sign Up
+				md-button.md-raised.md-accent(ng-click="vm.showPage('register')") Sign Up
 
-	md-content.md-whiteframe-8dp(aria-label="Registered", flex="15")
+	// Advanced
+	md-content.md-whiteframe-8dp(aria-label="Advanced", flex="15")
 		md-toolbar
 			.md-toolbar-tools(layout-align="center center")
 				h2#pricingMiddlePanelTitle Advanced
 		.userContent(layout="column", layout-align="start center")
-			md-icon.angular-material-icons.pricingIcon grade
+			md-icon.angular-material-icons.pricingIcon#pricingAdvancedIcon grade
 			.pricingPrice(layout="column", layout-align="start center")
 				div(layout="row", layout-align="center center")
 					h3.md-display-2.pricingPriceTitle £100
@@ -45,9 +47,10 @@
 					h3 Collaborate
 			md-divider(layout-fill)
 			div(layout="row", layout-align="center center", layout-fill)
-				md-button.md-raised.md-accent(ng-click="vm.passwordChange()") Sign Up
+				md-button.md-raised.md-accent(ng-click="vm.showPage('register')") Sign Up
 
-	md-content.md-whiteframe-1dp(aria-label="Registered", flex="15")
+	// Enterprise
+	md-content.md-whiteframe-1dp(aria-label="Enterprise", flex="15")
 		md-toolbar
 			.md-toolbar-tools(layout-align="center center")
 				h2 Enterprise
@@ -74,4 +77,4 @@
 					h3 Custom Development
 			md-divider(layout-fill)
 			div(layout="row", layout-align="center center", layout-fill)
-				md-button.md-raised.md-accent(ng-click="vm.passwordChange()") GET IN TOUCH
+				md-button.md-raised.md-accent(ng-click="vm.showPage('contact')") Get In Touch
