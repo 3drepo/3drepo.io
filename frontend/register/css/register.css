@@ -8,3 +8,8 @@ register md-input-container input {
     height: 35px !important;
     background: #ffffff !important;
 }
+
+register .registerLinks {
+    font-size: 14px;
+    margin: 5px 0;
+}

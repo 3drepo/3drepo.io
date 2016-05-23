@@ -1142,9 +1142,7 @@ login h3 {
 login #loginVersion{
   color: rgba(0, 0, 0 , 0.3);
   font-size: 14px;
-  position: absolute;
-  bottom: 10px;
-  left: 25px;
+  margin: 10px 0 0;
 }
 
 login md-input-container {
@@ -1160,7 +1158,8 @@ login md-input-container input {
 
 login .loginError {
   color: #F44336;
-  margin: 5px 0 0 8px;
+  margin: 5px 0 5px;
+  font-weight: normal;
 }
 
 login .loginTitle {
@@ -1168,9 +1167,9 @@ login .loginTitle {
   color: rgba(0, 0, 0, 0.5) !important;
 }
 
-login #forgotPassword {
+login .loginLinks {
   font-size: 14px;
-  margin: 5px 8px;
+  margin: 5px 0;
 }
 
 login #loginDivider {
@@ -1190,12 +1189,10 @@ login #loginDivider {
 }
 
 register-form #tc {
-    margin-bottom: 10px;
-    margin-left: 5px;
     width: 300px;
 }
 register-form #tc md-checkbox {
-    margin : 0 0 0 2px;
+    margin : 0;
 }
 register-form #tc md-checkbox ._md-icon {
     border-color: rgba(0, 0, 0, 0.4);
@@ -1232,6 +1229,12 @@ register-form #loginPricing {
     font-size: 14px;
     margin-left: 30px;
     outline: none;
+}
+
+register-form .registerError {
+    color: #F44336;
+    margin: 5px 0 5px;
+    font-weight: normal;
 }
 
 /** Panel *************************************************************************************************************/
@@ -1487,6 +1490,11 @@ register md-input-container input {
     margin-bottom: -15px;
     height: 35px !important;
     background: #ffffff !important;
+}
+
+register .registerLinks {
+    font-size: 14px;
+    margin: 5px 0;
 }
 
 right-panel {

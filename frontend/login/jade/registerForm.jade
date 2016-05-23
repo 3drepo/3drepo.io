@@ -15,5 +15,5 @@ div(layout="row", layout-align="start center")
 	#registerWait(ng-if="vm.registering", layout="row", layout-align="start center")
 		p Registering...
 		md-progress-circular(md-mode="indeterminate")
-	a#loginPricing(href="", ng-if="!vm.registering", ng-click="vm.showPage('pricing')") Pricing
-h4.loginError {{vm.registerErrorMessage}}
+h4.registerError {{vm.registerErrorMessage}}
+a.registerLinks(href="", ng-click="vm.showPage('pricing')") Pricing
