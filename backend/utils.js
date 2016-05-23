@@ -239,7 +239,7 @@ function Utils() {
       } else if(err.name === 'MongoError') {
         return responseCodes.DB_ERROR(err);
       } else {
-        return responseCodes.PROCESS_ERROR(err);
+        return err;
       }
     };
 

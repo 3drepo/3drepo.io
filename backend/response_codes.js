@@ -115,6 +115,9 @@ var responseCodes = {
 	INVALID_CAPTCHA_RES: {value: 62, message: 'Invalid captcha', status: 400},
 	REGISTER_DISABLE: {value: 63, message: 'Sign up function is disabled', status: 400},
 	PROJECT_EXIST: {value: 64, message: 'Project already exists', status: 400},
+	DATABASE_EXIST: {value: 65, message: 'Database already exists', status: 400 },
+	SIZE_LIMIT: {value: 66, message: 'Run of out database space. Please pay for more space.', status: 400},
+	INVALID_SUBSCRIPTION_PLAN: {value: 67, message: 'Invalid subscription plan', status: 400},
 
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {
@@ -164,16 +167,22 @@ var responseCodes = {
 	PROCESS_ERROR: function(message) {
 		 "use strict";
 
+		 if (typeof message !== 'string' && typeof message.message !== 'string'){
+		 	message = JSON.stringify(message);
+		 } else if (typeof message !== 'string' && typeof message.message === 'string'){
+		 	message = message.message;
+		 }
+
 		 return {
 			value: 4000,
-			message: typeof message === 'string' ? message : JSON.stringify(message),
+			message: message,
 			status: 500
 		};
 	}
 };
 
 var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
-49,  50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 1000, 2000, 3000, 4000];
+49,  50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 1000, 2000, 3000, 4000];
 
 var mimeTypes = {
 	"src"  : "application/json",
@@ -189,9 +198,19 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 {
 	"use strict";
 
+
 	if (!resCode || valid_values.indexOf(resCode.value) === -1) {
 
-		throw Error("Unspecified error code [" + JSON.stringify(resCode) + " @ " + place + "]");
+		//throw Error("Unspecified error code [" + JSON.stringify(resCode) + " @ " + place + "]");
+		if(resCode && resCode.stack){
+			req[C.REQ_REPO].logger.logError(resCode.stack, req);
+		} else if (resCode && resCode.message) {
+			req[C.REQ_REPO].logger.logError(resCode.message, req);
+		} else {
+			req[C.REQ_REPO].logger.logError(JSON.stringify(resCode), req);
+		}
+
+		resCode = responseCodes.PROCESS_ERROR(resCode);
 	}
 
 	if (resCode.value) // Prepare error response
@@ -199,7 +218,8 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 		let responseObject = _.extend({}, extraInfo, {
 			place: place,
 			status: resCode.status,
-			message: resCode.message
+			message: resCode.message,
+			value: resCode.value
 		});
 
 		// if (!extraInfo) {

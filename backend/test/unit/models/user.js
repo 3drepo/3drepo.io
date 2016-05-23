@@ -26,7 +26,8 @@ let User = proxyquire('../../../models/user', {
 		};
 	}, 
 	'mongoose': mongoose, 
-	'./factory/modelFactory':  modelFactoryMock
+	'./factory/modelFactory':  modelFactoryMock,
+	'../mailer/mailer': {}
 });
 
 
@@ -94,7 +95,10 @@ describe('User', function(){
 
 			return user.updateInfo(updateObj).then(user => {
 				// user updated 
-				expect(user.toObject().customData).to.deep.equal(updateObj);
+				//expect(user.toObject().customData).to.deep.equal(updateObj);
+				expect(user.toObject()).to.have.deep.property('customData.firstName', updateObj.firstName);
+				expect(user.toObject()).to.have.deep.property('customData.lastName', updateObj.lastName);
+				expect(user.toObject()).to.have.deep.property('customData.email', updateObj.email);
 				// save should've been called once
 				sinon.assert.calledOnce(spy);
 

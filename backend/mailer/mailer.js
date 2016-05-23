@@ -58,18 +58,25 @@ function rejectNoUrl(name){
 }
 
 function getURL(urlName, params){
+	'use strict';
 
 	if(!config.mail || !config.mail.urls || !config.mail.urls[urlName]){
 		return null;
 	}
 
-	return config.mail.urls[urlName](params);
+	let port = '';
+	if(config.using_ssl && config.port !== 443 || !config.using_ssl && config.port !== 80){
+		port = ':' + config.port
+	}
+
+	let baseUrl = (config.using_ssl ? 'https://' : 'http://') + config.host + port;
+	return baseUrl + config.mail.urls[urlName](params);
 }
 
 function sendVerifyUserEmail(to, data){
 	'use strict';
 
-	data.url = getURL('verify', {token: data.token, username: data.username});
+	data.url = getURL('verify', {token: data.token, username: data.username, pay: data.pay});
 
 	if(!data.url){
 		return rejectNoUrl('verify');
@@ -93,7 +100,15 @@ function sendResetPasswordEmail(to, data){
 	return sendEmail(template, to, data);
 }
 
+function sendPaymentReceivedEmail(to, data){
+	'use strict';
+
+	let template = require('./templates/paymentReceived');
+	return sendEmail(template, to, data);
+}
+
 module.exports = {
 	sendVerifyUserEmail,
-	sendResetPasswordEmail
+	sendResetPasswordEmail,
+	sendPaymentReceivedEmail
 }

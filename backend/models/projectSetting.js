@@ -41,6 +41,8 @@ var schema = mongoose.Schema({
 });
 
 schema.statics.mapTilesProp = ['lat', 'lon', 'width', 'height'];
+
+
 schema.methods.updateMapTileCoors = function(updateObj){
 	'use strict';
 

@@ -18,7 +18,6 @@
 var express = require('express');
 var router = express.Router({mergeParams: true});
 var middlewares = require('./middlewares');
-//var dbInterface = require("../db/db_interface.js");
 // var config = require('../config');
 var C = require("../constants");
 var responseCodes = require('../response_codes.js');
@@ -28,8 +27,8 @@ var utils = require('../utils');
 var stringToUUID = utils.stringToUUID;
 // var uuidToString = utils.uuidToString;
 //var mongo    = require("mongodb");
-// assuming master branch for now
-var dbInterface = require("../db/db_interface.js");
+
+var History = require('../models/history');
 
 router.get('/', middlewares.hasReadAccessToProject, listGroups);
 router.get('/:uid', middlewares.hasWriteAccessToProject, findGroup);
@@ -93,15 +92,19 @@ function createGroup(req, res, next){
 	group.save().then(group => {
 
 		//TO-DO: remove it or keep it, if keep it, push the error
-		dbInterface(req[C.REQ_REPO].logger).addToCurrentList(req.params.account, req.params.project, 'master', utils.uuidToMongoBuf3(group._id), err => {
+		History.findByBranch(getDbColOptions(req), 'master').then(history => {
+
+			history.addToCurrent(group._id);
+			return history.save();
+
+		}).catch(err => {
 			console.log(err);
-		}); 
+		});
 
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group.clean());
 		next();
 
 	}).catch(err => {
-		console.log(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		next();
 	});
@@ -113,22 +116,25 @@ function deleteGroup(req, res, next){
 	let place = utils.APIInfo(req);
 
 	Group.findOneAndRemove(getDbColOptions(req), { _id : stringToUUID(req.params.id)}).then( removedDocs => {
-		//TO-DO: remove it or keep it, if keep it, push the error
 
+		//TO-DO: remove it or keep it, if keep it, push the error
 		if(!removedDocs){
 			return Promise.reject({resCode: responseCodes.GROUP_NOT_FOUND});
 		}
 
-		dbInterface(req[C.REQ_REPO].logger).removeFromCurrentList(req.params.account, req.params.project, 'master', stringToUUID(req.params.id), err => {
+		History.findByBranch(getDbColOptions(req), 'master').then(history => {
+
+			history.removeFromCurrent(stringToUUID(req.params.id));
+			return history.save();
+
+		}).catch(err => {
 			console.log(err);
-		}); 
+		});
 
 		responseCodes.respond(place, req, res, next, responseCodes.OK, { 'status': 'success'});
 		//next();	
 
 	}).catch(err => {
-
-		console.log(err);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		//next();	
 	});

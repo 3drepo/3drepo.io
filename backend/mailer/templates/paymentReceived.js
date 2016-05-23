@@ -18,14 +18,13 @@
 var html = data => `
 	Hi there,<br>
 	<br>
-	Let's confirm your email address.<br>
-	By clicking on the following link, you are confirming your email address ${data.email} 
-	and agreeing to 3D Repo's Terms of Service.<br> 
-	<br>
-	<a href="${data.url}">Confirm Email Address</a>
+	Your payment of ${data.amount} is confirmed and you can start uploading projects in your 
+	${data.account} repository.
 `;
+
+var subject = 'Your payment to 3D Repo is confirmed';
 
 module.exports =  {
 	html: html,
-	subject: 'Welcome To 3D Repo! Verify Your Email‏'
+	subject: subject
 };

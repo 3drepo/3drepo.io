@@ -218,7 +218,8 @@
 				comment: "",
 				number: issue.number,
 				delete: true,
-				commentCreated: issue.comments[index].created
+				commentIndex: index
+				// commentCreated: issue.comments[index].created
 			});
 		};
 
@@ -226,7 +227,7 @@
 			return doPut(issue, {
 				comment: "",
 				number: issue.number,
-				set: true,
+				sealed: true,
 				commentIndex: commentIndex
 			});
 		};

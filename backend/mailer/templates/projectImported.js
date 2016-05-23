@@ -18,7 +18,7 @@
 var html = data => `
 	Hi there,<br>
 	<br>
-	Your project ${data.project} has been processed successfully without errors and is now ready for use.<br><br>
+	Your project ${data.project} has been processed successfully without errors and is now ready.<br><br>
 	<a href="${data.url}">Go to my project</a>
 `;
 

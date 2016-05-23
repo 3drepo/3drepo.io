@@ -110,8 +110,8 @@ module.exports = {
 		sender: '"3D Repo" <support@3drepo.org>',
 
 		urls: {
-			'forgotPassword': data => `https://3drepo.io/users/abcdefg?username=${data.username}&token=${data.token}`,
-			'verify': data => `https://3drepo.io/users/confirm?username=${data.username}&token=${data.token}`
+			'forgotPassword': data => `/passwordChange?username=${data.username}&token=${data.token}`,
+			'verify': data => `/registerVerify?username=${data.username}&token=${data.token}` + (data.pay ? '&pay=true' : '')
 		}
 	},
 	
