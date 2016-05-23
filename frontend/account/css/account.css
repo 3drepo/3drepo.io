@@ -97,7 +97,7 @@ account-projects .projectRight {
   margin-right: 55px !important;
 }
 
-account-projects #newProjectButton {
+account-projects #newDatabaseButton {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -177,7 +177,7 @@ logout md-icon {
   outline: none;
 }
 
-/** Account Menu *****************************************************************************************************/
+/** Account Menu ******************************************************************************************************/
 account-menu {
   position: absolute;
   top: 0;
@@ -208,4 +208,20 @@ account-menu md-icon {
 
 .newProjectDialog #newProjectIcon {
   margin-right: 10px;
+}
+
+/** New Database Dialog ***********************************************************************************************/
+.newDatabaseDialog {
+  min-width: 350px;
+  min-height: 250px;
+  overflow: hidden;
+}
+
+.newDatabaseDialog #newProjectIcon {
+  margin-right: 10px;
+}
+
+.newDatabaseDialog .databaseDialogInfo {
+  font-weight: normal;
+  color: rgba(0,0,0,0.7);
 }

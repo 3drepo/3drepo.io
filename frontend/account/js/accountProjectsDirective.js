@@ -35,9 +35,9 @@
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$mdDialog", "$element", "AccountService"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$mdDialog", "$element", "$timeout", "AccountService"];
 
-	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, AccountService) {
+	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, $timeout, AccountService) {
 		var vm = this,
 			promise,
 			bid4FreeProjects = null,
@@ -57,6 +57,7 @@
 		vm.accounts = [];
 		vm.info = "Retrieving projects..,";
 		vm.showProgress = true;
+		vm.paypalReturnUrl = "http://3drepo.io/";
 
 		promise = AccountService.getProjectsBid4FreeStatus(vm.account);
 		promise.then(function (data) {
@@ -117,6 +118,16 @@
 					vm.newProjectButtonDisabled =
 						(angular.isUndefined(newValue.otherType) || (angular.isDefined(newValue.otherType) && (newValue.otherType === "")));
 				}
+			}
+		}, true);
+
+		/*
+		 * Watch new database name
+		 */
+		$scope.$watch("vm.newDatabaseName", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				vm.newDatabaseButtonDisabled =
+					(angular.isUndefined(newValue) || (angular.isDefined(newValue) && (newValue.toString() === "")));
 			}
 		}, true);
 
@@ -235,6 +246,48 @@
 				}
 			);
 			fileUploader.click();
+		};
+
+		/**
+		 * Create a new database
+		 */
+		vm.newDatabase = function (event) {
+			vm.newDatabaseName = "";
+			vm.showPaymentWait = false;
+			vm.newDatabaseToken = false;
+			$mdDialog.show({
+				controller: function () {},
+				templateUrl: "databaseDialog.html",
+				parent: angular.element(document.body),
+				targetEvent: event,
+				clickOutsideToClose:true,
+				fullscreen: true,
+				scope: $scope,
+				preserveScope: true,
+				onRemoving: function () {$scope.closeDialog();}
+			});
+		};
+
+		/**
+		 * Save a new database
+		 */
+		vm.saveNewDatabase = function () {
+			promise = AccountService.newDatabase(vm.account, vm.newDatabaseName);
+			promise.then(function (response) {
+				console.log(response);
+				vm.newDatabaseToken = response.data.token;
+			});
+		};
+
+		/**
+		 * Show waiting before going to payment page
+		 * $timeout required otherwise Submit does not work
+		 */
+		vm.setupPayment = function () {
+			$timeout(function () {
+				console.log(vm.newDatabaseToken);
+				vm.showPaymentWait = true;
+			});
 		};
 
 		/**

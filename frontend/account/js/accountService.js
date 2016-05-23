@@ -173,11 +173,31 @@
 			return doPost(data, projectData.account + "/" + projectData.name);
 		};
 
+		/**
+		 * Upload file/model to database
+		 *
+		 * @param projectData
+		 * @returns {*|promise}
+		 */
 		obj.uploadModel = function (projectData) {
-			console.log(projectData);
 			var data = new FormData();
 			data.append("file", projectData.uploadFile);
 			return doPost(data, projectData.account + "/" + projectData.project + "/upload", {'Content-Type': undefined});
+		};
+
+		/**
+		 * Create a new database
+		 *
+		 * @param account
+		 * @param databaseName
+		 * @returns {*|promise}
+		 */
+		obj.newDatabase = function (account, databaseName) {
+			var data = {
+				database: databaseName,
+				plan: "THE-100-QUID-PLAN"
+			};
+			return doPost(data, account + "/database");
 		};
 
 		return obj;

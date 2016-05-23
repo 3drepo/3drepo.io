@@ -35,16 +35,28 @@
         };
     }
 
-    RegisterVerifyCtrl.$inject = ["$scope", "$location", "RegisterVerifyService"];
+    RegisterVerifyCtrl.$inject = ["$scope", "$location", "RegisterVerifyService", "AccountService"];
 
-    function RegisterVerifyCtrl ($scope, $location, RegisterVerifyService) {
+    function RegisterVerifyCtrl ($scope, $location, RegisterVerifyService, AccountService) {
         var vm = this,
-            promise;
+            promise,
+            username = $location.search().username,
+            pay = (($location.search().hasOwnProperty("pay")) && $location.search().pay);
 
         /*
          * Init
          */
         vm.verified = false;
+        vm.showPaymentWait = false;
+        vm.paypalReturnUrl = "http://3drepo.io/";
+        // Create database with username if paying
+        if (pay) {
+            promise = AccountService.newDatabase(username, username);
+            promise.then(function (response) {
+                console.log(response);
+                vm.newDatabaseToken = response.data.token;
+            });
+        }
 
         /*
          * Watch the token value
@@ -56,7 +68,7 @@
                 promise.then(function (response) {
                     if (response.status === 200) {
                         vm.verified = true;
-                        vm.verifySuccessMessage = "Congratulations. You have successfully registered for 3D Repo. You may now login to you account.";
+                        vm.verifySuccessMessage = "Congratulations. You have successfully signed up for 3D Repo. You may now login to you account.";
                     }
                     else if (response.data.value === 60) {
                         vm.verified = true;
@@ -71,6 +83,10 @@
 
         vm.goToLoginPage = function () {
             $location.path("/", "_self");
+        };
+
+        vm.setupPayment = function () {
+            vm.showPaymentWait = true;
         };
     }
 }());

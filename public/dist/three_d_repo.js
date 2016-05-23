@@ -4943,9 +4943,9 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$mdDialog", "$element", "AccountService"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$mdDialog", "$element", "$timeout", "AccountService"];
 
-	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, AccountService) {
+	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, $timeout, AccountService) {
 		var vm = this,
 			promise,
 			bid4FreeProjects = null,
@@ -4965,6 +4965,7 @@ var ViewerManager = {};
 		vm.accounts = [];
 		vm.info = "Retrieving projects..,";
 		vm.showProgress = true;
+		vm.paypalReturnUrl = "http://3drepo.io/";
 
 		promise = AccountService.getProjectsBid4FreeStatus(vm.account);
 		promise.then(function (data) {
@@ -5025,6 +5026,16 @@ var ViewerManager = {};
 					vm.newProjectButtonDisabled =
 						(angular.isUndefined(newValue.otherType) || (angular.isDefined(newValue.otherType) && (newValue.otherType === "")));
 				}
+			}
+		}, true);
+
+		/*
+		 * Watch new database name
+		 */
+		$scope.$watch("vm.newDatabaseName", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				vm.newDatabaseButtonDisabled =
+					(angular.isUndefined(newValue) || (angular.isDefined(newValue) && (newValue.toString() === "")));
 			}
 		}, true);
 
@@ -5143,6 +5154,48 @@ var ViewerManager = {};
 				}
 			);
 			fileUploader.click();
+		};
+
+		/**
+		 * Create a new database
+		 */
+		vm.newDatabase = function (event) {
+			vm.newDatabaseName = "";
+			vm.showPaymentWait = false;
+			vm.newDatabaseToken = false;
+			$mdDialog.show({
+				controller: function () {},
+				templateUrl: "databaseDialog.html",
+				parent: angular.element(document.body),
+				targetEvent: event,
+				clickOutsideToClose:true,
+				fullscreen: true,
+				scope: $scope,
+				preserveScope: true,
+				onRemoving: function () {$scope.closeDialog();}
+			});
+		};
+
+		/**
+		 * Save a new database
+		 */
+		vm.saveNewDatabase = function () {
+			promise = AccountService.newDatabase(vm.account, vm.newDatabaseName);
+			promise.then(function (response) {
+				console.log(response);
+				vm.newDatabaseToken = response.data.token;
+			});
+		};
+
+		/**
+		 * Show waiting before going to payment page
+		 * $timeout required otherwise Submit does not work
+		 */
+		vm.setupPayment = function () {
+			$timeout(function () {
+				console.log(vm.newDatabaseToken);
+				vm.showPaymentWait = true;
+			});
 		};
 
 		/**
@@ -5381,11 +5434,31 @@ var ViewerManager = {};
 			return doPost(data, projectData.account + "/" + projectData.name);
 		};
 
+		/**
+		 * Upload file/model to database
+		 *
+		 * @param projectData
+		 * @returns {*|promise}
+		 */
 		obj.uploadModel = function (projectData) {
-			console.log(projectData);
 			var data = new FormData();
 			data.append("file", projectData.uploadFile);
 			return doPost(data, projectData.account + "/" + projectData.project + "/upload", {'Content-Type': undefined});
+		};
+
+		/**
+		 * Create a new database
+		 *
+		 * @param account
+		 * @param databaseName
+		 * @returns {*|promise}
+		 */
+		obj.newDatabase = function (account, databaseName) {
+			var data = {
+				database: databaseName,
+				plan: "THE-100-QUID-PLAN"
+			};
+			return doPost(data, account + "/database");
 		};
 
 		return obj;
@@ -9584,7 +9657,7 @@ angular.module('3drepo')
 				if (vm.issueIsOpen && newValue.hasOwnProperty("comments")) {
 					for (i = 0, length = newValue.comments.length; i < length; i += 1) {
 						newValue.comments[i].canDelete =
-							(i === (newValue.comments.length - 1)) && (!newValue.comments[i].set);
+							(i === (newValue.comments.length - 1)) && (!newValue.comments[i].sealed);
 					}
 				}
 				initAssignedRolesDisplay();
@@ -10927,7 +11000,8 @@ angular.module('3drepo')
 				comment: "",
 				number: issue.number,
 				delete: true,
-				commentCreated: issue.comments[index].created
+				commentIndex: index
+				// commentCreated: issue.comments[index].created
 			});
 		};
 
@@ -10935,7 +11009,7 @@ angular.module('3drepo')
 			return doPut(issue, {
 				comment: "",
 				number: issue.number,
-				set: true,
+				sealed: true,
 				commentIndex: commentIndex
 			});
 		};
@@ -14395,16 +14469,28 @@ var Oculus = {};
         };
     }
 
-    RegisterVerifyCtrl.$inject = ["$scope", "$location", "RegisterVerifyService"];
+    RegisterVerifyCtrl.$inject = ["$scope", "$location", "RegisterVerifyService", "AccountService"];
 
-    function RegisterVerifyCtrl ($scope, $location, RegisterVerifyService) {
+    function RegisterVerifyCtrl ($scope, $location, RegisterVerifyService, AccountService) {
         var vm = this,
-            promise;
+            promise,
+            username = $location.search().username,
+            pay = (($location.search().hasOwnProperty("pay")) && $location.search().pay);
 
         /*
          * Init
          */
         vm.verified = false;
+        vm.showPaymentWait = false;
+        vm.paypalReturnUrl = "http://3drepo.io/";
+        // Create database with username if paying
+        if (pay) {
+            promise = AccountService.newDatabase(username, username);
+            promise.then(function (response) {
+                console.log(response);
+                vm.newDatabaseToken = response.data.token;
+            });
+        }
 
         /*
          * Watch the token value
@@ -14416,7 +14502,7 @@ var Oculus = {};
                 promise.then(function (response) {
                     if (response.status === 200) {
                         vm.verified = true;
-                        vm.verifySuccessMessage = "Congratulations. You have successfully registered for 3D Repo. You may now login to you account.";
+                        vm.verifySuccessMessage = "Congratulations. You have successfully signed up for 3D Repo. You may now login to you account.";
                     }
                     else if (response.data.value === 60) {
                         vm.verified = true;
@@ -14431,6 +14517,10 @@ var Oculus = {};
 
         vm.goToLoginPage = function () {
             $location.path("/", "_self");
+        };
+
+        vm.setupPayment = function () {
+            vm.showPaymentWait = true;
         };
     }
 }());
