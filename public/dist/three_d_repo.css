@@ -1214,55 +1214,6 @@ login #loginDivider {
   margin-right: 10px;
 }
 
-register-form #tc {
-    width: 300px;
-}
-register-form #tc md-checkbox {
-    margin : 0;
-}
-register-form #tc md-checkbox ._md-icon {
-    border-color: rgba(0, 0, 0, 0.4);
-}
-register-form #tc a {
-    font-size: 14px;
-    margin-left: 5px;
-}
-register-form #tc p {
-    font-size: 14px;
-    color: rgba(0, 0, 0, 0.7);
-}
-register-form #tc a {
-    outline: none;
-}
-
-register-form #loginCaptcha {
-    margin: -5px 30px 10px 7px;
-}
-
-register-form #registerWait {
-    height: 30px;
-}
-register-form #registerWait p {
-    margin: 0 10px 0 0;
-    color: rgba(0, 0, 0, 0.7);
-    font-size: 14px;
-}
-register-form #registerWait md-progress-circular,
-register-form #registerWait svg {
-    width: 20px !important;
-}
-register-form #loginPricing {
-    font-size: 14px;
-    margin-left: 30px;
-    outline: none;
-}
-
-register-form .registerError {
-    color: #F44336;
-    margin: 5px 0 5px;
-    font-weight: normal;
-}
-
 /** Panel *************************************************************************************************************/
 
 panel  {
@@ -1512,22 +1463,6 @@ md-dialog.qrCodeReaderDialog .qrCodeReaderIcon {
   margin-right: 10px;
 }
 
-register md-input-container {
-    margin: 0;
-}
-
-register md-input-container input {
-    padding: 5px !important;
-    margin-bottom: -15px;
-    height: 35px !important;
-    background: #ffffff !important;
-}
-
-register .registerLinks {
-    font-size: 14px;
-    margin: 5px 0;
-}
-
 right-panel {
     position: absolute;
     top: 70px;
@@ -1541,6 +1476,120 @@ right-panel #rightPanelButtons .md-button {
 right-panel #rightPanelButtons .fa {
     font-size: 24px;
 }
+register-form #tc {
+    width: 300px;
+}
+register-form #tc md-checkbox {
+    margin : 0;
+}
+register-form #tc md-checkbox ._md-icon {
+    border-color: rgba(0, 0, 0, 0.4);
+}
+register-form #tc a {
+    font-size: 14px;
+    margin-left: 5px;
+}
+register-form #tc p {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.7);
+}
+register-form #tc a {
+    outline: none;
+}
+
+register-form #loginCaptcha {
+    margin: -5px 30px 10px 7px;
+}
+
+register-form #registerWait {
+    height: 30px;
+}
+register-form #registerWait p {
+    margin: 0 10px 0 0;
+    color: rgba(0, 0, 0, 0.7);
+    font-size: 14px;
+}
+register-form #registerWait md-progress-circular,
+register-form #registerWait svg {
+    width: 20px !important;
+}
+register-form #loginPricing {
+    font-size: 14px;
+    margin-left: 30px;
+    outline: none;
+}
+
+register-form .registerError {
+    color: #F44336;
+    margin: 5px 0 5px;
+    font-weight: normal;
+}
+
+sign-up md-input-container {
+    margin: 0;
+}
+
+sign-up md-input-container input {
+    padding: 5px !important;
+    margin-bottom: -15px;
+    height: 35px !important;
+    background: #ffffff !important;
+}
+
+sign-up .registerLinks {
+    font-size: 14px;
+    margin: 5px 0;
+}
+
+sign-up-form #tc {
+    width: 300px;
+}
+sign-up-form #tc md-checkbox {
+    margin : 0;
+}
+sign-up-form #tc md-checkbox ._md-icon {
+    border-color: rgba(0, 0, 0, 0.4);
+}
+sign-up-form #tc a {
+    font-size: 14px;
+    margin-left: 5px;
+}
+sign-up-form #tc p {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.7);
+}
+sign-up-form #tc a {
+    outline: none;
+}
+
+sign-up-form #loginCaptcha {
+    margin: -5px 30px 10px 7px;
+}
+
+sign-up-form #registerWait {
+    height: 30px;
+}
+sign-up-form #registerWait p {
+    margin: 0 10px 0 0;
+    color: rgba(0, 0, 0, 0.7);
+    font-size: 14px;
+}
+sign-up-form #registerWait md-progress-circular,
+sign-up-form #registerWait svg {
+    width: 20px !important;
+}
+sign-up-form #loginPricing {
+    font-size: 14px;
+    margin-left: 30px;
+    outline: none;
+}
+
+sign-up-form .registerError {
+    color: #F44336;
+    margin: 5px 0 5px;
+    font-weight: normal;
+}
+
 tree span {
   outline: none;
   margin: 0;

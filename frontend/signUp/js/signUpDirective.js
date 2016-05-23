@@ -19,22 +19,22 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("register", register);
+		.directive("signUp", signUp);
 
-	function register() {
+	function signUp() {
 		return {
 			restrict: "E",
 			scope: {},
-			templateUrl: "register.html",
-			controller: RegisterCtrl,
+			templateUrl: "signUp.html",
+			controller: SignUpCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	RegisterCtrl.$inject = ["$location"];
+	SignUpCtrl.$inject = ["$location"];
 
-	function RegisterCtrl ($location) {
+	function SignUpCtrl ($location) {
 		var vm = this;
 	}
 }());

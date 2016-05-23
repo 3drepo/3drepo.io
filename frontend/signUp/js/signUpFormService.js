@@ -19,11 +19,11 @@
     "use strict";
 
     angular.module("3drepo")
-        .factory("RegisterFormService", RegisterFormService);
+        .factory("SignUpFormService", SignUpFormService);
 
-    RegisterFormService.$inject = ["$http", "$q", "serverConfig"];
+    SignUpFormService.$inject = ["$http", "$q", "serverConfig"];
 
-    function RegisterFormService($http, $q, serverConfig) {
+    function SignUpFormService($http, $q, serverConfig) {
         var obj = {};
 
         /**

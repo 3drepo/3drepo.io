@@ -19,32 +19,32 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("registerForm", registerForm);
+		.directive("signUpForm", signUpForm);
 
-	function registerForm() {
+	function signUpForm() {
 		return {
 			restrict: "EA",
-			templateUrl: "registerForm.html",
+			templateUrl: "signUpForm.html",
 			scope: {
 				buttonLabel: "@"
 			},
-			controller: RegisterFormCtrl,
+			controller: SignUpFormCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	RegisterFormCtrl.$inject = ["$scope", "$mdDialog", "$location", "serverConfig", "RegisterFormService"];
+	SignUpFormCtrl.$inject = ["$scope", "$mdDialog", "$location", "serverConfig", "SignUpFormService"];
 
-	function RegisterFormCtrl($scope, $mdDialog, $location, serverConfig, RegisterFormService) {
+	function SignUpFormCtrl($scope, $mdDialog, $location, serverConfig, SignUpFormService) {
 		var vm = this,
 			enterKey = 13,
-			promise;
+			promise,
+			pay;
 
 		/*
 		 * Init
 		 */
-		vm.user = {username: "", password: ""};
 		vm.newUser = {username: "", email: "", password: "", tcAgreed: false};
 		vm.version = serverConfig.apiVersion;
 		vm.logo = "/public/images/3drepo-logo-white.png";
@@ -53,6 +53,7 @@
 		vm.useReCapthca = false;
 		vm.useRegister = false;
 		vm.registering = false;
+		pay =  (($location.search().hasOwnProperty("pay")) && $location.search().pay);
 
 		/*
 		 * Auth stuff
@@ -141,13 +142,14 @@
 				if (vm.newUser.tcAgreed) {
 					data = {
 						email: vm.newUser.email,
-						password: vm.newUser.password
+						password: vm.newUser.password,
+						pay: pay
 					};
 					if (vm.useReCapthca) {
 						data.captcha = vm.reCaptchaResponse;
 					}
 					vm.registering = true;
-					promise = RegisterFormService.register(vm.newUser.username, data);
+					promise = SignUpFormService.register(vm.newUser.username, data);
 					promise.then(function (response) {
 						if (response.status === 200) {
 							vm.showPage("registerRequest");
