@@ -1,29 +1,31 @@
 .homeUserContent(layout="row", layout-align="center", flex)
 	md-content.md-whiteframe-1dp(aria-label="Registered")
 		md-toolbar
+			.md-toolbar-tools
+				h2 Log in
 		.userContent(layout="column")
 
 			// Register or login
 			div(layout="row")
 				// Login
 				div(layout="column", flex)
-					h3.loginTitle Log in
 					md-input-container.md-block(md-no-float)
 						input(type='text', ng-model='vm.user.username', placeholder='Username', ng-required, autofocus, ng-keypress="vm.login($event)")
 					md-input-container(md-no-float)
 						input(type='password', ng-model='vm.user.password', placeholder='Password', ng-required, ng-keypress="vm.login($event)")
 					div(layout="row", layout-align="start" flex="none")
 						md-button.md-accent.md-raised(ng-click="vm.login()") Log In
-					a#forgotPassword(href="", ng-click="vm.forgotPassword()") Forgot password?
 					h4.loginError {{vm.errorMessage}}
+					a.loginLinks(href="", ng-click="vm.showPage('passwordForgot')") Forgot password?
+					a.loginLinks(href="", ng-click="vm.showPage('pricing')") Sign up
 					h2.md-subhead#loginVersion Version: {{vm.version}}
 
-				div(ng-if="vm.useRegister", layout="row")
+				//div(ng-if="vm.useRegister", layout="row")
 					div(flex="10", layout="column", layout-align="center center")
 						#loginDivider(flex)
 
 					// Register
-					#loginRegister(layout="column", flex)
+					//#loginRegister(layout="column", flex)
 						h3.loginTitle Register
 						md-input-container.md-block(md-no-float)
 							input(type='text', ng-model='vm.newUser.username', placeholder='Username', ng-required, ng-keypress="vm.register($event)")
@@ -41,6 +43,10 @@
 							md-button.md-accent.md-raised(ng-click="vm.register()", ng-disabled="vm.registering", flex="none") Register For Free
 							#registerWait(ng-if="vm.registering", layout="row", layout-align="start center")
 								p Registering...
-								md-progress-circular(md-mode="indeterminate", md-diameter="20px")
-							a#loginPricing(href="", ng-if="!vm.registering") Pricing
+								md-progress-circular(md-mode="indeterminate")
+							a#loginPricing(href="", ng-if="!vm.registering", ng-click="vm.showPage('pricing')") Pricing
 						h4.loginError {{vm.registerErrorMessage}}
+
+					#loginRegister(layout="column", flex)
+						h3.loginTitle Register
+						register-form(button-label="register For Free")

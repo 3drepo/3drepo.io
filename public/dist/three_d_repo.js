@@ -5089,6 +5089,7 @@ var ViewerManager = {};
 
 			promise = AccountService.newProject(vm.newProjectData);
 			promise.then(function (response) {
+				console.log(response);
 				vm.projectsExist = true;
 				// Add project to list
 				project = {
@@ -7408,6 +7409,47 @@ var ViewerManager = {};
 }());
 
 /**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("contact", contact);
+
+	function contact() {
+		return {
+			restrict: "E",
+			scope: {},
+			templateUrl: "contact.html",
+			controller: ContactCtrl,
+			controllerAs: "vm",
+			bindToController: true
+		};
+	}
+
+	ContactCtrl.$inject = ["$location"];
+
+	function ContactCtrl ($location) {
+		var vm = this;
+	}
+}());
+
+/**
  *	Copyright (C) 2015 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
@@ -8548,19 +8590,26 @@ var ViewerManager = {};
 		};
 
 		this.handleStateChange = function(stateChangeObject) {
-			var param;
+			var param,
+				fromState = stateChangeObject.fromState.name.split(".");
 
 			var fromParams = stateChangeObject.fromParams;
 			var toParams   = stateChangeObject.toParams;
-			
-			// Handle going back to the home page, because fromParams will be empty
+
 			if (stateChangeObject.toState.url === "/") {
-				var fromState = stateChangeObject.fromState.name.split(".");
+				// Handle going back to the home page, because fromParams will be empty
 				fromParams = {};
 				for (i = 1; i < fromState.length; i += 1) {
 					fromParams[fromState[i]] = true;
 				}
 				toParams = {};
+			}
+			else if (stateChangeObject.toState.url.indexOf("/") === -1) {
+				// Handle going from one home sub page to another, because fromParams will be empty
+				fromParams = {};
+				for (i = 1; i < fromState.length; i += 1) {
+					fromParams[fromState[i]] = true;
+				}
 			}
 
 			// Switch off all parameters that we came from
@@ -11046,9 +11095,9 @@ angular.module('3drepo')
 		};
 	}
 
-	LoginCtrl.$inject = ["$scope", "$mdDialog", "$location", "Auth", "EventService", "serverConfig", "LoginService"];
+	LoginCtrl.$inject = ["$scope", "$mdDialog", "$location", "Auth", "EventService", "serverConfig"];
 
-	function LoginCtrl($scope, $mdDialog, $location, Auth, EventService, serverConfig, LoginService) {
+	function LoginCtrl($scope, $mdDialog, $location, Auth, EventService, serverConfig) {
 		var vm = this,
 			enterKey = 13,
 			promise;
@@ -11127,7 +11176,6 @@ angular.module('3drepo')
 		};
 
 		vm.showTC = function () {
-			
 			$mdDialog.show({
 				controller: tcDialogController,
 				templateUrl: "tcDialog.html",
@@ -11141,8 +11189,8 @@ angular.module('3drepo')
 			});
 		};
 
-		vm.forgotPassword = function () {
-			$location.path("/passwordForgot", "_self");
+		vm.showPage = function (page) {
+			$location.path("/" + page, "_self");
 		};
 
 		/*
@@ -11198,7 +11246,184 @@ angular.module('3drepo')
 					promise = LoginService.register(vm.newUser.username, data);
 					promise.then(function (response) {
 						if (response.status === 200) {
-							$location.path("/registerRequest", "_self");
+							vm.showPage("registerRequest");
+						}
+						else if (response.data.value === 62) {
+							vm.registerErrorMessage = "Prove you're not a robot";
+						}
+						else if (response.data.value === 55) {
+							vm.registerErrorMessage = "Username already in use";
+						}
+						else {
+							vm.registerErrorMessage = "Error with registration";
+						}
+						vm.registering = false;
+					});
+				}
+				else {
+					vm.registerErrorMessage = "You must agree to the terms and conditions";
+				}
+			}
+			else {
+				vm.registerErrorMessage = "Please fill all fields";
+			}
+		}
+	}
+}());
+
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("registerForm", registerForm);
+
+	function registerForm() {
+		return {
+			restrict: "EA",
+			templateUrl: "registerForm.html",
+			scope: {
+				buttonLabel: "@"
+			},
+			controller: RegisterFormCtrl,
+			controllerAs: "vm",
+			bindToController: true
+		};
+	}
+
+	RegisterFormCtrl.$inject = ["$scope", "$mdDialog", "$location", "serverConfig", "RegisterFormService"];
+
+	function RegisterFormCtrl($scope, $mdDialog, $location, serverConfig, RegisterFormService) {
+		var vm = this,
+			enterKey = 13,
+			promise;
+
+		/*
+		 * Init
+		 */
+		vm.user = {username: "", password: ""};
+		vm.newUser = {username: "", email: "", password: "", tcAgreed: false};
+		vm.version = serverConfig.apiVersion;
+		vm.logo = "/public/images/3drepo-logo-white.png";
+		vm.captchaKey = "6LfSDR8TAAAAACBaw6FY5WdnqOP0nfv3z8-cALAI";
+		vm.tcAgreed = false;
+		vm.useReCapthca = false;
+		vm.useRegister = false;
+		vm.registering = false;
+
+		/*
+		 * Auth stuff
+		 */
+		if (serverConfig.hasOwnProperty("auth")) {
+			if (serverConfig.auth.hasOwnProperty("register") && (serverConfig.auth.register)) {
+				vm.useRegister = true;
+				if (serverConfig.auth.hasOwnProperty("captcha") && (serverConfig.auth.captcha)) {
+					vm.useReCapthca = true;
+				}
+			}
+		}
+
+		/*
+		 * Watch changes to register fields to clear warning message
+		 */
+		$scope.$watch("vm.newUser", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				vm.registerErrorMessage = "";
+			}
+		}, true);
+
+		/**
+		 * Attempt to register
+		 *
+		 * @param {Object} event
+		 */
+		vm.register = function(event) {
+			if (angular.isDefined(event)) {
+				if (event.which === enterKey) {
+					doRegister();
+				}
+			}
+			else {
+				doRegister();
+			}
+		};
+
+		vm.showTC = function () {
+			$mdDialog.show({
+				controller: tcDialogController,
+				templateUrl: "tcDialog.html",
+				parent: angular.element(document.body),
+				targetEvent: event,
+				clickOutsideToClose:true,
+				fullscreen: true,
+				scope: $scope,
+				preserveScope: true,
+				onRemoving: removeDialog
+			});
+		};
+
+		vm.showPage = function (page) {
+			$location.path("/" + page, "_self");
+		};
+
+		/**
+		 * Close the dialog
+		 */
+		$scope.closeDialog = function() {
+			$mdDialog.cancel();
+		};
+
+		/**
+		 * Close the dialog by not clicking the close button
+		 */
+		function removeDialog () {
+			$scope.closeDialog();
+		}
+
+		/**
+		 * Dialog controller
+		 */
+		function tcDialogController() {
+		}
+
+		/**
+		 * Do the user registration
+		 */
+		function doRegister() {
+			var data;
+
+			if ((angular.isDefined(vm.newUser.username)) &&
+				(angular.isDefined(vm.newUser.email)) &&
+				(angular.isDefined(vm.newUser.password))) {
+				if (vm.newUser.tcAgreed) {
+					data = {
+						email: vm.newUser.email,
+						password: vm.newUser.password
+					};
+					if (vm.useReCapthca) {
+						data.captcha = vm.reCaptchaResponse;
+					}
+					vm.registering = true;
+					promise = RegisterFormService.register(vm.newUser.username, data);
+					promise.then(function (response) {
+						if (response.status === 200) {
+							vm.showPage("registerRequest");
 						}
 						else if (response.data.value === 62) {
 							vm.registerErrorMessage = "Prove you're not a robot";
@@ -11244,11 +11469,11 @@ angular.module('3drepo')
     "use strict";
 
     angular.module("3drepo")
-        .factory("LoginService", LoginService);
+        .factory("RegisterFormService", RegisterFormService);
 
-    LoginService.$inject = ["$http", "$q", "serverConfig"];
+    RegisterFormService.$inject = ["$http", "$q", "serverConfig"];
 
-    function LoginService($http, $q, serverConfig) {
+    function RegisterFormService($http, $q, serverConfig) {
         var obj = {};
 
         /**
@@ -13107,6 +13332,56 @@ var Oculus = {};
     }
 }());
 /**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("pricing", pricing);
+
+	function pricing() {
+		return {
+			restrict: "E",
+			scope: {},
+			templateUrl: "pricing.html",
+			controller: PricingCtrl,
+			controllerAs: "vm",
+			bindToController: true
+		};
+	}
+
+	PricingCtrl.$inject = ["$location"];
+
+	function PricingCtrl ($location) {
+		var vm = this;
+
+		/**
+		 * Go to a sub page
+		 * 
+		 * @param page
+		 */
+		vm.showPage = function (page) {
+			$location.path("/" + page, "_self");
+		};
+	}
+}());
+
+/**
  *  Copyright (C) 2014 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -14260,6 +14535,47 @@ var Oculus = {};
 		};
 	}
 }());
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("register", register);
+
+	function register() {
+		return {
+			restrict: "E",
+			scope: {},
+			templateUrl: "register.html",
+			controller: RegisterCtrl,
+			controllerAs: "vm",
+			bindToController: true
+		};
+	}
+
+	RegisterCtrl.$inject = ["$location"];
+
+	function RegisterCtrl ($location) {
+		var vm = this;
+	}
+}());
+
 /**
  *	Copyright (C) 2016 3D Repo Ltd
  *

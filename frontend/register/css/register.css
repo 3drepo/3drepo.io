@@ -1,0 +1,15 @@
+register md-input-container {
+    margin: 0;
+}
+
+register md-input-container input {
+    padding: 5px !important;
+    margin-bottom: -15px;
+    height: 35px !important;
+    background: #ffffff !important;
+}
+
+register .registerLinks {
+    font-size: 14px;
+    margin: 5px 0;
+}

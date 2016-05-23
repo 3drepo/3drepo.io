@@ -20,9 +20,7 @@ login h3 {
 login #loginVersion{
   color: rgba(0, 0, 0 , 0.3);
   font-size: 14px;
-  position: absolute;
-  bottom: 10px;
-  left: 25px;
+  margin: 10px 0 0;
 }
 
 login md-input-container {
@@ -38,7 +36,8 @@ login md-input-container input {
 
 login .loginError {
   color: #F44336;
-  margin: 5px 0 0 8px;
+  margin: 5px 0 5px;
+  font-weight: normal;
 }
 
 login .loginTitle {
@@ -46,55 +45,14 @@ login .loginTitle {
   color: rgba(0, 0, 0, 0.5) !important;
 }
 
-login #forgotPassword {
+login .loginLinks {
   font-size: 14px;
-  margin: 5px 8px;
+  margin: 5px 0;
 }
 
 login #loginDivider {
   width: 1px;
   background-color: rgba(0, 0, 0, 0.2);
-}
-
-login #tc {
-  margin-bottom: 10px;
-  margin-left: 5px;
-  width: 300px;
-}
-login #tc md-checkbox {
-  margin : 0 0 0 2px;
-}
-login #tc md-checkbox ._md-icon {
-  border-color: rgba(0, 0, 0, 0.4);
-}
-login #tc a {
-  font-size: 14px;
-  margin-left: 5px;
-}
-login #tc p {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.7);
-}
-login #tc a {
-  outline: none;
-}
-
-login #loginCaptcha {
-  margin: -5px 30px 10px 7px;
-}
-
-login #loginRegister #registerWait {
-  height: 30px;
-}
-login #loginRegister #registerWait p {
-  margin: 0 10px 0 0;
-  color: rgba(0, 0, 0, 0.7);
-  font-size: 14px;
-}
-login #loginRegister #loginPricing {
-  font-size: 14px;
-  margin-left: 30px;
-  outline: none;
 }
 
 /** Terms and Conditions Dialog ***************************************************************************************/
