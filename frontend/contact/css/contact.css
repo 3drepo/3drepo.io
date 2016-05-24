@@ -1,18 +1,7 @@
-contact md-input-container {
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
-    padding: 10px;
-}
-
 contact md-input-container textarea {
-    margin-bottom: -20px !important;
     min-height: 100px !important;
 }
 
 contact .md-button {
     margin-top: 10px;
-}
-
-contact h3 {
-    margin: 10px 0 0;
 }

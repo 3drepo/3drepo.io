@@ -144,6 +144,9 @@
 			if (angular.isDefined(newValue)) {
 				if (!newValue) {
 					vm.editingGroup = false; // To stop any event watching
+					hideAll = false;
+					vm.toShow ="showGroups";
+					doHideAll(hideAll);
 				}
 			}
 		});
@@ -280,7 +283,7 @@
 		 */
 		function setContentHeight () {
 			var contentHeight = 0,
-				groupHeaderHeight = 54, // It could be higher for items with long text but ignore that
+				groupHeaderHeight = 56, // It could be higher for items with long text but ignore that
 				baseGroupHeight = 210,
 				addHeight = 250,
 				infoHeight = 80,

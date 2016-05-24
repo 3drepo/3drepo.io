@@ -1,0 +1,9 @@
+register-verify .databaseError {
+    color: #F44336;
+    margin: 5px 0 5px;
+    font-weight: normal;
+}
+
+register-verify md-input-container {
+    margin: 5px 0 -15px;
+}

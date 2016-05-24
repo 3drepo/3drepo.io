@@ -32,9 +32,30 @@
 		};
 	}
 
-	ContactCtrl.$inject = ["$location"];
+	ContactCtrl.$inject = ["$scope"];
 
-	function ContactCtrl ($location) {
+	function ContactCtrl ($scope) {
 		var vm = this;
+
+		/*
+		 * Init
+		 */
+		vm.contact = {info: "", name: "", email: ""};
+
+		/*
+		 * Watch to enable send button
+		 */
+		$scope.$watch("vm.contact", function () {
+			vm.sendButtonDisabled = (
+				(vm.contact.info === "") ||
+				(vm.contact.name === "") ||
+				(vm.contact.email === "") ||
+				(angular.isUndefined(vm.contact.email))
+			);
+		}, true);
+
+		vm.send = function () {
+
+		};
 	}
 }());

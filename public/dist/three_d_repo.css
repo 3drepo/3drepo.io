@@ -94,7 +94,7 @@ account-projects #fileUploader {
 
 account-projects .accountRight,
 account-projects .projectRight {
-  margin-right: 55px !important;
+  margin-right: 10px !important;
 }
 
 account-projects #newDatabaseButton {
@@ -571,14 +571,14 @@ bottom-buttons {
   bottom: 80px;
   left: 0;
   right: 0;
-  width: 360px;
+  width: 260px;
   margin: auto;
   text-align: center;
 }
 
 bottom-buttons #leftButtons {
   position: absolute;
-  left: -15px;
+  left: 20px;
   top: 8px;
 }
 bottom-buttons #leftButtons span {
@@ -587,7 +587,7 @@ bottom-buttons #leftButtons span {
 
 bottom-buttons #rightButtons {
   position: absolute;
-  right: 35px;
+  right: 10px;
   top: 8px;
 }
 bottom-buttons #rightButtons span {
@@ -607,7 +607,7 @@ bottom-buttons .actionButton md-icon {
 
 bottom-buttons .viewingOptionButtons {
   position: absolute;
-  left: 40px;
+  right: 15px;
   top: -120px;
 }
 
@@ -621,14 +621,14 @@ bottom-buttons label:hover {
   cursor: pointer;
 }
 
-.bottomButtomIconCardboard {
+.bottomButtonIconCardboard {
   font-size: 20px !important;
   margin-left: -4px;
 }
-.bottomButtomIconWalk {
+.bottomButtonIconWalk {
   margin-left: 0;
 }
-.bottomButtomIconHelicopter {
+.bottomButtonIconHelicopter {
   margin-left: -5px;
   font-size: 22px !important;
 }
@@ -667,14 +667,7 @@ clip #clipAxislabel {
   width: 50px;
 }
 
-contact md-input-container {
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
-    padding: 10px;
-}
-
 contact md-input-container textarea {
-    margin-bottom: -20px !important;
     min-height: 100px !important;
 }
 
@@ -682,9 +675,6 @@ contact .md-button {
     margin-top: 10px;
 }
 
-contact h3 {
-    margin: 10px 0 0;
-}
 /** Docs **************************************************************************************************************/
 docs .typesList {
   padding: 0;
@@ -1478,6 +1468,15 @@ md-dialog.qrCodeReaderDialog .qrCodeReaderIcon {
   margin-right: 10px;
 }
 
+register-verify .databaseError {
+    color: #F44336;
+    margin: 5px 0 5px;
+    font-weight: normal;
+}
+
+register-verify md-input-container {
+    margin: 5px 0 -15px;
+}
 right-panel {
     position: absolute;
     top: 70px;

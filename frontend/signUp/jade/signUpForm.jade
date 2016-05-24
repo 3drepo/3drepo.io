@@ -5,6 +5,10 @@ form#signUpForm
 		input(type='email', ng-model='vm.newUser.email', placeholder='Email', ng-required, ng-keypress="vm.register($event)")
 	md-input-container.md-block(md-no-float)
 		input(type='password', ng-model='vm.newUser.password', placeholder='Password', ng-required ng-keypress="vm.register($event)")
+	// Extra hidden inputs to prevent input autofill
+	input(type="email", ng-show="false")
+	input(type="password", ng-show="false")
+
 	#tc(layout="row", layout-align="start center", flex)
 		md-checkbox.md-accent(ng-model="vm.newUser.tcAgreed" aria-label="Terms and conditions Checkbox")
 		div(layout="row", layout-align="start center")

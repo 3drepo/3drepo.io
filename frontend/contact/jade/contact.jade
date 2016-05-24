@@ -1,11 +1,17 @@
 .homeUserContent(layout="row", layout-align="center")
 	md-content.md-whiteframe-1dp(aria-label="Register", flex="20")
 		md-toolbar
-			.md-toolbar-tools(layout-align="center center")
+			.md-toolbar-tools
 				h2 Contact Us
-		.userContent(layout="column", layout-align="start center", layout-fill)
+		.userContent(layout="column", layout-fill)
 			md-input-container.md-block(md-no-float, layout-fill)
-				textarea(ng-model='vm.info', placeholder='Contact information')
-			md-button.md-accent.md-raised(ng-click="vm.send()") Send
-			h3 Or
-			h3 Call us on (44) 207 123 4567
+				textarea(ng-model="vm.contact.info", placeholder="Contact information")
+			md-input-container.md-block(md-no-float, layout-fill)
+				input(type="text", ng-model="vm.contact.name", placeholder="Name")
+			md-input-container.md-block(md-no-float, layout-fill)
+				input(type="email", ng-model="vm.contact.email", placeholder="Email")
+			// Extra hidden input to prevent input autofill
+			input(type="email", ng-show="false")
+
+			div(layout="row", layout-align="start")
+				md-button.md-accent.md-raised(ng-click="vm.send()", ng-disabled="vm.sendButtonDisabled") Send

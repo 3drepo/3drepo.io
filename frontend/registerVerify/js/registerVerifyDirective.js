@@ -49,14 +49,7 @@
         vm.verified = false;
         vm.showPaymentWait = false;
         vm.paypalReturnUrl = "http://3drepo.io/";
-        // Create database with username if paying
-        if (pay) {
-            promise = AccountService.newDatabase(username, username);
-            promise.then(function (response) {
-                console.log(response);
-                vm.newDatabaseToken = response.data.token;
-            });
-        }
+        vm.databaseName = vm.username;
 
         /*
          * Watch the token value
@@ -85,8 +78,25 @@
             $location.path("/", "_self");
         };
 
-        vm.setupPayment = function () {
-            vm.showPaymentWait = true;
+        vm.setupPayment = function ($event) {
+            console.log(1);
+            if (vm.databaseName !== "") {
+                console.log(2);
+                // Create database with username if paying
+                if (pay) {
+                    promise = AccountService.newDatabase(username, username);
+                    promise.then(function (response) {
+                        console.log(response);
+                        vm.newDatabaseToken = response.data.token;
+                    });
+                }
+                vm.showPaymentWait = true;
+            }
+            else {
+                console.log(3);
+                $event.stopPropagation();
+                vm.error = "Please provide a database name";
+            }
         };
     }
 }());

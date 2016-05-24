@@ -5,6 +5,13 @@ input(type="file", id="fileUploader")
 			.md-toolbar-tools
 				h2 Repos
 				span(flex)
+				md-menu(md-position-mode="target-right target", md-offset="5 10")
+					md-button.md-icon-button(aria-label="More", ng-click="$mdOpenMenu($event)")
+						md-icon.angular-material-icons(md-menu-origin) more_vert
+					md-menu-content(width="3")
+						md-menu-item
+							md-button(ng-click="vm.newDatabase($event)")
+								p(flex) Add database
 
 		md-list#accountList(flex, ng-if="vm.projectsExist")
 			div(ng-repeat="account in vm.accounts", flex)
@@ -41,6 +48,3 @@ input(type="file", id="fileUploader")
 			.cardInfo(layout="row", layout-align="center center")
 				p {{vm.info}}
 				md-progress-circular(md-diameter="20px", ng-if="vm.showProgress", md-mode="indeterminate")
-
-		md-button.md-accent.md-fab.md-mini#newDatabaseButton(aria-label="New Database", ng-click="vm.newDatabase($event)")
-			md-icon.angular-material-icons add

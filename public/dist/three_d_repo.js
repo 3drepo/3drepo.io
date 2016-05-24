@@ -7094,7 +7094,7 @@ var ViewerManager = {};
 
 				// Set up the new current selected option button
 				vm.selectedViewingOptionIndex = index;
-				vm.leftButtons[1] = vm.viewingOptions[index];
+				vm.rightButtons[0] = vm.viewingOptions[index];
 
 				vm.showViewingOptionButtons = false;
 			}
@@ -7136,14 +7136,14 @@ var ViewerManager = {};
 				label: "Walk",
 				icon: "fa fa-child",
 				click: setViewingOption,
-				iconClass: "bottomButtomIconWalk"
+				iconClass: "bottomButtonIconWalk"
 			},
 			{
 				mode: VIEWER_NAV_MODES.HELICOPTER,
 				label: "Helicopter",
 				icon: "icon icon_helicopter",
 				click: setViewingOption,
-				iconClass: "bottomButtomIconHelicopter"
+				iconClass: "bottomButtonIconHelicopter"
 			},
 			{
 				mode: VIEWER_NAV_MODES.TURNTABLE,
@@ -7160,9 +7160,9 @@ var ViewerManager = {};
 			icon: "fa fa-home",
 			click: home
 		});
-		vm.leftButtons.push(vm.viewingOptions[vm.selectedViewingOptionIndex]);
 
 		vm.rightButtons = [];
+		vm.rightButtons.push(vm.viewingOptions[vm.selectedViewingOptionIndex]);
 		/*
 		vm.rightButtons.push({
 			label: "Help",
@@ -7173,7 +7173,7 @@ var ViewerManager = {};
 			label: "VR",
 			icon: "icon icon_cardboard",
 			click: enterOculusDisplay,
-			iconClass: "bottomButtomIconCardboard"
+			iconClass: "bottomButtonIconCardboard"
 		});
 		 */
 	}
@@ -7515,10 +7515,31 @@ var ViewerManager = {};
 		};
 	}
 
-	ContactCtrl.$inject = ["$location"];
+	ContactCtrl.$inject = ["$scope"];
 
-	function ContactCtrl ($location) {
+	function ContactCtrl ($scope) {
 		var vm = this;
+
+		/*
+		 * Init
+		 */
+		vm.contact = {info: "", name: "", email: ""};
+
+		/*
+		 * Watch to enable send button
+		 */
+		$scope.$watch("vm.contact", function () {
+			vm.sendButtonDisabled = (
+				(vm.contact.info === "") ||
+				(vm.contact.name === "") ||
+				(vm.contact.email === "") ||
+				(angular.isUndefined(vm.contact.email))
+			);
+		}, true);
+
+		vm.send = function () {
+
+		};
 	}
 }());
 
@@ -7897,6 +7918,9 @@ var ViewerManager = {};
 			if (angular.isDefined(newValue)) {
 				if (!newValue) {
 					vm.editingGroup = false; // To stop any event watching
+					hideAll = false;
+					vm.toShow ="showGroups";
+					doHideAll(hideAll);
 				}
 			}
 		});
@@ -8033,7 +8057,7 @@ var ViewerManager = {};
 		 */
 		function setContentHeight () {
 			var contentHeight = 0,
-				groupHeaderHeight = 54, // It could be higher for items with long text but ignore that
+				groupHeaderHeight = 56, // It could be higher for items with long text but ignore that
 				baseGroupHeight = 210,
 				addHeight = 250,
 				infoHeight = 80,
@@ -10042,9 +10066,6 @@ angular.module('3drepo')
 		vm.issuesToShow = [];
 		vm.showProgress = true;
 		vm.progressInfo = "Loading issues";
-		vm.showIssuesInfo = false;
-		vm.showIssueList = false;
-		vm.showIssue = false;
 		vm.availableRoles = null;
 		vm.projectUserRoles = [];
 		vm.selectedIssue = null;
@@ -10331,6 +10352,15 @@ angular.module('3drepo')
 						if (!showClosed && vm.issuesToShow[i].hasOwnProperty("closed") && vm.issuesToShow[i].closed) {
 							vm.issuesToShow.splice(i, 1);
 						}
+					}
+
+					// Setup what to show
+					if (vm.issuesToShow.length > 0) {
+						vm.toShow = "showIssues";
+					}
+					else {
+						vm.toShow = "showInfo";
+						vm.issuesInfo = "There are currently no open issues";
 					}
 				}
 			}
@@ -14483,14 +14513,7 @@ var Oculus = {};
         vm.verified = false;
         vm.showPaymentWait = false;
         vm.paypalReturnUrl = "http://3drepo.io/";
-        // Create database with username if paying
-        if (pay) {
-            promise = AccountService.newDatabase(username, username);
-            promise.then(function (response) {
-                console.log(response);
-                vm.newDatabaseToken = response.data.token;
-            });
-        }
+        vm.databaseName = vm.username;
 
         /*
          * Watch the token value
@@ -14519,8 +14542,25 @@ var Oculus = {};
             $location.path("/", "_self");
         };
 
-        vm.setupPayment = function () {
-            vm.showPaymentWait = true;
+        vm.setupPayment = function ($event) {
+            console.log(1);
+            if (vm.databaseName !== "") {
+                console.log(2);
+                // Create database with username if paying
+                if (pay) {
+                    promise = AccountService.newDatabase(username, username);
+                    promise.then(function (response) {
+                        console.log(response);
+                        vm.newDatabaseToken = response.data.token;
+                    });
+                }
+                vm.showPaymentWait = true;
+            }
+            else {
+                console.log(3);
+                $event.stopPropagation();
+                vm.error = "Please provide a database name";
+            }
         };
     }
 }());

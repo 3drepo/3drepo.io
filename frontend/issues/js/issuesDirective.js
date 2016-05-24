@@ -72,9 +72,6 @@
 		vm.issuesToShow = [];
 		vm.showProgress = true;
 		vm.progressInfo = "Loading issues";
-		vm.showIssuesInfo = false;
-		vm.showIssueList = false;
-		vm.showIssue = false;
 		vm.availableRoles = null;
 		vm.projectUserRoles = [];
 		vm.selectedIssue = null;
@@ -361,6 +358,15 @@
 						if (!showClosed && vm.issuesToShow[i].hasOwnProperty("closed") && vm.issuesToShow[i].closed) {
 							vm.issuesToShow.splice(i, 1);
 						}
+					}
+
+					// Setup what to show
+					if (vm.issuesToShow.length > 0) {
+						vm.toShow = "showIssues";
+					}
+					else {
+						vm.toShow = "showInfo";
+						vm.issuesInfo = "There are currently no open issues";
 					}
 				}
 			}

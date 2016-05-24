@@ -125,7 +125,7 @@ module.exports.createApp = function(serverConfig)
 			},
 			{
 				"plugin": "registerVerify",
-				"url": "registerVerify?username&token"
+				"url": "registerVerify?username&token&pay"
 			},
 			{
 				"plugin": "passwordForgot",
