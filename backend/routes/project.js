@@ -283,15 +283,13 @@ function uploadProject(req, res, next){
 
 		console.log(file);
 
-		let acceptedFormat = ['x','obj','3ds','md3','md2','ply','mdl','ase','hmp','smd','mdc','md5','stl','lxo'
-			,'nff','raw','off','ac','bvh','irrmesh','irr','q3d','q3s','b3d','dae','ter','csm','3d','lws','xml','ogex','ms3d'
-			,'cob','scn','blend','pk3','ndo','ifc','xgl','zgl','fbx','assbin'];
+		let acceptedFormat = ['x','obj','3ds','md3','md2','ply','mdl','ase','hmp','smd','mdc','md5','stl','lxo','nff','raw','off','ac','bvh','irrmesh','irr','q3d','q3s','b3d','dae','ter','csm','3d','lws','xml','ogex','ms3d','cob','scn','blend','pk3','ndo','ifc','xgl','zgl','fbx','assbin'];
 
 		let format = file.originalname.split('.').splice(-1)[0];
 		let size = estimateImportedSize(format, parseInt(req.headers['content-length']));
 
 		if(acceptedFormat.indexOf(format) === -1){
-			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED })
+			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
 		}
 
 		middlewares.freeSpace(req.params.account).then(space => {
@@ -358,6 +356,11 @@ function uploadProject(req, res, next){
 					.then(corID => Promise.resolve(corID))
 					.catch(errCode => {
 						//catch here to provide custom error message
+						if(projectSetting){
+							projectSetting.errorReason = convertToErrorCode(errCode);
+							projectSetting.markModified('errorReason');
+						}
+
 						return Promise.reject(convertToErrorCode(errCode));
 					});
 
@@ -372,9 +375,11 @@ function uploadProject(req, res, next){
 				}).catch(err => {
 					// import failed for some reason(s)...
 					console.log(err.stack);
-					//mark project ready
-					projectSetting && (projectSetting.status = 'failed');
-					projectSetting && projectSetting.save();
+					//mark project failed
+					if(projectSetting){
+						projectSetting.status = 'failed';
+						projectSetting.save();
+					}
 
 					req[C.REQ_REPO].logger.logDebug(JSON.stringify(err));
 
