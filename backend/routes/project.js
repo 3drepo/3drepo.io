@@ -282,10 +282,19 @@ function uploadProject(req, res, next){
 	function fileFilter(req, file, cb){
 
 		console.log(file);
-		middlewares.freeSpace(req.params.account).then(space => {
 
-			let format = file.originalname.split('.').splice(-1)[0];
-			let size = estimateImportedSize(format, parseInt(req.headers['content-length']));
+		let acceptedFormat = ['x','obj','3ds','md3','md2','ply','mdl','ase','hmp','smd','mdc','md5','stl','lxo'
+			,'nff','raw','off','ac','bvh','irrmesh','irr','q3d','q3s','b3d','dae','ter','csm','3d','lws','xml','ogex','ms3d'
+			,'cob','scn','blend','pk3','ndo','ifc','xgl','zgl','fbx','assbin'];
+
+		let format = file.originalname.split('.').splice(-1)[0];
+		let size = estimateImportedSize(format, parseInt(req.headers['content-length']));
+
+		if(acceptedFormat.indexOf(format) === -1){
+			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED })
+		}
+
+		middlewares.freeSpace(req.params.account).then(space => {
 
 			console.log('est upload file size', size);
 			console.log('space left', space);
