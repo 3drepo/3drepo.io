@@ -36,7 +36,7 @@ function sendEmail(template, to, data){
 	let mailOptions = {
 		from: config.mail.sender,
 		to: to,
-		subject: template.subject,
+		subject: typeof template.subject === 'function' ? template.subject(data) : template.subject,
 		html: template.html(data)
 	};
 
@@ -107,8 +107,17 @@ function sendPaymentReceivedEmail(to, data){
 	return sendEmail(template, to, data);
 }
 
+function sendContactEmail(data){
+	'use strict';
+
+	let template = require('./templates/contact');
+	return sendEmail(template, config.contact.email, data);
+}
+
+
 module.exports = {
 	sendVerifyUserEmail,
 	sendResetPasswordEmail,
-	sendPaymentReceivedEmail
+	sendPaymentReceivedEmail,
+	sendContactEmail
 }

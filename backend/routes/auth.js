@@ -34,6 +34,7 @@
 	router.post("/login", login);
 	router.get("/login", checkLogin);
 	router.post("/logout", logout);
+	router.post('/contact', contact);
 	router.get("/:account.json", middlewares.hasReadAccessToAccount, listInfo);
 	router.get("/:account.jpg", middlewares.hasReadAccessToAccount, getAvatar);
 	router.get("/:account/subscriptions", middlewares.hasReadAccessToAccount, listSubscriptions);
@@ -388,6 +389,22 @@
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+
+	}
+
+	function contact(req, res, next){
+
+		let responsePlace = utils.APIInfo(req);
+
+		Mailer.sendContactEmail({
+			email: req.body.email,
+			name: req.body.name,
+			information: req.body.information
+		}).then(() => {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: 'success'});
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);
 		});
 
 	}
