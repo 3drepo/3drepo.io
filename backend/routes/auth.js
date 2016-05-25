@@ -302,12 +302,12 @@
 			}
 
 			user = _user;
-			return user.listProjects();
+			return user.listAccounts();
 
-		}).then(projects => {
+		}).then(databases => {
 
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
-				projects: projects,
+				accounts: databases,
 				firstName: user.customData.firstName,
 				lastName: user.customData.lastName,
 				email: user.customData.email

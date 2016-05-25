@@ -328,6 +328,69 @@ schema.methods.getPrivileges = function(){
 
 };
 
+schema.methods.listAccounts = function(){
+	'use strict';
+
+	let accounts = [];
+
+	this.roles.forEach(role => {
+		if(role.role === 'admin'){
+			accounts.push({ account: role.db, projects: []});
+		}
+	});
+
+	// group projects by accounts
+	return this.listProjects().then(projects => {
+		
+		projects.forEach(project => {
+
+			let account = _.find(accounts, account => account.account === project.account);
+
+			if(!account){
+
+				account = {
+					account: project.account,
+					projects: []
+				};
+
+				accounts.push(account);
+			}
+
+			account.projects.push({
+				project: project.project,
+				timestamp: project.timestamp,
+				status: project.status
+			});
+
+		});
+
+		accounts.forEach(account => {
+			account.projects.sort((a, b) => {
+				if(a.timestamp < b.timestamp){
+					return 1;
+				} else if (a.timestamp > b.timestamp){
+					return -1;
+				} else {
+					return 0;
+				}
+			});
+		});
+
+		accounts.sort((a, b) => {
+			if (a.account.toLowerCase() < b.account.toLowerCase()){
+				return -1;
+			} else if (a.account.toLowerCase() > b.account.toLowerCase()) {
+				return 1;
+			} else {
+				return 0;
+			}
+		});
+
+		return Promise.resolve(accounts);
+
+	});
+};
+
 schema.methods.listProjects = function(){
 	'use strict';
 
