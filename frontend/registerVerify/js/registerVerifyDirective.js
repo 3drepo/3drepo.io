@@ -24,10 +24,7 @@
     function registerVerify() {
         return {
             restrict: "E",
-            scope: {
-                username: "=",
-                token: "="
-            },
+            scope: {},
             templateUrl: "registerVerify.html",
             controller: RegisterVerifyCtrl,
             controllerAs: "vm",
@@ -41,36 +38,30 @@
         var vm = this,
             promise,
             username = $location.search().username,
-            pay = (($location.search().hasOwnProperty("pay")) && $location.search().pay);
+            token = $location.search().token;
 
         /*
          * Init
          */
         vm.verified = false;
         vm.showPaymentWait = false;
-        vm.paypalReturnUrl = "http://3drepo.io/";
-        vm.databaseName = vm.username;
+        vm.databaseName = username;
+        vm.pay = (($location.search().hasOwnProperty("pay")) && $location.search().pay);
 
-        /*
-         * Watch the token value
-         */
-        $scope.$watchGroup(["vm.username", "vm.token"], function () {
-            if (angular.isDefined(vm.username) && angular.isDefined(vm.token)) {
-                vm.verifyErrorMessage = "Verifying. Please wait...";
-                promise = RegisterVerifyService.verify(vm.username, {token: vm.token});
-                promise.then(function (response) {
-                    if (response.status === 200) {
-                        vm.verified = true;
-                        vm.verifySuccessMessage = "Congratulations. You have successfully signed up for 3D Repo. You may now login to you account.";
-                    }
-                    else if (response.data.value === 60) {
-                        vm.verified = true;
-                        vm.verifySuccessMessage = "You have already verified your account successfully. You may now login to your account.";
-                    }
-                    else {
-                        vm.verifyErrorMessage = "Error with verification";
-                    }
-                });
+        vm.verifyErrorMessage = "Verifying. Please wait...";
+        promise = RegisterVerifyService.verify(username, {token: token});
+        promise.then(function (response) {
+            console.log(response);
+            if (response.status === 200) {
+                vm.verified = true;
+                vm.verifySuccessMessage = "Congratulations. You have successfully signed up for 3D Repo. You may now login to you account.";
+            }
+            else if (response.data.value === 60) {
+                vm.verified = true;
+                vm.verifySuccessMessage = "You have already verified your account successfully. You may now login to your account.";
+            }
+            else {
+                vm.verifyErrorMessage = "Error with verification";
             }
         });
 
@@ -79,21 +70,24 @@
         };
 
         vm.setupPayment = function ($event) {
-            console.log(1);
             if (vm.databaseName !== "") {
-                console.log(2);
                 // Create database with username if paying
-                if (pay) {
-                    promise = AccountService.newDatabase(username, username);
+                if (vm.pay) {
+                    promise = AccountService.newDatabase(username, vm.databaseName);
                     promise.then(function (response) {
                         console.log(response);
                         vm.newDatabaseToken = response.data.token;
+                        vm.paypalReturnUrl =
+                            $location.protocol() + "://" +
+                            $location.host() + "/" +
+                            "payment?username=" + vm.account + "&" +
+                            "token=" + vm.newDatabaseToken;
+                        console.log(vm.paypalReturnUrl);
                     });
                 }
                 vm.showPaymentWait = true;
             }
             else {
-                console.log(3);
                 $event.stopPropagation();
                 vm.error = "Please provide a database name";
             }

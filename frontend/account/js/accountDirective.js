@@ -53,6 +53,7 @@
 		{
 			if (vm.account)
 			{
+				console.log(111111, vm.account);
 				promise = AccountService.getData(vm.account);
 				promise.then(function (data) {
 					vm.username        = vm.account;

@@ -57,7 +57,6 @@
 		vm.accounts = [];
 		vm.info = "Retrieving projects..,";
 		vm.showProgress = true;
-		vm.paypalReturnUrl = "http://3drepo.io/";
 
 		promise = AccountService.getProjectsBid4FreeStatus(vm.account);
 		promise.then(function (data) {
@@ -276,6 +275,11 @@
 			promise.then(function (response) {
 				console.log(response);
 				vm.newDatabaseToken = response.data.token;
+				vm.paypalReturnUrl =
+					$location.protocol() + "://" +
+					$location.host() + "/" +
+					"payment?username=" + vm.account + "&" +
+					"token=" + vm.newDatabaseToken;
 			});
 		};
 

@@ -5,11 +5,11 @@
 				h2 Registered for 3D Repo
 		.userContent(layout="column")
 			h3(ng-if="!vm.verified") {{vm.verifyErrorMessage}}
-			div(ng-if="true", layout="column", layout-align="start")
+			div(ng-if="vm.verified", layout="column", layout-align="start")
 				h3 {{vm.verifySuccessMessage}}
 				div(layout="row")
 					md-button.md-raised.md-accent(ng-click="vm.goToLoginPage()") Go To Login Page
-				div(ng-if="true")
+				div(ng-if="vm.pay")
 					h3 Or continue with payment
 					md-input-container(md-no-float)
 						input(type='text', ng-model='vm.databaseName', placeholder='Database name', ng-required, ng-keypress="vm.login($event)")

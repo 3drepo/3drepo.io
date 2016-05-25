@@ -148,6 +148,10 @@ module.exports.createApp = function(serverConfig)
 				"url": "contact"
 			},
 			{
+				"plugin": "payment",
+				"url": "payment?username&token"
+			},
+			{
 				"plugin": "account",
 				"children": [
 					{

@@ -55,6 +55,10 @@ home .homeUserContent .userContent h3 {
     font-weight: normal;
 }
 
+home .homeUserContent .userContent md-progress-circular {
+    margin-left: 10px;
+}
+
 home .cardInfo {
     text-align: center;
     padding: 15px;

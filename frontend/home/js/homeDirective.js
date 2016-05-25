@@ -87,6 +87,7 @@
 			state;
 
 		vm.state = StateManager.state;
+		console.log(2222, vm.account);
 
 		/*
 		 * Watch the state to handle moving to and from the login page

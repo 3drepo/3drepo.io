@@ -574,7 +574,10 @@
 				});
 			}
 
-			EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, issue: vm.selectedIssue});
+			// Wait for camera to stop before showing a scribble
+			$timeout(function () {
+				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, issue: vm.selectedIssue});
+			}, 1100);
 		};
 
 		/**
