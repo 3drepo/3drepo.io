@@ -119,6 +119,9 @@ var responseCodes = {
 	SIZE_LIMIT: {value: 66, message: 'Run of out database space. Please pay for more space.', status: 400},
 	INVALID_SUBSCRIPTION_PLAN: {value: 67, message: 'Invalid subscription plan', status: 400},
 
+	STASH_GEN_FAILED: { value: 66, message: "Failed to regenerate stash: Unknown error", status: 500 },
+	FILE_IMPORT_MISSING_TEXTURES: { value: 67, message: "Failed to import file: Missing textures", status: 500 },
+
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {
 			value: 42,

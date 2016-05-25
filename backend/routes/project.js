@@ -258,6 +258,12 @@ function convertToErrorCode(errCode){
             break;
         case 5:
             errObj = responseCodes.FILE_IMPORT_PROCESS_ERR;
+			break;
+        case 6:
+            errObj = responseCodes.FILE_IMPORT_STASH_GEN_FAILED;
+			break;
+        case 7:
+            errObj = responseCodes.FILE_IMPORT_MISSING_TEXTURES;
             break;
         default:
             errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
