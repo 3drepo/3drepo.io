@@ -4,14 +4,22 @@
 			.md-toolbar-tools
 				h2 Contact Us
 		.userContent(layout="column", layout-fill)
-			md-input-container.md-block(md-no-float, layout-fill)
-				textarea(ng-model="vm.contact.info", placeholder="Contact information")
-			md-input-container.md-block(md-no-float, layout-fill)
-				input(type="text", ng-model="vm.contact.name", placeholder="Name")
-			md-input-container.md-block(md-no-float, layout-fill)
-				input(type="email", ng-model="vm.contact.email", placeholder="Email")
-			// Extra hidden input to prevent input autofill
-			input(type="email", ng-show="false")
+			div(ng-if="!vm.sent")
+				md-input-container.md-block(md-no-float, layout-fill)
+					textarea(ng-model="vm.contact.information", placeholder="Contact information")
+				md-input-container.md-block(md-no-float, layout-fill)
+					input(type="text", ng-model="vm.contact.name", placeholder="Name")
+				md-input-container.md-block(md-no-float, layout-fill)
+					input(type="email", ng-model="vm.contact.email", placeholder="Email")
+				// Extra hidden input to prevent input autofill
+				input(type="email", ng-show="false")
 
-			div(layout="row", layout-align="start")
-				md-button.md-accent.md-raised(ng-click="vm.send()", ng-disabled="vm.sendButtonDisabled") Send
+				div(layout="row", layout-align="start center")
+					md-button.md-accent.md-raised(ng-click="vm.send()", ng-disabled="vm.sendButtonDisabled") Send
+					div(ng-if="vm.sending", layout="row", layout-align="start center")
+						p Please wait...
+						md-progress-circular(md-mode="indeterminate", md-diameter="20")
+
+			div(ng-if="vm.sent")
+				h3 Thank you {{vm.contact.name}}.
+				h3 We will get back to you shortly.

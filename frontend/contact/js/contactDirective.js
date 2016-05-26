@@ -32,22 +32,25 @@
 		};
 	}
 
-	ContactCtrl.$inject = ["$scope"];
+	ContactCtrl.$inject = ["$scope", "UtilsService"];
 
-	function ContactCtrl ($scope) {
-		var vm = this;
+	function ContactCtrl ($scope, UtilsService) {
+		var vm = this,
+			promise;
 
 		/*
 		 * Init
 		 */
-		vm.contact = {info: "", name: "", email: ""};
+		vm.contact = {information: "", name: "", email: ""};
+		vm.sent = false;
+		vm.sending = false;
 
 		/*
 		 * Watch to enable send button
 		 */
 		$scope.$watch("vm.contact", function () {
 			vm.sendButtonDisabled = (
-				(vm.contact.info === "") ||
+				(vm.contact.information === "") ||
 				(vm.contact.name === "") ||
 				(vm.contact.email === "") ||
 				(angular.isUndefined(vm.contact.email))
@@ -55,7 +58,15 @@
 		}, true);
 
 		vm.send = function () {
-
+			vm.sending = true;
+			promise = UtilsService.doPost(vm.contact, "contact");
+			promise.then(function (response) {
+				console.log(response);
+				vm.sending = false;
+				if (response.status === 200) {
+					vm.sent = true;
+				}
+			});
 		};
 	}
 }());

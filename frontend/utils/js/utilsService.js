@@ -70,6 +70,29 @@
             return deferred.promise;
         };
 
+        /**
+         * Handle POST requests
+         * @param data
+         * @param url
+         * @returns {*}
+         */
+        obj.doPost = function (data, url) {
+            var deferred = $q.defer(),
+                urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
+                config = {withCredentials: true};
+
+            $http.post(urlUse, data, config)
+                .then(
+                    function (response) {
+                        deferred.resolve(response);
+                    },
+                    function (error) {
+                        deferred.resolve(error);
+                    }
+                );
+            return deferred.promise;
+        }
+
         return obj;
     }
 }());

@@ -22,7 +22,7 @@ input#newProjectFileUploader(type="file")
 						.account(ng-click="vm.toggleProjectsList($index)", layout="row", layout-align="start center", md-ink-ripple, layout-fill)
 							md-button.md-icon-button(aria-label="Folder")
 								md-icon.angular-material-icons {{account.showProjectsIcon}}
-							p {{account.name}}
+							p {{account.account}}
 					spen(flex)
 					.accountRight
 						md-button.md-icon-button(aria-label="New project", ng-click="vm.newProject($event)")
@@ -39,7 +39,7 @@ input#newProjectFileUploader(type="file")
 						.projectRight(layout="row", layout-align="start center")
 							.projectUploadInfo(ng-if="project.uploading")
 								md-progress-circular.projectUploading(md-mode="indeterminate", md-diameter="15", ng-if="vm.showUploading")
-								md-icon.angular-material-icons.projectUploaded(ng-if="vm.showUploaded") done
+								md-icon.angular-material-icons.projectUploaded(ng-if="vm.showUploaded") {{vm.uploadedIcon}}
 							p.projectTimestamp {{project.timestamp}}
 							//md-button.md-accent(ng-click="vm.b4f(account.name, project.name)" ng-if="project.bif4FreeEnabled") B4F
 							md-button.md-accent.md-icon-button(

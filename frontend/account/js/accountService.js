@@ -81,44 +81,6 @@
 		}
 
 		/**
-		 * Get account data
-		 */
-		obj.getData = function (username) {
-			deferred = $q.defer();
-
-			var accountData = {};
-
-			$http.get(serverConfig.apiUrl(serverConfig.GET_API, username + ".json"))
-				.then(function (response) {
-					var i, length,
-						project, projectsGrouped,
-						data;
-
-					// Groups projects under accounts
-					projectsGrouped = {};
-					for (i = 0, length = response.data.projects.length; i < length; i += 1) {
-						project = response.data.projects[i];
-						if (!(project.account in projectsGrouped)) {
-							projectsGrouped[project.account] = [];
-						}
-						data = {
-							name: project.project,
-							timestamp: (project.timestamp !== null) ? UtilsService.formatTimestamp(project.timestamp) : ""
-						};
-						projectsGrouped[project.account].push(data);
-					}
-
-					accountData = response.data;
-					accountData.projectsGrouped = projectsGrouped;
-
-					accountData.avatarURL = serverConfig.apiUrl(serverConfig.GET_API, username + ".jpg");
-					deferred.resolve(accountData);
-				});
-
-			return deferred.promise;
-		};
-
-		/**
 		 * Update the user info
 		 *
 		 * @param {String} username
@@ -198,6 +160,16 @@
 				plan: "THE-100-QUID-PLAN"
 			};
 			return doPost(data, account + "/database");
+		};
+
+		/**
+		 * Get user info
+		 *
+		 * @param username
+		 * @returns {*|promise}
+		 */
+		obj.getUserInfo = function (username) {
+			return UtilsService.doGet(username + ".json");
 		};
 
 		return obj;

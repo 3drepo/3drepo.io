@@ -27,7 +27,7 @@
 			templateUrl: 'accountProjects.html',
 			scope: {
 				account: "=",
-				projectsGrouped: "="
+				accounts: "="
 			},
 			controller: AccountProjectsCtrl,
 			controllerAs: 'vm',
@@ -56,7 +56,6 @@
 			"GIS",
 			"Other"
 		];
-		vm.accounts = [];
 		vm.info = "Retrieving projects..,";
 		vm.showProgress = true;
 
@@ -92,27 +91,28 @@
 		});
 
 		/*
-		 * Handle changes to the state manager Data
-		 * Reformat the grouped projects to enable toggling of projects list
+		 * Added data to accounts and projects for UI
 		 */
-		$scope.$watch("vm.projectsGrouped", function () {
-			if (angular.isDefined(vm.projectsGrouped)) {
+		$scope.$watch("vm.accounts", function () {
+			console.log(vm.accounts);
+			var i, j, iLength, jLength;
+			
+			if (angular.isDefined(vm.accounts)) {
 				vm.showProgress = false;
-				vm.accounts = [];
-				vm.projectsExist = !((Object.keys(vm.projectsGrouped).length === 0) && (vm.projectsGrouped.constructor === Object));
+				vm.projectsExist = (vm.accounts.length > 0);
 				vm.info = vm.projectsExist ? "" : "There currently no projects";
-				angular.forEach(vm.projectsGrouped, function(value, key) {
-					angular.forEach(value, function(project) {
-						project = {
-							name: project.name,
-							timestamp: project.timestamp,
-							bif4FreeEnabled: false,
-							uploading: false
-						};
-						project.canUpload = (key === vm.account);
-						updateAccountProjects(key, project);
-					});
-				});
+				for (i = 0, iLength = vm.accounts.length; i < iLength; i+= 1) {
+					vm.accounts[i].name = vm.accounts[i].account;
+					vm.accounts[i].showProjects = true;
+					vm.accounts[i].showProjectsIcon = "folder_open";
+					for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
+						vm.accounts[i].projects[j].name = vm.accounts[i].projects[j].project;
+						vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp);
+						vm.accounts[i].projects[j].bif4FreeEnabled = false;
+						vm.accounts[i].projects[j].uploading = false;
+						vm.accounts[i].projects[j].canUpload = (vm.accounts[i].account === vm.account);
+					}
+				}
 				setupBid4FreeAccess();
 			}
 		});
@@ -338,22 +338,35 @@
 			projectData.uploadFile = file;
 			promise = AccountService.uploadModel(projectData);
 			promise.then(function (response) {
-				interval = $interval(function () {
-					promise = AccountService.uploadStatus(projectData);
-					promise.then(function (response) {
-						console.log(response);
-						if (response.data.status === "ok") {
-							project.timestamp = UtilsService.formatTimestamp(new Date());
-							vm.showUploading = false;
-							$interval.cancel(interval);
-							vm.showUploaded = true;
-							$timeout(function () {
-								vm.showUploaded = false;
-								project.uploading = false;
-							}, 4000);
-						}
-					});
-				}, 1000);
+				console.log(response);
+				if (response.status === 404) {
+					vm.showUploading = false;
+					vm.showUploaded = true;
+					vm.uploadedIcon = "close";
+					$timeout(function () {
+						vm.showUploaded = false;
+						project.uploading = false;
+					}, 4000);
+				}
+				else {
+					interval = $interval(function () {
+						promise = AccountService.uploadStatus(projectData);
+						promise.then(function (response) {
+							console.log(response);
+							if (response.data.status === "ok") {
+								project.timestamp = UtilsService.formatTimestamp(new Date());
+								vm.showUploading = false;
+								$interval.cancel(interval);
+								vm.showUploaded = true;
+								vm.uploadedIcon = "done";
+								$timeout(function () {
+									vm.showUploaded = false;
+									project.uploading = false;
+								}, 4000);
+							}
+						});
+					}, 1000);
+				}
 			});
 		}
 

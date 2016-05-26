@@ -11,7 +11,7 @@ div(ng-if="!vm.state.project")
 		#accountItem(ng-switch="vm.itemToShow")
 			account-projects(
 				account="vm.account"
-				projects-grouped='vm.projectsGrouped'
+				accounts="vm.accounts"
 				ng-switch-when="repos"
 			)
 			account-profile(

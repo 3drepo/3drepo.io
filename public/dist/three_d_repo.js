@@ -4681,16 +4681,18 @@ var ViewerManager = {};
 		{
 			if (vm.account)
 			{
-				console.log(111111, vm.account);
-				promise = AccountService.getData(vm.account);
-				promise.then(function (data) {
-					vm.username        = vm.account;
-					vm.firstName       = data.firstName;
-					vm.lastName        = data.lastName;
-					vm.email           = data.email;
-					vm.hasAvatar       = data.hasAvatar;
-					vm.avatarURL       = data.avatarURL;
-					vm.projectsGrouped = data.projectsGrouped;
+				promise = AccountService.getUserInfo(vm.account);
+				promise.then(function (response) {
+					console.log(response);
+					vm.accounts = response.data.accounts;
+					vm.username = vm.account;
+					vm.firstName = response.data.firstName;
+					vm.lastName = response.data.lastName;
+					vm.email = response.data.email;
+					/*
+					vm.hasAvatar = response.data.hasAvatar;
+					vm.avatarURL = response.data.avatarURL;
+					*/
 				});
 			} else {
 				vm.username        = null;
@@ -4936,7 +4938,7 @@ var ViewerManager = {};
 			templateUrl: 'accountProjects.html',
 			scope: {
 				account: "=",
-				projectsGrouped: "="
+				accounts: "="
 			},
 			controller: AccountProjectsCtrl,
 			controllerAs: 'vm',
@@ -4965,7 +4967,6 @@ var ViewerManager = {};
 			"GIS",
 			"Other"
 		];
-		vm.accounts = [];
 		vm.info = "Retrieving projects..,";
 		vm.showProgress = true;
 
@@ -5001,27 +5002,28 @@ var ViewerManager = {};
 		});
 
 		/*
-		 * Handle changes to the state manager Data
-		 * Reformat the grouped projects to enable toggling of projects list
+		 * Added data to accounts and projects for UI
 		 */
-		$scope.$watch("vm.projectsGrouped", function () {
-			if (angular.isDefined(vm.projectsGrouped)) {
+		$scope.$watch("vm.accounts", function () {
+			console.log(vm.accounts);
+			var i, j, iLength, jLength;
+			
+			if (angular.isDefined(vm.accounts)) {
 				vm.showProgress = false;
-				vm.accounts = [];
-				vm.projectsExist = !((Object.keys(vm.projectsGrouped).length === 0) && (vm.projectsGrouped.constructor === Object));
+				vm.projectsExist = (vm.accounts.length > 0);
 				vm.info = vm.projectsExist ? "" : "There currently no projects";
-				angular.forEach(vm.projectsGrouped, function(value, key) {
-					angular.forEach(value, function(project) {
-						project = {
-							name: project.name,
-							timestamp: project.timestamp,
-							bif4FreeEnabled: false,
-							uploading: false
-						};
-						project.canUpload = (key === vm.account);
-						updateAccountProjects(key, project);
-					});
-				});
+				for (i = 0, iLength = vm.accounts.length; i < iLength; i+= 1) {
+					vm.accounts[i].name = vm.accounts[i].account;
+					vm.accounts[i].showProjects = true;
+					vm.accounts[i].showProjectsIcon = "folder_open";
+					for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
+						vm.accounts[i].projects[j].name = vm.accounts[i].projects[j].project;
+						vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp);
+						vm.accounts[i].projects[j].bif4FreeEnabled = false;
+						vm.accounts[i].projects[j].uploading = false;
+						vm.accounts[i].projects[j].canUpload = (vm.accounts[i].account === vm.account);
+					}
+				}
 				setupBid4FreeAccess();
 			}
 		});
@@ -5247,22 +5249,35 @@ var ViewerManager = {};
 			projectData.uploadFile = file;
 			promise = AccountService.uploadModel(projectData);
 			promise.then(function (response) {
-				interval = $interval(function () {
-					promise = AccountService.uploadStatus(projectData);
-					promise.then(function (response) {
-						console.log(response);
-						if (response.data.status === "ok") {
-							project.timestamp = UtilsService.formatTimestamp(new Date());
-							vm.showUploading = false;
-							$interval.cancel(interval);
-							vm.showUploaded = true;
-							$timeout(function () {
-								vm.showUploaded = false;
-								project.uploading = false;
-							}, 4000);
-						}
-					});
-				}, 1000);
+				console.log(response);
+				if (response.status === 404) {
+					vm.showUploading = false;
+					vm.showUploaded = true;
+					vm.uploadedIcon = "close";
+					$timeout(function () {
+						vm.showUploaded = false;
+						project.uploading = false;
+					}, 4000);
+				}
+				else {
+					interval = $interval(function () {
+						promise = AccountService.uploadStatus(projectData);
+						promise.then(function (response) {
+							console.log(response);
+							if (response.data.status === "ok") {
+								project.timestamp = UtilsService.formatTimestamp(new Date());
+								vm.showUploading = false;
+								$interval.cancel(interval);
+								vm.showUploaded = true;
+								vm.uploadedIcon = "done";
+								$timeout(function () {
+									vm.showUploaded = false;
+									project.uploading = false;
+								}, 4000);
+							}
+						});
+					}, 1000);
+				}
 			});
 		}
 
@@ -5365,44 +5380,6 @@ var ViewerManager = {};
 		}
 
 		/**
-		 * Get account data
-		 */
-		obj.getData = function (username) {
-			deferred = $q.defer();
-
-			var accountData = {};
-
-			$http.get(serverConfig.apiUrl(serverConfig.GET_API, username + ".json"))
-				.then(function (response) {
-					var i, length,
-						project, projectsGrouped,
-						data;
-
-					// Groups projects under accounts
-					projectsGrouped = {};
-					for (i = 0, length = response.data.projects.length; i < length; i += 1) {
-						project = response.data.projects[i];
-						if (!(project.account in projectsGrouped)) {
-							projectsGrouped[project.account] = [];
-						}
-						data = {
-							name: project.project,
-							timestamp: (project.timestamp !== null) ? UtilsService.formatTimestamp(project.timestamp) : ""
-						};
-						projectsGrouped[project.account].push(data);
-					}
-
-					accountData = response.data;
-					accountData.projectsGrouped = projectsGrouped;
-
-					accountData.avatarURL = serverConfig.apiUrl(serverConfig.GET_API, username + ".jpg");
-					deferred.resolve(accountData);
-				});
-
-			return deferred.promise;
-		};
-
-		/**
 		 * Update the user info
 		 *
 		 * @param {String} username
@@ -5482,6 +5459,16 @@ var ViewerManager = {};
 				plan: "THE-100-QUID-PLAN"
 			};
 			return doPost(data, account + "/database");
+		};
+
+		/**
+		 * Get user info
+		 *
+		 * @param username
+		 * @returns {*|promise}
+		 */
+		obj.getUserInfo = function (username) {
+			return UtilsService.doGet(username + ".json");
 		};
 
 		return obj;
@@ -7538,22 +7525,25 @@ var ViewerManager = {};
 		};
 	}
 
-	ContactCtrl.$inject = ["$scope"];
+	ContactCtrl.$inject = ["$scope", "UtilsService"];
 
-	function ContactCtrl ($scope) {
-		var vm = this;
+	function ContactCtrl ($scope, UtilsService) {
+		var vm = this,
+			promise;
 
 		/*
 		 * Init
 		 */
-		vm.contact = {info: "", name: "", email: ""};
+		vm.contact = {information: "", name: "", email: ""};
+		vm.sent = false;
+		vm.sending = false;
 
 		/*
 		 * Watch to enable send button
 		 */
 		$scope.$watch("vm.contact", function () {
 			vm.sendButtonDisabled = (
-				(vm.contact.info === "") ||
+				(vm.contact.information === "") ||
 				(vm.contact.name === "") ||
 				(vm.contact.email === "") ||
 				(angular.isUndefined(vm.contact.email))
@@ -7561,7 +7551,15 @@ var ViewerManager = {};
 		}, true);
 
 		vm.send = function () {
-
+			vm.sending = true;
+			promise = UtilsService.doPost(vm.contact, "contact");
+			promise.then(function (response) {
+				console.log(response);
+				vm.sending = false;
+				if (response.status === 200) {
+					vm.sent = true;
+				}
+			});
 		};
 	}
 }());
@@ -15926,6 +15924,29 @@ var Oculus = {};
                 });
             return deferred.promise;
         };
+
+        /**
+         * Handle POST requests
+         * @param data
+         * @param url
+         * @returns {*}
+         */
+        obj.doPost = function (data, url) {
+            var deferred = $q.defer(),
+                urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
+                config = {withCredentials: true};
+
+            $http.post(urlUse, data, config)
+                .then(
+                    function (response) {
+                        deferred.resolve(response);
+                    },
+                    function (error) {
+                        deferred.resolve(error);
+                    }
+                );
+            return deferred.promise;
+        }
 
         return obj;
     }

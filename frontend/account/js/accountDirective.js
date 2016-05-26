@@ -53,16 +53,18 @@
 		{
 			if (vm.account)
 			{
-				console.log(111111, vm.account);
-				promise = AccountService.getData(vm.account);
-				promise.then(function (data) {
-					vm.username        = vm.account;
-					vm.firstName       = data.firstName;
-					vm.lastName        = data.lastName;
-					vm.email           = data.email;
-					vm.hasAvatar       = data.hasAvatar;
-					vm.avatarURL       = data.avatarURL;
-					vm.projectsGrouped = data.projectsGrouped;
+				promise = AccountService.getUserInfo(vm.account);
+				promise.then(function (response) {
+					console.log(response);
+					vm.accounts = response.data.accounts;
+					vm.username = vm.account;
+					vm.firstName = response.data.firstName;
+					vm.lastName = response.data.lastName;
+					vm.email = response.data.email;
+					/*
+					vm.hasAvatar = response.data.hasAvatar;
+					vm.avatarURL = response.data.avatarURL;
+					*/
 				});
 			} else {
 				vm.username        = null;
