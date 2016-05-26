@@ -6,11 +6,9 @@ div(ng-if="!vm.state.project")
 			first-name="vm.firstName"
 			last-name="vm.lastName"
 			email="vm.email"
-			flex="20"
 			on-show-item="vm.showItem(item)"
 		)
-		span(flex="5")
-		div(ng-switch="vm.itemToShow", flex="50")
+		#accountItem(ng-switch="vm.itemToShow")
 			account-projects(
 				account="vm.account"
 				projects-grouped='vm.projectsGrouped'

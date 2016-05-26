@@ -35,13 +35,15 @@
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$mdDialog", "$element", "$timeout", "AccountService"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$mdDialog", "$element", "$timeout", "$interval", "AccountService", "UtilsService"];
 
-	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, $timeout, AccountService) {
+	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, $timeout, $interval, AccountService, UtilsService) {
 		var vm = this,
 			promise,
 			bid4FreeProjects = null,
-			fileUploader = $element[0].querySelector("#fileUploader");
+			existingProjectToUpload,
+			existingProjectFileUploader,
+			newProjectFileUploader;
 
 		/*
 		 * Init
@@ -57,6 +59,24 @@
 		vm.accounts = [];
 		vm.info = "Retrieving projects..,";
 		vm.showProgress = true;
+
+		// Setup file uploaders
+		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
+		existingProjectFileUploader.addEventListener(
+			"change",
+			function () {
+				uploadModelToProject(existingProjectToUpload, this.files[0]);
+			},
+			false
+		);
+		newProjectFileUploader = $element[0].querySelector("#newProjectFileUploader");
+		newProjectFileUploader.addEventListener(
+			"change",
+			function () {
+				vm.uploadedFile = this.files[0];
+			},
+			false
+		);
 
 		promise = AccountService.getProjectsBid4FreeStatus(vm.account);
 		promise.then(function (data) {
@@ -86,7 +106,8 @@
 						project = {
 							name: project.name,
 							timestamp: project.timestamp,
-							bif4FreeEnabled: false
+							bif4FreeEnabled: false,
+							uploading: false
 						};
 						project.canUpload = (key === vm.account);
 						updateAccountProjects(key, project);
@@ -172,9 +193,6 @@
 			});
 		};
 		
-		vm.uploadModel = function () {
-		};
-
 		/**
 		 * Close the dialog
 		 */
@@ -203,12 +221,7 @@
 				updateAccountProjects (response.data.account, project);
 				// Save model to project
 				if (vm.uploadedFile !== null) {
-					projectData = response.data;
-					projectData.uploadFile = vm.uploadedFile;
-					promise = AccountService.uploadModel(projectData);
-					promise.then(function (response) {
-						console.log(response);
-					});
+					uploadModelToProject (project, vm.uploadedFile);
 				}
 				vm.closeDialog();
 			});
@@ -219,32 +232,17 @@
 		 * @param {String} project
 		 */
 		vm.uploadModel = function (project) {
-			vm.projectData = {
-				account: vm.account,
-				project: project
-			};
-			setupFileUploader(
-				function (file) {
-					vm.projectData.uploadFile = file;
-					promise = AccountService.uploadModel(vm.projectData);
-					promise.then(function (response) {
-						console.log(response);
-					});
-				}
-			);
-			fileUploader.click();
+			existingProjectFileUploader.value = "";
+			existingProjectToUpload = project;
+			existingProjectFileUploader.click();
 		};
 
 		/**
 		 * Upload a file
 		 */
 		vm.uploadFile = function () {
-			setupFileUploader(
-				function (file) {
-					vm.uploadedFile = file;
-				}
-			);
-			fileUploader.click();
+			newProjectFileUploader.value = "";
+			newProjectFileUploader.click();
 		};
 
 		/**
@@ -295,21 +293,6 @@
 		};
 
 		/**
-		 * Set up action on file upload
-		 *
-		 * @param {Function} callback
-		 */
-		function setupFileUploader (callback) {
-			fileUploader.addEventListener(
-				"change",
-				function (event) {
-					callback(this.files[0]);
-				},
-				false
-			);
-		}
-
-		/**
 		 * Add a project to an existing or create newly created account
 		 *
 		 * @param account
@@ -338,8 +321,43 @@
 			}
 		}
 
+		/**
+		 * Upload file/model to project
+		 * 
+		 * @param project
+		 * @param file
+		 */
+		function uploadModelToProject (project, file) {
+			var interval,
+				projectData = {
+					account: vm.account,
+					project: project.name
+				};
+			project.uploading = true;
+			vm.showUploading = true;
+			projectData.uploadFile = file;
+			promise = AccountService.uploadModel(projectData);
+			promise.then(function (response) {
+				interval = $interval(function () {
+					promise = AccountService.uploadStatus(projectData);
+					promise.then(function (response) {
+						console.log(response);
+						if (response.data.status === "ok") {
+							project.timestamp = UtilsService.formatTimestamp(new Date());
+							vm.showUploading = false;
+							$interval.cancel(interval);
+							vm.showUploaded = true;
+							$timeout(function () {
+								vm.showUploaded = false;
+								project.uploading = false;
+							}, 4000);
+						}
+					});
+				}, 1000);
+			});
+		}
+
 		vm.b4f = function (account, project) {
-			console.log(account, project);
 			$location.path("/" + account + "/" + project + "/bid4free", "_self");
 		};
 

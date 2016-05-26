@@ -138,16 +138,6 @@
 		 */
 		obj.updatePassword = function (username, passwords) {
 			return doPut(passwords, username);
-			/*
-			deferred = $q.defer();
-			$http.post(serverConfig.apiUrl(serverConfig.POST_API, username), passwords)
-				.then(function (response) {
-					console.log(response);
-					deferred.resolve(response);
-				});
-
-			return deferred.promise;
-			*/
 		};
 
 		obj.getProjectsBid4FreeStatus = function (username) {
@@ -183,6 +173,16 @@
 			var data = new FormData();
 			data.append("file", projectData.uploadFile);
 			return doPost(data, projectData.account + "/" + projectData.project + "/upload", {'Content-Type': undefined});
+		};
+
+		/**
+		 * Get upload status
+		 *
+		 * @param projectData
+		 * @returns {*|promise}
+		 */
+		obj.uploadStatus = function (projectData) {
+			return UtilsService.doGet(projectData.account + "/" + projectData.project + ".json");
 		};
 
 		/**
