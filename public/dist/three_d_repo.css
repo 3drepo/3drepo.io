@@ -1447,6 +1447,9 @@ pricing .pricingPriceSubtitle {
 
 pricing .pricingInfo {
     height: 350px;
+    display: block;
+    overflow: auto;
+    width: 100%;
 }
 pricing .pricingInfo .pricingInfoLine {
     margin: 10px 0;
