@@ -370,6 +370,9 @@ function uploadProject(req, res, next){
 
 					//mark project ready
 					projectSetting.status = 'ok';
+					projectSetting.errorReason = undefined;
+					projectSetting.markModified('errorReason');
+					
 					return projectSetting.save();
 
 				}).catch(err => {

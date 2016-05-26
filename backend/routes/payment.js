@@ -8,6 +8,7 @@ var querystring = require('../libs/httpsReq').querystring;
 
 // endpoints for paypal IPN message
 router.post("/paypal/food", activateSubscription);
+router.get("/:token", checkSubscription);
 
 function activateSubscription(req, res, next){
 	'use strict';
@@ -59,6 +60,30 @@ function activateSubscription(req, res, next){
 
 	//always respond 200 with OK to paypal 
 	responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, 'OK');
+}
+
+function checkSubscription(req, res, next){
+	'use strict';
+	//check subscription by token with having to login, only valid for a 1 hour after the subscription is created
+
+	let responsePlace = utils.APIInfo(req);
+
+	User.findSubscriptionByToken(null, req.params.token).then(subscription => {
+
+		let validDate = new Date(subscription.createdAt.valueOf());
+		validDate.setHours(validDate.getHours() + 1);
+
+		let now = new Date();
+
+		if(validDate > now){
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
+		} else {
+			return Promise.reject({ message: 'Expired'});
+		}
+		
+	}).catch(err => {
+		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
 }
 
 module.exports = router;
