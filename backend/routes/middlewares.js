@@ -188,7 +188,18 @@ function isSubContractorInvited(req, res, next){
 }
 
 function canCreateDatabase(req, res, next){
-	if (req.params.account === req.session[C.REPO_SESSION_USER].username){
+	'use strict';
+
+	if(!req.session[C.REPO_SESSION_USER] && req.body.verificationToken){
+
+		let allowRepeatedVerify = true;
+		User.verify(req.params.account, req.body.verificationToken, allowRepeatedVerify).then(() => {
+			next();
+		}).catch( err => {
+			responseCodes.respond("Middleware: canCreateDatabase", req, res, next, responseCodes.AUTH_ERROR, null, err);
+		});
+		
+	} else if (req.session[C.REPO_SESSION_USER] && req.params.account === req.session[C.REPO_SESSION_USER].username){
 		next();
 	} else {
 		responseCodes.respond("Middleware: canCreateDatabase", req, res, next, responseCodes.AUTH_ERROR, null, req.params);
@@ -231,7 +242,7 @@ var middlewares = {
 	hasWriteAccessToAccount: [loggedIn, hasWriteAccessToAccount],
 	isMainContractor: [loggedIn, isMainContractor],
 	isSubContractorInvited: [loggedIn, isSubContractorInvited],
-	canCreateDatabase: [loggedIn, canCreateDatabase],
+	canCreateDatabase,
 
 	// Helpers
 	freeSpace,

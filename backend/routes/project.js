@@ -258,6 +258,12 @@ function convertToErrorCode(errCode){
             break;
         case 5:
             errObj = responseCodes.FILE_IMPORT_PROCESS_ERR;
+			break;
+        case 6:
+            errObj = responseCodes.FILE_IMPORT_STASH_GEN_FAILED;
+			break;
+        case 7:
+            errObj = responseCodes.FILE_IMPORT_MISSING_TEXTURES;
             break;
         default:
             errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
@@ -276,10 +282,17 @@ function uploadProject(req, res, next){
 	function fileFilter(req, file, cb){
 
 		console.log(file);
-		middlewares.freeSpace(req.params.account).then(space => {
 
-			let format = file.originalname.split('.').splice(-1)[0];
-			let size = estimateImportedSize(format, parseInt(req.headers['content-length']));
+		let acceptedFormat = ['x','obj','3ds','md3','md2','ply','mdl','ase','hmp','smd','mdc','md5','stl','lxo','nff','raw','off','ac','bvh','irrmesh','irr','q3d','q3s','b3d','dae','ter','csm','3d','lws','xml','ogex','ms3d','cob','scn','blend','pk3','ndo','ifc','xgl','zgl','fbx','assbin'];
+
+		let format = file.originalname.split('.').splice(-1)[0];
+		let size = estimateImportedSize(format, parseInt(req.headers['content-length']));
+
+		if(acceptedFormat.indexOf(format) === -1){
+			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
+		}
+
+		middlewares.freeSpace(req.params.account).then(space => {
 
 			console.log('est upload file size', size);
 			console.log('space left', space);
@@ -343,6 +356,11 @@ function uploadProject(req, res, next){
 					.then(corID => Promise.resolve(corID))
 					.catch(errCode => {
 						//catch here to provide custom error message
+						if(projectSetting){
+							projectSetting.errorReason = convertToErrorCode(errCode);
+							projectSetting.markModified('errorReason');
+						}
+
 						return Promise.reject(convertToErrorCode(errCode));
 					});
 
@@ -352,14 +370,19 @@ function uploadProject(req, res, next){
 
 					//mark project ready
 					projectSetting.status = 'ok';
+					projectSetting.errorReason = undefined;
+					projectSetting.markModified('errorReason');
+					
 					return projectSetting.save();
 
 				}).catch(err => {
 					// import failed for some reason(s)...
 					console.log(err.stack);
-					//mark project ready
-					projectSetting && (projectSetting.status = 'failed');
-					projectSetting && projectSetting.save();
+					//mark project failed
+					if(projectSetting){
+						projectSetting.status = 'failed';
+						projectSetting.save();
+					}
 
 					req[C.REQ_REPO].logger.logDebug(JSON.stringify(err));
 

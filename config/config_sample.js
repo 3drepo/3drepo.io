@@ -123,5 +123,9 @@ module.exports = {
 	auth: {
 		captcha: true,
 		register: true
+	},
+
+	contact:{
+		email: 'support@3drepo.org'
 	}
 }

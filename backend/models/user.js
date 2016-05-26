@@ -208,28 +208,26 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	});
 };
 
-schema.statics.verify = function(username, token){
+schema.statics.verify = function(username, token, allowRepeatedVerify){
 	return this.findByUserName(username).then(user => {
 		
 		var tokenData = user.customData.emailVerifyToken;
 
-		if(!user.customData.inactive){
+		if(!user.customData.inactive && !allowRepeatedVerify){
 			return Promise.reject({ resCode: responseCodes.ALREADY_VERIFIED});
 
 		} else if(tokenData.token === token && tokenData.expiredAt > new Date()){
 
-			user.customData.inactive = undefined;
-			user.customData.emailVerifyToken = undefined;
-
-			return user.save(() => {
-				return Promise.resolve(true);
-			});
+			//don't remove the token at this point as it maybe needed to access create a database API for user who intended to pay when signup
+			return Promise.resolve(true);
 		
 		} else {
 			return Promise.reject({ resCode: responseCodes.TOKEN_INVALID});
 		}
 	});
 };
+
+
 
 schema.methods.getAvatar = function(){
 	return this.customData && this.customData.avatar || null;
@@ -326,6 +324,69 @@ schema.methods.getPrivileges = function(){
 		return Promise.resolve(privs);
 	});
 
+};
+
+schema.methods.listAccounts = function(){
+	'use strict';
+
+	let accounts = [];
+
+	this.roles.forEach(role => {
+		if(role.role === 'admin'){
+			accounts.push({ account: role.db, projects: []});
+		}
+	});
+
+	// group projects by accounts
+	return this.listProjects().then(projects => {
+		
+		projects.forEach(project => {
+
+			let account = _.find(accounts, account => account.account === project.account);
+
+			if(!account){
+
+				account = {
+					account: project.account,
+					projects: []
+				};
+
+				accounts.push(account);
+			}
+
+			account.projects.push({
+				project: project.project,
+				timestamp: project.timestamp,
+				status: project.status
+			});
+
+		});
+
+		accounts.forEach(account => {
+			account.projects.sort((a, b) => {
+				if(a.timestamp < b.timestamp){
+					return 1;
+				} else if (a.timestamp > b.timestamp){
+					return -1;
+				} else {
+					return 0;
+				}
+			});
+		});
+
+		accounts.sort((a, b) => {
+			if (a.account.toLowerCase() < b.account.toLowerCase()){
+				return -1;
+			} else if (a.account.toLowerCase() > b.account.toLowerCase()) {
+				return 1;
+			} else {
+				return 0;
+			}
+		});
+
+		return Promise.resolve(accounts);
+
+	});
 };
 
 schema.methods.listProjects = function(){
@@ -581,7 +642,7 @@ schema.statics.findSubscriptionsByBillingUser = function(billingUser){
 			dbSubs.forEach(dbSub => {
 
 				dbSub = dbSub.toObject();
-				dbSub.db = dbUser.user;
+				dbSub.account = dbUser.user;
 				subscriptions.push(dbSub);
 			});
 			
@@ -595,14 +656,23 @@ schema.statics.findSubscriptionsByBillingUser = function(billingUser){
 schema.statics.findSubscriptionByToken = function(billingUser, token){
 	'use strict';
 
-	return this.findOne({account: 'admin'}, { 
-		'customData.subscriptions.billingUser': billingUser, 
+	let query = { 
 		'customData.subscriptions.token': token
-	}, {
-		'customData.subscriptions.$': 1
+	};
+
+	if(billingUser){
+		query['customData.subscriptions.billingUser'] = billingUser;
+	}
+
+	return this.findOne({account: 'admin'}, query, {
+		'customData.subscriptions.$': 1,
+		'user': 1
 	}).then( dbUser => {
 
-		return Promise.resolve(dbUser.customData.subscriptions[0]);
+		let subscription = dbUser.customData.subscriptions[0].toObject();
+		subscription.account = dbUser.user;
+
+		return Promise.resolve(subscription);
 	});
 };
 

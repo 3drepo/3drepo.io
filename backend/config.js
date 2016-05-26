@@ -189,6 +189,10 @@
 	config.auth.captcha  = coalesce(config.auth.captcha, {});
 	config.auth.register  = coalesce(config.auth.register, {});
 
+	//contact
+	config.contact = coalesce(config.contact, {});
+	config.contact.email = coalesce(config.contact.email, 'support@3drepo.org');
+
 	config.version = VERSION;
 
 	module.exports = config;
