@@ -32,9 +32,9 @@
         };
     }
 
-    RegisterVerifyCtrl.$inject = ["$location", "RegisterVerifyService", "AccountService"];
+    RegisterVerifyCtrl.$inject = ["$location", "UtilsService", "AccountService"];
 
-    function RegisterVerifyCtrl ($location, RegisterVerifyService, AccountService) {
+    function RegisterVerifyCtrl ($location, UtilsService, AccountService) {
         var vm = this,
             promise,
             username = $location.search().username,
@@ -49,9 +49,8 @@
         vm.pay = (($location.search().hasOwnProperty("pay")) && $location.search().pay);
 
         vm.verifyErrorMessage = "Verifying. Please wait...";
-        promise = RegisterVerifyService.verify(username, {token: token});
+        promise = UtilsService.doPost({token: token}, username + "/verify");
         promise.then(function (response) {
-            console.log(response);
             if (response.status === 200) {
                 vm.verified = true;
                 vm.verifySuccessMessage = "Congratulations. You have successfully signed up for 3D Repo. You may now login to you account.";
@@ -88,8 +87,13 @@
                 vm.error = "Please provide a database name";
             }
             */
-            vm.paypalReturnUrl = $location.protocol() + "://" + $location.host();
-            console.log(vm.paypalReturnUrl);
+            console.log(username);
+            promise = AccountService.newSubscription(username);
+            promise.then(function (response) {
+                vm.newDatabaseToken = response.data.token;
+                vm.paypalReturnUrl = $location.protocol() + "://" + $location.host() + "?username=" + username;
+                console.log(vm.paypalReturnUrl);
+            });
         };
 
         vm.test = function () {

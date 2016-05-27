@@ -5459,6 +5459,19 @@ var ViewerManager = {};
 		};
 
 		/**
+		 * Create a new subscription
+		 *
+		 * @param account
+		 * @returns {*|promise}
+		 */
+		obj.newSubscription = function (account) {
+			var data = {
+				plan: "THE-100-QUID-PLAN"
+			};
+			return doPost(data, account + "/subscriptions");
+		};
+
+		/**
 		 * Get user info
 		 *
 		 * @param username
@@ -9157,7 +9170,7 @@ var ViewerManager = {};
 		 * 
 		 * 
 		 * @param event
-		 * @param type
+		 * @param display
 		 */
 		vm.display = function (event, display) {
 			vm.legalTitle = display.title;
@@ -14603,9 +14616,9 @@ var Oculus = {};
         };
     }
 
-    RegisterVerifyCtrl.$inject = ["$location", "RegisterVerifyService", "AccountService"];
+    RegisterVerifyCtrl.$inject = ["$location", "UtilsService", "AccountService"];
 
-    function RegisterVerifyCtrl ($location, RegisterVerifyService, AccountService) {
+    function RegisterVerifyCtrl ($location, UtilsService, AccountService) {
         var vm = this,
             promise,
             username = $location.search().username,
@@ -14620,9 +14633,8 @@ var Oculus = {};
         vm.pay = (($location.search().hasOwnProperty("pay")) && $location.search().pay);
 
         vm.verifyErrorMessage = "Verifying. Please wait...";
-        promise = RegisterVerifyService.verify(username, {token: token});
+        promise = UtilsService.doPost({token: token}, username + "/verify");
         promise.then(function (response) {
-            console.log(response);
             if (response.status === 200) {
                 vm.verified = true;
                 vm.verifySuccessMessage = "Congratulations. You have successfully signed up for 3D Repo. You may now login to you account.";
@@ -14659,8 +14671,13 @@ var Oculus = {};
                 vm.error = "Please provide a database name";
             }
             */
-            vm.paypalReturnUrl = $location.protocol() + "://" + $location.host();
-            console.log(vm.paypalReturnUrl);
+            console.log(username);
+            promise = AccountService.newSubscription(username);
+            promise.then(function (response) {
+                vm.newDatabaseToken = response.data.token;
+                vm.paypalReturnUrl = $location.protocol() + "://" + $location.host() + "?username=" + username;
+                console.log(vm.paypalReturnUrl);
+            });
         };
 
         vm.test = function () {
@@ -14669,64 +14686,6 @@ var Oculus = {};
     }
 }());
 
-/**
- *  Copyright (C) 2016 3D Repo Ltd
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-    "use strict";
-
-    angular.module("3drepo")
-        .factory("RegisterVerifyService", RegisterVerifyService);
-
-    RegisterVerifyService.$inject = ["$http", "$q", "serverConfig"];
-
-    function RegisterVerifyService($http, $q, serverConfig) {
-        var obj = {};
-
-        /**
-         * Handle POST requests
-         * @param data
-         * @param urlEnd
-         * @returns {*}
-         */
-        function doPost(data, urlEnd) {
-            var deferred = $q.defer(),
-                url = serverConfig.apiUrl(serverConfig.POST_API, urlEnd),
-                config = {withCredentials: true};
-
-            $http.post(url, data, config)
-                .then(
-                    function (response) {
-                        deferred.resolve(response);
-                    },
-                    function (error) {
-                        deferred.resolve(error);
-                    }
-                );
-            return deferred.promise;
-        }
-
-        obj.verify = function (username, data) {
-            return doPost(data, username + "/verify");
-        };
-
-        return obj;
-    }
-}());
 /**
  *	Copyright (C) 2016 3D Repo Ltd
  *

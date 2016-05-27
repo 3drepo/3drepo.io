@@ -163,6 +163,19 @@
 		};
 
 		/**
+		 * Create a new subscription
+		 *
+		 * @param account
+		 * @returns {*|promise}
+		 */
+		obj.newSubscription = function (account) {
+			var data = {
+				plan: "THE-100-QUID-PLAN"
+			};
+			return doPost(data, account + "/subscriptions");
+		};
+
+		/**
 		 * Get user info
 		 *
 		 * @param username
