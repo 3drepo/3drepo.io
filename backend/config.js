@@ -166,6 +166,10 @@
 	config.contact = coalesce(config.contact, {});
 	config.contact.email = coalesce(config.contact.email, 'support@3drepo.org');
 
+	//paypal
+	config.paypal = coalesce(config.paypal, {});
+	config.paypal.validateIPN = coalesce(config.paypal.validateIPN, true);
+
 	config.version = VERSION;
 
 	module.exports = config;

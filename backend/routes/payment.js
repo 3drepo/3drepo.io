@@ -3,8 +3,10 @@ var router = express.Router({mergeParams: true});
 var responseCodes = require("../response_codes.js");
 var utils = require("../utils");
 var User = require('../models/user');
+var Mailer = require('../mailer/mailer');
 var httpsPost = require('../libs/httpsReq').post;
 var querystring = require('../libs/httpsReq').querystring;
+var config = require('../config');
 
 // endpoints for paypal IPN message
 router.post("/paypal/food", activateSubscription);
@@ -18,6 +20,12 @@ function activateSubscription(req, res, next){
 	let paymentInfo = req.body;
 	let token = paymentInfo.custom;
 	let isPaymentIPN = paymentInfo.txn_type === 'subscr_payment';
+	let isSubscriptionInitIPN = paymentInfo.txn_type === 'subscr_signup';
+	let isSubscriptionCancelled = paymentInfo.txn_type === 'subscr_cancel';
+
+	let paymentOrSubscriptionSuccess = isPaymentIPN && paymentInfo.payment_status === 'Completed' || isSubscriptionInitIPN;
+	//let paymentPending = isPaymentIPN && paymentInfo.payment_status === 'Pending';
+	let paymentFailed = paymentInfo.txn_type === 'subscr_failed';
 
 
 	let url = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
@@ -25,8 +33,16 @@ function activateSubscription(req, res, next){
 	let qs = querystring(req.body);
 	qs = 'cmd=_notify-validate&' + qs;
 
+
+	let validateIPN = httpsPost(url, qs);
+
+	// skip ipn validation 
+	if(!config.paypal.validateIPN){
+		validateIPN = Promise.resolve('VERIFIED');
+	}
+
 	//first verify this message is genuinely coming from paypal
-	httpsPost(url, qs).then(resData => {
+	validateIPN.then(resData => {
 
 		if(resData === 'VERIFIED') {
 			return Promise.resolve();
@@ -36,25 +52,54 @@ function activateSubscription(req, res, next){
 
 	}).then(() => {
 
-		if(isPaymentIPN && paymentInfo.payment_status === 'Completed'){
+		if(paymentOrSubscriptionSuccess){
 
-			return User.activateSubscription(token, paymentInfo);
+			return User.activateSubscription(token, {
 
+				gateway: 'PAYPAL',
+				currency: paymentInfo.mc_currency,
+				amount: isSubscriptionInitIPN ? 0.00 : paymentInfo.mc_gross,
+				subscriptionSignup: isSubscriptionInitIPN
+
+			}, paymentInfo).then(resData => {
+				console.log(resData.subscription, 'payment confirmed and subscription activated');
+			});
+
+		} else if (isSubscriptionCancelled) {
+			// to be imple...
+
+	    } else if (paymentFailed){
+
+			User.findBillingUserByToken(token).then(user => {
+				Mailer.sendPaymentFailedEmail(user.customData.email, {
+					amount: paymentInfo.mc_currency +  ' ' + paymentInfo.payment_gross
+				});
+			});
+			
 		} else {
 
-			return Promise.reject({ 
-				message: 'handlers for payment status other than "Completed" are not yet implemented',
-				body: req.body
+			//other payment status we don't know how to deal with
+			return Promise.reject({ message: 'unexpected ipn message type'});
+		}
+
+	}).catch( err => {
+		
+		// log error and send email to support
+		if(err){
+
+			console.log(err);
+
+			User.findBillingUserByToken(token).then(user => {
+				Mailer.sendPaymentErrorEmail({
+					ipn: JSON.stringify(paymentInfo),
+					billingUser: user.user,
+					email: user.customData.email,
+					errmsg: JSON.stringify(err),
+					subscriptionToken: token
+				});
 			});
 		}
 
-	}).then(resData => {
-		console.log(resData.subscription, 'payment confirmed and subscription activated');
-
-
-	}).catch( err => {
-		console.log('error:');
-		console.log(err);
 	});
 
 

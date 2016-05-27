@@ -131,5 +131,9 @@ module.exports = {
 
 	contact:{
 		email: 'support@3drepo.org'
+	},
+
+	paypal:{
+		validateIPN: true
 	}
 }

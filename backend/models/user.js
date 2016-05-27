@@ -129,6 +129,16 @@ schema.statics.findByUserName = function(user){
 	return this.findOne({account: 'admin'}, { user });
 };
 
+schema.statics.findBillingUserByToken = function(token){
+	return this.findSubscriptionByToken(null, token).then(subscription => {
+		if(subscription){
+			return this.findByUserName(subscription.billingUser);
+		}
+
+		return Promise.resolve();
+	});
+};
+
 
 schema.statics.updatePassword = function(logger, username, oldPassword, token, newPassword){
 	'use strict';
@@ -473,6 +483,9 @@ var subscriptions = {
 		},
 		db: this.user,
 		billingCycle: 1, //month
+		freeTrial: 1, //month
+		currency: 'GBP',
+		amount: 100
 	}
 };
 
@@ -522,7 +535,7 @@ schema.methods.createSubscriptionToken = function(plan, billingUser){
 	}
 };
 
-schema.statics.activateSubscription = function(token, paymentInfo, disableEmail){
+schema.statics.activateSubscription = function(token, paymentInfo, raw, disableEmail){
 	'use strict';
 	
 	let query = {'customData.subscriptions.token': token};
@@ -539,6 +552,12 @@ schema.statics.activateSubscription = function(token, paymentInfo, disableEmail)
 		}
 
 		subscription = _.find(dbUser.customData.subscriptions, subscription => subscription.token === token);
+
+		if(!getSubscription(subscription.plan).freeTrial && paymentInfo.subscriptionSignup){
+			// do nothing if no free trial is provided for this plan and getting a subscription sign up message with no payment
+			return Promise.reject();
+		}
+
 		account = dbUser.user;
 
 		return Role.findByRoleID(`${account}.admin`);
@@ -564,11 +583,11 @@ schema.statics.activateSubscription = function(token, paymentInfo, disableEmail)
 		expiryAt.setMonth(expiryAt.getMonth() + getSubscription(subscription.plan).billingCycle);
 
 		let payment = {
-			raw: paymentInfo,
-			gateway: 'PAYPAL',
+			raw: raw,
+			gateway: paymentInfo.gateway,
 			createdAt: new Date(),
-			currency: paymentInfo.mc_currency,
-			amount: paymentInfo.mc_gross
+			currency: paymentInfo.currency,
+			amount: paymentInfo.amount
 		};
 
 		subscription.limits = getSubscription(subscription.plan).limits;
@@ -576,7 +595,7 @@ schema.statics.activateSubscription = function(token, paymentInfo, disableEmail)
 		subscription.active = true;
 		subscription.payments.push(payment);
 
-		if(!disableEmail){
+		if(!disableEmail && !paymentInfo.subscriptionSignup){
 
 			//send verification email
 			let amount = payment.amount;
@@ -600,6 +619,8 @@ schema.statics.activateSubscription = function(token, paymentInfo, disableEmail)
 		return dbUser.save().then(() => {
 			return Promise.resolve({subscription, account, payment});
 		});
+		
+
 		
 	});
 
