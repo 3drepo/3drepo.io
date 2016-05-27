@@ -219,6 +219,8 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 };
 
 schema.statics.verify = function(username, token, allowRepeatedVerify){
+	'use strict';
+
 	return this.findByUserName(username).then(user => {
 		
 		var tokenData = user.customData.emailVerifyToken;
@@ -228,10 +230,32 @@ schema.statics.verify = function(username, token, allowRepeatedVerify){
 
 		} else if(tokenData.token === token && tokenData.expiredAt > new Date()){
 
-			//don't remove the token at this point as it maybe needed to access create a database API for user who intended to pay when signup
-			user.customData.inactive = undefined;
 
-			return user.save();
+			//create admin role for own database
+
+			return Role.findByRoleID(`${username}.admin`).then(role => {
+
+				if(!role){
+					return Role.createAdminRole(username);
+				} else {
+					return Promise.resolve();
+				}
+
+			}).then(() => {
+
+				let adminRoleName = 'admin';
+				return User.grantRoleToUser(username, username, adminRoleName);
+
+			}).then(() => {
+
+				user.customData.inactive = undefined;
+				user.customData.emailVerifyToken = undefined;
+				return user.save();
+
+			});
+
+
+
 		
 		} else {
 			return Promise.reject({ resCode: responseCodes.TOKEN_INVALID});
