@@ -249,7 +249,7 @@ schema.statics.verify = function(username, token, allowRepeatedVerify){
 			}).then(() => {
 
 				user.customData.inactive = undefined;
-				user.customData.emailVerifyToken = undefined;
+				//user.customData.emailVerifyToken = undefined;
 				return user.save();
 
 			});
