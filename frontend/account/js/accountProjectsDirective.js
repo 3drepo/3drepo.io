@@ -100,7 +100,7 @@
 			if (angular.isDefined(vm.accounts)) {
 				vm.showProgress = false;
 				vm.projectsExist = (vm.accounts.length > 0);
-				vm.info = vm.projectsExist ? "" : "There currently no projects";
+				vm.info = vm.projectsExist ? "" : "There are currently no projects";
 				for (i = 0, iLength = vm.accounts.length; i < iLength; i+= 1) {
 					vm.accounts[i].name = vm.accounts[i].account;
 					vm.accounts[i].showProjects = true;
@@ -273,11 +273,7 @@
 			promise.then(function (response) {
 				console.log(response);
 				vm.newDatabaseToken = response.data.token;
-				vm.paypalReturnUrl =
-					$location.protocol() + "://" +
-					$location.host() + "/" +
-					"payment?username=" + vm.account + "&" +
-					"token=" + vm.newDatabaseToken;
+				vm.paypalReturnUrl = $location.protocol() + "://" + $location.host() + "/" + vm.account;
 			});
 		};
 

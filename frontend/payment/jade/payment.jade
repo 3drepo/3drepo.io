@@ -3,6 +3,8 @@
 		md-toolbar
 			.md-toolbar-tools
 				h2 Payment
-		.userContent(layout="row", layout-align="start center")
-			h3 Please wait for the payment to process...
-			md-progress-circular(md-mode="indeterminate", md-diameter="20")
+		.userContent(layout="column", layout-align="start")
+			h3 Thank you.
+			h3 You may now login to your account.
+			div(layout="row")
+				md-button.md-raised.md-accent(ng-click="vm.goToLoginPage()") Go To Login Page

@@ -32,9 +32,9 @@
         };
     }
 
-    RegisterVerifyCtrl.$inject = ["$scope", "$location", "RegisterVerifyService", "AccountService"];
+    RegisterVerifyCtrl.$inject = ["$location", "RegisterVerifyService", "AccountService"];
 
-    function RegisterVerifyCtrl ($scope, $location, RegisterVerifyService, AccountService) {
+    function RegisterVerifyCtrl ($location, RegisterVerifyService, AccountService) {
         var vm = this,
             promise,
             username = $location.search().username,
@@ -75,13 +75,8 @@
                 if (vm.pay) {
                     promise = AccountService.newDatabase(username, vm.databaseName);
                     promise.then(function (response) {
-                        console.log(response);
                         vm.newDatabaseToken = response.data.token;
-                        vm.paypalReturnUrl =
-                            $location.protocol() + "://" +
-                            $location.host() + "/" +
-                            "payment?username=" + vm.account + "&" +
-                            "token=" + vm.newDatabaseToken;
+                        vm.paypalReturnUrl = $location.protocol() + "://" + $location.host();
                         console.log(vm.paypalReturnUrl);
                     });
                 }
@@ -92,5 +87,9 @@
                 vm.error = "Please provide a database name";
             }
         };
+
+        vm.test = function () {
+            
+        }
     }
 }());

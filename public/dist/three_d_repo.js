@@ -5011,7 +5011,7 @@ var ViewerManager = {};
 			if (angular.isDefined(vm.accounts)) {
 				vm.showProgress = false;
 				vm.projectsExist = (vm.accounts.length > 0);
-				vm.info = vm.projectsExist ? "" : "There currently no projects";
+				vm.info = vm.projectsExist ? "" : "There are currently no projects";
 				for (i = 0, iLength = vm.accounts.length; i < iLength; i+= 1) {
 					vm.accounts[i].name = vm.accounts[i].account;
 					vm.accounts[i].showProjects = true;
@@ -5184,11 +5184,7 @@ var ViewerManager = {};
 			promise.then(function (response) {
 				console.log(response);
 				vm.newDatabaseToken = response.data.token;
-				vm.paypalReturnUrl =
-					$location.protocol() + "://" +
-					$location.host() + "/" +
-					"payment?username=" + vm.account + "&" +
-					"token=" + vm.newDatabaseToken;
+				vm.paypalReturnUrl = $location.protocol() + "://" + $location.host() + "/" + vm.account;
 			});
 		};
 
@@ -13258,12 +13254,14 @@ var Oculus = {};
 		};
 	}
 
-	paymentCtrl.$inject = ["$location", "Auth"];
+	paymentCtrl.$inject = ["$location"];
 
-	function paymentCtrl ($location, Auth) {
+	function paymentCtrl ($location) {
 		var vm = this;
 
-		Auth.logout();
+		vm.goToLoginPage = function () {
+			$location.path("/", "_self");
+		};
 	}
 }());
 
@@ -14563,9 +14561,9 @@ var Oculus = {};
         };
     }
 
-    RegisterVerifyCtrl.$inject = ["$scope", "$location", "RegisterVerifyService", "AccountService"];
+    RegisterVerifyCtrl.$inject = ["$location", "RegisterVerifyService", "AccountService"];
 
-    function RegisterVerifyCtrl ($scope, $location, RegisterVerifyService, AccountService) {
+    function RegisterVerifyCtrl ($location, RegisterVerifyService, AccountService) {
         var vm = this,
             promise,
             username = $location.search().username,
@@ -14606,13 +14604,8 @@ var Oculus = {};
                 if (vm.pay) {
                     promise = AccountService.newDatabase(username, vm.databaseName);
                     promise.then(function (response) {
-                        console.log(response);
                         vm.newDatabaseToken = response.data.token;
-                        vm.paypalReturnUrl =
-                            $location.protocol() + "://" +
-                            $location.host() + "/" +
-                            "payment?username=" + vm.account + "&" +
-                            "token=" + vm.newDatabaseToken;
+                        vm.paypalReturnUrl = $location.protocol() + "://" + $location.host();
                         console.log(vm.paypalReturnUrl);
                     });
                 }
@@ -14623,6 +14616,10 @@ var Oculus = {};
                 vm.error = "Please provide a database name";
             }
         };
+
+        vm.test = function () {
+            
+        }
     }
 }());
 

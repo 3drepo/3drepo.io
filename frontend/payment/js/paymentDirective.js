@@ -32,11 +32,13 @@
 		};
 	}
 
-	paymentCtrl.$inject = ["$location", "Auth"];
+	paymentCtrl.$inject = ["$location"];
 
-	function paymentCtrl ($location, Auth) {
+	function paymentCtrl ($location) {
 		var vm = this;
 
-		Auth.logout();
+		vm.goToLoginPage = function () {
+			$location.path("/", "_self");
+		};
 	}
 }());
