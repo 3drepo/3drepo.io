@@ -41,7 +41,7 @@
 	router.get("/:account/subscriptions/:token", middlewares.hasReadAccessToAccount, findSubscriptionByToken);
 	router.post('/:account', signUp);
 	router.post('/:account/database', middlewares.canCreateDatabase, createDatabase);
-	router.post('/:account/subscriptions', middlewares.hasWriteAccessToAccount, createSubscription);
+	router.post('/:account/subscriptions', middlewares.canCreateDatabase, createSubscription);
 	router.post('/:account/verify', verify);
 	router.post('/:account/forgot-password', forgotPassword);
 	router.put("/:account", middlewares.hasWriteAccessToAccount, updateUser);
@@ -375,6 +375,7 @@
 	function createSubscription(req, res, next){
 
 		let responsePlace = utils.APIInfo(req);
+
 
 		User.findByUserName(req.params.account).then(dbUser => {
 			let billingUser = req.params.account;
