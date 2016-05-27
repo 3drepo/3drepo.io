@@ -373,10 +373,10 @@ schema.methods.listAccounts = function(){
 		}
 	});
 
-	// //backward compatibility, user has access to database with the name same as their username
-	// if(!_.find(accounts, account => account.account === this.user)){
-	// 	accounts.push({ account: this.user, projects: [] });
-	// }
+	//backward compatibility, user has access to database with the name same as their username
+	if(!_.find(accounts, account => account.account === this.user)){
+		accounts.push({ account: this.user, projects: [] });
+	}
 	
 	// group projects by accounts
 	return this.listProjects().then(projects => {
