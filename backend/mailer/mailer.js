@@ -115,9 +115,29 @@ function sendContactEmail(data){
 }
 
 
+
+function sendPaymentFailedEmail(to, data){
+	'use strict';
+
+	let template = require('./templates/paymentFailed');
+	return sendEmail(template, to, data);
+
+}
+
+function sendPaymentErrorEmail(data){
+	'use strict';
+
+	let template = require('./templates/paymentError');
+	return sendEmail(template, config.contact.email, data);
+}
+
+
+
 module.exports = {
 	sendVerifyUserEmail,
 	sendResetPasswordEmail,
 	sendPaymentReceivedEmail,
-	sendContactEmail
+	sendContactEmail,
+	sendPaymentFailedEmail,
+	sendPaymentErrorEmail
 }
