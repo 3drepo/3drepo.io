@@ -219,6 +219,8 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 };
 
 schema.statics.verify = function(username, token, allowRepeatedVerify){
+	'use strict';
+
 	return this.findByUserName(username).then(user => {
 		
 		var tokenData = user.customData.emailVerifyToken;
@@ -228,10 +230,32 @@ schema.statics.verify = function(username, token, allowRepeatedVerify){
 
 		} else if(tokenData.token === token && tokenData.expiredAt > new Date()){
 
-			//don't remove the token at this point as it maybe needed to access create a database API for user who intended to pay when signup
-			user.customData.inactive = undefined;
 
-			return user.save();
+			//create admin role for own database
+
+			return Role.findByRoleID(`${username}.admin`).then(role => {
+
+				if(!role){
+					return Role.createAdminRole(username);
+				} else {
+					return Promise.resolve();
+				}
+
+			}).then(() => {
+
+				let adminRoleName = 'admin';
+				return User.grantRoleToUser(username, username, adminRoleName);
+
+			}).then(() => {
+
+				user.customData.inactive = undefined;
+				user.customData.emailVerifyToken = undefined;
+				return user.save();
+
+			});
+
+
+
 		
 		} else {
 			return Promise.reject({ resCode: responseCodes.TOKEN_INVALID});
@@ -345,10 +369,15 @@ schema.methods.listAccounts = function(){
 
 	this.roles.forEach(role => {
 		if(role.role === 'admin'){
-			accounts.push({ account: role.db, projects: []});
+			accounts.push({ account: role.db, projects: [] });
 		}
 	});
 
+	//backward compatibility, user has access to database with the name same as their username
+	if(!_.find(accounts, account => account.account === this.user)){
+		accounts.push({ account: this.user, projects: [] });
+	}
+	
 	// group projects by accounts
 	return this.listProjects().then(projects => {
 		
@@ -369,11 +398,12 @@ schema.methods.listAccounts = function(){
 			account.projects.push({
 				project: project.project,
 				timestamp: project.timestamp,
-				status: project.status
+				status: project.status,
 			});
 
 		});
 
+		let getQuotaPromises = [];
 		accounts.forEach(account => {
 			account.projects.sort((a, b) => {
 				if(a.timestamp < b.timestamp){
@@ -384,6 +414,12 @@ schema.methods.listAccounts = function(){
 					return 0;
 				}
 			});
+
+			getQuotaPromises.push(
+				User.findByUserName(account.account).then(user => {
+					account.quota = user.haveActiveSubscriptions() ? user.getSubscriptionLimits() : undefined;
+				})
+			);
 		});
 
 		accounts.sort((a, b) => {
@@ -396,8 +432,10 @@ schema.methods.listAccounts = function(){
 			}
 		});
 
-		return Promise.resolve(accounts);
 
+		return Promise.all(getQuotaPromises).then(() => {
+			return Promise.resolve(accounts);
+		});
 	});
 };
 
@@ -628,17 +666,26 @@ schema.statics.activateSubscription = function(token, paymentInfo, raw, disableE
 
 };
 
-schema.methods.getSubscriptionLimits = function(){
-	'use strict';
+schema.methods.haveActiveSubscriptions = function(){
+	return this.getActiveSubscriptions().length > 0;
+};
 
+schema.methods.getActiveSubscriptions = function(){
+	'use strict';
 	let now = new Date();
-	let subscriptions = _.filter(
+	return _.filter(
 		this.customData.subscriptions, 
 		subscription => subscription.active && subscription.expiredAt > now
 	);
+};
+
+schema.methods.getSubscriptionLimits = function(){
+	'use strict';
+
+	let subscriptions = this.getActiveSubscriptions();
 
 	let sumLimits = {
-		spaceLimit: 0,
+		spaceLimit: 0, 
 		collaboratorLimit: 0
 	};
 
