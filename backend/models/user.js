@@ -417,7 +417,9 @@ schema.methods.listAccounts = function(){
 
 			getQuotaPromises.push(
 				User.findByUserName(account.account).then(user => {
-					account.quota = user.haveActiveSubscriptions() ? user.getSubscriptionLimits() : undefined;
+					if(user){
+						account.quota = user.haveActiveSubscriptions() ? user.getSubscriptionLimits() : undefined;
+					}
 				})
 			);
 		});

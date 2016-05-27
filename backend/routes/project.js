@@ -154,7 +154,7 @@ function getProjectSetting(req, res, next){
 	let place = utils.APIInfo(req);
 	_getProject(req).then(setting => {
 
-		let whitelist = ['owner', 'desc', 'type', 'permissions', 'properties', 'status'];
+		let whitelist = ['owner', 'desc', 'type', 'permissions', 'properties', 'status', 'errorReason'];
 		let resObj = {};
 		
 		whitelist.forEach(key => {
