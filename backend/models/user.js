@@ -229,7 +229,9 @@ schema.statics.verify = function(username, token, allowRepeatedVerify){
 		} else if(tokenData.token === token && tokenData.expiredAt > new Date()){
 
 			//don't remove the token at this point as it maybe needed to access create a database API for user who intended to pay when signup
-			return Promise.resolve(true);
+			user.customData.inactive = undefined;
+
+			return user.save();
 		
 		} else {
 			return Promise.reject({ resCode: responseCodes.TOKEN_INVALID});
