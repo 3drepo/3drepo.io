@@ -77,3 +77,27 @@ home .cardInfo md-icon {
     width: 16px;
     height: 16px;
 }
+
+home #legalLinks {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 1000;
+}
+home #legalLinks .md-button {
+    font-size: 12px;
+    margin: 0;
+    opacity: 0.7;
+}
+
+/** Legal Dialog ******************************************************************************************************/
+.legalDialog {
+    min-width: calc(100vw - 50%);
+    min-height: calc(100vh - 25%);
+    overflow: hidden;
+}
+
+.legalDialog #tcIcon {
+    margin-right: 10px;
+}
+

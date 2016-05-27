@@ -110,7 +110,8 @@
 						vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp);
 						vm.accounts[i].projects[j].bif4FreeEnabled = false;
 						vm.accounts[i].projects[j].uploading = false;
-						vm.accounts[i].projects[j].canUpload = (vm.accounts[i].account === vm.account);
+						//vm.accounts[i].projects[j].canUpload = (vm.accounts[i].account === vm.account);
+						vm.accounts[i].projects[j].canUpload = true;
 					}
 				}
 				setupBid4FreeAccess();

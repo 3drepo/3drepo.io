@@ -9,7 +9,7 @@
 				h3 {{vm.verifySuccessMessage}}
 				div(layout="row")
 					md-button.md-raised.md-accent(ng-click="vm.goToLoginPage()") Go To Login Page
-				div(ng-if="vm.pay")
+				div(ng-if="vm.pay", layout="column")
 					h3 Or continue with payment
 					form(action="https://www.sandbox.paypal.com/cgi-bin/webscr", method="post", ng-submit="vm.setupPayment($event)")
 						input(type="hidden", name="cmd", value="_s-xclick")
@@ -21,4 +21,3 @@
 							div(ng-if="vm.showPaymentWait", layout="row", layout-align="start center")
 								p Please wait...
 								md-progress-circular(md-mode="indeterminate", md-diameter="20")
-

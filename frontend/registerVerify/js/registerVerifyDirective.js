@@ -70,6 +70,7 @@
         };
 
         vm.setupPayment = function ($event) {
+            /*
             if (vm.databaseName !== "") {
                 // Create database with username if paying
                 if (vm.pay) {
@@ -86,6 +87,9 @@
                 $event.stopPropagation();
                 vm.error = "Please provide a database name";
             }
+            */
+            vm.paypalReturnUrl = $location.protocol() + "://" + $location.host();
+            console.log(vm.paypalReturnUrl);
         };
 
         vm.test = function () {

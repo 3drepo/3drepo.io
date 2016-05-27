@@ -5021,7 +5021,8 @@ var ViewerManager = {};
 						vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp);
 						vm.accounts[i].projects[j].bif4FreeEnabled = false;
 						vm.accounts[i].projects[j].uploading = false;
-						vm.accounts[i].projects[j].canUpload = (vm.accounts[i].account === vm.account);
+						//vm.accounts[i].projects[j].canUpload = (vm.accounts[i].account === vm.account);
+						vm.accounts[i].projects[j].canUpload = true;
 					}
 				}
 				setupBid4FreeAccess();
@@ -9057,9 +9058,9 @@ var ViewerManager = {};
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "Auth", "StateManager", "EventService", "UtilsService"];
+    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "Auth", "StateManager", "EventService", "UtilsService"];
 
-    function HomeCtrl($scope, $element, $timeout, $compile, Auth, StateManager, EventService, UtilsService) {
+    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, Auth, StateManager, EventService, UtilsService) {
         var vm = this,
 			goToUserPage,
 			homeLoggedOut,
@@ -9067,8 +9068,15 @@ var ViewerManager = {};
 			element,
 			state;
 
+		/*
+		 * Init
+		 */
 		vm.state = StateManager.state;
-		console.log(2222, vm.account);
+		vm.legalDisplays = [
+			{title: "Terms & Conditions", value: "termsAndConditions"},
+			{title: "Privacy", value: "privacy"},
+			{title: "Cookies", value: "cookies"}
+		];
 
 		/*
 		 * Watch the state to handle moving to and from the login page
@@ -9145,6 +9153,26 @@ var ViewerManager = {};
             Auth.logout();
         };
 
+		/**
+		 * 
+		 * 
+		 * @param event
+		 * @param type
+		 */
+		vm.display = function (event, display) {
+			vm.legalTitle = display.title;
+			$mdDialog.show({
+				templateUrl: "legalDialog.html",
+				parent: angular.element(document.body),
+				targetEvent: event,
+				clickOutsideToClose:true,
+				fullscreen: true,
+				scope: $scope,
+				preserveScope: true,
+				onRemoving: removeDialog
+			});
+		};
+
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if (angular.isDefined(event) && angular.isDefined(event.type)) {
 				if (event.type === EventService.EVENT.USER_LOGGED_IN)
@@ -9165,6 +9193,20 @@ var ViewerManager = {};
 				}
 			}
 		});
+
+		/**
+		 * Close the dialog
+		 */
+		$scope.closeDialog = function() {
+			$mdDialog.cancel();
+		};
+
+		/**
+		 * Close the dialog by not clicking the close button
+		 */
+		function removeDialog () {
+			$scope.closeDialog();
+		}
     }
 }());
 
@@ -14599,6 +14641,7 @@ var Oculus = {};
         };
 
         vm.setupPayment = function ($event) {
+            /*
             if (vm.databaseName !== "") {
                 // Create database with username if paying
                 if (vm.pay) {
@@ -14615,6 +14658,9 @@ var Oculus = {};
                 $event.stopPropagation();
                 vm.error = "Please provide a database name";
             }
+            */
+            vm.paypalReturnUrl = $location.protocol() + "://" + $location.host();
+            console.log(vm.paypalReturnUrl);
         };
 
         vm.test = function () {
