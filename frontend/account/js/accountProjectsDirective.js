@@ -94,7 +94,6 @@
 		 * Added data to accounts and projects for UI
 		 */
 		$scope.$watch("vm.accounts", function () {
-			console.log(vm.accounts);
 			var i, j, iLength, jLength;
 			
 			if (angular.isDefined(vm.accounts)) {

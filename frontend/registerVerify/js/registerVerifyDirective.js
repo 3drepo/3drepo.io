@@ -32,9 +32,9 @@
         };
     }
 
-    RegisterVerifyCtrl.$inject = ["$location", "UtilsService", "AccountService"];
+    RegisterVerifyCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "AccountService"];
 
-    function RegisterVerifyCtrl ($location, UtilsService, AccountService) {
+    function RegisterVerifyCtrl ($scope, $location, $timeout, UtilsService, AccountService) {
         var vm = this,
             promise,
             username = $location.search().username,
@@ -69,35 +69,22 @@
         };
 
         vm.setupPayment = function ($event) {
-            /*
-            if (vm.databaseName !== "") {
-                // Create database with username if paying
-                if (vm.pay) {
-                    promise = AccountService.newDatabase(username, vm.databaseName);
-                    promise.then(function (response) {
-                        vm.newDatabaseToken = response.data.token;
-                        vm.paypalReturnUrl = $location.protocol() + "://" + $location.host();
-                        console.log(vm.paypalReturnUrl);
-                    });
-                }
-                vm.showPaymentWait = true;
-            }
-            else {
-                $event.stopPropagation();
-                vm.error = "Please provide a database name";
-            }
-            */
-            console.log(username);
-            promise = AccountService.newSubscription(username);
+            var data;
+            vm.paypalReturnUrl = $location.protocol() + "://" + $location.host();
+            data = {
+                verificationToken: token,
+                plan: "THE-100-QUID-PLAN"
+            };
+            promise = AccountService.newSubscription(username, data);
             promise.then(function (response) {
-                vm.newDatabaseToken = response.data.token;
-                vm.paypalReturnUrl = $location.protocol() + "://" + $location.host() + "?username=" + username;
-                console.log(vm.paypalReturnUrl);
+                vm.subscriptionToken = response.data.token;
+                // Make sure form contains the token before submitting
+                $timeout(function () {
+                    $scope.$apply();
+                    document.registerVerifyForm.action = "https://www.sandbox.paypal.com/cgi-bin/webscr";
+                    document.registerVerifyForm.submit();
+                }, 1000);
             });
         };
-
-        vm.test = function () {
-            
-        }
     }
 }());

@@ -166,12 +166,10 @@
 		 * Create a new subscription
 		 *
 		 * @param account
+		 * @param data
 		 * @returns {*|promise}
 		 */
-		obj.newSubscription = function (account) {
-			var data = {
-				plan: "THE-100-QUID-PLAN"
-			};
+		obj.newSubscription = function (account, data) {
 			return doPost(data, account + "/subscriptions");
 		};
 

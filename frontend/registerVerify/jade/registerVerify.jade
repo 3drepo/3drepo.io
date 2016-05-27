@@ -11,13 +11,13 @@
 					md-button.md-raised.md-accent(ng-click="vm.goToLoginPage()") Go To Login Page
 				div(ng-if="vm.pay", layout="column")
 					h3 Or continue with payment
-					form(action="https://www.sandbox.paypal.com/cgi-bin/webscr", method="post", ng-submit="vm.setupPayment($event)")
+					form(name="registerVerifyForm", method="post")
 						input(type="hidden", name="cmd", value="_s-xclick")
 						input(type="hidden", name="hosted_button_id", value="ETZVXP3F4Q4GE")
-						input(type="hidden", name="custom", value="{{vm.newDatabaseToken}}")
+						input(type="hidden", name="custom", value="{{vm.subscriptionToken}}")
 						input(type="hidden", name="return", value="{{vm.paypalReturnUrl}}")
 						div(layout="row", layout-align="start center")
-							md-button.md-accent.md-raised(type="submit", ng-disabled="vm.showPaymentWait") Pay
+							md-button.md-accent.md-raised(type="submit", ng-disabled="vm.showPaymentWait", ng-click="vm.setupPayment($event)") Pay
 							div(ng-if="vm.showPaymentWait", layout="row", layout-align="start center")
 								p Please wait...
 								md-progress-circular(md-mode="indeterminate", md-diameter="20")
