@@ -74,7 +74,10 @@ var repoLogger = function(req, id) {
     if (req)
     {
         self.session        = req.session;
+        self.req = req;
     }
+
+
 
     self.logger = logger;
     self.startTime = (new Date()).getTime();
@@ -89,7 +92,15 @@ repoLogger.prototype.logMessage = function(type, msg)
     var currentTime  = (new Date()).getTime();
     var timeDiff     = currentTime - this.startTime;
 
-    this.logger.log(type, (new Date()).toString() + "\t" + this.uid + "\t" + msg + " [" + timeDiff + " ms]");
+    let metadata = {
+        uid: this.uid,
+    };
+
+    this.session && this.session.user && (metadata.username = this.session.user.username);
+    this.req && this.req.method && (metadata.method = this.req.method);
+    this.req && this.req.originalUrl && (metadata.url = this.req.originalUrl);
+
+    this.logger.log(type, (new Date()).toString() + "\t" + this.uid + "\t" + msg + " [" + timeDiff + " ms]", metadata);
 };
 
 repoLogger.prototype.logInfo = function(msg) {

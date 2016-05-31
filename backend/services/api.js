@@ -46,6 +46,8 @@ module.exports.createApp = function (serverConfig) {
 	let bodyParser = require("body-parser");
 	let app = express();
 
+	app.use(sharedSession);
+	
 	app.use(cors({origin:true, credentials: true}));
 
 	// put logger in req object
@@ -97,8 +99,6 @@ module.exports.createApp = function (serverConfig) {
 	app.set("views", "./jade");
 	app.set("view_engine", "jade");
 	app.use(bodyParser.json());
-
-	app.use(sharedSession);
 
 	app.use(compress());
 
