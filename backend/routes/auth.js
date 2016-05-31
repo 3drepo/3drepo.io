@@ -30,6 +30,7 @@
 	var httpsPost = require("../libs/httpsReq").post;
 	//var Role = require('../models/role');
 	var crypto = require('crypto');
+	var ProjectHelper = require('../models/helper/project');
 
 	router.post("/login", login);
 	router.get("/login", checkLogin);
@@ -205,7 +206,14 @@
 		let responsePlace = utils.APIInfo(req);
 
 		User.verify(req.params[C.REPO_REST_API_ACCOUNT], req.body.token).then(() => {
+
+			//import toy project
+			ProjectHelper.importToyProject(req.params[C.REPO_REST_API_ACCOUNT]).catch(err => {
+				console.log('error', err);
+			});
+
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
+
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || err , err.resCode ? err.resCode : err);
 		});

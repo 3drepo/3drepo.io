@@ -24,10 +24,11 @@ var middlewares = require('./middlewares');
 var ProjectSetting = require('../models/projectSetting');
 var responseCodes = require('../response_codes');
 var C               = require("../constants");
-var Role = require('../models/role');
-var User = require('../models/user');
 var importQueue = require('../services/queue');
 var multer = require("multer");
+var ProjectHelpers = require('../models/helper/project');
+var createAndAssignRole = ProjectHelpers.createAndAssignRole;
+
 
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
@@ -168,57 +169,6 @@ function getProjectSetting(req, res, next){
 	});
 }
 
-function _createAndAssignRole(project, account, username, desc, type) {
-	'use strict';
-
-
-	return Role.findByRoleID(`${account}.${project}.viewer`).then(role =>{
-
-		if(role){
-			return Promise.resolve();
-		} else {
-			return Role.createViewerRole(account, project);
-		}
-
-	}).then(() => {
-
-		return Role.findByRoleID(`${account}.${project}.collaborator`);
-
-	}).then(role => {
-
-		if(role){
-			return Promise.resolve();
-		} else {
-			return Role.createCollaboratorRole(account, project);
-		}
-
-	}).then(() => {
-
-		return User.grantRoleToUser(username, account, `${project}.collaborator`);
-
-	}).then(() => {
-
-		return ProjectSetting.findById({account, project}, project).then(setting => {
-
-			if(setting){
-				return Promise.reject({resCode: responseCodes.PROJECT_EXIST});
-			}
-
-			setting = ProjectSetting.createInstance({
-				account: account, 
-				project: project
-			});
-			
-			setting._id = project;
-			setting.owner = username;
-			setting.desc = desc;
-			setting.type = type;
-			
-			return setting.save();
-		});
-
-	});
-}
 
 function createProject(req, res, next){
 	'use strict';
@@ -228,7 +178,7 @@ function createProject(req, res, next){
 	let account = req.params.account;
 	let username = req.session.user.username;
 
-	_createAndAssignRole(project, account, username, req.body.desc, req.body.type).then(() => {
+	createAndAssignRole(project, account, username, req.body.desc, req.body.type).then(() => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -324,7 +274,7 @@ function uploadProject(req, res, next){
 				let account = req.params.account;
 				let username = req.session.user.username;
 
-				_createAndAssignRole(project, account, username, req.body.desc, req.body.type).then(setting => {
+				createAndAssignRole(project, account, username, req.body.desc, req.body.type).then(setting => {
 					//console.log('setting', setting);
 					return Promise.resolve(setting);
 				}).catch(err => {

@@ -748,6 +748,7 @@ schema.statics.findSubscriptionByToken = function(billingUser, token){
 	});
 };
 
+
 var User = ModelFactory.createClass(
 	'User', 
 	schema, 
