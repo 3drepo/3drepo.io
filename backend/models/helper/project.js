@@ -81,6 +81,9 @@ function importToyProject(username){
 	let account = username;
 	let desc = '';
 	let type = 'sample';
+	
+	//dun move the toy model instead make a copy of it
+	let copy = true;
 
 	return createAndAssignRole(project, account, username, desc, type).then(setting => {
 		//console.log('setting', setting);
@@ -101,7 +104,8 @@ function importToyProject(username){
 			'toy.ifc', 
 			account,
 			project,
-			username
+			username,
+			copy
 		).then(corID => Promise.resolve(corID)
 		).catch(errCode => {
 			//catch here to provide custom error message
