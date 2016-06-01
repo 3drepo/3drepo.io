@@ -241,8 +241,8 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 		res.status(resCode.status).send(responseObject);
 
 	} else {
-		if(Buffer.isBuffer(extraInfo))
-		{
+		if(Buffer.isBuffer(extraInfo)){
+
 			res.status(resCode.status);
 
 			var contentType = mimeTypes[req.params.format];
@@ -253,12 +253,18 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 			}
 
 			//res.setHeader("Content-Length", extraInfo.length);
+
+			
 			res.write(extraInfo, "binary");
 			res.flush();
 			res.end();
 		} else {
+
 			res.status(resCode.status).send(extraInfo);
 		}
+
+		// log bandwidth and http status code
+		 req[C.REQ_REPO].logger.logInfo('Responded with ' + resCode.status, { httpCode: resCode.status, contentLength: extraInfo.length });
 	}
 
 	//next();
