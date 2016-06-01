@@ -109,7 +109,7 @@ install_x3dom();
  */
 function install_bower(){
 	fs.stat(public_dir_js, function(err, stat){
-		exec(path.normalize('node_modules/.bin/bower') + ' --allow-root install', function (error, stdout, stderr) {
+		exec(path.normalize('node_modules/.bin/bower') + ' install', function (error, stdout, stderr) {
 			  if (error !== null) {
 			    console.log(error);
 			  } else {

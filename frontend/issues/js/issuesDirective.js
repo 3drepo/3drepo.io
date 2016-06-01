@@ -560,6 +560,7 @@
 				EventService.send(EventService.EVENT.VIEWER.SET_CAMERA, {
 					position : vm.selectedIssue.viewpoint.position,
 					view_dir : vm.selectedIssue.viewpoint.view_dir,
+					//look_at: vm.selectedIssue.viewpoint.look_at,
 					up: vm.selectedIssue.viewpoint.up
 				});
 
