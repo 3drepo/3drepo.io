@@ -1,0 +1,64 @@
+pricing md-content.md-whiteframe-1dp,
+pricing md-content.md-whiteframe-8dp {
+    margin: 0 20px;
+}
+
+pricing md-toolbar h2 {
+    font-weight: bold !important;
+}
+
+pricing md-divider {
+    margin-bottom: 10px !important;
+    width: 100%;
+}
+
+pricing #pricingMiddlePanelTitle {
+    color: #FFFFFF;
+}
+
+pricing .pricingIcon {
+    font-size: 40px;
+    color: rgba(0,0,0,0.2);
+    margin-bottom: 10px;
+    width: 40px;
+}
+pricing .pricingIcon#pricingAdvancedIcon {
+    color: #FF9800;
+}
+
+pricing .pricingPrice {
+    height: 100px;
+    display: block;
+}
+pricing .pricingPriceTitle {
+    margin: 10px 0;
+    color: rgba(0,0,0,.6) !important;
+}
+pricing .pricingPriceSubtitle {
+    margin-top: -20px;
+    color: rgba(0,0,0,.6) !important;
+}
+
+pricing .pricingInfo {
+    height: 350px;
+    display: block;
+    overflow: auto;
+    width: 100%;
+}
+pricing .pricingInfo .pricingInfoLine {
+    margin: 10px 0;
+}
+pricing .pricingInfo .pricingInfoLine h3 {
+    margin: 0 0 0 0;
+    color: rgba(0,0,0,.6) !important;
+}
+pricing .pricingInfo .pricingInfoLine md-icon {
+    margin: 0 5px 0 0;
+    color: #C8E6C9;
+}
+
+pricing .pricingContent {
+    max-height: 600px;
+    height: calc(100vh - 180px);
+    overflow: auto;
+}

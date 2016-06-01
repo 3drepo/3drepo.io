@@ -25,9 +25,12 @@ var stringToUUID = utils.stringToUUID;
 var uuidToString = utils.uuidToString;
 var History = require('./history');
 var Ref = require('./ref');
+var GenericObject = require('./base/repo').GenericObject;
+var uuid = require("node-uuid");
 
 var schema = Schema({
-	_id: Buffer,
+	_id: Object,
+	object_id: Object,
 	name: { type: String, required: true },
 	viewpoint: {
 		up: [Number],
@@ -48,9 +51,10 @@ var schema = Schema({
 	position: [Number],
 	norm: [Number],
 	created: Number,
-	parent: Buffer,
+	parent: Object,
 	number: Number,
 	owner: String,
+	closed: Boolean,
 	comments: [{
 		owner: String,
 		comment: String,
@@ -60,28 +64,11 @@ var schema = Schema({
 		sealed: Boolean
 	}],
 	assigned_roles: [Schema.Types.Mixed],
+	closed_time: Number,
+	creator_role: String,
 	scribble: Object
 });
 
-//post find hook
-
-function postFind(docs){
-	docs && docs.forEach(doc => {
-		 postFindOne(doc);
-	});
-
-}
-
-function postFindOne(doc){
-	doc && doc.comments && doc.comments.forEach(comment => {
-		comment.sealed = comment.sealed || comment.set;
-	});
-}
-
-// compatibility with old comments with set attr
-schema.post('find', postFind);
-schema.post('findById', postFindOne);
-schema.post('findOne', postFindOne);
 
 // Model statics method
 //internal helper _find
@@ -237,7 +224,7 @@ schema.statics.findBySharedId = function(dbColOptions, sid, number) {
 	});
 };
 
-schema.statics.findByUID = function(dbColOptions, uid, onlyStubs){
+schema.statics.findByUID = function(dbColOptions, uid, onlyStubs, noClean){
 	'use strict';
 
 	let projection = {};
@@ -253,8 +240,102 @@ schema.statics.findByUID = function(dbColOptions, uid, onlyStubs){
 	}
 
 	return this.findById(dbColOptions, stringToUUID(uid)).then(issue => {
-		return Promise.resolve(issue.clean());
+		return Promise.resolve(noClean ? issue : issue.clean());
 	});
+};
+
+schema.statics.createIssue = function(dbColOptions, data){
+	'use strict';
+
+	let objectId = data.object_id;
+	let start = Promise.resolve();
+
+	let issue = Issue.createInstance(dbColOptions);
+ 	issue._id = stringToUUID(uuid.v1());
+
+	if(objectId){
+		start = GenericObject.getSharedId(dbColOptions, objectId).then(sid => {
+			issue.parent = stringToUUID(sid);
+		});
+	}
+
+	return start.then(() => {
+		return Issue.count(dbColOptions);
+	}).then(count => {
+
+		issue.number  = count + 1;
+		issue.object_id = objectId && stringToUUID(objectId);
+		issue.name = data.name || 'Issue ' + issue.number;
+		issue.created = (new Date()).getTime();
+		issue.owner = data.owner;
+		issue.scribble = data.scribble && new Buffer(data.scribble, 'base64');
+		issue.viewpoint = data.viewpoint;
+		issue.scale = data.scale;
+		issue.position = data.position;
+		issue.norm = data.norm;
+		issue.creator_role = data.creator_role;
+		issue.assigned_roles = data.assigned_roles;		
+
+		return issue.save();
+
+	});
+
+};
+
+schema.methods.updateComment = function(commentIndex, data){
+	'use strict';
+	let timeStamp = (new Date()).getTime();
+
+	if(this.closed || (this.comments[commentIndex] && this.comments[commentIndex].sealed)){
+		return Promise.reject({ message: 'An attempt to edit a sealed comment or a closed issue.'});
+	}
+
+	if(!commentIndex){
+		this.comments.push({ 
+			owner: data.owner,	
+			comment: data.comment, 
+			created: timeStamp
+		});
+	} else {
+
+		let commentObj = this.comments[commentIndex];
+		
+		if(data.comment){
+			commentObj.comment = data.comment;
+			commentObj.created = timeStamp;
+		}
+		
+		commentObj.sealed = data.sealed || commentObj.sealed;
+	}
+
+	return this.save();
+};
+
+schema.methods.removeComment = function(commentIndex){
+	'use strict';
+
+	if(this.closed || this.comments[commentIndex].sealed){
+		return Promise.reject({ message: 'An attempt to remove a sealed comment or a closed issue.'});
+	}
+
+	this.comments[commentIndex].remove();
+	return this.save();
+};
+
+schema.methods.closeIssue = function(){
+	'use strict';
+
+	this.closed = true;
+	this.closed_time = (new Date()).getTime();
+	return this.save();
+};
+
+schema.methods.reopenIssue = function(){
+	'use strict';
+
+	this.closed = false;
+	this.closed_time = null;
+	return this.save();
 };
 
 //Model method

@@ -27,7 +27,7 @@
 			templateUrl: 'accountProjects.html',
 			scope: {
 				account: "=",
-				projectsGrouped: "="
+				accounts: "="
 			},
 			controller: AccountProjectsCtrl,
 			controllerAs: 'vm',
@@ -35,13 +35,15 @@
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$mdDialog", "$element", "AccountService"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$mdDialog", "$element", "$timeout", "$interval", "AccountService", "UtilsService"];
 
-	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, AccountService) {
+	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, $timeout, $interval, AccountService, UtilsService) {
 		var vm = this,
 			promise,
 			bid4FreeProjects = null,
-			fileUploader = $element[0].querySelector("#fileUploader");
+			existingProjectToUpload,
+			existingProjectFileUploader,
+			newProjectFileUploader;
 
 		/*
 		 * Init
@@ -54,7 +56,26 @@
 			"GIS",
 			"Other"
 		];
-		vm.accounts = [];
+		vm.info = "Retrieving projects..,";
+		vm.showProgress = true;
+
+		// Setup file uploaders
+		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
+		existingProjectFileUploader.addEventListener(
+			"change",
+			function () {
+				uploadModelToProject(existingProjectToUpload, this.files[0]);
+			},
+			false
+		);
+		newProjectFileUploader = $element[0].querySelector("#newProjectFileUploader");
+		newProjectFileUploader.addEventListener(
+			"change",
+			function () {
+				vm.uploadedFile = this.files[0];
+			},
+			false
+		);
 
 		promise = AccountService.getProjectsBid4FreeStatus(vm.account);
 		promise.then(function (data) {
@@ -70,49 +91,28 @@
 		});
 
 		/*
-		 * Handle changes to the state manager Data
-		 * Reformat the grouped projects to enable toggling of projects list
+		 * Added data to accounts and projects for UI
 		 */
-		$scope.$watch("vm.projectsGrouped", function () {
-			var account,
-				project;
-			if (angular.isDefined(vm.projectsGrouped)) {
-				vm.accounts = [];
-				vm.projectsExist = !((Object.keys(vm.projectsGrouped).length === 0) && (vm.projectsGrouped.constructor === Object));
-				angular.forEach(vm.projectsGrouped, function(value, key) {
-					angular.forEach(value, function(project) {
-						project = {
-							name: project.name,
-							timestamp: project.timestamp,
-							bif4FreeEnabled: false
-						};
-						project.canUpload = (key === vm.account);
-						updateAccountProjects(key, project);
-						//account.projects.push(data);
-					});
-					/*
-					account = {
-						name: key,
-						projects: [],
-						showProjects: true,
-						showProjectsIcon: "folder_open"
-					};
-					angular.forEach(value, function(project) {
-						data = {
-							name: project.name,
-							timestamp: project.timestamp,
-							bif4FreeEnabled: false
-						};
-						data.canUpload = (account.name === vm.account);
-						account.projects.push(data);
-					});
-					vm.accounts.push(account);
-					if (account.name === vm.account) {
-						userAccount = vm.accounts[vm.accounts.length - 1];
-						console.log(userAccount);
+		$scope.$watch("vm.accounts", function () {
+			var i, j, iLength, jLength;
+			
+			if (angular.isDefined(vm.accounts)) {
+				vm.showProgress = false;
+				vm.projectsExist = (vm.accounts.length > 0);
+				vm.info = vm.projectsExist ? "" : "There are currently no projects";
+				for (i = 0, iLength = vm.accounts.length; i < iLength; i+= 1) {
+					vm.accounts[i].name = vm.accounts[i].account;
+					vm.accounts[i].showProjects = true;
+					vm.accounts[i].showProjectsIcon = "folder_open";
+					for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
+						vm.accounts[i].projects[j].name = vm.accounts[i].projects[j].project;
+						vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp);
+						vm.accounts[i].projects[j].bif4FreeEnabled = false;
+						vm.accounts[i].projects[j].uploading = false;
+						//vm.accounts[i].projects[j].canUpload = (vm.accounts[i].account === vm.account);
+						vm.accounts[i].projects[j].canUpload = true;
 					}
-					*/
-				});
+				}
 				setupBid4FreeAccess();
 			}
 		});
@@ -138,6 +138,16 @@
 					vm.newProjectButtonDisabled =
 						(angular.isUndefined(newValue.otherType) || (angular.isDefined(newValue.otherType) && (newValue.otherType === "")));
 				}
+			}
+		}, true);
+
+		/*
+		 * Watch new database name
+		 */
+		$scope.$watch("vm.newDatabaseName", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				vm.newDatabaseButtonDisabled =
+					(angular.isUndefined(newValue) || (angular.isDefined(newValue) && (newValue.toString() === "")));
 			}
 		}, true);
 
@@ -183,9 +193,6 @@
 			});
 		};
 		
-		vm.uploadModel = function () {
-		};
-
 		/**
 		 * Close the dialog
 		 */
@@ -214,12 +221,7 @@
 				updateAccountProjects (response.data.account, project);
 				// Save model to project
 				if (vm.uploadedFile !== null) {
-					projectData = response.data;
-					projectData.uploadFile = vm.uploadedFile;
-					promise = AccountService.uploadModel(projectData);
-					promise.then(function (response) {
-						console.log(response);
-					});
+					uploadModelToProject (project, vm.uploadedFile);
 				}
 				vm.closeDialog();
 			});
@@ -230,48 +232,61 @@
 		 * @param {String} project
 		 */
 		vm.uploadModel = function (project) {
-			vm.projectData = {
-				account: vm.account,
-				project: project
-			};
-			setupFileUploader(
-				function (file) {
-					vm.projectData.uploadFile = file;
-					promise = AccountService.uploadModel(vm.projectData);
-					promise.then(function (response) {
-						console.log(response);
-					});
-				}
-			);
-			fileUploader.click();
+			existingProjectFileUploader.value = "";
+			existingProjectToUpload = project;
+			existingProjectFileUploader.click();
 		};
 
 		/**
 		 * Upload a file
 		 */
 		vm.uploadFile = function () {
-			setupFileUploader(
-				function (file) {
-					vm.uploadedFile = file;
-				}
-			);
-			fileUploader.click();
+			newProjectFileUploader.value = "";
+			newProjectFileUploader.click();
 		};
 
 		/**
-		 * Set up action on file upload
-		 *
-		 * @param {Function} callback
+		 * Create a new database
 		 */
-		function setupFileUploader (callback) {
-			fileUploader.addEventListener(
-				"change",
-				function (event) {
-					callback(this.files[0]);
-				},
-				false
-			);
-		}
+		vm.newDatabase = function (event) {
+			vm.newDatabaseName = "";
+			vm.showPaymentWait = false;
+			vm.newDatabaseToken = false;
+			$mdDialog.show({
+				controller: function () {},
+				templateUrl: "databaseDialog.html",
+				parent: angular.element(document.body),
+				targetEvent: event,
+				clickOutsideToClose:true,
+				fullscreen: true,
+				scope: $scope,
+				preserveScope: true,
+				onRemoving: function () {$scope.closeDialog();}
+			});
+		};
+
+		/**
+		 * Save a new database
+		 */
+		vm.saveNewDatabase = function () {
+			promise = AccountService.newDatabase(vm.account, vm.newDatabaseName);
+			promise.then(function (response) {
+				console.log(response);
+				vm.newDatabaseToken = response.data.token;
+				vm.paypalReturnUrl = $location.protocol() + "://" + $location.host() + "/" + vm.account;
+			});
+		};
+
+		/**
+		 * Show waiting before going to payment page
+		 * $timeout required otherwise Submit does not work
+		 */
+		vm.setupPayment = function () {
+			$timeout(function () {
+				console.log(vm.newDatabaseToken);
+				vm.showPaymentWait = true;
+			});
+		};
 
 		/**
 		 * Add a project to an existing or create newly created account
@@ -302,8 +317,56 @@
 			}
 		}
 
+		/**
+		 * Upload file/model to project
+		 * 
+		 * @param project
+		 * @param file
+		 */
+		function uploadModelToProject (project, file) {
+			var interval,
+				projectData = {
+					account: vm.account,
+					project: project.name
+				};
+			project.uploading = true;
+			vm.showUploading = true;
+			projectData.uploadFile = file;
+			promise = AccountService.uploadModel(projectData);
+			promise.then(function (response) {
+				console.log(response);
+				if (response.status === 404) {
+					vm.showUploading = false;
+					vm.showUploaded = true;
+					vm.uploadedIcon = "close";
+					$timeout(function () {
+						vm.showUploaded = false;
+						project.uploading = false;
+					}, 4000);
+				}
+				else {
+					interval = $interval(function () {
+						promise = AccountService.uploadStatus(projectData);
+						promise.then(function (response) {
+							console.log(response);
+							if (response.data.status === "ok") {
+								project.timestamp = UtilsService.formatTimestamp(new Date());
+								vm.showUploading = false;
+								$interval.cancel(interval);
+								vm.showUploaded = true;
+								vm.uploadedIcon = "done";
+								$timeout(function () {
+									vm.showUploaded = false;
+									project.uploading = false;
+								}, 4000);
+							}
+						});
+					}, 1000);
+				}
+			});
+		}
+
 		vm.b4f = function (account, project) {
-			console.log(account, project);
 			$location.path("/" + account + "/" + project + "/bid4free", "_self");
 		};
 

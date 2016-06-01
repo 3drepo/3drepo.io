@@ -18,20 +18,86 @@
 var mongoose = require('mongoose');
 var ModelFactory = require('./factory/modelFactory');
 var responseCodes = require('../response_codes.js');
-//var _ = require('lodash');
+var _ = require('lodash');
 var DB = require('../db/db');
 var crypto = require('crypto');
 var utils = require("../utils");
 var History = require('./history');
 var projectSetting = require('./projectSetting');
+var Role = require('./role');
+var Mailer = require('../mailer/mailer');
 
 var schema = mongoose.Schema({
 	_id : String,
 	user: String,
 	//db: String,
-	customData: {},
-	roles: {}
+	customData: {
+
+		bids: [{
+			package: String,
+			project: String,
+			account: String,
+			role: String
+		}],
+
+		projects: [{
+			account: String,
+			project: String
+		}],
+
+		firstName: String,
+		lastName: String,
+		email: String,
+		inactive: Boolean,
+		resetPasswordToken: {
+			expiredAt: Date,
+			token: String
+		},
+		emailVerifyToken: {
+			expiredAt: Date,
+			token: String
+		},
+		subscriptions: [{
+			active: Boolean,
+			updatedAt: Date,
+			createdAt: Date,
+			billingUser: String,
+			expiredAt: Date,
+			limits: {},
+			token: String,
+			plan: String,
+			database: String,
+			payments: [{
+				gateway: String,
+				raw: {},
+				createdAt: Date,
+				currency: String,
+				amount: String
+			}]
+		}],
+		avatar: Object
+	},
+	roles: [{}]
 });
+
+schema.statics.historyChunksStats = function(dbName){
+	'use strict';
+
+	return ModelFactory.db.db(dbName).listCollections().toArray().then(collections => {
+
+		let historyChunks = _.filter(collections, collection => collection.name.endsWith('.history.chunks'));
+		let promises = [];
+		
+		historyChunks.forEach(collection => {
+			promises.push(ModelFactory.db.db(dbName).collection(collection.name).stats());
+		});
+
+		return Promise.all(promises);
+
+	});
+
+	
+};
 
 schema.statics.authenticate = function(logger, username, password){
 	'use strict';
@@ -61,6 +127,16 @@ schema.statics.authenticate = function(logger, username, password){
 
 schema.statics.findByUserName = function(user){
 	return this.findOne({account: 'admin'}, { user });
+};
+
+schema.statics.findBillingUserByToken = function(token){
+	return this.findSubscriptionByToken(null, token).then(subscription => {
+		if(subscription){
+			return this.findByUserName(subscription.billingUser);
+		}
+
+		return Promise.resolve();
+	});
 };
 
 
@@ -103,8 +179,7 @@ schema.statics.updatePassword = function(logger, username, oldPassword, token, n
 	}).then(() => {
 
 		if(user){
-			delete user.customData.resetPasswordToken;
-			user.markModified('customData');
+			user.customData.resetPasswordToken = undefined;
 			return user.save().then(() => Promise.resolve());
 		} 
 
@@ -143,29 +218,52 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	});
 };
 
-schema.statics.verify = function(username, token){
+schema.statics.verify = function(username, token, allowRepeatedVerify){
+	'use strict';
+
 	return this.findByUserName(username).then(user => {
 		
 		var tokenData = user.customData.emailVerifyToken;
 
-		if(!user.customData.inactive){
+		if(!user.customData.inactive && !allowRepeatedVerify){
 			return Promise.reject({ resCode: responseCodes.ALREADY_VERIFIED});
 
 		} else if(tokenData.token === token && tokenData.expiredAt > new Date()){
 
-			delete user.customData.inactive;
-			delete user.customData.emailVerifyToken;
-			user.markModified('customData');
 
-			return user.save(() => {
-				return Promise.resolve(true);
+			//create admin role for own database
+
+			return Role.findByRoleID(`${username}.admin`).then(role => {
+
+				if(!role){
+					return Role.createAdminRole(username);
+				} else {
+					return Promise.resolve();
+				}
+
+			}).then(() => {
+
+				let adminRoleName = 'admin';
+				return User.grantRoleToUser(username, username, adminRoleName);
+
+			}).then(() => {
+
+				user.customData.inactive = undefined;
+				//user.customData.emailVerifyToken = undefined;
+				return user.save();
+
 			});
+
+
+
 		
 		} else {
 			return Promise.reject({ resCode: responseCodes.TOKEN_INVALID});
 		}
 	});
 };
+
+
 
 schema.methods.getAvatar = function(){
 	return this.customData && this.customData.avatar || null;
@@ -184,7 +282,6 @@ schema.methods.updateInfo = function(updateObj){
 		}
 	});
 
-	this.markModified('customData');
 
 	return this.save();
 };
@@ -206,7 +303,6 @@ schema.statics.getForgotPasswordToken = function(username, email, tokenExpiryTim
 		}
 
 		user.customData.resetPasswordToken = resetPasswordToken;
-		user.markModified('customData');
 
 		return user.save();
 	
@@ -240,13 +336,13 @@ schema.statics.grantRoleToUser = function(username, db, role){
 			return ModelFactory.db.admin().command(grantRoleCmd);
 		}
 
-		return Promise.reject({resCode: responseCodes.PROJECT_EXIST});
+		return Promise.resolve();
 
 	});
 };
 
 // list project readable by this user
-schema.methods.listProjects = function(){
+schema.methods.getPrivileges = function(){
 	'use strict';
 
 	let viewRolesCmd = { rolesInfo : this.roles, showPrivileges: true };
@@ -260,6 +356,95 @@ schema.methods.listProjects = function(){
 				privs = privs.concat(rolesArr[i].inheritedPrivileges);
 			}
 		}
+
+		return Promise.resolve(privs);
+	});
+
+};
+
+schema.methods.listAccounts = function(){
+	'use strict';
+
+	let accounts = [];
+
+	this.roles.forEach(role => {
+		if(role.role === 'admin'){
+			accounts.push({ account: role.db, projects: [] });
+		}
+	});
+
+	//backward compatibility, user has access to database with the name same as their username
+	if(!_.find(accounts, account => account.account === this.user)){
+		accounts.push({ account: this.user, projects: [] });
+	}
+	
+	// group projects by accounts
+	return this.listProjects().then(projects => {
+		
+		projects.forEach(project => {
+
+			let account = _.find(accounts, account => account.account === project.account);
+
+			if(!account){
+
+				account = {
+					account: project.account,
+					projects: []
+				};
+
+				accounts.push(account);
+			}
+
+			account.projects.push({
+				project: project.project,
+				timestamp: project.timestamp,
+				status: project.status,
+			});
+
+		});
+
+		let getQuotaPromises = [];
+		accounts.forEach(account => {
+			account.projects.sort((a, b) => {
+				if(a.timestamp < b.timestamp){
+					return 1;
+				} else if (a.timestamp > b.timestamp){
+					return -1;
+				} else {
+					return 0;
+				}
+			});
+
+			getQuotaPromises.push(
+				User.findByUserName(account.account).then(user => {
+					if(user){
+						account.quota = user.haveActiveSubscriptions() ? user.getSubscriptionLimits() : undefined;
+					}
+				})
+			);
+		});
+
+		accounts.sort((a, b) => {
+			if (a.account.toLowerCase() < b.account.toLowerCase()){
+				return -1;
+			} else if (a.account.toLowerCase() > b.account.toLowerCase()) {
+				return 1;
+			} else {
+				return 0;
+			}
+		});
+
+
+		return Promise.all(getQuotaPromises).then(() => {
+			return Promise.resolve(accounts);
+		});
+	});
+};
+
+schema.methods.listProjects = function(){
+	'use strict';
+
+	return this.getPrivileges().then(privs => {
 
 		// This is the collection that we check for
 		// when seeing if a project is viewable
@@ -325,6 +510,241 @@ schema.methods.listProjects = function(){
 		});
 
 		return Promise.all(promises).then(() => Promise.resolve(projects));
+	});
+};
+
+
+
+//TO-DO: we have only one plan now so it is hardcoded
+var subscriptions = {
+	'THE-100-QUID-PLAN': {
+		plan: 'THE-100-QUID-PLAN',
+		limits: {
+			spaceLimit: 10737418240, //bytes
+			collaboratorLimit: 5,
+		},
+		db: this.user,
+		billingCycle: 1, //month
+		freeTrial: 1, //month
+		currency: 'GBP',
+		amount: 100
+	}
+};
+
+function getSubscription(plan){
+	return subscriptions[plan];
+}
+
+//TO-DO: payment, subscription activation methods, move to somewhere instead of staying in user.js
+// maybe something like schema.statics.subscriptions = require('...')
+schema.statics.getSubscription = function(plan) {
+	return subscriptions[plan];
+};
+
+schema.methods.createSubscriptionToken = function(plan, billingUser){
+	'use strict';
+
+	if(plan === 'THE-100-QUID-PLAN'){
+
+		let token = crypto.randomBytes(64).toString('hex');
+
+		this.customData.subscriptions = this.customData.subscriptions || [];
+		let subscriptions = this.customData.subscriptions;
+
+		var now = new Date();
+
+		let subscription = {
+			token: token,
+			plan: plan,
+			db: this.user,
+			billingUser: billingUser,
+			createdAt: now,
+			updatedAt: now,
+			active: false,
+			payments: []
+
+		};
+
+		subscriptions.push(subscription);
+
+		return this.save().then(() => {
+			return Promise.resolve(subscription);
+		});
+
+	} else {
+
+		return Promise.reject({ resCode: responseCodes.INVALID_SUBSCRIPTION_PLAN });
+	}
+};
+
+schema.statics.activateSubscription = function(token, paymentInfo, raw, disableEmail){
+	'use strict';
+	
+	let query = {'customData.subscriptions.token': token};
+	let subscription;
+	let account;
+	let dbUser;
+
+	return this.findOne({account: 'admin'}, query).then(user => {
+
+		dbUser =  user;
+
+		if(!dbUser){
+			return Promise.reject({ message: 'Token not found'});
+		}
+
+		subscription = _.find(dbUser.customData.subscriptions, subscription => subscription.token === token);
+
+		if(!getSubscription(subscription.plan).freeTrial && paymentInfo.subscriptionSignup){
+			// do nothing if no free trial is provided for this plan and getting a subscription sign up message with no payment
+			return Promise.reject();
+		}
+
+		account = dbUser.user;
+
+		return Role.findByRoleID(`${account}.admin`);
+
+	}).then(role => {
+
+		if(!role){
+			return Role.createAdminRole(account);
+		} else {
+			return Promise.resolve();
+		}
+
+	}).then(() => {
+
+		let adminRoleName = 'admin';
+		return User.grantRoleToUser(subscription.billingUser, account, adminRoleName);
+
+	}).then(() => {
+
+		let now = new Date();
+
+		let expiryAt = new Date(now.valueOf());
+		expiryAt.setMonth(expiryAt.getMonth() + getSubscription(subscription.plan).billingCycle);
+
+		let payment = {
+			raw: raw,
+			gateway: paymentInfo.gateway,
+			createdAt: new Date(),
+			currency: paymentInfo.currency,
+			amount: paymentInfo.amount
+		};
+
+		subscription.limits = getSubscription(subscription.plan).limits;
+		subscription.expiredAt = expiryAt;
+		subscription.active = true;
+		subscription.payments.push(payment);
+
+		if(!disableEmail && !paymentInfo.subscriptionSignup){
+
+			//send verification email
+			let amount = payment.amount;
+			let currency = payment.currency;
+			if(currency === 'GBP'){
+				currency = '£';
+			}
+
+			User.findByUserName(subscription.billingUser).then(user => {
+				return Mailer.sendPaymentReceivedEmail(user.customData.email, {
+					account: account,
+					amount: currency + amount
+
+				});
+			}).catch(err => {
+				console.log('Email Error', err);
+			});
+
+		}
+
+		return dbUser.save().then(() => {
+			return Promise.resolve({subscription, account, payment});
+		});
+		
+
+		
+	});
+
+};
+
+schema.methods.haveActiveSubscriptions = function(){
+	return this.getActiveSubscriptions().length > 0;
+};
+
+schema.methods.getActiveSubscriptions = function(){
+	'use strict';
+	let now = new Date();
+	return _.filter(
+		this.customData.subscriptions, 
+		subscription => subscription.active && subscription.expiredAt > now
+	);
+};
+
+schema.methods.getSubscriptionLimits = function(){
+	'use strict';
+
+	let subscriptions = this.getActiveSubscriptions();
+
+	let sumLimits = {
+		spaceLimit: 0, 
+		collaboratorLimit: 0
+	};
+
+	subscriptions.forEach(sub => {
+		sumLimits.spaceLimit += sub.limits.spaceLimit;
+		sumLimits.collaboratorLimit += sub.limits.collaboratorLimit;
+	});
+
+	return sumLimits;
+};
+
+schema.statics.findSubscriptionsByBillingUser = function(billingUser){
+	'use strict';
+
+	let subscriptions = [];
+
+	return this.find({account: 'admin'}, { 
+		'customData.subscriptions.billingUser': billingUser, 
+	}).then( dbUsers => {
+
+		dbUsers.forEach(dbUser => {
+	
+			let dbSubs = _.filter(dbUser.customData.subscriptions, subscription => subscription.billingUser === billingUser);
+			dbSubs.forEach(dbSub => {
+
+				dbSub = dbSub.toObject();
+				dbSub.account = dbUser.user;
+				subscriptions.push(dbSub);
+			});
+			
+		});
+
+		return Promise.resolve(subscriptions);
+
+	});
+};
+
+schema.statics.findSubscriptionByToken = function(billingUser, token){
+	'use strict';
+
+	let query = { 
+		'customData.subscriptions.token': token
+	};
+
+	if(billingUser){
+		query['customData.subscriptions.billingUser'] = billingUser;
+	}
+
+	return this.findOne({account: 'admin'}, query, {
+		'customData.subscriptions.$': 1,
+		'user': 1
+	}).then( dbUser => {
+
+		let subscription = dbUser.customData.subscriptions[0].toObject();
+		subscription.account = dbUser.user;
+
+		return Promise.resolve(subscription);
 	});
 };
 

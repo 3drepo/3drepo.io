@@ -49,6 +49,6 @@
 									md-checkbox.md-secondary(ng-model="role.assigned", aria-label="Issue Assign")
 
 					// Close/Open issue
-					md-button.md-primary.md-accent(ng-click="vm.toggleCloseIssue()", ng-if="vm.canModifyIssue") Close
+					md-button.md-primary.md-accent(ng-click="vm.toggleCloseIssue()", ng-if="vm.canModifyIssue") Resolve issue
 				.issueOpenContainer(ng-if="!vm.issueIsOpen")
-					md-button.md-primary.md-accent(ng-click="vm.toggleCloseIssue()", ng-if="vm.canModifyIssue") Open
+					md-button.md-primary.md-accent(ng-click="vm.toggleCloseIssue()", ng-if="vm.canModifyIssue") Open issue

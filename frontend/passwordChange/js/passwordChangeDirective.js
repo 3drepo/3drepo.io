@@ -40,12 +40,15 @@
     function PasswordChangeCtrl ($scope, $window, PasswordChangeService) {
         var vm = this,
             enterKey = 13,
-            promise;
+            promise,
+            messageColour = "rgba(0, 0, 0, 0.7)",
+            messageErrorColour = "#F44336";
         
         /*
          * Init
          */
         vm.passwordChanged = false;
+        vm.showProgress = false;
 
         /*
          * Watch inputs to clear any message
@@ -80,7 +83,10 @@
          */
         function doPasswordChange() {
             if (angular.isDefined(vm.username) && angular.isDefined(vm.token)) {
-                if (angular.isDefined(vm.newPassword)) {
+                if (angular.isDefined(vm.newPassword) && (vm.newPassword !== "")) {
+                    vm.messageColor = messageColour;
+                    vm.message = "Please wait...";
+                    vm.showProgress = true;
                     promise = PasswordChangeService.passwordChange(
                         vm.username,
                         {
@@ -89,20 +95,20 @@
                         }
                     );
                     promise.then(function (response) {
-                        console.log(response);
+                        vm.showProgress = false;
                         if (response.status === 400) {
-                            vm.messageColor = "#F44336";
+                            vm.messageColor = messageErrorColour;
                             vm.message = "Error changing password";
                         }
                         else {
                             vm.passwordChanged = true;
-                            vm.messageColor = "rgba(0, 0, 0, 0.7)";
+                            vm.messageColor = messageColour;
                             vm.message = "Your password has been reset. Please go to the login page.";
                         }
                     });
                 }
                 else {
-                    vm.messageColor = "#F44336";
+                    vm.messageColor = messageErrorColour;
                     vm.message = "A new password must be entered";
                 }
             }

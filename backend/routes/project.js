@@ -33,15 +33,13 @@ var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
 };
 
-//Every API list below has to log in to access
-router.use(middlewares.loggedIn);
 
 // bid4free exclusive api get project info
 router.get('/:project/info.json', hasReadProjectInfoAccess, B4F_getProjectSetting);
 //  bid4free exclusive api update project info
 router.post('/:project/info.json', middlewares.isMainContractor, B4F_updateProjectSetting);
 
-// Get projection info
+// Get project info
 router.get('/:project.json', middlewares.hasReadAccessToProject, getProjectSetting);
 
 router.put('/:project/settings/map-tile', middlewares.hasWriteAccessToProject, updateMapTileSettings);
@@ -49,6 +47,16 @@ router.put('/:project/settings/map-tile', middlewares.hasWriteAccessToProject, u
 router.post('/:project', middlewares.canCreateProject, createProject);
 
 router.post('/:project/upload', middlewares.canCreateProject, uploadProject);
+
+
+function estimateImportedSize(format, size){
+	// if(format === 'obj'){
+	// 	return size * 5;
+	// } else {
+	// 	return size * 3;
+	// }
+	return size;
+}
 
 function updateMapTileSettings(req, res, next){
 	'use strict';
@@ -146,7 +154,7 @@ function getProjectSetting(req, res, next){
 	let place = utils.APIInfo(req);
 	_getProject(req).then(setting => {
 
-		let whitelist = ['owner', 'desc', 'type', 'permissions', 'properties', 'status'];
+		let whitelist = ['owner', 'desc', 'type', 'permissions', 'properties', 'status', 'errorReason'];
 		let resObj = {};
 		
 		whitelist.forEach(key => {
@@ -163,33 +171,51 @@ function getProjectSetting(req, res, next){
 function _createAndAssignRole(project, account, username, desc, type) {
 	'use strict';
 
-	let roleId = `${account}.${project}`;
 
-	return Role.findByRoleID(roleId).then(role =>{
-			
+	return Role.findByRoleID(`${account}.${project}.viewer`).then(role =>{
+
 		if(role){
 			return Promise.resolve();
 		} else {
-			return Role.createRole(account, project);
+			return Role.createViewerRole(account, project);
 		}
 
 	}).then(() => {
 
-		return User.grantRoleToUser(username, account, project);
+		return Role.findByRoleID(`${account}.${project}.collaborator`);
+
+	}).then(role => {
+
+		if(role){
+			return Promise.resolve();
+		} else {
+			return Role.createCollaboratorRole(account, project);
+		}
 
 	}).then(() => {
 
-		let setting = ProjectSetting.createInstance({
-			account: account, 
-			project: project
+		return User.grantRoleToUser(username, account, `${project}.collaborator`);
+
+	}).then(() => {
+
+		return ProjectSetting.findById({account, project}, project).then(setting => {
+
+			if(setting){
+				return Promise.reject({resCode: responseCodes.PROJECT_EXIST});
+			}
+
+			setting = ProjectSetting.createInstance({
+				account: account, 
+				project: project
+			});
+			
+			setting._id = project;
+			setting.owner = username;
+			setting.desc = desc;
+			setting.type = type;
+			
+			return setting.save();
 		});
-		
-		setting._id = project;
-		setting.owner = username;
-		setting.desc = desc;
-		setting.type = type;
-		
-		return setting.save();
 
 	});
 }
@@ -232,6 +258,12 @@ function convertToErrorCode(errCode){
             break;
         case 5:
             errObj = responseCodes.FILE_IMPORT_PROCESS_ERR;
+			break;
+        case 6:
+            errObj = responseCodes.FILE_IMPORT_STASH_GEN_FAILED;
+			break;
+        case 7:
+            errObj = responseCodes.FILE_IMPORT_MISSING_TEXTURES;
             break;
         default:
             errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
@@ -245,12 +277,45 @@ function uploadProject(req, res, next){
 	'use strict';
 
 	let responsePlace = utils.APIInfo(req);
+
+	//check space
+	function fileFilter(req, file, cb){
+
+		console.log(file);
+
+		let acceptedFormat = ['x','obj','3ds','md3','md2','ply','mdl','ase','hmp','smd','mdc','md5','stl','lxo','nff','raw','off','ac','bvh','irrmesh','irr','q3d','q3s','b3d','dae','ter','csm','3d','lws','xml','ogex','ms3d','cob','scn','blend','pk3','ndo','ifc','xgl','zgl','fbx','assbin'];
+
+		let format = file.originalname.split('.').splice(-1)[0];
+		let size = estimateImportedSize(format, parseInt(req.headers['content-length']));
+
+		if(acceptedFormat.indexOf(format) === -1){
+			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
+		}
+
+		middlewares.freeSpace(req.params.account).then(space => {
+
+			console.log('est upload file size', size);
+			console.log('space left', space);
+
+			if(size > space){
+				cb({ resCode: responseCodes.SIZE_LIMIT });
+			} else {
+				cb(null, true);
+			}
+		});
+
+	}
+
 	if (config.cn_queue) {
 
-		var upload = multer({ dest: config.cn_queue.upload_dir });
+		var upload = multer({ 
+			dest: config.cn_queue.upload_dir,
+			fileFilter: fileFilter
+		});
+
 		upload.single("file")(req, res, function (err) {
 			if (err) {
-				return responseCodes.respond(responsePlace, req, res, next, responseCodes.FILE_IMPORT_PROCESS_ERR, {});
+				return responseCodes.respond(responsePlace, req, res, next, err.resCode || responseCodes.FILE_IMPORT_PROCESS_ERR, {});
 			} else {
 
 				let projectSetting;
@@ -263,6 +328,7 @@ function uploadProject(req, res, next){
 					//console.log('setting', setting);
 					return Promise.resolve(setting);
 				}).catch(err => {
+
 					if (err && err.resCode && err.resCode.value === responseCodes.PROJECT_EXIST.value){
 						return _getProject(req);
 					} else {
@@ -290,6 +356,11 @@ function uploadProject(req, res, next){
 					.then(corID => Promise.resolve(corID))
 					.catch(errCode => {
 						//catch here to provide custom error message
+						if(projectSetting){
+							projectSetting.errorReason = convertToErrorCode(errCode);
+							projectSetting.markModified('errorReason');
+						}
+
 						return Promise.reject(convertToErrorCode(errCode));
 					});
 
@@ -299,14 +370,19 @@ function uploadProject(req, res, next){
 
 					//mark project ready
 					projectSetting.status = 'ok';
+					projectSetting.errorReason = undefined;
+					projectSetting.markModified('errorReason');
+					
 					return projectSetting.save();
 
 				}).catch(err => {
 					// import failed for some reason(s)...
-					//console.log(err);
-					//mark project ready
-					projectSetting && (projectSetting.status = 'failed');
-					projectSetting && projectSetting.save();
+					console.log(err.stack);
+					//mark project failed
+					if(projectSetting){
+						projectSetting.status = 'failed';
+						projectSetting.save();
+					}
 
 					req[C.REQ_REPO].logger.logDebug(JSON.stringify(err));
 
@@ -319,12 +395,12 @@ function uploadProject(req, res, next){
 		});
 
 	} else {
-		responseCodes.onError(
+		responseCodes.respond(
 			responsePlace, 
+			req, res, next, 
 			responseCodes.QUEUE_NO_CONFIG, 
-			res, 
-			{ "user": req.session.user.username, "database" : req.params[C.REPO_REST_API_ACCOUNT], "project": req.params[C.REPO_REST_API_PROJECT] 
-		});
+			{}
+		);
 	}
 }
 

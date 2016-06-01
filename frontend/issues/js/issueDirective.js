@@ -121,7 +121,7 @@
 				if (vm.issueIsOpen && newValue.hasOwnProperty("comments")) {
 					for (i = 0, length = newValue.comments.length; i < length; i += 1) {
 						newValue.comments[i].canDelete =
-							(i === (newValue.comments.length - 1)) && (!newValue.comments[i].set);
+							(i === (newValue.comments.length - 1)) && (!newValue.comments[i].sealed);
 					}
 				}
 				initAssignedRolesDisplay();

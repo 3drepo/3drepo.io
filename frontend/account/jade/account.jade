@@ -1,9 +1,26 @@
 account-menu
 div(ng-if="!vm.state.project")
 	#account(layout="row")
-		account-profile(username="vm.username" first-name="vm.firstName" last-name="vm.lastName" email="vm.email", flex="20")
-		span(flex="5")
-		account-projects(account="vm.account", projects-grouped='vm.projectsGrouped', flex="50")
+		account-info(
+			username="vm.username"
+			first-name="vm.firstName"
+			last-name="vm.lastName"
+			email="vm.email"
+			on-show-item="vm.showItem(item)"
+		)
+		#accountItem(ng-switch="vm.itemToShow")
+			account-projects(
+				account="vm.account"
+				accounts="vm.accounts"
+				ng-switch-when="repos"
+			)
+			account-profile(
+				username="vm.username"
+				first-name="vm.firstName"
+				last-name="vm.lastName"
+				email="vm.email"
+				ng-switch-when="profile"
+			)
 
 div(ng-if="vm.state.project")
 	project(account="vm.state.account" project="vm.state.project" branch="vm.state.branch" revision="vm.state.revision" state="vm.state")

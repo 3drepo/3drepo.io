@@ -20,34 +20,18 @@ account-dir #noAvatarIcon md-icon {
   height: 100px;
 }
 
-account-dir #userinfo {
-  border: solid 1px #C5CAE9;
-  border-top: none;
-  padding: 20px;
-}
-account-dir #userinfo p {
-  font-size: 15px;
-  margin: 5px 0;
-  color: rgba(0,0,0,0.7);
-}
-
 account-dir .dataContainer {
   border: solid 1px rgba(0,0,0,0.2);
   margin-top: 20px;
 }
 
-account-dir md-tabs-canvas {
-  background: #E8EAF6;
-}
-
-/* This access the div under the md-tab-content */
-account-dir #account md-tab-content div:first-child {
-  height: calc(100% - 20px);
+account-dir #account #accountItem {
+  width: 44%;
 }
 
 /** Account Projects **************************************************************************************************/
 account-projects #accountList {
-  max-height: calc(100vh - 200px);
+  max-height: calc(100vh - 180px);
   overflow: auto;
 }
 
@@ -83,7 +67,8 @@ account-projects .projects p {
   margin: 0;
 }
 
-account-projects #fileUploader {
+account-projects #existingProjectFileUploader,
+account-projects #newProjectFileUploader {
   width: 0;
   height: 0;
   opacity: 0;
@@ -94,10 +79,10 @@ account-projects #fileUploader {
 
 account-projects .accountRight,
 account-projects .projectRight {
-  margin-right: 55px !important;
+  margin-right: 10px !important;
 }
 
-account-projects #newProjectButton {
+account-projects #newDatabaseButton {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -114,25 +99,56 @@ account-projects md-toolbar {
   min-height: 40px;
 }
 
-/** Account Profile ***************************************************************************************************/
-account-profile {
-  padding-left: 40px;
+account-projects .cardInfo md-progress-circular {
+  margin-left: 5px;
 }
 
-account-profile .dataContainer {
+account-projects .projectUploadInfo {
+  margin-right: 20px;
+  width: 15px;
+  height: 15px;
+}
+
+account-projects .projectRight .projectUploaded {
+  margin-top: -10px !important;
+  color: rgba(0,0,0,0.5);
+}
+
+/** Account Profile ***************************************************************************************************/
+account-profile .profile {
+  max-height: calc(100vh - 180px);
+  overflow: auto;
   padding: 10px;
 }
 
-account-profile md-input-container {
+account-profile #profileDivider {
+  display: block;
+  background: rgba(0,0,0,0.2);
+  width: 1px;
+  height: 380px;
+}
+
+/** Account Info ******************************************************************************************************/
+account-info {
+  margin-left: 70px;
+  width: 400px;
+  margin-right: 60px;
+}
+
+account-info .dataContainer {
+  padding: 10px;
+}
+
+account-info md-input-container {
   margin: 10px 0;
 }
-account-profile md-input-container input,
-account-profile md-input-container label {
+account-info md-input-container input,
+account-info md-input-container label {
   font-size: initial;
   color: rgba(0,0,0,0.7) !important;
 }
 
-account-profile p {
+account-info p {
   font-size: 14px;
   color: rgba(0,0,0,0.6);
 }
@@ -156,7 +172,7 @@ logout md-icon {
   outline: none;
 }
 
-/** Account Menu *****************************************************************************************************/
+/** Account Menu ******************************************************************************************************/
 account-menu {
   position: absolute;
   top: 0;
@@ -174,6 +190,9 @@ account-menu md-icon {
 #accountMenuContent {
   border-radius: 4px;
 }
+#accountMenuContent md-menu-item > .md-button {
+  display: block;
+}
 
 /** New Project Dialog ************************************************************************************************/
 .newProjectDialog {
@@ -186,6 +205,21 @@ account-menu md-icon {
   margin-right: 10px;
 }
 
+/** New Database Dialog ***********************************************************************************************/
+.newDatabaseDialog {
+  min-width: 350px;
+  min-height: 250px;
+  overflow: hidden;
+}
+
+.newDatabaseDialog #newProjectIcon {
+  margin-right: 10px;
+}
+
+.newDatabaseDialog .databaseDialogInfo {
+  font-weight: normal;
+  color: rgba(0,0,0,0.7);
+}
 /* Done to counter bootstrap styling. This should really be set in a top level style file */
 .md-datepicker-input-mask {
   width: 308px;
@@ -532,14 +566,14 @@ bottom-buttons {
   bottom: 80px;
   left: 0;
   right: 0;
-  width: 360px;
+  width: 260px;
   margin: auto;
   text-align: center;
 }
 
 bottom-buttons #leftButtons {
   position: absolute;
-  left: -15px;
+  left: 20px;
   top: 8px;
 }
 bottom-buttons #leftButtons span {
@@ -548,7 +582,7 @@ bottom-buttons #leftButtons span {
 
 bottom-buttons #rightButtons {
   position: absolute;
-  right: 35px;
+  right: 10px;
   top: 8px;
 }
 bottom-buttons #rightButtons span {
@@ -568,7 +602,7 @@ bottom-buttons .actionButton md-icon {
 
 bottom-buttons .viewingOptionButtons {
   position: absolute;
-  left: 40px;
+  right: 15px;
   top: -120px;
 }
 
@@ -582,14 +616,14 @@ bottom-buttons label:hover {
   cursor: pointer;
 }
 
-.bottomButtomIconCardboard {
+.bottomButtonIconCardboard {
   font-size: 20px !important;
   margin-left: -4px;
 }
-.bottomButtomIconWalk {
+.bottomButtonIconWalk {
   margin-left: 0;
 }
-.bottomButtomIconHelicopter {
+.bottomButtonIconHelicopter {
   margin-left: -5px;
   font-size: 22px !important;
 }
@@ -626,6 +660,14 @@ clip #clipAxislabel {
 }
 .clipSlider input {
   width: 50px;
+}
+
+contact md-input-container textarea {
+    min-height: 100px !important;
+}
+
+contact .md-button {
+    margin-top: 10px;
 }
 
 /** Docs **************************************************************************************************************/
@@ -810,16 +852,19 @@ home #homeLogo {
     left: 0;
     right: 0;
     margin: auto;
+    pointer-events: none;
 }
 home #homeLogo img {
     width: inherit;
+    pointer-events: inherit;
 }
 
 home .homeUserContent {
     padding-top: 120px;
 }
 
-home .homeUserContent .md-whiteframe-1dp {
+home .homeUserContent .md-whiteframe-1dp,
+home .homeUserContent .md-whiteframe-8dp {
     border-radius: 4px;
     background: #FFF;
 }
@@ -840,6 +885,10 @@ home .homeUserContent .userContent h3 {
     font-weight: normal;
 }
 
+home .homeUserContent .userContent md-progress-circular {
+    margin-left: 10px;
+}
+
 home .cardInfo {
     text-align: center;
     padding: 15px;
@@ -858,6 +907,30 @@ home .cardInfo md-icon {
     width: 16px;
     height: 16px;
 }
+
+home #legalLinks {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 1000;
+}
+home #legalLinks .md-button {
+    font-size: 12px;
+    margin: 0;
+    opacity: 0.7;
+}
+
+/** Legal Dialog ******************************************************************************************************/
+.legalDialog {
+    min-width: calc(100vw - 50%);
+    min-height: calc(100vh - 25%);
+    overflow: hidden;
+}
+
+.legalDialog #tcIcon {
+    margin-right: 10px;
+}
+
 
 /** Issues ************************************************************************************************************/
 
@@ -1123,9 +1196,7 @@ login h3 {
 login #loginVersion{
   color: rgba(0, 0, 0 , 0.3);
   font-size: 14px;
-  position: absolute;
-  bottom: 10px;
-  left: 25px;
+  margin: 10px 0 0;
 }
 
 login md-input-container {
@@ -1141,7 +1212,8 @@ login md-input-container input {
 
 login .loginError {
   color: #F44336;
-  margin: 5px 0 0 8px;
+  margin: 5px 0 5px;
+  font-weight: normal;
 }
 
 login .loginTitle {
@@ -1149,58 +1221,14 @@ login .loginTitle {
   color: rgba(0, 0, 0, 0.5) !important;
 }
 
-login #forgotPassword {
+login .loginLinks {
   font-size: 14px;
-  margin: 5px 8px;
+  margin: 5px 0;
 }
 
 login #loginDivider {
   width: 1px;
   background-color: rgba(0, 0, 0, 0.2);
-}
-
-login #tc {
-  margin-bottom: 10px;
-  margin-left: 5px;
-}
-login #tc md-checkbox {
-  margin : 0 0 0 2px;
-}
-login #tc md-checkbox ._md-icon {
-  border-color: rgba(0, 0, 0, 0.4);
-}
-login #tc a {
-  font-size: 14px;
-  margin-left: 5px;
-}
-login #tc p {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.7);
-}
-login #tc a {
-  outline: none;
-}
-
-login #loginCaptcha {
-  margin: -5px 30px 10px 7px;
-}
-
-login #loginRegister #registerWait {
-  height: 30px;
-}
-login #loginRegister #registerWait p {
-  margin: 0 10px 0 0;
-  color: rgba(0, 0, 0, 0.7);
-  font-size: 14px;
-}
-login #loginRegister #registerWait md-progress-circular,
-login #loginRegister #registerWait svg {
-  width: 20px !important;
-}
-login #loginRegister #loginPricing {
-  font-size: 14px;
-  margin-left: 30px;
-  outline: none;
 }
 
 /** Terms and Conditions Dialog ***************************************************************************************/
@@ -1325,7 +1353,6 @@ panel-card #panelCardContainer {
   overflow-x: hidden;
   overflow-y: auto;
   width: 100%;
-  height: 100%;
 }
 
 panel-card #helpButton {
@@ -1395,6 +1422,77 @@ panel-card-add {
 panel-card-option-erase md-icon {
   font-size: 24px !important;
 }
+password-change md-progress-circular {
+    margin-left: 5px;
+}
+password-forgot md-progress-circular {
+    margin-left: 5px;
+}
+pricing md-content.md-whiteframe-1dp,
+pricing md-content.md-whiteframe-8dp {
+    margin: 0 20px;
+}
+
+pricing md-toolbar h2 {
+    font-weight: bold !important;
+}
+
+pricing md-divider {
+    margin-bottom: 10px !important;
+    width: 100%;
+}
+
+pricing #pricingMiddlePanelTitle {
+    color: #FFFFFF;
+}
+
+pricing .pricingIcon {
+    font-size: 40px;
+    color: rgba(0,0,0,0.2);
+    margin-bottom: 10px;
+    width: 40px;
+}
+pricing .pricingIcon#pricingAdvancedIcon {
+    color: #FF9800;
+}
+
+pricing .pricingPrice {
+    height: 100px;
+    display: block;
+}
+pricing .pricingPriceTitle {
+    margin: 10px 0;
+    color: rgba(0,0,0,.6) !important;
+}
+pricing .pricingPriceSubtitle {
+    margin-top: -20px;
+    color: rgba(0,0,0,.6) !important;
+}
+
+pricing .pricingInfo {
+    height: 350px;
+    display: block;
+    overflow: auto;
+    width: 100%;
+}
+pricing .pricingInfo .pricingInfoLine {
+    margin: 10px 0;
+}
+pricing .pricingInfo .pricingInfoLine h3 {
+    margin: 0 0 0 0;
+    color: rgba(0,0,0,.6) !important;
+}
+pricing .pricingInfo .pricingInfoLine md-icon {
+    margin: 0 5px 0 0;
+    color: #C8E6C9;
+}
+
+pricing .pricingContent {
+    max-height: 600px;
+    height: calc(100vh - 180px);
+    overflow: auto;
+}
+
 md-dialog.qrCodeReaderDialog {
   max-height: 90%;
 }
@@ -1404,6 +1502,15 @@ md-dialog.qrCodeReaderDialog .qrCodeReaderIcon {
   margin-right: 10px;
 }
 
+register-verify .databaseError {
+    color: #F44336;
+    margin: 5px 0 5px;
+    font-weight: normal;
+}
+
+register-verify md-input-container {
+    margin: 5px 0 -15px;
+}
 right-panel {
     position: absolute;
     top: 70px;
@@ -1417,6 +1524,120 @@ right-panel #rightPanelButtons .md-button {
 right-panel #rightPanelButtons .fa {
     font-size: 24px;
 }
+register-form #tc {
+    width: 300px;
+}
+register-form #tc md-checkbox {
+    margin : 0;
+}
+register-form #tc md-checkbox ._md-icon {
+    border-color: rgba(0, 0, 0, 0.4);
+}
+register-form #tc a {
+    font-size: 14px;
+    margin-left: 5px;
+}
+register-form #tc p {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.7);
+}
+register-form #tc a {
+    outline: none;
+}
+
+register-form #loginCaptcha {
+    margin: -5px 30px 10px 7px;
+}
+
+register-form #registerWait {
+    height: 30px;
+}
+register-form #registerWait p {
+    margin: 0 10px 0 0;
+    color: rgba(0, 0, 0, 0.7);
+    font-size: 14px;
+}
+register-form #registerWait md-progress-circular,
+register-form #registerWait svg {
+    width: 20px !important;
+}
+register-form #loginPricing {
+    font-size: 14px;
+    margin-left: 30px;
+    outline: none;
+}
+
+register-form .registerError {
+    color: #F44336;
+    margin: 5px 0 5px;
+    font-weight: normal;
+}
+
+sign-up md-input-container {
+    margin: 0;
+}
+
+sign-up md-input-container input {
+    padding: 5px !important;
+    margin-bottom: -15px;
+    height: 35px !important;
+    background: #ffffff !important;
+}
+
+sign-up .registerLinks {
+    font-size: 14px;
+    margin: 5px 0;
+}
+
+sign-up-form #tc {
+    width: 300px;
+}
+sign-up-form #tc md-checkbox {
+    margin : 0;
+}
+sign-up-form #tc md-checkbox ._md-icon {
+    border-color: rgba(0, 0, 0, 0.4);
+}
+sign-up-form #tc a {
+    font-size: 14px;
+    margin-left: 5px;
+}
+sign-up-form #tc p {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.7);
+}
+sign-up-form #tc a {
+    outline: none;
+}
+
+sign-up-form #loginCaptcha {
+    margin: -5px 30px 10px 7px;
+}
+
+sign-up-form #registerWait {
+    height: 30px;
+}
+sign-up-form #registerWait p {
+    margin: 0 10px 0 0;
+    color: rgba(0, 0, 0, 0.7);
+    font-size: 14px;
+}
+sign-up-form #registerWait md-progress-circular,
+sign-up-form #registerWait svg {
+    width: 20px !important;
+}
+sign-up-form #loginPricing {
+    font-size: 14px;
+    margin-left: 30px;
+    outline: none;
+}
+
+sign-up-form .registerError {
+    color: #F44336;
+    margin: 5px 0 5px;
+    font-weight: normal;
+}
+
 tree span {
   outline: none;
   margin: 0;

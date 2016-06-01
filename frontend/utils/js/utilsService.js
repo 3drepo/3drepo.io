@@ -21,7 +21,9 @@
     angular.module("3drepo")
         .factory("UtilsService", UtilsService);
 
-    function UtilsService() {
+    UtilsService.$inject = ["$http", "$q", "serverConfig"];
+
+    function UtilsService($http, $q, serverConfig) {
         var obj = {};
 
         obj.formatTimestamp = function (timestamp) {
@@ -47,6 +49,49 @@
                 return (pos ? separator : '') + letter.toLowerCase();
             });
         };
+
+        /**
+         * Handle GET requests
+         * 
+         * @param url
+         * @returns {*|promise}
+         */
+        obj.doGet = function (url) {
+            var deferred = $q.defer(),
+                urlUse = serverConfig.apiUrl(serverConfig.GET_API, url);
+
+            $http.get(urlUse).then(
+                function (response) {
+                    deferred.resolve(response);
+                },
+                function (response) {
+                    deferred.resolve(response);
+                });
+            return deferred.promise;
+        };
+
+        /**
+         * Handle POST requests
+         * @param data
+         * @param url
+         * @returns {*}
+         */
+        obj.doPost = function (data, url) {
+            var deferred = $q.defer(),
+                urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
+                config = {withCredentials: true};
+
+            $http.post(urlUse, data, config)
+                .then(
+                    function (response) {
+                        deferred.resolve(response);
+                    },
+                    function (error) {
+                        deferred.resolve(error);
+                    }
+                );
+            return deferred.promise;
+        }
 
         return obj;
     }

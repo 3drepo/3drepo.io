@@ -4670,21 +4670,29 @@ var ViewerManager = {};
 			promise;
 
 		/*
+		 * Init
+		 */
+		vm.itemToShow = "repos";
+
+		/*
 		 * Get the account data
 		 */
 		$scope.$watch("vm.account", function()
 		{
 			if (vm.account)
 			{
-				promise = AccountService.getData(vm.account);
-				promise.then(function (data) {
-					vm.username        = data.username;
-					vm.firstName       = data.firstName;
-					vm.lastName        = data.lastName;
-					vm.email           = data.email;
-					vm.hasAvatar       = data.hasAvatar;
-					vm.avatarURL       = data.avatarURL;
-					vm.projectsGrouped = data.projectsGrouped;
+				promise = AccountService.getUserInfo(vm.account);
+				promise.then(function (response) {
+					console.log(response);
+					vm.accounts = response.data.accounts;
+					vm.username = vm.account;
+					vm.firstName = response.data.firstName;
+					vm.lastName = response.data.lastName;
+					vm.email = response.data.email;
+					/*
+					vm.hasAvatar = response.data.hasAvatar;
+					vm.avatarURL = response.data.avatarURL;
+					*/
 				});
 			} else {
 				vm.username        = null;
@@ -4694,6 +4702,61 @@ var ViewerManager = {};
 				vm.projectsGrouped = null;
 			}
 		});
+		
+		vm.showItem = function (item) {
+			vm.itemToShow = item;
+		};
+	}
+}());
+
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("accountInfo", accountInfo);
+
+	function accountInfo() {
+		return {
+			restrict: 'E',
+			templateUrl: 'accountInfo.html',
+			scope: {
+				username: "=",
+				firstName: "=",
+				lastName: "=",
+				email: "=",
+				onShowItem: "&"
+			},
+			controller: AccountInfoCtrl,
+			controllerAs: 'vm',
+			bindToController: true
+		};
+	}
+
+	AccountInfoCtrl.$inject = [];
+
+	function AccountInfoCtrl() {
+		var vm = this;
+
+		vm.showItem = function (item) {
+			vm.onShowItem({item: item});
+		};
 	}
 }());
 
@@ -4875,7 +4938,7 @@ var ViewerManager = {};
 			templateUrl: 'accountProjects.html',
 			scope: {
 				account: "=",
-				projectsGrouped: "="
+				accounts: "="
 			},
 			controller: AccountProjectsCtrl,
 			controllerAs: 'vm',
@@ -4883,13 +4946,15 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$mdDialog", "$element", "AccountService"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$mdDialog", "$element", "$timeout", "$interval", "AccountService", "UtilsService"];
 
-	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, AccountService) {
+	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, $timeout, $interval, AccountService, UtilsService) {
 		var vm = this,
 			promise,
 			bid4FreeProjects = null,
-			fileUploader = $element[0].querySelector("#fileUploader");
+			existingProjectToUpload,
+			existingProjectFileUploader,
+			newProjectFileUploader;
 
 		/*
 		 * Init
@@ -4902,7 +4967,26 @@ var ViewerManager = {};
 			"GIS",
 			"Other"
 		];
-		vm.accounts = [];
+		vm.info = "Retrieving projects..,";
+		vm.showProgress = true;
+
+		// Setup file uploaders
+		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
+		existingProjectFileUploader.addEventListener(
+			"change",
+			function () {
+				uploadModelToProject(existingProjectToUpload, this.files[0]);
+			},
+			false
+		);
+		newProjectFileUploader = $element[0].querySelector("#newProjectFileUploader");
+		newProjectFileUploader.addEventListener(
+			"change",
+			function () {
+				vm.uploadedFile = this.files[0];
+			},
+			false
+		);
 
 		promise = AccountService.getProjectsBid4FreeStatus(vm.account);
 		promise.then(function (data) {
@@ -4918,49 +5002,28 @@ var ViewerManager = {};
 		});
 
 		/*
-		 * Handle changes to the state manager Data
-		 * Reformat the grouped projects to enable toggling of projects list
+		 * Added data to accounts and projects for UI
 		 */
-		$scope.$watch("vm.projectsGrouped", function () {
-			var account,
-				project;
-			if (angular.isDefined(vm.projectsGrouped)) {
-				vm.accounts = [];
-				vm.projectsExist = !((Object.keys(vm.projectsGrouped).length === 0) && (vm.projectsGrouped.constructor === Object));
-				angular.forEach(vm.projectsGrouped, function(value, key) {
-					angular.forEach(value, function(project) {
-						project = {
-							name: project.name,
-							timestamp: project.timestamp,
-							bif4FreeEnabled: false
-						};
-						project.canUpload = (key === vm.account);
-						updateAccountProjects(key, project);
-						//account.projects.push(data);
-					});
-					/*
-					account = {
-						name: key,
-						projects: [],
-						showProjects: true,
-						showProjectsIcon: "folder_open"
-					};
-					angular.forEach(value, function(project) {
-						data = {
-							name: project.name,
-							timestamp: project.timestamp,
-							bif4FreeEnabled: false
-						};
-						data.canUpload = (account.name === vm.account);
-						account.projects.push(data);
-					});
-					vm.accounts.push(account);
-					if (account.name === vm.account) {
-						userAccount = vm.accounts[vm.accounts.length - 1];
-						console.log(userAccount);
+		$scope.$watch("vm.accounts", function () {
+			var i, j, iLength, jLength;
+			
+			if (angular.isDefined(vm.accounts)) {
+				vm.showProgress = false;
+				vm.projectsExist = (vm.accounts.length > 0);
+				vm.info = vm.projectsExist ? "" : "There are currently no projects";
+				for (i = 0, iLength = vm.accounts.length; i < iLength; i+= 1) {
+					vm.accounts[i].name = vm.accounts[i].account;
+					vm.accounts[i].showProjects = true;
+					vm.accounts[i].showProjectsIcon = "folder_open";
+					for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
+						vm.accounts[i].projects[j].name = vm.accounts[i].projects[j].project;
+						vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp);
+						vm.accounts[i].projects[j].bif4FreeEnabled = false;
+						vm.accounts[i].projects[j].uploading = false;
+						//vm.accounts[i].projects[j].canUpload = (vm.accounts[i].account === vm.account);
+						vm.accounts[i].projects[j].canUpload = true;
 					}
-					*/
-				});
+				}
 				setupBid4FreeAccess();
 			}
 		});
@@ -4986,6 +5049,16 @@ var ViewerManager = {};
 					vm.newProjectButtonDisabled =
 						(angular.isUndefined(newValue.otherType) || (angular.isDefined(newValue.otherType) && (newValue.otherType === "")));
 				}
+			}
+		}, true);
+
+		/*
+		 * Watch new database name
+		 */
+		$scope.$watch("vm.newDatabaseName", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				vm.newDatabaseButtonDisabled =
+					(angular.isUndefined(newValue) || (angular.isDefined(newValue) && (newValue.toString() === "")));
 			}
 		}, true);
 
@@ -5031,9 +5104,6 @@ var ViewerManager = {};
 			});
 		};
 		
-		vm.uploadModel = function () {
-		};
-
 		/**
 		 * Close the dialog
 		 */
@@ -5062,12 +5132,7 @@ var ViewerManager = {};
 				updateAccountProjects (response.data.account, project);
 				// Save model to project
 				if (vm.uploadedFile !== null) {
-					projectData = response.data;
-					projectData.uploadFile = vm.uploadedFile;
-					promise = AccountService.uploadModel(projectData);
-					promise.then(function (response) {
-						console.log(response);
-					});
+					uploadModelToProject (project, vm.uploadedFile);
 				}
 				vm.closeDialog();
 			});
@@ -5078,48 +5143,61 @@ var ViewerManager = {};
 		 * @param {String} project
 		 */
 		vm.uploadModel = function (project) {
-			vm.projectData = {
-				account: vm.account,
-				project: project
-			};
-			setupFileUploader(
-				function (file) {
-					vm.projectData.uploadFile = file;
-					promise = AccountService.uploadModel(vm.projectData);
-					promise.then(function (response) {
-						console.log(response);
-					});
-				}
-			);
-			fileUploader.click();
+			existingProjectFileUploader.value = "";
+			existingProjectToUpload = project;
+			existingProjectFileUploader.click();
 		};
 
 		/**
 		 * Upload a file
 		 */
 		vm.uploadFile = function () {
-			setupFileUploader(
-				function (file) {
-					vm.uploadedFile = file;
-				}
-			);
-			fileUploader.click();
+			newProjectFileUploader.value = "";
+			newProjectFileUploader.click();
 		};
 
 		/**
-		 * Set up action on file upload
-		 *
-		 * @param {Function} callback
+		 * Create a new database
 		 */
-		function setupFileUploader (callback) {
-			fileUploader.addEventListener(
-				"change",
-				function (event) {
-					callback(this.files[0]);
-				},
-				false
-			);
-		}
+		vm.newDatabase = function (event) {
+			vm.newDatabaseName = "";
+			vm.showPaymentWait = false;
+			vm.newDatabaseToken = false;
+			$mdDialog.show({
+				controller: function () {},
+				templateUrl: "databaseDialog.html",
+				parent: angular.element(document.body),
+				targetEvent: event,
+				clickOutsideToClose:true,
+				fullscreen: true,
+				scope: $scope,
+				preserveScope: true,
+				onRemoving: function () {$scope.closeDialog();}
+			});
+		};
+
+		/**
+		 * Save a new database
+		 */
+		vm.saveNewDatabase = function () {
+			promise = AccountService.newDatabase(vm.account, vm.newDatabaseName);
+			promise.then(function (response) {
+				console.log(response);
+				vm.newDatabaseToken = response.data.token;
+				vm.paypalReturnUrl = $location.protocol() + "://" + $location.host() + "/" + vm.account;
+			});
+		};
+
+		/**
+		 * Show waiting before going to payment page
+		 * $timeout required otherwise Submit does not work
+		 */
+		vm.setupPayment = function () {
+			$timeout(function () {
+				console.log(vm.newDatabaseToken);
+				vm.showPaymentWait = true;
+			});
+		};
 
 		/**
 		 * Add a project to an existing or create newly created account
@@ -5150,8 +5228,56 @@ var ViewerManager = {};
 			}
 		}
 
+		/**
+		 * Upload file/model to project
+		 * 
+		 * @param project
+		 * @param file
+		 */
+		function uploadModelToProject (project, file) {
+			var interval,
+				projectData = {
+					account: vm.account,
+					project: project.name
+				};
+			project.uploading = true;
+			vm.showUploading = true;
+			projectData.uploadFile = file;
+			promise = AccountService.uploadModel(projectData);
+			promise.then(function (response) {
+				console.log(response);
+				if (response.status === 404) {
+					vm.showUploading = false;
+					vm.showUploaded = true;
+					vm.uploadedIcon = "close";
+					$timeout(function () {
+						vm.showUploaded = false;
+						project.uploading = false;
+					}, 4000);
+				}
+				else {
+					interval = $interval(function () {
+						promise = AccountService.uploadStatus(projectData);
+						promise.then(function (response) {
+							console.log(response);
+							if (response.data.status === "ok") {
+								project.timestamp = UtilsService.formatTimestamp(new Date());
+								vm.showUploading = false;
+								$interval.cancel(interval);
+								vm.showUploaded = true;
+								vm.uploadedIcon = "done";
+								$timeout(function () {
+									vm.showUploaded = false;
+									project.uploading = false;
+								}, 4000);
+							}
+						});
+					}, 1000);
+				}
+			});
+		}
+
 		vm.b4f = function (account, project) {
-			console.log(account, project);
 			$location.path("/" + account + "/" + project + "/bid4free", "_self");
 		};
 
@@ -5227,42 +5353,27 @@ var ViewerManager = {};
 		}
 
 		/**
-		 * Get account data
+		 * Handle PUT requests
+		 * @param data
+		 * @param urlEnd
+		 * @returns {*}
 		 */
-		obj.getData = function (username) {
-			deferred = $q.defer();
+		function doPut(data, urlEnd) {
+			var deferred = $q.defer(),
+				url = serverConfig.apiUrl(serverConfig.POST_API, urlEnd),
+				config = {withCredentials: true};
 
-			var accountData = {};
-
-			$http.get(serverConfig.apiUrl(serverConfig.GET_API, username + ".json"))
-				.then(function (response) {
-					var i, length,
-						project, projectsGrouped,
-						data;
-
-					// Groups projects under accounts
-					projectsGrouped = {};
-					for (i = 0, length = response.data.projects.length; i < length; i += 1) {
-						project = response.data.projects[i];
-						if (!(project.account in projectsGrouped)) {
-							projectsGrouped[project.account] = [];
-						}
-						data = {
-							name: project.project,
-							timestamp: (project.timestamp !== null) ? UtilsService.formatTimestamp(project.timestamp) : ""
-						};
-						projectsGrouped[project.account].push(data);
+			$http.put(url, data, config)
+				.then(
+					function (response) {
+						deferred.resolve(response);
+					},
+					function (error) {
+						deferred.resolve(error);
 					}
-
-					accountData = response.data;
-					accountData.projectsGrouped = projectsGrouped;
-
-					accountData.avatarURL = serverConfig.apiUrl(serverConfig.GET_API, username + ".jpg");
-					deferred.resolve(accountData);
-				});
-
+				);
 			return deferred.promise;
-		};
+		}
 
 		/**
 		 * Update the user info
@@ -5272,14 +5383,7 @@ var ViewerManager = {};
 		 * @returns {*}
 		 */
 		obj.updateInfo = function (username, info) {
-			deferred = $q.defer();
-			$http.post(serverConfig.apiUrl(serverConfig.POST_API, username), info)
-				.then(function (response) {
-					console.log(response);
-					deferred.resolve(response);
-				});
-
-			return deferred.promise;
+			return doPut(info, username);
 		};
 
 		/**
@@ -5290,14 +5394,7 @@ var ViewerManager = {};
 		 * @returns {*}
 		 */
 		obj.updatePassword = function (username, passwords) {
-			deferred = $q.defer();
-			$http.post(serverConfig.apiUrl(serverConfig.POST_API, username), passwords)
-				.then(function (response) {
-					console.log(response);
-					deferred.resolve(response);
-				});
-
-			return deferred.promise;
+			return doPut(passwords, username);
 		};
 
 		obj.getProjectsBid4FreeStatus = function (username) {
@@ -5323,11 +5420,62 @@ var ViewerManager = {};
 			return doPost(data, projectData.account + "/" + projectData.name);
 		};
 
+		/**
+		 * Upload file/model to database
+		 *
+		 * @param projectData
+		 * @returns {*|promise}
+		 */
 		obj.uploadModel = function (projectData) {
-			console.log(projectData);
 			var data = new FormData();
 			data.append("file", projectData.uploadFile);
 			return doPost(data, projectData.account + "/" + projectData.project + "/upload", {'Content-Type': undefined});
+		};
+
+		/**
+		 * Get upload status
+		 *
+		 * @param projectData
+		 * @returns {*|promise}
+		 */
+		obj.uploadStatus = function (projectData) {
+			return UtilsService.doGet(projectData.account + "/" + projectData.project + ".json");
+		};
+
+		/**
+		 * Create a new database
+		 *
+		 * @param account
+		 * @param databaseName
+		 * @returns {*|promise}
+		 */
+		obj.newDatabase = function (account, databaseName) {
+			var data = {
+				database: databaseName,
+				plan: "THE-100-QUID-PLAN"
+			};
+			return doPost(data, account + "/database");
+		};
+
+		/**
+		 * Create a new subscription
+		 *
+		 * @param account
+		 * @param data
+		 * @returns {*|promise}
+		 */
+		obj.newSubscription = function (account, data) {
+			return doPost(data, account + "/subscriptions");
+		};
+
+		/**
+		 * Get user info
+		 *
+		 * @param username
+		 * @returns {*|promise}
+		 */
+		obj.getUserInfo = function (username) {
+			return UtilsService.doGet(username + ".json");
 		};
 
 		return obj;
@@ -6963,7 +7111,7 @@ var ViewerManager = {};
 
 				// Set up the new current selected option button
 				vm.selectedViewingOptionIndex = index;
-				vm.leftButtons[1] = vm.viewingOptions[index];
+				vm.rightButtons[0] = vm.viewingOptions[index];
 
 				vm.showViewingOptionButtons = false;
 			}
@@ -7005,14 +7153,14 @@ var ViewerManager = {};
 				label: "Walk",
 				icon: "fa fa-child",
 				click: setViewingOption,
-				iconClass: "bottomButtomIconWalk"
+				iconClass: "bottomButtonIconWalk"
 			},
 			{
 				mode: VIEWER_NAV_MODES.HELICOPTER,
 				label: "Helicopter",
 				icon: "icon icon_helicopter",
 				click: setViewingOption,
-				iconClass: "bottomButtomIconHelicopter"
+				iconClass: "bottomButtonIconHelicopter"
 			},
 			{
 				mode: VIEWER_NAV_MODES.TURNTABLE,
@@ -7029,9 +7177,9 @@ var ViewerManager = {};
 			icon: "fa fa-home",
 			click: home
 		});
-		vm.leftButtons.push(vm.viewingOptions[vm.selectedViewingOptionIndex]);
 
 		vm.rightButtons = [];
+		vm.rightButtons.push(vm.viewingOptions[vm.selectedViewingOptionIndex]);
 		/*
 		vm.rightButtons.push({
 			label: "Help",
@@ -7042,7 +7190,7 @@ var ViewerManager = {};
 			label: "VR",
 			icon: "icon icon_cardboard",
 			click: enterOculusDisplay,
-			iconClass: "bottomButtomIconCardboard"
+			iconClass: "bottomButtonIconCardboard"
 		});
 		 */
 	}
@@ -7347,6 +7495,79 @@ var ViewerManager = {};
 				}
 			}
 		});
+	}
+}());
+
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("contact", contact);
+
+	function contact() {
+		return {
+			restrict: "E",
+			scope: {},
+			templateUrl: "contact.html",
+			controller: ContactCtrl,
+			controllerAs: "vm",
+			bindToController: true
+		};
+	}
+
+	ContactCtrl.$inject = ["$scope", "UtilsService"];
+
+	function ContactCtrl ($scope, UtilsService) {
+		var vm = this,
+			promise;
+
+		/*
+		 * Init
+		 */
+		vm.contact = {information: "", name: "", email: ""};
+		vm.sent = false;
+		vm.sending = false;
+
+		/*
+		 * Watch to enable send button
+		 */
+		$scope.$watch("vm.contact", function () {
+			vm.sendButtonDisabled = (
+				(vm.contact.information === "") ||
+				(vm.contact.name === "") ||
+				(vm.contact.email === "") ||
+				(angular.isUndefined(vm.contact.email))
+			);
+		}, true);
+
+		vm.send = function () {
+			vm.sending = true;
+			promise = UtilsService.doPost(vm.contact, "contact");
+			promise.then(function (response) {
+				console.log(response);
+				vm.sending = false;
+				if (response.status === 200) {
+					vm.sent = true;
+				}
+			});
+		};
 	}
 }());
 
@@ -7725,6 +7946,9 @@ var ViewerManager = {};
 			if (angular.isDefined(newValue)) {
 				if (!newValue) {
 					vm.editingGroup = false; // To stop any event watching
+					hideAll = false;
+					vm.toShow ="showGroups";
+					doHideAll(hideAll);
 				}
 			}
 		});
@@ -7861,7 +8085,7 @@ var ViewerManager = {};
 		 */
 		function setContentHeight () {
 			var contentHeight = 0,
-				groupHeaderHeight = 54, // It could be higher for items with long text but ignore that
+				groupHeaderHeight = 56, // It could be higher for items with long text but ignore that
 				baseGroupHeight = 210,
 				addHeight = 250,
 				infoHeight = 80,
@@ -8491,19 +8715,26 @@ var ViewerManager = {};
 		};
 
 		this.handleStateChange = function(stateChangeObject) {
-			var param;
+			var param,
+				fromState = stateChangeObject.fromState.name.split(".");
 
 			var fromParams = stateChangeObject.fromParams;
 			var toParams   = stateChangeObject.toParams;
-			
-			// Handle going back to the home page, because fromParams will be empty
+
 			if (stateChangeObject.toState.url === "/") {
-				var fromState = stateChangeObject.fromState.name.split(".");
+				// Handle going back to the home page, because fromParams will be empty
 				fromParams = {};
 				for (i = 1; i < fromState.length; i += 1) {
 					fromParams[fromState[i]] = true;
 				}
 				toParams = {};
+			}
+			else if (stateChangeObject.toState.url.indexOf("/") === -1) {
+				// Handle going from one home sub page to another, because fromParams will be empty
+				fromParams = {};
+				for (i = 1; i < fromState.length; i += 1) {
+					fromParams[fromState[i]] = true;
+				}
 			}
 
 			// Switch off all parameters that we came from
@@ -8837,9 +9068,9 @@ var ViewerManager = {};
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "Auth", "StateManager", "EventService", "UtilsService"];
+    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "Auth", "StateManager", "EventService", "UtilsService"];
 
-    function HomeCtrl($scope, $element, $timeout, $compile, Auth, StateManager, EventService, UtilsService) {
+    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, Auth, StateManager, EventService, UtilsService) {
         var vm = this,
 			goToUserPage,
 			homeLoggedOut,
@@ -8847,7 +9078,15 @@ var ViewerManager = {};
 			element,
 			state;
 
+		/*
+		 * Init
+		 */
 		vm.state = StateManager.state;
+		vm.legalDisplays = [
+			{title: "Terms & Conditions", value: "termsAndConditions"},
+			{title: "Privacy", value: "privacy"},
+			{title: "Cookies", value: "cookies"}
+		];
 
 		/*
 		 * Watch the state to handle moving to and from the login page
@@ -8924,6 +9163,26 @@ var ViewerManager = {};
             Auth.logout();
         };
 
+		/**
+		 * 
+		 * 
+		 * @param event
+		 * @param display
+		 */
+		vm.display = function (event, display) {
+			vm.legalTitle = display.title;
+			$mdDialog.show({
+				templateUrl: "legalDialog.html",
+				parent: angular.element(document.body),
+				targetEvent: event,
+				clickOutsideToClose:true,
+				fullscreen: true,
+				scope: $scope,
+				preserveScope: true,
+				onRemoving: removeDialog
+			});
+		};
+
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if (angular.isDefined(event) && angular.isDefined(event.type)) {
 				if (event.type === EventService.EVENT.USER_LOGGED_IN)
@@ -8944,6 +9203,20 @@ var ViewerManager = {};
 				}
 			}
 		});
+
+		/**
+		 * Close the dialog
+		 */
+		$scope.closeDialog = function() {
+			$mdDialog.cancel();
+		};
+
+		/**
+		 * Close the dialog by not clicking the close button
+		 */
+		function removeDialog () {
+			$scope.closeDialog();
+		}
     }
 }());
 
@@ -9069,7 +9342,7 @@ angular.module('3drepo')
                 // Cleanup when destroyed
                 element.on('$destroy', function(){
                     scope.vm.eventsWatch(); // Disable events watch
-                })
+                });
             },
             controller: IssueAreaCtrl,
             controllerAs: "vm",
@@ -9077,9 +9350,9 @@ angular.module('3drepo')
         };
     }
 
-    IssueAreaCtrl.$inject = ["$scope", "$element", "$window", "$timeout", "$q", "EventService"];
+    IssueAreaCtrl.$inject = ["$scope", "$element", "$window", "$timeout", "EventService"];
 
-    function IssueAreaCtrl($scope, $element, $window, $timeout, $q, EventService) {
+    function IssueAreaCtrl($scope, $element, $window, $timeout, EventService) {
         var vm = this,
             canvas,
             canvasColour = "rgba(0 ,0 ,0, 0)",
@@ -9090,10 +9363,9 @@ angular.module('3drepo')
             mouse_button = 0,
             mouse_dragging = false,
             pen_col = "#FF0000",
-            initialPenSize = 4,
-            pen_size = initialPenSize,
-            initialPenIndicatorSize = 20,
+            initialPenIndicatorSize = 10,
             penIndicatorSize = initialPenIndicatorSize,
+            pen_size = penIndicatorSize,
             mouseWheelDirectionUp = null,
             hasDrawnOnCanvas = false;
 
@@ -9110,6 +9382,7 @@ angular.module('3drepo')
                 canvas = angular.element($element[0].querySelector('#issueAreaCanvas'));
                 myCanvas = document.getElementById("issueAreaCanvas");
                 penIndicator = angular.element($element[0].querySelector("#issueAreaPenIndicator"));
+                penIndicator.css("font-size", penIndicatorSize + "px");
                 vm.pointerEvents = "auto";
                 vm.showPenIndicator = false;
                 resizeCanvas();
@@ -9219,7 +9492,7 @@ angular.module('3drepo')
                 if (!mouse_dragging && !vm.showPenIndicator) {
                     $timeout(function () {
                         vm.showPenIndicator = true;
-                    })
+                    });
                 }
                 else {
                     if ((last_mouse_drag_x !== -1) && (!hasDrawnOnCanvas)) {
@@ -9231,26 +9504,23 @@ angular.module('3drepo')
                 evt.preventDefault();
                 evt.stopPropagation();
                 evt.returnValue = false;
-                setPenIndicatorPosition(mouse_drag_x, mouse_drag_y);
+                setPenIndicatorPosition(evt.layerX, evt.layerY);
             }, false);
 
             canvas.addEventListener('wheel', function (evt) {
-                var penToIndicatorRation = 0.7;
+                var penToIndicatorRation = 0.8;
 
                 if (evt.deltaY === 0) {
                     mouseWheelDirectionUp = null;
                     initialPenIndicatorSize = penIndicatorSize;
-                    initialPenSize = pen_size;
                 }
                 else if ((evt.deltaY === 1) && (mouseWheelDirectionUp === null)) {
                     mouseWheelDirectionUp = false;
                     penIndicatorSize = initialPenIndicatorSize;
-                    pen_size = initialPenSize;
                 }
                 else if ((evt.deltaY === -1) && (mouseWheelDirectionUp === null)) {
                     mouseWheelDirectionUp = true;
                     penIndicatorSize = initialPenIndicatorSize;
-                    pen_size = initialPenSize;
                 }
                 else {
                     penIndicatorSize += mouseWheelDirectionUp ? 1 : -1;
@@ -9273,8 +9543,9 @@ angular.module('3drepo')
         {
             var context = canvas.getContext("2d");
 
-            if (!mouse_dragging)
+            if (!mouse_dragging) {
                 return;
+            }
 
             if (last_mouse_drag_x < 0 || last_mouse_drag_y < 0)
             {
@@ -9333,6 +9604,7 @@ angular.module('3drepo')
             var context = myCanvas.getContext("2d");
             context.globalCompositeOperation = "source-over";
             pen_col = "#FF0000";
+            pen_size = penIndicatorSize;
             vm.canvasPointerEvents = "auto";
         }
 
@@ -9478,7 +9750,7 @@ angular.module('3drepo')
 				if (vm.issueIsOpen && newValue.hasOwnProperty("comments")) {
 					for (i = 0, length = newValue.comments.length; i < length; i += 1) {
 						newValue.comments[i].canDelete =
-							(i === (newValue.comments.length - 1)) && (!newValue.comments[i].set);
+							(i === (newValue.comments.length - 1)) && (!newValue.comments[i].sealed);
 					}
 				}
 				initAssignedRolesDisplay();
@@ -9863,9 +10135,6 @@ angular.module('3drepo')
 		vm.issuesToShow = [];
 		vm.showProgress = true;
 		vm.progressInfo = "Loading issues";
-		vm.showIssuesInfo = false;
-		vm.showIssueList = false;
-		vm.showIssue = false;
 		vm.availableRoles = null;
 		vm.projectUserRoles = [];
 		vm.selectedIssue = null;
@@ -10153,6 +10422,15 @@ angular.module('3drepo')
 							vm.issuesToShow.splice(i, 1);
 						}
 					}
+
+					// Setup what to show
+					if (vm.issuesToShow.length > 0) {
+						vm.toShow = "showIssues";
+					}
+					else {
+						vm.toShow = "showInfo";
+						vm.issuesInfo = "There are currently no open issues";
+					}
 				}
 			}
 		}
@@ -10359,7 +10637,10 @@ angular.module('3drepo')
 				});
 			}
 
-			EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, issue: vm.selectedIssue});
+			// Wait for camera to stop before showing a scribble
+			$timeout(function () {
+				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, issue: vm.selectedIssue});
+			}, 1100);
 		};
 
 		/**
@@ -10821,7 +11102,8 @@ angular.module('3drepo')
 				comment: "",
 				number: issue.number,
 				delete: true,
-				commentCreated: issue.comments[index].created
+				commentIndex: index
+				// commentCreated: issue.comments[index].created
 			});
 		};
 
@@ -10829,7 +11111,7 @@ angular.module('3drepo')
 			return doPut(issue, {
 				comment: "",
 				number: issue.number,
-				set: true,
+				sealed: true,
 				commentIndex: commentIndex
 			});
 		};
@@ -10989,9 +11271,9 @@ angular.module('3drepo')
 		};
 	}
 
-	LoginCtrl.$inject = ["$scope", "$mdDialog", "$location", "Auth", "EventService", "serverConfig", "LoginService"];
+	LoginCtrl.$inject = ["$scope", "$mdDialog", "$location", "Auth", "EventService", "serverConfig"];
 
-	function LoginCtrl($scope, $mdDialog, $location, Auth, EventService, serverConfig, LoginService) {
+	function LoginCtrl($scope, $mdDialog, $location, Auth, EventService, serverConfig) {
 		var vm = this,
 			enterKey = 13,
 			promise;
@@ -11070,7 +11352,6 @@ angular.module('3drepo')
 		};
 
 		vm.showTC = function () {
-			
 			$mdDialog.show({
 				controller: tcDialogController,
 				templateUrl: "tcDialog.html",
@@ -11166,64 +11447,6 @@ angular.module('3drepo')
 	}
 }());
 
-/**
- *  Copyright (C) 2016 3D Repo Ltd
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-    "use strict";
-
-    angular.module("3drepo")
-        .factory("LoginService", LoginService);
-
-    LoginService.$inject = ["$http", "$q", "serverConfig"];
-
-    function LoginService($http, $q, serverConfig) {
-        var obj = {};
-
-        /**
-         * Handle POST requests
-         * @param data
-         * @param urlEnd
-         * @returns {*}
-         */
-        function doPost(data, urlEnd) {
-            var deferred = $q.defer(),
-                url = serverConfig.apiUrl(serverConfig.POST_API, urlEnd),
-                config = {withCredentials: true};
-
-            $http.post(url, data, config)
-                .then(
-                    function (response) {
-                        deferred.resolve(response);
-                    },
-                    function (error) {
-                        deferred.resolve(error);
-                    }
-                );
-            return deferred.promise;
-        }
-
-        obj.register = function (username, data) {
-            return doPost(data, username);
-        };
-
-        return obj;
-    }
-}());
 /**
  **  Copyright (C) 2014 3D Repo Ltd
  **
@@ -12773,12 +12996,15 @@ var Oculus = {};
     function PasswordChangeCtrl ($scope, $window, PasswordChangeService) {
         var vm = this,
             enterKey = 13,
-            promise;
+            promise,
+            messageColour = "rgba(0, 0, 0, 0.7)",
+            messageErrorColour = "#F44336";
         
         /*
          * Init
          */
         vm.passwordChanged = false;
+        vm.showProgress = false;
 
         /*
          * Watch inputs to clear any message
@@ -12813,7 +13039,10 @@ var Oculus = {};
          */
         function doPasswordChange() {
             if (angular.isDefined(vm.username) && angular.isDefined(vm.token)) {
-                if (angular.isDefined(vm.newPassword)) {
+                if (angular.isDefined(vm.newPassword) && (vm.newPassword !== "")) {
+                    vm.messageColor = messageColour;
+                    vm.message = "Please wait...";
+                    vm.showProgress = true;
                     promise = PasswordChangeService.passwordChange(
                         vm.username,
                         {
@@ -12822,20 +13051,20 @@ var Oculus = {};
                         }
                     );
                     promise.then(function (response) {
-                        console.log(response);
+                        vm.showProgress = false;
                         if (response.status === 400) {
-                            vm.messageColor = "#F44336";
+                            vm.messageColor = messageErrorColour;
                             vm.message = "Error changing password";
                         }
                         else {
                             vm.passwordChanged = true;
-                            vm.messageColor = "rgba(0, 0, 0, 0.7)";
+                            vm.messageColor = messageColour;
                             vm.message = "Your password has been reset. Please go to the login page.";
                         }
                     });
                 }
                 else {
-                    vm.messageColor = "#F44336";
+                    vm.messageColor = messageErrorColour;
                     vm.message = "A new password must be entered";
                 }
             }
@@ -12939,7 +13168,14 @@ var Oculus = {};
 
     function PasswordForgotCtrl ($scope, PasswordForgotService) {
         var vm = this,
-            promise;
+            promise,
+            messageColour = "rgba(0, 0, 0, 0.7)",
+            messageErrorColour = "#F44336";
+        
+        /*
+         * Init
+         */
+        vm.showProgress = false;
 
         /*
          * Watch inputs to clear any message
@@ -12953,21 +13189,25 @@ var Oculus = {};
          */
         vm.requestPasswordChange = function () {
             if (angular.isDefined(vm.username) && angular.isDefined(vm.email)) {
+                vm.messageColor = messageColour;
+                vm.message = "Please wait...";
+                vm.showProgress = true;
                 promise = PasswordForgotService.forgot(vm.username, {email: vm.email});
                 promise.then(function (response) {
+                    vm.showProgress = false;
                     if (response.status === 200) {
                         vm.verified = true;
-                        vm.messageColor = "rgba(0, 0, 0, 0.7)";
+                        vm.messageColor = messageColour;
                         vm.message = "Thank you. You will receive an email shortly with a link to change your password";
                     }
                     else {
-                        vm.messageColor = "#F44336";
+                        vm.messageColor = messageErrorColour;
                         vm.message = "Error with with one or more fields";
                     }
                 });
             }
             else {
-                vm.messageColor = "#F44336";
+                vm.messageColor = messageErrorColour;
                 vm.message = "All fields must be filled";
             }
         };
@@ -13014,9 +13254,14 @@ var Oculus = {};
                 config = {withCredentials: true};
 
             $http.post(url, data, config)
-                .then(function (response) {
-                    deferred.resolve(response);
-                });
+                .then(
+                    function (response) {
+                        deferred.resolve(response);
+                    },
+                    function (error) {
+                        deferred.resolve(error);
+                    }
+                );
             return deferred.promise;
         }
 
@@ -13027,6 +13272,51 @@ var Oculus = {};
         return obj;
     }
 }());
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("payment", payment);
+
+	function payment() {
+		return {
+			restrict: "E",
+			scope: {},
+			templateUrl: "payment.html",
+			controller: paymentCtrl,
+			controllerAs: "vm",
+			bindToController: true
+		};
+	}
+
+	paymentCtrl.$inject = ["$location"];
+
+	function paymentCtrl ($location) {
+		var vm = this;
+
+		vm.goToLoginPage = function () {
+			$location.path("/", "_self");
+		};
+	}
+}());
+
 /**
  *	Copyright (C) 2016 3D Repo Ltd
  *
@@ -13061,10 +13351,23 @@ var Oculus = {};
 		};
 	}
 
-	PricingCtrl.$inject = [];
+	PricingCtrl.$inject = ["$location"];
 
-	function PricingCtrl () {
+	function PricingCtrl ($location) {
 		var vm = this;
+
+		/**
+		 * Go to a sub page
+		 * 
+		 * @param page
+		 * @param pay
+		 */
+		vm.showPage = function (page, pay) {
+			$location.path("/" + page, "_self");
+			if ((page === "signUp") && pay) {
+				$location.search("pay", true);
+			}
+		};
 	}
 }());
 
@@ -14001,8 +14304,6 @@ var Oculus = {};
 					}
 				} else if (event.type === EventService.EVENT.VIEWER.READY) {
 					window.viewer = vm.manager.getCurrentViewer();
-				}  else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
-					vm.pointerEvents = event.value.on ? "none" : "auto";
 				} else {
 					vm.vmservice.sendInternal(event.type, event.value);
 				}
@@ -14304,10 +14605,7 @@ var Oculus = {};
     function registerVerify() {
         return {
             restrict: "E",
-            scope: {
-                username: "=",
-                token: "="
-            },
+            scope: {},
             templateUrl: "registerVerify.html",
             controller: RegisterVerifyCtrl,
             controllerAs: "vm",
@@ -14315,104 +14613,63 @@ var Oculus = {};
         };
     }
 
-    RegisterVerifyCtrl.$inject = ["$scope", "$location", "RegisterVerifyService"];
+    RegisterVerifyCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "AccountService"];
 
-    function RegisterVerifyCtrl ($scope, $location, RegisterVerifyService) {
+    function RegisterVerifyCtrl ($scope, $location, $timeout, UtilsService, AccountService) {
         var vm = this,
-            promise;
+            promise,
+            username = $location.search().username,
+            token = $location.search().token;
 
         /*
          * Init
          */
         vm.verified = false;
+        vm.showPaymentWait = false;
+        vm.databaseName = username;
+        vm.pay = (($location.search().hasOwnProperty("pay")) && $location.search().pay);
 
-        /*
-         * Watch the token value
-         */
-        $scope.$watchGroup(["vm.username", "vm.token"], function () {
-            if (angular.isDefined(vm.username) && angular.isDefined(vm.token)) {
-                vm.verifyErrorMessage = "Verifying. Please wait...";
-                promise = RegisterVerifyService.verify(vm.username, {token: vm.token});
-                promise.then(function (response) {
-                    if (response.status === 200) {
-                        vm.verified = true;
-                        vm.verifySuccessMessage = "Congratulations. You have successfully registered for 3D Repo. You may now login to you account.";
-                    }
-                    else if (response.data.value === 60) {
-                        vm.verified = true;
-                        vm.verifySuccessMessage = "You have already verified your account successfully. You may now login to your account.";
-                    }
-                    else {
-                        vm.verifyErrorMessage = "Error with verification";
-                    }
-                });
+        vm.verifyErrorMessage = "Verifying. Please wait...";
+        promise = UtilsService.doPost({token: token}, username + "/verify");
+        promise.then(function (response) {
+            if (response.status === 200) {
+                vm.verified = true;
+                vm.verifySuccessMessage = "Congratulations. You have successfully signed up for 3D Repo. You may now login to you account.";
+            }
+            else if (response.data.value === 60) {
+                vm.verified = true;
+                vm.verifySuccessMessage = "You have already verified your account successfully. You may now login to your account.";
+            }
+            else {
+                vm.verifyErrorMessage = "Error with verification";
             }
         });
 
         vm.goToLoginPage = function () {
             $location.path("/", "_self");
         };
-    }
-}());
 
-/**
- *  Copyright (C) 2016 3D Repo Ltd
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-    "use strict";
-
-    angular.module("3drepo")
-        .factory("RegisterVerifyService", RegisterVerifyService);
-
-    RegisterVerifyService.$inject = ["$http", "$q", "serverConfig"];
-
-    function RegisterVerifyService($http, $q, serverConfig) {
-        var obj = {};
-
-        /**
-         * Handle POST requests
-         * @param data
-         * @param urlEnd
-         * @returns {*}
-         */
-        function doPost(data, urlEnd) {
-            var deferred = $q.defer(),
-                url = serverConfig.apiUrl(serverConfig.POST_API, urlEnd),
-                config = {withCredentials: true};
-
-            $http.post(url, data, config)
-                .then(
-                    function (response) {
-                        deferred.resolve(response);
-                    },
-                    function (error) {
-                        deferred.resolve(error);
-                    }
-                );
-            return deferred.promise;
-        }
-
-        obj.verify = function (username, data) {
-            return doPost(data, username + "/verify");
+        vm.setupPayment = function ($event) {
+            var data;
+            vm.paypalReturnUrl = $location.protocol() + "://" + $location.host();
+            data = {
+                verificationToken: token,
+                plan: "THE-100-QUID-PLAN"
+            };
+            promise = AccountService.newSubscription(username, data);
+            promise.then(function (response) {
+                vm.subscriptionToken = response.data.token;
+                // Make sure form contains the token before submitting
+                $timeout(function () {
+                    $scope.$apply();
+                    document.registerVerifyForm.action = "https://www.sandbox.paypal.com/cgi-bin/webscr";
+                    document.registerVerifyForm.submit();
+                }, 1000);
+            });
         };
-
-        return obj;
     }
 }());
+
 /**
  *	Copyright (C) 2016 3D Repo Ltd
  *
@@ -14503,6 +14760,284 @@ var Oculus = {};
     }
 }());
 
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("signUp", signUp);
+
+	function signUp() {
+		return {
+			restrict: "E",
+			scope: {},
+			templateUrl: "signUp.html",
+			controller: SignUpCtrl,
+			controllerAs: "vm",
+			bindToController: true
+		};
+	}
+
+	SignUpCtrl.$inject = ["$location"];
+
+	function SignUpCtrl ($location) {
+		var vm = this;
+	}
+}());
+
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("signUpForm", signUpForm);
+
+	function signUpForm() {
+		return {
+			restrict: "EA",
+			templateUrl: "signUpForm.html",
+			scope: {
+				buttonLabel: "@"
+			},
+			controller: SignUpFormCtrl,
+			controllerAs: "vm",
+			bindToController: true
+		};
+	}
+
+	SignUpFormCtrl.$inject = ["$scope", "$mdDialog", "$location", "serverConfig", "SignUpFormService"];
+
+	function SignUpFormCtrl($scope, $mdDialog, $location, serverConfig, SignUpFormService) {
+		var vm = this,
+			enterKey = 13,
+			promise,
+			pay;
+
+		/*
+		 * Init
+		 */
+		vm.newUser = {username: "", email: "", password: "", tcAgreed: false};
+		vm.version = serverConfig.apiVersion;
+		vm.logo = "/public/images/3drepo-logo-white.png";
+		vm.captchaKey = "6LfSDR8TAAAAACBaw6FY5WdnqOP0nfv3z8-cALAI";
+		vm.tcAgreed = false;
+		vm.useReCapthca = false;
+		vm.useRegister = false;
+		vm.registering = false;
+		pay =  (($location.search().hasOwnProperty("pay")) && $location.search().pay);
+
+		/*
+		 * Auth stuff
+		 */
+		if (serverConfig.hasOwnProperty("auth")) {
+			if (serverConfig.auth.hasOwnProperty("register") && (serverConfig.auth.register)) {
+				vm.useRegister = true;
+				if (serverConfig.auth.hasOwnProperty("captcha") && (serverConfig.auth.captcha)) {
+					vm.useReCapthca = true;
+				}
+			}
+		}
+
+		/*
+		 * Watch changes to register fields to clear warning message
+		 */
+		$scope.$watch("vm.newUser", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				vm.registerErrorMessage = "";
+			}
+		}, true);
+
+		/**
+		 * Attempt to register
+		 *
+		 * @param {Object} event
+		 */
+		vm.register = function(event) {
+			if (angular.isDefined(event)) {
+				if (event.which === enterKey) {
+					doRegister();
+				}
+			}
+			else {
+				doRegister();
+			}
+		};
+
+		vm.showTC = function () {
+			$mdDialog.show({
+				controller: tcDialogController,
+				templateUrl: "tcDialog.html",
+				parent: angular.element(document.body),
+				targetEvent: event,
+				clickOutsideToClose:true,
+				fullscreen: true,
+				scope: $scope,
+				preserveScope: true,
+				onRemoving: removeDialog
+			});
+		};
+
+		vm.showPage = function (page) {
+			$location.path("/" + page, "_self");
+		};
+
+		/**
+		 * Close the dialog
+		 */
+		$scope.closeDialog = function() {
+			$mdDialog.cancel();
+		};
+
+		/**
+		 * Close the dialog by not clicking the close button
+		 */
+		function removeDialog () {
+			$scope.closeDialog();
+		}
+
+		/**
+		 * Dialog controller
+		 */
+		function tcDialogController() {
+		}
+
+		/**
+		 * Do the user registration
+		 */
+		function doRegister() {
+			var data;
+
+			if ((angular.isDefined(vm.newUser.username)) &&
+				(angular.isDefined(vm.newUser.email)) &&
+				(angular.isDefined(vm.newUser.password))) {
+				if (vm.newUser.tcAgreed) {
+					data = {
+						email: vm.newUser.email,
+						password: vm.newUser.password,
+						pay: pay
+					};
+					if (vm.useReCapthca) {
+						data.captcha = vm.reCaptchaResponse;
+					}
+					vm.registering = true;
+					promise = SignUpFormService.register(vm.newUser.username, data);
+					promise.then(function (response) {
+						if (response.status === 200) {
+							vm.showPage("registerRequest");
+						}
+						else if (response.data.value === 62) {
+							vm.registerErrorMessage = "Prove you're not a robot";
+						}
+						else if (response.data.value === 55) {
+							vm.registerErrorMessage = "Username already in use";
+						}
+						else {
+							vm.registerErrorMessage = "Error with registration";
+						}
+						vm.registering = false;
+					});
+				}
+				else {
+					vm.registerErrorMessage = "You must agree to the terms and conditions";
+				}
+			}
+			else {
+				vm.registerErrorMessage = "Please fill all fields";
+			}
+		}
+	}
+}());
+
+/**
+ *  Copyright (C) 2016 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+    "use strict";
+
+    angular.module("3drepo")
+        .factory("SignUpFormService", SignUpFormService);
+
+    SignUpFormService.$inject = ["$http", "$q", "serverConfig"];
+
+    function SignUpFormService($http, $q, serverConfig) {
+        var obj = {};
+
+        /**
+         * Handle POST requests
+         * @param data
+         * @param urlEnd
+         * @returns {*}
+         */
+        function doPost(data, urlEnd) {
+            var deferred = $q.defer(),
+                url = serverConfig.apiUrl(serverConfig.POST_API, urlEnd),
+                config = {withCredentials: true};
+
+            $http.post(url, data, config)
+                .then(
+                    function (response) {
+                        deferred.resolve(response);
+                    },
+                    function (error) {
+                        deferred.resolve(error);
+                    }
+                );
+            return deferred.promise;
+        }
+
+        obj.register = function (username, data) {
+            return doPost(data, username);
+        };
+
+        return obj;
+    }
+}());
 /**
  *  Copyright (C) 2014 3D Repo Ltd
  *
@@ -15327,7 +15862,9 @@ var Oculus = {};
     angular.module("3drepo")
         .factory("UtilsService", UtilsService);
 
-    function UtilsService() {
+    UtilsService.$inject = ["$http", "$q", "serverConfig"];
+
+    function UtilsService($http, $q, serverConfig) {
         var obj = {};
 
         obj.formatTimestamp = function (timestamp) {
@@ -15353,6 +15890,49 @@ var Oculus = {};
                 return (pos ? separator : '') + letter.toLowerCase();
             });
         };
+
+        /**
+         * Handle GET requests
+         * 
+         * @param url
+         * @returns {*|promise}
+         */
+        obj.doGet = function (url) {
+            var deferred = $q.defer(),
+                urlUse = serverConfig.apiUrl(serverConfig.GET_API, url);
+
+            $http.get(urlUse).then(
+                function (response) {
+                    deferred.resolve(response);
+                },
+                function (response) {
+                    deferred.resolve(response);
+                });
+            return deferred.promise;
+        };
+
+        /**
+         * Handle POST requests
+         * @param data
+         * @param url
+         * @returns {*}
+         */
+        obj.doPost = function (data, url) {
+            var deferred = $q.defer(),
+                urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
+                config = {withCredentials: true};
+
+            $http.post(urlUse, data, config)
+                .then(
+                    function (response) {
+                        deferred.resolve(response);
+                    },
+                    function (error) {
+                        deferred.resolve(error);
+                    }
+                );
+            return deferred.promise;
+        }
 
         return obj;
     }

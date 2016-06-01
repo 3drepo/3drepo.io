@@ -26,6 +26,7 @@ var schema = mongoose.Schema({
 	desc: String,
 	type: String,
 	status: {type: String, default: 'ok'},
+	errorReason: Object,
 	permissions: [Number],
 	properties: {}, // TO-DO: ask tim/carmen for full properties and update this schema
 	info: mongoose.Schema({
@@ -41,6 +42,8 @@ var schema = mongoose.Schema({
 });
 
 schema.statics.mapTilesProp = ['lat', 'lon', 'width', 'height'];
+
+
 schema.methods.updateMapTileCoors = function(updateObj){
 	'use strict';
 

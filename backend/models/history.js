@@ -63,6 +63,18 @@ historySchema.statics.findByUID = function(dbColOptions, revId){
 	
 };
 
+// add an item to current
+historySchema.methods.addToCurrent = function(id) {
+	this.current.push(id);
+};
+
+// remove an item from current
+historySchema.methods.removeFromCurrent = function(id) {
+	this.current.remove(id);
+};
+
+//
+
 var History = ModelFactory.createClass(
 	'History', 
 	historySchema, 

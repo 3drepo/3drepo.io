@@ -32,9 +32,9 @@
 		};
 	}
 
-	LoginCtrl.$inject = ["$scope", "$mdDialog", "$location", "Auth", "EventService", "serverConfig", "LoginService"];
+	LoginCtrl.$inject = ["$scope", "$mdDialog", "$location", "Auth", "EventService", "serverConfig"];
 
-	function LoginCtrl($scope, $mdDialog, $location, Auth, EventService, serverConfig, LoginService) {
+	function LoginCtrl($scope, $mdDialog, $location, Auth, EventService, serverConfig) {
 		var vm = this,
 			enterKey = 13,
 			promise;
@@ -113,7 +113,6 @@
 		};
 
 		vm.showTC = function () {
-			
 			$mdDialog.show({
 				controller: tcDialogController,
 				templateUrl: "tcDialog.html",
@@ -127,8 +126,8 @@
 			});
 		};
 
-		vm.forgotPassword = function () {
-			$location.path("/passwordForgot", "_self");
+		vm.showPage = function (page) {
+			$location.path("/" + page, "_self");
 		};
 
 		/*
@@ -184,7 +183,7 @@
 					promise = LoginService.register(vm.newUser.username, data);
 					promise.then(function (response) {
 						if (response.status === 200) {
-							$location.path("/registerRequest", "_self");
+							vm.showPage("registerRequest");
 						}
 						else if (response.data.value === 62) {
 							vm.registerErrorMessage = "Prove you're not a robot";

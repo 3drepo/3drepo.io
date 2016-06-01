@@ -58,42 +58,27 @@
 		}
 
 		/**
-		 * Get account data
+		 * Handle PUT requests
+		 * @param data
+		 * @param urlEnd
+		 * @returns {*}
 		 */
-		obj.getData = function (username) {
-			deferred = $q.defer();
+		function doPut(data, urlEnd) {
+			var deferred = $q.defer(),
+				url = serverConfig.apiUrl(serverConfig.POST_API, urlEnd),
+				config = {withCredentials: true};
 
-			var accountData = {};
-
-			$http.get(serverConfig.apiUrl(serverConfig.GET_API, username + ".json"))
-				.then(function (response) {
-					var i, length,
-						project, projectsGrouped,
-						data;
-
-					// Groups projects under accounts
-					projectsGrouped = {};
-					for (i = 0, length = response.data.projects.length; i < length; i += 1) {
-						project = response.data.projects[i];
-						if (!(project.account in projectsGrouped)) {
-							projectsGrouped[project.account] = [];
-						}
-						data = {
-							name: project.project,
-							timestamp: (project.timestamp !== null) ? UtilsService.formatTimestamp(project.timestamp) : ""
-						};
-						projectsGrouped[project.account].push(data);
+			$http.put(url, data, config)
+				.then(
+					function (response) {
+						deferred.resolve(response);
+					},
+					function (error) {
+						deferred.resolve(error);
 					}
-
-					accountData = response.data;
-					accountData.projectsGrouped = projectsGrouped;
-
-					accountData.avatarURL = serverConfig.apiUrl(serverConfig.GET_API, username + ".jpg");
-					deferred.resolve(accountData);
-				});
-
+				);
 			return deferred.promise;
-		};
+		}
 
 		/**
 		 * Update the user info
@@ -103,14 +88,7 @@
 		 * @returns {*}
 		 */
 		obj.updateInfo = function (username, info) {
-			deferred = $q.defer();
-			$http.post(serverConfig.apiUrl(serverConfig.POST_API, username), info)
-				.then(function (response) {
-					console.log(response);
-					deferred.resolve(response);
-				});
-
-			return deferred.promise;
+			return doPut(info, username);
 		};
 
 		/**
@@ -121,14 +99,7 @@
 		 * @returns {*}
 		 */
 		obj.updatePassword = function (username, passwords) {
-			deferred = $q.defer();
-			$http.post(serverConfig.apiUrl(serverConfig.POST_API, username), passwords)
-				.then(function (response) {
-					console.log(response);
-					deferred.resolve(response);
-				});
-
-			return deferred.promise;
+			return doPut(passwords, username);
 		};
 
 		obj.getProjectsBid4FreeStatus = function (username) {
@@ -154,11 +125,62 @@
 			return doPost(data, projectData.account + "/" + projectData.name);
 		};
 
+		/**
+		 * Upload file/model to database
+		 *
+		 * @param projectData
+		 * @returns {*|promise}
+		 */
 		obj.uploadModel = function (projectData) {
-			console.log(projectData);
 			var data = new FormData();
 			data.append("file", projectData.uploadFile);
 			return doPost(data, projectData.account + "/" + projectData.project + "/upload", {'Content-Type': undefined});
+		};
+
+		/**
+		 * Get upload status
+		 *
+		 * @param projectData
+		 * @returns {*|promise}
+		 */
+		obj.uploadStatus = function (projectData) {
+			return UtilsService.doGet(projectData.account + "/" + projectData.project + ".json");
+		};
+
+		/**
+		 * Create a new database
+		 *
+		 * @param account
+		 * @param databaseName
+		 * @returns {*|promise}
+		 */
+		obj.newDatabase = function (account, databaseName) {
+			var data = {
+				database: databaseName,
+				plan: "THE-100-QUID-PLAN"
+			};
+			return doPost(data, account + "/database");
+		};
+
+		/**
+		 * Create a new subscription
+		 *
+		 * @param account
+		 * @param data
+		 * @returns {*|promise}
+		 */
+		obj.newSubscription = function (account, data) {
+			return doPost(data, account + "/subscriptions");
+		};
+
+		/**
+		 * Get user info
+		 *
+		 * @param username
+		 * @returns {*|promise}
+		 */
+		obj.getUserInfo = function (username) {
+			return UtilsService.doGet(username + ".json");
 		};
 
 		return obj;

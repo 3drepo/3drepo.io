@@ -1,12 +1,28 @@
-div(layout="column" layout-align="start center" flex)
-	div(layout="row" flex)
+div(layout="column", layout-align="start center", flex, layout-fill)
+	div(layout="row", flex)
 		label#clipAxislabel(flex="20") Axis:
-		md-radio-group(ng-model="vm.selectedAxis" flex="75" layout="row")
+		md-radio-group(ng-model="vm.selectedAxis", flex="75" ,layout="row")
 			md-radio-button(ng-repeat="axis in vm.axes", value="{{axis}}", ng-disabled="!vm.visible") {{axis}}
 
-	.clipSlider
-		div(layout="row" layout-align="start center")
-			md-slider(flex ng-model="vm.sliderPosition" step="{{vm.sliderStep}}" min="{{vm.sliderMin}}" max="{{vm.sliderMax}}" aria-label="Position" ng-disabled="!vm.visible")
-			div
-				input(flextype="number" ng-model="vm.sliderPosition" step="{{vm.sliderStep}}" min="{{vm.sliderMin}}" max="{{vm.sliderMax}}" ng-disabled="!vm.visible")
-				| &nbsp;%
+	.clipSlider(flex)
+		div(layout="column")
+			div(layout="row", layout-align="center center", flex="100")
+				md-slider(
+					flex="80"
+					ng-model="vm.sliderPosition"
+					step="{{vm.sliderStep}}"
+					min="{{vm.sliderMin}}"
+					max="{{vm.sliderMax}}"
+					aria-label="Position"
+					ng-disabled="!vm.visible"
+				)
+				div(flex, layout="row")
+					input(
+						flextype="number"
+						ng-model="vm.sliderPosition"
+						step="{{vm.sliderStep}}"
+						min="{{vm.sliderMin}}"
+						max="{{vm.sliderMax}}"
+						ng-disabled="!vm.visible"
+					)
+					| &nbsp;%

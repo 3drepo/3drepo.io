@@ -20,34 +20,18 @@ account-dir #noAvatarIcon md-icon {
   height: 100px;
 }
 
-account-dir #userinfo {
-  border: solid 1px #C5CAE9;
-  border-top: none;
-  padding: 20px;
-}
-account-dir #userinfo p {
-  font-size: 15px;
-  margin: 5px 0;
-  color: rgba(0,0,0,0.7);
-}
-
 account-dir .dataContainer {
   border: solid 1px rgba(0,0,0,0.2);
   margin-top: 20px;
 }
 
-account-dir md-tabs-canvas {
-  background: #E8EAF6;
-}
-
-/* This access the div under the md-tab-content */
-account-dir #account md-tab-content div:first-child {
-  height: calc(100% - 20px);
+account-dir #account #accountItem {
+  width: 44%;
 }
 
 /** Account Projects **************************************************************************************************/
 account-projects #accountList {
-  max-height: calc(100vh - 200px);
+  max-height: calc(100vh - 180px);
   overflow: auto;
 }
 
@@ -83,7 +67,8 @@ account-projects .projects p {
   margin: 0;
 }
 
-account-projects #fileUploader {
+account-projects #existingProjectFileUploader,
+account-projects #newProjectFileUploader {
   width: 0;
   height: 0;
   opacity: 0;
@@ -94,10 +79,10 @@ account-projects #fileUploader {
 
 account-projects .accountRight,
 account-projects .projectRight {
-  margin-right: 55px !important;
+  margin-right: 10px !important;
 }
 
-account-projects #newProjectButton {
+account-projects #newDatabaseButton {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -114,25 +99,56 @@ account-projects md-toolbar {
   min-height: 40px;
 }
 
-/** Account Profile ***************************************************************************************************/
-account-profile {
-  padding-left: 40px;
+account-projects .cardInfo md-progress-circular {
+  margin-left: 5px;
 }
 
-account-profile .dataContainer {
+account-projects .projectUploadInfo {
+  margin-right: 20px;
+  width: 15px;
+  height: 15px;
+}
+
+account-projects .projectRight .projectUploaded {
+  margin-top: -10px !important;
+  color: rgba(0,0,0,0.5);
+}
+
+/** Account Profile ***************************************************************************************************/
+account-profile .profile {
+  max-height: calc(100vh - 180px);
+  overflow: auto;
   padding: 10px;
 }
 
-account-profile md-input-container {
+account-profile #profileDivider {
+  display: block;
+  background: rgba(0,0,0,0.2);
+  width: 1px;
+  height: 380px;
+}
+
+/** Account Info ******************************************************************************************************/
+account-info {
+  margin-left: 70px;
+  width: 400px;
+  margin-right: 60px;
+}
+
+account-info .dataContainer {
+  padding: 10px;
+}
+
+account-info md-input-container {
   margin: 10px 0;
 }
-account-profile md-input-container input,
-account-profile md-input-container label {
+account-info md-input-container input,
+account-info md-input-container label {
   font-size: initial;
   color: rgba(0,0,0,0.7) !important;
 }
 
-account-profile p {
+account-info p {
   font-size: 14px;
   color: rgba(0,0,0,0.6);
 }
@@ -156,7 +172,7 @@ logout md-icon {
   outline: none;
 }
 
-/** Account Menu *****************************************************************************************************/
+/** Account Menu ******************************************************************************************************/
 account-menu {
   position: absolute;
   top: 0;
@@ -174,6 +190,9 @@ account-menu md-icon {
 #accountMenuContent {
   border-radius: 4px;
 }
+#accountMenuContent md-menu-item > .md-button {
+  display: block;
+}
 
 /** New Project Dialog ************************************************************************************************/
 .newProjectDialog {
@@ -184,4 +203,20 @@ account-menu md-icon {
 
 .newProjectDialog #newProjectIcon {
   margin-right: 10px;
+}
+
+/** New Database Dialog ***********************************************************************************************/
+.newDatabaseDialog {
+  min-width: 350px;
+  min-height: 250px;
+  overflow: hidden;
+}
+
+.newDatabaseDialog #newProjectIcon {
+  margin-right: 10px;
+}
+
+.newDatabaseDialog .databaseDialogInfo {
+  font-weight: normal;
+  color: rgba(0,0,0,0.7);
 }

@@ -1,24 +1,34 @@
-input(type="file", id="fileUploader")
+input#existingProjectFileUploader(type="file")
+input#newProjectFileUploader(type="file")
 .homeUserContent
 	md-content.md-whiteframe-1dp(aria-label="Projects", flex)
 		md-toolbar
 			.md-toolbar-tools
 				h2 Repos
 				span(flex)
+				md-menu(md-position-mode="target-right target", md-offset="5 10")
+					md-button.md-icon-button(aria-label="More", ng-click="$mdOpenMenu($event)")
+						md-icon.angular-material-icons(md-menu-origin) more_vert
+					md-menu-content(width="3")
+						md-menu-item
+							md-button(ng-click="vm.newDatabase($event)")
+								p(flex) Add database
 
 		md-list#accountList(flex, ng-if="vm.projectsExist")
-			.accounts(ng-repeat="account in vm.accounts", flex)
+			// Accounts
+			div(ng-repeat="account in vm.accounts", flex)
 				div(layout="row", layout-align="start center")
 					md-list-item(flex="100", layout-fill)
 						.account(ng-click="vm.toggleProjectsList($index)", layout="row", layout-align="start center", md-ink-ripple, layout-fill)
 							md-button.md-icon-button(aria-label="Folder")
 								md-icon.angular-material-icons {{account.showProjectsIcon}}
-							p {{account.name}}
+							p {{account.account}}
 					spen(flex)
 					.accountRight
 						md-button.md-icon-button(aria-label="New project", ng-click="vm.newProject($event)")
 							md-icon.angular-material-icons.md-accent playlist_add
 
+				// Projects
 				md-list.projects(ng-if="account.showProjects")
 					div(layout="row", ng-repeat="project in account.projects", layout-align="start center", flex)
 						md-list-item(flex, layout-fill)
@@ -27,19 +37,20 @@ input(type="file", id="fileUploader")
 									md-icon.angular-material-icons dashboard
 								p.projectName(flex) {{project.name}}
 						.projectRight(layout="row", layout-align="start center")
+							.projectUploadInfo(ng-if="project.uploading")
+								md-progress-circular.projectUploading(md-mode="indeterminate", md-diameter="15", ng-if="vm.showUploading")
+								md-icon.angular-material-icons.projectUploaded(ng-if="vm.showUploaded") {{vm.uploadedIcon}}
 							p.projectTimestamp {{project.timestamp}}
 							//md-button.md-accent(ng-click="vm.b4f(account.name, project.name)" ng-if="project.bif4FreeEnabled") B4F
 							md-button.md-accent.md-icon-button(
 								aria-label="Upload"
-								ng-click="vm.uploadModel(project.name)"
+								ng-click="vm.uploadModel(project)"
 								ng-if="project.canUpload")
 								md-icon.angular-material-icons cloud_upload
 
 				md-divider
 
 		div(ng-if="!vm.projectsExist")
-			.cardInfo
-				p There currently no projects
-
-		md-button.md-accent.md-fab.md-mini#newProjectButton(aria-label="New Project", ng-click="vm.newProject($event)")
-			md-icon.angular-material-icons add
+			.cardInfo(layout="row", layout-align="center center")
+				p {{vm.info}}
+				md-progress-circular(md-diameter="20px", ng-if="vm.showProgress", md-mode="indeterminate")

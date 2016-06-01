@@ -72,9 +72,6 @@
 		vm.issuesToShow = [];
 		vm.showProgress = true;
 		vm.progressInfo = "Loading issues";
-		vm.showIssuesInfo = false;
-		vm.showIssueList = false;
-		vm.showIssue = false;
 		vm.availableRoles = null;
 		vm.projectUserRoles = [];
 		vm.selectedIssue = null;
@@ -362,6 +359,15 @@
 							vm.issuesToShow.splice(i, 1);
 						}
 					}
+
+					// Setup what to show
+					if (vm.issuesToShow.length > 0) {
+						vm.toShow = "showIssues";
+					}
+					else {
+						vm.toShow = "showInfo";
+						vm.issuesInfo = "There are currently no open issues";
+					}
 				}
 			}
 		}
@@ -569,7 +575,10 @@
 				});
 			}
 
-			EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, issue: vm.selectedIssue});
+			// Wait for camera to stop before showing a scribble
+			$timeout(function () {
+				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, issue: vm.selectedIssue});
+			}, 1100);
 		};
 
 		/**

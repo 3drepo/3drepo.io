@@ -23,21 +23,18 @@ var utils = require('../utils');
 var middlewares = require('./middlewares');
 
 var ProjectPackage = require('../models/projectPackage');
-var dbInterface = require("../db/db_interface.js");
 
 var responseCodes = require('../response_codes');
-// var Bid = require('../models/bid');
 
-// var dbInterface     = require("../db_interface.js");
 var C               = require("../constants");
 var multiparty = require('multiparty');
+var User = require('../models/user');
 
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
 };
 
-//Every API listed below has to log in to access
-router.use(middlewares.loggedIn);
+
 // Create a package
 router.post('/packages.json', middlewares.isMainContractor,  createPackage);
 // Update a package
@@ -271,7 +268,15 @@ function listPackages(req, res, next){
 
 	} else if(req.role === C.REPO_ROLE_SUBCONTRACTOR) {
 		// Sub contractor list invited packages
-		dbInterface(req[C.REQ_REPO].logger).getUserBidInfo(req.session[C.REPO_SESSION_USER].username).then(bids => {
+
+
+		User.findByUserName(req.session.user.username).then(user => {
+
+			if(!user){
+				return Promise.reject({resCode: responseCodes.USER_NOT_FOUND});
+			}
+
+			let bids = user.customData.bids;
 
 			let filteredBids = _.filter(bids, { account : req.params.account, project: req.params.project});
 			let packages  = _.map(filteredBids, 'package');

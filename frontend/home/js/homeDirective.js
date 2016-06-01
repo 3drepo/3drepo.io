@@ -76,9 +76,9 @@
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "Auth", "StateManager", "EventService", "UtilsService"];
+    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "Auth", "StateManager", "EventService", "UtilsService"];
 
-    function HomeCtrl($scope, $element, $timeout, $compile, Auth, StateManager, EventService, UtilsService) {
+    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, Auth, StateManager, EventService, UtilsService) {
         var vm = this,
 			goToUserPage,
 			homeLoggedOut,
@@ -86,7 +86,15 @@
 			element,
 			state;
 
+		/*
+		 * Init
+		 */
 		vm.state = StateManager.state;
+		vm.legalDisplays = [
+			{title: "Terms & Conditions", value: "termsAndConditions"},
+			{title: "Privacy", value: "privacy"},
+			{title: "Cookies", value: "cookies"}
+		];
 
 		/*
 		 * Watch the state to handle moving to and from the login page
@@ -163,6 +171,26 @@
             Auth.logout();
         };
 
+		/**
+		 * 
+		 * 
+		 * @param event
+		 * @param display
+		 */
+		vm.display = function (event, display) {
+			vm.legalTitle = display.title;
+			$mdDialog.show({
+				templateUrl: "legalDialog.html",
+				parent: angular.element(document.body),
+				targetEvent: event,
+				clickOutsideToClose:true,
+				fullscreen: true,
+				scope: $scope,
+				preserveScope: true,
+				onRemoving: removeDialog
+			});
+		};
+
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if (angular.isDefined(event) && angular.isDefined(event.type)) {
 				if (event.type === EventService.EVENT.USER_LOGGED_IN)
@@ -183,6 +211,20 @@
 				}
 			}
 		});
+
+		/**
+		 * Close the dialog
+		 */
+		$scope.closeDialog = function() {
+			$mdDialog.cancel();
+		};
+
+		/**
+		 * Close the dialog by not clicking the close button
+		 */
+		function removeDialog () {
+			$scope.closeDialog();
+		}
     }
 }());
 

@@ -19,11 +19,11 @@
     "use strict";
 
     angular.module("3drepo")
-        .factory("RegisterVerifyService", RegisterVerifyService);
+        .factory("SignUpFormService", SignUpFormService);
 
-    RegisterVerifyService.$inject = ["$http", "$q", "serverConfig"];
+    SignUpFormService.$inject = ["$http", "$q", "serverConfig"];
 
-    function RegisterVerifyService($http, $q, serverConfig) {
+    function SignUpFormService($http, $q, serverConfig) {
         var obj = {};
 
         /**
@@ -49,8 +49,8 @@
             return deferred.promise;
         }
 
-        obj.verify = function (username, data) {
-            return doPost(data, username + "/verify");
+        obj.register = function (username, data) {
+            return doPost(data, username);
         };
 
         return obj;

@@ -22,9 +22,11 @@ var ModelFactory = require('../factory/modelFactory');
 var Revision = require('../revision');
 var utils = require("../../utils");
 var responseCodes = require('../../response_codes.js');
+var mongoose = require('mongoose');
+var _ = require('lodash');
 
-stringToUUID = utils.stringToUUID;
-uuidToString = utils.uuidToString;
+var stringToUUID = utils.stringToUUID;
+var uuidToString = utils.uuidToString;
 
 var attrs = {
 	_id: Buffer,
@@ -70,6 +72,29 @@ statics.findStashByFilename = function(dbCol, format, filename){
 			});
 
 		}
+	});
+
+};
+
+statics.getSharedId = function(dbCol, uid){
+	'use strict';
+
+	let projection = { shared_id: 1 };
+
+	return ModelFactory.db.db(dbCol.account).collection(`${dbCol.project}.stash.3drepo`).find({_id: stringToUUID(uid)}).limit(1).next().then(obj => {
+		if(!obj) {
+			return this.findById(dbCol, stringToUUID(uid), projection);
+		}
+
+		//from3DRepoStash = true;
+		obj.toObject = () => obj;
+		return Promise.resolve(obj);
+
+	}).then(obj => {
+
+		obj = obj && obj.toObject();
+		return Promise.resolve(obj && uuidToString(obj.shared_id));
+
 	});
 
 };
@@ -209,5 +234,22 @@ statics.findByRevision = function(dbCol, rid, sid, options){
 	// }
 };
 
+// genericObject for anything in .scene
+var Schema = mongoose.Schema;
 
-module.exports = {attrs, statics, methods};
+var genericObjectSchema = Schema(
+	_.extend({}, attrs)
+);
+
+_.extend(genericObjectSchema.statics, statics);
+_.extend(genericObjectSchema.methods, methods);
+
+var GenericObject = ModelFactory.createClass(
+	'GenericObject', 
+	genericObjectSchema, 
+	arg => { 
+		return `${arg.project}.scene`;
+	}
+);
+
+module.exports = {attrs, statics, methods, GenericObject};
