@@ -231,15 +231,21 @@ function uploadProject(req, res, next){
 	//check space
 	function fileFilter(req, file, cb){
 
-		console.log(file);
-
 		let acceptedFormat = ['x','obj','3ds','md3','md2','ply','mdl','ase','hmp','smd','mdc','md5','stl','lxo','nff','raw','off','ac','bvh','irrmesh','irr','q3d','q3s','b3d','dae','ter','csm','3d','lws','xml','ogex','ms3d','cob','scn','blend','pk3','ndo','ifc','xgl','zgl','fbx','assbin'];
 
-		let format = file.originalname.split('.').splice(-1)[0];
+		let format = file.originalname.split('.');
+		format = format.length <= 1 ? '' : format.splice(-1)[0];
+
 		let size = estimateImportedSize(format, parseInt(req.headers['content-length']));
+
+		console.log('size', size);
 
 		if(acceptedFormat.indexOf(format) === -1){
 			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
+		}
+
+		if(size > config.uploadSizeLimit){
+			return cb({ resCode: responseCodes.SIZE_LIMIT });
 		}
 
 		middlewares.freeSpace(req.params.account).then(space => {
@@ -248,7 +254,7 @@ function uploadProject(req, res, next){
 			console.log('space left', space);
 
 			if(size > space){
-				cb({ resCode: responseCodes.SIZE_LIMIT });
+				cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
 			} else {
 				cb(null, true);
 			}
@@ -260,7 +266,7 @@ function uploadProject(req, res, next){
 
 		var upload = multer({ 
 			dest: config.cn_queue.upload_dir,
-			fileFilter: fileFilter
+			fileFilter: fileFilter,
 		});
 
 		upload.single("file")(req, res, function (err) {
