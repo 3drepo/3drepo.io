@@ -25,6 +25,10 @@ function createAndAssignRole(project, account, username, desc, type) {
 	'use strict';
 
 
+	if(!project.match(/^[a-zA-Z0-9_-]{3,20}$/)){
+		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_NAME });
+	}
+
 	return Role.findByRoleID(`${account}.${project}.viewer`).then(role =>{
 
 		if(role){
