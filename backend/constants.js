@@ -201,3 +201,24 @@ define("MONGO_AUTH_FAILED", 18);
 //-----------------------------------------------------------------------------
 define("REPO_ROLE_SUBCONTRACTOR", "SubContractor");
 define("REPO_ROLE_MAINCONTRACTOR", "MainContractor");
+
+
+//-----------------------------------------------------------------------------
+//
+// Blacklist
+//
+//-----------------------------------------------------------------------------
+define("REPO_BLACKLIST_USERNAME", [
+	'payment',
+	'test',
+	'os'
+]);
+
+define("REPO_BLACKLIST_PROJECT", [
+	'database',
+	'verify',
+	'forgot-password',
+	'password',
+	'database',
+	'subscriptions'
+]);

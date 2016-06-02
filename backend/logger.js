@@ -23,6 +23,7 @@ var C        = require("./constants");
 // Custom logging levels for logger
 var myCustomLevels = {
     levels: {
+        nothing: -1,
 		error: 0,
 		warn: 1,
 		info: 2,

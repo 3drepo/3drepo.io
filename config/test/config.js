@@ -59,7 +59,7 @@ module.exports = {
 	js_debug_level: 'debug',
 	logfile: {
 		filename: './3drepo.log',
-		console_level: 'error',
+		console_level: 'nothing',
 		file_level: 'debug'
 	},
 	db: {
@@ -97,6 +97,9 @@ module.exports = {
 		emailVerify: 336,
 		forgotPassword: 24
 	},
-	crossOrigin: true,
+	auth: {
+		captcha: false,
+		register: true
+	},	crossOrigin: true,
 	test_helper_api: false
 }

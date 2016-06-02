@@ -77,12 +77,12 @@
 	function login(req, res, next){
 		let responsePlace = utils.APIInfo(req);
 
-		req[C.REQ_REPO].logger.logInfo("Authenticating user", req.body.username);
+		req[C.REQ_REPO].logger.logInfo("Authenticating user", { username: req.body.username});
 
 
 		User.authenticate(req[C.REQ_REPO].logger, req.body.username, req.body.password).then(user => {
 
-			req[C.REQ_REPO].logger.logInfo("User is logged in", req.body.username);
+			req[C.REQ_REPO].logger.logInfo("User is logged in", { username: req.body.username});
 
 			expireSession(req);
 			createSession(responsePlace, req, res, next, {username: user.user, roles: user.roles});
@@ -188,13 +188,13 @@
 				
 			}).catch( err => {
 				// catch email error instead of returning to client
-				systemLogger.logDebug(`Email error - ${err.message}`, req);
-				return Promise.reject(responseCodes.PROCESS_ERROR('Internal Email Error'));
+				systemLogger.logError(`Email error - ${err.message}`);
+				return Promise.resolve(err);
 			});
 
 		}).then(emailRes => {
 
-			systemLogger.logInfo('Email info - ' + JSON.stringify(emailRes), req);
+			systemLogger.logInfo('Email info - ' + JSON.stringify(emailRes));
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
@@ -232,13 +232,13 @@
 				username: req.params[C.REPO_REST_API_ACCOUNT]
 			}).catch( err => {
 				// catch email error instead of returning to client
-				systemLogger.logDebug(`Email error - ${err.message}`, req);
+				systemLogger.logDebug(`Email error - ${err.message}`);
 				return Promise.reject(responseCodes.PROCESS_ERROR('Internal Email Error'));
 			});
 		
 		}).then(emailRes => {
 			
-			systemLogger.logInfo('Email info - ' + JSON.stringify(emailRes), req);
+			systemLogger.logInfo('Email info - ' + JSON.stringify(emailRes));
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
 		}).catch(err => {
 			console.log(err);

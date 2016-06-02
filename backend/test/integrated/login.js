@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  *  Copyright (C) 2014 3D Repo Ltd
  *
@@ -15,29 +17,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-'use strict';
+let request = require('supertest');
 let expect = require('chai').expect;
-var app = require("../../services/api.js").createApp(
+let app = require("../../services/api.js").createApp(
 	{ session: require('express-session')({ secret: 'testing'}) }
 );
 
-var server = app.listen(8080, function () {
-	console.log('Example app listening on port 8080!');
-});
 
-var request = require('supertest');
+describe('Login', function () {
 
-describe('Auth', function () {
+	let server;
 
+	before(function(done){
+		server = app.listen(8080, function () {
+			console.log('API test server is listening on port 8080!');
+			done();
+		});
+	});
 
-	it('/login return 200 and account name on success', function (done) {
+	after(function(done){
+		server.close(function(){
+			console.log('API test server is closed');
+			done();
+		})
+	});
+
+	it('with correct password and username should login successfully', function (done) {
 		request(server)
 		.post('/login')
 		.send({ username: 'testing', password: 'testing' })
 		.expect(200, function(err, res){
 			expect(res.body.username).to.equal('testing');
-			done();
+			done(err);
 		});
 	});
 

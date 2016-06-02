@@ -2,17 +2,11 @@
 
 let log_iface = require("../backend/logger.js");
 let systemLogger = log_iface.systemLogger;
-var config = require("../backend/config.js");
+let config = require("../backend/config.js");
 let DB = require('../backend/db/db')(systemLogger);
 let User = require('../backend/models/user');
-
-let ghosts = [
-	'login',
-	'logout',
-	'payment',
-	'test',
-	'os'
-];
+let C = require("../backend/constants");
+let ghosts = C.REPO_BLACKLIST_USERNAME;
 
 DB.getDB('default').then( db => {
 	// set db to singleton modelFactory class

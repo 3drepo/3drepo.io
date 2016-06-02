@@ -196,6 +196,11 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	let adminDB = ModelFactory.db.admin();
 	
 	let cleanedCustomData = {};
+	
+	if(!customData.email || !customData.email.match(/^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/)){
+		return Promise.reject({ resCode: responseCodes.SIGN_UP_INVALID_EMAIL });
+	}
+
 	['firstName', 'lastName', 'email'].forEach(key => {
 		if (customData[key]){
 			cleanedCustomData[key] = customData[key];
