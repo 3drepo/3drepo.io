@@ -21,7 +21,7 @@ before_install:
 install: npm install
 script:
     - npm test
-    - npm test-int
+    - npm run test-int
 notifications:
     email: 
         recipients:
