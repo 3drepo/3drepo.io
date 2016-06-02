@@ -221,6 +221,7 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 		resCode = responseCodes.PROCESS_ERROR(resCode);
 	}
 
+	let length;
 	if (resCode.value) // Prepare error response
 	{
 		let responseObject = _.extend({}, extraInfo, {
@@ -240,13 +241,13 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 		// responseObject.status  = resCode.status;
 		// responseObject.message = resCode.message;
 
-		req[C.REQ_REPO].logger.logError(JSON.stringify(responseObject), req);
+		length = JSON.stringify(responseObject).length;
+		req[C.REQ_REPO].logger.logError(JSON.stringify(responseObject),  { httpCode: resCode.status, contentLength: length });
 
 		res.status(resCode.status).send(responseObject);
 
 	} else {
 
-		var length;
 		if(Buffer.isBuffer(extraInfo)){
 
 			res.status(resCode.status);
@@ -271,7 +272,7 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 		}
 
 		// log bandwidth and http status code
-		 req[C.REQ_REPO].logger.logInfo('Responded with ' + resCode.status, { httpCode: resCode.status, contentLength: length });
+		req[C.REQ_REPO].logger.logInfo('Responded with ' + resCode.status, { httpCode: resCode.status, contentLength: length });
 	}
 
 	//next();

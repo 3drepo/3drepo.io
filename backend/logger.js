@@ -106,10 +106,10 @@ repoLogger.prototype.logInfo = function(msg, meta) {
 	this.logMessage("info", msg, meta);
 };
 
-repoLogger.prototype.logError = function(msg) {
+repoLogger.prototype.logError = function(msg, meta) {
 	"use strict";
 
-    this.logMessage("error", msg);
+    this.logMessage("error", msg, meta);
 };
 
 repoLogger.prototype.logDebug = function(msg) {
