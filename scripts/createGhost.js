@@ -26,10 +26,10 @@ DB.getDB('default').then( db => {
 
 					console.log(`Ghost user ${username} not found. Creating...`);
 
-					return User.createUser(systemLogger, username, '', {}, -1).then(() => {
+					return User.createUser(systemLogger, username, '', { email: 'support@3drepo.org' }, -1).then(() => {
 						console.log(`Ghost user ${username} created.`);
-					}).catch(() => {
-						console.log(`Failed to create ghost user ${username}`);
+					}).catch(err => {
+						console.log(`Failed to create ghost user ${username}`, err);
 					});
 				}
 				
