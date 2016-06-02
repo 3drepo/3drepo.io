@@ -45,7 +45,7 @@ describe('Sign up', function(){
 		})
 	});
 
-	let username = 'helloworld';
+	let username = 'signup_helloworld';
 	let password = 'password';
 	let email = 'test3drepo@mailinator.com';
 
@@ -72,7 +72,6 @@ describe('Sign up', function(){
 	it('should have user created in database after sign up', function(){
 		// use return for promise function
 		return User.findByUserName(username).then(user => {
-			
 			expect(user).to.not.be.null;
 			expect(user.user).to.equal(username);
 		});
@@ -113,7 +112,7 @@ describe('Sign up', function(){
 
 	it('with invalid email address - abc@b should fail', function(done){
 			request(server)
-			.post('/somebaduser')
+			.post('/signup_somebaduser')
 			.send({
 
 				"email": "abc@b",
@@ -128,7 +127,7 @@ describe('Sign up', function(){
 
 	it('with invalid email address - abc should fail', function(done){
 			request(server)
-			.post('/somebaduser')
+			.post('/signup_somebaduser')
 			.send({
 
 				"email": "abc",
@@ -143,7 +142,7 @@ describe('Sign up', function(){
 
 	it('without email should fail', function(done){
 			request(server)
-			.post('/somebaduser')
+			.post('/signup_somebaduser')
 			.send({
 
 				"email": "",
@@ -158,7 +157,7 @@ describe('Sign up', function(){
 
 	it('without password should fail', function(done){
 			request(server)
-			.post('/somebaduser')
+			.post('/signup_somebaduser')
 			.send({
 
 				"email": email,

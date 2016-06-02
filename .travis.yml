@@ -21,7 +21,7 @@ before_install:
 install: npm install
 script:
     - npm test
-    - grunt test-integrated
+    - npm test-int
 notifications:
     email: 
         recipients:

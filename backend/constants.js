@@ -211,7 +211,8 @@ define("REPO_ROLE_MAINCONTRACTOR", "MainContractor");
 define("REPO_BLACKLIST_USERNAME", [
 	'payment',
 	'test',
-	'os'
+	'os',
+	'info'
 ]);
 
 define("REPO_BLACKLIST_PROJECT", [

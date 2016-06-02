@@ -79,6 +79,9 @@
 
 		req[C.REQ_REPO].logger.logInfo("Authenticating user", { username: req.body.username});
 
+		if(req.session.user){
+			return responseCodes.respond(responsePlace, req, res, next, responseCodes.ALREADY_LOGGED_IN, responseCodes.ALREADY_LOGGED_IN);
+		}
 
 		User.authenticate(req[C.REQ_REPO].logger, req.body.username, req.body.password).then(user => {
 
@@ -100,7 +103,7 @@
 		}
 	}
 
-	function logout(req, res, next){
+	function logout(req, res, next){{}
 		if(!req.session.user){
 			return responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, {});
 		}
@@ -110,7 +113,6 @@
 		req.session.destroy(function() {
 			req[C.REQ_REPO].logger.logDebug("User has logged out.", req);
 			res.clearCookie("connect.sid", { path: "/" + config.api_server.host_dir });
-
 			responseCodes.respond("Logout POST", req, res, next, responseCodes.OK, {username: username});
 		});
 	}

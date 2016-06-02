@@ -135,6 +135,10 @@ module.exports.createApp = function (serverConfig) {
 	});
 
 	//auth handler
+	app.get('/info', (req, res) => {
+		res.status(200).json({ status: 'OK', version: '?'});
+	});
+
 	app.use('/', require('../routes/auth'));
 	// os api handler
 	app.use('/os',require('../routes/osBuilding'));

@@ -105,7 +105,7 @@ schema.statics.authenticate = function(logger, username, password){
 	let authDB = DB(logger).getAuthDB();
 
 	if(!username || !password){
-		return Promise.reject();
+		return Promise.reject({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
 	}
 
 	return authDB.authenticate(username, password).then(() => {
