@@ -238,7 +238,7 @@ function uploadProject(req, res, next){
 
 		let size = estimateImportedSize(format, parseInt(req.headers['content-length']));
 
-		console.log('size', size);
+		// console.log('size', size);
 
 		if(acceptedFormat.indexOf(format) === -1){
 			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
@@ -250,8 +250,8 @@ function uploadProject(req, res, next){
 
 		middlewares.freeSpace(req.params.account).then(space => {
 
-			console.log('est upload file size', size);
-			console.log('space left', space);
+			// console.log('est upload file size', size);
+			// console.log('space left', space);
 
 			if(size > space){
 				cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
@@ -271,7 +271,7 @@ function uploadProject(req, res, next){
 
 		upload.single("file")(req, res, function (err) {
 			if (err) {
-				return responseCodes.respond(responsePlace, req, res, next, err.resCode || responseCodes.FILE_IMPORT_PROCESS_ERR, {});
+				return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
 			} else {
 
 				let projectSetting;
@@ -333,7 +333,7 @@ function uploadProject(req, res, next){
 
 				}).catch(err => {
 					// import failed for some reason(s)...
-					console.log(err.stack);
+					// console.log(err.stack);
 					//mark project failed
 					if(projectSetting){
 						projectSetting.status = 'failed';
