@@ -23,7 +23,7 @@
 	var C = require("../constants");
 	var middlewares = require("./middlewares");
 	var config = require('../config');
-	var systemLogger    = require("../logger.js").systemLogger;
+	//var systemLogger    = require("../logger.js").systemLogger;
 	var utils = require("../utils");
 	var User = require("../models/user");
 	var Mailer = require("../mailer/mailer");
@@ -60,7 +60,7 @@
 			if(err) {
 				responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {username: user.username});
 			} else {
-				systemLogger.logDebug("Authenticated user and signed token.", req);
+				req[C.REQ_REPO].logger.logDebug("Authenticated user and signed token.");
 
 				req.session[C.REPO_SESSION_USER] = user;
 				req.session.cookie.domain = req.host;
@@ -111,7 +111,7 @@
 		var username = req.session.user.username;
 
 		req.session.destroy(function() {
-			req[C.REQ_REPO].logger.logDebug("User has logged out.", req);
+			req[C.REQ_REPO].logger.logDebug("User has logged out.");
 			res.clearCookie("connect.sid", { path: "/" + config.api_server.host_dir });
 			responseCodes.respond("Logout POST", req, res, next, responseCodes.OK, {username: username});
 		});
@@ -175,7 +175,7 @@
 					lastName: req.body.lastName
 				}, config.tokenExpiry.emailVerify);
 			} else {
-				console.log(resBody);
+				//console.log(resBody);
 				return Promise.reject({ resCode: responseCodes.INVALID_CAPTCHA_RES});
 			}
 
@@ -190,13 +190,13 @@
 				
 			}).catch( err => {
 				// catch email error instead of returning to client
-				systemLogger.logError(`Email error - ${err.message}`);
+				req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
 				return Promise.resolve(err);
 			});
 
 		}).then(emailRes => {
 
-			systemLogger.logInfo('Email info - ' + JSON.stringify(emailRes));
+			req[C.REQ_REPO].logger.logInfo('Email info - ' + JSON.stringify(emailRes));
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
@@ -211,7 +211,7 @@
 
 			//import toy project
 			ProjectHelper.importToyProject(req.params[C.REPO_REST_API_ACCOUNT]).catch(err => {
-				console.log('error', err);
+				req[C.REQ_REPO].logger.logError(JSON.stringify(err));
 			});
 
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
@@ -234,16 +234,15 @@
 				username: req.params[C.REPO_REST_API_ACCOUNT]
 			}).catch( err => {
 				// catch email error instead of returning to client
-				systemLogger.logDebug(`Email error - ${err.message}`);
+				req[C.REQ_REPO].logger.logDebug(`Email error - ${err.message}`);
 				return Promise.reject(responseCodes.PROCESS_ERROR('Internal Email Error'));
 			});
 		
 		}).then(emailRes => {
 			
-			systemLogger.logInfo('Email info - ' + JSON.stringify(emailRes));
+			req[C.REQ_REPO].logger.logInfo('Email info - ' + JSON.stringify(emailRes));
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
 		}).catch(err => {
-			console.log(err);
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || err , err.resCode ? err.resCode : err);
 		});
 	}

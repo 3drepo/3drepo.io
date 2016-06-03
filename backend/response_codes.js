@@ -213,11 +213,11 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 
 		//throw Error("Unspecified error code [" + JSON.stringify(resCode) + " @ " + place + "]");
 		if(resCode && resCode.stack){
-			req[C.REQ_REPO].logger.logError(resCode.stack, req);
+			req[C.REQ_REPO].logger.logError(resCode.stack);
 		} else if (resCode && resCode.message) {
-			req[C.REQ_REPO].logger.logError(resCode.message, req);
+			req[C.REQ_REPO].logger.logError(resCode.message);
 		} else {
-			req[C.REQ_REPO].logger.logError(JSON.stringify(resCode), req);
+			req[C.REQ_REPO].logger.logError(JSON.stringify(resCode));
 		}
 
 		resCode = responseCodes.PROCESS_ERROR(resCode);

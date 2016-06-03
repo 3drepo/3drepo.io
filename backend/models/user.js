@@ -228,9 +228,14 @@ schema.statics.verify = function(username, token, allowRepeatedVerify){
 
 	return this.findByUserName(username).then(user => {
 		
-		var tokenData = user.customData.emailVerifyToken;
+		var tokenData = user && user.customData && user.customData.emailVerifyToken;
 
-		if(!user.customData.inactive && !allowRepeatedVerify){
+		if(!user){
+
+			return Promise.reject({ resCode: responseCodes.TOKEN_INVALID});
+
+		} else if(!user.customData.inactive && !allowRepeatedVerify){
+
 			return Promise.reject({ resCode: responseCodes.ALREADY_VERIFIED});
 
 		} else if(tokenData.token === token && tokenData.expiredAt > new Date()){
