@@ -34,15 +34,14 @@
  */
 
 var hostname   = "example.org";
-var http_port  = 8000;
+var http_port  = 80;
 var https_port = 443;
 
 module.exports = {
 	host: hostname,
 	cookie: {
-		secret: "A secret",
-		parser_secret : "Another secret",
-		maxAge: 3600,
+		secret: "a",
+		parser_secret : "b"
 	},
 	servers: [
 		{

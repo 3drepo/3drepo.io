@@ -20,6 +20,7 @@ var ProjectSetting = require('../projectSetting');
 var User = require('../user');
 var responseCodes = require('../../response_codes');
 var importQueue = require('../../services/queue');
+var C = require('../../constants');
 
 function createAndAssignRole(project, account, username, desc, type) {
 	'use strict';
@@ -27,6 +28,10 @@ function createAndAssignRole(project, account, username, desc, type) {
 
 	if(!project.match(/^[a-zA-Z0-9_-]{3,20}$/)){
 		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_NAME });
+	}
+
+	if(C.REPO_BLACKLIST_PROJECT.indexOf(project) !== -1){
+		return Promise.reject({ resCode: responseCodes.BLACKLISTED_PROJECT_NAME });
 	}
 
 	return Role.findByRoleID(`${account}.${project}.viewer`).then(role =>{
