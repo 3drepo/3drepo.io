@@ -105,7 +105,8 @@ module.exports = {
 		worker_queue: 'jobq',
 		callback_queue: 'callbackq',
 		upload_dir: 'uploads',
-		shared_storage: './'
+		shared_storage: 'uploads'
 	},
+	uploadSizeLimit: 8388608, // 8MB in test enviroment
 	test_helper_api: false
 }

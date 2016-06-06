@@ -223,9 +223,11 @@ function freeSpace(account){
 		let totalSize = 0;
 
 		stats.forEach(stat => {
-			console.log(stat.storageSize);
-			totalSize += stat.storageSize; 
+			totalSize += stat.size; 
 		});
+
+		// console.log(limits.spaceLimit);
+		// console.log(totalSize);
 
 		return Promise.resolve(limits.spaceLimit - totalSize);
 	});

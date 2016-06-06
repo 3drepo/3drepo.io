@@ -238,8 +238,6 @@ function uploadProject(req, res, next){
 
 		let size = estimateImportedSize(format, parseInt(req.headers['content-length']));
 
-		// console.log('size', size);
-
 		if(acceptedFormat.indexOf(format) === -1){
 			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
 		}
@@ -272,6 +270,10 @@ function uploadProject(req, res, next){
 		upload.single("file")(req, res, function (err) {
 			if (err) {
 				return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
+			
+			} else if(!req.file.size){
+				return responseCodes.respond(responsePlace, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
+			
 			} else {
 
 				let projectSetting;

@@ -26,7 +26,7 @@ let log_iface = require("../../logger.js");
 let systemLogger = log_iface.systemLogger;
 let responseCodes = require("../../response_codes.js");
 
-describe('Upload a project', function () {
+describe('Uploading a project', function () {
 	let User = require('../../models/user');
 	let server;
 	let agent;
@@ -93,12 +93,35 @@ describe('Upload a project', function () {
 
 	describe('without quota', function(){
 
-		it('should return error', function(done){
+		it('should return error (no subscriptions)', function(done){
 			agent.post(`/${username}/${project}/upload`)
-			.attach('file', __dirname + '/../../statics/3dmodels/toy.ifc')
+			.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
 			.expect(400, function(err, res){
 				expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT_PAY.value);
 				done(err);
+			});
+		});
+
+		it('should return error (has a subscription but ran out of space)', function(done){
+			//user: testing loaded with a valid subscription and a project with 6MB and subscription limit is 8MB
+			let agent2 = request.agent(server);
+			agent2.post('/login')
+			.send({ username: 'testing', password: 'testing' })
+			.expect(200, function(err, res){
+				expect(res.body.username).to.equal('testing');
+				
+				if(err){
+					return done(err);
+				}
+
+				//create a project
+				agent2.post(`/testing/testproject/upload`)
+				.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
+				.expect(400, function(err, res){
+					expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT_PAY.value);
+					done(err);
+				});
+
 			});
 		});
 
@@ -117,31 +140,79 @@ describe('Upload a project', function () {
 
 		it('should success', function(done){
 			agent.post(`/${username}/${project}/upload`)
-			.attach('file', __dirname + '/../../statics/3dmodels/toy.ifc')
+			.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
 			.expect(200, function(err, res){
-
-				let q = require('../../services/queue');
-				 q.channel.assertQueue(q.workerQName, { durable: true }).then( info => {
-
-				 	// upload api return before insert item to queue
-					setTimeout(function(){
-						//expect 1 message in the worker queue
-						expect(info.messageCount).to.equal(1);
-						done(err);
-					}, 1000);
-
-
-				 }).catch(err => {
-				 	done(err);
-				 });
-
-				
+				done(err);
 			});
 		});
 
-		it('', function(){
+		it('should have one item inserted into the queue', function(done){
+
+			let q = require('../../services/queue');
+
+			// upload api return before insert item to queue so introduce some time lag here
+			setTimeout(function(){
+
+				q.channel.assertQueue(q.workerQName, { durable: true }).then( info => {
+
+					//expect 1 message in the worker queue
+					expect(info.messageCount).to.equal(1);
+					done();
+
+				}).catch(err => {
+					done(err);
+				});
+
+			}, 1000);
+
+		});
+
+		it('but empty file size should fail', function(done){
+
+			agent.post(`/${username}/${project}/upload`)
+			.attach('file', __dirname + '/../../statics/3dmodels/empty.ifc')
+			.expect(400, function(err, res){
+				expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
+				done(err);
+			});
+
+		});
+
+		it('but unaccepted extension should failed', function(done){
+
+			agent.post(`/${username}/${project}/upload`)
+			.attach('file', __dirname + '/../../statics/3dmodels/toy.abc')
+			.expect(400, function(err, res){
+				expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
+				done(err);
+			});
+
+		});
+
+		it('but no extension should failed', function(done){
+
+			agent.post(`/${username}/${project}/upload`)
+			.attach('file', __dirname + '/../../statics/3dmodels/toy')
+			.expect(400, function(err, res){
+				expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
+				done(err);
+			});
+
+		});
+
+		it('but file size exceeded fixed single file size limit should fail', function(done){
+
+			agent.post(`/${username}/${project}/upload`)
+			.attach('file', __dirname + '/../../statics/3dmodels/toy.ifc')
+			.expect(400, function(err, res){
+				expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT.value);
+				done(err);
+			});
 
 		});
 
 	});
+
+
+
 });

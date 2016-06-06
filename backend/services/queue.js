@@ -84,8 +84,8 @@ ImportQueue.prototype.importFile = function(filePath, orgFileName, databaseName,
 
     let corID = uuid.v1();
 
-    console.log(filePath);
-    console.log(orgFileName);
+    //console.log(filePath);
+    //console.log(orgFileName);
 
     return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy).then(newPath => {
     
