@@ -25,7 +25,7 @@ let app = require("../../services/api.js").createApp(
 let log_iface = require("../../logger.js");
 let systemLogger = log_iface.systemLogger;
 let responseCodes = require("../../response_codes.js");
-
+let helpers = require("./helpers");
 
 
 describe('Project', function () {
@@ -36,36 +36,21 @@ describe('Project', function () {
 	let password = 'password';
 	let email = 'test3drepo@mailinator.com';
 	let project = 'project1';
+	let desc = 'desc';
+	let type = 'type';
 
 	before(function(done){
 
 		server = app.listen(8080, function () {
 			console.log('API test server is listening on port 8080!');
 
-			//hack: by starting the server earlier all the mongoose models like User will be connected to db without any configuration
-			request(server).get('/info').end(() => {
-
-				agent = request.agent(server);
-
-				// create a user
-				return User.createUser(systemLogger, username, password, {
-					email: email
-				}, 200000).then(emailVerifyToken => {
-					return User.verify(username, emailVerifyToken.token, true);
-				}).then(user => {
-					
-					//login
-					agent.post('/login')
-					.send({ username, password })
-					.expect(200, function(err, res){
-						expect(res.body.username).to.equal(username);
-						done(err);
-					});
-
-				}).catch(err => {
+			helpers.signUpAndLogin({
+				server, request, agent, expect, User, systemLogger,
+				username, password, email,
+				done: function(err, _agent){
+					agent = _agent;
 					done(err);
-				});
-
+				}
 			});
 			
 		});
@@ -80,10 +65,6 @@ describe('Project', function () {
 	});
 
 	it('should be created successfully', function(done){
-
-		let desc = 'desc';
-		let type = 'type';
-
 
 		agent.post(`/${username}/${project}`)
 		.send({ desc, type })
@@ -106,8 +87,6 @@ describe('Project', function () {
 	});
 
 	it('should return error message if project name already exists', function(done){
-		let desc = 'desc';
-		let type = 'type';
 
 		agent.post(`/${username}/${project}`)
 		.send({ desc, type })
@@ -119,8 +98,6 @@ describe('Project', function () {
 
 
 	it('should return error message if project name is blacklisted - password', function(done){
-		let desc = 'desc';
-		let type = 'type';
 
 		agent.post(`/${username}/password`)
 		.send({ desc, type })
@@ -131,8 +108,6 @@ describe('Project', function () {
 	});
 
 	it('should return error if creating a project in a database that doesn\'t exists or not authorized for', function(done){
-		let desc = 'desc';
-		let type = 'type';
 
 		agent.post(`/${username} + '_someonelese' /${project}`)
 		.send({ desc, type })

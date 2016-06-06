@@ -27,6 +27,7 @@ var History = require('./history');
 var Ref = require('./ref');
 var GenericObject = require('./base/repo').GenericObject;
 var uuid = require("node-uuid");
+var responseCodes = require('../response_codes.js');
 
 var schema = Schema({
 	_id: Object,
@@ -253,6 +254,10 @@ schema.statics.createIssue = function(dbColOptions, data){
 	let issue = Issue.createInstance(dbColOptions);
  	issue._id = stringToUUID(uuid.v1());
 
+ 	if(!data.name){
+ 		return Promise.reject({ resCode: responseCodes.ISSUE_NO_NAME })
+ 	}
+
 	if(objectId){
 		start = GenericObject.getSharedId(dbColOptions, objectId).then(sid => {
 			issue.parent = stringToUUID(sid);
@@ -265,7 +270,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 		issue.number  = count + 1;
 		issue.object_id = objectId && stringToUUID(objectId);
-		issue.name = data.name || 'Issue ' + issue.number;
+		issue.name = data.name
 		issue.created = (new Date()).getTime();
 		issue.owner = data.owner;
 		issue.scribble = data.scribble && new Buffer(data.scribble, 'base64');

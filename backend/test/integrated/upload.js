@@ -25,6 +25,7 @@ let app = require("../../services/api.js").createApp(
 let log_iface = require("../../logger.js");
 let systemLogger = log_iface.systemLogger;
 let responseCodes = require("../../response_codes.js");
+let helpers = require("./helpers");
 
 describe('Uploading a project', function () {
 	let User = require('../../models/user');
@@ -43,41 +44,13 @@ describe('Uploading a project', function () {
 		server = app.listen(8080, function () {
 			console.log('API test server is listening on port 8080!');
 
-			//hack: by starting the server earlier all the mongoose models like User will be connected to db without any configuration
-			request(server).get('/info').end(() => {
-
-				agent = request.agent(server);
-
-				// create a user
-				return User.createUser(systemLogger, username, password, {
-					email: email
-				}, 200000).then(emailVerifyToken => {
-					return User.verify(username, emailVerifyToken.token, true);
-				}).then(user => {
-					
-					//login
-					agent.post('/login')
-					.send({ username, password })
-					.expect(200, function(err, res){
-						expect(res.body.username).to.equal(username);
-						
-						if(err){
-							return done(err);
-						}
-
-						//create a project
-						agent.post(`/${username}/${project}`)
-						.send({ type, desc })
-						.expect(200, function(err, res){
-							done(err);
-						});
-
-					});
-
-				}).catch(err => {
+			helpers.signUpAndLoginAndCreateProject({
+				server, request, agent, expect, User, systemLogger,
+				username, password, email, project, desc, type,
+				done: function(err, _agent){
+					agent = _agent;
 					done(err);
-				});
-
+				}
 			});
 			
 		});
@@ -138,7 +111,7 @@ describe('Uploading a project', function () {
 			})
 		});
 
-		it('should success', function(done){
+		it('should succee', function(done){
 			agent.post(`/${username}/${project}/upload`)
 			.attach('file', __dirname + '/../../statics/3dmodels/8000cubes.obj')
 			.expect(200, function(err, res){

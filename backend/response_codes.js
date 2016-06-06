@@ -132,6 +132,8 @@ var responseCodes = {
 	STASH_GEN_FAILED: { value: 74, message: "Failed to regenerate stash: Unknown error", status: 500 },
 	FILE_IMPORT_MISSING_TEXTURES: { value: 75, message: "Failed to import file: Missing textures", status: 500 },
 
+	ISSUE_NO_NAME: { value: 76, message: "Create issue without name", status: 400},
+
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {
 			value: 42,
@@ -195,7 +197,7 @@ var responseCodes = {
 };
 
 var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
-49,  50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 1000, 2000, 3000, 4000];
+49,  50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 1000, 2000, 3000, 4000];
 
 var mimeTypes = {
 	"src"  : "application/json",
