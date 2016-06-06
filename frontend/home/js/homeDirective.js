@@ -76,9 +76,9 @@
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "Auth", "StateManager", "EventService", "UtilsService"];
+    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$location", "Auth", "StateManager", "EventService", "UtilsService"];
 
-    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, Auth, StateManager, EventService, UtilsService) {
+    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $location, Auth, StateManager, EventService, UtilsService) {
         var vm = this,
 			goToUserPage,
 			homeLoggedOut,
@@ -148,7 +148,9 @@
 						}
 					}
 					if (goToUserPage) {
-						vm.logout(); // Going back to the login page should logout the user
+						// Prevent user going back to the login page after logging in
+						$location.path("/" + localStorage.getItem("tdrLoggedIn"), "_self");
+						//vm.logout(); // Going back to the login page should logout the user
 					}
 				}
 			}

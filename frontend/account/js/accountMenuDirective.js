@@ -25,16 +25,18 @@
 		return {
 			restrict: "EA",
 			templateUrl: "accountMenu.html",
-			scope: {},
+			scope: {
+				account: "="
+			},
 			controller: AccountMenuCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	AccountMenuCtrl.$inject = ["Auth", "EventService"];
+	AccountMenuCtrl.$inject = ["$location", "Auth", "EventService"];
 
-	function AccountMenuCtrl (Auth, EventService) {
+	function AccountMenuCtrl ($location, Auth, EventService) {
 		var vm = this;
 
 		/**
@@ -58,6 +60,9 @@
 		 * Logout
 		 */
 		vm.logout = function () {
+			$location.path("/", "_self");
+			// Change the local storage login status for other tabs to listen to
+			localStorage.setItem("tdrLoggedIn", "false");
 			Auth.logout();
 		};
 	}

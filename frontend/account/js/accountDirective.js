@@ -35,9 +35,9 @@
 		};
 	}
 
-	AccountCtrl.$inject = ["$scope", "AccountService"];
+	AccountCtrl.$inject = ["$scope", "$location", "AccountService", "Auth"];
 
-	function AccountCtrl($scope, AccountService) {
+	function AccountCtrl($scope, $location, AccountService, Auth) {
 		var vm = this,
 			promise;
 
@@ -78,5 +78,22 @@
 		vm.showItem = function (item) {
 			vm.itemToShow = item;
 		};
+
+		/**
+		 * Event listener for change in local storage login status
+		 * 
+		 * @param event
+		 */
+		function loginStatusListener (event) {
+			if ((event.key === "tdrLoggedIn") && (event.newValue === "false")) {
+				$location.path("/", "_self");
+				Auth.logout();
+			}
+		}
+		window.addEventListener("storage", loginStatusListener, false);
+		// Set the logged in status to the account name just once
+		if (localStorage.getItem("tdrLoggedIn") === "false") {
+			localStorage.setItem("tdrLoggedIn", vm.account);
+		}
 	}
 }());

@@ -101,3 +101,8 @@ home #legalLinks .md-button {
     margin-right: 10px;
 }
 
+/** Dialog ************************************************************************************************************/
+md-dialog md-toolbar {
+    height: 40px;
+    min-height: 40px;
+}

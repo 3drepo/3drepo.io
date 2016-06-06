@@ -2669,6 +2669,7 @@ x3dom.runtime.ready = runtimeReady;
 
 // ----------------------------------------------------------
 var Viewer = {};
+var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 (function() {
 	"use strict";
@@ -2878,7 +2879,7 @@ var Viewer = {};
 
 				self.nav = document.createElement("navigationInfo");
 				self.nav.setAttribute("headlight", "false");
-				self.nav.setAttribute("type", self.defaultNavMode);
+				self.setNavMode(self.defaultNavMode);
 				self.scene.appendChild(self.nav);
 
 				self.loadViewpoint = self.name + "_default"; // Must be called after creating nav
@@ -2953,8 +2954,6 @@ var Viewer = {};
 
 				// TODO: This is a hack to get around a bug in X3DOM
 				self.getViewArea()._flyMat = null;
-
-				self.setNavMode(self.defaultNavMode);
 			};
 
 			ViewerUtil.onEvent("onLoaded", function(objEvent) {
@@ -3244,7 +3243,6 @@ var Viewer = {};
 			var eye = vpInfo.position;
 			var viewDir = vpInfo.view_dir;
 
-			console.log(event.orientation);
 
 			if (self.currentNavMode === self.NAV_MODES.HELICOPTER) {
 				self.nav._x3domNode._vf.typeParams[0] = Math.asin(viewDir[1]);
@@ -3760,8 +3758,8 @@ var Viewer = {};
 			}
 		};
 
-		this.setNavMode = function(mode) {
-			if (self.currentNavMode !== mode) {
+		this.setNavMode = function(mode, force) {
+			if (self.currentNavMode !== mode || force) {
 				// If the navigation mode has changed
 
 				if (mode === self.NAV_MODES.WAYFINDER) { // If we are entering wayfinder navigation
@@ -3779,6 +3777,13 @@ var Viewer = {};
 
 					self.nav._x3domNode._vf.typeParams[0] = Math.asin(viewDir[1]);
 					self.nav._x3domNode._vf.typeParams[1] = eye[1];
+
+					var bboxMax = self.getScene()._x3domNode.getVolume().max;
+					var bboxMin = self.getScene()._x3domNode.getVolume().min;
+					var bboxSize = bboxMax.subtract(bboxMin);
+					var calculatedSpeed = Math.sqrt(Math.max.apply(Math, bboxSize.toGL())) * 0.03;
+
+					self.nav.setAttribute("speed", calculatedSpeed);
 				}
 
 				self.currentNavMode = mode;
@@ -3865,28 +3870,25 @@ var Viewer = {};
 			var x3domView = new x3dom.fields.SFVec3f(viewDir[0], viewDir[1], viewDir[2]);
 			var x3domUp   = new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
 			var x3domFrom = new x3dom.fields.SFVec3f(pos[0], pos[1], pos[2]);
-			var x3domAt   = x3domFrom.add(x3domView);
+			var x3domAt   = x3domFrom.add(x3domView.normalize());
 
 			var viewMatrix = x3dom.fields.SFMatrix4f.lookAt(x3domFrom, x3domAt, x3domUp);
 
-			var currViewpoint = self.getCurrentViewpoint()._x3domNode;
+			var currViewpointNode = self.getCurrentViewpoint();
+			var currViewpoint = currViewpointNode._x3domNode;
 
 			if (self.currentNavMode === self.NAV_MODES.HELICOPTER) {
 				self.nav._x3domNode._vf.typeParams[0] = Math.asin(x3domView.y);
 				self.nav._x3domNode._vf.typeParams[1] = x3domFrom.y;
 			}
 
-			if (animate)
+			var oldViewMatrixCopy = currViewpoint._viewMatrix.toGL();
+
+			if (!animate && rollerCoasterMode)
 			{
-				self.getViewArea().animateTo(viewMatrix.inverse(), currViewpoint);
+				self.rollerCoasterMatrix = viewMatrix;
 			} else {
-				if (rollerCoasterMode)
-				{
-					self.rollerCoasterMatrix = viewMatrix;
-				} else {
-					self.getCurrentViewpoint()._x3domNode._viewMatrix.setValues(viewMatrix.inverse());
-					self.getViewArea()._doc.needRender = true;
-				}
+				currViewpoint._viewMatrix.setValues(viewMatrix.inverse());
 			}
 
 			var x3domCenter = null;
@@ -3897,12 +3899,35 @@ var Viewer = {};
 				var canvasHeight = self.getViewArea()._doc.canvas.height;
 
 				self.pickPoint(canvasWidth / 2, canvasHeight / 2);
-				x3domCenter = self.pickObject.pickPos;
+
+				if (self.pickObject.pickPos)
+				{
+					x3domCenter = self.pickObject.pickPos;
+
+				} else {
+					var ry = new x3dom.fields.Ray(x3domFrom, x3domView);
+					var bbox = self.getScene()._x3domNode.getVolume();
+
+					if(ry.intersect(bbox.min, bbox.max))
+					{
+						x3domCenter = x3domAt.add(x3domView.multiply(((1.0 / (GOLDEN_RATIO + 1.0)) * ry.exit)));
+					} else {
+						x3domCenter = x3domAt;
+					}
+				}
 			} else {
 				x3domCenter = new x3dom.fields.SFVec3f(centerOfRotation[0], centerOfRotation[1], centerOfRotation[2]);
 			}
 
-			currViewpoint.setCenterOfRotation(x3domCenter);
+			if (animate) {
+				currViewpoint._viewMatrix.setFromArray(oldViewMatrixCopy);
+				self.getViewArea().animateTo(viewMatrix.inverse(), currViewpoint);
+			}
+
+			currViewpointNode.setAttribute("centerofrotation", x3domCenter.toGL().join(","));
+
+			self.setNavMode(self.currentNavMode);
+			self.getViewArea()._doc.needRender = true;
 
 			if (self.linked) {
 				self.manager.switchMaster(self.handle);
@@ -4663,9 +4688,9 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountCtrl.$inject = ["$scope", "AccountService"];
+	AccountCtrl.$inject = ["$scope", "$location", "AccountService", "Auth"];
 
-	function AccountCtrl($scope, AccountService) {
+	function AccountCtrl($scope, $location, AccountService, Auth) {
 		var vm = this,
 			promise;
 
@@ -4706,6 +4731,23 @@ var ViewerManager = {};
 		vm.showItem = function (item) {
 			vm.itemToShow = item;
 		};
+
+		/**
+		 * Event listener for change in local storage login status
+		 * 
+		 * @param event
+		 */
+		function loginStatusListener (event) {
+			if ((event.key === "tdrLoggedIn") && (event.newValue === "false")) {
+				$location.path("/", "_self");
+				Auth.logout();
+			}
+		}
+		window.addEventListener("storage", loginStatusListener, false);
+		// Set the logged in status to the account name just once
+		if (localStorage.getItem("tdrLoggedIn") === "false") {
+			localStorage.setItem("tdrLoggedIn", vm.account);
+		}
 	}
 }());
 
@@ -4787,16 +4829,18 @@ var ViewerManager = {};
 		return {
 			restrict: "EA",
 			templateUrl: "accountMenu.html",
-			scope: {},
+			scope: {
+				account: "="
+			},
 			controller: AccountMenuCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	AccountMenuCtrl.$inject = ["Auth", "EventService"];
+	AccountMenuCtrl.$inject = ["$location", "Auth", "EventService"];
 
-	function AccountMenuCtrl (Auth, EventService) {
+	function AccountMenuCtrl ($location, Auth, EventService) {
 		var vm = this;
 
 		/**
@@ -4820,6 +4864,9 @@ var ViewerManager = {};
 		 * Logout
 		 */
 		vm.logout = function () {
+			$location.path("/", "_self");
+			// Change the local storage login status for other tabs to listen to
+			localStorage.setItem("tdrLoggedIn", "false");
 			Auth.logout();
 		};
 	}
@@ -9068,9 +9115,9 @@ var ViewerManager = {};
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "Auth", "StateManager", "EventService", "UtilsService"];
+    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$location", "Auth", "StateManager", "EventService", "UtilsService"];
 
-    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, Auth, StateManager, EventService, UtilsService) {
+    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $location, Auth, StateManager, EventService, UtilsService) {
         var vm = this,
 			goToUserPage,
 			homeLoggedOut,
@@ -9140,7 +9187,9 @@ var ViewerManager = {};
 						}
 					}
 					if (goToUserPage) {
-						vm.logout(); // Going back to the login page should logout the user
+						// Prevent user going back to the login page after logging in
+						$location.path("/" + localStorage.getItem("tdrLoggedIn"), "_self");
+						//vm.logout(); // Going back to the login page should logout the user
 					}
 				}
 			}
@@ -10629,6 +10678,7 @@ angular.module('3drepo')
 				EventService.send(EventService.EVENT.VIEWER.SET_CAMERA, {
 					position : vm.selectedIssue.viewpoint.position,
 					view_dir : vm.selectedIssue.viewpoint.view_dir,
+					//look_at: vm.selectedIssue.viewpoint.look_at,
 					up: vm.selectedIssue.viewpoint.up
 				});
 
@@ -13588,6 +13638,7 @@ var Oculus = {};
 			projectUI = angular.element($element[0].querySelector('#projectUI'));
 		});
 
+		/*
 		panelCard.left.push({
 			type: "tree",
 			title: "Tree",
@@ -13600,6 +13651,7 @@ var Oculus = {};
 				{type: "filter", visible: true}
 			]
 		});
+		*/
 
 		panelCard.left.push({
 			type: "issues",
@@ -13647,6 +13699,7 @@ var Oculus = {};
 			add: true
 		});
 
+		/*
 		panelCard.left.push({
 			type: "groups",
 			title: "Groups",
@@ -13668,6 +13721,7 @@ var Oculus = {};
 			],
 			add: true
 		});
+		*/
 
 		panelCard.left.push({
 			type: "clip",

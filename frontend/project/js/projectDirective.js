@@ -58,6 +58,7 @@
 			projectUI = angular.element($element[0].querySelector('#projectUI'));
 		});
 
+		/*
 		panelCard.left.push({
 			type: "tree",
 			title: "Tree",
@@ -70,6 +71,7 @@
 				{type: "filter", visible: true}
 			]
 		});
+		*/
 
 		panelCard.left.push({
 			type: "issues",
@@ -117,6 +119,7 @@
 			add: true
 		});
 
+		/*
 		panelCard.left.push({
 			type: "groups",
 			title: "Groups",
@@ -138,6 +141,7 @@
 			],
 			add: true
 		});
+		*/
 
 		panelCard.left.push({
 			type: "clip",
