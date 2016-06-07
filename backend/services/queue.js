@@ -53,6 +53,11 @@ ImportQueue.prototype.connect = function(url, options) {
     return amqp.connect(url).then( conn => {
 
         this.conn = conn;
+        
+        conn.on('close', () => {
+            this.conn = null;
+        });
+
         return conn.createChannel();
 
     }).then(channel => {
@@ -195,7 +200,7 @@ ImportQueue.prototype._consumeCallbackQueue = function(){
             if(defer && resErrorCode === 0){
                 defer.resolve();
             } else if (defer) {
-                defer.reject(resErrorCode);
+                defer.reject({resErrorCode: resErrorCode});
             } else {
                 self.logger.logError('Job done but cannot find corresponding defer object with cor id ' + rep.properties.correlationId);
             }

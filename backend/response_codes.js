@@ -194,7 +194,7 @@ var responseCodes = {
 
 		 return {
 			value: 4000,
-			message: message,
+			message: 'Internal Error',
 			status: 500
 		};
 	}

@@ -66,31 +66,6 @@ module.exports.createApp = function (serverConfig) {
 		});
 	});
 
-	app.use((req, res, next) => {
-		// init ampq and import queue object
-		let importQueue = require('../services/queue');
-		if(config.cn_queue){
-
-			importQueue.connect(config.cn_queue.host, {
-
-        		sharedSpacePath: config.cn_queue.shared_storage,
-        		logger: req[C.REQ_REPO].logger,
-        		callbackQName: config.cn_queue.callback_queue,
-        		workerQName: config.cn_queue.worker_queue 
-
-			}).then(() => {
-				next();
-			}).catch(err => {
-				console.log(err);
-				responseCodes.respond("Express Middleware - AMPQ", req, res, next, responseCodes.PROCESS_ERROR(err), err);
-			});
-
-		} else {
-			next();
-		}
-		
-
-	});
 
 	app.use(bodyParser.urlencoded({
 		extended: true

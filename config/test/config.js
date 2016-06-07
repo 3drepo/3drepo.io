@@ -58,7 +58,7 @@ module.exports = {
 	js_debug_level: 'debug',
 	logfile: {
 		filename: './3drepo.log',
-		console_level: 'nothing',
+		console_level: 'error',
 		file_level: 'debug'
 	},
 	db: {
