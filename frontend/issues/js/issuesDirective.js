@@ -140,13 +140,6 @@
 				issue.assignedRolesColors.push(roleColour);
 				pinColours.push(IssuesService.hexToRgb(roleColour));
 			}
-
-			/*
-			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, {
-				id: issue._id,
-				colours: pinColours
-			});
-			*/
 		}
 
 		/*
@@ -265,6 +258,8 @@
 		function setupIssuesToShow () {
 			var i = 0, j = 0, length = 0, roleAssigned;
 
+			vm.issuesToShow = [];
+
 			if (angular.isDefined(vm.issues)) {
 				if (vm.issues.length > 0) {
 					// Sort
@@ -359,16 +354,16 @@
 							vm.issuesToShow.splice(i, 1);
 						}
 					}
-
-					// Setup what to show
-					if (vm.issuesToShow.length > 0) {
-						vm.toShow = "showIssues";
-					}
-					else {
-						vm.toShow = "showInfo";
-						vm.issuesInfo = "There are currently no open issues";
-					}
 				}
+			}
+
+			// Setup what to show
+			if (vm.issuesToShow.length > 0) {
+				vm.toShow = "showIssues";
+			}
+			else {
+				vm.toShow = "showInfo";
+				vm.issuesInfo = "There are currently no open issues";
 			}
 		}
 
@@ -388,7 +383,6 @@
 				pin, pinData,
 				roleAssigned;
 
-			console.log(vm.issues);
 			for (i = 0, length = vm.issues.length; i < length; i += 1) {
 				if (vm.issues[i].object_id !== null) {
 					pin = angular.element(document.getElementById(vm.issues[i]._id));
@@ -502,12 +496,13 @@
 						removeAddPin();
 						EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: false});
 					}
-					vm.toShow = "showIssues";
+					//vm.toShow = "showIssues";
 					vm.showAdd = false; // So that showing add works
 					vm.canAdd = true;
 					vm.showEdit = false; // So that closing edit works
 
 					// Set the content height
+					setupIssuesToShow();
 					setContentHeight();
 
 					// Deselect any selected pin
@@ -746,6 +741,7 @@
 				closedIssueFooterHeight = 53,
 				infoHeight = 80;
 
+			console.log(vm.toShow);
 			switch (vm.toShow) {
 				case "showIssues":
 					issuesHeight = 0;

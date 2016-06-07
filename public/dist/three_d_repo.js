@@ -9802,15 +9802,13 @@ angular.module('3drepo')
 		};
 	}
 
-	IssueCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService"];
+	IssueCtrl.$inject = ["$scope", "IssuesService"];
 
-	function IssueCtrl($scope, $timeout, IssuesService, EventService) {
+	function IssueCtrl($scope, IssuesService) {
 		var vm = this,
 			promise = null,
 			originatorEv = null,
 			initWatch;
-
-		console.log(vm.index);
 
 		/*
 		 * Initialise view vars
@@ -10065,78 +10063,6 @@ angular.module('3drepo')
 			$mdOpenMenu(event);
 		};
 	}
-
-	/*
-	 * Below is for setting up the animation to show and hide comments
-	 */
-
-	angular.module("3drepo")
-		.animation(".issueComments", issueComments);
-
-	function issueComments() {
-		var height;
-		return {
-			addClass: function(element, className, done) {
-				if (className === "issueComments") {
-					angular.element(element)
-						.css({
-							height: 0,
-							opacity: 0
-						})
-						.animate({
-							height: height,
-							opacity: 1
-						}, 500, done);
-				} else {
-					done();
-				}
-			},
-			removeClass: function(element, className, done) {
-				height = element[0].children[0].offsetHeight;
-				if (className === "issueComments") {
-					angular.element(element)
-						.css({
-							height: height,
-							opacity: 1
-						})
-						.animate({
-							height: 0,
-							opacity: 0
-						}, 500, done);
-				} else {
-					done();
-				}
-			}
-		};
-	}
-
-	angular.module("3drepo")
-		.directive("commentsHeight", commentsHeight);
-
-	function commentsHeight() {
-		return {
-			restrict: "A",
-			scope: {
-				numNewComments: "="
-			},
-			link: link
-		};
-
-		function link(scope, element, attrs) {
-			var commentHeight = 75,
-				height = "0";
-			scope.$watch("numNewComments", function(newValue, oldValue) {
-				if (angular.isDefined(newValue)) {
-					if (newValue > oldValue) {
-						height = (element[0].offsetHeight + commentHeight).toString();
-					} else if (newValue < oldValue) {
-						height = (element[0].offsetHeight - commentHeight).toString();
-					}
-					element.css("height", height + "px");
-				}
-			});
-		}
-	}
 }());
 
 /**
@@ -10335,13 +10261,6 @@ angular.module('3drepo')
 				issue.assignedRolesColors.push(roleColour);
 				pinColours.push(IssuesService.hexToRgb(roleColour));
 			}
-
-			/*
-			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, {
-				id: issue._id,
-				colours: pinColours
-			});
-			*/
 		}
 
 		/*
@@ -10460,6 +10379,8 @@ angular.module('3drepo')
 		function setupIssuesToShow () {
 			var i = 0, j = 0, length = 0, roleAssigned;
 
+			vm.issuesToShow = [];
+
 			if (angular.isDefined(vm.issues)) {
 				if (vm.issues.length > 0) {
 					// Sort
@@ -10554,16 +10475,16 @@ angular.module('3drepo')
 							vm.issuesToShow.splice(i, 1);
 						}
 					}
-
-					// Setup what to show
-					if (vm.issuesToShow.length > 0) {
-						vm.toShow = "showIssues";
-					}
-					else {
-						vm.toShow = "showInfo";
-						vm.issuesInfo = "There are currently no open issues";
-					}
 				}
+			}
+
+			// Setup what to show
+			if (vm.issuesToShow.length > 0) {
+				vm.toShow = "showIssues";
+			}
+			else {
+				vm.toShow = "showInfo";
+				vm.issuesInfo = "There are currently no open issues";
 			}
 		}
 
@@ -10583,7 +10504,6 @@ angular.module('3drepo')
 				pin, pinData,
 				roleAssigned;
 
-			console.log(vm.issues);
 			for (i = 0, length = vm.issues.length; i < length; i += 1) {
 				if (vm.issues[i].object_id !== null) {
 					pin = angular.element(document.getElementById(vm.issues[i]._id));
@@ -10697,12 +10617,13 @@ angular.module('3drepo')
 						removeAddPin();
 						EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: false});
 					}
-					vm.toShow = "showIssues";
+					//vm.toShow = "showIssues";
 					vm.showAdd = false; // So that showing add works
 					vm.canAdd = true;
 					vm.showEdit = false; // So that closing edit works
 
 					// Set the content height
+					setupIssuesToShow();
 					setContentHeight();
 
 					// Deselect any selected pin
@@ -10941,6 +10862,7 @@ angular.module('3drepo')
 				closedIssueFooterHeight = 53,
 				infoHeight = 80;
 
+			console.log(vm.toShow);
 			switch (vm.toShow) {
 				case "showIssues":
 					issuesHeight = 0;
@@ -13792,7 +13714,8 @@ var Oculus = {};
 				right: []
 			},
 			projectUI,
-			issueArea;
+			issueArea,
+			issuesCardIndex = 0;
 
 		vm.pointerEvents = "auto";
 
@@ -13928,7 +13851,7 @@ var Oculus = {};
 				// Add filtering options for the Issues card menu
 				ProjectService.getRoles(vm.account, vm.project).then(function (data) {
 					for (i = 0, length = data.length; i < length; i += 1) {
-						panelCard.left[1].menu.push(
+						panelCard.left[issuesCardIndex].menu.push(
 							{
 								value: "filterRole_" + data[i].role,
 								label: data[i].role,
@@ -15127,19 +15050,6 @@ var Oculus = {};
 				preserveScope: true,
 				onRemoving: removeDialog
 			});
-			/*
-			$mdDialog.show({
-				controller: tcDialogController,
-				templateUrl: "tcDialog.html",
-				parent: angular.element(document.body),
-				targetEvent: event,
-				clickOutsideToClose:true,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true,
-				onRemoving: removeDialog
-			});
-			*/
 		};
 
 		vm.showPage = function (page) {

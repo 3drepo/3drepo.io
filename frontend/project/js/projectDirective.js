@@ -47,7 +47,8 @@
 				right: []
 			},
 			projectUI,
-			issueArea;
+			issueArea,
+			issuesCardIndex = 0;
 
 		vm.pointerEvents = "auto";
 
@@ -183,7 +184,7 @@
 				// Add filtering options for the Issues card menu
 				ProjectService.getRoles(vm.account, vm.project).then(function (data) {
 					for (i = 0, length = data.length; i < length; i += 1) {
-						panelCard.left[1].menu.push(
+						panelCard.left[issuesCardIndex].menu.push(
 							{
 								value: "filterRole_" + data[i].role,
 								label: data[i].role,
