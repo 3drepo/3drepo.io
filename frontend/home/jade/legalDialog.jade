@@ -1,10 +1,13 @@
 md-dialog.legalDialog(aria-label="Legal")
 	md-toolbar
 		.md-toolbar-tools
-			md-icon.angular-material-icons#tcIcon format_list_bulleted
 			h2 {{vm.legalTitle}}
 			span(flex)
 			md-button.md-icon-button(ng-click="downloadTc()")
 				md-icon.angular-material-icons(aria-label="Download") get_app
 			md-button.md-icon-button(ng-click="closeDialog()")
 				md-icon.angular-material-icons(aria-label="Close dialog") close
+	md-content(ng-switch="vm.legalText")
+		terms-and-conditions-text(ng-switch-when="termsAndConditions")
+		privacy-text(ng-switch-when="privacy")
+		cookies-text(ng-switch-when="cookies")

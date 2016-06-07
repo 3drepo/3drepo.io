@@ -174,13 +174,14 @@
         };
 
 		/**
-		 * 
+		 * Display legal text
 		 * 
 		 * @param event
 		 * @param display
 		 */
-		vm.display = function (event, display) {
+		vm.legalDisplay = function (event, display) {
 			vm.legalTitle = display.title;
+			vm.legalText = display.value;
 			$mdDialog.show({
 				templateUrl: "legalDialog.html",
 				parent: angular.element(document.body),

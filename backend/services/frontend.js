@@ -152,6 +152,18 @@ module.exports.createApp = function(serverConfig)
 				"url": "payment?username&token"
 			},
 			{
+				"plugin": "termsAndConditions",
+				"url": "termsAndConditions"
+			},
+			{
+				"plugin": "privacy",
+				"url": "privacy"
+			},
+			{
+				"plugin": "cookies",
+				"url": "cookies"
+			},
+			{
 				"plugin": "account",
 				"children": [
 					{
