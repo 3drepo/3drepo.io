@@ -218,6 +218,253 @@ describe('Creating an issue', function () {
 
 	});
 
+	describe('and then commenting', function(){
+
+		let issueId;
+
+		before(function(done){
+
+			let issue = Object.assign({"name":"Issue test"}, baseIssue);
+
+			agent.post(`/${username}/${project}/issues.json`)
+			.send({ data: JSON.stringify(issue) })
+			.expect(200 , function(err, res){
+				issueId = res.body._id;
+				done(err);
+			});
+
+		});
+
+		it('should succee', function(done){
+
+			let comment = { comment: 'hello world' };
+
+			agent.put(`/${username}/${project}/issues/${issueId}.json`)
+			.send({ data: JSON.stringify(comment) })
+			.expect(200 , function(err, res){
+
+				if(err){
+					return done(err);
+				}
+
+				//also check it is in database
+				Issue.findByUID({ account: username, project: project}, issueId).then(_issue => {
+
+					expect(_issue.comments.length).to.equal(1);
+					expect(_issue.comments[0].comment).to.equal(comment.comment);
+					expect(_issue.comments[0].owner).to.equal(username);
+					done();
+
+				}).catch( err => {
+					done(err);
+				});
+
+			});
+		});
+
+
+		it('should succee if editing an existing comment', function(done){
+
+			let comment = { comment: 'hello world 2', commentIndex: 0, edit: true };
+
+			agent.put(`/${username}/${project}/issues/${issueId}.json`)
+			.send({ data: JSON.stringify(comment) })
+			.expect(200 , function(err, res){
+
+				if(err){
+					return done(err);
+				}
+
+				//also check it is in database
+				Issue.findByUID({ account: username, project: project}, issueId).then(_issue => {
+
+					expect(_issue.comments.length).to.equal(1);
+					expect(_issue.comments[0].comment).to.equal(comment.comment);
+					expect(_issue.comments[0].owner).to.equal(username);
+					done();
+
+				}).catch( err => {
+					done(err);
+				});
+
+			});
+		});
+
+
+
+		it('should fail if comment is empty', function(done){
+
+			let comment = { comment: '' };
+
+			agent.put(`/${username}/${project}/issues/${issueId}.json`)
+			.send({ data: JSON.stringify(comment) })
+			.expect(400 , function(err, res){
+				expect(res.body.value).to.equal(responseCodes.MONGOOSE_VALIDATION_ERROR({}).value);
+				done(err);
+			});
+		});
+
+
+		it('should succee if removing an existing comment', function(done){
+
+			let comment = { commentIndex: 0, delete: true };
+
+			agent.put(`/${username}/${project}/issues/${issueId}.json`)
+			.send({ data: JSON.stringify(comment) })
+			.expect(200 , function(err, res){
+
+				done(err);
+
+			});
+		});
+
+		it('should fail if invalid issue ID is given', function(done){
+			
+			let invalidId = '00000000-0000-0000-0000-000000000000';
+			let comment = { comment: 'hello world' };
+
+			agent.put(`/${username}/${project}/issues/${invalidId}.json`)
+			.send({ data: JSON.stringify(comment) })
+			.expect(404 , function(err, res){
+				done(err);
+			});
+		});
+
+	});
+
+	describe('and then closing it', function(){
+
+		let issueId;
+
+		before(function(done){
+
+			let issue = Object.assign({"name":"Issue test"}, baseIssue);
+
+			agent.post(`/${username}/${project}/issues.json`)
+			.send({ data: JSON.stringify(issue) })
+			.expect(200 , function(err, res){
+
+				if(err) {
+					return done(err);
+				}
+
+				issueId = res.body._id;
+
+				//add an comment
+				let comment = { comment: 'hello world' };
+
+				agent.put(`/${username}/${project}/issues/${issueId}.json`)
+				.send({ data: JSON.stringify(comment) })
+				.expect(200 , function(err, res){
+					done(err);
+				});
+			});
+
+		});
+
+		it('should succee', function(done){
+
+			let close = { closed: true };
+
+			agent.put(`/${username}/${project}/issues/${issueId}.json`)
+			.send({ data: JSON.stringify(close) })
+			.expect(200 , function(err, res){
+
+				done(err);
+
+			});
+		});
+
+		it('should fail if adding a comment', function(done){
+			let comment = { comment: 'hello world' };
+
+			agent.put(`/${username}/${project}/issues/${issueId}.json`)
+			.send({ data: JSON.stringify(comment) })
+			.expect(400 , function(err, res){
+
+				expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
+				return done(err);
+
+			});
+		});
+
+		it('should fail if removing a comment', function(done){
+			let comment = { commentIndex: 0, delete: true };
+
+			agent.put(`/${username}/${project}/issues/${issueId}.json`)
+			.send({ data: JSON.stringify(comment) })
+			.expect(400 , function(err, res){
+
+				expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
+				return done(err);
+
+			});
+		});
+
+		it('should fail if editing a comment', function(done){
+			let comment = { comment: 'hello world 2', commentIndex: 0, edit: true };
+
+			agent.put(`/${username}/${project}/issues/${issueId}.json`)
+			.send({ data: JSON.stringify(comment) })
+			.expect(400 , function(err, res){
+
+				expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
+				return done(err);
+
+			});
+		});
+
+		it('should fail if closing again', function(done){
+
+			let close = { closed: true };
+
+			agent.put(`/${username}/${project}/issues/${issueId}.json`)
+			.send({ data: JSON.stringify(close) })
+			.expect(400 , function(err, res){
+
+				expect(res.body.value).to.equal(responseCodes.ISSUE_CLOSED_ALREADY.value);
+				done(err);
+
+			});
+		});
+
+		it('should succee if reopening', function(done){
+
+			let close = { closed: false };
+
+			agent.put(`/${username}/${project}/issues/${issueId}.json`)
+			.send({ data: JSON.stringify(close) })
+			.expect(200 , function(err, res){
+
+				if(err){ 
+					done(err);
+				}
+
+				//check in db it is reopened
+				Issue.findByUID({ account: username, project: project}, issueId).then(_issue => {
+
+					expect(_issue.closed).to.equal(false);
+					done();
+
+				}).catch( err => {
+					done(err);
+				});
+			});
+		});
+
+		it('should fail if invalid issue ID is given', function(done){
+			
+			let invalidId = '00000000-0000-0000-0000-000000000000';
+			let comment = { closed: false };
+
+			agent.put(`/${username}/${project}/issues/${invalidId}.json`)
+			.send({ data: JSON.stringify(comment) })
+			.expect(404 , function(err, res){
+				done(err);
+			});
+		});
+
+	})
 
 
 });
