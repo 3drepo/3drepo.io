@@ -47,7 +47,7 @@ router.put('/:project/settings/map-tile', middlewares.hasWriteAccessToProject, u
 
 router.post('/:project', middlewares.canCreateProject, createProject);
 
-router.post('/:project/upload', middlewares.canCreateProject, uploadProject);
+router.post('/:project/upload', middlewares.connectQueue, middlewares.canCreateProject, uploadProject);
 
 
 function estimateImportedSize(format, size){
@@ -312,14 +312,17 @@ function uploadProject(req, res, next){
 						req.session.user.username
 					)
 					.then(corID => Promise.resolve(corID))
-					.catch(errCode => {
+					.catch(err => {
+
 						//catch here to provide custom error message
-						if(projectSetting){
-							projectSetting.errorReason = convertToErrorCode(errCode);
+						if(err.errCode && projectSetting){
+							projectSetting.errorReason = convertToErrorCode(err.errCode);
 							projectSetting.markModified('errorReason');
+							return Promise.reject(convertToErrorCode(err.errCode));
 						}
 
-						return Promise.reject(convertToErrorCode(errCode));
+						return Promise.reject(err);
+						
 					});
 
 				}).then(corID => {
@@ -342,7 +345,7 @@ function uploadProject(req, res, next){
 						projectSetting.save();
 					}
 
-					req[C.REQ_REPO].logger.logDebug(JSON.stringify(err));
+					req[C.REQ_REPO].logger.logError(JSON.stringify(err));
 
 		
 

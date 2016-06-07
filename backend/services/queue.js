@@ -53,6 +53,11 @@ ImportQueue.prototype.connect = function(url, options) {
     return amqp.connect(url).then( conn => {
 
         this.conn = conn;
+        
+        conn.on('close', () => {
+            this.conn = null;
+        });
+
         return conn.createChannel();
 
     }).then(channel => {

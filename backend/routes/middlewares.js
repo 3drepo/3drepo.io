@@ -21,6 +21,7 @@ var C               = require("../constants");
 var Bid = require('../models/bid');
 // var History = require('../models/history');
 var User = require('../models/user');
+var config = require('../config');
 
 var READ_BIT	= 4;
 var WRITE_BIT	= 2;
@@ -234,6 +235,34 @@ function freeSpace(account){
 
 }
 
+function connectQueue(req, res, next){
+	'use strict';
+
+	// init ampq and import queue object
+	let importQueue = require('../services/queue');
+	if(config.cn_queue){
+
+		importQueue.connect(config.cn_queue.host, {
+
+			sharedSpacePath: config.cn_queue.shared_storage,
+			logger: req[C.REQ_REPO].logger,
+			callbackQName: config.cn_queue.callback_queue,
+			workerQName: config.cn_queue.worker_queue 
+
+		}).then(() => {
+			next();
+		}).catch(err => {
+			responseCodes.respond("Express Middleware - AMPQ", req, res, next, err);
+		});
+
+	} else {
+		next();
+	}
+		
+
+
+}
+
 var middlewares = {
 
 	// Real middlewares taking req, res, next
@@ -245,7 +274,7 @@ var middlewares = {
 	isMainContractor: [loggedIn, isMainContractor],
 	isSubContractorInvited: [loggedIn, isSubContractorInvited],
 	canCreateDatabase,
-
+	connectQueue,
 	// Helpers
 	freeSpace,
 	isSubContractorInvitedHelper,
