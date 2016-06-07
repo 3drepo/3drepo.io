@@ -15115,6 +15115,19 @@ var Oculus = {};
 		};
 
 		vm.showTC = function () {
+			vm.legalTitle = "Terms and Conditions";
+			vm.legalText = "termsAndConditions";
+			$mdDialog.show({
+				templateUrl: "legalDialog.html",
+				parent: angular.element(document.body),
+				targetEvent: event,
+				clickOutsideToClose:true,
+				fullscreen: true,
+				scope: $scope,
+				preserveScope: true,
+				onRemoving: removeDialog
+			});
+			/*
 			$mdDialog.show({
 				controller: tcDialogController,
 				templateUrl: "tcDialog.html",
@@ -15126,6 +15139,7 @@ var Oculus = {};
 				preserveScope: true,
 				onRemoving: removeDialog
 			});
+			*/
 		};
 
 		vm.showPage = function (page) {

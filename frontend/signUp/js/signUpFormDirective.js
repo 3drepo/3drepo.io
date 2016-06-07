@@ -93,9 +93,10 @@
 		};
 
 		vm.showTC = function () {
+			vm.legalTitle = "Terms and Conditions";
+			vm.legalText = "termsAndConditions";
 			$mdDialog.show({
-				controller: tcDialogController,
-				templateUrl: "tcDialog.html",
+				templateUrl: "legalDialog.html",
 				parent: angular.element(document.body),
 				targetEvent: event,
 				clickOutsideToClose:true,
