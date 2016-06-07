@@ -197,12 +197,12 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	
 	let cleanedCustomData = {};
 	
-	if(!customData.email || !customData.email.match(/^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/)){
+	if(customData && (!customData.email || !customData.email.match(/^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/))){
 		return Promise.reject({ resCode: responseCodes.SIGN_UP_INVALID_EMAIL });
 	}
 
 	['firstName', 'lastName', 'email'].forEach(key => {
-		if (customData[key]){
+		if (customData && customData[key]){
 			cleanedCustomData[key] = customData[key];
 		}
 	});
@@ -211,10 +211,14 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
 
 	cleanedCustomData.inactive = true;
-	cleanedCustomData.emailVerifyToken = {
-		token: crypto.randomBytes(64).toString('hex'),
-		expiredAt: expiryAt
-	};
+
+	if(customData){
+		cleanedCustomData.emailVerifyToken = {
+			token: crypto.randomBytes(64).toString('hex'),
+			expiredAt: expiryAt
+		};
+	}
+
 
 	return adminDB.addUser(username, password, {customData: cleanedCustomData, roles: []}).then( () => {
 		return Promise.resolve(cleanedCustomData.emailVerifyToken);

@@ -374,7 +374,7 @@
 			Promise.resolve() : Promise.reject({ resCode: responseCodes.INVALID_SUBSCRIPTION_PLAN });
 
 		return checkPlan.then(() => {
-			return User.createUser(req[C.REQ_REPO].logger, req.body.database, password, {}, 0);
+			return User.createUser(req[C.REQ_REPO].logger, req.body.database, password, null, 0);
 
 		}).then(() => {
 
