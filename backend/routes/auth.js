@@ -36,7 +36,7 @@
 	router.get("/login", checkLogin);
 	router.post("/logout", logout);
 	router.post('/contact', contact);
-	router.get("/:account.json", middlewares.hasReadAccessToAccount, listInfo);
+	router.get("/:account.json", middlewares.loggedIn, listInfo);
 	router.get("/:account.jpg", middlewares.hasReadAccessToAccount, getAvatar);
 	router.get("/:account/subscriptions", middlewares.hasReadAccessToAccount, listSubscriptions);
 	router.get("/:account/subscriptions/:token", middlewares.hasReadAccessToAccount, findSubscriptionByToken);
@@ -286,7 +286,7 @@
 		let responsePlace = utils.APIInfo(req);
 		//let user;
 
-		User.findByUserName(req.session.user.username).then(user => {
+		User.findByUserName(req.params.account).then(user => {
 
 			if(!user){
 				return Promise.reject({resCode: responseCodes.USER_NOT_FOUND});
@@ -305,7 +305,7 @@
 		let responsePlace = utils.APIInfo(req);
 		let user;
 
-		User.findByUserName(req.session.user.username).then(_user => {
+		User.findByUserName(req.params.account).then(_user => {
 
 			if(!_user){
 				return Promise.reject({resCode: responseCodes.USER_NOT_FOUND});
@@ -329,7 +329,33 @@
 	}
 
 	function listInfo(req, res, next){
-		if(req.query.hasOwnProperty('bids')){
+
+		let responsePlace = utils.APIInfo(req);
+
+		if(req.session.user.username !== req.params.account){
+
+			let getType;
+
+			if(C.REPO_BLACKLIST_USERNAME.indexOf(req.params.account) !== -1){
+				getType = Promise.resolve('blacklisted');
+			} else {
+				getType = User.findByUserName(req.params.account).then(_user => {
+					if(!_user){
+						return '';
+					} else if(!_user.customData.email){
+						return 'database';
+					} else {
+						return 'user';
+					}
+				});
+			}
+
+
+			getType.then(type => {
+				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {type});
+			});
+
+		} else if(req.query.hasOwnProperty('bids')){
 			listUserBid(req, res, next);
 		} else {
 			listUserInfo(req, res, next);
