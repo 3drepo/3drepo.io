@@ -200,7 +200,7 @@ ImportQueue.prototype._consumeCallbackQueue = function(){
             if(defer && resErrorCode === 0){
                 defer.resolve();
             } else if (defer) {
-                defer.reject({resErrorCode: resErrorCode});
+                defer.reject(resErrorCode);
             } else {
                 self.logger.logError('Job done but cannot find corresponding defer object with cor id ' + rep.properties.correlationId);
             }

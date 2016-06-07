@@ -314,13 +314,11 @@ function uploadProject(req, res, next){
 					.then(corID => Promise.resolve(corID))
 					.catch(err => {
 
-						
-
 						//catch here to provide custom error message
-						if(err.resErrorCode && projectSetting){
-							projectSetting.errorReason = convertToErrorCode(err.resErrorCode);
+						if(err.errCode && projectSetting){
+							projectSetting.errorReason = convertToErrorCode(err.errCode);
 							projectSetting.markModified('errorReason');
-							return Promise.reject(convertToErrorCode(err.resErrorCode));
+							return Promise.reject(convertToErrorCode(err.errCode));
 						}
 
 						return Promise.reject(err);
