@@ -3,6 +3,7 @@ node_js:
     - "4.1"
 env:
   - CXX=g++-4.8
+sudo: required
 addons:
   apt:
     sources:
@@ -19,9 +20,11 @@ before_install:
     - cd backend/test/integrated/
     - mongorestore
 install: npm install
+services:
+  - rabbitmq
 script:
     - npm test
-    - grunt test-integrated
+    - npm run test-int
 notifications:
     email: 
         recipients:

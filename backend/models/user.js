@@ -105,7 +105,7 @@ schema.statics.authenticate = function(logger, username, password){
 	let authDB = DB(logger).getAuthDB();
 
 	if(!username || !password){
-		return Promise.reject();
+		return Promise.reject({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
 	}
 
 	return authDB.authenticate(username, password).then(() => {
@@ -196,6 +196,11 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	let adminDB = ModelFactory.db.admin();
 	
 	let cleanedCustomData = {};
+	
+	if(!customData.email || !customData.email.match(/^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/)){
+		return Promise.reject({ resCode: responseCodes.SIGN_UP_INVALID_EMAIL });
+	}
+
 	['firstName', 'lastName', 'email'].forEach(key => {
 		if (customData[key]){
 			cleanedCustomData[key] = customData[key];
@@ -223,9 +228,14 @@ schema.statics.verify = function(username, token, allowRepeatedVerify){
 
 	return this.findByUserName(username).then(user => {
 		
-		var tokenData = user.customData.emailVerifyToken;
+		var tokenData = user && user.customData && user.customData.emailVerifyToken;
 
-		if(!user.customData.inactive && !allowRepeatedVerify){
+		if(!user){
+
+			return Promise.reject({ resCode: responseCodes.TOKEN_INVALID});
+
+		} else if(!user.customData.inactive && !allowRepeatedVerify){
+
 			return Promise.reject({ resCode: responseCodes.ALREADY_VERIFIED});
 
 		} else if(tokenData.token === token && tokenData.expiredAt > new Date()){
@@ -747,6 +757,7 @@ schema.statics.findSubscriptionByToken = function(billingUser, token){
 		return Promise.resolve(subscription);
 	});
 };
+
 
 var User = ModelFactory.createClass(
 	'User', 

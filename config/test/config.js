@@ -34,15 +34,14 @@
  */
 
 var hostname   = "example.org";
-var http_port  = 8000;
+var http_port  = 80;
 var https_port = 443;
 
 module.exports = {
 	host: hostname,
 	cookie: {
-		secret: "A secret",
-		parser_secret : "Another secret",
-		maxAge: 3600,
+		secret: "a",
+		parser_secret : "b"
 	},
 	servers: [
 		{
@@ -59,7 +58,7 @@ module.exports = {
 	js_debug_level: 'debug',
 	logfile: {
 		filename: './3drepo.log',
-		console_level: 'error',
+		console_level: 'nothing',
 		file_level: 'debug'
 	},
 	db: {
@@ -97,6 +96,17 @@ module.exports = {
 		emailVerify: 336,
 		forgotPassword: 24
 	},
-	crossOrigin: true,
+	auth: {
+		captcha: false,
+		register: true
+	},	crossOrigin: true,
+	cn_queue: {
+		host: 'amqp://localhost:5672',
+		worker_queue: 'jobq',
+		callback_queue: 'callbackq',
+		upload_dir: 'uploads',
+		shared_storage: 'uploads'
+	},
+	uploadSizeLimit: 8388608, // 8MB in test enviroment
 	test_helper_api: false
 }

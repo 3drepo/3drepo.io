@@ -79,13 +79,17 @@ function updateIssue(req, res, next){
 
 	Issue.findByUID(dbCol, issueId, false, true).then(issue => {
 
+		if(!issue){
+			return Promise.reject({ resCode: responseCodes.ISSUE_NOT_FOUND });
+		}
+
 		if(data.hasOwnProperty('comment') && data.edit){
 			action = issue.updateComment(data.commentIndex, data);
 
 		} else if(data.hasOwnProperty('comment') && data.sealed) {
 			action = issue.updateComment(data.commentIndex, data);
 
-		} else if(data.hasOwnProperty('comment') && data.delete) {
+		} else if(data.commentIndex >= 0 && data.delete) {
 			action = issue.removeComment(data.commentIndex, data);
 
 		} else if (data.hasOwnProperty('comment')){
@@ -102,7 +106,7 @@ function updateIssue(req, res, next){
 			action = issue.save();
 
 		} else {
-			return Promise.reject({ 'message': 'unknown action'});
+			return Promise.reject({ 'message': 'unknown action' });
 		}
 
 		return action;
@@ -124,7 +128,7 @@ function updateIssue(req, res, next){
 		responseCodes.respond(place, req, res, next, responseCodes.OK, resData);
 
 	}).catch(err => {
-		console.log(err.stack);
+
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }

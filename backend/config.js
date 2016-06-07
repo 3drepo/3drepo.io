@@ -197,6 +197,8 @@
 	config.paypal = coalesce(config.paypal, {});
 	config.paypal.validateIPN = coalesce(config.paypal.validateIPN, true);
 
+	//upload size limit
+	config.uploadSizeLimit = coalesce(config.uploadSizeLimit, 209715200);
 	config.version = VERSION;
 
 	module.exports = config;

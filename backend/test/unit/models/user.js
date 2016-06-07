@@ -86,7 +86,7 @@ describe('User', function(){
 			let updateObj = {
 				firstName: 'fname',
 				lastName: 'lastname',
-				email: 'email@3drepo.org'
+				email: 'test3drepo@mailinator.com'
 			};
 
 			user.markModified = () => true;
@@ -141,11 +141,12 @@ describe('User', function(){
 			let password = '123';
 			let options = {
 				'rubbish': 'should not be inserted into database',
-				'firstName': '123'
+				'firstName': '123',
+				'email': 'test3drepo@mailinator.com'
 			};
 
 			let expectedCallWithOptions = {
-				customData: { firstName : options.firstName, inactive: true},
+				customData: { firstName : options.firstName, inactive: true, email: options.email},
 				roles: []
 			}
 

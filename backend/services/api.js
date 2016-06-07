@@ -46,6 +46,8 @@ module.exports.createApp = function (serverConfig) {
 	let bodyParser = require("body-parser");
 	let app = express();
 
+	app.use(sharedSession);
+	
 	app.use(cors({origin:true, credentials: true}));
 
 	// put logger in req object
@@ -98,8 +100,6 @@ module.exports.createApp = function (serverConfig) {
 	app.set("view_engine", "jade");
 	app.use(bodyParser.json());
 
-	app.use(sharedSession);
-
 	app.use(compress());
 
 	/*
@@ -135,6 +135,10 @@ module.exports.createApp = function (serverConfig) {
 	});
 
 	//auth handler
+	app.get('/info', (req, res) => {
+		res.status(200).json({ status: 'OK', version: '?'});
+	});
+
 	app.use('/', require('../routes/auth'));
 	// os api handler
 	app.use('/os',require('../routes/osBuilding'));

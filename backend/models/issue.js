@@ -27,6 +27,7 @@ var History = require('./history');
 var Ref = require('./ref');
 var GenericObject = require('./base/repo').GenericObject;
 var uuid = require("node-uuid");
+var responseCodes = require('../response_codes.js');
 
 var schema = Schema({
 	_id: Object,
@@ -57,7 +58,7 @@ var schema = Schema({
 	closed: Boolean,
 	comments: [{
 		owner: String,
-		comment: String,
+		comment: {type: String, required: true},
 		created: Number,
 		//TO-DO Error: `set` may not be used as a schema pathname
 		//set: Boolean
@@ -253,6 +254,10 @@ schema.statics.createIssue = function(dbColOptions, data){
 	let issue = Issue.createInstance(dbColOptions);
  	issue._id = stringToUUID(uuid.v1());
 
+ 	if(!data.name){
+ 		return Promise.reject({ resCode: responseCodes.ISSUE_NO_NAME });
+ 	}
+
 	if(objectId){
 		start = GenericObject.getSharedId(dbColOptions, objectId).then(sid => {
 			issue.parent = stringToUUID(sid);
@@ -265,7 +270,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 		issue.number  = count + 1;
 		issue.object_id = objectId && stringToUUID(objectId);
-		issue.name = data.name || 'Issue ' + issue.number;
+		issue.name = data.name;
 		issue.created = (new Date()).getTime();
 		issue.owner = data.owner;
 		issue.scribble = data.scribble && new Buffer(data.scribble, 'base64');
@@ -287,10 +292,10 @@ schema.methods.updateComment = function(commentIndex, data){
 	let timeStamp = (new Date()).getTime();
 
 	if(this.closed || (this.comments[commentIndex] && this.comments[commentIndex].sealed)){
-		return Promise.reject({ message: 'An attempt to edit a sealed comment or a closed issue.'});
+		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_SEALED });
 	}
 
-	if(!commentIndex){
+	if(commentIndex === null || typeof commentIndex === 'undefined'){
 		this.comments.push({ 
 			owner: data.owner,	
 			comment: data.comment, 
@@ -300,6 +305,14 @@ schema.methods.updateComment = function(commentIndex, data){
 
 		let commentObj = this.comments[commentIndex];
 		
+		if(!commentObj){
+			return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_INVALID_INDEX });
+		}
+
+		if(commentObj.owner !== data.owner){
+			return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_PERMISSION_DECLINED });
+		}
+
 		if(data.comment){
 			commentObj.comment = data.comment;
 			commentObj.created = timeStamp;
@@ -315,7 +328,7 @@ schema.methods.removeComment = function(commentIndex){
 	'use strict';
 
 	if(this.closed || this.comments[commentIndex].sealed){
-		return Promise.reject({ message: 'An attempt to remove a sealed comment or a closed issue.'});
+		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_SEALED });
 	}
 
 	this.comments[commentIndex].remove();
@@ -324,6 +337,10 @@ schema.methods.removeComment = function(commentIndex){
 
 schema.methods.closeIssue = function(){
 	'use strict';
+
+	if(this.closed){
+		return Promise.reject({ resCode: responseCodes.ISSUE_CLOSED_ALREADY });
+	}
 
 	this.closed = true;
 	this.closed_time = (new Date()).getTime();
