@@ -55,16 +55,19 @@
 			{
 				promise = AccountService.getUserInfo(vm.account);
 				promise.then(function (response) {
-					console.log(response);
-					vm.accounts = response.data.accounts;
-					vm.username = vm.account;
-					vm.firstName = response.data.firstName;
-					vm.lastName = response.data.lastName;
-					vm.email = response.data.email;
-					/*
-					vm.hasAvatar = response.data.hasAvatar;
-					vm.avatarURL = response.data.avatarURL;
-					*/
+					console.log(666666, response);
+					// Response with data.type indicates it's not the user's account
+					if (!response.data.hasOwnProperty("type")) {
+						vm.accounts = response.data.accounts;
+						vm.username = vm.account;
+						vm.firstName = response.data.firstName;
+						vm.lastName = response.data.lastName;
+						vm.email = response.data.email;
+						/*
+						 vm.hasAvatar = response.data.hasAvatar;
+						 vm.avatarURL = response.data.avatarURL;
+						 */
+					}
 				});
 			} else {
 				vm.username        = null;

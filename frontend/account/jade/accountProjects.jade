@@ -32,7 +32,14 @@ input#newProjectFileUploader(type="file")
 				md-list.projects(ng-if="account.showProjects")
 					div(layout="row", ng-repeat="project in account.projects", layout-align="start center", flex)
 						md-list-item(flex, layout-fill)
-							.project(ng-click="vm.goToProject(account.name, project.name)", layout="row", md-ink-ripple, layout-align="start center", layout-fill)
+							.project(
+								ng-click="vm.goToProject(account.name, project)"
+								layout="row"
+								md-ink-ripple="{{!project.disabled}}"
+								layout-align="start center"
+								layout-fill
+								ng-class="{accountProjectDisabled: project.disabled, accountProjectEnabled: !project.disabled}"
+								)
 								md-button.md-icon-button(aria-label="Dashboard")
 									md-icon.angular-material-icons dashboard
 								p.projectName(flex) {{project.name}}

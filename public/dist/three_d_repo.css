@@ -44,8 +44,21 @@ account-projects .project {
   outline: none;
   padding-left: 10px;
 }
-account-projects .account:hover,
-account-projects .project:hover {
+account-projects .account:hover {
+  cursor: pointer;
+  background: #EEE;
+}
+
+.accountProjectDisabled {
+  color: #AAAAAA;
+}
+.accountProjectDisabled:hover {
+  cursor: default;
+}
+.accountProjectEnabled {
+  color: #4CAF50;
+}
+.accountProjectEnabled:hover {
   cursor: pointer;
   background: #EEE;
 }
@@ -53,9 +66,10 @@ account-projects .project:hover {
 account-projects .projects {
   margin-left: 40px;
 }
+
 account-projects .projects .projectName,
 account-projects .projects md-icon {
-  color: #4CAF50;
+  color: inherit;
 }
 account-projects .projects md-icon {
   margin: 0 !important;

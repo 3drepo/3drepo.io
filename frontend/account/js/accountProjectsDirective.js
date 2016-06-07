@@ -106,7 +106,13 @@
 					vm.accounts[i].showProjectsIcon = "folder_open";
 					for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
 						vm.accounts[i].projects[j].name = vm.accounts[i].projects[j].project;
-						vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp);
+						if (vm.accounts[i].projects[j].timestamp === null) {
+							vm.accounts[i].projects[j].disabled = true;
+						}
+						else {
+							vm.accounts[i].projects[j].disabled = false;
+							vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp);
+						}
 						vm.accounts[i].projects[j].bif4FreeEnabled = false;
 						vm.accounts[i].projects[j].uploading = false;
 						//vm.accounts[i].projects[j].canUpload = (vm.accounts[i].account === vm.account);
@@ -158,7 +164,9 @@
 		 * @param {String} project
 		 */
 		vm.goToProject = function (account, project) {
-			$location.path("/" + account + "/" + project, "_self");
+			if (!project.disabled) {
+				$location.path("/" + account + "/" + project.name, "_self");
+			}
 		};
 
 		/**

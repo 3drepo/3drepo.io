@@ -4708,16 +4708,19 @@ var ViewerManager = {};
 			{
 				promise = AccountService.getUserInfo(vm.account);
 				promise.then(function (response) {
-					console.log(response);
-					vm.accounts = response.data.accounts;
-					vm.username = vm.account;
-					vm.firstName = response.data.firstName;
-					vm.lastName = response.data.lastName;
-					vm.email = response.data.email;
-					/*
-					vm.hasAvatar = response.data.hasAvatar;
-					vm.avatarURL = response.data.avatarURL;
-					*/
+					console.log(666666, response);
+					// Response with data.type indicates it's not the user's account
+					if (!response.data.hasOwnProperty("type")) {
+						vm.accounts = response.data.accounts;
+						vm.username = vm.account;
+						vm.firstName = response.data.firstName;
+						vm.lastName = response.data.lastName;
+						vm.email = response.data.email;
+						/*
+						 vm.hasAvatar = response.data.hasAvatar;
+						 vm.avatarURL = response.data.avatarURL;
+						 */
+					}
 				});
 			} else {
 				vm.username        = null;
@@ -5064,7 +5067,13 @@ var ViewerManager = {};
 					vm.accounts[i].showProjectsIcon = "folder_open";
 					for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
 						vm.accounts[i].projects[j].name = vm.accounts[i].projects[j].project;
-						vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp);
+						if (vm.accounts[i].projects[j].timestamp === null) {
+							vm.accounts[i].projects[j].disabled = true;
+						}
+						else {
+							vm.accounts[i].projects[j].disabled = false;
+							vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp);
+						}
 						vm.accounts[i].projects[j].bif4FreeEnabled = false;
 						vm.accounts[i].projects[j].uploading = false;
 						//vm.accounts[i].projects[j].canUpload = (vm.accounts[i].account === vm.account);
@@ -5116,7 +5125,9 @@ var ViewerManager = {};
 		 * @param {String} project
 		 */
 		vm.goToProject = function (account, project) {
-			$location.path("/" + account + "/" + project, "_self");
+			if (!project.disabled) {
+				$location.path("/" + account + "/" + project.name, "_self");
+			}
 		};
 
 		/**
