@@ -76,32 +76,83 @@
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "Auth", "StateManager", "EventService"];
+    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$location", "Auth", "StateManager", "EventService", "UtilsService"];
 
-    function HomeCtrl($scope, Auth, StateManager, EventService) {
-        var vm = this;
+    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $location, Auth, StateManager, EventService, UtilsService) {
+        var vm = this,
+			goToUserPage,
+			homeLoggedOut,
+			notLoggedInElement,
+			element,
+			state;
 
+		/*
+		 * Init
+		 */
 		vm.state = StateManager.state;
+		vm.legalDisplays = [
+			{title: "Terms & Conditions", value: "termsAndConditions"},
+			{title: "Privacy", value: "privacy"},
+			{title: "Cookies", value: "cookies"}
+		];
 
+		/*
+		 * Watch the state to handle moving to and from the login page
+		 */
 		$scope.$watch("vm.state", function () {
-			if (angular.isDefined(vm.state.registerRequest) && (vm.state.registered !== null)) {
-				vm.notLoggedInToShow = "showRegisterRequest";
-			}
-			else if (angular.isDefined(vm.state.registerVerify) && (vm.state.registerVerify !== null)) {
-				vm.username = vm.state.username;
-				vm.token = vm.state.token;
-				vm.notLoggedInToShow = "showRegisterVerify";
-			}
-			else if (angular.isDefined(vm.state.passwordForgot) && (vm.state.registered !== null)) {
-				vm.notLoggedInToShow = "showPasswordForgot";
-			}
-			else if (angular.isDefined(vm.state.passwordChange) && (vm.state.registered !== null)) {
-				vm.username = vm.state.username;
-				vm.token = vm.state.token;
-				vm.notLoggedInToShow = "showPasswordChange";
-			}
-			else {
-				vm.notLoggedInToShow = "showLogin";
+			console.log(vm.state);
+			if (vm.state.hasOwnProperty("loggedIn")) {
+				if (!vm.state.loggedIn) {
+					$timeout(function () {
+						homeLoggedOut = angular.element($element[0].querySelector('#homeLoggedOut'));
+						homeLoggedOut.empty();
+
+						goToUserPage = false;
+						for (state in vm.state) {
+							if (vm.state.hasOwnProperty(state)) {
+								if (vm.state[state] === true) {
+									goToUserPage = true;
+									// username and token only required for some pages
+									vm.username = vm.state.username;
+									vm.token = vm.state.token;
+									// Create element
+									element = "<" + UtilsService.snake_case(state, "-") +
+										" username='vm.username'" +
+										" token='vm.token'>" +
+										"</" + UtilsService.snake_case(state, "-") + ">";
+									notLoggedInElement = angular.element(element);
+									homeLoggedOut.append(notLoggedInElement);
+									$compile(notLoggedInElement)($scope);
+									break;
+								}
+							}
+						}
+
+						if (!goToUserPage) {
+							// Create login element
+							notLoggedInElement = angular.element("<login></login>");
+							homeLoggedOut.append(notLoggedInElement);
+							$compile(notLoggedInElement)($scope);
+						}
+					});
+				}
+				else {
+					// If none of the states is truthy the user is going back to the login page
+					goToUserPage = true;
+					for (state in vm.state) {
+						if (vm.state.hasOwnProperty(state)) {
+							if ((state !== "loggedIn") && (typeof vm.state[state] === "string")) {
+								goToUserPage = false;
+								break;
+							}
+						}
+					}
+					if (goToUserPage) {
+						// Prevent user going back to the login page after logging in
+						$location.path("/" + localStorage.getItem("tdrLoggedIn"), "_self");
+						//vm.logout(); // Going back to the login page should logout the user
+					}
+				}
 			}
 		}, true);
 
@@ -122,6 +173,27 @@
             Auth.logout();
         };
 
+		/**
+		 * Display legal text
+		 * 
+		 * @param event
+		 * @param display
+		 */
+		vm.legalDisplay = function (event, display) {
+			vm.legalTitle = display.title;
+			vm.legalText = display.value;
+			$mdDialog.show({
+				templateUrl: "legalDialog.html",
+				parent: angular.element(document.body),
+				targetEvent: event,
+				clickOutsideToClose:true,
+				fullscreen: true,
+				scope: $scope,
+				preserveScope: true,
+				onRemoving: removeDialog
+			});
+		};
+
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if (angular.isDefined(event) && angular.isDefined(event.type)) {
 				if (event.type === EventService.EVENT.USER_LOGGED_IN)
@@ -136,13 +208,26 @@
 					}
 				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
 					EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
-				} else if (event.type === EventService.EVENT.VIEWER.LOGO_CLICK) {
-					console.log("Click logo");
+				} else if (event.type === EventService.EVENT.SHOW_PROJECTS) {
 					StateManager.clearState();
 					Auth.init();
 				}
 			}
 		});
+
+		/**
+		 * Close the dialog
+		 */
+		$scope.closeDialog = function() {
+			$mdDialog.cancel();
+		};
+
+		/**
+		 * Close the dialog by not clicking the close button
+		 */
+		function removeDialog () {
+			$scope.closeDialog();
+		}
     }
 }());
 

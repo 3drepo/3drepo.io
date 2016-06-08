@@ -120,32 +120,27 @@ schema.post('save', function(doc){
 				package: doc.packageName,
 			};
 
-			console.log('bid', bid);
-
 			db.collection('system.users').findOne({ user: doc.user}).then(user => {
-				console.log('user found', user.customData);
+				let customData = {};
 
-				console.log('find bid', _.findIndex(user.customData.bids, bid));
-				if (user.customData && user.customData.bids && _.findIndex(user.customData.bids, bid) === -1){
+				if(user.customData) {
+					customData = user.customData;
+				}
 
-					console.log('push bid');
-					user.customData.bids.push(bid);
-
-				} else if (!user.customData) {
-
-					user.customData = {
+				if (customData && customData.bids && _.findIndex(customData.bids, bid) === -1){
+					customData.bids.push(bid);
+				} else if (!customData) {
+					customData = {
 						bids: [bid]
 					};
 
-				} else if (!user.customData.bids){
-					user.customData.bids = [bid];
+				} else if (!customData.bids){
+					customData.bids = [bid];
 				}
 
-				console.log('new custom data', user.customData);
-
-				var updateUserCmd = {
+				let updateUserCmd = {
 					updateUser: doc.user,
-					customData: user.customData
+					customData: customData
 				};
 
 				return db.command(updateUserCmd);
@@ -154,8 +149,6 @@ schema.post('save', function(doc){
 				console.log(err);
 			});
 		});
-
-
 	}
 });
 

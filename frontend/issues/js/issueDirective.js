@@ -41,15 +41,13 @@
 		};
 	}
 
-	IssueCtrl.$inject = ["$scope", "$timeout", "IssuesService", "EventService"];
+	IssueCtrl.$inject = ["$scope", "IssuesService"];
 
-	function IssueCtrl($scope, $timeout, IssuesService, EventService) {
+	function IssueCtrl($scope, IssuesService) {
 		var vm = this,
 			promise = null,
 			originatorEv = null,
 			initWatch;
-
-		console.log(vm.index);
 
 		/*
 		 * Initialise view vars
@@ -303,77 +301,5 @@
 			originatorEv = event;
 			$mdOpenMenu(event);
 		};
-	}
-
-	/*
-	 * Below is for setting up the animation to show and hide comments
-	 */
-
-	angular.module("3drepo")
-		.animation(".issueComments", issueComments);
-
-	function issueComments() {
-		var height;
-		return {
-			addClass: function(element, className, done) {
-				if (className === "issueComments") {
-					angular.element(element)
-						.css({
-							height: 0,
-							opacity: 0
-						})
-						.animate({
-							height: height,
-							opacity: 1
-						}, 500, done);
-				} else {
-					done();
-				}
-			},
-			removeClass: function(element, className, done) {
-				height = element[0].children[0].offsetHeight;
-				if (className === "issueComments") {
-					angular.element(element)
-						.css({
-							height: height,
-							opacity: 1
-						})
-						.animate({
-							height: 0,
-							opacity: 0
-						}, 500, done);
-				} else {
-					done();
-				}
-			}
-		};
-	}
-
-	angular.module("3drepo")
-		.directive("commentsHeight", commentsHeight);
-
-	function commentsHeight() {
-		return {
-			restrict: "A",
-			scope: {
-				numNewComments: "="
-			},
-			link: link
-		};
-
-		function link(scope, element, attrs) {
-			var commentHeight = 75,
-				height = "0";
-			scope.$watch("numNewComments", function(newValue, oldValue) {
-				if (angular.isDefined(newValue)) {
-					if (newValue > oldValue) {
-						height = (element[0].offsetHeight + commentHeight).toString();
-					} else if (newValue < oldValue) {
-						height = (element[0].offsetHeight - commentHeight).toString();
-					}
-					element.css("height", height + "px");
-				}
-			});
-		}
 	}
 }());

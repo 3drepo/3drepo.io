@@ -33,7 +33,7 @@
                 // Cleanup when destroyed
                 element.on('$destroy', function(){
                     scope.vm.eventsWatch(); // Disable events watch
-                })
+                });
             },
             controller: IssueAreaCtrl,
             controllerAs: "vm",
@@ -41,9 +41,9 @@
         };
     }
 
-    IssueAreaCtrl.$inject = ["$scope", "$element", "$window", "$timeout", "$q", "EventService"];
+    IssueAreaCtrl.$inject = ["$scope", "$element", "$window", "$timeout", "EventService"];
 
-    function IssueAreaCtrl($scope, $element, $window, $timeout, $q, EventService) {
+    function IssueAreaCtrl($scope, $element, $window, $timeout, EventService) {
         var vm = this,
             canvas,
             canvasColour = "rgba(0 ,0 ,0, 0)",
@@ -54,10 +54,9 @@
             mouse_button = 0,
             mouse_dragging = false,
             pen_col = "#FF0000",
-            initialPenSize = 4,
-            pen_size = initialPenSize,
-            initialPenIndicatorSize = 20,
+            initialPenIndicatorSize = 10,
             penIndicatorSize = initialPenIndicatorSize,
+            pen_size = penIndicatorSize,
             mouseWheelDirectionUp = null,
             hasDrawnOnCanvas = false;
 
@@ -74,6 +73,7 @@
                 canvas = angular.element($element[0].querySelector('#issueAreaCanvas'));
                 myCanvas = document.getElementById("issueAreaCanvas");
                 penIndicator = angular.element($element[0].querySelector("#issueAreaPenIndicator"));
+                penIndicator.css("font-size", penIndicatorSize + "px");
                 vm.pointerEvents = "auto";
                 vm.showPenIndicator = false;
                 resizeCanvas();
@@ -183,7 +183,7 @@
                 if (!mouse_dragging && !vm.showPenIndicator) {
                     $timeout(function () {
                         vm.showPenIndicator = true;
-                    })
+                    });
                 }
                 else {
                     if ((last_mouse_drag_x !== -1) && (!hasDrawnOnCanvas)) {
@@ -195,26 +195,23 @@
                 evt.preventDefault();
                 evt.stopPropagation();
                 evt.returnValue = false;
-                setPenIndicatorPosition(mouse_drag_x, mouse_drag_y);
+                setPenIndicatorPosition(evt.layerX, evt.layerY);
             }, false);
 
             canvas.addEventListener('wheel', function (evt) {
-                var penToIndicatorRation = 0.7;
+                var penToIndicatorRation = 0.8;
 
                 if (evt.deltaY === 0) {
                     mouseWheelDirectionUp = null;
                     initialPenIndicatorSize = penIndicatorSize;
-                    initialPenSize = pen_size;
                 }
                 else if ((evt.deltaY === 1) && (mouseWheelDirectionUp === null)) {
                     mouseWheelDirectionUp = false;
                     penIndicatorSize = initialPenIndicatorSize;
-                    pen_size = initialPenSize;
                 }
                 else if ((evt.deltaY === -1) && (mouseWheelDirectionUp === null)) {
                     mouseWheelDirectionUp = true;
                     penIndicatorSize = initialPenIndicatorSize;
-                    pen_size = initialPenSize;
                 }
                 else {
                     penIndicatorSize += mouseWheelDirectionUp ? 1 : -1;
@@ -237,8 +234,9 @@
         {
             var context = canvas.getContext("2d");
 
-            if (!mouse_dragging)
+            if (!mouse_dragging) {
                 return;
+            }
 
             if (last_mouse_drag_x < 0 || last_mouse_drag_y < 0)
             {
@@ -297,6 +295,7 @@
             var context = myCanvas.getContext("2d");
             context.globalCompositeOperation = "source-over";
             pen_col = "#FF0000";
+            pen_size = penIndicatorSize;
             vm.canvasPointerEvents = "auto";
         }
 

@@ -47,7 +47,8 @@
 				right: []
 			},
 			projectUI,
-			issueArea;
+			issueArea,
+			issuesCardIndex = 0;
 
 		vm.pointerEvents = "auto";
 
@@ -58,6 +59,7 @@
 			projectUI = angular.element($element[0].querySelector('#projectUI'));
 		});
 
+		/*
 		panelCard.left.push({
 			type: "tree",
 			title: "Tree",
@@ -70,6 +72,7 @@
 				{type: "filter", visible: true}
 			]
 		});
+		*/
 
 		panelCard.left.push({
 			type: "issues",
@@ -117,6 +120,7 @@
 			add: true
 		});
 
+		/*
 		panelCard.left.push({
 			type: "groups",
 			title: "Groups",
@@ -138,6 +142,7 @@
 			],
 			add: true
 		});
+		*/
 
 		panelCard.left.push({
 			type: "clip",
@@ -179,7 +184,7 @@
 				// Add filtering options for the Issues card menu
 				ProjectService.getRoles(vm.account, vm.project).then(function (data) {
 					for (i = 0, length = data.length; i < length; i += 1) {
-						panelCard.left[1].menu.push(
+						panelCard.left[issuesCardIndex].menu.push(
 							{
 								value: "filterRole_" + data[i].role,
 								label: data[i].role,

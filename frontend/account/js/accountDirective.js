@@ -35,11 +35,16 @@
 		};
 	}
 
-	AccountCtrl.$inject = ["$scope", "AccountService"];
+	AccountCtrl.$inject = ["$scope", "$location", "AccountService", "Auth"];
 
-	function AccountCtrl($scope, AccountService) {
+	function AccountCtrl($scope, $location, AccountService, Auth) {
 		var vm = this,
 			promise;
+
+		/*
+		 * Init
+		 */
+		vm.itemToShow = "repos";
 
 		/*
 		 * Get the account data
@@ -48,15 +53,21 @@
 		{
 			if (vm.account)
 			{
-				promise = AccountService.getData(vm.account);
-				promise.then(function (data) {
-					vm.username        = data.username;
-					vm.firstName       = data.firstName;
-					vm.lastName        = data.lastName;
-					vm.email           = data.email;
-					vm.hasAvatar       = data.hasAvatar;
-					vm.avatarURL       = data.avatarURL;
-					vm.projectsGrouped = data.projectsGrouped;
+				promise = AccountService.getUserInfo(vm.account);
+				promise.then(function (response) {
+					console.log(666666, response);
+					// Response with data.type indicates it's not the user's account
+					if (!response.data.hasOwnProperty("type")) {
+						vm.accounts = response.data.accounts;
+						vm.username = vm.account;
+						vm.firstName = response.data.firstName;
+						vm.lastName = response.data.lastName;
+						vm.email = response.data.email;
+						/*
+						 vm.hasAvatar = response.data.hasAvatar;
+						 vm.avatarURL = response.data.avatarURL;
+						 */
+					}
 				});
 			} else {
 				vm.username        = null;
@@ -66,5 +77,26 @@
 				vm.projectsGrouped = null;
 			}
 		});
+		
+		vm.showItem = function (item) {
+			vm.itemToShow = item;
+		};
+
+		/**
+		 * Event listener for change in local storage login status
+		 * 
+		 * @param event
+		 */
+		function loginStatusListener (event) {
+			if ((event.key === "tdrLoggedIn") && (event.newValue === "false")) {
+				$location.path("/", "_self");
+				Auth.logout();
+			}
+		}
+		window.addEventListener("storage", loginStatusListener, false);
+		// Set the logged in status to the account name just once
+		if (localStorage.getItem("tdrLoggedIn") === "false") {
+			localStorage.setItem("tdrLoggedIn", vm.account);
+		}
 	}
 }());

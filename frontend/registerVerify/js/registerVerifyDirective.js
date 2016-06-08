@@ -24,10 +24,7 @@
     function registerVerify() {
         return {
             restrict: "E",
-            scope: {
-                username: "=",
-                token: "="
-            },
+            scope: {},
             templateUrl: "registerVerify.html",
             controller: RegisterVerifyCtrl,
             controllerAs: "vm",
@@ -35,36 +32,59 @@
         };
     }
 
-    RegisterVerifyCtrl.$inject = ["$scope", "$window", "RegisterVerifyService"];
+    RegisterVerifyCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "AccountService"];
 
-    function RegisterVerifyCtrl ($scope, $window, RegisterVerifyService) {
+    function RegisterVerifyCtrl ($scope, $location, $timeout, UtilsService, AccountService) {
         var vm = this,
-            promise;
+            promise,
+            username = $location.search().username,
+            token = $location.search().token;
 
         /*
          * Init
          */
         vm.verified = false;
+        vm.showPaymentWait = false;
+        vm.databaseName = username;
+        vm.pay = (($location.search().hasOwnProperty("pay")) && $location.search().pay);
 
-        /*
-         * Watch the token value
-         */
-        $scope.$watchGroup(["vm.username", "vm.token"], function () {
-            if (angular.isDefined(vm.username) && angular.isDefined(vm.token)) {
-                promise = RegisterVerifyService.verify(vm.username, {token: vm.token});
-                promise.then(function (response) {
-                    if (response.status === 200) {
-                        vm.verified = true;
-                    }
-                    else {
-                        vm.registerErrorMessage = "Error with verification";
-                    }
-                });
+        vm.verifyErrorMessage = "Verifying. Please wait...";
+        promise = UtilsService.doPost({token: token}, username + "/verify");
+        promise.then(function (response) {
+            if (response.status === 200) {
+                vm.verified = true;
+                vm.verifySuccessMessage = "Congratulations. You have successfully signed up for 3D Repo. You may now login to you account.";
+            }
+            else if (response.data.value === 60) {
+                vm.verified = true;
+                vm.verifySuccessMessage = "You have already verified your account successfully. You may now login to your account.";
+            }
+            else {
+                vm.verifyErrorMessage = "Error with verification";
             }
         });
 
         vm.goToLoginPage = function () {
-            $window.location.href = "/";
+            $location.path("/", "_self");
+        };
+
+        vm.setupPayment = function ($event) {
+            var data;
+            vm.paypalReturnUrl = $location.protocol() + "://" + $location.host();
+            data = {
+                verificationToken: token,
+                plan: "THE-100-QUID-PLAN"
+            };
+            promise = AccountService.newSubscription(username, data);
+            promise.then(function (response) {
+                vm.subscriptionToken = response.data.token;
+                // Make sure form contains the token before submitting
+                $timeout(function () {
+                    $scope.$apply();
+                    document.registerVerifyForm.action = "https://www.sandbox.paypal.com/cgi-bin/webscr";
+                    document.registerVerifyForm.submit();
+                }, 1000);
+            });
         };
     }
 }());

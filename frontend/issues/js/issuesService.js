@@ -81,7 +81,7 @@
 		obj.getIssues = function(account, project) {
 			var self = this,
 				deferred = $q.defer();
-			url = serverConfig.apiUrl(account + "/" + project + "/issues.json");
+			url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/issues.json");
 
 			$http.get(url)
 				.then(
@@ -115,7 +115,7 @@
 				deferred = $q.defer(),
 				viewpointPromise = $q.defer();
 
-			url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues.json");
+			url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues.json");
 
 			EventService.send(EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, {promise: viewpointPromise});
 
@@ -165,7 +165,7 @@
 		 */
 		function doPut(issue, data) {
 			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(issue.account + "/" + issue.project + "/issues/" + issue._id + ".json"),
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues/" + issue._id + ".json"),
 				config = {
 					withCredentials: true
 				};
@@ -264,7 +264,7 @@
 
 		obj.getRoles = function(account, project) {
 			var deferred = $q.defer();
-			url = serverConfig.apiUrl(account + '/' + project + '/roles.json');
+			url = serverConfig.apiUrl(serverConfig.GET_API, account + '/' + project + '/roles.json');
 
 			$http.get(url)
 				.then(
@@ -282,7 +282,7 @@
 
 		obj.getUserRolesForProject = function(account, project, username) {
 			var deferred = $q.defer();
-			url = serverConfig.apiUrl(account + "/" +project + "/" + username + "/userRolesForProject.json");
+			url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" +project + "/" + username + "/userRolesForProject.json");
 
 			$http.get(url)
 				.then(

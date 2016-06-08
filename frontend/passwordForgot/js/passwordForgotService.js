@@ -34,13 +34,18 @@
          */
         function doPost(data, urlEnd) {
             var deferred = $q.defer(),
-                url = serverConfig.apiUrl(urlEnd),
+                url = serverConfig.apiUrl(serverConfig.POST_API, urlEnd),
                 config = {withCredentials: true};
 
             $http.post(url, data, config)
-                .then(function (response) {
-                    deferred.resolve(response);
-                });
+                .then(
+                    function (response) {
+                        deferred.resolve(response);
+                    },
+                    function (error) {
+                        deferred.resolve(error);
+                    }
+                );
             return deferred.promise;
         }
 

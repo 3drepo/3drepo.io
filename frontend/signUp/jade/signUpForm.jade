@@ -1,0 +1,24 @@
+form#signUpForm
+	md-input-container.md-block(md-no-float)
+		input(type='text', ng-model='vm.newUser.username', placeholder='Username', ng-required, ng-keypress="vm.register($event)")
+	md-input-container.md-block(md-no-float)
+		input(type='email', ng-model='vm.newUser.email', placeholder='Email', ng-required, ng-keypress="vm.register($event)")
+	md-input-container.md-block(md-no-float)
+		input(type='password', ng-model='vm.newUser.password', placeholder='Password', ng-required ng-keypress="vm.register($event)")
+	// Extra hidden inputs to prevent input autofill
+	input(type="email", ng-show="false")
+	input(type="password", ng-show="false")
+
+	#tc(layout="row", layout-align="start center", flex)
+		md-checkbox.md-accent(ng-model="vm.newUser.tcAgreed" aria-label="Terms and conditions Checkbox")
+		div(layout="row", layout-align="start center")
+			p I agree to the
+			a(href="", ng-click="vm.showTC()") Terms and Conditions
+	#loginCaptcha(vc-recaptcha, key="vm.captchaKey", ng-model="vm.reCaptchaResponse", ng-if="vm.useReCapthca")
+	div(layout="row", layout-align="start center")
+		md-button.md-accent.md-raised(ng-click="vm.register()", ng-disabled="vm.registering", flex="none") {{vm.buttonLabel}}
+		#registerWait(ng-if="vm.registering", layout="row", layout-align="start center")
+			p Signing up...
+			md-progress-circular(md-mode="indeterminate")
+	h4.registerError {{vm.registerErrorMessage}}
+	a.registerLinks(href="", ng-click="vm.showPage('pricing')") Pricing

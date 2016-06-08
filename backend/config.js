@@ -18,7 +18,7 @@
 (function() {
 	"use strict";
 
-	const VERSION="1.0.0b";
+	const VERSION="v1.0.0";
 
 	var config = require("app-config").config;
 	var frontend_scripts = require("../common_public_files.js");
@@ -57,16 +57,27 @@
 		serverObject.public_port       = coalesce(serverObject.public_port, serverObject.port);
 		serverObject.public_protocol   = coalesce(serverObject.public_protocol, using_ssl ? "https" : "http");
 
-		serverObject.hostname = serverObject.subdomain ? (serverObject.subdomain + "." + host) : host;
+		serverObject.hostname = coalesce(serverObject.hostname, serverObject.subdomain ? (serverObject.subdomain + "." + host) : host);
 		serverObject.host_dir = serverObject.subdirectory ? ("/" + serverObject.subdirectory) : "/";
 
 		serverObject.base_url     = serverObject.public_protocol + "://" + serverObject.hostname + ":" + serverObject.public_port;
-		serverObject.location_url = "function(path) { return \"//\" + window.location.host + \"" + serverObject.host_dir + "/\" + path; }";
-		serverObject.url          = serverObject.base_url + serverObject.host_dir; 
+		//serverObject.location_url = "function(path) { return \"//\" + window.location.host + \"" + serverObject.host_dir + "/\" + path; }";
+		serverObject.url          = serverObject.base_url + serverObject.host_dir;
+
+		if (serverObject.use_location)
+		{
+			serverObject.location_url = Function("path","return \"//\" + window.location.host + \"" + serverObject.host_dir + "/\" + path;");
+		} else {
+			serverObject.location_url = Function("path","return '" + serverObject.url + "/' + path;");
+		}
+
+		serverObject.location_url = serverObject.location_url.toString();
 	};
 
 	// Check for hostname and ip here
-	config.host        = coalesce(config.host, "127.0.0.1");
+	config.host          = coalesce(config.host, "127.0.0.1");
+	config.numThreads    = coalesce(config.numThreads, 1);
+	config.HTTPSredirect = coalesce(config.HTTPSredirect, false);
 
 	// Global config variable used in the function above
 	let default_http_port  = coalesce(config.http_port, 80); // Default http port
@@ -78,6 +89,7 @@
 	config.cookie               = coalesce(config.cookie, {});
 	config.cookie.secret        = coalesce(config.cookie.secret, config.default_cookie_secret);
 	config.cookie.parser_secret = coalesce(config.cookie.parser_secret, config.default_cookie_parser_secret);
+	config.cookie_domain        = coalesce(config.cookie.domain, config.host);
 
 	// Check whether the secret have been set in the file or not
 	if ((config.cookie.secret === config.default_cookie_secret) || (config.cookie.parser_secret === config.default_cookie_parser_secret))
@@ -87,40 +99,55 @@
 	}
 
 	config.subdomains = {};
+	config.apiUrls = {};
+
+	var multipleAPIServer = false;
 
 	for (var i = 0; i < config.servers.length; i++)
 	{
 		var server = config.servers[i];
 
-		if(!server.subdomains){
-			server.subdomains = { 'default': null};
+		if (!config.subdomains.hasOwnProperty(server.subdomain))
+		{
+			config.subdomains[server.subdomain] = [];
 		}
 
-		Object.keys(server.subdomains).forEach(key => {
-			let serverSubDomain = server.subdomains[key];
-			if (!config.subdomains.hasOwnProperty(serverSubDomain))
-			{
-				config.subdomains[serverSubDomain] = [];
-			}
+		config.subdomains[server.subdomain].push(server);
 
-			config.subdomains[serverSubDomain].push(server);
+		if (server.service === "api")
+		{
+			fillInServerDetails(server, "api", config.using_ssl, config.host, default_http_port, default_https_port);
 
-			if (config.servers[i].service === "api")
+			if (!server.type)
 			{
+				server.type = "all";
+
 				config.api_server = server;
 
-				fillInServerDetails(config.api_server, "api", config.using_ssl, config.host, default_http_port, default_https_port);
-				config.api_server.external     = coalesce(config.api_server.external, false); // Do we need to start an API server, or just link to an external one.
-				config.api_server.chat_subpath = coalesce(config.api_server.chat_subpath, "chat");
-				config.api_server.chat_path    = config.api_server.host_dir + "/" + config.api_server.chat_subpath;
-				config.api_server.chat_host    = config.api_server.base_url;
+				if (!multipleAPIServer)
+				{
+					multipleAPIServer = true;
+				} else {
+					config.api_server.url = "{3drepo_api}";
+				}
 
-				config.api_server.session = sessionFactory.session(config);
-			} else {
-				fillInServerDetails(server, "server_" + i, config.using_ssl, config.host, default_http_port, default_https_port);
+				server.external     = coalesce(server.external, false); // Do we need to start an API server, or just link to an external one.
+				server.chat_subpath = coalesce(server.chat_subpath, "chat");
+				server.chat_path    = server.host_dir + "/" + server.chat_subpath;
+				server.chat_host    = server.base_url;
 			}
-		});
 
+			server.session = sessionFactory.session(config);
+
+			if (!config.apiUrls.hasOwnProperty(server.type))
+			{
+				config.apiUrls[server.type] = [];
+			}
+
+			config.apiUrls[server.type].push(server.location_url);
+		} else {
+			fillInServerDetails(server, "server_" + i, config.using_ssl, config.host, default_http_port, default_https_port);
+		}
 	}
 
 	config.disableCache            = coalesce(config.disableCache, false);

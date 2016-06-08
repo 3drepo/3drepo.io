@@ -34,7 +34,7 @@
          */
         function doPut(data, urlEnd) {
             var deferred = $q.defer(),
-                url = serverConfig.apiUrl(urlEnd),
+                url = serverConfig.apiUrl(serverConfig.POST_API, urlEnd),
                 config = {withCredentials: true};
 
             $http.put(url, data, config)

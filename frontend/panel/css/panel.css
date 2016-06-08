@@ -94,6 +94,8 @@ panel-card md-toolbar {
 }
 panel-card md-toolbar .md-toolbar-tools {
   padding-right: 0;
+  min-height: 40px;
+  height: 40px;
 }
 panel-card md-toolbar #options .md-button {
   margin: 0 4px;
@@ -107,7 +109,6 @@ panel-card #panelCardContainer {
   overflow-x: hidden;
   overflow-y: auto;
   width: 100%;
-  height: 100%;
 }
 
 panel-card #helpButton {

@@ -22,16 +22,19 @@ home #homeLogo {
     left: 0;
     right: 0;
     margin: auto;
+    pointer-events: none;
 }
 home #homeLogo img {
     width: inherit;
+    pointer-events: inherit;
 }
 
 home .homeUserContent {
     padding-top: 120px;
 }
 
-home .homeUserContent .md-whiteframe-1dp {
+home .homeUserContent .md-whiteframe-1dp,
+home .homeUserContent .md-whiteframe-8dp {
     border-radius: 4px;
     background: #FFF;
 }
@@ -39,14 +42,69 @@ home .homeUserContent .md-whiteframe-1dp {
 home .homeUserContent md-toolbar {
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
+    height: 40px;
+    min-height: 40px;
 }
 
 home .homeUserContent .userContent {
     padding: 20px;
+    max-height: calc(100vh - 200px);
+    overflow-x: hidden;
 }
 
 home .homeUserContent .userContent h3 {
     color: rgba(0, 0, 0, 0.7);
-    text-align: center;
     font-weight: normal;
+}
+
+home .homeUserContent .userContent md-progress-circular {
+    margin-left: 10px;
+}
+
+home .cardInfo {
+    text-align: center;
+    padding: 15px;
+    background: #E8EAF6;
+    margin: 15px;
+    border-radius: 4px;
+}
+home .cardInfo p {
+    margin: 0;
+    color: rgba(0, 0, 0, 0.7);
+    word-wrap: break-word;
+}
+home .cardInfo md-icon {
+    margin: 0;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+home #legalLinks {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 1000;
+}
+home #legalLinks .md-button {
+    font-size: 12px;
+    margin: 0;
+    opacity: 0.7;
+}
+
+/** Legal Dialog ******************************************************************************************************/
+.legalDialog {
+    width: calc(100vw - 50%);
+    min-height: calc(100vh - 25%);
+    overflow: hidden;
+}
+
+.legalDialog md-content {
+    padding: 20px;
+}
+
+/** Dialog ************************************************************************************************************/
+md-dialog md-toolbar {
+    height: 40px;
+    min-height: 40px;
 }

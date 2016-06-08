@@ -1,5 +1,4 @@
 node_modules
-common_public_files.js
 
 /public/css/*.css~
 /*.log
@@ -9,15 +8,6 @@ config/*
 bower_components
 
 certs
-
-public/dist/plugins.concat.js
-public/dist/plugins.min.js
-
-public/dist/plugins.concat.js.map
-public/dist/plugins.min.js.map
-
-public/dist/three_d_repo.min.js
-public/dist/three_d_repo.min.js.map
 
 public/images/logos
 
@@ -35,40 +25,24 @@ build/config.gypi
 obj/Debug
 
 .idea/.name
-
 .idea/3drepo.io.iml
-
 .idea/codeStyleSettings.xml
-
 .idea/inspectionProfiles/profiles_settings.xml
-
 .idea/inspectionProfiles/Project_Default.xml
-
 .idea/jsLibraryMappings.xml
-
 .idea/jsLinters/jshint.xml
-
 .idea/jsLinters/jslint.xml
-
 .idea/libraries/3drepo_io_node_modules.xml
-
 .idea/misc.xml
-
 .idea/modules.xml
-
 .idea/vcs.xml
-
 .idea/watcherTasks.xml
-
 .idea/workspace.xml
+.idea/encodings.xml
+.idea/mongoSettings.xml
 
 create_admin_user.js
-
 create_node_user.js
-
-.idea/encodings.xml
-
-.idea/mongoSettings.xml
 
 #SASS map files
 *.css.map
@@ -82,3 +56,8 @@ public/css/fonts/three-d-repo.woff
 
 #Distribution files
 public/dist
+
+#installation temporary files
+tools/release/tmp
+tools/release/*.exe
+

@@ -26,6 +26,7 @@ x3dom.runtime.ready = runtimeReady;
 
 // ----------------------------------------------------------
 var Viewer = {};
+var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 (function() {
 	"use strict";
@@ -107,7 +108,7 @@ var Viewer = {};
 		this.logos    = [];
 
 		this.logoClick = function() {
-			callback(self.EVENT.LOGO_CLICK);
+			//callback(self.EVENT.LOGO_CLICK);
 		};
 
 		this.addLogo = function() {
@@ -147,14 +148,17 @@ var Viewer = {};
 		};
 
 		this.removeLogo = function () {
-			var numLogos = this.logos.length - 1;
-			var widthPercentage = Math.floor(100 / numLogos) + "%";
+			if (self.logos.length)
+			{
+				var numLogos = this.logos.length - 1;
+				var widthPercentage = Math.floor(100 / numLogos) + "%";
 
-			self.logos[numLogos].parentNode.removeChild(self.logos[numLogos]);
+				self.logos[numLogos].parentNode.removeChild(self.logos[numLogos]);
 
-			self.logos.splice(numLogos,1);
+				self.logos.splice(numLogos,1);
 
-			self.updateLogoWidth(widthPercentage);
+				self.updateLogoWidth(widthPercentage);
+			}
 		};
 
 		this.updateLogoWidth = function(widthPercentage) {
@@ -162,6 +166,20 @@ var Viewer = {};
 			{
 
 				self.logos[i].style.width = widthPercentage;
+			}
+		};
+
+		this.handleKeyPresses = function(e) {
+			if (e.charCode === "r".charCodeAt(0)) {
+				self.reset();
+				self.setApp(null);
+				self.setNavMode(self.NAV_MODES.WALK);
+				self.disableClicking();
+			} else if (e.charCode === "a".charCodeAt(0)) {
+				self.showAll();
+				self.enableClicking();
+			} else if (e.charCode === "u".charCodeAt(0)) {
+				self.revealAll();
 			}
 		};
 
@@ -177,7 +195,6 @@ var Viewer = {};
 				x3dom.runtime.ready = self.initRuntime;
 
 				self.addLogo();
-
 
 				// Set up the DOM elements
 				self.viewer = document.createElement("x3d");
@@ -219,24 +236,12 @@ var Viewer = {};
 
 				self.nav = document.createElement("navigationInfo");
 				self.nav.setAttribute("headlight", "false");
-				self.nav.setAttribute("type", self.defaultNavMode);
+				self.setNavMode(self.defaultNavMode);
 				self.scene.appendChild(self.nav);
 
 				self.loadViewpoint = self.name + "_default"; // Must be called after creating nav
 
-				self.viewer.addEventListener("keypress", function(e) {
-					if (e.charCode === "r".charCodeAt(0)) {
-						self.reset();
-						self.setApp(null);
-						self.setNavMode(self.NAV_MODES.WALK);
-						self.disableClicking();
-					} else if (e.charCode === "a".charCodeAt(0)) {
-						self.showAll();
-						self.enableClicking();
-					} else if (e.charCode === "u".charCodeAt(0)) {
-						self.revealAll();
-					}
-				});
+				self.viewer.addEventListener("keypress", self.handleKeyPresses);
 
 				self.initialized = true;
 
@@ -250,7 +255,7 @@ var Viewer = {};
 				self.plugins = self.options.plugins;
 				Object.keys(self.plugins).forEach(function(key){
 					self.plugins[key].initCallback && self.plugins[key].initCallback(self);
-				})
+				});
 
 				callback(self.EVENT.READY, {
 					name: self.name,
@@ -259,9 +264,23 @@ var Viewer = {};
 			}
 		};
 
-		this.close = function() {
+		this.destroy = function() {
+			if (self.currentViewpoint) {
+				self.currentViewpoint._xmlNode.removeEventListener("viewpointChanged", self.viewPointChanged);
+			}
+			self.viewer.removeEventListener("mousedown", self.managerSwitchMaster);
+
+			self.removeLogo();
+
+			self.viewer.removeEventListener("mousedown", onMouseDown);
+			self.viewer.removeEventListener("mouseup", onMouseUp);
+			self.viewer.removeEventListener("keypress", self.handleKeyPresses);
+
 			self.viewer.parentNode.removeChild(self.viewer);
-			self.viewer = null;
+
+			ViewerUtil.offEventAll();
+
+			self.viewer = undefined;
 		};
 
 		// This is called when the X3DOM runtime is initialized
@@ -292,11 +311,7 @@ var Viewer = {};
 
 				// TODO: This is a hack to get around a bug in X3DOM
 				self.getViewArea()._flyMat = null;
-
-				self.setNavMode(self.defaultNavMode);
 			};
-
-			self.getCurrentViewpoint().addEventListener("viewpointChanged", self.viewPointChanged);
 
 			ViewerUtil.onEvent("onLoaded", function(objEvent) {
 				if (self.loadViewpoint) {
@@ -584,6 +599,7 @@ var Viewer = {};
 			var vpInfo = self.getCurrentViewpointInfo();
 			var eye = vpInfo.position;
 			var viewDir = vpInfo.view_dir;
+
 
 			if (self.currentNavMode === self.NAV_MODES.HELICOPTER) {
 				self.nav._x3domNode._vf.typeParams[0] = Math.asin(viewDir[1]);
@@ -1099,8 +1115,8 @@ var Viewer = {};
 			}
 		};
 
-		this.setNavMode = function(mode) {
-			if (self.currentNavMode !== mode) {
+		this.setNavMode = function(mode, force) {
+			if (self.currentNavMode !== mode || force) {
 				// If the navigation mode has changed
 
 				if (mode === self.NAV_MODES.WAYFINDER) { // If we are entering wayfinder navigation
@@ -1118,6 +1134,13 @@ var Viewer = {};
 
 					self.nav._x3domNode._vf.typeParams[0] = Math.asin(viewDir[1]);
 					self.nav._x3domNode._vf.typeParams[1] = eye[1];
+
+					var bboxMax = self.getScene()._x3domNode.getVolume().max;
+					var bboxMin = self.getScene()._x3domNode.getVolume().min;
+					var bboxSize = bboxMax.subtract(bboxMin);
+					var calculatedSpeed = Math.sqrt(Math.max.apply(Math, bboxSize.toGL())) * 0.03;
+
+					self.nav.setAttribute("speed", calculatedSpeed);
 				}
 
 				self.currentNavMode = mode;
@@ -1204,28 +1227,25 @@ var Viewer = {};
 			var x3domView = new x3dom.fields.SFVec3f(viewDir[0], viewDir[1], viewDir[2]);
 			var x3domUp   = new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
 			var x3domFrom = new x3dom.fields.SFVec3f(pos[0], pos[1], pos[2]);
-			var x3domAt   = x3domFrom.add(x3domView);
+			var x3domAt   = x3domFrom.add(x3domView.normalize());
 
 			var viewMatrix = x3dom.fields.SFMatrix4f.lookAt(x3domFrom, x3domAt, x3domUp);
 
-			var currViewpoint = self.getCurrentViewpoint()._x3domNode;
+			var currViewpointNode = self.getCurrentViewpoint();
+			var currViewpoint = currViewpointNode._x3domNode;
 
 			if (self.currentNavMode === self.NAV_MODES.HELICOPTER) {
 				self.nav._x3domNode._vf.typeParams[0] = Math.asin(x3domView.y);
 				self.nav._x3domNode._vf.typeParams[1] = x3domFrom.y;
 			}
 
-			if (animate)
+			var oldViewMatrixCopy = currViewpoint._viewMatrix.toGL();
+
+			if (!animate && rollerCoasterMode)
 			{
-				self.getViewArea().animateTo(viewMatrix.inverse(), currViewpoint);
+				self.rollerCoasterMatrix = viewMatrix;
 			} else {
-				if (rollerCoasterMode)
-				{
-					self.rollerCoasterMatrix = viewMatrix;
-				} else {
-					self.getCurrentViewpoint()._x3domNode._viewMatrix.setValues(viewMatrix.inverse());
-					self.getViewArea()._doc.needRender = true;
-				}
+				currViewpoint._viewMatrix.setValues(viewMatrix.inverse());
 			}
 
 			var x3domCenter = null;
@@ -1236,12 +1256,35 @@ var Viewer = {};
 				var canvasHeight = self.getViewArea()._doc.canvas.height;
 
 				self.pickPoint(canvasWidth / 2, canvasHeight / 2);
-				x3domCenter = self.pickObject.pickPos;
+
+				if (self.pickObject.pickPos)
+				{
+					x3domCenter = self.pickObject.pickPos;
+
+				} else {
+					var ry = new x3dom.fields.Ray(x3domFrom, x3domView);
+					var bbox = self.getScene()._x3domNode.getVolume();
+
+					if(ry.intersect(bbox.min, bbox.max))
+					{
+						x3domCenter = x3domAt.add(x3domView.multiply(((1.0 / (GOLDEN_RATIO + 1.0)) * ry.exit)));
+					} else {
+						x3domCenter = x3domAt;
+					}
+				}
 			} else {
 				x3domCenter = new x3dom.fields.SFVec3f(centerOfRotation[0], centerOfRotation[1], centerOfRotation[2]);
 			}
 
-			currViewpoint.setCenterOfRotation(x3domCenter);
+			if (animate) {
+				currViewpoint._viewMatrix.setFromArray(oldViewMatrixCopy);
+				self.getViewArea().animateTo(viewMatrix.inverse(), currViewpoint);
+			}
+
+			currViewpointNode.setAttribute("centerofrotation", x3domCenter.toGL().join(","));
+
+			self.setNavMode(self.currentNavMode);
+			self.getViewArea()._doc.needRender = true;
 
 			if (self.linked) {
 				self.manager.switchMaster(self.handle);
@@ -1249,6 +1292,11 @@ var Viewer = {};
 		};
 
 		this.linked = false;
+
+		this.managerSwitchMaster = function() {
+			self.manager.switchMaster(self.handle);
+		};
+
 		this.linkMe = function() {
 			// Need to be attached to the viewer master
 			if (!self.manager) {
@@ -1258,9 +1306,7 @@ var Viewer = {};
 			self.manager.linkMe(self.handle);
 			self.onViewpointChanged(self.manager.viewpointLinkFunction);
 
-			self.viewer.addEventListener("mousedown", function() {
-				self.manager.switchMaster(self.handle);
-			});
+			self.viewer.addEventListener("mousedown", self.managerSwitchMaster);
 
 			self.linked = true;
 		};
@@ -1296,9 +1342,9 @@ var Viewer = {};
 			var url = "";
 
 			if (revision === "head") {
-				url = server_config.apiUrl(account + "/" + project + "/revision/" + branch + "/head.x3d.mp");
+				url = server_config.apiUrl(server_config.GET_API, account + "/" + project + "/revision/" + branch + "/head.x3d.mp");
 			} else {
-				url = server_config.apiUrl(account + "/" + project + "/revision/" + revision + ".x3d.mp");
+				url = server_config.apiUrl(server_config.GET_API, account + "/" + project + "/revision/" + revision + ".x3d.mp");
 			}
 
 			self.account = account;

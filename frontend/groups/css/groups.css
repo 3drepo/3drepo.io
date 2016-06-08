@@ -19,8 +19,16 @@ groups md-list-item p {
   margin: 8px 20px !important;
 }
 
-groups #groupsList ._md-list-item-inner {
+groups #groupsList md-list-item {
   padding: 0;
+  height: 55px;
+}
+groups #groupsList .group {
+  outline: none;
+}
+groups #groupsList .group:hover {
+  cursor: pointer;
+  background: #EEE;
 }
 
 groups .groupColourBar {

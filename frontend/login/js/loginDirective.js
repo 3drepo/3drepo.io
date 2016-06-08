@@ -32,9 +32,9 @@
 		};
 	}
 
-	LoginCtrl.$inject = ["$scope", "$mdDialog", "$window", "$location", "Auth", "EventService", "serverConfig", "LoginService"];
+	LoginCtrl.$inject = ["$scope", "$mdDialog", "$location", "Auth", "EventService", "serverConfig"];
 
-	function LoginCtrl($scope, $mdDialog, $window, $location, Auth, EventService, serverConfig, LoginService) {
+	function LoginCtrl($scope, $mdDialog, $location, Auth, EventService, serverConfig) {
 		var vm = this,
 			enterKey = 13,
 			promise;
@@ -50,10 +50,12 @@
 		vm.tcAgreed = false;
 		vm.useReCapthca = false;
 		vm.useRegister = false;
+		vm.registering = false;
 
 		/*
 		 * Auth stuff
 		 */
+		console.log(serverConfig);
 		if (serverConfig.hasOwnProperty("auth")) {
 			if (serverConfig.auth.hasOwnProperty("register") && (serverConfig.auth.register)) {
 				vm.useRegister = true;
@@ -111,7 +113,6 @@
 		};
 
 		vm.showTC = function () {
-			
 			$mdDialog.show({
 				controller: tcDialogController,
 				templateUrl: "tcDialog.html",
@@ -125,9 +126,8 @@
 			});
 		};
 
-		vm.forgotPassword = function () {
-			//$window.location.href = "/passwordForgot";
-			$location.path("/passwordForgot", "_self");
+		vm.showPage = function (page) {
+			$location.path("/" + page, "_self");
 		};
 
 		/*
@@ -179,18 +179,22 @@
 					if (vm.useReCapthca) {
 						data.captcha = vm.reCaptchaResponse;
 					}
+					vm.registering = true;
 					promise = LoginService.register(vm.newUser.username, data);
 					promise.then(function (response) {
-						console.log(response);
 						if (response.status === 200) {
-							$window.location.href = "/registerRequest";
+							vm.showPage("registerRequest");
 						}
 						else if (response.data.value === 62) {
 							vm.registerErrorMessage = "Prove you're not a robot";
 						}
+						else if (response.data.value === 55) {
+							vm.registerErrorMessage = "Username already in use";
+						}
 						else {
 							vm.registerErrorMessage = "Error with registration";
 						}
+						vm.registering = false;
 					});
 				}
 				else {

@@ -63,12 +63,13 @@
 				req[C.REQ_REPO].logger.logDebug("Authenticated user and signed token.");
 
 				req.session[C.REPO_SESSION_USER] = user;
-				req.session.cookie.domain = req.host;
+				req.session.cookie.domain        = config.cookie_domain;
 
 				if (config.cookie.maxAge)
 				{
 					req.session.cookie.maxAge = config.cookie.maxAge;
 				}
+
 				responseCodes.respond(place, req, res, next, responseCodes.OK, {username: user.username, roles: user.roles});
 			}
 		});

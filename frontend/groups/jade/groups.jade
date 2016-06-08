@@ -15,11 +15,12 @@ div(ng-switch="vm.toShow")
 	// Groups list
 	#groupsList(ng-switch-when="showGroups")
 		md-list
-			md-list-item.md-1-line(ng-repeat="group in vm.groups" ng-click="vm.showGroup($index)")
-				div(layout="row" layout-align="start" flex)
+			md-list-item(ng-repeat="group in vm.groups", layout-fill)
+				.group(layout="row" layout-align="start", flex, ng-click="vm.showGroup($index)", md-ink-ripple, layout-fill)
 					.groupColourBar(flex="none", style="background:{{vm.colourToString(group.color)}}")
-					div(flex)
-						p {{group.name}}
+					div(flex, layout="column")
+						div(layout="row", layout-align="start center", flex)
+							p {{group.name}}
 						md-divider
 
 	// Group
