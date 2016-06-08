@@ -90,5 +90,5 @@ module.exports = {
 		shared_storage: 'uploads'
 	},
 	uploadSizeLimit: 8388608, // 8MB in test enviroment
-	test_helper_api: false
+	test_helper_api: false,
 }
