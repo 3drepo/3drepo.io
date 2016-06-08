@@ -49,22 +49,26 @@ module.exports.createApp = function(serverConfig)
 
 		params.config_js += "server_config.apiUrls = {";
 
-		for (var k in config.apiUrls)
+		for (let k in config.apiUrls)
 		{
-			params.config_js += "\"" + k + "\" : [";
-			params.config_js += config.apiUrls[k].join(",");
-			params.config_js += "],";
+			if (config.apiUrls.hasOwnProperty(k)) {
+				params.config_js += "\"" + k + "\" : [";
+				params.config_js += config.apiUrls[k].join(",");
+				params.config_js += "],";
+			}
 		}
 
 		params.config_js += "};\n";
 
-		var numApiUrlTypes = Object.keys(config.apiUrls).length;
+		//var numApiUrlTypes = Object.keys(config.apiUrls).length;
 
 		params.config_js += "server_config.apiUrlCounter = {";
 
-		for (var k in config.apiUrls)
+		for (let k in config.apiUrls)
 		{
-			params.config_js += "\"" + k + "\" : 0,";
+			if (config.apiUrls.hasOwnProperty(k)) {
+				params.config_js += "\"" + k + "\" : 0,";
+			}
 		}
 
 		params.config_js += "};\n";

@@ -66,9 +66,11 @@
 
 		if (serverObject.use_location)
 		{
-			serverObject.location_url = Function("path","return \"//\" + window.location.host + \"" + serverObject.host_dir + "/\" + path;");
+			/*jslint evil: true */
+			serverObject.location_url = new Function("path","return \"//\" + window.location.host + \"" + serverObject.host_dir + "/\" + path;");
 		} else {
-			serverObject.location_url = Function("path","return '" + serverObject.url + "/' + path;");
+			/*jslint evil: true */
+			serverObject.location_url = new Function("path","return '" + serverObject.url + "/' + path;");
 		}
 
 		serverObject.location_url = serverObject.location_url.toString();
