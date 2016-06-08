@@ -18,3 +18,6 @@ md-dialog.newProjectDialog(aria-label="New project")
 			md-input-container
 				md-button.md-accent(ng-click="vm.uploadFile()") Upload File
 				md-button.md-raised.md-accent(ng-disabled="vm.newProjectButtonDisabled", ng-click="vm.saveNewProject()") Save
+			#projectDialogFilenameContainer(layout="row", ng-if="vm.newProjectFileSelected")
+				p#projectDialogFilenameIntro Selected file
+				p#projectDialogFilename {{vm.uploadedFile.name}}

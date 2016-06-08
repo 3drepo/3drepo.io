@@ -5,8 +5,8 @@ input#newProjectFileUploader(type="file")
 		md-toolbar
 			.md-toolbar-tools
 				h2 Repos
-				span(flex)
-				md-menu(md-position-mode="target-right target", md-offset="5 10")
+				//span(flex)
+				//md-menu(md-position-mode="target-right target", md-offset="5 10")
 					md-button.md-icon-button(aria-label="More", ng-click="$mdOpenMenu($event)")
 						md-icon.angular-material-icons(md-menu-origin) more_vert
 					md-menu-content(width="3")
@@ -35,10 +35,9 @@ input#newProjectFileUploader(type="file")
 							.project(
 								ng-click="vm.goToProject(account.name, project)"
 								layout="row"
-								md-ink-ripple="{{!project.disabled}}"
+								md-ink-ripple
 								layout-align="start center"
 								layout-fill
-								ng-class="{accountProjectDisabled: project.disabled, accountProjectEnabled: !project.disabled}"
 								)
 								md-button.md-icon-button(aria-label="Dashboard")
 									md-icon.angular-material-icons dashboard

@@ -44,21 +44,8 @@ account-projects .project {
   outline: none;
   padding-left: 10px;
 }
-account-projects .account:hover {
-  cursor: pointer;
-  background: #EEE;
-}
-
-.accountProjectDisabled {
-  color: #AAAAAA;
-}
-.accountProjectDisabled:hover {
-  cursor: default;
-}
-.accountProjectEnabled {
-  color: #4CAF50;
-}
-.accountProjectEnabled:hover {
+account-projects .account:hover,
+account-projects .project:hover {
   cursor: pointer;
   background: #EEE;
 }
@@ -69,7 +56,7 @@ account-projects .projects {
 
 account-projects .projects .projectName,
 account-projects .projects md-icon {
-  color: inherit;
+  color: #4CAF50;
 }
 account-projects .projects md-icon {
   margin: 0 !important;
@@ -211,12 +198,24 @@ account-menu md-icon {
 /** New Project Dialog ************************************************************************************************/
 .newProjectDialog {
   min-width: 350px;
-  min-height: 450px;
+  min-height: 350px;
   overflow: hidden;
 }
 
 .newProjectDialog #newProjectIcon {
   margin-right: 10px;
+}
+
+.newProjectDialog #projectDialogFilenameContainer {
+  margin: 0 0 0 16px;
+}
+.newProjectDialog #projectDialogFilenameIntro {
+  color: rgba(0, 0, 0, 0.4);
+  margin: 0 5px 0 0;
+}
+.newProjectDialog #projectDialogFilename {
+  color: rgba(0, 0, 0, 0.7);
+  margin: 0;
 }
 
 /** New Database Dialog ***********************************************************************************************/

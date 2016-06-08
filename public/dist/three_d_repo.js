@@ -5034,6 +5034,9 @@ var ViewerManager = {};
 			"change",
 			function () {
 				vm.uploadedFile = this.files[0];
+				console.log(vm.uploadedFile);
+				vm.newProjectFileSelected = true;
+				$scope.$apply();
 			},
 			false
 		);
@@ -5067,11 +5070,7 @@ var ViewerManager = {};
 					vm.accounts[i].showProjectsIcon = "folder_open";
 					for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
 						vm.accounts[i].projects[j].name = vm.accounts[i].projects[j].project;
-						if (vm.accounts[i].projects[j].timestamp === null) {
-							vm.accounts[i].projects[j].disabled = true;
-						}
-						else {
-							vm.accounts[i].projects[j].disabled = false;
+						if (vm.accounts[i].projects[j].timestamp !== null) {
 							vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp);
 						}
 						vm.accounts[i].projects[j].bif4FreeEnabled = false;
@@ -5125,7 +5124,10 @@ var ViewerManager = {};
 		 * @param {String} project
 		 */
 		vm.goToProject = function (account, project) {
-			if (!project.disabled) {
+			if (project.timestamp === null) {
+				vm.uploadModel(project);
+			}
+			else {
 				$location.path("/" + account + "/" + project.name, "_self");
 			}
 		};
@@ -5144,6 +5146,7 @@ var ViewerManager = {};
 		 * Bring up dialog to add a new project
 		 */
 		vm.newProject = function (event) {
+			vm.newProjectFileSelected = false;
 			vm.newProjectData = {
 				account: vm.account,
 				type: vm.projectTypes[0]
