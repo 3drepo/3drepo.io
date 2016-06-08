@@ -542,6 +542,19 @@ var subscriptions = {
 		freeTrial: 1, //month
 		currency: 'GBP',
 		amount: 100
+	},
+
+	'SOFT-LAUNCH-FREE-TRIAL': {
+		plan: 'SOFT-LAUNCH-FREE-TRIAL',
+		limits: {
+			spaceLimit: 10737418240, //bytes
+			collaboratorLimit: 2,
+		},
+		db: this.user,
+		billingCycle: 3, //month
+		freeTrial: 0, //month
+		currency: 'GBP',
+		amount: 0
 	}
 };
 
@@ -558,7 +571,7 @@ schema.statics.getSubscription = function(plan) {
 schema.methods.createSubscriptionToken = function(plan, billingUser){
 	'use strict';
 
-	if(plan === 'THE-100-QUID-PLAN'){
+	if(plan === 'THE-100-QUID-PLAN' || plan === 'SOFT-LAUNCH-FREE-TRIAL'){
 
 		let token = crypto.randomBytes(64).toString('hex');
 

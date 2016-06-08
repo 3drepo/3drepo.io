@@ -28,7 +28,7 @@ var importQueue = require('../services/queue');
 var multer = require("multer");
 var ProjectHelpers = require('../models/helper/project');
 var createAndAssignRole = ProjectHelpers.createAndAssignRole;
-
+var convertToErrorCode = ProjectHelpers.convertToErrorCode;
 
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
@@ -185,43 +185,7 @@ function createProject(req, res, next){
 	});
 }
 
-/*******************************************************************************
- * Converts error code from repobouncerclient to a response error object
- * @param {errCode} - error code referenced in error_codes.h
- *******************************************************************************/
-function convertToErrorCode(errCode){
 
-    var errObj;
-
-    switch (errCode) {
-        case 0:
-            errObj = responseCodes.OK;
-            break;
-        case 1:
-            errObj = responseCodes.FILE_IMPORT_INVALID_ARGS;
-            break;
-        case 2:
-            errObj = responseCodes.NOT_AUTHORIZED;
-            break;
-        case 3:
-            errObj = responseCodes.FILE_IMPORT_UNKNOWN_CMD;
-            break;
-        case 5:
-            errObj = responseCodes.FILE_IMPORT_PROCESS_ERR;
-			break;
-        case 6:
-            errObj = responseCodes.FILE_IMPORT_STASH_GEN_FAILED;
-			break;
-        case 7:
-            errObj = responseCodes.FILE_IMPORT_MISSING_TEXTURES;
-            break;
-        default:
-            errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
-            break;
-
-    }
-    return errObj;
-}
 
 function uploadProject(req, res, next){
 	'use strict';

@@ -22,6 +22,44 @@ var responseCodes = require('../../response_codes');
 var importQueue = require('../../services/queue');
 var C = require('../../constants');
 
+/*******************************************************************************
+ * Converts error code from repobouncerclient to a response error object
+ * @param {errCode} - error code referenced in error_codes.h
+ *******************************************************************************/
+function convertToErrorCode(errCode){
+
+    var errObj;
+
+    switch (errCode) {
+        case 0:
+            errObj = responseCodes.OK;
+            break;
+        case 1:
+            errObj = responseCodes.FILE_IMPORT_INVALID_ARGS;
+            break;
+        case 2:
+            errObj = responseCodes.NOT_AUTHORIZED;
+            break;
+        case 3:
+            errObj = responseCodes.FILE_IMPORT_UNKNOWN_CMD;
+            break;
+        case 5:
+            errObj = responseCodes.FILE_IMPORT_PROCESS_ERR;
+			break;
+        case 6:
+            errObj = responseCodes.FILE_IMPORT_STASH_GEN_FAILED;
+			break;
+        case 7:
+            errObj = responseCodes.FILE_IMPORT_MISSING_TEXTURES;
+            break;
+        default:
+            errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
+            break;
+
+    }
+    return errObj;
+}
+
 function createAndAssignRole(project, account, username, desc, type) {
 	'use strict';
 
@@ -94,6 +132,7 @@ function importToyProject(username){
 	//dun move the toy model instead make a copy of it
 	let copy = true;
 
+	
 	return createAndAssignRole(project, account, username, desc, type).then(setting => {
 		//console.log('setting', setting);
 		return Promise.resolve(setting);
@@ -157,5 +196,6 @@ function importToyProject(username){
 
 module.exports = {
 	createAndAssignRole,
-	importToyProject
+	importToyProject,
+	convertToErrorCode
 };
