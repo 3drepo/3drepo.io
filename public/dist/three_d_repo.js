@@ -5025,6 +5025,7 @@ var ViewerManager = {};
 		existingProjectFileUploader.addEventListener(
 			"change",
 			function () {
+				vm.uploadedFile = this.files[0];
 				uploadModelToProject(existingProjectToUpload, this.files[0]);
 			},
 			false
@@ -5034,7 +5035,6 @@ var ViewerManager = {};
 			"change",
 			function () {
 				vm.uploadedFile = this.files[0];
-				console.log(vm.uploadedFile);
 				vm.newProjectFileSelected = true;
 				$scope.$apply();
 			},
@@ -5303,16 +5303,24 @@ var ViewerManager = {};
 				};
 			project.uploading = true;
 			vm.showUploading = true;
+			vm.showFileUploadInfo = false;
 			projectData.uploadFile = file;
 			promise = AccountService.uploadModel(projectData);
 			promise.then(function (response) {
 				console.log(response);
-				if (response.status === 404) {
+				if ((response.data.status === 400) || (response.data.status === 404)) {
+					if (response.data.value === 68) {
+						vm.fileUploadInfo = "Unsupported file format";
+					}
+					else if (response.data.value === 66) {
+						vm.fileUploadInfo = "Insufficient quota for model";
+					}
+					else {
+						vm.fileUploadInfo = "Error saving model";
+					}
 					vm.showUploading = false;
-					vm.showUploaded = true;
-					vm.uploadedIcon = "close";
+					vm.showFileUploadInfo = true;
 					$timeout(function () {
-						vm.showUploaded = false;
 						project.uploading = false;
 					}, 4000);
 				}
@@ -5325,10 +5333,9 @@ var ViewerManager = {};
 								project.timestamp = UtilsService.formatTimestamp(new Date());
 								vm.showUploading = false;
 								$interval.cancel(interval);
-								vm.showUploaded = true;
-								vm.uploadedIcon = "done";
+								vm.showFileUploadInfo = true;
+								vm.fileUploadInfo = "Uploaded";
 								$timeout(function () {
-									vm.showUploaded = false;
 									project.uploading = false;
 								}, 4000);
 							}
@@ -8758,7 +8765,7 @@ var ViewerManager = {};
 							resolve: {
 								init: function(StateManager, $stateParams)
 								{
-									//console.log('init', childState.plugin, $stateParams);
+
 									if(!$stateParams.hasOwnProperty(childState.plugin)){
 										$stateParams[childState.plugin] = true;
 									}
@@ -8778,9 +8785,11 @@ var ViewerManager = {};
 
 		$urlRouterProvider.otherwise("");
 	}])
-	.run(["$rootScope", "$state", "uiState", "StateManager", function($rootScope, $state, uiState, StateManager) {
+	.run(["$location", "$rootScope", "$state", "uiState", "StateManager", function($location, $rootScope, $state, uiState, StateManager) {
 		$rootScope.$on("$stateChangeStart",function(event, toState, toParams, fromState, fromParams){
 			StateManager.state.changing = true;
+
+
 
 			var stateChangeObject = {
 				toState    : toState,
@@ -8800,6 +8809,8 @@ var ViewerManager = {};
 				fromParams : fromParams
 			};
 
+			//console.log('path', $location.path());
+			//ga('send', 'pageview', $location.path());
 			StateManager.handleStateChange(stateChangeObject);
 		});
 	}])

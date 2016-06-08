@@ -64,6 +64,7 @@
 		existingProjectFileUploader.addEventListener(
 			"change",
 			function () {
+				vm.uploadedFile = this.files[0];
 				uploadModelToProject(existingProjectToUpload, this.files[0]);
 			},
 			false
@@ -73,7 +74,6 @@
 			"change",
 			function () {
 				vm.uploadedFile = this.files[0];
-				console.log(vm.uploadedFile);
 				vm.newProjectFileSelected = true;
 				$scope.$apply();
 			},
@@ -342,16 +342,24 @@
 				};
 			project.uploading = true;
 			vm.showUploading = true;
+			vm.showFileUploadInfo = false;
 			projectData.uploadFile = file;
 			promise = AccountService.uploadModel(projectData);
 			promise.then(function (response) {
 				console.log(response);
-				if (response.status === 404) {
+				if ((response.data.status === 400) || (response.data.status === 404)) {
+					if (response.data.value === 68) {
+						vm.fileUploadInfo = "Unsupported file format";
+					}
+					else if (response.data.value === 66) {
+						vm.fileUploadInfo = "Insufficient quota for model";
+					}
+					else {
+						vm.fileUploadInfo = "Error saving model";
+					}
 					vm.showUploading = false;
-					vm.showUploaded = true;
-					vm.uploadedIcon = "close";
+					vm.showFileUploadInfo = true;
 					$timeout(function () {
-						vm.showUploaded = false;
 						project.uploading = false;
 					}, 4000);
 				}
@@ -364,10 +372,9 @@
 								project.timestamp = UtilsService.formatTimestamp(new Date());
 								vm.showUploading = false;
 								$interval.cancel(interval);
-								vm.showUploaded = true;
-								vm.uploadedIcon = "done";
+								vm.showFileUploadInfo = true;
+								vm.fileUploadInfo = "Uploaded";
 								$timeout(function () {
-									vm.showUploaded = false;
 									project.uploading = false;
 								}, 4000);
 							}

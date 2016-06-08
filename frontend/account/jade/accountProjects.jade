@@ -43,9 +43,10 @@ input#newProjectFileUploader(type="file")
 									md-icon.angular-material-icons dashboard
 								p.projectName(flex) {{project.name}}
 						.projectRight(layout="row", layout-align="start center")
-							.projectUploadInfo(ng-if="project.uploading")
-								md-progress-circular.projectUploading(md-mode="indeterminate", md-diameter="15", ng-if="vm.showUploading")
-								md-icon.angular-material-icons.projectUploaded(ng-if="vm.showUploaded") {{vm.uploadedIcon}}
+							.projectUploadInfo(ng-if="project.uploading", layout="row", layout-align="start center")
+								p.projectUploadFilename {{vm.uploadedFile.name}}
+								p.projectUploadInfo(ng-if="vm.showFileUploadInfo") {{vm.fileUploadInfo}}
+								md-progress-circular.projectUploadIcon(md-mode="indeterminate", md-diameter="15", ng-if="vm.showUploading")
 							p.projectTimestamp {{project.timestamp}}
 							//md-button.md-accent(ng-click="vm.b4f(account.name, project.name)" ng-if="project.bif4FreeEnabled") B4F
 							md-button.md-accent.md-icon-button(

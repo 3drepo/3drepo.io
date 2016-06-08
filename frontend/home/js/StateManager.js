@@ -122,7 +122,7 @@
 			};
 
 			//console.log('path', $location.path());
-			ga('send', 'pageview', $location.path());
+			//ga('send', 'pageview', $location.path());
 			StateManager.handleStateChange(stateChangeObject);
 		});
 	}])

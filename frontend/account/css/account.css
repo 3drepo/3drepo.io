@@ -106,8 +106,22 @@ account-projects .cardInfo md-progress-circular {
 
 account-projects .projectUploadInfo {
   margin-right: 20px;
+}
+
+account-projects .projectUploadFilename {
+  color: rgba(0,0,0,0.5);
+  margin: 0 !important;
+}
+
+account-projects .projectUploadInfo {
+  color: rgba(0,0,0,0.7);
+  margin: 0 0 0 10px !important;
+}
+
+account-projects .projectUploadIcon {
   width: 15px;
   height: 15px;
+  margin-left: 10px;
 }
 
 account-projects .projectRight .projectUploaded {
