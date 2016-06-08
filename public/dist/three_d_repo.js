@@ -5061,6 +5061,7 @@ var ViewerManager = {};
 			var i, j, iLength, jLength;
 			
 			if (angular.isDefined(vm.accounts)) {
+				console.log(vm.accounts);
 				vm.showProgress = false;
 				vm.projectsExist = (vm.accounts.length > 0);
 				vm.info = vm.projectsExist ? "" : "There are currently no projects";
@@ -5071,7 +5072,7 @@ var ViewerManager = {};
 					for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
 						vm.accounts[i].projects[j].name = vm.accounts[i].projects[j].project;
 						if (vm.accounts[i].projects[j].timestamp !== null) {
-							vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp);
+							vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp, true);
 						}
 						vm.accounts[i].projects[j].bif4FreeEnabled = false;
 						vm.accounts[i].projects[j].uploading = false;
@@ -5330,7 +5331,7 @@ var ViewerManager = {};
 						promise.then(function (response) {
 							console.log(response);
 							if (response.data.status === "ok") {
-								project.timestamp = UtilsService.formatTimestamp(new Date());
+								project.timestamp = UtilsService.formatTimestamp(new Date(), true);
 								vm.showUploading = false;
 								$interval.cancel(interval);
 								vm.showFileUploadInfo = true;
@@ -13793,7 +13794,7 @@ var Oculus = {};
 				},
 				{
 					value: "showClosed",
-					label: "Show closed issues",
+					label: "Show resolved issues",
 					toggle: true,
 					selected: false,
 					firstSelected: false,
@@ -16117,20 +16118,21 @@ var Oculus = {};
     function UtilsService($http, $q, serverConfig) {
         var obj = {};
 
-        obj.formatTimestamp = function (timestamp) {
-            var date = new Date(timestamp);
+        obj.formatTimestamp = function (timestamp, showSeconds) {
+            var date = new Date(timestamp),
+                formatted;
 
-            /*
-            return (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
-                (date.getMonth() + 1) + "-" +
-                date.getFullYear() + " " +
-                (date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
-                date.getMinutes() + "-" +
-                (date.getSeconds() < 10 ? "0" : "") + date.getSeconds();
-            */
-            return (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
-                ((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1) + "-" +
-                date.getFullYear();
+            formatted = (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
+                        ((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1) + "-" +
+                        date.getFullYear();
+            
+            if (angular.isDefined(showSeconds) && showSeconds) {
+                formatted += " " + (date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
+                            date.getMinutes() + "-" +
+                            (date.getSeconds() < 10 ? "0" : "") + date.getSeconds();
+            }
+            
+            return formatted;
         };
         
         obj.snake_case = function snake_case(name, separator) {

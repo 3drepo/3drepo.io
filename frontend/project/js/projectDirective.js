@@ -101,7 +101,7 @@
 				},
 				{
 					value: "showClosed",
-					label: "Show closed issues",
+					label: "Show resolved issues",
 					toggle: true,
 					selected: false,
 					firstSelected: false,

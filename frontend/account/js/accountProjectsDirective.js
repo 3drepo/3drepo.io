@@ -100,6 +100,7 @@
 			var i, j, iLength, jLength;
 			
 			if (angular.isDefined(vm.accounts)) {
+				console.log(vm.accounts);
 				vm.showProgress = false;
 				vm.projectsExist = (vm.accounts.length > 0);
 				vm.info = vm.projectsExist ? "" : "There are currently no projects";
@@ -110,7 +111,7 @@
 					for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
 						vm.accounts[i].projects[j].name = vm.accounts[i].projects[j].project;
 						if (vm.accounts[i].projects[j].timestamp !== null) {
-							vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp);
+							vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp, true);
 						}
 						vm.accounts[i].projects[j].bif4FreeEnabled = false;
 						vm.accounts[i].projects[j].uploading = false;
@@ -369,7 +370,7 @@
 						promise.then(function (response) {
 							console.log(response);
 							if (response.data.status === "ok") {
-								project.timestamp = UtilsService.formatTimestamp(new Date());
+								project.timestamp = UtilsService.formatTimestamp(new Date(), true);
 								vm.showUploading = false;
 								$interval.cancel(interval);
 								vm.showFileUploadInfo = true;

@@ -63,6 +63,7 @@ account-projects .projects md-icon {
 }
 account-projects .projects .projectTimestamp {
   color: rgba(0, 0, 0, 0.3);
+  margin-left: 20px;
 }
 account-projects .projects p {
   margin: 0;
@@ -141,6 +142,19 @@ account-profile #profileDivider {
   background: rgba(0,0,0,0.2);
   width: 1px;
   height: 380px;
+}
+
+account-profile .accountProfileList {
+  max-height: calc(100vh - 200px);
+  overflow-x: hidden;
+}
+
+account-profile .accountProfileContent {
+  margin-left: 40px;
+}
+
+account-profile .updateContainer {
+  margin-top: -30px;
 }
 
 /** Account Info ******************************************************************************************************/
