@@ -122,7 +122,10 @@
 			};
 
 			//console.log('path', $location.path());
-			ga('send', 'pageview', $location.path());
+			if(typeof ga !== 'undefined' && ga !== null){
+				ga('send', 'pageview', $location.path());
+			}
+
 			StateManager.handleStateChange(stateChangeObject);
 		});
 	}])
