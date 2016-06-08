@@ -40,7 +40,7 @@ module.exports = {
 	js_debug_level: 'debug',
 	logfile: {
 		filename: './3drepo.log',
-		console_level: 'error',
+		console_level: 'debug',
 		file_level: 'debug'
 	},
 	db: {
@@ -90,5 +90,5 @@ module.exports = {
 		shared_storage: 'uploads'
 	},
 	uploadSizeLimit: 8388608, // 8MB in test enviroment
-	test_helper_api: false
+	test_helper_api: false,
 }

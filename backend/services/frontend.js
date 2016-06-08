@@ -306,7 +306,8 @@ module.exports.createApp = function(serverConfig)
 			"pluginCSS": [],
 			"renderMe": jade.renderFile,
 			"structure": JSON.stringify(pluginStructure),
-			"frontendJade": []
+			"frontendJade": [],
+			"gaTrackId": config.gaTrackId
 		};
 
 		params.parentStateJSON	= JSON.stringify(params.parentStateJSON);

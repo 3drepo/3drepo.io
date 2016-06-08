@@ -43,7 +43,7 @@
 	router.post('/:account', signUp);
 	router.post('/:account/database', middlewares.canCreateDatabase, createDatabase);
 	router.post('/:account/subscriptions', middlewares.canCreateDatabase, createSubscription);
-	router.post('/:account/verify', verify);
+	router.post('/:account/verify', middlewares.connectQueue, verify);
 	router.post('/:account/forgot-password', forgotPassword);
 	router.put("/:account", middlewares.hasWriteAccessToAccount, updateUser);
 	router.put("/:account/password", middlewares.hasWriteAccessToAccount, resetPassword);
@@ -104,7 +104,7 @@
 		}
 	}
 
-	function logout(req, res, next){{}
+	function logout(req, res, next){
 		if(!req.session.user){
 			return responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, {});
 		}
@@ -208,12 +208,21 @@
 		
 		let responsePlace = utils.APIInfo(req);
 
-		User.verify(req.params[C.REPO_REST_API_ACCOUNT], req.body.token).then(() => {
+		User.verify(req.params[C.REPO_REST_API_ACCOUNT], req.body.token).then(user => {
 
 			//import toy project
 			ProjectHelper.importToyProject(req.params[C.REPO_REST_API_ACCOUNT]).catch(err => {
 				req[C.REQ_REPO].logger.logError(JSON.stringify(err));
 			});
+
+			//soft launch give users some quota
+			return user.createSubscriptionToken('SOFT-LAUNCH-FREE-TRIAL', user.user)
+
+		}).then(sub => {
+
+			return User.activateSubscription(sub.token, {}, {}, true);
+
+		}).then(user => {
 
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
 
