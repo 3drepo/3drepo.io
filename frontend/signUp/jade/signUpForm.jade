@@ -1,10 +1,13 @@
 form#signUpForm
+	md-input-container.md-block
+		label Username
+		input(type='text', ng-model='vm.newUser.username', ng-required, ng-keypress="vm.register($event)")
+	md-input-container.md-block
+		label Email
+		input(type='email', ng-model='vm.newUser.email', ng-required, ng-keypress="vm.register($event)")
 	md-input-container.md-block(md-no-float)
-		input(type='text', ng-model='vm.newUser.username', placeholder='Username', ng-required, ng-keypress="vm.register($event)")
-	md-input-container.md-block(md-no-float)
-		input(type='email', ng-model='vm.newUser.email', placeholder='Email', ng-required, ng-keypress="vm.register($event)")
-	md-input-container.md-block(md-no-float)
-		input(type='password', ng-model='vm.newUser.password', placeholder='Password', ng-required ng-keypress="vm.register($event)")
+		label Password
+		input(type='password', ng-model='vm.newUser.password', ng-required ng-keypress="vm.register($event)")
 	// Extra hidden inputs to prevent input autofill
 	input(type="email", ng-show="false")
 	input(type="password", ng-show="false")

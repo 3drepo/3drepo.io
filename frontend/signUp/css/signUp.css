@@ -1,5 +1,5 @@
 sign-up md-input-container {
-    margin: 0;
+    margin-top: 0;
 }
 
 sign-up md-input-container input {
@@ -16,6 +16,7 @@ sign-up .registerLinks {
 
 sign-up-form #tc {
     width: 300px;
+    margin: -15px 0 0 2px;
 }
 sign-up-form #tc md-checkbox {
     margin : 0;
@@ -36,7 +37,7 @@ sign-up-form #tc a {
 }
 
 sign-up-form #loginCaptcha {
-    margin: -5px 30px 10px 7px;
+    margin: 10px 30px 10px 0;
 }
 
 sign-up-form #registerWait {
@@ -61,4 +62,8 @@ sign-up-form .registerError {
     color: #F44336;
     margin: 5px 0 5px;
     font-weight: normal;
+}
+
+sign-up-form .rc-anchor-light {
+    background: red;
 }

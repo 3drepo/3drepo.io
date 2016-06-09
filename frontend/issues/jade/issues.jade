@@ -38,9 +38,11 @@ div(ng-switch="vm.toShow")
 	// Add issue
 	#issuesAddContainer(ng-switch-when="showAdd")
 		md-input-container.md-block(md-no-float="")
-			input#issueAddTitle(placeholder="Title", ng-model="vm.title")
+			label Title
+			input#issueAddTitle(ng-model="vm.title")
 		md-input-container.md-block(md-no-float="")
-			textarea(placeholder="Comment", ng-model="vm.comment")
+			label Comment
+			textarea(ng-model="vm.comment")
 		div(layout="row")
 			md-button.md-raised.md-accent(ng-click="vm.saveIssue()", ng-disabled="vm.saveIssueDisabled") Save
 			md-button.md-primary(ng-click="vm.cancelAddIssue()") Cancel

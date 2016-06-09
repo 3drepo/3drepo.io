@@ -5,3 +5,7 @@ contact md-input-container textarea {
 contact .md-button {
     margin-top: 10px;
 }
+
+contact md-input-container {
+    margin: 0;
+}

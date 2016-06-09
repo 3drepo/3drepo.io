@@ -12,7 +12,7 @@ issues #issuesAddContainer .md-dialog-backdrop {
   height: 205px !important;
 }
 issues #issuesAddContainer md-input-container {
-  margin: 0;
+  margin-bottom: 0;
 }
 issues #issuesAddContainer h4 {
   margin-left: 4px;

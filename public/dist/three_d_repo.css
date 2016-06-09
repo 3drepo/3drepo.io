@@ -716,6 +716,10 @@ contact .md-button {
     margin-top: 10px;
 }
 
+contact md-input-container {
+    margin: 0;
+}
+
 /** Docs **************************************************************************************************************/
 docs .typesList {
   padding: 0;
@@ -998,7 +1002,7 @@ issues #issuesAddContainer .md-dialog-backdrop {
   height: 205px !important;
 }
 issues #issuesAddContainer md-input-container {
-  margin: 0;
+  margin-bottom: 0;
 }
 issues #issuesAddContainer h4 {
   margin-left: 4px;
@@ -1252,7 +1256,7 @@ login #loginVersion{
 }
 
 login md-input-container {
-  margin: 0;
+  margin-bottom: 0;
 }
 
 login md-input-container input {
@@ -1477,8 +1481,20 @@ panel-card-option-erase md-icon {
 password-change md-progress-circular {
     margin-left: 5px;
 }
+
+password-change md-input-container {
+    margin: 0;
+}
 password-forgot md-progress-circular {
     margin-left: 5px;
+}
+
+password-forgot md-input-container {
+    margin-bottom: 0;
+}
+
+password-forgot p {
+    margin-top: 0;
 }
 pricing md-content.md-whiteframe-1dp,
 pricing md-content.md-whiteframe-8dp {
@@ -1576,57 +1592,8 @@ right-panel #rightPanelButtons .md-button {
 right-panel #rightPanelButtons .fa {
     font-size: 24px;
 }
-register-form #tc {
-    width: 300px;
-}
-register-form #tc md-checkbox {
-    margin : 0;
-}
-register-form #tc md-checkbox ._md-icon {
-    border-color: rgba(0, 0, 0, 0.4);
-}
-register-form #tc a {
-    font-size: 14px;
-    margin-left: 5px;
-}
-register-form #tc p {
-    font-size: 14px;
-    color: rgba(0, 0, 0, 0.7);
-}
-register-form #tc a {
-    outline: none;
-}
-
-register-form #loginCaptcha {
-    margin: -5px 30px 10px 7px;
-}
-
-register-form #registerWait {
-    height: 30px;
-}
-register-form #registerWait p {
-    margin: 0 10px 0 0;
-    color: rgba(0, 0, 0, 0.7);
-    font-size: 14px;
-}
-register-form #registerWait md-progress-circular,
-register-form #registerWait svg {
-    width: 20px !important;
-}
-register-form #loginPricing {
-    font-size: 14px;
-    margin-left: 30px;
-    outline: none;
-}
-
-register-form .registerError {
-    color: #F44336;
-    margin: 5px 0 5px;
-    font-weight: normal;
-}
-
 sign-up md-input-container {
-    margin: 0;
+    margin-top: 0;
 }
 
 sign-up md-input-container input {
@@ -1643,6 +1610,7 @@ sign-up .registerLinks {
 
 sign-up-form #tc {
     width: 300px;
+    margin: -15px 0 0 2px;
 }
 sign-up-form #tc md-checkbox {
     margin : 0;
@@ -1663,7 +1631,7 @@ sign-up-form #tc a {
 }
 
 sign-up-form #loginCaptcha {
-    margin: -5px 30px 10px 7px;
+    margin: 10px 30px 10px 0;
 }
 
 sign-up-form #registerWait {
@@ -1690,6 +1658,9 @@ sign-up-form .registerError {
     font-weight: normal;
 }
 
+sign-up-form .rc-anchor-light {
+    background: red;
+}
 tree span {
   outline: none;
   margin: 0;

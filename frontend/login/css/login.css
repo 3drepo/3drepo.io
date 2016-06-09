@@ -24,7 +24,7 @@ login #loginVersion{
 }
 
 login md-input-container {
-  margin: 0;
+  margin-bottom: 0;
 }
 
 login md-input-container input {

@@ -734,14 +734,13 @@
 				maxStringLength = 32,
 				lineHeight = 18,
 				footerHeight,
-				addHeight = 230,
+				addHeight = 260,
 				commentHeight = 80,
 				headerHeight = 53,
 				openIssueFooterHeight = 180,
 				closedIssueFooterHeight = 53,
 				infoHeight = 80;
 
-			console.log(vm.toShow);
 			switch (vm.toShow) {
 				case "showIssues":
 					issuesHeight = 0;
