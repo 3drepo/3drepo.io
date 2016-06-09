@@ -3,7 +3,7 @@
 		md-toolbar
 			.md-toolbar-tools
 				h2 Contact Us
-		.userContent(layout="column", layout-fill)
+		.userContent(layout="column")
 			div(ng-if="!vm.sent")
 				md-input-container.md-block(md-no-float, layout-fill)
 					textarea(ng-model="vm.contact.information", placeholder="Contact information")

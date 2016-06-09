@@ -5021,7 +5021,6 @@ var ViewerManager = {};
 	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, $timeout, $interval, AccountService, UtilsService) {
 		var vm = this,
 			promise,
-			bid4FreeProjects = null,
 			existingProjectToUpload,
 			existingProjectFileUploader,
 			newProjectFileUploader;
@@ -5061,19 +5060,6 @@ var ViewerManager = {};
 			false
 		);
 
-		promise = AccountService.getProjectsBid4FreeStatus(vm.account);
-		promise.then(function (data) {
-			if (data.data.length > 0) {
-				bid4FreeProjects = [];
-				angular.forEach(data.data, function (value) {
-					if (bid4FreeProjects.indexOf(value.project) === -1) {
-						bid4FreeProjects.push(value.project);
-					}
-				});
-				setupBid4FreeAccess();
-			}
-		});
-
 		/*
 		 * Added data to accounts and projects for UI
 		 */
@@ -5085,10 +5071,13 @@ var ViewerManager = {};
 				vm.showProgress = false;
 				vm.projectsExist = (vm.accounts.length > 0);
 				vm.info = vm.projectsExist ? "" : "There are currently no projects";
+				// Accounts
 				for (i = 0, iLength = vm.accounts.length; i < iLength; i+= 1) {
 					vm.accounts[i].name = vm.accounts[i].account;
 					vm.accounts[i].showProjects = true;
 					vm.accounts[i].showProjectsIcon = "folder_open";
+
+					//Projects
 					for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
 						vm.accounts[i].projects[j].name = vm.accounts[i].projects[j].project;
 						if (vm.accounts[i].projects[j].timestamp !== null) {
@@ -5100,7 +5089,6 @@ var ViewerManager = {};
 						vm.accounts[i].projects[j].canUpload = true;
 					}
 				}
-				setupBid4FreeAccess();
 			}
 		});
 
@@ -5330,6 +5318,7 @@ var ViewerManager = {};
 			promise.then(function (response) {
 				console.log(response);
 				if ((response.data.status === 400) || (response.data.status === 404)) {
+					// Upload error
 					if (response.data.value === 68) {
 						vm.fileUploadInfo = "Unsupported file format";
 					}
@@ -5346,6 +5335,7 @@ var ViewerManager = {};
 					}, 4000);
 				}
 				else {
+					// Upload valid, poll for status
 					interval = $interval(function () {
 						promise = AccountService.uploadStatus(projectData);
 						promise.then(function (response) {
@@ -5364,20 +5354,6 @@ var ViewerManager = {};
 					}, 1000);
 				}
 			});
-		}
-
-		vm.b4f = function (account, project) {
-			$location.path("/" + account + "/" + project + "/bid4free", "_self");
-		};
-
-		function setupBid4FreeAccess () {
-			if ((vm.accounts.length > 0) && (bid4FreeProjects !== null)) {
-				angular.forEach(vm.accounts, function(account) {
-					angular.forEach(account.projects, function(project) {
-						project.bif4FreeEnabled = (bid4FreeProjects.indexOf(project.name) !== -1);
-					});
-				});
-			}
 		}
 	}
 }());
@@ -9322,11 +9298,9 @@ var ViewerManager = {};
 								if (vm.state[state] === true) {
 									goToUserPage = true;
 									useState = state;
-									break;
 								}
 								else if (typeof vm.state[state] === "string") {
 									goToAccount = true;
-									break;
 								}
 							}
 						}
@@ -9344,7 +9318,6 @@ var ViewerManager = {};
 						else {
 							// Prevent user going back to the login page after logging in
 							$location.path("/" + localStorage.getItem("tdrLoggedIn"), "_self");
-							//vm.logout(); // Going back to the login page should logout the user
 						}
 					});
 				}
@@ -13120,9 +13093,9 @@ var Oculus = {};
         };
     }
 
-    PasswordChangeCtrl.$inject = ["$scope", "$window", "PasswordChangeService"];
+    PasswordChangeCtrl.$inject = ["$scope", "$window", "UtilsService"];
 
-    function PasswordChangeCtrl ($scope, $window, PasswordChangeService) {
+    function PasswordChangeCtrl ($scope, $window, UtilsService) {
         var vm = this,
             enterKey = 13,
             promise,
@@ -13172,12 +13145,12 @@ var Oculus = {};
                     vm.messageColor = messageColour;
                     vm.message = "Please wait...";
                     vm.showProgress = true;
-                    promise = PasswordChangeService.passwordChange(
-                        vm.username,
+                    promise = UtilsService.doPut(
                         {
                             token: vm.token,
                             newPassword: vm.newPassword
-                        }
+                        },
+                        vm.username + "/password"
                     );
                     promise.then(function (response) {
                         vm.showProgress = false;
@@ -13293,9 +13266,9 @@ var Oculus = {};
         };
     }
 
-    PasswordForgotCtrl.$inject = ["$scope", "PasswordForgotService"];
+    PasswordForgotCtrl.$inject = ["$scope", "UtilsService"];
 
-    function PasswordForgotCtrl ($scope, PasswordForgotService) {
+    function PasswordForgotCtrl ($scope, UtilsService) {
         var vm = this,
             promise,
             messageColour = "rgba(0, 0, 0, 0.7)",
@@ -13321,7 +13294,7 @@ var Oculus = {};
                 vm.messageColor = messageColour;
                 vm.message = "Please wait...";
                 vm.showProgress = true;
-                promise = PasswordForgotService.forgot(vm.username, {email: vm.email});
+                promise = UtilsService.doPost({email: vm.email}, vm.username + "/forgot-password");
                 promise.then(function (response) {
                     vm.showProgress = false;
                     if (response.status === 200) {
@@ -13343,64 +13316,6 @@ var Oculus = {};
     }
 }());
 
-/**
- *  Copyright (C) 2016 3D Repo Ltd
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-    "use strict";
-
-    angular.module("3drepo")
-        .factory("PasswordForgotService", PasswordForgotService);
-
-    PasswordForgotService.$inject = ["$http", "$q", "serverConfig"];
-
-    function PasswordForgotService($http, $q, serverConfig) {
-        var obj = {};
-
-        /**
-         * Handle POST requests
-         * @param data
-         * @param urlEnd
-         * @returns {*}
-         */
-        function doPost(data, urlEnd) {
-            var deferred = $q.defer(),
-                url = serverConfig.apiUrl(serverConfig.POST_API, urlEnd),
-                config = {withCredentials: true};
-
-            $http.post(url, data, config)
-                .then(
-                    function (response) {
-                        deferred.resolve(response);
-                    },
-                    function (error) {
-                        deferred.resolve(error);
-                    }
-                );
-            return deferred.promise;
-        }
-
-        obj.forgot = function (username, data) {
-            return doPost(data, username + "/forgot-password");
-        };
-
-        return obj;
-    }
-}());
 /**
  *	Copyright (C) 2016 3D Repo Ltd
  *
@@ -16231,6 +16146,29 @@ var Oculus = {};
                 config = {withCredentials: true};
 
             $http.post(urlUse, data, config)
+                .then(
+                    function (response) {
+                        deferred.resolve(response);
+                    },
+                    function (error) {
+                        deferred.resolve(error);
+                    }
+                );
+            return deferred.promise;
+        };
+
+        /**
+         * Handle PUT requests
+         * @param data
+         * @param url
+         * @returns {*}
+         */
+        obj.doPut = function (data, url) {
+            var deferred = $q.defer(),
+                urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
+                config = {withCredentials: true};
+
+            $http.put(urlUse, data, config)
                 .then(
                     function (response) {
                         deferred.resolve(response);

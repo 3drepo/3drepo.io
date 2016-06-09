@@ -40,7 +40,6 @@
 	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, $timeout, $interval, AccountService, UtilsService) {
 		var vm = this,
 			promise,
-			bid4FreeProjects = null,
 			existingProjectToUpload,
 			existingProjectFileUploader,
 			newProjectFileUploader;
@@ -80,19 +79,6 @@
 			false
 		);
 
-		promise = AccountService.getProjectsBid4FreeStatus(vm.account);
-		promise.then(function (data) {
-			if (data.data.length > 0) {
-				bid4FreeProjects = [];
-				angular.forEach(data.data, function (value) {
-					if (bid4FreeProjects.indexOf(value.project) === -1) {
-						bid4FreeProjects.push(value.project);
-					}
-				});
-				setupBid4FreeAccess();
-			}
-		});
-
 		/*
 		 * Added data to accounts and projects for UI
 		 */
@@ -104,10 +90,13 @@
 				vm.showProgress = false;
 				vm.projectsExist = (vm.accounts.length > 0);
 				vm.info = vm.projectsExist ? "" : "There are currently no projects";
+				// Accounts
 				for (i = 0, iLength = vm.accounts.length; i < iLength; i+= 1) {
 					vm.accounts[i].name = vm.accounts[i].account;
 					vm.accounts[i].showProjects = true;
 					vm.accounts[i].showProjectsIcon = "folder_open";
+
+					//Projects
 					for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
 						vm.accounts[i].projects[j].name = vm.accounts[i].projects[j].project;
 						if (vm.accounts[i].projects[j].timestamp !== null) {
@@ -119,7 +108,6 @@
 						vm.accounts[i].projects[j].canUpload = true;
 					}
 				}
-				setupBid4FreeAccess();
 			}
 		});
 
@@ -349,6 +337,7 @@
 			promise.then(function (response) {
 				console.log(response);
 				if ((response.data.status === 400) || (response.data.status === 404)) {
+					// Upload error
 					if (response.data.value === 68) {
 						vm.fileUploadInfo = "Unsupported file format";
 					}
@@ -365,6 +354,7 @@
 					}, 4000);
 				}
 				else {
+					// Upload valid, poll for status
 					interval = $interval(function () {
 						promise = AccountService.uploadStatus(projectData);
 						promise.then(function (response) {
@@ -383,20 +373,6 @@
 					}, 1000);
 				}
 			});
-		}
-
-		vm.b4f = function (account, project) {
-			$location.path("/" + account + "/" + project + "/bid4free", "_self");
-		};
-
-		function setupBid4FreeAccess () {
-			if ((vm.accounts.length > 0) && (bid4FreeProjects !== null)) {
-				angular.forEach(vm.accounts, function(account) {
-					angular.forEach(account.projects, function(project) {
-						project.bif4FreeEnabled = (bid4FreeProjects.indexOf(project.name) !== -1);
-					});
-				});
-			}
 		}
 	}
 }());
