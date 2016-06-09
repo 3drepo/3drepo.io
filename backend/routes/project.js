@@ -244,19 +244,15 @@ function uploadProject(req, res, next){
 
 				let project = req.params.project;
 				let account = req.params.account;
-				let username = req.session.user.username;
+				//let username = req.session.user.username;
 
-				createAndAssignRole(project, account, username, req.body.desc, req.body.type).then(setting => {
-					//console.log('setting', setting);
-					return Promise.resolve(setting);
-				}).catch(err => {
+				ProjectSetting.findById({account, project}, project).then(setting => {
 
-					if (err && err.resCode && err.resCode.value === responseCodes.PROJECT_EXIST.value){
-						return _getProject(req);
-					} else {
-						return Promise.reject(err);
+					if(!setting){
+						req[C.REQ_REPO].logger.logError('Upload to non-exisitng project and create is now deprecated, please call create project API first then upload');
+						return responseCodes.respond(responsePlace, req, res, next, responseCodes.PROJECT_NOT_FOUND, responseCodes.PROJECT_NOT_FOUND);
+
 					}
-				}).then(setting => {
 
 					projectSetting = setting;
 					projectSetting.status = 'processing';
