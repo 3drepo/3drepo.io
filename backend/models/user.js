@@ -129,6 +129,7 @@ schema.statics.findByUserName = function(user){
 	return this.findOne({account: 'admin'}, { user });
 };
 
+
 schema.statics.findBillingUserByToken = function(token){
 	return this.findSubscriptionByToken(null, token).then(subscription => {
 		if(subscription){
@@ -353,6 +354,17 @@ schema.statics.grantRoleToUser = function(username, db, role){
 		return Promise.resolve();
 
 	});
+};
+
+schema.statics.revokeRolesFromUser = function(username, db, role){
+	'use strict';
+
+	let cmd = {
+		revokeRolesFromUser: username,
+		roles: [{ role, db }]
+	};
+
+	return ModelFactory.db.admin().command(cmd);
 };
 
 // list project readable by this user
@@ -775,6 +787,22 @@ schema.statics.findSubscriptionByToken = function(billingUser, token){
 	});
 };
 
+schema.methods.hasRole = function(db, roleName){
+	'use strict';
+
+	let roleLen = this.roles.length;
+
+	for(let i=0; i < roleLen; i++){
+
+		let role = this.roles[i];
+
+		if(role.role === roleName && role.db === db){
+			return role;
+		}
+	}
+
+	return null;
+};
 
 var User = ModelFactory.createClass(
 	'User', 

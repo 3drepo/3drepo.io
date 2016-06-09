@@ -38,7 +38,13 @@ var schema = mongoose.Schema({
 		budget: Number,
 		completedBy: Date,
 		contact: String
-	})
+	}),
+
+	//redundant field to speed up listing collaborators
+	collaborators: [{
+		user: String,
+		role: {type: String}
+	}]
 });
 
 schema.statics.mapTilesProp = ['lat', 'lon', 'width', 'height'];
@@ -63,6 +69,34 @@ schema.methods.updateMapTileCoors = function(updateObj){
 	this.markModified('properties');
 	return this.save();
 
+};
+
+schema.methods.findCollaborator = function(user, role){
+	'use strict';
+
+	let len = this.collaborators.length;
+
+
+	for(let i=0; i<len ; i++){
+
+		let collaborator = this.collaborators[i];
+		if(collaborator.user === user && collaborator.role === role){
+			return collaborator;
+		}
+	}
+
+	return null;
+};
+
+schema.methods.removeCollaborator = function(user, role){
+	'use strict';
+
+	let collaborator = this.findCollaborator(user, role);
+	if(collaborator){
+		this.collaborators.pull(collaborator._id);
+	}
+
+	return collaborator;
 };
 
 var ProjectSetting = ModelFactory.createClass(
