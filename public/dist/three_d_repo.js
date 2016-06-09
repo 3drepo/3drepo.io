@@ -4920,6 +4920,12 @@ var ViewerManager = {};
 		var vm = this,
 			promise;
 
+		/*
+		 * Init
+		 */
+		vm.showInfo = true;
+		vm.showChangePassword = false;
+
 		/**
 		 * Update the user info
 		 */
@@ -4956,6 +4962,20 @@ var ViewerManager = {};
 				}
 			});
 		};
+
+		/**
+		 * Toggle showing of user info
+		 */
+		vm.toggleInfo = function () {
+			vm.showInfo = !vm.showInfo;
+		};
+
+		/**
+		 * Toggle showing of password change
+		 */
+		vm.toggleChangePassword = function () {
+			vm.showChangePassword = !vm.showChangePassword;
+		}
 	}
 }());
 
@@ -7674,10 +7694,14 @@ var ViewerManager = {};
 		};
 	}
 
-	CookiesCtrl.$inject = [];
+	CookiesCtrl.$inject = ["$location"];
 
-	function CookiesCtrl () {
+	function CookiesCtrl ($location) {
 		var vm = this;
+
+		vm.home = function () {
+			$location.path("/", "_self");
+		};
 	}
 }());
 
@@ -9228,10 +9252,14 @@ var ViewerManager = {};
     function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $location, Auth, StateManager, EventService, UtilsService) {
         var vm = this,
 			goToUserPage,
+			goToAccount,
 			homeLoggedOut,
+			homeLoggedIn,
 			notLoggedInElement,
+			loggedInElement,
 			element,
-			state;
+			state,
+			useState;
 
 		/*
 		 * Init
@@ -9284,21 +9312,41 @@ var ViewerManager = {};
 					});
 				}
 				else {
-					// If none of the states is truthy the user is going back to the login page
-					goToUserPage = true;
-					for (state in vm.state) {
-						if (vm.state.hasOwnProperty(state)) {
-							if ((state !== "loggedIn") && (typeof vm.state[state] === "string")) {
-								goToUserPage = false;
-								break;
+					$timeout(function () {
+						homeLoggedIn = angular.element($element[0].querySelector('#homeLoggedIn'));
+						homeLoggedIn.empty();
+						goToAccount = false;
+						goToUserPage = false;
+						for (state in vm.state) {
+							if (vm.state.hasOwnProperty(state) && (state !== "loggedIn")) {
+								if (vm.state[state] === true) {
+									goToUserPage = true;
+									useState = state;
+									break;
+								}
+								else if (typeof vm.state[state] === "string") {
+									goToAccount = true;
+									break;
+								}
 							}
 						}
-					}
-					if (goToUserPage) {
-						// Prevent user going back to the login page after logging in
-						$location.path("/" + localStorage.getItem("tdrLoggedIn"), "_self");
-						//vm.logout(); // Going back to the login page should logout the user
-					}
+						if ((goToUserPage) || (goToAccount)) {
+							if (goToUserPage) {
+								element = "<" + UtilsService.snake_case(useState, "-") + "></" + UtilsService.snake_case(useState, "-") + ">";
+							}
+							else if (goToAccount) {
+								element = "<account-dir account='vm.state.account' state='vm.state'></account-dir>";
+							}
+							loggedInElement = angular.element(element);
+							homeLoggedIn.append(loggedInElement);
+							$compile(loggedInElement)($scope);
+						}
+						else {
+							// Prevent user going back to the login page after logging in
+							$location.path("/" + localStorage.getItem("tdrLoggedIn"), "_self");
+							//vm.logout(); // Going back to the login page should logout the user
+						}
+					});
 				}
 			}
 		}, true);
@@ -13486,10 +13534,14 @@ var Oculus = {};
 		};
 	}
 
-	PrivacyCtrl.$inject = [];
+	PrivacyCtrl.$inject = ["$location"];
 
-	function PrivacyCtrl () {
+	function PrivacyCtrl ($location) {
 		var vm = this;
+
+		vm.home = function () {
+			$location.path("/", "_self");
+		};
 	}
 }());
 
@@ -15241,10 +15293,14 @@ var Oculus = {};
 		};
 	}
 
-	TermsAndConditionsCtrl.$inject = [];
+	TermsAndConditionsCtrl.$inject = ["$location"];
 
-	function TermsAndConditionsCtrl () {
+	function TermsAndConditionsCtrl ($location) {
 		var vm = this;
+
+		vm.home = function () {
+			$location.path("/", "_self");
+		};
 	}
 }());
 

@@ -32,9 +32,13 @@
 		};
 	}
 
-	CookiesCtrl.$inject = [];
+	CookiesCtrl.$inject = ["$location"];
 
-	function CookiesCtrl () {
+	function CookiesCtrl ($location) {
 		var vm = this;
+
+		vm.home = function () {
+			$location.path("/", "_self");
+		};
 	}
 }());

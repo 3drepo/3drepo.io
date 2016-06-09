@@ -12,5 +12,4 @@ div(ng-if="!vm.state.changing")
 
 	div(ng-if="vm.state.loggedIn")
 		div(ng-if="vm.getLoggedInUrl()" ng-include="vm.getLoggedInUrl()")
-		div(ng-if="!vm.getLoggedInUrl()")
-			account-dir(account="vm.state.account", state="vm.state")
+		#homeLoggedIn(ng-if="!vm.getLoggedInUrl()")

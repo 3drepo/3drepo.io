@@ -3,5 +3,8 @@
 		md-toolbar
 			.md-toolbar-tools
 				h2 Privacy
+				span(flex)
+				md-button.md-icon-button(aria-label="Home", ng-click="vm.home()")
+					md-icon.angular-material-icons home
 		.userContent(layout="column")
 			privacy-text

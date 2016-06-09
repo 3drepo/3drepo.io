@@ -147,10 +147,11 @@ account-profile #profileDivider {
 account-profile .accountProfileList {
   max-height: calc(100vh - 200px);
   overflow-x: hidden;
+  padding: 0;
 }
 
 account-profile .accountProfileContent {
-  margin-left: 40px;
+  margin-left: 65px;
 }
 
 account-profile .updateContainer {
@@ -180,6 +181,10 @@ account-info md-input-container label {
 account-info p {
   font-size: 14px;
   color: rgba(0,0,0,0.6);
+}
+
+account-info md-list {
+  padding: 0;
 }
 
 /** Avatar Image ******************************************************************************************************/

@@ -32,9 +32,13 @@
 		};
 	}
 
-	TermsAndConditionsCtrl.$inject = [];
+	TermsAndConditionsCtrl.$inject = ["$location"];
 
-	function TermsAndConditionsCtrl () {
+	function TermsAndConditionsCtrl ($location) {
 		var vm = this;
+
+		vm.home = function () {
+			$location.path("/", "_self");
+		};
 	}
 }());
