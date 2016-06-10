@@ -51,6 +51,12 @@ router.delete('/:project', middlewares.canCreateProject, deleteProject);
 
 router.post('/:project/upload', middlewares.connectQueue, middlewares.canCreateProject, uploadProject);
 
+router.get('/:project/collaborators', middlewares.isAccountAdmin, listCollaborators);
+
+router.post('/:project/collaborators', middlewares.isAccountAdmin, addCollaborator);
+
+router.delete('/:project/collaborators', middlewares.isAccountAdmin, removeCollaborator);
+
 
 function estimateImportedSize(format, size){
 	// if(format === 'obj'){
@@ -193,7 +199,6 @@ function deleteProject(req, res, next){
 	let responsePlace = utils.APIInfo(req);
 	let project = req.params.project;
 	let account = req.params.account;
-	let username = req.session.user.username;
 
 	//delete
 	ProjectSetting.removeProject(account, project).then(() => {

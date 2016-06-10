@@ -95,20 +95,20 @@ schema.statics.removeViewerRole = function(account, project){
 
 	let dropRoleCmd = {
 		'dropRole' : `${project}.viewer`
-	}
+	};
 
 	return ModelFactory.db.db(account).command(dropRoleCmd);
-}
+};
 
 schema.statics.removeCollaboratorRole = function(account, project){
 	'use strict';
 
 	let dropRoleCmd = {
 		'dropRole' : `${project}.collaborator`
-	}
+	};
 
 	return ModelFactory.db.db(account).command(dropRoleCmd);
-}
+};
 
 
 

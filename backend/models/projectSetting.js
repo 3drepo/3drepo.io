@@ -138,14 +138,14 @@ schema.statics.removeProject = function(account, project){
 		let promises = [];
 		
 		collections.forEach(collection => {
-			if(collection.collectionName.startsWith(project)){
+			if(collection.name.startsWith(project)){
 				promises.push(ModelFactory.db.db(account).dropCollection(collection.name));
 			}
 		});
 
 		return Promise.all(promises);
 
-	}).then(collections => {
+	}).then(() => {
 		//remove project settings
 		return setting.remove();
 
@@ -154,12 +154,11 @@ schema.statics.removeProject = function(account, project){
 
 		//remove collaborator role first because it inherit viewer role
 		return Role.removeCollaboratorRole(account, project).then(() => {
-			return Role.removeViewerRole(account, project)
-		})
+			return Role.removeViewerRole(account, project);
+		});
 	});
 
-
-}
+};
 
 var ProjectSetting = ModelFactory.createClass(
 	'ProjectSetting',
