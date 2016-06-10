@@ -5155,23 +5155,14 @@ var ViewerManager = {};
 		 * Bring up dialog to add a new project
 		 */
 		vm.newProject = function (event) {
+			vm.showNewProjectErrorMessage = false;
 			vm.newProjectFileSelected = false;
 			vm.newProjectData = {
 				account: vm.account,
 				type: vm.projectTypes[0]
 			};
 			vm.uploadedFile = null;
-			$mdDialog.show({
-				controller: function () {},
-				templateUrl: "projectDialog.html",
-				parent: angular.element(document.body),
-				targetEvent: event,
-				clickOutsideToClose:true,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true,
-				onRemoving: function () {$scope.closeDialog();}
-			});
+			showDialog("projectDialog.html");
 		};
 		
 		/**
@@ -5185,26 +5176,31 @@ var ViewerManager = {};
 		 * Save a new project
 		 */
 		vm.saveNewProject = function () {
-			var projectData,
-				project;
+			var project;
 
 			promise = AccountService.newProject(vm.newProjectData);
 			promise.then(function (response) {
 				console.log(response);
-				vm.projectsExist = true;
-				// Add project to list
-				project = {
-					name: response.data.project,
-					canUpload: true,
-					timestamp: "",
-					bif4FreeEnabled: false
-				};
-				updateAccountProjects (response.data.account, project);
-				// Save model to project
-				if (vm.uploadedFile !== null) {
-					uploadModelToProject (project, vm.uploadedFile);
+				if (response.data.status === 400) {
+					vm.showNewProjectErrorMessage = true;
+					vm.newProjectErrorMessage = response.data.message;
 				}
-				vm.closeDialog();
+				else {
+					vm.projectsExist = true;
+					// Add project to list
+					project = {
+						name: response.data.project,
+						canUpload: true,
+						timestamp: null,
+						bif4FreeEnabled: false
+					};
+					updateAccountProjects (response.data.account, project);
+					// Save model to project
+					if (vm.uploadedFile !== null) {
+						uploadModelToProject (project, vm.uploadedFile);
+					}
+					vm.closeDialog();
+				}
 			});
 		};
 
@@ -5233,17 +5229,7 @@ var ViewerManager = {};
 			vm.newDatabaseName = "";
 			vm.showPaymentWait = false;
 			vm.newDatabaseToken = false;
-			$mdDialog.show({
-				controller: function () {},
-				templateUrl: "databaseDialog.html",
-				parent: angular.element(document.body),
-				targetEvent: event,
-				clickOutsideToClose:true,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true,
-				onRemoving: function () {$scope.closeDialog();}
-			});
+			showDialog("databaseDialog.html");
 		};
 
 		/**
@@ -5267,6 +5253,11 @@ var ViewerManager = {};
 				console.log(vm.newDatabaseToken);
 				vm.showPaymentWait = true;
 			});
+		};
+
+		vm.setupDeleteProject = function (project) {
+			vm.deleteProject = project;
+			showDialog("deleteProjectDialog.html");
 		};
 
 		/**
@@ -5325,9 +5316,6 @@ var ViewerManager = {};
 					else if (response.data.value === 66) {
 						vm.fileUploadInfo = "Insufficient quota for model";
 					}
-					else {
-						vm.fileUploadInfo = "Error saving model";
-					}
 					vm.showUploading = false;
 					vm.showFileUploadInfo = true;
 					$timeout(function () {
@@ -5340,12 +5328,17 @@ var ViewerManager = {};
 						promise = AccountService.uploadStatus(projectData);
 						promise.then(function (response) {
 							console.log(response);
-							if (response.data.status === "ok") {
-								project.timestamp = UtilsService.formatTimestamp(new Date(), true);
+							if ((response.data.status === "ok") || (response.data.status === "failed")) {
+								if (response.data.status === "ok") {
+									project.timestamp = UtilsService.formatTimestamp(new Date(), true);
+									vm.fileUploadInfo = "Uploaded";
+								}
+								else {
+									vm.fileUploadInfo = response.data.errorReason.message;
+								}
 								vm.showUploading = false;
 								$interval.cancel(interval);
 								vm.showFileUploadInfo = true;
-								vm.fileUploadInfo = "Uploaded";
 								$timeout(function () {
 									project.uploading = false;
 								}, 4000);
@@ -5353,6 +5346,24 @@ var ViewerManager = {};
 						});
 					}, 1000);
 				}
+			});
+		}
+
+		/**
+		 * Show a dialog
+		 * @param {String} dialogTemplate
+		 */
+		function showDialog (dialogTemplate) {
+			$mdDialog.show({
+				controller: function () {},
+				templateUrl: dialogTemplate,
+				parent: angular.element(document.body),
+				targetEvent: event,
+				clickOutsideToClose:true,
+				fullscreen: true,
+				scope: $scope,
+				preserveScope: true,
+				onRemoving: function () {$scope.closeDialog();}
 			});
 		}
 	}
@@ -9284,6 +9295,9 @@ var ViewerManager = {};
 							notLoggedInElement = angular.element("<login></login>");
 							homeLoggedOut.append(notLoggedInElement);
 							$compile(notLoggedInElement)($scope);
+							
+							// Set the URL to root if it is not root
+							$location.path("/", "_self");
 						}
 					});
 				}
@@ -9544,7 +9558,8 @@ angular.module('3drepo')
             pen_col = "#FF0000",
             initialPenIndicatorSize = 10,
             penIndicatorSize = initialPenIndicatorSize,
-            pen_size = penIndicatorSize,
+            penToIndicatorRatio = 0.8,
+            pen_size = penIndicatorSize * penToIndicatorRatio,
             mouseWheelDirectionUp = null,
             hasDrawnOnCanvas = false;
 
@@ -9686,6 +9701,8 @@ angular.module('3drepo')
                 setPenIndicatorPosition(evt.layerX, evt.layerY);
             }, false);
 
+            // Disable changing on pen size with mouse wheel
+            /*
             canvas.addEventListener('wheel', function (evt) {
                 var penToIndicatorRation = 0.8;
 
@@ -9711,6 +9728,7 @@ angular.module('3drepo')
                     pen_size = (pen_size < 0) ? 0 : pen_size;
                 }
             }, false);
+            */
         }
 
         /**
@@ -10831,6 +10849,7 @@ angular.module('3drepo')
 				setupIssuesToShow();
 				vm.showPins();
 				setContentHeight();
+				vm.canAdd = true;
 			});
 		};
 
@@ -10906,8 +10925,9 @@ angular.module('3drepo')
 				commentHeight = 80,
 				headerHeight = 53,
 				openIssueFooterHeight = 180,
-				closedIssueFooterHeight = 53,
-				infoHeight = 80;
+				closedIssueFooterHeight = 60,
+				infoHeight = 80,
+				issuesMinHeight = 260;
 
 			switch (vm.toShow) {
 				case "showIssues":
@@ -10919,6 +10939,7 @@ angular.module('3drepo')
 						}
 					}
 					height = issuesHeight;
+					height = (height < issuesMinHeight) ? issuesMinHeight : issuesHeight;
 					break;
 
 				case "showIssue":
@@ -13709,7 +13730,7 @@ var Oculus = {};
 					secondSelected: false
 				}
 			],
-			minHeight: 80,
+			minHeight: 260,
 			fixedHeight: false,
 			options: [
 				{type: "menu", visible: true},
@@ -14913,9 +14934,9 @@ var Oculus = {};
 		};
 	}
 
-	SignUpFormCtrl.$inject = ["$scope", "$mdDialog", "$location", "serverConfig", "SignUpFormService"];
+	SignUpFormCtrl.$inject = ["$scope", "$mdDialog", "$location", "serverConfig", "UtilsService"];
 
-	function SignUpFormCtrl($scope, $mdDialog, $location, serverConfig, SignUpFormService) {
+	function SignUpFormCtrl($scope, $mdDialog, $location, serverConfig, UtilsService) {
 		var vm = this,
 			enterKey = 13,
 			promise,
@@ -15005,12 +15026,6 @@ var Oculus = {};
 		}
 
 		/**
-		 * Dialog controller
-		 */
-		function tcDialogController() {
-		}
-
-		/**
 		 * Do the user registration
 		 */
 		function doRegister() {
@@ -15029,7 +15044,7 @@ var Oculus = {};
 						data.captcha = vm.reCaptchaResponse;
 					}
 					vm.registering = true;
-					promise = SignUpFormService.register(vm.newUser.username, data);
+					promise = UtilsService.doPost(data, vm.newUser.username);
 					promise.then(function (response) {
 						if (response.status === 200) {
 							vm.showPage("registerRequest");
@@ -15044,6 +15059,7 @@ var Oculus = {};
 							vm.registerErrorMessage = "Error with registration";
 						}
 						vm.registering = false;
+						grecaptcha.reset(); // reset reCaptcha
 					});
 				}
 				else {
@@ -15057,64 +15073,6 @@ var Oculus = {};
 	}
 }());
 
-/**
- *  Copyright (C) 2016 3D Repo Ltd
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-    "use strict";
-
-    angular.module("3drepo")
-        .factory("SignUpFormService", SignUpFormService);
-
-    SignUpFormService.$inject = ["$http", "$q", "serverConfig"];
-
-    function SignUpFormService($http, $q, serverConfig) {
-        var obj = {};
-
-        /**
-         * Handle POST requests
-         * @param data
-         * @param urlEnd
-         * @returns {*}
-         */
-        function doPost(data, urlEnd) {
-            var deferred = $q.defer(),
-                url = serverConfig.apiUrl(serverConfig.POST_API, urlEnd),
-                config = {withCredentials: true};
-
-            $http.post(url, data, config)
-                .then(
-                    function (response) {
-                        deferred.resolve(response);
-                    },
-                    function (error) {
-                        deferred.resolve(error);
-                    }
-                );
-            return deferred.promise;
-        }
-
-        obj.register = function (username, data) {
-            return doPost(data, username);
-        };
-
-        return obj;
-    }
-}());
 /**
  *	Copyright (C) 2016 3D Repo Ltd
  *

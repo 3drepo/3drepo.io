@@ -21,3 +21,4 @@ md-dialog.newProjectDialog(aria-label="New project")
 			#projectDialogFilenameContainer(layout="row", ng-if="vm.newProjectFileSelected")
 				p#projectDialogFilenameIntro Selected file
 				p#projectDialogFilename {{vm.uploadedFile.name}}
+			p#projectDialogError(ng-if="vm.showNewProjectErrorMessage") {{vm.newProjectErrorMessage}}

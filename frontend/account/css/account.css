@@ -251,6 +251,26 @@ account-menu md-icon {
   margin: 0;
 }
 
+.newProjectDialog #projectDialogError {
+  margin: 0;
+  color: #F44336;
+}
+
+/** Delete Project Dialog *********************************************************************************************/
+.deleteProjectDialog {
+  min-width: 350px;
+  min-height: 230px;
+  overflow: hidden;
+}
+
+.deleteProjectDialog p {
+  color: rgba(0 ,0, 0, 0.6);
+}
+.deleteProjectDialog #deleteProjectName {
+  color: rgba(0 ,0, 0, 0.9);
+  margin-left: 5px;
+}
+
 /** New Database Dialog ***********************************************************************************************/
 .newDatabaseDialog {
   min-width: 350px;

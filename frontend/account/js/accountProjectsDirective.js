@@ -174,23 +174,14 @@
 		 * Bring up dialog to add a new project
 		 */
 		vm.newProject = function (event) {
+			vm.showNewProjectErrorMessage = false;
 			vm.newProjectFileSelected = false;
 			vm.newProjectData = {
 				account: vm.account,
 				type: vm.projectTypes[0]
 			};
 			vm.uploadedFile = null;
-			$mdDialog.show({
-				controller: function () {},
-				templateUrl: "projectDialog.html",
-				parent: angular.element(document.body),
-				targetEvent: event,
-				clickOutsideToClose:true,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true,
-				onRemoving: function () {$scope.closeDialog();}
-			});
+			showDialog("projectDialog.html");
 		};
 		
 		/**
@@ -204,26 +195,31 @@
 		 * Save a new project
 		 */
 		vm.saveNewProject = function () {
-			var projectData,
-				project;
+			var project;
 
 			promise = AccountService.newProject(vm.newProjectData);
 			promise.then(function (response) {
 				console.log(response);
-				vm.projectsExist = true;
-				// Add project to list
-				project = {
-					name: response.data.project,
-					canUpload: true,
-					timestamp: "",
-					bif4FreeEnabled: false
-				};
-				updateAccountProjects (response.data.account, project);
-				// Save model to project
-				if (vm.uploadedFile !== null) {
-					uploadModelToProject (project, vm.uploadedFile);
+				if (response.data.status === 400) {
+					vm.showNewProjectErrorMessage = true;
+					vm.newProjectErrorMessage = response.data.message;
 				}
-				vm.closeDialog();
+				else {
+					vm.projectsExist = true;
+					// Add project to list
+					project = {
+						name: response.data.project,
+						canUpload: true,
+						timestamp: null,
+						bif4FreeEnabled: false
+					};
+					updateAccountProjects (response.data.account, project);
+					// Save model to project
+					if (vm.uploadedFile !== null) {
+						uploadModelToProject (project, vm.uploadedFile);
+					}
+					vm.closeDialog();
+				}
 			});
 		};
 
@@ -252,17 +248,7 @@
 			vm.newDatabaseName = "";
 			vm.showPaymentWait = false;
 			vm.newDatabaseToken = false;
-			$mdDialog.show({
-				controller: function () {},
-				templateUrl: "databaseDialog.html",
-				parent: angular.element(document.body),
-				targetEvent: event,
-				clickOutsideToClose:true,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true,
-				onRemoving: function () {$scope.closeDialog();}
-			});
+			showDialog("databaseDialog.html");
 		};
 
 		/**
@@ -286,6 +272,11 @@
 				console.log(vm.newDatabaseToken);
 				vm.showPaymentWait = true;
 			});
+		};
+
+		vm.setupDeleteProject = function (project) {
+			vm.deleteProject = project;
+			showDialog("deleteProjectDialog.html");
 		};
 
 		/**
@@ -344,9 +335,6 @@
 					else if (response.data.value === 66) {
 						vm.fileUploadInfo = "Insufficient quota for model";
 					}
-					else {
-						vm.fileUploadInfo = "Error saving model";
-					}
 					vm.showUploading = false;
 					vm.showFileUploadInfo = true;
 					$timeout(function () {
@@ -359,12 +347,17 @@
 						promise = AccountService.uploadStatus(projectData);
 						promise.then(function (response) {
 							console.log(response);
-							if (response.data.status === "ok") {
-								project.timestamp = UtilsService.formatTimestamp(new Date(), true);
+							if ((response.data.status === "ok") || (response.data.status === "failed")) {
+								if (response.data.status === "ok") {
+									project.timestamp = UtilsService.formatTimestamp(new Date(), true);
+									vm.fileUploadInfo = "Uploaded";
+								}
+								else {
+									vm.fileUploadInfo = response.data.errorReason.message;
+								}
 								vm.showUploading = false;
 								$interval.cancel(interval);
 								vm.showFileUploadInfo = true;
-								vm.fileUploadInfo = "Uploaded";
 								$timeout(function () {
 									project.uploading = false;
 								}, 4000);
@@ -372,6 +365,24 @@
 						});
 					}, 1000);
 				}
+			});
+		}
+
+		/**
+		 * Show a dialog
+		 * @param {String} dialogTemplate
+		 */
+		function showDialog (dialogTemplate) {
+			$mdDialog.show({
+				controller: function () {},
+				templateUrl: dialogTemplate,
+				parent: angular.element(document.body),
+				targetEvent: event,
+				clickOutsideToClose:true,
+				fullscreen: true,
+				scope: $scope,
+				preserveScope: true,
+				onRemoving: function () {$scope.closeDialog();}
 			});
 		}
 	}

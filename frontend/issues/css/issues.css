@@ -221,8 +221,8 @@ issue-area #issueAreaPenIndicator {
   position: absolute;
   display: block;
   color: #FFFFFF;
-  opacity: 0.9;
   font-size: 20px;
+  font-weight: bold;
 }
 
 issue-area #scribbleDisplay {

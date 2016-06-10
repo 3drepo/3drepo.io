@@ -251,6 +251,26 @@ account-menu md-icon {
   margin: 0;
 }
 
+.newProjectDialog #projectDialogError {
+  margin: 0;
+  color: #F44336;
+}
+
+/** Delete Project Dialog *********************************************************************************************/
+.deleteProjectDialog {
+  min-width: 350px;
+  min-height: 230px;
+  overflow: hidden;
+}
+
+.deleteProjectDialog p {
+  color: rgba(0 ,0, 0, 0.6);
+}
+.deleteProjectDialog #deleteProjectName {
+  color: rgba(0 ,0, 0, 0.9);
+  margin-left: 5px;
+}
+
 /** New Database Dialog ***********************************************************************************************/
 .newDatabaseDialog {
   min-width: 350px;
@@ -266,6 +286,7 @@ account-menu md-icon {
   font-weight: normal;
   color: rgba(0,0,0,0.7);
 }
+
 /* Done to counter bootstrap styling. This should really be set in a top level style file */
 .md-datepicker-input-mask {
   width: 308px;
@@ -1211,8 +1232,8 @@ issue-area #issueAreaPenIndicator {
   position: absolute;
   display: block;
   color: #FFFFFF;
-  opacity: 0.9;
   font-size: 20px;
+  font-weight: bold;
 }
 
 issue-area #scribbleDisplay {

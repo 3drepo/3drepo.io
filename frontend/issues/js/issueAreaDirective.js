@@ -56,7 +56,8 @@
             pen_col = "#FF0000",
             initialPenIndicatorSize = 10,
             penIndicatorSize = initialPenIndicatorSize,
-            pen_size = penIndicatorSize,
+            penToIndicatorRatio = 0.8,
+            pen_size = penIndicatorSize * penToIndicatorRatio,
             mouseWheelDirectionUp = null,
             hasDrawnOnCanvas = false;
 
@@ -198,6 +199,8 @@
                 setPenIndicatorPosition(evt.layerX, evt.layerY);
             }, false);
 
+            // Disable changing on pen size with mouse wheel
+            /*
             canvas.addEventListener('wheel', function (evt) {
                 var penToIndicatorRation = 0.8;
 
@@ -223,6 +226,7 @@
                     pen_size = (pen_size < 0) ? 0 : pen_size;
                 }
             }, false);
+            */
         }
 
         /**

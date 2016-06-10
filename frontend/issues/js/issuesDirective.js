@@ -663,6 +663,7 @@
 				setupIssuesToShow();
 				vm.showPins();
 				setContentHeight();
+				vm.canAdd = true;
 			});
 		};
 
@@ -738,8 +739,9 @@
 				commentHeight = 80,
 				headerHeight = 53,
 				openIssueFooterHeight = 180,
-				closedIssueFooterHeight = 53,
-				infoHeight = 80;
+				closedIssueFooterHeight = 60,
+				infoHeight = 80,
+				issuesMinHeight = 260;
 
 			switch (vm.toShow) {
 				case "showIssues":
@@ -751,6 +753,7 @@
 						}
 					}
 					height = issuesHeight;
+					height = (height < issuesMinHeight) ? issuesMinHeight : issuesHeight;
 					break;
 
 				case "showIssue":

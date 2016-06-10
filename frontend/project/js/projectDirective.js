@@ -108,7 +108,7 @@
 					secondSelected: false
 				}
 			],
-			minHeight: 80,
+			minHeight: 260,
 			fixedHeight: false,
 			options: [
 				{type: "menu", visible: true},
