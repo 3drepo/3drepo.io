@@ -31,7 +31,7 @@ function signUpAndLogin(params){
 			.send({ username, password })
 			.expect(200, function(err, res){
 				expect(res.body.username).to.equal(username);
-				
+				console.log(typeof done)
 				done(err, agent);
 
 			});

@@ -26,6 +26,7 @@ let log_iface = require("../../logger.js");
 let systemLogger = log_iface.systemLogger;
 let responseCodes = require("../../response_codes.js");
 let helpers = require("./helpers");
+let async = require('async');
 
 describe('Sharing a project', function () {
 	let User = require('../../models/user');
@@ -39,19 +40,31 @@ describe('Sharing a project', function () {
 	let username_viewer = 'collaborator_viewer';
 	let password_viewer = 'collaborator_viewer';
 
+	let username_editer = 'collaborator_editer';
+	let password_editer = 'collaborator_editer';
+
 	before(function(done){
 
 		server = app.listen(8080, function () {
 			console.log('API test server is listening on port 8080!');
 
 
-			helpers.signUpAndLogin({
-				server, request, agent, expect, User, systemLogger,
-				username: username_viewer, password: password_viewer, email,
-				done: function(err, _agent){
-					agent = _agent;
-					if (err) return done(err);
-
+			async.series([
+				function createViewer(done){
+					helpers.signUpAndLogin({
+						server, request, agent, expect, User, systemLogger,
+						username: username_viewer, password: password_viewer, email,
+						done
+					});
+				},
+				function createEditer(done){
+					helpers.signUpAndLogin({
+						server, request, agent, expect, User, systemLogger,
+						username: username_editer, password: password_editer, email,
+						done
+					});
+				},
+				function logInAsOwner(done){
 					agent = request.agent(server);
 					agent.post('/login')
 					.send({ username, password })
@@ -60,8 +73,7 @@ describe('Sharing a project', function () {
 						done(err);
 					});
 				}
-			});
-
+			], done);
 		});
 
 	});
@@ -76,20 +88,169 @@ describe('Sharing a project', function () {
 
 	describe('for view only', function(){
 
-		it('should succee', function(done){
+		it('should succee and the viewer is able to see the project', function(done){
 			let role = {
 				user: username_viewer,
 				role: 'viewer'
 			};
 
-			agent.post(`/${username}/${project}/collaborators`)
-			.send(role)
-			.expect(200, function(err, res){
-				expect(res.body).to.deep.equal(role);
-				done(err);
-			});
+			async.series([
+				function share(done){
+
+					agent.post(`/${username}/${project}/collaborators`)
+					.send(role)
+					.expect(200, function(err, res){
+						expect(res.body).to.deep.equal(role);
+						done(err);
+					});
+				},
+				function logout(done){
+
+					agent.post('/logout')
+					.send({})
+					.expect(200, function(err, res){
+						expect(res.body.username).to.equal(username);
+						done(err);
+					});
+				},
+				function loginAsViewer(done){
+
+					agent.post('/login')
+					.send({ username: username_viewer, password: password_viewer })
+					.expect(200, function(err, res){
+						expect(res.body.username).to.equal(username_viewer);
+						done(err);
+					});
+				},
+				function checkSharedProjectInList(done){
+
+					agent.get(`/${username_viewer}.json`)
+					.expect(200, function(err, res){
+
+						expect(res.body).to.have.property('accounts').that.is.an('array');
+						let account = res.body.accounts.find( a => a.account === username);
+						expect(account).to.have.property('projects').that.is.an('array');
+						let projectObj = account.projects.find( p => p.project === project);
+						expect(projectObj).to.have.property('project', project);
+
+						done(err);
+					});
+				},
+				function ableToViewProject(done){
+
+					agent.get(`/${username}/${project}/revision/master/head.x3d.mp`)
+					.expect(200, function(err ,res){
+						done(err);
+					});
+				}
+			], done);
+
+
 		});
 
+
+		it('and the viewer should be able to see list of issues', function(done){
+			agent.get(`/${username}/${project}/issues.json`)
+			.expect(200, done);
+		});
+
+		it('and the viewer should NOT be able to see raise issue', function(done){
+			agent.post(`/${username}/${project}/issues.json`)
+			.send({ data: {} })
+			.expect(401 , done);
+		});
+
+		describe('and then remove the role', function(done){
+			before(function(done){
+				async.waterfall([
+					function logout(done){
+
+						agent.post('/logout')
+						.send({})
+						.expect(200, function(err, res){
+							expect(res.body.username).to.equal(username_viewer);
+							done(err);
+						});
+					},
+					function loginAsProjectOwner(done){
+
+						agent.post('/login')
+						.send({ username, password })
+						.expect(200, function(err, res){
+							expect(res.body.username).to.equal(username);
+							done(err);
+						});
+					}
+				], done);
+			});
+
+			it('should succee and the viewer is NOT able to see the project', function(done){
+
+				let role = {
+					user: username_viewer,
+					role: 'viewer'
+				};
+					
+				async.waterfall([
+					function remove(done){
+
+						agent.delete(`/${username}/${project}/collaborators`)
+						.send(role)
+						.expect(200, function(err, res){
+							expect(res.body).to.deep.equal(role);
+							done(err);
+						});
+					},
+					function logout(done){
+
+						agent.post('/logout')
+						.send({})
+						.expect(200, function(err, res){
+							expect(res.body.username).to.equal(username);
+							done(err);
+						});
+					},
+					function loginAsViewer(done){
+
+						agent.post('/login')
+						.send({ username: username_viewer, password: password_viewer })
+						.expect(200, function(err, res){
+							expect(res.body.username).to.equal(username_viewer);
+							done(err);
+						});
+					},
+					function checkSharedProjectInList(done){
+
+						agent.get(`/${username_viewer}.json`)
+						.expect(200, function(err, res){
+
+							expect(res.body).to.have.property('accounts').that.is.an('array');
+							let account = res.body.accounts.find( a => a.account === username);
+							expect(account).to.be.undefined;
+
+							done(err);
+						});
+					},
+					function notAbleToViewProject(done){
+
+						agent.get(`/${username}/${project}/revision/master/head.x3d.mp`)
+						.expect(401, function(err ,res){
+							done(err);
+						});
+					}
+				], done);
+
+			});
+
+			it('and the viewer should NOT be able to see raise issue', function(done){
+				agent.post(`/${username}/${project}/issues.json`)
+				.send({ data: {} })
+				.expect(401 , done);
+			});
+		});
+	});
+
+	describe('for both view and edit', function(){
 
 	});
 });
