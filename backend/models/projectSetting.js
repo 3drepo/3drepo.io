@@ -120,10 +120,16 @@ schema.statics.removeProject = function(account, project){
 		//remove all roles related to this project for these users
 		let promises = [];
 		
-		promises.push(User.revokeRolesFromUser(owner, account, `${project}.collaborator`));
+		promises.push(User.revokeRolesFromUser(owner, account, `${project}.collaborator`).catch(err =>{
+			console.log(err);
+			return Promise.resolve();
+		}));
 		
 		collaborators.forEach(user => {
-			promises.push(User.revokeRolesFromUser(user.user, account, `${project}.${user.role}`));
+			promises.push(User.revokeRolesFromUser(user.user, account, `${project}.${user.role}`).catch(err => {
+				console.log(err);
+				return Promise.resolve();
+			}));
 		});
 
 		return Promise.all(promises);
@@ -155,6 +161,9 @@ schema.statics.removeProject = function(account, project){
 		//remove collaborator role first because it inherit viewer role
 		return Role.removeCollaboratorRole(account, project).then(() => {
 			return Role.removeViewerRole(account, project);
+		}).catch(err => {
+			console.log(err);
+			return Promise.resolve();
 		});
 	});
 
