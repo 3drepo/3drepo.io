@@ -353,7 +353,7 @@ function listCollaborators(req, res ,next){
 function addCollaborator(req, res ,next){
 	'use strict';
 
-	let username = req.body.username;
+	let username = req.body.user;
 	let project = req.params.project;
 	let account = req.params.account;
 	let role = req.body.role;
@@ -377,7 +377,7 @@ function removeCollaborator(req, res ,next){
 
 	let project = req.params.project;
 	let account = req.params.account;
-	let username = req.body.username;
+	let username = req.body.user;
 	let role = req.body.role;
 
 	ProjectHelpers.removeCollaborator(username, account, project, role).then(resRole => {
