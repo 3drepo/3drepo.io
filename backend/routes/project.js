@@ -47,14 +47,9 @@ router.put('/:project/settings/map-tile', middlewares.hasWriteAccessToProject, u
 
 router.post('/:project', middlewares.canCreateProject, createProject);
 
+router.delete('/:project', middlewares.canCreateProject, deleteProject);
+
 router.post('/:project/upload', middlewares.connectQueue, middlewares.canCreateProject, uploadProject);
-
-router.get('/:project/collaborators', middlewares.isAccountAdmin, listCollaborators);
-
-router.post('/:project/collaborators', middlewares.isAccountAdmin, addCollaborator);
-
-router.delete('/:project/collaborators', middlewares.isAccountAdmin, removeCollaborator);
-
 
 
 function estimateImportedSize(format, size){
@@ -192,6 +187,23 @@ function createProject(req, res, next){
 	});
 }
 
+function deleteProject(req, res, next){
+	'use strict';
+
+	let responsePlace = utils.APIInfo(req);
+	let project = req.params.project;
+	let account = req.params.account;
+	let username = req.session.user.username;
+
+	//delete
+	ProjectSetting.removeProject(account, project).then(() => {
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
+	}).catch( err => {
+		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);
+	});
+}
+
+
 function uploadProject(req, res, next){
 	'use strict';
 
@@ -328,64 +340,6 @@ function uploadProject(req, res, next){
 			{}
 		);
 	}
-
-}
-
-function listCollaborators(req, res ,next){
-	'use strict';
-
-	let project = req.params.project;
-	let account = req.params.account;
-
-	ProjectSetting.findById({account, project}, project).then(setting => {
-
-		if(!setting){
-			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
-		}
-
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, setting.collaborators);
-		
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-	});
-}
-
-function addCollaborator(req, res ,next){
-	'use strict';
-
-	let username = req.body.username;
-	let project = req.params.project;
-	let account = req.params.account;
-	let role = req.body.role;
-
-	if(['viewer', 'collaborator'].indexOf(role) === -1){
-
-		let err = responseCodes.INVALID_ROLE;
-		return responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-
-	}
-
-	ProjectHelpers.addCollaborator(username, account, project, role).then(resRole => {
-		return responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, resRole);
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-	});
-}
-
-function removeCollaborator(req, res ,next){
-	'use strict';
-
-	let project = req.params.project;
-	let account = req.params.account;
-	let username = req.body.username;
-	let role = req.body.role;
-
-	ProjectHelpers.removeCollaborator(username, account, project, role).then(resRole => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, resRole);
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-	});
-
 }
 
 module.exports = router;
