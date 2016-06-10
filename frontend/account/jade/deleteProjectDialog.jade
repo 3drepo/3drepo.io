@@ -9,7 +9,7 @@ md-dialog.deleteProjectDialog(aria-label="Delete project")
 		div(layout="column")
 			div(layout="row")
 				p Do you really want to delete project
-				p#deleteProjectName {{vm.deleteProject.name}}
+				p#deleteProjectName {{vm.projectToDelete.name}}
 				p ?
 			md-input-container
 				md-button.md-accent(ng-click="vm.deleteProject()") Yes

@@ -115,7 +115,30 @@
                     }
                 );
             return deferred.promise;
-        }
+        };
+
+        /**
+         * Handle DELETE requests
+         * @param url
+         * @returns {*}
+         */
+        obj.doDelete = function (url) {
+            console.log(url);
+            var deferred = $q.defer(),
+                urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
+                config = {withCredentials: true};
+
+            $http.delete(urlUse, config)
+                .then(
+                    function (response) {
+                        deferred.resolve(response);
+                    },
+                    function (error) {
+                        deferred.resolve(error);
+                    }
+                );
+            return deferred.promise;
+        };
 
         return obj;
     }

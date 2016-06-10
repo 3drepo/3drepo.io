@@ -274,9 +274,24 @@
 			});
 		};
 
+		/**
+		 * Set up deleting of project
+		 * @param {Object} project
+		 */
 		vm.setupDeleteProject = function (project) {
-			vm.deleteProject = project;
+			vm.projectToDelete = project;
 			showDialog("deleteProjectDialog.html");
+		};
+
+		/**
+		 * Delete project
+		 */
+		vm.deleteProject = function () {
+			console.log(1);
+			promise = UtilsService.doDelete(vm.account + "/" + vm.projectToDelete.name);
+			promise.then(function (response) {
+				console.log(response);
+			});
 		};
 
 		/**

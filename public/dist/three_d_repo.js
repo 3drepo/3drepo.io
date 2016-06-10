@@ -5255,9 +5255,24 @@ var ViewerManager = {};
 			});
 		};
 
+		/**
+		 * Set up deleting of project
+		 * @param {Object} project
+		 */
 		vm.setupDeleteProject = function (project) {
-			vm.deleteProject = project;
+			vm.projectToDelete = project;
 			showDialog("deleteProjectDialog.html");
+		};
+
+		/**
+		 * Delete project
+		 */
+		vm.deleteProject = function () {
+			console.log(1);
+			promise = UtilsService.doDelete(vm.account + "/" + vm.projectToDelete.name);
+			promise.then(function (response) {
+				console.log(response);
+			});
 		};
 
 		/**
@@ -16081,7 +16096,30 @@ var Oculus = {};
                     }
                 );
             return deferred.promise;
-        }
+        };
+
+        /**
+         * Handle DELETE requests
+         * @param url
+         * @returns {*}
+         */
+        obj.doDelete = function (url) {
+            console.log(url);
+            var deferred = $q.defer(),
+                urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
+                config = {withCredentials: true};
+
+            $http.delete(urlUse, config)
+                .then(
+                    function (response) {
+                        deferred.resolve(response);
+                    },
+                    function (error) {
+                        deferred.resolve(error);
+                    }
+                );
+            return deferred.promise;
+        };
 
         return obj;
     }
