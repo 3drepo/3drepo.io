@@ -47,7 +47,15 @@ router.put('/:project/settings/map-tile', middlewares.hasWriteAccessToProject, u
 
 router.post('/:project', middlewares.canCreateProject, createProject);
 
+router.delete('/:project', middlewares.canCreateProject, deleteProject);
+
 router.post('/:project/upload', middlewares.connectQueue, middlewares.canCreateProject, uploadProject);
+
+router.get('/:project/collaborators', middlewares.isAccountAdmin, listCollaborators);
+
+router.post('/:project/collaborators', middlewares.isAccountAdmin, addCollaborator);
+
+router.delete('/:project/collaborators', middlewares.isAccountAdmin, removeCollaborator);
 
 
 function estimateImportedSize(format, size){
@@ -185,6 +193,20 @@ function createProject(req, res, next){
 	});
 }
 
+function deleteProject(req, res, next){
+	'use strict';
+
+	let responsePlace = utils.APIInfo(req);
+	let project = req.params.project;
+	let account = req.params.account;
+
+	//delete
+	ProjectSetting.removeProject(account, project).then(() => {
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
+	}).catch( err => {
+		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);
+	});
+}
 
 
 function uploadProject(req, res, next){
@@ -244,19 +266,15 @@ function uploadProject(req, res, next){
 
 				let project = req.params.project;
 				let account = req.params.account;
-				let username = req.session.user.username;
+				//let username = req.session.user.username;
 
-				createAndAssignRole(project, account, username, req.body.desc, req.body.type).then(setting => {
-					//console.log('setting', setting);
-					return Promise.resolve(setting);
-				}).catch(err => {
+				ProjectSetting.findById({account, project}, project).then(setting => {
 
-					if (err && err.resCode && err.resCode.value === responseCodes.PROJECT_EXIST.value){
-						return _getProject(req);
-					} else {
-						return Promise.reject(err);
+					if(!setting){
+						req[C.REQ_REPO].logger.logError('Upload to non-exisitng project and create is now deprecated, please call create project API first then upload');
+						return responseCodes.respond(responsePlace, req, res, next, responseCodes.PROJECT_NOT_FOUND, responseCodes.PROJECT_NOT_FOUND);
+
 					}
-				}).then(setting => {
 
 					projectSetting = setting;
 					projectSetting.status = 'processing';
@@ -327,6 +345,65 @@ function uploadProject(req, res, next){
 			{}
 		);
 	}
+
+}
+
+function listCollaborators(req, res ,next){
+	'use strict';
+
+	let project = req.params.project;
+	let account = req.params.account;
+
+	ProjectSetting.findById({account, project}, project).then(setting => {
+
+		if(!setting){
+			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+		}
+
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, setting.collaborators);
+		
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+function addCollaborator(req, res ,next){
+	'use strict';
+
+	let username = req.body.user;
+	let project = req.params.project;
+	let account = req.params.account;
+	let role = req.body.role;
+
+	if(['viewer', 'collaborator'].indexOf(role) === -1){
+
+		let err = responseCodes.INVALID_ROLE;
+		return responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+
+	}
+
+	ProjectHelpers.addCollaborator(username, account, project, role).then(resRole => {
+		return responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, resRole);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+function removeCollaborator(req, res ,next){
+	'use strict';
+
+	let project = req.params.project;
+	let account = req.params.account;
+	let username = req.body.user;
+	let role = req.body.role;
+
+	ProjectHelpers.removeCollaborator(username, account, project, role).then(resRole => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, resRole);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+
+
 }
 
 module.exports = router;

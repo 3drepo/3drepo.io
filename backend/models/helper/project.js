@@ -194,8 +194,92 @@ function importToyProject(username){
 	});
 }
 
+function addCollaborator(username, account, project, role){
+	'use strict';
+
+	let setting;
+	return ProjectSetting.findById({account, project}, project).then(_setting => {
+
+		setting = _setting;
+
+		if(!setting){
+			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+		} else if (setting.findCollaborator(username, role)) {
+			return Promise.reject(responseCodes.ALREADY_IN_ROLE);
+		} else {
+			return User.findByUserName(username);
+		}
+
+
+	}).then(user => {
+		
+		if(!user){
+			return Promise.reject(responseCodes.USER_NOT_FOUND);
+		}
+
+		return User.grantRoleToUser(username, account, `${project}.${role}`);
+
+	}).then(() => {
+
+		let roleObj = {
+			user: username,
+			role: role
+		};
+
+		setting.collaborators.push(roleObj);
+
+		return setting.save().then(() => {
+			return Promise.resolve(roleObj);
+		});
+	});
+}
+
+function removeCollaborator(username, account, project, role){
+	'use strict';
+
+	let setting;
+	return ProjectSetting.findById({account, project}, project).then(_setting => {
+
+		setting = _setting;
+
+		if(!setting){
+			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+		} else {
+			return User.findByUserName(username);
+		}
+
+
+	}).then(user => {
+		
+		if(!user){
+			return Promise.reject(responseCodes.USER_NOT_FOUND);
+		}
+
+		return User.revokeRolesFromUser(username, account, `${project}.${role}`);
+
+	}).then(() => {
+
+		let roleObj = {
+			user: username,
+			role: role
+		};
+
+		let deletedCol = setting.removeCollaborator(username, role);
+
+		if(!deletedCol){
+			return Promise.reject(responseCodes.NOT_IN_ROLE);
+		}
+
+		return setting.save().then(() => {
+			return Promise.resolve(roleObj);
+		});
+	});
+}
+
 module.exports = {
 	createAndAssignRole,
 	importToyProject,
-	convertToErrorCode
+	convertToErrorCode,
+	addCollaborator,
+	removeCollaborator
 };

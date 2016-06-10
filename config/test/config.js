@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var hostname   = "example.org";
+var hostname   = "127.0.0.1";
 var http_port  = 80;
 var https_port = 443;
 
@@ -40,7 +40,7 @@ module.exports = {
 	js_debug_level: 'debug',
 	logfile: {
 		filename: './3drepo.log',
-		console_level: 'debug',
+		console_level: 'info',
 		file_level: 'debug'
 	},
 	db: {

@@ -137,6 +137,10 @@ var responseCodes = {
 	ISSUE_COMMENT_PERMISSION_DECLINED: {value: 78, message: "Can't edit comment made by others", status: 400},
 	ISSUE_COMMENT_SEALED: { value: 79, message: "Can't edit a sealed comment or a comment in closed issue", status: 400},
 	ISSUE_CLOSED_ALREADY: { value: 80, message: "Issue closed already", status: 400},
+	PROJECT_NOT_FOUND: { value: 81, message: "Project not found", status: 400},
+	INVALID_ROLE: {value: 82, message: 'Invalid role name', status: 400},
+	ALREADY_IN_ROLE: {value: 83, message: 'User already assigned with this role', status: 400},
+	NOT_IN_ROLE: { value: 84, message: 'User not in this role', status: 400},
 
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {
@@ -201,7 +205,7 @@ var responseCodes = {
 };
 
 var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
-49,  50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 
+49,  50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84,
 1000, 2000, 3000, 4000];
 
 var mimeTypes = {

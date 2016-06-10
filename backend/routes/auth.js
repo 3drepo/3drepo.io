@@ -216,13 +216,13 @@
 			});
 
 			//soft launch give users some quota
-			return user.createSubscriptionToken('SOFT-LAUNCH-FREE-TRIAL', user.user)
+			return user.createSubscriptionToken('SOFT-LAUNCH-FREE-TRIAL', user.user);
 
 		}).then(sub => {
 
 			return User.activateSubscription(sub.token, {}, {}, true);
 
-		}).then(user => {
+		}).then(() => {
 
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
 

@@ -259,7 +259,27 @@ function connectQueue(req, res, next){
 		next();
 	}
 		
+}
 
+function isAccountAdmin(req, res, next){
+	'use strict';
+
+	let username = req.session.user.username;
+	let account = req.params.account;
+
+	User.findByUserName(username).then(user => {
+
+		if(!user){
+			return Promise.reject();
+		} else if(!user.hasRole(account, 'admin')){
+			return Promise.reject();
+		} else {
+			next();
+		}
+
+	}).catch(() => {
+		responseCodes.respond("Middleware: isAccountAdmin", req, res, next, responseCodes.AUTH_ERROR, null, req.params);
+	});
 
 }
 
@@ -273,8 +293,10 @@ var middlewares = {
 	hasWriteAccessToAccount: [loggedIn, hasWriteAccessToAccount],
 	isMainContractor: [loggedIn, isMainContractor],
 	isSubContractorInvited: [loggedIn, isSubContractorInvited],
+	isAccountAdmin: [loggedIn, isAccountAdmin],
 	canCreateDatabase,
 	connectQueue,
+
 	// Helpers
 	freeSpace,
 	isSubContractorInvitedHelper,
