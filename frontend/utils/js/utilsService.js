@@ -123,7 +123,6 @@
          * @returns {*}
          */
         obj.doDelete = function (url) {
-            console.log(url);
             var deferred = $q.defer(),
                 urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
                 config = {withCredentials: true};

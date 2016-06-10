@@ -280,6 +280,7 @@
 		 */
 		vm.setupDeleteProject = function (project) {
 			vm.projectToDelete = project;
+			vm.showDeleteProjectError = false;
 			showDialog("deleteProjectDialog.html");
 		};
 
@@ -287,10 +288,28 @@
 		 * Delete project
 		 */
 		vm.deleteProject = function () {
-			console.log(1);
+			var i, iLength, j, jLength;
 			promise = UtilsService.doDelete(vm.account + "/" + vm.projectToDelete.name);
 			promise.then(function (response) {
 				console.log(response);
+				if (response.status === 200) {
+					// Remove project from list
+					for (i = 0, iLength = vm.accounts.length; i < iLength; i += 1) {
+						if (vm.accounts[i].name === response.data.account) {
+							for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
+								if (vm.accounts[i].projects[j].name === response.data.project) {
+									vm.accounts[i].projects.splice(j, 1);
+									break;
+								}
+							}
+						}
+					}
+					vm.closeDialog();
+				}
+				else {
+					vm.showDeleteProjectError = true;
+					vm.deleteProjectError = "Error deleting project";
+				}
 			});
 		};
 

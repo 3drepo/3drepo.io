@@ -271,6 +271,11 @@ account-menu md-icon {
   margin-left: 5px;
 }
 
+.deleteProjectDialog #deleteProjectError {
+  margin: 0;
+  color: #F44336;
+}
+
 /** New Database Dialog ***********************************************************************************************/
 .newDatabaseDialog {
   min-width: 350px;
