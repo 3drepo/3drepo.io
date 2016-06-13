@@ -375,13 +375,6 @@ function addCollaborator(req, res ,next){
 	let account = req.params.account;
 	let role = req.body.role;
 
-	if(['viewer', 'collaborator'].indexOf(role) === -1){
-
-		let err = responseCodes.INVALID_ROLE;
-		return responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-
-	}
-
 	ProjectHelpers.addCollaborator(username, account, project, role).then(resRole => {
 		return responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, resRole);
 	}).catch(err => {

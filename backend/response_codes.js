@@ -140,7 +140,7 @@ var responseCodes = {
 	PROJECT_NOT_FOUND: { value: 81, message: "Project not found", status: 400},
 	INVALID_ROLE: {value: 82, message: 'Invalid role name', status: 400},
 	ALREADY_IN_ROLE: {value: 83, message: 'User already assigned with this role', status: 400},
-	NOT_IN_ROLE: { value: 84, message: 'User not in this role', status: 400},
+	NOT_IN_ROLE: { value: 84, message: 'User or role not found', status: 400},
 	EMAIL_EXISTS: { value: 85, message: 'Email already exists', status: 400 },
 
 	MONGOOSE_VALIDATION_ERROR: function(err){

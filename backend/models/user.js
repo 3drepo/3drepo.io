@@ -26,6 +26,7 @@ var History = require('./history');
 var projectSetting = require('./projectSetting');
 var Role = require('./role');
 var Mailer = require('../mailer/mailer');
+var systemLogger = require("../logger.js").systemLogger;
 
 var schema = mongoose.Schema({
 	_id : String,
@@ -718,7 +719,7 @@ schema.statics.activateSubscription = function(token, paymentInfo, raw, disableE
 
 				});
 			}).catch(err => {
-				console.log('Email Error', err);
+				systemLogger.logError(`Email error - ${err.message}`);
 			});
 
 		}

@@ -131,6 +131,18 @@ function sendPaymentErrorEmail(data){
 	return sendEmail(template, config.contact.email, data);
 }
 
+function sendProjectInvitation(to, data){
+	'use strict';
+
+	data.url = getURL('project', { account: data.account, project: data.project });
+
+	if(!data.url){
+		return rejectNoUrl('project');
+	}
+
+	let template = require('./templates/invitedToProject');
+	return sendEmail(template, to, data);
+}
 
 
 module.exports = {
@@ -139,5 +151,6 @@ module.exports = {
 	sendPaymentReceivedEmail,
 	sendContactEmail,
 	sendPaymentFailedEmail,
-	sendPaymentErrorEmail
+	sendPaymentErrorEmail,
+	sendProjectInvitation
 }

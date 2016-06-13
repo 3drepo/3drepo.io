@@ -21,6 +21,8 @@ var User = require('../user');
 var responseCodes = require('../../response_codes');
 var importQueue = require('../../services/queue');
 var C = require('../../constants');
+var Mailer = require('../../mailer/mailer');
+var systemLogger = require("../../logger.js").systemLogger;
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -194,10 +196,22 @@ function importToyProject(username){
 	});
 }
 
-function addCollaborator(username, account, project, role){
+function addCollaborator(username, account, project, role, disableEmail){
 	'use strict';
 
 	let setting;
+	let user;
+	let action;
+
+	if(role === 'viewer'){
+		action = 'view';
+	} else if(role === 'collaborator'){
+		action = 'collaborate';
+	} else {
+		return Promise.reject(responseCodes.INVALID_ROLE);
+	}
+
+
 	return ProjectSetting.findById({account, project}, project).then(_setting => {
 
 		setting = _setting;
@@ -211,8 +225,10 @@ function addCollaborator(username, account, project, role){
 		}
 
 
-	}).then(user => {
+	}).then(_user => {
 		
+		user = _user;
+
 		if(!user){
 			return Promise.reject(responseCodes.USER_NOT_FOUND);
 		}
@@ -229,6 +245,15 @@ function addCollaborator(username, account, project, role){
 		setting.collaborators.push(roleObj);
 
 		return setting.save().then(() => {
+
+			if(!disableEmail){
+				Mailer.sendProjectInvitation(user.customData.email, {
+					action, account, project
+				}).catch(err => {
+					systemLogger.logError(`Email error - ${err.message}`);
+				});
+			}
+
 			return Promise.resolve(roleObj);
 		});
 	});
