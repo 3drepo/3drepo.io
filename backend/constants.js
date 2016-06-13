@@ -223,7 +223,8 @@ define("REPO_BLACKLIST_USERNAME", [
 	'registerRequest',
 	'registerVerify',
 	'signUp',
-	'termsAndConditions'
+	'termsAndConditions',
+	'false'
 ]);
 
 define("REPO_BLACKLIST_PROJECT", [
