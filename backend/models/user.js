@@ -129,8 +129,16 @@ schema.statics.findByUserName = function(user){
 	return this.findOne({account: 'admin'}, { user });
 };
 
-schema.statics.isEmailTaken = function(email){
-	return this.count({account: 'admin'}, { 'customData.email' : email });
+schema.statics.isEmailTaken = function(email, exceptUser){
+	'use strict';
+
+	let query = { 'customData.email': email};
+
+	if(exceptUser){
+		query = { 'customData.email': email, 'user': { '$ne': exceptUser }};
+	}
+
+	return this.count({account: 'admin'}, query);
 };
 
 schema.statics.findBillingUserByToken = function(token){
@@ -310,8 +318,13 @@ schema.methods.updateInfo = function(updateObj){
 		}
 	});
 
-
-	return this.save();
+	return User.isEmailTaken(this.customData.email, this.user).then(count => {
+		if(count === 0){
+			return this.save();
+		} else {
+			return Promise.reject({ resCode: responseCodes.EMAIL_EXISTS });
+		}
+	});
 };
 
 schema.statics.getForgotPasswordToken = function(username, email, tokenExpiryTime){

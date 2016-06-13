@@ -92,6 +92,7 @@ describe('User', function(){
 			user.markModified = () => true;
 
 			let spy = sinon.spy(user, 'save');
+			let stub = sinon.stub(User, 'isEmailTaken').returns(Promise.resolve(0));
 
 			return user.updateInfo(updateObj).then(user => {
 				// user updated 
@@ -101,8 +102,8 @@ describe('User', function(){
 				expect(user.toObject()).to.have.deep.property('customData.email', updateObj.email);
 				// save should've been called once
 				sinon.assert.calledOnce(spy);
-
 				spy.restore();
+				stub.restore();
 			});
 
 		})
