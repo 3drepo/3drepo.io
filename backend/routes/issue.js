@@ -44,14 +44,12 @@ function storeIssue(req, res, next){
 
 	Issue.createIssue({account: req.params.account, project: req.params.project}, data).then(issue => {
 
-		issue = issue.toObject();
-		issue.scribble = data.scribble;
 
 		let resData = {
-			_id: uuidToString(issue._id),
+			_id: issue._id,
 			account: req.params.account, 
 			project: req.params.project, 
-			issue_id : uuidToString(issue._id), 
+			issue_id : issue._id, 
 			number : issue.number, 
 			created : issue.created, 
 			scribble: data.scribble,
@@ -61,7 +59,6 @@ function storeIssue(req, res, next){
 		responseCodes.respond(place, req, res, next, responseCodes.OK, resData);
 
 	}).catch(err => {
-		console.log(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
