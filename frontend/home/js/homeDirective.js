@@ -81,7 +81,6 @@
     function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $location, Auth, StateManager, EventService, UtilsService) {
         var vm = this,
 			goToUserPage,
-			goToAccount,
 			homeLoggedOut,
 			homeLoggedIn,
 			notLoggedInElement,
@@ -99,6 +98,7 @@
 			{title: "Privacy", value: "privacy"},
 			{title: "Cookies", value: "cookies"}
 		];
+		vm.goToAccount = false;
 
 		/*
 		 * Watch the state to handle moving to and from the login page
@@ -147,7 +147,7 @@
 					$timeout(function () {
 						homeLoggedIn = angular.element($element[0].querySelector('#homeLoggedIn'));
 						homeLoggedIn.empty();
-						goToAccount = false;
+						vm.goToAccount = false;
 						goToUserPage = false;
 						for (state in vm.state) {
 							if (vm.state.hasOwnProperty(state) && (state !== "loggedIn")) {
@@ -156,20 +156,17 @@
 									useState = state;
 								}
 								else if (typeof vm.state[state] === "string") {
-									goToAccount = true;
+									vm.goToAccount = true;
 								}
 							}
 						}
-						if ((goToUserPage) || (goToAccount)) {
+						if ((goToUserPage) || (vm.goToAccount)) {
 							if (goToUserPage) {
 								element = "<" + UtilsService.snake_case(useState, "-") + "></" + UtilsService.snake_case(useState, "-") + ">";
+								loggedInElement = angular.element(element);
+								homeLoggedIn.append(loggedInElement);
+								$compile(loggedInElement)($scope);
 							}
-							else if (goToAccount) {
-								element = "<account-dir account='vm.state.account' state='vm.state'></account-dir>";
-							}
-							loggedInElement = angular.element(element);
-							homeLoggedIn.append(loggedInElement);
-							$compile(loggedInElement)($scope);
 						}
 						else {
 							// Prevent user going back to the login page after logging in

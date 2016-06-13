@@ -22,6 +22,6 @@ form#signUpForm
 		md-button.md-accent.md-raised(ng-click="vm.register()", ng-disabled="vm.registering", flex="none") {{vm.buttonLabel}}
 		#registerWait(ng-if="vm.registering", layout="row", layout-align="start center")
 			p Signing up...
-			md-progress-circular(md-mode="indeterminate")
+			md-progress-circular(md-mode="indeterminate", md-diameter="20")
 	h4.registerError {{vm.registerErrorMessage}}
 	a.registerLinks(href="", ng-click="vm.showPage('pricing')") Pricing

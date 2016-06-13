@@ -4708,7 +4708,6 @@ var ViewerManager = {};
 			{
 				promise = AccountService.getUserInfo(vm.account);
 				promise.then(function (response) {
-					console.log(666666, response);
 					// Response with data.type indicates it's not the user's account
 					if (!response.data.hasOwnProperty("type")) {
 						vm.accounts = response.data.accounts;
@@ -4720,6 +4719,10 @@ var ViewerManager = {};
 						 vm.hasAvatar = response.data.hasAvatar;
 						 vm.avatarURL = response.data.avatarURL;
 						 */
+					}
+					else {
+						// Redirect user to projects list
+						$location.path("/", "_self");
 					}
 				});
 			} else {
@@ -4844,7 +4847,8 @@ var ViewerManager = {};
 	AccountMenuCtrl.$inject = ["$location", "Auth", "EventService"];
 
 	function AccountMenuCtrl ($location, Auth, EventService) {
-		var vm = this;
+		var vm = this,
+			promise;
 
 		/**
 		 * Open menu
@@ -4867,10 +4871,13 @@ var ViewerManager = {};
 		 * Logout
 		 */
 		vm.logout = function () {
-			$location.path("/", "_self");
-			// Change the local storage login status for other tabs to listen to
-			localStorage.setItem("tdrLoggedIn", "false");
-			Auth.logout();
+			promise = Auth.logout();
+			promise.then(function () {
+				console.log(123);
+				$location.path("/", "_self");
+				// Change the local storage login status for other tabs to listen to
+				localStorage.setItem("tdrLoggedIn", "false");
+			});
 		};
 	}
 }());
@@ -9277,7 +9284,6 @@ var ViewerManager = {};
     function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $location, Auth, StateManager, EventService, UtilsService) {
         var vm = this,
 			goToUserPage,
-			goToAccount,
 			homeLoggedOut,
 			homeLoggedIn,
 			notLoggedInElement,
@@ -9295,6 +9301,7 @@ var ViewerManager = {};
 			{title: "Privacy", value: "privacy"},
 			{title: "Cookies", value: "cookies"}
 		];
+		vm.goToAccount = false;
 
 		/*
 		 * Watch the state to handle moving to and from the login page
@@ -9343,7 +9350,7 @@ var ViewerManager = {};
 					$timeout(function () {
 						homeLoggedIn = angular.element($element[0].querySelector('#homeLoggedIn'));
 						homeLoggedIn.empty();
-						goToAccount = false;
+						vm.goToAccount = false;
 						goToUserPage = false;
 						for (state in vm.state) {
 							if (vm.state.hasOwnProperty(state) && (state !== "loggedIn")) {
@@ -9352,20 +9359,17 @@ var ViewerManager = {};
 									useState = state;
 								}
 								else if (typeof vm.state[state] === "string") {
-									goToAccount = true;
+									vm.goToAccount = true;
 								}
 							}
 						}
-						if ((goToUserPage) || (goToAccount)) {
+						if ((goToUserPage) || (vm.goToAccount)) {
 							if (goToUserPage) {
 								element = "<" + UtilsService.snake_case(useState, "-") + "></" + UtilsService.snake_case(useState, "-") + ">";
+								loggedInElement = angular.element(element);
+								homeLoggedIn.append(loggedInElement);
+								$compile(loggedInElement)($scope);
 							}
-							else if (goToAccount) {
-								element = "<account-dir account='vm.state.account' state='vm.state'></account-dir>";
-							}
-							loggedInElement = angular.element(element);
-							homeLoggedIn.append(loggedInElement);
-							$compile(loggedInElement)($scope);
 						}
 						else {
 							// Prevent user going back to the login page after logging in
@@ -11418,7 +11422,8 @@ angular.module('3drepo')
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("login", login);
+		.directive("login", login)
+		.directive("mdInputContainer", mdInputContainer);
 
 	function login() {
 		return {
@@ -11604,6 +11609,26 @@ angular.module('3drepo')
 				vm.registerErrorMessage = "Please fill all fields";
 			}
 		}
+	}
+
+	/**
+	 * Re-make md-input-container to get around the problem discussed here https://github.com/angular/material/issues/1376
+	 * Taken from mikila85's version of blaise-io's workaround
+	 * 
+	 * @param $timeout
+	 * @returns {Function}
+	 */
+	function mdInputContainer ($timeout) {
+		return function ($scope, element) {
+			var ua = navigator.userAgent;
+			if (ua.match(/chrome/i) && !ua.match(/edge/i)) {
+				$timeout(function () {
+					if (element[0].querySelector("input[type=password]:-webkit-autofill")) {
+						element.addClass("md-input-has-value");
+					}
+				}, 100);
+			}
+		};
 	}
 }());
 

@@ -48,10 +48,6 @@ sign-up-form #registerWait p {
     color: rgba(0, 0, 0, 0.7);
     font-size: 14px;
 }
-sign-up-form #registerWait md-progress-circular,
-sign-up-form #registerWait svg {
-    width: 20px !important;
-}
 sign-up-form #loginPricing {
     font-size: 14px;
     margin-left: 30px;
