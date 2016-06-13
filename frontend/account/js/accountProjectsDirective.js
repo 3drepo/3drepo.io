@@ -55,7 +55,7 @@
 			"GIS",
 			"Other"
 		];
-		vm.info = "Retrieving projects..,";
+		vm.info = "Retrieving projects...";
 		vm.showProgress = true;
 
 		// Setup file uploaders
