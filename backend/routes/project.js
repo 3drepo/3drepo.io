@@ -291,7 +291,6 @@ function uploadProject(req, res, next){
 				}).then(() => {
 
 					// api respond once the file is uploaded
-
 					responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: 'uploaded'});
 
 					return importQueue.importFile(

@@ -157,8 +157,11 @@ ImportQueue.prototype._moveFileToSharedSpace = function(corID, orgFilePath, newF
 ImportQueue.prototype._dispatchWork = function(corID, msg){
     'use strict';
 
-    return this.channel.assertQueue(this.workerQName, { durable: true }).then( () => {
+    let info;
+    return this.channel.assertQueue(this.workerQName, { durable: true }).then( _info => {
 
+        info = _info;
+        
         return this.channel.sendToQueue(this.workerQName, 
             new Buffer(msg), 
             {
@@ -171,13 +174,30 @@ ImportQueue.prototype._dispatchWork = function(corID, msg){
     }).then( () => {
 
         this.logger.logInfo(
-            'Sent work to queue: ' + msg.toString() + ' with corr id: ' + corID.toString() + ' reply queue: ' + this.callbackQName
+            'Sent work to queue: ' + msg.toString() + ' with corr id: ' + corID.toString() + ' reply queue: ' + this.callbackQName,
+            {
+                corID: corID.toString()
+            }
         );
 
-        return Promise.resolve();
+
+        if(info.consumerCount <= 0){
+            this.logger.logError(
+                `No consumer found in the queue`,
+                {
+                    corID: corID.toString()
+                }
+            );
+        }
+
+        return Promise.resolve(() => {});
     });
 
 };
+
+// ImportQueue.prototype.assertQueue = function(){
+//     return this.channel.assertQueue(this.workerQName, { durable: true });
+// }
 
 /*******************************************************************************
  * Listen to callback queue, resolve promise when job done
