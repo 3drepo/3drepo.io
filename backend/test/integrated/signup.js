@@ -47,7 +47,7 @@ describe('Sign up', function(){
 
 	let username = 'signup_helloworld';
 	let password = 'password';
-	let email = 'test3drepo@mailinator.com';
+	let email = 'test3drepo_signup@mailinator.com';
 
 	let User = require('../../models/user');
 

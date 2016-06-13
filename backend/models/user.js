@@ -129,6 +129,9 @@ schema.statics.findByUserName = function(user){
 	return this.findOne({account: 'admin'}, { user });
 };
 
+schema.statics.isEmailTaken = function(email){
+	return this.count({account: 'admin'}, { 'customData.email' : email });
+};
 
 schema.statics.findBillingUserByToken = function(token){
 	return this.findSubscriptionByToken(null, token).then(subscription => {
@@ -221,10 +224,20 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	}
 
 
-	return adminDB.addUser(username, password, {customData: cleanedCustomData, roles: []}).then( () => {
-		return Promise.resolve(cleanedCustomData.emailVerifyToken);
-	}).catch(err => {
-		return Promise.reject({resCode : utils.mongoErrorToResCode(err)});
+	return this.isEmailTaken(customData.email).then(count => {
+
+		if(count === 0){
+
+			return adminDB.addUser(username, password, {customData: cleanedCustomData, roles: []}).then( () => {
+				return Promise.resolve(cleanedCustomData.emailVerifyToken);
+			}).catch(err => {
+				return Promise.reject({resCode : utils.mongoErrorToResCode(err)});
+			});
+
+		} else {
+			return Promise.reject({resCode: responseCodes.EMAIL_EXISTS });
+		}
+
 	});
 };
 
@@ -805,9 +818,9 @@ schema.methods.hasRole = function(db, roleName){
 };
 
 var User = ModelFactory.createClass(
-	'User', 
-	schema, 
-	() => { 
+	'User',
+	schema,
+	() => {
 		return 'system.users';
 	}
 );

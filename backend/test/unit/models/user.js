@@ -150,10 +150,13 @@ describe('User', function(){
 				roles: []
 			}
 
+			let stub = sinon.stub(User, 'isEmailTaken').returns(Promise.resolve(0));
+
 			return User.createUser({}, username, password, options, 1).then(res => {
 				expectedCallWithOptions.customData.emailVerifyToken = res;
 				sinon.assert.calledWith(spy, username, password, expectedCallWithOptions);
 				spy.restore();
+				stub.restore();
 			});
 		});
 

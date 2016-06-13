@@ -35,7 +35,8 @@ describe('Sharing a project', function () {
 	let username = 'testing';
 	let password = 'testing';
 	let project = 'testproject';
-	let email = 'test3drepo@mailinator.com'
+	let email = suf => `test3drepo_collaboration_${suf}@mailinator.com`;
+
 
 	let username_viewer = 'collaborator_viewer';
 	let password_viewer = 'collaborator_viewer';
@@ -53,14 +54,14 @@ describe('Sharing a project', function () {
 				function createViewer(done){
 					helpers.signUpAndLogin({
 						server, request, agent, expect, User, systemLogger,
-						username: username_viewer, password: password_viewer, email,
+						username: username_viewer, password: password_viewer, email: email('viewer'),
 						done
 					});
 				},
 				function createEditor(done){
 					helpers.signUpAndLogin({
 						server, request, agent, expect, User, systemLogger,
-						username: username_editor, password: password_editor, email,
+						username: username_editor, password: password_editor, email: email('editor'),
 						done
 					});
 				}
