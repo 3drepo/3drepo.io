@@ -281,7 +281,11 @@ schema.statics.createIssue = function(dbColOptions, data){
 		issue.creator_role = data.creator_role;
 		issue.assigned_roles = data.assigned_roles;		
 
-		return issue.save();
+		return issue.save().then(() => {
+			return ProjectSetting.findById(dbColOptions, dbColOptions.project);
+		}).then(settings => {
+			return Promise.resolve(issue.clean(settings.type));
+		});
 
 	});
 
