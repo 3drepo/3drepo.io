@@ -101,14 +101,14 @@
 				},
 				{
 					value: "showClosed",
-					label: "Show closed issues",
+					label: "Show resolved issues",
 					toggle: true,
 					selected: false,
 					firstSelected: false,
 					secondSelected: false
 				}
 			],
-			minHeight: 80,
+			minHeight: 260,
 			fixedHeight: false,
 			options: [
 				{type: "menu", visible: true},

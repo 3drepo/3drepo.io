@@ -63,6 +63,7 @@ account-projects .projects md-icon {
 }
 account-projects .projects .projectTimestamp {
   color: rgba(0, 0, 0, 0.3);
+  margin-left: 20px;
 }
 account-projects .projects p {
   margin: 0;
@@ -143,6 +144,20 @@ account-profile #profileDivider {
   height: 380px;
 }
 
+account-profile .accountProfileList {
+  max-height: calc(100vh - 200px);
+  overflow-x: hidden;
+  padding: 0;
+}
+
+account-profile .accountProfileContent {
+  margin-left: 65px;
+}
+
+account-profile .updateContainer {
+  margin-top: -30px;
+}
+
 /** Account Info ******************************************************************************************************/
 account-info {
   margin-left: 70px;
@@ -166,6 +181,10 @@ account-info md-input-container label {
 account-info p {
   font-size: 14px;
   color: rgba(0,0,0,0.6);
+}
+
+account-info md-list {
+  padding: 0;
 }
 
 /** Avatar Image ******************************************************************************************************/
@@ -230,6 +249,31 @@ account-menu md-icon {
 .newProjectDialog #projectDialogFilename {
   color: rgba(0, 0, 0, 0.7);
   margin: 0;
+}
+
+.newProjectDialog #projectDialogError {
+  margin: 0;
+  color: #F44336;
+}
+
+/** Delete Project Dialog *********************************************************************************************/
+.deleteProjectDialog {
+  min-width: 350px;
+  min-height: 230px;
+  overflow: hidden;
+}
+
+.deleteProjectDialog p {
+  color: rgba(0 ,0, 0, 0.6);
+}
+.deleteProjectDialog #deleteProjectName {
+  color: rgba(0 ,0, 0, 0.9);
+  margin-left: 5px;
+}
+
+.deleteProjectDialog #deleteProjectError {
+  margin: 0;
+  color: #F44336;
 }
 
 /** New Database Dialog ***********************************************************************************************/

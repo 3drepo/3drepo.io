@@ -63,6 +63,7 @@ account-projects .projects md-icon {
 }
 account-projects .projects .projectTimestamp {
   color: rgba(0, 0, 0, 0.3);
+  margin-left: 20px;
 }
 account-projects .projects p {
   margin: 0;
@@ -143,6 +144,20 @@ account-profile #profileDivider {
   height: 380px;
 }
 
+account-profile .accountProfileList {
+  max-height: calc(100vh - 200px);
+  overflow-x: hidden;
+  padding: 0;
+}
+
+account-profile .accountProfileContent {
+  margin-left: 65px;
+}
+
+account-profile .updateContainer {
+  margin-top: -30px;
+}
+
 /** Account Info ******************************************************************************************************/
 account-info {
   margin-left: 70px;
@@ -166,6 +181,10 @@ account-info md-input-container label {
 account-info p {
   font-size: 14px;
   color: rgba(0,0,0,0.6);
+}
+
+account-info md-list {
+  padding: 0;
 }
 
 /** Avatar Image ******************************************************************************************************/
@@ -232,6 +251,31 @@ account-menu md-icon {
   margin: 0;
 }
 
+.newProjectDialog #projectDialogError {
+  margin: 0;
+  color: #F44336;
+}
+
+/** Delete Project Dialog *********************************************************************************************/
+.deleteProjectDialog {
+  min-width: 350px;
+  min-height: 230px;
+  overflow: hidden;
+}
+
+.deleteProjectDialog p {
+  color: rgba(0 ,0, 0, 0.6);
+}
+.deleteProjectDialog #deleteProjectName {
+  color: rgba(0 ,0, 0, 0.9);
+  margin-left: 5px;
+}
+
+.deleteProjectDialog #deleteProjectError {
+  margin: 0;
+  color: #F44336;
+}
+
 /** New Database Dialog ***********************************************************************************************/
 .newDatabaseDialog {
   min-width: 350px;
@@ -247,6 +291,7 @@ account-menu md-icon {
   font-weight: normal;
   color: rgba(0,0,0,0.7);
 }
+
 /* Done to counter bootstrap styling. This should really be set in a top level style file */
 .md-datepicker-input-mask {
   width: 308px;
@@ -697,6 +742,10 @@ contact .md-button {
     margin-top: 10px;
 }
 
+contact md-input-container {
+    margin: 0;
+}
+
 /** Docs **************************************************************************************************************/
 docs .typesList {
   padding: 0;
@@ -979,7 +1028,7 @@ issues #issuesAddContainer .md-dialog-backdrop {
   height: 205px !important;
 }
 issues #issuesAddContainer md-input-container {
-  margin: 0;
+  margin-bottom: 0;
 }
 issues #issuesAddContainer h4 {
   margin-left: 4px;
@@ -1188,8 +1237,8 @@ issue-area #issueAreaPenIndicator {
   position: absolute;
   display: block;
   color: #FFFFFF;
-  opacity: 0.9;
   font-size: 20px;
+  font-weight: bold;
 }
 
 issue-area #scribbleDisplay {
@@ -1233,7 +1282,7 @@ login #loginVersion{
 }
 
 login md-input-container {
-  margin: 0;
+  margin-bottom: 0;
 }
 
 login md-input-container input {
@@ -1458,8 +1507,20 @@ panel-card-option-erase md-icon {
 password-change md-progress-circular {
     margin-left: 5px;
 }
+
+password-change md-input-container {
+    margin: 0;
+}
 password-forgot md-progress-circular {
     margin-left: 5px;
+}
+
+password-forgot md-input-container {
+    margin-bottom: 0;
+}
+
+password-forgot p {
+    margin-top: 0;
 }
 pricing md-content.md-whiteframe-1dp,
 pricing md-content.md-whiteframe-8dp {
@@ -1557,57 +1618,8 @@ right-panel #rightPanelButtons .md-button {
 right-panel #rightPanelButtons .fa {
     font-size: 24px;
 }
-register-form #tc {
-    width: 300px;
-}
-register-form #tc md-checkbox {
-    margin : 0;
-}
-register-form #tc md-checkbox ._md-icon {
-    border-color: rgba(0, 0, 0, 0.4);
-}
-register-form #tc a {
-    font-size: 14px;
-    margin-left: 5px;
-}
-register-form #tc p {
-    font-size: 14px;
-    color: rgba(0, 0, 0, 0.7);
-}
-register-form #tc a {
-    outline: none;
-}
-
-register-form #loginCaptcha {
-    margin: -5px 30px 10px 7px;
-}
-
-register-form #registerWait {
-    height: 30px;
-}
-register-form #registerWait p {
-    margin: 0 10px 0 0;
-    color: rgba(0, 0, 0, 0.7);
-    font-size: 14px;
-}
-register-form #registerWait md-progress-circular,
-register-form #registerWait svg {
-    width: 20px !important;
-}
-register-form #loginPricing {
-    font-size: 14px;
-    margin-left: 30px;
-    outline: none;
-}
-
-register-form .registerError {
-    color: #F44336;
-    margin: 5px 0 5px;
-    font-weight: normal;
-}
-
 sign-up md-input-container {
-    margin: 0;
+    margin-top: 0;
 }
 
 sign-up md-input-container input {
@@ -1624,6 +1636,7 @@ sign-up .registerLinks {
 
 sign-up-form #tc {
     width: 300px;
+    margin: -15px 0 0 2px;
 }
 sign-up-form #tc md-checkbox {
     margin : 0;
@@ -1644,7 +1657,7 @@ sign-up-form #tc a {
 }
 
 sign-up-form #loginCaptcha {
-    margin: -5px 30px 10px 7px;
+    margin: 10px 30px 10px 0;
 }
 
 sign-up-form #registerWait {
@@ -1654,10 +1667,6 @@ sign-up-form #registerWait p {
     margin: 0 10px 0 0;
     color: rgba(0, 0, 0, 0.7);
     font-size: 14px;
-}
-sign-up-form #registerWait md-progress-circular,
-sign-up-form #registerWait svg {
-    width: 20px !important;
 }
 sign-up-form #loginPricing {
     font-size: 14px;
@@ -1671,6 +1680,9 @@ sign-up-form .registerError {
     font-weight: normal;
 }
 
+sign-up-form .rc-anchor-light {
+    background: red;
+}
 tree span {
   outline: none;
   margin: 0;

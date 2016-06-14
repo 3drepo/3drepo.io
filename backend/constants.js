@@ -212,7 +212,19 @@ define("REPO_BLACKLIST_USERNAME", [
 	'payment',
 	'test',
 	'os',
-	'info'
+	'info',
+	'contact',
+	'cookies',
+	'passwordChange',
+	'passwordForgot',
+	'payment',
+	'pricing',
+	'privacy',
+	'registerRequest',
+	'registerVerify',
+	'signUp',
+	'termsAndConditions',
+	'false'
 ]);
 
 define("REPO_BLACKLIST_PROJECT", [

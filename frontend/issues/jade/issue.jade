@@ -1,15 +1,6 @@
 .issue(style="background:{{vm.backgroundColor}}")
 	// Header
 	issue-header(issue-data="vm.data")
-		//md-list-item.md-2-line.issueTitle
-			div.md-list-item-text
-				h3 {{vm.data.title}}
-				.issueTitleInfo(layout="row" layout-align="space-between center")
-					p {{vm.data.owner}}
-					p {{vm.data.timeStamp}}
-
-		//.issueRoleMarkers(layout="column")
-			div(ng-repeat="roleColor in vm.data.assignedRolesColors", style="background:{{roleColor}};", flex)
 
 	// Comments
 	div(ng-show="vm.showComments", ng-class="{issueComments: vm.showComments}", comments-height, num-new-comments="vm.numNewComments")
@@ -29,7 +20,8 @@
 
 			// New comment input
 			md-input-container.md-block(md-no-float="", ng-if="vm.issueIsOpen")
-				textarea(placeholder="New comment", ng-model="vm.comment")
+				label New comment
+				textarea(ng-model="vm.comment")
 
 			// Issue footer
 			.issueCommentsFooter

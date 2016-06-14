@@ -55,7 +55,6 @@
 			{
 				promise = AccountService.getUserInfo(vm.account);
 				promise.then(function (response) {
-					console.log(666666, response);
 					// Response with data.type indicates it's not the user's account
 					if (!response.data.hasOwnProperty("type")) {
 						vm.accounts = response.data.accounts;
@@ -67,6 +66,10 @@
 						 vm.hasAvatar = response.data.hasAvatar;
 						 vm.avatarURL = response.data.avatarURL;
 						 */
+					}
+					else {
+						// Redirect user to projects list
+						$location.path("/", "_self");
 					}
 				});
 			} else {

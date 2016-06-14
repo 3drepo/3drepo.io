@@ -37,7 +37,8 @@
 	AccountMenuCtrl.$inject = ["$location", "Auth", "EventService"];
 
 	function AccountMenuCtrl ($location, Auth, EventService) {
-		var vm = this;
+		var vm = this,
+			promise;
 
 		/**
 		 * Open menu
@@ -60,10 +61,12 @@
 		 * Logout
 		 */
 		vm.logout = function () {
-			$location.path("/", "_self");
-			// Change the local storage login status for other tabs to listen to
-			localStorage.setItem("tdrLoggedIn", "false");
-			Auth.logout();
+			promise = Auth.logout();
+			promise.then(function () {
+				$location.path("/", "_self");
+				// Change the local storage login status for other tabs to listen to
+				localStorage.setItem("tdrLoggedIn", "false");
+			});
 		};
 	}
 }());

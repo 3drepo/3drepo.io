@@ -26,20 +26,21 @@
     function UtilsService($http, $q, serverConfig) {
         var obj = {};
 
-        obj.formatTimestamp = function (timestamp) {
-            var date = new Date(timestamp);
+        obj.formatTimestamp = function (timestamp, showSeconds) {
+            var date = new Date(timestamp),
+                formatted;
 
-            /*
-            return (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
-                (date.getMonth() + 1) + "-" +
-                date.getFullYear() + " " +
-                (date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
-                date.getMinutes() + "-" +
-                (date.getSeconds() < 10 ? "0" : "") + date.getSeconds();
-            */
-            return (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
-                ((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1) + "-" +
-                date.getFullYear();
+            formatted = (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
+                        ((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1) + "-" +
+                        date.getFullYear();
+            
+            if (angular.isDefined(showSeconds) && showSeconds) {
+                formatted += " " + (date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
+                            date.getMinutes() + "-" +
+                            (date.getSeconds() < 10 ? "0" : "") + date.getSeconds();
+            }
+            
+            return formatted;
         };
         
         obj.snake_case = function snake_case(name, separator) {
@@ -91,7 +92,52 @@
                     }
                 );
             return deferred.promise;
-        }
+        };
+
+        /**
+         * Handle PUT requests
+         * @param data
+         * @param url
+         * @returns {*}
+         */
+        obj.doPut = function (data, url) {
+            var deferred = $q.defer(),
+                urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
+                config = {withCredentials: true};
+
+            $http.put(urlUse, data, config)
+                .then(
+                    function (response) {
+                        deferred.resolve(response);
+                    },
+                    function (error) {
+                        deferred.resolve(error);
+                    }
+                );
+            return deferred.promise;
+        };
+
+        /**
+         * Handle DELETE requests
+         * @param url
+         * @returns {*}
+         */
+        obj.doDelete = function (url) {
+            var deferred = $q.defer(),
+                urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
+                config = {withCredentials: true};
+
+            $http.delete(urlUse, config)
+                .then(
+                    function (response) {
+                        deferred.resolve(response);
+                    },
+                    function (error) {
+                        deferred.resolve(error);
+                    }
+                );
+            return deferred.promise;
+        };
 
         return obj;
     }

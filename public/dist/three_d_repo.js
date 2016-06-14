@@ -4708,7 +4708,6 @@ var ViewerManager = {};
 			{
 				promise = AccountService.getUserInfo(vm.account);
 				promise.then(function (response) {
-					console.log(666666, response);
 					// Response with data.type indicates it's not the user's account
 					if (!response.data.hasOwnProperty("type")) {
 						vm.accounts = response.data.accounts;
@@ -4720,6 +4719,10 @@ var ViewerManager = {};
 						 vm.hasAvatar = response.data.hasAvatar;
 						 vm.avatarURL = response.data.avatarURL;
 						 */
+					}
+					else {
+						// Redirect user to projects list
+						$location.path("/", "_self");
 					}
 				});
 			} else {
@@ -4844,7 +4847,8 @@ var ViewerManager = {};
 	AccountMenuCtrl.$inject = ["$location", "Auth", "EventService"];
 
 	function AccountMenuCtrl ($location, Auth, EventService) {
-		var vm = this;
+		var vm = this,
+			promise;
 
 		/**
 		 * Open menu
@@ -4867,10 +4871,12 @@ var ViewerManager = {};
 		 * Logout
 		 */
 		vm.logout = function () {
-			$location.path("/", "_self");
-			// Change the local storage login status for other tabs to listen to
-			localStorage.setItem("tdrLoggedIn", "false");
-			Auth.logout();
+			promise = Auth.logout();
+			promise.then(function () {
+				$location.path("/", "_self");
+				// Change the local storage login status for other tabs to listen to
+				localStorage.setItem("tdrLoggedIn", "false");
+			});
 		};
 	}
 }());
@@ -4920,6 +4926,12 @@ var ViewerManager = {};
 		var vm = this,
 			promise;
 
+		/*
+		 * Init
+		 */
+		vm.showInfo = true;
+		vm.showChangePassword = false;
+
 		/**
 		 * Update the user info
 		 */
@@ -4956,6 +4968,20 @@ var ViewerManager = {};
 				}
 			});
 		};
+
+		/**
+		 * Toggle showing of user info
+		 */
+		vm.toggleInfo = function () {
+			vm.showInfo = !vm.showInfo;
+		};
+
+		/**
+		 * Toggle showing of password change
+		 */
+		vm.toggleChangePassword = function () {
+			vm.showChangePassword = !vm.showChangePassword;
+		}
 	}
 }());
 
@@ -5001,7 +5027,6 @@ var ViewerManager = {};
 	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, $timeout, $interval, AccountService, UtilsService) {
 		var vm = this,
 			promise,
-			bid4FreeProjects = null,
 			existingProjectToUpload,
 			existingProjectFileUploader,
 			newProjectFileUploader;
@@ -5017,7 +5042,7 @@ var ViewerManager = {};
 			"GIS",
 			"Other"
 		];
-		vm.info = "Retrieving projects..,";
+		vm.info = "Retrieving projects...";
 		vm.showProgress = true;
 
 		// Setup file uploaders
@@ -5041,19 +5066,6 @@ var ViewerManager = {};
 			false
 		);
 
-		promise = AccountService.getProjectsBid4FreeStatus(vm.account);
-		promise.then(function (data) {
-			if (data.data.length > 0) {
-				bid4FreeProjects = [];
-				angular.forEach(data.data, function (value) {
-					if (bid4FreeProjects.indexOf(value.project) === -1) {
-						bid4FreeProjects.push(value.project);
-					}
-				});
-				setupBid4FreeAccess();
-			}
-		});
-
 		/*
 		 * Added data to accounts and projects for UI
 		 */
@@ -5061,17 +5073,21 @@ var ViewerManager = {};
 			var i, j, iLength, jLength;
 			
 			if (angular.isDefined(vm.accounts)) {
+				console.log(vm.accounts);
 				vm.showProgress = false;
 				vm.projectsExist = (vm.accounts.length > 0);
 				vm.info = vm.projectsExist ? "" : "There are currently no projects";
+				// Accounts
 				for (i = 0, iLength = vm.accounts.length; i < iLength; i+= 1) {
 					vm.accounts[i].name = vm.accounts[i].account;
 					vm.accounts[i].showProjects = true;
 					vm.accounts[i].showProjectsIcon = "folder_open";
+
+					//Projects
 					for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
 						vm.accounts[i].projects[j].name = vm.accounts[i].projects[j].project;
 						if (vm.accounts[i].projects[j].timestamp !== null) {
-							vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp);
+							vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp, true);
 						}
 						vm.accounts[i].projects[j].bif4FreeEnabled = false;
 						vm.accounts[i].projects[j].uploading = false;
@@ -5079,7 +5095,6 @@ var ViewerManager = {};
 						vm.accounts[i].projects[j].canUpload = true;
 					}
 				}
-				setupBid4FreeAccess();
 			}
 		});
 
@@ -5146,23 +5161,14 @@ var ViewerManager = {};
 		 * Bring up dialog to add a new project
 		 */
 		vm.newProject = function (event) {
+			vm.showNewProjectErrorMessage = false;
 			vm.newProjectFileSelected = false;
 			vm.newProjectData = {
 				account: vm.account,
 				type: vm.projectTypes[0]
 			};
 			vm.uploadedFile = null;
-			$mdDialog.show({
-				controller: function () {},
-				templateUrl: "projectDialog.html",
-				parent: angular.element(document.body),
-				targetEvent: event,
-				clickOutsideToClose:true,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true,
-				onRemoving: function () {$scope.closeDialog();}
-			});
+			showDialog("projectDialog.html");
 		};
 		
 		/**
@@ -5176,26 +5182,31 @@ var ViewerManager = {};
 		 * Save a new project
 		 */
 		vm.saveNewProject = function () {
-			var projectData,
-				project;
+			var project;
 
 			promise = AccountService.newProject(vm.newProjectData);
 			promise.then(function (response) {
 				console.log(response);
-				vm.projectsExist = true;
-				// Add project to list
-				project = {
-					name: response.data.project,
-					canUpload: true,
-					timestamp: "",
-					bif4FreeEnabled: false
-				};
-				updateAccountProjects (response.data.account, project);
-				// Save model to project
-				if (vm.uploadedFile !== null) {
-					uploadModelToProject (project, vm.uploadedFile);
+				if (response.data.status === 400) {
+					vm.showNewProjectErrorMessage = true;
+					vm.newProjectErrorMessage = response.data.message;
 				}
-				vm.closeDialog();
+				else {
+					vm.projectsExist = true;
+					// Add project to list
+					project = {
+						name: response.data.project,
+						canUpload: true,
+						timestamp: null,
+						bif4FreeEnabled: false
+					};
+					updateAccountProjects (response.data.account, project);
+					// Save model to project
+					if (vm.uploadedFile !== null) {
+						uploadModelToProject (project, vm.uploadedFile);
+					}
+					vm.closeDialog();
+				}
 			});
 		};
 
@@ -5224,17 +5235,7 @@ var ViewerManager = {};
 			vm.newDatabaseName = "";
 			vm.showPaymentWait = false;
 			vm.newDatabaseToken = false;
-			$mdDialog.show({
-				controller: function () {},
-				templateUrl: "databaseDialog.html",
-				parent: angular.element(document.body),
-				targetEvent: event,
-				clickOutsideToClose:true,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true,
-				onRemoving: function () {$scope.closeDialog();}
-			});
+			showDialog("databaseDialog.html");
 		};
 
 		/**
@@ -5257,6 +5258,45 @@ var ViewerManager = {};
 			$timeout(function () {
 				console.log(vm.newDatabaseToken);
 				vm.showPaymentWait = true;
+			});
+		};
+
+		/**
+		 * Set up deleting of project
+		 * @param {Object} project
+		 */
+		vm.setupDeleteProject = function (project) {
+			vm.projectToDelete = project;
+			vm.showDeleteProjectError = false;
+			showDialog("deleteProjectDialog.html");
+		};
+
+		/**
+		 * Delete project
+		 */
+		vm.deleteProject = function () {
+			var i, iLength, j, jLength;
+			promise = UtilsService.doDelete(vm.account + "/" + vm.projectToDelete.name);
+			promise.then(function (response) {
+				console.log(response);
+				if (response.status === 200) {
+					// Remove project from list
+					for (i = 0, iLength = vm.accounts.length; i < iLength; i += 1) {
+						if (vm.accounts[i].name === response.data.account) {
+							for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
+								if (vm.accounts[i].projects[j].name === response.data.project) {
+									vm.accounts[i].projects.splice(j, 1);
+									break;
+								}
+							}
+						}
+					}
+					vm.closeDialog();
+				}
+				else {
+					vm.showDeleteProjectError = true;
+					vm.deleteProjectError = "Error deleting project";
+				}
 			});
 		};
 
@@ -5309,14 +5349,12 @@ var ViewerManager = {};
 			promise.then(function (response) {
 				console.log(response);
 				if ((response.data.status === 400) || (response.data.status === 404)) {
+					// Upload error
 					if (response.data.value === 68) {
 						vm.fileUploadInfo = "Unsupported file format";
 					}
 					else if (response.data.value === 66) {
 						vm.fileUploadInfo = "Insufficient quota for model";
-					}
-					else {
-						vm.fileUploadInfo = "Error saving model";
 					}
 					vm.showUploading = false;
 					vm.showFileUploadInfo = true;
@@ -5325,16 +5363,22 @@ var ViewerManager = {};
 					}, 4000);
 				}
 				else {
+					// Upload valid, poll for status
 					interval = $interval(function () {
 						promise = AccountService.uploadStatus(projectData);
 						promise.then(function (response) {
 							console.log(response);
-							if (response.data.status === "ok") {
-								project.timestamp = UtilsService.formatTimestamp(new Date());
+							if ((response.data.status === "ok") || (response.data.status === "failed")) {
+								if (response.data.status === "ok") {
+									project.timestamp = UtilsService.formatTimestamp(new Date(), true);
+									vm.fileUploadInfo = "Uploaded";
+								}
+								else {
+									vm.fileUploadInfo = response.data.errorReason.message;
+								}
 								vm.showUploading = false;
 								$interval.cancel(interval);
 								vm.showFileUploadInfo = true;
-								vm.fileUploadInfo = "Uploaded";
 								$timeout(function () {
 									project.uploading = false;
 								}, 4000);
@@ -5345,18 +5389,22 @@ var ViewerManager = {};
 			});
 		}
 
-		vm.b4f = function (account, project) {
-			$location.path("/" + account + "/" + project + "/bid4free", "_self");
-		};
-
-		function setupBid4FreeAccess () {
-			if ((vm.accounts.length > 0) && (bid4FreeProjects !== null)) {
-				angular.forEach(vm.accounts, function(account) {
-					angular.forEach(account.projects, function(project) {
-						project.bif4FreeEnabled = (bid4FreeProjects.indexOf(project.name) !== -1);
-					});
-				});
-			}
+		/**
+		 * Show a dialog
+		 * @param {String} dialogTemplate
+		 */
+		function showDialog (dialogTemplate) {
+			$mdDialog.show({
+				controller: function () {},
+				templateUrl: dialogTemplate,
+				parent: angular.element(document.body),
+				targetEvent: event,
+				clickOutsideToClose:true,
+				fullscreen: true,
+				scope: $scope,
+				preserveScope: true,
+				onRemoving: function () {$scope.closeDialog();}
+			});
 		}
 	}
 }());
@@ -7673,10 +7721,14 @@ var ViewerManager = {};
 		};
 	}
 
-	CookiesCtrl.$inject = [];
+	CookiesCtrl.$inject = ["$location"];
 
-	function CookiesCtrl () {
+	function CookiesCtrl ($location) {
 		var vm = this;
+
+		vm.home = function () {
+			$location.path("/", "_self");
+		};
 	}
 }());
 
@@ -9232,9 +9284,12 @@ var ViewerManager = {};
         var vm = this,
 			goToUserPage,
 			homeLoggedOut,
+			homeLoggedIn,
 			notLoggedInElement,
+			loggedInElement,
 			element,
-			state;
+			state,
+			useState;
 
 		/*
 		 * Init
@@ -9245,6 +9300,7 @@ var ViewerManager = {};
 			{title: "Privacy", value: "privacy"},
 			{title: "Cookies", value: "cookies"}
 		];
+		vm.goToAccount = false;
 
 		/*
 		 * Watch the state to handle moving to and from the login page
@@ -9283,25 +9339,42 @@ var ViewerManager = {};
 							notLoggedInElement = angular.element("<login></login>");
 							homeLoggedOut.append(notLoggedInElement);
 							$compile(notLoggedInElement)($scope);
+							
+							// Set the URL to root if it is not root
+							$location.path("/", "_self");
 						}
 					});
 				}
 				else {
-					// If none of the states is truthy the user is going back to the login page
-					goToUserPage = true;
-					for (state in vm.state) {
-						if (vm.state.hasOwnProperty(state)) {
-							if ((state !== "loggedIn") && (typeof vm.state[state] === "string")) {
-								goToUserPage = false;
-								break;
+					$timeout(function () {
+						homeLoggedIn = angular.element($element[0].querySelector('#homeLoggedIn'));
+						homeLoggedIn.empty();
+						vm.goToAccount = false;
+						goToUserPage = false;
+						for (state in vm.state) {
+							if (vm.state.hasOwnProperty(state) && (state !== "loggedIn")) {
+								if (vm.state[state] === true) {
+									goToUserPage = true;
+									useState = state;
+								}
+								else if (typeof vm.state[state] === "string") {
+									vm.goToAccount = true;
+								}
 							}
 						}
-					}
-					if (goToUserPage) {
-						// Prevent user going back to the login page after logging in
-						$location.path("/" + localStorage.getItem("tdrLoggedIn"), "_self");
-						//vm.logout(); // Going back to the login page should logout the user
-					}
+						if ((goToUserPage) || (vm.goToAccount)) {
+							if (goToUserPage) {
+								element = "<" + UtilsService.snake_case(useState, "-") + "></" + UtilsService.snake_case(useState, "-") + ">";
+								loggedInElement = angular.element(element);
+								homeLoggedIn.append(loggedInElement);
+								$compile(loggedInElement)($scope);
+							}
+						}
+						else {
+							// Prevent user going back to the login page after logging in
+							$location.path("/" + localStorage.getItem("tdrLoggedIn"), "_self");
+						}
+					});
 				}
 			}
 		}, true);
@@ -9526,7 +9599,8 @@ angular.module('3drepo')
             pen_col = "#FF0000",
             initialPenIndicatorSize = 10,
             penIndicatorSize = initialPenIndicatorSize,
-            pen_size = penIndicatorSize,
+            penToIndicatorRatio = 0.8,
+            pen_size = penIndicatorSize * penToIndicatorRatio,
             mouseWheelDirectionUp = null,
             hasDrawnOnCanvas = false;
 
@@ -9668,6 +9742,8 @@ angular.module('3drepo')
                 setPenIndicatorPosition(evt.layerX, evt.layerY);
             }, false);
 
+            // Disable changing on pen size with mouse wheel
+            /*
             canvas.addEventListener('wheel', function (evt) {
                 var penToIndicatorRation = 0.8;
 
@@ -9693,6 +9769,7 @@ angular.module('3drepo')
                     pen_size = (pen_size < 0) ? 0 : pen_size;
                 }
             }, false);
+            */
         }
 
         /**
@@ -10813,6 +10890,7 @@ angular.module('3drepo')
 				setupIssuesToShow();
 				vm.showPins();
 				setContentHeight();
+				vm.canAdd = true;
 			});
 		};
 
@@ -10884,14 +10962,14 @@ angular.module('3drepo')
 				maxStringLength = 32,
 				lineHeight = 18,
 				footerHeight,
-				addHeight = 230,
+				addHeight = 260,
 				commentHeight = 80,
 				headerHeight = 53,
 				openIssueFooterHeight = 180,
-				closedIssueFooterHeight = 53,
-				infoHeight = 80;
+				closedIssueFooterHeight = 60,
+				infoHeight = 80,
+				issuesMinHeight = 260;
 
-			console.log(vm.toShow);
 			switch (vm.toShow) {
 				case "showIssues":
 					issuesHeight = 0;
@@ -10902,6 +10980,7 @@ angular.module('3drepo')
 						}
 					}
 					height = issuesHeight;
+					height = (height < issuesMinHeight) ? issuesMinHeight : issuesHeight;
 					break;
 
 				case "showIssue":
@@ -11342,7 +11421,8 @@ angular.module('3drepo')
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("login", login);
+		.directive("login", login)
+		.directive("mdInputContainer", mdInputContainer);
 
 	function login() {
 		return {
@@ -11528,6 +11608,26 @@ angular.module('3drepo')
 				vm.registerErrorMessage = "Please fill all fields";
 			}
 		}
+	}
+
+	/**
+	 * Re-make md-input-container to get around the problem discussed here https://github.com/angular/material/issues/1376
+	 * Taken from mikila85's version of blaise-io's workaround
+	 * 
+	 * @param $timeout
+	 * @returns {Function}
+	 */
+	function mdInputContainer ($timeout) {
+		return function ($scope, element) {
+			var ua = navigator.userAgent;
+			if (ua.match(/chrome/i) && !ua.match(/edge/i)) {
+				$timeout(function () {
+					if (element[0].querySelector("input[type=password]:-webkit-autofill")) {
+						element.addClass("md-input-has-value");
+					}
+				}, 100);
+			}
+		};
 	}
 }());
 
@@ -13075,9 +13175,9 @@ var Oculus = {};
         };
     }
 
-    PasswordChangeCtrl.$inject = ["$scope", "$window", "PasswordChangeService"];
+    PasswordChangeCtrl.$inject = ["$scope", "$window", "UtilsService"];
 
-    function PasswordChangeCtrl ($scope, $window, PasswordChangeService) {
+    function PasswordChangeCtrl ($scope, $window, UtilsService) {
         var vm = this,
             enterKey = 13,
             promise,
@@ -13127,12 +13227,12 @@ var Oculus = {};
                     vm.messageColor = messageColour;
                     vm.message = "Please wait...";
                     vm.showProgress = true;
-                    promise = PasswordChangeService.passwordChange(
-                        vm.username,
+                    promise = UtilsService.doPut(
                         {
                             token: vm.token,
                             newPassword: vm.newPassword
-                        }
+                        },
+                        vm.username + "/password"
                     );
                     promise.then(function (response) {
                         vm.showProgress = false;
@@ -13156,64 +13256,6 @@ var Oculus = {};
     }
 }());
 
-/**
- *  Copyright (C) 2016 3D Repo Ltd
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-    "use strict";
-
-    angular.module("3drepo")
-        .factory("PasswordChangeService", PasswordChangeService);
-
-    PasswordChangeService.$inject = ["$http", "$q", "serverConfig"];
-
-    function PasswordChangeService($http, $q, serverConfig) {
-        var obj = {};
-
-        /**
-         * Handle POST requests
-         * @param data
-         * @param urlEnd
-         * @returns {*}
-         */
-        function doPut(data, urlEnd) {
-            var deferred = $q.defer(),
-                url = serverConfig.apiUrl(serverConfig.POST_API, urlEnd),
-                config = {withCredentials: true};
-
-            $http.put(url, data, config)
-                .then(
-                    function (response) {
-                        deferred.resolve(response);
-                    },
-                    function (error) {
-                        deferred.resolve(error);
-                    }
-                );
-            return deferred.promise;
-        }
-
-        obj.passwordChange = function (username, data) {
-            return doPut(data, username + "/password");
-        };
-
-        return obj;
-    }
-}());
 /**
  *	Copyright (C) 2016 3D Repo Ltd
  *
@@ -13248,9 +13290,9 @@ var Oculus = {};
         };
     }
 
-    PasswordForgotCtrl.$inject = ["$scope", "PasswordForgotService"];
+    PasswordForgotCtrl.$inject = ["$scope", "UtilsService"];
 
-    function PasswordForgotCtrl ($scope, PasswordForgotService) {
+    function PasswordForgotCtrl ($scope, UtilsService) {
         var vm = this,
             promise,
             messageColour = "rgba(0, 0, 0, 0.7)",
@@ -13276,7 +13318,7 @@ var Oculus = {};
                 vm.messageColor = messageColour;
                 vm.message = "Please wait...";
                 vm.showProgress = true;
-                promise = PasswordForgotService.forgot(vm.username, {email: vm.email});
+                promise = UtilsService.doPost({email: vm.email}, vm.username + "/forgot-password");
                 promise.then(function (response) {
                     vm.showProgress = false;
                     if (response.status === 200) {
@@ -13298,64 +13340,6 @@ var Oculus = {};
     }
 }());
 
-/**
- *  Copyright (C) 2016 3D Repo Ltd
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-    "use strict";
-
-    angular.module("3drepo")
-        .factory("PasswordForgotService", PasswordForgotService);
-
-    PasswordForgotService.$inject = ["$http", "$q", "serverConfig"];
-
-    function PasswordForgotService($http, $q, serverConfig) {
-        var obj = {};
-
-        /**
-         * Handle POST requests
-         * @param data
-         * @param urlEnd
-         * @returns {*}
-         */
-        function doPost(data, urlEnd) {
-            var deferred = $q.defer(),
-                url = serverConfig.apiUrl(serverConfig.POST_API, urlEnd),
-                config = {withCredentials: true};
-
-            $http.post(url, data, config)
-                .then(
-                    function (response) {
-                        deferred.resolve(response);
-                    },
-                    function (error) {
-                        deferred.resolve(error);
-                    }
-                );
-            return deferred.promise;
-        }
-
-        obj.forgot = function (username, data) {
-            return doPost(data, username + "/forgot-password");
-        };
-
-        return obj;
-    }
-}());
 /**
  *	Copyright (C) 2016 3D Repo Ltd
  *
@@ -13489,10 +13473,14 @@ var Oculus = {};
 		};
 	}
 
-	PrivacyCtrl.$inject = [];
+	PrivacyCtrl.$inject = ["$location"];
 
-	function PrivacyCtrl () {
+	function PrivacyCtrl ($location) {
 		var vm = this;
+
+		vm.home = function () {
+			$location.path("/", "_self");
+		};
 	}
 }());
 
@@ -13797,14 +13785,14 @@ var Oculus = {};
 				},
 				{
 					value: "showClosed",
-					label: "Show closed issues",
+					label: "Show resolved issues",
 					toggle: true,
 					selected: false,
 					firstSelected: false,
 					secondSelected: false
 				}
 			],
-			minHeight: 80,
+			minHeight: 260,
 			fixedHeight: false,
 			options: [
 				{type: "menu", visible: true},
@@ -15008,9 +14996,9 @@ var Oculus = {};
 		};
 	}
 
-	SignUpFormCtrl.$inject = ["$scope", "$mdDialog", "$location", "serverConfig", "SignUpFormService"];
+	SignUpFormCtrl.$inject = ["$scope", "$mdDialog", "$location", "serverConfig", "UtilsService"];
 
-	function SignUpFormCtrl($scope, $mdDialog, $location, serverConfig, SignUpFormService) {
+	function SignUpFormCtrl($scope, $mdDialog, $location, serverConfig, UtilsService) {
 		var vm = this,
 			enterKey = 13,
 			promise,
@@ -15100,12 +15088,6 @@ var Oculus = {};
 		}
 
 		/**
-		 * Dialog controller
-		 */
-		function tcDialogController() {
-		}
-
-		/**
 		 * Do the user registration
 		 */
 		function doRegister() {
@@ -15124,7 +15106,7 @@ var Oculus = {};
 						data.captcha = vm.reCaptchaResponse;
 					}
 					vm.registering = true;
-					promise = SignUpFormService.register(vm.newUser.username, data);
+					promise = UtilsService.doPost(data, vm.newUser.username);
 					promise.then(function (response) {
 						if (response.status === 200) {
 							vm.showPage("registerRequest");
@@ -15139,6 +15121,7 @@ var Oculus = {};
 							vm.registerErrorMessage = "Error with registration";
 						}
 						vm.registering = false;
+						grecaptcha.reset(); // reset reCaptcha
 					});
 				}
 				else {
@@ -15152,64 +15135,6 @@ var Oculus = {};
 	}
 }());
 
-/**
- *  Copyright (C) 2016 3D Repo Ltd
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-    "use strict";
-
-    angular.module("3drepo")
-        .factory("SignUpFormService", SignUpFormService);
-
-    SignUpFormService.$inject = ["$http", "$q", "serverConfig"];
-
-    function SignUpFormService($http, $q, serverConfig) {
-        var obj = {};
-
-        /**
-         * Handle POST requests
-         * @param data
-         * @param urlEnd
-         * @returns {*}
-         */
-        function doPost(data, urlEnd) {
-            var deferred = $q.defer(),
-                url = serverConfig.apiUrl(serverConfig.POST_API, urlEnd),
-                config = {withCredentials: true};
-
-            $http.post(url, data, config)
-                .then(
-                    function (response) {
-                        deferred.resolve(response);
-                    },
-                    function (error) {
-                        deferred.resolve(error);
-                    }
-                );
-            return deferred.promise;
-        }
-
-        obj.register = function (username, data) {
-            return doPost(data, username);
-        };
-
-        return obj;
-    }
-}());
 /**
  *	Copyright (C) 2016 3D Repo Ltd
  *
@@ -15244,10 +15169,14 @@ var Oculus = {};
 		};
 	}
 
-	TermsAndConditionsCtrl.$inject = [];
+	TermsAndConditionsCtrl.$inject = ["$location"];
 
-	function TermsAndConditionsCtrl () {
+	function TermsAndConditionsCtrl ($location) {
 		var vm = this;
+
+		vm.home = function () {
+			$location.path("/", "_self");
+		};
 	}
 }());
 
@@ -16121,20 +16050,21 @@ var Oculus = {};
     function UtilsService($http, $q, serverConfig) {
         var obj = {};
 
-        obj.formatTimestamp = function (timestamp) {
-            var date = new Date(timestamp);
+        obj.formatTimestamp = function (timestamp, showSeconds) {
+            var date = new Date(timestamp),
+                formatted;
 
-            /*
-            return (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
-                (date.getMonth() + 1) + "-" +
-                date.getFullYear() + " " +
-                (date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
-                date.getMinutes() + "-" +
-                (date.getSeconds() < 10 ? "0" : "") + date.getSeconds();
-            */
-            return (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
-                ((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1) + "-" +
-                date.getFullYear();
+            formatted = (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
+                        ((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1) + "-" +
+                        date.getFullYear();
+            
+            if (angular.isDefined(showSeconds) && showSeconds) {
+                formatted += " " + (date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
+                            date.getMinutes() + "-" +
+                            (date.getSeconds() < 10 ? "0" : "") + date.getSeconds();
+            }
+            
+            return formatted;
         };
         
         obj.snake_case = function snake_case(name, separator) {
@@ -16186,7 +16116,52 @@ var Oculus = {};
                     }
                 );
             return deferred.promise;
-        }
+        };
+
+        /**
+         * Handle PUT requests
+         * @param data
+         * @param url
+         * @returns {*}
+         */
+        obj.doPut = function (data, url) {
+            var deferred = $q.defer(),
+                urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
+                config = {withCredentials: true};
+
+            $http.put(urlUse, data, config)
+                .then(
+                    function (response) {
+                        deferred.resolve(response);
+                    },
+                    function (error) {
+                        deferred.resolve(error);
+                    }
+                );
+            return deferred.promise;
+        };
+
+        /**
+         * Handle DELETE requests
+         * @param url
+         * @returns {*}
+         */
+        obj.doDelete = function (url) {
+            var deferred = $q.defer(),
+                urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
+                config = {withCredentials: true};
+
+            $http.delete(urlUse, config)
+                .then(
+                    function (response) {
+                        deferred.resolve(response);
+                    },
+                    function (error) {
+                        deferred.resolve(error);
+                    }
+                );
+            return deferred.promise;
+        };
 
         return obj;
     }

@@ -3,14 +3,17 @@
 		md-toolbar
 			.md-toolbar-tools
 				h2 Contact Us
-		.userContent(layout="column", layout-fill)
+		.userContent(layout="column")
 			div(ng-if="!vm.sent")
-				md-input-container.md-block(md-no-float, layout-fill)
-					textarea(ng-model="vm.contact.information", placeholder="Contact information")
-				md-input-container.md-block(md-no-float, layout-fill)
-					input(type="text", ng-model="vm.contact.name", placeholder="Name")
-				md-input-container.md-block(md-no-float, layout-fill)
-					input(type="email", ng-model="vm.contact.email", placeholder="Email")
+				md-input-container.md-block
+					label Contact information
+					textarea(ng-model="vm.contact.information")
+				md-input-container.md-block
+					label Name
+					input(type="text", ng-model="vm.contact.name")
+				md-input-container.md-block
+					label Email
+					input(type="email", ng-model="vm.contact.email")
 				// Extra hidden input to prevent input autofill
 				input(type="email", ng-show="false")
 

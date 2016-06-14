@@ -32,9 +32,13 @@
 		};
 	}
 
-	PrivacyCtrl.$inject = [];
+	PrivacyCtrl.$inject = ["$location"];
 
-	function PrivacyCtrl () {
+	function PrivacyCtrl ($location) {
 		var vm = this;
+
+		vm.home = function () {
+			$location.path("/", "_self");
+		};
 	}
 }());

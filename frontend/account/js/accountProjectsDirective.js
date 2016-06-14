@@ -40,7 +40,6 @@
 	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, $timeout, $interval, AccountService, UtilsService) {
 		var vm = this,
 			promise,
-			bid4FreeProjects = null,
 			existingProjectToUpload,
 			existingProjectFileUploader,
 			newProjectFileUploader;
@@ -56,7 +55,7 @@
 			"GIS",
 			"Other"
 		];
-		vm.info = "Retrieving projects..,";
+		vm.info = "Retrieving projects...";
 		vm.showProgress = true;
 
 		// Setup file uploaders
@@ -80,19 +79,6 @@
 			false
 		);
 
-		promise = AccountService.getProjectsBid4FreeStatus(vm.account);
-		promise.then(function (data) {
-			if (data.data.length > 0) {
-				bid4FreeProjects = [];
-				angular.forEach(data.data, function (value) {
-					if (bid4FreeProjects.indexOf(value.project) === -1) {
-						bid4FreeProjects.push(value.project);
-					}
-				});
-				setupBid4FreeAccess();
-			}
-		});
-
 		/*
 		 * Added data to accounts and projects for UI
 		 */
@@ -100,17 +86,21 @@
 			var i, j, iLength, jLength;
 			
 			if (angular.isDefined(vm.accounts)) {
+				console.log(vm.accounts);
 				vm.showProgress = false;
 				vm.projectsExist = (vm.accounts.length > 0);
 				vm.info = vm.projectsExist ? "" : "There are currently no projects";
+				// Accounts
 				for (i = 0, iLength = vm.accounts.length; i < iLength; i+= 1) {
 					vm.accounts[i].name = vm.accounts[i].account;
 					vm.accounts[i].showProjects = true;
 					vm.accounts[i].showProjectsIcon = "folder_open";
+
+					//Projects
 					for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
 						vm.accounts[i].projects[j].name = vm.accounts[i].projects[j].project;
 						if (vm.accounts[i].projects[j].timestamp !== null) {
-							vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp);
+							vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp, true);
 						}
 						vm.accounts[i].projects[j].bif4FreeEnabled = false;
 						vm.accounts[i].projects[j].uploading = false;
@@ -118,7 +108,6 @@
 						vm.accounts[i].projects[j].canUpload = true;
 					}
 				}
-				setupBid4FreeAccess();
 			}
 		});
 
@@ -185,23 +174,14 @@
 		 * Bring up dialog to add a new project
 		 */
 		vm.newProject = function (event) {
+			vm.showNewProjectErrorMessage = false;
 			vm.newProjectFileSelected = false;
 			vm.newProjectData = {
 				account: vm.account,
 				type: vm.projectTypes[0]
 			};
 			vm.uploadedFile = null;
-			$mdDialog.show({
-				controller: function () {},
-				templateUrl: "projectDialog.html",
-				parent: angular.element(document.body),
-				targetEvent: event,
-				clickOutsideToClose:true,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true,
-				onRemoving: function () {$scope.closeDialog();}
-			});
+			showDialog("projectDialog.html");
 		};
 		
 		/**
@@ -215,26 +195,31 @@
 		 * Save a new project
 		 */
 		vm.saveNewProject = function () {
-			var projectData,
-				project;
+			var project;
 
 			promise = AccountService.newProject(vm.newProjectData);
 			promise.then(function (response) {
 				console.log(response);
-				vm.projectsExist = true;
-				// Add project to list
-				project = {
-					name: response.data.project,
-					canUpload: true,
-					timestamp: "",
-					bif4FreeEnabled: false
-				};
-				updateAccountProjects (response.data.account, project);
-				// Save model to project
-				if (vm.uploadedFile !== null) {
-					uploadModelToProject (project, vm.uploadedFile);
+				if (response.data.status === 400) {
+					vm.showNewProjectErrorMessage = true;
+					vm.newProjectErrorMessage = response.data.message;
 				}
-				vm.closeDialog();
+				else {
+					vm.projectsExist = true;
+					// Add project to list
+					project = {
+						name: response.data.project,
+						canUpload: true,
+						timestamp: null,
+						bif4FreeEnabled: false
+					};
+					updateAccountProjects (response.data.account, project);
+					// Save model to project
+					if (vm.uploadedFile !== null) {
+						uploadModelToProject (project, vm.uploadedFile);
+					}
+					vm.closeDialog();
+				}
 			});
 		};
 
@@ -263,17 +248,7 @@
 			vm.newDatabaseName = "";
 			vm.showPaymentWait = false;
 			vm.newDatabaseToken = false;
-			$mdDialog.show({
-				controller: function () {},
-				templateUrl: "databaseDialog.html",
-				parent: angular.element(document.body),
-				targetEvent: event,
-				clickOutsideToClose:true,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true,
-				onRemoving: function () {$scope.closeDialog();}
-			});
+			showDialog("databaseDialog.html");
 		};
 
 		/**
@@ -296,6 +271,45 @@
 			$timeout(function () {
 				console.log(vm.newDatabaseToken);
 				vm.showPaymentWait = true;
+			});
+		};
+
+		/**
+		 * Set up deleting of project
+		 * @param {Object} project
+		 */
+		vm.setupDeleteProject = function (project) {
+			vm.projectToDelete = project;
+			vm.showDeleteProjectError = false;
+			showDialog("deleteProjectDialog.html");
+		};
+
+		/**
+		 * Delete project
+		 */
+		vm.deleteProject = function () {
+			var i, iLength, j, jLength;
+			promise = UtilsService.doDelete(vm.account + "/" + vm.projectToDelete.name);
+			promise.then(function (response) {
+				console.log(response);
+				if (response.status === 200) {
+					// Remove project from list
+					for (i = 0, iLength = vm.accounts.length; i < iLength; i += 1) {
+						if (vm.accounts[i].name === response.data.account) {
+							for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
+								if (vm.accounts[i].projects[j].name === response.data.project) {
+									vm.accounts[i].projects.splice(j, 1);
+									break;
+								}
+							}
+						}
+					}
+					vm.closeDialog();
+				}
+				else {
+					vm.showDeleteProjectError = true;
+					vm.deleteProjectError = "Error deleting project";
+				}
 			});
 		};
 
@@ -348,14 +362,12 @@
 			promise.then(function (response) {
 				console.log(response);
 				if ((response.data.status === 400) || (response.data.status === 404)) {
+					// Upload error
 					if (response.data.value === 68) {
 						vm.fileUploadInfo = "Unsupported file format";
 					}
 					else if (response.data.value === 66) {
 						vm.fileUploadInfo = "Insufficient quota for model";
-					}
-					else {
-						vm.fileUploadInfo = "Error saving model";
 					}
 					vm.showUploading = false;
 					vm.showFileUploadInfo = true;
@@ -364,16 +376,22 @@
 					}, 4000);
 				}
 				else {
+					// Upload valid, poll for status
 					interval = $interval(function () {
 						promise = AccountService.uploadStatus(projectData);
 						promise.then(function (response) {
 							console.log(response);
-							if (response.data.status === "ok") {
-								project.timestamp = UtilsService.formatTimestamp(new Date());
+							if ((response.data.status === "ok") || (response.data.status === "failed")) {
+								if (response.data.status === "ok") {
+									project.timestamp = UtilsService.formatTimestamp(new Date(), true);
+									vm.fileUploadInfo = "Uploaded";
+								}
+								else {
+									vm.fileUploadInfo = response.data.errorReason.message;
+								}
 								vm.showUploading = false;
 								$interval.cancel(interval);
 								vm.showFileUploadInfo = true;
-								vm.fileUploadInfo = "Uploaded";
 								$timeout(function () {
 									project.uploading = false;
 								}, 4000);
@@ -384,18 +402,22 @@
 			});
 		}
 
-		vm.b4f = function (account, project) {
-			$location.path("/" + account + "/" + project + "/bid4free", "_self");
-		};
-
-		function setupBid4FreeAccess () {
-			if ((vm.accounts.length > 0) && (bid4FreeProjects !== null)) {
-				angular.forEach(vm.accounts, function(account) {
-					angular.forEach(account.projects, function(project) {
-						project.bif4FreeEnabled = (bid4FreeProjects.indexOf(project.name) !== -1);
-					});
-				});
-			}
+		/**
+		 * Show a dialog
+		 * @param {String} dialogTemplate
+		 */
+		function showDialog (dialogTemplate) {
+			$mdDialog.show({
+				controller: function () {},
+				templateUrl: dialogTemplate,
+				parent: angular.element(document.body),
+				targetEvent: event,
+				clickOutsideToClose:true,
+				fullscreen: true,
+				scope: $scope,
+				preserveScope: true,
+				onRemoving: function () {$scope.closeDialog();}
+			});
 		}
 	}
 }());

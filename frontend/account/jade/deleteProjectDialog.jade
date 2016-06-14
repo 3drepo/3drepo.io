@@ -1,0 +1,17 @@
+md-dialog.deleteProjectDialog(aria-label="Delete project")
+	md-toolbar
+		.md-toolbar-tools
+			h2 Delete Project
+			span(flex)
+			md-button.md-icon-button(ng-click="vm.closeDialog()")
+				md-icon.angular-material-icons(aria-label="Close dialog") close
+	md-content(layout-margin)
+		div(layout="column", layout-align="start")
+			div(layout="row")
+				p Do you really want to delete project
+				p#deleteProjectName {{vm.projectToDelete.name}}
+				p ?
+			md-input-container
+				md-button.md-accent(ng-click="vm.deleteProject()") Yes
+				md-button.md-raised.md-accent(ng-click="vm.closeDialog()") No
+			p#deleteProjectError(ng-if="vm.showDeleteProjectError") {{vm.deleteProjectError}}

@@ -663,6 +663,7 @@
 				setupIssuesToShow();
 				vm.showPins();
 				setContentHeight();
+				vm.canAdd = true;
 			});
 		};
 
@@ -734,14 +735,14 @@
 				maxStringLength = 32,
 				lineHeight = 18,
 				footerHeight,
-				addHeight = 230,
+				addHeight = 260,
 				commentHeight = 80,
 				headerHeight = 53,
 				openIssueFooterHeight = 180,
-				closedIssueFooterHeight = 53,
-				infoHeight = 80;
+				closedIssueFooterHeight = 60,
+				infoHeight = 80,
+				issuesMinHeight = 260;
 
-			console.log(vm.toShow);
 			switch (vm.toShow) {
 				case "showIssues":
 					issuesHeight = 0;
@@ -752,6 +753,7 @@
 						}
 					}
 					height = issuesHeight;
+					height = (height < issuesMinHeight) ? issuesMinHeight : issuesHeight;
 					break;
 
 				case "showIssue":
