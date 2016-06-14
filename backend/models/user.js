@@ -23,6 +23,7 @@ var DB = require('../db/db');
 var crypto = require('crypto');
 var utils = require("../utils");
 var History = require('./history');
+var Billing = require('./billing');
 var projectSetting = require('./projectSetting');
 var Role = require('./role');
 var Mailer = require('../mailer/mailer');
@@ -66,14 +67,7 @@ var schema = mongoose.Schema({
 			limits: {},
 			token: String,
 			plan: String,
-			database: String,
-			payments: [{
-				gateway: String,
-				raw: {},
-				createdAt: Date,
-				currency: String,
-				amount: String
-			}]
+			database: String
 		}],
 		avatar: Object
 	},
@@ -599,9 +593,7 @@ schema.methods.createSubscriptionToken = function(plan, billingUser){
 			billingUser: billingUser,
 			createdAt: now,
 			updatedAt: now,
-			active: false,
-			payments: []
-
+			active: false
 		};
 
 		subscriptions.push(subscription);
@@ -663,24 +655,33 @@ schema.statics.activateSubscription = function(token, paymentInfo, raw, disableE
 		let expiryAt = new Date(now.valueOf());
 		expiryAt.setMonth(expiryAt.getMonth() + getSubscription(subscription.plan).billingCycle);
 
-		let payment = {
-			raw: raw,
-			gateway: paymentInfo.gateway,
-			createdAt: new Date(),
-			currency: paymentInfo.currency,
-			amount: paymentInfo.amount
-		};
+
 
 		subscription.limits = getSubscription(subscription.plan).limits;
 		subscription.expiredAt = expiryAt;
 		subscription.active = true;
-		subscription.payments.push(payment);
+		
+		if(paymentInfo.createBilling){
+			let billing = Billing.createInstance({ account });
+
+			billing.raw = raw;
+			billing.gateway = paymentInfo.gateway;
+			billing.createdAt = new Date();
+			billing.currency = paymentInfo.currency;
+			billing.amount = paymentInfo.amount;
+			billing.subscriptionToken = token;
+			
+			billing.save().catch( err => {
+				console.log('Billing error', err);
+			});
+		}
+
 
 		if(!disableEmail && !paymentInfo.subscriptionSignup){
 
 			//send verification email
-			let amount = payment.amount;
-			let currency = payment.currency;
+			let amount = paymentInfo.amount;
+			let currency = paymentInfo.currency;
 			if(currency === 'GBP'){
 				currency = '£';
 			}
@@ -698,7 +699,7 @@ schema.statics.activateSubscription = function(token, paymentInfo, raw, disableE
 		}
 
 		return dbUser.save().then(() => {
-			return Promise.resolve({subscription, account, payment});
+			return Promise.resolve({subscription, account, payment: paymentInfo});
 		});
 		
 
