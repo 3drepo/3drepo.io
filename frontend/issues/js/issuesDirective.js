@@ -155,7 +155,8 @@
 		 */
 		$scope.$watch("vm.showAdd", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
-				setupAdd("scribble");
+				setupAdd();
+				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: "scribble"});
 			}
 		});
 
@@ -234,7 +235,11 @@
 			} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_ADD) {
 				if (event.value.on) {
 					vm.show = true;
-					setupAdd(event.value.type);
+					setupAdd();
+					// This is done to override the default mode ("scribble") set in the vm.showAdd watch above ToDo improve!
+					$timeout(function () {
+						EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, event.value.type);
+					}, 200);
 				}
 				else {
 					vm.hideItem = true;
@@ -798,7 +803,7 @@
 		/**
 		 * Set up adding an issue
 		 */
-		function setupAdd (issueAreaType) {
+		function setupAdd () {
 			vm.toShow = "showAdd";
 			vm.onShowItem();
 			vm.showAdd = true;
@@ -811,9 +816,6 @@
 			$timeout(function () {
 				($element[0].querySelector("#issueAddTitle")).select();
 			});
-
-			// Show the issue area
-			EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: issueAreaType});
 		}
 	}
 }());

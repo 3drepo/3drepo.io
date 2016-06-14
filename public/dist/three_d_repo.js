@@ -9857,7 +9857,6 @@ angular.module('3drepo')
          * Set up placing of the pin
          */
         function setupPin () {
-            console.log(1);
             vm.canvasPointerEvents = "none";
         }
 
@@ -10418,7 +10417,8 @@ angular.module('3drepo')
 		 */
 		$scope.$watch("vm.showAdd", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
-				setupAdd("scribble");
+				setupAdd();
+				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: "scribble"});
 			}
 		});
 
@@ -10497,7 +10497,11 @@ angular.module('3drepo')
 			} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_ADD) {
 				if (event.value.on) {
 					vm.show = true;
-					setupAdd(event.value.type);
+					setupAdd();
+					// This is done to override the default mode ("scribble") set in the vm.showAdd watch above ToDo improve!
+					$timeout(function () {
+						EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, event.value.type);
+					}, 200);
 				}
 				else {
 					vm.hideItem = true;
@@ -11061,7 +11065,7 @@ angular.module('3drepo')
 		/**
 		 * Set up adding an issue
 		 */
-		function setupAdd (issueAreaType) {
+		function setupAdd () {
 			vm.toShow = "showAdd";
 			vm.onShowItem();
 			vm.showAdd = true;
@@ -11074,9 +11078,6 @@ angular.module('3drepo')
 			$timeout(function () {
 				($element[0].querySelector("#issueAddTitle")).select();
 			});
-
-			// Show the issue area
-			EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: issueAreaType});
 		}
 	}
 }());
@@ -14934,8 +14935,8 @@ var Oculus = {};
          * Setup event watch
          */
         $scope.$watch(EventService.currentEvent, function(event) {
-            if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) {
-                addIssueMode = event.value.on ? event.value.type : null;
+            if ((event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) && (!event.value.on)) {
+                addIssueMode = null;
             }
         });
 
