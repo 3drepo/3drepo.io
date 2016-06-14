@@ -23,11 +23,11 @@
 
     function measure() {
         return {
-            restrict: 'EA',
-            templateUrl: 'measure.html',
+            restrict: "EA",
+            templateUrl: "measure.html",
             scope: {},
             controller: MeasureCtrl,
-            controllerAs: 'vm',
+            controllerAs: "vm",
             bindToController: true
         };
     }
@@ -44,8 +44,7 @@
         vm.distance = false;
 
         $scope.$watch(EventService.currentEvent, function (event) {
-
-            if (event.type === EventService.EVENT.VIEWER.PICK_POINT) {
+		if (event.type === EventService.EVENT.VIEWER.PICK_POINT) {
                 if (event.value.hasOwnProperty("id")) {
                     // The check against currentPickPoint is due to the PICK_POINT event being called twice
                     if (angular.isUndefined(currentPickPoint) ||

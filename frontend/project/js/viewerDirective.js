@@ -94,6 +94,8 @@
 			v.gamepad    = new Gamepad(v.viewer);
 			v.gamepad.init();
 
+			v.measure    = new MeasureTool(v.viewer);
+
 			v.collision  = new Collision(v.viewer);
 
 
@@ -226,7 +228,7 @@
 						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
 							v.manager.getCurrentViewer().setNavMode(event.value.mode);
 						} else if (event.type === EventService.EVENT.MEASURE_MODE) {
-							v.viewer.measureMode(event.value);
+							v.measure.measureMode(event.value);
 						}
 					});
 				}
