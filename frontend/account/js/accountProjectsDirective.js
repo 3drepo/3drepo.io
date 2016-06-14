@@ -181,7 +181,7 @@
 				type: vm.projectTypes[0]
 			};
 			vm.uploadedFile = null;
-			showDialog("projectDialog.html");
+			showDialog(event, "projectDialog.html");
 		};
 		
 		/**
@@ -248,7 +248,7 @@
 			vm.newDatabaseName = "";
 			vm.showPaymentWait = false;
 			vm.newDatabaseToken = false;
-			showDialog("databaseDialog.html");
+			showDialog(event, "databaseDialog.html");
 		};
 
 		/**
@@ -278,10 +278,10 @@
 		 * Set up deleting of project
 		 * @param {Object} project
 		 */
-		vm.setupDeleteProject = function (project) {
+		vm.setupDeleteProject = function (event, project) {
 			vm.projectToDelete = project;
 			vm.showDeleteProjectError = false;
-			showDialog("deleteProjectDialog.html");
+			showDialog(event, "deleteProjectDialog.html");
 		};
 
 		/**
@@ -406,7 +406,7 @@
 		 * Show a dialog
 		 * @param {String} dialogTemplate
 		 */
-		function showDialog (dialogTemplate) {
+		function showDialog (event, dialogTemplate) {
 			$mdDialog.show({
 				controller: function () {},
 				templateUrl: dialogTemplate,

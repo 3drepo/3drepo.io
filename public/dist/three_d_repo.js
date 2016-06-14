@@ -4698,6 +4698,7 @@ var ViewerManager = {};
 		 * Init
 		 */
 		vm.itemToShow = "repos";
+		vm.showProject = false;
 
 		/*
 		 * Get the account data
@@ -4708,22 +4709,16 @@ var ViewerManager = {};
 			{
 				promise = AccountService.getUserInfo(vm.account);
 				promise.then(function (response) {
-					// Response with data.type indicates it's not the user's account
-					if (!response.data.hasOwnProperty("type")) {
-						vm.accounts = response.data.accounts;
-						vm.username = vm.account;
-						vm.firstName = response.data.firstName;
-						vm.lastName = response.data.lastName;
-						vm.email = response.data.email;
-						/*
-						 vm.hasAvatar = response.data.hasAvatar;
-						 vm.avatarURL = response.data.avatarURL;
-						 */
-					}
-					else {
-						// Redirect user to projects list
-						$location.path("/", "_self");
-					}
+					vm.accounts = response.data.accounts;
+					vm.username = vm.account;
+					vm.firstName = response.data.firstName;
+					vm.lastName = response.data.lastName;
+					vm.email = response.data.email;
+					/*
+					 vm.hasAvatar = response.data.hasAvatar;
+					 vm.avatarURL = response.data.avatarURL;
+					 */
+					goToProject();
 				});
 			} else {
 				vm.username        = null;
@@ -4733,7 +4728,33 @@ var ViewerManager = {};
 				vm.projectsGrouped = null;
 			}
 		});
-		
+
+		/*
+		 * Watch for change in project
+		 */
+		$scope.$watch("vm.state.project", function()
+		{
+			goToProject();
+		});
+
+		/**
+		 * Go to a project or back to the projects list if the project is unknown
+		 */
+		function goToProject () {
+			var i, length;
+			if (angular.isDefined(vm.accounts)) {
+				for (i = 0, length = vm.accounts[0].projects.length; i < length; i += 1) {
+					if (vm.accounts[0].projects[i].project === vm.state.project) {
+						vm.showProject = true;
+						break;
+					}
+				}
+				if (!vm.showProject) {
+					$location.path("/" + vm.state.account, "_self");
+				}
+			}
+		}
+
 		vm.showItem = function (item) {
 			vm.itemToShow = item;
 		};
@@ -5168,7 +5189,7 @@ var ViewerManager = {};
 				type: vm.projectTypes[0]
 			};
 			vm.uploadedFile = null;
-			showDialog("projectDialog.html");
+			showDialog(event, "projectDialog.html");
 		};
 		
 		/**
@@ -5235,7 +5256,7 @@ var ViewerManager = {};
 			vm.newDatabaseName = "";
 			vm.showPaymentWait = false;
 			vm.newDatabaseToken = false;
-			showDialog("databaseDialog.html");
+			showDialog(event, "databaseDialog.html");
 		};
 
 		/**
@@ -5265,10 +5286,10 @@ var ViewerManager = {};
 		 * Set up deleting of project
 		 * @param {Object} project
 		 */
-		vm.setupDeleteProject = function (project) {
+		vm.setupDeleteProject = function (event, project) {
 			vm.projectToDelete = project;
 			vm.showDeleteProjectError = false;
-			showDialog("deleteProjectDialog.html");
+			showDialog(event, "deleteProjectDialog.html");
 		};
 
 		/**
@@ -5393,7 +5414,7 @@ var ViewerManager = {};
 		 * Show a dialog
 		 * @param {String} dialogTemplate
 		 */
-		function showDialog (dialogTemplate) {
+		function showDialog (event, dialogTemplate) {
 			$mdDialog.show({
 				controller: function () {},
 				templateUrl: dialogTemplate,
@@ -9278,18 +9299,20 @@ var ViewerManager = {};
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$location", "Auth", "StateManager", "EventService", "UtilsService"];
+    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$location", "Auth", "StateManager", "EventService", "UtilsService", "AccountService"];
 
-    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $location, Auth, StateManager, EventService, UtilsService) {
+    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $location, Auth, StateManager, EventService, UtilsService, AccountService) {
         var vm = this,
 			goToUserPage,
+			goToAccount,
 			homeLoggedOut,
 			homeLoggedIn,
 			notLoggedInElement,
 			loggedInElement,
 			element,
 			state,
-			useState;
+			useState,
+			promise;
 
 		/*
 		 * Init
@@ -9349,7 +9372,7 @@ var ViewerManager = {};
 					$timeout(function () {
 						homeLoggedIn = angular.element($element[0].querySelector('#homeLoggedIn'));
 						homeLoggedIn.empty();
-						vm.goToAccount = false;
+						goToAccount = false;
 						goToUserPage = false;
 						for (state in vm.state) {
 							if (vm.state.hasOwnProperty(state) && (state !== "loggedIn")) {
@@ -9358,16 +9381,29 @@ var ViewerManager = {};
 									useState = state;
 								}
 								else if (typeof vm.state[state] === "string") {
-									vm.goToAccount = true;
+									goToAccount = true;
 								}
 							}
 						}
-						if ((goToUserPage) || (vm.goToAccount)) {
+						if ((goToUserPage) || (goToAccount)) {
 							if (goToUserPage) {
 								element = "<" + UtilsService.snake_case(useState, "-") + "></" + UtilsService.snake_case(useState, "-") + ">";
 								loggedInElement = angular.element(element);
 								homeLoggedIn.append(loggedInElement);
 								$compile(loggedInElement)($scope);
+							}
+							else {
+								promise = AccountService.getUserInfo(StateManager.state.account);
+								promise.then(function (response) {
+									// Response with data.type indicates it's not the user's account
+									if (!response.data.hasOwnProperty("type")) {
+										vm.goToAccount = true;
+									}
+									else {
+										// Logout if trying to view another account
+										Auth.logout();
+									}
+								});
 							}
 						}
 						else {
@@ -10723,7 +10759,6 @@ angular.module('3drepo')
 						removeAddPin();
 						EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: false});
 					}
-					//vm.toShow = "showIssues";
 					vm.showAdd = false; // So that showing add works
 					vm.canAdd = true;
 					vm.showEdit = false; // So that closing edit works
@@ -11029,6 +11064,7 @@ angular.module('3drepo')
 		function setupAdd (issueAreaType) {
 			vm.toShow = "showAdd";
 			vm.onShowItem();
+			vm.showAdd = true;
 			vm.canAdd = false;
 			setContentHeight();
 			setPinToAssignedRoleColours(vm.selectedIssue);
@@ -12113,10 +12149,14 @@ var Oculus = {};
 			contentHeight,
 			options = angular.element($element[0].querySelector('#options'));
 
+		/*
+		 * Init
+		 */
         vm.showHelp = false;
 		vm.showFilter = false;
 		vm.visibleStatus = false;
 		vm.showClearFilterButton = false;
+		vm.showAdd = false;
 
 		/*
 		 * Watch type on contentData to create content and tool bar options

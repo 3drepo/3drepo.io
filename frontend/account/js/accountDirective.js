@@ -45,6 +45,7 @@
 		 * Init
 		 */
 		vm.itemToShow = "repos";
+		vm.showProject = false;
 
 		/*
 		 * Get the account data
@@ -55,22 +56,16 @@
 			{
 				promise = AccountService.getUserInfo(vm.account);
 				promise.then(function (response) {
-					// Response with data.type indicates it's not the user's account
-					if (!response.data.hasOwnProperty("type")) {
-						vm.accounts = response.data.accounts;
-						vm.username = vm.account;
-						vm.firstName = response.data.firstName;
-						vm.lastName = response.data.lastName;
-						vm.email = response.data.email;
-						/*
-						 vm.hasAvatar = response.data.hasAvatar;
-						 vm.avatarURL = response.data.avatarURL;
-						 */
-					}
-					else {
-						// Redirect user to projects list
-						$location.path("/", "_self");
-					}
+					vm.accounts = response.data.accounts;
+					vm.username = vm.account;
+					vm.firstName = response.data.firstName;
+					vm.lastName = response.data.lastName;
+					vm.email = response.data.email;
+					/*
+					 vm.hasAvatar = response.data.hasAvatar;
+					 vm.avatarURL = response.data.avatarURL;
+					 */
+					goToProject();
 				});
 			} else {
 				vm.username        = null;
@@ -80,7 +75,33 @@
 				vm.projectsGrouped = null;
 			}
 		});
-		
+
+		/*
+		 * Watch for change in project
+		 */
+		$scope.$watch("vm.state.project", function()
+		{
+			goToProject();
+		});
+
+		/**
+		 * Go to a project or back to the projects list if the project is unknown
+		 */
+		function goToProject () {
+			var i, length;
+			if (angular.isDefined(vm.accounts)) {
+				for (i = 0, length = vm.accounts[0].projects.length; i < length; i += 1) {
+					if (vm.accounts[0].projects[i].project === vm.state.project) {
+						vm.showProject = true;
+						break;
+					}
+				}
+				if (!vm.showProject) {
+					$location.path("/" + vm.state.account, "_self");
+				}
+			}
+		}
+
 		vm.showItem = function (item) {
 			vm.itemToShow = item;
 		};

@@ -496,7 +496,6 @@
 						removeAddPin();
 						EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: false});
 					}
-					//vm.toShow = "showIssues";
 					vm.showAdd = false; // So that showing add works
 					vm.canAdd = true;
 					vm.showEdit = false; // So that closing edit works
@@ -802,6 +801,7 @@
 		function setupAdd (issueAreaType) {
 			vm.toShow = "showAdd";
 			vm.onShowItem();
+			vm.showAdd = true;
 			vm.canAdd = false;
 			setContentHeight();
 			setPinToAssignedRoleColours(vm.selectedIssue);

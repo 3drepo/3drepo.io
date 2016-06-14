@@ -76,18 +76,20 @@
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$location", "Auth", "StateManager", "EventService", "UtilsService"];
+    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$location", "Auth", "StateManager", "EventService", "UtilsService", "AccountService"];
 
-    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $location, Auth, StateManager, EventService, UtilsService) {
+    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $location, Auth, StateManager, EventService, UtilsService, AccountService) {
         var vm = this,
 			goToUserPage,
+			goToAccount,
 			homeLoggedOut,
 			homeLoggedIn,
 			notLoggedInElement,
 			loggedInElement,
 			element,
 			state,
-			useState;
+			useState,
+			promise;
 
 		/*
 		 * Init
@@ -147,7 +149,7 @@
 					$timeout(function () {
 						homeLoggedIn = angular.element($element[0].querySelector('#homeLoggedIn'));
 						homeLoggedIn.empty();
-						vm.goToAccount = false;
+						goToAccount = false;
 						goToUserPage = false;
 						for (state in vm.state) {
 							if (vm.state.hasOwnProperty(state) && (state !== "loggedIn")) {
@@ -156,16 +158,29 @@
 									useState = state;
 								}
 								else if (typeof vm.state[state] === "string") {
-									vm.goToAccount = true;
+									goToAccount = true;
 								}
 							}
 						}
-						if ((goToUserPage) || (vm.goToAccount)) {
+						if ((goToUserPage) || (goToAccount)) {
 							if (goToUserPage) {
 								element = "<" + UtilsService.snake_case(useState, "-") + "></" + UtilsService.snake_case(useState, "-") + ">";
 								loggedInElement = angular.element(element);
 								homeLoggedIn.append(loggedInElement);
 								$compile(loggedInElement)($scope);
+							}
+							else {
+								promise = AccountService.getUserInfo(StateManager.state.account);
+								promise.then(function (response) {
+									// Response with data.type indicates it's not the user's account
+									if (!response.data.hasOwnProperty("type")) {
+										vm.goToAccount = true;
+									}
+									else {
+										// Logout if trying to view another account
+										Auth.logout();
+									}
+								});
 							}
 						}
 						else {

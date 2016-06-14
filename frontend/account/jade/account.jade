@@ -1,5 +1,5 @@
 account-menu
-div(ng-if="!vm.state.project")
+div(ng-if="!vm.showProject")
 	#account(layout="row")
 		account-info(
 			username="vm.username"
@@ -22,5 +22,5 @@ div(ng-if="!vm.state.project")
 				ng-switch-when="profile"
 			)
 
-div(ng-if="vm.state.project")
+div(ng-if="vm.showProject")
 	project(account="vm.state.account" project="vm.state.project" branch="vm.state.branch" revision="vm.state.revision" state="vm.state")
