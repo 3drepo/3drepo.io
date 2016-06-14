@@ -46,6 +46,8 @@ module.exports.createApp = function (serverConfig) {
 	let bodyParser = require("body-parser");
 	let app = express();
 
+	app.use(sharedSession);
+	
 	app.use(cors({origin:true, credentials: true}));
 
 	// put logger in req object
@@ -64,31 +66,6 @@ module.exports.createApp = function (serverConfig) {
 		});
 	});
 
-	app.use((req, res, next) => {
-		// init ampq and import queue object
-		let importQueue = require('../services/queue');
-		if(config.cn_queue){
-
-			importQueue.connect(config.cn_queue.host, {
-
-        		sharedSpacePath: config.cn_queue.shared_storage,
-        		logger: req[C.REQ_REPO].logger,
-        		callbackQName: config.cn_queue.callback_queue,
-        		workerQName: config.cn_queue.worker_queue 
-
-			}).then(() => {
-				next();
-			}).catch(err => {
-				console.log(err);
-				responseCodes.respond("Express Middleware - AMPQ", req, res, next, responseCodes.PROCESS_ERROR(err), err);
-			});
-
-		} else {
-			next();
-		}
-		
-
-	});
 
 	app.use(bodyParser.urlencoded({
 		extended: true
@@ -97,8 +74,6 @@ module.exports.createApp = function (serverConfig) {
 	app.set("views", "./jade");
 	app.set("view_engine", "jade");
 	app.use(bodyParser.json());
-
-	app.use(sharedSession);
 
 	app.use(compress());
 
@@ -135,6 +110,10 @@ module.exports.createApp = function (serverConfig) {
 	});
 
 	//auth handler
+	app.get('/info', (req, res) => {
+		res.status(200).json({ status: 'OK', version: '?'});
+	});
+
 	app.use('/', require('../routes/auth'));
 	// os api handler
 	app.use('/os',require('../routes/osBuilding'));

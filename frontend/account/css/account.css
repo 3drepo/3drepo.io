@@ -53,6 +53,7 @@ account-projects .project:hover {
 account-projects .projects {
   margin-left: 40px;
 }
+
 account-projects .projects .projectName,
 account-projects .projects md-icon {
   color: #4CAF50;
@@ -62,6 +63,7 @@ account-projects .projects md-icon {
 }
 account-projects .projects .projectTimestamp {
   color: rgba(0, 0, 0, 0.3);
+  margin-left: 20px;
 }
 account-projects .projects p {
   margin: 0;
@@ -105,8 +107,22 @@ account-projects .cardInfo md-progress-circular {
 
 account-projects .projectUploadInfo {
   margin-right: 20px;
+}
+
+account-projects .projectUploadFilename {
+  color: rgba(0,0,0,0.5);
+  margin: 0 !important;
+}
+
+account-projects .projectUploadInfo {
+  color: rgba(0,0,0,0.7);
+  margin: 0 0 0 10px !important;
+}
+
+account-projects .projectUploadIcon {
   width: 15px;
   height: 15px;
+  margin-left: 10px;
 }
 
 account-projects .projectRight .projectUploaded {
@@ -126,6 +142,20 @@ account-profile #profileDivider {
   background: rgba(0,0,0,0.2);
   width: 1px;
   height: 380px;
+}
+
+account-profile .accountProfileList {
+  max-height: calc(100vh - 200px);
+  overflow-x: hidden;
+  padding: 0;
+}
+
+account-profile .accountProfileContent {
+  margin-left: 65px;
+}
+
+account-profile .updateContainer {
+  margin-top: -30px;
 }
 
 /** Account Info ******************************************************************************************************/
@@ -151,6 +181,10 @@ account-info md-input-container label {
 account-info p {
   font-size: 14px;
   color: rgba(0,0,0,0.6);
+}
+
+account-info md-list {
+  padding: 0;
 }
 
 /** Avatar Image ******************************************************************************************************/
@@ -197,12 +231,49 @@ account-menu md-icon {
 /** New Project Dialog ************************************************************************************************/
 .newProjectDialog {
   min-width: 350px;
-  min-height: 450px;
+  min-height: 350px;
   overflow: hidden;
 }
 
 .newProjectDialog #newProjectIcon {
   margin-right: 10px;
+}
+
+.newProjectDialog #projectDialogFilenameContainer {
+  margin: 0 0 0 16px;
+}
+.newProjectDialog #projectDialogFilenameIntro {
+  color: rgba(0, 0, 0, 0.4);
+  margin: 0 5px 0 0;
+}
+.newProjectDialog #projectDialogFilename {
+  color: rgba(0, 0, 0, 0.7);
+  margin: 0;
+}
+
+.newProjectDialog #projectDialogError {
+  margin: 0;
+  color: #F44336;
+}
+
+/** Delete Project Dialog *********************************************************************************************/
+.deleteProjectDialog {
+  min-width: 350px;
+  min-height: 230px;
+  overflow: hidden;
+}
+
+.deleteProjectDialog p {
+  color: rgba(0 ,0, 0, 0.6);
+}
+.deleteProjectDialog #deleteProjectName {
+  color: rgba(0 ,0, 0, 0.9);
+  margin-left: 5px;
+}
+
+.deleteProjectDialog #deleteProjectError {
+  margin: 0;
+  color: #F44336;
 }
 
 /** New Database Dialog ***********************************************************************************************/

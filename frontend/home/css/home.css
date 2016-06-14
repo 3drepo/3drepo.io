@@ -48,6 +48,8 @@ home .homeUserContent md-toolbar {
 
 home .homeUserContent .userContent {
     padding: 20px;
+    max-height: calc(100vh - 200px);
+    overflow-x: hidden;
 }
 
 home .homeUserContent .userContent h3 {
@@ -92,12 +94,17 @@ home #legalLinks .md-button {
 
 /** Legal Dialog ******************************************************************************************************/
 .legalDialog {
-    min-width: calc(100vw - 50%);
+    width: calc(100vw - 50%);
     min-height: calc(100vh - 25%);
     overflow: hidden;
 }
 
-.legalDialog #tcIcon {
-    margin-right: 10px;
+.legalDialog md-content {
+    padding: 20px;
 }
 
+/** Dialog ************************************************************************************************************/
+md-dialog md-toolbar {
+    height: 40px;
+    min-height: 40px;
+}

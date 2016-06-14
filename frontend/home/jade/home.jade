@@ -1,6 +1,6 @@
 img#homeBackground(src="/public/images/viewer_background.jpg")
 #legalLinks(layout="row")
-	md-button(ng-repeat="display in vm.legalDisplays", ng-click="vm.display($event, display)") {{display.title}}
+	md-button(ng-repeat="display in vm.legalDisplays", ng-click="vm.legalDisplay($event, display)") {{display.title}}
 
 #homeLogo
 	img(src="/public/images/3drepo-logo-white.png")
@@ -13,4 +13,5 @@ div(ng-if="!vm.state.changing")
 	div(ng-if="vm.state.loggedIn")
 		div(ng-if="vm.getLoggedInUrl()" ng-include="vm.getLoggedInUrl()")
 		div(ng-if="!vm.getLoggedInUrl()")
-			account-dir(account="vm.state.account", state="vm.state")
+			#homeLoggedIn
+			account-dir(account='vm.state.account', state='vm.state', ng-if="vm.goToAccount")

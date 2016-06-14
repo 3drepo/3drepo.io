@@ -94,6 +94,42 @@ describe('Project Settings', function(){
 		})
 	});
 
+	describe('.findCollaborator', function(){
+
+		it('should have findCollaborator method', function(){
+			let projectSetting = new ProjectSetting();
+			expect(projectSetting.findCollaborator).to.exist;
+		});
+
+
+		it('findCollaborator should able to return the collaborator found', function(){
+
+			let projectSetting = new ProjectSetting();
+
+			projectSetting.collaborators = [ 
+				{
+					"user" : "user1",
+					"role" : "viewer"
+				}, 
+				{
+					"user" : "user2",
+					"role" : "collaborator"
+				}
+			];
+
+			let found = projectSetting.findCollaborator(projectSetting.collaborators[1].user, projectSetting.collaborators[1].role);
+			expect(found).to.deep.equal(projectSetting.collaborators[1]);
+
+			found = projectSetting.findCollaborator(projectSetting.collaborators[0].user, projectSetting.collaborators[0].role);
+			expect(found).to.deep.equal(projectSetting.collaborators[0]);
+
+
+			found = projectSetting.findCollaborator('user1', 'collaborator');
+			expect(found).to.be.null;
+
+		});
+	});
+
 	after(function(done){
 		mockgoose.reset(function() {
 			mongoose.unmock(function(){

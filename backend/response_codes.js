@@ -116,12 +116,31 @@ var responseCodes = {
 	REGISTER_DISABLE: {value: 63, message: 'Sign up function is disabled', status: 400},
 	PROJECT_EXIST: {value: 64, message: 'Project already exists', status: 400},
 	DATABASE_EXIST: {value: 65, message: 'Database already exists', status: 400 },
-	SIZE_LIMIT: {value: 66, message: 'Run of out database space. Please pay for more space.', status: 400},
+
+	SIZE_LIMIT_PAY: {value: 66, message: 'Ran of out database space. Please pay for more space.', status: 400},
 	INVALID_SUBSCRIPTION_PLAN: {value: 67, message: 'Invalid subscription plan', status: 400},
 
-	STASH_GEN_FAILED: { value: 66, message: "Failed to regenerate stash: Unknown error", status: 500 },
-	FILE_IMPORT_MISSING_TEXTURES: { value: 67, message: "Failed to import file: Missing textures", status: 500 },
+
 	FILE_FORMAT_NOT_SUPPORTED: { value: 68, message: "Failed to process file: Format not supported", status: 400 },
+
+	SIZE_LIMIT: {value: 69, message: 'Single file size exceeded system limit', status: 400},
+	INVALID_PROJECT_NAME: {value: 70, message: 'Invalid project name', status: 400},
+	SIGN_UP_INVALID_EMAIL: {value: 71, message: 'Invalid email adress', status: 400},
+	ALREADY_LOGGED_IN: {value: 72, message: "You are already logged in", status: 400},
+	BLACKLISTED_PROJECT_NAME: {value: 73, message: "Project name reserved", status: 400},
+
+	STASH_GEN_FAILED: { value: 74, message: "Failed to regenerate stash: Unknown error", status: 500 },
+	FILE_IMPORT_MISSING_TEXTURES: { value: 75, message: "Failed to import file: Missing textures", status: 500 },
+
+	ISSUE_NO_NAME: { value: 76, message: "Create issue without name", status: 400},
+	ISSUE_COMMENT_INVALID_INDEX: {value: 77, message: "Invalid comment index", status: 400},
+	ISSUE_COMMENT_PERMISSION_DECLINED: {value: 78, message: "Can't edit comment made by others", status: 400},
+	ISSUE_COMMENT_SEALED: { value: 79, message: "Can't edit a sealed comment or a comment in closed issue", status: 400},
+	ISSUE_CLOSED_ALREADY: { value: 80, message: "Issue closed already", status: 400},
+	PROJECT_NOT_FOUND: { value: 81, message: "Project not found", status: 400},
+	INVALID_ROLE: {value: 82, message: 'Invalid role name', status: 400},
+	ALREADY_IN_ROLE: {value: 83, message: 'User already assigned with this role', status: 400},
+	NOT_IN_ROLE: { value: 84, message: 'User not in this role', status: 400},
 
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {
@@ -179,14 +198,15 @@ var responseCodes = {
 
 		 return {
 			value: 4000,
-			message: message,
+			message: 'Internal Error',
 			status: 500
 		};
 	}
 };
 
 var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
-49,  50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 1000, 2000, 3000, 4000];
+49,  50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84,
+1000, 2000, 3000, 4000];
 
 var mimeTypes = {
 	"src"  : "application/json",
@@ -207,16 +227,17 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 
 		//throw Error("Unspecified error code [" + JSON.stringify(resCode) + " @ " + place + "]");
 		if(resCode && resCode.stack){
-			req[C.REQ_REPO].logger.logError(resCode.stack, req);
+			req[C.REQ_REPO].logger.logError(resCode.stack);
 		} else if (resCode && resCode.message) {
-			req[C.REQ_REPO].logger.logError(resCode.message, req);
+			req[C.REQ_REPO].logger.logError(resCode.message);
 		} else {
-			req[C.REQ_REPO].logger.logError(JSON.stringify(resCode), req);
+			req[C.REQ_REPO].logger.logError(JSON.stringify(resCode));
 		}
 
 		resCode = responseCodes.PROCESS_ERROR(resCode);
 	}
 
+	let length;
 	if (resCode.value) // Prepare error response
 	{
 		let responseObject = _.extend({}, extraInfo, {
@@ -236,13 +257,15 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 		// responseObject.status  = resCode.status;
 		// responseObject.message = resCode.message;
 
-		req[C.REQ_REPO].logger.logError(JSON.stringify(responseObject), req);
+		length = JSON.stringify(responseObject).length;
+		req[C.REQ_REPO].logger.logError(JSON.stringify(responseObject),  { httpCode: resCode.status, contentLength: length });
 
 		res.status(resCode.status).send(responseObject);
 
 	} else {
-		if(Buffer.isBuffer(extraInfo))
-		{
+
+		if(Buffer.isBuffer(extraInfo)){
+
 			res.status(resCode.status);
 
 			var contentType = mimeTypes[req.params.format];
@@ -253,12 +276,19 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 			}
 
 			//res.setHeader("Content-Length", extraInfo.length);
+			length = extraInfo.length;
+			
 			res.write(extraInfo, "binary");
 			res.flush();
 			res.end();
 		} else {
+
+			length = typeof extraInfo === 'string' ? extraInfo.length : JSON.stringify(extraInfo).length;
 			res.status(resCode.status).send(extraInfo);
 		}
+
+		// log bandwidth and http status code
+		req[C.REQ_REPO].logger.logInfo('Responded with ' + resCode.status, { httpCode: resCode.status, contentLength: length });
 	}
 
 	//next();

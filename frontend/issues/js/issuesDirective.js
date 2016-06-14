@@ -140,13 +140,6 @@
 				issue.assignedRolesColors.push(roleColour);
 				pinColours.push(IssuesService.hexToRgb(roleColour));
 			}
-
-			/*
-			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, {
-				id: issue._id,
-				colours: pinColours
-			});
-			*/
 		}
 
 		/*
@@ -162,7 +155,8 @@
 		 */
 		$scope.$watch("vm.showAdd", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
-				setupAdd("scribble");
+				setupAdd();
+				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: "scribble"});
 			}
 		});
 
@@ -241,7 +235,11 @@
 			} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_ADD) {
 				if (event.value.on) {
 					vm.show = true;
-					setupAdd(event.value.type);
+					setupAdd();
+					// This is done to override the default mode ("scribble") set in the vm.showAdd watch above ToDo improve!
+					$timeout(function () {
+						EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, event.value.type);
+					}, 200);
 				}
 				else {
 					vm.hideItem = true;
@@ -264,6 +262,8 @@
 		 */
 		function setupIssuesToShow () {
 			var i = 0, j = 0, length = 0, roleAssigned;
+
+			vm.issuesToShow = [];
 
 			if (angular.isDefined(vm.issues)) {
 				if (vm.issues.length > 0) {
@@ -359,16 +359,16 @@
 							vm.issuesToShow.splice(i, 1);
 						}
 					}
-
-					// Setup what to show
-					if (vm.issuesToShow.length > 0) {
-						vm.toShow = "showIssues";
-					}
-					else {
-						vm.toShow = "showInfo";
-						vm.issuesInfo = "There are currently no open issues";
-					}
 				}
+			}
+
+			// Setup what to show
+			if (vm.issuesToShow.length > 0) {
+				vm.toShow = "showIssues";
+			}
+			else {
+				vm.toShow = "showInfo";
+				vm.issuesInfo = "There are currently no open issues";
 			}
 		}
 
@@ -388,7 +388,6 @@
 				pin, pinData,
 				roleAssigned;
 
-			console.log(vm.issues);
 			for (i = 0, length = vm.issues.length; i < length; i += 1) {
 				if (vm.issues[i].object_id !== null) {
 					pin = angular.element(document.getElementById(vm.issues[i]._id));
@@ -502,12 +501,12 @@
 						removeAddPin();
 						EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: false});
 					}
-					vm.toShow = "showIssues";
 					vm.showAdd = false; // So that showing add works
 					vm.canAdd = true;
 					vm.showEdit = false; // So that closing edit works
 
 					// Set the content height
+					setupIssuesToShow();
 					setContentHeight();
 
 					// Deselect any selected pin
@@ -668,6 +667,7 @@
 				setupIssuesToShow();
 				vm.showPins();
 				setContentHeight();
+				vm.canAdd = true;
 			});
 		};
 
@@ -739,12 +739,13 @@
 				maxStringLength = 32,
 				lineHeight = 18,
 				footerHeight,
-				addHeight = 230,
+				addHeight = 260,
 				commentHeight = 80,
 				headerHeight = 53,
 				openIssueFooterHeight = 180,
-				closedIssueFooterHeight = 53,
-				infoHeight = 80;
+				closedIssueFooterHeight = 60,
+				infoHeight = 80,
+				issuesMinHeight = 260;
 
 			switch (vm.toShow) {
 				case "showIssues":
@@ -756,6 +757,7 @@
 						}
 					}
 					height = issuesHeight;
+					height = (height < issuesMinHeight) ? issuesMinHeight : issuesHeight;
 					break;
 
 				case "showIssue":
@@ -801,9 +803,10 @@
 		/**
 		 * Set up adding an issue
 		 */
-		function setupAdd (issueAreaType) {
+		function setupAdd () {
 			vm.toShow = "showAdd";
 			vm.onShowItem();
+			vm.showAdd = true;
 			vm.canAdd = false;
 			setContentHeight();
 			setPinToAssignedRoleColours(vm.selectedIssue);
@@ -813,9 +816,6 @@
 			$timeout(function () {
 				($element[0].querySelector("#issueAddTitle")).select();
 			});
-
-			// Show the issue area
-			EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: issueAreaType});
 		}
 	}
 }());

@@ -131,5 +131,8 @@ module.exports = {
 
 	paypal:{
 		validateIPN: true
-	}
+	},
+
+	uploadSizeLimit: 209715200,
+	gaTrackId: ''
 }

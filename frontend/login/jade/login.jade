@@ -9,10 +9,12 @@
 			div(layout="row")
 				// Login
 				div(layout="column", flex)
-					md-input-container.md-block(md-no-float)
-						input(type='text', ng-model='vm.user.username', placeholder='Username', ng-required, autofocus, ng-keypress="vm.login($event)")
-					md-input-container(md-no-float)
-						input(type='password', ng-model='vm.user.password', placeholder='Password', ng-required, ng-keypress="vm.login($event)")
+					md-input-container.md-block
+						label Username
+						input(type='text', ng-model='vm.user.username', ng-required, autofocus, ng-keypress="vm.login($event)")
+					md-input-container.md-block
+						label Password
+						input(type='password', ng-model='vm.user.password', ng-required, ng-keypress="vm.login($event)")
 					div(layout="row", layout-align="start" flex="none")
 						md-button.md-accent.md-raised(ng-click="vm.login()") Log In
 					h4.loginError {{vm.errorMessage}}

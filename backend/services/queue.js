@@ -53,6 +53,11 @@ ImportQueue.prototype.connect = function(url, options) {
     return amqp.connect(url).then( conn => {
 
         this.conn = conn;
+        
+        conn.on('close', () => {
+            this.conn = null;
+        });
+
         return conn.createChannel();
 
     }).then(channel => {
@@ -79,15 +84,15 @@ ImportQueue.prototype.connect = function(url, options) {
  * @param {projectName} projectName - name of project to commit to
  * @param {userName} userName - name of user
  *******************************************************************************/
-ImportQueue.prototype.importFile = function(filePath, orgFileName, databaseName, projectName, userName){
+ImportQueue.prototype.importFile = function(filePath, orgFileName, databaseName, projectName, userName, copy){
     'use strict';
 
     let corID = uuid.v1();
 
-    console.log(filePath);
-    console.log(orgFileName);
+    //console.log(filePath);
+    //console.log(orgFileName);
 
-    return this._moveFileToSharedSpace(corID, filePath, orgFileName).then(newPath => {
+    return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy).then(newPath => {
     
         let msg = 'import ' + newPath + ' ' + databaseName + ' ' + projectName + ' ' + userName;
         return this._dispatchWork(corID, msg);
@@ -115,7 +120,7 @@ ImportQueue.prototype.importFile = function(filePath, orgFileName, databaseName,
  * @param {orgFilePath} orgFilePath - Path to where the file is currently
  * @param {newFileName} newFileName - New file name to rename to
  *******************************************************************************/
-ImportQueue.prototype._moveFileToSharedSpace = function(corID, orgFilePath, newFileName) {
+ImportQueue.prototype._moveFileToSharedSpace = function(corID, orgFilePath, newFileName, copy) {
     'use strict';
 
     let newFileDir = this.sharedSpacePath + "/" + corID + "/";
@@ -126,7 +131,10 @@ ImportQueue.prototype._moveFileToSharedSpace = function(corID, orgFilePath, newF
             if (err) {
                 reject(err);
             } else {
-                fs.move(orgFilePath, filePath, function (err) {
+
+                let move = copy ? fs.copy : fs.move;
+
+                move(orgFilePath, filePath, function (err) {
                     if (err) {
                         reject(err);
                     } else {

@@ -32,9 +32,9 @@
         };
     }
 
-    PasswordForgotCtrl.$inject = ["$scope", "PasswordForgotService"];
+    PasswordForgotCtrl.$inject = ["$scope", "UtilsService"];
 
-    function PasswordForgotCtrl ($scope, PasswordForgotService) {
+    function PasswordForgotCtrl ($scope, UtilsService) {
         var vm = this,
             promise,
             messageColour = "rgba(0, 0, 0, 0.7)",
@@ -60,7 +60,7 @@
                 vm.messageColor = messageColour;
                 vm.message = "Please wait...";
                 vm.showProgress = true;
-                promise = PasswordForgotService.forgot(vm.username, {email: vm.email});
+                promise = UtilsService.doPost({email: vm.email}, vm.username + "/forgot-password");
                 promise.then(function (response) {
                     vm.showProgress = false;
                     if (response.status === 200) {

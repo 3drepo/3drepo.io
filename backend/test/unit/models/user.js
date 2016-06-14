@@ -86,7 +86,7 @@ describe('User', function(){
 			let updateObj = {
 				firstName: 'fname',
 				lastName: 'lastname',
-				email: 'email@3drepo.org'
+				email: 'test3drepo@mailinator.com'
 			};
 
 			user.markModified = () => true;
@@ -141,11 +141,12 @@ describe('User', function(){
 			let password = '123';
 			let options = {
 				'rubbish': 'should not be inserted into database',
-				'firstName': '123'
+				'firstName': '123',
+				'email': 'test3drepo@mailinator.com'
 			};
 
 			let expectedCallWithOptions = {
-				customData: { firstName : options.firstName, inactive: true},
+				customData: { firstName : options.firstName, inactive: true, email: options.email},
 				roles: []
 			}
 
@@ -156,7 +157,42 @@ describe('User', function(){
 			});
 		});
 
-	})
+	});
+
+
+	describe('.hasRole', function(){
+		it('should have hasRole method', function(){
+			let user = new User();
+			expect(user.hasRole).to.exist;
+		});
+
+
+		it('hasRole should able to return the role found', function(){
+
+			let user = new User();
+
+			user.roles = [ 
+				{
+					"role" : "testproject.collaborator",
+					"db" : "testaccount"
+				}, 
+				{
+					"role" : "admin",
+					"db" : "testaccount"
+				}
+			];
+
+			let found = user.hasRole(user.roles[1].db, user.roles[1].role);
+			expect(found).to.deep.equal(user.roles[1]);
+
+			found = user.hasRole(user.roles[0].db, user.roles[0].role);
+			expect(found).to.deep.equal(user.roles[0]);
+
+
+			found = user.hasRole('a', 'b');
+			expect(found).to.be.null;
+		});
+	});
 
 	after(function(done){
 		mockgoose.reset(function() {

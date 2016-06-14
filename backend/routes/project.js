@@ -24,10 +24,11 @@ var middlewares = require('./middlewares');
 var ProjectSetting = require('../models/projectSetting');
 var responseCodes = require('../response_codes');
 var C               = require("../constants");
-var Role = require('../models/role');
-var User = require('../models/user');
 var importQueue = require('../services/queue');
 var multer = require("multer");
+var ProjectHelpers = require('../models/helper/project');
+var createAndAssignRole = ProjectHelpers.createAndAssignRole;
+var convertToErrorCode = ProjectHelpers.convertToErrorCode;
 
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
@@ -46,7 +47,15 @@ router.put('/:project/settings/map-tile', middlewares.hasWriteAccessToProject, u
 
 router.post('/:project', middlewares.canCreateProject, createProject);
 
-router.post('/:project/upload', middlewares.canCreateProject, uploadProject);
+router.delete('/:project', middlewares.canCreateProject, deleteProject);
+
+router.post('/:project/upload', middlewares.connectQueue, middlewares.canCreateProject, uploadProject);
+
+router.get('/:project/collaborators', middlewares.isAccountAdmin, listCollaborators);
+
+router.post('/:project/collaborators', middlewares.isAccountAdmin, addCollaborator);
+
+router.delete('/:project/collaborators', middlewares.isAccountAdmin, removeCollaborator);
 
 
 function estimateImportedSize(format, size){
@@ -168,57 +177,6 @@ function getProjectSetting(req, res, next){
 	});
 }
 
-function _createAndAssignRole(project, account, username, desc, type) {
-	'use strict';
-
-
-	return Role.findByRoleID(`${account}.${project}.viewer`).then(role =>{
-
-		if(role){
-			return Promise.resolve();
-		} else {
-			return Role.createViewerRole(account, project);
-		}
-
-	}).then(() => {
-
-		return Role.findByRoleID(`${account}.${project}.collaborator`);
-
-	}).then(role => {
-
-		if(role){
-			return Promise.resolve();
-		} else {
-			return Role.createCollaboratorRole(account, project);
-		}
-
-	}).then(() => {
-
-		return User.grantRoleToUser(username, account, `${project}.collaborator`);
-
-	}).then(() => {
-
-		return ProjectSetting.findById({account, project}, project).then(setting => {
-
-			if(setting){
-				return Promise.reject({resCode: responseCodes.PROJECT_EXIST});
-			}
-
-			setting = ProjectSetting.createInstance({
-				account: account, 
-				project: project
-			});
-			
-			setting._id = project;
-			setting.owner = username;
-			setting.desc = desc;
-			setting.type = type;
-			
-			return setting.save();
-		});
-
-	});
-}
 
 function createProject(req, res, next){
 	'use strict';
@@ -228,50 +186,28 @@ function createProject(req, res, next){
 	let account = req.params.account;
 	let username = req.session.user.username;
 
-	_createAndAssignRole(project, account, username, req.body.desc, req.body.type).then(() => {
+	createAndAssignRole(project, account, username, req.body.desc, req.body.type).then(() => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
 
-/*******************************************************************************
- * Converts error code from repobouncerclient to a response error object
- * @param {errCode} - error code referenced in error_codes.h
- *******************************************************************************/
-function convertToErrorCode(errCode){
+function deleteProject(req, res, next){
+	'use strict';
 
-    var errObj;
+	let responsePlace = utils.APIInfo(req);
+	let project = req.params.project;
+	let account = req.params.account;
 
-    switch (errCode) {
-        case 0:
-            errObj = responseCodes.OK;
-            break;
-        case 1:
-            errObj = responseCodes.FILE_IMPORT_INVALID_ARGS;
-            break;
-        case 2:
-            errObj = responseCodes.NOT_AUTHORIZED;
-            break;
-        case 3:
-            errObj = responseCodes.FILE_IMPORT_UNKNOWN_CMD;
-            break;
-        case 5:
-            errObj = responseCodes.FILE_IMPORT_PROCESS_ERR;
-			break;
-        case 6:
-            errObj = responseCodes.FILE_IMPORT_STASH_GEN_FAILED;
-			break;
-        case 7:
-            errObj = responseCodes.FILE_IMPORT_MISSING_TEXTURES;
-            break;
-        default:
-            errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
-            break;
-
-    }
-    return errObj;
+	//delete
+	ProjectSetting.removeProject(account, project).then(() => {
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
+	}).catch( err => {
+		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);
+	});
 }
+
 
 function uploadProject(req, res, next){
 	'use strict';
@@ -281,24 +217,28 @@ function uploadProject(req, res, next){
 	//check space
 	function fileFilter(req, file, cb){
 
-		console.log(file);
-
 		let acceptedFormat = ['x','obj','3ds','md3','md2','ply','mdl','ase','hmp','smd','mdc','md5','stl','lxo','nff','raw','off','ac','bvh','irrmesh','irr','q3d','q3s','b3d','dae','ter','csm','3d','lws','xml','ogex','ms3d','cob','scn','blend','pk3','ndo','ifc','xgl','zgl','fbx','assbin'];
 
-		let format = file.originalname.split('.').splice(-1)[0];
+		let format = file.originalname.split('.');
+		format = format.length <= 1 ? '' : format.splice(-1)[0];
+
 		let size = estimateImportedSize(format, parseInt(req.headers['content-length']));
 
 		if(acceptedFormat.indexOf(format) === -1){
 			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
 		}
 
+		if(size > config.uploadSizeLimit){
+			return cb({ resCode: responseCodes.SIZE_LIMIT });
+		}
+
 		middlewares.freeSpace(req.params.account).then(space => {
 
-			console.log('est upload file size', size);
-			console.log('space left', space);
+			// console.log('est upload file size', size);
+			// console.log('space left', space);
 
 			if(size > space){
-				cb({ resCode: responseCodes.SIZE_LIMIT });
+				cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
 			} else {
 				cb(null, true);
 			}
@@ -310,31 +250,31 @@ function uploadProject(req, res, next){
 
 		var upload = multer({ 
 			dest: config.cn_queue.upload_dir,
-			fileFilter: fileFilter
+			fileFilter: fileFilter,
 		});
 
 		upload.single("file")(req, res, function (err) {
 			if (err) {
-				return responseCodes.respond(responsePlace, req, res, next, err.resCode || responseCodes.FILE_IMPORT_PROCESS_ERR, {});
+				return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
+			
+			} else if(!req.file.size){
+				return responseCodes.respond(responsePlace, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
+			
 			} else {
 
 				let projectSetting;
 
 				let project = req.params.project;
 				let account = req.params.account;
-				let username = req.session.user.username;
+				//let username = req.session.user.username;
 
-				_createAndAssignRole(project, account, username, req.body.desc, req.body.type).then(setting => {
-					//console.log('setting', setting);
-					return Promise.resolve(setting);
-				}).catch(err => {
+				ProjectSetting.findById({account, project}, project).then(setting => {
 
-					if (err && err.resCode && err.resCode.value === responseCodes.PROJECT_EXIST.value){
-						return _getProject(req);
-					} else {
-						return Promise.reject(err);
+					if(!setting){
+						req[C.REQ_REPO].logger.logError('Upload to non-exisitng project and create is now deprecated, please call create project API first then upload');
+						return responseCodes.respond(responsePlace, req, res, next, responseCodes.PROJECT_NOT_FOUND, responseCodes.PROJECT_NOT_FOUND);
+
 					}
-				}).then(setting => {
 
 					projectSetting = setting;
 					projectSetting.status = 'processing';
@@ -354,14 +294,17 @@ function uploadProject(req, res, next){
 						req.session.user.username
 					)
 					.then(corID => Promise.resolve(corID))
-					.catch(errCode => {
+					.catch(err => {
+
 						//catch here to provide custom error message
-						if(projectSetting){
-							projectSetting.errorReason = convertToErrorCode(errCode);
+						if(err.errCode && projectSetting){
+							projectSetting.errorReason = convertToErrorCode(err.errCode);
 							projectSetting.markModified('errorReason');
+							return Promise.reject(convertToErrorCode(err.errCode));
 						}
 
-						return Promise.reject(convertToErrorCode(errCode));
+						return Promise.reject(err);
+						
 					});
 
 				}).then(corID => {
@@ -377,14 +320,14 @@ function uploadProject(req, res, next){
 
 				}).catch(err => {
 					// import failed for some reason(s)...
-					console.log(err.stack);
+					// console.log(err.stack);
 					//mark project failed
 					if(projectSetting){
 						projectSetting.status = 'failed';
 						projectSetting.save();
 					}
 
-					req[C.REQ_REPO].logger.logDebug(JSON.stringify(err));
+					req[C.REQ_REPO].logger.logError(JSON.stringify(err));
 
 		
 
@@ -402,6 +345,65 @@ function uploadProject(req, res, next){
 			{}
 		);
 	}
+
+}
+
+function listCollaborators(req, res ,next){
+	'use strict';
+
+	let project = req.params.project;
+	let account = req.params.account;
+
+	ProjectSetting.findById({account, project}, project).then(setting => {
+
+		if(!setting){
+			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+		}
+
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, setting.collaborators);
+		
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+function addCollaborator(req, res ,next){
+	'use strict';
+
+	let username = req.body.user;
+	let project = req.params.project;
+	let account = req.params.account;
+	let role = req.body.role;
+
+	if(['viewer', 'collaborator'].indexOf(role) === -1){
+
+		let err = responseCodes.INVALID_ROLE;
+		return responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+
+	}
+
+	ProjectHelpers.addCollaborator(username, account, project, role).then(resRole => {
+		return responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, resRole);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+function removeCollaborator(req, res ,next){
+	'use strict';
+
+	let project = req.params.project;
+	let account = req.params.account;
+	let username = req.body.user;
+	let role = req.body.role;
+
+	ProjectHelpers.removeCollaborator(username, account, project, role).then(resRole => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, resRole);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+
+
 }
 
 module.exports = router;

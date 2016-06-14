@@ -77,7 +77,7 @@
 							resolve: {
 								init: function(StateManager, $stateParams)
 								{
-									//console.log('init', childState.plugin, $stateParams);
+
 									if(!$stateParams.hasOwnProperty(childState.plugin)){
 										$stateParams[childState.plugin] = true;
 									}
@@ -97,9 +97,11 @@
 
 		$urlRouterProvider.otherwise("");
 	}])
-	.run(["$rootScope", "$state", "uiState", "StateManager", function($rootScope, $state, uiState, StateManager) {
+	.run(["$location", "$rootScope", "$state", "uiState", "StateManager", function($location, $rootScope, $state, uiState, StateManager) {
 		$rootScope.$on("$stateChangeStart",function(event, toState, toParams, fromState, fromParams){
 			StateManager.state.changing = true;
+
+
 
 			var stateChangeObject = {
 				toState    : toState,
@@ -118,6 +120,12 @@
 				fromState  : fromState,
 				fromParams : fromParams
 			};
+
+			//console.log('path', $location.path());
+
+			if(typeof ga !== 'undefined' && ga !== null){
+				ga('send', 'pageview', $location.path());
+			}
 
 			StateManager.handleStateChange(stateChangeObject);
 		});

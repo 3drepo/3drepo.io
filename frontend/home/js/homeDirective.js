@@ -76,15 +76,20 @@
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "Auth", "StateManager", "EventService", "UtilsService"];
+    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$location", "Auth", "StateManager", "EventService", "UtilsService", "AccountService"];
 
-    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, Auth, StateManager, EventService, UtilsService) {
+    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $location, Auth, StateManager, EventService, UtilsService, AccountService) {
         var vm = this,
 			goToUserPage,
+			goToAccount,
 			homeLoggedOut,
+			homeLoggedIn,
 			notLoggedInElement,
+			loggedInElement,
 			element,
-			state;
+			state,
+			useState,
+			promise;
 
 		/*
 		 * Init
@@ -95,6 +100,7 @@
 			{title: "Privacy", value: "privacy"},
 			{title: "Cookies", value: "cookies"}
 		];
+		vm.goToAccount = false;
 
 		/*
 		 * Watch the state to handle moving to and from the login page
@@ -133,23 +139,55 @@
 							notLoggedInElement = angular.element("<login></login>");
 							homeLoggedOut.append(notLoggedInElement);
 							$compile(notLoggedInElement)($scope);
+							
+							// Set the URL to root if it is not root
+							$location.path("/", "_self");
 						}
 					});
 				}
 				else {
-					// If none of the states is truthy the user is going back to the login page
-					goToUserPage = true;
-					for (state in vm.state) {
-						if (vm.state.hasOwnProperty(state)) {
-							if ((state !== "loggedIn") && (typeof vm.state[state] === "string")) {
-								goToUserPage = false;
-								break;
+					$timeout(function () {
+						homeLoggedIn = angular.element($element[0].querySelector('#homeLoggedIn'));
+						homeLoggedIn.empty();
+						goToAccount = false;
+						goToUserPage = false;
+						for (state in vm.state) {
+							if (vm.state.hasOwnProperty(state) && (state !== "loggedIn")) {
+								if (vm.state[state] === true) {
+									goToUserPage = true;
+									useState = state;
+								}
+								else if (typeof vm.state[state] === "string") {
+									goToAccount = true;
+								}
 							}
 						}
-					}
-					if (goToUserPage) {
-						vm.logout(); // Going back to the login page should logout the user
-					}
+						if ((goToUserPage) || (goToAccount)) {
+							if (goToUserPage) {
+								element = "<" + UtilsService.snake_case(useState, "-") + "></" + UtilsService.snake_case(useState, "-") + ">";
+								loggedInElement = angular.element(element);
+								homeLoggedIn.append(loggedInElement);
+								$compile(loggedInElement)($scope);
+							}
+							else {
+								promise = AccountService.getUserInfo(StateManager.state.account);
+								promise.then(function (response) {
+									// Response with data.type indicates it's not the user's account
+									if (!response.data.hasOwnProperty("type")) {
+										vm.goToAccount = true;
+									}
+									else {
+										// Logout if trying to view another account
+										Auth.logout();
+									}
+								});
+							}
+						}
+						else {
+							// Prevent user going back to the login page after logging in
+							$location.path("/" + localStorage.getItem("tdrLoggedIn"), "_self");
+						}
+					});
 				}
 			}
 		}, true);
@@ -172,13 +210,14 @@
         };
 
 		/**
-		 * 
+		 * Display legal text
 		 * 
 		 * @param event
 		 * @param display
 		 */
-		vm.display = function (event, display) {
+		vm.legalDisplay = function (event, display) {
 			vm.legalTitle = display.title;
+			vm.legalText = display.value;
 			$mdDialog.show({
 				templateUrl: "legalDialog.html",
 				parent: angular.element(document.body),

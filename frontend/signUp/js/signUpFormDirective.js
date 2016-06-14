@@ -34,9 +34,9 @@
 		};
 	}
 
-	SignUpFormCtrl.$inject = ["$scope", "$mdDialog", "$location", "serverConfig", "SignUpFormService"];
+	SignUpFormCtrl.$inject = ["$scope", "$mdDialog", "$location", "serverConfig", "UtilsService"];
 
-	function SignUpFormCtrl($scope, $mdDialog, $location, serverConfig, SignUpFormService) {
+	function SignUpFormCtrl($scope, $mdDialog, $location, serverConfig, UtilsService) {
 		var vm = this,
 			enterKey = 13,
 			promise,
@@ -93,9 +93,10 @@
 		};
 
 		vm.showTC = function () {
+			vm.legalTitle = "Terms and Conditions";
+			vm.legalText = "termsAndConditions";
 			$mdDialog.show({
-				controller: tcDialogController,
-				templateUrl: "tcDialog.html",
+				templateUrl: "legalDialog.html",
 				parent: angular.element(document.body),
 				targetEvent: event,
 				clickOutsideToClose:true,
@@ -125,12 +126,6 @@
 		}
 
 		/**
-		 * Dialog controller
-		 */
-		function tcDialogController() {
-		}
-
-		/**
 		 * Do the user registration
 		 */
 		function doRegister() {
@@ -149,7 +144,7 @@
 						data.captcha = vm.reCaptchaResponse;
 					}
 					vm.registering = true;
-					promise = SignUpFormService.register(vm.newUser.username, data);
+					promise = UtilsService.doPost(data, vm.newUser.username);
 					promise.then(function (response) {
 						if (response.status === 200) {
 							vm.showPage("registerRequest");
@@ -164,6 +159,7 @@
 							vm.registerErrorMessage = "Error with registration";
 						}
 						vm.registering = false;
+						grecaptcha.reset(); // reset reCaptcha
 					});
 				}
 				else {

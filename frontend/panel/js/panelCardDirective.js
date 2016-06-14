@@ -49,10 +49,14 @@
 			contentHeight,
 			options = angular.element($element[0].querySelector('#options'));
 
+		/*
+		 * Init
+		 */
         vm.showHelp = false;
 		vm.showFilter = false;
 		vm.visibleStatus = false;
 		vm.showClearFilterButton = false;
+		vm.showAdd = false;
 
 		/*
 		 * Watch type on contentData to create content and tool bar options

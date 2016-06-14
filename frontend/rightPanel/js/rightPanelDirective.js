@@ -63,8 +63,8 @@
          * Setup event watch
          */
         $scope.$watch(EventService.currentEvent, function(event) {
-            if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) {
-                addIssueMode = event.value.on ? event.value.type : null;
+            if ((event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) && (!event.value.on)) {
+                addIssueMode = null;
             }
         });
 

@@ -35,9 +35,9 @@
         };
     }
 
-    PasswordChangeCtrl.$inject = ["$scope", "$window", "PasswordChangeService"];
+    PasswordChangeCtrl.$inject = ["$scope", "$window", "UtilsService"];
 
-    function PasswordChangeCtrl ($scope, $window, PasswordChangeService) {
+    function PasswordChangeCtrl ($scope, $window, UtilsService) {
         var vm = this,
             enterKey = 13,
             promise,
@@ -87,12 +87,12 @@
                     vm.messageColor = messageColour;
                     vm.message = "Please wait...";
                     vm.showProgress = true;
-                    promise = PasswordChangeService.passwordChange(
-                        vm.username,
+                    promise = UtilsService.doPut(
                         {
                             token: vm.token,
                             newPassword: vm.newPassword
-                        }
+                        },
+                        vm.username + "/password"
                     );
                     promise.then(function (response) {
                         vm.showProgress = false;

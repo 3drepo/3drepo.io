@@ -21,6 +21,7 @@ var C               = require("../constants");
 var Bid = require('../models/bid');
 // var History = require('../models/history');
 var User = require('../models/user');
+var config = require('../config');
 
 var READ_BIT	= 4;
 var WRITE_BIT	= 2;
@@ -223,11 +224,61 @@ function freeSpace(account){
 		let totalSize = 0;
 
 		stats.forEach(stat => {
-			console.log(stat.storageSize);
-			totalSize += stat.storageSize; 
+			totalSize += stat.size; 
 		});
 
+		// console.log(limits.spaceLimit);
+		// console.log(totalSize);
+
 		return Promise.resolve(limits.spaceLimit - totalSize);
+	});
+
+}
+
+function connectQueue(req, res, next){
+	'use strict';
+
+	// init ampq and import queue object
+	let importQueue = require('../services/queue');
+	if(config.cn_queue){
+
+		importQueue.connect(config.cn_queue.host, {
+
+			sharedSpacePath: config.cn_queue.shared_storage,
+			logger: req[C.REQ_REPO].logger,
+			callbackQName: config.cn_queue.callback_queue,
+			workerQName: config.cn_queue.worker_queue 
+
+		}).then(() => {
+			next();
+		}).catch(err => {
+			responseCodes.respond("Express Middleware - AMPQ", req, res, next, err);
+		});
+
+	} else {
+		next();
+	}
+		
+}
+
+function isAccountAdmin(req, res, next){
+	'use strict';
+
+	let username = req.session.user.username;
+	let account = req.params.account;
+
+	User.findByUserName(username).then(user => {
+
+		if(!user){
+			return Promise.reject();
+		} else if(!user.hasRole(account, 'admin')){
+			return Promise.reject();
+		} else {
+			next();
+		}
+
+	}).catch(() => {
+		responseCodes.respond("Middleware: isAccountAdmin", req, res, next, responseCodes.AUTH_ERROR, null, req.params);
 	});
 
 }
@@ -242,7 +293,9 @@ var middlewares = {
 	hasWriteAccessToAccount: [loggedIn, hasWriteAccessToAccount],
 	isMainContractor: [loggedIn, isMainContractor],
 	isSubContractorInvited: [loggedIn, isSubContractorInvited],
+	isAccountAdmin: [loggedIn, isAccountAdmin],
 	canCreateDatabase,
+	connectQueue,
 
 	// Helpers
 	freeSpace,

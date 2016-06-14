@@ -23,26 +23,27 @@
 	var C = require("../constants");
 	var middlewares = require("./middlewares");
 	var config = require('../config');
-	var systemLogger    = require("../logger.js").systemLogger;
+	//var systemLogger    = require("../logger.js").systemLogger;
 	var utils = require("../utils");
 	var User = require("../models/user");
 	var Mailer = require("../mailer/mailer");
 	var httpsPost = require("../libs/httpsReq").post;
 	//var Role = require('../models/role');
 	var crypto = require('crypto');
+	var ProjectHelper = require('../models/helper/project');
 
 	router.post("/login", login);
 	router.get("/login", checkLogin);
 	router.post("/logout", logout);
 	router.post('/contact', contact);
-	router.get("/:account.json", middlewares.hasReadAccessToAccount, listInfo);
+	router.get("/:account.json", middlewares.loggedIn, listInfo);
 	router.get("/:account.jpg", middlewares.hasReadAccessToAccount, getAvatar);
 	router.get("/:account/subscriptions", middlewares.hasReadAccessToAccount, listSubscriptions);
 	router.get("/:account/subscriptions/:token", middlewares.hasReadAccessToAccount, findSubscriptionByToken);
 	router.post('/:account', signUp);
 	router.post('/:account/database', middlewares.canCreateDatabase, createDatabase);
 	router.post('/:account/subscriptions', middlewares.canCreateDatabase, createSubscription);
-	router.post('/:account/verify', verify);
+	router.post('/:account/verify', middlewares.connectQueue, verify);
 	router.post('/:account/forgot-password', forgotPassword);
 	router.put("/:account", middlewares.hasWriteAccessToAccount, updateUser);
 	router.put("/:account/password", middlewares.hasWriteAccessToAccount, resetPassword);
@@ -59,7 +60,7 @@
 			if(err) {
 				responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {username: user.username});
 			} else {
-				systemLogger.logDebug("Authenticated user and signed token.", req);
+				req[C.REQ_REPO].logger.logDebug("Authenticated user and signed token.");
 
 				req.session[C.REPO_SESSION_USER] = user;
 				req.session.cookie.domain        = config.cookie_domain;
@@ -77,12 +78,15 @@
 	function login(req, res, next){
 		let responsePlace = utils.APIInfo(req);
 
-		req[C.REQ_REPO].logger.logInfo("Authenticating user", req.body.username);
+		req[C.REQ_REPO].logger.logInfo("Authenticating user", { username: req.body.username});
 
+		if(req.session.user){
+			return responseCodes.respond(responsePlace, req, res, next, responseCodes.ALREADY_LOGGED_IN, responseCodes.ALREADY_LOGGED_IN);
+		}
 
 		User.authenticate(req[C.REQ_REPO].logger, req.body.username, req.body.password).then(user => {
 
-			req[C.REQ_REPO].logger.logInfo("User is logged in", req.body.username);
+			req[C.REQ_REPO].logger.logInfo("User is logged in", { username: req.body.username});
 
 			expireSession(req);
 			createSession(responsePlace, req, res, next, {username: user.user, roles: user.roles});
@@ -108,9 +112,8 @@
 		var username = req.session.user.username;
 
 		req.session.destroy(function() {
-			req[C.REQ_REPO].logger.logDebug("User has logged out.", req);
-			res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });
-
+			req[C.REQ_REPO].logger.logDebug("User has logged out.");
+			res.clearCookie("connect.sid", { path: "/" + config.api_server.host_dir });
 			responseCodes.respond("Logout POST", req, res, next, responseCodes.OK, {username: username});
 		});
 	}
@@ -173,7 +176,7 @@
 					lastName: req.body.lastName
 				}, config.tokenExpiry.emailVerify);
 			} else {
-				console.log(resBody);
+				//console.log(resBody);
 				return Promise.reject({ resCode: responseCodes.INVALID_CAPTCHA_RES});
 			}
 
@@ -188,13 +191,13 @@
 				
 			}).catch( err => {
 				// catch email error instead of returning to client
-				systemLogger.logDebug(`Email error - ${err.message}`, req);
-				return Promise.reject(responseCodes.PROCESS_ERROR('Internal Email Error'));
+				req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
+				return Promise.resolve(err);
 			});
 
 		}).then(emailRes => {
 
-			systemLogger.logInfo('Email info - ' + JSON.stringify(emailRes), req);
+			req[C.REQ_REPO].logger.logInfo('Email info - ' + JSON.stringify(emailRes));
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
@@ -205,8 +208,24 @@
 		
 		let responsePlace = utils.APIInfo(req);
 
-		User.verify(req.params[C.REPO_REST_API_ACCOUNT], req.body.token).then(() => {
+		User.verify(req.params[C.REPO_REST_API_ACCOUNT], req.body.token).then(user => {
+
+			//import toy project
+			ProjectHelper.importToyProject(req.params[C.REPO_REST_API_ACCOUNT]).catch(err => {
+				req[C.REQ_REPO].logger.logError(JSON.stringify(err));
+			});
+
+			//soft launch give users some quota
+			return user.createSubscriptionToken('SOFT-LAUNCH-FREE-TRIAL', user.user);
+
+		}).then(sub => {
+
+			return User.activateSubscription(sub.token, {}, {}, true);
+
+		}).then(() => {
+
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
+
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || err , err.resCode ? err.resCode : err);
 		});
@@ -225,16 +244,15 @@
 				username: req.params[C.REPO_REST_API_ACCOUNT]
 			}).catch( err => {
 				// catch email error instead of returning to client
-				systemLogger.logDebug(`Email error - ${err.message}`, req);
+				req[C.REQ_REPO].logger.logDebug(`Email error - ${err.message}`);
 				return Promise.reject(responseCodes.PROCESS_ERROR('Internal Email Error'));
 			});
 		
 		}).then(emailRes => {
 			
-			systemLogger.logInfo('Email info - ' + JSON.stringify(emailRes), req);
+			req[C.REQ_REPO].logger.logInfo('Email info - ' + JSON.stringify(emailRes));
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
 		}).catch(err => {
-			console.log(err);
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || err , err.resCode ? err.resCode : err);
 		});
 	}
@@ -278,7 +296,7 @@
 		let responsePlace = utils.APIInfo(req);
 		//let user;
 
-		User.findByUserName(req.session.user.username).then(user => {
+		User.findByUserName(req.params.account).then(user => {
 
 			if(!user){
 				return Promise.reject({resCode: responseCodes.USER_NOT_FOUND});
@@ -297,7 +315,7 @@
 		let responsePlace = utils.APIInfo(req);
 		let user;
 
-		User.findByUserName(req.session.user.username).then(_user => {
+		User.findByUserName(req.params.account).then(_user => {
 
 			if(!_user){
 				return Promise.reject({resCode: responseCodes.USER_NOT_FOUND});
@@ -321,7 +339,33 @@
 	}
 
 	function listInfo(req, res, next){
-		if(req.query.hasOwnProperty('bids')){
+
+		let responsePlace = utils.APIInfo(req);
+
+		if(req.session.user.username !== req.params.account){
+
+			let getType;
+
+			if(C.REPO_BLACKLIST_USERNAME.indexOf(req.params.account) !== -1){
+				getType = Promise.resolve('blacklisted');
+			} else {
+				getType = User.findByUserName(req.params.account).then(_user => {
+					if(!_user){
+						return '';
+					} else if(!_user.customData.email){
+						return 'database';
+					} else {
+						return 'user';
+					}
+				});
+			}
+
+
+			getType.then(type => {
+				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {type});
+			});
+
+		} else if(req.query.hasOwnProperty('bids')){
 			listUserBid(req, res, next);
 		} else {
 			listUserInfo(req, res, next);
@@ -339,7 +383,7 @@
 			Promise.resolve() : Promise.reject({ resCode: responseCodes.INVALID_SUBSCRIPTION_PLAN });
 
 		return checkPlan.then(() => {
-			return User.createUser(req[C.REQ_REPO].logger, req.body.database, password, {}, 0);
+			return User.createUser(req[C.REQ_REPO].logger, req.body.database, password, null, 0);
 
 		}).then(() => {
 

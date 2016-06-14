@@ -19,7 +19,8 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("login", login);
+		.directive("login", login)
+		.directive("mdInputContainer", mdInputContainer);
 
 	function login() {
 		return {
@@ -205,5 +206,25 @@
 				vm.registerErrorMessage = "Please fill all fields";
 			}
 		}
+	}
+
+	/**
+	 * Re-make md-input-container to get around the problem discussed here https://github.com/angular/material/issues/1376
+	 * Taken from mikila85's version of blaise-io's workaround
+	 * 
+	 * @param $timeout
+	 * @returns {Function}
+	 */
+	function mdInputContainer ($timeout) {
+		return function ($scope, element) {
+			var ua = navigator.userAgent;
+			if (ua.match(/chrome/i) && !ua.match(/edge/i)) {
+				$timeout(function () {
+					if (element[0].querySelector("input[type=password]:-webkit-autofill")) {
+						element.addClass("md-input-has-value");
+					}
+				}, 100);
+			}
+		};
 	}
 }());

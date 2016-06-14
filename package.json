@@ -9,7 +9,10 @@
     "postinstall": "node ./postinstall.js",
     "upgrade": "git checkout master && git pull && npm restart",
     "test": "grunt test",
-    "dev": "nodemon 3drepo.js"
+    "test-int-clean-up": "chmod 755 ./backend/test/cleanup/prompt.sh && ./backend/test/cleanup/prompt.sh && mongo localhost/admin ./backend/test/cleanup/db.js && NODE_ENV=test node ./backend/test/cleanup/queue.js && mongorestore ./backend/test/integrated/dump",
+    "test-int": "NODE_ENV=test npm run create-ghost && grunt test-integrated",
+    "dev": "nodemon 3drepo.js",
+    "create-ghost": "node scripts/createGhost"
   },
   "dependencies": {
     "amqplib": "0.4.1",

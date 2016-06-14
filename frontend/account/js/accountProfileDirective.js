@@ -43,6 +43,12 @@
 		var vm = this,
 			promise;
 
+		/*
+		 * Init
+		 */
+		vm.showInfo = true;
+		vm.showChangePassword = false;
+
 		/**
 		 * Update the user info
 		 */
@@ -79,5 +85,19 @@
 				}
 			});
 		};
+
+		/**
+		 * Toggle showing of user info
+		 */
+		vm.toggleInfo = function () {
+			vm.showInfo = !vm.showInfo;
+		};
+
+		/**
+		 * Toggle showing of password change
+		 */
+		vm.toggleChangePassword = function () {
+			vm.showChangePassword = !vm.showChangePassword;
+		}
 	}
 }());

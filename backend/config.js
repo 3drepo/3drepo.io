@@ -66,9 +66,11 @@
 
 		if (serverObject.use_location)
 		{
-			serverObject.location_url = Function("path","return \"//\" + window.location.host + \"" + serverObject.host_dir + "/\" + path;");
+			/*jslint evil: true */
+			serverObject.location_url = new Function("path","return \"//\" + window.location.host + \"" + serverObject.host_dir + "/\" + path;");
 		} else {
-			serverObject.location_url = Function("path","return '" + serverObject.url + "/' + path;");
+			/*jslint evil: true */
+			serverObject.location_url = new Function("path","return '" + serverObject.url + "/' + path;");
 		}
 
 		serverObject.location_url = serverObject.location_url.toString();
@@ -197,6 +199,8 @@
 	config.paypal = coalesce(config.paypal, {});
 	config.paypal.validateIPN = coalesce(config.paypal.validateIPN, true);
 
+	//upload size limit
+	config.uploadSizeLimit = coalesce(config.uploadSizeLimit, 209715200);
 	config.version = VERSION;
 
 	module.exports = config;

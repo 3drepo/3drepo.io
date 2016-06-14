@@ -105,7 +105,7 @@ schema.statics.authenticate = function(logger, username, password){
 	let authDB = DB(logger).getAuthDB();
 
 	if(!username || !password){
-		return Promise.reject();
+		return Promise.reject({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
 	}
 
 	return authDB.authenticate(username, password).then(() => {
@@ -128,6 +128,7 @@ schema.statics.authenticate = function(logger, username, password){
 schema.statics.findByUserName = function(user){
 	return this.findOne({account: 'admin'}, { user });
 };
+
 
 schema.statics.findBillingUserByToken = function(token){
 	return this.findSubscriptionByToken(null, token).then(subscription => {
@@ -196,8 +197,13 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	let adminDB = ModelFactory.db.admin();
 	
 	let cleanedCustomData = {};
+	
+	if(customData && (!customData.email || !customData.email.match(/^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/))){
+		return Promise.reject({ resCode: responseCodes.SIGN_UP_INVALID_EMAIL });
+	}
+
 	['firstName', 'lastName', 'email'].forEach(key => {
-		if (customData[key]){
+		if (customData && customData[key]){
 			cleanedCustomData[key] = customData[key];
 		}
 	});
@@ -206,10 +212,14 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
 
 	cleanedCustomData.inactive = true;
-	cleanedCustomData.emailVerifyToken = {
-		token: crypto.randomBytes(64).toString('hex'),
-		expiredAt: expiryAt
-	};
+
+	if(customData){
+		cleanedCustomData.emailVerifyToken = {
+			token: crypto.randomBytes(64).toString('hex'),
+			expiredAt: expiryAt
+		};
+	}
+
 
 	return adminDB.addUser(username, password, {customData: cleanedCustomData, roles: []}).then( () => {
 		return Promise.resolve(cleanedCustomData.emailVerifyToken);
@@ -223,9 +233,14 @@ schema.statics.verify = function(username, token, allowRepeatedVerify){
 
 	return this.findByUserName(username).then(user => {
 		
-		var tokenData = user.customData.emailVerifyToken;
+		var tokenData = user && user.customData && user.customData.emailVerifyToken;
 
-		if(!user.customData.inactive && !allowRepeatedVerify){
+		if(!user){
+
+			return Promise.reject({ resCode: responseCodes.TOKEN_INVALID});
+
+		} else if(!user.customData.inactive && !allowRepeatedVerify){
+
 			return Promise.reject({ resCode: responseCodes.ALREADY_VERIFIED});
 
 		} else if(tokenData.token === token && tokenData.expiredAt > new Date()){
@@ -339,6 +354,17 @@ schema.statics.grantRoleToUser = function(username, db, role){
 		return Promise.resolve();
 
 	});
+};
+
+schema.statics.revokeRolesFromUser = function(username, db, role){
+	'use strict';
+
+	let cmd = {
+		revokeRolesFromUser: username,
+		roles: [{ role, db }]
+	};
+
+	return ModelFactory.db.admin().command(cmd);
 };
 
 // list project readable by this user
@@ -528,6 +554,19 @@ var subscriptions = {
 		freeTrial: 1, //month
 		currency: 'GBP',
 		amount: 100
+	},
+
+	'SOFT-LAUNCH-FREE-TRIAL': {
+		plan: 'SOFT-LAUNCH-FREE-TRIAL',
+		limits: {
+			spaceLimit: 10737418240, //bytes
+			collaboratorLimit: 2,
+		},
+		db: this.user,
+		billingCycle: 3, //month
+		freeTrial: 0, //month
+		currency: 'GBP',
+		amount: 0
 	}
 };
 
@@ -544,7 +583,7 @@ schema.statics.getSubscription = function(plan) {
 schema.methods.createSubscriptionToken = function(plan, billingUser){
 	'use strict';
 
-	if(plan === 'THE-100-QUID-PLAN'){
+	if(plan === 'THE-100-QUID-PLAN' || plan === 'SOFT-LAUNCH-FREE-TRIAL'){
 
 		let token = crypto.randomBytes(64).toString('hex');
 
@@ -746,6 +785,23 @@ schema.statics.findSubscriptionByToken = function(billingUser, token){
 
 		return Promise.resolve(subscription);
 	});
+};
+
+schema.methods.hasRole = function(db, roleName){
+	'use strict';
+
+	let roleLen = this.roles.length;
+
+	for(let i=0; i < roleLen; i++){
+
+		let role = this.roles[i];
+
+		if(role.role === roleName && role.db === db){
+			return role;
+		}
+	}
+
+	return null;
 };
 
 var User = ModelFactory.createClass(

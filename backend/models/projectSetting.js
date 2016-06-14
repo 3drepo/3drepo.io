@@ -18,6 +18,8 @@
 
 var mongoose = require('mongoose');
 var ModelFactory = require('./factory/modelFactory');
+var Role = require('./role');
+var responseCodes = require('../response_codes.js');
 
 var schema = mongoose.Schema({
 	_id : String,
@@ -38,7 +40,13 @@ var schema = mongoose.Schema({
 		budget: Number,
 		completedBy: Date,
 		contact: String
-	})
+	}),
+
+	//redundant field to speed up listing collaborators
+	collaborators: [{
+		user: String,
+		role: {type: String}
+	}]
 });
 
 schema.statics.mapTilesProp = ['lat', 'lon', 'width', 'height'];
@@ -62,6 +70,102 @@ schema.methods.updateMapTileCoors = function(updateObj){
 	// this is needed since properties didn't have a strict schema, need to tell mongoose this is changed
 	this.markModified('properties');
 	return this.save();
+
+};
+
+schema.methods.findCollaborator = function(user, role){
+	'use strict';
+
+	let len = this.collaborators.length;
+
+
+	for(let i=0; i<len ; i++){
+
+		let collaborator = this.collaborators[i];
+		if(collaborator.user === user && collaborator.role === role){
+			return collaborator;
+		}
+	}
+
+	return null;
+};
+
+schema.methods.removeCollaborator = function(user, role){
+	'use strict';
+
+	let collaborator = this.findCollaborator(user, role);
+	if(collaborator){
+		this.collaborators.pull(collaborator._id);
+	}
+
+	return collaborator;
+};
+
+schema.statics.removeProject = function(account, project){
+	'use strict';
+
+	let User = require('./user');
+	let setting;
+	return this.findById({account, project}, project).then(_setting => {
+
+		setting = _setting;
+
+		if(!setting){
+			return Promise.reject({resCode: responseCodes.PROJECT_NOT_FOUND});
+		}
+
+		let owner = setting.owner;
+		let collaborators = setting.collaborators;
+
+		//remove all roles related to this project for these users
+		let promises = [];
+		
+		promises.push(User.revokeRolesFromUser(owner, account, `${project}.collaborator`).catch(err =>{
+			console.log(err);
+			return Promise.resolve();
+		}));
+		
+		collaborators.forEach(user => {
+			promises.push(User.revokeRolesFromUser(user.user, account, `${project}.${user.role}`).catch(err => {
+				console.log(err);
+				return Promise.resolve();
+			}));
+		});
+
+		return Promise.all(promises);
+
+	}).then(() => {
+		return ModelFactory.db.db(account).listCollections().toArray();
+
+	}).then(collections => {
+		//remove project collections
+		console.log(collections);
+		
+		let promises = [];
+		
+		collections.forEach(collection => {
+			if(collection.name.startsWith(project)){
+				promises.push(ModelFactory.db.db(account).dropCollection(collection.name));
+			}
+		});
+
+		return Promise.all(promises);
+
+	}).then(() => {
+		//remove project settings
+		return setting.remove();
+
+	}).then(() => {
+		//remove roles related to this project from system.roles collection
+
+		//remove collaborator role first because it inherit viewer role
+		return Role.removeCollaboratorRole(account, project).then(() => {
+			return Role.removeViewerRole(account, project);
+		}).catch(err => {
+			console.log(err);
+			return Promise.resolve();
+		});
+	});
 
 };
 
