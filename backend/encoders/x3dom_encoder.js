@@ -1019,6 +1019,7 @@ exports.route = function(router)
 			var subMeshIDX       = 0;
 			var runningVertTotal = 0;
 			var runningFaceTotal = 0;
+			var numAddedMeshes   = 0;
 
 			// TODO: Only needs the shell not the whole thing
 			dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, false, projection, function(err, type, uid, fromStash, objs)
@@ -1055,10 +1056,12 @@ exports.route = function(router)
 					{
 						if (bbox[0].length)
 						{
-							for (var j = 0; i < numAddedMeshes; i++)
+							for (var j = 0; j < numAddedMeshes; j++)
 							{
 								subMeshBBoxes.push(bbox);
 							}
+							maxSubMeshIDX += 1;	
+							bbox = [[],[]];
 						}
 
 						addMeshToBoundingBox(bbox, currentMeshBBox);
@@ -1067,10 +1070,12 @@ exports.route = function(router)
 
 						if (bbox[0].length)
 						{
-							for (var j = 0; i < numAddedMeshes; i++)
+							for (var j = 0; j < numAddedMeshes; j++)
 							{
 								subMeshBBoxes.push(bbox);
 							}
+							maxSubMeshIDX += numAddedMeshes;	
+							bbox = [[],[]];
 
 							numAddedMeshes = 0;
 						}
@@ -1081,10 +1086,13 @@ exports.route = function(router)
 					{
 						if (bbox[0].length)
 						{
-							for (var j = 0; i < numAddedMeshes; i++)
+							for (var j = 0; j < numAddedMeshes; j++)
 							{
 								subMeshBBoxes.push(bbox);
 							}
+							maxSubMeshIDX += 1;
+							console.log(bbox);	
+							bbox = [[],[]];
 						}
 
 						addMeshToBoundingBox(bbox, currentMeshBBox);
@@ -1092,18 +1100,21 @@ exports.route = function(router)
 						runningVertTotal = currentMeshNumVertices;
 					} else {
 						addMeshToBoundingBox(bbox, currentMeshBBox);
-						numAddedMeshes += 1;
 						runningVertTotal += currentMeshNumVertices;
 					}
 				}
 
 				if (bbox[0].length)
 				{
-					for (var j = 0; i < numAddedMeshes; i++)
+					for (var j = 0; j < numAddedMeshes; j++)
 					{
 						subMeshBBoxes.push(bbox);
 					}
+					maxSubMeshIDX += 1;	
+					console.log(bbox);	
+					bbox = [[],[]];
 				}
+				console.log(subMeshBBoxes);
 
 				// Loop through all IDs up to and including the maxSubMeshIDX
 				for(var subMeshIDX = 0; subMeshIDX < maxSubMeshIDX; subMeshIDX++)
