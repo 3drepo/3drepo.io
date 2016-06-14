@@ -89,8 +89,11 @@ function activateSubscription(req, res, next){
 		// log error and send email to support
 		if(err){
 
-			systemLogger.logError(err);
-			systemLogger.logError(err.stack);
+			systemLogger.logError('Error while activating subscription', {err: err, token: token} );
+			if(err.stack){
+				systemLogger.logError(err.stack);
+			}
+
 
 			User.findBillingUserByToken(token).then(user => {
 				Mailer.sendPaymentErrorEmail({

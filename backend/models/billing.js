@@ -27,6 +27,10 @@ var schema = mongoose.Schema({
 	amount: String
 });
 
+schema.statics.findBySubscriptionToken = function(account, token){
+	return this.find({account}, { subscriptionToken: token }, {}, {sort: {createdAt: -1}});
+};
+
 var Billing = ModelFactory.createClass(
 	'Billing',
 	schema,
@@ -35,8 +39,5 @@ var Billing = ModelFactory.createClass(
 	}
 );
 
-schema.statics.findBySubscriptionToken = function(account, token){
-	return this.find({account}, { subscriptionToken: token }, {}, {sort: {createdAt: -1}});
-};
 
 module.exports = Billing;

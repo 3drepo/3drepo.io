@@ -748,6 +748,8 @@ schema.statics.findSubscriptionsByBillingUser = function(billingUser){
 		'customData.subscriptions.billingUser': billingUser, 
 	}).then( dbUsers => {
 
+		let promises = [];
+
 		dbUsers.forEach(dbUser => {
 	
 			let dbSubs = _.filter(dbUser.customData.subscriptions, subscription => subscription.billingUser === billingUser);
@@ -755,12 +757,19 @@ schema.statics.findSubscriptionsByBillingUser = function(billingUser){
 
 				dbSub = dbSub.toObject();
 				dbSub.account = dbUser.user;
+				
+				promises.push(Billing.findBySubscriptionToken(dbUser.user, dbSub.token).then(payments => {
+					dbSub.payments = payments;
+				}));
+
 				subscriptions.push(dbSub);
 			});
 			
 		});
 
-		return Promise.resolve(subscriptions);
+		return Promise.all(promises).then(() => {
+			return Promise.resolve(subscriptions);
+		});
 
 	});
 };
