@@ -62,7 +62,7 @@
 
 		serverObject.base_url     = serverObject.public_protocol + "://" + serverObject.hostname + ":" + serverObject.public_port;
 		serverObject.location_url = "function(path) { return \"//\" + window.location.host + \"" + serverObject.host_dir + "/\" + path; }";
-		serverObject.url          = serverObject.base_url + serverObject.host_dir;
+		serverObject.url          = serverObject.base_url + serverObject.host_dir; 
 	};
 
 	// Check for hostname and ip here
@@ -91,29 +91,36 @@
 	for (var i = 0; i < config.servers.length; i++)
 	{
 		var server = config.servers[i];
-		var serverSubDomain = server.subdomain ? server.subdomain : null;
 
-		if (!config.subdomains.hasOwnProperty(serverSubDomain))
-		{
-			config.subdomains[serverSubDomain] = [];
+		if(!server.subdomains){
+			server.subdomains = { 'default': null};
 		}
 
-		config.subdomains[serverSubDomain].push(server);
+		Object.keys(server.subdomains).forEach(key => {
+			let serverSubDomain = server.subdomains[key];
+			if (!config.subdomains.hasOwnProperty(serverSubDomain))
+			{
+				config.subdomains[serverSubDomain] = [];
+			}
 
-		if (config.servers[i].service === "api")
-		{
-			config.api_server = server;
+			config.subdomains[serverSubDomain].push(server);
 
-			fillInServerDetails(config.api_server, "api", config.using_ssl, config.host, default_http_port, default_https_port);
-			config.api_server.external     = coalesce(config.api_server.external, false); // Do we need to start an API server, or just link to an external one.
-			config.api_server.chat_subpath = coalesce(config.api_server.chat_subpath, "chat");
-			config.api_server.chat_path    = "/" + config.api_server.host_dir + "/" + config.api_server.chat_subpath;
-			config.api_server.chat_host    = config.api_server.base_url;
+			if (config.servers[i].service === "api")
+			{
+				config.api_server = server;
 
-			config.api_server.session = sessionFactory.session(config);
-		} else {
-			fillInServerDetails(server, "server_" + i, config.using_ssl, config.host, default_http_port, default_https_port);
-		}
+				fillInServerDetails(config.api_server, "api", config.using_ssl, config.host, default_http_port, default_https_port);
+				config.api_server.external     = coalesce(config.api_server.external, false); // Do we need to start an API server, or just link to an external one.
+				config.api_server.chat_subpath = coalesce(config.api_server.chat_subpath, "chat");
+				config.api_server.chat_path    = config.api_server.host_dir + "/" + config.api_server.chat_subpath;
+				config.api_server.chat_host    = config.api_server.base_url;
+
+				config.api_server.session = sessionFactory.session(config);
+			} else {
+				fillInServerDetails(server, "server_" + i, config.using_ssl, config.host, default_http_port, default_https_port);
+			}
+		});
+
 	}
 
 	config.disableCache            = coalesce(config.disableCache, false);

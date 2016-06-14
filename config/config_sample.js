@@ -16,66 +16,81 @@
  */
 
 var hostname   = "example.org";
-var http_port  = 8000;
+var http_port  = 80;
 var https_port = 443;
 
 module.exports = {
 	host: hostname,
-	cookie: {
-		secret: "A secret",
-		parser_secret : "Another secret",
-		maxAge: 3600,
+	api_server: {
+		name: "api",
+		subdomain_or_subdir : 1,
+		http_port: http_port,
+		https_port: https_port,
+		public_port: http_port,
+		public_protocol: "http"
 	},
+	cookie: {
+	    secret: "a",
+	    parser_secret: "b"
+	},
+	default_format: "html",
 	servers: [
 		{
 			service: "api",
 			subdirectory: "api",
 			public_port: http_port,
-			public_protocol: "http"
+			public_protocol: "http",
+			subdomains: {
+				// host without subdomain name
+				'default': null,
+				// map-img.example.org
+				'mapImg': 'map-img'
+			}
 		},
 		{
 			service: "frontend",
 			template:   "frontend.jade"
 		}
 	],
-	js_debug_level: "debug",
+	js_debug_level: 'debug',
 	logfile: {
-		filename: "/var/log/3drepo.log",
-		console_level: "debug",
-		file_level: "debug"
+		filename: '/var/log/3drepo.log',
+		console_level: 'debug',
+		file_level: 'debug'
 	},
 	db: {
-		host: "localhost",
+		host: 'localhost',
 		port: 27017,
-		username: "username",
-		password: "password"
+		username: '',
+		password: ''
 	},
-	ssl: {
-		key: "my_key.pem",
-		cert:"my_server.crt",
-		ca: "my_server.ca"
+	// ssl: {
+	// 	key: 'my_key.pem',
+	// 	cert:'my_server.crt',
+	// 	ca: 'my_server.ca'
+	// },
+	cn_queue: {
+		host: 'amqp://localhost:5672',
+		worker_queue: 'jobq',
+		callback_queue: 'callbackq',
+		upload_dir: 'uploads',
+		shared_storage: 'D:/sharedSpace/'
 	},
 	os: {
 		keys: {
-			'property': '<your key>',
-			'place': '<your key>',
-			'map': '<your key>'
+			'property': '',
+			'place': '',
+			'map': ''
 		},
 		endpoints:{
 			bbox: 'https://api.ordnancesurvey.co.uk/places/v1/addresses/bbox',
 			radius: 'https://api.ordnancesurvey.co.uk/places/v1/addresses/radius',
+			uprn: 'https://api.ordnancesurvey.co.uk/places/v1/addresses/uprn',
 			dimensions: params => { return `https://api2.ordnancesurvey.co.uk/insights/beta/properties/${params.uprn}/dimensions` },
 			map: params => { return `https://api2.ordnancesurvey.co.uk/mapping_api/v1/service/zxy/${params.tileMatrixSet}/${params.layer}/${params.z}/${params.x}/${params.y}.png` }
 		}
 	},
-	cn_queue: {
-		host: "amqp://localhost:5672",
-		worker_queue: "jobq",
-		callback_queue: "callbackq",
-		upload_dir: "uploads",
-		shared_storage: "D:/sharedSpace/"
-	},
-
-	test_helper_api: false
+	crossOrigin: true,
+	test_helper_api: false,
+	disableCache: true
 }
-

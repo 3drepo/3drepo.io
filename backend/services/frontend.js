@@ -51,6 +51,15 @@ module.exports.createApp = function(serverConfig)
 			params.config_js = "var server_config = {}; server_config.apiUrl = function(path) { return '" + config.api_server.url + "/' + path; };";
 		}
 
+		params.config_js += `\nserver_config.subdomains = ${JSON.stringify(config.api_server.subdomains)};`;
+
+ 
+
+		params.config_js += `
+		server_config.getUrl = function(subdomain, path) {
+			return '${config.api_server.public_protocol}://' + subdomain + '.${config.api_server.hostname}:${config.api_server.public_port}${config.api_server.host_dir}/' + path;
+		};`;
+
 		if("wayfinder" in config)
 		{
 			// TODO: Make a public section in config for vars to be revealed
@@ -104,7 +113,7 @@ module.exports.createApp = function(serverConfig)
 							"groups",
 							"measure"
 						],
-						'url': '/:project?at',
+						'url': '/:project?at&up&view',
 						"children" : [
 							{
 								"plugin": "bid4free",

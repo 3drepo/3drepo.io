@@ -51,10 +51,10 @@
 		var setViewingOption = function (index) {
 			if (angular.isDefined(index)) {
 				// Set the viewing mode
-				
+
 				EventService.send(EventService.EVENT.VIEWER.SET_NAV_MODE,
 					{mode: vm.viewingOptions[index].mode});
-			
+
 				// Set up the new current selected option button
 				vm.selectedViewingOptionIndex = index;
 				vm.leftButtons[1] = vm.viewingOptions[index];
@@ -139,7 +139,7 @@
 
 		vm.rightButtons = [];
 		//vm.rightButtons.push({label: "Full screen", icon: "fa fa-arrows-alt", click: enterFullScreen});
-		/*
+		/*viewer.
 		vm.rightButtons.push({
 			label: "QR code",
 			icon: "fa fa-qrcode",
