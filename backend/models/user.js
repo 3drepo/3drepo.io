@@ -130,6 +130,10 @@ schema.statics.findByUserName = function(user){
 	return this.findOne({account: 'admin'}, { user });
 };
 
+schema.statics.findByEmail = function(email){
+	return this.findOne({account: 'admin'}, { 'customData.email': email });
+};
+
 schema.statics.isEmailTaken = function(email, exceptUser){
 	'use strict';
 

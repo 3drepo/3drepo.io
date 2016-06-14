@@ -283,7 +283,7 @@ describe('Sharing a project', function () {
 
 		it('should succee and the editor is able to see the project', function(done){
 			let role = {
-				user: username_editor,
+				email: email('editor'),
 				role: 'collaborator'
 			};
 
