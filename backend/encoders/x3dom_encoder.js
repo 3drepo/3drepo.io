@@ -1019,7 +1019,6 @@ exports.route = function(router)
 			var subMeshIDX       = 0;
 			var runningVertTotal = 0;
 			var runningFaceTotal = 0;
-			var numAddedMeshes   = 0;
 
 			// TODO: Only needs the shell not the whole thing
 			dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, false, projection, function(err, type, uid, fromStash, objs)
@@ -1040,6 +1039,7 @@ exports.route = function(router)
 				var subMeshBBoxes = [];
 				var bbox = [[],[]];
 				var runningVertTotal = 0;
+				var numAddedMeshes   = 0;
 
 				// Loop through submeshes and collect bounding boxes
 				for(var i = 0; i < mesh[C.REPO_NODE_LABEL_COMBINED_MAP].length; i++)
@@ -1091,7 +1091,6 @@ exports.route = function(router)
 								subMeshBBoxes.push(bbox);
 							}
 							maxSubMeshIDX += 1;
-							console.log(bbox);	
 							bbox = [[],[]];
 						}
 
@@ -1101,6 +1100,8 @@ exports.route = function(router)
 					} else {
 						addMeshToBoundingBox(bbox, currentMeshBBox);
 						runningVertTotal += currentMeshNumVertices;
+						if(numAddedMeshes == 0)
+							numAddedMeshes = 1;
 					}
 				}
 
@@ -1111,10 +1112,8 @@ exports.route = function(router)
 						subMeshBBoxes.push(bbox);
 					}
 					maxSubMeshIDX += 1;	
-					console.log(bbox);	
 					bbox = [[],[]];
 				}
-				console.log(subMeshBBoxes);
 
 				// Loop through all IDs up to and including the maxSubMeshIDX
 				for(var subMeshIDX = 0; subMeshIDX < maxSubMeshIDX; subMeshIDX++)
