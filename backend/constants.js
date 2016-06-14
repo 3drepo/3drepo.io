@@ -217,7 +217,6 @@ define("REPO_BLACKLIST_USERNAME", [
 	'cookies',
 	'passwordChange',
 	'passwordForgot',
-	'payment',
 	'pricing',
 	'privacy',
 	'registerRequest',
@@ -232,6 +231,6 @@ define("REPO_BLACKLIST_PROJECT", [
 	'verify',
 	'forgot-password',
 	'password',
-	'database',
-	'subscriptions'
+	'subscriptions',
+	'billings'
 ]);

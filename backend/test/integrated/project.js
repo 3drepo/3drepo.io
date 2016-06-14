@@ -26,7 +26,7 @@ let log_iface = require("../../logger.js");
 let systemLogger = log_iface.systemLogger;
 let responseCodes = require("../../response_codes.js");
 let helpers = require("./helpers");
-
+let C = require('../../constants');
 
 describe('Project', function () {
 	let User = require('../../models/user');
@@ -97,15 +97,31 @@ describe('Project', function () {
 	});
 
 
-	it('should return error message if project name is blacklisted - password', function(done){
+	C.REPO_BLACKLIST_PROJECT.forEach(projectName => {
 
-		agent.post(`/${username}/password`)
-		.send({ desc, type })
-		.expect(400, function(err ,res) {
-			expect(res.body.value).to.equal(responseCodes.BLACKLISTED_PROJECT_NAME.value);
-			done(err);
+
+		it(`should return error message if project name is blacklisted - ${projectName}`, function(done){
+
+			if([
+				'database',
+				'verify',
+				'forgot-password',
+				'subscriptions'
+			].indexOf(projectName) !== -1){
+				//skip these project name because they are actually other APIs.
+				return done();
+			}
+
+			agent.post(`/${username}/${projectName}`)
+			.send({ desc, type })
+			.expect(400, function(err ,res) {
+				expect(res.body.value).to.equal(responseCodes.BLACKLISTED_PROJECT_NAME.value);
+				done(err);
+			});
 		});
+
 	});
+
 
 	it('should return error if creating a project in a database that doesn\'t exists or not authorized for', function(done){
 

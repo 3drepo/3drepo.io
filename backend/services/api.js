@@ -73,7 +73,7 @@ module.exports.createApp = function (serverConfig) {
 
 	app.set("views", "./jade");
 	app.set("view_engine", "jade");
-	app.use(bodyParser.json());
+	app.use(bodyParser.json({ limit: '2mb'}));
 
 	app.use(compress());
 
