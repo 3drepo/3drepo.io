@@ -306,10 +306,6 @@ function removeCollaborator(username, email, account, project, role){
 
 	}).then(() => {
 
-		let roleObj = {
-			user: user.user,
-			role: role
-		};
 
 		let deletedCol = setting.removeCollaborator(user.user, role);
 
@@ -320,7 +316,7 @@ function removeCollaborator(username, email, account, project, role){
 		return setting.save().then(() => {
 
 			let res = { role };
-			
+
 			if(email){
 				res.email = email;
 			}  else if (username){
