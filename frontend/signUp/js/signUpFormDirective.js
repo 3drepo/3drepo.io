@@ -129,41 +129,47 @@
 		 * Do the user registration
 		 */
 		function doRegister() {
-			var data;
+			var data,
+				notUnicode = new RegExp("[^\x00-\x7F]+"); // Inspired b Jeremy Ruten's answer http://stackoverflow.com/a/150078/782358
 
 			if ((angular.isDefined(vm.newUser.username)) &&
 				(angular.isDefined(vm.newUser.email)) &&
 				(angular.isDefined(vm.newUser.password))) {
-				if (vm.newUser.tcAgreed) {
-					data = {
-						email: vm.newUser.email,
-						password: vm.newUser.password,
-						pay: pay
-					};
-					if (vm.useReCapthca) {
-						data.captcha = vm.reCaptchaResponse;
+				if (!notUnicode.test(vm.newUser.username)) {
+					if (vm.newUser.tcAgreed) {
+						data = {
+							email: vm.newUser.email,
+							password: vm.newUser.password,
+							pay: pay
+						};
+						if (vm.useReCapthca) {
+							data.captcha = vm.reCaptchaResponse;
+						}
+						vm.registering = true;
+						promise = UtilsService.doPost(data, vm.newUser.username);
+						promise.then(function (response) {
+							if (response.status === 200) {
+								vm.showPage("registerRequest");
+							}
+							else if (response.data.value === 62) {
+								vm.registerErrorMessage = "Prove you're not a robot";
+							}
+							else if (response.data.value === 55) {
+								vm.registerErrorMessage = "Username already in use";
+							}
+							else {
+								vm.registerErrorMessage = response.data.message;
+							}
+							vm.registering = false;
+							grecaptcha.reset(); // reset reCaptcha
+						});
 					}
-					vm.registering = true;
-					promise = UtilsService.doPost(data, vm.newUser.username);
-					promise.then(function (response) {
-						if (response.status === 200) {
-							vm.showPage("registerRequest");
-						}
-						else if (response.data.value === 62) {
-							vm.registerErrorMessage = "Prove you're not a robot";
-						}
-						else if (response.data.value === 55) {
-							vm.registerErrorMessage = "Username already in use";
-						}
-						else {
-							vm.registerErrorMessage = "Error with registration";
-						}
-						vm.registering = false;
-						grecaptcha.reset(); // reset reCaptcha
-					});
+					else {
+						vm.registerErrorMessage = "You must agree to the terms and conditions";
+					}
 				}
 				else {
-					vm.registerErrorMessage = "You must agree to the terms and conditions";
+					vm.registerErrorMessage = "Username contains characters not allowed";
 				}
 			}
 			else {
