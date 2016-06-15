@@ -5047,7 +5047,6 @@ var ViewerManager = {};
 
 	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, $timeout, $interval, AccountService, UtilsService, serverConfig) {
 		var vm = this,
-			promise,
 			existingProjectToUpload,
 			existingProjectFileUploader,
 			newProjectFileUploader;
@@ -5201,7 +5200,8 @@ var ViewerManager = {};
 		 * Save a new project
 		 */
 		vm.saveNewProject = function () {
-			var project;
+			var project,
+				promise;
 
 			promise = AccountService.newProject(vm.newProjectData);
 			promise.then(function (response) {
@@ -5260,7 +5260,7 @@ var ViewerManager = {};
 		 * Save a new database
 		 */
 		vm.saveNewDatabase = function () {
-			promise = AccountService.newDatabase(vm.account, vm.newDatabaseName);
+			var promise = AccountService.newDatabase(vm.account, vm.newDatabaseName);
 			promise.then(function (response) {
 				console.log(response);
 				vm.newDatabaseToken = response.data.token;
@@ -5293,7 +5293,8 @@ var ViewerManager = {};
 		 * Delete project
 		 */
 		vm.deleteProject = function () {
-			var i, iLength, j, jLength;
+			var i, iLength, j, jLength,
+				promise;
 			promise = UtilsService.doDelete(vm.account + "/" + vm.projectToDelete.name);
 			promise.then(function (response) {
 				if (response.status === 200) {
@@ -5355,76 +5356,90 @@ var ViewerManager = {};
 		function uploadModelToProject (project, file) {
 			var interval,
 				projectData,
-				infoTimeout = 4000;
+				infoTimeout = 4000,
+				promise;
 
-			project.uploading = true;
-			vm.showUploading = true;
-			vm.showFileUploadInfo = false;
+			// Check the quota
+			promise = UtilsService.doGet(vm.account + ".json");
+			promise.then(function (response) {
+				console.log(343, response);
+				if (file.size > response.data.accounts[0].quota.spaceLimit) {
+					showDialog (null, "increaseQuotaDialog.html");
+				}
+				else {
+					project.uploading = true;
+					vm.showUploading = true;
+					vm.showFileUploadInfo = false;
 
-			// Check for file size limit
-			if (file.size > serverConfig.uploadSizeLimit) {
-				$timeout(function () {
-					vm.showUploading = false;
-					vm.showFileUploadInfo = true;
-					vm.fileUploadInfo = "File exceeds size limit";
-					$timeout(function () {
-						project.uploading = false;
-					}, infoTimeout);
-				});
-			}
-			else {
-				projectData = {
-					account: vm.account,
-					project: project.name,
-					uploadFile: file
-				};
-				promise = AccountService.uploadModel(projectData);
-				promise.then(function (response) {
-					console.log(response);
-					if ((response.data.status === 400) || (response.data.status === 404)) {
-						// Upload error
-						if (response.data.value === 68) {
-							vm.fileUploadInfo = "Unsupported file format";
-						}
-						else if (response.data.value === 66) {
-							vm.fileUploadInfo = "Insufficient quota for model";
-						}
-						vm.showUploading = false;
-						vm.showFileUploadInfo = true;
+					// Check for file size limit
+					if (file.size > serverConfig.uploadSizeLimit) {
 						$timeout(function () {
-							project.uploading = false;
-						}, infoTimeout);
+							vm.showUploading = false;
+							vm.showFileUploadInfo = true;
+							vm.fileUploadInfo = "File exceeds size limit";
+							$timeout(function () {
+								project.uploading = false;
+							}, infoTimeout);
+						});
 					}
 					else {
-						// Upload valid, poll for status
-						interval = $interval(function () {
-							promise = AccountService.uploadStatus(projectData);
-							promise.then(function (response) {
-								console.log(response);
-								if ((response.data.status === "ok") || (response.data.status === "failed")) {
-									if (response.data.status === "ok") {
-										project.timestamp = UtilsService.formatTimestamp(new Date(), true);
-										vm.fileUploadInfo = "Uploaded";
-									}
-									else {
-										vm.fileUploadInfo = response.data.errorReason.message;
-									}
-									vm.showUploading = false;
-									$interval.cancel(interval);
-									vm.showFileUploadInfo = true;
-									$timeout(function () {
-										project.uploading = false;
-									}, infoTimeout);
+						projectData = {
+							account: vm.account,
+							project: project.name,
+							uploadFile: file
+						};
+						promise = AccountService.uploadModel(projectData);
+						promise.then(function (response) {
+							console.log(response);
+							if ((response.data.status === 400) || (response.data.status === 404)) {
+								// Upload error
+								if (response.data.value === 68) {
+									vm.fileUploadInfo = "Unsupported file format";
 								}
-							});
-						}, 1000);
+								else if (response.data.value === 66) {
+									vm.fileUploadInfo = "Insufficient quota for model";
+								}
+								vm.showUploading = false;
+								vm.showFileUploadInfo = true;
+								$timeout(function () {
+									project.uploading = false;
+								}, infoTimeout);
+							}
+							else {
+								// Upload valid, poll for status
+								interval = $interval(function () {
+									promise = AccountService.uploadStatus(projectData);
+									promise.then(function (response) {
+										console.log(response);
+										if ((response.data.status === "ok") || (response.data.status === "failed")) {
+											if (response.data.status === "ok") {
+												project.timestamp = UtilsService.formatTimestamp(new Date(), true);
+												vm.fileUploadInfo = "Uploaded";
+											}
+											else {
+												vm.fileUploadInfo = response.data.errorReason.message;
+											}
+											vm.showUploading = false;
+											$interval.cancel(interval);
+											vm.showFileUploadInfo = true;
+											$timeout(function () {
+												project.uploading = false;
+											}, infoTimeout);
+										}
+									});
+								}, 1000);
+							}
+						});
 					}
-				});
-			}
+				}
+			});
+
 		}
 
 		/**
 		 * Show a dialog
+		 *
+		 * @param {Object} event
 		 * @param {String} dialogTemplate
 		 */
 		function showDialog (event, dialogTemplate) {
@@ -16173,7 +16188,7 @@ var Oculus = {};
             
             if (angular.isDefined(showSeconds) && showSeconds) {
                 formatted += " " + (date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
-                            date.getMinutes() + "-" +
+                            (date.getMinutes() < 10 ? "0" : "") + date.getMinutes() + "-" +
                             (date.getSeconds() < 10 ? "0" : "") + date.getSeconds();
             }
             
