@@ -49,8 +49,7 @@ describe('Sharing a project', function () {
 		server = app.listen(8080, function () {
 			console.log('API test server is listening on port 8080!');
 
-
-			async.series([
+			let actions = [
 				function createViewer(done){
 					helpers.signUpAndLogin({
 						server, request, agent, expect, User, systemLogger,
@@ -65,7 +64,20 @@ describe('Sharing a project', function () {
 						done
 					});
 				}
-			], done);
+			];
+
+			[1,2,3,4,5].forEach(n => {
+
+				actions.push(function (done){
+					helpers.signUpAndLogin({
+						server, request, agent, expect, User, systemLogger,
+						username: username_viewer + n, password: password_viewer, email: email('viewer' + n),
+						done
+					});
+				});
+			});
+
+			async.series(actions, done);
 		});
 
 	});
@@ -463,4 +475,48 @@ describe('Sharing a project', function () {
 			});
 		});
 	});
+
+	describe('if run out of quota', function(done){
+
+		before(function(done){
+			// add 5 collaborators first to fill up the quota
+			let actions = [function(done){
+				agent = request.agent(server);
+				agent.post('/login')
+				.send({ username, password })
+				.expect(200, function(err, res){
+					expect(res.body.username).to.equal(username);
+					done(err);
+				});
+			}];
+
+			[1,2,3,4,5].forEach(n => {
+				actions.push(function(done){
+					agent.post(`/${username}/${project}/collaborators`)
+					.send({
+						user: username_viewer + n,
+						role: 'viewer'
+					})
+					.expect(200, function(err, res){
+						done(err);
+					});
+				});
+			});
+
+			async.series(actions, done);
+
+		});
+
+		it('should fail', function(done){
+			agent.post(`/${username}/${project}/collaborators`)
+			.send({
+				user: username_viewer,
+				role: 'viewer'
+			})
+			.expect(400, function(err, res){
+				expect(res.body.value).to.equal(responseCodes.COLLABORATOR_LIMIT_EXCEEDED.value);
+				done(err);
+			});
+		});
+	})
 });

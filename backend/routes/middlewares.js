@@ -19,6 +19,7 @@ var _ = require('lodash');
 var responseCodes = require('../response_codes');
 var C               = require("../constants");
 var Bid = require('../models/bid');
+var ProjectSetting = require('../models/projectSetting');
 // var History = require('../models/history');
 var User = require('../models/user');
 var config = require('../config');
@@ -235,6 +236,31 @@ function freeSpace(account){
 
 }
 
+function hasCollaboratorQuota(req, res, next){
+	'use strict';
+
+	let limits;
+
+	let account = req.params.account;
+	let project = req.params.project;
+
+	return User.findByUserName(account).then( dbUser => {
+
+		limits = dbUser.getSubscriptionLimits();
+
+		return ProjectSetting.findById({account}, project);
+
+	}).then(projectSetting => {
+
+		if(limits.collaboratorLimit - projectSetting.collaborators.length > 0){
+			next();
+		} else {
+			responseCodes.respond("", req, res, next, responseCodes.COLLABORATOR_LIMIT_EXCEEDED , null, {});
+		}
+
+	});
+}
+
 function connectQueue(req, res, next){
 	'use strict';
 
@@ -294,6 +320,8 @@ var middlewares = {
 	isMainContractor: [loggedIn, isMainContractor],
 	isSubContractorInvited: [loggedIn, isSubContractorInvited],
 	isAccountAdmin: [loggedIn, isAccountAdmin],
+	hasCollaboratorQuota: [loggedIn, hasCollaboratorQuota],
+
 	canCreateDatabase,
 	connectQueue,
 

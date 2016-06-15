@@ -53,7 +53,7 @@ router.post('/:project/upload', middlewares.connectQueue, middlewares.canCreateP
 
 router.get('/:project/collaborators', middlewares.isAccountAdmin, listCollaborators);
 
-router.post('/:project/collaborators', middlewares.isAccountAdmin, addCollaborator);
+router.post('/:project/collaborators', middlewares.isAccountAdmin, middlewares.hasCollaboratorQuota, addCollaborator);
 
 router.delete('/:project/collaborators', middlewares.isAccountAdmin, removeCollaborator);
 
