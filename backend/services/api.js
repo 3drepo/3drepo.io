@@ -109,11 +109,16 @@ module.exports.createApp = function (serverConfig) {
 		}
 	});
 
-	//auth handler
+	//info handler
 	app.get('/info', (req, res) => {
-		res.status(200).json({ status: 'OK', version: '?'});
+		require('child_process').exec('git rev-parse --short HEAD', { 
+			cwd: __dirname 
+		}, function (err, stdout) {
+			res.status(200).json({ status: 'OK', version: stdout.split('\n')[0]});
+		});
 	});
 
+	//auth handler
 	app.use('/', require('../routes/auth'));
 	// os api handler
 	app.use('/os',require('../routes/osBuilding'));

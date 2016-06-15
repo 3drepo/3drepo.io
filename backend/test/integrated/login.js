@@ -32,7 +32,7 @@ describe('Login', function () {
 	let username = 'login_username';
 	let username_not_verified = 'login_username_not_verified';
 	let password = 'password';
-	let email = 'test3drepo@mailinator.com';
+	let email = suf => `test3drepo_login_${suf}@mailinator.com`;
 
 	before(function(done){
 
@@ -63,7 +63,7 @@ describe('Login', function () {
 
 		// create a user
 		return User.createUser(systemLogger, username, password, {
-			email: email
+			email: email('success')
 		}, 200000).then(emailVerifyToken => {
 			return User.verify(username, emailVerifyToken.token, true);
 		}).then(user => {
@@ -86,7 +86,7 @@ describe('Login', function () {
 
 		// create a user
 		return User.createUser(systemLogger, username_not_verified, password, {
-			email: email
+			email: email('notyetverf')
 		}, 200000).then(user => {
 
 			return new Promise((resolve, reject) => {

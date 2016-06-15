@@ -27,6 +27,7 @@ var Billing = require('./billing');
 var projectSetting = require('./projectSetting');
 var Role = require('./role');
 var Mailer = require('../mailer/mailer');
+var systemLogger = require("../logger.js").systemLogger;
 
 var schema = mongoose.Schema({
 	_id : String,
@@ -123,6 +124,21 @@ schema.statics.findByUserName = function(user){
 	return this.findOne({account: 'admin'}, { user });
 };
 
+schema.statics.findByEmail = function(email){
+	return this.findOne({account: 'admin'}, { 'customData.email': email });
+};
+
+schema.statics.isEmailTaken = function(email, exceptUser){
+	'use strict';
+
+	let query = { 'customData.email': email};
+
+	if(exceptUser){
+		query = { 'customData.email': email, 'user': { '$ne': exceptUser }};
+	}
+
+	return this.count({account: 'admin'}, query);
+};
 
 schema.statics.findBillingUserByToken = function(token){
 	return this.findSubscriptionByToken(null, token).then(subscription => {
@@ -215,10 +231,20 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	}
 
 
-	return adminDB.addUser(username, password, {customData: cleanedCustomData, roles: []}).then( () => {
-		return Promise.resolve(cleanedCustomData.emailVerifyToken);
-	}).catch(err => {
-		return Promise.reject({resCode : utils.mongoErrorToResCode(err)});
+	return this.isEmailTaken(customData.email).then(count => {
+
+		if(count === 0){
+
+			return adminDB.addUser(username, password, {customData: cleanedCustomData, roles: []}).then( () => {
+				return Promise.resolve(cleanedCustomData.emailVerifyToken);
+			}).catch(err => {
+				return Promise.reject({resCode : utils.mongoErrorToResCode(err)});
+			});
+
+		} else {
+			return Promise.reject({resCode: responseCodes.EMAIL_EXISTS });
+		}
+
 	});
 };
 
@@ -291,8 +317,13 @@ schema.methods.updateInfo = function(updateObj){
 		}
 	});
 
-
-	return this.save();
+	return User.isEmailTaken(this.customData.email, this.user).then(count => {
+		if(count === 0){
+			return this.save();
+		} else {
+			return Promise.reject({ resCode: responseCodes.EMAIL_EXISTS });
+		}
+	});
 };
 
 schema.statics.getForgotPasswordToken = function(username, email, tokenExpiryTime){
@@ -439,9 +470,22 @@ schema.methods.listAccounts = function(){
 				User.findByUserName(account.account).then(user => {
 					if(user){
 						account.quota = user.haveActiveSubscriptions() ? user.getSubscriptionLimits() : undefined;
+						return User.historyChunksStats(account.account);
+					}
+
+				}).then(stats => {
+				
+					if(stats && account.quota){
+						let totalSize = 0;
+						stats.forEach(stat => {
+							totalSize += stat.size; 
+						});
+						
+						account.quota.spaceUsed = totalSize;
 					}
 				})
 			);
+
 		});
 
 		accounts.sort((a, b) => {
@@ -693,7 +737,7 @@ schema.statics.activateSubscription = function(token, paymentInfo, raw, disableE
 
 				});
 			}).catch(err => {
-				console.log('Email Error', err);
+				systemLogger.logError(`Email error - ${err.message}`);
 			});
 
 		}
@@ -781,6 +825,8 @@ schema.statics.findSubscriptionByToken = function(billingUser, token){
 		'customData.subscriptions.token': token
 	};
 
+	let subscription;
+
 	if(billingUser){
 		query['customData.subscriptions.billingUser'] = billingUser;
 	}
@@ -790,10 +836,16 @@ schema.statics.findSubscriptionByToken = function(billingUser, token){
 		'user': 1
 	}).then( dbUser => {
 
-		let subscription = dbUser.customData.subscriptions[0].toObject();
+		subscription = dbUser.customData.subscriptions[0].toObject();
 		subscription.account = dbUser.user;
+		
+		return Billing.findBySubscriptionToken(dbUser.user, subscription.token);
 
-		return Promise.resolve(subscription);
+	}).then(payments => {
+
+		subscription.payments = payments;
+		return subscription;
+
 	});
 };
 
@@ -815,9 +867,9 @@ schema.methods.hasRole = function(db, roleName){
 };
 
 var User = ModelFactory.createClass(
-	'User', 
-	schema, 
-	() => { 
+	'User',
+	schema,
+	() => {
 		return 'system.users';
 	}
 );

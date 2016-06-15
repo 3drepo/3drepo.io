@@ -34,7 +34,7 @@ describe('Project', function () {
 	let agent;
 	let username = 'project_username';
 	let password = 'password';
-	let email = 'test3drepo@mailinator.com';
+	let email = 'test3drepo_project@mailinator.com';
 	let project = 'project1';
 	let desc = 'desc';
 	let type = 'type';
@@ -120,6 +120,18 @@ describe('Project', function () {
 			});
 		});
 
+	});
+
+
+
+	it('should return error message if project name contains spaces', function(done){
+
+		agent.post('/' + username + '/you%20are%20genius')
+		.send({ desc, type })
+		.expect(400, function(err ,res) {
+			expect(res.body.value).to.equal(responseCodes.INVALID_PROJECT_NAME.value);
+			done(err);
+		});
 	});
 
 

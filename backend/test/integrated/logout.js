@@ -32,7 +32,7 @@ describe('Logout', function () {
 	let username = 'logout_username';
 	let username_not_verified = 'logout_username_not_verified';
 	let password = 'password';
-	let email = 'test3drepo@mailinator.com';
+	let email = 'test3drepo_logout@mailinator.com';
 
 	before(function(done){
 
