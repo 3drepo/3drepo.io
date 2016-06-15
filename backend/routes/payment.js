@@ -7,6 +7,7 @@ var Mailer = require('../mailer/mailer');
 var httpsPost = require('../libs/httpsReq').post;
 var querystring = require('../libs/httpsReq').querystring;
 var config = require('../config');
+var systemLogger = require("../logger.js").systemLogger;
 
 // endpoints for paypal IPN message
 router.post("/paypal/food", activateSubscription);
@@ -59,10 +60,11 @@ function activateSubscription(req, res, next){
 				gateway: 'PAYPAL',
 				currency: paymentInfo.mc_currency,
 				amount: isSubscriptionInitIPN ? 0.00 : paymentInfo.mc_gross,
-				subscriptionSignup: isSubscriptionInitIPN
+				subscriptionSignup: isSubscriptionInitIPN,
+				createBilling: !isSubscriptionInitIPN
 
 			}, paymentInfo).then(resData => {
-				console.log(resData.subscription, 'payment confirmed and subscription activated');
+				systemLogger.logInfo('payment confirmed and subscription activated', resData.subscription.toObject());
 			});
 
 		} else if (isSubscriptionCancelled) {
@@ -87,7 +89,11 @@ function activateSubscription(req, res, next){
 		// log error and send email to support
 		if(err){
 
-			console.log(err);
+			systemLogger.logError('Error while activating subscription', {err: err, token: token} );
+			if(err.stack){
+				systemLogger.logError(err.stack);
+			}
+
 
 			User.findBillingUserByToken(token).then(user => {
 				Mailer.sendPaymentErrorEmail({

@@ -119,6 +119,7 @@ describe('Uploading a project', function () {
 			});
 		});
 
+
 		it('should have one item inserted into the queue', function(done){
 
 			let q = require('../../services/queue');
@@ -140,6 +141,14 @@ describe('Uploading a project', function () {
 
 		});
 
+		it('should succee (uppercase extension)', function(done){
+			agent.post(`/${username}/${project}/upload`)
+			.attach('file', __dirname + '/../../statics/3dmodels/toy.IFC')
+			.expect(200, function(err, res){
+				done(err);
+			});
+		});
+		
 		it('but empty file size should fail', function(done){
 
 			agent.post(`/${username}/${project}/upload`)

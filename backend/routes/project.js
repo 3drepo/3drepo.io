@@ -217,14 +217,22 @@ function uploadProject(req, res, next){
 	//check space
 	function fileFilter(req, file, cb){
 
-		let acceptedFormat = ['x','obj','3ds','md3','md2','ply','mdl','ase','hmp','smd','mdc','md5','stl','lxo','nff','raw','off','ac','bvh','irrmesh','irr','q3d','q3s','b3d','dae','ter','csm','3d','lws','xml','ogex','ms3d','cob','scn','blend','pk3','ndo','ifc','xgl','zgl','fbx','assbin'];
+		let acceptedFormat = [
+			'x','obj','3ds','md3','md2','ply',
+			'mdl','ase','hmp','smd','mdc','md5',
+			'stl','lxo','nff','raw','off','ac',
+			'bvh','irrmesh','irr','q3d','q3s','b3d',
+			'dae','ter','csm','3d','lws','xml','ogex',
+			'ms3d','cob','scn','blend','pk3','ndo',
+			'ifc','xgl','zgl','fbx','assbin'
+		];
 
 		let format = file.originalname.split('.');
 		format = format.length <= 1 ? '' : format.splice(-1)[0];
 
 		let size = estimateImportedSize(format, parseInt(req.headers['content-length']));
 
-		if(acceptedFormat.indexOf(format) === -1){
+		if(acceptedFormat.indexOf(format.toLowerCase()) === -1){
 			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
 		}
 
@@ -283,7 +291,6 @@ function uploadProject(req, res, next){
 				}).then(() => {
 
 					// api respond once the file is uploaded
-
 					responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: 'uploaded'});
 
 					return importQueue.importFile(

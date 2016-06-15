@@ -96,6 +96,12 @@ describe('Sign up', function(){
 	C.REPO_BLACKLIST_USERNAME.forEach(username => {
 
 		it('with blacklisted username - ' + username + ' should fail', function(done){
+
+			// POST /contact is another API so skip checking
+			if(username === 'contact'){
+				return done();
+			}
+			
 			request(server)
 			.post(`/${username}`)
 			.send({

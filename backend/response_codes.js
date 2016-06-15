@@ -141,6 +141,7 @@ var responseCodes = {
 	INVALID_ROLE: {value: 82, message: 'Invalid role name', status: 400},
 	ALREADY_IN_ROLE: {value: 83, message: 'User already assigned with this role', status: 400},
 	NOT_IN_ROLE: { value: 84, message: 'User not in this role', status: 400},
+	QUEUE_NO_LISTENER: { value: 85, message: 'There is currently no worker listening to the queue, you model import is delayed', status: 400},
 
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {
