@@ -781,6 +781,8 @@ schema.statics.findSubscriptionByToken = function(billingUser, token){
 		'customData.subscriptions.token': token
 	};
 
+	let subscription;
+
 	if(billingUser){
 		query['customData.subscriptions.billingUser'] = billingUser;
 	}
@@ -790,10 +792,16 @@ schema.statics.findSubscriptionByToken = function(billingUser, token){
 		'user': 1
 	}).then( dbUser => {
 
-		let subscription = dbUser.customData.subscriptions[0].toObject();
+		subscription = dbUser.customData.subscriptions[0].toObject();
 		subscription.account = dbUser.user;
+		
+		return Billing.findBySubscriptionToken(dbUser.user, subscription.token);
 
-		return Promise.resolve(subscription);
+	}).then(payments => {
+
+		subscription.payments = payments;
+		return subscription;
+
 	});
 };
 
