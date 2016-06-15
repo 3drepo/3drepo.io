@@ -178,3 +178,10 @@ panel-card-add {
 panel-card-option-erase md-icon {
   font-size: 24px !important;
 }
+
+/** Panel Card Option *******************************************************************************************/
+panel-card-option-scribble md-icon,
+panel-card-option-erase md-icon,
+panel-card-option-pin md-icon {
+  color: inherit !important;
+}

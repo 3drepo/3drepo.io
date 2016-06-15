@@ -30,7 +30,7 @@
 					md-button.md-raised.md-accent(ng-click="vm.saveComment()", ng-disabled="vm.saveCommentDisabled") Save
 
 					// Assign role
-					md-menu(md-position-mode="target-right target", ng-if="vm.canModifyIssue")
+					//md-menu(md-position-mode="target-right target", ng-if="vm.canModifyIssue")
 						md-button.md-primary(ng-click="vm.openAssignedRolesMenu($mdOpenMenu, $event)") Assign
 						md-menu-content(width="4")
 							md-menu-item(ng-repeat="role in vm.roles")

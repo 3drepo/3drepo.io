@@ -804,6 +804,9 @@
 		 * Set up adding an issue
 		 */
 		function setupAdd () {
+			if (vm.toShow === "showIssue") {
+				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
+			}
 			vm.toShow = "showAdd";
 			vm.onShowItem();
 			vm.showAdd = true;

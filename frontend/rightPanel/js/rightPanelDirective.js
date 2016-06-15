@@ -41,49 +41,63 @@
         /*
          * Init
          */
-        vm.issueButtons = [
-            {
-                type: "scribble",
+        vm.issueButtons = {
+            "scribble": {
+                label: "Scribble",
                 icon: "border_color",
-                click: issueButtonClick
+                background: ""
             },
-            {
-                type: "erase",
+            "erase": {
+                label: "Erase",
                 faIcon: "fa fa-eraser",
-                click: issueButtonClick
+                background: ""
             },
-            {
-                type: "pin",
+            "pin": {
+                label: "Pin",
                 icon: "pin_drop",
-                click: issueButtonClick
+                background: ""
             }
-        ];
+        };
 
         /*
          * Setup event watch
          */
         $scope.$watch(EventService.currentEvent, function(event) {
             if ((event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) && (!event.value.on)) {
-                addIssueMode = null;
+                if (addIssueMode !== null) {
+                    vm.issueButtons[addIssueMode].background = "";
+                    addIssueMode = null;
+                }
+            }
+            else if (event.type === EventService.EVENT.SET_ISSUE_AREA_MODE) {
+                if (addIssueMode !== event.value) {
+                    vm.issueButtons[addIssueMode].background = "";
+                    addIssueMode = event.value;
+                    vm.issueButtons[addIssueMode].background = "#FF9800";
+                }
             }
         });
 
         /**
          * Set up adding an issue with scribble
          */
-        function issueButtonClick (buttonType) {
+        vm.issueButtonClick = function (buttonType) {
             if (addIssueMode === null) {
                 addIssueMode = buttonType;
+                vm.issueButtons[buttonType].background = "#FF9800";
                 EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: true, type: buttonType});
             }
             else if (addIssueMode === buttonType) {
                 addIssueMode = null;
+                vm.issueButtons[buttonType].background = "";
                 EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: false});
             }
             else {
+                vm.issueButtons[addIssueMode].background = "";
                 addIssueMode = buttonType;
+                vm.issueButtons[addIssueMode].background = "#FF9800";
                 EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, buttonType);
             }
-        }
+        };
     }
 }());

@@ -15,5 +15,6 @@ div(ng-show="vm.showPanel")
 	div#buttons(ng-class="{ active : vm.activate }", ng-if="vm.position==='left'")
 		.panelButtonGroup(ng-repeat="contentItem in vm.contentItems", layout="column", layout-align="start center")
 			md-button.md-fab.md-primary.md-mini(ng-click="vm.buttonClick(contentItem.type)", aria-label="{{contentItem.title}}")
+				md-tooltip(md-direction="right") {{contentItem.title}}
 				md-icon.angular-material-icons {{contentItem.icon}}
 			label {{contentItem.title}}

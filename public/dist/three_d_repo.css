@@ -1504,6 +1504,13 @@ panel-card-add {
 panel-card-option-erase md-icon {
   font-size: 24px !important;
 }
+
+/** Panel Card Option *******************************************************************************************/
+panel-card-option-scribble md-icon,
+panel-card-option-erase md-icon,
+panel-card-option-pin md-icon {
+  color: inherit !important;
+}
 password-change md-progress-circular {
     margin-left: 5px;
 }
@@ -1611,12 +1618,23 @@ right-panel {
     right: 0;
 }
 
+right-panel #rightPanelButtons .rightPanelButtonGroup {
+    margin-bottom: 20px;
+}
+
 right-panel #rightPanelButtons .md-button {
-    margin-bottom: 15px;
+    margin-bottom: 2px;
 }
 
 right-panel #rightPanelButtons .fa {
     font-size: 24px;
+}
+
+right-panel #rightPanelButtons label {
+    color: #FFFFFF;
+    text-shadow: 0 0 2px rgba(0,0,0,0.5);
+    font-weight: bold;
+    font-size: 14px;
 }
 sign-up md-input-container {
     margin-top: 0;
