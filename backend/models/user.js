@@ -470,9 +470,22 @@ schema.methods.listAccounts = function(){
 				User.findByUserName(account.account).then(user => {
 					if(user){
 						account.quota = user.haveActiveSubscriptions() ? user.getSubscriptionLimits() : undefined;
+						return User.historyChunksStats(account.account);
+					}
+
+				}).then(stats => {
+				
+					if(stats && account.quota){
+						let totalSize = 0;
+						stats.forEach(stat => {
+							totalSize += stat.size; 
+						});
+						
+						account.quota.spaceUsed = totalSize;
 					}
 				})
 			);
+
 		});
 
 		accounts.sort((a, b) => {
