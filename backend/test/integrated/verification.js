@@ -37,7 +37,7 @@ describe('Verify', function () {
 	let username_expired_token = 'verify_username_expired';
 
 	let password = 'password';
-	let email = 'test3drepo@mailinator.com';
+	let email = suf => `test3drepo_verification_${suf}@mailinator.com`;
 
 
 	before(function(done){
@@ -64,7 +64,7 @@ describe('Verify', function () {
 	it('user should success if username and token is correct', function(done){
 		// create a user
 		User.createUser(systemLogger, username, password, {
-			email: email
+			email: email('success')
 		}, 200000).then(emailVerifyToken => {
 
 			request(server)
@@ -83,7 +83,7 @@ describe('Verify', function () {
 	it('user should fail if verify more than once', function(done){
 		// create a user
 		User.createUser(systemLogger, username_double_verified, password, {
-			email: email
+			email: email('double')
 		}, 200000).then(emailVerifyToken => {
 
 			request(server)
@@ -118,7 +118,7 @@ describe('Verify', function () {
 
 		before(function(){
 			return User.createUser(systemLogger, username_not_verified, password, {
-				email: email
+				email: email('invalid')
 			}, 200000).then(emailVerifyToken => {
 				token = emailVerifyToken.token;
 			});
@@ -159,7 +159,7 @@ describe('Verify', function () {
 			let expiryTime = -1;
 
 			User.createUser(systemLogger, username_expired_token, password, {
-				email: email
+				email: email('expired')
 			}, expiryTime).then(emailVerifyToken => {
 
 				request(server)

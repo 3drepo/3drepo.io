@@ -27,7 +27,8 @@ let User = proxyquire('../../../models/user', {
 	}, 
 	'mongoose': mongoose, 
 	'./factory/modelFactory':  modelFactoryMock,
-	'../mailer/mailer': {}
+	'../mailer/mailer': {},
+	'../logger.js': {},
 });
 
 
@@ -92,6 +93,7 @@ describe('User', function(){
 			user.markModified = () => true;
 
 			let spy = sinon.spy(user, 'save');
+			let stub = sinon.stub(User, 'isEmailTaken').returns(Promise.resolve(0));
 
 			return user.updateInfo(updateObj).then(user => {
 				// user updated 
@@ -101,8 +103,8 @@ describe('User', function(){
 				expect(user.toObject()).to.have.deep.property('customData.email', updateObj.email);
 				// save should've been called once
 				sinon.assert.calledOnce(spy);
-
 				spy.restore();
+				stub.restore();
 			});
 
 		})
@@ -150,10 +152,13 @@ describe('User', function(){
 				roles: []
 			}
 
+			let stub = sinon.stub(User, 'isEmailTaken').returns(Promise.resolve(0));
+
 			return User.createUser({}, username, password, options, 1).then(res => {
 				expectedCallWithOptions.customData.emailVerifyToken = res;
 				sinon.assert.calledWith(spy, username, password, expectedCallWithOptions);
 				spy.restore();
+				stub.restore();
 			});
 		});
 

@@ -381,15 +381,9 @@ function addCollaborator(req, res ,next){
 	let project = req.params.project;
 	let account = req.params.account;
 	let role = req.body.role;
+	let email = req.body.email;
 
-	if(['viewer', 'collaborator'].indexOf(role) === -1){
-
-		let err = responseCodes.INVALID_ROLE;
-		return responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-
-	}
-
-	ProjectHelpers.addCollaborator(username, account, project, role).then(resRole => {
+	ProjectHelpers.addCollaborator(username, email, account, project, role).then(resRole => {
 		return responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, resRole);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -403,8 +397,9 @@ function removeCollaborator(req, res ,next){
 	let account = req.params.account;
 	let username = req.body.user;
 	let role = req.body.role;
+	let email = req.body.email;
 
-	ProjectHelpers.removeCollaborator(username, account, project, role).then(resRole => {
+	ProjectHelpers.removeCollaborator(username, email, account, project, role).then(resRole => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, resRole);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

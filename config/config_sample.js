@@ -111,7 +111,8 @@ module.exports = {
 
 		urls: {
 			'forgotPassword': data => `/passwordChange?username=${data.username}&token=${data.token}`,
-			'verify': data => `/registerVerify?username=${data.username}&token=${data.token}` + (data.pay ? '&pay=true' : '')
+			'verify': data => `/registerVerify?username=${data.username}&token=${data.token}` + (data.pay ? '&pay=true' : ''),
+			'project': data => `/${data.account}/${data.project}`
 		}
 	},
 	

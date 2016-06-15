@@ -36,7 +36,7 @@ describe('Creating an issue', function () {
 	let agent;
 	let username = 'issue_username';
 	let password = 'password';
-	let email = 'test3drepo@mailinator.com';
+	let email = 'test3drepo_issue@mailinator.com';
 	let project = 'project1';
 
 	let desc = 'desc';

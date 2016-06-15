@@ -21,6 +21,8 @@ var User = require('../user');
 var responseCodes = require('../../response_codes');
 var importQueue = require('../../services/queue');
 var C = require('../../constants');
+var Mailer = require('../../mailer/mailer');
+var systemLogger = require("../../logger.js").systemLogger;
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -194,10 +196,22 @@ function importToyProject(username){
 	});
 }
 
-function addCollaborator(username, account, project, role){
+function addCollaborator(username, email, account, project, role, disableEmail){
 	'use strict';
 
 	let setting;
+	let user;
+	let action;
+
+	if(role === 'viewer'){
+		action = 'view';
+	} else if(role === 'collaborator'){
+		action = 'collaborate';
+	} else {
+		return Promise.reject(responseCodes.INVALID_ROLE);
+	}
+
+
 	return ProjectSetting.findById({account, project}, project).then(_setting => {
 
 		setting = _setting;
@@ -207,37 +221,63 @@ function addCollaborator(username, account, project, role){
 		} else if (setting.findCollaborator(username, role)) {
 			return Promise.reject(responseCodes.ALREADY_IN_ROLE);
 		} else {
-			return User.findByUserName(username);
+
+			if(username){
+				return User.findByUserName(username);
+			} else {
+				return User.findByEmail(email);
+			}
+			
 		}
 
 
-	}).then(user => {
+	}).then(_user => {
 		
+		user = _user;
+
 		if(!user){
 			return Promise.reject(responseCodes.USER_NOT_FOUND);
 		}
 
-		return User.grantRoleToUser(username, account, `${project}.${role}`);
+		return User.grantRoleToUser(user.user, account, `${project}.${role}`);
 
 	}).then(() => {
 
 		let roleObj = {
-			user: username,
+			user: user.user,
 			role: role
 		};
 
 		setting.collaborators.push(roleObj);
 
 		return setting.save().then(() => {
-			return Promise.resolve(roleObj);
+
+			if(!disableEmail){
+				Mailer.sendProjectInvitation(user.customData.email, {
+					action, account, project
+				}).catch(err => {
+					systemLogger.logError(`Email error - ${err.message}`);
+				});
+			}
+
+			let res = { role };
+
+			if(email){
+				res.email = email;
+			}  else if (username){
+				res.user = username;
+			}
+
+			return Promise.resolve(res);
 		});
 	});
 }
 
-function removeCollaborator(username, account, project, role){
+function removeCollaborator(username, email, account, project, role){
 	'use strict';
 
 	let setting;
+	let user;
 	return ProjectSetting.findById({account, project}, project).then(_setting => {
 
 		setting = _setting;
@@ -245,33 +285,45 @@ function removeCollaborator(username, account, project, role){
 		if(!setting){
 			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 		} else {
-			return User.findByUserName(username);
+
+			if(username){
+				return User.findByUserName(username);
+			} else {
+				return User.findByEmail(email);
+			}
 		}
 
 
-	}).then(user => {
+	}).then(_user => {
 		
+		user = _user;
+
 		if(!user){
 			return Promise.reject(responseCodes.USER_NOT_FOUND);
 		}
 
-		return User.revokeRolesFromUser(username, account, `${project}.${role}`);
+		return User.revokeRolesFromUser(user.user, account, `${project}.${role}`);
 
 	}).then(() => {
 
-		let roleObj = {
-			user: username,
-			role: role
-		};
 
-		let deletedCol = setting.removeCollaborator(username, role);
+		let deletedCol = setting.removeCollaborator(user.user, role);
 
 		if(!deletedCol){
 			return Promise.reject(responseCodes.NOT_IN_ROLE);
 		}
 
 		return setting.save().then(() => {
-			return Promise.resolve(roleObj);
+
+			let res = { role };
+
+			if(email){
+				res.email = email;
+			}  else if (username){
+				res.user = username;
+			}
+
+			return Promise.resolve(res);
 		});
 	});
 }
