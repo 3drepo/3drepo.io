@@ -27,11 +27,11 @@
 	module.exports.session = function(config) {
 		var sessionConfig = expressSession({
 			secret: config.cookie.secret,
-			resave: false,
-			saveUninitialized: true,
+			resave: true,
+			saveUninitialized: false,
 			cookie: {
-				domain: config.api_server.hostname,
-				path: config.api_server.host_dir,
+				domain: config.cookie.domain,
+				path: "/",
 				secure: config.using_ssl,
 				httpOnly: false
 			},

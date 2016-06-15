@@ -73,7 +73,15 @@ module.exports.createApp = function (serverConfig) {
 	app.set("view_engine", "jade");
 	app.use(bodyParser.json());
 
-	app.use(sharedSession);
+	app.use(function (req, res, next) {
+		//if (req.session || (req.path === "/login" && req.method === "POST"))
+		//{
+		//	console.log("Using session");
+			sharedSession(req, res, next);
+		//} else {
+		//	next();
+		//}
+	});
 
 	app.use(compress());
 

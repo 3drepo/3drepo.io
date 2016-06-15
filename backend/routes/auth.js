@@ -12,20 +12,27 @@
 	var User = require("../models/user");
 
 	router.post("/login", login);
-	router.get("/login", checkLogin);
 	router.post("/logout", logout);
+
+	router.get("/login", checkLogin);
 	router.get("/:account.jpg", middlewares.loggedIn, getAvatar);
 	router.post("/:account", middlewares.loggedIn, updateUser);
 
 	function expireSession(req) {
-		req.session.cookie.expires = new Date(0);
-		req.session.cookie.maxAge = 0;
+		if (req.session)
+		{
+			req.session.cookie.expires = new Date(0);
+			req.session.cookie.maxAge = 0;
+		}
 	}
 
 	function createSession(place, req, res, next, user){
+		console.log(JSON.stringify(req.session));
 
 		req.session.regenerate(function(err) {
 			if(err) {
+				console.log("ERROR: " + err);
+
 				responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {username: user.username});
 			} else {
 				systemLogger.logDebug("Authenticated user and signed token.", req);
@@ -48,12 +55,8 @@
 
 		req[C.REQ_REPO].logger.logInfo("Authenticating user", req.body.username);
 
-
 		User.authenticate(req[C.REQ_REPO].logger, req.body.username, req.body.password).then(user => {
-
 			req[C.REQ_REPO].logger.logInfo("User is logged in", req.body.username);
-
-			expireSession(req);
 			createSession(responsePlace, req, res, next, {username: user.user, roles: user.roles});
 		}).catch(() => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.NOT_AUTHORIZED, {username: req.body.username});
@@ -62,7 +65,7 @@
 	}
 
 	function checkLogin(req, res, next){
-		if (!req.session.user) {
+		if (!req.session || !req.session.user) {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, {});
 		} else {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {username: req.session.user.username});
@@ -70,7 +73,7 @@
 	}
 
 	function logout(req, res, next){
-		if(!req.session.user){
+		if(!req.session || !req.session.user){
 			return responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, {});
 		}
 
@@ -136,4 +139,4 @@
 	}
 
 	module.exports = router;
-}());
+})();

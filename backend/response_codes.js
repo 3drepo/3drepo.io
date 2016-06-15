@@ -210,6 +210,9 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 			if (contentType)
 			{
 				res.setHeader("Content-Type", contentType);
+			} else {
+				// Force compression on everything else
+				res.setHeader("Content-Type", "application/json");
 			}
 
 			//res.setHeader("Content-Length", extraInfo.length);
