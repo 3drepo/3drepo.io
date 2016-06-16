@@ -171,6 +171,7 @@ module.exports.createApp = function(serverConfig)
 			},
 			{
 				"plugin": "account",
+				"url": ":account?page",
 				"children": [
 					{
 						"plugin": "project",

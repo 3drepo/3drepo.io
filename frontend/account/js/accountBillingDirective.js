@@ -19,41 +19,35 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountInfo", accountInfo);
+		.directive("accountBilling", accountBilling);
 
-	function accountInfo() {
+	function accountBilling() {
 		return {
-			restrict: 'E',
-			templateUrl: 'accountInfo.html',
+			restrict: 'EA',
+			templateUrl: 'accountBilling.html',
 			scope: {
-				username: "=",
-				firstName: "=",
-				lastName: "=",
-				email: "=",
-				onShowItem: "&"
 			},
-			controller: AccountInfoCtrl,
+			controller: AccountBillingCtrl,
 			controllerAs: 'vm',
 			bindToController: true
 		};
 	}
 
-	AccountInfoCtrl.$inject = [];
+	AccountBillingCtrl.$inject = [];
 
-	function AccountInfoCtrl() {
+	function AccountBillingCtrl() {
 		var vm = this;
-		
+
 		/*
 		 * Init
 		 */
-		vm.accountOptions = {
-			repos: {label: "Repos"},
-			profile: {label: "Profile"},
-			billing: {label: "Billing"}
+		vm.subscriptionTypes = {
+			band1: {space: 10, collaborators: 5},
+			band2: {space: 20, collaborators: 10},
+			band3: {space: 30, collaborators: 15},
+			band4: {space: 40, collaborators: 20},
+			band5: {space: 50, collaborators: 25}
 		};
 
-		vm.showItem = function (item) {
-			vm.onShowItem({item: item});
-		};
 	}
 }());

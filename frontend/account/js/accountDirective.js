@@ -35,17 +35,18 @@
 		};
 	}
 
-	AccountCtrl.$inject = ["$scope", "$location", "AccountService", "Auth"];
+	AccountCtrl.$inject = ["$scope", "$location", "$timeout", "AccountService", "Auth"];
 
-	function AccountCtrl($scope, $location, AccountService, Auth) {
+	function AccountCtrl($scope, $location, $timeout, AccountService, Auth) {
 		var vm = this,
-			promise;
+			promise,
+			pages = ["repos", "profile", "billing"];
 
 		/*
 		 * Init
 		 */
-		vm.itemToShow = "repos";
 		vm.showProject = false;
+		vm.showBillingPage = false;
 
 		/*
 		 * Get the account data
@@ -61,6 +62,19 @@
 					vm.firstName = response.data.firstName;
 					vm.lastName = response.data.lastName;
 					vm.email = response.data.email;
+
+					// Go to the correct "page"
+					if ($location.search().hasOwnProperty("page")) {
+						if (pages.indexOf(($location.search()).page) === -1) {
+							vm.itemToShow = pages[0];
+						}
+						else {
+							vm.itemToShow = ($location.search()).page;
+						}
+					}
+					else {
+						vm.itemToShow = pages[0];
+					}
 					/*
 					 vm.hasAvatar = response.data.hasAvatar;
 					 vm.avatarURL = response.data.avatarURL;
@@ -84,6 +98,21 @@
 			goToProject();
 		});
 
+		/*
+		 * Watch for change in project
+		 */
+		$scope.$watch("vm.showBillingPage", function (newValue) {
+			if (angular.isDefined(newValue) && newValue) {
+				vm.itemToShow = pages[2];
+				$location.search("page", pages[2]);
+
+				// Setup for the watch to work again
+				$timeout(function () {
+					vm.showBillingPage = false;
+				});
+			}
+		});
+
 		/**
 		 * Go to a project or back to the projects list if the project is unknown
 		 */
@@ -104,6 +133,7 @@
 
 		vm.showItem = function (item) {
 			vm.itemToShow = item;
+			$location.search("page", item);
 		};
 
 		/**

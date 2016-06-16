@@ -12,6 +12,7 @@ div(ng-if="!vm.showProject")
 			account-projects(
 				account="vm.account"
 				accounts="vm.accounts"
+				go-to-billing-page="vm.showBillingPage"
 				ng-switch-when="repos"
 			)
 			account-profile(
@@ -20,6 +21,9 @@ div(ng-if="!vm.showProject")
 				last-name="vm.lastName"
 				email="vm.email"
 				ng-switch-when="profile"
+			)
+			account-billing(
+				ng-switch-when="billing"
 			)
 
 div(ng-if="vm.showProject")

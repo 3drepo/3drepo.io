@@ -1,0 +1,15 @@
+.homeUserContent
+	md-content.md-whiteframe-1dp(aria-label="Billing", flex)
+		md-toolbar
+			.md-toolbar-tools
+				h2 Billing
+
+		md-content(layout-margin)
+			h1.md-title Select your new subscription below
+			md-input-container
+				label Subscriptions
+				md-select(ng-model="vm.selectedSubscription")
+					md-option(
+					ng-repeat="(key, value) in vm.subscriptionTypes"
+					value="{{key}}"
+					) {{value.space}}GB, {{value.collaborators}} collaborators

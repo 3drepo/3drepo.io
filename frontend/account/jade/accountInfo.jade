@@ -15,10 +15,7 @@
 							h3 {{vm.firstName}} {{vm.lastName}}
 							p {{vm.email}}
 					md-divider
-					md-list-item.md-2-line(ng-click="vm.showItem('repos')")
+					md-list-item.md-2-line(ng-repeat="(key, value) in vm.accountOptions", ng-click="vm.showItem(key)")
 						div.md-list-item-text
-							h3 Repos
-					md-divider
-					md-list-item.md-2-line(ng-click="vm.showItem('profile')")
-						div.md-list-item-text
-							h3 Profile
+							h3 {{value.label}}
+						md-divider(ng-if="!$last")

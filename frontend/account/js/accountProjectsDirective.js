@@ -27,7 +27,8 @@
 			templateUrl: 'accountProjects.html',
 			scope: {
 				account: "=",
-				accounts: "="
+				accounts: "=",
+				goToBillingPage: "="
 			},
 			controller: AccountProjectsCtrl,
 			controllerAs: 'vm',
@@ -46,6 +47,8 @@
 		/*
 		 * Init
 		 */
+		vm.info = "Retrieving projects...";
+		vm.showProgress = true;
 		vm.projectTypes = [
 			"Architectural",
 			"Structural",
@@ -53,8 +56,6 @@
 			"GIS",
 			"Other"
 		];
-		vm.info = "Retrieving projects...";
-		vm.showProgress = true;
 
 		// Setup file uploaders
 		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
@@ -354,9 +355,9 @@
 			// Check the quota
 			promise = UtilsService.doGet(vm.account + ".json");
 			promise.then(function (response) {
-				console.log(343, response);
 				if (file.size > response.data.accounts[0].quota.spaceLimit) {
-					showDialog (null, "increaseQuotaDialog.html");
+					// Show the billing page
+					vm.goToBillingPage = true;
 				}
 				else {
 					project.uploading = true;

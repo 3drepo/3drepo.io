@@ -4672,6 +4672,60 @@ var ViewerManager = {};
 	"use strict";
 
 	angular.module("3drepo")
+		.directive("accountBilling", accountBilling);
+
+	function accountBilling() {
+		return {
+			restrict: 'EA',
+			templateUrl: 'accountBilling.html',
+			scope: {
+			},
+			controller: AccountBillingCtrl,
+			controllerAs: 'vm',
+			bindToController: true
+		};
+	}
+
+	AccountBillingCtrl.$inject = [];
+
+	function AccountBillingCtrl() {
+		var vm = this;
+
+		/*
+		 * Init
+		 */
+		vm.subscriptionTypes = {
+			band1: {space: 10, collaborators: 5},
+			band2: {space: 20, collaborators: 10},
+			band3: {space: 30, collaborators: 15},
+			band4: {space: 40, collaborators: 20},
+			band5: {space: 50, collaborators: 25}
+		};
+
+	}
+}());
+
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
 		.directive("accountDir", accountDir);
 
 	function accountDir() {
@@ -4688,17 +4742,18 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountCtrl.$inject = ["$scope", "$location", "AccountService", "Auth"];
+	AccountCtrl.$inject = ["$scope", "$location", "$timeout", "AccountService", "Auth"];
 
-	function AccountCtrl($scope, $location, AccountService, Auth) {
+	function AccountCtrl($scope, $location, $timeout, AccountService, Auth) {
 		var vm = this,
-			promise;
+			promise,
+			pages = ["repos", "profile", "billing"];
 
 		/*
 		 * Init
 		 */
-		vm.itemToShow = "repos";
 		vm.showProject = false;
+		vm.showBillingPage = false;
 
 		/*
 		 * Get the account data
@@ -4714,6 +4769,19 @@ var ViewerManager = {};
 					vm.firstName = response.data.firstName;
 					vm.lastName = response.data.lastName;
 					vm.email = response.data.email;
+
+					// Go to the correct "page"
+					if ($location.search().hasOwnProperty("page")) {
+						if (pages.indexOf(($location.search()).page) === -1) {
+							vm.itemToShow = pages[0];
+						}
+						else {
+							vm.itemToShow = ($location.search()).page;
+						}
+					}
+					else {
+						vm.itemToShow = pages[0];
+					}
 					/*
 					 vm.hasAvatar = response.data.hasAvatar;
 					 vm.avatarURL = response.data.avatarURL;
@@ -4737,6 +4805,21 @@ var ViewerManager = {};
 			goToProject();
 		});
 
+		/*
+		 * Watch for change in project
+		 */
+		$scope.$watch("vm.showBillingPage", function (newValue) {
+			if (angular.isDefined(newValue) && newValue) {
+				vm.itemToShow = pages[2];
+				$location.search("page", pages[2]);
+
+				// Setup for the watch to work again
+				$timeout(function () {
+					vm.showBillingPage = false;
+				});
+			}
+		});
+
 		/**
 		 * Go to a project or back to the projects list if the project is unknown
 		 */
@@ -4757,6 +4840,7 @@ var ViewerManager = {};
 
 		vm.showItem = function (item) {
 			vm.itemToShow = item;
+			$location.search("page", item);
 		};
 
 		/**
@@ -4822,6 +4906,15 @@ var ViewerManager = {};
 
 	function AccountInfoCtrl() {
 		var vm = this;
+		
+		/*
+		 * Init
+		 */
+		vm.accountOptions = {
+			repos: {label: "Repos"},
+			profile: {label: "Profile"},
+			billing: {label: "Billing"}
+		};
 
 		vm.showItem = function (item) {
 			vm.onShowItem({item: item});
@@ -5035,7 +5128,8 @@ var ViewerManager = {};
 			templateUrl: 'accountProjects.html',
 			scope: {
 				account: "=",
-				accounts: "="
+				accounts: "=",
+				goToBillingPage: "="
 			},
 			controller: AccountProjectsCtrl,
 			controllerAs: 'vm',
@@ -5054,6 +5148,8 @@ var ViewerManager = {};
 		/*
 		 * Init
 		 */
+		vm.info = "Retrieving projects...";
+		vm.showProgress = true;
 		vm.projectTypes = [
 			"Architectural",
 			"Structural",
@@ -5061,8 +5157,6 @@ var ViewerManager = {};
 			"GIS",
 			"Other"
 		];
-		vm.info = "Retrieving projects...";
-		vm.showProgress = true;
 
 		// Setup file uploaders
 		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
@@ -5362,9 +5456,8 @@ var ViewerManager = {};
 			// Check the quota
 			promise = UtilsService.doGet(vm.account + ".json");
 			promise.then(function (response) {
-				console.log(343, response);
 				if (file.size > response.data.accounts[0].quota.spaceLimit) {
-					showDialog (null, "increaseQuotaDialog.html");
+					vm.goToBillingPage = true;
 				}
 				else {
 					project.uploading = true;
@@ -8859,6 +8952,7 @@ var ViewerManager = {};
 
 					//console.log('url', (parentStateName !== "home" ? "/" : "") + ":" + childState.plugin);
 
+					console.log(333);
 					(function(childState){
 						$stateProvider.state(childStateName, {
 							name: parentState.children[i].plugin,
@@ -8871,6 +8965,7 @@ var ViewerManager = {};
 										$stateParams[childState.plugin] = true;
 									}
 
+									console.log(123);
 									StateManager.setState($stateParams, {});
 								}
 							}
