@@ -99,7 +99,7 @@
 					for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
 						vm.accounts[i].projects[j].name = vm.accounts[i].projects[j].project;
 						if (vm.accounts[i].projects[j].timestamp !== null) {
-							vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp, true);
+							vm.accounts[i].projects[j].timestampPretty = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp, true);
 						}
 						vm.accounts[i].projects[j].uploading = false;
 						//vm.accounts[i].projects[j].canUpload = (vm.accounts[i].account === vm.account);
@@ -395,7 +395,8 @@
 								console.log(response);
 								if ((response.data.status === "ok") || (response.data.status === "failed")) {
 									if (response.data.status === "ok") {
-										project.timestamp = UtilsService.formatTimestamp(new Date(), true);
+										project.timestamp = new Date();
+										project.timestampPretty = UtilsService.formatTimestamp(project.timestamp, true);
 										vm.fileUploadInfo = "Uploaded";
 									}
 									else {

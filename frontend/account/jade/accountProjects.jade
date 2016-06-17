@@ -47,7 +47,7 @@ input#newProjectFileUploader(type="file")
 								p.projectUploadFilename {{vm.uploadedFile.name}}
 								p.projectUploadInfo(ng-if="vm.showFileUploadInfo") {{vm.fileUploadInfo}}
 								md-progress-circular.projectUploadIcon(md-mode="indeterminate", md-diameter="15", ng-if="vm.showUploading")
-							p.projectTimestamp {{project.timestamp}}
+							p.projectTimestamp {{project.timestampPretty}}
 							//md-button.md-accent(ng-click="vm.b4f(account.name, project.name)" ng-if="project.bif4FreeEnabled") B4F
 							md-button.md-accent.md-icon-button(
 								aria-label="Upload"

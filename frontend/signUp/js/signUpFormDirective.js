@@ -130,12 +130,12 @@
 		 */
 		function doRegister() {
 			var data,
-				notUnicode = new RegExp("[^\x00-\x7F]+"); // Inspired b Jeremy Ruten's answer http://stackoverflow.com/a/150078/782358
+				allowedFormat = new RegExp("^[a-zA-Z][a-zA-Z\d_]*$"); // English letters, numbers, underscore, not starting with number
 
 			if ((angular.isDefined(vm.newUser.username)) &&
 				(angular.isDefined(vm.newUser.email)) &&
 				(angular.isDefined(vm.newUser.password))) {
-				if (!notUnicode.test(vm.newUser.username)) {
+				if (allowedFormat.test(vm.newUser.username)) {
 					if (vm.newUser.tcAgreed) {
 						data = {
 							email: vm.newUser.email,
@@ -169,7 +169,7 @@
 					}
 				}
 				else {
-					vm.registerErrorMessage = "Username contains characters not allowed";
+					vm.registerErrorMessage = "Username not allowed";
 				}
 			}
 			else {

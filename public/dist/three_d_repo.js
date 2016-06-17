@@ -4709,6 +4709,7 @@ var ViewerManager = {};
 			{
 				promise = AccountService.getUserInfo(vm.account);
 				promise.then(function (response) {
+					console.log(response);
 					vm.accounts = response.data.accounts;
 					vm.username = vm.account;
 					vm.firstName = response.data.firstName;
@@ -5107,7 +5108,7 @@ var ViewerManager = {};
 					for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
 						vm.accounts[i].projects[j].name = vm.accounts[i].projects[j].project;
 						if (vm.accounts[i].projects[j].timestamp !== null) {
-							vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp, true);
+							vm.accounts[i].projects[j].timestampPretty = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp, true);
 						}
 						vm.accounts[i].projects[j].uploading = false;
 						//vm.accounts[i].projects[j].canUpload = (vm.accounts[i].account === vm.account);
@@ -5403,7 +5404,8 @@ var ViewerManager = {};
 								console.log(response);
 								if ((response.data.status === "ok") || (response.data.status === "failed")) {
 									if (response.data.status === "ok") {
-										project.timestamp = UtilsService.formatTimestamp(new Date(), true);
+										project.timestamp = new Date();
+										project.timestampPretty = UtilsService.formatTimestamp(project.timestamp, true);
 										vm.fileUploadInfo = "Uploaded";
 									}
 									else {
@@ -15199,12 +15201,12 @@ var Oculus = {};
 		 */
 		function doRegister() {
 			var data,
-				notUnicode = new RegExp("[^\x00-\x7F]+"); // Inspired b Jeremy Ruten's answer http://stackoverflow.com/a/150078/782358
+				allowedFormat = new RegExp("^[a-zA-Z][a-zA-Z\d_]*$"); // English letters, numbers, underscore, not starting with number
 
 			if ((angular.isDefined(vm.newUser.username)) &&
 				(angular.isDefined(vm.newUser.email)) &&
 				(angular.isDefined(vm.newUser.password))) {
-				if (!notUnicode.test(vm.newUser.username)) {
+				if (allowedFormat.test(vm.newUser.username)) {
 					if (vm.newUser.tcAgreed) {
 						data = {
 							email: vm.newUser.email,
@@ -15238,7 +15240,7 @@ var Oculus = {};
 					}
 				}
 				else {
-					vm.registerErrorMessage = "Username contains characters not allowed";
+					vm.registerErrorMessage = "Username not allowed";
 				}
 			}
 			else {
