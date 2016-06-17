@@ -48,7 +48,7 @@ home .homeUserContent md-toolbar {
 
 home .homeUserContent .userContent {
     padding: 20px;
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 230px);
     overflow-x: hidden;
 }
 
@@ -90,6 +90,10 @@ home #legalLinks .md-button {
     font-size: 12px;
     margin: 0;
     opacity: 0.7;
+}
+
+home md-radio-button ._md-label {
+    line-height: 1.7;
 }
 
 /** Legal Dialog ******************************************************************************************************/

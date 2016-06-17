@@ -1,0 +1,29 @@
+.homeUserContent
+	md-content.md-whiteframe-1dp(aria-label="Billing", flex)
+		md-toolbar
+			.md-toolbar-tools
+				md-button.md-icon-button(aria-label="Status", ng-click="vm.goBack()", ng-if="vm.callingPage")
+					md-icon.angular-material-icons(flex="none") arrow_back
+				h2 Upgrade
+
+		.userContent
+			md-list
+				md-list-item.md-2-line
+					.md-list-item-text
+						h3 Current subscription
+						p 10Gb, 5 collaborators
+			md-divider
+			md-content(layout-margin)
+				form
+					p.md-title Select a new subscription
+					md-radio-group(ng-model="vm.selectedSubscription")
+						md-radio-button(ng-repeat="(key, value) in vm.subscriptionTypes", value="{{key}}") {{value.space}}Gb, {{value.collaborators}} collaborators
+			md-divider
+			md-list
+				md-list-item.md-2-line
+					.md-list-item-text
+						h3 New subscription
+						p(ng-if="vm.selectedSubscription") {{vm.subscriptionTypes[vm.selectedSubscription].space}}Gb, {{vm.subscriptionTypes[vm.selectedSubscription].collaborators}} collaborators
+						p(ng-if="!vm.selectedSubscription") None selected
+			md-content(layout-margin)
+				md-button.md-raised.md-accent(ng-disabled="!vm.selectedSubscription") Pay

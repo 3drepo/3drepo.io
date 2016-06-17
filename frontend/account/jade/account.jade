@@ -10,20 +10,26 @@ div(ng-if="!vm.showProject")
 		)
 		#accountItem(ng-switch="vm.itemToShow")
 			account-projects(
+				ng-switch-when="repos"
 				account="vm.account"
 				accounts="vm.accounts"
-				go-to-billing-page="vm.showBillingPage"
-				ng-switch-when="repos"
+				show-page="vm.showPage(page, callingPage)"
 			)
 			account-profile(
+				ng-switch-when="profile"
 				username="vm.username"
 				first-name="vm.firstName"
 				last-name="vm.lastName"
 				email="vm.email"
-				ng-switch-when="profile"
 			)
 			account-billing(
 				ng-switch-when="billing"
+				show-page="vm.showPage(page, callingPage)"
+			)
+			account-upgrade(
+				ng-switch-when="upgrade"
+				calling-page="vm.callingPage"
+				show-page="vm.showPage(page, callingPage)"
 			)
 
 div(ng-if="vm.showProject")

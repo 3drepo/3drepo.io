@@ -26,7 +26,7 @@
 							label Email
 							input(ng-model="vm.email", type="email")
 						.updateContainer(layout="row", layout-align="start center")
-							md-button.md-accent(ng-click="vm.updateInfo()") Update
+							md-button.md-raised.md-accent(ng-click="vm.updateInfo()") Update
 							p {{vm.infoSaveInfo}}
 
 			md-divider
@@ -45,5 +45,5 @@
 							label New password
 							input(ng-model="vm.newPassword", type="password")
 						.updateContainer(layout="row", layout-align="start center")
-							md-button.md-accent(ng-click="vm.updatePassword()") Update
+							md-button.md-raised.md-accent(ng-click="vm.updatePassword()") Update
 							p {{vm.passwordSaveInfo}}

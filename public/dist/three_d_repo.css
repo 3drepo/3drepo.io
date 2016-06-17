@@ -155,7 +155,7 @@ account-profile .accountProfileContent {
 }
 
 account-profile .updateContainer {
-  margin-top: -30px;
+  margin: -20px 0 20px;
 }
 
 /** Account Info ******************************************************************************************************/
@@ -292,6 +292,13 @@ account-menu md-icon {
   color: rgba(0,0,0,0.7);
 }
 
+/** Account Upgrade ***************************************************************************************************/
+account-upgrade #accountUpgradeCurrentSubscription p {
+  color: rgba(0, 0, 0, 0.6);
+}
+account-upgrade #accountUpgradeCurrentSubscription p span {
+  color: rgba(0, 0, 0, 0.9);
+}
 /* Done to counter bootstrap styling. This should really be set in a top level style file */
 .md-datepicker-input-mask {
   width: 308px;
@@ -954,7 +961,7 @@ home .homeUserContent md-toolbar {
 
 home .homeUserContent .userContent {
     padding: 20px;
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 230px);
     overflow-x: hidden;
 }
 
@@ -996,6 +1003,10 @@ home #legalLinks .md-button {
     font-size: 12px;
     margin: 0;
     opacity: 0.7;
+}
+
+home md-radio-button ._md-label {
+    line-height: 1.7;
 }
 
 /** Legal Dialog ******************************************************************************************************/

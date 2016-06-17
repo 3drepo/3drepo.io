@@ -28,7 +28,7 @@
 			scope: {
 				account: "=",
 				accounts: "=",
-				goToBillingPage: "="
+				showPage: "&"
 			},
 			controller: AccountProjectsCtrl,
 			controllerAs: 'vm',
@@ -154,7 +154,7 @@
 				vm.uploadModel(project);
 			}
 			else {
-				$location.path("/" + account + "/" + project.name, "_self");
+				$location.path("/" + account + "/" + project.name, "_self").search("page", null);
 			}
 		};
 
@@ -356,8 +356,8 @@
 			promise = UtilsService.doGet(vm.account + ".json");
 			promise.then(function (response) {
 				if (file.size > response.data.accounts[0].quota.spaceLimit) {
-					// Show the billing page
-					vm.goToBillingPage = true;
+					// Show the upgrade page
+					vm.showPage({page: "upgrade", callingPage: "repos"});
 				}
 				else {
 					project.uploading = true;

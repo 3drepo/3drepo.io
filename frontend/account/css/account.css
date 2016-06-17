@@ -155,7 +155,7 @@ account-profile .accountProfileContent {
 }
 
 account-profile .updateContainer {
-  margin-top: -30px;
+  margin: -20px 0 20px;
 }
 
 /** Account Info ******************************************************************************************************/
@@ -290,4 +290,12 @@ account-menu md-icon {
 .newDatabaseDialog .databaseDialogInfo {
   font-weight: normal;
   color: rgba(0,0,0,0.7);
+}
+
+/** Account Upgrade ***************************************************************************************************/
+account-upgrade #accountUpgradeCurrentSubscription p {
+  color: rgba(0, 0, 0, 0.6);
+}
+account-upgrade #accountUpgradeCurrentSubscription p span {
+  color: rgba(0, 0, 0, 0.9);
 }

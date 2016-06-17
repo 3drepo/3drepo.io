@@ -35,18 +35,12 @@
 		};
 	}
 
-	AccountCtrl.$inject = ["$scope", "$location", "$timeout", "AccountService", "Auth"];
+	AccountCtrl.$inject = ["$scope", "$location", "AccountService", "Auth"];
 
-	function AccountCtrl($scope, $location, $timeout, AccountService, Auth) {
+	function AccountCtrl($scope, $location, AccountService, Auth) {
 		var vm = this,
 			promise,
-			pages = ["repos", "profile", "billing"];
-
-		/*
-		 * Init
-		 */
-		vm.showProject = false;
-		vm.showBillingPage = false;
+			pages = ["upgrade", "repos", "profile", "billing"];
 
 		/*
 		 * Get the account data
@@ -66,14 +60,14 @@
 					// Go to the correct "page"
 					if ($location.search().hasOwnProperty("page")) {
 						if (pages.indexOf(($location.search()).page) === -1) {
-							vm.itemToShow = pages[0];
+							vm.itemToShow = "repos";
 						}
 						else {
 							vm.itemToShow = ($location.search()).page;
 						}
 					}
 					else {
-						vm.itemToShow = pages[0];
+						vm.itemToShow = "repos";
 					}
 					/*
 					 vm.hasAvatar = response.data.hasAvatar;
@@ -93,31 +87,28 @@
 		/*
 		 * Watch for change in project
 		 */
-		$scope.$watch("vm.state.project", function()
-		{
+		$scope.$watch("vm.state.project", function() {
 			goToProject();
 		});
 
-		/*
-		 * Watch for change in project
+		/**
+		 * For pages to show other pages
+		 * 
+		 * @param page
+		 * @param callingPage
 		 */
-		$scope.$watch("vm.showBillingPage", function (newValue) {
-			if (angular.isDefined(newValue) && newValue) {
-				vm.itemToShow = pages[2];
-				$location.search("page", pages[2]);
-
-				// Setup for the watch to work again
-				$timeout(function () {
-					vm.showBillingPage = false;
-				});
-			}
-		});
+		vm.showPage = function (page, callingPage) {
+			vm.itemToShow = page;
+			$location.search("page", page);
+			vm.callingPage = callingPage;
+		};
 
 		/**
 		 * Go to a project or back to the projects list if the project is unknown
 		 */
 		function goToProject () {
 			var i, length;
+			vm.showProject = false;
 			if (angular.isDefined(vm.accounts)) {
 				for (i = 0, length = vm.accounts[0].projects.length; i < length; i += 1) {
 					if (vm.accounts[0].projects[i].project === vm.state.project) {

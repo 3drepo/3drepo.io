@@ -19,28 +19,40 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountBilling", accountBilling);
+		.directive("accountUpgrade", accountUpgrade);
 
-	function accountBilling() {
+	function accountUpgrade() {
 		return {
 			restrict: 'EA',
-			templateUrl: 'accountBilling.html',
+			templateUrl: 'accountUpgrade.html',
 			scope: {
+				callingPage: "=",
 				showPage: "&"
 			},
-			controller: AccountBillingCtrl,
+			controller: AccountUpgradeCtrl,
 			controllerAs: 'vm',
 			bindToController: true
 		};
 	}
 
-	AccountBillingCtrl.$inject = [];
+	AccountUpgradeCtrl.$inject = [];
 
-	function AccountBillingCtrl() {
+	function AccountUpgradeCtrl() {
 		var vm = this;
 
-		vm.upgrade = function () {
-			vm.showPage({page: "upgrade", callingPage: "billing"});
+		/*
+		 * Init
+		 */
+		vm.subscriptionTypes = {
+			band1: {space: 10, collaborators: 5, price: 100},
+			band2: {space: 20, collaborators: 10, price: 200},
+			band3: {space: 30, collaborators: 15, price: 300},
+			band4: {space: 40, collaborators: 20, price: 400},
+			band5: {space: 50, collaborators: 25, price: 500}
+		};
+
+		vm.goBack = function () {
+			vm.showPage({page: vm.callingPage});
 		};
 	}
 }());

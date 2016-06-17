@@ -4679,6 +4679,7 @@ var ViewerManager = {};
 			restrict: 'EA',
 			templateUrl: 'accountBilling.html',
 			scope: {
+				showPage: "&"
 			},
 			controller: AccountBillingCtrl,
 			controllerAs: 'vm',
@@ -4691,17 +4692,9 @@ var ViewerManager = {};
 	function AccountBillingCtrl() {
 		var vm = this;
 
-		/*
-		 * Init
-		 */
-		vm.subscriptionTypes = {
-			band1: {space: 10, collaborators: 5},
-			band2: {space: 20, collaborators: 10},
-			band3: {space: 30, collaborators: 15},
-			band4: {space: 40, collaborators: 20},
-			band5: {space: 50, collaborators: 25}
+		vm.upgrade = function () {
+			vm.showPage({page: "upgrade", callingPage: "billing"});
 		};
-
 	}
 }());
 
@@ -4742,18 +4735,12 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountCtrl.$inject = ["$scope", "$location", "$timeout", "AccountService", "Auth"];
+	AccountCtrl.$inject = ["$scope", "$location", "AccountService", "Auth"];
 
-	function AccountCtrl($scope, $location, $timeout, AccountService, Auth) {
+	function AccountCtrl($scope, $location, AccountService, Auth) {
 		var vm = this,
 			promise,
-			pages = ["repos", "profile", "billing"];
-
-		/*
-		 * Init
-		 */
-		vm.showProject = false;
-		vm.showBillingPage = false;
+			pages = ["upgrade", "repos", "profile", "billing"];
 
 		/*
 		 * Get the account data
@@ -4773,14 +4760,14 @@ var ViewerManager = {};
 					// Go to the correct "page"
 					if ($location.search().hasOwnProperty("page")) {
 						if (pages.indexOf(($location.search()).page) === -1) {
-							vm.itemToShow = pages[0];
+							vm.itemToShow = "repos";
 						}
 						else {
 							vm.itemToShow = ($location.search()).page;
 						}
 					}
 					else {
-						vm.itemToShow = pages[0];
+						vm.itemToShow = "repos";
 					}
 					/*
 					 vm.hasAvatar = response.data.hasAvatar;
@@ -4800,31 +4787,28 @@ var ViewerManager = {};
 		/*
 		 * Watch for change in project
 		 */
-		$scope.$watch("vm.state.project", function()
-		{
+		$scope.$watch("vm.state.project", function() {
 			goToProject();
 		});
 
-		/*
-		 * Watch for change in project
+		/**
+		 * For pages to show other pages
+		 * 
+		 * @param page
+		 * @param callingPage
 		 */
-		$scope.$watch("vm.showBillingPage", function (newValue) {
-			if (angular.isDefined(newValue) && newValue) {
-				vm.itemToShow = pages[2];
-				$location.search("page", pages[2]);
-
-				// Setup for the watch to work again
-				$timeout(function () {
-					vm.showBillingPage = false;
-				});
-			}
-		});
+		vm.showPage = function (page, callingPage) {
+			vm.itemToShow = page;
+			$location.search("page", page);
+			vm.callingPage = callingPage;
+		};
 
 		/**
 		 * Go to a project or back to the projects list if the project is unknown
 		 */
 		function goToProject () {
 			var i, length;
+			vm.showProject = false;
 			if (angular.isDefined(vm.accounts)) {
 				for (i = 0, length = vm.accounts[0].projects.length; i < length; i += 1) {
 					if (vm.accounts[0].projects[i].project === vm.state.project) {
@@ -5129,7 +5113,7 @@ var ViewerManager = {};
 			scope: {
 				account: "=",
 				accounts: "=",
-				goToBillingPage: "="
+				showPage: "&"
 			},
 			controller: AccountProjectsCtrl,
 			controllerAs: 'vm',
@@ -5200,7 +5184,7 @@ var ViewerManager = {};
 					for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
 						vm.accounts[i].projects[j].name = vm.accounts[i].projects[j].project;
 						if (vm.accounts[i].projects[j].timestamp !== null) {
-							vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp, true);
+							vm.accounts[i].projects[j].timestampPretty = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp, true);
 						}
 						vm.accounts[i].projects[j].uploading = false;
 						//vm.accounts[i].projects[j].canUpload = (vm.accounts[i].account === vm.account);
@@ -5255,7 +5239,7 @@ var ViewerManager = {};
 				vm.uploadModel(project);
 			}
 			else {
-				$location.path("/" + account + "/" + project.name, "_self");
+				$location.path("/" + account + "/" + project.name, "_self").search("page", null);
 			}
 		};
 
@@ -5457,7 +5441,8 @@ var ViewerManager = {};
 			promise = UtilsService.doGet(vm.account + ".json");
 			promise.then(function (response) {
 				if (file.size > response.data.accounts[0].quota.spaceLimit) {
-					vm.goToBillingPage = true;
+					// Show the upgrade page
+					vm.showPage({page: "upgrade", callingPage: "repos"});
 				}
 				else {
 					project.uploading = true;
@@ -5737,6 +5722,65 @@ var ViewerManager = {};
 		};
 
 		return obj;
+	}
+}());
+
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("accountUpgrade", accountUpgrade);
+
+	function accountUpgrade() {
+		return {
+			restrict: 'EA',
+			templateUrl: 'accountUpgrade.html',
+			scope: {
+				callingPage: "=",
+				showPage: "&"
+			},
+			controller: AccountUpgradeCtrl,
+			controllerAs: 'vm',
+			bindToController: true
+		};
+	}
+
+	AccountUpgradeCtrl.$inject = [];
+
+	function AccountUpgradeCtrl() {
+		var vm = this;
+
+		/*
+		 * Init
+		 */
+		vm.subscriptionTypes = {
+			band1: {space: 10, collaborators: 5, price: 100},
+			band2: {space: 20, collaborators: 10, price: 200},
+			band3: {space: 30, collaborators: 15, price: 300},
+			band4: {space: 40, collaborators: 20, price: 400},
+			band5: {space: 50, collaborators: 25, price: 500}
+		};
+
+		vm.goBack = function () {
+			vm.showPage({page: vm.callingPage});
+		};
 	}
 }());
 
@@ -8952,7 +8996,6 @@ var ViewerManager = {};
 
 					//console.log('url', (parentStateName !== "home" ? "/" : "") + ":" + childState.plugin);
 
-					console.log(333);
 					(function(childState){
 						$stateProvider.state(childStateName, {
 							name: parentState.children[i].plugin,
@@ -8965,7 +9008,6 @@ var ViewerManager = {};
 										$stateParams[childState.plugin] = true;
 									}
 
-									console.log(123);
 									StateManager.setState($stateParams, {});
 								}
 							}
@@ -15309,12 +15351,12 @@ var Oculus = {};
 		 */
 		function doRegister() {
 			var data,
-				notUnicode = new RegExp("[^\x00-\x7F]+"); // Inspired b Jeremy Ruten's answer http://stackoverflow.com/a/150078/782358
+				allowedFormat = new RegExp("^[a-zA-Z][a-zA-Z\d_]*$"); // English letters, numbers, underscore, not starting with number
 
 			if ((angular.isDefined(vm.newUser.username)) &&
 				(angular.isDefined(vm.newUser.email)) &&
 				(angular.isDefined(vm.newUser.password))) {
-				if (!notUnicode.test(vm.newUser.username)) {
+				if (allowedFormat.test(vm.newUser.username)) {
 					if (vm.newUser.tcAgreed) {
 						data = {
 							email: vm.newUser.email,
@@ -15348,7 +15390,7 @@ var Oculus = {};
 					}
 				}
 				else {
-					vm.registerErrorMessage = "Username contains characters not allowed";
+					vm.registerErrorMessage = "Username not allowed";
 				}
 			}
 			else {
