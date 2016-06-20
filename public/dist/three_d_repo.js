@@ -4692,6 +4692,12 @@ var ViewerManager = {};
 	function AccountBillingCtrl() {
 		var vm = this;
 
+		vm.billingHistory = [
+			{date: "10/04/2016", description: "1st payment", paymentMethod: "PayPal", amount: 100},
+			{date: "10/05/2016", description: "2nd payment", paymentMethod: "PayPal", amount: 100},
+			{date: "10/06/2016", description: "3rd payment", paymentMethod: "PayPal", amount: 100}
+		];
+
 		vm.upgrade = function () {
 			vm.showPage({page: "upgrade", callingPage: "billing"});
 		};

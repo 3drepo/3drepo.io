@@ -5,11 +5,41 @@
 				h2 Billing
 
 		.userContent
-			md-list
-				md-list-item.md-2-line
-					.md-list-item-text
-						h3 Current subscription
-						p 10Gb, 5 collaborators
+			// Current subscription
+			div(layout="row")
+				div(layout="column")
+					p.md-title Current subscription
+					p 10Gb, 5 collaborators
+				span(flex)
+				div(layout="row", layout-align="center center")
+					md-button.md-raised.md-accent(ng-click="vm.upgrade()") Upgrade
 			md-divider
-			md-content(layout-margin)
-				md-button.md-raised.md-accent(ng-click="vm.upgrade()") Upgrade
+			// Billing info
+			p.md-title Billing information
+			div(layout="row")
+				#accountBillingGroup(layout="column")
+					p Billing address
+					p 124 High Street
+					p Leeds
+					p LS11 8ST
+			md-divider
+				p.md-title Billing history
+				#accountBillingHistoryTitle(layout="row", layout-align="start")
+					p(flex="20") Date
+					p(flex="20") Description
+					p(flex="20") Payment method
+					p(flex="20") Amount
+				#accountBillingHistoryList(layout="row", layout-align="start start", ng-repeat="billing in vm.billingHistory")
+					p(flex="20") {{billing.date}}
+					p(flex="20") {{billing.description}}
+					p(flex="20") {{billing.paymentMethod}}
+					p(flex="20") {{billing.amount}}
+					md-button.md-icon-button.md-accent(aria-label="Download")
+						md-icon.angular-material-icons cloud_download
+
+
+
+
+
+
+

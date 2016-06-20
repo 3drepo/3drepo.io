@@ -187,6 +187,13 @@ account-info md-list {
   padding: 0;
 }
 
+account-info .accountInfoPage {
+  min-height: 60px;
+}
+account-info .accountInfoPage button {
+  min-height: 60px !important;
+}
+
 /** Avatar Image ******************************************************************************************************/
 .account-avatar-image {
 	width: 100%;
@@ -298,6 +305,27 @@ account-upgrade #accountUpgradeCurrentSubscription p {
 }
 account-upgrade #accountUpgradeCurrentSubscription p span {
   color: rgba(0, 0, 0, 0.9);
+}
+
+/** Account Billing ***************************************************************************************************/
+account-billing .md-title {
+  margin-bottom: 0;
+}
+
+account-billing #accountBillingGroup p {
+  margin: 0 0 10px;
+}
+account-billing #accountBillingGroup p:first-child {
+  color: rgba(0, 0, 0, 0.6);
+  margin-top: 20px;
+}
+
+account-billing #accountBillingHistoryTitle p {
+  color: rgba(0, 0, 0, 0.6);
+  margin: 20px 0 10px;
+}
+account-billing #accountBillingHistoryList p {
+  margin: 12px 0;
 }
 /* Done to counter bootstrap styling. This should really be set in a top level style file */
 .md-datepicker-input-mask {
