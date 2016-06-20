@@ -17,17 +17,12 @@
 
 angular.module('3drepo')
 .service('serverConfig', function() {
-	this.apiUrl = server_config.apiUrl;
+	"use strict";
 
-	this.democompany = server_config.democompany;
-	this.demoproject = server_config.demoproject;
-
-	this.chatHost    = server_config.chatHost;
-	this.chatPath    = server_config.chatPath;
-
-	this.apiVersion  = server_config.apiVersion;
-
-	this.backgroundImage = server_config.backgroundImage;
+	for (var k in server_config)
+	{
+		this[k] = server_config[k];
+	}
 });
 
 

@@ -89,10 +89,6 @@
 		document.addEventListener('fullscreenchange', exitFullScreen, false);
 		document.addEventListener('MSFullscreenChange', exitFullScreen, false);
 
-		var showQRCodeReader = function () {
-			EventService.send(EventService.EVENT.SHOW_QR_CODE_READER);
-		};
-
 		var enterOculusDisplay = function () {
 			EventService.send(EventService.EVENT.VIEWER.ENTER_VR);
 		};
@@ -138,13 +134,7 @@
 		vm.leftButtons.push(vm.viewingOptions[vm.selectedViewingOptionIndex]);
 
 		vm.rightButtons = [];
-		//vm.rightButtons.push({label: "Full screen", icon: "fa fa-arrows-alt", click: enterFullScreen});
-		/*viewer.
-		vm.rightButtons.push({
-			label: "QR code",
-			icon: "fa fa-qrcode",
-			click: showQRCodeReader
-		});
+		/*
 		vm.rightButtons.push({
 			label: "Help",
 			icon: "fa fa-question",

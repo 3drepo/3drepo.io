@@ -42,7 +42,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 	};
 
 	MapTile.prototype.updateSettings = function(settings){
-		
+
 		var self = this;
 
 		if(settings && settings.hasOwnProperty("mapTile")){
@@ -1032,7 +1032,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 		var gltf = document.createElement('gltf');
 		gltf.setAttribute('onclick', 'os_clickBuildingObject(event)');
-		gltf.setAttribute('url', server_config.apiUrl('os/buildings.gltf?method=osgrid&osgridref=' + osGridRef + '&draw=1'));
+		gltf.setAttribute('url', server_config.apiUrl(server_config.MAP_API, 'os/buildings.gltf?method=osgrid&osgridref=' + osGridRef + '&draw=1'));
 
 		var translate = [0, 0, 0];
 		var osCoor = OsGridRef.parse(osGridRef);
@@ -1113,8 +1113,7 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 		// app.appendChild(material);
 
 
-		//it.setAttribute("url", server_config.apiUrl('os/map-images/Outdoor/' + mapImagePosInfo.zoomLevel + '/' + x + '/' + y + '.png'));
-		it.setAttribute("url", server_config.getUrl(server_config.subdomains.mapImg, 'os/map-images/Outdoor/' + mapImagePosInfo.zoomLevel + '/' + x + '/' + y + '.png'));
+		it.setAttribute("url", server_config.apiUrl(server_config.MAP_API, 'os/map-images/Outdoor/' + mapImagePosInfo.zoomLevel + '/' + x + '/' + y + '.png'));
 		it.setAttribute("crossOrigin", "use-credentials");
 
 		app.appendChild(it);

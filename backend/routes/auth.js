@@ -31,12 +31,13 @@
 				systemLogger.logDebug("Authenticated user and signed token.", req);
 
 				req.session[C.REPO_SESSION_USER] = user;
-				req.session.cookie.domain = req.host;
+				req.session.cookie.domain        = config.cookie_domain;
 
 				if (config.cookie.maxAge)
 				{
 					req.session.cookie.maxAge = config.cookie.maxAge;
 				}
+
 				responseCodes.respond(place, req, res, next, responseCodes.OK, {username: user.username, roles: user.roles});
 			}
 		});
@@ -77,7 +78,7 @@
 
 		req.session.destroy(function() {
 			req[C.REQ_REPO].logger.logDebug("User has logged out.", req);
-			res.clearCookie("connect.sid", { path: "/" + config.api_server.host_dir });
+			res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });
 
 			responseCodes.respond("Logout POST", req, res, next, responseCodes.OK, {username: username});
 		});

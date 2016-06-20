@@ -147,14 +147,17 @@ var Viewer = {};
 		};
 
 		this.removeLogo = function () {
-			var numLogos = this.logos.length - 1;
-			var widthPercentage = Math.floor(100 / numLogos) + "%";
+			if (self.logos.length)
+			{
+				var numLogos = this.logos.length - 1;
+				var widthPercentage = Math.floor(100 / numLogos) + "%";
 
-			self.logos[numLogos].parentNode.removeChild(self.logos[numLogos]);
+				self.logos[numLogos].parentNode.removeChild(self.logos[numLogos]);
 
-			self.logos.splice(numLogos,1);
+				self.logos.splice(numLogos,1);
 
-			self.updateLogoWidth(widthPercentage);
+				self.updateLogoWidth(widthPercentage);
+			}
 		};
 
 		this.updateLogoWidth = function(widthPercentage) {
@@ -162,6 +165,20 @@ var Viewer = {};
 			{
 
 				self.logos[i].style.width = widthPercentage;
+			}
+		};
+
+		this.handleKeyPresses = function(e) {
+			if (e.charCode === "r".charCodeAt(0)) {
+				self.reset();
+				self.setApp(null);
+				self.setNavMode(self.NAV_MODES.WALK);
+				self.disableClicking();
+			} else if (e.charCode === "a".charCodeAt(0)) {
+				self.showAll();
+				self.enableClicking();
+			} else if (e.charCode === "u".charCodeAt(0)) {
+				self.revealAll();
 			}
 		};
 
@@ -177,7 +194,6 @@ var Viewer = {};
 				x3dom.runtime.ready = self.initRuntime;
 
 				self.addLogo();
-
 
 				// Set up the DOM elements
 				self.viewer = document.createElement("x3d");
@@ -225,19 +241,7 @@ var Viewer = {};
 
 				self.loadViewpoint = self.name + "_default"; // Must be called after creating nav
 
-				self.viewer.addEventListener("keypress", function(e) {
-					if (e.charCode === "r".charCodeAt(0)) {
-						self.reset();
-						self.setApp(null);
-						self.setNavMode(self.NAV_MODES.WALK);
-						self.disableClicking();
-					} else if (e.charCode === "a".charCodeAt(0)) {
-						self.showAll();
-						self.enableClicking();
-					} else if (e.charCode === "u".charCodeAt(0)) {
-						self.revealAll();
-					}
-				});
+				self.viewer.addEventListener("keypress", self.handleKeyPresses);
 
 				self.initialized = true;
 
@@ -251,7 +255,7 @@ var Viewer = {};
 				self.plugins = self.options.plugins;
 				Object.keys(self.plugins).forEach(function(key){
 					self.plugins[key].initCallback && self.plugins[key].initCallback(self);
-				})
+				});
 
 				callback(self.EVENT.READY, {
 					name: self.name,
@@ -260,9 +264,21 @@ var Viewer = {};
 			}
 		};
 
-		this.close = function() {
+		this.destroy = function() {
+			self.currentViewpoint._xmlNode.removeEventListener("viewpointChanged", self.viewPointChanged);
+			self.viewer.removeEventListener("mousedown", self.managerSwitchMaster);
+
+			self.removeLogo();
+
+			self.viewer.removeEventListener("mousedown", onMouseDown);
+			self.viewer.removeEventListener("mouseup", onMouseUp);
+			self.viewer.removeEventListener("keypress", self.handleKeyPresses);
+
 			self.viewer.parentNode.removeChild(self.viewer);
-			self.viewer = null;
+
+			ViewerUtil.offEventAll();
+
+			self.viewer = undefined;
 		};
 
 		// This is called when the X3DOM runtime is initialized
@@ -296,8 +312,6 @@ var Viewer = {};
 
 				self.setNavMode(self.defaultNavMode);
 			};
-
-			self.getCurrentViewpoint().addEventListener("viewpointChanged", self.viewPointChanged);
 
 			ViewerUtil.onEvent("onLoaded", function(objEvent) {
 				if (self.loadViewpoint) {
@@ -624,6 +638,8 @@ var Viewer = {};
 			var vpInfo = self.getCurrentViewpointInfo();
 			var eye = vpInfo.position;
 			var viewDir = vpInfo.view_dir;
+
+			console.log(event.orientation);
 
 			if (self.currentNavMode === self.NAV_MODES.HELICOPTER) {
 				self.nav._x3domNode._vf.typeParams[0] = Math.asin(viewDir[1]);
@@ -1289,6 +1305,11 @@ var Viewer = {};
 		};
 
 		this.linked = false;
+
+		this.managerSwitchMaster = function() {
+			self.manager.switchMaster(self.handle);
+		};
+
 		this.linkMe = function() {
 			// Need to be attached to the viewer master
 			if (!self.manager) {
@@ -1298,9 +1319,7 @@ var Viewer = {};
 			self.manager.linkMe(self.handle);
 			self.onViewpointChanged(self.manager.viewpointLinkFunction);
 
-			self.viewer.addEventListener("mousedown", function() {
-				self.manager.switchMaster(self.handle);
-			});
+			self.viewer.addEventListener("mousedown", self.managerSwitchMaster);
 
 			self.linked = true;
 		};
@@ -1336,9 +1355,9 @@ var Viewer = {};
 			var url = "";
 
 			if (revision === "head") {
-				url = server_config.apiUrl(account + "/" + project + "/revision/" + branch + "/head.x3d.mp");
+				url = server_config.apiUrl(server_config.GET_API, account + "/" + project + "/revision/" + branch + "/head.x3d.mp");
 			} else {
-				url = server_config.apiUrl(account + "/" + project + "/revision/" + revision + ".x3d.mp");
+				url = server_config.apiUrl(server_config.GET_API, account + "/" + project + "/revision/" + revision + ".x3d.mp");
 			}
 
 			self.account = account;
