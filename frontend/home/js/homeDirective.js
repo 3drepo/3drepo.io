@@ -164,12 +164,14 @@
 						}
 						if ((goToUserPage) || (goToAccount)) {
 							if (goToUserPage) {
+								vm.goToAccount = false;
 								element = "<" + UtilsService.snake_case(useState, "-") + "></" + UtilsService.snake_case(useState, "-") + ">";
 								loggedInElement = angular.element(element);
 								homeLoggedIn.append(loggedInElement);
 								$compile(loggedInElement)($scope);
 							}
 							else {
+								console.log(999, StateManager.state.account);
 								promise = AccountService.getUserInfo(StateManager.state.account);
 								promise.then(function (response) {
 									// Response with data.type indicates it's not the user's account
@@ -216,6 +218,8 @@
 		 * @param display
 		 */
 		vm.legalDisplay = function (event, display) {
+			$location.path("/" + display.value, "_self");
+			/*
 			vm.legalTitle = display.title;
 			vm.legalText = display.value;
 			$mdDialog.show({
@@ -228,6 +232,7 @@
 				preserveScope: true,
 				onRemoving: removeDialog
 			});
+			*/
 		};
 
 		$scope.$watch(EventService.currentEvent, function(event) {

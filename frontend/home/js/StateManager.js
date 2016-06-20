@@ -130,7 +130,7 @@
 			StateManager.handleStateChange(stateChangeObject);
 		});
 	}])
-	.service("StateManager", ["$q", "$state", "$rootScope", "structure", "EventService", function($q, $state, $rootScope, structure, EventService) {
+	.service("StateManager", ["$q", "$state", "$rootScope", "$timeout", "structure", "EventService", function($q, $state, $rootScope, $timeout, structure, EventService) {
 		var self = this;
 
 		// Stores the state, required as ui-router does not allow inherited
@@ -367,7 +367,9 @@
 			var updateLocation = !dontUpdateLocation ? true: false; // In case of null
 			$state.transitionTo(newStateName, self.state, { location: updateLocation });
 
-			self.state.changing = false;
+			$timeout(function () {
+				self.state.changing = false;
+			});
 		};
 
 		$rootScope.$watch(EventService.currentEvent, function(event) {

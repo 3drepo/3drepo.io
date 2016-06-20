@@ -84,7 +84,7 @@ home #legalLinks {
     position: absolute;
     bottom: 0;
     right: 0;
-    z-index: 1000;
+    z-index: 2;
 }
 home #legalLinks .md-button {
     font-size: 12px;
@@ -108,3 +108,4 @@ md-dialog md-toolbar {
     height: 40px;
     min-height: 40px;
 }
+

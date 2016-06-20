@@ -54,6 +54,7 @@
 		 * Set up event watching
 		 */
 		$scope.$watch(EventService.currentEvent, function (event) {
+			var item, i, length;
 			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
 				// Get any documents associated with an object
 				var object = event.value;
@@ -69,6 +70,19 @@
 								if (vm.docs.hasOwnProperty(docType)) {
 									vm.docs[docType].show = true;
 									allDocTypesHeight += docTypeHeight;
+
+									// Pretty format Meta Data dates
+									if (docType === "Meta Data") {
+										console.log(vm.docs["Meta Data"]);
+										for (i = 0, length = vm.docs["Meta Data"].data.length; i < length; i += 1) {
+											for (item in vm.docs["Meta Data"].data[i].metadata) {
+												if ((Date.parse(vm.docs["Meta Data"].data[i].metadata[item]) &&
+													(vm.docs["Meta Data"].data[i].metadata[item].indexOf("T") !== -1))) {
+													console.log(vm.docs["Meta Data"].data[i].metadata[item]);
+												}
+											}
+										}
+									}
 								}
 							}
 							setContentHeight();

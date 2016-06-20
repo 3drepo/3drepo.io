@@ -35,6 +35,7 @@ docs .metadataKey,
 docs .metadataValue {
   word-wrap: break-word;
   font-size: 14px;
+  margin-bottom: 0;
 }
 docs .metadataKey {
   color: rgba(0,0,0,0.5);

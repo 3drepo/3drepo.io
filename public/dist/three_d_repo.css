@@ -746,6 +746,17 @@ contact md-input-container {
     margin: 0;
 }
 
+cookies .md-toolbar-tools img {
+    width: 150px;
+}
+
+cookies-text {
+    position: absolute;
+    z-index: 3;
+    background: #FDFDFD;
+    color: rgba(0, 0, 0, 0.8);
+    padding: 10px 50px;
+}
 /** Docs **************************************************************************************************************/
 docs .typesList {
   padding: 0;
@@ -783,6 +794,7 @@ docs .metadataKey,
 docs .metadataValue {
   word-wrap: break-word;
   font-size: 14px;
+  margin-bottom: 0;
 }
 docs .metadataKey {
   color: rgba(0,0,0,0.5);
@@ -990,7 +1002,7 @@ home #legalLinks {
     position: absolute;
     bottom: 0;
     right: 0;
-    z-index: 1000;
+    z-index: 2;
 }
 home #legalLinks .md-button {
     font-size: 12px;
@@ -1014,6 +1026,8 @@ md-dialog md-toolbar {
     height: 40px;
     min-height: 40px;
 }
+
+
 /** Issues ************************************************************************************************************/
 
 issues #issuesAddContainer {
@@ -1594,6 +1608,18 @@ pricing .pricingContent {
     overflow: auto;
 }
 
+privacy .md-toolbar-tools img {
+    width: 150px;
+}
+
+privacy-text {
+    position: absolute;
+    z-index: 3;
+    background: #FDFDFD;
+    color: rgba(0, 0, 0, 0.8);
+    padding: 10px 50px;
+}
+
 md-dialog.qrCodeReaderDialog {
   max-height: 90%;
 }
@@ -1700,6 +1726,17 @@ sign-up-form .registerError {
 
 sign-up-form .rc-anchor-light {
     background: red;
+}
+terms-and-conditions .md-toolbar-tools img {
+    width: 150px;
+}
+
+terms-and-conditions-text {
+    position: absolute;
+    z-index: 3;
+    background: #FDFDFD;
+    color: rgba(0, 0, 0, 0.8);
+    padding: 10px 50px;
 }
 tree span {
   outline: none;

@@ -4709,7 +4709,6 @@ var ViewerManager = {};
 			{
 				promise = AccountService.getUserInfo(vm.account);
 				promise.then(function (response) {
-					console.log(response);
 					vm.accounts = response.data.accounts;
 					vm.username = vm.account;
 					vm.firstName = response.data.firstName;
@@ -7865,6 +7864,7 @@ var ViewerManager = {};
 		 * Set up event watching
 		 */
 		$scope.$watch(EventService.currentEvent, function (event) {
+			var item, i, length;
 			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
 				// Get any documents associated with an object
 				var object = event.value;
@@ -7880,6 +7880,19 @@ var ViewerManager = {};
 								if (vm.docs.hasOwnProperty(docType)) {
 									vm.docs[docType].show = true;
 									allDocTypesHeight += docTypeHeight;
+
+									// Pretty format Meta Data dates
+									if (docType === "Meta Data") {
+										console.log(vm.docs["Meta Data"]);
+										for (i = 0, length = vm.docs["Meta Data"].data.length; i < length; i += 1) {
+											for (item in vm.docs["Meta Data"].data[i].metadata) {
+												if ((Date.parse(vm.docs["Meta Data"].data[i].metadata[item]) &&
+													(vm.docs["Meta Data"].data[i].metadata[item].indexOf("T") !== -1))) {
+													console.log(vm.docs["Meta Data"].data[i].metadata[item]);
+												}
+											}
+										}
+									}
 								}
 							}
 							setContentHeight();
@@ -8906,7 +8919,7 @@ var ViewerManager = {};
 			StateManager.handleStateChange(stateChangeObject);
 		});
 	}])
-	.service("StateManager", ["$q", "$state", "$rootScope", "structure", "EventService", function($q, $state, $rootScope, structure, EventService) {
+	.service("StateManager", ["$q", "$state", "$rootScope", "$timeout", "structure", "EventService", function($q, $state, $rootScope, $timeout, structure, EventService) {
 		var self = this;
 
 		// Stores the state, required as ui-router does not allow inherited
@@ -9143,7 +9156,9 @@ var ViewerManager = {};
 			var updateLocation = !dontUpdateLocation ? true: false; // In case of null
 			$state.transitionTo(newStateName, self.state, { location: updateLocation });
 
-			self.state.changing = false;
+			$timeout(function () {
+				self.state.changing = false;
+			});
 		};
 
 		$rootScope.$watch(EventService.currentEvent, function(event) {
@@ -9402,12 +9417,14 @@ var ViewerManager = {};
 						}
 						if ((goToUserPage) || (goToAccount)) {
 							if (goToUserPage) {
+								vm.goToAccount = false;
 								element = "<" + UtilsService.snake_case(useState, "-") + "></" + UtilsService.snake_case(useState, "-") + ">";
 								loggedInElement = angular.element(element);
 								homeLoggedIn.append(loggedInElement);
 								$compile(loggedInElement)($scope);
 							}
 							else {
+								console.log(999, StateManager.state.account);
 								promise = AccountService.getUserInfo(StateManager.state.account);
 								promise.then(function (response) {
 									// Response with data.type indicates it's not the user's account
@@ -9454,6 +9471,8 @@ var ViewerManager = {};
 		 * @param display
 		 */
 		vm.legalDisplay = function (event, display) {
+			$location.path("/" + display.value, "_self");
+			/*
 			vm.legalTitle = display.title;
 			vm.legalText = display.value;
 			$mdDialog.show({
@@ -9466,6 +9485,7 @@ var ViewerManager = {};
 				preserveScope: true,
 				onRemoving: removeDialog
 			});
+			*/
 		};
 
 		$scope.$watch(EventService.currentEvent, function(event) {
@@ -12997,7 +13017,7 @@ var Oculus = {};
 
     function PanelCtrl ($scope, $window, $timeout, EventService) {
         var vm = this,
-			panelTopBottomGap = 40,
+			panelTopBottomGap = 55,
 			maxHeightAvailable = $window.innerHeight - panelTopBottomGap,
 			itemGap = 20,
 			panelToolbarHeight = 40,
