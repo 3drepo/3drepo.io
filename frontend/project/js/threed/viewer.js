@@ -204,6 +204,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				self.viewer.setAttribute("disableTouch", "true");
 				self.viewer.addEventListener("mousedown", onMouseDown);
 				self.viewer.addEventListener("mouseup",  onMouseUp);
+				self.viewer.addEventListener("mousemove",  onMouseMove);
 				self.viewer.style["pointer-events"] = "all";
 				self.viewer.className = "viewer";
 
@@ -211,7 +212,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				self.scene = document.createElement("Scene");
 				self.scene.setAttribute("onbackgroundclicked", "bgroundClick(event);");
-				self.scene.setAttribute("dopickpass", false);
+				//self.scene.setAttribute("dopickpass", false);
 				self.viewer.appendChild(self.scene);
 
 				self.pinShader = new PinShader(self.scene);
@@ -536,55 +537,96 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			ViewerUtil.onEvent("onMouseDown", functionToBind);
 		};
 
-		this.mouseDownPickPoint = function()
+		this.offMouseDown = function(functionToBind) {
+			ViewerUtil.offEvent("onMouseDown", functionToBind);
+		};
+
+		this.onMouseMove = function(functionToBind) {
+			ViewerUtil.onEvent("onMouseMove", functionToBind);
+		};
+
+		this.offMouseMove = function(functionToBind) {
+			ViewerUtil.offEvent("onMouseMove", functionToBind);
+		};
+
+		this.pickPoint = function(x, y, fireEvent)
 		{
-			var pickingInfo = self.getViewArea()._pickingInfo;
+			fireEvent = (typeof fireEvent === undefined) ? false : fireEvent;
+
+			self.getViewArea()._doc.ctx.pickValue(self.getViewArea(), x,y);
+
+			if (fireEvent)
+			{
+				// Simulate a mouse down pick point
+				self.mouseDownPickPoint({offsetX: x, offsetY: y});
+			}
+		};
+
+		this.mouseDownPickPoint = function(event)
+		{
+			var viewArea = self.getViewArea();
+			var pickingInfo = viewArea._pickingInfo;
 
 			if (pickingInfo.pickObj)
 			{
+				var account, project;
+				var projectParts = null;
 
-					var account, project;
-					var projectParts = null;
-
-					if (pickingInfo.pickObj._xmlNode)
+				if (pickingInfo.pickObj._xmlNode)
+				{
+					if (pickingInfo.pickObj._xmlNode.hasAttribute("id"))
 					{
-						if (pickingInfo.pickObj._xmlNode.hasAttribute("id"))
-						{
-							projectParts = pickingInfo.pickObj._xmlNode.getAttribute("id").split("__");
-						}
-					} else {
-						projectParts = pickingInfo.pickObj.pickObj._xmlNode.getAttribute("id").split("__");
+						projectParts = pickingInfo.pickObj._xmlNode.getAttribute("id").split("__");
 					}
+				} else {
+					projectParts = pickingInfo.pickObj.pickObj._xmlNode.getAttribute("id").split("__");
+				}
 
-					if (projectParts)
-					{
-						var objectID = pickingInfo.pickObj.partID ?
-							pickingInfo.pickObj.partID :
-							projectParts[2];
+				if (projectParts)
+				{
+					var objectID = pickingInfo.pickObj.partID ?
+						pickingInfo.pickObj.partID :
+						projectParts[2];
 
-						account = projectParts[0];
-						project = projectParts[1];
+					account = projectParts[0];
+					project = projectParts[1];
 
-						var inlineTransName = ViewerUtil.escapeCSSCharacters(account + "__" + project);
-						var projectInline = self.inlineRoots[inlineTransName];
-						var trans = projectInline._x3domNode.getCurrentTransform();
+					var inlineTransName = ViewerUtil.escapeCSSCharacters(account + "__" + project);
+					var projectInline = self.inlineRoots[inlineTransName];
+					var trans = projectInline._x3domNode.getCurrentTransform();
 
-						callback(self.EVENT.PICK_POINT, {
-							id: objectID,
-							position: pickingInfo.pickPos,
-							normal: pickingInfo.pickNorm,
-							trans: trans
-						});
-					} else {
-						callback(self.EVENT.PICK_POINT, {
-							position: pickingInfo.pickPos,
-							normal: pickingInfo.pickNorm
-						});
-					}
+					callback(self.EVENT.PICK_POINT, {
+						id: objectID,
+						position: pickingInfo.pickPos,
+						normal: pickingInfo.pickNorm,
+						trans: trans,
+						screenPos: [event.offsetX, event.offsetY]
+					});
+				} else {
+					callback(self.EVENT.PICK_POINT, {
+						position: pickingInfo.pickPos,
+						normal: pickingInfo.pickNorm
+					});
+				}
 			}
 		};
 
 		this.onMouseDown(this.mouseDownPickPoint);
+
+		/*
+		this.mouseMovePoint = function (event) {
+			if (event.hasOwnProperty("target")) {
+				console.log(event.hitPnt);
+			}
+			else {
+				console.log(event.clientX, event.clientY);
+				var viewArea = self.getViewArea();
+				viewArea._scene._nameSpace.doc.ctx.pickValue(viewArea, event.clientX, event.clientY, 1);
+			}
+		};
+
+		this.onMouseMove(this.mouseMovePoint);
+		*/
 
 		this.onViewpointChanged = function(functionToBind) {
 			ViewerUtil.onEvent("myViewpointHasChanged", functionToBind);
@@ -809,7 +851,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.offClickObject = function(functionToBind) {
-			offEvent("clickObject", functionToBind);
+			ViewerUtil.offEvent("clickObject", functionToBind);
 		};
 
 		this.viewpoints = {};
@@ -1781,6 +1823,7 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	GO_HOME: "VIEWER_GO_HOME",
 	SWITCH_FULLSCREEN: "VIEWER_SWITCH_FULLSCREEN",
 	REGISTER_VIEWPOINT_CALLBACK: "VIEWER_REGISTER_VIEWPOINT_CALLBACK",
+	REGISTER_MOUSE_MOVE_CALLBACK: "VIEWER_REGISTER_MOUSE_MOVE_CALLBACK",
 	OBJECT_SELECTED: "VIEWER_OBJECT_SELECTED",
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
 	HIGHLIGHT_OBJECTS: "VIEWER_HIGHLIGHT_OBJECTS",
@@ -1789,7 +1832,10 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 
 	GET_CURRENT_VIEWPOINT: "VIEWER_GET_CURRENT_VIEWPOINT",
 
+	MEASURE_MODE_CLICK_POINT: "VIEWER_MEASURE_MODE_CLICK_POINT",
+
 	PICK_POINT: "VIEWER_PICK_POINT",
+	MOVE_POINT: "VIEWER_MOVE_POINT",
 	SET_CAMERA: "VIEWER_SET_CAMERA",
 
 	LOGO_CLICK: "VIEWER_LOGO_CLICK",

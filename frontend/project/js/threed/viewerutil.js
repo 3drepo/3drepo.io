@@ -16,8 +16,8 @@
  **/
 
 var ViewerUtil;
-	var ViewerUtilListeners = {};
-	var ViewerUtilMyListeners = {};
+var ViewerUtilListeners = {};
+var ViewerUtilMyListeners = {};
 
 (function() {
 	"use strict";
@@ -48,6 +48,7 @@ var ViewerUtil;
 	ViewerUtil.prototype.triggerEvent = function(name, event)
 	{
 		var e = new CustomEvent(name, { detail: event });
+		console.log("TRIG: " + name);
 		eventElement.dispatchEvent(e);
 	};
 

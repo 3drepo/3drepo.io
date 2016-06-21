@@ -53,7 +53,7 @@
 
 	function ViewerCtrl ($scope, $q, $http, $element, $location, serverConfig, EventService)
 	{
-		var v = this;
+		var v = this, currentPickPoint;
 
 		v.initialised = $q.defer();
 		v.loaded      = $q.defer();
@@ -128,6 +128,8 @@
 			v.gamepad    = new Gamepad(v.viewer);
 			v.gamepad.init();
 
+			v.measure    = new MeasureTool(v.viewer);
+
 			v.collision  = new Collision(v.viewer);
 
 			$scope.reload();
@@ -178,6 +180,8 @@
 							v.oculus.switchVR();
 						} else if (event.type === EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK) {
 							v.viewer.onViewpointChanged(event.value.callback);
+						} else if (event.type === EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK) {
+							v.viewer.onMouseMove(event.value.callback);
 						} else if (event.type === EventService.EVENT.PROJECT_SETTINGS_READY) {
 							if (event.value.account === v.account && event.value.project === v.project)
 							{
@@ -220,8 +224,15 @@
 								event.value.clipDirection ? event.value.clipDirection : -1);
 						} else if (event.type === EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE) {
 							v.viewer.moveClippingPlane(event.value.percentage);
-						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) || (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS)) {
-							console.log(event.value);
+						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
+							v.viewer.highlightObjects(
+								event.value.account,
+								event.value.project,
+								event.value.id ? [event.value.id] : event.value.ids,
+								event.value.zoom,
+								event.value.colour
+							);
+						} else if (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS) {
 							v.viewer.highlightObjects(
 								event.value.account,
 								event.value.project,
@@ -253,6 +264,8 @@
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
 							v.manager.getCurrentViewer().setNavMode(event.value.mode);
+						} else if (event.type === EventService.EVENT.MEASURE_MODE) {
+							v.measure.measureMode(event.value);
 						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_URL){
 							//console.log('update url!!');
 							$location.path("/" + v.account + '/' + v.project).search({
