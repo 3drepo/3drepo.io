@@ -7,23 +7,26 @@
 				h2 Upgrade
 
 		.userContent
-			md-list
-				md-list-item.md-2-line
-					.md-list-item-text
-						h3 Current subscription
-						p 10Gb, 5 collaborators
+			p.md-title#accountUpgradeSubscriptionTitle Current subscription
+			.accountUpgradeSubscription(layout="row")
+				p Number of licenses
+				p {{vm.numLicenses}}
+				p Payment
+				p £{{vm.priceLicenses}} / month
+			md-divider
+			md-content
+				p.md-title New subscription
+				div(layout="row")
+					p Licenses
+					md-button.md-fab.md-mini.md-accent(aria-label="Reduce", ng-click="vm.changeLicenses(-1)")
+						md-icon.angular-material-icons(flex="none") remove
+					md-button.md-fab.md-mini.md-accent(aria-label="Reduce", ng-click="vm.changeLicenses(1)")
+						md-icon.angular-material-icons(flex="none") add
+			.accountUpgradeSubscription(layout="row")
+				p Number of licenses
+				p {{vm.numNewLicenses}}
+				p Payment
+				p £{{vm.priceNewLicenses}} / month
 			md-divider
 			md-content(layout-margin)
-				form
-					p.md-title Select a new subscription
-					md-radio-group(ng-model="vm.selectedSubscription")
-						md-radio-button(ng-repeat="(key, value) in vm.subscriptionTypes", value="{{key}}") {{value.space}}Gb, {{value.collaborators}} collaborators
-			md-divider
-			md-list
-				md-list-item.md-2-line
-					.md-list-item-text
-						h3 New subscription
-						p(ng-if="vm.selectedSubscription") {{vm.subscriptionTypes[vm.selectedSubscription].space}}Gb, {{vm.subscriptionTypes[vm.selectedSubscription].collaborators}} collaborators
-						p(ng-if="!vm.selectedSubscription") None selected
-			md-content(layout-margin)
-				md-button.md-raised.md-accent(ng-disabled="!vm.selectedSubscription") Pay
+				md-button.md-raised.md-accent(ng-disabled="vm.payButtonDisabled") Pay

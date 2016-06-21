@@ -171,7 +171,6 @@
 								$compile(loggedInElement)($scope);
 							}
 							else {
-								console.log(999, StateManager.state.account);
 								promise = AccountService.getUserInfo(StateManager.state.account);
 								promise.then(function (response) {
 									// Response with data.type indicates it's not the user's account

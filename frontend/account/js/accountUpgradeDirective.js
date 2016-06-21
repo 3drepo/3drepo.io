@@ -38,21 +38,28 @@
 	AccountUpgradeCtrl.$inject = [];
 
 	function AccountUpgradeCtrl() {
-		var vm = this;
+		var vm = this,
+			pricePerLicense = 100;
 
 		/*
 		 * Init
 		 */
-		vm.subscriptionTypes = {
-			band1: {space: 10, collaborators: 5, price: 100},
-			band2: {space: 20, collaborators: 10, price: 200},
-			band3: {space: 30, collaborators: 15, price: 300},
-			band4: {space: 40, collaborators: 20, price: 400},
-			band5: {space: 50, collaborators: 25, price: 500}
-		};
+		vm.numLicenses = 2;
+		vm.priceLicenses = vm.numLicenses * pricePerLicense;
+		vm.numNewLicenses = 2;
+		vm.priceNewLicenses = vm.priceLicenses;
+		vm.payButtonDisabled = true;
 
 		vm.goBack = function () {
 			vm.showPage({page: vm.callingPage});
+		};
+
+		vm.changeLicenses = function (change) {
+			if (!((vm.numNewLicenses === 0) && (change === -1))) {
+				vm.numNewLicenses += change;
+				vm.priceNewLicenses = vm.numNewLicenses * pricePerLicense;
+				vm.payButtonDisabled = (vm.numNewLicenses === vm.numLicenses);
+			}
 		};
 	}
 }());

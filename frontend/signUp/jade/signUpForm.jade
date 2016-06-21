@@ -9,6 +9,7 @@ form#signUpForm
 		label Password
 		input(type='password', ng-model='vm.newUser.password', ng-required ng-keypress="vm.register($event)")
 	// Extra hidden inputs to prevent input autofill
+	input(type="text", ng-show="false")
 	input(type="email", ng-show="false")
 	input(type="password", ng-show="false")
 

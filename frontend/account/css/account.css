@@ -300,10 +300,23 @@ account-menu md-icon {
 }
 
 /** Account Upgrade ***************************************************************************************************/
-account-upgrade #accountUpgradeCurrentSubscription p {
-  color: rgba(0, 0, 0, 0.6);
+account-upgrade #accountUpgradeSubscriptionTitle {
+  margin: 0;
 }
-account-upgrade #accountUpgradeCurrentSubscription p span {
+
+account-upgrade .accountUpgradeSubscription p:first-child {
+  color: rgba(0, 0, 0, 0.6);
+  margin-right: 10px;
+}
+account-upgrade .accountUpgradeSubscription p:nth-child(2) {
+  color: rgba(0, 0, 0, 0.9);
+  margin-right: 30px;
+}
+account-upgrade .accountUpgradeSubscription p:nth-child(3) {
+  color: rgba(0, 0, 0, 0.6);
+  margin-right: 10px;
+}
+account-upgrade .accountUpgradeSubscription p:nth-child(4) {
   color: rgba(0, 0, 0, 0.9);
 }
 
