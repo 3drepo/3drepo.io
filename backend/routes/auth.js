@@ -35,6 +35,8 @@
 	router.post("/login", login);
 	router.post("/logout", logout);
 
+	router.get("/login", checkLogin);
+
 	router.post('/contact', contact);
 	router.get("/:account.json", middlewares.loggedIn, listInfo);
 	router.get("/:account.jpg", middlewares.hasReadAccessToAccount, getAvatar);
@@ -57,12 +59,8 @@
 	}
 
 	function createSession(place, req, res, next, user){
-		console.log(JSON.stringify(req.session));
-
 		req.session.regenerate(function(err) {
 			if(err) {
-				console.log("ERROR: " + err);
-
 				responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {username: user.username});
 			} else {
 				req[C.REQ_REPO].logger.logDebug("Authenticated user and signed token.");
@@ -114,7 +112,7 @@
 
 		req.session.destroy(function() {
 			req[C.REQ_REPO].logger.logDebug("User has logged out.");
-			res.clearCookie("connect.sid", { path: "/" + config.api_server.host_dir });
+			//res.clearCookie("connect.sid", { domain: config.cookie.domain, path: "/" });
 			responseCodes.respond("Logout POST", req, res, next, responseCodes.OK, {username: username});
 		});
 	}

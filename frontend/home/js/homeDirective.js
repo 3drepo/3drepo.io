@@ -139,7 +139,7 @@
 							notLoggedInElement = angular.element("<login></login>");
 							homeLoggedOut.append(notLoggedInElement);
 							$compile(notLoggedInElement)($scope);
-							
+
 							// Set the URL to root if it is not root
 							$location.path("/", "_self");
 						}
@@ -213,7 +213,7 @@
 
 		/**
 		 * Display legal text
-		 * 
+		 *
 		 * @param event
 		 * @param display
 		 */

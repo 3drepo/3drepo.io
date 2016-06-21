@@ -32,8 +32,7 @@
 			cookie: {
 				domain: config.cookie.domain,
 				path: "/",
-				secure: config.using_ssl,
-				httpOnly: false
+				secure: config.using_ssl
 			},
 			store: new FileStore()
 		});
