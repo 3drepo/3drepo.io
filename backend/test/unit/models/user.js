@@ -26,7 +26,8 @@ let User = proxyquire('../../../models/user', {
 		};
 	}, 
 	'mongoose': mongoose, 
-	'./factory/modelFactory':  modelFactoryMock
+	'./factory/modelFactory':  modelFactoryMock,
+	'../mailer/mailer': {}
 });
 
 
@@ -85,7 +86,7 @@ describe('User', function(){
 			let updateObj = {
 				firstName: 'fname',
 				lastName: 'lastname',
-				email: 'email@3drepo.org'
+				email: 'test3drepo@mailinator.com'
 			};
 
 			user.markModified = () => true;
@@ -94,7 +95,10 @@ describe('User', function(){
 
 			return user.updateInfo(updateObj).then(user => {
 				// user updated 
-				expect(user.toObject().customData).to.deep.equal(updateObj);
+				//expect(user.toObject().customData).to.deep.equal(updateObj);
+				expect(user.toObject()).to.have.deep.property('customData.firstName', updateObj.firstName);
+				expect(user.toObject()).to.have.deep.property('customData.lastName', updateObj.lastName);
+				expect(user.toObject()).to.have.deep.property('customData.email', updateObj.email);
 				// save should've been called once
 				sinon.assert.calledOnce(spy);
 
@@ -117,13 +121,78 @@ describe('User', function(){
 
 			let stub = sinon.stub(User, 'authenticate').returns(Promise.resolve({username}));
 
-			return User.updatePassword(username, oldPassword, newPassword).then(() => {
-				sinon.assert.calledWith(stub, username, oldPassword);
+			return User.updatePassword({}, username, oldPassword, null, newPassword).then(() => {
+				sinon.assert.calledWith(stub, {}, username, oldPassword);
+				stub.restore();
 			});
 
-			stub.restore();
+		
 		})
-	})
+	});
+
+	describe('#createUser', function(){
+		it('should have createUser static method', function(){
+			expect(User.createUser).to.exist;
+		});
+
+		it('should have called addUser', function(){
+			let spy = sinon.spy(modelFactoryMock.db, 'addUser');
+			let username = 'user';
+			let password = '123';
+			let options = {
+				'rubbish': 'should not be inserted into database',
+				'firstName': '123',
+				'email': 'test3drepo@mailinator.com'
+			};
+
+			let expectedCallWithOptions = {
+				customData: { firstName : options.firstName, inactive: true, email: options.email},
+				roles: []
+			}
+
+			return User.createUser({}, username, password, options, 1).then(res => {
+				expectedCallWithOptions.customData.emailVerifyToken = res;
+				sinon.assert.calledWith(spy, username, password, expectedCallWithOptions);
+				spy.restore();
+			});
+		});
+
+	});
+
+
+	describe('.hasRole', function(){
+		it('should have hasRole method', function(){
+			let user = new User();
+			expect(user.hasRole).to.exist;
+		});
+
+
+		it('hasRole should able to return the role found', function(){
+
+			let user = new User();
+
+			user.roles = [ 
+				{
+					"role" : "testproject.collaborator",
+					"db" : "testaccount"
+				}, 
+				{
+					"role" : "admin",
+					"db" : "testaccount"
+				}
+			];
+
+			let found = user.hasRole(user.roles[1].db, user.roles[1].role);
+			expect(found).to.deep.equal(user.roles[1]);
+
+			found = user.hasRole(user.roles[0].db, user.roles[0].role);
+			expect(found).to.deep.equal(user.roles[0]);
+
+
+			found = user.hasRole('a', 'b');
+			expect(found).to.be.null;
+		});
+	});
 
 	after(function(done){
 		mockgoose.reset(function() {

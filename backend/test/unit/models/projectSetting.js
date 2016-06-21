@@ -1,4 +1,20 @@
 'use strict';
+/**
+ *  Copyright (C) 2014 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 let chai = require("chai");
 let expect = require('chai').expect;
@@ -76,6 +92,42 @@ describe('Project Settings', function(){
 
 
 		})
+	});
+
+	describe('.findCollaborator', function(){
+
+		it('should have findCollaborator method', function(){
+			let projectSetting = new ProjectSetting();
+			expect(projectSetting.findCollaborator).to.exist;
+		});
+
+
+		it('findCollaborator should able to return the collaborator found', function(){
+
+			let projectSetting = new ProjectSetting();
+
+			projectSetting.collaborators = [ 
+				{
+					"user" : "user1",
+					"role" : "viewer"
+				}, 
+				{
+					"user" : "user2",
+					"role" : "collaborator"
+				}
+			];
+
+			let found = projectSetting.findCollaborator(projectSetting.collaborators[1].user, projectSetting.collaborators[1].role);
+			expect(found).to.deep.equal(projectSetting.collaborators[1]);
+
+			found = projectSetting.findCollaborator(projectSetting.collaborators[0].user, projectSetting.collaborators[0].role);
+			expect(found).to.deep.equal(projectSetting.collaborators[0]);
+
+
+			found = projectSetting.findCollaborator('user1', 'collaborator');
+			expect(found).to.be.null;
+
+		});
 	});
 
 	after(function(done){

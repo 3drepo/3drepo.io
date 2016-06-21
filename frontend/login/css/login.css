@@ -1,4 +1,4 @@
-login #login {
+login {
   position: absolute;
   top: 0;
   width: 100%;
@@ -6,23 +6,25 @@ login #login {
   background-size: contain;
 }
 
-login #loginContent {
-  padding-top: 50px;
-  background: rgba(63,81,181,0.7);
+login .homeUserContent md-toolbar {
+  height: 40px;
+  min-height: 40px;
 }
 
-login #loginTitle {
-  color: #ffffff;
-  margin: 50px 0 -10px 0;
+login h1,
+login h2,
+login h3 {
+  color: #FFFFFF;
 }
 
-login #loginSubTitle,
 login #loginVersion{
-  color: rgba(255,255,255,0.6);
+  color: rgba(0, 0, 0 , 0.3);
+  font-size: 14px;
+  margin: 10px 0 0;
 }
 
 login md-input-container {
-  margin: 0;
+  margin-bottom: 0;
 }
 
 login md-input-container input {
@@ -32,6 +34,34 @@ login md-input-container input {
   background: #ffffff !important;
 }
 
-login #loginError {
+login .loginError {
   color: #F44336;
+  margin: 5px 0 5px;
+  font-weight: normal;
+}
+
+login .loginTitle {
+  margin: -5px 0 10px 7px;
+  color: rgba(0, 0, 0, 0.5) !important;
+}
+
+login .loginLinks {
+  font-size: 14px;
+  margin: 5px 0;
+}
+
+login #loginDivider {
+  width: 1px;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+/** Terms and Conditions Dialog ***************************************************************************************/
+.tcDialog {
+  min-width: 850px;
+  min-height: 664px;
+  overflow: hidden;
+}
+
+.tcDialog #tcIcon {
+  margin-right: 10px;
 }

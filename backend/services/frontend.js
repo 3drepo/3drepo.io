@@ -49,22 +49,26 @@ module.exports.createApp = function(serverConfig)
 
 		params.config_js += "server_config.apiUrls = {";
 
-		for (var k in config.apiUrls)
+		for (let k in config.apiUrls)
 		{
-			params.config_js += "\"" + k + "\" : [";
-			params.config_js += config.apiUrls[k].join(",");
-			params.config_js += "],";
+			if (config.apiUrls.hasOwnProperty(k)) {
+				params.config_js += "\"" + k + "\" : [";
+				params.config_js += config.apiUrls[k].join(",");
+				params.config_js += "],";
+			}
 		}
 
 		params.config_js += "};\n";
 
-		var numApiUrlTypes = Object.keys(config.apiUrls).length;
+		//var numApiUrlTypes = Object.keys(config.apiUrls).length;
 
 		params.config_js += "server_config.apiUrlCounter = {";
 
-		for (var k in config.apiUrls)
+		for (let k in config.apiUrls)
 		{
-			params.config_js += "\"" + k + "\" : 0,";
+			if (config.apiUrls.hasOwnProperty(k)) {
+				params.config_js += "\"" + k + "\" : 0,";
+			}
 		}
 
 		params.config_js += "};\n";
@@ -105,6 +109,8 @@ module.exports.createApp = function(serverConfig)
 
 		params.config_js += "\n\nvar realOpen = XMLHttpRequest.prototype.open;\n\nXMLHttpRequest.prototype.open = function(method, url, async, unk1, unk2) {\n if(async) this.withCredentials = true;\nrealOpen.apply(this, arguments);\n};";
 
+		params.config_js += "\n\nserver_config.auth = " + JSON.stringify(config.auth) + ";";
+
 		res.header("Content-Type", "text/javascript");
 		res.render("config.jade", params);
 	});
@@ -118,24 +124,71 @@ module.exports.createApp = function(serverConfig)
 		],
 		"children" : [
 			{
+				"plugin": "registerRequest",
+				"url": "registerRequest"
+			},
+			{
+				"plugin": "registerVerify",
+				"url": "registerVerify?username&token&pay"
+			},
+			{
+				"plugin": "passwordForgot",
+				"url": "passwordForgot"
+			},
+			{
+				"plugin": "passwordChange",
+				"url": "passwordChange?username&token"
+			},
+			{
+				"plugin": "pricing",
+				"url": "pricing"
+			},
+			{
+				"plugin": "signUp",
+				"url": "signUp?pay"
+			},
+			{
+				"plugin": "contact",
+				"url": "contact"
+			},
+			{
+				"plugin": "payment",
+				"url": "payment?username&token"
+			},
+			{
+				"plugin": "termsAndConditions",
+				"url": "termsAndConditions"
+			},
+			{
+				"plugin": "privacy",
+				"url": "privacy"
+			},
+			{
+				"plugin": "cookies",
+				"url": "cookies"
+			},
+			{
 				"plugin": "account",
 				"children": [
 					{
 						"plugin": "project",
 						"friends" : [
 							"panel",
+							"filter",
 							"tree",
 							"viewpoints",
 							"issues",
 							"clip",
-							"building",
 							"bottomButtons",
+							"qrCodeReader",
 							"docs",
 							"utils",
 							"walkthroughVr",
 							"oculus",
 							"groups",
-							"measure"
+							"measure",
+							"rightPanel",
+							"building"
 						],
 						'url': '/:project?at&up&view',
 						"children" : [
@@ -257,7 +310,8 @@ module.exports.createApp = function(serverConfig)
 			"pluginCSS": [],
 			"renderMe": jade.renderFile,
 			"structure": JSON.stringify(pluginStructure),
-			"frontendJade": []
+			"frontendJade": [],
+			"gaTrackId": config.gaTrackId
 		};
 
 		params.parentStateJSON	= JSON.stringify(params.parentStateJSON);

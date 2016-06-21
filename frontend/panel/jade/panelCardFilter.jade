@@ -1,5 +1,5 @@
-.panelCardFilter(ng-if="vm.showFilter", layout="row" flex="80")
+div(ng-if="vm.showFilter", layout="row" flex="100")
 	span(flex="100")
-		input#panelCardFilterInput(type="text", ng-model="vm.filterInputText" placeholder="Filter" flex="100")
+		input#panelCardFilterInput(type="text", ng-model="vm.filterInputText" placeholder=" Filter" flex="100")
 	div(flex="15", ng-if="vm.showClearFilterButton")
 		md-icon(md-font-icon="fa-times-circle" class="fa" ng-click="vm.clearFilter()")

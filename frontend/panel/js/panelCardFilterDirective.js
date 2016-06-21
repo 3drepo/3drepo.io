@@ -39,13 +39,15 @@
 
 	function PanelCardFilterCtrl ($scope, $timeout, $element) {
 		var vm = this,
-			filterTimeout = null;
+			filterTimeout = null,
+			filterInput;
 
 		/**
 		 * Reset the filter text
 		 */
 		vm.clearFilter = function () {
 			vm.filterInputText = "";
+			filterInput.focus();
 		};
 
 		/*
@@ -69,7 +71,8 @@
 		$scope.$watch("vm.showFilter", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
 				$timeout(function () {
-					angular.element($element[0].querySelector("#panelCardFilterInput")).focus();
+					filterInput = angular.element($element[0].querySelector("#panelCardFilterInput"));
+					filterInput.focus();
 				});
 			}
 		});

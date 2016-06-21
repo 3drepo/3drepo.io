@@ -1,33 +1,49 @@
-md-content(flex layout="row" layout-align="space-between")
-	.dataContainer(flex="45")
-		div
-			md-input-container.md-block
-				label Username
-				input(ng-model="vm.username" ng-disabled="true")
-		div(layout="row" layout-align="space-between")
-			md-input-container.md-block(flex="45")
-				label First name
-				input(ng-model="vm.firstName")
-			md-input-container.md-block(flex="45")
-				label Last name
-				input(ng-model="vm.lastName")
-		div
-			md-input-container.md-block
-				label Email
-				input(ng-model="vm.email", type="email")
-		div(layout="row", layout-align="start center")
-			md-button.md-accent(ng-click="vm.updateInfo()") Update
-			p {{vm.infoSaveInfo}}
+.homeUserContent
+	md-content.md-whiteframe-1dp(aria-label="Projects", flex)
+		md-toolbar
+			.md-toolbar-tools
+				h2 Profile
+				span(flex)
 
-	.dataContainer(flex="45")
-		div
-			md-input-container.md-block
-				label Old password
-				input(ng-model="vm.oldPassword", type="password")
-		div
-			md-input-container.md-block
-				label New password
-				input(ng-model="vm.newPassword", type="password")
-		div(layout="row", layout-align="start center")
-			md-button.md-accent(ng-click="vm.updatePassword()") Update
-			p {{vm.passwordSaveInfo}}
+		md-list.accountProfileList
+			div(layout="column", flex)
+				md-list-item(ng-click="vm.toggleInfo()")
+					md-button.md-icon-button(aria-label="Folder")
+						md-icon.angular-material-icons person_outline
+					p Info
+				div(flex layout="row")
+					.accountProfileContent(ng-show="vm.showInfo", layout="column", flex="40")
+						md-input-container.md-block
+							label Username
+							input(ng-model="vm.username" ng-disabled="true")
+						md-input-container
+							label First name
+							input(ng-model="vm.firstName")
+						md-input-container.md-block
+							label Last name
+							input(ng-model="vm.lastName")
+						md-input-container.md-block
+							label Email
+							input(ng-model="vm.email", type="email")
+						.updateContainer(layout="row", layout-align="start center")
+							md-button.md-accent(ng-click="vm.updateInfo()") Update
+							p {{vm.infoSaveInfo}}
+
+			md-divider
+
+			div(layout="column")
+				md-list-item(ng-click="vm.toggleChangePassword()")
+					md-button.md-icon-button(aria-label="Folder")
+						md-icon.angular-material-icons swap_vert
+					p Change Password
+				div(flex layout="row")
+					.accountProfileContent(ng-show="vm.showChangePassword", layout="column", flex="40")
+						md-input-container.md-block
+							label Old password
+							input(ng-model="vm.oldPassword", type="password")
+						md-input-container.md-block
+							label New password
+							input(ng-model="vm.newPassword", type="password")
+						.updateContainer(layout="row", layout-align="start center")
+							md-button.md-accent(ng-click="vm.updatePassword()") Update
+							p {{vm.passwordSaveInfo}}

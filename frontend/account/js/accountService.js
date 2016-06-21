@@ -21,46 +21,64 @@
 	angular.module("3drepo")
 		.factory("AccountService", AccountService);
 
-	AccountService.$inject = ["$http", "$q", "serverConfig"];
+	AccountService.$inject = ["$http", "$q", "serverConfig", "UtilsService"];
 
-	function AccountService($http, $q, serverConfig) {
+	function AccountService($http, $q, serverConfig, UtilsService) {
 		var obj = {},
 			deferred,
 			bid4free;
 
 		/**
-		 * Get account data
+		 * Do POST
+		 *
+		 * @param data
+		 * @param urlEnd
+		 * @param headers
+		 * @returns {*|promise}
 		 */
-		obj.getData = function (username) {
-			deferred = $q.defer();
+		function doPost(data, urlEnd, headers) {
+			var deferred = $q.defer(),
+				url = serverConfig.apiUrl(serverConfig.POST_API, urlEnd),
+				config = {withCredentials: true};
 
-			var accountData = {};
+			if (angular.isDefined(headers)) {
+				config.headers = headers;
+			}
 
-			$http.get(serverConfig.apiUrl(serverConfig.GET_API, username + ".json"))
-				.then(function (response) {
-					var i, length,
-						project, projectsGrouped;
-					console.log(response);
-
-					// Groups projects under accounts
-					projectsGrouped = {};
-					for (i = 0, length = response.data.projects.length; i < length; i += 1) {
-						project = response.data.projects[i];
-						if (!(project.account in projectsGrouped)) {
-							projectsGrouped[project.account] = [];
-						}
-						projectsGrouped[project.account].push(project.project);
+			$http.post(url, data, config)
+				.then(
+					function (response) {
+						deferred.resolve(response);
+					},
+					function (error) {
+						deferred.resolve(error);
 					}
-
-					accountData = response.data;
-					accountData.projectsGrouped = projectsGrouped;
-
-					accountData.avatarURL = serverConfig.apiUrl(serverConfig.GET_API, username + ".jpg");
-					deferred.resolve(accountData);
-				});
-
+				);
 			return deferred.promise;
-		};
+		}
+
+		/**
+		 * Handle PUT requests
+		 * @param data
+		 * @param urlEnd
+		 * @returns {*}
+		 */
+		function doPut(data, urlEnd) {
+			var deferred = $q.defer(),
+				url = serverConfig.apiUrl(serverConfig.POST_API, urlEnd),
+				config = {withCredentials: true};
+
+			$http.put(url, data, config)
+				.then(
+					function (response) {
+						deferred.resolve(response);
+					},
+					function (error) {
+						deferred.resolve(error);
+					}
+				);
+			return deferred.promise;
+		}
 
 		/**
 		 * Update the user info
@@ -70,14 +88,7 @@
 		 * @returns {*}
 		 */
 		obj.updateInfo = function (username, info) {
-			deferred = $q.defer();
-			$http.post(serverConfig.apiUrl(serverConfig.POST_API, username), info)
-				.then(function (response) {
-					console.log(response);
-					deferred.resolve(response);
-				});
-
-			return deferred.promise;
+			return doPut(info, username);
 		};
 
 		/**
@@ -88,14 +99,7 @@
 		 * @returns {*}
 		 */
 		obj.updatePassword = function (username, passwords) {
-			deferred = $q.defer();
-			$http.post(serverConfig.apiUrl(serverConfig.POST_API, username), passwords)
-				.then(function (response) {
-					console.log(response);
-					deferred.resolve(response);
-				});
-
-			return deferred.promise;
+			return doPut(passwords, username);
 		};
 
 		obj.getProjectsBid4FreeStatus = function (username) {
@@ -105,6 +109,78 @@
 					bid4free.resolve(response);
 				});
 			return bid4free.promise;
+		};
+
+		/**
+		 * Create a new project
+		 *
+		 * @param projectData
+		 * @returns {*|promise}
+		 */
+		obj.newProject = function (projectData) {
+			var data = {
+				desc: "",
+				type: (projectData.type === "Other") ? projectData.otherType : projectData.type
+			};
+			return doPost(data, projectData.account + "/" + projectData.name);
+		};
+
+		/**
+		 * Upload file/model to database
+		 *
+		 * @param projectData
+		 * @returns {*|promise}
+		 */
+		obj.uploadModel = function (projectData) {
+			var data = new FormData();
+			data.append("file", projectData.uploadFile);
+			return doPost(data, projectData.account + "/" + projectData.project + "/upload", {'Content-Type': undefined});
+		};
+
+		/**
+		 * Get upload status
+		 *
+		 * @param projectData
+		 * @returns {*|promise}
+		 */
+		obj.uploadStatus = function (projectData) {
+			return UtilsService.doGet(projectData.account + "/" + projectData.project + ".json");
+		};
+
+		/**
+		 * Create a new database
+		 *
+		 * @param account
+		 * @param databaseName
+		 * @returns {*|promise}
+		 */
+		obj.newDatabase = function (account, databaseName) {
+			var data = {
+				database: databaseName,
+				plan: "THE-100-QUID-PLAN"
+			};
+			return doPost(data, account + "/database");
+		};
+
+		/**
+		 * Create a new subscription
+		 *
+		 * @param account
+		 * @param data
+		 * @returns {*|promise}
+		 */
+		obj.newSubscription = function (account, data) {
+			return doPost(data, account + "/subscriptions");
+		};
+
+		/**
+		 * Get user info
+		 *
+		 * @param username
+		 * @returns {*|promise}
+		 */
+		obj.getUserInfo = function (username) {
+			return UtilsService.doGet(username + ".json");
 		};
 
 		return obj;

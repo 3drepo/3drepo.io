@@ -57,7 +57,7 @@
 
 				// Set up the new current selected option button
 				vm.selectedViewingOptionIndex = index;
-				vm.leftButtons[1] = vm.viewingOptions[index];
+				vm.rightButtons[0] = vm.viewingOptions[index];
 
 				vm.showViewingOptionButtons = false;
 			}
@@ -107,14 +107,14 @@
 				label: "Walk",
 				icon: "fa fa-child",
 				click: setViewingOption,
-				iconClass: "bottomButtomIconWalk"
+				iconClass: "bottomButtonIconWalk"
 			},
 			{
 				mode: VIEWER_NAV_MODES.HELICOPTER,
 				label: "Helicopter",
 				icon: "icon icon_helicopter",
 				click: setViewingOption,
-				iconClass: "bottomButtomIconHelicopter"
+				iconClass: "bottomButtonIconHelicopter"
 			},
 			{
 				mode: VIEWER_NAV_MODES.TURNTABLE,
@@ -131,26 +131,21 @@
 			icon: "fa fa-home",
 			click: home
 		});
-		vm.leftButtons.push(vm.viewingOptions[vm.selectedViewingOptionIndex]);
 
 		vm.rightButtons = [];
+		vm.rightButtons.push(vm.viewingOptions[vm.selectedViewingOptionIndex]);
 		/*
 		vm.rightButtons.push({
 			label: "Help",
 			icon: "fa fa-question",
 			click: toggleHelp
 		});
-		*/
 		vm.rightButtons.push({
 			label: "VR",
 			icon: "icon icon_cardboard",
 			click: enterOculusDisplay,
-			iconClass: "bottomButtomIconCardboard"
+			iconClass: "bottomButtonIconCardboard"
 		});
-		vm.rightButtons.push({
-			label: "Measure",
-			icon: "fa fa-arrows-v",
-			click: setMeasureMode
-		});
+		 */
 	}
 }());

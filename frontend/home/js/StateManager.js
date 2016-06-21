@@ -52,8 +52,8 @@
 		while (stateStack.length > 0)
 		{
 			var stackLength      = stateStack.length;
-			var parentState      = stateStack[stackLength - 1];
-			var parentStateName  = stateNameStack[stackLength - 1];
+			var parentState      = stateStack[0];
+			var parentStateName  = stateNameStack[0];
 
 			//console.log('parentState', parentState);
 			if (parentState.children)
@@ -77,7 +77,7 @@
 							resolve: {
 								init: function(StateManager, $stateParams)
 								{
-									//console.log('init', childState.plugin, $stateParams);
+
 									if(!$stateParams.hasOwnProperty(childState.plugin)){
 										$stateParams[childState.plugin] = true;
 									}
@@ -97,9 +97,11 @@
 
 		$urlRouterProvider.otherwise("");
 	}])
-	.run(["$rootScope", "$state", "uiState", "StateManager", function($rootScope, $state, uiState, StateManager) {
+	.run(["$location", "$rootScope", "$state", "uiState", "StateManager", function($location, $rootScope, $state, uiState, StateManager) {
 		$rootScope.$on("$stateChangeStart",function(event, toState, toParams, fromState, fromParams){
 			StateManager.state.changing = true;
+
+
 
 			var stateChangeObject = {
 				toState    : toState,
@@ -118,6 +120,12 @@
 				fromState  : fromState,
 				fromParams : fromParams
 			};
+
+			//console.log('path', $location.path());
+
+			if(typeof ga !== 'undefined' && ga !== null){
+				ga('send', 'pageview', $location.path());
+			}
 
 			StateManager.handleStateChange(stateChangeObject);
 		});
@@ -177,10 +185,27 @@
 		};
 
 		this.handleStateChange = function(stateChangeObject) {
-			var param;
+			var param,
+				fromState = stateChangeObject.fromState.name.split(".");
 
 			var fromParams = stateChangeObject.fromParams;
 			var toParams   = stateChangeObject.toParams;
+
+			if (stateChangeObject.toState.url === "/") {
+				// Handle going back to the home page, because fromParams will be empty
+				fromParams = {};
+				for (i = 1; i < fromState.length; i += 1) {
+					fromParams[fromState[i]] = true;
+				}
+				toParams = {};
+			}
+			else if (stateChangeObject.toState.url.indexOf("/") === -1) {
+				// Handle going from one home sub page to another, because fromParams will be empty
+				fromParams = {};
+				for (i = 1; i < fromState.length; i += 1) {
+					fromParams[fromState[i]] = true;
+				}
+			}
 
 			// Switch off all parameters that we came from
 			// but are not the same as where we are going to

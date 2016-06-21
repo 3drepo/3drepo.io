@@ -1,0 +1,11 @@
+contact md-input-container textarea {
+    min-height: 100px !important;
+}
+
+contact .md-button {
+    margin-top: 10px;
+}
+
+contact md-input-container {
+    margin: 0;
+}

@@ -1,0 +1,28 @@
+.homeUserContent(layout="row", layout-align="center")
+	md-content.md-whiteframe-1dp(aria-label="Contact Us", flex="20")
+		md-toolbar
+			.md-toolbar-tools
+				h2 Contact Us
+		.userContent(layout="column")
+			div(ng-if="!vm.sent")
+				md-input-container.md-block
+					label Contact information
+					textarea(ng-model="vm.contact.information")
+				md-input-container.md-block
+					label Name
+					input(type="text", ng-model="vm.contact.name")
+				md-input-container.md-block
+					label Email
+					input(type="email", ng-model="vm.contact.email")
+				// Extra hidden input to prevent input autofill
+				input(type="email", ng-show="false")
+
+				div(layout="row", layout-align="start center")
+					md-button.md-accent.md-raised(ng-click="vm.send()", ng-disabled="vm.sendButtonDisabled") Send
+					div(ng-if="vm.sending", layout="row", layout-align="start center")
+						p Please wait...
+						md-progress-circular(md-mode="indeterminate", md-diameter="20")
+
+			div(ng-if="vm.sent")
+				h3 Thank you {{vm.contact.name}}.
+				h3 We will get back to you shortly.

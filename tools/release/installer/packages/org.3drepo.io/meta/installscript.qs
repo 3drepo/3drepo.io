@@ -1,43 +1,69 @@
-/**************************************************************************
-**
-** Copyright (C) 2015 The Qt Company Ltd.
-** Contact: http://www.qt.io/licensing/
-**
-** This file is part of the Qt Installer Framework.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see http://qt.io/terms-conditions. For further
-** information use the contact form at http://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 2.1 or version 3 as published by the Free
-** Software Foundation and appearing in the file LICENSE.LGPLv21 and
-** LICENSE.LGPLv3 included in the packaging of this file. Please review the
-** following information to ensure the GNU Lesser General Public License
-** requirements will be met: https://www.gnu.org/licenses/lgpl.html and
-** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
-**
-** As a special exception, The Qt Company gives you certain additional
-** rights. These rights are described in The Qt Company LGPL Exception
-** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
-**
-**
-** $QT_END_LICENSE$
-**
-**************************************************************************/
-
 function Component()
 {
-	console.log("BEGIN");
-    installer.installationFinished.connect(this, Component.prototype.installationFinishedPageIsShown);
-	installer.installationStarted.connect(this, Component.prototype.installationStarted);
-    //installer.finishButtonClicked.connect(this, Component.prototype.installationFinished);
+	if (installer.isInstaller()){
+		component.loaded.connect(this, Component.prototype.installerLoaded);
+	
+	}
+}
+
+Component.prototype.installerLoaded = function () {
+    if(installer.addWizardPage(component, "HostRedirectWidget",  QInstaller.InstallationFinished))
+	{
+		var widget = gui.pageWidgetByObjectName("DynamicHostRedirectWidget");
+		if(widget != null)
+		{
+			widget.openHostFileButton.clicked.connect(this, Component.prototype.openHostFile);
+		}
+	}
+    if(installer.addWizardPage(component, "AlterConfigFileWidget",  QInstaller.InstallationFinished))
+	{
+		var widget = gui.pageWidgetByObjectName("DynamicAlterConfigFileWidget");
+		if(widget != null)
+		{
+			widget.launchConfigButton.clicked.connect(this, Component.prototype.openConfigFile);
+			var configFile = installer.value("TargetDir") + "\\config\\prod\\config.js";
+			widget.descLabel.text += configFile.replace("/", "\\"); 
+		}
+	}
+    
+	installer.addWizardPage(component, "runMongoWidget", QInstaller.InstallationFinished );
+    
+	if(installer.addWizardPage(component, "LaunchDependenciesForm", QInstaller.InstallationFinished ))
+	{
+		var widget = gui.pageWidgetByObjectName("DynamicLaunchDependenciesForm");
+		if(widget != null)
+		{
+			widget.installMongoButton.clicked.connect(this, Component.prototype.launchMongoInstall);
+			widget.installNodeButton.clicked.connect(this, Component.prototype.launchNodeInstall);
+		}
+	}
+
+}
+
+Component.prototype.openHostFile = function()
+{
+	//Open host file with notepad
+	var hostFile = "C:\\Windows\\System32\\Drivers\\etc\\hosts";
+	installer.execute("notepad.exe", hostFile);
+}
+
+Component.prototype.openConfigFile = function()
+{
+	//Open config file with notepad
+	var configFile = installer.value("TargetDir") + "\\config\\prod\\config.js";
+	installer.execute("notepad.exe", configFile.replace("/", "\\"));
+}
+
+Component.prototype.launchMongoInstall = function()
+{
+    //Open link to mongo db installation page
+	QDesktopServices.openUrl("file:///" + installer.value("TargetDir") + "/Downloads - MongoDB.url");
+}
+
+Component.prototype.launchNodeInstall = function()
+{
+    //Open link to node js installation page
+	QDesktopServices.openUrl("file:///" + installer.value("TargetDir") + "/Downloads - NodeJS.url");
 }
 
 Component.prototype.createOperations = function()
@@ -45,34 +71,3 @@ Component.prototype.createOperations = function()
     component.createOperations();
 }
 
-Component.prototype.installationStarted = function()
-{
-	console.log("Started");
-}
-
-Component.prototype.installationFinishedPageIsShown = function()
-{
-    try {
-		console.log("BLAH");
-
-        if (installer.isInstaller() && installer.status == QInstaller.Success) {
-            installer.addWizardPageItem( component, "MongoConfigWidget", QInstaller.InstallationFinished );
-        }
-    } catch(e) {
-        console.log(e);
-    }
-}
-
-Component.prototype.installationFinished = function()
-{
-    try {
-        if (installer.isInstaller() && installer.status == QInstaller.Success) {
-            var isReadMeCheckBoxChecked = component.userInterface( "ReadMeCheckBoxForm" ).readMeCheckBox.checked;
-            if (isReadMeCheckBoxChecked) {
-                QDesktopServices.openUrl("file:///" + installer.value("TargetDir") + "/README.txt");
-            }
-        }
-    } catch(e) {
-        console.log(e);
-    }
-}

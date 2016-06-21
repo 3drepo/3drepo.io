@@ -61,6 +61,8 @@
 		v.branch   = v.branch ? v.branch : "master";
 		v.revision = v.revision ? v.revision : "head";
 
+		v.pointerEvents = "auto";
+
 		if (!angular.isDefined(v.eventService))
 		{
 			v.EventService = EventService;

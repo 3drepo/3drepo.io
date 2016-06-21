@@ -66,9 +66,11 @@
 
 		if (serverObject.use_location)
 		{
-			serverObject.location_url = Function("path","return \"//\" + window.location.host + \"" + serverObject.host_dir + "/\" + path;");
+			/*jslint evil: true */
+			serverObject.location_url = new Function("path","return \"//\" + window.location.host + \"" + serverObject.host_dir + "/\" + path;");
 		} else {
-			serverObject.location_url = Function("path","return '" + serverObject.url + "/' + path;");
+			/*jslint evil: true */
+			serverObject.location_url = new Function("path","return '" + serverObject.url + "/' + path;");
 		}
 
 		serverObject.location_url = serverObject.location_url.toString();
@@ -174,6 +176,31 @@
 	config.logfile.console_level = coalesce(config.logfile.console_level, "info");
 	config.logfile.file_level    = coalesce(config.logfile.file_level, "info");
 
+	// Token expiry length
+	config.tokenExpiry  = coalesce(config.tokenExpiry, {});
+	config.tokenExpiry.emailVerify = coalesce(config.tokenExpiry.emailVerify, 14 * 24); // 2 weeks
+	config.tokenExpiry.forgotPassword = coalesce(config.tokenExpiry.forgotPassword, 24); // 24 hours
+
+	//captcha
+	config.captcha = coalesce(config.captcha, {});
+	config.captcha.validateUrl = coalesce(config.captcha.validateUrl, 'https://www.google.com/recaptcha/api/siteverify');
+	config.captcha.secretKey = coalesce(config.captcha.secretKey, '');
+
+	//default auth settings
+	config.auth  = coalesce(config.auth, {});
+	config.auth.captcha  = coalesce(config.auth.captcha, {});
+	config.auth.register  = coalesce(config.auth.register, {});
+
+	//contact
+	config.contact = coalesce(config.contact, {});
+	config.contact.email = coalesce(config.contact.email, 'support@3drepo.org');
+
+	//paypal
+	config.paypal = coalesce(config.paypal, {});
+	config.paypal.validateIPN = coalesce(config.paypal.validateIPN, true);
+
+	//upload size limit
+	config.uploadSizeLimit = coalesce(config.uploadSizeLimit, 209715200);
 	config.version = VERSION;
 
 	module.exports = config;

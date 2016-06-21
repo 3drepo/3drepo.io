@@ -701,8 +701,34 @@ DBInterface.prototype.getUserInfo = function(username, callback) {
 					callback(responseCodes.OK, user);
 				});
 				*/
+				
+				// get project timestamp (if any)
+				var promises = [];
+				user.projects.forEach(project => {
+					promises.push(new Promise((resolve) => {
+						self.getHeadRevision(project.account, project.project, 'master', (res, doc) => {
+							project.timestamp = doc ? doc[0].timestamp : null;
+							resolve();
+						});
+					}));
+				});
 
-				callback(responseCodes.OK, user);
+				//sort project by timestamp
+				user.projects.sort(function(a, b){
+					if(!a.timestamp) {
+						return 1;
+					} else if(!b.timestamp) {
+						return 0;
+					} else {
+						return b.timestamp - a.timestamp;
+					}
+				});
+
+				Promise.all(promises).then(() => {
+					callback(responseCodes.OK, user);
+				});
+
+				// callback(responseCodes.OK, user);
 			});
 
 		} else {
@@ -2045,7 +2071,7 @@ DBInterface.prototype.getObjectIssues = function(dbName, project, sids, number, 
 	});
 };
 
-DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, callback) {
+DBInterface.prototype.storeIssue = function(dbName, project, owner, issueId, data, callback) {
 	var self = this,
 		timeStamp = null,
 		updateQuery = {};
@@ -2063,18 +2089,20 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 			}
 
 			// Create new issue
-			if (!data._id) {
+			if (!issueId) {
 				var newID = uuid.v1();
 
-				self.logger.logDebug("Creating new issue " + newID + " for ID: " + id);
+				self.logger.logDebug("Creating new issue " + newID);
 
 				var projection = {};
 				projection[C.REPO_NODE_LABEL_SHARED_ID] = 1;
 
+				var id = data.object_id;
+
 				self.getObject(dbName, project, id, null, null, false, projection, function(err, type, uid, fromStash, obj) {
-					if (err.value && err.value !== responseCodes.OBJECT_NOT_FOUND.value) {
-						return callback(err);
-					}
+					// if (err.value && err.value !== responseCodes.OBJECT_NOT_FOUND.value) {
+					// 	return callback(err);
+					// }
 
 					// TODO: Implement this using sequence counters
 					coll.count(function(err, numIssues) {
@@ -2099,6 +2127,11 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 
 						data.owner = owner;
 
+						if(data.scribble){
+							var scribbleBase64 = data.scribble;
+							data.scribble = new Buffer(data.scribble, 'base64');
+						}
+
 						coll.insert(data, function(err, count) {
 							if (err) {
 								return callback(responseCodes.DB_ERROR(err));
@@ -2107,15 +2140,25 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 							self.logger.logDebug("Updated " + count + " records.");
 
 							data.typePrefix  = settings.length ? settings[0].type : undefined;
-
-							callback(responseCodes.OK, { account: dbName, project: project, issue_id : uuidToString(data._id), number : data.number, created : data.created, issue: data });
+							//return base64 version
+							data.scribble = scribbleBase64;
+							callback(responseCodes.OK, { 
+								_id: uuidToString(data._id),
+								account: dbName, 
+								project: project, 
+								issue_id : uuidToString(data._id), 
+								number : data.number, 
+								created : data.created, 
+								scribble: scribbleBase64,
+								issue: data,
+							});
 						});
 					});
 				});
 			} else {
-				self.logger.logDebug("Updating issue " + data._id);
+				self.logger.logDebug("Updating issue " + issueId);
 
-				data._id = stringToUUID(data._id);
+				issueId = stringToUUID(issueId);
 
 				timeStamp = (new Date()).getTime();
 				if (data.hasOwnProperty("comment")) {
@@ -2130,11 +2173,11 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 							$pull: {comments: {created: data.commentCreated}}
 						};
 					}
-					else if (data.hasOwnProperty("set")) {
+					else if (data.hasOwnProperty("sealed")) {
 						updateQuery = {
 							$set: {}
 						};
-						updateQuery.$set["comments." + data.commentIndex + ".set"] = true;
+						updateQuery.$set["comments." + data.commentIndex + ".sealed"] = true;
 					}
 					else {
 						updateQuery = {
@@ -2166,7 +2209,7 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 					};
 				}
 
-				coll.update({ _id : data._id}, updateQuery, function(err, count) {
+				coll.update({ _id : issueId}, updateQuery, function(err, count) {
 					if (err) { return callback(responseCodes.DB_ERROR(err)); }
 
 					var typePrefix = settings.length ? settings[0].type : undefined;
@@ -2175,10 +2218,11 @@ DBInterface.prototype.storeIssue = function(dbName, project, id, owner, data, ca
 					callback(
 						responseCodes.OK,
 						{
+							_id: uuidToString(issueId),
 							account: dbName,
 							project: project,
 							issue: data,
-							issue_id : uuidToString(data._id),
+							issue_id : uuidToString(issueId),
 							number: data.number,
 							owner: owner,
 							typePrefix: typePrefix,
@@ -3048,6 +3092,8 @@ DBInterface.prototype.getUserPrivileges = function (username, database, callback
 			return callback(err);
 		}
 
+		console.log(roles);
+
 		if (!roles || roles.length === 0) {
 			//no roles under this user, no point trying to find privileges
 			return callback(responseCodes.OK, []);
@@ -3056,6 +3102,7 @@ DBInterface.prototype.getUserPrivileges = function (username, database, callback
 		dbConn(self.logger).dbCallback(adminDB, function (err, dbConn) {
 			var command = { rolesInfo : roles, showPrivileges: true };
 			//Given the roles, get the privilege information
+			console.log(command);
 			dbConn.command(command, function (err, docs) {
 				if (err) {
 					return callback(responseCodes.DB_ERROR(err));
@@ -3073,6 +3120,9 @@ DBInterface.prototype.getUserPrivileges = function (username, database, callback
 					privileges = privileges.concat(rolesArr[i].inheritedPrivileges);
 				}
 				self.logger.logDebug(privileges.length + " privileges found.");
+
+				console.log(privileges);
+
 				callback(responseCodes.OK, privileges);
 			});
 		});

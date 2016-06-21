@@ -1,3 +1,20 @@
+/**
+ *  Copyright (C) 2014 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 var express = require('express');
 var router = express.Router({mergeParams: true});
 // var config = require("../config.js");
@@ -6,21 +23,18 @@ var utils = require('../utils');
 var middlewares = require('./middlewares');
 
 var ProjectPackage = require('../models/projectPackage');
-var dbInterface = require("../db/db_interface.js");
 
 var responseCodes = require('../response_codes');
-// var Bid = require('../models/bid');
 
-// var dbInterface     = require("../db_interface.js");
 var C               = require("../constants");
 var multiparty = require('multiparty');
+var User = require('../models/user');
 
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
 };
 
-//Every API listed below has to log in to access
-router.use(middlewares.loggedIn);
+
 // Create a package
 router.post('/packages.json', middlewares.isMainContractor,  createPackage);
 // Update a package
@@ -254,7 +268,15 @@ function listPackages(req, res, next){
 
 	} else if(req.role === C.REPO_ROLE_SUBCONTRACTOR) {
 		// Sub contractor list invited packages
-		dbInterface(req[C.REQ_REPO].logger).getUserBidInfo(req.session[C.REPO_SESSION_USER].username).then(bids => {
+
+
+		User.findByUserName(req.session.user.username).then(user => {
+
+			if(!user){
+				return Promise.reject({resCode: responseCodes.USER_NOT_FOUND});
+			}
+
+			let bids = user.customData.bids;
 
 			let filteredBids = _.filter(bids, { account : req.params.account, project: req.params.project});
 			let packages  = _.map(filteredBids, 'package');

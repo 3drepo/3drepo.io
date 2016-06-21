@@ -30,6 +30,7 @@
 				project: "=",
 				show: "=",
 				showAdd: "=",
+				showEdit: "=",
 				canAdd: "=",
 				onContentHeightRequest: "&",
 				onShowItem : "&",
@@ -97,9 +98,15 @@
 		 */
 		$scope.$watch("vm.hideItem", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
-				vm.toShow = "showGroups";
-				vm.showAdd = false;
+				if (vm.groups.length > 0) {
+					vm.toShow = "showGroups";
+				}
+				else {
+					vm.toShow = "showInfo";
+				}
+				vm.showAdd = false; // So that showing add works
 				vm.canAdd = true;
+				vm.showEdit = false; // So that closing edit works
 				setContentHeight();
 				setSelectedGroupHighlightStatus(false);
 				vm.selectedGroup = null;
@@ -137,6 +144,9 @@
 			if (angular.isDefined(newValue)) {
 				if (!newValue) {
 					vm.editingGroup = false; // To stop any event watching
+					hideAll = false;
+					vm.toShow ="showGroups";
+					doHideAll(hideAll);
 				}
 			}
 		});
@@ -174,6 +184,7 @@
 			vm.canAdd = false;
 			vm.editingGroup = false;
 			vm.showObjects = true;
+			vm.showEdit = true;
 			setContentHeight();
 			doHideAll(hideAll);
 			setSelectedGroupHighlightStatus(true);
@@ -221,7 +232,6 @@
 				if (vm.groups[i].name === vm.selectedGroup.name) {
 					promise = GroupsService.deleteGroup(vm.selectedGroup._id);
 					promise.then(function (data) {
-						console.log(data);
 						if (data.statusText === "OK") {
 							vm.groups.splice(i, 1);
 							vm.selectedGroup = null;
@@ -257,7 +267,6 @@
 				promise = GroupsService.createGroup(vm.name, vm.colourPickerColour);
 				promise.then(function (data) {
 					if (data.statusText === "OK") {
-						console.log(data);
 						vm.groups.push(data.data);
 						vm.selectedGroup = null;
 						vm.toShow = "showGroups";
@@ -274,7 +283,7 @@
 		 */
 		function setContentHeight () {
 			var contentHeight = 0,
-				groupHeaderHeight = 54, // It could be higher for items with long text but ignore that
+				groupHeaderHeight = 56, // It could be higher for items with long text but ignore that
 				baseGroupHeight = 210,
 				addHeight = 250,
 				infoHeight = 80,
@@ -315,7 +324,6 @@
 
 			eventWatch = $scope.$watch(EventService.currentEvent, function (event) {
 				if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
-					console.log(event.value);
 					index = vm.selectedGroup.parents.indexOf(event.value.id);
 					if (index !== -1) {
 						vm.selectedGroup.parents.splice(index, 1);
@@ -325,7 +333,6 @@
 
 					promise = GroupsService.updateGroup(vm.selectedGroup);
 					promise.then(function (data) {
-						console.log(data);
 						setSelectedGroupHighlightStatus(true);
 					});
 				}
@@ -339,7 +346,7 @@
 		 */
 		function setSelectedGroupHighlightStatus (highlight) {
 			var data;
-			if (vm.selectedGroup.parents.length > 0) {
+			if ((vm.selectedGroup !== null) && (vm.selectedGroup.parents.length > 0)) {
 				data = {
 					source: "tree",
 					account: vm.account,

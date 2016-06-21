@@ -56,3 +56,8 @@ public/css/fonts/three-d-repo.woff
 
 #Distribution files
 public/dist
+
+#installation temporary files
+tools/release/tmp
+tools/release/*.exe
+

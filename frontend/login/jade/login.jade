@@ -1,25 +1,23 @@
-//#login(ng-style="{'background-image':'url(' + vm.backgroundImage + ')'}", layout="column", flex)
-#login(layout="column" flex)
-	#loginContent(layout="row" flex="50")
-		span(flex="25")
-		div(flex="35" layout="column")
-			div(flex)
-				img(ng-src="{{vm.logo}}", flex-gt-sm="30", flex-sm="50", flex="80")
-				h2.md-subhead#loginVersion Version: {{vm.version}}
-			div(flex)
-				h1.md-display-1#loginTitle 3D BIM version control
-				h2.md-headline#loginSubTitle A scalable, open platform
+.homeUserContent(layout="row", layout-align="center", flex)
+	md-content.md-whiteframe-1dp(aria-label="Registered")
+		md-toolbar
+			.md-toolbar-tools
+				h2 Log in
+		.userContent(layout="column")
 
-		div(flex="15", layout="column")
-			div(layout="column", flex)
-				md-input-container.md-block(md-no-float)
-					input(type='text', ng-model='vm.user.username', placeholder='Username', ng-required, autofocus ng-keypress="vm.login($event)")
-				md-input-container(md-no-float)
-					input(type='password', ng-model='vm.user.password', placeholder='Password', ng-required ng-keypress="vm.login($event)")
-				div(layout="row", layout-align="start" flex="none")
-					md-button.md-accent.md-raised(ng-click="vm.login()") Log In
-				h2#loginError {{vm.errorMessage}}
-		span(flex="25")
-	div(layout="row" layout-align="center center" flex="50")
-		div
-			img(ng-src="{{vm.enterpriseLogo}}" flex style="max-width:100%; height: auto")
+			// Register or login
+			div(layout="row")
+				// Login
+				div(layout="column", flex)
+					md-input-container.md-block
+						label Username
+						input(type='text', ng-model='vm.user.username', ng-required, autofocus, ng-keypress="vm.login($event)")
+					md-input-container.md-block
+						label Password
+						input(type='password', ng-model='vm.user.password', ng-required, ng-keypress="vm.login($event)")
+					div(layout="row", layout-align="start" flex="none")
+						md-button.md-accent.md-raised(ng-click="vm.login()") Log In
+					h4.loginError {{vm.errorMessage}}
+					a.loginLinks(href="", ng-click="vm.showPage('passwordForgot')") Forgot password?
+					a.loginLinks(href="", ng-click="vm.showPage('pricing')") Sign up
+					h2.md-subhead#loginVersion Version: {{vm.version}}

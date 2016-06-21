@@ -984,6 +984,26 @@ exports.route = function(router)
 		render(dbInterface(req[C.REQ_REPO].logger), params.account, params.project, params.subformat, params.branch, null, err_callback);
 	});
 
+	function addMeshToBoundingBox(bbox, currentMeshBBox)
+	{
+		for(var v_idx = 0; v_idx < 3; v_idx++)
+		{
+			if (v_idx >= bbox[0].length)
+			{
+				bbox[0][v_idx] = currentMeshBBox[0][v_idx];
+				bbox[1][v_idx] = currentMeshBBox[1][v_idx];
+			} else {
+				if (bbox[0][v_idx] > currentMeshBBox[0][v_idx]) {
+					bbox[0][v_idx] = currentMeshBBox[0][v_idx];
+				}
+
+				if (bbox[1][v_idx] < currentMeshBBox[1][v_idx]) {
+					bbox[1][v_idx] = currentMeshBBox[1][v_idx];
+				}
+			}
+		}
+	}
+
 	router.get('x3d', '/:account/:project/:uid', function(req, res, params, err_callback)
 	{
 		if (params.subformat == "mpc")
@@ -995,6 +1015,7 @@ exports.route = function(router)
 			var subMeshIDX       = 0;
 			var runningVertTotal = 0;
 			var runningFaceTotal = 0;
+			var numAddedMeshes   = 0;
 
 			// TODO: Only needs the shell not the whole thing
 			dbInterface(req[C.REQ_REPO].logger).getObject(params.account, params.project, params.uid, null, null, false, projection, function(err, type, uid, fromStash, objs)
@@ -1014,7 +1035,9 @@ exports.route = function(router)
 
 				var subMeshBBoxes = [];
 				var bbox = [[],[]];
+				var runningVertTotal = 0;
 
+				// Loop through submeshes and collect bounding boxes
 				for(var i = 0; i < mesh[C.REPO_NODE_LABEL_COMBINED_MAP].length; i++)
 				{
 					var currentMesh      = mesh[C.REPO_NODE_LABEL_COMBINED_MAP][i];
@@ -1025,58 +1048,69 @@ exports.route = function(router)
 
 					var currentMeshNumVertices = currentMeshVTo - currentMeshVFrom;
 
-					var numAddedMeshes = 0;
-
-					if (currentMeshNumVertices > C.SRC_VERTEX_LIMIT) {
-						// Cut the previous off short
-						if (bbox[0].length) {
-							maxSubMeshIDX += 1;
-							subMeshBBoxes.push(bbox);
-						}
-
-						numAddedMeshes = Math.ceil(currentMeshNumVertices / C.SRC_VERTEX_LIMIT)
-						bbox = [[],[]];
-					} else if ((runningVertTotal + currentMeshNumVertices) > C.SRC_VERTEX_LIMIT) {
-						numAddedMeshes = 1;
-					}
-
-					for(var v_idx = 0; v_idx < 3; v_idx++)
+					if (currentMeshNumVertices > C.SRC_VERTEX_LIMIT)
 					{
-						if (v_idx >= bbox[0].length)
+						if (bbox[0].length)
 						{
-							bbox[0][v_idx] = currentMeshBBox[0][v_idx];
-							bbox[1][v_idx] = currentMeshBBox[1][v_idx];
-						} else {
-							if (bbox[0][v_idx] > currentMeshBBox[0][v_idx]) {
-								bbox[0][v_idx] = currentMeshBBox[0][v_idx];
+							for (var j = 0; j < numAddedMeshes; j++)
+							{
+								subMeshBBoxes.push(bbox);
 							}
+							maxSubMeshIDX += 1;	
+							bbox = [[],[]];
+						}
 
-							if (bbox[1][v_idx] < currentMeshBBox[1][v_idx]) {
-								bbox[1][v_idx] = currentMeshBBox[1][v_idx];
+						addMeshToBoundingBox(bbox, currentMeshBBox);
+						numAddedMeshes = Math.ceil(currentMeshNumVertices / C.SRC_VERTEX_LIMIT);
+						runningVertTotal = 0;
+
+						if (bbox[0].length)
+						{
+							for (var j = 0; j < numAddedMeshes; j++)
+							{
+								subMeshBBoxes.push(bbox);
 							}
+							maxSubMeshIDX += numAddedMeshes;	
+							bbox = [[],[]];
+
+							numAddedMeshes = 0;
 						}
 					}
-
-					if (((runningVertTotal + currentMeshNumVertices) > C.SRC_VERTEX_LIMIT) || (currentMeshNumVertices > C.SRC_VERTEX_LIMIT)) {
-						runningVertTotal = (currentMeshNumVertices > C.SRC_VERTEX_LIMIT) ? 0 : currentMeshNumVertices;
-						maxSubMeshIDX   += numAddedMeshes;
-
-						for(var j = 0; j < numAddedMeshes; j++)
+					// If current mesh pushes merged mesh over limit then
+					// finish old mesh and start new mesh and add current mesh to next mesh
+					else if ((runningVertTotal + currentMeshNumVertices) > C.SRC_VERTEX_LIMIT)
+					{
+						if (bbox[0].length)
 						{
-							subMeshBBoxes.push(bbox);
+							for (var j = 0; j < numAddedMeshes; j++)
+							{
+								subMeshBBoxes.push(bbox);
+							}
+							maxSubMeshIDX += 1;
+							console.log(bbox);	
+							bbox = [[],[]];
 						}
 
-						bbox = [[], []];
+						addMeshToBoundingBox(bbox, currentMeshBBox);
+						numAddedMeshes = 1;
+						runningVertTotal = currentMeshNumVertices;
 					} else {
+						addMeshToBoundingBox(bbox, currentMeshBBox);
 						runningVertTotal += currentMeshNumVertices;
 					}
 				}
 
-				// Cut the previous off short
-				if (bbox[0].length) {
-					maxSubMeshIDX += 1;
-					subMeshBBoxes.push(bbox);
+				if (bbox[0].length)
+				{
+					for (var j = 0; j < numAddedMeshes; j++)
+					{
+						subMeshBBoxes.push(bbox);
+					}
+					maxSubMeshIDX += 1;	
+					console.log(bbox);	
+					bbox = [[],[]];
 				}
+				console.log(subMeshBBoxes);
 
 				// Loop through all IDs up to and including the maxSubMeshIDX
 				for(var subMeshIDX = 0; subMeshIDX < maxSubMeshIDX; subMeshIDX++)

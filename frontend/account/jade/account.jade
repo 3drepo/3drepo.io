@@ -1,22 +1,26 @@
-logout
-div(ng-if="!vm.state.project")
+account-menu
+div(ng-if="!vm.showProject")
 	#account(layout="row")
-		div(layout="column", layout-fill, flex="20")
-			#logo(flex="15", layout="row", layout-align="center center")
-				img(src="/public/images/3drepo-logo-white.png", flex="70")
-			div(layout="row", flex="40")
-				img.account-avatar-image(ng-if="vm.hasAvatar", ng-src='{{vm.avatarURL}}')
-				#noAvatarIcon(flex, layout="row")
-					md-icon(ng-if="!vm.hasAvatar", class="fa fa-user")
-			#userinfo(layout="column")
-				p {{vm.firstName}} {{vm.lastName}}
-				p {{vm.email}}
+		account-info(
+			username="vm.username"
+			first-name="vm.firstName"
+			last-name="vm.lastName"
+			email="vm.email"
+			on-show-item="vm.showItem(item)"
+		)
+		#accountItem(ng-switch="vm.itemToShow")
+			account-projects(
+				account="vm.account"
+				accounts="vm.accounts"
+				ng-switch-when="repos"
+			)
+			account-profile(
+				username="vm.username"
+				first-name="vm.firstName"
+				last-name="vm.lastName"
+				email="vm.email"
+				ng-switch-when="profile"
+			)
 
-		span(flex="5")
-		md-tabs(md-border-bottom, flex="50")
-			md-tab#accountProjectsTab(label="Projects")
-				account-projects(flex account="vm.account" projects-grouped='vm.projectsGrouped')
-			md-tab(label="Profile")
-				account-profile(username="vm.username" first-name="vm.firstName" last-name="vm.lastName" email="vm.email")
-div(ng-if="vm.state.project")
+div(ng-if="vm.showProject")
 	project(account="vm.state.account" project="vm.state.project" branch="vm.state.branch" revision="vm.state.revision" state="vm.state")

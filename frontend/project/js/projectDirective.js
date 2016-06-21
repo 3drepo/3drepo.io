@@ -38,56 +38,48 @@
         };
     }
 
-	ProjectCtrl.$inject = ["$timeout", "$scope", "$compile", "$element", "EventService", "ProjectService"];
+	ProjectCtrl.$inject = ["$timeout", "$scope", "$element", "$compile", "EventService", "ProjectService"];
 
-	function ProjectCtrl($timeout, $scope, $compile, $element, EventService, ProjectService) {
+	function ProjectCtrl($timeout, $scope, $element, $compile, EventService, ProjectService) {
 		var vm = this, i, length,
 			panelCard = {
 				left: [],
 				right: []
-			};
+			},
+			projectUI,
+			issueArea,
+			issuesCardIndex = 0;
 
+		vm.pointerEvents = "auto";
+
+		/*
+		 * Get the project element
+		 */
+		$timeout(function () {
+			projectUI = angular.element($element[0].querySelector('#projectUI'));
+		});
+
+		/*
 		panelCard.left.push({
 			type: "tree",
 			title: "Tree",
 			show: true,
 			help: "Model elements shown in a tree structure",
-			icon: "fa-sitemap",
+			icon: "device_hub",
 			minHeight: 80,
 			fixedHeight: false,
 			options: [
-				"filter"
+				{type: "filter", visible: true}
 			]
 		});
+		*/
 
 		panelCard.left.push({
-			type: "groups",
-			title: "Groups",
-			show: true,
-			help: "groups of objects",
-			icon: "fa-cubes",
-			minHeight: 80,
-			fixedHeight: false,
-			options: [
-				"add",
-				"menu"
-			],
-			menu: [
-				{
-					value: "hideAll",
-					label: "Hide Groups",
-					selected: false,
-					toggle: true
-				}
-			]
-		});
-
-		panelCard.right.push({
 			type: "issues",
 			title: "Issues",
 			show: true,
 			help: "List current issues",
-			icon: "fa-map-marker",
+			icon: "place",
 			menu: [
 				{
 					value: "print",
@@ -109,39 +101,67 @@
 				},
 				{
 					value: "showClosed",
-					label: "Show closed issues",
+					label: "Show resolved issues",
 					toggle: true,
 					selected: false,
 					firstSelected: false,
 					secondSelected: false
 				}
 			],
+			minHeight: 260,
+			fixedHeight: false,
+			options: [
+				{type: "menu", visible: true},
+				{type: "filter", visible: true},
+				{type: "pin", visible: false},
+				{type: "erase", visible: false},
+				{type: "scribble", visible: false}
+			],
+			add: true
+		});
+
+		/*
+		panelCard.left.push({
+			type: "groups",
+			title: "Groups",
+			show: true,
+			help: "groups of objects",
+			icon: "view_comfy",
 			minHeight: 80,
 			fixedHeight: false,
 			options: [
-				"print",
-				"add",
-				"filter",
-				"menu"
-			]
+				{type: "menu", visible: true}
+			],
+			menu: [
+				{
+					value: "hideAll",
+					label: "Hide Groups",
+					selected: false,
+					toggle: true
+				}
+			],
+			add: true
 		});
-		panelCard.right.push({
+		*/
+
+		panelCard.left.push({
 			type: "clip",
 			title: "Clip",
 			show: false,
 			help: "Clipping plane",
-			icon: "fa-object-group",
+			icon: "crop_original",
 			fixedHeight: true,
 			options: [
-				"visible"
+				{type: "visible", visible: true}
 			]
 		});
+
 		panelCard.right.push({
 			type: "docs",
 			title: "Docs",
 			show: false,
 			help: "Documents",
-			icon: "fa-clone",
+			icon: "content_copy",
 			minHeight: 80,
 			fixedHeight: false,
 			options: []
@@ -164,7 +184,7 @@
 				// Add filtering options for the Issues card menu
 				ProjectService.getRoles(vm.account, vm.project).then(function (data) {
 					for (i = 0, length = data.length; i < length; i += 1) {
-						panelCard.right[0].menu.push(
+						panelCard.left[issuesCardIndex].menu.push(
 							{
 								value: "filterRole_" + data[i].role,
 								label: data[i].role,
@@ -200,12 +220,13 @@
 		});
 
 		/*
+<<<<<<< HEAD
 		 * Watch current event
 		 */
 		$scope.$watch(EventService.currentEvent, function (event) {
 			var parent = angular.element($element[0].querySelector("#project")),
 				element;
-			
+
 			if (event.type === EventService.EVENT.MEASURE_MODE) {
 				if (event.value) {
 					// Create measure display
@@ -221,5 +242,34 @@
 			}
 		});
 
+=======
+		 * Watch for events
+		 */
+		$scope.$watch(EventService.currentEvent, function (event) {
+			if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) {
+				if (event.value.on) {
+					issueArea = angular.element("<issue-area></issue-area>");
+					if (event.value.hasOwnProperty("issue")) {
+						vm.issueAreaIssue = event.value.issue;
+						issueArea = angular.element("<issue-area data='vm.issueAreaIssue'></issue-area>");
+					}
+					else if (event.value.hasOwnProperty("type")) {
+						vm.issueAreaType = event.value.type;
+						issueArea = angular.element("<issue-area type='vm.issueAreaType'></issue-area>");
+					}
+					projectUI.prepend(issueArea);
+					$compile(issueArea)($scope);
+				}
+				else {
+					if (angular.isDefined(issueArea)) {
+						issueArea.remove();
+					}
+				}
+			}
+			else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
+				vm.pointerEvents = event.value.on ? "none" : "auto";
+			}
+		})
+>>>>>>> ISSUE_210
 	}
 }());

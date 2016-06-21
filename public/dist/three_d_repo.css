@@ -5,7 +5,6 @@ account-dir #account {
   width: 100%;
   height: 100%;
   background-size: contain;
-  padding: 20px;
 }
 
 account-dir #logo {
@@ -21,34 +20,18 @@ account-dir #noAvatarIcon md-icon {
   height: 100px;
 }
 
-account-dir #userinfo {
-  border: solid 1px #C5CAE9;
-  border-top: none;
-  padding: 20px;
-}
-account-dir #userinfo p {
-  font-size: 15px;
-  margin: 5px 0;
-  color: rgba(0,0,0,0.7);
-}
-
 account-dir .dataContainer {
   border: solid 1px rgba(0,0,0,0.2);
   margin-top: 20px;
 }
 
-account-dir md-tabs-canvas {
-  background: #E8EAF6;
-}
-
-/* This access the div under the md-tab-content */
-account-dir #account md-tab-content div:first-child {
-  height: calc(100% - 20px);
+account-dir #account #accountItem {
+  width: 44%;
 }
 
 /** Account Projects **************************************************************************************************/
-account-projects .dataContainer {
-  height: calc(100% - 20px);
+account-projects #accountList {
+  max-height: calc(100vh - 180px);
   overflow: auto;
 }
 
@@ -56,52 +39,155 @@ account-projects md-list {
   padding: 0;
 }
 
-account-projects .accounts p,
-account-projects .accounts md-icon {
-  font-size: 20px;
-  color: rgba(0,0,0,0.6);
+account-projects .account,
+account-projects .project {
+  outline: none;
+  padding-left: 10px;
+}
+account-projects .account:hover,
+account-projects .project:hover {
+  cursor: pointer;
+  background: #EEE;
 }
 
 account-projects .projects {
   margin-left: 40px;
 }
 
-account-projects .projects p,
+account-projects .projects .projectName,
 account-projects .projects md-icon {
-  font-size: 15px;
   color: #4CAF50;
 }
+account-projects .projects md-icon {
+  margin: 0 !important;
+}
+account-projects .projects .projectTimestamp {
+  color: rgba(0, 0, 0, 0.3);
+  margin-left: 20px;
+}
 account-projects .projects p {
-  font-size: 14px;
   margin: 0;
 }
-account-projects .projects md-icon {
+
+account-projects #existingProjectFileUploader,
+account-projects #newProjectFileUploader {
+  width: 0;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+
+account-projects .accountRight,
+account-projects .projectRight {
   margin-right: 10px !important;
 }
-account-projects .projects .md-button {
-  margin-right: 20px !important;
+
+account-projects #newDatabaseButton {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+account-projects .md-whiteframe-1dp {
+  border-radius: 4px;
+  background: #FFF;
+}
+account-projects md-toolbar {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  height: 40px;
+  min-height: 40px;
+}
+
+account-projects .cardInfo md-progress-circular {
+  margin-left: 5px;
+}
+
+account-projects .projectUploadInfo {
+  margin-right: 20px;
+}
+
+account-projects .projectUploadFilename {
+  color: rgba(0,0,0,0.5);
+  margin: 0 !important;
+}
+
+account-projects .projectUploadInfo {
+  color: rgba(0,0,0,0.7);
+  margin: 0 0 0 10px !important;
+}
+
+account-projects .projectUploadIcon {
+  width: 15px;
+  height: 15px;
+  margin-left: 10px;
+}
+
+account-projects .projectRight .projectUploaded {
+  margin-top: -10px !important;
+  color: rgba(0,0,0,0.5);
 }
 
 /** Account Profile ***************************************************************************************************/
-account-profile .dataContainer {
+account-profile .profile {
+  max-height: calc(100vh - 180px);
+  overflow: auto;
   padding: 10px;
 }
 
-account-profile md-input-container {
+account-profile #profileDivider {
+  display: block;
+  background: rgba(0,0,0,0.2);
+  width: 1px;
+  height: 380px;
+}
+
+account-profile .accountProfileList {
+  max-height: calc(100vh - 200px);
+  overflow-x: hidden;
+  padding: 0;
+}
+
+account-profile .accountProfileContent {
+  margin-left: 65px;
+}
+
+account-profile .updateContainer {
+  margin-top: -30px;
+}
+
+/** Account Info ******************************************************************************************************/
+account-info {
+  margin-left: 70px;
+  width: 400px;
+  margin-right: 60px;
+}
+
+account-info .dataContainer {
+  padding: 10px;
+}
+
+account-info md-input-container {
   margin: 10px 0;
 }
-account-profile md-input-container input,
-account-profile md-input-container label {
+account-info md-input-container input,
+account-info md-input-container label {
   font-size: initial;
   color: rgba(0,0,0,0.7) !important;
 }
 
-account-profile p {
+account-info p {
   font-size: 14px;
   color: rgba(0,0,0,0.6);
 }
 
-/** Avatar Image *****************************************************************************************************/
+account-info md-list {
+  padding: 0;
+}
+
+/** Avatar Image ******************************************************************************************************/
 .account-avatar-image {
 	width: 100%;
 }
@@ -118,6 +204,92 @@ logout md-icon {
   text-shadow: 0 0 2px rgba(0,0,0,0.5);
   font-size: 20px !important;
   outline: none;
+}
+
+/** Account Menu ******************************************************************************************************/
+account-menu {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  padding-right: 6px;
+}
+account-menu md-icon {
+  color: #FFFFFF;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  font-size: 30px !important;
+  outline: none;
+}
+
+#accountMenuContent {
+  border-radius: 4px;
+}
+#accountMenuContent md-menu-item > .md-button {
+  display: block;
+}
+
+/** New Project Dialog ************************************************************************************************/
+.newProjectDialog {
+  min-width: 350px;
+  min-height: 350px;
+  overflow: hidden;
+}
+
+.newProjectDialog #newProjectIcon {
+  margin-right: 10px;
+}
+
+.newProjectDialog #projectDialogFilenameContainer {
+  margin: 0 0 0 16px;
+}
+.newProjectDialog #projectDialogFilenameIntro {
+  color: rgba(0, 0, 0, 0.4);
+  margin: 0 5px 0 0;
+}
+.newProjectDialog #projectDialogFilename {
+  color: rgba(0, 0, 0, 0.7);
+  margin: 0;
+}
+
+.newProjectDialog #projectDialogError {
+  margin: 0;
+  color: #F44336;
+}
+
+/** Delete Project Dialog *********************************************************************************************/
+.deleteProjectDialog {
+  min-width: 350px;
+  min-height: 230px;
+  overflow: hidden;
+}
+
+.deleteProjectDialog p {
+  color: rgba(0 ,0, 0, 0.6);
+}
+.deleteProjectDialog #deleteProjectName {
+  color: rgba(0 ,0, 0, 0.9);
+  margin-left: 5px;
+}
+
+.deleteProjectDialog #deleteProjectError {
+  margin: 0;
+  color: #F44336;
+}
+
+/** New Database Dialog ***********************************************************************************************/
+.newDatabaseDialog {
+  min-width: 350px;
+  min-height: 250px;
+  overflow: hidden;
+}
+
+.newDatabaseDialog #newProjectIcon {
+  margin-right: 10px;
+}
+
+.newDatabaseDialog .databaseDialogInfo {
+  font-weight: normal;
+  color: rgba(0,0,0,0.7);
 }
 
 /* Done to counter bootstrap styling. This should really be set in a top level style file */
@@ -466,14 +638,14 @@ bottom-buttons {
   bottom: 80px;
   left: 0;
   right: 0;
-  width: 360px;
+  width: 260px;
   margin: auto;
   text-align: center;
 }
 
 bottom-buttons #leftButtons {
   position: absolute;
-  left: -15px;
+  left: 20px;
   top: 8px;
 }
 bottom-buttons #leftButtons span {
@@ -482,7 +654,7 @@ bottom-buttons #leftButtons span {
 
 bottom-buttons #rightButtons {
   position: absolute;
-  right: 35px;
+  right: 10px;
   top: 8px;
 }
 bottom-buttons #rightButtons span {
@@ -502,7 +674,7 @@ bottom-buttons .actionButton md-icon {
 
 bottom-buttons .viewingOptionButtons {
   position: absolute;
-  left: 40px;
+  right: 15px;
   top: -120px;
 }
 
@@ -516,14 +688,14 @@ bottom-buttons label:hover {
   cursor: pointer;
 }
 
-.bottomButtomIconCardboard {
+.bottomButtonIconCardboard {
   font-size: 20px !important;
   margin-left: -4px;
 }
-.bottomButtomIconWalk {
+.bottomButtonIconWalk {
   margin-left: 0;
 }
-.bottomButtomIconHelicopter {
+.bottomButtonIconHelicopter {
   margin-left: -5px;
   font-size: 22px !important;
 }
@@ -560,6 +732,18 @@ clip #clipAxislabel {
 }
 .clipSlider input {
   width: 50px;
+}
+
+contact md-input-container textarea {
+    min-height: 100px !important;
+}
+
+contact .md-button {
+    margin-top: 10px;
+}
+
+contact md-input-container {
+    margin: 0;
 }
 
 /** Docs **************************************************************************************************************/
@@ -667,8 +851,16 @@ groups md-list-item p {
   margin: 8px 20px !important;
 }
 
-groups #groupsList ._md-list-item-inner {
+groups #groupsList md-list-item {
   padding: 0;
+  height: 55px;
+}
+groups #groupsList .group {
+  outline: none;
+}
+groups #groupsList .group:hover {
+  cursor: pointer;
+  background: #EEE;
 }
 
 groups .groupColourBar {
@@ -712,6 +904,116 @@ groups #groupsGroup md-checkbox {
   margin: 0;
 }
 
+home {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+home #homeBackground {
+    position:absolute;
+    width:100%;
+    height:100%;
+    top:0
+}
+
+home #homeLogo {
+    position: absolute;
+    z-index: 2;
+    text-align: center;
+    width: 250px;
+    top: 10px;
+    left: 0;
+    right: 0;
+    margin: auto;
+    pointer-events: none;
+}
+home #homeLogo img {
+    width: inherit;
+    pointer-events: inherit;
+}
+
+home .homeUserContent {
+    padding-top: 120px;
+}
+
+home .homeUserContent .md-whiteframe-1dp,
+home .homeUserContent .md-whiteframe-8dp {
+    border-radius: 4px;
+    background: #FFF;
+}
+
+home .homeUserContent md-toolbar {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    height: 40px;
+    min-height: 40px;
+}
+
+home .homeUserContent .userContent {
+    padding: 20px;
+    max-height: calc(100vh - 200px);
+    overflow-x: hidden;
+}
+
+home .homeUserContent .userContent h3 {
+    color: rgba(0, 0, 0, 0.7);
+    font-weight: normal;
+}
+
+home .homeUserContent .userContent md-progress-circular {
+    margin-left: 10px;
+}
+
+home .cardInfo {
+    text-align: center;
+    padding: 15px;
+    background: #E8EAF6;
+    margin: 15px;
+    border-radius: 4px;
+}
+home .cardInfo p {
+    margin: 0;
+    color: rgba(0, 0, 0, 0.7);
+    word-wrap: break-word;
+}
+home .cardInfo md-icon {
+    margin: 0;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+home #legalLinks {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 1000;
+}
+home #legalLinks .md-button {
+    font-size: 12px;
+    margin: 0;
+    opacity: 0.7;
+}
+
+/** Legal Dialog ******************************************************************************************************/
+.legalDialog {
+    width: calc(100vw - 50%);
+    min-height: calc(100vh - 25%);
+    overflow: hidden;
+}
+
+.legalDialog md-content {
+    padding: 20px;
+}
+
+/** Dialog ************************************************************************************************************/
+md-dialog md-toolbar {
+    height: 40px;
+    min-height: 40px;
+}
 /** Issues ************************************************************************************************************/
 
 issues #issuesAddContainer {
@@ -726,7 +1028,7 @@ issues #issuesAddContainer .md-dialog-backdrop {
   height: 205px !important;
 }
 issues #issuesAddContainer md-input-container {
-  margin: 0;
+  margin-bottom: 0;
 }
 issues #issuesAddContainer h4 {
   margin-left: 4px;
@@ -896,7 +1198,65 @@ issue-header h5 {
   margin-left: 5px;
 }
 
-login #login {
+/** Issue Area ********************************************************************************************************/
+issue-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+issue-area #issueAreaCanvas {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+issue-area #issueAreaCentre {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: -20px 0 0 -20px;
+  pointer-events: none;
+}
+
+issue-area #issueAreaButtons {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+issue-area #issueAreaButtons md-icon {
+  font-size: 30px;
+  margin-top: -7px;
+  margin-left: -4px;
+}
+
+issue-area #issueAreaPenIndicator {
+  position: absolute;
+  display: block;
+  color: #FFFFFF;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+issue-area #scribbleDisplay {
+  position:absolute;
+  width:100%;
+  height:100%;
+  overflow:hidden
+}
+/* Influenced by Itay answer - http://stackoverflow.com/a/18674144/782358 */
+issue-area #scribbleDisplay img {
+  position: absolute;
+  margin: auto;
+  height: 100%;
+  width: auto;
+  left: -200%;
+  right: -200%;
+}
+login {
   position: absolute;
   top: 0;
   width: 100%;
@@ -904,23 +1264,25 @@ login #login {
   background-size: contain;
 }
 
-login #loginContent {
-  padding-top: 50px;
-  background: rgba(63,81,181,0.7);
+login .homeUserContent md-toolbar {
+  height: 40px;
+  min-height: 40px;
 }
 
-login #loginTitle {
-  color: #ffffff;
-  margin: 50px 0 -10px 0;
+login h1,
+login h2,
+login h3 {
+  color: #FFFFFF;
 }
 
-login #loginSubTitle,
 login #loginVersion{
-  color: rgba(255,255,255,0.6);
+  color: rgba(0, 0, 0 , 0.3);
+  font-size: 14px;
+  margin: 10px 0 0;
 }
 
 login md-input-container {
-  margin: 0;
+  margin-bottom: 0;
 }
 
 login md-input-container input {
@@ -930,75 +1292,63 @@ login md-input-container input {
   background: #ffffff !important;
 }
 
-login #loginError {
+login .loginError {
   color: #F44336;
-}
-login #login {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-size: contain;
+  margin: 5px 0 5px;
+  font-weight: normal;
 }
 
-login #loginContent {
-  padding-top: 50px;
-  background: #004594;
+login .loginTitle {
+  margin: -5px 0 10px 7px;
+  color: rgba(0, 0, 0, 0.5) !important;
 }
 
-login #loginTitle {
-  color: #ffffff;
-  margin-bottom: -15px;
+login .loginLinks {
+  font-size: 14px;
+  margin: 5px 0;
 }
 
-login #loginSubTitle,
-login #loginVersion{
-  color: rgba(255,255,255,0.6);
+login #loginDivider {
+  width: 1px;
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
-login md-input-container {
-  margin: 0;
+/** Terms and Conditions Dialog ***************************************************************************************/
+.tcDialog {
+  min-width: 850px;
+  min-height: 664px;
+  overflow: hidden;
 }
 
-login md-input-container input {
-  padding: 5px !important;
-  margin-bottom: -15px;
-  height: 35px !important;
-  background: #ffffff !important;
+.tcDialog #tcIcon {
+  margin-right: 10px;
 }
 
-login #loginError {
-  color: #F44336;
-}
-
-login .md-button {
-  margin: 0 0 0 2px;
-}
 /** Panel *************************************************************************************************************/
 
 panel  {
   display: block;
   position: absolute;
   top: 20px;
-  width: 420px;
+  width: 470px;
   z-index: 2;
 }
 
 panel #items {
   position: absolute;
-  width: 350px;
+  width: 400px;
+  pointer-events: inherit;
 }
 
 panel #buttons {
   position: absolute;
   top: 50px;
+  pointer-events: inherit;
 }
 panel #buttons .panelButtonGroup {
   margin-bottom: 20px;
-  text-align: center;
 }
 panel #buttons .panelButtonGroup button {
-  display: block;
   margin-bottom: 2px;
 }
 panel #buttons .panelButtonGroup label {
@@ -1006,12 +1356,6 @@ panel #buttons .panelButtonGroup label {
   text-shadow: 0 0 2px rgba(0,0,0,0.5);
   font-weight: bold;
   font-size: 14px;
-}
-
-panel .md-mini md-icon,
-panel .md-icon-button md-icon{
-  font-size: 20px;
-  outline: none;
 }
 
 /** Panels ************************************************************************************************************/
@@ -1065,8 +1409,8 @@ panel-card .md-whiteframe-1dp {
 }
 
 panel-card md-toolbar {
-  min-height: 48px;
-  height: 48px;
+  min-height: 40px;
+  height: 40px;
   outline: none;
   /*-webkit-box-shadow: 0 8px 10px 1px rgba(0,0,0,0.15);
   -moz-box-shadow: 0 8px 10px 1px rgba(0,0,0,0.15);
@@ -1074,20 +1418,13 @@ panel-card md-toolbar {
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
 }
-panel-card md-toolbar span {
-  font-size: 18px;
+panel-card md-toolbar .md-toolbar-tools {
+  padding-right: 0;
+  min-height: 40px;
+  height: 40px;
 }
-panel-card md-toolbar label {
-  font-size: 20px;
-  margin-left: 10px;
-  font-weight: bold;
-}
-panel-card md-toolbar button {
-  margin: 0 !important;
-}
-
-panel-card .md-button.md-raised:not([disabled]) {
-  box-shadow: none;
+panel-card md-toolbar #options .md-button {
+  margin: 0 4px;
 }
 
 panel-card .md-menu {
@@ -1098,19 +1435,6 @@ panel-card #panelCardContainer {
   overflow-x: hidden;
   overflow-y: auto;
   width: 100%;
-  height: 100%;
-}
-
-panel-card .panelCardFilter {
-  margin-left: 10px;
-  opacity: 0.7;
-}
-panel-card .panelCardFilter md-icon {
-  margin-left: 12px;
-  outline: none;
-}
-panel-card .panelCardFilter md-icon:hover {
-  cursor: pointer;
 }
 
 panel-card #helpButton {
@@ -1122,7 +1446,7 @@ panel-card #helpButton {
 
 panel-card .statusIcon {
   outline: none;
-  width: 18px;
+  width: 30px;
 }
 
 panel-card #filterContainer {
@@ -1141,11 +1465,31 @@ panel-card .cardInfo p {
   color: rgba(0, 0, 0, 0.7);
   word-wrap: break-word;
 }
+
 panel-card .cardInfo md-icon {
   margin: 0;
   font-size: 16px;
   width: 16px;
   height: 16px;
+}
+
+/** Panel Card Filter ****************************************************************************************************/
+panel-card-filter input {
+  background: rgb(63,81,181);
+  border: none;
+  color: white;
+  border-bottom: 1px solid white;
+  outline: none;
+  margin-top: -5px;
+  font-size: 18px;
+}
+panel-card-filter md-icon {
+  margin-left: -16px;
+  font-size: 18px !important;
+  outline: none;
+}
+panel-card-filter md-icon:hover {
+  cursor: pointer;
 }
 
 
@@ -1156,10 +1500,93 @@ panel-card-add {
   right: 0;
 }
 
-panel-card-add md-icon {
-  font-size: 22px !important;
-  margin-top: 1px;
+/** Panel Card Option Erase *******************************************************************************************/
+panel-card-option-erase md-icon {
+  font-size: 24px !important;
 }
+password-change md-progress-circular {
+    margin-left: 5px;
+}
+
+password-change md-input-container {
+    margin: 0;
+}
+password-forgot md-progress-circular {
+    margin-left: 5px;
+}
+
+password-forgot md-input-container {
+    margin-bottom: 0;
+}
+
+password-forgot p {
+    margin-top: 0;
+}
+pricing md-content.md-whiteframe-1dp,
+pricing md-content.md-whiteframe-8dp {
+    margin: 0 20px;
+}
+
+pricing md-toolbar h2 {
+    font-weight: bold !important;
+}
+
+pricing md-divider {
+    margin-bottom: 10px !important;
+    width: 100%;
+}
+
+pricing #pricingMiddlePanelTitle {
+    color: #FFFFFF;
+}
+
+pricing .pricingIcon {
+    font-size: 40px;
+    color: rgba(0,0,0,0.2);
+    margin-bottom: 10px;
+    width: 40px;
+}
+pricing .pricingIcon#pricingAdvancedIcon {
+    color: #FF9800;
+}
+
+pricing .pricingPrice {
+    height: 100px;
+    display: block;
+}
+pricing .pricingPriceTitle {
+    margin: 10px 0;
+    color: rgba(0,0,0,.6) !important;
+}
+pricing .pricingPriceSubtitle {
+    margin-top: -20px;
+    color: rgba(0,0,0,.6) !important;
+}
+
+pricing .pricingInfo {
+    height: 350px;
+    display: block;
+    overflow: auto;
+    width: 100%;
+}
+pricing .pricingInfo .pricingInfoLine {
+    margin: 10px 0;
+}
+pricing .pricingInfo .pricingInfoLine h3 {
+    margin: 0 0 0 0;
+    color: rgba(0,0,0,.6) !important;
+}
+pricing .pricingInfo .pricingInfoLine md-icon {
+    margin: 0 5px 0 0;
+    color: #C8E6C9;
+}
+
+pricing .pricingContent {
+    max-height: 600px !important;
+    height: calc(100vh - 180px);
+    overflow: auto;
+}
+
 md-dialog.qrCodeReaderDialog {
   max-height: 90%;
 }
@@ -1169,6 +1596,93 @@ md-dialog.qrCodeReaderDialog .qrCodeReaderIcon {
   margin-right: 10px;
 }
 
+register-verify .databaseError {
+    color: #F44336;
+    margin: 5px 0 5px;
+    font-weight: normal;
+}
+
+register-verify md-input-container {
+    margin: 5px 0 -15px;
+}
+right-panel {
+    position: absolute;
+    top: 70px;
+    right: 0;
+}
+
+right-panel #rightPanelButtons .md-button {
+    margin-bottom: 15px;
+}
+
+right-panel #rightPanelButtons .fa {
+    font-size: 24px;
+}
+sign-up md-input-container {
+    margin-top: 0;
+}
+
+sign-up md-input-container input {
+    padding: 5px !important;
+    margin-bottom: -15px;
+    height: 35px !important;
+    background: #ffffff !important;
+}
+
+sign-up .registerLinks {
+    font-size: 14px;
+    margin: 5px 0;
+}
+
+sign-up-form #tc {
+    width: 300px;
+    margin: -15px 0 0 2px;
+}
+sign-up-form #tc md-checkbox {
+    margin : 0;
+}
+sign-up-form #tc md-checkbox ._md-icon {
+    border-color: rgba(0, 0, 0, 0.4);
+}
+sign-up-form #tc a {
+    font-size: 14px;
+    margin-left: 5px;
+}
+sign-up-form #tc p {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.7);
+}
+sign-up-form #tc a {
+    outline: none;
+}
+
+sign-up-form #loginCaptcha {
+    margin: 10px 30px 10px 0;
+}
+
+sign-up-form #registerWait {
+    height: 30px;
+}
+sign-up-form #registerWait p {
+    margin: 0 10px 0 0;
+    color: rgba(0, 0, 0, 0.7);
+    font-size: 14px;
+}
+sign-up-form #loginPricing {
+    font-size: 14px;
+    margin-left: 30px;
+    outline: none;
+}
+
+sign-up-form .registerError {
+    color: #F44336;
+    margin: 5px 0 5px;
+    font-weight: normal;
+}
+
+sign-up-form .rc-anchor-light {
+    background: red;
+}
 tree span {
   outline: none;
   margin: 0;
@@ -1270,7 +1784,7 @@ tree .virtualRepeatInfiniteScroll {
 
 tree .virtualRepeatInfiniteScroll .vertical-container {
   height: 100%;
-  width: 350px;
+  width: 100%;
 }
 
 tree .virtualRepeatInfiniteScroll .repeated-item {

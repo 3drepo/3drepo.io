@@ -46,6 +46,8 @@ module.exports.createApp = function (serverConfig) {
 	let bodyParser = require("body-parser");
 	let app = express();
 
+	app.use(sharedSession);
+	
 	app.use(cors({origin:true, credentials: true}));
 
 	// put logger in req object
@@ -55,8 +57,7 @@ module.exports.createApp = function (serverConfig) {
 	app.use((req, res, next) => {
 		// init the singleton db connection
 		let DB = require("../db/db")(req[C.REQ_REPO].logger);
-
-		DB.getDB("default").then( db => {
+		DB.getDB("admin").then( db => {
 			// set db to singleton modelFactory class
 			require("../models/factory/modelFactory").setDB(db);
 			next();
@@ -65,6 +66,7 @@ module.exports.createApp = function (serverConfig) {
 		});
 	});
 
+
 	app.use(bodyParser.urlencoded({
 		extended: true
 	}));
@@ -72,8 +74,6 @@ module.exports.createApp = function (serverConfig) {
 	app.set("views", "./jade");
 	app.set("view_engine", "jade");
 	app.use(bodyParser.json());
-
-	app.use(sharedSession);
 
 	app.use(compress());
 
@@ -99,14 +99,7 @@ module.exports.createApp = function (serverConfig) {
 		app.use(allowCrossDomain);
 	}
 	*/
-
-	//auth handler
-	app.use('/', require('../routes/auth'));
-	// os api handler
-	app.use('/os',require('../routes/osBuilding'));
-	//project setting handler
-	app.use('/:account/:project', require('../routes/projectSetting'));
-
+	
 	app.use(function(req, res, next) {
 		// intercept OPTIONS method
 		if ("OPTIONS" === req.method) {
@@ -116,6 +109,17 @@ module.exports.createApp = function (serverConfig) {
 		}
 	});
 
+	//auth handler
+	app.get('/info', (req, res) => {
+		res.status(200).json({ status: 'OK', version: '?'});
+	});
+
+	app.use('/', require('../routes/auth'));
+	// os api handler
+	app.use('/os',require('../routes/osBuilding'));
+	// payment api header
+	app.use('/payment', require('../routes/payment'));
+
 	if(config.test_helper_api){
 		// test helpers
 		app.use("/tests", require("../js/core/handlers/testHelper"));
@@ -124,7 +128,7 @@ module.exports.createApp = function (serverConfig) {
 	}
 
 	//project handlers
-	app.use("/:account/:project", require("../routes/project"));
+	app.use("/:account", require("../routes/project"));
 	// project package handlers
 	app.use("/:account/:project", require("../routes/projectPackage"));
 	// bid hanlders

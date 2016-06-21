@@ -1,4 +1,4 @@
-﻿/**
+/**
  *	Copyright (C) 2015 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
@@ -17,137 +17,64 @@
 
 /***************************************************************************
 *  @file Contains functionality to dispatch work to the 
- *       queue via amqp protocol. The queue configuration has to be specified
- *       in config.js and a compute node with a worker must be running
+ *       queue via amqp protocol. A compute node with a worker must be running
  *       to fulfil the tasks in order for the work to be done.
 ****************************************************************************/
 
-var amqp = require('amqplib/callback_api');
+var amqp = require('amqplib');
 var fs = require('fs.extra');
 var uuid = require('node-uuid');
-var responseCodes = require('../response_codes.js');
-var config = require('../config.js');
-var log_iface = require('../logger.js');
-var logger = log_iface.logger;
+
+function ImportQueue() {}
 
 /*******************************************************************************
- * Converts error code from repobouncerclient to a response error object
- * @param {errCode} - error code referenced in error_codes.h
+ * Create a connection and a channel in ampq and init variables
+ * @param {url} url - ampq connection string 
+ * @param {options} options - defines sharedSpacePath, logger, callbackQName and workerQName
  *******************************************************************************/
-function convertToErrorCode(errCode){
-    logger.log("debug", "convert To response code: " + errCode);
-    var errObj;
-    switch (errCode) {
-        case 0:
-            errObj = responseCodes.OK;
-            break;
-        case 1:
-            errObj = responseCodes.FILE_IMPORT_INVALID_ARGS;
-            break;
-        case 2:
-            errObj = responseCodes.NOT_AUTHORIZED;
-            break;
-        case 3:
-            errObj = responseCodes.FILE_IMPORT_UNKNOWN_CMD;
-            break;
-        case 5:
-            errObj = responseCodes.FILE_IMPORT_PROCESS_ERR;
-            break;
-        default:
-            errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
-            break;
+ImportQueue.prototype.connect = function(url, options) {
+    'use strict';
 
+    if(this.conn){
+        return Promise.resolve();
     }
-    return errObj;
-}
 
-/*******************************************************************************
- * Move a specified file to shared storage (area shared by queue workers)
- * move the file to shared storage space defined in config.js, put it in a corID/newFileName
- * note: using move(in fs.extra) instead of rename(in fs) as rename doesn't allow cross device
- * @param {corID} corID - Correlation ID
- * @param {orgFilePath} orgFilePath - Path to where the file is currently
- * @param {newFileName} newFileName - New file name to rename to
- * @param {callback} callback - callback(err)
- *******************************************************************************/
-function dispatchWork(corID, msg, callback){
-    amqp.connect(config.cn_queue.host, function (err, conn) {
-        if (err === null) {
-            logger.log('debug', 'established connection to ' + config.cn_queue.host);
-        }
-        else {
-            callback(responseCodes.QUEUE_CONN_ERR);
-            return;
-        }
-        conn.createChannel(function (err, ch) {
-            if (err === null) {
-                logger.log('debug', 'created channel in' + config.cn_queue.host);
-            }
-            else {
-                logger.log('error' , 'Failed to create a channel to ' + config.cn_queue.host);
-                callback(responseCodes.QUEUE_CONN_ERR);
-                return;
-            }
-                    
-            //initiate callback queue
-            ch.assertQueue(config.cn_queue.callback_queue, { durable: true }, function (err) {
-                if (err) {
-                    callback(responseCodes.QUEUE_CONN_ERR);
-                    return;
-                }
-                ch.consume(config.cn_queue.callback_queue, function (rep) {
-                    //consume callback
-                    if (this.corID === rep.properties.correlationId) {
-                        logger.log('info', 'Upload request id ' + this.corID + ' returned: ' + rep.content);
-                        callback(convertToErrorCode(parseInt(JSON.parse(rep.content).value)));
-                    }
-                    else {
-                        logger.log('info', '[UNMATCHED]Upload request id ' + this.corID + 'returned: ' + rep.properties.correlationId);
-                    }
-                }, { noAck: true });
-                
-                this.corID = corID;
-                //Send request to queue
-                ch.sendToQueue(config.cn_queue.worker_queue, new Buffer(msg), { correlationId: corID, replyTo: config.cn_queue.callback_queue, persistent: true });
-                logger.log('info', 'Sent work to queue: ' + msg.toString() + ' with corr id: ' + corID.toString() + ' reply queue: ' + config.cn_queue.callback_queue);
+    if(!options.sharedSpacePath){
+        return Promise.reject({ message: 'Please define sharedSpacePath in options'});
+    } else if(!options.logger){
+        return Promise.reject({ message: 'Please define logger in options'});
+    } else if(!options.callbackQName){
+        return Promise.reject({ message: 'Please define callbackQName in options'});
+    } else if(!options.workerQName){
+        return Promise.reject({ message: 'Please define workerQName in options'});
+    } 
 
-            });
-		
 
+    return amqp.connect(url).then( conn => {
+
+        this.conn = conn;
+        
+        conn.on('close', () => {
+            this.conn = null;
         });
+
+        return conn.createChannel();
+
+    }).then(channel => {
+
+        this.channel = channel;
+        this.sharedSpacePath = options.sharedSpacePath;
+        this.logger = options.logger;
+        this.callbackQName = options.callbackQName;
+        this.workerQName = options.workerQName;
+        this.deferedObjs = {};
+
+        return this._consumeCallbackQueue();
+
+    }).catch( err => {
+        return Promise.reject(err);
     });
-
-}
-
-/*******************************************************************************
- * Move a specified file to shared storage (area shared by queue workers)
- * move the file to shared storage space defined in config.js, put it in a corID/newFileName
- * note: using move(in fs.extra) instead of rename(in fs) as rename doesn't allow cross device
- * @param {corID} corID - Correlation ID
- * @param {orgFilePath} orgFilePath - Path to where the file is currently
- * @param {newFileName} newFileName - New file name to rename to
- * @param {callback} callback - callback(err)
- *******************************************************************************/
-function moveFileToSharedSpace(corID, orgFilePath, newFileName, callback) {
-    var newFileDir = config.cn_queue.shared_storage + "/" + corID + "/";
-    var filePath = newFileDir + newFileName;
-    
-    fs.mkdir(newFileDir, function (err) {
-        if (err) {
-            callback(responseCodes.QUEUE_INTERNAL_ERR, filePath);
-        }
-        else {
-            fs.move(orgFilePath, filePath, function (err) {
-                if (err) {
-                    callback(responseCodes.QUEUE_INTERNAL_ERR, filePath);
-                } else {
-                    callback(err, filePath);
-                }
-            });
-        }
-
-    });
-}
+};
 
 /*******************************************************************************
  * Dispatch work to queue to import a model via a file uploaded by User
@@ -156,22 +83,132 @@ function moveFileToSharedSpace(corID, orgFilePath, newFileName, callback) {
  * @param {databaseName} databaseName - name of database to commit to
  * @param {projectName} projectName - name of project to commit to
  * @param {userName} userName - name of user
- * @param {callback} callback - callback(status)
  *******************************************************************************/
-exports.importFile = function (filePath, orgFileName, databaseName, projectName, userName, callback) {
-    //structure is import file database project [owner] [config]
-    var corID = uuid.v1();
+ImportQueue.prototype.importFile = function(filePath, orgFileName, databaseName, projectName, userName, copy){
+    'use strict';
+
+    let corID = uuid.v1();
+
+    //console.log(filePath);
+    //console.log(orgFileName);
+
+    return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy).then(newPath => {
     
-    moveFileToSharedSpace(corID, filePath, orgFileName, function (err, newPath) {
-        if (err) {
-            callback(responseCodes.QUEUE_INTERNAL_ERR);
-        } else {
-            var msg = 'import ' + newPath + ' ' + databaseName + ' ' + projectName + ' ' + userName;
-            dispatchWork(corID, msg, function (err) {
-                if (callback) { callback(err); }
-            });
-        }
+        let msg = 'import ' + newPath + ' ' + databaseName + ' ' + projectName + ' ' + userName;
+        return this._dispatchWork(corID, msg);
+    
+    }).then(() => {
+
+        return new Promise((resolve, reject) => {
+
+
+            this.deferedObjs[corID] = {
+                resolve: () => resolve(corID),
+                reject: errCode => reject({corID, errCode})
+            };
+
+        });
 
     });
 };
 
+/*******************************************************************************
+ * Move a specified file to shared storage (area shared by queue workers)
+ * move the file to shared storage space, put it in a corID/newFileName
+ * note: using move(in fs.extra) instead of rename(in fs) as rename doesn't allow cross device
+ * @param {corID} corID - Correlation ID
+ * @param {orgFilePath} orgFilePath - Path to where the file is currently
+ * @param {newFileName} newFileName - New file name to rename to
+ *******************************************************************************/
+ImportQueue.prototype._moveFileToSharedSpace = function(corID, orgFilePath, newFileName, copy) {
+    'use strict';
+
+    let newFileDir = this.sharedSpacePath + "/" + corID + "/";
+    let filePath = newFileDir + newFileName;
+    
+    return new Promise((resolve, reject) => {
+        fs.mkdir(newFileDir, function (err){
+            if (err) {
+                reject(err);
+            } else {
+
+                let move = copy ? fs.copy : fs.move;
+
+                move(orgFilePath, filePath, function (err) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(filePath);
+                    }
+                });
+            }
+
+        });
+    });
+
+};
+
+/*******************************************************************************
+ * Insert a job item in worker queue
+ *
+ * @param {corID} corID - Correlation ID
+ * @param {msg} orgFilePath - Path to where the file is currently
+ *******************************************************************************/
+ImportQueue.prototype._dispatchWork = function(corID, msg){
+    'use strict';
+
+    return this.channel.assertQueue(this.workerQName, { durable: true }).then( () => {
+
+        return this.channel.sendToQueue(this.workerQName, 
+            new Buffer(msg), 
+            {
+                correlationId: corID, 
+                replyTo: this.callbackQName, 
+                persistent: true 
+            }
+        );
+
+    }).then( () => {
+
+        this.logger.logInfo(
+            'Sent work to queue: ' + msg.toString() + ' with corr id: ' + corID.toString() + ' reply queue: ' + this.callbackQName
+        );
+
+        return Promise.resolve();
+    });
+
+};
+
+/*******************************************************************************
+ * Listen to callback queue, resolve promise when job done
+ * Should be called once only, presumably in constructor
+ *******************************************************************************/
+ImportQueue.prototype._consumeCallbackQueue = function(){
+    'use strict';
+
+    let self = this;
+
+    return this.channel.assertQueue(this.callbackQName, { durable: true }).then(() => {
+        return this.channel.consume(this.callbackQName, function(rep) {
+            self.logger.logInfo('Job request id ' + rep.properties.correlationId + ' returned with: ' + rep.content);
+            
+
+            let defer = self.deferedObjs[rep.properties.correlationId];
+
+            let resErrorCode = parseInt(JSON.parse(rep.content).value);
+
+            if(defer && resErrorCode === 0){
+                defer.resolve();
+            } else if (defer) {
+                defer.reject(resErrorCode);
+            } else {
+                self.logger.logError('Job done but cannot find corresponding defer object with cor id ' + rep.properties.correlationId);
+            }
+
+            defer && delete self.deferedObjs[rep.properties.correlationId];
+            
+        }, { noAck: true });
+    });
+};
+
+module.exports = new ImportQueue();
