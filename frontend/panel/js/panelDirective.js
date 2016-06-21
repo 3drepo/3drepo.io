@@ -42,7 +42,7 @@
 
     function PanelCtrl ($scope, $window, $timeout, EventService) {
         var vm = this,
-			panelTopBottomGap = 40,
+			panelTopBottomGap = 55,
 			maxHeightAvailable = $window.innerHeight - panelTopBottomGap,
 			itemGap = 20,
 			panelToolbarHeight = 40,
