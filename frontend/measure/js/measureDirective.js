@@ -16,79 +16,85 @@
  */
 
 (function () {
-    "use strict";
+	"use strict";
 
-    angular.module("3drepo")
-        .directive("tdrMeasure", measure);
+	angular.module("3drepo")
+		.directive("tdrMeasure", measure);
 
-    function measure() {
-        return {
-            restrict: "EA",
-            templateUrl: "measure.html",
-            scope: {},
-            controller: MeasureCtrl,
-            controllerAs: "vm",
-            bindToController: true
-        };
-    }
+	function measure() {
+		return {
+			restrict: "EA",
+			templateUrl: "measure.html",
+			scope: {},
+			controller: MeasureCtrl,
+			controllerAs: "vm",
+			bindToController: true
+		};
+	}
 
-    MeasureCtrl.$inject = ["$scope", "$element", "EventService"];
+	MeasureCtrl.$inject = ["$scope", "$element", "EventService"];
 
-    function MeasureCtrl ($scope, $element, EventService) {
-        var vm = this,
-            coords = [null, null],
-            screenPos,
-            currentPickPoint;
+	function MeasureCtrl ($scope, $element, EventService) {
+		var vm = this,
+			coords = [null, null],
+			screenPos,
+			currentPickPoint;
 
-        vm.show = false;
-        vm.distance = false;
+		vm.axisDistance = [0.0, 0.0, 0.0];
+		vm.totalDistance = 0.0;
 
-        $scope.$watch(EventService.currentEvent, function (event) {
+		vm.show = false;
+		vm.distance = false;
+		vm.allowMove = false;
+
+		var coordVector = null, vectorLength = 0.0;
+
+		EventService.send(EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK, {
+			callback: function(event) {
+				var point = event.hitPnt;
+				var screenPos = [event.layerX, event.layerY];
+
+				if (vm.allowMove) {
+					if (point)
+					{
+						coords[1] = new x3dom.fields.SFVec3f(point[0], point[1], point[2]);
+					}
+
+					coordVector = coords[0].subtract(coords[1]);
+
+					vm.axisDistance[0] = Math.abs(coordVector.x).toFixed(3);
+					vm.axisDistance[1] = Math.abs(coordVector.y).toFixed(3);
+					vm.axisDistance[2] = Math.abs(coordVector.z).toFixed(3);
+
+					vm.totalDistance = coordVector.length().toFixed(3);
+
+					angular.element($element[0]).css("left", (screenPos[0] + 5).toString() + "px");
+					angular.element($element[0]).css("top", (screenPos[1] + 5).toString() + "px");
+
+					$scope.$apply();
+				}
+			}
+		});
+
+		$scope.$watch(EventService.currentEvent, function (event) {
 		if (event.type === EventService.EVENT.VIEWER.PICK_POINT) {
-                if (event.value.hasOwnProperty("id")) {
-                    // The check against currentPickPoint is due to the PICK_POINT event being called twice
-                    if (angular.isUndefined(currentPickPoint) ||
-                        (!((currentPickPoint.x === event.value.position.x) &&
-                           (currentPickPoint.y === event.value.position.y) &&
-                           (currentPickPoint.z === event.value.position.z)))) {
-                        currentPickPoint = event.value.position;
-                        if (coords[0] === null) {
-                            vm.show = true;
-                            coords[0] = currentPickPoint;
-                            vm.p1 =
-                                currentPickPoint.x.toFixed(3) + ", " +
-                                currentPickPoint.y.toFixed(3) + ", " +
-                                currentPickPoint.z.toFixed(3);
-                        }
-                        else if (coords[1] === null) {
-                            coords[1] = currentPickPoint;
-                            vm.p2 =
-                                currentPickPoint.x.toFixed(3) + ", " +
-                                currentPickPoint.y.toFixed(3) + ", " +
-                                currentPickPoint.z.toFixed(3);
-
-                            vm.distance = Math.sqrt(
-                                Math.pow(coords[1].x - coords[0].x, 2) +
-                                Math.pow(coords[1].y - coords[0].y, 2) +
-                                Math.pow(coords[1].z - coords[0].z, 2)
-                            ).toFixed(3);
-                        }
-                        else {
-                            coords[0] = currentPickPoint;
-                            vm.p1 =
-                                currentPickPoint.x.toFixed(3) + ", " +
-                                currentPickPoint.y.toFixed(3) + ", " +
-                                currentPickPoint.z.toFixed(3);
-                            coords[1] = null;
-                            vm.p2 = null;
-                            vm.distance = false;
-                        }
-                    }
-                    screenPos = event.value.screenPos;
-                    angular.element($element[0]).css("left", (screenPos[0] + 5).toString() + "px");
-                    angular.element($element[0]).css("top", (screenPos[1] + 5).toString() + "px");
-                }
-            }
-        });
-    }
+				if (event.value.hasOwnProperty("position")) {
+					// First click, if a point has not been clicked before
+					currentPickPoint = event.value.position;
+					if (coords[1] === null || coords[0] === null) {
+						vm.show = true;
+						vm.allowMove = true;
+						coords[0] = currentPickPoint;
+					}
+					else if (vm.allowMove) {
+						vm.allowMove = false;
+					} else {
+						coords[0] = currentPickPoint;
+						coords[1] = null;
+						vm.allowMove = true;
+					}
+				}
+			}
+		});
+	}
 }());

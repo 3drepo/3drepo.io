@@ -178,6 +178,8 @@
 							v.oculus.switchVR();
 						} else if (event.type === EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK) {
 							v.viewer.onViewpointChanged(event.value.callback);
+						} else if (event.type === EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK) {
+							v.viewer.onMouseMove(event.value.callback);
 						} else if (event.type === EventService.EVENT.PROJECT_SETTINGS_READY) {
 							if (event.value.account === v.account && event.value.project === v.project)
 							{

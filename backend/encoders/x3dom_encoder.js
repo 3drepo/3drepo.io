@@ -531,6 +531,8 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
 			{
 				var mp = xmlDoc.createElement('MultiPart');
 				mp.setAttribute('onload', 'onLoaded(event);');
+				mp.setAttribute('onmousemove', 'onMouseMove(event);');
+				mp.setAttribute('onmousedown', 'onMouseDown(event);');
 				mp.setAttribute('id', child['id']);
 				mp.setAttribute('url', config.api_server.url + '/' + account + '/' + project + '/' + child['id'] + '.x3d.mpc');
 				mp.setAttribute('urlIDMap', config.api_server.url + '/' + account + '/' + project + '/' + child['id'] + '.json.mpc');

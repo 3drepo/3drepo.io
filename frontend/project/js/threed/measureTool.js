@@ -69,9 +69,12 @@ var MeasureTool = {};
 			self.inMeasureMode   = true;
 			element.style.cursor = "crosshair";
 			self.viewer.onMouseDown(self.measureMouseDown);
+			self.viewer.onMouseMove(self.measureMouseMove);
+
 			self.viewer.highlightObjects();
+
 			// Switch off the pick point functionality
-			self.viewer.offMouseDown(self.mouseDownPickPoint);
+			self.viewer.disableClicking();
 		} else {
 			self.inMeasureMode   = false;
 			self.deleteMeasureLine();
@@ -80,7 +83,7 @@ var MeasureTool = {};
 			self.viewer.offMouseMove(self.measureMouseMove);
 
 			// Restore the previous functionality
-			self.viewer.onMouseDown(self.mouseDownPickPoint);
+			self.viewer.enableClicking();
 		}
 	};
 
@@ -97,22 +100,26 @@ var MeasureTool = {};
 			line,
 			colors;
 
-		line = document.createElement("LineSet");
+		var line = document.createElement("LineSet");
 		line.setAttribute("vertexCount", 8);
 
 		self.measureLineCoords = document.createElement("Coordinate");
 		self.measureLineCoords.setAttribute("point", "0 0 0,0 0 0,0 0 0,0 0 0,0 0 0,0 0 0,0 0 0,0 0 0");
 		line.appendChild(self.measureLineCoords);
 
-		colors = document.createElement("Color");
-		colors.setAttribute("color", "1 0 0,1 0 0,0 1 0,0 1 0,0 0 1,0 0 1, 1 1 1, 1 1 1");
+		var colors = document.createElement("Color");
+		colors.setAttribute("color", "0 1 0,0 1 0,1 0 0,1 0 0,0 0 1,0 0 1, 1 1 1, 1 1 1");
 		line.appendChild(colors);
 
-		lineDepth = document.createElement("DepthMode");
+		var lineDepth = document.createElement("DepthMode");
 		lineDepth.setAttribute("depthFunc", "ALWAYS");
 
-		lineApp = document.createElement("Appearance");
+		var lineApp = document.createElement("Appearance");
 		lineApp.appendChild(lineDepth);
+
+		var lineProperties = document.createElement("LineProperties");
+		lineProperties.setAttribute("linewidthScaleFactor", 3.0);
+		lineApp.appendChild(lineProperties);
 
 		self.measureLine = document.createElement("Shape");
 		self.measureLine.appendChild(lineApp);

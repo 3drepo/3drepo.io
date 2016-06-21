@@ -545,7 +545,7 @@ var Viewer = {};
 		};
 
 		this.offMouseMove = function(functionToBind) {
-			ViewerUtil.offEvent("offMouseMove", functionToBind);
+			ViewerUtil.offEvent("onMouseMove", functionToBind);
 		};
 
 		this.pickPoint = function(x, y, fireEvent)
@@ -612,6 +612,7 @@ var Viewer = {};
 
 		this.onMouseDown(this.mouseDownPickPoint);
 
+		/*
 		this.mouseMovePoint = function (event) {
 			if (event.hasOwnProperty("target")) {
 				console.log(event.hitPnt);
@@ -624,6 +625,7 @@ var Viewer = {};
 		};
 
 		this.onMouseMove(this.mouseMovePoint);
+		*/
 
 		this.onViewpointChanged = function(functionToBind) {
 			ViewerUtil.onEvent("myViewpointHasChanged", functionToBind);
@@ -849,7 +851,7 @@ var Viewer = {};
 		};
 
 		this.offClickObject = function(functionToBind) {
-			offEvent("clickObject", functionToBind);
+			ViewerUtil.offEvent("clickObject", functionToBind);
 		};
 
 		this.viewpoints = {};
@@ -1794,6 +1796,7 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	GO_HOME: "VIEWER_GO_HOME",
 	SWITCH_FULLSCREEN: "VIEWER_SWITCH_FULLSCREEN",
 	REGISTER_VIEWPOINT_CALLBACK: "VIEWER_REGISTER_VIEWPOINT_CALLBACK",
+	REGISTER_MOUSE_MOVE_CALLBACK: "VIEWER_REGISTER_MOUSE_MOVE_CALLBACK",
 	OBJECT_SELECTED: "VIEWER_OBJECT_SELECTED",
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
 	HIGHLIGHT_OBJECTS: "VIEWER_HIGHLIGHT_OBJECTS",
@@ -1801,6 +1804,8 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	SET_PIN_VISIBILITY: "VIEWER_SET_PIN_VISIBILITY",
 
 	GET_CURRENT_VIEWPOINT: "VIEWER_GET_CURRENT_VIEWPOINT",
+
+	MEASURE_MODE_CLICK_POINT: "VIEWER_MEASURE_MODE_CLICK_POINT",
 
 	PICK_POINT: "VIEWER_PICK_POINT",
 	MOVE_POINT: "VIEWER_MOVE_POINT",
