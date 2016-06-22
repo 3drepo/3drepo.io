@@ -4690,8 +4690,20 @@ var ViewerManager = {};
 	AccountBillingCtrl.$inject = [];
 
 	function AccountBillingCtrl() {
-		var vm = this;
+		var vm = this,
+			pricePerLicense = 100;
 
+		/*
+		 * Init
+		 */
+		vm.showInfo = true;
+		vm.numLicenses = 2;
+		vm.priceLicenses = vm.numLicenses * pricePerLicense;
+		vm.numNewLicenses = 2;
+		vm.priceNewLicenses = vm.priceLicenses;
+		vm.quotaUsed = 10.3;
+		vm.quotaAvailable = 0.5;
+		vm.payButtonDisabled = true;
 		vm.billingHistory = [
 			{date: "10/04/2016", description: "1st payment", paymentMethod: "PayPal", amount: 100},
 			{date: "10/05/2016", description: "2nd payment", paymentMethod: "PayPal", amount: 100},

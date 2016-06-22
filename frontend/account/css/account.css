@@ -340,3 +340,27 @@ account-billing #accountBillingHistoryTitle p {
 account-billing #accountBillingHistoryList p {
   margin: 12px 0;
 }
+
+account-billing #accountBillingInfo {
+  margin: -20px 0 -20px;
+}
+
+account-billing .accountBillingSubscription p:first-child {
+  color: rgba(0, 0, 0, 0.6);
+  margin-right: 10px;
+}
+account-billing .accountBillingSubscription p:nth-child(2) {
+  color: rgba(0, 0, 0, 0.9);
+  margin-right: 30px;
+}
+account-billing .accountBillingSubscription p:nth-child(3) {
+  color: rgba(0, 0, 0, 0.6);
+  margin-right: 10px;
+}
+account-billing .accountBillingSubscription p:nth-child(4) {
+  color: rgba(0, 0, 0, 0.9);
+}
+
+account-billing #accountBillingUpgrade {
+  margin: 20px 0 -20px;
+}

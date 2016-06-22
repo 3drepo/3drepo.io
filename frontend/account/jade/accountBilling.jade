@@ -5,37 +5,57 @@
 				h2 Billing
 
 		.userContent
+			// Info
+			#accountBillingInfo(ng-if="vm.showInfo")
+				p You have attempted to upload a model that is larger than your current subscription allows.
+
 			// Current subscription
 			div(layout="row")
 				div(layout="column")
 					p.md-title Current subscription
-					p 10Gb, 5 collaborators
-				span(flex)
-				div(layout="row", layout-align="center center")
-					md-button.md-raised.md-accent(ng-click="vm.upgrade()") Upgrade
+					.accountBillingSubscription(layout="row")
+						p Number of licenses
+						p {{vm.numLicenses}}
+						p Payment
+						p £{{vm.priceLicenses}} / month
+					.accountBillingSubscription(layout="row")
+						p Quota used
+						p {{vm.quotaUsed}}Gb
+						p Quota available
+						p {{vm.quotaAvailable}}Gb
 			md-divider
+
+			// Upgrade
+			#accountBillingUpgrade(layout="row", layout-align="start start", flex)
+				md-input-container
+					label Number of licenses
+					input(type="number", ng-model="vm.numNewLicenses")
+				md-button.md-raised.md-accent(ng-click="vm.upgrade()") Upgrade
+			md-divider
+
 			// Billing info
 			p.md-title Billing information
 			div(layout="row")
 				#accountBillingGroup(layout="column")
-					p Billing address
-					p 124 High Street
-					p Leeds
-					p LS11 8ST
+					p Postal code
+					p Country
+					p VAT number
 			md-divider
-				p.md-title Billing history
-				#accountBillingHistoryTitle(layout="row", layout-align="start")
-					p(flex="20") Date
-					p(flex="20") Description
-					p(flex="20") Payment method
-					p(flex="20") Amount
-				#accountBillingHistoryList(layout="row", layout-align="start start", ng-repeat="billing in vm.billingHistory")
-					p(flex="20") {{billing.date}}
-					p(flex="20") {{billing.description}}
-					p(flex="20") {{billing.paymentMethod}}
-					p(flex="20") {{billing.amount}}
-					md-button.md-icon-button.md-accent(aria-label="Download")
-						md-icon.angular-material-icons cloud_download
+
+			// Billing History
+			p.md-title Billing history
+			#accountBillingHistoryTitle(layout="row", layout-align="start")
+				p(flex="20") Date
+				p(flex="20") Description
+				p(flex="20") Payment method
+				p(flex="20") Amount
+			#accountBillingHistoryList(layout="row", layout-align="start start", ng-repeat="billing in vm.billingHistory")
+				p(flex="20") {{billing.date}}
+				p(flex="20") {{billing.description}}
+				p(flex="20") {{billing.paymentMethod}}
+				p(flex="20") {{billing.amount}}
+				md-button.md-icon-button.md-accent(aria-label="Download")
+					md-icon.angular-material-icons cloud_download
 
 
 
