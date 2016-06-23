@@ -5,57 +5,65 @@
 				h2 Billing
 
 		.userContent
-			// Info
-			#accountBillingInfo(ng-if="vm.showInfo")
-				p You have attempted to upload a model that is larger than your current subscription allows.
-
-			// Current subscription
+			// Subscription
+			h1.md-title Subscription
 			div(layout="row")
-				div(layout="column")
-					p.md-title Current subscription
-					.accountBillingSubscription(layout="row")
-						p Number of licenses
-						p {{vm.numLicenses}}
-						p Payment
-						p £{{vm.priceLicenses}} / month
-					.accountBillingSubscription(layout="row")
-						p Quota used
-						p {{vm.quotaUsed}}Gb
-						p Quota available
-						p {{vm.quotaAvailable}}Gb
-			md-divider
-
-			// Upgrade
-			#accountBillingUpgrade(layout="row", layout-align="start start", flex)
 				md-input-container
-					label Number of licenses
-					input(type="number", ng-model="vm.numNewLicenses")
-				md-button.md-raised.md-accent(ng-click="vm.upgrade()") Upgrade
-			md-divider
+					label Quota used (Gb)
+					input(type="text", ng-model="vm.quotaUsed", ng-disabled="true")
+				md-input-container
+					label Quota available (Gb)
+					input(type="text", ng-model="vm.quotaAvailable", ng-disabled="true")
+
+			div(layout="row")
+				md-input-container
+					label Licenses
+					input(type="number", ng-model="vm.numLicenses", min="1")
+				md-input-container
+					label Payment (£ / month)
+					input(type="text", ng-model="vm.priceLicenses", ng-disabled="true")
 
 			// Billing info
-			p.md-title Billing information
+			h1.md-title Billing information
 			div(layout="row")
-				#accountBillingGroup(layout="column")
-					p Postal code
-					p Country
-					p VAT number
-			md-divider
+				md-input-container
+					label Postal code
+					input(type="text", ng-model="vm.postalCode")
+				md-input-container
+					label Country
+					md-select(ng-model="vm.country")
+						md-option(ng-repeat="(key, value) in vm.countries", value="{{key}}") {{key}}
+				md-input-container
+					label VAT number
+					input(type="text", ng-model="vm.vatNumber")
+
+			#accountBillingSave
+				md-button.md-raised.md-accent Save
+				md-divider
 
 			// Billing History
-			p.md-title Billing history
-			#accountBillingHistoryTitle(layout="row", layout-align="start")
-				p(flex="20") Date
-				p(flex="20") Description
-				p(flex="20") Payment method
-				p(flex="20") Amount
-			#accountBillingHistoryList(layout="row", layout-align="start start", ng-repeat="billing in vm.billingHistory")
-				p(flex="20") {{billing.date}}
-				p(flex="20") {{billing.description}}
-				p(flex="20") {{billing.paymentMethod}}
-				p(flex="20") {{billing.amount}}
-				md-button.md-icon-button.md-accent(aria-label="Download")
-					md-icon.angular-material-icons cloud_download
+			h1.md-title Billing history
+			md-content#accountBillingHistory
+				section
+					md-subheader
+						div(layout="row", layout-align="start")
+							label(flex="20") Date
+							label(flex="20") Description
+							label(flex="20") Payment method
+							label(flex="20") Amount
+
+				#accountBillingHistoryContainer
+					#accountBillingHistoryList(layout="row", layout-align="start start", ng-repeat="billing in vm.billingHistory")
+						md-input-container(flex="20")
+							input(type="text", ng-model="billing.date", ng-disabled="true", aria-label="date")
+						md-input-container(flex="20")
+							input(type="text", ng-model="billing.description", ng-disabled="true", aria-label="description")
+						md-input-container(flex="20")
+							input(type="text", ng-model="billing.paymentMethod", ng-disabled="true", aria-label="paymentMethod")
+						md-input-container(flex="20")
+							input(type="text", ng-model="billing.amount", ng-disabled="true", aria-label="amount")
+						md-button.md-icon-button.md-accent(aria-label="Download")
+							md-icon.angular-material-icons cloud_download
 
 
 

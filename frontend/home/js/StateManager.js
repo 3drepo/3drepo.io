@@ -74,6 +74,7 @@
 						$stateProvider.state(childStateName, {
 							name: parentState.children[i].plugin,
 							url: childState.url || (parentStateName !== "home" ? "/" : "") + ":" + childState.plugin,
+							reloadOnSearch : false,
 							resolve: {
 								init: function(StateManager, $stateParams)
 								{

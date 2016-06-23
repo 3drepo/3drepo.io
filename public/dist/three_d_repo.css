@@ -131,31 +131,20 @@ account-projects .projectRight .projectUploaded {
 }
 
 /** Account Profile ***************************************************************************************************/
-account-profile .profile {
-  max-height: calc(100vh - 180px);
-  overflow: auto;
-  padding: 10px;
-}
-
-account-profile #profileDivider {
-  display: block;
-  background: rgba(0,0,0,0.2);
-  width: 1px;
-  height: 380px;
-}
-
-account-profile .accountProfileList {
-  max-height: calc(100vh - 200px);
-  overflow-x: hidden;
-  padding: 0;
-}
-
-account-profile .accountProfileContent {
-  margin-left: 65px;
+account-profile md-input-container {
+  margin-right: 5px;
 }
 
 account-profile .updateContainer {
-  margin: -20px 0 20px;
+  margin: -20px 0 0;
+}
+
+account-profile .md-title {
+  margin: -10px 0 20px;
+}
+
+account-profile md-divider {
+  margin: 20px 0 20px;
 }
 
 /** Account Info ******************************************************************************************************/
@@ -321,50 +310,44 @@ account-upgrade .accountUpgradeSubscription p:nth-child(4) {
 }
 
 /** Account Billing ***************************************************************************************************/
+account-billing md-input-container {
+  margin-right: 10px;
+}
+
 account-billing .md-title {
-  margin-bottom: 0;
+  margin-top: -10px;
 }
 
-account-billing #accountBillingGroup p {
-  margin: 0 0 10px;
-}
-account-billing #accountBillingGroup p:first-child {
-  color: rgba(0, 0, 0, 0.6);
-  margin-top: 20px;
+account-billing .md-button {
+  margin-bottom: 20px;
 }
 
-account-billing #accountBillingHistoryTitle p {
-  color: rgba(0, 0, 0, 0.6);
-  margin: 20px 0 10px;
-}
-account-billing #accountBillingHistoryList p {
-  margin: 12px 0;
+account-billing .cardInfo {
+  margin: 0 !important;
 }
 
-account-billing #accountBillingInfo {
-  margin: -20px 0 -20px;
+account-billing #accountBillingHistory {
+  max-height: 150px;
+  overflow-y: auto;
+}
+account-billing #accountBillingHistory .md-subheader label {
+  margin: 0 12px 0 0;
+  font-size: 12px;
+}
+account-billing #accountBillingHistoryList md-input-container {
+  margin: 0 10px 0 0;
+}
+account-billing #accountBillingHistoryList .md-button {
+  margin-top: -5px;
 }
 
-account-billing .accountBillingSubscription p:first-child {
-  color: rgba(0, 0, 0, 0.6);
-  margin-right: 10px;
-}
-account-billing .accountBillingSubscription p:nth-child(2) {
-  color: rgba(0, 0, 0, 0.9);
-  margin-right: 30px;
-}
-account-billing .accountBillingSubscription p:nth-child(3) {
-  color: rgba(0, 0, 0, 0.6);
-  margin-right: 10px;
-}
-account-billing .accountBillingSubscription p:nth-child(4) {
-  color: rgba(0, 0, 0, 0.9);
+account-billing #accountBillingHistoryContainer {
+  padding-left: 10px;
 }
 
-account-billing #accountBillingUpgrade {
-  margin: 20px 0 -20px;
+account-billing #accountBillingSave {
+  margin: -20px 0 20px;
 }
-
 /* Done to counter bootstrap styling. This should really be set in a top level style file */
 .md-datepicker-input-mask {
   width: 308px;

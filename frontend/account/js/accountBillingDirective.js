@@ -34,11 +34,12 @@
 		};
 	}
 
-	AccountBillingCtrl.$inject = [];
+	AccountBillingCtrl.$inject = ["$scope", "$http"];
 
-	function AccountBillingCtrl() {
+	function AccountBillingCtrl($scope, $http) {
 		var vm = this,
-			pricePerLicense = 100;
+			pricePerLicense = 100,
+			quotaPerLicense = 10;
 
 		/*
 		 * Init
@@ -48,14 +49,31 @@
 		vm.priceLicenses = vm.numLicenses * pricePerLicense;
 		vm.numNewLicenses = 2;
 		vm.priceNewLicenses = vm.priceLicenses;
-		vm.quotaUsed = 10.3;
-		vm.quotaAvailable = 0.5;
+		vm.quotaUsed = 17.3;
+		vm.quotaAvailable = Math.round(((vm.numLicenses * quotaPerLicense) - vm.quotaUsed) * 10) / 10; // Round to 1 decimal place
 		vm.payButtonDisabled = true;
+		vm.postalCode = "LS11 8QT";
+		vm.country = "United Kingdom";
+		vm.vatNumber = "12398756";
 		vm.billingHistory = [
 			{date: "10/04/2016", description: "1st payment", paymentMethod: "PayPal", amount: 100},
 			{date: "10/05/2016", description: "2nd payment", paymentMethod: "PayPal", amount: 100},
 			{date: "10/06/2016", description: "3rd payment", paymentMethod: "PayPal", amount: 100}
 		];
+		/*
+		$http.get("/public/data/countries.json").then(function (response) {
+			console.log(response);
+			vm.countries = response.data;
+		});
+		*/
+
+		$scope.$watch("vm.numNewLicenses", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				vm.priceNewLicenses = newValue * pricePerLicense;
+				vm.quotaNew = (newValue * quotaPerLicense);
+				vm.payButtonDisabled = (vm.numNewLicenses === vm.numLicenses);
+			}
+		});
 
 		vm.upgrade = function () {
 			vm.showPage({page: "upgrade", callingPage: "billing"});
