@@ -58,6 +58,7 @@
 			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
 				// Get any documents associated with an object
 				var object = event.value;
+				console.log(object);
 				promise = DocsService.getDocs(object.account, object.project, object.id);
 				promise.then(function (data) {
 					if (Object.keys(data).length > 0) {

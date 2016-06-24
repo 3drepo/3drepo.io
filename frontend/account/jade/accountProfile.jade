@@ -8,21 +8,19 @@
 		.userContent
 			div(layout="column", flex)
 				h1.md-title Info
+				md-input-container.md-block
+					label Username
+					input(ng-model="vm.username" ng-disabled="true")
 				div(layout="row")
-					md-input-container
-						label Username
-						input(ng-model="vm.username" ng-disabled="true")
-				div(layout="row")
-					md-input-container
+					md-input-container(flex)
 						label First name
-						input(ng-model="vm.firstName")
-					md-input-container
+						input(ng-model="vm.firstNameNew")
+					md-input-container(flex)
 						label Last name
-						input(ng-model="vm.lastName")
-				div(layout="row", flex="50")
-					md-input-container
-						label Email
-						input(ng-model="vm.email", type="email")
+						input(ng-model="vm.lastNameNew")
+				md-input-container.md-block
+					label Email
+					input(ng-model="vm.emailNew", type="email")
 				.updateContainer(layout="row", layout-align="start center")
 					md-button.md-raised.md-accent(ng-click="vm.updateInfo()") Update
 					p {{vm.infoSaveInfo}}
@@ -32,10 +30,10 @@
 			div(layout="column")
 				h1.md-title Password
 				div(layout="row")
-					md-input-container
+					md-input-container(flex)
 						label Old password
 						input(ng-model="vm.oldPassword", type="password")
-					md-input-container
+					md-input-container(flex)
 						label New password
 						input(ng-model="vm.newPassword", type="password")
 				.updateContainer(layout="row", layout-align="start center")

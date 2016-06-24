@@ -158,7 +158,7 @@
 
 		panelCard.right.push({
 			type: "docs",
-			title: "Docs",
+			title: "Data",
 			show: false,
 			help: "Documents",
 			icon: "content_copy",

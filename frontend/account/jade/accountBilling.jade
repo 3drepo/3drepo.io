@@ -8,32 +8,32 @@
 			// Subscription
 			h1.md-title Subscription
 			div(layout="row")
-				md-input-container
+				md-input-container(flex)
 					label Quota used (Gb)
 					input(type="text", ng-model="vm.quotaUsed", ng-disabled="true")
-				md-input-container
+				md-input-container(flex)
 					label Quota available (Gb)
 					input(type="text", ng-model="vm.quotaAvailable", ng-disabled="true")
 
 			div(layout="row")
-				md-input-container
+				md-input-container(flex)
 					label Licenses
 					input(type="number", ng-model="vm.numLicenses", min="1")
-				md-input-container
+				md-input-container(flex)
 					label Payment (£ / month)
 					input(type="text", ng-model="vm.priceLicenses", ng-disabled="true")
 
 			// Billing info
 			h1.md-title Billing information
 			div(layout="row")
-				md-input-container
+				md-input-container(flex)
 					label Postal code
 					input(type="text", ng-model="vm.postalCode")
-				md-input-container
+				md-input-container(flex)
 					label Country
 					md-select(ng-model="vm.country")
 						md-option(ng-repeat="(key, value) in vm.countries", value="{{key}}") {{key}}
-				md-input-container
+				md-input-container(flex)
 					label VAT number
 					input(type="text", ng-model="vm.vatNumber")
 
@@ -53,7 +53,7 @@
 							label(flex="20") Amount
 
 				#accountBillingHistoryContainer
-					#accountBillingHistoryList(layout="row", layout-align="start start", ng-repeat="billing in vm.billingHistory")
+					.accountBillingHistoryListItem(layout="row", layout-align="start start", ng-repeat="billing in vm.billingHistory")
 						md-input-container(flex="20")
 							input(type="text", ng-model="billing.date", ng-disabled="true", aria-label="date")
 						md-input-container(flex="20")
@@ -62,12 +62,7 @@
 							input(type="text", ng-model="billing.paymentMethod", ng-disabled="true", aria-label="paymentMethod")
 						md-input-container(flex="20")
 							input(type="text", ng-model="billing.amount", ng-disabled="true", aria-label="amount")
-						md-button.md-icon-button.md-accent(aria-label="Download")
+						md-button.md-icon-button.md-accent(aria-label="Download", ng-click="vm.downloadBilling($index)")
 							md-icon.angular-material-icons cloud_download
-
-
-
-
-
 
 

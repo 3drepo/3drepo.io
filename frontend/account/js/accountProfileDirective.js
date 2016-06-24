@@ -42,21 +42,25 @@
 	function AccountProfileCtrl(AccountService) {
 		var vm = this,
 			promise;
+		console.log(vm);
 
 		/*
 		 * Init
 		 */
 		vm.showInfo = true;
 		vm.showChangePassword = false;
+		vm.firstNameNew = vm.firstName;
+		vm.lastNameNew = vm.firstName;
+		vm.emailNew = vm.email;
 
 		/**
 		 * Update the user info
 		 */
 		vm.updateInfo = function () {
 			promise = AccountService.updateInfo(vm.username, {
-				email: vm.email,
-				firstName: vm.firstName,
-				lastName: vm.lastName
+				email: vm.emailNew,
+				firstName: vm.firstNameNew,
+				lastName: vm.lastNameNew
 			});
 			promise.then(function (response) {
 				console.log(response);

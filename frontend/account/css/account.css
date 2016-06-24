@@ -177,10 +177,11 @@ account-info md-list {
 }
 
 account-info .accountInfoPage {
-  min-height: 60px;
+  min-height: 50px;
 }
-account-info .accountInfoPage button {
-  min-height: 60px !important;
+account-info .accountInfoPage .md-button {
+  min-height: 50px!important;
+  height: 50px;
 }
 
 /** Avatar Image ******************************************************************************************************/
@@ -334,10 +335,10 @@ account-billing #accountBillingHistory .md-subheader label {
   margin: 0 12px 0 0;
   font-size: 12px;
 }
-account-billing #accountBillingHistoryList md-input-container {
+account-billing .accountBillingHistoryListItem md-input-container {
   margin: 0 10px 0 0;
 }
-account-billing #accountBillingHistoryList .md-button {
+account-billing .accountBillingHistoryListItem .md-button {
   margin-top: -5px;
 }
 
