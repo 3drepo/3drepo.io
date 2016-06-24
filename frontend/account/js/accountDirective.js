@@ -65,7 +65,6 @@
 					 vm.hasAvatar = response.data.hasAvatar;
 					 vm.avatarURL = response.data.avatarURL;
 					 */
-					goToProject();
 				});
 			} else {
 				vm.username        = null;
@@ -76,39 +75,13 @@
 			}
 		});
 
-		/*
-		 * Watch for change in project
-		 */
-		$scope.$watch("vm.state.project", function()
-		{
-			goToProject();
-		});
-
-		/**
-		 * Go to a project or back to the projects list if the project is unknown
-		 */
-		function goToProject () {
-			var i, length;
-			if (angular.isDefined(vm.accounts)) {
-				for (i = 0, length = vm.accounts[0].projects.length; i < length; i += 1) {
-					if (vm.accounts[0].projects[i].project === vm.state.project) {
-						vm.showProject = true;
-						break;
-					}
-				}
-				if (!vm.showProject) {
-					$location.path("/" + vm.state.account, "_self");
-				}
-			}
-		}
-
 		vm.showItem = function (item) {
 			vm.itemToShow = item;
 		};
 
 		/**
 		 * Event listener for change in local storage login status
-		 * 
+		 *
 		 * @param event
 		 */
 		function loginStatusListener (event) {

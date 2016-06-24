@@ -1,18 +1,18 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *	Copyright (C) 2014 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 (function() {
@@ -37,6 +37,7 @@
 
 					Auth.init().then(function (loggedIn) {
 						StateManager.state.loggedIn = loggedIn;
+
 						finishedAuth.resolve();
 					});
 
@@ -48,27 +49,47 @@
 		var stateStack       = [structure];
 		var stateNameStack   = ["home"];
 
-		//console.log('stateStack', stateStack);
+		//console.log("stateStack", stateStack);
 		while (stateStack.length > 0)
 		{
 			var stackLength      = stateStack.length;
 			var parentState      = stateStack[0];
 			var parentStateName  = stateNameStack[0];
 
-			//console.log('parentState', parentState);
+			// First loop through the list of functions as these are
+			// more specific than the
+			if (parentState.functions)
+			{
+				for (var i = 0; i < parentState.functions.length; i++)
+				{
+					var childFunction	  = parentState.functions[i];
+					var childFunctionName = parentStateName + "." + childFunction;
+
+					(function(childFunction) {
+						$stateProvider.state(childFunctionName, {
+							name: childFunction,
+							url: childFunction,
+							resolve: {
+								init: function (StateManager, $stateParams) {
+									$stateParams[childFunction] = true;
+
+									StateManager.setState($stateParams, {});
+								}
+							}
+						});
+					})(childFunction);
+				}
+			}
+
 			if (parentState.children)
 			{
 				for (var i = 0; i < parentState.children.length; i++)
 				{
 					var childState     = parentState.children[i];
 					var childStateName = parentStateName + "." + childState.plugin;
-					//console.log('childStateName', childStateName);
-					//console.log('myUrl', childState.url);
-					
+
 					stateNameStack.push(childStateName);
 					stateStack.push(parentState.children[i]);
-
-					//console.log('url', (parentStateName !== "home" ? "/" : "") + ":" + childState.plugin);
 
 					(function(childState){
 						$stateProvider.state(childStateName, {
@@ -77,17 +98,11 @@
 							resolve: {
 								init: function(StateManager, $stateParams)
 								{
-
-									if(!$stateParams.hasOwnProperty(childState.plugin)){
-										$stateParams[childState.plugin] = true;
-									}
-
-									StateManager.setState($stateParams, {});
+									StateManager.setState($stateParams, $stateParams.$$search);
 								}
 							}
 						});
 					})(childState);
-
 				}
 			}
 
@@ -97,11 +112,19 @@
 
 		$urlRouterProvider.otherwise("");
 	}])
-	.run(["$location", "$rootScope", "$state", "uiState", "StateManager", function($location, $rootScope, $state, uiState, StateManager) {
+	.run(["$location", "$rootScope", "$state", "uiState", "StateManager", "Auth", function($location, $rootScope, $state, uiState, StateManager, Auth) {
 		$rootScope.$on("$stateChangeStart",function(event, toState, toParams, fromState, fromParams){
 			StateManager.state.changing = true;
 
+			for(var i = 0; i < StateManager.functions.length; i++)
+			{
+				StateManager.setStateVar(StateManager.functions[i], false);
+			}
 
+			if (StateManager.state.loggedIn && !StateManager.state.account)
+			{
+				StateManager.setStateVar("account", Auth.username);
+			}
 
 			var stateChangeObject = {
 				toState    : toState,
@@ -121,29 +144,29 @@
 				fromParams : fromParams
 			};
 
-			//console.log('path', $location.path());
-
-			if(typeof ga !== 'undefined' && ga !== null){
-				ga('send', 'pageview', $location.path());
+			if(typeof ga !== "undefined" && ga !== null){
+				ga("send", "pageview", $location.path());
 			}
 
 			StateManager.handleStateChange(stateChangeObject);
 		});
 	}])
-	.service("StateManager", ["$q", "$state", "$rootScope", "$timeout", "structure", "EventService", function($q, $state, $rootScope, $timeout, structure, EventService) {
+	.service("StateManager", ["$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", function($q, $state, $rootScope, $timeout, structure, EventService, $window) {
 		var self = this;
+
+		$window.StateManager = this;
 
 		// Stores the state, required as ui-router does not allow inherited
 		// stateParams, and we need to dynamically generate state diagram.
 		// One day this might change.
 		// https://github.com/angular-ui/ui-router/wiki/URL-Routing
-		this.state      = {
+		this.state = {
 			changing: true
 		};
 
 		this.changedState = {};
 
-		this.structure   = structure;
+		this.structure  = structure;
 
 		this.destroy = function()  {
 			delete this.state;
@@ -158,6 +181,46 @@
 
 		// Has a state variable changed. Is this necessary ?
 		this.changed     = {};
+
+		this.state       = { loggedIn : false };
+		this.query       = {};
+		this.functions   = [];
+
+		var stateStack       = [structure];
+
+		// Populate list of functions
+		while (stateStack.length > 0)
+		{
+			var stackLength      = stateStack.length;
+			var parentState      = stateStack[stackLength - 1];
+
+			var i = 0;
+			var functionName;
+
+			if (parentState.functions)
+			{
+				for(i=0; i<parentState.functions.length; i++)
+				{
+					functionName = parentState.functions[i];
+
+					if (this.functions.indexOf(functionName) > -1) {
+						console.error("Duplicate function name when loading in StateManager : " + functionName);
+					} else {
+						this.functions.push(functionName);
+					}
+				}
+			}
+
+			if (parentState.children)
+			{
+				for (var i = 0; i < parentState.children.length; i++)
+				{
+					stateStack.push(parentState.children[i]);
+				}
+			}
+
+			stateStack.splice(0,1);
+		}
 
 		this.clearChanged = function()
 		{
@@ -174,8 +237,8 @@
 
 		var compareStateChangeObjects = function(stateChangeA, stateChangeB)
 		{
-			return 	(stateChangeA.toState    === stateChangeB.toState) &&
-					(stateChangeA.toParams   === stateChangeB.toParams) &&
+			return	(stateChangeA.toState	 === stateChangeB.toState) &&
+					(stateChangeA.toParams	 === stateChangeB.toParams) &&
 					(stateChangeA.fromState  === stateChangeB.fromState) &&
 					(stateChangeA.fromParams === stateChangeB.fromParams);
 		};
@@ -185,27 +248,9 @@
 		};
 
 		this.handleStateChange = function(stateChangeObject) {
-			var param,
-				fromState = stateChangeObject.fromState.name.split(".");
-
+			var param;
 			var fromParams = stateChangeObject.fromParams;
 			var toParams   = stateChangeObject.toParams;
-
-			if (stateChangeObject.toState.url === "/") {
-				// Handle going back to the home page, because fromParams will be empty
-				fromParams = {};
-				for (i = 1; i < fromState.length; i += 1) {
-					fromParams[fromState[i]] = true;
-				}
-				toParams = {};
-			}
-			else if (stateChangeObject.toState.url.indexOf("/") === -1) {
-				// Handle going from one home sub page to another, because fromParams will be empty
-				fromParams = {};
-				for (i = 1; i < fromState.length; i += 1) {
-					fromParams[fromState[i]] = true;
-				}
-			}
 
 			// Switch off all parameters that we came from
 			// but are not the same as where we are going to
@@ -238,8 +283,6 @@
 
 			// Loop through structure. If a parent is null, then we must clear
 			// it's children
-			var currentChildren = self.structure.children;
-
 			var stateStack       = [structure];
 			var stateNameStack   = ["home"];
 			var clearBelow       = false;
@@ -285,7 +328,7 @@
 			}
 		};
 
-		this.stateVars    = {};
+		this.stateVars   = {};
 
 		this.clearState = function(state) {
 			for (var state in self.state)
@@ -299,9 +342,27 @@
 
 		this.genStateName = function ()
 		{
-			var currentChildren	= self.structure.children;
-			var childidx 		= 0;
-			var stateName 		= "home.";	// Assume that the base state is there.
+			var currentChildren = self.structure.children;
+			var childidx        = 0;
+			var stateName       = "home."; // Assume that the base state is there.
+			var i               = 0;
+
+			// First loop through the list of functions
+			// belonging to parent structure.
+			// Only deals with functions on home directory
+			if (self.structure.functions)
+			{
+				for(i = 0; i < self.structure.functions.length; i++)
+				{
+					functionName = self.structure.functions[i];
+
+					if (self.state[functionName])
+					{
+						stateName += functionName + ".";
+						break;
+					}
+				}
+			}
 
 			while(childidx < currentChildren.length)
 			{
@@ -329,18 +390,21 @@
 
 		this.setStateVar = function(varName, value)
 		{
-			if (self.state[varName] !== value) {
-				self.state.changing = true;
-				self.changedState[varName] = value;
+			if (value === null)
+			{
+				delete self.state[varName];
+			} else {
+				if (self.state[varName] !== value) {
+					self.state.changing = true;
+					self.changedState[varName] = value;
+				}
 			}
 
 			self.state[varName] = value;
 		};
 
-		this.setState = function(stateParams, extraParams)
+		this.setState = function(stateParams, queryParams)
 		{
-			console.log("Setting state - " + JSON.stringify(stateParams));
-
 			// Copy all state parameters and extra parameters
 			// to the state
 			for(var state in stateParams)
@@ -350,13 +414,19 @@
 					self.setStateVar(state, stateParams[state]);
 				}
 			}
+
+			for(var param in queryParams)
+			{
+				if (queryParams.hasOwnProperty(param))
+				{
+					self.query[param] = queryParams[param];
+				}
+			}
 		};
 
 		this.updateState = function(dontUpdateLocation)
 		{
 			var newStateName = self.genStateName();
-
-			console.log("Moving to " + newStateName + " ...");
 
 			if (Object.keys(self.changedState).length)
 			{
