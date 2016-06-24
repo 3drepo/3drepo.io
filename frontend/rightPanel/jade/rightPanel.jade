@@ -5,3 +5,9 @@
 			md-icon.angular-material-icons(ng-if="value.icon") {{value.icon}}
 			md-icon(ng-if="value.faIcon", class="{{value.faIcon}}")
 		label {{value.label}}
+
+	.rightPanelButtonGroup(layout="column", layout-align="start center")
+		md-button.md-accent.md-fab.md-mini(aria-label="Measure", ng-click="vm.toggleMeasure()", style="background:{{value.background}}")
+			md-tooltip(md-direction="left") Measure
+			md-icon.angular-material-icons straighten
+		label Measure

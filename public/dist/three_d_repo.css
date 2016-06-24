@@ -1338,6 +1338,32 @@ login #loginDivider {
   margin-right: 10px;
 }
 
+tdr-measure {
+    position: absolute;
+}
+
+tdr-measure .md-whiteframe-1dp {
+    background: #FFFFFF;
+    border-radius: 2px;
+}
+
+tdr-measure .md-whiteframe-1dp md-toolbar {
+    height: 10px;
+    min-height: 10px;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+}
+
+tdr-measure .md-whiteframe-1dp md-content {
+    padding: 5px 10px;
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+}
+tdr-measure .md-whiteframe-1dp md-content p {
+    margin: 5px 0;
+    color: rgba(0,0,0,0.7);
+}
+
 /** Panel *************************************************************************************************************/
 
 panel  {
