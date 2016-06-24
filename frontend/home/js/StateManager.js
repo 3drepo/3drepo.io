@@ -70,10 +70,10 @@
 							name: childFunction,
 							url: childFunction,
 							resolve: {
-								init: function (StateManager, $stateParams) {
+								init: function (StateManager, $location, $stateParams) {
 									$stateParams[childFunction] = true;
 
-									StateManager.setState($stateParams, {});
+									StateManager.setState($stateParams, $location.search());
 								}
 							}
 						});
@@ -96,9 +96,9 @@
 							name: parentState.children[i].plugin,
 							url: childState.url || (parentStateName !== "home" ? "/" : "") + ":" + childState.plugin,
 							resolve: {
-								init: function(StateManager, $stateParams)
+								init: function(StateManager, $location, $stateParams)
 								{
-									StateManager.setState($stateParams, $stateParams.$$search);
+									StateManager.setState($stateParams, $location.search());
 								}
 							}
 						});
