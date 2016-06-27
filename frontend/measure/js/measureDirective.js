@@ -70,6 +70,7 @@
 						angular.element($element[0]).css("top", (vm.screenPos[1] + 5).toString() + "px");
 
 						$scope.$apply();
+                        vm.show = true;
 					} else {
 						vm.show = false;
 					}
@@ -83,15 +84,14 @@
 					// First click, if a point has not been clicked before
 					currentPickPoint = event.value.position;
 					if (coords[1] === null || coords[0] === null) {
-						vm.screenPos = event.value.screenPos;
 						vm.show = true;
 						vm.allowMove = true;
 						coords[0] = currentPickPoint;
 					}
 					else if (vm.allowMove) {
+                        vm.show = true;
 						vm.allowMove = false;
 					} else {
-						vm.screenPos = event.value.screenPos;
 						coords[0] = currentPickPoint;
 						coords[1] = null;
 						vm.allowMove = true;

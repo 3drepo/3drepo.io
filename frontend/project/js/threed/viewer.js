@@ -273,8 +273,8 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 			self.removeLogo();
 
-			self.viewer.removeEventListener("mousedown", onMouseDown);
-			self.viewer.removeEventListener("mouseup", onMouseUp);
+			//self.viewer.removeEventListener("mousedown", onMouseDown);
+			//self.viewer.removeEventListener("mouseup", onMouseUp);
 			self.viewer.removeEventListener("keypress", self.handleKeyPresses);
 
 			self.viewer.parentNode.removeChild(self.viewer);
@@ -558,7 +558,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			if (fireEvent)
 			{
 				// Simulate a mouse down pick point
-				self.mouseDownPickPoint({offsetX: x, offsetY: y});
+				self.mouseDownPickPoint({layerX: x, layerY: y});
 			}
 		};
 
@@ -595,12 +595,14 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					var projectInline = self.inlineRoots[inlineTransName];
 					var trans = projectInline._x3domNode.getCurrentTransform();
 
+                    console.trace(event);
+
 					callback(self.EVENT.PICK_POINT, {
 						id: objectID,
 						position: pickingInfo.pickPos,
 						normal: pickingInfo.pickNorm,
 						trans: trans,
-						screenPos: [event.offsetX, event.offsetY]
+						screenPos: [event.layerX, event.layerY]
 					});
 				} else {
 					callback(self.EVENT.PICK_POINT, {

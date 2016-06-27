@@ -531,8 +531,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
 			{
 				var mp = xmlDoc.createElement('MultiPart');
 				mp.setAttribute('onload', 'onLoaded(event);');
-				mp.setAttribute('onmousemove', 'onMouseMove(event);');
-				mp.setAttribute('onmousedown', 'onMouseDown(event);');
+				mp.setAttribute('onclick', 'clickObject(event);');
 				mp.setAttribute('id', child['id']);
 				mp.setAttribute('url', config.api_server.url + '/' + account + '/' + project + '/' + child['id'] + '.x3d.mpc');
 				mp.setAttribute('urlIDMap', config.api_server.url + '/' + account + '/' + project + '/' + child['id'] + '.json.mpc');
@@ -554,7 +553,10 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
 
 					shape.setAttribute('id', childUniqueID);
 					shape.setAttribute('DEF', childUniqueID); //dbInterface.uuidToString(child["shared_id"]));
+					shape.setAttribute('onclick', 'clickObject(event);');
 					shape.setAttribute('solid', 'true');
+					shape.setAttribute('onmouseover', 'onMouseOver(event);');
+					shape.setAttribute('onmousemove', 'onMouseMove(event);');
 
 					if (bbox)
 					{
@@ -1056,7 +1058,7 @@ exports.route = function(router)
 							{
 								subMeshBBoxes.push(bbox);
 							}
-							maxSubMeshIDX += 1;	
+							maxSubMeshIDX += 1;
 							bbox = [[],[]];
 						}
 
@@ -1070,7 +1072,7 @@ exports.route = function(router)
 							{
 								subMeshBBoxes.push(bbox);
 							}
-							maxSubMeshIDX += numAddedMeshes;	
+							maxSubMeshIDX += numAddedMeshes;
 							bbox = [[],[]];
 
 							numAddedMeshes = 0;
@@ -1107,7 +1109,7 @@ exports.route = function(router)
 					{
 						subMeshBBoxes.push(bbox);
 					}
-					maxSubMeshIDX += 1;	
+					maxSubMeshIDX += 1;
 					bbox = [[],[]];
 				}
 
