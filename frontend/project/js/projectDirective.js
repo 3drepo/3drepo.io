@@ -213,7 +213,10 @@
 				account:  vm.account,
 				project:  vm.project,
 				branch:   vm.branch,
-				revision: vm.revision
+				revision: vm.revision,
+				at:       StateManager.query.at,
+				up:       StateManager.query.up,
+				view:     StateManager.query.view
 			});
 
 			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelCard);

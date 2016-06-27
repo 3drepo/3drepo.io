@@ -48,30 +48,31 @@
 		vm.allowMove = false;
 
 		var coordVector = null, vectorLength = 0.0;
+		vm.screenPos = [0.0, 0.0];
 
 		EventService.send(EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK, {
 			callback: function(event) {
 				var point = event.hitPnt;
-				var screenPos = [event.layerX, event.layerY];
+				vm.screenPos = [event.layerX, event.layerY];
 
 				if (vm.allowMove) {
 					if (point)
 					{
 						coords[1] = new x3dom.fields.SFVec3f(point[0], point[1], point[2]);
+						coordVector = coords[0].subtract(coords[1]);
+						vm.axisDistance[0] = Math.abs(coordVector.x).toFixed(3);
+						vm.axisDistance[1] = Math.abs(coordVector.y).toFixed(3);
+						vm.axisDistance[2] = Math.abs(coordVector.z).toFixed(3);
+
+						vm.totalDistance = coordVector.length().toFixed(3);
+
+						angular.element($element[0]).css("left", (vm.screenPos[0] + 5).toString() + "px");
+						angular.element($element[0]).css("top", (vm.screenPos[1] + 5).toString() + "px");
+
+						$scope.$apply();
+					} else {
+						vm.show = false;
 					}
-
-					coordVector = coords[0].subtract(coords[1]);
-
-					vm.axisDistance[0] = Math.abs(coordVector.x).toFixed(3);
-					vm.axisDistance[1] = Math.abs(coordVector.y).toFixed(3);
-					vm.axisDistance[2] = Math.abs(coordVector.z).toFixed(3);
-
-					vm.totalDistance = coordVector.length().toFixed(3);
-
-					angular.element($element[0]).css("left", (screenPos[0] + 5).toString() + "px");
-					angular.element($element[0]).css("top", (screenPos[1] + 5).toString() + "px");
-
-					$scope.$apply();
 				}
 			}
 		});
@@ -82,6 +83,7 @@
 					// First click, if a point has not been clicked before
 					currentPickPoint = event.value.position;
 					if (coords[1] === null || coords[0] === null) {
+						vm.screenPos = event.value.screenPos;
 						vm.show = true;
 						vm.allowMove = true;
 						coords[0] = currentPickPoint;
@@ -89,6 +91,7 @@
 					else if (vm.allowMove) {
 						vm.allowMove = false;
 					} else {
+						vm.screenPos = event.value.screenPos;
 						coords[0] = currentPickPoint;
 						coords[1] = null;
 						vm.allowMove = true;

@@ -35,6 +35,9 @@
 				name: "@",
 				autoInit: "@",
 				vrMode: "@",
+				at: "@",
+				up: "@",
+				view: "@",
 				eventService: "="
 			},
 			link: function (scope, element) {
@@ -49,11 +52,11 @@
 		};
 	}
 
-	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "$location", "serverConfig", "EventService"];
+	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService"];
 
-	function ViewerCtrl ($scope, $q, $http, $element, $location, serverConfig, EventService)
+	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService)
 	{
-		var v = this, currentPickPoint;
+		var v = this;
 
 		v.initialised = $q.defer();
 		v.loaded      = $q.defer();
@@ -87,17 +90,17 @@
 			v.viewer = new Viewer(v.name, $element[0], v.manager, eventCallback, errCallback);
 
 			var options = {};
-			var querystring = $location.search();
-			var startLatLon = querystring.at && querystring.at.split(',');
+			var startLatLon = v.at && v.at.split(',');
 
-			var view = querystring.view && querystring.view.split(',');
+			var view = v.view && v.view.split(',');
+
 			view && view.forEach(function(val, i){
 				view[i] = parseFloat(val);
 			});
 
 			options.view = view;
 
-			var up = querystring.up && querystring.up.split(',');
+			var up = v.up && v.up.split(',');
 			up && up.forEach(function(val, i){
 				up[i] = parseFloat(val);
 			});
