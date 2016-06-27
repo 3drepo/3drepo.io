@@ -1,4 +1,4 @@
-#rightPanelButtons(layout="column")
+#rightPanelButtons(layout="column", ng-if="vm.showPanel")
 	.rightPanelButtonGroup(ng-repeat="(key, value) in vm.issueButtons", layout="column", layout-align="start center")
 		md-button.md-accent.md-fab.md-mini(aria-label="{{key}}", ng-click="vm.issueButtonClick(key)", style="background:{{value.background}}")
 			md-tooltip(md-direction="left") {{key}}

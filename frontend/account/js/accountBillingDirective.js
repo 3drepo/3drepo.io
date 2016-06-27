@@ -34,66 +34,71 @@
 		};
 	}
 
-	AccountBillingCtrl.$inject = ["$scope", "$http", "$element"];
+	AccountBillingCtrl.$inject = ["$scope", "$http"];
 
-	function AccountBillingCtrl($scope, $http, $element) {
+	function AccountBillingCtrl($scope, $http) {
 		var vm = this,
 			pricePerLicense = 100,
-			quotaPerLicense = 10;
+			quotaPerLicense = 10,
+			initData = {
+				licenses: 2,
+				postalCode: "LS11 8QT",
+				country: "United Kingdom",
+				vatNumber: "12398756"
+			};
 
 		/*
 		 * Init
 		 */
 		vm.showInfo = true;
-		vm.numLicenses = 2;
-		vm.priceLicenses = vm.numLicenses * pricePerLicense;
-		vm.numNewLicenses = 2;
-		vm.priceNewLicenses = vm.priceLicenses;
 		vm.quotaUsed = 17.3;
-		vm.quotaAvailable = Math.round(((vm.numLicenses * quotaPerLicense) - vm.quotaUsed) * 10) / 10; // Round to 1 decimal place
-		vm.payButtonDisabled = true;
-		vm.postalCode = "LS11 8QT";
-		vm.country = "United Kingdom";
-		vm.vatNumber = "12398756";
+		vm.quotaAvailable = Math.round(((initData.licenses * quotaPerLicense) - vm.quotaUsed) * 10) / 10; // Round to 1 decimal place
+		vm.newData = angular.copy(initData);
+		vm.saveButtonDisabled = true;
 		vm.billingHistory = [
-			{date: "10/04/2016", description: "1st payment", paymentMethod: "PayPal", amount: 100},
-			{date: "10/05/2016", description: "2nd payment", paymentMethod: "PayPal", amount: 100},
-			{date: "10/06/2016", description: "3rd payment", paymentMethod: "PayPal", amount: 100}
+			{"Date": "10/04/2016", "Description": "1st payment", "Payment Method": "PayPal", "Amount": 100},
+			{"Date": "10/05/2016", "Description": "2nd payment", "Payment Method": "PayPal", "Amount": 100},
+			{"Date": "10/06/2016", "Description": "3rd payment", "Payment Method": "PayPal", "Amount": 100}
 		];
 		$http.get("/public/data/countries.json").then(function (response) {
-			console.log(response);
 			vm.countries = response.data;
 		});
 
-		$scope.$watch("vm.numNewLicenses", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				vm.priceNewLicenses = newValue * pricePerLicense;
-				vm.quotaNew = (newValue * quotaPerLicense);
-				vm.payButtonDisabled = (vm.numNewLicenses === vm.numLicenses);
-			}
-		});
-
-		vm.upgrade = function () {
-			vm.showPage({page: "upgrade", callingPage: "billing"});
-		};
+		$scope.$watch("vm.newData", function (newValue) {
+				vm.priceLicenses = newValue * pricePerLicense;
+				vm.saveButtonDisabled = angular.equals(initData, vm.newData);
+		}, true);
 
 		vm.downloadBilling = function (index) {
-			var doc = new jsPDF();
-			console.log(doc);
+			var doc = new jsPDF(),
+				item,
+				itemCount,
+				itemY,
+				itemIncrementY = 10,
+				prefix;
+
+			// Title
 			doc.setFontSize(20);
 			doc.text(20, 20, "3D Repo Billing");
+
+			// Info
 			doc.setFontSize(15);
-			doc.setTextColor(0.9, 0.9, 0.9);
-			doc.text(20, 30, "Date");
-			doc.setTextColor(250, 250, 250);
-			doc.text(100, 30, vm.billingHistory[index].date);
-			doc.text(20, 40, "Description");
-			doc.text(100, 40, vm.billingHistory[index].description);
-			doc.text(20, 50, "Payment Method");
-			doc.text(100, 50, vm.billingHistory[index].paymentMethod);
-			doc.text(20, 60, "Amount");
-			doc.text(100, 60, "£" + vm.billingHistory[index].amount);
-			doc.save("3D_Repo_Billing_" + vm.billingHistory[index].date.replace("/", "_"));
+			itemCount = 0;
+			itemY = 30;
+			for (item in vm.billingHistory[index]) {
+				// "$$hashKey" is added by AngularJS
+				if (vm.billingHistory[index].hasOwnProperty(item) && (item !== "$$hashKey")) {
+					doc.setTextColor(100, 100, 100);
+					doc.text(20, (itemY + (itemIncrementY * itemCount)), item);
+					doc.setTextColor(50, 50, 50);
+					prefix = (item === "Amount") ? "£" : "";
+					doc.text(80, (itemY + (itemIncrementY * itemCount)), prefix + vm.billingHistory[index][item].toString());
+					itemCount += 1;
+				}
+			}
+
+			// Save
+			doc.save("3D_Repo_Billing_" + vm.billingHistory[index].Date.replace("/", "_"));
 		};
 	}
 }());

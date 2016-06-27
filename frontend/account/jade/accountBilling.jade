@@ -18,7 +18,7 @@
 			div(layout="row")
 				md-input-container(flex)
 					label Licenses
-					input(type="number", ng-model="vm.numLicenses", min="1")
+					input(type="number", ng-model="vm.newData.licenses", min="1")
 				md-input-container(flex)
 					label Payment (£ / month)
 					input(type="text", ng-model="vm.priceLicenses", ng-disabled="true")
@@ -28,17 +28,17 @@
 			div(layout="row")
 				md-input-container(flex)
 					label Postal code
-					input(type="text", ng-model="vm.postalCode")
+					input(type="text", ng-model="vm.newData.postalCode")
 				md-input-container(flex)
 					label Country
-					md-select(ng-model="vm.country")
+					md-select(ng-model="vm.newData.country")
 						md-option(ng-repeat="(key, value) in vm.countries", value="{{key}}") {{key}}
 				md-input-container(flex)
 					label VAT number
-					input(type="text", ng-model="vm.vatNumber")
+					input(type="text", ng-model="vm.newData.vatNumber")
 
 			#accountBillingSave
-				md-button.md-raised.md-accent Save
+				md-button.md-raised.md-accent(ng-disabled="vm.saveButtonDisabled") Save
 				md-divider
 
 			// Billing History
@@ -49,19 +49,19 @@
 						div(layout="row", layout-align="start")
 							label(flex="20") Date
 							label(flex="20") Description
-							label(flex="20") Payment method
-							label(flex="20") Amount
+							label(flex="20") Payment Method
+							label(flex="20") Amount (£)
 
 				#accountBillingHistoryContainer
 					.accountBillingHistoryListItem(layout="row", layout-align="start start", ng-repeat="billing in vm.billingHistory")
 						md-input-container(flex="20")
-							input(type="text", ng-model="billing.date", ng-disabled="true", aria-label="date")
+							input(type="text", ng-model="billing.Date", ng-disabled="true", aria-label="date")
 						md-input-container(flex="20")
-							input(type="text", ng-model="billing.description", ng-disabled="true", aria-label="description")
+							input(type="text", ng-model="billing.Description", ng-disabled="true", aria-label="description")
 						md-input-container(flex="20")
-							input(type="text", ng-model="billing.paymentMethod", ng-disabled="true", aria-label="paymentMethod")
+							input(type="text", ng-model="billing['Payment Method']", ng-disabled="true", aria-label="paymentMethod")
 						md-input-container(flex="20")
-							input(type="text", ng-model="billing.amount", ng-disabled="true", aria-label="amount")
+							input(type="text", ng-model="billing.Amount", ng-disabled="true", aria-label="amount")
 						md-button.md-icon-button.md-accent(aria-label="Download", ng-click="vm.downloadBilling($index)")
 							md-icon.angular-material-icons cloud_download
 

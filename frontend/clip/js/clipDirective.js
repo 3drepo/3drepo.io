@@ -51,7 +51,7 @@
 		vm.axes = ["X", "Y", "Z"];
 		vm.selectedAxis = vm.axes[0];
 		vm.visible = false;
-		vm.onContentHeightRequest({height: 120});
+		vm.onContentHeightRequest({height: 130});
 
 		function initClippingPlane () {
 			$timeout(function () {

@@ -41,6 +41,7 @@
         /*
          * Init
          */
+        vm.showPanel = true;
         vm.issueButtons = {
             "scribble": {
                 label: "Scribble",
@@ -75,6 +76,9 @@
                     addIssueMode = event.value;
                     vm.issueButtons[addIssueMode].background = "#FF9800";
                 }
+            }
+            else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
+                vm.showPanel = !vm.showPanel;
             }
         });
 
