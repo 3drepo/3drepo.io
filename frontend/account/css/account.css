@@ -349,3 +349,12 @@ account-billing #accountBillingHistoryContainer {
 account-billing #accountBillingSave {
   margin: -20px 0 20px;
 }
+
+/** Collaborator Dialog ***********************************************************************************************/
+#collaboratorDialog {
+  width: 400px;
+}
+
+#collaboratorDialog .collaboratorIcon {
+  margin: 0 10px;
+}

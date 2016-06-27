@@ -1,0 +1,36 @@
+md-dialog#collaboratorDialog(aria-label="New project")
+	md-toolbar
+		.md-toolbar-tools
+			md-button.md-icon-button
+				md-icon.angular-material-icons(aria-label="Collaborate") group
+			h2 Collaborate
+			span(flex)
+			md-button.md-icon-button(ng-click="vm.closeDialog()")
+				md-icon.angular-material-icons(aria-label="Close dialog") close
+	md-content(layout-margin)
+		md-autocomplete(
+			ng-disabled="ctrl.isDisabled"
+			md-no-cache="ctrl.noCache"
+			md-selected-item="ctrl.selectedItem"
+			md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
+			md-search-text="ctrl.searchText"
+			md-selected-item-change="ctrl.selectedItemChange(item)"
+			md-items="item in ctrl.querySearch(ctrl.searchText)"
+			md-item-text="item.display"
+			md-min-length="0"
+			placeholder="Find a collaborator"
+			)
+			md-item-template
+				span(md-highlight-text="ctrl.searchText", md-highlight-flags="^i") {{item.display}}
+			md-not-found
+				span No user matching "{{ctrl.searchText}}" was found.
+
+		md-list
+			md-subheader.md-no-sticky Collaborators
+			md-list-item(ng-repeat="(key, value) in vm.collaborators")
+				md-icon.angular-material-icons.collaboratorIcon(aria-label="Person") person
+				.md-list-item-text
+					p {{key}}
+				span(flex)
+				md-button.md-icon-button.md-accent(ng-click="vm.removeCollaborator(key)")
+					md-icon.angular-material-icons(aria-label="Close dialog") remove_circle

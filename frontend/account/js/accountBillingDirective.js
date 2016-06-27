@@ -70,35 +70,6 @@
 		}, true);
 
 		vm.downloadBilling = function (index) {
-			var doc = new jsPDF(),
-				item,
-				itemCount,
-				itemY,
-				itemIncrementY = 10,
-				prefix;
-
-			// Title
-			doc.setFontSize(20);
-			doc.text(20, 20, "3D Repo Billing");
-
-			// Info
-			doc.setFontSize(15);
-			itemCount = 0;
-			itemY = 30;
-			for (item in vm.billingHistory[index]) {
-				// "$$hashKey" is added by AngularJS
-				if (vm.billingHistory[index].hasOwnProperty(item) && (item !== "$$hashKey")) {
-					doc.setTextColor(100, 100, 100);
-					doc.text(20, (itemY + (itemIncrementY * itemCount)), item);
-					doc.setTextColor(50, 50, 50);
-					prefix = (item === "Amount") ? "£" : "";
-					doc.text(80, (itemY + (itemIncrementY * itemCount)), prefix + vm.billingHistory[index][item].toString());
-					itemCount += 1;
-				}
-			}
-
-			// Save
-			doc.save("3D_Repo_Billing_" + vm.billingHistory[index].Date.replace("/", "_"));
 		};
 	}
 }());

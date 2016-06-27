@@ -48,12 +48,19 @@ input#newProjectFileUploader(type="file")
 								p.projectUploadInfo(ng-if="vm.showFileUploadInfo") {{vm.fileUploadInfo}}
 								md-progress-circular.projectUploadIcon(md-mode="indeterminate", md-diameter="15", ng-if="vm.showUploading")
 							p.projectTimestamp {{project.timestampPretty}}
-							//md-button.md-accent(ng-click="vm.b4f(account.name, project.name)" ng-if="project.bif4FreeEnabled") B4F
 							md-button.md-accent.md-icon-button(
 								aria-label="Upload"
 								ng-click="vm.uploadModel(project)"
 								ng-if="project.canUpload")
 								md-icon.angular-material-icons cloud_upload
+							md-menu(md-position-mode="target-right target")
+								md-button.md-icon-button(aria-label="More", ng-click="$mdOpenMenu($event)")
+									md-icon.md-menu-origin.angular-material-icons(md-menu-origin) more_vert
+								md-menu-content(width="2")
+									md-menu-item(ng-repeat="(key, value) in vm.projectOptions")
+										md-button(ng-click="vm.doProjectOption($event, project, key)")
+											p
+											md-icon.angular-material-icons(md-menu-align-target) {{value}}
 							//md-button.md-icon-button(aria-label="Delete", ng-click="vm.setupDeleteProject(event, project)")
 								md-icon.angular-material-icons delete
 

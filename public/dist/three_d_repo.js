@@ -4722,40 +4722,7 @@ var ViewerManager = {};
 				vm.saveButtonDisabled = angular.equals(initData, vm.newData);
 		}, true);
 
-		vm.upgrade = function () {
-			vm.showPage({page: "upgrade", callingPage: "billing"});
-		};
-
 		vm.downloadBilling = function (index) {
-			var doc = new jsPDF(),
-				item,
-				itemCount,
-				itemY,
-				itemIncrementY = 10,
-				prefix;
-
-			// Title
-			doc.setFontSize(20);
-			doc.text(20, 20, "3D Repo Billing");
-
-			// Info
-			doc.setFontSize(15);
-			itemCount = 0;
-			itemY = 30;
-			for (item in vm.billingHistory[index]) {
-				// "$$hashKey" is added by AngularJS
-				if (vm.billingHistory[index].hasOwnProperty(item) && (item !== "$$hashKey")) {
-					doc.setTextColor(100, 100, 100);
-					doc.text(20, (itemY + (itemIncrementY * itemCount)), item);
-					doc.setTextColor(50, 50, 50);
-					prefix = (item === "Amount") ? "£" : "";
-					doc.text(80, (itemY + (itemIncrementY * itemCount)), prefix + vm.billingHistory[index][item].toString());
-					itemCount += 1;
-				}
-			}
-
-			// Save
-			doc.save("3D_Repo_Billing_" + vm.billingHistory[index].Date.replace("/", "_"));
 		};
 	}
 }());
@@ -5207,6 +5174,14 @@ var ViewerManager = {};
 			"GIS",
 			"Other"
 		];
+		vm.projectOptions = {
+			upload: "cloud_upload",
+			collaborate: "group"
+		};
+		vm.collaborators = {
+			"jozefdobos": "",
+			"timscully": ""
+		};
 
 		// Setup file uploaders
 		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
@@ -5460,6 +5435,34 @@ var ViewerManager = {};
 					vm.deleteProjectError = "Error deleting project";
 				}
 			});
+		};
+
+		/**
+		 * Handle project option selection
+		 *
+		 * @param event
+		 * @param project
+		 * @param option
+		 */
+		vm.doProjectOption = function (event, project, option) {
+			switch (option) {
+				case "upload":
+					vm.uploadModel(project);
+					break;
+
+				case "collaborate":
+					showDialog(event, "collaborateDialog.html");
+					break;
+			}
+		};
+
+		/**
+		 * Remove a collaborator
+		 *
+		 * @param collaborator
+		 */
+		vm.removeCollaborator = function (collaborator) {
+			delete vm.collaborators[collaborator];
 		};
 
 		/**

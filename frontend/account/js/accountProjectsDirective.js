@@ -56,6 +56,14 @@
 			"GIS",
 			"Other"
 		];
+		vm.projectOptions = {
+			upload: "cloud_upload",
+			collaborate: "group"
+		};
+		vm.collaborators = {
+			"jozefdobos": "",
+			"timscully": ""
+		};
 
 		// Setup file uploaders
 		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
@@ -309,6 +317,34 @@
 					vm.deleteProjectError = "Error deleting project";
 				}
 			});
+		};
+
+		/**
+		 * Handle project option selection
+		 *
+		 * @param event
+		 * @param project
+		 * @param option
+		 */
+		vm.doProjectOption = function (event, project, option) {
+			switch (option) {
+				case "upload":
+					vm.uploadModel(project);
+					break;
+
+				case "collaborate":
+					showDialog(event, "collaborateDialog.html");
+					break;
+			}
+		};
+
+		/**
+		 * Remove a collaborator
+		 *
+		 * @param collaborator
+		 */
+		vm.removeCollaborator = function (collaborator) {
+			delete vm.collaborators[collaborator];
 		};
 
 		/**
