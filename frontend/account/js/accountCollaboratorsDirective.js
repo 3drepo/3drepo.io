@@ -19,24 +19,24 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountBilling", accountBilling);
+		.directive("accountCollaborators", accountCollaborators);
 
-	function accountBilling() {
+	function accountCollaborators() {
 		return {
 			restrict: 'EA',
-			templateUrl: 'accountBilling.html',
+			templateUrl: 'accountCollaborators.html',
 			scope: {
 				showPage: "&"
 			},
-			controller: AccountBillingCtrl,
+			controller: AccountCollaboratorsCtrl,
 			controllerAs: 'vm',
 			bindToController: true
 		};
 	}
 
-	AccountBillingCtrl.$inject = ["$scope", "$http", "$location"];
+	AccountCollaboratorsCtrl.$inject = ["$scope", "$http", "$location"];
 
-	function AccountBillingCtrl($scope, $http, $location) {
+	function AccountCollaboratorsCtrl($scope, $http, $location) {
 		var vm = this,
 			pricePerLicense = 100,
 			quotaPerLicense = 10,

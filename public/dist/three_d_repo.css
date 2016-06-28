@@ -698,6 +698,21 @@ bid4free-workspace {
   bid4free-workspace .saveContainer md-icon {
     font-size: 25px !important; }
 
+billing {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgb(250, 250, 250);
+    z-index: 2;
+}
+
+billing .md-toolbar-tools img {
+    width: 150px;
+}
+
+billing #billingList {
+    padding: 20px;
+}
 bottom-buttons {
   display: block;
   position: absolute;

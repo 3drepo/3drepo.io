@@ -107,6 +107,7 @@
 		 */
 		$scope.$watch("vm.state", function () {
 			console.log(vm.state);
+			console.log(777);
 			if (vm.state.hasOwnProperty("loggedIn")) {
 				if (!vm.state.loggedIn) {
 					$timeout(function () {

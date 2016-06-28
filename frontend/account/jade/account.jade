@@ -31,6 +31,11 @@ div(ng-if="!vm.showProject")
 				calling-page="vm.callingPage"
 				show-page="vm.showPage(page, callingPage)"
 			)
+			account-collaborators(
+				ng-switch-when="collaborators"
+				calling-page="vm.callingPage"
+				show-page="vm.showPage(page, callingPage)"
+			)
 
 div(ng-if="vm.showProject")
 	project(account="vm.state.account" project="vm.state.project" branch="vm.state.branch" revision="vm.state.revision" state="vm.state")

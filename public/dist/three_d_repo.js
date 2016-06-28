@@ -4687,9 +4687,9 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountBillingCtrl.$inject = ["$scope", "$http"];
+	AccountBillingCtrl.$inject = ["$scope", "$http", "$location"];
 
-	function AccountBillingCtrl($scope, $http) {
+	function AccountBillingCtrl($scope, $http, $location) {
 		var vm = this,
 			pricePerLicense = 100,
 			quotaPerLicense = 10,
@@ -4722,7 +4722,99 @@ var ViewerManager = {};
 				vm.saveButtonDisabled = angular.equals(initData, vm.newData);
 		}, true);
 
+		/**
+		 * Show the billing page with the item
+		 *
+		 * @param index
+		 */
 		vm.downloadBilling = function (index) {
+			$location.path("/billing", "_self")
+				.search({}) // Clear all parameters
+				.search("item", index);
+		};
+	}
+}());
+
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("accountCollaborators", accountCollaborators);
+
+	function accountCollaborators() {
+		return {
+			restrict: 'EA',
+			templateUrl: 'accountCollaborators.html',
+			scope: {
+				showPage: "&"
+			},
+			controller: AccountCollaboratorsCtrl,
+			controllerAs: 'vm',
+			bindToController: true
+		};
+	}
+
+	AccountCollaboratorsCtrl.$inject = ["$scope", "$http", "$location"];
+
+	function AccountCollaboratorsCtrl($scope, $http, $location) {
+		var vm = this,
+			pricePerLicense = 100,
+			quotaPerLicense = 10,
+			initData = {
+				licenses: 2,
+				postalCode: "LS11 8QT",
+				country: "United Kingdom",
+				vatNumber: "12398756"
+			};
+
+		/*
+		 * Init
+		 */
+		vm.showInfo = true;
+		vm.quotaUsed = 17.3;
+		vm.quotaAvailable = Math.round(((initData.licenses * quotaPerLicense) - vm.quotaUsed) * 10) / 10; // Round to 1 decimal place
+		vm.newData = angular.copy(initData);
+		vm.saveButtonDisabled = true;
+		vm.billingHistory = [
+			{"Date": "10/04/2016", "Description": "1st payment", "Payment Method": "PayPal", "Amount": 100},
+			{"Date": "10/05/2016", "Description": "2nd payment", "Payment Method": "PayPal", "Amount": 100},
+			{"Date": "10/06/2016", "Description": "3rd payment", "Payment Method": "PayPal", "Amount": 100}
+		];
+		$http.get("/public/data/countries.json").then(function (response) {
+			vm.countries = response.data;
+		});
+
+		$scope.$watch("vm.newData", function (newValue) {
+				vm.priceLicenses = newValue * pricePerLicense;
+				vm.saveButtonDisabled = angular.equals(initData, vm.newData);
+		}, true);
+
+		/**
+		 * Show the billing page with the item
+		 *
+		 * @param index
+		 */
+		vm.downloadBilling = function (index) {
+			$location.path("/billing", "_self")
+				.search({}) // Clear all parameters
+				.search("item", index);
 		};
 	}
 }());
@@ -4769,7 +4861,7 @@ var ViewerManager = {};
 	function AccountCtrl($scope, $location, AccountService, Auth) {
 		var vm = this,
 			promise,
-			pages = ["upgrade", "repos", "profile", "billing"];
+			pages = ["repos", "profile", "billing", "collaborators"];
 
 		/*
 		 * Get the account data
@@ -4926,7 +5018,8 @@ var ViewerManager = {};
 		vm.accountOptions = {
 			repos: {label: "Repos"},
 			profile: {label: "Profile"},
-			billing: {label: "Billing"}
+			billing: {label: "Billing"},
+			collaborators: {label: "Collaborators"}
 		};
 
 		vm.showItem = function (item) {
@@ -5791,72 +5884,6 @@ var ViewerManager = {};
 		};
 
 		return obj;
-	}
-}());
-
-/**
- *	Copyright (C) 2016 3D Repo Ltd
- *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
- *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
- *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-	"use strict";
-
-	angular.module("3drepo")
-		.directive("accountUpgrade", accountUpgrade);
-
-	function accountUpgrade() {
-		return {
-			restrict: 'EA',
-			templateUrl: 'accountUpgrade.html',
-			scope: {
-				callingPage: "=",
-				showPage: "&"
-			},
-			controller: AccountUpgradeCtrl,
-			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
-
-	AccountUpgradeCtrl.$inject = [];
-
-	function AccountUpgradeCtrl() {
-		var vm = this,
-			pricePerLicense = 100;
-
-		/*
-		 * Init
-		 */
-		vm.numLicenses = 2;
-		vm.priceLicenses = vm.numLicenses * pricePerLicense;
-		vm.numNewLicenses = 2;
-		vm.priceNewLicenses = vm.priceLicenses;
-		vm.payButtonDisabled = true;
-
-		vm.goBack = function () {
-			vm.showPage({page: vm.callingPage});
-		};
-
-		vm.changeLicenses = function (change) {
-			if (!((vm.numNewLicenses === 0) && (change === -1))) {
-				vm.numNewLicenses += change;
-				vm.priceNewLicenses = vm.numNewLicenses * pricePerLicense;
-				vm.payButtonDisabled = (vm.numNewLicenses === vm.numLicenses);
-			}
-		};
 	}
 }());
 
@@ -7428,6 +7455,69 @@ var ViewerManager = {};
 			promise.then(function (response) {
 				console.log(response);
 			});
+		};
+	}
+}());
+
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("billing", billing);
+
+	function billing() {
+		return {
+			restrict: "E",
+			scope: {},
+			templateUrl: "billing.html",
+			controller: BillingCtrl,
+			controllerAs: "vm",
+			bindToController: true
+		};
+	}
+
+	BillingCtrl.$inject = ["$location"];
+
+	function BillingCtrl ($location) {
+		var vm = this;
+
+		/*
+		 * Init
+		 */
+		vm.billingHistory = [
+			{"Date": "10/04/2016", "Description": "1st payment", "Payment Method": "PayPal", "Amount": 100},
+			{"Date": "10/05/2016", "Description": "2nd payment", "Payment Method": "PayPal", "Amount": 100},
+			{"Date": "10/06/2016", "Description": "3rd payment", "Payment Method": "PayPal", "Amount": 100}
+		];
+		if ($location.search().hasOwnProperty("item") &&
+			(parseInt($location.search().item) >= 0) &&
+			(parseInt($location.search().item) < vm.billingHistory.length)) {
+			vm.showBilling = true;
+			vm.item = parseInt($location.search().item);
+		}
+		else {
+			vm.showBilling = false;
+		}
+
+		vm.home = function () {
+			$location.path("/", "_self");
 		};
 	}
 }());
@@ -9591,6 +9681,7 @@ var ViewerManager = {};
 		 */
 		$scope.$watch("vm.state", function () {
 			console.log(vm.state);
+			console.log(777);
 			if (vm.state.hasOwnProperty("loggedIn")) {
 				if (!vm.state.loggedIn) {
 					$timeout(function () {

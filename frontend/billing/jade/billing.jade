@@ -1,0 +1,22 @@
+md-toolbar
+	.md-toolbar-tools
+		h2 Billing
+		span(flex)
+		img(src="/public/images/3drepo-logo-white.png")
+		span(flex)
+		md-button.md-icon-button(aria-label="Home", ng-click="vm.home()")
+			md-icon.angular-material-icons home
+md-content(layout="row", layout-align="center", layout-margin, ng-if="vm.showBilling")
+	#billingList(layout="column", flex="50")
+		md-input-container(flex)
+			label Date
+			input(type="text", value="{{vm.billingHistory[vm.item].Date}}", ng-disabled="true")
+		md-input-container(flex)
+			label Description
+			input(type="text", value="{{vm.billingHistory[vm.item].Description}}", ng-disabled="true")
+		md-input-container(flex)
+			label Payment Method
+			input(type="text", value="{{vm.billingHistory[vm.item]['Payment Method']}}", ng-disabled="true")
+		md-input-container(flex)
+			label Amount (£)
+			input(type="text", value="{{vm.billingHistory[vm.item].Amount}}", ng-disabled="true")

@@ -40,7 +40,7 @@
 	function AccountCtrl($scope, $location, AccountService, Auth) {
 		var vm = this,
 			promise,
-			pages = ["upgrade", "repos", "profile", "billing"];
+			pages = ["repos", "profile", "billing", "collaborators"];
 
 		/*
 		 * Get the account data

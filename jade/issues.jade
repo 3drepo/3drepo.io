@@ -13,8 +13,8 @@ html(lang="en" ng-app="3drepo").ng-scope
 							h3 #!{issue.number} !{issue.name}
 					if issue.assigned_roles
 						tr
-							td(colspan=2) 
-								b Assigned: 
+							td(colspan=2)
+								b Assigned:
 								span [!{issue.assigned_roles.join(",")}]
 					tr
 						td !{issue.owner} [!{issue.created}]

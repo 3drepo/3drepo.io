@@ -34,14 +34,12 @@ var public_files = {
 		angularrouterjs: '/public/js/external/angular-ui-router.js',
 		momentjs: '/public/js/external/moment.js',
 		showdownjs: '/public/js/external/showdown.min.js',
-		angularsliderjs: '/public/js/external/slider.js',
 		socketio: '/public/js/external/socket.io.js',
         angularmaterialjs: '/public/js/external/angular-material.min.js',
         angularanimatejs: '/public/js/external/angular-animate.min.js',
         angularariajs: '/public/js/external/angular-aria.min.js',
 		angularsanitizejs: '/public/js/external/angular-sanitize.min.js',
 		angularrecaptcha: '/public/js/external/angular-recaptcha.min.js',
-		jspdf: '/public/js/external/jspdf.min.js',
 
 		//geodesy stuff (latlon to osgrid)
 		dms: '/public/js/external/dms.js',
@@ -80,8 +78,7 @@ var internal_files = {
 		'bower_components/geodesy/vector3d.js',
 		'bower_components/geodesy/latlon-ellipsoidal.js',
 		'bower_components/geodesy/osgridref.js',
-		'bower_components/angular-recaptcha/release/angular-recaptcha.min.js',
-		'bower_components/jspdf/dist/jspdf.min.js'
+		'bower_components/angular-recaptcha/release/angular-recaptcha.min.js'
 	],
 
 	bower_font_files: [

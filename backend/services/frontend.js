@@ -170,6 +170,10 @@ module.exports.createApp = function(serverConfig)
 				"url": "cookies"
 			},
 			{
+				"plugin": "billing",
+				"url": "billing?item"
+			},
+			{
 				"plugin": "account",
 				"url": ":account?page",
 				"children": [

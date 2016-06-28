@@ -49,7 +49,8 @@
 		vm.accountOptions = {
 			repos: {label: "Repos"},
 			profile: {label: "Profile"},
-			billing: {label: "Billing"}
+			billing: {label: "Billing"},
+			collaborators: {label: "Collaborators"}
 		};
 
 		vm.showItem = function (item) {
