@@ -64,8 +64,8 @@
 			vm.countries = response.data;
 		});
 
-		$scope.$watch("vm.newData", function (newValue) {
-				vm.priceLicenses = newValue * pricePerLicense;
+		$scope.$watch("vm.newData", function () {
+				vm.priceLicenses = vm.newData.licenses * pricePerLicense;
 				vm.saveButtonDisabled = angular.equals(initData, vm.newData);
 		}, true);
 

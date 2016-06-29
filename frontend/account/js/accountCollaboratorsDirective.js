@@ -34,50 +34,26 @@
 		};
 	}
 
-	AccountCollaboratorsCtrl.$inject = ["$scope", "$http", "$location"];
+	AccountCollaboratorsCtrl.$inject = [];
 
-	function AccountCollaboratorsCtrl($scope, $http, $location) {
-		var vm = this,
-			pricePerLicense = 100,
-			quotaPerLicense = 10,
-			initData = {
-				licenses: 2,
-				postalCode: "LS11 8QT",
-				country: "United Kingdom",
-				vatNumber: "12398756"
-			};
+	function AccountCollaboratorsCtrl() {
+		var vm = this;
 
 		/*
 		 * Init
 		 */
-		vm.showInfo = true;
-		vm.quotaUsed = 17.3;
-		vm.quotaAvailable = Math.round(((initData.licenses * quotaPerLicense) - vm.quotaUsed) * 10) / 10; // Round to 1 decimal place
-		vm.newData = angular.copy(initData);
-		vm.saveButtonDisabled = true;
-		vm.billingHistory = [
-			{"Date": "10/04/2016", "Description": "1st payment", "Payment Method": "PayPal", "Amount": 100},
-			{"Date": "10/05/2016", "Description": "2nd payment", "Payment Method": "PayPal", "Amount": 100},
-			{"Date": "10/06/2016", "Description": "3rd payment", "Payment Method": "PayPal", "Amount": 100}
-		];
-		$http.get("/public/data/countries.json").then(function (response) {
-			vm.countries = response.data;
-		});
-
-		$scope.$watch("vm.newData", function (newValue) {
-				vm.priceLicenses = newValue * pricePerLicense;
-				vm.saveButtonDisabled = angular.equals(initData, vm.newData);
-		}, true);
+		vm.collaborators = {
+			"jozefdobos": "",
+			"timscully": ""
+		};
 
 		/**
-		 * Show the billing page with the item
+		 * Remove a collaborator
 		 *
-		 * @param index
+		 * @param collaborator
 		 */
-		vm.downloadBilling = function (index) {
-			$location.path("/billing", "_self")
-				.search({}) // Clear all parameters
-				.search("item", index);
+		vm.removeCollaborator = function (collaborator) {
+			delete vm.collaborators[collaborator];
 		};
 	}
 }());

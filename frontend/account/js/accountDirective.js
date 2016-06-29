@@ -35,12 +35,11 @@
 		};
 	}
 
-	AccountCtrl.$inject = ["$scope", "$location", "AccountService", "Auth"];
+	AccountCtrl.$inject = ["$scope", "$location", "$injector", "AccountService", "Auth", "UtilsService"];
 
-	function AccountCtrl($scope, $location, AccountService, Auth) {
+	function AccountCtrl($scope, $location, $injector, AccountService, Auth, UtilsService) {
 		var vm = this,
-			promise,
-			pages = ["repos", "profile", "billing", "collaborators"];
+			promise;
 
 		/*
 		 * Get the account data
@@ -59,11 +58,12 @@
 
 					// Go to the correct "page"
 					if ($location.search().hasOwnProperty("page")) {
-						if (pages.indexOf(($location.search()).page) === -1) {
-							vm.itemToShow = "repos";
+						// Check that there is a directive for that "page"
+						if ($injector.has("account" + UtilsService.capitalizeFirstLetter($location.search().page) + "Directive")) {
+							vm.itemToShow = ($location.search()).page;
 						}
 						else {
-							vm.itemToShow = ($location.search()).page;
+							vm.itemToShow = "repos";
 						}
 					}
 					else {
@@ -98,6 +98,7 @@
 		 * @param callingPage
 		 */
 		vm.showPage = function (page, callingPage) {
+			console.log(page, callingPage);
 			vm.itemToShow = page;
 			$location.search("page", page);
 			vm.callingPage = callingPage;

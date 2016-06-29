@@ -4717,8 +4717,8 @@ var ViewerManager = {};
 			vm.countries = response.data;
 		});
 
-		$scope.$watch("vm.newData", function (newValue) {
-				vm.priceLicenses = newValue * pricePerLicense;
+		$scope.$watch("vm.newData", function () {
+				vm.priceLicenses = vm.newData.licenses * pricePerLicense;
 				vm.saveButtonDisabled = angular.equals(initData, vm.newData);
 		}, true);
 
@@ -4771,50 +4771,26 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountCollaboratorsCtrl.$inject = ["$scope", "$http", "$location"];
+	AccountCollaboratorsCtrl.$inject = [];
 
-	function AccountCollaboratorsCtrl($scope, $http, $location) {
-		var vm = this,
-			pricePerLicense = 100,
-			quotaPerLicense = 10,
-			initData = {
-				licenses: 2,
-				postalCode: "LS11 8QT",
-				country: "United Kingdom",
-				vatNumber: "12398756"
-			};
+	function AccountCollaboratorsCtrl() {
+		var vm = this;
 
 		/*
 		 * Init
 		 */
-		vm.showInfo = true;
-		vm.quotaUsed = 17.3;
-		vm.quotaAvailable = Math.round(((initData.licenses * quotaPerLicense) - vm.quotaUsed) * 10) / 10; // Round to 1 decimal place
-		vm.newData = angular.copy(initData);
-		vm.saveButtonDisabled = true;
-		vm.billingHistory = [
-			{"Date": "10/04/2016", "Description": "1st payment", "Payment Method": "PayPal", "Amount": 100},
-			{"Date": "10/05/2016", "Description": "2nd payment", "Payment Method": "PayPal", "Amount": 100},
-			{"Date": "10/06/2016", "Description": "3rd payment", "Payment Method": "PayPal", "Amount": 100}
-		];
-		$http.get("/public/data/countries.json").then(function (response) {
-			vm.countries = response.data;
-		});
-
-		$scope.$watch("vm.newData", function (newValue) {
-				vm.priceLicenses = newValue * pricePerLicense;
-				vm.saveButtonDisabled = angular.equals(initData, vm.newData);
-		}, true);
+		vm.collaborators = {
+			"jozefdobos": "",
+			"timscully": ""
+		};
 
 		/**
-		 * Show the billing page with the item
+		 * Remove a collaborator
 		 *
-		 * @param index
+		 * @param collaborator
 		 */
-		vm.downloadBilling = function (index) {
-			$location.path("/billing", "_self")
-				.search({}) // Clear all parameters
-				.search("item", index);
+		vm.removeCollaborator = function (collaborator) {
+			delete vm.collaborators[collaborator];
 		};
 	}
 }());
@@ -4856,9 +4832,9 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountCtrl.$inject = ["$scope", "$location", "AccountService", "Auth"];
+	AccountCtrl.$inject = ["$scope", "$location", "$injector", "AccountService", "Auth", "UtilsService"];
 
-	function AccountCtrl($scope, $location, AccountService, Auth) {
+	function AccountCtrl($scope, $location, $injector, AccountService, Auth, UtilsService) {
 		var vm = this,
 			promise,
 			pages = ["repos", "profile", "billing", "collaborators"];
@@ -4880,11 +4856,13 @@ var ViewerManager = {};
 
 					// Go to the correct "page"
 					if ($location.search().hasOwnProperty("page")) {
-						if (pages.indexOf(($location.search()).page) === -1) {
-							vm.itemToShow = "repos";
+						console.log(UtilsService.capitalizeFirstLetter($location.search().page));
+						console.log($injector.has("accountBillingDirective"));
+						if ($injector.has("account" + UtilsService.capitalizeFirstLetter($location.search().page) + "Directive")) {
+							vm.itemToShow = ($location.search()).page;
 						}
 						else {
-							vm.itemToShow = ($location.search()).page;
+							vm.itemToShow = "repos";
 						}
 					}
 					else {
@@ -4919,6 +4897,7 @@ var ViewerManager = {};
 		 * @param callingPage
 		 */
 		vm.showPage = function (page, callingPage) {
+			console.log(page, callingPage);
 			vm.itemToShow = page;
 			$location.search("page", page);
 			vm.callingPage = callingPage;
@@ -5268,8 +5247,8 @@ var ViewerManager = {};
 			"Other"
 		];
 		vm.projectOptions = {
-			upload: "cloud_upload",
-			collaborate: "group"
+			upload: {label: "Upload file", icon: "cloud_upload"},
+			collaborate: {label: "Add collaborator", icon: "group"}
 		};
 		vm.collaborators = {
 			"jozefdobos": "",
@@ -5559,6 +5538,14 @@ var ViewerManager = {};
 		};
 
 		/**
+		 * Go to the billing page to add more licenses
+		 */
+		vm.setupAddLicenses = function () {
+			vm.showPage({page: "billing", callingPage: "repos"});
+			vm.closeDialog();
+		};
+
+		/**
 		 * Add a project to an existing or create newly created account
 		 *
 		 * @param account
@@ -5602,9 +5589,10 @@ var ViewerManager = {};
 			// Check the quota
 			promise = UtilsService.doGet(vm.account + ".json");
 			promise.then(function (response) {
+				console.log(response);
 				if (file.size > response.data.accounts[0].quota.spaceLimit) {
-					// Show the upgrade page
-					vm.showPage({page: "upgrade", callingPage: "repos"});
+					// Show the over quota dialog
+					showDialog(null, "overQuotaDialog.html");
 				}
 				else {
 					project.uploading = true;
@@ -16510,6 +16498,13 @@ var Oculus = {};
     function UtilsService($http, $q, serverConfig) {
         var obj = {};
 
+		/**
+         * Prettify timestamp
+         *
+         * @param timestamp
+         * @param showSeconds
+         * @returns {string|*}
+         */
         obj.formatTimestamp = function (timestamp, showSeconds) {
             var date = new Date(timestamp),
                 formatted;
@@ -16526,13 +16521,31 @@ var Oculus = {};
             
             return formatted;
         };
-        
+
+		/**
+		 * Convert blah_test to blahTest
+         *
+         * @param name
+         * @param separator
+         * @returns {*|void|string|{REPLACE, REPLACE_NEGATIVE}|XML}
+         */
         obj.snake_case = function snake_case(name, separator) {
             var SNAKE_CASE_REGEXP = /[A-Z]/g;
             separator = separator || '_';
             return name.replace(SNAKE_CASE_REGEXP, function(letter, pos) {
                 return (pos ? separator : '') + letter.toLowerCase();
             });
+        };
+
+		/**
+         * Capitalise the first letter of a string
+         * Inspired by Steve Harrison's answer - http://stackoverflow.com/a/1026087/782358
+         *
+         * @param string
+         * @returns {string}
+         */
+        obj.capitalizeFirstLetter = function (string) {
+            return (string.toString()).charAt(0).toUpperCase() + string.slice(1);
         };
 
         /**

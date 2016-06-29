@@ -38,7 +38,9 @@
 					input(type="text", ng-model="vm.newData.vatNumber")
 
 			#accountBillingSave
-				md-button.md-raised.md-accent(ng-disabled="vm.saveButtonDisabled") Save
+				div(layout="row", layout-align="start")
+					md-button.md-raised.md-accent(ng-disabled="vm.saveButtonDisabled") Save
+					img(src="/public/images/pp-logo-100px.png")
 				md-divider
 
 			// Billing History

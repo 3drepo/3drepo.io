@@ -57,8 +57,8 @@
 			"Other"
 		];
 		vm.projectOptions = {
-			upload: "cloud_upload",
-			collaborate: "group"
+			upload: {label: "Upload file", icon: "cloud_upload"},
+			collaborate: {label: "Add collaborator", icon: "group"}
 		};
 		vm.collaborators = {
 			"jozefdobos": "",
@@ -348,6 +348,14 @@
 		};
 
 		/**
+		 * Go to the billing page to add more licenses
+		 */
+		vm.setupAddLicenses = function () {
+			vm.showPage({page: "billing", callingPage: "repos"});
+			vm.closeDialog();
+		};
+
+		/**
 		 * Add a project to an existing or create newly created account
 		 *
 		 * @param account
@@ -391,9 +399,10 @@
 			// Check the quota
 			promise = UtilsService.doGet(vm.account + ".json");
 			promise.then(function (response) {
+				console.log(response);
 				if (file.size > response.data.accounts[0].quota.spaceLimit) {
-					// Show the upgrade page
-					vm.showPage({page: "upgrade", callingPage: "repos"});
+					// Show the over quota dialog
+					showDialog(null, "overQuotaDialog.html");
 				}
 				else {
 					project.uploading = true;

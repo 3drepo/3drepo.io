@@ -61,19 +61,19 @@ home .homeUserContent .userContent md-progress-circular {
     margin-left: 10px;
 }
 
-home .cardInfo {
+.cardInfo {
     text-align: center;
     padding: 15px;
     background: #E8EAF6;
     margin: 15px;
     border-radius: 4px;
 }
-home .cardInfo p {
+.cardInfo p {
     margin: 0;
     color: rgba(0, 0, 0, 0.7);
     word-wrap: break-word;
 }
-home .cardInfo md-icon {
+.cardInfo md-icon {
     margin: 0;
     font-size: 16px;
     width: 16px;
