@@ -9,7 +9,7 @@ var querystring = require('../libs/httpsReq').querystring;
 var config = require('../config');
 var systemLogger = require("../logger.js").systemLogger;
 var paypal = require('../models/payment').paypal;
-
+var C = require("../constants");
 // endpoints for paypal IPN message
 router.post("/paypal/food", activateSubscription);
 
@@ -43,6 +43,21 @@ function executeAgreement(req, res, next){
 					if (err) {
 						reject(err);
 					} else {
+
+						if(dbUser.customData.billingAgreementId){
+							//cancel the old agreement, if any
+							var cancel_note = {
+								"note": "You have updated the license subscriptions. This agreement is going to be replaced by the new one."
+							};
+
+							paypal.billingAgreement.cancel(dbUser.customData.billingAgreementId, cancel_note, function (err, res) {
+								if (err) {
+									req[C.REQ_REPO].logger.logError(JSON.stringify(err));
+								} else {
+									req[C.REQ_REPO].logger.logInfo("Old billing agreement canceled successfully", { billingAgreementId: dbUser.customData.billingAgreementId});
+								}
+							});
+						}
 
 						dbUser.customData.paypalPaymentToken = token;
 						dbUser.customData.billingAgreementId = billingAgreement.id;

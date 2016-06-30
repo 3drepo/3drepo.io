@@ -138,9 +138,6 @@ function getBillingAgreement(currency, initAmount, amount, billingCycle, startDa
 
 }
 
-function executeBillingAgreement(token){
-
-}
 
 module.exports = {
 	getBillingAgreement,

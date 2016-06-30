@@ -24,11 +24,18 @@ var schema = mongoose.Schema({
 	raw: {},
 	createdAt: Date,
 	currency: String,
-	amount: String
+	amount: String,
+	items: [{
+		name: String,
+		currency: String,
+		amount: Number
+	}],
+	periodStart: Date,
+	periodEnd: Date
 });
 
-schema.statics.findBySubscriptionToken = function(account, token){
-	return this.find({account}, { subscriptionToken: token }, {}, {sort: {createdAt: -1}});
+schema.statics.findByAccount = function(account){
+	return this.find({account}, {}, {raw: 0}, {sort: {periodStart: -1}});
 };
 
 var Billing = ModelFactory.createClass(

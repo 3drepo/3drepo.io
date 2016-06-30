@@ -612,7 +612,7 @@ var subscriptions = {
 		plan: 'SOFT-LAUNCH-FREE-TRIAL',
 		limits: {
 			spaceLimit: 10737418240, //bytes
-			collaboratorLimit: 2,
+			collaboratorLimit:1,
 		},
 		db: this.user,
 		billingCycle: 3, //month
@@ -632,7 +632,7 @@ schema.statics.getSubscription = function(plan) {
 	return subscriptions[plan];
 };
 
-schema.methods.createSubscriptions = function(plans, billingUser){
+schema.methods.buySubscriptions = function(plans, billingUser){
 	'use strict';
 
 	this.customData.subscriptions = this.customData.subscriptions || [];
@@ -751,12 +751,11 @@ schema.methods.createSubscriptions = function(plans, billingUser){
 }
 
 
-schema.methods.createSubscriptionToken = function(plan, billingUser){
+schema.methods.createSubscription = function(plan, billingUser, active, expiredAt){
 	'use strict';
 
 	if(plan === 'THE-100-QUID-PLAN' || plan === 'SOFT-LAUNCH-FREE-TRIAL'){
 
-		let token = crypto.randomBytes(64).toString('hex');
 
 		this.customData.subscriptions = this.customData.subscriptions || [];
 		let subscriptions = this.customData.subscriptions;
@@ -764,13 +763,13 @@ schema.methods.createSubscriptionToken = function(plan, billingUser){
 		var now = new Date();
 
 		let subscription = {
-			token: token,
+
 			plan: plan,
-			db: this.user,
 			billingUser: billingUser,
 			createdAt: now,
 			updatedAt: now,
-			active: false
+			active: active,
+			expiredAt: expiredAt
 		};
 
 		subscriptions.push(subscription);
@@ -819,21 +818,33 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 	}).then(() => {
 
+		let items = [];
+
 		dbUser.customData.subscriptions.forEach(subscription => {
 
 			if(subscription.inCurrentAgreement){
 				let now = new Date();
-				let expiryAt = moment(paymentInfo.ipnDate).utc()
+				let expiredAt = moment(paymentInfo.ipnDate).utc()
 					.date(1)
 					.add(getSubscription(subscription.plan).billingCycle, 'month')
 					.hours(0).minutes(0).seconds(0).milliseconds(0)
 					.toDate();
 
+				let start = moment.utc(paymentInfo.ipnDate).date();
+				let end = moment(paymentInfo.ipnDate).utc().endOf('month').date();
+				let prorata = (end - start + 1) / end;
+				let amount = getSubscription(subscription.plan).amount * prorata;
+
 				subscription.limits = getSubscription(subscription.plan).limits;
 
-				if(!subscriptions.expiredAt || subscriptions.expiredAt < expiredAt){
-					subscription.expiredAt = expiryAt;
+				if(!subscription.expiredAt || subscription.expiredAt < expiredAt){
+					subscription.expiredAt = expiredAt;
 					subscription.active = true;
+					items.push({
+						name: subscription.plan,
+						currency: getSubscription(subscription.plan).currency,
+						amount: Math.round(amount * 100) / 100
+					})
 				}
 			
 			}
@@ -850,7 +861,16 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 			billing.currency = paymentInfo.currency;
 			billing.amount = paymentInfo.amount;
 			billing.billingAgreementId = billingAgreementId;
-			
+			billing.items = items;
+
+			billing.periodStart = moment(paymentInfo.ipnDate).utc()
+				.hours(0).minutes(0).seconds(0).milliseconds(0)
+				.toDate();
+
+			billing.periodEnd = moment(paymentInfo.ipnDate).utc()
+					.endOf('month')
+					.toDate();
+
 			billing.save().catch( err => {
 				console.log('Billing error', err);
 			});
@@ -919,40 +939,7 @@ schema.methods.getSubscriptionLimits = function(){
 	return sumLimits;
 };
 
-schema.statics.findSubscriptionsByBillingUser = function(billingUser){
-	'use strict';
 
-	let subscriptions = [];
-
-	return this.find({account: 'admin'}, { 
-		'customData.billingUser': billingUser, 
-	}).then( dbUsers => {
-
-		let promises = [];
-
-		dbUsers.forEach(dbUser => {
-	
-
-			dbUser.customData.subscriptions.forEach(dbSub => {
-
-				dbSub = dbSub.toObject();
-				dbSub.account = dbUser.user;
-				
-				promises.push(Billing.findBySubscriptionToken(dbUser.user, dbSub.token).then(payments => {
-					dbSub.payments = payments;
-				}));
-
-				subscriptions.push(dbSub);
-			});
-			
-		});
-
-		return Promise.all(promises).then(() => {
-			return Promise.resolve(subscriptions);
-		});
-
-	});
-};
 
 schema.statics.findSubscriptionByToken = function(billingUser, token){
 	'use strict';

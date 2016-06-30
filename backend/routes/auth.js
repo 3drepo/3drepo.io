@@ -31,6 +31,8 @@
 	//var Role = require('../models/role');
 	var crypto = require('crypto');
 	var ProjectHelper = require('../models/helper/project');
+	var Billing = require('../models/billing');
+	var moment = require('moment');
 
 	router.post("/login", login);
 	router.get("/login", checkLogin);
@@ -39,10 +41,11 @@
 	router.get("/:account.json", middlewares.loggedIn, listInfo);
 	router.get("/:account.jpg", middlewares.hasReadAccessToAccount, getAvatar);
 	router.get("/:account/subscriptions", middlewares.hasReadAccessToAccount, listSubscriptions);
-	router.get("/:account/subscriptions/:token", middlewares.hasReadAccessToAccount, findSubscriptionByToken);
+	router.get("/:account/billings", middlewares.hasReadAccessToAccount, listBillings);
 	router.post('/:account', signUp);
 	//router.post('/:account/database', middlewares.canCreateDatabase, createDatabase);
 	router.post('/:account/subscriptions', middlewares.canCreateDatabase, createSubscription);
+
 	router.post('/:account/verify', middlewares.connectQueue, verify);
 	router.post('/:account/forgot-password', forgotPassword);
 	router.put("/:account", middlewares.hasWriteAccessToAccount, updateUser);
@@ -216,11 +219,8 @@
 			});
 
 			//soft launch give users some quota
-			return user.createSubscriptionToken('SOFT-LAUNCH-FREE-TRIAL', user.user);
-
-		}).then(sub => {
-
-			return User.activateSubscription(sub.token, {}, {}, true);
+			let nextMonth = moment(paymentInfo.ipnDate).utc().add(1, 'month');
+			return user.createSubscription('SOFT-LAUNCH-FREE-TRIAL', user.user, true, nextMonth);
 
 		}).then(() => {
 
@@ -372,50 +372,50 @@
 		}
 	}
 
-	function createDatabase(req, res, next){
+	// function createDatabase(req, res, next){
 
 
-		let responsePlace = utils.APIInfo(req);
-		let password = crypto.randomBytes(64).toString('hex');
+	// 	let responsePlace = utils.APIInfo(req);
+	// 	let password = crypto.randomBytes(64).toString('hex');
 
-		//first create the ghost user
-		let checkPlan = User.getSubscription(req.body.plan) ? 
-			Promise.resolve() : Promise.reject({ resCode: responseCodes.INVALID_SUBSCRIPTION_PLAN });
+	// 	//first create the ghost user
+	// 	let checkPlan = User.getSubscription(req.body.plan) ? 
+	// 		Promise.resolve() : Promise.reject({ resCode: responseCodes.INVALID_SUBSCRIPTION_PLAN });
 
-		return checkPlan.then(() => {
-			return User.createUser(req[C.REQ_REPO].logger, req.body.database, password, null, 0);
+	// 	return checkPlan.then(() => {
+	// 		return User.createUser(req[C.REQ_REPO].logger, req.body.database, password, null, 0);
 
-		}).then(() => {
+	// 	}).then(() => {
 
-			return User.findByUserName(req.body.database);
+	// 		return User.findByUserName(req.body.database);
 
 
-		}).catch(err => {
-			//change user exists error message to database exists
-			if(err.resCode && err.resCode.value === 55){
-				return Promise.reject({ resCode: responseCodes.DATABASE_EXIST });
-			} else {
-				return Promise.reject(err);
-			}
+	// 	}).catch(err => {
+	// 		//change user exists error message to database exists
+	// 		if(err.resCode && err.resCode.value === 55){
+	// 			return Promise.reject({ resCode: responseCodes.DATABASE_EXIST });
+	// 		} else {
+	// 			return Promise.reject(err);
+	// 		}
 
-		}).then(dbUser => {
+	// 	}).then(dbUser => {
 			
-			//create a subscription token in this ghost user
-			let billingUser = req.params.account;
-			return dbUser.createSubscriptionToken(req.body.plan, billingUser);
+	// 		//create a subscription token in this ghost user
+	// 		let billingUser = req.params.account;
+	// 		return dbUser.createSubscriptionToken(req.body.plan, billingUser);
 
-		}).then(token => {
+	// 	}).then(token => {
 
 
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
-				database: req.body.database,
-				token: token.token
-			});
+	// 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
+	// 			database: req.body.database,
+	// 			token: token.token
+	// 		});
 
-		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
-	}
+	// 	}).catch(err => {
+	// 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	// 	});
+	// }
 
 	function createSubscription(req, res, next){
 
@@ -425,7 +425,7 @@
 		User.findByUserName(req.params.account).then(dbUser => {
 			let billingUser = req.params.account;
 			//return dbUser.createSubscriptionToken(req.body.plan, billingUser);
-			return dbUser.createSubscriptions(req.body.plans, billingUser);
+			return dbUser.buySubscriptions(req.body.plans, billingUser);
 		}).then(agreement => {
 
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
@@ -440,25 +440,21 @@
 	function listSubscriptions(req, res, next){
 
 		let responsePlace = utils.APIInfo(req);
-		User.findSubscriptionsByBillingUser(req.params.account).then(subscriptions => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscriptions);
+		User.findByUserName(req.params.account).then(user => {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, user.customData.subscriptions.filter(sub => sub.active));
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
 	}
 
-	function findSubscriptionByToken(req, res, next){
+	function listBillings(req, res, next){
 
 		let responsePlace = utils.APIInfo(req);
-		let billingUser = req.params.account;
-		let token = req.params.token;
-
-		User.findSubscriptionByToken(billingUser, token).then(subscription => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
+		Billing.findByAccount(req.params.account).then(billings => {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, billings);
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
-
 	}
 
 	function contact(req, res, next){
