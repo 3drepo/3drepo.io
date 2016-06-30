@@ -28,6 +28,8 @@ var projectSetting = require('./projectSetting');
 var Role = require('./role');
 var Mailer = require('../mailer/mailer');
 var systemLogger = require("../logger.js").systemLogger;
+var Payment = require('./payment');
+var moment = require('moment');
 
 var schema = mongoose.Schema({
 	_id : String,
@@ -64,12 +66,20 @@ var schema = mongoose.Schema({
 			updatedAt: Date,
 			createdAt: Date,
 			billingUser: String,
+			assignedUser: String,
 			expiredAt: Date,
 			limits: {},
-			token: String,
+			token: String, 
 			plan: String,
+			inCurrentAgreement: Boolean,
 			database: String
 		}],
+
+		//global billing info
+		billingAgreementId: String,
+		paypalPaymentToken: String,
+		billingUser: String,
+		
 		avatar: Object
 	},
 	roles: [{}]
@@ -126,6 +136,10 @@ schema.statics.findByUserName = function(user){
 
 schema.statics.findByEmail = function(email){
 	return this.findOne({account: 'admin'}, { 'customData.email': email });
+};
+
+schema.statics.findByPaypalPaymentToken = function(token){
+	return this.findOne({account: 'admin'}, { 'customData.paypalPaymentToken': token });
 };
 
 schema.statics.isEmailTaken = function(email, exceptUser){
@@ -618,6 +632,125 @@ schema.statics.getSubscription = function(plan) {
 	return subscriptions[plan];
 };
 
+schema.methods.createSubscriptions = function(plans, billingUser){
+	'use strict';
+
+	this.customData.subscriptions = this.customData.subscriptions || [];
+	this.customData.billingUser = billingUser;
+
+	let subscriptions = this.customData.subscriptions;
+	let error;
+	let now = new Date();
+
+	let currentCount = {};
+	let existingPlans = [];
+
+	//clear subscriptions
+	let ids = this.customData.subscriptions.filter(sub => !sub.active).map(sub => sub._id);
+	console.log('ids', ids);
+	ids.forEach(id => {
+		this.customData.subscriptions.remove(id);
+	});
+	
+
+	this.customData.subscriptions.forEach(subscription => {
+		if(!currentCount[subscription.plan]){
+			currentCount[subscription.plan] = 1;
+		} else {
+			currentCount[subscription.plan]++;
+		}
+	});
+
+	Object.keys(currentCount).forEach(plan => {
+		existingPlans.push({ plan: plan, quantity: currentCount[plan]});
+	});
+
+	console.log('currentCount', currentCount);
+
+	plans.forEach(plan => {
+		if(currentCount[plan.plan]){
+			plan.quantity = plan.quantity - currentCount[plan.plan];
+		}
+	});
+	
+	console.log('plans', plans);
+
+	//change of plans
+	plans = plans.filter(plan => plan.quantity > 0);
+
+	console.log('plans', plans);
+
+	plans.forEach(plan => {
+
+		if(getSubscription(plan.plan) && Number.isInteger(plan.quantity) && plan.quantity > 0){
+			
+			for(let i=0; i<plan.quantity; i++){
+
+				subscriptions.push({
+					plan: plan.plan,
+					createdAt: now,
+					updatedAt: now,
+					active: false
+				});
+			}
+		}
+	});
+
+
+	if(plans.length <= 0){
+		return Promise.reject({ message: 'You cant reduce the no. of licenses currently'});
+	}
+
+	let billingAgreement;
+
+	let startDate = moment.utc().date(1).add(1, 'month').hours(0).minutes(0).seconds(0).milliseconds(0).toDate();
+	let lastDayOfThisMonth = moment.utc().endOf('month').date();
+	let day = moment.utc().date();
+
+	let currency = 'GBP';
+	let amount = 0;
+	let billingCycle = 1;
+
+	plans.forEach(data => {
+
+		let quantity = data.quantity
+		let plan = getSubscription(data.plan);
+		amount += plan.amount * quantity;
+		// currency = plan.currency;
+		// billingCycle = plan.billingCycle;
+
+	});
+
+	//cal pro-rata price of new licenses subscription
+	let proRataPrice = (lastDayOfThisMonth - day + 1) / lastDayOfThisMonth * amount;
+	proRataPrice = Math.round(proRataPrice * 100) / 100;
+
+	//add exisiting plans to bill of next cycle as well
+	existingPlans.forEach(data => {
+
+		let quantity = data.quantity
+		let plan = getSubscription(data.plan);
+		amount += plan.amount * quantity;
+		// currency = plan.currency;
+		// billingCycle = plan.billingCycle;
+	});
+
+	amount = Math.round(amount * 100) / 100;
+
+	return Payment.getBillingAgreement(currency, proRataPrice, amount, billingCycle, startDate).then(_billingAgreement => {
+
+		billingAgreement = _billingAgreement;
+		this.customData.paypalPaymentToken = billingAgreement.paypalPaymentToken;
+
+		return this.save();
+
+	}).then(() => {
+		return Promise.resolve(billingAgreement);
+	});
+
+}
+
+
 schema.methods.createSubscriptionToken = function(plan, billingUser){
 	'use strict';
 
@@ -652,27 +785,19 @@ schema.methods.createSubscriptionToken = function(plan, billingUser){
 	}
 };
 
-schema.statics.activateSubscription = function(token, paymentInfo, raw, disableEmail){
+schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, raw, disableEmail){
 	'use strict';
 	
-	let query = {'customData.subscriptions.token': token};
-	let subscription;
+	let query = {'customData.billingAgreementId': billingAgreementId};
 	let account;
 	let dbUser;
 
 	return this.findOne({account: 'admin'}, query).then(user => {
 
-		dbUser =  user;
+		dbUser = user;
 
 		if(!dbUser){
-			return Promise.reject({ message: 'Token not found'});
-		}
-
-		subscription = _.find(dbUser.customData.subscriptions, subscription => subscription.token === token);
-
-		if(!getSubscription(subscription.plan).freeTrial && paymentInfo.subscriptionSignup){
-			// do nothing if no free trial is provided for this plan and getting a subscription sign up message with no payment
-			return Promise.reject();
+			return Promise.reject({ message: 'BillingAgreementId not found'});
 		}
 
 		account = dbUser.user;
@@ -690,22 +815,33 @@ schema.statics.activateSubscription = function(token, paymentInfo, raw, disableE
 	}).then(() => {
 
 		let adminRoleName = 'admin';
-		return User.grantRoleToUser(subscription.billingUser, account, adminRoleName);
+		return User.grantRoleToUser(dbUser.customData.billingUser, account, adminRoleName);
 
 	}).then(() => {
 
-		let now = new Date();
+		dbUser.customData.subscriptions.forEach(subscription => {
 
-		let expiryAt = new Date(now.valueOf());
-		expiryAt.setMonth(expiryAt.getMonth() + getSubscription(subscription.plan).billingCycle);
+			if(subscription.inCurrentAgreement){
+				let now = new Date();
+				let expiryAt = moment(paymentInfo.ipnDate).utc()
+					.date(1)
+					.add(getSubscription(subscription.plan).billingCycle, 'month')
+					.hours(0).minutes(0).seconds(0).milliseconds(0)
+					.toDate();
 
+				subscription.limits = getSubscription(subscription.plan).limits;
 
+				if(!subscriptions.expiredAt || subscriptions.expiredAt < expiredAt){
+					subscription.expiredAt = expiryAt;
+					subscription.active = true;
+				}
+			
+			}
 
-		subscription.limits = getSubscription(subscription.plan).limits;
-		subscription.expiredAt = expiryAt;
-		subscription.active = true;
-		
+		});
+
 		if(paymentInfo.createBilling){
+
 			let billing = Billing.createInstance({ account });
 
 			billing.raw = raw;
@@ -713,7 +849,7 @@ schema.statics.activateSubscription = function(token, paymentInfo, raw, disableE
 			billing.createdAt = new Date();
 			billing.currency = paymentInfo.currency;
 			billing.amount = paymentInfo.amount;
-			billing.subscriptionToken = token;
+			billing.billingAgreementId = billingAgreementId;
 			
 			billing.save().catch( err => {
 				console.log('Billing error', err);
@@ -721,7 +857,7 @@ schema.statics.activateSubscription = function(token, paymentInfo, raw, disableE
 		}
 
 
-		if(!disableEmail && !paymentInfo.subscriptionSignup){
+		if(!disableEmail){
 
 			//send verification email
 			let amount = paymentInfo.amount;
@@ -730,7 +866,7 @@ schema.statics.activateSubscription = function(token, paymentInfo, raw, disableE
 				currency = '£';
 			}
 
-			User.findByUserName(subscription.billingUser).then(user => {
+			User.findByUserName(dbUser.customData.billingUser).then(user => {
 				return Mailer.sendPaymentReceivedEmail(user.customData.email, {
 					account: account,
 					amount: currency + amount
@@ -743,7 +879,7 @@ schema.statics.activateSubscription = function(token, paymentInfo, raw, disableE
 		}
 
 		return dbUser.save().then(() => {
-			return Promise.resolve({subscription, account, payment: paymentInfo});
+			return Promise.resolve({subscriptions: dbUser.customData.subscriptions, account, payment: paymentInfo});
 		});
 		
 
@@ -789,15 +925,15 @@ schema.statics.findSubscriptionsByBillingUser = function(billingUser){
 	let subscriptions = [];
 
 	return this.find({account: 'admin'}, { 
-		'customData.subscriptions.billingUser': billingUser, 
+		'customData.billingUser': billingUser, 
 	}).then( dbUsers => {
 
 		let promises = [];
 
 		dbUsers.forEach(dbUser => {
 	
-			let dbSubs = _.filter(dbUser.customData.subscriptions, subscription => subscription.billingUser === billingUser);
-			dbSubs.forEach(dbSub => {
+
+			dbUser.customData.subscriptions.forEach(dbSub => {
 
 				dbSub = dbSub.toObject();
 				dbSub.account = dbUser.user;

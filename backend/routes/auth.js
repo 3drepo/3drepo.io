@@ -41,7 +41,7 @@
 	router.get("/:account/subscriptions", middlewares.hasReadAccessToAccount, listSubscriptions);
 	router.get("/:account/subscriptions/:token", middlewares.hasReadAccessToAccount, findSubscriptionByToken);
 	router.post('/:account', signUp);
-	router.post('/:account/database', middlewares.canCreateDatabase, createDatabase);
+	//router.post('/:account/database', middlewares.canCreateDatabase, createDatabase);
 	router.post('/:account/subscriptions', middlewares.canCreateDatabase, createSubscription);
 	router.post('/:account/verify', middlewares.connectQueue, verify);
 	router.post('/:account/forgot-password', forgotPassword);
@@ -424,11 +424,12 @@
 
 		User.findByUserName(req.params.account).then(dbUser => {
 			let billingUser = req.params.account;
-			return dbUser.createSubscriptionToken(req.body.plan, billingUser);
-		}).then(token => {
+			//return dbUser.createSubscriptionToken(req.body.plan, billingUser);
+			return dbUser.createSubscriptions(req.body.plans, billingUser);
+		}).then(agreement => {
 
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
-				token: token.token
+				url: agreement.url
 			});
 
 		}).catch(err => {

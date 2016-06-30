@@ -19,7 +19,7 @@ var ModelFactory = require('./factory/modelFactory');
 
 
 var schema = mongoose.Schema({
-	subscriptionToken: String,
+	billingAgreementId: String,
 	gateway: String,
 	raw: {},
 	createdAt: Date,
