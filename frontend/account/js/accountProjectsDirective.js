@@ -58,7 +58,7 @@
 		];
 		vm.projectOptions = {
 			upload: {label: "Upload file", icon: "cloud_upload"},
-			collaborate: {label: "Add collaborator", icon: "group"}
+			team: {label: "Team", icon: "group"}
 		};
 		vm.collaborators = {
 			"jozefdobos": "",
@@ -332,8 +332,9 @@
 					vm.uploadModel(project);
 					break;
 
-				case "collaborate":
-					showDialog(event, "collaborateDialog.html");
+				case "team":
+					$location.search("proj", project.name);
+					vm.showPage({page: "team", callingPage: "repos"});
 					break;
 			}
 		};

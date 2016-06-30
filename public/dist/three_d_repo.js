@@ -4771,27 +4771,72 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountCollaboratorsCtrl.$inject = [];
+	AccountCollaboratorsCtrl.$inject = ["$scope"];
 
-	function AccountCollaboratorsCtrl() {
+	function AccountCollaboratorsCtrl($scope) {
 		var vm = this;
 
 		/*
 		 * Init
 		 */
-		vm.collaborators = {
-			"jozefdobos": "",
-			"timscully": ""
+		vm.users = [
+			{name: "carmenfan"},
+			{name: "henryliu"}
+		];
+		vm.collaborators = [
+			{name: "jozefdobos"},
+			{name: "timscully"}
+		];
+		vm.unassigned = [];
+		vm.numUnassigned = 2;
+
+		$scope.$watch("vm.numUnassigned", function () {
+			// This might not be the best way of modifying unassigned but it's neat :-)
+			delete vm.unassigned;
+			vm.unassigned = new Array(vm.numUnassigned);
+
+			vm.addDisabled = (vm.numUnassigned === 0);
+		});
+
+		/**
+		 * Add the selected user as a collaborator
+		 */
+		vm.addCollaborator = function () {
+			var i, length;
+			if (vm.selectedUser !== null) {
+				vm.collaborators.push(vm.selectedUser);
+				for (i = 0, length = vm.users.length; i < length; i += 1) {
+					if (vm.users[i].name === vm.selectedUser.name) {
+						vm.users.splice(i, 1);
+						break;
+					}
+				}
+				vm.searchText = null;
+				vm.numUnassigned -= 1;
+			}
 		};
 
 		/**
 		 * Remove a collaborator
 		 *
-		 * @param collaborator
+		 * @param index
 		 */
-		vm.removeCollaborator = function (collaborator) {
-			delete vm.collaborators[collaborator];
+		vm.removeCollaborator = function (index) {
+			var collaborator = vm.collaborators.splice(index, 1);
+			vm.users.push(collaborator[0]);
+			vm.numUnassigned += 1;
 		};
+
+		vm.querySearch = function (query) {
+			return query ? vm.users.filter(createFilterFor(query)) : vm.users;
+		};
+
+		function createFilterFor (query) {
+			var lowercaseQuery = angular.lowercase(query);
+			return function filterFn(user) {
+				return (user.name.indexOf(lowercaseQuery) === 0);
+			};
+		}
 	}
 }());
 
@@ -4832,12 +4877,11 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountCtrl.$inject = ["$scope", "$location", "$injector", "AccountService", "Auth", "UtilsService"];
+	AccountCtrl.$inject = ["$scope", "$location", "$injector", "$state", "AccountService", "Auth", "UtilsService"];
 
-	function AccountCtrl($scope, $location, $injector, AccountService, Auth, UtilsService) {
+	function AccountCtrl($scope, $location, $injector, $state, AccountService, Auth, UtilsService) {
 		var vm = this,
-			promise,
-			pages = ["repos", "profile", "billing", "collaborators"];
+			promise;
 
 		/*
 		 * Get the account data
@@ -4856,8 +4900,7 @@ var ViewerManager = {};
 
 					// Go to the correct "page"
 					if ($location.search().hasOwnProperty("page")) {
-						console.log(UtilsService.capitalizeFirstLetter($location.search().page));
-						console.log($injector.has("accountBillingDirective"));
+						// Check that there is a directive for that "page"
 						if ($injector.has("account" + UtilsService.capitalizeFirstLetter($location.search().page) + "Directive")) {
 							vm.itemToShow = ($location.search()).page;
 						}
@@ -4890,6 +4933,15 @@ var ViewerManager = {};
 			goToProject();
 		});
 
+		/*
+		 * Handle browser back/forward buttons because 'reloadOnSearch' is set to false
+		 */
+		$scope.$on('$locationChangeSuccess', function() {
+			if ($state.params.hasOwnProperty("page") && ($state.params.page !== undefined)) {
+				vm.showPage($state.params.page);
+			}
+		});
+
 		/**
 		 * For pages to show other pages
 		 * 
@@ -4897,7 +4949,6 @@ var ViewerManager = {};
 		 * @param callingPage
 		 */
 		vm.showPage = function (page, callingPage) {
-			console.log(page, callingPage);
 			vm.itemToShow = page;
 			$location.search("page", page);
 			vm.callingPage = callingPage;
@@ -4921,11 +4972,6 @@ var ViewerManager = {};
 				}
 			}
 		}
-
-		vm.showItem = function (item) {
-			vm.itemToShow = item;
-			$location.search("page", item);
-		};
 
 		/**
 		 * Event listener for change in local storage login status
@@ -4978,7 +5024,7 @@ var ViewerManager = {};
 				firstName: "=",
 				lastName: "=",
 				email: "=",
-				onShowItem: "&"
+				itemToShow: "="
 			},
 			controller: AccountInfoCtrl,
 			controllerAs: 'vm',
@@ -4986,9 +5032,9 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountInfoCtrl.$inject = [];
+	AccountInfoCtrl.$inject = ["$location"];
 
-	function AccountInfoCtrl() {
+	function AccountInfoCtrl ($location) {
 		var vm = this;
 		
 		/*
@@ -5001,8 +5047,14 @@ var ViewerManager = {};
 			collaborators: {label: "Collaborators"}
 		};
 
+		/**
+		 * Show account "page"
+		 *
+		 * @param item
+		 */
 		vm.showItem = function (item) {
-			vm.onShowItem({item: item});
+			vm.itemToShow = item;
+			$location.search({}).search("page", item);
 		};
 	}
 }());
@@ -5248,7 +5300,7 @@ var ViewerManager = {};
 		];
 		vm.projectOptions = {
 			upload: {label: "Upload file", icon: "cloud_upload"},
-			collaborate: {label: "Add collaborator", icon: "group"}
+			team: {label: "Team", icon: "group"}
 		};
 		vm.collaborators = {
 			"jozefdobos": "",
@@ -5522,8 +5574,9 @@ var ViewerManager = {};
 					vm.uploadModel(project);
 					break;
 
-				case "collaborate":
-					showDialog(event, "collaborateDialog.html");
+				case "team":
+					$location.search("proj", project.name);
+					vm.showPage({page: "team", callingPage: "repos"});
 					break;
 			}
 		};
@@ -5872,6 +5925,111 @@ var ViewerManager = {};
 		};
 
 		return obj;
+	}
+}());
+
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("accountTeam", accountTeam);
+
+	function accountTeam() {
+		return {
+			restrict: 'EA',
+			templateUrl: 'accountTeam.html',
+			scope: {
+				showPage: "&"
+			},
+			controller: AccountTeamCtrl,
+			controllerAs: 'vm',
+			bindToController: true
+		};
+	}
+
+	AccountTeamCtrl.$inject = ["$location"];
+
+	function AccountTeamCtrl($location) {
+		var vm = this;
+
+		/*
+		 * Init
+		 */
+		vm.members = [
+			{name: "jozefdobos"},
+			{name: "timscully"}
+		];
+		vm.collaborators = [
+			{name: "carmenfan"},
+			{name: "henryliu"}
+		];
+		vm.addDisabled = false;
+		if ($location.search().hasOwnProperty("proj")) {
+			vm.projectName = $location.search().proj;
+		}
+
+		/**
+		 * Go back to the repos page
+		 */
+		vm.goBack = function () {
+			$location.search("project", null);
+			vm.showPage({page: "repos"});
+		};
+
+		/**
+		 * Add the selected member to the team
+		 */
+		vm.addMember = function () {
+			var i, length;
+			if (vm.selectedUser !== null) {
+				vm.members.push(vm.selectedUser);
+				for (i = 0, length = vm.collaborators.length; i < length; i += 1) {
+					if (vm.collaborators[i].name === vm.selectedUser.name) {
+						vm.collaborators.splice(i, 1);
+						break;
+					}
+				}
+				vm.searchText = null;
+			}
+		};
+
+		/**
+		 * Remove member from team
+		 *
+		 * @param index
+		 */
+		vm.removeMember = function (index) {
+			var member = vm.members.splice(index, 1);
+			vm.collaborators.push(member[0]);
+		};
+
+		vm.querySearch = function (query) {
+			return query ? vm.collaborators.filter(createFilterFor(query)) : vm.collaborators;
+		};
+
+		function createFilterFor (query) {
+			var lowercaseQuery = angular.lowercase(query);
+			return function filterFn(user) {
+				return (user.name.indexOf(lowercaseQuery) === 0);
+			};
+		}
 	}
 }());
 
@@ -9669,7 +9827,6 @@ var ViewerManager = {};
 		 */
 		$scope.$watch("vm.state", function () {
 			console.log(vm.state);
-			console.log(777);
 			if (vm.state.hasOwnProperty("loggedIn")) {
 				if (!vm.state.loggedIn) {
 					$timeout(function () {

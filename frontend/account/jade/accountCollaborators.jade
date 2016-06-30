@@ -6,28 +6,40 @@
 
 		.userContent
 			md-autocomplete(
-			ng-disabled="ctrl.isDisabled"
-			md-no-cache="ctrl.noCache"
-			md-selected-item="ctrl.selectedItem"
-			md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
-			md-search-text="ctrl.searchText"
-			md-selected-item-change="ctrl.selectedItemChange(item)"
-			md-items="item in ctrl.querySearch(ctrl.searchText)"
-			md-item-text="item.display"
+			md-no-cache="vm.noCache"
+			md-selected-item="vm.selectedUser"
+			md-search-text="vm.searchText"
+			md-items="user in vm.querySearch(vm.searchText)"
+			md-item-text="user.name"
 			md-min-length="0"
-			placeholder="Find a collaborator"
+			placeholder="Add a collaborator"
+			ng-disabled="vm.addDisabled"
 			)
 				md-item-template
-					span(md-highlight-text="ctrl.searchText", md-highlight-flags="^i") {{item.display}}
+					span(md-highlight-text="vm.searchText", md-highlight-flags="^i") {{user.name}}
 				md-not-found
-					span No user matching "{{ctrl.searchText}}" was found.
+					span No user matching "{{vm.searchText}}" was found.
+			md-button.md-raised.md-accent#accountCollaboratorsAdd(ng-click="vm.addCollaborator()", ng-disabled="vm.addDisabled") Add
 
+			md-divider
+
+			// Assigned
 			md-list
 				md-subheader.md-no-sticky Collaborators
-				md-list-item(ng-repeat="(key, value) in vm.collaborators")
+				md-list-item(ng-repeat="user in vm.collaborators")
 					md-icon.angular-material-icons.collaboratorIcon(aria-label="Person") person
 					.md-list-item-text
-						p {{key}}
+						p {{user.name}}
 					span(flex)
-					md-button.md-icon-button.md-accent(ng-click="vm.removeCollaborator(key)")
+					md-button.md-icon-button.md-accent(ng-click="vm.removeCollaborator($index)")
+						md-icon.angular-material-icons(aria-label="Close dialog") remove_circle
+
+			// Unassigned
+			md-list#accountCollaboratorsUnassigned
+				md-list-item(ng-repeat="unassigned in vm.unassigned track by $index")
+					md-icon.angular-material-icons.collaboratorIcon(aria-label="Person") person
+					.md-list-item-text
+						p Unassigned
+					span(flex)
+					md-button.md-icon-button
 						md-icon.angular-material-icons(aria-label="Close dialog") remove_circle

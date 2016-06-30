@@ -19,79 +19,79 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountCollaborators", accountCollaborators);
+		.directive("accountTeam", accountTeam);
 
-	function accountCollaborators() {
+	function accountTeam() {
 		return {
 			restrict: 'EA',
-			templateUrl: 'accountCollaborators.html',
+			templateUrl: 'accountTeam.html',
 			scope: {
 				showPage: "&"
 			},
-			controller: AccountCollaboratorsCtrl,
+			controller: AccountTeamCtrl,
 			controllerAs: 'vm',
 			bindToController: true
 		};
 	}
 
-	AccountCollaboratorsCtrl.$inject = ["$scope"];
+	AccountTeamCtrl.$inject = ["$location"];
 
-	function AccountCollaboratorsCtrl($scope) {
+	function AccountTeamCtrl($location) {
 		var vm = this;
 
 		/*
 		 * Init
 		 */
-		vm.users = [
-			{name: "carmenfan"},
-			{name: "henryliu"}
-		];
-		vm.collaborators = [
+		vm.members = [
 			{name: "jozefdobos"},
 			{name: "timscully"}
 		];
-		vm.unassigned = [];
-		vm.numUnassigned = 2;
-
-		$scope.$watch("vm.numUnassigned", function () {
-			// This might not be the best way of modifying unassigned but it's neat :-)
-			delete vm.unassigned;
-			vm.unassigned = new Array(vm.numUnassigned);
-
-			vm.addDisabled = (vm.numUnassigned === 0);
-		});
+		vm.collaborators = [
+			{name: "carmenfan"},
+			{name: "henryliu"}
+		];
+		vm.addDisabled = false;
+		if ($location.search().hasOwnProperty("proj")) {
+			vm.projectName = $location.search().proj;
+		}
 
 		/**
-		 * Add the selected user as a collaborator
+		 * Go back to the repos page
 		 */
-		vm.addCollaborator = function () {
+		vm.goBack = function () {
+			$location.search("project", null);
+			vm.showPage({page: "repos"});
+		};
+
+		/**
+		 * Add the selected member to the team
+		 */
+		vm.addMember = function () {
 			var i, length;
 			if (vm.selectedUser !== null) {
-				vm.collaborators.push(vm.selectedUser);
-				for (i = 0, length = vm.users.length; i < length; i += 1) {
-					if (vm.users[i].name === vm.selectedUser.name) {
-						vm.users.splice(i, 1);
+				vm.members.push(vm.selectedUser);
+				for (i = 0, length = vm.collaborators.length; i < length; i += 1) {
+					if (vm.collaborators[i].name === vm.selectedUser.name) {
+						vm.collaborators.splice(i, 1);
 						break;
 					}
 				}
 				vm.searchText = null;
-				vm.numUnassigned -= 1;
 			}
 		};
 
 		/**
-		 * Remove a collaborator
+		 * Remove member from team
 		 *
 		 * @param index
 		 */
-		vm.removeCollaborator = function (index) {
-			var collaborator = vm.collaborators.splice(index, 1);
-			vm.users.push(collaborator[0]);
-			vm.numUnassigned += 1;
+		vm.removeMember = function (index) {
+			var member = vm.members.splice(index, 1);
+			vm.collaborators.push(member[0]);
 		};
 
 		vm.querySearch = function (query) {
-			return query ? vm.users.filter(createFilterFor(query)) : vm.users;
+			return query ? vm.collaborators.filter(createFilterFor(query)) : vm.collaborators;
 		};
 
 		function createFilterFor (query) {

@@ -35,9 +35,9 @@
 		};
 	}
 
-	AccountCtrl.$inject = ["$scope", "$location", "$injector", "AccountService", "Auth", "UtilsService"];
+	AccountCtrl.$inject = ["$scope", "$location", "$injector", "$state", "AccountService", "Auth", "UtilsService"];
 
-	function AccountCtrl($scope, $location, $injector, AccountService, Auth, UtilsService) {
+	function AccountCtrl($scope, $location, $injector, $state, AccountService, Auth, UtilsService) {
 		var vm = this,
 			promise;
 
@@ -91,6 +91,15 @@
 			goToProject();
 		});
 
+		/*
+		 * Handle browser back/forward buttons because 'reloadOnSearch' is set to false
+		 */
+		$scope.$on('$locationChangeSuccess', function() {
+			if ($state.params.hasOwnProperty("page") && ($state.params.page !== undefined)) {
+				vm.showPage($state.params.page);
+			}
+		});
+
 		/**
 		 * For pages to show other pages
 		 * 
@@ -98,7 +107,6 @@
 		 * @param callingPage
 		 */
 		vm.showPage = function (page, callingPage) {
-			console.log(page, callingPage);
 			vm.itemToShow = page;
 			$location.search("page", page);
 			vm.callingPage = callingPage;
@@ -122,11 +130,6 @@
 				}
 			}
 		}
-
-		vm.showItem = function (item) {
-			vm.itemToShow = item;
-			$location.search("page", item);
-		};
 
 		/**
 		 * Event listener for change in local storage login status

@@ -359,6 +359,33 @@ account-collaborators .collaboratorIcon {
   margin: 0 10px !important;
 }
 
+account-collaborators #accountCollaboratorsAdd {
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+account-collaborators #accountCollaboratorsUnassigned {
+  opacity: 0.4;
+  margin-top: -15px;
+}
+
+/** Account team ******************************************************************************************************/
+account-team .collaboratorIcon {
+  margin: 0 10px !important;
+}
+
+account-team #project {
+  margin: -10px 0 10px;
+}
+account-team #project md-icon {
+  margin: 0 !important;
+}
+
+account-team #accountTeamAdd {
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
 /** Collaborator Dialog ***********************************************************************************************/
 #collaboratorDialog {
   width: 400px;

@@ -56,7 +56,7 @@ input#newProjectFileUploader(type="file")
 							md-menu(md-position-mode="target-right target")
 								md-button.md-icon-button(aria-label="More", ng-click="$mdOpenMenu($event)")
 									md-icon.md-menu-origin.angular-material-icons(md-menu-origin) more_vert
-								md-menu-content(width="4")
+								md-menu-content(width="3")
 									md-menu-item(ng-repeat="(key, value) in vm.projectOptions")
 										md-button(ng-click="vm.doProjectOption($event, project, key)")
 											div(layout="row", flex)

@@ -30,7 +30,7 @@
 				firstName: "=",
 				lastName: "=",
 				email: "=",
-				onShowItem: "&"
+				itemToShow: "="
 			},
 			controller: AccountInfoCtrl,
 			controllerAs: 'vm',
@@ -38,9 +38,9 @@
 		};
 	}
 
-	AccountInfoCtrl.$inject = [];
+	AccountInfoCtrl.$inject = ["$location"];
 
-	function AccountInfoCtrl() {
+	function AccountInfoCtrl ($location) {
 		var vm = this;
 		
 		/*
@@ -53,8 +53,14 @@
 			collaborators: {label: "Collaborators"}
 		};
 
+		/**
+		 * Show account "page"
+		 *
+		 * @param item
+		 */
 		vm.showItem = function (item) {
-			vm.onShowItem({item: item});
+			vm.itemToShow = item;
+			$location.search({}).search("page", item);
 		};
 	}
 }());
