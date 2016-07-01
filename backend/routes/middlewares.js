@@ -215,6 +215,7 @@ function freeSpace(account){
 
 	let limits;
 
+	//console.log('checking free space');
 	return User.findByUserName(account).then( dbUser => {
 
 		limits = dbUser.getSubscriptionLimits();

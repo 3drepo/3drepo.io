@@ -734,6 +734,10 @@ schema.methods.createSubscription = function(plan, billingUser, active, expiredA
 			expiredAt: expiredAt
 		};
 
+		if(active){
+			subscription.limits = getSubscription(subscription.plan).limits;
+		}
+
 		subscriptions.push(subscription);
 
 		return this.save().then(() => {
