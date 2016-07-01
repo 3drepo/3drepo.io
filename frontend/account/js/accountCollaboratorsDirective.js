@@ -26,6 +26,7 @@
 			restrict: 'EA',
 			templateUrl: 'accountCollaborators.html',
 			scope: {
+				account: "=",
 				showPage: "&"
 			},
 			controller: AccountCollaboratorsCtrl,
@@ -34,11 +35,17 @@
 		};
 	}
 
-	AccountCollaboratorsCtrl.$inject = [];
+	AccountCollaboratorsCtrl.$inject = ["UtilsService"];
 
-	function AccountCollaboratorsCtrl() {
+	function AccountCollaboratorsCtrl(UtilsService) {
 		var vm = this,
+			promise,
 			numLicenses = 4;
+
+		promise = UtilsService.doGet(vm.account + "/subscriptions");
+		promise.then(function (response) {
+			console.log(response);
+		});
 
 		/*
 		 * Init

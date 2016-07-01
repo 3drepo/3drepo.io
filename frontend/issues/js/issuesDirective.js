@@ -365,6 +365,8 @@
 			// Setup what to show
 			if (vm.issuesToShow.length > 0) {
 				vm.toShow = "showIssues";
+				// Hide any scribble if showing the issues list
+				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
 			}
 			else {
 				vm.toShow = "showInfo";
@@ -663,11 +665,24 @@
 						break;
 					}
 				}
-				vm.toShow = "showIssues";
-				setupIssuesToShow();
-				vm.showPins();
-				setContentHeight();
-				vm.canAdd = true;
+
+				// Remain in issue unless closing when showing closed issues is off
+				if (data.issue.closed) {
+					if (showClosed) {
+						setContentHeight();
+					}
+					else {
+						vm.toShow = "showIssues";
+						setupIssuesToShow();
+						vm.showPins();
+						setContentHeight();
+						vm.canAdd = true;
+						EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
+					}
+				}
+				else {
+					setContentHeight();
+				}
 			});
 		};
 

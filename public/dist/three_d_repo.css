@@ -154,6 +154,10 @@ account-info {
   margin-right: 60px;
 }
 
+account-info #accountInfoContent {
+  max-height: calc(100vh - 190px);
+}
+
 account-info .dataContainer {
   padding: 10px;
 }
@@ -287,27 +291,6 @@ account-menu md-icon {
 .newDatabaseDialog .databaseDialogInfo {
   font-weight: normal;
   color: rgba(0,0,0,0.7);
-}
-
-/** Account Upgrade ***************************************************************************************************/
-account-upgrade #accountUpgradeSubscriptionTitle {
-  margin: 0;
-}
-
-account-upgrade .accountUpgradeSubscription p:first-child {
-  color: rgba(0, 0, 0, 0.6);
-  margin-right: 10px;
-}
-account-upgrade .accountUpgradeSubscription p:nth-child(2) {
-  color: rgba(0, 0, 0, 0.9);
-  margin-right: 30px;
-}
-account-upgrade .accountUpgradeSubscription p:nth-child(3) {
-  color: rgba(0, 0, 0, 0.6);
-  margin-right: 10px;
-}
-account-upgrade .accountUpgradeSubscription p:nth-child(4) {
-  color: rgba(0, 0, 0, 0.9);
 }
 
 /** Account Billing ***************************************************************************************************/
@@ -1736,7 +1719,7 @@ pricing .pricingInfo .pricingInfoLine md-icon {
 
 pricing .pricingContent {
     max-height: 600px !important;
-    height: calc(100vh - 180px);
+    height: calc(100vh - 200px);
     overflow: auto;
 }
 

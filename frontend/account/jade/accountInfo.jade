@@ -4,7 +4,7 @@
 			.md-toolbar-tools
 				h2 {{vm.username}}
 
-		div(layout="column")
+		#accountInfoContent(layout="column")
 			div(layout="row", flex=)
 				img.account-avatar-image(ng-if="vm.hasAvatar", ng-src='{{vm.avatarURL}}')
 				#noAvatarIcon(flex, layout="row")

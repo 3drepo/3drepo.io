@@ -144,7 +144,7 @@
 		}
 		window.addEventListener("storage", loginStatusListener, false);
 		// Set the logged in status to the account name just once
-		if (localStorage.getItem("tdrLoggedIn") === "false") {
+		if ((localStorage.getItem("tdrLoggedIn") === "false") && (vm.account !== null)) {
 			localStorage.setItem("tdrLoggedIn", vm.account);
 		}
 	}

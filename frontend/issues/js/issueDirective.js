@@ -286,6 +286,7 @@
 		 * Toggle the closed status of an issue
 		 */
 		vm.toggleCloseIssue = function() {
+			vm.issueIsOpen = !vm.issueIsOpen;
 			vm.onToggleCloseIssue({
 				issue: vm.data
 			});

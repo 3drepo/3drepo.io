@@ -4763,6 +4763,7 @@ var ViewerManager = {};
 			restrict: 'EA',
 			templateUrl: 'accountCollaborators.html',
 			scope: {
+				account: "=",
 				showPage: "&"
 			},
 			controller: AccountCollaboratorsCtrl,
@@ -4771,11 +4772,17 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountCollaboratorsCtrl.$inject = [];
+	AccountCollaboratorsCtrl.$inject = ["UtilsService"];
 
-	function AccountCollaboratorsCtrl() {
+	function AccountCollaboratorsCtrl(UtilsService) {
 		var vm = this,
+			promise,
 			numLicenses = 4;
+
+		promise = UtilsService.doGet(vm.account + "/subscriptions");
+		promise.then(function (response) {
+			console.log(response);
+		});
 
 		/*
 		 * Init
@@ -4980,7 +4987,7 @@ var ViewerManager = {};
 		}
 		window.addEventListener("storage", loginStatusListener, false);
 		// Set the logged in status to the account name just once
-		if (localStorage.getItem("tdrLoggedIn") === "false") {
+		if ((localStorage.getItem("tdrLoggedIn") === "false") && (vm.account !== null)) {
 			localStorage.setItem("tdrLoggedIn", vm.account);
 		}
 	}
@@ -5120,6 +5127,7 @@ var ViewerManager = {};
 			promise.then(function () {
 				$location.path("/", "_self");
 				// Change the local storage login status for other tabs to listen to
+				console.log(999);
 				localStorage.setItem("tdrLoggedIn", "false");
 			});
 		};
@@ -9887,6 +9895,7 @@ var ViewerManager = {};
 								$compile(loggedInElement)($scope);
 							}
 							else {
+								console.log(777, StateManager.state.account);
 								promise = AccountService.getUserInfo(StateManager.state.account);
 								promise.then(function (response) {
 									// Response with data.type indicates it's not the user's account
@@ -9901,6 +9910,7 @@ var ViewerManager = {};
 							}
 						}
 						else {
+							console.log(123, localStorage.getItem("tdrLoggedIn"));
 							// Prevent user going back to the login page after logging in
 							$location.path("/" + localStorage.getItem("tdrLoggedIn"), "_self");
 						}
@@ -10685,6 +10695,7 @@ angular.module('3drepo')
 		 * Toggle the closed status of an issue
 		 */
 		vm.toggleCloseIssue = function() {
+			vm.issueIsOpen = !vm.issueIsOpen;
 			vm.onToggleCloseIssue({
 				issue: vm.data
 			});
@@ -11124,6 +11135,8 @@ angular.module('3drepo')
 			// Setup what to show
 			if (vm.issuesToShow.length > 0) {
 				vm.toShow = "showIssues";
+				// Hide any scribble if showing the issues list
+				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
 			}
 			else {
 				vm.toShow = "showInfo";
@@ -11422,11 +11435,24 @@ angular.module('3drepo')
 						break;
 					}
 				}
-				vm.toShow = "showIssues";
-				setupIssuesToShow();
-				vm.showPins();
-				setContentHeight();
-				vm.canAdd = true;
+
+				// Remain in issue unless closing when showing closed issues is off
+				if (data.issue.closed) {
+					if (showClosed) {
+						setContentHeight();
+					}
+					else {
+						vm.toShow = "showIssues";
+						setupIssuesToShow();
+						vm.showPins();
+						setContentHeight();
+						vm.canAdd = true;
+						EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
+					}
+				}
+				else {
+					setContentHeight();
+				}
 			});
 		};
 
@@ -12834,6 +12860,10 @@ var Oculus = {};
 						case "menu":
 							optionElement += "menu='vm.contentData.menu' selected-menu-option='vm.selectedMenuOption'";
 							break;
+
+						case "close":
+							optionElement += "show='vm.contentData.show'";
+							break;
 					}
 
 					optionElement += "><panel-card-option-" + vm.contentData.options[i].type + ">";
@@ -13068,6 +13098,51 @@ var Oculus = {};
 		vm.showAddElement = function (event) {
 			event.stopPropagation();
 			vm.showAdd = true;
+		};
+	}
+}());
+
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("panelCardOptionClose", panelCardOptionClose);
+
+	function panelCardOptionClose() {
+		return {
+			restrict: 'E',
+			templateUrl: 'panelCardOptionClose.html',
+			scope: {
+				show: "="
+			},
+			controller: panelCardOptionCloseCtrl,
+			controllerAs: 'vm',
+			bindToController: true
+		};
+	}
+
+	function panelCardOptionCloseCtrl() {
+		var vm = this;
+
+		vm.hide = function () {
+			vm.show = false;
 		};
 	}
 }());
@@ -14425,7 +14500,9 @@ var Oculus = {};
 			icon: "content_copy",
 			minHeight: 80,
 			fixedHeight: false,
-			options: []
+			options: [
+				{type: "close", visible: true}
+			]
 		});
 
 		panelCard.right.push({

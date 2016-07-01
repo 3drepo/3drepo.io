@@ -164,7 +164,9 @@
 			icon: "content_copy",
 			minHeight: 80,
 			fixedHeight: false,
-			options: []
+			options: [
+				{type: "close", visible: true}
+			]
 		});
 
 		panelCard.right.push({
