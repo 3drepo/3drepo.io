@@ -956,6 +956,52 @@ schema.methods.hasRole = function(db, roleName){
 	return null;
 };
 
+schema.methods.assignSubscriptionToUser = function(id, userData){
+	'use strict';
+
+	let subscription = this.customData.subscriptions.id(id);
+	
+	if(!subscription){
+		return Promise.reject({ resCode: responseCodes.SUBSCRIPTION_NOT_FOUND});
+	}
+
+	let next;
+	
+	console.log(userData);
+	
+	if(userData.email){
+		next = User.findByEmail(userData.email);
+	} else {
+		next = User.findByUserName(userData.user);
+	}
+
+	return next.then(user => {
+
+		if(!user){
+			return Promise.reject({ resCode: responseCodes.USER_NOT_FOUND });
+		}
+
+		let assigned;
+
+		this.customData.subscriptions.forEach(subscription => {
+			if(subscription.assignedUser === user.user){
+				assigned = true;
+			}
+		});
+
+		if(assigned){
+			return Promise.reject({ resCode: responseCodes.USER_ALREADY_ASSIGNED });
+		} else if(subscription.assignedUser){
+			return Promise.reject({ resCode: responseCodes.SUBSCRIPTION_ALREADY_ASSIGNED });
+		} else {
+			subscription.assignedUser = user.user;
+			return this.save().then(() => subscription);
+		}
+		
+	});
+
+}
+
 var User = ModelFactory.createClass(
 	'User',
 	schema,

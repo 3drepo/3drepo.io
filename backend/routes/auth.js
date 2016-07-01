@@ -45,7 +45,7 @@
 	router.post('/:account', signUp);
 	//router.post('/:account/database', middlewares.canCreateDatabase, createDatabase);
 	router.post('/:account/subscriptions', middlewares.canCreateDatabase, createSubscription);
-
+	router.post("/:account/subscriptions/:sid/assign", middlewares.hasWriteAccessToAccount, assignSubscription);
 	router.post('/:account/verify', middlewares.connectQueue, verify);
 	router.post('/:account/forgot-password', forgotPassword);
 	router.put("/:account", middlewares.hasWriteAccessToAccount, updateUser);
@@ -453,6 +453,30 @@
 		Billing.findByAccount(req.params.account).then(billings => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, billings);
 		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+	}
+
+	function assignSubscription(req, res, next){
+
+		console.log('Hello');
+
+		let responsePlace = utils.APIInfo(req);
+		User.findByUserName(req.params.account).then(dbUser => {
+			
+			let userData = {};
+			
+			if(req.body.email){
+				userData.email = req.body.email;
+			} else if(req.body.user) {
+				userData.user = req.body.user;
+			}
+
+			return dbUser.assignSubscriptionToUser(req.params.sid, userData);
+		}).then(subscription => {
+			console.log(subscription);
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
+		}).catch( err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
 	}
