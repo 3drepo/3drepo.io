@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  *  Copyright (C) 2014 3D Repo Ltd
  *
@@ -28,10 +26,11 @@ paypal.configure({
 });
 
 function getBillingAgreement(currency, initAmount, amount, billingCycle, startDate){
+	'use strict';
 
 	console.log('initAmount', initAmount);
 	console.log('amount', amount);
-	console.log('startDate', startDate)
+	console.log('startDate', startDate);
 	let billingPlanAttributes = {
 		"description": "3D Repo License",
 		"merchant_preferences": {
@@ -90,7 +89,7 @@ function getBillingAgreement(currency, initAmount, amount, billingCycle, startDa
 				}
 			];
 
-			paypal.billingPlan.update(billingPlan.id, billingPlanUpdateAttributes, function (err, res) {
+			paypal.billingPlan.update(billingPlan.id, billingPlanUpdateAttributes, function (err) {
 				if (err) {
 					reject(err);
 				} else {

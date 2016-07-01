@@ -166,7 +166,7 @@ schema.statics.isEmailTaken = function(email, exceptUser){
 
 schema.statics.findBillingUserByBillingId = function(billingAgreementId){
 	return this.findOne({account: 'admin'}, { 'customData.billingAgreementId': billingAgreementId });
-}
+};
 
 
 schema.statics.updatePassword = function(logger, username, oldPassword, token, newPassword){
@@ -602,7 +602,6 @@ schema.methods.buySubscriptions = function(plans, billingUser){
 	this.customData.billingUser = billingUser;
 
 	let subscriptions = this.customData.subscriptions;
-	let error;
 	let now = new Date();
 
 	let currentCount = {};
@@ -676,7 +675,7 @@ schema.methods.buySubscriptions = function(plans, billingUser){
 
 	plans.forEach(data => {
 
-		let quantity = data.quantity
+		let quantity = data.quantity;
 		let plan = getSubscription(data.plan);
 		amount += plan.amount * quantity;
 		// currency = plan.currency;
@@ -691,7 +690,7 @@ schema.methods.buySubscriptions = function(plans, billingUser){
 	//add exisiting plans to bill of next cycle as well
 	existingPlans.forEach(data => {
 
-		let quantity = data.quantity
+		let quantity = data.quantity;
 		let plan = getSubscription(data.plan);
 		amount += plan.amount * quantity;
 		// currency = plan.currency;
@@ -711,7 +710,7 @@ schema.methods.buySubscriptions = function(plans, billingUser){
 		return Promise.resolve(billingAgreement);
 	});
 
-}
+};
 
 
 schema.methods.createSubscription = function(plan, billingUser, active, expiredAt){
@@ -786,7 +785,7 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 		dbUser.customData.subscriptions.forEach(subscription => {
 
 			if(subscription.inCurrentAgreement){
-				let now = new Date();
+
 				let expiredAt = moment(paymentInfo.ipnDate).utc()
 					.date(1)
 					.add(getSubscription(subscription.plan).billingCycle, 'month')
@@ -808,7 +807,7 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 						name: subscription.plan,
 						currency: getSubscription(subscription.plan).currency,
 						amount: Math.round(amount * 100) / 100
-					})
+					});
 				}
 			
 			}
@@ -1000,7 +999,7 @@ schema.methods.assignSubscriptionToUser = function(id, userData){
 		
 	});
 
-}
+};
 
 var User = ModelFactory.createClass(
 	'User',

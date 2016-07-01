@@ -32,7 +32,6 @@ function executeAgreement(req, res, next){
 	User.findByPaypalPaymentToken(token).then(_dbUser => {
 
 		dbUser = _dbUser;
-		let next;
 
 		// important to check there is a user/ghost with this token before executing the agreement
 		if(!dbUser){
@@ -53,7 +52,7 @@ function executeAgreement(req, res, next){
 								"note": "You have updated the license subscriptions. This agreement is going to be replaced by the new one."
 							};
 
-							paypal.billingAgreement.cancel(dbUser.customData.billingAgreementId, cancel_note, function (err, res) {
+							paypal.billingAgreement.cancel(dbUser.customData.billingAgreementId, cancel_note, function (err) {
 								if (err) {
 									req[C.REQ_REPO].logger.logError(JSON.stringify(err));
 								} else {
