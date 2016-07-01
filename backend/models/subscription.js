@@ -4,7 +4,7 @@ var subscriptions = {
 		plan: 'THE-100-QUID-PLAN',
 		limits: {
 			spaceLimit: 10737418240, //bytes
-			collaboratorLimit: 5,
+			collaboratorLimit: 1,
 		},
 		billingCycle: 1, //month
 		freeTrial: 1, //month
