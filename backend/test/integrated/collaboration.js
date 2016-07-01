@@ -32,8 +32,8 @@ describe('Sharing a project', function () {
 	let User = require('../../models/user');
 	let server;
 	let agent;
-	let username = 'testing';
-	let password = 'testing';
+	let username = 'projectowner';
+	let password = 'password';
 	let project = 'testproject';
 	let email = suf => `test3drepo_collaboration_${suf}@mailinator.com`;
 

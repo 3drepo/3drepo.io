@@ -92,6 +92,10 @@ module.exports = {
 	uploadSizeLimit: 8388608, // 8MB in test enviroment
 	test_helper_api: false,
 	paypal:{
-		validateIPN: false
+		validateIPN: false,
+		mode: 'sandbox', //sandbox or live
+		//for travis only
+		client_id: 'AWog5lbf6LTb07XvRzvl4KAXVrmUyv4rEopFBNxHwO3nNieukILfTSxm8xCdsoAalrWTOPo9oQcrm3R-',
+		client_secret: 'EGIwoNlM_vq6rYsmIF2gOGDs0h2uilsiXyKiWjHT3TCqJLrdRHpneFAt5TvVmzjYFvrdZpYF9-zrfNmQ'
 	}
 }
