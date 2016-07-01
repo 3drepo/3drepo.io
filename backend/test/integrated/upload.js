@@ -26,6 +26,7 @@ let log_iface = require("../../logger.js");
 let systemLogger = log_iface.systemLogger;
 let responseCodes = require("../../response_codes.js");
 let helpers = require("./helpers");
+let moment = require("moment");
 
 describe('Uploading a project', function () {
 	let User = require('../../models/user');
@@ -105,7 +106,7 @@ describe('Uploading a project', function () {
 		before(function(){
 			//give some money to this guy
 			return User.findByUserName(username).then( user => {
-				return user.createSubscriptionToken('THE-100-QUID-PLAN', user.user)
+				return user.createSubscription('THE-100-QUID-PLAN', user.user, true, moment(paymentInfo.ipnDate).utc().add(1, 'month'))
 			}).then(subscription => {
 				return User.activateSubscription(subscription.token, {}, {}, true);
 			})
