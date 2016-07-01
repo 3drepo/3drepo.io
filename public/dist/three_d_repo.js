@@ -4771,10 +4771,11 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountCollaboratorsCtrl.$inject = ["$scope"];
+	AccountCollaboratorsCtrl.$inject = [];
 
-	function AccountCollaboratorsCtrl($scope) {
-		var vm = this;
+	function AccountCollaboratorsCtrl() {
+		var vm = this,
+			numLicenses = 4;
 
 		/*
 		 * Init
@@ -4787,16 +4788,7 @@ var ViewerManager = {};
 			{name: "jozefdobos"},
 			{name: "timscully"}
 		];
-		vm.unassigned = [];
-		vm.numUnassigned = 2;
-
-		$scope.$watch("vm.numUnassigned", function () {
-			// This might not be the best way of modifying unassigned but it's neat :-)
-			delete vm.unassigned;
-			vm.unassigned = new Array(vm.numUnassigned);
-
-			vm.addDisabled = (vm.numUnassigned === 0);
-		});
+		vm.unassigned = new Array(numLicenses - vm.collaborators.length);
 
 		/**
 		 * Add the selected user as a collaborator
@@ -4812,7 +4804,8 @@ var ViewerManager = {};
 					}
 				}
 				vm.searchText = null;
-				vm.numUnassigned -= 1;
+				vm.unassigned.splice(0, 1);
+				vm.addDisabled = (vm.collaborators.length === numLicenses);
 			}
 		};
 
@@ -4824,7 +4817,8 @@ var ViewerManager = {};
 		vm.removeCollaborator = function (index) {
 			var collaborator = vm.collaborators.splice(index, 1);
 			vm.users.push(collaborator[0]);
-			vm.numUnassigned += 1;
+			vm.unassigned.push(null);
+			vm.addDisabled = false;
 		};
 
 		vm.querySearch = function (query) {
@@ -6007,6 +6001,7 @@ var ViewerManager = {};
 					}
 				}
 				vm.searchText = null;
+				vm.addDisabled = (vm.collaborators.length === 0);
 			}
 		};
 
@@ -6018,6 +6013,7 @@ var ViewerManager = {};
 		vm.removeMember = function (index) {
 			var member = vm.members.splice(index, 1);
 			vm.collaborators.push(member[0]);
+			vm.addDisabled = false;
 		};
 
 		vm.querySearch = function (query) {

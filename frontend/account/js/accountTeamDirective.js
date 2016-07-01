@@ -77,6 +77,7 @@
 					}
 				}
 				vm.searchText = null;
+				vm.addDisabled = (vm.collaborators.length === 0);
 			}
 		};
 
@@ -88,6 +89,7 @@
 		vm.removeMember = function (index) {
 			var member = vm.members.splice(index, 1);
 			vm.collaborators.push(member[0]);
+			vm.addDisabled = false;
 		};
 
 		vm.querySearch = function (query) {
