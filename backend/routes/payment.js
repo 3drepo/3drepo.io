@@ -10,6 +10,8 @@ var config = require('../config');
 var systemLogger = require("../logger.js").systemLogger;
 var paypal = require('../models/payment').paypal;
 var C = require("../constants");
+var moment = require('moment');
+
 // endpoints for paypal IPN message
 router.post("/paypal/food", activateSubscription);
 
@@ -63,6 +65,13 @@ function executeAgreement(req, res, next){
 						dbUser.customData.billingAgreementId = billingAgreement.id;
 						dbUser.customData.subscriptions.forEach(subscription => {
 							subscription.inCurrentAgreement = true;
+							// don't wait for IPN message to confirm but to activate the subscription right away, for 2 hours.
+							// IPN message should come quickly after executing an agreement, usually less then a minute
+							let twoHoursLater = moment().utc().add(2, 'hour').toDate();
+							if(!subscription.expiredAt || subscription.expiredAt < twoHoursLater){
+								subscription.active = true;
+								subscription.expiredAt = twoHoursLater;
+							}
 						});
 
 						resolve();
@@ -148,11 +157,12 @@ function activateSubscription(req, res, next){
 
 	    } else if (paymentFailed){
 
-			User.findBillingUserByToken(token).then(user => {
-				Mailer.sendPaymentFailedEmail(user.customData.email, {
-					amount: paymentInfo.mc_currency +  ' ' + paymentInfo.mc_gross
-				});
-			});
+	    	console.log('Payment failed');
+			// User.findBillingUserByToken(token).then(user => {
+			// 	Mailer.sendPaymentFailedEmail(user.customData.email, {
+			// 		amount: paymentInfo.mc_currency +  ' ' + paymentInfo.mc_gross
+			// 	});
+			// });
 			
 		} else {
 

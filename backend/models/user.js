@@ -101,7 +101,6 @@ schema.statics.historyChunksStats = function(dbName){
 
 	});
 
-	
 };
 
 schema.statics.authenticate = function(logger, username, password){

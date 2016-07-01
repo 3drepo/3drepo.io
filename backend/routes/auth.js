@@ -219,7 +219,7 @@
 			});
 
 			//soft launch give users some quota
-			let nextMonth = moment(paymentInfo.ipnDate).utc().add(1, 'month');
+			let nextMonth = moment().utc().add(1, 'month');
 			return user.createSubscription('SOFT-LAUNCH-FREE-TRIAL', user.user, true, nextMonth);
 
 		}).then(() => {
