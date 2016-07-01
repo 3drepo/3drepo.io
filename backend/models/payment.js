@@ -19,11 +19,12 @@
 
 var paypal = require('paypal-rest-sdk');
 var url = require('url');
+var config = require('../config');
 
 paypal.configure({
-	'mode': 'sandbox', //sandbox or live
-	'client_id': 'AatDoaIkUa6jmtoH-5qsn4y012J5ZvGchYdCHVQcAc4x8KERgY-0-JnPh9qSGFbTnfFxZ0v4A2ATeetD',
-	'client_secret': 'EMWxLEqJvDGX0xer2ae-8znPU0kjFZOMC8C-vxL9kTvEITup-djBI1BdHVpIu6WuzTEvPVHImQEjZdzo'
+	'mode': config.paypal.mode, //sandbox or live
+	'client_id': config.paypal.client_id,
+	'client_secret': config.paypal.client_secret
 });
 
 function getBillingAgreement(currency, initAmount, amount, billingCycle, startDate){

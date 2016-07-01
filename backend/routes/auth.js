@@ -459,8 +459,6 @@
 
 	function assignSubscription(req, res, next){
 
-		console.log('Hello');
-
 		let responsePlace = utils.APIInfo(req);
 		User.findByUserName(req.params.account).then(dbUser => {
 			

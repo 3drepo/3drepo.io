@@ -111,6 +111,8 @@ module.exports.createApp = function(serverConfig)
 
 		params.config_js += "\n\nserver_config.auth = " + JSON.stringify(config.auth) + ";";
 
+		params.config_js += "\n\nserver_config.captcha_client_key = '" + config.captcha.clientKey + "';";
+
 		params.config_js += "\n\nserver_config.uploadSizeLimit = " + config.uploadSizeLimit + ";";
 
 		res.header("Content-Type", "text/javascript");
