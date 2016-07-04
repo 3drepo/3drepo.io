@@ -343,7 +343,12 @@ account-collaborators .collaboratorIcon {
 }
 
 account-collaborators #accountCollaboratorsAdd {
-  margin-top: 20px;
+  margin-top: -10px;
+}
+account-collaborators #accountCollaboratorsAdd md-input-container {
+  margin-bottom: 0;
+}
+account-collaborators #accountCollaboratorsAdd .md-button {
   margin-bottom: 30px;
 }
 

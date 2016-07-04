@@ -18,7 +18,7 @@
 			div(layout="row")
 				md-input-container(flex)
 					label Licenses
-					input(type="number", ng-model="vm.newData.licenses", min="1")
+					input(type="number", ng-model="vm.newData.licenses", min="{{vm.numCurrentLicenses}}")
 				md-input-container(flex)
 					label Payment (£ / month)
 					input(type="text", ng-model="vm.priceLicenses", ng-disabled="true")

@@ -42,7 +42,6 @@
 	function AccountProfileCtrl(AccountService) {
 		var vm = this,
 			promise;
-		console.log(vm);
 
 		/*
 		 * Init
@@ -50,7 +49,7 @@
 		vm.showInfo = true;
 		vm.showChangePassword = false;
 		vm.firstNameNew = vm.firstName;
-		vm.lastNameNew = vm.firstName;
+		vm.lastNameNew = vm.lastName;
 		vm.emailNew = vm.email;
 
 		/**
@@ -65,7 +64,11 @@
 			promise.then(function (response) {
 				console.log(response);
 				if (response.statusText === "OK") {
-					vm.infoSaveInfo = "Info saved";
+					vm.infoSaveInfo = "Saved";
+					vm.firstName = vm.firstNameNew;
+					vm.lastName = vm.lastNameNew;
+					vm.email = vm.emailNew;
+
 				} else {
 					vm.infoSaveInfo = "Error saving info";
 				}
@@ -83,7 +86,7 @@
 			promise.then(function (response) {
 				console.log(response);
 				if (response.statusText === "OK") {
-					vm.passwordSaveInfo = "Password saved";
+					vm.passwordSaveInfo = "Saved";
 				} else {
 					vm.passwordSaveInfo = "Error saving password";
 				}

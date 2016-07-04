@@ -53,6 +53,7 @@
 		vm.showInfo = true;
 		vm.quotaUsed = 17.3;
 		vm.quotaAvailable = Math.round(((initData.licenses * quotaPerLicense) - vm.quotaUsed) * 10) / 10; // Round to 1 decimal place
+		vm.numCurrentLicenses = initData.licenses;
 		vm.newData = angular.copy(initData);
 		vm.saveButtonDisabled = true;
 		vm.billingHistory = [
@@ -65,8 +66,14 @@
 		});
 
 		$scope.$watch("vm.newData", function () {
+			console.log(vm.newData);
+			if (vm.newData.licenses !== "undefined") {
 				vm.priceLicenses = vm.newData.licenses * pricePerLicense;
 				vm.saveButtonDisabled = angular.equals(initData, vm.newData);
+			}
+			else {
+				vm.saveButtonDisabled = false;
+			}
 		}, true);
 
 		/**

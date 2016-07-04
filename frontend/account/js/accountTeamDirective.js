@@ -26,6 +26,7 @@
 			restrict: 'EA',
 			templateUrl: 'accountTeam.html',
 			scope: {
+				account: "=",
 				showPage: "&"
 			},
 			controller: AccountTeamCtrl,
@@ -34,25 +35,44 @@
 		};
 	}
 
-	AccountTeamCtrl.$inject = ["$location"];
+	AccountTeamCtrl.$inject = ["$location", "UtilsService"];
 
-	function AccountTeamCtrl($location) {
-		var vm = this;
+	function AccountTeamCtrl($location, UtilsService) {
+		var vm = this,
+			i, length,
+			promise;
 
 		/*
 		 * Init
 		 */
-		vm.members = [
-			{name: "jozefdobos"},
-			{name: "timscully"}
-		];
-		vm.collaborators = [
-			{name: "carmenfan"},
-			{name: "henryliu"}
-		];
+		vm.collaborators = [];
+		vm.members = [];
 		vm.addDisabled = false;
 		if ($location.search().hasOwnProperty("proj")) {
 			vm.projectName = $location.search().proj;
+
+			// Get the collaborators
+			promise = UtilsService.doGet(vm.account + "/subscriptions");
+			promise.then(function (response) {
+				console.log(response);
+				if (response.status === 200) {
+					for (i = 0, length = response.data.length; i < length; i += 1) {
+						if (response.data[i].hasOwnProperty("assignedUser") && (response.data[i].assignedUser !== vm.account)) {
+							vm.collaborators.push({name: response.data[i].assignedUser});
+						}
+					}
+				}
+			});
+
+
+			// Get the team members
+			promise = UtilsService.doGet(vm.account + "/" + vm.projectName + "/collaborators");
+			promise.then(function (response) {
+				console.log(response);
+				if (response.status === 200) {
+					vm.members = response.data;
+				}
+			});
 		}
 
 		/**

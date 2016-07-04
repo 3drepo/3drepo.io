@@ -4706,6 +4706,7 @@ var ViewerManager = {};
 		vm.showInfo = true;
 		vm.quotaUsed = 17.3;
 		vm.quotaAvailable = Math.round(((initData.licenses * quotaPerLicense) - vm.quotaUsed) * 10) / 10; // Round to 1 decimal place
+		vm.numCurrentLicenses = initData.licenses;
 		vm.newData = angular.copy(initData);
 		vm.saveButtonDisabled = true;
 		vm.billingHistory = [
@@ -4718,8 +4719,14 @@ var ViewerManager = {};
 		});
 
 		$scope.$watch("vm.newData", function () {
+			console.log(vm.newData);
+			if (vm.newData.licenses !== "undefined") {
 				vm.priceLicenses = vm.newData.licenses * pricePerLicense;
 				vm.saveButtonDisabled = angular.equals(initData, vm.newData);
+			}
+			else {
+				vm.saveButtonDisabled = false;
+			}
 		}, true);
 
 		/**
@@ -4772,48 +4779,64 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountCollaboratorsCtrl.$inject = ["UtilsService"];
+	AccountCollaboratorsCtrl.$inject = ["$scope", "UtilsService"];
 
-	function AccountCollaboratorsCtrl(UtilsService) {
+	function AccountCollaboratorsCtrl($scope, UtilsService) {
 		var vm = this,
-			promise,
-			numLicenses = 4;
-
-		promise = UtilsService.doGet(vm.account + "/subscriptions");
-		promise.then(function (response) {
-			console.log(response);
-		});
+			i,
+			promise;
 
 		/*
 		 * Init
 		 */
-		vm.users = [
-			{name: "carmenfan"},
-			{name: "henryliu"}
-		];
-		vm.collaborators = [
-			{name: "jozefdobos"},
-			{name: "timscully"}
-		];
-		vm.unassigned = new Array(numLicenses - vm.collaborators.length);
+		vm.numLicenses = 0;
+		vm.unassigned = [];
+		vm.collaborators = [];
+		vm.allLicensesAssigned = false;
+		promise = UtilsService.doGet(vm.account + "/subscriptions");
+		promise.then(function (response) {
+			console.log(response);
+			if (response.status === 200) {
+				vm.numLicenses = response.data.length;
+				for (i = 0; i < response.data.length; i += 1) {
+					if (response.data[i].hasOwnProperty("assignedUser")) {
+						if (response.data[i].assignedUser !== vm.account) {
+							vm.collaborators.push({name: response.data[i].assignedUser});
+						}
+					}
+					else {
+						vm.unassigned.push(response.data[i]._id);
+					}
+				}
+				vm.allLicensesAssigned = (vm.unassigned.length === 0);
+			}
+		});
+
+		$scope.$watch("vm.newCollaborator", function (newValue) {
+			vm.addMessage = "";
+			vm.addDisabled = !(angular.isDefined(newValue) && (newValue.toString() !== ""));
+		});
 
 		/**
 		 * Add the selected user as a collaborator
 		 */
 		vm.addCollaborator = function () {
-			var i, length;
-			if (vm.selectedUser !== null) {
-				vm.collaborators.push(vm.selectedUser);
-				for (i = 0, length = vm.users.length; i < length; i += 1) {
-					if (vm.users[i].name === vm.selectedUser.name) {
-						vm.users.splice(i, 1);
-						break;
-					}
+			promise = UtilsService.doPost(
+				{user: vm.newCollaborator},
+				vm.account + "/subscriptions/" + vm.unassigned[0] + "/assign"
+			);
+			promise.then(function (response) {
+				console.log(response);
+				if (response.status === 200) {
+					vm.addMessage = "User " + vm.newCollaborator + " added as a collaborator";
+					vm.collaborators.push({name: vm.newCollaborator});
+					vm.unassigned.splice(0, 1);
+					vm.allLicensesAssigned = (vm.unassigned === 0);
 				}
-				vm.searchText = null;
-				vm.unassigned.splice(0, 1);
-				vm.addDisabled = (vm.collaborators.length === numLicenses);
-			}
+				else if (response.status === 404) {
+					vm.addMessage = response.data.message;
+				}
+			});
 		};
 
 		/**
@@ -5127,7 +5150,6 @@ var ViewerManager = {};
 			promise.then(function () {
 				$location.path("/", "_self");
 				// Change the local storage login status for other tabs to listen to
-				console.log(999);
 				localStorage.setItem("tdrLoggedIn", "false");
 			});
 		};
@@ -5178,7 +5200,6 @@ var ViewerManager = {};
 	function AccountProfileCtrl(AccountService) {
 		var vm = this,
 			promise;
-		console.log(vm);
 
 		/*
 		 * Init
@@ -5186,7 +5207,7 @@ var ViewerManager = {};
 		vm.showInfo = true;
 		vm.showChangePassword = false;
 		vm.firstNameNew = vm.firstName;
-		vm.lastNameNew = vm.firstName;
+		vm.lastNameNew = vm.lastName;
 		vm.emailNew = vm.email;
 
 		/**
@@ -5201,7 +5222,11 @@ var ViewerManager = {};
 			promise.then(function (response) {
 				console.log(response);
 				if (response.statusText === "OK") {
-					vm.infoSaveInfo = "Info saved";
+					vm.infoSaveInfo = "Saved";
+					vm.firstName = vm.firstNameNew;
+					vm.lastName = vm.lastNameNew;
+					vm.email = vm.emailNew;
+
 				} else {
 					vm.infoSaveInfo = "Error saving info";
 				}
@@ -5219,7 +5244,7 @@ var ViewerManager = {};
 			promise.then(function (response) {
 				console.log(response);
 				if (response.statusText === "OK") {
-					vm.passwordSaveInfo = "Password saved";
+					vm.passwordSaveInfo = "Saved";
 				} else {
 					vm.passwordSaveInfo = "Error saving password";
 				}
@@ -5958,6 +5983,7 @@ var ViewerManager = {};
 			restrict: 'EA',
 			templateUrl: 'accountTeam.html',
 			scope: {
+				account: "=",
 				showPage: "&"
 			},
 			controller: AccountTeamCtrl,
@@ -5966,25 +5992,44 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountTeamCtrl.$inject = ["$location"];
+	AccountTeamCtrl.$inject = ["$location", "UtilsService"];
 
-	function AccountTeamCtrl($location) {
-		var vm = this;
+	function AccountTeamCtrl($location, UtilsService) {
+		var vm = this,
+			i, length,
+			promise;
 
 		/*
 		 * Init
 		 */
-		vm.members = [
-			{name: "jozefdobos"},
-			{name: "timscully"}
-		];
-		vm.collaborators = [
-			{name: "carmenfan"},
-			{name: "henryliu"}
-		];
+		vm.collaborators = [];
+		vm.members = [];
 		vm.addDisabled = false;
 		if ($location.search().hasOwnProperty("proj")) {
 			vm.projectName = $location.search().proj;
+
+			// Get the collaborators
+			promise = UtilsService.doGet(vm.account + "/subscriptions");
+			promise.then(function (response) {
+				console.log(response);
+				if (response.status === 200) {
+					for (i = 0, length = response.data.length; i < length; i += 1) {
+						if (response.data[i].hasOwnProperty("assignedUser") && (response.data[i].assignedUser !== vm.account)) {
+							vm.collaborators.push({name: response.data[i].assignedUser});
+						}
+					}
+				}
+			});
+
+
+			// Get the team members
+			promise = UtilsService.doGet(vm.account + "/" + vm.projectName + "/collaborators");
+			promise.then(function (response) {
+				console.log(response);
+				if (response.status === 200) {
+					vm.members = response.data;
+				}
+			});
 		}
 
 		/**
@@ -9895,7 +9940,6 @@ var ViewerManager = {};
 								$compile(loggedInElement)($scope);
 							}
 							else {
-								console.log(777, StateManager.state.account);
 								promise = AccountService.getUserInfo(StateManager.state.account);
 								promise.then(function (response) {
 									// Response with data.type indicates it's not the user's account
@@ -9910,7 +9954,6 @@ var ViewerManager = {};
 							}
 						}
 						else {
-							console.log(123, localStorage.getItem("tdrLoggedIn"));
 							// Prevent user going back to the login page after logging in
 							$location.path("/" + localStorage.getItem("tdrLoggedIn"), "_self");
 						}

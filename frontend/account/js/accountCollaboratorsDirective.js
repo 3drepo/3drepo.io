@@ -35,48 +35,64 @@
 		};
 	}
 
-	AccountCollaboratorsCtrl.$inject = ["UtilsService"];
+	AccountCollaboratorsCtrl.$inject = ["$scope", "UtilsService"];
 
-	function AccountCollaboratorsCtrl(UtilsService) {
+	function AccountCollaboratorsCtrl($scope, UtilsService) {
 		var vm = this,
-			promise,
-			numLicenses = 4;
-
-		promise = UtilsService.doGet(vm.account + "/subscriptions");
-		promise.then(function (response) {
-			console.log(response);
-		});
+			i,
+			promise;
 
 		/*
 		 * Init
 		 */
-		vm.users = [
-			{name: "carmenfan"},
-			{name: "henryliu"}
-		];
-		vm.collaborators = [
-			{name: "jozefdobos"},
-			{name: "timscully"}
-		];
-		vm.unassigned = new Array(numLicenses - vm.collaborators.length);
+		vm.numLicenses = 0;
+		vm.unassigned = [];
+		vm.collaborators = [];
+		vm.allLicensesAssigned = false;
+		promise = UtilsService.doGet(vm.account + "/subscriptions");
+		promise.then(function (response) {
+			console.log(response);
+			if (response.status === 200) {
+				vm.numLicenses = response.data.length;
+				for (i = 0; i < response.data.length; i += 1) {
+					if (response.data[i].hasOwnProperty("assignedUser")) {
+						if (response.data[i].assignedUser !== vm.account) {
+							vm.collaborators.push({name: response.data[i].assignedUser});
+						}
+					}
+					else {
+						vm.unassigned.push(response.data[i]._id);
+					}
+				}
+				vm.allLicensesAssigned = (vm.unassigned.length === 0);
+			}
+		});
+
+		$scope.$watch("vm.newCollaborator", function (newValue) {
+			vm.addMessage = "";
+			vm.addDisabled = !(angular.isDefined(newValue) && (newValue.toString() !== ""));
+		});
 
 		/**
 		 * Add the selected user as a collaborator
 		 */
 		vm.addCollaborator = function () {
-			var i, length;
-			if (vm.selectedUser !== null) {
-				vm.collaborators.push(vm.selectedUser);
-				for (i = 0, length = vm.users.length; i < length; i += 1) {
-					if (vm.users[i].name === vm.selectedUser.name) {
-						vm.users.splice(i, 1);
-						break;
-					}
+			promise = UtilsService.doPost(
+				{user: vm.newCollaborator},
+				vm.account + "/subscriptions/" + vm.unassigned[0] + "/assign"
+			);
+			promise.then(function (response) {
+				console.log(response);
+				if (response.status === 200) {
+					vm.addMessage = "User " + vm.newCollaborator + " added as a collaborator";
+					vm.collaborators.push({name: vm.newCollaborator});
+					vm.unassigned.splice(0, 1);
+					vm.allLicensesAssigned = (vm.unassigned === 0);
 				}
-				vm.searchText = null;
-				vm.unassigned.splice(0, 1);
-				vm.addDisabled = (vm.collaborators.length === numLicenses);
-			}
+				else if (response.status === 404) {
+					vm.addMessage = response.data.message;
+				}
+			});
 		};
 
 		/**
