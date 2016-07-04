@@ -239,6 +239,23 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 			return Promise.reject(responseCodes.USER_NOT_FOUND);
 		}
 
+		return User.findByUserName(account);
+
+	}).then(dbUser => {
+
+		let found = false;
+		let subscriptions = dbUser.getActiveSubscriptions();
+
+		subscriptions.forEach(subscription => {
+			if(subscription.assignedUser === user.user){
+				found = true;
+			}
+		});
+
+		if(!found){
+			return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
+		}
+
 		return User.grantRoleToUser(user.user, account, `${project}.${role}`);
 
 	}).then(() => {

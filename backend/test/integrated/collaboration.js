@@ -32,8 +32,8 @@ describe('Sharing a project', function () {
 	let User = require('../../models/user');
 	let server;
 	let agent;
-	let username = 'testing';
-	let password = 'testing';
+	let username = 'projectowner';
+	let password = 'password';
 	let project = 'testproject';
 	let email = suf => `test3drepo_collaboration_${suf}@mailinator.com`;
 
@@ -476,47 +476,47 @@ describe('Sharing a project', function () {
 		});
 	});
 
-	describe('if run out of quota', function(done){
+	// describe('if run out of quota', function(done){
 
-		before(function(done){
-			// add 5 collaborators first to fill up the quota
-			let actions = [function(done){
-				agent = request.agent(server);
-				agent.post('/login')
-				.send({ username, password })
-				.expect(200, function(err, res){
-					expect(res.body.username).to.equal(username);
-					done(err);
-				});
-			}];
+	// 	before(function(done){
+	// 		// add 5 collaborators first to fill up the quota
+	// 		let actions = [function(done){
+	// 			agent = request.agent(server);
+	// 			agent.post('/login')
+	// 			.send({ username, password })
+	// 			.expect(200, function(err, res){
+	// 				expect(res.body.username).to.equal(username);
+	// 				done(err);
+	// 			});
+	// 		}];
 
-			[1,2,3,4,5].forEach(n => {
-				actions.push(function(done){
-					agent.post(`/${username}/${project}/collaborators`)
-					.send({
-						user: username_viewer + n,
-						role: 'viewer'
-					})
-					.expect(200, function(err, res){
-						done(err);
-					});
-				});
-			});
+	// 		[1,2,3,4,5].forEach(n => {
+	// 			actions.push(function(done){
+	// 				agent.post(`/${username}/${project}/collaborators`)
+	// 				.send({
+	// 					user: username_viewer + n,
+	// 					role: 'viewer'
+	// 				})
+	// 				.expect(200, function(err, res){
+	// 					done(err);
+	// 				});
+	// 			});
+	// 		});
 
-			async.series(actions, done);
+	// 		async.series(actions, done);
 
-		});
+	// 	});
 
-		it('should fail', function(done){
-			agent.post(`/${username}/${project}/collaborators`)
-			.send({
-				user: username_viewer,
-				role: 'viewer'
-			})
-			.expect(400, function(err, res){
-				expect(res.body.value).to.equal(responseCodes.COLLABORATOR_LIMIT_EXCEEDED.value);
-				done(err);
-			});
-		});
-	})
+	// 	it('should fail', function(done){
+	// 		agent.post(`/${username}/${project}/collaborators`)
+	// 		.send({
+	// 			user: username_viewer,
+	// 			role: 'viewer'
+	// 		})
+	// 		.expect(400, function(err, res){
+	// 			expect(res.body.value).to.equal(responseCodes.COLLABORATOR_LIMIT_EXCEEDED.value);
+	// 			done(err);
+	// 		});
+	// 	});
+	// })
 });

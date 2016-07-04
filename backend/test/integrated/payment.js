@@ -35,7 +35,7 @@ describe('Enrolling to a subscription', function () {
 	let password = 'payment_testing';
 	let project = 'testproject';
 	let email = 'test3drepo_payment@mailinator.com'
-
+	let billingId = 'I-000000000000';
 
 
 	before(function(done){
@@ -73,32 +73,27 @@ describe('Enrolling to a subscription', function () {
 	});
 
 
-	let subToken;
-	let plan = {
-		"plan": "THE-100-QUID-PLAN"
+	let plans = {
+		"plans": [
+			{    
+			"plan": "THE-100-QUID-PLAN",
+			"quantity": 2
+			}
+		]
 	};
 
 	it('should succee', function(done){
+		this.timeout(10000);
 		agent.post(`/${username}/subscriptions`)
-		.send(plan)
+		.send(plans)
 		.expect(200, function(err, res){
-			expect(res.body).to.have.property('token');
-			subToken = res.body.token;
+			expect(res.body).to.have.property('url');
 			done(err);
 		});
 	});
 
 
-	it('and then get the subscription information should succee', function(done){
-		agent.get(`/${username}/subscriptions/${subToken}`)
-		.expect(200, function(err, res){
-			expect(res.body).to.have.deep.property('token', subToken);
-			expect(res.body).to.have.deep.property('billingUser', username);
-			expect(res.body).to.have.deep.property('active', false);
-			expect(res.body).to.have.deep.property('plan', plan.plan);
-			done(err);
-		});
-	});
+
 
 	describe('and then pay', function(){
 
@@ -106,68 +101,63 @@ describe('Enrolling to a subscription', function () {
 			//fake payment
 			this.timeout(5000);
 
-			let fakePaymentMsg = 
-			'transaction_subject=The 30 quids plan&payment_date=10:00:16 May 19, 2016 PDT&txn_type=subscr_payment'
-			+ '&subscr_id=I-SLDTKPWF92PA&last_name=Me&residence_country=GB&item_name=The 30 quids plan&payment_gross='
-			+ '&mc_currency=GBP&business=test3drepo@example.org&payment_type=instant&protection_eligibility=Ineligible'
-			+ '&verify_sign=Aimo5phqEXAM2-I2V1YuRE4xEaUJAfttQCcdgQDNQkmYOlD3wzo0CRB8&payer_status=verified&test_ipn=1'
-			+ '&payer_email=test3drepopayer@example.org&txn_id=1DG79577K4955150L&receiver_email=test3drepo@example.org'
-			+ '&first_name=PAy&payer_id=6TCR69539GDR8&receiver_id=XNMSZ2D4UNB6G&payment_status=Completed&payment_fee='
-			+ '&mc_fee=1.22&mc_gross=30.00'
-			+ '&custom=' + subToken + '&charset=windows-1252&notify_version=3.8&ipn_track_id=cacc00e7108a3';
+			// set fake billing id
+			User.findByUserName(username).then(user => {
+				user.customData.billingAgreementId = billingId;
+				user.customData.billingUser = user.user;
+				user.customData.subscriptions.forEach(sub => {
+					sub.inCurrentAgreement = true;
+				});
 
-			agent.post(`/payment/paypal/food`)
-			.send(fakePaymentMsg)
-			.expect(200, function(err, res){
-				setTimeout(function(){
-					done(err);
-				}, 2000);
+				return user.save();
+			}).then(() => {
+
+				let fakePaymentMsg = 
+					'payment_cycle=Monthly&txn_type=recurring_payment_profile_created&last_name=Me&initial_payment_status=Completed'
+					+ '&next_payment_date=03:00:00 Aug 01, 2016 PDT&residence_country=GB&initial_payment_amount=200.00&currency_code=GBP'
+					+ '&time_created=04:03:03 Jul 01, 2016 PDT&verify_sign=AczUU94BMMolZ9uHs3gDJVFQWmnrAZ.4Lg5wG0nNi-FWSrwlHVyMqczD&period_type=Regular'
+					+ '&payer_status=verified&test_ipn=1&tax=0.00&payer_email=test3drepopayer@example.org&first_name=PAy'
+					+ '&receiver_email=test3drepo@example.org&payer_id=6TCR69539GDR8&product_type=1&initial_payment_txn_id=4GD07850L9231692J'
+					+ '&shipping=0.00&amount_per_cycle=600.00&profile_status=Active&charset=UTF-8&notify_version=3.8&amount=600.00'
+					+ '&outstanding_balance=0.00&recurring_payment_id=' + billingId
+					+ '&product_name=3D Repo License subscription. This month\'s pro-rata price: £200, then each month: £600&ipn_track_id=63ded6af9b148';
+
+					agent.post(`/payment/paypal/food`)
+					.send(fakePaymentMsg)
+					.expect(200, function(err, res){
+						setTimeout(function(){
+							done(err);
+						}, 2000);
+					});
+
 			});
+
+
 		});
 
 		it('and the subscription should be active and filled with quota', function(done){
 
-			agent.get(`/${username}/subscriptions/${subToken}`)
-			.expect(200, function(err, res){
-
-				expect(res.body).to.have.deep.property('token', subToken);
-				expect(res.body).to.have.deep.property('limits.spaceLimit');
-				expect(res.body.limits.spaceLimit).to.be.above(0);
-				expect(res.body).to.have.deep.property('active', true);
-				expect(res.body).to.have.deep.property('plan', plan.plan);
-				expect(res.body).to.have.deep.property('limits.collaboratorLimit');
-				expect(res.body.limits.collaboratorLimit).to.be.above(0);
-				expect(res.body).to.have.deep.property('payments').that.is.an('array');
-				expect(res.body.payments[0].amount).to.be.above(0);
-				expect(res.body.payments[0].currency).to.equal('GBP');
-				done(err);
-			});
-		});
-
-		it('and the subscription should be active and filled with quota (list all subscriptions)', function(done){
-
-
 			agent.get(`/${username}/subscriptions`)
 			.expect(200, function(err, res){
 
-				expect(res.body).to.be.an('array').and.to.have.length(1);
-				
-				let subscription = res.body[0];
+				expect(res.body).to.be.an('array').and.to.have.length(2);
 
-				expect(subscription).to.have.deep.property('token', subToken);
-				expect(subscription).to.have.deep.property('limits.spaceLimit');
-				expect(subscription.limits.spaceLimit).to.be.above(0);
-				expect(subscription).to.have.deep.property('active', true);
-				expect(subscription).to.have.deep.property('plan', plan.plan);
-				expect(subscription).to.have.deep.property('limits.collaboratorLimit');
-				expect(subscription.limits.collaboratorLimit).to.be.above(0);
-				expect(subscription).to.have.deep.property('payments').that.is.an('array');
-				expect(subscription.payments[0].amount).to.be.above(0);
-				expect(subscription.payments[0].currency).to.equal('GBP');
-				
+				let subscriptions = res.body;
+
+				console.log(subscriptions);
+
+				subscriptions.forEach(sub => {
+					expect(sub).to.have.deep.property('limits.spaceLimit');
+					expect(sub.limits.spaceLimit).to.be.above(0);
+					expect(sub).to.have.deep.property('active', true);
+					expect(sub).to.have.deep.property('plan', plans.plans[0].plan);
+					expect(sub).to.have.deep.property('limits.collaboratorLimit');
+					expect(sub.limits.collaboratorLimit).to.be.above(0);
+
+				});
+
 				done(err);
 			});
-
 		});
 	});
 

@@ -106,9 +106,7 @@ describe('Uploading a project', function () {
 		before(function(){
 			//give some money to this guy
 			return User.findByUserName(username).then( user => {
-				return user.createSubscription('THE-100-QUID-PLAN', user.user, true, moment(paymentInfo.ipnDate).utc().add(1, 'month'))
-			}).then(subscription => {
-				return User.activateSubscription(subscription.token, {}, {}, true);
+				return user.createSubscription('THE-100-QUID-PLAN', user.user, true, moment().utc().add(1, 'month'))
 			})
 		});
 

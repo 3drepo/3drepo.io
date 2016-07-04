@@ -10,6 +10,9 @@ var config = require('../config');
 var systemLogger = require("../logger.js").systemLogger;
 var paypal = require('../models/payment').paypal;
 var C = require("../constants");
+var moment = require('moment');
+var getSubscription = require('../models/subscription').getSubscription;
+
 // endpoints for paypal IPN message
 router.post("/paypal/food", activateSubscription);
 
@@ -29,7 +32,6 @@ function executeAgreement(req, res, next){
 	User.findByPaypalPaymentToken(token).then(_dbUser => {
 
 		dbUser = _dbUser;
-		let next;
 
 		// important to check there is a user/ghost with this token before executing the agreement
 		if(!dbUser){
@@ -50,7 +52,7 @@ function executeAgreement(req, res, next){
 								"note": "You have updated the license subscriptions. This agreement is going to be replaced by the new one."
 							};
 
-							paypal.billingAgreement.cancel(dbUser.customData.billingAgreementId, cancel_note, function (err, res) {
+							paypal.billingAgreement.cancel(dbUser.customData.billingAgreementId, cancel_note, function (err) {
 								if (err) {
 									req[C.REQ_REPO].logger.logError(JSON.stringify(err));
 								} else {
@@ -61,9 +63,40 @@ function executeAgreement(req, res, next){
 
 						dbUser.customData.paypalPaymentToken = token;
 						dbUser.customData.billingAgreementId = billingAgreement.id;
+
+						let assignedBillingUser = false;
+
 						dbUser.customData.subscriptions.forEach(subscription => {
+
+							if(subscription.assignedUser === dbUser.customData.billingUser){
+								assignedBillingUser = true;
+							}
+
 							subscription.inCurrentAgreement = true;
+		
+							// pre activate
+							// don't wait for IPN message to confirm but to activate the subscription right away, for 2 hours.
+							// IPN message should come quickly after executing an agreement, usually less then a minute
+							let twoHoursLater = moment().utc().add(2, 'hour').toDate();
+							if(!subscription.expiredAt || subscription.expiredAt < twoHoursLater){
+								subscription.active = true;
+								subscription.expiredAt = twoHoursLater;
+								subscription.limits = getSubscription(subscription.plan).limits;
+							}
+
 						});
+
+						if(!assignedBillingUser){
+
+							let subscriptions = dbUser.customData.subscriptions;
+							
+							for(let i=0; i < subscriptions.length; i++){
+								if(!subscriptions[i].assignedUser){
+									subscriptions[i].assignedUser = dbUser.customData.billingUser;
+									break;
+								}
+							}
+						}
 
 						resolve();
 					}
@@ -148,7 +181,8 @@ function activateSubscription(req, res, next){
 
 	    } else if (paymentFailed){
 
-			User.findBillingUserByToken(token).then(user => {
+	    	console.log('Payment failed');
+			User.findBillingUserByBillingId(billingAgreementId).then(user => {
 				Mailer.sendPaymentFailedEmail(user.customData.email, {
 					amount: paymentInfo.mc_currency +  ' ' + paymentInfo.mc_gross
 				});
@@ -171,15 +205,15 @@ function activateSubscription(req, res, next){
 			}
 
 
-			// User.findBillingUserByToken(token).then(user => {
-			// 	Mailer.sendPaymentErrorEmail({
-			// 		ipn: JSON.stringify(paymentInfo),
-			// 		billingUser: user.user,
-			// 		email: user.customData.email,
-			// 		errmsg: JSON.stringify(err),
-			// 		billingAgreementId: billingAgreementId
-			// 	});
-			// });
+			User.findBillingUserByBillingId(billingAgreementId).then(user => {
+				Mailer.sendPaymentErrorEmail({
+					ipn: JSON.stringify(paymentInfo),
+					billingUser: user.user,
+					email: user.customData.email,
+					errmsg: JSON.stringify(err),
+					billingAgreementId: billingAgreementId
+				});
+			});
 		}
 
 	});

@@ -29,7 +29,7 @@
 	var Mailer = require("../mailer/mailer");
 	var httpsPost = require("../libs/httpsReq").post;
 	//var Role = require('../models/role');
-	var crypto = require('crypto');
+	//var crypto = require('crypto');
 	var ProjectHelper = require('../models/helper/project');
 	var Billing = require('../models/billing');
 	var moment = require('moment');
@@ -45,7 +45,7 @@
 	router.post('/:account', signUp);
 	//router.post('/:account/database', middlewares.canCreateDatabase, createDatabase);
 	router.post('/:account/subscriptions', middlewares.canCreateDatabase, createSubscription);
-
+	router.post("/:account/subscriptions/:sid/assign", middlewares.hasWriteAccessToAccount, assignSubscription);
 	router.post('/:account/verify', middlewares.connectQueue, verify);
 	router.post('/:account/forgot-password', forgotPassword);
 	router.put("/:account", middlewares.hasWriteAccessToAccount, updateUser);
@@ -219,7 +219,7 @@
 			});
 
 			//soft launch give users some quota
-			let nextMonth = moment(paymentInfo.ipnDate).utc().add(1, 'month');
+			let nextMonth = moment().utc().add(1, 'month');
 			return user.createSubscription('SOFT-LAUNCH-FREE-TRIAL', user.user, true, nextMonth);
 
 		}).then(() => {
@@ -453,6 +453,28 @@
 		Billing.findByAccount(req.params.account).then(billings => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, billings);
 		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+	}
+
+	function assignSubscription(req, res, next){
+
+		let responsePlace = utils.APIInfo(req);
+		User.findByUserName(req.params.account).then(dbUser => {
+			
+			let userData = {};
+			
+			if(req.body.email){
+				userData.email = req.body.email;
+			} else if(req.body.user) {
+				userData.user = req.body.user;
+			}
+
+			return dbUser.assignSubscriptionToUser(req.params.sid, userData);
+		}).then(subscription => {
+			console.log(subscription);
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
+		}).catch( err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
 	}

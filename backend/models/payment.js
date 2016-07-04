@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  *  Copyright (C) 2014 3D Repo Ltd
  *
@@ -19,18 +17,20 @@
 
 var paypal = require('paypal-rest-sdk');
 var url = require('url');
+var config = require('../config');
 
 paypal.configure({
-	'mode': 'sandbox', //sandbox or live
-	'client_id': 'AatDoaIkUa6jmtoH-5qsn4y012J5ZvGchYdCHVQcAc4x8KERgY-0-JnPh9qSGFbTnfFxZ0v4A2ATeetD',
-	'client_secret': 'EMWxLEqJvDGX0xer2ae-8znPU0kjFZOMC8C-vxL9kTvEITup-djBI1BdHVpIu6WuzTEvPVHImQEjZdzo'
+	'mode': config.paypal.mode, //sandbox or live
+	'client_id': config.paypal.client_id,
+	'client_secret': config.paypal.client_secret
 });
 
 function getBillingAgreement(currency, initAmount, amount, billingCycle, startDate){
+	'use strict';
 
 	console.log('initAmount', initAmount);
 	console.log('amount', amount);
-	console.log('startDate', startDate)
+	console.log('startDate', startDate);
 	let billingPlanAttributes = {
 		"description": "3D Repo License",
 		"merchant_preferences": {
@@ -89,7 +89,7 @@ function getBillingAgreement(currency, initAmount, amount, billingCycle, startDa
 				}
 			];
 
-			paypal.billingPlan.update(billingPlan.id, billingPlanUpdateAttributes, function (err, res) {
+			paypal.billingPlan.update(billingPlan.id, billingPlanUpdateAttributes, function (err) {
 				if (err) {
 					reject(err);
 				} else {

@@ -118,7 +118,8 @@ module.exports = {
 	
 	captcha: {
 		'validateUrl': 'https://www.google.com/recaptcha/api/siteverify',
-		'secretKey': ''
+		'secretKey': '',
+		'clientKey': ''
 	},
 
 	auth: {
@@ -131,7 +132,13 @@ module.exports = {
 	},
 
 	paypal:{
-		validateIPN: true
+		
+		validateIPN: true,
+		ipnValidateUrl: 'https://www.paypal.com/cgi-bin/webscr',
+		mode: 'live', //sandbox or live
+		client_id: '',
+		client_secret: ''
+
 	},
 
 	uploadSizeLimit: 209715200,
