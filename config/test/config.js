@@ -93,6 +93,7 @@ module.exports = {
 	test_helper_api: false,
 	paypal:{
 		validateIPN: false,
+		ipnValidateUrl: 'https://www.sandbox.paypal.com/cgi-bin/webscr',
 		mode: 'sandbox', //sandbox or live
 		//for travis only
 		client_id: 'AWog5lbf6LTb07XvRzvl4KAXVrmUyv4rEopFBNxHwO3nNieukILfTSxm8xCdsoAalrWTOPo9oQcrm3R-',

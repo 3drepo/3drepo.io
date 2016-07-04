@@ -132,7 +132,9 @@ module.exports = {
 	},
 
 	paypal:{
+		
 		validateIPN: true,
+		ipnValidateUrl: 'https://www.paypal.com/cgi-bin/webscr',
 		mode: 'live', //sandbox or live
 		client_id: '',
 		client_secret: ''
