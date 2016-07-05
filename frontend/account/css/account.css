@@ -357,7 +357,7 @@ account-collaborators #accountCollaboratorsUnassigned {
   margin-top: -15px;
 }
 
-/** Account team ******************************************************************************************************/
+/** Account Team ******************************************************************************************************/
 account-team .collaboratorIcon {
   margin: 0 10px !important;
 }
@@ -372,6 +372,15 @@ account-team #project md-icon {
 account-team #accountTeamAdd {
   margin-top: 20px;
   margin-bottom: 30px;
+}
+
+account-team #accountTeamMemberRoleGroup {
+  margin: 20px 0 0 10px;
+}
+
+account-team #accountTeamMemberRole {
+  margin-left: 10px;
+  color: rgba(0, 0, 0, 0.5);
 }
 
 /** Collaborator Dialog ***********************************************************************************************/

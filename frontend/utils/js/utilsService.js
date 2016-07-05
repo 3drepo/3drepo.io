@@ -144,15 +144,23 @@
 
         /**
          * Handle DELETE requests
+         * @param data
          * @param url
          * @returns {*}
          */
-        obj.doDelete = function (url) {
+        obj.doDelete = function (data, url) {
             var deferred = $q.defer(),
-                urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
-                config = {withCredentials: true};
+                config = {
+                    method: "DELETE",
+                    url: serverConfig.apiUrl(serverConfig.POST_API, url),
+                    data: data,
+                    withCredentials: true,
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                };
 
-            $http.delete(urlUse, config)
+            $http(config)
                 .then(
                     function (response) {
                         deferred.resolve(response);

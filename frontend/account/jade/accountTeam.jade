@@ -12,20 +12,23 @@
 					md-button.md-icon-button(aria-label="Dashboard")
 						md-icon.angular-material-icons dashboard
 					p(flex) {{vm.projectName}}
+
 				md-autocomplete(
-				md-no-cache="vm.noCache"
-				md-selected-item="vm.selectedUser"
-				md-search-text="vm.searchText"
-				md-items="user in vm.querySearch(vm.searchText)"
-				md-item-text="user.name"
-				md-min-length="0"
-				placeholder="Add a team member"
-				ng-disabled="vm.addDisabled"
-				)
+					md-no-cache="vm.noCache"
+					md-selected-item="vm.selectedUser"
+					md-search-text="vm.searchText"
+					md-items="user in vm.querySearch(vm.searchText)"
+					md-item-text="user.user"
+					md-min-length="0"
+					placeholder="Add a team member"
+					flex)
 					md-item-template
-						span(md-highlight-text="vm.searchText", md-highlight-flags="^i") {{user.name}}
+						span(md-highlight-text="vm.searchText", md-highlight-flags="^i") {{user.user}}
 					md-not-found
 						span No user matching "{{ctrl.searchText}}" was found.
+				md-radio-group#accountTeamMemberRoleGroup(ng-model="vm.memberRole", layout="row", layout-align="start center")
+					md-radio-button.md-accent(value="collaborator", ng-disabled="vm.addDisabled") Collaborator
+					md-radio-button.md-accent(value="viewer", ng-disabled="vm.addDisabled") Viewer
 				md-button.md-raised.md-accent#accountTeamAdd(ng-click="vm.addMember()", ng-disabled="vm.addDisabled") Add
 
 				md-divider
@@ -36,7 +39,9 @@
 					md-list-item(ng-repeat="member in vm.members")
 						md-icon.angular-material-icons.collaboratorIcon(aria-label="Person") person
 						.md-list-item-text
-							p {{member.name}}
+							div(layout="row")
+								p {{member.user}}
+								p#accountTeamMemberRole ({{member.role}})
 						span(flex)
 						md-button.md-icon-button.md-accent(ng-click="vm.removeMember($index)")
 							md-icon.angular-material-icons(aria-label="Close dialog") remove_circle
