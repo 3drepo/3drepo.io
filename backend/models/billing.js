@@ -31,7 +31,13 @@ var schema = mongoose.Schema({
 		amount: Number
 	}],
 	periodStart: Date,
-	periodEnd: Date
+	periodEnd: Date,
+	info: {
+		postcode: String,
+		vat: String,
+		country: String
+
+	}
 });
 
 schema.statics.findByAccount = function(account){

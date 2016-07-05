@@ -75,7 +75,11 @@ var schema = mongoose.Schema({
 			inCurrentAgreement: Boolean,
 			database: String
 		}],
-
+		billingInfo:{
+			postcode: String,
+			vat: String,
+			country: String
+		},
 		//global billing info
 		billingAgreementId: String,
 		paypalPaymentToken: String,
@@ -325,7 +329,7 @@ schema.methods.getAvatar = function(){
 schema.methods.updateInfo = function(updateObj){
 	'use strict';
 
-	let updateableFields = [ 'firstName', 'lastName', 'email' ];
+	let updateableFields = [ 'firstName', 'lastName', 'email', 'billingInfo' ];
 	
 	this.customData = this.customData || {};
 
@@ -830,6 +834,8 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 			billing.amount = paymentInfo.amount;
 			billing.billingAgreementId = billingAgreementId;
 			billing.items = items;
+			//copy current billing info from user to billing
+			billing.info = dbUser.customData.billingInfo;
 
 			billing.periodStart = moment(paymentInfo.ipnDate).utc()
 				.hours(0).minutes(0).seconds(0).milliseconds(0)
