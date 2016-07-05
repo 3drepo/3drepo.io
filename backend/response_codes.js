@@ -147,7 +147,7 @@ var responseCodes = {
 	COLLABORATOR_LIMIT_EXCEEDED: {value: 87, message: 'You do not have enough quota to add an extra collaborator', status: 400},
 
 	LICENSE_NO_CHANGE: { value: 88, message: 'You must increase your number of licenses', status: 400},
-	SUBSCRIPTION_NOT_FOUND: {value: 89, message: 'Subscription not found', status: 400},
+	SUBSCRIPTION_NOT_FOUND: {value: 89, message: 'Subscription not found', status: 404},
 	SUBSCRIPTION_ALREADY_ASSIGNED: {value: 90, message: 'Subscription already assigned to someone else', status: 400},
 	USER_ALREADY_ASSIGNED: {value: 91, message: 'This user is already in another subscription', status: 400},
 	USER_NOT_ASSIGNED_WITH_LICENSE: {value: 92, message: 'This user is not assigned with license', status: 400},

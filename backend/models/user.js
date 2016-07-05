@@ -891,6 +891,47 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 };
 
+schema.methods.executeBillingAgreement = function(token, billingAgreementId){
+	'use strict';
+
+	this.customData.paypalPaymentToken = token;
+	this.customData.billingAgreementId = billingAgreementId;
+
+	let assignedBillingUser = false;
+
+	this.customData.subscriptions.forEach(subscription => {
+
+		if(subscription.assignedUser === this.customData.billingUser){
+			assignedBillingUser = true;
+		}
+
+		subscription.inCurrentAgreement = true;
+
+		// pre activate
+		// don't wait for IPN message to confirm but to activate the subscription right away, for 2 hours.
+		// IPN message should come quickly after executing an agreement, usually less then a minute
+		let twoHoursLater = moment().utc().add(2, 'hour').toDate();
+		if(!subscription.expiredAt || subscription.expiredAt < twoHoursLater){
+			subscription.active = true;
+			subscription.expiredAt = twoHoursLater;
+			subscription.limits = getSubscription(subscription.plan).limits;
+		}
+
+	});
+
+	if(!assignedBillingUser){
+
+		let subscriptions = this.customData.subscriptions;
+		
+		for(let i=0; i < subscriptions.length; i++){
+			if(!subscriptions[i].assignedUser){
+				subscriptions[i].assignedUser = this.customData.billingUser;
+				break;
+			}
+		}
+	}
+};
+
 schema.methods.haveActiveSubscriptions = function(){
 	return this.getActiveSubscriptions().length > 0;
 };

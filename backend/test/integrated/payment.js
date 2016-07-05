@@ -26,6 +26,7 @@ let log_iface = require("../../logger.js");
 let systemLogger = log_iface.systemLogger;
 let responseCodes = require("../../response_codes.js");
 let helpers = require("./helpers");
+let async = require('async');
 
 describe('Enrolling to a subscription', function () {
 	let User = require('../../models/user');
@@ -33,6 +34,16 @@ describe('Enrolling to a subscription', function () {
 	let agent;
 	let username = 'payment_testing';
 	let password = 'payment_testing';
+	
+	let username2 = 'payment_user2';
+	let password2 = 'payment_user2';
+	let email2 = 'test3drepo_payment2@mailinator.com';
+
+
+	let username3 = 'payment_user3';
+	let password3 = 'payment_user3';
+	let email3 = 'test3drepo_payment3@mailinator.com';
+
 	let project = 'testproject';
 	let email = 'test3drepo_payment@mailinator.com'
 	let billingId = 'I-000000000000';
@@ -44,22 +55,44 @@ describe('Enrolling to a subscription', function () {
 			console.log('API test server is listening on port 8080!');
 
 
-			helpers.signUpAndLogin({
-				server, request, agent, expect, User, systemLogger,
-				username, password, email,
-				done: function(err, _agent){
-					agent = _agent;
-					if (err) return done(err);
+			async.series([
 
-					agent = request.agent(server);
-					agent.post('/login')
-					.send({ username, password })
-					.expect(200, function(err, res){
-						expect(res.body.username).to.equal(username);
-						done(err);
+				function(done){
+					helpers.signUpAndLogin({
+						server, request, agent, expect, User, systemLogger,
+						username: username2, password: password2, email: email2,
+						done
+					});
+				},
+
+				function(done){
+					helpers.signUpAndLogin({
+						server, request, agent, expect, User, systemLogger,
+						username: username3, password: password3, email: email3,
+						done
+					});
+				},
+
+				function(done){
+					helpers.signUpAndLogin({
+						server, request, agent, expect, User, systemLogger,
+						username, password, email,
+						done: function(err, _agent){
+							agent = _agent;
+							if (err) return done(err);
+
+							agent = request.agent(server);
+							agent.post('/login')
+							.send({ username, password })
+							.expect(200, function(err, res){
+								expect(res.body.username).to.equal(username);
+								done(err);
+							});
+						}
 					});
 				}
-			});
+			], done);
+
 
 		});
 
@@ -77,7 +110,7 @@ describe('Enrolling to a subscription', function () {
 		"plans": [
 			{    
 			"plan": "THE-100-QUID-PLAN",
-			"quantity": 2
+			"quantity": 3
 			}
 		]
 	};
@@ -103,13 +136,10 @@ describe('Enrolling to a subscription', function () {
 
 			// set fake billing id
 			User.findByUserName(username).then(user => {
-				user.customData.billingAgreementId = billingId;
-				user.customData.billingUser = user.user;
-				user.customData.subscriptions.forEach(sub => {
-					sub.inCurrentAgreement = true;
-				});
 
+				user.executeBillingAgreement('EC-000000000', billingId);
 				return user.save();
+
 			}).then(() => {
 
 				let fakePaymentMsg = 
@@ -135,14 +165,15 @@ describe('Enrolling to a subscription', function () {
 
 		});
 
+		let subscriptions;
 		it('and the subscription should be active and filled with quota', function(done){
 
 			agent.get(`/${username}/subscriptions`)
 			.expect(200, function(err, res){
 
-				expect(res.body).to.be.an('array').and.to.have.length(2);
+				expect(res.body).to.be.an('array').and.to.have.length(3);
 
-				let subscriptions = res.body;
+				subscriptions = res.body;
 
 				console.log(subscriptions);
 
@@ -159,6 +190,115 @@ describe('Enrolling to a subscription', function () {
 				done(err);
 			});
 		});
+
+		it('and the first subscription should assigned to user itself', function(){
+			expect(subscriptions[0].assignedUser).to.equal(username);
+		});
+
+		describe('and then assigning it', function(){
+
+			
+
+			it('should fail if subscription id does not exist', function(done){
+				agent.post(`/${username}/subscriptions/000000000000000000000000/assign`)
+				.send({ user: username2})
+				.expect(404, function(err, res){
+					expect(res.body.value).to.equal(responseCodes.SUBSCRIPTION_NOT_FOUND.value);
+					done(err);
+				});
+			});
+
+			it('to a non existing user should fail', function(done){
+				agent.post(`/${username}/subscriptions/${subscriptions[1]._id}/assign`)
+				.send({ user: 'payment_non_existing'})
+				.expect(404, function(err, res){
+					expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
+					done(err);
+				});
+			});
+
+			it('to a existing user should success', function(done){
+				agent.post(`/${username}/subscriptions/${subscriptions[1]._id}/assign`)
+				.send({ user: username2 })
+				.expect(200, function(err, res){
+					done(err);
+				});
+			});
+
+			it('to a user assgined to another license should fail', function(done){
+				agent.post(`/${username}/subscriptions/${subscriptions[2]._id}/assign`)
+				.send({ user: username2 })
+				.expect(400, function(err, res){
+					expect(res.body.value).to.equal(responseCodes.USER_ALREADY_ASSIGNED.value);
+					done(err);
+				});
+			});
+
+			it('to an other existing user again should fail', function(done){
+				agent.post(`/${username}/subscriptions/${subscriptions[1]._id}/assign`)
+				.send({ user: username3 })
+				.expect(400, function(err, res){
+					expect(res.body.value).to.equal(responseCodes.SUBSCRIPTION_ALREADY_ASSIGNED.value);
+					done(err);
+				});
+			});
+
+			describe('and then deleting it', function(){
+
+
+				it('should fail if subscription id does not exist', function(done){
+					agent.delete(`/${username}/subscriptions/000000000000000000000000/assign`)
+					.send({})
+					.expect(404, function(err, res){
+						expect(res.body.value).to.equal(responseCodes.SUBSCRIPTION_NOT_FOUND.value);
+						done(err);
+					});
+				});
+
+				it('should success', function(done){
+					agent.delete(`/${username}/subscriptions/${subscriptions[1]._id}/assign`)
+					.send({})
+					.expect(200, function(err, res){
+						done(err);
+					});
+				});
+
+				it('should fail if try to remove itself', function(done){
+					agent.delete(`/${username}/subscriptions/${subscriptions[0]._id}/assign`)
+					.send({})
+					.expect(400, function(err, res){
+						expect(res.body.value).to.equal(responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF.value);
+						done(err);
+					});
+				});
+
+				it('should fail if try to remove itself', function(done){
+					agent.delete(`/${username}/subscriptions/${subscriptions[0]._id}/assign`)
+					.send({})
+					.expect(400, function(err, res){
+						expect(res.body.value).to.equal(responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF.value);
+						done(err);
+					});
+				});
+
+				it('should fail if license havent been assigned to anyone', function(done){
+					agent.delete(`/${username}/subscriptions/${subscriptions[2]._id}/assign`)
+					.send({})
+					.expect(400, function(err, res){
+						expect(res.body.value).to.equal(responseCodes.SUBSCRIPTION_NOT_ASSIGNED.value);
+						done(err);
+					});
+				});
+
+				it('should fail if the user is a collaborator of a project', function(){
+					//to-do
+				});
+
+			});
+
+		});
+
+
 	});
 
 });
