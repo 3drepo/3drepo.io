@@ -131,31 +131,20 @@ account-projects .projectRight .projectUploaded {
 }
 
 /** Account Profile ***************************************************************************************************/
-account-profile .profile {
-  max-height: calc(100vh - 180px);
-  overflow: auto;
-  padding: 10px;
-}
-
-account-profile #profileDivider {
-  display: block;
-  background: rgba(0,0,0,0.2);
-  width: 1px;
-  height: 380px;
-}
-
-account-profile .accountProfileList {
-  max-height: calc(100vh - 200px);
-  overflow-x: hidden;
-  padding: 0;
-}
-
-account-profile .accountProfileContent {
-  margin-left: 65px;
+account-profile md-input-container {
+  margin-right: 5px;
 }
 
 account-profile .updateContainer {
-  margin-top: -30px;
+  margin: -20px 0 0;
+}
+
+account-profile .md-title {
+  margin: -10px 0 20px;
+}
+
+account-profile md-divider {
+  margin: 20px 0 20px;
 }
 
 /** Account Info ******************************************************************************************************/
@@ -163,6 +152,10 @@ account-info {
   margin-left: 70px;
   width: 400px;
   margin-right: 60px;
+}
+
+account-info #accountInfoContent {
+  max-height: calc(100vh - 190px);
 }
 
 account-info .dataContainer {
@@ -185,6 +178,14 @@ account-info p {
 
 account-info md-list {
   padding: 0;
+}
+
+account-info .accountInfoPage {
+  min-height: 50px;
+}
+account-info .accountInfoPage .md-button {
+  min-height: 50px!important;
+  height: 50px;
 }
 
 /** Avatar Image ******************************************************************************************************/
@@ -292,6 +293,95 @@ account-menu md-icon {
   color: rgba(0,0,0,0.7);
 }
 
+/** Account Billing ***************************************************************************************************/
+account-billing md-input-container {
+  margin-right: 10px;
+}
+
+account-billing .md-title {
+  margin-top: -10px;
+}
+
+account-billing .md-button {
+  margin-bottom: 20px;
+}
+
+account-billing .cardInfo {
+  margin: 0 !important;
+}
+
+account-billing #accountBillingHistory {
+  max-height: 150px;
+  overflow-y: auto;
+}
+account-billing #accountBillingHistory .md-subheader label {
+  margin: 0 12px 0 0;
+  font-size: 12px;
+}
+account-billing .accountBillingHistoryListItem md-input-container {
+  margin: 0 10px 0 0;
+}
+account-billing .accountBillingHistoryListItem .md-button {
+  margin-top: -5px;
+}
+
+account-billing #accountBillingHistoryContainer {
+  padding-left: 10px;
+}
+
+account-billing #accountBillingSave {
+  margin: -20px 0 20px;
+}
+account-billing #accountBillingSave img {
+  height: 20px;
+  margin: 14px 0 0 5px;
+}
+
+/** Account Collaborators *********************************************************************************************/
+account-collaborators .collaboratorIcon {
+  margin: 0 10px !important;
+}
+
+account-collaborators #accountCollaboratorsAdd {
+  margin-top: -10px;
+}
+account-collaborators #accountCollaboratorsAdd md-input-container {
+  margin-bottom: 0;
+}
+account-collaborators #accountCollaboratorsAdd .md-button {
+  margin-bottom: 30px;
+}
+
+account-collaborators #accountCollaboratorsUnassigned {
+  opacity: 0.4;
+  margin-top: -15px;
+}
+
+/** Account team ******************************************************************************************************/
+account-team .collaboratorIcon {
+  margin: 0 10px !important;
+}
+
+account-team #project {
+  margin: -10px 0 10px;
+}
+account-team #project md-icon {
+  margin: 0 !important;
+}
+
+account-team #accountTeamAdd {
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+/** Collaborator Dialog ***********************************************************************************************/
+#collaboratorDialog {
+  width: 400px;
+}
+
+#collaboratorDialog .collaboratorIcon {
+  margin: 0 10px;
+}
 /* Done to counter bootstrap styling. This should really be set in a top level style file */
 .md-datepicker-input-mask {
   width: 308px;
@@ -632,6 +722,21 @@ bid4free-workspace {
   bid4free-workspace .saveContainer md-icon {
     font-size: 25px !important; }
 
+billing {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgb(250, 250, 250);
+    z-index: 2;
+}
+
+billing .md-toolbar-tools img {
+    width: 150px;
+}
+
+billing #billingList {
+    padding: 20px;
+}
 bottom-buttons {
   display: block;
   position: absolute;
@@ -746,6 +851,17 @@ contact md-input-container {
     margin: 0;
 }
 
+cookies .md-toolbar-tools img {
+    width: 150px;
+}
+
+cookies-text {
+    position: absolute;
+    z-index: 3;
+    background: #FDFDFD;
+    color: rgba(0, 0, 0, 0.8);
+    padding: 10px 50px;
+}
 /** Docs **************************************************************************************************************/
 docs .typesList {
   padding: 0;
@@ -756,12 +872,8 @@ docs .typesList h4 {
   color: rgba(0,0,0,0.6);
 }
 
-docs .docList {
-  padding: 15px 15px 5px 15px;
-  outline: none;
-}
-docs div:hover {
-  cursor: pointer;
+docs #docItem md-divider {
+  margin-top: 10px;
 }
 
 docs md-icon {
@@ -775,7 +887,7 @@ docs .docsLoadInfo {
 }
 
 docs .dataItem {
-  padding: 0 20px 0 20px;
+  padding: 0 15px;
   outline: none;
 }
 
@@ -783,9 +895,15 @@ docs .metadataKey,
 docs .metadataValue {
   word-wrap: break-word;
   font-size: 14px;
+  margin-bottom: 0;
 }
 docs .metadataKey {
-  color: rgba(0,0,0,0.5);
+  margin: 5px 0 5px 5px;
+  color: rgba(0,0,0,0.6);
+}
+docs .metadataValue {
+  margin: 5px 0;
+  color: rgba(0,0,0,0.9);
 }
 
 docs .cardInfo {
@@ -805,6 +923,13 @@ docs .cardInfo md-icon {
   font-size: 16px;
   width: 16px;
   height: 16px;
+}
+
+docs .docsListBackground1 {
+  background: rgb(240,240,240);;
+}
+docs .docsListBackground2 {
+  background: rgb(250,250,250);
 }
 
 /** Docs Dialog *******************************************************************************************************/
@@ -942,7 +1067,7 @@ home .homeUserContent {
 home .homeUserContent .md-whiteframe-1dp,
 home .homeUserContent .md-whiteframe-8dp {
     border-radius: 4px;
-    background: #FFF;
+    background: rgb(250, 250, 250);;
 }
 
 home .homeUserContent md-toolbar {
@@ -954,7 +1079,7 @@ home .homeUserContent md-toolbar {
 
 home .homeUserContent .userContent {
     padding: 20px;
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 230px);
     overflow-x: hidden;
 }
 
@@ -967,19 +1092,19 @@ home .homeUserContent .userContent md-progress-circular {
     margin-left: 10px;
 }
 
-home .cardInfo {
+.cardInfo {
     text-align: center;
     padding: 15px;
     background: #E8EAF6;
     margin: 15px;
     border-radius: 4px;
 }
-home .cardInfo p {
+.cardInfo p {
     margin: 0;
     color: rgba(0, 0, 0, 0.7);
     word-wrap: break-word;
 }
-home .cardInfo md-icon {
+.cardInfo md-icon {
     margin: 0;
     font-size: 16px;
     width: 16px;
@@ -990,12 +1115,16 @@ home #legalLinks {
     position: absolute;
     bottom: 0;
     right: 0;
-    z-index: 1000;
+    z-index: 2;
 }
 home #legalLinks .md-button {
     font-size: 12px;
     margin: 0;
     opacity: 0.7;
+}
+
+home md-radio-button ._md-label {
+    line-height: 1.7;
 }
 
 /** Legal Dialog ******************************************************************************************************/
@@ -1010,10 +1139,16 @@ home #legalLinks .md-button {
 }
 
 /** Dialog ************************************************************************************************************/
+md-dialog {
+    background: rgb(250, 250, 250);
+}
+
 md-dialog md-toolbar {
     height: 40px;
     min-height: 40px;
 }
+
+
 /** Issues ************************************************************************************************************/
 
 issues #issuesAddContainer {
@@ -1504,6 +1639,13 @@ panel-card-add {
 panel-card-option-erase md-icon {
   font-size: 24px !important;
 }
+
+/** Panel Card Option *******************************************************************************************/
+panel-card-option-scribble md-icon,
+panel-card-option-erase md-icon,
+panel-card-option-pin md-icon {
+  color: inherit !important;
+}
 password-change md-progress-circular {
     margin-left: 5px;
 }
@@ -1552,14 +1694,13 @@ pricing .pricingIcon#pricingAdvancedIcon {
 
 pricing .pricingPrice {
     height: 100px;
-    display: block;
 }
 pricing .pricingPriceTitle {
-    margin: 10px 0;
+    margin: 0;
     color: rgba(0,0,0,.6) !important;
 }
 pricing .pricingPriceSubtitle {
-    margin-top: -20px;
+    margin-top: -10px;
     color: rgba(0,0,0,.6) !important;
 }
 
@@ -1583,8 +1724,20 @@ pricing .pricingInfo .pricingInfoLine md-icon {
 
 pricing .pricingContent {
     max-height: 600px !important;
-    height: calc(100vh - 180px);
+    height: calc(100vh - 200px);
     overflow: auto;
+}
+
+privacy .md-toolbar-tools img {
+    width: 150px;
+}
+
+privacy-text {
+    position: absolute;
+    z-index: 3;
+    background: #FDFDFD;
+    color: rgba(0, 0, 0, 0.8);
+    padding: 10px 50px;
 }
 
 md-dialog.qrCodeReaderDialog {
@@ -1611,12 +1764,23 @@ right-panel {
     right: 0;
 }
 
+right-panel #rightPanelButtons .rightPanelButtonGroup {
+    margin-bottom: 20px;
+}
+
 right-panel #rightPanelButtons .md-button {
-    margin-bottom: 15px;
+    margin-bottom: 2px;
 }
 
 right-panel #rightPanelButtons .fa {
     font-size: 24px;
+}
+
+right-panel #rightPanelButtons label {
+    color: #FFFFFF;
+    text-shadow: 0 0 2px rgba(0,0,0,0.5);
+    font-weight: bold;
+    font-size: 14px;
 }
 sign-up md-input-container {
     margin-top: 0;
@@ -1682,6 +1846,17 @@ sign-up-form .registerError {
 
 sign-up-form .rc-anchor-light {
     background: red;
+}
+terms-and-conditions .md-toolbar-tools img {
+    width: 150px;
+}
+
+terms-and-conditions-text {
+    position: absolute;
+    z-index: 3;
+    background: #FDFDFD;
+    color: rgba(0, 0, 0, 0.8);
+    padding: 10px 50px;
 }
 tree span {
   outline: none;

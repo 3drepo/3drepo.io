@@ -1,12 +1,12 @@
 .homeUserContent(layout="row", layout-align="center")
 	// Basic
-	md-content.md-whiteframe-1dp(aria-label="Basic", flex="15")
+	md-content.md-whiteframe-1dp(aria-label="Basic", flex-lg="20", flex-gt-lg="15")
 		md-toolbar
-			.md-toolbar-tools
+			.md-toolbar-tools(layout="row", layout-align="center center")
 				h2 Basic
-		.userContent.pricingContent(layout="column", layout-align="start center",)
-			md-icon.angular-material-icons.pricingIcon account_circle
-			.pricingPrice
+		.userContent.pricingContent(layout="column", layout-align="start center")
+			md-icon.angular-material-icons.pricingIcon(flex="none") account_circle
+			.pricingPrice(flex="none")
 				h3.md-display-2.pricingPriceTitle Free
 			md-divider
 			.pricingInfo(layout="column", layout-align="start")
@@ -18,15 +18,14 @@
 				md-button.md-raised.md-accent(ng-click="vm.showPage('signUp')") Sign Up
 
 	// Advanced
-	//md-content.md-whiteframe-8dp(aria-label="Advanced", flex="15")
+	md-content.md-whiteframe-8dp(aria-label="Advanced", flex-lg="20", flex-gt-lg="15")
 		md-toolbar
-			.md-toolbar-tools
+			.md-toolbar-tools(layout="row", layout-align="center center")
 				h2#pricingMiddlePanelTitle Advanced
 		.userContent.pricingContent(layout="column", layout-align="start center")
-			md-icon.angular-material-icons.pricingIcon#pricingAdvancedIcon grade
-			.pricingPrice(layout="column", layout-align="start center")
-				div(layout="row", layout-align="center center")
-					h3.md-display-2.pricingPriceTitle £100
+			md-icon.angular-material-icons.pricingIcon#pricingAdvancedIcon(flex="none") grade
+			.pricingPrice(layout="column", layout-align="start center", flex="none")
+				h3.md-display-2.pricingPriceTitle £100
 				h3.md-subhead.pricingPriceSubtitle Per Month
 			md-divider
 			.pricingInfo(layout="column", layout-align="start")
@@ -41,13 +40,13 @@
 				md-button.md-raised.md-accent(ng-click="vm.showPage('signUp', true)") Sign Up
 
 	// Enterprise
-	md-content.md-whiteframe-1dp(aria-label="Enterprise", flex="15")
+	md-content.md-whiteframe-1dp(aria-label="Enterprise", flex-lg="20", flex-gt-lg="15")
 		md-toolbar
-			.md-toolbar-tools
+			.md-toolbar-tools(layout="row", layout-align="center center")
 				h2 Enterprise
 		.userContent.pricingContent(layout="column", layout-align="start center")
-			md-icon.angular-material-icons.pricingIcon language
-			.pricingPrice
+			md-icon.angular-material-icons.pricingIcon(flex="none") language
+			.pricingPrice(flex="none")
 				h3.md-display-2.pricingPriceTitle Custom
 			md-divider
 			.pricingInfo(layout="column", layout-align="start")

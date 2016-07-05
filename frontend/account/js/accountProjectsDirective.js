@@ -27,7 +27,8 @@
 			templateUrl: 'accountProjects.html',
 			scope: {
 				account: "=",
-				accounts: "="
+				accounts: "=",
+				showPage: "&"
 			},
 			controller: AccountProjectsCtrl,
 			controllerAs: 'vm',
@@ -35,11 +36,10 @@
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$mdDialog", "$element", "$timeout", "$interval", "AccountService", "UtilsService"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$mdDialog", "$element", "$timeout", "$interval", "AccountService", "UtilsService", "serverConfig"];
 
-	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, $timeout, $interval, AccountService, UtilsService) {
+	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, $timeout, $interval, AccountService, UtilsService, serverConfig) {
 		var vm = this,
-			promise,
 			existingProjectToUpload,
 			existingProjectFileUploader,
 			newProjectFileUploader;
@@ -47,7 +47,8 @@
 		/*
 		 * Init
 		 */
-		vm.bif4FreeEnabled = false;
+		vm.info = "Retrieving projects...";
+		vm.showProgress = true;
 		vm.projectTypes = [
 			"Architectural",
 			"Structural",
@@ -55,8 +56,14 @@
 			"GIS",
 			"Other"
 		];
-		vm.info = "Retrieving projects...";
-		vm.showProgress = true;
+		vm.projectOptions = {
+			upload: {label: "Upload file", icon: "cloud_upload"},
+			team: {label: "Team", icon: "group"}
+		};
+		vm.collaborators = {
+			"jozefdobos": "",
+			"timscully": ""
+		};
 
 		// Setup file uploaders
 		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
@@ -100,9 +107,8 @@
 					for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
 						vm.accounts[i].projects[j].name = vm.accounts[i].projects[j].project;
 						if (vm.accounts[i].projects[j].timestamp !== null) {
-							vm.accounts[i].projects[j].timestamp = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp, true);
+							vm.accounts[i].projects[j].timestampPretty = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp, true);
 						}
-						vm.accounts[i].projects[j].bif4FreeEnabled = false;
 						vm.accounts[i].projects[j].uploading = false;
 						//vm.accounts[i].projects[j].canUpload = (vm.accounts[i].account === vm.account);
 						vm.accounts[i].projects[j].canUpload = true;
@@ -156,7 +162,7 @@
 				vm.uploadModel(project);
 			}
 			else {
-				$location.path("/" + account + "/" + project.name, "_self");
+				$location.path("/" + account + "/" + project.name, "_self").search("page", null);
 			}
 		};
 
@@ -181,7 +187,7 @@
 				type: vm.projectTypes[0]
 			};
 			vm.uploadedFile = null;
-			showDialog("projectDialog.html");
+			showDialog(event, "projectDialog.html");
 		};
 		
 		/**
@@ -195,7 +201,8 @@
 		 * Save a new project
 		 */
 		vm.saveNewProject = function () {
-			var project;
+			var project,
+				promise;
 
 			promise = AccountService.newProject(vm.newProjectData);
 			promise.then(function (response) {
@@ -210,8 +217,7 @@
 					project = {
 						name: response.data.project,
 						canUpload: true,
-						timestamp: null,
-						bif4FreeEnabled: false
+						timestamp: null
 					};
 					updateAccountProjects (response.data.account, project);
 					// Save model to project
@@ -248,14 +254,14 @@
 			vm.newDatabaseName = "";
 			vm.showPaymentWait = false;
 			vm.newDatabaseToken = false;
-			showDialog("databaseDialog.html");
+			showDialog(event, "databaseDialog.html");
 		};
 
 		/**
 		 * Save a new database
 		 */
 		vm.saveNewDatabase = function () {
-			promise = AccountService.newDatabase(vm.account, vm.newDatabaseName);
+			var promise = AccountService.newDatabase(vm.account, vm.newDatabaseName);
 			promise.then(function (response) {
 				console.log(response);
 				vm.newDatabaseToken = response.data.token;
@@ -278,20 +284,20 @@
 		 * Set up deleting of project
 		 * @param {Object} project
 		 */
-		vm.setupDeleteProject = function (project) {
+		vm.setupDeleteProject = function (event, project) {
 			vm.projectToDelete = project;
 			vm.showDeleteProjectError = false;
-			showDialog("deleteProjectDialog.html");
+			showDialog(event, "deleteProjectDialog.html");
 		};
 
 		/**
 		 * Delete project
 		 */
 		vm.deleteProject = function () {
-			var i, iLength, j, jLength;
+			var i, iLength, j, jLength,
+				promise;
 			promise = UtilsService.doDelete(vm.account + "/" + vm.projectToDelete.name);
 			promise.then(function (response) {
-				console.log(response);
 				if (response.status === 200) {
 					// Remove project from list
 					for (i = 0, iLength = vm.accounts.length; i < iLength; i += 1) {
@@ -311,6 +317,43 @@
 					vm.deleteProjectError = "Error deleting project";
 				}
 			});
+		};
+
+		/**
+		 * Handle project option selection
+		 *
+		 * @param event
+		 * @param project
+		 * @param option
+		 */
+		vm.doProjectOption = function (event, project, option) {
+			switch (option) {
+				case "upload":
+					vm.uploadModel(project);
+					break;
+
+				case "team":
+					$location.search("proj", project.name);
+					vm.showPage({page: "team", callingPage: "repos"});
+					break;
+			}
+		};
+
+		/**
+		 * Remove a collaborator
+		 *
+		 * @param collaborator
+		 */
+		vm.removeCollaborator = function (collaborator) {
+			delete vm.collaborators[collaborator];
+		};
+
+		/**
+		 * Go to the billing page to add more licenses
+		 */
+		vm.setupAddLicenses = function () {
+			vm.showPage({page: "billing", callingPage: "repos"});
+			vm.closeDialog();
 		};
 
 		/**
@@ -350,63 +393,95 @@
 		 */
 		function uploadModelToProject (project, file) {
 			var interval,
-				projectData = {
-					account: vm.account,
-					project: project.name
-				};
-			project.uploading = true;
-			vm.showUploading = true;
-			vm.showFileUploadInfo = false;
-			projectData.uploadFile = file;
-			promise = AccountService.uploadModel(projectData);
+				projectData,
+				infoTimeout = 4000,
+				promise;
+
+			// Check the quota
+			promise = UtilsService.doGet(vm.account + ".json");
 			promise.then(function (response) {
 				console.log(response);
-				if ((response.data.status === 400) || (response.data.status === 404)) {
-					// Upload error
-					if (response.data.value === 68) {
-						vm.fileUploadInfo = "Unsupported file format";
-					}
-					else if (response.data.value === 66) {
-						vm.fileUploadInfo = "Insufficient quota for model";
-					}
-					vm.showUploading = false;
-					vm.showFileUploadInfo = true;
-					$timeout(function () {
-						project.uploading = false;
-					}, 4000);
+				if (file.size > response.data.accounts[0].quota.spaceLimit) {
+					// Show the over quota dialog
+					showDialog(null, "overQuotaDialog.html");
 				}
 				else {
-					// Upload valid, poll for status
-					interval = $interval(function () {
-						promise = AccountService.uploadStatus(projectData);
+					project.uploading = true;
+					vm.showUploading = true;
+					vm.showFileUploadInfo = false;
+
+					// Check for file size limit
+					if (file.size > serverConfig.uploadSizeLimit) {
+						$timeout(function () {
+							vm.showUploading = false;
+							vm.showFileUploadInfo = true;
+							vm.fileUploadInfo = "File exceeds size limit";
+							$timeout(function () {
+								project.uploading = false;
+							}, infoTimeout);
+						});
+					}
+					else {
+						projectData = {
+							account: vm.account,
+							project: project.name,
+							uploadFile: file
+						};
+						promise = AccountService.uploadModel(projectData);
 						promise.then(function (response) {
 							console.log(response);
-							if ((response.data.status === "ok") || (response.data.status === "failed")) {
-								if (response.data.status === "ok") {
-									project.timestamp = UtilsService.formatTimestamp(new Date(), true);
-									vm.fileUploadInfo = "Uploaded";
+							if ((response.data.status === 400) || (response.data.status === 404)) {
+								// Upload error
+								if (response.data.value === 68) {
+									vm.fileUploadInfo = "Unsupported file format";
 								}
-								else {
-									vm.fileUploadInfo = response.data.errorReason.message;
+								else if (response.data.value === 66) {
+									vm.fileUploadInfo = "Insufficient quota for model";
 								}
 								vm.showUploading = false;
-								$interval.cancel(interval);
 								vm.showFileUploadInfo = true;
 								$timeout(function () {
 									project.uploading = false;
-								}, 4000);
+								}, infoTimeout);
+							}
+							else {
+								// Upload valid, poll for status
+								interval = $interval(function () {
+									promise = AccountService.uploadStatus(projectData);
+									promise.then(function (response) {
+										console.log(response);
+										if ((response.data.status === "ok") || (response.data.status === "failed")) {
+											if (response.data.status === "ok") {
+												project.timestamp = UtilsService.formatTimestamp(new Date(), true);
+												vm.fileUploadInfo = "Uploaded";
+											}
+											else {
+												vm.fileUploadInfo = response.data.errorReason.message;
+											}
+											vm.showUploading = false;
+											$interval.cancel(interval);
+											vm.showFileUploadInfo = true;
+											$timeout(function () {
+												project.uploading = false;
+											}, infoTimeout);
+										}
+									});
+								}, 1000);
 							}
 						});
-					}, 1000);
+					}
 				}
 			});
+
 		}
 
 		/**
 		 * Show a dialog
+		 *
+		 * @param {Object} event
 		 * @param {String} dialogTemplate
 		 */
-		function showDialog (dialogTemplate) {
+		function showDialog (event, dialogTemplate) {
 			$mdDialog.show({
 				controller: function () {},
 				templateUrl: dialogTemplate,

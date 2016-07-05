@@ -155,7 +155,8 @@
 		 */
 		$scope.$watch("vm.showAdd", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
-				setupAdd("scribble");
+				setupAdd();
+				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: "scribble"});
 			}
 		});
 
@@ -234,7 +235,11 @@
 			} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_ADD) {
 				if (event.value.on) {
 					vm.show = true;
-					setupAdd(event.value.type);
+					setupAdd();
+					// This is done to override the default mode ("scribble") set in the vm.showAdd watch above ToDo improve!
+					$timeout(function () {
+						EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, event.value.type);
+					}, 200);
 				}
 				else {
 					vm.hideItem = true;
@@ -360,6 +365,8 @@
 			// Setup what to show
 			if (vm.issuesToShow.length > 0) {
 				vm.toShow = "showIssues";
+				// Hide any scribble if showing the issues list
+				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
 			}
 			else {
 				vm.toShow = "showInfo";
@@ -496,7 +503,6 @@
 						removeAddPin();
 						EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: false});
 					}
-					//vm.toShow = "showIssues";
 					vm.showAdd = false; // So that showing add works
 					vm.canAdd = true;
 					vm.showEdit = false; // So that closing edit works
@@ -659,11 +665,24 @@
 						break;
 					}
 				}
-				vm.toShow = "showIssues";
-				setupIssuesToShow();
-				vm.showPins();
-				setContentHeight();
-				vm.canAdd = true;
+
+				// Remain in issue unless closing when showing closed issues is off
+				if (data.issue.closed) {
+					if (showClosed) {
+						setContentHeight();
+					}
+					else {
+						vm.toShow = "showIssues";
+						setupIssuesToShow();
+						vm.showPins();
+						setContentHeight();
+						vm.canAdd = true;
+						EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
+					}
+				}
+				else {
+					setContentHeight();
+				}
 			});
 		};
 
@@ -799,9 +818,13 @@
 		/**
 		 * Set up adding an issue
 		 */
-		function setupAdd (issueAreaType) {
+		function setupAdd () {
+			if (vm.toShow === "showIssue") {
+				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
+			}
 			vm.toShow = "showAdd";
 			vm.onShowItem();
+			vm.showAdd = true;
 			vm.canAdd = false;
 			setContentHeight();
 			setPinToAssignedRoleColours(vm.selectedIssue);
@@ -811,9 +834,6 @@
 			$timeout(function () {
 				($element[0].querySelector("#issueAddTitle")).select();
 			});
-
-			// Show the issue area
-			EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: issueAreaType});
 		}
 	}
 }());

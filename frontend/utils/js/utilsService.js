@@ -26,6 +26,13 @@
     function UtilsService($http, $q, serverConfig) {
         var obj = {};
 
+		/**
+         * Prettify timestamp
+         *
+         * @param timestamp
+         * @param showSeconds
+         * @returns {string|*}
+         */
         obj.formatTimestamp = function (timestamp, showSeconds) {
             var date = new Date(timestamp),
                 formatted;
@@ -36,19 +43,37 @@
             
             if (angular.isDefined(showSeconds) && showSeconds) {
                 formatted += " " + (date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
-                            date.getMinutes() + "-" +
+                            (date.getMinutes() < 10 ? "0" : "") + date.getMinutes() + "-" +
                             (date.getSeconds() < 10 ? "0" : "") + date.getSeconds();
             }
             
             return formatted;
         };
-        
+
+		/**
+		 * Convert blah_test to blahTest
+         *
+         * @param name
+         * @param separator
+         * @returns {*|void|string|{REPLACE, REPLACE_NEGATIVE}|XML}
+         */
         obj.snake_case = function snake_case(name, separator) {
             var SNAKE_CASE_REGEXP = /[A-Z]/g;
             separator = separator || '_';
             return name.replace(SNAKE_CASE_REGEXP, function(letter, pos) {
                 return (pos ? separator : '') + letter.toLowerCase();
             });
+        };
+
+		/**
+         * Capitalise the first letter of a string
+         * Inspired by Steve Harrison's answer - http://stackoverflow.com/a/1026087/782358
+         *
+         * @param string
+         * @returns {string}
+         */
+        obj.capitalizeFirstLetter = function (string) {
+            return (string.toString()).charAt(0).toUpperCase() + string.slice(1);
         };
 
         /**

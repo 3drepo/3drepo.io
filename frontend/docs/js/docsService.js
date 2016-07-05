@@ -34,7 +34,7 @@
 			$http.get(url)
 				.then(
 					function(json) {
-						console.log(json);
+						console.log(876, json);
 						var dataType;
 						// Set up the url for each PDF doc
 						for (i = 0, length = json.data.meta.length; i < length; i += 1) {

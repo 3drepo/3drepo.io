@@ -790,8 +790,9 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 			if(subscription.inCurrentAgreement){
 
+				// set to to next 3rd of next month, give 3 days cushion
 				let expiredAt = moment(paymentInfo.ipnDate).utc()
-					.date(1)
+					.date(3)
 					.add(getSubscription(subscription.plan).billingCycle, 'month')
 					.hours(0).minutes(0).seconds(0).milliseconds(0)
 					.toDate();

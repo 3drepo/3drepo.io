@@ -35,9 +35,9 @@
 		};
 	}
 
-	DocsCtrl.$inject = ["$scope", "$mdDialog", "$timeout", "EventService", "DocsService"];
+	DocsCtrl.$inject = ["$scope", "$mdDialog", "$timeout", "EventService", "DocsService", "UtilsService"];
 
-	function DocsCtrl($scope, $mdDialog, $timeout, EventService, DocsService) {
+	function DocsCtrl($scope, $mdDialog, $timeout, EventService, DocsService, UtilsService) {
 		var vm = this,
 			promise,
 			docTypeHeight = 50,
@@ -54,9 +54,11 @@
 		 * Set up event watching
 		 */
 		$scope.$watch(EventService.currentEvent, function (event) {
+			var item, i, length;
 			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
 				// Get any documents associated with an object
 				var object = event.value;
+				console.log(object);
 				promise = DocsService.getDocs(object.account, object.project, object.id);
 				promise.then(function (data) {
 					if (Object.keys(data).length > 0) {
@@ -69,6 +71,21 @@
 								if (vm.docs.hasOwnProperty(docType)) {
 									vm.docs[docType].show = true;
 									allDocTypesHeight += docTypeHeight;
+
+									// Pretty format Meta Data dates, e.g. 1900-12-31T23:59:59
+									if (docType === "Meta Data") {
+										console.log(vm.docs["Meta Data"]);
+										for (i = 0, length = vm.docs["Meta Data"].data.length; i < length; i += 1) {
+											for (item in vm.docs["Meta Data"].data[i].metadata) {
+												if ((Date.parse(vm.docs["Meta Data"].data[i].metadata[item]) &&
+													(vm.docs["Meta Data"].data[i].metadata[item].indexOf("T") !== -1))) {
+													vm.docs["Meta Data"].data[i].metadata[item] =
+														UtilsService.formatTimestamp(new Date(vm.docs["Meta Data"].data[i].metadata[item]), true);
+													console.log(vm.docs["Meta Data"].data[i].metadata[item]);
+												}
+											}
+										}
+									}
 								}
 							}
 							setContentHeight();

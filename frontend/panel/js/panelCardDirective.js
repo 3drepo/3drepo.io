@@ -47,12 +47,17 @@
         var vm = this,
             filter = null,
 			contentHeight,
-			options = angular.element($element[0].querySelector('#options'));
+			options = angular.element($element[0].querySelector('#options')),
+			currentHighlightedOptionIndex = -1;
 
+		/*
+		 * Init
+		 */
         vm.showHelp = false;
 		vm.showFilter = false;
 		vm.visibleStatus = false;
 		vm.showClearFilterButton = false;
+		vm.showAdd = false;
 
 		/*
 		 * Watch type on contentData to create content and tool bar options
@@ -100,6 +105,11 @@
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if ((event.type === EventService.EVENT.TOGGLE_ISSUE_ADD) && (vm.contentData.type === "issues")) {
 				toggleAdd(event.value.on);
+				// Reset option highlight if the issue add is cancelled
+				if (!event.value.on) {
+					vm.contentData.options[currentHighlightedOptionIndex].color = "";
+					currentHighlightedOptionIndex = -1;
+				}
 			}
 			else if ((event.type === EventService.EVENT.PANEL_CARD_ADD_MODE) ||
 					 (event.type === EventService.EVENT.PANEL_CARD_EDIT_MODE)) {
@@ -107,6 +117,9 @@
 				if (event.value.on && (event.value.type !== vm.contentData.type)) {
 					vm.hideItem();
 				}
+			}
+			else if ((event.type === EventService.EVENT.SET_ISSUE_AREA_MODE) && (vm.contentData.type === "issues")) {
+				highlightOption(event.value);
 			}
 		});
 
@@ -205,6 +218,8 @@
 					optionElement = "<panel-card-option-" + vm.contentData.options[i].type;
 					optionElement += " id='panal_card_option_" + vm.contentData.options[i].type + "'";
 					optionElement += " ng-if='vm.contentData.options[" + i + "].visible'";
+					vm.contentData.options[i].color = "";
+					optionElement += " style='color:{{vm.contentData.options[" + i + "].color}}'";
 
 					switch (vm.contentData.options[i].type) {
 						case "filter":
@@ -217,6 +232,10 @@
 
 						case "menu":
 							optionElement += "menu='vm.contentData.menu' selected-menu-option='vm.selectedMenuOption'";
+							break;
+
+						case "close":
+							optionElement += "show='vm.contentData.show'";
 							break;
 					}
 
@@ -299,6 +318,31 @@
 					showToolbarOptions(["filter", "menu"], true);
 				}
 				EventService.send(EventService.EVENT.PANEL_CARD_ADD_MODE, {on: false});
+			}
+		}
+
+		/**
+		 * Highlight a toolbar option
+		 * @param option
+		 */
+		function highlightOption (option) {
+			var i, length;
+
+			if (vm.contentData.hasOwnProperty("options")) {
+				for (i = 0, length = vm.contentData.options.length; i < length; i += 1) {
+					if (vm.contentData.options[i].type === option) {
+						if ((currentHighlightedOptionIndex !== -1) && (currentHighlightedOptionIndex !== i)) {
+							vm.contentData.options[currentHighlightedOptionIndex].color = "";
+							currentHighlightedOptionIndex = i;
+							vm.contentData.options[i].color = "#FF9800";
+						}
+						else {
+							currentHighlightedOptionIndex = i;
+							vm.contentData.options[i].color = "#FF9800";
+						}
+						break;
+					}
+				}
 			}
 		}
 	}

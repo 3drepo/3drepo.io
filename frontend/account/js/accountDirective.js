@@ -35,16 +35,11 @@
 		};
 	}
 
-	AccountCtrl.$inject = ["$scope", "$location", "AccountService", "Auth"];
+	AccountCtrl.$inject = ["$scope", "$location", "$injector", "$state", "AccountService", "Auth", "UtilsService"];
 
-	function AccountCtrl($scope, $location, AccountService, Auth) {
+	function AccountCtrl($scope, $location, $injector, $state, AccountService, Auth, UtilsService) {
 		var vm = this,
 			promise;
-
-		/*
-		 * Init
-		 */
-		vm.itemToShow = "repos";
 
 		/*
 		 * Get the account data
@@ -55,22 +50,30 @@
 			{
 				promise = AccountService.getUserInfo(vm.account);
 				promise.then(function (response) {
-					// Response with data.type indicates it's not the user's account
-					if (!response.data.hasOwnProperty("type")) {
-						vm.accounts = response.data.accounts;
-						vm.username = vm.account;
-						vm.firstName = response.data.firstName;
-						vm.lastName = response.data.lastName;
-						vm.email = response.data.email;
-						/*
-						 vm.hasAvatar = response.data.hasAvatar;
-						 vm.avatarURL = response.data.avatarURL;
-						 */
+					vm.accounts = response.data.accounts;
+					vm.username = vm.account;
+					vm.firstName = response.data.firstName;
+					vm.lastName = response.data.lastName;
+					vm.email = response.data.email;
+
+					// Go to the correct "page"
+					if ($location.search().hasOwnProperty("page")) {
+						// Check that there is a directive for that "page"
+						if ($injector.has("account" + UtilsService.capitalizeFirstLetter($location.search().page) + "Directive")) {
+							vm.itemToShow = ($location.search()).page;
+						}
+						else {
+							vm.itemToShow = "repos";
+						}
 					}
 					else {
-						// Redirect user to projects list
-						$location.path("/", "_self");
+						vm.itemToShow = "repos";
 					}
+					/*
+					 vm.hasAvatar = response.data.hasAvatar;
+					 vm.avatarURL = response.data.avatarURL;
+					 */
+					goToProject();
 				});
 			} else {
 				vm.username        = null;
@@ -80,10 +83,53 @@
 				vm.projectsGrouped = null;
 			}
 		});
-		
-		vm.showItem = function (item) {
-			vm.itemToShow = item;
+
+		/*
+		 * Watch for change in project
+		 */
+		$scope.$watch("vm.state.project", function() {
+			goToProject();
+		});
+
+		/*
+		 * Handle browser back/forward buttons because 'reloadOnSearch' is set to false
+		 */
+		$scope.$on('$locationChangeSuccess', function() {
+			if ($state.params.hasOwnProperty("page") && ($state.params.page !== undefined)) {
+				vm.showPage($state.params.page);
+			}
+		});
+
+		/**
+		 * For pages to show other pages
+		 * 
+		 * @param page
+		 * @param callingPage
+		 */
+		vm.showPage = function (page, callingPage) {
+			vm.itemToShow = page;
+			$location.search("page", page);
+			vm.callingPage = callingPage;
 		};
+
+		/**
+		 * Go to a project or back to the projects list if the project is unknown
+		 */
+		function goToProject () {
+			var i, length;
+			vm.showProject = false;
+			if (angular.isDefined(vm.accounts)) {
+				for (i = 0, length = vm.accounts[0].projects.length; i < length; i += 1) {
+					if (vm.accounts[0].projects[i].project === vm.state.project) {
+						vm.showProject = true;
+						break;
+					}
+				}
+				if (!vm.showProject) {
+					$location.path("/" + vm.state.account, "_self");
+				}
+			}
+		}
 
 		/**
 		 * Event listener for change in local storage login status
@@ -98,7 +144,7 @@
 		}
 		window.addEventListener("storage", loginStatusListener, false);
 		// Set the logged in status to the account name just once
-		if (localStorage.getItem("tdrLoggedIn") === "false") {
+		if ((localStorage.getItem("tdrLoggedIn") === "false") && (vm.account !== null)) {
 			localStorage.setItem("tdrLoggedIn", vm.account);
 		}
 	}

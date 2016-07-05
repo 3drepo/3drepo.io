@@ -34,7 +34,6 @@ var public_files = {
 		angularrouterjs: '/public/js/external/angular-ui-router.js',
 		momentjs: '/public/js/external/moment.js',
 		showdownjs: '/public/js/external/showdown.min.js',
-		angularsliderjs: '/public/js/external/slider.js',
 		socketio: '/public/js/external/socket.io.js',
         angularmaterialjs: '/public/js/external/angular-material.min.js',
         angularanimatejs: '/public/js/external/angular-animate.min.js',

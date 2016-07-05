@@ -2,8 +2,9 @@
 	md-content.md-whiteframe-1dp(aria-label="Projects", flex)
 		md-toolbar
 			.md-toolbar-tools
+				h2 {{vm.username}}
 
-		div(layout="column")
+		#accountInfoContent(layout="column")
 			div(layout="row", flex=)
 				img.account-avatar-image(ng-if="vm.hasAvatar", ng-src='{{vm.avatarURL}}')
 				#noAvatarIcon(flex, layout="row")
@@ -14,11 +15,8 @@
 						div.md-list-item-text
 							h3 {{vm.firstName}} {{vm.lastName}}
 							p {{vm.email}}
-					md-divider
-					md-list-item.md-2-line(ng-click="vm.showItem('repos')")
+						md-divider
+					md-list-item.md-2-line.accountInfoPage(ng-repeat="(key, value) in vm.accountOptions", ng-click="vm.showItem(key)")
 						div.md-list-item-text
-							h3 Repos
-					md-divider
-					md-list-item.md-2-line(ng-click="vm.showItem('profile')")
-						div.md-list-item-text
-							h3 Profile
+							h3 {{value.label}}
+						md-divider(ng-if="!$last")

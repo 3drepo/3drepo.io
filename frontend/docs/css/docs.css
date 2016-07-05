@@ -8,12 +8,8 @@ docs .typesList h4 {
   color: rgba(0,0,0,0.6);
 }
 
-docs .docList {
-  padding: 15px 15px 5px 15px;
-  outline: none;
-}
-docs div:hover {
-  cursor: pointer;
+docs #docItem md-divider {
+  margin-top: 10px;
 }
 
 docs md-icon {
@@ -27,7 +23,7 @@ docs .docsLoadInfo {
 }
 
 docs .dataItem {
-  padding: 0 20px 0 20px;
+  padding: 0 15px;
   outline: none;
 }
 
@@ -35,9 +31,15 @@ docs .metadataKey,
 docs .metadataValue {
   word-wrap: break-word;
   font-size: 14px;
+  margin-bottom: 0;
 }
 docs .metadataKey {
-  color: rgba(0,0,0,0.5);
+  margin: 5px 0 5px 5px;
+  color: rgba(0,0,0,0.6);
+}
+docs .metadataValue {
+  margin: 5px 0;
+  color: rgba(0,0,0,0.9);
 }
 
 docs .cardInfo {
@@ -57,6 +59,13 @@ docs .cardInfo md-icon {
   font-size: 16px;
   width: 16px;
   height: 16px;
+}
+
+docs .docsListBackground1 {
+  background: rgb(240,240,240);;
+}
+docs .docsListBackground2 {
+  background: rgb(250,250,250);
 }
 
 /** Docs Dialog *******************************************************************************************************/

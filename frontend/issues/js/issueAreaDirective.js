@@ -278,7 +278,6 @@
          * Set up placing of the pin
          */
         function setupPin () {
-            console.log(1);
             vm.canvasPointerEvents = "none";
         }
 
