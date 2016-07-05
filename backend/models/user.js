@@ -716,7 +716,7 @@ schema.methods.buySubscriptions = function(plans, billingUser){
 schema.methods.createSubscription = function(plan, billingUser, active, expiredAt){
 	'use strict';
 
-	if(plan === 'THE-100-QUID-PLAN' || plan === 'SOFT-LAUNCH-FREE-TRIAL'){
+	if(getSubscription(plan)){
 
 
 		this.customData.subscriptions = this.customData.subscriptions || [];
@@ -885,7 +885,7 @@ schema.methods.getActiveSubscriptions = function(){
 	let now = new Date();
 	return _.filter(
 		this.customData.subscriptions, 
-		subscription => subscription.active && subscription.expiredAt > now
+		subscription => subscription.active && (subscription.expiredAt > now || !subscription.expiredAt)
 	);
 };
 
