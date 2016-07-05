@@ -852,14 +852,33 @@ contact md-input-container textarea {
     min-height: 100px !important;
 }
 
-contact .md-button {
+contact #contactSendButton {
     margin-top: 10px;
+    margin-bottom: 20px;
 }
 
 contact md-input-container {
     margin: 0;
 }
 
+contact #contact3DRepo p {
+    margin: 5px;
+}
+contact #contact3DRepo .contact3DRepoLabel {
+    color: rgba(0, 0, 0, 0.4);
+}
+contact #contact3DRepo #contactEmailButton {
+    margin-left: 0;
+    text-transform: lowercase;
+    font-size: 16px;
+    font-weight: normal;
+}
+
+contact #contactDivider {
+    width: 2px;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.1);
+}
 cookies .md-toolbar-tools img {
     width: 150px;
 }
