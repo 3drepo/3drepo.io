@@ -46,7 +46,7 @@
 	//router.post('/:account/database', middlewares.canCreateDatabase, createDatabase);
 	router.post('/:account/subscriptions', middlewares.canCreateDatabase, createSubscription);
 	router.post("/:account/subscriptions/:sid/assign", middlewares.hasWriteAccessToAccount, assignSubscription);
-	router.delete("/:account/subscriptions/:sid/assign", middlewares.hasWriteAccessToAccount, removeAssignedSubscription)
+	router.delete("/:account/subscriptions/:sid/assign", middlewares.hasWriteAccessToAccount, removeAssignedSubscription);
 	router.post('/:account/verify', middlewares.connectQueue, verify);
 	router.post('/:account/forgot-password', forgotPassword);
 	router.put("/:account", middlewares.hasWriteAccessToAccount, updateUser);

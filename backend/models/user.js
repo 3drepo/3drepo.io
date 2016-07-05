@@ -1012,7 +1012,7 @@ schema.methods.removeAssignedSubscriptionFromUser = function(id){
 		return this.save().then(() => subscription);
 	});
 
-}
+};
 
 schema.methods.assignSubscriptionToUser = function(id, userData){
 	'use strict';
