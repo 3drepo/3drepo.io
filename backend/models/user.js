@@ -527,7 +527,7 @@ schema.methods.listAccounts = function(){
 	});
 };
 
-schema.methods.listProjects = function(){
+schema.methods.listProjects = function(options){
 	'use strict';
 
 	return this.getPrivileges().then(privs => {
@@ -557,6 +557,10 @@ schema.methods.listProjects = function(){
 	}).then(projects => {
 
 		//get timestamp for project
+		if(options && options.skipTimestamp){
+			return Promise.resolve(projects);
+		}
+
 		let promises = [];
 		projects.forEach((project, index) => {
 			promises.push(
@@ -579,6 +583,10 @@ schema.methods.listProjects = function(){
 	}).then(projects => {
 
 		//get status for project
+		if(options && options.skipStatus){
+			return Promise.resolve(projects);
+		}
+
 		let promises = [];
 
 		projects.forEach((project, index) => {
@@ -966,6 +974,46 @@ schema.methods.hasRole = function(db, roleName){
 	return null;
 };
 
+schema.methods.removeAssignedSubscriptionFromUser = function(id){
+	'use strict';
+
+	let subscription = this.customData.subscriptions.id(id);
+	
+	if(!subscription){
+		return Promise.reject({ resCode: responseCodes.SUBSCRIPTION_NOT_FOUND});
+	}
+
+	if(!subscription.assignedUser){
+		return Promise.reject({ resCode: responseCodes.SUBSCRIPTION_NOT_ASSIGNED});
+	}
+
+	if(subscription.assignedUser === this.user){
+		return Promise.reject({ resCode: responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF});
+	}
+
+	//check if they are a collaborator
+	return projectSetting.find({ account: this.user }, {}).then(projects => {
+
+		let found = false;
+		projects.forEach(project => {
+			project.collaborators.forEach(collaborator => {
+				if(collaborator.user === subscription.assignedUser){
+					found = true;
+				}
+			});
+		});
+
+		if(found){
+			return Promise.reject({ resCode: responseCodes.USER_IN_COLLABORATOR_LIST });
+		}
+
+	}).then(() => {
+		subscription.assignedUser = undefined;
+		return this.save().then(() => subscription);
+	});
+
+}
+
 schema.methods.assignSubscriptionToUser = function(id, userData){
 	'use strict';
 
@@ -976,8 +1024,7 @@ schema.methods.assignSubscriptionToUser = function(id, userData){
 	}
 
 	let next;
-	
-	console.log(userData);
+
 	
 	if(userData.email){
 		next = User.findByEmail(userData.email);

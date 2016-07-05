@@ -46,6 +46,7 @@
 	//router.post('/:account/database', middlewares.canCreateDatabase, createDatabase);
 	router.post('/:account/subscriptions', middlewares.canCreateDatabase, createSubscription);
 	router.post("/:account/subscriptions/:sid/assign", middlewares.hasWriteAccessToAccount, assignSubscription);
+	router.delete("/:account/subscriptions/:sid/assign", middlewares.hasWriteAccessToAccount, removeAssignedSubscription)
 	router.post('/:account/verify', middlewares.connectQueue, verify);
 	router.post('/:account/forgot-password', forgotPassword);
 	router.put("/:account", middlewares.hasWriteAccessToAccount, updateUser);
@@ -475,6 +476,20 @@
 			return dbUser.assignSubscriptionToUser(req.params.sid, userData);
 		}).then(subscription => {
 			console.log(subscription);
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
+		}).catch( err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+	}
+
+	function removeAssignedSubscription(req, res, next){
+
+		let responsePlace = utils.APIInfo(req);
+		User.findByUserName(req.params.account).then(dbUser => {
+			
+			return dbUser.removeAssignedSubscriptionFromUser(req.params.sid);
+
+		}).then(subscription => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
 		}).catch( err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
