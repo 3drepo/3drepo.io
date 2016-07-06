@@ -223,6 +223,7 @@
 				} else {
 					promise = IssuesService.saveComment(vm.data, vm.comment);
 					promise.then(function(data) {
+						console.log(data);
 						if (!vm.data.hasOwnProperty("comments")) {
 							vm.data.comments = [];
 						}

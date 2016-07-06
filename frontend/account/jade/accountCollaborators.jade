@@ -33,13 +33,15 @@
 			// Assigned
 			md-list
 				md-subheader.md-no-sticky Collaborators ({{vm.collaborators.length}} assigned, {{vm.unassigned.length}} unassigned)
-				md-list-item(ng-repeat="user in vm.collaborators")
+				md-list-item(ng-repeat="collaborator in vm.collaborators")
 					md-icon.angular-material-icons.collaboratorIcon(aria-label="Person") person
 					.md-list-item-text
-						p {{user.name}}
+						p {{collaborator.user}}
 					span(flex)
-					md-button.md-icon-button.md-accent(ng-click="vm.removeCollaborator($index)")
-						md-icon.angular-material-icons(aria-label="Close dialog") remove_circle
+					div(layout="row", layout-align="end center")
+						p#accountCollaboratorMessage {{collaborator.deleteMessage}}
+						md-button.md-icon-button.md-accent(ng-click="vm.removeCollaborator($index)")
+							md-icon.angular-material-icons(aria-label="Close dialog") remove_circle
 
 			// Unassigned
 			md-list#accountCollaboratorsUnassigned
