@@ -16,7 +16,7 @@ release_type = sys.argv[1]
 version      = sys.argv[2]
 
 production   = (release_type == "prod")
-branch       = "staging" if production else "master"
+branch       = "master" if production else "staging"
 
 os.system("cd ../..")
 
