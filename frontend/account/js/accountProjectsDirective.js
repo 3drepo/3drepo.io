@@ -296,7 +296,7 @@
 		vm.deleteProject = function () {
 			var i, iLength, j, jLength,
 				promise;
-			promise = UtilsService.doDelete(vm.account + "/" + vm.projectToDelete.name);
+			promise = UtilsService.doDelete({}, vm.account + "/" + vm.projectToDelete.name);
 			promise.then(function (response) {
 				if (response.status === 200) {
 					// Remove project from list

@@ -68,6 +68,9 @@
 			}
 		});
 
+		/*
+		 * Watch changes to the new collaborator name
+		 */
 		$scope.$watch("vm.newCollaborator", function (newValue) {
 			vm.addMessage = "";
 			vm.addDisabled = !(angular.isDefined(newValue) && (newValue.toString() !== ""));
