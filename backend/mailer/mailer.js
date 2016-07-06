@@ -64,9 +64,10 @@ function getURL(urlName, params){
 		return null;
 	}
 
+	let apiServerConfig = config.servers.find(server => server.service === 'api');
 	let port = '';
-	if(config.using_ssl && config.port !== 443 || !config.using_ssl && config.port !== 80){
-		port = ':' + config.port
+	if(config.using_ssl && apiServerConfig.public_port !== 443 || !config.using_ssl && apiServerConfig.public_port !== 80){
+		port = ':' + apiServerConfig.public_port;
 	}
 
 	let baseUrl = (config.using_ssl ? 'https://' : 'http://') + config.host + port;
@@ -152,5 +153,5 @@ module.exports = {
 	sendContactEmail,
 	sendPaymentFailedEmail,
 	sendPaymentErrorEmail,
-	sendProjectInvitation
+	sendProjectInvitation,
 }

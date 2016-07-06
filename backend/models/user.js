@@ -711,7 +711,7 @@ schema.methods.buySubscriptions = function(plans, billingUser){
 
 	amount = Math.round(amount * 100) / 100;
 
-	return Payment.getBillingAgreement(currency, proRataPrice, amount, billingCycle, startDate).then(_billingAgreement => {
+	return Payment.getBillingAgreement(billingUser, currency, proRataPrice, amount, billingCycle, startDate).then(_billingAgreement => {
 
 		billingAgreement = _billingAgreement;
 		this.customData.paypalPaymentToken = billingAgreement.paypalPaymentToken;
