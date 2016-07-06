@@ -25,20 +25,30 @@ paypal.configure({
 	'client_secret': config.paypal.client_secret
 });
 
-function getBillingAgreement(currency, initAmount, amount, billingCycle, startDate){
+function getBillingAgreement(billingUser, currency, initAmount, amount, billingCycle, startDate){
 	'use strict';
 
 	console.log('initAmount', initAmount);
 	console.log('amount', amount);
 	console.log('startDate', startDate);
+
+	let apiServerConfig = config.servers.find(server => server.service === 'api');
+	let port = '';
+	if(config.using_ssl && apiServerConfig.public_port !== 443 || !config.using_ssl && apiServerConfig.public_port !== 80){
+		port = ':' + apiServerConfig.public_port;
+	}
+
+	let baseUrl = (config.using_ssl ? 'https://' : 'http://') + config.host + port;
+
+
 	let billingPlanAttributes = {
 		"description": "3D Repo License",
 		"merchant_preferences": {
 			"auto_bill_amount": "yes",
-			"cancel_url": "http://www.cancel.com",
+			"cancel_url": `${baseUrl}/${billingUser}?page=billing`,
 			"initial_fail_amount_action": "continue",
 			"max_fail_attempts": "1",
-			"return_url": "http://www.success.com",
+			"return_url": `${baseUrl}/${billingUser}?page=billing`,
 			"setup_fee": {
 				"currency": currency,
 				"value": initAmount

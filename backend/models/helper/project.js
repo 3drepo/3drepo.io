@@ -19,10 +19,11 @@ var Role = require('../role');
 var ProjectSetting = require('../projectSetting');
 var User = require('../user');
 var responseCodes = require('../../response_codes');
-var importQueue = require('../../services/queue');
+//var importQueue = require('../../services/queue');
 var C = require('../../constants');
 var Mailer = require('../../mailer/mailer');
 var systemLogger = require("../../logger.js").systemLogger;
+var config = require('../../config');
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -122,6 +123,57 @@ function createAndAssignRole(project, account, username, desc, type) {
 	});
 }
 
+function importToyJSON(db, project){
+	'use strict';
+
+	let path = '../../statics/toy';
+
+	let importCollectionFiles = {};
+
+	importCollectionFiles[`${project}.history.chunks`] = 'history.chunks.json';
+	importCollectionFiles[`${project}.history.files`] = 'history.files.json';
+	importCollectionFiles[`${project}.history`] = 'history.json';
+	importCollectionFiles[`${project}.issues`] = 'issues.json';
+	importCollectionFiles[`${project}.scene`] = 'scene.json';
+	importCollectionFiles[`${project}.stash.3drepo.chunks`] = 'stash.3drepo.chunks.json';
+	importCollectionFiles[`${project}.stash.3drepo.files`] = 'stash.3drepo.files.json';
+	importCollectionFiles[`${project}.stash.3drepo`] = 'stash.3drepo.json';
+	importCollectionFiles[`${project}.stash.json_mpc.chunks`] = 'stash.json_mpc.chunks.json';
+	importCollectionFiles[`${project}.stash.json_mpc.files`] = 'stash.json_mpc.files.json';
+	importCollectionFiles[`${project}.stash.src.chunks`] = 'stash.src.chunks.json';
+	importCollectionFiles[`${project}.stash.src.files`] = 'stash.src.files.json';
+
+	let host = config.db.host;
+	let username = config.db.username;
+	let password = config.db.password;
+
+	let promises = [];
+
+	Object.keys(importCollectionFiles).forEach(collection => {
+
+		let filename = importCollectionFiles[collection];
+
+		promises.push(new Promise((resolve, reject) => {
+
+			require('child_process').exec(
+			`mongoimport -j 4 --host ${host} --username ${username} --password ${password} --authenticationDatabase admin --db ${db} --collection ${collection} --file ${path}/${filename}`,
+			{ 
+				cwd: __dirname
+			}, function (err) {
+				if(err){
+					reject(err);
+				} else {
+					resolve();
+				}
+			});
+
+		}));
+	});
+
+	return Promise.all(promises);
+
+}
+
 function importToyProject(username){
 	'use strict';
 
@@ -132,7 +184,7 @@ function importToyProject(username){
 	let type = 'sample';
 	
 	//dun move the toy model instead make a copy of it
-	let copy = true;
+	// let copy = true;
 
 	
 	return createAndAssignRole(project, account, username, desc, type).then(setting => {
@@ -148,28 +200,7 @@ function importToyProject(username){
 
 	}).then(() => {
 
-		//import to queue in background
-		importQueue.importFile(
-			__dirname + '/../../statics/3dmodels/toy.ifc', 
-			'toy.ifc', 
-			account,
-			project,
-			username,
-			copy
-		).then(corID => Promise.resolve(corID)
-		).catch(errCode => {
-			//catch here to provide custom error message
-			console.log(errCode);
-
-			if(projectSetting){
-				projectSetting.errorReason = convertToErrorCode(errCode);
-				projectSetting.markModified('errorReason');
-			}
-
-			return Promise.reject(convertToErrorCode(errCode));
-
-		}).then(() => {
-
+		importToyJSON(account, project).then(() => {
 			//mark project ready
 
 			projectSetting.status = 'ok';
@@ -180,7 +211,7 @@ function importToyProject(username){
 
 		}).catch(err => {
 			// import failed for some reason(s)...
-			console.log(err.stack);
+			console.log(err);
 			//mark project failed
 			if(projectSetting){
 				projectSetting.status = 'failed';
@@ -189,6 +220,48 @@ function importToyProject(username){
 
 
 		});
+
+		//import to queue in background
+		// importQueue.importFile(
+		// 	__dirname + '/../../statics/3dmodels/toy.ifc', 
+		// 	'toy.ifc', 
+		// 	account,
+		// 	project,
+		// 	username,
+		// 	copy
+		// ).then(corID => Promise.resolve(corID)
+		// ).catch(errCode => {
+		// 	//catch here to provide custom error message
+		// 	console.log(errCode);
+
+		// 	if(projectSetting){
+		// 		projectSetting.errorReason = convertToErrorCode(errCode);
+		// 		projectSetting.markModified('errorReason');
+		// 	}
+
+		// 	return Promise.reject(convertToErrorCode(errCode));
+
+		// }).then(() => {
+
+		// 	//mark project ready
+
+		// 	projectSetting.status = 'ok';
+		// 	projectSetting.errorReason = undefined;
+		// 	projectSetting.markModified('errorReason');
+			
+		// 	return projectSetting.save();
+
+		// }).catch(err => {
+		// 	// import failed for some reason(s)...
+		// 	console.log(err.stack);
+		// 	//mark project failed
+		// 	if(projectSetting){
+		// 		projectSetting.status = 'failed';
+		// 		projectSetting.save();
+		// 	}
+
+
+		// });
 
 		//respond once project setting is created
 		return Promise.resolve();

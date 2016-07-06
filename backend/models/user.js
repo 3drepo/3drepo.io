@@ -711,7 +711,7 @@ schema.methods.buySubscriptions = function(plans, billingUser){
 
 	amount = Math.round(amount * 100) / 100;
 
-	return Payment.getBillingAgreement(currency, proRataPrice, amount, billingCycle, startDate).then(_billingAgreement => {
+	return Payment.getBillingAgreement(billingUser, currency, proRataPrice, amount, billingCycle, startDate).then(_billingAgreement => {
 
 		billingAgreement = _billingAgreement;
 		this.customData.paypalPaymentToken = billingAgreement.paypalPaymentToken;
@@ -1035,17 +1035,17 @@ schema.methods.removeAssignedSubscriptionFromUser = function(id){
 	//check if they are a collaborator
 	return projectSetting.find({ account: this.user }, {}).then(projects => {
 
-		let found = false;
+		let foundProjects = [];
 		projects.forEach(project => {
 			project.collaborators.forEach(collaborator => {
 				if(collaborator.user === subscription.assignedUser){
-					found = true;
+					foundProjects.push(project._id);
 				}
 			});
 		});
 
-		if(found){
-			return Promise.reject({ resCode: responseCodes.USER_IN_COLLABORATOR_LIST });
+		if(foundProjects.length > 0){
+			return Promise.reject({ resCode: responseCodes.USER_IN_COLLABORATOR_LIST, info: {projects: foundProjects}});
 		}
 
 	}).then(() => {

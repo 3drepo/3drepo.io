@@ -492,7 +492,7 @@
 		}).then(subscription => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
 		}).catch( err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? err.info : err);
 		});
 	}
 
