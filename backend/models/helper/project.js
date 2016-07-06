@@ -19,7 +19,7 @@ var Role = require('../role');
 var ProjectSetting = require('../projectSetting');
 var User = require('../user');
 var responseCodes = require('../../response_codes');
-var importQueue = require('../../services/queue');
+//var importQueue = require('../../services/queue');
 var C = require('../../constants');
 var Mailer = require('../../mailer/mailer');
 var systemLogger = require("../../logger.js").systemLogger;
@@ -156,12 +156,11 @@ function importToyJSON(db, project){
 		promises.push(new Promise((resolve, reject) => {
 
 			require('child_process').exec(
-			`mongoimport -j 4 --host ${host} --username ${username} --password ${password} --authenticationDatabase admin --db ${db} --collection ${collection} --file ${path}/${filename}`
-			, { 
+			`mongoimport -j 4 --host ${host} --username ${username} --password ${password} --authenticationDatabase admin --db ${db} --collection ${collection} --file ${path}/${filename}`,
+			{ 
 				cwd: __dirname
-			}, function (err, stdout) {
+			}, function (err) {
 				if(err){
-					console.log(err);
 					reject(err);
 				} else {
 					resolve();
@@ -185,7 +184,7 @@ function importToyProject(username){
 	let type = 'sample';
 	
 	//dun move the toy model instead make a copy of it
-	let copy = true;
+	// let copy = true;
 
 	
 	return createAndAssignRole(project, account, username, desc, type).then(setting => {
@@ -209,7 +208,7 @@ function importToyProject(username){
 			projectSetting.markModified('errorReason');
 			
 			return projectSetting.save();
-			
+
 		}).catch(err => {
 			// import failed for some reason(s)...
 			console.log(err);
