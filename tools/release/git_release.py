@@ -25,15 +25,16 @@ code = os.system("git checkout " + branch)
 if code:
     fatalError("git checkout failed")
 
-code = os.system("grunt webfont")
+if production:
+    code = os.system("grunt webfont")
 
-if code:
-    fatalError("Webfont compilation failed")
+    if code:
+        fatalError("Webfont compilation failed")
 
-code = os.system("grunt frontend")
+    code = os.system("grunt frontend")
 
-if code:
-    fatalError("Frontend compilation failed")
+    if code:
+        fatalError("Frontend compilation failed")
 
 code = 0
 
@@ -61,6 +62,9 @@ os.system("git tag -a " + tagName + " -m \" Version " + tagName + " \"")
 if production:
     os.system("git push origin :refs/tags/latest")
     os.system("git tag -fa latest -m \"Update latest\"")
+else:
+    os.system("git push origin :refs/tags/dev_latest")
+    os.system("git tag -fa dev_latest -m \"Update latest\"")
 
 os.system("git push origin --tags")
 os.system("git push")
