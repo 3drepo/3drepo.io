@@ -1035,17 +1035,17 @@ schema.methods.removeAssignedSubscriptionFromUser = function(id){
 	//check if they are a collaborator
 	return projectSetting.find({ account: this.user }, {}).then(projects => {
 
-		let found = false;
+		let foundProjects = [];
 		projects.forEach(project => {
 			project.collaborators.forEach(collaborator => {
 				if(collaborator.user === subscription.assignedUser){
-					found = true;
+					foundProjects.push(project._id);
 				}
 			});
 		});
 
-		if(found){
-			return Promise.reject({ resCode: responseCodes.USER_IN_COLLABORATOR_LIST });
+		if(foundProjects.length > 0){
+			return Promise.reject({ resCode: responseCodes.USER_IN_COLLABORATOR_LIST, info: {projects: foundProjects}});
 		}
 
 	}).then(() => {
