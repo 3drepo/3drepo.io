@@ -23,6 +23,7 @@ var importQueue = require('../../services/queue');
 var C = require('../../constants');
 var Mailer = require('../../mailer/mailer');
 var systemLogger = require("../../logger.js").systemLogger;
+var config = require('../../config');
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -120,6 +121,58 @@ function createAndAssignRole(project, account, username, desc, type) {
 		});
 
 	});
+}
+
+function importToy2(db, project){
+	'use strict';
+
+	let path = './backend/statics/toy';
+	console.log(process.cwd());
+	let importCollectionFiles = {};
+
+	importCollectionFiles[`${project}.history.chunks`] = 'history.chunks.json';
+	importCollectionFiles[`${project}.history.files`] = 'history.files.json';
+	importCollectionFiles[`${project}.history`] = 'history.json';
+	importCollectionFiles[`${project}.issues`] = 'issues.json';
+	importCollectionFiles[`${project}.scene`] = 'scene.json';
+	importCollectionFiles[`${project}.stash.3drepo.chunks`] = 'stash.3drepo.chunks.json';
+	importCollectionFiles[`${project}.stash.3drepo.files`] = 'stash.3drepo.files.json';
+	importCollectionFiles[`${project}.stash.3drepo`] = 'stash.3drepo.json';
+	importCollectionFiles[`${project}.stash.json_mpc.chunks`] = 'stash.json_mpc.chunks.json';
+	importCollectionFiles[`${project}.stash.json_mpc.files`] = 'stash.json_mpc.files.json';
+	importCollectionFiles[`${project}.stash.src.chunks`] = 'stash.src.chunks.json';
+	importCollectionFiles[`${project}.stash.src.files`] = 'stash.src.files.json';
+
+	let host = config.db.host;
+	let username = config.db.username;
+	let password = config.db.password;
+
+	let promises = [];
+
+	Object.keys(importCollectionFiles).forEach(collection => {
+
+		let filename = importCollectionFiles[collection];
+
+		promises.push(new Promise((resolve, reject) => {
+
+			require('child_process').exec(
+			`mongoimport -j 4 --host ${host} --username ${username} --password ${password} --authenticationDatabase admin --db ${db} --collection ${collection} --file ${path}/${filename}`
+			, { 
+				cwd: process.cwd() 
+			}, function (err, stdout) {
+				if(err){
+					console.log(err);
+					reject(err);
+				} else {
+					resolve();
+				}
+			});
+
+		}));
+	});
+
+	return Promise.all(promises);
+
 }
 
 function importToyProject(username){
@@ -350,5 +403,6 @@ module.exports = {
 	importToyProject,
 	convertToErrorCode,
 	addCollaborator,
-	removeCollaborator
+	removeCollaborator,
+	importToy2
 };
