@@ -90,6 +90,7 @@ home #legalLinks .md-button {
     font-size: 12px;
     margin: 0;
     opacity: 0.7;
+    min-width: 70px;
 }
 
 home md-radio-button ._md-label {

@@ -357,6 +357,11 @@ account-collaborators #accountCollaboratorsUnassigned {
   margin-top: -15px;
 }
 
+account-collaborators #accountCollaboratorMessage {
+  margin: 0;
+  opacity: 0.8;
+}
+
 /** Account Team ******************************************************************************************************/
 account-team .collaboratorIcon {
   margin: 0 10px !important;

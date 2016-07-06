@@ -1,6 +1,6 @@
 img#homeBackground(src="/public/images/viewer_background.jpg")
 #legalLinks(layout="row")
-	md-button(ng-repeat="display in vm.legalDisplays", ng-click="vm.legalDisplay($event, display)") {{display.title}}
+	md-button.md-primary(ng-repeat="display in vm.legalDisplays", ng-click="vm.legalDisplay($event, display)") {{display.title}}
 
 #homeLogo
 	img(src="/public/images/3drepo-logo-white.png")

@@ -4801,7 +4801,7 @@ var ViewerManager = {};
 				for (i = 0; i < response.data.length; i += 1) {
 					if (response.data[i].hasOwnProperty("assignedUser")) {
 						if (response.data[i].assignedUser !== vm.account) {
-							vm.collaborators.push({name: response.data[i].assignedUser});
+							vm.collaborators.push({user: response.data[i].assignedUser, id: response.data[i]._id});
 						}
 					}
 					else {
@@ -4832,7 +4832,7 @@ var ViewerManager = {};
 				console.log(response);
 				if (response.status === 200) {
 					vm.addMessage = "User " + vm.newCollaborator + " added as a collaborator";
-					vm.collaborators.push({name: vm.newCollaborator});
+					vm.collaborators.push({user: response.data.assignedUser, id: response.data._id});
 					vm.unassigned.splice(0, 1);
 					vm.allLicensesAssigned = (vm.unassigned === 0);
 				}
@@ -4848,10 +4848,20 @@ var ViewerManager = {};
 		 * @param index
 		 */
 		vm.removeCollaborator = function (index) {
-			var collaborator = vm.collaborators.splice(index, 1);
-			vm.users.push(collaborator[0]);
-			vm.unassigned.push(null);
-			vm.addDisabled = false;
+			promise = UtilsService.doDelete({}, vm.account + "/subscriptions/" + vm.collaborators[index].id + "/assign");
+			promise.then(function (response) {
+				console.log(response);
+				if (response.status === 200) {
+					vm.collaborators.splice(index, 1);
+					vm.unassigned.push(null);
+					vm.addDisabled = false;
+				}
+				else if (response.data.status === 400) {
+					if (response.data.value === 94) {
+						vm.collaborators[index].deleteMessage = "Currently a member of a team";
+					}
+				}
+			});
 		};
 
 		vm.querySearch = function (query) {
@@ -4860,8 +4870,8 @@ var ViewerManager = {};
 
 		function createFilterFor (query) {
 			var lowercaseQuery = angular.lowercase(query);
-			return function filterFn(user) {
-				return (user.name.indexOf(lowercaseQuery) === 0);
+			return function filterFn(collaborator) {
+				return (collaborator.user.indexOf(lowercaseQuery) === 0);
 			};
 		}
 	}
@@ -9901,7 +9911,8 @@ var ViewerManager = {};
 		vm.legalDisplays = [
 			{title: "Terms & Conditions", value: "termsAndConditions"},
 			{title: "Privacy", value: "privacy"},
-			{title: "Cookies", value: "cookies"}
+			{title: "Cookies", value: "cookies"},
+			{title: "Contact", value: "contact"}
 		];
 		vm.goToAccount = false;
 
@@ -9909,8 +9920,8 @@ var ViewerManager = {};
 		 * Watch the state to handle moving to and from the login page
 		 */
 		$scope.$watch("vm.state", function () {
-			console.log(vm.state);
-			if (vm.state.hasOwnProperty("loggedIn")) {
+			console.log(666, vm.state);
+			if (vm.state.hasOwnProperty("loggedIn") && vm.state.hasOwnProperty("changing") && vm.state.changing) {
 				if (!vm.state.loggedIn) {
 					$timeout(function () {
 						homeLoggedOut = angular.element($element[0].querySelector('#homeLoggedOut'));
@@ -10709,6 +10720,7 @@ angular.module('3drepo')
 				} else {
 					promise = IssuesService.saveComment(vm.data, vm.comment);
 					promise.then(function(data) {
+						console.log(data);
 						if (!vm.data.hasOwnProperty("comments")) {
 							vm.data.comments = [];
 						}

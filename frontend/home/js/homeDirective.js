@@ -98,7 +98,8 @@
 		vm.legalDisplays = [
 			{title: "Terms & Conditions", value: "termsAndConditions"},
 			{title: "Privacy", value: "privacy"},
-			{title: "Cookies", value: "cookies"}
+			{title: "Cookies", value: "cookies"},
+			{title: "Contact", value: "contact"}
 		];
 		vm.goToAccount = false;
 
@@ -106,8 +107,8 @@
 		 * Watch the state to handle moving to and from the login page
 		 */
 		$scope.$watch("vm.state", function () {
-			console.log(vm.state);
-			if (vm.state.hasOwnProperty("loggedIn")) {
+			console.log(666, vm.state);
+			if (vm.state.hasOwnProperty("loggedIn") && vm.state.hasOwnProperty("changing") && vm.state.changing) {
 				if (!vm.state.loggedIn) {
 					$timeout(function () {
 						homeLoggedOut = angular.element($element[0].querySelector('#homeLoggedOut'));
