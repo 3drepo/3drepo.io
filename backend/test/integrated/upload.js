@@ -142,7 +142,7 @@ describe('Uploading a project', function () {
 
 		it('should succee (uppercase extension)', function(done){
 			agent.post(`/${username}/${project}/upload`)
-			.attach('file', __dirname + '/../../statics/3dmodels/toy.IFC')
+			.attach('file', __dirname + '/../../statics/3dmodels/upper.OBJ')
 			.expect(200, function(err, res){
 				done(err);
 			});

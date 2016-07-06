@@ -75,7 +75,11 @@ var schema = mongoose.Schema({
 			inCurrentAgreement: Boolean,
 			database: String
 		}],
-
+		billingInfo:{
+			postcode: String,
+			vat: String,
+			country: String
+		},
 		//global billing info
 		billingAgreementId: String,
 		paypalPaymentToken: String,
@@ -325,7 +329,7 @@ schema.methods.getAvatar = function(){
 schema.methods.updateInfo = function(updateObj){
 	'use strict';
 
-	let updateableFields = [ 'firstName', 'lastName', 'email' ];
+	let updateableFields = [ 'firstName', 'lastName', 'email', 'billingInfo' ];
 	
 	this.customData = this.customData || {};
 
@@ -523,7 +527,7 @@ schema.methods.listAccounts = function(){
 	});
 };
 
-schema.methods.listProjects = function(){
+schema.methods.listProjects = function(options){
 	'use strict';
 
 	return this.getPrivileges().then(privs => {
@@ -553,6 +557,10 @@ schema.methods.listProjects = function(){
 	}).then(projects => {
 
 		//get timestamp for project
+		if(options && options.skipTimestamp){
+			return Promise.resolve(projects);
+		}
+
 		let promises = [];
 		projects.forEach((project, index) => {
 			promises.push(
@@ -575,6 +583,10 @@ schema.methods.listProjects = function(){
 	}).then(projects => {
 
 		//get status for project
+		if(options && options.skipStatus){
+			return Promise.resolve(projects);
+		}
+
 		let promises = [];
 
 		projects.forEach((project, index) => {
@@ -716,7 +728,7 @@ schema.methods.buySubscriptions = function(plans, billingUser){
 schema.methods.createSubscription = function(plan, billingUser, active, expiredAt){
 	'use strict';
 
-	if(plan === 'THE-100-QUID-PLAN' || plan === 'SOFT-LAUNCH-FREE-TRIAL'){
+	if(getSubscription(plan)){
 
 
 		this.customData.subscriptions = this.customData.subscriptions || [];
@@ -790,8 +802,9 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 			if(subscription.inCurrentAgreement){
 
+				// set to to next 3rd of next month, give 3 days cushion
 				let expiredAt = moment(paymentInfo.ipnDate).utc()
-					.date(1)
+					.date(3)
 					.add(getSubscription(subscription.plan).billingCycle, 'month')
 					.hours(0).minutes(0).seconds(0).milliseconds(0)
 					.toDate();
@@ -829,6 +842,8 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 			billing.amount = paymentInfo.amount;
 			billing.billingAgreementId = billingAgreementId;
 			billing.items = items;
+			//copy current billing info from user to billing
+			billing.info = dbUser.customData.billingInfo;
 
 			billing.periodStart = moment(paymentInfo.ipnDate).utc()
 				.hours(0).minutes(0).seconds(0).milliseconds(0)
@@ -876,6 +891,47 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 };
 
+schema.methods.executeBillingAgreement = function(token, billingAgreementId){
+	'use strict';
+
+	this.customData.paypalPaymentToken = token;
+	this.customData.billingAgreementId = billingAgreementId;
+
+	let assignedBillingUser = false;
+
+	this.customData.subscriptions.forEach(subscription => {
+
+		if(subscription.assignedUser === this.customData.billingUser){
+			assignedBillingUser = true;
+		}
+
+		subscription.inCurrentAgreement = true;
+
+		// pre activate
+		// don't wait for IPN message to confirm but to activate the subscription right away, for 2 hours.
+		// IPN message should come quickly after executing an agreement, usually less then a minute
+		let twoHoursLater = moment().utc().add(2, 'hour').toDate();
+		if(!subscription.expiredAt || subscription.expiredAt < twoHoursLater){
+			subscription.active = true;
+			subscription.expiredAt = twoHoursLater;
+			subscription.limits = getSubscription(subscription.plan).limits;
+		}
+
+	});
+
+	if(!assignedBillingUser){
+
+		let subscriptions = this.customData.subscriptions;
+		
+		for(let i=0; i < subscriptions.length; i++){
+			if(!subscriptions[i].assignedUser){
+				subscriptions[i].assignedUser = this.customData.billingUser;
+				break;
+			}
+		}
+	}
+};
+
 schema.methods.haveActiveSubscriptions = function(){
 	return this.getActiveSubscriptions().length > 0;
 };
@@ -885,7 +941,7 @@ schema.methods.getActiveSubscriptions = function(){
 	let now = new Date();
 	return _.filter(
 		this.customData.subscriptions, 
-		subscription => subscription.active && subscription.expiredAt > now
+		subscription => subscription.active && (subscription.expiredAt > now || !subscription.expiredAt)
 	);
 };
 
@@ -959,6 +1015,46 @@ schema.methods.hasRole = function(db, roleName){
 	return null;
 };
 
+schema.methods.removeAssignedSubscriptionFromUser = function(id){
+	'use strict';
+
+	let subscription = this.customData.subscriptions.id(id);
+	
+	if(!subscription){
+		return Promise.reject({ resCode: responseCodes.SUBSCRIPTION_NOT_FOUND});
+	}
+
+	if(!subscription.assignedUser){
+		return Promise.reject({ resCode: responseCodes.SUBSCRIPTION_NOT_ASSIGNED});
+	}
+
+	if(subscription.assignedUser === this.user){
+		return Promise.reject({ resCode: responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF});
+	}
+
+	//check if they are a collaborator
+	return projectSetting.find({ account: this.user }, {}).then(projects => {
+
+		let found = false;
+		projects.forEach(project => {
+			project.collaborators.forEach(collaborator => {
+				if(collaborator.user === subscription.assignedUser){
+					found = true;
+				}
+			});
+		});
+
+		if(found){
+			return Promise.reject({ resCode: responseCodes.USER_IN_COLLABORATOR_LIST });
+		}
+
+	}).then(() => {
+		subscription.assignedUser = undefined;
+		return this.save().then(() => subscription);
+	});
+
+};
+
 schema.methods.assignSubscriptionToUser = function(id, userData){
 	'use strict';
 
@@ -969,8 +1065,7 @@ schema.methods.assignSubscriptionToUser = function(id, userData){
 	}
 
 	let next;
-	
-	console.log(userData);
+
 	
 	if(userData.email){
 		next = User.findByEmail(userData.email);

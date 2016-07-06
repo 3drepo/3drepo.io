@@ -32,7 +32,7 @@
 	//var crypto = require('crypto');
 	var ProjectHelper = require('../models/helper/project');
 	var Billing = require('../models/billing');
-	var moment = require('moment');
+	var Subscription = require('../models/subscription');
 
 	router.post("/login", login);
 	router.get("/login", checkLogin);
@@ -46,6 +46,7 @@
 	//router.post('/:account/database', middlewares.canCreateDatabase, createDatabase);
 	router.post('/:account/subscriptions', middlewares.canCreateDatabase, createSubscription);
 	router.post("/:account/subscriptions/:sid/assign", middlewares.hasWriteAccessToAccount, assignSubscription);
+	router.delete("/:account/subscriptions/:sid/assign", middlewares.hasWriteAccessToAccount, removeAssignedSubscription);
 	router.post('/:account/verify', middlewares.connectQueue, verify);
 	router.post('/:account/forgot-password', forgotPassword);
 	router.put("/:account", middlewares.hasWriteAccessToAccount, updateUser);
@@ -218,9 +219,8 @@
 				req[C.REQ_REPO].logger.logError(JSON.stringify(err));
 			});
 
-			//soft launch give users some quota
-			let nextMonth = moment().utc().add(1, 'month');
-			return user.createSubscription('SOFT-LAUNCH-FREE-TRIAL', user.user, true, nextMonth);
+			//basic quota
+			return user.createSubscription('BASIC', user.user, true, null);
 
 		}).then(() => {
 
@@ -441,7 +441,10 @@
 
 		let responsePlace = utils.APIInfo(req);
 		User.findByUserName(req.params.account).then(user => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, user.customData.subscriptions.filter(sub => sub.active));
+
+			let subscriptions = user.getActiveSubscriptions().filter(sub => sub.plan !== Subscription.getBasicPlan().plan);
+
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscriptions);
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
@@ -473,6 +476,20 @@
 			return dbUser.assignSubscriptionToUser(req.params.sid, userData);
 		}).then(subscription => {
 			console.log(subscription);
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
+		}).catch( err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+	}
+
+	function removeAssignedSubscription(req, res, next){
+
+		let responsePlace = utils.APIInfo(req);
+		User.findByUserName(req.params.account).then(dbUser => {
+			
+			return dbUser.removeAssignedSubscriptionFromUser(req.params.sid);
+
+		}).then(subscription => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
 		}).catch( err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

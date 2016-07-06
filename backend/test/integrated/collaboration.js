@@ -476,6 +476,36 @@ describe('Sharing a project', function () {
 		});
 	});
 
+	describe('for unassigned user', function(){
+
+		before(function(done){
+
+			agent = request.agent(server);
+			agent.post('/login')
+			.send({ username, password })
+			.expect(200, function(err, res){
+				expect(res.body.username).to.equal(username);
+				done(err);
+			});
+			
+		});
+
+		it('should fail', function(done){
+			let role = {
+				user: username_viewer + '1',
+				role: 'viewer'
+			};
+
+			agent.post(`/${username}/${project}/collaborators`)
+			.send(role)
+			.expect(400, function(err, res){
+				expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+				done(err);
+			});
+		});
+	});
+
+	
 	// describe('if run out of quota', function(done){
 
 	// 	before(function(done){

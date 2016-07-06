@@ -12,13 +12,13 @@ var subscriptions = {
 		amount: 100
 	},
 
-	'SOFT-LAUNCH-FREE-TRIAL': {
-		plan: 'SOFT-LAUNCH-FREE-TRIAL',
+	'BASIC': {
+		plan: 'BASIC',
 		limits: {
-			spaceLimit: 10737418240, //bytes
-			collaboratorLimit:1,
+			spaceLimit: 26214400, //bytes
+			collaboratorLimit: 0,
 		},
-		billingCycle: 1, //month
+		billingCycle: -1, //month
 		freeTrial: 0, //month
 		currency: 'GBP',
 		amount: 0
@@ -29,6 +29,11 @@ function getSubscription(plan){
 	return subscriptions[plan];
 }
 
+function getBasicPlan(){
+	return getSubscription('BASIC');
+}
+
 module.exports = {
-	getSubscription
+	getSubscription,
+	getBasicPlan
 };
