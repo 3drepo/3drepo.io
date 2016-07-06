@@ -329,10 +329,10 @@ account-billing #accountBillingHistoryContainer {
   padding-left: 10px;
 }
 
-account-billing #accountBillingSave {
+account-billing .accountBillingSave {
   margin: -20px 0 20px;
 }
-account-billing #accountBillingSave img {
+account-billing .accountBillingSave img {
   height: 20px;
   margin: 14px 0 0 5px;
 }

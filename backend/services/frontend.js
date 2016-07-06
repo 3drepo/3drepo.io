@@ -177,7 +177,7 @@ module.exports.createApp = function(serverConfig)
 			},
 			{
 				"plugin": "account",
-				"url": ":account?page?proj",
+				"url": ":account?page?proj?token",
 				"children": [
 					{
 						"plugin": "project",

@@ -172,6 +172,8 @@
 								$compile(loggedInElement)($scope);
 							}
 							else {
+								vm.goToAccount = true;
+								/*
 								promise = AccountService.getUserInfo(StateManager.state.account);
 								promise.then(function (response) {
 									// Response with data.type indicates it's not the user's account
@@ -183,6 +185,7 @@
 										Auth.logout();
 									}
 								});
+								*/
 							}
 						}
 						else {

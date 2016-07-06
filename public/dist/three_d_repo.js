@@ -4679,6 +4679,7 @@ var ViewerManager = {};
 			restrict: 'EA',
 			templateUrl: 'accountBilling.html',
 			scope: {
+				account: "=",
 				showPage: "&"
 			},
 			controller: AccountBillingCtrl,
@@ -4687,14 +4688,14 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountBillingCtrl.$inject = ["$scope", "$http", "$location"];
+	AccountBillingCtrl.$inject = ["$scope", "$http", "$location", "$mdDialog", "$timeout", "UtilsService"];
 
-	function AccountBillingCtrl($scope, $http, $location) {
+	function AccountBillingCtrl($scope, $http, $location, $mdDialog, $timeout, UtilsService) {
 		var vm = this,
+			promise,
 			pricePerLicense = 100,
 			quotaPerLicense = 10,
-			initData = {
-				licenses: 2,
+			initBillingInfo = {
 				postalCode: "LS11 8QT",
 				country: "United Kingdom",
 				vatNumber: "12398756"
@@ -4703,30 +4704,67 @@ var ViewerManager = {};
 		/*
 		 * Init
 		 */
-		vm.showInfo = true;
-		vm.quotaUsed = 17.3;
-		vm.quotaAvailable = Math.round(((initData.licenses * quotaPerLicense) - vm.quotaUsed) * 10) / 10; // Round to 1 decimal place
-		vm.numCurrentLicenses = initData.licenses;
-		vm.newData = angular.copy(initData);
-		vm.saveButtonDisabled = true;
-		vm.billingHistory = [
-			{"Date": "10/04/2016", "Description": "1st payment", "Payment Method": "PayPal", "Amount": 100},
-			{"Date": "10/05/2016", "Description": "2nd payment", "Payment Method": "PayPal", "Amount": 100},
-			{"Date": "10/06/2016", "Description": "3rd payment", "Payment Method": "PayPal", "Amount": 100}
-		];
-		$http.get("/public/data/countries.json").then(function (response) {
-			vm.countries = response.data;
+		if ($location.search().hasOwnProperty("token")) {
+			vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
+			showDialog("paypalDialog.html");
+			promise = UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute");
+			promise.then(function (response) {
+				console.log(866, response);
+				if (response.status === 200) {
+				}
+				vm.payPalInfo = "PayPal has finished processing.";
+				$timeout(function () {
+					$mdDialog.cancel();
+					init();
+				}, 2000);
+			});
+		}
+		else {
+			init();
+		}
+
+		/**
+		 * Initialise data
+		 */
+		function init () {
+			vm.showInfo = true;
+			vm.quotaUsed = 17.3;
+			//vm.quotaAvailable = Math.round(((initData.licenses * quotaPerLicense) - vm.quotaUsed) * 10) / 10; // Round to 1 decimal place
+			//vm.numCurrentLicenses = initData.licenses;
+			vm.newBillingInfo = angular.copy(initBillingInfo);
+			vm.saveSubscriptionDisabled = true;
+			vm.saveBillingInfoDisabled = true;
+			vm.billingHistory = [
+				{"Date": "10/04/2016", "Description": "1st payment", "Payment Method": "PayPal", "Amount": 100},
+				{"Date": "10/05/2016", "Description": "2nd payment", "Payment Method": "PayPal", "Amount": 100},
+				{"Date": "10/06/2016", "Description": "3rd payment", "Payment Method": "PayPal", "Amount": 100}
+			];
+			$http.get("/public/data/countries.json").then(function (response) {
+				vm.countries = response.data;
+			});
+
+			promise = UtilsService.doGet(vm.account + "/subscriptions");
+			promise.then(function (response) {
+				console.log(response);
+				if (response.status === 200) {
+					vm.numLicenses = response.data.length;
+					vm.numNewLicenses = vm.numLicenses;
+				}
+			});
+		}
+
+		/*
+		 * Watch for change in licenses
+		 */
+		$scope.$watch("vm.numNewLicenses", function (newValue) {
+			vm.saveSubscriptionDisabled = (vm.numLicenses === newValue);
 		});
 
-		$scope.$watch("vm.newData", function () {
-			console.log(vm.newData);
-			if (vm.newData.licenses !== "undefined") {
-				vm.priceLicenses = vm.newData.licenses * pricePerLicense;
-				vm.saveButtonDisabled = angular.equals(initData, vm.newData);
-			}
-			else {
-				vm.saveButtonDisabled = false;
-			}
+		/*
+		 * Watch for change in billing info
+		 */
+		$scope.$watch("vm.newBillingInfo", function (newValue) {
+			vm.saveBillingInfoDisabled = angular.equals(initBillingInfo, newValue);
 		}, true);
 
 		/**
@@ -4739,6 +4777,41 @@ var ViewerManager = {};
 				.search({}) // Clear all parameters
 				.search("item", index);
 		};
+
+		vm.changeSubscription = function () {
+			vm.payPalInfo = "Redirecting to PayPal. Please do not refresh the page or close the tab.";
+			showDialog("paypalDialog.html");
+			var data = {plans: [{plan: "THE-100-QUID-PLAN", quantity: vm.numNewLicenses}]};
+			promise = UtilsService.doPost(data, vm.account + "/subscriptions");
+			promise.then(function (response) {
+				console.log(response);
+				if (response.status === 200) {
+					location.href = response.data.url;
+				}
+				else {
+					vm.payPalInfo = "Error processing PayPal payment.";
+					$timeout(function () {
+						$mdDialog.cancel();
+					}, 3000);
+				}
+			});
+		};
+
+		/**
+		 * Show a dialog
+		 *
+		 * @param {String} dialogTemplate
+		 */
+		function showDialog (dialogTemplate) {
+			$mdDialog.show({
+				templateUrl: dialogTemplate,
+				parent: angular.element(document.body),
+				targetEvent: null,
+				fullscreen: true,
+				scope: $scope,
+				preserveScope: true
+			});
+		}
 	}
 }());
 
@@ -4995,6 +5068,13 @@ var ViewerManager = {};
 		 * Go to a project or back to the projects list if the project is unknown
 		 */
 		function goToProject () {
+			if (angular.isDefined(vm.state.project) && (vm.state.project !== null)) {
+				vm.showProject = true;
+			}
+			else {
+				$location.path("/" + vm.state.account, "_self");
+			}
+			/*
 			var i, length;
 			vm.showProject = false;
 			if (angular.isDefined(vm.accounts)) {
@@ -5008,6 +5088,7 @@ var ViewerManager = {};
 					$location.path("/" + vm.state.account, "_self");
 				}
 			}
+			*/
 		}
 
 		/**
@@ -9985,6 +10066,8 @@ var ViewerManager = {};
 								$compile(loggedInElement)($scope);
 							}
 							else {
+								vm.goToAccount = true;
+								/*
 								promise = AccountService.getUserInfo(StateManager.state.account);
 								promise.then(function (response) {
 									// Response with data.type indicates it's not the user's account
@@ -9996,6 +10079,7 @@ var ViewerManager = {};
 										Auth.logout();
 									}
 								});
+								*/
 							}
 						}
 						else {

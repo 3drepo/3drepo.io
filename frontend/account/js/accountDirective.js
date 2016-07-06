@@ -116,6 +116,13 @@
 		 * Go to a project or back to the projects list if the project is unknown
 		 */
 		function goToProject () {
+			if (angular.isDefined(vm.state.project) && (vm.state.project !== null)) {
+				vm.showProject = true;
+			}
+			else {
+				$location.path("/" + vm.state.account, "_self");
+			}
+			/*
 			var i, length;
 			vm.showProject = false;
 			if (angular.isDefined(vm.accounts)) {
@@ -129,6 +136,7 @@
 					$location.path("/" + vm.state.account, "_self");
 				}
 			}
+			*/
 		}
 
 		/**

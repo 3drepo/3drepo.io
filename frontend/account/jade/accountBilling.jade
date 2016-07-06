@@ -18,28 +18,34 @@
 			div(layout="row")
 				md-input-container(flex)
 					label Licenses
-					input(type="number", ng-model="vm.newData.licenses", min="{{vm.numCurrentLicenses}}")
+					input(type="number", ng-model="vm.numNewLicenses", min="{{vm.numLicenses}}")
 				md-input-container(flex)
 					label Payment (£ / month)
 					input(type="text", ng-model="vm.priceLicenses", ng-disabled="true")
+
+			.accountBillingSave
+				div(layout="row", layout-align="start")
+					md-button.md-raised.md-accent(ng-disabled="vm.saveSubscriptionDisabled", ng-click="vm.changeSubscription()") Save
+					img(src="/public/images/pp-logo-100px.png")
+				md-divider
 
 			// Billing info
 			h1.md-title Billing information
 			div(layout="row")
 				md-input-container(flex)
 					label Postal code
-					input(type="text", ng-model="vm.newData.postalCode")
+					input(type="text", ng-model="vm.newBillingInfo.postalCode")
 				md-input-container(flex)
 					label Country
-					md-select(ng-model="vm.newData.country")
+					md-select(ng-model="vm.newBillingInfo.country")
 						md-option(ng-repeat="(key, value) in vm.countries", value="{{key}}") {{key}}
 				md-input-container(flex)
 					label VAT number
-					input(type="text", ng-model="vm.newData.vatNumber")
+					input(type="text", ng-model="vm.newBillingInfo.vatNumber")
 
-			#accountBillingSave
+			.accountBillingSave
 				div(layout="row", layout-align="start")
-					md-button.md-raised.md-accent(ng-disabled="vm.saveButtonDisabled") Save
+					md-button.md-raised.md-accent(ng-disabled="vm.saveBillingInfoDisabled") Save
 					img(src="/public/images/pp-logo-100px.png")
 				md-divider
 
