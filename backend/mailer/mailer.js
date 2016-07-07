@@ -66,10 +66,10 @@ function getURL(urlName, params){
 
 	let port = '';
 	if(config.using_ssl && config.port !== 443 || !config.using_ssl && config.port !== 80){
-		port = ':' + config.port
+		port = ':' + config.public_port
 	}
 
-	let baseUrl = (config.using_ssl ? 'https://' : 'http://') + config.host + port;
+	let baseUrl = (config.using_ssl ? 'https://' : 'http://') + config.host;
 	return baseUrl + config.mail.urls[urlName](params);
 }
 

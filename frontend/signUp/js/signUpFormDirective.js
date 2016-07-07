@@ -34,9 +34,9 @@
 		};
 	}
 
-	SignUpFormCtrl.$inject = ["$scope", "$mdDialog", "serverConfig", "UtilsService"];
+	SignUpFormCtrl.$inject = ["$scope", "$mdDialog", "$location", "serverConfig", "UtilsService"];
 
-	function SignUpFormCtrl($scope, $mdDialog, serverConfig, UtilsService) {
+	function SignUpFormCtrl($scope, $mdDialog, $location, serverConfig, UtilsService) {
 		var vm = this,
 			enterKey = 13,
 			promise;
