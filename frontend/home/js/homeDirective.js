@@ -135,6 +135,8 @@
 					}
 
 					if (!goToUserPage) {
+						vm.goToAccount = false;
+						
 						// Create login element
 						notLoggedInElement = angular.element("<login></login>");
 						homeLoggedOut.append(notLoggedInElement);

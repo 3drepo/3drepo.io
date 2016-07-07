@@ -5068,7 +5068,6 @@ var ViewerManager = {};
 		 * Go to a project or back to the projects list if the project is unknown
 		 */
 		function goToProject () {
-			console.log(111111, vm.state);
 			if (angular.isDefined(vm.state.project) && (vm.state.project !== null)) {
 				vm.showProject = true;
 			}
@@ -10031,6 +10030,8 @@ var ViewerManager = {};
 					}
 
 					if (!goToUserPage) {
+						vm.goToAccount = false;
+						
 						// Create login element
 						notLoggedInElement = angular.element("<login></login>");
 						homeLoggedOut.append(notLoggedInElement);
