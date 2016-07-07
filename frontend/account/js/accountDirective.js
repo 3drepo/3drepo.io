@@ -120,6 +120,7 @@
 				vm.showProject = true;
 			}
 			else {
+				vm.showProject = false;
 				$location.path("/" + vm.state.account, "_self");
 			}
 			/*

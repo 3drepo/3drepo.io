@@ -5068,10 +5068,12 @@ var ViewerManager = {};
 		 * Go to a project or back to the projects list if the project is unknown
 		 */
 		function goToProject () {
+			console.log(111111, vm.state);
 			if (angular.isDefined(vm.state.project) && (vm.state.project !== null)) {
 				vm.showProject = true;
 			}
 			else {
+				vm.showProject = false;
 				$location.path("/" + vm.state.account, "_self");
 			}
 			/*
@@ -5105,7 +5107,6 @@ var ViewerManager = {};
 		window.addEventListener("storage", loginStatusListener, false);
 		// Set the logged in status to the account name just once
 		if ((localStorage.getItem("tdrLoggedIn") === "false") && (vm.account !== null)) {
-			console.log(345);
 			localStorage.setItem("tdrLoggedIn", vm.account);
 		}
 	}
