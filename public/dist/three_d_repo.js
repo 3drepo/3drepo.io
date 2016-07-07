@@ -5244,6 +5244,7 @@ var ViewerManager = {};
 			promise = Auth.logout();
 			promise.then(function () {
 				//$location.path("/", "_self");
+				$location.search({}); // Clear URL parameters
 				// Change the local storage login status for other tabs to listen to
 				localStorage.setItem("tdrLoggedIn", "false");
 			});
@@ -9719,6 +9720,7 @@ var ViewerManager = {};
 		this.stateVars    = {};
 
 		this.clearState = function(state) {
+			console.log(12221, self.state)
 			for (var state in self.state)
 			{
 				if ((state !== "changing") && self.state.hasOwnProperty(state))
@@ -10031,7 +10033,7 @@ var ViewerManager = {};
 
 					if (!goToUserPage) {
 						vm.goToAccount = false;
-						
+
 						// Create login element
 						notLoggedInElement = angular.element("<login></login>");
 						homeLoggedOut.append(notLoggedInElement);
@@ -10145,6 +10147,7 @@ var ViewerManager = {};
 						}
 					}
 				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
+					StateManager.clearState();
 					EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
 				} else if (event.type === EventService.EVENT.SHOW_PROJECTS) {
 					StateManager.clearState();

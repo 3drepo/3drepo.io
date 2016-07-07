@@ -136,7 +136,7 @@
 
 					if (!goToUserPage) {
 						vm.goToAccount = false;
-						
+
 						// Create login element
 						notLoggedInElement = angular.element("<login></login>");
 						homeLoggedOut.append(notLoggedInElement);
@@ -250,6 +250,7 @@
 						}
 					}
 				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
+					StateManager.clearState();
 					EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
 				} else if (event.type === EventService.EVENT.SHOW_PROJECTS) {
 					StateManager.clearState();
