@@ -63,7 +63,7 @@
 		vm.logout = function () {
 			promise = Auth.logout();
 			promise.then(function () {
-				$location.path("/", "_self");
+				//$location.path("/", "_self");
 				// Change the local storage login status for other tabs to listen to
 				localStorage.setItem("tdrLoggedIn", "false");
 			});
