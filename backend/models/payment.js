@@ -47,7 +47,7 @@ function getBillingAgreement(billingUser, currency, initAmount, amount, billingC
 			"auto_bill_amount": "yes",
 			"cancel_url": `${baseUrl}/${billingUser}?page=billing`,
 			"initial_fail_amount_action": "continue",
-			"max_fail_attempts": "1",
+			"max_fail_attempts": "0",
 			"return_url": `${baseUrl}/${billingUser}?page=billing`,
 			"setup_fee": {
 				"currency": currency,

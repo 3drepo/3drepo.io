@@ -774,7 +774,7 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 		dbUser = user;
 
 		if(!dbUser){
-			return Promise.reject({ message: 'BillingAgreementId not found'});
+			return Promise.reject({ message: `No users found with billingAgreementId ${billingAgreementId}`});
 		}
 
 		account = dbUser.user;
