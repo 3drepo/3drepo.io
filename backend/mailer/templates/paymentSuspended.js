@@ -18,12 +18,13 @@
 var html = data => `
 	Hi there,<br>
 	<br>
-	Your payment of ${data.amount} is failed. Please make sure you have enough credits in your PayPal account and have
-	your account verified.
-	<br><br> We will reattempt to collect your recurring payments again within five days.
+	Your subscription is now suspended. 
+	<br>
+	Please click on the following link if you would like to subscribe again.
+	<br><a href="${data.url}">${data.url}</a>
 `;
 
-var subject = 'Your payment to 3D Repo is failed';
+var subject = 'Your 3D Repo subscription is suspended';
 
 module.exports =  {
 	html: html,

@@ -137,8 +137,10 @@ module.exports = {
 		ipnValidateUrl: 'https://www.paypal.com/cgi-bin/webscr',
 		mode: 'live', //sandbox or live
 		client_id: '',
-		client_secret: ''
-
+		client_secret: '',
+		debug:{
+			forceExecuteAgreementError: false,
+		}
 	},
 
 	uploadSizeLimit: 209715200,

@@ -15,17 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var html = data => `
-	Hi there,<br>
-	<br>
-	Your payment of ${data.amount} is failed. Please make sure you have enough credits in your PayPal account and have
-	your account verified.
-	<br><br> We will reattempt to collect your recurring payments again within five days.
-`;
+var express = require("express");
+var Subscription = require('../models/subscription');
+var responseCodes = require("../response_codes.js");
+var router = express.Router({mergeParams: true});
+var utils = require('../utils');
 
-var subject = 'Your payment to 3D Repo is failed';
+router.get("/plans", listPlans);
 
-module.exports =  {
-	html: html,
-	subject: subject
-};
+
+function listPlans(req, res, next){
+	'use strict';
+	let place = utils.APIInfo(req);
+	let subscriptions = Subscription.getAll().filter(sub => sub.plan !== Subscription.getBasicPlan().plan);
+	
+	responseCodes.respond(place, req, res, next, responseCodes.OK, subscriptions);
+}
+
+
+module.exports = router;

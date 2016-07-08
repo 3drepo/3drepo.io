@@ -30,7 +30,10 @@ var Mailer = require('../mailer/mailer');
 var systemLogger = require("../logger.js").systemLogger;
 var Payment = require('./payment');
 var moment = require('moment');
-var getSubscription = require('./subscription').getSubscription;
+var Subscription = require('./subscription');
+var getSubscription = Subscription.getSubscription;
+
+
 
 var schema = mongoose.Schema({
 	_id : String,
@@ -76,9 +79,12 @@ var schema = mongoose.Schema({
 			database: String
 		}],
 		billingInfo:{
-			postcode: String,
+
 			vat: String,
-			country: String
+			"line1": String,
+			"city": String,
+			"postalCode": String,
+			"countryCode": String
 		},
 		//global billing info
 		billingAgreementId: String,
@@ -270,11 +276,21 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	});
 };
 
-schema.statics.verify = function(username, token, allowRepeatedVerify){
+schema.statics.verify = function(username, token, options){
 	'use strict';
 
-	return this.findByUserName(username).then(user => {
+	options = options || {};
+
+	let allowRepeatedVerify = options.allowRepeatedVerify;
+	let skipImportToyProject = options.skipImportToyProject;
+	let skipCreateBasicPlan = options.skipCreateBasicPlan;
+
+	let user;
+
+	return this.findByUserName(username).then(_user => {
 		
+		user = _user;
+
 		var tokenData = user && user.customData && user.customData.emailVerifyToken;
 
 		if(!user){
@@ -317,6 +333,26 @@ schema.statics.verify = function(username, token, allowRepeatedVerify){
 		} else {
 			return Promise.reject({ resCode: responseCodes.TOKEN_INVALID});
 		}
+
+	}).then(() => {
+
+		if(!skipImportToyProject){
+
+			//import toy project
+			var ProjectHelper = require('./helper/project');
+
+			ProjectHelper.importToyProject(username).catch(err => {
+				systemLogger.logError(JSON.stringify(err));
+			});
+		}
+
+		if(!skipCreateBasicPlan){
+			//basic quota
+			return user.createSubscription(Subscription.getBasicPlan().plan, user.user, true, null).then(() => user);
+		}
+
+		return user;
+
 	});
 };
 
@@ -607,9 +643,10 @@ schema.methods.listProjects = function(options){
 	});
 };
 
-schema.methods.buySubscriptions = function(plans, billingUser){
+schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	'use strict';
 
+	plans = plans || [];
 	this.customData.subscriptions = this.customData.subscriptions || [];
 	this.customData.billingUser = billingUser;
 
@@ -671,55 +708,82 @@ schema.methods.buySubscriptions = function(plans, billingUser){
 	});
 
 
-	if(plans.length <= 0){
-		return Promise.reject(responseCodes.LICENSE_NO_CHANGE);
-	}
-
+	let next;
 	let billingAgreement;
 
-	let startDate = moment.utc().date(1).add(1, 'month').hours(0).minutes(0).seconds(0).milliseconds(0).toDate();
-	let lastDayOfThisMonth = moment.utc().endOf('month').date();
-	let day = moment.utc().date();
+	if(plans.length <= 0){
 
-	let currency = 'GBP';
-	let amount = 0;
-	let billingCycle = 1;
+		if(!this.customData.billingAgreementId){
+			next = Promise.resolve({});
+		} else {
+			next = Payment.updateBillingAddress(this.customData.billingAgreementId, {
+				"line1": billingAddress.line1,
+				"city": billingAddress.city,
+				"postal_code": billingAddress.postalCode,
+				"country_code": billingAddress.countryCode
+			});
+		}
 
-	plans.forEach(data => {
 
-		let quantity = data.quantity;
-		let plan = getSubscription(data.plan);
-		amount += plan.amount * quantity;
-		// currency = plan.currency;
-		// billingCycle = plan.billingCycle;
+	} else {
+		let startDate = moment.utc().date(1).add(1, 'month').hours(0).minutes(0).seconds(0).milliseconds(0).toDate();
+		let lastDayOfThisMonth = moment.utc().endOf('month').date();
+		let day = moment.utc().date();
 
-	});
+		let currency = 'GBP';
+		let amount = 0;
+		let billingCycle = 1;
 
-	//cal pro-rata price of new licenses subscription
-	let proRataPrice = (lastDayOfThisMonth - day + 1) / lastDayOfThisMonth * amount;
-	proRataPrice = Math.round(proRataPrice * 100) / 100;
+		plans.forEach(data => {
 
-	//add exisiting plans to bill of next cycle as well
-	existingPlans.forEach(data => {
+			let quantity = data.quantity;
+			let plan = getSubscription(data.plan);
+			amount += plan.amount * quantity;
+			// currency = plan.currency;
+			// billingCycle = plan.billingCycle;
 
-		let quantity = data.quantity;
-		let plan = getSubscription(data.plan);
-		amount += plan.amount * quantity;
-		// currency = plan.currency;
-		// billingCycle = plan.billingCycle;
-	});
+		});
 
-	amount = Math.round(amount * 100) / 100;
+		//cal pro-rata price of new licenses subscription
+		let proRataPrice = (lastDayOfThisMonth - day + 1) / lastDayOfThisMonth * amount;
+		proRataPrice = Math.round(proRataPrice * 100) / 100;
 
-	return Payment.getBillingAgreement(billingUser, currency, proRataPrice, amount, billingCycle, startDate).then(_billingAgreement => {
+		//add exisiting plans to bill of next cycle as well
+		existingPlans.forEach(data => {
 
-		billingAgreement = _billingAgreement;
-		this.customData.paypalPaymentToken = billingAgreement.paypalPaymentToken;
+			let quantity = data.quantity;
+			let plan = getSubscription(data.plan);
+			amount += plan.amount * quantity;
+			// currency = plan.currency;
+			// billingCycle = plan.billingCycle;
+		});
 
+		amount = Math.round(amount * 100) / 100;
+
+		next = Payment.getBillingAgreement(billingUser, {
+			"line1": billingAddress.line1,
+			"city": billingAddress.city,
+			"postal_code": billingAddress.postalCode,
+			"country_code": billingAddress.countryCode
+		}, currency, proRataPrice, amount, billingCycle, startDate).then(_billingAgreement => {
+
+			billingAgreement = _billingAgreement;
+			this.customData.paypalPaymentToken = billingAgreement.paypalPaymentToken;
+
+		});
+
+	}
+
+
+	return next.then(() => {
+
+		//store billing info locally
+		console.log(billingAddress);
+		this.customData.billingInfo = billingAddress;
 		return this.save();
 
 	}).then(() => {
-		return Promise.resolve(billingAgreement);
+		return Promise.resolve(billingAgreement || {});
 	});
 
 };
@@ -774,7 +838,7 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 		dbUser = user;
 
 		if(!dbUser){
-			return Promise.reject({ message: 'BillingAgreementId not found'});
+			return Promise.reject({ message: `No users found with billingAgreementId ${billingAgreementId}`});
 		}
 
 		account = dbUser.user;
@@ -901,6 +965,10 @@ schema.methods.executeBillingAgreement = function(token, billingAgreementId){
 
 	this.customData.subscriptions.forEach(subscription => {
 
+		if(subscription.plan === Subscription.getBasicPlan().plan){
+			return;
+		}
+
 		if(subscription.assignedUser === this.customData.billingUser){
 			assignedBillingUser = true;
 		}
@@ -924,7 +992,8 @@ schema.methods.executeBillingAgreement = function(token, billingAgreementId){
 		let subscriptions = this.customData.subscriptions;
 		
 		for(let i=0; i < subscriptions.length; i++){
-			if(!subscriptions[i].assignedUser){
+
+			if(subscriptions[i].plan !== Subscription.getBasicPlan().plan && !subscriptions[i].assignedUser){
 				subscriptions[i].assignedUser = this.customData.billingUser;
 				break;
 			}

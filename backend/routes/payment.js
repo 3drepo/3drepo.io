@@ -35,7 +35,7 @@ function executeAgreement(req, res, next){
 
 		// important to check there is a user/ghost with this token before executing the agreement
 		if(!dbUser){
-			return Promise.reject({message: 'Payment token not found. Someone has updated your subscriptions while you are trying to pay.'});
+			return Promise.reject({resCode: responseCodes.PAYMENT_TOKEN_ERROR});
 		} else {
 			return new Promise((resolve, reject) => {
 				paypal.billingAgreement.execute(token, {}, (err, billingAgreement) => {
@@ -44,9 +44,15 @@ function executeAgreement(req, res, next){
 
 					if (err) {
 						reject(err);
+					} else if(
+						(config.paypal.debug && config.paypal.debug.forceExecuteAgreementError) || 
+						['Expired', 'Suspended', 'Cancelled'].indexOf(billingAgreement.state) !== -1
+					){
+						reject({ resCode: responseCodes.EXECUTE_AGREEMENT_ERROR });
+
 					} else {
 
-						if(dbUser.customData.billingAgreementId){
+						if(dbUser.customData.billingAgreementId !== billingAgreement.id){
 							//cancel the old agreement, if any
 							var cancel_note = {
 								"note": "You have updated the license subscriptions. This agreement is going to be replaced by the new one."
@@ -94,13 +100,14 @@ function activateSubscription(req, res, next){
 	let isPaymentIPN = paymentInfo.txn_type === 'recurring_payment';
 	let isSubscriptionInitIPN = paymentInfo.txn_type === 'recurring_payment_profile_created';
 	let isSubscriptionCancelled = paymentInfo.txn_type === 'recurring_payment_profile_cancel';
+	let isSubscriptionSuspended = paymentInfo.txn_type === 'recurring_payment_suspended' || paymentInfo.txn_type === 'recurring_payment_suspended_due_to_max_failed_payment';
 
 	let paymentOrSubscriptionSuccess = isPaymentIPN && paymentInfo.payment_status === 'Completed' || isSubscriptionInitIPN;
 	//let paymentPending = isPaymentIPN && paymentInfo.payment_status === 'Pending';
-	let paymentFailed = paymentInfo.txn_type === 'recurring_payment_failed';
+	let paymentFailed = paymentInfo.txn_type === 'recurring_payment_failed' || paymentInfo.txn_type === 'recurring_payment_skipped';
 
 
-	let url = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
+	let url = config.paypal.ipnValidateUrl;
 
 	let qs = querystring(req.body);
 	qs = 'cmd=_notify-validate&' + qs;
@@ -142,16 +149,38 @@ function activateSubscription(req, res, next){
 
 		} else if (isSubscriptionCancelled) {
 			// ignore
+			systemLogger.logInfo('Subscription canceled', { billingAgreementId });
 
 	    } else if (paymentFailed){
 
-	    	console.log('Payment failed');
-			User.findBillingUserByBillingId(billingAgreementId).then(user => {
+
+			return User.findBillingUserByBillingId(billingAgreementId).then(user => {
+
+				if(!user){
+					return Promise.reject({ message: `User with billingId ${billingAgreementId} not found`});
+				}
+
+				systemLogger.logInfo('Payment failed', { billingAgreementId, user: user.user });
+
 				Mailer.sendPaymentFailedEmail(user.customData.email, {
-					amount: paymentInfo.mc_currency +  ' ' + paymentInfo.mc_gross
+					amount: paymentInfo.currency_code +  ' ' + (paymentInfo.mc_gross || paymentInfo.initial_payment_amount)
 				});
 			});
 			
+		} else if (isSubscriptionSuspended) {
+
+			return User.findBillingUserByBillingId(billingAgreementId).then(user => {
+
+				if(!user){
+					return Promise.reject({ message: `User with billingId ${billingAgreementId} not found`});
+				}
+
+				systemLogger.logInfo('Billing agreement suspended', { billingAgreementId, user: user.user });
+
+				Mailer.sendSubscriptionSuspendedEmail(user.customData.email, { billingUser: user.customData.billingUser });
+
+			});
+
 		} else {
 
 			//other payment status we don't know how to deal with
@@ -164,16 +193,18 @@ function activateSubscription(req, res, next){
 		if(err){
 
 			systemLogger.logError('Error while activating subscription', {err: err, billingAgreementId: billingAgreementId} );
+			
 			if(err.stack){
 				systemLogger.logError(err.stack);
 			}
 
 
 			User.findBillingUserByBillingId(billingAgreementId).then(user => {
+
 				Mailer.sendPaymentErrorEmail({
 					ipn: JSON.stringify(paymentInfo),
-					billingUser: user.user,
-					email: user.customData.email,
+					billingUser: user && user.user,
+					email: user && user.customData.email,
 					errmsg: JSON.stringify(err),
 					billingAgreementId: billingAgreementId
 				});
