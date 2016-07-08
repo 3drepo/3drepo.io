@@ -126,56 +126,22 @@ module.exports.createApp = function(serverConfig)
 		"friends" : [
 			"login"
 		],
+		"functions" : [
+			"registerRequest",
+			"registerVerify",
+			"passwordForgot",
+			"passwordChange",
+			"pricing",
+			"signUp",
+			"contact",
+			"payment",
+			"termsAndConditions",
+			"privacy",
+			"cookies",
+			"billing"
+		],
 		"children" : [
-			{
-				"plugin": "registerRequest",
-				"url": "registerRequest"
-			},
-			{
-				"plugin": "registerVerify",
-				"url": "registerVerify?username&token&pay"
-			},
-			{
-				"plugin": "passwordForgot",
-				"url": "passwordForgot"
-			},
-			{
-				"plugin": "passwordChange",
-				"url": "passwordChange?username&token"
-			},
-			{
-				"plugin": "pricing",
-				"url": "pricing"
-			},
-			{
-				"plugin": "signUp",
-				"url": "signUp?pay"
-			},
-			{
-				"plugin": "contact",
-				"url": "contact"
-			},
-			{
-				"plugin": "payment",
-				"url": "payment?username&token"
-			},
-			{
-				"plugin": "termsAndConditions",
-				"url": "termsAndConditions"
-			},
-			{
-				"plugin": "privacy",
-				"url": "privacy"
-			},
-			{
-				"plugin": "cookies",
-				"url": "cookies"
-			},
-			{
-				"plugin": "billing",
-				"url": "billing?item"
-			},
-			{
+		{
 				"plugin": "account",
 				"url": ":account?page?proj?token",
 				"children": [
@@ -198,19 +164,6 @@ module.exports.createApp = function(serverConfig)
 							"measure",
 							"rightPanel",
 							"building"
-						],
-						'url': '/:project?at&up&view',
-						"children" : [
-							{
-								"plugin": "bid4free",
-								'url': '/bid4free',
-								children: [
-									{
-										plugin: "bid4freeWorkspace",
-										url: '/bid4freeWorkspace'
-									}
-								]
-							}
 						]
 					}
 				]
@@ -276,6 +229,15 @@ module.exports.createApp = function(serverConfig)
 				for (i = 0, length = required.friends.length; i < length; i += 1) {
 					if (statesAndPlugins.indexOf(required.friends[i]) !== -1) {
 						getJadeFiles(required.friends[i], pathToStatesAndPlugins, params);
+					}
+				}
+			}
+
+			// Functions
+			if (required.hasOwnProperty("functions")) {
+				for (i = 0, length = required.functions.length; i < length; i += 1) {
+					if (statesAndPlugins.indexOf(required.functions[i]) !== -1) {
+						getJadeFiles(required.functions[i], pathToStatesAndPlugins, params);
 					}
 				}
 			}

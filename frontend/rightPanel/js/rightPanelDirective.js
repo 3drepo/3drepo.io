@@ -36,7 +36,8 @@
 
     function RightPanelCtrl ($scope, EventService) {
         var vm = this,
-            addIssueMode = null;
+            addIssueMode = null,
+            measureMode = false;
 
         /*
          * Init
@@ -102,6 +103,11 @@
                 vm.issueButtons[addIssueMode].background = "#FF9800";
                 EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, buttonType);
             }
+        };
+
+        vm.toggleMeasure = function () {
+            measureMode = !measureMode;
+            EventService.send(EventService.EVENT.MEASURE_MODE, measureMode);
         };
     }
 }());

@@ -1,5 +1,5 @@
 account-menu
-div(ng-if="!vm.showProject")
+div(ng-if="!vm.state.project")
 	#account(layout="row")
 		account-info(username="vm.username", first-name="vm.firstName", last-name="vm.lastName", email="vm.email", item-to-show="vm.itemToShow")
 
@@ -11,5 +11,5 @@ div(ng-if="!vm.showProject")
 			account-collaborators(ng-switch-when="collaborators", account="vm.account", show-page="vm.showPage(page, callingPage)")
 			account-team(ng-switch-when="team", account="vm.account", show-page="vm.showPage(page, callingPage)")
 
-div(ng-if="vm.showProject")
+div(ng-if="vm.state.project")
 	project(account="vm.state.account" project="vm.state.project" branch="vm.state.branch" revision="vm.state.revision" state="vm.state")

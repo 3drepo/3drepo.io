@@ -73,7 +73,6 @@
 					 vm.hasAvatar = response.data.hasAvatar;
 					 vm.avatarURL = response.data.avatarURL;
 					 */
-					goToProject();
 				});
 			} else {
 				vm.username        = null;
@@ -84,65 +83,13 @@
 			}
 		});
 
-		/*
-		 * Watch for change in project
-		 */
-		$scope.$watch("vm.state.project", function() {
-			goToProject();
-		});
-
-		/*
-		 * Handle browser back/forward buttons because 'reloadOnSearch' is set to false
-		 */
-		$scope.$on('$locationChangeSuccess', function() {
-			if ($state.params.hasOwnProperty("page") && ($state.params.page !== undefined)) {
-				vm.showPage($state.params.page);
-			}
-		});
-
-		/**
-		 * For pages to show other pages
-		 * 
-		 * @param page
-		 * @param callingPage
-		 */
-		vm.showPage = function (page, callingPage) {
-			vm.itemToShow = page;
-			$location.search("page", page);
-			vm.callingPage = callingPage;
+		vm.showItem = function (item) {
+			vm.itemToShow = item;
 		};
 
 		/**
-		 * Go to a project or back to the projects list if the project is unknown
-		 */
-		function goToProject () {
-			if (angular.isDefined(vm.state.project) && (vm.state.project !== null)) {
-				vm.showProject = true;
-			}
-			else {
-				vm.showProject = false;
-				$location.path("/" + vm.state.account, "_self");
-			}
-			/*
-			var i, length;
-			vm.showProject = false;
-			if (angular.isDefined(vm.accounts)) {
-				for (i = 0, length = vm.accounts[0].projects.length; i < length; i += 1) {
-					if (vm.accounts[0].projects[i].project === vm.state.project) {
-						vm.showProject = true;
-						break;
-					}
-				}
-				if (!vm.showProject) {
-					$location.path("/" + vm.state.account, "_self");
-				}
-			}
-			*/
-		}
-
-		/**
 		 * Event listener for change in local storage login status
-		 * 
+		 *
 		 * @param event
 		 */
 		function loginStatusListener (event) {

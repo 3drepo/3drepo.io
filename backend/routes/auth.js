@@ -35,8 +35,10 @@
 	var Subscription = require('../models/subscription');
 
 	router.post("/login", login);
-	router.get("/login", checkLogin);
 	router.post("/logout", logout);
+
+	router.get("/login", checkLogin);
+
 	router.post('/contact', contact);
 	router.get("/:account.json", middlewares.loggedIn, listInfo);
 	router.get("/:account.jpg", middlewares.hasReadAccessToAccount, getAvatar);
@@ -52,14 +54,15 @@
 	router.put("/:account", middlewares.hasWriteAccessToAccount, updateUser);
 	router.put("/:account/password", middlewares.hasWriteAccessToAccount, resetPassword);
 
-
 	function expireSession(req) {
-		req.session.cookie.expires = new Date(0);
-		req.session.cookie.maxAge = 0;
+		if (req.session)
+		{
+			req.session.cookie.expires = new Date(0);
+			req.session.cookie.maxAge = 0;
+		}
 	}
 
 	function createSession(place, req, res, next, user){
-
 		req.session.regenerate(function(err) {
 			if(err) {
 				responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {username: user.username});
@@ -89,19 +92,15 @@
 		}
 
 		User.authenticate(req[C.REQ_REPO].logger, req.body.username, req.body.password).then(user => {
-
-			req[C.REQ_REPO].logger.logInfo("User is logged in", { username: req.body.username});
-
-			expireSession(req);
+			req[C.REQ_REPO].logger.logInfo("User is logged in", req.body.username);
 			createSession(responsePlace, req, res, next, {username: user.user, roles: user.roles});
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
 		});
-
 	}
 
 	function checkLogin(req, res, next){
-		if (!req.session.user) {
+		if (!req.session || !req.session.user) {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, {});
 		} else {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {username: req.session.user.username});
@@ -109,7 +108,7 @@
 	}
 
 	function logout(req, res, next){
-		if(!req.session.user){
+		if(!req.session || !req.session.user){
 			return responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, {});
 		}
 
@@ -117,7 +116,7 @@
 
 		req.session.destroy(function() {
 			req[C.REQ_REPO].logger.logDebug("User has logged out.");
-			res.clearCookie("connect.sid", { path: "/" + config.api_server.host_dir });
+			//res.clearCookie("connect.sid", { domain: config.cookie.domain, path: "/" });
 			responseCodes.respond("Logout POST", req, res, next, responseCodes.OK, {username: username});
 		});
 	}
@@ -192,7 +191,7 @@
 				email: req.body.email,
 				username: req.params.account,
 				pay: req.body.pay
-				
+
 			}).catch( err => {
 				// catch email error instead of returning to client
 				req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
@@ -209,7 +208,7 @@
 	}
 
 	function verify(req, res, next){
-		
+
 		let responsePlace = utils.APIInfo(req);
 
 		User.verify(req.params[C.REPO_REST_API_ACCOUNT], req.body.token).then(user => {
@@ -247,9 +246,9 @@
 				req[C.REQ_REPO].logger.logDebug(`Email error - ${err.message}`);
 				return Promise.reject(responseCodes.PROCESS_ERROR('Internal Email Error'));
 			});
-		
+
 		}).then(emailRes => {
-			
+
 			req[C.REQ_REPO].logger.logInfo('Email info - ' + JSON.stringify(emailRes));
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
 		}).catch(err => {
@@ -303,7 +302,7 @@
 			}
 
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, user.customData.bids);
-		
+
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
@@ -382,6 +381,7 @@
 	// 	let checkPlan = User.getSubscription(req.body.plan) ? 
 	// 		Promise.resolve() : Promise.reject({ resCode: responseCodes.INVALID_SUBSCRIPTION_PLAN });
 
+
 	// 	return checkPlan.then(() => {
 	// 		return User.createUser(req[C.REQ_REPO].logger, req.body.database, password, null, 0);
 
@@ -403,6 +403,7 @@
 	// 		//create a subscription token in this ghost user
 	// 		let billingUser = req.params.account;
 	// 		return dbUser.createSubscriptionToken(req.body.plan, billingUser);
+
 
 	// 	}).then(token => {
 
@@ -513,5 +514,4 @@
 	}
 
 	module.exports = router;
-
 }());

@@ -42,13 +42,12 @@ var Pin = {};
 	 * @param {number} clipDirection - Direction of clipping (-1 or 1)
 	 */
 	Pin = function(id, element, trans, position, norm, scale, colours, viewpoint) {
-		console.log(id);
 		var self = this;
-		
+
 		self.id = id;
-				
+
 		self.highlighted = false;
-		
+
 		self.element = element;
 		self.trans = trans;
 		self.scale = scale;
@@ -56,16 +55,16 @@ var Pin = {};
 
 		self.ghostConeIsHighlighted = null;
 		self.coneIsHighlighted = null;
-		
+
 		self.ghostPinHeadNCol = null;
 		self.pinHeadNCol = null;
-		
+
 		self.ghostPinHeadColour = null;
 		self.pinHeadColour = null;
-		
+
 		self.ghostPinHeadIsHighlighted = null;
 		self.pinHeadIsHighlighted = null;
-		
+
 		self.coneDepth = null;
 		self.pinHeadDepth = null;
 
@@ -87,7 +86,7 @@ var Pin = {};
 		var parent = document.createElement("MatrixTransform");
 		parent.setAttribute("id", self.id);
 		parent.setAttribute("matrix", trans.toGL().toString());
-		
+
 		// Transform the normal into the coordinate frame of the parent
 		self.modelTransform = document.createElement("Transform");
 
@@ -124,9 +123,8 @@ var Pin = {};
 		} else {
 			self.numColours = colours.length;
 		}
-		
+
 		self.colours = colours;
-		console.log(colours);
 
 		self.pinHeadNCol.setAttribute("value", self.numColours);
 		self.pinHeadColour.setAttribute("value", self.colours.join(" "));
@@ -134,16 +132,16 @@ var Pin = {};
 		self.ghostPinHeadNCol.setAttribute("value", self.numColours);
 		self.ghostPinHeadColour.setAttribute("value", self.colours.join(" "));
 	};
-	
+
 	Pin.prototype.highlight = function()
 	{
 		var self = this;
-		
+
 		self.highlighted = !self.highlighted;
-		
+
 		var depthMode = self.highlighted ? "ALWAYS" : "LESS" ;
 		var highlighted = self.highlighted.toString();
-		
+
 		self.pinHeadIsHighlighted.setAttribute("value", highlighted);
 		self.ghostPinHeadIsHighlighted.setAttribute("value", highlighted);
 		self.coneIsHighlighted.setAttribute("value", highlighted);
@@ -207,7 +205,7 @@ var Pin = {};
 		coneishighlighted.setAttribute("name", "highlightPin");
 		coneishighlighted.setAttribute("value", "false");
 		coneshader.appendChild(coneishighlighted);
-		
+
 		if (ghostPin)
 		{
 			self.ghostConeIsHighlighted = coneishighlighted;
@@ -320,7 +318,7 @@ var Pin = {};
 		} else {
 			self.pinHeadIsHighlighted = pinheadishighlighted;
 		}
-		
+
 		var pinuseclipplane = document.createElement("field");
 		pinuseclipplane.setAttribute("type", "SFBool");
 		pinuseclipplane.setAttribute("name", "useClipPlane");

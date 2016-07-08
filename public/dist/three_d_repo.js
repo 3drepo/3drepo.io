@@ -16,8 +16,8 @@
  **/
 
 var ViewerUtil;
-	var ViewerUtilListeners = {};
-	var ViewerUtilMyListeners = {};
+var ViewerUtilListeners = {};
+var ViewerUtilMyListeners = {};
 
 (function() {
 	"use strict";
@@ -48,6 +48,7 @@ var ViewerUtil;
 	ViewerUtil.prototype.triggerEvent = function(name, event)
 	{
 		var e = new CustomEvent(name, { detail: event });
+        console.log("TRIG: " + name);
 		eventElement.dispatchEvent(e);
 	};
 
@@ -2109,6 +2110,175 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 }());
 
 /**
+ *  Copyright (C) 2014 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+var MeasureTool = {};
+
+(function() {
+    "use strict";
+
+    MeasureTool = function(viewer){
+        var self = this;
+
+        this.viewer = viewer;
+
+        this.lineStarted       = false;
+        this.inMeasureMode     = false;
+        this.measureCoords     = [null, null];
+        this.measureLine       = null;
+        this.measureLineCoords = null;
+
+        this.measureMouseMove = function(event)
+        {
+            var viewArea = self.viewer.getViewArea();
+            var pickingInfo = viewArea._pickingInfo;
+
+            self.measureCoords[1] = pickingInfo.pickPos;
+            self.updateMeasureLine();
+        };
+
+        this.measureMouseDown = function(event)
+        {
+            var viewArea = self.viewer.getViewArea();
+            var pickingInfo = viewArea._pickingInfo;
+
+                if (!self.lineStarted)
+                {
+                    self.measureCoords[0] = pickingInfo.pickPos;
+                    self.lineStarted      = true;
+
+                    self.createMeasureLine();
+                    self.viewer.onMouseMove(self.measureMouseMove);
+                } else {
+                    self.measureCoords[1] = pickingInfo.pickPos;
+                    self.lineStarted      = false;
+
+                    self.viewer.offMouseMove(self.measureMouseMove);
+                }
+        };
+    };
+
+    MeasureTool.prototype.measureMode = function (on) {
+        var self = this;
+
+        var element = document.getElementById("x3dom-default-canvas");
+        if (on) {
+            self.inMeasureMode   = true;
+            element.style.cursor = "crosshair";
+            self.viewer.onMouseDown(self.measureMouseDown);
+            self.viewer.onMouseMove(self.measureMouseMove);
+
+            self.viewer.highlightObjects();
+
+            // Switch off the pick point functionality
+            self.viewer.disableClicking();
+        } else {
+            self.inMeasureMode   = false;
+            self.deleteMeasureLine();
+            element.style.cursor = "-webkit-grab";
+            self.viewer.offMouseDown(self.measureMouseDown);
+            self.viewer.offMouseMove(self.measureMouseMove);
+
+            // Restore the previous functionality
+            self.viewer.enableClicking();
+        }
+    };
+
+    MeasureTool.prototype.createMeasureLine = function() {
+        var self = this;
+
+        if (self.measureLine !== null)
+        {
+            self.deleteMeasureLine();
+        }
+
+        var lineDepth,
+            lineApp,
+            line,
+            colors;
+
+        var line = document.createElement("LineSet");
+        line.setAttribute("vertexCount", 8);
+
+        self.measureLineCoords = document.createElement("Coordinate");
+        self.measureLineCoords.setAttribute("point", "0 0 0,0 0 0,0 0 0,0 0 0,0 0 0,0 0 0,0 0 0,0 0 0");
+        line.appendChild(self.measureLineCoords);
+
+        var colors = document.createElement("Color");
+        colors.setAttribute("color", "0 1 0,0 1 0,1 0 0,1 0 0,0 0 1,0 0 1, 1 1 1, 1 1 1");
+        line.appendChild(colors);
+
+        var lineDepth = document.createElement("DepthMode");
+        lineDepth.setAttribute("depthFunc", "ALWAYS");
+
+        var lineApp = document.createElement("Appearance");
+        lineApp.appendChild(lineDepth);
+
+        var lineProperties = document.createElement("LineProperties");
+        lineProperties.setAttribute("linewidthScaleFactor", 3.0);
+        lineApp.appendChild(lineProperties);
+
+        self.measureLine = document.createElement("Shape");
+        self.measureLine.appendChild(lineApp);
+        self.measureLine.appendChild(line);
+
+        self.viewer.scene.appendChild(self.measureLine);
+    };
+
+    MeasureTool.prototype.updateMeasureLine = function()
+    {
+        var self = this;
+
+        if (self.lineStarted)
+        {
+        var coordString = "";
+
+            if (self.measureCoords[0] !== null && self.measureCoords[1] !== null)
+            {
+                var startCoordArray = self.measureCoords[0].toGL();
+                var endCoordArray   = self.measureCoords[1].toGL();
+
+                coordString += startCoordArray.join(" ") + ",";
+                coordString += startCoordArray[0] + " " + startCoordArray[1] + " " + endCoordArray[2] + ",";
+                coordString += startCoordArray[0] + " " + startCoordArray[1] + " " + endCoordArray[2] + ",";
+                coordString += endCoordArray[0] + " " + startCoordArray[1] + " " + endCoordArray[2] + ",";
+                coordString += endCoordArray[0] + " " + startCoordArray[1] + " " + endCoordArray[2] + ",";
+                coordString += endCoordArray.join(" ") + ",";
+                coordString += endCoordArray.join(" ") + ",";
+                coordString += startCoordArray.join(" ");
+
+                self.measureLineCoords.setAttribute("point", coordString);
+            }
+        }
+    };
+
+    MeasureTool.prototype.deleteMeasureLine = function () {
+        var self = this;
+
+        if (self.measureLine !== null) {
+            self.measureLine.parentElement.removeChild(self.measureLine);
+            self.measureLine = null;
+            self.measureLineCoords = null;
+        }
+    };
+})();
+
+
+/**
  **  Copyright (C) 2014 3D Repo Ltd
  **
  **  This program is free software: you can redistribute it and/or modify
@@ -2152,13 +2322,12 @@ var Pin = {};
 	 * @param {number} clipDirection - Direction of clipping (-1 or 1)
 	 */
 	Pin = function(id, element, trans, position, norm, scale, colours, viewpoint) {
-		console.log(id);
 		var self = this;
-		
+
 		self.id = id;
-				
+
 		self.highlighted = false;
-		
+
 		self.element = element;
 		self.trans = trans;
 		self.scale = scale;
@@ -2166,16 +2335,16 @@ var Pin = {};
 
 		self.ghostConeIsHighlighted = null;
 		self.coneIsHighlighted = null;
-		
+
 		self.ghostPinHeadNCol = null;
 		self.pinHeadNCol = null;
-		
+
 		self.ghostPinHeadColour = null;
 		self.pinHeadColour = null;
-		
+
 		self.ghostPinHeadIsHighlighted = null;
 		self.pinHeadIsHighlighted = null;
-		
+
 		self.coneDepth = null;
 		self.pinHeadDepth = null;
 
@@ -2197,7 +2366,7 @@ var Pin = {};
 		var parent = document.createElement("MatrixTransform");
 		parent.setAttribute("id", self.id);
 		parent.setAttribute("matrix", trans.toGL().toString());
-		
+
 		// Transform the normal into the coordinate frame of the parent
 		self.modelTransform = document.createElement("Transform");
 
@@ -2234,9 +2403,8 @@ var Pin = {};
 		} else {
 			self.numColours = colours.length;
 		}
-		
+
 		self.colours = colours;
-		console.log(colours);
 
 		self.pinHeadNCol.setAttribute("value", self.numColours);
 		self.pinHeadColour.setAttribute("value", self.colours.join(" "));
@@ -2244,16 +2412,16 @@ var Pin = {};
 		self.ghostPinHeadNCol.setAttribute("value", self.numColours);
 		self.ghostPinHeadColour.setAttribute("value", self.colours.join(" "));
 	};
-	
+
 	Pin.prototype.highlight = function()
 	{
 		var self = this;
-		
+
 		self.highlighted = !self.highlighted;
-		
+
 		var depthMode = self.highlighted ? "ALWAYS" : "LESS" ;
 		var highlighted = self.highlighted.toString();
-		
+
 		self.pinHeadIsHighlighted.setAttribute("value", highlighted);
 		self.ghostPinHeadIsHighlighted.setAttribute("value", highlighted);
 		self.coneIsHighlighted.setAttribute("value", highlighted);
@@ -2317,7 +2485,7 @@ var Pin = {};
 		coneishighlighted.setAttribute("name", "highlightPin");
 		coneishighlighted.setAttribute("value", "false");
 		coneshader.appendChild(coneishighlighted);
-		
+
 		if (ghostPin)
 		{
 			self.ghostConeIsHighlighted = coneishighlighted;
@@ -2430,7 +2598,7 @@ var Pin = {};
 		} else {
 			self.pinHeadIsHighlighted = pinheadishighlighted;
 		}
-		
+
 		var pinuseclipplane = document.createElement("field");
 		pinuseclipplane.setAttribute("type", "SFBool");
 		pinuseclipplane.setAttribute("name", "useClipPlane");
@@ -2462,6 +2630,7 @@ var Pin = {};
 	};
 
 }());
+
 /**
  *	Copyright (C) 2014 3D Repo Ltd
  *
@@ -2847,6 +3016,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				self.viewer.setAttribute("disableTouch", "true");
 				self.viewer.addEventListener("mousedown", onMouseDown);
 				self.viewer.addEventListener("mouseup",  onMouseUp);
+				self.viewer.addEventListener("mousemove",  onMouseMove);
 				self.viewer.style["pointer-events"] = "all";
 				self.viewer.className = "viewer";
 
@@ -2854,7 +3024,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 				self.scene = document.createElement("Scene");
 				self.scene.setAttribute("onbackgroundclicked", "bgroundClick(event);");
-				self.scene.setAttribute("dopickpass", false);
+				//self.scene.setAttribute("dopickpass", false);
 				self.viewer.appendChild(self.scene);
 
 				self.pinShader = new PinShader(self.scene);
@@ -2915,8 +3085,8 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 			self.removeLogo();
 
-			self.viewer.removeEventListener("mousedown", onMouseDown);
-			self.viewer.removeEventListener("mouseup", onMouseUp);
+			//self.viewer.removeEventListener("mousedown", onMouseDown);
+			//self.viewer.removeEventListener("mouseup", onMouseUp);
 			self.viewer.removeEventListener("keypress", self.handleKeyPresses);
 
 			self.viewer.parentNode.removeChild(self.viewer);
@@ -3179,55 +3349,98 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			ViewerUtil.onEvent("onMouseDown", functionToBind);
 		};
 
-		this.mouseDownPickPoint = function()
+		this.offMouseDown = function(functionToBind) {
+			ViewerUtil.offEvent("onMouseDown", functionToBind);
+		};
+
+		this.onMouseMove = function(functionToBind) {
+			ViewerUtil.onEvent("onMouseMove", functionToBind);
+		};
+
+		this.offMouseMove = function(functionToBind) {
+			ViewerUtil.offEvent("onMouseMove", functionToBind);
+		};
+
+		this.pickPoint = function(x, y, fireEvent)
 		{
-			var pickingInfo = self.getViewArea()._pickingInfo;
+			fireEvent = (typeof fireEvent === undefined) ? false : fireEvent;
+
+			self.getViewArea()._doc.ctx.pickValue(self.getViewArea(), x,y);
+
+			if (fireEvent)
+			{
+				// Simulate a mouse down pick point
+				self.mouseDownPickPoint({layerX: x, layerY: y});
+			}
+		};
+
+		this.mouseDownPickPoint = function(event)
+		{
+			var viewArea = self.getViewArea();
+			var pickingInfo = viewArea._pickingInfo;
 
 			if (pickingInfo.pickObj)
 			{
+				var account, project;
+				var projectParts = null;
 
-					var account, project;
-					var projectParts = null;
-
-					if (pickingInfo.pickObj._xmlNode)
+				if (pickingInfo.pickObj._xmlNode)
+				{
+					if (pickingInfo.pickObj._xmlNode.hasAttribute("id"))
 					{
-						if (pickingInfo.pickObj._xmlNode.hasAttribute("id"))
-						{
-							projectParts = pickingInfo.pickObj._xmlNode.getAttribute("id").split("__");
-						}
-					} else {
-						projectParts = pickingInfo.pickObj.pickObj._xmlNode.getAttribute("id").split("__");
+						projectParts = pickingInfo.pickObj._xmlNode.getAttribute("id").split("__");
 					}
+				} else {
+					projectParts = pickingInfo.pickObj.pickObj._xmlNode.getAttribute("id").split("__");
+				}
 
-					if (projectParts)
-					{
-						var objectID = pickingInfo.pickObj.partID ?
-							pickingInfo.pickObj.partID :
-							projectParts[2];
+				if (projectParts)
+				{
+					var objectID = pickingInfo.pickObj.partID ?
+						pickingInfo.pickObj.partID :
+						projectParts[2];
 
-						account = projectParts[0];
-						project = projectParts[1];
+					account = projectParts[0];
+					project = projectParts[1];
 
-						var inlineTransName = ViewerUtil.escapeCSSCharacters(account + "__" + project);
-						var projectInline = self.inlineRoots[inlineTransName];
-						var trans = projectInline._x3domNode.getCurrentTransform();
+					var inlineTransName = ViewerUtil.escapeCSSCharacters(account + "__" + project);
+					var projectInline = self.inlineRoots[inlineTransName];
+					var trans = projectInline._x3domNode.getCurrentTransform();
 
-						callback(self.EVENT.PICK_POINT, {
-							id: objectID,
-							position: pickingInfo.pickPos,
-							normal: pickingInfo.pickNorm,
-							trans: trans
-						});
-					} else {
-						callback(self.EVENT.PICK_POINT, {
-							position: pickingInfo.pickPos,
-							normal: pickingInfo.pickNorm
-						});
-					}
+                    console.trace(event);
+
+					callback(self.EVENT.PICK_POINT, {
+						id: objectID,
+						position: pickingInfo.pickPos,
+						normal: pickingInfo.pickNorm,
+						trans: trans,
+						screenPos: [event.layerX, event.layerY]
+					});
+				} else {
+					callback(self.EVENT.PICK_POINT, {
+						position: pickingInfo.pickPos,
+						normal: pickingInfo.pickNorm
+					});
+				}
 			}
 		};
 
 		this.onMouseDown(this.mouseDownPickPoint);
+
+		/*
+		this.mouseMovePoint = function (event) {
+			if (event.hasOwnProperty("target")) {
+				console.log(event.hitPnt);
+			}
+			else {
+				console.log(event.clientX, event.clientY);
+				var viewArea = self.getViewArea();
+				viewArea._scene._nameSpace.doc.ctx.pickValue(viewArea, event.clientX, event.clientY, 1);
+			}
+		};
+
+		this.onMouseMove(this.mouseMovePoint);
+		*/
 
 		this.onViewpointChanged = function(functionToBind) {
 			ViewerUtil.onEvent("myViewpointHasChanged", functionToBind);
@@ -3452,7 +3665,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		};
 
 		this.offClickObject = function(functionToBind) {
-			offEvent("clickObject", functionToBind);
+			ViewerUtil.offEvent("clickObject", functionToBind);
 		};
 
 		this.viewpoints = {};
@@ -4424,6 +4637,7 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 	GO_HOME: "VIEWER_GO_HOME",
 	SWITCH_FULLSCREEN: "VIEWER_SWITCH_FULLSCREEN",
 	REGISTER_VIEWPOINT_CALLBACK: "VIEWER_REGISTER_VIEWPOINT_CALLBACK",
+	REGISTER_MOUSE_MOVE_CALLBACK: "VIEWER_REGISTER_MOUSE_MOVE_CALLBACK",
 	OBJECT_SELECTED: "VIEWER_OBJECT_SELECTED",
 	BACKGROUND_SELECTED: "VIEWER_BACKGROUND_SELECTED",
 	HIGHLIGHT_OBJECTS: "VIEWER_HIGHLIGHT_OBJECTS",
@@ -4432,7 +4646,10 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 
 	GET_CURRENT_VIEWPOINT: "VIEWER_GET_CURRENT_VIEWPOINT",
 
+	MEASURE_MODE_CLICK_POINT: "VIEWER_MEASURE_MODE_CLICK_POINT",
+
 	PICK_POINT: "VIEWER_PICK_POINT",
+	MOVE_POINT: "VIEWER_MOVE_POINT",
 	SET_CAMERA: "VIEWER_SET_CAMERA",
 
 	LOGO_CLICK: "VIEWER_LOGO_CLICK",
@@ -4745,7 +4962,7 @@ var ViewerManager = {};
 
 			promise = UtilsService.doGet(vm.account + "/subscriptions");
 			promise.then(function (response) {
-				console.log("subscriptions ", response);
+				console.log(response);
 				if (response.status === 200) {
 					vm.numLicenses = response.data.length;
 					vm.numNewLicenses = vm.numLicenses;
@@ -5025,7 +5242,6 @@ var ViewerManager = {};
 					 vm.hasAvatar = response.data.hasAvatar;
 					 vm.avatarURL = response.data.avatarURL;
 					 */
-					goToProject();
 				});
 			} else {
 				vm.username        = null;
@@ -5036,65 +5252,13 @@ var ViewerManager = {};
 			}
 		});
 
-		/*
-		 * Watch for change in project
-		 */
-		$scope.$watch("vm.state.project", function() {
-			goToProject();
-		});
-
-		/*
-		 * Handle browser back/forward buttons because 'reloadOnSearch' is set to false
-		 */
-		$scope.$on('$locationChangeSuccess', function() {
-			if ($state.params.hasOwnProperty("page") && ($state.params.page !== undefined)) {
-				vm.showPage($state.params.page);
-			}
-		});
-
-		/**
-		 * For pages to show other pages
-		 * 
-		 * @param page
-		 * @param callingPage
-		 */
-		vm.showPage = function (page, callingPage) {
-			vm.itemToShow = page;
-			$location.search("page", page);
-			vm.callingPage = callingPage;
+		vm.showItem = function (item) {
+			vm.itemToShow = item;
 		};
 
 		/**
-		 * Go to a project or back to the projects list if the project is unknown
-		 */
-		function goToProject () {
-			if (angular.isDefined(vm.state.project) && (vm.state.project !== null)) {
-				vm.showProject = true;
-			}
-			else {
-				vm.showProject = false;
-				$location.path("/" + vm.state.account, "_self");
-			}
-			/*
-			var i, length;
-			vm.showProject = false;
-			if (angular.isDefined(vm.accounts)) {
-				for (i = 0, length = vm.accounts[0].projects.length; i < length; i += 1) {
-					if (vm.accounts[0].projects[i].project === vm.state.project) {
-						vm.showProject = true;
-						break;
-					}
-				}
-				if (!vm.showProject) {
-					$location.path("/" + vm.state.account, "_self");
-				}
-			}
-			*/
-		}
-
-		/**
 		 * Event listener for change in local storage login status
-		 * 
+		 *
 		 * @param event
 		 */
 		function loginStatusListener (event) {
@@ -7881,11 +8045,13 @@ var ViewerManager = {};
 	BottomButtonsCtrl.$inject = ["EventService"];
 
 	function BottomButtonsCtrl (EventService) {
-		var vm = this;
+		var vm = this,
+			measureMode = false;
+
+
 		vm.showButtons = true;
 		vm.fullScreen = false;
 		vm.showViewingOptionButtons = false;
-		console.log(EventService);
 
 		vm.toggleElements = function () {
 			EventService.send(EventService.EVENT.TOGGLE_ELEMENTS);
@@ -7935,6 +8101,14 @@ var ViewerManager = {};
 
 		var enterOculusDisplay = function () {
 			EventService.send(EventService.EVENT.VIEWER.ENTER_VR);
+		};
+
+		/**
+		 * Enter pinakin mode
+		 */
+		var setMeasureMode = function () {
+			measureMode = !measureMode;
+			EventService.send(EventService.EVENT.MEASURE_MODE, measureMode);
 		};
 
 		vm.viewingOptions = [
@@ -8094,7 +8268,7 @@ var ViewerManager = {};
 		/*
 		 * Init
 		 */
-		 
+
 		/*
 		 * Watch for show/hide of card
 		 */
@@ -8113,20 +8287,17 @@ var ViewerManager = {};
 
 
 		$scope.$watch(EventService.currentEvent, function (event) {
-			console.log('event', event);
 			if (event.type === EventService.EVENT.VIEWER.OS_BUILDING_CLICK) {
 
 				vm.testdata = event.value.id;
 				var url = '/api/os/building-meta/' + event.value.id;
-				console.log(url);
 				$http.get(url)
 					.then(
 						function(data) {
 							vm.meta = data.data;
-							console.log(vm.meta);
 						},
 						function (err) {
-							console.log(err);
+							console.trace(err);
 						}
 					);
 				}
@@ -9430,20 +9601,20 @@ var ViewerManager = {};
 })();
 
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *	Copyright (C) 2014 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 (function() {
@@ -9468,6 +9639,7 @@ var ViewerManager = {};
 
 					Auth.init().then(function (loggedIn) {
 						StateManager.state.loggedIn = loggedIn;
+
 						finishedAuth.resolve();
 					});
 
@@ -9479,27 +9651,47 @@ var ViewerManager = {};
 		var stateStack       = [structure];
 		var stateNameStack   = ["home"];
 
-		//console.log('stateStack', stateStack);
+		//console.log("stateStack", stateStack);
 		while (stateStack.length > 0)
 		{
 			var stackLength      = stateStack.length;
 			var parentState      = stateStack[0];
 			var parentStateName  = stateNameStack[0];
 
-			//console.log('parentState', parentState);
+			// First loop through the list of functions as these are
+			// more specific than the
+			if (parentState.functions)
+			{
+				for (var i = 0; i < parentState.functions.length; i++)
+				{
+					var childFunction	  = parentState.functions[i];
+					var childFunctionName = parentStateName + "." + childFunction;
+
+					(function(childFunction) {
+						$stateProvider.state(childFunctionName, {
+							name: childFunction,
+							url: childFunction,
+							resolve: {
+								init: function (StateManager, $location, $stateParams) {
+									$stateParams[childFunction] = true;
+
+									StateManager.setState($stateParams, $location.search());
+								}
+							}
+						});
+					})(childFunction);
+				}
+			}
+
 			if (parentState.children)
 			{
 				for (var i = 0; i < parentState.children.length; i++)
 				{
 					var childState     = parentState.children[i];
 					var childStateName = parentStateName + "." + childState.plugin;
-					//console.log('childStateName', childStateName);
-					//console.log('myUrl', childState.url);
-					
+
 					stateNameStack.push(childStateName);
 					stateStack.push(parentState.children[i]);
-
-					//console.log('url', (parentStateName !== "home" ? "/" : "") + ":" + childState.plugin);
 
 					(function(childState){
 						$stateProvider.state(childStateName, {
@@ -9507,19 +9699,13 @@ var ViewerManager = {};
 							url: childState.url || (parentStateName !== "home" ? "/" : "") + ":" + childState.plugin,
 							reloadOnSearch : false,
 							resolve: {
-								init: function(StateManager, $stateParams)
+								init: function(StateManager, $location, $stateParams)
 								{
-
-									if(!$stateParams.hasOwnProperty(childState.plugin)){
-										$stateParams[childState.plugin] = true;
-									}
-
-									StateManager.setState($stateParams, {});
+									StateManager.setState($stateParams, $location.search());
 								}
 							}
 						});
 					})(childState);
-
 				}
 			}
 
@@ -9529,11 +9715,19 @@ var ViewerManager = {};
 
 		$urlRouterProvider.otherwise("");
 	}])
-	.run(["$location", "$rootScope", "$state", "uiState", "StateManager", function($location, $rootScope, $state, uiState, StateManager) {
+	.run(["$location", "$rootScope", "$state", "uiState", "StateManager", "Auth", function($location, $rootScope, $state, uiState, StateManager, Auth) {
 		$rootScope.$on("$stateChangeStart",function(event, toState, toParams, fromState, fromParams){
 			StateManager.state.changing = true;
 
+			for(var i = 0; i < StateManager.functions.length; i++)
+			{
+				StateManager.setStateVar(StateManager.functions[i], false);
+			}
 
+			if (StateManager.state.loggedIn && !StateManager.state.account)
+			{
+				StateManager.setStateVar("account", Auth.username);
+			}
 
 			var stateChangeObject = {
 				toState    : toState,
@@ -9553,29 +9747,29 @@ var ViewerManager = {};
 				fromParams : fromParams
 			};
 
-			//console.log('path', $location.path());
-
-			if(typeof ga !== 'undefined' && ga !== null){
-				ga('send', 'pageview', $location.path());
+			if(typeof ga !== "undefined" && ga !== null){
+				ga("send", "pageview", $location.path());
 			}
 
 			StateManager.handleStateChange(stateChangeObject);
 		});
 	}])
-	.service("StateManager", ["$q", "$state", "$rootScope", "$timeout", "structure", "EventService", function($q, $state, $rootScope, $timeout, structure, EventService) {
+	.service("StateManager", ["$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", function($q, $state, $rootScope, $timeout, structure, EventService, $window) {
 		var self = this;
+
+		$window.StateManager = this;
 
 		// Stores the state, required as ui-router does not allow inherited
 		// stateParams, and we need to dynamically generate state diagram.
 		// One day this might change.
 		// https://github.com/angular-ui/ui-router/wiki/URL-Routing
-		this.state      = {
+		this.state = {
 			changing: true
 		};
 
 		this.changedState = {};
 
-		this.structure   = structure;
+		this.structure  = structure;
 
 		this.destroy = function()  {
 			delete this.state;
@@ -9590,6 +9784,46 @@ var ViewerManager = {};
 
 		// Has a state variable changed. Is this necessary ?
 		this.changed     = {};
+
+		this.state       = { loggedIn : false };
+		this.query       = {};
+		this.functions   = [];
+
+		var stateStack       = [structure];
+
+		// Populate list of functions
+		while (stateStack.length > 0)
+		{
+			var stackLength      = stateStack.length;
+			var parentState      = stateStack[stackLength - 1];
+
+			var i = 0;
+			var functionName;
+
+			if (parentState.functions)
+			{
+				for(i=0; i<parentState.functions.length; i++)
+				{
+					functionName = parentState.functions[i];
+
+					if (this.functions.indexOf(functionName) > -1) {
+						console.error("Duplicate function name when loading in StateManager : " + functionName);
+					} else {
+						this.functions.push(functionName);
+					}
+				}
+			}
+
+			if (parentState.children)
+			{
+				for (var i = 0; i < parentState.children.length; i++)
+				{
+					stateStack.push(parentState.children[i]);
+				}
+			}
+
+			stateStack.splice(0,1);
+		}
 
 		this.clearChanged = function()
 		{
@@ -9606,8 +9840,8 @@ var ViewerManager = {};
 
 		var compareStateChangeObjects = function(stateChangeA, stateChangeB)
 		{
-			return 	(stateChangeA.toState    === stateChangeB.toState) &&
-					(stateChangeA.toParams   === stateChangeB.toParams) &&
+			return	(stateChangeA.toState	 === stateChangeB.toState) &&
+					(stateChangeA.toParams	 === stateChangeB.toParams) &&
 					(stateChangeA.fromState  === stateChangeB.fromState) &&
 					(stateChangeA.fromParams === stateChangeB.fromParams);
 		};
@@ -9617,27 +9851,9 @@ var ViewerManager = {};
 		};
 
 		this.handleStateChange = function(stateChangeObject) {
-			var param,
-				fromState = stateChangeObject.fromState.name.split(".");
-
+			var param;
 			var fromParams = stateChangeObject.fromParams;
 			var toParams   = stateChangeObject.toParams;
-
-			if (stateChangeObject.toState.url === "/") {
-				// Handle going back to the home page, because fromParams will be empty
-				fromParams = {};
-				for (i = 1; i < fromState.length; i += 1) {
-					fromParams[fromState[i]] = true;
-				}
-				toParams = {};
-			}
-			else if (stateChangeObject.toState.url.indexOf("/") === -1) {
-				// Handle going from one home sub page to another, because fromParams will be empty
-				fromParams = {};
-				for (i = 1; i < fromState.length; i += 1) {
-					fromParams[fromState[i]] = true;
-				}
-			}
 
 			// Switch off all parameters that we came from
 			// but are not the same as where we are going to
@@ -9670,8 +9886,6 @@ var ViewerManager = {};
 
 			// Loop through structure. If a parent is null, then we must clear
 			// it's children
-			var currentChildren = self.structure.children;
-
 			var stateStack       = [structure];
 			var stateNameStack   = ["home"];
 			var clearBelow       = false;
@@ -9717,7 +9931,7 @@ var ViewerManager = {};
 			}
 		};
 
-		this.stateVars    = {};
+		this.stateVars   = {};
 
 		this.clearState = function(state) {
 			for (var state in self.state)
@@ -9731,9 +9945,27 @@ var ViewerManager = {};
 
 		this.genStateName = function ()
 		{
-			var currentChildren	= self.structure.children;
-			var childidx 		= 0;
-			var stateName 		= "home.";	// Assume that the base state is there.
+			var currentChildren = self.structure.children;
+			var childidx        = 0;
+			var stateName       = "home."; // Assume that the base state is there.
+			var i               = 0;
+
+			// First loop through the list of functions
+			// belonging to parent structure.
+			// Only deals with functions on home directory
+			if (self.structure.functions)
+			{
+				for(i = 0; i < self.structure.functions.length; i++)
+				{
+					functionName = self.structure.functions[i];
+
+					if (self.state[functionName])
+					{
+						stateName += functionName + ".";
+						break;
+					}
+				}
+			}
 
 			while(childidx < currentChildren.length)
 			{
@@ -9761,18 +9993,21 @@ var ViewerManager = {};
 
 		this.setStateVar = function(varName, value)
 		{
-			if (self.state[varName] !== value) {
-				self.state.changing = true;
-				self.changedState[varName] = value;
+			if (value === null)
+			{
+				delete self.state[varName];
+			} else {
+				if (self.state[varName] !== value) {
+					self.state.changing = true;
+					self.changedState[varName] = value;
+				}
 			}
 
 			self.state[varName] = value;
 		};
 
-		this.setState = function(stateParams, extraParams)
+		this.setState = function(stateParams, queryParams)
 		{
-			console.log("Setting state - " + JSON.stringify(stateParams));
-
 			// Copy all state parameters and extra parameters
 			// to the state
 			for(var state in stateParams)
@@ -9782,13 +10017,19 @@ var ViewerManager = {};
 					self.setStateVar(state, stateParams[state]);
 				}
 			}
+
+			for(var param in queryParams)
+			{
+				if (queryParams.hasOwnProperty(param))
+				{
+					self.query[param] = queryParams[param];
+				}
+			}
 		};
 
 		this.updateState = function(dontUpdateLocation)
 		{
 			var newStateName = self.genStateName();
-
-			console.log("Moving to " + newStateName + " ...");
 
 			if (Object.keys(self.changedState).length)
 			{
@@ -9976,21 +10217,20 @@ var ViewerManager = {};
 
     function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $location, Auth, StateManager, EventService, UtilsService, AccountService) {
         var vm = this,
-			goToUserPage,
-			goToAccount,
 			homeLoggedOut,
-			homeLoggedIn,
 			notLoggedInElement,
-			loggedInElement,
 			element,
-			state,
-			useState,
-			promise;
+			state, func, i;
 
 		/*
 		 * Init
 		 */
 		vm.state = StateManager.state;
+		vm.query = StateManager.query;
+		vm.functions = StateManager.functions;
+
+		vm.goToUserPage = false;
+
 		vm.legalDisplays = [
 			{title: "Terms & Conditions", value: "termsAndConditions"},
 			{title: "Privacy", value: "privacy"},
@@ -9999,106 +10239,45 @@ var ViewerManager = {};
 		];
 		vm.goToAccount = false;
 
-		/*
-		 * Watch the state to handle moving to and from the login page
-		 */
-		$scope.$watch("vm.state", function () {
-			console.log(666, vm.state);
-			if (vm.state.hasOwnProperty("loggedIn") && vm.state.hasOwnProperty("changing") && vm.state.changing) {
-				if (!vm.state.loggedIn) {
-					homeLoggedOut = angular.element($element[0].querySelector('#homeLoggedOut'));
-					homeLoggedOut.empty();
+		$timeout(function () {
+			homeLoggedOut = angular.element($element[0].querySelector('#homeLoggedOut'));
 
-					goToUserPage = false;
-					for (state in vm.state) {
-						if (vm.state.hasOwnProperty(state)) {
-							if ((state !== "changing") && (vm.state[state] === true)) {
-								goToUserPage = true;
-								// username and token only required for some pages
-								vm.username = vm.state.username;
-								vm.token = vm.state.token;
-								// Create element
-								element = "<" + UtilsService.snake_case(state, "-") +
-									" username='vm.username'" +
-									" token='vm.token'>" +
-									"</" + UtilsService.snake_case(state, "-") + ">";
-								notLoggedInElement = angular.element(element);
-								homeLoggedOut.append(notLoggedInElement);
-								$compile(notLoggedInElement)($scope);
-								break;
-							}
-						}
-					}
+			/*
+			 * Watch the state to handle moving to and from the login page
+			 */
+			$scope.$watch("vm.state", function () {
+				homeLoggedOut.empty();
 
-					if (!goToUserPage) {
-						vm.goToAccount = false;
+				vm.goToUserPage = false;
+				for (i = 0; i < vm.functions.length; i++) {
+					func = vm.functions[i];
 
-						// Create login element
-						notLoggedInElement = angular.element("<login></login>");
+					if (vm.state[func]) {
+						vm.goToUserPage = true;
+						// Create element
+						element = "<" + UtilsService.snake_case(func, "-") +
+							" username='vm.query.username'" +
+							" token='vm.query.token'>" +
+							"</" + UtilsService.snake_case(func, "-") + ">";
+
+						notLoggedInElement = angular.element(element);
 						homeLoggedOut.append(notLoggedInElement);
 						$compile(notLoggedInElement)($scope);
-
-						// Set the URL to root if it is not root
-						$location.path("/", "_self");
+						break;
 					}
 				}
-				else {
-					homeLoggedIn = angular.element($element[0].querySelector('#homeLoggedIn'));
-					homeLoggedIn.empty();
-					goToAccount = false;
-					goToUserPage = false;
-					for (state in vm.state) {
-						if (vm.state.hasOwnProperty(state) && (state !== "loggedIn")) {
-							if ((state !== "changing") && (vm.state[state] === true)) {
-								goToUserPage = true;
-								useState = state;
-							}
-							else if ((typeof vm.state[state] === "string") && (vm.state[state] !== "null")) {
-								goToAccount = true;
-							}
-						}
-					}
-					if ((goToUserPage) || (goToAccount)) {
-						if (goToUserPage) {
-							console.log(222);
-							vm.goToAccount = false;
-							element = "<" + UtilsService.snake_case(useState, "-") + "></" + UtilsService.snake_case(useState, "-") + ">";
-							loggedInElement = angular.element(element);
-							homeLoggedIn.append(loggedInElement);
-							$compile(loggedInElement)($scope);
-						}
-						else {
-							vm.goToAccount = true;
-							/*
-							promise = AccountService.getUserInfo(StateManager.state.account);
-							promise.then(function (response) {
-								// Response with data.type indicates it's not the user's account
-								if (!response.data.hasOwnProperty("type")) {
-									vm.goToAccount = true;
-								}
-								else {
-									// Logout if trying to view another account
-									Auth.logout();
-								}
-							});
-							*/
-						}
-					}
-					else {
-						// Prevent user going back to the login page after logging in
-						$location.path("/" + localStorage.getItem("tdrLoggedIn"), "_self");
-					}
+
+				if (!vm.state.loggedIn && !vm.goToUserPage) {
+					// Create login element
+					notLoggedInElement = angular.element("<login></login>");
+					homeLoggedOut.append(notLoggedInElement);
+					$compile(notLoggedInElement)($scope);
+
+					// Set the URL to root if it is not root
+					$location.path("/", "_self");
 				}
-			}
-		}, true);
-
-		vm.getLoggedInUrl = function() {
-			return vm.loggedInUrl;
-		};
-
-		vm.getLoggedOutUrl = function() {
-			return vm.loggedOutUrl;
-		};
+			}, true);
+		});
 
 		if (angular.isDefined(vm.account) && angular.isDefined(vm.password))
 		{
@@ -10111,7 +10290,7 @@ var ViewerManager = {};
 
 		/**
 		 * Display legal text
-		 * 
+		 *
 		 * @param event
 		 * @param display
 		 */
@@ -10228,6 +10407,77 @@ var ViewerManager = {};
 		$httpProvider.interceptors.push("authInterceptor");
 	});
 })();
+
+/**
+ *  Copyright (C) 2015 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.factory("HttpService", HttpService);
+
+	HttpService.$inject = ["$http", "$q", "StateManager", "serverConfig"];
+
+	function HttpService($http, $q, StateManager, serverConfig) {
+		var handlerFactory = function(httpReq)
+		{
+			return function (type, url, success, failure)
+			{
+				var deferred = $q.defer();
+
+				// Determine full url
+				var getURI = serverConfig.apiUrl(type, url);
+
+				// If not success function is specified then
+				// provide a default one
+				var successFunc = success || function (response) { deferred.resolve(response); };
+
+				// If no failure function is specified then provide a default one
+				var failureFunc = failure || function (response) {
+					if (response.status === 404 || response.status === 401)
+					{
+						// If there is a not found error or an unauthorized error
+						// then panic and clear the state. Don't worry everything will
+						// recover. :)
+
+						StateManager.clearState();
+						StateManager.updateState();
+					}
+
+					deferred.resolve([]);
+				};
+
+				httpReq(getURI).then(successFunc, failureFunc);
+
+				return deferred.promise;
+			};
+		};
+
+		var get  = handlerFactory($http.get);
+		var post = handlerFactory($http.post);
+
+		return {
+			get:  get,
+			post: post
+		};
+	}
+}());
+
 
 /**
  *  Copyright (C) 2014 3D Repo Ltd
@@ -12370,6 +12620,110 @@ angular.module('3drepo')
 }());
 
 /**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("tdrMeasure", measure);
+
+	function measure() {
+		return {
+			restrict: "EA",
+			templateUrl: "measure.html",
+			scope: {},
+			controller: MeasureCtrl,
+			controllerAs: "vm",
+			bindToController: true
+		};
+	}
+
+	MeasureCtrl.$inject = ["$scope", "$element", "EventService"];
+
+	function MeasureCtrl ($scope, $element, EventService) {
+		var vm = this,
+			coords = [null, null],
+			screenPos,
+			currentPickPoint;
+
+		vm.axisDistance = [0.0, 0.0, 0.0];
+		vm.totalDistance = 0.0;
+
+		vm.show = false;
+		vm.distance = false;
+		vm.allowMove = false;
+
+		var coordVector = null, vectorLength = 0.0;
+		vm.screenPos = [0.0, 0.0];
+
+		EventService.send(EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK, {
+			callback: function(event) {
+				var point = event.hitPnt;
+				vm.screenPos = [event.layerX, event.layerY];
+
+				if (vm.allowMove) {
+					if (point)
+					{
+						coords[1] = new x3dom.fields.SFVec3f(point[0], point[1], point[2]);
+						coordVector = coords[0].subtract(coords[1]);
+						vm.axisDistance[0] = Math.abs(coordVector.x).toFixed(3);
+						vm.axisDistance[1] = Math.abs(coordVector.y).toFixed(3);
+						vm.axisDistance[2] = Math.abs(coordVector.z).toFixed(3);
+
+						vm.totalDistance = coordVector.length().toFixed(3);
+
+						angular.element($element[0]).css("left", (vm.screenPos[0] + 5).toString() + "px");
+						angular.element($element[0]).css("top", (vm.screenPos[1] + 5).toString() + "px");
+
+						$scope.$apply();
+                        vm.show = true;
+					} else {
+						vm.show = false;
+					}
+				}
+			}
+		});
+
+		$scope.$watch(EventService.currentEvent, function (event) {
+		if (event.type === EventService.EVENT.VIEWER.PICK_POINT) {
+				if (event.value.hasOwnProperty("position")) {
+					// First click, if a point has not been clicked before
+					currentPickPoint = event.value.position;
+					if (coords[1] === null || coords[0] === null) {
+						vm.show = true;
+						vm.allowMove = true;
+						coords[0] = currentPickPoint;
+					}
+					else if (vm.allowMove) {
+                        vm.show = true;
+						vm.allowMove = false;
+					} else {
+						coords[0] = currentPickPoint;
+						coords[1] = null;
+						vm.allowMove = true;
+					}
+				}
+			}
+		});
+	}
+}());
+
+/**
  **  Copyright (C) 2014 3D Repo Ltd
  **
  **  This program is free software: you can redistribute it and/or modify
@@ -14253,15 +14607,12 @@ var Oculus = {};
 
 		/**
 		 * Go to a sub page
-		 * 
+		 *
 		 * @param page
 		 * @param pay
 		 */
 		vm.showPage = function (page, pay) {
 			$location.path("/" + page, "_self");
-			if ((page === "signUp") && pay) {
-				$location.search("pay", true);
-			}
 		};
 	}
 }());
@@ -14353,97 +14704,98 @@ var Oculus = {};
 }());
 
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *	Copyright (C) 2014 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 (function () {
 	"use strict";
 
-    angular.module("3drepo")
-        .factory("EventService", EventService);
+	angular.module("3drepo")
+		.factory("EventService", EventService);
 
 	EventService.$inject = ["$timeout"];
 
-    function EventService ($timeout) {
-        var EVENT = {
-            FILTER: "EVENT_FILTER",
-            FULL_SCREEN_ENTER: "EVENT_FULL_SCREEN_ENTER",
+	function EventService ($timeout) {
+		var EVENT = {
+			FILTER: "EVENT_FILTER",
+			FULL_SCREEN_ENTER: "EVENT_FULL_SCREEN_ENTER",
 			GET_ISSUE_AREA_PNG: "EVENT_GET_ISSUE_AREA_PNG",
-            GLOBAL_CLICK: "EVENT_GLOBAL_CLICK",
+			GLOBAL_CLICK: "EVENT_GLOBAL_CLICK",
+			MEASURE_MODE: "EVENT_MEASURE_MODE",
 			ISSUE_AREA_PNG: "EVENT_ISSUE_AREA_PNG",
 			OBJECT_SELECTED: "EVENT_OBJECT_SELECTED",
-            PIN_SELECTED: "EVENT_PIN_SELECTED",
-            PANEL_CONTENT_CLICK: "EVENT_LEFT_PANEL_CONTENT_CLICK",
+			PIN_SELECTED: "EVENT_PIN_SELECTED",
+			PANEL_CONTENT_CLICK: "EVENT_LEFT_PANEL_CONTENT_CLICK",
 			PANEL_CARD_ADD_MODE: "EVENT_PANEL_CARD_ADD_MODE",
 			PANEL_CARD_EDIT_MODE: "EVENT_PANEL_CARD_EDIT_MODE",
-            PANEL_CONTENT_SETUP: "EVENT_PANEL_CONTENT_SETUP",
+			PANEL_CONTENT_SETUP: "EVENT_PANEL_CONTENT_SETUP",
 			PANEL_CONTENT_TOGGLED: "EVENT_PANEL_CONTENT_TOGGLED",
 			SET_ISSUE_AREA_MODE: "EVENT_SET_ISSUE_AREA_MODE",
 			SHOW_PROJECTS: "EVENT_SHOW_PROJECTS",
 			SHOW_QR_CODE_READER: "EVENT_SHOW_QR_CODE_READER",
-            TOGGLE_ELEMENTS: "EVENT_TOGGLE_ELEMENTS",
-            TOGGLE_HELP: "EVENT_TOGGLE_HELP",
+			TOGGLE_ELEMENTS: "EVENT_TOGGLE_ELEMENTS",
+			TOGGLE_HELP: "EVENT_TOGGLE_HELP",
 			TOGGLE_ISSUE_ADD: "EVENT_TOGGLE_ISSUE_ADD",
 			TOGGLE_ISSUE_AREA: "EVENT_TOGGLE_ISSUE_AREA",
 			TOGGLE_ISSUE_AREA_DRAWING: "EVENT_TOGGLE_ISSUE_AREA_DRAWING",
 			WINDOW_HEIGHT_CHANGE: "EVENT_WINDOW_HEIGHT_CHANGE",
 			SET_CLIPPING_PLANES: "EVENT_SET_CLIPPING_PLANES",
-			
+
 			// Events to control the viewer manager
-            CREATE_VIEWER: "EVENT_CREATE_VIEWER",
-            CLOSE_VIEWER: "EVENT_CLOSE_VIEWER",
-			
+			CREATE_VIEWER: "EVENT_CREATE_VIEWER",
+			CLOSE_VIEWER: "EVENT_CLOSE_VIEWER",
+
 			// Specific to the javascript viewer
 			// populated by the viewer.js script
 			VIEWER: VIEWER_EVENTS,
-			
+
 			// Ready signals
 			PROJECT_SETTINGS_READY: "EVENT_PROJECT_SETTINGS_READY",
-			
+
 			// User logs in and out
-			USER_LOGGED_IN: "EVENT_USER_LOGGED_IN", 
+			USER_LOGGED_IN: "EVENT_USER_LOGGED_IN",
 			USER_LOGGED_OUT: "EVENT_USER_LOGGED_OUT",
-			
+
 			// Not authorized
 			USER_NOT_AUTHORIZED: "EVENT_USER_NOT_AUTHORIZED",
-			
+
 			// State changes
 			SET_STATE: "EVENT_SET_STATE",
 			STATE_CHANGED: "EVENT_STATE_CHANGED"
-        };
-		
+		};
+
 		var ERROR = {
 			DUPLICATE_VIEWER_NAME: "ERROR_DUPLICATE_VIEWER_NAME"
 		};
 
-        var currentEvent = {};
+		var currentEvent = {};
 		var currentError = {};
 
-        var send = function (type, value) {
+		var send = function (type, value) {
 			$timeout(function() {
 				if (angular.isUndefined(type))
 				{
-					console.trace("UNDEFINED EVENT TYPE");			
+					console.trace("UNDEFINED EVENT TYPE");
 				} else {
 					console.log("SEND: " + type + " : " + JSON.stringify(value));
 					currentEvent = {type: type, value: value};
 				}
 			});
-        };
-		
+		};
+
 		var sendError = function(type, value) {
 			$timeout(function() {
 				if (angular.isUndefined(type))
@@ -14456,15 +14808,15 @@ var Oculus = {};
 			});
 		};
 
-        return {
-            EVENT: EVENT,
+		return {
+			EVENT: EVENT,
 			ERROR: ERROR,
-            currentEvent: function() {return currentEvent;},
+			currentEvent: function() {return currentEvent;},
 			currentError: function() {return currentError;},
-            send: send,
+			send: send,
 			sendError: sendError
-        };
-    }
+		};
+	}
 }());
 
 /**
@@ -14726,7 +15078,10 @@ var Oculus = {};
 				account:  vm.account,
 				project:  vm.project,
 				branch:   vm.branch,
-				revision: vm.revision
+				revision: vm.revision,
+				at:       StateManager.query.at,
+				up:       StateManager.query.up,
+				view:     StateManager.query.view
 			});
 
 			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelCard);
@@ -14736,6 +15091,9 @@ var Oculus = {};
 		 * Watch for events
 		 */
 		$scope.$watch(EventService.currentEvent, function (event) {
+			var parent = angular.element($element[0].querySelector("#project")),
+				element;
+
 			if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) {
 				if (event.value.on) {
 					issueArea = angular.element("<issue-area></issue-area>");
@@ -14758,6 +15116,18 @@ var Oculus = {};
 			}
 			else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
 				vm.pointerEvents = event.value.on ? "none" : "auto";
+			} else if (event.type === EventService.EVENT.MEASURE_MODE) {
+				if (event.value) {
+					// Create measure display
+					element = angular.element("<tdr-measure id='tdrMeasure'></tdr-measure>");
+					parent.append(element);
+					$compile(element)($scope);
+				}
+				else {
+					// Remove measure display
+					element = angular.element($element[0].querySelector("#tdrMeasure"));
+					element.remove();
+				}
 			}
 		})
 	}
@@ -14786,16 +15156,16 @@ var Oculus = {};
 	angular.module("3drepo")
 		.factory("ProjectService", ProjectService);
 
-	ProjectService.$inject = ["$http", "$q", "StateManager", "serverConfig", "Auth"];
+	ProjectService.$inject = ["$http", "$q", "StateManager", "serverConfig", "HttpService", "Auth"];
 
-	function ProjectService($http, $q, StateManager, serverConfig, Auth) {
+	function ProjectService($http, $q, StateManager, serverConfig, HttpService, Auth) {
 		var state = StateManager.state;
 
 		var getProjectInfo = function (account, project) {
 			var deferred = $q.defer(),
 				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + ".json");
 
-			$http.get(url).then(
+			return HttpService.get(serverConfig.GET_API, account + "/" + project + ".json",
 				function(json) {
 					deferred.resolve({
 						account     : account,
@@ -14806,12 +15176,7 @@ var Oculus = {};
 						type		: json.type,
 						settings 	: json.properties
 					});
-				},
-				function () {
-					deferred.resolve([]);
 				});
-
-			return deferred.promise;
 		};
 
 		var getRoles = function (account, project) {
@@ -14948,6 +15313,9 @@ var Oculus = {};
 				name: "@",
 				autoInit: "@",
 				vrMode: "@",
+				at: "@",
+				up: "@",
+				view: "@",
 				eventService: "="
 			},
 			link: function (scope, element) {
@@ -14962,9 +15330,9 @@ var Oculus = {};
 		};
 	}
 
-	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "$location", "serverConfig", "EventService"];
+	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService"];
 
-	function ViewerCtrl ($scope, $q, $http, $element, $location, serverConfig, EventService)
+	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService)
 	{
 		var v = this;
 
@@ -15000,17 +15368,17 @@ var Oculus = {};
 			v.viewer = new Viewer(v.name, $element[0], v.manager, eventCallback, errCallback);
 
 			var options = {};
-			var querystring = $location.search();
-			var startLatLon = querystring.at && querystring.at.split(',');
+			var startLatLon = v.at && v.at.split(',');
 
-			var view = querystring.view && querystring.view.split(',');
+			var view = v.view && v.view.split(',');
+
 			view && view.forEach(function(val, i){
 				view[i] = parseFloat(val);
 			});
 
 			options.view = view;
 
-			var up = querystring.up && querystring.up.split(',');
+			var up = v.up && v.up.split(',');
 			up && up.forEach(function(val, i){
 				up[i] = parseFloat(val);
 			});
@@ -15040,6 +15408,8 @@ var Oculus = {};
 			v.oculus     = new Oculus(v.viewer);
 			v.gamepad    = new Gamepad(v.viewer);
 			v.gamepad.init();
+
+			v.measure    = new MeasureTool(v.viewer);
 
 			v.collision  = new Collision(v.viewer);
 
@@ -15091,6 +15461,8 @@ var Oculus = {};
 							v.oculus.switchVR();
 						} else if (event.type === EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK) {
 							v.viewer.onViewpointChanged(event.value.callback);
+						} else if (event.type === EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK) {
+							v.viewer.onMouseMove(event.value.callback);
 						} else if (event.type === EventService.EVENT.PROJECT_SETTINGS_READY) {
 							if (event.value.account === v.account && event.value.project === v.project)
 							{
@@ -15133,8 +15505,15 @@ var Oculus = {};
 								event.value.clipDirection ? event.value.clipDirection : -1);
 						} else if (event.type === EventService.EVENT.VIEWER.MOVE_CLIPPING_PLANE) {
 							v.viewer.moveClippingPlane(event.value.percentage);
-						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) || (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS)) {
-							console.log(event.value);
+						} else if ((event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
+							v.viewer.highlightObjects(
+								event.value.account,
+								event.value.project,
+								event.value.id ? [event.value.id] : event.value.ids,
+								event.value.zoom,
+								event.value.colour
+							);
+						} else if (event.type === EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS) {
 							v.viewer.highlightObjects(
 								event.value.account,
 								event.value.project,
@@ -15166,6 +15545,8 @@ var Oculus = {};
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
 							v.manager.getCurrentViewer().setNavMode(event.value.mode);
+						} else if (event.type === EventService.EVENT.MEASURE_MODE) {
+							v.measure.measureMode(event.value);
 						} else if (event.type === EventService.EVENT.VIEWER.UPDATE_URL){
 							//console.log('update url!!');
 							$location.path("/" + v.account + '/' + v.project).search({
@@ -15301,219 +15682,6 @@ var Oculus = {};
 }());
 
 /**
- *  Copyright (C) 2015 3D Repo Ltd
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-	"use strict";
-
-	angular.module("3drepo")
-		.directive("qrCodeReader", qrCodeReader)
-		.directive('qrCodeCameraSwitch', qrCodeCameraSwitch);
-
-	function qrCodeReader() {
-		return {
-			restrict: "EA",
-			scope: {},
-			controller: QrCodeReaderCtrl,
-			controllerAs: "vm",
-			bindToController: true
-		};
-	}
-
-	QrCodeReaderCtrl.$inject = ["$scope", "$mdDialog", "EventService", "QrCodeReaderService"];
-
-	function QrCodeReaderCtrl($scope, $mdDialog, EventService, QrCodeReaderService) {
-		var vm = this;
-		$scope.captureQRCode = QrCodeReaderService.captureQRCode;
-		$scope.cameraOn = QrCodeReaderService.cameraOn;
-
-		$scope.$watch(EventService.currentEvent, function (event) {
-			if (event.type === EventService.EVENT.SHOW_QR_CODE_READER) {
-				$scope.cameraOn.status = true;
-				$mdDialog.show({
-					controller: qrCodeReaderDialogController,
-					templateUrl: 'qrCodeReaderDialog.html',
-					parent: angular.element(document.body),
-					targetEvent: event,
-					clickOutsideToClose:true,
-					fullscreen: true,
-					scope: $scope,
-					preserveScope: true,
-					onRemoving: removeDialog
-				});
-			}
-		});
-
-		$scope.closeDialog = function() {
-			$scope.cameraOn.status = false;
-			$mdDialog.cancel();
-		};
-
-		function removeDialog () {
-			$scope.closeDialog();
-		}
-
-		function qrCodeReaderDialogController($scope) {
-		}
-	}
-
-	function qrCodeCameraSwitch () {
-		return {
-			restrict: 'A',
-			scope: {
-				capture: '='
-			},
-			link: function link(scope, element, attrs) {
-				if (attrs.qrCodeCameraSwitch === "true") {
-					scope.capture(scope, element[0], function(err, res) {
-						if(!err) {
-							window.location.replace(res);
-						}
-						else {
-							console.log("QRCode error: " + err);
-						}
-					});
-				}
-			}
-		};
-	}
-}());
-/**
- *  Copyright (C) 2015 3D Repo Ltd
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-	"use strict";
-
-	angular.module('3drepo')
-		.factory('QrCodeReaderService', QrCodeReaderService);
-
-	QrCodeReaderService.$inject = ["$window", "$timeout"];
-
-	function QrCodeReaderService($window, $timeout) {
-		var cameraOn = {
-				status: false
-			},
-			source = null,
-			videoStream = null;
-
-		if ($window.MediaStreamTrack.getSources)
-		{
-			$window.MediaStreamTrack.getSources(function (srcs) {
-				var videoSRCS = srcs.filter(function(item) { return item.kind === 'video'; });
-				source = null;
-
-				if (videoSRCS.length > 1)
-				{
-					videoSRCS = videoSRCS.filter(function(item) { return (item.facing === 'environment'); });
-				}
-
-				if (!videoSRCS.length)
-				{
-					callback("No valid cameras found");
-				}
-
-				source = videoSRCS[0];
-			});
-		}
-
-		function decodeCanvas (scope, element, callback)
-		{
-			var width  = element.videoWidth;
-			var height = element.videoHeight;
-
-			if (width && height) {
-				if(!scope.canvas) {
-					scope.canvas				= document.createElement('canvas');
-					scope.canvas.id				= 'qr-canvas';
-					scope.canvas.width			= width;
-					scope.canvas.style.width	= width + "px";
-					scope.canvas.height			= height;
-					scope.canvas.style.height	= height + "px";
-
-					element.appendChild(scope.canvas);
-				}
-
-				var ctx = scope.canvas.getContext("2d");
-				ctx.clearRect(0,0, width, height);
-				ctx.drawImage(element, 0, 0, width, height);
-
-				try {
-					return callback(null, qrcode.decode());
-				} catch (err) {
-					if (!cameraOn.status)
-					{
-						if (videoStream) {
-							videoStream.stop();
-						}
-
-						return callback(err);
-					}
-
-					callback(err);
-				}
-			}
-
-			$timeout(function() {decodeCanvas(scope, element, callback);}, 200);
-		}
-
-		var captureQRCode = function(scope, element, callback)
-		{
-			$window.navigator.getUserMedia = $window.navigator.getUserMedia || $window.navigator.webkitGetUserMedia || $window.navigator.mozGetUserMedia;
-
-			var constraints = {
-				video: {
-					optional: [{
-						sourceId: source.id
-					}]
-				}
-			};
-
-			// Initialize camera
-			$window.navigator.getUserMedia(constraints, function (mediaVideoStream) {
-				element.src = $window.URL.createObjectURL(mediaVideoStream);
-
-				videoStream = mediaVideoStream;
-				$timeout(function() {decodeCanvas(scope, element, callback); }, 200);
-			}, function(err) {
-				callback(err);
-			});
-		};
-
-		return {
-			cameraOn: cameraOn,
-			captureQRCode: captureQRCode
-		};
-	}
-}());
-/**
  *	Copyright (C) 2016 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
@@ -15601,13 +15769,13 @@ var Oculus = {};
         };
     }
 
-    RegisterVerifyCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "AccountService"];
+    RegisterVerifyCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "AccountService", "StateManager"];
 
-    function RegisterVerifyCtrl ($scope, $location, $timeout, UtilsService, AccountService) {
+    function RegisterVerifyCtrl ($scope, $location, $timeout, UtilsService, AccountService, StateManager) {
         var vm = this,
             promise,
-            username = $location.search().username,
-            token = $location.search().token;
+            username = StateManager.query.username,
+            token = StateManager.query.token;
 
         /*
          * Init
@@ -15615,7 +15783,6 @@ var Oculus = {};
         vm.verified = false;
         vm.showPaymentWait = false;
         vm.databaseName = username;
-        vm.pay = (($location.search().hasOwnProperty("pay")) && $location.search().pay);
 
         vm.verifyErrorMessage = "Verifying. Please wait...";
         promise = UtilsService.doPost({token: token}, username + "/verify");
@@ -15696,7 +15863,8 @@ var Oculus = {};
 
     function RightPanelCtrl ($scope, EventService) {
         var vm = this,
-            addIssueMode = null;
+            addIssueMode = null,
+            measureMode = false;
 
         /*
          * Init
@@ -15762,6 +15930,11 @@ var Oculus = {};
                 vm.issueButtons[addIssueMode].background = "#FF9800";
                 EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, buttonType);
             }
+        };
+
+        vm.toggleMeasure = function () {
+            measureMode = !measureMode;
+            EventService.send(EventService.EVENT.MEASURE_MODE, measureMode);
         };
     }
 }());
@@ -15843,13 +16016,12 @@ var Oculus = {};
 		};
 	}
 
-	SignUpFormCtrl.$inject = ["$scope", "$mdDialog", "$location", "serverConfig", "UtilsService"];
+	SignUpFormCtrl.$inject = ["$scope", "$mdDialog", "serverConfig", "UtilsService"];
 
-	function SignUpFormCtrl($scope, $mdDialog, $location, serverConfig, UtilsService) {
+	function SignUpFormCtrl($scope, $mdDialog, serverConfig, UtilsService) {
 		var vm = this,
 			enterKey = 13,
-			promise,
-			pay;
+			promise;
 
 		/*
 		 * Init
@@ -15862,7 +16034,6 @@ var Oculus = {};
 		vm.useReCapthca = false;
 		vm.useRegister = false;
 		vm.registering = false;
-		pay =  (($location.search().hasOwnProperty("pay")) && $location.search().pay);
 
 		/*
 		 * Auth stuff
@@ -15939,7 +16110,7 @@ var Oculus = {};
 		 */
 		function doRegister() {
 			var data,
-				allowedFormat = new RegExp("^[a-zA-Z][a-zA-Z\d_]*$"); // English letters, numbers, underscore, not starting with number
+				allowedFormat = new RegExp("^[a-zA-Z][\\w]*$"); // English letters, numbers, underscore, not starting with number
 
 			if ((angular.isDefined(vm.newUser.username)) &&
 				(angular.isDefined(vm.newUser.email)) &&
@@ -15948,8 +16119,7 @@ var Oculus = {};
 					if (vm.newUser.tcAgreed) {
 						data = {
 							email: vm.newUser.email,
-							password: vm.newUser.password,
-							pay: pay
+							password: vm.newUser.password
 						};
 						if (vm.useReCapthca) {
 							data.captcha = vm.reCaptchaResponse;

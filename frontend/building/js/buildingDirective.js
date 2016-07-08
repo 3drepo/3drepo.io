@@ -44,7 +44,7 @@
 		/*
 		 * Init
 		 */
-		 
+
 		/*
 		 * Watch for show/hide of card
 		 */
@@ -63,20 +63,17 @@
 
 
 		$scope.$watch(EventService.currentEvent, function (event) {
-			console.log('event', event);
 			if (event.type === EventService.EVENT.VIEWER.OS_BUILDING_CLICK) {
 
 				vm.testdata = event.value.id;
 				var url = '/api/os/building-meta/' + event.value.id;
-				console.log(url);
 				$http.get(url)
 					.then(
 						function(data) {
 							vm.meta = data.data;
-							console.log(vm.meta);
 						},
 						function (err) {
-							console.log(err);
+							console.trace(err);
 						}
 					);
 				}

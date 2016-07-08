@@ -32,13 +32,13 @@
         };
     }
 
-    RegisterVerifyCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "AccountService"];
+    RegisterVerifyCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "AccountService", "StateManager"];
 
-    function RegisterVerifyCtrl ($scope, $location, $timeout, UtilsService, AccountService) {
+    function RegisterVerifyCtrl ($scope, $location, $timeout, UtilsService, AccountService, StateManager) {
         var vm = this,
             promise,
-            username = $location.search().username,
-            token = $location.search().token;
+            username = StateManager.query.username,
+            token = StateManager.query.token;
 
         /*
          * Init
@@ -46,7 +46,6 @@
         vm.verified = false;
         vm.showPaymentWait = false;
         vm.databaseName = username;
-        vm.pay = (($location.search().hasOwnProperty("pay")) && $location.search().pay);
 
         vm.verifyErrorMessage = "Verifying. Please wait...";
         promise = UtilsService.doPost({token: token}, username + "/verify");

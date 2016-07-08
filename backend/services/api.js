@@ -47,7 +47,7 @@ module.exports.createApp = function (serverConfig) {
 	let app = express();
 
 	app.use(sharedSession);
-	
+
 	app.use(cors({origin:true, credentials: true}));
 
 	// put logger in req object
@@ -73,7 +73,18 @@ module.exports.createApp = function (serverConfig) {
 
 	app.set("views", "./jade");
 	app.set("view_engine", "jade");
+
 	app.use(bodyParser.json({ limit: '2mb'}));
+
+	app.use(function (req, res, next) {
+		//if (req.session || (req.path === "/login" && req.method === "POST"))
+		//{
+		//	console.log("Using session");
+			sharedSession(req, res, next);
+		//} else {
+		//	next();
+		//}
+	});
 
 	app.use(compress());
 
@@ -99,7 +110,7 @@ module.exports.createApp = function (serverConfig) {
 		app.use(allowCrossDomain);
 	}
 	*/
-	
+
 	app.use(function(req, res, next) {
 		// intercept OPTIONS method
 		if ("OPTIONS" === req.method) {
