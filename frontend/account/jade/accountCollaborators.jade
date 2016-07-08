@@ -5,50 +5,44 @@
 				h2 Collaborators
 
 		.userContent
-			//md-autocomplete(
-				md-no-cache="vm.noCache"
-				md-selected-item="vm.selectedUser"
-				md-search-text="vm.searchText"
-				md-items="user in vm.querySearch(vm.searchText)"
-				md-item-text="user.name"
-				md-min-length="0"
-				placeholder="Add a collaborator"
-				ng-disabled="vm.addDisabled"
-				)
-				md-item-template
-					span(md-highlight-text="vm.searchText", md-highlight-flags="^i") {{user.name}}
-				md-not-found
-					span No user matching "{{vm.searchText}}" was found.
-			#accountCollaboratorsAdd
-				div
-					md-input-container.md-block(ng-disabled="vm.allLicensesAssigned")
-						label Collaborator username
-						input(type="text", ng-model="vm.newCollaborator")
-				div(layout="row")
-					md-button.md-raised.md-accent(ng-click="vm.addCollaborator()", ng-disabled="vm.addDisabled") Add
-					p {{vm.addMessage}}
+			div(ng-if="vm.numLicenses === 0")
+				.cardInfo
+					p You must have a minimum of two licenses to add collaborators to a project.
+					br
+					p Please go to the Billing Page to add licenses.
+				md-button.md-raised.md-accent#accountCollaboratorsBPButton(ng-click="vm.goToBillingPage()") Billing Page
 
-			md-divider
+			div(ng-if="vm.numLicenses > 0")
+				#accountCollaboratorsAdd
+					div
+						md-input-container.md-block(ng-disabled="vm.allLicensesAssigned")
+							label Collaborator username
+							input(type="text", ng-model="vm.newCollaborator")
+					div(layout="row")
+						md-button.md-raised.md-accent(ng-click="vm.addCollaborator()", ng-disabled="vm.addDisabled") Add
+						p {{vm.addMessage}}
 
-			// Assigned
-			md-list
-				md-subheader.md-no-sticky Collaborators ({{vm.collaborators.length}} assigned, {{vm.unassigned.length}} unassigned)
-				md-list-item(ng-repeat="collaborator in vm.collaborators")
-					md-icon.angular-material-icons.collaboratorIcon(aria-label="Person") person
-					.md-list-item-text
-						p {{collaborator.user}}
-					span(flex)
-					div(layout="row", layout-align="end center")
-						p#accountCollaboratorMessage {{collaborator.deleteMessage}}
-						md-button.md-icon-button.md-accent(ng-click="vm.removeCollaborator($index)")
+				md-divider
+
+				// Assigned
+				md-list
+					md-subheader.md-no-sticky Collaborators ({{vm.collaborators.length}} assigned, {{vm.unassigned.length}} unassigned)
+					md-list-item(ng-repeat="collaborator in vm.collaborators")
+						md-icon.angular-material-icons.collaboratorIcon(aria-label="Person") person
+						.md-list-item-text
+							p {{collaborator.user}}
+						span(flex)
+						div(layout="row", layout-align="end center")
+							p#accountCollaboratorMessage {{collaborator.deleteMessage}}
+							md-button.md-icon-button.md-accent(ng-click="vm.removeCollaborator($index)")
+								md-icon.angular-material-icons(aria-label="Close dialog") remove_circle
+
+				// Unassigned
+				md-list#accountCollaboratorsUnassigned
+					md-list-item(ng-repeat="unassigned in vm.unassigned track by $index")
+						md-icon.angular-material-icons.collaboratorIcon(aria-label="Person") person
+						.md-list-item-text
+							p Unassigned
+						span(flex)
+						md-button.md-icon-button
 							md-icon.angular-material-icons(aria-label="Close dialog") remove_circle
-
-			// Unassigned
-			md-list#accountCollaboratorsUnassigned
-				md-list-item(ng-repeat="unassigned in vm.unassigned track by $index")
-					md-icon.angular-material-icons.collaboratorIcon(aria-label="Person") person
-					.md-list-item-text
-						p Unassigned
-					span(flex)
-					md-button.md-icon-button
-						md-icon.angular-material-icons(aria-label="Close dialog") remove_circle
