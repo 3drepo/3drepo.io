@@ -31,6 +31,8 @@
 			resolve: {
 				init: function(Auth, StateManager, $q)
 				{
+					console.log("Auth Init");
+
 					var finishedAuth = $q.defer();
 
 					StateManager.state.changing = true;
@@ -73,7 +75,7 @@
 								init: function (StateManager, $location, $stateParams) {
 									$stateParams[childFunction] = true;
 
-									StateManager.setState($stateParams, $location.search());
+									StateManager.setState($stateParams);
 								}
 							}
 						});
@@ -99,7 +101,7 @@
 							resolve: {
 								init: function(StateManager, $location, $stateParams)
 								{
-									StateManager.setState($stateParams, $location.search());
+									StateManager.setState($stateParams);
 								}
 							}
 						});
@@ -113,8 +115,10 @@
 
 		$urlRouterProvider.otherwise("");
 	}])
-	.run(["$location", "$rootScope", "$state", "uiState", "StateManager", "Auth", function($location, $rootScope, $state, uiState, StateManager, Auth) {
+	.run(["$location", "$rootScope", "$state", "uiState", "StateManager", "Auth", "$timeout", function($location, $rootScope, $state, uiState, StateManager, Auth, $timeout) {
 		$rootScope.$on("$stateChangeStart",function(event, toState, toParams, fromState, fromParams){
+			console.log("stateChangeStart: " + JSON.stringify(fromState) + " --> " + JSON.stringify(toState));
+
 			StateManager.state.changing = true;
 
 			for(var i = 0; i < StateManager.functions.length; i++)
@@ -127,6 +131,8 @@
 				StateManager.setStateVar("account", Auth.username);
 			}
 
+			StateManager.clearQuery();
+
 			var stateChangeObject = {
 				toState    : toState,
 				toParams   : toParams,
@@ -138,6 +144,8 @@
 		});
 
 		$rootScope.$on("$stateChangeSuccess",function(event, toState, toParams, fromState, fromParams){
+			console.log("stateChangeSuccess: " + JSON.stringify(fromState) + " --> " + JSON.stringify(toState));
+
 			var stateChangeObject = {
 				toState    : toState,
 				toParams   : toParams,
@@ -150,6 +158,16 @@
 			}
 
 			StateManager.handleStateChange(stateChangeObject);
+		});
+
+		$rootScope.$on('$locationChangeStart', function() {
+			console.log("locationChange");
+		});
+
+		$rootScope.$on('$locationChangeSuccess', function() {
+			console.log("locationChangeSucc");
+
+			StateManager.setQuery($location.search());
 		});
 	}])
 	.service("StateManager", ["$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", function($q, $state, $rootScope, $timeout, structure, EventService, $window) {
@@ -341,6 +359,13 @@
 			}
 		};
 
+		this.clearQuery = function(state) {
+			for(var param in self.query)
+			{
+				delete self.query[param];
+			}
+		};
+
 		this.genStateName = function ()
 		{
 			var currentChildren = self.structure.children;
@@ -404,18 +429,18 @@
 			self.state[varName] = value;
 		};
 
-		this.setState = function(stateParams, queryParams)
-		{
+		this.setState = function(stateParams) {
 			// Copy all state parameters and extra parameters
 			// to the state
-			for(var state in stateParams)
-			{
-				if (stateParams.hasOwnProperty(state))
-				{
+			for (var state in stateParams) {
+				if (stateParams.hasOwnProperty(state)) {
 					self.setStateVar(state, stateParams[state]);
 				}
 			}
+		};
 
+		this.setQuery = function(queryParams)
+		{
 			for(var param in queryParams)
 			{
 				if (queryParams.hasOwnProperty(param))

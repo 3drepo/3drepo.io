@@ -158,7 +158,10 @@
 		 * @param display
 		 */
 		vm.legalDisplay = function (event, display) {
-			$location.path("/" + display.value, "_self");
+			StateManager.clearState();
+			StateManager.setStateVar("cookies", true);
+			StateManager.updateState();
+			//$location.path("/" + display.value, "_self");
 			/*
 			vm.legalTitle = display.title;
 			vm.legalText = display.value;

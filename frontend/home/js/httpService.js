@@ -35,7 +35,7 @@
 
 				// If not success function is specified then
 				// provide a default one
-				var successFunc = success || function (response) { deferred.resolve(response); };
+				var successFunc = success || function (response) { deferred.resolve(response.data); };
 
 				// If no failure function is specified then provide a default one
 				var failureFunc = failure || function (response) {

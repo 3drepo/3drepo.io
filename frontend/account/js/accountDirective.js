@@ -27,6 +27,7 @@
 			templateUrl: "account.html",
 			scope: {
 				state: "=",
+				query: "=",
 				account: "="
 			},
 			controller: AccountCtrl,
@@ -44,9 +45,9 @@
 		/*
 		 * Get the account data
 		 */
-		$scope.$watch("vm.account", function()
+		$scope.$watchGroup(["vm.account", "vm.query.page"], function()
 		{
-			if (vm.account)
+			if (vm.account || vm.query.page)
 			{
 				promise = AccountService.getUserInfo(vm.account);
 				promise.then(function (response) {
@@ -57,10 +58,10 @@
 					vm.email = response.data.email;
 
 					// Go to the correct "page"
-					if ($location.search().hasOwnProperty("page")) {
+					if (vm.query.hasOwnProperty("page")) {
 						// Check that there is a directive for that "page"
-						if ($injector.has("account" + UtilsService.capitalizeFirstLetter($location.search().page) + "Directive")) {
-							vm.itemToShow = ($location.search()).page;
+						if ($injector.has("account" + UtilsService.capitalizeFirstLetter(vm.query.page) + "Directive")) {
+							vm.itemToShow = vm.query.page;
 						}
 						else {
 							vm.itemToShow = "repos";
