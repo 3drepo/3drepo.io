@@ -1,10 +1,10 @@
 .homeUserContent(layout="row", layout-align="center")
-	md-content.md-whiteframe-1dp(aria-label="Contact Us", flex="40")
+	md-content.md-whiteframe-1dp(aria-label="Contact Us", flex="45")
 		md-toolbar
 			.md-toolbar-tools
 				h2 Contact Us
 		.userContent(layout="row")
-			div(layout="column", flex)
+			div(layout="column", flex="45")
 				div(ng-if="!vm.sent")
 					md-input-container.md-block
 						label Contact information
@@ -35,7 +35,7 @@
 				p.md-title 3D Repo Ltd
 				div(layout="column", flex)
 					div(layout="row", flex="none")
-						p.contact3DRepoLabel(flex="40") Address
+						p.contact3DRepoLabel(flex="45") Address
 						div(layout="column")
 							p c/o EIT Digital
 							p Centre House Block C
@@ -43,14 +43,11 @@
 							p London W12 7SB
 							p United Kingdom
 					div(layout="row", layout-align="start center", flex="none")
-						p.contact3DRepoLabel(flex="40") Email
+						p.contact3DRepoLabel(flex="45") Email
 						md-button.md-primary#contactEmailButton(href="mailto:support@3drepo.org") support@3drepo.org
 					div(layout="row", flex="none")
-						p.contact3DRepoLabel(flex="40") Telephone
-						p 123456789
-					div(layout="row", flex="none")
-						p.contact3DRepoLabel(flex="40") Company Number
+						p.contact3DRepoLabel(flex="45") Company registered in England & Wales No.
 						p 09014101
 					div(layout="row", flex="none")
-						p.contact3DRepoLabel(flex="40") VAT Registration
+						p.contact3DRepoLabel(flex="45") VAT Registration
 						p GB 206 9090 15

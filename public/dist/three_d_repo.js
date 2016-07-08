@@ -4745,7 +4745,7 @@ var ViewerManager = {};
 
 			promise = UtilsService.doGet(vm.account + "/subscriptions");
 			promise.then(function (response) {
-				console.log(response);
+				console.log("subscriptions ", response);
 				if (response.status === 200) {
 					vm.numLicenses = response.data.length;
 					vm.numNewLicenses = vm.numLicenses;
@@ -9720,7 +9720,6 @@ var ViewerManager = {};
 		this.stateVars    = {};
 
 		this.clearState = function(state) {
-			console.log(12221, self.state)
 			for (var state in self.state)
 			{
 				if ((state !== "changing") && self.state.hasOwnProperty(state))
