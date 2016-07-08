@@ -132,7 +132,7 @@ describe('Enrolling to a subscription', function () {
 
 		before(function(done){
 			//fake payment
-			this.timeout(5000);
+			this.timeout(4000);
 
 			// set fake billing id
 			User.findByUserName(username).then(user => {
@@ -160,6 +160,8 @@ describe('Enrolling to a subscription', function () {
 						}, 2000);
 					});
 
+			}).catch(err => {
+				done(err);
 			});
 
 

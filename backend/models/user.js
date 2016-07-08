@@ -30,7 +30,10 @@ var Mailer = require('../mailer/mailer');
 var systemLogger = require("../logger.js").systemLogger;
 var Payment = require('./payment');
 var moment = require('moment');
-var getSubscription = require('./subscription').getSubscription;
+var Subscription = require('./subscription');
+var getSubscription = Subscription.getSubscription;
+
+
 
 var schema = mongoose.Schema({
 	_id : String,
@@ -270,11 +273,21 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	});
 };
 
-schema.statics.verify = function(username, token, allowRepeatedVerify){
+schema.statics.verify = function(username, token, options){
 	'use strict';
 
-	return this.findByUserName(username).then(user => {
+	options = options || {};
+
+	let allowRepeatedVerify = options.allowRepeatedVerify;
+	let skipImportToyProject = options.skipImportToyProject;
+	let skipCreateBasicPlan = options.skipCreateBasicPlan;
+
+	let user;
+
+	return this.findByUserName(username).then(_user => {
 		
+		user = _user;
+
 		var tokenData = user && user.customData && user.customData.emailVerifyToken;
 
 		if(!user){
@@ -317,6 +330,26 @@ schema.statics.verify = function(username, token, allowRepeatedVerify){
 		} else {
 			return Promise.reject({ resCode: responseCodes.TOKEN_INVALID});
 		}
+
+	}).then(() => {
+
+		if(!skipImportToyProject){
+
+			//import toy project
+			var ProjectHelper = require('./helper/project');
+
+			ProjectHelper.importToyProject(username).catch(err => {
+				systemLogger.logError(JSON.stringify(err));
+			});
+		}
+
+		if(!skipCreateBasicPlan){
+			//basic quota
+			return user.createSubscription(Subscription.getBasicPlan().plan, user.user, true, null).then(() => user);
+		}
+
+		return user;
+
 	});
 };
 
@@ -901,6 +934,10 @@ schema.methods.executeBillingAgreement = function(token, billingAgreementId){
 
 	this.customData.subscriptions.forEach(subscription => {
 
+		if(subscription.plan === Subscription.getBasicPlan().plan){
+			return;
+		}
+
 		if(subscription.assignedUser === this.customData.billingUser){
 			assignedBillingUser = true;
 		}
@@ -924,7 +961,8 @@ schema.methods.executeBillingAgreement = function(token, billingAgreementId){
 		let subscriptions = this.customData.subscriptions;
 		
 		for(let i=0; i < subscriptions.length; i++){
-			if(!subscriptions[i].assignedUser){
+
+			if(subscriptions[i].plan !== Subscription.getBasicPlan().plan && !subscriptions[i].assignedUser){
 				subscriptions[i].assignedUser = this.customData.billingUser;
 				break;
 			}

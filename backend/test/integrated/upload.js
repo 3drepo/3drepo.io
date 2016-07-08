@@ -47,7 +47,7 @@ describe('Uploading a project', function () {
 
 			helpers.signUpAndLoginAndCreateProject({
 				server, request, agent, expect, User, systemLogger,
-				username, password, email, project, desc, type,
+				username, password, email, project, desc, type, noBasicPlan: true,
 				done: function(err, _agent){
 					agent = _agent;
 					done(err);
