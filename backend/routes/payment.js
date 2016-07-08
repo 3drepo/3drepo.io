@@ -45,8 +45,8 @@ function executeAgreement(req, res, next){
 					if (err) {
 						reject(err);
 					} else if(
-						(config.paypal.debug && config.paypal.debug.forceExecuteAgreementError)
-						|| ['Expired', 'Suspended', 'Cancelled'].indexOf(billingAgreement.state) !== -1
+						(config.paypal.debug && config.paypal.debug.forceExecuteAgreementError) || 
+						['Expired', 'Suspended', 'Cancelled'].indexOf(billingAgreement.state) !== -1
 					){
 						reject({ resCode: responseCodes.EXECUTE_AGREEMENT_ERROR });
 
