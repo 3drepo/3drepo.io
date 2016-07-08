@@ -646,6 +646,7 @@ schema.methods.listProjects = function(options){
 schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	'use strict';
 
+	plans = plans || [];
 	this.customData.subscriptions = this.customData.subscriptions || [];
 	this.customData.billingUser = billingUser;
 
@@ -711,12 +712,19 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	let billingAgreement;
 
 	if(plans.length <= 0){
-		next = Payment.updateBillingAddress(this.customData.billingAgreementId, {
-			"line1": billingAddress.line1,
-			"city": billingAddress.city,
-			"postal_code": billingAddress.postalCode,
-			"country_code": billingAddress.countryCode
-		});
+
+		if(!this.customData.billingAgreementId){
+			next = Promise.resolve({});
+		} else {
+			next = Payment.updateBillingAddress(this.customData.billingAgreementId, {
+				"line1": billingAddress.line1,
+				"city": billingAddress.city,
+				"postal_code": billingAddress.postalCode,
+				"country_code": billingAddress.countryCode
+			});
+		}
+
+
 	} else {
 		let startDate = moment.utc().date(1).add(1, 'month').hours(0).minutes(0).seconds(0).milliseconds(0).toDate();
 		let lastDayOfThisMonth = moment.utc().endOf('month').date();
@@ -770,6 +778,7 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	return next.then(() => {
 
 		//store billing info locally
+		console.log(billingAddress);
 		this.customData.billingInfo = billingAddress;
 		return this.save();
 
