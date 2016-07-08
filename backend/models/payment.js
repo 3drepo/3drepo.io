@@ -25,7 +25,7 @@ paypal.configure({
 	'client_secret': config.paypal.client_secret
 });
 
-function getBillingAgreement(billingUser, currency, initAmount, amount, billingCycle, startDate){
+function getBillingAgreement(billingUser, billingAddress, currency, initAmount, amount, billingCycle, startDate){
 	'use strict';
 
 	console.log('initAmount', initAmount);
@@ -122,7 +122,8 @@ function getBillingAgreement(billingUser, currency, initAmount, amount, billingC
 				},
 				"payer": {
 					"payment_method": "paypal"
-				}
+				},
+				"shipping_address": billingAddress
 			};
 
 			paypal.billingAgreement.create(billingAgreementAttributes, function (err, billingAgreement) {
@@ -148,8 +149,34 @@ function getBillingAgreement(billingUser, currency, initAmount, amount, billingC
 
 }
 
+function updateBillingAddress(billingAgreementId, billingAddress){
+	'use strict';
+
+	let updateOps = [
+		{
+			"op": "replace",
+			"path": "/",
+			"value": {
+				"shipping_address": billingAddress
+			}
+		}
+	];
+
+	return new Promise((resolve, reject) => {
+		paypal.billingAgreement.update(billingAgreementId, updateOps, function (err, billingAgreement) {
+			if (err) {
+				reject(err);
+			} else {
+				console.log(JSON.stringify(billingAgreement));
+				resolve(billingAgreement);
+			}
+		});
+	});
+
+}
 
 module.exports = {
 	getBillingAgreement,
+	updateBillingAddress,
 	paypal
 };

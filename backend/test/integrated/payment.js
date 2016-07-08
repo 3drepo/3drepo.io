@@ -112,7 +112,14 @@ describe('Enrolling to a subscription', function () {
 			"plan": "THE-100-QUID-PLAN",
 			"quantity": 3
 			}
-		]
+		],
+	    "billingAddress":{
+	        "line1": "na",
+	        "city": "London",
+	        "postalCode": "A00 2ss020",
+	        "countryCode": "GB",
+	        "vat": "90090-0909"
+	    }
 	};
 
 	it('should succee', function(done){

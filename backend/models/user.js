@@ -79,9 +79,12 @@ var schema = mongoose.Schema({
 			database: String
 		}],
 		billingInfo:{
-			postcode: String,
+
 			vat: String,
-			country: String
+			"line1": String,
+			"city": String,
+			"postalCode": String,
+			"countryCode": String
 		},
 		//global billing info
 		billingAgreementId: String,
@@ -640,7 +643,7 @@ schema.methods.listProjects = function(options){
 	});
 };
 
-schema.methods.buySubscriptions = function(plans, billingUser){
+schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	'use strict';
 
 	this.customData.subscriptions = this.customData.subscriptions || [];
@@ -704,55 +707,74 @@ schema.methods.buySubscriptions = function(plans, billingUser){
 	});
 
 
-	if(plans.length <= 0){
-		return Promise.reject(responseCodes.LICENSE_NO_CHANGE);
-	}
-
+	let next;
 	let billingAgreement;
 
-	let startDate = moment.utc().date(1).add(1, 'month').hours(0).minutes(0).seconds(0).milliseconds(0).toDate();
-	let lastDayOfThisMonth = moment.utc().endOf('month').date();
-	let day = moment.utc().date();
+	if(plans.length <= 0){
+		next = Payment.updateBillingAddress(this.customData.billingAgreementId, {
+			"line1": billingAddress.line1,
+			"city": billingAddress.city,
+			"postal_code": billingAddress.postalCode,
+			"country_code": billingAddress.countryCode
+		});
+	} else {
+		let startDate = moment.utc().date(1).add(1, 'month').hours(0).minutes(0).seconds(0).milliseconds(0).toDate();
+		let lastDayOfThisMonth = moment.utc().endOf('month').date();
+		let day = moment.utc().date();
 
-	let currency = 'GBP';
-	let amount = 0;
-	let billingCycle = 1;
+		let currency = 'GBP';
+		let amount = 0;
+		let billingCycle = 1;
 
-	plans.forEach(data => {
+		plans.forEach(data => {
 
-		let quantity = data.quantity;
-		let plan = getSubscription(data.plan);
-		amount += plan.amount * quantity;
-		// currency = plan.currency;
-		// billingCycle = plan.billingCycle;
+			let quantity = data.quantity;
+			let plan = getSubscription(data.plan);
+			amount += plan.amount * quantity;
+			// currency = plan.currency;
+			// billingCycle = plan.billingCycle;
 
-	});
+		});
 
-	//cal pro-rata price of new licenses subscription
-	let proRataPrice = (lastDayOfThisMonth - day + 1) / lastDayOfThisMonth * amount;
-	proRataPrice = Math.round(proRataPrice * 100) / 100;
+		//cal pro-rata price of new licenses subscription
+		let proRataPrice = (lastDayOfThisMonth - day + 1) / lastDayOfThisMonth * amount;
+		proRataPrice = Math.round(proRataPrice * 100) / 100;
 
-	//add exisiting plans to bill of next cycle as well
-	existingPlans.forEach(data => {
+		//add exisiting plans to bill of next cycle as well
+		existingPlans.forEach(data => {
 
-		let quantity = data.quantity;
-		let plan = getSubscription(data.plan);
-		amount += plan.amount * quantity;
-		// currency = plan.currency;
-		// billingCycle = plan.billingCycle;
-	});
+			let quantity = data.quantity;
+			let plan = getSubscription(data.plan);
+			amount += plan.amount * quantity;
+			// currency = plan.currency;
+			// billingCycle = plan.billingCycle;
+		});
 
-	amount = Math.round(amount * 100) / 100;
+		amount = Math.round(amount * 100) / 100;
 
-	return Payment.getBillingAgreement(billingUser, currency, proRataPrice, amount, billingCycle, startDate).then(_billingAgreement => {
+		next = Payment.getBillingAgreement(billingUser, {
+			"line1": billingAddress.line1,
+			"city": billingAddress.city,
+			"postal_code": billingAddress.postalCode,
+			"country_code": billingAddress.countryCode
+		}, currency, proRataPrice, amount, billingCycle, startDate).then(_billingAgreement => {
 
-		billingAgreement = _billingAgreement;
-		this.customData.paypalPaymentToken = billingAgreement.paypalPaymentToken;
+			billingAgreement = _billingAgreement;
+			this.customData.paypalPaymentToken = billingAgreement.paypalPaymentToken;
 
+		});
+
+	}
+
+
+	return next.then(() => {
+
+		//store billing info locally
+		this.customData.billingInfo = billingAddress;
 		return this.save();
 
 	}).then(() => {
-		return Promise.resolve(billingAgreement);
+		return Promise.resolve(billingAgreement || {});
 	});
 
 };

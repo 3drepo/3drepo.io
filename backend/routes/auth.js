@@ -319,7 +319,8 @@
 				accounts: databases,
 				firstName: user.customData.firstName,
 				lastName: user.customData.lastName,
-				email: user.customData.email
+				email: user.customData.email,
+				billingInfo: user.customData.billingInfo
 			});
 
 		}).catch(err => {
@@ -409,12 +410,14 @@
 	function createSubscription(req, res, next){
 
 		let responsePlace = utils.APIInfo(req);
+		let dbUser;
 
+		User.findByUserName(req.params.account).then(_dbUser => {
 
-		User.findByUserName(req.params.account).then(dbUser => {
+			dbUser = _dbUser;
 			let billingUser = req.params.account;
 			//return dbUser.createSubscriptionToken(req.body.plan, billingUser);
-			return dbUser.buySubscriptions(req.body.plans, billingUser);
+			return dbUser.buySubscriptions(req.body.plans, billingUser, req.body.billingAddress || {});
 		}).then(agreement => {
 
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
