@@ -43,9 +43,9 @@
 			pricePerLicense = 100,
 			quotaPerLicense = 10,
 			initBillingInfo = {
-				postalCode: "LS11 8QT",
-				country: "United Kingdom",
-				vatNumber: "12398756"
+				postalCode: "",
+				country: "",
+				vatNumber: ""
 			};
 
 		/*
@@ -79,8 +79,8 @@
 			//vm.quotaAvailable = Math.round(((initData.licenses * quotaPerLicense) - vm.quotaUsed) * 10) / 10; // Round to 1 decimal place
 			//vm.numCurrentLicenses = initData.licenses;
 			vm.newBillingInfo = angular.copy(initBillingInfo);
-			vm.saveSubscriptionDisabled = true;
-			vm.saveBillingInfoDisabled = true;
+			vm.saveDisabled = true;
+			vm.billingDetailsDisabled = true;
 			vm.billingHistory = [
 				{"Date": "10/04/2016", "Description": "1st payment", "Payment Method": "PayPal", "Amount": 100},
 				{"Date": "10/05/2016", "Description": "2nd payment", "Payment Method": "PayPal", "Amount": 100},
@@ -103,15 +103,35 @@
 		/*
 		 * Watch for change in licenses
 		 */
-		$scope.$watch("vm.numNewLicenses", function (newValue) {
-			vm.saveSubscriptionDisabled = (vm.numLicenses === newValue);
+		$scope.$watch("vm.numNewLicenses", function () {
+			if (vm.numLicenses === vm.numNewLicenses) {
+				vm.saveDisabled = true;
+				vm.billingDetailsDisabled = true;
+			}
+			else {
+				if (vm.numLicenses === 0) {
+					vm.saveDisabled = ((vm.newBillingInfo.postalCode === "") || (vm.newBillingInfo.country === ""));
+				}
+				else {
+					vm.saveDisabled = angular.equals(vm.newBillingInfo, initBillingInfo);
+				}
+				vm.billingDetailsDisabled = false;
+			}
 		});
 
 		/*
 		 * Watch for change in billing info
 		 */
-		$scope.$watch("vm.newBillingInfo", function (newValue) {
-			vm.saveBillingInfoDisabled = angular.equals(initBillingInfo, newValue);
+		$scope.$watch("vm.newBillingInfo", function () {
+			console.log(vm.newBillingInfo, vm.numLicenses);
+			if (vm.numLicenses === 0) {
+				console.log(1);
+				vm.saveDisabled = ((vm.newBillingInfo.postalCode === "") || (vm.newBillingInfo.country === ""));
+			}
+			else {
+				console.log(2);
+				vm.saveDisabled = angular.equals(vm.newBillingInfo, initBillingInfo);
+			}
 		}, true);
 
 		/**

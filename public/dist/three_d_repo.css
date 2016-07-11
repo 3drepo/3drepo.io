@@ -333,8 +333,9 @@ account-billing .accountBillingSave {
   margin: -20px 0 20px;
 }
 account-billing .accountBillingSave img {
-  height: 20px;
-  margin: 14px 0 0 5px;
+  margin: 0 -6px -13px;
+  background: #FFF;
+  padding: 5px;
 }
 
 /** Account Collaborators *********************************************************************************************/
@@ -360,6 +361,15 @@ account-collaborators #accountCollaboratorsUnassigned {
 account-collaborators #accountCollaboratorMessage {
   margin: 0;
   opacity: 0.8;
+}
+
+account-collaborators .cardInfo {
+  margin: 0;
+  text-align: left;
+}
+
+account-collaborators #accountCollaboratorsBPButton {
+  margin-top: 20px;
 }
 
 /** Account Team ******************************************************************************************************/

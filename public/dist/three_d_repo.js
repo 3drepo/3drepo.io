@@ -4913,9 +4913,9 @@ var ViewerManager = {};
 			pricePerLicense = 100,
 			quotaPerLicense = 10,
 			initBillingInfo = {
-				postalCode: "LS11 8QT",
-				country: "United Kingdom",
-				vatNumber: "12398756"
+				postalCode: "",
+				country: "",
+				vatNumber: ""
 			};
 
 		/*
@@ -4949,8 +4949,8 @@ var ViewerManager = {};
 			//vm.quotaAvailable = Math.round(((initData.licenses * quotaPerLicense) - vm.quotaUsed) * 10) / 10; // Round to 1 decimal place
 			//vm.numCurrentLicenses = initData.licenses;
 			vm.newBillingInfo = angular.copy(initBillingInfo);
-			vm.saveSubscriptionDisabled = true;
-			vm.saveBillingInfoDisabled = true;
+			vm.saveDisabled = true;
+			vm.billingDetailsDisabled = true;
 			vm.billingHistory = [
 				{"Date": "10/04/2016", "Description": "1st payment", "Payment Method": "PayPal", "Amount": 100},
 				{"Date": "10/05/2016", "Description": "2nd payment", "Payment Method": "PayPal", "Amount": 100},
@@ -4973,15 +4973,35 @@ var ViewerManager = {};
 		/*
 		 * Watch for change in licenses
 		 */
-		$scope.$watch("vm.numNewLicenses", function (newValue) {
-			vm.saveSubscriptionDisabled = (vm.numLicenses === newValue);
+		$scope.$watch("vm.numNewLicenses", function () {
+			if (vm.numLicenses === vm.numNewLicenses) {
+				vm.saveDisabled = true;
+				vm.billingDetailsDisabled = true;
+			}
+			else {
+				if (vm.numLicenses === 0) {
+					vm.saveDisabled = ((vm.newBillingInfo.postalCode === "") || (vm.newBillingInfo.country === ""));
+				}
+				else {
+					vm.saveDisabled = angular.equals(vm.newBillingInfo, initBillingInfo);
+				}
+				vm.billingDetailsDisabled = false;
+			}
 		});
 
 		/*
 		 * Watch for change in billing info
 		 */
-		$scope.$watch("vm.newBillingInfo", function (newValue) {
-			vm.saveBillingInfoDisabled = angular.equals(initBillingInfo, newValue);
+		$scope.$watch("vm.newBillingInfo", function () {
+			console.log(vm.newBillingInfo, vm.numLicenses);
+			if (vm.numLicenses === 0) {
+				console.log(1);
+				vm.saveDisabled = ((vm.newBillingInfo.postalCode === "") || (vm.newBillingInfo.country === ""));
+			}
+			else {
+				console.log(2);
+				vm.saveDisabled = angular.equals(vm.newBillingInfo, initBillingInfo);
+			}
 		}, true);
 
 		/**
@@ -5069,9 +5089,9 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountCollaboratorsCtrl.$inject = ["$scope", "UtilsService"];
+	AccountCollaboratorsCtrl.$inject = ["$scope", "UtilsService", "StateManager"];
 
-	function AccountCollaboratorsCtrl($scope, UtilsService) {
+	function AccountCollaboratorsCtrl($scope, UtilsService, StateManager) {
 		var vm = this,
 			i,
 			promise;
@@ -5085,7 +5105,7 @@ var ViewerManager = {};
 		vm.allLicensesAssigned = false;
 		promise = UtilsService.doGet(vm.account + "/subscriptions");
 		promise.then(function (response) {
-			console.log(response);
+			console.log("subscriptions ", response);
 			if (response.status === 200) {
 				vm.numLicenses = response.data.length;
 				for (i = 0; i < response.data.length; i += 1) {
@@ -5154,16 +5174,10 @@ var ViewerManager = {};
 			});
 		};
 
-		vm.querySearch = function (query) {
-			return query ? vm.users.filter(createFilterFor(query)) : vm.users;
+		vm.goToBillingPage = function () {
+			//StateManager.clearQuery("page");
+			StateManager.setQuery({page: "billing"});
 		};
-
-		function createFilterFor (query) {
-			var lowercaseQuery = angular.lowercase(query);
-			return function filterFn(collaborator) {
-				return (collaborator.user.indexOf(lowercaseQuery) === 0);
-			};
-		}
 	}
 }());
 

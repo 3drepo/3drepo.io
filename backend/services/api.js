@@ -129,6 +129,7 @@ module.exports.createApp = function (serverConfig) {
 		});
 	});
 
+	app.use('/', require('../routes/plan'));
 	//auth handler
 	app.use('/', require('../routes/auth'));
 	// os api handler

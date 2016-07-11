@@ -30,7 +30,6 @@
 	var httpsPost = require("../libs/httpsReq").post;
 	//var Role = require('../models/role');
 	//var crypto = require('crypto');
-	var ProjectHelper = require('../models/helper/project');
 	var Billing = require('../models/billing');
 	var Subscription = require('../models/subscription');
 
@@ -49,7 +48,7 @@
 	router.post('/:account/subscriptions', middlewares.canCreateDatabase, createSubscription);
 	router.post("/:account/subscriptions/:sid/assign", middlewares.hasWriteAccessToAccount, assignSubscription);
 	router.delete("/:account/subscriptions/:sid/assign", middlewares.hasWriteAccessToAccount, removeAssignedSubscription);
-	router.post('/:account/verify', middlewares.connectQueue, verify);
+	router.post('/:account/verify', verify);
 	router.post('/:account/forgot-password', forgotPassword);
 	router.put("/:account", middlewares.hasWriteAccessToAccount, updateUser);
 	router.put("/:account/password", middlewares.hasWriteAccessToAccount, resetPassword);
@@ -211,17 +210,7 @@
 
 		let responsePlace = utils.APIInfo(req);
 
-		User.verify(req.params[C.REPO_REST_API_ACCOUNT], req.body.token).then(user => {
-
-			//import toy project
-			ProjectHelper.importToyProject(req.params[C.REPO_REST_API_ACCOUNT]).catch(err => {
-				req[C.REQ_REPO].logger.logError(JSON.stringify(err));
-			});
-
-			//basic quota
-			return user.createSubscription('BASIC', user.user, true, null);
-
-		}).then(() => {
+		User.verify(req.params[C.REPO_REST_API_ACCOUNT], req.body.token).then(() => {
 
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
 
@@ -329,7 +318,8 @@
 				accounts: databases,
 				firstName: user.customData.firstName,
 				lastName: user.customData.lastName,
-				email: user.customData.email
+				email: user.customData.email,
+				billingInfo: user.customData.billingInfo
 			});
 
 		}).catch(err => {
@@ -421,12 +411,14 @@
 	function createSubscription(req, res, next){
 
 		let responsePlace = utils.APIInfo(req);
+		let dbUser;
 
+		User.findByUserName(req.params.account).then(_dbUser => {
 
-		User.findByUserName(req.params.account).then(dbUser => {
+			dbUser = _dbUser;
 			let billingUser = req.params.account;
 			//return dbUser.createSubscriptionToken(req.body.plan, billingUser);
-			return dbUser.buySubscriptions(req.body.plans, billingUser);
+			return dbUser.buySubscriptions(req.body.plans, billingUser, req.body.billingAddress || {});
 		}).then(agreement => {
 
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {

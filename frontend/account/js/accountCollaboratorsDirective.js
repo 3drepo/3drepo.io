@@ -35,9 +35,9 @@
 		};
 	}
 
-	AccountCollaboratorsCtrl.$inject = ["$scope", "UtilsService"];
+	AccountCollaboratorsCtrl.$inject = ["$scope", "UtilsService", "StateManager"];
 
-	function AccountCollaboratorsCtrl($scope, UtilsService) {
+	function AccountCollaboratorsCtrl($scope, UtilsService, StateManager) {
 		var vm = this,
 			i,
 			promise;
@@ -51,7 +51,7 @@
 		vm.allLicensesAssigned = false;
 		promise = UtilsService.doGet(vm.account + "/subscriptions");
 		promise.then(function (response) {
-			console.log(response);
+			console.log("subscriptions ", response);
 			if (response.status === 200) {
 				vm.numLicenses = response.data.length;
 				for (i = 0; i < response.data.length; i += 1) {
@@ -120,15 +120,9 @@
 			});
 		};
 
-		vm.querySearch = function (query) {
-			return query ? vm.users.filter(createFilterFor(query)) : vm.users;
+		vm.goToBillingPage = function () {
+			//StateManager.clearQuery("page");
+			StateManager.setQuery({page: "billing"});
 		};
-
-		function createFilterFor (query) {
-			var lowercaseQuery = angular.lowercase(query);
-			return function filterFn(collaborator) {
-				return (collaborator.user.indexOf(lowercaseQuery) === 0);
-			};
-		}
 	}
 }());

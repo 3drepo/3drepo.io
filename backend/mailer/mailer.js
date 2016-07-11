@@ -57,12 +57,8 @@ function rejectNoUrl(name){
 	return Promise.reject({ message: `config.mails.urls[${name}] is not defined`})
 }
 
-function getURL(urlName, params){
+function getBaseURL(){
 	'use strict';
-
-	if(!config.mail || !config.mail.urls || !config.mail.urls[urlName]){
-		return null;
-	}
 
 	let apiServerConfig = config.servers.find(server => server.service === 'api');
 	let port = '';
@@ -71,7 +67,18 @@ function getURL(urlName, params){
 	}
 
 	let baseUrl = (config.using_ssl ? 'https://' : 'http://') + config.host + port;
-	return baseUrl + config.mail.urls[urlName](params);
+
+	return baseUrl;
+}
+
+function getURL(urlName, params){
+	'use strict';
+
+	if(!config.mail || !config.mail.urls || !config.mail.urls[urlName]){
+		return null;
+	}
+
+	return getBaseURL() + config.mail.urls[urlName](params);
 }
 
 function sendVerifyUserEmail(to, data){
@@ -125,6 +132,16 @@ function sendPaymentFailedEmail(to, data){
 
 }
 
+function sendSubscriptionSuspendedEmail(to, data){
+	'use strict';
+
+	let template = require('./templates/paymentSuspended');
+	data.url = getBaseURL() + `/${data.billingUser}/?page=billing`;
+
+	return sendEmail(template, to, data);
+
+}
+
 function sendPaymentErrorEmail(data){
 	'use strict';
 
@@ -154,4 +171,5 @@ module.exports = {
 	sendPaymentFailedEmail,
 	sendPaymentErrorEmail,
 	sendProjectInvitation,
+	sendSubscriptionSuspendedEmail
 }

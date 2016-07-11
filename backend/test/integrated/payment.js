@@ -112,7 +112,14 @@ describe('Enrolling to a subscription', function () {
 			"plan": "THE-100-QUID-PLAN",
 			"quantity": 3
 			}
-		]
+		],
+	    "billingAddress":{
+	        "line1": "na",
+	        "city": "London",
+	        "postalCode": "A00 2ss020",
+	        "countryCode": "GB",
+	        "vat": "90090-0909"
+	    }
 	};
 
 	it('should succee', function(done){
@@ -132,7 +139,7 @@ describe('Enrolling to a subscription', function () {
 
 		before(function(done){
 			//fake payment
-			this.timeout(5000);
+			this.timeout(4000);
 
 			// set fake billing id
 			User.findByUserName(username).then(user => {
@@ -160,6 +167,8 @@ describe('Enrolling to a subscription', function () {
 						}, 2000);
 					});
 
+			}).catch(err => {
+				done(err);
 			});
 
 
