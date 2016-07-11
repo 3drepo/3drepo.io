@@ -32,19 +32,18 @@
 		};
 	}
 
-	PricingCtrl.$inject = ["EventService"];
+	PricingCtrl.$inject = ["$location"];
 
-	function PricingCtrl (EventService) {
+	function PricingCtrl ($location) {
 		var vm = this;
 
 		/**
 		 * Go to a sub page
 		 *
 		 * @param page
-		 * @param pay
 		 */
-		vm.showPage = function (page, pay) {
-			EventService.send(EventService.EVENT.GO_HOME);
+		vm.showPage = function (page) {
+			$location.path("/" + page, "_self");
 		};
 	}
 }());

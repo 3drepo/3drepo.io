@@ -33,9 +33,9 @@
 		};
 	}
 
-	LoginCtrl.$inject = ["$scope", "$mdDialog", "Auth", "EventService", "serverConfig"];
+	LoginCtrl.$inject = ["$scope", "$mdDialog", "$location", "Auth", "EventService", "serverConfig"];
 
-	function LoginCtrl($scope, $mdDialog, Auth, EventService, serverConfig) {
+	function LoginCtrl($scope, $mdDialog, $location, Auth, EventService, serverConfig) {
 		var vm = this,
 			enterKey = 13,
 			promise;
@@ -128,7 +128,7 @@
 		};
 
 		vm.showPage = function (page) {
-			EventService.send(EventService.EVENT.GO_HOME);
+			$location.path("/" + page, "_self");
 		};
 
 		/*

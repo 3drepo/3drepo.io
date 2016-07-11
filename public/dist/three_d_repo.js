@@ -5011,9 +5011,7 @@ var ViewerManager = {};
 		 * @param index
 		 */
 		vm.downloadBilling = function (index) {
-			$location.path("/billing", "_self")
-				.search({}) // Clear all parameters
-				.search("item", index);
+			$location.url("/billing?item=" + index);
 		};
 
 		vm.changeSubscription = function () {
@@ -5248,7 +5246,6 @@ var ViewerManager = {};
 			{
 				promise = AccountService.getUserInfo(vm.account);
 				promise.then(function (response) {
-					console.log("**userInfo** ", response);
 					vm.accounts = response.data.accounts;
 					vm.username = vm.account;
 					vm.firstName = response.data.firstName;
@@ -5294,7 +5291,6 @@ var ViewerManager = {};
 		 */
 		function loginStatusListener (event) {
 			if ((event.key === "tdrLoggedIn") && (event.newValue === "false")) {
-				$location.path("/", "_self");
 				Auth.logout();
 			}
 		}
@@ -5409,9 +5405,9 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountMenuCtrl.$inject = ["$location", "Auth", "EventService"];
+	AccountMenuCtrl.$inject = ["Auth", "EventService"];
 
-	function AccountMenuCtrl ($location, Auth, EventService) {
+	function AccountMenuCtrl (Auth, EventService) {
 		var vm = this,
 			promise;
 
@@ -5436,13 +5432,7 @@ var ViewerManager = {};
 		 * Logout
 		 */
 		vm.logout = function () {
-			promise = Auth.logout();
-			promise.then(function () {
-				//$location.path("/", "_self");
-				$location.search({}); // Clear URL parameters
-				// Change the local storage login status for other tabs to listen to
-				localStorage.setItem("tdrLoggedIn", "false");
-			});
+			Auth.logout();
 		};
 	}
 }());
@@ -8002,7 +7992,9 @@ var ViewerManager = {};
 	function billing() {
 		return {
 			restrict: "E",
-			scope: {},
+			scope: {
+				query: "="
+			},
 			templateUrl: "billing.html",
 			controller: BillingCtrl,
 			controllerAs: "vm",
@@ -8010,9 +8002,9 @@ var ViewerManager = {};
 		};
 	}
 
-	BillingCtrl.$inject = ["$location"];
+	BillingCtrl.$inject = ["EventService"];
 
-	function BillingCtrl ($location) {
+	function BillingCtrl (EventService) {
 		var vm = this;
 
 		/*
@@ -8023,18 +8015,18 @@ var ViewerManager = {};
 			{"Date": "10/05/2016", "Description": "2nd payment", "Payment Method": "PayPal", "Amount": 100},
 			{"Date": "10/06/2016", "Description": "3rd payment", "Payment Method": "PayPal", "Amount": 100}
 		];
-		if ($location.search().hasOwnProperty("item") &&
-			(parseInt($location.search().item) >= 0) &&
-			(parseInt($location.search().item) < vm.billingHistory.length)) {
+		if (vm.query.hasOwnProperty("item") &&
+			(parseInt(vm.query.item) >= 0) &&
+			(parseInt(vm.query.item) < vm.billingHistory.length)) {
 			vm.showBilling = true;
-			vm.item = parseInt($location.search().item);
+			vm.item = parseInt(vm.query.item);
 		}
 		else {
 			vm.showBilling = false;
 		}
 
 		vm.home = function () {
-			$location.path("/", "_self");
+			EventService.send(EventService.EVENT.GO_HOME)
 		};
 	}
 }());
@@ -8597,13 +8589,13 @@ var ViewerManager = {};
 		};
 	}
 
-	CookiesCtrl.$inject = ["$location"];
+	CookiesCtrl.$inject = ["EventService"];
 
-	function CookiesCtrl ($location) {
+	function CookiesCtrl (EventService) {
 		var vm = this;
 
 		vm.home = function () {
-			$location.path("/", "_self");
+			EventService.send(EventService.EVENT.GO_HOME);
 		};
 	}
 }());
@@ -9551,6 +9543,7 @@ var ViewerManager = {};
 			self.loggedIn  = false;
 			self.username  = null;
 			self.userRoles = null;
+			localStorage.setItem("tdrLoggedIn", "false");
 
 			EventService.send(EventService.EVENT.USER_LOGGED_OUT, { error: reason });
 
@@ -9664,13 +9657,14 @@ var ViewerManager = {};
 			resolve: {
 				init: function(Auth, StateManager, $q)
 				{
-					console.log("Auth Init");
+					StateManager.state.authInitialized = false;
 
 					var finishedAuth = $q.defer();
 
 					StateManager.state.changing = true;
 
 					Auth.init().then(function (loggedIn) {
+						StateManager.state.authInitialized = true;
 						StateManager.state.loggedIn = loggedIn;
 
 						finishedAuth.resolve();
@@ -9985,7 +9979,7 @@ var ViewerManager = {};
 		this.clearState = function(state) {
 			for (var state in self.state)
 			{
-				if ((state !== "changing") && self.state.hasOwnProperty(state))
+				if ((["changing", "authInitialized", "loggedIn"].indexOf(state) === -1) && self.state.hasOwnProperty(state))
 				{
 					self.setStateVar(state, null);
 				}
@@ -10005,6 +9999,7 @@ var ViewerManager = {};
 			var childidx        = 0;
 			var stateName       = "home."; // Assume that the base state is there.
 			var i               = 0;
+			var usesFunction    = false;
 
 			// First loop through the list of functions
 			// belonging to parent structure.
@@ -10018,30 +10013,34 @@ var ViewerManager = {};
 					if (self.state[functionName])
 					{
 						stateName += functionName + ".";
+						usesFunction = true;
 						break;
 					}
 				}
 			}
 
-			while(childidx < currentChildren.length)
+			if (!usesFunction)
 			{
-				var child  = currentChildren[childidx];
-				var plugin = child.plugin;
-
-				if (self.state.hasOwnProperty(plugin) && self.state[plugin])
+				while(childidx < currentChildren.length)
 				{
-					stateName += plugin + ".";
+					var child  = currentChildren[childidx];
+					var plugin = child.plugin;
 
-					if (child.children) {
-						currentChildren = child.children;
-					} else {
-						currentChildren = [];
+					if (self.state.hasOwnProperty(plugin) && self.state[plugin])
+					{
+						stateName += plugin + ".";
+
+						if (child.children) {
+							currentChildren = child.children;
+						} else {
+							currentChildren = [];
+						}
+
+						childidx = -1;
 					}
 
-					childidx = -1;
+					childidx += 1;
 				}
-
-				childidx += 1;
 			}
 
 			return stateName.substring(0, stateName.length - 1);
@@ -10113,6 +10112,8 @@ var ViewerManager = {};
 					}
 
 					self.updateState();
+				} else if (event.type === EventService.EVENT.CLEAR_STATE) {
+					self.clearState();
 				}
 			}
 		});
@@ -10302,35 +10303,35 @@ var ViewerManager = {};
 			 * Watch the state to handle moving to and from the login page
 			 */
 			$scope.$watch("vm.state", function () {
-				homeLoggedOut.empty();
+				if (vm.state.authInitialized) {
+					homeLoggedOut.empty();
 
-				vm.goToUserPage = false;
-				for (i = 0; i < vm.functions.length; i++) {
-					func = vm.functions[i];
+					vm.goToUserPage = false;
+					for (i = 0; i < vm.functions.length; i++) {
+						func = vm.functions[i];
 
-					if (vm.state[func]) {
-						vm.goToUserPage = true;
-						// Create element
-						element = "<" + UtilsService.snake_case(func, "-") +
-							" username='vm.query.username'" +
-							" token='vm.query.token'>" +
-							"</" + UtilsService.snake_case(func, "-") + ">";
+						if (vm.state[func]) {
+							vm.goToUserPage = true;
+							// Create element
+							element = "<" + UtilsService.snake_case(func, "-") +
+								" username='vm.query.username'" +
+								" token='vm.query.token'" +
+								" query='vm.query'>" +
+								"</" + UtilsService.snake_case(func, "-") + ">";
 
-						notLoggedInElement = angular.element(element);
+							notLoggedInElement = angular.element(element);
+							homeLoggedOut.append(notLoggedInElement);
+							$compile(notLoggedInElement)($scope);
+							break;
+						}
+					}
+
+					if (!vm.state.loggedIn && !vm.goToUserPage) {
+						// Create login element
+						notLoggedInElement = angular.element("<login></login>");
 						homeLoggedOut.append(notLoggedInElement);
 						$compile(notLoggedInElement)($scope);
-						break;
 					}
-				}
-
-				if (!vm.state.loggedIn && !vm.goToUserPage) {
-					// Create login element
-					notLoggedInElement = angular.element("<login></login>");
-					homeLoggedOut.append(notLoggedInElement);
-					$compile(notLoggedInElement)($scope);
-
-					// Set the URL to root if it is not root
-					$location.path("/", "_self");
 				}
 			}, true);
 		});
@@ -10351,10 +10352,8 @@ var ViewerManager = {};
 		 * @param display
 		 */
 		vm.legalDisplay = function (event, display) {
-			StateManager.clearState();
-			StateManager.setStateVar("cookies", true);
-			StateManager.updateState();
-			//$location.path("/" + display.value, "_self");
+			$location.url("/" + display.value);
+
 			/*
 			vm.legalTitle = display.title;
 			vm.legalText = display.value;
@@ -10375,20 +10374,25 @@ var ViewerManager = {};
 			if (angular.isDefined(event) && angular.isDefined(event.type)) {
 				if (event.type === EventService.EVENT.USER_LOGGED_IN)
 				{
-					var account = StateManager.state.account ? StateManager.state.account : event.value.username;
 					if (!event.value.error)
 					{
-						if (!event.value.initialiser)
-						{
-							EventService.send(EventService.EVENT.SET_STATE, { loggedIn: true, account: account });
-						}
+						StateManager.setStateVar("loggedIn", true);
+						EventService.send(EventService.EVENT.GO_HOME);
 					}
 				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
-					StateManager.clearState();
+					EventService.send(EventService.EVENT.CLEAR_STATE);
 					EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
 				} else if (event.type === EventService.EVENT.SHOW_PROJECTS) {
-					StateManager.clearState();
+					EventService.send(EventService.EVENT.CLEAR_STATE);
 					Auth.init();
+				} else if (event.type === EventService.EVENT.GO_HOME) {
+					EventService.send(EventService.EVENT.CLEAR_STATE);
+
+					if (StateManager.state.loggedIn) {
+						EventService.send(EventService.EVENT.SET_STATE, { account: Auth.username });
+					} else {
+						EventService.send(EventService.EVENT.SET_STATE, {});
+					}
 				}
 			}
 		});
@@ -10448,8 +10452,6 @@ var ViewerManager = {};
 			var onSuccess = function (res) { return res;};
 			var onError = function(res) {
 				if (res.status === 401 || res.status === 400) {
-					$location.path("/login");
-
 					return $q.reject(res);
 				} else {
 					return $q.reject(res);
@@ -10490,9 +10492,9 @@ var ViewerManager = {};
 	angular.module("3drepo")
 		.factory("HttpService", HttpService);
 
-	HttpService.$inject = ["$http", "$q", "StateManager", "serverConfig"];
+	HttpService.$inject = ["$http", "$q", "EventService", "serverConfig"];
 
-	function HttpService($http, $q, StateManager, serverConfig) {
+	function HttpService($http, $q, EventService, serverConfig) {
 		var handlerFactory = function(httpReq)
 		{
 			return function (type, url, success, failure)
@@ -10513,9 +10515,7 @@ var ViewerManager = {};
 						// If there is a not found error or an unauthorized error
 						// then panic and clear the state. Don't worry everything will
 						// recover. :)
-
-						StateManager.clearState();
-						StateManager.updateState();
+						EventService.send(EventService.EVENT.GO_HOME);
 					}
 
 					deferred.resolve([]);
@@ -12545,7 +12545,7 @@ angular.module('3drepo')
 				Auth.login(vm.user.username, vm.user.password);
 			}
 		};
-		
+
 		/**
 		 * Attempt to register
 		 *
@@ -12660,7 +12660,7 @@ angular.module('3drepo')
 	/**
 	 * Re-make md-input-container to get around the problem discussed here https://github.com/angular/material/issues/1376
 	 * Taken from mikila85's version of blaise-io's workaround
-	 * 
+	 *
 	 * @param $timeout
 	 * @returns {Function}
 	 */
@@ -14614,13 +14614,13 @@ var Oculus = {};
 		};
 	}
 
-	paymentCtrl.$inject = ["$location"];
+	paymentCtrl.$inject = ["EventService"];
 
-	function paymentCtrl ($location) {
+	function paymentCtrl (EventService) {
 		var vm = this;
 
 		vm.goToLoginPage = function () {
-			$location.path("/", "_self");
+			EventService.send(EventService.EVENT.GO_HOME);
 		};
 	}
 }());
@@ -14668,9 +14668,8 @@ var Oculus = {};
 		 * Go to a sub page
 		 *
 		 * @param page
-		 * @param pay
 		 */
-		vm.showPage = function (page, pay) {
+		vm.showPage = function (page) {
 			$location.path("/" + page, "_self");
 		};
 	}
@@ -14710,13 +14709,13 @@ var Oculus = {};
 		};
 	}
 
-	PrivacyCtrl.$inject = ["$location"];
+	PrivacyCtrl.$inject = ["EventService"];
 
-	function PrivacyCtrl ($location) {
+	function PrivacyCtrl (EventService) {
 		var vm = this;
 
 		vm.home = function () {
-			$location.path("/", "_self");
+			EventService.send(EventService.EVENT.GO_HOME);
 		};
 	}
 }());
@@ -14832,6 +14831,8 @@ var Oculus = {};
 			USER_NOT_AUTHORIZED: "EVENT_USER_NOT_AUTHORIZED",
 
 			// State changes
+			GO_HOME: "EVENT_GO_HOME",
+			CLEAR_STATE: "EVENT_CLEAR_STATE",
 			SET_STATE: "EVENT_SET_STATE",
 			STATE_CHANGED: "EVENT_STATE_CHANGED"
 		};
@@ -15828,9 +15829,9 @@ var Oculus = {};
         };
     }
 
-    RegisterVerifyCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "AccountService", "StateManager"];
+    RegisterVerifyCtrl.$inject = ["EventService", "UtilsService", "StateManager"];
 
-    function RegisterVerifyCtrl ($scope, $location, $timeout, UtilsService, AccountService, StateManager) {
+    function RegisterVerifyCtrl (EventService, UtilsService, StateManager) {
         var vm = this,
             promise,
             username = StateManager.query.username,
@@ -15860,26 +15861,7 @@ var Oculus = {};
         });
 
         vm.goToLoginPage = function () {
-            $location.path("/", "_self");
-        };
-
-        vm.setupPayment = function ($event) {
-            var data;
-            vm.paypalReturnUrl = $location.protocol() + "://" + $location.host();
-            data = {
-                verificationToken: token,
-                plan: "THE-100-QUID-PLAN"
-            };
-            promise = AccountService.newSubscription(username, data);
-            promise.then(function (response) {
-                vm.subscriptionToken = response.data.token;
-                // Make sure form contains the token before submitting
-                $timeout(function () {
-                    $scope.$apply();
-                    document.registerVerifyForm.action = "https://www.sandbox.paypal.com/cgi-bin/webscr";
-                    document.registerVerifyForm.submit();
-                }, 1000);
-            });
+			EventService.send(EventService.EVENT.GO_HOME);
         };
     }
 }());
@@ -16251,13 +16233,13 @@ var Oculus = {};
 		};
 	}
 
-	TermsAndConditionsCtrl.$inject = ["$location"];
+	TermsAndConditionsCtrl.$inject = ["EventService"];
 
-	function TermsAndConditionsCtrl ($location) {
+	function TermsAndConditionsCtrl (EventService) {
 		var vm = this;
 
 		vm.home = function () {
-			$location.path("/", "_self");
+			EventService.send(EventService.EVENT.GO_HOME);
 		};
 	}
 }());
