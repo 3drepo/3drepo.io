@@ -41,25 +41,40 @@ function getBillingAgreement(billingUser, billingAddress, currency, initAmount, 
 
 	let baseUrl = (config.using_ssl ? 'https://' : 'http://') + config.host + port;
 
+
+
+
 	let taxAmount = vat.getByCountryCode(billingAddress.country_code) * amount;
 	taxAmount = Math.round(taxAmount * 100) / 100;
 	let afterTaxAmount = amount - taxAmount;
 
-	let taxFirstCycleAmount = vat.getByCountryCode(billingAddress.country_code) * firstCycleAmount;
-	taxFirstCycleAmount = Math.round(taxFirstCycleAmount * 100) / 100;
-	let afterTaxFirstCycleAmount = firstCycleAmount - taxFirstCycleAmount;
-
-	let billingPlanAttributes = {
-		"description": "3D Repo License",
-		"merchant_preferences": {
-			"auto_bill_amount": "yes",
-			"cancel_url": `${baseUrl}/${billingUser}?page=billing`,
-			"initial_fail_amount_action": "continue",
-			"max_fail_attempts": "0",
-			"return_url": `${baseUrl}/${billingUser}?page=billing`
+	let paymentDefs = [];
+	paymentDefs.push({
+		"amount": {
+			"currency": currency,
+			"value": afterTaxAmount
 		},
-		"name": "3D Repo Licences",
-		"payment_definitions": [{
+		"cycles": "0",
+		"frequency": "MONTH",
+		"frequency_interval": billingCycle,
+		"name": "Monthly payment",
+		"type": "REGULAR",
+		"charge_models":[{
+			"type": "TAX",
+			"amount": {
+				"value": taxAmount,
+				"currency": currency
+			}
+		}]
+	});
+
+	if(firstCycleAmount){
+
+		let taxFirstCycleAmount = vat.getByCountryCode(billingAddress.country_code) * firstCycleAmount;
+		taxFirstCycleAmount = Math.round(taxFirstCycleAmount * 100) / 100;
+		let afterTaxFirstCycleAmount = firstCycleAmount - taxFirstCycleAmount;
+
+		paymentDefs.push({
 			"amount": {
 				"currency": currency,
 				"value": afterTaxFirstCycleAmount
@@ -76,35 +91,32 @@ function getBillingAgreement(billingUser, billingAddress, currency, initAmount, 
 					"currency": currency
 				}
 			}]
-		}, {
-			"amount": {
-				"currency": currency,
-				"value": afterTaxAmount
-			},
-			"cycles": "0",
-			"frequency": "MONTH",
-			"frequency_interval": billingCycle,
-			"name": "Monthly payment",
-			"type": "REGULAR",
-			"charge_models":[{
-				"type": "TAX",
-				"amount": {
-					"value": taxAmount,
-					"currency": currency
-				}
-			}]
-		}],
+		});
+	}
+
+
+	let billingPlanAttributes = {
+		"description": "3D Repo License",
+		"merchant_preferences": {
+			"auto_bill_amount": "yes",
+			"cancel_url": `${baseUrl}/${billingUser}?page=billing`,
+			"initial_fail_amount_action": "continue",
+			"max_fail_attempts": "0",
+			"return_url": `${baseUrl}/${billingUser}?page=billing`
+		},
+		"name": "3D Repo Licences",
+		"payment_definitions": paymentDefs,
 	    "type": "INFINITE"
 	};
 
 	if(initAmount){
-		billingPlanAttributes.setup_fee = {
+		billingPlanAttributes.merchant_preferences.setup_fee = {
 			"value": initAmount,
 			"currency": "GBP"
 		};
 	}
 
-	console.log(billingPlanAttributes);
+	console.log(JSON.stringify(billingPlanAttributes, null ,2));
 
 	return new Promise((resolve, reject) => {
 
@@ -146,9 +158,19 @@ function getBillingAgreement(billingUser, billingAddress, currency, initAmount, 
 		//create agreement
 		return new Promise((resolve, reject) => {
 
-			var billingAgreementAttributes = {
+			let desc = `3D Repo Licence subscription. First month: £${initAmount}, `;
+			
+			if(firstCycleAmount){
+				desc += `then second month's pro-rata price: £${firstCycleAmount}, `;
+			}
+
+			desc += `then each month: £${amount}`;
+			
+			console.log('desc len', desc.length);
+
+			let billingAgreementAttributes = {
 				"name": "3D Repo Licenses",
-				"description": `3D Repo License subscription. First month free, then the following month's pro-rata price: £${firstCycleAmount}, then each month: £${amount}`,
+				"description": desc,
 				"start_date": startDate.toISOString(),
 				"plan": {
 					"id": billingPlan.id
@@ -159,12 +181,13 @@ function getBillingAgreement(billingUser, billingAddress, currency, initAmount, 
 				"shipping_address": billingAddress
 			};
 
+			console.log('creating agreement...');
 			paypal.billingAgreement.create(billingAgreementAttributes, function (err, billingAgreement) {
 				if (err) {
 					reject(err);
 				} else {
 
-					console.log(billingAgreement);
+					console.log(JSON.stringify(billingAgreement, null ,2));
 					let link = billingAgreement.links.find(link => link.rel === 'approval_url');
 					let token = url.parse(link.href, true).query.token;
 

@@ -743,10 +743,13 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 		nextMonth.remainingDays = Math.round(moment.duration(moment(nextMonth.endOfMonth).utc().diff(nextMonth.today)).asDays());
 
 		let trialDate = {};
-		trialDate.today = moment(trialStartDate).utc().startOf('day');
-		trialDate.endOfMonth = moment(trialDate.today).utc().endOf('month');
-		trialDate.totalDays = trialDate.endOfMonth.date();
-		trialDate.remainingDays = Math.round(moment.duration(moment(trialDate.endOfMonth).utc().diff(trialDate.today)).asDays());
+		if(this.customData.freeTrial){
+			trialDate.today = moment(this.customData.freeTrial.startAt).utc().startOf('day');
+			trialDate.endOfMonth = moment(trialDate.today).utc().endOf('month');
+			trialDate.totalDays = trialDate.endOfMonth.date();
+			trialDate.remainingDays = Math.round(moment.duration(moment(trialDate.endOfMonth).utc().diff(trialDate.today)).asDays());
+		}
+
 
 		// let endOfMonthOfStartDate = moment(startDate).utc().endOf('month');
 		// let totalDays = endOfMonthOfStartDate.date();
@@ -758,11 +761,12 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 		let initAmount = 0;
 		let firstCycleAmount = 0;
 		let billingCycle = 1;
-
+		let firstCycleLength;
+		
 		let isfirstPlan = this.getActiveSubscriptions({skipBasic: true}).length === 0;
 
 		let now = new Date();
-		let inTrialPeriod = this.customData.trialEndAt && this.customData.trialEndAt < now;
+		let inTrialPeriod = this.customData.freeTrial && this.customData.freeTrial.endAt < now;
 
 		if(isfirstPlan){
 			// first time to buy licence(s), free for 1st licence for 1st month
