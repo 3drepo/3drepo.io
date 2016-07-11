@@ -34,9 +34,9 @@
 		};
 	}
 
-	AccountMenuCtrl.$inject = ["$location", "Auth", "EventService"];
+	AccountMenuCtrl.$inject = ["Auth", "EventService"];
 
-	function AccountMenuCtrl ($location, Auth, EventService) {
+	function AccountMenuCtrl (Auth, EventService) {
 		var vm = this,
 			promise;
 
@@ -61,13 +61,7 @@
 		 * Logout
 		 */
 		vm.logout = function () {
-			promise = Auth.logout();
-			promise.then(function () {
-				//$location.path("/", "_self");
-				$location.search({}); // Clear URL parameters
-				// Change the local storage login status for other tabs to listen to
-				localStorage.setItem("tdrLoggedIn", "false");
-			});
+			Auth.logout();
 		};
 	}
 }());

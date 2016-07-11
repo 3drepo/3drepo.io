@@ -32,9 +32,9 @@
 		};
 	}
 
-	PricingCtrl.$inject = ["$location"];
+	PricingCtrl.$inject = ["EventService"];
 
-	function PricingCtrl ($location) {
+	function PricingCtrl (EventService) {
 		var vm = this;
 
 		/**
@@ -44,7 +44,7 @@
 		 * @param pay
 		 */
 		vm.showPage = function (page, pay) {
-			$location.path("/" + page, "_self");
+			EventService.send(EventService.EVENT.GO_HOME);
 		};
 	}
 }());

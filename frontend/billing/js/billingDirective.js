@@ -24,7 +24,9 @@
 	function billing() {
 		return {
 			restrict: "E",
-			scope: {},
+			scope: {
+				query: "="
+			},
 			templateUrl: "billing.html",
 			controller: BillingCtrl,
 			controllerAs: "vm",
@@ -32,9 +34,9 @@
 		};
 	}
 
-	BillingCtrl.$inject = ["$location"];
+	BillingCtrl.$inject = ["EventService"];
 
-	function BillingCtrl ($location) {
+	function BillingCtrl (EventService) {
 		var vm = this;
 
 		/*
@@ -45,18 +47,18 @@
 			{"Date": "10/05/2016", "Description": "2nd payment", "Payment Method": "PayPal", "Amount": 100},
 			{"Date": "10/06/2016", "Description": "3rd payment", "Payment Method": "PayPal", "Amount": 100}
 		];
-		if ($location.search().hasOwnProperty("item") &&
-			(parseInt($location.search().item) >= 0) &&
-			(parseInt($location.search().item) < vm.billingHistory.length)) {
+		if (vm.query.hasOwnProperty("item") &&
+			(parseInt(vm.query.item) >= 0) &&
+			(parseInt(vm.query.item) < vm.billingHistory.length)) {
 			vm.showBilling = true;
-			vm.item = parseInt($location.search().item);
+			vm.item = parseInt(vm.query.item);
 		}
 		else {
 			vm.showBilling = false;
 		}
 
 		vm.home = function () {
-			$location.path("/", "_self");
+			EventService.send(EventService.EVENT.GO_HOME)
 		};
 	}
 }());

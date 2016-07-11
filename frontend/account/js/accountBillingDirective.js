@@ -120,9 +120,7 @@
 		 * @param index
 		 */
 		vm.downloadBilling = function (index) {
-			$location.path("/billing", "_self")
-				.search({}) // Clear all parameters
-				.search("item", index);
+			$location.url("/billing?item=" + index);
 		};
 
 		vm.changeSubscription = function () {

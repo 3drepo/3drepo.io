@@ -95,7 +95,6 @@
 		 */
 		function loginStatusListener (event) {
 			if ((event.key === "tdrLoggedIn") && (event.newValue === "false")) {
-				$location.path("/", "_self");
 				Auth.logout();
 			}
 		}

@@ -31,13 +31,14 @@
 			resolve: {
 				init: function(Auth, StateManager, $q)
 				{
-					console.log("Auth Init");
+					StateManager.state.authInitialized = false;
 
 					var finishedAuth = $q.defer();
 
 					StateManager.state.changing = true;
 
 					Auth.init().then(function (loggedIn) {
+						StateManager.state.authInitialized = true;
 						StateManager.state.loggedIn = loggedIn;
 
 						finishedAuth.resolve();
@@ -352,7 +353,7 @@
 		this.clearState = function(state) {
 			for (var state in self.state)
 			{
-				if ((state !== "changing") && self.state.hasOwnProperty(state))
+				if ((["changing", "authInitialized", "loggedIn"].indexOf(state) === -1) && self.state.hasOwnProperty(state))
 				{
 					self.setStateVar(state, null);
 				}
@@ -372,6 +373,7 @@
 			var childidx        = 0;
 			var stateName       = "home."; // Assume that the base state is there.
 			var i               = 0;
+			var usesFunction    = false;
 
 			// First loop through the list of functions
 			// belonging to parent structure.
@@ -385,30 +387,34 @@
 					if (self.state[functionName])
 					{
 						stateName += functionName + ".";
+						usesFunction = true;
 						break;
 					}
 				}
 			}
 
-			while(childidx < currentChildren.length)
+			if (!usesFunction)
 			{
-				var child  = currentChildren[childidx];
-				var plugin = child.plugin;
-
-				if (self.state.hasOwnProperty(plugin) && self.state[plugin])
+				while(childidx < currentChildren.length)
 				{
-					stateName += plugin + ".";
+					var child  = currentChildren[childidx];
+					var plugin = child.plugin;
 
-					if (child.children) {
-						currentChildren = child.children;
-					} else {
-						currentChildren = [];
+					if (self.state.hasOwnProperty(plugin) && self.state[plugin])
+					{
+						stateName += plugin + ".";
+
+						if (child.children) {
+							currentChildren = child.children;
+						} else {
+							currentChildren = [];
+						}
+
+						childidx = -1;
 					}
 
-					childidx = -1;
+					childidx += 1;
 				}
-
-				childidx += 1;
 			}
 
 			return stateName.substring(0, stateName.length - 1);
@@ -480,6 +486,8 @@
 					}
 
 					self.updateState();
+				} else if (event.type === EventService.EVENT.CLEAR_STATE) {
+					self.clearState();
 				}
 			}
 		});

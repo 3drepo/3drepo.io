@@ -32,9 +32,9 @@
         };
     }
 
-    RegisterVerifyCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "AccountService", "StateManager"];
+    RegisterVerifyCtrl.$inject = ["$scope", "EventService", "$timeout", "UtilsService", "AccountService", "StateManager"];
 
-    function RegisterVerifyCtrl ($scope, $location, $timeout, UtilsService, AccountService, StateManager) {
+    function RegisterVerifyCtrl ($scope, EventService, $timeout, UtilsService, AccountService, StateManager) {
         var vm = this,
             promise,
             username = StateManager.query.username,
@@ -64,7 +64,7 @@
         });
 
         vm.goToLoginPage = function () {
-            $location.path("/", "_self");
+			EventService.send(EventService.EVENT.GO_HOME);
         };
 
         vm.setupPayment = function ($event) {

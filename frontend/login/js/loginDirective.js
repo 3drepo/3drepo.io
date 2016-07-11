@@ -33,9 +33,9 @@
 		};
 	}
 
-	LoginCtrl.$inject = ["$scope", "$mdDialog", "$location", "Auth", "EventService", "serverConfig"];
+	LoginCtrl.$inject = ["$scope", "$mdDialog", "Auth", "EventService", "serverConfig"];
 
-	function LoginCtrl($scope, $mdDialog, $location, Auth, EventService, serverConfig) {
+	function LoginCtrl($scope, $mdDialog, Auth, EventService, serverConfig) {
 		var vm = this,
 			enterKey = 13,
 			promise;
@@ -96,7 +96,7 @@
 				Auth.login(vm.user.username, vm.user.password);
 			}
 		};
-		
+
 		/**
 		 * Attempt to register
 		 *
@@ -128,7 +128,7 @@
 		};
 
 		vm.showPage = function (page) {
-			$location.path("/" + page, "_self");
+			EventService.send(EventService.EVENT.GO_HOME);
 		};
 
 		/*
@@ -211,7 +211,7 @@
 	/**
 	 * Re-make md-input-container to get around the problem discussed here https://github.com/angular/material/issues/1376
 	 * Taken from mikila85's version of blaise-io's workaround
-	 * 
+	 *
 	 * @param $timeout
 	 * @returns {Function}
 	 */
