@@ -45,7 +45,7 @@
 		/*
 		 * Init
 		 */
-		vm.numLicenses = 0;
+		vm.numLicenses = -1;
 		vm.unassigned = [];
 		vm.collaborators = [];
 		vm.allLicensesAssigned = false;

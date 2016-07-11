@@ -26,18 +26,18 @@
 			div(layout="row")
 				md-input-container(flex)
 					label Postal code
-					input(type="text", ng-model="vm.newBillingInfo.postalCode", ng-disabled="vm.billingDetailsDisabled")
+					input(type="text", ng-model="vm.newBillingAddress.postalCode", ng-disabled="vm.billingDetailsDisabled")
 				md-input-container(flex)
 					label Country
-					md-select(ng-model="vm.newBillingInfo.country", ng-disabled="vm.billingDetailsDisabled")
-						md-option(ng-repeat="(key, value) in vm.countries", value="{{key}}") {{key}}
+					md-select(ng-model="vm.newBillingAddress.countryCode", ng-disabled="vm.billingDetailsDisabled")
+						md-option(ng-repeat="country in vm.countries", value="{{country.code}}") {{country.name}}
 				md-input-container(flex)
 					label VAT number (optional)
-					input(type="text", ng-model="vm.newBillingInfo.vatNumber", ng-disabled="vm.billingDetailsDisabled")
+					input(type="text", ng-model="vm.newBillingAddress.vat", ng-disabled="vm.billingDetailsDisabled")
 
 			.accountBillingSave
 				div(layout="row", layout-align="start")
-					md-button.md-raised.md-accent(ng-disabled="vm.saveDisabled")
+					md-button.md-raised.md-accent(ng-disabled="vm.saveDisabled", ng-click="vm.changeSubscription()")
 						img(src="/public/images/pp-logo-100px.png")
 				md-divider
 

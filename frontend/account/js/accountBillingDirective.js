@@ -27,7 +27,7 @@
 			templateUrl: 'accountBilling.html',
 			scope: {
 				account: "=",
-				showPage: "&"
+				billingAddress: "="
 			},
 			controller: AccountBillingCtrl,
 			controllerAs: 'vm',
@@ -35,18 +35,13 @@
 		};
 	}
 
-	AccountBillingCtrl.$inject = ["$scope", "$http", "$location", "$mdDialog", "$timeout", "UtilsService"];
+	AccountBillingCtrl.$inject = ["$scope", "$location", "$mdDialog", "$timeout", "UtilsService", "serverConfig"];
 
-	function AccountBillingCtrl($scope, $http, $location, $mdDialog, $timeout, UtilsService) {
+	function AccountBillingCtrl($scope, $location, $mdDialog, $timeout, UtilsService, serverConfig) {
 		var vm = this,
 			promise,
 			pricePerLicense = 100,
-			quotaPerLicense = 10,
-			initBillingInfo = {
-				postalCode: "",
-				country: "",
-				vatNumber: ""
-			};
+			quotaPerLicense = 10;
 
 		/*
 		 * Init
@@ -77,25 +72,29 @@
 			vm.showInfo = true;
 			vm.quotaUsed = 17.3;
 			//vm.quotaAvailable = Math.round(((initData.licenses * quotaPerLicense) - vm.quotaUsed) * 10) / 10; // Round to 1 decimal place
-			//vm.numCurrentLicenses = initData.licenses;
-			vm.newBillingInfo = angular.copy(initBillingInfo);
+			vm.newBillingAddress = angular.copy(vm.billingAddress);
 			vm.saveDisabled = true;
 			vm.billingDetailsDisabled = true;
+			vm.countries = serverConfig.countries;
 			vm.billingHistory = [
 				{"Date": "10/04/2016", "Description": "1st payment", "Payment Method": "PayPal", "Amount": 100},
 				{"Date": "10/05/2016", "Description": "2nd payment", "Payment Method": "PayPal", "Amount": 100},
 				{"Date": "10/06/2016", "Description": "3rd payment", "Payment Method": "PayPal", "Amount": 100}
 			];
-			$http.get("/public/data/countries.json").then(function (response) {
-				vm.countries = response.data;
-			});
 
 			promise = UtilsService.doGet(vm.account + "/subscriptions");
 			promise.then(function (response) {
-				console.log(response);
+				console.log("**subscriptions** ", response);
 				if (response.status === 200) {
 					vm.numLicenses = response.data.length;
 					vm.numNewLicenses = vm.numLicenses;
+
+					promise = UtilsService.doGet(vm.account + "/plans");
+					promise.then(function (response) {
+						console.log("**plans** ", response);
+						if (response.status === 200) {
+						}
+					});
 				}
 			});
 		}
@@ -104,33 +103,35 @@
 		 * Watch for change in licenses
 		 */
 		$scope.$watch("vm.numNewLicenses", function () {
-			if (vm.numLicenses === vm.numNewLicenses) {
-				vm.saveDisabled = true;
-				vm.billingDetailsDisabled = true;
-			}
-			else {
-				if (vm.numLicenses === 0) {
-					vm.saveDisabled = ((vm.newBillingInfo.postalCode === "") || (vm.newBillingInfo.country === ""));
+			if (angular.isDefined(vm.numNewLicenses)) {
+				if (vm.numLicenses === vm.numNewLicenses) {
+					vm.saveDisabled = true;
+					vm.billingDetailsDisabled = true;
 				}
 				else {
-					vm.saveDisabled = angular.equals(vm.newBillingInfo, initBillingInfo);
+					if (vm.numLicenses === 0) {
+						vm.saveDisabled = ((vm.newBillingAddress.postalCode === "") || (vm.newBillingAddress.country === ""));
+					}
+					else {
+						vm.saveDisabled = angular.equals(vm.newBillingAddress, vm.billingAddress);
+					}
+					vm.billingDetailsDisabled = false;
 				}
-				vm.billingDetailsDisabled = false;
 			}
 		});
 
 		/*
 		 * Watch for change in billing info
 		 */
-		$scope.$watch("vm.newBillingInfo", function () {
-			console.log(vm.newBillingInfo, vm.numLicenses);
-			if (vm.numLicenses === 0) {
-				console.log(1);
-				vm.saveDisabled = ((vm.newBillingInfo.postalCode === "") || (vm.newBillingInfo.country === ""));
-			}
-			else {
-				console.log(2);
-				vm.saveDisabled = angular.equals(vm.newBillingInfo, initBillingInfo);
+		$scope.$watch("vm.newBillingAddress", function () {
+			if (angular.isDefined(vm.newBillingAddress)) {
+				console.log(vm.newBillingAddress, vm.numLicenses);
+				if (vm.numLicenses === 0) {
+					vm.saveDisabled = ((vm.newBillingAddress.postalCode === "") || (vm.newBillingAddress.country === ""));
+				}
+				else {
+					vm.saveDisabled = angular.equals(vm.newBillingAddress, vm.billingAddress);
+				}
 			}
 		}, true);
 
@@ -146,7 +147,20 @@
 		vm.changeSubscription = function () {
 			vm.payPalInfo = "Redirecting to PayPal. Please do not refresh the page or close the tab.";
 			showDialog("paypalDialog.html");
-			var data = {plans: [{plan: "THE-100-QUID-PLAN", quantity: vm.numNewLicenses}]};
+			
+			var data = {
+				plans: [{
+					plan: "THE-100-QUID-PLAN",
+					quantity: vm.numNewLicenses
+				}]
+			};
+			if (vm.numLicenses === 0) {
+				data.billingAddress = vm.newBillingAddress;
+			}
+			else if (!angular.equals(vm.billingAddress, vm.newBillingAddress)) {
+				data.billingAddress = vm.newBillingAddress;
+			}
+
 			promise = UtilsService.doPost(data, vm.account + "/subscriptions");
 			promise.then(function (response) {
 				console.log(response);

@@ -34,9 +34,9 @@
 		};
 	}
 
-	SignUpFormCtrl.$inject = ["$scope", "$mdDialog", "serverConfig", "UtilsService", "EventService"];
+	SignUpFormCtrl.$inject = ["$scope", "$mdDialog", "$location", "serverConfig", "UtilsService"];
 
-	function SignUpFormCtrl($scope, $mdDialog, serverConfig, UtilsService, EventService) {
+	function SignUpFormCtrl($scope, $mdDialog, $location, serverConfig, UtilsService) {
 		var vm = this,
 			enterKey = 13,
 			promise;
@@ -106,7 +106,7 @@
 		};
 
 		vm.showPage = function (page) {
-			EventService.send(EventService.EVENT.GO_HOME);
+			$location.path("/" + page, "_self");
 		};
 
 		/**

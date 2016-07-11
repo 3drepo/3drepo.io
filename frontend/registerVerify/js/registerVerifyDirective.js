@@ -32,9 +32,9 @@
         };
     }
 
-    RegisterVerifyCtrl.$inject = ["$scope", "EventService", "$timeout", "UtilsService", "AccountService", "StateManager"];
+    RegisterVerifyCtrl.$inject = ["EventService", "UtilsService", "StateManager"];
 
-    function RegisterVerifyCtrl ($scope, EventService, $timeout, UtilsService, AccountService, StateManager) {
+    function RegisterVerifyCtrl (EventService, UtilsService, StateManager) {
         var vm = this,
             promise,
             username = StateManager.query.username,
@@ -65,25 +65,6 @@
 
         vm.goToLoginPage = function () {
 			EventService.send(EventService.EVENT.GO_HOME);
-        };
-
-        vm.setupPayment = function ($event) {
-            var data;
-            vm.paypalReturnUrl = $location.protocol() + "://" + $location.host();
-            data = {
-                verificationToken: token,
-                plan: "THE-100-QUID-PLAN"
-            };
-            promise = AccountService.newSubscription(username, data);
-            promise.then(function (response) {
-                vm.subscriptionToken = response.data.token;
-                // Make sure form contains the token before submitting
-                $timeout(function () {
-                    $scope.$apply();
-                    document.registerVerifyForm.action = "https://www.sandbox.paypal.com/cgi-bin/webscr";
-                    document.registerVerifyForm.submit();
-                }, 1000);
-            });
         };
     }
 }());

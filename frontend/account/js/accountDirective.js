@@ -56,6 +56,7 @@
 					vm.firstName = response.data.firstName;
 					vm.lastName = response.data.lastName;
 					vm.email = response.data.email;
+					vm.billingAddress = response.data.billingInfo;
 
 					// Go to the correct "page"
 					if (vm.query.hasOwnProperty("page")) {
