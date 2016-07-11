@@ -18,6 +18,7 @@
 var paypal = require('paypal-rest-sdk');
 var url = require('url');
 var config = require('../config');
+var vat = require('./vat');
 
 paypal.configure({
 	'mode': config.paypal.mode, //sandbox or live
@@ -25,10 +26,10 @@ paypal.configure({
 	'client_secret': config.paypal.client_secret
 });
 
-function getBillingAgreement(billingUser, billingAddress, currency, initAmount, amount, billingCycle, startDate){
+function getBillingAgreement(billingUser, billingAddress, currency, initAmount, firstCycleAmount, amount, billingCycle, startDate, firstCycleLength){
 	'use strict';
 
-	console.log('initAmount', initAmount);
+	console.log('firstCycleAmount', firstCycleAmount);
 	console.log('amount', amount);
 	console.log('startDate', startDate);
 
@@ -40,6 +41,13 @@ function getBillingAgreement(billingUser, billingAddress, currency, initAmount, 
 
 	let baseUrl = (config.using_ssl ? 'https://' : 'http://') + config.host + port;
 
+	let taxAmount = vat.getByCountryCode(billingAddress.country_code) * amount;
+	taxAmount = Math.round(taxAmount * 100) / 100;
+	let afterTaxAmount = amount - taxAmount;
+
+	let taxFirstCycleAmount = vat.getByCountryCode(billingAddress.country_code) * firstCycleAmount;
+	taxFirstCycleAmount = Math.round(taxFirstCycleAmount * 100) / 100;
+	let afterTaxFirstCycleAmount = firstCycleAmount - taxFirstCycleAmount;
 
 	let billingPlanAttributes = {
 		"description": "3D Repo License",
@@ -48,28 +56,53 @@ function getBillingAgreement(billingUser, billingAddress, currency, initAmount, 
 			"cancel_url": `${baseUrl}/${billingUser}?page=billing`,
 			"initial_fail_amount_action": "continue",
 			"max_fail_attempts": "0",
-			"return_url": `${baseUrl}/${billingUser}?page=billing`,
-			"setup_fee": {
-				"currency": currency,
-				"value": initAmount
-			}
+			"return_url": `${baseUrl}/${billingUser}?page=billing`
 		},
-		"name": "3D Repo License",
-		"payment_definitions": [
-			{
+		"name": "3D Repo Licences",
+		"payment_definitions": [{
+			"amount": {
+				"currency": currency,
+				"value": afterTaxFirstCycleAmount
+			},
+			"cycles": "1",
+			"frequency": "DAY",
+			"frequency_interval": firstCycleLength,
+			"name": "First month payment after free trial",
+			"type": "TRIAL",
+			"charge_models":[{
+				"type": "TAX",
 				"amount": {
-					"currency": currency,
-					"value": amount
+					"value": taxFirstCycleAmount,
+					"currency": currency
+				}
+			}]
+		}, {
+			"amount": {
+				"currency": currency,
+				"value": afterTaxAmount
 			},
-				"cycles": "0",
-				"frequency": "MONTH",
-				"frequency_interval": billingCycle,
-				"name": "Monthly payment",
-				"type": "REGULAR"
-			},
-		],
+			"cycles": "0",
+			"frequency": "MONTH",
+			"frequency_interval": billingCycle,
+			"name": "Monthly payment",
+			"type": "REGULAR",
+			"charge_models":[{
+				"type": "TAX",
+				"amount": {
+					"value": taxAmount,
+					"currency": currency
+				}
+			}]
+		}],
 	    "type": "INFINITE"
 	};
+
+	if(initAmount){
+		billingPlanAttributes.setup_fee = {
+			"value": initAmount,
+			"currency": "GBP"
+		};
+	}
 
 	console.log(billingPlanAttributes);
 
@@ -115,8 +148,8 @@ function getBillingAgreement(billingUser, billingAddress, currency, initAmount, 
 
 			var billingAgreementAttributes = {
 				"name": "3D Repo Licenses",
-				"description": `3D Repo License subscription. This month's pro-rata price: £${initAmount}, then each month: £${amount}`,
-				"start_date": startDate,
+				"description": `3D Repo License subscription. First month free, then the following month's pro-rata price: £${firstCycleAmount}, then each month: £${amount}`,
+				"start_date": startDate.toISOString(),
 				"plan": {
 					"id": billingPlan.id
 				},

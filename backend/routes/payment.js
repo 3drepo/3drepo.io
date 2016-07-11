@@ -141,7 +141,8 @@ function activateSubscription(req, res, next){
 				amount: isSubscriptionInitIPN ? paymentInfo.initial_payment_amount : paymentInfo.mc_gross,
 				subscriptionSignup: isSubscriptionInitIPN,
 				createBilling: true,
-				ipnDate: new Date(paymentInfo.time_created)
+				ipnDate: new Date(paymentInfo.time_created),
+				nextPaymentDate:  new Date(paymentInfo.next_payment_date)
 
 			}, paymentInfo).then(resData => {
 				systemLogger.logInfo('payment confirmed and licenses activated', resData.subscriptions.toObject());
