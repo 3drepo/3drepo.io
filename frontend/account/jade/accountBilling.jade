@@ -10,10 +10,10 @@
 			div(layout="row")
 				md-input-container(flex)
 					label Quota used (Gb)
-					input(type="text", ng-model="vm.quotaUsed", ng-disabled="true")
+					input(type="text", value="{{vm.quotaSpaceUsed}}", ng-disabled="true")
 				md-input-container(flex)
 					label Quota available (Gb)
-					input(type="text", ng-model="vm.quotaAvailable", ng-disabled="true")
+					input(type="text", value="{{vm.quotaSpaceLimit}}", ng-disabled="true")
 
 			div(layout="row")
 				md-input-container(flex)
@@ -21,7 +21,7 @@
 					input(type="number", ng-model="vm.numNewLicenses", min="{{vm.numLicenses}}")
 				md-input-container(flex)
 					label Payment (£ / month)
-					input(type="text", ng-model="vm.priceLicenses", ng-disabled="true")
+					input(type="text", value="{{vm.priceLicenses}}", ng-disabled="true")
 
 			div(layout="row")
 				md-input-container(flex)
@@ -48,20 +48,20 @@
 					md-subheader
 						div(layout="row", layout-align="start")
 							label(flex="20") Date
-							label(flex="20") Description
+							label(flex="20") Id
 							label(flex="20") Payment Method
 							label(flex="20") Amount (£)
 
 				#accountBillingHistoryContainer
-					.accountBillingHistoryListItem(layout="row", layout-align="start start", ng-repeat="billing in vm.billingHistory")
+					.accountBillingHistoryListItem(layout="row", layout-align="start start", ng-repeat="billing in vm.billings")
 						md-input-container(flex="20")
-							input(type="text", ng-model="billing.Date", ng-disabled="true", aria-label="date")
+							input(type="text", value="{{billing.createdAt | date:'dd-MM-yyyy'}}", ng-disabled="true", aria-label="date")
 						md-input-container(flex="20")
-							input(type="text", ng-model="billing.Description", ng-disabled="true", aria-label="description")
+							input(type="text", value="{{billing.billingAgreementId}}", ng-disabled="true", aria-label="id")
 						md-input-container(flex="20")
-							input(type="text", ng-model="billing['Payment Method']", ng-disabled="true", aria-label="paymentMethod")
+							input(type="text", value="{{billing.gateway}}", ng-disabled="true", aria-label="paymentMethod")
 						md-input-container(flex="20")
-							input(type="text", ng-model="billing.Amount", ng-disabled="true", aria-label="amount")
+							input(type="text", value="{{billing.amount}}", ng-disabled="true", aria-label="amount")
 						md-button.md-icon-button.md-accent(aria-label="Download", ng-click="vm.downloadBilling($index)")
 							md-icon.angular-material-icons cloud_download
 

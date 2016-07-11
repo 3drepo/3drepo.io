@@ -36,11 +36,14 @@
 		};
 	}
 
-	AccountCtrl.$inject = ["$scope", "$location", "$injector", "$state", "AccountService", "Auth", "UtilsService"];
+	AccountCtrl.$inject = ["$scope", "$injector", "AccountService", "Auth", "UtilsService"];
 
-	function AccountCtrl($scope, $location, $injector, $state, AccountService, Auth, UtilsService) {
+	function AccountCtrl($scope, $injector, AccountService, Auth, UtilsService) {
 		var vm = this,
-			promise;
+			userInfoPromise,
+			billingsPromise,
+			subscriptionsPromise,
+			plansPromise;
 
 		/*
 		 * Get the account data
@@ -49,33 +52,63 @@
 		{
 			if (vm.account || vm.query.page)
 			{
-				promise = AccountService.getUserInfo(vm.account);
-				promise.then(function (response) {
+				userInfoPromise = AccountService.getUserInfo(vm.account);
+				userInfoPromise.then(function (response) {
+					var i, length;
+
 					vm.accounts = response.data.accounts;
 					vm.username = vm.account;
 					vm.firstName = response.data.firstName;
 					vm.lastName = response.data.lastName;
 					vm.email = response.data.email;
 					vm.billingAddress = response.data.billingInfo;
+					for (i = 0, length = vm.accounts.length; i < length; i += 1) {
+						if (vm.accounts[i].account === vm.account) {
+							vm.quota = vm.accounts[i].quota;
+							break;
+						}
+					}
+				});
 
-					// Go to the correct "page"
-					if (vm.query.hasOwnProperty("page")) {
-						// Check that there is a directive for that "page"
-						if ($injector.has("account" + UtilsService.capitalizeFirstLetter(vm.query.page) + "Directive")) {
-							vm.itemToShow = vm.query.page;
-						}
-						else {
-							vm.itemToShow = "repos";
-						}
+				billingsPromise = UtilsService.doGet(vm.account + "/billings");
+				billingsPromise.then(function (response) {
+					console.log("**billings** ", response);
+					vm.billings = response.data;
+				});
+
+				subscriptionsPromise = UtilsService.doGet(vm.account + "/subscriptions");
+				subscriptionsPromise.then(function (response) {
+					var numLicenses;
+					console.log("**subscriptions** ", response);
+					if (response.status === 200) {
+						numLicenses = response.data.length;
+
+						plansPromise = UtilsService.doGet("plans");
+						plansPromise.then(function (response) {
+							console.log("**plans** ", response);
+							if (response.status === 200) {
+								vm.licenses = {
+									numLicenses: numLicenses,
+									pricePerLicense: response.data[0].amount
+								};
+							}
+						});
+					}
+				});
+
+				// Go to the correct "page"
+				if (vm.query.hasOwnProperty("page")) {
+					// Check that there is a directive for that "page"
+					if ($injector.has("account" + UtilsService.capitalizeFirstLetter(vm.query.page) + "Directive")) {
+						vm.itemToShow = vm.query.page;
 					}
 					else {
 						vm.itemToShow = "repos";
 					}
-					/*
-					 vm.hasAvatar = response.data.hasAvatar;
-					 vm.avatarURL = response.data.avatarURL;
-					 */
-				});
+				}
+				else {
+					vm.itemToShow = "repos";
+				}
 			} else {
 				vm.username        = null;
 				vm.firstName       = null;

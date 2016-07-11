@@ -4897,7 +4897,10 @@ var ViewerManager = {};
 			templateUrl: 'accountBilling.html',
 			scope: {
 				account: "=",
-				billingAddress: "="
+				billingAddress: "=",
+				quota: "=",
+				billings: "=",
+				licenses: "="
 			},
 			controller: AccountBillingCtrl,
 			controllerAs: 'vm',
@@ -4910,8 +4913,7 @@ var ViewerManager = {};
 	function AccountBillingCtrl($scope, $location, $mdDialog, $timeout, UtilsService, serverConfig) {
 		var vm = this,
 			promise,
-			pricePerLicense = 100,
-			quotaPerLicense = 10;
+			bytesInAGb = 1000000000;
 
 		/*
 		 * Init
@@ -4940,33 +4942,10 @@ var ViewerManager = {};
 		 */
 		function init () {
 			vm.showInfo = true;
-			vm.quotaUsed = 17.3;
-			//vm.quotaAvailable = Math.round(((initData.licenses * quotaPerLicense) - vm.quotaUsed) * 10) / 10; // Round to 1 decimal place
 			vm.newBillingAddress = angular.copy(vm.billingAddress);
 			vm.saveDisabled = true;
 			vm.billingDetailsDisabled = true;
 			vm.countries = serverConfig.countries;
-			vm.billingHistory = [
-				{"Date": "10/04/2016", "Description": "1st payment", "Payment Method": "PayPal", "Amount": 100},
-				{"Date": "10/05/2016", "Description": "2nd payment", "Payment Method": "PayPal", "Amount": 100},
-				{"Date": "10/06/2016", "Description": "3rd payment", "Payment Method": "PayPal", "Amount": 100}
-			];
-
-			promise = UtilsService.doGet(vm.account + "/subscriptions");
-			promise.then(function (response) {
-				console.log("**subscriptions** ", response);
-				if (response.status === 200) {
-					vm.numLicenses = response.data.length;
-					vm.numNewLicenses = vm.numLicenses;
-
-					promise = UtilsService.doGet(vm.account + "/plans");
-					promise.then(function (response) {
-						console.log("**plans** ", response);
-						if (response.status === 200) {
-						}
-					});
-				}
-			});
 		}
 
 		/*
@@ -4987,6 +4966,7 @@ var ViewerManager = {};
 					}
 					vm.billingDetailsDisabled = false;
 				}
+				vm.priceLicenses = vm.numNewLicenses * vm.pricePerLicense;
 			}
 		});
 
@@ -5005,13 +4985,33 @@ var ViewerManager = {};
 			}
 		}, true);
 
+		/*
+		 * Watch for quota
+		 */
+		$scope.$watch("vm.quota", function () {
+			if (angular.isDefined(vm.quota)) {
+				vm.quotaSpaceUsed = (vm.quota.spaceUsed / bytesInAGb).toFixed(2);
+				vm.quotaSpaceLimit = (vm.quota.spaceLimit / bytesInAGb).toFixed(2);
+			}
+		}, true);
+
+		/*
+		 * Watch for licenses
+		 */
+		$scope.$watch("vm.licenses", function () {
+			if (angular.isDefined(vm.licenses)) {
+				vm.numNewLicenses = vm.licenses.numLicenses;
+				vm.pricePerLicense = vm.licenses.pricePerLicense;
+			}
+		}, true);
+
 		/**
 		 * Show the billing page with the item
 		 *
 		 * @param index
 		 */
 		vm.downloadBilling = function (index) {
-			$location.url("/billing?item=" + index);
+			$location.url("/billing?user=" + vm.account + "&item=" + index);
 		};
 
 		vm.changeSubscription = function () {
@@ -5231,11 +5231,14 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountCtrl.$inject = ["$scope", "$location", "$injector", "$state", "AccountService", "Auth", "UtilsService"];
+	AccountCtrl.$inject = ["$scope", "$injector", "AccountService", "Auth", "UtilsService"];
 
-	function AccountCtrl($scope, $location, $injector, $state, AccountService, Auth, UtilsService) {
+	function AccountCtrl($scope, $injector, AccountService, Auth, UtilsService) {
 		var vm = this,
-			promise;
+			userInfoPromise,
+			billingsPromise,
+			subscriptionsPromise,
+			plansPromise;
 
 		/*
 		 * Get the account data
@@ -5244,33 +5247,63 @@ var ViewerManager = {};
 		{
 			if (vm.account || vm.query.page)
 			{
-				promise = AccountService.getUserInfo(vm.account);
-				promise.then(function (response) {
+				userInfoPromise = AccountService.getUserInfo(vm.account);
+				userInfoPromise.then(function (response) {
+					var i, length;
+
 					vm.accounts = response.data.accounts;
 					vm.username = vm.account;
 					vm.firstName = response.data.firstName;
 					vm.lastName = response.data.lastName;
 					vm.email = response.data.email;
 					vm.billingAddress = response.data.billingInfo;
+					for (i = 0, length = vm.accounts.length; i < length; i += 1) {
+						if (vm.accounts[i].account === vm.account) {
+							vm.quota = vm.accounts[i].quota;
+							break;
+						}
+					}
+				});
 
-					// Go to the correct "page"
-					if (vm.query.hasOwnProperty("page")) {
-						// Check that there is a directive for that "page"
-						if ($injector.has("account" + UtilsService.capitalizeFirstLetter(vm.query.page) + "Directive")) {
-							vm.itemToShow = vm.query.page;
-						}
-						else {
-							vm.itemToShow = "repos";
-						}
+				billingsPromise = UtilsService.doGet(vm.account + "/billings");
+				billingsPromise.then(function (response) {
+					console.log("**billings** ", response);
+					vm.billings = response.data;
+				});
+
+				subscriptionsPromise = UtilsService.doGet(vm.account + "/subscriptions");
+				subscriptionsPromise.then(function (response) {
+					var numLicenses;
+					console.log("**subscriptions** ", response);
+					if (response.status === 200) {
+						numLicenses = response.data.length;
+
+						plansPromise = UtilsService.doGet("plans");
+						plansPromise.then(function (response) {
+							console.log("**plans** ", response);
+							if (response.status === 200) {
+								vm.licenses = {
+									numLicenses: numLicenses,
+									pricePerLicense: response.data[0].amount
+								};
+							}
+						});
+					}
+				});
+
+				// Go to the correct "page"
+				if (vm.query.hasOwnProperty("page")) {
+					// Check that there is a directive for that "page"
+					if ($injector.has("account" + UtilsService.capitalizeFirstLetter(vm.query.page) + "Directive")) {
+						vm.itemToShow = vm.query.page;
 					}
 					else {
 						vm.itemToShow = "repos";
 					}
-					/*
-					 vm.hasAvatar = response.data.hasAvatar;
-					 vm.avatarURL = response.data.avatarURL;
-					 */
-				});
+				}
+				else {
+					vm.itemToShow = "repos";
+				}
 			} else {
 				vm.username        = null;
 				vm.firstName       = null;
@@ -8002,31 +8035,31 @@ var ViewerManager = {};
 		};
 	}
 
-	BillingCtrl.$inject = ["EventService"];
+	BillingCtrl.$inject = ["EventService", "UtilsService"];
 
-	function BillingCtrl (EventService) {
-		var vm = this;
+	function BillingCtrl (EventService, UtilsService) {
+		var vm = this,
+			billingsPromise;
 
 		/*
 		 * Init
 		 */
-		vm.billingHistory = [
-			{"Date": "10/04/2016", "Description": "1st payment", "Payment Method": "PayPal", "Amount": 100},
-			{"Date": "10/05/2016", "Description": "2nd payment", "Payment Method": "PayPal", "Amount": 100},
-			{"Date": "10/06/2016", "Description": "3rd payment", "Payment Method": "PayPal", "Amount": 100}
-		];
-		if (vm.query.hasOwnProperty("item") &&
-			(parseInt(vm.query.item) >= 0) &&
-			(parseInt(vm.query.item) < vm.billingHistory.length)) {
-			vm.showBilling = true;
-			vm.item = parseInt(vm.query.item);
-		}
-		else {
-			vm.showBilling = false;
+		vm.showBilling = false;
+		if (vm.query.hasOwnProperty("user") && vm.query.hasOwnProperty("item")) {
+			billingsPromise = UtilsService.doGet(vm.query.user + "/billings");
+			billingsPromise.then(function (response) {
+				console.log("**billings** ", response);
+				if ((response.data.length > 0) &&
+					(parseInt(vm.query.item) >= 0) &&
+					(parseInt(vm.query.item) < response.data.length)) {
+					vm.showBilling = true;
+					vm.billing = response.data[parseInt(vm.query.item)];
+				}
+			});
 		}
 
 		vm.home = function () {
-			EventService.send(EventService.EVENT.GO_HOME)
+			EventService.send(EventService.EVENT.GO_HOME);
 		};
 	}
 }());

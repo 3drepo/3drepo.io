@@ -27,7 +27,10 @@
 			templateUrl: 'accountBilling.html',
 			scope: {
 				account: "=",
-				billingAddress: "="
+				billingAddress: "=",
+				quota: "=",
+				billings: "=",
+				licenses: "="
 			},
 			controller: AccountBillingCtrl,
 			controllerAs: 'vm',
@@ -40,8 +43,7 @@
 	function AccountBillingCtrl($scope, $location, $mdDialog, $timeout, UtilsService, serverConfig) {
 		var vm = this,
 			promise,
-			pricePerLicense = 100,
-			quotaPerLicense = 10;
+			bytesInAGb = 1000000000;
 
 		/*
 		 * Init
@@ -70,33 +72,10 @@
 		 */
 		function init () {
 			vm.showInfo = true;
-			vm.quotaUsed = 17.3;
-			//vm.quotaAvailable = Math.round(((initData.licenses * quotaPerLicense) - vm.quotaUsed) * 10) / 10; // Round to 1 decimal place
 			vm.newBillingAddress = angular.copy(vm.billingAddress);
 			vm.saveDisabled = true;
 			vm.billingDetailsDisabled = true;
 			vm.countries = serverConfig.countries;
-			vm.billingHistory = [
-				{"Date": "10/04/2016", "Description": "1st payment", "Payment Method": "PayPal", "Amount": 100},
-				{"Date": "10/05/2016", "Description": "2nd payment", "Payment Method": "PayPal", "Amount": 100},
-				{"Date": "10/06/2016", "Description": "3rd payment", "Payment Method": "PayPal", "Amount": 100}
-			];
-
-			promise = UtilsService.doGet(vm.account + "/subscriptions");
-			promise.then(function (response) {
-				console.log("**subscriptions** ", response);
-				if (response.status === 200) {
-					vm.numLicenses = response.data.length;
-					vm.numNewLicenses = vm.numLicenses;
-
-					promise = UtilsService.doGet(vm.account + "/plans");
-					promise.then(function (response) {
-						console.log("**plans** ", response);
-						if (response.status === 200) {
-						}
-					});
-				}
-			});
 		}
 
 		/*
@@ -117,6 +96,7 @@
 					}
 					vm.billingDetailsDisabled = false;
 				}
+				vm.priceLicenses = vm.numNewLicenses * vm.pricePerLicense;
 			}
 		});
 
@@ -135,13 +115,33 @@
 			}
 		}, true);
 
+		/*
+		 * Watch for quota
+		 */
+		$scope.$watch("vm.quota", function () {
+			if (angular.isDefined(vm.quota)) {
+				vm.quotaSpaceUsed = (vm.quota.spaceUsed / bytesInAGb).toFixed(2);
+				vm.quotaSpaceLimit = (vm.quota.spaceLimit / bytesInAGb).toFixed(2);
+			}
+		}, true);
+
+		/*
+		 * Watch for licenses
+		 */
+		$scope.$watch("vm.licenses", function () {
+			if (angular.isDefined(vm.licenses)) {
+				vm.numNewLicenses = vm.licenses.numLicenses;
+				vm.pricePerLicense = vm.licenses.pricePerLicense;
+			}
+		}, true);
+
 		/**
 		 * Show the billing page with the item
 		 *
 		 * @param index
 		 */
 		vm.downloadBilling = function (index) {
-			$location.url("/billing?item=" + index);
+			$location.url("/billing?user=" + vm.account + "&item=" + index);
 		};
 
 		vm.changeSubscription = function () {

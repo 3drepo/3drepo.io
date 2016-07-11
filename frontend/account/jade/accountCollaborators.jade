@@ -14,9 +14,10 @@
 
 			div(ng-if="vm.numLicenses > 0")
 				#accountCollaboratorsAdd
-					div
-						md-input-container.md-block(ng-disabled="vm.allLicensesAssigned")
-							label Collaborator username
+					div(flex="30", layout="column")
+						p Add a collaborator
+						md-input-container(ng-disabled="vm.allLicensesAssigned")
+							label Username
 							input(type="text", ng-model="vm.newCollaborator")
 					div(layout="row")
 						md-button.md-raised.md-accent(ng-click="vm.addCollaborator()", ng-disabled="vm.addDisabled") Add

@@ -34,31 +34,31 @@
 		};
 	}
 
-	BillingCtrl.$inject = ["EventService"];
+	BillingCtrl.$inject = ["EventService", "UtilsService"];
 
-	function BillingCtrl (EventService) {
-		var vm = this;
+	function BillingCtrl (EventService, UtilsService) {
+		var vm = this,
+			billingsPromise;
 
 		/*
 		 * Init
 		 */
-		vm.billingHistory = [
-			{"Date": "10/04/2016", "Description": "1st payment", "Payment Method": "PayPal", "Amount": 100},
-			{"Date": "10/05/2016", "Description": "2nd payment", "Payment Method": "PayPal", "Amount": 100},
-			{"Date": "10/06/2016", "Description": "3rd payment", "Payment Method": "PayPal", "Amount": 100}
-		];
-		if (vm.query.hasOwnProperty("item") &&
-			(parseInt(vm.query.item) >= 0) &&
-			(parseInt(vm.query.item) < vm.billingHistory.length)) {
-			vm.showBilling = true;
-			vm.item = parseInt(vm.query.item);
-		}
-		else {
-			vm.showBilling = false;
+		vm.showBilling = false;
+		if (vm.query.hasOwnProperty("user") && vm.query.hasOwnProperty("item")) {
+			billingsPromise = UtilsService.doGet(vm.query.user + "/billings");
+			billingsPromise.then(function (response) {
+				console.log("**billings** ", response);
+				if ((response.data.length > 0) &&
+					(parseInt(vm.query.item) >= 0) &&
+					(parseInt(vm.query.item) < response.data.length)) {
+					vm.showBilling = true;
+					vm.billing = response.data[parseInt(vm.query.item)];
+				}
+			});
 		}
 
 		vm.home = function () {
-			EventService.send(EventService.EVENT.GO_HOME)
+			EventService.send(EventService.EVENT.GO_HOME);
 		};
 	}
 }());
