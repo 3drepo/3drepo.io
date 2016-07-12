@@ -23,17 +23,19 @@
 					label Payment (£ / month)
 					input(type="text", value="{{vm.priceLicenses}}", ng-disabled="true")
 
-			div(layout="row")
-				md-input-container(flex)
-					label Postal code
-					input(type="text", ng-model="vm.newBillingAddress.postalCode", ng-disabled="vm.billingDetailsDisabled")
-				md-input-container(flex)
-					label Country
-					md-select(ng-model="vm.newBillingAddress.countryCode", ng-disabled="vm.billingDetailsDisabled")
-						md-option(ng-repeat="country in vm.countries", value="{{country.code}}") {{country.name}}
-				md-input-container(flex)
-					label VAT number (optional)
-					input(type="text", ng-model="vm.newBillingAddress.vat", ng-disabled="vm.billingDetailsDisabled")
+			div(layout="column")
+				div(layout="row")
+					md-input-container(flex)
+						label Postal code
+						input(type="text", ng-model="vm.newBillingAddress.postalCode", ng-disabled="vm.billingDetailsDisabled")
+					md-input-container(flex)
+						label Country
+						md-select(ng-model="vm.newBillingAddress.countryCode", ng-disabled="vm.billingDetailsDisabled")
+							md-option(ng-repeat="country in vm.countries", value="{{country.code}}") {{country.name}}
+					md-input-container(flex)
+						label VAT number (optional)
+						input(type="text", ng-model="vm.newBillingAddress.vat", ng-disabled="vm.billingDetailsDisabled")
+				p#accountBillingAddressInfo Postal code and country are required. Changing your billing information could affect your applicable tax rate.
 
 			.accountBillingSave
 				div(layout="row", layout-align="start")

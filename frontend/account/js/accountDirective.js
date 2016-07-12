@@ -36,9 +36,9 @@
 		};
 	}
 
-	AccountCtrl.$inject = ["$scope", "$injector", "AccountService", "Auth", "UtilsService"];
+	AccountCtrl.$inject = ["$scope", "$injector", "$location", "AccountService", "Auth", "UtilsService"];
 
-	function AccountCtrl($scope, $injector, AccountService, Auth, UtilsService) {
+	function AccountCtrl($scope, $injector, $location, AccountService, Auth, UtilsService) {
 		var vm = this,
 			userInfoPromise,
 			billingsPromise,
@@ -55,7 +55,7 @@
 				userInfoPromise = AccountService.getUserInfo(vm.account);
 				userInfoPromise.then(function (response) {
 					var i, length;
-
+					console.log("**userInfo** ", response);
 					vm.accounts = response.data.accounts;
 					vm.username = vm.account;
 					vm.firstName = response.data.firstName;
@@ -120,6 +120,18 @@
 
 		vm.showItem = function (item) {
 			vm.itemToShow = item;
+		};
+
+		/**
+		 * For pages to show other pages
+		 *
+		 * @param page
+		 * @param callingPage
+		 */
+		vm.showPage = function (page, callingPage) {
+			vm.itemToShow = page;
+			$location.search("page", page);
+			vm.callingPage = callingPage;
 		};
 
 		/**

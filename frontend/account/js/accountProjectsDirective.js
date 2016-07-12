@@ -19,7 +19,13 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountProjects", accountProjects);
+		.directive("accountProjects", accountProjects)
+		.filter("quotaFilter", function() {
+			return function(input) {
+				var bytesInAGb = 1000000000;
+				return (input / bytesInAGb).toFixed(2);
+			};
+		});
 
 	function accountProjects() {
 		return {
@@ -28,7 +34,8 @@
 			scope: {
 				account: "=",
 				accounts: "=",
-				showPage: "&"
+				showPage: "&",
+				quota: "="
 			},
 			controller: AccountProjectsCtrl,
 			controllerAs: 'vm',
@@ -49,20 +56,10 @@
 		 */
 		vm.info = "Retrieving projects...";
 		vm.showProgress = true;
-		vm.projectTypes = [
-			"Architectural",
-			"Structural",
-			"Mechanical",
-			"GIS",
-			"Other"
-		];
+		vm.projectTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
 		vm.projectOptions = {
 			upload: {label: "Upload file", icon: "cloud_upload"},
 			team: {label: "Team", icon: "group"}
-		};
-		vm.collaborators = {
-			"jozefdobos": "",
-			"timscully": ""
 		};
 
 		// Setup file uploaders

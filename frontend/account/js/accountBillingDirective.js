@@ -83,6 +83,7 @@
 		 */
 		$scope.$watch("vm.numNewLicenses", function () {
 			if (angular.isDefined(vm.numNewLicenses)) {
+				console.log(vm.numLicenses, vm.numNewLicenses);
 				if (vm.numLicenses === vm.numNewLicenses) {
 					vm.saveDisabled = true;
 					vm.billingDetailsDisabled = true;
@@ -92,7 +93,7 @@
 						vm.saveDisabled = ((vm.newBillingAddress.postalCode === "") || (vm.newBillingAddress.country === ""));
 					}
 					else {
-						vm.saveDisabled = angular.equals(vm.newBillingAddress, vm.billingAddress);
+						vm.saveDisabled = false;
 					}
 					vm.billingDetailsDisabled = false;
 				}
@@ -105,7 +106,6 @@
 		 */
 		$scope.$watch("vm.newBillingAddress", function () {
 			if (angular.isDefined(vm.newBillingAddress)) {
-				console.log(vm.newBillingAddress, vm.numLicenses);
 				if (vm.numLicenses === 0) {
 					vm.saveDisabled = ((vm.newBillingAddress.postalCode === "") || (vm.newBillingAddress.country === ""));
 				}
@@ -130,7 +130,8 @@
 		 */
 		$scope.$watch("vm.licenses", function () {
 			if (angular.isDefined(vm.licenses)) {
-				vm.numNewLicenses = vm.licenses.numLicenses;
+				vm.numLicenses = vm.licenses.numLicenses;
+				vm.numNewLicenses = vm.numLicenses;
 				vm.pricePerLicense = vm.licenses.pricePerLicense;
 			}
 		}, true);
@@ -152,14 +153,9 @@
 				plans: [{
 					plan: "THE-100-QUID-PLAN",
 					quantity: vm.numNewLicenses
-				}]
+				}],
+				billingAddress: vm.newBillingAddress
 			};
-			if (vm.numLicenses === 0) {
-				data.billingAddress = vm.newBillingAddress;
-			}
-			else if (!angular.equals(vm.billingAddress, vm.newBillingAddress)) {
-				data.billingAddress = vm.newBillingAddress;
-			}
 
 			promise = UtilsService.doPost(data, vm.account + "/subscriptions");
 			promise.then(function (response) {

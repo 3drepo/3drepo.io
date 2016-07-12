@@ -87,6 +87,13 @@
          * Set up adding an issue with scribble
          */
         vm.issueButtonClick = function (buttonType) {
+            // Turn off measure mode
+            if (measureMode) {
+                measureMode = false;
+                EventService.send(EventService.EVENT.MEASURE_MODE, measureMode);
+            }
+
+
             if (addIssueMode === null) {
                 addIssueMode = buttonType;
                 vm.issueButtons[buttonType].background = "#FF9800";
@@ -106,6 +113,11 @@
         };
 
         vm.toggleMeasure = function () {
+            // Turn off issue mode
+            if (addIssueMode !== null) {
+                EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: false});
+            }
+
             measureMode = !measureMode;
             EventService.send(EventService.EVENT.MEASURE_MODE, measureMode);
         };

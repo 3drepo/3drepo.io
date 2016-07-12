@@ -4,12 +4,12 @@ div(ng-if="!vm.state.project")
 		account-info(username="vm.username", first-name="vm.firstName", last-name="vm.lastName", email="vm.email", item-to-show="vm.itemToShow")
 
 		#accountItem(ng-switch="vm.itemToShow")
-			account-projects(ng-switch-when="repos", account="vm.account", accounts="vm.accounts", show-page="vm.showPage(page, callingPage)")
+			account-projects(ng-switch-when="repos", account="vm.account", accounts="vm.accounts", show-page="vm.showItem(page, callingPage)", quota="vm.quota")
 			account-profile(ng-switch-when="profile", username="vm.username", first-name="vm.firstName", last-name="vm.lastName", email="vm.email")
 			account-billing(ng-switch-when="billing", account="vm.account", billing-address="vm.billingAddress", quota="vm.quota", billings="vm.billings", licenses="vm.licenses")
-			account-upgrade(ng-switch-when="upgrade", show-page="vm.showPage(page, callingPage)")
-			account-collaborators(ng-switch-when="collaborators", account="vm.account", show-page="vm.showPage(page, callingPage)")
+			account-licenses(ng-switch-when="licenses", account="vm.account", show-page="vm.showPage(page, callingPage)")
 			account-team(ng-switch-when="team", account="vm.account", show-page="vm.showPage(page, callingPage)")
 
 div(ng-if="vm.state.project")
 	project(account="vm.state.account" project="vm.state.project" branch="vm.state.branch" revision="vm.state.revision" state="vm.state")
+accou

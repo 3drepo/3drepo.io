@@ -338,6 +338,12 @@ account-billing .accountBillingSave img {
   padding: 5px;
 }
 
+account-billing #accountBillingAddressInfo {
+  margin: -35px 0 35px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.4);
+}
+
 /** Account Collaborators *********************************************************************************************/
 account-collaborators .collaboratorIcon {
   margin: 0 10px !important;
@@ -370,6 +376,45 @@ account-collaborators .cardInfo {
 
 account-collaborators #accountCollaboratorsBPButton {
   margin-top: 20px;
+}
+
+/** Account Licenses *********************************************************************************************/
+account-licenses .licenseIcon {
+  margin: 0 10px !important;
+}
+
+account-licenses #accountLicensesAdd {
+  margin-top: -10px;
+}
+account-licenses #accountLicensesAdd md-input-container {
+  margin-bottom: 0;
+}
+account-licenses #accountLicensesAdd .md-button {
+  margin-bottom: 30px;
+}
+
+account-licenses #accountLicensesUnassigned {
+  opacity: 0.4;
+  margin-top: -15px;
+}
+
+account-licenses #accountLicenseMessage {
+  margin: 0;
+  opacity: 0.8;
+}
+
+account-licenses .cardInfo {
+  margin: 0;
+  text-align: left;
+}
+
+account-licenses .accountLicensesBPButton {
+  margin-top: 20px;
+}
+
+account-licenses #accountLicensesList {
+  max-height: 250px;
+  overflow-y: auto;
 }
 
 /** Account Team ******************************************************************************************************/

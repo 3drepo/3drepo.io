@@ -256,6 +256,12 @@ function publicize_files(flist, target_dir_js, target_dir_css, target_dir_font){
 			target_dir = target_dir_js;
 		} else {
 			target_dir = target_dir_font;
+			// Create directory if it doesn't exist
+			try {
+				fs.statSync(target_dir);
+			} catch(e) {
+				fs.mkdirSync(target_dir);
+			}
 		}
 		
 		if (target_dir !== null) {
