@@ -479,7 +479,7 @@
 		let responsePlace = utils.APIInfo(req);
 		User.findByUserName(req.params.account).then(dbUser => {
 			
-			return dbUser.removeAssignedSubscriptionFromUser(req.params.sid);
+			return dbUser.removeAssignedSubscriptionFromUser(req.params.sid, req.query.cascadeRemove);
 
 		}).then(subscription => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);

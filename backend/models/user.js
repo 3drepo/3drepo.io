@@ -31,6 +31,7 @@ var systemLogger = require("../logger.js").systemLogger;
 var Payment = require('./payment');
 var moment = require('moment');
 var Subscription = require('./subscription');
+
 var getSubscription = Subscription.getSubscription;
 
 
@@ -1172,8 +1173,10 @@ schema.methods.hasRole = function(db, roleName){
 	return null;
 };
 
-schema.methods.removeAssignedSubscriptionFromUser = function(id){
+schema.methods.removeAssignedSubscriptionFromUser = function(id, cascadeRemove){
 	'use strict';
+
+	let ProjectHelper = require('./helper/project');
 
 	let subscription = this.customData.subscriptions.id(id);
 	
@@ -1196,13 +1199,22 @@ schema.methods.removeAssignedSubscriptionFromUser = function(id){
 		projects.forEach(project => {
 			project.collaborators.forEach(collaborator => {
 				if(collaborator.user === subscription.assignedUser){
-					foundProjects.push(project._id);
+					foundProjects.push({ project: project._id, role: collaborator.role});
 				}
 			});
 		});
 
-		if(foundProjects.length > 0){
+		if(!cascadeRemove && foundProjects.length > 0){
 			return Promise.reject({ resCode: responseCodes.USER_IN_COLLABORATOR_LIST, info: {projects: foundProjects}});
+		} else {
+
+			let promises = [];
+			foundProjects.forEach(foundProject => {
+				promises.push(ProjectHelper.removeCollaborator(subscription.assignedUser, null, this.user, foundProject.project, foundProject.role));
+			});
+			
+			return Promise.all(promises);
+
 		}
 
 	}).then(() => {
