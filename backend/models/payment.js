@@ -152,7 +152,7 @@ function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAm
 		//create agreement
 		return new Promise((resolve, reject) => {
 
-			let desc = `3D Repo Licence subscription.`
+			let desc = `3D Repo Licence subscription.`;
 			desc += `This month's pro-rata price: £${firstCycleAmount}, then `;
 			desc += `each month: £${amount}`;
 			

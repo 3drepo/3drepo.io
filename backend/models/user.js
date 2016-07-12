@@ -759,9 +759,6 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 		nextMonth.totalDays = nextMonth.endOfMonth.date();
 		nextMonth.remainingDays = Math.round(moment.duration(moment(nextMonth.endOfMonth).utc().diff(nextMonth.today)).asDays());
 
-
-		let day = moment.utc().date();
-
 		let currency = 'GBP';
 		let amount = 0;
 		let billingCycle = 1;
@@ -787,7 +784,7 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 		let startDate = moment().utc().startOf('day').add(1, 'month').date(1);
 
 		if(firstCycleAmount > 0){
-			let startDate = moment.utc().add(10, 'second');
+			startDate = moment.utc().add(10, 'second');
 		}
 
 		//add exisiting plans to bill of next cycle as well
@@ -815,7 +812,7 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 			ids.forEach(id => {
 				this.customData.subscriptions.remove(id);
 			});
-			
+
 			next = new Promise((resolve, reject) => {
 				Payment.paypal.billingAgreement.cancel(this.customData.billingAgreementId, cancel_note, (err) => {
 					if (err) {
@@ -833,7 +830,7 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 						resolve();
 					}
 				});
-			})
+			});
 
 
 		} else {
@@ -953,9 +950,9 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 					.hours(0).minutes(0).seconds(0).milliseconds(0)
 					.toDate();
 
-				let start = moment.utc(paymentInfo.ipnDate).date();
-				let end = moment(paymentInfo.ipnDate).utc().endOf('month').date();
-				let prorata = (end - start + 1) / end;
+				//let start = moment.utc(paymentInfo.ipnDate).date();
+				//let end = moment(paymentInfo.ipnDate).utc().endOf('month').date();
+				//let prorata = (end - start + 1) / end;
 
 
 				subscription.limits = getSubscription(subscription.plan).limits;
@@ -967,6 +964,7 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 					items.push({
 						name: subscription.plan,
 						currency: getSubscription(subscription.plan).currency,
+
 					});
 				}
 			

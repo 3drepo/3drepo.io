@@ -43,4 +43,4 @@ function getByCountryCode(code){
 
 module.exports = {
 	getByCountryCode
-}
+};
