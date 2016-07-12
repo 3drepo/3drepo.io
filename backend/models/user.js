@@ -76,6 +76,7 @@ var schema = mongoose.Schema({
 			token: String, 
 			plan: String,
 			inCurrentAgreement: Boolean,
+			pendingDelete: Boolean,
 			database: String
 		}],
 		billingInfo:{
@@ -665,6 +666,9 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	
 
 	this.customData.subscriptions.forEach(subscription => {
+
+		subscription.pendingDelete = undefined;
+
 		if(!currentCount[subscription.plan]){
 			currentCount[subscription.plan] = 1;
 		} else {
@@ -684,10 +688,9 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 		}
 	});
 	
-	console.log('plans', plans);
 
 	//change of plans
-	plans = plans.filter(plan => plan.quantity > 0);
+	plans = plans.filter(plan => plan.quantity !== 0);
 
 	console.log('plans', plans);
 
@@ -704,9 +707,24 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 					active: false
 				});
 			}
+
+		} else if (getSubscription(plan.plan) && Number.isInteger(plan.quantity) && plan.quantity < 0) {
+			// remove subscription
+
+			let subs = this.getActiveSubscriptions().filter(sub => sub.plan === plan.plan);
+
+
+			for(let i=0; i<plan.quantity * -1; i++){
+				subs[i].pendingDelete = true;
+			}
+
+
+			let existingPlan = existingPlans.find(existingPlan => existingPlan.plan === plan.plan);
+			existingPlan.quantity += plan.quantity;
 		}
 	});
 
+	console.log('existingPlans2', existingPlans);
 
 	let next;
 	let billingAgreement;
@@ -727,7 +745,6 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 
 	} else {
 
-		let startDate;
 
 		let currentDate = {};
 		currentDate.today = moment().utc().startOf('day');
@@ -742,190 +759,100 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 		nextMonth.totalDays = nextMonth.endOfMonth.date();
 		nextMonth.remainingDays = Math.round(moment.duration(moment(nextMonth.endOfMonth).utc().diff(nextMonth.today)).asDays());
 
-		let trialDate = {};
-		if(this.customData.freeTrial){
-			trialDate.today = moment(this.customData.freeTrial.startAt).utc().startOf('day');
-			trialDate.endOfMonth = moment(trialDate.today).utc().endOf('month');
-			trialDate.totalDays = trialDate.endOfMonth.date();
-			trialDate.remainingDays = Math.round(moment.duration(moment(trialDate.endOfMonth).utc().diff(trialDate.today)).asDays());
-		}
 
-
-		// let endOfMonthOfStartDate = moment(startDate).utc().endOf('month');
-		// let totalDays = endOfMonthOfStartDate.date();
-		// let noOfDays = Math.round(moment.duration(moment(endOfMonthOfStartDate).utc().diff(startDate)).asDays());
-		// let firstCycleLength = noOfDays;
+		let day = moment.utc().date();
 
 		let currency = 'GBP';
 		let amount = 0;
-		let initAmount = 0;
-		let firstCycleAmount = 0;
 		let billingCycle = 1;
-		let firstCycleLength;
-		
-		let isfirstPlan = this.getActiveSubscriptions({skipBasic: true}).length === 0;
+		let firstBillingCycle = currentDate.remainingDays;
 
-		let now = new Date();
-		let inTrialPeriod = this.customData.freeTrial && this.customData.freeTrial.endAt < now;
+		plans.forEach(data => {
 
-		if(isfirstPlan){
-			// first time to buy licence(s), free for 1st licence for 1st month
+			let quantity = data.quantity;
 
-			startDate = moment(nextMonth.today);
-
-			//////////////////
-			// 1st cycle (init payment)
-			//////////////////
-			plans.forEach(data => {
-				let quantity = data.quantity - 1;
-				let plan = getSubscription(data.plan);
-				initAmount += plan.amount * (currentDate.remainingDays / currentDate.totalDays) * quantity;
-
-			});
-
-			//////////////////
-			// 2nd cycle
-			//////////////////
-			//cal pro-rata price for 1st free licence for 2nd cycle
-			firstCycleAmount = nextMonth.remainingDays / nextMonth.totalDays * getSubscription(plans[0].plan).amount;
-			firstCycleLength = nextMonth.remainingDays;
-
-			plans.forEach(data => {
-
-				let quantity = data.quantity - 1;
-				let plan = getSubscription(data.plan);
-				firstCycleAmount += plan.amount * quantity;
-
-			});
-
-			/////////////////////
-			// remaining cycles
-			////////////////////
-			plans.forEach(data => {
-
-				let quantity = data.quantity;
+			if(quantity > 0){
 				let plan = getSubscription(data.plan);
 				amount += plan.amount * quantity;
-
-			});
-
-			//add exisiting plans to the bill of next cycle as well
-			existingPlans.forEach(data => {
-
-				let quantity = data.quantity;
-				let plan = getSubscription(data.plan);
-				amount += plan.amount * quantity;
-
-			});
-
-		} else if (inTrialPeriod) {
-			// buying extra licence(s) during 1-month free trial for 1 month
-
-			startDate = trialStartDate;
-			//////////////////
-			// 1st cycle (init payment)
-			//////////////////
-			plans.forEach(data => {
-				let quantity = data.quantity;
-				let plan = getSubscription(data.plan);
-				initAmount += plan.amount * (currentDate.remainingDays / currentDate.totalDays) * quantity;
-
-			});
-
-
-			//////////////////
-			// 2nd cycle
-			//////////////////
-			//cal pro-rata price for 1st free licence for 2nd cycle
-			firstCycleAmount = trialDate.remainingDays / trialDate.totalDays * getSubscription(plans[0].plan).amount; // it works because we only have 1 type of plan now
-			firstCycleLength = trialDate.remainingDays;
-
-			// new licences
-			plans.forEach(data => {
-				let quantity = data.quantity;
-				let plan = getSubscription(data.plan);
-				firstCycleAmount += plan.amount * quantity;
-
-			});
-
-			//add exisiting plans to the bill of next cycle as well
-			existingPlans.forEach(data => {
-				let quantity = data.quantity;
-				let plan = getSubscription(data.plan);
-				firstCycleAmount += plan.amount * quantity;
-			});
-
-			/////////////////////
-			// remaining cycles
-			////////////////////
-			plans.forEach(data => {
-
-				let quantity = data.quantity;
-				let plan = getSubscription(data.plan);
-				amount += plan.amount * quantity;
-
-			});
-
-			//add exisiting plans to the bill of next cycle as well
-			existingPlans.forEach(data => {
-
-				let quantity = data.quantity;
-				let plan = getSubscription(data.plan);
-				amount += plan.amount * quantity;
-
-			});
-
-		} else {
-			// not in trial period any more
-
-			startDate = moment(nextMonth.today);
-			//////////////////
-			// 1st cycle (init payment)
-			//////////////////
-			plans.forEach(data => {
-				let quantity = data.quantity;
-				let plan = getSubscription(data.plan);
-				initAmount += plan.amount * (currentDate.remainingDays / currentDate.totalDays) * quantity;
-
-			});
-
-			/////////////////////
-			// remaining cycles
-			////////////////////
-			plans.forEach(data => {
-
-				let quantity = data.quantity;
-				let plan = getSubscription(data.plan);
-				amount += plan.amount * quantity;
-
-			});
-
-			//add exisiting plans to the bill of next cycle as well
-			existingPlans.forEach(data => {
-
-				let quantity = data.quantity;
-				let plan = getSubscription(data.plan);
-				amount += plan.amount * quantity;
-
-			});
-		}
-
-
-		initAmount = Math.round(initAmount * 100) / 100;
-		firstCycleAmount = Math.round(firstCycleAmount * 100) / 100;
-		amount = Math.round(amount * 100) / 100;
-
-		next = Payment.getBillingAgreement(billingUser, {
-			"line1": billingAddress.line1,
-			"city": billingAddress.city,
-			"postal_code": billingAddress.postalCode,
-			"country_code": billingAddress.countryCode
-		}, currency, initAmount, firstCycleAmount, amount, billingCycle, startDate.toDate(), firstCycleLength).then(_billingAgreement => {
-
-			billingAgreement = _billingAgreement;
-			this.customData.paypalPaymentToken = billingAgreement.paypalPaymentToken;
+			}
 
 		});
+
+		console.log('new plan amount', amount);
+		//cal pro-rata price of new licenses subscription
+		let proRataPrice = currentDate.remainingDays / currentDate.totalDays * amount;
+		proRataPrice = Math.round(proRataPrice * 100) / 100;
+		let firstCycleAmount = proRataPrice;
+
+		let startDate = moment().utc().startOf('day').add(1, 'month').date(1);
+
+		if(firstCycleAmount > 0){
+			let startDate = moment.utc().add(10, 'second');
+		}
+
+		//add exisiting plans to bill of next cycle as well
+		existingPlans.forEach(data => {
+
+			let quantity = data.quantity;
+			let plan = getSubscription(data.plan);
+			amount += plan.amount * quantity;
+		});
+
+		amount = Math.round(amount * 100) / 100;
+
+		if (amount <= 0 && firstCycleAmount <= 0 && !this.customData.billingAgreementId){
+
+			next = Promise.resolve();
+
+		} else if(amount <= 0 && firstCycleAmount <= 0){
+			//cancel the old agreement, if any
+			var cancel_note = {
+				"note": "You have updated the licence subscriptions."
+			};
+
+			let ids = this.customData.subscriptions.filter(sub => sub.pendingDelete).map(sub => sub._id);
+
+			ids.forEach(id => {
+				this.customData.subscriptions.remove(id);
+			});
+			
+			next = new Promise((resolve, reject) => {
+				Payment.paypal.billingAgreement.cancel(this.customData.billingAgreementId, cancel_note, (err) => {
+					if (err) {
+						systemLogger.logError(JSON.stringify(err),{ 
+							billingAgreementId: this.customData.billingAgreementId
+						});
+
+						reject(err);
+					} else {
+						systemLogger.logInfo("Billing agreement canceled successfully", { 
+							billingAgreementId: this.customData.billingAgreementId
+						});
+
+						this.customData.billingAgreementId = undefined;
+						resolve();
+					}
+				});
+			})
+
+
+		} else {
+
+
+			next = Payment.getBillingAgreement(billingUser, {
+				"line1": billingAddress.line1,
+				"city": billingAddress.city,
+				"postal_code": billingAddress.postalCode,
+				"country_code": billingAddress.countryCode
+			}, currency, firstCycleAmount, firstBillingCycle, amount, billingCycle, startDate.toDate()).then(_billingAgreement => {
+
+				billingAgreement = _billingAgreement;
+				this.customData.paypalPaymentToken = billingAgreement.paypalPaymentToken;
+
+			});
+
+		}
+
 
 	}
 
@@ -940,7 +867,6 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	}).then(() => {
 		return Promise.resolve(billingAgreement || {});
 	});
-
 };
 
 
@@ -1138,6 +1064,14 @@ schema.methods.executeBillingAgreement = function(token, billingAgreementId){
 			subscription.limits = getSubscription(subscription.plan).limits;
 		}
 
+	});
+
+
+	//clear pending delete subscriptions
+	let ids = this.customData.subscriptions.filter(sub => sub.pendingDelete).map(sub => sub._id);
+
+	ids.forEach(id => {
+		this.customData.subscriptions.remove(id);
 	});
 
 	if(!assignedBillingUser){

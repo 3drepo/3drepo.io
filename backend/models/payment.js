@@ -26,7 +26,7 @@ paypal.configure({
 	'client_secret': config.paypal.client_secret
 });
 
-function getBillingAgreement(billingUser, billingAddress, currency, initAmount, firstCycleAmount, amount, billingCycle, startDate, firstCycleLength){
+function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAmount, firstBillingCycle, amount, billingCycle, startDate){
 	'use strict';
 
 	console.log('firstCycleAmount', firstCycleAmount);
@@ -57,7 +57,7 @@ function getBillingAgreement(billingUser, billingAddress, currency, initAmount, 
 		"cycles": "0",
 		"frequency": "MONTH",
 		"frequency_interval": billingCycle,
-		"name": "Monthly payment",
+		"name": "Regular monthly price",
 		"type": "REGULAR",
 		"charge_models":[{
 			"type": "TAX",
@@ -81,8 +81,8 @@ function getBillingAgreement(billingUser, billingAddress, currency, initAmount, 
 			},
 			"cycles": "1",
 			"frequency": "DAY",
-			"frequency_interval": firstCycleLength,
-			"name": "First month payment after free trial",
+			"frequency_interval": firstBillingCycle,
+			"name": "First month pro-rata price",
 			"type": "TRIAL",
 			"charge_models":[{
 				"type": "TAX",
@@ -96,25 +96,19 @@ function getBillingAgreement(billingUser, billingAddress, currency, initAmount, 
 
 
 	let billingPlanAttributes = {
-		"description": "3D Repo License",
+		"description": "3D Repo Licence",
 		"merchant_preferences": {
 			"auto_bill_amount": "yes",
 			"cancel_url": `${baseUrl}/${billingUser}?page=billing`,
 			"initial_fail_amount_action": "continue",
 			"max_fail_attempts": "0",
-			"return_url": `${baseUrl}/${billingUser}?page=billing`
+			"return_url": `${baseUrl}/${billingUser}?page=billing&cancel=1`
 		},
 		"name": "3D Repo Licences",
 		"payment_definitions": paymentDefs,
 	    "type": "INFINITE"
 	};
 
-	if(initAmount){
-		billingPlanAttributes.merchant_preferences.setup_fee = {
-			"value": initAmount,
-			"currency": "GBP"
-		};
-	}
 
 	console.log(JSON.stringify(billingPlanAttributes, null ,2));
 
@@ -158,13 +152,9 @@ function getBillingAgreement(billingUser, billingAddress, currency, initAmount, 
 		//create agreement
 		return new Promise((resolve, reject) => {
 
-			let desc = `3D Repo Licence subscription. First month: £${initAmount}, `;
-			
-			if(firstCycleAmount){
-				desc += `then second month's pro-rata price: £${firstCycleAmount}, `;
-			}
-
-			desc += `then each month: £${amount}`;
+			let desc = `3D Repo Licence subscription.`
+			desc += `This month's pro-rata price: £${firstCycleAmount}, then `;
+			desc += `each month: £${amount}`;
 			
 			console.log('desc len', desc.length);
 
