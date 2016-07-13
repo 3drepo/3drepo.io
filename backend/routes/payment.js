@@ -52,7 +52,7 @@ function executeAgreement(req, res, next){
 
 					} else {
 
-						if(dbUser.customData.billingAgreementId !== billingAgreement.id){
+						if(dbUser.customData.billingAgreementId && dbUser.customData.billingAgreementId !== billingAgreement.id){
 							//cancel the old agreement, if any
 							var cancel_note = {
 								"note": "You have updated the license subscriptions. This agreement is going to be replaced by the new one."

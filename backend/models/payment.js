@@ -47,6 +47,7 @@ function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAm
 	let taxAmount = vat.getByCountryCode(billingAddress.country_code) * amount;
 	taxAmount = Math.round(taxAmount * 100) / 100;
 	let afterTaxAmount = amount - taxAmount;
+	afterTaxAmount = Math.round(afterTaxAmount * 100) / 100;
 
 	let paymentDefs = [];
 	paymentDefs.push({
@@ -70,9 +71,11 @@ function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAm
 
 	if(firstCycleAmount){
 
+;
 		let taxFirstCycleAmount = vat.getByCountryCode(billingAddress.country_code) * firstCycleAmount;
 		taxFirstCycleAmount = Math.round(taxFirstCycleAmount * 100) / 100;
 		let afterTaxFirstCycleAmount = firstCycleAmount - taxFirstCycleAmount;
+		afterTaxFirstCycleAmount = Math.round(afterTaxFirstCycleAmount * 100) / 100;
 
 		paymentDefs.push({
 			"amount": {
