@@ -27,7 +27,8 @@
 			templateUrl: 'accountLicenses.html',
 			scope: {
 				account: "=",
-				showPage: "&"
+				showPage: "&",
+				subscriptions: "="
 			},
 			controller: AccountLicensesCtrl,
 			controllerAs: 'vm',
@@ -45,16 +46,15 @@
 		/*
 		 * Init
 		 */
-		vm.numLicenses = -1;
-		vm.unassigned = [];
-		vm.licenses = [];
-		vm.allLicensesAssigned = false;
+
+		/*
 		promise = UtilsService.doGet(vm.account + "/subscriptions");
 		promise.then(function (response) {
 			var data;
 			console.log("subscriptions ", response);
 			if (response.status === 200) {
 				vm.numLicenses = response.data.length;
+				vm.toShow = (vm.numLicenses > 0) ? "0+": "0";
 				for (i = 0; i < response.data.length; i += 1) {
 					if (response.data[i].hasOwnProperty("assignedUser")) {
 						data = {user: response.data[i].assignedUser, id: response.data[i]._id};
@@ -67,6 +67,33 @@
 				}
 				vm.allLicensesAssigned = (vm.unassigned.length === 0);
 			}
+		});
+		*/
+
+		/*
+		 * Watch subscriptions
+		 */
+		$scope.$watch("vm.subscriptions", function () {
+			console.log(444, vm.subscriptions);
+			vm.unassigned = [];
+			vm.licenses = [];
+			vm.allLicensesAssigned = false;
+			vm.numLicenses = vm.subscriptions.length;
+			vm.toShow = (vm.numLicenses > 0) ? "0+": "0";
+
+			for (i = 0; i < vm.subscriptions.length; i += 1) {
+				if (vm.subscriptions[i].hasOwnProperty("assignedUser")) {
+					vm.licenses.push({
+						user: vm.subscriptions[i].assignedUser,
+						id: vm.subscriptions[i]._id,
+						showRemove: (vm.subscriptions[i].assignedUser !== vm.account)
+					});
+				}
+				else {
+					vm.unassigned.push(vm.subscriptions[i]._id);
+				}
+			}
+			vm.allLicensesAssigned = (vm.unassigned.length === 0);
 		});
 
 		/*

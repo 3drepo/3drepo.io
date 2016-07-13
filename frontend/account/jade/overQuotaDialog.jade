@@ -13,10 +13,10 @@ md-dialog.overQuotaDialog(aria-label="Over quota")
 			div(layout="row")
 				md-input-container(flex)
 					label Quota used (Gb)
-					input(type="text", value="{{vm.quota.spaceUsed | quotaFilter}}", ng-disabled="true")
+					input(type="text", value="{{vm.quota.spaceUsed | bToGb}}", ng-disabled="true")
 				md-input-container(flex)
 					label Quota available (Gb)
-					input(type="text", value="{{vm.quota.spaceLimit| quotaFilter}}", ng-disabled="true")
+					input(type="text", value="{{vm.quota.spaceLimit| bToGb}}", ng-disabled="true")
 			div(layout="row", layout-align="start")
 				md-button.md-accent.md-raised(ng-click="vm.setupAddLicenses()") Add licenses
 				md-button.md-accent(ng-click="vm.closeDialog()") Cancel

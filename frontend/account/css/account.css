@@ -29,6 +29,11 @@ account-dir #account #accountItem {
   width: 44%;
 }
 
+account-dir .userContent .cardInfo {
+  margin: 0 0 10px;
+  text-align: left;
+}
+
 /** Account Projects **************************************************************************************************/
 account-projects #accountList {
   max-height: calc(100vh - 180px);
@@ -306,10 +311,6 @@ account-billing .md-button {
   margin-bottom: 20px;
 }
 
-account-billing .cardInfo {
-  margin: 0 !important;
-}
-
 account-billing #accountBillingHistory {
   max-height: 150px;
   overflow-y: auto;
@@ -369,11 +370,6 @@ account-collaborators #accountCollaboratorMessage {
   opacity: 0.8;
 }
 
-account-collaborators .cardInfo {
-  margin: 0;
-  text-align: left;
-}
-
 account-collaborators #accountCollaboratorsBPButton {
   margin-top: 20px;
 }
@@ -401,15 +397,6 @@ account-licenses #accountLicensesUnassigned {
 account-licenses #accountLicenseMessage {
   margin: 0;
   opacity: 0.8;
-}
-
-account-licenses .cardInfo {
-  margin: 0;
-  text-align: left;
-}
-
-account-licenses .accountLicensesBPButton {
-  margin-top: 20px;
 }
 
 account-licenses #accountLicensesList {

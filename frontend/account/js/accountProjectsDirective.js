@@ -19,13 +19,7 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountProjects", accountProjects)
-		.filter("quotaFilter", function() {
-			return function(input) {
-				var bytesInAGb = 1000000000;
-				return (input / bytesInAGb).toFixed(2);
-			};
-		});
+		.directive("accountProjects", accountProjects);
 
 	function accountProjects() {
 		return {

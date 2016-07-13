@@ -30,7 +30,8 @@
 				billingAddress: "=",
 				quota: "=",
 				billings: "=",
-				licenses: "="
+				subscriptions: "=",
+				plans: "="
 			},
 			controller: AccountBillingCtrl,
 			controllerAs: 'vm',
@@ -42,8 +43,7 @@
 
 	function AccountBillingCtrl($scope, $location, $mdDialog, $timeout, UtilsService, serverConfig) {
 		var vm = this,
-			promise,
-			bytesInAGb = 1000000000;
+			promise;
 
 		/*
 		 * Init
@@ -56,7 +56,7 @@
 				console.log(866, response);
 				if (response.status === 200) {
 				}
-				vm.payPalInfo = "PayPal has finished processing.";
+				vm.payPalInfo = "PayPal has finished processing. Thank you.";
 				$timeout(function () {
 					$mdDialog.cancel();
 					init();
@@ -90,7 +90,12 @@
 				}
 				else {
 					if (vm.numLicenses === 0) {
-						vm.saveDisabled = ((vm.newBillingAddress.postalCode === "") || (vm.newBillingAddress.country === ""));
+						vm.saveDisabled = (
+							(angular.isUndefined(vm.newBillingAddress.postalCode)) ||
+							(angular.isUndefined(vm.newBillingAddress.country))
+							(vm.newBillingAddress.postalCode === "") ||
+							(vm.newBillingAddress.country === "")
+						);
 					}
 					else {
 						vm.saveDisabled = false;
@@ -116,23 +121,20 @@
 		}, true);
 
 		/*
-		 * Watch for quota
+		 * Watch for subscriptions
 		 */
-		$scope.$watch("vm.quota", function () {
-			if (angular.isDefined(vm.quota)) {
-				vm.quotaSpaceUsed = (vm.quota.spaceUsed / bytesInAGb).toFixed(2);
-				vm.quotaSpaceLimit = (vm.quota.spaceLimit / bytesInAGb).toFixed(2);
+		$scope.$watch("vm.subscriptions", function () {
+			if (angular.isDefined(vm.subscriptions) && angular.isDefined(vm.plans)) {
+				setupLicensesInfo();
 			}
 		}, true);
 
 		/*
-		 * Watch for licenses
+		 * Watch for plans
 		 */
-		$scope.$watch("vm.licenses", function () {
-			if (angular.isDefined(vm.licenses)) {
-				vm.numLicenses = vm.licenses.numLicenses;
-				vm.numNewLicenses = vm.numLicenses;
-				vm.pricePerLicense = vm.licenses.pricePerLicense;
+		$scope.$watch("vm.plans", function () {
+			if (angular.isDefined(vm.subscriptions) && angular.isDefined(vm.plans)) {
+				setupLicensesInfo();
 			}
 		}, true);
 
@@ -156,6 +158,13 @@
 				}],
 				billingAddress: vm.newBillingAddress
 			};
+			// Fill in required info with dummy data if it is missing
+			if (!data.billingAddress.hasOwnProperty("line1")) {
+				data.billingAddress.line1 = "1 High Street";
+			}
+			if (!data.billingAddress.hasOwnProperty("city")) {
+				data.billingAddress.city = "London";
+			}
 
 			promise = UtilsService.doPost(data, vm.account + "/subscriptions");
 			promise.then(function (response) {
@@ -187,5 +196,15 @@
 				preserveScope: true
 			});
 		}
+
+		/**
+		 * Set up num licenses and price
+		 */
+		function setupLicensesInfo () {
+			vm.numLicenses = vm.subscriptions.length;
+			vm.numNewLicenses = vm.numLicenses;
+			vm.pricePerLicense = vm.plans[0].amount;
+		}
+
 	}
 }());

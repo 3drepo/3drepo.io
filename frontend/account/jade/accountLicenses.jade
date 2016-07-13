@@ -5,52 +5,54 @@
 				h2 Licenses
 
 		.userContent
-			div(ng-if="vm.numLicenses === 0")
-				.cardInfo
-					p You do not currently have any licenses.
-					br
-					p Please go to the Billing Page to add licenses.
-				md-button.md-raised.md-accent.accountLicensesBPButton(ng-click="vm.goToBillingPage()") Billing Page
+			div(ng-switch="vm.toShow")
+				div(ng-switch-when="0")
+					.cardInfo
+						p You do not currently have any licenses.
+						br
+						p Please go to the Billing Page to add licenses.
+					md-button.md-raised.md-accent(ng-click="vm.goToBillingPage()") Billing Page
 
-			div(ng-if="vm.numLicenses > 0")
-				#accountLicensesAdd
-					div(flex="30", layout="column")
-						p Assign a license
-						md-input-container(ng-disabled="vm.allLicensesAssigned")
-							label Username
-							input(type="text", ng-model="vm.newLicense", autofocus)
-					div(layout="row")
-						md-button.md-raised.md-accent(ng-click="vm.assignLicense()", ng-disabled="vm.addDisabled") Assign
-						p {{vm.addMessage}}
+				div(ng-switch-when="0+")
+					#accountLicensesAdd
+						div(flex="30", layout="column")
+							p Assign a license
+							md-input-container
+								label Username
+								input(type="text", ng-model="vm.newLicense", tdr-focus="true", ng-disabled="vm.allLicensesAssigned")
+						div(layout="row")
+							md-button.md-raised.md-accent(ng-click="vm.assignLicense()", ng-disabled="vm.addDisabled") Assign
+							p {{vm.addMessage}}
 
-				md-divider
+					md-divider
 
-				// Assigned
-				md-content#accountLicensesList
-					section
-						md-subheader
-							div Licenses ({{vm.licenses.length}} assigned, {{vm.numLicenses}} total)
-					md-list-item(ng-repeat="license in vm.licenses")
-						md-icon.angular-material-icons.licenseIcon(aria-label="Person") person
-						.md-list-item-text
-							p {{license.user}}
-						span(flex)
-						div(layout="row", layout-align="end center")
-							p#accountLicenseMessage {{license.deleteMessage}}
-							md-button.md-icon-button.md-accent(ng-click="vm.removeLicense($index)")
-								md-icon.angular-material-icons(aria-label="Close dialog", ng-if="license.showRemove") remove_circle
-
-					// Unassigned
-					md-list#accountLicensesUnassigned
-						md-list-item(ng-repeat="unassigned in vm.unassigned track by $index")
+					// Assigned
+					md-content#accountLicensesList
+						section
+							md-subheader
+								div Licenses ({{vm.licenses.length}} assigned, {{vm.numLicenses}} total)
+						md-list-item(ng-repeat="license in vm.licenses")
 							md-icon.angular-material-icons.licenseIcon(aria-label="Person") person
 							.md-list-item-text
-								p Unassigned
+								p {{license.user}}
 							span(flex)
-							md-button.md-icon-button
-								md-icon.angular-material-icons(aria-label="Close dialog") remove_circle
+							div(layout="row", layout-align="end center")
+								p#accountLicenseMessage {{license.deleteMessage}}
+								md-button.md-icon-button.md-accent(ng-click="vm.removeLicense($index)", aria-label="Close dialog", ng-if="license.showRemove")
+									md-icon.angular-material-icons remove_circle
 
-				md-divider
+						// Unassigned
+						md-list#accountLicensesUnassigned
+							md-list-item(ng-repeat="unassigned in vm.unassigned track by $index")
+								md-icon.angular-material-icons.licenseIcon(aria-label="Person") person
+								.md-list-item-text
+									p Unassigned
+								span(flex)
+								md-button.md-icon-button(aria-label="Remove")
+									md-icon.angular-material-icons remove_circle
+
+					md-divider
+
 					div(layout="column", layout-align="start start")
 						p To add more licenses please go to the Billing Page
-						md-button.md-raised.md-accent.accountLicensesBPButton(ng-click="vm.goToBillingPage()") Billing Page
+						md-button.md-raised.md-accent(ng-click="vm.goToBillingPage()") Billing Page

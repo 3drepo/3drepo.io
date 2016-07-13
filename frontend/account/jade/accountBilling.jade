@@ -10,10 +10,10 @@
 			div(layout="row")
 				md-input-container(flex)
 					label Quota used (Gb)
-					input(type="text", value="{{vm.quotaSpaceUsed}}", ng-disabled="true")
+					input(type="text", value="{{vm.quota.spaceUsed | bToGb}}", ng-disabled="true")
 				md-input-container(flex)
 					label Quota available (Gb)
-					input(type="text", value="{{vm.quotaSpaceLimit}}", ng-disabled="true")
+					input(type="text", value="{{vm.quota.spaceLimit | bToGb}}", ng-disabled="true")
 
 			div(layout="row")
 				md-input-container(flex)
@@ -39,7 +39,7 @@
 
 			.accountBillingSave
 				div(layout="row", layout-align="start")
-					md-button.md-raised.md-accent(ng-disabled="vm.saveDisabled", ng-click="vm.changeSubscription()")
+					md-button.md-raised.md-accent(ng-disabled="vm.saveDisabled", ng-click="vm.changeSubscription()", aria-label="Save")
 						img(src="/public/images/pp-logo-100px.png")
 				md-divider
 

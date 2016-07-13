@@ -4900,7 +4900,8 @@ var ViewerManager = {};
 				billingAddress: "=",
 				quota: "=",
 				billings: "=",
-				licenses: "="
+				subscriptions: "=",
+				plans: "="
 			},
 			controller: AccountBillingCtrl,
 			controllerAs: 'vm',
@@ -4912,8 +4913,7 @@ var ViewerManager = {};
 
 	function AccountBillingCtrl($scope, $location, $mdDialog, $timeout, UtilsService, serverConfig) {
 		var vm = this,
-			promise,
-			bytesInAGb = 1000000000;
+			promise;
 
 		/*
 		 * Init
@@ -4926,7 +4926,7 @@ var ViewerManager = {};
 				console.log(866, response);
 				if (response.status === 200) {
 				}
-				vm.payPalInfo = "PayPal has finished processing.";
+				vm.payPalInfo = "PayPal has finished processing. Thank you.";
 				$timeout(function () {
 					$mdDialog.cancel();
 					init();
@@ -4960,7 +4960,12 @@ var ViewerManager = {};
 				}
 				else {
 					if (vm.numLicenses === 0) {
-						vm.saveDisabled = ((vm.newBillingAddress.postalCode === "") || (vm.newBillingAddress.country === ""));
+						vm.saveDisabled = (
+							(angular.isUndefined(vm.newBillingAddress.postalCode)) ||
+							(angular.isUndefined(vm.newBillingAddress.country))
+							(vm.newBillingAddress.postalCode === "") ||
+							(vm.newBillingAddress.country === "")
+						);
 					}
 					else {
 						vm.saveDisabled = false;
@@ -4986,23 +4991,20 @@ var ViewerManager = {};
 		}, true);
 
 		/*
-		 * Watch for quota
+		 * Watch for subscriptions
 		 */
-		$scope.$watch("vm.quota", function () {
-			if (angular.isDefined(vm.quota)) {
-				vm.quotaSpaceUsed = (vm.quota.spaceUsed / bytesInAGb).toFixed(2);
-				vm.quotaSpaceLimit = (vm.quota.spaceLimit / bytesInAGb).toFixed(2);
+		$scope.$watch("vm.subscriptions", function () {
+			if (angular.isDefined(vm.subscriptions) && angular.isDefined(vm.plans)) {
+				setupLicensesInfo();
 			}
 		}, true);
 
 		/*
-		 * Watch for licenses
+		 * Watch for plans
 		 */
-		$scope.$watch("vm.licenses", function () {
-			if (angular.isDefined(vm.licenses)) {
-				vm.numLicenses = vm.licenses.numLicenses;
-				vm.numNewLicenses = vm.numLicenses;
-				vm.pricePerLicense = vm.licenses.pricePerLicense;
+		$scope.$watch("vm.plans", function () {
+			if (angular.isDefined(vm.subscriptions) && angular.isDefined(vm.plans)) {
+				setupLicensesInfo();
 			}
 		}, true);
 
@@ -5026,6 +5028,13 @@ var ViewerManager = {};
 				}],
 				billingAddress: vm.newBillingAddress
 			};
+			// Fill in required info with dummy data if it is missing
+			if (!data.billingAddress.hasOwnProperty("line1")) {
+				data.billingAddress.line1 = "1 High Street";
+			}
+			if (!data.billingAddress.hasOwnProperty("city")) {
+				data.billingAddress.city = "London";
+			}
 
 			promise = UtilsService.doPost(data, vm.account + "/subscriptions");
 			promise.then(function (response) {
@@ -5057,6 +5066,16 @@ var ViewerManager = {};
 				preserveScope: true
 			});
 		}
+
+		/**
+		 * Set up num licenses and price
+		 */
+		function setupLicensesInfo () {
+			vm.numLicenses = vm.subscriptions.length;
+			vm.numNewLicenses = vm.numLicenses;
+			vm.pricePerLicense = vm.plans[0].amount;
+		}
+
 	}
 }());
 
@@ -5269,21 +5288,15 @@ var ViewerManager = {};
 
 				subscriptionsPromise = UtilsService.doGet(vm.account + "/subscriptions");
 				subscriptionsPromise.then(function (response) {
-					var numLicenses;
 					console.log("**subscriptions** ", response);
-					if (response.status === 200) {
-						numLicenses = response.data.length;
+					vm.subscriptions = response.data;
+				});
 
-						plansPromise = UtilsService.doGet("plans");
-						plansPromise.then(function (response) {
-							console.log("**plans** ", response);
-							if (response.status === 200) {
-								vm.licenses = {
-									numLicenses: numLicenses,
-									pricePerLicense: response.data[0].amount
-								};
-							}
-						});
+				plansPromise = UtilsService.doGet("plans");
+				plansPromise.then(function (response) {
+					console.log("**plans** ", response);
+					if (response.status === 200) {
+						vm.plans = response.data;
 					}
 				});
 
@@ -5439,7 +5452,8 @@ var ViewerManager = {};
 			templateUrl: 'accountLicenses.html',
 			scope: {
 				account: "=",
-				showPage: "&"
+				showPage: "&",
+				subscriptions: "="
 			},
 			controller: AccountLicensesCtrl,
 			controllerAs: 'vm',
@@ -5457,16 +5471,15 @@ var ViewerManager = {};
 		/*
 		 * Init
 		 */
-		vm.numLicenses = -1;
-		vm.unassigned = [];
-		vm.licenses = [];
-		vm.allLicensesAssigned = false;
+
+		/*
 		promise = UtilsService.doGet(vm.account + "/subscriptions");
 		promise.then(function (response) {
 			var data;
 			console.log("subscriptions ", response);
 			if (response.status === 200) {
 				vm.numLicenses = response.data.length;
+				vm.toShow = (vm.numLicenses > 0) ? "0+": "0";
 				for (i = 0; i < response.data.length; i += 1) {
 					if (response.data[i].hasOwnProperty("assignedUser")) {
 						data = {user: response.data[i].assignedUser, id: response.data[i]._id};
@@ -5479,6 +5492,33 @@ var ViewerManager = {};
 				}
 				vm.allLicensesAssigned = (vm.unassigned.length === 0);
 			}
+		});
+		*/
+
+		/*
+		 * Watch subscriptions
+		 */
+		$scope.$watch("vm.subscriptions", function () {
+			console.log(444, vm.subscriptions);
+			vm.unassigned = [];
+			vm.licenses = [];
+			vm.allLicensesAssigned = false;
+			vm.numLicenses = vm.subscriptions.length;
+			vm.toShow = (vm.numLicenses > 0) ? "0+": "0";
+
+			for (i = 0; i < vm.subscriptions.length; i += 1) {
+				if (vm.subscriptions[i].hasOwnProperty("assignedUser")) {
+					vm.licenses.push({
+						user: vm.subscriptions[i].assignedUser,
+						id: vm.subscriptions[i]._id,
+						showRemove: (vm.subscriptions[i].assignedUser !== vm.account)
+					});
+				}
+				else {
+					vm.unassigned.push(vm.subscriptions[i]._id);
+				}
+			}
+			vm.allLicensesAssigned = (vm.unassigned.length === 0);
 		});
 
 		/*
@@ -5740,13 +5780,7 @@ var ViewerManager = {};
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("accountProjects", accountProjects)
-		.filter("quotaFilter", function() {
-			return function(input) {
-				var bytesInAGb = 1000000000;
-				return (input / bytesInAGb).toFixed(2);
-			};
-		});
+		.directive("accountProjects", accountProjects);
 
 	function accountProjects() {
 		return {
@@ -6433,7 +6467,8 @@ var ViewerManager = {};
 			templateUrl: 'accountTeam.html',
 			scope: {
 				account: "=",
-				showPage: "&"
+				showPage: "&",
+				subscriptions: "="
 			},
 			controller: AccountTeamCtrl,
 			controllerAs: 'vm',
@@ -6441,13 +6476,11 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountTeamCtrl.$inject = ["$scope", "$location", "UtilsService"];
+	AccountTeamCtrl.$inject = ["$scope", "$location", "UtilsService", "StateManager"];
 
-	function AccountTeamCtrl($scope, $location, UtilsService) {
+	function AccountTeamCtrl($scope, $location, UtilsService, StateManager) {
 		var vm = this,
-			i, iLength, j, jLength,
-			promise,
-			isMember;
+			promise;
 
 		/*
 		 * Init
@@ -6456,38 +6489,20 @@ var ViewerManager = {};
 		vm.collaborators = [];
 		vm.members = [];
 		vm.addDisabled = false;
+		vm.toShow = (vm.subscriptions.length > 1) ? "1+" : vm.subscriptions.length.toString();
+
 		if ($location.search().hasOwnProperty("proj")) {
 			vm.projectName = $location.search().proj;
 
-			// Get the team members
 			promise = UtilsService.doGet(vm.account + "/" + vm.projectName + "/collaborators");
 			promise.then(function (response) {
 				console.log(response);
 				if (response.status === 200) {
 					vm.members = response.data;
-				}
-
-				// Get the collaborators who are not team members
-				promise = UtilsService.doGet(vm.account + "/subscriptions");
-				promise.then(function (response) {
-					console.log(response);
-					if (response.status === 200) {
-						for (i = 0, iLength = response.data.length; i < iLength; i += 1) {
-							if (response.data[i].hasOwnProperty("assignedUser") && (response.data[i].assignedUser !== vm.account)) {
-								isMember = false;
-								for (j = 0, jLength = vm.members.length; j < jLength; j += 1) {
-									if (vm.members[j].user === response.data[i].assignedUser) {
-										isMember = true;
-										break;
-									}
-								}
-								if (!isMember) {
-									vm.collaborators.push({user: response.data[i].assignedUser});
-								}
-							}
-						}
+					if (angular.isDefined("vm.subscriptions")) {
+						setupTeam();
 					}
-				});
+				}
 			});
 		}
 
@@ -6515,6 +6530,7 @@ var ViewerManager = {};
 					role: vm.memberRole,
 					user: vm.selectedUser.user
 				};
+
 			promise = UtilsService.doPost(data, vm.account + "/" + vm.projectName + "/collaborators");
 			promise.then(function (response) {
 				console.log(response);
@@ -6528,6 +6544,7 @@ var ViewerManager = {};
 					}
 					vm.searchText = null;
 					vm.addDisabled = (vm.collaborators.length === 0);
+					vm.allLicenseAssigneesMembers = (vm.collaborators.length === 0);
 				}
 			});
 		};
@@ -6545,6 +6562,7 @@ var ViewerManager = {};
 					var member = vm.members.splice(index, 1);
 					vm.collaborators.push(member[0]);
 					vm.addDisabled = false;
+					vm.allLicenseAssigneesMembers = false;
 				}
 			});
 		};
@@ -6558,6 +6576,37 @@ var ViewerManager = {};
 			return function filterFn(user) {
 				return (user.user.indexOf(lowercaseQuery) === 0);
 			};
+		}
+
+		vm.goToPage = function (page) {
+			StateManager.setQuery({page: page});
+		};
+
+		/**
+		 * Set up the team page
+		 */
+		function setupTeam () {
+			var i, iLength, j, jLength,
+				isMember;
+
+			for (i = 0, iLength = vm.subscriptions.length; i < iLength; i += 1) {
+				if (vm.subscriptions[i].hasOwnProperty("assignedUser") && (vm.subscriptions[i].assignedUser !== vm.account)) {
+					isMember = false;
+					for (j = 0, jLength = vm.members.length; j < jLength; j += 1) {
+						if (vm.members[j].user === vm.subscriptions[i].assignedUser) {
+							isMember = true;
+							break;
+						}
+					}
+					if (!isMember) {
+						vm.collaborators.push({user: vm.subscriptions[i].assignedUser});
+					}
+				}
+			}
+
+			vm.noLicensesAssigned = ((vm.subscriptions.length > 1) && ((vm.collaborators.length + vm.members.length) === 0));
+			vm.notAllLicensesAssigned = ((vm.subscriptions.length > 1) && ((vm.subscriptions.length - 1) !== (vm.collaborators.length + vm.members.length)));
+			vm.allLicenseAssigneesMembers = (vm.collaborators.length === 0);
 		}
 	}
 }());
@@ -17266,6 +17315,75 @@ var Oculus = {};
 	}
 
 }());
+/**
+ *  Copyright (C) 2016 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+
+		// Inspired by Mark Rajcok'a answer - http://stackoverflow.com/a/14837021/782358
+		.directive('tdrFocus', function() {
+			return {
+				scope: { trigger: '=tdrFocus' },
+				link: function(scope, element) {
+					scope.$watch('trigger', function(value) {
+						if(value === true) {
+							element[0].focus();
+							scope.trigger = false;
+						}
+					});
+				}
+			};
+		});
+}());
+
+/**
+ *  Copyright (C) 2016 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+
+		.filter("bToGb", function() {
+			return function(input) {
+				var bytesInAGb = 1000000000;
+				return (input / bytesInAGb).toFixed(2);
+			};
+		});
+
+}());
+
 /**
  *  Copyright (C) 2016 3D Repo Ltd
  *

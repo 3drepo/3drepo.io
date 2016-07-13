@@ -78,21 +78,15 @@
 
 				subscriptionsPromise = UtilsService.doGet(vm.account + "/subscriptions");
 				subscriptionsPromise.then(function (response) {
-					var numLicenses;
 					console.log("**subscriptions** ", response);
-					if (response.status === 200) {
-						numLicenses = response.data.length;
+					vm.subscriptions = response.data;
+				});
 
-						plansPromise = UtilsService.doGet("plans");
-						plansPromise.then(function (response) {
-							console.log("**plans** ", response);
-							if (response.status === 200) {
-								vm.licenses = {
-									numLicenses: numLicenses,
-									pricePerLicense: response.data[0].amount
-								};
-							}
-						});
+				plansPromise = UtilsService.doGet("plans");
+				plansPromise.then(function (response) {
+					console.log("**plans** ", response);
+					if (response.status === 200) {
+						vm.plans = response.data;
 					}
 				});
 
