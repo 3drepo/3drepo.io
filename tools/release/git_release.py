@@ -58,7 +58,7 @@ os.system("git clean -f -d")
 os.system("git commit -m \"Version string update\"")
 
 os.system("git push origin :refs/tags/" + version)
-os.system("git tag -a " + version + " -m \" Version " + version + " \"")
+os.system("git tag -fa " + version + " -m \" Version " + version + " \"")
 
 if production:
     os.system("git push origin :refs/tags/latest")
