@@ -5461,33 +5461,6 @@ var ViewerManager = {};
 			promise;
 
 		/*
-		 * Init
-		 */
-
-		/*
-		promise = UtilsService.doGet(vm.account + "/subscriptions");
-		promise.then(function (response) {
-			var data;
-			console.log("subscriptions ", response);
-			if (response.status === 200) {
-				vm.numLicenses = response.data.length;
-				vm.toShow = (vm.numLicenses > 0) ? "0+": "0";
-				for (i = 0; i < response.data.length; i += 1) {
-					if (response.data[i].hasOwnProperty("assignedUser")) {
-						data = {user: response.data[i].assignedUser, id: response.data[i]._id};
-						data.showRemove = (response.data[i].assignedUser !== vm.account);
-						vm.licenses.push(data);
-					}
-					else {
-						vm.unassigned.push(response.data[i]._id);
-					}
-				}
-				vm.allLicensesAssigned = (vm.unassigned.length === 0);
-			}
-		});
-		*/
-
-		/*
 		 * Watch subscriptions
 		 */
 		$scope.$watch("vm.subscriptions", function () {
@@ -5514,9 +5487,9 @@ var ViewerManager = {};
 		});
 
 		/*
-		 * Watch changes to the new license name
+		 * Watch changes to the new license assignee name
 		 */
-		$scope.$watch("vm.newLicense", function (newValue) {
+		$scope.$watch("vm.newLicenseAssignee", function (newValue) {
 			vm.addMessage = "";
 			vm.addDisabled = !(angular.isDefined(newValue) && (newValue.toString() !== ""));
 		});
@@ -5526,13 +5499,13 @@ var ViewerManager = {};
 		 */
 		vm.assignLicense = function () {
 			promise = UtilsService.doPost(
-				{user: vm.newLicense},
+				{user: vm.newLicenseAssignee},
 				vm.account + "/subscriptions/" + vm.unassigned[0] + "/assign"
 			);
 			promise.then(function (response) {
 				console.log(response);
 				if (response.status === 200) {
-					vm.addMessage = "User " + vm.newLicense + " added as a license";
+					vm.addMessage = "User " + vm.newLicenseAssignee + " added as a license";
 					vm.licenses.push({user: response.data.assignedUser, id: response.data._id});
 					vm.unassigned.splice(0, 1);
 					vm.allLicensesAssigned = (vm.unassigned === 0);
@@ -5559,8 +5532,26 @@ var ViewerManager = {};
 				}
 				else if (response.data.status === 400) {
 					if (response.data.value === 94) {
-						vm.licenses[index].deleteMessage = "Currently a member of a team";
+						vm.licenseAssigneeIndex = index;
+						vm.userProjects = response.data.projects;
+						UtilsService.showDialog("removeLicenseDialog.html", $scope);
 					}
+				}
+			});
+		};
+
+		/**
+		 * Remove license from user who is a team member of a project
+		 */
+		vm.removeLicenseConfirmed = function () {
+			promise = UtilsService.doDelete({}, vm.account + "/subscriptions/" + vm.licenses[vm.licenseAssigneeIndex].id + "/assign?cascadeRemove=true");
+			promise.then(function (response) {
+				console.log(response);
+				if (response.status === 200) {
+					vm.licenses.splice(vm.licenseAssigneeIndex, 1);
+					vm.unassigned.push(null);
+					vm.addDisabled = false;
+					UtilsService.closeDialog();
 				}
 			});
 		};
@@ -6216,7 +6207,6 @@ var ViewerManager = {};
 					}
 				}
 			});
-
 		}
 
 		/**
@@ -6596,8 +6586,15 @@ var ViewerManager = {};
 				}
 			}
 
-			vm.noLicensesAssigned = ((vm.subscriptions.length > 1) && ((vm.collaborators.length + vm.members.length) === 0));
-			vm.notAllLicensesAssigned = ((vm.subscriptions.length > 1) && ((vm.subscriptions.length - 1) !== (vm.collaborators.length + vm.members.length)));
+			vm.noLicensesAssigned =
+				(vm.subscriptions.length > 1) &&
+				((vm.collaborators.length + vm.members.length) === 0);
+
+			vm.notAllLicensesAssigned =
+				!vm.noLicensesAssigned &&
+				(vm.subscriptions.length > 1) &&
+				((vm.subscriptions.length - 1) !== (vm.collaborators.length + vm.members.length));
+			
 			vm.allLicenseAssigneesMembers = (vm.collaborators.length === 0);
 		}
 	}
@@ -17399,9 +17396,9 @@ var Oculus = {};
     angular.module("3drepo")
         .factory("UtilsService", UtilsService);
 
-    UtilsService.$inject = ["$http", "$q", "serverConfig"];
+    UtilsService.$inject = ["$http", "$q", "$mdDialog", "serverConfig"];
 
-    function UtilsService($http, $q, serverConfig) {
+    function UtilsService($http, $q, $mdDialog, serverConfig) {
         var obj = {};
 
 		/**
@@ -17548,6 +17545,42 @@ var Oculus = {};
                     }
                 );
             return deferred.promise;
+        };
+
+        /**
+         * Show a dialog
+         *
+         * @param {String} dialogTemplate
+         * @param {Object} scope
+         * @param {Object} parent
+         * @param {Boolean} fullscreen
+         * @param {Boolean} clickOutsideToClose
+         * @param {Object} event
+         */
+        obj.showDialog = function (dialogTemplate, scope, parent, fullscreen, clickOutsideToClose, event) {
+            // Allow the dialog to have cancel ability
+            scope.utilsRemoveDialog = scope.utilsRemoveDialog || function () {$mdDialog.cancel();};
+
+            // Set up and show dialog
+            var data = {
+                controller: function () {},
+                templateUrl: dialogTemplate,
+                onRemoving: function () {$mdDialog.cancel();}
+            };
+            data.parent = angular.element(angular.isDefined(parent) ? parent : document.body);
+            data.scope = (angular.isDefined(scope)) ? scope : null;
+            data.preserveScope = (data.scope !== null);
+            data.targetEvent = (angular.isDefined(event)) ? event : null;
+            data.clickOutsideToClose = (angular.isDefined(clickOutsideToClose)) ? clickOutsideToClose : true;
+            data.fullscreen = (angular.isDefined(fullscreen)) ? fullscreen : true;
+            $mdDialog.show(data);
+        };
+
+        /**
+         * close a dialog
+         */
+        obj.closeDialog = function () {
+            $mdDialog.cancel();
         };
 
         return obj;

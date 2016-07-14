@@ -19,7 +19,7 @@
 							p Assign a license
 							md-input-container
 								label Username
-								input(type="text", ng-model="vm.newLicense", tdr-focus="true", ng-disabled="vm.allLicensesAssigned")
+								input(type="text", ng-model="vm.newLicenseAssignee", tdr-focus="true", ng-disabled="vm.allLicensesAssigned")
 						div(layout="row")
 							md-button.md-raised.md-accent(ng-click="vm.assignLicense()", ng-disabled="vm.addDisabled") Assign
 							p {{vm.addMessage}}

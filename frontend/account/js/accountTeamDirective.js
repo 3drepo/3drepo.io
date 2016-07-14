@@ -164,8 +164,15 @@
 				}
 			}
 
-			vm.noLicensesAssigned = ((vm.subscriptions.length > 1) && ((vm.collaborators.length + vm.members.length) === 0));
-			vm.notAllLicensesAssigned = ((vm.subscriptions.length > 1) && ((vm.subscriptions.length - 1) !== (vm.collaborators.length + vm.members.length)));
+			vm.noLicensesAssigned =
+				(vm.subscriptions.length > 1) &&
+				((vm.collaborators.length + vm.members.length) === 0);
+
+			vm.notAllLicensesAssigned =
+				!vm.noLicensesAssigned &&
+				(vm.subscriptions.length > 1) &&
+				((vm.subscriptions.length - 1) !== (vm.collaborators.length + vm.members.length));
+
 			vm.allLicenseAssigneesMembers = (vm.collaborators.length === 0);
 		}
 	}
