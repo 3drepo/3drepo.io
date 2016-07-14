@@ -92,7 +92,9 @@ var schema = mongoose.Schema({
 		billingAgreementId: String,
 		paypalPaymentToken: String,
 		billingUser: String,
-		
+		lastAnniversaryDate: Date,
+		nextPaymentDate: Date,
+		firstNextPaymentDate:  Date,
 		avatar: Object
 	},
 	roles: [{}]
@@ -658,7 +660,7 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	let currentCount = {};
 
 	//clear subscriptions
-	let ids = this.customData.subscriptions.filter(sub => !sub.active).map(sub => sub._id);
+	let ids = this.customData.subscriptions.filter(sub => !sub.active || (sub.expiredAt && sub.expiredAt < new Date())).map(sub => sub._id);
 
 	ids.forEach(id => {
 		this.customData.subscriptions.remove(id);
@@ -709,23 +711,10 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 
 	} else {
 
-		let currentDate = {};
-		currentDate.today = moment().utc().startOf('day');
-		currentDate.endOfMonth = moment(currentDate.today).utc().endOf('month');
-		currentDate.totalDays = currentDate.endOfMonth.date();
-		currentDate.remainingDays = Math.round(moment.duration(moment(currentDate.endOfMonth).utc().diff(currentDate.today)).asDays());
-
-
-		let nextMonth = {};
-		nextMonth.today = moment().utc().startOf('day').add(1, 'month');
-		nextMonth.endOfMonth = moment(nextMonth.today).utc().endOf('month');
-		nextMonth.totalDays = nextMonth.endOfMonth.date();
-		nextMonth.remainingDays = Math.round(moment.duration(moment(nextMonth.endOfMonth).utc().diff(nextMonth.today)).asDays());
-
 		let currency = 'GBP';
 		let amount = 0;
 		let billingCycle = 1;
-		let firstBillingCycle = currentDate.remainingDays;
+		let firstBillingCycle;
 		let existingPlans = [];
 		let now = new Date();
 		let check = Promise.resolve();
@@ -827,15 +816,33 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 		next = check.then(() => {
 			console.log('new plan amount', amount);
 
-			//cal pro-rata price of new licenses subscription
-			let proRataPrice = currentDate.remainingDays / currentDate.totalDays * amount;
-			proRataPrice = Math.round(proRataPrice * 100) / 100;
-			let firstCycleAmount = proRataPrice;
+			let startDate = moment().utc().add(10, 'second');
+			let firstCycleAmount;
 
-			let startDate = moment().utc().startOf('day').add(1, 'month').date(1);
+			if(this.getActiveSubscriptions({ skipBasic: 'true'}).length === 0){
+				// first time to buy licence and pick today as the anniversary date
+				console.log('First time buying');
 
-			if(firstCycleAmount > 0){
-				startDate = moment.utc().add(10, 'second');
+				this.customData.lastAnniversaryDate = startDate.clone().startOf('day').toDate();
+				this.customData.firstNextPaymentDate = Payment.getNextPaymentDate(startDate);
+
+
+			} else if (amount > 0) {
+				//not the first time, but buy new licences
+				//calulate pro-rata
+				let today = moment().utc().startOf('day');
+				let lastAnniversaryDate = moment(this.customData.lastAnniversaryDate).utc();
+				let nextPaymentDate = moment(this.customData.nextPaymentDate || this.customData.firstNextPaymentDate).utc().endOf('date');
+
+				firstBillingCycle = Math.round(moment.duration(nextPaymentDate.diff(today)).asDays());
+				//cal pro-rata price of new licenses subscription
+				let proRataPrice =  firstBillingCycle / Math.round(moment.duration(nextPaymentDate.diff(lastAnniversaryDate)).asDays()) * amount;
+				proRataPrice = Math.round(proRataPrice * 100) / 100;
+				firstCycleAmount = proRataPrice;
+
+			} else {
+				//decreasing licence or no change at all
+				startDate = moment(this.customData.nextPaymentDate || this.customData.firstNextPaymentDate).utc().startOf('date');
 			}
 
 			//add exisiting plans to bill of next cycle as well
@@ -997,6 +1004,12 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 		let items = [];
 
+		if(dbUser.customData.nextPaymentDate){
+			dbUser.customData.lastAnniversaryDate = new Date(dbUser.customData.nextPaymentDate);
+		}
+
+		dbUser.customData.nextPaymentDate = moment(paymentInfo.nextPaymentDate).utc().startOf('date').toDate();
+
 		dbUser.customData.subscriptions.forEach(subscription => {
 
 			if(subscription.inCurrentAgreement){
@@ -1043,13 +1056,12 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 			//copy current billing info from user to billing
 			billing.info = dbUser.customData.billingInfo;
 
-			billing.periodStart = moment(paymentInfo.ipnDate).utc()
-				.hours(0).minutes(0).seconds(0).milliseconds(0)
+			billing.periodStart = dbUser.customData.lastAnniversaryDate;
+			billing.periodEnd = moment(dbUser.customData.nextPaymentDate)
+				.utc()
+				.subtract(1, 'day')
+				.endOf('date')
 				.toDate();
-
-			billing.periodEnd = moment(paymentInfo.ipnDate).utc()
-					.endOf('month')
-					.toDate();
 
 			billing.save().catch( err => {
 				console.log('Billing error', err);

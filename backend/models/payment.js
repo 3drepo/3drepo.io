@@ -19,6 +19,7 @@ var paypal = require('paypal-rest-sdk');
 var url = require('url');
 var config = require('../config');
 var vat = require('./vat');
+var moment = require('moment');
 
 paypal.configure({
 	'mode': config.paypal.mode, //sandbox or live
@@ -44,10 +45,10 @@ function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAm
 
 
 
-	let taxAmount = vat.getByCountryCode(billingAddress.country_code, vatNumber) * amount;
-	taxAmount = Math.round(taxAmount * 100) / 100;
-	let afterTaxAmount = amount - taxAmount;
+	let afterTaxAmount = amount / ( 1 + vat.getByCountryCode(billingAddress.country_code, vatNumber));
 	afterTaxAmount = Math.round(afterTaxAmount * 100) / 100;
+	let taxAmount = amount - afterTaxAmount;
+	taxAmount = Math.round(taxAmount * 100) / 100;
 
 	let paymentDefs = [];
 	paymentDefs.push({
@@ -71,10 +72,10 @@ function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAm
 
 	if(firstCycleAmount){
 		
-		let taxFirstCycleAmount = vat.getByCountryCode(billingAddress.country_code, vatNumber) * firstCycleAmount;
-		taxFirstCycleAmount = Math.round(taxFirstCycleAmount * 100) / 100;
-		let afterTaxFirstCycleAmount = firstCycleAmount - taxFirstCycleAmount;
+		let afterTaxFirstCycleAmount = firstCycleAmount / ( 1 + vat.getByCountryCode(billingAddress.country_code, vatNumber));
 		afterTaxFirstCycleAmount = Math.round(afterTaxFirstCycleAmount * 100) / 100;
+		let taxFirstCycleAmount = firstCycleAmount - afterTaxFirstCycleAmount;
+		taxFirstCycleAmount = Math.round(taxFirstCycleAmount * 100) / 100;
 
 		paymentDefs.push({
 			"amount": {
@@ -223,8 +224,22 @@ function updateBillingAddress(billingAgreementId, billingAddress){
 
 }
 
+function getNextPaymentDate(date){
+	'use strict';
+	
+	let start = moment(date).utc().startOf('date');
+	let next = moment(date).utc().startOf('date').add(1, 'month');
+
+	if(next.date() !== start.date()){
+		next.add(1, 'day');
+	}
+
+	return next.toDate();
+}
+
 module.exports = {
 	getBillingAgreement,
 	updateBillingAddress,
-	paypal
+	paypal,
+	getNextPaymentDate
 };
