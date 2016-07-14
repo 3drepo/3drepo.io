@@ -892,7 +892,14 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 					"city": billingAddress.city,
 					"postal_code": billingAddress.postalCode,
 					"country_code": billingAddress.countryCode
-				}, currency, firstCycleAmount, firstBillingCycle, amount, billingCycle, startDate.toDate()).then(_billingAgreement => {
+				}, currency, 
+					firstCycleAmount, 
+					firstBillingCycle, 
+					amount, 
+					billingCycle, 
+					startDate.toDate(), 
+					billingAddress.vat
+				).then(_billingAgreement => {
 
 					billingAgreement = _billingAgreement;
 					this.customData.paypalPaymentToken = billingAgreement.paypalPaymentToken;

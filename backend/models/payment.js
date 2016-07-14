@@ -26,7 +26,7 @@ paypal.configure({
 	'client_secret': config.paypal.client_secret
 });
 
-function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAmount, firstBillingCycle, amount, billingCycle, startDate){
+function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAmount, firstBillingCycle, amount, billingCycle, startDate, vatNumber){
 	'use strict';
 
 	console.log('firstCycleAmount', firstCycleAmount);
@@ -44,7 +44,7 @@ function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAm
 
 
 
-	let taxAmount = vat.getByCountryCode(billingAddress.country_code) * amount;
+	let taxAmount = vat.getByCountryCode(billingAddress.country_code, vatNumber) * amount;
 	taxAmount = Math.round(taxAmount * 100) / 100;
 	let afterTaxAmount = amount - taxAmount;
 	afterTaxAmount = Math.round(afterTaxAmount * 100) / 100;
@@ -70,9 +70,8 @@ function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAm
 	});
 
 	if(firstCycleAmount){
-
-;
-		let taxFirstCycleAmount = vat.getByCountryCode(billingAddress.country_code) * firstCycleAmount;
+		
+		let taxFirstCycleAmount = vat.getByCountryCode(billingAddress.country_code, vatNumber) * firstCycleAmount;
 		taxFirstCycleAmount = Math.round(taxFirstCycleAmount * 100) / 100;
 		let afterTaxFirstCycleAmount = firstCycleAmount - taxFirstCycleAmount;
 		afterTaxFirstCycleAmount = Math.round(afterTaxFirstCycleAmount * 100) / 100;
