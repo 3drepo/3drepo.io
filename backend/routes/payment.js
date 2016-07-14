@@ -52,7 +52,7 @@ function executeAgreement(req, res, next){
 
 					} else {
 
-						if(dbUser.customData.billingAgreementId !== billingAgreement.id){
+						if(dbUser.customData.billingAgreementId && dbUser.customData.billingAgreementId !== billingAgreement.id){
 							//cancel the old agreement, if any
 							var cancel_note = {
 								"note": "You have updated the license subscriptions. This agreement is going to be replaced by the new one."
@@ -102,7 +102,7 @@ function activateSubscription(req, res, next){
 	let isSubscriptionCancelled = paymentInfo.txn_type === 'recurring_payment_profile_cancel';
 	let isSubscriptionSuspended = paymentInfo.txn_type === 'recurring_payment_suspended' || paymentInfo.txn_type === 'recurring_payment_suspended_due_to_max_failed_payment';
 
-	let paymentOrSubscriptionSuccess = isPaymentIPN && paymentInfo.payment_status === 'Completed' || isSubscriptionInitIPN;
+	let paymentOrSubscriptionSuccess = isPaymentIPN && paymentInfo.payment_status === 'Completed';
 	//let paymentPending = isPaymentIPN && paymentInfo.payment_status === 'Pending';
 	let paymentFailed = paymentInfo.txn_type === 'recurring_payment_failed' || paymentInfo.txn_type === 'recurring_payment_skipped';
 
@@ -132,16 +132,18 @@ function activateSubscription(req, res, next){
 	}).then(() => {
 
 
-		if(paymentOrSubscriptionSuccess){
+		if(isSubscriptionInitIPN){
+			//ignore
+		} else if(paymentOrSubscriptionSuccess){
 
 			return User.activateSubscription(billingAgreementId, {
 
 				gateway: 'PAYPAL',
 				currency: paymentInfo.currency_code,
 				amount: isSubscriptionInitIPN ? paymentInfo.initial_payment_amount : paymentInfo.mc_gross,
-				subscriptionSignup: isSubscriptionInitIPN,
 				createBilling: true,
-				ipnDate: new Date(paymentInfo.time_created)
+				ipnDate: new Date(paymentInfo.time_created),
+				nextPaymentDate:  new Date(paymentInfo.next_payment_date)
 
 			}, paymentInfo).then(resData => {
 				systemLogger.logInfo('payment confirmed and licenses activated', resData.subscriptions.toObject());

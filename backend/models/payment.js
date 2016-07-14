@@ -18,6 +18,7 @@
 var paypal = require('paypal-rest-sdk');
 var url = require('url');
 var config = require('../config');
+var vat = require('./vat');
 
 paypal.configure({
 	'mode': config.paypal.mode, //sandbox or live
@@ -25,10 +26,10 @@ paypal.configure({
 	'client_secret': config.paypal.client_secret
 });
 
-function getBillingAgreement(billingUser, billingAddress, currency, initAmount, amount, billingCycle, startDate){
+function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAmount, firstBillingCycle, amount, billingCycle, startDate){
 	'use strict';
 
-	console.log('initAmount', initAmount);
+	console.log('firstCycleAmount', firstCycleAmount);
 	console.log('amount', amount);
 	console.log('startDate', startDate);
 
@@ -41,37 +42,78 @@ function getBillingAgreement(billingUser, billingAddress, currency, initAmount, 
 	let baseUrl = (config.using_ssl ? 'https://' : 'http://') + config.host + port;
 
 
+
+
+	let taxAmount = vat.getByCountryCode(billingAddress.country_code) * amount;
+	taxAmount = Math.round(taxAmount * 100) / 100;
+	let afterTaxAmount = amount - taxAmount;
+	afterTaxAmount = Math.round(afterTaxAmount * 100) / 100;
+
+	let paymentDefs = [];
+	paymentDefs.push({
+		"amount": {
+			"currency": currency,
+			"value": afterTaxAmount
+		},
+		"cycles": "0",
+		"frequency": "MONTH",
+		"frequency_interval": billingCycle,
+		"name": "Regular monthly price",
+		"type": "REGULAR",
+		"charge_models":[{
+			"type": "TAX",
+			"amount": {
+				"value": taxAmount,
+				"currency": currency
+			}
+		}]
+	});
+
+	if(firstCycleAmount){
+
+;
+		let taxFirstCycleAmount = vat.getByCountryCode(billingAddress.country_code) * firstCycleAmount;
+		taxFirstCycleAmount = Math.round(taxFirstCycleAmount * 100) / 100;
+		let afterTaxFirstCycleAmount = firstCycleAmount - taxFirstCycleAmount;
+		afterTaxFirstCycleAmount = Math.round(afterTaxFirstCycleAmount * 100) / 100;
+
+		paymentDefs.push({
+			"amount": {
+				"currency": currency,
+				"value": afterTaxFirstCycleAmount
+			},
+			"cycles": "1",
+			"frequency": "DAY",
+			"frequency_interval": firstBillingCycle,
+			"name": "First month pro-rata price",
+			"type": "TRIAL",
+			"charge_models":[{
+				"type": "TAX",
+				"amount": {
+					"value": taxFirstCycleAmount,
+					"currency": currency
+				}
+			}]
+		});
+	}
+
+
 	let billingPlanAttributes = {
-		"description": "3D Repo License",
+		"description": "3D Repo Licence",
 		"merchant_preferences": {
 			"auto_bill_amount": "yes",
 			"cancel_url": `${baseUrl}/${billingUser}?page=billing`,
 			"initial_fail_amount_action": "continue",
 			"max_fail_attempts": "0",
-			"return_url": `${baseUrl}/${billingUser}?page=billing`,
-			"setup_fee": {
-				"currency": currency,
-				"value": initAmount
-			}
+			"return_url": `${baseUrl}/${billingUser}?page=billing&cancel=1`
 		},
-		"name": "3D Repo License",
-		"payment_definitions": [
-			{
-				"amount": {
-					"currency": currency,
-					"value": amount
-			},
-				"cycles": "0",
-				"frequency": "MONTH",
-				"frequency_interval": billingCycle,
-				"name": "Monthly payment",
-				"type": "REGULAR"
-			},
-		],
+		"name": "3D Repo Licences",
+		"payment_definitions": paymentDefs,
 	    "type": "INFINITE"
 	};
 
-	console.log(billingPlanAttributes);
+
+	console.log(JSON.stringify(billingPlanAttributes, null ,2));
 
 	return new Promise((resolve, reject) => {
 
@@ -113,10 +155,16 @@ function getBillingAgreement(billingUser, billingAddress, currency, initAmount, 
 		//create agreement
 		return new Promise((resolve, reject) => {
 
-			var billingAgreementAttributes = {
+			let desc = `3D Repo Licence subscription.`;
+			desc += `This month's pro-rata price: £${firstCycleAmount}, then `;
+			desc += `each month: £${amount}`;
+			
+			console.log('desc len', desc.length);
+
+			let billingAgreementAttributes = {
 				"name": "3D Repo Licenses",
-				"description": `3D Repo License subscription. This month's pro-rata price: £${initAmount}, then each month: £${amount}`,
-				"start_date": startDate,
+				"description": desc,
+				"start_date": startDate.toISOString(),
 				"plan": {
 					"id": billingPlan.id
 				},
@@ -126,12 +174,13 @@ function getBillingAgreement(billingUser, billingAddress, currency, initAmount, 
 				"shipping_address": billingAddress
 			};
 
+			console.log('creating agreement...');
 			paypal.billingAgreement.create(billingAgreementAttributes, function (err, billingAgreement) {
 				if (err) {
 					reject(err);
 				} else {
 
-					console.log(billingAgreement);
+					console.log(JSON.stringify(billingAgreement, null ,2));
 					let link = billingAgreement.links.find(link => link.rel === 'approval_url');
 					let token = url.parse(link.href, true).query.token;
 

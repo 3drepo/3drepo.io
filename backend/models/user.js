@@ -31,6 +31,7 @@ var systemLogger = require("../logger.js").systemLogger;
 var Payment = require('./payment');
 var moment = require('moment');
 var Subscription = require('./subscription');
+
 var getSubscription = Subscription.getSubscription;
 
 
@@ -76,6 +77,7 @@ var schema = mongoose.Schema({
 			token: String, 
 			plan: String,
 			inCurrentAgreement: Boolean,
+			pendingDelete: Boolean,
 			database: String
 		}],
 		billingInfo:{
@@ -643,6 +645,7 @@ schema.methods.listProjects = function(options){
 	});
 };
 
+//to-do: refactor
 schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	'use strict';
 
@@ -651,20 +654,23 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	this.customData.billingUser = billingUser;
 
 	let subscriptions = this.customData.subscriptions;
-	let now = new Date();
 
 	let currentCount = {};
-	let existingPlans = [];
 
 	//clear subscriptions
 	let ids = this.customData.subscriptions.filter(sub => !sub.active).map(sub => sub._id);
-	console.log('ids', ids);
+
 	ids.forEach(id => {
 		this.customData.subscriptions.remove(id);
 	});
 	
 
+	//count user current plans
 	this.customData.subscriptions.forEach(subscription => {
+
+		//clean old flag
+		subscription.pendingDelete = undefined;
+
 		if(!currentCount[subscription.plan]){
 			currentCount[subscription.plan] = 1;
 		} else {
@@ -672,40 +678,15 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 		}
 	});
 
-	Object.keys(currentCount).forEach(plan => {
-		existingPlans.push({ plan: plan, quantity: currentCount[plan]});
-	});
-
-	console.log('currentCount', currentCount);
-
+	// calulate change of plans
 	plans.forEach(plan => {
 		if(currentCount[plan.plan]){
 			plan.quantity = plan.quantity - currentCount[plan.plan];
 		}
 	});
-	
-	console.log('plans', plans);
 
-	//change of plans
-	plans = plans.filter(plan => plan.quantity > 0);
-
-	console.log('plans', plans);
-
-	plans.forEach(plan => {
-
-		if(getSubscription(plan.plan) && Number.isInteger(plan.quantity) && plan.quantity > 0){
-			
-			for(let i=0; i<plan.quantity; i++){
-
-				subscriptions.push({
-					plan: plan.plan,
-					createdAt: now,
-					updatedAt: now,
-					active: false
-				});
-			}
-		}
-	});
+	// get plans with changes
+	plans = plans.filter(plan => plan.quantity !== 0);
 
 
 	let next;
@@ -713,6 +694,7 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 
 	if(plans.length <= 0){
 
+		// no changes in no. of licences
 		if(!this.customData.billingAgreementId){
 			next = Promise.resolve({});
 		} else {
@@ -726,57 +708,204 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 
 
 	} else {
-		let startDate = moment.utc().date(1).add(1, 'month').hours(0).minutes(0).seconds(0).milliseconds(0).toDate();
-		let lastDayOfThisMonth = moment.utc().endOf('month').date();
-		let day = moment.utc().date();
+
+		let currentDate = {};
+		currentDate.today = moment().utc().startOf('day');
+		currentDate.endOfMonth = moment(currentDate.today).utc().endOf('month');
+		currentDate.totalDays = currentDate.endOfMonth.date();
+		currentDate.remainingDays = Math.round(moment.duration(moment(currentDate.endOfMonth).utc().diff(currentDate.today)).asDays());
+
+
+		let nextMonth = {};
+		nextMonth.today = moment().utc().startOf('day').add(1, 'month');
+		nextMonth.endOfMonth = moment(nextMonth.today).utc().endOf('month');
+		nextMonth.totalDays = nextMonth.endOfMonth.date();
+		nextMonth.remainingDays = Math.round(moment.duration(moment(nextMonth.endOfMonth).utc().diff(nextMonth.today)).asDays());
 
 		let currency = 'GBP';
 		let amount = 0;
 		let billingCycle = 1;
+		let firstBillingCycle = currentDate.remainingDays;
+		let existingPlans = [];
+		let now = new Date();
+		let check = Promise.resolve();
 
-		plans.forEach(data => {
 
-			let quantity = data.quantity;
-			let plan = getSubscription(data.plan);
-			amount += plan.amount * quantity;
-			// currency = plan.currency;
-			// billingCycle = plan.billingCycle;
-
+		Object.keys(currentCount).forEach(plan => {
+			existingPlans.push({ plan: plan, quantity: currentCount[plan]});
 		});
 
-		//cal pro-rata price of new licenses subscription
-		let proRataPrice = (lastDayOfThisMonth - day + 1) / lastDayOfThisMonth * amount;
-		proRataPrice = Math.round(proRataPrice * 100) / 100;
+		plans.forEach(plan => {
 
-		//add exisiting plans to bill of next cycle as well
-		existingPlans.forEach(data => {
+			if(getSubscription(plan.plan) && Number.isInteger(plan.quantity) && plan.quantity > 0){
+				
+				// buying new licences
+				amount += getSubscription(plan.plan).amount * plan.quantity;
 
-			let quantity = data.quantity;
-			let plan = getSubscription(data.plan);
-			amount += plan.amount * quantity;
-			// currency = plan.currency;
-			// billingCycle = plan.billingCycle;
+				for(let i=0; i<plan.quantity; i++){
+
+					subscriptions.push({
+						plan: plan.plan,
+						createdAt: now,
+						updatedAt: now,
+						active: false
+					});
+				}
+
+			} else if (getSubscription(plan.plan) && Number.isInteger(plan.quantity) && plan.quantity < 0) {
+				
+				// canceling licences
+
+				// cancel plans with no assigned user first
+
+				let removeNumber = -plan.quantity;
+				let removeCount = 0;
+
+				console.log('removeNumber', removeNumber);
+
+
+				let subs = this.getActiveSubscriptions().filter(sub => sub.plan === plan.plan && !sub.assignedUser);
+				for(let i=0 ; i < subs.length && removeCount < removeNumber; i++){
+					subs[i].pendingDelete = true;
+					removeCount++;
+				}
+
+
+				console.log('removeCount', removeCount);
+
+
+				//allow to remove billingUser's licence if remove count = user's current no. of licences
+				if(removeCount < removeNumber && 
+					this.getActiveSubscriptions().filter(sub => sub.plan === plan.plan).length === removeNumber){
+
+					let subs = this.getActiveSubscriptions().filter(sub => sub.plan === plan.plan && sub.assignedUser === this.customData.billingUser);
+					for(let i=0 ; i < subs.length && removeCount < removeNumber; i++){
+						subs[i].pendingDelete = true;
+						removeCount++;
+					}
+				}
+
+				console.log('removeCount', removeCount);
+
+				//check if they can remove licences
+				let quotaAfterDelete = this.getSubscriptionLimits({ excludePendingDelete : true });
+				let totalSize = 0;
+
+				check = new Promise((resolve, reject) => {
+			
+					if(removeCount < removeNumber){
+						reject(responseCodes.REMOVE_ASSIGNED_LICENCE);
+					} else {
+						resolve(User.historyChunksStats(this.user));
+					}
+					
+				}).then(stats => {
+				
+					if(stats){
+						stats.forEach(stat => {
+							totalSize += stat.size; 
+						});
+					}
+				}).then(() => {
+
+					console.log(quotaAfterDelete.spaceLimit - totalSize);
+					if(quotaAfterDelete.spaceLimit - totalSize < 0){
+						return Promise.reject(responseCodes.LICENCE_REMOVAL_SPACE_EXCEEDED);
+					} else{
+						return Promise.resolve();
+					}
+
+				});
+
+				let existingPlan = existingPlans.find(existingPlan => existingPlan.plan === plan.plan);
+				existingPlan.quantity += plan.quantity;
+
+			}
 		});
 
-		amount = Math.round(amount * 100) / 100;
 
-		next = Payment.getBillingAgreement(billingUser, {
-			"line1": billingAddress.line1,
-			"city": billingAddress.city,
-			"postal_code": billingAddress.postalCode,
-			"country_code": billingAddress.countryCode
-		}, currency, proRataPrice, amount, billingCycle, startDate).then(_billingAgreement => {
+		next = check.then(() => {
+			console.log('new plan amount', amount);
 
-			billingAgreement = _billingAgreement;
-			this.customData.paypalPaymentToken = billingAgreement.paypalPaymentToken;
+			//cal pro-rata price of new licenses subscription
+			let proRataPrice = currentDate.remainingDays / currentDate.totalDays * amount;
+			proRataPrice = Math.round(proRataPrice * 100) / 100;
+			let firstCycleAmount = proRataPrice;
 
+			let startDate = moment().utc().startOf('day').add(1, 'month').date(1);
+
+			if(firstCycleAmount > 0){
+				startDate = moment.utc().add(10, 'second');
+			}
+
+			//add exisiting plans to bill of next cycle as well
+			existingPlans.forEach(data => {
+
+				let quantity = data.quantity;
+				let plan = getSubscription(data.plan);
+				amount += plan.amount * quantity;
+			});
+
+			amount = Math.round(amount * 100) / 100;
+
+			if (amount <= 0 && firstCycleAmount <= 0 && !this.customData.billingAgreementId){
+
+				return Promise.resolve();
+
+			} else if(amount <= 0 && firstCycleAmount <= 0){
+				//cancel the old agreement, if any
+
+				var cancel_note = {
+					"note": "You have updated the licence subscriptions."
+				};
+
+				let ids = this.customData.subscriptions.filter(sub => sub.pendingDelete).map(sub => sub._id);
+
+				ids.forEach(id => {
+					this.customData.subscriptions.remove(id);
+				});
+
+				return new Promise((resolve, reject) => {
+					Payment.paypal.billingAgreement.cancel(this.customData.billingAgreementId, cancel_note, (err) => {
+						if (err) {
+							systemLogger.logError(JSON.stringify(err),{ 
+								billingAgreementId: this.customData.billingAgreementId
+							});
+
+							reject(err);
+						} else {
+							systemLogger.logInfo("Billing agreement canceled successfully", { 
+								billingAgreementId: this.customData.billingAgreementId
+							});
+
+							this.customData.billingAgreementId = undefined;
+							resolve();
+						}
+					});
+				});
+
+
+			} else {
+
+				return Payment.getBillingAgreement(billingUser, {
+					"line1": billingAddress.line1,
+					"city": billingAddress.city,
+					"postal_code": billingAddress.postalCode,
+					"country_code": billingAddress.countryCode
+				}, currency, firstCycleAmount, firstBillingCycle, amount, billingCycle, startDate.toDate()).then(_billingAgreement => {
+
+					billingAgreement = _billingAgreement;
+					this.customData.paypalPaymentToken = billingAgreement.paypalPaymentToken;
+
+				});
+
+			}
 		});
 
 	}
 
 
 	return next.then(() => {
-
 		//store billing info locally
 		console.log(billingAddress);
 		this.customData.billingInfo = billingAddress;
@@ -785,7 +914,6 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	}).then(() => {
 		return Promise.resolve(billingAgreement || {});
 	});
-
 };
 
 
@@ -867,16 +995,15 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 			if(subscription.inCurrentAgreement){
 
 				// set to to next 3rd of next month, give 3 days cushion
-				let expiredAt = moment(paymentInfo.ipnDate).utc()
-					.date(3)
-					.add(getSubscription(subscription.plan).billingCycle, 'month')
+				let expiredAt = moment(paymentInfo.nextPaymentDate).utc()
+					.add(3, 'day')
 					.hours(0).minutes(0).seconds(0).milliseconds(0)
 					.toDate();
 
-				let start = moment.utc(paymentInfo.ipnDate).date();
-				let end = moment(paymentInfo.ipnDate).utc().endOf('month').date();
-				let prorata = (end - start + 1) / end;
-				let amount = getSubscription(subscription.plan).amount * prorata;
+				//let start = moment.utc(paymentInfo.ipnDate).date();
+				//let end = moment(paymentInfo.ipnDate).utc().endOf('month').date();
+				//let prorata = (end - start + 1) / end;
+
 
 				subscription.limits = getSubscription(subscription.plan).limits;
 
@@ -887,7 +1014,7 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 					items.push({
 						name: subscription.plan,
 						currency: getSubscription(subscription.plan).currency,
-						amount: Math.round(amount * 100) / 100
+
 					});
 				}
 			
@@ -987,6 +1114,14 @@ schema.methods.executeBillingAgreement = function(token, billingAgreementId){
 
 	});
 
+
+	//clear pending delete subscriptions
+	let ids = this.customData.subscriptions.filter(sub => sub.pendingDelete).map(sub => sub._id);
+
+	ids.forEach(id => {
+		this.customData.subscriptions.remove(id);
+	});
+
 	if(!assignedBillingUser){
 
 		let subscriptions = this.customData.subscriptions;
@@ -1005,19 +1140,34 @@ schema.methods.haveActiveSubscriptions = function(){
 	return this.getActiveSubscriptions().length > 0;
 };
 
-schema.methods.getActiveSubscriptions = function(){
+schema.methods.getActiveSubscriptions = function(options){
 	'use strict';
 	let now = new Date();
-	return _.filter(
-		this.customData.subscriptions, 
-		subscription => subscription.active && (subscription.expiredAt > now || !subscription.expiredAt)
-	);
+	options = options || {};
+
+
+	return this.customData.subscriptions.filter(sub => { 
+
+		let basicCond = true;
+		if (options.skipBasic){
+			basicCond = sub.plan !== Subscription.getBasicPlan().plan;
+		}
+
+		let pendingDeleteCond = true;
+		if(options.excludePendingDelete){
+			pendingDeleteCond = !sub.pendingDelete;
+		}
+
+		return basicCond && pendingDeleteCond && sub.active && (sub.expiredAt > now || !sub.expiredAt);
+	});
+	
+
 };
 
-schema.methods.getSubscriptionLimits = function(){
+schema.methods.getSubscriptionLimits = function(options){
 	'use strict';
 
-	let subscriptions = this.getActiveSubscriptions();
+	let subscriptions = this.getActiveSubscriptions(options);
 
 	let sumLimits = {
 		spaceLimit: 0, 
@@ -1084,8 +1234,10 @@ schema.methods.hasRole = function(db, roleName){
 	return null;
 };
 
-schema.methods.removeAssignedSubscriptionFromUser = function(id){
+schema.methods.removeAssignedSubscriptionFromUser = function(id, cascadeRemove){
 	'use strict';
+
+	let ProjectHelper = require('./helper/project');
 
 	let subscription = this.customData.subscriptions.id(id);
 	
@@ -1108,13 +1260,22 @@ schema.methods.removeAssignedSubscriptionFromUser = function(id){
 		projects.forEach(project => {
 			project.collaborators.forEach(collaborator => {
 				if(collaborator.user === subscription.assignedUser){
-					foundProjects.push(project._id);
+					foundProjects.push({ project: project._id, role: collaborator.role});
 				}
 			});
 		});
 
-		if(foundProjects.length > 0){
+		if(!cascadeRemove && foundProjects.length > 0){
 			return Promise.reject({ resCode: responseCodes.USER_IN_COLLABORATOR_LIST, info: {projects: foundProjects}});
+		} else {
+
+			let promises = [];
+			foundProjects.forEach(foundProject => {
+				promises.push(ProjectHelper.removeCollaborator(subscription.assignedUser, null, this.user, foundProject.project, foundProject.role));
+			});
+			
+			return Promise.all(promises);
+
 		}
 
 	}).then(() => {
