@@ -102,10 +102,10 @@ function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAm
 		"description": "3D Repo Licence",
 		"merchant_preferences": {
 			"auto_bill_amount": "yes",
-			"cancel_url": `${baseUrl}/${billingUser}?page=billing`,
+			"cancel_url": `${baseUrl}/${billingUser}?page=billing&cancel=1`,
 			"initial_fail_amount_action": "continue",
 			"max_fail_attempts": "0",
-			"return_url": `${baseUrl}/${billingUser}?page=billing&cancel=1`
+			"return_url": `${baseUrl}/${billingUser}?page=billing`
 		},
 		"name": "3D Repo Licences",
 		"payment_definitions": paymentDefs,
