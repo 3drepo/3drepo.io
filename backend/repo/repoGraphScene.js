@@ -128,7 +128,7 @@ repoGraphScene.prototype.decode = function(bsonArray, gridfsfiles) {
 						scene[C.REPO_SCENE_LABEL_MAPS_COUNT]++;
 						break;
 					default :
-						logger.logError('Unsupported node type found: ' + bson[C.REPO_NODE_LABEL_TYPE]);
+						console.log('Unsupported node type found: ' + bson[C.REPO_NODE_LABEL_TYPE]);
 				}
 
 				let sidBytes = bson[C.REPO_NODE_LABEL_SHARED_ID].buffer;
