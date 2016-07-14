@@ -72,9 +72,7 @@
 		 */
 		function init () {
 			vm.showInfo = true;
-			vm.newBillingAddress = angular.copy(vm.billingAddress);
 			vm.saveDisabled = true;
-			vm.billingDetailsDisabled = true;
 			vm.countries = serverConfig.countries;
 		}
 
@@ -83,39 +81,33 @@
 		 */
 		$scope.$watch("vm.numNewLicenses", function () {
 			if (angular.isDefined(vm.numNewLicenses)) {
-				console.log(vm.numLicenses, vm.numNewLicenses);
-				if (vm.numLicenses === vm.numNewLicenses) {
-					vm.saveDisabled = true;
-					vm.billingDetailsDisabled = true;
-				}
-				else {
-					if (vm.numLicenses === 0) {
-						vm.saveDisabled = (
-							(angular.isUndefined(vm.newBillingAddress.postalCode)) ||
-							(angular.isUndefined(vm.newBillingAddress.country))
-							(vm.newBillingAddress.postalCode === "") ||
-							(vm.newBillingAddress.country === "")
-						);
-					}
-					else {
-						vm.saveDisabled = false;
-					}
-					vm.billingDetailsDisabled = false;
-				}
+				vm.saveDisabled = (vm.numLicenses === 0);
 				vm.priceLicenses = vm.numNewLicenses * vm.pricePerLicense;
 			}
 		});
+
+		/*
+		 * Watch passed billing address
+		 */
+		$scope.$watch("vm.billingAddress", function () {
+			if (angular.isDefined(vm.billingAddress)) {
+				// Initialise billing address properties if they don't exist
+				vm.billingAddress.postalCode = vm.billingAddress.hasOwnProperty("postalCode") ? vm.billingAddress.postalCode : "";
+				vm.billingAddress.countryCode = vm.billingAddress.hasOwnProperty("countryCode") ? vm.billingAddress.countryCode : "";
+				vm.newBillingAddress = angular.copy(vm.billingAddress);
+			}
+		}, true);
 
 		/*
 		 * Watch for change in billing info
 		 */
 		$scope.$watch("vm.newBillingAddress", function () {
 			if (angular.isDefined(vm.newBillingAddress)) {
-				if (vm.numLicenses === 0) {
-					vm.saveDisabled = ((vm.newBillingAddress.postalCode === "") || (vm.newBillingAddress.country === ""));
-				}
-				else {
-					vm.saveDisabled = angular.equals(vm.newBillingAddress, vm.billingAddress);
+				if (vm.numNewLicenses !== 0) {
+					vm.saveDisabled =
+						angular.equals(vm.newBillingAddress, vm.billingAddress) ||
+						(vm.newBillingAddress.postalCode === "") ||
+						(vm.newBillingAddress.countryCode === "");
 				}
 			}
 		}, true);
