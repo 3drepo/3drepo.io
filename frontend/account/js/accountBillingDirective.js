@@ -48,7 +48,11 @@
 		/*
 		 * Init
 		 */
-		if ($location.search().hasOwnProperty("token")) {
+		if ($location.search().hasOwnProperty("cancel")) {
+			// Cancelled out of PayPal
+			init();
+		}
+		else if ($location.search().hasOwnProperty("token")) {
 			vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
 			showDialog("paypalDialog.html");
 			promise = UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute");

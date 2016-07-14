@@ -4901,7 +4901,8 @@ var ViewerManager = {};
 				quota: "=",
 				billings: "=",
 				subscriptions: "=",
-				plans: "="
+				plans: "=",
+				query: "="
 			},
 			controller: AccountBillingCtrl,
 			controllerAs: 'vm',
@@ -4918,7 +4919,11 @@ var ViewerManager = {};
 		/*
 		 * Init
 		 */
-		if ($location.search().hasOwnProperty("token")) {
+		if ($location.search().hasOwnProperty("cancel")) {
+			// Cancelled out of PayPal
+			init();
+		}
+		else if ($location.search().hasOwnProperty("token")) {
 			vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
 			showDialog("paypalDialog.html");
 			promise = UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute");
@@ -5246,6 +5251,7 @@ var ViewerManager = {};
 			billingsPromise,
 			subscriptionsPromise,
 			plansPromise;
+		console.log($location.search());
 
 		/*
 		 * Get the account data
@@ -6594,7 +6600,7 @@ var ViewerManager = {};
 				!vm.noLicensesAssigned &&
 				(vm.subscriptions.length > 1) &&
 				((vm.subscriptions.length - 1) !== (vm.collaborators.length + vm.members.length));
-			
+
 			vm.allLicenseAssigneesMembers = (vm.collaborators.length === 0);
 		}
 	}
