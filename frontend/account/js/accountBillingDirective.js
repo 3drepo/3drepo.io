@@ -57,7 +57,7 @@
 			showDialog("paypalDialog.html");
 			promise = UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute");
 			promise.then(function (response) {
-				console.log(866, response);
+				console.log("payment/paypal/execute ", response);
 				if (response.status === 200) {
 				}
 				vm.payPalInfo = "PayPal has finished processing. Thank you.";
@@ -85,7 +85,22 @@
 		 */
 		$scope.$watch("vm.numNewLicenses", function () {
 			if (angular.isDefined(vm.numNewLicenses)) {
-				vm.saveDisabled = (vm.numLicenses === 0);
+				if (vm.numNewLicenses === 0) {
+					vm.saveDisabled = true;
+				}
+				else {
+					if (vm.numLicenses === vm.numNewLicenses) {
+						vm.saveDisabled =
+							angular.equals(vm.newBillingAddress, vm.billingAddress) ||
+							(vm.newBillingAddress.postalCode === "") ||
+							(vm.newBillingAddress.countryCode === "");
+					}
+					else {
+						vm.saveDisabled =
+							(vm.newBillingAddress.postalCode === "") ||
+							(vm.newBillingAddress.countryCode === "");
+					}
+				}
 				vm.priceLicenses = vm.numNewLicenses * vm.pricePerLicense;
 			}
 		});

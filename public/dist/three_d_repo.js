@@ -4901,8 +4901,7 @@ var ViewerManager = {};
 				quota: "=",
 				billings: "=",
 				subscriptions: "=",
-				plans: "=",
-				query: "="
+				plans: "="
 			},
 			controller: AccountBillingCtrl,
 			controllerAs: 'vm',
@@ -4925,18 +4924,26 @@ var ViewerManager = {};
 		}
 		else if ($location.search().hasOwnProperty("token")) {
 			vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
-			showDialog("paypalDialog.html");
+			var test = showDialog("paypalDialog.html");
+			$timeout(function () {
+				console.log(98989);
+				test.hide();
+			}, 2000);
+
+			/*
 			promise = UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute");
 			promise.then(function (response) {
-				console.log(866, response);
+				console.log("payment/paypal/execute ", response);
 				if (response.status === 200) {
 				}
 				vm.payPalInfo = "PayPal has finished processing. Thank you.";
 				$timeout(function () {
+					console.log(98989);
 					$mdDialog.cancel();
 					init();
 				}, 2000);
 			});
+			*/
 		}
 		else {
 			init();
@@ -4956,7 +4963,22 @@ var ViewerManager = {};
 		 */
 		$scope.$watch("vm.numNewLicenses", function () {
 			if (angular.isDefined(vm.numNewLicenses)) {
-				vm.saveDisabled = (vm.numLicenses === 0);
+				if (vm.numNewLicenses === 0) {
+					vm.saveDisabled = true;
+				}
+				else {
+					if (vm.numLicenses === vm.numNewLicenses) {
+						vm.saveDisabled =
+							angular.equals(vm.newBillingAddress, vm.billingAddress) ||
+							(vm.newBillingAddress.postalCode === "") ||
+							(vm.newBillingAddress.countryCode === "");
+					}
+					else {
+						vm.saveDisabled =
+							(vm.newBillingAddress.postalCode === "") ||
+							(vm.newBillingAddress.countryCode === "");
+					}
+				}
 				vm.priceLicenses = vm.numNewLicenses * vm.pricePerLicense;
 			}
 		});
@@ -5251,7 +5273,6 @@ var ViewerManager = {};
 			billingsPromise,
 			subscriptionsPromise,
 			plansPromise;
-		console.log($location.search());
 
 		/*
 		 * Get the account data
