@@ -4901,7 +4901,9 @@ var ViewerManager = {};
 				quota: "=",
 				billings: "=",
 				subscriptions: "=",
-				plans: "="
+				plans: "=",
+				fistName: "=",
+				lastName: "="
 			},
 			controller: AccountBillingCtrl,
 			controllerAs: 'vm',
@@ -4924,13 +4926,7 @@ var ViewerManager = {};
 		}
 		else if ($location.search().hasOwnProperty("token")) {
 			vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
-			var test = showDialog("paypalDialog.html");
-			$timeout(function () {
-				console.log(98989);
-				test.hide();
-			}, 2000);
-
-			/*
+			showDialog("paypalDialog.html");
 			promise = UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute");
 			promise.then(function (response) {
 				console.log("payment/paypal/execute ", response);
@@ -4938,12 +4934,10 @@ var ViewerManager = {};
 				}
 				vm.payPalInfo = "PayPal has finished processing. Thank you.";
 				$timeout(function () {
-					console.log(98989);
 					$mdDialog.cancel();
 					init();
 				}, 2000);
 			});
-			*/
 		}
 		else {
 			init();
@@ -4968,15 +4962,10 @@ var ViewerManager = {};
 				}
 				else {
 					if (vm.numLicenses === vm.numNewLicenses) {
-						vm.saveDisabled =
-							angular.equals(vm.newBillingAddress, vm.billingAddress) ||
-							(vm.newBillingAddress.postalCode === "") ||
-							(vm.newBillingAddress.countryCode === "");
+						vm.saveDisabled = angular.equals(vm.newBillingAddress, vm.billingAddress) || aRequiredAddressFieldIsEmpty();
 					}
 					else {
-						vm.saveDisabled =
-							(vm.newBillingAddress.postalCode === "") ||
-							(vm.newBillingAddress.countryCode === "");
+						vm.saveDisabled = aRequiredAddressFieldIsEmpty();
 					}
 				}
 				vm.priceLicenses = vm.numNewLicenses * vm.pricePerLicense;
@@ -4989,9 +4978,10 @@ var ViewerManager = {};
 		$scope.$watch("vm.billingAddress", function () {
 			if (angular.isDefined(vm.billingAddress)) {
 				// Initialise billing address properties if they don't exist
-				vm.billingAddress.postalCode = vm.billingAddress.hasOwnProperty("postalCode") ? vm.billingAddress.postalCode : "";
-				vm.billingAddress.countryCode = vm.billingAddress.hasOwnProperty("countryCode") ? vm.billingAddress.countryCode : "";
+				vm.billingAddress.firstName = vm.firstName;
+				vm.billingAddress.lastName = vm.lastName;
 				vm.newBillingAddress = angular.copy(vm.billingAddress);
+
 			}
 		}, true);
 
@@ -5001,10 +4991,7 @@ var ViewerManager = {};
 		$scope.$watch("vm.newBillingAddress", function () {
 			if (angular.isDefined(vm.newBillingAddress)) {
 				if (vm.numNewLicenses !== 0) {
-					vm.saveDisabled =
-						angular.equals(vm.newBillingAddress, vm.billingAddress) ||
-						(vm.newBillingAddress.postalCode === "") ||
-						(vm.newBillingAddress.countryCode === "");
+					vm.saveDisabled = angular.equals(vm.newBillingAddress, vm.billingAddress) || aRequiredAddressFieldIsEmpty();
 				}
 			}
 		}, true);
@@ -5026,6 +5013,18 @@ var ViewerManager = {};
 				setupLicensesInfo();
 			}
 		}, true);
+
+		/*
+		 * Watch fits name and last name
+		 */
+		$scope.$watchGroup(["vm.firstName", "vm.lastName"], function () {
+			if (angular.isDefined("vm.newBillingAddress")) {
+				console.log(vm.newBillingAddress);
+				vm.newBillingAddress.firstName = vm.firstName;
+				vm.newBillingAddress.lastName = vm.lastName;
+				console.log(vm.newBillingAddress);
+			}
+		});
 
 		/**
 		 * Show the billing page with the item
@@ -5095,6 +5094,15 @@ var ViewerManager = {};
 			vm.pricePerLicense = vm.plans[0].amount;
 		}
 
+		function aRequiredAddressFieldIsEmpty () {
+			return (
+				angular.isUndefined(vm.newBillingAddress.line1) ||
+				angular.isUndefined(vm.newBillingAddress.postalCode) ||
+				angular.isUndefined(vm.newBillingAddress.city) ||
+				angular.isUndefined(vm.newBillingAddress.countryCode)
+			);
+
+		}
 	}
 }());
 

@@ -90,15 +90,10 @@
 				}
 				else {
 					if (vm.numLicenses === vm.numNewLicenses) {
-						vm.saveDisabled =
-							angular.equals(vm.newBillingAddress, vm.billingAddress) ||
-							(vm.newBillingAddress.postalCode === "") ||
-							(vm.newBillingAddress.countryCode === "");
+						vm.saveDisabled = angular.equals(vm.newBillingAddress, vm.billingAddress) || aRequiredAddressFieldIsEmpty();
 					}
 					else {
-						vm.saveDisabled =
-							(vm.newBillingAddress.postalCode === "") ||
-							(vm.newBillingAddress.countryCode === "");
+						vm.saveDisabled = aRequiredAddressFieldIsEmpty();
 					}
 				}
 				vm.priceLicenses = vm.numNewLicenses * vm.pricePerLicense;
@@ -110,9 +105,11 @@
 		 */
 		$scope.$watch("vm.billingAddress", function () {
 			if (angular.isDefined(vm.billingAddress)) {
+				/*
 				// Initialise billing address properties if they don't exist
 				vm.billingAddress.postalCode = vm.billingAddress.hasOwnProperty("postalCode") ? vm.billingAddress.postalCode : "";
 				vm.billingAddress.countryCode = vm.billingAddress.hasOwnProperty("countryCode") ? vm.billingAddress.countryCode : "";
+				*/
 				vm.newBillingAddress = angular.copy(vm.billingAddress);
 			}
 		}, true);
@@ -123,10 +120,7 @@
 		$scope.$watch("vm.newBillingAddress", function () {
 			if (angular.isDefined(vm.newBillingAddress)) {
 				if (vm.numNewLicenses !== 0) {
-					vm.saveDisabled =
-						angular.equals(vm.newBillingAddress, vm.billingAddress) ||
-						(vm.newBillingAddress.postalCode === "") ||
-						(vm.newBillingAddress.countryCode === "");
+					vm.saveDisabled = angular.equals(vm.newBillingAddress, vm.billingAddress) || aRequiredAddressFieldIsEmpty();
 				}
 			}
 		}, true);
@@ -217,5 +211,14 @@
 			vm.pricePerLicense = vm.plans[0].amount;
 		}
 
+		function aRequiredAddressFieldIsEmpty () {
+			return (
+				angular.isUndefined(vm.newBillingAddress.line1) ||
+				angular.isUndefined(vm.newBillingAddress.postalCode) ||
+				angular.isUndefined(vm.newBillingAddress.city) ||
+				angular.isUndefined(vm.newBillingAddress.countryCode)
+			);
+
+		}
 	}
 }());
