@@ -37,7 +37,8 @@
     function RightPanelCtrl ($scope, EventService) {
         var vm = this,
             addIssueMode = null,
-            measureMode = false;
+            measureMode = false,
+            highlightBackground = "#FF9800";
 
         /*
          * Init
@@ -60,6 +61,7 @@
                 background: ""
             }
         };
+        vm.measureBackground = "";
 
         /*
          * Setup event watch
@@ -75,7 +77,7 @@
                 if (addIssueMode !== event.value) {
                     vm.issueButtons[addIssueMode].background = "";
                     addIssueMode = event.value;
-                    vm.issueButtons[addIssueMode].background = "#FF9800";
+                    vm.issueButtons[addIssueMode].background = highlightBackground;
                 }
             }
             else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
@@ -90,13 +92,14 @@
             // Turn off measure mode
             if (measureMode) {
                 measureMode = false;
+                vm.measureBackground = "";
                 EventService.send(EventService.EVENT.MEASURE_MODE, measureMode);
             }
 
 
             if (addIssueMode === null) {
                 addIssueMode = buttonType;
-                vm.issueButtons[buttonType].background = "#FF9800";
+                vm.issueButtons[buttonType].background = highlightBackground;
                 EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: true, type: buttonType});
             }
             else if (addIssueMode === buttonType) {
@@ -107,7 +110,7 @@
             else {
                 vm.issueButtons[addIssueMode].background = "";
                 addIssueMode = buttonType;
-                vm.issueButtons[addIssueMode].background = "#FF9800";
+                vm.issueButtons[addIssueMode].background = highlightBackground;
                 EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, buttonType);
             }
         };
@@ -119,6 +122,7 @@
             }
 
             measureMode = !measureMode;
+            vm.measureBackground = measureMode ? highlightBackground : "";
             EventService.send(EventService.EVENT.MEASURE_MODE, measureMode);
         };
     }

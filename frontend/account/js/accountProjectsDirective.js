@@ -191,33 +191,46 @@
 		/**
 		 * Save a new project
 		 */
-		vm.saveNewProject = function () {
+		vm.saveNewProject = function (event) {
 			var project,
-				promise;
+				promise,
+				enterKey = 13,
+				doSave = false;
 
-			promise = AccountService.newProject(vm.newProjectData);
-			promise.then(function (response) {
-				console.log(response);
-				if (response.data.status === 400) {
-					vm.showNewProjectErrorMessage = true;
-					vm.newProjectErrorMessage = response.data.message;
+			if (angular.isDefined(event)) {
+				if (event.which === enterKey) {
+					doSave = true;
 				}
-				else {
-					vm.projectsExist = true;
-					// Add project to list
-					project = {
-						name: response.data.project,
-						canUpload: true,
-						timestamp: null
-					};
-					updateAccountProjects (response.data.account, project);
-					// Save model to project
-					if (vm.uploadedFile !== null) {
-						uploadModelToProject (project, vm.uploadedFile);
+			}
+			else {
+				doSave = true;
+			}
+
+			if (doSave) {
+				promise = AccountService.newProject(vm.newProjectData);
+				promise.then(function (response) {
+					console.log(response);
+					if (response.data.status === 400) {
+						vm.showNewProjectErrorMessage = true;
+						vm.newProjectErrorMessage = response.data.message;
 					}
-					vm.closeDialog();
-				}
-			});
+					else {
+						vm.projectsExist = true;
+						// Add project to list
+						project = {
+							name: response.data.project,
+							canUpload: true,
+							timestamp: null
+						};
+						updateAccountProjects (response.data.account, project);
+						// Save model to project
+						if (vm.uploadedFile !== null) {
+							uploadModelToProject (project, vm.uploadedFile);
+						}
+						vm.closeDialog();
+					}
+				});
+			}
 		};
 
 		/**
@@ -420,7 +433,7 @@
 						};
 						promise = AccountService.uploadModel(projectData);
 						promise.then(function (response) {
-							console.log(response);
+							console.log("uploadModel", response);
 							if ((response.data.status === 400) || (response.data.status === 404)) {
 								// Upload error
 								if (response.data.value === 68) {
@@ -440,10 +453,10 @@
 								interval = $interval(function () {
 									promise = AccountService.uploadStatus(projectData);
 									promise.then(function (response) {
-										console.log(response);
+										console.log("uploadStatus", response);
 										if ((response.data.status === "ok") || (response.data.status === "failed")) {
 											if (response.data.status === "ok") {
-												project.timestamp = UtilsService.formatTimestamp(new Date(), true);
+												project.timestampPretty = UtilsService.formatTimestamp(new Date(), true);
 												vm.fileUploadInfo = "Uploaded";
 											}
 											else {

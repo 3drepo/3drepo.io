@@ -211,8 +211,15 @@
 			vm.pricePerLicense = vm.plans[0].amount;
 		}
 
+		/**
+		 * Check if any required input fields is empty
+		 *
+		 * @returns {boolean}
+		 */
 		function aRequiredAddressFieldIsEmpty () {
 			return (
+				angular.isUndefined(vm.newBillingAddress.firstName) ||
+				angular.isUndefined(vm.newBillingAddress.lastName) ||
 				angular.isUndefined(vm.newBillingAddress.line1) ||
 				angular.isUndefined(vm.newBillingAddress.postalCode) ||
 				angular.isUndefined(vm.newBillingAddress.city) ||

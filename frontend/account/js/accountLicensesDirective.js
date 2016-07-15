@@ -80,23 +80,37 @@
 		/**
 		 * Assign a license to the selected user
 		 */
-		vm.assignLicense = function () {
-			promise = UtilsService.doPost(
-				{user: vm.newLicenseAssignee},
-				vm.account + "/subscriptions/" + vm.unassigned[0] + "/assign"
-			);
-			promise.then(function (response) {
-				console.log(response);
-				if (response.status === 200) {
-					vm.addMessage = "User " + vm.newLicenseAssignee + " added as a license";
-					vm.licenses.push({user: response.data.assignedUser, id: response.data._id});
-					vm.unassigned.splice(0, 1);
-					vm.allLicensesAssigned = (vm.unassigned === 0);
+		vm.assignLicense = function (event) {
+			var doSave = false,
+				enterKey = 13;
+
+			if (angular.isDefined(event)) {
+				if (event.which === enterKey) {
+					doSave = true;
 				}
-				else if (response.status === 404) {
-					vm.addMessage = response.data.message;
-				}
-			});
+			}
+			else {
+				doSave = true;
+			}
+
+			if (doSave) {
+				promise = UtilsService.doPost(
+					{user: vm.newLicenseAssignee},
+					vm.account + "/subscriptions/" + vm.unassigned[0] + "/assign"
+				);
+				promise.then(function (response) {
+					console.log(response);
+					if (response.status === 200) {
+						vm.addMessage = "User " + vm.newLicenseAssignee + " added as a license";
+						vm.licenses.push({user: response.data.assignedUser, id: response.data._id, showRemove: true});
+						vm.unassigned.splice(0, 1);
+						vm.allLicensesAssigned = (vm.unassigned === 0);
+					}
+					else if (response.status === 404) {
+						vm.addMessage = response.data.message;
+					}
+				});
+			}
 		};
 
 		/**

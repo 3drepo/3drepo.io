@@ -8,7 +8,7 @@ md-dialog.newProjectDialog(aria-label="New project")
 	md-content(layout-margin)
 		div(layout="column")
 			md-input-container
-				input(placeholder="Project name", autofocus, ng-model="vm.newProjectData.name")
+				input(placeholder="Project name", tdr-focus="true", ng-model="vm.newProjectData.name", ng-keypress="vm.saveNewProject($event)")
 			md-input-container
 				label Project type
 				md-select(ng-model="vm.newProjectData.type")

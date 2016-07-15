@@ -4901,9 +4901,7 @@ var ViewerManager = {};
 				quota: "=",
 				billings: "=",
 				subscriptions: "=",
-				plans: "=",
-				fistName: "=",
-				lastName: "="
+				plans: "="
 			},
 			controller: AccountBillingCtrl,
 			controllerAs: 'vm',
@@ -4977,11 +4975,12 @@ var ViewerManager = {};
 		 */
 		$scope.$watch("vm.billingAddress", function () {
 			if (angular.isDefined(vm.billingAddress)) {
+				/*
 				// Initialise billing address properties if they don't exist
-				vm.billingAddress.firstName = vm.firstName;
-				vm.billingAddress.lastName = vm.lastName;
+				vm.billingAddress.postalCode = vm.billingAddress.hasOwnProperty("postalCode") ? vm.billingAddress.postalCode : "";
+				vm.billingAddress.countryCode = vm.billingAddress.hasOwnProperty("countryCode") ? vm.billingAddress.countryCode : "";
+				*/
 				vm.newBillingAddress = angular.copy(vm.billingAddress);
-
 			}
 		}, true);
 
@@ -5013,18 +5012,6 @@ var ViewerManager = {};
 				setupLicensesInfo();
 			}
 		}, true);
-
-		/*
-		 * Watch fits name and last name
-		 */
-		$scope.$watchGroup(["vm.firstName", "vm.lastName"], function () {
-			if (angular.isDefined("vm.newBillingAddress")) {
-				console.log(vm.newBillingAddress);
-				vm.newBillingAddress.firstName = vm.firstName;
-				vm.newBillingAddress.lastName = vm.lastName;
-				console.log(vm.newBillingAddress);
-			}
-		});
 
 		/**
 		 * Show the billing page with the item
@@ -5094,8 +5081,15 @@ var ViewerManager = {};
 			vm.pricePerLicense = vm.plans[0].amount;
 		}
 
+		/**
+		 * Check if any required input fields is empty
+		 *
+		 * @returns {boolean}
+		 */
 		function aRequiredAddressFieldIsEmpty () {
 			return (
+				angular.isUndefined(vm.newBillingAddress.firstName) ||
+				angular.isUndefined(vm.newBillingAddress.lastName) ||
 				angular.isUndefined(vm.newBillingAddress.line1) ||
 				angular.isUndefined(vm.newBillingAddress.postalCode) ||
 				angular.isUndefined(vm.newBillingAddress.city) ||
@@ -5298,7 +5292,14 @@ var ViewerManager = {};
 					vm.firstName = response.data.firstName;
 					vm.lastName = response.data.lastName;
 					vm.email = response.data.email;
+
 					vm.billingAddress = response.data.billingInfo;
+					// Pre-populate billing name if it doesn't exist with profile name
+					if (!vm.billingAddress.hasOwnProperty("firstName")) {
+						vm.billingAddress.firstName = vm.firstName;
+						vm.billingAddress.lastName = vm.lastName;
+					}
+
 					for (i = 0, length = vm.accounts.length; i < length; i += 1) {
 						if (vm.accounts[i].account === vm.account) {
 							vm.quota = vm.accounts[i].quota;
@@ -5532,23 +5533,37 @@ var ViewerManager = {};
 		/**
 		 * Assign a license to the selected user
 		 */
-		vm.assignLicense = function () {
-			promise = UtilsService.doPost(
-				{user: vm.newLicenseAssignee},
-				vm.account + "/subscriptions/" + vm.unassigned[0] + "/assign"
-			);
-			promise.then(function (response) {
-				console.log(response);
-				if (response.status === 200) {
-					vm.addMessage = "User " + vm.newLicenseAssignee + " added as a license";
-					vm.licenses.push({user: response.data.assignedUser, id: response.data._id});
-					vm.unassigned.splice(0, 1);
-					vm.allLicensesAssigned = (vm.unassigned === 0);
+		vm.assignLicense = function (event) {
+			var doSave = false,
+				enterKey = 13;
+
+			if (angular.isDefined(event)) {
+				if (event.which === enterKey) {
+					doSave = true;
 				}
-				else if (response.status === 404) {
-					vm.addMessage = response.data.message;
-				}
-			});
+			}
+			else {
+				doSave = true;
+			}
+
+			if (doSave) {
+				promise = UtilsService.doPost(
+					{user: vm.newLicenseAssignee},
+					vm.account + "/subscriptions/" + vm.unassigned[0] + "/assign"
+				);
+				promise.then(function (response) {
+					console.log(response);
+					if (response.status === 200) {
+						vm.addMessage = "User " + vm.newLicenseAssignee + " added as a license";
+						vm.licenses.push({user: response.data.assignedUser, id: response.data._id, showRemove: true});
+						vm.unassigned.splice(0, 1);
+						vm.allLicensesAssigned = (vm.unassigned === 0);
+					}
+					else if (response.status === 404) {
+						vm.addMessage = response.data.message;
+					}
+				});
+			}
 		};
 
 		/**
@@ -5970,33 +5985,46 @@ var ViewerManager = {};
 		/**
 		 * Save a new project
 		 */
-		vm.saveNewProject = function () {
+		vm.saveNewProject = function (event) {
 			var project,
-				promise;
+				promise,
+				enterKey = 13,
+				doSave = false;
 
-			promise = AccountService.newProject(vm.newProjectData);
-			promise.then(function (response) {
-				console.log(response);
-				if (response.data.status === 400) {
-					vm.showNewProjectErrorMessage = true;
-					vm.newProjectErrorMessage = response.data.message;
+			if (angular.isDefined(event)) {
+				if (event.which === enterKey) {
+					doSave = true;
 				}
-				else {
-					vm.projectsExist = true;
-					// Add project to list
-					project = {
-						name: response.data.project,
-						canUpload: true,
-						timestamp: null
-					};
-					updateAccountProjects (response.data.account, project);
-					// Save model to project
-					if (vm.uploadedFile !== null) {
-						uploadModelToProject (project, vm.uploadedFile);
+			}
+			else {
+				doSave = true;
+			}
+
+			if (doSave) {
+				promise = AccountService.newProject(vm.newProjectData);
+				promise.then(function (response) {
+					console.log(response);
+					if (response.data.status === 400) {
+						vm.showNewProjectErrorMessage = true;
+						vm.newProjectErrorMessage = response.data.message;
 					}
-					vm.closeDialog();
-				}
-			});
+					else {
+						vm.projectsExist = true;
+						// Add project to list
+						project = {
+							name: response.data.project,
+							canUpload: true,
+							timestamp: null
+						};
+						updateAccountProjects (response.data.account, project);
+						// Save model to project
+						if (vm.uploadedFile !== null) {
+							uploadModelToProject (project, vm.uploadedFile);
+						}
+						vm.closeDialog();
+					}
+				});
+			}
 		};
 
 		/**
@@ -6199,7 +6227,7 @@ var ViewerManager = {};
 						};
 						promise = AccountService.uploadModel(projectData);
 						promise.then(function (response) {
-							console.log(response);
+							console.log("uploadModel", response);
 							if ((response.data.status === 400) || (response.data.status === 404)) {
 								// Upload error
 								if (response.data.value === 68) {
@@ -6219,10 +6247,10 @@ var ViewerManager = {};
 								interval = $interval(function () {
 									promise = AccountService.uploadStatus(projectData);
 									promise.then(function (response) {
-										console.log(response);
+										console.log("uploadStatus", response);
 										if ((response.data.status === "ok") || (response.data.status === "failed")) {
 											if (response.data.status === "ok") {
-												project.timestamp = UtilsService.formatTimestamp(new Date(), true);
+												project.timestampPretty = UtilsService.formatTimestamp(new Date(), true);
 												vm.fileUploadInfo = "Uploaded";
 											}
 											else {
@@ -16146,7 +16174,8 @@ var Oculus = {};
     function RightPanelCtrl ($scope, EventService) {
         var vm = this,
             addIssueMode = null,
-            measureMode = false;
+            measureMode = false,
+            highlightBackground = "#FF9800";
 
         /*
          * Init
@@ -16169,6 +16198,7 @@ var Oculus = {};
                 background: ""
             }
         };
+        vm.measureBackground = "";
 
         /*
          * Setup event watch
@@ -16184,7 +16214,7 @@ var Oculus = {};
                 if (addIssueMode !== event.value) {
                     vm.issueButtons[addIssueMode].background = "";
                     addIssueMode = event.value;
-                    vm.issueButtons[addIssueMode].background = "#FF9800";
+                    vm.issueButtons[addIssueMode].background = highlightBackground;
                 }
             }
             else if (event.type === EventService.EVENT.TOGGLE_ELEMENTS) {
@@ -16199,13 +16229,14 @@ var Oculus = {};
             // Turn off measure mode
             if (measureMode) {
                 measureMode = false;
+                vm.measureBackground = "";
                 EventService.send(EventService.EVENT.MEASURE_MODE, measureMode);
             }
 
 
             if (addIssueMode === null) {
                 addIssueMode = buttonType;
-                vm.issueButtons[buttonType].background = "#FF9800";
+                vm.issueButtons[buttonType].background = highlightBackground;
                 EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: true, type: buttonType});
             }
             else if (addIssueMode === buttonType) {
@@ -16216,7 +16247,7 @@ var Oculus = {};
             else {
                 vm.issueButtons[addIssueMode].background = "";
                 addIssueMode = buttonType;
-                vm.issueButtons[addIssueMode].background = "#FF9800";
+                vm.issueButtons[addIssueMode].background = highlightBackground;
                 EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, buttonType);
             }
         };
@@ -16228,6 +16259,7 @@ var Oculus = {};
             }
 
             measureMode = !measureMode;
+            vm.measureBackground = measureMode ? highlightBackground : "";
             EventService.send(EventService.EVENT.MEASURE_MODE, measureMode);
         };
     }

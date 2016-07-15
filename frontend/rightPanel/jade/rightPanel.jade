@@ -7,7 +7,7 @@
 		label {{value.label}}
 
 	.rightPanelButtonGroup(layout="column", layout-align="start center")
-		md-button.md-accent.md-fab.md-mini(aria-label="Measure", ng-click="vm.toggleMeasure()", style="background:{{value.background}}")
+		md-button.md-accent.md-fab.md-mini(aria-label="Measure", ng-click="vm.toggleMeasure()", style="background:{{vm.measureBackground}}")
 			md-tooltip(md-direction="left") Measure
 			md-icon.angular-material-icons straighten
 		label Measure
