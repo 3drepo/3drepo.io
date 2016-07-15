@@ -19,6 +19,7 @@ var paypal = require('paypal-rest-sdk');
 var url = require('url');
 var config = require('../config');
 var vat = require('./vat');
+var moment = require('moment');
 
 paypal.configure({
 	'mode': config.paypal.mode, //sandbox or live
@@ -26,7 +27,7 @@ paypal.configure({
 	'client_secret': config.paypal.client_secret
 });
 
-function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAmount, firstBillingCycle, amount, billingCycle, startDate){
+function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAmount, firstBillingCycle, amount, billingCycle, startDate, vatNumber){
 	'use strict';
 
 	console.log('firstCycleAmount', firstCycleAmount);
@@ -44,10 +45,10 @@ function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAm
 
 
 
-	let taxAmount = vat.getByCountryCode(billingAddress.country_code) * amount;
-	taxAmount = Math.round(taxAmount * 100) / 100;
-	let afterTaxAmount = amount - taxAmount;
+	let afterTaxAmount = amount / ( 1 + vat.getByCountryCode(billingAddress.country_code, vatNumber));
 	afterTaxAmount = Math.round(afterTaxAmount * 100) / 100;
+	let taxAmount = amount - afterTaxAmount;
+	taxAmount = Math.round(taxAmount * 100) / 100;
 
 	let paymentDefs = [];
 	paymentDefs.push({
@@ -70,12 +71,11 @@ function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAm
 	});
 
 	if(firstCycleAmount){
-
-;
-		let taxFirstCycleAmount = vat.getByCountryCode(billingAddress.country_code) * firstCycleAmount;
-		taxFirstCycleAmount = Math.round(taxFirstCycleAmount * 100) / 100;
-		let afterTaxFirstCycleAmount = firstCycleAmount - taxFirstCycleAmount;
+		
+		let afterTaxFirstCycleAmount = firstCycleAmount / ( 1 + vat.getByCountryCode(billingAddress.country_code, vatNumber));
 		afterTaxFirstCycleAmount = Math.round(afterTaxFirstCycleAmount * 100) / 100;
+		let taxFirstCycleAmount = firstCycleAmount - afterTaxFirstCycleAmount;
+		taxFirstCycleAmount = Math.round(taxFirstCycleAmount * 100) / 100;
 
 		paymentDefs.push({
 			"amount": {
@@ -157,14 +157,14 @@ function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAm
 
 			let desc = `3D Repo Licence subscription.`;
 			desc += `This month's pro-rata price: £${firstCycleAmount}, then `;
-			desc += `each month: £${amount}`;
+			desc += `regualr monthly recurring payment: £${amount}`;
 			
 			console.log('desc len', desc.length);
 
 			let billingAgreementAttributes = {
 				"name": "3D Repo Licenses",
 				"description": desc,
-				"start_date": startDate.toISOString(),
+				"start_date": moment(startDate).utc().format(),
 				"plan": {
 					"id": billingPlan.id
 				},
@@ -224,8 +224,22 @@ function updateBillingAddress(billingAgreementId, billingAddress){
 
 }
 
+function getNextPaymentDate(date){
+	'use strict';
+	
+	let start = moment(date).utc().startOf('date');
+	let next = moment(date).utc().startOf('date').add(1, 'month');
+
+	if(next.date() !== start.date()){
+		next.add(1, 'day');
+	}
+
+	return next.toDate();
+}
+
 module.exports = {
 	getBillingAgreement,
 	updateBillingAddress,
-	paypal
+	paypal,
+	getNextPaymentDate
 };

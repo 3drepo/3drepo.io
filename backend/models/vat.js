@@ -29,16 +29,30 @@ var vat = [
 	{ countryCode: 'GB', standardRate: 20 }
 ];
 
-function getByCountryCode(code){
+function getByCountryCode(code, isBusiness){
 	'use strict';
 
-	let rate = vat.find(item => item.countryCode === code);
+	let rate;
 
-	if(!rate){
-		rate = vat.find(item => item.countryCode === 'GB');
+	if(isBusiness) {
+
+		if(code === 'GB'){
+			rate = vat.find(item => item.countryCode === 'GB');
+		} else {
+			rate = {standardRate : 0 };
+		}
+
+	} else {
+
+		rate = vat.find(item => item.countryCode === code);
+
+		if(!rate){
+			rate = {standardRate : 0 };
+		}
 	}
 
 	return rate.standardRate / 100;
+
 }
 
 module.exports = {
