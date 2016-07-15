@@ -157,14 +157,14 @@ function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAm
 
 			let desc = `3D Repo Licence subscription.`;
 			desc += `This month's pro-rata price: £${firstCycleAmount}, then `;
-			desc += `each month: £${amount}`;
+			desc += `regualr monthly recurring payment: £${amount}`;
 			
 			console.log('desc len', desc.length);
 
 			let billingAgreementAttributes = {
 				"name": "3D Repo Licenses",
 				"description": desc,
-				"start_date": startDate.toISOString(),
+				"start_date": moment(startDate).utc().format(),
 				"plan": {
 					"id": billingPlan.id
 				},

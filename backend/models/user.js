@@ -82,8 +82,10 @@ var schema = mongoose.Schema({
 		}],
 		billingInfo:{
 
-			vat: String,
+			"vat": String,
 			"line1": String,
+			"line2": String,
+			"line3": String,
 			"city": String,
 			"postalCode": String,
 			"countryCode": String
@@ -702,6 +704,7 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 		} else {
 			next = Payment.updateBillingAddress(this.customData.billingAgreementId, {
 				"line1": billingAddress.line1,
+				"line2": billingAddress.line2,
 				"city": billingAddress.city,
 				"postal_code": billingAddress.postalCode,
 				"country_code": billingAddress.countryCode
@@ -817,7 +820,7 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 			console.log('new plan amount', amount);
 
 			let startDate = moment().utc().add(10, 'second');
-			let firstCycleAmount;
+			let firstCycleAmount = 0;
 
 			if(this.getActiveSubscriptions({ skipBasic: 'true'}).length === 0){
 				// first time to buy licence and pick today as the anniversary date
@@ -832,8 +835,9 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 				//calulate pro-rata
 				let today = moment().utc().startOf('day');
 				let lastAnniversaryDate = moment(this.customData.lastAnniversaryDate).utc();
-				let nextPaymentDate = moment(this.customData.nextPaymentDate || this.customData.firstNextPaymentDate).utc().endOf('date');
-
+				let nextPaymentDate = moment(this.customData.nextPaymentDate || this.customData.firstNextPaymentDate).utc().startOf('date');
+				console.log('nextPaymentDate', nextPaymentDate.toISOString());
+				console.log('maxDay', Math.round(moment.duration(nextPaymentDate.diff(lastAnniversaryDate)).asDays()));
 				firstBillingCycle = Math.round(moment.duration(nextPaymentDate.diff(today)).asDays());
 				//cal pro-rata price of new licenses subscription
 				let proRataPrice =  firstBillingCycle / Math.round(moment.duration(nextPaymentDate.diff(lastAnniversaryDate)).asDays()) * amount;
@@ -896,6 +900,7 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 
 				return Payment.getBillingAgreement(billingUser, {
 					"line1": billingAddress.line1,
+					"line2": billingAddress.line2,
 					"city": billingAddress.city,
 					"postal_code": billingAddress.postalCode,
 					"country_code": billingAddress.countryCode

@@ -151,7 +151,7 @@ function activateSubscription(req, res, next){
 
 		} else if (isSubscriptionCancelled) {
 			// ignore
-			systemLogger.logInfo('Subscription canceled', { billingAgreementId });
+			systemLogger.logInfo('IPN said subscription canceled', { billingAgreementId });
 
 	    } else if (paymentFailed){
 
