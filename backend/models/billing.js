@@ -37,10 +37,12 @@ var schema = mongoose.Schema({
 		"line1": String,
 		"line2": String,
 		"line3": String,
+		"firstName": String,
+		"lastName": String,
+		"company": String,
 		"city": String,
 		"postalCode": String,
 		"countryCode": String
-
 	}
 });
 

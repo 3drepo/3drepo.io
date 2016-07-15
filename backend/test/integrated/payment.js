@@ -25,8 +25,10 @@ let app = require("../../services/api.js").createApp(
 let log_iface = require("../../logger.js");
 let systemLogger = log_iface.systemLogger;
 let responseCodes = require("../../response_codes.js");
+let getNextPaymentDate = require("../../models/payment").getNextPaymentDate;
 let helpers = require("./helpers");
 let async = require('async');
+let moment = require('moment-timezone');
 
 describe('Enrolling to a subscription', function () {
 	let User = require('../../models/user');
@@ -114,7 +116,12 @@ describe('Enrolling to a subscription', function () {
 			}
 		],
 	    "billingAddress":{
-	        "line1": "na",
+	        "line1": "line1",
+	        "line2": "line2",
+	        "line3": "line3",
+	        "firstName": "henry",
+	        "lastName": "liu",
+	        "company": "3D Repo",
 	        "city": "London",
 	        "postalCode": "A00 2ss020",
 	        "countryCode": "GB",
@@ -149,15 +156,23 @@ describe('Enrolling to a subscription', function () {
 
 			}).then(() => {
 
+				let paymentDate = moment().tz('America/Los_Angeles').format('HH:mm:ss MMM DD, YYYY z');
+				let nextPayDateString = moment(getNextPaymentDate(new Date())).tz('America/Los_Angeles').format('HH:mm:ss MMM DD, YYYY z')
+
 				let fakePaymentMsg = 
-					'payment_cycle=Monthly&txn_type=recurring_payment_profile_created&last_name=Me&initial_payment_status=Completed'
-					+ '&next_payment_date=03:00:00 Aug 01, 2016 PDT&residence_country=GB&initial_payment_amount=200.00&currency_code=GBP'
-					+ '&time_created=04:03:03 Jul 01, 2016 PDT&verify_sign=AczUU94BMMolZ9uHs3gDJVFQWmnrAZ.4Lg5wG0nNi-FWSrwlHVyMqczD&period_type=Regular'
-					+ '&payer_status=verified&test_ipn=1&tax=0.00&payer_email=test3drepopayer@example.org&first_name=PAy'
-					+ '&receiver_email=test3drepo@example.org&payer_id=6TCR69539GDR8&product_type=1&initial_payment_txn_id=4GD07850L9231692J'
-					+ '&shipping=0.00&amount_per_cycle=600.00&profile_status=Active&charset=UTF-8&notify_version=3.8&amount=600.00'
-					+ '&outstanding_balance=0.00&recurring_payment_id=' + billingId
-					+ '&product_name=3D Repo License subscription. This month\'s pro-rata price: £200, then each month: £600&ipn_track_id=63ded6af9b148';
+					'mc_gross=100.00&outstanding_balance=0.00&period_type= Regular&next_payment_date=' + nextPayDateString
+					+ '&protection_eligibility=Eligible&payment_cycle=Monthly&address_status=unconfirmed&tax=0.00&payer_id=2PXA53TAV2ZVA'
+					+ '&address_street=na&payment_date=' + paymentDate + '&payment_status=Completed'
+					+ '&product_name=3D Repo Licence subscription.This month\'s pro-rata price: 0, then each month: £100&charset=UTF-8'
+					+ '&recurring_payment_id=' + billingId + '&address_zip=A00 2ss020&first_name=HUNG HO&mc_fee=4.10&address_country_code=HU'
+					+ '&address_name=HUNG HO LIU&notify_version=3.8&amount_per_cycle=100.00&payer_status=verified&currency_code=GBP'
+					+ '&business=test3drepo@example.org&address_country=Hungary&address_city=London'
+					+ '&verify_sign=AiPC9BjkCyDFQXbSkoZcgqH3hpacASD7TZ5vh-uuZ2-Goi9dUDXNh4Wy&payer_email=test3drepo_hungary@example.org'
+					+ '&initial_payment_amount=0.00&profile_status=Active&amount=100.00&txn_id=7VE78102JM363223J&payment_type=instant'
+					+ '&last_name=LIU&address_state=&receiver_email=test3drepo@example.org&payment_fee=&receiver_id=XNMSZ2D4UNB6G'
+					+ '&txn_type=recurring_payment&mc_currency=GBP&residence_country=HU&test_ipn=1'
+					+ '&transaction_subject=3D Repo Licence subscription.This month\'s pro-rata price: 0, then each month: £100'
+					+ '&payment_gross=&shipping=0.00&product_type=1&time_created=' + paymentDate + '&ipn_track_id=78a335fad3b16';
 
 					agent.post(`/payment/paypal/food`)
 					.send(fakePaymentMsg)
