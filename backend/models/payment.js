@@ -241,7 +241,7 @@ function getBillingAgreement(
 
 			let desc = ``;
 			if (firstCycleAmount){
-				desc += `This month's pro-rata price: £${firstCycleAmount}. `;
+				desc += `This month's pro-rata: £${firstCycleAmount}. `;
 			}
 			desc += `Regualr monthly recurring payment £${regularAmount}, starts on ${moment(startDate).utc().format('Do MMM YYYY')}`;
 			
