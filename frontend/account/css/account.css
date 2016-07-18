@@ -396,6 +396,10 @@ account-team #accountTeamMemberRole {
   color: rgba(0, 0, 0, 0.5);
 }
 
+account-team #accountTeamSubHeader {
+  color: rgba(0, 0, 0, 0.3);
+}
+
 /** Collaborator Dialog ***********************************************************************************************/
 #collaboratorDialog {
   width: 400px;
@@ -403,4 +407,9 @@ account-team #accountTeamMemberRole {
 
 #collaboratorDialog .collaboratorIcon {
   margin: 0 10px;
+}
+
+/** PayPal Dialog *****************************************************************************************************/
+#paypalDialog .userContent .cardInfo {
+  text-align: left;
 }

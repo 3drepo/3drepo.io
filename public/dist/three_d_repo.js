@@ -4909,9 +4909,9 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountBillingCtrl.$inject = ["$scope", "$location", "$mdDialog", "$timeout", "UtilsService", "serverConfig"];
+	AccountBillingCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "serverConfig"];
 
-	function AccountBillingCtrl($scope, $location, $mdDialog, $timeout, UtilsService, serverConfig) {
+	function AccountBillingCtrl($scope, $location, $timeout, UtilsService, serverConfig) {
 		var vm = this,
 			promise;
 
@@ -4955,18 +4955,16 @@ var ViewerManager = {};
 		 */
 		$scope.$watch("vm.numNewLicenses", function () {
 			if (angular.isDefined(vm.numNewLicenses)) {
-				if (vm.numNewLicenses === 0) {
-					vm.saveDisabled = true;
+				if (vm.numLicenses === vm.numNewLicenses) {
+					vm.saveDisabled = angular.equals(vm.newBillingAddress, vm.billingAddress) || aRequiredAddressFieldIsEmpty();
 				}
 				else {
-					if (vm.numLicenses === vm.numNewLicenses) {
-						vm.saveDisabled = angular.equals(vm.newBillingAddress, vm.billingAddress) || aRequiredAddressFieldIsEmpty();
-					}
-					else {
-						vm.saveDisabled = aRequiredAddressFieldIsEmpty();
-					}
+					vm.saveDisabled = aRequiredAddressFieldIsEmpty();
 				}
 				vm.priceLicenses = vm.numNewLicenses * vm.pricePerLicense;
+			}
+			else {
+				vm.saveDisabled = true;
 			}
 		});
 
@@ -4975,11 +4973,6 @@ var ViewerManager = {};
 		 */
 		$scope.$watch("vm.billingAddress", function () {
 			if (angular.isDefined(vm.billingAddress)) {
-				/*
-				// Initialise billing address properties if they don't exist
-				vm.billingAddress.postalCode = vm.billingAddress.hasOwnProperty("postalCode") ? vm.billingAddress.postalCode : "";
-				vm.billingAddress.countryCode = vm.billingAddress.hasOwnProperty("countryCode") ? vm.billingAddress.countryCode : "";
-				*/
 				vm.newBillingAddress = angular.copy(vm.billingAddress);
 			}
 		}, true);
@@ -5023,9 +5016,6 @@ var ViewerManager = {};
 		};
 
 		vm.changeSubscription = function () {
-			vm.payPalInfo = "Redirecting to PayPal. Please do not refresh the page or close the tab.";
-			UtilsService.showDialog("paypalDialog.html", $scope);
-
 			var data = {
 				plans: [{
 					plan: "THE-100-QUID-PLAN",
@@ -5033,14 +5023,9 @@ var ViewerManager = {};
 				}],
 				billingAddress: vm.newBillingAddress
 			};
-			// Fill in required info with dummy data if it is missing
-			if (!data.billingAddress.hasOwnProperty("line1")) {
-				data.billingAddress.line1 = "1 High Street";
-			}
-			if (!data.billingAddress.hasOwnProperty("city")) {
-				data.billingAddress.city = "London";
-			}
 
+			vm.payPalInfo = "Redirecting to PayPal. Please do not refresh the page or close the tab.";
+			UtilsService.showDialog("paypalDialog.html", $scope, null, true);
 			promise = UtilsService.doPost(data, vm.account + "/subscriptions");
 			promise.then(function (response) {
 				console.log(response);
@@ -5048,13 +5033,16 @@ var ViewerManager = {};
 					location.href = response.data.url;
 				}
 				else {
-					vm.payPalInfo = "Error processing PayPal.";
-					$timeout(function () {
-						UtilsService.closeDialog();
-					}, 3000);
+					vm.changeHelpToShow = response.data.value;
+					vm.payPalInfo = response.data.message;
 				}
 			});
 		};
+
+		vm.goToPage = function (page) {
+			$location.path("/" + page, "_self");
+		};
+
 
 		/**
 		 * Set up num licenses and price

@@ -158,8 +158,8 @@ var responseCodes = {
 	PAYMENT_TOKEN_ERROR: { value: 96, message: 'Payment token is invalid', status: 400}, 
 	EXECUTE_AGREEMENT_ERROR: { value: 97, message: 'Failed to get payment from PayPal', status: 400 },
 
-	LICENCE_REMOVAL_SPACE_EXCEEDED: { value: 98, message: 'Not having enough space after removing the licence', status: 400 },
-	REMOVE_ASSIGNED_LICENCE: { value: 99, message: 'Some of the licences are assigned are can\'t be removed', status: 400 },
+	LICENCE_REMOVAL_SPACE_EXCEEDED: { value: 98, message: 'Your current quota usage exceeds the requested change.', status: 400 },
+	REMOVE_ASSIGNED_LICENCE: { value: 99, message: 'Some of the licences are assigned and can\'t be removed', status: 400 },
 
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {

@@ -1,4 +1,4 @@
-.homeUserContent
+.homeUserContent#accountBillingPage
 	md-content.md-whiteframe-1dp(aria-label="Billing", flex)
 		md-toolbar
 			.md-toolbar-tools
@@ -10,15 +10,15 @@
 					div(layout="row")
 						md-input-container(flex)
 							label Licenses
-							input(type="number", ng-model="vm.numNewLicenses", min="0", tdr-focus="true")
+							input(type="number", ng-model="vm.numNewLicenses", min="0", max="1000", tdr-focus="true", required)
 						md-input-container(flex)
 							label Payment (£ / month)
 							input(type="text", value="{{vm.priceLicenses}}", ng-disabled="true")
 						md-input-container(flex)
-							label Quota used (Gb)
+							label Current quota used (Gb)
 							input(type="text", value="{{vm.quota.spaceUsed | bToGb}}", ng-disabled="true")
 						md-input-container(flex)
-							label Quota available (Gb)
+							label Current quota available (Gb)
 							input(type="text", value="{{vm.quota.spaceLimit | bToGb}}", ng-disabled="true")
 
 					div(layout="row")

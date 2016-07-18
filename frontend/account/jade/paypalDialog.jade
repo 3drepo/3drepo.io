@@ -1,9 +1,16 @@
-md-dialog.newDatabaseDialog(aria-label="New database")
+md-dialog#paypalDialog(aria-label="New database")
 	md-toolbar
 		.md-toolbar-tools
 			h2 Subscription
 			span(flex)
-	md-content(layout-margin, layout="column", layout-align="center center", flex)
+	.userContent
 		.cardInfo
 			p {{vm.payPalInfo}}
-
+			br
+			div(ng-switch="vm.changeHelpToShow")
+				p(ng-switch-when="98")
+					| Please go to the
+					=" "
+					a(href="", ng-click="vm.goToPage('contact')") Contact Page
+					=" "
+					| to request this change.

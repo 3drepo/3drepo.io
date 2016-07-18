@@ -10,7 +10,12 @@
 					.cardInfo
 						p You do not currently have any licenses.
 						br
-						p Please go to the Billing Page to add licenses.
+						p
+							| Please go to the
+							=" "
+							a(href="", ng-click="vm.goToBillingPage()") Billing Page
+							=" "
+							| to add licenses.
 					md-button.md-raised.md-accent(ng-click="vm.goToBillingPage()") Billing Page
 
 				div(ng-switch-when="0+")

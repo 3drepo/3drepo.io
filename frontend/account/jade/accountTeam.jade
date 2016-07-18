@@ -50,7 +50,7 @@
 								span(md-highlight-text="vm.searchText", md-highlight-flags="^i") {{user.user}}
 							md-not-found
 								span No user matching "{{ctrl.searchText}}" was found.
-						md-radio-group#accountTeamMemberRoleGroup(ng-model="vm.memberRole", layout="row", layout-align="start center")
+						//md-radio-group#accountTeamMemberRoleGroup(ng-model="vm.memberRole", layout="row", layout-align="start center")
 							md-radio-button.md-accent(value="collaborator", ng-disabled="vm.addDisabled") Collaborator
 							md-radio-button.md-accent(value="viewer", ng-disabled="vm.addDisabled") Viewer
 						md-button.md-raised.md-accent#accountTeamAdd(ng-click="vm.addMember()", ng-disabled="vm.addDisabled") Add
@@ -59,13 +59,16 @@
 
 					// Assigned
 					md-list(ng-if="!vm.noLicensesAssigned")
-						md-subheader.md-no-sticky Team ({{vm.members.length}} assigned)
+						md-subheader.md-no-sticky
+							| Team
+							=" "
+							span#accountTeamSubHeader ({{vm.members.length}} member)
 						md-list-item(ng-repeat="member in vm.members")
 							md-icon.angular-material-icons.collaboratorIcon(aria-label="Person") person
 							.md-list-item-text
 								div(layout="row")
 									p {{member.user}}
-									p#accountTeamMemberRole ({{member.role}})
+									//p#accountTeamMemberRole ({{member.role}})
 							span(flex)
 							md-button.md-icon-button.md-accent(ng-click="vm.removeMember($index)")
 								md-icon.angular-material-icons(aria-label="Close dialog") remove_circle
