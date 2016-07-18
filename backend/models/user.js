@@ -675,6 +675,11 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	//count user current plans
 	this.customData.subscriptions.forEach(subscription => {
 
+		//ignore basic plan
+		if (subscription.plan === Subscription.getBasicPlan().plan) {
+			return;
+		}
+
 		//clean old flag
 		subscription.pendingDelete = undefined;
 
@@ -718,9 +723,6 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	} else {
 
 		let currency = 'GBP';
-		let amount = 0;
-		let billingCycle = 1;
-		let firstBillingCycle;
 		let existingPlans = [];
 		let now = new Date();
 		let check = Promise.resolve();
@@ -735,7 +737,7 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 			if(getSubscription(plan.plan) && Number.isInteger(plan.quantity) && plan.quantity > 0){
 				
 				// buying new licences
-				amount += getSubscription(plan.plan).amount * plan.quantity;
+				//amount += getSubscription(plan.plan).amount * plan.quantity;
 
 				for(let i=0; i<plan.quantity; i++){
 
@@ -756,19 +758,12 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 				let removeNumber = -plan.quantity;
 				let removeCount = 0;
 
-				console.log('removeNumber', removeNumber);
-
 
 				let subs = this.getActiveSubscriptions().filter(sub => sub.plan === plan.plan && !sub.assignedUser);
 				for(let i=0 ; i < subs.length && removeCount < removeNumber; i++){
 					subs[i].pendingDelete = true;
 					removeCount++;
 				}
-
-
-				console.log('removeCount', removeCount);
-
-
 				//allow to remove billingUser's licence if remove count = user's current no. of licences
 				if(removeCount < removeNumber && 
 					this.getActiveSubscriptions().filter(sub => sub.plan === plan.plan).length === removeNumber){
@@ -779,8 +774,6 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 						removeCount++;
 					}
 				}
-
-				console.log('removeCount', removeCount);
 
 				//check if they can remove licences
 				let quotaAfterDelete = this.getSubscriptionLimits({ excludePendingDelete : true });
@@ -820,53 +813,27 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 
 
 		next = check.then(() => {
-			console.log('new plan amount', amount);
+			//console.log('new plan amount', amount);
 
 			let startDate = moment().utc().add(10, 'second');
-			let firstCycleAmount = 0;
+			let nextPaymentDate;
 
 			if(this.getActiveSubscriptions({ skipBasic: 'true'}).length === 0){
 				// first time to buy licence and pick today as the anniversary date
 				console.log('First time buying');
-
 				this.customData.lastAnniversaryDate = startDate.clone().startOf('day').toDate();
 				this.customData.firstNextPaymentDate = Payment.getNextPaymentDate(startDate);
 
-
-			} else if (amount > 0) {
-				//not the first time, but buy new licences
-				//calulate pro-rata
-				let today = moment().utc().startOf('day');
-				let lastAnniversaryDate = moment(this.customData.lastAnniversaryDate).utc();
-				let nextPaymentDate = moment(this.customData.nextPaymentDate || this.customData.firstNextPaymentDate).utc().startOf('date');
-				console.log('nextPaymentDate', nextPaymentDate.toISOString());
-				console.log('maxDay', Math.round(moment.duration(nextPaymentDate.diff(lastAnniversaryDate)).asDays()));
-				firstBillingCycle = Math.round(moment.duration(nextPaymentDate.diff(today)).asDays());
-				//cal pro-rata price of new licenses subscription
-				let proRataPrice =  firstBillingCycle / Math.round(moment.duration(nextPaymentDate.diff(lastAnniversaryDate)).asDays()) * amount;
-				proRataPrice = Math.round(proRataPrice * 100) / 100;
-				firstCycleAmount = proRataPrice;
-
-			} else {
-				//decreasing licence or no change at all
-				startDate = moment(this.customData.nextPaymentDate || this.customData.firstNextPaymentDate).utc().startOf('date');
 			}
 
-			//add exisiting plans to bill of next cycle as well
-			existingPlans.forEach(data => {
+			nextPaymentDate = moment(this.customData.nextPaymentDate || this.customData.firstNextPaymentDate).utc().startOf('date');
+			let paymentDateAndAmount = Payment.getPaymentDateAndAmount(plans, existingPlans, startDate, this.customData.lastAnniversaryDate, nextPaymentDate, billingAddress.countryCode, billingAddress.company);
 
-				let quantity = data.quantity;
-				let plan = getSubscription(data.plan);
-				amount += plan.amount * quantity;
-			});
-
-			amount = Math.round(amount * 100) / 100;
-
-			if (amount <= 0 && firstCycleAmount <= 0 && !this.customData.billingAgreementId){
+			if (paymentDateAndAmount.regularAmount <= 0 && paymentDateAndAmount.firstCycleAmount <= 0 && !this.customData.billingAgreementId){
 
 				return Promise.resolve();
 
-			} else if(amount <= 0 && firstCycleAmount <= 0){
+			} else if(paymentDateAndAmount.regularAmount <= 0 && paymentDateAndAmount.firstCycleAmount <= 0){
 				//cancel the old agreement, if any
 
 				var cancel_note = {
@@ -901,19 +868,27 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 
 			} else {
 
-				return Payment.getBillingAgreement(billingUser, {
+				let paypalBillingAddress = {
 					"line1": billingAddress.line1,
 					"line2": billingAddress.line2,
 					"city": billingAddress.city,
 					"postal_code": billingAddress.postalCode,
 					"country_code": billingAddress.countryCode
-				}, currency, 
-					firstCycleAmount, 
-					firstBillingCycle, 
-					amount, 
-					billingCycle, 
-					startDate.toDate(), 
-					billingAddress.vat
+				};
+
+				return Payment.getBillingAgreement(
+					billingUser,
+					paypalBillingAddress, 
+					currency, 
+					paymentDateAndAmount.firstCycleAmount, 
+					paymentDateAndAmount.firstCycleBeforeTaxAmount, 
+					paymentDateAndAmount.firstCycleTaxAmount, 
+					paymentDateAndAmount.firstCycleLength,
+					paymentDateAndAmount.regularAmount, 
+					paymentDateAndAmount.regularBeforeTaxAmount, 
+					paymentDateAndAmount.regularTaxAmount, 
+					paymentDateAndAmount.regularCycleLength, 
+					paymentDateAndAmount.startDate
 				).then(_billingAgreement => {
 
 					billingAgreement = _billingAgreement;
@@ -1130,12 +1105,12 @@ schema.methods.executeBillingAgreement = function(token, billingAgreementId){
 		subscription.inCurrentAgreement = true;
 
 		// pre activate
-		// don't wait for IPN message to confirm but to activate the subscription right away, for 2 hours.
+		// don't wait for IPN message to confirm but to activate the subscription right away, for 24 hours.
 		// IPN message should come quickly after executing an agreement, usually less then a minute
-		let twoHoursLater = moment().utc().add(2, 'hour').toDate();
-		if(!subscription.expiredAt || subscription.expiredAt < twoHoursLater){
+		let oneDayLater = moment().utc().add(24, 'hour').toDate();
+		if(!subscription.expiredAt || subscription.expiredAt < oneDayLater){
 			subscription.active = true;
-			subscription.expiredAt = twoHoursLater;
+			subscription.expiredAt = oneDayLater;
 			subscription.limits = getSubscription(subscription.plan).limits;
 		}
 
