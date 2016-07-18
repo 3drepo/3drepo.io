@@ -43,7 +43,7 @@
 						md-items="user in vm.querySearch(vm.searchText)"
 						md-item-text="user.user"
 						md-min-length="0"
-						placeholder="Add a team member"
+						placeholder="Select a team member"
 						flex
 						ng-disabled="vm.allLicenseAssigneesMembers")
 							md-item-template
@@ -59,7 +59,7 @@
 
 					// Assigned
 					md-list(ng-if="!vm.noLicensesAssigned")
-						md-subheader.md-no-sticky Team ({{vm.members.length}} assigned, {{vm.collaborators.length + vm.members.length}} total)
+						md-subheader.md-no-sticky Team ({{vm.members.length}} assigned)
 						md-list-item(ng-repeat="member in vm.members")
 							md-icon.angular-material-icons.collaboratorIcon(aria-label="Person") person
 							.md-list-item-text
@@ -69,9 +69,3 @@
 							span(flex)
 							md-button.md-icon-button.md-accent(ng-click="vm.removeMember($index)")
 								md-icon.angular-material-icons(aria-label="Close dialog") remove_circle
-
-					div(layout="column", layout-align="start", ng-if="vm.notAllLicensesAssigned", flex)
-						md-divider(flex)
-						p You have not assigned all licenses to users. To add more team members please assign more licenses.
-						div(layout="row", flex="none")
-							md-button.md-raised.md-accent.accountLicensesBPButton(ng-click="vm.goToPage('licenses')") Licenses Page

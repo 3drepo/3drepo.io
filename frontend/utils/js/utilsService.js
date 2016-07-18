@@ -175,14 +175,14 @@
         /**
          * Show a dialog
          *
-         * @param {String} dialogTemplate
-         * @param {Object} scope
+         * @param {String} dialogTemplate - required
+         * @param {Object} scope - required
+         * @param {Object} event
+         * @param {Boolean} clickOutsideToClose
          * @param {Object} parent
          * @param {Boolean} fullscreen
-         * @param {Boolean} clickOutsideToClose
-         * @param {Object} event
          */
-        obj.showDialog = function (dialogTemplate, scope, parent, fullscreen, clickOutsideToClose, event) {
+        obj.showDialog = function (dialogTemplate, scope, event, clickOutsideToClose, parent, fullscreen) {
             // Allow the dialog to have cancel ability
             scope.utilsRemoveDialog = scope.utilsRemoveDialog || function () {$mdDialog.cancel();};
 

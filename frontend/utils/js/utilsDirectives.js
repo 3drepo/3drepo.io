@@ -21,14 +21,15 @@
 	angular.module("3drepo")
 
 		// Inspired by Mark Rajcok'a answer - http://stackoverflow.com/a/14837021/782358
-		.directive('tdrFocus', function() {
+		.directive('tdrFocus', function($timeout) {
 			return {
-				scope: { trigger: '=tdrFocus' },
+				scope: { trigger: '@tdrFocus' },
 				link: function(scope, element) {
 					scope.$watch('trigger', function(value) {
-						if(value === true) {
-							element[0].focus();
-							scope.trigger = false;
+						if (value.toString() === "true") {
+							$timeout(function() {
+								element[0].focus();
+							});
 						}
 					});
 				}

@@ -56,8 +56,9 @@
 								md-button.md-icon-button(aria-label="Remove")
 									md-icon.angular-material-icons remove_circle
 
-					md-divider
-
-					div(layout="column", layout-align="start start")
-						p To add more licenses please go to the Billing Page
-						md-button.md-raised.md-accent(ng-click="vm.goToBillingPage()") Billing Page
+					div(ng-if="vm.allLicensesAssigned")
+						md-divider
+						p#accountLicensesBillingPage
+							| To add more licenses please go to the
+							=" "
+							a(href="", ng-click="vm.goToBillingPage()") Billing Page

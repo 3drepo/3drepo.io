@@ -54,7 +54,7 @@
 		}
 		else if ($location.search().hasOwnProperty("token")) {
 			vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
-			showDialog("paypalDialog.html");
+			UtilsService.showDialog("paypalDialog.html", $scope);
 			promise = UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute");
 			promise.then(function (response) {
 				console.log("payment/paypal/execute ", response);
@@ -62,7 +62,7 @@
 				}
 				vm.payPalInfo = "PayPal has finished processing. Thank you.";
 				$timeout(function () {
-					$mdDialog.cancel();
+					UtilsService.closeDialog();
 					init();
 				}, 2000);
 			});
@@ -154,8 +154,8 @@
 
 		vm.changeSubscription = function () {
 			vm.payPalInfo = "Redirecting to PayPal. Please do not refresh the page or close the tab.";
-			showDialog("paypalDialog.html");
-			
+			UtilsService.showDialog("paypalDialog.html", $scope);
+
 			var data = {
 				plans: [{
 					plan: "THE-100-QUID-PLAN",
@@ -180,27 +180,11 @@
 				else {
 					vm.payPalInfo = "Error processing PayPal.";
 					$timeout(function () {
-						$mdDialog.cancel();
+						UtilsService.closeDialog();
 					}, 3000);
 				}
 			});
 		};
-
-		/**
-		 * Show a dialog
-		 *
-		 * @param {String} dialogTemplate
-		 */
-		function showDialog (dialogTemplate) {
-			$mdDialog.show({
-				templateUrl: dialogTemplate,
-				parent: angular.element(document.body),
-				targetEvent: null,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true
-			});
-		}
 
 		/**
 		 * Set up num licenses and price

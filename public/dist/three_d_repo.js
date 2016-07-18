@@ -4924,7 +4924,7 @@ var ViewerManager = {};
 		}
 		else if ($location.search().hasOwnProperty("token")) {
 			vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
-			showDialog("paypalDialog.html");
+			UtilsService.showDialog("paypalDialog.html", $scope);
 			promise = UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute");
 			promise.then(function (response) {
 				console.log("payment/paypal/execute ", response);
@@ -4932,7 +4932,7 @@ var ViewerManager = {};
 				}
 				vm.payPalInfo = "PayPal has finished processing. Thank you.";
 				$timeout(function () {
-					$mdDialog.cancel();
+					UtilsService.closeDialog();
 					init();
 				}, 2000);
 			});
@@ -5024,8 +5024,8 @@ var ViewerManager = {};
 
 		vm.changeSubscription = function () {
 			vm.payPalInfo = "Redirecting to PayPal. Please do not refresh the page or close the tab.";
-			showDialog("paypalDialog.html");
-			
+			UtilsService.showDialog("paypalDialog.html", $scope);
+
 			var data = {
 				plans: [{
 					plan: "THE-100-QUID-PLAN",
@@ -5050,27 +5050,11 @@ var ViewerManager = {};
 				else {
 					vm.payPalInfo = "Error processing PayPal.";
 					$timeout(function () {
-						$mdDialog.cancel();
+						UtilsService.closeDialog();
 					}, 3000);
 				}
 			});
 		};
-
-		/**
-		 * Show a dialog
-		 *
-		 * @param {String} dialogTemplate
-		 */
-		function showDialog (dialogTemplate) {
-			$mdDialog.show({
-				templateUrl: dialogTemplate,
-				parent: angular.element(document.body),
-				targetEvent: null,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true
-			});
-		}
 
 		/**
 		 * Set up num licenses and price
@@ -5097,135 +5081,6 @@ var ViewerManager = {};
 			);
 
 		}
-	}
-}());
-
-/**
- *	Copyright (C) 2016 3D Repo Ltd
- *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
- *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
- *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-	"use strict";
-
-	angular.module("3drepo")
-		.directive("accountCollaborators", accountCollaborators);
-
-	function accountCollaborators() {
-		return {
-			restrict: 'EA',
-			templateUrl: 'accountCollaborators.html',
-			scope: {
-				account: "=",
-				showPage: "&"
-			},
-			controller: AccountCollaboratorsCtrl,
-			controllerAs: 'vm',
-			bindToController: true
-		};
-	}
-
-	AccountCollaboratorsCtrl.$inject = ["$scope", "UtilsService", "StateManager"];
-
-	function AccountCollaboratorsCtrl($scope, UtilsService, StateManager) {
-		var vm = this,
-			i,
-			promise;
-
-		/*
-		 * Init
-		 */
-		vm.numLicenses = -1;
-		vm.unassigned = [];
-		vm.collaborators = [];
-		vm.allLicensesAssigned = false;
-		promise = UtilsService.doGet(vm.account + "/subscriptions");
-		promise.then(function (response) {
-			console.log("subscriptions ", response);
-			if (response.status === 200) {
-				vm.numLicenses = response.data.length;
-				for (i = 0; i < response.data.length; i += 1) {
-					if (response.data[i].hasOwnProperty("assignedUser")) {
-						if (response.data[i].assignedUser !== vm.account) {
-							vm.collaborators.push({user: response.data[i].assignedUser, id: response.data[i]._id});
-						}
-					}
-					else {
-						vm.unassigned.push(response.data[i]._id);
-					}
-				}
-				vm.allLicensesAssigned = (vm.unassigned.length === 0);
-			}
-		});
-
-		/*
-		 * Watch changes to the new collaborator name
-		 */
-		$scope.$watch("vm.newCollaborator", function (newValue) {
-			vm.addMessage = "";
-			vm.addDisabled = !(angular.isDefined(newValue) && (newValue.toString() !== ""));
-		});
-
-		/**
-		 * Add the selected user as a collaborator
-		 */
-		vm.addCollaborator = function () {
-			promise = UtilsService.doPost(
-				{user: vm.newCollaborator},
-				vm.account + "/subscriptions/" + vm.unassigned[0] + "/assign"
-			);
-			promise.then(function (response) {
-				console.log(response);
-				if (response.status === 200) {
-					vm.addMessage = "User " + vm.newCollaborator + " added as a collaborator";
-					vm.collaborators.push({user: response.data.assignedUser, id: response.data._id});
-					vm.unassigned.splice(0, 1);
-					vm.allLicensesAssigned = (vm.unassigned === 0);
-				}
-				else if (response.status === 404) {
-					vm.addMessage = response.data.message;
-				}
-			});
-		};
-
-		/**
-		 * Remove a collaborator
-		 *
-		 * @param index
-		 */
-		vm.removeCollaborator = function (index) {
-			promise = UtilsService.doDelete({}, vm.account + "/subscriptions/" + vm.collaborators[index].id + "/assign");
-			promise.then(function (response) {
-				console.log(response);
-				if (response.status === 200) {
-					vm.collaborators.splice(index, 1);
-					vm.unassigned.push(null);
-					vm.addDisabled = false;
-				}
-				else if (response.data.status === 400) {
-					if (response.data.value === 94) {
-						vm.collaborators[index].deleteMessage = "Currently a member of a team";
-					}
-				}
-			});
-		};
-
-		vm.goToBillingPage = function () {
-			//StateManager.clearQuery("page");
-			StateManager.setQuery({page: "billing"});
-		};
 	}
 }());
 
@@ -5972,14 +5827,14 @@ var ViewerManager = {};
 				type: vm.projectTypes[0]
 			};
 			vm.uploadedFile = null;
-			showDialog(event, "projectDialog.html");
+			UtilsService.showDialog("projectDialog.html", $scope, event, true);
 		};
 		
 		/**
 		 * Close the dialog
 		 */
 		vm.closeDialog = function() {
-			$mdDialog.cancel();
+			UtilsService.closeDialog();
 		};
 
 		/**
@@ -6052,7 +5907,7 @@ var ViewerManager = {};
 			vm.newDatabaseName = "";
 			vm.showPaymentWait = false;
 			vm.newDatabaseToken = false;
-			showDialog(event, "databaseDialog.html");
+			UtilsService.showDialog("databaseDialog.html", $scoipe, event, true);
 		};
 
 		/**
@@ -6085,7 +5940,7 @@ var ViewerManager = {};
 		vm.setupDeleteProject = function (event, project) {
 			vm.projectToDelete = project;
 			vm.showDeleteProjectError = false;
-			showDialog(event, "deleteProjectDialog.html");
+			UtilsService.showDialog("deleteProjectDialog.html", $scope, event, true);
 		};
 
 		/**
@@ -6201,7 +6056,7 @@ var ViewerManager = {};
 				console.log(response);
 				if (file.size > response.data.accounts[0].quota.spaceLimit) {
 					// Show the over quota dialog
-					showDialog(null, "overQuotaDialog.html");
+					UtilsService.showDialog("overQuotaDialog.html", $scope, null, true);
 				}
 				else {
 					project.uploading = true;
@@ -6269,26 +6124,6 @@ var ViewerManager = {};
 						});
 					}
 				}
-			});
-		}
-
-		/**
-		 * Show a dialog
-		 *
-		 * @param {Object} event
-		 * @param {String} dialogTemplate
-		 */
-		function showDialog (event, dialogTemplate) {
-			$mdDialog.show({
-				controller: function () {},
-				templateUrl: dialogTemplate,
-				parent: angular.element(document.body),
-				targetEvent: event,
-				clickOutsideToClose:true,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true,
-				onRemoving: function () {$scope.closeDialog();}
 			});
 		}
 	}
@@ -6660,51 +6495,6 @@ var ViewerManager = {};
 
 			vm.allLicenseAssigneesMembers = (vm.collaborators.length === 0);
 		}
-	}
-}());
-
-/**
- *	Copyright (C) 2016 3D Repo Ltd
- *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
- *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
- *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-	"use strict";
-
-	angular.module("3drepo")
-		.directive("logout", logout);
-
-	function logout() {
-		return {
-			restrict: "EA",
-			templateUrl: "logout.html",
-			scope: {},
-			controller: LogoutCtrl,
-			controllerAs: "vm",
-			bindToController: true
-		};
-	}
-
-	LogoutCtrl.$inject = ["Auth"];
-
-	function LogoutCtrl (Auth) {
-		var vm = this;
-
-		vm.logout = function () {
-			Auth.logout();
-		};
 	}
 }());
 
@@ -16414,6 +16204,7 @@ var Oculus = {};
 		};
 
 		vm.showPage = function (page) {
+			console.log(page);
 			$location.path("/" + page, "_self");
 		};
 
@@ -17394,14 +17185,15 @@ var Oculus = {};
 	angular.module("3drepo")
 
 		// Inspired by Mark Rajcok'a answer - http://stackoverflow.com/a/14837021/782358
-		.directive('tdrFocus', function() {
+		.directive('tdrFocus', function($timeout) {
 			return {
-				scope: { trigger: '=tdrFocus' },
+				scope: { trigger: '@tdrFocus' },
 				link: function(scope, element) {
 					scope.$watch('trigger', function(value) {
-						if(value === true) {
-							element[0].focus();
-							scope.trigger = false;
+						if (value.toString() === "true") {
+							$timeout(function() {
+								element[0].focus();
+							});
 						}
 					});
 				}
@@ -17617,14 +17409,14 @@ var Oculus = {};
         /**
          * Show a dialog
          *
-         * @param {String} dialogTemplate
-         * @param {Object} scope
+         * @param {String} dialogTemplate - required
+         * @param {Object} scope - required
+         * @param {Object} event
+         * @param {Boolean} clickOutsideToClose
          * @param {Object} parent
          * @param {Boolean} fullscreen
-         * @param {Boolean} clickOutsideToClose
-         * @param {Object} event
          */
-        obj.showDialog = function (dialogTemplate, scope, parent, fullscreen, clickOutsideToClose, event) {
+        obj.showDialog = function (dialogTemplate, scope, event, clickOutsideToClose, parent, fullscreen) {
             // Allow the dialog to have cancel ability
             scope.utilsRemoveDialog = scope.utilsRemoveDialog || function () {$mdDialog.cancel();};
 

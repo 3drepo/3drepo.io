@@ -10,7 +10,7 @@
 					div(layout="row")
 						md-input-container(flex)
 							label Licenses
-							input(type="number", ng-model="vm.numNewLicenses", min="0")
+							input(type="number", ng-model="vm.numNewLicenses", min="0", tdr-focus="true")
 						md-input-container(flex)
 							label Payment (£ / month)
 							input(type="text", value="{{vm.priceLicenses}}", ng-disabled="true")
@@ -29,6 +29,14 @@
 							label Last Name
 							input(type="text", ng-model="vm.newBillingAddress.lastName", required)
 
+					div(layout="row")
+						md-input-container(flex)
+							label Company Name
+							input(type="text", ng-model="vm.newBillingAddress.companyName")
+						md-input-container(flex)
+							label VAT Number
+							input(type="text", ng-model="vm.newBillingAddress.vat")
+
 					div(layout="column", flex)
 						div(layout="row", flex, layout-align="start start")
 							div(layout="column", flex)
@@ -38,27 +46,21 @@
 								md-input-container(flex)
 									label Address 2
 									input(type="text", ng-model="vm.newBillingAddress.line2")
-								md-input-container(flex)
-									label Address 3
-									input(type="text", ng-model="vm.newBillingAddress.line3")
-								md-input-container(flex)
-									label Company Name
-									input(type="text", ng-model="vm.newBillingAddress.companyName")
+
+
 
 							div(layout="column", flex)
-								md-input-container(flex)
-									label Postal code
-									input(type="text", ng-model="vm.newBillingAddress.postalCode", required)
 								md-input-container(flex)
 									label City
 									input(type="text", ng-model="vm.newBillingAddress.city", required)
 								md-input-container(flex)
+									label Postal code
+									input(type="text", ng-model="vm.newBillingAddress.postalCode", required)
+								md-input-container(flex)
 									label Country
 									md-select(ng-model="vm.newBillingAddress.countryCode", required)
 										md-option(ng-repeat="country in vm.countries", value="{{country.code}}") {{country.name}}
-								md-input-container(flex)
-									label VAT Number (optional)
-									input(type="text", ng-model="vm.newBillingAddress.vat")
+
 
 					.accountBillingSave
 						div(layout="row", layout-align="start")

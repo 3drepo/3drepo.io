@@ -178,14 +178,14 @@
 				type: vm.projectTypes[0]
 			};
 			vm.uploadedFile = null;
-			showDialog(event, "projectDialog.html");
+			UtilsService.showDialog("projectDialog.html", $scope, event, true);
 		};
 		
 		/**
 		 * Close the dialog
 		 */
 		vm.closeDialog = function() {
-			$mdDialog.cancel();
+			UtilsService.closeDialog();
 		};
 
 		/**
@@ -258,7 +258,7 @@
 			vm.newDatabaseName = "";
 			vm.showPaymentWait = false;
 			vm.newDatabaseToken = false;
-			showDialog(event, "databaseDialog.html");
+			UtilsService.showDialog("databaseDialog.html", $scoipe, event, true);
 		};
 
 		/**
@@ -291,7 +291,7 @@
 		vm.setupDeleteProject = function (event, project) {
 			vm.projectToDelete = project;
 			vm.showDeleteProjectError = false;
-			showDialog(event, "deleteProjectDialog.html");
+			UtilsService.showDialog("deleteProjectDialog.html", $scope, event, true);
 		};
 
 		/**
@@ -407,7 +407,7 @@
 				console.log(response);
 				if (file.size > response.data.accounts[0].quota.spaceLimit) {
 					// Show the over quota dialog
-					showDialog(null, "overQuotaDialog.html");
+					UtilsService.showDialog("overQuotaDialog.html", $scope, null, true);
 				}
 				else {
 					project.uploading = true;
@@ -475,26 +475,6 @@
 						});
 					}
 				}
-			});
-		}
-
-		/**
-		 * Show a dialog
-		 *
-		 * @param {Object} event
-		 * @param {String} dialogTemplate
-		 */
-		function showDialog (event, dialogTemplate) {
-			$mdDialog.show({
-				controller: function () {},
-				templateUrl: dialogTemplate,
-				parent: angular.element(document.body),
-				targetEvent: event,
-				clickOutsideToClose:true,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true,
-				onRemoving: function () {$scope.closeDialog();}
 			});
 		}
 	}
