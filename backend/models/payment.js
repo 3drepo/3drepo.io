@@ -273,7 +273,8 @@ function getBillingAgreement(
 
 					resolve({ 
 						url: link.href, 
-						paypalPaymentToken: token
+						paypalPaymentToken: token,
+						agreement: billingAgreement
 					});
 				}
 			});

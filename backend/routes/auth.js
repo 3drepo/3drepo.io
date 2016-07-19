@@ -420,9 +420,15 @@
 			return dbUser.buySubscriptions(req.body.plans, billingUser, req.body.billingAddress || {});
 		}).then(agreement => {
 
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
+			let resData = {
 				url: agreement.url
-			});
+			};
+
+			if(config.paypal.debug && config.paypal.debug.showFullAgreement){
+				resData.agreement = agreement.agreement;
+			}
+
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, resData);
 
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

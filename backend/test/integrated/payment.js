@@ -29,7 +29,9 @@ let getNextPaymentDate = require("../../models/payment").getNextPaymentDate;
 let helpers = require("./helpers");
 let async = require('async');
 let moment = require('moment-timezone');
+let Payment = require('../../models/payment');
 
+let url = require('url');
 describe('Enrolling to a subscription', function () {
 	let User = require('../../models/user');
 	let server;
@@ -108,6 +110,7 @@ describe('Enrolling to a subscription', function () {
 	});
 
 
+
 	let plans = {
 		"plans": [
 			{    
@@ -115,26 +118,37 @@ describe('Enrolling to a subscription', function () {
 			"quantity": 3
 			}
 		],
-	    "billingAddress":{
-	        "line1": "line1",
-	        "line2": "line2",
-	        "line3": "line3",
-	        "firstName": "henry",
-	        "lastName": "liu",
-	        "company": "3D Repo",
-	        "city": "London",
-	        "postalCode": "A00 2ss020",
-	        "countryCode": "GB",
-	        "vat": "90090-0909"
-	    }
+		"billingAddress":{
+			"line1": "line1",
+			"line2": "line2",
+			"line3": "line3",
+			"firstName": "henry",
+			"lastName": "liu",
+			"company": "3D Repo",
+			"city": "London",
+			"postalCode": "A00 2ss020",
+			"countryCode": "GB",
+			"vat": "90090-0909"
+		}
 	};
 
-	it('should succee', function(done){
+	it('should succee (GB business)', function(done){
 		this.timeout(10000);
+
 		agent.post(`/${username}/subscriptions`)
 		.send(plans)
 		.expect(200, function(err, res){
 			expect(res.body).to.have.property('url');
+			let parsed = url.parse(res.body.url, true);
+			expect(parsed.query).to.have.property('token');
+			
+			let paymentDef = res.body.agreement.plan.payment_definitions.find(def => def.type === 'REGULAR');
+			expect(paymentDef).to.be.not.null;
+			expect(paymentDef.amount.value).to.equal('250');
+			expect(paymentDef.amount.currency).to.equal('GBP');
+			expect(paymentDef.charge_models[0].type).to.equal('TAX');
+			expect(paymentDef.charge_models[0].amount.value).to.equal('50');
+			expect(paymentDef.charge_models[0].amount.currency).to.equal('GBP');
 			done(err);
 		});
 	});
@@ -146,7 +160,7 @@ describe('Enrolling to a subscription', function () {
 
 		before(function(done){
 			//fake payment
-			this.timeout(4000);
+			this.timeout(7000);
 
 			// set fake billing id
 			User.findByUserName(username).then(user => {
