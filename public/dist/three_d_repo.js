@@ -5033,6 +5033,7 @@ var ViewerManager = {};
 					location.href = response.data.url;
 				}
 				else {
+					console.log(vm.quota);
 					vm.changeHelpToShow = response.data.value;
 					vm.payPalInfo = response.data.message;
 				}
@@ -5690,7 +5691,8 @@ var ViewerManager = {};
 		vm.projectTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
 		vm.projectOptions = {
 			upload: {label: "Upload file", icon: "cloud_upload"},
-			team: {label: "Team", icon: "group"}
+			team: {label: "Team", icon: "group"},
+			delete: {label: "Delete", icon: "delete"}
 		};
 
 		// Setup file uploaders
@@ -5923,6 +5925,8 @@ var ViewerManager = {};
 
 		/**
 		 * Set up deleting of project
+		 *
+		 * @param {Object} event
 		 * @param {Object} project
 		 */
 		vm.setupDeleteProject = function (event, project) {
@@ -5976,6 +5980,10 @@ var ViewerManager = {};
 				case "team":
 					$location.search("proj", project.name);
 					vm.showPage({page: "team", callingPage: "repos"});
+					break;
+
+				case "delete":
+					vm.setupDeleteProject(event, project);
 					break;
 			}
 		};

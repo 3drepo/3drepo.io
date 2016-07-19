@@ -265,7 +265,6 @@ account-menu md-icon {
 }
 .deleteProjectDialog #deleteProjectName {
   color: rgba(0 ,0, 0, 0.9);
-  margin-left: 5px;
 }
 
 .deleteProjectDialog #deleteProjectError {

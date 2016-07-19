@@ -53,7 +53,8 @@
 		vm.projectTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
 		vm.projectOptions = {
 			upload: {label: "Upload file", icon: "cloud_upload"},
-			team: {label: "Team", icon: "group"}
+			team: {label: "Team", icon: "group"},
+			delete: {label: "Delete", icon: "delete"}
 		};
 
 		// Setup file uploaders
@@ -286,6 +287,8 @@
 
 		/**
 		 * Set up deleting of project
+		 *
+		 * @param {Object} event
 		 * @param {Object} project
 		 */
 		vm.setupDeleteProject = function (event, project) {
@@ -339,6 +342,10 @@
 				case "team":
 					$location.search("proj", project.name);
 					vm.showPage({page: "team", callingPage: "repos"});
+					break;
+
+				case "delete":
+					vm.setupDeleteProject(event, project);
 					break;
 			}
 		};

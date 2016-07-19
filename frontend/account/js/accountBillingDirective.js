@@ -163,6 +163,7 @@
 					location.href = response.data.url;
 				}
 				else {
+					console.log(vm.quota);
 					vm.changeHelpToShow = response.data.value;
 					vm.payPalInfo = response.data.message;
 				}
