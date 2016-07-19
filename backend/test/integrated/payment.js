@@ -310,14 +310,6 @@ describe('Enrolling to a subscription', function () {
 					});
 				});
 
-				it('should fail if try to remove itself', function(done){
-					agent.delete(`/${username}/subscriptions/${subscriptions[0]._id}/assign`)
-					.send({})
-					.expect(400, function(err, res){
-						expect(res.body.value).to.equal(responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF.value);
-						done(err);
-					});
-				});
 
 				it('should fail if license havent been assigned to anyone', function(done){
 					agent.delete(`/${username}/subscriptions/${subscriptions[2]._id}/assign`)

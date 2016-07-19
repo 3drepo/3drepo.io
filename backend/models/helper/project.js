@@ -289,20 +289,11 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 
 		setting = _setting;
 
-		if(!setting){
-			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
-		} else if (setting.findCollaborator(username, role)) {
-			return Promise.reject(responseCodes.ALREADY_IN_ROLE);
+		if(username){
+			return User.findByUserName(username);
 		} else {
-
-			if(username){
-				return User.findByUserName(username);
-			} else {
-				return User.findByEmail(email);
-			}
-			
+			return User.findByEmail(email);
 		}
-
 
 	}).then(_user => {
 		
@@ -310,6 +301,14 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 
 		if(!user){
 			return Promise.reject(responseCodes.USER_NOT_FOUND);
+		}
+
+		if(!setting){
+			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+		} else if (setting.findCollaborator(user.user, role)) {
+			return Promise.reject(responseCodes.ALREADY_IN_ROLE);
+		} else if(setting.owner === user.user) {
+			return Promise.reject(responseCodes.ALREADY_IN_ROLE);
 		}
 
 		return User.findByUserName(account);
@@ -392,16 +391,15 @@ function removeCollaborator(username, email, account, project, role){
 			return Promise.reject(responseCodes.USER_NOT_FOUND);
 		}
 
-		return User.revokeRolesFromUser(user.user, account, `${project}.${role}`);
-
-	}).then(() => {
-
-
 		let deletedCol = setting.removeCollaborator(user.user, role);
 
 		if(!deletedCol){
 			return Promise.reject(responseCodes.NOT_IN_ROLE);
 		}
+
+		return User.revokeRolesFromUser(user.user, account, `${project}.${role}`);
+
+	}).then(() => {
 
 		return setting.save().then(() => {
 

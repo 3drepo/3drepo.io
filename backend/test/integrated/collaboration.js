@@ -28,7 +28,7 @@ let responseCodes = require("../../response_codes.js");
 let helpers = require("./helpers");
 let async = require('async');
 
-describe('Sharing a project', function () {
+describe('Sharing/Unsharing a project', function () {
 	let User = require('../../models/user');
 	let server;
 	let agent;
@@ -505,48 +505,122 @@ describe('Sharing a project', function () {
 		});
 	});
 
+	describe('for non-existing user', function(){
+
+		it('should fail (share)', function(done){
+			let role = {
+				user: username_viewer + '99',
+				role: 'viewer'
+			};
+
+			agent.post(`/${username}/${project}/collaborators`)
+			.send(role)
+			.expect(404, function(err, res){
+				expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
+				done(err);
+			});
+		});
+
+		it('should fail (unshare)', function(done){
+			let role = {
+				user: username_viewer + '99',
+				role: 'viewer'
+			};
+
+			agent.delete(`/${username}/${project}/collaborators`)
+			.send(role)
+			.expect(404, function(err, res){
+				expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
+				done(err);
+			});
+		});
+
+
+	});
+
+
+	describe('for a user dont have access', function(){
+
+		it('should fail (share)', function(done){
+			let role = {
+				user: username_viewer + '2',
+				role: 'viewer'
+			};
+
+			agent.delete(`/${username}/${project}/collaborators`)
+			.send(role)
+			.expect(400, function(err, res){
+				expect(res.body.value).to.equal(responseCodes.NOT_IN_ROLE.value);
+				done(err);
+			});
+		});
+
+	});
+
+	describe('to themselves', function(){
+
+		it('should fail (share)', function(done){
+			let role = {
+				user: username,
+				role: 'collaborator'
+			};
+
+			agent.post(`/${username}/${project}/collaborators`)
+			.send(role)
+			.expect(400, function(err, res){
+				expect(res.body.value).to.equal(responseCodes.ALREADY_IN_ROLE.value);
+				done(err);
+			});
+		});
+
+
+		it('should fail (unshare)', function(done){
+			let role = {
+				user: username,
+				role: 'collaborator'
+			};
+
+			agent.delete(`/${username}/${project}/collaborators`)
+			.send(role)
+			.expect(400, function(err, res){
+				expect(res.body.value).to.equal(responseCodes.NOT_IN_ROLE.value);
+				done(err);
+			});
+		});
+
+	});
+
+
+	describe('to the same user twice', function(){
+
+
+			let role = {
+				user: username_viewer,
+				role: 'viewer'
+			};
+
+
 	
-	// describe('if run out of quota', function(done){
+			it('should fail (share)', function(done){
+				agent.post(`/${username}/${project}/collaborators`)
+				.send(role)
+				.expect(200, function(err, res){
 
-	// 	before(function(done){
-	// 		// add 5 collaborators first to fill up the quota
-	// 		let actions = [function(done){
-	// 			agent = request.agent(server);
-	// 			agent.post('/login')
-	// 			.send({ username, password })
-	// 			.expect(200, function(err, res){
-	// 				expect(res.body.username).to.equal(username);
-	// 				done(err);
-	// 			});
-	// 		}];
+					expect(res.body).to.deep.equal(role);
+					if(!err){
+						agent.post(`/${username}/${project}/collaborators`)
+						.send(role)
+						.expect(400, function(err, res){
+							expect(res.body.value).to.equal(responseCodes.ALREADY_IN_ROLE.value);
+							done(err);
+						});
+					} else {
+						done(err);
+					}
 
-	// 		[1,2,3,4,5].forEach(n => {
-	// 			actions.push(function(done){
-	// 				agent.post(`/${username}/${project}/collaborators`)
-	// 				.send({
-	// 					user: username_viewer + n,
-	// 					role: 'viewer'
-	// 				})
-	// 				.expect(200, function(err, res){
-	// 					done(err);
-	// 				});
-	// 			});
-	// 		});
+				});
+			});
+				
+	});
 
-	// 		async.series(actions, done);
-
-	// 	});
-
-	// 	it('should fail', function(done){
-	// 		agent.post(`/${username}/${project}/collaborators`)
-	// 		.send({
-	// 			user: username_viewer,
-	// 			role: 'viewer'
-	// 		})
-	// 		.expect(400, function(err, res){
-	// 			expect(res.body.value).to.equal(responseCodes.COLLABORATOR_LIMIT_EXCEEDED.value);
-	// 			done(err);
-	// 		});
-	// 	});
-	// })
 });
