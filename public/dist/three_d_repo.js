@@ -4914,6 +4914,7 @@ var ViewerManager = {};
 	function AccountBillingCtrl($scope, $location, $timeout, UtilsService, serverConfig) {
 		var vm = this,
 			promise;
+		console.log(vm.quota);
 
 		/*
 		 * Init
@@ -4924,6 +4925,7 @@ var ViewerManager = {};
 		}
 		else if ($location.search().hasOwnProperty("token")) {
 			vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
+			vm.closeDialogEnabled = false;
 			UtilsService.showDialog("paypalDialog.html", $scope);
 			promise = UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute");
 			promise.then(function (response) {
@@ -4974,6 +4976,8 @@ var ViewerManager = {};
 		$scope.$watch("vm.billingAddress", function () {
 			if (angular.isDefined(vm.billingAddress)) {
 				vm.newBillingAddress = angular.copy(vm.billingAddress);
+				// Cannot change country
+				vm.countrySelectDisabled = angular.isDefined(vm.billingAddress.countryCode);
 			}
 		}, true);
 
@@ -4984,6 +4988,8 @@ var ViewerManager = {};
 			if (angular.isDefined(vm.newBillingAddress)) {
 				if (vm.numNewLicenses !== 0) {
 					vm.saveDisabled = angular.equals(vm.newBillingAddress, vm.billingAddress) || aRequiredAddressFieldIsEmpty();
+					// Company name required if VAT number exists
+					vm.companyNameRequired = (angular.isDefined(vm.newBillingAddress.vat) && (vm.newBillingAddress.vat !== ""));
 				}
 			}
 		}, true);
@@ -5033,7 +5039,7 @@ var ViewerManager = {};
 					location.href = response.data.url;
 				}
 				else {
-					console.log(vm.quota);
+					vm.closeDialogEnabled = true;
 					vm.changeHelpToShow = response.data.value;
 					vm.payPalInfo = response.data.message;
 				}
@@ -5044,6 +5050,9 @@ var ViewerManager = {};
 			$location.path("/" + page, "_self");
 		};
 
+		vm.closeDialog = function () {
+			UtilsService.closeDialog();
+		};
 
 		/**
 		 * Set up num licenses and price
@@ -5066,7 +5075,8 @@ var ViewerManager = {};
 				angular.isUndefined(vm.newBillingAddress.line1) ||
 				angular.isUndefined(vm.newBillingAddress.postalCode) ||
 				angular.isUndefined(vm.newBillingAddress.city) ||
-				angular.isUndefined(vm.newBillingAddress.countryCode)
+				angular.isUndefined(vm.newBillingAddress.countryCode) ||
+				(angular.isDefined(vm.newBillingAddress.vat) && (vm.newBillingAddress.vat !== "") && angular.isUndefined(vm.newBillingAddress.companyName))
 			);
 
 		}
@@ -17219,10 +17229,35 @@ var Oculus = {};
 
 	angular.module("3drepo")
 
-		.filter("bToGb", function() {
-			return function(input) {
-				var bytesInAGb = 1000000000;
-				return (input / bytesInAGb).toFixed(2);
+		.filter("formatBytes", function() {
+			return function(input, referenceValue) {
+				var bytesInMB = 1048576,
+					bytesInGB = 1073741824,
+					factor,
+					units;
+
+				// referenceValue is used for consistency of units
+				if (angular.isDefined(referenceValue)) {
+					if (referenceValue > 1073741824) {
+						factor = bytesInGB;
+						units = " (GB)";
+					}
+					else {
+						factor = bytesInMB;
+						units = " (MB)";
+					}
+				}
+				else {
+					if (input > 1073741824) {
+						factor = bytesInGB;
+						units = " (GB)";
+					}
+					else {
+						factor = bytesInMB;
+						units = " (MB)";
+					}
+				}
+				return (Math.round(input / factor * 100) / 100).toString() + units; // (input / bytesInAGb).toFixed(2); // Math.round(43159388160 / 1024/1024/1024 * 100) / 100
 			};
 		});
 

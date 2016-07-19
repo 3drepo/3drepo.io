@@ -44,6 +44,7 @@
 	function AccountBillingCtrl($scope, $location, $timeout, UtilsService, serverConfig) {
 		var vm = this,
 			promise;
+		console.log(vm.quota);
 
 		/*
 		 * Init
@@ -54,6 +55,7 @@
 		}
 		else if ($location.search().hasOwnProperty("token")) {
 			vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
+			vm.closeDialogEnabled = false;
 			UtilsService.showDialog("paypalDialog.html", $scope);
 			promise = UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute");
 			promise.then(function (response) {
@@ -104,6 +106,8 @@
 		$scope.$watch("vm.billingAddress", function () {
 			if (angular.isDefined(vm.billingAddress)) {
 				vm.newBillingAddress = angular.copy(vm.billingAddress);
+				// Cannot change country
+				vm.countrySelectDisabled = angular.isDefined(vm.billingAddress.countryCode);
 			}
 		}, true);
 
@@ -114,6 +118,8 @@
 			if (angular.isDefined(vm.newBillingAddress)) {
 				if (vm.numNewLicenses !== 0) {
 					vm.saveDisabled = angular.equals(vm.newBillingAddress, vm.billingAddress) || aRequiredAddressFieldIsEmpty();
+					// Company name required if VAT number exists
+					vm.companyNameRequired = (angular.isDefined(vm.newBillingAddress.vat) && (vm.newBillingAddress.vat !== ""));
 				}
 			}
 		}, true);
@@ -163,7 +169,7 @@
 					location.href = response.data.url;
 				}
 				else {
-					console.log(vm.quota);
+					vm.closeDialogEnabled = true;
 					vm.changeHelpToShow = response.data.value;
 					vm.payPalInfo = response.data.message;
 				}
@@ -174,6 +180,9 @@
 			$location.path("/" + page, "_self");
 		};
 
+		vm.closeDialog = function () {
+			UtilsService.closeDialog();
+		};
 
 		/**
 		 * Set up num licenses and price
@@ -196,7 +205,8 @@
 				angular.isUndefined(vm.newBillingAddress.line1) ||
 				angular.isUndefined(vm.newBillingAddress.postalCode) ||
 				angular.isUndefined(vm.newBillingAddress.city) ||
-				angular.isUndefined(vm.newBillingAddress.countryCode)
+				angular.isUndefined(vm.newBillingAddress.countryCode) ||
+				(angular.isDefined(vm.newBillingAddress.vat) && (vm.newBillingAddress.vat !== "") && angular.isUndefined(vm.newBillingAddress.companyName))
 			);
 
 		}

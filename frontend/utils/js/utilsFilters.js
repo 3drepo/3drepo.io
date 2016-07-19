@@ -20,10 +20,35 @@
 
 	angular.module("3drepo")
 
-		.filter("bToGb", function() {
-			return function(input) {
-				var bytesInAGb = 1000000000;
-				return (input / bytesInAGb).toFixed(2);
+		.filter("formatBytes", function() {
+			return function(input, referenceValue) {
+				var bytesInMB = 1048576,
+					bytesInGB = 1073741824,
+					factor,
+					units;
+
+				// referenceValue is used for consistency of units
+				if (angular.isDefined(referenceValue)) {
+					if (referenceValue > 1073741824) {
+						factor = bytesInGB;
+						units = " (GB)";
+					}
+					else {
+						factor = bytesInMB;
+						units = " (MB)";
+					}
+				}
+				else {
+					if (input > 1073741824) {
+						factor = bytesInGB;
+						units = " (GB)";
+					}
+					else {
+						factor = bytesInMB;
+						units = " (MB)";
+					}
+				}
+				return (Math.round(input / factor * 100) / 100).toString() + units; // (input / bytesInAGb).toFixed(2); // Math.round(43159388160 / 1024/1024/1024 * 100) / 100
 			};
 		});
 

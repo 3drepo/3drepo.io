@@ -15,11 +15,11 @@
 							label Payment (£ / month)
 							input(type="text", value="{{vm.priceLicenses}}", ng-disabled="true")
 						md-input-container(flex)
-							label Current quota used (Gb)
-							input(type="text", value="{{vm.quota.spaceUsed | bToGb}}", ng-disabled="true")
+							label Quota available
+							input(type="text", value="{{vm.quota.spaceLimit | formatBytes}}", ng-disabled="true")
 						md-input-container(flex)
-							label Current quota available (Gb)
-							input(type="text", value="{{vm.quota.spaceLimit | bToGb}}", ng-disabled="true")
+							label Quota used
+							input(type="text", value="{{vm.quota.spaceUsed | formatBytes:vm.quota.spaceLimit}}", ng-disabled="true")
 
 					div(layout="row")
 						md-input-container(flex)
@@ -32,7 +32,7 @@
 					div(layout="row")
 						md-input-container(flex)
 							label Company Name
-							input(type="text", ng-model="vm.newBillingAddress.companyName")
+							input(type="text", ng-model="vm.newBillingAddress.companyName", ng-required="vm.companyNameRequired")
 						md-input-container(flex)
 							label VAT Number
 							input(type="text", ng-model="vm.newBillingAddress.vat")
@@ -58,7 +58,7 @@
 									input(type="text", ng-model="vm.newBillingAddress.postalCode", required)
 								md-input-container(flex)
 									label Country
-									md-select(ng-model="vm.newBillingAddress.countryCode", required)
+									md-select(ng-model="vm.newBillingAddress.countryCode", required, ng-disabled="vm.countrySelectDisabled")
 										md-option(ng-repeat="country in vm.countries", value="{{country.code}}") {{country.name}}
 
 
@@ -76,7 +76,7 @@
 						md-subheader
 							div(layout="row", layout-align="start")
 								label(flex="20") Date
-								label(flex="25") Id
+								//label(flex="25") Id
 								label(flex="25") Payment Method
 								label(flex="20") Amount (£)
 
@@ -84,7 +84,7 @@
 						.accountBillingHistoryListItem(layout="row", layout-align="start start", ng-repeat="billing in vm.billings")
 							md-input-container(flex="20")
 								input(type="text", value="{{billing.createdAt | date:'dd-MM-yyyy'}}", ng-disabled="true", aria-label="date")
-							md-input-container(flex="25")
+							//md-input-container(flex="25")
 								input(type="text", value="{{billing.billingAgreementId}}", ng-disabled="true", aria-label="id")
 							md-input-container(flex="25")
 								input(type="text", value="{{billing.gateway}}", ng-disabled="true", aria-label="paymentMethod")
