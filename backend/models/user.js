@@ -993,6 +993,7 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 		dbUser.customData.nextPaymentDate = moment(paymentInfo.nextPaymentDate).utc().startOf('date').toDate();
 
+		let inCurrentAgreementCount = dbUser.customData.subscriptions.filter(sub => sub.inCurrentAgreement).length;
 		dbUser.customData.subscriptions.forEach(subscription => {
 
 			if(subscription.inCurrentAgreement){
@@ -1003,9 +1004,6 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 					.hours(0).minutes(0).seconds(0).milliseconds(0)
 					.toDate();
 
-				//let start = moment.utc(paymentInfo.ipnDate).date();
-				//let end = moment(paymentInfo.ipnDate).utc().endOf('month').date();
-				//let prorata = (end - start + 1) / end;
 
 
 				subscription.limits = getSubscription(subscription.plan).limits;
@@ -1017,7 +1015,7 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 					items.push({
 						name: subscription.plan,
 						currency: getSubscription(subscription.plan).currency,
-
+						amount: Math.round(paymentInfo.amount / inCurrentAgreementCount * 100) / 100
 					});
 				}
 			
@@ -1026,6 +1024,13 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 		});
 
 		if(paymentInfo.createBilling){
+
+
+			let nextAmount = 0;
+
+			dbUser.customData.subscriptions.filter(sub => sub.inCurrentAgreement).forEach(sub => {
+				nextAmount += getSubscription(sub.plan).amount;
+			});
 
 			let billing = Billing.createInstance({ account });
 
@@ -1036,6 +1041,11 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 			billing.amount = paymentInfo.amount;
 			billing.billingAgreementId = billingAgreementId;
 			billing.items = items;
+			billing.nextPaymentDate = paymentInfo.nextPaymentDate;
+			billing.taxAmount = paymentInfo.taxAmount;
+			billing.nextPaymentAmount = nextAmount;
+
+
 			//copy current billing info from user to billing
 			billing.info = dbUser.customData.billingInfo;
 
