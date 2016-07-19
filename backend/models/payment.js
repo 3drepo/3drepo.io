@@ -24,14 +24,109 @@ var moment = require('moment');
 paypal.configure({
 	'mode': config.paypal.mode, //sandbox or live
 	'client_id': config.paypal.client_id,
-	'client_secret': config.paypal.client_secret
+	'client_secret': config.paypal.client_secret,
 });
 
-function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAmount, firstBillingCycle, amount, billingCycle, startDate, vatNumber){
+
+var Subscription = require('./subscription');
+var getSubscription = Subscription.getSubscription;
+
+function roundTo2DP(value){
+	return Math.round(value * 100) / 100;
+}
+
+function getPaymentDateAndAmount(newLicences, oldPayableLicences, paymentDate, lastAnniversaryDate, nextPaymentDate, country, isBusiness){
+	'use strict';
+
+	let firstCycleAmount = 0;
+	let firstCycleBeforeTaxAmount = 0;
+	let firstCycleTaxAmount = 0;
+	let firstCycleLength = { value: -1, unit : 'DAY' };
+
+	let regularAmount = 0;
+	let regularBeforeTaxAmount = 0;
+	let regularTaxAmount = 0;
+	let regularCycleLength = { value: 1, unit: 'MONTH' };
+
+	let startDate;
+
+	// new licences
+	newLicences.forEach(licence => {
+
+		if(licence.quantity > 0){
+			regularAmount += getSubscription(licence.plan).amount * licence.quantity;
+		}
+		
+	});
+
+	// do pro-rata if not first time to buy
+	if(oldPayableLicences.length > 0 && regularAmount > 0){
+
+		paymentDate = moment(paymentDate).utc();
+		startDate = paymentDate.toDate();
+
+		lastAnniversaryDate = moment(lastAnniversaryDate).utc();
+		nextPaymentDate = moment(nextPaymentDate).utc();
+		console.log(moment(paymentDate).utc().startOf('date').toISOString());
+		console.log(moment.duration(nextPaymentDate.diff(moment(paymentDate).utc().startOf('date'))).asDays());
+		firstCycleLength.value = Math.round(moment.duration(nextPaymentDate.diff(moment(paymentDate).utc().startOf('date'))).asDays());
+		firstCycleAmount =  firstCycleLength.value / Math.round(moment.duration(nextPaymentDate.diff(lastAnniversaryDate)).asDays()) * regularAmount;
+		firstCycleAmount = Math.round(firstCycleAmount * 100) / 100;
+
+	} else if (regularAmount > 0) {
+		startDate =  moment(paymentDate).utc().toDate();
+	} else {
+		// decrease no. of licences
+		startDate = moment(nextPaymentDate).utc().toDate();
+	}
+
+
+	oldPayableLicences.forEach(licence => {
+
+		let quantity = licence.quantity;
+		let plan = getSubscription(licence.plan);
+		regularAmount += plan.amount * quantity;
+	});
+
+
+	firstCycleBeforeTaxAmount = firstCycleAmount / (1 + vat.getByCountryCode(country, isBusiness));
+	firstCycleTaxAmount = firstCycleAmount - firstCycleBeforeTaxAmount;
+
+	regularBeforeTaxAmount = regularAmount / ( 1 + vat.getByCountryCode(country, isBusiness));
+	regularTaxAmount = regularAmount - regularBeforeTaxAmount;
+
+
+	firstCycleAmount = roundTo2DP(firstCycleAmount);
+	firstCycleBeforeTaxAmount = roundTo2DP(firstCycleBeforeTaxAmount);
+	firstCycleTaxAmount = roundTo2DP(firstCycleTaxAmount);
+
+	regularAmount  = roundTo2DP(regularAmount);
+	regularBeforeTaxAmount = roundTo2DP(regularBeforeTaxAmount);
+	regularTaxAmount = roundTo2DP(regularTaxAmount);
+
+	return {
+		firstCycleAmount,
+		firstCycleBeforeTaxAmount,
+		firstCycleTaxAmount,
+		firstCycleLength,
+		regularAmount,
+		regularBeforeTaxAmount,
+		regularTaxAmount,
+		regularCycleLength,
+		startDate
+	};
+}
+
+function getBillingAgreement(
+	billingUser, billingAddress, currency, 
+	firstCycleAmount, firstCycleBeforeTaxAmount, firstCycleTaxAmount, firstCycleLength,
+	regularAmount, regularBeforeTaxAmount, regularTaxAmount, regularCycleLength, 
+	startDate
+){
 	'use strict';
 
 	console.log('firstCycleAmount', firstCycleAmount);
-	console.log('amount', amount);
+	console.log('regularAmount', regularAmount);
 	console.log('startDate', startDate);
 
 	let apiServerConfig = config.servers.find(server => server.service === 'api');
@@ -43,28 +138,21 @@ function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAm
 	let baseUrl = (config.using_ssl ? 'https://' : 'http://') + config.host + port;
 
 
-
-
-	let afterTaxAmount = amount / ( 1 + vat.getByCountryCode(billingAddress.country_code, vatNumber));
-	afterTaxAmount = Math.round(afterTaxAmount * 100) / 100;
-	let taxAmount = amount - afterTaxAmount;
-	taxAmount = Math.round(taxAmount * 100) / 100;
-
 	let paymentDefs = [];
 	paymentDefs.push({
 		"amount": {
 			"currency": currency,
-			"value": afterTaxAmount
+			"value": regularBeforeTaxAmount
 		},
 		"cycles": "0",
-		"frequency": "MONTH",
-		"frequency_interval": billingCycle,
+		"frequency": regularCycleLength.unit,
+		"frequency_interval": regularCycleLength.value,
 		"name": "Regular monthly price",
 		"type": "REGULAR",
 		"charge_models":[{
 			"type": "TAX",
 			"amount": {
-				"value": taxAmount,
+				"value": regularTaxAmount,
 				"currency": currency
 			}
 		}]
@@ -72,25 +160,21 @@ function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAm
 
 	if(firstCycleAmount){
 		
-		let afterTaxFirstCycleAmount = firstCycleAmount / ( 1 + vat.getByCountryCode(billingAddress.country_code, vatNumber));
-		afterTaxFirstCycleAmount = Math.round(afterTaxFirstCycleAmount * 100) / 100;
-		let taxFirstCycleAmount = firstCycleAmount - afterTaxFirstCycleAmount;
-		taxFirstCycleAmount = Math.round(taxFirstCycleAmount * 100) / 100;
 
 		paymentDefs.push({
 			"amount": {
 				"currency": currency,
-				"value": afterTaxFirstCycleAmount
+				"value": firstCycleBeforeTaxAmount
 			},
 			"cycles": "1",
-			"frequency": "DAY",
-			"frequency_interval": firstBillingCycle,
+			"frequency": firstCycleLength.unit,
+			"frequency_interval": firstCycleLength.value,
 			"name": "First month pro-rata price",
 			"type": "TRIAL",
 			"charge_models":[{
 				"type": "TAX",
 				"amount": {
-					"value": taxFirstCycleAmount,
+					"value": firstCycleTaxAmount,
 					"currency": currency
 				}
 			}]
@@ -155,9 +239,11 @@ function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAm
 		//create agreement
 		return new Promise((resolve, reject) => {
 
-			let desc = `3D Repo Licence subscription.`;
-			desc += `This month's pro-rata price: £${firstCycleAmount}, then `;
-			desc += `regualr monthly recurring payment: £${amount}`;
+			let desc = ``;
+			if (firstCycleAmount){
+				desc += `This month's pro-rata price: £${firstCycleAmount}. `;
+			}
+			desc += `Regualr monthly recurring payment £${regularAmount}, starts on ${moment(startDate).utc().format('Do MMM YYYY')}`;
 			
 			console.log('desc len', desc.length);
 
@@ -174,6 +260,7 @@ function getBillingAgreement(billingUser, billingAddress, currency, firstCycleAm
 				"shipping_address": billingAddress
 			};
 
+			console.log(JSON.stringify(billingAgreementAttributes, null , 2));
 			console.log('creating agreement...');
 			paypal.billingAgreement.create(billingAgreementAttributes, function (err, billingAgreement) {
 				if (err) {
@@ -224,6 +311,7 @@ function updateBillingAddress(billingAgreementId, billingAddress){
 
 }
 
+// used to predict next payment date when ipn from paypal is delayed, where ipn contains the actual next payment date info.
 function getNextPaymentDate(date){
 	'use strict';
 	
@@ -241,5 +329,6 @@ module.exports = {
 	getBillingAgreement,
 	updateBillingAddress,
 	paypal,
-	getNextPaymentDate
+	getNextPaymentDate,
+	getPaymentDateAndAmount
 };
