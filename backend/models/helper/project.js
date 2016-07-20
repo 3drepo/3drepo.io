@@ -156,7 +156,7 @@ function importToyJSON(db, project){
 		promises.push(new Promise((resolve, reject) => {
 
 			require('child_process').exec(
-			`mongoimport -j 4 --host ${host} --username ${username} --password ${password} --authenticationDatabase admin --db ${db} --collection ${collection} --file ${path}/${filename}`,
+			`mongoimport -j 8 --host ${host} --username ${username} --password ${password} --authenticationDatabase admin --db ${db} --collection ${collection} --file ${path}/${filename}`,
 			{ 
 				cwd: __dirname
 			}, function (err) {
@@ -211,7 +211,7 @@ function importToyProject(username){
 
 		}).catch(err => {
 			// import failed for some reason(s)...
-			console.log(err);
+			console.log('import toy project error', err);
 			//mark project failed
 			if(projectSetting){
 				projectSetting.status = 'failed';
