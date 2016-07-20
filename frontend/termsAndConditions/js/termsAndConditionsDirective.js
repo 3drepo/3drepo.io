@@ -32,13 +32,13 @@
 		};
 	}
 
-	TermsAndConditionsCtrl.$inject = ["$location"];
+	TermsAndConditionsCtrl.$inject = ["EventService"];
 
-	function TermsAndConditionsCtrl ($location) {
+	function TermsAndConditionsCtrl (EventService) {
 		var vm = this;
 
 		vm.home = function () {
-			$location.path("/", "_self");
+			EventService.send(EventService.EVENT.GO_HOME);
 		};
 	}
 }());

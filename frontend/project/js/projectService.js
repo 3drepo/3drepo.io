@@ -21,16 +21,16 @@
 	angular.module("3drepo")
 		.factory("ProjectService", ProjectService);
 
-	ProjectService.$inject = ["$http", "$q", "StateManager", "serverConfig", "Auth"];
+	ProjectService.$inject = ["$http", "$q", "StateManager", "serverConfig", "HttpService", "Auth"];
 
-	function ProjectService($http, $q, StateManager, serverConfig, Auth) {
+	function ProjectService($http, $q, StateManager, serverConfig, HttpService, Auth) {
 		var state = StateManager.state;
 
 		var getProjectInfo = function (account, project) {
 			var deferred = $q.defer(),
 				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + ".json");
 
-			$http.get(url).then(
+			return HttpService.get(serverConfig.GET_API, account + "/" + project + ".json",
 				function(json) {
 					deferred.resolve({
 						account     : account,
@@ -41,12 +41,7 @@
 						type		: json.type,
 						settings 	: json.properties
 					});
-				},
-				function () {
-					deferred.resolve([]);
 				});
-
-			return deferred.promise;
 		};
 
 		var getRoles = function (account, project) {

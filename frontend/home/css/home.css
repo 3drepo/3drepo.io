@@ -61,6 +61,10 @@ home .homeUserContent .userContent md-progress-circular {
     margin-left: 10px;
 }
 
+home .homeUserContent md-tabs-wrapper {
+    background: #FFFFFF;
+}
+
 .cardInfo {
     text-align: center;
     padding: 15px;

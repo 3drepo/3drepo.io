@@ -96,7 +96,7 @@
 				Auth.login(vm.user.username, vm.user.password);
 			}
 		};
-		
+
 		/**
 		 * Attempt to register
 		 *
@@ -211,7 +211,7 @@
 	/**
 	 * Re-make md-input-container to get around the problem discussed here https://github.com/angular/material/issues/1376
 	 * Taken from mikila85's version of blaise-io's workaround
-	 * 
+	 *
 	 * @param $timeout
 	 * @returns {Function}
 	 */

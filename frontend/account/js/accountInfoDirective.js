@@ -50,7 +50,7 @@
 			repos: {label: "Repos"},
 			profile: {label: "Profile"},
 			billing: {label: "Billing"},
-			collaborators: {label: "Collaborators"}
+			licenses: {label: "Licenses"}
 		};
 
 		/**

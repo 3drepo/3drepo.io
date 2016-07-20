@@ -21,9 +21,9 @@
     angular.module("3drepo")
         .factory("UtilsService", UtilsService);
 
-    UtilsService.$inject = ["$http", "$q", "serverConfig"];
+    UtilsService.$inject = ["$http", "$q", "$mdDialog", "serverConfig"];
 
-    function UtilsService($http, $q, serverConfig) {
+    function UtilsService($http, $q, $mdDialog, serverConfig) {
         var obj = {};
 
 		/**
@@ -170,6 +170,42 @@
                     }
                 );
             return deferred.promise;
+        };
+
+        /**
+         * Show a dialog
+         *
+         * @param {String} dialogTemplate - required
+         * @param {Object} scope - required
+         * @param {Object} event
+         * @param {Boolean} clickOutsideToClose
+         * @param {Object} parent
+         * @param {Boolean} fullscreen
+         */
+        obj.showDialog = function (dialogTemplate, scope, event, clickOutsideToClose, parent, fullscreen) {
+            // Allow the dialog to have cancel ability
+            scope.utilsRemoveDialog = scope.utilsRemoveDialog || function () {$mdDialog.cancel();};
+
+            // Set up and show dialog
+            var data = {
+                controller: function () {},
+                templateUrl: dialogTemplate,
+                onRemoving: function () {$mdDialog.cancel();}
+            };
+            data.parent = angular.element(angular.isDefined(parent) ? parent : document.body);
+            data.scope = (angular.isDefined(scope)) ? scope : null;
+            data.preserveScope = (data.scope !== null);
+            data.targetEvent = (angular.isDefined(event)) ? event : null;
+            data.clickOutsideToClose = (angular.isDefined(clickOutsideToClose)) ? clickOutsideToClose : true;
+            data.fullscreen = (angular.isDefined(fullscreen)) ? fullscreen : true;
+            $mdDialog.show(data);
+        };
+
+        /**
+         * close a dialog
+         */
+        obj.closeDialog = function () {
+            $mdDialog.cancel();
         };
 
         return obj;

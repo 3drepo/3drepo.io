@@ -68,6 +68,7 @@
 			self.loggedIn  = false;
 			self.username  = null;
 			self.userRoles = null;
+			localStorage.setItem("tdrLoggedIn", "false");
 
 			EventService.send(EventService.EVENT.USER_LOGGED_OUT, { error: reason });
 

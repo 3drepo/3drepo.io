@@ -39,8 +39,7 @@
 	function SignUpFormCtrl($scope, $mdDialog, $location, serverConfig, UtilsService) {
 		var vm = this,
 			enterKey = 13,
-			promise,
-			pay;
+			promise;
 
 		/*
 		 * Init
@@ -53,7 +52,6 @@
 		vm.useReCapthca = false;
 		vm.useRegister = false;
 		vm.registering = false;
-		pay =  (($location.search().hasOwnProperty("pay")) && $location.search().pay);
 
 		/*
 		 * Auth stuff
@@ -108,6 +106,7 @@
 		};
 
 		vm.showPage = function (page) {
+			console.log(page);
 			$location.path("/" + page, "_self");
 		};
 
@@ -130,7 +129,7 @@
 		 */
 		function doRegister() {
 			var data,
-				allowedFormat = new RegExp("^[a-zA-Z][a-zA-Z\d_]*$"); // English letters, numbers, underscore, not starting with number
+				allowedFormat = new RegExp("^[a-zA-Z][\\w]*$"); // English letters, numbers, underscore, not starting with number
 
 			if ((angular.isDefined(vm.newUser.username)) &&
 				(angular.isDefined(vm.newUser.email)) &&
@@ -139,8 +138,7 @@
 					if (vm.newUser.tcAgreed) {
 						data = {
 							email: vm.newUser.email,
-							password: vm.newUser.password,
-							pay: pay
+							password: vm.newUser.password
 						};
 						if (vm.useReCapthca) {
 							data.captcha = vm.reCaptchaResponse;

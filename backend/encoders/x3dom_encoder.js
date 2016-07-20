@@ -77,7 +77,7 @@ function X3D_Header() {
 function X3D_CreateScene(xmlDoc, rootNode) {
 	var scene = xmlDoc.createElement('Scene');
 	scene.setAttribute('id', 'scene');
-	scene.setAttribute('dopickpass', 'false');
+	//scene.setAttribute('dopickpass', 'false');
 
 	xmlDoc.firstChild.appendChild(scene);
 
@@ -531,13 +531,11 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
 			{
 				var mp = xmlDoc.createElement('MultiPart');
 				mp.setAttribute('onload', 'onLoaded(event);');
+				mp.setAttribute('onclick', 'clickObject(event);');
 				mp.setAttribute('id', child['id']);
 				mp.setAttribute('url', config.api_server.url + '/' + account + '/' + project + '/' + child['id'] + '.x3d.mpc');
 				mp.setAttribute('urlIDMap', config.api_server.url + '/' + account + '/' + project + '/' + child['id'] + '.json.mpc');
-				mp.setAttribute('onclick', 'clickObject(event);');
 				mp.setAttribute('solid', 'true');
-				mp.setAttribute('onmouseover', 'onMouseOver(event);');
-				mp.setAttribute('onmousemove', 'onMouseMove(event);');
 				mp.setAttribute('nameSpaceName', child['id']);
 
 				if (bbox)
@@ -1060,7 +1058,7 @@ exports.route = function(router)
 							{
 								subMeshBBoxes.push(bbox);
 							}
-							maxSubMeshIDX += 1;	
+							maxSubMeshIDX += 1;
 							bbox = [[],[]];
 						}
 
@@ -1074,7 +1072,7 @@ exports.route = function(router)
 							{
 								subMeshBBoxes.push(bbox);
 							}
-							maxSubMeshIDX += numAddedMeshes;	
+							maxSubMeshIDX += numAddedMeshes;
 							bbox = [[],[]];
 
 							numAddedMeshes = 0;
@@ -1111,7 +1109,7 @@ exports.route = function(router)
 					{
 						subMeshBBoxes.push(bbox);
 					}
-					maxSubMeshIDX += 1;	
+					maxSubMeshIDX += 1;
 					bbox = [[],[]];
 				}
 

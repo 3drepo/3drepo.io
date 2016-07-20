@@ -1,23 +1,23 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *	Copyright (C) 2014 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 var _ = require('lodash');
 var responseCodes = require('../response_codes');
-var C               = require("../constants");
+var C				= require("../constants");
 var Bid = require('../models/bid');
 var ProjectSetting = require('../models/projectSetting');
 // var History = require('../models/history');
@@ -82,7 +82,7 @@ function hasAccessToProject(req, res, next, permissionBit){
 		}
 	}).catch( err => {
 		responseCodes.respond("Middleware: check has access to project", req, res, next, err , null, err);
-	}); 
+	});
 }
 
 function hasWriteAccessToProject(req, res, next){
@@ -91,7 +91,7 @@ function hasWriteAccessToProject(req, res, next){
 
 
 function hasReadAccessToProject(req, res, next){
-	return hasAccessToProject(req, res, next, READ_BIT); 
+	return hasAccessToProject(req, res, next, READ_BIT);
 }
 
 function hasAccessToAccount(req, res, next){
@@ -115,18 +115,18 @@ function hasWriteAccessToAccount(req, res, next){
 
 function canCreateProject(req, res, next){
 	"use strict";
-	
+
 	if (req.params.account === req.session[C.REPO_SESSION_USER].username){
 		next();
 	} else {
 		hasWriteAccessToProject(req, res, next);
 	}
 }
-	
+
 function loggedIn(req, res, next){
 	'use strict';
 
-	if (!(req.session.hasOwnProperty(C.REPO_SESSION_USER))) {
+	if (!req.session || !req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
 		responseCodes.respond("Check logged in middleware", req, res, next, responseCodes.AUTH_ERROR, null, req.params);
 	} else {
 		next();
@@ -213,11 +213,11 @@ function freeSpace(account){
 		return User.historyChunksStats(account);
 
 	}).then(stats => {
-		
+
 		let totalSize = 0;
 
 		stats.forEach(stat => {
-			totalSize += stat.size; 
+			totalSize += stat.size;
 		});
 
 		// console.log(limits.spaceLimit);
@@ -265,7 +265,7 @@ function connectQueue(req, res, next){
 			sharedSpacePath: config.cn_queue.shared_storage,
 			logger: req[C.REQ_REPO].logger,
 			callbackQName: config.cn_queue.callback_queue,
-			workerQName: config.cn_queue.worker_queue 
+			workerQName: config.cn_queue.worker_queue
 
 		}).then(() => {
 			next();
@@ -276,7 +276,7 @@ function connectQueue(req, res, next){
 	} else {
 		next();
 	}
-		
+
 }
 
 function isAccountAdmin(req, res, next){

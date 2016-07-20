@@ -35,11 +35,13 @@
 	BottomButtonsCtrl.$inject = ["EventService"];
 
 	function BottomButtonsCtrl (EventService) {
-		var vm = this;
+		var vm = this,
+			measureMode = false;
+
+
 		vm.showButtons = true;
 		vm.fullScreen = false;
 		vm.showViewingOptionButtons = false;
-		console.log(EventService);
 
 		vm.toggleElements = function () {
 			EventService.send(EventService.EVENT.TOGGLE_ELEMENTS);
@@ -89,6 +91,14 @@
 
 		var enterOculusDisplay = function () {
 			EventService.send(EventService.EVENT.VIEWER.ENTER_VR);
+		};
+
+		/**
+		 * Enter pinakin mode
+		 */
+		var setMeasureMode = function () {
+			measureMode = !measureMode;
+			EventService.send(EventService.EVENT.MEASURE_MODE, measureMode);
 		};
 
 		vm.viewingOptions = [

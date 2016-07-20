@@ -32,13 +32,13 @@
 		};
 	}
 
-	paymentCtrl.$inject = ["$location"];
+	paymentCtrl.$inject = ["EventService"];
 
-	function paymentCtrl ($location) {
+	function paymentCtrl (EventService) {
 		var vm = this;
 
 		vm.goToLoginPage = function () {
-			$location.path("/", "_self");
+			EventService.send(EventService.EVENT.GO_HOME);
 		};
 	}
 }());

@@ -39,15 +39,11 @@
 
 		/**
 		 * Go to a sub page
-		 * 
+		 *
 		 * @param page
-		 * @param pay
 		 */
-		vm.showPage = function (page, pay) {
+		vm.showPage = function (page) {
 			$location.path("/" + page, "_self");
-			if ((page === "signUp") && pay) {
-				$location.search("pay", true);
-			}
 		};
 	}
 }());

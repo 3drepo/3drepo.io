@@ -26,7 +26,12 @@
 			restrict: 'EA',
 			templateUrl: 'accountBilling.html',
 			scope: {
-				showPage: "&"
+				account: "=",
+				billingAddress: "=",
+				quota: "=",
+				billings: "=",
+				subscriptions: "=",
+				plans: "="
 			},
 			controller: AccountBillingCtrl,
 			controllerAs: 'vm',
@@ -34,45 +39,106 @@
 		};
 	}
 
-	AccountBillingCtrl.$inject = ["$scope", "$http", "$location"];
+	AccountBillingCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "serverConfig"];
 
-	function AccountBillingCtrl($scope, $http, $location) {
+	function AccountBillingCtrl($scope, $location, $timeout, UtilsService, serverConfig) {
 		var vm = this,
-			pricePerLicense = 100,
-			quotaPerLicense = 10,
-			initData = {
-				licenses: 2,
-				postalCode: "LS11 8QT",
-				country: "United Kingdom",
-				vatNumber: "12398756"
-			};
+			promise;
+		console.log(vm.quota);
 
 		/*
 		 * Init
 		 */
-		vm.showInfo = true;
-		vm.quotaUsed = 17.3;
-		vm.quotaAvailable = Math.round(((initData.licenses * quotaPerLicense) - vm.quotaUsed) * 10) / 10; // Round to 1 decimal place
-		vm.numCurrentLicenses = initData.licenses;
-		vm.newData = angular.copy(initData);
-		vm.saveButtonDisabled = true;
-		vm.billingHistory = [
-			{"Date": "10/04/2016", "Description": "1st payment", "Payment Method": "PayPal", "Amount": 100},
-			{"Date": "10/05/2016", "Description": "2nd payment", "Payment Method": "PayPal", "Amount": 100},
-			{"Date": "10/06/2016", "Description": "3rd payment", "Payment Method": "PayPal", "Amount": 100}
-		];
-		$http.get("/public/data/countries.json").then(function (response) {
-			vm.countries = response.data;
-		});
+		if ($location.search().hasOwnProperty("cancel")) {
+			// Cancelled out of PayPal
+			init();
+		}
+		else if ($location.search().hasOwnProperty("token")) {
+			vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
+			vm.closeDialogEnabled = false;
+			UtilsService.showDialog("paypalDialog.html", $scope);
+			promise = UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute");
+			promise.then(function (response) {
+				console.log("payment/paypal/execute ", response);
+				if (response.status === 200) {
+				}
+				vm.payPalInfo = "PayPal has finished processing. Thank you.";
+				$timeout(function () {
+					UtilsService.closeDialog();
+					init();
+				}, 2000);
+			});
+		}
+		else {
+			init();
+		}
 
-		$scope.$watch("vm.newData", function () {
-			console.log(vm.newData);
-			if (vm.newData.licenses !== "undefined") {
-				vm.priceLicenses = vm.newData.licenses * pricePerLicense;
-				vm.saveButtonDisabled = angular.equals(initData, vm.newData);
+		/**
+		 * Initialise data
+		 */
+		function init () {
+			vm.showInfo = true;
+			vm.saveDisabled = true;
+			vm.countries = serverConfig.countries;
+		}
+
+		/*
+		 * Watch for change in licenses
+		 */
+		$scope.$watch("vm.numNewLicenses", function () {
+			if (angular.isDefined(vm.numNewLicenses)) {
+				if (vm.numLicenses === vm.numNewLicenses) {
+					vm.saveDisabled = angular.equals(vm.newBillingAddress, vm.billingAddress) || aRequiredAddressFieldIsEmpty();
+				}
+				else {
+					vm.saveDisabled = aRequiredAddressFieldIsEmpty();
+				}
+				vm.priceLicenses = vm.numNewLicenses * vm.pricePerLicense;
 			}
 			else {
-				vm.saveButtonDisabled = false;
+				vm.saveDisabled = true;
+			}
+		});
+
+		/*
+		 * Watch passed billing address
+		 */
+		$scope.$watch("vm.billingAddress", function () {
+			if (angular.isDefined(vm.billingAddress)) {
+				vm.newBillingAddress = angular.copy(vm.billingAddress);
+				// Cannot change country
+				vm.countrySelectDisabled = angular.isDefined(vm.billingAddress.countryCode);
+			}
+		}, true);
+
+		/*
+		 * Watch for change in billing info
+		 */
+		$scope.$watch("vm.newBillingAddress", function () {
+			if (angular.isDefined(vm.newBillingAddress)) {
+				if (vm.numNewLicenses !== 0) {
+					vm.saveDisabled = angular.equals(vm.newBillingAddress, vm.billingAddress) || aRequiredAddressFieldIsEmpty();
+					// Company name required if VAT number exists
+					vm.companyNameRequired = (angular.isDefined(vm.newBillingAddress.vat) && (vm.newBillingAddress.vat !== ""));
+				}
+			}
+		}, true);
+
+		/*
+		 * Watch for subscriptions
+		 */
+		$scope.$watch("vm.subscriptions", function () {
+			if (angular.isDefined(vm.subscriptions) && angular.isDefined(vm.plans)) {
+				setupLicensesInfo();
+			}
+		}, true);
+
+		/*
+		 * Watch for plans
+		 */
+		$scope.$watch("vm.plans", function () {
+			if (angular.isDefined(vm.subscriptions) && angular.isDefined(vm.plans)) {
+				setupLicensesInfo();
 			}
 		}, true);
 
@@ -82,9 +148,67 @@
 		 * @param index
 		 */
 		vm.downloadBilling = function (index) {
-			$location.path("/billing", "_self")
-				.search({}) // Clear all parameters
-				.search("item", index);
+			$location.url("/billing?user=" + vm.account + "&item=" + index);
 		};
+
+		vm.changeSubscription = function () {
+			var data = {
+				plans: [{
+					plan: "THE-100-QUID-PLAN",
+					quantity: vm.numNewLicenses
+				}],
+				billingAddress: vm.newBillingAddress
+			};
+
+			vm.payPalInfo = "Redirecting to PayPal. Please do not refresh the page or close the tab.";
+			UtilsService.showDialog("paypalDialog.html", $scope, null, true);
+			promise = UtilsService.doPost(data, vm.account + "/subscriptions");
+			promise.then(function (response) {
+				console.log(response);
+				if (response.status === 200) {
+					location.href = response.data.url;
+				}
+				else {
+					vm.closeDialogEnabled = true;
+					vm.changeHelpToShow = response.data.value;
+					vm.payPalInfo = response.data.message;
+				}
+			});
+		};
+
+		vm.goToPage = function (page) {
+			$location.path("/" + page, "_self");
+		};
+
+		vm.closeDialog = function () {
+			UtilsService.closeDialog();
+		};
+
+		/**
+		 * Set up num licenses and price
+		 */
+		function setupLicensesInfo () {
+			vm.numLicenses = vm.subscriptions.length;
+			vm.numNewLicenses = vm.numLicenses;
+			vm.pricePerLicense = vm.plans[0].amount;
+		}
+
+		/**
+		 * Check if any required input fields is empty
+		 *
+		 * @returns {boolean}
+		 */
+		function aRequiredAddressFieldIsEmpty () {
+			return (
+				angular.isUndefined(vm.newBillingAddress.firstName) ||
+				angular.isUndefined(vm.newBillingAddress.lastName) ||
+				angular.isUndefined(vm.newBillingAddress.line1) ||
+				angular.isUndefined(vm.newBillingAddress.postalCode) ||
+				angular.isUndefined(vm.newBillingAddress.city) ||
+				angular.isUndefined(vm.newBillingAddress.countryCode) ||
+				(angular.isDefined(vm.newBillingAddress.vat) && (vm.newBillingAddress.vat !== "") && angular.isUndefined(vm.newBillingAddress.companyName))
+			);
+
+		}
 	}
 }());

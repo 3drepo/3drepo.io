@@ -32,13 +32,13 @@
 		};
 	}
 
-	CookiesCtrl.$inject = ["$location"];
+	CookiesCtrl.$inject = ["EventService"];
 
-	function CookiesCtrl ($location) {
+	function CookiesCtrl (EventService) {
 		var vm = this;
 
 		vm.home = function () {
-			$location.path("/", "_self");
+			EventService.send(EventService.EVENT.GO_HOME);
 		};
 	}
 }());

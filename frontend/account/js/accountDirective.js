@@ -27,6 +27,7 @@
 			templateUrl: "account.html",
 			scope: {
 				state: "=",
+				query: "=",
 				account: "="
 			},
 			controller: AccountCtrl,
@@ -35,46 +36,80 @@
 		};
 	}
 
-	AccountCtrl.$inject = ["$scope", "$location", "$injector", "$state", "AccountService", "Auth", "UtilsService"];
+	AccountCtrl.$inject = ["$scope", "$injector", "$location", "AccountService", "Auth", "UtilsService"];
 
-	function AccountCtrl($scope, $location, $injector, $state, AccountService, Auth, UtilsService) {
+	function AccountCtrl($scope, $injector, $location, AccountService, Auth, UtilsService) {
 		var vm = this,
-			promise;
+			userInfoPromise,
+			billingsPromise,
+			subscriptionsPromise,
+			plansPromise;
 
 		/*
 		 * Get the account data
 		 */
-		$scope.$watch("vm.account", function()
+		$scope.$watchGroup(["vm.account", "vm.query.page"], function()
 		{
-			if (vm.account)
+			if (vm.account || vm.query.page)
 			{
-				promise = AccountService.getUserInfo(vm.account);
-				promise.then(function (response) {
+				userInfoPromise = AccountService.getUserInfo(vm.account);
+				userInfoPromise.then(function (response) {
+					var i, length;
+					console.log("**userInfo** ", response);
 					vm.accounts = response.data.accounts;
 					vm.username = vm.account;
 					vm.firstName = response.data.firstName;
 					vm.lastName = response.data.lastName;
 					vm.email = response.data.email;
 
-					// Go to the correct "page"
-					if ($location.search().hasOwnProperty("page")) {
-						// Check that there is a directive for that "page"
-						if ($injector.has("account" + UtilsService.capitalizeFirstLetter($location.search().page) + "Directive")) {
-							vm.itemToShow = ($location.search()).page;
+					vm.billingAddress = response.data.billingInfo;
+					// Pre-populate billing name if it doesn't exist with profile name
+					if (!vm.billingAddress.hasOwnProperty("firstName")) {
+						vm.billingAddress.firstName = vm.firstName;
+						vm.billingAddress.lastName = vm.lastName;
+					}
+
+					for (i = 0, length = vm.accounts.length; i < length; i += 1) {
+						if (vm.accounts[i].account === vm.account) {
+							vm.quota = vm.accounts[i].quota;
+							break;
 						}
-						else {
-							vm.itemToShow = "repos";
-						}
+					}
+				});
+
+				billingsPromise = UtilsService.doGet(vm.account + "/billings");
+				billingsPromise.then(function (response) {
+					console.log("**billings** ", response);
+					vm.billings = response.data;
+				});
+
+				subscriptionsPromise = UtilsService.doGet(vm.account + "/subscriptions");
+				subscriptionsPromise.then(function (response) {
+					console.log("**subscriptions** ", response);
+					vm.subscriptions = response.data;
+				});
+
+				plansPromise = UtilsService.doGet("plans");
+				plansPromise.then(function (response) {
+					console.log("**plans** ", response);
+					if (response.status === 200) {
+						vm.plans = response.data;
+					}
+				});
+
+				// Go to the correct "page"
+				if (vm.query.hasOwnProperty("page")) {
+					// Check that there is a directive for that "page"
+					if ($injector.has("account" + UtilsService.capitalizeFirstLetter(vm.query.page) + "Directive")) {
+						vm.itemToShow = vm.query.page;
 					}
 					else {
 						vm.itemToShow = "repos";
 					}
-					/*
-					 vm.hasAvatar = response.data.hasAvatar;
-					 vm.avatarURL = response.data.avatarURL;
-					 */
-					goToProject();
-				});
+				}
+				else {
+					vm.itemToShow = "repos";
+				}
 			} else {
 				vm.username        = null;
 				vm.firstName       = null;
@@ -84,25 +119,13 @@
 			}
 		});
 
-		/*
-		 * Watch for change in project
-		 */
-		$scope.$watch("vm.state.project", function() {
-			goToProject();
-		});
-
-		/*
-		 * Handle browser back/forward buttons because 'reloadOnSearch' is set to false
-		 */
-		$scope.$on('$locationChangeSuccess', function() {
-			if ($state.params.hasOwnProperty("page") && ($state.params.page !== undefined)) {
-				vm.showPage($state.params.page);
-			}
-		});
+		vm.showItem = function (item) {
+			vm.itemToShow = item;
+		};
 
 		/**
 		 * For pages to show other pages
-		 * 
+		 *
 		 * @param page
 		 * @param callingPage
 		 */
@@ -113,32 +136,12 @@
 		};
 
 		/**
-		 * Go to a project or back to the projects list if the project is unknown
-		 */
-		function goToProject () {
-			var i, length;
-			vm.showProject = false;
-			if (angular.isDefined(vm.accounts)) {
-				for (i = 0, length = vm.accounts[0].projects.length; i < length; i += 1) {
-					if (vm.accounts[0].projects[i].project === vm.state.project) {
-						vm.showProject = true;
-						break;
-					}
-				}
-				if (!vm.showProject) {
-					$location.path("/" + vm.state.account, "_self");
-				}
-			}
-		}
-
-		/**
 		 * Event listener for change in local storage login status
-		 * 
+		 *
 		 * @param event
 		 */
 		function loginStatusListener (event) {
 			if ((event.key === "tdrLoggedIn") && (event.newValue === "false")) {
-				$location.path("/", "_self");
 				Auth.logout();
 			}
 		}

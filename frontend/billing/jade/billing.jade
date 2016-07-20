@@ -10,13 +10,13 @@ md-content(layout="row", layout-align="center", layout-margin, ng-if="vm.showBil
 	#billingList(layout="column", flex="50")
 		md-input-container(flex)
 			label Date
-			input(type="text", value="{{vm.billingHistory[vm.item].Date}}", ng-disabled="true")
-		md-input-container(flex)
-			label Description
-			input(type="text", value="{{vm.billingHistory[vm.item].Description}}", ng-disabled="true")
+			input(type="text", value="{{vm.billing.createdAt | date:'dd-MM-yyyy'}}", ng-disabled="true")
+		//md-input-container(flex)
+			label Id
+			input(type="text", value="{{vm.billing.billingAgreementId}}", ng-disabled="true")
 		md-input-container(flex)
 			label Payment Method
-			input(type="text", value="{{vm.billingHistory[vm.item]['Payment Method']}}", ng-disabled="true")
+			input(type="text", value="{{vm.billing.gateway}}", ng-disabled="true")
 		md-input-container(flex)
 			label Amount (£)
-			input(type="text", value="{{vm.billingHistory[vm.item].Amount}}", ng-disabled="true")
+			input(type="text", value="{{vm.billing.amount}}", ng-disabled="true")

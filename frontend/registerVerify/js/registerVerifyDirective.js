@@ -32,13 +32,13 @@
         };
     }
 
-    RegisterVerifyCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "AccountService"];
+    RegisterVerifyCtrl.$inject = ["EventService", "UtilsService", "StateManager"];
 
-    function RegisterVerifyCtrl ($scope, $location, $timeout, UtilsService, AccountService) {
+    function RegisterVerifyCtrl (EventService, UtilsService, StateManager) {
         var vm = this,
             promise,
-            username = $location.search().username,
-            token = $location.search().token;
+            username = StateManager.query.username,
+            token = StateManager.query.token;
 
         /*
          * Init
@@ -46,7 +46,6 @@
         vm.verified = false;
         vm.showPaymentWait = false;
         vm.databaseName = username;
-        vm.pay = (($location.search().hasOwnProperty("pay")) && $location.search().pay);
 
         vm.verifyErrorMessage = "Verifying. Please wait...";
         promise = UtilsService.doPost({token: token}, username + "/verify");
@@ -65,26 +64,7 @@
         });
 
         vm.goToLoginPage = function () {
-            $location.path("/", "_self");
-        };
-
-        vm.setupPayment = function ($event) {
-            var data;
-            vm.paypalReturnUrl = $location.protocol() + "://" + $location.host();
-            data = {
-                verificationToken: token,
-                plan: "THE-100-QUID-PLAN"
-            };
-            promise = AccountService.newSubscription(username, data);
-            promise.then(function (response) {
-                vm.subscriptionToken = response.data.token;
-                // Make sure form contains the token before submitting
-                $timeout(function () {
-                    $scope.$apply();
-                    document.registerVerifyForm.action = "https://www.sandbox.paypal.com/cgi-bin/webscr";
-                    document.registerVerifyForm.submit();
-                }, 1000);
-            });
+			EventService.send(EventService.EVENT.GO_HOME);
         };
     }
 }());

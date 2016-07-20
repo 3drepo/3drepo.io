@@ -215,7 +215,10 @@
 				account:  vm.account,
 				project:  vm.project,
 				branch:   vm.branch,
-				revision: vm.revision
+				revision: vm.revision,
+				at:       StateManager.query.at,
+				up:       StateManager.query.up,
+				view:     StateManager.query.view
 			});
 
 			EventService.send(EventService.EVENT.PANEL_CONTENT_SETUP, panelCard);
@@ -225,6 +228,9 @@
 		 * Watch for events
 		 */
 		$scope.$watch(EventService.currentEvent, function (event) {
+			var parent = angular.element($element[0].querySelector("#project")),
+				element;
+
 			if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) {
 				if (event.value.on) {
 					issueArea = angular.element("<issue-area></issue-area>");
@@ -247,6 +253,18 @@
 			}
 			else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
 				vm.pointerEvents = event.value.on ? "none" : "auto";
+			} else if (event.type === EventService.EVENT.MEASURE_MODE) {
+				if (event.value) {
+					// Create measure display
+					element = angular.element("<tdr-measure id='tdrMeasure'></tdr-measure>");
+					parent.append(element);
+					$compile(element)($scope);
+				}
+				else {
+					// Remove measure display
+					element = angular.element($element[0].querySelector("#tdrMeasure"));
+					element.remove();
+				}
 			}
 		})
 	}

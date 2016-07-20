@@ -28,7 +28,8 @@
 			scope: {
 				account: "=",
 				accounts: "=",
-				showPage: "&"
+				showPage: "&",
+				quota: "="
 			},
 			controller: AccountProjectsCtrl,
 			controllerAs: 'vm',
@@ -49,20 +50,11 @@
 		 */
 		vm.info = "Retrieving projects...";
 		vm.showProgress = true;
-		vm.projectTypes = [
-			"Architectural",
-			"Structural",
-			"Mechanical",
-			"GIS",
-			"Other"
-		];
+		vm.projectTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
 		vm.projectOptions = {
 			upload: {label: "Upload file", icon: "cloud_upload"},
-			team: {label: "Team", icon: "group"}
-		};
-		vm.collaborators = {
-			"jozefdobos": "",
-			"timscully": ""
+			team: {label: "Team", icon: "group"},
+			delete: {label: "Delete", icon: "delete"}
 		};
 
 		// Setup file uploaders
@@ -187,46 +179,59 @@
 				type: vm.projectTypes[0]
 			};
 			vm.uploadedFile = null;
-			showDialog(event, "projectDialog.html");
+			UtilsService.showDialog("projectDialog.html", $scope, event, true);
 		};
 		
 		/**
 		 * Close the dialog
 		 */
 		vm.closeDialog = function() {
-			$mdDialog.cancel();
+			UtilsService.closeDialog();
 		};
 
 		/**
 		 * Save a new project
 		 */
-		vm.saveNewProject = function () {
+		vm.saveNewProject = function (event) {
 			var project,
-				promise;
+				promise,
+				enterKey = 13,
+				doSave = false;
 
-			promise = AccountService.newProject(vm.newProjectData);
-			promise.then(function (response) {
-				console.log(response);
-				if (response.data.status === 400) {
-					vm.showNewProjectErrorMessage = true;
-					vm.newProjectErrorMessage = response.data.message;
+			if (angular.isDefined(event)) {
+				if (event.which === enterKey) {
+					doSave = true;
 				}
-				else {
-					vm.projectsExist = true;
-					// Add project to list
-					project = {
-						name: response.data.project,
-						canUpload: true,
-						timestamp: null
-					};
-					updateAccountProjects (response.data.account, project);
-					// Save model to project
-					if (vm.uploadedFile !== null) {
-						uploadModelToProject (project, vm.uploadedFile);
+			}
+			else {
+				doSave = true;
+			}
+
+			if (doSave) {
+				promise = AccountService.newProject(vm.newProjectData);
+				promise.then(function (response) {
+					console.log(response);
+					if (response.data.status === 400) {
+						vm.showNewProjectErrorMessage = true;
+						vm.newProjectErrorMessage = response.data.message;
 					}
-					vm.closeDialog();
-				}
-			});
+					else {
+						vm.projectsExist = true;
+						// Add project to list
+						project = {
+							name: response.data.project,
+							canUpload: true,
+							timestamp: null
+						};
+						updateAccountProjects (response.data.account, project);
+						// Save model to project
+						if (vm.uploadedFile !== null) {
+							uploadModelToProject (project, vm.uploadedFile);
+						}
+						vm.closeDialog();
+					}
+				});
+			}
 		};
 
 		/**
@@ -254,7 +259,7 @@
 			vm.newDatabaseName = "";
 			vm.showPaymentWait = false;
 			vm.newDatabaseToken = false;
-			showDialog(event, "databaseDialog.html");
+			UtilsService.showDialog("databaseDialog.html", $scoipe, event, true);
 		};
 
 		/**
@@ -282,12 +287,14 @@
 
 		/**
 		 * Set up deleting of project
+		 *
+		 * @param {Object} event
 		 * @param {Object} project
 		 */
 		vm.setupDeleteProject = function (event, project) {
 			vm.projectToDelete = project;
 			vm.showDeleteProjectError = false;
-			showDialog(event, "deleteProjectDialog.html");
+			UtilsService.showDialog("deleteProjectDialog.html", $scope, event, true);
 		};
 
 		/**
@@ -335,6 +342,10 @@
 				case "team":
 					$location.search("proj", project.name);
 					vm.showPage({page: "team", callingPage: "repos"});
+					break;
+
+				case "delete":
+					vm.setupDeleteProject(event, project);
 					break;
 			}
 		};
@@ -403,7 +414,7 @@
 				console.log(response);
 				if (file.size > response.data.accounts[0].quota.spaceLimit) {
 					// Show the over quota dialog
-					showDialog(null, "overQuotaDialog.html");
+					UtilsService.showDialog("overQuotaDialog.html", $scope, null, true);
 				}
 				else {
 					project.uploading = true;
@@ -429,7 +440,7 @@
 						};
 						promise = AccountService.uploadModel(projectData);
 						promise.then(function (response) {
-							console.log(response);
+							console.log("uploadModel", response);
 							if ((response.data.status === 400) || (response.data.status === 404)) {
 								// Upload error
 								if (response.data.value === 68) {
@@ -449,10 +460,10 @@
 								interval = $interval(function () {
 									promise = AccountService.uploadStatus(projectData);
 									promise.then(function (response) {
-										console.log(response);
+										console.log("uploadStatus", response);
 										if ((response.data.status === "ok") || (response.data.status === "failed")) {
 											if (response.data.status === "ok") {
-												project.timestamp = UtilsService.formatTimestamp(new Date(), true);
+												project.timestampPretty = UtilsService.formatTimestamp(new Date(), true);
 												vm.fileUploadInfo = "Uploaded";
 											}
 											else {
@@ -471,27 +482,6 @@
 						});
 					}
 				}
-			});
-
-		}
-
-		/**
-		 * Show a dialog
-		 *
-		 * @param {Object} event
-		 * @param {String} dialogTemplate
-		 */
-		function showDialog (event, dialogTemplate) {
-			$mdDialog.show({
-				controller: function () {},
-				templateUrl: dialogTemplate,
-				parent: angular.element(document.body),
-				targetEvent: event,
-				clickOutsideToClose:true,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true,
-				onRemoving: function () {$scope.closeDialog();}
 			});
 		}
 	}

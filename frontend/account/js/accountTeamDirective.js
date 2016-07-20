@@ -27,7 +27,8 @@
 			templateUrl: 'accountTeam.html',
 			scope: {
 				account: "=",
-				showPage: "&"
+				showPage: "&",
+				subscriptions: "="
 			},
 			controller: AccountTeamCtrl,
 			controllerAs: 'vm',
@@ -35,13 +36,11 @@
 		};
 	}
 
-	AccountTeamCtrl.$inject = ["$scope", "$location", "UtilsService"];
+	AccountTeamCtrl.$inject = ["$scope", "$location", "UtilsService", "StateManager"];
 
-	function AccountTeamCtrl($scope, $location, UtilsService) {
+	function AccountTeamCtrl($scope, $location, UtilsService, StateManager) {
 		var vm = this,
-			i, iLength, j, jLength,
-			promise,
-			isMember;
+			promise;
 
 		/*
 		 * Init
@@ -50,38 +49,20 @@
 		vm.collaborators = [];
 		vm.members = [];
 		vm.addDisabled = false;
+		vm.toShow = (vm.subscriptions.length > 1) ? "1+" : vm.subscriptions.length.toString();
+
 		if ($location.search().hasOwnProperty("proj")) {
 			vm.projectName = $location.search().proj;
 
-			// Get the team members
 			promise = UtilsService.doGet(vm.account + "/" + vm.projectName + "/collaborators");
 			promise.then(function (response) {
 				console.log(response);
 				if (response.status === 200) {
 					vm.members = response.data;
-				}
-
-				// Get the collaborators who are not team members
-				promise = UtilsService.doGet(vm.account + "/subscriptions");
-				promise.then(function (response) {
-					console.log(response);
-					if (response.status === 200) {
-						for (i = 0, iLength = response.data.length; i < iLength; i += 1) {
-							if (response.data[i].hasOwnProperty("assignedUser") && (response.data[i].assignedUser !== vm.account)) {
-								isMember = false;
-								for (j = 0, jLength = vm.members.length; j < jLength; j += 1) {
-									if (vm.members[j].user === response.data[i].assignedUser) {
-										isMember = true;
-										break;
-									}
-								}
-								if (!isMember) {
-									vm.collaborators.push({user: response.data[i].assignedUser});
-								}
-							}
-						}
+					if (angular.isDefined("vm.subscriptions")) {
+						setupTeam();
 					}
-				});
+				}
 			});
 		}
 
@@ -109,6 +90,7 @@
 					role: vm.memberRole,
 					user: vm.selectedUser.user
 				};
+
 			promise = UtilsService.doPost(data, vm.account + "/" + vm.projectName + "/collaborators");
 			promise.then(function (response) {
 				console.log(response);
@@ -122,6 +104,7 @@
 					}
 					vm.searchText = null;
 					vm.addDisabled = (vm.collaborators.length === 0);
+					vm.allLicenseAssigneesMembers = (vm.collaborators.length === 0);
 				}
 			});
 		};
@@ -139,6 +122,7 @@
 					var member = vm.members.splice(index, 1);
 					vm.collaborators.push(member[0]);
 					vm.addDisabled = false;
+					vm.allLicenseAssigneesMembers = false;
 				}
 			});
 		};
@@ -152,6 +136,44 @@
 			return function filterFn(user) {
 				return (user.user.indexOf(lowercaseQuery) === 0);
 			};
+		}
+
+		vm.goToPage = function (page) {
+			StateManager.setQuery({page: page});
+		};
+
+		/**
+		 * Set up the team page
+		 */
+		function setupTeam () {
+			var i, iLength, j, jLength,
+				isMember;
+
+			for (i = 0, iLength = vm.subscriptions.length; i < iLength; i += 1) {
+				if (vm.subscriptions[i].hasOwnProperty("assignedUser") && (vm.subscriptions[i].assignedUser !== vm.account)) {
+					isMember = false;
+					for (j = 0, jLength = vm.members.length; j < jLength; j += 1) {
+						if (vm.members[j].user === vm.subscriptions[i].assignedUser) {
+							isMember = true;
+							break;
+						}
+					}
+					if (!isMember) {
+						vm.collaborators.push({user: vm.subscriptions[i].assignedUser});
+					}
+				}
+			}
+
+			vm.noLicensesAssigned =
+				(vm.subscriptions.length > 1) &&
+				((vm.collaborators.length + vm.members.length) === 0);
+
+			vm.notAllLicensesAssigned =
+				!vm.noLicensesAssigned &&
+				(vm.subscriptions.length > 1) &&
+				((vm.subscriptions.length - 1) !== (vm.collaborators.length + vm.members.length));
+
+			vm.allLicenseAssigneesMembers = (vm.collaborators.length === 0);
 		}
 	}
 }());
