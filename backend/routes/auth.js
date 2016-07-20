@@ -53,13 +53,13 @@
 	router.put("/:account", middlewares.hasWriteAccessToAccount, updateUser);
 	router.put("/:account/password", middlewares.hasWriteAccessToAccount, resetPassword);
 
-	function expireSession(req) {
-		if (req.session)
-		{
-			req.session.cookie.expires = new Date(0);
-			req.session.cookie.maxAge = 0;
-		}
-	}
+	// function expireSession(req) {
+	// 	if (req.session)
+	// 	{
+	// 		req.session.cookie.expires = new Date(0);
+	// 		req.session.cookie.maxAge = 0;
+	// 	}
+	// }
 
 	function createSession(place, req, res, next, user){
 		req.session.regenerate(function(err) {

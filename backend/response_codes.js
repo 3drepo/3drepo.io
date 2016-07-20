@@ -228,9 +228,9 @@ var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21,
 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 1000, 2000, 3000, 4000];
 
 var mimeTypes = {
-	"src"  : "application/json",
+	"src"  : "application/octet-stream",
 	"gltf" : "application/json",
-	"bin"  : "application/json",
+	"bin"  : "application/octet-stream",
 	"x3d"  : "application/xml",
 	"json" : "application/json",
 	"png"  : "image/png",
@@ -298,7 +298,7 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 			}
 
 			//res.setHeader("Content-Length", extraInfo.length);
-			length = extraInfo.length;
+			//length = extraInfo.length;
 			
 			res.write(extraInfo, "binary");
 			res.flush();
