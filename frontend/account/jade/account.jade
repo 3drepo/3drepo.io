@@ -13,7 +13,7 @@ div(ng-if="!vm.state.project")
 			ng-switch-when="repos"
 			account="vm.account"
 			accounts="vm.accounts"
-			show-page="vm.showItem(page, callingPage)"
+			on-show-page="vm.showItem(page, callingPage)"
 			quota="vm.quota")
 
 			account-profile(

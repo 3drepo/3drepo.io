@@ -11,27 +11,10 @@ login .homeUserContent md-toolbar {
   min-height: 40px;
 }
 
-login h1,
-login h2,
-login h3 {
-  color: #FFFFFF;
-}
-
 login #loginVersion{
   color: rgba(0, 0, 0 , 0.3);
   font-size: 14px;
   margin: 10px 0 0;
-}
-
-login md-input-container {
-  margin-bottom: 0;
-}
-
-login md-input-container input {
-  padding: 5px !important;
-  margin-bottom: -15px;
-  height: 35px !important;
-  background: #ffffff !important;
 }
 
 login .loginError {
@@ -40,19 +23,9 @@ login .loginError {
   font-weight: normal;
 }
 
-login .loginTitle {
-  margin: -5px 0 10px 7px;
-  color: rgba(0, 0, 0, 0.5) !important;
-}
-
 login .loginLinks {
   font-size: 14px;
   margin: 5px 0;
-}
-
-login #loginDivider {
-  width: 1px;
-  background-color: rgba(0, 0, 0, 0.2);
 }
 
 /** Terms and Conditions Dialog ***************************************************************************************/

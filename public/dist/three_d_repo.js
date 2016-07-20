@@ -5667,6 +5667,240 @@ var ViewerManager = {};
 	"use strict";
 
 	angular.module("3drepo")
+		.directive("accountProject", accountProject);
+
+	function accountProject () {
+		return {
+			restrict: 'E',
+			templateUrl: 'accountProject.html',
+			scope: {
+				account: "=",
+				project: "=",
+				onUploadFile: "&",
+				uploadedFile: "=",
+				onShowPage: "&",
+				onSetupDeleteProject: "&"
+			},
+			controller: accountProjectCtrl,
+			controllerAs: 'vm',
+			bindToController: true,
+			link: function (scope, element) {
+				// Cleanup when destroyed
+				element.on('$destroy', function(){
+					scope.vm.uploadedFileWatch(); // Disable events watch
+				});
+			}
+		};
+	}
+
+	accountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "UtilsService", "serverConfig"];
+
+	function accountProjectCtrl ($scope, $location, $timeout, $interval, UtilsService, serverConfig) {
+		var vm = this,
+			infoTimeout = 4000;
+
+		// Init
+		vm.project.name = vm.project.project;
+		if (vm.project.timestamp !== null) {
+			vm.project.timestampPretty = UtilsService.formatTimestamp(vm.project.timestamp, true);
+		}
+		vm.project.canUpload = true;
+		vm.projectOptions = {
+			upload: {label: "Upload file", icon: "cloud_upload"},
+			team: {label: "Team", icon: "group"},
+			delete: {label: "Delete", icon: "delete"}
+		};
+		checkFileUploading();
+
+		/*
+		 * Watch the new project type
+		 */
+		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
+			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {
+				console.log(vm.uploadedFile);
+				uploadFileToProject(vm.uploadedFile.file);
+			}
+		});
+
+		/**
+		 * Go to the project viewer
+		 */
+		vm.goToProject = function () {
+			if (vm.project.timestamp === null) {
+				vm.uploadFile();
+			}
+			else {
+				$location.path("/" + vm.account.name + "/" + vm.project.name, "_self").search("page", null);
+			}
+		};
+
+		/**
+		 * Call parent upload function
+		 */
+		vm.uploadFile = function () {
+			vm.onUploadFile({project: vm.project});
+		};
+
+		/**
+		 * Handle project option selection
+		 *
+		 * @param event
+		 * @param option
+		 */
+		vm.doProjectOption = function (event, option) {
+			switch (option) {
+				case "upload":
+					vm.uploadFile();
+					break;
+
+				case "team":
+					$location.search("proj", vm.project.name);
+					vm.onShowPage({page: "team", callingPage: "repos"});
+					break;
+
+				case "delete":
+					vm.onSetupDeleteProject({event: event, project: vm.project});
+					break;
+			}
+		};
+
+
+		/**
+		 * Upload file/model to project
+		 *
+		 * @param file
+		 */
+		function uploadFileToProject (file) {
+			var promise,
+				formData;
+
+			// Check the quota
+			promise = UtilsService.doGet(vm.account.name + ".json");
+			promise.then(function (response) {
+				console.log(response);
+				if (file.size > response.data.accounts[0].quota.spaceLimit) {
+					// Show the over quota dialog
+					UtilsService.showDialog("overQuotaDialog.html", $scope, null, true);
+				}
+				else {
+					vm.project.uploading = true;
+					vm.showUploading = true;
+					vm.showFileUploadInfo = false;
+
+					// Check for file size limit
+					if (file.size > serverConfig.uploadSizeLimit) {
+						$timeout(function () {
+							vm.showUploading = false;
+							vm.showFileUploadInfo = true;
+							vm.fileUploadInfo = "File exceeds size limit";
+							$timeout(function () {
+								vm.project.uploading = false;
+							}, infoTimeout);
+						});
+					}
+					else {
+						formData = new FormData();
+						formData.append("file", file);
+						promise = UtilsService.doPost(formData, vm.account.name + "/" + vm.project.name + "/upload", {'Content-Type': undefined});
+						promise.then(function (response) {
+							console.log("uploadModel", response);
+							if ((response.data.status === 400) || (response.data.status === 404)) {
+								// Upload error
+								if (response.data.value === 68) {
+									vm.fileUploadInfo = "Unsupported file format";
+								}
+								else if (response.data.value === 66) {
+									vm.fileUploadInfo = "Insufficient quota for model";
+								}
+								vm.showUploading = false;
+								vm.showFileUploadInfo = true;
+								$timeout(function () {
+									vm.project.uploading = false;
+								}, infoTimeout);
+							}
+							else {
+								pollUpload();
+							}
+						});
+					}
+				}
+			});
+		}
+
+		/**
+		 * Display file uploading and info
+		 */
+		function checkFileUploading () {
+			var promise = UtilsService.doGet(vm.account.name + "/" + vm.project.name + ".json");
+			promise.then(function (response) {
+				if (response.data.status === "processing") {
+					vm.project.uploading = true;
+					vm.showUploading = true;
+					vm.showFileUploadInfo = false;
+					pollUpload();
+				}
+			});
+		}
+
+		/**
+		 * Poll uploading of file
+		 */
+		function pollUpload () {
+			var interval,
+				promise;
+
+			interval = $interval(function () {
+				promise = UtilsService.doGet(vm.account.name + "/" + vm.project.name + ".json");
+				promise.then(function (response) {
+					console.log("uploadStatus", response);
+					if ((response.data.status === "ok") || (response.data.status === "failed")) {
+						if (response.data.status === "ok") {
+							vm.project.timestamp = new Date();
+							vm.project.timestampPretty = UtilsService.formatTimestamp(vm.project.timestamp, true);
+							vm.fileUploadInfo = "Uploaded";
+						}
+						else {
+							if (response.data.hasOwnProperty("errorReason")) {
+								vm.fileUploadInfo = response.data.errorReason.message;
+							}
+							else {
+								vm.fileUploadInfo = "Failed to upload file";
+							}
+						}
+						vm.showUploading = false;
+						$interval.cancel(interval);
+						vm.showFileUploadInfo = true;
+						$timeout(function () {
+							vm.project.uploading = false;
+						}, infoTimeout);
+					}
+				});
+			}, 1000);
+		}
+	}
+}());
+
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
 		.directive("accountProjects", accountProjects);
 
 	function accountProjects() {
@@ -5676,7 +5910,7 @@ var ViewerManager = {};
 			scope: {
 				account: "=",
 				accounts: "=",
-				showPage: "&",
+				onShowPage: "&",
 				quota: "="
 			},
 			controller: AccountProjectsCtrl,
@@ -5685,9 +5919,9 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$mdDialog", "$element", "$timeout", "$interval", "AccountService", "UtilsService", "serverConfig"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService"];
 
-	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, $timeout, $interval, AccountService, UtilsService, serverConfig) {
+	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService) {
 		var vm = this,
 			existingProjectToUpload,
 			existingProjectFileUploader,
@@ -5699,19 +5933,14 @@ var ViewerManager = {};
 		vm.info = "Retrieving projects...";
 		vm.showProgress = true;
 		vm.projectTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
-		vm.projectOptions = {
-			upload: {label: "Upload file", icon: "cloud_upload"},
-			team: {label: "Team", icon: "group"},
-			delete: {label: "Delete", icon: "delete"}
-		};
 
 		// Setup file uploaders
 		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
 		existingProjectFileUploader.addEventListener(
 			"change",
 			function () {
-				vm.uploadedFile = this.files[0];
-				uploadModelToProject(existingProjectToUpload, this.files[0]);
+				vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0]};
+				$scope.$apply();
 			},
 			false
 		);
@@ -5719,7 +5948,7 @@ var ViewerManager = {};
 		newProjectFileUploader.addEventListener(
 			"change",
 			function () {
-				vm.uploadedFile = this.files[0];
+				vm.newProjectFileToUpload = this.files[0];
 				vm.newProjectFileSelected = true;
 				$scope.$apply();
 			},
@@ -5730,7 +5959,7 @@ var ViewerManager = {};
 		 * Added data to accounts and projects for UI
 		 */
 		$scope.$watch("vm.accounts", function () {
-			var i, j, iLength, jLength;
+			var i, length;
 			
 			if (angular.isDefined(vm.accounts)) {
 				console.log(vm.accounts);
@@ -5738,21 +5967,10 @@ var ViewerManager = {};
 				vm.projectsExist = (vm.accounts.length > 0);
 				vm.info = vm.projectsExist ? "" : "There are currently no projects";
 				// Accounts
-				for (i = 0, iLength = vm.accounts.length; i < iLength; i+= 1) {
+				for (i = 0, length = vm.accounts.length; i < length; i+= 1) {
 					vm.accounts[i].name = vm.accounts[i].account;
 					vm.accounts[i].showProjects = true;
 					vm.accounts[i].showProjectsIcon = "folder_open";
-
-					//Projects
-					for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
-						vm.accounts[i].projects[j].name = vm.accounts[i].projects[j].project;
-						if (vm.accounts[i].projects[j].timestamp !== null) {
-							vm.accounts[i].projects[j].timestampPretty = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp, true);
-						}
-						vm.accounts[i].projects[j].uploading = false;
-						//vm.accounts[i].projects[j].canUpload = (vm.accounts[i].account === vm.account);
-						vm.accounts[i].projects[j].canUpload = true;
-					}
 				}
 			}
 		});
@@ -5792,21 +6010,6 @@ var ViewerManager = {};
 		}, true);
 
 		/**
-		 * Go to the project viewer
-		 *
-		 * @param {String} account
-		 * @param {String} project
-		 */
-		vm.goToProject = function (account, project) {
-			if (project.timestamp === null) {
-				vm.uploadModel(project);
-			}
-			else {
-				$location.path("/" + account + "/" + project.name, "_self").search("page", null);
-			}
-		};
-
-		/**
 		 * Toggle display of projects for an account
 		 *
 		 * @param {Number} index
@@ -5826,7 +6029,7 @@ var ViewerManager = {};
 				account: vm.account,
 				type: vm.projectTypes[0]
 			};
-			vm.uploadedFile = null;
+			vm.newProjectFileToUpload = null;
 			UtilsService.showDialog("projectDialog.html", $scope, event, true);
 		};
 		
@@ -5867,15 +6070,11 @@ var ViewerManager = {};
 						vm.projectsExist = true;
 						// Add project to list
 						project = {
-							name: response.data.project,
+							project: response.data.project,
 							canUpload: true,
 							timestamp: null
 						};
 						updateAccountProjects (response.data.account, project);
-						// Save model to project
-						if (vm.uploadedFile !== null) {
-							uploadModelToProject (project, vm.uploadedFile);
-						}
 						vm.closeDialog();
 					}
 				});
@@ -5883,10 +6082,12 @@ var ViewerManager = {};
 		};
 
 		/**
+		 * Upload a file
 		 *
-		 * @param {String} project
+		 * @param {Object} project
 		 */
-		vm.uploadModel = function (project) {
+		vm.uploadFile = function (project) {
+			console.log(project);
 			existingProjectFileUploader.value = "";
 			existingProjectToUpload = project;
 			existingProjectFileUploader.click();
@@ -5895,7 +6096,7 @@ var ViewerManager = {};
 		/**
 		 * Upload a file
 		 */
-		vm.uploadFile = function () {
+		vm.uploadFileForNewProject = function () {
 			newProjectFileUploader.value = "";
 			newProjectFileUploader.click();
 		};
@@ -5907,7 +6108,7 @@ var ViewerManager = {};
 			vm.newDatabaseName = "";
 			vm.showPaymentWait = false;
 			vm.newDatabaseToken = false;
-			UtilsService.showDialog("databaseDialog.html", $scoipe, event, true);
+			UtilsService.showDialog("databaseDialog.html", $scope, event, true);
 		};
 
 		/**
@@ -5975,30 +6176,6 @@ var ViewerManager = {};
 		};
 
 		/**
-		 * Handle project option selection
-		 *
-		 * @param event
-		 * @param project
-		 * @param option
-		 */
-		vm.doProjectOption = function (event, project, option) {
-			switch (option) {
-				case "upload":
-					vm.uploadModel(project);
-					break;
-
-				case "team":
-					$location.search("proj", project.name);
-					vm.showPage({page: "team", callingPage: "repos"});
-					break;
-
-				case "delete":
-					vm.setupDeleteProject(event, project);
-					break;
-			}
-		};
-
-		/**
 		 * Remove a collaborator
 		 *
 		 * @param collaborator
@@ -6011,8 +6188,12 @@ var ViewerManager = {};
 		 * Go to the billing page to add more licenses
 		 */
 		vm.setupAddLicenses = function () {
-			vm.showPage({page: "billing", callingPage: "repos"});
+			vm.showPage("billing", "repos");
 			vm.closeDialog();
+		};
+
+		vm.showPage = function (page, callingPage) {
+			vm.onShowPage({page: page, callingPage: callingPage});
 		};
 
 		/**
@@ -6042,95 +6223,13 @@ var ViewerManager = {};
 				accountToUpdate.canUpload = (account === vm.account);
 				vm.accounts.push(accountToUpdate);
 			}
-		}
 
-		/**
-		 * Upload file/model to project
-		 * 
-		 * @param project
-		 * @param file
-		 */
-		function uploadModelToProject (project, file) {
-			var interval,
-				projectData,
-				infoTimeout = 4000,
-				promise;
-
-			// Check the quota
-			promise = UtilsService.doGet(vm.account + ".json");
-			promise.then(function (response) {
-				console.log(response);
-				if (file.size > response.data.accounts[0].quota.spaceLimit) {
-					// Show the over quota dialog
-					UtilsService.showDialog("overQuotaDialog.html", $scope, null, true);
-				}
-				else {
-					project.uploading = true;
-					vm.showUploading = true;
-					vm.showFileUploadInfo = false;
-
-					// Check for file size limit
-					if (file.size > serverConfig.uploadSizeLimit) {
-						$timeout(function () {
-							vm.showUploading = false;
-							vm.showFileUploadInfo = true;
-							vm.fileUploadInfo = "File exceeds size limit";
-							$timeout(function () {
-								project.uploading = false;
-							}, infoTimeout);
-						});
-					}
-					else {
-						projectData = {
-							account: vm.account,
-							project: project.name,
-							uploadFile: file
-						};
-						promise = AccountService.uploadModel(projectData);
-						promise.then(function (response) {
-							console.log("uploadModel", response);
-							if ((response.data.status === 400) || (response.data.status === 404)) {
-								// Upload error
-								if (response.data.value === 68) {
-									vm.fileUploadInfo = "Unsupported file format";
-								}
-								else if (response.data.value === 66) {
-									vm.fileUploadInfo = "Insufficient quota for model";
-								}
-								vm.showUploading = false;
-								vm.showFileUploadInfo = true;
-								$timeout(function () {
-									project.uploading = false;
-								}, infoTimeout);
-							}
-							else {
-								// Upload valid, poll for status
-								interval = $interval(function () {
-									promise = AccountService.uploadStatus(projectData);
-									promise.then(function (response) {
-										console.log("uploadStatus", response);
-										if ((response.data.status === "ok") || (response.data.status === "failed")) {
-											if (response.data.status === "ok") {
-												project.timestampPretty = UtilsService.formatTimestamp(new Date(), true);
-												vm.fileUploadInfo = "Uploaded";
-											}
-											else {
-												vm.fileUploadInfo = response.data.errorReason.message;
-											}
-											vm.showUploading = false;
-											$interval.cancel(interval);
-											vm.showFileUploadInfo = true;
-											$timeout(function () {
-												project.uploading = false;
-											}, infoTimeout);
-										}
-									});
-								}, 1000);
-							}
-						});
-					}
-				}
-			});
+			// Save model to project
+			if (vm.newProjectFileToUpload !== null) {
+				$timeout(function () {
+					vm.uploadedFile = {project: project, file: vm.newProjectFileToUpload};
+				});
+			}
 		}
 	}
 }());
@@ -10335,9 +10434,9 @@ var ViewerManager = {};
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$location", "Auth", "StateManager", "EventService", "UtilsService", "AccountService"];
+    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$location", "$window", "Auth", "StateManager", "EventService", "UtilsService"];
 
-    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $location, Auth, StateManager, EventService, UtilsService, AccountService) {
+    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $location, $window, Auth, StateManager, EventService, UtilsService) {
         var vm = this,
 			homeLoggedOut,
 			notLoggedInElement,
@@ -10357,6 +10456,7 @@ var ViewerManager = {};
 			{title: "Terms & Conditions", value: "termsAndConditions"},
 			{title: "Privacy", value: "privacy"},
 			{title: "Cookies", value: "cookies"},
+			{title: "Pricing", value: "pricing"},
 			{title: "Contact", value: "contact"}
 		];
 		vm.goToAccount = false;
@@ -10418,6 +10518,7 @@ var ViewerManager = {};
 		 */
 		vm.legalDisplay = function (event, display) {
 			$location.url("/" + display.value);
+			//$window.open("/" + display.value);
 
 			/*
 			vm.legalTitle = display.title;
@@ -17240,24 +17341,39 @@ var Oculus = {};
 				if (angular.isDefined(referenceValue)) {
 					if (referenceValue > 1073741824) {
 						factor = bytesInGB;
-						units = " (GB)";
+						units = " GB";
 					}
 					else {
 						factor = bytesInMB;
-						units = " (MB)";
+						units = " MB";
 					}
 				}
 				else {
 					if (input > 1073741824) {
 						factor = bytesInGB;
-						units = " (GB)";
+						units = " GB";
 					}
 					else {
 						factor = bytesInMB;
-						units = " (MB)";
+						units = " MB";
 					}
 				}
-				return (Math.round(input / factor * 100) / 100).toString() + units; // (input / bytesInAGb).toFixed(2); // Math.round(43159388160 / 1024/1024/1024 * 100) / 100
+				return (Math.round(input / factor * 100) / 100).toString() + units; // (input / bytesInAGb).toFixed(2)
+			};
+		})
+
+		.filter("invoiceDate", function () {
+			return function(input) {
+				var date = new Date(input),
+					invoiceDate;
+
+				invoiceDate = (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
+					((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1) + "-" +
+					date.getFullYear() + " " +
+					(date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
+					(date.getMinutes() < 10 ? "0" : "") + date.getMinutes() + " GMT";
+
+				return invoiceDate;
 			};
 		});
 
@@ -17367,10 +17483,14 @@ var Oculus = {};
          * @param url
          * @returns {*}
          */
-        obj.doPost = function (data, url) {
+        obj.doPost = function (data, url, headers) {
             var deferred = $q.defer(),
                 urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
                 config = {withCredentials: true};
+
+            if (angular.isDefined(headers)) {
+                config.headers = headers;
+            }
 
             $http.post(urlUse, data, config)
                 .then(

@@ -102,10 +102,14 @@
          * @param url
          * @returns {*}
          */
-        obj.doPost = function (data, url) {
+        obj.doPost = function (data, url, headers) {
             var deferred = $q.defer(),
                 urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
                 config = {withCredentials: true};
+
+            if (angular.isDefined(headers)) {
+                config.headers = headers;
+            }
 
             $http.post(urlUse, data, config)
                 .then(

@@ -13,3 +13,15 @@ billing .md-toolbar-tools img {
 billing #billingList {
     padding: 20px;
 }
+
+billing #billingCompanyAddress {
+    margin-top: 50px;
+}
+
+billing #billingClientAddress {
+    margin: 10px 0 40px;
+}
+
+billing .billingInfoTitle {
+    font-weight: bold;
+}

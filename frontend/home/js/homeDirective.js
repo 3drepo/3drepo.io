@@ -76,9 +76,9 @@
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$location", "Auth", "StateManager", "EventService", "UtilsService", "AccountService"];
+    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$location", "$window", "Auth", "StateManager", "EventService", "UtilsService"];
 
-    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $location, Auth, StateManager, EventService, UtilsService, AccountService) {
+    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $location, $window, Auth, StateManager, EventService, UtilsService) {
         var vm = this,
 			homeLoggedOut,
 			notLoggedInElement,
@@ -98,6 +98,7 @@
 			{title: "Terms & Conditions", value: "termsAndConditions"},
 			{title: "Privacy", value: "privacy"},
 			{title: "Cookies", value: "cookies"},
+			{title: "Pricing", value: "pricing"},
 			{title: "Contact", value: "contact"}
 		];
 		vm.goToAccount = false;
@@ -159,6 +160,7 @@
 		 */
 		vm.legalDisplay = function (event, display) {
 			$location.url("/" + display.value);
+			//$window.open("/" + display.value);
 
 			/*
 			vm.legalTitle = display.title;

@@ -312,7 +312,7 @@ account-billing #accountBillingHistory section {
   margin-left: -10px;
 }
 account-billing #accountBillingHistory .md-subheader label {
-  margin: 0 11px 0 0;
+  margin: 0 9px 0 0;
 }
 account-billing .accountBillingHistoryListItem md-input-container {
   margin-right: 10px;
@@ -767,6 +767,18 @@ billing .md-toolbar-tools img {
 billing #billingList {
     padding: 20px;
 }
+
+billing #billingCompanyAddress {
+    margin-top: 50px;
+}
+
+billing #billingClientAddress {
+    margin: 10px 0 40px;
+}
+
+billing .billingInfoTitle {
+    font-weight: bold;
+}
 bottom-buttons {
   display: block;
   position: absolute;
@@ -1171,14 +1183,25 @@ home #legalLinks {
     z-index: 2;
 }
 home #legalLinks .md-button {
-    font-size: 12px;
+    font-size: 11px;
     margin: 0;
     opacity: 0.7;
-    min-width: 70px;
+    min-width: 65px;
 }
 
 home md-radio-button ._md-label {
     line-height: 1.7;
+}
+
+.inputHint {
+    position: absolute;
+    left: 2px;
+    right: auto;
+    bottom: 7px;
+    font-size: 12px;
+    line-height: 14px;
+    transition: all 0.3s cubic-bezier(0.55, 0, 0.55, 0.2);
+    color: grey;
 }
 
 /** Legal Dialog ******************************************************************************************************/
@@ -1458,27 +1481,10 @@ login .homeUserContent md-toolbar {
   min-height: 40px;
 }
 
-login h1,
-login h2,
-login h3 {
-  color: #FFFFFF;
-}
-
 login #loginVersion{
   color: rgba(0, 0, 0 , 0.3);
   font-size: 14px;
   margin: 10px 0 0;
-}
-
-login md-input-container {
-  margin-bottom: 0;
-}
-
-login md-input-container input {
-  padding: 5px !important;
-  margin-bottom: -15px;
-  height: 35px !important;
-  background: #ffffff !important;
 }
 
 login .loginError {
@@ -1487,19 +1493,9 @@ login .loginError {
   font-weight: normal;
 }
 
-login .loginTitle {
-  margin: -5px 0 10px 7px;
-  color: rgba(0, 0, 0, 0.5) !important;
-}
-
 login .loginLinks {
   font-size: 14px;
   margin: 5px 0;
-}
-
-login #loginDivider {
-  width: 1px;
-  background-color: rgba(0, 0, 0, 0.2);
 }
 
 /** Terms and Conditions Dialog ***************************************************************************************/

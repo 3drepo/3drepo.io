@@ -12,15 +12,23 @@
 					.cardInfo
 						p You do not currently have any licenses. A minimum of two is required to add team members.
 						br
-						p Please go to the Billing Page to add licenses.
-					md-button.md-raised.md-accent.accountLicensesBPButton(ng-click="vm.goToPage('billing')") Billing Page
+						p
+							| Please go to the
+							=" "
+							a(href="", ng-click="vm.goToPage('billing')") Billing Page
+							=" "
+							| to add licenses.
 
 				div(ng-switch-when="1")
 					.cardInfo
 						p You currently have one license. A minimum of two is required to add team members.
 						br
-						p Please go to the Billing Page to add licenses.
-					md-button.md-raised.md-accent.accountLicensesBPButton(ng-click="vm.goToPage('billing')") Billing Page
+						p
+							| Please go to the
+							=" "
+							a(href="", ng-click="vm.goToPage('billing')") Billing Page
+							=" "
+							| to add licenses.
 
 				div(ng-switch-when="1+")
 					#project(layout="row", layout-align="start center")
@@ -32,8 +40,12 @@
 						.cardInfo
 							p You do not have any licenses assigned to other users. You currently have {{vm.subscriptions.length - 1}} license(s) unassigned.
 							br
-							p Please go to the Licenses Page to assign a license.
-						md-button.md-raised.md-accent.accountLicensesBPButton(ng-click="vm.goToPage('licenses')") Licenses Page
+							p
+								| Please go to the
+								=" "
+								a(href="", ng-click="vm.goToPage('licenses')") Licenses Page
+								=" "
+								| to assign a license.
 
 					div(ng-if="!vm.noLicensesAssigned")
 						md-autocomplete(

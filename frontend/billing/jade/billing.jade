@@ -1,22 +1,59 @@
-md-toolbar
-	.md-toolbar-tools
-		h2 Billing
-		span(flex)
-		img(src="/public/images/3drepo-logo-white.png")
-		span(flex)
-		md-button.md-icon-button(aria-label="Home", ng-click="vm.home()")
-			md-icon.angular-material-icons home
-md-content(layout="row", layout-align="center", layout-margin, ng-if="vm.showBilling")
-	#billingList(layout="column", flex="50")
-		md-input-container(flex)
-			label Date
-			input(type="text", value="{{vm.billing.createdAt | date:'dd-MM-yyyy'}}", ng-disabled="true")
-		//md-input-container(flex)
-			label Id
-			input(type="text", value="{{vm.billing.billingAgreementId}}", ng-disabled="true")
-		md-input-container(flex)
-			label Payment Method
-			input(type="text", value="{{vm.billing.gateway}}", ng-disabled="true")
-		md-input-container(flex)
-			label Amount (£)
-			input(type="text", value="{{vm.billing.amount}}", ng-disabled="true")
+div(layout-fill, layout="column")
+	md-toolbar
+		.md-toolbar-tools
+			h2 Billing
+			span(flex)
+			img(src="/public/images/3drepo-logo-white.png")
+			span(flex)
+			md-button.md-icon-button(aria-label="Home", ng-click="vm.home()")
+				md-icon.angular-material-icons home
+
+	md-content(ng-if="vm.showBilling", layout="row", flex, layout-align="center")
+		div(flex="50", layout="column")
+			#billingCompanyAddress(layout="column")
+				label.md-title 3D Repo
+				label c/o EIT Digital
+				label Centre House Block C
+				label 56 Wood Lane
+				label London W12 7SB
+				label United Kingdom
+
+			p.md-headline Invoice
+
+			.billingInfoTitle(layout="row")
+				label(flex="30") To
+				label(flex="30") Date
+				label Invoice ID
+
+			md-divider
+
+			#billingClientAddress(layout="row")
+				div(layout="column", flex="30")
+					label {{vm.billing.info.firstName}} {{vm.billing.info.lastName}}
+					label {{vm.billing.info.line1}}
+					label(ng-if="vm.billing.info.line2") {{vm.billing.info.line2}}
+					label {{vm.billing.info.city}}
+					label {{vm.billing.info.postalCode}}
+					label {{vm.billing.info.countryCode}}
+				label(flex="30") {{vm.billing.createdAt | invoiceDate}}
+				label {{vm.billing.billingAgreementId}}
+
+			.billingInfoTitle(layout="row")
+				label(flex="60") Product
+				label Amount
+
+			md-divider
+
+			//#billingList(layout="column")
+				md-input-container(flex)
+					label Date
+					input(type="text", value="{{vm.billing.createdAt | date:'dd-MM-yyyy'}}", ng-disabled="true")
+				//md-input-container(flex)
+					label Id
+					input(type="text", value="{{vm.billing.billingAgreementId}}", ng-disabled="true")
+				md-input-container(flex)
+					label Payment Method
+					input(type="text", value="{{vm.billing.gateway}}", ng-disabled="true")
+				md-input-container(flex)
+					label Amount (£)
+					input(type="text", value="{{vm.billing.amount}}", ng-disabled="true")
