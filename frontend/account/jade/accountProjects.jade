@@ -38,7 +38,8 @@ input#newProjectFileUploader(type="file")
 					on-upload-file="vm.uploadFile(project)"
 					uploaded-file="vm.uploadedFile"
 					on-show-page="vm.showPage(page, callingPage)"
-					on-setup-delete-project="vm.setupDeleteProject(event, project)")
+					on-setup-delete-project="vm.setupDeleteProject(event, project)",
+					quota="vm.quota")
 				md-divider
 
 		div(ng-if="!vm.projectsExist")

@@ -75,6 +75,7 @@
 							break;
 						}
 					}
+					console.log(8888, vm.quota);
 				});
 
 				billingsPromise = UtilsService.doGet(vm.account + "/billings");

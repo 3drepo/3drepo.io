@@ -5159,6 +5159,7 @@ var ViewerManager = {};
 							break;
 						}
 					}
+					console.log(8888, vm.quota);
 				});
 
 				billingsPromise = UtilsService.doGet(vm.account + "/billings");
@@ -5684,7 +5685,8 @@ var ViewerManager = {};
 				onUploadFile: "&",
 				uploadedFile: "=",
 				onShowPage: "&",
-				onSetupDeleteProject: "&"
+				onSetupDeleteProject: "&",
+				quota: "="
 			},
 			controller: accountProjectCtrl,
 			controllerAs: 'vm',
@@ -5776,6 +5778,20 @@ var ViewerManager = {};
 			}
 		};
 
+		/**
+		 * Go to the billing page to add more licenses
+		 */
+		vm.setupAddLicenses = function () {
+			vm.onShowPage({page: "billing", callingPage: "repos"});
+			UtilsService.closeDialog();
+		};
+
+		/**
+		 * Close the dialog
+		 */
+		vm.closeDialog = function() {
+			UtilsService.closeDialog();
+		};
 
 		/**
 		 * Upload file/model to project
@@ -6194,14 +6210,6 @@ var ViewerManager = {};
 		 */
 		vm.removeCollaborator = function (collaborator) {
 			delete vm.collaborators[collaborator];
-		};
-
-		/**
-		 * Go to the billing page to add more licenses
-		 */
-		vm.setupAddLicenses = function () {
-			vm.showPage("billing", "repos");
-			vm.closeDialog();
 		};
 
 		vm.showPage = function (page, callingPage) {

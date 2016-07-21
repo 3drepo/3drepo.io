@@ -302,14 +302,6 @@
 			delete vm.collaborators[collaborator];
 		};
 
-		/**
-		 * Go to the billing page to add more licenses
-		 */
-		vm.setupAddLicenses = function () {
-			vm.showPage("billing", "repos");
-			vm.closeDialog();
-		};
-
 		vm.showPage = function (page, callingPage) {
 			vm.onShowPage({page: page, callingPage: callingPage});
 		};

@@ -412,6 +412,15 @@ account-team #accountTeamSubHeader {
 #paypalDialog .userContent .cardInfo {
   text-align: left;
 }
+
+/** Over Quota Dialog *************************************************************************************************/
+#overQuotaDialog .cardInfo {
+  text-align: left;
+}
+
+#overQuotaDialog #overQuotaInfo {
+  margin: 20px 20px 0;;
+}
 /* Done to counter bootstrap styling. This should really be set in a top level style file */
 .md-datepicker-input-mask {
   width: 308px;

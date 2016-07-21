@@ -412,3 +412,12 @@ account-team #accountTeamSubHeader {
 #paypalDialog .userContent .cardInfo {
   text-align: left;
 }
+
+/** Over Quota Dialog *************************************************************************************************/
+#overQuotaDialog .cardInfo {
+  text-align: left;
+}
+
+#overQuotaDialog #overQuotaInfo {
+  margin: 20px 20px 0;;
+}

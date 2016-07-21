@@ -31,7 +31,8 @@
 				onUploadFile: "&",
 				uploadedFile: "=",
 				onShowPage: "&",
-				onSetupDeleteProject: "&"
+				onSetupDeleteProject: "&",
+				quota: "="
 			},
 			controller: accountProjectCtrl,
 			controllerAs: 'vm',
@@ -123,6 +124,20 @@
 			}
 		};
 
+		/**
+		 * Go to the billing page to add more licenses
+		 */
+		vm.setupAddLicenses = function () {
+			vm.onShowPage({page: "billing", callingPage: "repos"});
+			UtilsService.closeDialog();
+		};
+
+		/**
+		 * Close the dialog
+		 */
+		vm.closeDialog = function() {
+			UtilsService.closeDialog();
+		};
 
 		/**
 		 * Upload file/model to project
