@@ -995,7 +995,11 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 		let items = [];
 
-		if(dbUser.customData.nextPaymentDate){
+		dbUser.customData.nextPaymentDate && console.log('nextPaymentDate', moment(paymentInfo.nextPaymentDate).utc().startOf('date').toISOString());
+		console.log('pp next', moment(dbUser.customData.nextPaymentDate).utc().startOf('date').toISOString());
+
+		if(dbUser.customData.nextPaymentDate && moment(paymentInfo.nextPaymentDate).utc().startOf('date').toISOString() !== moment(dbUser.customData.nextPaymentDate).utc().startOf('date').toISOString()){
+			console.log('last ann date changed');
 			dbUser.customData.lastAnniversaryDate = new Date(dbUser.customData.nextPaymentDate);
 		}
 

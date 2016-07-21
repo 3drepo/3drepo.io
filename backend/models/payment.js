@@ -38,6 +38,8 @@ function roundTo2DP(value){
 function getPaymentDateAndAmount(newLicences, oldPayableLicences, paymentDate, lastAnniversaryDate, nextPaymentDate, country, isBusiness){
 	'use strict';
 
+	console.log('nextPaymentDate', nextPaymentDate);
+	console.log('lastAnniversaryDate', lastAnniversaryDate);
 	let firstCycleAmount = 0;
 	let firstCycleBeforeTaxAmount = 0;
 	let firstCycleTaxAmount = 0;
