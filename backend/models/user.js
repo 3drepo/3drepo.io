@@ -555,6 +555,7 @@ schema.methods.listAccounts = function(){
 
 		});
 
+
 		accounts.sort((a, b) => {
 			if (a.account.toLowerCase() < b.account.toLowerCase()){
 				return -1;
@@ -565,6 +566,13 @@ schema.methods.listAccounts = function(){
 			}
 		});
 
+		// own acconut always ranks top of the list
+		let myAccountIndex = accounts.findIndex(account => account.account === this.user);
+		if(myAccountIndex > -1){
+			let myAccount = accounts[myAccountIndex];
+			accounts.splice(myAccountIndex, 1);
+			accounts.unshift(myAccount);
+		} 
 
 		return Promise.all(getQuotaPromises).then(() => {
 			return Promise.resolve(accounts);
@@ -1115,12 +1123,12 @@ schema.methods.executeBillingAgreement = function(token, billingAgreementId){
 		subscription.inCurrentAgreement = true;
 
 		// pre activate
-		// don't wait for IPN message to confirm but to activate the subscription right away, for 24 hours.
+		// don't wait for IPN message to confirm but to activate the subscription right away, for 48 hours.
 		// IPN message should come quickly after executing an agreement, usually less then a minute
-		let oneDayLater = moment().utc().add(24, 'hour').toDate();
-		if(!subscription.expiredAt || subscription.expiredAt < oneDayLater){
+		let twoDayLater = moment().utc().add(48, 'hour').toDate();
+		if(!subscription.expiredAt || subscription.expiredAt < twoDayLater){
 			subscription.active = true;
-			subscription.expiredAt = oneDayLater;
+			subscription.expiredAt = twoDayLater;
 			subscription.limits = getSubscription(subscription.plan).limits;
 		}
 
