@@ -4914,6 +4914,7 @@ var ViewerManager = {};
 	function AccountBillingCtrl($scope, $location, $timeout, UtilsService, serverConfig) {
 		var vm = this,
 			promise;
+		console.log(12345);
 
 		/*
 		 * Init
@@ -9939,11 +9940,6 @@ var ViewerManager = {};
 				StateManager.setStateVar(StateManager.functions[i], false);
 			}
 
-			if (StateManager.state.loggedIn && !StateManager.state.account)
-			{
-				StateManager.setStateVar("account", Auth.username);
-			}
-
 			StateManager.clearQuery();
 
 			var stateChangeObject = {
@@ -9973,17 +9969,24 @@ var ViewerManager = {};
 			StateManager.handleStateChange(stateChangeObject);
 		});
 
-		$rootScope.$on('$locationChangeStart', function() {
+		$rootScope.$on('$locationChangeStart', function(event, next, current) {
 			console.log("locationChange");
 		});
 
 		$rootScope.$on('$locationChangeSuccess', function() {
 			console.log("locationChangeSucc");
 
-			StateManager.setQuery($location.search());
+			var queryParams = $location.search();
+
+			if (Object.keys(queryParams).length === 0)
+			{
+				StateManager.clearQuery();
+			} else {
+				StateManager.setQuery(queryParams);
+			}
 		});
 	}])
-	.service("StateManager", ["$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", function($q, $state, $rootScope, $timeout, structure, EventService, $window) {
+	.service("StateManager", ["$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", "Auth", function($q, $state, $rootScope, $timeout, structure, EventService, $window, Auth) {
 		var self = this;
 
 		$window.StateManager = this;
@@ -10153,7 +10156,14 @@ var ViewerManager = {};
 			if (compareStateChangeObjects(stateChangeObject, self.stateChangeQueue[0]))
 			{
 				self.stateChangeQueue.pop();
-				self.updateState();
+
+				if (StateManager.state.loggedIn && !StateManager.state.account)
+				{
+					StateManager.setStateVar("account", Auth.username);
+					StateManager.updateState();
+				} else {
+					self.updateState(true);
+				}
 			} else {
 				self.stateChangeQueue.pop();
 				self.handleStateChange(self.stateChangeQueue[self.stateChangeQueue.length - 1]);
@@ -10291,7 +10301,7 @@ var ViewerManager = {};
 				if (event.type === EventService.EVENT.SET_STATE) {
 					for (var key in event.value)
 					{
-						if (event.value.hasOwnProperty(key))
+						if (key !== "updateLocation" && event.value.hasOwnProperty(key))
 						{
 							self.setStateVar(key, event.value[key]);
 						}
@@ -10456,9 +10466,9 @@ var ViewerManager = {};
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$location", "$window", "Auth", "StateManager", "EventService", "UtilsService"];
+    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$window", "Auth", "StateManager", "EventService", "UtilsService"];
 
-    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $location, $window, Auth, StateManager, EventService, UtilsService) {
+    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $window, Auth, StateManager, EventService, UtilsService) {
         var vm = this,
 			homeLoggedOut,
 			notLoggedInElement,
@@ -10539,23 +10549,7 @@ var ViewerManager = {};
 		 * @param display
 		 */
 		vm.legalDisplay = function (event, display) {
-			$location.url("/" + display.value);
-			//$window.open("/" + display.value);
-
-			/*
-			vm.legalTitle = display.title;
-			vm.legalText = display.value;
-			$mdDialog.show({
-				templateUrl: "legalDialog.html",
-				parent: angular.element(document.body),
-				targetEvent: event,
-				clickOutsideToClose:true,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true,
-				onRemoving: removeDialog
-			});
-			*/
+			$window.open("/" + display.value);
 		};
 
 		$scope.$watch(EventService.currentEvent, function(event) {
@@ -10564,8 +10558,10 @@ var ViewerManager = {};
 				{
 					if (!event.value.error)
 					{
-						StateManager.setStateVar("loggedIn", true);
-						EventService.send(EventService.EVENT.GO_HOME);
+						if(!event.value.initialiser) {
+							StateManager.setStateVar("loggedIn", true);
+							EventService.send(EventService.EVENT.GO_HOME);
+						}
 					}
 				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
 					EventService.send(EventService.EVENT.CLEAR_STATE);

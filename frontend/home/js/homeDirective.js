@@ -76,9 +76,9 @@
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$location", "$window", "Auth", "StateManager", "EventService", "UtilsService"];
+    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$window", "Auth", "StateManager", "EventService", "UtilsService"];
 
-    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $location, $window, Auth, StateManager, EventService, UtilsService) {
+    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $window, Auth, StateManager, EventService, UtilsService) {
         var vm = this,
 			homeLoggedOut,
 			notLoggedInElement,
@@ -159,23 +159,7 @@
 		 * @param display
 		 */
 		vm.legalDisplay = function (event, display) {
-			$location.url("/" + display.value);
-			//$window.open("/" + display.value);
-
-			/*
-			vm.legalTitle = display.title;
-			vm.legalText = display.value;
-			$mdDialog.show({
-				templateUrl: "legalDialog.html",
-				parent: angular.element(document.body),
-				targetEvent: event,
-				clickOutsideToClose:true,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true,
-				onRemoving: removeDialog
-			});
-			*/
+			$window.open("/" + display.value);
 		};
 
 		$scope.$watch(EventService.currentEvent, function(event) {
