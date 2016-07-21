@@ -43,6 +43,7 @@
 	router.get("/:account.jpg", middlewares.hasReadAccessToAccount, getAvatar);
 	router.get("/:account/subscriptions", middlewares.hasReadAccessToAccount, listSubscriptions);
 	router.get("/:account/billings", middlewares.hasReadAccessToAccount, listBillings);
+	router.get("/:account/billings/:id.html", middlewares.hasReadAccessToAccount, renderBilling);
 	router.post('/:account', signUp);
 	//router.post('/:account/database', middlewares.canCreateDatabase, createDatabase);
 	router.post('/:account/subscriptions', middlewares.canCreateDatabase, createSubscription);
@@ -53,13 +54,13 @@
 	router.put("/:account", middlewares.hasWriteAccessToAccount, updateUser);
 	router.put("/:account/password", middlewares.hasWriteAccessToAccount, resetPassword);
 
-	function expireSession(req) {
-		if (req.session)
-		{
-			req.session.cookie.expires = new Date(0);
-			req.session.cookie.maxAge = 0;
-		}
-	}
+	// function expireSession(req) {
+	// 	if (req.session)
+	// 	{
+	// 		req.session.cookie.expires = new Date(0);
+	// 		req.session.cookie.maxAge = 0;
+	// 	}
+	// }
 
 	function createSession(place, req, res, next, user){
 		req.session.regenerate(function(err) {
@@ -421,9 +422,15 @@
 			return dbUser.buySubscriptions(req.body.plans, billingUser, req.body.billingAddress || {});
 		}).then(agreement => {
 
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
+			let resData = {
 				url: agreement.url
-			});
+			};
+
+			if(config.paypal.debug && config.paypal.debug.showFullAgreement){
+				resData.agreement = agreement.agreement;
+			}
+
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, resData);
 
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -448,6 +455,22 @@
 		let responsePlace = utils.APIInfo(req);
 		Billing.findByAccount(req.params.account).then(billings => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, billings);
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+	}
+
+	function renderBilling(req, res, next){
+		let responsePlace = utils.APIInfo(req);
+		Billing.findById({account: req.params.account}, req.params.id).then(billing => {
+			
+			if(!billing){
+				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
+			}
+
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, billing);
+			//res.render("???.jade", {billing : billing});
+			
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});

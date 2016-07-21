@@ -29,7 +29,9 @@ let getNextPaymentDate = require("../../models/payment").getNextPaymentDate;
 let helpers = require("./helpers");
 let async = require('async');
 let moment = require('moment-timezone');
+let Payment = require('../../models/payment');
 
+let url = require('url');
 describe('Enrolling to a subscription', function () {
 	let User = require('../../models/user');
 	let server;
@@ -108,6 +110,7 @@ describe('Enrolling to a subscription', function () {
 	});
 
 
+
 	let plans = {
 		"plans": [
 			{    
@@ -115,26 +118,37 @@ describe('Enrolling to a subscription', function () {
 			"quantity": 3
 			}
 		],
-	    "billingAddress":{
-	        "line1": "line1",
-	        "line2": "line2",
-	        "line3": "line3",
-	        "firstName": "henry",
-	        "lastName": "liu",
-	        "company": "3D Repo",
-	        "city": "London",
-	        "postalCode": "A00 2ss020",
-	        "countryCode": "GB",
-	        "vat": "90090-0909"
-	    }
+		"billingAddress":{
+			"line1": "line1",
+			"line2": "line2",
+			"line3": "line3",
+			"firstName": "henry",
+			"lastName": "liu",
+			"company": "3D Repo",
+			"city": "London",
+			"postalCode": "A00 2ss020",
+			"countryCode": "GB",
+			"vat": "90090-0909"
+		}
 	};
 
-	it('should succee', function(done){
+	it('should succee (GB business)', function(done){
 		this.timeout(10000);
+
 		agent.post(`/${username}/subscriptions`)
 		.send(plans)
 		.expect(200, function(err, res){
 			expect(res.body).to.have.property('url');
+			let parsed = url.parse(res.body.url, true);
+			expect(parsed.query).to.have.property('token');
+			
+			let paymentDef = res.body.agreement.plan.payment_definitions.find(def => def.type === 'REGULAR');
+			expect(paymentDef).to.be.not.null;
+			expect(paymentDef.amount.value).to.equal('250');
+			expect(paymentDef.amount.currency).to.equal('GBP');
+			expect(paymentDef.charge_models[0].type).to.equal('TAX');
+			expect(paymentDef.charge_models[0].amount.value).to.equal('50');
+			expect(paymentDef.charge_models[0].amount.currency).to.equal('GBP');
 			done(err);
 		});
 	});
@@ -146,7 +160,7 @@ describe('Enrolling to a subscription', function () {
 
 		before(function(done){
 			//fake payment
-			this.timeout(4000);
+			this.timeout(7000);
 
 			// set fake billing id
 			User.findByUserName(username).then(user => {
@@ -164,12 +178,12 @@ describe('Enrolling to a subscription', function () {
 					+ '&protection_eligibility=Eligible&payment_cycle=Monthly&address_status=unconfirmed&tax=0.00&payer_id=2PXA53TAV2ZVA'
 					+ '&address_street=na&payment_date=' + paymentDate + '&payment_status=Completed'
 					+ '&product_name=3D Repo Licence subscription.This month\'s pro-rata price: 0, then each month: £100&charset=UTF-8'
-					+ '&recurring_payment_id=' + billingId + '&address_zip=A00 2ss020&first_name=HUNG HO&mc_fee=4.10&address_country_code=HU'
-					+ '&address_name=HUNG HO LIU&notify_version=3.8&amount_per_cycle=100.00&payer_status=verified&currency_code=GBP'
+					+ '&recurring_payment_id=' + billingId + '&address_zip=A00 2ss020&first_name=repo&mc_fee=4.10&address_country_code=HU'
+					+ '&address_name=3drepo&notify_version=3.8&amount_per_cycle=100.00&payer_status=verified&currency_code=GBP'
 					+ '&business=test3drepo@example.org&address_country=Hungary&address_city=London'
 					+ '&verify_sign=AiPC9BjkCyDFQXbSkoZcgqH3hpacASD7TZ5vh-uuZ2-Goi9dUDXNh4Wy&payer_email=test3drepo_hungary@example.org'
 					+ '&initial_payment_amount=0.00&profile_status=Active&amount=100.00&txn_id=7VE78102JM363223J&payment_type=instant'
-					+ '&last_name=LIU&address_state=&receiver_email=test3drepo@example.org&payment_fee=&receiver_id=XNMSZ2D4UNB6G'
+					+ '&last_name=3d&address_state=&receiver_email=test3drepo@example.org&payment_fee=&receiver_id=XNMSZ2D4UNB6G'
 					+ '&txn_type=recurring_payment&mc_currency=GBP&residence_country=HU&test_ipn=1'
 					+ '&transaction_subject=3D Repo Licence subscription.This month\'s pro-rata price: 0, then each month: £100'
 					+ '&payment_gross=&shipping=0.00&product_type=1&time_created=' + paymentDate + '&ipn_track_id=78a335fad3b16';
@@ -296,14 +310,6 @@ describe('Enrolling to a subscription', function () {
 					});
 				});
 
-				it('should fail if try to remove itself', function(done){
-					agent.delete(`/${username}/subscriptions/${subscriptions[0]._id}/assign`)
-					.send({})
-					.expect(400, function(err, res){
-						expect(res.body.value).to.equal(responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF.value);
-						done(err);
-					});
-				});
 
 				it('should fail if license havent been assigned to anyone', function(done){
 					agent.delete(`/${username}/subscriptions/${subscriptions[2]._id}/assign`)

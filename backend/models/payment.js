@@ -38,6 +38,8 @@ function roundTo2DP(value){
 function getPaymentDateAndAmount(newLicences, oldPayableLicences, paymentDate, lastAnniversaryDate, nextPaymentDate, country, isBusiness){
 	'use strict';
 
+	console.log('nextPaymentDate', nextPaymentDate);
+	console.log('lastAnniversaryDate', lastAnniversaryDate);
 	let firstCycleAmount = 0;
 	let firstCycleBeforeTaxAmount = 0;
 	let firstCycleTaxAmount = 0;
@@ -241,7 +243,7 @@ function getBillingAgreement(
 
 			let desc = ``;
 			if (firstCycleAmount){
-				desc += `This month's pro-rata price: £${firstCycleAmount}. `;
+				desc += `This month's pro-rata: £${firstCycleAmount}. `;
 			}
 			desc += `Regualr monthly recurring payment £${regularAmount}, starts on ${moment(startDate).utc().format('Do MMM YYYY')}`;
 			
@@ -273,7 +275,8 @@ function getBillingAgreement(
 
 					resolve({ 
 						url: link.href, 
-						paypalPaymentToken: token
+						paypalPaymentToken: token,
+						agreement: billingAgreement
 					});
 				}
 			});

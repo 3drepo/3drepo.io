@@ -27,7 +27,10 @@ let systemLogger = log_iface.systemLogger;
 let responseCodes = require("../../response_codes.js");
 let helpers = require("./helpers");
 let C = require('../../constants');
-
+let async = require('async');
+let Role = require('../../models/role');
+let ProjectSetting = require('../../models/projectSetting');
+let User = require('../../models/user');
 describe('Project', function () {
 	let User = require('../../models/user');
 	let server;
@@ -145,4 +148,81 @@ describe('Project', function () {
 	});
 
 
+	describe('Delete a project', function(){
+
+		let username = 'projectshared';
+		let password = 'password';
+		let project = 'sample_project';
+
+		let collaboratorUsername = 'testing';
+
+		before(function(done){
+			async.series([
+				function logout(done){
+					agent.post('/logout').send({}).expect(200, done);
+				},
+				function login(done){
+					agent.post('/login').send({
+						username, password
+					}).expect(200, done);
+				}, function(done){
+					// check if the project is shared and roles are in place
+					Role.findByRoleID(`${username}.${project}.viewer`).then(role => {
+						expect(role).to.not.be.null;
+						return Role.findByRoleID(`${username}.${project}.collaborator`);
+					}).then(role => {
+						expect(role).to.not.be.null;
+						done();
+					});
+				}, function(done){
+					// check if the project is shared and roles are in place
+					ProjectSetting.findById({account: username, project: project}, project).then(setting => {
+						expect(setting).to.not.be.null;
+						done();
+					});
+				}, function(done){
+					// check if the project is shared and roles are in place
+					return User.findByUserName(collaboratorUsername).then(user => {
+						expect(user.roles.find(role => role.role === `${project}.collaborator` && role.db === username)).to.not.be.undefined;
+						done();
+					});
+				}
+			], done);
+
+		});
+
+
+		it('should success', function(done){
+			agent.delete(`/${username}/${project}`).expect(200, done);
+		});
+
+		it('should fail if delete again', function(done){
+			agent.delete(`/${username}/${project}`).expect(400, function(err, res){
+				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+				done(err);
+			});
+		});
+
+		it('should remove all the roles in roles collection', function(){
+			return Role.findByRoleID(`${username}.${project}.viewer`).then(role => {
+				expect(role).to.be.null;
+				return Role.findByRoleID(`${username}.${project}.collaborator`);
+			}).then(role => {
+				expect(role).to.be.null;
+			});
+		});
+
+		it('should remove setting in settings collection', function() {
+			return ProjectSetting.findById({account: username, project: project}, project).then(setting => {
+				expect(setting).to.be.null;
+			});
+		});
+
+		it('should remove role from collaborator user.roles', function(){
+			return User.findByUserName(collaboratorUsername).then(user => {
+				expect(user.roles.find(role => role.role === `${project}.collaborator` && role.db === username)).to.be.undefined;
+			});
+		});
+
+	})
 });

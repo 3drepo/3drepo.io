@@ -555,6 +555,7 @@ schema.methods.listAccounts = function(){
 
 		});
 
+
 		accounts.sort((a, b) => {
 			if (a.account.toLowerCase() < b.account.toLowerCase()){
 				return -1;
@@ -565,6 +566,13 @@ schema.methods.listAccounts = function(){
 			}
 		});
 
+		// own acconut always ranks top of the list
+		let myAccountIndex = accounts.findIndex(account => account.account === this.user);
+		if(myAccountIndex > -1){
+			let myAccount = accounts[myAccountIndex];
+			accounts.splice(myAccountIndex, 1);
+			accounts.unshift(myAccount);
+		} 
 
 		return Promise.all(getQuotaPromises).then(() => {
 			return Promise.resolve(accounts);
@@ -987,12 +995,17 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 		let items = [];
 
-		if(dbUser.customData.nextPaymentDate){
+		dbUser.customData.nextPaymentDate && console.log('nextPaymentDate', moment(paymentInfo.nextPaymentDate).utc().startOf('date').toISOString());
+		console.log('pp next', moment(dbUser.customData.nextPaymentDate).utc().startOf('date').toISOString());
+
+		if(dbUser.customData.nextPaymentDate && moment(paymentInfo.nextPaymentDate).utc().startOf('date').toISOString() !== moment(dbUser.customData.nextPaymentDate).utc().startOf('date').toISOString()){
+			console.log('last ann date changed');
 			dbUser.customData.lastAnniversaryDate = new Date(dbUser.customData.nextPaymentDate);
 		}
 
 		dbUser.customData.nextPaymentDate = moment(paymentInfo.nextPaymentDate).utc().startOf('date').toDate();
 
+		let inCurrentAgreementCount = dbUser.customData.subscriptions.filter(sub => sub.inCurrentAgreement).length;
 		dbUser.customData.subscriptions.forEach(subscription => {
 
 			if(subscription.inCurrentAgreement){
@@ -1003,9 +1016,6 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 					.hours(0).minutes(0).seconds(0).milliseconds(0)
 					.toDate();
 
-				//let start = moment.utc(paymentInfo.ipnDate).date();
-				//let end = moment(paymentInfo.ipnDate).utc().endOf('month').date();
-				//let prorata = (end - start + 1) / end;
 
 
 				subscription.limits = getSubscription(subscription.plan).limits;
@@ -1017,7 +1027,7 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 					items.push({
 						name: subscription.plan,
 						currency: getSubscription(subscription.plan).currency,
-
+						amount: Math.round(paymentInfo.amount / inCurrentAgreementCount * 100) / 100
 					});
 				}
 			
@@ -1026,6 +1036,13 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 		});
 
 		if(paymentInfo.createBilling){
+
+
+			let nextAmount = 0;
+
+			dbUser.customData.subscriptions.filter(sub => sub.inCurrentAgreement).forEach(sub => {
+				nextAmount += getSubscription(sub.plan).amount;
+			});
 
 			let billing = Billing.createInstance({ account });
 
@@ -1036,6 +1053,11 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 			billing.amount = paymentInfo.amount;
 			billing.billingAgreementId = billingAgreementId;
 			billing.items = items;
+			billing.nextPaymentDate = paymentInfo.nextPaymentDate;
+			billing.taxAmount = paymentInfo.taxAmount;
+			billing.nextPaymentAmount = nextAmount;
+
+
 			//copy current billing info from user to billing
 			billing.info = dbUser.customData.billingInfo;
 
@@ -1105,12 +1127,12 @@ schema.methods.executeBillingAgreement = function(token, billingAgreementId){
 		subscription.inCurrentAgreement = true;
 
 		// pre activate
-		// don't wait for IPN message to confirm but to activate the subscription right away, for 24 hours.
+		// don't wait for IPN message to confirm but to activate the subscription right away, for 48 hours.
 		// IPN message should come quickly after executing an agreement, usually less then a minute
-		let oneDayLater = moment().utc().add(24, 'hour').toDate();
-		if(!subscription.expiredAt || subscription.expiredAt < oneDayLater){
+		let twoDayLater = moment().utc().add(48, 'hour').toDate();
+		if(!subscription.expiredAt || subscription.expiredAt < twoDayLater){
 			subscription.active = true;
-			subscription.expiredAt = oneDayLater;
+			subscription.expiredAt = twoDayLater;
 			subscription.limits = getSubscription(subscription.plan).limits;
 		}
 

@@ -156,7 +156,7 @@ function importToyJSON(db, project){
 		promises.push(new Promise((resolve, reject) => {
 
 			require('child_process').exec(
-			`mongoimport -j 4 --host ${host} --username ${username} --password ${password} --authenticationDatabase admin --db ${db} --collection ${collection} --file ${path}/${filename}`,
+			`mongoimport -j 8 --host ${host} --username ${username} --password ${password} --authenticationDatabase admin --db ${db} --collection ${collection} --file ${path}/${filename}`,
 			{ 
 				cwd: __dirname
 			}, function (err) {
@@ -211,7 +211,7 @@ function importToyProject(username){
 
 		}).catch(err => {
 			// import failed for some reason(s)...
-			console.log(err);
+			console.log('import toy project error', err);
 			//mark project failed
 			if(projectSetting){
 				projectSetting.status = 'failed';
@@ -289,20 +289,11 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 
 		setting = _setting;
 
-		if(!setting){
-			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
-		} else if (setting.findCollaborator(username, role)) {
-			return Promise.reject(responseCodes.ALREADY_IN_ROLE);
+		if(username){
+			return User.findByUserName(username);
 		} else {
-
-			if(username){
-				return User.findByUserName(username);
-			} else {
-				return User.findByEmail(email);
-			}
-			
+			return User.findByEmail(email);
 		}
-
 
 	}).then(_user => {
 		
@@ -310,6 +301,14 @@ function addCollaborator(username, email, account, project, role, disableEmail){
 
 		if(!user){
 			return Promise.reject(responseCodes.USER_NOT_FOUND);
+		}
+
+		if(!setting){
+			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+		} else if (setting.findCollaborator(user.user, role)) {
+			return Promise.reject(responseCodes.ALREADY_IN_ROLE);
+		} else if(setting.owner === user.user) {
+			return Promise.reject(responseCodes.ALREADY_IN_ROLE);
 		}
 
 		return User.findByUserName(account);
@@ -392,16 +391,15 @@ function removeCollaborator(username, email, account, project, role){
 			return Promise.reject(responseCodes.USER_NOT_FOUND);
 		}
 
-		return User.revokeRolesFromUser(user.user, account, `${project}.${role}`);
-
-	}).then(() => {
-
-
 		let deletedCol = setting.removeCollaborator(user.user, role);
 
 		if(!deletedCol){
 			return Promise.reject(responseCodes.NOT_IN_ROLE);
 		}
+
+		return User.revokeRolesFromUser(user.user, account, `${project}.${role}`);
+
+	}).then(() => {
 
 		return setting.save().then(() => {
 

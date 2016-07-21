@@ -32,6 +32,9 @@ var schema = mongoose.Schema({
 	}],
 	periodStart: Date,
 	periodEnd: Date,
+	nextPaymentDate: Date,
+	nextPaymentAmount: String,
+	taxAmount: String,
 	info: {
 		"vat": String,
 		"line1": String,

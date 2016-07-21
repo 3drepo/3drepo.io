@@ -15,7 +15,7 @@ var subscriptions = [
 	{
 		plan: 'BASIC',
 		limits: {
-			spaceLimit: 26214400, //bytes
+			spaceLimit: 209715200, //bytes
 			collaboratorLimit: 0,
 		},
 		billingCycle: -1, //month
