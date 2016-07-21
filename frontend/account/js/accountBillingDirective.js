@@ -44,7 +44,6 @@
 	function AccountBillingCtrl($scope, $location, $timeout, UtilsService, serverConfig) {
 		var vm = this,
 			promise;
-		console.log(vm.quota);
 
 		/*
 		 * Init

@@ -758,6 +758,12 @@ billing {
     height: 100%;
     background: rgb(250, 250, 250);
     z-index: 2;
+    color: rgba(0, 0, 0, 0.8);
+}
+
+billing p,
+billing label {
+    color: rgba(0, 0, 0, 0.7);
 }
 
 billing .md-toolbar-tools img {
@@ -778,6 +784,16 @@ billing #billingClientAddress {
 
 billing .billingInfoTitle {
     font-weight: bold;
+}
+
+billing #billingProductInfo {
+    margin: 10px 0 40px;
+}
+
+billing #billingReverseCharge {
+    margin-top: 40px;
+    font-size: 14px;
+    line-height: 30px;
 }
 bottom-buttons {
   display: block;
@@ -1849,16 +1865,6 @@ right-panel #rightPanelButtons label {
     font-weight: bold;
     font-size: 14px;
 }
-sign-up md-input-container {
-    margin-top: 0;
-}
-
-sign-up md-input-container input {
-    padding: 5px !important;
-    margin-bottom: -15px;
-    height: 35px !important;
-}
-
 sign-up .registerLinks {
     font-size: 14px;
     margin: 5px 0;
@@ -1881,6 +1887,7 @@ sign-up-form #tc a {
 sign-up-form #tc p {
     font-size: 14px;
     color: rgba(0, 0, 0, 0.7);
+    margin: -3px 0 20px 10px;
 }
 sign-up-form #tc a {
     outline: none;

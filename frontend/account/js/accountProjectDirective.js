@@ -78,11 +78,18 @@
 		 * Go to the project viewer
 		 */
 		vm.goToProject = function () {
+			// No timestamp indicates no model previously uploaded
 			if (vm.project.timestamp === null) {
 				vm.uploadFile();
 			}
 			else {
-				$location.path("/" + vm.account.name + "/" + vm.project.name, "_self").search("page", null);
+				// Disable going to viewer if uploading a model
+				var promise = UtilsService.doGet(vm.account.name + "/" + vm.project.name + ".json");
+				promise.then(function (response) {
+					if (response.data.status !== "processing") {
+						$location.path("/" + vm.account.name + "/" + vm.project.name, "_self").search("page", null);
+					}
+				});
 			}
 		};
 

@@ -1,13 +1,3 @@
-sign-up md-input-container {
-    margin-top: 0;
-}
-
-sign-up md-input-container input {
-    padding: 5px !important;
-    margin-bottom: -15px;
-    height: 35px !important;
-}
-
 sign-up .registerLinks {
     font-size: 14px;
     margin: 5px 0;
@@ -30,6 +20,7 @@ sign-up-form #tc a {
 sign-up-form #tc p {
     font-size: 14px;
     color: rgba(0, 0, 0, 0.7);
+    margin: -3px 0 20px 10px;
 }
 sign-up-form #tc a {
     outline: none;

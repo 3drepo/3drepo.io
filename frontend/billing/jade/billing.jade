@@ -10,50 +10,48 @@ div(layout-fill, layout="column")
 
 	md-content(ng-if="vm.showBilling", layout="row", flex, layout-align="center")
 		div(flex="50", layout="column")
-			#billingCompanyAddress(layout="column")
+			#billingCompanyAddress(layout="column", flex="none")
 				label.md-title 3D Repo
 				label c/o EIT Digital
 				label Centre House Block C
 				label 56 Wood Lane
 				label London W12 7SB
 				label United Kingdom
+				label VAT ID: GB 206 9090 15
+				a(href="mailto:support@3drepo.org") support@3drepo.org
 
-			p.md-headline Invoice
+			p.md-headline(flex="none") Invoice
 
-			.billingInfoTitle(layout="row")
-				label(flex="30") To
-				label(flex="30") Date
+			.billingInfoTitle(layout="row", flex="none")
+				label(flex="40") To
+				label(flex="40") Date
 				label Invoice ID
 
-			md-divider
+			md-divider(flex="none")
 
-			#billingClientAddress(layout="row")
-				div(layout="column", flex="30")
+			#billingClientAddress(layout="row", flex="none")
+				div(layout="column", flex="40")
 					label {{vm.billing.info.firstName}} {{vm.billing.info.lastName}}
 					label {{vm.billing.info.line1}}
 					label(ng-if="vm.billing.info.line2") {{vm.billing.info.line2}}
 					label {{vm.billing.info.city}}
 					label {{vm.billing.info.postalCode}}
-					label {{vm.billing.info.countryCode}}
-				label(flex="30") {{vm.billing.createdAt | invoiceDate}}
+					label {{vm.billing.info.country}}
+				label(flex="40") {{vm.billing.createdAt | invoiceDate}}
 				label {{vm.billing.billingAgreementId}}
 
-			.billingInfoTitle(layout="row")
-				label(flex="60") Product
+			.billingInfoTitle(layout="row", flex="none")
+				label(flex="80") Product
 				label Amount
 
-			md-divider
+			md-divider(flex="none")
 
-			//#billingList(layout="column")
-				md-input-container(flex)
-					label Date
-					input(type="text", value="{{vm.billing.createdAt | date:'dd-MM-yyyy'}}", ng-disabled="true")
-				//md-input-container(flex)
-					label Id
-					input(type="text", value="{{vm.billing.billingAgreementId}}", ng-disabled="true")
-				md-input-container(flex)
-					label Payment Method
-					input(type="text", value="{{vm.billing.gateway}}", ng-disabled="true")
-				md-input-container(flex)
-					label Amount (£)
-					input(type="text", value="{{vm.billing.amount}}", ng-disabled="true")
+			#billingProductInfo(layout="row", flex="none")
+				label(flex="80") {{vm.billing.items[0].name}}
+				label £{{vm.billing.amount}}
+
+			md-divider(flex="none")
+
+			#billingReverseCharge(layout="column", flex="none")
+				label Prices inclusive of VAT, where applicable
+				label VAT is subject to the Reverse Charge

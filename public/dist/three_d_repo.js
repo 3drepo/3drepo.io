@@ -4914,7 +4914,6 @@ var ViewerManager = {};
 	function AccountBillingCtrl($scope, $location, $timeout, UtilsService, serverConfig) {
 		var vm = this,
 			promise;
-		console.log(vm.quota);
 
 		/*
 		 * Init
@@ -5408,13 +5407,18 @@ var ViewerManager = {};
 				promise.then(function (response) {
 					console.log(response);
 					if (response.status === 200) {
-						vm.addMessage = "User " + vm.newLicenseAssignee + " added as a license";
+						vm.addMessage = "User " + vm.newLicenseAssignee + " assigned a license";
 						vm.licenses.push({user: response.data.assignedUser, id: response.data._id, showRemove: true});
 						vm.unassigned.splice(0, 1);
-						vm.allLicensesAssigned = (vm.unassigned === 0);
+						vm.allLicensesAssigned = (vm.unassigned.length === 0);
+						vm.addDisabled = vm.allLicensesAssigned;
+						vm.newLicenseAssignee = "";
+					}
+					else if (response.status === 400) {
+						vm.addMessage = "This user has already been assigned a license";
 					}
 					else if (response.status === 404) {
-						vm.addMessage = response.data.message;
+						vm.addMessage = "User not found";
 					}
 				});
 			}
@@ -5430,9 +5434,10 @@ var ViewerManager = {};
 			promise.then(function (response) {
 				console.log(response);
 				if (response.status === 200) {
+					vm.unassigned.push(vm.licenses[index].id);
 					vm.licenses.splice(index, 1);
-					vm.unassigned.push(null);
 					vm.addDisabled = false;
+					vm.allLicensesAssigned = false;
 				}
 				else if (response.data.status === 400) {
 					if (response.data.value === 94) {
@@ -5452,8 +5457,8 @@ var ViewerManager = {};
 			promise.then(function (response) {
 				console.log(response);
 				if (response.status === 200) {
+					vm.unassigned.push(vm.licenses[vm.licenseAssigneeIndex].id);
 					vm.licenses.splice(vm.licenseAssigneeIndex, 1);
-					vm.unassigned.push(null);
 					vm.addDisabled = false;
 					UtilsService.closeDialog();
 				}
@@ -5726,11 +5731,18 @@ var ViewerManager = {};
 		 * Go to the project viewer
 		 */
 		vm.goToProject = function () {
+			// No timestamp indicates no model previously uploaded
 			if (vm.project.timestamp === null) {
 				vm.uploadFile();
 			}
 			else {
-				$location.path("/" + vm.account.name + "/" + vm.project.name, "_self").search("page", null);
+				// Disable going to viewer if uploading a model
+				var promise = UtilsService.doGet(vm.account.name + "/" + vm.project.name + ".json");
+				promise.then(function (response) {
+					if (response.data.status !== "processing") {
+						$location.path("/" + vm.account.name + "/" + vm.project.name, "_self").search("page", null);
+					}
+				});
 			}
 		};
 
@@ -8166,11 +8178,12 @@ var ViewerManager = {};
 		};
 	}
 
-	BillingCtrl.$inject = ["EventService", "UtilsService"];
+	BillingCtrl.$inject = ["EventService", "UtilsService", "serverConfig"];
 
-	function BillingCtrl (EventService, UtilsService) {
+	function BillingCtrl (EventService, UtilsService, serverConfig) {
 		var vm = this,
-			billingsPromise;
+			billingsPromise,
+			i, length;
 
 		/*
 		 * Init
@@ -8179,12 +8192,21 @@ var ViewerManager = {};
 		if (vm.query.hasOwnProperty("user") && vm.query.hasOwnProperty("item")) {
 			billingsPromise = UtilsService.doGet(vm.query.user + "/billings");
 			billingsPromise.then(function (response) {
-				console.log("**billings** ", response);
+				console.log("**billings**", response);
 				if ((response.data.length > 0) &&
 					(parseInt(vm.query.item) >= 0) &&
 					(parseInt(vm.query.item) < response.data.length)) {
 					vm.showBilling = true;
 					vm.billing = response.data[parseInt(vm.query.item)];
+					if (serverConfig.hasOwnProperty("countries")) {
+						console.log(serverConfig.countries);
+						for (i = 0, length = serverConfig.countries.length; i < length; i += 1) {
+							if (serverConfig.countries[i].code === vm.billing.info.countryCode) {
+								vm.billing.info.country = serverConfig.countries[i].name;
+								break;
+							}
+						}
+					}
 				}
 			});
 		}
