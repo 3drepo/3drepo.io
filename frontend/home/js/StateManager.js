@@ -127,11 +127,6 @@
 				StateManager.setStateVar(StateManager.functions[i], false);
 			}
 
-			if (StateManager.state.loggedIn && !StateManager.state.account)
-			{
-				StateManager.setStateVar("account", Auth.username);
-			}
-
 			StateManager.clearQuery();
 
 			var stateChangeObject = {
@@ -178,7 +173,7 @@
 			}
 		});
 	}])
-	.service("StateManager", ["$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", function($q, $state, $rootScope, $timeout, structure, EventService, $window) {
+	.service("StateManager", ["$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", "Auth", function($q, $state, $rootScope, $timeout, structure, EventService, $window, Auth) {
 		var self = this;
 
 		$window.StateManager = this;
@@ -348,7 +343,14 @@
 			if (compareStateChangeObjects(stateChangeObject, self.stateChangeQueue[0]))
 			{
 				self.stateChangeQueue.pop();
-				self.updateState();
+
+				if (StateManager.state.loggedIn && !StateManager.state.account)
+				{
+					StateManager.setStateVar("account", Auth.username);
+					StateManager.updateState();
+				} else {
+					self.updateState(true);
+				}
 			} else {
 				self.stateChangeQueue.pop();
 				self.handleStateChange(self.stateChangeQueue[self.stateChangeQueue.length - 1]);
@@ -486,7 +488,7 @@
 				if (event.type === EventService.EVENT.SET_STATE) {
 					for (var key in event.value)
 					{
-						if (event.value.hasOwnProperty(key))
+						if (key !== "updateLocation" && event.value.hasOwnProperty(key))
 						{
 							self.setStateVar(key, event.value[key]);
 						}
