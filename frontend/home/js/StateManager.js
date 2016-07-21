@@ -161,14 +161,21 @@
 			StateManager.handleStateChange(stateChangeObject);
 		});
 
-		$rootScope.$on('$locationChangeStart', function() {
+		$rootScope.$on('$locationChangeStart', function(event, next, current) {
 			console.log("locationChange");
 		});
 
 		$rootScope.$on('$locationChangeSuccess', function() {
 			console.log("locationChangeSucc");
 
-			StateManager.setQuery($location.search());
+			var queryParams = $location.search();
+
+			if (Object.keys(queryParams).length === 0)
+			{
+				StateManager.clearQuery();
+			} else {
+				StateManager.setQuery(queryParams);
+			}
 		});
 	}])
 	.service("StateManager", ["$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", function($q, $state, $rootScope, $timeout, structure, EventService, $window) {
