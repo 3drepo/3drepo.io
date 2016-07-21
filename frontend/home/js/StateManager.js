@@ -344,10 +344,15 @@
 			{
 				self.stateChangeQueue.pop();
 
-				if (StateManager.state.loggedIn && !StateManager.state.account)
+				var functionList = self.functionsUsed();
+
+				// If we are not trying to access a function
+				// and yet there is no account set. Then
+				// we need to go back to the account page if possible.
+				if ((functionList.length === 0) && self.state.loggedIn && !self.state.account)
 				{
-					StateManager.setStateVar("account", Auth.username);
-					StateManager.updateState();
+					self.setStateVar("account", Auth.username);
+					self.updateState();
 				} else {
 					self.updateState(true);
 				}
@@ -376,13 +381,9 @@
 			}
 		};
 
-		this.genStateName = function ()
+		this.functionsUsed = function ()
 		{
-			var currentChildren = self.structure.children;
-			var childidx        = 0;
-			var stateName       = "home."; // Assume that the base state is there.
-			var i               = 0;
-			var usesFunction    = false;
+			var functionList = [];
 
 			// First loop through the list of functions
 			// belonging to parent structure.
@@ -395,14 +396,28 @@
 
 					if (self.state[functionName])
 					{
-						stateName += functionName + ".";
-						usesFunction = true;
+						functionList.push(functionName);
 						break;
 					}
 				}
 			}
 
-			if (!usesFunction)
+			return functionList;
+		}
+
+		this.genStateName = function ()
+		{
+			var currentChildren = self.structure.children;
+			var childidx        = 0;
+			var stateName       = "home."; // Assume that the base state is there.
+			var i               = 0;
+			var functionList    = self.functionsUsed();
+			var usesFunction    = (functionList.length > 0);
+
+			if (usesFunction)
+			{
+				stateName += functionList.join(".") + ".";
+			} else
 			{
 				while(childidx < currentChildren.length)
 				{
