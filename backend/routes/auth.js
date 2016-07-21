@@ -43,6 +43,7 @@
 	router.get("/:account.jpg", middlewares.hasReadAccessToAccount, getAvatar);
 	router.get("/:account/subscriptions", middlewares.hasReadAccessToAccount, listSubscriptions);
 	router.get("/:account/billings", middlewares.hasReadAccessToAccount, listBillings);
+	router.get("/:account/billings/:id.html", middlewares.hasReadAccessToAccount, renderBilling);
 	router.post('/:account', signUp);
 	//router.post('/:account/database', middlewares.canCreateDatabase, createDatabase);
 	router.post('/:account/subscriptions', middlewares.canCreateDatabase, createSubscription);
@@ -454,6 +455,22 @@
 		let responsePlace = utils.APIInfo(req);
 		Billing.findByAccount(req.params.account).then(billings => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, billings);
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+	}
+
+	function renderBilling(req, res, next){
+		let responsePlace = utils.APIInfo(req);
+		Billing.findById({account: req.params.account}, req.params.id).then(billing => {
+			
+			if(!billing){
+				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
+			}
+
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, billing);
+			//res.render("???.jade", {billing : billing});
+			
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
