@@ -6,7 +6,6 @@ let mongoose = require('mongoose');
 let mockgoose = require('mockgoose');
 let _ = require('lodash');
 
-mockgoose(mongoose);
 
 let proxyquire = require('proxyquire').noCallThru();;
 let modelFactoryMock = proxyquire('../../../models/factory/modelFactory', { 
@@ -39,8 +38,10 @@ describe('User', function(){
 
 		modelFactoryMock.setDB(new DB());
 
-	    mongoose.connect('mongodb://doesnt.matter/whatdb-it-is-mock', function(err) {
-	        done(err);
+	    mockgoose(mongoose).then(function() {
+	        mongoose.connect('mongodb://example.com/TestingDB', function(err) {
+	            done(err);
+	        });
 	    });
 
 	});
