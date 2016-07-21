@@ -184,8 +184,10 @@
 				{
 					if (!event.value.error)
 					{
-						StateManager.setStateVar("loggedIn", true);
-						EventService.send(EventService.EVENT.GO_HOME);
+						if(!event.value.initialiser) {
+							StateManager.setStateVar("loggedIn", true);
+							EventService.send(EventService.EVENT.GO_HOME);
+						}
 					}
 				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
 					EventService.send(EventService.EVENT.CLEAR_STATE);
