@@ -91,7 +91,8 @@ var schema = mongoose.Schema({
 			"company": String,
 			"city": String,
 			"postalCode": String,
-			"countryCode": String
+			"countryCode": String,
+			"state": String,
 		},
 		//global billing info
 		billingAgreementId: String,
@@ -723,7 +724,8 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 				"line2": billingAddress.line2,
 				"city": billingAddress.city,
 				"postal_code": billingAddress.postalCode,
-				"country_code": billingAddress.countryCode
+				"country_code": billingAddress.countryCode,
+				"state": billingAddress.state
 			});
 		}
 
@@ -881,7 +883,8 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 					"line2": billingAddress.line2,
 					"city": billingAddress.city,
 					"postal_code": billingAddress.postalCode,
-					"country_code": billingAddress.countryCode
+					"country_code": billingAddress.countryCode,
+					"state": billingAddress.state
 				};
 
 				return Payment.getBillingAgreement(
