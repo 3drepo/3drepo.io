@@ -4921,6 +4921,7 @@ var ViewerManager = {};
 		vm.showInfo = true;
 		vm.saveDisabled = true;
 		vm.countries = serverConfig.countries;
+		vm.showStates = false;
 
 		/*
 		 * Watch for change in licenses
@@ -4961,6 +4962,7 @@ var ViewerManager = {};
 					// Company name required if VAT number exists
 					vm.companyNameRequired = (angular.isDefined(vm.newBillingAddress.vat) && (vm.newBillingAddress.vat !== ""));
 				}
+				vm.showStates = (vm.newBillingAddress.countryCode === "US")
 			}
 		}, true);
 
@@ -8209,12 +8211,18 @@ var ViewerManager = {};
 	function BillingCtrl (EventService, UtilsService, serverConfig) {
 		var vm = this,
 			billingsPromise,
-			i, length;
+			i, length,
+			euCountryCodes = [
+				"BE", "BG", "CZ", "DK", "DE", "EE", "IE", "EL", "ES", "FR", "HR", "IT", "CY", "LV", "LT",
+				"LU", "HU", "MT", "NL", "AT", "PL", "PT", "RO", "SI", "SK", "FI", "SE"
+			];
 
 		/*
 		 * Init
 		 */
 		vm.showBilling = false;
+		vm.B2B_EU = false;
+
 		if (vm.query.hasOwnProperty("user") && vm.query.hasOwnProperty("item")) {
 			billingsPromise = UtilsService.doGet(vm.query.user + "/billings");
 			billingsPromise.then(function (response) {
@@ -8224,8 +8232,15 @@ var ViewerManager = {};
 					(parseInt(vm.query.item) < response.data.length)) {
 					vm.showBilling = true;
 					vm.billing = response.data[parseInt(vm.query.item)];
+
+					vm.billing.netAmount = vm.billing.amount- vm.billing.taxAmount;
+					vm.billing.taxPercentage = Math.round(vm.billing.taxAmount / vm.billing.amount * 100);
+
+					// Check if B2B EU
+					vm.B2B_EU = (euCountryCodes.indexOf(vm.billing.info.countryCode) !== -1);
+
+					// Get country from country code
 					if (serverConfig.hasOwnProperty("countries")) {
-						console.log(serverConfig.countries);
 						for (i = 0, length = serverConfig.countries.length; i < length; i += 1) {
 							if (serverConfig.countries[i].code === vm.billing.info.countryCode) {
 								vm.billing.info.country = serverConfig.countries[i].name;
@@ -8239,6 +8254,10 @@ var ViewerManager = {};
 
 		vm.home = function () {
 			EventService.send(EventService.EVENT.GO_HOME);
+		};
+
+		vm.print = function () {
+			window.print();
 		};
 	}
 }());
@@ -17449,7 +17468,7 @@ var Oculus = {};
 					((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1) + "-" +
 					date.getFullYear() + " " +
 					(date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
-					(date.getMinutes() < 10 ? "0" : "") + date.getMinutes() + " GMT";
+					(date.getMinutes() < 10 ? "0" : "") + date.getMinutes();
 
 				return invoiceDate;
 			};
@@ -17503,30 +17522,6 @@ var Oculus = {};
 
     function UtilsService($http, $q, $mdDialog, serverConfig) {
         var obj = {};
-
-		/**
-         * Prettify timestamp
-         *
-         * @param timestamp
-         * @param showSeconds
-         * @returns {string|*}
-         */
-        obj.formatTimestamp = function (timestamp, showSeconds) {
-            var date = new Date(timestamp),
-                formatted;
-
-            formatted = (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
-                        ((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1) + "-" +
-                        date.getFullYear();
-            
-            if (angular.isDefined(showSeconds) && showSeconds) {
-                formatted += " " + (date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
-                            (date.getMinutes() < 10 ? "0" : "") + date.getMinutes() + "-" +
-                            (date.getSeconds() < 10 ? "0" : "") + date.getSeconds();
-            }
-            
-            return formatted;
-        };
 
 		/**
 		 * Convert blah_test to blahTest

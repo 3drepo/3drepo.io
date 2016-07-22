@@ -39,12 +39,18 @@
 	function BillingCtrl (EventService, UtilsService, serverConfig) {
 		var vm = this,
 			billingsPromise,
-			i, length;
+			i, length,
+			euCountryCodes = [
+				"BE", "BG", "CZ", "DK", "DE", "EE", "IE", "EL", "ES", "FR", "HR", "IT", "CY", "LV", "LT",
+				"LU", "HU", "MT", "NL", "AT", "PL", "PT", "RO", "SI", "SK", "FI", "SE"
+			];
 
 		/*
 		 * Init
 		 */
 		vm.showBilling = false;
+		vm.B2B_EU = false;
+
 		if (vm.query.hasOwnProperty("user") && vm.query.hasOwnProperty("item")) {
 			billingsPromise = UtilsService.doGet(vm.query.user + "/billings");
 			billingsPromise.then(function (response) {
@@ -54,8 +60,15 @@
 					(parseInt(vm.query.item) < response.data.length)) {
 					vm.showBilling = true;
 					vm.billing = response.data[parseInt(vm.query.item)];
+
+					vm.billing.netAmount = vm.billing.amount- vm.billing.taxAmount;
+					vm.billing.taxPercentage = Math.round(vm.billing.taxAmount / vm.billing.amount * 100);
+
+					// Check if B2B EU
+					vm.B2B_EU = (euCountryCodes.indexOf(vm.billing.info.countryCode) !== -1);
+
+					// Get country from country code
 					if (serverConfig.hasOwnProperty("countries")) {
-						console.log(serverConfig.countries);
 						for (i = 0, length = serverConfig.countries.length; i < length; i += 1) {
 							if (serverConfig.countries[i].code === vm.billing.info.countryCode) {
 								vm.billing.info.country = serverConfig.countries[i].name;
@@ -69,6 +82,10 @@
 
 		vm.home = function () {
 			EventService.send(EventService.EVENT.GO_HOME);
+		};
+
+		vm.print = function () {
+			window.print();
 		};
 	}
 }());

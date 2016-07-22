@@ -51,6 +51,7 @@
 		vm.showInfo = true;
 		vm.saveDisabled = true;
 		vm.countries = serverConfig.countries;
+		vm.showStates = false;
 
 		/*
 		 * Watch for change in licenses
@@ -91,6 +92,7 @@
 					// Company name required if VAT number exists
 					vm.companyNameRequired = (angular.isDefined(vm.newBillingAddress.vat) && (vm.newBillingAddress.vat !== ""));
 				}
+				vm.showStates = (vm.newBillingAddress.countryCode === "US")
 			}
 		}, true);
 

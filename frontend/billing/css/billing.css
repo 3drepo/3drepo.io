@@ -41,3 +41,9 @@ billing #billingReverseCharge {
     font-size: 14px;
     line-height: 30px;
 }
+
+billing #billingPeriod {
+    color: rgba(0,0,0,.4);
+    font-size: 14px;
+    margin-top: 5px;
+}

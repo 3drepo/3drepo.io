@@ -804,6 +804,13 @@ billing #billingReverseCharge {
     font-size: 14px;
     line-height: 30px;
 }
+
+billing #billingPeriod {
+    color: rgba(0,0,0,.4);
+    font-size: 14px;
+    margin-top: 5px;
+}
+
 bottom-buttons {
   display: block;
   position: absolute;
@@ -1227,6 +1234,14 @@ home md-radio-button ._md-label {
     line-height: 14px;
     transition: all 0.3s cubic-bezier(0.55, 0, 0.55, 0.2);
     color: grey;
+}
+
+@media print
+{
+    .noPrint, .noPrint *
+    {
+        display: none !important;
+    }
 }
 
 /** Legal Dialog ******************************************************************************************************/

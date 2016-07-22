@@ -112,6 +112,14 @@ home md-radio-button ._md-label {
     color: grey;
 }
 
+@media print
+{
+    .noPrint, .noPrint *
+    {
+        display: none !important;
+    }
+}
+
 /** Legal Dialog ******************************************************************************************************/
 .legalDialog {
     width: calc(100vw - 50%);

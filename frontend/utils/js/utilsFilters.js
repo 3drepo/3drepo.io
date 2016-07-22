@@ -61,7 +61,7 @@
 					((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1) + "-" +
 					date.getFullYear() + " " +
 					(date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
-					(date.getMinutes() < 10 ? "0" : "") + date.getMinutes() + " GMT";
+					(date.getMinutes() < 10 ? "0" : "") + date.getMinutes();
 
 				return invoiceDate;
 			};
