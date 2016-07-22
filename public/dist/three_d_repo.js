@@ -5136,31 +5136,53 @@ var ViewerManager = {};
 			var promise;
 
 			if (vm.account || vm.query.page) {
-				// Handle return back from PayPal
-				if ($location.search().hasOwnProperty("cancel")) {
-					// Cancelled
-					init();
-				}
-				else if ($location.search().hasOwnProperty("token")) {
-					// Made a payment
-					vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
-					vm.closeDialogEnabled = false;
-					UtilsService.showDialog("paypalDialog.html", $scope);
-					promise = UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute");
-					promise.then(function (response) {
-						console.log("payment/paypal/execute ", response);
-						if (response.status === 200) {
-						}
-						vm.payPalInfo = "PayPal has finished processing. Thank you.";
-						$timeout(function () {
-							UtilsService.closeDialog();
+				// Go to the correct "page"
+				if (vm.query.hasOwnProperty("page")) {
+					// Check that there is a directive for that "page"
+					if ($injector.has("account" + UtilsService.capitalizeFirstLetter(vm.query.page) + "Directive")) {
+						vm.itemToShow = vm.query.page;
+					}
+					else {
+						vm.itemToShow = "repos";
+					}
+
+					// Get initial user info, which may change if returning from PayPal
+					getUserInfo();
+
+					// Billing Page
+					if (vm.itemToShow === "billing") {
+						// Handle return back from PayPal
+						if ($location.search().hasOwnProperty("cancel")) {
+							// Cancelled
 							init();
-						}, 2000);
-					});
+						}
+						else if ($location.search().hasOwnProperty("token")) {
+							// Made a payment
+							vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
+							vm.closeDialogEnabled = false;
+							UtilsService.showDialog("paypalDialog.html", $scope);
+							promise = UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute");
+							promise.then(function (response) {
+								console.log("payment/paypal/execute ", response);
+								if (response.status === 200) {
+								}
+								vm.payPalInfo = "PayPal has finished processing. Thank you.";
+								$timeout(function () {
+									UtilsService.closeDialog();
+									init();
+								}, 2000);
+							});
+						}
+						else {
+							init();
+						}
+					}
 				}
 				else {
+					vm.itemToShow = "repos";
 					init();
 				}
+
 			} else {
 				vm.username        = null;
 				vm.firstName       = null;
@@ -5203,10 +5225,35 @@ var ViewerManager = {};
 		}
 
 		function init () {
-			var userInfoPromise,
-				billingsPromise,
+			var billingsPromise,
 				subscriptionsPromise,
 				plansPromise;
+
+			getUserInfo();
+
+			billingsPromise = UtilsService.doGet(vm.account + "/billings");
+			billingsPromise.then(function (response) {
+				console.log("**billings** ", response);
+				vm.billings = response.data;
+			});
+
+			subscriptionsPromise = UtilsService.doGet(vm.account + "/subscriptions");
+			subscriptionsPromise.then(function (response) {
+				console.log("**subscriptions** ", response);
+				vm.subscriptions = response.data;
+			});
+
+			plansPromise = UtilsService.doGet("plans");
+			plansPromise.then(function (response) {
+				console.log("**plans** ", response);
+				if (response.status === 200) {
+					vm.plans = response.data;
+				}
+			});
+		}
+
+		function getUserInfo () {
+			var userInfoPromise;
 
 			userInfoPromise = AccountService.getUserInfo(vm.account);
 			userInfoPromise.then(function (response) {
@@ -5231,42 +5278,7 @@ var ViewerManager = {};
 						break;
 					}
 				}
-				console.log(8888, vm.quota);
 			});
-
-			billingsPromise = UtilsService.doGet(vm.account + "/billings");
-			billingsPromise.then(function (response) {
-				console.log("**billings** ", response);
-				vm.billings = response.data;
-			});
-
-			subscriptionsPromise = UtilsService.doGet(vm.account + "/subscriptions");
-			subscriptionsPromise.then(function (response) {
-				console.log("**subscriptions** ", response);
-				vm.subscriptions = response.data;
-			});
-
-			plansPromise = UtilsService.doGet("plans");
-			plansPromise.then(function (response) {
-				console.log("**plans** ", response);
-				if (response.status === 200) {
-					vm.plans = response.data;
-				}
-			});
-
-			// Go to the correct "page"
-			if (vm.query.hasOwnProperty("page")) {
-				// Check that there is a directive for that "page"
-				if ($injector.has("account" + UtilsService.capitalizeFirstLetter(vm.query.page) + "Directive")) {
-					vm.itemToShow = vm.query.page;
-				}
-				else {
-					vm.itemToShow = "repos";
-				}
-			}
-			else {
-				vm.itemToShow = "repos";
-			}
 		}
 	}
 }());
