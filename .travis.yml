@@ -23,8 +23,8 @@ install: npm install
 services:
   - rabbitmq
 script:
-    - sudo npm test
-    - sudo npm run test-int
+    - npm test
+    - npm run test-int
 notifications:
     email: 
         recipients:
