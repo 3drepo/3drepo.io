@@ -1,0 +1,26 @@
+div(layout="row", layout-align="start center", flex)
+	md-list-item(flex, layout-fill)
+		.project(
+		ng-click="vm.goToProject()"
+		layout="row"
+		md-ink-ripple
+		layout-align="start center"
+		layout-fill)
+			md-button.md-icon-button(aria-label="Dashboard")
+				md-icon.angular-material-icons dashboard
+			p.projectName(flex) {{vm.project.name}}
+	.projectRight(layout="row", layout-align="start center")
+		.projectUploadInfo(ng-if="vm.project.uploading", layout="row", layout-align="start center")
+			p.projectUploadFilename {{vm.uploadedFile.name}}
+			p.projectUploadInfo(ng-if="vm.showFileUploadInfo") {{vm.fileUploadInfo}}
+			md-progress-circular.projectUploadIcon(md-mode="indeterminate", md-diameter="15", ng-if="vm.showUploading")
+		p.projectTimestamp {{vm.project.timestampPretty}}
+		md-menu(md-position-mode="target-right target")
+			md-button.md-icon-button(aria-label="More", ng-click="$mdOpenMenu($event)")
+				md-icon.md-menu-origin.angular-material-icons(md-menu-origin) more_vert
+			md-menu-content(width="3")
+				md-menu-item(ng-repeat="(key, value) in vm.projectOptions")
+					md-button(ng-click="vm.doProjectOption($event, key)")
+						div(layout="row", flex)
+							p(flex) {{value.label}}
+							md-icon.angular-material-icons(md-menu-align-target) {{value.icon}}

@@ -4,6 +4,12 @@ billing {
     height: 100%;
     background: rgb(250, 250, 250);
     z-index: 2;
+    color: rgba(0, 0, 0, 0.8);
+}
+
+billing p,
+billing label {
+    color: rgba(0, 0, 0, 0.7);
 }
 
 billing .md-toolbar-tools img {
@@ -12,4 +18,26 @@ billing .md-toolbar-tools img {
 
 billing #billingList {
     padding: 20px;
+}
+
+billing #billingCompanyAddress {
+    margin-top: 50px;
+}
+
+billing #billingClientAddress {
+    margin: 10px 0 40px;
+}
+
+billing .billingInfoTitle {
+    font-weight: bold;
+}
+
+billing #billingProductInfo {
+    margin: 10px 0 40px;
+}
+
+billing #billingReverseCharge {
+    margin-top: 40px;
+    font-size: 14px;
+    line-height: 30px;
 }

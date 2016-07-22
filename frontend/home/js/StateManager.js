@@ -127,11 +127,6 @@
 				StateManager.setStateVar(StateManager.functions[i], false);
 			}
 
-			if (StateManager.state.loggedIn && !StateManager.state.account)
-			{
-				StateManager.setStateVar("account", Auth.username);
-			}
-
 			StateManager.clearQuery();
 
 			var stateChangeObject = {
@@ -161,17 +156,24 @@
 			StateManager.handleStateChange(stateChangeObject);
 		});
 
-		$rootScope.$on('$locationChangeStart', function() {
+		$rootScope.$on('$locationChangeStart', function(event, next, current) {
 			console.log("locationChange");
 		});
 
 		$rootScope.$on('$locationChangeSuccess', function() {
 			console.log("locationChangeSucc");
 
-			StateManager.setQuery($location.search());
+			var queryParams = $location.search();
+
+			if (Object.keys(queryParams).length === 0)
+			{
+				StateManager.clearQuery();
+			} else {
+				StateManager.setQuery(queryParams);
+			}
 		});
 	}])
-	.service("StateManager", ["$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", function($q, $state, $rootScope, $timeout, structure, EventService, $window) {
+	.service("StateManager", ["$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", "Auth", function($q, $state, $rootScope, $timeout, structure, EventService, $window, Auth) {
 		var self = this;
 
 		$window.StateManager = this;
@@ -341,7 +343,19 @@
 			if (compareStateChangeObjects(stateChangeObject, self.stateChangeQueue[0]))
 			{
 				self.stateChangeQueue.pop();
-				self.updateState();
+
+				var functionList = self.functionsUsed();
+
+				// If we are not trying to access a function
+				// and yet there is no account set. Then
+				// we need to go back to the account page if possible.
+				if ((functionList.length === 0) && self.state.loggedIn && !self.state.account)
+				{
+					self.setStateVar("account", Auth.username);
+					self.updateState();
+				} else {
+					self.updateState(true);
+				}
 			} else {
 				self.stateChangeQueue.pop();
 				self.handleStateChange(self.stateChangeQueue[self.stateChangeQueue.length - 1]);
@@ -367,13 +381,9 @@
 			}
 		};
 
-		this.genStateName = function ()
+		this.functionsUsed = function ()
 		{
-			var currentChildren = self.structure.children;
-			var childidx        = 0;
-			var stateName       = "home."; // Assume that the base state is there.
-			var i               = 0;
-			var usesFunction    = false;
+			var functionList = [];
 
 			// First loop through the list of functions
 			// belonging to parent structure.
@@ -386,14 +396,28 @@
 
 					if (self.state[functionName])
 					{
-						stateName += functionName + ".";
-						usesFunction = true;
+						functionList.push(functionName);
 						break;
 					}
 				}
 			}
 
-			if (!usesFunction)
+			return functionList;
+		}
+
+		this.genStateName = function ()
+		{
+			var currentChildren = self.structure.children;
+			var childidx        = 0;
+			var stateName       = "home."; // Assume that the base state is there.
+			var i               = 0;
+			var functionList    = self.functionsUsed();
+			var usesFunction    = (functionList.length > 0);
+
+			if (usesFunction)
+			{
+				stateName += functionList.join(".") + ".";
+			} else
 			{
 				while(childidx < currentChildren.length)
 				{
@@ -479,7 +503,7 @@
 				if (event.type === EventService.EVENT.SET_STATE) {
 					for (var key in event.value)
 					{
-						if (event.value.hasOwnProperty(key))
+						if (key !== "updateLocation" && event.value.hasOwnProperty(key))
 						{
 							self.setStateVar(key, event.value[key]);
 						}

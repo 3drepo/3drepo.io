@@ -4914,11 +4914,11 @@ var ViewerManager = {};
 	function AccountBillingCtrl($scope, $location, $timeout, UtilsService, serverConfig) {
 		var vm = this,
 			promise;
-		console.log(vm.quota);
 
 		/*
 		 * Init
 		 */
+		/*
 		if ($location.search().hasOwnProperty("cancel")) {
 			// Cancelled out of PayPal
 			init();
@@ -4942,6 +4942,8 @@ var ViewerManager = {};
 		else {
 			init();
 		}
+		*/
+		init();
 
 		/**
 		 * Initialise data
@@ -5121,67 +5123,19 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountCtrl.$inject = ["$scope", "$injector", "$location", "AccountService", "Auth", "UtilsService"];
+	AccountCtrl.$inject = ["$scope", "$injector", "$location", "$timeout", "AccountService", "Auth", "UtilsService"];
 
-	function AccountCtrl($scope, $injector, $location, AccountService, Auth, UtilsService) {
-		var vm = this,
-			userInfoPromise,
-			billingsPromise,
-			subscriptionsPromise,
-			plansPromise;
+	function AccountCtrl($scope, $injector, $location, $timeout, AccountService, Auth, UtilsService) {
+		var vm = this;
 
 		/*
 		 * Get the account data
 		 */
 		$scope.$watchGroup(["vm.account", "vm.query.page"], function()
 		{
-			if (vm.account || vm.query.page)
-			{
-				userInfoPromise = AccountService.getUserInfo(vm.account);
-				userInfoPromise.then(function (response) {
-					var i, length;
-					console.log("**userInfo** ", response);
-					vm.accounts = response.data.accounts;
-					vm.username = vm.account;
-					vm.firstName = response.data.firstName;
-					vm.lastName = response.data.lastName;
-					vm.email = response.data.email;
+			var promise;
 
-					vm.billingAddress = response.data.billingInfo;
-					// Pre-populate billing name if it doesn't exist with profile name
-					if (!vm.billingAddress.hasOwnProperty("firstName")) {
-						vm.billingAddress.firstName = vm.firstName;
-						vm.billingAddress.lastName = vm.lastName;
-					}
-
-					for (i = 0, length = vm.accounts.length; i < length; i += 1) {
-						if (vm.accounts[i].account === vm.account) {
-							vm.quota = vm.accounts[i].quota;
-							break;
-						}
-					}
-				});
-
-				billingsPromise = UtilsService.doGet(vm.account + "/billings");
-				billingsPromise.then(function (response) {
-					console.log("**billings** ", response);
-					vm.billings = response.data;
-				});
-
-				subscriptionsPromise = UtilsService.doGet(vm.account + "/subscriptions");
-				subscriptionsPromise.then(function (response) {
-					console.log("**subscriptions** ", response);
-					vm.subscriptions = response.data;
-				});
-
-				plansPromise = UtilsService.doGet("plans");
-				plansPromise.then(function (response) {
-					console.log("**plans** ", response);
-					if (response.status === 200) {
-						vm.plans = response.data;
-					}
-				});
-
+			if (vm.account || vm.query.page) {
 				// Go to the correct "page"
 				if (vm.query.hasOwnProperty("page")) {
 					// Check that there is a directive for that "page"
@@ -5191,10 +5145,44 @@ var ViewerManager = {};
 					else {
 						vm.itemToShow = "repos";
 					}
+
+					// Get initial user info, which may change if returning from PayPal
+					getUserInfo();
+
+					// Billing Page
+					if (vm.itemToShow === "billing") {
+						// Handle return back from PayPal
+						if ($location.search().hasOwnProperty("cancel")) {
+							// Cancelled
+							init();
+						}
+						else if ($location.search().hasOwnProperty("token")) {
+							// Made a payment
+							vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
+							vm.closeDialogEnabled = false;
+							UtilsService.showDialog("paypalDialog.html", $scope);
+							promise = UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute");
+							promise.then(function (response) {
+								console.log("payment/paypal/execute ", response);
+								if (response.status === 200) {
+								}
+								vm.payPalInfo = "PayPal has finished processing. Thank you.";
+								$timeout(function () {
+									UtilsService.closeDialog();
+									init();
+								}, 2000);
+							});
+						}
+						else {
+							init();
+						}
+					}
 				}
 				else {
 					vm.itemToShow = "repos";
+					init();
 				}
+
 			} else {
 				vm.username        = null;
 				vm.firstName       = null;
@@ -5234,6 +5222,63 @@ var ViewerManager = {};
 		// Set the logged in status to the account name just once
 		if ((localStorage.getItem("tdrLoggedIn") === "false") && (vm.account !== null)) {
 			localStorage.setItem("tdrLoggedIn", vm.account);
+		}
+
+		function init () {
+			var billingsPromise,
+				subscriptionsPromise,
+				plansPromise;
+
+			getUserInfo();
+
+			billingsPromise = UtilsService.doGet(vm.account + "/billings");
+			billingsPromise.then(function (response) {
+				console.log("**billings** ", response);
+				vm.billings = response.data;
+			});
+
+			subscriptionsPromise = UtilsService.doGet(vm.account + "/subscriptions");
+			subscriptionsPromise.then(function (response) {
+				console.log("**subscriptions** ", response);
+				vm.subscriptions = response.data;
+			});
+
+			plansPromise = UtilsService.doGet("plans");
+			plansPromise.then(function (response) {
+				console.log("**plans** ", response);
+				if (response.status === 200) {
+					vm.plans = response.data;
+				}
+			});
+		}
+
+		function getUserInfo () {
+			var userInfoPromise;
+
+			userInfoPromise = AccountService.getUserInfo(vm.account);
+			userInfoPromise.then(function (response) {
+				var i, length;
+				console.log("**userInfo** ", response);
+				vm.accounts = response.data.accounts;
+				vm.username = vm.account;
+				vm.firstName = response.data.firstName;
+				vm.lastName = response.data.lastName;
+				vm.email = response.data.email;
+
+				vm.billingAddress = response.data.billingInfo;
+				// Pre-populate billing name if it doesn't exist with profile name
+				if (!vm.billingAddress.hasOwnProperty("firstName")) {
+					vm.billingAddress.firstName = vm.firstName;
+					vm.billingAddress.lastName = vm.lastName;
+				}
+
+				for (i = 0, length = vm.accounts.length; i < length; i += 1) {
+					if (vm.accounts[i].account === vm.account) {
+						vm.quota = vm.accounts[i].quota;
+						break;
+					}
+				}
+			});
 		}
 	}
 }());
@@ -5408,13 +5453,18 @@ var ViewerManager = {};
 				promise.then(function (response) {
 					console.log(response);
 					if (response.status === 200) {
-						vm.addMessage = "User " + vm.newLicenseAssignee + " added as a license";
+						vm.addMessage = "User " + vm.newLicenseAssignee + " assigned a license";
 						vm.licenses.push({user: response.data.assignedUser, id: response.data._id, showRemove: true});
 						vm.unassigned.splice(0, 1);
-						vm.allLicensesAssigned = (vm.unassigned === 0);
+						vm.allLicensesAssigned = (vm.unassigned.length === 0);
+						vm.addDisabled = vm.allLicensesAssigned;
+						vm.newLicenseAssignee = "";
+					}
+					else if (response.status === 400) {
+						vm.addMessage = "This user has already been assigned a license";
 					}
 					else if (response.status === 404) {
-						vm.addMessage = response.data.message;
+						vm.addMessage = "User not found";
 					}
 				});
 			}
@@ -5430,9 +5480,10 @@ var ViewerManager = {};
 			promise.then(function (response) {
 				console.log(response);
 				if (response.status === 200) {
+					vm.unassigned.push(vm.licenses[index].id);
 					vm.licenses.splice(index, 1);
-					vm.unassigned.push(null);
 					vm.addDisabled = false;
+					vm.allLicensesAssigned = false;
 				}
 				else if (response.data.status === 400) {
 					if (response.data.value === 94) {
@@ -5452,8 +5503,8 @@ var ViewerManager = {};
 			promise.then(function (response) {
 				console.log(response);
 				if (response.status === 200) {
+					vm.unassigned.push(vm.licenses[vm.licenseAssigneeIndex].id);
 					vm.licenses.splice(vm.licenseAssigneeIndex, 1);
-					vm.unassigned.push(null);
 					vm.addDisabled = false;
 					UtilsService.closeDialog();
 				}
@@ -5667,6 +5718,262 @@ var ViewerManager = {};
 	"use strict";
 
 	angular.module("3drepo")
+		.directive("accountProject", accountProject);
+
+	function accountProject () {
+		return {
+			restrict: 'E',
+			templateUrl: 'accountProject.html',
+			scope: {
+				account: "=",
+				project: "=",
+				onUploadFile: "&",
+				uploadedFile: "=",
+				onShowPage: "&",
+				onSetupDeleteProject: "&",
+				quota: "="
+			},
+			controller: accountProjectCtrl,
+			controllerAs: 'vm',
+			bindToController: true,
+			link: function (scope, element) {
+				// Cleanup when destroyed
+				element.on('$destroy', function(){
+					scope.vm.uploadedFileWatch(); // Disable events watch
+				});
+			}
+		};
+	}
+
+	accountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "UtilsService", "serverConfig"];
+
+	function accountProjectCtrl ($scope, $location, $timeout, $interval, UtilsService, serverConfig) {
+		var vm = this,
+			infoTimeout = 4000;
+
+		// Init
+		vm.project.name = vm.project.project;
+		if (vm.project.timestamp !== null) {
+			vm.project.timestampPretty = UtilsService.formatTimestamp(vm.project.timestamp, true);
+		}
+		vm.project.canUpload = true;
+		vm.projectOptions = {
+			upload: {label: "Upload file", icon: "cloud_upload"},
+			team: {label: "Team", icon: "group"},
+			delete: {label: "Delete", icon: "delete"}
+		};
+		checkFileUploading();
+
+		/*
+		 * Watch the new project type
+		 */
+		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
+			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {
+				console.log(vm.uploadedFile);
+				uploadFileToProject(vm.uploadedFile.file);
+			}
+		});
+
+		/**
+		 * Go to the project viewer
+		 */
+		vm.goToProject = function () {
+			// No timestamp indicates no model previously uploaded
+			if (vm.project.timestamp === null) {
+				vm.uploadFile();
+			}
+			else {
+				// Disable going to viewer if uploading a model
+				var promise = UtilsService.doGet(vm.account.name + "/" + vm.project.name + ".json");
+				promise.then(function (response) {
+					if (response.data.status !== "processing") {
+						$location.path("/" + vm.account.name + "/" + vm.project.name, "_self").search("page", null);
+					}
+				});
+			}
+		};
+
+		/**
+		 * Call parent upload function
+		 */
+		vm.uploadFile = function () {
+			vm.onUploadFile({project: vm.project});
+		};
+
+		/**
+		 * Handle project option selection
+		 *
+		 * @param event
+		 * @param option
+		 */
+		vm.doProjectOption = function (event, option) {
+			switch (option) {
+				case "upload":
+					vm.uploadFile();
+					break;
+
+				case "team":
+					$location.search("proj", vm.project.name);
+					vm.onShowPage({page: "team", callingPage: "repos"});
+					break;
+
+				case "delete":
+					vm.onSetupDeleteProject({event: event, project: vm.project});
+					break;
+			}
+		};
+
+		/**
+		 * Go to the billing page to add more licenses
+		 */
+		vm.setupAddLicenses = function () {
+			vm.onShowPage({page: "billing", callingPage: "repos"});
+			UtilsService.closeDialog();
+		};
+
+		/**
+		 * Close the dialog
+		 */
+		vm.closeDialog = function() {
+			UtilsService.closeDialog();
+		};
+
+		/**
+		 * Upload file/model to project
+		 *
+		 * @param file
+		 */
+		function uploadFileToProject (file) {
+			var promise,
+				formData;
+
+			// Check the quota
+			promise = UtilsService.doGet(vm.account.name + ".json");
+			promise.then(function (response) {
+				console.log(response);
+				if (file.size > response.data.accounts[0].quota.spaceLimit) {
+					// Show the over quota dialog
+					UtilsService.showDialog("overQuotaDialog.html", $scope, null, true);
+				}
+				else {
+					vm.project.uploading = true;
+					vm.showUploading = true;
+					vm.showFileUploadInfo = false;
+
+					// Check for file size limit
+					if (file.size > serverConfig.uploadSizeLimit) {
+						$timeout(function () {
+							vm.showUploading = false;
+							vm.showFileUploadInfo = true;
+							vm.fileUploadInfo = "File exceeds size limit";
+							$timeout(function () {
+								vm.project.uploading = false;
+							}, infoTimeout);
+						});
+					}
+					else {
+						formData = new FormData();
+						formData.append("file", file);
+						promise = UtilsService.doPost(formData, vm.account.name + "/" + vm.project.name + "/upload", {'Content-Type': undefined});
+						promise.then(function (response) {
+							console.log("uploadModel", response);
+							if ((response.data.status === 400) || (response.data.status === 404)) {
+								// Upload error
+								if (response.data.value === 68) {
+									vm.fileUploadInfo = "Unsupported file format";
+								}
+								else if (response.data.value === 66) {
+									vm.fileUploadInfo = "Insufficient quota for model";
+								}
+								vm.showUploading = false;
+								vm.showFileUploadInfo = true;
+								$timeout(function () {
+									vm.project.uploading = false;
+								}, infoTimeout);
+							}
+							else {
+								pollUpload();
+							}
+						});
+					}
+				}
+			});
+		}
+
+		/**
+		 * Display file uploading and info
+		 */
+		function checkFileUploading () {
+			var promise = UtilsService.doGet(vm.account.name + "/" + vm.project.name + ".json");
+			promise.then(function (response) {
+				if (response.data.status === "processing") {
+					vm.project.uploading = true;
+					vm.showUploading = true;
+					vm.showFileUploadInfo = false;
+					pollUpload();
+				}
+			});
+		}
+
+		/**
+		 * Poll uploading of file
+		 */
+		function pollUpload () {
+			var interval,
+				promise;
+
+			interval = $interval(function () {
+				promise = UtilsService.doGet(vm.account.name + "/" + vm.project.name + ".json");
+				promise.then(function (response) {
+					console.log("uploadStatus", response);
+					if ((response.data.status === "ok") || (response.data.status === "failed")) {
+						if (response.data.status === "ok") {
+							vm.project.timestamp = new Date();
+							vm.project.timestampPretty = UtilsService.formatTimestamp(vm.project.timestamp, true);
+							vm.fileUploadInfo = "Uploaded";
+						}
+						else {
+							if (response.data.hasOwnProperty("errorReason")) {
+								vm.fileUploadInfo = response.data.errorReason.message;
+							}
+							else {
+								vm.fileUploadInfo = "Failed to upload file";
+							}
+						}
+						vm.showUploading = false;
+						$interval.cancel(interval);
+						vm.showFileUploadInfo = true;
+						$timeout(function () {
+							vm.project.uploading = false;
+						}, infoTimeout);
+					}
+				});
+			}, 1000);
+		}
+	}
+}());
+
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
 		.directive("accountProjects", accountProjects);
 
 	function accountProjects() {
@@ -5676,7 +5983,7 @@ var ViewerManager = {};
 			scope: {
 				account: "=",
 				accounts: "=",
-				showPage: "&",
+				onShowPage: "&",
 				quota: "="
 			},
 			controller: AccountProjectsCtrl,
@@ -5685,9 +5992,9 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$mdDialog", "$element", "$timeout", "$interval", "AccountService", "UtilsService", "serverConfig"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService"];
 
-	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, $timeout, $interval, AccountService, UtilsService, serverConfig) {
+	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService) {
 		var vm = this,
 			existingProjectToUpload,
 			existingProjectFileUploader,
@@ -5699,19 +6006,14 @@ var ViewerManager = {};
 		vm.info = "Retrieving projects...";
 		vm.showProgress = true;
 		vm.projectTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
-		vm.projectOptions = {
-			upload: {label: "Upload file", icon: "cloud_upload"},
-			team: {label: "Team", icon: "group"},
-			delete: {label: "Delete", icon: "delete"}
-		};
 
 		// Setup file uploaders
 		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
 		existingProjectFileUploader.addEventListener(
 			"change",
 			function () {
-				vm.uploadedFile = this.files[0];
-				uploadModelToProject(existingProjectToUpload, this.files[0]);
+				vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0]};
+				$scope.$apply();
 			},
 			false
 		);
@@ -5719,7 +6021,7 @@ var ViewerManager = {};
 		newProjectFileUploader.addEventListener(
 			"change",
 			function () {
-				vm.uploadedFile = this.files[0];
+				vm.newProjectFileToUpload = this.files[0];
 				vm.newProjectFileSelected = true;
 				$scope.$apply();
 			},
@@ -5730,7 +6032,7 @@ var ViewerManager = {};
 		 * Added data to accounts and projects for UI
 		 */
 		$scope.$watch("vm.accounts", function () {
-			var i, j, iLength, jLength;
+			var i, length;
 			
 			if (angular.isDefined(vm.accounts)) {
 				console.log(vm.accounts);
@@ -5738,21 +6040,10 @@ var ViewerManager = {};
 				vm.projectsExist = (vm.accounts.length > 0);
 				vm.info = vm.projectsExist ? "" : "There are currently no projects";
 				// Accounts
-				for (i = 0, iLength = vm.accounts.length; i < iLength; i+= 1) {
+				for (i = 0, length = vm.accounts.length; i < length; i+= 1) {
 					vm.accounts[i].name = vm.accounts[i].account;
 					vm.accounts[i].showProjects = true;
 					vm.accounts[i].showProjectsIcon = "folder_open";
-
-					//Projects
-					for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
-						vm.accounts[i].projects[j].name = vm.accounts[i].projects[j].project;
-						if (vm.accounts[i].projects[j].timestamp !== null) {
-							vm.accounts[i].projects[j].timestampPretty = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp, true);
-						}
-						vm.accounts[i].projects[j].uploading = false;
-						//vm.accounts[i].projects[j].canUpload = (vm.accounts[i].account === vm.account);
-						vm.accounts[i].projects[j].canUpload = true;
-					}
 				}
 			}
 		});
@@ -5792,21 +6083,6 @@ var ViewerManager = {};
 		}, true);
 
 		/**
-		 * Go to the project viewer
-		 *
-		 * @param {String} account
-		 * @param {String} project
-		 */
-		vm.goToProject = function (account, project) {
-			if (project.timestamp === null) {
-				vm.uploadModel(project);
-			}
-			else {
-				$location.path("/" + account + "/" + project.name, "_self").search("page", null);
-			}
-		};
-
-		/**
 		 * Toggle display of projects for an account
 		 *
 		 * @param {Number} index
@@ -5826,7 +6102,7 @@ var ViewerManager = {};
 				account: vm.account,
 				type: vm.projectTypes[0]
 			};
-			vm.uploadedFile = null;
+			vm.newProjectFileToUpload = null;
 			UtilsService.showDialog("projectDialog.html", $scope, event, true);
 		};
 		
@@ -5867,15 +6143,11 @@ var ViewerManager = {};
 						vm.projectsExist = true;
 						// Add project to list
 						project = {
-							name: response.data.project,
+							project: response.data.project,
 							canUpload: true,
 							timestamp: null
 						};
 						updateAccountProjects (response.data.account, project);
-						// Save model to project
-						if (vm.uploadedFile !== null) {
-							uploadModelToProject (project, vm.uploadedFile);
-						}
 						vm.closeDialog();
 					}
 				});
@@ -5883,10 +6155,12 @@ var ViewerManager = {};
 		};
 
 		/**
+		 * Upload a file
 		 *
-		 * @param {String} project
+		 * @param {Object} project
 		 */
-		vm.uploadModel = function (project) {
+		vm.uploadFile = function (project) {
+			console.log(project);
 			existingProjectFileUploader.value = "";
 			existingProjectToUpload = project;
 			existingProjectFileUploader.click();
@@ -5895,7 +6169,7 @@ var ViewerManager = {};
 		/**
 		 * Upload a file
 		 */
-		vm.uploadFile = function () {
+		vm.uploadFileForNewProject = function () {
 			newProjectFileUploader.value = "";
 			newProjectFileUploader.click();
 		};
@@ -5907,7 +6181,7 @@ var ViewerManager = {};
 			vm.newDatabaseName = "";
 			vm.showPaymentWait = false;
 			vm.newDatabaseToken = false;
-			UtilsService.showDialog("databaseDialog.html", $scoipe, event, true);
+			UtilsService.showDialog("databaseDialog.html", $scope, event, true);
 		};
 
 		/**
@@ -5975,30 +6249,6 @@ var ViewerManager = {};
 		};
 
 		/**
-		 * Handle project option selection
-		 *
-		 * @param event
-		 * @param project
-		 * @param option
-		 */
-		vm.doProjectOption = function (event, project, option) {
-			switch (option) {
-				case "upload":
-					vm.uploadModel(project);
-					break;
-
-				case "team":
-					$location.search("proj", project.name);
-					vm.showPage({page: "team", callingPage: "repos"});
-					break;
-
-				case "delete":
-					vm.setupDeleteProject(event, project);
-					break;
-			}
-		};
-
-		/**
 		 * Remove a collaborator
 		 *
 		 * @param collaborator
@@ -6007,12 +6257,8 @@ var ViewerManager = {};
 			delete vm.collaborators[collaborator];
 		};
 
-		/**
-		 * Go to the billing page to add more licenses
-		 */
-		vm.setupAddLicenses = function () {
-			vm.showPage({page: "billing", callingPage: "repos"});
-			vm.closeDialog();
+		vm.showPage = function (page, callingPage) {
+			vm.onShowPage({page: page, callingPage: callingPage});
 		};
 
 		/**
@@ -6042,95 +6288,13 @@ var ViewerManager = {};
 				accountToUpdate.canUpload = (account === vm.account);
 				vm.accounts.push(accountToUpdate);
 			}
-		}
 
-		/**
-		 * Upload file/model to project
-		 * 
-		 * @param project
-		 * @param file
-		 */
-		function uploadModelToProject (project, file) {
-			var interval,
-				projectData,
-				infoTimeout = 4000,
-				promise;
-
-			// Check the quota
-			promise = UtilsService.doGet(vm.account + ".json");
-			promise.then(function (response) {
-				console.log(response);
-				if (file.size > response.data.accounts[0].quota.spaceLimit) {
-					// Show the over quota dialog
-					UtilsService.showDialog("overQuotaDialog.html", $scope, null, true);
-				}
-				else {
-					project.uploading = true;
-					vm.showUploading = true;
-					vm.showFileUploadInfo = false;
-
-					// Check for file size limit
-					if (file.size > serverConfig.uploadSizeLimit) {
-						$timeout(function () {
-							vm.showUploading = false;
-							vm.showFileUploadInfo = true;
-							vm.fileUploadInfo = "File exceeds size limit";
-							$timeout(function () {
-								project.uploading = false;
-							}, infoTimeout);
-						});
-					}
-					else {
-						projectData = {
-							account: vm.account,
-							project: project.name,
-							uploadFile: file
-						};
-						promise = AccountService.uploadModel(projectData);
-						promise.then(function (response) {
-							console.log("uploadModel", response);
-							if ((response.data.status === 400) || (response.data.status === 404)) {
-								// Upload error
-								if (response.data.value === 68) {
-									vm.fileUploadInfo = "Unsupported file format";
-								}
-								else if (response.data.value === 66) {
-									vm.fileUploadInfo = "Insufficient quota for model";
-								}
-								vm.showUploading = false;
-								vm.showFileUploadInfo = true;
-								$timeout(function () {
-									project.uploading = false;
-								}, infoTimeout);
-							}
-							else {
-								// Upload valid, poll for status
-								interval = $interval(function () {
-									promise = AccountService.uploadStatus(projectData);
-									promise.then(function (response) {
-										console.log("uploadStatus", response);
-										if ((response.data.status === "ok") || (response.data.status === "failed")) {
-											if (response.data.status === "ok") {
-												project.timestampPretty = UtilsService.formatTimestamp(new Date(), true);
-												vm.fileUploadInfo = "Uploaded";
-											}
-											else {
-												vm.fileUploadInfo = response.data.errorReason.message;
-											}
-											vm.showUploading = false;
-											$interval.cancel(interval);
-											vm.showFileUploadInfo = true;
-											$timeout(function () {
-												project.uploading = false;
-											}, infoTimeout);
-										}
-									});
-								}, 1000);
-							}
-						});
-					}
-				}
-			});
+			// Save model to project
+			if (vm.newProjectFileToUpload !== null) {
+				$timeout(function () {
+					vm.uploadedFile = {project: project, file: vm.newProjectFileToUpload};
+				});
+			}
 		}
 	}
 }());
@@ -8067,11 +8231,12 @@ var ViewerManager = {};
 		};
 	}
 
-	BillingCtrl.$inject = ["EventService", "UtilsService"];
+	BillingCtrl.$inject = ["EventService", "UtilsService", "serverConfig"];
 
-	function BillingCtrl (EventService, UtilsService) {
+	function BillingCtrl (EventService, UtilsService, serverConfig) {
 		var vm = this,
-			billingsPromise;
+			billingsPromise,
+			i, length;
 
 		/*
 		 * Init
@@ -8080,12 +8245,21 @@ var ViewerManager = {};
 		if (vm.query.hasOwnProperty("user") && vm.query.hasOwnProperty("item")) {
 			billingsPromise = UtilsService.doGet(vm.query.user + "/billings");
 			billingsPromise.then(function (response) {
-				console.log("**billings** ", response);
+				console.log("**billings**", response);
 				if ((response.data.length > 0) &&
 					(parseInt(vm.query.item) >= 0) &&
 					(parseInt(vm.query.item) < response.data.length)) {
 					vm.showBilling = true;
 					vm.billing = response.data[parseInt(vm.query.item)];
+					if (serverConfig.hasOwnProperty("countries")) {
+						console.log(serverConfig.countries);
+						for (i = 0, length = serverConfig.countries.length; i < length; i += 1) {
+							if (serverConfig.countries[i].code === vm.billing.info.countryCode) {
+								vm.billing.info.country = serverConfig.countries[i].name;
+								break;
+							}
+						}
+					}
 				}
 			});
 		}
@@ -9818,11 +9992,6 @@ var ViewerManager = {};
 				StateManager.setStateVar(StateManager.functions[i], false);
 			}
 
-			if (StateManager.state.loggedIn && !StateManager.state.account)
-			{
-				StateManager.setStateVar("account", Auth.username);
-			}
-
 			StateManager.clearQuery();
 
 			var stateChangeObject = {
@@ -9852,17 +10021,24 @@ var ViewerManager = {};
 			StateManager.handleStateChange(stateChangeObject);
 		});
 
-		$rootScope.$on('$locationChangeStart', function() {
+		$rootScope.$on('$locationChangeStart', function(event, next, current) {
 			console.log("locationChange");
 		});
 
 		$rootScope.$on('$locationChangeSuccess', function() {
 			console.log("locationChangeSucc");
 
-			StateManager.setQuery($location.search());
+			var queryParams = $location.search();
+
+			if (Object.keys(queryParams).length === 0)
+			{
+				StateManager.clearQuery();
+			} else {
+				StateManager.setQuery(queryParams);
+			}
 		});
 	}])
-	.service("StateManager", ["$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", function($q, $state, $rootScope, $timeout, structure, EventService, $window) {
+	.service("StateManager", ["$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", "Auth", function($q, $state, $rootScope, $timeout, structure, EventService, $window, Auth) {
 		var self = this;
 
 		$window.StateManager = this;
@@ -10032,7 +10208,19 @@ var ViewerManager = {};
 			if (compareStateChangeObjects(stateChangeObject, self.stateChangeQueue[0]))
 			{
 				self.stateChangeQueue.pop();
-				self.updateState();
+
+				var functionList = self.functionsUsed();
+
+				// If we are not trying to access a function
+				// and yet there is no account set. Then
+				// we need to go back to the account page if possible.
+				if ((functionList.length === 0) && self.state.loggedIn && !self.state.account)
+				{
+					self.setStateVar("account", Auth.username);
+					self.updateState();
+				} else {
+					self.updateState(true);
+				}
 			} else {
 				self.stateChangeQueue.pop();
 				self.handleStateChange(self.stateChangeQueue[self.stateChangeQueue.length - 1]);
@@ -10058,13 +10246,9 @@ var ViewerManager = {};
 			}
 		};
 
-		this.genStateName = function ()
+		this.functionsUsed = function ()
 		{
-			var currentChildren = self.structure.children;
-			var childidx        = 0;
-			var stateName       = "home."; // Assume that the base state is there.
-			var i               = 0;
-			var usesFunction    = false;
+			var functionList = [];
 
 			// First loop through the list of functions
 			// belonging to parent structure.
@@ -10077,14 +10261,28 @@ var ViewerManager = {};
 
 					if (self.state[functionName])
 					{
-						stateName += functionName + ".";
-						usesFunction = true;
+						functionList.push(functionName);
 						break;
 					}
 				}
 			}
 
-			if (!usesFunction)
+			return functionList;
+		}
+
+		this.genStateName = function ()
+		{
+			var currentChildren = self.structure.children;
+			var childidx        = 0;
+			var stateName       = "home."; // Assume that the base state is there.
+			var i               = 0;
+			var functionList    = self.functionsUsed();
+			var usesFunction    = (functionList.length > 0);
+
+			if (usesFunction)
+			{
+				stateName += functionList.join(".") + ".";
+			} else
 			{
 				while(childidx < currentChildren.length)
 				{
@@ -10170,7 +10368,7 @@ var ViewerManager = {};
 				if (event.type === EventService.EVENT.SET_STATE) {
 					for (var key in event.value)
 					{
-						if (event.value.hasOwnProperty(key))
+						if (key !== "updateLocation" && event.value.hasOwnProperty(key))
 						{
 							self.setStateVar(key, event.value[key]);
 						}
@@ -10335,9 +10533,9 @@ var ViewerManager = {};
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$location", "Auth", "StateManager", "EventService", "UtilsService", "AccountService"];
+    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$window", "Auth", "StateManager", "EventService", "UtilsService"];
 
-    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $location, Auth, StateManager, EventService, UtilsService, AccountService) {
+    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $window, Auth, StateManager, EventService, UtilsService) {
         var vm = this,
 			homeLoggedOut,
 			notLoggedInElement,
@@ -10357,6 +10555,7 @@ var ViewerManager = {};
 			{title: "Terms & Conditions", value: "termsAndConditions"},
 			{title: "Privacy", value: "privacy"},
 			{title: "Cookies", value: "cookies"},
+			{title: "Pricing", value: "pricing"},
 			{title: "Contact", value: "contact"}
 		];
 		vm.goToAccount = false;
@@ -10417,22 +10616,7 @@ var ViewerManager = {};
 		 * @param display
 		 */
 		vm.legalDisplay = function (event, display) {
-			$location.url("/" + display.value);
-
-			/*
-			vm.legalTitle = display.title;
-			vm.legalText = display.value;
-			$mdDialog.show({
-				templateUrl: "legalDialog.html",
-				parent: angular.element(document.body),
-				targetEvent: event,
-				clickOutsideToClose:true,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true,
-				onRemoving: removeDialog
-			});
-			*/
+			$window.open("/" + display.value);
 		};
 
 		$scope.$watch(EventService.currentEvent, function(event) {
@@ -10441,8 +10625,10 @@ var ViewerManager = {};
 				{
 					if (!event.value.error)
 					{
-						StateManager.setStateVar("loggedIn", true);
-						EventService.send(EventService.EVENT.GO_HOME);
+						if(!event.value.initialiser) {
+							StateManager.setStateVar("loggedIn", true);
+							EventService.send(EventService.EVENT.GO_HOME);
+						}
 					}
 				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
 					EventService.send(EventService.EVENT.CLEAR_STATE);
@@ -17240,24 +17426,39 @@ var Oculus = {};
 				if (angular.isDefined(referenceValue)) {
 					if (referenceValue > 1073741824) {
 						factor = bytesInGB;
-						units = " (GB)";
+						units = " GB";
 					}
 					else {
 						factor = bytesInMB;
-						units = " (MB)";
+						units = " MB";
 					}
 				}
 				else {
 					if (input > 1073741824) {
 						factor = bytesInGB;
-						units = " (GB)";
+						units = " GB";
 					}
 					else {
 						factor = bytesInMB;
-						units = " (MB)";
+						units = " MB";
 					}
 				}
-				return (Math.round(input / factor * 100) / 100).toString() + units; // (input / bytesInAGb).toFixed(2); // Math.round(43159388160 / 1024/1024/1024 * 100) / 100
+				return (Math.round(input / factor * 100) / 100).toString() + units; // (input / bytesInAGb).toFixed(2)
+			};
+		})
+
+		.filter("invoiceDate", function () {
+			return function(input) {
+				var date = new Date(input),
+					invoiceDate;
+
+				invoiceDate = (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
+					((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1) + "-" +
+					date.getFullYear() + " " +
+					(date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
+					(date.getMinutes() < 10 ? "0" : "") + date.getMinutes() + " GMT";
+
+				return invoiceDate;
 			};
 		});
 
@@ -17367,10 +17568,14 @@ var Oculus = {};
          * @param url
          * @returns {*}
          */
-        obj.doPost = function (data, url) {
+        obj.doPost = function (data, url, headers) {
             var deferred = $q.defer(),
                 urlUse = serverConfig.apiUrl(serverConfig.POST_API, url),
                 config = {withCredentials: true};
+
+            if (angular.isDefined(headers)) {
+                config.headers = headers;
+            }
 
             $http.post(urlUse, data, config)
                 .then(

@@ -76,9 +76,9 @@
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$location", "Auth", "StateManager", "EventService", "UtilsService", "AccountService"];
+    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$window", "Auth", "StateManager", "EventService", "UtilsService"];
 
-    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $location, Auth, StateManager, EventService, UtilsService, AccountService) {
+    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $window, Auth, StateManager, EventService, UtilsService) {
         var vm = this,
 			homeLoggedOut,
 			notLoggedInElement,
@@ -98,6 +98,7 @@
 			{title: "Terms & Conditions", value: "termsAndConditions"},
 			{title: "Privacy", value: "privacy"},
 			{title: "Cookies", value: "cookies"},
+			{title: "Pricing", value: "pricing"},
 			{title: "Contact", value: "contact"}
 		];
 		vm.goToAccount = false;
@@ -158,22 +159,7 @@
 		 * @param display
 		 */
 		vm.legalDisplay = function (event, display) {
-			$location.url("/" + display.value);
-
-			/*
-			vm.legalTitle = display.title;
-			vm.legalText = display.value;
-			$mdDialog.show({
-				templateUrl: "legalDialog.html",
-				parent: angular.element(document.body),
-				targetEvent: event,
-				clickOutsideToClose:true,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true,
-				onRemoving: removeDialog
-			});
-			*/
+			$window.open("/" + display.value);
 		};
 
 		$scope.$watch(EventService.currentEvent, function(event) {
@@ -182,8 +168,10 @@
 				{
 					if (!event.value.error)
 					{
-						StateManager.setStateVar("loggedIn", true);
-						EventService.send(EventService.EVENT.GO_HOME);
+						if(!event.value.initialiser) {
+							StateManager.setStateVar("loggedIn", true);
+							EventService.send(EventService.EVENT.GO_HOME);
+						}
 					}
 				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
 					EventService.send(EventService.EVENT.CLEAR_STATE);

@@ -34,11 +34,12 @@
 		};
 	}
 
-	BillingCtrl.$inject = ["EventService", "UtilsService"];
+	BillingCtrl.$inject = ["EventService", "UtilsService", "serverConfig"];
 
-	function BillingCtrl (EventService, UtilsService) {
+	function BillingCtrl (EventService, UtilsService, serverConfig) {
 		var vm = this,
-			billingsPromise;
+			billingsPromise,
+			i, length;
 
 		/*
 		 * Init
@@ -47,12 +48,21 @@
 		if (vm.query.hasOwnProperty("user") && vm.query.hasOwnProperty("item")) {
 			billingsPromise = UtilsService.doGet(vm.query.user + "/billings");
 			billingsPromise.then(function (response) {
-				console.log("**billings** ", response);
+				console.log("**billings**", response);
 				if ((response.data.length > 0) &&
 					(parseInt(vm.query.item) >= 0) &&
 					(parseInt(vm.query.item) < response.data.length)) {
 					vm.showBilling = true;
 					vm.billing = response.data[parseInt(vm.query.item)];
+					if (serverConfig.hasOwnProperty("countries")) {
+						console.log(serverConfig.countries);
+						for (i = 0, length = serverConfig.countries.length; i < length; i += 1) {
+							if (serverConfig.countries[i].code === vm.billing.info.countryCode) {
+								vm.billing.info.country = serverConfig.countries[i].name;
+								break;
+							}
+						}
+					}
 				}
 			});
 		}

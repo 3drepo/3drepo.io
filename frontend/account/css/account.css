@@ -312,7 +312,7 @@ account-billing #accountBillingHistory section {
   margin-left: -10px;
 }
 account-billing #accountBillingHistory .md-subheader label {
-  margin: 0 11px 0 0;
+  margin: 0 9px 0 0;
 }
 account-billing .accountBillingHistoryListItem md-input-container {
   margin-right: 10px;
@@ -411,4 +411,13 @@ account-team #accountTeamSubHeader {
 /** PayPal Dialog *****************************************************************************************************/
 #paypalDialog .userContent .cardInfo {
   text-align: left;
+}
+
+/** Over Quota Dialog *************************************************************************************************/
+#overQuotaDialog .cardInfo {
+  text-align: left;
+}
+
+#overQuotaDialog #overQuotaInfo {
+  margin: 20px 20px 0;;
 }

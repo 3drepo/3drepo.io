@@ -31,24 +31,39 @@
 				if (angular.isDefined(referenceValue)) {
 					if (referenceValue > 1073741824) {
 						factor = bytesInGB;
-						units = " (GB)";
+						units = " GB";
 					}
 					else {
 						factor = bytesInMB;
-						units = " (MB)";
+						units = " MB";
 					}
 				}
 				else {
 					if (input > 1073741824) {
 						factor = bytesInGB;
-						units = " (GB)";
+						units = " GB";
 					}
 					else {
 						factor = bytesInMB;
-						units = " (MB)";
+						units = " MB";
 					}
 				}
-				return (Math.round(input / factor * 100) / 100).toString() + units; // (input / bytesInAGb).toFixed(2); // Math.round(43159388160 / 1024/1024/1024 * 100) / 100
+				return (Math.round(input / factor * 100) / 100).toString() + units; // (input / bytesInAGb).toFixed(2)
+			};
+		})
+
+		.filter("invoiceDate", function () {
+			return function(input) {
+				var date = new Date(input),
+					invoiceDate;
+
+				invoiceDate = (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
+					((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1) + "-" +
+					date.getFullYear() + " " +
+					(date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
+					(date.getMinutes() < 10 ? "0" : "") + date.getMinutes() + " GMT";
+
+				return invoiceDate;
 			};
 		});
 

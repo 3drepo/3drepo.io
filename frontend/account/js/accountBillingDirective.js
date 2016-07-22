@@ -44,11 +44,11 @@
 	function AccountBillingCtrl($scope, $location, $timeout, UtilsService, serverConfig) {
 		var vm = this,
 			promise;
-		console.log(vm.quota);
 
 		/*
 		 * Init
 		 */
+		/*
 		if ($location.search().hasOwnProperty("cancel")) {
 			// Cancelled out of PayPal
 			init();
@@ -72,6 +72,8 @@
 		else {
 			init();
 		}
+		*/
+		init();
 
 		/**
 		 * Initialise data

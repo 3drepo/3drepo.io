@@ -91,14 +91,25 @@ home #legalLinks {
     z-index: 2;
 }
 home #legalLinks .md-button {
-    font-size: 12px;
+    font-size: 11px;
     margin: 0;
     opacity: 0.7;
-    min-width: 70px;
+    min-width: 65px;
 }
 
 home md-radio-button ._md-label {
     line-height: 1.7;
+}
+
+.inputHint {
+    position: absolute;
+    left: 2px;
+    right: auto;
+    bottom: 7px;
+    font-size: 12px;
+    line-height: 14px;
+    transition: all 0.3s cubic-bezier(0.55, 0, 0.55, 0.2);
+    color: grey;
 }
 
 /** Legal Dialog ******************************************************************************************************/

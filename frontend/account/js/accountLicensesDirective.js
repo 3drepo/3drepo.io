@@ -101,13 +101,18 @@
 				promise.then(function (response) {
 					console.log(response);
 					if (response.status === 200) {
-						vm.addMessage = "User " + vm.newLicenseAssignee + " added as a license";
+						vm.addMessage = "User " + vm.newLicenseAssignee + " assigned a license";
 						vm.licenses.push({user: response.data.assignedUser, id: response.data._id, showRemove: true});
 						vm.unassigned.splice(0, 1);
-						vm.allLicensesAssigned = (vm.unassigned === 0);
+						vm.allLicensesAssigned = (vm.unassigned.length === 0);
+						vm.addDisabled = vm.allLicensesAssigned;
+						vm.newLicenseAssignee = "";
+					}
+					else if (response.status === 400) {
+						vm.addMessage = "This user has already been assigned a license";
 					}
 					else if (response.status === 404) {
-						vm.addMessage = response.data.message;
+						vm.addMessage = "User not found";
 					}
 				});
 			}
@@ -123,9 +128,10 @@
 			promise.then(function (response) {
 				console.log(response);
 				if (response.status === 200) {
+					vm.unassigned.push(vm.licenses[index].id);
 					vm.licenses.splice(index, 1);
-					vm.unassigned.push(null);
 					vm.addDisabled = false;
+					vm.allLicensesAssigned = false;
 				}
 				else if (response.data.status === 400) {
 					if (response.data.value === 94) {
@@ -145,8 +151,8 @@
 			promise.then(function (response) {
 				console.log(response);
 				if (response.status === 200) {
+					vm.unassigned.push(vm.licenses[vm.licenseAssigneeIndex].id);
 					vm.licenses.splice(vm.licenseAssigneeIndex, 1);
-					vm.unassigned.push(null);
 					vm.addDisabled = false;
 					UtilsService.closeDialog();
 				}
