@@ -48,6 +48,7 @@
 		/*
 		 * Init
 		 */
+		/*
 		if ($location.search().hasOwnProperty("cancel")) {
 			// Cancelled out of PayPal
 			init();
@@ -71,6 +72,8 @@
 		else {
 			init();
 		}
+		*/
+		init();
 
 		/**
 		 * Initialise data
