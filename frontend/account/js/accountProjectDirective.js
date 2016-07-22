@@ -46,16 +46,16 @@
 		};
 	}
 
-	accountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "UtilsService", "serverConfig"];
+	accountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig"];
 
-	function accountProjectCtrl ($scope, $location, $timeout, $interval, UtilsService, serverConfig) {
+	function accountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig) {
 		var vm = this,
 			infoTimeout = 4000;
 
 		// Init
 		vm.project.name = vm.project.project;
 		if (vm.project.timestamp !== null) {
-			vm.project.timestampPretty = UtilsService.formatTimestamp(vm.project.timestamp, true);
+			vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
 		}
 		vm.project.canUpload = true;
 		vm.projectOptions = {
@@ -230,7 +230,7 @@
 					if ((response.data.status === "ok") || (response.data.status === "failed")) {
 						if (response.data.status === "ok") {
 							vm.project.timestamp = new Date();
-							vm.project.timestampPretty = UtilsService.formatTimestamp(vm.project.timestamp, true);
+							vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
 							vm.fileUploadInfo = "Uploaded";
 						}
 						else {

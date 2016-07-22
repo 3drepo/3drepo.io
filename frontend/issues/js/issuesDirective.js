@@ -78,6 +78,7 @@
 		vm.autoSaveComment = false;
 		vm.canAdd = true;
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
+		vm.savingIssue = false;
 
 		/*
 		 * Get all the Issues
@@ -591,6 +592,7 @@
 			}
 			else {
 				if (angular.isDefined(vm.title) && (vm.title !== "")) {
+					vm.savingIssue = true;
 					var issueAreaPngPromise = $q.defer();
 					EventService.send(EventService.EVENT.GET_ISSUE_AREA_PNG, {promise: issueAreaPngPromise});
 					issueAreaPngPromise.promise.then(function (png) {
@@ -631,6 +633,7 @@
 							// Get out of add mode and show issues
 							vm.hideItem = true;
 
+							vm.savingIssue = false;
 							setupIssuesToShow();
 							setContentHeight();
 							vm.showPins();
@@ -721,6 +724,13 @@
 		vm.closeAddAlert = function () {
 			vm.showAddAlert = false;
 			vm.addAlertText = "";
+		};
+
+		/**
+		 * A comment has been saved
+		 */
+		vm.commentSaved = function () {
+			setContentHeight();
 		};
 
 		/**

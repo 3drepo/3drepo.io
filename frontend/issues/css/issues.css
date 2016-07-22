@@ -121,9 +121,6 @@ md-list-item .issueAssignColourMarker {
 issue .issueOpenContainer {
   margin-top: 10px;
 }
-issue .issueOpenContainer button {
-  margin-left: 220px;
-}
 
 /** Issue Header ******************************************************************************************************/
 issue-header {

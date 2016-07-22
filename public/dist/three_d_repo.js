@@ -4909,50 +4909,18 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountBillingCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "serverConfig"];
+	AccountBillingCtrl.$inject = ["$scope", "$location", "UtilsService", "serverConfig"];
 
-	function AccountBillingCtrl($scope, $location, $timeout, UtilsService, serverConfig) {
+	function AccountBillingCtrl($scope, $location, UtilsService, serverConfig) {
 		var vm = this,
 			promise;
 
 		/*
 		 * Init
 		 */
-		/*
-		if ($location.search().hasOwnProperty("cancel")) {
-			// Cancelled out of PayPal
-			init();
-		}
-		else if ($location.search().hasOwnProperty("token")) {
-			vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
-			vm.closeDialogEnabled = false;
-			UtilsService.showDialog("paypalDialog.html", $scope);
-			promise = UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute");
-			promise.then(function (response) {
-				console.log("payment/paypal/execute ", response);
-				if (response.status === 200) {
-				}
-				vm.payPalInfo = "PayPal has finished processing. Thank you.";
-				$timeout(function () {
-					UtilsService.closeDialog();
-					init();
-				}, 2000);
-			});
-		}
-		else {
-			init();
-		}
-		*/
-		init();
-
-		/**
-		 * Initialise data
-		 */
-		function init () {
-			vm.showInfo = true;
-			vm.saveDisabled = true;
-			vm.countries = serverConfig.countries;
-		}
+		vm.showInfo = true;
+		vm.saveDisabled = true;
+		vm.countries = serverConfig.countries;
 
 		/*
 		 * Watch for change in licenses
@@ -5032,7 +5000,12 @@ var ViewerManager = {};
 				billingAddress: vm.newBillingAddress
 			};
 
-			vm.payPalInfo = "Redirecting to PayPal. Please do not refresh the page or close the tab.";
+			if (vm.numLicenses === vm.numNewLicenses) {
+				vm.payPalInfo = "Updating billing information. Please do not refresh the page or close the tab.";
+			}
+			else {
+				vm.payPalInfo = "Redirecting to PayPal. Please do not refresh the page or close the tab.";
+			}
 			UtilsService.showDialog("paypalDialog.html", $scope, null, true);
 			promise = UtilsService.doPost(data, vm.account + "/subscriptions");
 			promise.then(function (response) {
@@ -5745,16 +5718,16 @@ var ViewerManager = {};
 		};
 	}
 
-	accountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "UtilsService", "serverConfig"];
+	accountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig"];
 
-	function accountProjectCtrl ($scope, $location, $timeout, $interval, UtilsService, serverConfig) {
+	function accountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig) {
 		var vm = this,
 			infoTimeout = 4000;
 
 		// Init
 		vm.project.name = vm.project.project;
 		if (vm.project.timestamp !== null) {
-			vm.project.timestampPretty = UtilsService.formatTimestamp(vm.project.timestamp, true);
+			vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
 		}
 		vm.project.canUpload = true;
 		vm.projectOptions = {
@@ -5929,7 +5902,7 @@ var ViewerManager = {};
 					if ((response.data.status === "ok") || (response.data.status === "failed")) {
 						if (response.data.status === "ok") {
 							vm.project.timestamp = new Date();
-							vm.project.timestampPretty = UtilsService.formatTimestamp(vm.project.timestamp, true);
+							vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
 							vm.fileUploadInfo = "Uploaded";
 						}
 						else {
@@ -8917,9 +8890,9 @@ var ViewerManager = {};
 		};
 	}
 
-	DocsCtrl.$inject = ["$scope", "$mdDialog", "$timeout", "EventService", "DocsService", "UtilsService"];
+	DocsCtrl.$inject = ["$scope", "$mdDialog", "$timeout", "$filter", "EventService", "DocsService", "UtilsService"];
 
-	function DocsCtrl($scope, $mdDialog, $timeout, EventService, DocsService, UtilsService) {
+	function DocsCtrl($scope, $mdDialog, $timeout, $filter, EventService, DocsService, UtilsService) {
 		var vm = this,
 			promise,
 			docTypeHeight = 50,
@@ -8962,7 +8935,7 @@ var ViewerManager = {};
 												if ((Date.parse(vm.docs["Meta Data"].data[i].metadata[item]) &&
 													(vm.docs["Meta Data"].data[i].metadata[item].indexOf("T") !== -1))) {
 													vm.docs["Meta Data"].data[i].metadata[item] =
-														UtilsService.formatTimestamp(new Date(vm.docs["Meta Data"].data[i].metadata[item]), true);
+														$filter("prettyDate")(new Date(vm.docs["Meta Data"].data[i].metadata[item]), {showSeconds: true});
 													console.log(vm.docs["Meta Data"].data[i].metadata[item]);
 												}
 											}
@@ -11172,6 +11145,7 @@ angular.module('3drepo')
 				index: "=",
 				data: "=",
 				autoSaveComment: "=",
+				onCommentSaved: "&",
 				onCommentAutoSaved: "&",
 				onToggleCloseIssue: "&",
 				availableRoles: "=",
@@ -11202,6 +11176,8 @@ angular.module('3drepo')
 		vm.showInfo = false;
 		vm.editingComment = false;
 		vm.assignedRolesColors = [];
+		vm.savingComment = false;
+		vm.togglingIssueState = true;
 
 		/*
 		 * Handle the list of available roles
@@ -11356,12 +11332,14 @@ angular.module('3drepo')
 		 */
 		vm.saveComment = function() {
 			if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
+				vm.savingComment = true;
 				if (vm.editingComment) {
 					promise = IssuesService.editComment(vm.data, vm.comment, vm.editingCommentIndex);
 					promise.then(function(data) {
 						vm.data.comments[vm.editingCommentIndex].comment = vm.comment;
 						vm.data.comments[vm.editingCommentIndex].timeStamp = IssuesService.getPrettyTime(data.created);
 						vm.comment = "";
+						vm.savingComment = false;
 					});
 				} else {
 					promise = IssuesService.saveComment(vm.data, vm.comment);
@@ -11383,6 +11361,9 @@ angular.module('3drepo')
 							vm.onCommentAutoSaved({index: vm.index}); // Tell the issue list a comment auto save has been done
 							vm.autoSaveComment = false;
 						}
+						else {
+							vm.onCommentSaved();
+						}
 
 						// Mark previous comment as 'set' - no longer deletable or editable
 						if (vm.data.comments.length > 1) {
@@ -11391,6 +11372,8 @@ angular.module('3drepo')
 								vm.data.comments[vm.data.comments.length - 2].set = true;
 							});
 						}
+
+						vm.savingComment = false;
 					});
 				}
 			}
@@ -11583,6 +11566,7 @@ angular.module('3drepo')
 		vm.autoSaveComment = false;
 		vm.canAdd = true;
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
+		vm.savingIssue = false;
 
 		/*
 		 * Get all the Issues
@@ -12096,6 +12080,7 @@ angular.module('3drepo')
 			}
 			else {
 				if (angular.isDefined(vm.title) && (vm.title !== "")) {
+					vm.savingIssue = true;
 					var issueAreaPngPromise = $q.defer();
 					EventService.send(EventService.EVENT.GET_ISSUE_AREA_PNG, {promise: issueAreaPngPromise});
 					issueAreaPngPromise.promise.then(function (png) {
@@ -12136,6 +12121,7 @@ angular.module('3drepo')
 							// Get out of add mode and show issues
 							vm.hideItem = true;
 
+							vm.savingIssue = false;
 							setupIssuesToShow();
 							setContentHeight();
 							vm.showPins();
@@ -12226,6 +12212,13 @@ angular.module('3drepo')
 		vm.closeAddAlert = function () {
 			vm.showAddAlert = false;
 			vm.addAlertText = "";
+		};
+
+		/**
+		 * A comment has been saved
+		 */
+		vm.commentSaved = function () {
+			setContentHeight();
 		};
 
 		/**
@@ -17459,6 +17452,25 @@ var Oculus = {};
 					(date.getMinutes() < 10 ? "0" : "") + date.getMinutes() + " GMT";
 
 				return invoiceDate;
+			};
+		})
+
+		.filter("prettyDate", function () {
+			return function(input, showSeconds) {
+				var date = new Date(input),
+					projectDate;
+
+				projectDate = (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
+					((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1) + "-" +
+					date.getFullYear();
+
+				if (angular.isDefined(showSeconds) && showSeconds) {
+					projectDate += " " + (date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
+						(date.getMinutes() < 10 ? "0" : "") + date.getMinutes() + "-" +
+						(date.getSeconds() < 10 ? "0" : "") + date.getSeconds();
+				}
+
+				return projectDate;
 			};
 		});
 

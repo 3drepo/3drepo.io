@@ -39,50 +39,18 @@
 		};
 	}
 
-	AccountBillingCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService", "serverConfig"];
+	AccountBillingCtrl.$inject = ["$scope", "$location", "UtilsService", "serverConfig"];
 
-	function AccountBillingCtrl($scope, $location, $timeout, UtilsService, serverConfig) {
+	function AccountBillingCtrl($scope, $location, UtilsService, serverConfig) {
 		var vm = this,
 			promise;
 
 		/*
 		 * Init
 		 */
-		/*
-		if ($location.search().hasOwnProperty("cancel")) {
-			// Cancelled out of PayPal
-			init();
-		}
-		else if ($location.search().hasOwnProperty("token")) {
-			vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
-			vm.closeDialogEnabled = false;
-			UtilsService.showDialog("paypalDialog.html", $scope);
-			promise = UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute");
-			promise.then(function (response) {
-				console.log("payment/paypal/execute ", response);
-				if (response.status === 200) {
-				}
-				vm.payPalInfo = "PayPal has finished processing. Thank you.";
-				$timeout(function () {
-					UtilsService.closeDialog();
-					init();
-				}, 2000);
-			});
-		}
-		else {
-			init();
-		}
-		*/
-		init();
-
-		/**
-		 * Initialise data
-		 */
-		function init () {
-			vm.showInfo = true;
-			vm.saveDisabled = true;
-			vm.countries = serverConfig.countries;
-		}
+		vm.showInfo = true;
+		vm.saveDisabled = true;
+		vm.countries = serverConfig.countries;
 
 		/*
 		 * Watch for change in licenses
@@ -162,7 +130,12 @@
 				billingAddress: vm.newBillingAddress
 			};
 
-			vm.payPalInfo = "Redirecting to PayPal. Please do not refresh the page or close the tab.";
+			if (vm.numLicenses === vm.numNewLicenses) {
+				vm.payPalInfo = "Updating billing information. Please do not refresh the page or close the tab.";
+			}
+			else {
+				vm.payPalInfo = "Redirecting to PayPal. Please do not refresh the page or close the tab.";
+			}
 			UtilsService.showDialog("paypalDialog.html", $scope, null, true);
 			promise = UtilsService.doPost(data, vm.account + "/subscriptions");
 			promise.then(function (response) {

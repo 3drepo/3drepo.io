@@ -254,17 +254,17 @@ account-menu md-icon {
 }
 
 /** Delete Project Dialog *********************************************************************************************/
-.deleteProjectDialog {
-  min-width: 350px;
-  min-height: 230px;
-  overflow: hidden;
-}
-
 .deleteProjectDialog p {
   color: rgba(0 ,0, 0, 0.6);
+  margin: 0;
 }
 .deleteProjectDialog #deleteProjectName {
   color: rgba(0 ,0, 0, 0.9);
+}
+
+.deleteProjectDialog #deleteProjectWarning {
+  color: #F44336;
+  margin: 0;
 }
 
 .deleteProjectDialog #deleteProjectError {

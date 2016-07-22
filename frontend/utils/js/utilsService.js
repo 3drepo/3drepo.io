@@ -27,30 +27,6 @@
         var obj = {};
 
 		/**
-         * Prettify timestamp
-         *
-         * @param timestamp
-         * @param showSeconds
-         * @returns {string|*}
-         */
-        obj.formatTimestamp = function (timestamp, showSeconds) {
-            var date = new Date(timestamp),
-                formatted;
-
-            formatted = (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
-                        ((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1) + "-" +
-                        date.getFullYear();
-            
-            if (angular.isDefined(showSeconds) && showSeconds) {
-                formatted += " " + (date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
-                            (date.getMinutes() < 10 ? "0" : "") + date.getMinutes() + "-" +
-                            (date.getSeconds() < 10 ? "0" : "") + date.getSeconds();
-            }
-            
-            return formatted;
-        };
-
-		/**
 		 * Convert blah_test to blahTest
          *
          * @param name

@@ -27,7 +27,9 @@
 			.issueCommentsFooter
 				div(ng-if="vm.issueIsOpen",layout="row", layout-align="start center")
 					// Save comment
-					md-button.md-raised.md-accent(ng-click="vm.saveComment()", ng-disabled="vm.saveCommentDisabled") Save
+					div(layout="row", layout-align="start center")
+						md-button.md-raised.md-accent(ng-click="vm.saveComment()", ng-disabled="vm.saveCommentDisabled") Save
+						md-progress-circular(md-diameter="20px", ng-if="vm.savingComment")
 
 					// Assign role
 					//md-menu(md-position-mode="target-right target", ng-if="vm.canModifyIssue")

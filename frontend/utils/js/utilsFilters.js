@@ -65,6 +65,25 @@
 
 				return invoiceDate;
 			};
+		})
+
+		.filter("prettyDate", function () {
+			return function(input, showSeconds) {
+				var date = new Date(input),
+					projectDate;
+
+				projectDate = (date.getDate() < 10 ? "0" : "") + date.getDate() + "-" +
+					((date.getMonth() + 1) < 10 ? "0" : "") + (date.getMonth() + 1) + "-" +
+					date.getFullYear();
+
+				if (angular.isDefined(showSeconds) && showSeconds) {
+					projectDate += " " + (date.getHours() < 10 ? "0" : "") + date.getHours() + ":" +
+						(date.getMinutes() < 10 ? "0" : "") + date.getMinutes() + "-" +
+						(date.getSeconds() < 10 ? "0" : "") + date.getSeconds();
+				}
+
+				return projectDate;
+			};
 		});
 
 }());
