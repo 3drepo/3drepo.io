@@ -20,6 +20,7 @@ var url = require('url');
 var config = require('../config');
 var vat = require('./vat');
 var moment = require('moment');
+var responseCodes = require('../response_codes.js');
 
 paypal.configure({
 	'mode': config.paypal.mode, //sandbox or live
@@ -38,8 +39,8 @@ function roundTo2DP(value){
 function getPaymentDateAndAmount(newLicences, oldPayableLicences, paymentDate, lastAnniversaryDate, nextPaymentDate, country, isBusiness){
 	'use strict';
 
-	console.log('nextPaymentDate', nextPaymentDate);
-	console.log('lastAnniversaryDate', lastAnniversaryDate);
+	//console.log('nextPaymentDate', nextPaymentDate);
+	//console.log('lastAnniversaryDate', lastAnniversaryDate);
 	let firstCycleAmount = 0;
 	let firstCycleBeforeTaxAmount = 0;
 	let firstCycleTaxAmount = 0;
@@ -304,7 +305,10 @@ function updateBillingAddress(billingAgreementId, billingAddress){
 	return new Promise((resolve, reject) => {
 		paypal.billingAgreement.update(billingAgreementId, updateOps, function (err, billingAgreement) {
 			if (err) {
-				reject(err);
+				//console.log(err);
+				let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
+				paypalError.message = err.response.message;
+				reject(paypalError);
 			} else {
 				console.log(JSON.stringify(billingAgreement));
 				resolve(billingAgreement);

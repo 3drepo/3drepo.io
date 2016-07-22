@@ -69,7 +69,7 @@
     "jshint": "^2.8.0",
     "response-time": "^2.3.1",
     "minify": "1.4.23",
-    "mockgoose": "^5.3.3",
+    "mockgoose": "6.0.3",
     "mongo-mock": "^2.0.0",
     "mongoose-mock": "^0.4.0",
     "proxyquire": "^1.7.4",

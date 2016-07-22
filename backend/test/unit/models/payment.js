@@ -2,11 +2,8 @@
 
 let chai = require("chai");
 let expect = require('chai').expect;
-let mongoose = require('mongoose');
-let mockgoose = require('mockgoose');
 let moment = require('moment');
 
-mockgoose(mongoose);
 
 let proxyquire = require('proxyquire').noCallThru();;
 
