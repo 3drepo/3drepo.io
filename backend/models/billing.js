@@ -27,8 +27,10 @@ var schema = mongoose.Schema({
 	amount: String,
 	items: [{
 		name: String,
+		description:  String, 
 		currency: String,
-		amount: Number
+		amount: Number,
+		taxAmount: Number
 	}],
 	periodStart: Date,
 	periodEnd: Date,

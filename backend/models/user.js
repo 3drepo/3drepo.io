@@ -1026,8 +1026,10 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 					items.push({
 						name: subscription.plan,
+						description: getSubscription(subscription.plan).description,
 						currency: getSubscription(subscription.plan).currency,
-						amount: Math.round(paymentInfo.amount / inCurrentAgreementCount * 100) / 100
+						amount: Math.round(paymentInfo.amount / inCurrentAgreementCount * 100) / 100,
+						taxAmount: Math.round(paymentInfo.taxAmount / inCurrentAgreementCount * 100) / 100
 					});
 				}
 			
