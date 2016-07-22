@@ -91,7 +91,8 @@ var schema = mongoose.Schema({
 			"company": String,
 			"city": String,
 			"postalCode": String,
-			"countryCode": String
+			"countryCode": String,
+			"state": String,
 		},
 		//global billing info
 		billingAgreementId: String,
@@ -313,30 +314,9 @@ schema.statics.verify = function(username, token, options){
 		} else if(tokenData.token === token && tokenData.expiredAt > new Date()){
 
 
-			//create admin role for own database
-
-			return Role.findByRoleID(`${username}.admin`).then(role => {
-
-				if(!role){
-					return Role.createAdminRole(username);
-				} else {
-					return Promise.resolve();
-				}
-
-			}).then(() => {
-
-				let adminRoleName = 'admin';
-				return User.grantRoleToUser(username, username, adminRoleName);
-
-			}).then(() => {
-
-				user.customData.inactive = undefined;
-				//user.customData.emailVerifyToken = undefined;
-				return user.save();
-
-			});
-
-
+			user.customData.inactive = undefined;
+			user.customData.emailVerifyToken = undefined;
+			return user.save();
 
 		
 		} else {
@@ -360,8 +340,23 @@ schema.statics.verify = function(username, token, options){
 			return user.createSubscription(Subscription.getBasicPlan().plan, user.user, true, null).then(() => user);
 		}
 
-		return user;
+		return Promise.resolve();
 
+	}).then(() => {
+
+		//create admin role for own database
+		return Role.createAdminRole(username).catch(err => {
+
+			//role exists
+			if(err.code === '11000'){
+				return Promise.resolve();
+			}
+
+		});
+
+	}).then(() => {
+		let adminRoleName = 'admin';
+		return User.grantRoleToUser(username, username, adminRoleName);
 	});
 };
 
@@ -723,7 +718,8 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 				"line2": billingAddress.line2,
 				"city": billingAddress.city,
 				"postal_code": billingAddress.postalCode,
-				"country_code": billingAddress.countryCode
+				"country_code": billingAddress.countryCode,
+				"state": billingAddress.state
 			});
 		}
 
@@ -881,7 +877,8 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 					"line2": billingAddress.line2,
 					"city": billingAddress.city,
 					"postal_code": billingAddress.postalCode,
-					"country_code": billingAddress.countryCode
+					"country_code": billingAddress.countryCode,
+					"state": billingAddress.state
 				};
 
 				return Payment.getBillingAgreement(
@@ -1026,8 +1023,10 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 					items.push({
 						name: subscription.plan,
+						description: getSubscription(subscription.plan).description,
 						currency: getSubscription(subscription.plan).currency,
-						amount: Math.round(paymentInfo.amount / inCurrentAgreementCount * 100) / 100
+						amount: Math.round(paymentInfo.amount / inCurrentAgreementCount * 100) / 100,
+						taxAmount: Math.round(paymentInfo.taxAmount / inCurrentAgreementCount * 100) / 100
 					});
 				}
 			

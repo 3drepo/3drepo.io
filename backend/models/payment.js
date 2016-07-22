@@ -208,7 +208,10 @@ function getBillingAgreement(
 		paypal.billingPlan.create(billingPlanAttributes, function (err, billingPlan) {
 			
 			if(err){
-				reject(err);
+				//console.log(err);
+				let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
+				paypalError.message = err.response.message;
+				reject(paypalError);
 			} else {
 				resolve(billingPlan);
 			}
@@ -230,7 +233,10 @@ function getBillingAgreement(
 
 			paypal.billingPlan.update(billingPlan.id, billingPlanUpdateAttributes, function (err) {
 				if (err) {
-					reject(err);
+					//console.log(err);
+					let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
+					paypalError.message = err.response.message;
+					reject(paypalError);
 				} else {
 					resolve(billingPlan);
 				}
@@ -267,7 +273,10 @@ function getBillingAgreement(
 			console.log('creating agreement...');
 			paypal.billingAgreement.create(billingAgreementAttributes, function (err, billingAgreement) {
 				if (err) {
-					reject(err);
+					//console.log(err);
+					let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
+					paypalError.message = err.response.message;
+					reject(paypalError);
 				} else {
 
 					console.log(JSON.stringify(billingAgreement, null ,2));

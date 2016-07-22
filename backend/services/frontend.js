@@ -25,7 +25,7 @@ module.exports.createApp = function(serverConfig)
 	let compress = require("compression");
 	let fs = require("fs");
 	let jade = require("jade");
-	let countries = require('../models/country');
+	let addressMeta = require('../models/addressMeta');
 
 	//let systemLogger = require("../logger.js").systemLogger;
 
@@ -116,7 +116,9 @@ module.exports.createApp = function(serverConfig)
 
 		params.config_js += "\n\nserver_config.uploadSizeLimit = " + config.uploadSizeLimit + ";";
 
-		params.config_js += "\n\nserver_config.countries = " + JSON.stringify(countries) + ";";
+		params.config_js += "\n\nserver_config.countries = " + JSON.stringify(addressMeta.countries) + ";";
+
+		params.config_js += "\n\nserver_config.usStates = " + JSON.stringify(addressMeta.usStates) + ";";
 
 		res.header("Content-Type", "text/javascript");
 		res.render("config.jade", params);
