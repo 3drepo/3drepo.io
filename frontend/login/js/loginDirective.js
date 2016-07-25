@@ -47,7 +47,6 @@
 		vm.newUser = {username: "", email: "", password: "", tcAgreed: false};
 		vm.version = serverConfig.apiVersion;
 		vm.logo = "/public/images/3drepo-logo-white.png";
-		vm.captchaKey = serverConfig.captcha_client_key;
 		vm.tcAgreed = false;
 		vm.useReCapthca = false;
 		vm.useRegister = false;
@@ -56,7 +55,6 @@
 		/*
 		 * Auth stuff
 		 */
-		console.log(serverConfig);
 		if (serverConfig.hasOwnProperty("auth")) {
 			if (serverConfig.auth.hasOwnProperty("register") && (serverConfig.auth.register)) {
 				vm.useRegister = true;

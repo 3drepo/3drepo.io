@@ -12773,7 +12773,6 @@ angular.module('3drepo')
 		vm.newUser = {username: "", email: "", password: "", tcAgreed: false};
 		vm.version = serverConfig.apiVersion;
 		vm.logo = "/public/images/3drepo-logo-white.png";
-		vm.captchaKey = serverConfig.captcha_client_key;
 		vm.tcAgreed = false;
 		vm.useReCapthca = false;
 		vm.useRegister = false;
@@ -16361,7 +16360,7 @@ var Oculus = {};
 		vm.newUser = {username: "", email: "", password: "", tcAgreed: false};
 		vm.version = serverConfig.apiVersion;
 		vm.logo = "/public/images/3drepo-logo-white.png";
-		vm.captchaKey = "6LfSDR8TAAAAACBaw6FY5WdnqOP0nfv3z8-cALAI";
+		vm.captchaKey = serverConfig.captcha_client_key;
 		vm.tcAgreed = false;
 		vm.useReCapthca = false;
 		vm.useRegister = false;
