@@ -51,10 +51,10 @@
 								md-input-container(flex)
 									label City
 									input(type="text", ng-model="vm.newBillingAddress.city", required)
-								//md-input-container(flex, ng-if="vm.showStates")
+								md-input-container(flex, ng-if="vm.showStates")
 									label State
-									md-select(ng-model="vm.newBillingAddress.state", required)
-										md-option(ng-repeat="country in vm.countries", value="{{country.code}}") {{country.name}}
+									md-select(ng-model="vm.newBillingAddress.state", ng-required="true")
+										md-option(ng-repeat="state in vm.usStates", value="{{state.code}}") {{state.name}}
 								md-input-container(flex)
 									label Postal code
 									input(type="text", ng-model="vm.newBillingAddress.postalCode", required)

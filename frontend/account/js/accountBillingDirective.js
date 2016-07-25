@@ -51,6 +51,8 @@
 		vm.showInfo = true;
 		vm.saveDisabled = true;
 		vm.countries = serverConfig.countries;
+		vm.usStates = serverConfig.usStates;
+		console.log(serverConfig);
 		vm.showStates = false;
 
 		/*
@@ -58,7 +60,11 @@
 		 */
 		$scope.$watch("vm.numNewLicenses", function () {
 			if (angular.isDefined(vm.numNewLicenses)) {
-				if (vm.numLicenses === vm.numNewLicenses) {
+				console.log(vm.numLicenses, vm.numNewLicenses);
+				if ((vm.numLicenses === 0) && (vm.numNewLicenses === 0)) {
+					vm.saveDisabled = true;
+				}
+				else if (vm.numLicenses === vm.numNewLicenses) {
 					vm.saveDisabled = angular.equals(vm.newBillingAddress, vm.billingAddress) || aRequiredAddressFieldIsEmpty();
 				}
 				else {
@@ -183,9 +189,9 @@
 				angular.isUndefined(vm.newBillingAddress.postalCode) ||
 				angular.isUndefined(vm.newBillingAddress.city) ||
 				angular.isUndefined(vm.newBillingAddress.countryCode) ||
-				(angular.isDefined(vm.newBillingAddress.vat) && (vm.newBillingAddress.vat !== "") && angular.isUndefined(vm.newBillingAddress.companyName))
+				(angular.isDefined(vm.newBillingAddress.vat) && (vm.newBillingAddress.vat !== "") && angular.isUndefined(vm.newBillingAddress.companyName)) ||
+				((vm.newBillingAddress.countryCode === "US") && angular.isUndefined(vm.newBillingAddress.state))
 			);
-
 		}
 	}
 }());
