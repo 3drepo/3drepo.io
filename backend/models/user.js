@@ -31,6 +31,7 @@ var systemLogger = require("../logger.js").systemLogger;
 var Payment = require('./payment');
 var moment = require('moment');
 var Subscription = require('./subscription');
+var config = require('../config');
 
 var getSubscription = Subscription.getSubscription;
 
@@ -245,8 +246,13 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	let adminDB = ModelFactory.db.admin();
 	
 	let cleanedCustomData = {};
-	
-	if(customData && (!customData.email || !customData.email.match(/^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/))){
+	let emailRegex = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+
+	if(config.auth.allowPlusSignInEmail){
+		emailRegex = /^([+a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+	}
+
+	if(customData && (!customData.email || !customData.email.match(emailRegex))){
 		return Promise.reject({ resCode: responseCodes.SIGN_UP_INVALID_EMAIL });
 	}
 

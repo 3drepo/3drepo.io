@@ -124,7 +124,8 @@ module.exports = {
 
 	auth: {
 		captcha: true,
-		register: true
+		register: true,
+		allowPlusSignInEmail: false 
 	},
 
 	contact:{
