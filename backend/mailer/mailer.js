@@ -169,7 +169,12 @@ module.exports = {
 	sendPaymentReceivedEmail,
 	sendContactEmail,
 	sendPaymentFailedEmail,
+<<<<<<< HEAD
 	sendPaymentErrorEmail,
 	sendProjectInvitation,
 	sendSubscriptionSuspendedEmail
 }
+=======
+	sendPaymentErrorEmail
+}
+>>>>>>> ISSUE_210
