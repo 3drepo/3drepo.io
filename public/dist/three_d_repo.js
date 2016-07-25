@@ -10546,6 +10546,7 @@ var ViewerManager = {};
 		vm.state = StateManager.state;
 		vm.query = StateManager.query;
 		vm.functions = StateManager.functions;
+		vm.pointerEvents = "auto";
 
 		vm.goToUserPage = false;
 
@@ -10564,8 +10565,8 @@ var ViewerManager = {};
 			/*
 			 * Watch the state to handle moving to and from the login page
 			 */
-			$scope.$watch("vm.state", function () {
-				if (vm.state.authInitialized) {
+			$scope.$watch("vm.state", function (newState, oldState) {
+				if (newState !== oldState && !vm.state.changing && vm.state.authInitialized) {
 					homeLoggedOut.empty();
 
 					vm.goToUserPage = false;
@@ -10607,6 +10608,10 @@ var ViewerManager = {};
             Auth.logout();
         };
 
+		vm.home = function () {
+			EventService.send(EventService.EVENT.GO_HOME);
+		};
+
 		/**
 		 * Display legal text
 		 *
@@ -10642,6 +10647,9 @@ var ViewerManager = {};
 					} else {
 						EventService.send(EventService.EVENT.SET_STATE, {});
 					}
+				}
+				else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
+					vm.pointerEvents = event.value.on ? "none" : "auto";
 				}
 			}
 		});
@@ -15312,7 +15320,6 @@ var Oculus = {};
 			add: true
 		});
 
-		/*
 		panelCard.left.push({
 			type: "groups",
 			title: "Groups",
@@ -15334,7 +15341,6 @@ var Oculus = {};
 			],
 			add: true
 		});
-		*/
 
 		panelCard.left.push({
 			type: "clip",

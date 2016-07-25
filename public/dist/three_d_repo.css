@@ -1146,11 +1146,15 @@ home #homeLogo {
     left: 0;
     right: 0;
     margin: auto;
-    pointer-events: none;
+    outline: none;
+}
+home #homeLogo:hover {
+    cursor: pointer;
 }
 home #homeLogo img {
     width: inherit;
     pointer-events: inherit;
+    outline: none;
 }
 
 home .homeUserContent {

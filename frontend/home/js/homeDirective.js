@@ -91,6 +91,7 @@
 		vm.state = StateManager.state;
 		vm.query = StateManager.query;
 		vm.functions = StateManager.functions;
+		vm.pointerEvents = "auto";
 
 		vm.goToUserPage = false;
 
@@ -152,6 +153,10 @@
             Auth.logout();
         };
 
+		vm.home = function () {
+			EventService.send(EventService.EVENT.GO_HOME);
+		};
+
 		/**
 		 * Display legal text
 		 *
@@ -187,6 +192,9 @@
 					} else {
 						EventService.send(EventService.EVENT.SET_STATE, {});
 					}
+				}
+				else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
+					vm.pointerEvents = event.value.on ? "none" : "auto";
 				}
 			}
 		});
