@@ -109,8 +109,8 @@
 			/*
 			 * Watch the state to handle moving to and from the login page
 			 */
-			$scope.$watch("vm.state", function () {
-				if (vm.state.authInitialized) {
+			$scope.$watch("vm.state", function (newState, oldState) {
+				if (newState !== oldState && !vm.state.changing && vm.state.authInitialized) {
 					homeLoggedOut.empty();
 
 					vm.goToUserPage = false;
