@@ -89,6 +89,38 @@ describe('Project', function () {
 		});
 	});
 
+	it('update settings should be successful', function(done){
+
+		let body = {
+
+				mapTile: {
+					lat: 123,
+					lon: 234,
+					y: 5
+				},
+				seaLevel: 2,
+				unit: 2
+
+		};
+		
+		agent.put(`/${username}/${project}/settings`)
+		.send(body).expect(200, function(err ,res) {
+
+			expect(res.body.properties).to.deep.equal(body);
+
+			if(err){
+				return done(err);
+			}
+
+			agent.get(`/${username}/${project}.json`)
+			.expect(200, function(err, res){
+				expect(res.body.properties).to.deep.equal(body);
+				done(err);
+			})
+			
+		});
+	});
+
 	it('should return error message if project name already exists', function(done){
 
 		agent.post(`/${username}/${project}`)

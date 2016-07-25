@@ -43,7 +43,7 @@ router.post('/:project/info.json', middlewares.isMainContractor, B4F_updateProje
 // Get project info
 router.get('/:project.json', middlewares.hasReadAccessToProject, getProjectSetting);
 
-router.put('/:project/settings/map-tile', middlewares.hasWriteAccessToProject, updateMapTileSettings);
+router.put('/:project/settings', middlewares.hasWriteAccessToProject, updateSettings);
 
 router.post('/:project', middlewares.canCreateProject, createProject);
 
@@ -67,7 +67,7 @@ function estimateImportedSize(format, size){
 	return size;
 }
 
-function updateMapTileSettings(req, res, next){
+function updateSettings(req, res, next){
 	'use strict';
 
 
@@ -75,7 +75,8 @@ function updateMapTileSettings(req, res, next){
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
 
 	return ProjectSetting.findById(dbCol, req.params.project).then(projectSetting => {
-		return projectSetting.updateMapTileCoors(req.body);
+		projectSetting.updateProperties(req.body);
+		return projectSetting.save();
 	}).then(projectSetting => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, projectSetting);
 	}).catch(err => {

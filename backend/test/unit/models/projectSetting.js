@@ -61,38 +61,38 @@ describe('Project Settings', function(){
 	});
 
 
-	describe('#updateMapTileCoors', function(){
-		it('have update map tile coors function', function(){
+	describe('#updateProperties', function(){
+
+		it('should have updateProperties function', function(){
 			let projectSetting = new ProjectSetting();
-			expect(projectSetting).to.have.property('updateMapTileCoors');
+			expect(projectSetting).to.have.property('updateProperties');
 		});
 
-		it('should update map tiles properties, call markModified and call save function', function(){
+		it('should update properties and call markModified function', function(){
 
-			let mapTileProp = {
-				lat: 123,
-				lon: 234,
-				width: 567,
-				height: 789
+			let props = {
+
+				mapTile: {
+					lat: 123,
+					lon: 234,
+					y: 5
+				},
+				seaLevel: 2,
+				unit: 2
+
 			};
 
 			let projectSetting = new ProjectSetting();
 			
-			let stub = sinon.stub(projectSetting, 'save').returns(Promise.resolve(projectSetting));
 			let markModStub = sinon.stub(projectSetting, 'markModified').returns(true);
 
-			return projectSetting.updateMapTileCoors(mapTileProp).then(result => {
+			projectSetting.updateProperties(props);
 
-				sinon.assert.calledOnce(stub);
-				sinon.assert.calledWith(markModStub, 'properties');
-				expect(result.properties.mapTile).to.deep.equal(mapTileProp);
-				stub.restore();
-				markModStub.restore();
+			sinon.assert.calledWith(markModStub, 'properties');
+			expect(projectSetting.properties).to.deep.equal(props);
+			markModStub.restore();
 
-			});
-
-
-		})
+		});
 	});
 
 	describe('.findCollaborator', function(){
