@@ -1,0 +1,71 @@
+div(layout-fill, layout="column")
+	md-toolbar.noPrint
+		.md-toolbar-tools
+			span(flex)
+			img(src="/public/images/3drepo-logo-white.png")
+			span(flex)
+			md-button.md-icon-button(aria-label="Home", ng-click="vm.home()")
+				md-icon.angular-material-icons home
+
+	md-content(ng-if="vm.showBilling", layout="row", flex="none", layout-align="center")
+		div(layout="column", style="width:90%")
+			#billingCompanyAddress(layout="row", layout-align="space-between start")
+				div(layout="column", flex="none")
+					label.md-title 3D Repo
+					label c/o EIT Digital
+					label Centre House Block C
+					label 56 Wood Lane
+					label London W12 7SB
+					label United Kingdom
+					label VAT ID: GB 206 9090 15
+					a(href="mailto:support@3drepo.org") support@3drepo.org
+
+				md-button.md-raised.md-accent.noPrint(ng-click="vm.print()") Print
+
+			p.md-headline(flex="none") Invoice
+
+			.billingInfoTitle(layout="row", flex="none")
+				label(flex="30") To
+				label(flex="20") Date
+				label Invoice ID
+
+			md-divider(flex="none")
+
+			#billingClientAddress(layout="row", flex="none")
+				div(layout="column", flex="30")
+					label {{vm.billing.info.firstName}} {{vm.billing.info.lastName}}
+					label(ng-if="vm.billing.info.company") {{vm.billing.info.company}}
+					label {{vm.billing.info.line1}}
+					label(ng-if="vm.billing.info.line2") {{vm.billing.info.line2}}
+					label {{vm.billing.info.city}}
+					label {{vm.billing.info.postalCode}}
+					label {{vm.billing.info.country}}
+					label(ng-if="vm.billing.info.vat") VAT ID: {{vm.billing.info.vat}}
+				label(flex="20") {{vm.billing.createdAt | invoiceDate}} GMT
+				label {{vm.billing.billingAgreementId}}
+
+			.billingInfoTitle(layout="row", flex="none")
+				label(flex="30") Product
+				label(flex="10") Quantity
+				label(flex="10") Unit Price
+				label(flex="10") Net
+				label(flex="10") VAT (%)
+				label(flex="20") VAT
+				label Total
+
+			md-divider(flex="none")
+
+			#billingProductInfo(layout="row", flex="none")
+				div(flex="30", layout="column", layout-align="start")
+					label {{vm.billing.items[0].name}}
+					label#billingPeriod ({{vm.billing.periodStart | prettyDate:false}} to {{vm.billing.periodEnd | prettyDate:false}})
+				label(flex="10") {{vm.billing.items.length}}
+				label(flex="10") £100.00
+				label(flex="10") £{{vm.billing.netAmount}}
+				label(flex="10") {{vm.billing.taxPercentage}}%
+				label(flex="20") £{{vm.billing.taxAmount}}
+				label £{{vm.billing.amount}}
+
+			#billingReverseCharge(flex, ng-if="vm.B2B_EU")
+				md-divider(flex="none")
+				label VAT is subject to the Reverse Charge

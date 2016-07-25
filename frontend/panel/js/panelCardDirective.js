@@ -233,6 +233,10 @@
 						case "menu":
 							optionElement += "menu='vm.contentData.menu' selected-menu-option='vm.selectedMenuOption'";
 							break;
+
+						case "close":
+							optionElement += "show='vm.contentData.show'";
+							break;
 					}
 
 					optionElement += "><panel-card-option-" + vm.contentData.options[i].type + ">";

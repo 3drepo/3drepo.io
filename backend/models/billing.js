@@ -19,16 +19,41 @@ var ModelFactory = require('./factory/modelFactory');
 
 
 var schema = mongoose.Schema({
-	subscriptionToken: String,
+	billingAgreementId: String,
 	gateway: String,
 	raw: {},
 	createdAt: Date,
 	currency: String,
-	amount: String
+	amount: String,
+	items: [{
+		name: String,
+		description:  String, 
+		currency: String,
+		amount: Number,
+		taxAmount: Number
+	}],
+	periodStart: Date,
+	periodEnd: Date,
+	nextPaymentDate: Date,
+	nextPaymentAmount: String,
+	taxAmount: String,
+	info: {
+		"vat": String,
+		"line1": String,
+		"line2": String,
+		"line3": String,
+		"state": String,
+		"firstName": String,
+		"lastName": String,
+		"company": String,
+		"city": String,
+		"postalCode": String,
+		"countryCode": String
+	}
 });
 
-schema.statics.findBySubscriptionToken = function(account, token){
-	return this.find({account}, { subscriptionToken: token }, {}, {sort: {createdAt: -1}});
+schema.statics.findByAccount = function(account){
+	return this.find({account}, {}, {raw: 0}, {sort: {periodStart: -1}});
 };
 
 var Billing = ModelFactory.createClass(

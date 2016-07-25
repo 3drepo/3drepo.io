@@ -120,6 +120,7 @@ schema.statics.removeProject = function(account, project){
 		//remove all roles related to this project for these users
 		let promises = [];
 		
+		//owner has a collaborator role
 		promises.push(User.revokeRolesFromUser(owner, account, `${project}.collaborator`).catch(err =>{
 			console.log(err);
 			return Promise.resolve();

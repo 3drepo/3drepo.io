@@ -29,8 +29,9 @@
 	var Mailer = require("../mailer/mailer");
 	var httpsPost = require("../libs/httpsReq").post;
 	//var Role = require('../models/role');
-	var crypto = require('crypto');
-	var ProjectHelper = require('../models/helper/project');
+	//var crypto = require('crypto');
+	var Billing = require('../models/billing');
+	var Subscription = require('../models/subscription');
 
 	router.post("/login", login);
 	router.post("/logout", logout);
@@ -41,22 +42,25 @@
 	router.get("/:account.json", middlewares.loggedIn, listInfo);
 	router.get("/:account.jpg", middlewares.hasReadAccessToAccount, getAvatar);
 	router.get("/:account/subscriptions", middlewares.hasReadAccessToAccount, listSubscriptions);
-	router.get("/:account/subscriptions/:token", middlewares.hasReadAccessToAccount, findSubscriptionByToken);
+	router.get("/:account/billings", middlewares.hasReadAccessToAccount, listBillings);
+	router.get("/:account/billings/:id.html", middlewares.hasReadAccessToAccount, renderBilling);
 	router.post('/:account', signUp);
-	router.post('/:account/database', middlewares.canCreateDatabase, createDatabase);
+	//router.post('/:account/database', middlewares.canCreateDatabase, createDatabase);
 	router.post('/:account/subscriptions', middlewares.canCreateDatabase, createSubscription);
-	router.post('/:account/verify', middlewares.connectQueue, verify);
+	router.post("/:account/subscriptions/:sid/assign", middlewares.hasWriteAccessToAccount, assignSubscription);
+	router.delete("/:account/subscriptions/:sid/assign", middlewares.hasWriteAccessToAccount, removeAssignedSubscription);
+	router.post('/:account/verify', verify);
 	router.post('/:account/forgot-password', forgotPassword);
 	router.put("/:account", middlewares.hasWriteAccessToAccount, updateUser);
 	router.put("/:account/password", middlewares.hasWriteAccessToAccount, resetPassword);
 
-	function expireSession(req) {
-		if (req.session)
-		{
-			req.session.cookie.expires = new Date(0);
-			req.session.cookie.maxAge = 0;
-		}
-	}
+	// function expireSession(req) {
+	// 	if (req.session)
+	// 	{
+	// 		req.session.cookie.expires = new Date(0);
+	// 		req.session.cookie.maxAge = 0;
+	// 	}
+	// }
 
 	function createSession(place, req, res, next, user){
 		req.session.regenerate(function(err) {
@@ -133,7 +137,7 @@
 
 			// Update user info
 			User.findByUserName(req.params[C.REPO_REST_API_ACCOUNT]).then(user => {
-				user.updateInfo(req.body);
+				return user.updateInfo(req.body);
 			}).then(() => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 			}).catch(err => {
@@ -207,21 +211,7 @@
 
 		let responsePlace = utils.APIInfo(req);
 
-		User.verify(req.params[C.REPO_REST_API_ACCOUNT], req.body.token).then(user => {
-
-			//import toy project
-			ProjectHelper.importToyProject(req.params[C.REPO_REST_API_ACCOUNT]).catch(err => {
-				req[C.REQ_REPO].logger.logError(JSON.stringify(err));
-			});
-
-			//soft launch give users some quota
-			return user.createSubscriptionToken('SOFT-LAUNCH-FREE-TRIAL', user.user);
-
-		}).then(sub => {
-
-			return User.activateSubscription(sub.token, {}, {}, true);
-
-		}).then(() => {
+		User.verify(req.params[C.REPO_REST_API_ACCOUNT], req.body.token).then(() => {
 
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
 
@@ -329,7 +319,8 @@
 				accounts: databases,
 				firstName: user.customData.firstName,
 				lastName: user.customData.lastName,
-				email: user.customData.email
+				email: user.customData.email,
+				billingInfo: user.customData.billingInfo
 			});
 
 		}).catch(err => {
@@ -371,64 +362,75 @@
 		}
 	}
 
-	function createDatabase(req, res, next){
+	// function createDatabase(req, res, next){
 
 
-		let responsePlace = utils.APIInfo(req);
-		let password = crypto.randomBytes(64).toString('hex');
+	// 	let responsePlace = utils.APIInfo(req);
+	// 	let password = crypto.randomBytes(64).toString('hex');
 
-		//first create the ghost user
-		let checkPlan = User.getSubscription(req.body.plan) ?
-			Promise.resolve() : Promise.reject({ resCode: responseCodes.INVALID_SUBSCRIPTION_PLAN });
-
-		return checkPlan.then(() => {
-			return User.createUser(req[C.REQ_REPO].logger, req.body.database, password, null, 0);
-
-		}).then(() => {
-
-			return User.findByUserName(req.body.database);
+	// 	//first create the ghost user
+	// 	let checkPlan = User.getSubscription(req.body.plan) ? 
+	// 		Promise.resolve() : Promise.reject({ resCode: responseCodes.INVALID_SUBSCRIPTION_PLAN });
 
 
-		}).catch(err => {
-			//change user exists error message to database exists
-			if(err.resCode && err.resCode.value === 55){
-				return Promise.reject({ resCode: responseCodes.DATABASE_EXIST });
-			} else {
-				return Promise.reject(err);
-			}
+	// 	return checkPlan.then(() => {
+	// 		return User.createUser(req[C.REQ_REPO].logger, req.body.database, password, null, 0);
 
-		}).then(dbUser => {
+	// 	}).then(() => {
 
-			//create a subscription token in this ghost user
-			let billingUser = req.params.account;
-			return dbUser.createSubscriptionToken(req.body.plan, billingUser);
-
-		}).then(token => {
+	// 		return User.findByUserName(req.body.database);
 
 
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
-				database: req.body.database,
-				token: token.token
-			});
+	// 	}).catch(err => {
+	// 		//change user exists error message to database exists
+	// 		if(err.resCode && err.resCode.value === 55){
+	// 			return Promise.reject({ resCode: responseCodes.DATABASE_EXIST });
+	// 		} else {
+	// 			return Promise.reject(err);
+	// 		}
 
-		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
-	}
+	// 	}).then(dbUser => {
+			
+	// 		//create a subscription token in this ghost user
+	// 		let billingUser = req.params.account;
+	// 		return dbUser.createSubscriptionToken(req.body.plan, billingUser);
+
+
+	// 	}).then(token => {
+
+
+	// 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
+	// 			database: req.body.database,
+	// 			token: token.token
+	// 		});
+
+	// 	}).catch(err => {
+	// 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	// 	});
+	// }
 
 	function createSubscription(req, res, next){
 
 		let responsePlace = utils.APIInfo(req);
+		let dbUser;
 
+		User.findByUserName(req.params.account).then(_dbUser => {
 
-		User.findByUserName(req.params.account).then(dbUser => {
+			dbUser = _dbUser;
 			let billingUser = req.params.account;
-			return dbUser.createSubscriptionToken(req.body.plan, billingUser);
-		}).then(token => {
+			//return dbUser.createSubscriptionToken(req.body.plan, billingUser);
+			return dbUser.buySubscriptions(req.body.plans, billingUser, req.body.billingAddress || {});
+		}).then(agreement => {
 
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
-				token: token.token
-			});
+			let resData = {
+				url: agreement.url
+			};
+
+			if(config.paypal.debug && config.paypal.debug.showFullAgreement){
+				resData.agreement = agreement.agreement;
+			}
+
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, resData);
 
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -438,25 +440,76 @@
 	function listSubscriptions(req, res, next){
 
 		let responsePlace = utils.APIInfo(req);
-		User.findSubscriptionsByBillingUser(req.params.account).then(subscriptions => {
+		User.findByUserName(req.params.account).then(user => {
+
+			let subscriptions = user.getActiveSubscriptions().filter(sub => sub.plan !== Subscription.getBasicPlan().plan);
+
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscriptions);
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
 	}
 
-	function findSubscriptionByToken(req, res, next){
+	function listBillings(req, res, next){
 
 		let responsePlace = utils.APIInfo(req);
-		let billingUser = req.params.account;
-		let token = req.params.token;
-
-		User.findSubscriptionByToken(billingUser, token).then(subscription => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
+		Billing.findByAccount(req.params.account).then(billings => {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, billings);
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});
+	}
 
+	function renderBilling(req, res, next){
+		let responsePlace = utils.APIInfo(req);
+		Billing.findById({account: req.params.account}, req.params.id).then(billing => {
+			
+			if(!billing){
+				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
+			}
+
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, billing);
+			//res.render("???.jade", {billing : billing});
+			
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+	}
+
+	function assignSubscription(req, res, next){
+
+		let responsePlace = utils.APIInfo(req);
+		User.findByUserName(req.params.account).then(dbUser => {
+			
+			let userData = {};
+			
+			if(req.body.email){
+				userData.email = req.body.email;
+			} else if(req.body.user) {
+				userData.user = req.body.user;
+			}
+
+			return dbUser.assignSubscriptionToUser(req.params.sid, userData);
+		}).then(subscription => {
+			console.log(subscription);
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
+		}).catch( err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+	}
+
+	function removeAssignedSubscription(req, res, next){
+
+		let responsePlace = utils.APIInfo(req);
+		User.findByUserName(req.params.account).then(dbUser => {
+			
+			return dbUser.removeAssignedSubscriptionFromUser(req.params.sid, req.query.cascadeRemove);
+
+		}).then(subscription => {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscription);
+		}).catch( err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? err.info : err);
+		});
 	}
 
 	function contact(req, res, next){

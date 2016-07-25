@@ -18,10 +18,9 @@
 var html = data => `
 	Hi there,<br>
 	<br>
-	Your payment of ${data.amount} is failed. Please make sure you have enough credits in your PayPal account.
-	<br><br> PayPal reattempts to collect recurring payments three days after the day on which recurring payments fail. 
-	If the first reattempt to collect a recurring payment fails, PayPal waits 5 days to reattempt a second time. 
-	If the second reattempt fails, PayPal cancels the subscription.
+	Your payment of ${data.amount} is failed. Please make sure you have enough credits in your PayPal account and have
+	your account verified.
+	<br><br> We will reattempt to collect your recurring payments again within five days.
 `;
 
 var subject = 'Your payment to 3D Repo is failed';

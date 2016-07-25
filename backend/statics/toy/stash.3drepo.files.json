@@ -1,0 +1,2 @@
+{"_id":{"$oid":"577a46d226bbb6304552ffa5"},"filename":"c5535379-66cc-4179-9ee1-ec1357d91f63_faces","chunkSize":261120,"uploadDate":{"$date":"2016-07-04T11:21:54.839Z"},"md5":"6ffa9a1ebfd3e6719414fcf146548e57","length":7992928}
+{"_id":{"$oid":"577a46d226bbb6304552ffc5"},"filename":"c5535379-66cc-4179-9ee1-ec1357d91f63_normals","chunkSize":261120,"uploadDate":{"$date":"2016-07-04T11:21:55.079Z"},"md5":"5da6841ccd70e72fcba25084e4f2cec6","length":10711248}

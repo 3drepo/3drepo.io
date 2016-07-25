@@ -1,5 +1,6 @@
 input#existingProjectFileUploader(type="file")
 input#newProjectFileUploader(type="file")
+
 .homeUserContent
 	md-content.md-whiteframe-1dp(aria-label="Projects", flex)
 		md-toolbar
@@ -30,33 +31,15 @@ input#newProjectFileUploader(type="file")
 
 				// Projects
 				md-list.projects(ng-if="account.showProjects")
-					div(layout="row", ng-repeat="project in account.projects", layout-align="start center", flex)
-						md-list-item(flex, layout-fill)
-							.project(
-								ng-click="vm.goToProject(account.name, project)"
-								layout="row"
-								md-ink-ripple
-								layout-align="start center"
-								layout-fill
-								)
-								md-button.md-icon-button(aria-label="Dashboard")
-									md-icon.angular-material-icons dashboard
-								p.projectName(flex) {{project.name}}
-						.projectRight(layout="row", layout-align="start center")
-							.projectUploadInfo(ng-if="project.uploading", layout="row", layout-align="start center")
-								p.projectUploadFilename {{vm.uploadedFile.name}}
-								p.projectUploadInfo(ng-if="vm.showFileUploadInfo") {{vm.fileUploadInfo}}
-								md-progress-circular.projectUploadIcon(md-mode="indeterminate", md-diameter="15", ng-if="vm.showUploading")
-							p.projectTimestamp {{project.timestampPretty}}
-							//md-button.md-accent(ng-click="vm.b4f(account.name, project.name)" ng-if="project.bif4FreeEnabled") B4F
-							md-button.md-accent.md-icon-button(
-								aria-label="Upload"
-								ng-click="vm.uploadModel(project)"
-								ng-if="project.canUpload")
-								md-icon.angular-material-icons cloud_upload
-							//md-button.md-icon-button(aria-label="Delete", ng-click="vm.setupDeleteProject(event, project)")
-								md-icon.angular-material-icons delete
-
+					account-project(
+					ng-repeat="project in account.projects"
+					account="account"
+					project="project"
+					on-upload-file="vm.uploadFile(project)"
+					uploaded-file="vm.uploadedFile"
+					on-show-page="vm.showPage(page, callingPage)"
+					on-setup-delete-project="vm.setupDeleteProject(event, project)",
+					quota="vm.quota")
 				md-divider
 
 		div(ng-if="!vm.projectsExist")

@@ -11,6 +11,7 @@ html(lang="en" ng-app="3drepo")
 
 		script(type="text/javascript", src="/public/plugins/base/config.js")
 
+		// ReCapthca
 		script(src="//www.google.com/recaptcha/api.js?render=explicit&onload=vcRecaptchaApiLoaded", async, defer)
 
 		// CSS Files
@@ -19,6 +20,9 @@ html(lang="en" ng-app="3drepo")
 
 		// All CSS minified
 		link(rel='stylesheet', type='text/css', href='/public/dist/three_d_repo.min.css')
+
+		// Styling used in the Angular Material demos
+		link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
 
 		// JS Files
 		each val, key in jsfiles
@@ -44,7 +48,7 @@ html(lang="en" ng-app="3drepo")
 
 		// Plugin JS and Angular files
 		//script(type="text/javascript", src='/public/dist/plugins.min.js')
-		script(type="text/javascript", src='/public/dist/three_d_repo.min.js')
+		script(type="text/javascript", src='/public/dist/three_d_repo.js')
 
 		// Plugin JS Files
 		//each val in pluginJS

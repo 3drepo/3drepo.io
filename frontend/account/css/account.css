@@ -29,6 +29,11 @@ account-dir #account #accountItem {
   width: 44%;
 }
 
+account-dir .userContent .cardInfo {
+  margin: 0 0 10px;
+  text-align: left;
+}
+
 /** Account Projects **************************************************************************************************/
 account-projects #accountList {
   max-height: calc(100vh - 180px);
@@ -131,31 +136,20 @@ account-projects .projectRight .projectUploaded {
 }
 
 /** Account Profile ***************************************************************************************************/
-account-profile .profile {
-  max-height: calc(100vh - 180px);
-  overflow: auto;
-  padding: 10px;
-}
-
-account-profile #profileDivider {
-  display: block;
-  background: rgba(0,0,0,0.2);
-  width: 1px;
-  height: 380px;
-}
-
-account-profile .accountProfileList {
-  max-height: calc(100vh - 200px);
-  overflow-x: hidden;
-  padding: 0;
-}
-
-account-profile .accountProfileContent {
-  margin-left: 65px;
+account-profile md-input-container {
+  margin-right: 5px;
 }
 
 account-profile .updateContainer {
-  margin-top: -30px;
+  margin: -20px 0 0;
+}
+
+account-profile .md-title {
+  margin: -10px 0 20px;
+}
+
+account-profile md-divider {
+  margin: 20px 0 20px;
 }
 
 /** Account Info ******************************************************************************************************/
@@ -163,6 +157,13 @@ account-info {
   margin-left: 70px;
   width: 400px;
   margin-right: 60px;
+}
+
+account-info #accountInfoContent {
+  max-height: calc(100vh - 190px);
+}
+account-info #accountInfoContent md-list {
+  overflow-y: auto;
 }
 
 account-info .dataContainer {
@@ -187,23 +188,19 @@ account-info md-list {
   padding: 0;
 }
 
+/*
+account-info .accountInfoPage {
+  min-height: 50px;
+}
+account-info .accountInfoPage .md-button {
+  min-height: 50px!important;
+  height: 50px;
+}
+*/
+
 /** Avatar Image ******************************************************************************************************/
 .account-avatar-image {
 	width: 100%;
-}
-
-/** Logout button *****************************************************************************************************/
-logout {
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 1;
-}
-logout md-icon {
-  color: #FFFFFF;
-  text-shadow: 0 0 2px rgba(0,0,0,0.5);
-  font-size: 20px !important;
-  outline: none;
 }
 
 /** Account Menu ******************************************************************************************************/
@@ -257,18 +254,17 @@ account-menu md-icon {
 }
 
 /** Delete Project Dialog *********************************************************************************************/
-.deleteProjectDialog {
-  min-width: 350px;
-  min-height: 230px;
-  overflow: hidden;
-}
-
 .deleteProjectDialog p {
   color: rgba(0 ,0, 0, 0.6);
+  margin: 0;
 }
 .deleteProjectDialog #deleteProjectName {
   color: rgba(0 ,0, 0, 0.9);
-  margin-left: 5px;
+}
+
+.deleteProjectDialog #deleteProjectWarning {
+  color: #F44336;
+  margin: 0;
 }
 
 .deleteProjectDialog #deleteProjectError {
@@ -290,4 +286,138 @@ account-menu md-icon {
 .newDatabaseDialog .databaseDialogInfo {
   font-weight: normal;
   color: rgba(0,0,0,0.7);
+}
+
+/** Account Billing ***************************************************************************************************/
+account-billing md-input-container {
+  margin-right: 10px;
+}
+
+account-billing .userContent {
+  max-height: calc(100vh - 270px) !important;
+}
+
+account-billing .md-button {
+  margin-bottom: 20px;
+}
+
+account-billing #accountBillingSubscription md-select {
+  margin-bottom: 24px;
+}
+account-billing #accountBillingSubscription .md-button {
+  margin-top: 10px;
+}
+
+account-billing #accountBillingHistory section {
+  margin-left: -10px;
+}
+account-billing #accountBillingHistory .md-subheader label {
+  margin: 0 9px 0 0;
+}
+account-billing .accountBillingHistoryListItem md-input-container {
+  margin-right: 10px;
+}
+account-billing .accountBillingHistoryListItem .md-button {
+  margin-top: 15px;
+}
+
+account-billing .accountBillingSave img {
+  height: 20px;
+  margin-top: 17px;
+}
+
+account-billing #accountBillingAddressInfo {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+/** Account Licenses *********************************************************************************************/
+account-licenses .licenseIcon {
+  margin: 0 10px !important;
+}
+
+account-licenses #accountLicensesAdd {
+  margin-top: -10px;
+}
+account-licenses #accountLicensesAdd md-input-container {
+  margin-bottom: 0;
+}
+account-licenses #accountLicensesAdd .md-button {
+  margin-bottom: 30px;
+}
+
+account-licenses #accountLicensesUnassigned {
+  opacity: 0.4;
+  margin-top: -5px;
+}
+
+account-licenses #accountLicenseMessage {
+  margin: 0;
+  opacity: 0.8;
+}
+
+account-licenses #accountLicensesList {
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+account-licenses #accountLicensesBillingPage {
+  margin-top: 30px;
+}
+account-licenses #accountLicensesBillingPage a {
+  color: rgb(67,160,71);
+}
+
+/** Account Team ******************************************************************************************************/
+account-team .collaboratorIcon {
+  margin: 0 10px !important;
+}
+
+account-team #project {
+  margin: -10px 0 10px;
+}
+account-team #project md-icon {
+  margin: 0 !important;
+}
+
+account-team #accountTeamAdd {
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+account-team #accountTeamMemberRoleGroup {
+  margin: 20px 0 0 10px;
+}
+
+account-team #accountTeamMemberRole {
+  margin-left: 10px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+account-team #accountTeamSubHeader {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+/** Collaborator Dialog ***********************************************************************************************/
+#collaboratorDialog {
+  width: 400px;
+}
+
+#collaboratorDialog .collaboratorIcon {
+  margin: 0 10px;
+}
+
+/** PayPal Dialog *****************************************************************************************************/
+#paypalDialog .userContent .cardInfo {
+  text-align: left;
+}
+
+/** Over Quota Dialog *************************************************************************************************/
+#overQuotaDialog .cardInfo {
+  text-align: left;
+}
+
+#overQuotaDialog #overQuotaInfo {
+  margin: 20px 20px 0;;
 }

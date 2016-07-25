@@ -118,8 +118,8 @@ function updateIssue(req, res, next){
 			issue: data,
 			issue_id : uuidToString(issue._id),
 			number: issue.number,
-			owner: issue.owner,
-			created: issue.created
+			owner: data.hasOwnProperty('comment') ?  data.owner : issue.owner,
+			created: data.hasOwnProperty('comment') ? (new Date()).getTime() : issue.created
 		};
 
 		responseCodes.respond(place, req, res, next, responseCodes.OK, resData);

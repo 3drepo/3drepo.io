@@ -25,6 +25,7 @@ module.exports.createApp = function(serverConfig)
 	let compress = require("compression");
 	let fs = require("fs");
 	let jade = require("jade");
+	let addressMeta = require('../models/addressMeta');
 
 	//let systemLogger = require("../logger.js").systemLogger;
 
@@ -111,7 +112,13 @@ module.exports.createApp = function(serverConfig)
 
 		params.config_js += "\n\nserver_config.auth = " + JSON.stringify(config.auth) + ";";
 
+		params.config_js += "\n\nserver_config.captcha_client_key = '" + config.captcha.clientKey + "';";
+
 		params.config_js += "\n\nserver_config.uploadSizeLimit = " + config.uploadSizeLimit + ";";
+
+		params.config_js += "\n\nserver_config.countries = " + JSON.stringify(addressMeta.countries) + ";";
+
+		params.config_js += "\n\nserver_config.usStates = " + JSON.stringify(addressMeta.usStates) + ";";
 
 		res.header("Content-Type", "text/javascript");
 		res.render("config.jade", params);
@@ -135,11 +142,13 @@ module.exports.createApp = function(serverConfig)
 			"payment",
 			"termsAndConditions",
 			"privacy",
-			"cookies"
+			"cookies",
+			"billing"
 		],
 		"children" : [
 		{
 				"plugin": "account",
+				"url": ":account",
 				"children": [
 					{
 						"plugin": "project",

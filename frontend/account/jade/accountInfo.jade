@@ -4,22 +4,18 @@
 			.md-toolbar-tools
 				h2 {{vm.username}}
 
-		div(layout="column")
-			div(layout="row", flex=)
+		#accountInfoContent(layout="column")
+			div(layout="row", flex="none")
 				img.account-avatar-image(ng-if="vm.hasAvatar", ng-src='{{vm.avatarURL}}')
 				#noAvatarIcon(flex, layout="row")
 					md-icon(ng-if="!vm.hasAvatar", class="fa fa-user")
-			div
-				md-list
-					md-list-item.md-2-line
-						div.md-list-item-text
-							h3 {{vm.firstName}} {{vm.lastName}}
-							p {{vm.email}}
+			md-list
+				md-list-item.md-2-line
+					div.md-list-item-text
+						h3 {{vm.firstName}} {{vm.lastName}}
+						p {{vm.email}}
 					md-divider
-					md-list-item.md-2-line(ng-click="vm.showItem('repos')")
-						div.md-list-item-text
-							h3 Repos
-					md-divider
-					md-list-item.md-2-line(ng-click="vm.showItem('profile')")
-						div.md-list-item-text
-							h3 Profile
+				md-list-item.md-2-line.accountInfoPage(ng-repeat="(key, value) in vm.accountOptions", ng-click="vm.showItem(key)")
+					div.md-list-item-text
+						h3 {{value.label}}
+					md-divider(ng-if="!$last")

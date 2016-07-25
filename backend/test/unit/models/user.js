@@ -6,7 +6,6 @@ let mongoose = require('mongoose');
 let mockgoose = require('mockgoose');
 let _ = require('lodash');
 
-mockgoose(mongoose);
 
 let proxyquire = require('proxyquire').noCallThru();;
 let modelFactoryMock = proxyquire('../../../models/factory/modelFactory', { 
@@ -27,7 +26,9 @@ let User = proxyquire('../../../models/user', {
 	}, 
 	'mongoose': mongoose, 
 	'./factory/modelFactory':  modelFactoryMock,
-	'../mailer/mailer': {}
+	'../mailer/mailer': {},
+	'../logger.js': {},
+	'./payment': {},
 });
 
 
@@ -37,8 +38,10 @@ describe('User', function(){
 
 		modelFactoryMock.setDB(new DB());
 
-	    mongoose.connect('mongodb://doesnt.matter/whatdb-it-is-mock', function(err) {
-	        done(err);
+	    mockgoose(mongoose).then(function() {
+	        mongoose.connect('mongodb://example.com/TestingDB', function(err) {
+	            done(err);
+	        });
 	    });
 
 	});
@@ -92,6 +95,7 @@ describe('User', function(){
 			user.markModified = () => true;
 
 			let spy = sinon.spy(user, 'save');
+			let stub = sinon.stub(User, 'isEmailTaken').returns(Promise.resolve(0));
 
 			return user.updateInfo(updateObj).then(user => {
 				// user updated 
@@ -101,8 +105,8 @@ describe('User', function(){
 				expect(user.toObject()).to.have.deep.property('customData.email', updateObj.email);
 				// save should've been called once
 				sinon.assert.calledOnce(spy);
-
 				spy.restore();
+				stub.restore();
 			});
 
 		})
@@ -150,10 +154,13 @@ describe('User', function(){
 				roles: []
 			}
 
+			let stub = sinon.stub(User, 'isEmailTaken').returns(Promise.resolve(0));
+
 			return User.createUser({}, username, password, options, 1).then(res => {
 				expectedCallWithOptions.customData.emailVerifyToken = res;
 				sinon.assert.calledWith(spy, username, password, expectedCallWithOptions);
 				spy.restore();
+				stub.restore();
 			});
 		});
 

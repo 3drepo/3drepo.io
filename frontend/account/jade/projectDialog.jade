@@ -8,7 +8,8 @@ md-dialog.newProjectDialog(aria-label="New project")
 	md-content(layout-margin)
 		div(layout="column")
 			md-input-container
-				input(placeholder="Project name", autofocus, ng-model="vm.newProjectData.name")
+				input(placeholder="Project name", tdr-focus="true", ng-model="vm.newProjectData.name", ng-keypress="vm.saveNewProject($event)")
+				.inputHint Letters, numbers and underscore only
 			md-input-container
 				label Project type
 				md-select(ng-model="vm.newProjectData.type")
@@ -16,9 +17,9 @@ md-dialog.newProjectDialog(aria-label="New project")
 			md-input-container(ng-if="vm.showProjectTypeOtherInput")
 				input(placeholder="Other project type", ng-model="vm.newProjectData.otherType")
 			md-input-container
-				md-button.md-accent(ng-click="vm.uploadFile()") Upload File
+				md-button.md-accent(ng-click="vm.uploadFileForNewProject()") Upload File
 				md-button.md-raised.md-accent(ng-disabled="vm.newProjectButtonDisabled", ng-click="vm.saveNewProject()") Save
 			#projectDialogFilenameContainer(layout="row", ng-if="vm.newProjectFileSelected")
 				p#projectDialogFilenameIntro Selected file
-				p#projectDialogFilename {{vm.uploadedFile.name}}
+				p#projectDialogFilename {{vm.newProjectFileToUpload.name}}
 			p#projectDialogError(ng-if="vm.showNewProjectErrorMessage") {{vm.newProjectErrorMessage}}

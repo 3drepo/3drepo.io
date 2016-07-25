@@ -111,18 +111,21 @@ module.exports = {
 
 		urls: {
 			'forgotPassword': data => `/passwordChange?username=${data.username}&token=${data.token}`,
-			'verify': data => `/registerVerify?username=${data.username}&token=${data.token}` + (data.pay ? '&pay=true' : '')
+			'verify': data => `/registerVerify?username=${data.username}&token=${data.token}` + (data.pay ? '&pay=true' : ''),
+			'project': data => `/${data.account}/${data.project}`
 		}
 	},
 	
 	captcha: {
 		'validateUrl': 'https://www.google.com/recaptcha/api/siteverify',
-		'secretKey': ''
+		'secretKey': '',
+		'clientKey': ''
 	},
 
 	auth: {
 		captcha: true,
-		register: true
+		register: true,
+		allowPlusSignInEmail: false 
 	},
 
 	contact:{
@@ -130,7 +133,15 @@ module.exports = {
 	},
 
 	paypal:{
-		validateIPN: true
+		
+		validateIPN: true,
+		ipnValidateUrl: 'https://www.paypal.com/cgi-bin/webscr',
+		mode: 'live', //sandbox or live
+		client_id: '',
+		client_secret: '',
+		debug:{
+			forceExecuteAgreementError: false,
+		}
 	},
 
 	uploadSizeLimit: 209715200,

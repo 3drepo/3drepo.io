@@ -26,6 +26,7 @@ let log_iface = require("../../logger.js");
 let systemLogger = log_iface.systemLogger;
 let responseCodes = require("../../response_codes.js");
 let helpers = require("./helpers");
+let moment = require("moment");
 
 describe('Uploading a project', function () {
 	let User = require('../../models/user');
@@ -33,7 +34,7 @@ describe('Uploading a project', function () {
 	let agent;
 	let username = 'upload_username';
 	let password = 'password';
-	let email = 'test3drepo@mailinator.com';
+	let email = 'test3drepo_upload@mailinator.com';
 	let project = 'project1';
 
 	let desc = 'desc';
@@ -46,7 +47,7 @@ describe('Uploading a project', function () {
 
 			helpers.signUpAndLoginAndCreateProject({
 				server, request, agent, expect, User, systemLogger,
-				username, password, email, project, desc, type,
+				username, password, email, project, desc, type, noBasicPlan: true,
 				done: function(err, _agent){
 					agent = _agent;
 					done(err);
@@ -105,9 +106,7 @@ describe('Uploading a project', function () {
 		before(function(){
 			//give some money to this guy
 			return User.findByUserName(username).then( user => {
-				return user.createSubscriptionToken('THE-100-QUID-PLAN', user.user)
-			}).then(subscription => {
-				return User.activateSubscription(subscription.token, {}, {}, true);
+				return user.createSubscription('THE-100-QUID-PLAN', user.user, true, moment().utc().add(1, 'month'))
 			})
 		});
 
@@ -143,7 +142,7 @@ describe('Uploading a project', function () {
 
 		it('should succee (uppercase extension)', function(done){
 			agent.post(`/${username}/${project}/upload`)
-			.attach('file', __dirname + '/../../statics/3dmodels/toy.IFC')
+			.attach('file', __dirname + '/../../statics/3dmodels/upper.OBJ')
 			.expect(200, function(err, res){
 				done(err);
 			});

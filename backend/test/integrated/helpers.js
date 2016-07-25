@@ -12,7 +12,7 @@ function signUpAndLogin(params){
 	let done = params.done;
 	let agent = params.agent;
 	let expect = params.expect;
-
+	let noBasicPlan = params.noBasicPlan;
 
 	//hack: by starting the server earlier all the mongoose models like User will be connected to db without any configuration
 	request(server).get('/info').end(() => {
@@ -23,7 +23,7 @@ function signUpAndLogin(params){
 		return User.createUser(systemLogger, username, password, {
 			email: email
 		}, 200000).then(emailVerifyToken => {
-			return User.verify(username, emailVerifyToken.token, true);
+			return User.verify(username, emailVerifyToken.token, {skipImportToyProject : true, skipCreateBasicPlan: noBasicPlan});
 		}).then(user => {
 			
 			//login
@@ -31,7 +31,7 @@ function signUpAndLogin(params){
 			.send({ username, password })
 			.expect(200, function(err, res){
 				expect(res.body.username).to.equal(username);
-				
+				console.log(typeof done)
 				done(err, agent);
 
 			});
@@ -59,10 +59,11 @@ function signUpAndLoginAndCreateProject(params){
 	let desc = params.desc;
 	let expect = params.expect;
 	let project = params.project;
+	let noBasicPlan = params.noBasicPlan;
 
 	signUpAndLogin({
 		server, request, agent, expect, User, systemLogger,
-		username, password, email,
+		username, password, email, noBasicPlan, 
 		done: function(err, _agent){
 
 			agent = _agent;

@@ -156,13 +156,15 @@
 
 		panelCard.right.push({
 			type: "docs",
-			title: "Docs",
+			title: "Data",
 			show: false,
 			help: "Documents",
 			icon: "content_copy",
 			minHeight: 80,
 			fixedHeight: false,
-			options: []
+			options: [
+				{type: "close", visible: true}
+			]
 		});
 
 		panelCard.right.push({

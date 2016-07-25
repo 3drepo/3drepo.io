@@ -76,9 +76,9 @@
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$location", "Auth", "StateManager", "EventService", "UtilsService", "AccountService"];
+    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$window", "Auth", "StateManager", "EventService", "UtilsService"];
 
-    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $location, Auth, StateManager, EventService, UtilsService, AccountService) {
+    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $window, Auth, StateManager, EventService, UtilsService) {
         var vm = this,
 			homeLoggedOut,
 			notLoggedInElement,
@@ -91,13 +91,16 @@
 		vm.state = StateManager.state;
 		vm.query = StateManager.query;
 		vm.functions = StateManager.functions;
+		vm.pointerEvents = "auto";
 
 		vm.goToUserPage = false;
 
 		vm.legalDisplays = [
 			{title: "Terms & Conditions", value: "termsAndConditions"},
 			{title: "Privacy", value: "privacy"},
-			{title: "Cookies", value: "cookies"}
+			{title: "Cookies", value: "cookies"},
+			{title: "Pricing", value: "pricing"},
+			{title: "Contact", value: "contact"}
 		];
 		vm.goToAccount = false;
 
@@ -107,36 +110,36 @@
 			/*
 			 * Watch the state to handle moving to and from the login page
 			 */
-			$scope.$watch("vm.state", function () {
-				homeLoggedOut.empty();
+			$scope.$watch("vm.state", function (newState, oldState) {
+				if (newState !== oldState && !vm.state.changing && vm.state.authInitialized) {
+					homeLoggedOut.empty();
 
-				vm.goToUserPage = false;
-				for (i = 0; i < vm.functions.length; i++) {
-					func = vm.functions[i];
+					vm.goToUserPage = false;
+					for (i = 0; i < vm.functions.length; i++) {
+						func = vm.functions[i];
 
-					if (vm.state[func]) {
-						vm.goToUserPage = true;
-						// Create element
-						element = "<" + UtilsService.snake_case(func, "-") +
-							" username='vm.query.username'" +
-							" token='vm.query.token'>" +
-							"</" + UtilsService.snake_case(func, "-") + ">";
+						if (vm.state[func]) {
+							vm.goToUserPage = true;
+							// Create element
+							element = "<" + UtilsService.snake_case(func, "-") +
+								" username='vm.query.username'" +
+								" token='vm.query.token'" +
+								" query='vm.query'>" +
+								"</" + UtilsService.snake_case(func, "-") + ">";
 
-						notLoggedInElement = angular.element(element);
+							notLoggedInElement = angular.element(element);
+							homeLoggedOut.append(notLoggedInElement);
+							$compile(notLoggedInElement)($scope);
+							break;
+						}
+					}
+
+					if (!vm.state.loggedIn && !vm.goToUserPage) {
+						// Create login element
+						notLoggedInElement = angular.element("<login></login>");
 						homeLoggedOut.append(notLoggedInElement);
 						$compile(notLoggedInElement)($scope);
-						break;
 					}
-				}
-
-				if (!vm.state.loggedIn && !vm.goToUserPage) {
-					// Create login element
-					notLoggedInElement = angular.element("<login></login>");
-					homeLoggedOut.append(notLoggedInElement);
-					$compile(notLoggedInElement)($scope);
-
-					// Set the URL to root if it is not root
-					$location.path("/", "_self");
 				}
 			}, true);
 		});
@@ -150,6 +153,10 @@
             Auth.logout();
         };
 
+		vm.home = function () {
+			EventService.send(EventService.EVENT.GO_HOME);
+		};
+
 		/**
 		 * Display legal text
 		 *
@@ -157,40 +164,37 @@
 		 * @param display
 		 */
 		vm.legalDisplay = function (event, display) {
-			$location.path("/" + display.value, "_self");
-			/*
-			vm.legalTitle = display.title;
-			vm.legalText = display.value;
-			$mdDialog.show({
-				templateUrl: "legalDialog.html",
-				parent: angular.element(document.body),
-				targetEvent: event,
-				clickOutsideToClose:true,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true,
-				onRemoving: removeDialog
-			});
-			*/
+			$window.open("/" + display.value);
 		};
 
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if (angular.isDefined(event) && angular.isDefined(event.type)) {
 				if (event.type === EventService.EVENT.USER_LOGGED_IN)
 				{
-					var account = StateManager.state.account ? StateManager.state.account : event.value.username;
 					if (!event.value.error)
 					{
-						if (!event.value.initialiser)
-						{
-							EventService.send(EventService.EVENT.SET_STATE, { loggedIn: true, account: account });
+						if(!event.value.initialiser) {
+							StateManager.setStateVar("loggedIn", true);
+							EventService.send(EventService.EVENT.GO_HOME);
 						}
 					}
 				} else if (event.type === EventService.EVENT.USER_LOGGED_OUT) {
+					EventService.send(EventService.EVENT.CLEAR_STATE);
 					EventService.send(EventService.EVENT.SET_STATE, { loggedIn: false, account: null });
 				} else if (event.type === EventService.EVENT.SHOW_PROJECTS) {
-					StateManager.clearState();
+					EventService.send(EventService.EVENT.CLEAR_STATE);
 					Auth.init();
+				} else if (event.type === EventService.EVENT.GO_HOME) {
+					EventService.send(EventService.EVENT.CLEAR_STATE);
+
+					if (StateManager.state.loggedIn) {
+						EventService.send(EventService.EVENT.SET_STATE, { account: Auth.username });
+					} else {
+						EventService.send(EventService.EVENT.SET_STATE, {});
+					}
+				}
+				else if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
+					vm.pointerEvents = event.value.on ? "none" : "auto";
 				}
 			}
 		});

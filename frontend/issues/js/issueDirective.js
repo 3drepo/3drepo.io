@@ -29,6 +29,7 @@
 				index: "=",
 				data: "=",
 				autoSaveComment: "=",
+				onCommentSaved: "&",
 				onCommentAutoSaved: "&",
 				onToggleCloseIssue: "&",
 				availableRoles: "=",
@@ -59,6 +60,8 @@
 		vm.showInfo = false;
 		vm.editingComment = false;
 		vm.assignedRolesColors = [];
+		vm.savingComment = false;
+		vm.togglingIssueState = true;
 
 		/*
 		 * Handle the list of available roles
@@ -213,16 +216,19 @@
 		 */
 		vm.saveComment = function() {
 			if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
+				vm.savingComment = true;
 				if (vm.editingComment) {
 					promise = IssuesService.editComment(vm.data, vm.comment, vm.editingCommentIndex);
 					promise.then(function(data) {
 						vm.data.comments[vm.editingCommentIndex].comment = vm.comment;
 						vm.data.comments[vm.editingCommentIndex].timeStamp = IssuesService.getPrettyTime(data.created);
 						vm.comment = "";
+						vm.savingComment = false;
 					});
 				} else {
 					promise = IssuesService.saveComment(vm.data, vm.comment);
 					promise.then(function(data) {
+						console.log(data);
 						if (!vm.data.hasOwnProperty("comments")) {
 							vm.data.comments = [];
 						}
@@ -239,6 +245,9 @@
 							vm.onCommentAutoSaved({index: vm.index}); // Tell the issue list a comment auto save has been done
 							vm.autoSaveComment = false;
 						}
+						else {
+							vm.onCommentSaved();
+						}
 
 						// Mark previous comment as 'set' - no longer deletable or editable
 						if (vm.data.comments.length > 1) {
@@ -247,6 +256,8 @@
 								vm.data.comments[vm.data.comments.length - 2].set = true;
 							});
 						}
+
+						vm.savingComment = false;
 					});
 				}
 			}
@@ -286,6 +297,7 @@
 		 * Toggle the closed status of an issue
 		 */
 		vm.toggleCloseIssue = function() {
+			vm.issueIsOpen = !vm.issueIsOpen;
 			vm.onToggleCloseIssue({
 				issue: vm.data
 			});

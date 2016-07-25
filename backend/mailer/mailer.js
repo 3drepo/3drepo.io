@@ -57,6 +57,20 @@ function rejectNoUrl(name){
 	return Promise.reject({ message: `config.mails.urls[${name}] is not defined`})
 }
 
+function getBaseURL(){
+	'use strict';
+
+	let apiServerConfig = config.servers.find(server => server.service === 'api');
+	let port = '';
+	if(config.using_ssl && apiServerConfig.public_port !== 443 || !config.using_ssl && apiServerConfig.public_port !== 80){
+		port = ':' + apiServerConfig.public_port;
+	}
+
+	let baseUrl = (config.using_ssl ? 'https://' : 'http://') + config.host + port;
+
+	return baseUrl;
+}
+
 function getURL(urlName, params){
 	'use strict';
 
@@ -64,13 +78,7 @@ function getURL(urlName, params){
 		return null;
 	}
 
-	let port = '';
-	if(config.using_ssl && config.port !== 443 || !config.using_ssl && config.port !== 80){
-		port = ':' + config.public_port
-	}
-
-	let baseUrl = (config.using_ssl ? 'https://' : 'http://') + config.host;
-	return baseUrl + config.mail.urls[urlName](params);
+	return getBaseURL() + config.mail.urls[urlName](params);
 }
 
 function sendVerifyUserEmail(to, data){
@@ -124,6 +132,16 @@ function sendPaymentFailedEmail(to, data){
 
 }
 
+function sendSubscriptionSuspendedEmail(to, data){
+	'use strict';
+
+	let template = require('./templates/paymentSuspended');
+	data.url = getBaseURL() + `/${data.billingUser}/?page=billing`;
+
+	return sendEmail(template, to, data);
+
+}
+
 function sendPaymentErrorEmail(data){
 	'use strict';
 
@@ -131,6 +149,18 @@ function sendPaymentErrorEmail(data){
 	return sendEmail(template, config.contact.email, data);
 }
 
+function sendProjectInvitation(to, data){
+	'use strict';
+
+	data.url = getURL('project', { account: data.account, project: data.project });
+
+	if(!data.url){
+		return rejectNoUrl('project');
+	}
+
+	let template = require('./templates/invitedToProject');
+	return sendEmail(template, to, data);
+}
 
 
 module.exports = {
@@ -139,5 +169,7 @@ module.exports = {
 	sendPaymentReceivedEmail,
 	sendContactEmail,
 	sendPaymentFailedEmail,
-	sendPaymentErrorEmail
+	sendPaymentErrorEmail,
+	sendProjectInvitation,
+	sendSubscriptionSuspendedEmail
 }

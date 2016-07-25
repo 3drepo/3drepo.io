@@ -78,6 +78,7 @@
 		vm.autoSaveComment = false;
 		vm.canAdd = true;
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
+		vm.savingIssue = false;
 
 		/*
 		 * Get all the Issues
@@ -365,6 +366,8 @@
 			// Setup what to show
 			if (vm.issuesToShow.length > 0) {
 				vm.toShow = "showIssues";
+				// Hide any scribble if showing the issues list
+				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
 			}
 			else {
 				vm.toShow = "showInfo";
@@ -589,6 +592,7 @@
 			}
 			else {
 				if (angular.isDefined(vm.title) && (vm.title !== "")) {
+					vm.savingIssue = true;
 					var issueAreaPngPromise = $q.defer();
 					EventService.send(EventService.EVENT.GET_ISSUE_AREA_PNG, {promise: issueAreaPngPromise});
 					issueAreaPngPromise.promise.then(function (png) {
@@ -629,6 +633,7 @@
 							// Get out of add mode and show issues
 							vm.hideItem = true;
 
+							vm.savingIssue = false;
 							setupIssuesToShow();
 							setContentHeight();
 							vm.showPins();
@@ -663,11 +668,24 @@
 						break;
 					}
 				}
-				vm.toShow = "showIssues";
-				setupIssuesToShow();
-				vm.showPins();
-				setContentHeight();
-				vm.canAdd = true;
+
+				// Remain in issue unless closing when showing closed issues is off
+				if (data.issue.closed) {
+					if (showClosed) {
+						setContentHeight();
+					}
+					else {
+						vm.toShow = "showIssues";
+						setupIssuesToShow();
+						vm.showPins();
+						setContentHeight();
+						vm.canAdd = true;
+						EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
+					}
+				}
+				else {
+					setContentHeight();
+				}
 			});
 		};
 
@@ -706,6 +724,13 @@
 		vm.closeAddAlert = function () {
 			vm.showAddAlert = false;
 			vm.addAlertText = "";
+		};
+
+		/**
+		 * A comment has been saved
+		 */
+		vm.commentSaved = function () {
+			setContentHeight();
 		};
 
 		/**

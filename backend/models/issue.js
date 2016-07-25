@@ -313,7 +313,7 @@ schema.methods.updateComment = function(commentIndex, data){
 			return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_INVALID_INDEX });
 		}
 
-		if(commentObj.owner !== data.owner){
+		if(commentObj.owner !== data.owner && data.comment){
 			return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_PERMISSION_DECLINED });
 		}
 
@@ -328,8 +328,18 @@ schema.methods.updateComment = function(commentIndex, data){
 	return this.save();
 };
 
-schema.methods.removeComment = function(commentIndex){
+schema.methods.removeComment = function(commentIndex, data){
 	'use strict';
+
+	let commentObj = this.comments[commentIndex];
+	
+	if(!commentObj){
+		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_INVALID_INDEX });
+	}
+
+	if(commentObj.owner !== data.owner){
+		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_PERMISSION_DECLINED });
+	}
 
 	if(this.closed || this.comments[commentIndex].sealed){
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_SEALED });

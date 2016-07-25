@@ -31,11 +31,14 @@
 			resolve: {
 				init: function(Auth, StateManager, $q)
 				{
+					StateManager.state.authInitialized = false;
+
 					var finishedAuth = $q.defer();
 
 					StateManager.state.changing = true;
 
 					Auth.init().then(function (loggedIn) {
+						StateManager.state.authInitialized = true;
 						StateManager.state.loggedIn = loggedIn;
 
 						finishedAuth.resolve();
@@ -73,7 +76,7 @@
 								init: function (StateManager, $location, $stateParams) {
 									$stateParams[childFunction] = true;
 
-									StateManager.setState($stateParams, $location.search());
+									StateManager.setState($stateParams);
 								}
 							}
 						});
@@ -95,10 +98,11 @@
 						$stateProvider.state(childStateName, {
 							name: parentState.children[i].plugin,
 							url: childState.url || (parentStateName !== "home" ? "/" : "") + ":" + childState.plugin,
+							reloadOnSearch : false,
 							resolve: {
 								init: function(StateManager, $location, $stateParams)
 								{
-									StateManager.setState($stateParams, $location.search());
+									StateManager.setState($stateParams);
 								}
 							}
 						});
@@ -112,8 +116,10 @@
 
 		$urlRouterProvider.otherwise("");
 	}])
-	.run(["$location", "$rootScope", "$state", "uiState", "StateManager", "Auth", function($location, $rootScope, $state, uiState, StateManager, Auth) {
+	.run(["$location", "$rootScope", "$state", "uiState", "StateManager", "Auth", "$timeout", function($location, $rootScope, $state, uiState, StateManager, Auth, $timeout) {
 		$rootScope.$on("$stateChangeStart",function(event, toState, toParams, fromState, fromParams){
+			console.log("stateChangeStart: " + JSON.stringify(fromState) + " --> " + JSON.stringify(toState));
+
 			StateManager.state.changing = true;
 
 			for(var i = 0; i < StateManager.functions.length; i++)
@@ -121,10 +127,7 @@
 				StateManager.setStateVar(StateManager.functions[i], false);
 			}
 
-			if (StateManager.state.loggedIn && !StateManager.state.account)
-			{
-				StateManager.setStateVar("account", Auth.username);
-			}
+			StateManager.clearQuery();
 
 			var stateChangeObject = {
 				toState    : toState,
@@ -137,6 +140,8 @@
 		});
 
 		$rootScope.$on("$stateChangeSuccess",function(event, toState, toParams, fromState, fromParams){
+			console.log("stateChangeSuccess: " + JSON.stringify(fromState) + " --> " + JSON.stringify(toState));
+
 			var stateChangeObject = {
 				toState    : toState,
 				toParams   : toParams,
@@ -150,8 +155,25 @@
 
 			StateManager.handleStateChange(stateChangeObject);
 		});
+
+		$rootScope.$on('$locationChangeStart', function(event, next, current) {
+			console.log("locationChange");
+		});
+
+		$rootScope.$on('$locationChangeSuccess', function() {
+			console.log("locationChangeSucc");
+
+			var queryParams = $location.search();
+
+			if (Object.keys(queryParams).length === 0)
+			{
+				StateManager.clearQuery();
+			} else {
+				StateManager.setQuery(queryParams);
+			}
+		});
 	}])
-	.service("StateManager", ["$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", function($q, $state, $rootScope, $timeout, structure, EventService, $window) {
+	.service("StateManager", ["$q", "$state", "$rootScope", "$timeout", "structure", "EventService", "$window", "Auth", function($q, $state, $rootScope, $timeout, structure, EventService, $window, Auth) {
 		var self = this;
 
 		$window.StateManager = this;
@@ -321,7 +343,19 @@
 			if (compareStateChangeObjects(stateChangeObject, self.stateChangeQueue[0]))
 			{
 				self.stateChangeQueue.pop();
-				self.updateState();
+
+				var functionList = self.functionsUsed();
+
+				// If we are not trying to access a function
+				// and yet there is no account set. Then
+				// we need to go back to the account page if possible.
+				if ((functionList.length === 0) && self.state.loggedIn && !self.state.account)
+				{
+					self.setStateVar("account", Auth.username);
+					self.updateState();
+				} else {
+					self.updateState(true);
+				}
 			} else {
 				self.stateChangeQueue.pop();
 				self.handleStateChange(self.stateChangeQueue[self.stateChangeQueue.length - 1]);
@@ -333,19 +367,23 @@
 		this.clearState = function(state) {
 			for (var state in self.state)
 			{
-				if ((state !== "changing") && self.state.hasOwnProperty(state))
+				if ((["changing", "authInitialized", "loggedIn"].indexOf(state) === -1) && self.state.hasOwnProperty(state))
 				{
 					self.setStateVar(state, null);
 				}
 			}
 		};
 
-		this.genStateName = function ()
+		this.clearQuery = function(state) {
+			for(var param in self.query)
+			{
+				delete self.query[param];
+			}
+		};
+
+		this.functionsUsed = function ()
 		{
-			var currentChildren = self.structure.children;
-			var childidx        = 0;
-			var stateName       = "home."; // Assume that the base state is there.
-			var i               = 0;
+			var functionList = [];
 
 			// First loop through the list of functions
 			// belonging to parent structure.
@@ -358,31 +396,49 @@
 
 					if (self.state[functionName])
 					{
-						stateName += functionName + ".";
+						functionList.push(functionName);
 						break;
 					}
 				}
 			}
 
-			while(childidx < currentChildren.length)
+			return functionList;
+		}
+
+		this.genStateName = function ()
+		{
+			var currentChildren = self.structure.children;
+			var childidx        = 0;
+			var stateName       = "home."; // Assume that the base state is there.
+			var i               = 0;
+			var functionList    = self.functionsUsed();
+			var usesFunction    = (functionList.length > 0);
+
+			if (usesFunction)
 			{
-				var child  = currentChildren[childidx];
-				var plugin = child.plugin;
-
-				if (self.state.hasOwnProperty(plugin) && self.state[plugin])
+				stateName += functionList.join(".") + ".";
+			} else
+			{
+				while(childidx < currentChildren.length)
 				{
-					stateName += plugin + ".";
+					var child  = currentChildren[childidx];
+					var plugin = child.plugin;
 
-					if (child.children) {
-						currentChildren = child.children;
-					} else {
-						currentChildren = [];
+					if (self.state.hasOwnProperty(plugin) && self.state[plugin])
+					{
+						stateName += plugin + ".";
+
+						if (child.children) {
+							currentChildren = child.children;
+						} else {
+							currentChildren = [];
+						}
+
+						childidx = -1;
 					}
 
-					childidx = -1;
+					childidx += 1;
 				}
-
-				childidx += 1;
 			}
 
 			return stateName.substring(0, stateName.length - 1);
@@ -403,18 +459,18 @@
 			self.state[varName] = value;
 		};
 
-		this.setState = function(stateParams, queryParams)
-		{
+		this.setState = function(stateParams) {
 			// Copy all state parameters and extra parameters
 			// to the state
-			for(var state in stateParams)
-			{
-				if (stateParams.hasOwnProperty(state))
-				{
+			for (var state in stateParams) {
+				if (stateParams.hasOwnProperty(state)) {
 					self.setStateVar(state, stateParams[state]);
 				}
 			}
+		};
 
+		this.setQuery = function(queryParams)
+		{
 			for(var param in queryParams)
 			{
 				if (queryParams.hasOwnProperty(param))
@@ -447,13 +503,15 @@
 				if (event.type === EventService.EVENT.SET_STATE) {
 					for (var key in event.value)
 					{
-						if (event.value.hasOwnProperty(key))
+						if (key !== "updateLocation" && event.value.hasOwnProperty(key))
 						{
 							self.setStateVar(key, event.value[key]);
 						}
 					}
 
 					self.updateState();
+				} else if (event.type === EventService.EVENT.CLEAR_STATE) {
+					self.clearState();
 				}
 			}
 		});

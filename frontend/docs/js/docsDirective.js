@@ -35,9 +35,9 @@
 		};
 	}
 
-	DocsCtrl.$inject = ["$scope", "$mdDialog", "$timeout", "EventService", "DocsService", "UtilsService"];
+	DocsCtrl.$inject = ["$scope", "$mdDialog", "$timeout", "$filter", "EventService", "DocsService", "UtilsService"];
 
-	function DocsCtrl($scope, $mdDialog, $timeout, EventService, DocsService, UtilsService) {
+	function DocsCtrl($scope, $mdDialog, $timeout, $filter, EventService, DocsService, UtilsService) {
 		var vm = this,
 			promise,
 			docTypeHeight = 50,
@@ -58,6 +58,7 @@
 			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
 				// Get any documents associated with an object
 				var object = event.value;
+				console.log(object);
 				promise = DocsService.getDocs(object.account, object.project, object.id);
 				promise.then(function (data) {
 					if (Object.keys(data).length > 0) {
@@ -79,7 +80,7 @@
 												if ((Date.parse(vm.docs["Meta Data"].data[i].metadata[item]) &&
 													(vm.docs["Meta Data"].data[i].metadata[item].indexOf("T") !== -1))) {
 													vm.docs["Meta Data"].data[i].metadata[item] =
-														UtilsService.formatTimestamp(new Date(vm.docs["Meta Data"].data[i].metadata[item]), true);
+														$filter("prettyDate")(new Date(vm.docs["Meta Data"].data[i].metadata[item]), {showSeconds: true});
 													console.log(vm.docs["Meta Data"].data[i].metadata[item]);
 												}
 											}

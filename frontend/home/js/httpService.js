@@ -21,9 +21,9 @@
 	angular.module("3drepo")
 		.factory("HttpService", HttpService);
 
-	HttpService.$inject = ["$http", "$q", "StateManager", "serverConfig"];
+	HttpService.$inject = ["$http", "$q", "EventService", "serverConfig"];
 
-	function HttpService($http, $q, StateManager, serverConfig) {
+	function HttpService($http, $q, EventService, serverConfig) {
 		var handlerFactory = function(httpReq)
 		{
 			return function (type, url, success, failure)
@@ -35,7 +35,7 @@
 
 				// If not success function is specified then
 				// provide a default one
-				var successFunc = success || function (response) { deferred.resolve(response); };
+				var successFunc = success || function (response) { deferred.resolve(response.data); };
 
 				// If no failure function is specified then provide a default one
 				var failureFunc = failure || function (response) {
@@ -44,9 +44,7 @@
 						// If there is a not found error or an unauthorized error
 						// then panic and clear the state. Don't worry everything will
 						// recover. :)
-
-						StateManager.clearState();
-						StateManager.updateState();
+						EventService.send(EventService.EVENT.GO_HOME);
 					}
 
 					deferred.resolve([]);

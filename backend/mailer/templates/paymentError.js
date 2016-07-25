@@ -20,7 +20,7 @@ var html = data => `
 	<br><br>
 	Email: ${data.email}
 	<br><br>
-	Subscription: ${data.subscriptionToken}
+	billingAgreementId: ${data.billingAgreementId}
 	<br><br>
 	Error: ${data.errmsg}
 	<br><br>

@@ -1,0 +1,86 @@
+.homeUserContent
+	md-content.md-whiteframe-1dp(aria-label="Team", flex)
+		md-toolbar
+			.md-toolbar-tools
+				md-button.md-icon-button(ng-click="vm.goBack()")
+					md-icon.angular-material-icons(aria-label="Close dialog") arrow_back
+				h2 Team
+
+		.userContent
+			div(ng-switch="vm.toShow")
+				div(ng-switch-when="0")
+					.cardInfo
+						p You do not currently have any licenses. A minimum of two is required to add team members.
+						br
+						p
+							| Please go to the
+							=" "
+							a(href="", ng-click="vm.goToPage('billing')") Billing Page
+							=" "
+							| to add licenses.
+
+				div(ng-switch-when="1")
+					.cardInfo
+						p You currently have one license. A minimum of two is required to add team members.
+						br
+						p
+							| Please go to the
+							=" "
+							a(href="", ng-click="vm.goToPage('billing')") Billing Page
+							=" "
+							| to add licenses.
+
+				div(ng-switch-when="1+")
+					#project(layout="row", layout-align="start center")
+						md-button.md-icon-button(aria-label="Dashboard")
+							md-icon.angular-material-icons dashboard
+						p(flex) {{vm.projectName}}
+
+					div(ng-if="vm.noLicensesAssigned")
+						.cardInfo
+							p You do not have any licenses assigned to other users. You currently have {{vm.subscriptions.length - 1}} license(s) unassigned.
+							br
+							p
+								| Please go to the
+								=" "
+								a(href="", ng-click="vm.goToPage('licenses')") Licenses Page
+								=" "
+								| to assign a license.
+
+					div(ng-if="!vm.noLicensesAssigned")
+						md-autocomplete(
+						md-no-cache="vm.noCache"
+						md-selected-item="vm.selectedUser"
+						md-search-text="vm.searchText"
+						md-items="user in vm.querySearch(vm.searchText)"
+						md-item-text="user.user"
+						md-min-length="0"
+						placeholder="Select a team member"
+						flex
+						ng-disabled="vm.allLicenseAssigneesMembers")
+							md-item-template
+								span(md-highlight-text="vm.searchText", md-highlight-flags="^i") {{user.user}}
+							md-not-found
+								span No user matching "{{ctrl.searchText}}" was found.
+						//md-radio-group#accountTeamMemberRoleGroup(ng-model="vm.memberRole", layout="row", layout-align="start center")
+							md-radio-button.md-accent(value="collaborator", ng-disabled="vm.addDisabled") Collaborator
+							md-radio-button.md-accent(value="viewer", ng-disabled="vm.addDisabled") Viewer
+						md-button.md-raised.md-accent#accountTeamAdd(ng-click="vm.addMember()", ng-disabled="vm.addDisabled") Add
+
+					md-divider(ng-if="!vm.noLicensesAssigned")
+
+					// Assigned
+					md-list(ng-if="!vm.noLicensesAssigned")
+						md-subheader.md-no-sticky
+							| Team
+							=" "
+							span#accountTeamSubHeader ({{vm.members.length}} member)
+						md-list-item(ng-repeat="member in vm.members")
+							md-icon.angular-material-icons.collaboratorIcon(aria-label="Person") person
+							.md-list-item-text
+								div(layout="row")
+									p {{member.user}}
+									//p#accountTeamMemberRole ({{member.role}})
+							span(flex)
+							md-button.md-icon-button.md-accent(ng-click="vm.removeMember($index)")
+								md-icon.angular-material-icons(aria-label="Close dialog") remove_circle

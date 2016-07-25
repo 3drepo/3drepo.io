@@ -48,20 +48,27 @@
 		 */
 		vm.showInfo = true;
 		vm.showChangePassword = false;
+		vm.firstNameNew = vm.firstName;
+		vm.lastNameNew = vm.lastName;
+		vm.emailNew = vm.email;
 
 		/**
 		 * Update the user info
 		 */
 		vm.updateInfo = function () {
 			promise = AccountService.updateInfo(vm.username, {
-				email: vm.email,
-				firstName: vm.firstName,
-				lastName: vm.lastName
+				email: vm.emailNew,
+				firstName: vm.firstNameNew,
+				lastName: vm.lastNameNew
 			});
 			promise.then(function (response) {
 				console.log(response);
 				if (response.statusText === "OK") {
-					vm.infoSaveInfo = "Info saved";
+					vm.infoSaveInfo = "Saved";
+					vm.firstName = vm.firstNameNew;
+					vm.lastName = vm.lastNameNew;
+					vm.email = vm.emailNew;
+
 				} else {
 					vm.infoSaveInfo = "Error saving info";
 				}
@@ -79,7 +86,7 @@
 			promise.then(function (response) {
 				console.log(response);
 				if (response.statusText === "OK") {
-					vm.passwordSaveInfo = "Password saved";
+					vm.passwordSaveInfo = "Saved";
 				} else {
 					vm.passwordSaveInfo = "Error saving password";
 				}

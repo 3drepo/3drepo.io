@@ -28,14 +28,13 @@ pricing .pricingIcon#pricingAdvancedIcon {
 
 pricing .pricingPrice {
     height: 100px;
-    display: block;
 }
 pricing .pricingPriceTitle {
-    margin: 10px 0;
+    margin: 0;
     color: rgba(0,0,0,.6) !important;
 }
 pricing .pricingPriceSubtitle {
-    margin-top: -20px;
+    margin-top: -10px;
     color: rgba(0,0,0,.6) !important;
 }
 
@@ -59,6 +58,6 @@ pricing .pricingInfo .pricingInfoLine md-icon {
 
 pricing .pricingContent {
     max-height: 600px !important;
-    height: calc(100vh - 180px);
+    height: calc(100vh - 200px);
     overflow: auto;
 }

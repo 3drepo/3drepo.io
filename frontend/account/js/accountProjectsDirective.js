@@ -27,7 +27,9 @@
 			templateUrl: 'accountProjects.html',
 			scope: {
 				account: "=",
-				accounts: "="
+				accounts: "=",
+				onShowPage: "&",
+				quota: "="
 			},
 			controller: AccountProjectsCtrl,
 			controllerAs: 'vm',
@@ -35,11 +37,10 @@
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$mdDialog", "$element", "$timeout", "$interval", "AccountService", "UtilsService", "serverConfig"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService"];
 
-	function AccountProjectsCtrl($scope, $location, $mdDialog, $element, $timeout, $interval, AccountService, UtilsService, serverConfig) {
+	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService) {
 		var vm = this,
-			promise,
 			existingProjectToUpload,
 			existingProjectFileUploader,
 			newProjectFileUploader;
@@ -47,23 +48,17 @@
 		/*
 		 * Init
 		 */
-		vm.projectTypes = [
-			"Architectural",
-			"Structural",
-			"Mechanical",
-			"GIS",
-			"Other"
-		];
 		vm.info = "Retrieving projects...";
 		vm.showProgress = true;
+		vm.projectTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
 
 		// Setup file uploaders
 		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
 		existingProjectFileUploader.addEventListener(
 			"change",
 			function () {
-				vm.uploadedFile = this.files[0];
-				uploadModelToProject(existingProjectToUpload, this.files[0]);
+				vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0]};
+				$scope.$apply();
 			},
 			false
 		);
@@ -71,7 +66,7 @@
 		newProjectFileUploader.addEventListener(
 			"change",
 			function () {
-				vm.uploadedFile = this.files[0];
+				vm.newProjectFileToUpload = this.files[0];
 				vm.newProjectFileSelected = true;
 				$scope.$apply();
 			},
@@ -82,7 +77,7 @@
 		 * Added data to accounts and projects for UI
 		 */
 		$scope.$watch("vm.accounts", function () {
-			var i, j, iLength, jLength;
+			var i, length;
 			
 			if (angular.isDefined(vm.accounts)) {
 				console.log(vm.accounts);
@@ -90,21 +85,10 @@
 				vm.projectsExist = (vm.accounts.length > 0);
 				vm.info = vm.projectsExist ? "" : "There are currently no projects";
 				// Accounts
-				for (i = 0, iLength = vm.accounts.length; i < iLength; i+= 1) {
+				for (i = 0, length = vm.accounts.length; i < length; i+= 1) {
 					vm.accounts[i].name = vm.accounts[i].account;
 					vm.accounts[i].showProjects = true;
 					vm.accounts[i].showProjectsIcon = "folder_open";
-
-					//Projects
-					for (j = 0, jLength = vm.accounts[i].projects.length; j < jLength; j += 1) {
-						vm.accounts[i].projects[j].name = vm.accounts[i].projects[j].project;
-						if (vm.accounts[i].projects[j].timestamp !== null) {
-							vm.accounts[i].projects[j].timestampPretty = UtilsService.formatTimestamp(vm.accounts[i].projects[j].timestamp, true);
-						}
-						vm.accounts[i].projects[j].uploading = false;
-						//vm.accounts[i].projects[j].canUpload = (vm.accounts[i].account === vm.account);
-						vm.accounts[i].projects[j].canUpload = true;
-					}
 				}
 			}
 		});
@@ -144,21 +128,6 @@
 		}, true);
 
 		/**
-		 * Go to the project viewer
-		 *
-		 * @param {String} account
-		 * @param {String} project
-		 */
-		vm.goToProject = function (account, project) {
-			if (project.timestamp === null) {
-				vm.uploadModel(project);
-			}
-			else {
-				$location.path("/" + account + "/" + project.name, "_self");
-			}
-		};
-
-		/**
 		 * Toggle display of projects for an account
 		 *
 		 * @param {Number} index
@@ -178,53 +147,65 @@
 				account: vm.account,
 				type: vm.projectTypes[0]
 			};
-			vm.uploadedFile = null;
-			showDialog(event, "projectDialog.html");
+			vm.newProjectFileToUpload = null;
+			UtilsService.showDialog("projectDialog.html", $scope, event, true);
 		};
 		
 		/**
 		 * Close the dialog
 		 */
 		vm.closeDialog = function() {
-			$mdDialog.cancel();
+			UtilsService.closeDialog();
 		};
 
 		/**
 		 * Save a new project
 		 */
-		vm.saveNewProject = function () {
-			var project;
+		vm.saveNewProject = function (event) {
+			var project,
+				promise,
+				enterKey = 13,
+				doSave = false;
 
-			promise = AccountService.newProject(vm.newProjectData);
-			promise.then(function (response) {
-				console.log(response);
-				if (response.data.status === 400) {
-					vm.showNewProjectErrorMessage = true;
-					vm.newProjectErrorMessage = response.data.message;
+			if (angular.isDefined(event)) {
+				if (event.which === enterKey) {
+					doSave = true;
 				}
-				else {
-					vm.projectsExist = true;
-					// Add project to list
-					project = {
-						name: response.data.project,
-						canUpload: true,
-						timestamp: null
-					};
-					updateAccountProjects (response.data.account, project);
-					// Save model to project
-					if (vm.uploadedFile !== null) {
-						uploadModelToProject (project, vm.uploadedFile);
+			}
+			else {
+				doSave = true;
+			}
+
+			if (doSave) {
+				promise = AccountService.newProject(vm.newProjectData);
+				promise.then(function (response) {
+					console.log(response);
+					if (response.data.status === 400) {
+						vm.showNewProjectErrorMessage = true;
+						vm.newProjectErrorMessage = response.data.message;
 					}
-					vm.closeDialog();
-				}
-			});
+					else {
+						vm.projectsExist = true;
+						// Add project to list
+						project = {
+							project: response.data.project,
+							canUpload: true,
+							timestamp: null
+						};
+						updateAccountProjects (response.data.account, project);
+						vm.closeDialog();
+					}
+				});
+			}
 		};
 
 		/**
+		 * Upload a file
 		 *
-		 * @param {String} project
+		 * @param {Object} project
 		 */
-		vm.uploadModel = function (project) {
+		vm.uploadFile = function (project) {
+			console.log(project);
 			existingProjectFileUploader.value = "";
 			existingProjectToUpload = project;
 			existingProjectFileUploader.click();
@@ -233,7 +214,7 @@
 		/**
 		 * Upload a file
 		 */
-		vm.uploadFile = function () {
+		vm.uploadFileForNewProject = function () {
 			newProjectFileUploader.value = "";
 			newProjectFileUploader.click();
 		};
@@ -245,14 +226,14 @@
 			vm.newDatabaseName = "";
 			vm.showPaymentWait = false;
 			vm.newDatabaseToken = false;
-			showDialog(event, "databaseDialog.html");
+			UtilsService.showDialog("databaseDialog.html", $scope, event, true);
 		};
 
 		/**
 		 * Save a new database
 		 */
 		vm.saveNewDatabase = function () {
-			promise = AccountService.newDatabase(vm.account, vm.newDatabaseName);
+			var promise = AccountService.newDatabase(vm.account, vm.newDatabaseName);
 			promise.then(function (response) {
 				console.log(response);
 				vm.newDatabaseToken = response.data.token;
@@ -273,20 +254,23 @@
 
 		/**
 		 * Set up deleting of project
+		 *
+		 * @param {Object} event
 		 * @param {Object} project
 		 */
 		vm.setupDeleteProject = function (event, project) {
 			vm.projectToDelete = project;
 			vm.showDeleteProjectError = false;
-			showDialog(event, "deleteProjectDialog.html");
+			UtilsService.showDialog("deleteProjectDialog.html", $scope, event, true);
 		};
 
 		/**
 		 * Delete project
 		 */
 		vm.deleteProject = function () {
-			var i, iLength, j, jLength;
-			promise = UtilsService.doDelete(vm.account + "/" + vm.projectToDelete.name);
+			var i, iLength, j, jLength,
+				promise;
+			promise = UtilsService.doDelete({}, vm.account + "/" + vm.projectToDelete.name);
 			promise.then(function (response) {
 				if (response.status === 200) {
 					// Remove project from list
@@ -307,6 +291,19 @@
 					vm.deleteProjectError = "Error deleting project";
 				}
 			});
+		};
+
+		/**
+		 * Remove a collaborator
+		 *
+		 * @param collaborator
+		 */
+		vm.removeCollaborator = function (collaborator) {
+			delete vm.collaborators[collaborator];
+		};
+
+		vm.showPage = function (page, callingPage) {
+			vm.onShowPage({page: page, callingPage: callingPage});
 		};
 
 		/**
@@ -336,102 +333,13 @@
 				accountToUpdate.canUpload = (account === vm.account);
 				vm.accounts.push(accountToUpdate);
 			}
-		}
 
-		/**
-		 * Upload file/model to project
-		 * 
-		 * @param project
-		 * @param file
-		 */
-		function uploadModelToProject (project, file) {
-			var interval,
-				projectData,
-				infoTimeout = 4000;
-
-			project.uploading = true;
-			vm.showUploading = true;
-			vm.showFileUploadInfo = false;
-
-			// Check for file size limit
-			if (file.size > serverConfig.uploadSizeLimit) {
+			// Save model to project
+			if (vm.newProjectFileToUpload !== null) {
 				$timeout(function () {
-					vm.showUploading = false;
-					vm.showFileUploadInfo = true;
-					vm.fileUploadInfo = "File exceeds size limit";
-					$timeout(function () {
-						project.uploading = false;
-					}, infoTimeout);
+					vm.uploadedFile = {project: project, file: vm.newProjectFileToUpload};
 				});
 			}
-			else {
-				projectData = {
-					account: vm.account,
-					project: project.name,
-					uploadFile: file
-				};
-				promise = AccountService.uploadModel(projectData);
-				promise.then(function (response) {
-					console.log(response);
-					if ((response.data.status === 400) || (response.data.status === 404)) {
-						// Upload error
-						if (response.data.value === 68) {
-							vm.fileUploadInfo = "Unsupported file format";
-						}
-						else if (response.data.value === 66) {
-							vm.fileUploadInfo = "Insufficient quota for model";
-						}
-						vm.showUploading = false;
-						vm.showFileUploadInfo = true;
-						$timeout(function () {
-							project.uploading = false;
-						}, infoTimeout);
-					}
-					else {
-						// Upload valid, poll for status
-						interval = $interval(function () {
-							promise = AccountService.uploadStatus(projectData);
-							promise.then(function (response) {
-								console.log(response);
-								if ((response.data.status === "ok") || (response.data.status === "failed")) {
-									if (response.data.status === "ok") {
-										project.timestamp = new Date();
-										project.timestampPretty = UtilsService.formatTimestamp(project.timestamp, true);
-										vm.fileUploadInfo = "Uploaded";
-									}
-									else {
-										vm.fileUploadInfo = response.data.errorReason.message;
-									}
-									vm.showUploading = false;
-									$interval.cancel(interval);
-									vm.showFileUploadInfo = true;
-									$timeout(function () {
-										project.uploading = false;
-									}, infoTimeout);
-								}
-							});
-						}, 1000);
-					}
-				});
-			}
-		}
-
-		/**
-		 * Show a dialog
-		 * @param {String} dialogTemplate
-		 */
-		function showDialog (event, dialogTemplate) {
-			$mdDialog.show({
-				controller: function () {},
-				templateUrl: dialogTemplate,
-				parent: angular.element(document.body),
-				targetEvent: event,
-				clickOutsideToClose:true,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true,
-				onRemoving: function () {$scope.closeDialog();}
-			});
 		}
 	}
 }());

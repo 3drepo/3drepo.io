@@ -30,7 +30,7 @@
 				firstName: "=",
 				lastName: "=",
 				email: "=",
-				onShowItem: "&"
+				itemToShow: "="
 			},
 			controller: AccountInfoCtrl,
 			controllerAs: 'vm',
@@ -38,13 +38,29 @@
 		};
 	}
 
-	AccountInfoCtrl.$inject = [];
+	AccountInfoCtrl.$inject = ["$location"];
 
-	function AccountInfoCtrl() {
+	function AccountInfoCtrl ($location) {
 		var vm = this;
+		
+		/*
+		 * Init
+		 */
+		vm.accountOptions = {
+			repos: {label: "Repos"},
+			profile: {label: "Profile"},
+			billing: {label: "Billing"},
+			licenses: {label: "Licenses"}
+		};
 
+		/**
+		 * Show account "page"
+		 *
+		 * @param item
+		 */
 		vm.showItem = function (item) {
-			vm.onShowItem({item: item});
+			vm.itemToShow = item;
+			$location.search({}).search("page", item);
 		};
 	}
 }());

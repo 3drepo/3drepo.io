@@ -36,8 +36,6 @@
 			var onSuccess = function (res) { return res;};
 			var onError = function(res) {
 				if (res.status === 401 || res.status === 400) {
-					$location.path("/login");
-
 					return $q.reject(res);
 				} else {
 					return $q.reject(res);

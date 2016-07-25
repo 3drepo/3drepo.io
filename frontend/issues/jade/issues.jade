@@ -29,6 +29,7 @@ div(ng-switch="vm.toShow")
 		index="vm.selectedIndex"
 		data="vm.selectedIssue"
 		auto-save-comment="vm.autoSaveComment"
+		on-comment-saved="vm.commentSaved()"
 		on-comment-auto-saved="vm.commentAutoSaved(index)"
 		available-roles="vm.availableRoles"
 		project-user-roles="vm.projectUserRoles",
@@ -43,8 +44,9 @@ div(ng-switch="vm.toShow")
 		md-input-container.md-block(md-no-float="")
 			label Comment
 			textarea(ng-model="vm.comment")
-		div(layout="row")
+		div(layout="row", layout-align="start center")
 			md-button.md-raised.md-accent(ng-click="vm.saveIssue()", ng-disabled="vm.saveIssueDisabled") Save
+			md-progress-circular(md-diameter="20px", ng-if="vm.savingIssue")
 			md-button.md-primary(ng-click="vm.cancelAddIssue()") Cancel
 
 	// Info

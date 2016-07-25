@@ -1,13 +1,18 @@
 md-list.typesList(ng-if="!vm.showInfo")
-	div(ng-repeat="(key, value) in vm.docs")
+	#docItem(ng-repeat="(key, value) in vm.docs")
 		md-list-item.md-1-line(ng-click="vm.toggleItem(key)")
 			.md-list-item-text
-				h4 {{key}}
+				h1.md-title {{key}}
 		div(ng-if="value.show")
 			// Meta data
 			div(ng-if="key==='Meta Data'")
 				.dataItem(ng-repeat="metadataItem in value.data", layout="column", flex)
-					div(ng-repeat="(mKey, mValue) in metadataItem.metadata", layout="row", layout-align="space-between start")
+					div(
+						ng-repeat="(mKey, mValue) in metadataItem.metadata",
+						layout="row", layout-align="space-between start",
+						ng-class-odd="'docsListBackground1'",
+						ng-class-even="'docsListBackground2'"
+						)
 						p.metadataKey(flex="50") {{mKey}}
 						p.metadataValue(flex="45", ng-bind-html="mValue | linky:'_blank'") {{mValue}}
 

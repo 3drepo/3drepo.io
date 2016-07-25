@@ -2,25 +2,54 @@ account-menu
 div(ng-if="!vm.state.project")
 	#account(layout="row")
 		account-info(
+		username="vm.username"
+		first-name="vm.firstName"
+		last-name="vm.lastName"
+		email="vm.email"
+		item-to-show="vm.itemToShow")
+
+		#accountItem(ng-switch="vm.itemToShow")
+			account-projects(
+			ng-switch-when="repos"
+			account="vm.account"
+			accounts="vm.accounts"
+			on-show-page="vm.showItem(page, callingPage)"
+			quota="vm.quota")
+
+			account-profile(
+			ng-switch-when="profile"
 			username="vm.username"
 			first-name="vm.firstName"
 			last-name="vm.lastName"
-			email="vm.email"
-			on-show-item="vm.showItem(item)"
-		)
-		#accountItem(ng-switch="vm.itemToShow")
-			account-projects(
-				account="vm.account"
-				accounts="vm.accounts"
-				ng-switch-when="repos"
-			)
-			account-profile(
-				username="vm.username"
-				first-name="vm.firstName"
-				last-name="vm.lastName"
-				email="vm.email"
-				ng-switch-when="profile"
-			)
+			email="vm.email")
+
+			account-billing(
+			ng-switch-when="billing"
+			account="vm.account"
+			billing-address="vm.billingAddress"
+			quota="vm.quota"
+			billings="vm.billings"
+			subscriptions="vm.subscriptions"
+			plans="vm.plans"
+			first-name="vm.firstName"
+			last-name="vm.lastName")
+
+			account-licenses(
+			ng-switch-when="licenses"
+			account="vm.account"
+			show-page="vm.showPage(page, callingPage)"
+			subscriptions="vm.subscriptions")
+
+			account-team(
+			ng-switch-when="team"
+			account="vm.account"
+			show-page="vm.showPage(page, callingPage)"
+			subscriptions="vm.subscriptions")
 
 div(ng-if="vm.state.project")
-	project(account="vm.state.account" project="vm.state.project" branch="vm.state.branch" revision="vm.state.revision" state="vm.state")
+	project(
+	account="vm.state.account"
+	project="vm.state.project"
+	branch="vm.state.branch"
+	revision="vm.state.revision"
+	state="vm.state")

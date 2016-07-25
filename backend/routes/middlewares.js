@@ -19,6 +19,7 @@ var _ = require('lodash');
 var responseCodes = require('../response_codes');
 var C				= require("../constants");
 var Bid = require('../models/bid');
+var ProjectSetting = require('../models/projectSetting');
 // var History = require('../models/history');
 var User = require('../models/user');
 var config = require('../config');
@@ -191,16 +192,7 @@ function isSubContractorInvited(req, res, next){
 function canCreateDatabase(req, res, next){
 	'use strict';
 
-	if(!req.session[C.REPO_SESSION_USER] && req.body.verificationToken){
-
-		let allowRepeatedVerify = true;
-		User.verify(req.params.account, req.body.verificationToken, allowRepeatedVerify).then(() => {
-			next();
-		}).catch( err => {
-			responseCodes.respond("Middleware: canCreateDatabase", req, res, next, responseCodes.AUTH_ERROR, null, err);
-		});
-
-	} else if (req.session[C.REPO_SESSION_USER] && req.params.account === req.session[C.REPO_SESSION_USER].username){
+	if (req.session[C.REPO_SESSION_USER] && req.params.account === req.session[C.REPO_SESSION_USER].username){
 		next();
 	} else {
 		responseCodes.respond("Middleware: canCreateDatabase", req, res, next, responseCodes.AUTH_ERROR, null, req.params);
@@ -214,6 +206,7 @@ function freeSpace(account){
 
 	let limits;
 
+	//console.log('checking free space');
 	return User.findByUserName(account).then( dbUser => {
 
 		limits = dbUser.getSubscriptionLimits();
@@ -233,6 +226,31 @@ function freeSpace(account){
 		return Promise.resolve(limits.spaceLimit - totalSize);
 	});
 
+}
+
+function hasCollaboratorQuota(req, res, next){
+	'use strict';
+
+	let limits;
+
+	let account = req.params.account;
+	let project = req.params.project;
+
+	return User.findByUserName(account).then( dbUser => {
+
+		limits = dbUser.getSubscriptionLimits();
+
+		return ProjectSetting.findById({account}, project);
+
+	}).then(projectSetting => {
+
+		if(limits.collaboratorLimit - projectSetting.collaborators.length > 0){
+			next();
+		} else {
+			responseCodes.respond("", req, res, next, responseCodes.COLLABORATOR_LIMIT_EXCEEDED , null, {});
+		}
+
+	});
 }
 
 function connectQueue(req, res, next){
@@ -294,6 +312,8 @@ var middlewares = {
 	isMainContractor: [loggedIn, isMainContractor],
 	isSubContractorInvited: [loggedIn, isSubContractorInvited],
 	isAccountAdmin: [loggedIn, isAccountAdmin],
+	hasCollaboratorQuota: [loggedIn, hasCollaboratorQuota],
+
 	canCreateDatabase,
 	connectQueue,
 

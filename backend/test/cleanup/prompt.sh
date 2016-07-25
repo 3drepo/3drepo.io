@@ -1,5 +1,5 @@
 while true; do
-    read -p "This will destory everything load in copy of test data in your database, and pruge everything in your queue. Are you sure to proceed?[DELETE/n]" yn
+    read -p "This will destory everything and load a copy of test data in your database and pruge everything in your queue. Are you sure to proceed?[DELETE/n]" yn
     case $yn in
         DELETE ) make install; break;;
         [Nn]* ) exit 1;;

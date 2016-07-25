@@ -27,6 +27,15 @@ var Billing = require('./billing');
 var projectSetting = require('./projectSetting');
 var Role = require('./role');
 var Mailer = require('../mailer/mailer');
+var systemLogger = require("../logger.js").systemLogger;
+var Payment = require('./payment');
+var moment = require('moment');
+var Subscription = require('./subscription');
+var config = require('../config');
+
+var getSubscription = Subscription.getSubscription;
+
+
 
 var schema = mongoose.Schema({
 	_id : String,
@@ -63,12 +72,36 @@ var schema = mongoose.Schema({
 			updatedAt: Date,
 			createdAt: Date,
 			billingUser: String,
+			assignedUser: String,
 			expiredAt: Date,
 			limits: {},
-			token: String,
+			token: String, 
 			plan: String,
+			inCurrentAgreement: Boolean,
+			pendingDelete: Boolean,
 			database: String
 		}],
+		billingInfo:{
+
+			"vat": String,
+			"line1": String,
+			"line2": String,
+			"line3": String,
+			"firstName": String,
+			"lastName": String,
+			"company": String,
+			"city": String,
+			"postalCode": String,
+			"countryCode": String,
+			"state": String,
+		},
+		//global billing info
+		billingAgreementId: String,
+		paypalPaymentToken: String,
+		billingUser: String,
+		lastAnniversaryDate: Date,
+		nextPaymentDate: Date,
+		firstNextPaymentDate:  Date,
 		avatar: Object
 	},
 	roles: [{}]
@@ -90,7 +123,6 @@ schema.statics.historyChunksStats = function(dbName){
 
 	});
 
-	
 };
 
 schema.statics.authenticate = function(logger, username, password){
@@ -123,15 +155,38 @@ schema.statics.findByUserName = function(user){
 	return this.findOne({account: 'admin'}, { user });
 };
 
+schema.statics.findByEmail = function(email){
+	return this.findOne({account: 'admin'}, { 'customData.email': email });
+};
 
-schema.statics.findBillingUserByToken = function(token){
-	return this.findSubscriptionByToken(null, token).then(subscription => {
-		if(subscription){
-			return this.findByUserName(subscription.billingUser);
-		}
+schema.statics.findByPaypalPaymentToken = function(token){
+	return this.findOne({account: 'admin'}, { 'customData.paypalPaymentToken': token });
+};
 
-		return Promise.resolve();
-	});
+schema.statics.isEmailTaken = function(email, exceptUser){
+	'use strict';
+
+	let query = { 'customData.email': email};
+
+	if(exceptUser){
+		query = { 'customData.email': email, 'user': { '$ne': exceptUser }};
+	}
+
+	return this.count({account: 'admin'}, query);
+};
+
+// schema.statics.findBillingUserByToken = function(token){
+// 	return this.findSubscriptionByToken(null, token).then(subscription => {
+// 		if(subscription){
+// 			return this.findByUserName(subscription.billingUser);
+// 		}
+
+// 		return Promise.resolve();
+// 	});
+// };
+
+schema.statics.findBillingUserByBillingId = function(billingAgreementId){
+	return this.findOne({account: 'admin'}, { 'customData.billingAgreementId': billingAgreementId });
 };
 
 
@@ -191,8 +246,13 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	let adminDB = ModelFactory.db.admin();
 	
 	let cleanedCustomData = {};
-	
-	if(customData && (!customData.email || !customData.email.match(/^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/))){
+	let emailRegex = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+
+	if(config.auth.allowPlusSignInEmail){
+		emailRegex = /^([+a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+	}
+
+	if(customData && (!customData.email || !customData.email.match(emailRegex))){
 		return Promise.reject({ resCode: responseCodes.SIGN_UP_INVALID_EMAIL });
 	}
 
@@ -215,18 +275,38 @@ schema.statics.createUser = function(logger, username, password, customData, tok
 	}
 
 
-	return adminDB.addUser(username, password, {customData: cleanedCustomData, roles: []}).then( () => {
-		return Promise.resolve(cleanedCustomData.emailVerifyToken);
-	}).catch(err => {
-		return Promise.reject({resCode : utils.mongoErrorToResCode(err)});
+	return this.isEmailTaken(customData.email).then(count => {
+
+		if(count === 0){
+
+			return adminDB.addUser(username, password, {customData: cleanedCustomData, roles: []}).then( () => {
+				return Promise.resolve(cleanedCustomData.emailVerifyToken);
+			}).catch(err => {
+				return Promise.reject({resCode : utils.mongoErrorToResCode(err)});
+			});
+
+		} else {
+			return Promise.reject({resCode: responseCodes.EMAIL_EXISTS });
+		}
+
 	});
 };
 
-schema.statics.verify = function(username, token, allowRepeatedVerify){
+schema.statics.verify = function(username, token, options){
 	'use strict';
 
-	return this.findByUserName(username).then(user => {
+	options = options || {};
+
+	let allowRepeatedVerify = options.allowRepeatedVerify;
+	let skipImportToyProject = options.skipImportToyProject;
+	let skipCreateBasicPlan = options.skipCreateBasicPlan;
+
+	let user;
+
+	return this.findByUserName(username).then(_user => {
 		
+		user = _user;
+
 		var tokenData = user && user.customData && user.customData.emailVerifyToken;
 
 		if(!user){
@@ -240,35 +320,49 @@ schema.statics.verify = function(username, token, allowRepeatedVerify){
 		} else if(tokenData.token === token && tokenData.expiredAt > new Date()){
 
 
-			//create admin role for own database
-
-			return Role.findByRoleID(`${username}.admin`).then(role => {
-
-				if(!role){
-					return Role.createAdminRole(username);
-				} else {
-					return Promise.resolve();
-				}
-
-			}).then(() => {
-
-				let adminRoleName = 'admin';
-				return User.grantRoleToUser(username, username, adminRoleName);
-
-			}).then(() => {
-
-				user.customData.inactive = undefined;
-				//user.customData.emailVerifyToken = undefined;
-				return user.save();
-
-			});
-
-
+			user.customData.inactive = undefined;
+			user.customData.emailVerifyToken = undefined;
+			return user.save();
 
 		
 		} else {
 			return Promise.reject({ resCode: responseCodes.TOKEN_INVALID});
 		}
+
+	}).then(() => {
+
+		if(!skipImportToyProject){
+
+			//import toy project
+			var ProjectHelper = require('./helper/project');
+
+			ProjectHelper.importToyProject(username).catch(err => {
+				systemLogger.logError(JSON.stringify(err));
+			});
+		}
+
+		if(!skipCreateBasicPlan){
+			//basic quota
+			return user.createSubscription(Subscription.getBasicPlan().plan, user.user, true, null).then(() => user);
+		}
+
+		return Promise.resolve();
+
+	}).then(() => {
+
+		//create admin role for own database
+		return Role.createAdminRole(username).catch(err => {
+
+			//role exists
+			if(err.code === '11000'){
+				return Promise.resolve();
+			}
+
+		});
+
+	}).then(() => {
+		let adminRoleName = 'admin';
+		return User.grantRoleToUser(username, username, adminRoleName);
 	});
 };
 
@@ -281,7 +375,7 @@ schema.methods.getAvatar = function(){
 schema.methods.updateInfo = function(updateObj){
 	'use strict';
 
-	let updateableFields = [ 'firstName', 'lastName', 'email' ];
+	let updateableFields = [ 'firstName', 'lastName', 'email', 'billingInfo' ];
 	
 	this.customData = this.customData || {};
 
@@ -291,8 +385,13 @@ schema.methods.updateInfo = function(updateObj){
 		}
 	});
 
-
-	return this.save();
+	return User.isEmailTaken(this.customData.email, this.user).then(count => {
+		if(count === 0){
+			return this.save();
+		} else {
+			return Promise.reject({ resCode: responseCodes.EMAIL_EXISTS });
+		}
+	});
 };
 
 schema.statics.getForgotPasswordToken = function(username, email, tokenExpiryTime){
@@ -439,10 +538,24 @@ schema.methods.listAccounts = function(){
 				User.findByUserName(account.account).then(user => {
 					if(user){
 						account.quota = user.haveActiveSubscriptions() ? user.getSubscriptionLimits() : undefined;
+						return User.historyChunksStats(account.account);
+					}
+
+				}).then(stats => {
+				
+					if(stats && account.quota){
+						let totalSize = 0;
+						stats.forEach(stat => {
+							totalSize += stat.size; 
+						});
+						
+						account.quota.spaceUsed = totalSize;
 					}
 				})
 			);
+
 		});
+
 
 		accounts.sort((a, b) => {
 			if (a.account.toLowerCase() < b.account.toLowerCase()){
@@ -454,6 +567,13 @@ schema.methods.listAccounts = function(){
 			}
 		});
 
+		// own acconut always ranks top of the list
+		let myAccountIndex = accounts.findIndex(account => account.account === this.user);
+		if(myAccountIndex > -1){
+			let myAccount = accounts[myAccountIndex];
+			accounts.splice(myAccountIndex, 1);
+			accounts.unshift(myAccount);
+		} 
 
 		return Promise.all(getQuotaPromises).then(() => {
 			return Promise.resolve(accounts);
@@ -461,7 +581,7 @@ schema.methods.listAccounts = function(){
 	});
 };
 
-schema.methods.listProjects = function(){
+schema.methods.listProjects = function(options){
 	'use strict';
 
 	return this.getPrivileges().then(privs => {
@@ -491,6 +611,10 @@ schema.methods.listProjects = function(){
 	}).then(projects => {
 
 		//get timestamp for project
+		if(options && options.skipTimestamp){
+			return Promise.resolve(projects);
+		}
+
 		let promises = [];
 		projects.forEach((project, index) => {
 			promises.push(
@@ -513,6 +637,10 @@ schema.methods.listProjects = function(){
 	}).then(projects => {
 
 		//get status for project
+		if(options && options.skipStatus){
+			return Promise.resolve(projects);
+		}
+
 		let promises = [];
 
 		projects.forEach((project, index) => {
@@ -533,53 +661,275 @@ schema.methods.listProjects = function(){
 	});
 };
 
-
-
-//TO-DO: we have only one plan now so it is hardcoded
-var subscriptions = {
-	'THE-100-QUID-PLAN': {
-		plan: 'THE-100-QUID-PLAN',
-		limits: {
-			spaceLimit: 10737418240, //bytes
-			collaboratorLimit: 5,
-		},
-		db: this.user,
-		billingCycle: 1, //month
-		freeTrial: 1, //month
-		currency: 'GBP',
-		amount: 100
-	},
-
-	'SOFT-LAUNCH-FREE-TRIAL': {
-		plan: 'SOFT-LAUNCH-FREE-TRIAL',
-		limits: {
-			spaceLimit: 10737418240, //bytes
-			collaboratorLimit: 2,
-		},
-		db: this.user,
-		billingCycle: 3, //month
-		freeTrial: 0, //month
-		currency: 'GBP',
-		amount: 0
-	}
-};
-
-function getSubscription(plan){
-	return subscriptions[plan];
-}
-
-//TO-DO: payment, subscription activation methods, move to somewhere instead of staying in user.js
-// maybe something like schema.statics.subscriptions = require('...')
-schema.statics.getSubscription = function(plan) {
-	return subscriptions[plan];
-};
-
-schema.methods.createSubscriptionToken = function(plan, billingUser){
+//to-do: refactor
+schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	'use strict';
 
-	if(plan === 'THE-100-QUID-PLAN' || plan === 'SOFT-LAUNCH-FREE-TRIAL'){
+	plans = plans || [];
+	this.customData.subscriptions = this.customData.subscriptions || [];
+	this.customData.billingUser = billingUser;
 
-		let token = crypto.randomBytes(64).toString('hex');
+	let subscriptions = this.customData.subscriptions;
+
+	let currentCount = {};
+
+	//clear subscriptions
+	let ids = this.customData.subscriptions.filter(sub => !sub.active || (sub.expiredAt && sub.expiredAt < new Date())).map(sub => sub._id);
+
+	ids.forEach(id => {
+		this.customData.subscriptions.remove(id);
+	});
+	
+
+	//count user current plans
+	this.customData.subscriptions.forEach(subscription => {
+
+		//ignore basic plan
+		if (subscription.plan === Subscription.getBasicPlan().plan) {
+			return;
+		}
+
+		//clean old flag
+		subscription.pendingDelete = undefined;
+
+		if(!currentCount[subscription.plan]){
+			currentCount[subscription.plan] = 1;
+		} else {
+			currentCount[subscription.plan]++;
+		}
+	});
+
+	// calulate change of plans
+	plans.forEach(plan => {
+		if(currentCount[plan.plan]){
+			plan.quantity = plan.quantity - currentCount[plan.plan];
+		}
+	});
+
+	// get plans with changes
+	plans = plans.filter(plan => plan.quantity !== 0);
+
+
+	let next;
+	let billingAgreement;
+
+	if(plans.length <= 0){
+
+		// no changes in no. of licences
+		if(!this.customData.billingAgreementId){
+			next = Promise.resolve({});
+		} else {
+			next = Payment.updateBillingAddress(this.customData.billingAgreementId, {
+				"line1": billingAddress.line1,
+				"line2": billingAddress.line2,
+				"city": billingAddress.city,
+				"postal_code": billingAddress.postalCode,
+				"country_code": billingAddress.countryCode,
+				"state": billingAddress.state
+			});
+		}
+
+
+	} else {
+
+		let currency = 'GBP';
+		let existingPlans = [];
+		let now = new Date();
+		let check = Promise.resolve();
+
+
+		Object.keys(currentCount).forEach(plan => {
+			existingPlans.push({ plan: plan, quantity: currentCount[plan]});
+		});
+
+		plans.forEach(plan => {
+
+			if(getSubscription(plan.plan) && Number.isInteger(plan.quantity) && plan.quantity > 0){
+				
+				// buying new licences
+				//amount += getSubscription(plan.plan).amount * plan.quantity;
+
+				for(let i=0; i<plan.quantity; i++){
+
+					subscriptions.push({
+						plan: plan.plan,
+						createdAt: now,
+						updatedAt: now,
+						active: false
+					});
+				}
+
+			} else if (getSubscription(plan.plan) && Number.isInteger(plan.quantity) && plan.quantity < 0) {
+				
+				// canceling licences
+
+				// cancel plans with no assigned user first
+
+				let removeNumber = -plan.quantity;
+				let removeCount = 0;
+
+
+				let subs = this.getActiveSubscriptions().filter(sub => sub.plan === plan.plan && !sub.assignedUser);
+				for(let i=0 ; i < subs.length && removeCount < removeNumber; i++){
+					subs[i].pendingDelete = true;
+					removeCount++;
+				}
+				//allow to remove billingUser's licence if remove count = user's current no. of licences
+				if(removeCount < removeNumber && 
+					this.getActiveSubscriptions().filter(sub => sub.plan === plan.plan).length === removeNumber){
+
+					let subs = this.getActiveSubscriptions().filter(sub => sub.plan === plan.plan && sub.assignedUser === this.customData.billingUser);
+					for(let i=0 ; i < subs.length && removeCount < removeNumber; i++){
+						subs[i].pendingDelete = true;
+						removeCount++;
+					}
+				}
+
+				//check if they can remove licences
+				let quotaAfterDelete = this.getSubscriptionLimits({ excludePendingDelete : true });
+				let totalSize = 0;
+
+				check = new Promise((resolve, reject) => {
+			
+					if(removeCount < removeNumber){
+						reject(responseCodes.REMOVE_ASSIGNED_LICENCE);
+					} else {
+						resolve(User.historyChunksStats(this.user));
+					}
+					
+				}).then(stats => {
+				
+					if(stats){
+						stats.forEach(stat => {
+							totalSize += stat.size; 
+						});
+					}
+				}).then(() => {
+
+					console.log(quotaAfterDelete.spaceLimit - totalSize);
+					if(quotaAfterDelete.spaceLimit - totalSize < 0){
+						return Promise.reject(responseCodes.LICENCE_REMOVAL_SPACE_EXCEEDED);
+					} else{
+						return Promise.resolve();
+					}
+
+				});
+
+				let existingPlan = existingPlans.find(existingPlan => existingPlan.plan === plan.plan);
+				existingPlan.quantity += plan.quantity;
+
+			}
+		});
+
+
+		next = check.then(() => {
+			//console.log('new plan amount', amount);
+
+			let startDate = moment().utc().add(10, 'second');
+			let nextPaymentDate;
+
+			if(this.getActiveSubscriptions({ skipBasic: 'true'}).length === 0){
+				// first time to buy licence and pick today as the anniversary date
+				console.log('First time buying');
+				this.customData.lastAnniversaryDate = startDate.clone().startOf('day').toDate();
+				this.customData.firstNextPaymentDate = Payment.getNextPaymentDate(startDate);
+
+			}
+
+			nextPaymentDate = moment(this.customData.nextPaymentDate || this.customData.firstNextPaymentDate).utc().startOf('date');
+			let paymentDateAndAmount = Payment.getPaymentDateAndAmount(plans, existingPlans, startDate, this.customData.lastAnniversaryDate, nextPaymentDate, billingAddress.countryCode, billingAddress.company);
+
+			if (paymentDateAndAmount.regularAmount <= 0 && paymentDateAndAmount.firstCycleAmount <= 0 && !this.customData.billingAgreementId){
+
+				return Promise.resolve();
+
+			} else if(paymentDateAndAmount.regularAmount <= 0 && paymentDateAndAmount.firstCycleAmount <= 0){
+				//cancel the old agreement, if any
+
+				var cancel_note = {
+					"note": "You have updated the licence subscriptions."
+				};
+
+				let ids = this.customData.subscriptions.filter(sub => sub.pendingDelete).map(sub => sub._id);
+
+				ids.forEach(id => {
+					this.customData.subscriptions.remove(id);
+				});
+
+				return new Promise((resolve, reject) => {
+					Payment.paypal.billingAgreement.cancel(this.customData.billingAgreementId, cancel_note, (err) => {
+						if (err) {
+							systemLogger.logError(JSON.stringify(err),{ 
+								billingAgreementId: this.customData.billingAgreementId
+							});
+
+							reject(err);
+						} else {
+							systemLogger.logInfo("Billing agreement canceled successfully", { 
+								billingAgreementId: this.customData.billingAgreementId
+							});
+
+							this.customData.billingAgreementId = undefined;
+							resolve();
+						}
+					});
+				});
+
+
+			} else {
+
+				let paypalBillingAddress = {
+					"line1": billingAddress.line1,
+					"line2": billingAddress.line2,
+					"city": billingAddress.city,
+					"postal_code": billingAddress.postalCode,
+					"country_code": billingAddress.countryCode,
+					"state": billingAddress.state
+				};
+
+				return Payment.getBillingAgreement(
+					billingUser,
+					paypalBillingAddress, 
+					currency, 
+					paymentDateAndAmount.firstCycleAmount, 
+					paymentDateAndAmount.firstCycleBeforeTaxAmount, 
+					paymentDateAndAmount.firstCycleTaxAmount, 
+					paymentDateAndAmount.firstCycleLength,
+					paymentDateAndAmount.regularAmount, 
+					paymentDateAndAmount.regularBeforeTaxAmount, 
+					paymentDateAndAmount.regularTaxAmount, 
+					paymentDateAndAmount.regularCycleLength, 
+					paymentDateAndAmount.startDate
+				).then(_billingAgreement => {
+
+					billingAgreement = _billingAgreement;
+					this.customData.paypalPaymentToken = billingAgreement.paypalPaymentToken;
+
+				});
+
+			}
+		});
+
+	}
+
+
+	return next.then(() => {
+		//store billing info locally
+		console.log(billingAddress);
+		this.customData.billingInfo = billingAddress;
+		return this.save();
+
+	}).then(() => {
+		return Promise.resolve(billingAgreement || {});
+	});
+};
+
+
+schema.methods.createSubscription = function(plan, billingUser, active, expiredAt){
+	'use strict';
+
+	if(getSubscription(plan)){
+
 
 		this.customData.subscriptions = this.customData.subscriptions || [];
 		let subscriptions = this.customData.subscriptions;
@@ -587,14 +937,18 @@ schema.methods.createSubscriptionToken = function(plan, billingUser){
 		var now = new Date();
 
 		let subscription = {
-			token: token,
+
 			plan: plan,
-			db: this.user,
 			billingUser: billingUser,
 			createdAt: now,
 			updatedAt: now,
-			active: false
+			active: active,
+			expiredAt: expiredAt
 		};
+
+		if(active){
+			subscription.limits = getSubscription(subscription.plan).limits;
+		}
 
 		subscriptions.push(subscription);
 
@@ -608,27 +962,19 @@ schema.methods.createSubscriptionToken = function(plan, billingUser){
 	}
 };
 
-schema.statics.activateSubscription = function(token, paymentInfo, raw, disableEmail){
+schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, raw, disableEmail){
 	'use strict';
 	
-	let query = {'customData.subscriptions.token': token};
-	let subscription;
+	let query = {'customData.billingAgreementId': billingAgreementId};
 	let account;
 	let dbUser;
 
 	return this.findOne({account: 'admin'}, query).then(user => {
 
-		dbUser =  user;
+		dbUser = user;
 
 		if(!dbUser){
-			return Promise.reject({ message: 'Token not found'});
-		}
-
-		subscription = _.find(dbUser.customData.subscriptions, subscription => subscription.token === token);
-
-		if(!getSubscription(subscription.plan).freeTrial && paymentInfo.subscriptionSignup){
-			// do nothing if no free trial is provided for this plan and getting a subscription sign up message with no payment
-			return Promise.reject();
+			return Promise.reject({ message: `No users found with billingAgreementId ${billingAgreementId}`});
 		}
 
 		account = dbUser.user;
@@ -646,22 +992,63 @@ schema.statics.activateSubscription = function(token, paymentInfo, raw, disableE
 	}).then(() => {
 
 		let adminRoleName = 'admin';
-		return User.grantRoleToUser(subscription.billingUser, account, adminRoleName);
+		return User.grantRoleToUser(dbUser.customData.billingUser, account, adminRoleName);
 
 	}).then(() => {
 
-		let now = new Date();
+		let items = [];
 
-		let expiryAt = new Date(now.valueOf());
-		expiryAt.setMonth(expiryAt.getMonth() + getSubscription(subscription.plan).billingCycle);
+		dbUser.customData.nextPaymentDate && console.log('nextPaymentDate', moment(paymentInfo.nextPaymentDate).utc().startOf('date').toISOString());
+		console.log('pp next', moment(dbUser.customData.nextPaymentDate).utc().startOf('date').toISOString());
+
+		if(dbUser.customData.nextPaymentDate && moment(paymentInfo.nextPaymentDate).utc().startOf('date').toISOString() !== moment(dbUser.customData.nextPaymentDate).utc().startOf('date').toISOString()){
+			console.log('last ann date changed');
+			dbUser.customData.lastAnniversaryDate = new Date(dbUser.customData.nextPaymentDate);
+		}
+
+		dbUser.customData.nextPaymentDate = moment(paymentInfo.nextPaymentDate).utc().startOf('date').toDate();
+
+		let inCurrentAgreementCount = dbUser.customData.subscriptions.filter(sub => sub.inCurrentAgreement).length;
+		dbUser.customData.subscriptions.forEach(subscription => {
+
+			if(subscription.inCurrentAgreement){
+
+				// set to to next 3rd of next month, give 3 days cushion
+				let expiredAt = moment(paymentInfo.nextPaymentDate).utc()
+					.add(3, 'day')
+					.hours(0).minutes(0).seconds(0).milliseconds(0)
+					.toDate();
 
 
 
-		subscription.limits = getSubscription(subscription.plan).limits;
-		subscription.expiredAt = expiryAt;
-		subscription.active = true;
-		
+				subscription.limits = getSubscription(subscription.plan).limits;
+
+				if(!subscription.expiredAt || subscription.expiredAt < expiredAt){
+					subscription.expiredAt = expiredAt;
+					subscription.active = true;
+
+					items.push({
+						name: subscription.plan,
+						description: getSubscription(subscription.plan).description,
+						currency: getSubscription(subscription.plan).currency,
+						amount: Math.round(paymentInfo.amount / inCurrentAgreementCount * 100) / 100,
+						taxAmount: Math.round(paymentInfo.taxAmount / inCurrentAgreementCount * 100) / 100
+					});
+				}
+			
+			}
+
+		});
+
 		if(paymentInfo.createBilling){
+
+
+			let nextAmount = 0;
+
+			dbUser.customData.subscriptions.filter(sub => sub.inCurrentAgreement).forEach(sub => {
+				nextAmount += getSubscription(sub.plan).amount;
+			});
+
 			let billing = Billing.createInstance({ account });
 
 			billing.raw = raw;
@@ -669,15 +1056,30 @@ schema.statics.activateSubscription = function(token, paymentInfo, raw, disableE
 			billing.createdAt = new Date();
 			billing.currency = paymentInfo.currency;
 			billing.amount = paymentInfo.amount;
-			billing.subscriptionToken = token;
-			
+			billing.billingAgreementId = billingAgreementId;
+			billing.items = items;
+			billing.nextPaymentDate = paymentInfo.nextPaymentDate;
+			billing.taxAmount = paymentInfo.taxAmount;
+			billing.nextPaymentAmount = nextAmount;
+
+
+			//copy current billing info from user to billing
+			billing.info = dbUser.customData.billingInfo;
+
+			billing.periodStart = dbUser.customData.lastAnniversaryDate;
+			billing.periodEnd = moment(dbUser.customData.nextPaymentDate)
+				.utc()
+				.subtract(1, 'day')
+				.endOf('date')
+				.toDate();
+
 			billing.save().catch( err => {
 				console.log('Billing error', err);
 			});
 		}
 
 
-		if(!disableEmail && !paymentInfo.subscriptionSignup){
+		if(!disableEmail){
 
 			//send verification email
 			let amount = paymentInfo.amount;
@@ -686,20 +1088,21 @@ schema.statics.activateSubscription = function(token, paymentInfo, raw, disableE
 				currency = '£';
 			}
 
-			User.findByUserName(subscription.billingUser).then(user => {
+			User.findByUserName(dbUser.customData.billingUser).then(user => {
+
 				return Mailer.sendPaymentReceivedEmail(user.customData.email, {
 					account: account,
 					amount: currency + amount
-
 				});
+
 			}).catch(err => {
-				console.log('Email Error', err);
+				systemLogger.logError(`Email error - ${err.message}`);
 			});
 
 		}
 
 		return dbUser.save().then(() => {
-			return Promise.resolve({subscription, account, payment: paymentInfo});
+			return Promise.resolve({subscriptions: dbUser.customData.subscriptions, account, payment: paymentInfo});
 		});
 		
 
@@ -708,28 +1111,99 @@ schema.statics.activateSubscription = function(token, paymentInfo, raw, disableE
 
 };
 
+schema.methods.executeBillingAgreement = function(token, billingAgreementId){
+	'use strict';
+
+	this.customData.paypalPaymentToken = token;
+	this.customData.billingAgreementId = billingAgreementId;
+
+	let assignedBillingUser = false;
+
+	this.customData.subscriptions.forEach(subscription => {
+
+		if(subscription.plan === Subscription.getBasicPlan().plan){
+			return;
+		}
+
+		if(subscription.assignedUser === this.customData.billingUser){
+			assignedBillingUser = true;
+		}
+
+		subscription.inCurrentAgreement = true;
+
+		// pre activate
+		// don't wait for IPN message to confirm but to activate the subscription right away, for 48 hours.
+		// IPN message should come quickly after executing an agreement, usually less then a minute
+		let twoDayLater = moment().utc().add(48, 'hour').toDate();
+		if(!subscription.expiredAt || subscription.expiredAt < twoDayLater){
+			subscription.active = true;
+			subscription.expiredAt = twoDayLater;
+			subscription.limits = getSubscription(subscription.plan).limits;
+		}
+
+	});
+
+
+	//clear pending delete subscriptions
+	let ids = this.customData.subscriptions.filter(sub => sub.pendingDelete).map(sub => sub._id);
+
+	ids.forEach(id => {
+		this.customData.subscriptions.remove(id);
+	});
+
+	if(!assignedBillingUser){
+
+		let subscriptions = this.customData.subscriptions;
+		
+		for(let i=0; i < subscriptions.length; i++){
+
+			if(subscriptions[i].plan !== Subscription.getBasicPlan().plan && !subscriptions[i].assignedUser){
+				subscriptions[i].assignedUser = this.customData.billingUser;
+				break;
+			}
+		}
+	}
+};
+
 schema.methods.haveActiveSubscriptions = function(){
 	return this.getActiveSubscriptions().length > 0;
 };
 
-schema.methods.getActiveSubscriptions = function(){
+schema.methods.getActiveSubscriptions = function(options){
 	'use strict';
 	let now = new Date();
-	return _.filter(
-		this.customData.subscriptions, 
-		subscription => subscription.active && subscription.expiredAt > now
-	);
+	options = options || {};
+
+
+	return this.customData.subscriptions.filter(sub => { 
+
+		let basicCond = true;
+		if (options.skipBasic){
+			basicCond = sub.plan !== Subscription.getBasicPlan().plan;
+		}
+
+		let pendingDeleteCond = true;
+		if(options.excludePendingDelete){
+			pendingDeleteCond = !sub.pendingDelete;
+		}
+
+		return basicCond && pendingDeleteCond && sub.active && (sub.expiredAt > now || !sub.expiredAt);
+	});
+	
+
 };
 
-schema.methods.getSubscriptionLimits = function(){
+schema.methods.getSubscriptionLimits = function(options){
 	'use strict';
 
-	let subscriptions = this.getActiveSubscriptions();
+	let subscriptions = this.getActiveSubscriptions(options);
 
 	let sumLimits = {
 		spaceLimit: 0, 
 		collaboratorLimit: 0
 	};
+
+	console.log(subscriptions);
 
 	subscriptions.forEach(sub => {
 		sumLimits.spaceLimit += sub.limits.spaceLimit;
@@ -739,40 +1213,7 @@ schema.methods.getSubscriptionLimits = function(){
 	return sumLimits;
 };
 
-schema.statics.findSubscriptionsByBillingUser = function(billingUser){
-	'use strict';
 
-	let subscriptions = [];
-
-	return this.find({account: 'admin'}, { 
-		'customData.subscriptions.billingUser': billingUser, 
-	}).then( dbUsers => {
-
-		let promises = [];
-
-		dbUsers.forEach(dbUser => {
-	
-			let dbSubs = _.filter(dbUser.customData.subscriptions, subscription => subscription.billingUser === billingUser);
-			dbSubs.forEach(dbSub => {
-
-				dbSub = dbSub.toObject();
-				dbSub.account = dbUser.user;
-				
-				promises.push(Billing.findBySubscriptionToken(dbUser.user, dbSub.token).then(payments => {
-					dbSub.payments = payments;
-				}));
-
-				subscriptions.push(dbSub);
-			});
-			
-		});
-
-		return Promise.all(promises).then(() => {
-			return Promise.resolve(subscriptions);
-		});
-
-	});
-};
 
 schema.statics.findSubscriptionByToken = function(billingUser, token){
 	'use strict';
@@ -780,6 +1221,8 @@ schema.statics.findSubscriptionByToken = function(billingUser, token){
 	let query = { 
 		'customData.subscriptions.token': token
 	};
+
+	let subscription;
 
 	if(billingUser){
 		query['customData.subscriptions.billingUser'] = billingUser;
@@ -790,10 +1233,16 @@ schema.statics.findSubscriptionByToken = function(billingUser, token){
 		'user': 1
 	}).then( dbUser => {
 
-		let subscription = dbUser.customData.subscriptions[0].toObject();
+		subscription = dbUser.customData.subscriptions[0].toObject();
 		subscription.account = dbUser.user;
+		
+		return Billing.findBySubscriptionToken(dbUser.user, subscription.token);
 
-		return Promise.resolve(subscription);
+	}).then(payments => {
+
+		subscription.payments = payments;
+		return subscription;
+
 	});
 };
 
@@ -814,10 +1263,106 @@ schema.methods.hasRole = function(db, roleName){
 	return null;
 };
 
+schema.methods.removeAssignedSubscriptionFromUser = function(id, cascadeRemove){
+	'use strict';
+
+	let ProjectHelper = require('./helper/project');
+
+	let subscription = this.customData.subscriptions.id(id);
+	
+	if(!subscription){
+		return Promise.reject({ resCode: responseCodes.SUBSCRIPTION_NOT_FOUND});
+	}
+
+	if(!subscription.assignedUser){
+		return Promise.reject({ resCode: responseCodes.SUBSCRIPTION_NOT_ASSIGNED});
+	}
+
+	if(subscription.assignedUser === this.user){
+		return Promise.reject({ resCode: responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF});
+	}
+
+	//check if they are a collaborator
+	return projectSetting.find({ account: this.user }, {}).then(projects => {
+
+		let foundProjects = [];
+		projects.forEach(project => {
+			project.collaborators.forEach(collaborator => {
+				if(collaborator.user === subscription.assignedUser){
+					foundProjects.push({ project: project._id, role: collaborator.role});
+				}
+			});
+		});
+
+		if(!cascadeRemove && foundProjects.length > 0){
+			return Promise.reject({ resCode: responseCodes.USER_IN_COLLABORATOR_LIST, info: {projects: foundProjects}});
+		} else {
+
+			let promises = [];
+			foundProjects.forEach(foundProject => {
+				promises.push(ProjectHelper.removeCollaborator(subscription.assignedUser, null, this.user, foundProject.project, foundProject.role));
+			});
+			
+			return Promise.all(promises);
+
+		}
+
+	}).then(() => {
+		subscription.assignedUser = undefined;
+		return this.save().then(() => subscription);
+	});
+
+};
+
+schema.methods.assignSubscriptionToUser = function(id, userData){
+	'use strict';
+
+	let subscription = this.customData.subscriptions.id(id);
+	
+	if(!subscription){
+		return Promise.reject({ resCode: responseCodes.SUBSCRIPTION_NOT_FOUND});
+	}
+
+	let next;
+
+	
+	if(userData.email){
+		next = User.findByEmail(userData.email);
+	} else {
+		next = User.findByUserName(userData.user);
+	}
+
+	return next.then(user => {
+
+		if(!user){
+			return Promise.reject({ resCode: responseCodes.USER_NOT_FOUND });
+		}
+
+		let assigned;
+
+		this.customData.subscriptions.forEach(subscription => {
+			if(subscription.assignedUser === user.user){
+				assigned = true;
+			}
+		});
+
+		if(assigned){
+			return Promise.reject({ resCode: responseCodes.USER_ALREADY_ASSIGNED });
+		} else if(subscription.assignedUser){
+			return Promise.reject({ resCode: responseCodes.SUBSCRIPTION_ALREADY_ASSIGNED });
+		} else {
+			subscription.assignedUser = user.user;
+			return this.save().then(() => subscription);
+		}
+		
+	});
+
+};
+
 var User = ModelFactory.createClass(
-	'User', 
-	schema, 
-	() => { 
+	'User',
+	schema,
+	() => {
 		return 'system.users';
 	}
 );

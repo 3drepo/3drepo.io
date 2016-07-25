@@ -78,6 +78,7 @@ function findByUID(req, res, next){
 		}
 
 	}).then(data => {
+		req.params.format = 'src';
 		responseCodes.respond(place, req, res, next, responseCodes.OK, data);
 	}).catch(err => {
 		console.log(err.stack);
@@ -121,6 +122,7 @@ function findByRevision(req, res, next){
 		}
 
 	}).then(data => {
+		req.params.format = 'src';
 		responseCodes.respond(place, req, res, next, responseCodes.OK, data);
 	}).catch(err => {
 		console.log(err.stack);

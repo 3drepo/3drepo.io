@@ -140,8 +140,29 @@ var responseCodes = {
 	PROJECT_NOT_FOUND: { value: 81, message: "Project not found", status: 400},
 	INVALID_ROLE: {value: 82, message: 'Invalid role name', status: 400},
 	ALREADY_IN_ROLE: {value: 83, message: 'User already assigned with this role', status: 400},
-	NOT_IN_ROLE: { value: 84, message: 'User not in this role', status: 400},
-	QUEUE_NO_LISTENER: { value: 85, message: 'There is currently no worker listening to the queue, you model import is delayed', status: 400},
+
+	NOT_IN_ROLE: { value: 84, message: 'User or role not found', status: 400},
+	EMAIL_EXISTS: { value: 85, message: 'Email already exists', status: 400 },
+	QUEUE_NO_LISTENER: { value: 86, message: 'There is currently no worker listening to the queue, you model import is delayed', status: 400},
+	COLLABORATOR_LIMIT_EXCEEDED: {value: 87, message: 'You do not have enough quota to add an extra collaborator', status: 400},
+
+	LICENSE_NO_CHANGE: { value: 88, message: 'You must increase your number of licenses', status: 400},
+	SUBSCRIPTION_NOT_FOUND: {value: 89, message: 'Subscription not found', status: 404},
+	SUBSCRIPTION_ALREADY_ASSIGNED: {value: 90, message: 'Subscription already assigned to someone else', status: 400},
+	USER_ALREADY_ASSIGNED: {value: 91, message: 'This user is already in another subscription', status: 400},
+	USER_NOT_ASSIGNED_WITH_LICENSE: {value: 92, message: 'This user is not assigned with license', status: 400},
+	SUBSCRIPTION_NOT_ASSIGNED: {value: 93, message: 'This subscription is not assigned to any user', status: 400},
+	USER_IN_COLLABORATOR_LIST: {value: 94, message: 'This user is currently in collaborator list of a project', status: 400 },
+	SUBSCRIPTION_CANNOT_REMOVE_SELF: {value: 95, message: 'You cannot remove yourself', status: 400 },
+
+	PAYMENT_TOKEN_ERROR: { value: 96, message: 'Payment token is invalid', status: 400}, 
+	EXECUTE_AGREEMENT_ERROR: { value: 97, message: 'Failed to get payment from PayPal', status: 400 },
+
+	LICENCE_REMOVAL_SPACE_EXCEEDED: { value: 98, message: 'Your current quota usage exceeds the requested change.', status: 400 },
+	REMOVE_ASSIGNED_LICENCE: { value: 99, message: 'Some of the licences are assigned and can\'t be removed', status: 400 },
+
+	BILLING_NOT_FOUND: { value: 100, message: 'Billing not found', status: 404 },
+	PAYPAL_ERROR: { value: 101, status: 400 },
 
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {
@@ -207,12 +228,12 @@ var responseCodes = {
 
 var valid_values = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
 49,  50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84,
-1000, 2000, 3000, 4000];
+85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 1000, 2000, 3000, 4000];
 
 var mimeTypes = {
-	"src"  : "application/json",
+	"src"  : "text/plain",
 	"gltf" : "application/json",
-	"bin"  : "application/json",
+	"bin"  : "text/plain",
 	"x3d"  : "application/xml",
 	"json" : "application/json",
 	"png"  : "image/png",
@@ -285,6 +306,7 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 			res.write(extraInfo, "binary");
 			res.flush();
 			res.end();
+			
 		} else {
 
 			length = typeof extraInfo === 'string' ? extraInfo.length : JSON.stringify(extraInfo).length;
