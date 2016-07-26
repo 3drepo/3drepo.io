@@ -424,6 +424,10 @@ function downloadLatest(account, project){
 
 	return bucket.find({}, {sort: { uploadDate: -1}}).next().then(file => {
 
+		if(!file){
+			return Promise.reject(responseCodes.NO_FILE_FOUND);
+		}
+
 		// change file name
 		let filename = file.filename.split('_');
 		let ext = '';
