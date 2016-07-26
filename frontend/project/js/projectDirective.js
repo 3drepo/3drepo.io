@@ -120,7 +120,6 @@
 			add: true
 		});
 
-		/*
 		panelCard.left.push({
 			type: "groups",
 			title: "Groups",
@@ -142,7 +141,6 @@
 			],
 			add: true
 		});
-		*/
 
 		panelCard.left.push({
 			type: "clip",

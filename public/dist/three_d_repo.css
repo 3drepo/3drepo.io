@@ -1146,11 +1146,15 @@ home #homeLogo {
     left: 0;
     right: 0;
     margin: auto;
-    pointer-events: none;
+    outline: none;
+}
+home #homeLogo:hover {
+    cursor: pointer;
 }
 home #homeLogo img {
     width: inherit;
     pointer-events: inherit;
+    outline: none;
 }
 
 home .homeUserContent {
@@ -1763,9 +1767,6 @@ password-change md-progress-circular {
     margin-left: 5px;
 }
 
-password-change md-input-container {
-    margin: 0;
-}
 password-forgot md-progress-circular {
     margin-left: 5px;
 }
