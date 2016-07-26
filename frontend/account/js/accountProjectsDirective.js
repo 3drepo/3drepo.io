@@ -247,7 +247,6 @@
 		 */
 		vm.setupPayment = function () {
 			$timeout(function () {
-				console.log(vm.newDatabaseToken);
 				vm.showPaymentWait = true;
 			});
 		};
