@@ -21,6 +21,17 @@ var ModelFactory = require('../factory/modelFactory');
 var stream = require('stream');
 var GridFSBucket = require('mongodb').GridFSBucket;
 
+
+function getGridFSBucket (account, bucketName){
+	'use strict';
+
+	return new GridFSBucket(
+		ModelFactory.db.db(account),
+		{ bucketName:  bucketName}
+	);
+}
+
+
 function _getGridFSBucket (dbCol, format){
 	'use strict';
 
@@ -83,5 +94,6 @@ function saveStashByFilename(dbCol, format, filename, buffer){
 
 module.exports = {
 	findStashByFilename: findStashByFilename,
-	saveStashByFilename: saveStashByFilename
+	saveStashByFilename: saveStashByFilename,
+	getGridFSBucket: getGridFSBucket
 };

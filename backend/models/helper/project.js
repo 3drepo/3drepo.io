@@ -24,6 +24,7 @@ var C = require('../../constants');
 var Mailer = require('../../mailer/mailer');
 var systemLogger = require("../../logger.js").systemLogger;
 var config = require('../../config');
+var stash = require('./stash');
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -416,10 +417,36 @@ function removeCollaborator(username, email, account, project, role){
 	});
 }
 
+function downloadLatest(account, project){
+	'use strict';
+
+	let bucket =  stash.getGridFSBucket(account, `${project}.history`);
+
+	return bucket.find({}, {sort: { uploadDate: -1}}).next().then(file => {
+
+		// change file name
+		let filename = file.filename.split('_');
+		let ext = '';
+		
+		if (filename.length > 1){
+			ext = '.' + filename.pop();
+		}
+
+		file.filename = filename.join('_') + ext;
+
+		return Promise.resolve({
+			readStream: bucket.openDownloadStream(file._id),
+			meta: file
+		});
+		
+	});
+}
+
 module.exports = {
 	createAndAssignRole,
 	importToyProject,
 	convertToErrorCode,
 	addCollaborator,
-	removeCollaborator
+	removeCollaborator,
+	downloadLatest
 };
