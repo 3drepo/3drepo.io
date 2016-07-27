@@ -19,7 +19,7 @@ var Role = require('../role');
 var ProjectSetting = require('../projectSetting');
 var User = require('../user');
 var responseCodes = require('../../response_codes');
-//var importQueue = require('../../services/queue');
+var importQueue = require('../../services/queue');
 var C = require('../../constants');
 var Mailer = require('../../mailer/mailer');
 var systemLogger = require("../../logger.js").systemLogger;
@@ -55,6 +55,9 @@ function convertToErrorCode(errCode){
         case 7:
             errObj = responseCodes.FILE_IMPORT_MISSING_TEXTURES;
             break;
+        case 9:
+        	errObj = responseCodes.REPOERR_FED_GEN_FAIL;
+        	break;
         default:
             errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
             break;
@@ -416,10 +419,32 @@ function removeCollaborator(username, email, account, project, role){
 	});
 }
 
+
+function createFederatedProject(account, project, subProjects){
+	'use strict';
+	
+	let federatedJSON = {
+		database: account,
+		project: project,
+		subProjects: []
+	};
+	
+	subProjects.forEach(subProject => {
+		federatedJSON.subProjects.push({
+			database: subProject.database,
+			project: subProject.project
+		});
+	});
+
+	return importQueue.createFederatedProject(account, federatedJSON);
+}
+
+
 module.exports = {
 	createAndAssignRole,
 	importToyProject,
 	convertToErrorCode,
 	addCollaborator,
-	removeCollaborator
+	removeCollaborator,
+	createFederatedProject
 };

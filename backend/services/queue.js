@@ -108,9 +108,62 @@ ImportQueue.prototype.importFile = function(filePath, orgFileName, databaseName,
             };
 
         });
-
     });
 };
+
+/*******************************************************************************
+ * Dispatch work to queue to create a federated project
+ * @param {account} account - username
+ * @param {defObj} defObj - object to describe the federated project like subprojects and transformation
+ *******************************************************************************/
+ImportQueue.prototype.createFederatedProject = function(account, defObj){
+    'use strict';
+
+    let corID = uuid.v1();
+    let newFileDir = this.sharedSpacePath + "/" + corID;
+    let filename = `${newFileDir}/obj.json`;
+
+
+    return new Promise((resolve, reject) => {
+
+        fs.mkdir(newFileDir, function (err){
+            if (err) {
+                reject(err);
+            } else {
+                resolve();
+            }
+        });
+
+    }).then(() => {
+
+        return new Promise((resolve, reject) => {
+            fs.writeFile(filename, JSON.stringify(defObj), { flag: 'a+'}, err => {
+                if(err){
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+
+    }).then(() => {
+
+        let msg = `genFed ${filename} ${account}`;
+        return this._dispatchWork(corID, msg);
+
+    }).then(() => {
+
+        return new Promise((resolve, reject) => {
+            this.deferedObjs[corID] = {
+                resolve: () => resolve(corID),
+                reject: errCode => reject({corID, errCode})
+            };
+        });
+
+    });
+
+
+}
 
 /*******************************************************************************
  * Move a specified file to shared storage (area shared by queue workers)

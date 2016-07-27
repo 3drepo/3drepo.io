@@ -45,7 +45,7 @@ router.get('/:project.json', middlewares.hasReadAccessToProject, getProjectSetti
 
 router.put('/:project/settings/map-tile', middlewares.hasWriteAccessToProject, updateMapTileSettings);
 
-router.post('/:project', middlewares.canCreateProject, createProject);
+router.post('/:project', middlewares.connectQueue, middlewares.canCreateProject, createProject);
 
 router.delete('/:project', middlewares.canCreateProject, deleteProject);
 
@@ -178,6 +178,7 @@ function getProjectSetting(req, res, next){
 }
 
 
+
 function createProject(req, res, next){
 	'use strict';
 	
@@ -187,6 +188,14 @@ function createProject(req, res, next){
 	let username = req.session.user.username;
 
 	createAndAssignRole(project, account, username, req.body.desc, req.body.type).then(() => {
+
+		if(req.body.subProjects && req.body.subProjects.length > 0){
+			return ProjectHelpers.createFederatedProject(account, project, req.body.subProjects);
+		}
+
+		return Promise.resolve();
+
+	}).then(() => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -207,6 +216,8 @@ function deleteProject(req, res, next){
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);
 	});
 }
+
+
 
 
 function uploadProject(req, res, next){
