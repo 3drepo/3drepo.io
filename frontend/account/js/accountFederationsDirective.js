@@ -43,6 +43,7 @@
 		var vm = this;
 
 		// Init
+		vm.showInfo = true;
 		vm.federations = [
 			{name: "Cheese"},
 			{name: "Bacon"}
