@@ -163,7 +163,7 @@ ImportQueue.prototype.createFederatedProject = function(account, defObj){
     });
 
 
-}
+};
 
 /*******************************************************************************
  * Move a specified file to shared storage (area shared by queue workers)
