@@ -125,6 +125,7 @@ panel-card .statusIcon {
 
 panel-card #filterContainer {
   max-width: 50%;
+  margin-top: -5px;
 }
 
 panel-card .cardInfo {
@@ -149,13 +150,12 @@ panel-card .cardInfo md-icon {
 
 /** Panel Card Filter ****************************************************************************************************/
 panel-card-filter input {
-  background: rgb(63,81,181);
+  background: rgb(0,69,148);
   border: none;
   color: white;
   border-bottom: 1px solid white;
   outline: none;
-  margin-top: -5px;
-  font-size: 18px;
+  font-size: 14px;
 }
 panel-card-filter md-icon {
   margin-left: -16px;

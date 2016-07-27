@@ -59,21 +59,6 @@
 			projectUI = angular.element($element[0].querySelector('#projectUI'));
 		});
 
-		/*
-		panelCard.left.push({
-			type: "tree",
-			title: "Tree",
-			show: true,
-			help: "Model elements shown in a tree structure",
-			icon: "device_hub",
-			minHeight: 80,
-			fixedHeight: false,
-			options: [
-				{type: "filter", visible: true}
-			]
-		});
-		*/
-
 		panelCard.left.push({
 			type: "issues",
 			title: "Issues",
@@ -119,6 +104,19 @@
 			],
 			add: true
 		});
+
+		 panelCard.left.push({
+			 type: "tree",
+			 title: "Tree",
+			 show: true,
+			 help: "Model elements shown in a tree structure",
+			 icon: "device_hub",
+			 minHeight: 80,
+			 fixedHeight: false,
+			 options: [
+			 	{type: "filter", visible: true}
+			 ]
+		 });
 
 		panelCard.left.push({
 			type: "groups",

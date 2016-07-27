@@ -22,7 +22,7 @@ div(class="virtualRepeatInfiniteScroll", ng-show="vm.showTree")
 						.treeIconDot(class="fa fa-circle")
 
 // Filter list
-div(class="virtualRepeatInfiniteScroll" ng-if="vm.filterItemsFound")
+div(class="virtualRepeatInfiniteScroll" ng-if="vm.showFilterList && vm.filterItemsFound")
 	md-virtual-repeat-container.vertical-container
 		.treeNodes(
 			md-virtual-repeat="item in vm.infiniteItemsFilter"

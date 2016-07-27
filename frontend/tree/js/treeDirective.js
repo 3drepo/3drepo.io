@@ -173,7 +173,7 @@
 				numChildren = 0,
 				index = -1,
 				endOfSplice = false,
-				numChildrenToForceRedraw = 10;
+				numChildrenToForceRedraw = 3;
 
 			for (i = 0, length = vm.nodesToShow.length; i < length; i += 1) {
 				if (vm.nodesToShow[i]._id === _id) {
