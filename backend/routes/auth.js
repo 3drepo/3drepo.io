@@ -52,7 +52,7 @@
 	router.post('/:account/verify', verify);
 	router.post('/:account/forgot-password', forgotPassword);
 	router.put("/:account", middlewares.hasWriteAccessToAccount, updateUser);
-	router.put("/:account/password", middlewares.hasWriteAccessToAccount, resetPassword);
+	router.put("/:account/password", resetPassword);
 
 	// function expireSession(req) {
 	// 	if (req.session)

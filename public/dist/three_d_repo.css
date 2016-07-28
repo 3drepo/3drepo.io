@@ -1767,9 +1767,6 @@ password-change md-progress-circular {
     margin-left: 5px;
 }
 
-password-change md-input-container {
-    margin: 0;
-}
 password-forgot md-progress-circular {
     margin-left: 5px;
 }
