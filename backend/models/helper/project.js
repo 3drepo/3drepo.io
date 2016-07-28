@@ -66,7 +66,7 @@ function convertToErrorCode(errCode){
     return errObj;
 }
 
-function createAndAssignRole(project, account, username, desc, type) {
+function createAndAssignRole(project, account, username, desc, type, federate) {
 	'use strict';
 
 
@@ -119,6 +119,7 @@ function createAndAssignRole(project, account, username, desc, type) {
 			setting.owner = username;
 			setting.desc = desc;
 			setting.type = type;
+			setting.federate = federate;
 			
 			return setting.save();
 		});

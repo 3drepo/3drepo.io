@@ -23,7 +23,7 @@ var utils = require('../utils');
 var middlewares = require('./middlewares');
 var ProjectSetting = require('../models/projectSetting');
 var responseCodes = require('../response_codes');
-var C               = require("../constants");
+var C = require("../constants");
 var importQueue = require('../services/queue');
 var multer = require("multer");
 var ProjectHelpers = require('../models/helper/project');
@@ -46,6 +46,9 @@ router.get('/:project.json', middlewares.hasReadAccessToProject, getProjectSetti
 router.put('/:project/settings/map-tile', middlewares.hasWriteAccessToProject, updateMapTileSettings);
 
 router.post('/:project', middlewares.connectQueue, middlewares.canCreateProject, createProject);
+
+//update federated project
+router.put('/:project', middlewares.connectQueue, middlewares.hasWriteAccessToProject, updateProject);
 
 router.delete('/:project', middlewares.canCreateProject, deleteProject);
 
@@ -187,15 +190,48 @@ function createProject(req, res, next){
 	let account = req.params.account;
 	let username = req.session.user.username;
 
-	createAndAssignRole(project, account, username, req.body.desc, req.body.type).then(() => {
+	let federate;
+	if(req.body.subProjects && req.body.subProjects.length > 0){
+		federate = true;
+	}
 
-		if(req.body.subProjects && req.body.subProjects.length > 0){
+	createAndAssignRole(project, account, username, req.body.desc, req.body.type, federate).then(() => {
+
+		if(federate){
 			return ProjectHelpers.createFederatedProject(account, project, req.body.subProjects);
 		}
 
 		return Promise.resolve();
 
 	}).then(() => {
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
+	}).catch( err => {
+		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function updateProject(req, res, next){
+	'use strict';
+
+	let responsePlace = utils.APIInfo(req);
+	let project = req.params.project;
+	let account = req.params.account;
+
+	let promise = Promise.resolve();
+	
+	if(req.body.subProjects && req.body.subProjects.length > 0){
+		promise = ProjectHelpers.createFederatedProject(account, project, req.body.subProjects).then(() => {
+
+			return ProjectSetting.findById({account, project}, project);
+
+		}).then(setting => {
+
+			setting.federate = true;
+			return setting.save();
+		});
+	}
+
+	promise.then(() => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
