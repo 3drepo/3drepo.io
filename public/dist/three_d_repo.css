@@ -432,6 +432,26 @@ account-team #accountTeamSubHeader {
 #federationDialog #federationSave {
   margin-top: 10px;
 }
+
+#federationDialog md-list {
+  padding: 0;
+}
+
+#federationDialog md-list-item {
+  height: 35px;
+  min-height: 35px;
+}
+#federationDialog md-list-item p {
+  margin-left: -20px;
+}
+
+#federationDialog .federationProject {
+  padding-left: 40px;
+}
+
+#federationDialog #federatedProjectAccount {
+  color: rgba(0, 0, 0, 0.5);
+}
 /* Done to counter bootstrap styling. This should really be set in a top level style file */
 .md-datepicker-input-mask {
   width: 308px;

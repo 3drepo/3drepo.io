@@ -1,4 +1,4 @@
-md-dialog#federationDialog(aria-label="Federation", flex="40")
+md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50")
 	md-toolbar
 		.md-toolbar-tools
 			h2 Federation
@@ -7,6 +7,7 @@ md-dialog#federationDialog(aria-label="Federation", flex="40")
 				md-icon.angular-material-icons(aria-label="Close dialog") close
 	md-content(layout-margin)
 		div(layout="column", flex)
+			// Federation name
 			div(layout="row", flex)
 				md-input-container(flex="50")
 					input(placeholder="Federation name", tdr-focus="true", ng-model="vm.newFederationData.name")
@@ -14,26 +15,49 @@ md-dialog#federationDialog(aria-label="Federation", flex="40")
 
 			md-divider
 
+			// List
 			div(layout="row", flex)
+				// Available
 				div(layout="column", flex)
-					p.federationTitle(layout="row", layout-align="center center") Available
-					div(ng-repeat="account in vm.accounts", flex)
-						div(layout="row", layout-align="start center")
-							md-button.md-icon-button(aria-label="Folder")
-								md-icon.angular-material-icons {{account.showProjectsIcon}}
-							md-list-item
-								p {{account.account}}
-							span(flex)
-							md-button.md-icon-button(aria-label="Add", ng-click="vm.newProject($event)")
-								md-icon.angular-material-icons.md-accent add_circle
+					p(layout="row", layout-align="center center") Available
+					md-list(ng-repeat="(accountIndex, account) in vm.accountsCopy")
+						md-list-item(ng-click="vm.toggleShowProjects($index)")
+							md-icon.angular-material-icons {{account.showProjectsIcon}}
+							p {{account.account}}
+						md-list(ng-if="account.showProjects")
+							md-list-item.federationProject(
+							ng-repeat="project in account.projects"
+							style="opacity:{{project.federated? 0.2 : 1.0}}")
+								md-icon.angular-material-icons dashboard
+								p {{project.project}}
+								span(flex)
+								md-button.md-icon-button(
+								aria-label="Add"
+								ng-click="vm.addToFederation(accountIndex, $index)"
+								ng-if="!project.federated")
+									md-icon.angular-material-icons.md-accent add_circle
 
+				// Divider
 				div(layout="row", layout-align="center")
 					#federationDivider(flex="none")
+
+				// Federated
 				div(layout="column", flex)
-					p.federationTitle(layout="row", layout-align="center center") Federated
+					p(layout="row", layout-align="center center") Federated
+					md-list
+						md-list-item.federationProject(ng-repeat="item in vm.federation")
+							md-icon.angular-material-icons dashboard
+							p
+								| {{item.project.project}}
+								=" "
+								span#federatedProjectAccount ({{item.account.account}})
+							span(flex)
+							md-button.md-icon-button(aria-label="Remove", ng-click="vm.removeFromFederation($index)")
+								md-icon.angular-material-icons.md-accent remove_circle
 
 			md-divider
 
+			// Save/Cancel
 			#federationSave(layout="row", layout-align="start center")
-				md-button.md-raised.md-accent(ng-disabled="vm.newProjectButtonDisabled", ng-click="vm.saveFederation()") Save
-				md-button.md-accent(ng-disabled="vm.newProjectButtonDisabled", ng-click="vm.closeDialog()") Cancel
+				md-button.md-raised.md-accent(ng-disabled="vm.newFederationButtonDisabled", ng-click="vm.saveFederation()") Save
+				md-button.md-accent(ng-disabled="vm.newFederationButtonDisabled", ng-click="vm.closeDialog()") Cancel

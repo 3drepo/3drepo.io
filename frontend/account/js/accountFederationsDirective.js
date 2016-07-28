@@ -49,12 +49,48 @@
 			{name: "Bacon"}
 		];
 
+		$scope.$watch("vm.accounts", function () {
+			if (angular.isDefined(vm.accounts)) {
+				vm.accountsCopy = angular.copy(vm.accounts);
+			}
+		});
+
+		$scope.$watch("vm.newFederationData.name", function () {
+			if (angular.isDefined(vm.accounts)) {
+				vm.accountsCopy = angular.copy(vm.accounts);
+			}
+		});
+
 		vm.setupFederation = function (event) {
+			vm.newFederationData = 
+			vm.federation = [];
 			UtilsService.showDialog("federationDialog.html", $scope, event);
 		};
 
 		vm.closeDialog = function () {
 			UtilsService.closeDialog();
+		};
+
+		vm.toggleShowProjects = function (index) {
+			vm.accountsCopy[index].showProjects = !vm.accountsCopy[index].showProjects;
+			vm.accountsCopy[index].showProjectsIcon = vm.accountsCopy[index].showProjects ? "folder_open" : "folder";
+		};
+
+		vm.addToFederation = function (accountIndex, projectIndex) {
+			console.log(accountIndex, projectIndex);
+			vm.federation.push({
+				accountIndex: accountIndex,
+				account: vm.accountsCopy[accountIndex],
+				projectIndex: projectIndex,
+				project: vm.accountsCopy[accountIndex].projects[projectIndex]
+			});
+
+			vm.accountsCopy[accountIndex].projects[projectIndex].federated = true;
+		};
+
+		vm.removeFromFederation = function (index) {
+			var item = vm.federation.splice(index, 1);
+			vm.accountsCopy[item[0].accountIndex].projects[item[0].projectIndex].federated = false;
 		};
 	}
 }());
