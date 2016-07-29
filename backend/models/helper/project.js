@@ -24,6 +24,10 @@ var C = require('../../constants');
 var Mailer = require('../../mailer/mailer');
 var systemLogger = require("../../logger.js").systemLogger;
 var config = require('../../config');
+var History = require('../history');
+var utils = require("../../utils");
+var stash = require('./stash');
+var Ref = require('../ref');
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -441,11 +445,82 @@ function createFederatedProject(account, project, subProjects){
 }
 
 
+function getFullTree(account, project, branch){
+	'use strict';
+
+	let revId, treeFileName;
+	let subTrees;
+
+	return History.findByBranch({ account, project }, branch).then(history => {
+
+		revId = utils.uuidToString(history._id);
+		treeFileName = `/${account}/${project}/revision/${revId}/fulltree.json`;
+
+		let filter = {
+			type: "ref",
+			_id: { $in: history.current }
+		};
+
+		return Ref.find({ account, project }, filter);
+
+	}).then(refs => {
+
+		//for all refs get their tree
+		let getTrees = [];
+		
+		refs.forEach(ref => {
+			getTrees.push(
+				getFullTree(ref.owner, ref.project, uuidToString(ref._rid)).then(tree => {
+					return Promise.resolve({
+						tree: tree,
+						_rid: uuidToString(ref._rid),
+						_id: uuidToString(ref._id)
+					});
+				})
+			);
+		});
+
+		return Promise.all(getTrees);
+
+	}).then(_subTrees => {
+
+		subTrees = _subTrees;
+		return stash.findStashByFilename({ account, project }, 'json_mpc', treeFileName);
+
+	}).then(buf => {
+
+		if(!buf){
+			return Promise.reject(responseCodes.TREE_NOT_FOUND);
+		} else {
+
+			let tree = JSON.parse(buf);
+
+			//merge the tree if sub projects found
+			console.log('subTrees', subTrees);
+			subTrees.forEach(subTree => {
+	
+				tree.nodes.children && tree.nodes.children.forEach(child => {
+	
+					let targetChild = child.children && child.children.find(_child => _child._id === subTree._id);
+					if (targetChild){
+						targetChild.children = subTree.tree.nodes.children;
+					} 
+
+				});
+			});
+			
+			return Promise.resolve(tree);
+		}
+
+	});
+}
+
 module.exports = {
 	createAndAssignRole,
 	importToyProject,
 	convertToErrorCode,
 	addCollaborator,
 	removeCollaborator,
-	createFederatedProject
+	createFederatedProject,
+	getFullTree
 };

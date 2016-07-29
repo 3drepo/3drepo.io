@@ -50,6 +50,9 @@ router.post('/:project', middlewares.connectQueue, middlewares.canCreateProject,
 //update federated project
 router.put('/:project', middlewares.connectQueue, middlewares.hasWriteAccessToProject, updateProject);
 
+//master tree
+router.get('/:project/revision/master/head/fulltree.json', middlewares.hasReadAccessToProject, getProjectTree);
+
 router.delete('/:project', middlewares.canCreateProject, deleteProject);
 
 router.post('/:project/upload', middlewares.connectQueue, middlewares.canCreateProject, uploadProject);
@@ -453,6 +456,22 @@ function removeCollaborator(req, res ,next){
 	});
 
 
+}
+
+function getProjectTree(req, res, next){
+	'use strict';
+
+	let project = req.params.project;
+	let account = req.params.account;
+
+
+	ProjectHelpers.getFullTree(account, project, 'master').then(tree => {
+
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, tree);
+
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
 }
 
 module.exports = router;
