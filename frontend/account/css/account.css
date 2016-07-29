@@ -326,8 +326,8 @@ account-billing .accountBillingSave img {
   margin-top: 17px;
 }
 
-account-billing #accountBillingAddressInfo {
-  margin: 0;
+account-billing .accountBillingAddressInfo {
+  margin: 0 0 5px;
   font-size: 12px;
   color: rgba(0, 0, 0, 0.4);
 }

@@ -68,4 +68,7 @@ div(layout-fill, layout="column")
 
 			#billingReverseCharge(flex, ng-if="vm.B2B_EU")
 				md-divider(flex="none")
-				label VAT is subject to the Reverse Charge
+				p
+					| This invoice may be subject to the
+					=" "
+					a(target="_blank", href="http://ec.europa.eu/taxation_customs/taxation/vat/topics/invoicing_en.htm") Reverse Charge

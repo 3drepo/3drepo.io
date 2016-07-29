@@ -5040,7 +5040,7 @@ var ViewerManager = {};
 		 * Set up num licenses and price
 		 */
 		function setupLicensesInfo () {
-			vm.numLicenses = vm.subscriptions.length;
+			vm.numLicenses = vm.subscriptions.filter(function (sub) {return sub.inCurrentAgreement;}).length;
 			vm.numNewLicenses = vm.numLicenses;
 			vm.pricePerLicense = vm.plans[0].amount;
 		}
@@ -5126,10 +5126,7 @@ var ViewerManager = {};
 						vm.itemToShow = "repos";
 					}
 
-					// Get initial user info, which may change if returning from PayPal
-					getUserInfo();
-
-					// Billing Page
+					// Handle Billing Page
 					if (vm.itemToShow === "billing") {
 						// Handle return back from PayPal
 						if ($location.search().hasOwnProperty("cancel")) {
@@ -5137,6 +5134,9 @@ var ViewerManager = {};
 							init();
 						}
 						else if ($location.search().hasOwnProperty("token")) {
+							// Get initial user info, which may change if returning from PayPal
+							getUserInfo();
+
 							// Made a payment
 							vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
 							vm.closeDialogEnabled = false;
@@ -5156,6 +5156,9 @@ var ViewerManager = {};
 						else {
 							init();
 						}
+					}
+					else {
+						init();
 					}
 				}
 				else {
@@ -5379,14 +5382,13 @@ var ViewerManager = {};
 		 * Watch subscriptions
 		 */
 		$scope.$watch("vm.subscriptions", function () {
-			console.log(444, vm.subscriptions);
 			vm.unassigned = [];
 			vm.licenses = [];
 			vm.allLicensesAssigned = false;
-			vm.numLicenses = vm.subscriptions.length;
+			vm.numLicenses = vm.subscriptions.filter(function (sub) {return sub.inCurrentAgreement;}).length;
 			vm.toShow = (vm.numLicenses > 0) ? "0+": "0";
 
-			for (i = 0; i < vm.subscriptions.length; i += 1) {
+			for (i = 0; i < vm.numLicenses; i += 1) {
 				if (vm.subscriptions[i].hasOwnProperty("assignedUser")) {
 					vm.licenses.push({
 						user: vm.subscriptions[i].assignedUser,
@@ -5749,7 +5751,7 @@ var ViewerManager = {};
 		 */
 		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
 			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {
-				console.log(vm.uploadedFile);
+				console.log("Uploaded file", vm.uploadedFile);
 				uploadFileToProject(vm.uploadedFile.file);
 			}
 		});
@@ -5758,18 +5760,14 @@ var ViewerManager = {};
 		 * Go to the project viewer
 		 */
 		vm.goToProject = function () {
-			// No timestamp indicates no model previously uploaded
-			if (vm.project.timestamp === null) {
-				vm.uploadFile();
-			}
-			else {
-				// Disable going to viewer if uploading a model
-				var promise = UtilsService.doGet(vm.account.name + "/" + vm.project.name + ".json");
-				promise.then(function (response) {
-					if (response.data.status !== "processing") {
-						$location.path("/" + vm.account.name + "/" + vm.project.name, "_self").search("page", null);
-					}
-				});
+			if (!vm.project.uploading) {
+				if (vm.project.timestamp === null) {
+					// No timestamp indicates no model previously uploaded
+					vm.uploadFile();
+				}
+				else {
+					$location.path("/" + vm.account.name + "/" + vm.project.name, "_self").search("page", null);
+				}
 			}
 		};
 
@@ -5872,6 +5870,7 @@ var ViewerManager = {};
 								}, infoTimeout);
 							}
 							else {
+								console.log("Polling upload!");
 								pollUpload();
 							}
 						});
@@ -6519,7 +6518,8 @@ var ViewerManager = {};
 		vm.collaborators = [];
 		vm.members = [];
 		vm.addDisabled = false;
-		vm.toShow = (vm.subscriptions.length > 1) ? "1+" : vm.subscriptions.length.toString();
+		vm.numSubscriptions = vm.subscriptions.filter(function (sub) {return sub.inCurrentAgreement;}).length;
+		vm.toShow = (vm.numSubscriptions > 1) ? "1+" : vm.numSubscriptions.toString();
 
 		if ($location.search().hasOwnProperty("proj")) {
 			vm.projectName = $location.search().proj;
@@ -6619,7 +6619,7 @@ var ViewerManager = {};
 			var i, iLength, j, jLength,
 				isMember;
 
-			for (i = 0, iLength = vm.subscriptions.length; i < iLength; i += 1) {
+			for (i = 0, iLength = vm.numSubscriptions; i < iLength; i += 1) {
 				if (vm.subscriptions[i].hasOwnProperty("assignedUser") && (vm.subscriptions[i].assignedUser !== vm.account)) {
 					isMember = false;
 					for (j = 0, jLength = vm.members.length; j < jLength; j += 1) {
@@ -6634,14 +6634,15 @@ var ViewerManager = {};
 				}
 			}
 
+			vm.numSubscriptions = vm.subscriptions.filter(function (sub) {return sub.inCurrentAgreement;}).length;
 			vm.noLicensesAssigned =
-				(vm.subscriptions.length > 1) &&
+				(vm.numSubscriptions > 1) &&
 				((vm.collaborators.length + vm.members.length) === 0);
 
 			vm.notAllLicensesAssigned =
 				!vm.noLicensesAssigned &&
-				(vm.subscriptions.length > 1) &&
-				((vm.subscriptions.length - 1) !== (vm.collaborators.length + vm.members.length));
+				(vm.numSubscriptions > 1) &&
+				((vm.numSubscriptions - 1) !== (vm.collaborators.length + vm.members.length));
 
 			vm.allLicenseAssigneesMembers = (vm.collaborators.length === 0);
 		}
@@ -8239,7 +8240,7 @@ var ViewerManager = {};
 					vm.billing = response.data[parseInt(vm.query.item)];
 
 					vm.billing.netAmount = vm.billing.amount- vm.billing.taxAmount;
-					vm.billing.taxPercentage = Math.round(vm.billing.taxAmount / vm.billing.amount * 100);
+					vm.billing.taxPercentage = Math.round(vm.billing.taxAmount / vm.billing.netAmount * 100);
 
 					// Check if B2B EU
 					vm.B2B_EU = (euCountryCodes.indexOf(vm.billing.info.countryCode) !== -1);
@@ -12744,8 +12745,7 @@ angular.module('3drepo')
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("login", login)
-		.directive("mdInputContainer", mdInputContainer);
+		.directive("login", login);
 
 	function login() {
 		return {
@@ -12758,51 +12758,16 @@ angular.module('3drepo')
 		};
 	}
 
-	LoginCtrl.$inject = ["$scope", "$mdDialog", "$location", "Auth", "EventService", "serverConfig"];
+	LoginCtrl.$inject = ["$scope", "Auth", "EventService", "serverConfig"];
 
-	function LoginCtrl($scope, $mdDialog, $location, Auth, EventService, serverConfig) {
+	function LoginCtrl($scope, Auth, EventService, serverConfig) {
 		var vm = this,
-			enterKey = 13,
-			promise;
+			enterKey = 13;
 
 		/*
 		 * Init
 		 */
-		vm.user = {username: "", password: ""};
-		vm.newUser = {username: "", email: "", password: "", tcAgreed: false};
 		vm.version = serverConfig.apiVersion;
-		vm.logo = "/public/images/3drepo-logo-white.png";
-		vm.tcAgreed = false;
-		vm.useReCapthca = false;
-		vm.useRegister = false;
-		vm.registering = false;
-
-		/*
-		 * Auth stuff
-		 */
-		if (serverConfig.hasOwnProperty("auth")) {
-			if (serverConfig.auth.hasOwnProperty("register") && (serverConfig.auth.register)) {
-				vm.useRegister = true;
-				if (serverConfig.auth.hasOwnProperty("captcha") && (serverConfig.auth.captcha)) {
-					vm.useReCapthca = true;
-				}
-			}
-		}
-
-		// Logo
-		if (angular.isDefined(serverConfig.backgroundImage))
-		{
-			vm.enterpriseLogo = serverConfig.backgroundImage;
-		}
-
-		/*
-		 * Watch changes to register fields to clear warning message
-		 */
-		$scope.$watch("vm.newUser", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				vm.registerErrorMessage = "";
-			}
-		}, true);
 
 		/**
 		 * Attempt to login
@@ -12820,40 +12785,6 @@ angular.module('3drepo')
 			}
 		};
 
-		/**
-		 * Attempt to register
-		 *
-		 * @param {Object} event
-		 */
-		vm.register = function(event) {
-			if (angular.isDefined(event)) {
-				if (event.which === enterKey) {
-					doRegister();
-				}
-			}
-			else {
-				doRegister();
-			}
-		};
-
-		vm.showTC = function () {
-			$mdDialog.show({
-				controller: tcDialogController,
-				templateUrl: "tcDialog.html",
-				parent: angular.element(document.body),
-				targetEvent: event,
-				clickOutsideToClose:true,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true,
-				onRemoving: removeDialog
-			});
-		};
-
-		vm.showPage = function (page) {
-			$location.path("/" + page, "_self");
-		};
-
 		/*
 		 * Event watch
 		 */
@@ -12865,90 +12796,6 @@ angular.module('3drepo')
 				}
 			}
 		});
-
-		/**
-		 * Close the dialog
-		 */
-		$scope.closeDialog = function() {
-			$mdDialog.cancel();
-		};
-
-		/**
-		 * Close the dialog by not clicking the close button
-		 */
-		function removeDialog () {
-			$scope.closeDialog();
-		}
-
-		/**
-		 * Dialog controller
-		 */
-		function tcDialogController() {
-		}
-
-		/**
-		 * Do the user registration
-		 */
-		function doRegister() {
-			var data;
-
-			if ((angular.isDefined(vm.newUser.username)) &&
-				(angular.isDefined(vm.newUser.email)) &&
-				(angular.isDefined(vm.newUser.password))) {
-				if (vm.newUser.tcAgreed) {
-					data = {
-						email: vm.newUser.email,
-						password: vm.newUser.password
-					};
-					if (vm.useReCapthca) {
-						data.captcha = vm.reCaptchaResponse;
-					}
-					vm.registering = true;
-					promise = LoginService.register(vm.newUser.username, data);
-					promise.then(function (response) {
-						if (response.status === 200) {
-							vm.showPage("registerRequest");
-						}
-						else if (response.data.value === 62) {
-							vm.registerErrorMessage = "Prove you're not a robot";
-						}
-						else if (response.data.value === 55) {
-							vm.registerErrorMessage = "Username already in use";
-						}
-						else {
-							vm.registerErrorMessage = "Error with registration";
-						}
-						vm.registering = false;
-					});
-				}
-				else {
-					vm.registerErrorMessage = "You must agree to the terms and conditions";
-				}
-			}
-			else {
-				vm.registerErrorMessage = "Please fill all fields";
-			}
-		}
-	}
-
-	/**
-	 * Re-make md-input-container to get around the problem discussed here https://github.com/angular/material/issues/1376
-	 * Taken from mikila85's version of blaise-io's workaround
-	 *
-	 * @param $timeout
-	 * @returns {Function}
-	 */
-	function mdInputContainer ($timeout) {
-		return function ($scope, element) {
-			var ua = navigator.userAgent;
-			if (ua.match(/chrome/i) && !ua.match(/edge/i)) {
-				$timeout(function () {
-					if (element[0].querySelector("input[type=password]:-webkit-autofill")) {
-						element.addClass("md-input-has-value");
-					}
-				}, 100);
-			}
-		};
 	}
 }());
 
@@ -16429,7 +16276,6 @@ var Oculus = {};
 		};
 
 		vm.showPage = function (page) {
-			console.log(page);
 			$location.path("/" + page, "_self");
 		};
 

@@ -12,7 +12,7 @@
 							label Licenses
 							input(type="number", ng-model="vm.numNewLicenses", min="0", max="1000", tdr-focus="true", required)
 						md-input-container(flex)
-							label Payment (£ / month)
+							label Payment (£ / month) **
 							input(type="text", value="{{vm.priceLicenses}}", ng-disabled="true")
 						md-input-container(flex)
 							label Quota available
@@ -23,18 +23,18 @@
 
 					div(layout="row")
 						md-input-container(flex)
-							label First Name
+							label First name
 							input(type="text", ng-model="vm.newBillingAddress.firstName", required)
 						md-input-container(flex)
-							label Last Name
+							label Last name
 							input(type="text", ng-model="vm.newBillingAddress.lastName", required)
 
 					div(layout="row")
 						md-input-container(flex)
-							label Company Name
+							label Business name
 							input(type="text", ng-model="vm.newBillingAddress.company", ng-required="vm.companyNameRequired")
 						md-input-container(flex)
-							label VAT Number
+							label VAT number
 							input(type="text", ng-model="vm.newBillingAddress.vat")
 
 					div(layout="column", flex)
@@ -69,7 +69,9 @@
 							md-button.md-raised.md-accent(ng-disabled="vm.saveDisabled", ng-click="vm.changeSubscription()", aria-label="Save") Update
 							img(src="/public/images/pp-logo-100px.png")
 
-					p#accountBillingAddressInfo Changing your billing information could affect your applicable tax rate.
+					p.accountBillingAddressInfo Changing your billing information could affect your applicable tax rate
+					p.accountBillingAddressInfo * Required field
+					p.accountBillingAddressInfo ** Subject to VAT where applicable
 
 
 			md-tab(label="History")
