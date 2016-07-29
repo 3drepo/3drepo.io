@@ -127,8 +127,8 @@ describe('Billing agreement price from PayPal', function () {
 			noOfLicence: 3, 
 			companyName: '3D Repo', 
 			country: 'GB', 
-			amount: '250', 
-			taxAmount: '50', 
+			amount: '300', 
+			taxAmount: '60', 
 		}, done);
 	});
 
@@ -137,8 +137,8 @@ describe('Billing agreement price from PayPal', function () {
 		makeTest({ 
 			noOfLicence: 2, 
 			country: 'GB', 
-			amount: '166.67', 
-			taxAmount: '33.33', 
+			amount: '200', 
+			taxAmount: '40', 
 		}, done);
 
 	});
@@ -159,8 +159,8 @@ describe('Billing agreement price from PayPal', function () {
 		makeTest({ 
 			noOfLicence: 2, 
 			country: 'DE', 
-			amount: '168.07', 
-			taxAmount: '31.93', 
+			amount: '200', 
+			taxAmount: '38', 
 		}, done);
 
 	});
@@ -204,8 +204,8 @@ describe('Billing agreement price from PayPal', function () {
 				noOfLicence: 2, 
 				companyName: '3D Repo', 
 				country: 'GB', 
-				amount: '166.67', 
-				taxAmount: '33.33'
+				amount: '200', 
+				taxAmount: '40'
 			}, done);
 		});
 	});

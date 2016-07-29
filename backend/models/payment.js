@@ -70,8 +70,8 @@ function getPaymentDateAndAmount(newLicences, oldPayableLicences, paymentDate, l
 
 		lastAnniversaryDate = moment(lastAnniversaryDate).utc();
 		nextPaymentDate = moment(nextPaymentDate).utc();
-		console.log(moment(paymentDate).utc().startOf('date').toISOString());
-		console.log(moment.duration(nextPaymentDate.diff(moment(paymentDate).utc().startOf('date'))).asDays());
+		//console.log(moment(paymentDate).utc().startOf('date').toISOString());
+		//console.log(moment.duration(nextPaymentDate.diff(moment(paymentDate).utc().startOf('date'))).asDays());
 		firstCycleLength.value = Math.round(moment.duration(nextPaymentDate.diff(moment(paymentDate).utc().startOf('date'))).asDays());
 		firstCycleAmount =  firstCycleLength.value / Math.round(moment.duration(nextPaymentDate.diff(lastAnniversaryDate)).asDays()) * regularAmount;
 		firstCycleAmount = Math.round(firstCycleAmount * 100) / 100;
@@ -92,11 +92,13 @@ function getPaymentDateAndAmount(newLicences, oldPayableLicences, paymentDate, l
 	});
 
 
-	firstCycleBeforeTaxAmount = firstCycleAmount / (1 + vat.getByCountryCode(country, isBusiness));
-	firstCycleTaxAmount = firstCycleAmount - firstCycleBeforeTaxAmount;
+	firstCycleBeforeTaxAmount = firstCycleAmount;
+	firstCycleTaxAmount = firstCycleBeforeTaxAmount * vat.getByCountryCode(country, isBusiness);
+	firstCycleAmount = firstCycleBeforeTaxAmount + firstCycleTaxAmount;
 
-	regularBeforeTaxAmount = regularAmount / ( 1 + vat.getByCountryCode(country, isBusiness));
-	regularTaxAmount = regularAmount - regularBeforeTaxAmount;
+	regularBeforeTaxAmount = regularAmount;
+	regularTaxAmount = regularBeforeTaxAmount * vat.getByCountryCode(country, isBusiness);
+	regularAmount = regularBeforeTaxAmount + regularTaxAmount;
 
 
 	firstCycleAmount = roundTo2DP(firstCycleAmount);
