@@ -81,7 +81,7 @@ describe('Billing agreement price from PayPal', function () {
 				"line3": "line3",
 				"firstName": "Nigel",
 				"lastName": "Farage",
-				"company": options.companyName,
+				"vat": options.vat,
 				"city": "city",
 				"postalCode": "A00 2ss020",
 				"countryCode": options.country
@@ -125,7 +125,7 @@ describe('Billing agreement price from PayPal', function () {
 		this.timeout(10000);
 		makeTest({ 
 			noOfLicence: 3, 
-			companyName: '3D Repo', 
+			vat: '9009009', 
 			country: 'GB', 
 			amount: '300', 
 			taxAmount: '60', 
@@ -147,7 +147,7 @@ describe('Billing agreement price from PayPal', function () {
 		this.timeout(10000);
 		makeTest({ 
 			noOfLicence: 3, 
-			companyName: '3D Repo', 
+			vat: '9009009', 
 			country: 'DE', 
 			amount: '300',
 			taxAmount: '0'
@@ -202,7 +202,7 @@ describe('Billing agreement price from PayPal', function () {
 			this.timeout(10000);
 			makeTest({ 
 				noOfLicence: 2, 
-				companyName: '3D Repo', 
+				vat: '9009009', 
 				country: 'GB', 
 				amount: '200', 
 				taxAmount: '40'

@@ -837,7 +837,7 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 			}
 
 			nextPaymentDate = moment(this.customData.nextPaymentDate || this.customData.firstNextPaymentDate).utc().startOf('date');
-			let paymentDateAndAmount = Payment.getPaymentDateAndAmount(plans, existingPlans, startDate, this.customData.lastAnniversaryDate, nextPaymentDate, billingAddress.countryCode, billingAddress.company);
+			let paymentDateAndAmount = Payment.getPaymentDateAndAmount(plans, existingPlans, startDate, this.customData.lastAnniversaryDate, nextPaymentDate, billingAddress.countryCode, billingAddress.vat);
 
 			if (paymentDateAndAmount.regularAmount <= 0 && paymentDateAndAmount.firstCycleAmount <= 0 && !this.customData.billingAgreementId){
 
