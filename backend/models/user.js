@@ -32,6 +32,7 @@ var Payment = require('./payment');
 var moment = require('moment');
 var Subscription = require('./subscription');
 var config = require('../config');
+var vat = require('./vat');
 
 var getSubscription = Subscription.getSubscription;
 
@@ -713,207 +714,222 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	let next;
 	let billingAgreement;
 
-	if(plans.length <= 0){
+	let cleanedVATNumber = billingAddress.vat;
+	if (billingAddress.vat && billingAddress.vat.toUpperCase().startsWith(billingAddress.countryCode)) {
+		cleanedVATNumber = billingAddress.vat.substr(2); 
+	}
 
-		// no changes in no. of licences
-		if(!this.customData.billingAgreementId){
-			next = Promise.resolve({});
+	let checkVAT = billingAddress.vat ? vat.checkVAT(billingAddress.countryCode, cleanedVATNumber) : Promise.resolve(({ valid: true }));
+
+	return checkVAT.then(result => {
+		if(!result.valid){
+			return Promise.reject(responseCodes.INVALID_VAT);
 		} else {
-			next = Payment.updateBillingAddress(this.customData.billingAgreementId, {
-				"line1": billingAddress.line1,
-				"line2": billingAddress.line2,
-				"city": billingAddress.city,
-				"postal_code": billingAddress.postalCode,
-				"country_code": billingAddress.countryCode,
-				"state": billingAddress.state
-			});
-		}
 
+			if(plans.length <= 0){
 
-	} else {
-
-		let currency = 'GBP';
-		let existingPlans = [];
-		let now = new Date();
-		let check = Promise.resolve();
-
-
-		Object.keys(currentCount).forEach(plan => {
-			existingPlans.push({ plan: plan, quantity: currentCount[plan]});
-		});
-
-		plans.forEach(plan => {
-
-			if(getSubscription(plan.plan) && Number.isInteger(plan.quantity) && plan.quantity > 0){
-				
-				// buying new licences
-				//amount += getSubscription(plan.plan).amount * plan.quantity;
-
-				for(let i=0; i<plan.quantity; i++){
-
-					subscriptions.push({
-						plan: plan.plan,
-						createdAt: now,
-						updatedAt: now,
-						active: false
+				// no changes in no. of licences
+				if(!this.customData.billingAgreementId){
+					next = Promise.resolve({});
+				} else {
+					next = Payment.updateBillingAddress(this.customData.billingAgreementId, {
+						"line1": billingAddress.line1,
+						"line2": billingAddress.line2,
+						"city": billingAddress.city,
+						"postal_code": billingAddress.postalCode,
+						"country_code": billingAddress.countryCode,
+						"state": billingAddress.state
 					});
 				}
-
-			} else if (getSubscription(plan.plan) && Number.isInteger(plan.quantity) && plan.quantity < 0) {
-				
-				// canceling licences
-
-				// cancel plans with no assigned user first
-
-				let removeNumber = -plan.quantity;
-				let removeCount = 0;
-
-
-				let subs = this.getActiveSubscriptions().filter(sub => sub.plan === plan.plan && !sub.assignedUser);
-				for(let i=0 ; i < subs.length && removeCount < removeNumber; i++){
-					subs[i].pendingDelete = true;
-					removeCount++;
-				}
-				//allow to remove billingUser's licence if remove count = user's current no. of licences
-				if(removeCount < removeNumber && 
-					this.getActiveSubscriptions().filter(sub => sub.plan === plan.plan).length === removeNumber){
-
-					let subs = this.getActiveSubscriptions().filter(sub => sub.plan === plan.plan && sub.assignedUser === this.customData.billingUser);
-					for(let i=0 ; i < subs.length && removeCount < removeNumber; i++){
-						subs[i].pendingDelete = true;
-						removeCount++;
-					}
-				}
-
-				//check if they can remove licences
-				let quotaAfterDelete = this.getSubscriptionLimits({ excludePendingDelete : true });
-				let totalSize = 0;
-
-				check = new Promise((resolve, reject) => {
-			
-					if(removeCount < removeNumber){
-						reject(responseCodes.REMOVE_ASSIGNED_LICENCE);
-					} else {
-						resolve(User.historyChunksStats(this.user));
-					}
-					
-				}).then(stats => {
-				
-					if(stats){
-						stats.forEach(stat => {
-							totalSize += stat.size; 
-						});
-					}
-				}).then(() => {
-
-					console.log(quotaAfterDelete.spaceLimit - totalSize);
-					if(quotaAfterDelete.spaceLimit - totalSize < 0){
-						return Promise.reject(responseCodes.LICENCE_REMOVAL_SPACE_EXCEEDED);
-					} else{
-						return Promise.resolve();
-					}
-
-				});
-
-				let existingPlan = existingPlans.find(existingPlan => existingPlan.plan === plan.plan);
-				existingPlan.quantity += plan.quantity;
-
-			}
-		});
-
-
-		next = check.then(() => {
-			//console.log('new plan amount', amount);
-
-			let startDate = moment().utc().add(10, 'second');
-			let nextPaymentDate;
-
-			if(this.getActiveSubscriptions({ skipBasic: 'true'}).length === 0){
-				// first time to buy licence and pick today as the anniversary date
-				console.log('First time buying');
-				this.customData.lastAnniversaryDate = startDate.clone().startOf('day').toDate();
-				this.customData.firstNextPaymentDate = Payment.getNextPaymentDate(startDate);
-
-			}
-
-			nextPaymentDate = moment(this.customData.nextPaymentDate || this.customData.firstNextPaymentDate).utc().startOf('date');
-			let paymentDateAndAmount = Payment.getPaymentDateAndAmount(plans, existingPlans, startDate, this.customData.lastAnniversaryDate, nextPaymentDate, billingAddress.countryCode, billingAddress.vat);
-
-			if (paymentDateAndAmount.regularAmount <= 0 && paymentDateAndAmount.firstCycleAmount <= 0 && !this.customData.billingAgreementId){
-
-				return Promise.resolve();
-
-			} else if(paymentDateAndAmount.regularAmount <= 0 && paymentDateAndAmount.firstCycleAmount <= 0){
-				//cancel the old agreement, if any
-
-				var cancel_note = {
-					"note": "You have updated the licence subscriptions."
-				};
-
-				let ids = this.customData.subscriptions.filter(sub => sub.pendingDelete).map(sub => sub._id);
-
-				ids.forEach(id => {
-					this.customData.subscriptions.remove(id);
-				});
-
-				return new Promise((resolve, reject) => {
-					Payment.paypal.billingAgreement.cancel(this.customData.billingAgreementId, cancel_note, (err) => {
-						if (err) {
-							systemLogger.logError(JSON.stringify(err),{ 
-								billingAgreementId: this.customData.billingAgreementId
-							});
-
-							reject(err);
-						} else {
-							systemLogger.logInfo("Billing agreement canceled successfully", { 
-								billingAgreementId: this.customData.billingAgreementId
-							});
-
-							this.customData.billingAgreementId = undefined;
-							resolve();
-						}
-					});
-				});
 
 
 			} else {
 
-				let paypalBillingAddress = {
-					"line1": billingAddress.line1,
-					"line2": billingAddress.line2,
-					"city": billingAddress.city,
-					"postal_code": billingAddress.postalCode,
-					"country_code": billingAddress.countryCode,
-					"state": billingAddress.state
-				};
+				let currency = 'GBP';
+				let existingPlans = [];
+				let now = new Date();
+				let check = Promise.resolve();
 
-				return Payment.getBillingAgreement(
-					billingUser,
-					paypalBillingAddress, 
-					currency, 
-					paymentDateAndAmount.firstCycleAmount, 
-					paymentDateAndAmount.firstCycleBeforeTaxAmount, 
-					paymentDateAndAmount.firstCycleTaxAmount, 
-					paymentDateAndAmount.firstCycleLength,
-					paymentDateAndAmount.regularAmount, 
-					paymentDateAndAmount.regularBeforeTaxAmount, 
-					paymentDateAndAmount.regularTaxAmount, 
-					paymentDateAndAmount.regularCycleLength, 
-					paymentDateAndAmount.startDate
-				).then(_billingAgreement => {
 
-					billingAgreement = _billingAgreement;
-					this.customData.paypalPaymentToken = billingAgreement.paypalPaymentToken;
+				Object.keys(currentCount).forEach(plan => {
+					existingPlans.push({ plan: plan, quantity: currentCount[plan]});
+				});
 
+				plans.forEach(plan => {
+
+					if(getSubscription(plan.plan) && Number.isInteger(plan.quantity) && plan.quantity > 0){
+						
+						// buying new licences
+						//amount += getSubscription(plan.plan).amount * plan.quantity;
+
+						for(let i=0; i<plan.quantity; i++){
+
+							subscriptions.push({
+								plan: plan.plan,
+								createdAt: now,
+								updatedAt: now,
+								active: false
+							});
+						}
+
+					} else if (getSubscription(plan.plan) && Number.isInteger(plan.quantity) && plan.quantity < 0) {
+						
+						// canceling licences
+
+						// cancel plans with no assigned user first
+
+						let removeNumber = -plan.quantity;
+						let removeCount = 0;
+
+
+						let subs = this.getActiveSubscriptions().filter(sub => sub.plan === plan.plan && !sub.assignedUser);
+						for(let i=0 ; i < subs.length && removeCount < removeNumber; i++){
+							subs[i].pendingDelete = true;
+							removeCount++;
+						}
+						//allow to remove billingUser's licence if remove count = user's current no. of licences
+						if(removeCount < removeNumber && 
+							this.getActiveSubscriptions().filter(sub => sub.plan === plan.plan).length === removeNumber){
+
+							let subs = this.getActiveSubscriptions().filter(sub => sub.plan === plan.plan && sub.assignedUser === this.customData.billingUser);
+							for(let i=0 ; i < subs.length && removeCount < removeNumber; i++){
+								subs[i].pendingDelete = true;
+								removeCount++;
+							}
+						}
+
+						//check if they can remove licences
+						let quotaAfterDelete = this.getSubscriptionLimits({ excludePendingDelete : true });
+						let totalSize = 0;
+
+						check = new Promise((resolve, reject) => {
+					
+							if(removeCount < removeNumber){
+								reject(responseCodes.REMOVE_ASSIGNED_LICENCE);
+							} else {
+								resolve(User.historyChunksStats(this.user));
+							}
+							
+						}).then(stats => {
+						
+							if(stats){
+								stats.forEach(stat => {
+									totalSize += stat.size; 
+								});
+							}
+						}).then(() => {
+
+							console.log(quotaAfterDelete.spaceLimit - totalSize);
+							if(quotaAfterDelete.spaceLimit - totalSize < 0){
+								return Promise.reject(responseCodes.LICENCE_REMOVAL_SPACE_EXCEEDED);
+							} else{
+								return Promise.resolve();
+							}
+
+						});
+
+						let existingPlan = existingPlans.find(existingPlan => existingPlan.plan === plan.plan);
+						existingPlan.quantity += plan.quantity;
+
+					}
+				});
+
+
+				next = check.then(() => {
+					//console.log('new plan amount', amount);
+
+					let startDate = moment().utc().add(10, 'second');
+					let nextPaymentDate;
+
+					if(this.getActiveSubscriptions({ skipBasic: 'true'}).length === 0){
+						// first time to buy licence and pick today as the anniversary date
+						console.log('First time buying');
+						this.customData.lastAnniversaryDate = startDate.clone().startOf('day').toDate();
+						this.customData.firstNextPaymentDate = Payment.getNextPaymentDate(startDate);
+
+					}
+
+					nextPaymentDate = moment(this.customData.nextPaymentDate || this.customData.firstNextPaymentDate).utc().startOf('date');
+					let paymentDateAndAmount = Payment.getPaymentDateAndAmount(plans, existingPlans, startDate, this.customData.lastAnniversaryDate, nextPaymentDate, billingAddress.countryCode, billingAddress.vat);
+
+					if (paymentDateAndAmount.regularAmount <= 0 && paymentDateAndAmount.firstCycleAmount <= 0 && !this.customData.billingAgreementId){
+
+						return Promise.resolve();
+
+					} else if(paymentDateAndAmount.regularAmount <= 0 && paymentDateAndAmount.firstCycleAmount <= 0){
+						//cancel the old agreement, if any
+
+						var cancel_note = {
+							"note": "You have updated the licence subscriptions."
+						};
+
+						let ids = this.customData.subscriptions.filter(sub => sub.pendingDelete).map(sub => sub._id);
+
+						ids.forEach(id => {
+							this.customData.subscriptions.remove(id);
+						});
+
+						return new Promise((resolve, reject) => {
+							Payment.paypal.billingAgreement.cancel(this.customData.billingAgreementId, cancel_note, (err) => {
+								if (err) {
+									systemLogger.logError(JSON.stringify(err),{ 
+										billingAgreementId: this.customData.billingAgreementId
+									});
+
+									reject(err);
+								} else {
+									systemLogger.logInfo("Billing agreement canceled successfully", { 
+										billingAgreementId: this.customData.billingAgreementId
+									});
+
+									this.customData.billingAgreementId = undefined;
+									resolve();
+								}
+							});
+						});
+
+
+					} else {
+
+						let paypalBillingAddress = {
+							"line1": billingAddress.line1,
+							"line2": billingAddress.line2,
+							"city": billingAddress.city,
+							"postal_code": billingAddress.postalCode,
+							"country_code": billingAddress.countryCode,
+							"state": billingAddress.state
+						};
+
+						return Payment.getBillingAgreement(
+							billingUser,
+							paypalBillingAddress, 
+							currency, 
+							paymentDateAndAmount.firstCycleAmount, 
+							paymentDateAndAmount.firstCycleBeforeTaxAmount, 
+							paymentDateAndAmount.firstCycleTaxAmount, 
+							paymentDateAndAmount.firstCycleLength,
+							paymentDateAndAmount.regularAmount, 
+							paymentDateAndAmount.regularBeforeTaxAmount, 
+							paymentDateAndAmount.regularTaxAmount, 
+							paymentDateAndAmount.regularCycleLength, 
+							paymentDateAndAmount.startDate
+						).then(_billingAgreement => {
+
+							billingAgreement = _billingAgreement;
+							this.customData.paypalPaymentToken = billingAgreement.paypalPaymentToken;
+
+						});
+
+					}
 				});
 
 			}
-		});
 
-	}
+		}
 
+		return next;
 
-	return next.then(() => {
+	}).then(() => {
 		//store billing info locally
 		console.log(billingAddress);
 		this.customData.billingInfo = billingAddress;
