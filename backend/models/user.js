@@ -687,8 +687,8 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	//count user current plans
 	this.customData.subscriptions.forEach(subscription => {
 
-		//ignore basic plan
-		if (subscription.plan === Subscription.getBasicPlan().plan) {
+		//ignore basic plan or plans not inCurrentAgreement
+		if (subscription.plan === Subscription.getBasicPlan().plan || !subscription.inCurrentAgreement) {
 			return;
 		}
 
@@ -790,16 +790,16 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 						let removeCount = 0;
 
 
-						let subs = this.getActiveSubscriptions().filter(sub => sub.plan === plan.plan && !sub.assignedUser);
+						let subs = this.getActiveSubscriptions({excludeNotInAgreement: true}).filter(sub => sub.plan === plan.plan && !sub.assignedUser);
 						for(let i=0 ; i < subs.length && removeCount < removeNumber; i++){
 							subs[i].pendingDelete = true;
 							removeCount++;
 						}
 						//allow to remove billingUser's licence if remove count = user's current no. of licences
 						if(removeCount < removeNumber && 
-							this.getActiveSubscriptions().filter(sub => sub.plan === plan.plan).length === removeNumber){
+							this.getActiveSubscriptions({ excludeNotInAgreement: true }).filter(sub => sub.plan === plan.plan).length === removeNumber){
 
-							let subs = this.getActiveSubscriptions().filter(sub => sub.plan === plan.plan && sub.assignedUser === this.customData.billingUser);
+							let subs = this.getActiveSubscriptions( {excludeNotInAgreement:  true}).filter(sub => sub.plan === plan.plan && sub.assignedUser === this.customData.billingUser);
 							for(let i=0 ; i < subs.length && removeCount < removeNumber; i++){
 								subs[i].pendingDelete = true;
 								removeCount++;
@@ -1298,7 +1298,12 @@ schema.methods.getActiveSubscriptions = function(options){
 			pendingDeleteCond = !sub.pendingDelete;
 		}
 
-		return basicCond && pendingDeleteCond && sub.active && (sub.expiredAt > now || !sub.expiredAt);
+		let inCurrentAgreementCond = true;
+		if(options.excludeNotInAgreement){
+			inCurrentAgreementCond = sub.inCurrentAgreement;
+		} 
+
+		return basicCond && pendingDeleteCond && sub.active && (sub.expiredAt > now || !sub.expiredAt) && inCurrentAgreementCond;
 	});
 	
 
