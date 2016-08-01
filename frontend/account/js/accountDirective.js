@@ -59,10 +59,7 @@
 						vm.itemToShow = "repos";
 					}
 
-					// Get initial user info, which may change if returning from PayPal
-					getUserInfo();
-
-					// Billing Page
+					// Handle Billing Page
 					if (vm.itemToShow === "billing") {
 						// Handle return back from PayPal
 						if ($location.search().hasOwnProperty("cancel")) {
@@ -70,6 +67,9 @@
 							init();
 						}
 						else if ($location.search().hasOwnProperty("token")) {
+							// Get initial user info, which may change if returning from PayPal
+							getUserInfo();
+
 							// Made a payment
 							vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
 							vm.closeDialogEnabled = false;
@@ -89,6 +89,9 @@
 						else {
 							init();
 						}
+					}
+					else {
+						init();
 					}
 				}
 				else {

@@ -70,7 +70,7 @@
 		 */
 		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
 			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {
-				console.log(vm.uploadedFile);
+				console.log("Uploaded file", vm.uploadedFile);
 				uploadFileToProject(vm.uploadedFile.file);
 			}
 		});
@@ -79,18 +79,14 @@
 		 * Go to the project viewer
 		 */
 		vm.goToProject = function () {
-			// No timestamp indicates no model previously uploaded
-			if (vm.project.timestamp === null) {
-				vm.uploadFile();
-			}
-			else {
-				// Disable going to viewer if uploading a model
-				var promise = UtilsService.doGet(vm.account.name + "/" + vm.project.name + ".json");
-				promise.then(function (response) {
-					if (response.data.status !== "processing") {
-						$location.path("/" + vm.account.name + "/" + vm.project.name, "_self").search("page", null);
-					}
-				});
+			if (!vm.project.uploading) {
+				if (vm.project.timestamp === null) {
+					// No timestamp indicates no model previously uploaded
+					vm.uploadFile();
+				}
+				else {
+					$location.path("/" + vm.account.name + "/" + vm.project.name, "_self").search("page", null);
+				}
 			}
 		};
 
@@ -193,6 +189,7 @@
 								}, infoTimeout);
 							}
 							else {
+								console.log("Polling upload!");
 								pollUpload();
 							}
 						});

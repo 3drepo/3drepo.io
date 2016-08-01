@@ -47,14 +47,13 @@
 		 * Watch subscriptions
 		 */
 		$scope.$watch("vm.subscriptions", function () {
-			console.log(444, vm.subscriptions);
 			vm.unassigned = [];
 			vm.licenses = [];
 			vm.allLicensesAssigned = false;
-			vm.numLicenses = vm.subscriptions.length;
+			vm.numLicenses = vm.subscriptions.filter(function (sub) {return sub.inCurrentAgreement;}).length;
 			vm.toShow = (vm.numLicenses > 0) ? "0+": "0";
 
-			for (i = 0; i < vm.subscriptions.length; i += 1) {
+			for (i = 0; i < vm.numLicenses; i += 1) {
 				if (vm.subscriptions[i].hasOwnProperty("assignedUser")) {
 					vm.licenses.push({
 						user: vm.subscriptions[i].assignedUser,

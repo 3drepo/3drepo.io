@@ -12,7 +12,7 @@
 							label Licenses
 							input(type="number", ng-model="vm.numNewLicenses", min="0", max="1000", tdr-focus="true", required)
 						md-input-container(flex)
-							label Payment (£ / month)
+							label Payment (£ / month) **
 							input(type="text", value="{{vm.priceLicenses}}", ng-disabled="true")
 						md-input-container(flex)
 							label Quota available
@@ -23,18 +23,18 @@
 
 					div(layout="row")
 						md-input-container(flex)
-							label First Name
+							label First name
 							input(type="text", ng-model="vm.newBillingAddress.firstName", required)
 						md-input-container(flex)
-							label Last Name
+							label Last name
 							input(type="text", ng-model="vm.newBillingAddress.lastName", required)
 
 					div(layout="row")
 						md-input-container(flex)
-							label Company Name
+							label Business name
 							input(type="text", ng-model="vm.newBillingAddress.company", ng-required="vm.companyNameRequired")
 						md-input-container(flex)
-							label VAT Number
+							label VAT number
 							input(type="text", ng-model="vm.newBillingAddress.vat")
 
 					div(layout="column", flex)
@@ -66,10 +66,12 @@
 
 					.accountBillingSave
 						div(layout="row", layout-align="start")
-							md-button.md-raised.md-accent(ng-disabled="vm.saveDisabled", ng-click="vm.changeSubscription()", aria-label="Save") Update
+							md-button.md-raised.md-accent(ng-disabled="vm.saveDisabled", ng-click="vm.changeSubscription()", aria-label="Save") Confirm
 							img(src="/public/images/pp-logo-100px.png")
 
-					p#accountBillingAddressInfo Changing your billing information could affect your applicable tax rate.
+					p.accountBillingAddressInfo Changing your billing information could affect your applicable tax rate
+					p.accountBillingAddressInfo * Required field
+					p.accountBillingAddressInfo ** Subject to VAT where applicable
 
 
 			md-tab(label="History")
@@ -77,23 +79,30 @@
 					section
 						md-subheader
 							div(layout="row", layout-align="start")
+								label(flex="5") No.
 								label(flex="20") ID
 								label(flex="15") Date
-								label(flex="20") Description
-								label(flex="20") Payment Method
-								label(flex="15") Amount (£)
+								label(flex="10") Status
+								label(flex="25") Description
+								label(flex="10") Payment
+								label(flex="10") Amount (£)
+								span(flex="5")
 
 					div
 						.accountBillingHistoryListItem(layout="row", layout-align="start start", ng-repeat="billing in vm.billings")
+							md-input-container(flex="5")
+								input(type="text", value="1", ng-disabled="true", aria-label="number")
 							md-input-container(flex="20")
 								input(type="text", value="{{billing.billingAgreementId}}", ng-disabled="true", aria-label="id")
 							md-input-container(flex="15")
 								input(type="text", value="{{billing.createdAt | date:'dd-MM-yyyy'}}", ng-disabled="true", aria-label="date")
-							md-input-container(flex="20")
-								input(type="text", value="{{billing.items[0].name}}", ng-disabled="true", aria-label="description")
-							md-input-container(flex="20")
+							md-input-container(flex="10")
+								input(type="text", value="Pending", ng-disabled="true", aria-label="status")
+							md-input-container(flex="25")
+								input(type="text", value="{{billing.items[0].description}}", ng-disabled="true", aria-label="description")
+							md-input-container(flex="10")
 								input(type="text", value="{{billing.gateway}}", ng-disabled="true", aria-label="paymentMethod")
-							md-input-container(flex="15")
+							md-input-container(flex="10")
 								input(type="text", value="{{billing.amount}}", ng-disabled="true", aria-label="amount")
-							md-button.md-icon-button.md-accent(aria-label="Download", ng-click="vm.downloadBilling($index)", flex="none")
+							md-button.md-icon-button.md-accent(aria-label="Download", ng-click="vm.downloadBilling($index)", flex="5")
 								md-icon.angular-material-icons cloud_download

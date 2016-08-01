@@ -62,10 +62,14 @@
 					vm.billing = response.data[parseInt(vm.query.item)];
 
 					vm.billing.netAmount = vm.billing.amount- vm.billing.taxAmount;
-					vm.billing.taxPercentage = Math.round(vm.billing.taxAmount / vm.billing.amount * 100);
+					vm.billing.taxPercentage = Math.round(vm.billing.taxAmount / vm.billing.netAmount * 100);
 
 					// Check if B2B EU
 					vm.B2B_EU = (euCountryCodes.indexOf(vm.billing.info.countryCode) !== -1);
+
+					// Check if pro-forma
+					vm.billing.status = "pending";
+					vm.proForma = (vm.billing.status === "pending");
 
 					// Get country from country code
 					if (serverConfig.hasOwnProperty("countries")) {
