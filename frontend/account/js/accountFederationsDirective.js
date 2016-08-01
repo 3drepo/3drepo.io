@@ -43,7 +43,6 @@
 		var vm = this;
 
 		// Init
-		vm.showInfo = true;
 		vm.federations = [
 			{
 				name: "Cheese",
@@ -55,7 +54,6 @@
 			}
 		];
 		vm.showInfo = (vm.federations.length === 0);
-		vm.newFederationData = {};
 
 		/*
 		 * Watch accounts input
@@ -67,18 +65,10 @@
 		});
 
 		/*
-		 * Watch the new federation name
-		 */
-		/*
-		$scope.$watch("vm.newFederationData.name", function () {
-			vm.newFederationButtonDisabled = (angular.isUndefined(vm.newFederationData.name)) || (vm.newFederationData.name === "");
-		});
-		*/
-
-		/*
 		 * Watch for change in edited federation
 		 */
 		$scope.$watch("vm.newFederationData", function () {
+			console.log(vm.newFederationData, vm.federationOriginalData);
 			if (vm.federationOriginalData === null) {
 				vm.newFederationButtonDisabled = (angular.isUndefined(vm.newFederationData.name)) || (vm.newFederationData.name === "");
 			}
@@ -147,6 +137,13 @@
 		 * Save a federation
 		 */
 		vm.saveFederation = function () {
+			if (vm.federationOriginalData === null) {
+				vm.federations.push(vm.newFederationData);
+			}
+			else {
+				vm.federationOriginalData.projects = vm.newFederationData.projects;
+			}
+			vm.closeDialog();
 		};
 
 		/**
@@ -156,8 +153,22 @@
 		 * @param index
 		 */
 		vm.editFederation = function (event, index) {
+			var i, j, k, iLength, jLength, kLength;
+
 			vm.federationOriginalData = vm.federations[index];
 			vm.newFederationData = angular.copy(vm.federationOriginalData);
+
+			for (i = 0, iLength = vm.accountsCopy.length; i < iLength; i += 1) {
+				for (j = 0, jLength = vm.accountsCopy[i].projects.length; j < jLength; j += 1) {
+					vm.accountsCopy[i].projects[j].federated = false;
+					for (k = 0, kLength = vm.federationOriginalData.projects.length; k < kLength; k += 1) {
+						if (vm.federationOriginalData.projects[k].project.project === vm.accountsCopy[i].projects[j].project) {
+							vm.accountsCopy[i].projects[j].federated = true;
+						}
+					}
+				}
+			}
+
 			UtilsService.showDialog("federationDialog.html", $scope, event);
 		};
 	}
