@@ -1210,7 +1210,7 @@ schema.methods.executeBillingAgreement = function(token, billingAgreementId, bil
 	if(items.length > 0){
 
 
-		let billAmount = billingAgreement.plan.payment_definitions.find(def => def.type === 'TRIAL') || billingAgreement.plan.payment_definitions.find(def => def.type === 'REGULAR')
+		let billAmount = billingAgreement.plan.payment_definitions.find(def => def.type === 'TRIAL') || billingAgreement.plan.payment_definitions.find(def => def.type === 'REGULAR');
 		let nextAmount = billingAgreement.plan.payment_definitions.find(def => def.type === 'REGULAR');
 		
 		let paymentInfo = {

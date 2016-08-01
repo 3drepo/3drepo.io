@@ -177,7 +177,68 @@ describe('Enrolling to a subscription', function () {
 			// set fake billing id
 			User.findByUserName(username).then(user => {
 
-				user.executeBillingAgreement('EC-000000000', billingId);
+				user.executeBillingAgreement('EC-000000000', billingId, {
+				  "id": billingId,
+				  "name": "3D Repo Licenses",
+				  "description": "Regualr monthly recurring payment £360, starts on 1st Aug 2016",
+				  "plan": {
+				    "id": "P-0E4438980T7694020I2RECCQ",
+				    "state": "ACTIVE",
+				    "name": "3D Repo Licences",
+				    "description": "3D Repo Licence",
+				    "type": "INFINITE",
+				    "payment_definitions": [
+				      {
+				        "id": "PD-4N463346D9639034UI2RECCQ",
+				        "name": "Regular monthly price",
+				        "type": "REGULAR",
+				        "frequency": "Month",
+				        "amount": {
+				          "currency": "GBP",
+				          "value": "300"
+				        },
+				        "cycles": "0",
+				        "charge_models": [
+				          {
+				            "id": "CHM-3R965001UL5436050I2RECCQ",
+				            "type": "TAX",
+				            "amount": {
+				              "currency": "GBP",
+				              "value": "60"
+				            }
+				          }
+				        ],
+				        "frequency_interval": "1"
+				      }
+				    ],
+				    "merchant_preferences": {
+				      "setup_fee": {
+				        "currency": "GBP",
+				        "value": "0"
+				      },
+				      "max_fail_attempts": "0",
+				      "return_url": "http://127.0.0.1/payment_testing?page=billing",
+				      "cancel_url": "http://127.0.0.1/payment_testing?page=billing&cancel=1",
+				      "auto_bill_amount": "YES",
+				      "initial_fail_amount_action": "CONTINUE"
+				    }
+				  },
+				  "links": [
+				    {
+				      "href": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-5EL17555M32938829",
+				      "rel": "approval_url",
+				      "method": "REDIRECT"
+				    },
+				    {
+				      "href": "https://api.sandbox.paypal.com/v1/payments/billing-agreements/EC-5EL17555M32938829/agreement-execute",
+				      "rel": "execute",
+				      "method": "POST"
+				    }
+				  ],
+				  "start_date": "2016-08-01T15:04:22Z",
+				  "httpStatusCode": 201
+				}
+			);
 				return user.save();
 
 			}).then(() => {
@@ -186,18 +247,18 @@ describe('Enrolling to a subscription', function () {
 				let nextPayDateString = moment(getNextPaymentDate(new Date())).tz('America/Los_Angeles').format('HH:mm:ss MMM DD, YYYY z')
 
 				let fakePaymentMsg = 
-					'mc_gross=100.00&outstanding_balance=0.00&period_type= Regular&next_payment_date=' + nextPayDateString
-					+ '&protection_eligibility=Eligible&payment_cycle=Monthly&address_status=unconfirmed&tax=0.00&payer_id=2PXA53TAV2ZVA'
+					'mc_gross=360.00&outstanding_balance=0.00&period_type= Regular&next_payment_date=' + nextPayDateString
+					+ '&protection_eligibility=Eligible&payment_cycle=Monthly&address_status=unconfirmed&tax=60.00&payer_id=2PXA53TAV2ZVA'
 					+ '&address_street=na&payment_date=' + paymentDate + '&payment_status=Completed'
-					+ '&product_name=3D Repo Licence subscription.This month\'s pro-rata price: 0, then each month: £100&charset=UTF-8'
-					+ '&recurring_payment_id=' + billingId + '&address_zip=A00 2ss020&first_name=repo&mc_fee=4.10&address_country_code=HU'
-					+ '&address_name=3drepo&notify_version=3.8&amount_per_cycle=100.00&payer_status=verified&currency_code=GBP'
-					+ '&business=test3drepo@example.org&address_country=Hungary&address_city=London'
+					+ '&product_name=abc&charset=UTF-8'
+					+ '&recurring_payment_id=' + billingId + '&address_zip=A00 2ss020&first_name=repo&mc_fee=0.00&address_country_code=GB'
+					+ '&address_name=3drepo&notify_version=3.8&amount_per_cycle=360.00&payer_status=verified&currency_code=GBP'
+					+ '&business=test3drepo@example.org&address_country=UK&address_city=London'
 					+ '&verify_sign=AiPC9BjkCyDFQXbSkoZcgqH3hpacASD7TZ5vh-uuZ2-Goi9dUDXNh4Wy&payer_email=test3drepo_hungary@example.org'
-					+ '&initial_payment_amount=0.00&profile_status=Active&amount=100.00&txn_id=7VE78102JM363223J&payment_type=instant'
+					+ '&initial_payment_amount=0.00&profile_status=Active&amount=360.00&txn_id=7VE78102JM363223J&payment_type=instant'
 					+ '&last_name=3d&address_state=&receiver_email=test3drepo@example.org&payment_fee=&receiver_id=XNMSZ2D4UNB6G'
 					+ '&txn_type=recurring_payment&mc_currency=GBP&residence_country=HU&test_ipn=1'
-					+ '&transaction_subject=3D Repo Licence subscription.This month\'s pro-rata price: 0, then each month: £100'
+					+ '&transaction_subject=abc'
 					+ '&payment_gross=&shipping=0.00&product_type=1&time_created=' + paymentDate + '&ipn_track_id=78a335fad3b16';
 
 					agent.post(`/payment/paypal/food`)

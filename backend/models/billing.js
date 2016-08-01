@@ -63,7 +63,7 @@ schema.statics.hasPendingBill = function(account, billingAgreementId){
 		console.log('count', count);
 		return Promise.resolve(count > 0);
 	});
-}
+};
 
 schema.statics.findAndRemovePendingBill = function(account, billingAgreementId){
 	return this.findOne({account}, {billingAgreementId: billingAgreementId, pending: true}).then(billing => {
