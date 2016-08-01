@@ -849,7 +849,7 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 					let startDate = moment().utc().add(10, 'second');
 					let nextPaymentDate;
 
-					if(this.getActiveSubscriptions({ skipBasic: 'true'}).length === 0){
+					if(this.getActiveSubscriptions({ skipBasic: 'true', excludeNotInAgreement: true}).length === 0){
 						// first time to buy licence and pick today as the anniversary date
 						console.log('First time buying');
 						this.customData.lastAnniversaryDate = startDate.clone().startOf('day').toDate();
