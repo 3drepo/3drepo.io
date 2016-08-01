@@ -8238,7 +8238,7 @@ var ViewerManager = {};
 					(parseInt(vm.query.item) < response.data.length)) {
 					vm.showBilling = true;
 					vm.billing = response.data[parseInt(vm.query.item)];
-
+					console.log('periodEnd', vm.billing.periodEnd);
 					vm.billing.netAmount = vm.billing.amount- vm.billing.taxAmount;
 					vm.billing.taxPercentage = Math.round(vm.billing.taxAmount / vm.billing.netAmount * 100);
 
@@ -17361,6 +17361,14 @@ var Oculus = {};
 				}
 
 				return projectDate;
+			};
+		})
+
+
+		.filter("prettyGMTDate", function () {
+			return function(input) {
+				var date = new Date(input);
+				return date.toISOString().substr(0,10);
 			};
 		});
 

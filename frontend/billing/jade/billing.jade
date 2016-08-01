@@ -64,7 +64,7 @@ div(layout-fill, layout="column")
 			#billingProductInfo(layout="row", flex="none")
 				div(flex="30", layout="column", layout-align="start")
 					label {{vm.billing.items[0].description}}
-					label#billingPeriod ({{vm.billing.periodStart | prettyDate:false}} to {{vm.billing.periodEnd | prettyDate:false}})
+					label#billingPeriod ({{vm.billing.periodStart | prettyGMTDate }} to {{vm.billing.periodEnd | prettyGMTDate }})
 				label(flex="15") {{vm.billing.items.length}}
 				label(flex="15") £100.00
 				label(flex="10") £{{vm.billing.netAmount}}
