@@ -8245,6 +8245,10 @@ var ViewerManager = {};
 					// Check if B2B EU
 					vm.B2B_EU = (euCountryCodes.indexOf(vm.billing.info.countryCode) !== -1);
 
+					// Check if pro-forma
+					vm.billing.status = "pending";
+					vm.proForma = (vm.billing.status === "pending");
+
 					// Get country from country code
 					if (serverConfig.hasOwnProperty("countries")) {
 						for (i = 0, length = serverConfig.countries.length; i < length; i += 1) {

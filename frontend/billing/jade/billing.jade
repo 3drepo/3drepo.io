@@ -9,8 +9,8 @@ div(layout-fill, layout="column")
 
 	md-content(ng-if="vm.showBilling", layout="row", flex="none", layout-align="center")
 		div(layout="column", style="width:90%")
-			#billingCompanyAddress(layout="row", layout-align="space-between start")
-				div(layout="column", flex="none")
+			#billingCompanyAddress(layout="row", layout-align="start start")
+				div(layout="column", flex="45")
 					label.md-title 3D Repo
 					label c/o EIT Digital
 					label Centre House Block C
@@ -20,13 +20,18 @@ div(layout-fill, layout="column")
 					label VAT ID: GB 206 9090 15
 					a(href="mailto:support@3drepo.org") support@3drepo.org
 
+				label.md-display-1(ng-if="vm.proForma") Pro-forma
+
+				span(flex)
+
 				md-button.md-raised.md-accent.noPrint(ng-click="vm.print()") Print
 
 			p.md-headline(flex="none") Invoice
 
 			.billingInfoTitle(layout="row", flex="none")
 				label(flex="30") To
-				label(flex="20") Date
+				label(flex="30") Date
+				label(flex="20") Invoice No.
 				label Invoice ID
 
 			md-divider(flex="none")
@@ -41,29 +46,30 @@ div(layout-fill, layout="column")
 					label {{vm.billing.info.postalCode}}
 					label {{vm.billing.info.country}}
 					label(ng-if="vm.billing.info.vat") VAT ID: {{vm.billing.info.vat}}
-				label(flex="20") {{vm.billing.createdAt | invoiceDate}} GMT
+				label(flex="30") {{vm.billing.createdAt | invoiceDate}} GMT
+				label(flex="20") 1
 				label {{vm.billing.billingAgreementId}}
 
 			.billingInfoTitle(layout="row", flex="none")
 				label(flex="30") Product
-				label(flex="10") Quantity
-				label(flex="10") Unit Price
+				label(flex="15") Quantity
+				label(flex="15") Unit Price
 				label(flex="10") Net
 				label(flex="10") VAT (%)
-				label(flex="20") VAT
+				label(flex="10") VAT
 				label Total
 
 			md-divider(flex="none")
 
 			#billingProductInfo(layout="row", flex="none")
 				div(flex="30", layout="column", layout-align="start")
-					label {{vm.billing.items[0].name}}
+					label {{vm.billing.items[0].description}}
 					label#billingPeriod ({{vm.billing.periodStart | prettyDate:false}} to {{vm.billing.periodEnd | prettyDate:false}})
-				label(flex="10") {{vm.billing.items.length}}
-				label(flex="10") £100.00
+				label(flex="15") {{vm.billing.items.length}}
+				label(flex="15") £100.00
 				label(flex="10") £{{vm.billing.netAmount}}
 				label(flex="10") {{vm.billing.taxPercentage}}%
-				label(flex="20") £{{vm.billing.taxAmount}}
+				label(flex="10") £{{vm.billing.taxAmount}}
 				label £{{vm.billing.amount}}
 
 			#billingReverseCharge(flex, ng-if="vm.B2B_EU")
