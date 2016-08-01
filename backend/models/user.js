@@ -721,6 +721,11 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 
 	let checkVAT = billingAddress.vat ? vat.checkVAT(billingAddress.countryCode, cleanedVATNumber) : Promise.resolve(({ valid: true }));
 
+	if(config.vat && config.vat.debug && config.vat.debug.skipNonGBChecking && billingAddress.countryCode !== 'GB'){
+		checkVAT = Promise.resolve(({ valid: true }));
+	}
+
+
 	return checkVAT.then(result => {
 		if(!result.valid){
 			return Promise.reject(responseCodes.INVALID_VAT);

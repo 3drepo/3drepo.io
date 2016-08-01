@@ -125,7 +125,7 @@ describe('Billing agreement price from PayPal', function () {
 		this.timeout(10000);
 		makeTest({ 
 			noOfLicence: 3, 
-			vat: '9009009', 
+			vat: '206909015', 
 			country: 'GB', 
 			amount: '300', 
 			taxAmount: '60', 
@@ -202,7 +202,7 @@ describe('Billing agreement price from PayPal', function () {
 			this.timeout(10000);
 			makeTest({ 
 				noOfLicence: 2, 
-				vat: '9009009', 
+				vat: '206909015', 
 				country: 'GB', 
 				amount: '200', 
 				taxAmount: '40'

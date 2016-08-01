@@ -128,11 +128,28 @@ describe('Enrolling to a subscription', function () {
 			"city": "London",
 			"postalCode": "A00 2ss020",
 			"countryCode": "GB",
-			"vat": "90090-0909"
+			"vat": "123456"
 		}
 	};
 
+
+	it('should fail if VAT is invalid', function(done){
+		this.timeout(10000);
+
+		agent.post(`/${username}/subscriptions`)
+		.send(plans)
+		.expect(400, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.INVALID_VAT.value);
+			done(err);
+		});
+	});
+
+
+
 	it('should succee (GB business)', function(done){
+
+		plans.billingAddress.vat = '206909015';
+
 		this.timeout(10000);
 
 		agent.post(`/${username}/subscriptions`)
