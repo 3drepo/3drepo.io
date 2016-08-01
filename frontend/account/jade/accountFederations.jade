@@ -1,6 +1,12 @@
-.userContent
+.userContent(ng-if="vm.showInfo")
 	.cardInfo
 		p You do not currently have any federations set up
+
+md-list(ng-if="!vm.showInfo")
+	md-list-item(ng-repeat="federation in vm.federations", ng-click="vm.editFederation($event, $index)")
+		.md-list-item-text
+			p {{federation.name}}
+
 div(layout="row" layout-align="end" layout-margin)
-	md-button.md-accent.md-fab.md-mini(aria-label="Add" ng-click="vm.setupFederation($event)")
+	md-button.md-accent.md-fab.md-mini(aria-label="Add" ng-click="vm.setupNewFederation($event)")
 		md-icon.angular-material-icons add
