@@ -33,6 +33,7 @@ var moment = require('moment');
 var Subscription = require('./subscription');
 var config = require('../config');
 var vat = require('./vat');
+var Counter = require('./counter');
 
 var getSubscription = Subscription.getSubscription;
 
@@ -80,6 +81,7 @@ var schema = mongoose.Schema({
 			plan: String,
 			inCurrentAgreement: Boolean,
 			pendingDelete: Boolean,
+			//newPurchased: Boolean,
 			database: String
 		}],
 		billingInfo:{
@@ -773,6 +775,7 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 								plan: plan.plan,
 								createdAt: now,
 								updatedAt: now,
+								inCurrentAgreement: true,
 								active: false
 							});
 						}
@@ -1029,31 +1032,31 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 		dbUser.customData.nextPaymentDate = moment(paymentInfo.nextPaymentDate).utc().startOf('date').toDate();
 
-		let inCurrentAgreementCount = dbUser.customData.subscriptions.filter(sub => sub.inCurrentAgreement).length;
+
+		// set to to next 3rd of next month, give 3 days cushion
+		let expiredAt = moment(paymentInfo.nextPaymentDate).utc()
+			.add(3, 'day')
+			.hours(0).minutes(0).seconds(0).milliseconds(0)
+			.toDate();
+
+		let newPurchaseCount = dbUser.customData.subscriptions.filter(sub => sub.inCurrentAgreement && (!sub.expiredAt || sub.expiredAt < expiredAt)).length;
+
 		dbUser.customData.subscriptions.forEach(subscription => {
 
 			if(subscription.inCurrentAgreement){
-
-				// set to to next 3rd of next month, give 3 days cushion
-				let expiredAt = moment(paymentInfo.nextPaymentDate).utc()
-					.add(3, 'day')
-					.hours(0).minutes(0).seconds(0).milliseconds(0)
-					.toDate();
-
-
 
 				subscription.limits = getSubscription(subscription.plan).limits;
 
 				if(!subscription.expiredAt || subscription.expiredAt < expiredAt){
 					subscription.expiredAt = expiredAt;
-					subscription.active = true;
+					//subscription.active = true;
 
 					items.push({
 						name: subscription.plan,
 						description: getSubscription(subscription.plan).description,
 						currency: getSubscription(subscription.plan).currency,
-						amount: Math.round(paymentInfo.amount / inCurrentAgreementCount * 100) / 100,
-						taxAmount: Math.round(paymentInfo.taxAmount / inCurrentAgreementCount * 100) / 100
+						amount: Math.round(paymentInfo.amount / newPurchaseCount * 100) / 100,
+						taxAmount: Math.round(paymentInfo.taxAmount / newPurchaseCount * 100) / 100
 					});
 				}
 			
@@ -1063,40 +1066,47 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 		if(paymentInfo.createBilling){
 
-
-			let nextAmount = 0;
-
-			dbUser.customData.subscriptions.filter(sub => sub.inCurrentAgreement).forEach(sub => {
-				nextAmount += getSubscription(sub.plan).amount;
-			});
-
 			let billing = Billing.createInstance({ account });
 
-			billing.raw = raw;
-			billing.gateway = paymentInfo.gateway;
-			billing.createdAt = new Date();
-			billing.currency = paymentInfo.currency;
-			billing.amount = paymentInfo.amount;
-			billing.billingAgreementId = billingAgreementId;
-			billing.items = items;
-			billing.nextPaymentDate = paymentInfo.nextPaymentDate;
-			billing.taxAmount = paymentInfo.taxAmount;
-			billing.nextPaymentAmount = nextAmount;
+			Billing.findAndRemovePendingBill(account, billingAgreementId).then(pendingBill => {
 
+				if(pendingBill){
+					return Promise.resolve(pendingBill.invoiceNo);
+				} else {
+					return Counter.findAndIncInvoiceNumber().then(counter => {
+						return Promise.resolve('SO-' + counter.count);
+					});
+				}
 
-			//copy current billing info from user to billing
-			billing.info = dbUser.customData.billingInfo;
+			}).then(invoiceNo => {
 
-			billing.periodStart = dbUser.customData.lastAnniversaryDate;
-			billing.periodEnd = moment(dbUser.customData.nextPaymentDate)
-				.utc()
-				.subtract(1, 'day')
-				.endOf('date')
-				.toDate();
+				billing.raw = raw;
+				billing.gateway = paymentInfo.gateway;
+				billing.createdAt = new Date();
+				billing.currency = paymentInfo.currency;
+				billing.amount = paymentInfo.amount;
+				billing.billingAgreementId = billingAgreementId;
+				billing.items = items;
+				billing.nextPaymentDate = paymentInfo.nextPaymentDate;
+				billing.taxAmount = paymentInfo.taxAmount;
+				billing.nextPaymentAmount = paymentInfo.nextAmount;
+				billing.invoiceNo = invoiceNo;
 
-			billing.save().catch( err => {
-				console.log('Billing error', err);
+				//copy current billing info from user to billing
+				billing.info = dbUser.customData.billingInfo;
+
+				billing.periodStart = dbUser.customData.lastAnniversaryDate;
+				billing.periodEnd = moment(dbUser.customData.nextPaymentDate)
+					.utc()
+					.subtract(1, 'day')
+					.endOf('date')
+					.toDate();
+
+				billing.save().catch( err => {
+					console.log('Billing error', err);
+				});
 			});
+
 		}
 
 
@@ -1132,17 +1142,18 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 };
 
-schema.methods.executeBillingAgreement = function(token, billingAgreementId){
+schema.methods.executeBillingAgreement = function(token, billingAgreementId, billingAgreement){
 	'use strict';
 
 	this.customData.paypalPaymentToken = token;
 	this.customData.billingAgreementId = billingAgreementId;
 
 	let assignedBillingUser = false;
+	let items = [];
 
 	this.customData.subscriptions.forEach(subscription => {
 
-		if(subscription.plan === Subscription.getBasicPlan().plan){
+		if(subscription.plan === Subscription.getBasicPlan().plan || !subscription.inCurrentAgreement){
 			return;
 		}
 
@@ -1150,14 +1161,23 @@ schema.methods.executeBillingAgreement = function(token, billingAgreementId){
 			assignedBillingUser = true;
 		}
 
-		subscription.inCurrentAgreement = true;
+		//subscription.inCurrentAgreement = true;
 
+		if(!subscription.active){
+
+			items.push({
+				name: subscription.plan,
+				description: getSubscription(subscription.plan).description,
+				currency: getSubscription(subscription.plan).currency,
+			});
+		}
 		// pre activate
 		// don't wait for IPN message to confirm but to activate the subscription right away, for 48 hours.
 		// IPN message should come quickly after executing an agreement, usually less then a minute
 		let twoDayLater = moment().utc().add(48, 'hour').toDate();
 		if(!subscription.expiredAt || subscription.expiredAt < twoDayLater){
 			subscription.active = true;
+			//subscription.newPurchased = true;
 			subscription.expiredAt = twoDayLater;
 			subscription.limits = getSubscription(subscription.plan).limits;
 		}
@@ -1184,6 +1204,76 @@ schema.methods.executeBillingAgreement = function(token, billingAgreementId){
 			}
 		}
 	}
+
+	// create pending bill
+
+	if(items.length > 0){
+
+
+		let billAmount = billingAgreement.plan.payment_definitions.find(def => def.type === 'TRIAL') || billingAgreement.plan.payment_definitions.find(def => def.type === 'REGULAR')
+		let nextAmount = billingAgreement.plan.payment_definitions.find(def => def.type === 'REGULAR');
+		
+		let paymentInfo = {
+			currency: billAmount.amount.currency,
+			taxAmount: parseFloat(billAmount.charge_models.find(model => model.type === 'TAX').amount.value)
+		};
+
+		paymentInfo.amount = parseFloat(billAmount.amount.value) + paymentInfo.taxAmount;
+		paymentInfo.nextAmount = parseFloat(nextAmount.amount.value) + parseFloat(nextAmount.charge_models.find(model => model.type === 'TAX').amount.value);
+		paymentInfo.nextAmount = Math.round(paymentInfo.nextAmount * 100) / 100;
+
+		items.forEach(item => {
+			item.amount = Math.round(paymentInfo.amount / items.length * 100) / 100;
+			item.taxAmount = Math.round(paymentInfo.taxAmount / items.length * 100) / 100;
+		});
+
+		let billing = Billing.createInstance({ account: this.user });
+
+		Billing.hasPendingBill(this.user, billingAgreementId).then(hasBill => {
+
+			if(hasBill){
+				return Promise.resolve();
+			} else {
+				return Counter.findAndIncInvoiceNumber().then(counter => {
+					return Promise.resolve('SO-' + counter.count);
+				});
+			}
+
+		}).then(invoiceNo => {
+
+			if(invoiceNo){
+
+				billing.gateway = 'PAYPAL';
+				billing.createdAt = new Date();
+				billing.currency = paymentInfo.currency;
+				billing.amount = paymentInfo.amount;
+				billing.billingAgreementId = billingAgreementId;
+				billing.items = items;
+				billing.nextPaymentDate = this.customData.firstNextPaymentDate;
+				billing.taxAmount = paymentInfo.taxAmount;
+				billing.nextPaymentAmount = paymentInfo.nextAmount;
+				billing.invoiceNo = invoiceNo;
+				billing.pending = true;
+
+				//copy current billing info from user to billing
+				billing.info = this.customData.billingInfo;
+
+				billing.periodStart = this.customData.lastAnniversaryDate;
+				billing.periodEnd = moment(this.customData.firstNextPaymentDate)
+					.utc()
+					.subtract(1, 'day')
+					.endOf('date')
+					.toDate();
+
+				return billing.save();
+			}
+
+		}).catch(err => {
+			console.log('Billing error', err);
+		});
+	}
+
+
 };
 
 schema.methods.haveActiveSubscriptions = function(){

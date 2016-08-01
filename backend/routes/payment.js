@@ -67,7 +67,7 @@ function executeAgreement(req, res, next){
 							});
 						}
 
-						dbUser.executeBillingAgreement(token, billingAgreement.id);
+						dbUser.executeBillingAgreement(token, billingAgreement.id, billingAgreement);
 						resolve();
 					}
 				});
@@ -144,7 +144,8 @@ function activateSubscription(req, res, next){
 				createBilling: true,
 				ipnDate: new Date(paymentInfo.time_created),
 				nextPaymentDate:  new Date(paymentInfo.next_payment_date),
-				taxAmount: paymentInfo.tax
+				taxAmount: paymentInfo.tax,
+				nextAmount: paymentInfo.amount_per_cycle
 
 			}, paymentInfo).then(resData => {
 				systemLogger.logInfo('payment confirmed and licenses activated', resData.subscriptions.toObject());

@@ -19,6 +19,7 @@ var ModelFactory = require('./factory/modelFactory');
 
 
 var schema = mongoose.Schema({
+	invoiceNo: String,
 	billingAgreementId: String,
 	gateway: String,
 	raw: {},
@@ -49,11 +50,29 @@ var schema = mongoose.Schema({
 		"city": String,
 		"postalCode": String,
 		"countryCode": String
-	}
+	},
+	pending: Boolean
 });
 
 schema.statics.findByAccount = function(account){
 	return this.find({account}, {}, {raw: 0}, {sort: {periodStart: -1}});
+};
+
+schema.statics.hasPendingBill = function(account, billingAgreementId){
+	return this.count({account}, {billingAgreementId: billingAgreementId, pending: true}).then( count => {
+		console.log('count', count);
+		return Promise.resolve(count > 0);
+	});
+}
+
+schema.statics.findAndRemovePendingBill = function(account, billingAgreementId){
+	return this.findOne({account}, {billingAgreementId: billingAgreementId, pending: true}).then(billing => {
+		if(billing){
+			return billing.remove().then(() => {
+				return billing;
+			});
+		}
+	}); 
 };
 
 var Billing = ModelFactory.createClass(
