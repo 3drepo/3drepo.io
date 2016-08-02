@@ -80,6 +80,10 @@
 								if (response.status === 200) {
 								}
 								vm.payPalInfo = "PayPal has finished processing. Thank you.";
+
+								// Clear token URL parameter
+								$location.search("token", null);
+
 								$timeout(function () {
 									UtilsService.closeDialog();
 									init();

@@ -20,7 +20,7 @@ div(layout-fill, layout="column")
 					label VAT ID: GB 206 9090 15
 					a(href="mailto:support@3drepo.org") support@3drepo.org
 
-				label.md-display-1(ng-if="vm.proForma") Pro-forma
+				label.md-display-1(ng-if="vm.billing.pending") Pro-forma
 
 				span(flex)
 
@@ -31,8 +31,7 @@ div(layout-fill, layout="column")
 			.billingInfoTitle(layout="row", flex="none")
 				label(flex="30") To
 				label(flex="30") Date
-				label(flex="20") Invoice No.
-				label Invoice ID
+				label(flex="20") Invoice Number
 
 			md-divider(flex="none")
 
@@ -47,8 +46,7 @@ div(layout-fill, layout="column")
 					label {{vm.billing.info.country}}
 					label(ng-if="vm.billing.info.vat") VAT ID: {{vm.billing.info.vat}}
 				label(flex="30") {{vm.billing.createdAt | invoiceDate}} GMT
-				label(flex="20") 1
-				label {{vm.billing.billingAgreementId}}
+				label(flex="20") {{vm.billing.invoiceNo}}
 
 			.billingInfoTitle(layout="row", flex="none")
 				label(flex="30") Product

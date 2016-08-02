@@ -39,9 +39,9 @@
 		};
 	}
 
-	AccountBillingCtrl.$inject = ["$scope", "$location", "UtilsService", "serverConfig"];
+	AccountBillingCtrl.$inject = ["$scope", "$window", "UtilsService", "serverConfig"];
 
-	function AccountBillingCtrl($scope, $location, UtilsService, serverConfig) {
+	function AccountBillingCtrl($scope, $window, UtilsService, serverConfig) {
 		var vm = this,
 			promise;
 
@@ -119,13 +119,26 @@
 			}
 		}, true);
 
+		/*
+		 * Watch for billings
+		 */
+		$scope.$watch("vm.billings", function () {
+			var i, length;
+
+			if (angular.isDefined(vm.billings)) {
+				for (i = 0, length = vm.billings.length; i < length; i += 1) {
+					vm.billings[i].status = vm.billings[i].pending ? "Pending" : "Payed";
+				}
+			}
+		});
+
 		/**
 		 * Show the billing page with the item
 		 *
 		 * @param index
 		 */
 		vm.downloadBilling = function (index) {
-			$location.url("/billing?user=" + vm.account + "&item=" + index);
+			$window.open("/billing?user=" + vm.account + "&item=" + index);
 		};
 
 		vm.changeSubscription = function () {
@@ -156,10 +169,6 @@
 					vm.payPalInfo = response.data.message;
 				}
 			});
-		};
-
-		vm.goToPage = function (page) {
-			$location.path("/" + page, "_self");
 		};
 
 		vm.closeDialog = function () {

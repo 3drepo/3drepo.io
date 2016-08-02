@@ -4909,9 +4909,9 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountBillingCtrl.$inject = ["$scope", "$location", "UtilsService", "serverConfig"];
+	AccountBillingCtrl.$inject = ["$scope", "$window", "UtilsService", "serverConfig"];
 
-	function AccountBillingCtrl($scope, $location, UtilsService, serverConfig) {
+	function AccountBillingCtrl($scope, $window, UtilsService, serverConfig) {
 		var vm = this,
 			promise;
 
@@ -4989,13 +4989,26 @@ var ViewerManager = {};
 			}
 		}, true);
 
+		/*
+		 * Watch for billings
+		 */
+		$scope.$watch("vm.billings", function () {
+			var i, length;
+
+			if (angular.isDefined(vm.billings)) {
+				for (i = 0, length = vm.billings.length; i < length; i += 1) {
+					vm.billings[i].status = vm.billings[i].pending ? "Pending" : "Payed";
+				}
+			}
+		});
+
 		/**
 		 * Show the billing page with the item
 		 *
 		 * @param index
 		 */
 		vm.downloadBilling = function (index) {
-			$location.url("/billing?user=" + vm.account + "&item=" + index);
+			$window.open("/billing?user=" + vm.account + "&item=" + index);
 		};
 
 		vm.changeSubscription = function () {
@@ -5026,10 +5039,6 @@ var ViewerManager = {};
 					vm.payPalInfo = response.data.message;
 				}
 			});
-		};
-
-		vm.goToPage = function (page) {
-			$location.path("/" + page, "_self");
 		};
 
 		vm.closeDialog = function () {
@@ -5147,6 +5156,10 @@ var ViewerManager = {};
 								if (response.status === 200) {
 								}
 								vm.payPalInfo = "PayPal has finished processing. Thank you.";
+
+								// Clear token URL parameter
+								$location.search("token", null);
+
 								$timeout(function () {
 									UtilsService.closeDialog();
 									init();
@@ -8238,16 +8251,11 @@ var ViewerManager = {};
 					(parseInt(vm.query.item) < response.data.length)) {
 					vm.showBilling = true;
 					vm.billing = response.data[parseInt(vm.query.item)];
-					console.log('periodEnd', vm.billing.periodEnd);
 					vm.billing.netAmount = vm.billing.amount- vm.billing.taxAmount;
 					vm.billing.taxPercentage = Math.round(vm.billing.taxAmount / vm.billing.netAmount * 100);
 
 					// Check if B2B EU
-					vm.B2B_EU = (euCountryCodes.indexOf(vm.billing.info.countryCode) !== -1);
-
-					// Check if pro-forma
-					vm.billing.status = "pending";
-					vm.proForma = (vm.billing.status === "pending");
+					vm.B2B_EU = (euCountryCodes.indexOf(vm.billing.info.countryCode) !== -1) && (vm.billing.info.hasOwnProperty("vat"));
 
 					// Get country from country code
 					if (serverConfig.hasOwnProperty("countries")) {

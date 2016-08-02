@@ -79,28 +79,25 @@
 					section
 						md-subheader
 							div(layout="row", layout-align="start")
-								label(flex="5") No.
-								label(flex="20") ID
+								label(flex="10") Number
 								label(flex="15") Date
-								label(flex="10") Status
+								label(flex="15") Status
 								label(flex="25") Description
-								label(flex="10") Payment
+								label(flex="15") Payment
 								label(flex="10") Amount (£)
 								span(flex="5")
 
 					div
 						.accountBillingHistoryListItem(layout="row", layout-align="start start", ng-repeat="billing in vm.billings")
-							md-input-container(flex="5")
-								input(type="text", value="1", ng-disabled="true", aria-label="number")
-							md-input-container(flex="20")
-								input(type="text", value="{{billing.billingAgreementId}}", ng-disabled="true", aria-label="id")
+							md-input-container(flex="10")
+								input(type="text", value="{{billing.invoiceNo}}", ng-disabled="true", aria-label="number")
 							md-input-container(flex="15")
 								input(type="text", value="{{billing.createdAt | date:'dd-MM-yyyy'}}", ng-disabled="true", aria-label="date")
-							md-input-container(flex="10")
-								input(type="text", value="Pending", ng-disabled="true", aria-label="status")
+							md-input-container(flex="15")
+								input(type="text", value="{{billing.status}}", ng-disabled="true", aria-label="status")
 							md-input-container(flex="25")
 								input(type="text", value="{{billing.items[0].description}}", ng-disabled="true", aria-label="description")
-							md-input-container(flex="10")
+							md-input-container(flex="15")
 								input(type="text", value="{{billing.gateway}}", ng-disabled="true", aria-label="paymentMethod")
 							md-input-container(flex="10")
 								input(type="text", value="{{billing.amount}}", ng-disabled="true", aria-label="amount")
