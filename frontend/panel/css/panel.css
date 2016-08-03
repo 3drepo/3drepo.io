@@ -131,7 +131,7 @@ panel-card #filterContainer {
 panel-card .cardInfo {
   text-align: center;
   padding: 15px;
-  background: #E8EAF6;
+  background: rgba(0,69,148,.1);
   margin: 15px;
   border-radius: 4px;
 }

@@ -16631,7 +16631,8 @@ var Oculus = {};
 			length = 0,
 			currentSelectedNode = null,
 			currentScrolledToNode = null,
-			highlightSelectedViewerObject = true;
+			highlightSelectedViewerObject = true,
+			clickedHidden = {}; // Nodes that have actually been clicked to hide
 
 		/*
 		 * Init
@@ -16645,6 +16646,8 @@ var Oculus = {};
 		vm.showProgress = true;
 		vm.progressInfo = "Loading full tree structure";
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
+		vm.visible   = [];
+		vm.invisible = [];
 
 		/*
 		 * Get all the tree nodes
@@ -16667,12 +16670,12 @@ var Oculus = {};
 		 * Set the content height.
 		 * The height of a node is dependent on its name length and its level.
 		 *
-		 * @param (Number} nodesToShow
+		 * @param {Number} nodesToShow
 		 */
 		function setContentHeight (nodesToShow) {
 			var i, length,
 				height = 0,
-				nodeMinHeight = 36,
+				nodeMinHeight = 48,
 				maxStringLength = 35, maxStringLengthForLevel = 0,
 				lineHeight = 18, levelOffset = 2;
 
@@ -16692,11 +16695,12 @@ var Oculus = {};
 			vm.nodesToShow[0].expanded = false;
 			vm.nodesToShow[0].hasChildren = true;
 			vm.nodesToShow[0].selected = false;
-			vm.nodesToShow[0].toggleState = "visible";
-		}
+			// Only make the top node visible if it was not previously clicked hidden
+			if (!wasClickedHidden(vm.nodesToShow[0])) {
+				vm.nodesToShow[0].toggleState = "visible";
+			}
 
-		vm.visible   = [];
-		vm.invisible = [];
+		}
 
 		/**
 		 * Set the toggle state of a node
@@ -16750,15 +16754,19 @@ var Oculus = {};
 				endOfSplice = false,
 				numChildrenToForceRedraw = 3;
 
+			// Find node index
 			for (i = 0, length = vm.nodesToShow.length; i < length; i += 1) {
 				if (vm.nodesToShow[i]._id === _id) {
 					index = i;
 					break;
 				}
 			}
+
+			// Found
 			if (index !== -1) {
 				if (vm.nodesToShow[index].hasChildren) {
 					if (vm.nodesToShow[index].expanded) {
+						// Collapse
 						while (!endOfSplice) {
 							if (angular.isDefined(vm.nodesToShow[index + 1]) && vm.nodesToShow[index + 1].path.indexOf(_id) !== -1) {
 								vm.nodesToShow.splice(index + 1, 1);
@@ -16767,6 +16775,7 @@ var Oculus = {};
 							}
 						}
 					} else {
+						// Expand
 						numChildren = vm.nodesToShow[index].children.length;
 
 						// If the node has a large number of children then force a redraw of the tree to get round the display problem
@@ -16777,13 +16786,20 @@ var Oculus = {};
 						for (i = 0; i < numChildren; i += 1) {
 							vm.nodesToShow[index].children[i].expanded = false;
 
-							vm.setToggleState(vm.nodesToShow[index].children[i], vm.nodesToShow[index].toggleState);
+							// vm.setToggleState(vm.nodesToShow[index].children[i], vm.nodesToShow[index].toggleState);
+							// If the child node was not clicked hidden set its toggle state to visible
+							if (!wasClickedHidden(vm.nodesToShow[index].children[i])) {
+								vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
+							}
 
+							// Determine if child node has childern
 							vm.nodesToShow[index].children[i].level = vm.nodesToShow[index].level + 1;
-							if("children" in vm.nodesToShow[index].children[i])
+							if("children" in vm.nodesToShow[index].children[i]) {
 								vm.nodesToShow[index].children[i].hasChildren = vm.nodesToShow[index].children[i].children.length > 0;
-							else
+							}
+							else {
 								vm.nodesToShow[index].children[i].hasChildren = false;
+							}
 
 							vm.nodesToShow.splice(index + i + 1, 0, vm.nodesToShow[index].children[i]);
 						}
@@ -16826,11 +16842,18 @@ var Oculus = {};
 					for (j = 0; j < childrenLength; j += 1) {
 						vm.nodesToShow[i].children[j].selected = (vm.nodesToShow[i].children[j]._id === selectedId);
 
-						vm.setToggleState(vm.nodesToShow[i].children[j], "visible");
-						if("children" in vm.nodesToShow[i].children[j])
+						// Only set the toggle state once when the node is listed
+						if (!vm.nodesToShow[i].children[j].hasOwnProperty("toggleState")) {
+							vm.setToggleState(vm.nodesToShow[i].children[j], "visible");
+						}
+
+						if("children" in vm.nodesToShow[i].children[j]) {
 							vm.nodesToShow[i].children[j].hasChildren = vm.nodesToShow[i].children[j].children.length > 0;
-						else
+						}
+						else {
 							vm.nodesToShow[i].children[j].hasChildren = false;
+						}
+
 						if (vm.nodesToShow[i].children[j].selected) {
 							selectionFound = true;
 
@@ -16840,6 +16863,7 @@ var Oculus = {};
 								currentSelectedNode = currentScrolledToNode;
 							});
 						}
+
 						if ((level === (path.length - 2)) && !selectionFound) {
 							selectedIndex += 1;
 						}
@@ -16862,7 +16886,6 @@ var Oculus = {};
 
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
-				console.log(event);
 				if ((event.value.source !== "tree") && highlightSelectedViewerObject)
 				{
 					var objectID = event.value.id;
@@ -16891,7 +16914,13 @@ var Oculus = {};
 		});
 
 		vm.toggleTreeNode = function (node) {
-			var i = 0, j = 0, k = 0, nodesLength, path, parent = null, nodeToggleState = "visible", numInvisible = 0, numParentInvisible = 0;
+			var i, j,
+				nodesLength,
+				path,
+				parent = null,
+				nodeToggleState = "visible",
+				numInvisible = 0,
+				numParentInvisible = 0;
 
 			vm.toggledNode = node;
 
@@ -16903,6 +16932,7 @@ var Oculus = {};
 				if (vm.nodesToShow[i]._id === node._id) {
 					vm.setToggleState(vm.nodesToShow[i], (vm.nodesToShow[i].toggleState === "visible") ? "invisible" : "visible");
 					nodeToggleState = vm.nodesToShow[i].toggleState;
+					updateClickedHidden(vm.nodesToShow[i]);
 				}
 				// Set children to node toggle state
 				else if (vm.nodesToShow[i].path.indexOf(node._id) !== -1) {
@@ -16919,8 +16949,16 @@ var Oculus = {};
 				for (i = (path.length - 1); i >= 0; i -= 1) {
 					for (j = 0, nodesLength = vm.nodesToShow.length; j < nodesLength; j += 1) {
 						if (vm.nodesToShow[j]._id === path[i]) {
-							numInvisible = vm.nodesToShow[j].children.reduce(function(total,child){return child.toggleState=="invisible"? total+1 : total}, 0)
-							numParentInvisible = vm.nodesToShow[j].children.reduce(function(total,child){return child.toggleState=="parentOfInvisible"? total+1 : total}, 0)
+							numInvisible = vm.nodesToShow[j].children.reduce(
+								function (total, child) {
+									return child.toggleState === "invisible" ? total + 1 : total;
+								},
+								0);
+							numParentInvisible = vm.nodesToShow[j].children.reduce(
+								function (total, child) {
+									return child.toggleState === "parentOfInvisible" ? total + 1 : total;
+								},
+								0);
 
 							if (numInvisible === vm.nodesToShow[j].children.length) {
 								vm.setToggleState(vm.nodesToShow[j], "invisible");
@@ -17030,7 +17068,7 @@ var Oculus = {};
 				if (newValue.toString() === "") {
 					vm.showTree = true;
 					vm.showFilterList = false;
-					vm.nodes = vm.allNodes;
+					vm.nodes = vm.nodesToShow;
 					setContentHeight(vm.nodes);
 				} else {
 					vm.showTree = false;
@@ -17175,6 +17213,33 @@ var Oculus = {};
 					}
 				}
 			};
+		}
+
+		/**
+		 * If a node was clicked to hide, add it to a list of similar nodes
+		 *
+		 * @param {Object} node
+		 */
+		function updateClickedHidden (node) {
+			if (node.toggleState === "invisible") {
+				clickedHidden[node._id] = node;
+			}
+			else {
+				delete clickedHidden[node._id];
+			}
+		}
+
+		/**
+		 * Check if a node was clicked to hide
+		 *
+		 * @param {Object} node
+		 */
+		function wasClickedHidden (node) {
+			return clickedHidden.hasOwnProperty(node._id);
+		}
+
+		function isInvisible (node) {
+
 		}
 	}
 }());
