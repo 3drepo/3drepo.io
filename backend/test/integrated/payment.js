@@ -145,6 +145,80 @@ describe('Enrolling to a subscription', function () {
 	});
 
 
+	it('should success no VAT is supplied', function(done){
+		this.timeout(10000);
+
+		delete plans.billingAddress.vat;
+
+		agent.post(`/${username}/subscriptions`)
+		.send(plans)
+		.expect(200, function(err, res){
+			done(err);
+		});
+	});
+
+
+	it('should success VAT is supplied and country is non EU', function(done){
+		this.timeout(10000);
+
+		let plans = {
+			"plans": [
+				{    
+				"plan": "THE-100-QUID-PLAN",
+				"quantity": 3
+				}
+			],
+			"billingAddress":{
+				"line1": "line1",
+				"line2": "line2",
+				"line3": "line3",
+				"firstName": "henry",
+				"lastName": "liu",
+				"company": "3D Repo",
+				"city": "London",
+				"postalCode": "A00 2ss020",
+				"countryCode": "HK",
+				"vat": "123456"
+			}
+		};
+
+		agent.post(`/${username}/subscriptions`)
+		.send(plans)
+		.expect(200, function(err, res){
+			done(err);
+		});
+	});
+
+
+	it('should success VAT is not supplied and country is non EU', function(done){
+		this.timeout(10000);
+
+		let plans = {
+			"plans": [
+				{    
+				"plan": "THE-100-QUID-PLAN",
+				"quantity": 3
+				}
+			],
+			"billingAddress":{
+				"line1": "line1",
+				"line2": "line2",
+				"line3": "line3",
+				"firstName": "henry",
+				"lastName": "liu",
+				"company": "3D Repo",
+				"city": "London",
+				"postalCode": "A00 2ss020",
+				"countryCode": "HK"
+			}
+		};
+
+		agent.post(`/${username}/subscriptions`)
+		.send(plans)
+		.expect(200, function(err, res){
+			done(err);
+		});
+	});
 
 	it('should succee (GB business)', function(done){
 
