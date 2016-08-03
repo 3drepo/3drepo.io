@@ -43,7 +43,8 @@
 	router.get("/:account.jpg", middlewares.hasReadAccessToAccount, getAvatar);
 	router.get("/:account/subscriptions", middlewares.hasReadAccessToAccount, listSubscriptions);
 	router.get("/:account/billings", middlewares.hasReadAccessToAccount, listBillings);
-	router.get("/:account/billings/:id.html", middlewares.hasReadAccessToAccount, renderBilling);
+	router.get("/:account/billings/:invoiceNo.html", middlewares.hasReadAccessToAccount, renderBilling);
+	router.get("/:account/billings/:invoiceNo.pdf", middlewares.hasReadAccessToAccount, renderBillingPDF);
 	router.post('/:account', signUp);
 	//router.post('/:account/database', middlewares.canCreateDatabase, createDatabase);
 	router.post('/:account/subscriptions', middlewares.canCreateDatabase, createSubscription);
@@ -468,7 +469,7 @@
 	function renderBilling(req, res, next){
 
 		let responsePlace = utils.APIInfo(req);
-		Billing.findById({account: req.params.account}, req.params.id).then(billing => {
+		Billing.findByInvoiceNo(req.params.account, req.params.invoiceNo).then(billing => {
 			
 			if(!billing){
 				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
@@ -476,6 +477,37 @@
 
 			res.render("invoice.jade", {billing : billing.clean(), baseURL: utils.getBaseURL()});
 			
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+}
+
+	function renderBillingPDF(req, res, next){
+
+		let responsePlace = utils.APIInfo(req);
+		let billing;
+
+		Billing.findByInvoiceNo(req.params.account, req.params.invoiceNo).then(_billing => {
+			
+			billing = _billing;
+			if(!billing){
+				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
+			}
+
+			return billing.getPDF({regenerate: false});
+		
+		}).then(pdf => {
+
+			console.log(pdf.length);
+
+			res.writeHead(200, {
+				'Content-Type': 'application/pdf',
+				'Content-disposition': `inline; filename="invoice-${billing.invoiceNo}.pdf"`,
+				'Content-Length': pdf.length
+			});
+
+			res.end(pdf);
+
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});

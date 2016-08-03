@@ -18,6 +18,11 @@ var mongoose = require('mongoose');
 var ModelFactory = require('./factory/modelFactory');
 var addressMeta = require('./addressMeta');
 var moment = require('moment');
+var fs = require('fs');
+var jade = require('jade');
+var phantom = require('phantom');
+var utils = require("../utils");
+var config = require('../config');
 
 var schema = mongoose.Schema({
 	invoiceNo: String,
@@ -57,7 +62,11 @@ var schema = mongoose.Schema({
 });
 
 schema.statics.findByAccount = function(account){
-	return this.find({account}, {}, {raw: 0}, {sort: {periodStart: -1}});
+	return this.find({account}, {}, {raw: 0, pdf: 0}, {sort: {periodStart: -1}});
+};
+
+schema.statics.findByInvoiceNo = function(account, invoiceNo){
+	return this.findOne({account}, { invoiceNo});
 };
 
 schema.statics.hasPendingBill = function(account, billingAgreementId){
@@ -108,13 +117,9 @@ schema.methods.generatePDF = function(){
 	'use strict';
 
 	let cleaned = this.clean();
-	let jade = require('jade');
-	let fs = require('fs');
-	let phantom = require('phantom');
+
 	let ph;
 	let page;
-	let utils = require("../utils");
-	let config = require('../config');
 
 	if(!config.invoice_dir){
 		return Promise.reject({ message: 'invoice dir is not set in config file'});
@@ -171,6 +176,36 @@ schema.methods.generatePDF = function(){
 		return Promise.reject(err);
 	});
 
+};
+
+schema.methods.getPDF = function(options){
+	'use strict';
+
+	options = options || {};
+
+	if(options.regenerate || !this.pdf){
+
+		return this.generatePDF().then(pdfPath => {
+
+			let pdfRS = fs.createReadStream(pdfPath);
+			let bufs = [];
+
+			return new Promise((resolve, reject) => {
+
+				pdfRS.on('data', function(d){ bufs.push(d); });
+				pdfRS.on('end', function(){
+					resolve(Buffer.concat(bufs));
+				});
+				pdfRS.on('err', err => {
+					reject(err);
+				});
+			});
+		});
+
+	} else {
+		//console.log('from cache')
+		return Promise.resolve(this.pdf.buffer);
+	}
 };
 
 var Billing = ModelFactory.createClass(
