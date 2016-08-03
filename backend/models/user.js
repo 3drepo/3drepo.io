@@ -542,19 +542,21 @@ schema.methods.listAccounts = function(){
 			getQuotaPromises.push(
 				User.findByUserName(account.account).then(user => {
 					if(user){
-						account.quota = user.haveActiveSubscriptions() ? user.getSubscriptionLimits() : undefined;
+						account.quota = user.getSubscriptionLimits();
 						return User.historyChunksStats(account.account);
 					}
 
 				}).then(stats => {
 				
-					if(stats && account.quota){
+					if(stats && account.quota.spaceLimit > 0){
 						let totalSize = 0;
 						stats.forEach(stat => {
 							totalSize += stat.size; 
 						});
 						
 						account.quota.spaceUsed = totalSize;
+					} else {
+						account.quota.spaceUsed = 0;
 					}
 				})
 			);
@@ -1377,7 +1379,7 @@ schema.methods.getSubscriptionLimits = function(options){
 		collaboratorLimit: 0
 	};
 
-	console.log(subscriptions);
+	//console.log(subscriptions);
 
 	subscriptions.forEach(sub => {
 		sumLimits.spaceLimit += sub.limits.spaceLimit;
