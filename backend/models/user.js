@@ -35,6 +35,7 @@ var config = require('../config');
 var vat = require('./vat');
 var Counter = require('./counter');
 var fs = require('fs');
+var addressMeta = require('./addressMeta');
 
 var getSubscription = Subscription.getSubscription;
 
@@ -722,9 +723,12 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 		cleanedVATNumber = billingAddress.vat.substr(2); 
 	}
 
-	let checkVAT = billingAddress.vat ? vat.checkVAT(billingAddress.countryCode, cleanedVATNumber) : Promise.resolve(({ valid: true }));
+	let checkVAT = billingAddress.vat && addressMeta.euCountriesCode.indexOf(billingAddress.countryCode) !== -1 ? 
+	vat.checkVAT(billingAddress.countryCode, cleanedVATNumber) : Promise.resolve(({ valid: true }));
 
-	if(config.vat && config.vat.debug && config.vat.debug.skipNonGBChecking && billingAddress.countryCode !== 'GB'){
+	let skipCheckingForTravis = config.vat && config.vat.debug && config.vat.debug.skipNonGBChecking && billingAddress.countryCode !== 'GB';
+
+	if(skipCheckingForTravis){
 		checkVAT = Promise.resolve(({ valid: true }));
 	}
 
