@@ -34,6 +34,7 @@ var Subscription = require('./subscription');
 var config = require('../config');
 var vat = require('./vat');
 var Counter = require('./counter');
+var fs = require('fs');
 
 var getSubscription = Subscription.getSubscription;
 
@@ -1064,11 +1065,13 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 		});
 
+		let createBill = Promise.resolve();
+
 		if(paymentInfo.createBilling){
 
 			let billing = Billing.createInstance({ account });
 
-			Billing.findAndRemovePendingBill(account, billingAgreementId).then(pendingBill => {
+			createBill = Billing.findAndRemovePendingBill(account, billingAgreementId).then(pendingBill => {
 
 				if(pendingBill){
 					return Promise.resolve(pendingBill.invoiceNo);
@@ -1102,9 +1105,7 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 					.endOf('date')
 					.toDate();
 
-				billing.save().catch( err => {
-					console.log('Billing error', err);
-				});
+				return billing.save();
 			});
 
 		}
@@ -1112,23 +1113,65 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 		if(!disableEmail){
 
-			//send verification email
-			let amount = paymentInfo.amount;
-			let currency = paymentInfo.currency;
-			if(currency === 'GBP'){
-				currency = '£';
-			}
 
-			User.findByUserName(dbUser.customData.billingUser).then(user => {
+			createBill.then(billing => {
 
-				return Mailer.sendPaymentReceivedEmail(user.customData.email, {
-					account: account,
-					amount: currency + amount
+				if(billing){
+					return billing.generatePDF().then(pdfPath => {
+
+						let pdfRS = fs.createReadStream(pdfPath);
+						let bufs = [];
+
+						return new Promise((resolve, reject) => {
+
+							pdfRS.on('data', function(d){ bufs.push(d); });
+							pdfRS.on('end', function(){
+								resolve(Buffer.concat(bufs));
+							});
+							pdfRS.on('err', err => {
+								reject(err);
+							});
+						});
+
+
+					}).then(pdf => {
+
+						billing.pdf = pdf;
+						// also save the pdf to database for ref.
+						return billing.save();
+
+					});
+				}
+
+			}).then(billing => {
+				
+				let attachments;
+
+				if(billing && billing.pdf){
+					attachments = [{
+						filename: `invoice-${billing.invoiceNo}.pdf`,
+						content: billing.pdf
+					}];
+				}
+
+				//send invoice
+				let amount = paymentInfo.amount;
+				let currency = paymentInfo.currency;
+				if(currency === 'GBP'){
+					currency = '£';
+				}
+
+				User.findByUserName(dbUser.customData.billingUser).then(user => {
+					return Mailer.sendPaymentReceivedEmail(user.customData.email, {
+						account: account,
+						amount: currency + amount
+					}, attachments);
 				});
 
 			}).catch(err => {
 				systemLogger.logError(`Email error - ${err.message}`);
 			});
+
 
 		}
 

@@ -21,7 +21,7 @@ var config = require('../config');
 
 var transporter;
 
-function sendEmail(template, to, data){
+function sendEmail(template, to, data, attachments){
 	'use strict';
 
 
@@ -39,6 +39,10 @@ function sendEmail(template, to, data){
 		subject: typeof template.subject === 'function' ? template.subject(data) : template.subject,
 		html: template.html(data)
 	};
+
+	if(attachments){
+		mailOptions.attachments = attachments;
+	}
 
 	transporter = transporter || nodemailer.createTransport(config.mail.smtpConfig);
 
@@ -108,11 +112,11 @@ function sendResetPasswordEmail(to, data){
 	return sendEmail(template, to, data);
 }
 
-function sendPaymentReceivedEmail(to, data){
+function sendPaymentReceivedEmail(to, data, attachments){
 	'use strict';
 
 	let template = require('./templates/paymentReceived');
-	return sendEmail(template, to, data);
+	return sendEmail(template, to, data, attachments);
 }
 
 function sendContactEmail(data){

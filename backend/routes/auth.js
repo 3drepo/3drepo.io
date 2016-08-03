@@ -454,6 +454,11 @@
 
 		let responsePlace = utils.APIInfo(req);
 		Billing.findByAccount(req.params.account).then(billings => {
+			
+			billings.forEach((billing, i) => {
+				billings[i] = billing.clean({skipDate: true});
+			});
+
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, billings);
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -461,6 +466,7 @@
 	}
 
 	function renderBilling(req, res, next){
+
 		let responsePlace = utils.APIInfo(req);
 		Billing.findById({account: req.params.account}, req.params.id).then(billing => {
 			
@@ -468,8 +474,7 @@
 				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
 			}
 
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, billing);
-			//res.render("???.jade", {billing : billing});
+			res.render("invoice.jade", {billing : billing.clean(), baseURL: utils.getBaseURL()});
 			
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

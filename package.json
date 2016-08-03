@@ -46,6 +46,7 @@
     "node-uuid": "1.4.7",
     "nodemailer": "^2.3.2",
     "paypal-rest-sdk": "^1.6.9",
+    "phantom": "^2.1.14",
     "session-file-store": "0.0.18",
     "shortid": "2.2.4",
     "soap": "0.16.0",
