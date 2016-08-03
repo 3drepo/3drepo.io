@@ -116,13 +116,43 @@ function sendPaymentReceivedEmail(to, data, attachments){
 	'use strict';
 
 	let template = require('./templates/paymentReceived');
+
+
 	return sendEmail(template, to, data, attachments);
 }
+
+function sendPaymentReceivedEmailToSales(data, attachments){
+	'use strict';
+
+	let template = require('./templates/paymentReceived');
+	
+	let salesTemplate = {
+		html: template.html,
+		subject: function(data){
+			return `[Invoice ${data.invoiceNo}] ${data.email}`;
+		}
+	};
+
+	if(config.contact && config.contact.sales){
+		//console.log(config.contact.sales);
+		return sendEmail(salesTemplate, config.contact.sales, data, attachments);
+	} else {
+		return Promise.resolve();
+	}
+
+	
+}
+
 
 function sendContactEmail(data){
 	'use strict';
 
 	let template = require('./templates/contact');
+	
+	if(!config.contact || !config.contact.email){
+		return Promise.reject({ messsage: 'config.contact.email is undefined in config file'});
+	}
+
 	return sendEmail(template, config.contact.email, data);
 }
 
@@ -175,5 +205,6 @@ module.exports = {
 	sendPaymentFailedEmail,
 	sendPaymentErrorEmail,
 	sendProjectInvitation,
-	sendSubscriptionSuspendedEmail
+	sendSubscriptionSuspendedEmail,
+	sendPaymentReceivedEmailToSales
 }

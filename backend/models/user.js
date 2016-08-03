@@ -1165,12 +1165,23 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 					currency = '£';
 				}
 
-				User.findByUserName(dbUser.customData.billingUser).then(user => {
+				return User.findByUserName(dbUser.customData.billingUser).then(user => {
+					
+					//make a copy to sales
+
+					Mailer.sendPaymentReceivedEmailToSales({
+						account: account,
+						amount: currency + amount,
+						email: user.customData.email,
+						invoiceNo: billing.invoiceNo
+					}, attachments);
+
 					return Mailer.sendPaymentReceivedEmail(user.customData.email, {
 						account: account,
 						amount: currency + amount
 					}, attachments);
 				});
+
 
 			}).catch(err => {
 				systemLogger.logError(`Email error - ${err.message}`);
