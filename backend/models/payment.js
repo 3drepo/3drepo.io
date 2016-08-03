@@ -212,7 +212,7 @@ function getBillingAgreement(
 			if(err){
 				//console.log(err);
 				let paypalError = JSON.parse(JSON.stringify(responseCodes.PAYPAL_ERROR));
-				paypalError.message = err.response.message;
+				paypalError.message = err.response && err.response.message || err.message;
 				reject(paypalError);
 			} else {
 				resolve(billingPlan);
