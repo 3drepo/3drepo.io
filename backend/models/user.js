@@ -1076,9 +1076,11 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 		if(paymentInfo.createBilling){
 
 			let billing = Billing.createInstance({ account });
+			let pendingBill;
 
-			createBill = Billing.findAndRemovePendingBill(account, billingAgreementId).then(pendingBill => {
+			createBill = Billing.findAndRemovePendingBill(account, billingAgreementId).then(_pendingBill => {
 
+				pendingBill = _pendingBill;
 				if(pendingBill){
 					return Promise.resolve(pendingBill.invoiceNo);
 				} else {
@@ -1095,7 +1097,7 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 				billing.currency = paymentInfo.currency;
 				billing.amount = paymentInfo.amount;
 				billing.billingAgreementId = billingAgreementId;
-				billing.items = items;
+				billing.items = pendingBill.items || items;
 				billing.nextPaymentDate = paymentInfo.nextPaymentDate;
 				billing.taxAmount = paymentInfo.taxAmount;
 				billing.nextPaymentAmount = paymentInfo.nextAmount;
