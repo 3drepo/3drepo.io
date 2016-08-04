@@ -329,6 +329,8 @@
 				if (currentSelectedNode !== null) {
 					currentSelectedNode.selected = false;
 					currentSelectedNode = null;
+					vm.currentFilterItemSelected.class = "";
+					vm.currentFilterItemSelected = null;
 				}
 			}
 			else if ((event.type === EventService.EVENT.PANEL_CARD_ADD_MODE) ||
@@ -661,10 +663,6 @@
 		 */
 		function wasClickedHidden (node) {
 			return clickedHidden.hasOwnProperty(node._id);
-		}
-
-		function isInvisible (node) {
-
 		}
 	}
 }());
