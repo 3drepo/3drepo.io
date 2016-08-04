@@ -4923,6 +4923,7 @@ var ViewerManager = {};
 		vm.countries = serverConfig.countries;
 		vm.usStates = serverConfig.usStates;
 		vm.showStates = false;
+		vm.newBillingAddress = {};
 
 		/*
 		 * Watch for change in licenses
