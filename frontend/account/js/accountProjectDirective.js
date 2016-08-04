@@ -66,7 +66,7 @@
 		checkFileUploading();
 
 		/*
-		 * Watch the new project type
+		 * Watch changes in upload file
 		 */
 		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
 			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {

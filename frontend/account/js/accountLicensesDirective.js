@@ -50,7 +50,7 @@
 			vm.unassigned = [];
 			vm.licenses = [];
 			vm.allLicensesAssigned = false;
-			vm.numLicenses = vm.subscriptions.filter(function (sub) {return sub.inCurrentAgreement;}).length;
+			vm.numLicenses = vm.subscriptions.length;
 			vm.toShow = (vm.numLicenses > 0) ? "0+": "0";
 
 			for (i = 0; i < vm.numLicenses; i += 1) {
