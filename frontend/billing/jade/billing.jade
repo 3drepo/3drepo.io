@@ -4,11 +4,13 @@ div(layout-fill, layout="column")
 			span(flex)
 			img(src="/public/images/3drepo-logo-white.png")
 			span(flex)
-			md-button.md-icon-button(aria-label="Home", ng-click="vm.home()")
+			md-button.md-icon-button(aria-label="Print", ng-click="vm.print()")
+				md-icon.angular-material-icons print
+			//md-button.md-icon-button(aria-label="Home", ng-click="vm.home()")
 				md-icon.angular-material-icons home
 
 	md-content(ng-if="vm.showBilling", layout="row", flex="none", layout-align="center")
-		div(layout="column", style="width:90%")
+		#billingMainContent(layout="column")
 			#billingCompanyAddress(layout="row", layout-align="start start")
 				div(layout="column", flex="45")
 					label.md-title 3D Repo
@@ -17,16 +19,22 @@ div(layout-fill, layout="column")
 					label 56 Wood Lane
 					label London W12 7SB
 					label United Kingdom
-					label VAT ID: GB 206 9090 15
-					a(href="mailto:support@3drepo.org") support@3drepo.org
-
-				label.md-display-1(ng-if="vm.billing.pending") Pro-forma
+					label VAT registration: GB 206 9090 15
+					label
+						| Email:
+						=" "
+						a(href="mailto:support@3drepo.org") support@3drepo.org
 
 				span(flex)
 
-				md-button.md-raised.md-accent.noPrint(ng-click="vm.print()") Print
+				div(layout="column", layout-align="end end")
+					img#billingInvoiceLogo(src="/public/images/logo.png")
+					p.md-display-1 {{vm.type}}
 
-			p.md-headline(flex="none") Invoice
+				//span(flex)
+				//md-button.md-raised.md-accent.noPrint(ng-click="vm.print()") Print
+
+			#billingGap1
 
 			.billingInfoTitle(layout="row", flex="none")
 				label(flex="30") To
@@ -44,7 +52,7 @@ div(layout-fill, layout="column")
 					label {{vm.billing.info.city}}
 					label {{vm.billing.info.postalCode}}
 					label {{vm.billing.info.country}}
-					label(ng-if="vm.billing.info.vat") VAT ID: {{vm.billing.info.vat}}
+					label(ng-if="vm.billing.info.vat") VAT registration: {{vm.billing.info.vat}}
 				label(flex="30") {{vm.billing.createdAt | invoiceDate}} GMT
 				label(flex="20") {{vm.billing.invoiceNo}}
 
@@ -68,7 +76,7 @@ div(layout-fill, layout="column")
 				label(flex="10") £{{vm.billing.netAmount}}
 				label(flex="10") {{vm.billing.taxPercentage}}%
 				label(flex="10") £{{vm.billing.taxAmount}}
-				label £{{vm.billing.amount}}
+				label#billingTotalValue £{{vm.billing.amount}}
 
 			#billingReverseCharge(flex, ng-if="vm.B2B_EU")
 				md-divider(flex="none")

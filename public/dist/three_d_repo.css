@@ -777,6 +777,14 @@ billing {
     color: rgba(0, 0, 0, 0.8);
 }
 
+billing #billingMainContent {
+    width: 90%
+}
+
+billing #billingGap1 {
+    height: 100px;
+}
+
 billing p,
 billing label {
     color: rgba(0, 0, 0, 0.7);
@@ -818,6 +826,13 @@ billing #billingPeriod {
     margin-top: 5px;
 }
 
+billing #billingInvoiceLogo {
+    width: 200px
+}
+
+billing #billingTotalValue {
+    font-weight: bold;
+}
 bottom-buttons {
   display: block;
   position: absolute;
