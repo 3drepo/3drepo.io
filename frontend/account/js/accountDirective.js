@@ -64,6 +64,11 @@
 						// Handle return back from PayPal
 						if ($location.search().hasOwnProperty("cancel")) {
 							// Cancelled
+
+							// Clear token URL parameters
+							$location.search("token", null);
+							$location.search("cancel", null);
+
 							init();
 						}
 						else if ($location.search().hasOwnProperty("token")) {

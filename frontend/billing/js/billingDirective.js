@@ -60,11 +60,14 @@
 					(parseInt(vm.query.item) < response.data.length)) {
 					vm.showBilling = true;
 					vm.billing = response.data[parseInt(vm.query.item)];
-					vm.billing.netAmount = vm.billing.amount- vm.billing.taxAmount;
+					vm.billing.netAmount = parseFloat(vm.billing.amount - vm.billing.taxAmount).toFixed(2);
 					vm.billing.taxPercentage = Math.round(vm.billing.taxAmount / vm.billing.netAmount * 100);
 
 					// Check if B2B EU
 					vm.B2B_EU = (euCountryCodes.indexOf(vm.billing.info.countryCode) !== -1) && (vm.billing.info.hasOwnProperty("vat"));
+
+					// Type
+					vm.type = vm.billing.pending ? "Order confirmation" : "Invoice";
 
 					// Get country from country code
 					if (serverConfig.hasOwnProperty("countries")) {
