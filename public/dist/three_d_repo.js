@@ -5246,17 +5246,23 @@ var ViewerManager = {};
 				vm.lastName = response.data.lastName;
 				vm.email = response.data.email;
 
-				vm.billingAddress = response.data.billingInfo;
 				// Pre-populate billing name if it doesn't exist with profile name
-				if (!vm.billingAddress.hasOwnProperty("firstName")) {
-					vm.billingAddress.firstName = vm.firstName;
-					vm.billingAddress.lastName = vm.lastName;
+				vm.billingAddress = {};
+				if (response.data.hasOwnProperty("billingInfo")) {
+					vm.billingAddress = response.data.billingInfo;
+					if (!vm.billingAddress.hasOwnProperty("firstName")) {
+						vm.billingAddress.firstName = vm.firstName;
+						vm.billingAddress.lastName = vm.lastName;
+					}
 				}
 
-				for (i = 0, length = vm.accounts.length; i < length; i += 1) {
-					if (vm.accounts[i].account === vm.account) {
-						vm.quota = vm.accounts[i].quota;
-						break;
+				// Get quota
+				if (angular.isDefined(vm.accounts)) {
+					for (i = 0, length = vm.accounts.length; i < length; i += 1) {
+						if (vm.accounts[i].account === vm.account) {
+							vm.quota = vm.accounts[i].quota;
+							break;
+						}
 					}
 				}
 			});
@@ -16904,6 +16910,8 @@ var Oculus = {};
 				if (currentSelectedNode !== null) {
 					currentSelectedNode.selected = false;
 					currentSelectedNode = null;
+					vm.currentFilterItemSelected.class = "";
+					vm.currentFilterItemSelected = null;
 				}
 			}
 			else if ((event.type === EventService.EVENT.PANEL_CARD_ADD_MODE) ||
@@ -17236,10 +17244,6 @@ var Oculus = {};
 		 */
 		function wasClickedHidden (node) {
 			return clickedHidden.hasOwnProperty(node._id);
-		}
-
-		function isInvisible (node) {
-
 		}
 	}
 }());
