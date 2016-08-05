@@ -163,7 +163,7 @@ schema.methods.generatePDF = function(){
 	}).then(_page => {
 
 		page = _page;
-		page.property('viewportSize', { width: 1200, height: 800 });
+		page.property('viewportSize', { width: 1700 , height: 2200 });
 		return page.open(`file://${config.invoice_dir}/${this.id}.html`);
 
 	}).then(() => {
