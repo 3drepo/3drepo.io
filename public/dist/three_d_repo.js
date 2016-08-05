@@ -5246,23 +5246,17 @@ var ViewerManager = {};
 				vm.lastName = response.data.lastName;
 				vm.email = response.data.email;
 
+				vm.billingAddress = response.data.billingInfo;
 				// Pre-populate billing name if it doesn't exist with profile name
-				vm.billingAddress = {};
-				if (response.data.hasOwnProperty("billingInfo")) {
-					vm.billingAddress = response.data.billingInfo;
-					if (!vm.billingAddress.hasOwnProperty("firstName")) {
-						vm.billingAddress.firstName = vm.firstName;
-						vm.billingAddress.lastName = vm.lastName;
-					}
+				if (!vm.billingAddress.hasOwnProperty("firstName")) {
+					vm.billingAddress.firstName = vm.firstName;
+					vm.billingAddress.lastName = vm.lastName;
 				}
 
-				// Get quota
-				if (angular.isDefined(vm.accounts)) {
-					for (i = 0, length = vm.accounts.length; i < length; i += 1) {
-						if (vm.accounts[i].account === vm.account) {
-							vm.quota = vm.accounts[i].quota;
-							break;
-						}
+				for (i = 0, length = vm.accounts.length; i < length; i += 1) {
+					if (vm.accounts[i].account === vm.account) {
+						vm.quota = vm.accounts[i].quota;
+						break;
 					}
 				}
 			});
@@ -17076,6 +17070,7 @@ var Oculus = {};
 				if (newValue.toString() === "") {
 					vm.showTree = true;
 					vm.showFilterList = false;
+					vm.showProgress = false;
 					vm.nodes = vm.nodesToShow;
 					setContentHeight(vm.nodes);
 				} else {

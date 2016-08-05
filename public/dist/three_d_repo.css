@@ -1970,6 +1970,14 @@ tree .treeNodes p {
 }
 tree .treeNodes p:hover {
   cursor: pointer;
+  background: #F0F0F0;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+}
+
+tree .treeNodeDivider {
+  margin-top: 4px;
 }
 
 tree md-checkbox {
@@ -2023,9 +2031,8 @@ tree .virtualRepeatInfiniteScroll .repeated-item {
   padding: 4px 0;
 }
 
-tree .filterNode {
-  padding-left: 20px !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+tree .filterListNodeName {
+  margin-left: 15px !important;
 }
 
 .viewerSelected {
