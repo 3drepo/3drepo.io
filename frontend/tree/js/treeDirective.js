@@ -495,6 +495,7 @@
 				if (newValue.toString() === "") {
 					vm.showTree = true;
 					vm.showFilterList = false;
+					vm.showProgress = false;
 					vm.nodes = vm.nodesToShow;
 					setContentHeight(vm.nodes);
 				} else {
