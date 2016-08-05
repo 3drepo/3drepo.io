@@ -96,7 +96,7 @@
 		vm.goToUserPage = false;
 
 		vm.legalDisplays = [
-			{title: "Terms & Conditions", value: "termsAndConditions"},
+			{title: "Terms & Conditions", value: "terms"},
 			{title: "Privacy", value: "privacy"},
 			{title: "Cookies", value: "cookies"},
 			{title: "Pricing", value: "pricing"},

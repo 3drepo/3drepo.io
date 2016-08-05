@@ -5267,17 +5267,23 @@ var ViewerManager = {};
 				vm.lastName = response.data.lastName;
 				vm.email = response.data.email;
 
-				vm.billingAddress = response.data.billingInfo;
 				// Pre-populate billing name if it doesn't exist with profile name
-				if (!vm.billingAddress.hasOwnProperty("firstName")) {
-					vm.billingAddress.firstName = vm.firstName;
-					vm.billingAddress.lastName = vm.lastName;
+				vm.billingAddress = {};
+				if (response.data.hasOwnProperty("billingInfo")) {
+					vm.billingAddress = response.data.billingInfo;
+					if (!vm.billingAddress.hasOwnProperty("firstName")) {
+						vm.billingAddress.firstName = vm.firstName;
+						vm.billingAddress.lastName = vm.lastName;
+					}
 				}
 
-				for (i = 0, length = vm.accounts.length; i < length; i += 1) {
-					if (vm.accounts[i].account === vm.account) {
-						vm.quota = vm.accounts[i].quota;
-						break;
+				// Get quota
+				if (angular.isDefined(vm.accounts)) {
+					for (i = 0, length = vm.accounts.length; i < length; i += 1) {
+						if (vm.accounts[i].account === vm.account) {
+							vm.quota = vm.accounts[i].quota;
+							break;
+						}
 					}
 				}
 			});
@@ -5404,7 +5410,7 @@ var ViewerManager = {};
 			vm.unassigned = [];
 			vm.licenses = [];
 			vm.allLicensesAssigned = false;
-			vm.numLicenses = vm.subscriptions.filter(function (sub) {return sub.inCurrentAgreement;}).length;
+			vm.numLicenses = vm.subscriptions.length;
 			vm.toShow = (vm.numLicenses > 0) ? "0+": "0";
 
 			for (i = 0; i < vm.numLicenses; i += 1) {
@@ -5766,7 +5772,7 @@ var ViewerManager = {};
 		checkFileUploading();
 
 		/*
-		 * Watch the new project type
+		 * Watch changes in upload file
 		 */
 		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
 			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {
@@ -10572,7 +10578,7 @@ var ViewerManager = {};
 		vm.goToUserPage = false;
 
 		vm.legalDisplays = [
-			{title: "Terms & Conditions", value: "termsAndConditions"},
+			{title: "Terms & Conditions", value: "terms"},
 			{title: "Privacy", value: "privacy"},
 			{title: "Cookies", value: "cookies"},
 			{title: "Pricing", value: "pricing"},
@@ -16364,6 +16370,92 @@ var Oculus = {};
 				vm.registerErrorMessage = "Please fill all fields";
 			}
 		}
+	}
+}());
+
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("terms", terms);
+
+	function terms() {
+		return {
+			restrict: "E",
+			scope: {},
+			templateUrl: "terms.html",
+			controller: TermsCtrl,
+			controllerAs: "vm",
+			bindToController: true
+		};
+	}
+
+	TermsCtrl.$inject = ["EventService"];
+
+	function TermsCtrl (EventService) {
+		var vm = this;
+
+		vm.home = function () {
+			EventService.send(EventService.EVENT.GO_HOME);
+		};
+	}
+}());
+
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("termsText", termsText);
+
+	function termsText() {
+		return {
+			restrict: "E",
+			scope: {},
+			templateUrl: "termsText.html",
+			controller: TermsTextCtrl,
+			controllerAs: "vm",
+			bindToController: true
+		};
+	}
+
+	TermsTextCtrl.$inject = [];
+
+	function TermsTextCtrl () {
+		var vm = this;
 	}
 }());
 
