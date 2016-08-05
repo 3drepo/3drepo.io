@@ -67,8 +67,12 @@ function executeAgreement(req, res, next){
 							});
 						}
 
-						dbUser.executeBillingAgreement(token, billingAgreement.id, billingAgreement);
-						resolve();
+						dbUser.executeBillingAgreement(token, billingAgreement.id, billingAgreement).then(() => {
+							resolve();
+						}).catch( err => {
+							reject(err);
+						});
+						
 					}
 				});
 			});

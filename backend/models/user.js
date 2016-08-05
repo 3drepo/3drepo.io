@@ -1306,7 +1306,7 @@ schema.methods.executeBillingAgreement = function(token, billingAgreementId, bil
 
 		let billing = Billing.createInstance({ account: this.user });
 
-		Billing.hasPendingBill(this.user, billingAgreementId).then(hasBill => {
+		return Billing.hasPendingBill(this.user, billingAgreementId).then(hasBill => {
 
 			if(hasBill){
 				return Promise.resolve();
@@ -1345,10 +1345,13 @@ schema.methods.executeBillingAgreement = function(token, billingAgreementId, bil
 				return billing.save();
 			}
 
-		}).catch(err => {
-			console.log('Billing error', err);
 		});
+
+	} else {
+		return Promise.resolve();
 	}
+
+
 
 
 };

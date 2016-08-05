@@ -251,7 +251,7 @@ describe('Enrolling to a subscription', function () {
 			// set fake billing id
 			User.findByUserName(username).then(user => {
 
-				user.executeBillingAgreement('EC-000000000', billingId, {
+				return user.executeBillingAgreement('EC-000000000', billingId, {
 				  "id": billingId,
 				  "name": "3D Repo Licenses",
 				  "description": "Regualr monthly recurring payment £360, starts on 1st Aug 2016",
@@ -311,9 +311,30 @@ describe('Enrolling to a subscription', function () {
 				  ],
 				  "start_date": "2016-08-01T15:04:22Z",
 				  "httpStatusCode": 201
-				}
-			);
-				return user.save();
+				}).then(() => {
+					return user.save();
+				});
+
+			}).then(() => {
+
+
+				// it should have a pending billing with SO-1 as invoice number.
+				return new Promise((resolve, reject) => {
+					agent.get(`/${username}/billings`)
+					.expect(200, function(err, res){
+						//console.log('billings', res.body);
+						expect(res.body).to.be.an('array').and.to.have.length(1);
+						expect(res.body[0].invoiceNo).to.equal('SO-1');
+						expect(res.body[0].pending).to.equal(true);
+
+						if(err){
+							reject(err);
+						} else {
+							resolve();
+						}
+					});
+				});
+
 
 			}).then(() => {
 
@@ -335,14 +356,44 @@ describe('Enrolling to a subscription', function () {
 					+ '&transaction_subject=abc'
 					+ '&payment_gross=&shipping=0.00&product_type=1&time_created=' + paymentDate + '&ipn_track_id=78a335fad3b16';
 
+				return new Promise((resolve, reject) => {
 					agent.post(`/payment/paypal/food`)
 					.send(fakePaymentMsg)
 					.expect(200, function(err, res){
 						setTimeout(function(){
-							done(err);
+							if(err){
+								reject(err);
+							} else {
+								resolve();
+							}
 						}, 2000);
 					});
+				});
 
+
+			}).then(() => {
+
+				// it should have a pending billing with SO-1 as invoice number.
+				return new Promise((resolve, reject) => {
+					agent.get(`/${username}/billings`)
+					.expect(200, function(err, res){
+						//console.log('billings', res.body);
+						expect(res.body).to.be.an('array').and.to.have.length(1);
+						expect(res.body[0].invoiceNo).to.equal('SO-1');
+						expect(res.body[0].pending).to.be.undefined;
+
+						if(err){
+							reject(err);
+						} else {
+							resolve();
+						}
+					});
+				});
+
+			}).then(() => {
+
+				done();
+				
 			}).catch(err => {
 				done(err);
 			});
