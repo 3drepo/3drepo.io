@@ -401,6 +401,14 @@ describe('Enrolling to a subscription', function () {
 
 		});
 
+		after(function(done){
+			agent.post('/logout')
+			.send({})
+			.expect(200, function(err, res){
+				done(err);
+			});
+		});
+
 		let subscriptions;
 		it('and the subscription should be active and filled with quota', function(done){
 
@@ -528,5 +536,127 @@ describe('Enrolling to a subscription', function () {
 
 
 	});
+
+
+	describe('second user pays', function(){
+		before(function(done){
+			agent.post('/login')
+			.send({ username: username3, password: password3 })
+			.expect(200, function(err, res){
+				expect(res.body.username).to.equal(username3);
+				done(err);
+			});
+		});
+
+		it('should succee (GB business)', function(done){
+
+			plans.billingAddress.vat = '206909015';
+
+			this.timeout(10000);
+
+			agent.post(`/${username3}/subscriptions`)
+			.send(plans)
+			.expect(200, function(err, res){
+				expect(res.body).to.have.property('url');
+				let parsed = url.parse(res.body.url, true);
+				expect(parsed.query).to.have.property('token');
+				
+				let paymentDef = res.body.agreement.plan.payment_definitions.find(def => def.type === 'REGULAR');
+				expect(paymentDef).to.be.not.null;
+				done(err);
+			});
+		});
+
+		it('should have an invoice with invoice number SO-2', function(){
+			return User.findByUserName(username3).then(user => {
+
+				return user.executeBillingAgreement('EC-000000001', billingId, {
+				  "id": billingId,
+				  "name": "3D Repo Licenses",
+				  "description": "Regualr monthly recurring payment £360, starts on 1st Aug 2016",
+				  "plan": {
+				    "id": "P-0E4438980T7694020I2RECCQ",
+				    "state": "ACTIVE",
+				    "name": "3D Repo Licences",
+				    "description": "3D Repo Licence",
+				    "type": "INFINITE",
+				    "payment_definitions": [
+				      {
+				        "id": "PD-4N463346D9639034UI2RECCQ",
+				        "name": "Regular monthly price",
+				        "type": "REGULAR",
+				        "frequency": "Month",
+				        "amount": {
+				          "currency": "GBP",
+				          "value": "300"
+				        },
+				        "cycles": "0",
+				        "charge_models": [
+				          {
+				            "id": "CHM-3R965001UL5436050I2RECCQ",
+				            "type": "TAX",
+				            "amount": {
+				              "currency": "GBP",
+				              "value": "60"
+				            }
+				          }
+				        ],
+				        "frequency_interval": "1"
+				      }
+				    ],
+				    "merchant_preferences": {
+				      "setup_fee": {
+				        "currency": "GBP",
+				        "value": "0"
+				      },
+				      "max_fail_attempts": "0",
+				      "return_url": "http://127.0.0.1/payment_testing?page=billing",
+				      "cancel_url": "http://127.0.0.1/payment_testing?page=billing&cancel=1",
+				      "auto_bill_amount": "YES",
+				      "initial_fail_amount_action": "CONTINUE"
+				    }
+				  },
+				  "links": [
+				    {
+				      "href": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-5EL17555M32938829",
+				      "rel": "approval_url",
+				      "method": "REDIRECT"
+				    },
+				    {
+				      "href": "https://api.sandbox.paypal.com/v1/payments/billing-agreements/EC-5EL17555M32938829/agreement-execute",
+				      "rel": "execute",
+				      "method": "POST"
+				    }
+				  ],
+				  "start_date": "2016-08-01T15:04:22Z",
+				  "httpStatusCode": 201
+				}).then(() => {
+					return user.save();
+				});
+
+			}).then(() => {
+
+
+				// it should have a pending billing with SO-2 as invoice number.
+				return new Promise((resolve, reject) => {
+					agent.get(`/${username3}/billings`)
+					.expect(200, function(err, res){
+						//console.log('billings', res.body);
+						expect(res.body).to.be.an('array').and.to.have.length(1);
+						expect(res.body[0].invoiceNo).to.equal('SO-2');
+						expect(res.body[0].pending).to.equal(true);
+
+						if(err){
+							reject(err);
+						} else {
+							resolve();
+						}
+					});
+				});
+
+
+			});
+		});
+	})
 
 });
