@@ -58,7 +58,6 @@
 			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
 				// Get any documents associated with an object
 				var object = event.value;
-				console.log(object);
 				promise = DocsService.getDocs(object.account, object.project, object.id);
 				promise.then(function (data) {
 					if (Object.keys(data).length > 0) {
@@ -74,14 +73,15 @@
 
 									// Pretty format Meta Data dates, e.g. 1900-12-31T23:59:59
 									if (docType === "Meta Data") {
-										console.log(vm.docs["Meta Data"]);
 										for (i = 0, length = vm.docs["Meta Data"].data.length; i < length; i += 1) {
 											for (item in vm.docs["Meta Data"].data[i].metadata) {
-												if ((Date.parse(vm.docs["Meta Data"].data[i].metadata[item]) &&
-													(vm.docs["Meta Data"].data[i].metadata[item].indexOf("T") !== -1))) {
-													vm.docs["Meta Data"].data[i].metadata[item] =
-														$filter("prettyDate")(new Date(vm.docs["Meta Data"].data[i].metadata[item]), {showSeconds: true});
-													console.log(vm.docs["Meta Data"].data[i].metadata[item]);
+												if (vm.docs["Meta Data"].data[i].metadata.hasOwnProperty(item)) {
+													if (Date.parse(vm.docs["Meta Data"].data[i].metadata[item]) &&
+														(typeof vm.docs["Meta Data"].data[i].metadata[item] === "string") &&
+														(vm.docs["Meta Data"].data[i].metadata[item].indexOf("T") !== -1)) {
+														vm.docs["Meta Data"].data[i].metadata[item] =
+															$filter("prettyDate")(new Date(vm.docs["Meta Data"].data[i].metadata[item]), {showSeconds: true});
+													}
 												}
 											}
 										}

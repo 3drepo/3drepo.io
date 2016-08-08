@@ -1973,17 +1973,6 @@ terms-text {
     color: rgba(0, 0, 0, 0.8);
     padding: 10px 50px;
 }
-terms-and-conditions .md-toolbar-tools img {
-    width: 150px;
-}
-
-terms-and-conditions-text {
-    position: absolute;
-    z-index: 3;
-    background: #FDFDFD;
-    color: rgba(0, 0, 0, 0.8);
-    padding: 10px 50px;
-}
 tree span {
   outline: none;
   margin: 0;

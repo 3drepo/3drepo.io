@@ -48,7 +48,7 @@ var ViewerUtilMyListeners = {};
 	ViewerUtil.prototype.triggerEvent = function(name, event)
 	{
 		var e = new CustomEvent(name, { detail: event });
-        console.log("TRIG: " + name);
+        //console.log("TRIG: " + name);
 		eventElement.dispatchEvent(e);
 	};
 
@@ -5009,7 +5009,8 @@ var ViewerManager = {};
 		 * @param index
 		 */
 		vm.downloadBilling = function (index) {
-			$window.open("/billing?user=" + vm.account + "&item=" + index);
+			//$window.open("/billing?user=" + vm.account + "&item=" + index);
+			$window.open(serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/billings/" + vm.billings[index].invoiceNo + ".pdf"), "_blank");
 		};
 
 		vm.changeSubscription = function () {
@@ -8965,7 +8966,6 @@ var ViewerManager = {};
 			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
 				// Get any documents associated with an object
 				var object = event.value;
-				console.log(object);
 				promise = DocsService.getDocs(object.account, object.project, object.id);
 				promise.then(function (data) {
 					if (Object.keys(data).length > 0) {
@@ -8981,14 +8981,15 @@ var ViewerManager = {};
 
 									// Pretty format Meta Data dates, e.g. 1900-12-31T23:59:59
 									if (docType === "Meta Data") {
-										console.log(vm.docs["Meta Data"]);
 										for (i = 0, length = vm.docs["Meta Data"].data.length; i < length; i += 1) {
 											for (item in vm.docs["Meta Data"].data[i].metadata) {
-												if ((Date.parse(vm.docs["Meta Data"].data[i].metadata[item]) &&
-													(vm.docs["Meta Data"].data[i].metadata[item].indexOf("T") !== -1))) {
-													vm.docs["Meta Data"].data[i].metadata[item] =
-														$filter("prettyDate")(new Date(vm.docs["Meta Data"].data[i].metadata[item]), {showSeconds: true});
-													console.log(vm.docs["Meta Data"].data[i].metadata[item]);
+												if (vm.docs["Meta Data"].data[i].metadata.hasOwnProperty(item)) {
+													if (Date.parse(vm.docs["Meta Data"].data[i].metadata[item]) &&
+														(typeof vm.docs["Meta Data"].data[i].metadata[item] === "string") &&
+														(vm.docs["Meta Data"].data[i].metadata[item].indexOf("T") !== -1)) {
+														vm.docs["Meta Data"].data[i].metadata[item] =
+															$filter("prettyDate")(new Date(vm.docs["Meta Data"].data[i].metadata[item]), {showSeconds: true});
+													}
 												}
 											}
 										}
@@ -9116,7 +9117,6 @@ var ViewerManager = {};
 			$http.get(url)
 				.then(
 					function(json) {
-						console.log(876, json);
 						var dataType;
 						// Set up the url for each PDF doc
 						for (i = 0, length = json.data.meta.length; i < length; i += 1) {
@@ -14444,6 +14444,9 @@ var Oculus = {};
 						}
 						else {
 							contentItem.height = contentItem.minHeight;
+							availableHeight -= contentItem.height + panelToolbarHeight + itemGap;
+							contentItems.splice(i, 1);
+							assignHeights(availableHeight, contentItems, prev);
 						}
 					}
 					else {
@@ -16455,92 +16458,6 @@ var Oculus = {};
 	TermsTextCtrl.$inject = [];
 
 	function TermsTextCtrl () {
-		var vm = this;
-	}
-}());
-
-/**
- *	Copyright (C) 2016 3D Repo Ltd
- *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
- *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
- *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-	"use strict";
-
-	angular.module("3drepo")
-		.directive("termsAndConditions", termsAndConditions);
-
-	function termsAndConditions() {
-		return {
-			restrict: "E",
-			scope: {},
-			templateUrl: "termsAndConditions.html",
-			controller: TermsAndConditionsCtrl,
-			controllerAs: "vm",
-			bindToController: true
-		};
-	}
-
-	TermsAndConditionsCtrl.$inject = ["EventService"];
-
-	function TermsAndConditionsCtrl (EventService) {
-		var vm = this;
-
-		vm.home = function () {
-			EventService.send(EventService.EVENT.GO_HOME);
-		};
-	}
-}());
-
-/**
- *	Copyright (C) 2016 3D Repo Ltd
- *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
- *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
- *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-	"use strict";
-
-	angular.module("3drepo")
-		.directive("termsAndConditionsText", termsAndConditionsText);
-
-	function termsAndConditionsText() {
-		return {
-			restrict: "E",
-			scope: {},
-			templateUrl: "termsAndConditionsText.html",
-			controller: TermsAndConditionsTextCtrl,
-			controllerAs: "vm",
-			bindToController: true
-		};
-	}
-
-	TermsAndConditionsTextCtrl.$inject = [];
-
-	function TermsAndConditionsTextCtrl () {
 		var vm = this;
 	}
 }());

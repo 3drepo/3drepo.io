@@ -48,7 +48,7 @@ var ViewerUtilMyListeners = {};
 	ViewerUtil.prototype.triggerEvent = function(name, event)
 	{
 		var e = new CustomEvent(name, { detail: event });
-        console.log("TRIG: " + name);
+        //console.log("TRIG: " + name);
 		eventElement.dispatchEvent(e);
 	};
 
