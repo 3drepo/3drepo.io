@@ -63,7 +63,7 @@ var schema = mongoose.Schema({
 });
 
 schema.statics.findByAccount = function(account){
-	return this.find({account}, {}, {raw: 0, pdf: 0}, {sort: {periodStart: -1}});
+	return this.find({account}, {}, {raw: 0, pdf: 0}, {sort: {createdAt: -1}});
 };
 
 schema.statics.findByInvoiceNo = function(account, invoiceNo){

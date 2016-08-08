@@ -486,6 +486,11 @@
 
 		let responsePlace = utils.APIInfo(req);
 		let billing;
+		let regenerate;
+
+		if(config.pdf && config.pdf.debug && config.pdf.debug.allowRegenerate){
+			regenerate = req.query.regenerate;
+		}
 
 		Billing.findByInvoiceNo(req.params.account, req.params.invoiceNo).then(_billing => {
 			
@@ -494,11 +499,10 @@
 				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
 			}
 
-			return billing.getPDF({regenerate: false});
+			return billing.getPDF({regenerate: regenerate});
 		
 		}).then(pdf => {
 
-			console.log(pdf.length);
 
 			res.writeHead(200, {
 				'Content-Type': 'application/pdf',

@@ -1106,11 +1106,11 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 				billing.raw = raw;
 				billing.gateway = paymentInfo.gateway;
-				billing.createdAt = new Date();
+				billing.createdAt = pendingBill.createdAt;
 				billing.currency = paymentInfo.currency;
 				billing.amount = paymentInfo.amount;
 				billing.billingAgreementId = billingAgreementId;
-				billing.items = pendingBill && pendingBill.items || items;
+				billing.items = pendingBill.items;
 				billing.nextPaymentDate = paymentInfo.nextPaymentDate;
 				billing.taxAmount = paymentInfo.taxAmount;
 				billing.nextPaymentAmount = paymentInfo.nextAmount;
@@ -1118,14 +1118,10 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 				billing.transactionId = paymentInfo.transactionId;
 
 				//copy current billing info from user to billing
-				billing.info = dbUser.customData.billingInfo;
+				billing.info = pendingBill.info;
 
-				billing.periodStart = dbUser.customData.lastAnniversaryDate;
-				billing.periodEnd = moment(dbUser.customData.nextPaymentDate)
-					.utc()
-					.subtract(1, 'day')
-					.endOf('date')
-					.toDate();
+				billing.periodStart = pendingBill.periodStart;
+				billing.periodEnd = pendingBill.periodEnd;
 
 				return billing.save();
 			});
@@ -1320,13 +1316,15 @@ schema.methods.executeBillingAgreement = function(token, billingAgreementId, bil
 
 			if(invoiceNo){
 
+				let nextPaymentDate = moment(this.customData.nextPaymentDate || this.customData.firstNextPaymentDate).utc().startOf('date');
+
 				billing.gateway = 'PAYPAL';
 				billing.createdAt = new Date();
 				billing.currency = paymentInfo.currency;
 				billing.amount = paymentInfo.amount;
 				billing.billingAgreementId = billingAgreementId;
 				billing.items = items;
-				billing.nextPaymentDate = this.customData.firstNextPaymentDate;
+				billing.nextPaymentDate = nextPaymentDate;
 				billing.taxAmount = paymentInfo.taxAmount;
 				billing.nextPaymentAmount = paymentInfo.nextAmount;
 				billing.invoiceNo = invoiceNo;
@@ -1335,8 +1333,8 @@ schema.methods.executeBillingAgreement = function(token, billingAgreementId, bil
 				//copy current billing info from user to billing
 				billing.info = this.customData.billingInfo;
 
-				billing.periodStart = this.customData.lastAnniversaryDate;
-				billing.periodEnd = moment(this.customData.firstNextPaymentDate)
+				billing.periodStart = moment().utc().toDate();
+				billing.periodEnd = nextPaymentDate
 					.utc()
 					.subtract(1, 'day')
 					.endOf('date')
