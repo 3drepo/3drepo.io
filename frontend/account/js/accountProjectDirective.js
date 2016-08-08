@@ -60,6 +60,7 @@
 		vm.project.canUpload = true;
 		vm.projectOptions = {
 			upload: {label: "Upload file", icon: "cloud_upload"},
+			projectsetting: {label: "Settings", icon: "settings"},
 			team: {label: "Team", icon: "group"},
 			delete: {label: "Delete", icon: "delete"}
 		};
@@ -109,6 +110,12 @@
 		 */
 		vm.doProjectOption = function (event, option) {
 			switch (option) {
+				case "projectsetting":
+					console.log('Settings clicked');
+					$location.search("proj", vm.project.name);
+					vm.onShowPage({page: "projectsetting", callingPage: "repos"});
+					break;
+
 				case "upload":
 					vm.uploadFile();
 					break;

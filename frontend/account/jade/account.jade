@@ -46,6 +46,13 @@ div(ng-if="!vm.state.project")
 			show-page="vm.showPage(page, callingPage)"
 			subscriptions="vm.subscriptions")
 
+			account-projectsetting(
+			ng-switch-when="projectsetting"
+			account="vm.account"
+			project="vm.project"
+			show-page="vm.showPage(page, callingPage)"
+			subscriptions="vm.subscriptions")
+
 div(ng-if="vm.state.project")
 	project(
 	account="vm.state.account"

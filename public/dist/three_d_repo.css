@@ -421,6 +421,36 @@ account-team #accountTeamSubHeader {
 #overQuotaDialog #overQuotaInfo {
   margin: 20px 20px 0;;
 }
+
+/** Account Project Setting ******************************************************************************************/
+account-projectsetting .collaboratorIcon {
+  margin: 0 10px !important;
+}
+
+account-projectsetting #project {
+  margin: -10px 0 10px;
+}
+account-projectsetting #project md-icon {
+  margin: 0 !important;
+}
+
+account-projectsetting #accountTeamAdd {
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+account-projectsetting #accountTeamMemberRoleGroup {
+  margin: 20px 0 0 10px;
+}
+
+account-projectsetting #accountTeamMemberRole {
+  margin-left: 10px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+account-projectsetting #accountTeamSubHeader {
+  color: rgba(0, 0, 0, 0.3);
+}
 /* Done to counter bootstrap styling. This should really be set in a top level style file */
 .md-datepicker-input-mask {
   width: 308px;
