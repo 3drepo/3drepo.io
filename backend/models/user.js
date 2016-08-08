@@ -1008,7 +1008,20 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 			return Promise.reject({ message: `No users found with billingAgreementId ${billingAgreementId}`});
 		}
 
+		if(dbUser.customData.nextPaymentDate > paymentInfo.nextPaymentDate){
+			return Promise.reject({ message: 'Received ipn message older than the one in database. Activation halt.' });
+		}
+
+
 		account = dbUser.user;
+
+		return Billing.findByTransactionId(account, paymentInfo.transactionId);
+
+	}).then(billing => {
+
+		if(billing){
+			return Promise.reject({ message: 'Duplicated ipn message. Activation halt.'});
+		}
 
 		return Role.findByRoleID(`${account}.admin`);
 
@@ -1097,11 +1110,12 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 				billing.currency = paymentInfo.currency;
 				billing.amount = paymentInfo.amount;
 				billing.billingAgreementId = billingAgreementId;
-				billing.items = pendingBill.items || items;
+				billing.items = pendingBill && pendingBill.items || items;
 				billing.nextPaymentDate = paymentInfo.nextPaymentDate;
 				billing.taxAmount = paymentInfo.taxAmount;
 				billing.nextPaymentAmount = paymentInfo.nextAmount;
 				billing.invoiceNo = invoiceNo;
+				billing.transactionId = paymentInfo.transactionId;
 
 				//copy current billing info from user to billing
 				billing.info = dbUser.customData.billingInfo;
@@ -1188,6 +1202,7 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 
 			}).catch(err => {
+				console.log(err.stack);
 				systemLogger.logError(`Email error - ${err.message}`);
 			});
 
@@ -1291,7 +1306,7 @@ schema.methods.executeBillingAgreement = function(token, billingAgreementId, bil
 
 		let billing = Billing.createInstance({ account: this.user });
 
-		Billing.hasPendingBill(this.user, billingAgreementId).then(hasBill => {
+		return Billing.hasPendingBill(this.user, billingAgreementId).then(hasBill => {
 
 			if(hasBill){
 				return Promise.resolve();
@@ -1330,10 +1345,13 @@ schema.methods.executeBillingAgreement = function(token, billingAgreementId, bil
 				return billing.save();
 			}
 
-		}).catch(err => {
-			console.log('Billing error', err);
 		});
+
+	} else {
+		return Promise.resolve();
 	}
+
+
 
 
 };

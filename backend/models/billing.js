@@ -43,6 +43,7 @@ var schema = mongoose.Schema({
 	periodEnd: Date,
 	nextPaymentDate: Date,
 	nextPaymentAmount: String,
+	transactionId: String,
 	taxAmount: String,
 	info: {
 		"vat": String,
@@ -67,6 +68,10 @@ schema.statics.findByAccount = function(account){
 
 schema.statics.findByInvoiceNo = function(account, invoiceNo){
 	return this.findOne({account}, { invoiceNo});
+};
+
+schema.statics.findByTransactionId = function(account, transactionId){
+	return this.findOne({account}, { transactionId }, {raw: 0, pdf: 0});
 };
 
 schema.statics.hasPendingBill = function(account, billingAgreementId){
@@ -158,7 +163,7 @@ schema.methods.generatePDF = function(){
 	}).then(_page => {
 
 		page = _page;
-		page.property('viewportSize', { width: 1200, height: 800 });
+		page.property('viewportSize', { width: 1200 , height: 1553 });
 		return page.open(`file://${config.invoice_dir}/${this.id}.html`);
 
 	}).then(() => {

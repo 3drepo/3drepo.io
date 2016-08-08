@@ -18,6 +18,7 @@
 
 var nodemailer = require('nodemailer');
 var config = require('../config');
+var responseCodes = require('../response_codes');
 
 var transporter;
 
@@ -150,7 +151,7 @@ function sendContactEmail(data){
 	let template = require('./templates/contact');
 	
 	if(!config.contact || !config.contact.email){
-		return Promise.reject({ messsage: 'config.contact.email is undefined in config file'});
+		return Promise.reject(responseCodes.NO_CONTACT_EMAIL);
 	}
 
 	return sendEmail(template, config.contact.email, data);
