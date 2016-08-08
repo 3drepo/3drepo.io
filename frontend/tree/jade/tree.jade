@@ -38,7 +38,7 @@ div(class="virtualRepeatInfiniteScroll" ng-if="vm.showFilterList && vm.filterIte
 					div(flex, layout="row", layout-align="start center")
 						p.filterListNodeName(ng-click="vm.filterItemSelected(item)", ng-class="item.class") {{item.name}}
 					// Toggle visibility
-					md-button.md-icon-button.md-primary.toggleButton(aria-label="Toggle Visible", ng-click="vm.toggleFilterNode(item)")
+					//md-button.md-icon-button.md-primary.toggleButton(aria-label="Toggle Visible", ng-click="vm.toggleFilterNode(item)")
 						md-icon.angular-material-icons(aria-label="Visible", ng-if="item.toggleState==='visible'") visibility
 						md-icon.angular-material-icons(aria-label="Invisible", ng-if="item.toggleState==='invisible'") visibility_off
 				md-divider.treeNodeDivider(ng-if="item")
