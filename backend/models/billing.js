@@ -94,11 +94,7 @@ schema.statics.findAndRemovePendingBill = function(account, billingAgreementId){
 schema.methods.clean = function(options) {
 	'use strict';
 
-	let euCountryCodes = [
-		"BE", "BG", "CZ", "DK", "DE", "EE", "IE", "EL", "ES", "FR", "HR", "IT", "CY", "LV", "LT",
-		"LU", "HU", "MT", "NL", "AT", "PL", "PT", "RO", "SI", "SK", "FI", "SE"
-	];
-
+	let euCountryCodes = addressMeta.euCountriesCode;
 
 	options = options || {};
 	let billing = this.toObject();
