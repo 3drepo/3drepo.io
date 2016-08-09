@@ -515,6 +515,36 @@ function getFullTree(account, project, branch){
 	});
 }
 
+function listSubProjects(account, project, branch){
+	'use strict';
+
+	let subProjects = [];
+
+	return History.findByBranch({ account, project }, branch).then(history => {
+
+
+
+		let filter = {
+			type: "ref",
+			_id: { $in: history.current }
+		};
+
+		return Ref.find({ account, project }, filter);
+
+	}).then(refs => {
+
+		refs.forEach(ref => {
+			subProjects.push({
+				database: ref.owner,
+				project: ref.project
+			});
+		});
+
+		return Promise.resolve(subProjects);
+	
+	});
+}
+
 module.exports = {
 	createAndAssignRole,
 	importToyProject,
@@ -522,5 +552,6 @@ module.exports = {
 	addCollaborator,
 	removeCollaborator,
 	createFederatedProject,
+	listSubProjects,
 	getFullTree
 };

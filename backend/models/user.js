@@ -523,7 +523,8 @@ schema.methods.listAccounts = function(){
 				project: project.project,
 				timestamp: project.timestamp,
 				status: project.status,
-				federate: project.federate
+				federate: project.federate,
+				subProjects: project.subProjects
 			});
 
 		});
@@ -591,6 +592,8 @@ schema.methods.listAccounts = function(){
 
 schema.methods.listProjects = function(options){
 	'use strict';
+
+	var ProjectHelper = require('./helper/project');
 
 	return this.getPrivileges().then(privs => {
 
@@ -662,6 +665,21 @@ schema.methods.listProjects = function(options){
 
 					return Promise.resolve();
 					
+				}).then(() => {
+
+					
+					if(projects[index].federate){
+						return ProjectHelper.listSubProjects(projects[index].account, projects[index].project, 'master');
+					}
+
+					return Promise.resolve();
+
+				}).then(subProjects => {
+
+					if(subProjects){
+						projects[index].subProjects = subProjects;
+					}
+
 				}).catch(() => Promise.resolve())
 			);
 		});
