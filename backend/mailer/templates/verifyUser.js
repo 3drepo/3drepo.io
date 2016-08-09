@@ -27,5 +27,5 @@ var html = data => `
 
 module.exports =  {
 	html: html,
-	subject: 'Welcome To 3D Repo! Verify Your Email‏'
+	subject: 'Welcome to 3D Repo! Verify Your Email‏'
 };

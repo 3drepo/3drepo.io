@@ -55,28 +55,40 @@
         /**
          * Process forgotten password recovery
          */
-        vm.requestPasswordChange = function () {
-            if (angular.isDefined(vm.username) && angular.isDefined(vm.email)) {
-                vm.messageColor = messageColour;
-                vm.message = "Please wait...";
-                vm.showProgress = true;
-                promise = UtilsService.doPost({email: vm.email}, vm.username + "/forgot-password");
-                promise.then(function (response) {
-                    vm.showProgress = false;
-                    if (response.status === 200) {
-                        vm.verified = true;
-                        vm.messageColor = messageColour;
-                        vm.message = "Thank you. You will receive an email shortly with a link to change your password";
-                    }
-                    else {
-                        vm.messageColor = messageErrorColour;
-                        vm.message = "Error with with one or more fields";
-                    }
-                });
+        vm.requestPasswordChange = function (event) {
+            var enterKey = 13,
+                requestChange = false;
+
+            if (angular.isDefined(event)) {
+                requestChange = (event.which === enterKey);
             }
             else {
-                vm.messageColor = messageErrorColour;
-                vm.message = "All fields must be filled";
+                requestChange = true;
+            }
+
+            if (requestChange) {
+                if (angular.isDefined(vm.username) && angular.isDefined(vm.email)) {
+                    vm.messageColor = messageColour;
+                    vm.message = "Please wait...";
+                    vm.showProgress = true;
+                    promise = UtilsService.doPost({email: vm.email}, vm.username + "/forgot-password");
+                    promise.then(function (response) {
+                        vm.showProgress = false;
+                        if (response.status === 200) {
+                            vm.verified = true;
+                            vm.messageColor = messageColour;
+                            vm.message = "Thank you. You will receive an email shortly with a link to change your password";
+                        }
+                        else {
+                            vm.messageColor = messageErrorColour;
+                            vm.message = "Error with with one or more fields";
+                        }
+                    });
+                }
+                else {
+                    vm.messageColor = messageErrorColour;
+                    vm.message = "All fields must be filled";
+                }
             }
         };
     }

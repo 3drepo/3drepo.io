@@ -16,9 +16,16 @@
  */
 var mongoose = require('mongoose');
 var ModelFactory = require('./factory/modelFactory');
-
+var addressMeta = require('./addressMeta');
+var moment = require('moment');
+var fs = require('fs');
+var jade = require('jade');
+var phantom = require('phantom');
+var utils = require("../utils");
+var config = require('../config');
 
 var schema = mongoose.Schema({
+	invoiceNo: String,
 	billingAgreementId: String,
 	gateway: String,
 	raw: {},
@@ -36,6 +43,7 @@ var schema = mongoose.Schema({
 	periodEnd: Date,
 	nextPaymentDate: Date,
 	nextPaymentAmount: String,
+	transactionId: String,
 	taxAmount: String,
 	info: {
 		"vat": String,
@@ -49,11 +57,160 @@ var schema = mongoose.Schema({
 		"city": String,
 		"postalCode": String,
 		"countryCode": String
-	}
+	},
+	pending: Boolean,
+	pdf: Object
 });
 
 schema.statics.findByAccount = function(account){
-	return this.find({account}, {}, {raw: 0}, {sort: {periodStart: -1}});
+	return this.find({account}, {}, {raw: 0, pdf: 0}, {sort: {createdAt: -1}});
+};
+
+schema.statics.findByInvoiceNo = function(account, invoiceNo){
+	return this.findOne({account}, { invoiceNo});
+};
+
+schema.statics.findByTransactionId = function(account, transactionId){
+	return this.findOne({account}, { transactionId }, {raw: 0, pdf: 0});
+};
+
+schema.statics.hasPendingBill = function(account, billingAgreementId){
+	return this.count({account}, {billingAgreementId: billingAgreementId, pending: true}).then( count => {
+		console.log('count', count);
+		return Promise.resolve(count > 0);
+	});
+};
+
+schema.statics.findAndRemovePendingBill = function(account, billingAgreementId){
+	return this.findOne({account}, {billingAgreementId: billingAgreementId, pending: true}).then(billing => {
+		if(billing){
+			return billing.remove().then(() => {
+				return billing;
+			});
+		}
+	}); 
+};
+
+schema.methods.clean = function(options) {
+	'use strict';
+
+	let euCountryCodes = [
+		"BE", "BG", "CZ", "DK", "DE", "EE", "IE", "EL", "ES", "FR", "HR", "IT", "CY", "LV", "LT",
+		"LU", "HU", "MT", "NL", "AT", "PL", "PT", "RO", "SI", "SK", "FI", "SE"
+	];
+
+
+	options = options || {};
+	let billing = this.toObject();
+	billing.info.country = addressMeta.countries.find(c => c.code === billing.info.countryCode).name;
+	billing.taxAmount = parseFloat(billing.taxAmount).toFixed(2);
+	billing.amount  = parseFloat(billing.amount).toFixed(2);
+	billing.netAmount  = (Math.round((parseFloat(billing.amount) - parseFloat(billing.taxAmount)) * 100) / 100).toFixed(2);
+	billing.taxPercentage = (Math.round(parseFloat(billing.taxAmount) / parseFloat(billing.netAmount) * 100) / 100 * 100);
+	
+	if(!options.skipDate) {
+		billing.createdAt = moment(billing.createdAt).utc().format('DD-MM-YYYY HH:mm');
+		billing.periodStart = moment(billing.periodStart).utc().format('YYYY-MM-DD');
+		billing.periodEnd = moment(billing.periodEnd).utc().format('YYYY-MM-DD');
+	}
+
+	billing.B2B_EU = (euCountryCodes.indexOf(billing.info.countryCode) !== -1) && (billing.info.hasOwnProperty("vat"));
+	return billing;
+};
+
+schema.methods.generatePDF = function(){
+	'use strict';
+
+	let cleaned = this.clean();
+
+	let ph;
+	let page;
+
+	if(!config.invoice_dir){
+		return Promise.reject({ message: 'invoice dir is not set in config file'});
+	}
+
+	return new Promise((resolve, reject) => {
+		
+		jade.renderFile('./jade/invoice.jade', {billing : cleaned, baseURL: utils.getBaseURL()}, function(err, html){
+			if(err){
+				reject(err);
+			} else {
+				resolve(html);
+			}
+		});
+
+	}).then(html => {
+
+		return new Promise((resolve, reject) => {
+			fs.writeFile(`${config.invoice_dir}/${this.id}.html`, html, { flag: 'a+'}, err => {
+				if(err){
+					reject(err);
+				} else {
+					resolve();
+				}
+			});
+		});
+
+	}).then(() => {
+		return phantom.create();
+
+	}).then(_ph => {
+
+		ph = _ph;
+		return ph.createPage();
+		
+	}).then(_page => {
+
+		page = _page;
+		page.property('viewportSize', { width: 1200 , height: 1553 });
+		return page.open(`file://${config.invoice_dir}/${this.id}.html`);
+
+	}).then(() => {
+
+		return page.render(`${config.invoice_dir}/${this.id}.pdf`);
+		
+	}).then(() => {
+
+		ph && ph.exit();
+		return Promise.resolve(`${config.invoice_dir}/${this.id}.pdf`);
+
+	}).catch( err => {
+
+		ph && ph.exit();
+		return Promise.reject(err);
+	});
+
+};
+
+schema.methods.getPDF = function(options){
+	'use strict';
+
+	options = options || {};
+
+	if(options.regenerate || !this.pdf){
+
+		return this.generatePDF().then(pdfPath => {
+
+			let pdfRS = fs.createReadStream(pdfPath);
+			let bufs = [];
+
+			return new Promise((resolve, reject) => {
+
+				pdfRS.on('data', function(d){ bufs.push(d); });
+				pdfRS.on('end', function(){
+					resolve(Buffer.concat(bufs));
+				});
+				pdfRS.on('err', err => {
+					reject(err);
+				});
+			});
+		});
+
+	} else {
+		//console.log('from cache')
+		return Promise.resolve(this.pdf.buffer);
+	}
 };
 
 var Billing = ModelFactory.createClass(

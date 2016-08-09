@@ -35,9 +35,9 @@
         };
     }
 
-    PasswordChangeCtrl.$inject = ["$scope", "$window", "UtilsService"];
+    PasswordChangeCtrl.$inject = ["$scope", "UtilsService", "EventService"];
 
-    function PasswordChangeCtrl ($scope, $window, UtilsService) {
+    function PasswordChangeCtrl ($scope, UtilsService, EventService) {
         var vm = this,
             enterKey = 13,
             promise,
@@ -75,7 +75,7 @@
          * Take the user back to the login page
          */
         vm.goToLoginPage = function () {
-            $window.location.href = "/";
+            EventService.send(EventService.EVENT.GO_HOME);
         };
 
         /**

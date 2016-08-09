@@ -43,7 +43,8 @@
 	router.get("/:account.jpg", middlewares.hasReadAccessToAccount, getAvatar);
 	router.get("/:account/subscriptions", middlewares.hasReadAccessToAccount, listSubscriptions);
 	router.get("/:account/billings", middlewares.hasReadAccessToAccount, listBillings);
-	router.get("/:account/billings/:id.html", middlewares.hasReadAccessToAccount, renderBilling);
+	router.get("/:account/billings/:invoiceNo.html", middlewares.hasReadAccessToAccount, renderBilling);
+	router.get("/:account/billings/:invoiceNo.pdf", middlewares.hasReadAccessToAccount, renderBillingPDF);
 	router.post('/:account', signUp);
 	//router.post('/:account/database', middlewares.canCreateDatabase, createDatabase);
 	router.post('/:account/subscriptions', middlewares.canCreateDatabase, createSubscription);
@@ -52,7 +53,7 @@
 	router.post('/:account/verify', verify);
 	router.post('/:account/forgot-password', forgotPassword);
 	router.put("/:account", middlewares.hasWriteAccessToAccount, updateUser);
-	router.put("/:account/password", middlewares.hasWriteAccessToAccount, resetPassword);
+	router.put("/:account/password", resetPassword);
 
 	// function expireSession(req) {
 	// 	if (req.session)
@@ -454,6 +455,11 @@
 
 		let responsePlace = utils.APIInfo(req);
 		Billing.findByAccount(req.params.account).then(billings => {
+			
+			billings.forEach((billing, i) => {
+				billings[i] = billing.clean({skipDate: true});
+			});
+
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, billings);
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -461,16 +467,51 @@
 	}
 
 	function renderBilling(req, res, next){
+
 		let responsePlace = utils.APIInfo(req);
-		Billing.findById({account: req.params.account}, req.params.id).then(billing => {
+		Billing.findByInvoiceNo(req.params.account, req.params.invoiceNo).then(billing => {
 			
 			if(!billing){
 				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
 			}
 
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, billing);
-			//res.render("???.jade", {billing : billing});
+			res.render("invoice.jade", {billing : billing.clean(), baseURL: utils.getBaseURL()});
 			
+		}).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+}
+
+	function renderBillingPDF(req, res, next){
+
+		let responsePlace = utils.APIInfo(req);
+		let billing;
+		let regenerate;
+
+		if(config.pdf && config.pdf.debug && config.pdf.debug.allowRegenerate){
+			regenerate = req.query.regenerate;
+		}
+
+		Billing.findByInvoiceNo(req.params.account, req.params.invoiceNo).then(_billing => {
+			
+			billing = _billing;
+			if(!billing){
+				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
+			}
+
+			return billing.getPDF({regenerate: regenerate});
+		
+		}).then(pdf => {
+
+
+			res.writeHead(200, {
+				'Content-Type': 'application/pdf',
+				'Content-disposition': `inline; filename="invoice-${billing.invoiceNo}.pdf"`,
+				'Content-Length': pdf.length
+			});
+
+			res.end(pdf);
+
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 		});

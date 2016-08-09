@@ -18,7 +18,7 @@
 (function() {
 	"use strict";
 
-	const VERSION="1.1.1";
+	const VERSION="1.3.1";
 
 	var config = require("app-config").config;
 	var frontend_scripts = require("../common_public_files.js");
@@ -191,9 +191,6 @@
 	config.auth.captcha  = coalesce(config.auth.captcha, {});
 	config.auth.register  = coalesce(config.auth.register, {});
 
-	//contact
-	config.contact = coalesce(config.contact, {});
-	config.contact.email = coalesce(config.contact.email, 'support@3drepo.org');
 
 	//paypal
 	config.paypal = coalesce(config.paypal, {});

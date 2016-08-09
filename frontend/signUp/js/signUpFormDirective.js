@@ -106,7 +106,6 @@
 		};
 
 		vm.showPage = function (page) {
-			console.log(page);
 			$location.path("/" + page, "_self");
 		};
 

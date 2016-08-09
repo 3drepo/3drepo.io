@@ -81,7 +81,7 @@ describe('Billing agreement price from PayPal', function () {
 				"line3": "line3",
 				"firstName": "Nigel",
 				"lastName": "Farage",
-				"company": options.companyName,
+				"vat": options.vat,
 				"city": "city",
 				"postalCode": "A00 2ss020",
 				"countryCode": options.country
@@ -125,10 +125,10 @@ describe('Billing agreement price from PayPal', function () {
 		this.timeout(10000);
 		makeTest({ 
 			noOfLicence: 3, 
-			companyName: '3D Repo', 
+			vat: '206909015', 
 			country: 'GB', 
-			amount: '250', 
-			taxAmount: '50', 
+			amount: '300', 
+			taxAmount: '60', 
 		}, done);
 	});
 
@@ -137,8 +137,8 @@ describe('Billing agreement price from PayPal', function () {
 		makeTest({ 
 			noOfLicence: 2, 
 			country: 'GB', 
-			amount: '166.67', 
-			taxAmount: '33.33', 
+			amount: '200', 
+			taxAmount: '40', 
 		}, done);
 
 	});
@@ -147,7 +147,7 @@ describe('Billing agreement price from PayPal', function () {
 		this.timeout(10000);
 		makeTest({ 
 			noOfLicence: 3, 
-			companyName: '3D Repo', 
+			vat: '9009009', 
 			country: 'DE', 
 			amount: '300',
 			taxAmount: '0'
@@ -159,8 +159,8 @@ describe('Billing agreement price from PayPal', function () {
 		makeTest({ 
 			noOfLicence: 2, 
 			country: 'DE', 
-			amount: '168.07', 
-			taxAmount: '31.93', 
+			amount: '200', 
+			taxAmount: '38', 
 		}, done);
 
 	});
@@ -202,10 +202,10 @@ describe('Billing agreement price from PayPal', function () {
 			this.timeout(10000);
 			makeTest({ 
 				noOfLicence: 2, 
-				companyName: '3D Repo', 
+				vat: '206909015', 
 				country: 'GB', 
-				amount: '166.67', 
-				taxAmount: '33.33'
+				amount: '200', 
+				taxAmount: '40'
 			}, done);
 		});
 	});

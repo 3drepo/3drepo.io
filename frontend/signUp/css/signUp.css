@@ -14,8 +14,7 @@ sign-up-form #tc md-checkbox ._md-icon {
     border-color: rgba(0, 0, 0, 0.4);
 }
 sign-up-form #tc a {
-    font-size: 14px;
-    margin-left: 5px;
+    font-size: 12px;
 }
 sign-up-form #tc p {
     font-size: 14px;
@@ -52,4 +51,10 @@ sign-up-form .registerError {
 
 sign-up-form .rc-anchor-light {
     background: red;
+}
+
+sign-up-form #signUpFormHiddenInputs {
+    position: absolute;
+    top: 0;
+    opacity: 0;
 }
