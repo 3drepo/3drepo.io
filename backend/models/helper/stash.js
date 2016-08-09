@@ -20,6 +20,7 @@
 var ModelFactory = require('../factory/modelFactory');
 var stream = require('stream');
 var GridFSBucket = require('mongodb').GridFSBucket;
+var systemLogger = require("../../logger.js").systemLogger;
 
 function _getGridFSBucket (dbCol, format){
 	'use strict';
@@ -30,28 +31,37 @@ function _getGridFSBucket (dbCol, format){
 	);
 }
 
-function findStashByFilename(dbCol, format, filename){
+function findStashByFilename(dbCol, format, filename, getStreamOnly){
 	'use strict';
 
 	let bucket = _getGridFSBucket(dbCol, format);
 
 	return bucket.find({ filename }).toArray().then(files => {
 		if(!files.length){
-			dbCol.logger.logInfo(filename + " - Attempt to retrieved from stash but not found");
+			systemLogger.logInfo(filename + " - Attempt to retrieved from stash but not found");
 			return Promise.resolve(false);
 			
 		} else {
-			dbCol.logger.logInfo(filename + " - Retrieved from stash");
+			systemLogger.logInfo(filename + " - Retrieved from stash");
 
 			return new Promise((resolve) => {
 
 				let downloadStream = bucket.openDownloadStreamByName(filename);
-				let bufs = [];
 
-				downloadStream.on('data', function(d){ bufs.push(d); });
-				downloadStream.on('end', function(){
-					resolve(Buffer.concat(bufs));
-				});
+				if(getStreamOnly){
+					
+					resolve(downloadStream);
+
+				} else { 
+
+					let bufs = [];
+
+					downloadStream.on('data', function(d){ bufs.push(d); });
+					downloadStream.on('end', function(){
+						resolve(Buffer.concat(bufs));
+					});
+
+				}
 
 			});
 

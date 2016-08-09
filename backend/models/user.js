@@ -518,6 +518,7 @@ schema.methods.listAccounts = function(){
 				project: project.project,
 				timestamp: project.timestamp,
 				status: project.status,
+				federate: project.federate
 			});
 
 		});
@@ -649,6 +650,7 @@ schema.methods.listProjects = function(options){
 
 					if(setting){
 						projects[index].status = setting.status;
+						projects[index].federate = setting.federate;
 					}
 
 					return Promise.resolve();
