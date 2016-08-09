@@ -6314,7 +6314,6 @@ var ViewerManager = {};
 			restrict: 'EA',
 			templateUrl: 'accountProjectsetting.html',
 			scope: {
-				project: "=",
 				account: "=",
 				showPage: "&",
 				subscriptions: "="
@@ -6338,6 +6337,29 @@ var ViewerManager = {};
 			$location.search("project", null);
 			vm.showPage({page: "repos"});
 		};
+
+		vm.units = [
+			{value: 'light-year', name: 'Light year'},
+			{value: 'meter', name: 'meter'}
+		];
+
+		vm.mapTile = {};
+		vm.projectName = $location.search().proj;
+
+
+		UtilsService.doGet(vm.account + "/" + vm.projectName + ".json")
+		.then(function (response) {
+			console.log(response);
+			if (response.status === 200) {
+
+			} else if (response.status === 401){
+
+			}
+		});
+
+		vm.save = function(){
+			console.log('Saving...');
+		}
 	}
 }());
 

@@ -49,7 +49,7 @@ var schema = mongoose.Schema({
 	}]
 });
 
-schema.statics.allowedProps = [ 'unit', 'seaLevel', 'mapTile.lat', 'mapTile.lon', 'mapTile.y'];
+schema.statics.allowedProps = [ 'unit', 'mapTile.lat', 'mapTile.lon', 'mapTile.y'];
 
 schema.methods.updateProperties = function(updateObj){
 	'use strict';

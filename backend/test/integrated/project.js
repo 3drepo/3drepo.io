@@ -98,8 +98,7 @@ describe('Project', function () {
 					lon: 234,
 					y: 5
 				},
-				seaLevel: 2,
-				unit: 2
+				unit: 'meter'
 
 		};
 		
