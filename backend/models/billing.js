@@ -23,6 +23,7 @@ var jade = require('jade');
 var phantom = require('phantom');
 var utils = require("../utils");
 var config = require('../config');
+var Subscriptions = require('./subscription');
 
 var schema = mongoose.Schema({
 	invoiceNo: String,
@@ -103,7 +104,16 @@ schema.methods.clean = function(options) {
 	billing.amount  = parseFloat(billing.amount).toFixed(2);
 	billing.netAmount  = (Math.round((parseFloat(billing.amount) - parseFloat(billing.taxAmount)) * 100) / 100).toFixed(2);
 	billing.taxPercentage = (Math.round(parseFloat(billing.taxAmount) / parseFloat(billing.netAmount) * 100) / 100 * 100);
+	billing.unitPrice = (Math.round(parseFloat(billing.netAmount) / billing.items.length * 1000) / 1000).toFixed(3);
 	
+	if(billing.unitPrice.substr(-1) === '0'){
+		billing.unitPrice = billing.unitPrice.slice(0, -1);
+	}
+
+	if(billing.unitPrice !== Subscriptions.getSubscription(billing.items[0].name).amount.toFixed(2)){
+		billing.proRata = true;
+	}
+
 	if(!options.skipDate) {
 		billing.createdAt = moment(billing.createdAt).utc().format('DD-MM-YYYY HH:mm');
 		billing.periodStart = moment(billing.periodStart).utc().format('YYYY-MM-DD');
