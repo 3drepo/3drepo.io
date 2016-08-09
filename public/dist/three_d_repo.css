@@ -311,8 +311,15 @@ account-billing #accountBillingSubscription .md-button {
 account-billing #accountBillingHistory section {
   margin-left: -10px;
 }
+account-billing #accountBillingHistory .md-subheader ._md-subheader-inner {
+  padding: 16px 10px;
+}
 account-billing #accountBillingHistory .md-subheader label {
-  margin: 0 9px 0 0;
+  margin-right: 10px;
+}
+
+account-billing .accountBillingHistoryListItem {
+  font-size: 14px;
 }
 account-billing .accountBillingHistoryListItem md-input-container {
   margin-right: 10px;
@@ -326,8 +333,8 @@ account-billing .accountBillingSave img {
   margin-top: 17px;
 }
 
-account-billing #accountBillingAddressInfo {
-  margin: 0;
+account-billing .accountBillingAddressInfo {
+  margin: 0 0 5px;
   font-size: 12px;
   color: rgba(0, 0, 0, 0.4);
 }
@@ -770,6 +777,14 @@ billing {
     color: rgba(0, 0, 0, 0.8);
 }
 
+billing #billingMainContent {
+    width: 90%
+}
+
+billing #billingGap1 {
+    height: 100px;
+}
+
 billing p,
 billing label {
     color: rgba(0, 0, 0, 0.7);
@@ -811,6 +826,13 @@ billing #billingPeriod {
     margin-top: 5px;
 }
 
+billing #billingInvoiceLogo {
+    width: 200px
+}
+
+billing #billingTotalValue {
+    font-weight: bold;
+}
 bottom-buttons {
   display: block;
   position: absolute;
@@ -1218,11 +1240,10 @@ home #legalLinks {
     right: 0;
     z-index: 2;
 }
-home #legalLinks .md-button {
-    font-size: 11px;
-    margin: 0;
+home #legalLinks a {
+    font-size: 12px;
+    margin: 10px 10px 5px;
     opacity: 0.7;
-    min-width: 65px;
 }
 
 home md-radio-button ._md-label {
@@ -1539,17 +1560,11 @@ login .loginLinks {
   margin: 5px 0;
 }
 
-/** Terms and Conditions Dialog ***************************************************************************************/
-.tcDialog {
-  min-width: 850px;
-  min-height: 664px;
-  overflow: hidden;
+login #loginHiddenInputs {
+  position: absolute;
+  top: 0;
+  opacity: 0;
 }
-
-.tcDialog #tcIcon {
-  margin-right: 10px;
-}
-
 tdr-measure {
     position: absolute;
 }
@@ -1767,9 +1782,6 @@ password-change md-progress-circular {
     margin-left: 5px;
 }
 
-password-change md-input-container {
-    margin: 0;
-}
 password-forgot md-progress-circular {
     margin-left: 5px;
 }
@@ -1906,8 +1918,7 @@ sign-up-form #tc md-checkbox ._md-icon {
     border-color: rgba(0, 0, 0, 0.4);
 }
 sign-up-form #tc a {
-    font-size: 14px;
-    margin-left: 5px;
+    font-size: 12px;
 }
 sign-up-form #tc p {
     font-size: 14px;
@@ -1945,11 +1956,17 @@ sign-up-form .registerError {
 sign-up-form .rc-anchor-light {
     background: red;
 }
-terms-and-conditions .md-toolbar-tools img {
+
+sign-up-form #signUpFormHiddenInputs {
+    position: absolute;
+    top: 0;
+    opacity: 0;
+}
+terms .md-toolbar-tools img {
     width: 150px;
 }
 
-terms-and-conditions-text {
+terms-text {
     position: absolute;
     z-index: 3;
     background: #FDFDFD;

@@ -84,6 +84,14 @@
 
 				return projectDate;
 			};
+		})
+
+
+		.filter("prettyGMTDate", function () {
+			return function(input) {
+				var date = new Date(input);
+				return date.toISOString().substr(0,10);
+			};
 		});
 
 }());

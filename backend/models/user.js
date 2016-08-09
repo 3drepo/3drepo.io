@@ -32,6 +32,10 @@ var Payment = require('./payment');
 var moment = require('moment');
 var Subscription = require('./subscription');
 var config = require('../config');
+var vat = require('./vat');
+var Counter = require('./counter');
+var fs = require('fs');
+var addressMeta = require('./addressMeta');
 
 var getSubscription = Subscription.getSubscription;
 
@@ -79,6 +83,7 @@ var schema = mongoose.Schema({
 			plan: String,
 			inCurrentAgreement: Boolean,
 			pendingDelete: Boolean,
+			//newPurchased: Boolean,
 			database: String
 		}],
 		billingInfo:{
@@ -538,19 +543,21 @@ schema.methods.listAccounts = function(){
 			getQuotaPromises.push(
 				User.findByUserName(account.account).then(user => {
 					if(user){
-						account.quota = user.haveActiveSubscriptions() ? user.getSubscriptionLimits() : undefined;
+						account.quota = user.getSubscriptionLimits();
 						return User.historyChunksStats(account.account);
 					}
 
 				}).then(stats => {
 				
-					if(stats && account.quota){
+					if(stats && account.quota.spaceLimit > 0){
 						let totalSize = 0;
 						stats.forEach(stat => {
 							totalSize += stat.size; 
 						});
 						
 						account.quota.spaceUsed = totalSize;
+					} else {
+						account.quota.spaceUsed = 0;
 					}
 				})
 			);
@@ -686,8 +693,8 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	//count user current plans
 	this.customData.subscriptions.forEach(subscription => {
 
-		//ignore basic plan
-		if (subscription.plan === Subscription.getBasicPlan().plan) {
+		//ignore basic plan or plans not inCurrentAgreement
+		if (subscription.plan === Subscription.getBasicPlan().plan || !subscription.inCurrentAgreement) {
 			return;
 		}
 
@@ -715,207 +722,231 @@ schema.methods.buySubscriptions = function(plans, billingUser, billingAddress){
 	let next;
 	let billingAgreement;
 
-	if(plans.length <= 0){
+	let cleanedVATNumber = billingAddress.vat;
+	if (billingAddress.vat && billingAddress.vat.toUpperCase().startsWith(billingAddress.countryCode)) {
+		cleanedVATNumber = billingAddress.vat.substr(2); 
+	}
 
-		// no changes in no. of licences
-		if(!this.customData.billingAgreementId){
-			next = Promise.resolve({});
+	let checkVAT = billingAddress.vat && addressMeta.euCountriesCode.indexOf(billingAddress.countryCode) !== -1 ? 
+	vat.checkVAT(billingAddress.countryCode, cleanedVATNumber) : Promise.resolve(({ valid: true }));
+
+	let skipCheckingForTravis = config.vat && config.vat.debug && config.vat.debug.skipNonGBChecking && billingAddress.countryCode !== 'GB';
+
+	if(skipCheckingForTravis){
+		checkVAT = Promise.resolve(({ valid: true }));
+	}
+
+
+	return checkVAT.then(result => {
+		if(!result.valid){
+			return Promise.reject(responseCodes.INVALID_VAT);
 		} else {
-			next = Payment.updateBillingAddress(this.customData.billingAgreementId, {
-				"line1": billingAddress.line1,
-				"line2": billingAddress.line2,
-				"city": billingAddress.city,
-				"postal_code": billingAddress.postalCode,
-				"country_code": billingAddress.countryCode,
-				"state": billingAddress.state
-			});
-		}
 
+			if(plans.length <= 0){
 
-	} else {
-
-		let currency = 'GBP';
-		let existingPlans = [];
-		let now = new Date();
-		let check = Promise.resolve();
-
-
-		Object.keys(currentCount).forEach(plan => {
-			existingPlans.push({ plan: plan, quantity: currentCount[plan]});
-		});
-
-		plans.forEach(plan => {
-
-			if(getSubscription(plan.plan) && Number.isInteger(plan.quantity) && plan.quantity > 0){
-				
-				// buying new licences
-				//amount += getSubscription(plan.plan).amount * plan.quantity;
-
-				for(let i=0; i<plan.quantity; i++){
-
-					subscriptions.push({
-						plan: plan.plan,
-						createdAt: now,
-						updatedAt: now,
-						active: false
+				// no changes in no. of licences
+				if(!this.customData.billingAgreementId){
+					next = Promise.resolve({});
+				} else {
+					next = Payment.updateBillingAddress(this.customData.billingAgreementId, {
+						"line1": billingAddress.line1,
+						"line2": billingAddress.line2,
+						"city": billingAddress.city,
+						"postal_code": billingAddress.postalCode,
+						"country_code": billingAddress.countryCode,
+						"state": billingAddress.state
 					});
 				}
-
-			} else if (getSubscription(plan.plan) && Number.isInteger(plan.quantity) && plan.quantity < 0) {
-				
-				// canceling licences
-
-				// cancel plans with no assigned user first
-
-				let removeNumber = -plan.quantity;
-				let removeCount = 0;
-
-
-				let subs = this.getActiveSubscriptions().filter(sub => sub.plan === plan.plan && !sub.assignedUser);
-				for(let i=0 ; i < subs.length && removeCount < removeNumber; i++){
-					subs[i].pendingDelete = true;
-					removeCount++;
-				}
-				//allow to remove billingUser's licence if remove count = user's current no. of licences
-				if(removeCount < removeNumber && 
-					this.getActiveSubscriptions().filter(sub => sub.plan === plan.plan).length === removeNumber){
-
-					let subs = this.getActiveSubscriptions().filter(sub => sub.plan === plan.plan && sub.assignedUser === this.customData.billingUser);
-					for(let i=0 ; i < subs.length && removeCount < removeNumber; i++){
-						subs[i].pendingDelete = true;
-						removeCount++;
-					}
-				}
-
-				//check if they can remove licences
-				let quotaAfterDelete = this.getSubscriptionLimits({ excludePendingDelete : true });
-				let totalSize = 0;
-
-				check = new Promise((resolve, reject) => {
-			
-					if(removeCount < removeNumber){
-						reject(responseCodes.REMOVE_ASSIGNED_LICENCE);
-					} else {
-						resolve(User.historyChunksStats(this.user));
-					}
-					
-				}).then(stats => {
-				
-					if(stats){
-						stats.forEach(stat => {
-							totalSize += stat.size; 
-						});
-					}
-				}).then(() => {
-
-					console.log(quotaAfterDelete.spaceLimit - totalSize);
-					if(quotaAfterDelete.spaceLimit - totalSize < 0){
-						return Promise.reject(responseCodes.LICENCE_REMOVAL_SPACE_EXCEEDED);
-					} else{
-						return Promise.resolve();
-					}
-
-				});
-
-				let existingPlan = existingPlans.find(existingPlan => existingPlan.plan === plan.plan);
-				existingPlan.quantity += plan.quantity;
-
-			}
-		});
-
-
-		next = check.then(() => {
-			//console.log('new plan amount', amount);
-
-			let startDate = moment().utc().add(10, 'second');
-			let nextPaymentDate;
-
-			if(this.getActiveSubscriptions({ skipBasic: 'true'}).length === 0){
-				// first time to buy licence and pick today as the anniversary date
-				console.log('First time buying');
-				this.customData.lastAnniversaryDate = startDate.clone().startOf('day').toDate();
-				this.customData.firstNextPaymentDate = Payment.getNextPaymentDate(startDate);
-
-			}
-
-			nextPaymentDate = moment(this.customData.nextPaymentDate || this.customData.firstNextPaymentDate).utc().startOf('date');
-			let paymentDateAndAmount = Payment.getPaymentDateAndAmount(plans, existingPlans, startDate, this.customData.lastAnniversaryDate, nextPaymentDate, billingAddress.countryCode, billingAddress.company);
-
-			if (paymentDateAndAmount.regularAmount <= 0 && paymentDateAndAmount.firstCycleAmount <= 0 && !this.customData.billingAgreementId){
-
-				return Promise.resolve();
-
-			} else if(paymentDateAndAmount.regularAmount <= 0 && paymentDateAndAmount.firstCycleAmount <= 0){
-				//cancel the old agreement, if any
-
-				var cancel_note = {
-					"note": "You have updated the licence subscriptions."
-				};
-
-				let ids = this.customData.subscriptions.filter(sub => sub.pendingDelete).map(sub => sub._id);
-
-				ids.forEach(id => {
-					this.customData.subscriptions.remove(id);
-				});
-
-				return new Promise((resolve, reject) => {
-					Payment.paypal.billingAgreement.cancel(this.customData.billingAgreementId, cancel_note, (err) => {
-						if (err) {
-							systemLogger.logError(JSON.stringify(err),{ 
-								billingAgreementId: this.customData.billingAgreementId
-							});
-
-							reject(err);
-						} else {
-							systemLogger.logInfo("Billing agreement canceled successfully", { 
-								billingAgreementId: this.customData.billingAgreementId
-							});
-
-							this.customData.billingAgreementId = undefined;
-							resolve();
-						}
-					});
-				});
 
 
 			} else {
 
-				let paypalBillingAddress = {
-					"line1": billingAddress.line1,
-					"line2": billingAddress.line2,
-					"city": billingAddress.city,
-					"postal_code": billingAddress.postalCode,
-					"country_code": billingAddress.countryCode,
-					"state": billingAddress.state
-				};
+				let currency = 'GBP';
+				let existingPlans = [];
+				let now = new Date();
+				let check = Promise.resolve();
 
-				return Payment.getBillingAgreement(
-					billingUser,
-					paypalBillingAddress, 
-					currency, 
-					paymentDateAndAmount.firstCycleAmount, 
-					paymentDateAndAmount.firstCycleBeforeTaxAmount, 
-					paymentDateAndAmount.firstCycleTaxAmount, 
-					paymentDateAndAmount.firstCycleLength,
-					paymentDateAndAmount.regularAmount, 
-					paymentDateAndAmount.regularBeforeTaxAmount, 
-					paymentDateAndAmount.regularTaxAmount, 
-					paymentDateAndAmount.regularCycleLength, 
-					paymentDateAndAmount.startDate
-				).then(_billingAgreement => {
 
-					billingAgreement = _billingAgreement;
-					this.customData.paypalPaymentToken = billingAgreement.paypalPaymentToken;
+				Object.keys(currentCount).forEach(plan => {
+					existingPlans.push({ plan: plan, quantity: currentCount[plan]});
+				});
 
+				plans.forEach(plan => {
+
+					if(getSubscription(plan.plan) && Number.isInteger(plan.quantity) && plan.quantity > 0){
+						
+						// buying new licences
+						//amount += getSubscription(plan.plan).amount * plan.quantity;
+
+						for(let i=0; i<plan.quantity; i++){
+
+							subscriptions.push({
+								plan: plan.plan,
+								createdAt: now,
+								updatedAt: now,
+								inCurrentAgreement: true,
+								active: false
+							});
+						}
+
+					} else if (getSubscription(plan.plan) && Number.isInteger(plan.quantity) && plan.quantity < 0) {
+						
+						// canceling licences
+
+						// cancel plans with no assigned user first
+
+						let removeNumber = -plan.quantity;
+						let removeCount = 0;
+
+
+						let subs = this.getActiveSubscriptions({excludeNotInAgreement: true}).filter(sub => sub.plan === plan.plan && !sub.assignedUser);
+						for(let i=0 ; i < subs.length && removeCount < removeNumber; i++){
+							subs[i].pendingDelete = true;
+							removeCount++;
+						}
+						//allow to remove billingUser's licence if remove count = user's current no. of licences
+						if(removeCount < removeNumber && 
+							this.getActiveSubscriptions({ excludeNotInAgreement: true }).filter(sub => sub.plan === plan.plan).length === removeNumber){
+
+							let subs = this.getActiveSubscriptions( {excludeNotInAgreement:  true}).filter(sub => sub.plan === plan.plan && sub.assignedUser === this.customData.billingUser);
+							for(let i=0 ; i < subs.length && removeCount < removeNumber; i++){
+								subs[i].pendingDelete = true;
+								removeCount++;
+							}
+						}
+
+						//check if they can remove licences
+						let quotaAfterDelete = this.getSubscriptionLimits({ excludePendingDelete : true });
+						let totalSize = 0;
+
+						check = new Promise((resolve, reject) => {
+					
+							if(removeCount < removeNumber){
+								reject(responseCodes.REMOVE_ASSIGNED_LICENCE);
+							} else {
+								resolve(User.historyChunksStats(this.user));
+							}
+							
+						}).then(stats => {
+						
+							if(stats){
+								stats.forEach(stat => {
+									totalSize += stat.size; 
+								});
+							}
+						}).then(() => {
+
+							console.log(quotaAfterDelete.spaceLimit - totalSize);
+							if(quotaAfterDelete.spaceLimit - totalSize < 0){
+								return Promise.reject(responseCodes.LICENCE_REMOVAL_SPACE_EXCEEDED);
+							} else{
+								return Promise.resolve();
+							}
+
+						});
+
+						let existingPlan = existingPlans.find(existingPlan => existingPlan.plan === plan.plan);
+						existingPlan.quantity += plan.quantity;
+
+					}
+				});
+
+
+				next = check.then(() => {
+					//console.log('new plan amount', amount);
+
+					let startDate = moment().utc().add(10, 'second');
+					let nextPaymentDate;
+
+					if(this.getActiveSubscriptions({ skipBasic: 'true', excludeNotInAgreement: true}).length === 0){
+						// first time to buy licence and pick today as the anniversary date
+						console.log('First time buying');
+						this.customData.lastAnniversaryDate = startDate.clone().startOf('day').toDate();
+						this.customData.firstNextPaymentDate = Payment.getNextPaymentDate(startDate);
+
+					}
+
+					nextPaymentDate = moment(this.customData.nextPaymentDate || this.customData.firstNextPaymentDate).utc().startOf('date');
+					let paymentDateAndAmount = Payment.getPaymentDateAndAmount(plans, existingPlans, startDate, this.customData.lastAnniversaryDate, nextPaymentDate, billingAddress.countryCode, billingAddress.vat);
+
+					if (paymentDateAndAmount.regularAmount <= 0 && paymentDateAndAmount.firstCycleAmount <= 0 && !this.customData.billingAgreementId){
+
+						return Promise.resolve();
+
+					} else if(paymentDateAndAmount.regularAmount <= 0 && paymentDateAndAmount.firstCycleAmount <= 0){
+						//cancel the old agreement, if any
+
+						var cancel_note = {
+							"note": "You have updated the licence subscriptions."
+						};
+
+						let ids = this.customData.subscriptions.filter(sub => sub.pendingDelete).map(sub => sub._id);
+
+						ids.forEach(id => {
+							this.customData.subscriptions.remove(id);
+						});
+
+						return new Promise((resolve, reject) => {
+							Payment.paypal.billingAgreement.cancel(this.customData.billingAgreementId, cancel_note, (err) => {
+								if (err) {
+									systemLogger.logError(JSON.stringify(err),{ 
+										billingAgreementId: this.customData.billingAgreementId
+									});
+
+									reject(err);
+								} else {
+									systemLogger.logInfo("Billing agreement canceled successfully", { 
+										billingAgreementId: this.customData.billingAgreementId
+									});
+
+									this.customData.billingAgreementId = undefined;
+									resolve();
+								}
+							});
+						});
+
+
+					} else {
+
+						let paypalBillingAddress = {
+							"line1": billingAddress.line1,
+							"line2": billingAddress.line2,
+							"city": billingAddress.city,
+							"postal_code": billingAddress.postalCode,
+							"country_code": billingAddress.countryCode,
+							"state": billingAddress.state
+						};
+
+						return Payment.getBillingAgreement(
+							billingUser,
+							paypalBillingAddress, 
+							currency, 
+							paymentDateAndAmount.firstCycleAmount, 
+							paymentDateAndAmount.firstCycleBeforeTaxAmount, 
+							paymentDateAndAmount.firstCycleTaxAmount, 
+							paymentDateAndAmount.firstCycleLength,
+							paymentDateAndAmount.regularAmount, 
+							paymentDateAndAmount.regularBeforeTaxAmount, 
+							paymentDateAndAmount.regularTaxAmount, 
+							paymentDateAndAmount.regularCycleLength, 
+							paymentDateAndAmount.startDate
+						).then(_billingAgreement => {
+
+							billingAgreement = _billingAgreement;
+							this.customData.paypalPaymentToken = billingAgreement.paypalPaymentToken;
+
+						});
+
+					}
 				});
 
 			}
-		});
 
-	}
+		}
 
+		return next;
 
-	return next.then(() => {
+	}).then(() => {
 		//store billing info locally
 		console.log(billingAddress);
 		this.customData.billingInfo = billingAddress;
@@ -979,7 +1010,20 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 			return Promise.reject({ message: `No users found with billingAgreementId ${billingAgreementId}`});
 		}
 
+		if(dbUser.customData.nextPaymentDate > paymentInfo.nextPaymentDate){
+			return Promise.reject({ message: 'Received ipn message older than the one in database. Activation halt.' });
+		}
+
+
 		account = dbUser.user;
+
+		return Billing.findByTransactionId(account, paymentInfo.transactionId);
+
+	}).then(billing => {
+
+		if(billing){
+			return Promise.reject({ message: 'Duplicated ipn message. Activation halt.'});
+		}
 
 		return Role.findByRoleID(`${account}.admin`);
 
@@ -1010,31 +1054,31 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 		dbUser.customData.nextPaymentDate = moment(paymentInfo.nextPaymentDate).utc().startOf('date').toDate();
 
-		let inCurrentAgreementCount = dbUser.customData.subscriptions.filter(sub => sub.inCurrentAgreement).length;
+
+		// set to to next 3rd of next month, give 3 days cushion
+		let expiredAt = moment(paymentInfo.nextPaymentDate).utc()
+			.add(3, 'day')
+			.hours(0).minutes(0).seconds(0).milliseconds(0)
+			.toDate();
+
+		let newPurchaseCount = dbUser.customData.subscriptions.filter(sub => sub.inCurrentAgreement && (!sub.expiredAt || sub.expiredAt < expiredAt)).length;
+
 		dbUser.customData.subscriptions.forEach(subscription => {
 
 			if(subscription.inCurrentAgreement){
-
-				// set to to next 3rd of next month, give 3 days cushion
-				let expiredAt = moment(paymentInfo.nextPaymentDate).utc()
-					.add(3, 'day')
-					.hours(0).minutes(0).seconds(0).milliseconds(0)
-					.toDate();
-
-
 
 				subscription.limits = getSubscription(subscription.plan).limits;
 
 				if(!subscription.expiredAt || subscription.expiredAt < expiredAt){
 					subscription.expiredAt = expiredAt;
-					subscription.active = true;
+					//subscription.active = true;
 
 					items.push({
 						name: subscription.plan,
 						description: getSubscription(subscription.plan).description,
 						currency: getSubscription(subscription.plan).currency,
-						amount: Math.round(paymentInfo.amount / inCurrentAgreementCount * 100) / 100,
-						taxAmount: Math.round(paymentInfo.taxAmount / inCurrentAgreementCount * 100) / 100
+						amount: Math.round(paymentInfo.amount / newPurchaseCount * 100) / 100,
+						taxAmount: Math.round(paymentInfo.taxAmount / newPurchaseCount * 100) / 100
 					});
 				}
 			
@@ -1042,64 +1086,124 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 		});
 
+		let createBill = Promise.resolve();
+
 		if(paymentInfo.createBilling){
 
-
-			let nextAmount = 0;
-
-			dbUser.customData.subscriptions.filter(sub => sub.inCurrentAgreement).forEach(sub => {
-				nextAmount += getSubscription(sub.plan).amount;
-			});
-
 			let billing = Billing.createInstance({ account });
+			let pendingBill;
 
-			billing.raw = raw;
-			billing.gateway = paymentInfo.gateway;
-			billing.createdAt = new Date();
-			billing.currency = paymentInfo.currency;
-			billing.amount = paymentInfo.amount;
-			billing.billingAgreementId = billingAgreementId;
-			billing.items = items;
-			billing.nextPaymentDate = paymentInfo.nextPaymentDate;
-			billing.taxAmount = paymentInfo.taxAmount;
-			billing.nextPaymentAmount = nextAmount;
+			createBill = Billing.findAndRemovePendingBill(account, billingAgreementId).then(_pendingBill => {
 
+				pendingBill = _pendingBill;
+				if(pendingBill){
+					return Promise.resolve(pendingBill.invoiceNo);
+				} else {
+					return Counter.findAndIncInvoiceNumber().then(counter => {
+						return Promise.resolve('SO-' + counter.count);
+					});
+				}
 
-			//copy current billing info from user to billing
-			billing.info = dbUser.customData.billingInfo;
+			}).then(invoiceNo => {
 
-			billing.periodStart = dbUser.customData.lastAnniversaryDate;
-			billing.periodEnd = moment(dbUser.customData.nextPaymentDate)
-				.utc()
-				.subtract(1, 'day')
-				.endOf('date')
-				.toDate();
+				billing.raw = raw;
+				billing.gateway = paymentInfo.gateway;
+				billing.createdAt = pendingBill.createdAt;
+				billing.currency = paymentInfo.currency;
+				billing.amount = paymentInfo.amount;
+				billing.billingAgreementId = billingAgreementId;
+				billing.items = pendingBill.items;
+				billing.nextPaymentDate = paymentInfo.nextPaymentDate;
+				billing.taxAmount = paymentInfo.taxAmount;
+				billing.nextPaymentAmount = paymentInfo.nextAmount;
+				billing.invoiceNo = invoiceNo;
+				billing.transactionId = paymentInfo.transactionId;
 
-			billing.save().catch( err => {
-				console.log('Billing error', err);
+				//copy current billing info from user to billing
+				billing.info = pendingBill.info;
+
+				billing.periodStart = pendingBill.periodStart;
+				billing.periodEnd = pendingBill.periodEnd;
+
+				return billing.save();
 			});
+
 		}
 
 
 		if(!disableEmail){
 
-			//send verification email
-			let amount = paymentInfo.amount;
-			let currency = paymentInfo.currency;
-			if(currency === 'GBP'){
-				currency = '£';
-			}
 
-			User.findByUserName(dbUser.customData.billingUser).then(user => {
+			createBill.then(billing => {
 
-				return Mailer.sendPaymentReceivedEmail(user.customData.email, {
-					account: account,
-					amount: currency + amount
+				if(billing){
+					return billing.generatePDF().then(pdfPath => {
+
+						let pdfRS = fs.createReadStream(pdfPath);
+						let bufs = [];
+
+						return new Promise((resolve, reject) => {
+
+							pdfRS.on('data', function(d){ bufs.push(d); });
+							pdfRS.on('end', function(){
+								resolve(Buffer.concat(bufs));
+							});
+							pdfRS.on('err', err => {
+								reject(err);
+							});
+						});
+
+
+					}).then(pdf => {
+
+						billing.pdf = pdf;
+						// also save the pdf to database for ref.
+						return billing.save();
+
+					});
+				}
+
+			}).then(billing => {
+				
+				let attachments;
+
+				if(billing && billing.pdf){
+					attachments = [{
+						filename: `invoice-${billing.invoiceNo}.pdf`,
+						content: billing.pdf
+					}];
+				}
+
+				//send invoice
+				let amount = paymentInfo.amount;
+				let currency = paymentInfo.currency;
+				if(currency === 'GBP'){
+					currency = '£';
+				}
+
+				return User.findByUserName(dbUser.customData.billingUser).then(user => {
+					
+					//make a copy to sales
+
+					Mailer.sendPaymentReceivedEmailToSales({
+						account: account,
+						amount: currency + amount,
+						email: user.customData.email,
+						invoiceNo: billing.invoiceNo
+					}, attachments);
+
+					return Mailer.sendPaymentReceivedEmail(user.customData.email, {
+						account: account,
+						amount: currency + amount
+					}, attachments);
 				});
 
+
 			}).catch(err => {
+				console.log(err.stack);
 				systemLogger.logError(`Email error - ${err.message}`);
 			});
+
 
 		}
 
@@ -1113,17 +1217,18 @@ schema.statics.activateSubscription = function(billingAgreementId, paymentInfo, 
 
 };
 
-schema.methods.executeBillingAgreement = function(token, billingAgreementId){
+schema.methods.executeBillingAgreement = function(token, billingAgreementId, billingAgreement){
 	'use strict';
 
 	this.customData.paypalPaymentToken = token;
 	this.customData.billingAgreementId = billingAgreementId;
 
 	let assignedBillingUser = false;
+	let items = [];
 
 	this.customData.subscriptions.forEach(subscription => {
 
-		if(subscription.plan === Subscription.getBasicPlan().plan){
+		if(subscription.plan === Subscription.getBasicPlan().plan || !subscription.inCurrentAgreement){
 			return;
 		}
 
@@ -1131,14 +1236,23 @@ schema.methods.executeBillingAgreement = function(token, billingAgreementId){
 			assignedBillingUser = true;
 		}
 
-		subscription.inCurrentAgreement = true;
+		//subscription.inCurrentAgreement = true;
 
+		if(!subscription.active){
+
+			items.push({
+				name: subscription.plan,
+				description: getSubscription(subscription.plan).description,
+				currency: getSubscription(subscription.plan).currency,
+			});
+		}
 		// pre activate
 		// don't wait for IPN message to confirm but to activate the subscription right away, for 48 hours.
 		// IPN message should come quickly after executing an agreement, usually less then a minute
 		let twoDayLater = moment().utc().add(48, 'hour').toDate();
 		if(!subscription.expiredAt || subscription.expiredAt < twoDayLater){
 			subscription.active = true;
+			//subscription.newPurchased = true;
 			subscription.expiredAt = twoDayLater;
 			subscription.limits = getSubscription(subscription.plan).limits;
 		}
@@ -1165,6 +1279,81 @@ schema.methods.executeBillingAgreement = function(token, billingAgreementId){
 			}
 		}
 	}
+
+	// create pending bill
+
+	if(items.length > 0){
+
+
+		let billAmount = billingAgreement.plan.payment_definitions.find(def => def.type === 'TRIAL') || billingAgreement.plan.payment_definitions.find(def => def.type === 'REGULAR');
+		let nextAmount = billingAgreement.plan.payment_definitions.find(def => def.type === 'REGULAR');
+		
+		let paymentInfo = {
+			currency: billAmount.amount.currency,
+			taxAmount: parseFloat(billAmount.charge_models.find(model => model.type === 'TAX').amount.value)
+		};
+
+		paymentInfo.amount = parseFloat(billAmount.amount.value) + paymentInfo.taxAmount;
+		paymentInfo.nextAmount = parseFloat(nextAmount.amount.value) + parseFloat(nextAmount.charge_models.find(model => model.type === 'TAX').amount.value);
+		paymentInfo.nextAmount = Math.round(paymentInfo.nextAmount * 100) / 100;
+
+		items.forEach(item => {
+			item.amount = Math.round(paymentInfo.amount / items.length * 100) / 100;
+			item.taxAmount = Math.round(paymentInfo.taxAmount / items.length * 100) / 100;
+		});
+
+		let billing = Billing.createInstance({ account: this.user });
+
+		return Billing.hasPendingBill(this.user, billingAgreementId).then(hasBill => {
+
+			if(hasBill){
+				return Promise.resolve();
+			} else {
+				return Counter.findAndIncInvoiceNumber().then(counter => {
+					return Promise.resolve('SO-' + counter.count);
+				});
+			}
+
+		}).then(invoiceNo => {
+
+			if(invoiceNo){
+
+				let nextPaymentDate = moment(this.customData.nextPaymentDate || this.customData.firstNextPaymentDate).utc().startOf('date');
+
+				billing.gateway = 'PAYPAL';
+				billing.createdAt = new Date();
+				billing.currency = paymentInfo.currency;
+				billing.amount = paymentInfo.amount;
+				billing.billingAgreementId = billingAgreementId;
+				billing.items = items;
+				billing.nextPaymentDate = nextPaymentDate;
+				billing.taxAmount = paymentInfo.taxAmount;
+				billing.nextPaymentAmount = paymentInfo.nextAmount;
+				billing.invoiceNo = invoiceNo;
+				billing.pending = true;
+
+				//copy current billing info from user to billing
+				billing.info = this.customData.billingInfo;
+
+				billing.periodStart = moment().utc().toDate();
+				billing.periodEnd = nextPaymentDate
+					.utc()
+					.subtract(1, 'day')
+					.endOf('date')
+					.toDate();
+
+				return billing.save();
+			}
+
+		});
+
+	} else {
+		return Promise.resolve();
+	}
+
+
+
+
 };
 
 schema.methods.haveActiveSubscriptions = function(){
@@ -1189,7 +1378,12 @@ schema.methods.getActiveSubscriptions = function(options){
 			pendingDeleteCond = !sub.pendingDelete;
 		}
 
-		return basicCond && pendingDeleteCond && sub.active && (sub.expiredAt > now || !sub.expiredAt);
+		let inCurrentAgreementCond = true;
+		if(options.excludeNotInAgreement){
+			inCurrentAgreementCond = sub.inCurrentAgreement;
+		} 
+
+		return basicCond && pendingDeleteCond && sub.active && (sub.expiredAt > now || !sub.expiredAt) && inCurrentAgreementCond;
 	});
 	
 
@@ -1205,7 +1399,7 @@ schema.methods.getSubscriptionLimits = function(options){
 		collaboratorLimit: 0
 	};
 
-	console.log(subscriptions);
+	//console.log(subscriptions);
 
 	subscriptions.forEach(sub => {
 		sumLimits.spaceLimit += sub.limits.spaceLimit;
