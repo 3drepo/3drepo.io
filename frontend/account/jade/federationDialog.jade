@@ -45,12 +45,12 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 				div(layout="column", flex)
 					p(layout="row", layout-align="center center") Federated
 					md-list
-						md-list-item.federationProject(ng-repeat="item in vm.newFederationData.projects")
+						md-list-item.federationProject(ng-repeat="item in vm.newFederationData.subProjects")
 							md-icon.angular-material-icons dashboard
 							p
-								| {{item.project.project}}
+								| {{item.project}}
 								=" "
-								span#federatedProjectAccount ({{item.account.account}})
+								span#federatedProjectAccount ({{item.database}})
 							span(flex)
 							md-button.md-icon-button(aria-label="Remove", ng-click="vm.removeFromFederation($index)")
 								md-icon.angular-material-icons.md-accent remove_circle
