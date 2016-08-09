@@ -37,22 +37,13 @@
 		};
 	}
 
-	AccountFederationsCtrl.$inject = ["$scope", "UtilsService"];
+	AccountFederationsCtrl.$inject = ["$scope", "$timeout", "UtilsService"];
 
-	function AccountFederationsCtrl ($scope, UtilsService) {
+	function AccountFederationsCtrl ($scope, $timeout, UtilsService) {
 		var vm = this;
 
 		// Init
-		vm.federations = [
-			{
-				name: "Cheese",
-				projects: []
-			},
-			{
-				name: "Bacon",
-				projects: []
-			}
-		];
+		vm.federations = [];
 		vm.showInfo = (vm.federations.length === 0);
 
 		/*
@@ -60,6 +51,7 @@
 		 */
 		$scope.$watch("vm.accounts", function () {
 			if (angular.isDefined(vm.accounts)) {
+				console.log(678, vm.accounts);
 				vm.accountsCopy = angular.copy(vm.accounts);
 			}
 		});
@@ -68,7 +60,6 @@
 		 * Watch for change in edited federation
 		 */
 		$scope.$watch("vm.newFederationData", function () {
-			console.log(vm.newFederationData, vm.federationOriginalData);
 			if (vm.federationOriginalData === null) {
 				vm.newFederationButtonDisabled = (angular.isUndefined(vm.newFederationData.name)) || (vm.newFederationData.name === "");
 			}
@@ -137,13 +128,22 @@
 		 * Save a federation
 		 */
 		vm.saveFederation = function () {
+			var promise,
+				data = {desc: "", type: ""};
+
 			if (vm.federationOriginalData === null) {
-				vm.federations.push(vm.newFederationData);
+				promise = UtilsService.doPost(data, vm.account + "/" + vm.newFederationData.name);
+				promise.then(function (response) {
+					console.log(response);
+					vm.federations.push(vm.newFederationData);
+					$timeout(function () {
+						vm.closeDialog();
+					}, 2000);
+				});
 			}
 			else {
 				vm.federationOriginalData.projects = vm.newFederationData.projects;
 			}
-			vm.closeDialog();
 		};
 
 		/**

@@ -452,6 +452,11 @@ account-team #accountTeamSubHeader {
 #federationDialog #federatedProjectAccount {
   color: rgba(0, 0, 0, 0.5);
 }
+
+/** Account Federations ***********************************************************************************************/
+account-federations .userContent {
+  margin-bottom: -30px;
+}
 /* Done to counter bootstrap styling. This should really be set in a top level style file */
 .md-datepicker-input-mask {
   width: 308px;
