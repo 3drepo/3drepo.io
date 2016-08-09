@@ -6333,6 +6333,8 @@ var ViewerManager = {};
 		/**
 		 * Go back to the repos page
 		 */
+
+
 		vm.goBack = function () {
 			$location.search("project", null);
 			vm.showPage({page: "repos"});
@@ -6349,16 +6351,43 @@ var ViewerManager = {};
 
 		UtilsService.doGet(vm.account + "/" + vm.projectName + ".json")
 		.then(function (response) {
-			console.log(response);
-			if (response.status === 200) {
 
-			} else if (response.status === 401){
+			if (response.status === 200 && response.data.properties) {
 
+				if(response.data.properties.mapTile){
+
+					response.data.properties.mapTile.lat && (vm.mapTile.lat = response.data.properties.mapTile.lat);
+					response.data.properties.mapTile.lon && (vm.mapTile.lon = response.data.properties.mapTile.lon);
+					response.data.properties.mapTile.y && (vm.mapTile.y = response.data.properties.mapTile.y);
+				}
+
+				response.data.properties.unit && (vm.unit = response.data.properties.unit);
+				
+
+			} else {
+				vm.message = response.data.message;
 			}
+
+
 		});
 
 		vm.save = function(){
-			console.log('Saving...');
+
+			var data = {
+				mapTile: vm.mapTile,
+				unit: vm.unit
+			};
+
+			UtilsService.doPut(data, vm.account + "/" + vm.projectName +  "/settings")
+			.then(function(response){
+				if(response.status === 200){
+					vm.message = 'Saved';
+				} else {
+					vm.message = response.data.message;
+				}
+
+
+			})
 		}
 	}
 }());
