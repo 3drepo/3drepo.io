@@ -63,12 +63,16 @@ function convertToErrorCode(errCode){
     return errObj;
 }
 
-function createAndAssignRole(project, account, username, desc, type) {
+function createAndAssignRole(project, account, username, desc, type, unit) {
 	'use strict';
 
 
 	if(!project.match(/^[a-zA-Z0-9_-]{3,20}$/)){
 		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_NAME });
+	}
+
+	if(!unit){
+		return Promise.reject({ resCode: responseCodes.PROJECT_NO_UNIT });
 	}
 
 	if(C.REPO_BLACKLIST_PROJECT.indexOf(project) !== -1){
@@ -116,7 +120,10 @@ function createAndAssignRole(project, account, username, desc, type) {
 			setting.owner = username;
 			setting.desc = desc;
 			setting.type = type;
-			
+			setting.updateProperties({
+				unit
+			});
+
 			return setting.save();
 		});
 

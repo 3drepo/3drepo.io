@@ -187,7 +187,8 @@ function createProject(req, res, next){
 	let account = req.params.account;
 	let username = req.session.user.username;
 
-	createAndAssignRole(project, account, username, req.body.desc, req.body.type).then(() => {
+
+	createAndAssignRole(project, account, username, req.body.desc, req.body.type, req.body.unit).then(() => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

@@ -52,10 +52,7 @@
 			vm.showPage({page: "repos"});
 		};
 
-		vm.units = [
-			{value: 'light-year', name: 'Light year'},
-			{value: 'meter', name: 'meter'}
-		];
+		vm.units = server_config.units
 
 		vm.mapTile = {};
 		vm.projectName = $location.search().proj;
