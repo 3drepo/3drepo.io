@@ -39,9 +39,9 @@
 		};
 	}
 
-	AccountBillingCtrl.$inject = ["$scope", "$window", "UtilsService", "serverConfig"];
+	AccountBillingCtrl.$inject = ["$scope", "$window", "$timeout", "UtilsService", "serverConfig"];
 
-	function AccountBillingCtrl($scope, $window, UtilsService, serverConfig) {
+	function AccountBillingCtrl($scope, $window, $timeout, UtilsService, serverConfig) {
 		var vm = this,
 			promise;
 
@@ -163,7 +163,15 @@
 			promise.then(function (response) {
 				console.log(response);
 				if (response.status === 200) {
-					location.href = response.data.url;
+					if (vm.numLicenses === vm.numNewLicenses) {
+						vm.payPalInfo = "Billing information updated.";
+						$timeout(function () {
+							UtilsService.closeDialog();
+						}, 2000);
+					}
+					else {
+						location.href = response.data.url;
+					}
 				}
 				else {
 					vm.closeDialogEnabled = true;
