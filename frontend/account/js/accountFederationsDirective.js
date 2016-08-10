@@ -37,14 +37,19 @@
 		};
 	}
 
-	AccountFederationsCtrl.$inject = ["$scope", "UtilsService"];
+	AccountFederationsCtrl.$inject = ["$scope", "$location", "UtilsService"];
 
-	function AccountFederationsCtrl ($scope, UtilsService) {
+	function AccountFederationsCtrl ($scope, $location, UtilsService) {
 		var vm = this;
 
 		// Init
 		vm.federations = [];
 		vm.showInfo = (vm.federations.length === 0);
+		vm.federationOptions = {
+			edit: {label: "Edit", icon: "edit"},
+			team: {label: "Team", icon: "group"},
+			delete: {label: "Delete", icon: "delete"}
+		};
 
 		/*
 		 * Watch accounts input
@@ -61,6 +66,8 @@
 					}
 				}
 			}
+			console.log(vm.federations);
+			vm.showInfo = (vm.federations.length === 0);
 		});
 
 		/*
@@ -169,8 +176,8 @@
 			for (i = 0, iLength = vm.accountsCopy.length; i < iLength; i += 1) {
 				for (j = 0, jLength = vm.accountsCopy[i].projects.length; j < jLength; j += 1) {
 					vm.accountsCopy[i].projects[j].federated = false;
-					for (k = 0, kLength = vm.federationOriginalData.projects.length; k < kLength; k += 1) {
-						if (vm.federationOriginalData.projects[k].project.project === vm.accountsCopy[i].projects[j].project) {
+					for (k = 0, kLength = vm.federationOriginalData.subProjects.length; k < kLength; k += 1) {
+						if (vm.federationOriginalData.subProjects[k].project === vm.accountsCopy[i].projects[j].project) {
 							vm.accountsCopy[i].projects[j].federated = true;
 						}
 					}
@@ -178,6 +185,37 @@
 			}
 
 			UtilsService.showDialog("federationDialog.html", $scope, event);
+		};
+
+		/**
+		 * Open the federation in the viewer
+		 */
+		vm.viewFederation = function (index) {
+			$location.path("/" + vm.account + "/" + vm.federations[index].project, "_self").search(null);
+		};
+
+		/**
+		 * Handle federation option selection
+		 *
+		 * @param event
+		 * @param option
+		 * @param index
+		 */
+		vm.doFederationOption = function (event, option, index) {
+			switch (option) {
+				case "edit":
+					vm.editFederation(event, index);
+					break;
+
+				case "team":
+					$location.search("proj", vm.project.name);
+					vm.onShowPage({page: "team", callingPage: "repos"});
+					break;
+
+				case "delete":
+					vm.onSetupDeleteProject({event: event, project: vm.project});
+					break;
+			}
 		};
 	}
 }());

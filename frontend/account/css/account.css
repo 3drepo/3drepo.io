@@ -464,3 +464,15 @@ account-team #accountTeamSubHeader {
 account-federations .userContent {
   margin-bottom: -30px;
 }
+
+account-federations md-list {
+  padding: 0;
+}
+account-federations .md-list-item-text {
+  color: rgb(67, 160, 71);
+}
+
+account-federations .federationProjectsList {
+  margin: 0 0 10px 70px;
+  color: rgba(0, 0, 0, 0.5);
+}
