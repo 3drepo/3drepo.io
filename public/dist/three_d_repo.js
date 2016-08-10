@@ -1003,8 +1003,11 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 		var self = this;
 
-		if(settings && settings.hasOwnProperty("mapTile")){
+		if(settings && settings.hasOwnProperty("mapTile") && settings.mapTile.lat && settings.mapTile.lon){
 			// set origin BNG
+			settings.mapTile.lat = parseFloat(settings.mapTile.lat);
+			settings.mapTile.lon = parseFloat(settings.mapTile.lon);
+			settings.mapTile.y = parseInt(settings.mapTile.y);
 			this.settings = settings;
 			this.originBNG = OsGridRef.latLonToOsGrid(new LatLon(this.settings.mapTile.lat, this.settings.mapTile.lon));
 			this.meterPerPixel = 1;
@@ -13094,16 +13097,17 @@ angular.module('3drepo')
 		return {
 			restrict: "EA",
 			templateUrl: "measure.html",
-			scope: {},
+			scope: {
+			},
 			controller: MeasureCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	MeasureCtrl.$inject = ["$scope", "$element", "EventService"];
+	MeasureCtrl.$inject = ["$scope", "$element", "EventService", "ProjectService"];
 
-	function MeasureCtrl ($scope, $element, EventService) {
+	function MeasureCtrl ($scope, $element, EventService, ProjectService) {
 		var vm = this,
 			coords = [null, null],
 			screenPos,
@@ -13115,6 +13119,7 @@ angular.module('3drepo')
 		vm.show = false;
 		vm.distance = false;
 		vm.allowMove = false;
+		vm.units = server_config.units;
 
 		var coordVector = null, vectorLength = 0.0;
 		vm.screenPos = [0.0, 0.0];
@@ -13148,7 +13153,7 @@ angular.module('3drepo')
 		});
 
 		$scope.$watch(EventService.currentEvent, function (event) {
-		if (event.type === EventService.EVENT.VIEWER.PICK_POINT) {
+			if (event.type === EventService.EVENT.VIEWER.PICK_POINT) {
 				if (event.value.hasOwnProperty("position")) {
 					// First click, if a point has not been clicked before
 					currentPickPoint = event.value.position;
@@ -13166,6 +13171,8 @@ angular.module('3drepo')
 						vm.allowMove = true;
 					}
 				}
+			} else if (event.type === EventService.EVENT.PROJECT_SETTINGS_READY){
+				vm.unit = vm.units.find(function(unit) { return unit.value === event.value.settings.unit}).name;
 			}
 		});
 	}
@@ -15502,6 +15509,26 @@ var Oculus = {};
 			]
 		});
 
+		function sendProjectInfoEvent(){
+			if(!vm.settings){
+				ProjectService.getProjectInfo(vm.account, vm.project).then(function (data) {
+					vm.settings = data.settings
+					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
+						account: data.account,
+						project: data.project,
+						settings: data.settings
+					});
+				});
+			} else {
+				EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
+					account: vm.account,
+					project: vm.project,
+					settings: vm.settings
+				});
+			}
+
+		}
+
 		$scope.$watchGroup(["vm.account","vm.project"], function()
 		{
 			if (angular.isDefined(vm.account) && angular.isDefined(vm.project)) {
@@ -15521,13 +15548,8 @@ var Oculus = {};
 					}
 				});
 
-				ProjectService.getProjectInfo(vm.account, vm.project).then(function (data) {
-					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
-						account: data.account,
-						project: data.project,
-						settings: data.settings
-					});
-				});
+				sendProjectInfoEvent();
+
 			}
 		});
 
@@ -15581,6 +15603,8 @@ var Oculus = {};
 					element = angular.element("<tdr-measure id='tdrMeasure'></tdr-measure>");
 					parent.append(element);
 					$compile(element)($scope);
+
+					sendProjectInfoEvent();
 				}
 				else {
 					// Remove measure display
@@ -15624,18 +15648,23 @@ var Oculus = {};
 			var deferred = $q.defer(),
 				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + ".json");
 
-			return HttpService.get(serverConfig.GET_API, account + "/" + project + ".json",
-				function(json) {
-					deferred.resolve({
-						account     : account,
-						project		: project,
-						name        : name,
-						owner		: json.owner,
-						description	: json.desc,
-						type		: json.type,
-						settings 	: json.properties
-					});
+			$http.get(url).then(function(res){
+				var data = res.data;
+				console.log('getProjectInfo data', data);
+				deferred.resolve({
+					account     : account,
+					project		: project,
+					owner		: data.owner,
+					description	: data.desc,
+					type		: data.type,
+					settings 	: data.properties
+				}, function(){
+					deferred.resolve();
 				});
+			});
+
+
+			return deferred.promise;
 		};
 
 		var getRoles = function (account, project) {
@@ -15789,9 +15818,9 @@ var Oculus = {};
 		};
 	}
 
-	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService"];
+	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService", "$location"];
 
-	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService)
+	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService, $location)
 	{
 		var v = this;
 
@@ -16138,71 +16167,6 @@ var Oculus = {};
 			}
 		});
 	}
-}());
-
-/**
- *  Copyright (C) 2016 3D Repo Ltd
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-    "use strict";
-
-    angular.module("3drepo")
-        .directive("projectSetting", projectSetting);
-
-    function projectSetting() {
-        return {
-            restrict: "E",
-            scope: {
-                account: "=",
-                project: "=",
-                lat: "=",
-                lon: "=",
-                y: "=",
-                seaLevel: "=",
-                unit: "="
-            },
-            templateUrl: "projectSetting.html",
-            controller: ProjectSettingCtrl,
-            controllerAs: "vm",
-            bindToController: true
-        };
-    }
-
-    ProjectSettingCtrl.$inject = ["$scope", "$window", "UtilsService", "EventService"];
-
-    function ProjectSettingCtrl ($scope, $window, UtilsService, EventService) {
-
-        var vm = this;
-        
-        /*
-         * Init
-         */
-        $scope.$watch(EventService.currentEvent, function(event) {
-            if (event.type === EventService.EVENT.PROJECT_SETTINGS_READY) {
-                if (event.value.account === vm.account && event.value.project === vm.project) {
-                    v.viewer.updateSettings(event.value.settings);
-                    v.mapTile.updateSettings(event.value.settings);
-                }
-            }
-        })
-
-
-    }
-    
 }());
 
 /**

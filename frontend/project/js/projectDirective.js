@@ -178,6 +178,26 @@
 			]
 		});
 
+		function sendProjectInfoEvent(){
+			if(!vm.settings){
+				ProjectService.getProjectInfo(vm.account, vm.project).then(function (data) {
+					vm.settings = data.settings
+					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
+						account: data.account,
+						project: data.project,
+						settings: data.settings
+					});
+				});
+			} else {
+				EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
+					account: vm.account,
+					project: vm.project,
+					settings: vm.settings
+				});
+			}
+
+		}
+
 		$scope.$watchGroup(["vm.account","vm.project"], function()
 		{
 			if (angular.isDefined(vm.account) && angular.isDefined(vm.project)) {
@@ -197,13 +217,8 @@
 					}
 				});
 
-				ProjectService.getProjectInfo(vm.account, vm.project).then(function (data) {
-					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
-						account: data.account,
-						project: data.project,
-						settings: data.settings
-					});
-				});
+				sendProjectInfoEvent();
+
 			}
 		});
 
@@ -257,6 +272,8 @@
 					element = angular.element("<tdr-measure id='tdrMeasure'></tdr-measure>");
 					parent.append(element);
 					$compile(element)($scope);
+
+					sendProjectInfoEvent();
 				}
 				else {
 					// Remove measure display
