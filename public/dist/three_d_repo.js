@@ -5740,6 +5740,7 @@ var ViewerManager = {};
 		vm.project.canUpload = true;
 		vm.projectOptions = {
 			upload: {label: "Upload file", icon: "cloud_upload"},
+			download: {label: "Download", icon: "cloud_download"},
 			team: {label: "Team", icon: "group"},
 			delete: {label: "Delete", icon: "delete"}
 		};
@@ -5791,6 +5792,13 @@ var ViewerManager = {};
 			switch (option) {
 				case "upload":
 					vm.uploadFile();
+					break;
+
+				case "download":
+					window.open(
+						serverConfig.apiUrl(serverConfig.GET_API, vm.account.name + "/" + vm.project.name + "/download/latest"),
+						'_blank' 
+					);
 					break;
 
 				case "team":
@@ -12781,7 +12789,6 @@ angular.module('3drepo')
 		/*
 		 * Auth stuff
 		 */
-		console.log(serverConfig);
 		if (serverConfig.hasOwnProperty("auth")) {
 			if (serverConfig.auth.hasOwnProperty("register") && (serverConfig.auth.register)) {
 				vm.useRegister = true;

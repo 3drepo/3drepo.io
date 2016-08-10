@@ -60,6 +60,7 @@
 		vm.project.canUpload = true;
 		vm.projectOptions = {
 			upload: {label: "Upload file", icon: "cloud_upload"},
+			download: {label: "Download", icon: "cloud_download"},
 			team: {label: "Team", icon: "group"},
 			delete: {label: "Delete", icon: "delete"}
 		};
@@ -111,6 +112,13 @@
 			switch (option) {
 				case "upload":
 					vm.uploadFile();
+					break;
+
+				case "download":
+					window.open(
+						serverConfig.apiUrl(serverConfig.GET_API, vm.account.name + "/" + vm.project.name + "/download/latest"),
+						'_blank' 
+					);
 					break;
 
 				case "team":
