@@ -28,13 +28,8 @@ login .loginLinks {
   margin: 5px 0;
 }
 
-/** Terms and Conditions Dialog ***************************************************************************************/
-.tcDialog {
-  min-width: 850px;
-  min-height: 664px;
-  overflow: hidden;
-}
-
-.tcDialog #tcIcon {
-  margin-right: 10px;
+login #loginHiddenInputs {
+  position: absolute;
+  top: 0;
+  opacity: 0;
 }

@@ -102,5 +102,10 @@ module.exports = {
 			forceExecuteAgreementError: false,
 			showFullAgreement: true
 		}
+	},
+	vat: {
+		debug: {
+			skipNonGBChecking: true
+		}
 	}
 }

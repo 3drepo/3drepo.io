@@ -1,7 +1,7 @@
 var subscriptions = [
 	{
 		plan: 'THE-100-QUID-PLAN',
-		description: '3D Repo Advanced Licence',
+		description: 'Advanced Licence',
 		limits: {
 			spaceLimit: 10737418240, //bytes
 			collaboratorLimit: 1,

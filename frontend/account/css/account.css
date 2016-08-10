@@ -311,8 +311,15 @@ account-billing #accountBillingSubscription .md-button {
 account-billing #accountBillingHistory section {
   margin-left: -10px;
 }
+account-billing #accountBillingHistory .md-subheader ._md-subheader-inner {
+  padding: 16px 10px;
+}
 account-billing #accountBillingHistory .md-subheader label {
-  margin: 0 9px 0 0;
+  margin-right: 10px;
+}
+
+account-billing .accountBillingHistoryListItem {
+  font-size: 14px;
 }
 account-billing .accountBillingHistoryListItem md-input-container {
   margin-right: 10px;
@@ -326,8 +333,8 @@ account-billing .accountBillingSave img {
   margin-top: 17px;
 }
 
-account-billing #accountBillingAddressInfo {
-  margin: 0;
+account-billing .accountBillingAddressInfo {
+  margin: 0 0 5px;
   font-size: 12px;
   color: rgba(0, 0, 0, 0.4);
 }

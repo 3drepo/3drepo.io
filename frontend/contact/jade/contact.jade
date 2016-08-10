@@ -2,13 +2,13 @@
 	md-content.md-whiteframe-1dp(aria-label="Contact Us", flex="45")
 		md-toolbar
 			.md-toolbar-tools
-				h2 Contact Us
+				h2 Contact us
 		.userContent(layout="row")
 			div(layout="column", flex="45")
 				div(ng-if="!vm.sent")
 					md-input-container.md-block
-						label Contact information
-						textarea(ng-model="vm.contact.information")
+						label Message
+						textarea(ng-model="vm.contact.information" autofocus)
 					md-input-container.md-block
 						label Name
 						input(type="text", ng-model="vm.contact.name")

@@ -48,7 +48,7 @@ var ViewerUtilMyListeners = {};
 	ViewerUtil.prototype.triggerEvent = function(name, event)
 	{
 		var e = new CustomEvent(name, { detail: event });
-        console.log("TRIG: " + name);
+        //console.log("TRIG: " + name);
 		eventElement.dispatchEvent(e);
 	};
 
@@ -4912,9 +4912,9 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountBillingCtrl.$inject = ["$scope", "$location", "UtilsService", "serverConfig"];
+	AccountBillingCtrl.$inject = ["$scope", "$window", "UtilsService", "serverConfig"];
 
-	function AccountBillingCtrl($scope, $location, UtilsService, serverConfig) {
+	function AccountBillingCtrl($scope, $window, UtilsService, serverConfig) {
 		var vm = this,
 			promise;
 
@@ -4926,6 +4926,7 @@ var ViewerManager = {};
 		vm.countries = serverConfig.countries;
 		vm.usStates = serverConfig.usStates;
 		vm.showStates = false;
+		vm.newBillingAddress = {};
 
 		/*
 		 * Watch for change in licenses
@@ -4992,13 +4993,27 @@ var ViewerManager = {};
 			}
 		}, true);
 
+		/*
+		 * Watch for billings
+		 */
+		$scope.$watch("vm.billings", function () {
+			var i, length;
+
+			if (angular.isDefined(vm.billings)) {
+				for (i = 0, length = vm.billings.length; i < length; i += 1) {
+					vm.billings[i].status = vm.billings[i].pending ? "Pending" : "Payed";
+				}
+			}
+		});
+
 		/**
 		 * Show the billing page with the item
 		 *
 		 * @param index
 		 */
 		vm.downloadBilling = function (index) {
-			$location.url("/billing?user=" + vm.account + "&item=" + index);
+			//$window.open("/billing?user=" + vm.account + "&item=" + index);
+			$window.open(serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/billings/" + vm.billings[index].invoiceNo + ".pdf"), "_blank");
 		};
 
 		vm.changeSubscription = function () {
@@ -5031,10 +5046,6 @@ var ViewerManager = {};
 			});
 		};
 
-		vm.goToPage = function (page) {
-			$location.path("/" + page, "_self");
-		};
-
 		vm.closeDialog = function () {
 			UtilsService.closeDialog();
 		};
@@ -5043,7 +5054,7 @@ var ViewerManager = {};
 		 * Set up num licenses and price
 		 */
 		function setupLicensesInfo () {
-			vm.numLicenses = vm.subscriptions.length;
+			vm.numLicenses = vm.subscriptions.filter(function (sub) {return sub.inCurrentAgreement;}).length;
 			vm.numNewLicenses = vm.numLicenses;
 			vm.pricePerLicense = vm.plans[0].amount;
 		}
@@ -5129,17 +5140,22 @@ var ViewerManager = {};
 						vm.itemToShow = "repos";
 					}
 
-					// Get initial user info, which may change if returning from PayPal
-					getUserInfo();
-
-					// Billing Page
+					// Handle Billing Page
 					if (vm.itemToShow === "billing") {
 						// Handle return back from PayPal
 						if ($location.search().hasOwnProperty("cancel")) {
 							// Cancelled
+
+							// Clear token URL parameters
+							$location.search("token", null);
+							$location.search("cancel", null);
+
 							init();
 						}
 						else if ($location.search().hasOwnProperty("token")) {
+							// Get initial user info, which may change if returning from PayPal
+							getUserInfo();
+
 							// Made a payment
 							vm.payPalInfo = "PayPal payment processing. Please do not refresh the page or close the tab.";
 							vm.closeDialogEnabled = false;
@@ -5150,6 +5166,10 @@ var ViewerManager = {};
 								if (response.status === 200) {
 								}
 								vm.payPalInfo = "PayPal has finished processing. Thank you.";
+
+								// Clear token URL parameter
+								$location.search("token", null);
+
 								$timeout(function () {
 									UtilsService.closeDialog();
 									init();
@@ -5159,6 +5179,9 @@ var ViewerManager = {};
 						else {
 							init();
 						}
+					}
+					else {
+						init();
 					}
 				}
 				else {
@@ -5248,17 +5271,23 @@ var ViewerManager = {};
 				vm.lastName = response.data.lastName;
 				vm.email = response.data.email;
 
-				vm.billingAddress = response.data.billingInfo;
 				// Pre-populate billing name if it doesn't exist with profile name
-				if (!vm.billingAddress.hasOwnProperty("firstName")) {
-					vm.billingAddress.firstName = vm.firstName;
-					vm.billingAddress.lastName = vm.lastName;
+				vm.billingAddress = {};
+				if (response.data.hasOwnProperty("billingInfo")) {
+					vm.billingAddress = response.data.billingInfo;
+					if (!vm.billingAddress.hasOwnProperty("firstName")) {
+						vm.billingAddress.firstName = vm.firstName;
+						vm.billingAddress.lastName = vm.lastName;
+					}
 				}
 
-				for (i = 0, length = vm.accounts.length; i < length; i += 1) {
-					if (vm.accounts[i].account === vm.account) {
-						vm.quota = vm.accounts[i].quota;
-						break;
+				// Get quota
+				if (angular.isDefined(vm.accounts)) {
+					for (i = 0, length = vm.accounts.length; i < length; i += 1) {
+						if (vm.accounts[i].account === vm.account) {
+							vm.quota = vm.accounts[i].quota;
+							break;
+						}
 					}
 				}
 			});
@@ -5382,14 +5411,13 @@ var ViewerManager = {};
 		 * Watch subscriptions
 		 */
 		$scope.$watch("vm.subscriptions", function () {
-			console.log(444, vm.subscriptions);
 			vm.unassigned = [];
 			vm.licenses = [];
 			vm.allLicensesAssigned = false;
 			vm.numLicenses = vm.subscriptions.length;
 			vm.toShow = (vm.numLicenses > 0) ? "0+": "0";
 
-			for (i = 0; i < vm.subscriptions.length; i += 1) {
+			for (i = 0; i < vm.numLicenses; i += 1) {
 				if (vm.subscriptions[i].hasOwnProperty("assignedUser")) {
 					vm.licenses.push({
 						user: vm.subscriptions[i].assignedUser,
@@ -5749,11 +5777,11 @@ var ViewerManager = {};
 		checkFileUploading();
 
 		/*
-		 * Watch the new project type
+		 * Watch changes in upload file
 		 */
 		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
 			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {
-				console.log(vm.uploadedFile);
+				console.log("Uploaded file", vm.uploadedFile);
 				uploadFileToProject(vm.uploadedFile.file);
 			}
 		});
@@ -5762,18 +5790,14 @@ var ViewerManager = {};
 		 * Go to the project viewer
 		 */
 		vm.goToProject = function () {
-			// No timestamp indicates no model previously uploaded
-			if (vm.project.timestamp === null) {
-				vm.uploadFile();
-			}
-			else {
-				// Disable going to viewer if uploading a model
-				var promise = UtilsService.doGet(vm.account.name + "/" + vm.project.name + ".json");
-				promise.then(function (response) {
-					if (response.data.status !== "processing") {
-						$location.path("/" + vm.account.name + "/" + vm.project.name, "_self").search("page", null);
-					}
-				});
+			if (!vm.project.uploading) {
+				if (vm.project.timestamp === null) {
+					// No timestamp indicates no model previously uploaded
+					vm.uploadFile();
+				}
+				else {
+					$location.path("/" + vm.account.name + "/" + vm.project.name, "_self").search("page", null);
+				}
 			}
 		};
 
@@ -5882,6 +5906,7 @@ var ViewerManager = {};
 								}, infoTimeout);
 							}
 							else {
+								console.log("Polling upload!");
 								pollUpload();
 							}
 						});
@@ -6637,7 +6662,8 @@ var ViewerManager = {};
 		vm.collaborators = [];
 		vm.members = [];
 		vm.addDisabled = false;
-		vm.toShow = (vm.subscriptions.length > 1) ? "1+" : vm.subscriptions.length.toString();
+		vm.numSubscriptions = vm.subscriptions.filter(function (sub) {return sub.inCurrentAgreement;}).length;
+		vm.toShow = (vm.numSubscriptions > 1) ? "1+" : vm.numSubscriptions.toString();
 
 		if ($location.search().hasOwnProperty("proj")) {
 			vm.projectName = $location.search().proj;
@@ -6737,7 +6763,7 @@ var ViewerManager = {};
 			var i, iLength, j, jLength,
 				isMember;
 
-			for (i = 0, iLength = vm.subscriptions.length; i < iLength; i += 1) {
+			for (i = 0, iLength = vm.numSubscriptions; i < iLength; i += 1) {
 				if (vm.subscriptions[i].hasOwnProperty("assignedUser") && (vm.subscriptions[i].assignedUser !== vm.account)) {
 					isMember = false;
 					for (j = 0, jLength = vm.members.length; j < jLength; j += 1) {
@@ -6752,14 +6778,15 @@ var ViewerManager = {};
 				}
 			}
 
+			vm.numSubscriptions = vm.subscriptions.filter(function (sub) {return sub.inCurrentAgreement;}).length;
 			vm.noLicensesAssigned =
-				(vm.subscriptions.length > 1) &&
+				(vm.numSubscriptions > 1) &&
 				((vm.collaborators.length + vm.members.length) === 0);
 
 			vm.notAllLicensesAssigned =
 				!vm.noLicensesAssigned &&
-				(vm.subscriptions.length > 1) &&
-				((vm.subscriptions.length - 1) !== (vm.collaborators.length + vm.members.length));
+				(vm.numSubscriptions > 1) &&
+				((vm.numSubscriptions - 1) !== (vm.collaborators.length + vm.members.length));
 
 			vm.allLicenseAssigneesMembers = (vm.collaborators.length === 0);
 		}
@@ -8355,12 +8382,14 @@ var ViewerManager = {};
 					(parseInt(vm.query.item) < response.data.length)) {
 					vm.showBilling = true;
 					vm.billing = response.data[parseInt(vm.query.item)];
-
-					vm.billing.netAmount = vm.billing.amount- vm.billing.taxAmount;
-					vm.billing.taxPercentage = Math.round(vm.billing.taxAmount / vm.billing.amount * 100);
+					vm.billing.netAmount = parseFloat(vm.billing.amount - vm.billing.taxAmount).toFixed(2);
+					vm.billing.taxPercentage = Math.round(vm.billing.taxAmount / vm.billing.netAmount * 100);
 
 					// Check if B2B EU
-					vm.B2B_EU = (euCountryCodes.indexOf(vm.billing.info.countryCode) !== -1);
+					vm.B2B_EU = (euCountryCodes.indexOf(vm.billing.info.countryCode) !== -1) && (vm.billing.info.hasOwnProperty("vat"));
+
+					// Type
+					vm.type = vm.billing.pending ? "Order confirmation" : "Invoice";
 
 					// Get country from country code
 					if (serverConfig.hasOwnProperty("countries")) {
@@ -9055,7 +9084,6 @@ var ViewerManager = {};
 			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
 				// Get any documents associated with an object
 				var object = event.value;
-				console.log(object);
 				promise = DocsService.getDocs(object.account, object.project, object.id);
 				promise.then(function (data) {
 					if (Object.keys(data).length > 0) {
@@ -9071,14 +9099,15 @@ var ViewerManager = {};
 
 									// Pretty format Meta Data dates, e.g. 1900-12-31T23:59:59
 									if (docType === "Meta Data") {
-										console.log(vm.docs["Meta Data"]);
 										for (i = 0, length = vm.docs["Meta Data"].data.length; i < length; i += 1) {
 											for (item in vm.docs["Meta Data"].data[i].metadata) {
-												if ((Date.parse(vm.docs["Meta Data"].data[i].metadata[item]) &&
-													(vm.docs["Meta Data"].data[i].metadata[item].indexOf("T") !== -1))) {
-													vm.docs["Meta Data"].data[i].metadata[item] =
-														$filter("prettyDate")(new Date(vm.docs["Meta Data"].data[i].metadata[item]), {showSeconds: true});
-													console.log(vm.docs["Meta Data"].data[i].metadata[item]);
+												if (vm.docs["Meta Data"].data[i].metadata.hasOwnProperty(item)) {
+													if (Date.parse(vm.docs["Meta Data"].data[i].metadata[item]) &&
+														(typeof vm.docs["Meta Data"].data[i].metadata[item] === "string") &&
+														(vm.docs["Meta Data"].data[i].metadata[item].indexOf("T") !== -1)) {
+														vm.docs["Meta Data"].data[i].metadata[item] =
+															$filter("prettyDate")(new Date(vm.docs["Meta Data"].data[i].metadata[item]), {showSeconds: true});
+													}
 												}
 											}
 										}
@@ -9206,7 +9235,6 @@ var ViewerManager = {};
 			$http.get(url)
 				.then(
 					function(json) {
-						console.log(876, json);
 						var dataType;
 						// Set up the url for each PDF doc
 						for (i = 0, length = json.data.meta.length; i < length; i += 1) {
@@ -10668,7 +10696,7 @@ var ViewerManager = {};
 		vm.goToUserPage = false;
 
 		vm.legalDisplays = [
-			{title: "Terms & Conditions", value: "termsAndConditions"},
+			{title: "Terms & Conditions", value: "terms"},
 			{title: "Privacy", value: "privacy"},
 			{title: "Cookies", value: "cookies"},
 			{title: "Pricing", value: "pricing"},
@@ -12862,8 +12890,7 @@ angular.module('3drepo')
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("login", login)
-		.directive("mdInputContainer", mdInputContainer);
+		.directive("login", login);
 
 	function login() {
 		return {
@@ -12876,51 +12903,16 @@ angular.module('3drepo')
 		};
 	}
 
-	LoginCtrl.$inject = ["$scope", "$mdDialog", "$location", "Auth", "EventService", "serverConfig"];
+	LoginCtrl.$inject = ["$scope", "Auth", "EventService", "serverConfig"];
 
-	function LoginCtrl($scope, $mdDialog, $location, Auth, EventService, serverConfig) {
+	function LoginCtrl($scope, Auth, EventService, serverConfig) {
 		var vm = this,
-			enterKey = 13,
-			promise;
+			enterKey = 13;
 
 		/*
 		 * Init
 		 */
-		vm.user = {username: "", password: ""};
-		vm.newUser = {username: "", email: "", password: "", tcAgreed: false};
 		vm.version = serverConfig.apiVersion;
-		vm.logo = "/public/images/3drepo-logo-white.png";
-		vm.tcAgreed = false;
-		vm.useReCapthca = false;
-		vm.useRegister = false;
-		vm.registering = false;
-
-		/*
-		 * Auth stuff
-		 */
-		if (serverConfig.hasOwnProperty("auth")) {
-			if (serverConfig.auth.hasOwnProperty("register") && (serverConfig.auth.register)) {
-				vm.useRegister = true;
-				if (serverConfig.auth.hasOwnProperty("captcha") && (serverConfig.auth.captcha)) {
-					vm.useReCapthca = true;
-				}
-			}
-		}
-
-		// Logo
-		if (angular.isDefined(serverConfig.backgroundImage))
-		{
-			vm.enterpriseLogo = serverConfig.backgroundImage;
-		}
-
-		/*
-		 * Watch changes to register fields to clear warning message
-		 */
-		$scope.$watch("vm.newUser", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				vm.registerErrorMessage = "";
-			}
-		}, true);
 
 		/**
 		 * Attempt to login
@@ -12938,40 +12930,6 @@ angular.module('3drepo')
 			}
 		};
 
-		/**
-		 * Attempt to register
-		 *
-		 * @param {Object} event
-		 */
-		vm.register = function(event) {
-			if (angular.isDefined(event)) {
-				if (event.which === enterKey) {
-					doRegister();
-				}
-			}
-			else {
-				doRegister();
-			}
-		};
-
-		vm.showTC = function () {
-			$mdDialog.show({
-				controller: tcDialogController,
-				templateUrl: "tcDialog.html",
-				parent: angular.element(document.body),
-				targetEvent: event,
-				clickOutsideToClose:true,
-				fullscreen: true,
-				scope: $scope,
-				preserveScope: true,
-				onRemoving: removeDialog
-			});
-		};
-
-		vm.showPage = function (page) {
-			$location.path("/" + page, "_self");
-		};
-
 		/*
 		 * Event watch
 		 */
@@ -12983,90 +12941,6 @@ angular.module('3drepo')
 				}
 			}
 		});
-
-		/**
-		 * Close the dialog
-		 */
-		$scope.closeDialog = function() {
-			$mdDialog.cancel();
-		};
-
-		/**
-		 * Close the dialog by not clicking the close button
-		 */
-		function removeDialog () {
-			$scope.closeDialog();
-		}
-
-		/**
-		 * Dialog controller
-		 */
-		function tcDialogController() {
-		}
-
-		/**
-		 * Do the user registration
-		 */
-		function doRegister() {
-			var data;
-
-			if ((angular.isDefined(vm.newUser.username)) &&
-				(angular.isDefined(vm.newUser.email)) &&
-				(angular.isDefined(vm.newUser.password))) {
-				if (vm.newUser.tcAgreed) {
-					data = {
-						email: vm.newUser.email,
-						password: vm.newUser.password
-					};
-					if (vm.useReCapthca) {
-						data.captcha = vm.reCaptchaResponse;
-					}
-					vm.registering = true;
-					promise = LoginService.register(vm.newUser.username, data);
-					promise.then(function (response) {
-						if (response.status === 200) {
-							vm.showPage("registerRequest");
-						}
-						else if (response.data.value === 62) {
-							vm.registerErrorMessage = "Prove you're not a robot";
-						}
-						else if (response.data.value === 55) {
-							vm.registerErrorMessage = "Username already in use";
-						}
-						else {
-							vm.registerErrorMessage = "Error with registration";
-						}
-						vm.registering = false;
-					});
-				}
-				else {
-					vm.registerErrorMessage = "You must agree to the terms and conditions";
-				}
-			}
-			else {
-				vm.registerErrorMessage = "Please fill all fields";
-			}
-		}
-	}
-
-	/**
-	 * Re-make md-input-container to get around the problem discussed here https://github.com/angular/material/issues/1376
-	 * Taken from mikila85's version of blaise-io's workaround
-	 *
-	 * @param $timeout
-	 * @returns {Function}
-	 */
-	function mdInputContainer ($timeout) {
-		return function ($scope, element) {
-			var ua = navigator.userAgent;
-			if (ua.match(/chrome/i) && !ua.match(/edge/i)) {
-				$timeout(function () {
-					if (element[0].querySelector("input[type=password]:-webkit-autofill")) {
-						element.addClass("md-input-has-value");
-					}
-				}, 100);
-			}
-		};
 	}
 }());
 
@@ -14692,6 +14566,9 @@ var Oculus = {};
 						}
 						else {
 							contentItem.height = contentItem.minHeight;
+							availableHeight -= contentItem.height + panelToolbarHeight + itemGap;
+							contentItems.splice(i, 1);
+							assignHeights(availableHeight, contentItems, prev);
 						}
 					}
 					else {
@@ -15390,21 +15267,6 @@ var Oculus = {};
 			projectUI = angular.element($element[0].querySelector('#projectUI'));
 		});
 
-		/*
-		panelCard.left.push({
-			type: "tree",
-			title: "Tree",
-			show: true,
-			help: "Model elements shown in a tree structure",
-			icon: "device_hub",
-			minHeight: 80,
-			fixedHeight: false,
-			options: [
-				{type: "filter", visible: true}
-			]
-		});
-		*/
-
 		panelCard.left.push({
 			type: "issues",
 			title: "Issues",
@@ -15450,6 +15312,19 @@ var Oculus = {};
 			],
 			add: true
 		});
+
+		 panelCard.left.push({
+			 type: "tree",
+			 title: "Tree",
+			 show: true,
+			 help: "Model elements shown in a tree structure",
+			 icon: "device_hub",
+			 minHeight: 80,
+			 fixedHeight: false,
+			 options: [
+			 	{type: "filter", visible: true}
+			 ]
+		 });
 
 		panelCard.left.push({
 			type: "groups",
@@ -16573,7 +16448,6 @@ var Oculus = {};
 		};
 
 		vm.showPage = function (page) {
-			console.log(page);
 			$location.path("/" + page, "_self");
 		};
 
@@ -16665,22 +16539,22 @@ var Oculus = {};
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("termsAndConditions", termsAndConditions);
+		.directive("terms", terms);
 
-	function termsAndConditions() {
+	function terms() {
 		return {
 			restrict: "E",
 			scope: {},
-			templateUrl: "termsAndConditions.html",
-			controller: TermsAndConditionsCtrl,
+			templateUrl: "terms.html",
+			controller: TermsCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	TermsAndConditionsCtrl.$inject = ["EventService"];
+	TermsCtrl.$inject = ["EventService"];
 
-	function TermsAndConditionsCtrl (EventService) {
+	function TermsCtrl (EventService) {
 		var vm = this;
 
 		vm.home = function () {
@@ -16710,22 +16584,22 @@ var Oculus = {};
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("termsAndConditionsText", termsAndConditionsText);
+		.directive("termsText", termsText);
 
-	function termsAndConditionsText() {
+	function termsText() {
 		return {
 			restrict: "E",
 			scope: {},
-			templateUrl: "termsAndConditionsText.html",
-			controller: TermsAndConditionsTextCtrl,
+			templateUrl: "termsText.html",
+			controller: TermsTextCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	TermsAndConditionsTextCtrl.$inject = [];
+	TermsTextCtrl.$inject = [];
 
-	function TermsAndConditionsTextCtrl () {
+	function TermsTextCtrl () {
 		var vm = this;
 	}
 }());
@@ -16788,7 +16662,8 @@ var Oculus = {};
 			length = 0,
 			currentSelectedNode = null,
 			currentScrolledToNode = null,
-			highlightSelectedViewerObject = true;
+			highlightSelectedViewerObject = true,
+			clickedHidden = {}; // Nodes that have actually been clicked to hide
 
 		/*
 		 * Init
@@ -16802,6 +16677,8 @@ var Oculus = {};
 		vm.showProgress = true;
 		vm.progressInfo = "Loading full tree structure";
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
+		vm.visible   = [];
+		vm.invisible = [];
 
 		/*
 		 * Get all the tree nodes
@@ -16824,12 +16701,12 @@ var Oculus = {};
 		 * Set the content height.
 		 * The height of a node is dependent on its name length and its level.
 		 *
-		 * @param (Number} nodesToShow
+		 * @param {Number} nodesToShow
 		 */
 		function setContentHeight (nodesToShow) {
 			var i, length,
 				height = 0,
-				nodeMinHeight = 36,
+				nodeMinHeight = 48,
 				maxStringLength = 35, maxStringLengthForLevel = 0,
 				lineHeight = 18, levelOffset = 2;
 
@@ -16849,11 +16726,12 @@ var Oculus = {};
 			vm.nodesToShow[0].expanded = false;
 			vm.nodesToShow[0].hasChildren = true;
 			vm.nodesToShow[0].selected = false;
-			vm.nodesToShow[0].toggleState = "visible";
-		}
+			// Only make the top node visible if it was not previously clicked hidden
+			if (!wasClickedHidden(vm.nodesToShow[0])) {
+				vm.nodesToShow[0].toggleState = "visible";
+			}
 
-		vm.visible   = [];
-		vm.invisible = [];
+		}
 
 		/**
 		 * Set the toggle state of a node
@@ -16905,17 +16783,21 @@ var Oculus = {};
 				numChildren = 0,
 				index = -1,
 				endOfSplice = false,
-				numChildrenToForceRedraw = 10;
+				numChildrenToForceRedraw = 3;
 
+			// Find node index
 			for (i = 0, length = vm.nodesToShow.length; i < length; i += 1) {
 				if (vm.nodesToShow[i]._id === _id) {
 					index = i;
 					break;
 				}
 			}
+
+			// Found
 			if (index !== -1) {
 				if (vm.nodesToShow[index].hasChildren) {
 					if (vm.nodesToShow[index].expanded) {
+						// Collapse
 						while (!endOfSplice) {
 							if (angular.isDefined(vm.nodesToShow[index + 1]) && vm.nodesToShow[index + 1].path.indexOf(_id) !== -1) {
 								vm.nodesToShow.splice(index + 1, 1);
@@ -16924,6 +16806,7 @@ var Oculus = {};
 							}
 						}
 					} else {
+						// Expand
 						numChildren = vm.nodesToShow[index].children.length;
 
 						// If the node has a large number of children then force a redraw of the tree to get round the display problem
@@ -16934,13 +16817,20 @@ var Oculus = {};
 						for (i = 0; i < numChildren; i += 1) {
 							vm.nodesToShow[index].children[i].expanded = false;
 
-							vm.setToggleState(vm.nodesToShow[index].children[i], vm.nodesToShow[index].toggleState);
+							// vm.setToggleState(vm.nodesToShow[index].children[i], vm.nodesToShow[index].toggleState);
+							// If the child node was not clicked hidden set its toggle state to visible
+							if (!wasClickedHidden(vm.nodesToShow[index].children[i])) {
+								vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
+							}
 
+							// Determine if child node has childern
 							vm.nodesToShow[index].children[i].level = vm.nodesToShow[index].level + 1;
-							if("children" in vm.nodesToShow[index].children[i])
+							if("children" in vm.nodesToShow[index].children[i]) {
 								vm.nodesToShow[index].children[i].hasChildren = vm.nodesToShow[index].children[i].children.length > 0;
-							else
+							}
+							else {
 								vm.nodesToShow[index].children[i].hasChildren = false;
+							}
 
 							vm.nodesToShow.splice(index + i + 1, 0, vm.nodesToShow[index].children[i]);
 						}
@@ -16983,11 +16873,18 @@ var Oculus = {};
 					for (j = 0; j < childrenLength; j += 1) {
 						vm.nodesToShow[i].children[j].selected = (vm.nodesToShow[i].children[j]._id === selectedId);
 
-						vm.setToggleState(vm.nodesToShow[i].children[j], "visible");
-						if("children" in vm.nodesToShow[i].children[j])
+						// Only set the toggle state once when the node is listed
+						if (!vm.nodesToShow[i].children[j].hasOwnProperty("toggleState")) {
+							vm.setToggleState(vm.nodesToShow[i].children[j], "visible");
+						}
+
+						if("children" in vm.nodesToShow[i].children[j]) {
 							vm.nodesToShow[i].children[j].hasChildren = vm.nodesToShow[i].children[j].children.length > 0;
-						else
+						}
+						else {
 							vm.nodesToShow[i].children[j].hasChildren = false;
+						}
+
 						if (vm.nodesToShow[i].children[j].selected) {
 							selectionFound = true;
 
@@ -16997,6 +16894,7 @@ var Oculus = {};
 								currentSelectedNode = currentScrolledToNode;
 							});
 						}
+
 						if ((level === (path.length - 2)) && !selectionFound) {
 							selectedIndex += 1;
 						}
@@ -17019,7 +16917,6 @@ var Oculus = {};
 
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
-				console.log(event);
 				if ((event.value.source !== "tree") && highlightSelectedViewerObject)
 				{
 					var objectID = event.value.id;
@@ -17038,6 +16935,8 @@ var Oculus = {};
 				if (currentSelectedNode !== null) {
 					currentSelectedNode.selected = false;
 					currentSelectedNode = null;
+					vm.currentFilterItemSelected.class = "";
+					vm.currentFilterItemSelected = null;
 				}
 			}
 			else if ((event.type === EventService.EVENT.PANEL_CARD_ADD_MODE) ||
@@ -17048,7 +16947,13 @@ var Oculus = {};
 		});
 
 		vm.toggleTreeNode = function (node) {
-			var i = 0, j = 0, k = 0, nodesLength, path, parent = null, nodeToggleState = "visible", numInvisible = 0, numParentInvisible = 0;
+			var i, j,
+				nodesLength,
+				path,
+				parent = null,
+				nodeToggleState = "visible",
+				numInvisible = 0,
+				numParentInvisible = 0;
 
 			vm.toggledNode = node;
 
@@ -17060,6 +16965,7 @@ var Oculus = {};
 				if (vm.nodesToShow[i]._id === node._id) {
 					vm.setToggleState(vm.nodesToShow[i], (vm.nodesToShow[i].toggleState === "visible") ? "invisible" : "visible");
 					nodeToggleState = vm.nodesToShow[i].toggleState;
+					updateClickedHidden(vm.nodesToShow[i]);
 				}
 				// Set children to node toggle state
 				else if (vm.nodesToShow[i].path.indexOf(node._id) !== -1) {
@@ -17076,8 +16982,16 @@ var Oculus = {};
 				for (i = (path.length - 1); i >= 0; i -= 1) {
 					for (j = 0, nodesLength = vm.nodesToShow.length; j < nodesLength; j += 1) {
 						if (vm.nodesToShow[j]._id === path[i]) {
-							numInvisible = vm.nodesToShow[j].children.reduce(function(total,child){return child.toggleState=="invisible"? total+1 : total}, 0)
-							numParentInvisible = vm.nodesToShow[j].children.reduce(function(total,child){return child.toggleState=="parentOfInvisible"? total+1 : total}, 0)
+							numInvisible = vm.nodesToShow[j].children.reduce(
+								function (total, child) {
+									return child.toggleState === "invisible" ? total + 1 : total;
+								},
+								0);
+							numParentInvisible = vm.nodesToShow[j].children.reduce(
+								function (total, child) {
+									return child.toggleState === "parentOfInvisible" ? total + 1 : total;
+								},
+								0);
 
 							if (numInvisible === vm.nodesToShow[j].children.length) {
 								vm.setToggleState(vm.nodesToShow[j], "invisible");
@@ -17187,7 +17101,8 @@ var Oculus = {};
 				if (newValue.toString() === "") {
 					vm.showTree = true;
 					vm.showFilterList = false;
-					vm.nodes = vm.allNodes;
+					vm.showProgress = false;
+					vm.nodes = vm.nodesToShow;
 					setContentHeight(vm.nodes);
 				} else {
 					vm.showTree = false;
@@ -17332,6 +17247,29 @@ var Oculus = {};
 					}
 				}
 			};
+		}
+
+		/**
+		 * If a node was clicked to hide, add it to a list of similar nodes
+		 *
+		 * @param {Object} node
+		 */
+		function updateClickedHidden (node) {
+			if (node.toggleState === "invisible") {
+				clickedHidden[node._id] = node;
+			}
+			else {
+				delete clickedHidden[node._id];
+			}
+		}
+
+		/**
+		 * Check if a node was clicked to hide
+		 *
+		 * @param {Object} node
+		 */
+		function wasClickedHidden (node) {
+			return clickedHidden.hasOwnProperty(node._id);
 		}
 	}
 }());
@@ -17655,6 +17593,14 @@ var Oculus = {};
 				}
 
 				return projectDate;
+			};
+		})
+
+
+		.filter("prettyGMTDate", function () {
+			return function(input) {
+				var date = new Date(input);
+				return date.toISOString().substr(0,10);
 			};
 		});
 

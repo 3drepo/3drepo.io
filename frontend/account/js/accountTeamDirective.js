@@ -49,7 +49,8 @@
 		vm.collaborators = [];
 		vm.members = [];
 		vm.addDisabled = false;
-		vm.toShow = (vm.subscriptions.length > 1) ? "1+" : vm.subscriptions.length.toString();
+		vm.numSubscriptions = vm.subscriptions.filter(function (sub) {return sub.inCurrentAgreement;}).length;
+		vm.toShow = (vm.numSubscriptions > 1) ? "1+" : vm.numSubscriptions.toString();
 
 		if ($location.search().hasOwnProperty("proj")) {
 			vm.projectName = $location.search().proj;
@@ -149,7 +150,7 @@
 			var i, iLength, j, jLength,
 				isMember;
 
-			for (i = 0, iLength = vm.subscriptions.length; i < iLength; i += 1) {
+			for (i = 0, iLength = vm.numSubscriptions; i < iLength; i += 1) {
 				if (vm.subscriptions[i].hasOwnProperty("assignedUser") && (vm.subscriptions[i].assignedUser !== vm.account)) {
 					isMember = false;
 					for (j = 0, jLength = vm.members.length; j < jLength; j += 1) {
@@ -164,14 +165,15 @@
 				}
 			}
 
+			vm.numSubscriptions = vm.subscriptions.filter(function (sub) {return sub.inCurrentAgreement;}).length;
 			vm.noLicensesAssigned =
-				(vm.subscriptions.length > 1) &&
+				(vm.numSubscriptions > 1) &&
 				((vm.collaborators.length + vm.members.length) === 0);
 
 			vm.notAllLicensesAssigned =
 				!vm.noLicensesAssigned &&
-				(vm.subscriptions.length > 1) &&
-				((vm.subscriptions.length - 1) !== (vm.collaborators.length + vm.members.length));
+				(vm.numSubscriptions > 1) &&
+				((vm.numSubscriptions - 1) !== (vm.collaborators.length + vm.members.length));
 
 			vm.allLicenseAssigneesMembers = (vm.collaborators.length === 0);
 		}

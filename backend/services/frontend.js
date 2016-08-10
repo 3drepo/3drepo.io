@@ -26,8 +26,10 @@ module.exports.createApp = function(serverConfig)
 	let fs = require("fs");
 	let jade = require("jade");
 	let addressMeta = require('../models/addressMeta');
+
 	let units = require('../models/unit');
-	
+	let favicon = require("serve-favicon");
+
 	//let systemLogger = require("../logger.js").systemLogger;
 
 
@@ -43,6 +45,8 @@ module.exports.createApp = function(serverConfig)
 	app.set("views", "./jade");
 	app.set("view_engine", "jade");
 	app.locals.pretty = true;
+
+	app.use(favicon('public/images/favicon.ico'));
 
 	app.get("/public/plugins/base/config.js", function(req, res) {
 		let params = {};
@@ -143,7 +147,7 @@ module.exports.createApp = function(serverConfig)
 			"signUp",
 			"contact",
 			"payment",
-			"termsAndConditions",
+			"terms",
 			"privacy",
 			"cookies",
 			"billing"

@@ -41,6 +41,7 @@ describe('Project', function () {
 	let project = 'project1';
 	let desc = 'desc';
 	let type = 'type';
+	let unit = 'meter';
 
 	before(function(done){
 
@@ -70,7 +71,7 @@ describe('Project', function () {
 	it('should be created successfully', function(done){
 
 		agent.post(`/${username}/${project}`)
-		.send({ desc, type })
+		.send({ desc, type, unit })
 		.expect(200, function(err ,res) {
 
 			expect(res.body.project).to.equal(project);
@@ -83,6 +84,7 @@ describe('Project', function () {
 			.expect(200, function(err, res){
 				expect(res.body.desc).to.equal(desc);
 				expect(res.body.type).to.equal(type);
+				expect(res.body.properties.unit).to.equal(unit);
 				done(err);
 			})
 			
@@ -123,7 +125,7 @@ describe('Project', function () {
 	it('should return error message if project name already exists', function(done){
 
 		agent.post(`/${username}/${project}`)
-		.send({ desc, type })
+		.send({ desc, type, unit })
 		.expect(400, function(err ,res) {
 			expect(res.body.value).to.equal(responseCodes.PROJECT_EXIST.value);
 			done(err);
@@ -147,7 +149,7 @@ describe('Project', function () {
 			}
 
 			agent.post(`/${username}/${projectName}`)
-			.send({ desc, type })
+			.send({ desc, type, unit })
 			.expect(400, function(err ,res) {
 				expect(res.body.value).to.equal(responseCodes.BLACKLISTED_PROJECT_NAME.value);
 				done(err);
@@ -161,7 +163,7 @@ describe('Project', function () {
 	it('should return error message if project name contains spaces', function(done){
 
 		agent.post('/' + username + '/you%20are%20genius')
-		.send({ desc, type })
+		.send({ desc, type, unit })
 		.expect(400, function(err ,res) {
 			expect(res.body.value).to.equal(responseCodes.INVALID_PROJECT_NAME.value);
 			done(err);
@@ -172,7 +174,7 @@ describe('Project', function () {
 	it('should return error if creating a project in a database that doesn\'t exists or not authorized for', function(done){
 
 		agent.post(`/${username} + '_someonelese' /${project}`)
-		.send({ desc, type })
+		.send({ desc, type, unit })
 		.expect(401, function(err ,res) {
 			done(err);
 		});

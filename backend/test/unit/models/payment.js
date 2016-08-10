@@ -77,9 +77,9 @@ describe('Payment', function(){
 
 			let dateAmountData = Payment.getPaymentDateAndAmount(newLicences, oldPayableLicences, paymentDate, null, getNextPaymentDate, country, isBusiness);
 			
-			expect(dateAmountData.regularAmount).to.equal(100);
-			expect(dateAmountData.regularBeforeTaxAmount).to.closeTo(83.33, Number.EPSILON);
-			expect(dateAmountData.regularTaxAmount).to.closeTo(16.67, Number.EPSILON);
+			expect(dateAmountData.regularAmount).to.equal(120);
+			expect(dateAmountData.regularBeforeTaxAmount).to.closeTo(100, Number.EPSILON);
+			expect(dateAmountData.regularTaxAmount).to.closeTo(20, Number.EPSILON);
 			expect(dateAmountData.firstCycleAmount).to.equal(0);
 			expect(dateAmountData.firstCycleBeforeTaxAmount).to.equal(0);
 			expect(dateAmountData.firstCycleTaxAmount).to.equal(0);
@@ -108,9 +108,9 @@ describe('Payment', function(){
 
 			let dateAmountData = Payment.getPaymentDateAndAmount(newLicences, oldPayableLicences, paymentDate, null, getNextPaymentDate, country, isBusiness);
 			
-			expect(dateAmountData.regularAmount).to.equal(300);
-			expect(dateAmountData.regularBeforeTaxAmount).to.closeTo(250, Number.EPSILON);
-			expect(dateAmountData.regularTaxAmount).to.closeTo(50, Number.EPSILON);
+			expect(dateAmountData.regularAmount).to.equal(360);
+			expect(dateAmountData.regularBeforeTaxAmount).to.closeTo(300, Number.EPSILON);
+			expect(dateAmountData.regularTaxAmount).to.closeTo(60, Number.EPSILON);
 			expect(dateAmountData.firstCycleAmount).to.equal(0);
 			expect(dateAmountData.firstCycleBeforeTaxAmount).to.equal(0);
 			expect(dateAmountData.firstCycleTaxAmount).to.equal(0);
@@ -171,9 +171,9 @@ describe('Payment', function(){
 
 			let dateAmountData = Payment.getPaymentDateAndAmount(newLicences, oldPayableLicences, paymentDate, null, getNextPaymentDate, country, isBusiness);
 			
-			expect(dateAmountData.regularAmount).to.equal(100);
-			expect(dateAmountData.regularBeforeTaxAmount).to.closeTo(83.33, Number.EPSILON);
-			expect(dateAmountData.regularTaxAmount).to.closeTo(16.67, Number.EPSILON);
+			expect(dateAmountData.regularAmount).to.equal(120);
+			expect(dateAmountData.regularBeforeTaxAmount).to.closeTo(100, Number.EPSILON);
+			expect(dateAmountData.regularTaxAmount).to.closeTo(20, Number.EPSILON);
 			expect(dateAmountData.firstCycleAmount).to.equal(0);
 			expect(dateAmountData.firstCycleBeforeTaxAmount).to.equal(0);
 			expect(dateAmountData.firstCycleTaxAmount).to.equal(0);
@@ -202,9 +202,9 @@ describe('Payment', function(){
 
 			let dateAmountData = Payment.getPaymentDateAndAmount(newLicences, oldPayableLicences, paymentDate, null, getNextPaymentDate, country, isBusiness);
 			
-			expect(dateAmountData.regularAmount).to.equal(200);
-			expect(dateAmountData.regularBeforeTaxAmount).to.closeTo(168.07, Number.EPSILON);
-			expect(dateAmountData.regularTaxAmount).to.closeTo(31.93, Number.EPSILON);
+			expect(dateAmountData.regularAmount).to.equal(238);
+			expect(dateAmountData.regularBeforeTaxAmount).to.closeTo(200, Number.EPSILON);
+			expect(dateAmountData.regularTaxAmount).to.closeTo(38, Number.EPSILON);
 			expect(dateAmountData.firstCycleAmount).to.equal(0);
 			expect(dateAmountData.firstCycleBeforeTaxAmount).to.equal(0);
 			expect(dateAmountData.firstCycleTaxAmount).to.equal(0);
@@ -239,12 +239,12 @@ describe('Payment', function(){
 
 			let dateAmountData = Payment.getPaymentDateAndAmount(newLicences, oldPayableLicences, paymentDate, lastAnniversaryDate, getNextPaymentDate, country, isBusiness);
 	
-			expect(dateAmountData.regularAmount).to.equal(400);
-			expect(dateAmountData.regularBeforeTaxAmount).to.closeTo(333.33, Number.EPSILON);
-			expect(dateAmountData.regularTaxAmount).to.closeTo(66.67, Number.EPSILON);
-			expect(dateAmountData.firstCycleAmount).closeTo(6.45, Number.EPSILON);
-			expect(dateAmountData.firstCycleBeforeTaxAmount).closeTo(5.38, Number.EPSILON);
-			expect(dateAmountData.firstCycleTaxAmount).closeTo(1.08, Number.EPSILON);
+			expect(dateAmountData.regularAmount).to.equal(480);
+			expect(dateAmountData.regularBeforeTaxAmount).to.closeTo(400, Number.EPSILON);
+			expect(dateAmountData.regularTaxAmount).to.closeTo(80, Number.EPSILON);
+			expect(dateAmountData.firstCycleAmount).closeTo(7.74, Number.EPSILON);
+			expect(dateAmountData.firstCycleBeforeTaxAmount).closeTo(6.45, Number.EPSILON);
+			expect(dateAmountData.firstCycleTaxAmount).closeTo(1.29, Number.EPSILON);
 			expect(dateAmountData.firstCycleLength.value).to.equal(1);
 			expect(dateAmountData.firstCycleLength.unit).to.equal('DAY');
 			expect(dateAmountData.regularCycleLength.value).to.equal(1);
@@ -276,12 +276,12 @@ describe('Payment', function(){
 
 			let dateAmountData = Payment.getPaymentDateAndAmount(newLicences, oldPayableLicences, paymentDate, lastAnniversaryDate, getNextPaymentDate, country, isBusiness);
 
-			expect(dateAmountData.regularAmount).to.equal(200);
-			expect(dateAmountData.regularBeforeTaxAmount).to.closeTo(166.67, Number.EPSILON);
-			expect(dateAmountData.regularTaxAmount).to.closeTo(33.33, Number.EPSILON);
-			expect(dateAmountData.firstCycleAmount).closeTo(82.76, Number.EPSILON);
-			expect(dateAmountData.firstCycleBeforeTaxAmount).closeTo(68.97, Number.EPSILON);
-			expect(dateAmountData.firstCycleTaxAmount).closeTo(13.79, Number.EPSILON);
+			expect(dateAmountData.regularAmount).to.equal(240);
+			expect(dateAmountData.regularBeforeTaxAmount).to.closeTo(200, Number.EPSILON);
+			expect(dateAmountData.regularTaxAmount).to.closeTo(40, Number.EPSILON);
+			expect(dateAmountData.firstCycleAmount).closeTo(99.31, Number.EPSILON);
+			expect(dateAmountData.firstCycleBeforeTaxAmount).closeTo(82.76, Number.EPSILON);
+			expect(dateAmountData.firstCycleTaxAmount).closeTo(16.55, Number.EPSILON);
 			expect(dateAmountData.firstCycleLength.value).to.equal(24);
 			expect(dateAmountData.firstCycleLength.unit).to.equal('DAY');
 			expect(dateAmountData.regularCycleLength.value).to.equal(1);
@@ -312,12 +312,12 @@ describe('Payment', function(){
 
 			let dateAmountData = Payment.getPaymentDateAndAmount(newLicences, oldPayableLicences, paymentDate, lastAnniversaryDate, getNextPaymentDate, country, isBusiness);
 
-			expect(dateAmountData.regularAmount).to.equal(200);
-			expect(dateAmountData.regularBeforeTaxAmount).to.closeTo(166.67, Number.EPSILON);
-			expect(dateAmountData.regularTaxAmount).to.closeTo(33.33, Number.EPSILON);
-			expect(dateAmountData.firstCycleAmount).closeTo(100, Number.EPSILON);
-			expect(dateAmountData.firstCycleBeforeTaxAmount).closeTo(83.33, Number.EPSILON);
-			expect(dateAmountData.firstCycleTaxAmount).closeTo(16.67, Number.EPSILON);
+			expect(dateAmountData.regularAmount).to.equal(240);
+			expect(dateAmountData.regularBeforeTaxAmount).to.closeTo(200, Number.EPSILON);
+			expect(dateAmountData.regularTaxAmount).to.closeTo(40, Number.EPSILON);
+			expect(dateAmountData.firstCycleAmount).closeTo(120, Number.EPSILON);
+			expect(dateAmountData.firstCycleBeforeTaxAmount).closeTo(100, Number.EPSILON);
+			expect(dateAmountData.firstCycleTaxAmount).closeTo(20, Number.EPSILON);
 			expect(dateAmountData.firstCycleLength.value).to.equal(31);
 			expect(dateAmountData.firstCycleLength.unit).to.equal('DAY');
 			expect(dateAmountData.regularCycleLength.value).to.equal(1);
@@ -384,9 +384,9 @@ describe('Payment', function(){
 
 			let dateAmountData = Payment.getPaymentDateAndAmount(newLicences, oldPayableLicences, paymentDate, lastAnniversaryDate, getNextPaymentDate, country, isBusiness);
 
-			expect(dateAmountData.regularAmount).to.equal(200);
-			expect(dateAmountData.regularBeforeTaxAmount).to.closeTo(166.67, Number.EPSILON);
-			expect(dateAmountData.regularTaxAmount).to.closeTo(33.33, Number.EPSILON);
+			expect(dateAmountData.regularAmount).to.equal(240);
+			expect(dateAmountData.regularBeforeTaxAmount).to.closeTo(200, Number.EPSILON);
+			expect(dateAmountData.regularTaxAmount).to.closeTo(40, Number.EPSILON);
 			expect(dateAmountData.firstCycleAmount).closeTo(0, Number.EPSILON);
 			expect(dateAmountData.firstCycleBeforeTaxAmount).closeTo(0, Number.EPSILON);
 			expect(dateAmountData.firstCycleTaxAmount).closeTo(0, Number.EPSILON);

@@ -196,6 +196,9 @@
 						}
 						else {
 							contentItem.height = contentItem.minHeight;
+							availableHeight -= contentItem.height + panelToolbarHeight + itemGap;
+							contentItems.splice(i, 1);
+							assignHeights(availableHeight, contentItems, prev);
 						}
 					}
 					else {

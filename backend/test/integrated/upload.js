@@ -39,6 +39,7 @@ describe('Uploading a project', function () {
 
 	let desc = 'desc';
 	let type = 'type';
+	let unit = 'meter';
 
 	before(function(done){
 
@@ -47,7 +48,7 @@ describe('Uploading a project', function () {
 
 			helpers.signUpAndLoginAndCreateProject({
 				server, request, agent, expect, User, systemLogger,
-				username, password, email, project, desc, type, noBasicPlan: true,
+				username, password, email, project, desc, type, noBasicPlan: true, unit,
 				done: function(err, _agent){
 					agent = _agent;
 					done(err);
