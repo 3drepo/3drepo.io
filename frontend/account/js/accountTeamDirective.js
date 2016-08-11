@@ -27,6 +27,7 @@
 			templateUrl: 'accountTeam.html',
 			scope: {
 				account: "=",
+				item: "=",
 				showPage: "&",
 				subscriptions: "="
 			},
@@ -49,23 +50,20 @@
 		vm.collaborators = [];
 		vm.members = [];
 		vm.addDisabled = false;
-		vm.numSubscriptions = vm.subscriptions.filter(function (sub) {return sub.inCurrentAgreement;}).length;
+		vm.numSubscriptions = vm.subscriptions.length;
 		vm.toShow = (vm.numSubscriptions > 1) ? "1+" : vm.numSubscriptions.toString();
 
-		if ($location.search().hasOwnProperty("proj")) {
-			vm.projectName = $location.search().proj;
-
-			promise = UtilsService.doGet(vm.account + "/" + vm.projectName + "/collaborators");
-			promise.then(function (response) {
-				console.log(response);
-				if (response.status === 200) {
-					vm.members = response.data;
-					if (angular.isDefined("vm.subscriptions")) {
-						setupTeam();
-					}
+		console.log(vm.item);
+		promise = UtilsService.doGet(vm.account + "/" + vm.item.project + "/collaborators");
+		promise.then(function (response) {
+			console.log(response);
+			if (response.status === 200) {
+				vm.members = response.data;
+				if (angular.isDefined("vm.subscriptions")) {
+					setupTeam();
 				}
-			});
-		}
+			}
+		});
 
 		/*
 		 * Watch changes to the new member name
@@ -141,6 +139,10 @@
 
 		vm.goToPage = function (page) {
 			StateManager.setQuery({page: page});
+		};
+
+		vm.closeDialog = function () {
+			UtilsService.closeDialog();
 		};
 
 		/**

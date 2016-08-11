@@ -377,6 +377,10 @@ account-licenses #accountLicensesBillingPage a {
 }
 
 /** Account Team ******************************************************************************************************/
+account-team {
+  width: 500px;
+}
+
 account-team .collaboratorIcon {
   margin: 0 10px !important;
 }

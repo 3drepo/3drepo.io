@@ -3,13 +3,13 @@
 		p You do not currently have any federations set up
 
 md-list(ng-if="!vm.showInfo")
-	div(layout="column", layout-align="start", ng-repeat="(federationIndex, federation) in vm.federations")
+	div(layout="column", layout-align="start", ng-repeat="(federationIndex, federation) in vm.accountsCopy[0].fedProjects")
 		div(layout="row", layout-align="start center")
 			md-list-item(ng-click="vm.viewFederation($index)", flex)
 				md-button.md-icon-button.md-accent(aria-label="Federation")
 					md-icon.angular-material-icons border_all
 				.md-list-item-text(flex="40")
-					p {{federation.name}}
+					p {{federation.project}}
 			//md-button.md-icon-button.md-accent(aria-label="Edit", ng-click="vm.editFederation($event, $index)")
 				md-icon.angular-material-icons edit
 			md-menu(md-position-mode="target-right target")
