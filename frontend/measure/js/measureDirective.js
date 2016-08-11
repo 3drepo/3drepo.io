@@ -26,6 +26,9 @@
 			restrict: "EA",
 			templateUrl: "measure.html",
 			scope: {
+				account: '=',
+				project: '=',
+				settings: '='
 			},
 			controller: MeasureCtrl,
 			controllerAs: "vm",
@@ -51,6 +54,9 @@
 
 		var coordVector = null, vectorLength = 0.0;
 		vm.screenPos = [0.0, 0.0];
+
+		//console.log('measure scope', $scope);
+		vm.unit = vm.units.find(function(unit) { return unit.value === vm.settings.unit}).name;
 
 		EventService.send(EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK, {
 			callback: function(event) {
@@ -99,8 +105,6 @@
 						vm.allowMove = true;
 					}
 				}
-			} else if (event.type === EventService.EVENT.PROJECT_SETTINGS_READY){
-				vm.unit = vm.units.find(function(unit) { return unit.value === event.value.settings.unit}).name;
 			}
 		});
 	}

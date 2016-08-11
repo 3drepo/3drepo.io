@@ -12972,6 +12972,9 @@ angular.module('3drepo')
 			restrict: "EA",
 			templateUrl: "measure.html",
 			scope: {
+				account: '=',
+				project: '=',
+				settings: '='
 			},
 			controller: MeasureCtrl,
 			controllerAs: "vm",
@@ -12997,6 +13000,9 @@ angular.module('3drepo')
 
 		var coordVector = null, vectorLength = 0.0;
 		vm.screenPos = [0.0, 0.0];
+
+		console.log('measure scope', $scope);
+		vm.unit = vm.units.find(function(unit) { return unit.value === vm.settings.unit}).name;
 
 		EventService.send(EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK, {
 			callback: function(event) {
@@ -13045,8 +13051,6 @@ angular.module('3drepo')
 						vm.allowMove = true;
 					}
 				}
-			} else if (event.type === EventService.EVENT.PROJECT_SETTINGS_READY){
-				vm.unit = vm.units.find(function(unit) { return unit.value === event.value.settings.unit}).name;
 			}
 		});
 	}
@@ -15384,25 +15388,6 @@ var Oculus = {};
 			]
 		});
 
-		function sendProjectInfoEvent(){
-			if(!vm.settings){
-				ProjectService.getProjectInfo(vm.account, vm.project).then(function (data) {
-					vm.settings = data.settings
-					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
-						account: data.account,
-						project: data.project,
-						settings: data.settings
-					});
-				});
-			} else {
-				EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
-					account: vm.account,
-					project: vm.project,
-					settings: vm.settings
-				});
-			}
-
-		}
 
 		$scope.$watchGroup(["vm.account","vm.project"], function()
 		{
@@ -15423,8 +15408,14 @@ var Oculus = {};
 					}
 				});
 
-				sendProjectInfoEvent();
-
+				ProjectService.getProjectInfo(vm.account, vm.project).then(function (data) {
+					vm.settings = data.settings
+					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
+						account: data.account,
+						project: data.project,
+						settings: data.settings
+					});
+				});
 			}
 		});
 
@@ -15475,11 +15466,10 @@ var Oculus = {};
 			} else if (event.type === EventService.EVENT.MEASURE_MODE) {
 				if (event.value) {
 					// Create measure display
-					element = angular.element("<tdr-measure id='tdrMeasure'></tdr-measure>");
+					element = angular.element("<tdr-measure id='tdrMeasure' account='vm.account' project='vm.project' settings='vm.settings' ></tdr-measure>");
 					parent.append(element);
 					$compile(element)($scope);
 
-					sendProjectInfoEvent();
 				}
 				else {
 					// Remove measure display
