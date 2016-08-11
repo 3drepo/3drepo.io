@@ -90,7 +90,7 @@
 					user: vm.selectedUser.user
 				};
 
-			promise = UtilsService.doPost(data, vm.account + "/" + vm.projectName + "/collaborators");
+			promise = UtilsService.doPost(data, vm.account + "/" + vm.item.project + "/collaborators");
 			promise.then(function (response) {
 				console.log(response);
 				if (response.status === 200) {
@@ -114,7 +114,7 @@
 		 * @param index
 		 */
 		vm.removeMember = function (index) {
-			promise = UtilsService.doDelete(vm.members[index], vm.account + "/" + vm.projectName + "/collaborators");
+			promise = UtilsService.doDelete(vm.members[index], vm.account + "/" + vm.item.project + "/collaborators");
 			promise.then(function (response) {
 				console.log(response);
 				if (response.status === 200) {

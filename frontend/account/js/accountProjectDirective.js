@@ -32,9 +32,10 @@
 				uploadedFile: "=",
 				onShowPage: "&",
 				onSetupDeleteProject: "&",
-				quota: "="
+				quota: "=",
+				subscriptions: "="
 			},
-			controller: accountProjectCtrl,
+			controller: AccountProjectCtrl,
 			controllerAs: 'vm',
 			bindToController: true,
 			link: function (scope, element) {
@@ -46,9 +47,9 @@
 		};
 	}
 
-	accountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig"];
+	AccountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig"];
 
-	function accountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig) {
+	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig) {
 		var vm = this,
 			infoTimeout = 4000;
 
@@ -85,7 +86,7 @@
 					vm.uploadFile();
 				}
 				else {
-					$location.path("/" + vm.account.name + "/" + vm.project.name, "_self").search("page", null);
+					$location.path("/" + vm.account + "/" + vm.project.name, "_self").search("page", null);
 				}
 			}
 		};
@@ -110,8 +111,7 @@
 					break;
 
 				case "team":
-					$location.search("proj", vm.project.name);
-					vm.onShowPage({page: "team", callingPage: "repos"});
+					setupEditTeam(event);
 					break;
 
 				case "delete":
@@ -145,7 +145,7 @@
 				formData;
 
 			// Check the quota
-			promise = UtilsService.doGet(vm.account.name + ".json");
+			promise = UtilsService.doGet(vm.account + ".json");
 			promise.then(function (response) {
 				console.log(response);
 				if (file.size > response.data.accounts[0].quota.spaceLimit) {
@@ -171,7 +171,7 @@
 					else {
 						formData = new FormData();
 						formData.append("file", file);
-						promise = UtilsService.doPost(formData, vm.account.name + "/" + vm.project.name + "/upload", {'Content-Type': undefined});
+						promise = UtilsService.doPost(formData, vm.account + "/" + vm.project.name + "/upload", {'Content-Type': undefined});
 						promise.then(function (response) {
 							console.log("uploadModel", response);
 							if ((response.data.status === 400) || (response.data.status === 404)) {
@@ -202,7 +202,7 @@
 		 * Display file uploading and info
 		 */
 		function checkFileUploading () {
-			var promise = UtilsService.doGet(vm.account.name + "/" + vm.project.name + ".json");
+			var promise = UtilsService.doGet(vm.account + "/" + vm.project.name + ".json");
 			promise.then(function (response) {
 				if (response.data.status === "processing") {
 					vm.project.uploading = true;
@@ -221,7 +221,7 @@
 				promise;
 
 			interval = $interval(function () {
-				promise = UtilsService.doGet(vm.account.name + "/" + vm.project.name + ".json");
+				promise = UtilsService.doGet(vm.account + "/" + vm.project.name + ".json");
 				promise.then(function (response) {
 					console.log("uploadStatus", response);
 					if ((response.data.status === "ok") || (response.data.status === "failed")) {
@@ -248,5 +248,16 @@
 				});
 			}, 1000);
 		}
+
+		/**
+		 * Set up team of project
+		 *
+		 * @param {Object} event
+		 */
+		function setupEditTeam (event) {
+			vm.item = vm.project;
+			UtilsService.showDialog("teamDialog.html", $scope, event);
+		}
+
 	}
 }());

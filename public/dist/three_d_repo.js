@@ -6017,7 +6017,8 @@ var ViewerManager = {};
 				uploadedFile: "=",
 				onShowPage: "&",
 				onSetupDeleteProject: "&",
-				quota: "="
+				quota: "=",
+				subscriptions: "="
 			},
 			controller: accountProjectCtrl,
 			controllerAs: 'vm',
@@ -6070,7 +6071,7 @@ var ViewerManager = {};
 					vm.uploadFile();
 				}
 				else {
-					$location.path("/" + vm.account.name + "/" + vm.project.name, "_self").search("page", null);
+					$location.path("/" + vm.account + "/" + vm.project.name, "_self").search("page", null);
 				}
 			}
 		};
@@ -6095,8 +6096,11 @@ var ViewerManager = {};
 					break;
 
 				case "team":
+					/*
 					$location.search("proj", vm.project.name);
 					vm.onShowPage({page: "team", callingPage: "repos"});
+					*/
+					setupEditTeam(event);
 					break;
 
 				case "delete":
@@ -6130,7 +6134,7 @@ var ViewerManager = {};
 				formData;
 
 			// Check the quota
-			promise = UtilsService.doGet(vm.account.name + ".json");
+			promise = UtilsService.doGet(vm.account + ".json");
 			promise.then(function (response) {
 				console.log(response);
 				if (file.size > response.data.accounts[0].quota.spaceLimit) {
@@ -6156,7 +6160,7 @@ var ViewerManager = {};
 					else {
 						formData = new FormData();
 						formData.append("file", file);
-						promise = UtilsService.doPost(formData, vm.account.name + "/" + vm.project.name + "/upload", {'Content-Type': undefined});
+						promise = UtilsService.doPost(formData, vm.account + "/" + vm.project.name + "/upload", {'Content-Type': undefined});
 						promise.then(function (response) {
 							console.log("uploadModel", response);
 							if ((response.data.status === 400) || (response.data.status === 404)) {
@@ -6187,7 +6191,7 @@ var ViewerManager = {};
 		 * Display file uploading and info
 		 */
 		function checkFileUploading () {
-			var promise = UtilsService.doGet(vm.account.name + "/" + vm.project.name + ".json");
+			var promise = UtilsService.doGet(vm.account + "/" + vm.project.name + ".json");
 			promise.then(function (response) {
 				if (response.data.status === "processing") {
 					vm.project.uploading = true;
@@ -6206,7 +6210,7 @@ var ViewerManager = {};
 				promise;
 
 			interval = $interval(function () {
-				promise = UtilsService.doGet(vm.account.name + "/" + vm.project.name + ".json");
+				promise = UtilsService.doGet(vm.account + "/" + vm.project.name + ".json");
 				promise.then(function (response) {
 					console.log("uploadStatus", response);
 					if ((response.data.status === "ok") || (response.data.status === "failed")) {
@@ -6233,6 +6237,17 @@ var ViewerManager = {};
 				});
 			}, 1000);
 		}
+
+		/**
+		 * Set up team of project
+		 *
+		 * @param {Object} event
+		 */
+		function setupEditTeam (event) {
+			vm.item = vm.project;
+			UtilsService.showDialog("teamDialog.html", $scope, event);
+		}
+
 	}
 }());
 
@@ -6267,7 +6282,8 @@ var ViewerManager = {};
 				account: "=",
 				accounts: "=",
 				onShowPage: "&",
-				quota: "="
+				quota: "=",
+				subscriptions: "="
 			},
 			controller: AccountProjectsCtrl,
 			controllerAs: 'vm',
@@ -6916,7 +6932,7 @@ var ViewerManager = {};
 					user: vm.selectedUser.user
 				};
 
-			promise = UtilsService.doPost(data, vm.account + "/" + vm.projectName + "/collaborators");
+			promise = UtilsService.doPost(data, vm.account + "/" + vm.item.project + "/collaborators");
 			promise.then(function (response) {
 				console.log(response);
 				if (response.status === 200) {
@@ -6940,7 +6956,7 @@ var ViewerManager = {};
 		 * @param index
 		 */
 		vm.removeMember = function (index) {
-			promise = UtilsService.doDelete(vm.members[index], vm.account + "/" + vm.projectName + "/collaborators");
+			promise = UtilsService.doDelete(vm.members[index], vm.account + "/" + vm.item.project + "/collaborators");
 			promise.then(function (response) {
 				console.log(response);
 				if (response.status === 200) {

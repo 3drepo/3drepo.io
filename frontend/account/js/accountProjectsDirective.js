@@ -29,7 +29,8 @@
 				account: "=",
 				accounts: "=",
 				onShowPage: "&",
-				quota: "="
+				quota: "=",
+				subscriptions: "="
 			},
 			controller: AccountProjectsCtrl,
 			controllerAs: 'vm',
