@@ -253,21 +253,21 @@ account-menu md-icon {
   color: #F44336;
 }
 
-/** Delete Project Dialog *********************************************************************************************/
-.deleteProjectDialog p {
+/** Delete Dialog *********************************************************************************************/
+.deleteDialog p {
   color: rgba(0 ,0, 0, 0.6);
   margin: 0;
 }
-.deleteProjectDialog #deleteProjectName {
+.deleteDialog #deleteName {
   color: rgba(0 ,0, 0, 0.9);
 }
 
-.deleteProjectDialog #deleteProjectWarning {
+.deleteDialog #deleteWarning {
   color: #F44336;
   margin: 0;
 }
 
-.deleteProjectDialog #deleteProjectError {
+.deleteDialog #deleteError {
   margin: 0;
   color: #F44336;
 }

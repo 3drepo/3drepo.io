@@ -5335,7 +5335,8 @@ var ViewerManager = {};
 	AccountFederationsCtrl.$inject = ["$scope", "$location", "UtilsService"];
 
 	function AccountFederationsCtrl ($scope, $location, UtilsService) {
-		var vm = this;
+		var vm = this,
+			federationToDeleteIndex;
 
 		// Init
 		vm.federations = [];
@@ -5508,9 +5509,40 @@ var ViewerManager = {};
 					break;
 
 				case "delete":
-					vm.onSetupDeleteProject({event: event, project: vm.project});
+					setupDelete(event, index);
 					break;
 			}
+		};
+
+		/**
+		 * Delete federation
+		 */
+		vm.delete = function () {
+			var promise = UtilsService.doDelete({}, vm.account + "/" + vm.federations[federationToDeleteIndex].project);
+			promise.then(function (response) {
+				if (response.status === 200) {
+					vm.federations.splice(federationToDeleteIndex, 1);
+					vm.closeDialog();
+				}
+				else {
+					vm.deleteError = "Error deleting federation";
+				}
+			});
+		};
+
+		/**
+		 * Set up deleting of federation
+		 *
+		 * @param {Object} event
+		 * @param {Object} index
+		 */
+		 function setupDelete (event, index) {
+			federationToDeleteIndex = index ;
+			vm.deleteError = null;
+			vm.deleteTitle = "Delete Federation";
+			vm.deleteWarning = "This federation will be lost permanently and will not be recoverable";
+			vm.deleteName = vm.federations[federationToDeleteIndex].project;
+			UtilsService.showDialog("deleteDialog.html", $scope, event, true);
 		};
 	}
 }());
@@ -6442,14 +6474,17 @@ var ViewerManager = {};
 		 */
 		vm.setupDeleteProject = function (event, project) {
 			vm.projectToDelete = project;
-			vm.showDeleteProjectError = false;
-			UtilsService.showDialog("deleteProjectDialog.html", $scope, event, true);
+			vm.deleteError = null;
+			vm.deleteTitle = "Delete Project";
+			vm.deleteWarning = "Your data will be lost permanently and will not be recoverable";
+			vm.deleteName = vm.projectToDelete.name;
+			UtilsService.showDialog("deleteDialog.html", $scope, event, true);
 		};
 
 		/**
 		 * Delete project
 		 */
-		vm.deleteProject = function () {
+		vm.delete = function () {
 			var i, iLength, j, jLength,
 				promise;
 			promise = UtilsService.doDelete({}, vm.account + "/" + vm.projectToDelete.name);
@@ -6469,8 +6504,7 @@ var ViewerManager = {};
 					vm.closeDialog();
 				}
 				else {
-					vm.showDeleteProjectError = true;
-					vm.deleteProjectError = "Error deleting project";
+					vm.deleteError = "Error deleting project";
 				}
 			});
 		};
