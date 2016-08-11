@@ -6552,7 +6552,7 @@ var ViewerManager = {};
 		vm.collaborators = [];
 		vm.members = [];
 		vm.addDisabled = false;
-		vm.numSubscriptions = vm.subscriptions.filter(function (sub) {return sub.inCurrentAgreement;}).length;
+		vm.numSubscriptions = vm.subscriptions.length;
 		vm.toShow = (vm.numSubscriptions > 1) ? "1+" : vm.numSubscriptions.toString();
 
 		if ($location.search().hasOwnProperty("proj")) {
