@@ -36,9 +36,9 @@
 		};
 	}
 
-	AccountCtrl.$inject = ["$scope", "$injector", "$location", "$timeout", "AccountService", "Auth", "UtilsService"];
+	AccountCtrl.$inject = ["$scope", "$injector", "$location", "$timeout", "AccountService", "Auth", "UtilsService", "serverConfig"];
 
-	function AccountCtrl($scope, $injector, $location, $timeout, AccountService, Auth, UtilsService) {
+	function AccountCtrl($scope, $injector, $location, $timeout, AccountService, Auth, UtilsService, serverConfig) {
 		var vm = this;
 
 		/*
@@ -114,6 +114,7 @@
 				vm.lastName        = null;
 				vm.email           = null;
 				vm.projectsGrouped = null;
+				vm.avatarUrl = null;
 			}
 		});
 
@@ -189,6 +190,9 @@
 				vm.firstName = response.data.firstName;
 				vm.lastName = response.data.lastName;
 				vm.email = response.data.email;
+				if(response.data.hasAvatar){
+					vm.avatarUrl = serverConfig.apiUrl(serverConfig.GET_API, vm.username + "/avatar");
+				}
 
 				// Pre-populate billing name if it doesn't exist with profile name
 				vm.billingAddress = {};
@@ -210,6 +214,7 @@
 					}
 				}
 			});
+
 		}
 	}
 }());

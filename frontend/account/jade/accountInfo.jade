@@ -6,9 +6,9 @@
 
 		#accountInfoContent(layout="column")
 			div(layout="row", flex="none")
-				img.account-avatar-image(ng-if="vm.hasAvatar", ng-src='{{vm.avatarURL}}')
-				#noAvatarIcon(flex, layout="row")
-					md-icon(ng-if="!vm.hasAvatar", class="fa fa-user")
+				img.account-avatar-image(ng-if="vm.avatarUrl", src='{{vm.avatarUrl}}')
+				#noAvatarIcon(ng-if="!vm.avatarUrl", flex, layout="row")
+					md-icon(class="fa fa-user")
 			md-list
 				md-list-item.md-2-line
 					div.md-list-item-text

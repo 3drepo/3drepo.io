@@ -30,7 +30,8 @@
 				firstName: "=",
 				lastName: "=",
 				email: "=",
-				itemToShow: "="
+				itemToShow: "=",
+				avatarUrl: "="
 			},
 			controller: AccountInfoCtrl,
 			controllerAs: 'vm',
@@ -38,11 +39,12 @@
 		};
 	}
 
-	AccountInfoCtrl.$inject = ["$location"];
+	AccountInfoCtrl.$inject = ["$location", "$scope"];
 
-	function AccountInfoCtrl ($location) {
+	function AccountInfoCtrl ($location, $scope) {
 		var vm = this;
 		
+		console.log('accountinfo', $scope)
 		/*
 		 * Init
 		 */
@@ -62,5 +64,7 @@
 			vm.itemToShow = item;
 			$location.search({}).search("page", item);
 		};
+
+
 	}
 }());

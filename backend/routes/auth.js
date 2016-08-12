@@ -40,7 +40,7 @@
 
 	router.post('/contact', contact);
 	router.get("/:account.json", middlewares.loggedIn, listInfo);
-	router.get("/:account.jpg", middlewares.hasReadAccessToAccount, getAvatar);
+	router.get("/:account/avatar", middlewares.hasReadAccessToAccount, getAvatar);
 	router.get("/:account/subscriptions", middlewares.hasReadAccessToAccount, listSubscriptions);
 	router.get("/:account/billings", middlewares.hasReadAccessToAccount, listBillings);
 	router.get("/:account/billings/:invoiceNo.html", middlewares.hasReadAccessToAccount, renderBilling);
@@ -321,7 +321,8 @@
 				firstName: user.customData.firstName,
 				lastName: user.customData.lastName,
 				email: user.customData.email,
-				billingInfo: user.customData.billingInfo
+				billingInfo: user.customData.billingInfo,
+				hasAvatar: user.customData.avatar ? true : false
 			});
 
 		}).catch(err => {
