@@ -68,7 +68,7 @@ describe('Project Settings', function(){
 			expect(projectSetting).to.have.property('updateProperties');
 		});
 
-		it('should update properties and call markModified function', function(){
+		it('should update properties', function(){
 
 			let props = {
 
@@ -83,13 +83,10 @@ describe('Project Settings', function(){
 
 			let projectSetting = new ProjectSetting();
 			
-			let markModStub = sinon.stub(projectSetting, 'markModified').returns(true);
-
 			projectSetting.updateProperties(props);
-
-			sinon.assert.calledWith(markModStub, 'properties');
+	
 			expect(projectSetting.toObject().properties).to.deep.equal(props);
-			markModStub.restore();
+		
 
 		});
 	});

@@ -6388,6 +6388,7 @@ var ViewerManager = {};
 					response.data.properties.mapTile.lat && (vm.mapTile.lat = response.data.properties.mapTile.lat);
 					response.data.properties.mapTile.lon && (vm.mapTile.lon = response.data.properties.mapTile.lon);
 					response.data.properties.mapTile.y && (vm.mapTile.y = response.data.properties.mapTile.y);
+					vm.projectType = response.data.type;
 				}
 
 				response.data.properties.unit && (vm.unit = response.data.properties.unit);
@@ -13001,7 +13002,7 @@ angular.module('3drepo')
 		var coordVector = null, vectorLength = 0.0;
 		vm.screenPos = [0.0, 0.0];
 
-		console.log('measure scope', $scope);
+		//console.log('measure scope', $scope);
 		vm.unit = vm.units.find(function(unit) { return unit.value === vm.settings.unit}).name;
 
 		EventService.send(EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK, {

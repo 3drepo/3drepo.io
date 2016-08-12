@@ -70,29 +70,10 @@ schema.statics.allowedProps = [ 'unit', 'mapTile.lat', 'mapTile.lon', 'mapTile.y
 schema.methods.updateProperties = function(updateObj){
 	'use strict';
 
-	let allowedProps = this.constructor.allowedProps;
-
-	this.properties = this.properties || {};
-
-	allowedProps.forEach(key => {
-
-		let keys = key.split('.');
-		//only support 1 level 
-
-		if(keys.length > 2 ){
-			throw new Error('Only support 1 level of nesting');
-		} else if(keys.length === 2 && updateObj[keys[1]]){
-			this.properties[keys[0]] = this.properties[keys[0]] || {};
-			this.properties[keys[0]][keys[1]] = updateObj[keys[1]];
-			
-		} else if(updateObj[keys[0]]){
-			this.properties[keys[0]] = updateObj[keys[0]];
-		}
-
+	Object.keys(updateObj).forEach(key => {
+		this.properties[key] = updateObj[key];
 	});
 
-	// this is needed since properties didn't have a strict schema, need to tell mongoose this is changed
-	this.markModified('properties');
 };
 
 
