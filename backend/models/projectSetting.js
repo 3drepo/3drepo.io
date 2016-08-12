@@ -30,7 +30,23 @@ var schema = mongoose.Schema({
 	status: {type: String, default: 'ok'},
 	errorReason: Object,
 	permissions: [Number],
-	properties: {}, // TO-DO: ask tim/carmen for full properties and update this schema
+	properties: {
+		"pinSize" : Number,
+		"avatarHeight" : Number,
+		"visibilityLimit" : Number,
+		"speed" : Number,
+		"zNear" : Number,
+		"zFar" : Number,
+		"unit": String,
+		"mapTile": {
+			lat: Number,
+			lon: Number,
+			y: Number
+		}
+
+	},
+
+	//bid_4_free only fields
 	info: mongoose.Schema({
 
 		name: String,

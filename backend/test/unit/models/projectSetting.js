@@ -77,7 +77,7 @@ describe('Project Settings', function(){
 					lon: 234,
 					y: 5
 				},
-				unit: 2
+				unit: "metre"
 
 			};
 
@@ -88,7 +88,7 @@ describe('Project Settings', function(){
 			projectSetting.updateProperties(props);
 
 			sinon.assert.calledWith(markModStub, 'properties');
-			expect(projectSetting.properties).to.deep.equal(props);
+			expect(projectSetting.toObject().properties).to.deep.equal(props);
 			markModStub.restore();
 
 		});

@@ -1,4 +1,4 @@
 module.exports = [
-	{value: 'light-year', name: 'Light year'},
-	{value: 'meter', name: 'meter'}
+	{value: 'centimetre', name: 'Centimetre'},
+	{value: 'metre', name: 'Metre'}
 ];
