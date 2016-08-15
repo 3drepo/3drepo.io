@@ -200,5 +200,8 @@
 	config.uploadSizeLimit = coalesce(config.uploadSizeLimit, 209715200);
 	config.version = VERSION;
 
+	//avatar size limit
+	config.avatarSizeLimit = coalesce(config.avatarSizeLimit, 1048576);
+
 	module.exports = config;
 })();

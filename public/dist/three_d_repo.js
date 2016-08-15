@@ -5114,9 +5114,9 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountCtrl.$inject = ["$scope", "$injector", "$location", "$timeout", "AccountService", "Auth", "UtilsService", "serverConfig"];
+	AccountCtrl.$inject = ["$scope", "$injector", "$location", "$timeout", "AccountService", "Auth", "UtilsService"];
 
-	function AccountCtrl($scope, $injector, $location, $timeout, AccountService, Auth, UtilsService, serverConfig) {
+	function AccountCtrl($scope, $injector, $location, $timeout, AccountService, Auth, UtilsService) {
 		var vm = this;
 
 		/*
@@ -5268,9 +5268,7 @@ var ViewerManager = {};
 				vm.firstName = response.data.firstName;
 				vm.lastName = response.data.lastName;
 				vm.email = response.data.email;
-				if(response.data.hasAvatar){
-					vm.avatarUrl = serverConfig.apiUrl(serverConfig.GET_API, vm.username + "/avatar");
-				}
+				vm.hasAvatar = response.data.hasAvatar;
 
 				// Pre-populate billing name if it doesn't exist with profile name
 				vm.billingAddress = {};
@@ -5330,7 +5328,7 @@ var ViewerManager = {};
 				lastName: "=",
 				email: "=",
 				itemToShow: "=",
-				avatarUrl: "="
+				hasAvatar: "="
 			},
 			controller: AccountInfoCtrl,
 			controllerAs: 'vm',
@@ -5338,9 +5336,9 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountInfoCtrl.$inject = ["$location", "$scope"];
+	AccountInfoCtrl.$inject = ["$location", "$scope", "serverConfig", "UtilsService"];
 
-	function AccountInfoCtrl ($location, $scope) {
+	function AccountInfoCtrl ($location, $scope, serverConfig, UtilsService) {
 		var vm = this;
 		
 		console.log('accountinfo', $scope)
@@ -5363,6 +5361,53 @@ var ViewerManager = {};
 			vm.itemToShow = item;
 			$location.search({}).search("page", item);
 		};
+
+
+		function getAvatarUrl(){
+			return serverConfig.apiUrl(serverConfig.GET_API, vm.username + "/avatar") + '?' + new Date().valueOf();
+		}
+
+		$scope.$watchGroup(["vm.username", "vm.hasAvatar"], function(){
+
+			if(vm.username && vm.hasAvatar){
+				vm.avatarUrl = getAvatarUrl();
+			}
+
+		});
+
+
+		
+
+		vm.upload = function(){
+
+			var file = document.createElement('input');
+
+			file.setAttribute('type', 'file');
+			file.setAttribute('accept', '.gif,.jpg,.jpeg,.png');
+			file.click();
+
+			file.addEventListener("change", function () {
+
+				vm.uploadingAvatar = true;
+				var formData = new FormData();
+				formData.append("file", file.files[0]);
+
+				UtilsService.doPost(formData, vm.username + "/avatar", {'Content-Type': undefined}).then(function(res){
+					vm.uploadingAvatar = false;
+					
+					console.log(res);
+					if(res.status === 200){
+						vm.avatarUrl = getAvatarUrl();
+					} else {
+						console.log('Upload avatar error', res.data);
+					}
+
+				});
+
+				$scope.$apply();
+
+			});
+		}
 
 
 	}

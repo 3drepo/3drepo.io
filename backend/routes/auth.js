@@ -32,6 +32,7 @@
 	//var crypto = require('crypto');
 	var Billing = require('../models/billing');
 	var Subscription = require('../models/subscription');
+	var multer = require("multer");
 
 	router.post("/login", login);
 	router.post("/logout", logout);
@@ -41,6 +42,7 @@
 	router.post('/contact', contact);
 	router.get("/:account.json", middlewares.loggedIn, listInfo);
 	router.get("/:account/avatar", middlewares.hasReadAccessToAccount, getAvatar);
+	router.post("/:account/avatar", middlewares.hasReadAccessToAccount, uploadAvatar);
 	router.get("/:account/subscriptions", middlewares.hasReadAccessToAccount, listSubscriptions);
 	router.get("/:account/billings", middlewares.hasReadAccessToAccount, listBillings);
 	router.get("/:account/billings/:invoiceNo.html", middlewares.hasReadAccessToAccount, renderBilling);
@@ -268,6 +270,53 @@
 		}).catch(() => {
 
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+		});
+	}
+
+	function uploadAvatar(req, res, next){
+		let responsePlace = utils.APIInfo(req);
+
+
+
+		//check space and format
+		function fileFilter(req, file, cb){
+
+			let acceptedFormat = ['png', 'jpg', 'gif'];
+
+			let format = file.originalname.split('.');
+			format = format.length <= 1 ? '' : format.splice(-1)[0];
+
+			let size = parseInt(req.headers['content-length']);
+
+			if(acceptedFormat.indexOf(format.toLowerCase()) === -1){
+				return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
+			}
+
+			if(size > config.avatarSizeLimit){
+				return cb({ resCode: responseCodes.AVATAR_SIZE_LIMIT });
+			}
+
+			return cb(null, true);
+		}
+
+		var upload = multer({ 
+			storage: multer.memoryStorage(),
+			fileFilter: fileFilter
+		});
+
+		upload.single("file")(req, res, function (err) {
+			if (err) {
+				return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
+			} else {
+				User.findByUserName(req.params[C.REPO_REST_API_ACCOUNT]).then(user => {
+					user.customData.avatar = { data: req.file.buffer};
+					return user.save();
+				}).then(() => {
+					responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: 'success' });
+				}).catch(err => {
+					responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
+				});
+			}
 		});
 	}
 

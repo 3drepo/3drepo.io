@@ -203,6 +203,14 @@ account-info .accountInfoPage .md-button {
   height:150px;
   background: #E8EAF6;
   margin: auto;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+.avatarUploadIcon{
+  margin: auto;
+  margin-top: 20px;
+  cursor: pointer;
 }
 
 /** Account Menu ******************************************************************************************************/
