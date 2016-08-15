@@ -111,19 +111,19 @@ var repoGetHandler = function(router, checkAccess){
 	//self.getInternal("/:account/:project.:format.:subformat?");
 
 	// Project revision list
-	self.getInternal("/:account/:project/revisions.:format.:subformat?",
-		{
-			"start"  : 1,
-			"number" : 5,
-			"full"   : null
-		});
+	// self.getInternal("/:account/:project/revisions.:format.:subformat?",
+	// 	{
+	// 		"start"  : 1,
+	// 		"number" : 5,
+	// 		"full"   : null
+	// 	});
 
-	self.getInternal("/:account/:project/revisions/:branch.:format.:subformat?",
-		{
-			"start"  : 1,
-			"number" : 5,
-			"full"   : null
-		});
+	// self.getInternal("/:account/:project/revisions/:branch.:format.:subformat?",
+	// 	{
+	// 		"start"  : 1,
+	// 		"number" : 5,
+	// 		"full"   : null
+	// 	});
 
 	// Get map from object id to path in tree for multipart
 	self.getInternal("/:account/:project/revision/:branch/head/fulltree.:format");

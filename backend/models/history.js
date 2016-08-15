@@ -22,6 +22,7 @@ var utils = require("../utils");
 var C = require("../constants");
 
 var stringToUUID = utils.stringToUUID;
+var uuidToString = utils.uuidToString;
 
 var Schema = mongoose.Schema;
 
@@ -38,6 +39,23 @@ var historySchema = Schema({
 		current: []
 });
 
+// list revisions by branch
+historySchema.statics.listByBranch = function(dbColOptions, branch, projection){
+	
+	var query = {};
+	if(branch === C.MASTER_BRANCH_NAME){
+		query.shared_id = stringToUUID(C.MASTER_BRANCH);
+	} else {
+		query.shared_id = stringToUUID(branch);
+	}
+
+	return History.find(
+		dbColOptions, 
+		query, 
+		projection, 
+		{sort: {timestamp: -1}}
+	);
+};
 
 // get the head of a branch
 historySchema.statics.findByBranch = function(dbColOptions, branch){
@@ -72,6 +90,27 @@ historySchema.methods.addToCurrent = function(id) {
 historySchema.methods.removeFromCurrent = function(id) {
 	this.current.remove(id);
 };
+
+historySchema.statics.clean = function(histories){
+	'use strict';
+
+	let cleaned = [];
+
+	histories.forEach(history => {
+
+		let cleanedHistory;
+		cleanedHistory = history.toObject();
+		cleanedHistory._id = uuidToString(cleanedHistory._id);
+		cleaned.push(cleanedHistory);
+
+	});
+
+	return cleaned;
+}
+
+historySchema.methods.clean = function(){
+	return this.toObject();
+}
 
 //
 
