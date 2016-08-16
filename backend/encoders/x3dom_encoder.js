@@ -893,6 +893,35 @@ function X3D_AddGroundPlane(xmlDoc, bbox)
 	scene.appendChild(flipMat);
 }
 
+exports.render = function (account, project, doc, logger){
+
+	var xmlDoc = X3D_Header();
+
+	if (!doc.mRootNode){
+		throw responseCodes.ROOT_NODE_NOT_FOUND;
+	}
+
+	var sceneRoot	= X3D_CreateScene(xmlDoc, doc.mRootNode);
+
+	var sceneBBoxMin = [];
+	var sceneBBoxMax = [];
+
+	var dummyRoot = { children: [doc.mRootNode] };
+
+	var mat = mathjs.eye(4);
+	var globalCoordOffset = null;
+	var globalCoordPromise = deferred();
+	var dbInterface = {};
+
+	X3D_AddChildren(xmlDoc, sceneRoot.root, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, 'mp', logger);
+	var bbox = repoNodeMesh.extractBoundingBox(doc.mRootNode);
+
+	X3D_AddViewpoint(xmlDoc, sceneRoot.scene, account, project, bbox);
+
+	return new xmlSerial().serializeToString(xmlDoc);
+
+}
+
 /*******************************************************************************
  * Add ground plane to scene
  *
@@ -901,9 +930,13 @@ function X3D_AddGroundPlane(xmlDoc, bbox)
  *						ground plane
  *******************************************************************************/
 function render(dbInterface, account, project, subFormat, branch, revision, callback) {
+	console.log('subformat', subFormat);
 	var full = (subFormat == "x3d");
 
 	dbInterface.getScene(account, project, branch, revision, full, function(err, doc) {
+
+		console.log(doc);
+
 		if(err.value) return callback(err);
 
 		var xmlDoc = X3D_Header();
