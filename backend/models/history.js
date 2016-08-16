@@ -75,10 +75,11 @@ historySchema.statics.findByBranch = function(dbColOptions, branch){
 	);
 };
 
-historySchema.statics.findByUID = function(dbColOptions, revId){
+historySchema.statics.findByUID = function(dbColOptions, revId, projection){
 
-	return History.findOne(dbColOptions, { _id: stringToUUID(revId)});
-	
+	projection = projection || {};
+	return History.findOne(dbColOptions, { _id: stringToUUID(revId)}, projection);
+
 };
 
 // add an item to current
@@ -97,19 +98,18 @@ historySchema.statics.clean = function(histories){
 	let cleaned = [];
 
 	histories.forEach(history => {
-
-		let cleanedHistory;
-		cleanedHistory = history.toObject();
-		cleanedHistory._id = uuidToString(cleanedHistory._id);
-		cleaned.push(cleanedHistory);
-
+		cleaned.push(history.clean());
 	});
 
 	return cleaned;
 }
 
 historySchema.methods.clean = function(){
-	return this.toObject();
+	'use strict';
+
+	let clean = this.toObject();
+	clean._id = uuidToString(clean._id);
+	return clean;
 }
 
 //

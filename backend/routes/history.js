@@ -26,6 +26,7 @@ var utils = require('../utils');
 
 router.get('/revisions.json', middlewares.hasReadAccessToProject, listRevisions);
 router.get('/revisions/:branch.json', middlewares.hasReadAccessToProject, listRevisionsByBranch);
+router.put('/revisions/:id/name', middlewares.hasReadAccessToProject, updateRevisionName);
 
 function listRevisions(req, res, next){
 	'use strict';
@@ -35,7 +36,7 @@ function listRevisions(req, res, next){
 	let project = req.params.project;
 
 
-	History.find({account, project}, {}, {_id : 1, timestamp: 1}, {sort: {timestamp: -1}}).then(histories => {
+	History.find({account, project}, {}, {_id : 1, name: 1, timestamp: 1}, {sort: {timestamp: -1}}).then(histories => {
 		
 		histories = History.clean(histories);
 		responseCodes.respond(place, req, res, next, responseCodes.OK, histories);
@@ -53,13 +54,34 @@ function listRevisionsByBranch(req, res, next){
 	let project = req.params.project;
 
 
-	History.listByBranch({account, project}, req.params.branch, {_id : 1, timestamp: 1}).then(histories => {
+	History.listByBranch({account, project}, req.params.branch, {_id : 1, name: 1, timestamp: 1}).then(histories => {
 		
 		histories = History.clean(histories);
 		responseCodes.respond(place, req, res, next, responseCodes.OK, histories);
 
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode ? err.resCode: err, err.resCode ? err.resCode: err);
+	});
+}
+
+function updateRevisionName(req, res, next){
+	'use strict';
+
+	let place = utils.APIInfo(req);
+	let account = req.params.account;
+	let project = req.params.project;
+
+	History.findByUID({account, project}, req.params.id, {_id : 1, name: 1}).then(history => {
+		if (!history){
+			return Promise.reject(responseCodes.REVISION_NOT_FOUND);
+		} else {
+			history.name = req.body.name;
+			return history.save();
+		}
+	}).then(history => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, history.clean());
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err, err);
 	});
 }
 
