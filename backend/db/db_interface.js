@@ -2546,7 +2546,6 @@ DBInterface.prototype.getScene = function(dbName, project, branch, revision, ful
 		async.concat(coll, function(item, iter_callback){
 			if (item.type === "ref")
 			{
-				console.log('ref found *******************')
 				var childRefAccount = item.hasOwnProperty("owner") ? item.owner : dbName;
 
 				self.getCoordOffset(childRefAccount, item.project, "master", item.revision, function(err, coordOffset) {

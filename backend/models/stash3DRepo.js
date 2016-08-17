@@ -19,10 +19,6 @@
 var mongoose = require('mongoose');
 var ModelFactory = require('./factory/modelFactory');
 var Schema = mongoose.Schema;
-var utils = require('../utils');
-var stringToUUID = utils.stringToUUID;
-var uuidToString = utils.uuidToString;
-
 
 var schema = Schema({
 	_id: Object

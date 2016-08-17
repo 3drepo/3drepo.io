@@ -113,7 +113,7 @@ historySchema.statics.clean = function(histories){
 	});
 
 	return cleaned;
-}
+};
 
 historySchema.methods.clean = function(){
 	'use strict';
@@ -121,7 +121,7 @@ historySchema.methods.clean = function(){
 	let clean = this.toObject();
 	clean._id = uuidToString(clean._id);
 	return clean;
-}
+};
 
 //
 
