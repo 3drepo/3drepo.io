@@ -28,7 +28,9 @@ var uuidToString = utils.uuidToString;
 
 
 router.get('/issues/:uid.json', middlewares.hasReadAccessToProject, findIssueById);
+
 router.get('/issues.json', middlewares.hasReadAccessToProject, listIssues);
+router.get('/revision/:rid/issues.json', middlewares.hasReadAccessToProject, listIssues);
 //router.get('/issues/:sid.json', middlewares.hasReadAccessToProject, listIssuesBySID);
 router.get("/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
 router.post('/issues.json', middlewares.hasWriteAccessToProject, storeIssue);
@@ -140,8 +142,10 @@ function listIssues(req, res, next) {
 	var findIssue;
 	if(req.query.shared_id){
 		findIssue = Issue.findBySharedId(dbCol, req.query.shared_id, req.query.number);
+	} else if (req.params.rid) {
+		findIssue = Issue.findByProjectName(dbCol, null, req.params.rid);
 	} else {
-		findIssue = Issue.findByProjectName(dbCol, "master", null);
+		findIssue = Issue.findByProjectName(dbCol, "master");
 	}
 
 	findIssue.then(issues => {

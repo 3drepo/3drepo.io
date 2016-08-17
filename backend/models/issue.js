@@ -32,6 +32,7 @@ var responseCodes = require('../response_codes.js');
 var schema = Schema({
 	_id: Object,
 	object_id: Object,
+	rev_id: Object,
 	name: { type: String, required: true },
 	viewpoint: {
 		up: [Number],
@@ -62,7 +63,8 @@ var schema = Schema({
 		created: Number,
 		//TO-DO Error: `set` may not be used as a schema pathname
 		//set: Boolean
-		sealed: Boolean
+		sealed: Boolean,
+		rev_id: Object
 	}],
 	assigned_roles: [Schema.Types.Mixed],
 	closed_time: Number,
@@ -106,7 +108,7 @@ schema.statics.getFederatedProjectList = function(dbColOptions, branch, revision
 		if(branch) {
 			getHistory = History.findByBranch(dbColOptions, branch);
 		} else if (revision) {
-			getHistory = History.findByUID(dbColOptions, revision);
+			getHistory = utils.isUUID(revision) ? History.findByUID(dbColOptions, revision) : History.findByTag(dbColOptions, revision);
 		}
 
 		return getHistory.then(history => {
@@ -165,17 +167,39 @@ schema.statics.getFederatedProjectList = function(dbColOptions, branch, revision
 
 };
 
-schema.statics.findByProjectName = function(dbColOptions, branch, rev){
+schema.statics.findByProjectName = function(dbColOptions, branch, revId){
 	'use strict';
 	let issues;
 	let self = this;
+	let filter = {};
 
-	return this._find(dbColOptions, {}).then(_issues => {
+	let addRevFilter = Promise.resolve();
+
+	if (revId){
+
+		let findHistory = utils.isUUID(revId) ? History.findByUID : History.findByTag;
+
+		addRevFilter = findHistory(dbColOptions, revId).then(history => {
+			if(!history){
+				return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+			} else {
+				filter = {
+					'created' : { '$gte': history.timestamp.valueOf() }
+				};
+				return Promise.resolve();
+			}
+		});
+	}
+
+
+	return addRevFilter.then(() => {
+		return this._find(dbColOptions, filter);
+	}).then(_issues => {
 		issues = _issues;
 		return self.getFederatedProjectList(
 			dbColOptions,
 			branch,
-			rev
+			revId
 		);
 
 	}).then(refs => {
