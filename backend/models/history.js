@@ -37,6 +37,7 @@ var historySchema = Schema({
 		tag: String,
 		author: String,
 		timestamp: Date,
+		coordOffset: [],
 		current: []
 });
 
@@ -59,9 +60,11 @@ historySchema.statics.listByBranch = function(dbColOptions, branch, projection){
 };
 
 // get the head of a branch
-historySchema.statics.findByBranch = function(dbColOptions, branch){
+historySchema.statics.findByBranch = function(dbColOptions, branch, projection){
 	
 	var query = {};
+	projection = projection || {};
+
 	if(branch === C.MASTER_BRANCH_NAME){
 		query.shared_id = stringToUUID(C.MASTER_BRANCH);
 	} else {
@@ -71,7 +74,7 @@ historySchema.statics.findByBranch = function(dbColOptions, branch){
 	return History.findOne(
 		dbColOptions, 
 		query, 
-		{}, 
+		projection, 
 		{sort: {timestamp: -1}}
 	);
 };

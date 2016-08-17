@@ -34,8 +34,8 @@ var x3dEncoder = require("../encoders/x3dom_encoder");
 router.get('/:uid.src.:subformat?', middlewares.hasReadAccessToProject, findByUID);
 router.get('/revision/:rid/:sid.src.:subformat?', middlewares.hasReadAccessToProject, findByRevision);
 
-router.get('/revision/master/head.x3d.mp.clone', middlewares.hasReadAccessToProject, generateX3DofHead);
-router.get('/revision/:id.x3d.mp.clone', middlewares.hasReadAccessToProject, generateX3D);
+router.get('/revision/master/head.x3d.mp', middlewares.hasReadAccessToProject, generateX3DofHead);
+router.get('/revision/:id.x3d.mp', middlewares.hasReadAccessToProject, generateX3D);
 
 function findByUID(req, res, next){
 	'use strict';
@@ -165,12 +165,31 @@ function getSceneObject(account, project, history){
 		return objs;
 
 	}).then(objs => {	
-		
+
+		let getCoordOffSets = [];
+
 		objs.forEach((obj, i) => {
 			objs[i] = obj.toObject();
+			
+			if (objs[i].type === 'ref'){
+
+				let refAccount = objs[i].owner || account;
+				let promise = History.findByBranch({
+						account: refAccount, 
+						project: objs[i].project 
+					}, utils.uuidToString(objs[i]._rid), {
+						coordOffset: 1
+					}
+				).then(history => {
+
+					objs[i].coordOffset = history.coordOffset || [0,0,0];
+				});
+
+				getCoordOffSets.push(promise);
+			}
 		});
 
-		return objs;
+		return Promise.all(getCoordOffSets).then(() => objs);
 	});
 }
 
