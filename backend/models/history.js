@@ -62,6 +62,7 @@ historySchema.statics.listByBranch = function(dbColOptions, branch, projection){
 // get the head of a branch
 historySchema.statics.findByBranch = function(dbColOptions, branch, projection){
 	
+	console.log('dbColOptions', dbColOptions)
 	var query = {};
 	projection = projection || {};
 

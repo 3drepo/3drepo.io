@@ -273,7 +273,8 @@ schema.statics.createIssue = function(dbColOptions, data){
 	'use strict';
 
 	let objectId = data.object_id;
-	let start = Promise.resolve();
+
+	let promises = [];
 
 	let issue = Issue.createInstance(dbColOptions);
  	issue._id = stringToUUID(uuid.v1());
@@ -283,13 +284,34 @@ schema.statics.createIssue = function(dbColOptions, data){
  	}
 
 	if(objectId){
-		start = GenericObject.getSharedId(dbColOptions, objectId).then(sid => {
-			issue.parent = stringToUUID(sid);
-		});
+		promises.push(
+			GenericObject.getSharedId(dbColOptions, objectId).then(sid => {
+				issue.parent = stringToUUID(sid);
+			})
+		);
 	}
 
-	return start.then(() => {
+	let getHistory;
+
+	if(data.revId){
+		getHistory = utils.isUUID(data.revId) ? History.findByUID : History.findByTag;
+		getHistory = getHistory(dbColOptions, data.revId, {_id: 1});
+	} else {
+		getHistory = History.findByBranch(dbColOptions, 'master', {_id: 1});
+	}
+
+	//assign rev_id for issue
+	promises.push(getHistory.then(history => {
+		if(!history){
+			return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+		} else {
+			issue.rev_id = history._id;
+		}
+	}));
+
+	return Promise.all(promises).then(() => {
 		return Issue.count(dbColOptions);
+		
 	}).then(count => {
 
 		issue.number  = count + 1;
@@ -324,11 +346,34 @@ schema.methods.updateComment = function(commentIndex, data){
 	}
 
 	if(commentIndex === null || typeof commentIndex === 'undefined'){
-		this.comments.push({ 
-			owner: data.owner,	
-			comment: data.comment, 
-			created: timeStamp
+
+		let getHistory;
+
+		if(data.revId){
+			getHistory = utils.isUUID(data.revId) ? History.findByUID : History.findByTag;
+			getHistory = getHistory(this._dbcolOptions, data.revId, {_id: 1});
+		} else {
+			getHistory = History.findByBranch(this._dbcolOptions, 'master', {_id: 1});
+		}
+
+		//assign rev_id for issue
+		return getHistory.then(history => {
+			if(!history){
+				return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+			} else {
+
+				this.comments.push({ 
+					owner: data.owner,	
+					comment: data.comment, 
+					created: timeStamp,
+					rev_id: history._id
+				});
+			}
+		}).then(() => {
+			return this.save();
 		});
+
+
 	} else {
 
 		let commentObj = this.comments[commentIndex];
@@ -347,9 +392,11 @@ schema.methods.updateComment = function(commentIndex, data){
 		}
 		
 		commentObj.sealed = data.sealed || commentObj.sealed;
+
+		return this.save();
 	}
 
-	return this.save();
+	
 };
 
 schema.methods.removeComment = function(commentIndex, data){
