@@ -302,9 +302,9 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 	//assign rev_id for issue
 	promises.push(getHistory.then(history => {
-		if(!history){
+		if(!history && data.revId){
 			return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
-		} else {
+		} else if (history){
 			issue.rev_id = history._id;
 		}
 	}));
@@ -358,7 +358,7 @@ schema.methods.updateComment = function(commentIndex, data){
 
 		//assign rev_id for issue
 		return getHistory.then(history => {
-			if(!history){
+			if(!history && data.revId){
 				return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
 			} else {
 
@@ -366,7 +366,7 @@ schema.methods.updateComment = function(commentIndex, data){
 					owner: data.owner,	
 					comment: data.comment, 
 					created: timeStamp,
-					rev_id: history._id
+					rev_id: history ? history._id : undefined
 				});
 			}
 		}).then(() => {
