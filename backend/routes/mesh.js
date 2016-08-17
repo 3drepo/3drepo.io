@@ -180,8 +180,21 @@ function generateX3D(req, res, next){
 	let place = utils.APIInfo(req);
 	let account = req.params.account;
 	let project = req.params.project;
+	let id = req.params.id;
 
-	History.findByUID({account, project}, req.params.id).then(history => {
+	let findHistory;
+
+	if(utils.isUUID(id)){
+		findHistory = History.findByUID;
+	} else {
+		findHistory = History.findByTag;
+	}
+
+	findHistory({account, project}, id).then(history => {
+
+		if(!history){
+			return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+		}
 
 		return getSceneObject(account, project, history);
 

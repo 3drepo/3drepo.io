@@ -26,7 +26,7 @@ var utils = require('../utils');
 
 router.get('/revisions.json', middlewares.hasReadAccessToProject, listRevisions);
 router.get('/revisions/:branch.json', middlewares.hasReadAccessToProject, listRevisionsByBranch);
-router.put('/revisions/:id/name', middlewares.hasReadAccessToProject, updateRevisionName);
+router.put('/revisions/:id/tag', middlewares.hasReadAccessToProject, updateRevisionTag);
 
 function listRevisions(req, res, next){
 	'use strict';
@@ -36,7 +36,7 @@ function listRevisions(req, res, next){
 	let project = req.params.project;
 
 
-	History.find({account, project}, {}, {_id : 1, name: 1, timestamp: 1}, {sort: {timestamp: -1}}).then(histories => {
+	History.find({account, project}, {}, {_id : 1, tag: 1, timestamp: 1}, {sort: {timestamp: -1}}).then(histories => {
 		
 		histories = History.clean(histories);
 		responseCodes.respond(place, req, res, next, responseCodes.OK, histories);
@@ -54,7 +54,7 @@ function listRevisionsByBranch(req, res, next){
 	let project = req.params.project;
 
 
-	History.listByBranch({account, project}, req.params.branch, {_id : 1, name: 1, timestamp: 1}).then(histories => {
+	History.listByBranch({account, project}, req.params.branch, {_id : 1, tag: 1, timestamp: 1}).then(histories => {
 		
 		histories = History.clean(histories);
 		responseCodes.respond(place, req, res, next, responseCodes.OK, histories);
@@ -64,18 +64,18 @@ function listRevisionsByBranch(req, res, next){
 	});
 }
 
-function updateRevisionName(req, res, next){
+function updateRevisionTag(req, res, next){
 	'use strict';
 
 	let place = utils.APIInfo(req);
 	let account = req.params.account;
 	let project = req.params.project;
 
-	History.findByUID({account, project}, req.params.id, {_id : 1, name: 1}).then(history => {
+	History.findByUID({account, project}, req.params.id, {_id : 1, tag: 1}).then(history => {
 		if (!history){
-			return Promise.reject(responseCodes.REVISION_NOT_FOUND);
+			return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
 		} else {
-			history.name = req.body.name;
+			history.tag = req.body.tag;
 			return history.save();
 		}
 	}).then(history => {

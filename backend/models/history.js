@@ -34,6 +34,7 @@ var historySchema = Schema({
 		api: Number,
 		parents: [],
 		name: String,
+		tag: String,
 		author: String,
 		timestamp: Date,
 		current: []
@@ -79,6 +80,13 @@ historySchema.statics.findByUID = function(dbColOptions, revId, projection){
 
 	projection = projection || {};
 	return History.findOne(dbColOptions, { _id: stringToUUID(revId)}, projection);
+
+};
+
+historySchema.statics.findByTag = function(dbColOptions, tag, projection){
+
+	projection = projection || {};
+	return History.findOne(dbColOptions, { tag }, projection);
 
 };
 
