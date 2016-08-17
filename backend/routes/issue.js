@@ -33,6 +33,8 @@ router.get('/issues.json', middlewares.hasReadAccessToProject, listIssues);
 router.get('/revision/:rid/issues.json', middlewares.hasReadAccessToProject, listIssues);
 //router.get('/issues/:sid.json', middlewares.hasReadAccessToProject, listIssuesBySID);
 router.get("/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
+router.get("/revision/:rid/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
+
 router.post('/issues.json', middlewares.hasWriteAccessToProject, storeIssue);
 router.put('/issues/:issueId.json', middlewares.hasWriteAccessToProject, updateIssue);
 
@@ -192,8 +194,15 @@ function renderIssuesHTML(req, res, next){
 
 	let place = utils.APIInfo(req);
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
+	let findIssue;
+	
+	if (req.params.rid) {
+		findIssue = Issue.findByProjectName(dbCol, null, req.params.rid);
+	} else {
+		findIssue = Issue.findByProjectName(dbCol, "master");
+	}
 
-	Issue.findByProjectName(dbCol, "master", null).then(issues => {
+	findIssue.then(issues => {
 		// Split issues by type
 		let splitIssues   = {open : [], closed: []};
 
