@@ -1,0 +1,18 @@
+md-dialog.revisionsDialog(aria-label="Revisions")
+	md-toolbar
+		.md-toolbar-tools
+			h2 Revisions
+			span(flex)
+			md-button.md-icon-button(ng-click="vm.closeDialog()")
+				md-icon.angular-material-icons(aria-label="Close dialog") close
+	md-list
+		md-list-item(layout-fill, md-ink-ripple, ng-repeat="rev in vm.revisions", ng-click="vm.hello()")
+			div.revision-item
+				div.revision-first-row
+					div.revision-name-and-author
+						div.revision(ng-if="rev.tag") {{rev.tag}} 
+						div.revision(ng-if="!rev.tag") {{rev._id}}
+						div.author {{rev.author}}
+					div.timestamp {{rev.timestamp | revisionDate }}
+				div.desc {{rev.desc}}
+			md-divider

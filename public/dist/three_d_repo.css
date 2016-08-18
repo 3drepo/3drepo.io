@@ -428,6 +428,54 @@ account-team #accountTeamSubHeader {
 #overQuotaDialog #overQuotaInfo {
   margin: 20px 20px 0;;
 }
+
+/** Revisions Dialog *************************************************************************************************/
+.revisionsDialog {
+  width: 60%;
+}
+
+.revisionsDialog .revision-name-and-author {
+  display: inline-block;
+  width:60%;
+  align-self: flex-start;
+}
+
+.revisionsDialog .revision {
+  font-size:19px;
+  line-height: normal;
+}
+
+.revisionsDialog .desc {
+  line-height: normal;
+  margin-top: 10px;
+}
+
+.revisionsDialog .author {
+  font-size:13px;
+  line-height: normal;
+}
+
+.revisionsDialog .timestamp {
+  display: inline-block;
+  width:40%;
+  align-self: flex-start;
+  text-align: right;
+}
+
+.revisionsDialog .desc {
+  font-size:12px;
+  color: grey;
+}
+
+.revisionsDialog .revision-first-row{
+   display: flex;
+   width: 100%
+}
+.revisionsDialog .revision-item{
+  padding-top: 10px;
+  padding-bottom:15px;
+  width:100%;
+}
 /* Done to counter bootstrap styling. This should really be set in a top level style file */
 .md-datepicker-input-mask {
   width: 308px;
@@ -1716,14 +1764,10 @@ panel-card .statusIcon {
   width: 30px;
 }
 
-panel-card #filterContainer {
-  max-width: 50%;
-}
-
 panel-card .cardInfo {
   text-align: center;
   padding: 15px;
-  background: #E8EAF6;
+  background: rgba(0,69,148,.1);
   margin: 15px;
   border-radius: 4px;
 }
@@ -1742,13 +1786,12 @@ panel-card .cardInfo md-icon {
 
 /** Panel Card Filter ****************************************************************************************************/
 panel-card-filter input {
-  background: rgb(63,81,181);
+  background: rgb(0,69,148);
   border: none;
   color: white;
   border-bottom: 1px solid white;
   outline: none;
-  margin-top: -5px;
-  font-size: 18px;
+  font-size: 16px;
 }
 panel-card-filter md-icon {
   margin-left: -16px;
@@ -1985,16 +2028,21 @@ tree span .fa {
 
 tree .treeNodes p {
   outline: none;
-  width: 100%;
   word-break: break-all;
   word-wrap: break-word;
-  line-height: 18px;
-  margin: -2px 0 0 0;
+  margin: 0 0 0 -5px;
   font-size: 14px;
-  padding: 2px;
 }
 tree .treeNodes p:hover {
   cursor: pointer;
+  background: #F0F0F0;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+}
+
+tree .treeNodeDivider {
+  margin-top: 4px;
 }
 
 tree md-checkbox {
@@ -2007,61 +2055,27 @@ tree md-checkbox {
   font-weight: normal;
 }
 
-tree .treeButton {
-  outline: none;
-  width: 45px;
-  text-align: center;
-  padding-top: 1px;
+
+tree .treeButtonDisabled {
+  color: #CCCCCC !important;
 }
-tree .treeButton md-icon {
-  font-size: 20px;
-  position: relative;
-}
-tree .treeButton md-icon .treeIconCheck {
-  position: absolute;
-  left: 3px;
-  font-size: 11px;
-  top: 5px;
-}
-tree .treeButton md-icon  .treeIconDot {
-  position: absolute;
-  left: 6px;
-  font-size: 6px;
-  top: 7px;
-}
-tree .treeButton .treeButtonDisabled {
-  color: #CCCCCC;
-}
-tree .treeButton:hover {
-  cursor: pointer;
-}
+
 
 tree .treeNodeSelected {
-  background: #C5CAE9;
-  padding: 2px;
-  border-radius: 4px;
+  background: rgba(0,69,148, 0.2);
+  border-radius: 2px;
 }
 
-/** Tree Node *********************************************************************************************************/
-
-.tree-node-unselected {
-  background: #FFFFFF;
-}
-.tree-node-selected {
-  background: #E8EAF6;
-}
-.tree-node:hover {
-  cursor: default;
-}
-.tree-node span {
-  padding-right: 5px;
+tree .expandButton {
+  margin-left: 0 !important;
 }
 
-.tree-node button {
-  padding: 0;
+tree .toggleButton {
+  margin-right: 0 !important;
 }
-.tree-node .md-button {
-  border-radius: 0;
+
+tree .parentOfInvisible {
+  color: #999 !important;
 }
 
 /** Tree filter list **************************************************************************************************/
@@ -2079,11 +2093,11 @@ tree .virtualRepeatInfiniteScroll .vertical-container {
 
 tree .virtualRepeatInfiniteScroll .repeated-item {
   cursor: default;
-  padding: 8px 0 8px;
+  padding: 4px 0;
 }
 
-#treeFilterItemName {
-  margin-left: 20px;
+tree .filterListNodeName {
+  margin-left: 15px !important;
 }
 
 .viewerSelected {

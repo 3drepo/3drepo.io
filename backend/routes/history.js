@@ -35,7 +35,7 @@ function listRevisions(req, res, next){
 	let project = req.params.project;
 
 
-	History.find({account, project}, {}, {_id : 1, tag: 1, timestamp: 1}, {sort: {timestamp: -1}}).then(histories => {
+	History.find({account, project}, {}, {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1}, {sort: {timestamp: -1}}).then(histories => {
 		
 		histories = History.clean(histories);
 		responseCodes.respond(place, req, res, next, responseCodes.OK, histories);
@@ -53,7 +53,7 @@ function listRevisionsByBranch(req, res, next){
 	let project = req.params.project;
 
 
-	History.listByBranch({account, project}, req.params.branch, {_id : 1, tag: 1, timestamp: 1}).then(histories => {
+	History.listByBranch({account, project}, req.params.branch, {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1}).then(histories => {
 		
 		histories = History.clean(histories);
 		responseCodes.respond(place, req, res, next, responseCodes.OK, histories);

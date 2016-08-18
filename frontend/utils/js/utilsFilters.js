@@ -92,6 +92,12 @@
 				var date = new Date(input);
 				return date.toISOString().substr(0,10);
 			};
+		})
+
+		.filter("revisionDate", function () {
+			return function(input) {
+				return moment(input).format('DD/MM/YYYY HH:mm');
+			};
 		});
 
 }());

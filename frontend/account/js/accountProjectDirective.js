@@ -60,6 +60,7 @@
 		vm.project.canUpload = true;
 		vm.projectOptions = {
 			upload: {label: "Upload file", icon: "cloud_upload"},
+			revision: {label: "Revisions", icon: "settings_backup_restore"},
 			team: {label: "Team", icon: "group"},
 			delete: {label: "Delete", icon: "delete"}
 		};
@@ -116,6 +117,11 @@
 
 				case "delete":
 					vm.onSetupDeleteProject({event: event, project: vm.project});
+					break;
+
+				case "revision":
+					getRevision();
+					UtilsService.showDialog("revisionsDialog.html", $scope, event, true);
 					break;
 			}
 		};
@@ -247,6 +253,19 @@
 					}
 				});
 			}, 1000);
+		}
+
+		function getRevision(){
+			if(!vm.revisions){
+				return UtilsService.doGet(vm.account.name + "/" + vm.project.name + "/revisions.json").then(function(response){
+					console.log(response);
+					if(response.status === 200){
+						vm.revisions =response.data;
+					}
+				});
+			}
+
+			return Promise.resolve();
 		}
 	}
 }());
