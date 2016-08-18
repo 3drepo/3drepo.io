@@ -29,6 +29,7 @@ var multer = require("multer");
 var ProjectHelpers = require('../models/helper/project');
 var createAndAssignRole = ProjectHelpers.createAndAssignRole;
 var convertToErrorCode = ProjectHelpers.convertToErrorCode;
+var History = require('../models/history');
 
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
@@ -324,6 +325,18 @@ function uploadProject(req, res, next){
 					projectSetting.markModified('errorReason');
 					
 					return projectSetting.save();
+
+				}).then(() => {
+					//update revision tag or desc, now assume latest revision 
+					//better if bouncer return us the actual revision id
+					if(req.body.tag || req.body.desc){
+						return History.findByBranch({account, project}, 'master', {tag:1 ,desc: 1}).then(history => {
+							history.tag = req.body.tag;
+							history.desc = req.body.desc;
+							return history.save();
+						})
+					}
+					
 
 				}).catch(err => {
 					// import failed for some reason(s)...

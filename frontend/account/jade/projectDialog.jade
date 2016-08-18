@@ -16,6 +16,10 @@ md-dialog.newProjectDialog(aria-label="New project")
 					md-option(ng-repeat="projectType in vm.projectTypes", value="{{projectType}}") {{projectType}}
 			md-input-container(ng-if="vm.showProjectTypeOtherInput")
 				input(placeholder="Other project type", ng-model="vm.newProjectData.otherType")
+			md-input-container(ng-if="vm.newProjectFileSelected")
+				input(placeholder="Revision name", ng-model="vm.uploadTag")
+			md-input-container(ng-if="vm.newProjectFileSelected")
+				textarea(placeholder="Revision description", ng-model="vm.uploadDesc")
 			md-input-container
 				md-button.md-accent(ng-click="vm.uploadFileForNewProject()") Upload File
 				md-button.md-raised.md-accent(ng-disabled="vm.newProjectButtonDisabled", ng-click="vm.saveNewProject()") Save

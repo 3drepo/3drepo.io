@@ -30,6 +30,8 @@
 				project: "=",
 				onUploadFile: "&",
 				uploadedFile: "=",
+				uploadTag: "=",
+				uploadDesc: "=",
 				onShowPage: "&",
 				onSetupDeleteProject: "&",
 				quota: "="
@@ -69,6 +71,7 @@
 		/*
 		 * Watch changes in upload file
 		 */
+
 		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
 			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {
 				console.log("Uploaded file", vm.uploadedFile);
@@ -83,7 +86,7 @@
 			if (!vm.project.uploading) {
 				if (vm.project.timestamp === null) {
 					// No timestamp indicates no model previously uploaded
-					vm.uploadFile();
+					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true);
 				}
 				else {
 					$location.path("/" + vm.account.name + "/" + vm.project.name, "_self").search("page", null);
@@ -95,7 +98,8 @@
 		 * Call parent upload function
 		 */
 		vm.uploadFile = function () {
-			vm.onUploadFile({project: vm.project});
+			//vm.onUploadFile({project: vm.project});
+			vm.uploadedFile = {project: vm.project, file: vm.file.files[0]};
 		};
 
 		/**
@@ -107,7 +111,8 @@
 		vm.doProjectOption = function (event, option) {
 			switch (option) {
 				case "upload":
-					vm.uploadFile();
+					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true);
+					//vm.uploadFile();
 					break;
 
 				case "team":
@@ -141,6 +146,18 @@
 			UtilsService.closeDialog();
 		};
 
+		vm.file;
+
+		vm.selectFile = function(){
+			vm.file = document.createElement('input');
+			vm.file.setAttribute('type', 'file');
+			vm.file.click();
+
+			vm.file.addEventListener("change", function () {
+				vm.selectedFile = vm.file.files[0];
+				$scope.$apply();
+			});
+		}
 		/**
 		 * Upload file/model to project
 		 *
@@ -175,8 +192,18 @@
 						});
 					}
 					else {
+
 						formData = new FormData();
 						formData.append("file", file);
+
+						if(vm.uploadTag){
+							formData.append('tag', vm.uploadTag);
+						}
+
+						if(vm.uploadDesc){
+							formData.append('desc', vm.uploadDesc);
+						}
+
 						promise = UtilsService.doPost(formData, vm.account.name + "/" + vm.project.name + "/upload", {'Content-Type': undefined});
 						promise.then(function (response) {
 							console.log("uploadModel", response);
@@ -267,5 +294,6 @@
 
 			return Promise.resolve();
 		}
+
 	}
 }());

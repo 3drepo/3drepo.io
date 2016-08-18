@@ -36,6 +36,7 @@ var historySchema = Schema({
 		name: String,
 		tag: String,
 		author: String,
+		desc: String,
 		timestamp: Date,
 		coordOffset: [],
 		current: []
