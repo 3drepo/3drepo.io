@@ -5745,8 +5745,6 @@ var ViewerManager = {};
 				project: "=",
 				onUploadFile: "&",
 				uploadedFile: "=",
-				uploadTag: "=",
-				uploadDesc: "=",
 				onShowPage: "&",
 				onSetupDeleteProject: "&",
 				quota: "="
@@ -5790,7 +5788,7 @@ var ViewerManager = {};
 		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
 			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {
 				console.log("Uploaded file", vm.uploadedFile);
-				uploadFileToProject(vm.uploadedFile.file);
+				uploadFileToProject(vm.uploadedFile.file, vm.uploadedFile.tag, vm.uploadedFile.desc);
 			}
 		});
 
@@ -5809,13 +5807,6 @@ var ViewerManager = {};
 			}
 		};
 
-		/**
-		 * Call parent upload function
-		 */
-		vm.uploadFile = function () {
-			//vm.onUploadFile({project: vm.project});
-			vm.uploadedFile = {project: vm.project, file: vm.file.files[0]};
-		};
 
 		/**
 		 * Handle project option selection
@@ -5863,6 +5854,10 @@ var ViewerManager = {};
 
 		vm.file;
 
+
+		/**
+		 * When users click select file
+		 */
 		vm.selectFile = function(){
 			vm.file = document.createElement('input');
 			vm.file.setAttribute('type', 'file');
@@ -5873,12 +5868,23 @@ var ViewerManager = {};
 				$scope.$apply();
 			});
 		}
+
+		/**
+		 * When users click upload after selecting
+		 */
+		vm.uploadFile = function () {
+			//vm.onUploadFile({project: vm.project});
+			vm.uploadedFile = {project: vm.project, file: vm.file.files[0], tag: vm.tag, desc: vm.desc};
+			vm.closeDialog();
+
+		};
+
 		/**
 		 * Upload file/model to project
 		 *
 		 * @param file
 		 */
-		function uploadFileToProject (file) {
+		function uploadFileToProject(file, tag, desc) {
 			var promise,
 				formData;
 
@@ -5911,12 +5917,12 @@ var ViewerManager = {};
 						formData = new FormData();
 						formData.append("file", file);
 
-						if(vm.uploadTag){
-							formData.append('tag', vm.uploadTag);
+						if(tag){
+							formData.append('tag', tag);
 						}
 
-						if(vm.uploadDesc){
-							formData.append('desc', vm.uploadDesc);
+						if(desc){
+							formData.append('desc', desc);
 						}
 
 						promise = UtilsService.doPost(formData, vm.account.name + "/" + vm.project.name + "/upload", {'Content-Type': undefined});
@@ -5977,6 +5983,8 @@ var ViewerManager = {};
 							vm.project.timestamp = new Date();
 							vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
 							vm.fileUploadInfo = "Uploaded";
+							// clear revisions cache
+							vm.revisions = null;
 						}
 						else {
 							if (response.data.hasOwnProperty("errorReason")) {
@@ -6056,8 +6064,8 @@ var ViewerManager = {};
 
 	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService) {
 		var vm = this,
-			existingProjectToUpload,
-			existingProjectFileUploader,
+			// existingProjectToUpload,
+			// existingProjectFileUploader,
 			newProjectFileUploader;
 
 		/*
@@ -6068,15 +6076,15 @@ var ViewerManager = {};
 		vm.projectTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
 
 		// Setup file uploaders
-		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
-		existingProjectFileUploader.addEventListener(
-			"change",
-			function () {
-				vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0]};
-				$scope.$apply();
-			},
-			false
-		);
+		// existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
+		// existingProjectFileUploader.addEventListener(
+		// 	"change",
+		// 	function () {
+		// 		vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0], tag: vm.tag, desc: vm.desc};
+		// 		$scope.$apply();
+		// 	},
+		// 	false
+		// );
 		newProjectFileUploader = $element[0].querySelector("#newProjectFileUploader");
 		newProjectFileUploader.addEventListener(
 			"change",
@@ -6156,6 +6164,8 @@ var ViewerManager = {};
 		 * Bring up dialog to add a new project
 		 */
 		vm.newProject = function (event) {
+			vm.tag = null;
+			vm.desc = null;
 			vm.showNewProjectErrorMessage = false;
 			vm.newProjectFileSelected = false;
 			vm.newProjectData = {
@@ -6219,12 +6229,12 @@ var ViewerManager = {};
 		 *
 		 * @param {Object} project
 		 */
-		vm.uploadFile = function (project) {
-			console.log(project);
-			existingProjectFileUploader.value = "";
-			existingProjectToUpload = project;
-			existingProjectFileUploader.click();
-		};
+		// vm.uploadFile = function (project) {
+		// 	console.log(project);
+		// 	existingProjectFileUploader.value = "";
+		// 	existingProjectToUpload = project;
+		// 	existingProjectFileUploader.click();
+		// };
 
 		/**
 		 * Upload a file
@@ -6352,7 +6362,7 @@ var ViewerManager = {};
 			// Save model to project
 			if (vm.newProjectFileToUpload !== null) {
 				$timeout(function () {
-					vm.uploadedFile = {project: project, file: vm.newProjectFileToUpload};
+					vm.uploadedFile = {project: project, file: vm.newProjectFileToUpload, tag: vm.tag, desc: vm.desc};
 				});
 			}
 		}

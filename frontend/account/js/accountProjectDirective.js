@@ -30,8 +30,6 @@
 				project: "=",
 				onUploadFile: "&",
 				uploadedFile: "=",
-				uploadTag: "=",
-				uploadDesc: "=",
 				onShowPage: "&",
 				onSetupDeleteProject: "&",
 				quota: "="
@@ -75,7 +73,7 @@
 		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
 			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {
 				console.log("Uploaded file", vm.uploadedFile);
-				uploadFileToProject(vm.uploadedFile.file);
+				uploadFileToProject(vm.uploadedFile.file, vm.uploadedFile.tag, vm.uploadedFile.desc);
 			}
 		});
 
@@ -94,13 +92,6 @@
 			}
 		};
 
-		/**
-		 * Call parent upload function
-		 */
-		vm.uploadFile = function () {
-			//vm.onUploadFile({project: vm.project});
-			vm.uploadedFile = {project: vm.project, file: vm.file.files[0]};
-		};
 
 		/**
 		 * Handle project option selection
@@ -148,6 +139,10 @@
 
 		vm.file;
 
+
+		/**
+		 * When users click select file
+		 */
 		vm.selectFile = function(){
 			vm.file = document.createElement('input');
 			vm.file.setAttribute('type', 'file');
@@ -158,12 +153,23 @@
 				$scope.$apply();
 			});
 		}
+
+		/**
+		 * When users click upload after selecting
+		 */
+		vm.uploadFile = function () {
+			//vm.onUploadFile({project: vm.project});
+			vm.uploadedFile = {project: vm.project, file: vm.file.files[0], tag: vm.tag, desc: vm.desc};
+			vm.closeDialog();
+
+		};
+
 		/**
 		 * Upload file/model to project
 		 *
 		 * @param file
 		 */
-		function uploadFileToProject (file) {
+		function uploadFileToProject(file, tag, desc) {
 			var promise,
 				formData;
 
@@ -196,12 +202,12 @@
 						formData = new FormData();
 						formData.append("file", file);
 
-						if(vm.uploadTag){
-							formData.append('tag', vm.uploadTag);
+						if(tag){
+							formData.append('tag', tag);
 						}
 
-						if(vm.uploadDesc){
-							formData.append('desc', vm.uploadDesc);
+						if(desc){
+							formData.append('desc', desc);
 						}
 
 						promise = UtilsService.doPost(formData, vm.account.name + "/" + vm.project.name + "/upload", {'Content-Type': undefined});
@@ -262,6 +268,8 @@
 							vm.project.timestamp = new Date();
 							vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
 							vm.fileUploadInfo = "Uploaded";
+							// clear revisions cache
+							vm.revisions = null;
 						}
 						else {
 							if (response.data.hasOwnProperty("errorReason")) {

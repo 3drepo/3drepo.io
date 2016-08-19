@@ -41,8 +41,8 @@
 
 	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService) {
 		var vm = this,
-			existingProjectToUpload,
-			existingProjectFileUploader,
+			// existingProjectToUpload,
+			// existingProjectFileUploader,
 			newProjectFileUploader;
 
 		/*
@@ -53,15 +53,15 @@
 		vm.projectTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
 
 		// Setup file uploaders
-		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
-		existingProjectFileUploader.addEventListener(
-			"change",
-			function () {
-				vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0]};
-				$scope.$apply();
-			},
-			false
-		);
+		// existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
+		// existingProjectFileUploader.addEventListener(
+		// 	"change",
+		// 	function () {
+		// 		vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0], tag: vm.tag, desc: vm.desc};
+		// 		$scope.$apply();
+		// 	},
+		// 	false
+		// );
 		newProjectFileUploader = $element[0].querySelector("#newProjectFileUploader");
 		newProjectFileUploader.addEventListener(
 			"change",
@@ -141,6 +141,8 @@
 		 * Bring up dialog to add a new project
 		 */
 		vm.newProject = function (event) {
+			vm.tag = null;
+			vm.desc = null;
 			vm.showNewProjectErrorMessage = false;
 			vm.newProjectFileSelected = false;
 			vm.newProjectData = {
@@ -204,12 +206,12 @@
 		 *
 		 * @param {Object} project
 		 */
-		vm.uploadFile = function (project) {
-			console.log(project);
-			existingProjectFileUploader.value = "";
-			existingProjectToUpload = project;
-			existingProjectFileUploader.click();
-		};
+		// vm.uploadFile = function (project) {
+		// 	console.log(project);
+		// 	existingProjectFileUploader.value = "";
+		// 	existingProjectToUpload = project;
+		// 	existingProjectFileUploader.click();
+		// };
 
 		/**
 		 * Upload a file
@@ -337,7 +339,7 @@
 			// Save model to project
 			if (vm.newProjectFileToUpload !== null) {
 				$timeout(function () {
-					vm.uploadedFile = {project: project, file: vm.newProjectFileToUpload};
+					vm.uploadedFile = {project: project, file: vm.newProjectFileToUpload, tag: vm.tag, desc: vm.desc};
 				});
 			}
 		}

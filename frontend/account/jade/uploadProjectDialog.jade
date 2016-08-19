@@ -9,9 +9,9 @@ md-dialog.newProjectDialog(aria-label="New project")
 		div(layout="column")
 
 			md-input-container
-				input(placeholder="Revision name", ng-model="vm.uploadTag")
+				input(placeholder="Revision name", ng-model="vm.tag")
 			md-input-container
-				textarea(placeholder="Revision description", ng-model="vm.uploadDesc")
+				textarea(placeholder="Revision description", ng-model="vm.desc")
 
 			md-input-container
 				md-button.md-accent(ng-click="vm.selectFile()") Select File
