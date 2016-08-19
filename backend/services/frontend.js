@@ -155,6 +155,9 @@ module.exports.createApp = function(serverConfig)
 				"children": [
 					{
 						"plugin": "project",
+						"children": [ 
+							{"plugin": "revision"}
+						],
 						"friends" : [
 							"panel",
 							"filter",
