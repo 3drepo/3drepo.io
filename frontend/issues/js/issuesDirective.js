@@ -83,7 +83,7 @@
 		/*
 		 * Get all the Issues
 		 */
-		promise = IssuesService.getIssues(vm.account, vm.project);
+		promise = IssuesService.getIssues(vm.account, vm.project, vm.revision);
 		promise.then(function (data) {
 			var i, length;
 			vm.showProgress = false;

@@ -180,14 +180,32 @@ schema.statics.findByProjectName = function(dbColOptions, branch, revId){
 		let findHistory = utils.isUUID(revId) ? History.findByUID : History.findByTag;
 
 		addRevFilter = findHistory(dbColOptions, revId).then(history => {
+
 			if(!history){
 				return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
 			} else {
-				filter = {
-					'created' : { '$gte': history.timestamp.valueOf() }
-				};
-				return Promise.resolve();
+
+				return History.find(
+					dbColOptions, 
+					{ timestamp: {'$gt': history.timestamp }}, 
+					{_id : 1, timestamp: 1, tag: 1}, 
+					{sort: {timestamp: -1}
+				});
+
 			}
+
+		}).then(histories => {
+
+			if(histories.length > 0){
+
+				let history = histories[0];
+				console.log('next history found', history);
+				filter = {
+					'created' : { '$lte': history.timestamp.valueOf() }
+				};
+			}
+
+			return Promise.resolve();
 		});
 	}
 

@@ -5880,6 +5880,14 @@ var ViewerManager = {};
 		};
 
 		/**
+		* Go to the specified revision
+		*/
+		vm.goToVision = function(revId){
+			console.log(revId);
+			$location.path("/" + vm.account.name + "/" + vm.project.name + "/" + revId , "_self");
+		}
+
+		/**
 		 * Upload file/model to project
 		 *
 		 * @param file
@@ -11696,7 +11704,7 @@ angular.module('3drepo')
 		/*
 		 * Get all the Issues
 		 */
-		promise = IssuesService.getIssues(vm.account, vm.project);
+		promise = IssuesService.getIssues(vm.account, vm.project, vm.revision);
 		promise.then(function (data) {
 			var i, length;
 			vm.showProgress = false;
@@ -12541,10 +12549,16 @@ angular.module('3drepo')
 			}
 		};
 
-		obj.getIssues = function(account, project) {
+		obj.getIssues = function(account, project, revision) {
 			var self = this,
 				deferred = $q.defer();
-			url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/issues.json");
+
+			if(revision){
+				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/revision/" + revision + "/issues.json");
+			} else {
+				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/issues.json");
+			}
+			
 
 			$http.get(url)
 				.then(
@@ -17227,9 +17241,9 @@ var Oculus = {};
 			ts.account  = account;
 			ts.project  = project;
 			ts.branch   = branch ? branch : "master";
-			ts.revision = revision ? revision : "head";
+			//ts.revision = revision ? revision : "head";
 
-			if (ts.branch === "master")
+			if (!revision)
 			{
 				ts.baseURL = "/" + account + "/" + project + "/revision/master/head/";
 			} else {

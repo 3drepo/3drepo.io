@@ -78,10 +78,16 @@
 			}
 		};
 
-		obj.getIssues = function(account, project) {
+		obj.getIssues = function(account, project, revision) {
 			var self = this,
 				deferred = $q.defer();
-			url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/issues.json");
+
+			if(revision){
+				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/revision/" + revision + "/issues.json");
+			} else {
+				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/issues.json");
+			}
+			
 
 			$http.get(url)
 				.then(
