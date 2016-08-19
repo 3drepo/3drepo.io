@@ -10,7 +10,7 @@ var vat = [
 	{ countryCode: 'DE', standardRate: 19 },
 	{ countryCode: 'DK', standardRate: 25 },
 	{ countryCode: 'EE', standardRate: 20 },
-	{ countryCode: 'EL', standardRate: 23 },
+	{ countryCode: 'GR', standardRate: 23 },
 	{ countryCode: 'ES', standardRate: 21 },
 	{ countryCode: 'FI', standardRate: 24 },
 	{ countryCode: 'FR', standardRate: 20 },

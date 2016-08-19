@@ -12,12 +12,15 @@ account-dir #logo {
 }
 
 account-dir #noAvatarIcon {
-  background: #E8EAF6;
+  background: rgba(0,69,148,.1);
+  height: 150px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1)
 }
 account-dir #noAvatarIcon md-icon {
-  font-size: 100px;
-  width: 100px;
-  height: 100px;
+  font-size: 150px;
+  width: 150px;
+  height: 150px;
+  color: rgb(0,69,148);
 }
 
 account-dir .dataContainer {
@@ -371,9 +374,6 @@ account-licenses #accountLicensesList {
 
 account-licenses #accountLicensesBillingPage {
   margin-top: 30px;
-}
-account-licenses #accountLicensesBillingPage a {
-  color: rgb(67,160,71);
 }
 
 /** Account Team ******************************************************************************************************/
@@ -1218,7 +1218,7 @@ home .homeUserContent md-tabs-wrapper {
 .cardInfo {
     text-align: center;
     padding: 15px;
-    background: #E8EAF6;
+    background: rgba(0,69,148,.1);
     margin: 15px;
     border-radius: 4px;
 }
