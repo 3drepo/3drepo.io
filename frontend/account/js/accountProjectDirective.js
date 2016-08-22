@@ -221,7 +221,7 @@
 						promise = UtilsService.doPost(formData, vm.account.name + "/" + vm.project.name + "/upload", {'Content-Type': undefined});
 						promise.then(function (response) {
 							console.log("uploadModel", response);
-							if ((response.data.status === 400) || (response.data.status === 404)) {
+							if ((response.status === 400) || (response.status === 404)) {
 								// Upload error
 								if (response.data.value === 68) {
 									vm.fileUploadInfo = "Unsupported file format";
@@ -229,6 +229,10 @@
 								else if (response.data.value === 66) {
 									vm.fileUploadInfo = "Insufficient quota for model";
 								}
+								else {
+									vm.fileUploadInfo = response.data.message;
+								}
+								
 								vm.showUploading = false;
 								vm.showFileUploadInfo = true;
 								$timeout(function () {
