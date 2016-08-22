@@ -42,6 +42,7 @@ var historySchema = Schema({
 		current: []
 });
 
+historySchema.statics.tagRegExp = /^[a-zA-Z0-9_-]{3,20}$/;
 // list revisions by branch
 historySchema.statics.listByBranch = function(dbColOptions, branch, projection){
 	

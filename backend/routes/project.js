@@ -269,6 +269,9 @@ function uploadProject(req, res, next){
 			} else if(!req.file.size){
 				return responseCodes.respond(responsePlace, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 			
+			} else if(req.body.tag && !req.body.tag.match(History.tagRegExp)){
+				return responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_TAG_NAME, responseCodes.INVALID_TAG_NAME);
+			
 			} else {
 
 				let projectSetting;
@@ -277,12 +280,22 @@ function uploadProject(req, res, next){
 				let account = req.params.account;
 				//let username = req.session.user.username;
 
-				ProjectSetting.findById({account, project}, project).then(setting => {
+				//check dup tag and invalid first
+
+				History.findByTag({account, project}, req.body.tag, {_id: 1}).then(tag => {
+					
+					if(tag){
+						responseCodes.respond(responsePlace, req, res, next, responseCodes.DUPLICATE_TAG, responseCodes.DUPLICATE_TAG);
+						return Promise.reject(responseCodes.DUPLICATE_TAG);
+					} else {
+						return ProjectSetting.findById({account, project}, project);
+					}
+
+				}).then(setting => {
 
 					if(!setting){
-						req[C.REQ_REPO].logger.logError('Upload to non-exisitng project and create is now deprecated, please call create project API first then upload');
-						return responseCodes.respond(responsePlace, req, res, next, responseCodes.PROJECT_NOT_FOUND, responseCodes.PROJECT_NOT_FOUND);
-
+						responseCodes.respond(responsePlace, req, res, next, responseCodes.PROJECT_NOT_FOUND, responseCodes.PROJECT_NOT_FOUND);
+						return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 					}
 
 					projectSetting = setting;
