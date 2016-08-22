@@ -83,8 +83,11 @@ ImportQueue.prototype.connect = function(url, options) {
  * @param {databaseName} databaseName - name of database to commit to
  * @param {projectName} projectName - name of project to commit to
  * @param {userName} userName - name of user
+ * @param {copy} copy - use fs.copy or fs.move, default fs.move
+ * @param {tag} tag - revision tag
+ * @param {desc} desc - revison description
  *******************************************************************************/
-ImportQueue.prototype.importFile = function(filePath, orgFileName, databaseName, projectName, userName, copy){
+ImportQueue.prototype.importFile = function(filePath, orgFileName, databaseName, projectName, userName, copy, tag, desc){
     'use strict';
 
     let corID = uuid.v1();
@@ -92,9 +95,40 @@ ImportQueue.prototype.importFile = function(filePath, orgFileName, databaseName,
     //console.log(filePath);
     //console.log(orgFileName);
 
+    let jsonFilename = `${this.sharedSpacePath}/${corID}.json`; 
+
     return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy).then(newPath => {
     
-        let msg = 'import ' + newPath + ' ' + databaseName + ' ' + projectName + ' ' + userName;
+        let json = {
+            file: newPath,
+            database: databaseName,
+            project: projectName,   
+            owner: userName,
+        }
+
+        if(tag){
+            json.tag = tag;
+        }
+
+        if(desc){
+            json.desc = desc;
+        }
+
+
+        return new Promise((resolve, reject) => {
+            fs.writeFile(jsonFilename, JSON.stringify(json), { flag: 'a+'}, err => {
+                if(err){
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+
+    }).then(() => {
+
+        //let msg = 'import ' + newPath + ' ' + databaseName + ' ' + projectName + ' ' + userName;
+        let msg = `import -f ${jsonFilename}`;
         return this._dispatchWork(corID, msg);
     
     }).then(() => {
@@ -119,6 +153,7 @@ ImportQueue.prototype.importFile = function(filePath, orgFileName, databaseName,
  * @param {corID} corID - Correlation ID
  * @param {orgFilePath} orgFilePath - Path to where the file is currently
  * @param {newFileName} newFileName - New file name to rename to
+ * @param {copy} copy - use fs.copy instead of fs.move if set to true
  *******************************************************************************/
 ImportQueue.prototype._moveFileToSharedSpace = function(corID, orgFilePath, newFileName, copy) {
     'use strict';

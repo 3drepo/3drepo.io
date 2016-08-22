@@ -299,7 +299,10 @@ function uploadProject(req, res, next){
 						req.file.originalname, 
 						req.params.account,
 						req.params.project,
-						req.session.user.username
+						req.session.user.username,
+						null,
+						req.body.tag,
+						req.body.desc
 					)
 					.then(corID => Promise.resolve(corID))
 					.catch(err => {
@@ -324,19 +327,7 @@ function uploadProject(req, res, next){
 					projectSetting.errorReason = undefined;
 					projectSetting.markModified('errorReason');
 					
-					return projectSetting.save();
-
-				}).then(() => {
-					//update revision tag or desc, now assume latest revision 
-					//better if bouncer return us the actual revision id
-					if(req.body.tag || req.body.desc){
-						return History.findByBranch({account, project}, 'master', {tag:1 ,desc: 1}).then(history => {
-							history.tag = req.body.tag;
-							history.desc = req.body.desc;
-							return history.save();
-						})
-					}
-					
+					return projectSetting.save();					
 
 				}).catch(err => {
 					// import failed for some reason(s)...
