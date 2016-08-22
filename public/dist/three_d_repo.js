@@ -5761,9 +5761,9 @@ var ViewerManager = {};
 		};
 	}
 
-	accountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig"];
+	accountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService"];
 
-	function accountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig) {
+	function accountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService) {
 		var vm = this,
 			infoTimeout = 4000;
 
@@ -6019,15 +6019,10 @@ var ViewerManager = {};
 
 		function getRevision(){
 			if(!vm.revisions){
-				return UtilsService.doGet(vm.account.name + "/" + vm.project.name + "/revisions.json").then(function(response){
-					console.log(response);
-					if(response.status === 200){
-						vm.revisions =response.data;
-					}
+				RevisionsService.listAll(vm.account.name, vm.project.name).then(function(revisions){
+					vm.revisions = revisions;
 				});
 			}
-
-			return Promise.resolve();
 		}
 
 	}
@@ -16127,6 +16122,103 @@ var Oculus = {};
 			EventService.send(EventService.EVENT.GO_HOME);
         };
     }
+}());
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("revisions", revisions);
+
+	function revisions () {
+		return {
+			restrict: 'E',
+			templateUrl: 'revisions.html',
+			scope: {
+				account: "=",
+				project: "=",
+				revision: "=",
+			},
+			controller: revisionsCtrl,
+			controllerAs: 'vm',
+			bindToController: true,
+		};
+	}
+
+	revisionsCtrl.$inject = ["$location", "$scope", "RevisionsService", "UtilsService"];
+
+	function revisionsCtrl ($location, $scope, RevisionsService, UtilsService) {
+		var vm = this;
+		vm.revName = vm.revision || 'head';
+		//$scope.$apply();
+
+
+		vm.openDialog = function(){
+
+			if(!vm.revisions){
+				RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
+					vm.revisions = revisions;
+				});
+			}
+
+			UtilsService.showDialog("revisionsDialog.html", $scope, event, true);
+		}
+
+		/**
+		* Go to the specified revision
+		*/
+		vm.goToVision = function(revId){
+			$location.path("/" + vm.account + "/" + vm.project + "/" + revId , "_self");
+		}
+
+		vm.closeDialog = function() {
+			UtilsService.closeDialog();
+		};
+
+	}
+
+
+}());
+
+/**
+ *  Copyright (C) 2016 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.factory("RevisionsService", RevisionsService);
+
+	RevisionsService.$inject = ["UtilsService"];
+
+	function RevisionsService(UtilsService) {
+
+		function listAll(account, project){
+			return UtilsService.doGet(account + "/" + project + "/revisions.json").then(function(response){
+				if(response.status === 200){
+					return Promise.resolve(response.data);
+				} else {
+					return Promise.reject(response.data);
+				}
+			});
+		}
+
+		return { listAll: listAll};
+	}
 }());
 
 /**

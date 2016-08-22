@@ -46,9 +46,9 @@
 		};
 	}
 
-	accountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig"];
+	accountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService"];
 
-	function accountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig) {
+	function accountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService) {
 		var vm = this,
 			infoTimeout = 4000;
 
@@ -304,15 +304,10 @@
 
 		function getRevision(){
 			if(!vm.revisions){
-				return UtilsService.doGet(vm.account.name + "/" + vm.project.name + "/revisions.json").then(function(response){
-					console.log(response);
-					if(response.status === 200){
-						vm.revisions =response.data;
-					}
+				RevisionsService.listAll(vm.account.name, vm.project.name).then(function(revisions){
+					vm.revisions = revisions;
 				});
 			}
-
-			return Promise.resolve();
 		}
 
 	}

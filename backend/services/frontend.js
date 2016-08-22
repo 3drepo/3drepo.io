@@ -174,7 +174,8 @@ module.exports.createApp = function(serverConfig)
 							"groups",
 							"measure",
 							"rightPanel",
-							"building"
+							"building",
+							"revisions"
 						]
 					}
 				]
