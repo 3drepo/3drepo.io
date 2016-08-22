@@ -178,19 +178,21 @@ schema.statics.findByProjectName = function(dbColOptions, branch, revId){
 	if (revId){
 
 		let findHistory = utils.isUUID(revId) ? History.findByUID : History.findByTag;
-
+		let currHistory;
 		addRevFilter = findHistory(dbColOptions, revId).then(history => {
 
 			if(!history){
 				return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
 			} else {
 
+				currHistory = history;
+
 				return History.find(
 					dbColOptions, 
-					{ timestamp: {'$gt': history.timestamp }}, 
-					{_id : 1, timestamp: 1, tag: 1}, 
-					{sort: {timestamp: -1}
-				});
+					{ timestamp: {'$gt': currHistory.timestamp }}, 
+					{_id : 1, timestamp: 1}, 
+					{sort: {timestamp: 1}}
+				);
 
 			}
 
@@ -200,12 +202,33 @@ schema.statics.findByProjectName = function(dbColOptions, branch, revId){
 
 				let history = histories[0];
 				console.log('next history found', history);
+
+				//backward comp: find all issues, without rev_id field, with timestamp just less than the next cloest revision 
 				filter = {
-					'created' : { '$lte': history.timestamp.valueOf() }
+					'created' : { '$lt': history.timestamp.valueOf() },
+					rev_id: null 
 				};
 			}
 
-			return Promise.resolve();
+			return History.find(
+				dbColOptions, 
+				{ timestamp: {'$lte': currHistory.timestamp }}, 
+				{_id : 1}
+			);
+		}).then(histories => {
+
+			if(histories.length > 0){
+				// for issues with rev_id, get all issues if rev_id in revIds
+				let revIds = histories.map(h => h._id);
+
+				filter = {
+					'$or' : [ filter, {
+						rev_id: { '$in' : revIds }
+					}]
+				};
+				//console.log(filter);
+
+			}
 		});
 	}
 
@@ -468,6 +491,11 @@ schema.methods.clean = function(typePrefix){
 	cleaned.parent = cleaned.parent ? uuidToString(cleaned.parent) : undefined;
 	cleaned.account = this._dbcolOptions.account;
 	cleaned.project = this._dbcolOptions.project;
+	cleaned.rev_id && (cleaned.rev_id = uuidToString(cleaned.rev_id));
+
+	cleaned.comments.forEach( (comment, i) => {
+		cleaned.comments[i].rev_id = comment.rev_id && (comment.rev_id = uuidToString(comment.rev_id))
+	});
 
 	if(cleaned.scribble){
 		cleaned.scribble = cleaned.scribble.toString('base64');

@@ -121,7 +121,14 @@
 				deferred = $q.defer(),
 				viewpointPromise = $q.defer();
 
-			url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues.json");
+			var url;
+
+			if(issue.rev_id){
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/revision/" + issue.rev_id + "/issues.json");
+			} else {
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues.json");
+			}
+			
 
 			EventService.send(EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, {promise: viewpointPromise});
 
@@ -135,6 +142,7 @@
 					assigned_roles: userRoles,
 					scribble: issue.scribble
 				};
+
 				config = {withCredentials: true};
 
 				if (issue.pickedPos !== null) {
@@ -170,11 +178,18 @@
 		 * @returns {*}
 		 */
 		function doPut(issue, data) {
-			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues/" + issue._id + ".json"),
-				config = {
-					withCredentials: true
-				};
+			var deferred = $q.defer();
+			var url;
+
+			if(issue.rev_id){
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/revision/" + issue.rev_id + "/issues/" +  issue._id + ".json");
+			} else {
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues/" + issue._id + ".json");
+			}
+				
+			var config = {
+				withCredentials: true
+			};
 			$http.put(url, {data: JSON.stringify(data)}, config)
 				.then(function (response) {
 					deferred.resolve(response.data);

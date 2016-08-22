@@ -12168,6 +12168,7 @@ angular.module('3drepo')
 			}
 			vm.selectedIssue = vm.issuesToShow[index];
 			vm.selectedIndex = index;
+			vm.selectedIssue.rev_id = vm.revision;
 			vm.selectedIssue.selected = true;
 			vm.selectedIssue.showInfo = false;
 
@@ -12225,8 +12226,13 @@ angular.module('3drepo')
 							creator_role: vm.projectUserRoles[0],
 							account: vm.account,
 							project: vm.project,
-							scribble: png
+							scribble: png,
 						};
+
+						if(vm.revision){
+							issue.rev_id = vm.revision;
+						}
+
 						if (selectedObjectId !== null) {
 							issue.objectId = selectedObjectId;
 							issue.pickedPos = pickedPos;
@@ -12592,7 +12598,14 @@ angular.module('3drepo')
 				deferred = $q.defer(),
 				viewpointPromise = $q.defer();
 
-			url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues.json");
+			var url;
+
+			if(issue.rev_id){
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/revision/" + issue.rev_id + "/issues.json");
+			} else {
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues.json");
+			}
+			
 
 			EventService.send(EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, {promise: viewpointPromise});
 
@@ -12606,6 +12619,7 @@ angular.module('3drepo')
 					assigned_roles: userRoles,
 					scribble: issue.scribble
 				};
+
 				config = {withCredentials: true};
 
 				if (issue.pickedPos !== null) {
@@ -12641,11 +12655,18 @@ angular.module('3drepo')
 		 * @returns {*}
 		 */
 		function doPut(issue, data) {
-			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues/" + issue._id + ".json"),
-				config = {
-					withCredentials: true
-				};
+			var deferred = $q.defer();
+			var url;
+
+			if(issue.rev_id){
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/revision/" + issue.rev_id + "/issues/" +  issue._id + ".json");
+			} else {
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues/" + issue._id + ".json");
+			}
+				
+			var config = {
+				withCredentials: true
+			};
 			$http.put(url, {data: JSON.stringify(data)}, config)
 				.then(function (response) {
 					deferred.resolve(response.data);
