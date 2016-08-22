@@ -8938,6 +8938,7 @@ var ViewerManager = {};
 			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
 				// Get any documents associated with an object
 				var object = event.value;
+				console.log(object);
 				promise = DocsService.getDocs(object.account, object.project, object.id);
 				promise.then(function (data) {
 					if (Object.keys(data).length > 0) {
@@ -8953,6 +8954,7 @@ var ViewerManager = {};
 
 									// Pretty format Meta Data dates, e.g. 1900-12-31T23:59:59
 									if (docType === "Meta Data") {
+										console.log(vm.docs["Meta Data"]);
 										for (i = 0, length = vm.docs["Meta Data"].data.length; i < length; i += 1) {
 											for (item in vm.docs["Meta Data"].data[i].metadata) {
 												if ((Date.parse(vm.docs["Meta Data"].data[i].metadata[item]) &&
@@ -9087,6 +9089,7 @@ var ViewerManager = {};
 			$http.get(url)
 				.then(
 					function(json) {
+						console.log(876, json);
 						var dataType;
 						// Set up the url for each PDF doc
 						for (i = 0, length = json.data.meta.length; i < length; i += 1) {
@@ -16629,7 +16632,8 @@ var Oculus = {};
 			currentSelectedNode = null,
 			currentScrolledToNode = null,
 			highlightSelectedViewerObject = true,
-			clickedHidden = {}; // Nodes that have actually been clicked to hide
+			clickedHidden = {}, // Nodes that have actually been clicked to hide
+			clickedShown = {}; // Nodes that have actually been clicked to show
 
 		/*
 		 * Init
@@ -16803,6 +16807,12 @@ var Oculus = {};
 							if (!vm.nodesToShow[index].children[i].hasOwnProperty("toggleState")) {
 								vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
 							}
+							// A node should relect the state of any path relative
+							else if (((vm.nodesToShow[index].children[i].toggleState === "invisible") ||
+									  (vm.nodesToShow[index].children[i].toggleState === "parentOfInvisible")) &&
+									 pathRelativeWasClickShown(vm.nodesToShow[index].children[i])) {
+								vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
+							}
 
 							// Determine if child node has childern
 							vm.nodesToShow[index].children[i].level = vm.nodesToShow[index].level + 1;
@@ -16852,7 +16862,26 @@ var Oculus = {};
 					}
 
 					for (j = 0; j < childrenLength; j += 1) {
+						if (vm.nodesToShow[i].children[j]._id === selectedId) {
+							// If the selected mesh doesn't have a name highlight the parent in the tree
+							// highlight the parent in the viewer
+							if (vm.nodesToShow[i].children[j].hasOwnProperty("name")) {
+								vm.nodesToShow[i].children[j].selected = true;
+							}
+							else {
+								vm.selectNode(vm.nodesToShow[i]);
+							}
+						}
+						else {
+							// This will clear any previously selected node
+							vm.nodesToShow[i].children[j].selected = false;
+						}
+						/*
 						vm.nodesToShow[i].children[j].selected = (vm.nodesToShow[i].children[j]._id === selectedId);
+						if (vm.nodesToShow[i].children[j].selected) {
+							console.log(vm.nodesToShow[i].children[j]);
+						}
+						*/
 
 						// Only set the toggle state once when the node is listed
 						if (!vm.nodesToShow[i].children[j].hasOwnProperty("toggleState")) {
@@ -16952,6 +16981,7 @@ var Oculus = {};
 					vm.setToggleState(vm.nodesToShow[i], (vm.nodesToShow[i].toggleState === "visible") ? "invisible" : "visible");
 					nodeToggleState = vm.nodesToShow[i].toggleState;
 					updateClickedHidden(vm.nodesToShow[i]);
+					updateClickedShown(vm.nodesToShow[i]);
 				}
 				// Set children to node toggle state
 				else if (vm.nodesToShow[i].path.indexOf(node._id) !== -1) {
@@ -17247,6 +17277,42 @@ var Oculus = {};
 			else {
 				delete clickedHidden[node._id];
 			}
+		}
+
+		/**
+		 * If a node was clicked to show, add it to a list of similar nodes
+		 *
+		 * @param {Object} node
+		 */
+		function updateClickedShown (node) {
+			if (node.toggleState === "visible") {
+				clickedShown[node._id] = node;
+			}
+			else {
+				delete clickedShown[node._id];
+			}
+			console.log(clickedShown);
+		}
+
+		/**
+		 * Check if a relative in the path was clicked to show
+		 *
+		 * @param {Object} node
+		 */
+		function pathRelativeWasClickShown (node) {
+			var i, length,
+				relativeWasClickShown = false,
+				path = node.path.split("__");
+
+			path.pop(); // Remove _id of node from path
+			for (i = 0, length = path.length; i < length; i += 1) {
+				if (clickedShown.hasOwnProperty(path[i])) {
+					relativeWasClickShown = true;
+					break;
+				}
+			}
+
+			return relativeWasClickShown;
 		}
 
 		/**
