@@ -48,7 +48,7 @@ var ViewerUtilMyListeners = {};
 	ViewerUtil.prototype.triggerEvent = function(name, event)
 	{
 		var e = new CustomEvent(name, { detail: event });
-        console.log("TRIG: " + name);
+        //console.log("TRIG: " + name);
 		eventElement.dispatchEvent(e);
 	};
 
@@ -8938,7 +8938,6 @@ var ViewerManager = {};
 			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
 				// Get any documents associated with an object
 				var object = event.value;
-				console.log(object);
 				promise = DocsService.getDocs(object.account, object.project, object.id);
 				promise.then(function (data) {
 					if (Object.keys(data).length > 0) {
@@ -8954,7 +8953,6 @@ var ViewerManager = {};
 
 									// Pretty format Meta Data dates, e.g. 1900-12-31T23:59:59
 									if (docType === "Meta Data") {
-										console.log(vm.docs["Meta Data"]);
 										for (i = 0, length = vm.docs["Meta Data"].data.length; i < length; i += 1) {
 											for (item in vm.docs["Meta Data"].data[i].metadata) {
 												if ((Date.parse(vm.docs["Meta Data"].data[i].metadata[item]) &&
@@ -9089,7 +9087,6 @@ var ViewerManager = {};
 			$http.get(url)
 				.then(
 					function(json) {
-						console.log(876, json);
 						var dataType;
 						// Set up the url for each PDF doc
 						for (i = 0, length = json.data.meta.length; i < length; i += 1) {
@@ -16681,7 +16678,12 @@ var Oculus = {};
 
 			for (i = 0, length = nodesToShow.length; i < length ; i += 1) {
 				maxStringLengthForLevel = maxStringLength - (nodesToShow[i].level * levelOffset);
-				height += nodeMinHeight + (lineHeight * Math.floor(nodesToShow[i].name.length / maxStringLengthForLevel));
+				if (nodesToShow[i].hasOwnProperty("name")) {
+					height += nodeMinHeight + (lineHeight * Math.floor(nodesToShow[i].name.length / maxStringLengthForLevel));
+				}
+				else {
+					height += nodeMinHeight + lineHeight;
+				}
 			}
 			vm.onContentHeightRequest({height: height});
 		}
@@ -16695,11 +16697,16 @@ var Oculus = {};
 			vm.nodesToShow[0].expanded = false;
 			vm.nodesToShow[0].hasChildren = true;
 			vm.nodesToShow[0].selected = false;
+			/*
 			// Only make the top node visible if it was not previously clicked hidden
 			if (!wasClickedHidden(vm.nodesToShow[0])) {
 				vm.nodesToShow[0].toggleState = "visible";
 			}
-
+			*/
+			// Only make the top node visible if it does not have a toggleState
+			if (!vm.nodesToShow[0].hasOwnProperty("toggleState")) {
+				vm.nodesToShow[0].toggleState = "visible";
+			}
 		}
 
 		/**
@@ -16786,9 +16793,14 @@ var Oculus = {};
 						for (i = 0; i < numChildren; i += 1) {
 							vm.nodesToShow[index].children[i].expanded = false;
 
-							// vm.setToggleState(vm.nodesToShow[index].children[i], vm.nodesToShow[index].toggleState);
+							/*
 							// If the child node was not clicked hidden set its toggle state to visible
 							if (!wasClickedHidden(vm.nodesToShow[index].children[i])) {
+								vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
+							}
+							*/
+							// If the child node does not have a toggleState set it to visible
+							if (!vm.nodesToShow[index].children[i].hasOwnProperty("toggleState")) {
 								vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
 							}
 
@@ -16856,12 +16868,15 @@ var Oculus = {};
 
 						if (vm.nodesToShow[i].children[j].selected) {
 							selectionFound = true;
+							currentSelectedNode = vm.nodesToShow[i].children[j];
 
+							/*
 							// This is a hack to get around the double click event issue
 							currentScrolledToNode = vm.nodesToShow[i].children[j];
 							$timeout(function () {
 								currentSelectedNode = currentScrolledToNode;
 							});
+							*/
 						}
 
 						if ((level === (path.length - 2)) && !selectionFound) {
@@ -16904,8 +16919,10 @@ var Oculus = {};
 				if (currentSelectedNode !== null) {
 					currentSelectedNode.selected = false;
 					currentSelectedNode = null;
-					vm.currentFilterItemSelected.class = "";
-					vm.currentFilterItemSelected = null;
+					if (vm.currentFilterItemSelected !== null) {
+						vm.currentFilterItemSelected.class = "";
+						vm.currentFilterItemSelected = null;
+					}
 				}
 			}
 			else if ((event.type === EventService.EVENT.PANEL_CARD_ADD_MODE) ||

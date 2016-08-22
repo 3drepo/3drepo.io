@@ -106,7 +106,12 @@
 
 			for (i = 0, length = nodesToShow.length; i < length ; i += 1) {
 				maxStringLengthForLevel = maxStringLength - (nodesToShow[i].level * levelOffset);
-				height += nodeMinHeight + (lineHeight * Math.floor(nodesToShow[i].name.length / maxStringLengthForLevel));
+				if (nodesToShow[i].hasOwnProperty("name")) {
+					height += nodeMinHeight + (lineHeight * Math.floor(nodesToShow[i].name.length / maxStringLengthForLevel));
+				}
+				else {
+					height += nodeMinHeight + lineHeight;
+				}
 			}
 			vm.onContentHeightRequest({height: height});
 		}
@@ -120,11 +125,16 @@
 			vm.nodesToShow[0].expanded = false;
 			vm.nodesToShow[0].hasChildren = true;
 			vm.nodesToShow[0].selected = false;
+			/*
 			// Only make the top node visible if it was not previously clicked hidden
 			if (!wasClickedHidden(vm.nodesToShow[0])) {
 				vm.nodesToShow[0].toggleState = "visible";
 			}
-
+			*/
+			// Only make the top node visible if it does not have a toggleState
+			if (!vm.nodesToShow[0].hasOwnProperty("toggleState")) {
+				vm.nodesToShow[0].toggleState = "visible";
+			}
 		}
 
 		/**
@@ -211,9 +221,14 @@
 						for (i = 0; i < numChildren; i += 1) {
 							vm.nodesToShow[index].children[i].expanded = false;
 
-							// vm.setToggleState(vm.nodesToShow[index].children[i], vm.nodesToShow[index].toggleState);
+							/*
 							// If the child node was not clicked hidden set its toggle state to visible
 							if (!wasClickedHidden(vm.nodesToShow[index].children[i])) {
+								vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
+							}
+							*/
+							// If the child node does not have a toggleState set it to visible
+							if (!vm.nodesToShow[index].children[i].hasOwnProperty("toggleState")) {
 								vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
 							}
 
@@ -281,12 +296,15 @@
 
 						if (vm.nodesToShow[i].children[j].selected) {
 							selectionFound = true;
+							currentSelectedNode = vm.nodesToShow[i].children[j];
 
+							/*
 							// This is a hack to get around the double click event issue
 							currentScrolledToNode = vm.nodesToShow[i].children[j];
 							$timeout(function () {
 								currentSelectedNode = currentScrolledToNode;
 							});
+							*/
 						}
 
 						if ((level === (path.length - 2)) && !selectionFound) {
@@ -329,8 +347,10 @@
 				if (currentSelectedNode !== null) {
 					currentSelectedNode.selected = false;
 					currentSelectedNode = null;
-					vm.currentFilterItemSelected.class = "";
-					vm.currentFilterItemSelected = null;
+					if (vm.currentFilterItemSelected !== null) {
+						vm.currentFilterItemSelected.class = "";
+						vm.currentFilterItemSelected = null;
+					}
 				}
 			}
 			else if ((event.type === EventService.EVENT.PANEL_CARD_ADD_MODE) ||
