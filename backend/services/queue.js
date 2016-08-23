@@ -104,7 +104,7 @@ ImportQueue.prototype.importFile = function(filePath, orgFileName, databaseName,
             database: databaseName,
             project: projectName,   
             owner: userName,
-        }
+        };
 
         if(tag){
             json.tag = tag;

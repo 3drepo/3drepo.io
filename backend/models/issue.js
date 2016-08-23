@@ -494,7 +494,7 @@ schema.methods.clean = function(typePrefix){
 	cleaned.rev_id && (cleaned.rev_id = uuidToString(cleaned.rev_id));
 
 	cleaned.comments.forEach( (comment, i) => {
-		cleaned.comments[i].rev_id = comment.rev_id && (comment.rev_id = uuidToString(comment.rev_id))
+		cleaned.comments[i].rev_id = comment.rev_id && (comment.rev_id = uuidToString(comment.rev_id));
 	});
 
 	if(cleaned.scribble){
