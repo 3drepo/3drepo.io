@@ -96,7 +96,7 @@
 		 * Set the content height.
 		 * The height of a node is dependent on its name length and its level.
 		 *
-		 * @param {Number} nodesToShow
+		 * @param {Array} nodesToShow
 		 */
 		function setContentHeight (nodesToShow) {
 			var i, length,
@@ -140,8 +140,8 @@
 
 		/**
 		 * Set the toggle state of a node
-		 * @param node Node to change the visibility for
-		 * @param String visibility Visibility to change to
+		 * @param {Object} node Node to change the visibility for
+		 * @param {String} visibility Visibility to change to
 		 */
 		vm.setToggleState = function(node, visibility)
 		{
@@ -287,6 +287,9 @@
 					}
 
 					for (j = 0; j < childrenLength; j += 1) {
+						// Set child to not expanded
+						vm.nodesToShow[i].children[j].expanded = false;
+
 						if (vm.nodesToShow[i].children[j]._id === selectedId) {
 							// If the selected mesh doesn't have a name highlight the parent in the tree
 							// highlight the parent in the viewer
@@ -301,38 +304,27 @@
 							// This will clear any previously selected node
 							vm.nodesToShow[i].children[j].selected = false;
 						}
-						/*
-						vm.nodesToShow[i].children[j].selected = (vm.nodesToShow[i].children[j]._id === selectedId);
-						if (vm.nodesToShow[i].children[j].selected) {
-							console.log(vm.nodesToShow[i].children[j]);
-						}
-						*/
 
 						// Only set the toggle state once when the node is listed
 						if (!vm.nodesToShow[i].children[j].hasOwnProperty("toggleState")) {
 							vm.setToggleState(vm.nodesToShow[i].children[j], "visible");
 						}
 
-						if("children" in vm.nodesToShow[i].children[j]) {
+						// Determine if child node has childern
+						if ("children" in vm.nodesToShow[i].children[j]) {
 							vm.nodesToShow[i].children[j].hasChildren = vm.nodesToShow[i].children[j].children.length > 0;
 						}
 						else {
 							vm.nodesToShow[i].children[j].hasChildren = false;
 						}
 
+						// Set current selected node
 						if (vm.nodesToShow[i].children[j].selected) {
 							selectionFound = true;
 							currentSelectedNode = vm.nodesToShow[i].children[j];
-
-							/*
-							// This is a hack to get around the double click event issue
-							currentScrolledToNode = vm.nodesToShow[i].children[j];
-							$timeout(function () {
-								currentSelectedNode = currentScrolledToNode;
-							});
-							*/
 						}
 
+						// Determine if more expansion is required
 						if ((level === (path.length - 2)) && !selectionFound) {
 							selectedIndex += 1;
 						}
