@@ -167,7 +167,7 @@
 		/**
 		* Go to the specified revision
 		*/
-		vm.goToVision = function(revId){
+		vm.goToRevision = function(revId){
 			console.log(revId);
 			$location.path("/" + vm.account.name + "/" + vm.project.name + "/" + revId , "_self");
 		}

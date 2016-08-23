@@ -1946,6 +1946,15 @@ revisions {
   padding-bottom:15px;
   width:100%;
 }
+
+.revisionsDialog .current{
+  background-color: #ffffe0;
+}
+
+.revisionsDialog span.current{
+    font-style: italic;
+    font-size: 12px;
+}
 right-panel {
     position: absolute;
     top: 70px;

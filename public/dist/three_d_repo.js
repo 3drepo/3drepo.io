@@ -5882,7 +5882,7 @@ var ViewerManager = {};
 		/**
 		* Go to the specified revision
 		*/
-		vm.goToVision = function(revId){
+		vm.goToRevision = function(revId){
 			console.log(revId);
 			$location.path("/" + vm.account.name + "/" + vm.project.name + "/" + revId , "_self");
 		}
@@ -16145,13 +16145,35 @@ var Oculus = {};
 		};
 	}
 
-	revisionsCtrl.$inject = ["$location", "$scope", "RevisionsService", "UtilsService"];
+	revisionsCtrl.$inject = ["$location", "$scope", "RevisionsService", "UtilsService", "$filter"];
 
-	function revisionsCtrl ($location, $scope, RevisionsService, UtilsService) {
+	function revisionsCtrl ($location, $scope, RevisionsService, UtilsService, $filter) {
 		var vm = this;
-		vm.revName = vm.revision || 'head';
-		//$scope.$apply();
 
+		RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
+			vm.revisions = revisions;
+		});
+
+		$scope.$watch("vm.revisions", function () {
+			
+			if(!vm.revision){
+				vm.revName = vm.revisions[0].tag || $filter('revisionDate')(vm.revisions[0].timestamp);
+				vm.revisions[0].current = true;
+
+			} else {
+				vm.revisions && vm.revisions.forEach(function(rev, i){
+					if(rev.tag === vm.revision){
+						vm.revName = vm.revision;
+						vm.revisions[i].current = true;
+					} else if(rev._id === vm.revision){
+						vm.revName = $filter('revisionDate')(rev.timestamp);
+						vm.revisions[i].current = true;
+
+					}
+				});
+			}
+
+		});
 
 		vm.openDialog = function(){
 
@@ -16167,8 +16189,11 @@ var Oculus = {};
 		/**
 		* Go to the specified revision
 		*/
-		vm.goToVision = function(revId){
+		vm.goToRevision = function(revId){
+
+			UtilsService.closeDialog();
 			$location.path("/" + vm.account + "/" + vm.project + "/" + revId , "_self");
+
 		}
 
 		vm.closeDialog = function() {
