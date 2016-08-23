@@ -10,7 +10,7 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 			// Federation name
 			div(layout="row", flex)
 				md-input-container(flex="50")
-					input(placeholder="Federation name", tdr-focus="true", ng-model="vm.newFederationData.name", ng-disabled="vm.federationOriginalData")
+					input(placeholder="Federation name", tdr-focus="true", ng-model="vm.newFederationData.project", ng-disabled="vm.federationOriginalData")
 					.inputHint(ng-if="!vm.federationOriginalData") Letters, numbers and underscore only
 
 			md-divider
@@ -20,8 +20,8 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 				// Available
 				div(layout="column", flex)
 					p(layout="row", layout-align="center center") Available
-					md-list(ng-repeat="(accountIndex, account) in vm.accountsCopy")
-						md-list-item(ng-click="vm.toggleShowProjects($index)")
+					md-list(ng-repeat="(accountIndex, account) in vm.accountsToUse")
+						//md-list-item(ng-click="vm.toggleShowProjects($index)")
 							md-icon.angular-material-icons {{account.showProjectsIcon}}
 							p {{account.account}}
 						md-list(ng-if="account.showProjects")
@@ -45,15 +45,15 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 				div(layout="column", flex)
 					p(layout="row", layout-align="center center") Federated
 					md-list
-						md-list-item.federationProject(ng-repeat="item in vm.newFederationData.subProjects")
-							md-icon.angular-material-icons dashboard
-							p
-								| {{item.project}}
-								=" "
-								span#federatedProjectAccount ({{item.database}})
-							span(flex)
-							md-button.md-icon-button(aria-label="Remove", ng-click="vm.removeFromFederation($index)")
-								md-icon.angular-material-icons.md-accent remove_circle
+						div(ng-repeat="item in vm.newFederationData.subProjects", layout="column")
+							md-list-item.federationProject
+								md-icon.angular-material-icons dashboard
+								p {{item.project}}
+								span(flex)
+								md-button.md-icon-button(aria-label="Remove", ng-click="vm.removeFromFederation($index)")
+									md-icon.angular-material-icons.md-accent remove_circle
+							div(ng-if="vm.showRemoveWarning")
+								p#federationWarning This project cannot be removed. Please delete Federation.
 
 			md-divider
 

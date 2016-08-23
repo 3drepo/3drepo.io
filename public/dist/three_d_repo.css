@@ -457,8 +457,14 @@ account-team #accountTeamSubHeader {
 }
 
 #federationDialog .federationProject {
-  padding-left: 40px;
+  padding-left: 20px;
 }
+
+#federationDialog #federationWarning {
+  margin: 5px 0 0 20px;
+  color: #F44336;
+}
+
 
 #federationDialog #federatedProjectAccount {
   color: rgba(0, 0, 0, 0.5);

@@ -3,7 +3,7 @@
 		p You do not currently have any federations set up
 
 md-list(ng-if="!vm.showInfo")
-	div(layout="column", layout-align="start", ng-repeat="(federationIndex, federation) in vm.accountsCopy[0].fedProjects")
+	div(layout="column", layout-align="start", ng-repeat="(federationIndex, federation) in vm.accountsToUse[0].fedProjects")
 		div(layout="row", layout-align="start center")
 			md-list-item(ng-click="vm.viewFederation($index)", flex)
 				md-button.md-icon-button.md-accent(aria-label="Federation")

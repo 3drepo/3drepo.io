@@ -42,7 +42,8 @@
 
 	function AccountFederationsCtrl ($scope, $location, $timeout, UtilsService) {
 		var vm = this,
-			federationToDeleteIndex;
+			federationToDeleteIndex,
+			accountsToUse;
 
 		// Init
 		vm.federationOptions = {
@@ -55,10 +56,20 @@
 		 * Watch accounts input
 		 */
 		$scope.$watch("vm.accounts", function () {
+			var i, length;
+
+			// Currently only use the user DB for federation
+			accountsToUse = [];
 			if (angular.isDefined(vm.accounts)) {
-				vm.accountsCopy = angular.copy(vm.accounts);
-				console.log(vm.accountsCopy);
-				vm.showInfo = (vm.accountsCopy[0].fedProjects.length === 0);
+				for (i = 0, length = vm.accounts.length; i < length; i += 1) {
+					if (vm.accounts[i].account === vm.account) {
+						accountsToUse.push(vm.accounts[i]);
+						break;
+					}
+				}
+				vm.accountsToUse = angular.copy(accountsToUse);
+				console.log(vm.accountsToUse);
+				vm.showInfo = (vm.accountsToUse[0].fedProjects.length === 0);
 			}
 		});
 
@@ -80,7 +91,7 @@
 		 * @param event
 		 */
 		vm.setupNewFederation = function (event) {
-			vm.accountsCopy = angular.copy(vm.accounts);
+			vm.accountsToUse = angular.copy(accountsToUse);
 			vm.federationOriginalData = null;
 			vm.newFederationData = {
 				desc: "",
@@ -104,8 +115,8 @@
 		 * @param index
 		 */
 		vm.toggleShowProjects = function (index) {
-			vm.accountsCopy[index].showProjects = !vm.accountsCopy[index].showProjects;
-			vm.accountsCopy[index].showProjectsIcon = vm.accountsCopy[index].showProjects ? "folder_open" : "folder";
+			vm.accountsToUse[index].showProjects = !vm.accountsToUse[index].showProjects;
+			vm.accountsToUse[index].showProjectsIcon = vm.accountsToUse[index].showProjects ? "folder_open" : "folder";
 		};
 
 		/**
@@ -115,14 +126,16 @@
 		 * @param projectIndex
 		 */
 		vm.addToFederation = function (accountIndex, projectIndex) {
+			vm.showRemoveWarning = false;
+
 			vm.newFederationData.subProjects.push({
 				accountIndex: accountIndex,
-				database: vm.accountsCopy[accountIndex].account,
+				database: vm.accountsToUse[accountIndex].account,
 				projectIndex: projectIndex,
-				project: vm.accountsCopy[accountIndex].projects[projectIndex].project
+				project: vm.accountsToUse[accountIndex].projects[projectIndex].project
 			});
 
-			vm.accountsCopy[accountIndex].projects[projectIndex].federated = true;
+			vm.accountsToUse[accountIndex].projects[projectIndex].federated = true;
 		};
 
 		/**
@@ -133,14 +146,21 @@
 		vm.removeFromFederation = function (index) {
 			var i, j, iLength, jLength,
 				exit = false,
-				item = vm.newFederationData.subProjects.splice(index, 1);
+				item;
 
-			for (i = 0, iLength = vm.accountsCopy.length; (i < iLength) && !exit; i += 1) {
-				if (vm.accountsCopy[i].account === item[0].database) {
-					for (j = 0, jLength = vm.accountsCopy[i].projects.length; (j < jLength) && !exit; j += 1) {
-						if (vm.accountsCopy[i].projects[j].project === item[0].project) {
-							vm.accountsCopy[i].projects[j].federated = false;
-							exit = true;
+			// Cannot have existing federation with no sub projects
+			if (vm.newFederationData.hasOwnProperty("timestamp") && vm.newFederationData.subProjects.length === 1) {
+				vm.showRemoveWarning = true;
+			}
+			else {
+				item = vm.newFederationData.subProjects.splice(index, 1)
+				for (i = 0, iLength = vm.accountsToUse.length; (i < iLength) && !exit; i += 1) {
+					if (vm.accountsToUse[i].account === item[0].database) {
+						for (j = 0, jLength = vm.accountsToUse[i].projects.length; (j < jLength) && !exit; j += 1) {
+							if (vm.accountsToUse[i].projects[j].project === item[0].project) {
+								vm.accountsToUse[i].projects[j].federated = false;
+								exit = true;
+							}
 						}
 					}
 				}
@@ -157,7 +177,7 @@
 				promise = UtilsService.doPost(vm.newFederationData, vm.account + "/" + vm.newFederationData.project);
 				promise.then(function (response) {
 					console.log(response);
-					vm.accountsCopy[0].fedProjects.push(vm.newFederationData);
+					vm.accountsToUse[0].fedProjects.push(vm.newFederationData);
 					vm.closeDialog();
 				});
 			}
@@ -178,7 +198,7 @@
 		 * Open the federation in the viewer
 		 */
 		vm.viewFederation = function (index) {
-			$location.path("/" + vm.account + "/" + vm.accountsCopy[0].fedProjects[index].project, "_self").search(null);
+			$location.path("/" + vm.account + "/" + vm.accountsToUse[0].fedProjects[index].project, "_self").search(null);
 		};
 
 		/**
@@ -208,10 +228,10 @@
 		 * Delete federation
 		 */
 		vm.delete = function () {
-			var promise = UtilsService.doDelete({}, vm.account + "/" + vm.accountsCopy[0].fedProjects[federationToDeleteIndex].project);
+			var promise = UtilsService.doDelete({}, vm.account + "/" + vm.accountsToUse[0].fedProjects[federationToDeleteIndex].project);
 			promise.then(function (response) {
 				if (response.status === 200) {
-					vm.accountsCopy[0].fedProjects.splice(federationToDeleteIndex, 1);
+					vm.accountsToUse[0].fedProjects.splice(federationToDeleteIndex, 1);
 					vm.closeDialog();
 				}
 				else {
@@ -229,16 +249,19 @@
 		function setupEditFederation (event, index) {
 			var i, j, k, iLength, jLength, kLength;
 
-			vm.accountsCopy = angular.copy(vm.accounts);
-			vm.federationOriginalData = vm.accountsCopy[0].fedProjects[index];
+			vm.showRemoveWarning = false;
+
+			vm.accountsToUse = angular.copy(accountsToUse);
+			vm.federationOriginalData = vm.accountsToUse[0].fedProjects[index];
 			vm.newFederationData = angular.copy(vm.federationOriginalData);
 
-			for (i = 0, iLength = vm.accountsCopy.length; i < iLength; i += 1) {
-				for (j = 0, jLength = vm.accountsCopy[i].projects.length; j < jLength; j += 1) {
-					vm.accountsCopy[i].projects[j].federated = false;
+			// Disable projects in the projects list that are federated
+			for (i = 0, iLength = vm.accountsToUse.length; i < iLength; i += 1) {
+				for (j = 0, jLength = vm.accountsToUse[i].projects.length; j < jLength; j += 1) {
+					vm.accountsToUse[i].projects[j].federated = false;
 					for (k = 0, kLength = vm.federationOriginalData.subProjects.length; k < kLength; k += 1) {
-						if (vm.federationOriginalData.subProjects[k].project === vm.accountsCopy[i].projects[j].project) {
-							vm.accountsCopy[i].projects[j].federated = true;
+						if (vm.federationOriginalData.subProjects[k].project === vm.accountsToUse[i].projects[j].project) {
+							vm.accountsToUse[i].projects[j].federated = true;
 						}
 					}
 				}
@@ -258,7 +281,7 @@
 			vm.deleteError = null;
 			vm.deleteTitle = "Delete Federation";
 			vm.deleteWarning = "This federation will be lost permanently and will not be recoverable";
-			vm.deleteName = vm.accountsCopy[0].fedProjects[federationToDeleteIndex].project;
+			vm.deleteName = vm.accountsToUse[0].fedProjects[federationToDeleteIndex].project;
 			UtilsService.showDialog("deleteDialog.html", $scope, event, true);
 		}
 
@@ -269,7 +292,7 @@
 		 * @param {Object} index
 		 */
 		function setupEditTeam (event, index) {
-			vm.item = vm.accountsCopy[0].fedProjects[index];
+			vm.item = vm.accountsToUse[0].fedProjects[index];
 			UtilsService.showDialog("teamDialog.html", $scope, event);
 		}
 	}
