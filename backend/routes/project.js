@@ -29,6 +29,8 @@ var multer = require("multer");
 var ProjectHelpers = require('../models/helper/project');
 var createAndAssignRole = ProjectHelpers.createAndAssignRole;
 var convertToErrorCode = ProjectHelpers.convertToErrorCode;
+var fs = require('fs');
+var systemLogger = require("../logger.js").systemLogger;
 
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
@@ -293,6 +295,22 @@ function uploadProject(req, res, next){
 					// api respond once the file is uploaded
 					responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: 'uploaded'});
 
+					let deleteModel = function(filePath){
+						fs.unlink(filePath, function(err){
+							if(err){
+								systemLogger.logError('error while deleting tmp model file',{
+									message: err.message,
+									err: err,
+									file: filePath
+								});
+							} else {
+								systemLogger.logInfo('tmp model deleted',{
+									file: filePath
+								});
+							}
+						});
+					};
+
 					return importQueue.importFile(
 						req.file.path, 
 						req.file.originalname, 
@@ -300,8 +318,14 @@ function uploadProject(req, res, next){
 						req.params.project,
 						req.session.user.username
 					)
-					.then(corID => Promise.resolve(corID))
-					.catch(err => {
+					.then(obj => {
+
+						deleteModel(obj.newPath);
+						return Promise.resolve(obj);
+
+					}).catch(err => {
+
+						deleteModel(err.newPath);
 
 						//catch here to provide custom error message
 						if(err.errCode && projectSetting){
@@ -310,11 +334,14 @@ function uploadProject(req, res, next){
 							return Promise.reject(convertToErrorCode(err.errCode));
 						}
 
+
 						return Promise.reject(err);
 						
 					});
 
-				}).then(corID => {
+				}).then(obj => {
+
+					let corID = obj.corID;
 
 					req[C.REQ_REPO].logger.logInfo(`Job ${corID} imported without error`);
 

@@ -91,9 +91,12 @@ ImportQueue.prototype.importFile = function(filePath, orgFileName, databaseName,
 
     //console.log(filePath);
     //console.log(orgFileName);
+    let newPath;
 
-    return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy).then(newPath => {
+    return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy).then(_newPath => {
     
+        newPath = _newPath;
+        
         let msg = 'import ' + newPath + ' ' + databaseName + ' ' + projectName + ' ' + userName;
         return this._dispatchWork(corID, msg);
     
@@ -103,8 +106,8 @@ ImportQueue.prototype.importFile = function(filePath, orgFileName, databaseName,
 
 
             this.deferedObjs[corID] = {
-                resolve: () => resolve(corID),
-                reject: errCode => reject({corID, errCode})
+                resolve: () => resolve({corID, newPath}),
+                reject: errCode => reject({corID, errCode, newPath})
             };
 
         });
