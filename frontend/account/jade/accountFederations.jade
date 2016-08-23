@@ -1,38 +1,42 @@
-.userContent(ng-if="vm.showInfo")
-	.cardInfo
-		p You do not currently have any federations set up
+.userContent
 
-md-list(ng-if="!vm.showInfo")
-	div(layout="column", layout-align="start", ng-repeat="(federationIndex, federation) in vm.accountsToUse[0].fedProjects")
-		div(layout="row", layout-align="start center")
-			md-list-item(ng-click="vm.viewFederation($index)", flex)
-				md-button.md-icon-button.md-accent(aria-label="Federation")
-					md-icon.angular-material-icons border_all
-				.md-list-item-text(flex="40")
-					p {{federation.project}}
-			//md-button.md-icon-button.md-accent(aria-label="Edit", ng-click="vm.editFederation($event, $index)")
-				md-icon.angular-material-icons edit
-			md-menu(md-position-mode="target-right target")
-				md-button.md-icon-button.md-accent(aria-label="More", ng-click="$mdOpenMenu($event)")
-					md-icon.md-menu-origin.angular-material-icons(md-menu-origin) more_vert
-				md-menu-content(width="3")
-					md-menu-item(ng-repeat="(key, value) in vm.federationOptions")
-						md-button(ng-click="vm.doFederationOption($event, key, federationIndex)")
-							div(layout="row", flex)
-								p(flex) {{value.label}}
-								md-icon.angular-material-icons(md-menu-align-target) {{value.icon}}
+	div(ng-if="vm.showInfo")
+		.cardInfo
+			p You do not currently have any federations set up
 
-		p.federationProjectsList
-			| (
-			span(ng-repeat="subProject in federation.subProjects")
-				| {{subProject.project}}
-				span(ng-if="!$last")
-					| ,
-					=" "
-				span(ng-if="$last") )
+	md-list(ng-if="!vm.showInfo")
+		div(layout="column", layout-align="start", ng-repeat="(federationIndex, federation) in vm.accountsToUse[0].fedProjects")
+			div(layout="row", layout-align="start center")
+				md-list-item(ng-click="vm.viewFederation($index)", flex)
+					md-button.md-icon-button.md-accent(aria-label="Federation")
+						md-icon.angular-material-icons border_all
+					.md-list-item-text(flex="40")
+						p {{federation.project}}
+				//md-button.md-icon-button.md-accent(aria-label="Edit", ng-click="vm.editFederation($event, $index)")
+					md-icon.angular-material-icons edit
+				div(layout="row")
+					p.federationTimestamp {{federation.timestamp | prettyDate:true}}
+					md-menu(md-position-mode="target-right target")
+						md-button.md-icon-button.md-accent(aria-label="More", ng-click="$mdOpenMenu($event)")
+							md-icon.md-menu-origin.angular-material-icons(md-menu-origin) more_vert
+						md-menu-content(width="3")
+							md-menu-item(ng-repeat="(key, value) in vm.federationOptions")
+								md-button(ng-click="vm.doFederationOption($event, key, federationIndex)")
+									div(layout="row", flex)
+										p(flex) {{value.label}}
+										md-icon.angular-material-icons(md-menu-align-target) {{value.icon}}
 
-		md-divider
+			p.federationProjectsList
+				| (
+				span(ng-repeat="subProject in federation.subProjects")
+					| {{subProject.project}}
+					span(ng-if="!$last")
+						| ,
+						=" "
+					span(ng-if="$last") )
 
-div(layout="row" layout-align="end" )
-	md-button.md-accent.md-fab.md-mini(aria-label="Add" ng-click="vm.setupNewFederation($event)")
-		md-icon.angular-material-icons add
+			md-divider
+
+	div(layout="row" layout-align="end" )
+		md-button.md-accent.md-fab.md-mini(aria-label="Add" ng-click="vm.setupNewFederation($event)")
+			md-icon.angular-material-icons add

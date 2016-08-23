@@ -138,6 +138,10 @@ account-projects .projectRight .projectUploaded {
   color: rgba(0,0,0,0.5);
 }
 
+account-projects .userContent {
+  padding: 0 !important;
+}
+
 /** Account Profile ***************************************************************************************************/
 account-profile md-input-container {
   margin-right: 5px;
@@ -472,7 +476,7 @@ account-team #accountTeamSubHeader {
 
 /** Account Federations ***********************************************************************************************/
 account-federations .userContent {
-  margin-bottom: -30px;
+  padding: 0 !important;
 }
 
 account-federations md-list {
@@ -485,4 +489,9 @@ account-federations .md-list-item-text {
 account-federations .federationProjectsList {
   margin: 0 0 10px 70px;
   color: rgba(0, 0, 0, 0.5);
+}
+
+account-federations .federationTimestamp {
+  color: rgba(0,0,0,.3);
+  margin-left: 20px;
 }

@@ -5362,8 +5362,8 @@ var ViewerManager = {};
 			var i, length;
 
 			// Currently only use the user DB for federation
-			accountsToUse = [];
 			if (angular.isDefined(vm.accounts)) {
+				accountsToUse = [];
 				for (i = 0, length = vm.accounts.length; i < length; i += 1) {
 					if (vm.accounts[i].account === vm.account) {
 						accountsToUse.push(vm.accounts[i]);
@@ -5372,7 +5372,8 @@ var ViewerManager = {};
 				}
 				vm.accountsToUse = angular.copy(accountsToUse);
 				console.log(vm.accountsToUse);
-				vm.showInfo = (vm.accountsToUse[0].fedProjects.length === 0);
+
+				vm.showInfo = ((vm.accountsToUse.length === 0) || (vm.accountsToUse[0].fedProjects.length === 0));
 			}
 		});
 
@@ -5456,7 +5457,7 @@ var ViewerManager = {};
 				vm.showRemoveWarning = true;
 			}
 			else {
-				item = vm.newFederationData.subProjects.splice(index, 1)
+				item = vm.newFederationData.subProjects.splice(index, 1);
 				for (i = 0, iLength = vm.accountsToUse.length; (i < iLength) && !exit; i += 1) {
 					if (vm.accountsToUse[i].account === item[0].database) {
 						for (j = 0, jLength = vm.accountsToUse[i].projects.length; (j < jLength) && !exit; j += 1) {
@@ -5501,7 +5502,7 @@ var ViewerManager = {};
 		 * Open the federation in the viewer
 		 */
 		vm.viewFederation = function (index) {
-			$location.path("/" + vm.account + "/" + vm.accountsToUse[0].fedProjects[index].project, "_self").search(null);
+			$location.path("/" + vm.account + "/" + vm.accountsToUse[0].fedProjects[index].project, "_self").search({});
 		};
 
 		/**
