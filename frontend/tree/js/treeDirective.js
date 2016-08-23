@@ -101,7 +101,7 @@
 		function setContentHeight (nodesToShow) {
 			var i, length,
 				height = 0,
-				nodeMinHeight = 48,
+				nodeMinHeight = 42,
 				maxStringLength = 35, maxStringLengthForLevel = 0,
 				lineHeight = 18, levelOffset = 2;
 

@@ -1965,7 +1965,7 @@ tree .treeNodes p {
   outline: none;
   word-break: break-all;
   word-wrap: break-word;
-  margin: 0 0 0 -5px;
+  margin: 8px 0 8px -5px;
   font-size: 14px;
 }
 tree .treeNodes p:hover {
@@ -1974,10 +1974,6 @@ tree .treeNodes p:hover {
   -webkit-border-radius: 2px;
   -moz-border-radius: 2px;
   border-radius: 2px;
-}
-
-tree .treeNodeDivider {
-  margin-top: 4px;
 }
 
 tree md-checkbox {
@@ -2028,7 +2024,8 @@ tree .virtualRepeatInfiniteScroll .vertical-container {
 
 tree .virtualRepeatInfiniteScroll .repeated-item {
   cursor: default;
-  padding: 4px 0;
+  padding: 0 0;
+  min-height: 1px;
 }
 
 tree .filterListNodeName {
