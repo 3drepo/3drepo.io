@@ -19,7 +19,7 @@ describe('VAT', function(){
 
 		it('in other countries should be 0', function(){
 
-			let otherEU = ['AT','BE','BG','CY','CZ','DE','DK','EE','EL','ES','FI','FR',
+			let otherEU = ['AT','BE','BG','CY','CZ','DE','DK','EE','GR','ES','FI','FR',
 			'HR','HU','IE','IT','LT','LU','LV','MT','NL','PL','PT','RO',
 			'SE','SI','SK'];
 
@@ -58,7 +58,7 @@ describe('VAT', function(){
 			expect(vat.getByCountryCode('DE', isBusiness)).to.closeTo(0.19, Number.EPSILON);
 			expect(vat.getByCountryCode('DK', isBusiness)).to.closeTo(0.25, Number.EPSILON);
 			expect(vat.getByCountryCode('EE', isBusiness)).to.closeTo(0.2, Number.EPSILON);
-			expect(vat.getByCountryCode('EL', isBusiness)).to.closeTo(0.23, Number.EPSILON);
+			expect(vat.getByCountryCode('GR', isBusiness)).to.closeTo(0.23, Number.EPSILON);
 			expect(vat.getByCountryCode('ES', isBusiness)).to.closeTo(0.21, Number.EPSILON);
 			expect(vat.getByCountryCode('FI', isBusiness)).to.closeTo(0.24, Number.EPSILON);
 			expect(vat.getByCountryCode('FR', isBusiness)).to.closeTo(0.2, Number.EPSILON);
