@@ -2093,7 +2093,7 @@ tree .noAccessName {
   opacity: 0.5;
 }
 tree .noAccessName:hover {
-  cursor: default;
+  cursor: default !important;
 }
 
 tree .toggleButton {

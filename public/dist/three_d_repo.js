@@ -5361,19 +5361,20 @@ var ViewerManager = {};
 		$scope.$watch("vm.accounts", function () {
 			var i, length;
 
-			// Currently only use the user DB for federation
 			if (angular.isDefined(vm.accounts)) {
-				accountsToUse = [];
-				for (i = 0, length = vm.accounts.length; i < length; i += 1) {
-					if (vm.accounts[i].account === vm.account) {
-						accountsToUse.push(vm.accounts[i]);
-						break;
+				vm.showInfo = true;
+				if (vm.accounts.length > 0) {
+					accountsToUse = [];
+					for (i = 0, length = vm.accounts.length; i < length; i += 1) {
+						if (vm.accounts[i].fedProjects.length > 0) {
+							accountsToUse.push(vm.accounts[i]);
+							vm.showInfo = false;
+						}
 					}
-				}
-				vm.accountsToUse = angular.copy(accountsToUse);
-				console.log(vm.accountsToUse);
 
-				vm.showInfo = ((vm.accountsToUse.length === 0) || (vm.accountsToUse[0].fedProjects.length === 0));
+					vm.accountsToUse = angular.copy(accountsToUse);
+					console.log(vm.accountsToUse);
+				}
 			}
 		});
 
@@ -5501,8 +5502,8 @@ var ViewerManager = {};
 		/**
 		 * Open the federation in the viewer
 		 */
-		vm.viewFederation = function (index) {
-			$location.path("/" + vm.account + "/" + vm.accountsToUse[0].fedProjects[index].project, "_self").search({});
+		vm.viewFederation = function (account, index) {
+			$location.path("/" + account + "/" + vm.accountsToUse[0].fedProjects[index].project, "_self").search({});
 		};
 
 		/**

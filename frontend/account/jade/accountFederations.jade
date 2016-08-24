@@ -7,7 +7,7 @@
 	md-list(ng-if="!vm.showInfo")
 		div(layout="column", layout-align="start", ng-repeat="(federationIndex, federation) in vm.accountsToUse[0].fedProjects")
 			div(layout="row", layout-align="start center")
-				md-list-item(ng-click="vm.viewFederation($index)", flex)
+				md-list-item(ng-click="vm.viewFederation(vm.accountsToUse[0].account, $index)", flex)
 					md-button.md-icon-button.md-accent(aria-label="Federation")
 						md-icon.angular-material-icons border_all
 					.md-list-item-text(flex="40")
