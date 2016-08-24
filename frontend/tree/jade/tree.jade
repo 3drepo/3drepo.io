@@ -7,16 +7,20 @@ div(class="virtualRepeatInfiniteScroll", ng-show="vm.showTree")
 		.treeNodes(md-virtual-repeat="item in vm.infiniteItemsTree" md-on-demand="" class="repeated-item")
 			.treeNode(style="margin-left:{{item.level * 20}}px", ng-if="item.name", layout="row", layout-align="start center", flex)
 				// Expand/collapse
-				md-button.md-icon-button.md-primary.expandButton(aria-label="Toggle Expand", ng-click="vm.expand(item._id)")
+				md-button.md-icon-button.md-primary.expandButton(aria-label="Toggle Expand", ng-click="vm.expand(item._id)", ng-if="!item.status")
 					md-icon.angular-material-icons(ng-if="!item.expanded && item.hasChildren") add_box
-					//md-icon.angular-material-icons(ng-if="!item.expanded && !item.hasChildren", ng-class="{treeButtonDisabled: true}") remove
 					md-icon.angular-material-icons(ng-if="!item.expanded && !item.hasChildren") remove
 					md-icon.angular-material-icons(ng-if="item.expanded") indeterminate_check_box
+
+				md-button.md-icon-button.noAccessButton(aria-label="Status", ng-if="item.status")
+					md-icon.angular-material-icons(ng-if="item.status==='NO_ACCESS'") do_not_disturb
+					md-icon.angular-material-icons(ng-if="item.status==='NOT_FOUND'") error_outline
 				// Name
 				div(flex, layout="row", layout-align="start center")
-					p(ng-click="vm.selectNode(item)" ng-class="{treeNodeSelected: item.selected}") {{item.name}}
+					p(ng-click="vm.selectNode(item)" ng-class="{treeNodeSelected: item.selected}", ng-if="!item.status") {{item.name}}
+					p.noAccessName(ng-if="item.status") {{item.name}}
 				// Toggle visibility
-				md-button.md-icon-button.md-primary.toggleButton(aria-label="Toggle Visible", ng-click="vm.toggleTreeNode(item)")
+				md-button.md-icon-button.md-primary.toggleButton(aria-label="Toggle Visible", ng-click="vm.toggleTreeNode(item)", ng-if="!item.status")
 					md-icon.angular-material-icons(ng-if="item.toggleState==='visible'") visibility
 					md-icon.angular-material-icons(ng-if="item.toggleState==='invisible'") visibility_off
 					md-icon.angular-material-icons.parentOfInvisible(aria-label="ParentOfInvisible", ng-if="item.toggleState==='parentOfInvisible'") visibility_off

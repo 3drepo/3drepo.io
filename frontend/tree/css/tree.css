@@ -48,6 +48,17 @@ tree .expandButton {
   margin-left: 0 !important;
 }
 
+tree .noAccessButton {
+  margin-left: 0 !important;
+  opacity: 0.5;
+}
+tree .noAccessName {
+  opacity: 0.5;
+}
+tree .noAccessName:hover {
+  cursor: default !important;
+}
+
 tree .toggleButton {
   margin-right: 0 !important;
 }

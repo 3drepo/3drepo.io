@@ -17050,6 +17050,8 @@ var Oculus = {};
 							}
 						}
 					} else {
+						console.log(666, vm.nodesToShow[index].children);
+
 						// Expand
 						numChildren = vm.nodesToShow[index].children.length;
 
@@ -17059,26 +17061,34 @@ var Oculus = {};
 						}
 
 						for (i = 0; i < numChildren; i += 1) {
-							vm.nodesToShow[index].children[i].expanded = false;
+							if (vm.nodesToShow[index].children[i].hasOwnProperty("children") &&
+								// For federation - handle node of project that cannot be viewed or has been deleted
+								vm.nodesToShow[index].children[i].children[0].hasOwnProperty("status")) {
+								vm.nodesToShow[index].children[i].status = vm.nodesToShow[index].children[i].children[0].status;
+							}
+							else {
+								// Normal tree node
+								vm.nodesToShow[index].children[i].expanded = false;
 
-							/*
-							// If the child node was not clicked hidden set its toggle state to visible
-							if (!wasClickedHidden(vm.nodesToShow[index].children[i])) {
-								vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
-							}
-							*/
-							// If the child node does not have a toggleState set it to visible
-							if (!vm.nodesToShow[index].children[i].hasOwnProperty("toggleState")) {
-								vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
-							}
-							// A node should relect the state of any path relative
-							else if (((vm.nodesToShow[index].children[i].toggleState === "invisible") ||
-									  (vm.nodesToShow[index].children[i].toggleState === "parentOfInvisible")) &&
-									 pathRelativeWasClickShown(vm.nodesToShow[index].children[i])) {
-								vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
+								/*
+								 // If the child node was not clicked hidden set its toggle state to visible
+								 if (!wasClickedHidden(vm.nodesToShow[index].children[i])) {
+								 vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
+								 }
+								 */
+								// If the child node does not have a toggleState set it to visible
+								if (!vm.nodesToShow[index].children[i].hasOwnProperty("toggleState")) {
+									vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
+								}
+								// A node should relect the state of any path relative
+								else if (((vm.nodesToShow[index].children[i].toggleState === "invisible") ||
+									(vm.nodesToShow[index].children[i].toggleState === "parentOfInvisible")) &&
+									pathRelativeWasClickShown(vm.nodesToShow[index].children[i])) {
+									vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
+								}
 							}
 
-							// Determine if child node has childern
+							// Determine if child node has children
 							vm.nodesToShow[index].children[i].level = vm.nodesToShow[index].level + 1;
 							if("children" in vm.nodesToShow[index].children[i]) {
 								vm.nodesToShow[index].children[i].hasChildren = vm.nodesToShow[index].children[i].children.length > 0;
