@@ -33,8 +33,11 @@ var historySchema = Schema({
 		api: Number,
 		parents: [],
 		name: String,
+		tag: String,
 		author: String,
+		desc: String,
 		timestamp: Date,
+		coordOffset: [],
 		current: []
 });
 
