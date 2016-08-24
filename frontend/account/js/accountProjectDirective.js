@@ -32,9 +32,10 @@
 				uploadedFile: "=",
 				onShowPage: "&",
 				onSetupDeleteProject: "&",
-				quota: "="
+				quota: "=",
+				subscriptions: "="
 			},
-			controller: accountProjectCtrl,
+			controller: AccountProjectCtrl,
 			controllerAs: 'vm',
 			bindToController: true,
 			link: function (scope, element) {
@@ -46,9 +47,9 @@
 		};
 	}
 
-	accountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig"];
+	AccountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig"];
 
-	function accountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig) {
+	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig) {
 		var vm = this,
 			infoTimeout = 4000;
 
@@ -66,11 +67,11 @@
 		checkFileUploading();
 
 		/*
-		 * Watch the new project type
+		 * Watch changes in upload file
 		 */
 		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
 			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {
-				console.log(vm.uploadedFile);
+				console.log("Uploaded file", vm.uploadedFile);
 				uploadFileToProject(vm.uploadedFile.file);
 			}
 		});
@@ -79,18 +80,14 @@
 		 * Go to the project viewer
 		 */
 		vm.goToProject = function () {
-			// No timestamp indicates no model previously uploaded
-			if (vm.project.timestamp === null) {
-				vm.uploadFile();
-			}
-			else {
-				// Disable going to viewer if uploading a model
-				var promise = UtilsService.doGet(vm.account.name + "/" + vm.project.name + ".json");
-				promise.then(function (response) {
-					if (response.data.status !== "processing") {
-						$location.path("/" + vm.account.name + "/" + vm.project.name, "_self").search("page", null);
-					}
-				});
+			if (!vm.project.uploading) {
+				if (vm.project.timestamp === null) {
+					// No timestamp indicates no model previously uploaded
+					vm.uploadFile();
+				}
+				else {
+					$location.path("/" + vm.account + "/" + vm.project.name, "_self").search("page", null);
+				}
 			}
 		};
 
@@ -114,8 +111,7 @@
 					break;
 
 				case "team":
-					$location.search("proj", vm.project.name);
-					vm.onShowPage({page: "team", callingPage: "repos"});
+					setupEditTeam(event);
 					break;
 
 				case "delete":
@@ -149,7 +145,7 @@
 				formData;
 
 			// Check the quota
-			promise = UtilsService.doGet(vm.account.name + ".json");
+			promise = UtilsService.doGet(vm.account + ".json");
 			promise.then(function (response) {
 				console.log(response);
 				if (file.size > response.data.accounts[0].quota.spaceLimit) {
@@ -175,7 +171,7 @@
 					else {
 						formData = new FormData();
 						formData.append("file", file);
-						promise = UtilsService.doPost(formData, vm.account.name + "/" + vm.project.name + "/upload", {'Content-Type': undefined});
+						promise = UtilsService.doPost(formData, vm.account + "/" + vm.project.name + "/upload", {'Content-Type': undefined});
 						promise.then(function (response) {
 							console.log("uploadModel", response);
 							if ((response.data.status === 400) || (response.data.status === 404)) {
@@ -193,6 +189,7 @@
 								}, infoTimeout);
 							}
 							else {
+								console.log("Polling upload!");
 								pollUpload();
 							}
 						});
@@ -205,7 +202,7 @@
 		 * Display file uploading and info
 		 */
 		function checkFileUploading () {
-			var promise = UtilsService.doGet(vm.account.name + "/" + vm.project.name + ".json");
+			var promise = UtilsService.doGet(vm.account + "/" + vm.project.name + ".json");
 			promise.then(function (response) {
 				if (response.data.status === "processing") {
 					vm.project.uploading = true;
@@ -224,7 +221,7 @@
 				promise;
 
 			interval = $interval(function () {
-				promise = UtilsService.doGet(vm.account.name + "/" + vm.project.name + ".json");
+				promise = UtilsService.doGet(vm.account + "/" + vm.project.name + ".json");
 				promise.then(function (response) {
 					console.log("uploadStatus", response);
 					if ((response.data.status === "ok") || (response.data.status === "failed")) {
@@ -251,5 +248,16 @@
 				});
 			}, 1000);
 		}
+
+		/**
+		 * Set up team of project
+		 *
+		 * @param {Object} event
+		 */
+		function setupEditTeam (event) {
+			vm.item = vm.project;
+			UtilsService.showDialog("teamDialog.html", $scope, event);
+		}
+
 	}
 }());

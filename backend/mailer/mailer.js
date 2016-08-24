@@ -18,10 +18,11 @@
 
 var nodemailer = require('nodemailer');
 var config = require('../config');
+var responseCodes = require('../response_codes');
 
 var transporter;
 
-function sendEmail(template, to, data){
+function sendEmail(template, to, data, attachments){
 	'use strict';
 
 
@@ -39,6 +40,10 @@ function sendEmail(template, to, data){
 		subject: typeof template.subject === 'function' ? template.subject(data) : template.subject,
 		html: template.html(data)
 	};
+
+	if(attachments){
+		mailOptions.attachments = attachments;
+	}
 
 	transporter = transporter || nodemailer.createTransport(config.mail.smtpConfig);
 
@@ -108,17 +113,47 @@ function sendResetPasswordEmail(to, data){
 	return sendEmail(template, to, data);
 }
 
-function sendPaymentReceivedEmail(to, data){
+function sendPaymentReceivedEmail(to, data, attachments){
 	'use strict';
 
 	let template = require('./templates/paymentReceived');
-	return sendEmail(template, to, data);
+
+
+	return sendEmail(template, to, data, attachments);
 }
+
+function sendPaymentReceivedEmailToSales(data, attachments){
+	'use strict';
+
+	let template = require('./templates/paymentReceived');
+	
+	let salesTemplate = {
+		html: template.html,
+		subject: function(data){
+			return `[Invoice ${data.invoiceNo}] ${data.email}`;
+		}
+	};
+
+	if(config.contact && config.contact.sales){
+		//console.log(config.contact.sales);
+		return sendEmail(salesTemplate, config.contact.sales, data, attachments);
+	} else {
+		return Promise.resolve();
+	}
+
+	
+}
+
 
 function sendContactEmail(data){
 	'use strict';
 
 	let template = require('./templates/contact');
+	
+	if(!config.contact || !config.contact.email){
+		return Promise.reject(responseCodes.NO_CONTACT_EMAIL);
+	}
+
 	return sendEmail(template, config.contact.email, data);
 }
 
@@ -171,5 +206,6 @@ module.exports = {
 	sendPaymentFailedEmail,
 	sendPaymentErrorEmail,
 	sendProjectInvitation,
-	sendSubscriptionSuspendedEmail
+	sendSubscriptionSuspendedEmail,
+	sendPaymentReceivedEmailToSales
 }

@@ -1,3 +1,6 @@
+var soap = require('soap');
+var vatValidationUrl = 'http://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl';
+
 var vat = [
 	{ countryCode: 'AT', standardRate: 20 },
 	{ countryCode: 'BE', standardRate: 21 },
@@ -7,7 +10,7 @@ var vat = [
 	{ countryCode: 'DE', standardRate: 19 },
 	{ countryCode: 'DK', standardRate: 25 },
 	{ countryCode: 'EE', standardRate: 20 },
-	{ countryCode: 'EL', standardRate: 23 },
+	{ countryCode: 'GR', standardRate: 23 },
 	{ countryCode: 'ES', standardRate: 21 },
 	{ countryCode: 'FI', standardRate: 24 },
 	{ countryCode: 'FR', standardRate: 20 },
@@ -55,6 +58,27 @@ function getByCountryCode(code, isBusiness){
 
 }
 
+
+function checkVAT(code, vat){
+
+	return new Promise((resolve, reject) => {
+		soap.createClient(vatValidationUrl, function(err, client) {
+			client.checkVat({
+				countryCode: code,
+				vatNumber: vat
+			}, function(err, result) {
+				if(err){
+					reject(err);
+				} else {
+					resolve(result);
+				}
+			});
+		});
+	});
+
+}
+
 module.exports = {
-	getByCountryCode
+	getByCountryCode,
+	checkVAT
 };

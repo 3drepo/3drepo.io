@@ -29,6 +29,7 @@ var schema = mongoose.Schema({
 	type: String,
 	status: {type: String, default: 'ok'},
 	errorReason: Object,
+	federate: Boolean,
 	permissions: [Number],
 	properties: {}, // TO-DO: ask tim/carmen for full properties and update this schema
 	info: mongoose.Schema({

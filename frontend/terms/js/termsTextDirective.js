@@ -19,22 +19,22 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("termsAndConditionsText", termsAndConditionsText);
+		.directive("termsText", termsText);
 
-	function termsAndConditionsText() {
+	function termsText() {
 		return {
 			restrict: "E",
 			scope: {},
-			templateUrl: "termsAndConditionsText.html",
-			controller: TermsAndConditionsTextCtrl,
+			templateUrl: "termsText.html",
+			controller: TermsTextCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	TermsAndConditionsTextCtrl.$inject = [];
+	TermsTextCtrl.$inject = [];
 
-	function TermsAndConditionsTextCtrl () {
+	function TermsTextCtrl () {
 		var vm = this;
 	}
 }());

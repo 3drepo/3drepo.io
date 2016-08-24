@@ -19,11 +19,15 @@ var Role = require('../role');
 var ProjectSetting = require('../projectSetting');
 var User = require('../user');
 var responseCodes = require('../../response_codes');
-//var importQueue = require('../../services/queue');
+var importQueue = require('../../services/queue');
 var C = require('../../constants');
 var Mailer = require('../../mailer/mailer');
 var systemLogger = require("../../logger.js").systemLogger;
 var config = require('../../config');
+var History = require('../history');
+var utils = require("../../utils");
+var stash = require('./stash');
+var Ref = require('../ref');
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -55,6 +59,9 @@ function convertToErrorCode(errCode){
         case 7:
             errObj = responseCodes.FILE_IMPORT_MISSING_TEXTURES;
             break;
+        case 9:
+        	errObj = responseCodes.REPOERR_FED_GEN_FAIL;
+        	break;
         default:
             errObj = responseCodes.FILE_IMPORT_UNKNOWN_ERR;
             break;
@@ -63,7 +70,7 @@ function convertToErrorCode(errCode){
     return errObj;
 }
 
-function createAndAssignRole(project, account, username, desc, type) {
+function createAndAssignRole(project, account, username, desc, type, federate) {
 	'use strict';
 
 
@@ -116,6 +123,7 @@ function createAndAssignRole(project, account, username, desc, type) {
 			setting.owner = username;
 			setting.desc = desc;
 			setting.type = type;
+			setting.federate = federate;
 			
 			return setting.save();
 		});
@@ -416,10 +424,137 @@ function removeCollaborator(username, email, account, project, role){
 	});
 }
 
+
+function createFederatedProject(account, project, subProjects){
+	'use strict';
+	
+	let federatedJSON = {
+		database: account,
+		project: project,
+		subProjects: []
+	};
+	
+	subProjects.forEach(subProject => {
+		federatedJSON.subProjects.push({
+			database: subProject.database,
+			project: subProject.project
+		});
+	});
+
+	return importQueue.createFederatedProject(account, federatedJSON);
+}
+
+
+function getFullTree(account, project, branch){
+	'use strict';
+
+	let revId, treeFileName;
+	let subTrees;
+
+	return History.findByBranch({ account, project }, branch).then(history => {
+
+		if(!history){
+			return Promise.resolve([]);
+		}
+
+		revId = utils.uuidToString(history._id);
+		treeFileName = `/${account}/${project}/revision/${revId}/fulltree.json`;
+
+		let filter = {
+			type: "ref",
+			_id: { $in: history.current }
+		};
+
+		return Ref.find({ account, project }, filter);
+
+	}).then(refs => {
+
+		//for all refs get their tree
+		let getTrees = [];
+		
+		refs.forEach(ref => {
+			getTrees.push(
+				getFullTree(ref.owner, ref.project, uuidToString(ref._rid)).then(tree => {
+					return Promise.resolve({
+						tree: tree,
+						_rid: uuidToString(ref._rid),
+						_id: uuidToString(ref._id)
+					});
+				})
+			);
+		});
+
+		return Promise.all(getTrees);
+
+	}).then(_subTrees => {
+
+		subTrees = _subTrees;
+		return stash.findStashByFilename({ account, project }, 'json_mpc', treeFileName);
+
+	}).then(buf => {
+
+		let tree;
+
+		if(buf){
+			tree = JSON.parse(buf);
+		}
+
+		subTrees.forEach(subTree => {
+
+			tree && tree.nodes.children && tree.nodes.children.forEach(child => {
+
+				let targetChild = child.children && child.children.find(_child => _child._id === subTree._id);
+				if (targetChild){
+
+					subTree && subTree.tree && subTree.tree.nodes && (targetChild.children = [subTree.tree.nodes]);
+					(!subTree || !subTree.tree || !subTree.tree.nodes) && (targetChild.status = 'NOT_FOUND');
+				} 
+
+			});
+		});
+		
+		return Promise.resolve(tree);
+
+	});
+}
+
+function listSubProjects(account, project, branch){
+	'use strict';
+
+	let subProjects = [];
+
+	return History.findByBranch({ account, project }, branch).then(history => {
+
+
+
+		let filter = {
+			type: "ref",
+			_id: { $in: history.current }
+		};
+
+		return Ref.find({ account, project }, filter);
+
+	}).then(refs => {
+
+		refs.forEach(ref => {
+			subProjects.push({
+				database: ref.owner,
+				project: ref.project
+			});
+		});
+
+		return Promise.resolve(subProjects);
+	
+	});
+}
+
 module.exports = {
 	createAndAssignRole,
 	importToyProject,
 	convertToErrorCode,
 	addCollaborator,
-	removeCollaborator
+	removeCollaborator,
+	createFederatedProject,
+	listSubProjects,
+	getFullTree
 };

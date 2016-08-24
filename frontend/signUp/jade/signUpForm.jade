@@ -1,30 +1,35 @@
 form#signUpForm
 	md-input-container.md-block
 		label Username
-		input(type='text', ng-model='vm.newUser.username', ng-required, ng-keypress="vm.register($event)")
+		input(type='text', ng-model='vm.newUser.username', ng-required, ng-keypress="vm.register($event)", tdr-focus="true")
 	md-input-container.md-block
 		label Email
 		input(type='email', ng-model='vm.newUser.email', ng-required, ng-keypress="vm.register($event)")
 	md-input-container.md-block(md-no-float)
 		label Password
 		input(type='password', ng-model='vm.newUser.password', ng-required ng-keypress="vm.register($event)")
-	// Extra hidden inputs to prevent input autofill
-	input(type="text", ng-show="false")
-	input(type="email", ng-show="false")
-	input(type="password", ng-show="false")
+
+	// Hidden inputs to prevent autofill
+	#signUpFormHiddenInputs(ng-show="false", layout="column")
+		input(type='text')
+		input(type='email')
+		input(type='password')
 
 	#tc(layout="row", layout-align="start start", flex)
 		md-checkbox.md-accent(ng-model="vm.newUser.tcAgreed" aria-label="Terms and conditions Checkbox")
 		div(layout="row", layout-align="start center")
 			p
 				| I agree to the
-				a(href="", ng-click="vm.showPage('termsAndConditions')") Terms and Conditions
+				=" "
+				a(target="_blank", href="/terms") Terms and Conditions
 				=" "
 				| and I have read the
-				a(href="", ng-click="vm.showPage('privacy')") Privacy
+				=" "
+				a(target="_blank", href="/privacy") Privacy
 				=" "
 				| and
-				a(href="", ng-click="vm.showPage('cookies')") Cookies
+				=" "
+				a(target="_blank", href="/cookies") Cookies
 				=" "
 				| policies
 	#loginCaptcha(vc-recaptcha, key="vm.captchaKey", ng-model="vm.reCaptchaResponse", ng-if="vm.useReCapthca")
@@ -34,4 +39,4 @@ form#signUpForm
 			p Signing up...
 			md-progress-circular(md-mode="indeterminate", md-diameter="20")
 	h4.registerError {{vm.registerErrorMessage}}
-	a.registerLinks(href="", ng-click="vm.showPage('pricing')") Pricing
+	a.registerLinks(target="_blank", href="/pricing") Pricing

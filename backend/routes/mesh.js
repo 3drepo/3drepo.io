@@ -25,9 +25,16 @@ var Mesh = require('../models/mesh');
 var utils = require('../utils');
 var srcEncoder = require('../encoders/src_encoder');
 var stash = require('../models/helper/stash');
+var History = require('../models/history');
+var Stash3DRepo = require('../models/stash3DRepo');
+var Scene = require('../models/scene');
+var repoGraphScene = require("../repo/repoGraphScene.js");
+var x3dEncoder = require("../encoders/x3dom_encoder");
 
 router.get('/:uid.src.:subformat?', middlewares.hasReadAccessToProject, findByUID);
 router.get('/revision/:rid/:sid.src.:subformat?', middlewares.hasReadAccessToProject, findByRevision);
+
+router.get('/revision/master/head.x3d.mp', middlewares.hasReadAccessToProject, generateX3DofHead);
 
 // function _getStashOptions(dbCol, format, url){
 
@@ -145,6 +152,76 @@ function findByRevision(req, res, next){
 	// 	console.log(err.stack);
 	// 	responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	// });
+}
+
+
+function getSceneObject(account, project, history){
+	'use strict';
+
+	let projection = {
+		vertices: 0,
+		normals: 0,
+		faces: 0,
+		data: 0,
+		uv_channels: 0
+	};
+
+	return Stash3DRepo.find({account, project}, {rev_id: history._id}, projection).then(objs => {
+
+		if(!objs.length){
+			return Scene.find({account, project}, { _id: {$in: history.current }}, projection);
+		}
+
+		return objs;
+
+	}).then(objs => {	
+
+		let getCoordOffSets = [];
+
+		objs.forEach((obj, i) => {
+			objs[i] = obj.toObject();
+			
+			if (objs[i].type === 'ref'){
+
+				let refAccount = objs[i].owner || account;
+				let promise = History.findByBranch({
+						account: refAccount, 
+						project: objs[i].project 
+					}, utils.uuidToString(objs[i]._rid), {
+						coordOffset: 1
+					}
+				).then(history => {
+					objs[i].coordOffset = (history && history.coordOffset) || [0,0,0];
+				});
+
+				getCoordOffSets.push(promise);
+			}
+		});
+
+		return Promise.all(getCoordOffSets).then(() => objs);
+	});
+}
+
+function generateX3DofHead(req, res ,next){
+	'use strict';
+
+	let place = utils.APIInfo(req);
+	let account = req.params.account;
+	let project = req.params.project;
+
+	History.findByBranch({account, project}, 'master').then(history => {
+
+		return getSceneObject(account, project, history);
+
+	}).then(objs => {
+
+		let xml = x3dEncoder.render(account, project, repoGraphScene(req[C.REQ_REPO].logger).decode(objs), req[C.REQ_REPO].logger);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, xml);
+
+	}).catch(err => {
+		console.log(err.stack);
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
 }
 
 module.exports = router;

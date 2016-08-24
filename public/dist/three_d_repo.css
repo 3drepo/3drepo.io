@@ -12,12 +12,15 @@ account-dir #logo {
 }
 
 account-dir #noAvatarIcon {
-  background: #E8EAF6;
+  background: rgba(0,69,148,.1);
+  height: 150px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1)
 }
 account-dir #noAvatarIcon md-icon {
-  font-size: 100px;
-  width: 100px;
-  height: 100px;
+  font-size: 150px;
+  width: 150px;
+  height: 150px;
+  color: rgb(0,69,148);
 }
 
 account-dir .dataContainer {
@@ -133,6 +136,10 @@ account-projects .projectUploadIcon {
 account-projects .projectRight .projectUploaded {
   margin-top: -10px !important;
   color: rgba(0,0,0,0.5);
+}
+
+account-projects .userContent {
+  padding: 0 !important;
 }
 
 /** Account Profile ***************************************************************************************************/
@@ -253,21 +260,21 @@ account-menu md-icon {
   color: #F44336;
 }
 
-/** Delete Project Dialog *********************************************************************************************/
-.deleteProjectDialog p {
+/** Delete Dialog *********************************************************************************************/
+.deleteDialog p {
   color: rgba(0 ,0, 0, 0.6);
   margin: 0;
 }
-.deleteProjectDialog #deleteProjectName {
+.deleteDialog #deleteName {
   color: rgba(0 ,0, 0, 0.9);
 }
 
-.deleteProjectDialog #deleteProjectWarning {
+.deleteDialog #deleteWarning {
   color: #F44336;
   margin: 0;
 }
 
-.deleteProjectDialog #deleteProjectError {
+.deleteDialog #deleteError {
   margin: 0;
   color: #F44336;
 }
@@ -311,8 +318,15 @@ account-billing #accountBillingSubscription .md-button {
 account-billing #accountBillingHistory section {
   margin-left: -10px;
 }
+account-billing #accountBillingHistory .md-subheader ._md-subheader-inner {
+  padding: 16px 10px;
+}
 account-billing #accountBillingHistory .md-subheader label {
-  margin: 0 9px 0 0;
+  margin-right: 10px;
+}
+
+account-billing .accountBillingHistoryListItem {
+  font-size: 14px;
 }
 account-billing .accountBillingHistoryListItem md-input-container {
   margin-right: 10px;
@@ -326,8 +340,8 @@ account-billing .accountBillingSave img {
   margin-top: 17px;
 }
 
-account-billing #accountBillingAddressInfo {
-  margin: 0;
+account-billing .accountBillingAddressInfo {
+  margin: 0 0 5px;
   font-size: 12px;
   color: rgba(0, 0, 0, 0.4);
 }
@@ -365,11 +379,12 @@ account-licenses #accountLicensesList {
 account-licenses #accountLicensesBillingPage {
   margin-top: 30px;
 }
-account-licenses #accountLicensesBillingPage a {
-  color: rgb(67,160,71);
-}
 
 /** Account Team ******************************************************************************************************/
+account-team {
+  width: 500px;
+}
+
 account-team .collaboratorIcon {
   margin: 0 10px !important;
 }
@@ -420,6 +435,65 @@ account-team #accountTeamSubHeader {
 
 #overQuotaDialog #overQuotaInfo {
   margin: 20px 20px 0;;
+}
+
+/** Federation Dialog *************************************************************************************************/
+#federationDialog #federationDivider {
+  width: 1px;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+#federationDialog #federationSave {
+  margin-top: 10px;
+}
+
+#federationDialog md-list {
+  padding: 0;
+}
+
+#federationDialog md-list-item {
+  height: 35px;
+  min-height: 35px;
+}
+#federationDialog md-list-item p {
+  margin-left: -20px;
+}
+
+#federationDialog .federationProject {
+  padding-left: 20px;
+}
+
+#federationDialog #federationWarning {
+  margin: 5px 0 0 20px;
+  color: #F44336;
+}
+
+
+#federationDialog #federatedProjectAccount {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/** Account Federations ***********************************************************************************************/
+account-federations .userContent {
+  padding: 0 !important;
+}
+
+account-federations md-list {
+  padding: 0;
+}
+account-federations .md-list-item-text {
+  color: rgb(67, 160, 71);
+}
+
+account-federations .federationProjectsList {
+  margin: 0 0 10px 70px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+account-federations .federationTimestamp {
+  color: rgba(0,0,0,.3);
+  margin-left: 20px;
 }
 /* Done to counter bootstrap styling. This should really be set in a top level style file */
 .md-datepicker-input-mask {
@@ -770,6 +844,14 @@ billing {
     color: rgba(0, 0, 0, 0.8);
 }
 
+billing #billingMainContent {
+    width: 90%
+}
+
+billing #billingGap1 {
+    height: 100px;
+}
+
 billing p,
 billing label {
     color: rgba(0, 0, 0, 0.7);
@@ -811,6 +893,13 @@ billing #billingPeriod {
     margin-top: 5px;
 }
 
+billing #billingInvoiceLogo {
+    width: 200px
+}
+
+billing #billingTotalValue {
+    font-weight: bold;
+}
 bottom-buttons {
   display: block;
   position: absolute;
@@ -1218,11 +1307,10 @@ home #legalLinks {
     right: 0;
     z-index: 2;
 }
-home #legalLinks .md-button {
-    font-size: 11px;
-    margin: 0;
+home #legalLinks a {
+    font-size: 12px;
+    margin: 10px 10px 5px;
     opacity: 0.7;
-    min-width: 65px;
 }
 
 home md-radio-button ._md-label {
@@ -1539,17 +1627,11 @@ login .loginLinks {
   margin: 5px 0;
 }
 
-/** Terms and Conditions Dialog ***************************************************************************************/
-.tcDialog {
-  min-width: 850px;
-  min-height: 664px;
-  overflow: hidden;
+login #loginHiddenInputs {
+  position: absolute;
+  top: 0;
+  opacity: 0;
 }
-
-.tcDialog #tcIcon {
-  margin-right: 10px;
-}
-
 tdr-measure {
     position: absolute;
 }
@@ -1762,9 +1844,6 @@ password-change md-progress-circular {
     margin-left: 5px;
 }
 
-password-change md-input-container {
-    margin: 0;
-}
 password-forgot md-progress-circular {
     margin-left: 5px;
 }
@@ -1901,8 +1980,7 @@ sign-up-form #tc md-checkbox ._md-icon {
     border-color: rgba(0, 0, 0, 0.4);
 }
 sign-up-form #tc a {
-    font-size: 14px;
-    margin-left: 5px;
+    font-size: 12px;
 }
 sign-up-form #tc p {
     font-size: 14px;
@@ -1940,11 +2018,17 @@ sign-up-form .registerError {
 sign-up-form .rc-anchor-light {
     background: red;
 }
-terms-and-conditions .md-toolbar-tools img {
+
+sign-up-form #signUpFormHiddenInputs {
+    position: absolute;
+    top: 0;
+    opacity: 0;
+}
+terms .md-toolbar-tools img {
     width: 150px;
 }
 
-terms-and-conditions-text {
+terms-text {
     position: absolute;
     z-index: 3;
     background: #FDFDFD;

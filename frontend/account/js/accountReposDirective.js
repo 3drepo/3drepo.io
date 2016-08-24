@@ -19,26 +19,33 @@
 	"use strict";
 
 	angular.module("3drepo")
-		.directive("termsAndConditions", termsAndConditions);
+		.directive("accountRepos", accountRepos);
 
-	function termsAndConditions() {
+	function accountRepos() {
 		return {
-			restrict: "E",
-			scope: {},
-			templateUrl: "termsAndConditions.html",
-			controller: TermsAndConditionsCtrl,
-			controllerAs: "vm",
+			restrict: 'EA',
+			templateUrl: 'accountRepos.html',
+			scope: {
+				account: "=",
+				accounts: "=",
+				onShowPage: "&",
+				quota: "=",
+				subscriptions: "="
+			},
+			controller: AccountReposCtrl,
+			controllerAs: 'vm',
 			bindToController: true
 		};
 	}
 
-	TermsAndConditionsCtrl.$inject = ["EventService"];
+	AccountReposCtrl.$inject = [];
 
-	function TermsAndConditionsCtrl (EventService) {
+	function AccountReposCtrl() {
 		var vm = this;
 
-		vm.home = function () {
-			EventService.send(EventService.EVENT.GO_HOME);
+		vm.showPage = function (page, callingPage) {
+			vm.onShowPage({page: page, callingPage: callingPage});
 		};
+
 	}
 }());

@@ -27,6 +27,7 @@
 			templateUrl: 'accountTeam.html',
 			scope: {
 				account: "=",
+				item: "=",
 				showPage: "&",
 				subscriptions: "="
 			},
@@ -49,22 +50,20 @@
 		vm.collaborators = [];
 		vm.members = [];
 		vm.addDisabled = false;
-		vm.toShow = (vm.subscriptions.length > 1) ? "1+" : vm.subscriptions.length.toString();
+		vm.numSubscriptions = vm.subscriptions.length;
+		vm.toShow = (vm.numSubscriptions > 1) ? "1+" : vm.numSubscriptions.toString();
 
-		if ($location.search().hasOwnProperty("proj")) {
-			vm.projectName = $location.search().proj;
-
-			promise = UtilsService.doGet(vm.account + "/" + vm.projectName + "/collaborators");
-			promise.then(function (response) {
-				console.log(response);
-				if (response.status === 200) {
-					vm.members = response.data;
-					if (angular.isDefined("vm.subscriptions")) {
-						setupTeam();
-					}
+		console.log(vm.item);
+		promise = UtilsService.doGet(vm.account + "/" + vm.item.project + "/collaborators");
+		promise.then(function (response) {
+			console.log(response);
+			if (response.status === 200) {
+				vm.members = response.data;
+				if (angular.isDefined("vm.subscriptions")) {
+					setupTeam();
 				}
-			});
-		}
+			}
+		});
 
 		/*
 		 * Watch changes to the new member name
@@ -91,7 +90,7 @@
 					user: vm.selectedUser.user
 				};
 
-			promise = UtilsService.doPost(data, vm.account + "/" + vm.projectName + "/collaborators");
+			promise = UtilsService.doPost(data, vm.account + "/" + vm.item.project + "/collaborators");
 			promise.then(function (response) {
 				console.log(response);
 				if (response.status === 200) {
@@ -115,7 +114,7 @@
 		 * @param index
 		 */
 		vm.removeMember = function (index) {
-			promise = UtilsService.doDelete(vm.members[index], vm.account + "/" + vm.projectName + "/collaborators");
+			promise = UtilsService.doDelete(vm.members[index], vm.account + "/" + vm.item.project + "/collaborators");
 			promise.then(function (response) {
 				console.log(response);
 				if (response.status === 200) {
@@ -142,6 +141,10 @@
 			StateManager.setQuery({page: page});
 		};
 
+		vm.closeDialog = function () {
+			UtilsService.closeDialog();
+		};
+
 		/**
 		 * Set up the team page
 		 */
@@ -149,7 +152,7 @@
 			var i, iLength, j, jLength,
 				isMember;
 
-			for (i = 0, iLength = vm.subscriptions.length; i < iLength; i += 1) {
+			for (i = 0, iLength = vm.numSubscriptions; i < iLength; i += 1) {
 				if (vm.subscriptions[i].hasOwnProperty("assignedUser") && (vm.subscriptions[i].assignedUser !== vm.account)) {
 					isMember = false;
 					for (j = 0, jLength = vm.members.length; j < jLength; j += 1) {
@@ -164,14 +167,15 @@
 				}
 			}
 
+			vm.numSubscriptions = vm.subscriptions.filter(function (sub) {return sub.inCurrentAgreement;}).length;
 			vm.noLicensesAssigned =
-				(vm.subscriptions.length > 1) &&
+				(vm.numSubscriptions > 1) &&
 				((vm.collaborators.length + vm.members.length) === 0);
 
 			vm.notAllLicensesAssigned =
 				!vm.noLicensesAssigned &&
-				(vm.subscriptions.length > 1) &&
-				((vm.subscriptions.length - 1) !== (vm.collaborators.length + vm.members.length));
+				(vm.numSubscriptions > 1) &&
+				((vm.numSubscriptions - 1) !== (vm.collaborators.length + vm.members.length));
 
 			vm.allLicenseAssigneesMembers = (vm.collaborators.length === 0);
 		}

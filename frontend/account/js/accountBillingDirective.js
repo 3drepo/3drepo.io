@@ -39,9 +39,9 @@
 		};
 	}
 
-	AccountBillingCtrl.$inject = ["$scope", "$location", "UtilsService", "serverConfig"];
+	AccountBillingCtrl.$inject = ["$scope", "$window", "$timeout", "UtilsService", "serverConfig"];
 
-	function AccountBillingCtrl($scope, $location, UtilsService, serverConfig) {
+	function AccountBillingCtrl($scope, $window, $timeout, UtilsService, serverConfig) {
 		var vm = this,
 			promise;
 
@@ -52,8 +52,8 @@
 		vm.saveDisabled = true;
 		vm.countries = serverConfig.countries;
 		vm.usStates = serverConfig.usStates;
-		console.log(serverConfig);
 		vm.showStates = false;
+		vm.newBillingAddress = {};
 
 		/*
 		 * Watch for change in licenses
@@ -120,13 +120,27 @@
 			}
 		}, true);
 
+		/*
+		 * Watch for billings
+		 */
+		$scope.$watch("vm.billings", function () {
+			var i, length;
+
+			if (angular.isDefined(vm.billings)) {
+				for (i = 0, length = vm.billings.length; i < length; i += 1) {
+					vm.billings[i].status = vm.billings[i].pending ? "Pending" : "Payed";
+				}
+			}
+		});
+
 		/**
 		 * Show the billing page with the item
 		 *
 		 * @param index
 		 */
 		vm.downloadBilling = function (index) {
-			$location.url("/billing?user=" + vm.account + "&item=" + index);
+			//$window.open("/billing?user=" + vm.account + "&item=" + index);
+			$window.open(serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/billings/" + vm.billings[index].invoiceNo + ".pdf"), "_blank");
 		};
 
 		vm.changeSubscription = function () {
@@ -149,7 +163,15 @@
 			promise.then(function (response) {
 				console.log(response);
 				if (response.status === 200) {
-					location.href = response.data.url;
+					if (vm.numLicenses === vm.numNewLicenses) {
+						vm.payPalInfo = "Billing information updated.";
+						$timeout(function () {
+							UtilsService.closeDialog();
+						}, 2000);
+					}
+					else {
+						location.href = response.data.url;
+					}
 				}
 				else {
 					vm.closeDialogEnabled = true;
@@ -157,10 +179,6 @@
 					vm.payPalInfo = response.data.message;
 				}
 			});
-		};
-
-		vm.goToPage = function (page) {
-			$location.path("/" + page, "_self");
 		};
 
 		vm.closeDialog = function () {
@@ -171,7 +189,7 @@
 		 * Set up num licenses and price
 		 */
 		function setupLicensesInfo () {
-			vm.numLicenses = vm.subscriptions.length;
+			vm.numLicenses = vm.subscriptions.filter(function (sub) {return sub.inCurrentAgreement;}).length;
 			vm.numNewLicenses = vm.numLicenses;
 			vm.pricePerLicense = vm.plans[0].amount;
 		}
@@ -189,7 +207,7 @@
 				angular.isUndefined(vm.newBillingAddress.postalCode) ||
 				angular.isUndefined(vm.newBillingAddress.city) ||
 				angular.isUndefined(vm.newBillingAddress.countryCode) ||
-				(angular.isDefined(vm.newBillingAddress.vat) && (vm.newBillingAddress.vat !== "") && angular.isUndefined(vm.newBillingAddress.companyName)) ||
+				(angular.isDefined(vm.newBillingAddress.vat) && (vm.newBillingAddress.vat !== "") && angular.isUndefined(vm.newBillingAddress.company)) ||
 				((vm.newBillingAddress.countryCode === "US") && angular.isUndefined(vm.newBillingAddress.state))
 			);
 		}
