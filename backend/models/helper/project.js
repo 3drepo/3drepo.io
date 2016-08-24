@@ -512,6 +512,13 @@ function getFullTree(account, project, branch, username){
 			tree = JSON.parse(buf);
 		}
 
+		let resetPath = function(node, parentPath){
+			node.children && node.children.forEach(child => {
+				child.path = parentPath + '__' + child.path; 
+				child.children && resetPath(child.children, child.path);
+			});
+		};
+
 		subTrees.forEach(subTree => {
 
 			tree && tree.nodes.children && tree.nodes.children.forEach(child => {
@@ -519,7 +526,12 @@ function getFullTree(account, project, branch, username){
 				let targetChild = child.children && child.children.find(_child => _child._id === subTree._id);
 				if (targetChild){
 
-					subTree && subTree.tree && subTree.tree.nodes && (targetChild.children = [subTree.tree.nodes]);
+					if(subTree && subTree.tree && subTree.tree.nodes){
+						subTree.tree.nodes.path = targetChild.path + '__' + subTree.tree.nodes.path;
+						resetPath(subTree.tree.nodes, subTree.tree.nodes.path);
+						targetChild.children = [subTree.tree.nodes];
+					}
+
 					(!subTree || !subTree.tree || !subTree.tree.nodes) && (targetChild.status = subTree.status);
 				} 
 
