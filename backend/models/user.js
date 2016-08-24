@@ -554,7 +554,7 @@ schema.methods.listAccounts = function(){
 						});
 						
 						account.quota.spaceUsed = totalSize;
-					} else {
+					} else if(account.quota) {
 						account.quota.spaceUsed = 0;
 					}
 				})
