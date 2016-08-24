@@ -503,7 +503,7 @@ function getFullTree(account, project, branch){
 	
 					let targetChild = child.children && child.children.find(_child => _child._id === subTree._id);
 					if (targetChild){
-						targetChild.children = subTree.tree.nodes;
+						targetChild.children = [subTree.tree.nodes];
 					} 
 
 				});
