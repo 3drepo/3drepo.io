@@ -442,7 +442,18 @@ function createFederatedProject(account, project, subProjects){
 		});
 	});
 
-	return importQueue.createFederatedProject(account, federatedJSON);
+	if(subProjects.length === 0) {
+		return Promise.resolve();
+	}
+	
+	return importQueue.createFederatedProject(account, federatedJSON).catch(err => {
+		//catch here to provide custom error message
+		if(err.errCode){
+			return Promise.reject(convertToErrorCode(err.errCode));
+		}
+		return Promise.reject(err);
+		
+	});
 }
 
 

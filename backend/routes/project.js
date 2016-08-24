@@ -194,7 +194,7 @@ function createProject(req, res, next){
 	let username = req.session.user.username;
 
 	let federate;
-	if(req.body.subProjects && req.body.subProjects.length > 0){
+	if(req.body.subProjects){
 		federate = true;
 	}
 
