@@ -28,6 +28,7 @@ var History = require('../history');
 var utils = require("../../utils");
 var stash = require('./stash');
 var Ref = require('../ref');
+var middlewares = require('../../routes/middlewares');
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -445,15 +446,26 @@ function createFederatedProject(account, project, subProjects){
 }
 
 
-function getFullTree(account, project, branch){
+function getFullTree(account, project, branch, username){
 	'use strict';
 
 	let revId, treeFileName;
 	let subTrees;
+	let status;
 
-	return History.findByBranch({ account, project }, branch).then(history => {
+	return middlewares.hasReadAccessToProjectHelper(username, account, project).then(granted => {
+
+		if(granted){
+			return History.findByBranch({ account, project }, branch);
+		} else {
+			status = 'NO_ACCESS';
+			return Promise.resolve();
+		}
+
+	}).then(history => {
 
 		if(!history){
+			!status && (status = 'NOT_FOUND');
 			return Promise.resolve([]);
 		}
 
@@ -474,9 +486,10 @@ function getFullTree(account, project, branch){
 		
 		refs.forEach(ref => {
 			getTrees.push(
-				getFullTree(ref.owner, ref.project, uuidToString(ref._rid)).then(tree => {
+				getFullTree(ref.owner, ref.project, uuidToString(ref._rid), username).then(obj => {
 					return Promise.resolve({
-						tree: tree,
+						tree: obj.tree,
+						status: obj.status,
 						_rid: uuidToString(ref._rid),
 						_id: uuidToString(ref._id)
 					});
@@ -507,13 +520,13 @@ function getFullTree(account, project, branch){
 				if (targetChild){
 
 					subTree && subTree.tree && subTree.tree.nodes && (targetChild.children = [subTree.tree.nodes]);
-					(!subTree || !subTree.tree || !subTree.tree.nodes) && (targetChild.status = 'NOT_FOUND');
+					(!subTree || !subTree.tree || !subTree.tree.nodes) && (targetChild.status = subTree.status);
 				} 
 
 			});
 		});
 		
-		return Promise.resolve(tree);
+		return Promise.resolve({tree, status});
 
 	});
 }

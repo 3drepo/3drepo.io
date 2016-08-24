@@ -463,11 +463,11 @@ function getProjectTree(req, res, next){
 
 	let project = req.params.project;
 	let account = req.params.account;
+	let username = req.session.user.username;
 
+	ProjectHelpers.getFullTree(account, project, 'master', username).then(obj => {
 
-	ProjectHelpers.getFullTree(account, project, 'master').then(tree => {
-
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, tree);
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj.tree);
 
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
