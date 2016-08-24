@@ -453,6 +453,10 @@ function getFullTree(account, project, branch){
 
 	return History.findByBranch({ account, project }, branch).then(history => {
 
+		if(!history){
+			return Promise.resolve([]);
+		}
+
 		revId = utils.uuidToString(history._id);
 		treeFileName = `/${account}/${project}/revision/${revId}/fulltree.json`;
 
@@ -489,28 +493,27 @@ function getFullTree(account, project, branch){
 
 	}).then(buf => {
 
-		if(!buf){
-			return Promise.reject(responseCodes.TREE_NOT_FOUND);
-		} else {
+		let tree;
 
-			let tree = JSON.parse(buf);
-
-			//merge the tree if sub projects found
-			console.log('subTrees', subTrees);
-			subTrees.forEach(subTree => {
-	
-				tree.nodes.children && tree.nodes.children.forEach(child => {
-	
-					let targetChild = child.children && child.children.find(_child => _child._id === subTree._id);
-					if (targetChild){
-						targetChild.children = [subTree.tree.nodes];
-					} 
-
-				});
-			});
-			
-			return Promise.resolve(tree);
+		if(buf){
+			tree = JSON.parse(buf);
 		}
+
+		subTrees.forEach(subTree => {
+
+			tree && tree.nodes.children && tree.nodes.children.forEach(child => {
+
+				let targetChild = child.children && child.children.find(_child => _child._id === subTree._id);
+				if (targetChild){
+
+					subTree && subTree.tree && subTree.tree.nodes && (targetChild.children = [subTree.tree.nodes]);
+					(!subTree || !subTree.tree || !subTree.tree.nodes) && (targetChild.status = 'NOT_FOUND');
+				} 
+
+			});
+		});
+		
+		return Promise.resolve(tree);
 
 	});
 }

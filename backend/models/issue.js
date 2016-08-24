@@ -111,6 +111,11 @@ schema.statics.getFederatedProjectList = function(dbColOptions, branch, revision
 
 		return getHistory.then(history => {
 
+
+			if(!history){
+				return Promise.resolve([]);
+			}
+
 			let filter = {
 				type: "ref",
 				_id: { $in: history.current }
@@ -118,9 +123,8 @@ schema.statics.getFederatedProjectList = function(dbColOptions, branch, revision
 
 
 			return Ref.find(dbColOptions, filter);
+
 		}).then(refs => {
-
-
 
 			var promises = [];
 
