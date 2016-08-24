@@ -24,6 +24,8 @@ var C = require('../../constants');
 var Mailer = require('../../mailer/mailer');
 var systemLogger = require("../../logger.js").systemLogger;
 var config = require('../../config');
+var stash = require('./stash');
+
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -170,7 +172,43 @@ function importToyJSON(db, project){
 		}));
 	});
 
-	return Promise.all(promises);
+	return Promise.all(promises).then(() => {
+		//rename json_mpc stash
+		let jsonBucket = stash.getGridFSBucket({ account: db, project: project }, 'json_mpc');
+		
+		jsonBucket.find().forEach(file => {
+			
+			let newFileName = file.filename;
+			newFileName = newFileName.split('/');
+			newFileName[1] = db;
+			newFileName = newFileName.join('/');
+			jsonBucket.rename(file._id, newFileName, function(err) {
+				err && systemLogger.logError('error while renaming sample project stash', 
+					{ err: err, collections: 'stash.json_mpc.files', db: db, _id: file._id, filename: file.filename }
+				);
+			});
+		});
+
+		//rename src stash
+		let srcBucket = stash.getGridFSBucket({ account: db, project: project }, 'src');
+		
+		srcBucket.find().forEach(file => {
+
+			let newFileName = file.filename;
+			newFileName = newFileName.split('/');
+			newFileName[1] = db;
+			newFileName = newFileName.join('/');
+			srcBucket.rename(file._id, newFileName, function(err) {
+				err && systemLogger.logError('error while renaming sample project stash', 
+					{ err: err, collections: 'stash.src.files', db: db, _id: file._id, filename: file.filename }
+				);
+			});
+
+		});
+
+		return Promise.resolve();
+
+	});
 
 }
 

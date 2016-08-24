@@ -83,5 +83,6 @@ function saveStashByFilename(dbCol, format, filename, buffer){
 
 module.exports = {
 	findStashByFilename: findStashByFilename,
-	saveStashByFilename: saveStashByFilename
+	saveStashByFilename: saveStashByFilename,
+	getGridFSBucket: _getGridFSBucket
 };
