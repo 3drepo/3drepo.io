@@ -94,61 +94,6 @@ describe('Project', function () {
 	});
 
 
-	it('(fedration) should be created successfully', function(done){
-		this.timeout(5000);
-
-		let q = require('../../services/queue');
-		let corId;
-
-		//fake a response from bouncer;
-		setTimeout(function(){
-			q.channel.assertQueue(q.workerQName, { durable: true }).then(info => {
-				expect(info.messageCount).to.equal(1);
-				return q.channel.get(q.workerQName);
-			}).then(res => {
-				corId = res.properties.correlationId;
-				return q.channel.assertQueue(q.callbackQName, { durable: true });
-			}).then(() => {
-				//send fake job done message to the queue;
-				return q.channel.sendToQueue(q.callbackQName, 
-					new Buffer(JSON.stringify({ value: 0})), 
-					{
-						correlationId: corId, 
-						persistent: true 
-					}
-				);
-			}).catch(err => {
-				throw err;
-			});
-
-		}, 1000);
-
-		agent.post(`/${username}/${projectFed}`)
-		.send({ 
-			desc, 
-			type, 
-			subProjects:[{
-				"database": "testing",
-				"project": "testproject"
-			}] 
-		})
-		.expect(200, function(err ,res) {
-
-			expect(res.body.project).to.equal(projectFed);
-
-			if(err){
-				return done(err);
-			}
-
-			agent.get(`/${username}/${projectFed}.json`)
-			.expect(200, function(err, res){
-				expect(res.body.desc).to.equal(desc);
-				expect(res.body.type).to.equal(type);
-				done(err);
-			})
-			
-		});
-	});
 
 	it('should return error message if project name already exists', function(done){
 

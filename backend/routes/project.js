@@ -198,15 +198,7 @@ function createProject(req, res, next){
 		federate = true;
 	}
 
-	createAndAssignRole(project, account, username, req.body.desc, req.body.type, federate).then(() => {
-
-		if(federate){
-			return ProjectHelpers.createFederatedProject(account, project, req.body.subProjects);
-		}
-
-		return Promise.resolve();
-
-	}).then(() => {
+	createAndAssignRole(project, account, username, req.body.desc, req.body.type, req.body.subProjects, federate).then(() => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -223,15 +215,15 @@ function updateProject(req, res, next){
 	let promise = Promise.resolve();
 	
 	if(req.body.subProjects && req.body.subProjects.length > 0){
-		promise = ProjectHelpers.createFederatedProject(account, project, req.body.subProjects).then(() => {
 
-			return ProjectSetting.findById({account, project}, project);
-
-		}).then(setting => {
-
-			setting.federate = true;
-			return setting.save();
+		promise = ProjectSetting.findById({account, account}, project).then(setting => {
+			if (!setting.federate){
+				return Promise.reject(responseCodes.PROJECT_IS_NOT_A_FED);
+			} else {
+				return ProjectHelpers.createFederatedProject(account, project, req.body.subProjects);
+			}
 		});
+
 	}
 
 	promise.then(() => {

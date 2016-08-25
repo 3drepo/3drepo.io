@@ -71,7 +71,7 @@ function convertToErrorCode(errCode){
     return errObj;
 }
 
-function createAndAssignRole(project, account, username, desc, type, federate) {
+function createAndAssignRole(project, account, username, desc, type, subProjects, federate) {
 	'use strict';
 
 
@@ -79,11 +79,26 @@ function createAndAssignRole(project, account, username, desc, type, federate) {
 		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_NAME });
 	}
 
+
+
 	if(C.REPO_BLACKLIST_PROJECT.indexOf(project) !== -1){
 		return Promise.reject({ resCode: responseCodes.BLACKLISTED_PROJECT_NAME });
 	}
 
-	return Role.findByRoleID(`${account}.${project}.viewer`).then(role =>{
+
+	return ProjectSetting.findById({account, project}, project).then(setting => {
+
+		if(setting){
+			return Promise.reject({resCode: responseCodes.PROJECT_EXIST});
+		}
+
+		return (federate ? createFederatedProject(account, project, subProjects) : Promise.resolve());
+
+	}).then(() => {
+		
+		return Role.findByRoleID(`${account}.${project}.viewer`);
+
+	}).then(role =>{
 
 		if(role){
 			return Promise.resolve();
@@ -109,25 +124,20 @@ function createAndAssignRole(project, account, username, desc, type, federate) {
 
 	}).then(() => {
 
-		return ProjectSetting.findById({account, project}, project).then(setting => {
 
-			if(setting){
-				return Promise.reject({resCode: responseCodes.PROJECT_EXIST});
-			}
-
-			setting = ProjectSetting.createInstance({
-				account: account, 
-				project: project
-			});
-			
-			setting._id = project;
-			setting.owner = username;
-			setting.desc = desc;
-			setting.type = type;
-			setting.federate = federate;
-			
-			return setting.save();
+		let setting = ProjectSetting.createInstance({
+			account: account, 
+			project: project
 		});
+		
+		setting._id = project;
+		setting.owner = username;
+		setting.desc = desc;
+		setting.type = type;
+		setting.federate = federate;
+		
+		return setting.save();
+		
 
 	});
 }
@@ -435,18 +445,42 @@ function createFederatedProject(account, project, subProjects){
 		subProjects: []
 	};
 	
+	let error;
+
+	let addSubProjects = [];
+
 	subProjects.forEach(subProject => {
-		federatedJSON.subProjects.push({
-			database: subProject.database,
-			project: subProject.project
-		});
+
+		if(subProject.database !== account){
+			error = responseCodes.FED_MODEL_IN_OTHER_DB;
+		}
+
+		addSubProjects.push(ProjectSetting.findById({account, project: subProject.project}, subProject.project).then(setting => {
+			if(setting.federate){
+				return Promise.reject(responseCodes.FED_MODEL_IS_A_FED);
+
+			} else if(!federatedJSON.subProjects.find(o => o.database === subProject.database && o.project === subProject.project)) {
+				federatedJSON.subProjects.push({
+					database: subProject.database,
+					project: subProject.project
+				});
+			}
+		}));
+
 	});
+
+	if(error){
+		return Promise.reject(error);
+	}
 
 	if(subProjects.length === 0) {
 		return Promise.resolve();
 	}
 	
-	return importQueue.createFederatedProject(account, federatedJSON).catch(err => {
+	//console.log(federatedJSON);
+	return Promise.all(addSubProjects).then(() => {
+		return importQueue.createFederatedProject(account, federatedJSON);
+	}).catch(err => {
 		//catch here to provide custom error message
 		if(err.errCode){
 			return Promise.reject(convertToErrorCode(err.errCode));
@@ -454,6 +488,7 @@ function createFederatedProject(account, project, subProjects){
 		return Promise.reject(err);
 		
 	});
+
 }
 
 
