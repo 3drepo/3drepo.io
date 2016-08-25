@@ -65,13 +65,19 @@
 				if (vm.accounts.length > 0) {
 					accountsToUse = [];
 					for (i = 0, length = vm.accounts.length; i < length; i += 1) {
-						if (vm.accounts[i].fedProjects.length > 0) {
-							accountsToUse.push(vm.accounts[i]);
-							vm.showInfo = false;
-						}
 						if (vm.accounts[i].account === vm.account) {
+							vm.accounts[i].showProjects = true;
+							accountsToUse.push(vm.accounts[i]);
+							if (vm.accounts[i].fedProjects.length > 0) {
+								vm.showInfo = false;
+							}
 							userAccountIndex = i;
 							userAccount = vm.accounts[i];
+						}
+						else if (vm.accounts[i].fedProjects.length > 0) {
+							vm.accounts[i].showProjects = true;
+							accountsToUse.push(vm.accounts[i]);
+							vm.showInfo = false;
 						}
 					}
 
@@ -178,6 +184,7 @@
 				promise = UtilsService.doPost(vm.newFederationData, vm.account + "/" + vm.newFederationData.project);
 				promise.then(function (response) {
 					console.log(response);
+					vm.showInfo = false;
 					vm.newFederationData.timestamp = (new Date()).toString();
 					vm.accountsToUse[userAccountIndex].fedProjects.push(vm.newFederationData);
 					vm.closeDialog();
@@ -198,9 +205,12 @@
 
 		/**
 		 * Open the federation in the viewer
+		 *
+		 * @param {Object} account
+		 * @param {Number} index
 		 */
 		vm.viewFederation = function (account, index) {
-			$location.path("/" + account + "/" + vm.accountsToUse[0].fedProjects[index].project, "_self").search({});
+			$location.path("/" + account.account + "/" + account.fedProjects[index].project, "_self").search({});
 		};
 
 		/**
@@ -234,12 +244,23 @@
 			promise.then(function (response) {
 				if (response.status === 200) {
 					vm.accountsToUse[0].fedProjects.splice(federationToDeleteIndex, 1);
+					vm.showInfo = ((vm.accountsToUse.length === 1) && (vm.accountsToUse[0].fedProjects.length === 0));
 					vm.closeDialog();
 				}
 				else {
 					vm.deleteError = "Error deleting federation";
 				}
 			});
+		};
+
+		/**
+		 * Toggle display of projects for an account
+		 *
+		 * @param {Number} index
+		 */
+		vm.toggleProjectsList = function (index) {
+			vm.accountsToUse[index].showProjects = !vm.accountsToUse[index].showProjects;
+			vm.accountsToUse[index].showProjectsIcon = vm.accountsToUse[index].showProjects ? "folder_open" : "folder";
 		};
 
 		/**

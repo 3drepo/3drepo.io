@@ -33,7 +33,6 @@ account-dir #account #accountItem {
 }
 
 account-dir .userContent .cardInfo {
-  margin: 0 0 10px;
   text-align: left;
 }
 
@@ -487,8 +486,9 @@ account-federations .md-list-item-text {
 }
 
 account-federations .federationProjectsList {
-  margin: 0 0 10px 70px;
+  margin: -20px 0 10px 100px;
   color: rgba(0, 0, 0, 0.5);
+  font-size: 14px;
 }
 
 account-federations .federationTimestamp {
@@ -498,4 +498,17 @@ account-federations .federationTimestamp {
 
 account-federations #accountFederationInfo {
   padding: 20px 20px 0 20px;
+}
+
+account-federations .account {
+  outline: none;
+  padding-left: 10px;
+}
+account-federations .account:hover {
+  cursor: pointer;
+  background: #EEE;
+}
+
+account-federations .federation {
+  padding-left: 30px;
 }
