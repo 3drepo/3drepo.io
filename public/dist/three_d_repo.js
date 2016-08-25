@@ -5383,7 +5383,7 @@ var ViewerManager = {};
 		 */
 		$scope.$watch("vm.newFederationData", function () {
 			if (vm.federationOriginalData === null) {
-				vm.newFederationButtonDisabled = (angular.isUndefined(vm.newFederationData.name)) || (vm.newFederationData.name === "");
+				vm.newFederationButtonDisabled = (angular.isUndefined(vm.newFederationData.project)) || (vm.newFederationData.project === "");
 			}
 			else {
 				vm.newFederationButtonDisabled = angular.equals(vm.newFederationData, vm.federationOriginalData);
@@ -17051,8 +17051,6 @@ var Oculus = {};
 							}
 						}
 					} else {
-						console.log(666, vm.nodesToShow[index].level);
-
 						// Expand
 						numChildren = vm.nodesToShow[index].children.length;
 
@@ -17063,6 +17061,7 @@ var Oculus = {};
 
 						for (i = 0; i < numChildren; i += 1) {
 							// For federation - handle node of project that cannot be viewed or has been deleted
+							// That node will be below level 0 only
 							if ((vm.nodesToShow[index].level === 0) &&
 								vm.nodesToShow[index].children[i].hasOwnProperty("children") &&
 								vm.nodesToShow[index].children[i].children[0].hasOwnProperty("status")) {
