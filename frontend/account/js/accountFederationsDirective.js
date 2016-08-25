@@ -80,7 +80,7 @@
 		 */
 		$scope.$watch("vm.newFederationData", function () {
 			if (vm.federationOriginalData === null) {
-				vm.newFederationButtonDisabled = (angular.isUndefined(vm.newFederationData.name)) || (vm.newFederationData.name === "");
+				vm.newFederationButtonDisabled = (angular.isUndefined(vm.newFederationData.project)) || (vm.newFederationData.project === "");
 			}
 			else {
 				vm.newFederationButtonDisabled = angular.equals(vm.newFederationData, vm.federationOriginalData);

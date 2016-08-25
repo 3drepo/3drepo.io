@@ -17051,7 +17051,7 @@ var Oculus = {};
 							}
 						}
 					} else {
-						console.log(666, vm.nodesToShow[index].children);
+						console.log(666, vm.nodesToShow[index].level);
 
 						// Expand
 						numChildren = vm.nodesToShow[index].children.length;
@@ -17062,8 +17062,9 @@ var Oculus = {};
 						}
 
 						for (i = 0; i < numChildren; i += 1) {
-							if (vm.nodesToShow[index].children[i].hasOwnProperty("children") &&
-								// For federation - handle node of project that cannot be viewed or has been deleted
+							// For federation - handle node of project that cannot be viewed or has been deleted
+							if ((vm.nodesToShow[index].level === 0) &&
+								vm.nodesToShow[index].children[i].hasOwnProperty("children") &&
 								vm.nodesToShow[index].children[i].children[0].hasOwnProperty("status")) {
 								vm.nodesToShow[index].children[i].status = vm.nodesToShow[index].children[i].children[0].status;
 							}
