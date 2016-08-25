@@ -43,7 +43,9 @@
 	function AccountFederationsCtrl ($scope, $location, $timeout, UtilsService) {
 		var vm = this,
 			federationToDeleteIndex,
-			accountsToUse;
+			userAccount, // For creating federations
+			userAccountIndex,
+			accountsToUse; // For listing federations
 
 		// Init
 		vm.federationOptions = {
@@ -66,6 +68,10 @@
 						if (vm.accounts[i].fedProjects.length > 0) {
 							accountsToUse.push(vm.accounts[i]);
 							vm.showInfo = false;
+						}
+						if (vm.accounts[i].account === vm.account) {
+							userAccountIndex = i;
+							userAccount = vm.accounts[i];
 						}
 					}
 
@@ -93,7 +99,7 @@
 		 * @param event
 		 */
 		vm.setupNewFederation = function (event) {
-			vm.accountsToUse = angular.copy(accountsToUse);
+			vm.userAccount = angular.copy(userAccount);
 			vm.federationOriginalData = null;
 			vm.newFederationData = {
 				desc: "",
@@ -124,20 +130,18 @@
 		/**
 		 * Add a project to a federation
 		 *
-		 * @param accountIndex
 		 * @param projectIndex
 		 */
-		vm.addToFederation = function (accountIndex, projectIndex) {
+		vm.addToFederation = function (projectIndex) {
 			vm.showRemoveWarning = false;
 
 			vm.newFederationData.subProjects.push({
-				accountIndex: accountIndex,
-				database: vm.accountsToUse[accountIndex].account,
+				database: vm.userAccount.account,
 				projectIndex: projectIndex,
-				project: vm.accountsToUse[accountIndex].projects[projectIndex].project
+				project: vm.userAccount.projects[projectIndex].project
 			});
 
-			vm.accountsToUse[accountIndex].projects[projectIndex].federated = true;
+			vm.userAccount.projects[projectIndex].federated = true;
 		};
 
 		/**
@@ -146,8 +150,7 @@
 		 * @param index
 		 */
 		vm.removeFromFederation = function (index) {
-			var i, j, iLength, jLength,
-				exit = false,
+			var i, length,
 				item;
 
 			// Cannot have existing federation with no sub projects
@@ -156,14 +159,10 @@
 			}
 			else {
 				item = vm.newFederationData.subProjects.splice(index, 1);
-				for (i = 0, iLength = vm.accountsToUse.length; (i < iLength) && !exit; i += 1) {
-					if (vm.accountsToUse[i].account === item[0].database) {
-						for (j = 0, jLength = vm.accountsToUse[i].projects.length; (j < jLength) && !exit; j += 1) {
-							if (vm.accountsToUse[i].projects[j].project === item[0].project) {
-								vm.accountsToUse[i].projects[j].federated = false;
-								exit = true;
-							}
-						}
+				for (i = 0, length = vm.userAccount.projects.length; i < length; i += 1) {
+					if (vm.userAccount.projects[i].project === item[0].project) {
+						vm.userAccount.projects[i].federated = false;
+						break;
 					}
 				}
 			}
@@ -179,8 +178,8 @@
 				promise = UtilsService.doPost(vm.newFederationData, vm.account + "/" + vm.newFederationData.project);
 				promise.then(function (response) {
 					console.log(response);
-					vm.newFederationData.timstamp = (new Date()).toString();
-					vm.accountsToUse[0].fedProjects.push(vm.newFederationData);
+					vm.newFederationData.timestamp = (new Date()).toString();
+					vm.accountsToUse[userAccountIndex].fedProjects.push(vm.newFederationData);
 					vm.closeDialog();
 				});
 			}

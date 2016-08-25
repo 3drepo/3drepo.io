@@ -495,6 +495,10 @@ account-federations .federationTimestamp {
   color: rgba(0,0,0,.3);
   margin-left: 20px;
 }
+
+account-federations #accountFederationInfo {
+  padding: 20px 20px 0 20px;
+}
 /* Done to counter bootstrap styling. This should really be set in a top level style file */
 .md-datepicker-input-mask {
   width: 308px;
