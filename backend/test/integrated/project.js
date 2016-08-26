@@ -91,6 +91,19 @@ describe('Project', function () {
 		});
 	});
 
+
+	it('should fail if no unit specified', function(done){
+
+		agent.post(`/${username}/${project}_no_unit`)
+		.send({ desc, type })
+		.expect(400, function(err ,res) {
+
+			expect(res.body.value).to.equal(responseCodes.PROJECT_NO_UNIT.value);
+			done(err);
+			
+		});
+	});
+
 	it('update settings should be successful', function(done){
 
 		let body = {
