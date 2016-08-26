@@ -128,7 +128,11 @@ function createAndAssignRole(project, account, username, desc, type, unit, subPr
 
 	}).then(() => {
 
-		let setting = ProjectSetting.createInstance({
+		return ProjectSetting.findById({account, project}, project);
+
+	}).then(setting => {
+
+		setting = setting || ProjectSetting.createInstance({
 			account: account, 
 			project: project
 		});
@@ -141,7 +145,7 @@ function createAndAssignRole(project, account, username, desc, type, unit, subPr
 		setting.updateProperties({
 			unit
 		});
-			
+
 		return setting.save();
 		
 	});
