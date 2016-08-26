@@ -123,15 +123,30 @@ ImportQueue.prototype.createFederatedProject = function(account, defObj){
     let newFileDir = this.sharedSpacePath + "/" + corID;
     let filename = `${newFileDir}/obj.json`;
 
-
     return new Promise((resolve, reject) => {
 
-        fs.mkdir(newFileDir, function (err){
-            if (err) {
-                reject(err);
-            } else {
+        fs.mkdir(this.sharedSpacePath, function(err){
+
+            if(!err || err && err.code == 'EEXIST'){
                 resolve();
+            } else {
+                reject(err);
             }
+            
+        });
+
+    }).then(() => {
+
+        return new Promise((resolve, reject) => {
+
+            fs.mkdir(newFileDir, function (err){
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+
         });
 
     }).then(() => {

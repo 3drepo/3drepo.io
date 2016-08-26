@@ -65,7 +65,10 @@ describe('Federated Project', function () {
 
 	after(function(done){
 		let q = require('../../services/queue');
-		q.channel.purgeQueue(q.workerQName).then(() => {
+
+		q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
+			return q.channel.purgeQueue(q.workerQName);
+		}).then(() => {
 			server.close(function(){
 				console.log('API test server is closed');
 				done();
@@ -295,7 +298,9 @@ describe('Federated Project', function () {
 
 		}, 1000);
 
-		q.channel.purgeQueue(q.workerQName).then(() => {
+		q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
+			return q.channel.purgeQueue(q.workerQName);
+		}).then(() => {
 			agent.post(`/${username}/dupfed`)
 			.send({ 
 				desc, 
