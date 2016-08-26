@@ -8874,47 +8874,6 @@ var ViewerManager = {};
 }());
 
 /**
- *	Copyright (C) 2016 3D Repo Ltd
- *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
- *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
- *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-	"use strict";
-
-	angular.module("3drepo")
-		.directive("cookiesText", cookiesText);
-
-	function cookiesText() {
-		return {
-			restrict: "E",
-			scope: {},
-			templateUrl: "cookiesText.html",
-			controller: CookiesTextCtrl,
-			controllerAs: "vm",
-			bindToController: true
-		};
-	}
-
-	CookiesTextCtrl.$inject = [];
-
-	function CookiesTextCtrl () {
-		var vm = this;
-	}
-}());
-
-/**
  *	Copyright (C) 2015 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
@@ -10566,9 +10525,9 @@ var ViewerManager = {};
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$window", "Auth", "StateManager", "EventService", "UtilsService"];
+    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$window", "Auth", "StateManager", "EventService", "UtilsService", "serverConfig"];
 
-    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $window, Auth, StateManager, EventService, UtilsService) {
+    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $window, Auth, StateManager, EventService, UtilsService, serverConfig) {
         var vm = this,
 			homeLoggedOut,
 			notLoggedInElement,
@@ -10582,17 +10541,15 @@ var ViewerManager = {};
 		vm.query = StateManager.query;
 		vm.functions = StateManager.functions;
 		vm.pointerEvents = "auto";
-
+		vm.goToAccount = false;
 		vm.goToUserPage = false;
 
-		vm.legalDisplays = [
-			{title: "Terms & Conditions", value: "terms"},
-			{title: "Privacy", value: "privacy"},
-			{title: "Cookies", value: "cookies"},
-			{title: "Pricing", value: "pricing"},
-			{title: "Contact", value: "contact"}
-		];
-		vm.goToAccount = false;
+		vm.legalDisplays = [];
+		if (angular.isDefined(serverConfig.legal)) {
+			vm.legalDisplays = serverConfig.legal;
+		}
+		vm.legalDisplays.push({title: "Pricing", page: "pricing"});
+		vm.legalDisplays.push({title: "Contact", page: "contact"});
 
 		$timeout(function () {
 			homeLoggedOut = angular.element($element[0].querySelector('#homeLoggedOut'));
@@ -14892,47 +14849,6 @@ var Oculus = {};
 }());
 
 /**
- *	Copyright (C) 2016 3D Repo Ltd
- *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
- *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
- *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-	"use strict";
-
-	angular.module("3drepo")
-		.directive("privacyText", privacyText);
-
-	function privacyText() {
-		return {
-			restrict: "E",
-			scope: {},
-			templateUrl: "privacyText.html",
-			controller: PrivacyTextCtrl,
-			controllerAs: "vm",
-			bindToController: true
-		};
-	}
-
-	PrivacyTextCtrl.$inject = [];
-
-	function PrivacyTextCtrl () {
-		var vm = this;
-	}
-}());
-
-/**
  *	Copyright (C) 2014 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
@@ -16247,7 +16163,10 @@ var Oculus = {};
 	function SignUpFormCtrl($scope, $mdDialog, $location, serverConfig, UtilsService) {
 		var vm = this,
 			enterKey = 13,
-			promise;
+			promise,
+			agreeToText = "",
+			haveReadText = "",
+			legalItem;
 
 		/*
 		 * Init
@@ -16260,6 +16179,7 @@ var Oculus = {};
 		vm.useReCapthca = false;
 		vm.useRegister = false;
 		vm.registering = false;
+		vm.showLegalText = false;
 
 		/*
 		 * Auth stuff
@@ -16270,6 +16190,41 @@ var Oculus = {};
 				if (serverConfig.auth.hasOwnProperty("captcha") && (serverConfig.auth.captcha)) {
 					vm.useReCapthca = true;
 				}
+			}
+		}
+
+		// Legal text
+		if (angular.isDefined(serverConfig.legal)) {
+			vm.showLegalText = true;
+			vm.legalText = "";
+			for (legalItem in serverConfig.legal) {
+				if (serverConfig.legal.hasOwnProperty(legalItem)) {
+					if (serverConfig.legal[legalItem].type === "agreeTo") {
+						if (agreeToText === "") {
+							agreeToText = "I agree to the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]);
+						}
+						else {
+							agreeToText += " and the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]);
+						}
+					}
+					else if (serverConfig.legal[legalItem].type === "haveRead") {
+						if (haveReadText === "") {
+							haveReadText = "I have read the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]) + " policy";
+						}
+						else {
+							haveReadText += " and the " + getLegalTextFromLegalItem(serverConfig.legal[legalItem]) + " policy";
+						}
+					}
+				}
+			}
+
+			vm.legalText = agreeToText;
+			if (vm.legalText !== "") {
+				vm.legalText += " and ";
+			}
+			vm.legalText += haveReadText;
+			if (vm.legalText !== "") {
+				vm.legalText += ".";
 			}
 		}
 
@@ -16381,6 +16336,10 @@ var Oculus = {};
 				vm.registerErrorMessage = "Please fill all fields";
 			}
 		}
+
+		function getLegalTextFromLegalItem (legalItem) {
+			return "<a target='_blank' href='/" + legalItem.page + "'>" + legalItem.title + "</a>";
+		}
 	}
 }());
 
@@ -16426,47 +16385,6 @@ var Oculus = {};
 		vm.home = function () {
 			EventService.send(EventService.EVENT.GO_HOME);
 		};
-	}
-}());
-
-/**
- *	Copyright (C) 2016 3D Repo Ltd
- *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
- *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
- *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-(function () {
-	"use strict";
-
-	angular.module("3drepo")
-		.directive("termsText", termsText);
-
-	function termsText() {
-		return {
-			restrict: "E",
-			scope: {},
-			templateUrl: "termsText.html",
-			controller: TermsTextCtrl,
-			controllerAs: "vm",
-			bindToController: true
-		};
-	}
-
-	TermsTextCtrl.$inject = [];
-
-	function TermsTextCtrl () {
-		var vm = this;
 	}
 }());
 

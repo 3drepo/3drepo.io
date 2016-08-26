@@ -123,6 +123,8 @@ module.exports.createApp = function(serverConfig)
 
 		params.config_js += "\n\nserver_config.usStates = " + JSON.stringify(addressMeta.usStates) + ";";
 
+		params.config_js += "\n\nserver_config.legal = " + JSON.stringify(config.legal) + ";";
+
 		res.header("Content-Type", "text/javascript");
 		res.render("config.jade", params);
 	});
@@ -143,9 +145,6 @@ module.exports.createApp = function(serverConfig)
 			"signUp",
 			"contact",
 			"payment",
-			"terms",
-			"privacy",
-			"cookies",
 			"billing"
 		],
 		"children" : [
@@ -178,6 +177,13 @@ module.exports.createApp = function(serverConfig)
 			}
 		]
 	};
+
+	// Set up the legal plugins
+	if (config.hasOwnProperty("legal")) {
+		for (var i = 0; i < config.legal.length; i += 1) {
+			DEFAULT_PLUGIN_STRUCTURE.functions.push(config.legal[i].page);
+		}
+	}
 
 	// TODO: Replace with user based plugin selection
 	var pluginStructure = {};
@@ -295,6 +301,12 @@ module.exports.createApp = function(serverConfig)
 
 		params.parentStateJSON	= JSON.stringify(params.parentStateJSON);
 		params.uistate = JSON.stringify(params.uistate);
+
+		// Set up the legal plugins
+		params.legalTemplates = [];
+		if (config.hasOwnProperty("legal")) {
+			params.legalTemplates = config.legal;
+		}
 
 		setupJade(params);
 		res.render(serverConfig.template, params);

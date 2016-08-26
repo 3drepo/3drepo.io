@@ -966,17 +966,6 @@ contact #contactDivider {
     height: 100%;
     background: rgba(0, 0, 0, 0.1);
 }
-cookies .md-toolbar-tools img {
-    width: 150px;
-}
-
-cookies-text {
-    position: absolute;
-    z-index: 3;
-    background: #FDFDFD;
-    color: rgba(0, 0, 0, 0.8);
-    padding: 10px 50px;
-}
 /** Docs **************************************************************************************************************/
 docs .typesList {
   padding: 0;
@@ -1290,7 +1279,21 @@ md-dialog md-toolbar {
     min-height: 40px;
 }
 
+/** Legal *************************************************************************************************************/
+#legal {
+    position: absolute;
+    z-index: 3;
+    background: #FDFDFD;
+    color: rgba(0, 0, 0, 0.8);
+}
 
+#legal .md-toolbar-tools img {
+    width: 150px;
+}
+
+#legal #legalText {
+    padding: 10px 50px;
+}
 /** Issues ************************************************************************************************************/
 
 issues #issuesAddContainer {
@@ -1857,18 +1860,6 @@ pricing .pricingContent {
     overflow: auto;
 }
 
-privacy .md-toolbar-tools img {
-    width: 150px;
-}
-
-privacy-text {
-    position: absolute;
-    z-index: 3;
-    background: #FDFDFD;
-    color: rgba(0, 0, 0, 0.8);
-    padding: 10px 50px;
-}
-
 register-verify .databaseError {
     color: #F44336;
     margin: 5px 0 5px;
@@ -1961,17 +1952,6 @@ sign-up-form #signUpFormHiddenInputs {
     position: absolute;
     top: 0;
     opacity: 0;
-}
-terms .md-toolbar-tools img {
-    width: 150px;
-}
-
-terms-text {
-    position: absolute;
-    z-index: 3;
-    background: #FDFDFD;
-    color: rgba(0, 0, 0, 0.8);
-    padding: 10px 50px;
 }
 tree span {
   outline: none;
