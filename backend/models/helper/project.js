@@ -194,7 +194,7 @@ function importToyProject(username){
 	// let copy = true;
 
 	
-	return createAndAssignRole(project, account, username, desc, type).then(setting => {
+	return createAndAssignRole(project, account, username, desc, type, 'm').then(setting => {
 		//console.log('setting', setting);
 		return Promise.resolve(setting);
 
