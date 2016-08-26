@@ -28,6 +28,7 @@ var Ref = require('./ref');
 var GenericObject = require('./base/repo').GenericObject;
 var uuid = require("node-uuid");
 var responseCodes = require('../response_codes.js');
+var middlewares = require('../routes/middlewares');
 
 var schema = Schema({
 	_id: Object,
@@ -93,7 +94,7 @@ schema.statics._find = function(dbColOptions, filter, projection){
 	});
 };
 
-schema.statics.getFederatedProjectList = function(dbColOptions, branch, revision){
+schema.statics.getFederatedProjectList = function(dbColOptions, username, branch, revision){
 	'use strict';
 
 	var allRefs = [];
@@ -102,14 +103,18 @@ schema.statics.getFederatedProjectList = function(dbColOptions, branch, revision
 
 		let getHistory;
 
-
-		if(branch) {
+		if(branch){
 			getHistory = History.findByBranch(dbColOptions, branch);
 		} else if (revision) {
-			getHistory = History.findByUID(dbColOptions, revision);
+			getHistory =  History.findByUID(dbColOptions, revision);
 		}
 
 		return getHistory.then(history => {
+
+
+			if(!history){
+				return Promise.resolve([]);
+			}
 
 			let filter = {
 				type: "ref",
@@ -118,9 +123,8 @@ schema.statics.getFederatedProjectList = function(dbColOptions, branch, revision
 
 
 			return Ref.find(dbColOptions, filter);
+
 		}).then(refs => {
-
-
 
 			var promises = [];
 
@@ -158,14 +162,14 @@ schema.statics.getFederatedProjectList = function(dbColOptions, branch, revision
 		});
 	}
 
+
 	return _get(dbColOptions, branch, revision).then(() => {
-		//console.log('finial allRefs', allRefs);
 		return Promise.resolve(allRefs);
 	});
 
 };
 
-schema.statics.findByProjectName = function(dbColOptions, branch, rev){
+schema.statics.findByProjectName = function(dbColOptions, username, branch, rev){
 	'use strict';
 	let issues;
 	let self = this;
@@ -174,6 +178,7 @@ schema.statics.findByProjectName = function(dbColOptions, branch, rev){
 		issues = _issues;
 		return self.getFederatedProjectList(
 			dbColOptions,
+			username,
 			branch,
 			rev
 		);
@@ -184,13 +189,20 @@ schema.statics.findByProjectName = function(dbColOptions, branch, rev){
 			return Promise.resolve(issues);
 		} else {
 
-			//console.log('refs', refs.length);
 			let promises = [];
 			refs.forEach(ref => {
 				let childDbName = ref.owner || dbColOptions.account;
 				let childProject = ref.project;
 
-				promises.push(self._find({account: childDbName, project: childProject}));
+				promises.push(
+					middlewares.hasReadAccessToProjectHelper(username, childDbName, childProject).then(granted => {
+						if(granted){
+							return self._find({account: childDbName, project: childProject});
+						} else {
+							return Promise.resolve([]);
+						}
+					})
+				);
 			});
 
 			return Promise.all(promises).then(refIssues => {

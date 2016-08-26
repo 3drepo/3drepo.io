@@ -29,7 +29,8 @@
 				account: "=",
 				accounts: "=",
 				onShowPage: "&",
-				quota: "="
+				quota: "=",
+				subscriptions: "="
 			},
 			controller: AccountProjectsCtrl,
 			controllerAs: 'vm',
@@ -251,7 +252,6 @@
 		 */
 		vm.setupPayment = function () {
 			$timeout(function () {
-				console.log(vm.newDatabaseToken);
 				vm.showPaymentWait = true;
 			});
 		};
@@ -264,14 +264,17 @@
 		 */
 		vm.setupDeleteProject = function (event, project) {
 			vm.projectToDelete = project;
-			vm.showDeleteProjectError = false;
-			UtilsService.showDialog("deleteProjectDialog.html", $scope, event, true);
+			vm.deleteError = null;
+			vm.deleteTitle = "Delete Project";
+			vm.deleteWarning = "Your data will be lost permanently and will not be recoverable";
+			vm.deleteName = vm.projectToDelete.name;
+			UtilsService.showDialog("deleteDialog.html", $scope, event, true);
 		};
 
 		/**
 		 * Delete project
 		 */
-		vm.deleteProject = function () {
+		vm.delete = function () {
 			var i, iLength, j, jLength,
 				promise;
 			promise = UtilsService.doDelete({}, vm.account + "/" + vm.projectToDelete.name);
@@ -291,8 +294,7 @@
 					vm.closeDialog();
 				}
 				else {
-					vm.showDeleteProjectError = true;
-					vm.deleteProjectError = "Error deleting project";
+					vm.deleteError = "Error deleting project";
 				}
 			});
 		};

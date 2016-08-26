@@ -138,6 +138,10 @@ account-projects .projectRight .projectUploaded {
   color: rgba(0,0,0,0.5);
 }
 
+account-projects .userContent {
+  padding: 0 !important;
+}
+
 /** Account Profile ***************************************************************************************************/
 account-profile md-input-container {
   margin-right: 5px;
@@ -256,21 +260,21 @@ account-menu md-icon {
   color: #F44336;
 }
 
-/** Delete Project Dialog *********************************************************************************************/
-.deleteProjectDialog p {
+/** Delete Dialog *********************************************************************************************/
+.deleteDialog p {
   color: rgba(0 ,0, 0, 0.6);
   margin: 0;
 }
-.deleteProjectDialog #deleteProjectName {
+.deleteDialog #deleteName {
   color: rgba(0 ,0, 0, 0.9);
 }
 
-.deleteProjectDialog #deleteProjectWarning {
+.deleteDialog #deleteWarning {
   color: #F44336;
   margin: 0;
 }
 
-.deleteProjectDialog #deleteProjectError {
+.deleteDialog #deleteError {
   margin: 0;
   color: #F44336;
 }
@@ -377,6 +381,10 @@ account-licenses #accountLicensesBillingPage {
 }
 
 /** Account Team ******************************************************************************************************/
+account-team {
+  width: 500px;
+}
+
 account-team .collaboratorIcon {
   margin: 0 10px !important;
 }
@@ -457,6 +465,65 @@ account-projectsetting #accountTeamMemberRole {
 
 account-projectsetting #accountTeamSubHeader {
   color: rgba(0, 0, 0, 0.3);
+}
+
+/** Federation Dialog *************************************************************************************************/
+#federationDialog #federationDivider {
+  width: 1px;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+#federationDialog #federationSave {
+  margin-top: 10px;
+}
+
+#federationDialog md-list {
+  padding: 0;
+}
+
+#federationDialog md-list-item {
+  height: 35px;
+  min-height: 35px;
+}
+#federationDialog md-list-item p {
+  margin-left: -20px;
+}
+
+#federationDialog .federationProject {
+  padding-left: 20px;
+}
+
+#federationDialog #federationWarning {
+  margin: 5px 0 0 20px;
+  color: #F44336;
+}
+
+
+#federationDialog #federatedProjectAccount {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/** Account Federations ***********************************************************************************************/
+account-federations .userContent {
+  padding: 0 !important;
+}
+
+account-federations md-list {
+  padding: 0;
+}
+account-federations .md-list-item-text {
+  color: rgb(67, 160, 71);
+}
+
+account-federations .federationProjectsList {
+  margin: 0 0 10px 70px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+account-federations .federationTimestamp {
+  color: rgba(0,0,0,.3);
+  margin-left: 20px;
 }
 /* Done to counter bootstrap styling. This should really be set in a top level style file */
 .md-datepicker-input-mask {

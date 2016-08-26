@@ -39,6 +39,7 @@ describe('Project', function () {
 	let password = 'password';
 	let email = 'test3drepo_project@mailinator.com';
 	let project = 'project1';
+	let projectFed = 'projectFed1';
 	let desc = 'desc';
 	let type = 'type';
 	let unit = 'm';
@@ -62,9 +63,12 @@ describe('Project', function () {
 	});
 
 	after(function(done){
-		server.close(function(){
-			console.log('API test server is closed');
-			done();
+		let q = require('../../services/queue');
+		q.channel.purgeQueue(q.workerQName).then(() => {
+			server.close(function(){
+				console.log('API test server is closed');
+				done();
+			});
 		});
 	});
 
@@ -134,6 +138,8 @@ describe('Project', function () {
 			
 		});
 	});
+
+
 
 	it('should return error message if project name already exists', function(done){
 

@@ -141,7 +141,7 @@ function listIssues(req, res, next) {
 	if(req.query.shared_id){
 		findIssue = Issue.findBySharedId(dbCol, req.query.shared_id, req.query.number);
 	} else {
-		findIssue = Issue.findByProjectName(dbCol, "master", null);
+		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, "master", null);
 	}
 
 	findIssue.then(issues => {
@@ -189,7 +189,7 @@ function renderIssuesHTML(req, res, next){
 	let place = utils.APIInfo(req);
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
 
-	Issue.findByProjectName(dbCol, "master", null).then(issues => {
+	Issue.findByProjectName(dbCol, req.session.user.username, "master", null).then(issues => {
 		// Split issues by type
 		let splitIssues   = {open : [], closed: []};
 
