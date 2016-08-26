@@ -13,6 +13,13 @@ md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50
 					input(placeholder="Federation name", tdr-focus="true", ng-model="vm.newFederationData.project", ng-disabled="vm.federationOriginalData")
 					.inputHint(ng-if="!vm.federationOriginalData") Letters, numbers and underscore only
 
+			div(layout="row", flex)
+				md-input-container(flex="50")
+					label Unit
+					md-select(ng-model="vm.newFederationData.unit")
+						md-option(ng-repeat="unit in vm.units", value="{{unit.value}}") {{unit.name}}
+
+
 			md-divider
 
 			// List

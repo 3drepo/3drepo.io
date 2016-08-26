@@ -5360,6 +5360,8 @@ var ViewerManager = {};
 			delete: {label: "Delete", icon: "delete"}
 		};
 
+		vm.units = server_config.units;
+		
 		/*
 		 * Watch accounts input
 		 */
