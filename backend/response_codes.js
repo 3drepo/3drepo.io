@@ -172,9 +172,10 @@ var responseCodes = {
 	FED_MODEL_IN_OTHER_DB: { value: 110, message: 'Models of federation must reside in the same account', status: 400},
 	FED_MODEL_IS_A_FED: {value: 111, message: 'Models of federation cannot be a federation', status:400},
 	PROJECT_IS_NOT_A_FED: {value: 112, message: 'Project is not a federation', status:400},
+
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {
-			value: 42,
+			value: 900,
 			status: 400 ,
 			message: err.message || 'Validation failed'
 		};
@@ -234,7 +235,7 @@ var responseCodes = {
 	}
 };
 
-var valid_values = [1000, 2000, 3000, 4000];
+var valid_values = [900, 1000, 2000, 3000, 4000];
 
 Object.keys(responseCodes).forEach(key => {
 	if(typeof responseCodes[key].value !== 'undefined'){

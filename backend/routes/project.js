@@ -216,8 +216,11 @@ function updateProject(req, res, next){
 	
 	if(req.body.subProjects && req.body.subProjects.length > 0){
 
-		promise = ProjectSetting.findById({account, account}, project).then(setting => {
-			if (!setting.federate){
+		promise = ProjectSetting.findById({account}, project).then(setting => {
+			
+			if(!setting) {
+				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+			} else if (!setting.federate){
 				return Promise.reject(responseCodes.PROJECT_IS_NOT_A_FED);
 			} else {
 				return ProjectHelpers.createFederatedProject(account, project, req.body.subProjects);

@@ -337,7 +337,7 @@ describe('Federated Project', function () {
 
 	it('update should fail if project is not a fed', function(done){
 
-		agent.put(`/${username}/subProjects[0]`)
+		agent.put(`/${username}/${subProjects[0]}`)
 		.send({ 
 			desc, 
 			type, 
@@ -351,6 +351,69 @@ describe('Federated Project', function () {
 			expect(res.body.value).to.equal(responseCodes.PROJECT_IS_NOT_A_FED.value);
 			done(err);
 
+		});
+	});
+
+	it('update should fail if project does not exist', function(done){
+		agent.put(`/${username}/nonexistproject`)
+		.send({ 
+			desc, 
+			type, 
+			subProjects:[{
+				"database": username,
+				"project": subProjects[0]
+			}] 
+		})
+		.expect(400, function(err ,res) {
+
+			expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+			done(err);
+
+		});
+	});
+
+	it('update should success if project is a federation', function(done){
+		this.timeout(5000);
+
+		let q = require('../../services/queue');
+		let corId;
+
+		//fake a response from bouncer;
+		setTimeout(function(){
+			q.channel.assertQueue(q.workerQName, { durable: true }).then(info => {
+				expect(info.messageCount).to.equal(1);
+				return q.channel.get(q.workerQName);
+			}).then(res => {
+				corId = res.properties.correlationId;
+				return q.channel.assertQueue(q.callbackQName, { durable: true });
+			}).then(() => {
+				//send fake job done message to the queue;
+				return q.channel.sendToQueue(q.callbackQName, 
+					new Buffer(JSON.stringify({ value: 0})), 
+					{
+						correlationId: corId, 
+						persistent: true 
+					}
+				);
+			}).catch(err => {
+				done(err);
+			});
+
+		}, 1000);
+
+		agent.put(`/${username}/${fedProject}`)
+		.send({ 
+			desc, 
+			type, 
+			subProjects:[{
+				"database": username,
+				"project": subProjects[1]
+			}] 
+		})
+		.expect(200, function(err ,res) {
+
+			expect(res.body.project).to.equal(fedProject);
+			return done(err);
 		});
 	});
 });
