@@ -194,19 +194,11 @@ function createProject(req, res, next){
 	let username = req.session.user.username;
 
 	let federate;
-	if(req.body.subProjects && req.body.subProjects.length > 0){
+	if(req.body.subProjects){
 		federate = true;
 	}
 
-	createAndAssignRole(project, account, username, req.body.desc, req.body.type, federate).then(() => {
-
-		if(federate){
-			return ProjectHelpers.createFederatedProject(account, project, req.body.subProjects);
-		}
-
-		return Promise.resolve();
-
-	}).then(() => {
+	createAndAssignRole(project, account, username, req.body.desc, req.body.type, req.body.subProjects, federate).then(() => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -223,15 +215,18 @@ function updateProject(req, res, next){
 	let promise = Promise.resolve();
 	
 	if(req.body.subProjects && req.body.subProjects.length > 0){
-		promise = ProjectHelpers.createFederatedProject(account, project, req.body.subProjects).then(() => {
 
-			return ProjectSetting.findById({account, project}, project);
-
-		}).then(setting => {
-
-			setting.federate = true;
-			return setting.save();
+		promise = ProjectSetting.findById({account}, project).then(setting => {
+			
+			if(!setting) {
+				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+			} else if (!setting.federate){
+				return Promise.reject(responseCodes.PROJECT_IS_NOT_A_FED);
+			} else {
+				return ProjectHelpers.createFederatedProject(account, project, req.body.subProjects);
+			}
 		});
+
 	}
 
 	promise.then(() => {
@@ -463,11 +458,11 @@ function getProjectTree(req, res, next){
 
 	let project = req.params.project;
 	let account = req.params.account;
+	let username = req.session.user.username;
 
+	ProjectHelpers.getFullTree(account, project, 'master', username).then(obj => {
 
-	ProjectHelpers.getFullTree(account, project, 'master').then(tree => {
-
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, tree);
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj.tree);
 
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

@@ -28,6 +28,7 @@ var History = require('../history');
 var utils = require("../../utils");
 var stash = require('./stash');
 var Ref = require('../ref');
+var middlewares = require('../../routes/middlewares');
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -70,7 +71,7 @@ function convertToErrorCode(errCode){
     return errObj;
 }
 
-function createAndAssignRole(project, account, username, desc, type, federate) {
+function createAndAssignRole(project, account, username, desc, type, subProjects, federate) {
 	'use strict';
 
 
@@ -78,11 +79,26 @@ function createAndAssignRole(project, account, username, desc, type, federate) {
 		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_NAME });
 	}
 
+
+
 	if(C.REPO_BLACKLIST_PROJECT.indexOf(project) !== -1){
 		return Promise.reject({ resCode: responseCodes.BLACKLISTED_PROJECT_NAME });
 	}
 
-	return Role.findByRoleID(`${account}.${project}.viewer`).then(role =>{
+
+	return ProjectSetting.findById({account, project}, project).then(setting => {
+
+		if(setting){
+			return Promise.reject({resCode: responseCodes.PROJECT_EXIST});
+		}
+
+		return (federate ? createFederatedProject(account, project, subProjects) : Promise.resolve());
+
+	}).then(() => {
+		
+		return Role.findByRoleID(`${account}.${project}.viewer`);
+
+	}).then(role =>{
 
 		if(role){
 			return Promise.resolve();
@@ -108,25 +124,23 @@ function createAndAssignRole(project, account, username, desc, type, federate) {
 
 	}).then(() => {
 
-		return ProjectSetting.findById({account, project}, project).then(setting => {
+		return ProjectSetting.findById({account, project}, project);
 
-			if(setting){
-				return Promise.reject({resCode: responseCodes.PROJECT_EXIST});
-			}
+	}).then(setting => {
 
-			setting = ProjectSetting.createInstance({
-				account: account, 
-				project: project
-			});
-			
-			setting._id = project;
-			setting.owner = username;
-			setting.desc = desc;
-			setting.type = type;
-			setting.federate = federate;
-			
-			return setting.save();
+		setting = setting || ProjectSetting.createInstance({
+			account: account, 
+			project: project
 		});
+		
+		setting._id = project;
+		setting.owner = username;
+		setting.desc = desc;
+		setting.type = type;
+		setting.federate = federate;
+		
+		return setting.save();
+		
 
 	});
 }
@@ -434,26 +448,73 @@ function createFederatedProject(account, project, subProjects){
 		subProjects: []
 	};
 	
+	let error;
+
+	let addSubProjects = [];
+
 	subProjects.forEach(subProject => {
-		federatedJSON.subProjects.push({
-			database: subProject.database,
-			project: subProject.project
-		});
+
+		if(subProject.database !== account){
+			error = responseCodes.FED_MODEL_IN_OTHER_DB;
+		}
+
+		addSubProjects.push(ProjectSetting.findById({account, project: subProject.project}, subProject.project).then(setting => {
+			if(setting.federate){
+				return Promise.reject(responseCodes.FED_MODEL_IS_A_FED);
+
+			} else if(!federatedJSON.subProjects.find(o => o.database === subProject.database && o.project === subProject.project)) {
+				federatedJSON.subProjects.push({
+					database: subProject.database,
+					project: subProject.project
+				});
+			}
+		}));
+
 	});
 
-	return importQueue.createFederatedProject(account, federatedJSON);
+	if(error){
+		return Promise.reject(error);
+	}
+
+	if(subProjects.length === 0) {
+		return Promise.resolve();
+	}
+	
+	//console.log(federatedJSON);
+	return Promise.all(addSubProjects).then(() => {
+		return importQueue.createFederatedProject(account, federatedJSON);
+	}).catch(err => {
+		//catch here to provide custom error message
+		if(err.errCode){
+			return Promise.reject(convertToErrorCode(err.errCode));
+		}
+		return Promise.reject(err);
+		
+	});
+
 }
 
 
-function getFullTree(account, project, branch){
+function getFullTree(account, project, branch, username){
 	'use strict';
 
 	let revId, treeFileName;
 	let subTrees;
+	let status;
 
-	return History.findByBranch({ account, project }, branch).then(history => {
+	return middlewares.hasReadAccessToProjectHelper(username, account, project).then(granted => {
+
+		if(granted){
+			return History.findByBranch({ account, project }, branch);
+		} else {
+			status = 'NO_ACCESS';
+			return Promise.resolve();
+		}
+
+	}).then(history => {
 
 		if(!history){
+			!status && (status = 'NOT_FOUND');
 			return Promise.resolve([]);
 		}
 
@@ -474,9 +535,10 @@ function getFullTree(account, project, branch){
 		
 		refs.forEach(ref => {
 			getTrees.push(
-				getFullTree(ref.owner, ref.project, uuidToString(ref._rid)).then(tree => {
+				getFullTree(ref.owner, ref.project, uuidToString(ref._rid), username).then(obj => {
 					return Promise.resolve({
-						tree: tree,
+						tree: obj.tree,
+						status: obj.status,
 						_rid: uuidToString(ref._rid),
 						_id: uuidToString(ref._id)
 					});
@@ -499,6 +561,13 @@ function getFullTree(account, project, branch){
 			tree = JSON.parse(buf);
 		}
 
+		let resetPath = function(node, parentPath){
+			node.children && node.children.forEach(child => {
+				child.path = parentPath + '__' + child.path; 
+				child.children && resetPath(child.children, child.path);
+			});
+		};
+
 		subTrees.forEach(subTree => {
 
 			tree && tree.nodes.children && tree.nodes.children.forEach(child => {
@@ -506,14 +575,19 @@ function getFullTree(account, project, branch){
 				let targetChild = child.children && child.children.find(_child => _child._id === subTree._id);
 				if (targetChild){
 
-					subTree && subTree.tree && subTree.tree.nodes && (targetChild.children = [subTree.tree.nodes]);
-					(!subTree || !subTree.tree || !subTree.tree.nodes) && (targetChild.status = 'NOT_FOUND');
+					if(subTree && subTree.tree && subTree.tree.nodes){
+						subTree.tree.nodes.path = targetChild.path + '__' + subTree.tree.nodes.path;
+						resetPath(subTree.tree.nodes, subTree.tree.nodes.path);
+						targetChild.children = [subTree.tree.nodes];
+					}
+
+					(!subTree || !subTree.tree || !subTree.tree.nodes) && (targetChild.status = subTree.status);
 				} 
 
 			});
 		});
 		
-		return Promise.resolve(tree);
+		return Promise.resolve({tree, status});
 
 	});
 }
