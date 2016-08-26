@@ -124,8 +124,11 @@ function createAndAssignRole(project, account, username, desc, type, subProjects
 
 	}).then(() => {
 
+		return ProjectSetting.findById({account, project}, project);
 
-		let setting = ProjectSetting.createInstance({
+	}).then(setting => {
+
+		setting = setting || ProjectSetting.createInstance({
 			account: account, 
 			project: project
 		});
