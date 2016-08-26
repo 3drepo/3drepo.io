@@ -127,7 +127,7 @@ ImportQueue.prototype.createFederatedProject = function(account, defObj){
 
         fs.mkdir(this.sharedSpacePath, function(err){
 
-            if(!err || err && err.code == 'EEXIST'){
+            if(!err || err && err.code === 'EEXIST'){
                 resolve();
             } else {
                 reject(err);
