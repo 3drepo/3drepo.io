@@ -1,4 +1,6 @@
 module.exports = [
-	{value: 'centimetre', name: 'Centimetre'},
-	{value: 'metre', name: 'Metre'}
+	{value: 'cm', name: 'Centimetres'},
+	{value: 'm', name: 'Metres'},
+	{value: 'ft', name: 'Feet and inches'},
+	{value: 'mm', name: 'Millimetres'}
 ];

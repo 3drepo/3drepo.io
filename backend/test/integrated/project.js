@@ -41,7 +41,7 @@ describe('Project', function () {
 	let project = 'project1';
 	let desc = 'desc';
 	let type = 'type';
-	let unit = 'meter';
+	let unit = 'm';
 
 	before(function(done){
 
@@ -100,7 +100,7 @@ describe('Project', function () {
 					lon: 234,
 					y: 5
 				},
-				unit: 'meter'
+				unit: 'cm'
 
 		};
 		

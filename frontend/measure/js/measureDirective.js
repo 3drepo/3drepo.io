@@ -56,7 +56,7 @@
 		vm.screenPos = [0.0, 0.0];
 
 		//console.log('measure scope', $scope);
-		vm.unit = vm.units.find(function(unit) { return unit.value === vm.settings.unit}).name;
+		vm.unit = vm.settings.unit;
 
 		EventService.send(EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK, {
 			callback: function(event) {
