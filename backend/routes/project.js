@@ -53,6 +53,9 @@ router.put('/:project', middlewares.connectQueue, middlewares.hasWriteAccessToPr
 //master tree
 router.get('/:project/revision/master/head/fulltree.json', middlewares.hasReadAccessToProject, getProjectTree);
 
+//search master tree
+router.get('/:project/revision/master/head/searchtree.json', middlewares.hasReadAccessToProject, searchProjectTree);
+
 router.delete('/:project', middlewares.canCreateProject, deleteProject);
 
 router.post('/:project/upload', middlewares.connectQueue, middlewares.canCreateProject, uploadProject);
@@ -463,6 +466,24 @@ function getProjectTree(req, res, next){
 	ProjectHelpers.getFullTree(account, project, 'master', username).then(obj => {
 
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj.tree);
+
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+
+function searchProjectTree(req, res, next){
+	'use strict';
+
+	let project = req.params.project;
+	let account = req.params.account;
+	let username = req.session.user.username;
+	let searchString = req.query.searchString;
+
+	ProjectHelpers.searchTree(account, project, 'master', null, searchString, username).then(items => {
+
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, items);
 
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

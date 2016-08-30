@@ -101,7 +101,7 @@ var repoGetHandler = function(router, checkAccess){
     });
 
     // Retrieve all tree elements with a name containing the search string
-    self.getInternal("/:account/:project/revision/:branch/head/searchtree.:format");
+//    self.getInternal("/:account/:project/revision/:branch/head/searchtree.:format");
 
 	// Account information
 	self.getInternal("/search.:format");
