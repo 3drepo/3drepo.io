@@ -1003,8 +1003,11 @@ var os_clickBuildingObject  = ViewerUtil.eventFactory("os_clickBuildingObject");
 
 		var self = this;
 
-		if(settings && settings.hasOwnProperty("mapTile")){
+		if(settings && settings.hasOwnProperty("mapTile") && settings.mapTile.lat && settings.mapTile.lon){
 			// set origin BNG
+			settings.mapTile.lat = parseFloat(settings.mapTile.lat);
+			settings.mapTile.lon = parseFloat(settings.mapTile.lon);
+			settings.mapTile.y = parseInt(settings.mapTile.y);
 			this.settings = settings;
 			this.originBNG = OsGridRef.latLonToOsGrid(new LatLon(this.settings.mapTile.lat, this.settings.mapTile.lon));
 			this.meterPerPixel = 1;
@@ -5214,6 +5217,7 @@ var ViewerManager = {};
 		 * @param callingPage
 		 */
 		vm.showPage = function (page, callingPage) {
+			console.log(page, callingPage);
 			vm.itemToShow = page;
 			$location.search("page", page);
 			vm.callingPage = callingPage;
@@ -5296,6 +5300,331 @@ var ViewerManager = {};
 					}
 				}
 			});
+		}
+	}
+}());
+
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("accountFederations", accountFederations);
+
+	function accountFederations() {
+		return {
+			restrict: 'EA',
+			templateUrl: 'accountFederations.html',
+			scope: {
+				account: "=",
+				accounts: "=",
+				onShowPage: "&",
+				quota: "=",
+				subscriptions: "="
+			},
+			controller: AccountFederationsCtrl,
+			controllerAs: 'vm',
+			bindToController: true
+		};
+	}
+
+	AccountFederationsCtrl.$inject = ["$scope", "$location", "$timeout", "UtilsService"];
+
+	function AccountFederationsCtrl ($scope, $location, $timeout, UtilsService) {
+		var vm = this,
+			federationToDeleteIndex,
+			userAccount, // For creating federations
+			userAccountIndex,
+			accountsToUse; // For listing federations
+
+		// Init
+		vm.federationOptions = {
+			edit: {label: "Edit", icon: "edit"},
+			team: {label: "Team", icon: "group"},
+			delete: {label: "Delete", icon: "delete"}
+		};
+
+		vm.units = server_config.units;
+		
+		/*
+		 * Watch accounts input
+		 */
+		$scope.$watch("vm.accounts", function () {
+			var i, length;
+
+			if (angular.isDefined(vm.accounts)) {
+				vm.showInfo = true;
+				if (vm.accounts.length > 0) {
+					accountsToUse = [];
+					for (i = 0, length = vm.accounts.length; i < length; i += 1) {
+						if (vm.accounts[i].account === vm.account) {
+							vm.accounts[i].showProjects = true;
+							accountsToUse.push(vm.accounts[i]);
+							if (vm.accounts[i].fedProjects.length > 0) {
+								vm.showInfo = false;
+							}
+							userAccountIndex = i;
+							userAccount = vm.accounts[i];
+						}
+						else if (vm.accounts[i].fedProjects.length > 0) {
+							vm.accounts[i].showProjects = true;
+							accountsToUse.push(vm.accounts[i]);
+							vm.showInfo = false;
+						}
+					}
+
+					vm.accountsToUse = angular.copy(accountsToUse);
+					console.log(vm.accountsToUse);
+				}
+			}
+		});
+
+		/*
+		 * Watch for change in edited federation
+		 */
+		$scope.$watch("vm.newFederationData", function () {
+			if (vm.federationOriginalData === null) {
+				vm.newFederationButtonDisabled = (angular.isUndefined(vm.newFederationData.project)) || (vm.newFederationData.project === "");
+			}
+			else {
+				vm.newFederationButtonDisabled = angular.equals(vm.newFederationData, vm.federationOriginalData);
+			}
+		}, true);
+
+		/**
+		 * Open the federation dialog
+		 *
+		 * @param event
+		 */
+		vm.setupNewFederation = function (event) {
+			vm.userAccount = angular.copy(userAccount);
+			vm.federationOriginalData = null;
+			vm.newFederationData = {
+				desc: "",
+				type: "",
+				subProjects: []
+			};
+			UtilsService.showDialog("federationDialog.html", $scope, event);
+		};
+
+		/**
+		 * Close the federation dialog
+		 *
+		 */
+		vm.closeDialog = function () {
+			UtilsService.closeDialog();
+		};
+
+		/**
+		 * Toggle showing of projects in an account
+		 *
+		 * @param index
+		 */
+		vm.toggleShowProjects = function (index) {
+			vm.accountsToUse[index].showProjects = !vm.accountsToUse[index].showProjects;
+			vm.accountsToUse[index].showProjectsIcon = vm.accountsToUse[index].showProjects ? "folder_open" : "folder";
+		};
+
+		/**
+		 * Add a project to a federation
+		 *
+		 * @param projectIndex
+		 */
+		vm.addToFederation = function (projectIndex) {
+			vm.showRemoveWarning = false;
+
+			vm.newFederationData.subProjects.push({
+				database: vm.userAccount.account,
+				projectIndex: projectIndex,
+				project: vm.userAccount.projects[projectIndex].project
+			});
+
+			vm.userAccount.projects[projectIndex].federated = true;
+		};
+
+		/**
+		 * Remove a project from a federation
+		 *
+		 * @param index
+		 */
+		vm.removeFromFederation = function (index) {
+			var i, length,
+				item;
+
+			// Cannot have existing federation with no sub projects
+			if (vm.newFederationData.hasOwnProperty("timestamp") && vm.newFederationData.subProjects.length === 1) {
+				vm.showRemoveWarning = true;
+			}
+			else {
+				item = vm.newFederationData.subProjects.splice(index, 1);
+				for (i = 0, length = vm.userAccount.projects.length; i < length; i += 1) {
+					if (vm.userAccount.projects[i].project === item[0].project) {
+						vm.userAccount.projects[i].federated = false;
+						break;
+					}
+				}
+			}
+		};
+
+		/**
+		 * Save a federation
+		 */
+		vm.saveFederation = function () {
+			var promise;
+
+			if (vm.federationOriginalData === null) {
+				promise = UtilsService.doPost(vm.newFederationData, vm.account + "/" + vm.newFederationData.project);
+				promise.then(function (response) {
+					console.log(response);
+					vm.showInfo = false;
+					vm.newFederationData.timestamp = (new Date()).toString();
+					vm.accountsToUse[userAccountIndex].fedProjects.push(vm.newFederationData);
+					vm.closeDialog();
+				});
+			}
+			else {
+				promise = UtilsService.doPut(vm.newFederationData, vm.account + "/" + vm.newFederationData.project);
+				promise.then(function (response) {
+					console.log(response);
+					vm.closeDialog();
+				});
+			}
+
+			$timeout(function () {
+				$scope.$apply();
+			});
+		};
+
+		/**
+		 * Open the federation in the viewer
+		 *
+		 * @param {Object} account
+		 * @param {Number} index
+		 */
+		vm.viewFederation = function (account, index) {
+			$location.path("/" + account.account + "/" + account.fedProjects[index].project, "_self").search({});
+		};
+
+		/**
+		 * Handle federation option selection
+		 *
+		 * @param event
+		 * @param option
+		 * @param index
+		 */
+		vm.doFederationOption = function (event, option, index) {
+			switch (option) {
+				case "edit":
+					setupEditFederation(event, index);
+					break;
+
+				case "team":
+					setupEditTeam(event, index);
+					break;
+
+				case "delete":
+					setupDelete(event, index);
+					break;
+			}
+		};
+
+		/**
+		 * Delete federation
+		 */
+		vm.delete = function () {
+			var promise = UtilsService.doDelete({}, vm.account + "/" + vm.accountsToUse[0].fedProjects[federationToDeleteIndex].project);
+			promise.then(function (response) {
+				if (response.status === 200) {
+					vm.accountsToUse[0].fedProjects.splice(federationToDeleteIndex, 1);
+					vm.showInfo = ((vm.accountsToUse.length === 1) && (vm.accountsToUse[0].fedProjects.length === 0));
+					vm.closeDialog();
+				}
+				else {
+					vm.deleteError = "Error deleting federation";
+				}
+			});
+		};
+
+		/**
+		 * Toggle display of projects for an account
+		 *
+		 * @param {Number} index
+		 */
+		vm.toggleProjectsList = function (index) {
+			vm.accountsToUse[index].showProjects = !vm.accountsToUse[index].showProjects;
+			vm.accountsToUse[index].showProjectsIcon = vm.accountsToUse[index].showProjects ? "folder_open" : "folder";
+		};
+
+		/**
+		 * Edit a federation
+		 *
+		 * @param event
+		 * @param index
+		 */
+		function setupEditFederation (event, index) {
+			var i, j, k, iLength, jLength, kLength;
+
+			vm.showRemoveWarning = false;
+
+			vm.accountsToUse = angular.copy(accountsToUse);
+			vm.federationOriginalData = vm.accountsToUse[0].fedProjects[index];
+			vm.newFederationData = angular.copy(vm.federationOriginalData);
+
+			// Disable projects in the projects list that are federated
+			for (i = 0, iLength = vm.accountsToUse.length; i < iLength; i += 1) {
+				for (j = 0, jLength = vm.accountsToUse[i].projects.length; j < jLength; j += 1) {
+					vm.accountsToUse[i].projects[j].federated = false;
+					for (k = 0, kLength = vm.federationOriginalData.subProjects.length; k < kLength; k += 1) {
+						if (vm.federationOriginalData.subProjects[k].project === vm.accountsToUse[i].projects[j].project) {
+							vm.accountsToUse[i].projects[j].federated = true;
+						}
+					}
+				}
+			}
+
+			UtilsService.showDialog("federationDialog.html", $scope, event);
+		}
+
+		/**
+		 * Set up deleting of federation
+		 *
+		 * @param {Object} event
+		 * @param {Object} index
+		 */
+		 function setupDelete (event, index) {
+			federationToDeleteIndex = index ;
+			vm.deleteError = null;
+			vm.deleteTitle = "Delete Federation";
+			vm.deleteWarning = "This federation will be lost permanently and will not be recoverable";
+			vm.deleteName = vm.accountsToUse[0].fedProjects[federationToDeleteIndex].project;
+			UtilsService.showDialog("deleteDialog.html", $scope, event, true);
+		}
+
+		/**
+		 * Set up team of federation
+		 *
+		 * @param {Object} event
+		 * @param {Object} index
+		 */
+		function setupEditTeam (event, index) {
+			vm.item = vm.accountsToUse[0].fedProjects[index];
+			UtilsService.showDialog("teamDialog.html", $scope, event);
 		}
 	}
 }());
@@ -5747,9 +6076,10 @@ var ViewerManager = {};
 				uploadedFile: "=",
 				onShowPage: "&",
 				onSetupDeleteProject: "&",
-				quota: "="
+				quota: "=",
+				subscriptions: "="
 			},
-			controller: accountProjectCtrl,
+			controller: AccountProjectCtrl,
 			controllerAs: 'vm',
 			bindToController: true,
 			link: function (scope, element) {
@@ -5761,9 +6091,9 @@ var ViewerManager = {};
 		};
 	}
 
-	accountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig"];
+	AccountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig"];
 
-	function accountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig) {
+	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig) {
 		var vm = this,
 			infoTimeout = 4000;
 
@@ -5775,6 +6105,7 @@ var ViewerManager = {};
 		vm.project.canUpload = true;
 		vm.projectOptions = {
 			upload: {label: "Upload file", icon: "cloud_upload"},
+			projectsetting: {label: "Settings", icon: "settings"},
 			team: {label: "Team", icon: "group"},
 			delete: {label: "Delete", icon: "delete"}
 		};
@@ -5800,7 +6131,7 @@ var ViewerManager = {};
 					vm.uploadFile();
 				}
 				else {
-					$location.path("/" + vm.account.name + "/" + vm.project.name, "_self").search("page", null);
+					$location.path("/" + vm.account + "/" + vm.project.name, "_self").search("page", null);
 				}
 			}
 		};
@@ -5820,13 +6151,18 @@ var ViewerManager = {};
 		 */
 		vm.doProjectOption = function (event, option) {
 			switch (option) {
+				case "projectsetting":
+					console.log('Settings clicked');
+					$location.search("proj", vm.project.name);
+					vm.onShowPage({page: "projectsetting", callingPage: "repos"});
+					break;
+
 				case "upload":
 					vm.uploadFile();
 					break;
 
 				case "team":
-					$location.search("proj", vm.project.name);
-					vm.onShowPage({page: "team", callingPage: "repos"});
+					setupEditTeam(event);
 					break;
 
 				case "delete":
@@ -5860,7 +6196,7 @@ var ViewerManager = {};
 				formData;
 
 			// Check the quota
-			promise = UtilsService.doGet(vm.account.name + ".json");
+			promise = UtilsService.doGet(vm.account + ".json");
 			promise.then(function (response) {
 				console.log(response);
 				if (file.size > response.data.accounts[0].quota.spaceLimit) {
@@ -5886,7 +6222,7 @@ var ViewerManager = {};
 					else {
 						formData = new FormData();
 						formData.append("file", file);
-						promise = UtilsService.doPost(formData, vm.account.name + "/" + vm.project.name + "/upload", {'Content-Type': undefined});
+						promise = UtilsService.doPost(formData, vm.account + "/" + vm.project.name + "/upload", {'Content-Type': undefined});
 						promise.then(function (response) {
 							console.log("uploadModel", response);
 							if ((response.data.status === 400) || (response.data.status === 404)) {
@@ -5917,7 +6253,7 @@ var ViewerManager = {};
 		 * Display file uploading and info
 		 */
 		function checkFileUploading () {
-			var promise = UtilsService.doGet(vm.account.name + "/" + vm.project.name + ".json");
+			var promise = UtilsService.doGet(vm.account + "/" + vm.project.name + ".json");
 			promise.then(function (response) {
 				if (response.data.status === "processing") {
 					vm.project.uploading = true;
@@ -5936,7 +6272,7 @@ var ViewerManager = {};
 				promise;
 
 			interval = $interval(function () {
-				promise = UtilsService.doGet(vm.account.name + "/" + vm.project.name + ".json");
+				promise = UtilsService.doGet(vm.account + "/" + vm.project.name + ".json");
 				promise.then(function (response) {
 					console.log("uploadStatus", response);
 					if ((response.data.status === "ok") || (response.data.status === "failed")) {
@@ -5963,6 +6299,17 @@ var ViewerManager = {};
 				});
 			}, 1000);
 		}
+
+		/**
+		 * Set up team of project
+		 *
+		 * @param {Object} event
+		 */
+		function setupEditTeam (event) {
+			vm.item = vm.project;
+			UtilsService.showDialog("teamDialog.html", $scope, event);
+		}
+
 	}
 }());
 
@@ -5997,7 +6344,8 @@ var ViewerManager = {};
 				account: "=",
 				accounts: "=",
 				onShowPage: "&",
-				quota: "="
+				quota: "=",
+				subscriptions: "="
 			},
 			controller: AccountProjectsCtrl,
 			controllerAs: 'vm',
@@ -6019,6 +6367,7 @@ var ViewerManager = {};
 		vm.info = "Retrieving projects...";
 		vm.showProgress = true;
 		vm.projectTypes = ["Architectural", "Structural", "Mechanical", "GIS", "Other"];
+		vm.units = server_config.units;
 
 		// Setup file uploaders
 		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
@@ -6074,6 +6423,7 @@ var ViewerManager = {};
 		 * Watch new project data
 		 */
 		$scope.$watch("vm.newProjectData", function (newValue) {
+
 			if (angular.isDefined(newValue)) {
 				vm.newProjectButtonDisabled =
 					(angular.isUndefined(newValue.name) || (angular.isDefined(newValue.name) && (newValue.name === "")));
@@ -6082,6 +6432,8 @@ var ViewerManager = {};
 					vm.newProjectButtonDisabled =
 						(angular.isUndefined(newValue.otherType) || (angular.isDefined(newValue.otherType) && (newValue.otherType === "")));
 				}
+
+				vm.newProjectButtonDisabled = !newValue.unit;
 			}
 		}, true);
 
@@ -6215,7 +6567,6 @@ var ViewerManager = {};
 		 */
 		vm.setupPayment = function () {
 			$timeout(function () {
-				console.log(vm.newDatabaseToken);
 				vm.showPaymentWait = true;
 			});
 		};
@@ -6228,14 +6579,17 @@ var ViewerManager = {};
 		 */
 		vm.setupDeleteProject = function (event, project) {
 			vm.projectToDelete = project;
-			vm.showDeleteProjectError = false;
-			UtilsService.showDialog("deleteProjectDialog.html", $scope, event, true);
+			vm.deleteError = null;
+			vm.deleteTitle = "Delete Project";
+			vm.deleteWarning = "Your data will be lost permanently and will not be recoverable";
+			vm.deleteName = vm.projectToDelete.name;
+			UtilsService.showDialog("deleteDialog.html", $scope, event, true);
 		};
 
 		/**
 		 * Delete project
 		 */
-		vm.deleteProject = function () {
+		vm.delete = function () {
 			var i, iLength, j, jLength,
 				promise;
 			promise = UtilsService.doDelete({}, vm.account + "/" + vm.projectToDelete.name);
@@ -6255,8 +6609,7 @@ var ViewerManager = {};
 					vm.closeDialog();
 				}
 				else {
-					vm.showDeleteProjectError = true;
-					vm.deleteProjectError = "Error deleting project";
+					vm.deleteError = "Error deleting project";
 				}
 			});
 		};
@@ -6309,6 +6662,162 @@ var ViewerManager = {};
 				});
 			}
 		}
+	}
+}());
+
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("accountProjectsetting", accountProjectsetting);
+
+	function accountProjectsetting() {
+		return {
+			restrict: 'EA',
+			templateUrl: 'accountProjectsetting.html',
+			scope: {
+				account: "=",
+				showPage: "&",
+				subscriptions: "="
+			},
+			controller: AccountProjectsettingCtrl,
+			controllerAs: 'vm',
+			bindToController: true
+		};
+	}
+
+	AccountProjectsettingCtrl.$inject = ["$scope", "$location", "UtilsService", "StateManager"];
+
+	function AccountProjectsettingCtrl($scope, $location, UtilsService, StateManager) {
+		var vm = this,
+			promise;
+
+		/**
+		 * Go back to the repos page
+		 */
+
+
+		vm.goBack = function () {
+			$location.search("project", null);
+			vm.showPage({page: "repos"});
+		};
+
+		vm.units = server_config.units
+
+		vm.mapTile = {};
+		vm.projectName = $location.search().proj;
+
+
+		UtilsService.doGet(vm.account + "/" + vm.projectName + ".json")
+		.then(function (response) {
+
+			if (response.status === 200 && response.data.properties) {
+
+				if(response.data.properties.mapTile){
+
+					response.data.properties.mapTile.lat && (vm.mapTile.lat = response.data.properties.mapTile.lat);
+					response.data.properties.mapTile.lon && (vm.mapTile.lon = response.data.properties.mapTile.lon);
+					response.data.properties.mapTile.y && (vm.mapTile.y = response.data.properties.mapTile.y);
+					vm.projectType = response.data.type;
+				}
+
+				response.data.properties.unit && (vm.unit = response.data.properties.unit);
+				
+
+			} else {
+				vm.message = response.data.message;
+			}
+
+
+		});
+
+		vm.save = function(){
+
+			var data = {
+				mapTile: vm.mapTile,
+				unit: vm.unit
+			};
+
+			UtilsService.doPut(data, vm.account + "/" + vm.projectName +  "/settings")
+			.then(function(response){
+				if(response.status === 200){
+					vm.message = 'Saved';
+				} else {
+					vm.message = response.data.message;
+				}
+
+
+			})
+		}
+	}
+}());
+
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("accountRepos", accountRepos);
+
+	function accountRepos() {
+		return {
+			restrict: 'EA',
+			templateUrl: 'accountRepos.html',
+			scope: {
+				account: "=",
+				accounts: "=",
+				onShowPage: "&",
+				quota: "=",
+				subscriptions: "="
+			},
+			controller: AccountReposCtrl,
+			controllerAs: 'vm',
+			bindToController: true
+		};
+	}
+
+	AccountReposCtrl.$inject = [];
+
+	function AccountReposCtrl() {
+		var vm = this;
+
+		vm.showPage = function (page, callingPage) {
+			vm.onShowPage({page: page, callingPage: callingPage});
+		};
+
 	}
 }());
 
@@ -6434,7 +6943,8 @@ var ViewerManager = {};
 		obj.newProject = function (projectData) {
 			var data = {
 				desc: "",
-				type: (projectData.type === "Other") ? projectData.otherType : projectData.type
+				type: (projectData.type === "Other") ? projectData.otherType : projectData.type,
+				unit: projectData.unit
 			};
 			return doPost(data, projectData.account + "/" + projectData.name);
 		};
@@ -6530,6 +7040,7 @@ var ViewerManager = {};
 			templateUrl: 'accountTeam.html',
 			scope: {
 				account: "=",
+				item: "=",
 				showPage: "&",
 				subscriptions: "="
 			},
@@ -6555,20 +7066,17 @@ var ViewerManager = {};
 		vm.numSubscriptions = vm.subscriptions.length;
 		vm.toShow = (vm.numSubscriptions > 1) ? "1+" : vm.numSubscriptions.toString();
 
-		if ($location.search().hasOwnProperty("proj")) {
-			vm.projectName = $location.search().proj;
-
-			promise = UtilsService.doGet(vm.account + "/" + vm.projectName + "/collaborators");
-			promise.then(function (response) {
-				console.log(response);
-				if (response.status === 200) {
-					vm.members = response.data;
-					if (angular.isDefined("vm.subscriptions")) {
-						setupTeam();
-					}
+		console.log(vm.item);
+		promise = UtilsService.doGet(vm.account + "/" + vm.item.project + "/collaborators");
+		promise.then(function (response) {
+			console.log(response);
+			if (response.status === 200) {
+				vm.members = response.data;
+				if (angular.isDefined("vm.subscriptions")) {
+					setupTeam();
 				}
-			});
-		}
+			}
+		});
 
 		/*
 		 * Watch changes to the new member name
@@ -6595,7 +7103,7 @@ var ViewerManager = {};
 					user: vm.selectedUser.user
 				};
 
-			promise = UtilsService.doPost(data, vm.account + "/" + vm.projectName + "/collaborators");
+			promise = UtilsService.doPost(data, vm.account + "/" + vm.item.project + "/collaborators");
 			promise.then(function (response) {
 				console.log(response);
 				if (response.status === 200) {
@@ -6619,7 +7127,7 @@ var ViewerManager = {};
 		 * @param index
 		 */
 		vm.removeMember = function (index) {
-			promise = UtilsService.doDelete(vm.members[index], vm.account + "/" + vm.projectName + "/collaborators");
+			promise = UtilsService.doDelete(vm.members[index], vm.account + "/" + vm.item.project + "/collaborators");
 			promise.then(function (response) {
 				console.log(response);
 				if (response.status === 200) {
@@ -6644,6 +7152,10 @@ var ViewerManager = {};
 
 		vm.goToPage = function (page) {
 			StateManager.setQuery({page: page});
+		};
+
+		vm.closeDialog = function () {
+			UtilsService.closeDialog();
 		};
 
 		/**
@@ -12861,16 +13373,20 @@ angular.module('3drepo')
 		return {
 			restrict: "EA",
 			templateUrl: "measure.html",
-			scope: {},
+			scope: {
+				account: '=',
+				project: '=',
+				settings: '='
+			},
 			controller: MeasureCtrl,
 			controllerAs: "vm",
 			bindToController: true
 		};
 	}
 
-	MeasureCtrl.$inject = ["$scope", "$element", "EventService"];
+	MeasureCtrl.$inject = ["$scope", "$element", "EventService", "ProjectService"];
 
-	function MeasureCtrl ($scope, $element, EventService) {
+	function MeasureCtrl ($scope, $element, EventService, ProjectService) {
 		var vm = this,
 			coords = [null, null],
 			screenPos,
@@ -12882,9 +13398,13 @@ angular.module('3drepo')
 		vm.show = false;
 		vm.distance = false;
 		vm.allowMove = false;
+		vm.units = server_config.units;
 
 		var coordVector = null, vectorLength = 0.0;
 		vm.screenPos = [0.0, 0.0];
+
+		//console.log('measure scope', $scope);
+		vm.unit = vm.settings.unit;
 
 		EventService.send(EventService.EVENT.VIEWER.REGISTER_MOUSE_MOVE_CALLBACK, {
 			callback: function(event) {
@@ -12915,7 +13435,7 @@ angular.module('3drepo')
 		});
 
 		$scope.$watch(EventService.currentEvent, function (event) {
-		if (event.type === EventService.EVENT.VIEWER.PICK_POINT) {
+			if (event.type === EventService.EVENT.VIEWER.PICK_POINT) {
 				if (event.value.hasOwnProperty("position")) {
 					// First click, if a point has not been clicked before
 					currentPickPoint = event.value.position;
@@ -15153,21 +15673,6 @@ var Oculus = {};
 			projectUI = angular.element($element[0].querySelector('#projectUI'));
 		});
 
-		/*
-		panelCard.left.push({
-			type: "tree",
-			title: "Tree",
-			show: true,
-			help: "Model elements shown in a tree structure",
-			icon: "device_hub",
-			minHeight: 80,
-			fixedHeight: false,
-			options: [
-				{type: "filter", visible: true}
-			]
-		});
-		*/
-
 		panelCard.left.push({
 			type: "issues",
 			title: "Issues",
@@ -15213,6 +15718,19 @@ var Oculus = {};
 			],
 			add: true
 		});
+
+		 panelCard.left.push({
+			 type: "tree",
+			 title: "Tree",
+			 show: true,
+			 help: "Model elements shown in a tree structure",
+			 icon: "device_hub",
+			 minHeight: 80,
+			 fixedHeight: false,
+			 options: [
+			 	{type: "filter", visible: true}
+			 ]
+		 });
 
 		panelCard.left.push({
 			type: "groups",
@@ -15272,6 +15790,7 @@ var Oculus = {};
 			]
 		});
 
+
 		$scope.$watchGroup(["vm.account","vm.project"], function()
 		{
 			if (angular.isDefined(vm.account) && angular.isDefined(vm.project)) {
@@ -15292,6 +15811,7 @@ var Oculus = {};
 				});
 
 				ProjectService.getProjectInfo(vm.account, vm.project).then(function (data) {
+					vm.settings = data.settings
 					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
 						account: data.account,
 						project: data.project,
@@ -15348,9 +15868,10 @@ var Oculus = {};
 			} else if (event.type === EventService.EVENT.MEASURE_MODE) {
 				if (event.value) {
 					// Create measure display
-					element = angular.element("<tdr-measure id='tdrMeasure'></tdr-measure>");
+					element = angular.element("<tdr-measure id='tdrMeasure' account='vm.account' project='vm.project' settings='vm.settings' ></tdr-measure>");
 					parent.append(element);
 					$compile(element)($scope);
+
 				}
 				else {
 					// Remove measure display
@@ -15394,18 +15915,23 @@ var Oculus = {};
 			var deferred = $q.defer(),
 				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + ".json");
 
-			return HttpService.get(serverConfig.GET_API, account + "/" + project + ".json",
-				function(json) {
-					deferred.resolve({
-						account     : account,
-						project		: project,
-						name        : name,
-						owner		: json.owner,
-						description	: json.desc,
-						type		: json.type,
-						settings 	: json.properties
-					});
+			$http.get(url).then(function(res){
+				var data = res.data;
+				console.log('getProjectInfo data', data);
+				deferred.resolve({
+					account     : account,
+					project		: project,
+					owner		: data.owner,
+					description	: data.desc,
+					type		: data.type,
+					settings 	: data.properties
+				}, function(){
+					deferred.resolve();
 				});
+			});
+
+
+			return deferred.promise;
 		};
 
 		var getRoles = function (account, project) {
@@ -15559,9 +16085,9 @@ var Oculus = {};
 		};
 	}
 
-	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService"];
+	ViewerCtrl.$inject = ["$scope", "$q", "$http", "$element", "serverConfig", "EventService", "$location"];
 
-	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService)
+	function ViewerCtrl ($scope, $q, $http, $element, serverConfig, EventService, $location)
 	{
 		var v = this;
 
@@ -16528,7 +17054,8 @@ var Oculus = {};
 			length = 0,
 			currentSelectedNode = null,
 			currentScrolledToNode = null,
-			highlightSelectedViewerObject = true;
+			highlightSelectedViewerObject = true,
+			clickedHidden = {}; // Nodes that have actually been clicked to hide
 
 		/*
 		 * Init
@@ -16542,6 +17069,8 @@ var Oculus = {};
 		vm.showProgress = true;
 		vm.progressInfo = "Loading full tree structure";
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
+		vm.visible   = [];
+		vm.invisible = [];
 
 		/*
 		 * Get all the tree nodes
@@ -16564,12 +17093,12 @@ var Oculus = {};
 		 * Set the content height.
 		 * The height of a node is dependent on its name length and its level.
 		 *
-		 * @param (Number} nodesToShow
+		 * @param {Number} nodesToShow
 		 */
 		function setContentHeight (nodesToShow) {
 			var i, length,
 				height = 0,
-				nodeMinHeight = 36,
+				nodeMinHeight = 48,
 				maxStringLength = 35, maxStringLengthForLevel = 0,
 				lineHeight = 18, levelOffset = 2;
 
@@ -16589,11 +17118,12 @@ var Oculus = {};
 			vm.nodesToShow[0].expanded = false;
 			vm.nodesToShow[0].hasChildren = true;
 			vm.nodesToShow[0].selected = false;
-			vm.nodesToShow[0].toggleState = "visible";
-		}
+			// Only make the top node visible if it was not previously clicked hidden
+			if (!wasClickedHidden(vm.nodesToShow[0])) {
+				vm.nodesToShow[0].toggleState = "visible";
+			}
 
-		vm.visible   = [];
-		vm.invisible = [];
+		}
 
 		/**
 		 * Set the toggle state of a node
@@ -16645,17 +17175,21 @@ var Oculus = {};
 				numChildren = 0,
 				index = -1,
 				endOfSplice = false,
-				numChildrenToForceRedraw = 10;
+				numChildrenToForceRedraw = 3;
 
+			// Find node index
 			for (i = 0, length = vm.nodesToShow.length; i < length; i += 1) {
 				if (vm.nodesToShow[i]._id === _id) {
 					index = i;
 					break;
 				}
 			}
+
+			// Found
 			if (index !== -1) {
 				if (vm.nodesToShow[index].hasChildren) {
 					if (vm.nodesToShow[index].expanded) {
+						// Collapse
 						while (!endOfSplice) {
 							if (angular.isDefined(vm.nodesToShow[index + 1]) && vm.nodesToShow[index + 1].path.indexOf(_id) !== -1) {
 								vm.nodesToShow.splice(index + 1, 1);
@@ -16664,6 +17198,7 @@ var Oculus = {};
 							}
 						}
 					} else {
+						// Expand
 						numChildren = vm.nodesToShow[index].children.length;
 
 						// If the node has a large number of children then force a redraw of the tree to get round the display problem
@@ -16674,13 +17209,20 @@ var Oculus = {};
 						for (i = 0; i < numChildren; i += 1) {
 							vm.nodesToShow[index].children[i].expanded = false;
 
-							vm.setToggleState(vm.nodesToShow[index].children[i], vm.nodesToShow[index].toggleState);
+							// vm.setToggleState(vm.nodesToShow[index].children[i], vm.nodesToShow[index].toggleState);
+							// If the child node was not clicked hidden set its toggle state to visible
+							if (!wasClickedHidden(vm.nodesToShow[index].children[i])) {
+								vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
+							}
 
+							// Determine if child node has childern
 							vm.nodesToShow[index].children[i].level = vm.nodesToShow[index].level + 1;
-							if("children" in vm.nodesToShow[index].children[i])
+							if("children" in vm.nodesToShow[index].children[i]) {
 								vm.nodesToShow[index].children[i].hasChildren = vm.nodesToShow[index].children[i].children.length > 0;
-							else
+							}
+							else {
 								vm.nodesToShow[index].children[i].hasChildren = false;
+							}
 
 							vm.nodesToShow.splice(index + i + 1, 0, vm.nodesToShow[index].children[i]);
 						}
@@ -16723,11 +17265,18 @@ var Oculus = {};
 					for (j = 0; j < childrenLength; j += 1) {
 						vm.nodesToShow[i].children[j].selected = (vm.nodesToShow[i].children[j]._id === selectedId);
 
-						vm.setToggleState(vm.nodesToShow[i].children[j], "visible");
-						if("children" in vm.nodesToShow[i].children[j])
+						// Only set the toggle state once when the node is listed
+						if (!vm.nodesToShow[i].children[j].hasOwnProperty("toggleState")) {
+							vm.setToggleState(vm.nodesToShow[i].children[j], "visible");
+						}
+
+						if("children" in vm.nodesToShow[i].children[j]) {
 							vm.nodesToShow[i].children[j].hasChildren = vm.nodesToShow[i].children[j].children.length > 0;
-						else
+						}
+						else {
 							vm.nodesToShow[i].children[j].hasChildren = false;
+						}
+
 						if (vm.nodesToShow[i].children[j].selected) {
 							selectionFound = true;
 
@@ -16737,6 +17286,7 @@ var Oculus = {};
 								currentSelectedNode = currentScrolledToNode;
 							});
 						}
+
 						if ((level === (path.length - 2)) && !selectionFound) {
 							selectedIndex += 1;
 						}
@@ -16759,7 +17309,6 @@ var Oculus = {};
 
 		$scope.$watch(EventService.currentEvent, function(event) {
 			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
-				console.log(event);
 				if ((event.value.source !== "tree") && highlightSelectedViewerObject)
 				{
 					var objectID = event.value.id;
@@ -16778,6 +17327,8 @@ var Oculus = {};
 				if (currentSelectedNode !== null) {
 					currentSelectedNode.selected = false;
 					currentSelectedNode = null;
+					vm.currentFilterItemSelected.class = "";
+					vm.currentFilterItemSelected = null;
 				}
 			}
 			else if ((event.type === EventService.EVENT.PANEL_CARD_ADD_MODE) ||
@@ -16788,7 +17339,13 @@ var Oculus = {};
 		});
 
 		vm.toggleTreeNode = function (node) {
-			var i = 0, j = 0, k = 0, nodesLength, path, parent = null, nodeToggleState = "visible", numInvisible = 0, numParentInvisible = 0;
+			var i, j,
+				nodesLength,
+				path,
+				parent = null,
+				nodeToggleState = "visible",
+				numInvisible = 0,
+				numParentInvisible = 0;
 
 			vm.toggledNode = node;
 
@@ -16800,6 +17357,7 @@ var Oculus = {};
 				if (vm.nodesToShow[i]._id === node._id) {
 					vm.setToggleState(vm.nodesToShow[i], (vm.nodesToShow[i].toggleState === "visible") ? "invisible" : "visible");
 					nodeToggleState = vm.nodesToShow[i].toggleState;
+					updateClickedHidden(vm.nodesToShow[i]);
 				}
 				// Set children to node toggle state
 				else if (vm.nodesToShow[i].path.indexOf(node._id) !== -1) {
@@ -16816,8 +17374,16 @@ var Oculus = {};
 				for (i = (path.length - 1); i >= 0; i -= 1) {
 					for (j = 0, nodesLength = vm.nodesToShow.length; j < nodesLength; j += 1) {
 						if (vm.nodesToShow[j]._id === path[i]) {
-							numInvisible = vm.nodesToShow[j].children.reduce(function(total,child){return child.toggleState=="invisible"? total+1 : total}, 0)
-							numParentInvisible = vm.nodesToShow[j].children.reduce(function(total,child){return child.toggleState=="parentOfInvisible"? total+1 : total}, 0)
+							numInvisible = vm.nodesToShow[j].children.reduce(
+								function (total, child) {
+									return child.toggleState === "invisible" ? total + 1 : total;
+								},
+								0);
+							numParentInvisible = vm.nodesToShow[j].children.reduce(
+								function (total, child) {
+									return child.toggleState === "parentOfInvisible" ? total + 1 : total;
+								},
+								0);
 
 							if (numInvisible === vm.nodesToShow[j].children.length) {
 								vm.setToggleState(vm.nodesToShow[j], "invisible");
@@ -16927,7 +17493,8 @@ var Oculus = {};
 				if (newValue.toString() === "") {
 					vm.showTree = true;
 					vm.showFilterList = false;
-					vm.nodes = vm.allNodes;
+					vm.showProgress = false;
+					vm.nodes = vm.nodesToShow;
 					setContentHeight(vm.nodes);
 				} else {
 					vm.showTree = false;
@@ -17072,6 +17639,29 @@ var Oculus = {};
 					}
 				}
 			};
+		}
+
+		/**
+		 * If a node was clicked to hide, add it to a list of similar nodes
+		 *
+		 * @param {Object} node
+		 */
+		function updateClickedHidden (node) {
+			if (node.toggleState === "invisible") {
+				clickedHidden[node._id] = node;
+			}
+			else {
+				delete clickedHidden[node._id];
+			}
+		}
+
+		/**
+		 * Check if a node was clicked to hide
+		 *
+		 * @param {Object} node
+		 */
+		function wasClickedHidden (node) {
+			return clickedHidden.hasOwnProperty(node._id);
 		}
 	}
 }());
@@ -17486,6 +18076,7 @@ var Oculus = {};
          * Handle POST requests
          * @param data
          * @param url
+         * @param headers
          * @returns {*}
          */
         obj.doPost = function (data, url, headers) {

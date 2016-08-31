@@ -23,7 +23,7 @@ var utils = require('../utils');
 var middlewares = require('./middlewares');
 var ProjectSetting = require('../models/projectSetting');
 var responseCodes = require('../response_codes');
-var C               = require("../constants");
+var C = require("../constants");
 var importQueue = require('../services/queue');
 var multer = require("multer");
 var ProjectHelpers = require('../models/helper/project');
@@ -45,9 +45,15 @@ router.post('/:project/info.json', middlewares.isMainContractor, B4F_updateProje
 // Get project info
 router.get('/:project.json', middlewares.hasReadAccessToProject, getProjectSetting);
 
-router.put('/:project/settings/map-tile', middlewares.hasWriteAccessToProject, updateMapTileSettings);
+router.put('/:project/settings', middlewares.hasWriteAccessToProject, updateSettings);
 
-router.post('/:project', middlewares.canCreateProject, createProject);
+router.post('/:project', middlewares.connectQueue, middlewares.canCreateProject, createProject);
+
+//update federated project
+router.put('/:project', middlewares.connectQueue, middlewares.hasWriteAccessToProject, updateProject);
+
+//master tree
+router.get('/:project/revision/master/head/fulltree.json', middlewares.hasReadAccessToProject, getProjectTree);
 
 router.delete('/:project', middlewares.canCreateProject, deleteProject);
 
@@ -69,7 +75,7 @@ function estimateImportedSize(format, size){
 	return size;
 }
 
-function updateMapTileSettings(req, res, next){
+function updateSettings(req, res, next){
 	'use strict';
 
 
@@ -77,7 +83,8 @@ function updateMapTileSettings(req, res, next){
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
 
 	return ProjectSetting.findById(dbCol, req.params.project).then(projectSetting => {
-		return projectSetting.updateMapTileCoors(req.body);
+		projectSetting.updateProperties(req.body);
+		return projectSetting.save();
 	}).then(projectSetting => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, projectSetting);
 	}).catch(err => {
@@ -180,6 +187,7 @@ function getProjectSetting(req, res, next){
 }
 
 
+
 function createProject(req, res, next){
 	'use strict';
 	
@@ -188,7 +196,43 @@ function createProject(req, res, next){
 	let account = req.params.account;
 	let username = req.session.user.username;
 
-	createAndAssignRole(project, account, username, req.body.desc, req.body.type).then(() => {
+	let federate;
+	if(req.body.subProjects){
+		federate = true;
+	}
+
+	createAndAssignRole(project, account, username, req.body.desc, req.body.type, req.body.unit, req.body.subProjects, federate).then(() => {
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
+	}).catch( err => {
+		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function updateProject(req, res, next){
+	'use strict';
+
+	let responsePlace = utils.APIInfo(req);
+	let project = req.params.project;
+	let account = req.params.account;
+
+	let promise = Promise.resolve();
+	
+	if(req.body.subProjects && req.body.subProjects.length > 0){
+
+		promise = ProjectSetting.findById({account}, project).then(setting => {
+			
+			if(!setting) {
+				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+			} else if (!setting.federate){
+				return Promise.reject(responseCodes.PROJECT_IS_NOT_A_FED);
+			} else {
+				return ProjectHelpers.createFederatedProject(account, project, req.body.subProjects);
+			}
+		});
+
+	}
+
+	promise.then(() => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -209,6 +253,8 @@ function deleteProject(req, res, next){
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);
 	});
 }
+
+
 
 
 function uploadProject(req, res, next){
@@ -433,6 +479,22 @@ function removeCollaborator(req, res ,next){
 	});
 
 
+}
+
+function getProjectTree(req, res, next){
+	'use strict';
+
+	let project = req.params.project;
+	let account = req.params.account;
+	let username = req.session.user.username;
+
+	ProjectHelpers.getFullTree(account, project, 'master', username).then(obj => {
+
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj.tree);
+
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
 }
 
 module.exports = router;

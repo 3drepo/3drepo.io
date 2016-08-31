@@ -26,6 +26,8 @@ module.exports.createApp = function(serverConfig)
 	let fs = require("fs");
 	let jade = require("jade");
 	let addressMeta = require('../models/addressMeta');
+
+	let units = require('../models/unit');
 	let favicon = require("serve-favicon");
 
 	//let systemLogger = require("../logger.js").systemLogger;
@@ -122,6 +124,8 @@ module.exports.createApp = function(serverConfig)
 		params.config_js += "\n\nserver_config.countries = " + JSON.stringify(addressMeta.countries) + ";";
 
 		params.config_js += "\n\nserver_config.usStates = " + JSON.stringify(addressMeta.usStates) + ";";
+
+		params.config_js += "\n\nserver_config.units = " + JSON.stringify(units) + ";";
 
 		res.header("Content-Type", "text/javascript");
 		res.render("config.jade", params);

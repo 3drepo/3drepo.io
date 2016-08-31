@@ -41,6 +41,7 @@ describe('Creating an issue', function () {
 
 	let desc = 'desc';
 	let type = 'type';
+	let unit = 'meter';
 
 	let baseIssue = { 
 		"viewpoint":{
@@ -68,7 +69,7 @@ describe('Creating an issue', function () {
 
 			helpers.signUpAndLoginAndCreateProject({
 				server, request, agent, expect, User, systemLogger,
-				username, password, email, project, desc, type,
+				username, password, email, project, desc, type, unit,
 				done: function(err, _agent){
 					agent = _agent;
 					done(err);

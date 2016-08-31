@@ -1,0 +1,20 @@
+md-dialog.deleteDialog(aria-label="Delete")
+	md-toolbar
+		.md-toolbar-tools
+			h2 {{vm.deleteTitle}}
+			span(flex)
+			md-button.md-icon-button(ng-click="vm.closeDialog()")
+				md-icon.angular-material-icons(aria-label="Close dialog") close
+	md-content(layout-margin)
+		div(layout="column", layout-align="start")
+			div
+				p
+					| Do you really want to delete
+					=" "
+					span#deleteName {{vm.deleteName}}?
+				br
+				p#deleteWarning {{vm.deleteWarning}}
+			md-input-container
+				md-button.md-raised.md-accent(ng-click="vm.closeDialog()") No
+				md-button.md-accent(ng-click="vm.delete()") Yes
+			p#deleteError(ng-if="vm.deleteError") {{vm.deleteError}}

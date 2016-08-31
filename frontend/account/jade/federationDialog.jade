@@ -1,0 +1,70 @@
+md-dialog#federationDialog(aria-label="Federation", flex-lg="80", flex-gt-lg="50")
+	md-toolbar
+		.md-toolbar-tools
+			h2 Federation
+			span(flex)
+			md-button.md-icon-button(ng-click="vm.closeDialog()")
+				md-icon.angular-material-icons(aria-label="Close dialog") close
+	md-content(layout-margin)
+		div(layout="column", flex)
+			// Federation name
+			div(layout="row", flex)
+				md-input-container(flex="50")
+					input(placeholder="Federation name", tdr-focus="true", ng-model="vm.newFederationData.project", ng-disabled="vm.federationOriginalData")
+					.inputHint(ng-if="!vm.federationOriginalData") Letters, numbers and underscore only
+
+			div(layout="row", flex)
+				md-input-container(flex="50")
+					label Unit
+					md-select(ng-model="vm.newFederationData.unit")
+						md-option(ng-repeat="unit in vm.units", value="{{unit.value}}") {{unit.name}}
+
+
+			md-divider
+
+			// List
+			div(layout="row", flex)
+				// Available
+				div(layout="column", flex)
+					p(layout="row", layout-align="center center") Available
+					md-list
+						//md-list-item(ng-click="vm.toggleShowProjects($index)")
+							md-icon.angular-material-icons {{account.showProjectsIcon}}
+							p {{account.account}}
+						md-list
+							md-list-item.federationProject(
+							ng-repeat="project in vm.userAccount.projects"
+							style="opacity:{{project.federated? 0.2 : 1.0}}")
+								md-icon.angular-material-icons dashboard
+								p {{project.project}}
+								span(flex)
+								md-button.md-icon-button(
+								aria-label="Add"
+								ng-click="vm.addToFederation($index)"
+								ng-if="!project.federated")
+									md-icon.angular-material-icons.md-accent add_circle
+
+				// Divider
+				div(layout="row", layout-align="center")
+					#federationDivider(flex="none")
+
+				// Federated
+				div(layout="column", flex)
+					p(layout="row", layout-align="center center") Federated
+					md-list
+						div(ng-repeat="item in vm.newFederationData.subProjects", layout="column")
+							md-list-item.federationProject
+								md-icon.angular-material-icons dashboard
+								p {{item.project}}
+								span(flex)
+								md-button.md-icon-button(aria-label="Remove", ng-click="vm.removeFromFederation($index)")
+									md-icon.angular-material-icons.md-accent remove_circle
+							div(ng-if="vm.showRemoveWarning")
+								p#federationWarning This project cannot be removed. Please delete federation.
+
+			md-divider
+
+			// Save/Cancel
+			#federationSave(layout="row", layout-align="start center")
+				md-button.md-raised.md-accent(ng-disabled="vm.newFederationButtonDisabled", ng-click="vm.saveFederation()") Save
+				md-button.md-accent(ng-click="vm.closeDialog()") Cancel

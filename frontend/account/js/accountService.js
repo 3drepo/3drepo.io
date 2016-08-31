@@ -120,7 +120,8 @@
 		obj.newProject = function (projectData) {
 			var data = {
 				desc: "",
-				type: (projectData.type === "Other") ? projectData.otherType : projectData.type
+				type: (projectData.type === "Other") ? projectData.otherType : projectData.type,
+				unit: projectData.unit
 			};
 			return doPost(data, projectData.account + "/" + projectData.name);
 		};

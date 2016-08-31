@@ -42,7 +42,7 @@
 								div Licenses ({{vm.numLicenses}} assigned, {{vm.numLicenses}} total)
 						md-list-item(ng-repeat="license in vm.licenses")
 							md-icon.angular-material-icons.licenseIcon(aria-label="Person") person
-							.md-list-item-text
+							.md-list-item-text(flex)
 								p {{license.user}}
 							span(flex)
 							div(layout="row", layout-align="end center")

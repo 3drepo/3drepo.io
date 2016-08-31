@@ -33,7 +33,6 @@ account-dir #account #accountItem {
 }
 
 account-dir .userContent .cardInfo {
-  margin: 0 0 10px;
   text-align: left;
 }
 
@@ -136,6 +135,10 @@ account-projects .projectUploadIcon {
 account-projects .projectRight .projectUploaded {
   margin-top: -10px !important;
   color: rgba(0,0,0,0.5);
+}
+
+account-projects .userContent {
+  padding: 0 !important;
 }
 
 /** Account Profile ***************************************************************************************************/
@@ -256,21 +259,21 @@ account-menu md-icon {
   color: #F44336;
 }
 
-/** Delete Project Dialog *********************************************************************************************/
-.deleteProjectDialog p {
+/** Delete Dialog *********************************************************************************************/
+.deleteDialog p {
   color: rgba(0 ,0, 0, 0.6);
   margin: 0;
 }
-.deleteProjectDialog #deleteProjectName {
+.deleteDialog #deleteName {
   color: rgba(0 ,0, 0, 0.9);
 }
 
-.deleteProjectDialog #deleteProjectWarning {
+.deleteDialog #deleteWarning {
   color: #F44336;
   margin: 0;
 }
 
-.deleteProjectDialog #deleteProjectError {
+.deleteDialog #deleteError {
   margin: 0;
   color: #F44336;
 }
@@ -377,6 +380,10 @@ account-licenses #accountLicensesBillingPage {
 }
 
 /** Account Team ******************************************************************************************************/
+account-team {
+  width: 500px;
+}
+
 account-team .collaboratorIcon {
   margin: 0 10px !important;
 }
@@ -427,4 +434,111 @@ account-team #accountTeamSubHeader {
 
 #overQuotaDialog #overQuotaInfo {
   margin: 20px 20px 0;;
+}
+
+/** Account Project Setting ******************************************************************************************/
+account-projectsetting .collaboratorIcon {
+  margin: 0 10px !important;
+}
+
+account-projectsetting #project {
+  margin: -10px 0 10px;
+}
+account-projectsetting #project md-icon {
+  margin: 0 !important;
+}
+
+account-projectsetting #accountTeamAdd {
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+account-projectsetting #accountTeamMemberRoleGroup {
+  margin: 20px 0 0 10px;
+}
+
+account-projectsetting #accountTeamMemberRole {
+  margin-left: 10px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+account-projectsetting #accountTeamSubHeader {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+/** Federation Dialog *************************************************************************************************/
+#federationDialog #federationDivider {
+  width: 1px;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+#federationDialog #federationSave {
+  margin-top: 10px;
+}
+
+#federationDialog md-list {
+  padding: 0;
+}
+
+#federationDialog md-list-item {
+  height: 35px;
+  min-height: 35px;
+}
+#federationDialog md-list-item p {
+  margin-left: -20px;
+}
+
+#federationDialog .federationProject {
+  padding-left: 20px;
+}
+
+#federationDialog #federationWarning {
+  margin: 5px 0 0 20px;
+  color: #F44336;
+}
+
+
+#federationDialog #federatedProjectAccount {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/** Account Federations ***********************************************************************************************/
+account-federations .userContent {
+  padding: 0 !important;
+}
+
+account-federations md-list {
+  padding: 0;
+}
+account-federations .md-list-item-text {
+  color: rgb(67, 160, 71);
+}
+
+account-federations .federationProjectsList {
+  margin: -20px 0 10px 100px;
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 14px;
+}
+
+account-federations .federationTimestamp {
+  color: rgba(0,0,0,.3);
+  margin-left: 20px;
+}
+
+account-federations #accountFederationInfo {
+  padding: 20px 20px 0 20px;
+}
+
+account-federations .account {
+  outline: none;
+  padding-left: 10px;
+}
+account-federations .account:hover {
+  cursor: pointer;
+  background: #EEE;
+}
+
+account-federations .federation {
+  padding-left: 30px;
 }

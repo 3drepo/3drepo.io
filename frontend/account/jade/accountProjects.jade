@@ -1,48 +1,38 @@
-input#existingProjectFileUploader(type="file")
-input#newProjectFileUploader(type="file")
+.userContent
 
-.homeUserContent
-	md-content.md-whiteframe-1dp(aria-label="Projects", flex)
-		md-toolbar
-			.md-toolbar-tools
-				h2 Repos
-				//span(flex)
-				//md-menu(md-position-mode="target-right target", md-offset="5 10")
-					md-button.md-icon-button(aria-label="More", ng-click="$mdOpenMenu($event)")
-						md-icon.angular-material-icons(md-menu-origin) more_vert
-					md-menu-content(width="3")
-						md-menu-item
-							md-button(ng-click="vm.newDatabase($event)")
-								p(flex) Add database
+	input#existingProjectFileUploader(type="file")
+	input#newProjectFileUploader(type="file")
 
-		md-list#accountList(flex, ng-if="vm.projectsExist")
-			// Accounts
-			div(ng-repeat="account in vm.accounts", flex)
-				div(layout="row", layout-align="start center")
-					md-list-item(flex="100", layout-fill)
-						.account(ng-click="vm.toggleProjectsList($index)", layout="row", layout-align="start center", md-ink-ripple, layout-fill)
-							md-button.md-icon-button(aria-label="Folder")
-								md-icon.angular-material-icons {{account.showProjectsIcon}}
-							p {{account.account}}
-					spen(flex)
-					.accountRight
-						md-button.md-icon-button(aria-label="New project", ng-click="vm.newProject($event)")
-							md-icon.angular-material-icons.md-accent playlist_add
+	md-list#accountList(flex, ng-if="vm.projectsExist")
+		// Accounts
+		// Don't show account if it doesn't have any projects - possible when user is a team member of a federation but not a member of a project in that federation!
+		div(ng-repeat="account in vm.accounts", flex, ng-if="account.projects.length!==0")
+			div(layout="row", layout-align="start center")
+				md-list-item(flex="100", layout-fill)
+					.account(ng-click="vm.toggleProjectsList($index)", layout="row", layout-align="start center", md-ink-ripple, layout-fill)
+						md-button.md-icon-button(aria-label="Folder")
+							md-icon.angular-material-icons {{account.showProjectsIcon}}
+						p {{account.account}}
+				span(flex)
+				.accountRight
+					md-button.md-icon-button(aria-label="New project", ng-click="vm.newProject($event)")
+						md-icon.angular-material-icons.md-accent playlist_add
 
-				// Projects
-				md-list.projects(ng-if="account.showProjects")
-					account-project(
-					ng-repeat="project in account.projects"
-					account="account"
-					project="project"
-					on-upload-file="vm.uploadFile(project)"
-					uploaded-file="vm.uploadedFile"
-					on-show-page="vm.showPage(page, callingPage)"
-					on-setup-delete-project="vm.setupDeleteProject(event, project)",
-					quota="vm.quota")
-				md-divider
+			// Projects
+			md-list.projects(ng-if="account.showProjects")
+				account-project(
+				ng-repeat="project in account.projects"
+				account="account.name"
+				project="project"
+				on-upload-file="vm.uploadFile(project)"
+				uploaded-file="vm.uploadedFile"
+				on-show-page="vm.showPage(page, callingPage)"
+				on-setup-delete-project="vm.setupDeleteProject(event, project)",
+				quota="vm.quota"
+				subscriptions="vm.subscriptions")
+			md-divider
 
-		div(ng-if="!vm.projectsExist")
-			.cardInfo(layout="row", layout-align="center center")
-				p {{vm.info}}
-				md-progress-circular(md-diameter="20px", ng-if="vm.showProgress", md-mode="indeterminate")
+	div(ng-if="!vm.projectsExist")
+		.cardInfo(layout="row", layout-align="center center")
+			p {{vm.info}}
+			md-progress-circular(md-diameter="20px", ng-if="vm.showProgress", md-mode="indeterminate")
