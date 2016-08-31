@@ -6108,12 +6108,18 @@ var ViewerManager = {};
 			vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
 		}
 		vm.project.canUpload = true;
+
 		vm.projectOptions = {
 			upload: {label: "Upload file", icon: "cloud_upload"},
 			projectsetting: {label: "Settings", icon: "settings"},
 			team: {label: "Team", icon: "group"},
 			delete: {label: "Delete", icon: "delete"}
 		};
+
+		if(vm.project.timestamp && !vm.project.federate){
+			vm.projectOptions.download = {label: "Download", icon: "cloud_download"};
+		}
+
 		checkFileUploading();
 
 		/*
@@ -6164,6 +6170,13 @@ var ViewerManager = {};
 
 				case "upload":
 					vm.uploadFile();
+					break;
+
+				case "download":
+					window.open(
+						serverConfig.apiUrl(serverConfig.GET_API, vm.account.name + "/" + vm.project.name + "/download/latest"),
+						'_blank' 
+					);
 					break;
 
 				case "team":
@@ -13320,6 +13333,41 @@ angular.module('3drepo')
 		 * Init
 		 */
 		vm.version = serverConfig.apiVersion;
+<<<<<<< HEAD
+=======
+		vm.logo = "/public/images/3drepo-logo-white.png";
+		vm.tcAgreed = false;
+		vm.useReCapthca = false;
+		vm.useRegister = false;
+		vm.registering = false;
+
+		/*
+		 * Auth stuff
+		 */
+		if (serverConfig.hasOwnProperty("auth")) {
+			if (serverConfig.auth.hasOwnProperty("register") && (serverConfig.auth.register)) {
+				vm.useRegister = true;
+				if (serverConfig.auth.hasOwnProperty("captcha") && (serverConfig.auth.captcha)) {
+					vm.useReCapthca = true;
+				}
+			}
+		}
+
+		// Logo
+		if (angular.isDefined(serverConfig.backgroundImage))
+		{
+			vm.enterpriseLogo = serverConfig.backgroundImage;
+		}
+
+		/*
+		 * Watch changes to register fields to clear warning message
+		 */
+		$scope.$watch("vm.newUser", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				vm.registerErrorMessage = "";
+			}
+		}, true);
+>>>>>>> ISSUE_233
 
 		/**
 		 * Attempt to login

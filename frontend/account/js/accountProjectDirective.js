@@ -59,12 +59,18 @@
 			vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
 		}
 		vm.project.canUpload = true;
+
 		vm.projectOptions = {
 			upload: {label: "Upload file", icon: "cloud_upload"},
 			projectsetting: {label: "Settings", icon: "settings"},
 			team: {label: "Team", icon: "group"},
 			delete: {label: "Delete", icon: "delete"}
 		};
+
+		if(vm.project.timestamp && !vm.project.federate){
+			vm.projectOptions.download = {label: "Download", icon: "cloud_download"};
+		}
+
 		checkFileUploading();
 
 		/*
@@ -115,6 +121,13 @@
 
 				case "upload":
 					vm.uploadFile();
+					break;
+
+				case "download":
+					window.open(
+						serverConfig.apiUrl(serverConfig.GET_API, vm.account.name + "/" + vm.project.name + "/download/latest"),
+						'_blank' 
+					);
 					break;
 
 				case "team":

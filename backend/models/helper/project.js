@@ -204,7 +204,7 @@ function importToyJSON(db, project){
 
 	return Promise.all(promises).then(() => {
 		//rename json_mpc stash
-		let jsonBucket = stash.getGridFSBucket({ account: db, project: project }, 'json_mpc');
+		let jsonBucket = stash.getGridFSBucket(account, `${project}.stash.json_mpc`);
 		
 		jsonBucket.find().forEach(file => {
 			
@@ -220,7 +220,7 @@ function importToyJSON(db, project){
 		});
 
 		//rename src stash
-		let srcBucket = stash.getGridFSBucket({ account: db, project: project }, 'src');
+		let srcBucket = stash.getGridFSBucket(account, `${project}.stash.src`);
 		
 		srcBucket.find().forEach(file => {
 
@@ -438,6 +438,7 @@ function removeCollaborator(username, email, account, project, role){
 		});
 	});
 }
+
 
 
 function createFederatedProject(account, project, subProjects){
@@ -699,6 +700,33 @@ function listSubProjects(account, project, branch){
 
 		return Promise.resolve(subProjects);
 	
+
+function downloadLatest(account, project){
+	'use strict';
+
+	let bucket =  stash.getGridFSBucket(account, `${project}.history`);
+
+	return bucket.find({}, {sort: { uploadDate: -1}}).next().then(file => {
+
+		if(!file){
+			return Promise.reject(responseCodes.NO_FILE_FOUND);
+		}
+
+		// change file name
+		let filename = file.filename.split('_');
+		let ext = '';
+		
+		if (filename.length > 1){
+			ext = '.' + filename.pop();
+		}
+
+		file.filename = filename.join('_') + ext;
+
+		return Promise.resolve({
+			readStream: bucket.openDownloadStream(file._id),
+			meta: file
+		});
+		
 	});
 }
 
@@ -711,5 +739,6 @@ module.exports = {
 	createFederatedProject,
 	listSubProjects,
 	getFullTree,
-	searchTree
+	searchTree,
+	downloadLatest
 };

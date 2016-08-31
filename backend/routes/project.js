@@ -68,6 +68,7 @@ router.post('/:project/collaborators', middlewares.isAccountAdmin, middlewares.h
 
 router.delete('/:project/collaborators', middlewares.isAccountAdmin, removeCollaborator);
 
+router.get('/:project/download/latest', middlewares.hasReadAccessToProject, downloadLatest);
 
 function estimateImportedSize(format, size){
 	// if(format === 'obj'){
@@ -484,6 +485,7 @@ function removeCollaborator(req, res ,next){
 
 }
 
+
 function getProjectTree(req, res, next){
 	'use strict';
 
@@ -512,6 +514,28 @@ function searchProjectTree(req, res, next){
 	ProjectHelpers.searchTree(account, project, 'master', null, searchString, username).then(items => {
 
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, items);
+
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+
+function downloadLatest(req, res, next){
+	'use strict';
+	ProjectHelpers.downloadLatest(req.params.account, req.params.project).then(file => {
+
+		let headers = {
+			'Content-Length': file.meta.length,
+			'Content-Disposition': 'attachment;filename=' + file.meta.filename,
+		};
+
+		if(file.meta.contentType){
+			headers['Content-Type'] = file.meta.contentType;
+		}
+
+		res.writeHead(200, headers);
+		file.readStream.pipe(res);
 
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);

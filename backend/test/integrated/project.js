@@ -199,6 +199,36 @@ describe('Project', function () {
 		});
 	});
 
+	describe('Download latest file', function(){ 
+
+		let username = 'testing';
+		let password = 'testing';
+		let project = 'testproject';
+
+		before(function(done){
+			async.series([
+				function logout(done){
+					agent.post('/logout').send({}).expect(200, done);
+				},
+				function login(done){
+					agent.post('/login').send({
+						username, password
+					}).expect(200, done);
+				}
+			], done);
+		});
+
+		it('should success and get the latest file', function(done){
+			agent.get(`/${username}/${project}/download/latest`).expect(200, function(err, res){
+
+				expect(res.headers['content-disposition']).to.equal('attachment;filename=6f1744b1-0d20-4f64-ac76-51c31b53c55a3DrepoBIM.obj');
+				
+				done(err);
+			});
+		});
+
+	});
+
 
 	describe('Delete a project', function(){
 

@@ -163,6 +163,7 @@ var responseCodes = {
 
 	BILLING_NOT_FOUND: { value: 100, message: 'Billing not found', status: 404 },
 	PAYPAL_ERROR: { value: 101, status: 400 },
+	NO_FILE_FOUND: { value: 102, message: 'No file can be downloaded', status: 404},
 
 	PROJECT_NO_UNIT: { value: 103, status: 400, message: 'Unit is not specified'},
 
@@ -238,7 +239,6 @@ var responseCodes = {
 		};
 	}
 };
-
 
 var valid_values = [900, 1000, 2000, 3000, 4000];
 

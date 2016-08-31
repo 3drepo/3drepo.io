@@ -22,14 +22,25 @@ var stream = require('stream');
 var GridFSBucket = require('mongodb').GridFSBucket;
 var systemLogger = require("../../logger.js").systemLogger;
 
-function _getGridFSBucket (dbCol, format){
+
+function getGridFSBucket (account, bucketName){
 	'use strict';
 
 	return new GridFSBucket(
-		ModelFactory.db.db(dbCol.account),
-		{ bucketName:  `${dbCol.project}.stash.${format}`}
+		ModelFactory.db.db(account),
+		{ bucketName:  bucketName}
 	);
 }
+
+
+// function _getGridFSBucket (dbCol, format){
+// 	'use strict';
+
+// 	return new GridFSBucket(
+// 		ModelFactory.db.db(dbCol.account),
+// 		{ bucketName:  `${dbCol.project}.stash.${format}`}
+// 	);
+// }
 
 function findStashByFilename(dbCol, format, filename, getStreamOnly){
 	'use strict';
@@ -94,5 +105,6 @@ function saveStashByFilename(dbCol, format, filename, buffer){
 module.exports = {
 	findStashByFilename: findStashByFilename,
 	saveStashByFilename: saveStashByFilename,
-	getGridFSBucket: _getGridFSBucket
+	getGridFSBucket: getGridFSBucket
+
 };
