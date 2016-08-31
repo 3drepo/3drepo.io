@@ -8,6 +8,7 @@
 		div(ng-repeat="(accountIndex, account) in vm.accountsToUse", ng-if="account.fedProjects.length!==0")
 			// Account
 			div(layout="row", layout-align="start center")
+
 				md-list-item(flex="100", layout-fill)
 					.account(ng-click="vm.toggleProjectsList($index)", layout="row", layout-align="start center", md-ink-ripple, layout-fill)
 						md-button.md-icon-button(aria-label="Folder")

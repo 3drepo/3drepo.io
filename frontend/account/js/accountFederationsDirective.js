@@ -66,6 +66,7 @@
 				if (vm.accounts.length > 0) {
 					accountsToUse = [];
 					for (i = 0, length = vm.accounts.length; i < length; i += 1) {
+
 						if (i === 0) {
 							vm.accounts[i].showProjects = true;
 							accountsToUse.push(vm.accounts[i]);
@@ -210,6 +211,7 @@
 		 * @param {Object} accountIndex
 		 * @param {Number} projectIndex
 		 */
+
 		vm.viewFederation = function (event, accountIndex, projectIndex) {
 			console.log(vm.accountsToUse[accountIndex]);
 			if ((accountIndex === 0) && !vm.accountsToUse[accountIndex].fedProjects[projectIndex].hasOwnProperty("subProjects")) {
@@ -218,6 +220,7 @@
 			else {
 				$location.path("/" + vm.accountsToUse[accountIndex].account + "/" +  vm.accountsToUse[accountIndex].fedProjects[projectIndex].project, "_self").search({});
 			}
+
 		};
 
 		/**

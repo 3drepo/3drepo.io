@@ -5372,6 +5372,7 @@ var ViewerManager = {};
 				if (vm.accounts.length > 0) {
 					accountsToUse = [];
 					for (i = 0, length = vm.accounts.length; i < length; i += 1) {
+
 						if (i === 0) {
 							vm.accounts[i].showProjects = true;
 							accountsToUse.push(vm.accounts[i]);
@@ -5516,6 +5517,7 @@ var ViewerManager = {};
 		 * @param {Object} accountIndex
 		 * @param {Number} projectIndex
 		 */
+
 		vm.viewFederation = function (event, accountIndex, projectIndex) {
 			console.log(vm.accountsToUse[accountIndex]);
 			if ((accountIndex === 0) && !vm.accountsToUse[accountIndex].fedProjects[projectIndex].hasOwnProperty("subProjects")) {
@@ -5524,6 +5526,7 @@ var ViewerManager = {};
 			else {
 				$location.path("/" + vm.accountsToUse[accountIndex].account + "/" +  vm.accountsToUse[accountIndex].fedProjects[projectIndex].project, "_self").search({});
 			}
+
 		};
 
 		/**
@@ -17073,7 +17076,8 @@ var Oculus = {};
 			currentSelectedNode = null,
 			currentScrolledToNode = null,
 			highlightSelectedViewerObject = true,
-			clickedHidden = {}; // Nodes that have actually been clicked to hide
+			clickedHidden = {}, // Nodes that have actually been clicked to hide
+			clickedShown = {}; // Nodes that have actually been clicked to show
 
 		/*
 		 * Init
@@ -17111,18 +17115,23 @@ var Oculus = {};
 		 * Set the content height.
 		 * The height of a node is dependent on its name length and its level.
 		 *
-		 * @param {Number} nodesToShow
+		 * @param {Array} nodesToShow
 		 */
 		function setContentHeight (nodesToShow) {
 			var i, length,
 				height = 0,
-				nodeMinHeight = 48,
+				nodeMinHeight = 42,
 				maxStringLength = 35, maxStringLengthForLevel = 0,
 				lineHeight = 18, levelOffset = 2;
 
 			for (i = 0, length = nodesToShow.length; i < length ; i += 1) {
 				maxStringLengthForLevel = maxStringLength - (nodesToShow[i].level * levelOffset);
-				height += nodeMinHeight + (lineHeight * Math.floor(nodesToShow[i].name.length / maxStringLengthForLevel));
+				if (nodesToShow[i].hasOwnProperty("name")) {
+					height += nodeMinHeight + (lineHeight * Math.floor(nodesToShow[i].name.length / maxStringLengthForLevel));
+				}
+				else {
+					height += nodeMinHeight + lineHeight;
+				}
 			}
 			vm.onContentHeightRequest({height: height});
 		}
@@ -17136,17 +17145,22 @@ var Oculus = {};
 			vm.nodesToShow[0].expanded = false;
 			vm.nodesToShow[0].hasChildren = true;
 			vm.nodesToShow[0].selected = false;
+			/*
 			// Only make the top node visible if it was not previously clicked hidden
 			if (!wasClickedHidden(vm.nodesToShow[0])) {
 				vm.nodesToShow[0].toggleState = "visible";
 			}
-
+			*/
+			// Only make the top node visible if it does not have a toggleState
+			if (!vm.nodesToShow[0].hasOwnProperty("toggleState")) {
+				vm.nodesToShow[0].toggleState = "visible";
+			}
 		}
 
 		/**
 		 * Set the toggle state of a node
-		 * @param node Node to change the visibility for
-		 * @param String visibility Visibility to change to
+		 * @param {Object} node Node to change the visibility for
+		 * @param {String} visibility Visibility to change to
 		 */
 		vm.setToggleState = function(node, visibility)
 		{
@@ -17225,15 +17239,36 @@ var Oculus = {};
 						}
 
 						for (i = 0; i < numChildren; i += 1) {
-							vm.nodesToShow[index].children[i].expanded = false;
+							// For federation - handle node of project that cannot be viewed or has been deleted
+							// That node will be below level 0 only
+							if ((vm.nodesToShow[index].level === 0) &&
+								vm.nodesToShow[index].children[i].hasOwnProperty("children") &&
+								vm.nodesToShow[index].children[i].children[0].hasOwnProperty("status")) {
+								vm.nodesToShow[index].children[i].status = vm.nodesToShow[index].children[i].children[0].status;
+							}
+							else {
+								// Normal tree node
+								vm.nodesToShow[index].children[i].expanded = false;
 
-							// vm.setToggleState(vm.nodesToShow[index].children[i], vm.nodesToShow[index].toggleState);
-							// If the child node was not clicked hidden set its toggle state to visible
-							if (!wasClickedHidden(vm.nodesToShow[index].children[i])) {
-								vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
+								/*
+								 // If the child node was not clicked hidden set its toggle state to visible
+								 if (!wasClickedHidden(vm.nodesToShow[index].children[i])) {
+								 vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
+								 }
+								 */
+								// If the child node does not have a toggleState set it to visible
+								if (!vm.nodesToShow[index].children[i].hasOwnProperty("toggleState")) {
+									vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
+								}
+								// A node should relect the state of any path relative
+								else if (((vm.nodesToShow[index].children[i].toggleState === "invisible") ||
+									(vm.nodesToShow[index].children[i].toggleState === "parentOfInvisible")) &&
+									pathRelativeWasClickShown(vm.nodesToShow[index].children[i])) {
+									vm.setToggleState(vm.nodesToShow[index].children[i], "visible");
+								}
 							}
 
-							// Determine if child node has childern
+							// Determine if child node has children
 							vm.nodesToShow[index].children[i].level = vm.nodesToShow[index].level + 1;
 							if("children" in vm.nodesToShow[index].children[i]) {
 								vm.nodesToShow[index].children[i].hasChildren = vm.nodesToShow[index].children[i].children.length > 0;
@@ -17281,30 +17316,44 @@ var Oculus = {};
 					}
 
 					for (j = 0; j < childrenLength; j += 1) {
-						vm.nodesToShow[i].children[j].selected = (vm.nodesToShow[i].children[j]._id === selectedId);
+						// Set child to not expanded
+						vm.nodesToShow[i].children[j].expanded = false;
+
+						if (vm.nodesToShow[i].children[j]._id === selectedId) {
+							// If the selected mesh doesn't have a name highlight the parent in the tree
+							// highlight the parent in the viewer
+							if (vm.nodesToShow[i].children[j].hasOwnProperty("name")) {
+								vm.nodesToShow[i].children[j].selected = true;
+							}
+							else {
+								vm.selectNode(vm.nodesToShow[i]);
+							}
+						}
+						else {
+							// This will clear any previously selected node
+							vm.nodesToShow[i].children[j].selected = false;
+						}
 
 						// Only set the toggle state once when the node is listed
 						if (!vm.nodesToShow[i].children[j].hasOwnProperty("toggleState")) {
 							vm.setToggleState(vm.nodesToShow[i].children[j], "visible");
 						}
 
-						if("children" in vm.nodesToShow[i].children[j]) {
+						// Determine if child node has childern
+						if ("children" in vm.nodesToShow[i].children[j]) {
 							vm.nodesToShow[i].children[j].hasChildren = vm.nodesToShow[i].children[j].children.length > 0;
 						}
 						else {
 							vm.nodesToShow[i].children[j].hasChildren = false;
 						}
 
+						// Set current selected node
 						if (vm.nodesToShow[i].children[j].selected) {
 							selectionFound = true;
-
-							// This is a hack to get around the double click event issue
-							currentScrolledToNode = vm.nodesToShow[i].children[j];
-							$timeout(function () {
-								currentSelectedNode = currentScrolledToNode;
-							});
+							currentSelectedNode = vm.nodesToShow[i].children[j];
 						}
 
+						// Determine if more expansion is required
 						if ((level === (path.length - 2)) && !selectionFound) {
 							selectedIndex += 1;
 						}
@@ -17345,8 +17394,10 @@ var Oculus = {};
 				if (currentSelectedNode !== null) {
 					currentSelectedNode.selected = false;
 					currentSelectedNode = null;
-					vm.currentFilterItemSelected.class = "";
-					vm.currentFilterItemSelected = null;
+					if (vm.currentFilterItemSelected !== null) {
+						vm.currentFilterItemSelected.class = "";
+						vm.currentFilterItemSelected = null;
+					}
 				}
 			}
 			else if ((event.type === EventService.EVENT.PANEL_CARD_ADD_MODE) ||
@@ -17376,6 +17427,7 @@ var Oculus = {};
 					vm.setToggleState(vm.nodesToShow[i], (vm.nodesToShow[i].toggleState === "visible") ? "invisible" : "visible");
 					nodeToggleState = vm.nodesToShow[i].toggleState;
 					updateClickedHidden(vm.nodesToShow[i]);
+					updateClickedShown(vm.nodesToShow[i]);
 				}
 				// Set children to node toggle state
 				else if (vm.nodesToShow[i].path.indexOf(node._id) !== -1) {
@@ -17671,6 +17723,42 @@ var Oculus = {};
 			else {
 				delete clickedHidden[node._id];
 			}
+		}
+
+		/**
+		 * If a node was clicked to show, add it to a list of similar nodes
+		 *
+		 * @param {Object} node
+		 */
+		function updateClickedShown (node) {
+			if (node.toggleState === "visible") {
+				clickedShown[node._id] = node;
+			}
+			else {
+				delete clickedShown[node._id];
+			}
+			console.log(clickedShown);
+		}
+
+		/**
+		 * Check if a relative in the path was clicked to show
+		 *
+		 * @param {Object} node
+		 */
+		function pathRelativeWasClickShown (node) {
+			var i, length,
+				relativeWasClickShown = false,
+				path = node.path.split("__");
+
+			path.pop(); // Remove _id of node from path
+			for (i = 0, length = path.length; i < length; i += 1) {
+				if (clickedShown.hasOwnProperty(path[i])) {
+					relativeWasClickShown = true;
+					break;
+				}
+			}
+
+			return relativeWasClickShown;
 		}
 
 		/**
