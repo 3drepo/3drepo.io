@@ -620,7 +620,7 @@ function searchTree(account, project, branch, revision, searchString, username){
 
 		objs.forEach((obj, i) => {
 			
-			objs[i] = obj.toObject();
+			objs[i] = obj.toJSON();
 			objs[i].account = account;
 			objs[i].project = project;
 			items.push(objs[i]);

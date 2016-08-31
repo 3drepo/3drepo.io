@@ -28,9 +28,6 @@ var History = require('../models/history');
 var utils = require('../utils');
 var srcEncoder = require('../encoders/src_encoder');
 var stash = require('../models/helper/stash');
-var History = require('../models/history');
-var Stash3DRepo = require('../models/stash3DRepo');
-var Scene = require('../models/scene');
 var repoGraphScene = require("../repo/repoGraphScene.js");
 var x3dEncoder = require("../encoders/x3dom_encoder");
 
@@ -243,9 +240,15 @@ function generateX3DofHead(req, res ,next){
 
 	History.findByBranch({account, project}, 'master').then(history => {
 
+		if(!history){
+			return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+		}
+
 		return getSceneObject(account, project, history);
 
 	}).then(objs => {
+
+		//console.log(objs);
 
 		let xml = x3dEncoder.render(account, project, repoGraphScene(req[C.REQ_REPO].logger).decode(objs), req[C.REQ_REPO].logger);
 		responseCodes.respond(place, req, res, next, responseCodes.OK, xml);
