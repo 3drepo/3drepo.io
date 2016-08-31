@@ -33,14 +33,14 @@ function getGridFSBucket (account, bucketName){
 }
 
 
-// function _getGridFSBucket (dbCol, format){
-// 	'use strict';
+function _getGridFSBucket (dbCol, format){
+	'use strict';
 
-// 	return new GridFSBucket(
-// 		ModelFactory.db.db(dbCol.account),
-// 		{ bucketName:  `${dbCol.project}.stash.${format}`}
-// 	);
-// }
+	return new GridFSBucket(
+		ModelFactory.db.db(dbCol.account),
+		{ bucketName:  `${dbCol.project}.stash.${format}`}
+	);
+}
 
 function findStashByFilename(dbCol, format, filename, getStreamOnly){
 	'use strict';

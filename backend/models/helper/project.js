@@ -700,6 +700,9 @@ function listSubProjects(account, project, branch){
 
 		return Promise.resolve(subProjects);
 	
+	});
+}
+	
 
 function downloadLatest(account, project){
 	'use strict';

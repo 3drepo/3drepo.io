@@ -6174,7 +6174,7 @@ var ViewerManager = {};
 
 				case "download":
 					window.open(
-						serverConfig.apiUrl(serverConfig.GET_API, vm.account.name + "/" + vm.project.name + "/download/latest"),
+						serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.project.name + "/download/latest"),
 						'_blank' 
 					);
 					break;
