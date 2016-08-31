@@ -5350,7 +5350,6 @@ var ViewerManager = {};
 		var vm = this,
 			federationToDeleteIndex,
 			userAccount, // For creating federations
-			userAccountIndex,
 			accountsToUse; // For listing federations
 
 		// Init
@@ -5373,13 +5372,12 @@ var ViewerManager = {};
 				if (vm.accounts.length > 0) {
 					accountsToUse = [];
 					for (i = 0, length = vm.accounts.length; i < length; i += 1) {
-						if (vm.accounts[i].account === vm.account) {
+						if (i === 0) {
 							vm.accounts[i].showProjects = true;
 							accountsToUse.push(vm.accounts[i]);
 							if (vm.accounts[i].fedProjects.length > 0) {
 								vm.showInfo = false;
 							}
-							userAccountIndex = i;
 							userAccount = vm.accounts[i];
 						}
 						else if (vm.accounts[i].fedProjects.length > 0) {
@@ -5494,7 +5492,7 @@ var ViewerManager = {};
 					console.log(response);
 					vm.showInfo = false;
 					vm.newFederationData.timestamp = (new Date()).toString();
-					vm.accountsToUse[userAccountIndex].fedProjects.push(vm.newFederationData);
+					vm.accountsToUse[0].fedProjects.push(vm.newFederationData);
 					vm.closeDialog();
 				});
 			}
@@ -5512,13 +5510,20 @@ var ViewerManager = {};
 		};
 
 		/**
-		 * Open the federation in the viewer
+		 * Open the federation in the viewer if it has sub projects otherwise open edit dialog
 		 *
-		 * @param {Object} account
-		 * @param {Number} index
+		 * @param {Object} event
+		 * @param {Object} accountIndex
+		 * @param {Number} projectIndex
 		 */
-		vm.viewFederation = function (account, index) {
-			$location.path("/" + account.account + "/" + account.fedProjects[index].project, "_self").search({});
+		vm.viewFederation = function (event, accountIndex, projectIndex) {
+			console.log(vm.accountsToUse[accountIndex]);
+			if ((accountIndex === 0) && !vm.accountsToUse[accountIndex].fedProjects[projectIndex].hasOwnProperty("subProjects")) {
+				setupEditFederation(event, projectIndex);
+			}
+			else {
+				$location.path("/" + vm.accountsToUse[accountIndex].account + "/" +  vm.accountsToUse[accountIndex].fedProjects[projectIndex].project, "_self").search({});
+			}
 		};
 
 		/**
@@ -5526,20 +5531,20 @@ var ViewerManager = {};
 		 *
 		 * @param event
 		 * @param option
-		 * @param index
+		 * @param federationIndex
 		 */
-		vm.doFederationOption = function (event, option, index) {
+		vm.doFederationOption = function (event, option, federationIndex) {
 			switch (option) {
 				case "edit":
-					setupEditFederation(event, index);
+					setupEditFederation(event, federationIndex);
 					break;
 
 				case "team":
-					setupEditTeam(event, index);
+					setupEditTeam(event, federationIndex);
 					break;
 
 				case "delete":
-					setupDelete(event, index);
+					setupDelete(event, federationIndex);
 					break;
 			}
 		};
@@ -5575,24 +5580,24 @@ var ViewerManager = {};
 		 * Edit a federation
 		 *
 		 * @param event
-		 * @param index
+		 * @param projectIndex
 		 */
-		function setupEditFederation (event, index) {
+		function setupEditFederation (event, projectIndex) {
 			var i, j, k, iLength, jLength, kLength;
 
 			vm.showRemoveWarning = false;
 
-			vm.accountsToUse = angular.copy(accountsToUse);
-			vm.federationOriginalData = vm.accountsToUse[0].fedProjects[index];
+			vm.userAccount = angular.copy(userAccount);
+			vm.federationOriginalData = vm.accountsToUse[0].fedProjects[projectIndex];
 			vm.newFederationData = angular.copy(vm.federationOriginalData);
 
 			// Disable projects in the projects list that are federated
-			for (i = 0, iLength = vm.accountsToUse.length; i < iLength; i += 1) {
-				for (j = 0, jLength = vm.accountsToUse[i].projects.length; j < jLength; j += 1) {
-					vm.accountsToUse[i].projects[j].federated = false;
+			for (j = 0, jLength = vm.userAccount.projects.length; j < jLength; j += 1) {
+				vm.userAccount.projects[j].federated = false;
+				if (vm.federationOriginalData.hasOwnProperty("subProjects")) {
 					for (k = 0, kLength = vm.federationOriginalData.subProjects.length; k < kLength; k += 1) {
-						if (vm.federationOriginalData.subProjects[k].project === vm.accountsToUse[i].projects[j].project) {
-							vm.accountsToUse[i].projects[j].federated = true;
+						if (vm.federationOriginalData.subProjects[k].project === vm.userAccount.projects[j].project) {
+							vm.userAccount.projects[j].federated = true;
 						}
 					}
 				}

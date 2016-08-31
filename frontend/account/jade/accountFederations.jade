@@ -5,7 +5,7 @@
 			p You do not currently have any federations set up
 
 	md-list(ng-if="!vm.showInfo")
-		div(ng-repeat="account in vm.accountsToUse", ng-if="account.fedProjects.length!==0")
+		div(ng-repeat="(accountIndex, account) in vm.accountsToUse", ng-if="account.fedProjects.length!==0")
 			// Account
 			div(layout="row", layout-align="start center")
 				md-list-item(flex="100", layout-fill)
@@ -18,16 +18,16 @@
 			div(ng-if="account.showProjects")
 				div(layout="column", layout-align="start", ng-repeat="(federationIndex, federation) in account.fedProjects")
 					div(layout="row", layout-align="start center")
-						md-list-item.federation(ng-click="vm.viewFederation(account, $index)", flex)
+						md-list-item.federation(ng-click="vm.viewFederation($event, accountIndex, federationIndex)", flex)
 							md-button.md-icon-button.md-accent(aria-label="Federation")
 								md-icon.angular-material-icons border_all
 							.md-list-item-text(flex="40")
 								p {{federation.project}}
 						//md-button.md-icon-button.md-accent(aria-label="Edit", ng-click="vm.editFederation($event, $index)")
 							md-icon.angular-material-icons edit
-						div(layout="row")
+						#federationInfoRight(layout="row")
 							p.federationTimestamp {{federation.timestamp | prettyDate:true}}
-							md-menu(md-position-mode="target-right target")
+							md-menu(md-position-mode="target-right target", ng-if="accountIndex===0")
 								md-button.md-icon-button.md-accent(aria-label="More", ng-click="$mdOpenMenu($event)")
 									md-icon.md-menu-origin.angular-material-icons(md-menu-origin) more_vert
 								md-menu-content(width="3")

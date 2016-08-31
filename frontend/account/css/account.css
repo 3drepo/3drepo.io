@@ -523,7 +523,6 @@ account-federations .federationProjectsList {
 
 account-federations .federationTimestamp {
   color: rgba(0,0,0,.3);
-  margin-left: 20px;
 }
 
 account-federations #accountFederationInfo {
@@ -541,4 +540,8 @@ account-federations .account:hover {
 
 account-federations .federation {
   padding-left: 30px;
+}
+
+account-federations #federationInfoRight p:only-child {
+  margin-right: 20px;
 }
