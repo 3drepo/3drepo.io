@@ -76,9 +76,9 @@
         };
     }
 
-    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$window", "Auth", "StateManager", "EventService", "UtilsService"];
+    HomeCtrl.$inject = ["$scope", "$element", "$timeout", "$compile", "$mdDialog", "$window", "Auth", "StateManager", "EventService", "UtilsService", "serverConfig"];
 
-    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $window, Auth, StateManager, EventService, UtilsService) {
+    function HomeCtrl($scope, $element, $timeout, $compile, $mdDialog, $window, Auth, StateManager, EventService, UtilsService, serverConfig) {
         var vm = this,
 			homeLoggedOut,
 			notLoggedInElement,
@@ -92,17 +92,15 @@
 		vm.query = StateManager.query;
 		vm.functions = StateManager.functions;
 		vm.pointerEvents = "auto";
-
+		vm.goToAccount = false;
 		vm.goToUserPage = false;
 
-		vm.legalDisplays = [
-			{title: "Terms & Conditions", value: "terms"},
-			{title: "Privacy", value: "privacy"},
-			{title: "Cookies", value: "cookies"},
-			{title: "Pricing", value: "pricing"},
-			{title: "Contact", value: "contact"}
-		];
-		vm.goToAccount = false;
+		vm.legalDisplays = [];
+		if (angular.isDefined(serverConfig.legal)) {
+			vm.legalDisplays = serverConfig.legal;
+		}
+		vm.legalDisplays.push({title: "Pricing", page: "pricing"});
+		vm.legalDisplays.push({title: "Contact", page: "contact"});
 
 		$timeout(function () {
 			homeLoggedOut = angular.element($element[0].querySelector('#homeLoggedOut'));

@@ -144,3 +144,18 @@ md-dialog md-toolbar {
     min-height: 40px;
 }
 
+/** Legal *************************************************************************************************************/
+#legal {
+    position: absolute;
+    z-index: 3;
+    background: #FDFDFD;
+    color: rgba(0, 0, 0, 0.8);
+}
+
+#legal .md-toolbar-tools img {
+    width: 150px;
+}
+
+#legal #legalText {
+    padding: 10px 50px;
+}

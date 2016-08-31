@@ -1,4 +1,4 @@
-form#signUpForm
+form
 	md-input-container.md-block
 		label Username
 		input(type='text', ng-model='vm.newUser.username', ng-required, ng-keypress="vm.register($event)", tdr-focus="true")
@@ -15,23 +15,10 @@ form#signUpForm
 		input(type='email')
 		input(type='password')
 
-	#tc(layout="row", layout-align="start start", flex)
+	#tc(layout="row", layout-align="start start", flex, ng-if="vm.showLegalText")
 		md-checkbox.md-accent(ng-model="vm.newUser.tcAgreed" aria-label="Terms and conditions Checkbox")
 		div(layout="row", layout-align="start center")
-			p
-				| I agree to the
-				=" "
-				a(target="_blank", href="/terms") Terms and Conditions
-				=" "
-				| and I have read the
-				=" "
-				a(target="_blank", href="/privacy") Privacy
-				=" "
-				| and
-				=" "
-				a(target="_blank", href="/cookies") Cookies
-				=" "
-				| policies
+			p(ng-bind-html="vm.legalText")
 	#loginCaptcha(vc-recaptcha, key="vm.captchaKey", ng-model="vm.reCaptchaResponse", ng-if="vm.useReCapthca")
 	div(layout="row", layout-align="start center")
 		md-button.md-accent.md-raised(ng-click="vm.register()", ng-disabled="vm.registering", flex="none") {{vm.buttonLabel}}

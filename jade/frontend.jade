@@ -75,4 +75,9 @@ html(lang="en" ng-app="3drepo")
 			script(type="text/ng-template", id=j.id)
 				!= renderMe(j.path, locals)
 
+		// Legal pages
+		each j in legalTemplates
+			script(type="text/ng-template", id=j.page+".html")
+				!= renderMe(j.path, locals)
+
 		home
