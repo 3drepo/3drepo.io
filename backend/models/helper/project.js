@@ -204,7 +204,7 @@ function importToyJSON(db, project){
 
 	return Promise.all(promises).then(() => {
 		//rename json_mpc stash
-		let jsonBucket = stash.getGridFSBucket(account, `${project}.stash.json_mpc`);
+		let jsonBucket = stash.getGridFSBucket(db, `${project}.stash.json_mpc`);
 		
 		jsonBucket.find().forEach(file => {
 			
@@ -220,7 +220,7 @@ function importToyJSON(db, project){
 		});
 
 		//rename src stash
-		let srcBucket = stash.getGridFSBucket(account, `${project}.stash.src`);
+		let srcBucket = stash.getGridFSBucket(db, `${project}.stash.src`);
 		
 		srcBucket.find().forEach(file => {
 

@@ -341,7 +341,7 @@ schema.statics.verify = function(username, token, options){
 			var ProjectHelper = require('./helper/project');
 
 			ProjectHelper.importToyProject(username).catch(err => {
-				systemLogger.logError('Failed to import toy project', err);
+				systemLogger.logError('Failed to import toy project', err && err.stack ? err.stack : err);
 			});
 		}
 
