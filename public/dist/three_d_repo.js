@@ -6099,9 +6099,11 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig"];
 
-	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig) {
+	AccountProjectCtrl.$inject = ["$scope", "$location", "$timeout", "$interval", "$filter", "UtilsService", "serverConfig", "RevisionsService"];
+
+	function AccountProjectCtrl ($scope, $location, $timeout, $interval, $filter, UtilsService, serverConfig, RevisionsService) {
+
 		var vm = this,
 			infoTimeout = 4000;
 
@@ -6115,6 +6117,7 @@ var ViewerManager = {};
 		vm.projectOptions = {
 			upload: {label: "Upload file", icon: "cloud_upload"},
 			projectsetting: {label: "Settings", icon: "settings"},
+			revision: {label: "Revisions", icon: "settings_backup_restore"},
 			team: {label: "Team", icon: "group"},
 			delete: {label: "Delete", icon: "delete"}
 		};
@@ -6128,10 +6131,11 @@ var ViewerManager = {};
 		/*
 		 * Watch changes in upload file
 		 */
+
 		vm.uploadedFileWatch = $scope.$watch("vm.uploadedFile", function () {
 			if (angular.isDefined(vm.uploadedFile) && (vm.uploadedFile !== null) && (vm.uploadedFile.project.name === vm.project.name)) {
 				console.log("Uploaded file", vm.uploadedFile);
-				uploadFileToProject(vm.uploadedFile.file);
+				uploadFileToProject(vm.uploadedFile.file, vm.uploadedFile.tag, vm.uploadedFile.desc);
 			}
 		});
 
@@ -6142,7 +6146,7 @@ var ViewerManager = {};
 			if (!vm.project.uploading) {
 				if (vm.project.timestamp === null) {
 					// No timestamp indicates no model previously uploaded
-					vm.uploadFile();
+					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true);
 				}
 				else {
 					$location.path("/" + vm.account + "/" + vm.project.name, "_self").search("page", null);
@@ -6150,12 +6154,6 @@ var ViewerManager = {};
 			}
 		};
 
-		/**
-		 * Call parent upload function
-		 */
-		vm.uploadFile = function () {
-			vm.onUploadFile({project: vm.project});
-		};
 
 		/**
 		 * Handle project option selection
@@ -6172,7 +6170,8 @@ var ViewerManager = {};
 					break;
 
 				case "upload":
-					vm.uploadFile();
+					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true);
+					//vm.uploadFile();
 					break;
 
 				case "download":
@@ -6188,6 +6187,11 @@ var ViewerManager = {};
 
 				case "delete":
 					vm.onSetupDeleteProject({event: event, project: vm.project});
+					break;
+
+				case "revision":
+					getRevision();
+					UtilsService.showDialog("revisionsDialog.html", $scope, event, true);
 					break;
 			}
 		};
@@ -6207,12 +6211,47 @@ var ViewerManager = {};
 			UtilsService.closeDialog();
 		};
 
+		vm.file;
+
+
+		/**
+		 * When users click select file
+		 */
+		vm.selectFile = function(){
+			vm.file = document.createElement('input');
+			vm.file.setAttribute('type', 'file');
+			vm.file.click();
+
+			vm.file.addEventListener("change", function () {
+				vm.selectedFile = vm.file.files[0];
+				$scope.$apply();
+			});
+		}
+
+		/**
+		 * When users click upload after selecting
+		 */
+		vm.uploadFile = function () {
+			//vm.onUploadFile({project: vm.project});
+			vm.uploadedFile = {project: vm.project, file: vm.file.files[0], tag: vm.tag, desc: vm.desc};
+			vm.closeDialog();
+
+		};
+
+		/**
+		* Go to the specified revision
+		*/
+		vm.goToRevision = function(revId){
+			console.log(revId);
+			$location.path("/" + vm.account + "/" + vm.project.name + "/" + revId , "_self");
+		}
+
 		/**
 		 * Upload file/model to project
 		 *
 		 * @param file
 		 */
-		function uploadFileToProject (file) {
+		function uploadFileToProject(file, tag, desc) {
 			var promise,
 				formData;
 
@@ -6241,12 +6280,23 @@ var ViewerManager = {};
 						});
 					}
 					else {
+
 						formData = new FormData();
 						formData.append("file", file);
+
+						if(tag){
+							formData.append('tag', tag);
+						}
+
+						if(desc){
+							formData.append('desc', desc);
+						}
+
 						promise = UtilsService.doPost(formData, vm.account + "/" + vm.project.name + "/upload", {'Content-Type': undefined});
+
 						promise.then(function (response) {
 							console.log("uploadModel", response);
-							if ((response.data.status === 400) || (response.data.status === 404)) {
+							if ((response.status === 400) || (response.status === 404)) {
 								// Upload error
 								if (response.data.value === 68) {
 									vm.fileUploadInfo = "Unsupported file format";
@@ -6254,6 +6304,10 @@ var ViewerManager = {};
 								else if (response.data.value === 66) {
 									vm.fileUploadInfo = "Insufficient quota for model";
 								}
+								else {
+									vm.fileUploadInfo = response.data.message;
+								}
+								
 								vm.showUploading = false;
 								vm.showFileUploadInfo = true;
 								$timeout(function () {
@@ -6301,6 +6355,8 @@ var ViewerManager = {};
 							vm.project.timestamp = new Date();
 							vm.project.timestampPretty = $filter("prettyDate")(vm.project.timestamp, {showSeconds: true});
 							vm.fileUploadInfo = "Uploaded";
+							// clear revisions cache
+							vm.revisions = null;
 						}
 						else {
 							if (response.data.hasOwnProperty("errorReason")) {
@@ -6321,6 +6377,7 @@ var ViewerManager = {};
 			}, 1000);
 		}
 
+
 		/**
 		 * Set up team of project
 		 *
@@ -6329,6 +6386,15 @@ var ViewerManager = {};
 		function setupEditTeam (event) {
 			vm.item = vm.project;
 			UtilsService.showDialog("teamDialog.html", $scope, event);
+
+		}
+
+		function getRevision(){
+			if(!vm.revisions){
+				RevisionsService.listAll(vm.account, vm.project.name).then(function(revisions){
+					vm.revisions = revisions;
+				});
+			}
 		}
 
 	}
@@ -6378,8 +6444,8 @@ var ViewerManager = {};
 
 	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService) {
 		var vm = this,
-			existingProjectToUpload,
-			existingProjectFileUploader,
+			// existingProjectToUpload,
+			// existingProjectFileUploader,
 			newProjectFileUploader;
 
 		/*
@@ -6391,15 +6457,15 @@ var ViewerManager = {};
 		vm.units = server_config.units;
 
 		// Setup file uploaders
-		existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
-		existingProjectFileUploader.addEventListener(
-			"change",
-			function () {
-				vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0]};
-				$scope.$apply();
-			},
-			false
-		);
+		// existingProjectFileUploader = $element[0].querySelector("#existingProjectFileUploader");
+		// existingProjectFileUploader.addEventListener(
+		// 	"change",
+		// 	function () {
+		// 		vm.uploadedFile = {project: existingProjectToUpload, file: this.files[0], tag: vm.tag, desc: vm.desc};
+		// 		$scope.$apply();
+		// 	},
+		// 	false
+		// );
 		newProjectFileUploader = $element[0].querySelector("#newProjectFileUploader");
 		newProjectFileUploader.addEventListener(
 			"change",
@@ -6482,6 +6548,8 @@ var ViewerManager = {};
 		 * Bring up dialog to add a new project
 		 */
 		vm.newProject = function (event) {
+			vm.tag = null;
+			vm.desc = null;
 			vm.showNewProjectErrorMessage = false;
 			vm.newProjectFileSelected = false;
 			vm.newProjectData = {
@@ -6545,12 +6613,12 @@ var ViewerManager = {};
 		 *
 		 * @param {Object} project
 		 */
-		vm.uploadFile = function (project) {
-			console.log(project);
-			existingProjectFileUploader.value = "";
-			existingProjectToUpload = project;
-			existingProjectFileUploader.click();
-		};
+		// vm.uploadFile = function (project) {
+		// 	console.log(project);
+		// 	existingProjectFileUploader.value = "";
+		// 	existingProjectToUpload = project;
+		// 	existingProjectFileUploader.click();
+		// };
 
 		/**
 		 * Upload a file
@@ -6679,7 +6747,7 @@ var ViewerManager = {};
 			// Save model to project
 			if (vm.newProjectFileToUpload !== null) {
 				$timeout(function () {
-					vm.uploadedFile = {project: project, file: vm.newProjectFileToUpload};
+					vm.uploadedFile = {project: project, file: vm.newProjectFileToUpload, tag: vm.tag, desc: vm.desc};
 				});
 			}
 		}
@@ -12172,7 +12240,7 @@ angular.module('3drepo')
 		/*
 		 * Get all the Issues
 		 */
-		promise = IssuesService.getIssues(vm.account, vm.project);
+		promise = IssuesService.getIssues(vm.account, vm.project, vm.revision);
 		promise.then(function (data) {
 			var i, length;
 			vm.showProgress = false;
@@ -12636,6 +12704,7 @@ angular.module('3drepo')
 			}
 			vm.selectedIssue = vm.issuesToShow[index];
 			vm.selectedIndex = index;
+			vm.selectedIssue.rev_id = vm.revision;
 			vm.selectedIssue.selected = true;
 			vm.selectedIssue.showInfo = false;
 
@@ -12693,8 +12762,13 @@ angular.module('3drepo')
 							creator_role: vm.projectUserRoles[0],
 							account: vm.account,
 							project: vm.project,
-							scribble: png
+							scribble: png,
 						};
+
+						if(vm.revision){
+							issue.rev_id = vm.revision;
+						}
+
 						if (selectedObjectId !== null) {
 							issue.objectId = selectedObjectId;
 							issue.pickedPos = pickedPos;
@@ -13017,10 +13091,16 @@ angular.module('3drepo')
 			}
 		};
 
-		obj.getIssues = function(account, project) {
+		obj.getIssues = function(account, project, revision) {
 			var self = this,
 				deferred = $q.defer();
-			url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/issues.json");
+
+			if(revision){
+				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/revision/" + revision + "/issues.json");
+			} else {
+				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/issues.json");
+			}
+			
 
 			$http.get(url)
 				.then(
@@ -13054,7 +13134,14 @@ angular.module('3drepo')
 				deferred = $q.defer(),
 				viewpointPromise = $q.defer();
 
-			url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues.json");
+			var url;
+
+			if(issue.rev_id){
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/revision/" + issue.rev_id + "/issues.json");
+			} else {
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues.json");
+			}
+			
 
 			EventService.send(EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, {promise: viewpointPromise});
 
@@ -13068,6 +13155,7 @@ angular.module('3drepo')
 					assigned_roles: userRoles,
 					scribble: issue.scribble
 				};
+
 				config = {withCredentials: true};
 
 				if (issue.pickedPos !== null) {
@@ -13103,11 +13191,18 @@ angular.module('3drepo')
 		 * @returns {*}
 		 */
 		function doPut(issue, data) {
-			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues/" + issue._id + ".json"),
-				config = {
-					withCredentials: true
-				};
+			var deferred = $q.defer();
+			var url;
+
+			if(issue.rev_id){
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/revision/" + issue.rev_id + "/issues/" +  issue._id + ".json");
+			} else {
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues/" + issue._id + ".json");
+			}
+				
+			var config = {
+				withCredentials: true
+			};
 			$http.put(url, {data: JSON.stringify(data)}, config)
 				.then(function (response) {
 					deferred.resolve(response.data);
@@ -16582,6 +16677,128 @@ var Oculus = {};
     }
 }());
 
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.directive("revisions", revisions);
+
+	function revisions () {
+		return {
+			restrict: 'E',
+			templateUrl: 'revisions.html',
+			scope: {
+				account: "=",
+				project: "=",
+				revision: "=",
+			},
+			controller: revisionsCtrl,
+			controllerAs: 'vm',
+			bindToController: true,
+		};
+	}
+
+	revisionsCtrl.$inject = ["$location", "$scope", "RevisionsService", "UtilsService", "$filter"];
+
+	function revisionsCtrl ($location, $scope, RevisionsService, UtilsService, $filter) {
+		var vm = this;
+
+		RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
+			vm.revisions = revisions;
+		});
+
+		$scope.$watch("vm.revisions", function () {
+			
+			if(!vm.revision){
+				vm.revName = vm.revisions[0].tag || $filter('revisionDate')(vm.revisions[0].timestamp);
+				vm.revisions[0].current = true;
+
+			} else {
+				vm.revisions && vm.revisions.forEach(function(rev, i){
+					if(rev.tag === vm.revision){
+						vm.revName = vm.revision;
+						vm.revisions[i].current = true;
+					} else if(rev._id === vm.revision){
+						vm.revName = $filter('revisionDate')(rev.timestamp);
+						vm.revisions[i].current = true;
+
+					}
+				});
+			}
+
+		});
+
+		vm.openDialog = function(){
+
+			if(!vm.revisions){
+				RevisionsService.listAll(vm.account, vm.project).then(function(revisions){
+					vm.revisions = revisions;
+				});
+			}
+
+			UtilsService.showDialog("revisionsDialog.html", $scope, event, true);
+		}
+
+		/**
+		* Go to the specified revision
+		*/
+		vm.goToRevision = function(revId){
+
+			UtilsService.closeDialog();
+			$location.path("/" + vm.account + "/" + vm.project + "/" + revId , "_self");
+
+		}
+
+		vm.closeDialog = function() {
+			UtilsService.closeDialog();
+		};
+
+	}
+
+
+}());
+
+/**
+ *  Copyright (C) 2016 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.factory("RevisionsService", RevisionsService);
+
+	RevisionsService.$inject = ["UtilsService"];
+
+	function RevisionsService(UtilsService) {
+
+		function listAll(account, project){
+			return UtilsService.doGet(account + "/" + project + "/revisions.json").then(function(response){
+				if(response.status === 200){
+					return Promise.resolve(response.data);
+				} else {
+					return Promise.reject(response.data);
+				}
+			});
+		}
+
+		return { listAll: listAll};
+	}
+}());
+
 /**
  *	Copyright (C) 2016 3D Repo Ltd
  *
@@ -17804,9 +18021,9 @@ var Oculus = {};
 			ts.account  = account;
 			ts.project  = project;
 			ts.branch   = branch ? branch : "master";
-			ts.revision = revision ? revision : "head";
+			//ts.revision = revision ? revision : "head";
 
-			if (ts.branch === "master")
+			if (!revision)
 			{
 				ts.baseURL = "/" + account + "/" + project + "/revision/master/head/";
 			} else {
@@ -18099,6 +18316,12 @@ var Oculus = {};
 			return function(input) {
 				var date = new Date(input);
 				return date.toISOString().substr(0,10);
+			};
+		})
+
+		.filter("revisionDate", function () {
+			return function(input) {
+				return moment(input).format('DD/MM/YYYY HH:mm');
 			};
 		});
 

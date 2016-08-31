@@ -159,6 +159,9 @@ module.exports.createApp = function(serverConfig)
 				"children": [
 					{
 						"plugin": "project",
+						"children": [ 
+							{"plugin": "revision"}
+						],
 						"friends" : [
 							"panel",
 							"filter",
@@ -175,7 +178,8 @@ module.exports.createApp = function(serverConfig)
 							"groups",
 							"measure",
 							"rightPanel",
-							"building"
+							"building",
+							"revisions"
 						]
 					}
 				]

@@ -25,20 +25,20 @@ var Schema = mongoose.Schema;
 
 var meshSchema = Schema(
 	_.extend({}, repoBase.attrs, {
-		vertices:  Buffer,
+		vertices:  Object,
 		vertices_count: Number,
 		vertices_byte_count: Number,
 
-		normals: Buffer,
+		normals: Object,
 
-		faces: Buffer,
+		faces: Object,
 		faces_count: Number,
 		faces_byte_count: Number,
 
 		outline: [],
 		bounding_box: [],
 
-		uv_channels: Buffer,
+		uv_channels: Object,
 		uv_channels_count: Number,
 		uv_channels_byte_count: Number
 

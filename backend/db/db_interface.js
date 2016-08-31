@@ -1128,7 +1128,7 @@ DBInterface.prototype.queryScene = function(dbName, project, branch, revision, f
 
 				dbConn(self.logger).filterColl(dbName, project + ".scene", filter, projection, function(err, coll) {
 					if (err.value) { return callback(err); }
-
+					console.log(coll.length);
 					callback(responseCodes.OK, false, coll);
 				});
 			} else {
@@ -2542,6 +2542,7 @@ DBInterface.prototype.getScene = function(dbName, project, branch, revision, ful
 	var self = this;
 
 	self.queryScene(dbName, project, branch, revision, {}, projection, function(err, fromStash, coll) {
+					//console.log(coll);
 		async.concat(coll, function(item, iter_callback){
 			if (item.type === "ref")
 			{
@@ -2566,6 +2567,7 @@ DBInterface.prototype.getScene = function(dbName, project, branch, revision, ful
 				return callback(err);
 			}
 
+			console.log(coll);
 			callback(responseCodes.OK, repoGraphScene(self.logger).decode(coll));
 		});
 	});

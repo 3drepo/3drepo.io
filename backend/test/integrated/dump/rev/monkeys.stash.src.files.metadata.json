@@ -1,0 +1,1 @@
+{"options":{},"indexes":[{"v":1,"key":{"_id":1},"name":"_id_","ns":"rev.monkeys.stash.src.files"},{"v":1,"key":{"filename":1},"name":"filename_1","ns":"rev.monkeys.stash.src.files"}]}

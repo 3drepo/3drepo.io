@@ -172,6 +172,8 @@ var responseCodes = {
 
 	INVALID_VAT: {value: 106, status: 400, message: 'Invalid VAT number'},
 	NO_CONTACT_EMAIL: { value: 107, status: 400, message: 'contact.email is not defined in config'},
+	DUPLICATE_TAG : { value: 108, status: 400, message: 'Revision name already exists'},
+	INVALID_TAG_NAME: {value : 109, status: 400, message: 'Invalid revision name'},
 
 	FED_MODEL_IN_OTHER_DB: { value: 110, message: 'Models of federation must reside in the same account', status: 400},
 	FED_MODEL_IS_A_FED: {value: 111, message: 'Models of federation cannot be a federation', status:400},
@@ -247,6 +249,7 @@ Object.keys(responseCodes).forEach(key => {
 		valid_values.push(responseCodes[key].value);
 	}
 });
+
 
 
 var mimeTypes = {

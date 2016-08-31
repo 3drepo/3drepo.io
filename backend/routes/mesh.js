@@ -22,6 +22,9 @@ var config = require('../config');
 var C = require("../constants");
 var responseCodes = require('../response_codes.js');
 var Mesh = require('../models/mesh');
+var Scene = require('../models/scene');
+var Stash3DRepo = require('../models/stash3DRepo');
+var History = require('../models/history');
 var utils = require('../utils');
 var srcEncoder = require('../encoders/src_encoder');
 var stash = require('../models/helper/stash');
@@ -35,16 +38,8 @@ router.get('/:uid.src.:subformat?', middlewares.hasReadAccessToProject, findByUI
 router.get('/revision/:rid/:sid.src.:subformat?', middlewares.hasReadAccessToProject, findByRevision);
 
 router.get('/revision/master/head.x3d.mp', middlewares.hasReadAccessToProject, generateX3DofHead);
+router.get('/revision/:id.x3d.mp', middlewares.hasReadAccessToProject, generateX3D);
 
-// function _getStashOptions(dbCol, format, url){
-
-// 	if(config.disableCache){
-// 		return false;
-// 	} else {
-// 		return { format, filename: `/${dbCol.account}/${dbCol.project}${url}` };
-// 	}
-
-// }
 
 function findByUID(req, res, next){
 	'use strict';
@@ -154,7 +149,6 @@ function findByRevision(req, res, next){
 	// });
 }
 
-
 function getSceneObject(account, project, history){
 	'use strict';
 
@@ -201,6 +195,44 @@ function getSceneObject(account, project, history){
 		return Promise.all(getCoordOffSets).then(() => objs);
 	});
 }
+
+
+function generateX3D(req, res, next){
+	'use strict';
+
+	let place = utils.APIInfo(req);
+	let account = req.params.account;
+	let project = req.params.project;
+	let id = req.params.id;
+
+	let findHistory;
+
+	if(utils.isUUID(id)){
+		findHistory = History.findByUID;
+	} else {
+		findHistory = History.findByTag;
+	}
+
+	findHistory({account, project}, id).then(history => {
+
+		if(!history){
+			return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+		}
+
+		return getSceneObject(account, project, history);
+
+	}).then(objs => {
+
+		let xml = x3dEncoder.render(account, project, repoGraphScene(req[C.REQ_REPO].logger).decode(objs), req[C.REQ_REPO].logger);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, xml);
+
+	}).catch(err => {
+		console.log(err.stack);
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+
 
 function generateX3DofHead(req, res ,next){
 	'use strict';
