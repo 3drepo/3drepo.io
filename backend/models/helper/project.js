@@ -25,10 +25,13 @@ var Mailer = require('../../mailer/mailer');
 var systemLogger = require("../../logger.js").systemLogger;
 var config = require('../../config');
 var History = require('../history');
+var Scene = require('../scene');
+var Ref = require('../ref');
 var utils = require("../../utils");
 var stash = require('./stash');
 var Ref = require('../ref');
 var middlewares = require('../../routes/middlewares');
+var C = require("../../constants");
 
 
 /*******************************************************************************
@@ -590,6 +593,85 @@ function getFullTree(account, project, branch, username){
 	});
 }
 
+function searchTree(account, project, branch, revision, searchString, username){
+	'use strict';
+
+	let getHistory = revision ? History.findByUID({account, project}, revision) : History.findByBranch({account, project}, branch);
+	let items = [];
+	let history;
+
+	let search = () => getHistory.then(_history => {
+
+		history = _history;
+
+		if(!history){
+			return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+		}
+
+		let filter = {
+			_id: {'$in': history.current },
+			name: new RegExp(searchString, 'i')
+		};
+
+		return Scene.find({account, project}, filter, { name: 1 });
+
+	}).then(objs => {
+
+		objs.forEach((obj, i) => {
+			
+			objs[i] = obj.toObject();
+			objs[i].account = account;
+			objs[i].project = project;
+			items.push(objs[i]);
+
+		});
+
+		let filter = {
+			_id: {'$in': history.current },
+			type: 'ref'
+		};
+
+		return Ref.find({account, project}, filter);
+
+	}).then(refs => {
+
+		let promises = [];
+
+		refs.forEach(ref => {
+
+			let revision, branch;
+
+			if(utils.uuidToString(ref._rid) !== C.MASTER_BRANCH){
+				revision = ref._rid;
+			} else {
+				branch = C.MASTER_BRANCH_NAME;
+			}
+
+			promises.push(searchTree(ref.owner, ref.project, branch, revision, searchString, username));
+		});
+
+		return Promise.all(promises);
+
+	}).then(results => {
+
+		results.forEach(objs => {
+			items = items.concat(objs);
+		});
+
+		return Promise.resolve(items);
+
+	});
+
+	return middlewares.hasReadAccessToProjectHelper(username, account, project).then(granted => {
+		if(granted){
+			return search();
+		} else {
+			return Promise.resolve([]);
+		}
+	});
+
+}
+
 function listSubProjects(account, project, branch){
 	'use strict';
 
@@ -628,5 +710,6 @@ module.exports = {
 	removeCollaborator,
 	createFederatedProject,
 	listSubProjects,
-	getFullTree
+	getFullTree,
+	searchTree
 };
