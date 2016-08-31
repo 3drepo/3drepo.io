@@ -38,16 +38,31 @@ div(ng-switch="vm.toShow")
 
 	// Add issue
 	#issuesAddContainer(ng-switch-when="showAdd")
+		// Type
+		#issuesAddType
+			p Type
+			md-radio-group(ng-model="vm.type", layout="row", layout-align="space-between")
+				md-radio-button.md-primary(ng-repeat="issueType in vm.issueTypes", value="{{issueType.value}}")
+					md-icon.angular-material-icons {{issueType.icon}}
+		md-divider#issuesAddTypeDivider
+		// Title
 		md-input-container.md-block(md-no-float="")
 			label Title
 			input#issueAddTitle(ng-model="vm.title")
+		// Comment
 		md-input-container.md-block(md-no-float="")
 			label Comment
 			textarea(ng-model="vm.comment")
+		// Save
 		div(layout="row", layout-align="start center")
 			md-button.md-raised.md-accent(ng-click="vm.saveIssue()", ng-disabled="vm.saveIssueDisabled") Save
 			md-progress-circular(md-diameter="20px", ng-if="vm.savingIssue")
 			md-button.md-primary(ng-click="vm.cancelAddIssue()") Cancel
+		// Scribble extra
+		div(ng-if="vm.type==='scribble'")
+			md-divider
+			md-checkbox(ng-model="vm.toggleErase" aria-label="Toggle erase")
+				md-icon(class="fa fa-eraser")
 
 	// Info
 	.cardInfo(ng-switch-when="showInfo")

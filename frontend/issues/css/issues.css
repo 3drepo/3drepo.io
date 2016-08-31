@@ -66,6 +66,14 @@ issues #addAlert #addAlertBackground #addAlertInfo .md-button {
   background: #EEEEEE;
 }
 
+issues #issuesAddType {
+  margin: 0 5px 20px;
+}
+
+issues #issuesAddTypeDivider {
+  margin-bottom: 40px;
+}
+
 /** Issue *************************************************************************************************************/
 issue {
   display: block;

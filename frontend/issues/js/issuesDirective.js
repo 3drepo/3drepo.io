@@ -79,6 +79,11 @@
 		vm.canAdd = true;
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
 		vm.savingIssue = false;
+		vm.issueTypes = [
+			{value: "scribble", icon: "border_color"},
+			{value: "pin", icon: "pin_drop"},
+			{value: "multi", icon: "apps"}
+		];
 
 		/*
 		 * Get all the Issues
@@ -162,11 +167,11 @@
 		});
 
 		/*
-		 * Handle input to the title field of a new issue
+		 * New issue must have type and non-empty title
 		 */
-		$scope.$watch("vm.title", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				vm.saveIssueDisabled = (newValue.toString() === "");
+		$scope.$watchGroup(["vm.title", "vm.type"], function () {
+			if (angular.isDefined(vm.title) && angular.isDefined(vm.type)) {
+				vm.saveIssueDisabled = (vm.title.toString() === "");
 			}
 		});
 
@@ -764,7 +769,7 @@
 				maxStringLength = 32,
 				lineHeight = 18,
 				footerHeight,
-				addHeight = 260,
+				addHeight = 500,
 				commentHeight = 80,
 				headerHeight = 53,
 				openIssueFooterHeight = 180,
