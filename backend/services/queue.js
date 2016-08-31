@@ -92,14 +92,17 @@ ImportQueue.prototype.importFile = function(filePath, orgFileName, databaseName,
 
     let corID = uuid.v1();
 
-    //console.log(filePath);
-    //console.log(orgFileName);
-    let newPath;
 
+
+    let newPath;
+    let newFileDir;
     let jsonFilename = `${this.sharedSpacePath}/${corID}.json`; 
 
-    return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy).then(newPath => {
+    return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy).then(obj => {
     
+        newPath = obj.filePath;
+        newFileDir = obj.newFileDir;
+
         let json = {
             file: newPath,
             database: databaseName,
@@ -138,8 +141,8 @@ ImportQueue.prototype.importFile = function(filePath, orgFileName, databaseName,
 
 
             this.deferedObjs[corID] = {
-                resolve: () => resolve({corID, newPath}),
-                reject: errCode => reject({corID, errCode, newPath})
+                resolve: () => resolve({corID, newPath, newFileDir, jsonFilename}),
+                reject: errCode => reject({corID, errCode, newPath, newFileDir, jsonFilename})
             };
 
         });
@@ -242,7 +245,7 @@ ImportQueue.prototype._moveFileToSharedSpace = function(corID, orgFilePath, newF
                     if (err) {
                         reject(err);
                     } else {
-                        resolve(filePath);
+                        resolve({filePath, newFileDir});
                     }
                 });
             }

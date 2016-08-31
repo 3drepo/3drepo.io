@@ -333,9 +333,9 @@ function uploadProject(req, res, next){
 				let account = req.params.account;
 				//let username = req.session.user.username;
 
-				//check dup tag and invalid first
+				//check dup tag first
 
-				History.findByTag({account, project}, req.body.tag, {_id: 1}).then(tag => {
+				(req.body.tag ? History.findByTag({account, project}, req.body.tag, {_id: 1}) : Promise.resolve()).then(tag => {
 					
 					if(tag){
 						responseCodes.respond(responsePlace, req, res, next, responseCodes.DUPLICATE_TAG, responseCodes.DUPLICATE_TAG);
@@ -360,7 +360,7 @@ function uploadProject(req, res, next){
 					// api respond once the file is uploaded
 					responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: 'uploaded'});
 
-					let deleteModel = function(filePath){
+					let deleteFiles = function(filePath, fileDir, jsonFile){
 						fs.unlink(filePath, function(err){
 							if(err){
 								systemLogger.logError('error while deleting tmp model file',{
@@ -371,6 +371,34 @@ function uploadProject(req, res, next){
 							} else {
 								systemLogger.logInfo('tmp model deleted',{
 									file: filePath
+								});
+							}
+						});
+
+						fs.unlink(jsonFile, function(err){
+							if(err){
+								systemLogger.logError('error while deleting json file',{
+									message: err.message,
+									err: err,
+									file: jsonFile
+								});
+							} else {
+								systemLogger.logInfo('json file deleted',{
+									file: jsonFile
+								});
+							}
+						});
+
+						fs.rmdir(fileDir, function(err){
+							if(err){
+								systemLogger.logError('error while tmp dir',{
+									message: err.message,
+									err: err,
+									file: fileDir
+								});
+							} else {
+								systemLogger.logInfo('tmp dir deleted',{
+									file: fileDir
 								});
 							}
 						});
@@ -388,12 +416,12 @@ function uploadProject(req, res, next){
 					)
 					.then(obj => {
 
-						deleteModel(obj.newPath);
+						deleteFiles(obj.newPath, obj.newFileDir, obj.jsonFilename);
 						return Promise.resolve(obj);
 
 					}).catch(err => {
 
-						deleteModel(err.newPath);
+						deleteFiles(err.newPath, err.newFileDir, err.jsonFilename);
 
 						//catch here to provide custom error message
 						if(err.errCode && projectSetting){
@@ -422,14 +450,14 @@ function uploadProject(req, res, next){
 
 				}).catch(err => {
 					// import failed for some reason(s)...
-					// console.log(err.stack);
 					//mark project failed
+
 					if(projectSetting){
 						projectSetting.status = 'failed';
 						projectSetting.save();
 					}
 
-					req[C.REQ_REPO].logger.logError(JSON.stringify(err));
+					err.stack ? req[C.REQ_REPO].logger.logError(err.stack) : req[C.REQ_REPO].logger.logError(err);
 
 		
 
