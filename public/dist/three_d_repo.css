@@ -976,6 +976,9 @@ cookies-text {
     background: #FDFDFD;
     color: rgba(0, 0, 0, 0.8);
     padding: 10px 50px;
+    height: calc(100% - 64px);
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 /** Docs **************************************************************************************************************/
 docs .typesList {
@@ -1867,6 +1870,10 @@ privacy-text {
     background: #FDFDFD;
     color: rgba(0, 0, 0, 0.8);
     padding: 10px 50px;
+    height: calc(100% - 64px);
+    overflow-y: auto;
+    overflow-x: hidden;
+
 }
 
 register-verify .databaseError {
@@ -1972,6 +1979,9 @@ terms-text {
     background: #FDFDFD;
     color: rgba(0, 0, 0, 0.8);
     padding: 10px 50px;
+    height: calc(100% - 64px);
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 tree span {
   outline: none;

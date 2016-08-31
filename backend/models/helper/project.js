@@ -24,6 +24,8 @@ var C = require('../../constants');
 var Mailer = require('../../mailer/mailer');
 var systemLogger = require("../../logger.js").systemLogger;
 var config = require('../../config');
+var stash = require('./stash');
+
 
 /*******************************************************************************
  * Converts error code from repobouncerclient to a response error object
@@ -161,7 +163,7 @@ function importToyJSON(db, project){
 				cwd: __dirname
 			}, function (err) {
 				if(err){
-					reject(err);
+					reject({message: err.message.replace(new RegExp(password, 'g'), '[password masked]').replace(new RegExp(username, 'g'), '[username masked]')});
 				} else {
 					resolve();
 				}
@@ -170,7 +172,43 @@ function importToyJSON(db, project){
 		}));
 	});
 
-	return Promise.all(promises);
+	return Promise.all(promises).then(() => {
+		//rename json_mpc stash
+		let jsonBucket = stash.getGridFSBucket({ account: db, project: project }, 'json_mpc');
+		
+		jsonBucket.find().forEach(file => {
+			
+			let newFileName = file.filename;
+			newFileName = newFileName.split('/');
+			newFileName[1] = db;
+			newFileName = newFileName.join('/');
+			jsonBucket.rename(file._id, newFileName, function(err) {
+				err && systemLogger.logError('error while renaming sample project stash', 
+					{ err: err, collections: 'stash.json_mpc.files', db: db, _id: file._id, filename: file.filename }
+				);
+			});
+		});
+
+		//rename src stash
+		let srcBucket = stash.getGridFSBucket({ account: db, project: project }, 'src');
+		
+		srcBucket.find().forEach(file => {
+
+			let newFileName = file.filename;
+			newFileName = newFileName.split('/');
+			newFileName[1] = db;
+			newFileName = newFileName.join('/');
+			srcBucket.rename(file._id, newFileName, function(err) {
+				err && systemLogger.logError('error while renaming sample project stash', 
+					{ err: err, collections: 'stash.src.files', db: db, _id: file._id, filename: file.filename }
+				);
+			});
+
+		});
+
+		return Promise.resolve();
+
+	});
 
 }
 
@@ -200,71 +238,26 @@ function importToyProject(username){
 
 	}).then(() => {
 
-		importToyJSON(account, project).then(() => {
-			//mark project ready
+		return importToyJSON(account, project);
 
-			projectSetting.status = 'ok';
-			projectSetting.errorReason = undefined;
-			projectSetting.markModified('errorReason');
-			
-			return projectSetting.save();
+	}).then(() => {
+		//mark project ready
 
-		}).catch(err => {
-			// import failed for some reason(s)...
-			console.log('import toy project error', err);
-			//mark project failed
-			if(projectSetting){
-				projectSetting.status = 'failed';
-				projectSetting.save();
-			}
+		projectSetting.status = 'ok';
+		projectSetting.errorReason = undefined;
+		projectSetting.markModified('errorReason');
+		
+		return projectSetting.save();
 
+	}).catch(err => {
 
-		});
+		//mark project failed
+		if(projectSetting){
+			projectSetting.status = 'failed';
+			projectSetting.save();
+		}
 
-		//import to queue in background
-		// importQueue.importFile(
-		// 	__dirname + '/../../statics/3dmodels/toy.ifc', 
-		// 	'toy.ifc', 
-		// 	account,
-		// 	project,
-		// 	username,
-		// 	copy
-		// ).then(corID => Promise.resolve(corID)
-		// ).catch(errCode => {
-		// 	//catch here to provide custom error message
-		// 	console.log(errCode);
-
-		// 	if(projectSetting){
-		// 		projectSetting.errorReason = convertToErrorCode(errCode);
-		// 		projectSetting.markModified('errorReason');
-		// 	}
-
-		// 	return Promise.reject(convertToErrorCode(errCode));
-
-		// }).then(() => {
-
-		// 	//mark project ready
-
-		// 	projectSetting.status = 'ok';
-		// 	projectSetting.errorReason = undefined;
-		// 	projectSetting.markModified('errorReason');
-			
-		// 	return projectSetting.save();
-
-		// }).catch(err => {
-		// 	// import failed for some reason(s)...
-		// 	console.log(err.stack);
-		// 	//mark project failed
-		// 	if(projectSetting){
-		// 		projectSetting.status = 'failed';
-		// 		projectSetting.save();
-		// 	}
-
-
-		// });
-
-		//respond once project setting is created
-		return Promise.resolve();
+		return Promise.reject(err);
 
 	});
 }
