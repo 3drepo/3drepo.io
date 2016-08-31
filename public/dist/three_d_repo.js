@@ -13333,41 +13333,6 @@ angular.module('3drepo')
 		 * Init
 		 */
 		vm.version = serverConfig.apiVersion;
-<<<<<<< HEAD
-=======
-		vm.logo = "/public/images/3drepo-logo-white.png";
-		vm.tcAgreed = false;
-		vm.useReCapthca = false;
-		vm.useRegister = false;
-		vm.registering = false;
-
-		/*
-		 * Auth stuff
-		 */
-		if (serverConfig.hasOwnProperty("auth")) {
-			if (serverConfig.auth.hasOwnProperty("register") && (serverConfig.auth.register)) {
-				vm.useRegister = true;
-				if (serverConfig.auth.hasOwnProperty("captcha") && (serverConfig.auth.captcha)) {
-					vm.useReCapthca = true;
-				}
-			}
-		}
-
-		// Logo
-		if (angular.isDefined(serverConfig.backgroundImage))
-		{
-			vm.enterpriseLogo = serverConfig.backgroundImage;
-		}
-
-		/*
-		 * Watch changes to register fields to clear warning message
-		 */
-		$scope.$watch("vm.newUser", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				vm.registerErrorMessage = "";
-			}
-		}, true);
->>>>>>> ISSUE_233
 
 		/**
 		 * Attempt to login
