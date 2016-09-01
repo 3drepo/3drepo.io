@@ -41,7 +41,7 @@ function startQueue(done){
 	});
 }
 
-describe('Intrastructure', function () {
+describe('Infrastructure', function () {
 
 	let User = require('../../models/user');
 	let server;

@@ -124,6 +124,42 @@ describe('Revision', function () {
 		});
 	});
 
+
+	it('get tree by revision tag should success', function(done){
+		agent.get(`/${username}/${project}/revision/original/fulltree.json`)
+		.expect(200, function(err, res){
+			expect(res.body.nodes.name).to.equal('suzanne-flat.obj');
+			done(err);
+		});
+	});
+
+
+	it('get tree by revision id should success', function(done){
+		agent.get(`/${username}/${project}/revision/6c558faa-8236-4255-a48a-a4ce99465182/fulltree.json`)
+		.expect(200, function(err, res){
+			expect(res.body.nodes.name).to.equal('suzanne-flat.obj');
+			done(err);
+		});
+	});
+
+	it('get tree by non existing revision should fail', function(done){
+		agent.get(`/${username}/${project}/revision/000/fulltree.json`)
+		.expect(404, function(err, res){
+			expect(res.body.value).to.equal(responseCodes.TREE_NOT_FOUND.value);
+			done(err);
+		});
+	});
+
+
+
+	it('get tree of head of master should success', function(done){
+		agent.get(`/${username}/${project}/revision/master/head/fulltree.json`)
+		.expect(200, function(err, res){
+			expect(res.body.nodes.name).to.equal('3DrepoBIM.obj');
+			done(err);
+		});
+	});
+
 	it('upload with exisitng tag name should fail', function(done){
 
 		let revWithTag = revisions.find(rev => rev.tag);
