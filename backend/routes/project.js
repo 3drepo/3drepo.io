@@ -541,8 +541,11 @@ function getProjectTree(req, res, next){
 
 	ProjectHelpers.getFullTree(account, project, 'master', username).then(obj => {
 
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj.tree);
+		if(!obj.tree){
+			return Promise.reject(responseCodes.TREE_NOT_FOUND);
+		}
 
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj.tree);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});

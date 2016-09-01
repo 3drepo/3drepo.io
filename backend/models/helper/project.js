@@ -561,6 +561,8 @@ function getFullTree(account, project, branch, username){
 
 		if(buf){
 			tree = JSON.parse(buf);
+		} else if (!status && !buf){
+			status = 'NOT_FOUND';
 		}
 
 		let resetPath = function(node, parentPath){
