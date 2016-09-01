@@ -497,7 +497,7 @@ function createFederatedProject(account, project, subProjects){
 }
 
 
-function getFullTree(account, project, branch, username){
+function getFullTree(account, project, branch, rev, username){
 	'use strict';
 
 	let revId, treeFileName;
@@ -506,8 +506,18 @@ function getFullTree(account, project, branch, username){
 
 	return middlewares.hasReadAccessToProjectHelper(username, account, project).then(granted => {
 
-		if(granted){
+		if(granted && rev && utils.isUUID(rev)){
+
+			return History.findByUID({ account, project }, rev);
+
+		} else if (granted && rev && !utils.isUUID(rev)) {
+
+			return History.findByTag({ account, project }, rev);
+
+		} else if (granted && branch) {
+
 			return History.findByBranch({ account, project }, branch);
+
 		} else {
 			status = 'NO_ACCESS';
 			return Promise.resolve();
@@ -534,15 +544,24 @@ function getFullTree(account, project, branch, username){
 
 		//for all refs get their tree
 		let getTrees = [];
-		
+
 		refs.forEach(ref => {
+
+			let refBranch, refRev;
+
+			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
+			} else {
+				refRev = utils.uuidToString(ref._rid);
+			}
+
 			getTrees.push(
-				getFullTree(ref.owner, ref.project, uuidToString(ref._rid), username).then(obj => {
+				getFullTree(ref.owner, ref.project, refBranch, refRev, username).then(obj => {
 					return Promise.resolve({
 						tree: obj.tree,
 						status: obj.status,
-						_rid: uuidToString(ref._rid),
-						_id: uuidToString(ref._id)
+						_rid: utils.uuidToString(ref._rid),
+						_id: utils.uuidToString(ref._id)
 					});
 				})
 			);
@@ -596,10 +615,19 @@ function getFullTree(account, project, branch, username){
 	});
 }
 
-function searchTree(account, project, branch, revision, searchString, username){
+function searchTree(account, project, branch, rev, searchString, username){
 	'use strict';
 
-	let getHistory = revision ? History.findByUID({account, project}, revision) : History.findByBranch({account, project}, branch);
+	let getHistory;
+
+	if(rev && utils.isUUID(rev)){
+		getHistory = History.findByUID({account, project}, rev);
+	} else if (rev && !utils.isUUID(rev)){
+		getHistory = History.findByTag({account, project}, rev);
+	} else {
+		getHistory = History.findByBranch({account, project}, branch);
+	}
+
 	let items = [];
 	let history;
 
@@ -642,15 +670,15 @@ function searchTree(account, project, branch, revision, searchString, username){
 
 		refs.forEach(ref => {
 
-			let revision, branch;
+			let refRev, refBranch;
 
-			if(utils.uuidToString(ref._rid) !== C.MASTER_BRANCH){
-				revision = ref._rid;
+			if(utils.uuidToString(ref._rid) === C.MASTER_BRANCH){
+				refBranch = C.MASTER_BRANCH_NAME;
 			} else {
-				branch = C.MASTER_BRANCH_NAME;
+				refRev = utils.uuidToString(ref._rid);
 			}
 
-			promises.push(searchTree(ref.owner, ref.project, branch, revision, searchString, username));
+			promises.push(searchTree(ref.owner, ref.project, refBranch, refRev, searchString, username));
 		});
 
 		return Promise.all(promises);

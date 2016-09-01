@@ -57,8 +57,12 @@ router.put('/:project', middlewares.connectQueue, middlewares.hasWriteAccessToPr
 //master tree
 router.get('/:project/revision/master/head/fulltree.json', middlewares.hasReadAccessToProject, getProjectTree);
 
+router.get('/:project/revision/:rev/fulltree.json', middlewares.hasReadAccessToProject, getProjectTree);
+
 //search master tree
 router.get('/:project/revision/master/head/searchtree.json', middlewares.hasReadAccessToProject, searchProjectTree);
+
+router.get('/:project/revision/:rev/searchtree.json', middlewares.hasReadAccessToProject, searchProjectTree);
 
 router.delete('/:project', middlewares.canCreateProject, deleteProject);
 
@@ -538,8 +542,13 @@ function getProjectTree(req, res, next){
 	let project = req.params.project;
 	let account = req.params.account;
 	let username = req.session.user.username;
+	let branch;
 
-	ProjectHelpers.getFullTree(account, project, 'master', username).then(obj => {
+	if(!req.params.rev){
+		branch = C.MASTER_BRANCH_NAME;
+	}
+
+	ProjectHelpers.getFullTree(account, project, branch, req.params.rev, username).then(obj => {
 
 		if(!obj.tree){
 			return Promise.reject(responseCodes.TREE_NOT_FOUND);
@@ -560,7 +569,13 @@ function searchProjectTree(req, res, next){
 	let username = req.session.user.username;
 	let searchString = req.query.searchString;
 
-	ProjectHelpers.searchTree(account, project, 'master', null, searchString, username).then(items => {
+	let branch;
+
+	if(!req.params.rev){
+		branch = C.MASTER_BRANCH_NAME;
+	}
+
+	ProjectHelpers.searchTree(account, project, branch, req.params.rev, searchString, username).then(items => {
 
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, items);
 
