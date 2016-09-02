@@ -119,7 +119,8 @@
 			var self = this,
 				dataToSend,
 				deferred = $q.defer(),
-				viewpointPromise = $q.defer();
+				viewpointPromise = $q.defer(),
+				snapshotPromise = $q.defer();
 
 			var url;
 
@@ -128,44 +129,53 @@
 			} else {
 				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues.json");
 			}
-			
 
+			// Get the viewpoint
 			EventService.send(EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, {promise: viewpointPromise});
-
 			viewpointPromise.promise.then(function (viewpoint) {
-				data = {
-					object_id: issue.objectId,
-					name: issue.name,
-					viewpoint: viewpoint,
-					scale: 1.0,
-					creator_role: issue.creator_role,
-					assigned_roles: userRoles,
-					scribble: issue.scribble
-				};
+				// Get the snapshot
+				EventService.send(EventService.EVENT.VIEWER.GET_SCREENSHOT, {promise: snapshotPromise});
+				snapshotPromise.promise.then(function (snapshot) {
+					console.log(snapshot);
 
-				config = {withCredentials: true};
+					data = {
+						object_id: issue.objectId,
+						name: issue.name,
+						viewpoint: viewpoint,
+						scale: 1.0,
+						creator_role: issue.creator_role,
+						assigned_roles: userRoles,
+						scribble: issue.scribble
+					};
 
-				if (issue.pickedPos !== null) {
-					data.position = issue.pickedPos.toGL();
-					data.norm = issue.pickedNorm.toGL();
-				}
+					config = {withCredentials: true};
 
-				dataToSend = {data: JSON.stringify(data)};
+					if (issue.pickedPos !== null) {
+						data.position = issue.pickedPos.toGL();
+						data.norm = issue.pickedNorm.toGL();
+					}
 
-				$http.post(url, dataToSend, config)
-					.then(function successCallback(response) {
-						console.log(response);
-						response.data.issue._id = response.data.issue_id;
-						response.data.issue.account = issue.account;
-						response.data.issue.project = issue.project;
-						response.data.issue.timeStamp = self.getPrettyTime(response.data.issue.created);
-						response.data.issue.creator_role = issue.creator_role;
-						response.data.issue.scribble = issue.scribble;
+					dataToSend = {data: JSON.stringify(data)};
 
-						response.data.issue.title = generateTitle(response.data.issue);
-						self.removePin();
-						deferred.resolve(response.data.issue);
-					});
+					deferred.resolve(null);
+
+					/*
+					$http.post(url, dataToSend, config)
+						.then(function successCallback(response) {
+							console.log(response);
+							response.data.issue._id = response.data.issue_id;
+							response.data.issue.account = issue.account;
+							response.data.issue.project = issue.project;
+							response.data.issue.timeStamp = self.getPrettyTime(response.data.issue.created);
+							response.data.issue.creator_role = issue.creator_role;
+							response.data.issue.scribble = issue.scribble;
+
+							response.data.issue.title = generateTitle(response.data.issue);
+							self.removePin();
+							deferred.resolve(response.data.issue);
+						});
+					*/
+				});
 			});
 
 			return deferred.promise;

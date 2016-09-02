@@ -4649,6 +4649,8 @@ var VIEWER_EVENTS = Viewer.prototype.EVENT = {
 
 	GET_CURRENT_VIEWPOINT: "VIEWER_GET_CURRENT_VIEWPOINT",
 
+	GET_SCREENSHOT: "VIEWER_GET_SCREENSHOT",
+
 	MEASURE_MODE_CLICK_POINT: "VIEWER_MEASURE_MODE_CLICK_POINT",
 
 	PICK_POINT: "VIEWER_PICK_POINT",
@@ -13089,7 +13091,8 @@ angular.module('3drepo')
 			var self = this,
 				dataToSend,
 				deferred = $q.defer(),
-				viewpointPromise = $q.defer();
+				viewpointPromise = $q.defer(),
+				snapshotPromise = $q.defer();
 
 			var url;
 
@@ -13098,44 +13101,53 @@ angular.module('3drepo')
 			} else {
 				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues.json");
 			}
-			
 
+			// Get the viewpoint
 			EventService.send(EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, {promise: viewpointPromise});
-
 			viewpointPromise.promise.then(function (viewpoint) {
-				data = {
-					object_id: issue.objectId,
-					name: issue.name,
-					viewpoint: viewpoint,
-					scale: 1.0,
-					creator_role: issue.creator_role,
-					assigned_roles: userRoles,
-					scribble: issue.scribble
-				};
+				// Get the snapshot
+				EventService.send(EventService.EVENT.VIEWER.GET_SCREENSHOT, {promise: snapshotPromise});
+				snapshotPromise.promise.then(function (snapshot) {
+					console.log(snapshot);
 
-				config = {withCredentials: true};
+					data = {
+						object_id: issue.objectId,
+						name: issue.name,
+						viewpoint: viewpoint,
+						scale: 1.0,
+						creator_role: issue.creator_role,
+						assigned_roles: userRoles,
+						scribble: issue.scribble
+					};
 
-				if (issue.pickedPos !== null) {
-					data.position = issue.pickedPos.toGL();
-					data.norm = issue.pickedNorm.toGL();
-				}
+					config = {withCredentials: true};
 
-				dataToSend = {data: JSON.stringify(data)};
+					if (issue.pickedPos !== null) {
+						data.position = issue.pickedPos.toGL();
+						data.norm = issue.pickedNorm.toGL();
+					}
 
-				$http.post(url, dataToSend, config)
-					.then(function successCallback(response) {
-						console.log(response);
-						response.data.issue._id = response.data.issue_id;
-						response.data.issue.account = issue.account;
-						response.data.issue.project = issue.project;
-						response.data.issue.timeStamp = self.getPrettyTime(response.data.issue.created);
-						response.data.issue.creator_role = issue.creator_role;
-						response.data.issue.scribble = issue.scribble;
+					dataToSend = {data: JSON.stringify(data)};
 
-						response.data.issue.title = generateTitle(response.data.issue);
-						self.removePin();
-						deferred.resolve(response.data.issue);
-					});
+					deferred.resolve(null);
+
+					/*
+					$http.post(url, dataToSend, config)
+						.then(function successCallback(response) {
+							console.log(response);
+							response.data.issue._id = response.data.issue_id;
+							response.data.issue.account = issue.account;
+							response.data.issue.project = issue.project;
+							response.data.issue.timeStamp = self.getPrettyTime(response.data.issue.created);
+							response.data.issue.creator_role = issue.creator_role;
+							response.data.issue.scribble = issue.scribble;
+
+							response.data.issue.title = generateTitle(response.data.issue);
+							self.removePin();
+							deferred.resolve(response.data.issue);
+						});
+					*/
+				});
 			});
 
 			return deferred.promise;
@@ -16328,7 +16340,11 @@ var Oculus = {};
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT) {
 							if (angular.isDefined(event.value.promise)) {
-								event.value.promise.resolve(v.viewer.getCurrentViewpointInfo());
+								event.value.promise.resolve(v.manager.getCurrentViewer().getCurrentViewpointInfo());
+							}
+						} else if (event.type === EventService.EVENT.VIEWER.GET_SCREENSHOT) {
+							if (angular.isDefined(event.value.promise)) {
+								event.value.promise.resolve(v.manager.getCurrentViewer().runtime.getScreenshot());
 							}
 						} else if (event.type === EventService.EVENT.VIEWER.SET_NAV_MODE) {
 							v.manager.getCurrentViewer().setNavMode(event.value.mode);
