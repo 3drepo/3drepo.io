@@ -162,7 +162,7 @@
 		$scope.$watch("vm.showAdd", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
 				setupAdd();
-				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: "scribble"});
+				//EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: "scribble"});
 			}
 		});
 
@@ -170,6 +170,9 @@
 		 * New issue must have type and non-empty title
 		 */
 		$scope.$watchGroup(["vm.title", "vm.type"], function () {
+			if (angular.isDefined(vm.type)) {
+				setupIssueType(vm.type);
+			}
 			if (angular.isDefined(vm.title) && angular.isDefined(vm.type)) {
 				vm.saveIssueDisabled = (vm.title.toString() === "");
 			}
@@ -186,33 +189,38 @@
 			{
 				if (event.value.hasOwnProperty("id"))
 				{
-					// Remove pin from last position if it exists
-					removeAddPin();
+					if (vm.type === "pin") {
+						// Remove pin from last position if it exists
+						removeAddPin();
 
-					selectedObjectId = event.value.id;
+						selectedObjectId = event.value.id;
 
-					// Convert data to arrays
-					angular.forEach(event.value.position, function(value) {
-						pickedPos = event.value.position;
-						position.push(value);
-					});
-					angular.forEach(event.value.normal, function(value) {
-						pickedNorm = event.value.normal;
-						normal.push(value);
-					});
+						// Convert data to arrays
+						angular.forEach(event.value.position, function(value) {
+							pickedPos = event.value.position;
+							position.push(value);
+						});
+						angular.forEach(event.value.normal, function(value) {
+							pickedNorm = event.value.normal;
+							normal.push(value);
+						});
 
 
-					// Add pin
-					IssuesService.addPin(
-						{
-							id: IssuesService.newPinId,
-							position: position,
-							norm: normal,
-							account: vm.account,
-							project: vm.project
-						},
-						IssuesService.hexToRgb(IssuesService.getRoleColor(vm.projectUserRoles[0]))
-					);
+						// Add pin
+						IssuesService.addPin(
+							{
+								id: IssuesService.newPinId,
+								position: position,
+								norm: normal,
+								account: vm.account,
+								project: vm.project
+							},
+							IssuesService.hexToRgb(IssuesService.getRoleColor(vm.projectUserRoles[0]))
+						);
+					}
+					else if (vm.type === "multi") {
+
+					}
 				} else {
 					removeAddPin();
 				}
@@ -248,7 +256,7 @@
 					}, 200);
 				}
 				else {
-					vm.hideItem = true;
+					//vm.hideItem = true;
 				}
 			}
 		});
@@ -259,6 +267,7 @@
 		function removeAddPin () {
 			IssuesService.removePin(IssuesService.newPinId);
 			selectedObjectId = null;
+			EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
 			pickedPos = null;
 			pickedNorm = null;
 		}
@@ -512,6 +521,11 @@
 					vm.showAdd = false; // So that showing add works
 					vm.canAdd = true;
 					vm.showEdit = false; // So that closing edit works
+
+					// Reset the add type
+					if (angular.isDefined(vm.type)) {
+						delete vm.type;
+					}
 
 					// Set the content height
 					setupIssuesToShow();
@@ -769,7 +783,7 @@
 				maxStringLength = 32,
 				lineHeight = 18,
 				footerHeight,
-				addHeight = 500,
+				addHeight = 510,
 				commentHeight = 80,
 				headerHeight = 53,
 				openIssueFooterHeight = 180,
@@ -834,6 +848,12 @@
 		 * Set up adding an issue
 		 */
 		function setupAdd () {
+			vm.toShow = "showAdd";
+			vm.canAdd = false;
+			vm.onShowItem();
+			setContentHeight();
+
+			/*
 			if (vm.toShow === "showIssue") {
 				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
 			}
@@ -849,6 +869,25 @@
 			$timeout(function () {
 				($element[0].querySelector("#issueAddTitle")).select();
 			});
+			*/
+		}
+
+		function setupIssueType (type) {
+			switch (type) {
+				case "scribble":
+					removeAddPin();
+					EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: "scribble"});
+					break;
+
+				case "pin":
+					EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
+					break;
+
+				case "multi":
+					removeAddPin();
+					EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
+					break;
+			}
 		}
 	}
 }());

@@ -308,13 +308,13 @@
 			if (on) {
 				if (vm.contentData.type === "issues") {
 					showToolbarOptions(["filter", "menu"], false);
-					showToolbarOptions(["pin", "scribble", "erase"], true);
+					//showToolbarOptions(["pin", "scribble", "erase"], true);
 				}
 				EventService.send(EventService.EVENT.PANEL_CARD_ADD_MODE, {on: true, type: vm.contentData.type});
 			}
 			else {
 				if (vm.contentData.type === "issues") {
-					showToolbarOptions(["pin", "scribble", "erase"], false);
+					//showToolbarOptions(["pin", "scribble", "erase"], false);
 					showToolbarOptions(["filter", "menu"], true);
 				}
 				EventService.send(EventService.EVENT.PANEL_CARD_ADD_MODE, {on: false});

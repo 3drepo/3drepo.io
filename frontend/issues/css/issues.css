@@ -2,7 +2,7 @@
 
 issues #issuesAddContainer {
   position: relative;
-  margin: 10px;
+  margin: 15px;
 }
 issues #issuesAddContainer .md-dialog-container {
   top: 0 !important;
@@ -67,11 +67,39 @@ issues #addAlert #addAlertBackground #addAlertInfo .md-button {
 }
 
 issues #issuesAddType {
-  margin: 0 5px 20px;
+  margin-bottom: 20px;
+}
+issues #issuesAddType md-radio-button ._md-off {
+  border-color: rgb(67,160,71);
 }
 
 issues #issuesAddTypeDivider {
   margin-bottom: 40px;
+}
+
+issues #issuesAddSave {
+  margin-bottom: 20px;
+}
+
+issues .issuesAddExtra md-divider {
+  margin-bottom: 20px;
+  border-top-style: dashed;
+}
+issues .issuesAddExtra div p {
+  margin: 0 5px;
+}
+issues .issuesAddExtra div md-icon {
+  margin: 0;
+}
+
+issues .issuesAddExtraErase {
+  margin: 20px 0 0 30px;
+}
+issues md-checkbox.issuesAddExtraErase ._md-icon {
+  border-color: rgb(67,160,71);
+}
+issues .issuesAddExtraErase md-icon {
+  font-size: 24px;
 }
 
 /** Issue *************************************************************************************************************/
