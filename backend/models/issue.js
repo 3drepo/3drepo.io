@@ -29,6 +29,9 @@ var GenericObject = require('./base/repo').GenericObject;
 var uuid = require("node-uuid");
 var responseCodes = require('../response_codes.js');
 var middlewares = require('../routes/middlewares');
+var xmlBuilder = require('xmlbuilder');
+var moment = require('moment');
+var archiver = require('archiver');
 
 var schema = Schema({
 	_id: Object,
@@ -516,6 +519,81 @@ schema.methods.clean = function(typePrefix){
 	}
 
 	return cleaned;
+};
+
+schema.methods.getBCFMarkup = function(){
+	'use strict';
+
+	let markup = {
+		Markup:{
+			'@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+			'@xmlns:xsd': 'http://www.w3.org/2001/XMLSchema',
+			Header:{},
+			Topic: {
+				'@Guid': uuidToString(this._id),
+				'Title': this.name ,
+				'CreationDate': moment(this.created).utc().format() ,
+				'CreationAuthor': this.owner 
+			}
+		}
+	};
+
+	let markupXml = xmlBuilder.create(markup, {version: '1.0', encoding: 'UTF-8'});
+
+	this.comments.forEach(comment => {
+		let commentNode = markupXml.ele('Comment');
+		commentNode.ele('Comment', comment.comment);
+		commentNode.ele('Author', comment.owner);
+		commentNode.ele('Date', moment(comment.created).utc().format());
+	});
+
+	return markupXml.end({ pretty: true });
+};
+
+schema.methods.getBCFViewpoint = function(){
+	'use strict';
+
+	let viewpoint = {
+		VisualizationInfo:{
+			'@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+			'@xmlns:xsd': 'http://www.w3.org/2001/XMLSchema',
+			PerspectiveCamera:{
+				CameraViewPoint:{
+					X: this.viewpoint.position[0],
+					Y: this.viewpoint.position[1],
+					Z: this.viewpoint.position[2]
+				},
+				CameraDirection:{
+					X: this.viewpoint.view_dir[0],
+					Y: this.viewpoint.view_dir[1],
+					Z: this.viewpoint.view_dir[2]
+				},
+				CameraUpVector:{
+					X: this.viewpoint.up[0],
+					Y: this.viewpoint.up[1],
+					Z: this.viewpoint.up[2]
+				},
+				FieldOfView: this.viewpoint.fov
+			}
+		}
+
+	};
+
+	let viewpointXml =  xmlBuilder.create(viewpoint, {version: '1.0', encoding: 'UTF-8'});
+
+	return viewpointXml.end({ pretty: true });
+};
+
+schema.methods.getBCFZipReadStream = function(){
+	'use strict';
+
+	var zip = archiver.create('zip');
+
+	zip.append(new Buffer(this.getBCFMarkup(), 'utf8'), {name: 'markup.bcf'})
+	.append(new Buffer(this.getBCFViewpoint(), 'utf8'), {name: 'viewpoint.bcfv'})
+	.finalize();
+
+	return zip;
 };
 
 

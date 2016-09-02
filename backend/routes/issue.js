@@ -28,6 +28,7 @@ var uuidToString = utils.uuidToString;
 
 
 router.get('/issues/:uid.json', middlewares.hasReadAccessToProject, findIssueById);
+router.get('/issues/:uid.zip', middlewares.hasReadAccessToProject, getIssueBCF);
 
 router.get('/issues.json', middlewares.hasReadAccessToProject, listIssues);
 router.get('/revision/:rid/issues.json', middlewares.hasReadAccessToProject, listIssues);
@@ -192,6 +193,32 @@ function findIssueById(req, res, next) {
 	});
 
 }
+
+function getIssueBCF(req, res, next) {
+	'use strict';
+
+	let params = req.params;
+	let place = utils.APIInfo(req);
+	let dbCol =  {account: req.params.account, project: req.params.project};
+
+	Issue.findByUID(dbCol, params.uid, false, true).then(issue => {
+
+		let headers = {
+			'Content-Disposition': 'attachment;filename=' + params.uid + '.zip',
+			'Content-Type': 'application/zip'
+		};
+
+		let zipRS = issue.getBCFZipReadStream();
+
+		res.writeHead(200, headers);
+		zipRS.pipe(res);
+
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+
+}
+
 
 function renderIssuesHTML(req, res, next){
 	'use strict';
