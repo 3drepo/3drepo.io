@@ -73,7 +73,8 @@ var schema = Schema({
 	assigned_roles: [Schema.Types.Mixed],
 	closed_time: Number,
 	creator_role: String,
-	scribble: Object
+	scribble: Object,
+	screenshot: Object,
 });
 
 
@@ -243,7 +244,7 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 
 
 	return addRevFilter.then(() => {
-		return this._find(dbColOptions, filter);
+		return this._find(dbColOptions, filter, {screenshot: 0});
 	}).then(_issues => {
 		issues = _issues;
 		return self.getFederatedProjectList(
@@ -378,6 +379,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 		issue.created = (new Date()).getTime();
 		issue.owner = data.owner;
 		issue.scribble = data.scribble && new Buffer(data.scribble, 'base64');
+		issue.screenshot = data.screenshot && new Buffer(data.screenshot, 'base64');
 		issue.viewpoint = data.viewpoint;
 		issue.scale = data.scale;
 		issue.position = data.position;
@@ -388,6 +390,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 		return issue.save().then(() => {
 			return ProjectSetting.findById(dbColOptions, dbColOptions.project);
 		}).then(settings => {
+			issue.screenshot = 'saved';
 			return Promise.resolve(issue.clean(settings.type));
 		});
 
