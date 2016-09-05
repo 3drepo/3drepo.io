@@ -2039,7 +2039,7 @@ revisions {
 
 /** Revisions Dialog *************************************************************************************************/
 .revisionsDialog {
-  width: 60%;
+  width: 40%;
 }
 
 .revisionsDialog .revision-name-and-author {
