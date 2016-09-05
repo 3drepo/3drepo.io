@@ -521,6 +521,11 @@ schema.methods.clean = function(typePrefix){
 		cleaned.scribble = cleaned.scribble.toString('base64');
 	}
 
+
+	if(cleaned.screenshot){
+		cleaned.screenshot = cleaned.screenshot.toString('base64');
+	}
+
 	return cleaned;
 };
 
@@ -594,6 +599,7 @@ schema.methods.getBCFZipReadStream = function(){
 
 	zip.append(new Buffer(this.getBCFMarkup(), 'utf8'), {name: 'markup.bcf'})
 	.append(new Buffer(this.getBCFViewpoint(), 'utf8'), {name: 'viewpoint.bcfv'})
+	.append(this.screenshot.buffer, {name: 'snapshot.png'})
 	.finalize();
 
 	return zip;
