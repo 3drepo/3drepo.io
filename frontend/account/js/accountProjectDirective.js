@@ -102,6 +102,7 @@
 		vm.doProjectOption = function (event, option) {
 			switch (option) {
 				case "upload":
+					vm.uploadErrorMessage = null;
 					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true);
 					//vm.uploadFile();
 					break;
@@ -137,9 +138,6 @@
 			UtilsService.closeDialog();
 		};
 
-		vm.file;
-
-
 		/**
 		 * When users click select file
 		 */
@@ -159,8 +157,27 @@
 		 */
 		vm.uploadFile = function () {
 			//vm.onUploadFile({project: vm.project});
-			vm.uploadedFile = {project: vm.project, file: vm.file.files[0], tag: vm.tag, desc: vm.desc};
-			vm.closeDialog();
+			
+			vm.uploadErrorMessage = null;
+
+			if(!vm.tag.match(/^[a-zA-Z0-9_-]{3,20}$/)){
+				vm.uploadErrorMessage = 'Invalid revision name';
+			} else {
+				getRevision().then(function(revisions){
+
+					revisions.forEach(function(rev){
+						if(rev.tag === vm.tag){
+							vm.uploadErrorMessage = 'Revision name already exists';
+						}
+					});
+
+					if(!vm.uploadErrorMessage){
+						vm.uploadedFile = {project: vm.project, file: vm.file.files[0], tag: vm.tag, desc: vm.desc};
+						vm.closeDialog();
+					}
+				});
+			}
+
 
 		};
 
@@ -304,9 +321,12 @@
 
 		function getRevision(){
 			if(!vm.revisions){
-				RevisionsService.listAll(vm.account.name, vm.project.name).then(function(revisions){
+				return RevisionsService.listAll(vm.account.name, vm.project.name).then(function(revisions){
 					vm.revisions = revisions;
+					return Promise.resolve(revisions);
 				});
+			} else {
+				return Promise.resolve(vm.revisions);
 			}
 		}
 
