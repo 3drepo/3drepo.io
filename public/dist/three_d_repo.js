@@ -5862,7 +5862,6 @@ var ViewerManager = {};
 			// Check the quota
 			promise = UtilsService.doGet(vm.account.name + ".json");
 			promise.then(function (response) {
-				console.log(response);
 				if (file.size > response.data.accounts[0].quota.spaceLimit) {
 					// Show the over quota dialog
 					UtilsService.showDialog("overQuotaDialog.html", $scope, null, true);
@@ -5884,6 +5883,7 @@ var ViewerManager = {};
 						});
 					}
 					else {
+						vm.uploadFileName = file.name;
 						formData = new FormData();
 						formData.append("file", file);
 						promise = UtilsService.doPost(formData, vm.account.name + "/" + vm.project.name + "/upload", {'Content-Type': undefined});
