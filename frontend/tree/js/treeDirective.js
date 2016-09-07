@@ -136,7 +136,6 @@
 			if (!vm.nodesToShow[0].hasOwnProperty("toggleState")) {
 				vm.nodesToShow[0].toggleState = "visible";
 			}
-			console.log(vm.nodesToShow[0]);
 		}
 
 		/**
@@ -203,7 +202,6 @@
 			// Found
 			if (index !== -1) {
 				if (vm.nodesToShow[index].hasChildren) {
-					console.log(vm.nodesToShow[index]);
 					if (vm.nodesToShow[index].expanded) {
 						// Collapse
 						while (!endOfSplice) {
@@ -591,7 +589,6 @@
 		 */
 		vm.selectNode = function (node) {
 			// Remove highlight from the current selection and highlight this node if not the same
-			console.log(currentSelectedNode);
 			if (currentSelectedNode !== null) {
 				currentSelectedNode.selected = false;
 				if (currentSelectedNode._id === node._id) {
@@ -724,7 +721,6 @@
 			else {
 				delete clickedShown[node._id];
 			}
-			console.log(clickedShown);
 		}
 
 		/**
