@@ -19,7 +19,7 @@
 var nodemailer = require('nodemailer');
 var config = require('../config');
 var responseCodes = require('../response_codes');
-
+var getBaseURL = config.getBaseURL;
 var transporter;
 
 function sendEmail(template, to, data, attachments){
@@ -62,19 +62,6 @@ function rejectNoUrl(name){
 	return Promise.reject({ message: `config.mails.urls[${name}] is not defined`})
 }
 
-function getBaseURL(){
-	'use strict';
-
-	let apiServerConfig = config.servers.find(server => server.service === 'api');
-	let port = '';
-	if(config.using_ssl && apiServerConfig.public_port !== 443 || !config.using_ssl && apiServerConfig.public_port !== 80){
-		port = ':' + apiServerConfig.public_port;
-	}
-
-	let baseUrl = (config.using_ssl ? 'https://' : 'http://') + config.host + port;
-
-	return baseUrl;
-}
 
 function getURL(urlName, params){
 	'use strict';
