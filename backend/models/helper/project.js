@@ -504,32 +504,38 @@ function getFullTree(account, project, branch, username){
 	let revId, treeFileName;
 	let subTrees;
 	let status;
+	let history;
 
-	return middlewares.hasReadAccessToProjectHelper(username, account, project).then(granted => {
+	return History.findByBranch({ account, project }, branch).then(_history => {
 
-		if(granted){
-			return History.findByBranch({ account, project }, branch);
-		} else {
-			status = 'NO_ACCESS';
-			return Promise.resolve();
-		}
+		history = _history;
+		return middlewares.hasReadAccessToProjectHelper(username, account, project);
 
-	}).then(history => {
+	}).then(granted => {
 
 		if(!history){
-			!status && (status = 'NOT_FOUND');
+
+			status = 'NOT_FOUND';
 			return Promise.resolve([]);
+
+		} else if (!granted) {
+
+			status = 'NO_ACCESS';
+			return Promise.resolve([]);
+		
+		} else {
+
+			revId = utils.uuidToString(history._id);
+			treeFileName = `/${account}/${project}/revision/${revId}/fulltree.json`;
+
+			let filter = {
+				type: "ref",
+				_id: { $in: history.current }
+			};
+
+			return Ref.find({ account, project }, filter);
+
 		}
-
-		revId = utils.uuidToString(history._id);
-		treeFileName = `/${account}/${project}/revision/${revId}/fulltree.json`;
-
-		let filter = {
-			type: "ref",
-			_id: { $in: history.current }
-		};
-
-		return Ref.find({ account, project }, filter);
 
 	}).then(refs => {
 
