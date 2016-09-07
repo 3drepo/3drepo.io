@@ -136,6 +136,7 @@
 			if (!vm.nodesToShow[0].hasOwnProperty("toggleState")) {
 				vm.nodesToShow[0].toggleState = "visible";
 			}
+			console.log(vm.nodesToShow[0]);
 		}
 
 		/**
@@ -185,6 +186,7 @@
 		 */
 		vm.expand = function (_id) {
 			var i, length,
+				j, jLength,
 				numChildren = 0,
 				index = -1,
 				endOfSplice = false,
@@ -201,6 +203,7 @@
 			// Found
 			if (index !== -1) {
 				if (vm.nodesToShow[index].hasChildren) {
+					console.log(vm.nodesToShow[index]);
 					if (vm.nodesToShow[index].expanded) {
 						// Collapse
 						while (!endOfSplice) {
@@ -249,13 +252,16 @@
 								}
 							}
 
-							// Determine if child node has children
+							// A child node only "hasChildren", i.e. expandable, if any of it's children have a name
 							vm.nodesToShow[index].children[i].level = vm.nodesToShow[index].level + 1;
-							if("children" in vm.nodesToShow[index].children[i]) {
-								vm.nodesToShow[index].children[i].hasChildren = vm.nodesToShow[index].children[i].children.length > 0;
-							}
-							else {
-								vm.nodesToShow[index].children[i].hasChildren = false;
+							vm.nodesToShow[index].children[i].hasChildren = false;
+							if (("children" in vm.nodesToShow[index].children[i]) && (vm.nodesToShow[index].children[i].children.length > 0)) {
+								for (j = 0, jLength = vm.nodesToShow[index].children[i].children.length; j < jLength; j++) {
+									if (vm.nodesToShow[index].children[i].children[j].hasOwnProperty("name")) {
+										vm.nodesToShow[index].children[i].hasChildren = true;
+										break;
+									}
+								}
 							}
 
 							vm.nodesToShow.splice(index + i + 1, 0, vm.nodesToShow[index].children[i]);

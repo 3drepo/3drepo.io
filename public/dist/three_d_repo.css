@@ -2035,6 +2035,23 @@ terms-text {
     color: rgba(0, 0, 0, 0.8);
     padding: 10px 50px;
 }
+tree .virtualRepeatInfiniteScroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+}
+
+tree .virtualRepeatInfiniteScroll .vertical-container {
+  height: 100%;
+  width: 100%;
+}
+
+tree .virtualRepeatInfiniteScroll .repeated-item {
+  cursor: default;
+  padding: 0 0;
+  min-height: 1px;
+}
+
 tree span {
   outline: none;
   margin: 0;
@@ -2105,30 +2122,16 @@ tree .parentOfInvisible {
 }
 
 /** Tree filter list **************************************************************************************************/
-
-tree .virtualRepeatInfiniteScroll {
-  overflow-y: auto;
-  overflow-x: hidden;
-  height: 100%;
+tree .filterNode {
+  height: 41px;
 }
 
-tree .virtualRepeatInfiniteScroll .vertical-container {
+tree .filterNode div {
   height: 100%;
-  width: 100%;
-}
-
-tree .virtualRepeatInfiniteScroll .repeated-item {
-  cursor: default;
-  padding: 0 0;
-  min-height: 1px;
 }
 
 tree .filterListNodeName {
   margin-left: 15px !important;
-}
-
-.viewerSelected {
-  color: #F00;
 }
 
 /** TDR Progress ******************************************************************************************************/
