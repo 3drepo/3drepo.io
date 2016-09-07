@@ -61,6 +61,7 @@ var schema = Schema({
 	number: Number,
 	owner: String,
 	closed: Boolean,
+	priority: String,
 	comments: [{
 		owner: String,
 		comment: {type: String, required: true},
@@ -80,7 +81,7 @@ var schema = Schema({
 
 // Model statics method
 //internal helper _find
-schema.statics._find = function(dbColOptions, filter, projection){
+schema.statics._find = function(dbColOptions, filter, projection, noClean){
 	'use strict';
 	//get project type
 	let settings;
@@ -93,7 +94,7 @@ schema.statics._find = function(dbColOptions, filter, projection){
 
 		issues = _issues;
 		issues.forEach((issue, index) => {
-			issues[index] = issue.clean(settings.type);
+			issues[index] = noClean ? issue: issue.clean(settings.type);
 		});
 
 		return Promise.resolve(issues);
@@ -176,7 +177,7 @@ schema.statics.getFederatedProjectList = function(dbColOptions, username, branch
 };
 
 
-schema.statics.findByProjectName = function(dbColOptions, username, branch, revId){
+schema.statics.findByProjectName = function(dbColOptions, username, branch, revId, projection, noClean){
 
 	'use strict';
 	let issues;
@@ -244,7 +245,7 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 
 
 	return addRevFilter.then(() => {
-		return this._find(dbColOptions, filter, {screenshot: 0});
+		return this._find(dbColOptions, filter, projection || {screenshot: 0}, noClean);
 	}).then(_issues => {
 		issues = _issues;
 		return self.getFederatedProjectList(
@@ -268,7 +269,7 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 				promises.push(
 					middlewares.hasReadAccessToProjectHelper(username, childDbName, childProject).then(granted => {
 						if(granted){
-							return self._find({account: childDbName, project: childProject});
+							return self._find({account: childDbName, project: childProject}, null, projection || {screenshot: 0}, noClean);
 						} else {
 							return Promise.resolve([]);
 						}
@@ -287,6 +288,36 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 	});
 
 };
+
+schema.statics.getBCFZipReadStream = function(account, project, username, branch, revId){
+	'use strict';
+
+	var zip = archiver.create('zip');
+
+	zip.append(new Buffer(this.getProjectBCF(project), 'utf8'), {name: 'project.bcf'})
+	.append(new Buffer(this.getBCFVersion(), 'utf8'), {name: 'bcf.version'})
+
+	let projection = {};
+	let noClean = true;
+
+	return this.findByProjectName({account, project}, username, branch, revId, projection, noClean).then(issues => {
+
+		issues.forEach(issue => {
+
+			zip.append(new Buffer(issue.getBCFMarkup(), 'utf8'), {name: `${uuidToString(issue._id)}/markup.bcf`})
+			.append(new Buffer(issue.getBCFViewpoint(), 'utf8'), {name: `${uuidToString(issue._id)}/viewpoint.bcfv`})
+
+			if(issue.screenshot){
+				zip.append(issue.screenshot.buffer, {name: `${uuidToString(issue._id)}/snapshot.png`});
+			}
+		});
+
+		zip.finalize();
+
+		return Promise.resolve(zip);
+	});
+
+}
 
 schema.statics.findBySharedId = function(dbColOptions, sid, number) {
 	'use strict';
@@ -385,7 +416,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 		issue.position = data.position;
 		issue.norm = data.norm;
 		issue.creator_role = data.creator_role;
-		issue.assigned_roles = data.assigned_roles;		
+		issue.assigned_roles = data.assigned_roles;
 
 		return issue.save().then(() => {
 			return ProjectSetting.findById(dbColOptions, dbColOptions.project);
@@ -539,6 +570,8 @@ schema.methods.getBCFMarkup = function(){
 			Header:{},
 			Topic: {
 				'@Guid': uuidToString(this._id),
+				'@TopicStatus': this.closed ? 'Closed' : 'Open',
+				'Priority': this.priority,
 				'Title': this.name ,
 				'CreationDate': moment(this.created).utc().format() ,
 				'CreationAuthor': this.owner 
@@ -548,15 +581,60 @@ schema.methods.getBCFMarkup = function(){
 
 	let markupXml = xmlBuilder.create(markup, {version: '1.0', encoding: 'UTF-8'});
 
+	let viewPointGuid = uuidToString(utils.generateUUID());
+	
+	if(this.comments.length > 0){
+		let vpNode = markupXml.ele('Viewpoints', { 'Guid': viewPointGuid });
+		vpNode.ele('Viewpoint', 'viewpoint.bcfv');
+		if(this.screenshot){
+			vpNode.ele('Snapshot', 'snapshot.png');
+		}
+	}
+
 	this.comments.forEach(comment => {
-		let commentNode = markupXml.ele('Comment');
+		let commentNode = markupXml.ele('Comment', { 'Guid': uuidToString(utils.generateUUID()) });
 		commentNode.ele('Comment', comment.comment);
 		commentNode.ele('Author', comment.owner);
 		commentNode.ele('Date', moment(comment.created).utc().format());
+		commentNode.ele('Viewpoint', { 'Guid': viewPointGuid });
 	});
+
+
 
 	return markupXml.end({ pretty: true });
 };
+
+schema.statics.getBCFVersion = function(){
+	'use strict';
+
+	return `
+		<?xml version="1.0" encoding="UTF-8"?>
+		<Version VersionId="2.0" xsi:noNamespaceSchemaLocation="version.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+			<DetailedVersion>2.0 RC</DetailedVersion>
+		</Version>
+	`;
+
+}
+
+schema.statics.getProjectBCF = function(projectId){
+	'use strict';
+
+	let project = {
+		ProjectExtension:{
+			'@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+			'@xmlns:xsd': 'http://www.w3.org/2001/XMLSchema',
+			Project: {
+				'@ProjectId': projectId,
+				'Name': projectId,
+			},
+			'ExtensionSchema': {
+
+			}
+		}
+	};
+
+	return xmlBuilder.create(project, {version: '1.0', encoding: 'UTF-8'}).end({ pretty: true });
+}
 
 schema.methods.getBCFViewpoint = function(){
 	'use strict';
@@ -590,19 +668,6 @@ schema.methods.getBCFViewpoint = function(){
 	let viewpointXml =  xmlBuilder.create(viewpoint, {version: '1.0', encoding: 'UTF-8'});
 
 	return viewpointXml.end({ pretty: true });
-};
-
-schema.methods.getBCFZipReadStream = function(){
-	'use strict';
-
-	var zip = archiver.create('zip');
-
-	zip.append(new Buffer(this.getBCFMarkup(), 'utf8'), {name: 'markup.bcf'})
-	.append(new Buffer(this.getBCFViewpoint(), 'utf8'), {name: 'viewpoint.bcfv'})
-	.append(this.screenshot.buffer, {name: 'snapshot.png'})
-	.finalize();
-
-	return zip;
 };
 
 

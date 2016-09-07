@@ -28,10 +28,14 @@ var uuidToString = utils.uuidToString;
 
 
 router.get('/issues/:uid.json', middlewares.hasReadAccessToProject, findIssueById);
-router.get('/issues/:uid.zip', middlewares.hasReadAccessToProject, getIssueBCF);
+
 
 router.get('/issues.json', middlewares.hasReadAccessToProject, listIssues);
+router.get('/issues.bcfzip', middlewares.hasReadAccessToProject, getIssuesBCF);
+
 router.get('/revision/:rid/issues.json', middlewares.hasReadAccessToProject, listIssues);
+router.get('/revision/:rid/issues.bcfzip', middlewares.hasReadAccessToProject, getIssuesBCF);
+
 //router.get('/issues/:sid.json', middlewares.hasReadAccessToProject, listIssuesBySID);
 router.get("/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
 router.get("/revision/:rid/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
@@ -164,6 +168,37 @@ function listIssues(req, res, next) {
 
 }
 
+function getIssuesBCF(req, res, next) {
+	'use strict';
+
+	let params = req.params;
+	let place = utils.APIInfo(req);
+	let account = req.params.account;
+	let project = req.params.project;
+	
+	let getBCFZipRS;
+
+	if (req.params.rid) {
+		getBCFZipRS = Issue.getBCFZipReadStream(account, project, req.session.user.username, null, req.params.rid);
+	} else {
+		getBCFZipRS = Issue.getBCFZipReadStream(account, project, req.session.user.username, "master", null);
+	}
+
+	getBCFZipRS.then(zipRS => {
+
+		let headers = {
+			'Content-Disposition': 'attachment;filename=issues.bcfzip',
+			'Content-Type': 'application/zip'
+		};
+
+		res.writeHead(200, headers);
+		zipRS.pipe(res);
+
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+
+}
 // function listIssuesBySID(req, res, next) {
 // 	'use strict';
 
@@ -193,32 +228,6 @@ function findIssueById(req, res, next) {
 	});
 
 }
-
-function getIssueBCF(req, res, next) {
-	'use strict';
-
-	let params = req.params;
-	let place = utils.APIInfo(req);
-	let dbCol =  {account: req.params.account, project: req.params.project};
-
-	Issue.findByUID(dbCol, params.uid, false, true).then(issue => {
-
-		let headers = {
-			'Content-Disposition': 'attachment;filename=' + params.uid + '.zip',
-			'Content-Type': 'application/zip'
-		};
-
-		let zipRS = issue.getBCFZipReadStream();
-
-		res.writeHead(200, headers);
-		zipRS.pipe(res);
-
-	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
-
-}
-
 
 function renderIssuesHTML(req, res, next){
 	'use strict';
