@@ -295,7 +295,7 @@ schema.statics.getBCFZipReadStream = function(account, project, username, branch
 	var zip = archiver.create('zip');
 
 	zip.append(new Buffer(this.getProjectBCF(project), 'utf8'), {name: 'project.bcf'})
-	.append(new Buffer(this.getBCFVersion(), 'utf8'), {name: 'bcf.version'})
+	.append(new Buffer(this.getBCFVersion(), 'utf8'), {name: 'bcf.version'});
 
 	let projection = {};
 	let noClean = true;
@@ -305,7 +305,7 @@ schema.statics.getBCFZipReadStream = function(account, project, username, branch
 		issues.forEach(issue => {
 
 			zip.append(new Buffer(issue.getBCFMarkup(), 'utf8'), {name: `${uuidToString(issue._id)}/markup.bcf`})
-			.append(new Buffer(issue.getBCFViewpoint(), 'utf8'), {name: `${uuidToString(issue._id)}/viewpoint.bcfv`})
+			.append(new Buffer(issue.getBCFViewpoint(), 'utf8'), {name: `${uuidToString(issue._id)}/viewpoint.bcfv`});
 
 			if(issue.screenshot){
 				zip.append(issue.screenshot.buffer, {name: `${uuidToString(issue._id)}/snapshot.png`});
@@ -317,7 +317,7 @@ schema.statics.getBCFZipReadStream = function(account, project, username, branch
 		return Promise.resolve(zip);
 	});
 
-}
+};
 
 schema.statics.findBySharedId = function(dbColOptions, sid, number) {
 	'use strict';
@@ -614,7 +614,7 @@ schema.statics.getBCFVersion = function(){
 		</Version>
 	`;
 
-}
+};
 
 schema.statics.getProjectBCF = function(projectId){
 	'use strict';
@@ -634,7 +634,7 @@ schema.statics.getProjectBCF = function(projectId){
 	};
 
 	return xmlBuilder.create(project, {version: '1.0', encoding: 'UTF-8'}).end({ pretty: true });
-}
+};
 
 schema.methods.getBCFViewpoint = function(){
 	'use strict';

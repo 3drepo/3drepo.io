@@ -170,8 +170,7 @@ function listIssues(req, res, next) {
 
 function getIssuesBCF(req, res, next) {
 	'use strict';
-
-	let params = req.params;
+	
 	let place = utils.APIInfo(req);
 	let account = req.params.account;
 	let project = req.params.project;
