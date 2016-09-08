@@ -33,7 +33,6 @@ account-dir #account #accountItem {
 }
 
 account-dir .userContent .cardInfo {
-  margin: 0 0 10px;
   text-align: left;
 }
 
@@ -136,6 +135,10 @@ account-projects .projectUploadIcon {
 account-projects .projectRight .projectUploaded {
   margin-top: -10px !important;
   color: rgba(0,0,0,0.5);
+}
+
+account-projects .userContent {
+  padding: 0 !important;
 }
 
 /** Account Profile ***************************************************************************************************/
@@ -256,21 +259,21 @@ account-menu md-icon {
   color: #F44336;
 }
 
-/** Delete Project Dialog *********************************************************************************************/
-.deleteProjectDialog p {
+/** Delete Dialog *********************************************************************************************/
+.deleteDialog p {
   color: rgba(0 ,0, 0, 0.6);
   margin: 0;
 }
-.deleteProjectDialog #deleteProjectName {
+.deleteDialog #deleteName {
   color: rgba(0 ,0, 0, 0.9);
 }
 
-.deleteProjectDialog #deleteProjectWarning {
+.deleteDialog #deleteWarning {
   color: #F44336;
   margin: 0;
 }
 
-.deleteProjectDialog #deleteProjectError {
+.deleteDialog #deleteError {
   margin: 0;
   color: #F44336;
 }
@@ -377,6 +380,10 @@ account-licenses #accountLicensesBillingPage {
 }
 
 /** Account Team ******************************************************************************************************/
+account-team {
+  width: 500px;
+}
+
 account-team .collaboratorIcon {
   margin: 0 10px !important;
 }
@@ -428,6 +435,118 @@ account-team #accountTeamSubHeader {
 #overQuotaDialog #overQuotaInfo {
   margin: 20px 20px 0;;
 }
+
+
+/** Account Project Setting ******************************************************************************************/
+account-projectsetting .collaboratorIcon {
+  margin: 0 10px !important;
+}
+
+account-projectsetting #project {
+  margin: -10px 0 10px;
+}
+account-projectsetting #project md-icon {
+  margin: 0 !important;
+}
+
+account-projectsetting #accountTeamAdd {
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+account-projectsetting #accountTeamMemberRoleGroup {
+  margin: 20px 0 0 10px;
+}
+
+account-projectsetting #accountTeamMemberRole {
+  margin-left: 10px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+account-projectsetting #accountTeamSubHeader {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+/** Federation Dialog *************************************************************************************************/
+#federationDialog #federationDivider {
+  width: 1px;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+#federationDialog #federationSave {
+  margin-top: 10px;
+}
+
+#federationDialog md-list {
+  padding: 0;
+}
+
+#federationDialog md-list-item {
+  height: 35px;
+  min-height: 35px;
+}
+#federationDialog md-list-item p {
+  margin-left: -20px;
+}
+
+#federationDialog .federationProject {
+  padding-left: 20px;
+}
+
+#federationDialog #federationWarning {
+  margin: 5px 0 0 20px;
+  color: #F44336;
+}
+
+
+#federationDialog #federatedProjectAccount {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/** Account Federations ***********************************************************************************************/
+account-federations .userContent {
+  padding: 0 !important;
+}
+
+account-federations md-list {
+  padding: 0;
+}
+account-federations .md-list-item-text {
+  color: rgb(67, 160, 71);
+}
+
+account-federations .federationProjectsList {
+  margin: -20px 0 10px 100px;
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 14px;
+}
+
+account-federations .federationTimestamp {
+  color: rgba(0,0,0,.3);
+}
+
+account-federations #accountFederationInfo {
+  padding: 20px 20px 0 20px;
+}
+
+account-federations .account {
+  outline: none;
+  padding-left: 10px;
+}
+account-federations .account:hover {
+  cursor: pointer;
+  background: #EEE;
+}
+
+account-federations .federation {
+  padding-left: 30px;
+}
+
+account-federations #federationInfoRight p:only-child {
+  margin-right: 20px;
+}
+
 /* Done to counter bootstrap styling. This should really be set in a top level style file */
 .md-datepicker-input-mask {
   width: 308px;
@@ -976,6 +1095,9 @@ cookies-text {
     background: #FDFDFD;
     color: rgba(0, 0, 0, 0.8);
     padding: 10px 50px;
+    height: calc(100% - 64px);
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 /** Docs **************************************************************************************************************/
 docs .typesList {
@@ -1290,7 +1412,21 @@ md-dialog md-toolbar {
     min-height: 40px;
 }
 
+/** Legal *************************************************************************************************************/
+#legal {
+    position: absolute;
+    z-index: 3;
+    background: #FDFDFD;
+    color: rgba(0, 0, 0, 0.8);
+}
 
+#legal .md-toolbar-tools img {
+    width: 150px;
+}
+
+#legal #legalText {
+    padding: 10px 50px;
+}
 /** Issues ************************************************************************************************************/
 
 issues #issuesAddContainer {
@@ -1357,42 +1493,6 @@ issues #addAlert #addAlertBackground #addAlertInfo {
 }
 issues #addAlert #addAlertBackground #addAlertInfo .md-button {
   background: #EEEEEE;
-}
-
-issues #issuesAddType {
-  margin-bottom: 20px;
-}
-issues #issuesAddType md-radio-button ._md-off {
-  border-color: rgb(67,160,71);
-}
-
-issues #issuesAddTypeDivider {
-  margin-bottom: 40px;
-}
-
-issues #issuesAddSave {
-  margin-bottom: 20px;
-}
-
-issues .issuesAddExtra md-divider {
-  margin-bottom: 20px;
-  border-top-style: dashed;
-}
-issues .issuesAddExtra div p {
-  margin: 0 5px;
-}
-issues .issuesAddExtra div md-icon {
-  margin: 0;
-}
-
-issues .issuesAddExtraErase {
-  margin: 20px 0 0 30px;
-}
-issues md-checkbox.issuesAddExtraErase ._md-icon {
-  border-color: rgb(67,160,71);
-}
-issues .issuesAddExtraErase md-icon {
-  font-size: 24px;
 }
 
 /** Issue *************************************************************************************************************/
@@ -1898,6 +1998,10 @@ privacy-text {
     background: #FDFDFD;
     color: rgba(0, 0, 0, 0.8);
     padding: 10px 50px;
+    height: calc(100% - 64px);
+    overflow-y: auto;
+    overflow-x: hidden;
+
 }
 
 register-verify .databaseError {
@@ -1908,6 +2012,86 @@ register-verify .databaseError {
 
 register-verify md-input-container {
     margin: 5px 0 -15px;
+}
+
+/** Revisions dropdown in 3dviewer ***********************************************************************************/
+revisions {
+    z-index: 2;
+    position: absolute;
+    color: white;
+    text-shadow: 1px 1px#666666;
+    font-size: 14px;
+    width: 250px;
+    top: 90px;
+    left: 50%;
+    font-weight: bold;
+    margin-left: -125px;
+    text-align: center;
+}
+
+.revisions-dropdown .angular-material-icons{
+  color: white;
+}
+
+.revisions-dropdown{
+  cursor:pointer;
+}
+
+/** Revisions Dialog *************************************************************************************************/
+.revisionsDialog {
+  width: 60%;
+}
+
+.revisionsDialog .revision-name-and-author {
+  display: inline-block;
+  width:60%;
+  align-self: flex-start;
+}
+
+.revisionsDialog .revision {
+  font-size:19px;
+  line-height: normal;
+}
+
+.revisionsDialog .desc {
+  line-height: normal;
+  margin-top: 10px;
+}
+
+.revisionsDialog .author {
+  font-size:13px;
+  line-height: normal;
+}
+
+.revisionsDialog .timestamp {
+  display: inline-block;
+  width:40%;
+  align-self: flex-start;
+  text-align: right;
+}
+
+.revisionsDialog .desc {
+  font-size:12px;
+  color: grey;
+}
+
+.revisionsDialog .revision-first-row{
+   display: flex;
+   width: 100%
+}
+.revisionsDialog .revision-item{
+  padding-top: 10px;
+  padding-bottom:15px;
+  width:100%;
+}
+
+.revisionsDialog .current{
+  background-color: #ffffe0;
+}
+
+.revisionsDialog span.current{
+    font-style: italic;
+    font-size: 12px;
 }
 right-panel {
     position: absolute;
@@ -2003,6 +2187,9 @@ terms-text {
     background: #FDFDFD;
     color: rgba(0, 0, 0, 0.8);
     padding: 10px 50px;
+    height: calc(100% - 64px);
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 tree span {
   outline: none;
@@ -2018,7 +2205,7 @@ tree .treeNodes p {
   outline: none;
   word-break: break-all;
   word-wrap: break-word;
-  margin: 0 0 0 -5px;
+  margin: 8px 0 8px -5px;
   font-size: 14px;
 }
 tree .treeNodes p:hover {
@@ -2027,10 +2214,6 @@ tree .treeNodes p:hover {
   -webkit-border-radius: 2px;
   -moz-border-radius: 2px;
   border-radius: 2px;
-}
-
-tree .treeNodeDivider {
-  margin-top: 4px;
 }
 
 tree md-checkbox {
@@ -2058,6 +2241,17 @@ tree .expandButton {
   margin-left: 0 !important;
 }
 
+tree .noAccessButton {
+  margin-left: 0 !important;
+  opacity: 0.5;
+}
+tree .noAccessName {
+  opacity: 0.5;
+}
+tree .noAccessName:hover {
+  cursor: default !important;
+}
+
 tree .toggleButton {
   margin-right: 0 !important;
 }
@@ -2081,7 +2275,8 @@ tree .virtualRepeatInfiniteScroll .vertical-container {
 
 tree .virtualRepeatInfiniteScroll .repeated-item {
   cursor: default;
-  padding: 4px 0;
+  padding: 0 0;
+  min-height: 1px;
 }
 
 tree .filterListNodeName {

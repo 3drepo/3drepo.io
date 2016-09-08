@@ -38,7 +38,8 @@
 				selectedMenuOption: "=",
 				onContentHeightRequest: "&",
 				onShowItem : "&",
-				hideItem: "="
+				hideItem: "=",
+				keysDown: "="
 			},
 			controller: IssuesCtrl,
 			controllerAs: 'vm',
@@ -79,11 +80,6 @@
 		vm.canAdd = true;
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
 		vm.savingIssue = false;
-		vm.issueTypes = [
-			{value: "scribble", icon: "border_color"},
-			{value: "pin", icon: "pin_drop"},
-			{value: "multi", icon: "apps"}
-		];
 
 		/*
 		 * Get all the Issues
@@ -258,6 +254,8 @@
 				else {
 					//vm.hideItem = true;
 				}
+			} else if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+				vm.selectedObject = event.value;
 			}
 		});
 
@@ -536,6 +534,9 @@
 
 					// No selected issue
 					vm.selectedIssue = null;
+
+					// Clear anything do to with multi mode
+					vm.clearMulti = true;
 
 					// Hide issue area
 					EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
@@ -856,6 +857,7 @@
 		function setupAdd () {
 			vm.toShow = "showAdd";
 			vm.canAdd = false;
+			vm.clearMulti = false;
 			vm.onShowItem();
 			setContentHeight();
 

@@ -50,7 +50,11 @@
 			issueArea,
 			issuesCardIndex = 0;
 
+		/*
+		 * Init
+		 */
 		vm.pointerEvents = "auto";
+		vm.keysDown = [];
 
 		/*
 		 * Get the project element
@@ -265,6 +269,27 @@
 					element.remove();
 				}
 			}
-		})
+		});
+
+		/**
+		 * Keep a list of keys held down
+		 * For changes to be registered by directives and especially components the list needs to be recreated
+		 *
+		 * @param event
+		 */
+		vm.keyAction = function (event) {
+			// Recreate list
+			var tmp = vm.keysDown;
+			delete vm.keysDown;
+			vm.keysDown = angular.copy(tmp);
+
+			// Update list
+			if (event.type === "keydown") {
+				vm.keysDown.push(event.which);
+			}
+			else if (event.type === "keyup") {
+				vm.keysDown.splice(vm.keysDown.indexOf(event.which), 1);
+			}
+		};
 	}
 }());

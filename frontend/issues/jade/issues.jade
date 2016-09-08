@@ -38,48 +38,28 @@ div(ng-switch="vm.toShow")
 
 	// Add issue
 	#issuesAddContainer(ng-switch-when="showAdd")
-		// Type
-		#issuesAddType
-			p Type
-			md-radio-group(ng-model="vm.type", layout="row", layout-align="space-between")
-				md-radio-button.md-accent(ng-repeat="issueType in vm.issueTypes", value="{{issueType.value}}")
-					md-icon.angular-material-icons {{issueType.icon}}
-		md-divider#issuesAddTypeDivider
 		// Title
 		md-input-container.md-block(md-no-float="")
 			label Title
-			input#issueAddTitle(ng-model="vm.title")
+			input#issueAddTitle(ng-model="vm.title" tdr-focus="true")
 		// Comment
 		md-input-container.md-block(md-no-float="")
 			label Comment
 			textarea(ng-model="vm.comment")
 		// Save
-		#issuesAddSave(layout="row", layout-align="start center")
+		div(layout="row", layout-align="start center")
 			md-button.md-raised.md-accent(ng-click="vm.saveIssue()", ng-disabled="vm.saveIssueDisabled") Save
 			md-progress-circular(md-diameter="20px", ng-if="vm.savingIssue")
 			md-button.md-accent(ng-click="vm.cancelAddIssue()") Cancel
-		// Scribble extra
-		.issuesAddExtra(ng-if="vm.type==='scribble'")
-			md-divider
-			div(layout="row", layout-align="start start")
-				md-icon.angular-material-icons info_outline
-				p Draw (and erase) lines over the model.
-			md-checkbox.issuesAddExtraErase(ng-model="vm.toggleErase" aria-label="Toggle erase") Erase
-				//md-icon(class="fa fa-eraser")
-		// Pin extra
-		.issuesAddExtra(ng-if="vm.type==='pin'")
-			md-divider.
-			div(layout="row", layout-align="start start")
-				md-icon.angular-material-icons info_outline
-				p Click anywhere on an object to position the pin.
-		// Multi extra
-		.issuesAddExtra(ng-if="vm.type==='multi'")
-			md-divider
-			div(layout="row", layout-align="start start")
-				md-icon.angular-material-icons info_outline
-				p Click on objects to add or remove.
-
+		// Multi component
+		issues-multi(
+		account="vm.account",
+		project="vm.project",
+		selected-object="vm.selectedObject",
+		keys-down="vm.keysDown"
+		clear="vm.clearMulti")
 
 	// Info
 	.cardInfo(ng-switch-when="showInfo")
 		p {{vm.issuesInfo}}
+

@@ -33,7 +33,8 @@
                 position: "=",
                 contentData: "=",
 				onHeightRequest: "&",
-				onShowFilter: "&"
+				onShowFilter: "&",
+				keysDown: "="
             },
             controller: PanelCardCtrl,
             controllerAs: "vm",
@@ -176,7 +177,8 @@
 				"account='vm.account' " +
 				"project='vm.project' " +
 				"branch='vm.branch' " +
-				"revision='vm.revision' ";
+				"revision='vm.revision' " +
+				"keys-down='vm.keysDown' ";
 
 			// Only add attributes when needed
 			if (vm.contentData.hasOwnProperty("options")) {
