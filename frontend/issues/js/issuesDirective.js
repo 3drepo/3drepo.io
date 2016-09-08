@@ -88,7 +88,7 @@
 		/*
 		 * Get all the Issues
 		 */
-		promise = IssuesService.getIssues(vm.account, vm.project);
+		promise = IssuesService.getIssues(vm.account, vm.project, vm.revision);
 		promise.then(function (data) {
 			var i, length;
 			vm.showProgress = false;
@@ -566,6 +566,7 @@
 			}
 			vm.selectedIssue = vm.issuesToShow[index];
 			vm.selectedIndex = index;
+			vm.selectedIssue.rev_id = vm.revision;
 			vm.selectedIssue.selected = true;
 			vm.selectedIssue.showInfo = false;
 
@@ -623,8 +624,13 @@
 							creator_role: vm.projectUserRoles[0],
 							account: vm.account,
 							project: vm.project,
-							scribble: png
+							scribble: png,
 						};
+
+						if(vm.revision){
+							issue.rev_id = vm.revision;
+						}
+
 						if (selectedObjectId !== null) {
 							issue.objectId = selectedObjectId;
 							issue.pickedPos = pickedPos;

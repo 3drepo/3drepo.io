@@ -28,10 +28,12 @@ var Ref = require('./ref');
 var GenericObject = require('./base/repo').GenericObject;
 var uuid = require("node-uuid");
 var responseCodes = require('../response_codes.js');
+var middlewares = require('../routes/middlewares');
 
 var schema = Schema({
 	_id: Object,
 	object_id: Object,
+	rev_id: Object,
 	name: { type: String, required: true },
 	viewpoint: {
 		up: [Number],
@@ -62,7 +64,8 @@ var schema = Schema({
 		created: Number,
 		//TO-DO Error: `set` may not be used as a schema pathname
 		//set: Boolean
-		sealed: Boolean
+		sealed: Boolean,
+		rev_id: Object
 	}],
 	assigned_roles: [Schema.Types.Mixed],
 	closed_time: Number,
@@ -93,7 +96,7 @@ schema.statics._find = function(dbColOptions, filter, projection){
 	});
 };
 
-schema.statics.getFederatedProjectList = function(dbColOptions, branch, revision){
+schema.statics.getFederatedProjectList = function(dbColOptions, username, branch, revision){
 	'use strict';
 
 	var allRefs = [];
@@ -102,14 +105,18 @@ schema.statics.getFederatedProjectList = function(dbColOptions, branch, revision
 
 		let getHistory;
 
-
-		if(branch) {
+		if(branch){
 			getHistory = History.findByBranch(dbColOptions, branch);
 		} else if (revision) {
-			getHistory = History.findByUID(dbColOptions, revision);
+			getHistory = utils.isUUID(revision) ? History.findByUID(dbColOptions, revision) : History.findByTag(dbColOptions, revision);
 		}
 
 		return getHistory.then(history => {
+
+
+			if(!history){
+				return Promise.resolve([]);
+			}
 
 			let filter = {
 				type: "ref",
@@ -118,9 +125,8 @@ schema.statics.getFederatedProjectList = function(dbColOptions, branch, revision
 
 
 			return Ref.find(dbColOptions, filter);
+
 		}).then(refs => {
-
-
 
 			var promises = [];
 
@@ -158,24 +164,90 @@ schema.statics.getFederatedProjectList = function(dbColOptions, branch, revision
 		});
 	}
 
+
 	return _get(dbColOptions, branch, revision).then(() => {
-		//console.log('finial allRefs', allRefs);
 		return Promise.resolve(allRefs);
 	});
 
 };
 
-schema.statics.findByProjectName = function(dbColOptions, branch, rev){
+
+schema.statics.findByProjectName = function(dbColOptions, username, branch, revId){
+
 	'use strict';
 	let issues;
 	let self = this;
+	let filter = {};
 
-	return this._find(dbColOptions, {}).then(_issues => {
+	let addRevFilter = Promise.resolve();
+
+	if (revId){
+
+		let findHistory = utils.isUUID(revId) ? History.findByUID : History.findByTag;
+		let currHistory;
+		addRevFilter = findHistory(dbColOptions, revId).then(history => {
+
+			if(!history){
+				return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+			} else {
+
+				currHistory = history;
+
+				return History.find(
+					dbColOptions, 
+					{ timestamp: {'$gt': currHistory.timestamp }}, 
+					{_id : 1, timestamp: 1}, 
+					{sort: {timestamp: 1}}
+				);
+
+			}
+
+		}).then(histories => {
+
+			if(histories.length > 0){
+
+				let history = histories[0];
+				console.log('next history found', history);
+
+				//backward comp: find all issues, without rev_id field, with timestamp just less than the next cloest revision 
+				filter = {
+					'created' : { '$lt': history.timestamp.valueOf() },
+					rev_id: null 
+				};
+			}
+
+			return History.find(
+				dbColOptions, 
+				{ timestamp: {'$lte': currHistory.timestamp }}, 
+				{_id : 1}
+			);
+		}).then(histories => {
+
+			if(histories.length > 0){
+				// for issues with rev_id, get all issues if rev_id in revIds
+				let revIds = histories.map(h => h._id);
+
+				filter = {
+					'$or' : [ filter, {
+						rev_id: { '$in' : revIds }
+					}]
+				};
+				//console.log(filter);
+
+			}
+		});
+	}
+
+
+	return addRevFilter.then(() => {
+		return this._find(dbColOptions, filter);
+	}).then(_issues => {
 		issues = _issues;
 		return self.getFederatedProjectList(
 			dbColOptions,
+			username,
 			branch,
-			rev
+			revId
 		);
 
 	}).then(refs => {
@@ -184,13 +256,20 @@ schema.statics.findByProjectName = function(dbColOptions, branch, rev){
 			return Promise.resolve(issues);
 		} else {
 
-			//console.log('refs', refs.length);
 			let promises = [];
 			refs.forEach(ref => {
 				let childDbName = ref.owner || dbColOptions.account;
 				let childProject = ref.project;
 
-				promises.push(self._find({account: childDbName, project: childProject}));
+				promises.push(
+					middlewares.hasReadAccessToProjectHelper(username, childDbName, childProject).then(granted => {
+						if(granted){
+							return self._find({account: childDbName, project: childProject});
+						} else {
+							return Promise.resolve([]);
+						}
+					})
+				);
 			});
 
 			return Promise.all(promises).then(refIssues => {
@@ -249,7 +328,8 @@ schema.statics.createIssue = function(dbColOptions, data){
 	'use strict';
 
 	let objectId = data.object_id;
-	let start = Promise.resolve();
+
+	let promises = [];
 
 	let issue = Issue.createInstance(dbColOptions);
  	issue._id = stringToUUID(uuid.v1());
@@ -259,13 +339,34 @@ schema.statics.createIssue = function(dbColOptions, data){
  	}
 
 	if(objectId){
-		start = GenericObject.getSharedId(dbColOptions, objectId).then(sid => {
-			issue.parent = stringToUUID(sid);
-		});
+		promises.push(
+			GenericObject.getSharedId(dbColOptions, objectId).then(sid => {
+				issue.parent = stringToUUID(sid);
+			})
+		);
 	}
 
-	return start.then(() => {
+	let getHistory;
+
+	if(data.revId){
+		getHistory = utils.isUUID(data.revId) ? History.findByUID : History.findByTag;
+		getHistory = getHistory(dbColOptions, data.revId, {_id: 1});
+	} else {
+		getHistory = History.findByBranch(dbColOptions, 'master', {_id: 1});
+	}
+
+	//assign rev_id for issue
+	promises.push(getHistory.then(history => {
+		if(!history && data.revId){
+			return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+		} else if (history){
+			issue.rev_id = history._id;
+		}
+	}));
+
+	return Promise.all(promises).then(() => {
 		return Issue.count(dbColOptions);
+		
 	}).then(count => {
 
 		issue.number  = count + 1;
@@ -300,11 +401,34 @@ schema.methods.updateComment = function(commentIndex, data){
 	}
 
 	if(commentIndex === null || typeof commentIndex === 'undefined'){
-		this.comments.push({ 
-			owner: data.owner,	
-			comment: data.comment, 
-			created: timeStamp
+
+		let getHistory;
+
+		if(data.revId){
+			getHistory = utils.isUUID(data.revId) ? History.findByUID : History.findByTag;
+			getHistory = getHistory(this._dbcolOptions, data.revId, {_id: 1});
+		} else {
+			getHistory = History.findByBranch(this._dbcolOptions, 'master', {_id: 1});
+		}
+
+		//assign rev_id for issue
+		return getHistory.then(history => {
+			if(!history && data.revId){
+				return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
+			} else {
+
+				this.comments.push({ 
+					owner: data.owner,	
+					comment: data.comment, 
+					created: timeStamp,
+					rev_id: history ? history._id : undefined
+				});
+			}
+		}).then(() => {
+			return this.save();
 		});
+
+
 	} else {
 
 		let commentObj = this.comments[commentIndex];
@@ -323,9 +447,11 @@ schema.methods.updateComment = function(commentIndex, data){
 		}
 		
 		commentObj.sealed = data.sealed || commentObj.sealed;
+
+		return this.save();
 	}
 
-	return this.save();
+	
 };
 
 schema.methods.removeComment = function(commentIndex, data){
@@ -379,6 +505,11 @@ schema.methods.clean = function(typePrefix){
 	cleaned.parent = cleaned.parent ? uuidToString(cleaned.parent) : undefined;
 	cleaned.account = this._dbcolOptions.account;
 	cleaned.project = this._dbcolOptions.project;
+	cleaned.rev_id && (cleaned.rev_id = uuidToString(cleaned.rev_id));
+
+	cleaned.comments.forEach( (comment, i) => {
+		cleaned.comments[i].rev_id = comment.rev_id && (comment.rev_id = uuidToString(comment.rev_id));
+	});
 
 	if(cleaned.scribble){
 		cleaned.scribble = cleaned.scribble.toString('base64');

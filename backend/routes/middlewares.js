@@ -65,6 +65,16 @@ function getAccessToProject(username, account, project){
 	});
 }
 
+function hasReadAccessToProjectHelper(username, account, project){
+	return hasAccessToProjectHelper(username, account, project, WRITE_BIT);
+}
+
+function hasAccessToProjectHelper(username, account, project, permissionBit){
+	return getAccessToProject(username, account, project).then(permissionFlag => {
+		return Promise.resolve(permissionFlag & permissionBit);
+	});
+}
+
 function hasAccessToProject(req, res, next, permissionBit){
 	'use strict';
 
@@ -321,7 +331,8 @@ var middlewares = {
 	freeSpace,
 	isSubContractorInvitedHelper,
 	loggedIn,
-	checkRole
+	checkRole,
+	hasReadAccessToProjectHelper
 };
 
 module.exports = middlewares;

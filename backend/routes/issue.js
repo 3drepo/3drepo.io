@@ -28,12 +28,18 @@ var uuidToString = utils.uuidToString;
 
 
 router.get('/issues/:uid.json', middlewares.hasReadAccessToProject, findIssueById);
+
 router.get('/issues.json', middlewares.hasReadAccessToProject, listIssues);
+router.get('/revision/:rid/issues.json', middlewares.hasReadAccessToProject, listIssues);
 //router.get('/issues/:sid.json', middlewares.hasReadAccessToProject, listIssuesBySID);
 router.get("/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
+router.get("/revision/:rid/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
+
 router.post('/issues.json', middlewares.hasWriteAccessToProject, storeIssue);
 router.put('/issues/:issueId.json', middlewares.hasWriteAccessToProject, updateIssue);
 
+router.post('/revision/:rid/issues.json', middlewares.hasWriteAccessToProject, storeIssue);
+router.put('/revision/:rid/issues/:issueId.json', middlewares.hasWriteAccessToProject, updateIssue);
 
 function storeIssue(req, res, next){
 	'use strict';
@@ -41,6 +47,7 @@ function storeIssue(req, res, next){
 	let place = utils.APIInfo(req);
 	let data = JSON.parse(req.body.data);
 	data.owner = req.session.user.username;
+	data.revId = req.params.rid;
 
 	Issue.createIssue({account: req.params.account, project: req.params.project}, data).then(issue => {
 
@@ -69,6 +76,7 @@ function updateIssue(req, res, next){
 	let place = utils.APIInfo(req);
 	let data = JSON.parse(req.body.data);
 	data.owner = req.session.user.username;
+	data.revId = req.params.rid;
 	let dbCol = {account: req.params.account, project: req.params.project};
 	let issueId = req.params.issueId;
 	let action;
@@ -140,8 +148,10 @@ function listIssues(req, res, next) {
 	var findIssue;
 	if(req.query.shared_id){
 		findIssue = Issue.findBySharedId(dbCol, req.query.shared_id, req.query.number);
+	} else if (req.params.rid) {
+		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, null, req.params.rid);
 	} else {
-		findIssue = Issue.findByProjectName(dbCol, "master", null);
+		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, "master", null);
 	}
 
 	findIssue.then(issues => {
@@ -188,8 +198,15 @@ function renderIssuesHTML(req, res, next){
 
 	let place = utils.APIInfo(req);
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
+	let findIssue;
 
-	Issue.findByProjectName(dbCol, "master", null).then(issues => {
+	if (req.params.rid) {
+		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, null, req.params.rid);
+	} else {
+		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, "master");
+	}
+
+	findIssue.then(issues => {
 		// Split issues by type
 		let splitIssues   = {open : [], closed: []};
 

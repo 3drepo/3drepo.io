@@ -78,10 +78,16 @@
 			}
 		};
 
-		obj.getIssues = function(account, project) {
+		obj.getIssues = function(account, project, revision) {
 			var self = this,
 				deferred = $q.defer();
-			url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/issues.json");
+
+			if(revision){
+				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/revision/" + revision + "/issues.json");
+			} else {
+				url = serverConfig.apiUrl(serverConfig.GET_API, account + "/" + project + "/issues.json");
+			}
+			
 
 			$http.get(url)
 				.then(
@@ -113,45 +119,63 @@
 			var self = this,
 				dataToSend,
 				deferred = $q.defer(),
-				viewpointPromise = $q.defer();
+				viewpointPromise = $q.defer(),
+				snapshotPromise = $q.defer();
 
-			url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues.json");
+			var url;
 
+			if(issue.rev_id){
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/revision/" + issue.rev_id + "/issues.json");
+			} else {
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues.json");
+			}
+
+			// Get the viewpoint
 			EventService.send(EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, {promise: viewpointPromise});
-
 			viewpointPromise.promise.then(function (viewpoint) {
-				data = {
-					object_id: issue.objectId,
-					name: issue.name,
-					viewpoint: viewpoint,
-					scale: 1.0,
-					creator_role: issue.creator_role,
-					assigned_roles: userRoles,
-					scribble: issue.scribble
-				};
-				config = {withCredentials: true};
+				// Get the snapshot
+				EventService.send(EventService.EVENT.VIEWER.GET_SCREENSHOT, {promise: snapshotPromise});
+				snapshotPromise.promise.then(function (snapshot) {
+					console.log(snapshot);
 
-				if (issue.pickedPos !== null) {
-					data.position = issue.pickedPos.toGL();
-					data.norm = issue.pickedNorm.toGL();
-				}
+					data = {
+						object_id: issue.objectId,
+						name: issue.name,
+						viewpoint: viewpoint,
+						scale: 1.0,
+						creator_role: issue.creator_role,
+						assigned_roles: userRoles,
+						scribble: issue.scribble
+					};
 
-				dataToSend = {data: JSON.stringify(data)};
+					config = {withCredentials: true};
 
-				$http.post(url, dataToSend, config)
-					.then(function successCallback(response) {
-						console.log(response);
-						response.data.issue._id = response.data.issue_id;
-						response.data.issue.account = issue.account;
-						response.data.issue.project = issue.project;
-						response.data.issue.timeStamp = self.getPrettyTime(response.data.issue.created);
-						response.data.issue.creator_role = issue.creator_role;
-						response.data.issue.scribble = issue.scribble;
+					if (issue.pickedPos !== null) {
+						data.position = issue.pickedPos.toGL();
+						data.norm = issue.pickedNorm.toGL();
+					}
 
-						response.data.issue.title = generateTitle(response.data.issue);
-						self.removePin();
-						deferred.resolve(response.data.issue);
-					});
+					dataToSend = {data: JSON.stringify(data)};
+
+					deferred.resolve(null);
+
+					/*
+					$http.post(url, dataToSend, config)
+						.then(function successCallback(response) {
+							console.log(response);
+							response.data.issue._id = response.data.issue_id;
+							response.data.issue.account = issue.account;
+							response.data.issue.project = issue.project;
+							response.data.issue.timeStamp = self.getPrettyTime(response.data.issue.created);
+							response.data.issue.creator_role = issue.creator_role;
+							response.data.issue.scribble = issue.scribble;
+
+							response.data.issue.title = generateTitle(response.data.issue);
+							self.removePin();
+							deferred.resolve(response.data.issue);
+						});
+					*/
+				});
 			});
 
 			return deferred.promise;
@@ -164,11 +188,18 @@
 		 * @returns {*}
 		 */
 		function doPut(issue, data) {
-			var deferred = $q.defer(),
-				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues/" + issue._id + ".json"),
-				config = {
-					withCredentials: true
-				};
+			var deferred = $q.defer();
+			var url;
+
+			if(issue.rev_id){
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/revision/" + issue.rev_id + "/issues/" +  issue._id + ".json");
+			} else {
+				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues/" + issue._id + ".json");
+			}
+				
+			var config = {
+				withCredentials: true
+			};
 			$http.put(url, {data: JSON.stringify(data)}, config)
 				.then(function (response) {
 					deferred.resolve(response.data);

@@ -29,8 +29,8 @@ var stringToUUID = utils.stringToUUID;
 var uuidToString = utils.uuidToString;
 
 var attrs = {
-	_id: Buffer,
-	shared_id: Buffer,
+	_id: Object,
+	shared_id: Object,
 	paths: [],
 	type: String,
 	api: Number,

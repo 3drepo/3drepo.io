@@ -83,18 +83,56 @@ ImportQueue.prototype.connect = function(url, options) {
  * @param {databaseName} databaseName - name of database to commit to
  * @param {projectName} projectName - name of project to commit to
  * @param {userName} userName - name of user
+ * @param {copy} copy - use fs.copy or fs.move, default fs.move
+ * @param {tag} tag - revision tag
+ * @param {desc} desc - revison description
  *******************************************************************************/
-ImportQueue.prototype.importFile = function(filePath, orgFileName, databaseName, projectName, userName, copy){
+ImportQueue.prototype.importFile = function(filePath, orgFileName, databaseName, projectName, userName, copy, tag, desc){
     'use strict';
 
     let corID = uuid.v1();
 
-    //console.log(filePath);
-    //console.log(orgFileName);
 
-    return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy).then(newPath => {
+
+    let newPath;
+    let newFileDir;
+    let jsonFilename = `${this.sharedSpacePath}/${corID}.json`; 
+
+    return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy).then(obj => {
     
-        let msg = 'import ' + newPath + ' ' + databaseName + ' ' + projectName + ' ' + userName;
+        newPath = obj.filePath;
+        newFileDir = obj.newFileDir;
+
+        let json = {
+            file: newPath,
+            database: databaseName,
+            project: projectName,   
+            owner: userName,
+        };
+
+        if(tag){
+            json.tag = tag;
+        }
+
+        if(desc){
+            json.desc = desc;
+        }
+
+
+        return new Promise((resolve, reject) => {
+            fs.writeFile(jsonFilename, JSON.stringify(json), { flag: 'a+'}, err => {
+                if(err){
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+
+    }).then(() => {
+
+        //let msg = 'import ' + newPath + ' ' + databaseName + ' ' + projectName + ' ' + userName;
+        let msg = `import -f ${jsonFilename}`;
         return this._dispatchWork(corID, msg);
     
     }).then(() => {
@@ -103,13 +141,81 @@ ImportQueue.prototype.importFile = function(filePath, orgFileName, databaseName,
 
 
             this.deferedObjs[corID] = {
-                resolve: () => resolve(corID),
-                reject: errCode => reject({corID, errCode})
+                resolve: () => resolve({corID, newPath, newFileDir, jsonFilename}),
+                reject: errCode => reject({corID, errCode, newPath, newFileDir, jsonFilename})
             };
 
         });
+    });
+};
+
+/*******************************************************************************
+ * Dispatch work to queue to create a federated project
+ * @param {account} account - username
+ * @param {defObj} defObj - object to describe the federated project like subprojects and transformation
+ *******************************************************************************/
+ImportQueue.prototype.createFederatedProject = function(account, defObj){
+    'use strict';
+
+    let corID = uuid.v1();
+    let newFileDir = this.sharedSpacePath + "/" + corID;
+    let filename = `${newFileDir}/obj.json`;
+
+    return new Promise((resolve, reject) => {
+
+        fs.mkdir(this.sharedSpacePath, function(err){
+
+            if(!err || err && err.code === 'EEXIST'){
+                resolve();
+            } else {
+                reject(err);
+            }
+            
+        });
+
+    }).then(() => {
+
+        return new Promise((resolve, reject) => {
+
+            fs.mkdir(newFileDir, function (err){
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+
+        });
+
+    }).then(() => {
+
+        return new Promise((resolve, reject) => {
+            fs.writeFile(filename, JSON.stringify(defObj), { flag: 'a+'}, err => {
+                if(err){
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+
+    }).then(() => {
+
+        let msg = `genFed ${filename} ${account}`;
+        return this._dispatchWork(corID, msg);
+
+    }).then(() => {
+
+        return new Promise((resolve, reject) => {
+            this.deferedObjs[corID] = {
+                resolve: () => resolve(corID),
+                reject: errCode => reject({corID, errCode})
+            };
+        });
 
     });
+
+
 };
 
 /*******************************************************************************
@@ -119,6 +225,7 @@ ImportQueue.prototype.importFile = function(filePath, orgFileName, databaseName,
  * @param {corID} corID - Correlation ID
  * @param {orgFilePath} orgFilePath - Path to where the file is currently
  * @param {newFileName} newFileName - New file name to rename to
+ * @param {copy} copy - use fs.copy instead of fs.move if set to true
  *******************************************************************************/
 ImportQueue.prototype._moveFileToSharedSpace = function(corID, orgFilePath, newFileName, copy) {
     'use strict';
@@ -138,7 +245,7 @@ ImportQueue.prototype._moveFileToSharedSpace = function(corID, orgFilePath, newF
                     if (err) {
                         reject(err);
                     } else {
-                        resolve(filePath);
+                        resolve({filePath, newFileDir});
                     }
                 });
             }

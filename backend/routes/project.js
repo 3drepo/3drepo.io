@@ -23,12 +23,16 @@ var utils = require('../utils');
 var middlewares = require('./middlewares');
 var ProjectSetting = require('../models/projectSetting');
 var responseCodes = require('../response_codes');
-var C               = require("../constants");
+var C = require("../constants");
 var importQueue = require('../services/queue');
 var multer = require("multer");
 var ProjectHelpers = require('../models/helper/project');
 var createAndAssignRole = ProjectHelpers.createAndAssignRole;
 var convertToErrorCode = ProjectHelpers.convertToErrorCode;
+var fs = require('fs');
+var systemLogger = require("../logger.js").systemLogger;
+var History = require('../models/history');
+
 
 var getDbColOptions = function(req){
 	return {account: req.params.account, project: req.params.project};
@@ -43,9 +47,22 @@ router.post('/:project/info.json', middlewares.isMainContractor, B4F_updateProje
 // Get project info
 router.get('/:project.json', middlewares.hasReadAccessToProject, getProjectSetting);
 
-router.put('/:project/settings/map-tile', middlewares.hasWriteAccessToProject, updateMapTileSettings);
+router.put('/:project/settings', middlewares.hasWriteAccessToProject, updateSettings);
 
-router.post('/:project', middlewares.canCreateProject, createProject);
+router.post('/:project', middlewares.connectQueue, middlewares.canCreateProject, createProject);
+
+//update federated project
+router.put('/:project', middlewares.connectQueue, middlewares.hasWriteAccessToProject, updateProject);
+
+//master tree
+router.get('/:project/revision/master/head/fulltree.json', middlewares.hasReadAccessToProject, getProjectTree);
+
+router.get('/:project/revision/:rev/fulltree.json', middlewares.hasReadAccessToProject, getProjectTree);
+
+//search master tree
+router.get('/:project/revision/master/head/searchtree.json', middlewares.hasReadAccessToProject, searchProjectTree);
+
+router.get('/:project/revision/:rev/searchtree.json', middlewares.hasReadAccessToProject, searchProjectTree);
 
 router.delete('/:project', middlewares.canCreateProject, deleteProject);
 
@@ -57,6 +74,7 @@ router.post('/:project/collaborators', middlewares.isAccountAdmin, middlewares.h
 
 router.delete('/:project/collaborators', middlewares.isAccountAdmin, removeCollaborator);
 
+router.get('/:project/download/latest', middlewares.hasReadAccessToProject, downloadLatest);
 
 function estimateImportedSize(format, size){
 	// if(format === 'obj'){
@@ -67,7 +85,7 @@ function estimateImportedSize(format, size){
 	return size;
 }
 
-function updateMapTileSettings(req, res, next){
+function updateSettings(req, res, next){
 	'use strict';
 
 
@@ -75,7 +93,8 @@ function updateMapTileSettings(req, res, next){
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
 
 	return ProjectSetting.findById(dbCol, req.params.project).then(projectSetting => {
-		return projectSetting.updateMapTileCoors(req.body);
+		projectSetting.updateProperties(req.body);
+		return projectSetting.save();
 	}).then(projectSetting => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, projectSetting);
 	}).catch(err => {
@@ -178,6 +197,7 @@ function getProjectSetting(req, res, next){
 }
 
 
+
 function createProject(req, res, next){
 	'use strict';
 	
@@ -186,7 +206,43 @@ function createProject(req, res, next){
 	let account = req.params.account;
 	let username = req.session.user.username;
 
-	createAndAssignRole(project, account, username, req.body.desc, req.body.type).then(() => {
+	let federate;
+	if(req.body.subProjects){
+		federate = true;
+	}
+
+	createAndAssignRole(project, account, username, req.body.desc, req.body.type, req.body.unit, req.body.subProjects, federate).then(() => {
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
+	}).catch( err => {
+		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function updateProject(req, res, next){
+	'use strict';
+
+	let responsePlace = utils.APIInfo(req);
+	let project = req.params.project;
+	let account = req.params.account;
+
+	let promise = Promise.resolve();
+	
+	if(req.body.subProjects && req.body.subProjects.length > 0){
+
+		promise = ProjectSetting.findById({account}, project).then(setting => {
+			
+			if(!setting) {
+				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
+			} else if (!setting.federate){
+				return Promise.reject(responseCodes.PROJECT_IS_NOT_A_FED);
+			} else {
+				return ProjectHelpers.createFederatedProject(account, project, req.body.subProjects);
+			}
+		});
+
+	}
+
+	promise.then(() => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, project });
 	}).catch( err => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -207,6 +263,8 @@ function deleteProject(req, res, next){
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);
 	});
 }
+
+
 
 
 function uploadProject(req, res, next){
@@ -268,6 +326,9 @@ function uploadProject(req, res, next){
 			} else if(!req.file.size){
 				return responseCodes.respond(responsePlace, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 			
+			} else if(req.body.tag && !req.body.tag.match(History.tagRegExp)){
+				return responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_TAG_NAME, responseCodes.INVALID_TAG_NAME);
+			
 			} else {
 
 				let projectSetting;
@@ -276,12 +337,22 @@ function uploadProject(req, res, next){
 				let account = req.params.account;
 				//let username = req.session.user.username;
 
-				ProjectSetting.findById({account, project}, project).then(setting => {
+				//check dup tag first
+
+				(req.body.tag ? History.findByTag({account, project}, req.body.tag, {_id: 1}) : Promise.resolve()).then(tag => {
+					
+					if(tag){
+						responseCodes.respond(responsePlace, req, res, next, responseCodes.DUPLICATE_TAG, responseCodes.DUPLICATE_TAG);
+						return Promise.reject(responseCodes.DUPLICATE_TAG);
+					} else {
+						return ProjectSetting.findById({account, project}, project);
+					}
+
+				}).then(setting => {
 
 					if(!setting){
-						req[C.REQ_REPO].logger.logError('Upload to non-exisitng project and create is now deprecated, please call create project API first then upload');
-						return responseCodes.respond(responsePlace, req, res, next, responseCodes.PROJECT_NOT_FOUND, responseCodes.PROJECT_NOT_FOUND);
-
+						responseCodes.respond(responsePlace, req, res, next, responseCodes.PROJECT_NOT_FOUND, responseCodes.PROJECT_NOT_FOUND);
+						return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 					}
 
 					projectSetting = setting;
@@ -293,15 +364,68 @@ function uploadProject(req, res, next){
 					// api respond once the file is uploaded
 					responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: 'uploaded'});
 
+					let deleteFiles = function(filePath, fileDir, jsonFile){
+						fs.unlink(filePath, function(err){
+							if(err){
+								systemLogger.logError('error while deleting tmp model file',{
+									message: err.message,
+									err: err,
+									file: filePath
+								});
+							} else {
+								systemLogger.logInfo('tmp model deleted',{
+									file: filePath
+								});
+							}
+						});
+
+						fs.unlink(jsonFile, function(err){
+							if(err){
+								systemLogger.logError('error while deleting json file',{
+									message: err.message,
+									err: err,
+									file: jsonFile
+								});
+							} else {
+								systemLogger.logInfo('json file deleted',{
+									file: jsonFile
+								});
+							}
+						});
+
+						fs.rmdir(fileDir, function(err){
+							if(err){
+								systemLogger.logError('error while tmp dir',{
+									message: err.message,
+									err: err,
+									file: fileDir
+								});
+							} else {
+								systemLogger.logInfo('tmp dir deleted',{
+									file: fileDir
+								});
+							}
+						});
+					};
+
 					return importQueue.importFile(
 						req.file.path, 
 						req.file.originalname, 
 						req.params.account,
 						req.params.project,
-						req.session.user.username
+						req.session.user.username,
+						null,
+						req.body.tag,
+						req.body.desc
 					)
-					.then(corID => Promise.resolve(corID))
-					.catch(err => {
+					.then(obj => {
+
+						deleteFiles(obj.newPath, obj.newFileDir, obj.jsonFilename);
+						return Promise.resolve(obj);
+
+					}).catch(err => {
+
+						deleteFiles(err.newPath, err.newFileDir, err.jsonFilename);
 
 						//catch here to provide custom error message
 						if(err.errCode && projectSetting){
@@ -310,11 +434,14 @@ function uploadProject(req, res, next){
 							return Promise.reject(convertToErrorCode(err.errCode));
 						}
 
+
 						return Promise.reject(err);
 						
 					});
 
-				}).then(corID => {
+				}).then(obj => {
+
+					let corID = obj.corID;
 
 					req[C.REQ_REPO].logger.logInfo(`Job ${corID} imported without error`);
 
@@ -323,18 +450,18 @@ function uploadProject(req, res, next){
 					projectSetting.errorReason = undefined;
 					projectSetting.markModified('errorReason');
 					
-					return projectSetting.save();
+					return projectSetting.save();					
 
 				}).catch(err => {
 					// import failed for some reason(s)...
-					// console.log(err.stack);
 					//mark project failed
+
 					if(projectSetting){
 						projectSetting.status = 'failed';
 						projectSetting.save();
 					}
 
-					req[C.REQ_REPO].logger.logError(JSON.stringify(err));
+					err.stack ? req[C.REQ_REPO].logger.logError(err.stack) : req[C.REQ_REPO].logger.logError(err);
 
 		
 
@@ -406,6 +533,77 @@ function removeCollaborator(req, res ,next){
 	});
 
 
+}
+
+
+function getProjectTree(req, res, next){
+	'use strict';
+
+	let project = req.params.project;
+	let account = req.params.account;
+	let username = req.session.user.username;
+	let branch;
+
+	if(!req.params.rev){
+		branch = C.MASTER_BRANCH_NAME;
+	}
+
+	ProjectHelpers.getFullTree(account, project, branch, req.params.rev, username).then(obj => {
+
+		if(!obj.tree){
+			return Promise.reject(responseCodes.TREE_NOT_FOUND);
+		}
+
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj.tree);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+
+function searchProjectTree(req, res, next){
+	'use strict';
+
+	let project = req.params.project;
+	let account = req.params.account;
+	let username = req.session.user.username;
+	let searchString = req.query.searchString;
+
+	let branch;
+
+	if(!req.params.rev){
+		branch = C.MASTER_BRANCH_NAME;
+	}
+
+	ProjectHelpers.searchTree(account, project, branch, req.params.rev, searchString, username).then(items => {
+
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, items);
+
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+
+function downloadLatest(req, res, next){
+	'use strict';
+	ProjectHelpers.downloadLatest(req.params.account, req.params.project).then(file => {
+
+		let headers = {
+			'Content-Length': file.meta.length,
+			'Content-Disposition': 'attachment;filename=' + file.meta.filename,
+		};
+
+		if(file.meta.contentType){
+			headers['Content-Type'] = file.meta.contentType;
+		}
+
+		res.writeHead(200, headers);
+		file.readStream.pipe(res);
+
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
 }
 
 module.exports = router;

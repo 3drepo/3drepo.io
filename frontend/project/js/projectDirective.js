@@ -176,6 +176,7 @@
 			]
 		});
 
+
 		$scope.$watchGroup(["vm.account","vm.project"], function()
 		{
 			if (angular.isDefined(vm.account) && angular.isDefined(vm.project)) {
@@ -196,6 +197,7 @@
 				});
 
 				ProjectService.getProjectInfo(vm.account, vm.project).then(function (data) {
+					vm.settings = data.settings
 					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
 						account: data.account,
 						project: data.project,
@@ -252,9 +254,10 @@
 			} else if (event.type === EventService.EVENT.MEASURE_MODE) {
 				if (event.value) {
 					// Create measure display
-					element = angular.element("<tdr-measure id='tdrMeasure'></tdr-measure>");
+					element = angular.element("<tdr-measure id='tdrMeasure' account='vm.account' project='vm.project' settings='vm.settings' ></tdr-measure>");
 					parent.append(element);
 					$compile(element)($scope);
+
 				}
 				else {
 					// Remove measure display
