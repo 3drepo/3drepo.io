@@ -49,8 +49,8 @@ var schema = Schema({
 		aspect_ratio: Number,
 		far : Number,
 		near : Number,
-		clippingPlanes : [Schema.Types.Mixed ]
-
+		clippingPlanes : [Schema.Types.Mixed ],
+		guid: Object
 	},
 
 	scale: Number,
@@ -69,13 +69,18 @@ var schema = Schema({
 		//TO-DO Error: `set` may not be used as a schema pathname
 		//set: Boolean
 		sealed: Boolean,
-		rev_id: Object
+		rev_id: Object,
+		guid: Object,
+		//bcf extra fields we don't care
+		extras: {}
 	}],
 	assigned_roles: [Schema.Types.Mixed],
 	closed_time: Number,
 	creator_role: String,
 	scribble: Object,
 	screenshot: Object,
+	//bcf extra fields we don't care
+	extras: {}
 });
 
 
@@ -560,8 +565,28 @@ schema.methods.clean = function(typePrefix){
 	return cleaned;
 };
 
+schema.methods.generateCommentsGUID = function(){
+	'use strict';
+
+	this.comments.forEach(comment => {
+		if(!comment.guid){
+			comment.guid = utils.generateUUID();
+		}
+	});
+};
+
+schema.methods.generateViewpointGUID = function(){
+	if(!this.viewpoint.guid){
+		this.viewpoint.guid = utils.generateUUID();
+	}
+};
+
 schema.methods.getBCFMarkup = function(){
 	'use strict';
+
+	this.generateViewpointGUID();
+	this.generateCommentsGUID();
+	this.save();
 
 	let markup = {
 		Markup:{
@@ -581,7 +606,7 @@ schema.methods.getBCFMarkup = function(){
 
 	let markupXml = xmlBuilder.create(markup, {version: '1.0', encoding: 'UTF-8'});
 
-	let viewPointGuid = uuidToString(utils.generateUUID());
+	let viewPointGuid = uuidToString(this.viewpoint.guid);
 	
 	if(this.comments.length > 0){
 		let vpNode = markupXml.ele('Viewpoints', { 'Guid': viewPointGuid });
@@ -592,7 +617,7 @@ schema.methods.getBCFMarkup = function(){
 	}
 
 	this.comments.forEach(comment => {
-		let commentNode = markupXml.ele('Comment', { 'Guid': uuidToString(utils.generateUUID()) });
+		let commentNode = markupXml.ele('Comment', { 'Guid': uuidToString(comment.guid) });
 		commentNode.ele('Comment', comment.comment);
 		commentNode.ele('Author', comment.owner);
 		commentNode.ele('Date', moment(comment.created).utc().format());
@@ -670,6 +695,9 @@ schema.methods.getBCFViewpoint = function(){
 	return viewpointXml.end({ pretty: true });
 };
 
+schema.statics.importBCF = function(zipRS){
+
+}
 
 var Issue = ModelFactory.createClass(
 	'Issue',
