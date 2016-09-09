@@ -10,8 +10,14 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 
 div(ng-switch="vm.toShow")
 	// Issues list
-	md-list(ng-switch-when="showIssues")
-		div(ng-repeat="issue in vm.issuesToShow")
+	div(ng-switch-when="showIssues")
+		issues-list-item(
+		ng-repeat="issue in vm.issuesToShow"
+		data="issue"
+		on-edit-issue="vm.editIssue($index)"
+		deselect="vm.deselectIssueListItemId"
+		on-select="vm.issuesListItemSelect(issueId)")
+		//div(ng-repeat="issue in vm.issuesToShow")
 			.issueHeader
 				issue-header(
 					index="$index"
@@ -24,7 +30,11 @@ div(ng-switch="vm.toShow")
 			md-divider
 
 	// Issue
-	issue(
+	issue-comp(
+	ng-switch-when="showIssue"
+	index="vm.selectedIndex"
+	data="vm.selectedIssue")
+	//issue(
 		ng-switch-when="showIssue"
 		index="vm.selectedIndex"
 		data="vm.selectedIssue"
@@ -37,7 +47,7 @@ div(ng-switch="vm.toShow")
 		on-toggle-close-issue="vm.toggleCloseIssue(issue)")
 
 	// Add issue
-	#issuesAddContainer(ng-switch-when="showAdd")
+	//#issuesAddContainer(ng-switch-when="showAdd")
 		// Title
 		md-input-container.md-block(md-no-float="")
 			label Title
@@ -53,11 +63,14 @@ div(ng-switch="vm.toShow")
 			md-button.md-accent(ng-click="vm.cancelAddIssue()") Cancel
 		// Multi component
 		issues-multi(
-		account="vm.account",
-		project="vm.project",
-		selected-object="vm.selectedObject",
+		account="vm.account"
+		project="vm.project"
+		selected-object="vm.selectedObject"
 		keys-down="vm.keysDown"
-		clear="vm.clearMulti")
+		clear="vm.clearMulti"
+		send-event="vm.sendEvent(type, value)")
+		// Footer
+		issues-footer
 
 	// Info
 	.cardInfo(ng-switch-when="showInfo")

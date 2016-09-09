@@ -63,7 +63,8 @@
 			selectedObjectId = null,
 			pickedPos = null,
 			pickedNorm = null,
-			pinHighlightColour = [1.0000, 0.7, 0.0];
+			pinHighlightColour = [1.0000, 0.7, 0.0],
+			selectedIssuesListItemId = null;
 
 		/*
 		 * Init
@@ -165,13 +166,8 @@
 		/*
 		 * New issue must have type and non-empty title
 		 */
-		$scope.$watchGroup(["vm.title", "vm.type"], function () {
-			if (angular.isDefined(vm.type)) {
-				setupIssueType(vm.type);
-			}
-			if (angular.isDefined(vm.title) && angular.isDefined(vm.type)) {
-				vm.saveIssueDisabled = (vm.title.toString() === "");
-			}
+		$scope.$watch("vm.title", function () {
+			vm.saveIssueDisabled = (angular.isUndefined(vm.title) || (vm.title.toString() === ""));
 		});
 
 		/**
@@ -779,6 +775,23 @@
 			$timeout.cancel(vm.infoTimeout);
 		};
 
+		vm.sendEvent = function (type, value) {
+			EventService.send(type, value);
+		};
+
+		vm.issuesListItemSelect = function (issueId) {
+			if (selectedIssuesListItemId === null) {
+				selectedIssuesListItemId = issueId;
+			}
+			else if (selectedIssuesListItemId === issueId) {
+				selectedIssuesListItemId = null;
+			}
+			else {
+				vm.deselectIssueListItemId = selectedIssuesListItemId;
+				selectedIssuesListItemId = issueId;
+			}
+		};
+
 		/**
 		 * Set the content height
 		 */
@@ -878,24 +891,6 @@
 				($element[0].querySelector("#issueAddTitle")).select();
 			});
 			*/
-		}
-
-		function setupIssueType (type) {
-			switch (type) {
-				case "scribble":
-					removeAddPin();
-					EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: "scribble"});
-					break;
-
-				case "pin":
-					EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
-					break;
-
-				case "multi":
-					removeAddPin();
-					EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
-					break;
-			}
 		}
 	}
 }());

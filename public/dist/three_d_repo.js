@@ -11743,6 +11743,44 @@ angular.module('3drepo')
     }
 }());
 /**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the issueComp of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.component(
+			"issueComp",
+			{
+				controller: IssueCompCtrl,
+				templateUrl: "issueComp.html",
+				bindings: {
+					data: "<",
+					onEditIssue: "="
+				}
+			}
+		);
+
+	IssueCompCtrl.$inject = [];
+
+	function IssueCompCtrl () {
+	}
+}());
+/**
  *	Copyright (C) 2014 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
@@ -12179,7 +12217,8 @@ angular.module('3drepo')
 			selectedObjectId = null,
 			pickedPos = null,
 			pickedNorm = null,
-			pinHighlightColour = [1.0000, 0.7, 0.0];
+			pinHighlightColour = [1.0000, 0.7, 0.0],
+			selectedIssuesListItemId = null;
 
 		/*
 		 * Init
@@ -12281,13 +12320,8 @@ angular.module('3drepo')
 		/*
 		 * New issue must have type and non-empty title
 		 */
-		$scope.$watchGroup(["vm.title", "vm.type"], function () {
-			if (angular.isDefined(vm.type)) {
-				setupIssueType(vm.type);
-			}
-			if (angular.isDefined(vm.title) && angular.isDefined(vm.type)) {
-				vm.saveIssueDisabled = (vm.title.toString() === "");
-			}
+		$scope.$watch("vm.title", function () {
+			vm.saveIssueDisabled = (angular.isUndefined(vm.title) || (vm.title.toString() === ""));
 		});
 
 		/**
@@ -12895,6 +12929,23 @@ angular.module('3drepo')
 			$timeout.cancel(vm.infoTimeout);
 		};
 
+		vm.sendEvent = function (type, value) {
+			EventService.send(type, value);
+		};
+
+		vm.issuesListItemSelect = function (issueId) {
+			if (selectedIssuesListItemId === null) {
+				selectedIssuesListItemId = issueId;
+			}
+			else if (selectedIssuesListItemId === issueId) {
+				selectedIssuesListItemId = null;
+			}
+			else {
+				vm.deselectIssueListItemId = selectedIssuesListItemId;
+				selectedIssuesListItemId = issueId;
+			}
+		};
+
 		/**
 		 * Set the content height
 		 */
@@ -12995,27 +13046,123 @@ angular.module('3drepo')
 			});
 			*/
 		}
-
-		function setupIssueType (type) {
-			switch (type) {
-				case "scribble":
-					removeAddPin();
-					EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: "scribble"});
-					break;
-
-				case "pin":
-					EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
-					break;
-
-				case "multi":
-					removeAddPin();
-					EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
-					break;
-			}
-		}
 	}
 }());
 
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the issuesFooter of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.component(
+			"issuesFooter",
+			{
+				controller: IssuesFooterCtrl,
+				templateUrl: "issuesFooter.html",
+				bindings: {
+				}
+			}
+		);
+
+	IssuesFooterCtrl.$inject = [];
+
+	function IssuesFooterCtrl () {
+		var highlightBackground = "#FF9800",
+			currentActionIndex = null;
+
+		this.actions = [
+			{icon: "home", action: "home", color: ""},
+			{icon: "home", action: "home", color: ""},
+			{icon: "home", action: "home", color: ""}
+		];
+
+		this.doAction = function (index) {
+			console.log(this.actions[index].action);
+			if (currentActionIndex === null) {
+				currentActionIndex = index;
+				this.actions[currentActionIndex].color = highlightBackground;
+			}
+			else if (currentActionIndex === index) {
+				this.actions[currentActionIndex].color = "";
+				currentActionIndex = null;
+			}
+			else {
+				this.actions[currentActionIndex].color = "";
+				currentActionIndex = index;
+				this.actions[currentActionIndex].color = highlightBackground;
+			}
+		};
+	}
+}());
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the issuesListItem of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.component(
+			"issuesListItem",
+			{
+				controller: IssuesListItemCtrl,
+				templateUrl: "issuesListItem.html",
+				bindings: {
+					data: "<",
+					deselect: "<",
+					onSelect: "&"
+				}
+			}
+		);
+
+	IssuesListItemCtrl.$inject = [];
+
+	function IssuesListItemCtrl () {
+		this.showEnter = false;
+
+		this.toggleEnter = function () {
+			this.showEnter = !this.showEnter;
+			if (this.showEnter) {
+				this.onSelect({issueId: this.data._id});
+			}
+		};
+
+		this.$onChanges = function (changes) {
+			if (changes.hasOwnProperty("deselect") && (this.deselect === this.data._id)) {
+				this.showEnter = false;
+			}
+		};
+	}
+}());
 /**
  *	Copyright (C) 2016 3D Repo Ltd
  *
@@ -13046,7 +13193,8 @@ angular.module('3drepo')
 					project: "<",
 					selectedObject: "<",
 					keysDown: "<",
-					clear: "<"
+					clear: "<",
+					sendEvent: "&"
 				}
 			}
 		);
@@ -13071,9 +13219,11 @@ angular.module('3drepo')
 				if (multiMode) {
 					this.displaySelectedObjects(selectedObjectIDs);
 				}
+				/*
 				else {
 					this.displaySelectedObjects([]);
 				}
+				*/
 			}
 			else if (changes.hasOwnProperty("selectedObject") && multiMode) {
 				objectIndex = selectedObjectIDs.indexOf(this.selectedObject.id);
@@ -13099,7 +13249,7 @@ angular.module('3drepo')
 				ids: selectedObjects,
 				colour: "1.0 0.0 0.0"
 			};
-			EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
+			this.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, value: data});
 		};
 	}
 }());
@@ -16072,6 +16222,7 @@ var Oculus = {};
 		 * @param event
 		 */
 		vm.keyAction = function (event) {
+			var i;
 			// Recreate list
 			var tmp = vm.keysDown;
 			delete vm.keysDown;
@@ -16082,7 +16233,12 @@ var Oculus = {};
 				vm.keysDown.push(event.which);
 			}
 			else if (event.type === "keyup") {
-				vm.keysDown.splice(vm.keysDown.indexOf(event.which), 1);
+				// Remove all instances of the key (multiple instances can happen if keyup wasn't registered)
+				for (i = (vm.keysDown.length - 1); i >= 0; i -= 1) {
+					if (vm.keysDown[i] === event.which) {
+						vm.keysDown.splice(i, 1);
+					}
+				}
 			}
 		};
 	}

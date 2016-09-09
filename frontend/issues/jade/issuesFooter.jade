@@ -1,0 +1,16 @@
+md-divider
+div
+	md-button.md-icon-button(
+	ng-repeat="action in $ctrl.actions"
+	aria-label="{{action.icon}}"
+	ng-click="$ctrl.doAction($index)")
+		md-tooltip(md-direction="bottom") {{action.icon}}
+		md-icon.angular-material-icons(style="color:{{action.color}}") {{action.icon}}
+
+	md-button.md-fab.md-mini.md-primary(aria-label="Resolve")
+		md-tooltip(md-direction="bottom") Resolve
+		md-icon.angular-material-icons done
+
+	md-button.md-fab.md-mini.md-accent(aria-label="Submit")
+		md-tooltip(md-direction="bottom") Submit
+		md-icon.angular-material-icons save

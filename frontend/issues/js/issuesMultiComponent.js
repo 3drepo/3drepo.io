@@ -28,7 +28,8 @@
 					project: "<",
 					selectedObject: "<",
 					keysDown: "<",
-					clear: "<"
+					clear: "<",
+					sendEvent: "&"
 				}
 			}
 		);
@@ -53,9 +54,11 @@
 				if (multiMode) {
 					this.displaySelectedObjects(selectedObjectIDs);
 				}
+				/*
 				else {
 					this.displaySelectedObjects([]);
 				}
+				*/
 			}
 			else if (changes.hasOwnProperty("selectedObject") && multiMode) {
 				objectIndex = selectedObjectIDs.indexOf(this.selectedObject.id);
@@ -81,7 +84,7 @@
 				ids: selectedObjects,
 				colour: "1.0 0.0 0.0"
 			};
-			EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
+			this.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, value: data});
 		};
 	}
 }());

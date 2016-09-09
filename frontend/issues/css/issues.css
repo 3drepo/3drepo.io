@@ -237,3 +237,30 @@ issue-area #scribbleDisplay img {
   left: -200%;
   right: -200%;
 }
+
+/** Issues List Item **************************************************************************************************/
+issues-list-item {
+  display: block;
+  height: 100px;
+  position: relative;
+}
+issues-list-item:hover {
+  background: rgba(0,69,148,.1);
+  cursor: pointer;
+}
+
+issues-list-item div:first-child {
+  outline: none;
+}
+
+issues-list-item #issuesListItemEnter {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50px;
+  height: 100%;
+  background: rgb(0, 69, 148);
+}
+issues-list-item #issuesListItemEnter md-icon {
+  color: #FFFFFF;
+}

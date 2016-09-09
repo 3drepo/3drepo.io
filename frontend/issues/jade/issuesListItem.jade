@@ -1,0 +1,7 @@
+div(layout="column", layout-fill, ng-click="$ctrl.toggleEnter()")
+	p {{$ctrl.data.title}}
+	span(flex)
+	md-divider
+
+	#issuesListItemEnter(ng-if="$ctrl.showEnter", layout="column", layout-align="center center")
+		md-icon.angular-material-icons arrow_forward

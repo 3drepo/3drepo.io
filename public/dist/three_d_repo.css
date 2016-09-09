@@ -1666,6 +1666,33 @@ issue-area #scribbleDisplay img {
   left: -200%;
   right: -200%;
 }
+
+/** Issues List Item **************************************************************************************************/
+issues-list-item {
+  display: block;
+  height: 100px;
+  position: relative;
+}
+issues-list-item:hover {
+  background: rgba(0,69,148,.1);
+  cursor: pointer;
+}
+
+issues-list-item div:first-child {
+  outline: none;
+}
+
+issues-list-item #issuesListItemEnter {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50px;
+  height: 100%;
+  background: rgb(0, 69, 148);
+}
+issues-list-item #issuesListItemEnter md-icon {
+  color: #FFFFFF;
+}
 login {
   position: absolute;
   top: 0;
@@ -1850,26 +1877,6 @@ panel-card #helpButton {
 panel-card .statusIcon {
   outline: none;
   width: 30px;
-}
-
-panel-card .cardInfo {
-  text-align: center;
-  padding: 15px;
-  background: rgba(0,69,148,.1);
-  margin: 15px;
-  border-radius: 4px;
-}
-panel-card .cardInfo p {
-  margin: 0;
-  color: rgba(0, 0, 0, 0.7);
-  word-wrap: break-word;
-}
-
-panel-card .cardInfo md-icon {
-  margin: 0;
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
 }
 
 /** Panel Card Filter ****************************************************************************************************/

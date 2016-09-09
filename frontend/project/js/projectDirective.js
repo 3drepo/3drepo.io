@@ -278,6 +278,7 @@
 		 * @param event
 		 */
 		vm.keyAction = function (event) {
+			var i;
 			// Recreate list
 			var tmp = vm.keysDown;
 			delete vm.keysDown;
@@ -288,7 +289,12 @@
 				vm.keysDown.push(event.which);
 			}
 			else if (event.type === "keyup") {
-				vm.keysDown.splice(vm.keysDown.indexOf(event.which), 1);
+				// Remove all instances of the key (multiple instances can happen if keyup wasn't registered)
+				for (i = (vm.keysDown.length - 1); i >= 0; i -= 1) {
+					if (vm.keysDown[i] === event.which) {
+						vm.keysDown.splice(i, 1);
+					}
+				}
 			}
 		};
 	}
