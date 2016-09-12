@@ -461,7 +461,7 @@ function createFederatedProject(account, project, subProjects){
 		}
 
 		addSubProjects.push(ProjectSetting.findById({account, project: subProject.project}, subProject.project).then(setting => {
-			if(setting.federate){
+			if(setting && setting.federate){
 				return Promise.reject(responseCodes.FED_MODEL_IS_A_FED);
 
 			} else if(!federatedJSON.subProjects.find(o => o.database === subProject.database && o.project === subProject.project)) {
