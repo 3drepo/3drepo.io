@@ -17394,6 +17394,7 @@ var Oculus = {};
 		 */
 		vm.expand = function (_id) {
 			var i, length,
+				j, jLength,
 				numChildren = 0,
 				index = -1,
 				endOfSplice = false,
@@ -17458,13 +17459,16 @@ var Oculus = {};
 								}
 							}
 
-							// Determine if child node has children
+							// A child node only "hasChildren", i.e. expandable, if any of it's children have a name
 							vm.nodesToShow[index].children[i].level = vm.nodesToShow[index].level + 1;
-							if("children" in vm.nodesToShow[index].children[i]) {
-								vm.nodesToShow[index].children[i].hasChildren = vm.nodesToShow[index].children[i].children.length > 0;
-							}
-							else {
-								vm.nodesToShow[index].children[i].hasChildren = false;
+							vm.nodesToShow[index].children[i].hasChildren = false;
+							if (("children" in vm.nodesToShow[index].children[i]) && (vm.nodesToShow[index].children[i].children.length > 0)) {
+								for (j = 0, jLength = vm.nodesToShow[index].children[i].children.length; j < jLength; j++) {
+									if (vm.nodesToShow[index].children[i].children[j].hasOwnProperty("name")) {
+										vm.nodesToShow[index].children[i].hasChildren = true;
+										break;
+									}
+								}
 							}
 
 							vm.nodesToShow.splice(index + i + 1, 0, vm.nodesToShow[index].children[i]);
@@ -17794,7 +17798,6 @@ var Oculus = {};
 		 */
 		vm.selectNode = function (node) {
 			// Remove highlight from the current selection and highlight this node if not the same
-			console.log(currentSelectedNode);
 			if (currentSelectedNode !== null) {
 				currentSelectedNode.selected = false;
 				if (currentSelectedNode._id === node._id) {
@@ -17927,7 +17930,6 @@ var Oculus = {};
 			else {
 				delete clickedShown[node._id];
 			}
-			console.log(clickedShown);
 		}
 
 		/**

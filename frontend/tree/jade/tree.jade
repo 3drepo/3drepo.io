@@ -2,9 +2,10 @@
 tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 
 // Tree
-div(class="virtualRepeatInfiniteScroll", ng-show="vm.showTree")
-	md-virtual-repeat-container.vertical-container(md-top-index="vm.topIndex" ng-if="vm.showNodes")
-		.treeNodes(md-virtual-repeat="item in vm.infiniteItemsTree" md-on-demand="" class="repeated-item")
+.virtualRepeatInfiniteScroll(ng-show="vm.showTree")
+	md-virtual-repeat-container.vertical-container(md-top-index="vm.topIndex", ng-if="vm.showNodes")
+		// .treeNodes(md-virtual-repeat="item in vm.infiniteItemsTree" md-on-demand="" class="repeated-item")
+		.treeNodes.repeated-item(md-virtual-repeat="item in vm.nodesToShow")
 			.treeNode(style="margin-left:{{item.level * 20}}px", ng-if="item.name", layout="row", layout-align="start center", flex)
 				// Expand/collapse
 				md-button.md-icon-button.md-primary.expandButton(aria-label="Toggle Expand", ng-click="vm.expand(item._id)", ng-if="!item.status")
@@ -18,7 +19,7 @@ div(class="virtualRepeatInfiniteScroll", ng-show="vm.showTree")
 				// Name
 				div(flex, layout="row", layout-align="start center")
 					p(ng-click="vm.selectNode(item)" ng-class="{treeNodeSelected: item.selected}", ng-if="!item.status") {{item.name}}
-					p.noAccessName(ng-if="item.status") {{item.name}}
+					p.noAccessName(ng-if="item.status") Name {{item.name}}
 				// Toggle visibility
 				md-button.md-icon-button.md-primary.toggleButton(aria-label="Toggle Visible", ng-click="vm.toggleTreeNode(item)", ng-if="!item.status")
 					md-icon.angular-material-icons(ng-if="item.toggleState==='visible'") visibility
@@ -29,23 +30,17 @@ div(class="virtualRepeatInfiniteScroll", ng-show="vm.showTree")
 // Filter list
 div(class="virtualRepeatInfiniteScroll" ng-if="vm.showFilterList && vm.filterItemsFound")
 	md-virtual-repeat-container.vertical-container
-		.treeNodes.filterNode(
-		md-virtual-repeat="item in vm.infiniteItemsFilter"
-		md-on-demand=""
-		class="repeated-item"
-		flex=""
-		layout="row"
-		layout-align="start center")
-			div(flex)
-				// Name
-				div(layout="row", layout-align="start center", flex)
-					div(flex, layout="row", layout-align="start center")
-						p.filterListNodeName(ng-click="vm.filterItemSelected(item)", ng-class="item.class") {{item.name}}
-					// Toggle visibility
-					//md-button.md-icon-button.md-primary.toggleButton(aria-label="Toggle Visible", ng-click="vm.toggleFilterNode(item)")
-						md-icon.angular-material-icons(aria-label="Visible", ng-if="item.toggleState==='visible'") visibility
-						md-icon.angular-material-icons(aria-label="Invisible", ng-if="item.toggleState==='invisible'") visibility_off
-				md-divider(ng-if="item")
+		//.treeNodes.filterNode.repeated-item(md-virtual-repeat="item in vm.infiniteItemsFilter", md-on-demand="", flex="", layout="row", layout-align="start center")
+		.treeNodes.filterNode.repeated-item(md-virtual-repeat="item in vm.nodes")
+			// Name
+			div(layout="row", layout-align="start center", flex)
+				div(flex, layout="row", layout-align="start center")
+					p.filterListNodeName(ng-click="vm.filterItemSelected(item)", ng-class="item.class") {{item.name}}
+				// Toggle visibility
+				//md-button.md-icon-button.md-primary.toggleButton(aria-label="Toggle Visible", ng-click="vm.toggleFilterNode(item)")
+					md-icon.angular-material-icons(aria-label="Visible", ng-if="item.toggleState==='visible'") visibility
+					md-icon.angular-material-icons(aria-label="Invisible", ng-if="item.toggleState==='invisible'") visibility_off
+			md-divider(ng-if="item")
 
 .cardInfo(ng-if="vm.showFilterList && !vm.filterItemsFound")
 	p No items found
