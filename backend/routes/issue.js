@@ -24,14 +24,15 @@ var responseCodes = require('../response_codes.js');
 var Issue = require('../models/issue');
 var utils = require('../utils');
 var uuidToString = utils.uuidToString;
-
-
+var multer = require("multer");
+var config = require("../config.js");
 
 router.get('/issues/:uid.json', middlewares.hasReadAccessToProject, findIssueById);
 
 
 router.get('/issues.json', middlewares.hasReadAccessToProject, listIssues);
 router.get('/issues.bcfzip', middlewares.hasReadAccessToProject, getIssuesBCF);
+router.post('/issues.bcfzip', middlewares.hasReadAccessToProject, importBCF);
 
 router.get('/revision/:rid/issues.json', middlewares.hasReadAccessToProject, listIssues);
 router.get('/revision/:rid/issues.bcfzip', middlewares.hasReadAccessToProject, getIssuesBCF);
@@ -269,6 +270,52 @@ function renderIssuesHTML(req, res, next){
 
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function importBCF(req, res, next){
+	'use strict';
+
+	let responsePlace = utils.APIInfo(req);
+
+	//check space
+	function fileFilter(req, file, cb){
+
+		let acceptedFormat = [
+			'bcfzip', 'zip'
+		];
+
+		let format = file.originalname.split('.');
+		format = format.length <= 1 ? '' : format.splice(-1)[0];
+
+		let size = parseInt(req.headers['content-length']);
+
+		if(acceptedFormat.indexOf(format.toLowerCase()) === -1){
+			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
+		}
+
+		if(size > config.uploadSizeLimit){
+			return cb({ resCode: responseCodes.SIZE_LIMIT });
+		}
+
+		cb(null, true);
+	}
+
+	var upload = multer({ 
+		dest: config.bcf_dir,
+		fileFilter: fileFilter,
+	});
+
+	upload.single("file")(req, res, function (err) {
+		if (err) {
+			return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
+		
+		} else if(!req.file.size){
+			return responseCodes.respond(responsePlace, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
+		} else {
+			console.log(req.file);
+			Issue.importBCF(req.params.account, req.params.project, req.file.path).then(() => console.log('end')).catch(err => console.log(err.stack));
+		}
 	});
 }
 

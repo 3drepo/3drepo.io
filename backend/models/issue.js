@@ -32,12 +32,18 @@ var middlewares = require('../routes/middlewares');
 var xmlBuilder = require('xmlbuilder');
 var moment = require('moment');
 var archiver = require('archiver');
+var yauzl = require("yauzl");
+var parseXmlString = require('xml2js').parseString;
 
 var schema = Schema({
 	_id: Object,
 	object_id: Object,
 	rev_id: Object,
 	name: { type: String, required: true },
+	topic_type: String,
+	status: String,
+
+	// TO-DO: remove this after db migration => viewpoints[0]=viewpoint
 	viewpoint: {
 		up: [Number],
 		position: [Number],
@@ -52,6 +58,23 @@ var schema = Schema({
 		clippingPlanes : [Schema.Types.Mixed ],
 		guid: Object
 	},
+
+	//BCF 
+	viewpoints: [{
+		up: [Number],
+		position: [Number],
+		look_at: [Number],
+		view_dir: [Number],
+		right: [Number],
+		unityHeight : Number,
+		fov : Number,
+		aspect_ratio: Number,
+		far : Number,
+		near : Number,
+		clippingPlanes : [Schema.Types.Mixed ],
+		screenshot: Object,
+		guid: Object
+	}],
 
 	scale: Number,
 	position: [Number],
@@ -71,6 +94,7 @@ var schema = Schema({
 		sealed: Boolean,
 		rev_id: Object,
 		guid: Object,
+		viewpoint: Object, //guid backref to viewpoints
 		//bcf extra fields we don't care
 		extras: {}
 	}],
@@ -78,7 +102,6 @@ var schema = Schema({
 	closed_time: Number,
 	creator_role: String,
 	scribble: Object,
-	screenshot: Object,
 	//bcf extra fields we don't care
 	extras: {}
 });
@@ -572,6 +595,9 @@ schema.methods.generateCommentsGUID = function(){
 		if(!comment.guid){
 			comment.guid = utils.generateUUID();
 		}
+		if(!comment.viewpoint){
+			comment.viewpoint = this.viewpoint.guid;
+		}
 	});
 };
 
@@ -621,7 +647,7 @@ schema.methods.getBCFMarkup = function(){
 		commentNode.ele('Comment', comment.comment);
 		commentNode.ele('Author', comment.owner);
 		commentNode.ele('Date', moment(comment.created).utc().format());
-		commentNode.ele('Viewpoint', { 'Guid': viewPointGuid });
+		commentNode.ele('Viewpoint', { 'Guid': uuidToString(comment.viewpoint) });
 	});
 
 
@@ -695,7 +721,131 @@ schema.methods.getBCFViewpoint = function(){
 	return viewpointXml.end({ pretty: true });
 };
 
-schema.statics.importBCF = function(zipRS){
+schema.statics.importBCF = function(account, project, zipPath){
+	'use strict';
+
+	return new Promise((resolve, reject) => {
+
+		let files = {};
+		let promises = [];
+		let issues = [];
+
+		function handleZip(err, zipfile) {
+			if(err){
+				return reject(err);
+			}
+
+			zipfile.readEntry();
+
+			zipfile.on('entry', entry => handleEntry(zipfile, entry));
+
+			zipfile.on('end', entry => {
+
+				Promise.all(promises).then(() => {
+
+					let createIssueProms = [];
+
+					Object.keys(files).forEach(guid => {
+						createIssueProms.push(createIssue(guid));
+					});
+
+					return Promise.all(createIssueProms);
+
+				}).then(() => {
+					resolve();
+				}).catch(err => {
+					reject(err);
+				});
+			});
+
+		}
+
+
+		function createIssue(guid){
+		
+			return new Promise((resolve, reject) => {
+
+				let issueFiles = files[guid];
+				let markupBuf = issueFiles[`${guid}/markup.bcf`];
+
+				if(markupBuf){
+
+					let xml = markupBuf.toString('utf8');
+
+					parseXmlString(xml, {explicitCharkey: 1}, function (err, xml) {
+
+						if(err){
+							return reject(err);
+						} 
+
+						let issue = Issue.createInstance({account, project});
+						issue._id = stringToUUID(guid);
+						issue.extras = {};
+
+						if(xml.Markup){
+							xml.Markup.Header && (issue.extras.Header = xml.Markup.Header);
+							xml.Markup.Topic[0].ReferenceLink && (issue.extras.ReferenceLink = xml.Markup.Topic[0].ReferenceLink);
+							issue.priority = xml.Markup.Topic[0].Priority[0]._;
+							issue.topic_type = xml.Markup.Topic[0].$.TopicType;
+							issue.status = xml.Markup.Topic[0].$.TopicStatus;
+							issue.name = xml.Markup.Topic[0].Title[0]._;
+						}
+						
+
+						console.log(JSON.stringify(issue.clean(), null ,2));
+
+						resolve();
+
+					});
+				}
+			});
+
+		}
+
+		function handleEntry(zipfile, entry) {
+			// handle each entry
+
+			let paths = entry.fileName.split('/');
+			let guid = paths[0] && utils.isUUID(paths[0]) && paths[0];
+
+			if(guid && !files[guid]){
+				files[guid] = {};
+			}
+
+			// if entry is a file and start with guid
+			console.log(entry.fileName)
+			if(!entry.fileName.endsWith('/') && guid){
+
+				promises.push(new Promise( (resolve, reject) => {
+					zipfile.openReadStream(entry, (err, rs) => {
+						if(err){
+							return reject(err);
+						} else {
+
+							let bufs = [];
+
+							rs.on('data', d => bufs.push(d) );
+
+							rs.on('end', () => {
+								let buf = Buffer.concat(bufs);
+								files[guid][entry.fileName] = buf;
+								resolve();
+							});
+
+							rs.on('error', err =>{
+								reject(err);
+							});
+						}
+					});
+				}));
+			} 
+
+			zipfile.readEntry();
+
+		}
+
+		yauzl.open(zipPath, {lazyEntries: true}, handleZip);
+	});
 
 }
 
