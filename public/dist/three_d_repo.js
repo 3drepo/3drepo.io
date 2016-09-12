@@ -6300,11 +6300,9 @@ var ViewerManager = {};
 						});
 					}
 					else {
-<<<<<<< HEAD
 
-=======
 						vm.uploadFileName = file.name;
->>>>>>> ISSUE_245
+
 						formData = new FormData();
 						formData.append("file", file);
 
