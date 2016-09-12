@@ -11769,8 +11769,7 @@ angular.module('3drepo')
 				controller: IssueCompCtrl,
 				templateUrl: "issueComp.html",
 				bindings: {
-					data: "<",
-					onEditIssue: "="
+					data: "<"
 				}
 			}
 		);
@@ -12218,7 +12217,8 @@ angular.module('3drepo')
 			pickedPos = null,
 			pickedNorm = null,
 			pinHighlightColour = [1.0000, 0.7, 0.0],
-			selectedIssuesListItemId = null;
+			selectedIssue = null,
+			selectedIssueIndex = null;
 
 		/*
 		 * Init
@@ -12657,6 +12657,7 @@ angular.module('3drepo')
 		/*
 		 * Handle parent notice to hide a selected issue or add issue
 		 */
+		/*
 		$scope.$watch("vm.hideItem", function (newValue) {
 			if (angular.isDefined(newValue) && newValue) {
 				vm.autoSaveComment = true; // Auto save a comment if needed
@@ -12693,6 +12694,7 @@ angular.module('3drepo')
 				});
 			}
 		});
+		*/
 
 		/**
 		 * Make the selected issue fill the content and notify the parent
@@ -12929,23 +12931,6 @@ angular.module('3drepo')
 			$timeout.cancel(vm.infoTimeout);
 		};
 
-		vm.sendEvent = function (type, value) {
-			EventService.send(type, value);
-		};
-
-		vm.issuesListItemSelect = function (issueId) {
-			if (selectedIssuesListItemId === null) {
-				selectedIssuesListItemId = issueId;
-			}
-			else if (selectedIssuesListItemId === issueId) {
-				selectedIssuesListItemId = null;
-			}
-			else {
-				vm.deselectIssueListItemId = selectedIssuesListItemId;
-				selectedIssuesListItemId = issueId;
-			}
-		};
-
 		/**
 		 * Set the content height
 		 */
@@ -12963,10 +12948,13 @@ angular.module('3drepo')
 				openIssueFooterHeight = 180,
 				closedIssueFooterHeight = 60,
 				infoHeight = 80,
-				issuesMinHeight = 260;
+				issuesMinHeight = 260,
+				issueListItemHeight = 150,
+				addButtonHeight = 75;
 
 			switch (vm.toShow) {
 				case "showIssues":
+					/*
 					issuesHeight = 0;
 					for (i = 0, length = vm.issuesToShow.length; (i < length); i += 1) {
 						issuesHeight += issueMinHeight;
@@ -12976,6 +12964,8 @@ angular.module('3drepo')
 					}
 					height = issuesHeight;
 					height = (height < issuesMinHeight) ? issuesMinHeight : issuesHeight;
+					*/
+					height = (vm.issuesToShow.length * issueListItemHeight) + addButtonHeight;
 					break;
 
 				case "showIssue":
@@ -13046,6 +13036,97 @@ angular.module('3drepo')
 			});
 			*/
 		}
+
+		/* New Stuff **************************************************************************************************/
+
+		vm.sendEvent = function (type, value) {
+			EventService.send(type, value);
+		};
+
+		vm.issueSelect = function (issue) {
+			var i, length;
+
+			if (selectedIssue === null) {
+				selectedIssue = issue;
+				showIssue(selectedIssue);
+			}
+			else if (selectedIssue._id === issue._id) {
+				selectedIssue = null;
+			}
+			else {
+				vm.selectIssue = {issue: selectedIssue, selected: false};
+				selectedIssue = issue;
+				showIssue(selectedIssue);
+			}
+
+			if (selectedIssue !== null) {
+				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
+					if (vm.issuesToShow[i]._id === selectedIssue._id) {
+						selectedIssueIndex = i;
+					}
+				}
+			}
+		};
+
+		vm.editIssue = function (issue) {
+			vm.issueToEdit = issue;
+			vm.toShow = "showIssue";
+			vm.onShowItem();
+		};
+
+		$scope.$watch("vm.hideItem", function (newValue) {
+			if (angular.isDefined(newValue) && newValue) {
+				vm.toShow = "showIssues";
+				if (selectedIssue !== null) {
+					vm.selectIssue = {issue: selectedIssue, selected: true};
+				}
+			}
+		});
+
+		function showIssue (issue) {
+			EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
+			// Highlight pin, move camera and setup clipping plane
+			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, {
+				id: issue._id,
+				colours: pinHighlightColour
+			});
+
+			EventService.send(EventService.EVENT.VIEWER.SET_CAMERA, {
+				position : issue.viewpoint.position,
+				view_dir : issue.viewpoint.view_dir,
+				up: issue.viewpoint.up
+			});
+
+			EventService.send(EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, {
+				clippingPlanes: issue.viewpoint.clippingPlanes
+			});
+
+			// Wait for camera to stop before showing a scribble
+			$timeout(function () {
+				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, issue: issue});
+			}, 1100);
+		}
+
+		$scope.$watch("vm.keysDown", function () {
+			var upArrow = 38,
+				downArrow = 40;
+
+			if (angular.isDefined(vm.keysDown) && (vm.keysDown.length > 0) && (selectedIssueIndex !== null)) {
+				if ((vm.keysDown[0] === downArrow) && (selectedIssueIndex !== (vm.issuesToShow.length - 1))) {
+					vm.selectIssue = {issue: selectedIssue, selected: false};
+					selectedIssueIndex += 1;
+				}
+				else if ((vm.keysDown[0] === upArrow) && (selectedIssueIndex !== 0)) {
+					vm.selectIssue = {issue: selectedIssue, selected: false};
+					selectedIssueIndex -= 1;
+				}
+				$timeout(function () {
+					selectedIssue = vm.issuesToShow[selectedIssueIndex];
+					vm.selectIssue = {issue: selectedIssue, selected: true};
+					showIssue(selectedIssue);
+				});
+			}
+		});
 	}
 }());
 
@@ -13138,8 +13219,10 @@ angular.module('3drepo')
 				templateUrl: "issuesListItem.html",
 				bindings: {
 					data: "<",
-					deselect: "<",
-					onSelect: "&"
+					select: "<",
+					onSelect: "&",
+					onEditIssue: "&",
+					keysDown: "<"
 				}
 			}
 		);
@@ -13147,19 +13230,31 @@ angular.module('3drepo')
 	IssuesListItemCtrl.$inject = [];
 
 	function IssuesListItemCtrl () {
-		this.showEnter = false;
+		this.selected = false;
+		this.thumbnail = "/public/images/ground.png";
 
-		this.toggleEnter = function () {
-			this.showEnter = !this.showEnter;
-			if (this.showEnter) {
+		this.$onChanges = function (changes) {
+			if (changes.hasOwnProperty("data") &&
+				angular.isDefined(changes.data.currentValue)) {
+				//console.log(this.data);
+			}
+
+			if (changes.hasOwnProperty("select") &&
+				angular.isDefined(changes.select.currentValue) &&
+				(this.select.issue._id === this.data._id)) {
+				this.selected = this.select.selected;
+			}
+		};
+
+		this.toggleSelected = function () {
+			this.selected = !this.selected;
+			if (this.selected) {
 				this.onSelect({issueId: this.data._id});
 			}
 		};
 
-		this.$onChanges = function (changes) {
-			if (changes.hasOwnProperty("deselect") && (this.deselect === this.data._id)) {
-				this.showEnter = false;
-			}
+		this.editIssue = function () {
+			this.onEditIssue({issue: this.data});
 		};
 	}
 }());
@@ -13214,7 +13309,7 @@ angular.module('3drepo')
 		 */
 		this.$onChanges = function (changes) {
 			//console.log(changes);
-			if (changes.hasOwnProperty("keysDown")) {
+			if (changes.hasOwnProperty("keysDown") && angular.isDefined(this.keysDown)) {
 				multiMode = ((isMac && this.keysDown.indexOf(cmdKey) !== -1) || (!isMac && this.keysDown.indexOf(ctrlKey) !== -1));
 				if (multiMode) {
 					this.displaySelectedObjects(selectedObjectIDs);
@@ -14327,7 +14422,7 @@ var Oculus = {};
 				createCardContent();
 				createToolbarOptions();
 				createFilter();
-				createAdd();
+				//createAdd();
 				vm.statusIcon = vm.contentData.icon;
 			}
 		});

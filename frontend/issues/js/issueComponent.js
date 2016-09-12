@@ -25,8 +25,7 @@
 				controller: IssueCompCtrl,
 				templateUrl: "issueComp.html",
 				bindings: {
-					data: "<",
-					onEditIssue: "="
+					data: "<"
 				}
 			}
 		);

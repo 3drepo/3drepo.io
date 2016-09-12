@@ -26,8 +26,10 @@
 				templateUrl: "issuesListItem.html",
 				bindings: {
 					data: "<",
-					deselect: "<",
-					onSelect: "&"
+					select: "<",
+					onSelect: "&",
+					onEditIssue: "&",
+					keysDown: "<"
 				}
 			}
 		);
@@ -35,19 +37,31 @@
 	IssuesListItemCtrl.$inject = [];
 
 	function IssuesListItemCtrl () {
-		this.showEnter = false;
+		this.selected = false;
+		this.thumbnail = "/public/images/ground.png";
 
-		this.toggleEnter = function () {
-			this.showEnter = !this.showEnter;
-			if (this.showEnter) {
+		this.$onChanges = function (changes) {
+			if (changes.hasOwnProperty("data") &&
+				angular.isDefined(changes.data.currentValue)) {
+				//console.log(this.data);
+			}
+
+			if (changes.hasOwnProperty("select") &&
+				angular.isDefined(changes.select.currentValue) &&
+				(this.select.issue._id === this.data._id)) {
+				this.selected = this.select.selected;
+			}
+		};
+
+		this.toggleSelected = function () {
+			this.selected = !this.selected;
+			if (this.selected) {
 				this.onSelect({issueId: this.data._id});
 			}
 		};
 
-		this.$onChanges = function (changes) {
-			if (changes.hasOwnProperty("deselect") && (this.deselect === this.data._id)) {
-				this.showEnter = false;
-			}
+		this.editIssue = function () {
+			this.onEditIssue({issue: this.data});
 		};
 	}
 }());

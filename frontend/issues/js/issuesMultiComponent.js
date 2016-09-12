@@ -49,7 +49,7 @@
 		 */
 		this.$onChanges = function (changes) {
 			//console.log(changes);
-			if (changes.hasOwnProperty("keysDown")) {
+			if (changes.hasOwnProperty("keysDown") && angular.isDefined(this.keysDown)) {
 				multiMode = ((isMac && this.keysDown.indexOf(cmdKey) !== -1) || (!isMac && this.keysDown.indexOf(ctrlKey) !== -1));
 				if (multiMode) {
 					this.displaySelectedObjects(selectedObjectIDs);

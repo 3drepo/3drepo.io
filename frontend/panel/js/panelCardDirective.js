@@ -68,7 +68,7 @@
 				createCardContent();
 				createToolbarOptions();
 				createFilter();
-				createAdd();
+				//createAdd();
 				vm.statusIcon = vm.contentData.icon;
 			}
 		});

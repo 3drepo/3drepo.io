@@ -241,7 +241,7 @@ issue-area #scribbleDisplay img {
 /** Issues List Item **************************************************************************************************/
 issues-list-item {
   display: block;
-  height: 100px;
+  height: 150px;
   position: relative;
 }
 issues-list-item:hover {
@@ -253,6 +253,50 @@ issues-list-item div:first-child {
   outline: none;
 }
 
+issues-list-item #issuesListItemContent {
+  padding: 10px;
+}
+
+issues-list-item #issuesListItemTitle {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+issues-list-item #issuesListItemTitle,
+issues-list-item #issuesListItemInfo {
+  margin-bottom: 10px;
+}
+
+issues-list-item #issuesListItemInfo label,
+issues-list-item #issuesListItemDescription label {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+issues-list-item #issueListItemThumbnail {
+  padding-right: 10px;
+}
+issues-list-item #issueListItemThumbnail img {
+  width: 100%;
+}
+
+issues-list-item #issuesListItemDescription {
+  height: 70px;
+}
+issues-list-item #issuesListItemDescription label {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+issues-list-item #issuesListItemStatus {
+  width: 20px;
+  height: 20px;
+  background: green;
+  border-radius: 100px;
+}
+
 issues-list-item #issuesListItemEnter {
   position: absolute;
   top: 0;
@@ -260,6 +304,7 @@ issues-list-item #issuesListItemEnter {
   width: 50px;
   height: 100%;
   background: rgb(0, 69, 148);
+  outline: none;
 }
 issues-list-item #issuesListItemEnter md-icon {
   color: #FFFFFF;

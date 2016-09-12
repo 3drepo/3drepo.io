@@ -14,9 +14,13 @@ div(ng-switch="vm.toShow")
 		issues-list-item(
 		ng-repeat="issue in vm.issuesToShow"
 		data="issue"
-		on-edit-issue="vm.editIssue($index)"
-		deselect="vm.deselectIssueListItemId"
-		on-select="vm.issuesListItemSelect(issueId)")
+		on-edit-issue="vm.editIssue(issue)"
+		select="vm.selectIssue"
+		on-select="vm.issueSelect(issue)")
+		div(layout="row" layout-align="end" layout-margin)
+			md-button.md-accent.md-fab.md-mini(aria-label="Add" ng-click="vm.editIssue()")
+				md-icon.angular-material-icons add
+
 		//div(ng-repeat="issue in vm.issuesToShow")
 			.issueHeader
 				issue-header(
@@ -32,8 +36,7 @@ div(ng-switch="vm.toShow")
 	// Issue
 	issue-comp(
 	ng-switch-when="showIssue"
-	index="vm.selectedIndex"
-	data="vm.selectedIssue")
+	data="vm.issueToEdit")
 	//issue(
 		ng-switch-when="showIssue"
 		index="vm.selectedIndex"
