@@ -130,10 +130,6 @@ function getBillingAgreement(
 ){
 	'use strict';
 
-	console.log('firstCycleAmount', firstCycleAmount);
-	console.log('regularAmount', regularAmount);
-	console.log('startDate', startDate);
-
 	let apiServerConfig = config.servers.find(server => server.service === 'api');
 	let port = '';
 	if(config.using_ssl && apiServerConfig.public_port !== 443 || !config.using_ssl && apiServerConfig.public_port !== 80){
@@ -202,8 +198,6 @@ function getBillingAgreement(
 	};
 
 
-	console.log(JSON.stringify(billingPlanAttributes, null ,2));
-
 	return new Promise((resolve, reject) => {
 
 		// create plan
@@ -254,9 +248,9 @@ function getBillingAgreement(
 			if (firstCycleAmount){
 				desc += `This month's pro-rata: £${firstCycleAmount}. `;
 			}
-			desc += `Regualr monthly recurring payment £${regularAmount}, starts on ${moment(startDate).utc().format('Do MMM YYYY')}`;
+			desc += `Regular monthly recurring payment £${regularAmount}, starts on ${moment(startDate).utc().format('Do MMM YYYY')}`;
 			
-			console.log('desc len', desc.length);
+
 
 			let billingAgreementAttributes = {
 				"name": "3D Repo Licenses",
@@ -271,8 +265,7 @@ function getBillingAgreement(
 				"shipping_address": billingAddress
 			};
 
-			console.log(JSON.stringify(billingAgreementAttributes, null , 2));
-			console.log('creating agreement...');
+
 			paypal.billingAgreement.create(billingAgreementAttributes, function (err, billingAgreement) {
 				if (err) {
 					//console.log(err);
@@ -281,7 +274,6 @@ function getBillingAgreement(
 					reject(paypalError);
 				} else {
 
-					console.log(JSON.stringify(billingAgreement, null ,2));
 					let link = billingAgreement.links.find(link => link.rel === 'approval_url');
 					let token = url.parse(link.href, true).query.token;
 
@@ -321,7 +313,6 @@ function updateBillingAddress(billingAgreementId, billingAddress){
 				paypalError.message = err.response.message;
 				reject(paypalError);
 			} else {
-				console.log(JSON.stringify(billingAgreement));
 				resolve(billingAgreement);
 			}
 		});
