@@ -160,7 +160,7 @@
 			
 			vm.uploadErrorMessage = null;
 
-			if(!vm.tag.match(/^[a-zA-Z0-9_-]{3,20}$/)){
+			if(RevisionsService.isTagFormatInValid(vm.tag)){
 				vm.uploadErrorMessage = 'Invalid revision name';
 			} else {
 				getRevision().then(function(revisions){

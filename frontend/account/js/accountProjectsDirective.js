@@ -37,9 +37,9 @@
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService"];
 
-	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService) {
+	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService) {
 		var vm = this,
 			// existingProjectToUpload,
 			// existingProjectFileUploader,
@@ -179,6 +179,13 @@
 			}
 
 			if (doSave) {
+
+				if(RevisionsService.isTagFormatInValid(vm.tag)){
+					vm.showNewProjectErrorMessage = true;
+					vm.newProjectErrorMessage = 'Invalid revision name';
+					return;
+				}
+
 				promise = AccountService.newProject(vm.newProjectData);
 				promise.then(function (response) {
 					console.log(response);
