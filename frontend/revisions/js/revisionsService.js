@@ -35,6 +35,13 @@
 			});
 		}
 
-		return { listAll: listAll};
+		function isTagFormatInValid(tag){
+			return tag && !tag.match(server_config.tagRegExp);
+		}
+
+		return { 
+			listAll: listAll,
+			isTagFormatInValid: isTagFormatInValid
+		};
 	}
 }());

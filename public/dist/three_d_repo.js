@@ -6238,7 +6238,7 @@ var ViewerManager = {};
 			
 			vm.uploadErrorMessage = null;
 
-			if(!vm.tag.match(/^[a-zA-Z0-9_-]{3,20}$/)){
+			if(RevisionsService.isTagFormatInValid(vm.tag)){
 				vm.uploadErrorMessage = 'Invalid revision name';
 			} else {
 				getRevision().then(function(revisions){
@@ -6465,9 +6465,9 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService"];
 
-	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService) {
+	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService) {
 		var vm = this,
 			// existingProjectToUpload,
 			// existingProjectFileUploader,
@@ -6614,6 +6614,13 @@ var ViewerManager = {};
 			}
 
 			if (doSave) {
+
+				if(RevisionsService.isTagFormatInValid(vm.tag)){
+					vm.showNewProjectErrorMessage = true;
+					vm.newProjectErrorMessage = 'Invalid revision name';
+					return;
+				}
+
 				promise = AccountService.newProject(vm.newProjectData);
 				promise.then(function (response) {
 					console.log(response);
@@ -16752,7 +16759,14 @@ var Oculus = {};
 			});
 		}
 
-		return { listAll: listAll};
+		function isTagFormatInValid(tag){
+			return tag && !tag.match(server_config.tagRegExp);
+		}
+
+		return { 
+			listAll: listAll,
+			isTagFormatInValid: isTagFormatInValid
+		};
 	}
 }());
 
