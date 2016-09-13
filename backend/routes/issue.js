@@ -276,7 +276,7 @@ function renderIssuesHTML(req, res, next){
 function importBCF(req, res, next){
 	'use strict';
 
-	let responsePlace = utils.APIInfo(req);
+	let place = utils.APIInfo(req);
 
 	//check space
 	function fileFilter(req, file, cb){
@@ -313,8 +313,12 @@ function importBCF(req, res, next){
 		} else if(!req.file.size){
 			return responseCodes.respond(responsePlace, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 		} else {
-			console.log(req.file);
-			Issue.importBCF(req.params.account, req.params.project, req.file.path).then(() => console.log('end')).catch(err => console.log(err.stack));
+
+			Issue.importBCF(req.params.account, req.params.project, req.file.path).then(() => {
+				responseCodes.respond(place, req, res, next, responseCodes.OK, {'status': 'ok'});
+			}).catch(err => {
+				responseCodes.respond(place, req, res, next, err, err);
+			});
 		}
 	});
 }

@@ -29,12 +29,22 @@ var GenericObject = require('./base/repo').GenericObject;
 var uuid = require("node-uuid");
 var responseCodes = require('../response_codes.js');
 var middlewares = require('../routes/middlewares');
-var xmlBuilder = require('xmlbuilder');
+// var xmlBuilder = require('xmlbuilder');
 var moment = require('moment');
 var archiver = require('archiver');
 var yauzl = require("yauzl");
 var xml2js = require('xml2js');
 var _ = require('lodash');
+var xmlBuilder = new xml2js.Builder({
+	explicitRoot: false,
+	xmldec: {
+		version: '1.0',
+		encoding: 'UTF-8',
+		standalone: false
+	},
+	explicitCharkey: true,
+	attrkey: '@'
+});
 
 var schema = Schema({
 	_id: Object,
@@ -75,7 +85,8 @@ var schema = Schema({
 		clippingPlanes : [Schema.Types.Mixed ],
 		screenshot: Object,
 		guid: Object,
-		extras: {}
+		extras: {},
+		scribble: Object
 	}],
 
 	scale: Number,
@@ -348,12 +359,18 @@ schema.statics.getBCFZipReadStream = function(account, project, username, branch
 
 		issues.forEach(issue => {
 
-			zip.append(new Buffer(issue.getBCFMarkup(), 'utf8'), {name: `${uuidToString(issue._id)}/markup.bcf`})
-			.append(new Buffer(issue.getBCFViewpoint(), 'utf8'), {name: `${uuidToString(issue._id)}/viewpoint.bcfv`});
+			let bcf = issue.getBCFMarkup();
 
-			if(issue.screenshot){
-				zip.append(issue.screenshot.buffer, {name: `${uuidToString(issue._id)}/snapshot.png`});
-			}
+			zip.append(new Buffer(bcf.markup, 'utf8'), {name: `${uuidToString(issue._id)}/markup.bcf`});
+
+			bcf.viewpoints.forEach(vp => {
+				zip.append(new Buffer(vp.xml, 'utf8'), {name: `${uuidToString(issue._id)}/${vp.filename}`});
+			});
+
+			bcf.snapshots.forEach(snapshot => {
+				zip.append(snapshot.snapshot.buffer, {name: `${uuidToString(issue._id)}/${snapshot.filename}`});
+			});
+
 		});
 
 		zip.finalize();
@@ -629,46 +646,193 @@ schema.methods.getBCFMarkup = function(){
 	this.generateViewpointGUID();
 	this.generateCommentsGUID();
 	this.save();
+	
+	let viewpointEntries = [];
+	let snapshotEntries = [];
 
 	let markup = {
 		Markup:{
-			'@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-			'@xmlns:xsd': 'http://www.w3.org/2001/XMLSchema',
+			'@' : {
+				'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+				'xmlns:xsd': 'http://www.w3.org/2001/XMLSchema'
+			},
 			Header:{},
 			Topic: {
-				'@Guid': uuidToString(this._id),
-				'@TopicStatus': this.closed ? 'Closed' : 'Open',
+				'@' : {
+					'Guid': uuidToString(this._id),
+					'TopicStatus': this.status ? this.status : (this.closed ? 'closed' : 'pen')
+				},
 				'Priority': this.priority,
 				'Title': this.name ,
 				'CreationDate': moment(this.created).utc().format() ,
-				'CreationAuthor': this.owner 
-			}
+				'CreationAuthor': this.owner,
+				'Description': this.desc
+			},
+			'Comment': [],
+			'Viewpoints': [],
 		}
 	};
 
-	let markupXml = xmlBuilder.create(markup, {version: '1.0', encoding: 'UTF-8'});
+	this.topic_type && (markup.Markup.Topic['@'].TopicType = this.topic_type);
 
-	let viewPointGuid = uuidToString(this.viewpoint.guid);
+	markup.Markup.Header = _.get(this, 'extras.Header');
+	markup.Markup.Topic.ReferenceLink = _.get(this, 'extras.ReferenceLink');
+	markup.Markup.Topic.Index = _.get(this, 'extras.Index');
+	markup.Markup.Topic.Labels = _.get(this, 'extras.Labels');
+	markup.Markup.Topic.ModifiedDate = _.get(this, 'extras.ModifiedDate');
+	markup.Markup.Topic.ModifiedAuthor = _.get(this, 'extras.ModifiedAuthor');
+	markup.Markup.Topic.DueDate = _.get(this, 'extras.DueDate');
+	markup.Markup.Topic.AssignedTo = _.get(this, 'extras.AssignedTo');
+	markup.Markup.Topic.BimSnippet = _.get(this, 'extras.BimSnippet');
+	markup.Markup.Topic.DocumentReference = _.get(this, 'extras.DocumentReference');
+	markup.Markup.Topic.RelatedTopic = _.get(this, 'extras.RelatedTopic');
 	
-	if(this.comments.length > 0){
-		let vpNode = markupXml.ele('Viewpoints', { 'Guid': viewPointGuid });
-		vpNode.ele('Viewpoint', 'viewpoint.bcfv');
-		if(this.screenshot){
-			vpNode.ele('Snapshot', 'snapshot.png');
-		}
-	}
-
+	//add comments
 	this.comments.forEach(comment => {
-		let commentNode = markupXml.ele('Comment', { 'Guid': uuidToString(comment.guid) });
-		commentNode.ele('Comment', comment.comment);
-		commentNode.ele('Author', comment.owner);
-		commentNode.ele('Date', moment(comment.created).utc().format());
-		commentNode.ele('Viewpoint', { 'Guid': uuidToString(comment.viewpoint) });
+
+		let commentXmlObj = {
+			'@':{
+				Guid: utils.uuidToString(comment.guid)
+			},
+			'Author': comment.owner,
+			'Comment': comment.comment,
+			'Viewpoint': utils.uuidToString(comment.viewpoint),
+			'Date': moment(comment.created).utc().format()
+		};
+
+		commentXmlObj.ModifiedDate = _.get(comment, 'extras.ModifiedDate');
+		commentXmlObj.ModifiedAuthor = _.get(comment, 'extras.ModifiedAuthor');
+
+		markup.Markup.Comment.push(commentXmlObj);
+
 	});
 
 
+	// generate viewpoints
+	if(this.comments.length > 0 && this.viewpoints.length > 0){
 
-	return markupXml.end({ pretty: true });
+		let snapshotNo = 0;
+
+		this.viewpoints.forEach((vp, index) => {
+
+			let number = index === 0 ? '' : index;
+			let viewpointFileName = `viewpoint${number}.bcfv`;
+			let snapshotFileName = `snapshot${(snapshotNo === 0 ? '' : snapshotNo)}.png`;
+
+			let vpObj = {
+				'@': {
+					'Guid': utils.uuidToString(vp.guid)
+				},
+				'Viewpoint': viewpointFileName,
+				
+			};
+
+			if(vp.screenshot){
+				vpObj.Snapshot = snapshotFileName;
+				snapshotNo++;
+			}
+
+			vp.extras.Index && (vpObj.Index = vp.extras.Index);
+
+			markup.Markup.Viewpoints.push(vpObj);
+			
+			let viewpointXmlObj = {
+				VisualizationInfo:{
+					'@':{
+						'Guid': utils.uuidToString(vp.guid),
+						'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+						'xmlns:xsd': 'http://www.w3.org/2001/XMLSchema',
+					},
+					'PerspectiveCamera':{
+						CameraViewPoint:{
+							X: vp.look_at[0],
+							Y: vp.look_at[1],
+							Z: vp.look_at[2]
+						},
+						CameraDirection:{
+							X: vp.view_dir[0],
+							Y: vp.view_dir[1],
+							Z: vp.view_dir[2]
+						},
+						CameraUpVector:{
+							X: vp.up[0],
+							Y: vp.up[1],
+							Z: vp.up[2]
+						},
+						FieldOfView: vp.fov
+					}
+				}
+			};
+
+			viewpointXmlObj.VisualizationInfo.Components = vp.extras.Components;
+			viewpointXmlObj.VisualizationInfo.Spaces = vp.extras.Spaces;
+			viewpointXmlObj.VisualizationInfo.SpaceBoundaries = vp.extras.SpaceBoundaries;
+			viewpointXmlObj.VisualizationInfo.Openings = vp.extras.Openings;
+			viewpointXmlObj.VisualizationInfo.OrthogonalCamera = vp.extras.OrthogonalCamera;
+			viewpointXmlObj.VisualizationInfo.Lines = vp.extras.Lines;
+			viewpointXmlObj.VisualizationInfo.ClippingPlanes = vp.extras.ClippingPlanes;
+			viewpointXmlObj.VisualizationInfo.Bitmap = vp.extras.Bitmap;
+
+			viewpointEntries.push({
+				filename: viewpointFileName,
+				xml:  xmlBuilder.buildObject(viewpointXmlObj)
+			});
+
+
+			if(vp.screenshot){
+				snapshotEntries.push({
+					filename: snapshotFileName,
+					snapshot: vp.screenshot
+				});
+			}
+
+
+		});
+	} else if (this.comments.length > 0){
+		//only add viewpoint node if there is at least one comment
+
+		markup.Markup.Viewpoints.push({
+			'@': { 'Guid': utils.uuidToString(this.viewpoint.guid) },
+			'Viewpoint': 'viewpoint.bcfv'
+		});
+
+		viewpointEntries.push({
+			filename: 'viewpoint.bcfv',
+			xml:  xmlBuilder.buildObject({
+				VisualizationInfo:{
+					'@':{
+						'Guid': utils.uuidToString(this.viewpoint.guid),
+						'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+						'xmlns:xsd': 'http://www.w3.org/2001/XMLSchema',
+					},
+					'PerspectiveCamera':{
+						CameraViewPoint:{
+							X: this.viewpoint.look_at[0],
+							Y: this.viewpoint.look_at[1],
+							Z: this.viewpoint.look_at[2]
+						},
+						CameraDirection:{
+							X: this.viewpoint.view_dir[0],
+							Y: this.viewpoint.view_dir[1],
+							Z: this.viewpoint.view_dir[2]
+						},
+						CameraUpVector:{
+							X: this.viewpoint.up[0],
+							Y: this.viewpoint.up[1],
+							Z: this.viewpoint.up[2]
+						},
+						FieldOfView: this.viewpoint.fov
+					}
+				}
+			})
+		});
+	}
+
+	return {
+		markup: xmlBuilder.buildObject(markup),
+		viewpoints: viewpointEntries,
+		snapshots: snapshotEntries
+	};
 };
 
 schema.statics.getBCFVersion = function(){
@@ -688,10 +852,12 @@ schema.statics.getProjectBCF = function(projectId){
 
 	let project = {
 		ProjectExtension:{
-			'@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-			'@xmlns:xsd': 'http://www.w3.org/2001/XMLSchema',
-			Project: {
-				'@ProjectId': projectId,
+			'@' : {
+				'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+				'xmlns:xsd': 'http://www.w3.org/2001/XMLSchema'
+			},
+			'Project': {
+				'@': { 'ProjectId': projectId },
 				'Name': projectId,
 			},
 			'ExtensionSchema': {
@@ -700,42 +866,9 @@ schema.statics.getProjectBCF = function(projectId){
 		}
 	};
 
-	return xmlBuilder.create(project, {version: '1.0', encoding: 'UTF-8'}).end({ pretty: true });
+	return xmlBuilder.buildObject(project);
 };
 
-schema.methods.getBCFViewpoint = function(){
-	'use strict';
-
-	let viewpoint = {
-		VisualizationInfo:{
-			'@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-			'@xmlns:xsd': 'http://www.w3.org/2001/XMLSchema',
-			PerspectiveCamera:{
-				CameraViewPoint:{
-					X: this.viewpoint.position[0],
-					Y: this.viewpoint.position[1],
-					Z: this.viewpoint.position[2]
-				},
-				CameraDirection:{
-					X: this.viewpoint.view_dir[0],
-					Y: this.viewpoint.view_dir[1],
-					Z: this.viewpoint.view_dir[2]
-				},
-				CameraUpVector:{
-					X: this.viewpoint.up[0],
-					Y: this.viewpoint.up[1],
-					Z: this.viewpoint.up[2]
-				},
-				FieldOfView: this.viewpoint.fov
-			}
-		}
-
-	};
-
-	let viewpointXml =  xmlBuilder.create(viewpoint, {version: '1.0', encoding: 'UTF-8'});
-
-	return viewpointXml.end({ pretty: true });
-};
 
 schema.statics.importBCF = function(account, project, zipPath){
 	'use strict';
@@ -744,7 +877,6 @@ schema.statics.importBCF = function(account, project, zipPath){
 
 		let files = {};
 		let promises = [];
-		let issues = [];
 
 		function handleZip(err, zipfile) {
 			if(err){
@@ -755,14 +887,25 @@ schema.statics.importBCF = function(account, project, zipPath){
 
 			zipfile.on('entry', entry => handleEntry(zipfile, entry));
 
-			zipfile.on('end', entry => {
+			zipfile.on('end', () => {
 
 				Promise.all(promises).then(() => {
 
 					let createIssueProms = [];
 
 					Object.keys(files).forEach(guid => {
-						createIssueProms.push(createIssue(guid));
+
+						let promise = Issue.count({account, project}, { _id: utils.stringToUUID(guid)}).then(count => {
+							if(count <= 0) {
+								return createIssue(guid);
+							} else {
+								console.log('duplicate issue');
+								return Promise.resolve();
+							}
+						});
+
+						createIssueProms.push(promise);
+
 					});
 
 					return Promise.all(createIssueProms);
@@ -783,18 +926,21 @@ schema.statics.importBCF = function(account, project, zipPath){
 
 			vps && vps.forEach(vp => {
 
-				if(!_.get(vp, '$.Guid')){
+				if(!_.get(vp, '@.Guid')){
 					return;
 				}
 				
 				let vpFile = issueFiles[`${issueGuid}/${_.get(vp, 'Viewpoint[0]._')}`];
 
-				viewpoints[vp.$.Guid] = {
+				viewpoints[vp['@'].Guid] = {
 					snapshot: issueFiles[`${issueGuid}/${_.get(vp, 'Snapshot[0]._')}`],
-				}
+				};
 
-				vpFile && promises.push(parseXmlString(vpFile.toString('utf8'), {explicitCharkey: 1}).then(xml => {
-					viewpoints[vp.$.Guid].viewpoint = xml;
+				vpFile && promises.push(parseXmlString(vpFile.toString('utf8'), {explicitCharkey: 1, attrkey: '@'}).then(xml => {
+					viewpoints[vp['@'].Guid].viewpointXml = xml;
+					viewpoints[vp['@'].Guid].Index = _.get(vp, 'Index');
+					viewpoints[vp['@'].Guid].Viewpoint = _.get(vp, 'Viewpoint');
+					viewpoints[vp['@'].Guid].Snapshot = _.get(vp, 'Snapshot');
 				}));
 
 			});
@@ -813,7 +959,7 @@ schema.statics.importBCF = function(account, project, zipPath){
 				return Promise.resolve();
 			}
 
-			return parseXmlString(markupBuf.toString('utf8'), {explicitCharkey: 1}).then(_xml => {
+			return parseXmlString(markupBuf.toString('utf8'), {explicitCharkey: 1, attrkey: '@'}).then(_xml => {
 
 				xml = _xml;
 
@@ -824,8 +970,8 @@ schema.statics.importBCF = function(account, project, zipPath){
 				if(xml.Markup){
 					
 					issue.extras.Header = _.get(xml, 'Markup.Header');
-					issue.topic_type = _.get(xml, 'Markup.Topic[0].$.TopicType');
-					issue.status =_.get(xml, 'Markup.Topic[0].$.TopicStatus');
+					issue.topic_type = _.get(xml, 'Markup.Topic[0].@.TopicType');
+					issue.status =_.get(xml, 'Markup.Topic[0].@.TopicStatus');
 					issue.extras.ReferenceLink = _.get(xml, 'Topic[0].ReferenceLink');
 					issue.name = _.get(xml, 'Markup.Topic[0].Title[0]._');
 					issue.priority =  _.get(xml, 'Markup.Topic[0].Priority[0]._');
@@ -847,71 +993,77 @@ schema.statics.importBCF = function(account, project, zipPath){
 
 				_.get(xml ,'Markup.Comment') && xml.Markup.Comment.forEach(comment => {
 					let obj = {
-						guid: _.get(comment, '$.Guid') ? utils.stringToUUID(_.get(comment, '$.Guid')) : utils.generateUUID(),
+						guid: _.get(comment, '@.Guid') ? utils.stringToUUID(_.get(comment, '@.Guid')) : utils.generateUUID(),
 						created: moment(_.get(comment, 'Date[0]._')).format('x'),
 						owner: _.get(comment, 'Author[0]._'),
 						comment: _.get(comment, 'Comment[0]._'),
 						sealed: true,
-						viewpoint: utils.isUUID(_.get(comment, 'Viewpoint[0].$.Guid')) ? utils.stringToUUID(comment.Viewpoint[0].$.Guid) : undefined,
+						viewpoint: utils.isUUID(_.get(comment, 'Viewpoint[0].@.Guid')) ? utils.stringToUUID(comment.Viewpoint[0]['@'].Guid) : undefined,
 						extras: {}
 					};
 
 					obj.extras.ModifiedDate = _.get(comment, 'ModifiedDate');
 					obj.extras.ModifiedAuthor = _.get(comment, 'ModifiedAuthor');
 
-					issue.comments.push(obj)
+					issue.comments.push(obj);
 				});
 
 				return parseViewpoints(guid, issueFiles, xml.Markup.Viewpoints);
 
 			}).then(viewpoints => {
 
-				console.log(viewpoints);
-				
 				Object.keys(viewpoints).forEach(guid => {
 
-					if(!viewpoints[guid].viewpoint){
+					if(!viewpoints[guid].viewpointXml){
 						return;
 					}
 
+					let extras = {};
+					let vpXML = viewpoints[guid].viewpointXml;
+
+					extras.Components = _.get(vpXML, 'VisualizationInfo.Components');
+					extras.Spaces = _.get(vpXML, 'VisualizationInfo.Spaces');
+					extras.SpaceBoundaries = _.get(vpXML, 'VisualizationInfo.SpaceBoundaries');
+					extras.Openings = _.get(vpXML, 'VisualizationInfo.Openings');
+					extras.OrthogonalCamera = _.get(vpXML, 'VisualizationInfo.OrthogonalCamera');
+					extras.Lines = _.get(vpXML, 'VisualizationInfo.Lines');
+					extras.ClippingPlanes = _.get(vpXML, 'VisualizationInfo.ClippingPlanes');
+					extras.Bitmap = _.get(vpXML, 'VisualizationInfo.Bitmap');
+					extras.Index = viewpoints[guid].Viewpoint;
+					extras.Snapshot = viewpoints[guid].Snapshot;
+
+					issue.viewpoints.push({
+						guid: utils.stringToUUID(guid),
+						extras: extras,
+						screenshot: viewpoints[guid].snapshot,
+						up: [
+							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].X[0]._')),
+							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Y[0]._')),
+							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Z[0]._'))
+						],
+						view_dir: [
+							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].X[0]._')),
+							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Y[0]._')),
+							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Z[0]._'))
+						],
+						look_at:[
+							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].X[0]._')),
+							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Y[0]._')),
+							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Z[0]._'))
+						],
+						fov: parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._'))
+
+					});
 				});
 
-				let extras = {};
-				let vpXML = viewpoints[guid].viewpoint;
+				return issue.save();
 
-				extras.Components = _.get(vpXML, 'VisualizationInfo.Components');
-				extras.Spaces = _.get(vpXML, 'VisualizationInfo.Spaces');
-				extras.SpaceBoundaries = _.get(vpXML, 'VisualizationInfo.SpaceBoundaries');
-				extras.Openings = _.get(vpXML, 'VisualizationInfo.Openings');
-				extras.OrthogonalCamera = _.get(vpXML, 'VisualizationInfo.OrthogonalCamera');
-				
-				issue.viewpoints.push({
-					guid: utils.stringToUUID(guid),
-					extras: extras
-				})
-				// 	viewpoints: [{
-				// 	up: [Number],
-				// 	position: [Number],
-				// 	look_at: [Number],
-				// 	view_dir: [Number],
-				// 	right: [Number],
-				// 	unityHeight : Number,
-				// 	fov : Number,
-				// 	aspect_ratio: Number,
-				// 	far : Number,
-				// 	near : Number,
-				// 	clippingPlanes : [Schema.Types.Mixed ],
-				// 	screenshot: Object,
-				// 	guid: Object
-				// }],
-
-				//console.log(JSON.stringify(issue.clean(), null ,2));
 			});
 
 		}
 
+		// read each item zip file, put them in files object
 		function handleEntry(zipfile, entry) {
-			// handle each entry
 
 			let paths = entry.fileName.split('/');
 			let guid = paths[0] && utils.isUUID(paths[0]) && paths[0];
@@ -921,7 +1073,6 @@ schema.statics.importBCF = function(account, project, zipPath){
 			}
 
 			// if entry is a file and start with guid
-			console.log(entry.fileName)
 			if(!entry.fileName.endsWith('/') && guid){
 
 				promises.push(new Promise( (resolve, reject) => {
@@ -955,7 +1106,7 @@ schema.statics.importBCF = function(account, project, zipPath){
 		yauzl.open(zipPath, {lazyEntries: true}, handleZip);
 	});
 
-}
+};
 
 var Issue = ModelFactory.createClass(
 	'Issue',
