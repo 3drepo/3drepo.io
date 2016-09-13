@@ -812,7 +812,7 @@
 					height = issuesHeight;
 					height = (height < issuesMinHeight) ? issuesMinHeight : issuesHeight;
 					*/
-					height = (vm.issuesToShow.length * issueListItemHeight) + addButtonHeight;
+					height = (vm.issuesToShow.length * issueListItemHeight);
 					break;
 
 				case "showIssue":
@@ -891,34 +891,37 @@
 		};
 
 		vm.issueSelect = function (issue) {
-			var i, length;
-
 			if (selectedIssue === null) {
 				selectedIssue = issue;
+				vm.selectIssue = {issue: selectedIssue, selected: true};
 				showIssue(selectedIssue);
+				setSelectedIssueIndex(selectedIssue);
 			}
 			else if (selectedIssue._id === issue._id) {
+				vm.selectIssue = {issue: selectedIssue, selected: false};
 				selectedIssue = null;
+				setSelectedIssueIndex(selectedIssue);
 			}
 			else {
 				vm.selectIssue = {issue: selectedIssue, selected: false};
-				selectedIssue = issue;
-				showIssue(selectedIssue);
+				$timeout(function () {
+					selectedIssue = issue;
+					vm.selectIssue = {issue: selectedIssue, selected: true};
+					showIssue(selectedIssue);
+					setSelectedIssueIndex(selectedIssue);
+				});
 			}
 
-			if (selectedIssue !== null) {
-				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
-					if (vm.issuesToShow[i]._id === selectedIssue._id) {
-						selectedIssueIndex = i;
-					}
-				}
-			}
 		};
 
 		vm.editIssue = function (issue) {
 			vm.issueToEdit = issue;
 			vm.toShow = "showIssue";
 			vm.onShowItem();
+		};
+
+		vm.editIssueExit = function (issue) {
+			vm.hideItem = true;
 		};
 
 		$scope.$watch("vm.hideItem", function (newValue) {
@@ -954,24 +957,47 @@
 			}, 1100);
 		}
 
+		function setSelectedIssueIndex (selectedIssue) {
+			var i, length;
+
+			if (selectedIssue !== null) {
+				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
+					if (vm.issuesToShow[i]._id === selectedIssue._id) {
+						selectedIssueIndex = i;
+					}
+				}
+			}
+			else {
+				selectedIssueIndex = null;
+			}
+		}
+
 		$scope.$watch("vm.keysDown", function () {
 			var upArrow = 38,
-				downArrow = 40;
+				downArrow = 40,
+				rightArrow = 39;
 
-			if (angular.isDefined(vm.keysDown) && (vm.keysDown.length > 0) && (selectedIssueIndex !== null)) {
-				if ((vm.keysDown[0] === downArrow) && (selectedIssueIndex !== (vm.issuesToShow.length - 1))) {
-					vm.selectIssue = {issue: selectedIssue, selected: false};
-					selectedIssueIndex += 1;
+			if ((vm.toShow === "showIssues") && angular.isDefined(vm.keysDown) &&
+				(vm.keysDown.length > 0) &&
+				(selectedIssueIndex !== null)) {
+				if ((vm.keysDown[0] === downArrow) || (vm.keysDown[0] === upArrow)) {
+					if ((vm.keysDown[0] === downArrow) && (selectedIssueIndex !== (vm.issuesToShow.length - 1))) {
+						vm.selectIssue = {issue: selectedIssue, selected: false};
+						selectedIssueIndex += 1;
+					}
+					else if ((vm.keysDown[0] === upArrow) && (selectedIssueIndex !== 0)) {
+						vm.selectIssue = {issue: selectedIssue, selected: false};
+						selectedIssueIndex -= 1;
+					}
+					$timeout(function () {
+						selectedIssue = vm.issuesToShow[selectedIssueIndex];
+						vm.selectIssue = {issue: selectedIssue, selected: true};
+						showIssue(selectedIssue);
+					});
 				}
-				else if ((vm.keysDown[0] === upArrow) && (selectedIssueIndex !== 0)) {
-					vm.selectIssue = {issue: selectedIssue, selected: false};
-					selectedIssueIndex -= 1;
+				else if (vm.keysDown[0] === rightArrow) {
+					vm.editIssue(selectedIssue);
 				}
-				$timeout(function () {
-					selectedIssue = vm.issuesToShow[selectedIssueIndex];
-					vm.selectIssue = {issue: selectedIssue, selected: true};
-					showIssue(selectedIssue);
-				});
 			}
 		});
 	}

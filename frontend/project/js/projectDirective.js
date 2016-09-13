@@ -284,9 +284,11 @@
 			delete vm.keysDown;
 			vm.keysDown = angular.copy(tmp);
 
-			// Update list
+			// Update list, but avoid repeat
 			if (event.type === "keydown") {
-				vm.keysDown.push(event.which);
+				if (vm.keysDown.indexOf(event.which) === -1) {
+					vm.keysDown.push(event.which);
+				}
 			}
 			else if (event.type === "keyup") {
 				// Remove all instances of the key (multiple instances can happen if keyup wasn't registered)

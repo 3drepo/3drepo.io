@@ -8,18 +8,19 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 			h3 {{vm.addAlertText}}
 			md-button.md-primary(ng-click="vm.closeAddAlert()") OK
 
-div(ng-switch="vm.toShow")
+#issuesAddButton(ng-if="vm.toShow==='showIssues'", layout-margin)
+	md-button.md-accent.md-fab.md-mini(aria-label="Add" ng-click="vm.editIssue()")
+		md-icon.angular-material-icons add
+
+#issuesContent(ng-switch="vm.toShow")
 	// Issues list
-	div(ng-switch-when="showIssues")
+	div(ng-switch-when="showIssues", tabindex="0", tdr-focus="true")
 		issues-list-item(
 		ng-repeat="issue in vm.issuesToShow"
 		data="issue"
 		on-edit-issue="vm.editIssue(issue)"
 		select="vm.selectIssue"
 		on-select="vm.issueSelect(issue)")
-		div(layout="row" layout-align="end" layout-margin)
-			md-button.md-accent.md-fab.md-mini(aria-label="Add" ng-click="vm.editIssue()")
-				md-icon.angular-material-icons add
 
 		//div(ng-repeat="issue in vm.issuesToShow")
 			.issueHeader
@@ -36,7 +37,9 @@ div(ng-switch="vm.toShow")
 	// Issue
 	issue-comp(
 	ng-switch-when="showIssue"
-	data="vm.issueToEdit")
+	data="vm.issueToEdit"
+	keys-down="vm.keysDown"
+	exit="vm.editIssueExit(issue)")
 	//issue(
 		ng-switch-when="showIssue"
 		index="vm.selectedIndex"

@@ -29,16 +29,17 @@
 			}
 		);
 
-	IssuesFooterCtrl.$inject = [];
+	IssuesFooterCtrl.$inject = ["$mdDialog"];
 
-	function IssuesFooterCtrl () {
-		var highlightBackground = "#FF9800",
+	function IssuesFooterCtrl ($mdDialog) {
+		var self = this,
+			highlightBackground = "#FF9800",
 			currentActionIndex = null;
 
 		this.actions = [
-			{icon: "home", action: "home", color: ""},
-			{icon: "home", action: "home", color: ""},
-			{icon: "home", action: "home", color: ""}
+			{icon: "camera_alt", action: "screen_shot", label: "Screen shot", color: ""},
+			{icon: "place", action: "pin", label: "Pin", color: ""},
+			{icon: "view_comfy", action: "multi", label: "Multi", color: ""}
 		];
 
 		this.doAction = function (index) {
@@ -56,6 +57,36 @@
 				currentActionIndex = index;
 				this.actions[currentActionIndex].color = highlightBackground;
 			}
+
+			switch (this.actions[currentActionIndex].action) {
+				case "screen_shot":
+					$mdDialog.show({
+						controller: ScreenShotDialogController,
+						controllerAs: "vm",
+						templateUrl: "issueScreenShotDialog.html"
+					});
+					break;
+
+				case "pin":
+					break;
+
+				case "multi":
+					break;
+			}
 		};
+
+		this.blah = function () {
+			console.log("blah");
+		};
+
+		function ScreenShotDialogController () {
+			console.log(self);
+			this.title = "Screen Shot";
+
+			this.closeDialog = function () {
+				$mdDialog.cancel();
+				self.blah();
+			};
+		}
 	}
 }());

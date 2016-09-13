@@ -1,4 +1,43 @@
-div(layout="column")
+div(layout="column", tabindex="0", tdr-focus="true")
+	.issueCompItemContainer(layout="row", layout-align="start start", flex)
+		md-icon.angular-material-icons#issueCompStatus(style="color:{{$ctrl.statusIconColour}}") {{$ctrl.statusIconIcon}}
+		md-input-container.issueComp(flex)
+			label Title
+			input(
+			type="text"
+			ng-model="$ctrl.issueData.title"
+			aria-label="Title"
+			ng-disabled="$ctrl.issueData.title"
+			tdr-focus="true")
+	md-divider
+
+	.issueCompItemContainer(layout="row")
+		md-input-container.issueComItemStatus(flex)
+			label Priority
+			md-select(ng-model="$ctrl.issueData.priority", ng-change="$ctrl.statusIconChange()")
+				md-option(ng-repeat="priority in $ctrl.priorities", value="{{priority.value}}") {{priority.label}}
+		md-input-container.issueComItemStatus(flex)
+			label Status
+			md-select(ng-model="$ctrl.issueData.status", ng-change="$ctrl.statusIconChange()")
+				md-option(ng-repeat="status in $ctrl.statuses", value="{{status.value}}") {{status.label}}
+		md-input-container(flex)
+			label Type
+			md-select(ng-model="$ctrl.issueData.type")
+				md-option(ng-repeat="type in $ctrl.types", value="{{type.value}}") {{type.label}}
+	md-divider
+
+	.issueCompItemContainer(layout="row", layout-align="start start", flex)
+		md-input-container.issueComp(flex)
+			label Description
+			textarea(ng-model="$ctrl.issueData.description")
+	md-divider
+
+	.issueCompItemContainer(layout="row", layout-align="start start", flex)
+		md-input-container.issueComp(flex)
+			label Comment
+			textarea(ng-model="$ctrl.issueData.comment")
+	md-divider
+
 	issues-footer
 
 issues-multi(

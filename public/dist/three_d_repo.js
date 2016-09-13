@@ -11769,7 +11769,9 @@ angular.module('3drepo')
 				controller: IssueCompCtrl,
 				templateUrl: "issueComp.html",
 				bindings: {
-					data: "<"
+					data: "<",
+					keysDown: "<",
+					exit: "&"
 				}
 			}
 		);
@@ -11777,6 +11779,80 @@ angular.module('3drepo')
 	IssueCompCtrl.$inject = [];
 
 	function IssueCompCtrl () {
+		/*
+		 * Init
+		 */
+		this.priorities = [
+			{value: "none", label: "None"},
+			{value: "low", label: "Low"},
+			{value: "medium", label: "Medium"},
+			{value: "high", label: "High"}
+		];
+		this.statuses = [
+			{value: "open", label: "Open"},
+			{value: "in_progress", label: "In progress"},
+			{value: "closed", label: "Closed"}
+		];
+		this.types = [
+			{value: "for_information", label: "For information"},
+			{value: "for_approval", label: "For approval"},
+			{value: "vr", label: "VR"},
+		];
+
+		/**
+		 * Monitor changes to parameters
+		 * @param {Object} changes
+		 */
+		this.$onChanges = function (changes) {
+			var leftArrow = 37;
+			if (changes.hasOwnProperty("keysDown") &&
+				angular.isDefined(changes.keysDown.previousValue)) {
+				if (changes.keysDown.previousValue[0] === leftArrow) {
+					this.exit({issue: this.data});
+				}
+			}
+
+			if (changes.hasOwnProperty("data")) {
+				if (typeof changes.data.currentValue === "object") {
+					this.issueData = this.data;
+				}
+				else {
+					this.issueData = {
+						priority: "none",
+						status: "open"
+					};
+				}
+				this.setStatusIcon();
+			}
+		};
+
+		this.statusIconChange = function () {
+			this.setStatusIcon();
+		};
+
+		this.setStatusIcon = function () {
+			if (this.issueData.status === "closed") {
+				this.statusIconIcon = "check_circle";
+				this.statusIconColour = "#004594";
+			}
+			else {
+				this.statusIconIcon = (this.issueData.status === "open") ? "panorama_fish_eye" : "lens";
+				switch (this.issueData.priority) {
+					case "none":
+						this.statusIconColour = "#7777777";
+						break;
+					case "low":
+						this.statusIconColour = "#4CAF50";
+						break;
+					case "medium":
+						this.statusIconColour = "#FF9800";
+						break;
+					case "high":
+						this.statusIconColour = "#F44336";
+						break;
+				}
+			}
+		}
 	}
 }());
 /**
@@ -12965,7 +13041,7 @@ angular.module('3drepo')
 					height = issuesHeight;
 					height = (height < issuesMinHeight) ? issuesMinHeight : issuesHeight;
 					*/
-					height = (vm.issuesToShow.length * issueListItemHeight) + addButtonHeight;
+					height = (vm.issuesToShow.length * issueListItemHeight);
 					break;
 
 				case "showIssue":
@@ -13044,34 +13120,37 @@ angular.module('3drepo')
 		};
 
 		vm.issueSelect = function (issue) {
-			var i, length;
-
 			if (selectedIssue === null) {
 				selectedIssue = issue;
+				vm.selectIssue = {issue: selectedIssue, selected: true};
 				showIssue(selectedIssue);
+				setSelectedIssueIndex(selectedIssue);
 			}
 			else if (selectedIssue._id === issue._id) {
+				vm.selectIssue = {issue: selectedIssue, selected: false};
 				selectedIssue = null;
+				setSelectedIssueIndex(selectedIssue);
 			}
 			else {
 				vm.selectIssue = {issue: selectedIssue, selected: false};
-				selectedIssue = issue;
-				showIssue(selectedIssue);
+				$timeout(function () {
+					selectedIssue = issue;
+					vm.selectIssue = {issue: selectedIssue, selected: true};
+					showIssue(selectedIssue);
+					setSelectedIssueIndex(selectedIssue);
+				});
 			}
 
-			if (selectedIssue !== null) {
-				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
-					if (vm.issuesToShow[i]._id === selectedIssue._id) {
-						selectedIssueIndex = i;
-					}
-				}
-			}
 		};
 
 		vm.editIssue = function (issue) {
 			vm.issueToEdit = issue;
 			vm.toShow = "showIssue";
 			vm.onShowItem();
+		};
+
+		vm.editIssueExit = function (issue) {
+			vm.hideItem = true;
 		};
 
 		$scope.$watch("vm.hideItem", function (newValue) {
@@ -13107,24 +13186,47 @@ angular.module('3drepo')
 			}, 1100);
 		}
 
+		function setSelectedIssueIndex (selectedIssue) {
+			var i, length;
+
+			if (selectedIssue !== null) {
+				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
+					if (vm.issuesToShow[i]._id === selectedIssue._id) {
+						selectedIssueIndex = i;
+					}
+				}
+			}
+			else {
+				selectedIssueIndex = null;
+			}
+		}
+
 		$scope.$watch("vm.keysDown", function () {
 			var upArrow = 38,
-				downArrow = 40;
+				downArrow = 40,
+				rightArrow = 39;
 
-			if (angular.isDefined(vm.keysDown) && (vm.keysDown.length > 0) && (selectedIssueIndex !== null)) {
-				if ((vm.keysDown[0] === downArrow) && (selectedIssueIndex !== (vm.issuesToShow.length - 1))) {
-					vm.selectIssue = {issue: selectedIssue, selected: false};
-					selectedIssueIndex += 1;
+			if ((vm.toShow === "showIssues") && angular.isDefined(vm.keysDown) &&
+				(vm.keysDown.length > 0) &&
+				(selectedIssueIndex !== null)) {
+				if ((vm.keysDown[0] === downArrow) || (vm.keysDown[0] === upArrow)) {
+					if ((vm.keysDown[0] === downArrow) && (selectedIssueIndex !== (vm.issuesToShow.length - 1))) {
+						vm.selectIssue = {issue: selectedIssue, selected: false};
+						selectedIssueIndex += 1;
+					}
+					else if ((vm.keysDown[0] === upArrow) && (selectedIssueIndex !== 0)) {
+						vm.selectIssue = {issue: selectedIssue, selected: false};
+						selectedIssueIndex -= 1;
+					}
+					$timeout(function () {
+						selectedIssue = vm.issuesToShow[selectedIssueIndex];
+						vm.selectIssue = {issue: selectedIssue, selected: true};
+						showIssue(selectedIssue);
+					});
 				}
-				else if ((vm.keysDown[0] === upArrow) && (selectedIssueIndex !== 0)) {
-					vm.selectIssue = {issue: selectedIssue, selected: false};
-					selectedIssueIndex -= 1;
+				else if (vm.keysDown[0] === rightArrow) {
+					vm.editIssue(selectedIssue);
 				}
-				$timeout(function () {
-					selectedIssue = vm.issuesToShow[selectedIssueIndex];
-					vm.selectIssue = {issue: selectedIssue, selected: true};
-					showIssue(selectedIssue);
-				});
 			}
 		});
 	}
@@ -13161,16 +13263,17 @@ angular.module('3drepo')
 			}
 		);
 
-	IssuesFooterCtrl.$inject = [];
+	IssuesFooterCtrl.$inject = ["$mdDialog"];
 
-	function IssuesFooterCtrl () {
-		var highlightBackground = "#FF9800",
+	function IssuesFooterCtrl ($mdDialog) {
+		var self = this,
+			highlightBackground = "#FF9800",
 			currentActionIndex = null;
 
 		this.actions = [
-			{icon: "home", action: "home", color: ""},
-			{icon: "home", action: "home", color: ""},
-			{icon: "home", action: "home", color: ""}
+			{icon: "camera_alt", action: "screen_shot", label: "Screen shot", color: ""},
+			{icon: "place", action: "pin", label: "Pin", color: ""},
+			{icon: "view_comfy", action: "multi", label: "Multi", color: ""}
 		];
 
 		this.doAction = function (index) {
@@ -13188,7 +13291,37 @@ angular.module('3drepo')
 				currentActionIndex = index;
 				this.actions[currentActionIndex].color = highlightBackground;
 			}
+
+			switch (this.actions[currentActionIndex].action) {
+				case "screen_shot":
+					$mdDialog.show({
+						controller: ScreenShotDialogController,
+						controllerAs: "vm",
+						templateUrl: "issueScreenShotDialog.html"
+					});
+					break;
+
+				case "pin":
+					break;
+
+				case "multi":
+					break;
+			}
 		};
+
+		this.blah = function () {
+			console.log("blah");
+		};
+
+		function ScreenShotDialogController () {
+			console.log(self);
+			this.title = "Screen Shot";
+
+			this.closeDialog = function () {
+				$mdDialog.cancel();
+				self.blah();
+			};
+		}
 	}
 }());
 /**
@@ -13233,12 +13366,11 @@ angular.module('3drepo')
 		this.selected = false;
 		this.thumbnail = "/public/images/ground.png";
 
+		/**
+		 * Monitor changes to parameters
+		 * @param {Object} changes
+		 */
 		this.$onChanges = function (changes) {
-			if (changes.hasOwnProperty("data") &&
-				angular.isDefined(changes.data.currentValue)) {
-				//console.log(this.data);
-			}
-
 			if (changes.hasOwnProperty("select") &&
 				angular.isDefined(changes.select.currentValue) &&
 				(this.select.issue._id === this.data._id)) {
@@ -13246,13 +13378,19 @@ angular.module('3drepo')
 			}
 		};
 
-		this.toggleSelected = function () {
-			this.selected = !this.selected;
-			if (this.selected) {
+		/**
+		 * Toggle selected state. Ignore key press.
+		 * @param {Object} event
+		 */
+		this.toggleSelected = function (event) {
+			if (event.type === "click") {
 				this.onSelect({issueId: this.data._id});
 			}
 		};
 
+		/**
+		 * Set up editing of issue
+		 */
 		this.editIssue = function () {
 			this.onEditIssue({issue: this.data});
 		};
@@ -15966,7 +16104,7 @@ var Oculus = {};
 				{
 					console.trace("UNDEFINED EVENT TYPE");
 				} else {
-					console.log("SEND: " + type + " : " + JSON.stringify(value));
+					//console.log("SEND: " + type + " : " + JSON.stringify(value));
 					currentEvent = {type: type, value: value};
 				}
 			});
@@ -16323,9 +16461,11 @@ var Oculus = {};
 			delete vm.keysDown;
 			vm.keysDown = angular.copy(tmp);
 
-			// Update list
+			// Update list, but avoid repeat
 			if (event.type === "keydown") {
-				vm.keysDown.push(event.which);
+				if (vm.keysDown.indexOf(event.which) === -1) {
+					vm.keysDown.push(event.which);
+				}
 			}
 			else if (event.type === "keyup") {
 				// Remove all instances of the key (multiple instances can happen if keyup wasn't registered)

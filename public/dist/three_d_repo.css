@@ -1456,10 +1456,6 @@ issues .issueHeader:hover {
   cursor: pointer;
 }
 
-issues textarea {
-  min-height: 70px !important;
-}
-
 issues md-list {
   padding: 0;
 }
@@ -1493,6 +1489,17 @@ issues #addAlert #addAlertBackground #addAlertInfo {
 }
 issues #addAlert #addAlertBackground #addAlertInfo .md-button {
   background: #EEEEEE;
+}
+
+issues #issuesAddButton {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+issues #issuesContent {
+  height: 100%;
+  overflow: auto;
 }
 
 /** Issue *************************************************************************************************************/
@@ -1737,6 +1744,27 @@ issues-list-item #issuesListItemEnter {
 }
 issues-list-item #issuesListItemEnter md-icon {
   color: #FFFFFF;
+}
+
+/** Issue Comp ********************************************************************************************************/
+issue-comp div:first-child {
+  outline: none;
+}
+
+issue-comp .issueCompItemContainer {
+  padding: 10px;
+}
+
+issue-comp #issueCompStatus {
+  margin: 25px 10px 0 0;
+}
+
+issue-comp textarea {
+  min-height: 70px !important;
+}
+
+issue-comp .issueComItemStatus {
+  margin-right: 5px;
 }
 login {
   position: absolute;

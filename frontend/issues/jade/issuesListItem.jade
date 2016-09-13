@@ -1,4 +1,4 @@
-div(layout="column", layout-fill, ng-click="$ctrl.toggleSelected()")
+div(layout="column", layout-fill, ng-click="$ctrl.toggleSelected($event)")
 	#issuesListItemContent(layout='row', flex)
 		#issueListItemThumbnail(flex="33", layout="column", layout-align="center center")
 			img(ng-src="{{$ctrl.thumbnail}}")

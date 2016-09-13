@@ -40,12 +40,11 @@
 		this.selected = false;
 		this.thumbnail = "/public/images/ground.png";
 
+		/**
+		 * Monitor changes to parameters
+		 * @param {Object} changes
+		 */
 		this.$onChanges = function (changes) {
-			if (changes.hasOwnProperty("data") &&
-				angular.isDefined(changes.data.currentValue)) {
-				//console.log(this.data);
-			}
-
 			if (changes.hasOwnProperty("select") &&
 				angular.isDefined(changes.select.currentValue) &&
 				(this.select.issue._id === this.data._id)) {
@@ -53,13 +52,19 @@
 			}
 		};
 
-		this.toggleSelected = function () {
-			this.selected = !this.selected;
-			if (this.selected) {
+		/**
+		 * Toggle selected state. Ignore key press.
+		 * @param {Object} event
+		 */
+		this.toggleSelected = function (event) {
+			if (event.type === "click") {
 				this.onSelect({issueId: this.data._id});
 			}
 		};
 
+		/**
+		 * Set up editing of issue
+		 */
 		this.editIssue = function () {
 			this.onEditIssue({issue: this.data});
 		};
