@@ -112,7 +112,7 @@
 		 panelCard.left.push({
 			 type: "tree",
 			 title: "Tree",
-			 show: true,
+			 show: false,
 			 help: "Model elements shown in a tree structure",
 			 icon: "device_hub",
 			 minHeight: 80,
@@ -122,6 +122,7 @@
 			 ]
 		 });
 
+		/*
 		panelCard.left.push({
 			type: "groups",
 			title: "Groups",
@@ -143,6 +144,7 @@
 			],
 			add: true
 		});
+		*/
 
 		panelCard.left.push({
 			type: "clip",

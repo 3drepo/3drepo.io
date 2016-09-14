@@ -1,0 +1,15 @@
+md-toolbar
+	.md-toolbar-tools
+		h2 Screen Shot
+		span(flex)
+		md-button.md-icon-button(ng-click="$ctrl.closeDialog()")
+			md-icon.angular-material-icons(aria-label="Close dialog") close
+md-content
+	canvas#issueScreenShotCanvas
+	#issueScreenShotActions(layout="row")
+		md-button.md-fab.md-mini(ng-click="$ctrl.setupScribble()")
+			md-icon.angular-material-icons(aria-label="Pen") border_color
+		md-button.md-fab.md-mini(ng-click="$ctrl.setupErase()")
+			md-icon#issueScreenShotEraseIcon(class="fa fa-eraser")
+		md-button.md-fab.md-mini.md-primary(ng-click="$ctrl.doAction('save')")
+			md-icon.angular-material-icons(aria-label="Save") save

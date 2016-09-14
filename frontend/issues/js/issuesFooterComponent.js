@@ -25,6 +25,7 @@
 				controller: IssuesFooterCtrl,
 				templateUrl: "issuesFooter.html",
 				bindings: {
+					sendEvent: "&"
 				}
 			}
 		);
@@ -75,17 +76,15 @@
 			}
 		};
 
-		this.blah = function () {
-			console.log("blah");
-		};
-
 		function ScreenShotDialogController () {
-			console.log(self);
-			this.title = "Screen Shot";
+			this.dialogCaller = self;
 
-			this.closeDialog = function () {
-				$mdDialog.cancel();
-				self.blah();
+			/**
+			 * Deselect the scren shot action button after close the screen shot dialog
+			 */
+			this.closeScreenShot = function () {
+				self.actions[currentActionIndex].color = "";
+				currentActionIndex = null;
 			};
 		}
 	}

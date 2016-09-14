@@ -27,7 +27,8 @@
 				bindings: {
 					data: "<",
 					keysDown: "<",
-					exit: "&"
+					exit: "&",
+					sendEvent: "&"
 				}
 			}
 		);

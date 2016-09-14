@@ -337,3 +337,25 @@ issue-comp textarea {
 issue-comp .issueComItemStatus {
   margin-right: 5px;
 }
+
+/** Issue Screen Shot  ************************************************************************************************/
+#issueScreenShotDialog {
+  width:80%;
+  height: calc(80% + 40px); /* 40px is the height of the dialog toolbar */
+  max-height: calc(80% + 40px);
+  overflow: hidden;
+}
+
+issues-screen-shot #issueScreenShotActions {
+  position: absolute;
+  bottom: 5px;
+  display: block;
+  width: 176px;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+
+issues-screen-shot #issueScreenShotEraseIcon {
+  font-size: 24px;
+}

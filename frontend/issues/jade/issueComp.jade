@@ -38,7 +38,7 @@ div(layout="column", tabindex="0", tdr-focus="true")
 			textarea(ng-model="$ctrl.issueData.comment")
 	md-divider
 
-	issues-footer
+	issues-footer(send-event="$ctrl.sendEvent({type: type, value: value})")
 
 issues-multi(
 account="vm.account"
