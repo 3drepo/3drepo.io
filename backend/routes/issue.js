@@ -128,6 +128,7 @@ function updateIssue(req, res, next){
 	}).then(issue => {
 
 		issue = issue.toObject();
+		data.viewpoint.screenshot = 'saved';
 		let resData = {
 			_id: uuidToString(issue._id),
 			account: req.params.account,
@@ -231,7 +232,7 @@ function findIssueById(req, res, next) {
 	let dbCol =  {account: req.params.account, project: req.params.project};
 
 	Issue.findByUID(dbCol, params.uid).then(issue => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, [issue]);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, issue);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
