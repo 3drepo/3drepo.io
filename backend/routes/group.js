@@ -28,8 +28,6 @@ var stringToUUID = utils.stringToUUID;
 // var uuidToString = utils.uuidToString;
 //var mongo    = require("mongodb");
 
-var History = require('../models/history');
-
 router.get('/', middlewares.hasReadAccessToProject, listGroups);
 router.get('/:uid', middlewares.hasWriteAccessToProject, findGroup);
 router.put('/:uid', middlewares.hasWriteAccessToProject, updateGroup);
@@ -83,23 +81,13 @@ function findGroup(req, res, next){
 }
 
 function createGroup(req, res, next){
-
 	'use strict';
+
 	let place = utils.APIInfo(req);
 
 	let group = Group.createGroup(getDbColOptions(req), req.body);
 
 	group.save().then(group => {
-
-		//TO-DO: remove it or keep it, if keep it, push the error
-		History.findByBranch(getDbColOptions(req), 'master').then(history => {
-
-			history.addToCurrent(group._id);
-			return history.save();
-
-		}).catch(err => {
-			console.log(err);
-		});
 
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group.clean());
 		next();
@@ -115,21 +103,7 @@ function deleteGroup(req, res, next){
 
 	let place = utils.APIInfo(req);
 
-	Group.findOneAndRemove(getDbColOptions(req), { _id : stringToUUID(req.params.id)}).then( removedDocs => {
-
-		//TO-DO: remove it or keep it, if keep it, push the error
-		if(!removedDocs){
-			return Promise.reject({resCode: responseCodes.GROUP_NOT_FOUND});
-		}
-
-		History.findByBranch(getDbColOptions(req), 'master').then(history => {
-
-			history.removeFromCurrent(stringToUUID(req.params.id));
-			return history.save();
-
-		}).catch(err => {
-			console.log(err);
-		});
+	Group.findOneAndRemove(getDbColOptions(req), { _id : stringToUUID(req.params.id)}).then( () => {
 
 		responseCodes.respond(place, req, res, next, responseCodes.OK, { 'status': 'success'});
 		//next();	
