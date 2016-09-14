@@ -92,6 +92,7 @@ var schema = Schema({
 		scribble: {flag: Number, content: Object},
 	}],
 
+	group_id: Object,
 	scale: Number,
 	position: [Number],
 	norm: [Number],
@@ -492,6 +493,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 		issue.topic_type = data.topic_type;
 		issue.desc = data.desc;
 		issue.priority = data.priority;
+		issue.group_id = data.group_id && stringToUUID(data.group_id);
 		//issue.scribble = data.scribble && new Buffer(data.scribble, 'base64');
 		//issue.screenshot = data.screenshot && new Buffer(data.screenshot, 'base64');
 		//issue.viewpoint = data.viewpoint;
@@ -696,7 +698,8 @@ schema.methods.clean = function(typePrefix){
 	cleaned.account = this._dbcolOptions.account;
 	cleaned.project = this._dbcolOptions.project;
 	cleaned.rev_id && (cleaned.rev_id = uuidToString(cleaned.rev_id));
-
+	cleaned.group_id = cleaned.group_id ? uuidToString(cleaned.group_id) : undefined;
+	
 	cleaned.viewpoints.forEach((vp, i) => {
 		cleaned.viewpoints[i].guid = uuidToString(cleaned.viewpoints[i].guid);
 		
@@ -724,7 +727,7 @@ schema.methods.clean = function(typePrefix){
 
 	cleaned.viewpoint = undefined;
 	cleaned.viewpoints = undefined;
-	
+
 	return cleaned;
 };
 
