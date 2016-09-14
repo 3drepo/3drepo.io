@@ -526,7 +526,7 @@ schema.statics.getScreenshot = function(dbColOptions, uid, vid){
 			return issue.viewpoints[0].screenshot.content.buffer;
 		}
 	});
-}
+};
 
 schema.methods.updateComment = function(commentIndex, data){
 	'use strict';
@@ -632,7 +632,7 @@ schema.methods.removeComment = function(commentIndex, data){
 
 schema.methods.isClosed = function(){
 	return this.status === 'closed' || this.closed;
-}
+};
 
 schema.methods.changeStatus = function(status){
 	'use strict';
@@ -646,7 +646,7 @@ schema.methods.changeStatus = function(status){
 	this.status_last_changed = (new Date()).getTime();
 	this.status = status;
 	return this.save();
-}
+};
 
 schema.methods.changePriority = function(priority){
 	'use strict';
@@ -665,7 +665,7 @@ schema.methods.changePriority = function(priority){
 	this.priority = priority;
 	return this.save();
 
-}
+};
 
 // schema.methods.closeIssue = function(){
 // 	'use strict';
@@ -699,12 +699,12 @@ schema.methods.clean = function(typePrefix){
 	cleaned.project = this._dbcolOptions.project;
 	cleaned.rev_id && (cleaned.rev_id = uuidToString(cleaned.rev_id));
 	cleaned.group_id = cleaned.group_id ? uuidToString(cleaned.group_id) : undefined;
-	
+
 	cleaned.viewpoints.forEach((vp, i) => {
 		cleaned.viewpoints[i].guid = uuidToString(cleaned.viewpoints[i].guid);
 		
 		if(cleaned.viewpoints[i].screenshot.flag){
-			cleaned.viewpoints[i].screenshot = cleaned.account + '/' + cleaned.project +'/issues/' + cleaned._id + '/viewpoints/' + cleaned.viewpoints[i].guid + '/screenshot.png'
+			cleaned.viewpoints[i].screenshot = cleaned.account + '/' + cleaned.project +'/issues/' + cleaned._id + '/viewpoints/' + cleaned.viewpoints[i].guid + '/screenshot.png';
 		}
 	});
 
