@@ -179,6 +179,10 @@ var responseCodes = {
 	FED_MODEL_IS_A_FED: {value: 111, message: 'Models of federation cannot be a federation', status:400},
 	PROJECT_IS_NOT_A_FED: {value: 112, message: 'Project is not a federation', status:400},
 	SCREENSHOT_NOT_FOUND: {value: 113, message: 'Screenshot not found', status: 404},
+	ISSUE_INVALID_STATUS: {value: 114, message: 'Invalid issue status', status: 400},
+	ISSUE_INVALID_PRIORITY: {value: 115, message: 'Invalid issue priority', status: 400},
+	ISSUE_SAME_STATUS: {value: 116, message: 'New status is the same as current status', status: 400},
+	ISSUE_SAME_PRIORITY: {value: 117, message: 'New priority is the same as current priority', status: 400},
 
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {

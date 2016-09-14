@@ -97,7 +97,17 @@ function updateIssue(req, res, next){
 			return Promise.reject({ resCode: responseCodes.ISSUE_NOT_FOUND });
 		}
 
-		if(data.hasOwnProperty('comment') && data.edit){
+		if(data.hasOwnProperty('topic_type')){
+			issue.topic_type = data.topic_type;
+			action = issue.save();
+
+		} else if(data.hasOwnProperty('priority')){
+			action = issue.changePriority(data.priority);
+
+		} else if(data.hasOwnProperty('status')){
+			action = issue.changeStatus(data.status);
+
+		} else if(data.hasOwnProperty('comment') && data.edit){
 			action = issue.updateComment(data.commentIndex, data);
 
 		} else if(data.hasOwnProperty('comment') && data.sealed) {
@@ -110,10 +120,10 @@ function updateIssue(req, res, next){
 			action = issue.updateComment(null, data);
 		
 		} else if (data.hasOwnProperty('closed') && data.closed){
-			action = issue.closeIssue();
+			action = Promise.reject('This action is deprecated, use PUT issues/id.json {"status": "closed"}');
 
 		} else if (data.hasOwnProperty('closed') && !data.closed){
-			action = issue.reopenIssue();
+			action = Promise.reject('This action is deprecated, use PUT issues/id.json {"status": "closed"}');
 
 		} else if (data.hasOwnProperty("assigned_roles")){
 			issue.assigned_roles = data.assigned_roles;
@@ -128,7 +138,7 @@ function updateIssue(req, res, next){
 	}).then(issue => {
 
 		issue = issue.toObject();
-		data.viewpoint.screenshot = 'saved';
+		data.viewpoint && (data.viewpoint.screenshot = 'saved');
 		let resData = {
 			_id: uuidToString(issue._id),
 			account: req.params.account,
@@ -266,7 +276,7 @@ function renderIssuesHTML(req, res, next){
 				}
 			}
 
-			if(issues[i].closed)
+			if(issues[i].closed || issues[i].status === 'closed')
 			{
 				issues[i].created = new Date(issues[i].created).toString();
 				splitIssues.closed.push(issues[i]);

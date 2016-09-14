@@ -120,6 +120,8 @@ var schema = Schema({
 	}],
 	assigned_roles: [Schema.Types.Mixed],
 	closed_time: Number,
+	status_last_changed: Number,
+	priority_last_changed: Number,
 	creator_role: String,
 
 	//to be remove
@@ -145,6 +147,13 @@ function parseXmlString(xml, options){
 }
 // Model statics method
 //internal helper _find
+
+var statusEnum = ['open', 'in progress', 'closed'];
+var priorityEnum = ['low', 'medium', 'high', 'critical'];
+
+schema.statics.statusEnum = statusEnum;
+schema.statics.priorityEnum = priorityEnum;
+
 schema.statics._find = function(dbColOptions, filter, projection, noClean){
 	'use strict';
 	//get project type
@@ -522,7 +531,7 @@ schema.methods.updateComment = function(commentIndex, data){
 
 	let timeStamp = (new Date()).getTime();
 
-	if(this.closed || (this.comments[commentIndex] && this.comments[commentIndex].sealed)){
+	if(this.isClosed() || (this.comments[commentIndex] && this.comments[commentIndex].sealed)){
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_SEALED });
 	}
 
@@ -611,7 +620,7 @@ schema.methods.removeComment = function(commentIndex, data){
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_PERMISSION_DECLINED });
 	}
 
-	if(this.closed || this.comments[commentIndex].sealed){
+	if(this.isClosed() || this.comments[commentIndex].sealed){
 		return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_SEALED });
 	}
 
@@ -619,25 +628,62 @@ schema.methods.removeComment = function(commentIndex, data){
 	return this.save();
 };
 
-schema.methods.closeIssue = function(){
+schema.methods.isClosed = function(){
+	return this.status === 'closed' || this.closed;
+}
+
+schema.methods.changeStatus = function(status){
 	'use strict';
 
-	if(this.closed){
-		return Promise.reject({ resCode: responseCodes.ISSUE_CLOSED_ALREADY });
+	if(status === this.status){
+		return Promise.reject({ resCode: responseCodes.ISSUE_SAME_STATUS });
+	} else if (statusEnum.indexOf(status) === -1){
+		return Promise.reject({ resCode: responseCodes.ISSUE_INVALID_STATUS });
+	}
+		
+	this.status_last_changed = (new Date()).getTime();
+	this.status = status;
+	return this.save();
+}
+
+schema.methods.changePriority = function(priority){
+	'use strict';
+
+	if(this.isClosed()){
+		return Promise.reject(responseCodes.ISSUE_CLOSED_ALREADY);
 	}
 
-	this.closed = true;
-	this.closed_time = (new Date()).getTime();
+	if(priority === this.priority){
+		return Promise.reject({ resCode: responseCodes.ISSUE_SAME_PRIORITY });
+	} else if (priorityEnum.indexOf(priority) === -1){
+		return Promise.reject({ resCode: responseCodes.ISSUE_INVALID_PRIORITY });
+	}
+	
+	this.priority_last_changed = (new Date()).getTime();
+	this.priority = priority;
 	return this.save();
-};
 
-schema.methods.reopenIssue = function(){
-	'use strict';
+}
 
-	this.closed = false;
-	this.closed_time = null;
-	return this.save();
-};
+// schema.methods.closeIssue = function(){
+// 	'use strict';
+
+// 	if(this.closed){
+// 		return Promise.reject({ resCode: responseCodes.ISSUE_CLOSED_ALREADY });
+// 	}
+
+// 	this.closed = true;
+// 	this.closed_time = (new Date()).getTime();
+// 	return this.save();
+// };
+
+// schema.methods.reopenIssue = function(){
+// 	'use strict';
+
+// 	this.closed = false;
+// 	this.closed_time = null;
+// 	return this.save();
+// };
 
 //Model method
 schema.methods.clean = function(typePrefix){
@@ -659,16 +705,26 @@ schema.methods.clean = function(typePrefix){
 		}
 	});
 
+
 	cleaned.comments.forEach( (comment, i) => {
 		cleaned.comments[i].rev_id = comment.rev_id && (comment.rev_id = uuidToString(comment.rev_id));
 		cleaned.comments[i].guid && (cleaned.comments[i].guid = uuidToString(cleaned.comments[i].guid));
-		cleaned.comments[i].viewpoint = cleaned.viewpoints.find(vp => vp.guid === uuidToString(cleaned.comments[i].viewpoint));
+
+		if(cleaned.comments[i].viewpoint){
+			cleaned.comments[i].viewpoint = cleaned.viewpoints.find(vp => vp.guid === uuidToString(cleaned.comments[i].viewpoint));
+		} else {
+			cleaned.comments[i].viewpoint = cleaned.viewpoint;
+		}
+		
 	});
 
 	if(cleaned.scribble){
 		cleaned.scribble = cleaned.scribble.toString('base64');
 	}
 
+	cleaned.viewpoint = undefined;
+	cleaned.viewpoints = undefined;
+	
 	return cleaned;
 };
 
@@ -711,7 +767,7 @@ schema.methods.getBCFMarkup = function(){
 			Topic: {
 				'@' : {
 					'Guid': uuidToString(this._id),
-					'TopicStatus': this.status ? this.status : (this.closed ? 'closed' : 'pen')
+					'TopicStatus': this.status ? this.status : (this.closed ? 'closed' : 'open')
 				},
 				'Priority': this.priority,
 				'Title': this.name ,
