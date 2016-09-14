@@ -178,7 +178,7 @@ var responseCodes = {
 	FED_MODEL_IN_OTHER_DB: { value: 110, message: 'Models of federation must reside in the same account', status: 400},
 	FED_MODEL_IS_A_FED: {value: 111, message: 'Models of federation cannot be a federation', status:400},
 	PROJECT_IS_NOT_A_FED: {value: 112, message: 'Project is not a federation', status:400},
-
+	SCREENSHOT_NOT_FOUND: {value: 113, message: 'Screenshot not found', status: 404},
 
 	MONGOOSE_VALIDATION_ERROR: function(err){
 		return {
@@ -262,7 +262,7 @@ var mimeTypes = {
 	"jpg"  : "image/jpg"
 };
 
-responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
+responseCodes.respond = function(place, req, res, next, resCode, extraInfo, format)
 {
 	"use strict";
 
@@ -309,10 +309,9 @@ responseCodes.respond = function(place, req, res, next, resCode, extraInfo)
 	} else {
 
 		if(Buffer.isBuffer(extraInfo)){
-
 			res.status(resCode.status);
 
-			var contentType = mimeTypes[req.params.format];
+			var contentType = mimeTypes[format || req.params.format];
 
 			if (contentType)
 			{

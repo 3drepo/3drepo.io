@@ -37,6 +37,8 @@ router.post('/issues.bcfzip', middlewares.hasReadAccessToProject, importBCF);
 router.get('/revision/:rid/issues.json', middlewares.hasReadAccessToProject, listIssues);
 router.get('/revision/:rid/issues.bcfzip', middlewares.hasReadAccessToProject, getIssuesBCF);
 
+router.get('/issues/:uid/viewpoints/:vid/screenshot.png', middlewares.hasReadAccessToProject, getScreenshot);
+
 //router.get('/issues/:sid.json', middlewares.hasReadAccessToProject, listIssuesBySID);
 router.get("/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
 router.get("/revision/:rid/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
@@ -51,12 +53,12 @@ function storeIssue(req, res, next){
 	'use strict';
 
 	let place = utils.APIInfo(req);
-	let data = JSON.parse(req.body.data);
+	//let data = JSON.parse(req.body.data);
+	let data = req.body;
 	data.owner = req.session.user.username;
 	data.revId = req.params.rid;
 
 	Issue.createIssue({account: req.params.account, project: req.params.project}, data).then(issue => {
-
 
 		let resData = {
 			_id: issue._id,
@@ -80,7 +82,8 @@ function updateIssue(req, res, next){
 	'use strict';
 
 	let place = utils.APIInfo(req);
-	let data = JSON.parse(req.body.data);
+	//let data = JSON.parse(req.body.data);
+	let data = req.body;
 	data.owner = req.session.user.username;
 	data.revId = req.params.rid;
 	let dbCol = {account: req.params.account, project: req.params.project};
@@ -150,20 +153,26 @@ function listIssues(req, res, next) {
 	//let params = req.params;
 	let place = utils.APIInfo(req);
 	let dbCol =  {account: req.params.account, project: req.params.project, logger: req[C.REQ_REPO].logger};
+	let projection = {
+		extras: 0,
+		'comments.extras': 0,
+		'viewpoints.extras': 0,
+		'viewpoints.scribble': 0,
+		'viewpoints.screenshot.content': 0
+	};
 
 	var findIssue;
 	if(req.query.shared_id){
 		findIssue = Issue.findBySharedId(dbCol, req.query.shared_id, req.query.number);
 	} else if (req.params.rid) {
-		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, null, req.params.rid);
+		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, null, req.params.rid, projection);
 	} else {
-		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, "master", null);
+		findIssue = Issue.findByProjectName(dbCol, req.session.user.username, "master", null, projection);
 	}
 
 	findIssue.then(issues => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, issues);
 	}).catch(err => {
-		console.log(err);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 
@@ -321,6 +330,20 @@ function importBCF(req, res, next){
 			});
 		}
 	});
+}
+
+function getScreenshot(req, res, next){
+	'use strict';
+
+	let place = utils.APIInfo(req);
+	let dbCol = {account: req.params.account, project: req.params.project};
+
+	Issue.getScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, 'png');
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err, err);
+	});
+
 }
 
 module.exports = router;

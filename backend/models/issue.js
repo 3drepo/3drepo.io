@@ -52,7 +52,11 @@ var schema = Schema({
 	rev_id: Object,
 	name: { type: String, required: true },
 	topic_type: String,
-	status: String,
+	status: {
+        type: String,
+        //enum: ['open', 'in progress', 'closed']
+	},
+
 
 	// TO-DO: remove this after db migration => viewpoints[0]=viewpoint
 	viewpoint: {
@@ -70,7 +74,6 @@ var schema = Schema({
 		guid: Object
 	},
 
-	//BCF 
 	viewpoints: [{
 		up: [Number],
 		position: [Number],
@@ -83,10 +86,10 @@ var schema = Schema({
 		far : Number,
 		near : Number,
 		clippingPlanes : [Schema.Types.Mixed ],
-		screenshot: Object,
+		screenshot: {flag: Number, content: Object},
 		guid: Object,
 		extras: {},
-		scribble: Object
+		scribble: {flag: Number, content: Object},
 	}],
 
 	scale: Number,
@@ -98,7 +101,10 @@ var schema = Schema({
 	owner: String,
 	closed: Boolean,
 	desc: String,
-	priority: String,
+	priority: {
+		type: String,
+		//enum: ['low', 'medium', 'high', 'critical']
+	},
 	comments: [{
 		owner: String,
 		comment: {type: String, required: true},
@@ -115,7 +121,10 @@ var schema = Schema({
 	assigned_roles: [Schema.Types.Mixed],
 	closed_time: Number,
 	creator_role: String,
+
+	//to be remove
 	scribble: Object,
+	
 	//bcf extra fields we don't care
 	extras: {}
 });
@@ -300,7 +309,7 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 
 
 	return addRevFilter.then(() => {
-		return this._find(dbColOptions, filter, projection || {screenshot: 0}, noClean);
+		return this._find(dbColOptions, filter, projection, noClean);
 	}).then(_issues => {
 		issues = _issues;
 		return self.getFederatedProjectList(
@@ -324,7 +333,7 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 				promises.push(
 					middlewares.hasReadAccessToProjectHelper(username, childDbName, childProject).then(granted => {
 						if(granted){
-							return self._find({account: childDbName, project: childProject}, null, projection || {screenshot: 0}, noClean);
+							return self._find({account: childDbName, project: childProject}, null, projection, noClean);
 						} else {
 							return Promise.resolve([]);
 						}
@@ -470,9 +479,13 @@ schema.statics.createIssue = function(dbColOptions, data){
 		issue.name = data.name;
 		issue.created = (new Date()).getTime();
 		issue.owner = data.owner;
-		issue.scribble = data.scribble && new Buffer(data.scribble, 'base64');
-		issue.screenshot = data.screenshot && new Buffer(data.screenshot, 'base64');
-		issue.viewpoint = data.viewpoint;
+		issue.status = data.status;
+		issue.topic_type = data.topic_type;
+		issue.desc = data.desc;
+		issue.priority = data.priority;
+		//issue.scribble = data.scribble && new Buffer(data.scribble, 'base64');
+		//issue.screenshot = data.screenshot && new Buffer(data.screenshot, 'base64');
+		//issue.viewpoint = data.viewpoint;
 		issue.scale = data.scale;
 		issue.position = data.position;
 		issue.norm = data.norm;
@@ -482,7 +495,6 @@ schema.statics.createIssue = function(dbColOptions, data){
 		return issue.save().then(() => {
 			return ProjectSetting.findById(dbColOptions, dbColOptions.project);
 		}).then(settings => {
-			issue.screenshot = 'saved';
 			return Promise.resolve(issue.clean(settings.type));
 		});
 
@@ -490,8 +502,24 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 };
 
+schema.statics.getScreenshot = function(dbColOptions, uid, vid){
+	'use strict';
+	
+	return this.findById(dbColOptions, stringToUUID(uid), { 
+		viewpoints: { $elemMatch: { guid: stringToUUID(vid) } }
+	}).then(issue => {
+
+		if(!_.get(issue, 'viewpoints[0].screenshot.content.buffer')){
+			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
+		} else {
+			return issue.viewpoints[0].screenshot.content.buffer;
+		}
+	});
+}
+
 schema.methods.updateComment = function(commentIndex, data){
 	'use strict';
+
 	let timeStamp = (new Date()).getTime();
 
 	if(this.closed || (this.comments[commentIndex] && this.comments[commentIndex].sealed)){
@@ -515,11 +543,29 @@ schema.methods.updateComment = function(commentIndex, data){
 				return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
 			} else {
 
+				data.viewpoint.guid = utils.generateUUID();
+				data.viewpoint.screenshot = data.viewpoint.screenshot && new Buffer(data.viewpoint.screenshot, 'base64');
+				data.viewpoint.scribble = data.viewpoint.scribble && new Buffer(data.viewpoint.scribble, 'base64');
+
+				data.viewpoint.screenshot = {
+					content: data.viewpoint.screenshot,
+					flag: 1
+				};
+
+				data.viewpoint.scribble = {
+					content: data.viewpoint.scribble,
+					flag: 1
+				};
+
+				this.viewpoints.push(data.viewpoint);
+
 				this.comments.push({ 
 					owner: data.owner,	
 					comment: data.comment, 
 					created: timeStamp,
-					rev_id: history ? history._id : undefined
+					rev_id: history ? history._id : undefined,
+					guid: utils.generateUUID(),
+					viewpoint: data.viewpoint.guid
 				});
 			}
 		}).then(() => {
@@ -605,17 +651,22 @@ schema.methods.clean = function(typePrefix){
 	cleaned.project = this._dbcolOptions.project;
 	cleaned.rev_id && (cleaned.rev_id = uuidToString(cleaned.rev_id));
 
+	cleaned.viewpoints.forEach((vp, i) => {
+		cleaned.viewpoints[i].guid = uuidToString(cleaned.viewpoints[i].guid);
+		
+		if(cleaned.viewpoints[i].screenshot.flag){
+			cleaned.viewpoints[i].screenshot = cleaned.account + '/' + cleaned.project +'/issues/' + cleaned._id + '/viewpoints/' + cleaned.viewpoints[i].guid + '/screenshot.png'
+		}
+	});
+
 	cleaned.comments.forEach( (comment, i) => {
 		cleaned.comments[i].rev_id = comment.rev_id && (comment.rev_id = uuidToString(comment.rev_id));
+		cleaned.comments[i].guid && (cleaned.comments[i].guid = uuidToString(cleaned.comments[i].guid));
+		cleaned.comments[i].viewpoint = cleaned.viewpoints.find(vp => vp.guid === uuidToString(cleaned.comments[i].viewpoint));
 	});
 
 	if(cleaned.scribble){
 		cleaned.scribble = cleaned.scribble.toString('base64');
-	}
-
-
-	if(cleaned.screenshot){
-		cleaned.screenshot = cleaned.screenshot.toString('base64');
 	}
 
 	return cleaned;
@@ -727,12 +778,18 @@ schema.methods.getBCFMarkup = function(){
 				
 			};
 
-			if(vp.screenshot){
+			if(vp.screenshot.flag){
+
 				vpObj.Snapshot = snapshotFileName;
+				snapshotEntries.push({
+					filename: snapshotFileName,
+					snapshot: vp.screenshot.content
+				});
 				snapshotNo++;
+
 			}
 
-			vp.extras.Index && (vpObj.Index = vp.extras.Index);
+			_.get(vp, 'extras.Index') && (vpObj.Index = vp.extras.Index);
 
 			markup.Markup.Viewpoints.push(vpObj);
 			
@@ -764,30 +821,22 @@ schema.methods.getBCFMarkup = function(){
 				}
 			};
 
-			viewpointXmlObj.VisualizationInfo.Components = vp.extras.Components;
-			viewpointXmlObj.VisualizationInfo.Spaces = vp.extras.Spaces;
-			viewpointXmlObj.VisualizationInfo.SpaceBoundaries = vp.extras.SpaceBoundaries;
-			viewpointXmlObj.VisualizationInfo.Openings = vp.extras.Openings;
-			viewpointXmlObj.VisualizationInfo.OrthogonalCamera = vp.extras.OrthogonalCamera;
-			viewpointXmlObj.VisualizationInfo.Lines = vp.extras.Lines;
-			viewpointXmlObj.VisualizationInfo.ClippingPlanes = vp.extras.ClippingPlanes;
-			viewpointXmlObj.VisualizationInfo.Bitmap = vp.extras.Bitmap;
+			viewpointXmlObj.VisualizationInfo.Components = _.get(vp, 'extras.Components');
+			viewpointXmlObj.VisualizationInfo.Spaces = _.get(vp, 'extras.Spaces');
+			viewpointXmlObj.VisualizationInfo.SpaceBoundaries = _.get(vp, 'extras.SpaceBoundaries');
+			viewpointXmlObj.VisualizationInfo.Openings = _.get(vp, 'extras.Openings');
+			viewpointXmlObj.VisualizationInfo.OrthogonalCamera = _.get(vp, 'extras.OrthogonalCamera');
+			viewpointXmlObj.VisualizationInfo.Lines = _.get(vp, 'extras.Lines');
+			viewpointXmlObj.VisualizationInfo.ClippingPlanes = _.get(vp, 'extras.ClippingPlanes');
+			viewpointXmlObj.VisualizationInfo.Bitmap = _.get(vp, 'extras.Bitmap');
 
 			viewpointEntries.push({
 				filename: viewpointFileName,
 				xml:  xmlBuilder.buildObject(viewpointXmlObj)
 			});
 
-
-			if(vp.screenshot){
-				snapshotEntries.push({
-					filename: snapshotFileName,
-					snapshot: vp.screenshot
-				});
-			}
-
-
 		});
+
 	} else if (this.comments.length > 0){
 		//only add viewpoint node if there is at least one comment
 
@@ -872,7 +921,6 @@ schema.statics.getProjectBCF = function(projectId){
 
 schema.statics.importBCF = function(account, project, zipPath){
 	'use strict';
-
 	return new Promise((resolve, reject) => {
 
 		let files = {};
@@ -1032,10 +1080,17 @@ schema.statics.importBCF = function(account, project, zipPath){
 					extras.Index = viewpoints[guid].Viewpoint;
 					extras.Snapshot = viewpoints[guid].Snapshot;
 
+					console.log(viewpoints[guid]);
+
+					let screenshotObj = viewpoints[guid].snapshot ? {
+						flag: 1,
+						content: viewpoints[guid].snapshot,
+					} : undefined;
+
 					issue.viewpoints.push({
 						guid: utils.stringToUUID(guid),
 						extras: extras,
-						screenshot: viewpoints[guid].snapshot,
+						screenshot: screenshotObj,
 						up: [
 							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].X[0]._')),
 							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Y[0]._')),
