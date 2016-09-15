@@ -484,6 +484,14 @@ schema.statics.createIssue = function(dbColOptions, data){
 		
 	}).then(count => {
 
+		if(statusEnum.indexOf(data.status) === -1){
+			return Promise.reject(responseCodes.ISSUE_INVALID_STATUS);
+		}
+
+		if(priorityEnum.indexOf(data.priority) === -1){
+			return Promise.reject(responseCodes.ISSUE_INVALID_PRIORITY);
+		}
+
 		issue.number  = count + 1;
 		issue.object_id = objectId && stringToUUID(objectId);
 		issue.name = data.name;
@@ -496,7 +504,23 @@ schema.statics.createIssue = function(dbColOptions, data){
 		issue.group_id = data.group_id && stringToUUID(data.group_id);
 		//issue.scribble = data.scribble && new Buffer(data.scribble, 'base64');
 		//issue.screenshot = data.screenshot && new Buffer(data.screenshot, 'base64');
-		//issue.viewpoint = data.viewpoint;
+
+		if(data.viewpoint){
+			data.viewpoint.guid = utils.generateUUID();
+			
+			data.viewpoint.screenshot && (data.viewpoint.screenshot = {
+				content: new Buffer(data.viewpoint.screenshot, 'base64'),
+				flag: 1
+			});
+
+			data.viewpoint.scribble && (data.viewpoint.scribble = {
+				content: new Buffer(data.viewpoint.scribble, 'base64'),
+				flag: 1
+			});
+
+			issue.viewpoints.push(data.viewpoint);
+		}
+		
 		issue.scale = data.scale;
 		issue.position = data.position;
 		issue.norm = data.norm;
@@ -528,6 +552,16 @@ schema.statics.getScreenshot = function(dbColOptions, uid, vid){
 	});
 };
 
+schema.methods.updateAttr = function(attr, value){
+
+	if(this.isClosed()){
+		return Promise.reject(responseCodes.ISSUE_CLOSED_ALREADY);
+	}
+
+	this[attr] = value;
+	return this.save();
+};
+
 schema.methods.updateComment = function(commentIndex, data){
 	'use strict';
 
@@ -555,18 +589,16 @@ schema.methods.updateComment = function(commentIndex, data){
 			} else {
 
 				data.viewpoint.guid = utils.generateUUID();
-				data.viewpoint.screenshot = data.viewpoint.screenshot && new Buffer(data.viewpoint.screenshot, 'base64');
-				data.viewpoint.scribble = data.viewpoint.scribble && new Buffer(data.viewpoint.scribble, 'base64');
 
-				data.viewpoint.screenshot = {
-					content: data.viewpoint.screenshot,
+				data.viewpoint.screenshot && (data.viewpoint.screenshot = {
+					content: new Buffer(data.viewpoint.screenshot, 'base64'),
 					flag: 1
-				};
+				});
 
-				data.viewpoint.scribble = {
-					content: data.viewpoint.scribble,
+				data.viewpoint.scribble && (data.viewpoint.scribble = {
+					content: new Buffer(data.viewpoint.scribble, 'base64'),
 					flag: 1
-				};
+				});
 
 				this.viewpoints.push(data.viewpoint);
 
@@ -703,7 +735,7 @@ schema.methods.clean = function(typePrefix){
 	cleaned.viewpoints.forEach((vp, i) => {
 		cleaned.viewpoints[i].guid = uuidToString(cleaned.viewpoints[i].guid);
 		
-		if(cleaned.viewpoints[i].screenshot.flag){
+		if(_.get(cleaned, `viewpoints[${i}].screenshot.flag`)){
 			cleaned.viewpoints[i].screenshot = cleaned.account + '/' + cleaned.project +'/issues/' + cleaned._id + '/viewpoints/' + cleaned.viewpoints[i].guid + '/screenshot.png';
 		}
 	});
@@ -725,7 +757,10 @@ schema.methods.clean = function(typePrefix){
 		cleaned.scribble = cleaned.scribble.toString('base64');
 	}
 
-	cleaned.viewpoint = undefined;
+	if(cleaned.viewpoints.length > 0){
+		cleaned.viewpoint = cleaned.viewpoints[0];
+	}
+	
 	cleaned.viewpoints = undefined;
 
 	return cleaned;

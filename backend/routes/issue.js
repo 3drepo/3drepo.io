@@ -98,8 +98,10 @@ function updateIssue(req, res, next){
 		}
 
 		if(data.hasOwnProperty('topic_type')){
-			issue.topic_type = data.topic_type;
-			action = issue.save();
+			action = issue.updateAttr('topic_type', data.topic_type);
+
+		} else if(data.hasOwnProperty('desc')){
+			action = issue.updateAttr('desc', data.desc);
 
 		} else if(data.hasOwnProperty('priority')){
 			action = issue.changePriority(data.priority);
