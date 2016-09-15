@@ -6,39 +6,41 @@ div(layout="column", tabindex="0", tdr-focus="true")
 			input(
 			type="text"
 			ng-model="$ctrl.issueData.title"
+			ng-change="$ctrl.titleChange()"
+			ng-disabled="$ctrl.data"
 			aria-label="Title"
-			ng-disabled="$ctrl.issueData.title"
-			tdr-focus="true")
-	md-divider
+			tdr-focus="true"
+			required)
 
 	.issueCompItemContainer(layout="row")
 		md-input-container.issueComItemStatus(flex="30")
 			label Priority
-			md-select(ng-model="$ctrl.issueData.priority", ng-change="$ctrl.statusIconChange()")
+			md-select(ng-model="$ctrl.issueData.priority", ng-change="$ctrl.setStatusIcon()")
 				md-option(ng-repeat="priority in $ctrl.priorities", value="{{priority.value}}") {{priority.label}}
 		md-input-container.issueComItemStatus(flex)
 			label Status
-			md-select(ng-model="$ctrl.issueData.status", ng-change="$ctrl.statusIconChange()")
+			md-select(ng-model="$ctrl.issueData.status", ng-change="$ctrl.setStatusIcon()")
 				md-option(ng-repeat="status in $ctrl.statuses", value="{{status.value}}") {{status.label}}
 		md-input-container(flex)
 			label Type
 			md-select(ng-model="$ctrl.issueData.type")
 				md-option(ng-repeat="type in $ctrl.types", value="{{type.value}}") {{type.label}}
-	md-divider
 
 	.issueCompItemContainer(layout="row", layout-align="start start", flex)
 		md-input-container.issueComp(flex)
 			label Description
 			textarea(ng-model="$ctrl.issueData.description")
-	md-divider
 
-	.issueCompItemContainer(layout="row", layout-align="start start", flex)
+	.issueCompItemContainer(layout="row", layout-align="start start", flex, , ng-if="$ctrl.data")
 		md-input-container.issueComp(flex)
 			label Comment
-			textarea(ng-model="$ctrl.issueData.comment")
+			textarea(ng-model="$ctrl.issueData.comment", required)
 	md-divider
 
-	issues-footer(send-event="$ctrl.sendEvent({type: type, value: value})")
+	issues-footer(
+	send-event="$ctrl.sendEvent({type: type, value: value})"
+	save-disabled="$ctrl.saveDisabled"
+	new-issue="!$ctrl.data")
 
 issues-multi(
 account="vm.account"

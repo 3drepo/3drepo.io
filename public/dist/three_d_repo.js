@@ -11805,6 +11805,7 @@ angular.module('3drepo')
 		 * @param {Object} changes
 		 */
 		this.$onChanges = function (changes) {
+			/*
 			var leftArrow = 37;
 			if (changes.hasOwnProperty("keysDown") &&
 				angular.isDefined(changes.keysDown.previousValue)) {
@@ -11812,10 +11813,12 @@ angular.module('3drepo')
 					this.exit({issue: this.data});
 				}
 			}
+			*/
 
 			if (changes.hasOwnProperty("data")) {
 				if (typeof changes.data.currentValue === "object") {
 					this.issueData = this.data;
+					this.saveDisabled = false;
 				}
 				else {
 					this.issueData = {
@@ -11823,15 +11826,22 @@ angular.module('3drepo')
 						status: "open",
 						type: "for_information"
 					};
+					this.saveDisabled = true;
 				}
 				this.setStatusIcon();
 			}
 		};
 
-		this.statusIconChange = function () {
-			this.setStatusIcon();
+		/**
+		 * Disabled the save button for a new issue if there is no title
+		 */
+		this.titleChange = function () {
+			this.saveDisabled = (typeof this.issueData.title === "undefined");
 		};
 
+		/**
+		 * Set the status icon style and colour
+		 */
 		this.setStatusIcon = function () {
 			if (this.issueData.status === "closed") {
 				this.statusIconIcon = "check_circle";
@@ -11854,7 +11864,7 @@ angular.module('3drepo')
 						break;
 				}
 			}
-		}
+		};
 	}
 }());
 /**
@@ -13276,7 +13286,7 @@ angular.module('3drepo')
 				openIssueFooterHeight = 180,
 				closedIssueFooterHeight = 60,
 				infoHeight = 80,
-				issuesMinHeight = 590,
+				issuesMinHeight = 440,
 				issueListItemHeight = 150,
 				addButtonHeight = 75;
 
@@ -13415,6 +13425,7 @@ angular.module('3drepo')
 				if (selectedIssue !== null) {
 					vm.selectIssue = {issue: selectedIssue, selected: true};
 				}
+				setContentHeight();
 			}
 		});
 
@@ -13515,7 +13526,9 @@ angular.module('3drepo')
 				controller: IssuesFooterCtrl,
 				templateUrl: "issuesFooter.html",
 				bindings: {
-					sendEvent: "&"
+					sendEvent: "&",
+					saveDisabled: "=",
+					newIssue: "="
 				}
 			}
 		);
@@ -13528,9 +13541,9 @@ angular.module('3drepo')
 			currentActionIndex = null;
 
 		this.actions = [
-			{icon: "camera_alt", action: "screen_shot", label: "Screen shot", color: ""},
-			{icon: "place", action: "pin", label: "Pin", color: ""},
-			{icon: "view_comfy", action: "multi", label: "Multi", color: ""}
+			{icon: "camera_alt", action: "screen_shot", label: "Screen shot", color: "", disabled: false},
+			{icon: "place", action: "pin", label: "Pin", color: "", disabled: !this.newIssue},
+			{icon: "view_comfy", action: "multi", label: "Multi", color: "", disabled: !this.newIssue}
 		];
 
 		this.doAction = function (index) {

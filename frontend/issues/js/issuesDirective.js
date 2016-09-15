@@ -795,7 +795,7 @@
 				openIssueFooterHeight = 180,
 				closedIssueFooterHeight = 60,
 				infoHeight = 80,
-				issuesMinHeight = 590,
+				issuesMinHeight = 435,
 				issueListItemHeight = 150,
 				addButtonHeight = 75;
 
@@ -934,6 +934,7 @@
 				if (selectedIssue !== null) {
 					vm.selectIssue = {issue: selectedIssue, selected: true};
 				}
+				setContentHeight();
 			}
 		});
 

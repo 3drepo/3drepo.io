@@ -61,6 +61,7 @@
 		 * @param {Object} changes
 		 */
 		this.$onChanges = function (changes) {
+			/*
 			var leftArrow = 37;
 			if (changes.hasOwnProperty("keysDown") &&
 				angular.isDefined(changes.keysDown.previousValue)) {
@@ -68,10 +69,12 @@
 					this.exit({issue: this.data});
 				}
 			}
+			*/
 
 			if (changes.hasOwnProperty("data")) {
 				if (typeof changes.data.currentValue === "object") {
 					this.issueData = this.data;
+					this.saveDisabled = false;
 				}
 				else {
 					this.issueData = {
@@ -79,15 +82,22 @@
 						status: "open",
 						type: "for_information"
 					};
+					this.saveDisabled = true;
 				}
 				this.setStatusIcon();
 			}
 		};
 
-		this.statusIconChange = function () {
-			this.setStatusIcon();
+		/**
+		 * Disabled the save button for a new issue if there is no title
+		 */
+		this.titleChange = function () {
+			this.saveDisabled = (typeof this.issueData.title === "undefined");
 		};
 
+		/**
+		 * Set the status icon style and colour
+		 */
 		this.setStatusIcon = function () {
 			if (this.issueData.status === "closed") {
 				this.statusIconIcon = "check_circle";
@@ -110,6 +120,6 @@
 						break;
 				}
 			}
-		}
+		};
 	}
 }());

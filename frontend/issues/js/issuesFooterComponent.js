@@ -25,7 +25,9 @@
 				controller: IssuesFooterCtrl,
 				templateUrl: "issuesFooter.html",
 				bindings: {
-					sendEvent: "&"
+					sendEvent: "&",
+					saveDisabled: "=",
+					newIssue: "="
 				}
 			}
 		);
@@ -38,9 +40,9 @@
 			currentActionIndex = null;
 
 		this.actions = [
-			{icon: "camera_alt", action: "screen_shot", label: "Screen shot", color: ""},
-			{icon: "place", action: "pin", label: "Pin", color: ""},
-			{icon: "view_comfy", action: "multi", label: "Multi", color: ""}
+			{icon: "camera_alt", action: "screen_shot", label: "Screen shot", color: "", disabled: false},
+			{icon: "place", action: "pin", label: "Pin", color: "", disabled: !this.newIssue},
+			{icon: "view_comfy", action: "multi", label: "Multi", color: "", disabled: !this.newIssue}
 		];
 
 		this.doAction = function (index) {

@@ -4,15 +4,12 @@
 		ng-repeat="action in $ctrl.actions"
 		aria-label="{{action.icon}}"
 		ng-click="$ctrl.doAction($index)"
-		style="background:{{action.color}}")
+		style="background:{{action.color}}"
+		ng-disabled="action.disabled")
 			md-tooltip(md-direction="bottom") {{action.label}}
 			md-icon.angular-material-icons {{action.icon}}
 
 	div
-		md-button.md-fab.md-mini.md-primary(aria-label="Resolve")
-			md-tooltip(md-direction="bottom") Resolve
-			md-icon.angular-material-icons done
-
-		md-button.md-fab.md-mini.md-primary(aria-label="Submit")
+		md-button.md-fab.md-mini.md-primary(aria-label="Submit", ng-disabled="$ctrl.saveDisabled")
 			md-tooltip(md-direction="bottom") Submit
 			md-icon.angular-material-icons save
