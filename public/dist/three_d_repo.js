@@ -11820,7 +11820,8 @@ angular.module('3drepo')
 				else {
 					this.issueData = {
 						priority: "none",
-						status: "open"
+						status: "open",
+						type: "for_information"
 					};
 				}
 				this.setStatusIcon();
@@ -12265,6 +12266,8 @@ angular.module('3drepo')
 
 	function IssuesScreenShotCtrl ($q, $timeout, UtilsService, EventService) {
 		var self = this,
+			currentActionIndex = null,
+			highlightBackground = "#FF9800",
 			screenShotPromise = $q.defer(),
 			issueScreenShotCanvas = document.getElementById("issueScreenShotCanvas"),
 			issueScreenShotCanvasContext = issueScreenShotCanvas.getContext("2d"),
@@ -12288,14 +12291,24 @@ angular.module('3drepo')
 		issueScreenShotCanvas.width = (innerWidth * 80) / 100;
 		issueScreenShotCanvas.height = (innerHeight * 80) / 100;
 
+		// Set up canvas
+		initCanvas(issueScreenShotCanvas);
+		setupScribble();
+
 		// Get the screen shot
 		this.sendEvent({type:EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
 		screenShotPromise.promise.then(function (screenShot) {
-			screenShotImage.src = screenShot;
-			issueScreenShotCanvasContext.drawImage(screenShotImage, 0, 0, issueScreenShotCanvas.width, issueScreenShotCanvas.height);
-			self.initCanvas(issueScreenShotCanvas);
-			self.setupScribble();
+			//screenShotImage.src = screenShot;
+			//issueScreenShotCanvasContext.drawImage(screenShotImage, 0, 0, issueScreenShotCanvas.width, issueScreenShotCanvas.height);
+			self.screenShot = screenShot;
 		});
+
+		// Set up action buttons
+		this.actions = [
+			{icon: "border_color", action: "draw", label: "Draw", color: ""},
+			{icon: "fa fa-eraser", action: "erase", label: "Erase", color: ""}
+		];
+
 
 		this.closeDialog = function () {
 			UtilsService.closeDialog();
@@ -12306,7 +12319,7 @@ angular.module('3drepo')
 		 * Setup canvas and event listeners
 		 * @param canvas
 		 */
-		this.initCanvas = function (canvas)
+		function initCanvas (canvas)
 		{
 			canvas.addEventListener('mousedown', function (evt) {
 				mouse_drag_x = evt.layerX;
@@ -12418,7 +12431,7 @@ angular.module('3drepo')
 		/**
 		 * Erase the canvas
 		 */
-		this.setupErase = function () {
+		function setupErase () {
 			issueScreenShotCanvasContext.globalCompositeOperation = "destination-out";
 			pen_col = "rgba(0, 0, 0, 1)";
 			// vm.canvasPointerEvents = "auto";
@@ -12427,12 +12440,43 @@ angular.module('3drepo')
 		/**
 		 * Set up drawing
 		 */
-		this.setupScribble = function () {
+		function setupScribble () {
 			issueScreenShotCanvasContext.globalCompositeOperation = "source-over";
 			pen_col = "#FF0000";
 			pen_size = penIndicatorSize;
 			// vm.canvasPointerEvents = "auto";
 		}
+
+
+		this.doAction = function (index) {
+			if (currentActionIndex === null) {
+				currentActionIndex = index;
+				this.actions[currentActionIndex].color = highlightBackground;
+			}
+			else if (currentActionIndex === index) {
+				this.actions[currentActionIndex].color = "";
+				currentActionIndex = null;
+			}
+			else {
+				this.actions[currentActionIndex].color = "";
+				currentActionIndex = index;
+				this.actions[currentActionIndex].color = highlightBackground;
+			}
+
+			switch (this.actions[currentActionIndex].action) {
+				case "draw":
+					setupScribble();
+					break;
+
+				case "erase":
+					setupErase();
+					break;
+			}
+		};
+
+		this.save = function () {
+			this.closeDialog();
+		};
 	}
 }());
 /**
@@ -13232,7 +13276,7 @@ angular.module('3drepo')
 				openIssueFooterHeight = 180,
 				closedIssueFooterHeight = 60,
 				infoHeight = 80,
-				issuesMinHeight = 260,
+				issuesMinHeight = 590,
 				issueListItemHeight = 150,
 				addButtonHeight = 75;
 
@@ -13253,6 +13297,7 @@ angular.module('3drepo')
 					break;
 
 				case "showIssue":
+					/*
 					if (vm.selectedIssue.closed) {
 						footerHeight = closedIssueFooterHeight;
 					}
@@ -13262,6 +13307,8 @@ angular.module('3drepo')
 
 					var numberComments = vm.selectedIssue.hasOwnProperty("comments") ? vm.selectedIssue.comments.length : 0;
 					height = headerHeight + (numberComments * commentHeight) + footerHeight;
+					*/
+					height = issuesMinHeight;
 					break;
 
 				case "showAdd":
@@ -13354,6 +13401,7 @@ angular.module('3drepo')
 		vm.editIssue = function (issue) {
 			vm.issueToEdit = issue;
 			vm.toShow = "showIssue";
+			setContentHeight();
 			vm.onShowItem();
 		};
 

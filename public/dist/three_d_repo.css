@@ -1785,8 +1785,21 @@ issues-screen-shot #issueScreenShotActions {
   margin: auto;
 }
 
-issues-screen-shot #issueScreenShotEraseIcon {
+issues-screen-shot #issueScreenShotFAIcon {
   font-size: 24px;
+}
+
+issues-screen-shot #issueScreenShotContent {
+  overflow: hidden;
+}
+
+issues-screen-shot #issueScreenShotCanvas {
+  position: absolute;
+  top: 0;
+}
+
+issues-screen-shot #issueScreenShotImage {
+  width: 100%;
 }
 login {
   position: absolute;

@@ -12,7 +12,7 @@ div(layout="column", tabindex="0", tdr-focus="true")
 	md-divider
 
 	.issueCompItemContainer(layout="row")
-		md-input-container.issueComItemStatus(flex)
+		md-input-container.issueComItemStatus(flex="30")
 			label Priority
 			md-select(ng-model="$ctrl.issueData.priority", ng-change="$ctrl.statusIconChange()")
 				md-option(ng-repeat="priority in $ctrl.priorities", value="{{priority.value}}") {{priority.label}}

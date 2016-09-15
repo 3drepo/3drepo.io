@@ -35,6 +35,8 @@
 
 	function IssuesScreenShotCtrl ($q, $timeout, UtilsService, EventService) {
 		var self = this,
+			currentActionIndex = null,
+			highlightBackground = "#FF9800",
 			screenShotPromise = $q.defer(),
 			issueScreenShotCanvas = document.getElementById("issueScreenShotCanvas"),
 			issueScreenShotCanvasContext = issueScreenShotCanvas.getContext("2d"),
@@ -58,14 +60,24 @@
 		issueScreenShotCanvas.width = (innerWidth * 80) / 100;
 		issueScreenShotCanvas.height = (innerHeight * 80) / 100;
 
+		// Set up canvas
+		initCanvas(issueScreenShotCanvas);
+		setupScribble();
+
 		// Get the screen shot
 		this.sendEvent({type:EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
 		screenShotPromise.promise.then(function (screenShot) {
-			screenShotImage.src = screenShot;
-			issueScreenShotCanvasContext.drawImage(screenShotImage, 0, 0, issueScreenShotCanvas.width, issueScreenShotCanvas.height);
-			self.initCanvas(issueScreenShotCanvas);
-			self.setupScribble();
+			//screenShotImage.src = screenShot;
+			//issueScreenShotCanvasContext.drawImage(screenShotImage, 0, 0, issueScreenShotCanvas.width, issueScreenShotCanvas.height);
+			self.screenShot = screenShot;
 		});
+
+		// Set up action buttons
+		this.actions = [
+			{icon: "border_color", action: "draw", label: "Draw", color: ""},
+			{icon: "fa fa-eraser", action: "erase", label: "Erase", color: ""}
+		];
+
 
 		this.closeDialog = function () {
 			UtilsService.closeDialog();
@@ -76,7 +88,7 @@
 		 * Setup canvas and event listeners
 		 * @param canvas
 		 */
-		this.initCanvas = function (canvas)
+		function initCanvas (canvas)
 		{
 			canvas.addEventListener('mousedown', function (evt) {
 				mouse_drag_x = evt.layerX;
@@ -188,7 +200,7 @@
 		/**
 		 * Erase the canvas
 		 */
-		this.setupErase = function () {
+		function setupErase () {
 			issueScreenShotCanvasContext.globalCompositeOperation = "destination-out";
 			pen_col = "rgba(0, 0, 0, 1)";
 			// vm.canvasPointerEvents = "auto";
@@ -197,11 +209,42 @@
 		/**
 		 * Set up drawing
 		 */
-		this.setupScribble = function () {
+		function setupScribble () {
 			issueScreenShotCanvasContext.globalCompositeOperation = "source-over";
 			pen_col = "#FF0000";
 			pen_size = penIndicatorSize;
 			// vm.canvasPointerEvents = "auto";
 		}
+
+
+		this.doAction = function (index) {
+			if (currentActionIndex === null) {
+				currentActionIndex = index;
+				this.actions[currentActionIndex].color = highlightBackground;
+			}
+			else if (currentActionIndex === index) {
+				this.actions[currentActionIndex].color = "";
+				currentActionIndex = null;
+			}
+			else {
+				this.actions[currentActionIndex].color = "";
+				currentActionIndex = index;
+				this.actions[currentActionIndex].color = highlightBackground;
+			}
+
+			switch (this.actions[currentActionIndex].action) {
+				case "draw":
+					setupScribble();
+					break;
+
+				case "erase":
+					setupErase();
+					break;
+			}
+		};
+
+		this.save = function () {
+			this.closeDialog();
+		};
 	}
 }());

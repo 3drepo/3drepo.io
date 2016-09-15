@@ -76,7 +76,8 @@
 				else {
 					this.issueData = {
 						priority: "none",
-						status: "open"
+						status: "open",
+						type: "for_information"
 					};
 				}
 				this.setStatusIcon();

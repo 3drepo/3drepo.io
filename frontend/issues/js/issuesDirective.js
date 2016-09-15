@@ -795,7 +795,7 @@
 				openIssueFooterHeight = 180,
 				closedIssueFooterHeight = 60,
 				infoHeight = 80,
-				issuesMinHeight = 260,
+				issuesMinHeight = 590,
 				issueListItemHeight = 150,
 				addButtonHeight = 75;
 
@@ -816,6 +816,7 @@
 					break;
 
 				case "showIssue":
+					/*
 					if (vm.selectedIssue.closed) {
 						footerHeight = closedIssueFooterHeight;
 					}
@@ -825,6 +826,8 @@
 
 					var numberComments = vm.selectedIssue.hasOwnProperty("comments") ? vm.selectedIssue.comments.length : 0;
 					height = headerHeight + (numberComments * commentHeight) + footerHeight;
+					*/
+					height = issuesMinHeight;
 					break;
 
 				case "showAdd":
@@ -917,6 +920,7 @@
 		vm.editIssue = function (issue) {
 			vm.issueToEdit = issue;
 			vm.toShow = "showIssue";
+			setContentHeight();
 			vm.onShowItem();
 		};
 
