@@ -26,8 +26,9 @@
 				templateUrl: "issuesFooter.html",
 				bindings: {
 					sendEvent: "&",
-					saveDisabled: "=",
-					newIssue: "="
+					newIssue: "=",
+					submitDisabled: "=",
+					submit: "&"
 				}
 			}
 		);
@@ -76,6 +77,10 @@
 				case "multi":
 					break;
 			}
+		};
+
+		this.doSubmit = function () {
+			this.submit();
 		};
 
 		function ScreenShotDialogController () {

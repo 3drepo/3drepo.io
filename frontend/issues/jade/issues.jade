@@ -8,7 +8,7 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 			h3 {{vm.addAlertText}}
 			md-button.md-primary(ng-click="vm.closeAddAlert()") OK
 
-#issuesAddButton(ng-if="vm.toShow==='showIssues'", layout-margin)
+#issuesAddButton(ng-if="vm.showAddButton", layout-margin)
 	md-button.md-accent.md-fab.md-mini(aria-label="Add" ng-click="vm.editIssue()")
 		md-icon.angular-material-icons add
 
@@ -37,6 +37,8 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 	// Issue
 	issue-comp(
 	ng-switch-when="showIssue"
+	account="vm.account"
+	project="vm.project"
 	data="vm.issueToEdit"
 	keys-down="vm.keysDown"
 	exit="vm.editIssueExit(issue)"

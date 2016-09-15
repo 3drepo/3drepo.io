@@ -1,12 +1,12 @@
 div(layout="column", tabindex="0", tdr-focus="true")
 	.issueCompItemContainer(layout="row", layout-align="start start", flex)
-		md-icon.angular-material-icons#issueCompStatus(style="color:{{$ctrl.statusIconColour}}") {{$ctrl.statusIconIcon}}
+		md-icon.angular-material-icons#issueCompStatus(style="color:{{$ctrl.statusIcon.colour}}") {{$ctrl.statusIcon.icon}}
 		md-input-container.issueComp(flex)
 			label Title
 			input(
 			type="text"
-			ng-model="$ctrl.issueData.title"
-			ng-change="$ctrl.titleChange()"
+			ng-model="$ctrl.issueData.name"
+			ng-change="$ctrl.nameChange()"
 			ng-disabled="$ctrl.data"
 			aria-label="Title"
 			tdr-focus="true"
@@ -29,7 +29,7 @@ div(layout="column", tabindex="0", tdr-focus="true")
 	.issueCompItemContainer(layout="row", layout-align="start start", flex)
 		md-input-container.issueComp(flex)
 			label Description
-			textarea(ng-model="$ctrl.issueData.description")
+			textarea(ng-model="$ctrl.issueData.desc")
 
 	.issueCompItemContainer(layout="row", layout-align="start start", flex, , ng-if="$ctrl.data")
 		md-input-container.issueComp(flex)
@@ -39,8 +39,9 @@ div(layout="column", tabindex="0", tdr-focus="true")
 
 	issues-footer(
 	send-event="$ctrl.sendEvent({type: type, value: value})"
-	save-disabled="$ctrl.saveDisabled"
-	new-issue="!$ctrl.data")
+	submit-disabled="$ctrl.submitDisabled"
+	new-issue="!$ctrl.data"
+	submit="$ctrl.submit()")
 
 issues-multi(
 account="vm.account"

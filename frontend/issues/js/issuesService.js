@@ -24,7 +24,8 @@
 	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService"];
 
 	function IssuesService($http, $q,  serverConfig, EventService) {
-		var url = "",
+		var self = this,
+			url = "",
 			data = {},
 			config = {},
 			i, j = 0,
@@ -70,7 +71,7 @@
 			return prettyTime;
 		};
 
-		var generateTitle = function(issue) {
+		obj.generateTitle = function(issue) {
 			if (issue.typePrefix) {
 				return issue.typePrefix + "." + issue.number + " " + issue.name;
 			} else {
@@ -92,6 +93,7 @@
 			$http.get(url)
 				.then(
 					function(data) {
+						console.log(data);
 						deferred.resolve(data.data);
 						for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
 							data.data[i].timeStamp = self.getPrettyTime(data.data[i].created);
@@ -104,7 +106,7 @@
 								}
 							}
 
-							data.data[i].title = generateTitle(data.data[i]);
+							//data.data[i].title = self.obj.generateTitle(data.data[i]);
 						}
 					},
 					function() {
@@ -116,67 +118,38 @@
 		};
 
 		obj.saveIssue = function (issue) {
-			var self = this,
-				dataToSend,
-				deferred = $q.defer(),
-				viewpointPromise = $q.defer(),
-				snapshotPromise = $q.defer();
+			var deferred = $q.defer(),
+				url;
 
-			var url;
-
-			if(issue.rev_id){
+			if (issue.rev_id){
 				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/revision/" + issue.rev_id + "/issues.json");
 			} else {
 				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues.json");
 			}
 
-			// Get the viewpoint
-			EventService.send(EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, {promise: viewpointPromise});
-			viewpointPromise.promise.then(function (viewpoint) {
-				// Get the snapshot
-				EventService.send(EventService.EVENT.VIEWER.GET_SCREENSHOT, {promise: snapshotPromise});
-				snapshotPromise.promise.then(function (snapshot) {
-					console.log(snapshot);
+			config = {withCredentials: true};
 
-					data = {
-						object_id: issue.objectId,
-						name: issue.name,
-						viewpoint: viewpoint,
-						scale: 1.0,
-						creator_role: issue.creator_role,
-						assigned_roles: userRoles,
-						scribble: issue.scribble
-					};
+			if (issue.pickedPos !== null) {
+				issue.position = issue.pickedPos.toGL();
+				issue.norm = issue.pickedNorm.toGL();
+			}
 
-					config = {withCredentials: true};
-
-					if (issue.pickedPos !== null) {
-						data.position = issue.pickedPos.toGL();
-						data.norm = issue.pickedNorm.toGL();
-					}
-
-					dataToSend = {data: JSON.stringify(data)};
-
-					deferred.resolve(null);
-
+			$http.post(url, issue, config)
+				.then(function successCallback(response) {
+					console.log(response);
 					/*
-					$http.post(url, dataToSend, config)
-						.then(function successCallback(response) {
-							console.log(response);
-							response.data.issue._id = response.data.issue_id;
-							response.data.issue.account = issue.account;
-							response.data.issue.project = issue.project;
-							response.data.issue.timeStamp = self.getPrettyTime(response.data.issue.created);
-							response.data.issue.creator_role = issue.creator_role;
-							response.data.issue.scribble = issue.scribble;
+					response.data.issue._id = response.data.issue_id;
+					response.data.issue.account = issue.account;
+					response.data.issue.project = issue.project;
+					response.data.issue.timeStamp = self.getPrettyTime(response.data.issue.created);
+					response.data.issue.creator_role = issue.creator_role;
+					response.data.issue.scribble = issue.scribble;
 
-							response.data.issue.title = generateTitle(response.data.issue);
-							self.removePin();
-							deferred.resolve(response.data.issue);
-						});
+					response.data.issue.title = generateTitle(response.data.issue);
+					self.removePin();
 					*/
+					deferred.resolve(response.data.issue);
 				});
-			});
 
 			return deferred.promise;
 		};
@@ -371,6 +344,38 @@
 			}
 			return roleColor;
 		};
+
+		/**
+		 * Set the status icon style and colour
+		 */
+		obj.getStatusIcon = function (issue) {
+			var statusIcon = {};
+
+			if (issue.status === "closed") {
+				statusIcon.icon = "check_circle";
+				statusIcon.colour = "#004594";
+			}
+			else {
+				statusIcon.icon = (issue.status === "open") ? "panorama_fish_eye" : "lens";
+				switch (issue.priority) {
+					case "none":
+						statusIcon.colour = "#7777777";
+						break;
+					case "low":
+						statusIcon.colour = "#4CAF50";
+						break;
+					case "medium":
+						statusIcon.colour = "#FF9800";
+						break;
+					case "high":
+						statusIcon.colour = "#F44336";
+						break;
+				}
+			}
+
+			return statusIcon;
+		};
+
 
 		Object.defineProperty(
 			obj,

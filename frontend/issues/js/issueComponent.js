@@ -25,6 +25,8 @@
 				controller: IssueCompCtrl,
 				templateUrl: "issueComp.html",
 				bindings: {
+					account: "<",
+					project: "<",
 					data: "<",
 					keysDown: "<",
 					exit: "&",
@@ -33,9 +35,11 @@
 			}
 		);
 
-	IssueCompCtrl.$inject = [];
+	IssueCompCtrl.$inject = ["$q", "EventService", "IssuesService"];
 
-	function IssueCompCtrl () {
+	function IssueCompCtrl ($q, EventService, IssuesService) {
+		var self = this;
+
 		/*
 		 * Init
 		 */
@@ -47,7 +51,7 @@
 		];
 		this.statuses = [
 			{value: "open", label: "Open"},
-			{value: "in_progress", label: "In progress"},
+			{value: "in progress", label: "In progress"},
 			{value: "closed", label: "Closed"}
 		];
 		this.types = [
@@ -73,8 +77,9 @@
 
 			if (changes.hasOwnProperty("data")) {
 				if (typeof changes.data.currentValue === "object") {
-					this.issueData = this.data;
-					this.saveDisabled = false;
+					this.issueData = angular.copy(this.data);
+					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
+					this.submitDisabled = false;
 				}
 				else {
 					this.issueData = {
@@ -82,44 +87,66 @@
 						status: "open",
 						type: "for_information"
 					};
-					this.saveDisabled = true;
+					this.submitDisabled = true;
 				}
-				this.setStatusIcon();
+				this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 			}
 		};
 
 		/**
-		 * Disabled the save button for a new issue if there is no title
+		 * Disabled the save button for a new issue if there is no name
 		 */
-		this.titleChange = function () {
-			this.saveDisabled = (typeof this.issueData.title === "undefined");
+		this.nameChange = function () {
+			this.submitDisabled = (typeof this.issueData.name === "undefined");
 		};
 
 		/**
 		 * Set the status icon style and colour
 		 */
 		this.setStatusIcon = function () {
-			if (this.issueData.status === "closed") {
-				this.statusIconIcon = "check_circle";
-				this.statusIconColour = "#004594";
-			}
-			else {
-				this.statusIconIcon = (this.issueData.status === "open") ? "panorama_fish_eye" : "lens";
-				switch (this.issueData.priority) {
-					case "none":
-						this.statusIconColour = "#7777777";
-						break;
-					case "low":
-						this.statusIconColour = "#4CAF50";
-						break;
-					case "medium":
-						this.statusIconColour = "#FF9800";
-						break;
-					case "high":
-						this.statusIconColour = "#F44336";
-						break;
-				}
-			}
+			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
+		};
+
+		this.submit = function () {
+			var viewpointPromise = $q.defer(),
+				screenShotPromise = $q.defer(),
+				savePromise,
+				issue;
+
+			// Viewpoint
+			this.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
+			viewpointPromise.promise.then(function (viewpoint) {
+				// Screen shot
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
+				screenShotPromise.promise.then(function (screenShot) {
+					// Remove base64 header text
+					screenShot = screenShot.substring(screenShot.indexOf(",") + 1);
+					// Add to viewpoint
+					viewpoint.screenshot = screenShot;
+
+					// Save issue
+					issue = {
+						account: self.account,
+						project: self.project,
+						objectId: null,
+						name: self.issueData.name,
+						viewpoint: viewpoint,
+						creator_role: "Test",
+						pickedPos: null,
+						pickedNorm: null,
+						scale: 1.0,
+						assigned_roles: [],
+						priority: self.issueData.priority,
+						status: self.issueData.status,
+						type: self.issueData.type,
+						desc: self.issueData.description
+					};
+					savePromise = IssuesService.saveIssue(issue);
+					savePromise.then(function (data) {
+						console.log(data);
+					});
+				});
+			});
 		};
 	}
 }());

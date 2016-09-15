@@ -1713,7 +1713,9 @@ issues-list-item #issueListItemThumbnail {
   padding-right: 10px;
 }
 issues-list-item #issueListItemThumbnail img {
-  width: 100%;
+  height: 120px;
+  position: absolute;
+  clip: rect(0px, 250px, 120px, 140px);
 }
 
 issues-list-item #issuesListItemDescription {

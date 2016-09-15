@@ -34,11 +34,13 @@
 			}
 		);
 
-	IssuesListItemCtrl.$inject = [];
+	IssuesListItemCtrl.$inject = ["serverConfig", "IssuesService"];
 
-	function IssuesListItemCtrl () {
+	function IssuesListItemCtrl (serverConfig, IssuesService) {
 		this.selected = false;
-		this.thumbnail = "/public/images/ground.png";
+		this.screenShot = serverConfig.apiUrl(serverConfig.GET_API, this.data.viewpoint.screenshot);
+		this.data.title = IssuesService.generateTitle(this.data);
+		this.statusIcon = IssuesService.getStatusIcon(this.data);
 
 		/**
 		 * Monitor changes to parameters

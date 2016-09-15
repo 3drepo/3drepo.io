@@ -794,7 +794,7 @@
 				headerHeight = 53,
 				openIssueFooterHeight = 180,
 				closedIssueFooterHeight = 60,
-				infoHeight = 80,
+				infoHeight = 81,
 				issuesMinHeight = 435,
 				issueListItemHeight = 150,
 				addButtonHeight = 75;
@@ -935,6 +935,15 @@
 					vm.selectIssue = {issue: selectedIssue, selected: true};
 				}
 				setContentHeight();
+			}
+		});
+
+		/*
+		 * Show the add button if displaying info or list
+		 */
+		$scope.$watch("vm.toShow", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				vm.showAddButton = ((newValue.toString() === "showIssues") || (newValue.toString() === "showInfo"));
 			}
 		});
 

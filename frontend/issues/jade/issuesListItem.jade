@@ -1,17 +1,18 @@
 div(layout="column", layout-fill, ng-click="$ctrl.toggleSelected($event)")
 	#issuesListItemContent(layout='row', flex)
 		#issueListItemThumbnail(flex="33", layout="column", layout-align="center center")
-			img(ng-src="{{$ctrl.thumbnail}}")
+			img(ng-src="{{$ctrl.screenShot}}")
 		div(flex, layout="column")
 			label#issuesListItemTitle(flex="none") {{$ctrl.data.title}}
 			#issuesListItemInfo(layout="row", layout-align="start center", flex="none")
 				div(flex="15")
-					#issuesListItemStatus
+					//#issuesListItemStatus
+					md-icon.angular-material-icons#issueCompStatus(style="color:{{$ctrl.statusIcon.colour}}") {{$ctrl.statusIcon.icon}}
 				label(flex) {{$ctrl.data.owner}}
 				div(layout="row", layout-align="end", flex="30")
 					label {{$ctrl.data.timeStamp}}
 			#issuesListItemDescription
-				label Description which is soooooo very very very very very very very very very very very very very very very very very very very very very very very
+				label {{$ctrl.data.desc}}
 	md-divider
 
 	#issuesListItemEnter(ng-if="$ctrl.selected", ng-click="$ctrl.editIssue()", layout="column", layout-align="center center")

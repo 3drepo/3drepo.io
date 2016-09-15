@@ -11769,6 +11769,8 @@ angular.module('3drepo')
 				controller: IssueCompCtrl,
 				templateUrl: "issueComp.html",
 				bindings: {
+					account: "<",
+					project: "<",
 					data: "<",
 					keysDown: "<",
 					exit: "&",
@@ -11777,9 +11779,11 @@ angular.module('3drepo')
 			}
 		);
 
-	IssueCompCtrl.$inject = [];
+	IssueCompCtrl.$inject = ["$q", "EventService", "IssuesService"];
 
-	function IssueCompCtrl () {
+	function IssueCompCtrl ($q, EventService, IssuesService) {
+		var self = this;
+
 		/*
 		 * Init
 		 */
@@ -11791,7 +11795,7 @@ angular.module('3drepo')
 		];
 		this.statuses = [
 			{value: "open", label: "Open"},
-			{value: "in_progress", label: "In progress"},
+			{value: "in progress", label: "In progress"},
 			{value: "closed", label: "Closed"}
 		];
 		this.types = [
@@ -11817,8 +11821,9 @@ angular.module('3drepo')
 
 			if (changes.hasOwnProperty("data")) {
 				if (typeof changes.data.currentValue === "object") {
-					this.issueData = this.data;
-					this.saveDisabled = false;
+					this.issueData = angular.copy(this.data);
+					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
+					this.submitDisabled = false;
 				}
 				else {
 					this.issueData = {
@@ -11826,44 +11831,66 @@ angular.module('3drepo')
 						status: "open",
 						type: "for_information"
 					};
-					this.saveDisabled = true;
+					this.submitDisabled = true;
 				}
-				this.setStatusIcon();
+				this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 			}
 		};
 
 		/**
-		 * Disabled the save button for a new issue if there is no title
+		 * Disabled the save button for a new issue if there is no name
 		 */
-		this.titleChange = function () {
-			this.saveDisabled = (typeof this.issueData.title === "undefined");
+		this.nameChange = function () {
+			this.submitDisabled = (typeof this.issueData.name === "undefined");
 		};
 
 		/**
 		 * Set the status icon style and colour
 		 */
 		this.setStatusIcon = function () {
-			if (this.issueData.status === "closed") {
-				this.statusIconIcon = "check_circle";
-				this.statusIconColour = "#004594";
-			}
-			else {
-				this.statusIconIcon = (this.issueData.status === "open") ? "panorama_fish_eye" : "lens";
-				switch (this.issueData.priority) {
-					case "none":
-						this.statusIconColour = "#7777777";
-						break;
-					case "low":
-						this.statusIconColour = "#4CAF50";
-						break;
-					case "medium":
-						this.statusIconColour = "#FF9800";
-						break;
-					case "high":
-						this.statusIconColour = "#F44336";
-						break;
-				}
-			}
+			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
+		};
+
+		this.submit = function () {
+			var viewpointPromise = $q.defer(),
+				screenShotPromise = $q.defer(),
+				savePromise,
+				issue;
+
+			// Viewpoint
+			this.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
+			viewpointPromise.promise.then(function (viewpoint) {
+				// Screen shot
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
+				screenShotPromise.promise.then(function (screenShot) {
+					// Remove base64 header text
+					screenShot = screenShot.substring(screenShot.indexOf(",") + 1);
+					// Add to viewpoint
+					viewpoint.screenshot = screenShot;
+
+					// Save issue
+					issue = {
+						account: self.account,
+						project: self.project,
+						objectId: null,
+						name: self.issueData.name,
+						viewpoint: viewpoint,
+						creator_role: "Test",
+						pickedPos: null,
+						pickedNorm: null,
+						scale: 1.0,
+						assigned_roles: [],
+						priority: self.issueData.priority,
+						status: self.issueData.status,
+						type: self.issueData.type,
+						desc: self.issueData.description
+					};
+					savePromise = IssuesService.saveIssue(issue);
+					savePromise.then(function (data) {
+						console.log(data);
+					});
+				});
+			});
 		};
 	}
 }());
@@ -13285,8 +13312,8 @@ angular.module('3drepo')
 				headerHeight = 53,
 				openIssueFooterHeight = 180,
 				closedIssueFooterHeight = 60,
-				infoHeight = 80,
-				issuesMinHeight = 440,
+				infoHeight = 81,
+				issuesMinHeight = 435,
 				issueListItemHeight = 150,
 				addButtonHeight = 75;
 
@@ -13429,6 +13456,15 @@ angular.module('3drepo')
 			}
 		});
 
+		/*
+		 * Show the add button if displaying info or list
+		 */
+		$scope.$watch("vm.toShow", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				vm.showAddButton = ((newValue.toString() === "showIssues") || (newValue.toString() === "showInfo"));
+			}
+		});
+
 		function showIssue (issue) {
 			EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
 			// Highlight pin, move camera and setup clipping plane
@@ -13527,8 +13563,9 @@ angular.module('3drepo')
 				templateUrl: "issuesFooter.html",
 				bindings: {
 					sendEvent: "&",
-					saveDisabled: "=",
-					newIssue: "="
+					newIssue: "=",
+					submitDisabled: "=",
+					submit: "&"
 				}
 			}
 		);
@@ -13577,6 +13614,10 @@ angular.module('3drepo')
 				case "multi":
 					break;
 			}
+		};
+
+		this.doSubmit = function () {
+			this.submit();
 		};
 
 		function ScreenShotDialogController () {
@@ -13628,11 +13669,13 @@ angular.module('3drepo')
 			}
 		);
 
-	IssuesListItemCtrl.$inject = [];
+	IssuesListItemCtrl.$inject = ["serverConfig", "IssuesService"];
 
-	function IssuesListItemCtrl () {
+	function IssuesListItemCtrl (serverConfig, IssuesService) {
 		this.selected = false;
-		this.thumbnail = "/public/images/ground.png";
+		this.screenShot = serverConfig.apiUrl(serverConfig.GET_API, this.data.viewpoint.screenshot);
+		this.data.title = IssuesService.generateTitle(this.data);
+		this.statusIcon = IssuesService.getStatusIcon(this.data);
 
 		/**
 		 * Monitor changes to parameters
@@ -13780,7 +13823,8 @@ angular.module('3drepo')
 	IssuesService.$inject = ["$http", "$q", "serverConfig", "EventService"];
 
 	function IssuesService($http, $q,  serverConfig, EventService) {
-		var url = "",
+		var self = this,
+			url = "",
 			data = {},
 			config = {},
 			i, j = 0,
@@ -13826,7 +13870,7 @@ angular.module('3drepo')
 			return prettyTime;
 		};
 
-		var generateTitle = function(issue) {
+		obj.generateTitle = function(issue) {
 			if (issue.typePrefix) {
 				return issue.typePrefix + "." + issue.number + " " + issue.name;
 			} else {
@@ -13848,6 +13892,7 @@ angular.module('3drepo')
 			$http.get(url)
 				.then(
 					function(data) {
+						console.log(data);
 						deferred.resolve(data.data);
 						for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
 							data.data[i].timeStamp = self.getPrettyTime(data.data[i].created);
@@ -13860,7 +13905,7 @@ angular.module('3drepo')
 								}
 							}
 
-							data.data[i].title = generateTitle(data.data[i]);
+							//data.data[i].title = self.obj.generateTitle(data.data[i]);
 						}
 					},
 					function() {
@@ -13872,67 +13917,38 @@ angular.module('3drepo')
 		};
 
 		obj.saveIssue = function (issue) {
-			var self = this,
-				dataToSend,
-				deferred = $q.defer(),
-				viewpointPromise = $q.defer(),
-				snapshotPromise = $q.defer();
+			var deferred = $q.defer(),
+				url;
 
-			var url;
-
-			if(issue.rev_id){
+			if (issue.rev_id){
 				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/revision/" + issue.rev_id + "/issues.json");
 			} else {
 				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues.json");
 			}
 
-			// Get the viewpoint
-			EventService.send(EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, {promise: viewpointPromise});
-			viewpointPromise.promise.then(function (viewpoint) {
-				// Get the snapshot
-				EventService.send(EventService.EVENT.VIEWER.GET_SCREENSHOT, {promise: snapshotPromise});
-				snapshotPromise.promise.then(function (snapshot) {
-					console.log(snapshot);
+			config = {withCredentials: true};
 
-					data = {
-						object_id: issue.objectId,
-						name: issue.name,
-						viewpoint: viewpoint,
-						scale: 1.0,
-						creator_role: issue.creator_role,
-						assigned_roles: userRoles,
-						scribble: issue.scribble
-					};
+			if (issue.pickedPos !== null) {
+				issue.position = issue.pickedPos.toGL();
+				issue.norm = issue.pickedNorm.toGL();
+			}
 
-					config = {withCredentials: true};
-
-					if (issue.pickedPos !== null) {
-						data.position = issue.pickedPos.toGL();
-						data.norm = issue.pickedNorm.toGL();
-					}
-
-					dataToSend = {data: JSON.stringify(data)};
-
-					deferred.resolve(null);
-
+			$http.post(url, issue, config)
+				.then(function successCallback(response) {
+					console.log(response);
 					/*
-					$http.post(url, dataToSend, config)
-						.then(function successCallback(response) {
-							console.log(response);
-							response.data.issue._id = response.data.issue_id;
-							response.data.issue.account = issue.account;
-							response.data.issue.project = issue.project;
-							response.data.issue.timeStamp = self.getPrettyTime(response.data.issue.created);
-							response.data.issue.creator_role = issue.creator_role;
-							response.data.issue.scribble = issue.scribble;
+					response.data.issue._id = response.data.issue_id;
+					response.data.issue.account = issue.account;
+					response.data.issue.project = issue.project;
+					response.data.issue.timeStamp = self.getPrettyTime(response.data.issue.created);
+					response.data.issue.creator_role = issue.creator_role;
+					response.data.issue.scribble = issue.scribble;
 
-							response.data.issue.title = generateTitle(response.data.issue);
-							self.removePin();
-							deferred.resolve(response.data.issue);
-						});
+					response.data.issue.title = generateTitle(response.data.issue);
+					self.removePin();
 					*/
+					deferred.resolve(response.data.issue);
 				});
-			});
 
 			return deferred.promise;
 		};
@@ -14127,6 +14143,38 @@ angular.module('3drepo')
 			}
 			return roleColor;
 		};
+
+		/**
+		 * Set the status icon style and colour
+		 */
+		obj.getStatusIcon = function (issue) {
+			var statusIcon = {};
+
+			if (issue.status === "closed") {
+				statusIcon.icon = "check_circle";
+				statusIcon.colour = "#004594";
+			}
+			else {
+				statusIcon.icon = (issue.status === "open") ? "panorama_fish_eye" : "lens";
+				switch (issue.priority) {
+					case "none":
+						statusIcon.colour = "#7777777";
+						break;
+					case "low":
+						statusIcon.colour = "#4CAF50";
+						break;
+					case "medium":
+						statusIcon.colour = "#FF9800";
+						break;
+					case "high":
+						statusIcon.colour = "#F44336";
+						break;
+				}
+			}
+
+			return statusIcon;
+		};
+
 
 		Object.defineProperty(
 			obj,

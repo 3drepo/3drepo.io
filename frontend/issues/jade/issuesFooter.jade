@@ -10,6 +10,6 @@
 			md-icon.angular-material-icons {{action.icon}}
 
 	div
-		md-button.md-fab.md-mini.md-primary(aria-label="Submit", ng-disabled="$ctrl.saveDisabled")
+		md-button.md-fab.md-mini.md-primary(aria-label="Submit", ng-disabled="$ctrl.submitDisabled", ng-click="$ctrl.doSubmit()")
 			md-tooltip(md-direction="bottom") Submit
 			md-icon.angular-material-icons save
