@@ -16,8 +16,7 @@
  */
 
 
-var _ = require('lodash');
-var repoBase = require('./base/repo');
+
 var mongoose = require('mongoose');
 var ModelFactory = require('./factory/modelFactory');
 var utils = require('../utils');
@@ -25,32 +24,25 @@ var uuid = require('node-uuid');
 
 var Schema = mongoose.Schema;
 
-var groupSchema = Schema(
-	_.extend({}, repoBase.attrs, {
-		// no extra attributes
-		_id: Object,
-		type: { type: String, default: 'group'},
-		parents: [],
-		color: [Number]
-	})
-);
+var groupSchema = Schema({
+	// no extra attributes
+	_id: Object,
+	parents: [],
+	hidden: {type: Boolean, default: false},
+	color: [Number]
+});
 
-
-groupSchema.statics = {};
-groupSchema.methods = {};
 
 
 groupSchema.statics.findByUID = function(dbCol, uid){
 	'use strict';
-	return this.findOne(dbCol, { _id: utils.stringToUUID(uid), type: 'group' });
+	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) });
 };
 
 groupSchema.statics.listGroups = function(dbCol){
 	'use strict';
 
-	//TO-DO : get head history-> current, and do type: group, _id: {$in: current}
-
-	return this.find(dbCol, { type : 'group'});
+	return this.find(dbCol, {});
 };
 
 groupSchema.methods.updateAttrs = function(data){
@@ -83,25 +75,29 @@ groupSchema.statics.createGroup = function(dbCol, data){
 
 
 	group._id = stringToUUID(uuid.v1());
-	group.shared_id = stringToUUID(uuid.v1());
-	group.api = 1;
-
 	group.updateAttrs(data);
 	
 	return group;
 };
 
-// extend statics method
-groupSchema.statics = _.extend({}, repoBase.statics, groupSchema.statics);
+groupSchema.methods.clean = function(){
+	'use strict';
 
-// extend instance method
-groupSchema.methods = _.extend({}, repoBase.methods, groupSchema.methods);
+	let cleaned = this.toObject();
+	cleaned._id = uuidToString(cleaned._id);
+	cleaned.parents.forEach((parent, i) => {
+		cleaned.parents[i] = uuidToString(parent);
+	});
+
+	return cleaned;
+
+};
 
 var Group = ModelFactory.createClass(
 	'Group', 
 	groupSchema, 
 	arg => { 
-		return `${arg.project}.scene`;
+		return `${arg.project}.groups`;
 	}
 );
 
