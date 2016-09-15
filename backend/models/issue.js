@@ -150,7 +150,7 @@ function parseXmlString(xml, options){
 //internal helper _find
 
 var statusEnum = ['open', 'in progress', 'closed'];
-var priorityEnum = ['low', 'medium', 'high', 'critical'];
+var priorityEnum = ['none', 'low', 'medium', 'high'];
 
 schema.statics.statusEnum = statusEnum;
 schema.statics.priorityEnum = priorityEnum;
@@ -588,6 +588,7 @@ schema.methods.updateComment = function(commentIndex, data){
 				return Promise.reject(responseCodes.PROJECT_HISTORY_NOT_FOUND);
 			} else {
 
+				data.viewpoint = data.viewpoint || {};
 				data.viewpoint.guid = utils.generateUUID();
 
 				data.viewpoint.screenshot && (data.viewpoint.screenshot = {
