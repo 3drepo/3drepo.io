@@ -60,18 +60,18 @@ function storeIssue(req, res, next){
 
 	Issue.createIssue({account: req.params.account, project: req.params.project}, data).then(issue => {
 
-		let resData = {
-			_id: issue._id,
-			account: req.params.account, 
-			project: req.params.project, 
-			issue_id : issue._id, 
-			number : issue.number, 
-			created : issue.created, 
-			scribble: data.scribble,
-			issue: issue
-		};
+		// let resData = {
+		// 	_id: issue._id,
+		// 	account: req.params.account, 
+		// 	project: req.params.project, 
+		// 	issue_id : issue._id, 
+		// 	number : issue.number, 
+		// 	created : issue.created, 
+		// 	scribble: data.scribble,
+		// 	issue: issue
+		// };
 
-		responseCodes.respond(place, req, res, next, responseCodes.OK, resData);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, issue);
 
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -112,7 +112,7 @@ function updateIssue(req, res, next){
 		} else if(data.hasOwnProperty('comment') && data.edit){
 			action = issue.updateComment(data.commentIndex, data);
 
-		} else if(data.hasOwnProperty('comment') && data.sealed) {
+		} else if(data.sealed) {
 			action = issue.updateComment(data.commentIndex, data);
 
 		} else if(data.commentIndex >= 0 && data.delete) {

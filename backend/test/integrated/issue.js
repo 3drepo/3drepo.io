@@ -103,24 +103,24 @@ describe('Creating an issue', function () {
 				.expect(200 , function(err, res){
 					
 					issueId = res.body._id;
-					expect(res.body.issue.name).to.equal(issue.name);
-					expect(res.body.issue.scale).to.equal(issue.scale);
-					expect(res.body.issue.status).to.equal(issue.status);
-					expect(res.body.issue.topic_type).to.equal(issue.topic_type);
-					expect(res.body.issue.priority).to.equal(issue.priority);
-					expect(res.body.issue.creator_role).to.equal(issue.creator_role);
-					expect(res.body.issue.assigned_roles).to.deep.equal(issue.assigned_roles);
-					expect(res.body.issue.viewpoint.up).to.deep.equal(issue.viewpoint.up);
-					expect(res.body.issue.viewpoint.position).to.deep.equal(issue.viewpoint.position);
-					expect(res.body.issue.viewpoint.look_at).to.deep.equal(issue.viewpoint.look_at);
-					expect(res.body.issue.viewpoint.view_dir).to.deep.equal(issue.viewpoint.view_dir);
-					expect(res.body.issue.viewpoint.right).to.deep.equal(issue.viewpoint.right);
-					expect(res.body.issue.viewpoint.unityHeight).to.equal(issue.viewpoint.unityHeight);
-					expect(res.body.issue.viewpoint.fov).to.equal(issue.viewpoint.fov);
-					expect(res.body.issue.viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
-					expect(res.body.issue.viewpoint.far).to.equal(issue.viewpoint.far);
-					expect(res.body.issue.viewpoint.near).to.equal(issue.viewpoint.near);
-					expect(res.body.issue.viewpoint.clippingPlanes).to.deep.equal(issue.viewpoint.clippingPlanes);
+					expect(res.body.name).to.equal(issue.name);
+					expect(res.body.scale).to.equal(issue.scale);
+					expect(res.body.status).to.equal(issue.status);
+					expect(res.body.topic_type).to.equal(issue.topic_type);
+					expect(res.body.priority).to.equal(issue.priority);
+					expect(res.body.creator_role).to.equal(issue.creator_role);
+					expect(res.body.assigned_roles).to.deep.equal(issue.assigned_roles);
+					expect(res.body.viewpoint.up).to.deep.equal(issue.viewpoint.up);
+					expect(res.body.viewpoint.position).to.deep.equal(issue.viewpoint.position);
+					expect(res.body.viewpoint.look_at).to.deep.equal(issue.viewpoint.look_at);
+					expect(res.body.viewpoint.view_dir).to.deep.equal(issue.viewpoint.view_dir);
+					expect(res.body.viewpoint.right).to.deep.equal(issue.viewpoint.right);
+					expect(res.body.viewpoint.unityHeight).to.equal(issue.viewpoint.unityHeight);
+					expect(res.body.viewpoint.fov).to.equal(issue.viewpoint.fov);
+					expect(res.body.viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
+					expect(res.body.viewpoint.far).to.equal(issue.viewpoint.far);
+					expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
+					expect(res.body.viewpoint.clippingPlanes).to.deep.equal(issue.viewpoint.clippingPlanes);
 
 					return done(err);
 				});
@@ -237,8 +237,8 @@ describe('Creating an issue', function () {
 				.send(issue)
 				.expect(200 , function(err, res){
 					issueId = res.body._id;
-					expect(res.body.issue.norm).to.deep.equal(issue.norm);
-					expect(res.body.issue.position).to.deep.equal(issue.position);
+					expect(res.body.norm).to.deep.equal(issue.norm);
+					expect(res.body.position).to.deep.equal(issue.position);
 					return done(err);
 					
 				});
@@ -474,6 +474,71 @@ describe('Creating an issue', function () {
 		], done);
 	});
 
+	describe('and then sealing a comment', function(){
+
+		let issueId;
+
+		before(function(done){
+
+			let issue = Object.assign({"name":"Issue test"}, baseIssue);
+
+			async.series([
+				function(done){
+					agent.post(`/${username}/${project}/issues.json`)
+					.send(issue)
+					.expect(200 , function(err, res){
+						issueId = res.body._id;
+						done(err);
+					});
+				},
+				function(done){
+
+					let comment = { 
+						comment: 'hello world',
+						"viewpoint":{
+							"up":[0,1,0],
+							"position":[38,38 ,125.08011914810137],
+							"look_at":[0,0,-163.08011914810137],
+							"view_dir":[0,0,-1],
+							"right":[1,0,0],
+							"unityHeight ":3.537606904422707,
+							"fov":2.1124830653010416,
+							"aspect_ratio":0.8750189337327384,
+							"far":276.75612077194506 ,
+							"near":76.42411012233212,
+							"clippingPlanes":[]
+						},
+					};
+
+					agent.put(`/${username}/${project}/issues/${issueId}.json`)
+					.send(comment)
+					.expect(200 , done);
+
+				}
+			], done);
+
+		});
+
+		it('should succee', function(done){
+			agent.put(`/${username}/${project}/issues/${issueId}.json`)
+			.send({sealed: true, commentIndex: 0})
+			.expect(200, function(err, res){
+				done(err);
+			});
+		});
+
+
+		it('should fail if editing a sealed comment', function(done){
+			agent.put(`/${username}/${project}/issues/${issueId}.json`)
+			.send({comment: 'abcd', commentIndex: 0, edit: true})
+			.expect(400, function(err, res){
+				expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
+				done(err);
+			});
+		});
+
+	});
+
 	describe('and then commenting', function(){
 
 		let issueId;
@@ -557,9 +622,9 @@ describe('Creating an issue', function () {
 				function(done){
 					agent.get(`/${username}/${project}/issues/${issueId}.json`).expect(200, function(err , res){
 
-					expect(res.body.comments.length).to.equal(1);
-					expect(res.body.comments[0].comment).to.equal(comment.comment);
-					expect(res.body.comments[0].owner).to.equal(username);
+						expect(res.body.comments.length).to.equal(1);
+						expect(res.body.comments[0].comment).to.equal(comment.comment);
+						expect(res.body.comments[0].owner).to.equal(username);
 
 						done(err);
 					});
