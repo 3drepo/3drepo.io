@@ -35,6 +35,8 @@ var archiver = require('archiver');
 var yauzl = require("yauzl");
 var xml2js = require('xml2js');
 var _ = require('lodash');
+var gd = require('node-gd');
+
 var xmlBuilder = new xml2js.Builder({
 	explicitRoot: false,
 	xmldec: {
@@ -102,6 +104,7 @@ var schema = Schema({
 	owner: String,
 	closed: Boolean,
 	desc: String,
+	thumbnail: {flag: Number, content: Object},
 	priority: {
 		type: String,
 		//enum: ['low', 'medium', 'high', 'critical']
@@ -508,10 +511,18 @@ schema.statics.createIssue = function(dbColOptions, data){
 		if(data.viewpoint){
 			data.viewpoint.guid = utils.generateUUID();
 			
-			data.viewpoint.screenshot && (data.viewpoint.screenshot = {
-				content: new Buffer(data.viewpoint.screenshot, 'base64'),
-				flag: 1
-			});
+			if(data.viewpoint.screenshot){
+
+				data.viewpoint.screenshot = {
+					content: new Buffer(data.viewpoint.screenshot, 'base64'),
+					flag: 1
+				};
+
+				issue.thumbnail = {
+					flag: 1,
+					content: this.resizeAndCropScreenshot(data.viewpoint.screenshot.content, 150, 150, true)
+				};
+			}
 
 			data.viewpoint.scribble && (data.viewpoint.scribble = {
 				content: new Buffer(data.viewpoint.scribble, 'base64'),
@@ -537,19 +548,79 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 };
 
-schema.statics.getScreenshot = function(dbColOptions, uid, vid){
+schema.statics.getScreenshot = function(dbColOptions, uid, vid, width, height){
 	'use strict';
 	
+
 	return this.findById(dbColOptions, stringToUUID(uid), { 
 		viewpoints: { $elemMatch: { guid: stringToUUID(vid) } }
 	}).then(issue => {
 
 		if(!_.get(issue, 'viewpoints[0].screenshot.content.buffer')){
 			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
+		} else if (width){
+
+			return this.resizeAndCropScreenshot(issue.viewpoints[0].screenshot.content.buffer, width);
 		} else {
-			return issue.viewpoints[0].screenshot.content.buffer;
+			return issue.viewpoints[0].screenshot.content.buffer
 		}
 	});
+};
+
+schema.statics.getThumbnail = function(dbColOptions, uid){
+	'use strict';
+	
+
+	return this.findById(dbColOptions, stringToUUID(uid), { thumbnail: 1 }).then(issue => {
+
+		if(!_.get(issue, 'thumbnail.content.buffer')){
+			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
+		} else {
+			return issue.thumbnail.content.buffer
+		}
+	});
+};
+
+schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeight, crop){
+	'use strict';
+
+
+	let img = gd.createFromPngPtr(pngBuffer);
+	let sourceX, sourceY, sourceWidth, sourceHeight;
+
+	if(!img){
+
+		return;
+
+	} else if (!crop){
+
+		sourceX = 0;
+		sourceY = 0;
+		sourceWidth = img.width;
+		sourceHeight = img.height;
+
+	} else if(img.width > img.height){
+		
+		sourceY = 0;
+		sourceHeight = img.height;
+		sourceX = Math.round(img.width / 2 - img.height / 2);
+		sourceWidth = sourceHeight;
+
+	} else {
+
+		sourceX = 0;
+		sourceWidth = img.width;
+		sourceY = (img.height / 2 - img.width / 2)
+		sourceHeight = sourceWidth;
+	}
+	
+	destHeight = destHeight || Math.floor(destWidth / img.width * img.height);
+
+	let destImg  = gd.createTrueColorSync(destWidth, destHeight);
+	img.copyResampled(destImg, 0, 0, sourceX, sourceY, destWidth, destHeight, sourceWidth, sourceHeight);
+
+	return new Buffer(destImg.pngPtr(), 'binary');
+	
 };
 
 schema.methods.updateAttr = function(attr, value){
@@ -720,7 +791,10 @@ schema.methods.changePriority = function(priority){
 // 	return this.save();
 // };
 
+
 //Model method
+
+
 schema.methods.clean = function(typePrefix){
 	'use strict';
 
@@ -741,6 +815,9 @@ schema.methods.clean = function(typePrefix){
 		}
 	});
 
+	if(_.get(cleaned, `thumbnail.flag`)){
+		cleaned.thumbnail = cleaned.account + '/' + cleaned.project +'/issues/' + cleaned._id + '/thumbnail.png';
+	}
 
 	cleaned.comments.forEach( (comment, i) => {
 		cleaned.comments[i].rev_id = comment.rev_id && (comment.rev_id = uuidToString(comment.rev_id));

@@ -43,6 +43,7 @@
     "mongoose-timestamp": "^0.5.0",
     "multer": "1.1.0",
     "multiparty": "4.1.2",
+    "node-gd": "^1.4.0",
     "node-static": "0.7.7",
     "node-uuid": "1.4.7",
     "nodemailer": "^2.3.2",

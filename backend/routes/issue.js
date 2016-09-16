@@ -28,16 +28,17 @@ var multer = require("multer");
 var config = require("../config.js");
 
 router.get('/issues/:uid.json', middlewares.hasReadAccessToProject, findIssueById);
-
+router.get('/issues/:uid/thumbnail.png', middlewares.hasReadAccessToProject, getThumbnail);
 
 router.get('/issues.json', middlewares.hasReadAccessToProject, listIssues);
 router.get('/issues.bcfzip', middlewares.hasReadAccessToProject, getIssuesBCF);
 router.post('/issues.bcfzip', middlewares.hasReadAccessToProject, importBCF);
 
+router.get('/issues/:uid/viewpoints/:vid/screenshot.png', middlewares.hasReadAccessToProject, getScreenshot);
+router.get('/issues/:uid/viewpoints/:vid/screenshotSmall.png', middlewares.hasReadAccessToProject, getScreenshotSmall);
 router.get('/revision/:rid/issues.json', middlewares.hasReadAccessToProject, listIssues);
 router.get('/revision/:rid/issues.bcfzip', middlewares.hasReadAccessToProject, getIssuesBCF);
 
-router.get('/issues/:uid/viewpoints/:vid/screenshot.png', middlewares.hasReadAccessToProject, getScreenshot);
 
 //router.get('/issues/:sid.json', middlewares.hasReadAccessToProject, listIssuesBySID);
 router.get("/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
@@ -171,7 +172,8 @@ function listIssues(req, res, next) {
 		'comments.extras': 0,
 		'viewpoints.extras': 0,
 		'viewpoints.scribble': 0,
-		'viewpoints.screenshot.content': 0
+		'viewpoints.screenshot.content': 0,
+		'thumbnail.content': 0
 	};
 
 	var findIssue;
@@ -352,6 +354,35 @@ function getScreenshot(req, res, next){
 	let dbCol = {account: req.params.account, project: req.params.project};
 
 	Issue.getScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, 'png');
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err, err);
+	});
+
+}
+
+function getScreenshotSmall(req, res, next){
+	'use strict';
+
+	let place = utils.APIInfo(req);
+	let dbCol = {account: req.params.account, project: req.params.project};
+
+	let width = 350;
+	Issue.getScreenshot(dbCol, req.params.uid, req.params.vid, width).then(buffer => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, 'png');
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err, err);
+	});
+
+}
+
+function getThumbnail(req, res, next){
+	'use strict';
+
+	let place = utils.APIInfo(req);
+	let dbCol = {account: req.params.account, project: req.params.project};
+
+	Issue.getThumbnail(dbCol, req.params.uid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, 'png');
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
