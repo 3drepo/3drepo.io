@@ -170,10 +170,9 @@
 				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues/" + issue._id + ".json");
 			}
 				
-			var config = {
-				withCredentials: true
-			};
-			$http.put(url, {data: JSON.stringify(data)}, config)
+			var config = {withCredentials: true};
+
+			$http.put(url, data, config)
 				.then(function (response) {
 					deferred.resolve(response.data);
 				});
@@ -201,10 +200,10 @@
 			);
 		};
 
-		obj.saveComment = function(issue, comment) {
+		obj.saveComment = function(issue, comment, viewpoint) {
 			return doPut(issue, {
 				comment: comment,
-				number: issue.number
+				viewpoint: viewpoint
 			});
 		};
 

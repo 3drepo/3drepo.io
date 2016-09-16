@@ -1499,7 +1499,8 @@ issues #issuesAddButton {
 
 issues #issuesContent {
   height: 100%;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /** Issue *************************************************************************************************************/
@@ -1709,15 +1710,6 @@ issues-list-item #issuesListItemDescription label {
   color: rgba(0, 0, 0, 0.5);
 }
 
-issues-list-item #issueListItemThumbnail {
-  padding-right: 10px;
-}
-issues-list-item #issueListItemThumbnail img {
-  height: 120px;
-  position: absolute;
-  clip: rect(0px, 250px, 120px, 140px);
-}
-
 issues-list-item #issuesListItemDescription {
   height: 70px;
 }
@@ -1726,13 +1718,6 @@ issues-list-item #issuesListItemDescription label {
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
-}
-
-issues-list-item #issuesListItemStatus {
-  width: 20px;
-  height: 20px;
-  background: green;
-  border-radius: 100px;
 }
 
 issues-list-item #issuesListItemEnter {
@@ -1748,11 +1733,16 @@ issues-list-item #issuesListItemEnter md-icon {
   color: #FFFFFF;
 }
 
-/** Issue Comp ********************************************************************************************************/
-issue-comp div:first-child {
-  outline: none;
+issues-list-item .issueListItemThumbnail {
+  padding-right: 10px;
+}
+issues-list-item .issueListItemThumbnail img {
+  height: 120px;
+  position: absolute;
+  clip: rect(0px, 250px, 120px, 140px);
 }
 
+/** Issue Comp ********************************************************************************************************/
 issue-comp .issueCompItemContainer {
   padding: 10px;
 }
@@ -1767,6 +1757,19 @@ issue-comp textarea {
 
 issue-comp .issueComItemStatus {
   margin-right: 5px;
+}
+
+issue-comp .issueCompThumbnail {
+  position: relative;
+  margin-bottom: 120px;
+  outline: none;
+}
+issue-comp .issueCompThumbnail:hover {
+  cursor: pointer;
+}
+issue-comp .issueCompThumbnail img {
+  position: absolute;
+  width: 360px;
 }
 
 /** Issue Screen Shot  ************************************************************************************************/
@@ -1795,7 +1798,7 @@ issues-screen-shot #issueScreenShotContent {
   overflow: hidden;
 }
 
-issues-screen-shot #issueScreenShotCanvas {
+issues-screen-shot #scribbleCanvas {
   position: absolute;
   top: 0;
 }
@@ -1803,6 +1806,7 @@ issues-screen-shot #issueScreenShotCanvas {
 issues-screen-shot #issueScreenShotImage {
   width: 100%;
 }
+
 login {
   position: absolute;
   top: 0;

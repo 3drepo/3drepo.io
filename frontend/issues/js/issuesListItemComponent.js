@@ -34,11 +34,14 @@
 			}
 		);
 
-	IssuesListItemCtrl.$inject = ["serverConfig", "IssuesService"];
+	IssuesListItemCtrl.$inject = ["UtilsService", "IssuesService"];
 
-	function IssuesListItemCtrl (serverConfig, IssuesService) {
+	function IssuesListItemCtrl (UtilsService, IssuesService) {
+		/*
+		 * Init
+		 */
+		this.UtilsService = UtilsService;
 		this.selected = false;
-		this.screenShot = serverConfig.apiUrl(serverConfig.GET_API, this.data.viewpoint.screenshot);
 		this.data.title = IssuesService.generateTitle(this.data);
 		this.statusIcon = IssuesService.getStatusIcon(this.data);
 

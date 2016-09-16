@@ -28,7 +28,8 @@
 					sendEvent: "&",
 					newIssue: "=",
 					submitDisabled: "=",
-					submit: "&"
+					submit: "&",
+					screenShotSave: "&"
 				}
 			}
 		);
@@ -87,7 +88,7 @@
 			this.dialogCaller = self;
 
 			/**
-			 * Deselect the scren shot action button after close the screen shot dialog
+			 * Deselect the screen shot action button after close the screen shot dialog
 			 */
 			this.closeScreenShot = function () {
 				self.actions[currentActionIndex].color = "";

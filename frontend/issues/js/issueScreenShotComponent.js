@@ -26,7 +26,9 @@
 				templateUrl: "issueScreenShot.html",
 				bindings: {
 					sendEvent: "&",
-					close: "&"
+					close: "&",
+					screenShotSave: "&",
+					screenShot: "="
 				}
 			}
 		);
@@ -38,9 +40,8 @@
 			currentActionIndex = null,
 			highlightBackground = "#FF9800",
 			screenShotPromise = $q.defer(),
-			issueScreenShotCanvas = document.getElementById("issueScreenShotCanvas"),
-			issueScreenShotCanvasContext = issueScreenShotCanvas.getContext("2d"),
-			screenShotImage = new Image(),
+			scribbleCanvas,
+			scribbleCanvasContext,
 			// Inspired by confile's answer - http://stackoverflow.com/a/28241682/782358
 			innerWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,
 			innerHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight,
@@ -56,28 +57,36 @@
 			pen_size = penIndicatorSize * penToIndicatorRatio,
 			hasDrawnOnCanvas = false;
 
-		// Set the screen shot canvas to 80% screen size
-		issueScreenShotCanvas.width = (innerWidth * 80) / 100;
-		issueScreenShotCanvas.height = (innerHeight * 80) / 100;
+		if (typeof this.screenShot !== "undefined") {
+			self.screenShotUse = this.screenShot;
+		}
+		else {
+			$timeout(function () {
+				// Get scribble canvas
+				scribbleCanvas = document.getElementById("scribbleCanvas");
+				scribbleCanvasContext = scribbleCanvas.getContext("2d");
 
-		// Set up canvas
-		initCanvas(issueScreenShotCanvas);
-		setupScribble();
+				// Set the screen shot canvas to 80% screen size
+				scribbleCanvas.width = (innerWidth * 80) / 100;
+				scribbleCanvas.height = (innerHeight * 80) / 100;
 
-		// Get the screen shot
-		this.sendEvent({type:EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
-		screenShotPromise.promise.then(function (screenShot) {
-			//screenShotImage.src = screenShot;
-			//issueScreenShotCanvasContext.drawImage(screenShotImage, 0, 0, issueScreenShotCanvas.width, issueScreenShotCanvas.height);
-			self.screenShot = screenShot;
-		});
+				// Set up canvas
+				initCanvas(scribbleCanvas);
+				setupScribble();
 
-		// Set up action buttons
-		this.actions = [
-			{icon: "border_color", action: "draw", label: "Draw", color: ""},
-			{icon: "fa fa-eraser", action: "erase", label: "Erase", color: ""}
-		];
+				// Get the screen shot
+				self.sendEvent({type:EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
+				screenShotPromise.promise.then(function (screenShot) {
+					self.screenShotUse = screenShot;
+				});
 
+				// Set up action buttons
+				self.actions = [
+					{icon: "border_color", action: "draw", label: "Draw", color: ""},
+					{icon: "fa fa-eraser", action: "erase", label: "Erase", color: ""}
+				];
+			});
+		}
 
 		this.closeDialog = function () {
 			UtilsService.closeDialog();
@@ -88,8 +97,7 @@
 		 * Setup canvas and event listeners
 		 * @param canvas
 		 */
-		function initCanvas (canvas)
-		{
+		function initCanvas (canvas) {
 			canvas.addEventListener('mousedown', function (evt) {
 				mouse_drag_x = evt.layerX;
 				mouse_drag_y = evt.layerY;
@@ -160,15 +168,14 @@
 				evt.returnValue = false;
 				//setPenIndicatorPosition(evt.layerX, evt.layerY);
 			}, false);
-		};
+		}
 
 		/**
 		 * Update the canvas
 		 *
 		 * @param canvas
 		 */
-		function updateImage(canvas)
-		{
+		function updateImage(canvas) {
 			var context = canvas.getContext("2d");
 
 			if (!mouse_dragging) {
@@ -201,7 +208,7 @@
 		 * Erase the canvas
 		 */
 		function setupErase () {
-			issueScreenShotCanvasContext.globalCompositeOperation = "destination-out";
+			scribbleCanvasContext.globalCompositeOperation = "destination-out";
 			pen_col = "rgba(0, 0, 0, 1)";
 			// vm.canvasPointerEvents = "auto";
 		}
@@ -210,7 +217,7 @@
 		 * Set up drawing
 		 */
 		function setupScribble () {
-			issueScreenShotCanvasContext.globalCompositeOperation = "source-over";
+			scribbleCanvasContext.globalCompositeOperation = "source-over";
 			pen_col = "#FF0000";
 			pen_size = penIndicatorSize;
 			// vm.canvasPointerEvents = "auto";
@@ -244,6 +251,23 @@
 		};
 
 		this.save = function () {
+			var	screenShotCanvas = document.getElementById("screenShotCanvas"),
+				screenShotCanvasContext = screenShotCanvas.getContext("2d"),
+				screenShotImage = new Image(),
+				screenShot;
+
+			screenShotCanvas.width = scribbleCanvas.width;
+			screenShotCanvas.height = scribbleCanvas.height;
+			screenShotImage.src = this.screenShotUse;
+			screenShotCanvasContext.drawImage(screenShotImage, 0, 0, screenShotCanvas.width, screenShotCanvas.height);
+			screenShotCanvasContext.drawImage(scribbleCanvas, 0, 0);
+
+			screenShot = screenShotCanvas.toDataURL('image/png');
+			// Remove base64 header text
+			//screenShot = screenShot.substring(screenShot.indexOf(",") + 1);
+			//console.log(screenShot);
+			this.screenShotSave({screenShot: screenShot});
+
 			this.closeDialog();
 		};
 	}

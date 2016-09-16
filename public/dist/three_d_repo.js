@@ -11779,14 +11779,18 @@ angular.module('3drepo')
 			}
 		);
 
-	IssueCompCtrl.$inject = ["$q", "EventService", "IssuesService"];
+	IssueCompCtrl.$inject = ["$q", "$mdDialog", "EventService", "IssuesService", "UtilsService"];
 
-	function IssueCompCtrl ($q, EventService, IssuesService) {
-		var self = this;
+	function IssueCompCtrl ($q, $mdDialog, EventService, IssuesService, UtilsService) {
+		var self = this,
+			savedScreenShot = null;
 
 		/*
 		 * Init
 		 */
+		this.UtilsService = UtilsService;
+		this.hideDescription = false;
+		this.submitDisabled = true;
 		this.priorities = [
 			{value: "none", label: "None"},
 			{value: "low", label: "Low"},
@@ -11823,25 +11827,33 @@ angular.module('3drepo')
 				if (typeof changes.data.currentValue === "object") {
 					this.issueData = angular.copy(this.data);
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
-					this.submitDisabled = false;
+					this.hideDescription = !this.issueData.hasOwnProperty("desc");
+					this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshot);
 				}
 				else {
 					this.issueData = {
 						priority: "none",
 						status: "open",
-						type: "for_information"
+						type: "for_information",
+						viewpoint: {}
 					};
-					this.submitDisabled = true;
 				}
 				this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 			}
 		};
 
 		/**
-		 * Disabled the save button for a new issue if there is no name
+		 * Disable the save button for a new issue if there is no name
 		 */
 		this.nameChange = function () {
 			this.submitDisabled = (typeof this.issueData.name === "undefined");
+		};
+
+		/**
+		 * Disable the save button when commenting on an issue if there is no comment
+		 */
+		this.commentChange = function () {
+			this.submitDisabled = ((typeof this.data === "object") && (typeof this.comment === "undefined"));
 		};
 
 		/**
@@ -11851,47 +11863,126 @@ angular.module('3drepo')
 			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 		};
 
+		/**
+		 * Submit - new issue or comment
+		 */
 		this.submit = function () {
 			var viewpointPromise = $q.defer(),
-				screenShotPromise = $q.defer(),
-				savePromise,
-				issue;
+				screenShotPromise = $q.defer();
 
 			// Viewpoint
 			this.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
 			viewpointPromise.promise.then(function (viewpoint) {
-				// Screen shot
-				self.sendEvent({type: EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
-				screenShotPromise.promise.then(function (screenShot) {
-					// Remove base64 header text
-					screenShot = screenShot.substring(screenShot.indexOf(",") + 1);
-					// Add to viewpoint
-					viewpoint.screenshot = screenShot;
-
-					// Save issue
-					issue = {
-						account: self.account,
-						project: self.project,
-						objectId: null,
-						name: self.issueData.name,
-						viewpoint: viewpoint,
-						creator_role: "Test",
-						pickedPos: null,
-						pickedNorm: null,
-						scale: 1.0,
-						assigned_roles: [],
-						priority: self.issueData.priority,
-						status: self.issueData.status,
-						type: self.issueData.type,
-						desc: self.issueData.description
-					};
-					savePromise = IssuesService.saveIssue(issue);
-					savePromise.then(function (data) {
-						console.log(data);
-					});
-				});
+				if (typeof self.data === "undefined") {
+					if (savedScreenShot !== null) {
+						saveIssue(viewpoint, savedScreenShot);
+					}
+					else {
+						self.sendEvent({type: EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
+						screenShotPromise.promise.then(function (screenShot) {
+							saveIssue(viewpoint, screenShot);
+						});
+					}
+				}
+				else {
+					saveComment(viewpoint);
+				}
 			});
 		};
+
+		this.showScreenShot = function (screenShot) {
+			self.screenShot = UtilsService.getServerUrl(screenShot);
+			$mdDialog.show({
+				controller: function () {
+					this.dialogCaller = self;
+				},
+				controllerAs: "vm",
+				templateUrl: "issueScreenShotDialog.html"
+			});
+		};
+
+		/**
+		 * Save new issue
+		 * @param viewpoint
+		 * @param screenShot
+		 */
+		function saveIssue (viewpoint, screenShot) {
+			var	savePromise,
+				issue;
+
+			// Remove base64 header text from screenShot and add to viewpoint
+			screenShot = screenShot.substring(screenShot.indexOf(",") + 1);
+			viewpoint.screenshot = screenShot;
+
+			// Save issue
+			issue = {
+				account: self.account,
+				project: self.project,
+				objectId: null,
+				name: self.issueData.name,
+				viewpoint: viewpoint,
+				creator_role: "Test",
+				pickedPos: null,
+				pickedNorm: null,
+				scale: 1.0,
+				assigned_roles: [],
+				priority: self.issueData.priority,
+				status: self.issueData.status,
+				type: self.issueData.type,
+				desc: self.issueData.description
+			};
+			savePromise = IssuesService.saveIssue(issue);
+			savePromise.then(function (data) {
+				console.log(data);
+			});
+		}
+
+		/**
+		 * Add comment to issue
+		 * @param viewpoint
+		 */
+		function saveComment (viewpoint) {
+			var	savePromise,
+				screenShot,
+				viewpointToUse;
+
+			// If there is a saved screen shot use the current viewpoint, else the issue viewpoint
+			// Remove base64 header text from screen shot and add to viewpoint
+			if (angular.isDefined(self.descriptionThumbnail)) {
+				viewpointToUse = viewpoint;
+				screenShot = savedScreenShot.substring(savedScreenShot.indexOf(",") + 1);
+				viewpoint.screenshot = screenShot;
+			}
+			else {
+				viewpointToUse = self.issueData.viewpoint;
+			}
+
+			savePromise = IssuesService.saveComment(self.issueData, self.comment, viewpointToUse);
+			savePromise.then(function (data) {
+				console.log(data);
+			});
+		}
+
+		/**
+		 * A screen shot has been saved
+		 * @param data
+		 */
+		this.screenShotSave = function (data) {
+			savedScreenShot = data.screenShot;
+			if (typeof self.data === "object") {
+				self.commentThumbnail = data.screenShot;
+			}
+			else {
+				self.descriptionThumbnail = data.screenShot;
+			}
+		};
+
+		/**
+		 * Controller for screen shot dialog
+		 */
+		function ScreenShotDialogController () {
+			this.dialogCaller = self;
+		}
 	}
 }());
 /**
@@ -12294,7 +12385,9 @@ angular.module('3drepo')
 				templateUrl: "issueScreenShot.html",
 				bindings: {
 					sendEvent: "&",
-					close: "&"
+					close: "&",
+					screenShotSave: "&",
+					screenShot: "="
 				}
 			}
 		);
@@ -12306,9 +12399,8 @@ angular.module('3drepo')
 			currentActionIndex = null,
 			highlightBackground = "#FF9800",
 			screenShotPromise = $q.defer(),
-			issueScreenShotCanvas = document.getElementById("issueScreenShotCanvas"),
-			issueScreenShotCanvasContext = issueScreenShotCanvas.getContext("2d"),
-			screenShotImage = new Image(),
+			scribbleCanvas,
+			scribbleCanvasContext,
 			// Inspired by confile's answer - http://stackoverflow.com/a/28241682/782358
 			innerWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,
 			innerHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight,
@@ -12324,28 +12416,36 @@ angular.module('3drepo')
 			pen_size = penIndicatorSize * penToIndicatorRatio,
 			hasDrawnOnCanvas = false;
 
-		// Set the screen shot canvas to 80% screen size
-		issueScreenShotCanvas.width = (innerWidth * 80) / 100;
-		issueScreenShotCanvas.height = (innerHeight * 80) / 100;
+		if (typeof this.screenShot !== "undefined") {
+			self.screenShotUse = this.screenShot;
+		}
+		else {
+			$timeout(function () {
+				// Get scribble canvas
+				scribbleCanvas = document.getElementById("scribbleCanvas");
+				scribbleCanvasContext = scribbleCanvas.getContext("2d");
 
-		// Set up canvas
-		initCanvas(issueScreenShotCanvas);
-		setupScribble();
+				// Set the screen shot canvas to 80% screen size
+				scribbleCanvas.width = (innerWidth * 80) / 100;
+				scribbleCanvas.height = (innerHeight * 80) / 100;
 
-		// Get the screen shot
-		this.sendEvent({type:EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
-		screenShotPromise.promise.then(function (screenShot) {
-			//screenShotImage.src = screenShot;
-			//issueScreenShotCanvasContext.drawImage(screenShotImage, 0, 0, issueScreenShotCanvas.width, issueScreenShotCanvas.height);
-			self.screenShot = screenShot;
-		});
+				// Set up canvas
+				initCanvas(scribbleCanvas);
+				setupScribble();
 
-		// Set up action buttons
-		this.actions = [
-			{icon: "border_color", action: "draw", label: "Draw", color: ""},
-			{icon: "fa fa-eraser", action: "erase", label: "Erase", color: ""}
-		];
+				// Get the screen shot
+				self.sendEvent({type:EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
+				screenShotPromise.promise.then(function (screenShot) {
+					self.screenShotUse = screenShot;
+				});
 
+				// Set up action buttons
+				self.actions = [
+					{icon: "border_color", action: "draw", label: "Draw", color: ""},
+					{icon: "fa fa-eraser", action: "erase", label: "Erase", color: ""}
+				];
+			});
+		}
 
 		this.closeDialog = function () {
 			UtilsService.closeDialog();
@@ -12356,8 +12456,7 @@ angular.module('3drepo')
 		 * Setup canvas and event listeners
 		 * @param canvas
 		 */
-		function initCanvas (canvas)
-		{
+		function initCanvas (canvas) {
 			canvas.addEventListener('mousedown', function (evt) {
 				mouse_drag_x = evt.layerX;
 				mouse_drag_y = evt.layerY;
@@ -12428,15 +12527,14 @@ angular.module('3drepo')
 				evt.returnValue = false;
 				//setPenIndicatorPosition(evt.layerX, evt.layerY);
 			}, false);
-		};
+		}
 
 		/**
 		 * Update the canvas
 		 *
 		 * @param canvas
 		 */
-		function updateImage(canvas)
-		{
+		function updateImage(canvas) {
 			var context = canvas.getContext("2d");
 
 			if (!mouse_dragging) {
@@ -12469,7 +12567,7 @@ angular.module('3drepo')
 		 * Erase the canvas
 		 */
 		function setupErase () {
-			issueScreenShotCanvasContext.globalCompositeOperation = "destination-out";
+			scribbleCanvasContext.globalCompositeOperation = "destination-out";
 			pen_col = "rgba(0, 0, 0, 1)";
 			// vm.canvasPointerEvents = "auto";
 		}
@@ -12478,7 +12576,7 @@ angular.module('3drepo')
 		 * Set up drawing
 		 */
 		function setupScribble () {
-			issueScreenShotCanvasContext.globalCompositeOperation = "source-over";
+			scribbleCanvasContext.globalCompositeOperation = "source-over";
 			pen_col = "#FF0000";
 			pen_size = penIndicatorSize;
 			// vm.canvasPointerEvents = "auto";
@@ -12512,6 +12610,23 @@ angular.module('3drepo')
 		};
 
 		this.save = function () {
+			var	screenShotCanvas = document.getElementById("screenShotCanvas"),
+				screenShotCanvasContext = screenShotCanvas.getContext("2d"),
+				screenShotImage = new Image(),
+				screenShot;
+
+			screenShotCanvas.width = scribbleCanvas.width;
+			screenShotCanvas.height = scribbleCanvas.height;
+			screenShotImage.src = this.screenShotUse;
+			screenShotCanvasContext.drawImage(screenShotImage, 0, 0, screenShotCanvas.width, screenShotCanvas.height);
+			screenShotCanvasContext.drawImage(scribbleCanvas, 0, 0);
+
+			screenShot = screenShotCanvas.toDataURL('image/png');
+			// Remove base64 header text
+			//screenShot = screenShot.substring(screenShot.indexOf(",") + 1);
+			//console.log(screenShot);
+			this.screenShotSave({screenShot: screenShot});
+
 			this.closeDialog();
 		};
 	}
@@ -13565,7 +13680,8 @@ angular.module('3drepo')
 					sendEvent: "&",
 					newIssue: "=",
 					submitDisabled: "=",
-					submit: "&"
+					submit: "&",
+					screenShotSave: "&"
 				}
 			}
 		);
@@ -13624,7 +13740,7 @@ angular.module('3drepo')
 			this.dialogCaller = self;
 
 			/**
-			 * Deselect the scren shot action button after close the screen shot dialog
+			 * Deselect the screen shot action button after close the screen shot dialog
 			 */
 			this.closeScreenShot = function () {
 				self.actions[currentActionIndex].color = "";
@@ -13669,11 +13785,14 @@ angular.module('3drepo')
 			}
 		);
 
-	IssuesListItemCtrl.$inject = ["serverConfig", "IssuesService"];
+	IssuesListItemCtrl.$inject = ["UtilsService", "IssuesService"];
 
-	function IssuesListItemCtrl (serverConfig, IssuesService) {
+	function IssuesListItemCtrl (UtilsService, IssuesService) {
+		/*
+		 * Init
+		 */
+		this.UtilsService = UtilsService;
 		this.selected = false;
-		this.screenShot = serverConfig.apiUrl(serverConfig.GET_API, this.data.viewpoint.screenshot);
 		this.data.title = IssuesService.generateTitle(this.data);
 		this.statusIcon = IssuesService.getStatusIcon(this.data);
 
@@ -13969,10 +14088,9 @@ angular.module('3drepo')
 				url = serverConfig.apiUrl(serverConfig.POST_API, issue.account + "/" + issue.project + "/issues/" + issue._id + ".json");
 			}
 				
-			var config = {
-				withCredentials: true
-			};
-			$http.put(url, {data: JSON.stringify(data)}, config)
+			var config = {withCredentials: true};
+
+			$http.put(url, data, config)
 				.then(function (response) {
 					deferred.resolve(response.data);
 				});
@@ -14000,10 +14118,10 @@ angular.module('3drepo')
 			);
 		};
 
-		obj.saveComment = function(issue, comment) {
+		obj.saveComment = function(issue, comment, viewpoint) {
 			return doPut(issue, {
 				comment: comment,
-				number: issue.number
+				viewpoint: viewpoint
 			});
 		};
 
@@ -19320,6 +19438,10 @@ var Oculus = {};
          */
         obj.closeDialog = function () {
             $mdDialog.cancel();
+        };
+
+        obj.getServerUrl = function (url) {
+            return serverConfig.apiUrl(serverConfig.GET_API, url);
         };
 
         return obj;

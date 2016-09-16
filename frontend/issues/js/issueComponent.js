@@ -35,14 +35,18 @@
 			}
 		);
 
-	IssueCompCtrl.$inject = ["$q", "EventService", "IssuesService"];
+	IssueCompCtrl.$inject = ["$q", "$mdDialog", "EventService", "IssuesService", "UtilsService"];
 
-	function IssueCompCtrl ($q, EventService, IssuesService) {
-		var self = this;
+	function IssueCompCtrl ($q, $mdDialog, EventService, IssuesService, UtilsService) {
+		var self = this,
+			savedScreenShot = null;
 
 		/*
 		 * Init
 		 */
+		this.UtilsService = UtilsService;
+		this.hideDescription = false;
+		this.submitDisabled = true;
 		this.priorities = [
 			{value: "none", label: "None"},
 			{value: "low", label: "Low"},
@@ -79,25 +83,33 @@
 				if (typeof changes.data.currentValue === "object") {
 					this.issueData = angular.copy(this.data);
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
-					this.submitDisabled = false;
+					this.hideDescription = !this.issueData.hasOwnProperty("desc");
+					this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshot);
 				}
 				else {
 					this.issueData = {
 						priority: "none",
 						status: "open",
-						type: "for_information"
+						type: "for_information",
+						viewpoint: {}
 					};
-					this.submitDisabled = true;
 				}
 				this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 			}
 		};
 
 		/**
-		 * Disabled the save button for a new issue if there is no name
+		 * Disable the save button for a new issue if there is no name
 		 */
 		this.nameChange = function () {
 			this.submitDisabled = (typeof this.issueData.name === "undefined");
+		};
+
+		/**
+		 * Disable the save button when commenting on an issue if there is no comment
+		 */
+		this.commentChange = function () {
+			this.submitDisabled = ((typeof this.data === "object") && (typeof this.comment === "undefined"));
 		};
 
 		/**
@@ -107,46 +119,125 @@
 			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 		};
 
+		/**
+		 * Submit - new issue or comment
+		 */
 		this.submit = function () {
 			var viewpointPromise = $q.defer(),
-				screenShotPromise = $q.defer(),
-				savePromise,
-				issue;
+				screenShotPromise = $q.defer();
 
 			// Viewpoint
 			this.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
 			viewpointPromise.promise.then(function (viewpoint) {
-				// Screen shot
-				self.sendEvent({type: EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
-				screenShotPromise.promise.then(function (screenShot) {
-					// Remove base64 header text
-					screenShot = screenShot.substring(screenShot.indexOf(",") + 1);
-					// Add to viewpoint
-					viewpoint.screenshot = screenShot;
-
-					// Save issue
-					issue = {
-						account: self.account,
-						project: self.project,
-						objectId: null,
-						name: self.issueData.name,
-						viewpoint: viewpoint,
-						creator_role: "Test",
-						pickedPos: null,
-						pickedNorm: null,
-						scale: 1.0,
-						assigned_roles: [],
-						priority: self.issueData.priority,
-						status: self.issueData.status,
-						type: self.issueData.type,
-						desc: self.issueData.description
-					};
-					savePromise = IssuesService.saveIssue(issue);
-					savePromise.then(function (data) {
-						console.log(data);
-					});
-				});
+				if (typeof self.data === "undefined") {
+					if (savedScreenShot !== null) {
+						saveIssue(viewpoint, savedScreenShot);
+					}
+					else {
+						self.sendEvent({type: EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
+						screenShotPromise.promise.then(function (screenShot) {
+							saveIssue(viewpoint, screenShot);
+						});
+					}
+				}
+				else {
+					saveComment(viewpoint);
+				}
 			});
 		};
+
+		this.showScreenShot = function (screenShot) {
+			self.screenShot = UtilsService.getServerUrl(screenShot);
+			$mdDialog.show({
+				controller: function () {
+					this.dialogCaller = self;
+				},
+				controllerAs: "vm",
+				templateUrl: "issueScreenShotDialog.html"
+			});
+		};
+
+		/**
+		 * Save new issue
+		 * @param viewpoint
+		 * @param screenShot
+		 */
+		function saveIssue (viewpoint, screenShot) {
+			var	savePromise,
+				issue;
+
+			// Remove base64 header text from screenShot and add to viewpoint
+			screenShot = screenShot.substring(screenShot.indexOf(",") + 1);
+			viewpoint.screenshot = screenShot;
+
+			// Save issue
+			issue = {
+				account: self.account,
+				project: self.project,
+				objectId: null,
+				name: self.issueData.name,
+				viewpoint: viewpoint,
+				creator_role: "Test",
+				pickedPos: null,
+				pickedNorm: null,
+				scale: 1.0,
+				assigned_roles: [],
+				priority: self.issueData.priority,
+				status: self.issueData.status,
+				type: self.issueData.type,
+				desc: self.issueData.description
+			};
+			savePromise = IssuesService.saveIssue(issue);
+			savePromise.then(function (data) {
+				console.log(data);
+			});
+		}
+
+		/**
+		 * Add comment to issue
+		 * @param viewpoint
+		 */
+		function saveComment (viewpoint) {
+			var	savePromise,
+				screenShot,
+				viewpointToUse;
+
+			// If there is a saved screen shot use the current viewpoint, else the issue viewpoint
+			// Remove base64 header text from screen shot and add to viewpoint
+			if (angular.isDefined(self.descriptionThumbnail)) {
+				viewpointToUse = viewpoint;
+				screenShot = savedScreenShot.substring(savedScreenShot.indexOf(",") + 1);
+				viewpoint.screenshot = screenShot;
+			}
+			else {
+				viewpointToUse = self.issueData.viewpoint;
+			}
+
+			savePromise = IssuesService.saveComment(self.issueData, self.comment, viewpointToUse);
+			savePromise.then(function (data) {
+				console.log(data);
+			});
+		}
+
+		/**
+		 * A screen shot has been saved
+		 * @param data
+		 */
+		this.screenShotSave = function (data) {
+			savedScreenShot = data.screenShot;
+			if (typeof self.data === "object") {
+				self.commentThumbnail = data.screenShot;
+			}
+			else {
+				self.descriptionThumbnail = data.screenShot;
+			}
+		};
+
+		/**
+		 * Controller for screen shot dialog
+		 */
+		function ScreenShotDialogController () {
+			this.dialogCaller = self;
+		}
 	}
 }());

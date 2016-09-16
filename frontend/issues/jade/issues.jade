@@ -9,7 +9,7 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 			md-button.md-primary(ng-click="vm.closeAddAlert()") OK
 
 #issuesAddButton(ng-if="vm.showAddButton", layout-margin)
-	md-button.md-accent.md-fab.md-mini(aria-label="Add" ng-click="vm.editIssue()")
+	md-button.md-accent.md-fab(aria-label="Add" ng-click="vm.editIssue()")
 		md-icon.angular-material-icons add
 
 #issuesContent(ng-switch="vm.toShow")
