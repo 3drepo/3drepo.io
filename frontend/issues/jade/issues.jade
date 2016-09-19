@@ -42,7 +42,9 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 	data="vm.issueToEdit"
 	keys-down="vm.keysDown"
 	exit="vm.editIssueExit(issue)"
-	send-event="vm.sendEvent(type, value)")
+	send-event="vm.sendEvent(type, value)"
+	event="vm.event"
+	pin-clicked="vm.pinClicked({issueId: issueId})")
 	//issue(
 		ng-switch-when="showIssue"
 		index="vm.selectedIndex"

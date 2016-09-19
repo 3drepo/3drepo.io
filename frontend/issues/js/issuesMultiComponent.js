@@ -29,7 +29,8 @@
 					selectedObject: "<",
 					keysDown: "<",
 					clear: "<",
-					sendEvent: "&"
+					sendEvent: "&",
+					event: "<"
 				}
 			}
 		);
@@ -48,7 +49,7 @@
 		 * Handle component input changes
 		 */
 		this.$onChanges = function (changes) {
-			//console.log(changes);
+			console.log(changes);
 			if (changes.hasOwnProperty("keysDown") && angular.isDefined(this.keysDown)) {
 				multiMode = ((isMac && this.keysDown.indexOf(cmdKey) !== -1) || (!isMac && this.keysDown.indexOf(ctrlKey) !== -1));
 				if (multiMode) {
@@ -60,6 +61,7 @@
 				}
 				*/
 			}
+			/*
 			else if (changes.hasOwnProperty("selectedObject") && multiMode) {
 				objectIndex = selectedObjectIDs.indexOf(this.selectedObject.id);
 				if (objectIndex === -1) {
@@ -71,8 +73,25 @@
 				//console.log(selectedObjectIDs);
 				this.displaySelectedObjects(selectedObjectIDs);
 			}
+			*/
 			else if (changes.hasOwnProperty("clear") && this.clear) {
 				this.displaySelectedObjects([]);
+			}
+
+			if (changes.hasOwnProperty("event")) {
+				if (changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+					objectIndex = selectedObjectIDs.indexOf(changes.event.currentValue.value.id);
+					if (objectIndex === -1) {
+						selectedObjectIDs.push(changes.event.currentValue.value.id);
+					}
+					else {
+						selectedObjectIDs.splice(objectIndex, 1);
+					}
+					this.displaySelectedObjects(selectedObjectIDs);
+				}
+				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
+					//removePin();
+				}
 			}
 		};
 

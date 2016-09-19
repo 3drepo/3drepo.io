@@ -30,7 +30,8 @@
 					data: "<",
 					keysDown: "<",
 					exit: "&",
-					sendEvent: "&"
+					sendEvent: "&",
+					event: "<"
 				}
 			}
 		);
@@ -39,7 +40,9 @@
 
 	function IssueCompCtrl ($q, $mdDialog, EventService, IssuesService, UtilsService) {
 		var self = this,
-			savedScreenShot = null;
+			savedScreenShot = null,
+			highlightBackground = "#FF9800",
+			currentActionIndex = null;
 
 		/*
 		 * Init
@@ -58,10 +61,15 @@
 			{value: "in progress", label: "In progress"},
 			{value: "closed", label: "Closed"}
 		];
-		this.types = [
+		this.topic_types = [
 			{value: "for_information", label: "For information"},
 			{value: "for_approval", label: "For approval"},
 			{value: "vr", label: "VR"},
+		];
+		this.actions = [
+			{icon: "camera_alt", action: "screen_shot", label: "Screen shot", color: "", disabled: false},
+			{icon: "place", action: "pin", label: "Pin", color: "", disabled: this.data},
+			{icon: "view_comfy", action: "multi", label: "Multi", color: "", disabled: this.data}
 		];
 
 		/**
@@ -90,7 +98,7 @@
 					this.issueData = {
 						priority: "none",
 						status: "open",
-						type: "for_information",
+						topic_type: "for_information",
 						viewpoint: {}
 					};
 				}
@@ -157,6 +165,49 @@
 			});
 		};
 
+		this.doAction = function (index) {
+			console.log(this.actions[index].action);
+			if (currentActionIndex === null) {
+				currentActionIndex = index;
+				this.actions[currentActionIndex].color = highlightBackground;
+			}
+			else if (currentActionIndex === index) {
+				this.actions[currentActionIndex].color = "";
+				currentActionIndex = null;
+			}
+			else {
+				this.actions[currentActionIndex].color = "";
+				currentActionIndex = index;
+				this.actions[currentActionIndex].color = highlightBackground;
+			}
+
+			self.action = this.actions[currentActionIndex].action;
+
+			switch (this.actions[currentActionIndex].action) {
+				case "screen_shot":
+					$mdDialog.show({
+						controller: ScreenShotDialogController,
+						controllerAs: "vm",
+						templateUrl: "issueScreenShotDialog.html"
+					});
+					break;
+
+				case "pin":
+					break;
+
+				case "multi":
+					break;
+			}
+		};
+
+		/**
+		 * Set the current add pin data
+		 * @param pinData
+		 */
+		this.setPin = function (pinData) {
+			self.pinData = pinData.data;
+		};
+
 		/**
 		 * Save new issue
 		 * @param viewpoint
@@ -184,9 +235,14 @@
 				assigned_roles: [],
 				priority: self.issueData.priority,
 				status: self.issueData.status,
-				type: self.issueData.type,
-				desc: self.issueData.description
+				topic_type: self.issueData.topic_type,
+				desc: self.issueData.desc
 			};
+			// Pin data
+			if (self.pinData !== null) {
+				issue.pickedPos = self.pinData.pickedPos;
+				issue.pickedNorm = self.pinData.pickedNorm;
+			}
 			savePromise = IssuesService.saveIssue(issue);
 			savePromise.then(function (data) {
 				console.log(data);
@@ -204,13 +260,16 @@
 
 			// If there is a saved screen shot use the current viewpoint, else the issue viewpoint
 			// Remove base64 header text from screen shot and add to viewpoint
-			if (angular.isDefined(self.descriptionThumbnail)) {
+			if (angular.isDefined(self.commentThumbnail)) {
 				viewpointToUse = viewpoint;
 				screenShot = savedScreenShot.substring(savedScreenShot.indexOf(",") + 1);
 				viewpoint.screenshot = screenShot;
 			}
 			else {
 				viewpointToUse = self.issueData.viewpoint;
+				if (viewpointToUse.hasOwnProperty("screenshot")) {
+					delete viewpointToUse.screenshot;
+				}
 			}
 
 			savePromise = IssuesService.saveComment(self.issueData, self.comment, viewpointToUse);
@@ -238,6 +297,14 @@
 		 */
 		function ScreenShotDialogController () {
 			this.dialogCaller = self;
+
+			/**
+			 * Deselect the screen shot action button after close the screen shot dialog
+			 */
+			this.closeScreenShot = function () {
+				self.actions[currentActionIndex].color = "";
+				currentActionIndex = null;
+			};
 		}
 	}
 }());

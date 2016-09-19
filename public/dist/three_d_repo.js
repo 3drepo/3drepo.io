@@ -11774,7 +11774,8 @@ angular.module('3drepo')
 					data: "<",
 					keysDown: "<",
 					exit: "&",
-					sendEvent: "&"
+					sendEvent: "&",
+					event: "<"
 				}
 			}
 		);
@@ -11783,7 +11784,9 @@ angular.module('3drepo')
 
 	function IssueCompCtrl ($q, $mdDialog, EventService, IssuesService, UtilsService) {
 		var self = this,
-			savedScreenShot = null;
+			savedScreenShot = null,
+			highlightBackground = "#FF9800",
+			currentActionIndex = null;
 
 		/*
 		 * Init
@@ -11802,10 +11805,15 @@ angular.module('3drepo')
 			{value: "in progress", label: "In progress"},
 			{value: "closed", label: "Closed"}
 		];
-		this.types = [
+		this.topic_types = [
 			{value: "for_information", label: "For information"},
 			{value: "for_approval", label: "For approval"},
 			{value: "vr", label: "VR"},
+		];
+		this.actions = [
+			{icon: "camera_alt", action: "screen_shot", label: "Screen shot", color: "", disabled: false},
+			{icon: "place", action: "pin", label: "Pin", color: "", disabled: this.data},
+			{icon: "view_comfy", action: "multi", label: "Multi", color: "", disabled: this.data}
 		];
 
 		/**
@@ -11834,7 +11842,7 @@ angular.module('3drepo')
 					this.issueData = {
 						priority: "none",
 						status: "open",
-						type: "for_information",
+						topic_type: "for_information",
 						viewpoint: {}
 					};
 				}
@@ -11901,6 +11909,49 @@ angular.module('3drepo')
 			});
 		};
 
+		this.doAction = function (index) {
+			console.log(this.actions[index].action);
+			if (currentActionIndex === null) {
+				currentActionIndex = index;
+				this.actions[currentActionIndex].color = highlightBackground;
+			}
+			else if (currentActionIndex === index) {
+				this.actions[currentActionIndex].color = "";
+				currentActionIndex = null;
+			}
+			else {
+				this.actions[currentActionIndex].color = "";
+				currentActionIndex = index;
+				this.actions[currentActionIndex].color = highlightBackground;
+			}
+
+			self.action = this.actions[currentActionIndex].action;
+
+			switch (this.actions[currentActionIndex].action) {
+				case "screen_shot":
+					$mdDialog.show({
+						controller: ScreenShotDialogController,
+						controllerAs: "vm",
+						templateUrl: "issueScreenShotDialog.html"
+					});
+					break;
+
+				case "pin":
+					break;
+
+				case "multi":
+					break;
+			}
+		};
+
+		/**
+		 * Set the current add pin data
+		 * @param pinData
+		 */
+		this.setPin = function (pinData) {
+			self.pinData = pinData.data;
+		};
+
 		/**
 		 * Save new issue
 		 * @param viewpoint
@@ -11928,9 +11979,14 @@ angular.module('3drepo')
 				assigned_roles: [],
 				priority: self.issueData.priority,
 				status: self.issueData.status,
-				type: self.issueData.type,
-				desc: self.issueData.description
+				topic_type: self.issueData.topic_type,
+				desc: self.issueData.desc
 			};
+			// Pin data
+			if (self.pinData !== null) {
+				issue.pickedPos = self.pinData.pickedPos;
+				issue.pickedNorm = self.pinData.pickedNorm;
+			}
 			savePromise = IssuesService.saveIssue(issue);
 			savePromise.then(function (data) {
 				console.log(data);
@@ -11948,13 +12004,16 @@ angular.module('3drepo')
 
 			// If there is a saved screen shot use the current viewpoint, else the issue viewpoint
 			// Remove base64 header text from screen shot and add to viewpoint
-			if (angular.isDefined(self.descriptionThumbnail)) {
+			if (angular.isDefined(self.commentThumbnail)) {
 				viewpointToUse = viewpoint;
 				screenShot = savedScreenShot.substring(savedScreenShot.indexOf(",") + 1);
 				viewpoint.screenshot = screenShot;
 			}
 			else {
 				viewpointToUse = self.issueData.viewpoint;
+				if (viewpointToUse.hasOwnProperty("screenshot")) {
+					delete viewpointToUse.screenshot;
+				}
 			}
 
 			savePromise = IssuesService.saveComment(self.issueData, self.comment, viewpointToUse);
@@ -11982,6 +12041,14 @@ angular.module('3drepo')
 		 */
 		function ScreenShotDialogController () {
 			this.dialogCaller = self;
+
+			/**
+			 * Deselect the screen shot action button after close the screen shot dialog
+			 */
+			this.closeScreenShot = function () {
+				self.actions[currentActionIndex].color = "";
+				currentActionIndex = null;
+			};
 		}
 	}
 }());
@@ -12357,6 +12424,104 @@ angular.module('3drepo')
 	}
 }());
 
+/**
+ *	Copyright (C) 2016 3D Repo Ltd
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the issuesPin of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+(function () {
+	"use strict";
+
+	angular.module("3drepo")
+		.component(
+			"issuesPin",
+			{
+				controller: IssuesPinCtrl,
+				bindings: {
+					account: "<",
+					project: "<",
+					sendEvent: "&",
+					event: "<",
+					setPin: "&"
+				}
+			}
+		);
+
+	IssuesPinCtrl.$inject = ["EventService"];
+
+	function IssuesPinCtrl (EventService) {
+		var self = this,
+			newPinId = "newPinId";
+
+		// Init
+		this.setPin({data: null});
+
+		/**
+		 * Monitor changes to parameters
+		 * @param {Object} changes
+		 */
+		this.$onChanges = function (changes) {
+			var data,
+				position = [],
+				normal = [],
+				pickedPos = null,
+				pickedNorm = null;
+
+			if (changes.hasOwnProperty("event")) {
+				if ((changes.event.currentValue.type === EventService.EVENT.VIEWER.PICK_POINT) &&
+					(changes.event.currentValue.value.hasOwnProperty("id"))) {
+					removePin();
+
+					// Add pin
+					// Convert data to arrays
+					angular.forEach(changes.event.currentValue.value.position, function (value) {
+						pickedPos = changes.event.currentValue.value.position;
+						position.push(value);
+					});
+					angular.forEach(changes.event.currentValue.value.normal, function (value) {
+						pickedNorm = changes.event.currentValue.value.normal;
+						normal.push(value);
+					});
+
+					data = {
+						id: newPinId,
+						account: self.account,
+						project: self.project,
+						position: position,
+						norm: normal,
+						selectedObjectId: changes.event.currentValue.value.id,
+						pickedPos: pickedPos,
+						pickedNorm: pickedNorm,
+						colours: [[200, 0, 0]]
+					};
+					self.sendEvent({type: EventService.EVENT.VIEWER.ADD_PIN, value: data});
+					this.setPin({data: data});
+				}
+				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
+					removePin();
+				}
+			}
+		};
+
+		function removePin () {
+			self.sendEvent({type: EventService.EVENT.VIEWER.REMOVE_PIN, value: {id: newPinId}});
+			self.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, value: []});
+			self.setPin({data: null});
+		}
+	}
+}());
 /**
  *	Copyright (C) 2016 3D Repo Ltd
  *
@@ -12810,9 +12975,12 @@ angular.module('3drepo')
 		$scope.$watch(EventService.currentEvent, function(event) {
 			var i, length,
 				position = [], normal = [];
+			vm.event = event;
+			console.log(event);
 
 			if ((event.type === EventService.EVENT.VIEWER.PICK_POINT) && (vm.toShow === "showAdd"))
 			{
+				/*
 				if (event.value.hasOwnProperty("id"))
 				{
 					if (vm.type === "pin") {
@@ -12850,28 +13018,9 @@ angular.module('3drepo')
 				} else {
 					removeAddPin();
 				}
+				*/
 			} else if ((event.type === EventService.EVENT.VIEWER.CLICK_PIN) && vm.show) {
-				if (vm.toShow === "showAdd") {
-					removeAddPin();
-				}
-
-				// Show or hide the selected issue
-				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
-					if (event.value.id === vm.issuesToShow[i]._id) {
-						if (vm.selectedIssue === null) {
-							vm.showSelectedIssue(i, true);
-						}
-						else {
-							if (vm.selectedIssue._id === vm.issuesToShow[i]._id) {
-								vm.hideItem = true;
-							}
-							else {
-								vm.showSelectedIssue(i, true);
-							}
-						}
-						break;
-					}
-				}
+				pinClicked(event.value.id);
 			} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_ADD) {
 				if (event.value.on) {
 					vm.show = true;
@@ -12885,20 +13034,13 @@ angular.module('3drepo')
 					//vm.hideItem = true;
 				}
 			} else if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
-				vm.selectedObject = event.value;
+				//vm.selectedObject = event.value;
 			}
-		});
+			else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
+				backgroundSelected();
+			}
 
-		/**
-		 * Remove the temporary pin used for adding an issue
-		 */
-		function removeAddPin () {
-			IssuesService.removePin(IssuesService.newPinId);
-			selectedObjectId = null;
-			EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
-			pickedPos = null;
-			pickedNorm = null;
-		}
+		});
 
 		/**
 		 * Setup the issues to show
@@ -13521,104 +13663,9 @@ angular.module('3drepo')
 		}
 
 		/* New Stuff **************************************************************************************************/
-
-		vm.sendEvent = function (type, value) {
-			EventService.send(type, value);
-		};
-
-		vm.issueSelect = function (issue) {
-			if (selectedIssue === null) {
-				selectedIssue = issue;
-				vm.selectIssue = {issue: selectedIssue, selected: true};
-				showIssue(selectedIssue);
-				setSelectedIssueIndex(selectedIssue);
-			}
-			else if (selectedIssue._id === issue._id) {
-				vm.selectIssue = {issue: selectedIssue, selected: false};
-				selectedIssue = null;
-				setSelectedIssueIndex(selectedIssue);
-			}
-			else {
-				vm.selectIssue = {issue: selectedIssue, selected: false};
-				$timeout(function () {
-					selectedIssue = issue;
-					vm.selectIssue = {issue: selectedIssue, selected: true};
-					showIssue(selectedIssue);
-					setSelectedIssueIndex(selectedIssue);
-				});
-			}
-
-		};
-
-		vm.editIssue = function (issue) {
-			vm.issueToEdit = issue;
-			vm.toShow = "showIssue";
-			setContentHeight();
-			vm.onShowItem();
-		};
-
-		vm.editIssueExit = function (issue) {
-			vm.hideItem = true;
-		};
-
-		$scope.$watch("vm.hideItem", function (newValue) {
-			if (angular.isDefined(newValue) && newValue) {
-				vm.toShow = "showIssues";
-				if (selectedIssue !== null) {
-					vm.selectIssue = {issue: selectedIssue, selected: true};
-				}
-				setContentHeight();
-			}
-		});
-
 		/*
-		 * Show the add button if displaying info or list
+		 * Handle keys down
 		 */
-		$scope.$watch("vm.toShow", function (newValue) {
-			if (angular.isDefined(newValue)) {
-				vm.showAddButton = ((newValue.toString() === "showIssues") || (newValue.toString() === "showInfo"));
-			}
-		});
-
-		function showIssue (issue) {
-			EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
-			// Highlight pin, move camera and setup clipping plane
-			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, {
-				id: issue._id,
-				colours: pinHighlightColour
-			});
-
-			EventService.send(EventService.EVENT.VIEWER.SET_CAMERA, {
-				position : issue.viewpoint.position,
-				view_dir : issue.viewpoint.view_dir,
-				up: issue.viewpoint.up
-			});
-
-			EventService.send(EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, {
-				clippingPlanes: issue.viewpoint.clippingPlanes
-			});
-
-			// Wait for camera to stop before showing a scribble
-			$timeout(function () {
-				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, issue: issue});
-			}, 1100);
-		}
-
-		function setSelectedIssueIndex (selectedIssue) {
-			var i, length;
-
-			if (selectedIssue !== null) {
-				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
-					if (vm.issuesToShow[i]._id === selectedIssue._id) {
-						selectedIssueIndex = i;
-					}
-				}
-			}
-			else {
-				selectedIssueIndex = null;
-			}
-		}
-
 		$scope.$watch("vm.keysDown", function () {
 			var upArrow = 38,
 				downArrow = 40,
@@ -13647,6 +13694,162 @@ angular.module('3drepo')
 				}
 			}
 		});
+
+		/*
+		 * Go back to issues list
+		 */
+		$scope.$watch("vm.hideItem", function (newValue) {
+			if (angular.isDefined(newValue) && newValue) {
+				vm.toShow = "showIssues";
+				if (selectedIssue !== null) {
+					vm.selectIssue = {issue: selectedIssue, selected: true};
+				}
+				setContentHeight();
+			}
+		});
+
+		/*
+		 * Show the add button if displaying info or list
+		 */
+		$scope.$watch("vm.toShow", function (newValue) {
+			if (angular.isDefined(newValue)) {
+				vm.showAddButton = ((newValue.toString() === "showIssues") || (newValue.toString() === "showInfo"));
+			}
+		});
+
+		/**
+		 * Send event
+		 * @param type
+		 * @param value
+		 */
+		vm.sendEvent = function (type, value) {
+			EventService.send(type, value);
+		};
+
+		/**
+		 * Issue selected
+		 * @param issue
+		 */
+		vm.issueSelect = function (issue) {
+			if (selectedIssue === null) {
+				selectedIssue = issue;
+				vm.selectIssue = {issue: selectedIssue, selected: true};
+				showIssue(selectedIssue);
+				setSelectedIssueIndex(selectedIssue);
+			}
+			else if (selectedIssue._id === issue._id) {
+				vm.selectIssue = {issue: selectedIssue, selected: false};
+				selectedIssue = null;
+				setSelectedIssueIndex(selectedIssue);
+			}
+			else {
+				vm.selectIssue = {issue: selectedIssue, selected: false};
+				$timeout(function () {
+					selectedIssue = issue;
+					vm.selectIssue = {issue: selectedIssue, selected: true};
+					showIssue(selectedIssue);
+					setSelectedIssueIndex(selectedIssue);
+				});
+			}
+
+		};
+
+		/**
+		 * Set up editing issue
+		 * @param issue
+		 */
+		vm.editIssue = function (issue) {
+			vm.issueToEdit = issue;
+			vm.toShow = "showIssue";
+			setContentHeight();
+			vm.onShowItem();
+		};
+
+		/**
+		 * Exit issue editing
+		 * @param issue
+		 */
+		vm.editIssueExit = function (issue) {
+			vm.hideItem = true;
+		};
+
+		/**
+		 * Remove the temporary pin used for adding an issue
+		 */
+		function removeAddPin () {
+			IssuesService.removePin(IssuesService.newPinId);
+			selectedObjectId = null;
+			EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
+			pickedPos = null;
+			pickedNorm = null;
+		}
+
+		/**
+		 * Show issue details
+		 * @param issue
+		 */
+		function showIssue (issue) {
+			// Highlight pin, move camera and setup clipping plane
+			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, {
+				id: issue._id,
+				colours: pinHighlightColour
+			});
+
+			EventService.send(EventService.EVENT.VIEWER.SET_CAMERA, {
+				position : issue.viewpoint.position,
+				view_dir : issue.viewpoint.view_dir,
+				up: issue.viewpoint.up
+			});
+
+			EventService.send(EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, {
+				clippingPlanes: issue.viewpoint.clippingPlanes
+			});
+		}
+
+		/**
+		 * Set the selected issue index
+		 * @param selectedIssue
+		 */
+		function setSelectedIssueIndex (selectedIssue) {
+			var i, length;
+
+			if (selectedIssue !== null) {
+				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
+					if (vm.issuesToShow[i]._id === selectedIssue._id) {
+						selectedIssueIndex = i;
+					}
+				}
+			}
+			else {
+				selectedIssueIndex = null;
+			}
+		}
+
+		function pinClicked(issueId) {
+			var i, length;
+
+			for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
+				if (vm.issuesToShow[i]._id === issueId) {
+					selectedIssue = vm.issuesToShow[i];
+					vm.selectIssue = {issue: selectedIssue, selected: true};
+					showIssue(selectedIssue);
+					setSelectedIssueIndex(selectedIssue);
+					vm.editIssue(selectedIssue);
+					break;
+				}
+			}
+		}
+
+		function backgroundSelected () {
+			if (selectedIssue !== null) {
+				EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, {
+					id: selectedIssue._id,
+					colours: [[0.5, 0, 0]]
+				});
+				vm.editIssueExit(selectedIssue);
+				selectedIssue = null;
+			}
+		}
 	}
 }());
 
@@ -13678,6 +13881,7 @@ angular.module('3drepo')
 				templateUrl: "issuesFooter.html",
 				bindings: {
 					sendEvent: "&",
+					event: "<",
 					newIssue: "=",
 					submitDisabled: "=",
 					submit: "&",
@@ -13714,6 +13918,8 @@ angular.module('3drepo')
 				currentActionIndex = index;
 				this.actions[currentActionIndex].color = highlightBackground;
 			}
+
+			self.action = this.actions[currentActionIndex].action;
 
 			switch (this.actions[currentActionIndex].action) {
 				case "screen_shot":
@@ -13857,7 +14063,8 @@ angular.module('3drepo')
 					selectedObject: "<",
 					keysDown: "<",
 					clear: "<",
-					sendEvent: "&"
+					sendEvent: "&",
+					event: "<"
 				}
 			}
 		);
@@ -13876,7 +14083,7 @@ angular.module('3drepo')
 		 * Handle component input changes
 		 */
 		this.$onChanges = function (changes) {
-			//console.log(changes);
+			console.log(changes);
 			if (changes.hasOwnProperty("keysDown") && angular.isDefined(this.keysDown)) {
 				multiMode = ((isMac && this.keysDown.indexOf(cmdKey) !== -1) || (!isMac && this.keysDown.indexOf(ctrlKey) !== -1));
 				if (multiMode) {
@@ -13888,6 +14095,7 @@ angular.module('3drepo')
 				}
 				*/
 			}
+			/*
 			else if (changes.hasOwnProperty("selectedObject") && multiMode) {
 				objectIndex = selectedObjectIDs.indexOf(this.selectedObject.id);
 				if (objectIndex === -1) {
@@ -13899,8 +14107,26 @@ angular.module('3drepo')
 				//console.log(selectedObjectIDs);
 				this.displaySelectedObjects(selectedObjectIDs);
 			}
+			*/
 			else if (changes.hasOwnProperty("clear") && this.clear) {
 				this.displaySelectedObjects([]);
+			}
+
+			if (changes.hasOwnProperty("event")) {
+				console.log(123, changes.event);
+				if (changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+					objectIndex = selectedObjectIDs.indexOf(changes.event.currentValue.value.id);
+					if (objectIndex === -1) {
+						selectedObjectIDs.push(changes.event.currentValue.value.id);
+					}
+					else {
+						selectedObjectIDs.splice(objectIndex, 1);
+					}
+					this.displaySelectedObjects(selectedObjectIDs);
+				}
+				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
+					//removePin();
+				}
 			}
 		};
 

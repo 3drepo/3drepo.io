@@ -1748,14 +1748,14 @@ issue-comp .issueCompItemContainer {
 }
 
 issue-comp #issueCompStatus {
-  margin: 25px 10px 0 0;
+  margin: 0 0 10px;
 }
 
 issue-comp textarea {
   min-height: 70px !important;
 }
 
-issue-comp .issueComItemStatus {
+issue-comp .issueCompItemStatus {
   margin-right: 5px;
 }
 
@@ -1769,7 +1769,24 @@ issue-comp .issueCompThumbnail:hover {
 }
 issue-comp .issueCompThumbnail img {
   position: absolute;
-  width: 360px;
+  width: 365px;
+}
+
+issue-comp .issueCompIssueOwner {
+  margin-top: -30px;
+}
+
+issue-comp .issueCompCommentOwner {
+  margin-bottom: 10px;
+}
+
+issue-comp .issueCompIssueOwner label,
+issue-comp .issueCompCommentOwner label {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+issue-comp .issueCompCommentTitle {
+  margin: 10px 0 5px;
 }
 
 /** Issue Screen Shot  ************************************************************************************************/

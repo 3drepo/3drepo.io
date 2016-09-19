@@ -26,6 +26,7 @@
 				templateUrl: "issuesFooter.html",
 				bindings: {
 					sendEvent: "&",
+					event: "<",
 					newIssue: "=",
 					submitDisabled: "=",
 					submit: "&",
@@ -62,6 +63,8 @@
 				currentActionIndex = index;
 				this.actions[currentActionIndex].color = highlightBackground;
 			}
+
+			self.action = this.actions[currentActionIndex].action;
 
 			switch (this.actions[currentActionIndex].action) {
 				case "screen_shot":
