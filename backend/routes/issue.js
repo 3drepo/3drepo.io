@@ -23,21 +23,21 @@ var C = require("../constants");
 var responseCodes = require('../response_codes.js');
 var Issue = require('../models/issue');
 var utils = require('../utils');
-var uuidToString = utils.uuidToString;
 var multer = require("multer");
 var config = require("../config.js");
 
 router.get('/issues/:uid.json', middlewares.hasReadAccessToProject, findIssueById);
-
+router.get('/issues/:uid/thumbnail.png', middlewares.hasReadAccessToProject, getThumbnail);
 
 router.get('/issues.json', middlewares.hasReadAccessToProject, listIssues);
 router.get('/issues.bcfzip', middlewares.hasReadAccessToProject, getIssuesBCF);
 router.post('/issues.bcfzip', middlewares.hasReadAccessToProject, importBCF);
 
+router.get('/issues/:uid/viewpoints/:vid/screenshot.png', middlewares.hasReadAccessToProject, getScreenshot);
+router.get('/issues/:uid/viewpoints/:vid/screenshotSmall.png', middlewares.hasReadAccessToProject, getScreenshotSmall);
 router.get('/revision/:rid/issues.json', middlewares.hasReadAccessToProject, listIssues);
 router.get('/revision/:rid/issues.bcfzip', middlewares.hasReadAccessToProject, getIssuesBCF);
 
-router.get('/issues/:uid/viewpoints/:vid/screenshot.png', middlewares.hasReadAccessToProject, getScreenshot);
 
 //router.get('/issues/:sid.json', middlewares.hasReadAccessToProject, listIssuesBySID);
 router.get("/issues.html", middlewares.hasReadAccessToProject, renderIssuesHTML);
@@ -60,18 +60,18 @@ function storeIssue(req, res, next){
 
 	Issue.createIssue({account: req.params.account, project: req.params.project}, data).then(issue => {
 
-		let resData = {
-			_id: issue._id,
-			account: req.params.account, 
-			project: req.params.project, 
-			issue_id : issue._id, 
-			number : issue.number, 
-			created : issue.created, 
-			scribble: data.scribble,
-			issue: issue
-		};
+		// let resData = {
+		// 	_id: issue._id,
+		// 	account: req.params.account, 
+		// 	project: req.params.project, 
+		// 	issue_id : issue._id, 
+		// 	number : issue.number, 
+		// 	created : issue.created, 
+		// 	scribble: data.scribble,
+		// 	issue: issue
+		// };
 
-		responseCodes.respond(place, req, res, next, responseCodes.OK, resData);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, issue);
 
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -91,7 +91,7 @@ function updateIssue(req, res, next){
 	let action;
 
 
-	Issue.findByUID(dbCol, issueId, false, true).then(issue => {
+	Issue.findById(dbCol, utils.stringToUUID(issueId), { 'viewpoints.screenshot': 0, 'thumbnail': 0 }).then(issue => {
 
 		if(!issue){
 			return Promise.reject({ resCode: responseCodes.ISSUE_NOT_FOUND });
@@ -112,7 +112,7 @@ function updateIssue(req, res, next){
 		} else if(data.hasOwnProperty('comment') && data.edit){
 			action = issue.updateComment(data.commentIndex, data);
 
-		} else if(data.hasOwnProperty('comment') && data.sealed) {
+		} else if(data.sealed) {
 			action = issue.updateComment(data.commentIndex, data);
 
 		} else if(data.commentIndex >= 0 && data.delete) {
@@ -139,14 +139,12 @@ function updateIssue(req, res, next){
 
 	}).then(issue => {
 
-		issue = issue.toObject();
-		data.viewpoint && (data.viewpoint.screenshot = 'saved');
 		let resData = {
-			_id: uuidToString(issue._id),
+			_id: issueId,
 			account: req.params.account,
 			project: req.params.project,
-			issue: data,
-			issue_id : uuidToString(issue._id),
+			issue: issue,
+			issue_id : issueId,
 			number: issue.number,
 			owner: data.hasOwnProperty('comment') ?  data.owner : issue.owner,
 			created: data.hasOwnProperty('comment') ? (new Date()).getTime() : issue.created
@@ -171,7 +169,9 @@ function listIssues(req, res, next) {
 		'comments.extras': 0,
 		'viewpoints.extras': 0,
 		'viewpoints.scribble': 0,
-		'viewpoints.screenshot.content': 0
+		'viewpoints.screenshot.content': 0,
+		'viewpoints.screenshot.resizedContent': 0,
+		'thumbnail.content': 0
 	};
 
 	var findIssue;
@@ -352,6 +352,34 @@ function getScreenshot(req, res, next){
 	let dbCol = {account: req.params.account, project: req.params.project};
 
 	Issue.getScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, 'png');
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err, err);
+	});
+
+}
+
+function getScreenshotSmall(req, res, next){
+	'use strict';
+
+	let place = utils.APIInfo(req);
+	let dbCol = {account: req.params.account, project: req.params.project};
+
+	Issue.getSmallScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, 'png');
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err, err);
+	});
+
+}
+
+function getThumbnail(req, res, next){
+	'use strict';
+
+	let place = utils.APIInfo(req);
+	let dbCol = {account: req.params.account, project: req.params.project};
+
+	Issue.getThumbnail(dbCol, req.params.uid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, 'png');
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);

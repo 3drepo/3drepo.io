@@ -26,7 +26,7 @@ let log_iface = require("../../logger.js");
 let systemLogger = log_iface.systemLogger;
 let responseCodes = require("../../response_codes.js");
 let helpers = require("./helpers");
-
+let async = require('async');
 
 describe('Creating an issue', function () {
 
@@ -43,7 +43,11 @@ describe('Creating an issue', function () {
 	let type = 'type';
 	let unit = 'meter';
 
-	let baseIssue = { 
+	let pngBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mPUjrj6n4EIwDiqkL4KAV6SF3F1FmGrAAAAAElFTkSuQmCC';
+	let baseIssue = {
+		"status": "open",
+		"priority": "low",
+		"topic_type": "for info",
 		"viewpoint":{
 			"up":[0,1,0],
 			"position":[38,38 ,125.08011914810137],
@@ -90,67 +94,129 @@ describe('Creating an issue', function () {
 	it('should succee', function(done){
 
 		let issue = Object.assign({"name":"Issue test"}, baseIssue);
+		let issueId;
 
-		agent.post(`/${username}/${project}/issues.json`)
-		.send({ data: JSON.stringify(issue) })
-		.expect(200 , function(err, res){
-			
-			expect(res.body.issue.name).to.equal(issue.name);
-			expect(res.body.issue.scale).to.equal(issue.scale);
-			expect(res.body.issue.creator_role).to.equal(issue.creator_role);
-			expect(res.body.issue.assigned_roles).to.deep.equal(issue.assigned_roles);
-			expect(res.body.issue.viewpoint.up).to.deep.equal(issue.viewpoint.up);
-			expect(res.body.issue.viewpoint.position).to.deep.equal(issue.viewpoint.position);
-			expect(res.body.issue.viewpoint.look_at).to.deep.equal(issue.viewpoint.look_at);
-			expect(res.body.issue.viewpoint.view_dir).to.deep.equal(issue.viewpoint.view_dir);
-			expect(res.body.issue.viewpoint.right).to.deep.equal(issue.viewpoint.right);
-			expect(res.body.issue.viewpoint.unityHeight).to.equal(issue.viewpoint.unityHeight);
-			expect(res.body.issue.viewpoint.fov).to.equal(issue.viewpoint.fov);
-			expect(res.body.issue.viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
-			expect(res.body.issue.viewpoint.far).to.equal(issue.viewpoint.far);
-			expect(res.body.issue.viewpoint.near).to.equal(issue.viewpoint.near);
-			expect(res.body.issue.viewpoint.clippingPlanes).to.deep.equal(issue.viewpoint.clippingPlanes);
+		async.series([
+			function(done){
+				agent.post(`/${username}/${project}/issues.json`)
+				.send(issue)
+				.expect(200 , function(err, res){
+					
+					issueId = res.body._id;
+					expect(res.body.name).to.equal(issue.name);
+					expect(res.body.scale).to.equal(issue.scale);
+					expect(res.body.status).to.equal(issue.status);
+					expect(res.body.topic_type).to.equal(issue.topic_type);
+					expect(res.body.priority).to.equal(issue.priority);
+					expect(res.body.creator_role).to.equal(issue.creator_role);
+					expect(res.body.assigned_roles).to.deep.equal(issue.assigned_roles);
+					expect(res.body.viewpoint.up).to.deep.equal(issue.viewpoint.up);
+					expect(res.body.viewpoint.position).to.deep.equal(issue.viewpoint.position);
+					expect(res.body.viewpoint.look_at).to.deep.equal(issue.viewpoint.look_at);
+					expect(res.body.viewpoint.view_dir).to.deep.equal(issue.viewpoint.view_dir);
+					expect(res.body.viewpoint.right).to.deep.equal(issue.viewpoint.right);
+					expect(res.body.viewpoint.unityHeight).to.equal(issue.viewpoint.unityHeight);
+					expect(res.body.viewpoint.fov).to.equal(issue.viewpoint.fov);
+					expect(res.body.viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
+					expect(res.body.viewpoint.far).to.equal(issue.viewpoint.far);
+					expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
+					expect(res.body.viewpoint.clippingPlanes).to.deep.equal(issue.viewpoint.clippingPlanes);
 
-			if(err){
-				return done(err);
+					return done(err);
+				});
+			},
+
+			function(done){
+				agent.get(`/${username}/${project}/issues/${issueId}.json`).expect(200, function(err , res){
+
+					expect(res.body.name).to.equal(issue.name);
+					expect(res.body.scale).to.equal(issue.scale);
+					expect(res.body.status).to.equal(issue.status);
+					expect(res.body.topic_type).to.equal(issue.topic_type);
+					expect(res.body.priority).to.equal(issue.priority);
+					expect(res.body.creator_role).to.equal(issue.creator_role);
+					expect(res.body.assigned_roles).to.deep.equal(issue.assigned_roles);
+					expect(res.body.viewpoint.up).to.deep.equal(issue.viewpoint.up);
+					expect(res.body.viewpoint.position).to.deep.equal(issue.viewpoint.position);
+					expect(res.body.viewpoint.look_at).to.deep.equal(issue.viewpoint.look_at);
+					expect(res.body.viewpoint.view_dir).to.deep.equal(issue.viewpoint.view_dir);
+					expect(res.body.viewpoint.right).to.deep.equal(issue.viewpoint.right);
+					expect(res.body.viewpoint.unityHeight).to.equal(issue.viewpoint.unityHeight);
+					expect(res.body.viewpoint.fov).to.equal(issue.viewpoint.fov);
+					expect(res.body.viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
+					expect(res.body.viewpoint.far).to.equal(issue.viewpoint.far);
+					expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
+					expect(res.body.viewpoint.clippingPlanes).to.deep.equal(issue.viewpoint.clippingPlanes);
+
+					return done(err);
+
+				});
 			}
-
-			//also check it is in database
-			Issue.findByUID({ account: username, project: project}, res.body._id).then(_issue => {
-
-				expect(_issue.name).to.equal(issue.name);
-				expect(_issue.scale).to.equal(issue.scale);
-				expect(_issue.creator_role).to.equal(issue.creator_role);
-				expect(_issue.assigned_roles).to.deep.equal(issue.assigned_roles);
-				expect(_issue.viewpoint.up).to.deep.equal(issue.viewpoint.up);
-				expect(_issue.viewpoint.position).to.deep.equal(issue.viewpoint.position);
-				expect(_issue.viewpoint.look_at).to.deep.equal(issue.viewpoint.look_at);
-				expect(_issue.viewpoint.view_dir).to.deep.equal(issue.viewpoint.view_dir);
-				expect(_issue.viewpoint.right).to.deep.equal(issue.viewpoint.right);
-				expect(_issue.viewpoint.unityHeight).to.equal(issue.viewpoint.unityHeight);
-				expect(_issue.viewpoint.fov).to.equal(issue.viewpoint.fov);
-				expect(_issue.viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
-				expect(_issue.viewpoint.far).to.equal(issue.viewpoint.far);
-				expect(_issue.viewpoint.near).to.equal(issue.viewpoint.near);
-				expect(_issue.viewpoint.clippingPlanes).to.deep.equal(issue.viewpoint.clippingPlanes);
-
-				done();
-			}).catch( err => {
-				done(err);
-			});
-			
-		});
+		], done);
 
 	});
 
+	it('with screenshot should succee', function(done){
+
+		let issue = Object.assign({"name":"Issue test"}, baseIssue);
+		issue.viewpoint.screenshot = pngBase64;
+
+		let issueId;
+
+		async.series([
+			function(done){
+				agent.post(`/${username}/${project}/issues.json`)
+				.send(issue)
+				.expect(200 , function(err, res){
+					
+					issueId = res.body._id;
+					return done(err);
+				});
+			},
+
+			function(done){
+				agent.get(`/${username}/${project}/issues/${issueId}.json`).expect(200, function(err , res){
+
+					expect(res.body.viewpoint.screenshot).to.equal(`${username}/${project}/issues/${issueId}/viewpoints/${res.body.viewpoint.guid}/screenshot.png`);
+					return done(err);
+
+				});
+			}
+		], done);
+
+	});
 	it('without name should fail', function(done){
 
 		let issue = baseIssue;
 
 		agent.post(`/${username}/${project}/issues.json`)
-		.send({ data: JSON.stringify(issue) })
+		.send(issue)
 		.expect(400 , function(err, res){
 			expect(res.body.value).to.equal(responseCodes.ISSUE_NO_NAME.value);
+			done(err);
+		});
+	});
+
+	it('with invalid priority value', function(done){
+
+		let issue = Object.assign({}, baseIssue, {"name":"Issue test", "priority":"abc"});
+
+		agent.post(`/${username}/${project}/issues.json`)
+		.send(issue)
+		.expect(400 , function(err, res){
+			expect(res.body.value).to.equal(responseCodes.ISSUE_INVALID_PRIORITY.value);
+			done(err);
+		});
+	});
+
+	it('with invalid status value', function(done){
+
+		let issue = Object.assign({}, baseIssue, {"name":"Issue test", "status":"abc"});
+
+		agent.post(`/${username}/${project}/issues.json`)
+		.send(issue)
+		.expect(400 , function(err, res){
+			expect(res.body.value).to.equal(responseCodes.ISSUE_INVALID_STATUS.value);
 			done(err);
 		});
 	});
@@ -163,58 +229,312 @@ describe('Creating an issue', function () {
 			"position": [33.167440465643935, 12.46054749529149, -46.997271893235435]
 		}, baseIssue);
 
-		agent.post(`/${username}/${project}/issues.json`)
-		.send({ data: JSON.stringify(issue) })
-		.expect(200 , function(err, res){
-			
-			expect(res.body.issue.norm).to.deep.equal(issue.norm);
-			expect(res.body.issue.position).to.deep.equal(issue.position);
+		let issueId;
 
-			if(err){
-				return done(err);
+		async.series([
+			function(done){
+				agent.post(`/${username}/${project}/issues.json`)
+				.send(issue)
+				.expect(200 , function(err, res){
+					issueId = res.body._id;
+					expect(res.body.norm).to.deep.equal(issue.norm);
+					expect(res.body.position).to.deep.equal(issue.position);
+					return done(err);
+					
+				});
+			},
+			function(done){
+				agent.get(`/${username}/${project}/issues/${issueId}.json`).expect(200, function(err , res){
+
+					expect(res.body.norm).to.deep.equal(issue.norm);
+					expect(res.body.position).to.deep.equal(issue.position);
+					done(err);
+
+				});
 			}
-			
-			//also check it is in database
-			Issue.findByUID({ account: username, project: project}, res.body._id).then(_issue => {
-
-				expect(_issue.norm).to.deep.equal(issue.norm);
-				expect(_issue.position).to.deep.equal(issue.position);
-				done();
-
-			}).catch( err => {
-				done(err);
-			});
-
-		});
+		], done);
 	});
 
-	it('with scribble should succee and scribble is saved', function(done){
 
-		let issue = Object.assign({
-			"name":"Issue test",
-			"scribble": "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AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/9wWZDWhBi7eXxgAAAABJRU5ErkJggg=="
-		}, baseIssue);
+	it('change status should succee', function(done){
 
-		agent.post(`/${username}/${project}/issues.json`)
-		.send({ data: JSON.stringify(issue) })
-		.expect(200 , function(err, res){
-			
-			expect(res.body.issue.scribble).to.deep.equal(issue.scribble);
+		let issue = Object.assign({"name":"Issue test"}, baseIssue);
+		let issueId;
+		let status = { status: 'in progress'};
+		async.series([
+			function(done){
+				agent.post(`/${username}/${project}/issues.json`)
+				.send(issue)
+				.expect(200 , function(err, res){
+					issueId = res.body._id;
+					return done(err);
+					
+				});
+			},
+			function(done){
+				agent.put(`/${username}/${project}/issues/${issueId}.json`)
+				.send(status)
+				.expect(200, done);
+			},
+			function(done){
+				agent.get(`/${username}/${project}/issues/${issueId}.json`)
+				.expect(200, function(err, res){
+					expect(res.body.status === status.status);
+					done(err);
+				});
+			},
+		], done);
+	});
 
-			if(err){
-				return done(err);
+
+	it('change status should fail if value is invalid', function(done){
+
+		let issue = Object.assign({"name":"Issue test"}, baseIssue);
+		let issueId;
+		let status = { status: '999'};
+		async.series([
+			function(done){
+				agent.post(`/${username}/${project}/issues.json`)
+				.send(issue)
+				.expect(200 , function(err, res){
+					issueId = res.body._id;
+					return done(err);
+					
+				});
+			},
+			function(done){
+				agent.put(`/${username}/${project}/issues/${issueId}.json`)
+				.send(status)
+				.expect(400, function(err, res){
+					expect(res.body.value === responseCodes.ISSUE_INVALID_STATUS.value);
+					done(err);
+				});
 			}
-			
-			//also check it is in database
-			Issue.findByUID({ account: username, project: project}, res.body._id).then(_issue => {
+		], done);
+	});
 
-				expect(_issue.scribble).to.equal(issue.scribble);
-				done();
+	it('change priority should succee', function(done){
 
-			}).catch( err => {
+		let issue = Object.assign({"name":"Issue test"}, baseIssue);
+		let issueId;
+		let priority = { priority: 'high'};
+		async.series([
+			function(done){
+				agent.post(`/${username}/${project}/issues.json`)
+				.send(issue)
+				.expect(200 , function(err, res){
+					issueId = res.body._id;
+					return done(err);
+					
+				});
+			},
+			function(done){
+				agent.put(`/${username}/${project}/issues/${issueId}.json`)
+				.send(priority)
+				.expect(200, done);
+			},
+			function(done){
+				agent.get(`/${username}/${project}/issues/${issueId}.json`)
+				.expect(200, function(err, res){
+					expect(res.body.priority === priority.priority);
+					done(err);
+				});
+			},
+		], done);
+	});
+
+	it('change priority should fail if value is invalid', function(done){
+
+		let issue = Object.assign({"name":"Issue test"}, baseIssue);
+		let issueId;
+		let priority = { priority: 'xxx'};
+		async.series([
+			function(done){
+				agent.post(`/${username}/${project}/issues.json`)
+				.send(issue)
+				.expect(200 , function(err, res){
+					issueId = res.body._id;
+					return done(err);
+					
+				});
+			},
+			function(done){
+				agent.put(`/${username}/${project}/issues/${issueId}.json`)
+				.send(priority)
+				.expect(400, function(err, res){
+					expect(res.body.value === responseCodes.ISSUE_INVALID_PRIORITY.value);
+					done(err);
+				});
+			}
+		], done);
+	});
+
+
+	it('change topic_type should succee', function(done){
+
+		let issue = Object.assign({"name":"Issue test"}, baseIssue);
+		let issueId;
+		let topic_type = { topic_type: 'for abcdef'};
+		async.series([
+			function(done){
+				agent.post(`/${username}/${project}/issues.json`)
+				.send(issue)
+				.expect(200 , function(err, res){
+					issueId = res.body._id;
+					return done(err);
+					
+				});
+			},
+			function(done){
+				agent.put(`/${username}/${project}/issues/${issueId}.json`)
+				.send(topic_type)
+				.expect(200, done);
+			},
+			function(done){
+				agent.get(`/${username}/${project}/issues/${issueId}.json`)
+				.expect(200, function(err, res){
+					expect(res.body.topic_type === topic_type.topic_type);
+					done(err);
+				});
+			},
+		], done);
+	});
+
+
+	it('change desc should succee', function(done){
+
+		let issue = Object.assign({"name":"Issue test"}, baseIssue);
+		let issueId;
+		let desc = { desc: 'for abcdef'};
+		async.series([
+			function(done){
+				agent.post(`/${username}/${project}/issues.json`)
+				.send(issue)
+				.expect(200 , function(err, res){
+					issueId = res.body._id;
+					return done(err);
+					
+				});
+			},
+			function(done){
+				agent.put(`/${username}/${project}/issues/${issueId}.json`)
+				.send(desc)
+				.expect(200, done);
+			},
+			function(done){
+				agent.get(`/${username}/${project}/issues/${issueId}.json`)
+				.expect(200, function(err, res){
+					expect(res.body.desc === desc.desc);
+					done(err);
+				});
+			},
+		], done);
+	});
+
+
+	it('change or commenting should fail if status is closed', function(done){
+
+		let issue = Object.assign({"name":"Issue test"}, baseIssue, {status: 'closed'});
+		let issueId;
+
+		async.series([
+			function(done){
+				agent.post(`/${username}/${project}/issues.json`)
+				.send(issue)
+				.expect(200 , function(err, res){
+					issueId = res.body._id;
+					return done(err);
+					
+				});
+			},
+			function(done){
+				agent.put(`/${username}/${project}/issues/${issueId}.json`)
+				.send({ desc: 'desc'})
+				.expect(400, function(err, res){
+					expect(res.body.value).to.equal(responseCodes.ISSUE_CLOSED_ALREADY.value);
+					done(err);
+				});
+			},
+			function(done){
+				agent.put(`/${username}/${project}/issues/${issueId}.json`)
+				.send({ topic_type: 'desc'})
+				.expect(400, function(err, res){
+					expect(res.body.value).to.equal(responseCodes.ISSUE_CLOSED_ALREADY.value);
+					done(err);
+				});
+			},
+			function(done){
+				agent.put(`/${username}/${project}/issues/${issueId}.json`)
+				.send({ priority: 'high'})
+				.expect(400, function(err, res){
+					expect(res.body.value).to.equal(responseCodes.ISSUE_CLOSED_ALREADY.value);
+					done(err);
+				});
+			},
+		], done);
+	});
+
+	describe('and then sealing a comment', function(){
+
+		let issueId;
+
+		before(function(done){
+
+			let issue = Object.assign({"name":"Issue test"}, baseIssue);
+
+			async.series([
+				function(done){
+					agent.post(`/${username}/${project}/issues.json`)
+					.send(issue)
+					.expect(200 , function(err, res){
+						issueId = res.body._id;
+						done(err);
+					});
+				},
+				function(done){
+
+					let comment = { 
+						comment: 'hello world',
+						"viewpoint":{
+							"up":[0,1,0],
+							"position":[38,38 ,125.08011914810137],
+							"look_at":[0,0,-163.08011914810137],
+							"view_dir":[0,0,-1],
+							"right":[1,0,0],
+							"unityHeight ":3.537606904422707,
+							"fov":2.1124830653010416,
+							"aspect_ratio":0.8750189337327384,
+							"far":276.75612077194506 ,
+							"near":76.42411012233212,
+							"clippingPlanes":[]
+						},
+					};
+
+					agent.put(`/${username}/${project}/issues/${issueId}.json`)
+					.send(comment)
+					.expect(200 , done);
+
+				}
+			], done);
+
+		});
+
+		it('should succee', function(done){
+			agent.put(`/${username}/${project}/issues/${issueId}.json`)
+			.send({sealed: true, commentIndex: 0})
+			.expect(200, function(err, res){
 				done(err);
 			});
+		});
 
+
+		it('should fail if editing a sealed comment', function(done){
+			agent.put(`/${username}/${project}/issues/${issueId}.json`)
+			.send({comment: 'abcd', commentIndex: 0, edit: true})
+			.expect(400, function(err, res){
+				expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
+				done(err);
+			});
 		});
 
 	});
@@ -228,7 +548,7 @@ describe('Creating an issue', function () {
 			let issue = Object.assign({"name":"Issue test"}, baseIssue);
 
 			agent.post(`/${username}/${project}/issues.json`)
-			.send({ data: JSON.stringify(issue) })
+			.send(issue)
 			.expect(200 , function(err, res){
 				issueId = res.body._id;
 				done(err);
@@ -238,29 +558,53 @@ describe('Creating an issue', function () {
 
 		it('should succee', function(done){
 
-			let comment = { comment: 'hello world' };
+			let comment = { 
+				comment: 'hello world',
+				"viewpoint":{
+					"up":[0,1,0],
+					"position":[38,38 ,125.08011914810137],
+					"look_at":[0,0,-163.08011914810137],
+					"view_dir":[0,0,-1],
+					"right":[1,0,0],
+					"unityHeight ":3.537606904422707,
+					"fov":2.1124830653010416,
+					"aspect_ratio":0.8750189337327384,
+					"far":276.75612077194506 ,
+					"near":76.42411012233212,
+					"clippingPlanes":[]
+				},
+			};
 
-			agent.put(`/${username}/${project}/issues/${issueId}.json`)
-			.send({ data: JSON.stringify(comment) })
-			.expect(200 , function(err, res){
+			async.series([
+				function(done){
+					agent.put(`/${username}/${project}/issues/${issueId}.json`)
+					.send(comment)
+					.expect(200 , done);
+				},
 
-				if(err){
-					return done(err);
+				function(done){
+					agent.get(`/${username}/${project}/issues/${issueId}.json`).expect(200, function(err , res){
+
+						expect(res.body.comments.length).to.equal(1);
+						expect(res.body.comments[0].comment).to.equal(comment.comment);
+						expect(res.body.comments[0].owner).to.equal(username);
+						expect(res.body.comments[0].viewpoint.up).to.deep.equal(comment.viewpoint.up);
+						expect(res.body.comments[0].viewpoint.position).to.deep.equal(comment.viewpoint.position);
+						expect(res.body.comments[0].viewpoint.look_at).to.deep.equal(comment.viewpoint.look_at);
+						expect(res.body.comments[0].viewpoint.view_dir).to.deep.equal(comment.viewpoint.view_dir);
+						expect(res.body.comments[0].viewpoint.right).to.deep.equal(comment.viewpoint.right);
+						expect(res.body.comments[0].viewpoint.unityHeight).to.equal(comment.viewpoint.unityHeight);
+						expect(res.body.comments[0].viewpoint.fov).to.equal(comment.viewpoint.fov);
+						expect(res.body.comments[0].viewpoint.aspect_ratio).to.equal(comment.viewpoint.aspect_ratio);
+						expect(res.body.comments[0].viewpoint.far).to.equal(comment.viewpoint.far);
+						expect(res.body.comments[0].viewpoint.near).to.equal(comment.viewpoint.near);
+						expect(res.body.comments[0].viewpoint.clippingPlanes).to.deep.equal(comment.viewpoint.clippingPlanes);
+
+						done(err);
+					});
 				}
+			], done);
 
-				//also check it is in database
-				Issue.findByUID({ account: username, project: project}, issueId).then(_issue => {
-
-					expect(_issue.comments.length).to.equal(1);
-					expect(_issue.comments[0].comment).to.equal(comment.comment);
-					expect(_issue.comments[0].owner).to.equal(username);
-					done();
-
-				}).catch( err => {
-					done(err);
-				});
-
-			});
 		});
 
 
@@ -268,27 +612,25 @@ describe('Creating an issue', function () {
 
 			let comment = { comment: 'hello world 2', commentIndex: 0, edit: true };
 
-			agent.put(`/${username}/${project}/issues/${issueId}.json`)
-			.send({ data: JSON.stringify(comment) })
-			.expect(200 , function(err, res){
+			async.series([
+				function(done){
+					agent.put(`/${username}/${project}/issues/${issueId}.json`)
+					.send(comment)
+					.expect(200 , done);
+				},
 
-				if(err){
-					return done(err);
+				function(done){
+					agent.get(`/${username}/${project}/issues/${issueId}.json`).expect(200, function(err , res){
+
+						expect(res.body.comments.length).to.equal(1);
+						expect(res.body.comments[0].comment).to.equal(comment.comment);
+						expect(res.body.comments[0].owner).to.equal(username);
+
+						done(err);
+					});
 				}
+			], done);
 
-				//also check it is in database
-				Issue.findByUID({ account: username, project: project}, issueId).then(_issue => {
-
-					expect(_issue.comments.length).to.equal(1);
-					expect(_issue.comments[0].comment).to.equal(comment.comment);
-					expect(_issue.comments[0].owner).to.equal(username);
-					done();
-
-				}).catch( err => {
-					done(err);
-				});
-
-			});
 		});
 
 
@@ -298,7 +640,7 @@ describe('Creating an issue', function () {
 			let comment = { comment: '' };
 
 			agent.put(`/${username}/${project}/issues/${issueId}.json`)
-			.send({ data: JSON.stringify(comment) })
+			.send({comment})
 			.expect(400 , function(err, res){
 				expect(res.body.value).to.equal(responseCodes.MONGOOSE_VALIDATION_ERROR({}).value);
 				done(err);
@@ -311,11 +653,9 @@ describe('Creating an issue', function () {
 			let comment = { commentIndex: 0, delete: true };
 
 			agent.put(`/${username}/${project}/issues/${issueId}.json`)
-			.send({ data: JSON.stringify(comment) })
+			.send(comment)
 			.expect(200 , function(err, res){
-
 				done(err);
-
 			});
 		});
 
@@ -325,7 +665,7 @@ describe('Creating an issue', function () {
 			let comment = { comment: 'hello world' };
 
 			agent.put(`/${username}/${project}/issues/${invalidId}.json`)
-			.send({ data: JSON.stringify(comment) })
+			.send(comment)
 			.expect(404 , function(err, res){
 				done(err);
 			});
@@ -342,7 +682,7 @@ describe('Creating an issue', function () {
 			let issue = Object.assign({"name":"Issue test"}, baseIssue);
 
 			agent.post(`/${username}/${project}/issues.json`)
-			.send({ data: JSON.stringify(issue) })
+			.send(issue)
 			.expect(200 , function(err, res){
 
 				if(err) {
@@ -355,7 +695,7 @@ describe('Creating an issue', function () {
 				let comment = { comment: 'hello world' };
 
 				agent.put(`/${username}/${project}/issues/${issueId}.json`)
-				.send({ data: JSON.stringify(comment) })
+				.send(comment)
 				.expect(200 , function(err, res){
 					done(err);
 				});
@@ -365,10 +705,10 @@ describe('Creating an issue', function () {
 
 		it('should succee', function(done){
 
-			let close = { closed: true };
+			let close = { status: 'closed' };
 
 			agent.put(`/${username}/${project}/issues/${issueId}.json`)
-			.send({ data: JSON.stringify(close) })
+			.send(close)
 			.expect(200 , function(err, res){
 
 				done(err);
@@ -380,7 +720,7 @@ describe('Creating an issue', function () {
 			let comment = { comment: 'hello world' };
 
 			agent.put(`/${username}/${project}/issues/${issueId}.json`)
-			.send({ data: JSON.stringify(comment) })
+			.send(comment)
 			.expect(400 , function(err, res){
 
 				expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
@@ -393,7 +733,7 @@ describe('Creating an issue', function () {
 			let comment = { commentIndex: 0, delete: true };
 
 			agent.put(`/${username}/${project}/issues/${issueId}.json`)
-			.send({ data: JSON.stringify(comment) })
+			.send(comment)
 			.expect(400 , function(err, res){
 
 				expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
@@ -406,7 +746,7 @@ describe('Creating an issue', function () {
 			let comment = { comment: 'hello world 2', commentIndex: 0, edit: true };
 
 			agent.put(`/${username}/${project}/issues/${issueId}.json`)
-			.send({ data: JSON.stringify(comment) })
+			.send(comment)
 			.expect(400 , function(err, res){
 
 				expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
@@ -417,13 +757,13 @@ describe('Creating an issue', function () {
 
 		it('should fail if closing again', function(done){
 
-			let close = { closed: true };
+			let close = {  status: 'closed'  };
 
 			agent.put(`/${username}/${project}/issues/${issueId}.json`)
-			.send({ data: JSON.stringify(close) })
+			.send(close)
 			.expect(400 , function(err, res){
 
-				expect(res.body.value).to.equal(responseCodes.ISSUE_CLOSED_ALREADY.value);
+				expect(res.body.value).to.equal(responseCodes.ISSUE_SAME_STATUS.value);
 				done(err);
 
 			});
@@ -431,35 +771,23 @@ describe('Creating an issue', function () {
 
 		it('should succee if reopening', function(done){
 
-			let close = { closed: false };
+			let open = {  status: 'open' };
 
 			agent.put(`/${username}/${project}/issues/${issueId}.json`)
-			.send({ data: JSON.stringify(close) })
+			.send(open)
 			.expect(200 , function(err, res){
+				done(err)
 
-				if(err){ 
-					done(err);
-				}
-
-				//check in db it is reopened
-				Issue.findByUID({ account: username, project: project}, issueId).then(_issue => {
-
-					expect(_issue.closed).to.equal(false);
-					done();
-
-				}).catch( err => {
-					done(err);
-				});
 			});
 		});
 
 		it('should fail if invalid issue ID is given', function(done){
 			
 			let invalidId = '00000000-0000-0000-0000-000000000000';
-			let comment = { closed: false };
+			let close = { status: 'closed' };
 
 			agent.put(`/${username}/${project}/issues/${invalidId}.json`)
-			.send({ data: JSON.stringify(comment) })
+			.send(close )
 			.expect(404 , function(err, res){
 				done(err);
 			});
