@@ -18,6 +18,7 @@ before_install:
     - sudo apt-get update
     - sudo apt-get install -y mongodb-org
     - mongod --version
+    - sudo service mongod start
     - npm install -g grunt-cli
     - sleep 15
     - cd backend/test/integrated/
