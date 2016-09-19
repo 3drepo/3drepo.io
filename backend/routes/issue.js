@@ -23,7 +23,6 @@ var C = require("../constants");
 var responseCodes = require('../response_codes.js');
 var Issue = require('../models/issue');
 var utils = require('../utils');
-var uuidToString = utils.uuidToString;
 var multer = require("multer");
 var config = require("../config.js");
 
@@ -92,7 +91,7 @@ function updateIssue(req, res, next){
 	let action;
 
 
-	Issue.findByUID(dbCol, issueId, false, true).then(issue => {
+	Issue.findById(dbCol, utils.stringToUUID(issueId), { 'viewpoints.screenshot': 0, 'thumbnail': 0 }).then(issue => {
 
 		if(!issue){
 			return Promise.reject({ resCode: responseCodes.ISSUE_NOT_FOUND });
@@ -140,14 +139,12 @@ function updateIssue(req, res, next){
 
 	}).then(issue => {
 
-		issue = issue.toObject();
-		data.viewpoint && (data.viewpoint.screenshot = 'saved');
 		let resData = {
-			_id: uuidToString(issue._id),
+			_id: issueId,
 			account: req.params.account,
 			project: req.params.project,
-			issue: data,
-			issue_id : uuidToString(issue._id),
+			issue: issue,
+			issue_id : issueId,
 			number: issue.number,
 			owner: data.hasOwnProperty('comment') ?  data.owner : issue.owner,
 			created: data.hasOwnProperty('comment') ? (new Date()).getTime() : issue.created
@@ -173,6 +170,7 @@ function listIssues(req, res, next) {
 		'viewpoints.extras': 0,
 		'viewpoints.scribble': 0,
 		'viewpoints.screenshot.content': 0,
+		'viewpoints.screenshot.resizedContent': 0,
 		'thumbnail.content': 0
 	};
 
@@ -367,8 +365,7 @@ function getScreenshotSmall(req, res, next){
 	let place = utils.APIInfo(req);
 	let dbCol = {account: req.params.account, project: req.params.project};
 
-	let width = 350;
-	Issue.getScreenshot(dbCol, req.params.uid, req.params.vid, width).then(buffer => {
+	Issue.getSmallScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, 'png');
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);

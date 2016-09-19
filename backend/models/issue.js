@@ -36,6 +36,7 @@ var yauzl = require("yauzl");
 var xml2js = require('xml2js');
 var _ = require('lodash');
 var gd = require('node-gd');
+var systemLogger = require("../logger.js").systemLogger;
 
 var xmlBuilder = new xml2js.Builder({
 	explicitRoot: false,
@@ -88,7 +89,11 @@ var schema = Schema({
 		far : Number,
 		near : Number,
 		clippingPlanes : [Schema.Types.Mixed ],
-		screenshot: {flag: Number, content: Object},
+		screenshot: {
+			flag: Number, 
+			content: Object,
+			resizedContent: Object
+		},
 		guid: Object,
 		extras: {},
 		scribble: {flag: Number, content: Object},
@@ -289,7 +294,7 @@ schema.statics.findByProjectName = function(dbColOptions, username, branch, revI
 			if(histories.length > 0){
 
 				let history = histories[0];
-				console.log('next history found', history);
+				//console.log('next history found', history);
 
 				//backward comp: find all issues, without rev_id field, with timestamp just less than the next cloest revision 
 				filter = {
@@ -520,7 +525,7 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 				issue.thumbnail = {
 					flag: 1,
-					content: this.resizeAndCropScreenshot(data.viewpoint.screenshot.content, 150, 150, true)
+					content: this.resizeAndCropScreenshot(data.viewpoint.screenshot.content, 120, 120, true)
 				};
 			}
 
@@ -548,21 +553,52 @@ schema.statics.createIssue = function(dbColOptions, data){
 
 };
 
-schema.statics.getScreenshot = function(dbColOptions, uid, vid, width, height){
+schema.statics.getScreenshot = function(dbColOptions, uid, vid){
 	'use strict';
 	
+
+	return this.findById(dbColOptions, stringToUUID(uid), { 
+		viewpoints: { $elemMatch: { guid: stringToUUID(vid) } },
+		'viewpoints.screenshot.resizedContent': 0
+	}).then(issue => {
+
+		if(!_.get(issue, 'viewpoints[0].screenshot.content.buffer')){
+			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
+		} else {
+			return issue.viewpoints[0].screenshot.content.buffer;
+		}
+	});
+};
+
+schema.statics.getSmallScreenshot = function(dbColOptions, uid, vid){
+	'use strict';
 
 	return this.findById(dbColOptions, stringToUUID(uid), { 
 		viewpoints: { $elemMatch: { guid: stringToUUID(vid) } }
 	}).then(issue => {
 
-		if(!_.get(issue, 'viewpoints[0].screenshot.content.buffer')){
-			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
-		} else if (width){
+		if (_.get(issue, 'viewpoints[0].screenshot.resizedContent.buffer')){
 
-			return this.resizeAndCropScreenshot(issue.viewpoints[0].screenshot.content.buffer, width);
+			return issue.viewpoints[0].screenshot.resizedContent.buffer;
+		} else if(!_.get(issue, 'viewpoints[0].screenshot.content.buffer')){
+			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 		} else {
-			return issue.viewpoints[0].screenshot.content.buffer
+			
+			let resized = this.resizeAndCropScreenshot(issue.viewpoints[0].screenshot.content.buffer, 365);
+		
+
+			this.findOneAndUpdate(dbColOptions, 
+				{ _id: stringToUUID(uid), 'viewpoints.guid': stringToUUID(vid)},
+				{ '$set': { 'viewpoints.$.screenshot.resizedContent': resized } }
+			).catch( err => {
+				systemLogger.logError('error while saving resized screenshot',{
+					issueId: uid,
+					viewpointId: vid,
+					err: err,
+				});
+			});
+
+			return resized;
 		}
 	});
 };
@@ -576,7 +612,7 @@ schema.statics.getThumbnail = function(dbColOptions, uid){
 		if(!_.get(issue, 'thumbnail.content.buffer')){
 			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 		} else {
-			return issue.thumbnail.content.buffer
+			return issue.thumbnail.content.buffer;
 		}
 	});
 };
@@ -588,9 +624,15 @@ schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeig
 	let img = gd.createFromPngPtr(pngBuffer);
 	let sourceX, sourceY, sourceWidth, sourceHeight;
 
+	console.log(destWidth, img.width);
+
 	if(!img){
 
 		return;
+
+	} else if(img.width <= destWidth) {
+
+		return pngBuffer;
 
 	} else if (!crop){
 
@@ -610,7 +652,7 @@ schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeig
 
 		sourceX = 0;
 		sourceWidth = img.width;
-		sourceY = (img.height / 2 - img.width / 2)
+		sourceY = (img.height / 2 - img.width / 2);
 		sourceHeight = sourceWidth;
 	}
 	
@@ -644,6 +686,7 @@ schema.methods.updateComment = function(commentIndex, data){
 
 	if(commentIndex === null || typeof commentIndex === 'undefined'){
 
+		let commentGuid = utils.generateUUID();
 		let getHistory;
 
 		if(data.revId){
@@ -675,16 +718,19 @@ schema.methods.updateComment = function(commentIndex, data){
 				this.viewpoints.push(data.viewpoint);
 
 				this.comments.push({ 
-					owner: data.owner,	
+					owner: data.owner,
 					comment: data.comment, 
 					created: timeStamp,
 					rev_id: history ? history._id : undefined,
-					guid: utils.generateUUID(),
+					guid: commentGuid,
 					viewpoint: data.viewpoint.guid
 				});
 			}
 		}).then(() => {
 			return this.save();
+		}).then(issue => {
+			issue = issue.clean();
+			return issue.comments.find(c => c.guid === utils.uuidToString(commentGuid));
 		});
 
 
@@ -707,7 +753,10 @@ schema.methods.updateComment = function(commentIndex, data){
 		
 		commentObj.sealed = data.sealed || commentObj.sealed;
 
-		return this.save();
+		return this.save().then(issue => {
+			issue = issue.clean();
+			return issue.comments.find(c => c.guid === utils.uuidToString(commentObj.guid));
+		});
 	}
 
 	
@@ -812,6 +861,7 @@ schema.methods.clean = function(typePrefix){
 		
 		if(_.get(cleaned, `viewpoints[${i}].screenshot.flag`)){
 			cleaned.viewpoints[i].screenshot = cleaned.account + '/' + cleaned.project +'/issues/' + cleaned._id + '/viewpoints/' + cleaned.viewpoints[i].guid + '/screenshot.png';
+			cleaned.viewpoints[i].screenshotSmall = cleaned.account + '/' + cleaned.project +'/issues/' + cleaned._id + '/viewpoints/' + cleaned.viewpoints[i].guid + '/screenshotSmall.png';
 		}
 	});
 
