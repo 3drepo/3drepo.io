@@ -98,7 +98,8 @@ div(layout="column", tabindex="0", tdr-focus="true")
 		keys-down="$ctrl.keysDown"
 		clear="vm.clearMulti"
 		send-event="$ctrl.sendEvent({type: type, value: value})"
-		event="$ctrl.event")
+		event="$ctrl.event"
+		set-multi="$ctrl.setMulti({data: data})")
 		// Pin
 		issues-pin(
 		ng-switch-when="pin"

@@ -11794,6 +11794,8 @@ angular.module('3drepo')
 		this.UtilsService = UtilsService;
 		this.hideDescription = false;
 		this.submitDisabled = true;
+		this.pinData = null;
+		this.multiData = null;
 		this.priorities = [
 			{value: "none", label: "None"},
 			{value: "low", label: "Low"},
@@ -11876,16 +11878,33 @@ angular.module('3drepo')
 		 */
 		this.submit = function () {
 			var viewpointPromise = $q.defer(),
-				screenShotPromise = $q.defer();
+				screenShotPromise = $q.defer(),
+				groupPromise = $q.defer(),
+				data;
 
 			// Viewpoint
 			this.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
 			viewpointPromise.promise.then(function (viewpoint) {
 				if (typeof self.data === "undefined") {
+					// Save issue
 					if (savedScreenShot !== null) {
-						saveIssue(viewpoint, savedScreenShot);
+						if (self.multiData !== null) {
+							data = {
+								name: self.issueData.name,
+								color: [255, 0, 0],
+								parents: self.multiData
+							};
+							UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
+								console.log(response);
+								saveIssue(viewpoint, savedScreenShot, response.data._id);
+							});
+						}
+						else {
+							saveIssue(viewpoint, savedScreenShot);
+						}
 					}
 					else {
+						// Get a screen shot if not already created
 						self.sendEvent({type: EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
 						screenShotPromise.promise.then(function (screenShot) {
 							saveIssue(viewpoint, screenShot);
@@ -11893,6 +11912,7 @@ angular.module('3drepo')
 					}
 				}
 				else {
+					// Save comment
 					saveComment(viewpoint);
 				}
 			});
@@ -11909,8 +11929,11 @@ angular.module('3drepo')
 			});
 		};
 
+		/**
+		 * Do an action
+		 * @param index
+		 */
 		this.doAction = function (index) {
-			console.log(this.actions[index].action);
 			if (currentActionIndex === null) {
 				currentActionIndex = index;
 				this.actions[currentActionIndex].color = highlightBackground;
@@ -11935,12 +11958,6 @@ angular.module('3drepo')
 						templateUrl: "issueScreenShotDialog.html"
 					});
 					break;
-
-				case "pin":
-					break;
-
-				case "multi":
-					break;
 			}
 		};
 
@@ -11953,11 +11970,20 @@ angular.module('3drepo')
 		};
 
 		/**
+		 * Set the current add pin data
+		 * @param multiData
+		 */
+		this.setMulti = function (multiData) {
+			self.multiData = multiData.data;
+		};
+
+		/**
 		 * Save new issue
 		 * @param viewpoint
 		 * @param screenShot
+		 * @param groupId
 		 */
-		function saveIssue (viewpoint, screenShot) {
+		function saveIssue (viewpoint, screenShot, groupId) {
 			var	savePromise,
 				issue;
 
@@ -11986,6 +12012,10 @@ angular.module('3drepo')
 			if (self.pinData !== null) {
 				issue.pickedPos = self.pinData.pickedPos;
 				issue.pickedNorm = self.pinData.pickedNorm;
+			}
+			// Group data
+			if (angular.isDefined(groupId)) {
+				issue.group_id = groupId;
 			}
 			savePromise = IssuesService.saveIssue(issue);
 			savePromise.then(function (data) {
@@ -12845,9 +12875,9 @@ angular.module('3drepo')
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$timeout", "$filter", "$window", "$q", "$element", "IssuesService", "EventService", "Auth", "serverConfig"];
+	IssuesCtrl.$inject = ["$scope", "$timeout", "$filter", "$window", "$q", "$element", "IssuesService", "EventService", "Auth", "serverConfig", "UtilsService"];
 
-	function IssuesCtrl($scope, $timeout, $filter, $window, $q, $element, IssuesService, EventService, Auth, serverConfig) {
+	function IssuesCtrl($scope, $timeout, $filter, $window, $q, $element, IssuesService, EventService, Auth, serverConfig, UtilsService) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -13741,9 +13771,11 @@ angular.module('3drepo')
 				vm.selectIssue = {issue: selectedIssue, selected: false};
 				selectedIssue = null;
 				setSelectedIssueIndex(selectedIssue);
+				deselectPin(selectedIssue._id);
 			}
 			else {
 				vm.selectIssue = {issue: selectedIssue, selected: false};
+				deselectPin(selectedIssue._id);
 				$timeout(function () {
 					selectedIssue = issue;
 					vm.selectIssue = {issue: selectedIssue, selected: true};
@@ -13789,6 +13821,8 @@ angular.module('3drepo')
 		 * @param issue
 		 */
 		function showIssue (issue) {
+			var data;
+
 			// Highlight pin, move camera and setup clipping plane
 			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, {
 				id: issue._id,
@@ -13804,6 +13838,23 @@ angular.module('3drepo')
 			EventService.send(EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, {
 				clippingPlanes: issue.viewpoint.clippingPlanes
 			});
+
+			// Remove highlight from any multi objects
+			EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
+
+			// Show multi objects
+			if (issue.hasOwnProperty("group_id")) {
+				UtilsService.doGet(vm.account + "/" + vm.project + "/groups/" + issue.group_id).then(function (response) {
+					data = {
+						source: "tree",
+						account: vm.account,
+						project: vm.project,
+						ids: response.data.parents,
+						colour: response.data.colour
+					};
+					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
+				});
+			}
 		}
 
 		/**
@@ -13825,7 +13876,11 @@ angular.module('3drepo')
 			}
 		}
 
-		function pinClicked(issueId) {
+		/**
+		 * Pin clicked in viewer
+		 * @param issueId
+		 */
+		function pinClicked (issueId) {
 			var i, length;
 
 			for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
@@ -13840,15 +13895,27 @@ angular.module('3drepo')
 			}
 		}
 
+		/**
+		 * Background selected in viewer
+		 */
 		function backgroundSelected () {
 			if (selectedIssue !== null) {
-				EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, {
-					id: selectedIssue._id,
-					colours: [[0.5, 0, 0]]
-				});
+				deselectPin(selectedIssue._id);
 				vm.editIssueExit(selectedIssue);
 				selectedIssue = null;
 			}
+		}
+
+		/**
+		 * Set the pin to look deselected
+		 * @param issueId
+		 */
+		function deselectPin (issueId) {
+			console.log(456);
+			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, {
+				id: issueId,
+				colours: [[0.5, 0, 0]]
+			});
 		}
 	}
 }());
@@ -14064,7 +14131,8 @@ angular.module('3drepo')
 					keysDown: "<",
 					clear: "<",
 					sendEvent: "&",
-					event: "<"
+					event: "<",
+					setMulti: "&"
 				}
 			}
 		);
@@ -14072,12 +14140,16 @@ angular.module('3drepo')
 	IssuesMultiCtrl.$inject = ["EventService"];
 
 	function IssuesMultiCtrl (EventService) {
-		var objectIndex,
+		var self = this,
+			objectIndex,
 			selectedObjectIDs = [],
 			cmdKey = 91,
 			ctrlKey = 17,
 			isMac = (navigator.platform.indexOf("Mac") !== -1),
 			multiMode = false;
+
+		// Init
+		this.setMulti({data: null});
 
 		/**
 		 * Handle component input changes
@@ -14095,25 +14167,11 @@ angular.module('3drepo')
 				}
 				*/
 			}
-			/*
-			else if (changes.hasOwnProperty("selectedObject") && multiMode) {
-				objectIndex = selectedObjectIDs.indexOf(this.selectedObject.id);
-				if (objectIndex === -1) {
-					selectedObjectIDs.push(this.selectedObject.id);
-				}
-				else {
-					selectedObjectIDs.splice(objectIndex, 1);
-				}
-				//console.log(selectedObjectIDs);
-				this.displaySelectedObjects(selectedObjectIDs);
-			}
-			*/
 			else if (changes.hasOwnProperty("clear") && this.clear) {
 				this.displaySelectedObjects([]);
 			}
 
 			if (changes.hasOwnProperty("event")) {
-				console.log(123, changes.event);
 				if (changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
 					objectIndex = selectedObjectIDs.indexOf(changes.event.currentValue.value.id);
 					if (objectIndex === -1) {
@@ -14123,6 +14181,13 @@ angular.module('3drepo')
 						selectedObjectIDs.splice(objectIndex, 1);
 					}
 					this.displaySelectedObjects(selectedObjectIDs);
+
+					if (selectedObjectIDs.length > 0) {
+						self.setMulti({data: selectedObjectIDs});
+					}
+					else {
+						self.setMulti({data: null});
+					}
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 					//removePin();

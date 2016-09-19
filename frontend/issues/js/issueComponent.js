@@ -50,6 +50,8 @@
 		this.UtilsService = UtilsService;
 		this.hideDescription = false;
 		this.submitDisabled = true;
+		this.pinData = null;
+		this.multiData = null;
 		this.priorities = [
 			{value: "none", label: "None"},
 			{value: "low", label: "Low"},
@@ -132,16 +134,33 @@
 		 */
 		this.submit = function () {
 			var viewpointPromise = $q.defer(),
-				screenShotPromise = $q.defer();
+				screenShotPromise = $q.defer(),
+				groupPromise = $q.defer(),
+				data;
 
 			// Viewpoint
 			this.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
 			viewpointPromise.promise.then(function (viewpoint) {
 				if (typeof self.data === "undefined") {
+					// Save issue
 					if (savedScreenShot !== null) {
-						saveIssue(viewpoint, savedScreenShot);
+						if (self.multiData !== null) {
+							data = {
+								name: self.issueData.name,
+								color: [255, 0, 0],
+								parents: self.multiData
+							};
+							UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
+								console.log(response);
+								saveIssue(viewpoint, savedScreenShot, response.data._id);
+							});
+						}
+						else {
+							saveIssue(viewpoint, savedScreenShot);
+						}
 					}
 					else {
+						// Get a screen shot if not already created
 						self.sendEvent({type: EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
 						screenShotPromise.promise.then(function (screenShot) {
 							saveIssue(viewpoint, screenShot);
@@ -149,6 +168,7 @@
 					}
 				}
 				else {
+					// Save comment
 					saveComment(viewpoint);
 				}
 			});
@@ -165,8 +185,11 @@
 			});
 		};
 
+		/**
+		 * Do an action
+		 * @param index
+		 */
 		this.doAction = function (index) {
-			console.log(this.actions[index].action);
 			if (currentActionIndex === null) {
 				currentActionIndex = index;
 				this.actions[currentActionIndex].color = highlightBackground;
@@ -191,12 +214,6 @@
 						templateUrl: "issueScreenShotDialog.html"
 					});
 					break;
-
-				case "pin":
-					break;
-
-				case "multi":
-					break;
 			}
 		};
 
@@ -209,11 +226,20 @@
 		};
 
 		/**
+		 * Set the current add pin data
+		 * @param multiData
+		 */
+		this.setMulti = function (multiData) {
+			self.multiData = multiData.data;
+		};
+
+		/**
 		 * Save new issue
 		 * @param viewpoint
 		 * @param screenShot
+		 * @param groupId
 		 */
-		function saveIssue (viewpoint, screenShot) {
+		function saveIssue (viewpoint, screenShot, groupId) {
 			var	savePromise,
 				issue;
 
@@ -242,6 +268,10 @@
 			if (self.pinData !== null) {
 				issue.pickedPos = self.pinData.pickedPos;
 				issue.pickedNorm = self.pinData.pickedNorm;
+			}
+			// Group data
+			if (angular.isDefined(groupId)) {
+				issue.group_id = groupId;
 			}
 			savePromise = IssuesService.saveIssue(issue);
 			savePromise.then(function (data) {

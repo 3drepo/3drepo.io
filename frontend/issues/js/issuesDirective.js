@@ -47,9 +47,9 @@
 		};
 	}
 
-	IssuesCtrl.$inject = ["$scope", "$timeout", "$filter", "$window", "$q", "$element", "IssuesService", "EventService", "Auth", "serverConfig"];
+	IssuesCtrl.$inject = ["$scope", "$timeout", "$filter", "$window", "$q", "$element", "IssuesService", "EventService", "Auth", "serverConfig", "UtilsService"];
 
-	function IssuesCtrl($scope, $timeout, $filter, $window, $q, $element, IssuesService, EventService, Auth, serverConfig) {
+	function IssuesCtrl($scope, $timeout, $filter, $window, $q, $element, IssuesService, EventService, Auth, serverConfig, UtilsService) {
 		var vm = this,
 			promise,
 			rolesPromise,
@@ -943,9 +943,11 @@
 				vm.selectIssue = {issue: selectedIssue, selected: false};
 				selectedIssue = null;
 				setSelectedIssueIndex(selectedIssue);
+				deselectPin(selectedIssue._id);
 			}
 			else {
 				vm.selectIssue = {issue: selectedIssue, selected: false};
+				deselectPin(selectedIssue._id);
 				$timeout(function () {
 					selectedIssue = issue;
 					vm.selectIssue = {issue: selectedIssue, selected: true};
@@ -991,6 +993,8 @@
 		 * @param issue
 		 */
 		function showIssue (issue) {
+			var data;
+
 			// Highlight pin, move camera and setup clipping plane
 			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, {
 				id: issue._id,
@@ -1006,6 +1010,23 @@
 			EventService.send(EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, {
 				clippingPlanes: issue.viewpoint.clippingPlanes
 			});
+
+			// Remove highlight from any multi objects
+			EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, []);
+
+			// Show multi objects
+			if (issue.hasOwnProperty("group_id")) {
+				UtilsService.doGet(vm.account + "/" + vm.project + "/groups/" + issue.group_id).then(function (response) {
+					data = {
+						source: "tree",
+						account: vm.account,
+						project: vm.project,
+						ids: response.data.parents,
+						colour: response.data.colour
+					};
+					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
+				});
+			}
 		}
 
 		/**
@@ -1027,7 +1048,11 @@
 			}
 		}
 
-		function pinClicked(issueId) {
+		/**
+		 * Pin clicked in viewer
+		 * @param issueId
+		 */
+		function pinClicked (issueId) {
 			var i, length;
 
 			for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
@@ -1042,15 +1067,27 @@
 			}
 		}
 
+		/**
+		 * Background selected in viewer
+		 */
 		function backgroundSelected () {
 			if (selectedIssue !== null) {
-				EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, {
-					id: selectedIssue._id,
-					colours: [[0.5, 0, 0]]
-				});
+				deselectPin(selectedIssue._id);
 				vm.editIssueExit(selectedIssue);
 				selectedIssue = null;
 			}
+		}
+
+		/**
+		 * Set the pin to look deselected
+		 * @param issueId
+		 */
+		function deselectPin (issueId) {
+			console.log(456);
+			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, {
+				id: issueId,
+				colours: [[0.5, 0, 0]]
+			});
 		}
 	}
 }());
