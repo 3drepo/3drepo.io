@@ -37,6 +37,7 @@ var xml2js = require('xml2js');
 var _ = require('lodash');
 var gd = require('node-gd');
 var systemLogger = require("../logger.js").systemLogger;
+var Group = require('./group');
 
 var xmlBuilder = new xml2js.Builder({
 	explicitRoot: false,
@@ -457,6 +458,16 @@ schema.statics.createIssue = function(dbColOptions, data){
 	let issue = Issue.createInstance(dbColOptions);
  	issue._id = stringToUUID(uuid.v1());
 
+ 	let checkGroup = function(group_id){
+		return Group.findByUID(dbColOptions, group_id).then(group => {
+			if(!group){
+				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+			} else {
+				return Promise.resolve(group);
+			}
+		});
+ 	};
+
  	if(!data.name){
  		return Promise.reject({ resCode: responseCodes.ISSUE_NO_NAME });
  	}
@@ -487,7 +498,22 @@ schema.statics.createIssue = function(dbColOptions, data){
 		}
 	}));
 
+	let group;
+
 	return Promise.all(promises).then(() => {
+
+		if(data.group_id){
+			return checkGroup(data.group_id);
+		} else {
+			return Promise.resolve();
+		}
+		
+	}).then(_group => {
+
+		if(_group){
+			group = _group;
+		}
+
 		return Issue.count(dbColOptions);
 		
 	}).then(count => {
@@ -544,6 +570,15 @@ schema.statics.createIssue = function(dbColOptions, data){
 		issue.assigned_roles = data.assigned_roles;
 
 		return issue.save().then(() => {
+
+			if(group){
+				group.issue_id = issue._id;
+				return group.save();
+			} else {
+				return Promise.resolve();
+			}
+
+		}).then(() => {
 			return ProjectSetting.findById(dbColOptions, dbColOptions.project);
 		}).then(settings => {
 			return Promise.resolve(issue.clean(settings.type));

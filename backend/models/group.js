@@ -28,7 +28,7 @@ var groupSchema = Schema({
 	// no extra attributes
 	_id: Object,
 	parents: [],
-	hidden: {type: Boolean, default: false},
+	issue_id: Object,
 	color: [Number]
 });
 
@@ -85,6 +85,7 @@ groupSchema.methods.clean = function(){
 
 	let cleaned = this.toObject();
 	cleaned._id = uuidToString(cleaned._id);
+	cleaned.issue_id = uuidToString(cleaned.issue_id);
 	cleaned.parents.forEach((parent, i) => {
 		cleaned.parents[i] = uuidToString(parent);
 	});
