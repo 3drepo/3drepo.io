@@ -19,6 +19,7 @@ before_install:
     - sleep 15
     - cd backend/test/integrated/
     - mongorestore
+    - sudo apt-get install libgd2-dev
 install: npm install
 services:
   - rabbitmq
