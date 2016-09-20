@@ -221,7 +221,7 @@
 				}
 				*/
 			} else if ((event.type === EventService.EVENT.VIEWER.CLICK_PIN) && vm.show) {
-				pinClicked(event.value.id);
+				//pinClicked(event.value.id);
 			} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_ADD) {
 				if (event.value.on) {
 					vm.show = true;
@@ -238,7 +238,7 @@
 				//vm.selectedObject = event.value;
 			}
 			else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
-				backgroundSelected();
+				//backgroundSelected();
 			}
 
 		});
@@ -864,47 +864,14 @@
 		}
 
 		/* New Stuff **************************************************************************************************/
-		/*
-		 * Handle keys down
-		 */
-		$scope.$watch("vm.keysDown", function () {
-			var upArrow = 38,
-				downArrow = 40,
-				rightArrow = 39;
-
-			if ((vm.toShow === "showIssues") && angular.isDefined(vm.keysDown) &&
-				(vm.keysDown.length > 0) &&
-				(selectedIssueIndex !== null)) {
-				if ((vm.keysDown[0] === downArrow) || (vm.keysDown[0] === upArrow)) {
-					if ((vm.keysDown[0] === downArrow) && (selectedIssueIndex !== (vm.issuesToShow.length - 1))) {
-						vm.selectIssue = {issue: selectedIssue, selected: false};
-						selectedIssueIndex += 1;
-					}
-					else if ((vm.keysDown[0] === upArrow) && (selectedIssueIndex !== 0)) {
-						vm.selectIssue = {issue: selectedIssue, selected: false};
-						selectedIssueIndex -= 1;
-					}
-					$timeout(function () {
-						selectedIssue = vm.issuesToShow[selectedIssueIndex];
-						vm.selectIssue = {issue: selectedIssue, selected: true};
-						showIssue(selectedIssue);
-					});
-				}
-				else if (vm.keysDown[0] === rightArrow) {
-					vm.editIssue(selectedIssue);
-				}
-			}
-		});
 
 		/*
 		 * Go back to issues list
 		 */
 		$scope.$watch("vm.hideItem", function (newValue) {
+			console.log(newValue);
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showIssues";
-				if (selectedIssue !== null) {
-					vm.selectIssue = {issue: selectedIssue, selected: true};
-				}
 				setContentHeight();
 			}
 		});
@@ -928,36 +895,6 @@
 		};
 
 		/**
-		 * Issue selected
-		 * @param issue
-		 */
-		vm.issueSelect = function (issue) {
-			if (selectedIssue === null) {
-				selectedIssue = issue;
-				vm.selectIssue = {issue: selectedIssue, selected: true};
-				showIssue(selectedIssue);
-				setSelectedIssueIndex(selectedIssue);
-			}
-			else if (selectedIssue._id === issue._id) {
-				vm.selectIssue = {issue: selectedIssue, selected: false};
-				selectedIssue = null;
-				setSelectedIssueIndex(selectedIssue);
-				deselectPin(selectedIssue._id);
-			}
-			else {
-				vm.selectIssue = {issue: selectedIssue, selected: false};
-				deselectPin(selectedIssue._id);
-				$timeout(function () {
-					selectedIssue = issue;
-					vm.selectIssue = {issue: selectedIssue, selected: true};
-					showIssue(selectedIssue);
-					setSelectedIssueIndex(selectedIssue);
-				});
-			}
-
-		};
-
-		/**
 		 * Set up editing issue
 		 * @param issue
 		 */
@@ -966,6 +903,9 @@
 			vm.toShow = "showIssue";
 			setContentHeight();
 			vm.onShowItem();
+			if (angular.isUndefined(issue) && (selectedIssue !== null)) {
+				deselectPin(selectedIssue._id);
+			}
 		};
 
 		/**
@@ -1025,55 +965,6 @@
 					};
 					EventService.send(EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, data);
 				});
-			}
-		}
-
-		/**
-		 * Set the selected issue index
-		 * @param selectedIssue
-		 */
-		function setSelectedIssueIndex (selectedIssue) {
-			var i, length;
-
-			if (selectedIssue !== null) {
-				for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
-					if (vm.issuesToShow[i]._id === selectedIssue._id) {
-						selectedIssueIndex = i;
-					}
-				}
-			}
-			else {
-				selectedIssueIndex = null;
-			}
-		}
-
-		/**
-		 * Pin clicked in viewer
-		 * @param issueId
-		 */
-		function pinClicked (issueId) {
-			var i, length;
-
-			for (i = 0, length = vm.issuesToShow.length; i < length; i += 1) {
-				if (vm.issuesToShow[i]._id === issueId) {
-					selectedIssue = vm.issuesToShow[i];
-					vm.selectIssue = {issue: selectedIssue, selected: true};
-					showIssue(selectedIssue);
-					setSelectedIssueIndex(selectedIssue);
-					vm.editIssue(selectedIssue);
-					break;
-				}
-			}
-		}
-
-		/**
-		 * Background selected in viewer
-		 */
-		function backgroundSelected () {
-			if (selectedIssue !== null) {
-				deselectPin(selectedIssue._id);
-				vm.editIssueExit(selectedIssue);
-				selectedIssue = null;
 			}
 		}
 

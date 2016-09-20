@@ -1675,6 +1675,68 @@ issue-area #scribbleDisplay img {
   right: -200%;
 }
 
+/** Issues List *******************************************************************************************************/
+issues-list .issueListItem {
+  height: 150px;
+  position: relative;
+  outline: none;
+}
+issues-list .issueListItem:hover {
+  background: rgba(0,69,148,.1);
+  cursor: pointer;
+}
+
+issues-list .issueListItem div:first-child {
+  outline: none;
+}
+
+issues-list #issuesListItemContent {
+  padding: 10px;
+}
+
+issues-list #issuesListItemTitle {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+issues-list #issuesListItemTitle,
+issues-list #issuesListItemInfo {
+  margin-bottom: 10px;
+}
+
+issues-list #issuesListItemInfo label,
+issues-list #issuesListItemDescription label {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+issues-list #issuesListItemDescription {
+  height: 70px;
+}
+issues-list #issuesListItemDescription label {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+issues-list #issuesListItemEnter {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50px;
+  height: 100%;
+  background: rgb(0, 69, 148);
+  outline: none;
+}
+issues-list #issuesListItemEnter md-icon {
+  color: #FFFFFF;
+}
+
+issues-list .issueListItemThumbnail {
+  margin-left: -15px;
+}
+
 /** Issues List Item **************************************************************************************************/
 issues-list-item {
   display: block;
@@ -1788,12 +1850,12 @@ issue-comp .issueCompCommentTitle {
 }
 
 issue-comp .issueCommentWithScreenShot:hover,
-issue-comp #issueCompDescription:hover {
+issue-comp .issueDescriptionWithScreenShot:hover {
   background: rgba(0,69,148,.1);
   cursor: pointer;
 }
 issue-comp .issueCommentWithScreenShot *:hover,
-issue-comp #issueCompDescription *:hover {
+issue-comp .issueDescriptionWithScreenShot *:hover {
   cursor: pointer;
 }
 

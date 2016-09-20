@@ -1,4 +1,4 @@
-div(layout="column", tabindex="0", tdr-focus="true")
+div(layout="column", tabindex="0", tdr-focus="true", flex)
 	// Title
 	.issueCompItemContainer(layout="column", layout-align="start", flex)
 		md-icon.angular-material-icons#issueCompStatus(style="color:{{$ctrl.statusIcon.colour}}") {{$ctrl.statusIcon.icon}}
@@ -33,7 +33,12 @@ div(layout="column", tabindex="0", tdr-focus="true")
 
 	// Description
 	.issueCompItemContainer(layout="column", layout-align="start", flex)
-		#issueCompDescription(ng-click="$ctrl.showViewpointAndScreenShot($ctrl.issueData.viewpoint)")
+		div(
+		ng-click="$ctrl.showViewpointAndScreenShot($ctrl.issueData.viewpoint)"
+		ng-class="{issueDescriptionWithScreenShot: $ctrl.issueData.viewpoint.screenshot}"
+		layout="column"
+		layout-align="start"
+		flex)
 			md-input-container.issueComp(flex, ng-if="!$ctrl.hideDescription")
 				label Description
 				textarea(ng-model="$ctrl.issueData.desc", ng-disabled="$ctrl.data")
