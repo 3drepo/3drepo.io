@@ -11834,11 +11834,12 @@ angular.module('3drepo')
 			*/
 
 			if (changes.hasOwnProperty("data")) {
-				if (typeof changes.data.currentValue === "object") {
+				if (this.data) {
 					this.issueData = angular.copy(this.data);
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
 					this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshot);
+					this.canUpdate = (this.account === this.issueData.owner);
 				}
 				else {
 					this.issueData = {
@@ -11847,6 +11848,7 @@ angular.module('3drepo')
 						topic_type: "for_information",
 						viewpoint: {}
 					};
+					this.canUpdate = true;
 				}
 				this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 			}
@@ -11863,59 +11865,44 @@ angular.module('3drepo')
 		 * Disable the save button when commenting on an issue if there is no comment
 		 */
 		this.commentChange = function () {
-			this.submitDisabled = ((typeof this.data === "object") && (typeof this.comment === "undefined"));
+			this.submitDisabled = (this.data && (typeof this.comment === "undefined"));
 		};
 
 		/**
-		 * Set the status icon style and colour
+		 * Handle status change
 		 */
-		this.setStatusIcon = function () {
+		this.statusChange = function () {
 			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
+			// Update
+			if (this.data) {
+				this.submitDisabled = (this.data.priority === this.issueData.priority) && (this.data.status === this.issueData.status);
+			}
 		};
 
 		/**
-		 * Submit - new issue or comment
+		 * Submit - new issue or comment or update issue
 		 */
 		this.submit = function () {
-			var viewpointPromise = $q.defer(),
-				screenShotPromise = $q.defer(),
-				groupPromise = $q.defer(),
-				data;
-
-			// Viewpoint
-			this.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
-			viewpointPromise.promise.then(function (viewpoint) {
-				if (typeof self.data === "undefined") {
-					// Save issue
-					if (savedScreenShot !== null) {
-						if (self.multiData !== null) {
-							data = {
-								name: self.issueData.name,
-								color: [255, 0, 0],
-								parents: self.multiData
-							};
-							UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
-								console.log(response);
-								saveIssue(viewpoint, savedScreenShot, response.data._id);
-							});
-						}
-						else {
-							saveIssue(viewpoint, savedScreenShot);
+			if (self.data) {
+				if (self.data.owner === self.account) {
+					if ((this.data.priority !== this.issueData.priority) ||
+						(this.data.status !== this.issueData.status)) {
+						updateIssue();
+						if (typeof this.comment !== "undefined") {
+							saveComment();
 						}
 					}
 					else {
-						// Get a screen shot if not already created
-						self.sendEvent({type: EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
-						screenShotPromise.promise.then(function (screenShot) {
-							saveIssue(viewpoint, screenShot);
-						});
+						saveComment();
 					}
 				}
 				else {
-					// Save comment
-					saveComment(viewpoint);
+					saveComment();
 				}
-			});
+			}
+			else {
+				saveIssue();
+			}
 		};
 
 		this.showScreenShot = function (screenShot) {
@@ -11978,12 +11965,54 @@ angular.module('3drepo')
 		};
 
 		/**
-		 * Save new issue
+		 * Save issue
+		 */
+		function saveIssue () {
+			var viewpointPromise = $q.defer(),
+				screenShotPromise = $q.defer(),
+				data;
+
+			// Get the viewpoint
+			self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
+			viewpointPromise.promise.then(function (viewpoint) {
+				if (savedScreenShot !== null) {
+					if (self.multiData !== null) {
+						// Create a group of selected objects
+						data = {name: self.issueData.name, color: [255, 0, 0], parents: self.multiData};
+						UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
+							doSaveIssue(viewpoint, savedScreenShot, response.data._id);
+						});
+					}
+					else {
+						doSaveIssue(viewpoint, savedScreenShot);
+					}
+				}
+				else {
+					// Get a screen shot if not already created
+					self.sendEvent({type: EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
+					screenShotPromise.promise.then(function (screenShot) {
+						if (self.multiData !== null) {
+							// Create a group of selected objects
+							data = {name: self.issueData.name, color: [255, 0, 0], parents: self.multiData};
+							UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
+								doSaveIssue(viewpoint, screenShot, response.data._id);
+							});
+						}
+						else {
+							doSaveIssue(viewpoint, screenShot);
+						}
+					});
+				}
+			});
+		}
+
+		/**
+		 * Send new issue data to server
 		 * @param viewpoint
 		 * @param screenShot
 		 * @param groupId
 		 */
-		function saveIssue (viewpoint, screenShot, groupId) {
+		function doSaveIssue (viewpoint, screenShot, groupId) {
 			var	savePromise,
 				issue;
 
@@ -12024,32 +12053,45 @@ angular.module('3drepo')
 		}
 
 		/**
-		 * Add comment to issue
-		 * @param viewpoint
+		 * Update an existing issue
 		 */
-		function saveComment (viewpoint) {
+		function updateIssue () {
+			IssuesService.updateIssue(self.issueData, self.issueData.priority, self.issueData.status)
+				.then(function (data) {console.log(data);});
+		}
+
+		/**
+		 * Add comment to issue
+		 */
+		function saveComment () {
 			var	savePromise,
 				screenShot,
-				viewpointToUse;
+				viewpointToUse,
+				viewpointPromise = $q.defer();
 
 			// If there is a saved screen shot use the current viewpoint, else the issue viewpoint
 			// Remove base64 header text from screen shot and add to viewpoint
 			if (angular.isDefined(self.commentThumbnail)) {
-				viewpointToUse = viewpoint;
-				screenShot = savedScreenShot.substring(savedScreenShot.indexOf(",") + 1);
-				viewpoint.screenshot = screenShot;
+				// Get the viewpoint
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
+				viewpointPromise.promise.then(function (viewpoint) {
+					screenShot = savedScreenShot.substring(savedScreenShot.indexOf(",") + 1);
+					viewpoint.screenshot = screenShot;
+					// Save
+					savePromise = IssuesService.saveComment(self.issueData, self.comment, viewpointToUse);
+					savePromise.then(function (data) {console.log(data);});
+				});
 			}
 			else {
+				// Use issue viewpoint
 				viewpointToUse = self.issueData.viewpoint;
 				if (viewpointToUse.hasOwnProperty("screenshot")) {
 					delete viewpointToUse.screenshot;
 				}
+				// save
+				savePromise = IssuesService.saveComment(self.issueData, self.comment, viewpointToUse);
+				savePromise.then(function (data) {console.log(data);});
 			}
-
-			savePromise = IssuesService.saveComment(self.issueData, self.comment, viewpointToUse);
-			savePromise.then(function (data) {
-				console.log(data);
-			});
 		}
 
 		/**
@@ -13911,7 +13953,6 @@ angular.module('3drepo')
 		 * @param issueId
 		 */
 		function deselectPin (issueId) {
-			console.log(456);
 			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, {
 				id: issueId,
 				colours: [[0.5, 0, 0]]
@@ -14361,6 +14402,20 @@ angular.module('3drepo')
 				});
 
 			return deferred.promise;
+		};
+
+		/**
+		 * Update issue
+		 * @param issue
+		 * @param priority
+		 * @param status
+		 * @returns {*}
+		 */
+		obj.updateIssue = function (issue, priority, status) {
+			return doPut(issue, {
+				priority: priority,
+				status: status
+			});
 		};
 
 		/**

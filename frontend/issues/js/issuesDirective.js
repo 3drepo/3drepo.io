@@ -1083,7 +1083,6 @@
 		 * @param issueId
 		 */
 		function deselectPin (issueId) {
-			console.log(456);
 			EventService.send(EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR, {
 				id: issueId,
 				colours: [[0.5, 0, 0]]

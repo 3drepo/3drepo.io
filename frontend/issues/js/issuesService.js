@@ -155,6 +155,20 @@
 		};
 
 		/**
+		 * Update issue
+		 * @param issue
+		 * @param priority
+		 * @param status
+		 * @returns {*}
+		 */
+		obj.updateIssue = function (issue, priority, status) {
+			return doPut(issue, {
+				priority: priority,
+				status: status
+			});
+		};
+
+		/**
 		 * Handle PUT requests
 		 * @param issue
 		 * @param data

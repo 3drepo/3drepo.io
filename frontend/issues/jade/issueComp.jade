@@ -20,11 +20,11 @@ div(layout="column", tabindex="0", tdr-focus="true")
 	.issueCompItemContainer(layout="row")
 		md-input-container.issueCompItemStatus(flex="30")
 			label Priority
-			md-select(ng-model="$ctrl.issueData.priority", ng-change="$ctrl.setStatusIcon()", ng-disabled="$ctrl.data")
+			md-select(ng-model="$ctrl.issueData.priority", ng-change="$ctrl.statusChange()", ng-disabled="!$ctrl.canUpdate")
 				md-option(ng-repeat="priority in $ctrl.priorities", value="{{priority.value}}") {{priority.label}}
 		md-input-container.issueCompItemStatus(flex)
 			label Status
-			md-select(ng-model="$ctrl.issueData.status", ng-change="$ctrl.setStatusIcon()", ng-disabled="$ctrl.data")
+			md-select(ng-model="$ctrl.issueData.status", ng-change="$ctrl.statusChange()", ng-disabled="!$ctrl.canUpdate")
 				md-option(ng-repeat="status in $ctrl.statuses", value="{{status.value}}") {{status.label}}
 		md-input-container(flex)
 			label Type
@@ -61,18 +61,11 @@ div(layout="column", tabindex="0", tdr-focus="true")
 	.issueCompItemContainer(layout="column", layout-align="start", flex, ng-if="$ctrl.data")
 		md-input-container.issueComp(flex)
 			label Comment
-			textarea(ng-model="$ctrl.comment", ng-required="$ctrl.data", ng-change="$ctrl.commentChange()")
+			textarea(ng-model="$ctrl.comment", ng-change="$ctrl.commentChange()")
 		.issueCompThumbnail(layout="row", layout-align="center", ng-if="$ctrl.commentThumbnail", ng-click="$ctrl.showThumbnail()")
 			img(ng-src="{{$ctrl.commentThumbnail}}")
 
 	// Footer
-	//issues-footer(
-		send-event="$ctrl.sendEvent({type: type, value: value})"
-		event="$ctrl.event"
-		submit-disabled="$ctrl.submitDisabled"
-		new-issue="!$ctrl.data"
-		submit="$ctrl.submit()"
-		screen-shot-save="$ctrl.screenShotSave({screenShot: screenShot})")
 	.issueCompItemContainer(layout="row", layout-align="space-between center")
 		div
 			md-button.md-icon-button(
@@ -88,8 +81,8 @@ div(layout="column", tabindex="0", tdr-focus="true")
 				md-tooltip(md-direction="bottom") Submit
 				md-icon.angular-material-icons save
 
+	// Multi and Pin
 	div(ng-switch="$ctrl.action")
-		// Multi
 		issues-multi(
 		ng-switch-when="multi"
 		account="$ctrl.account"
@@ -100,7 +93,7 @@ div(layout="column", tabindex="0", tdr-focus="true")
 		send-event="$ctrl.sendEvent({type: type, value: value})"
 		event="$ctrl.event"
 		set-multi="$ctrl.setMulti({data: data})")
-		// Pin
+
 		issues-pin(
 		ng-switch-when="pin"
 		account="$ctrl.account"
