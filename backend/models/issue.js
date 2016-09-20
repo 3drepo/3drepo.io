@@ -1178,6 +1178,9 @@ schema.statics.getProjectBCF = function(projectId){
 
 schema.statics.importBCF = function(account, project, zipPath){
 	'use strict';
+
+	let self = this;
+
 	return new Promise((resolve, reject) => {
 
 		let files = {};
@@ -1191,6 +1194,8 @@ schema.statics.importBCF = function(account, project, zipPath){
 			zipfile.readEntry();
 
 			zipfile.on('entry', entry => handleEntry(zipfile, entry));
+
+			zipfile.on('error', err => reject(err));
 
 			zipfile.on('end', () => {
 
@@ -1317,6 +1322,8 @@ schema.statics.importBCF = function(account, project, zipPath){
 
 			}).then(viewpoints => {
 
+				let thumbnailGenerated;
+
 				Object.keys(viewpoints).forEach(guid => {
 
 					if(!viewpoints[guid].viewpointXml){
@@ -1344,28 +1351,44 @@ schema.statics.importBCF = function(account, project, zipPath){
 						content: viewpoints[guid].snapshot,
 					} : undefined;
 
-					issue.viewpoints.push({
+					//take the first screenshot as thumbnail
+					if(!thumbnailGenerated && screenshotObj){
+
+						issue.thumbnail = {
+							flag: 1,
+							content: self.resizeAndCropScreenshot(viewpoints[guid].snapshot, 120, 120, true)
+						};
+
+						thumbnailGenerated = true;
+					}
+
+					let vp = {
 						guid: utils.stringToUUID(guid),
 						extras: extras,
-						screenshot: screenshotObj,
-						up: [
+						screenshot: screenshotObj
+
+					};
+
+					if(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0]')){
+						vp.up = [
 							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].X[0]._')),
 							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Y[0]._')),
 							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Z[0]._'))
 						],
-						view_dir: [
+						vp.view_dir = [
 							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].X[0]._')),
 							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Y[0]._')),
 							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Z[0]._'))
 						],
-						look_at:[
+						vp.look_at = [
 							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].X[0]._')),
 							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Y[0]._')),
 							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Z[0]._'))
 						],
-						fov: parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._'))
+						vp.fov = parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._'))
+					}
 
-					});
+					issue.viewpoints.push(vp);
 				});
 
 				return issue.save();
@@ -1378,6 +1401,7 @@ schema.statics.importBCF = function(account, project, zipPath){
 		function handleEntry(zipfile, entry) {
 
 			let paths = entry.fileName.split('/');
+			console.log(paths);
 			let guid = paths[0] && utils.isUUID(paths[0]) && paths[0];
 
 			if(guid && !files[guid]){
