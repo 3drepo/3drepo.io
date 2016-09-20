@@ -178,7 +178,6 @@
 			var i, length,
 				position = [], normal = [];
 			vm.event = event;
-			console.log(event);
 
 			if ((event.type === EventService.EVENT.VIEWER.PICK_POINT) && (vm.toShow === "showAdd"))
 			{

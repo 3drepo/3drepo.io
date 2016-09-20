@@ -94,7 +94,7 @@
 					this.issueData = angular.copy(this.data);
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
-					this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshot);
+					this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshotSmall);
 					this.canUpdate = (this.account === this.issueData.owner);
 				}
 				else {
@@ -161,15 +161,31 @@
 			}
 		};
 
-		this.showScreenShot = function (screenShot) {
-			self.screenShot = UtilsService.getServerUrl(screenShot);
-			$mdDialog.show({
-				controller: function () {
-					this.dialogCaller = self;
-				},
-				controllerAs: "vm",
-				templateUrl: "issueScreenShotDialog.html"
-			});
+		/**
+		 * Show viewpoint and screen shot if there is one
+		 * @param viewpoint
+		 */
+		this.showViewpointAndScreenShot = function (viewpoint) {
+			var data;
+			if (angular.isDefined(viewpoint.screenshot)) {
+				// Viewpoint
+				data = {
+					position : viewpoint.position,
+					view_dir : viewpoint.view_dir,
+					up: viewpoint.up
+				};
+				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CAMERA, value: data});
+
+				// Screen shot
+				self.screenShot = UtilsService.getServerUrl(viewpoint.screenshot);
+				$mdDialog.show({
+					controller: function () {
+						this.dialogCaller = self;
+					},
+					controllerAs: "vm",
+					templateUrl: "issueScreenShotDialog.html"
+				});
+			}
 		};
 
 		/**
@@ -269,8 +285,7 @@
 		 * @param groupId
 		 */
 		function doSaveIssue (viewpoint, screenShot, groupId) {
-			var	savePromise,
-				issue;
+			var	issue;
 
 			// Remove base64 header text from screenShot and add to viewpoint
 			screenShot = screenShot.substring(screenShot.indexOf(",") + 1);
@@ -302,9 +317,11 @@
 			if (angular.isDefined(groupId)) {
 				issue.group_id = groupId;
 			}
-			savePromise = IssuesService.saveIssue(issue);
-			savePromise.then(function (data) {
-				console.log(data);
+			IssuesService.saveIssue(issue)
+				.then(function (response) {
+					self.data = response.data; // So that new changes are registered as updates
+					self.issueData = response.data;
+					self.descriptionThumbnail = UtilsService.getServerUrl(self.issueData.viewpoint.screenshotSmall);
 			});
 		}
 
@@ -320,9 +337,8 @@
 		 * Add comment to issue
 		 */
 		function saveComment () {
-			var	savePromise,
-				screenShot,
-				viewpointToUse,
+			var	screenShot,
+				issueViewpoint,
 				viewpointPromise = $q.defer();
 
 			// If there is a saved screen shot use the current viewpoint, else the issue viewpoint
@@ -334,20 +350,41 @@
 					screenShot = savedScreenShot.substring(savedScreenShot.indexOf(",") + 1);
 					viewpoint.screenshot = screenShot;
 					// Save
-					savePromise = IssuesService.saveComment(self.issueData, self.comment, viewpointToUse);
-					savePromise.then(function (data) {console.log(data);});
+					IssuesService.saveComment(self.issueData, self.comment, viewpoint)
+						.then(function (response) {
+							console.log(response);
+							addNewCommentToIssue(response.data.issue);
+						});
 				});
 			}
 			else {
-				// Use issue viewpoint
-				viewpointToUse = self.issueData.viewpoint;
-				if (viewpointToUse.hasOwnProperty("screenshot")) {
-					delete viewpointToUse.screenshot;
+				// Use issue viewpoint and delete any screen shot
+				issueViewpoint = angular.copy(self.issueData.viewpoint);
+				if (issueViewpoint.hasOwnProperty("screenshot")) {
+					delete issueViewpoint.screenshot;
 				}
-				// save
-				savePromise = IssuesService.saveComment(self.issueData, self.comment, viewpointToUse);
-				savePromise.then(function (data) {console.log(data);});
+				// Save
+				IssuesService.saveComment(self.issueData, self.comment, issueViewpoint)
+					.then(function (response) {
+						console.log(response);
+						addNewCommentToIssue(response.data.issue);
+					});
 			}
+		}
+
+		/**
+		 * Add newly created comment to current issue
+		 * @param comment
+		 */
+		function addNewCommentToIssue (comment) {
+			self.issueData.comments.push({
+				comment: comment.comment,
+				owner: comment.owner,
+				timeStamp: IssuesService.getPrettyTime(comment.created),
+				viewpoint: comment.viewpoint
+			});
+			delete self.comment;
+			delete self.commentThumbnail;
 		}
 
 		/**

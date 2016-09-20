@@ -33,19 +33,25 @@ div(layout="column", tabindex="0", tdr-focus="true")
 
 	// Description
 	.issueCompItemContainer(layout="column", layout-align="start", flex)
-		md-input-container.issueComp(flex, ng-if="!$ctrl.hideDescription")
-			label Description
-			textarea(ng-model="$ctrl.issueData.desc", ng-disabled="$ctrl.data")
-		.issueCompThumbnail(
-		layout="row"
-		layout-align="center"
-		ng-if="$ctrl.descriptionThumbnail"
-		ng-click="$ctrl.showScreenShot($ctrl.issueData.viewpoint.screenshot)")
-			img(ng-src="{{$ctrl.descriptionThumbnail}}")
+		#issueCompDescription(ng-click="$ctrl.showViewpointAndScreenShot($ctrl.issueData.viewpoint)")
+			md-input-container.issueComp(flex, ng-if="!$ctrl.hideDescription")
+				label Description
+				textarea(ng-model="$ctrl.issueData.desc", ng-disabled="$ctrl.data")
+			.issueCompThumbnail(
+			layout="row"
+			layout-align="center"
+			ng-if="$ctrl.descriptionThumbnail")
+				img(ng-src="{{$ctrl.descriptionThumbnail}}")
 
 	// Comments
 	.issueCompItemContainer(layout="column", layout-align="start", flex)
-		div(ng-repeat="comment in $ctrl.issueData.comments", layout="column", layout-align="start", flex)
+		div(
+		ng-repeat="comment in $ctrl.issueData.comments"
+		layout="column"
+		layout-align="start"
+		flex
+		ng-class="{issueCommentWithScreenShot: comment.viewpoint.screenshot}"
+		ng-click="$ctrl.showViewpointAndScreenShot(comment.viewpoint)")
 			label.issueCompCommentTitle {{comment.comment}}
 			.issueCompCommentOwner(ng-if="$ctrl.data", layout="row", layout-align="space-between", flex)
 				label {{comment.owner}}
@@ -53,8 +59,7 @@ div(layout="column", tabindex="0", tdr-focus="true")
 			.issueCompThumbnail(
 			layout="row"
 			layout-align="center"
-			ng-if="comment.viewpoint.screenshot"
-			ng-click="$ctrl.showScreenShot(comment.viewpoint.screenshot)")
+			ng-if="comment.viewpoint.screenshot")
 				img(ng-src="{{$ctrl.UtilsService.getServerUrl(comment.viewpoint.screenshot)}}")
 
 	// New comment

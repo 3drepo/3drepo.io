@@ -11838,7 +11838,7 @@ angular.module('3drepo')
 					this.issueData = angular.copy(this.data);
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
-					this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshot);
+					this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshotSmall);
 					this.canUpdate = (this.account === this.issueData.owner);
 				}
 				else {
@@ -11905,15 +11905,31 @@ angular.module('3drepo')
 			}
 		};
 
-		this.showScreenShot = function (screenShot) {
-			self.screenShot = UtilsService.getServerUrl(screenShot);
-			$mdDialog.show({
-				controller: function () {
-					this.dialogCaller = self;
-				},
-				controllerAs: "vm",
-				templateUrl: "issueScreenShotDialog.html"
-			});
+		/**
+		 * Show viewpoint and screen shot if there is one
+		 * @param viewpoint
+		 */
+		this.showViewpointAndScreenShot = function (viewpoint) {
+			var data;
+			if (angular.isDefined(viewpoint.screenshot)) {
+				// Viewpoint
+				data = {
+					position : viewpoint.position,
+					view_dir : viewpoint.view_dir,
+					up: viewpoint.up
+				};
+				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CAMERA, value: data});
+
+				// Screen shot
+				self.screenShot = UtilsService.getServerUrl(viewpoint.screenshot);
+				$mdDialog.show({
+					controller: function () {
+						this.dialogCaller = self;
+					},
+					controllerAs: "vm",
+					templateUrl: "issueScreenShotDialog.html"
+				});
+			}
 		};
 
 		/**
@@ -12013,8 +12029,7 @@ angular.module('3drepo')
 		 * @param groupId
 		 */
 		function doSaveIssue (viewpoint, screenShot, groupId) {
-			var	savePromise,
-				issue;
+			var	issue;
 
 			// Remove base64 header text from screenShot and add to viewpoint
 			screenShot = screenShot.substring(screenShot.indexOf(",") + 1);
@@ -12046,9 +12061,11 @@ angular.module('3drepo')
 			if (angular.isDefined(groupId)) {
 				issue.group_id = groupId;
 			}
-			savePromise = IssuesService.saveIssue(issue);
-			savePromise.then(function (data) {
-				console.log(data);
+			IssuesService.saveIssue(issue)
+				.then(function (response) {
+					self.data = response.data; // So that new changes are registered as updates
+					self.issueData = response.data;
+					self.descriptionThumbnail = UtilsService.getServerUrl(self.issueData.viewpoint.screenshotSmall);
 			});
 		}
 
@@ -12064,9 +12081,8 @@ angular.module('3drepo')
 		 * Add comment to issue
 		 */
 		function saveComment () {
-			var	savePromise,
-				screenShot,
-				viewpointToUse,
+			var	screenShot,
+				issueViewpoint,
 				viewpointPromise = $q.defer();
 
 			// If there is a saved screen shot use the current viewpoint, else the issue viewpoint
@@ -12078,20 +12094,41 @@ angular.module('3drepo')
 					screenShot = savedScreenShot.substring(savedScreenShot.indexOf(",") + 1);
 					viewpoint.screenshot = screenShot;
 					// Save
-					savePromise = IssuesService.saveComment(self.issueData, self.comment, viewpointToUse);
-					savePromise.then(function (data) {console.log(data);});
+					IssuesService.saveComment(self.issueData, self.comment, viewpoint)
+						.then(function (response) {
+							console.log(response);
+							addNewCommentToIssue(response.data.issue);
+						});
 				});
 			}
 			else {
-				// Use issue viewpoint
-				viewpointToUse = self.issueData.viewpoint;
-				if (viewpointToUse.hasOwnProperty("screenshot")) {
-					delete viewpointToUse.screenshot;
+				// Use issue viewpoint and delete any screen shot
+				issueViewpoint = angular.copy(self.issueData.viewpoint);
+				if (issueViewpoint.hasOwnProperty("screenshot")) {
+					delete issueViewpoint.screenshot;
 				}
-				// save
-				savePromise = IssuesService.saveComment(self.issueData, self.comment, viewpointToUse);
-				savePromise.then(function (data) {console.log(data);});
+				// Save
+				IssuesService.saveComment(self.issueData, self.comment, issueViewpoint)
+					.then(function (response) {
+						console.log(response);
+						addNewCommentToIssue(response.data.issue);
+					});
 			}
+		}
+
+		/**
+		 * Add newly created comment to current issue
+		 * @param comment
+		 */
+		function addNewCommentToIssue (comment) {
+			self.issueData.comments.push({
+				comment: comment.comment,
+				owner: comment.owner,
+				timeStamp: IssuesService.getPrettyTime(comment.created),
+				viewpoint: comment.viewpoint
+			});
+			delete self.comment;
+			delete self.commentThumbnail;
 		}
 
 		/**
@@ -13048,7 +13085,6 @@ angular.module('3drepo')
 			var i, length,
 				position = [], normal = [];
 			vm.event = event;
-			console.log(event);
 
 			if ((event.type === EventService.EVENT.VIEWER.PICK_POINT) && (vm.toShow === "showAdd"))
 			{
@@ -14386,7 +14422,6 @@ angular.module('3drepo')
 
 			$http.post(url, issue, config)
 				.then(function successCallback(response) {
-					console.log(response);
 					/*
 					response.data.issue._id = response.data.issue_id;
 					response.data.issue.account = issue.account;
@@ -14398,7 +14433,7 @@ angular.module('3drepo')
 					response.data.issue.title = generateTitle(response.data.issue);
 					self.removePin();
 					*/
-					deferred.resolve(response.data.issue);
+					deferred.resolve(response);
 				});
 
 			return deferred.promise;
@@ -14438,7 +14473,7 @@ angular.module('3drepo')
 
 			$http.put(url, data, config)
 				.then(function (response) {
-					deferred.resolve(response.data);
+					deferred.resolve(response);
 				});
 			return deferred.promise;
 		}

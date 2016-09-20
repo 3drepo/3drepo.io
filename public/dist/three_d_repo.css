@@ -1734,17 +1734,15 @@ issues-list-item #issuesListItemEnter md-icon {
 }
 
 issues-list-item .issueListItemThumbnail {
-  padding-right: 10px;
-}
-issues-list-item .issueListItemThumbnail img {
-  height: 120px;
-  position: absolute;
-  clip: rect(0px, 250px, 120px, 140px);
+  margin-left: -15px;
 }
 
 /** Issue Comp ********************************************************************************************************/
 issue-comp .issueCompItemContainer {
   padding: 10px;
+}
+issue-comp .issueCompItemContainer div {
+  outline: none;
 }
 
 issue-comp #issueCompStatus {
@@ -1788,6 +1786,17 @@ issue-comp .issueCompCommentOwner label {
 issue-comp .issueCompCommentTitle {
   margin: 10px 0 5px;
 }
+
+issue-comp .issueCommentWithScreenShot:hover,
+issue-comp #issueCompDescription:hover {
+  background: rgba(0,69,148,.1);
+  cursor: pointer;
+}
+issue-comp .issueCommentWithScreenShot *:hover,
+issue-comp #issueCompDescription *:hover {
+  cursor: pointer;
+}
+
 
 /** Issue Screen Shot  ************************************************************************************************/
 #issueScreenShotDialog {

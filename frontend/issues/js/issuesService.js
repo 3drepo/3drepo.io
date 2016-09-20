@@ -136,7 +136,6 @@
 
 			$http.post(url, issue, config)
 				.then(function successCallback(response) {
-					console.log(response);
 					/*
 					response.data.issue._id = response.data.issue_id;
 					response.data.issue.account = issue.account;
@@ -148,7 +147,7 @@
 					response.data.issue.title = generateTitle(response.data.issue);
 					self.removePin();
 					*/
-					deferred.resolve(response.data.issue);
+					deferred.resolve(response);
 				});
 
 			return deferred.promise;
@@ -188,7 +187,7 @@
 
 			$http.put(url, data, config)
 				.then(function (response) {
-					deferred.resolve(response.data);
+					deferred.resolve(response);
 				});
 			return deferred.promise;
 		}
