@@ -30,7 +30,8 @@
 				project:  "=",
 				branch:   "=",
 				revision: "=",				
-                position: "@"
+                position: "@",
+				keysDown: "="
             },
             controller: PanelCtrl,
             controllerAs: "vm",

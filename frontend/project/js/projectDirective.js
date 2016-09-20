@@ -50,7 +50,11 @@
 			issueArea,
 			issuesCardIndex = 0;
 
+		/*
+		 * Init
+		 */
 		vm.pointerEvents = "auto";
+		vm.keysDown = [];
 
 		/*
 		 * Get the project element
@@ -108,7 +112,7 @@
 		 panelCard.left.push({
 			 type: "tree",
 			 title: "Tree",
-			 show: true,
+			 show: false,
 			 help: "Model elements shown in a tree structure",
 			 icon: "device_hub",
 			 minHeight: 80,
@@ -118,6 +122,7 @@
 			 ]
 		 });
 
+		/*
 		panelCard.left.push({
 			type: "groups",
 			title: "Groups",
@@ -139,6 +144,7 @@
 			],
 			add: true
 		});
+		*/
 
 		panelCard.left.push({
 			type: "clip",
@@ -265,6 +271,35 @@
 					element.remove();
 				}
 			}
-		})
+		});
+
+		/**
+		 * Keep a list of keys held down
+		 * For changes to be registered by directives and especially components the list needs to be recreated
+		 *
+		 * @param event
+		 */
+		vm.keyAction = function (event) {
+			var i;
+			// Recreate list
+			var tmp = vm.keysDown;
+			delete vm.keysDown;
+			vm.keysDown = angular.copy(tmp);
+
+			// Update list, but avoid repeat
+			if (event.type === "keydown") {
+				if (vm.keysDown.indexOf(event.which) === -1) {
+					vm.keysDown.push(event.which);
+				}
+			}
+			else if (event.type === "keyup") {
+				// Remove all instances of the key (multiple instances can happen if keyup wasn't registered)
+				for (i = (vm.keysDown.length - 1); i >= 0; i -= 1) {
+					if (vm.keysDown[i] === event.which) {
+						vm.keysDown.splice(i, 1);
+					}
+				}
+			}
+		};
 	}
 }());

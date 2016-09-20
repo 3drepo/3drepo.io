@@ -1,0 +1,32 @@
+.issueCompItemContainer(layout="row", layout-align="space-between center")
+	div
+		md-button.md-icon-button(
+		ng-repeat="action in $ctrl.actions"
+		aria-label="{{action.icon}}"
+		ng-click="$ctrl.doAction($index)"
+		ng-disabled="action.disabled")
+			md-tooltip(md-direction="bottom") {{action.label}}
+			md-icon.angular-material-icons(style="color:{{action.color}}") {{action.icon}}
+
+	div
+		md-button.md-fab.md-mini(aria-label="Submit", ng-disabled="$ctrl.submitDisabled", ng-click="$ctrl.doSubmit()")
+			md-tooltip(md-direction="bottom") Submit
+			md-icon.angular-material-icons save
+
+div(ng-switch="$ctrl.action")
+	// Multi
+	issues-multi(
+	ng-switch-when="multi"
+	account="vm.account"
+	project="vm.project"
+	selected-object="vm.selectedObject"
+	keys-down="vm.keysDown"
+	clear="vm.clearMulti"
+	send-event="vm.sendEvent(type, value)")
+	// Pin
+	issues-pin(
+	ng-switch-when="pin"
+	account="$ctrl.account"
+	project="$ctrl.project"
+	send-event="$ctrl.sendEvent(type, value)"
+	event="$ctrl.event")

@@ -1,0 +1,25 @@
+md-toolbar
+	.md-toolbar-tools
+		md-button.md-icon-button
+			md-icon.angular-material-icons(aria-label="Screen Shot") camera_alt
+		h2 Screen Shot
+		span(flex)
+		md-button.md-icon-button(ng-click="$ctrl.closeDialog()")
+			md-icon.angular-material-icons(aria-label="Close dialog") close
+md-content#issueScreenShotContent
+	img#issueScreenShotImage(ng-src="{{$ctrl.screenShotUse}}")
+	div(ng-if="!$ctrl.screenShot")
+		canvas#scribbleCanvas
+		#issueScreenShotActions(layout="row")
+			md-button.md-fab.md-mini(
+			ng-repeat="action in $ctrl.actions"
+			aria-label="{{action.icon}}"
+			ng-click="$ctrl.doAction($index)"
+			style="background:{{action.color}}")
+				md-tooltip(md-direction="bottom") {{action.label}}
+				md-icon.angular-material-icons(ng-if="action.icon.indexOf('fa fa-') === -1") {{action.icon}}
+				md-icon#issueScreenShotFAIcon(ng-if="action.icon.indexOf('fa fa-') !== -1", class="fa fa-eraser")
+			md-button.md-fab.md-mini.md-primary(ng-click="$ctrl.save()")
+				md-icon.angular-material-icons(aria-label="Save") save
+
+canvas#screenShotCanvas

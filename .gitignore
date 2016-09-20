@@ -61,5 +61,5 @@ public/dist
 tools/release/tmp
 tools/release/*.exe
 
-#legal pages
+#legal
 jade/legal

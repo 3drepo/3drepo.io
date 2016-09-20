@@ -1,0 +1,109 @@
+div(layout="column", tabindex="0", tdr-focus="true")
+	// Title
+	.issueCompItemContainer(layout="column", layout-align="start", flex)
+		md-icon.angular-material-icons#issueCompStatus(style="color:{{$ctrl.statusIcon.colour}}") {{$ctrl.statusIcon.icon}}
+		md-input-container.issueComp(flex)
+			label Title
+			input(
+			type="text"
+			ng-model="$ctrl.issueData.name"
+			ng-change="$ctrl.nameChange()"
+			ng-disabled="$ctrl.data"
+			aria-label="Title"
+			tdr-focus="true"
+			required)
+		.issueCompIssueOwner(ng-if="$ctrl.data", layout="row", layout-align="space-between", flex)
+			label {{$ctrl.data.owner}}
+			label {{$ctrl.data.timeStamp}}
+
+	// Status
+	.issueCompItemContainer(layout="row")
+		md-input-container.issueCompItemStatus(flex="30")
+			label Priority
+			md-select(ng-model="$ctrl.issueData.priority", ng-change="$ctrl.setStatusIcon()", ng-disabled="$ctrl.data")
+				md-option(ng-repeat="priority in $ctrl.priorities", value="{{priority.value}}") {{priority.label}}
+		md-input-container.issueCompItemStatus(flex)
+			label Status
+			md-select(ng-model="$ctrl.issueData.status", ng-change="$ctrl.setStatusIcon()", ng-disabled="$ctrl.data")
+				md-option(ng-repeat="status in $ctrl.statuses", value="{{status.value}}") {{status.label}}
+		md-input-container(flex)
+			label Type
+			md-select(ng-model="$ctrl.issueData.topic_type", ng-disabled="$ctrl.data")
+				md-option(ng-repeat="type in $ctrl.topic_types", value="{{type.value}}") {{type.label}}
+
+	// Description
+	.issueCompItemContainer(layout="column", layout-align="start", flex)
+		md-input-container.issueComp(flex, ng-if="!$ctrl.hideDescription")
+			label Description
+			textarea(ng-model="$ctrl.issueData.desc", ng-disabled="$ctrl.data")
+		.issueCompThumbnail(
+		layout="row"
+		layout-align="center"
+		ng-if="$ctrl.descriptionThumbnail"
+		ng-click="$ctrl.showScreenShot($ctrl.issueData.viewpoint.screenshot)")
+			img(ng-src="{{$ctrl.descriptionThumbnail}}")
+
+	// Comments
+	.issueCompItemContainer(layout="column", layout-align="start", flex)
+		div(ng-repeat="comment in $ctrl.issueData.comments", layout="column", layout-align="start", flex)
+			label.issueCompCommentTitle {{comment.comment}}
+			.issueCompCommentOwner(ng-if="$ctrl.data", layout="row", layout-align="space-between", flex)
+				label {{comment.owner}}
+				label {{comment.timeStamp}}
+			.issueCompThumbnail(
+			layout="row"
+			layout-align="center"
+			ng-if="comment.viewpoint.screenshot"
+			ng-click="$ctrl.showScreenShot(comment.viewpoint.screenshot)")
+				img(ng-src="{{$ctrl.UtilsService.getServerUrl(comment.viewpoint.screenshot)}}")
+
+	// New comment
+	.issueCompItemContainer(layout="column", layout-align="start", flex, ng-if="$ctrl.data")
+		md-input-container.issueComp(flex)
+			label Comment
+			textarea(ng-model="$ctrl.comment", ng-required="$ctrl.data", ng-change="$ctrl.commentChange()")
+		.issueCompThumbnail(layout="row", layout-align="center", ng-if="$ctrl.commentThumbnail", ng-click="$ctrl.showThumbnail()")
+			img(ng-src="{{$ctrl.commentThumbnail}}")
+
+	// Footer
+	//issues-footer(
+		send-event="$ctrl.sendEvent({type: type, value: value})"
+		event="$ctrl.event"
+		submit-disabled="$ctrl.submitDisabled"
+		new-issue="!$ctrl.data"
+		submit="$ctrl.submit()"
+		screen-shot-save="$ctrl.screenShotSave({screenShot: screenShot})")
+	.issueCompItemContainer(layout="row", layout-align="space-between center")
+		div
+			md-button.md-icon-button(
+			ng-repeat="action in $ctrl.actions"
+			aria-label="{{action.icon}}"
+			ng-click="$ctrl.doAction($index)"
+			ng-disabled="action.disabled")
+				md-tooltip(md-direction="bottom") {{action.label}}
+				md-icon.angular-material-icons(style="color:{{action.color}}") {{action.icon}}
+
+		div
+			md-button.md-fab.md-mini(aria-label="Submit", ng-disabled="$ctrl.submitDisabled", ng-click="$ctrl.submit()")
+				md-tooltip(md-direction="bottom") Submit
+				md-icon.angular-material-icons save
+
+	div(ng-switch="$ctrl.action")
+		// Multi
+		issues-multi(
+		ng-switch-when="multi"
+		account="$ctrl.account"
+		project="$ctrl.project"
+		selected-object="$ctrl.selectedObject"
+		keys-down="$ctrl.keysDown"
+		clear="vm.clearMulti"
+		send-event="$ctrl.sendEvent({type: type, value: value})"
+		event="$ctrl.event")
+		// Pin
+		issues-pin(
+		ng-switch-when="pin"
+		account="$ctrl.account"
+		project="$ctrl.project"
+		send-event="$ctrl.sendEvent({type: type, value: value})"
+		event="$ctrl.event"
+		set-pin="$ctrl.setPin({data: data})")

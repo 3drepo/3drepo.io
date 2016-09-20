@@ -33,7 +33,8 @@
                 position: "=",
                 contentData: "=",
 				onHeightRequest: "&",
-				onShowFilter: "&"
+				onShowFilter: "&",
+				keysDown: "="
             },
             controller: PanelCardCtrl,
             controllerAs: "vm",
@@ -67,7 +68,7 @@
 				createCardContent();
 				createToolbarOptions();
 				createFilter();
-				createAdd();
+				//createAdd();
 				vm.statusIcon = vm.contentData.icon;
 			}
 		});
@@ -176,7 +177,8 @@
 				"account='vm.account' " +
 				"project='vm.project' " +
 				"branch='vm.branch' " +
-				"revision='vm.revision' ";
+				"revision='vm.revision' " +
+				"keys-down='vm.keysDown' ";
 
 			// Only add attributes when needed
 			if (vm.contentData.hasOwnProperty("options")) {
@@ -308,13 +310,13 @@
 			if (on) {
 				if (vm.contentData.type === "issues") {
 					showToolbarOptions(["filter", "menu"], false);
-					showToolbarOptions(["pin", "scribble", "erase"], true);
+					//showToolbarOptions(["pin", "scribble", "erase"], true);
 				}
 				EventService.send(EventService.EVENT.PANEL_CARD_ADD_MODE, {on: true, type: vm.contentData.type});
 			}
 			else {
 				if (vm.contentData.type === "issues") {
-					showToolbarOptions(["pin", "scribble", "erase"], false);
+					//showToolbarOptions(["pin", "scribble", "erase"], false);
 					showToolbarOptions(["filter", "menu"], true);
 				}
 				EventService.send(EventService.EVENT.PANEL_CARD_ADD_MODE, {on: false});

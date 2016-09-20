@@ -8,10 +8,21 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 			h3 {{vm.addAlertText}}
 			md-button.md-primary(ng-click="vm.closeAddAlert()") OK
 
-div(ng-switch="vm.toShow")
+#issuesAddButton(ng-if="vm.showAddButton", layout-margin)
+	md-button.md-accent.md-fab(aria-label="Add" ng-click="vm.editIssue()")
+		md-icon.angular-material-icons add
+
+#issuesContent(ng-switch="vm.toShow")
 	// Issues list
-	md-list(ng-switch-when="showIssues")
-		div(ng-repeat="issue in vm.issuesToShow")
+	div(ng-switch-when="showIssues", tabindex="0", tdr-focus="true")
+		issues-list-item(
+		ng-repeat="issue in vm.issuesToShow"
+		data="issue"
+		on-edit-issue="vm.editIssue(issue)"
+		select="vm.selectIssue"
+		on-select="vm.issueSelect(issue)")
+
+		//div(ng-repeat="issue in vm.issuesToShow")
 			.issueHeader
 				issue-header(
 					index="$index"
@@ -24,7 +35,17 @@ div(ng-switch="vm.toShow")
 			md-divider
 
 	// Issue
-	issue(
+	issue-comp(
+	ng-switch-when="showIssue"
+	account="vm.account"
+	project="vm.project"
+	data="vm.issueToEdit"
+	keys-down="vm.keysDown"
+	exit="vm.editIssueExit(issue)"
+	send-event="vm.sendEvent(type, value)"
+	event="vm.event"
+	pin-clicked="vm.pinClicked({issueId: issueId})")
+	//issue(
 		ng-switch-when="showIssue"
 		index="vm.selectedIndex"
 		data="vm.selectedIssue"
@@ -37,18 +58,32 @@ div(ng-switch="vm.toShow")
 		on-toggle-close-issue="vm.toggleCloseIssue(issue)")
 
 	// Add issue
-	#issuesAddContainer(ng-switch-when="showAdd")
+	//#issuesAddContainer(ng-switch-when="showAdd")
+		// Title
 		md-input-container.md-block(md-no-float="")
 			label Title
-			input#issueAddTitle(ng-model="vm.title")
+			input#issueAddTitle(ng-model="vm.title" tdr-focus="true")
+		// Comment
 		md-input-container.md-block(md-no-float="")
 			label Comment
 			textarea(ng-model="vm.comment")
+		// Save
 		div(layout="row", layout-align="start center")
 			md-button.md-raised.md-accent(ng-click="vm.saveIssue()", ng-disabled="vm.saveIssueDisabled") Save
 			md-progress-circular(md-diameter="20px", ng-if="vm.savingIssue")
-			md-button.md-primary(ng-click="vm.cancelAddIssue()") Cancel
+			md-button.md-accent(ng-click="vm.cancelAddIssue()") Cancel
+		// Multi component
+		issues-multi(
+		account="vm.account"
+		project="vm.project"
+		selected-object="vm.selectedObject"
+		keys-down="vm.keysDown"
+		clear="vm.clearMulti"
+		send-event="vm.sendEvent(type, value)")
+		// Footer
+		issues-footer
 
 	// Info
 	.cardInfo(ng-switch-when="showInfo")
 		p {{vm.issuesInfo}}
+

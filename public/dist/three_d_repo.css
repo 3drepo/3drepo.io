@@ -1431,7 +1431,7 @@ md-dialog md-toolbar {
 
 issues #issuesAddContainer {
   position: relative;
-  margin: 10px;
+  margin: 15px;
 }
 issues #issuesAddContainer .md-dialog-container {
   top: 0 !important;
@@ -1454,10 +1454,6 @@ issues .issueHeader {
 issues .issueHeader:hover {
   background-color: #EEEEEE;
   cursor: pointer;
-}
-
-issues textarea {
-  min-height: 70px !important;
 }
 
 issues md-list {
@@ -1493,6 +1489,18 @@ issues #addAlert #addAlertBackground #addAlertInfo {
 }
 issues #addAlert #addAlertBackground #addAlertInfo .md-button {
   background: #EEEEEE;
+}
+
+issues #issuesAddButton {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+issues #issuesContent {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /** Issue *************************************************************************************************************/
@@ -1666,6 +1674,156 @@ issue-area #scribbleDisplay img {
   left: -200%;
   right: -200%;
 }
+
+/** Issues List Item **************************************************************************************************/
+issues-list-item {
+  display: block;
+  height: 150px;
+  position: relative;
+}
+issues-list-item:hover {
+  background: rgba(0,69,148,.1);
+  cursor: pointer;
+}
+
+issues-list-item div:first-child {
+  outline: none;
+}
+
+issues-list-item #issuesListItemContent {
+  padding: 10px;
+}
+
+issues-list-item #issuesListItemTitle {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+issues-list-item #issuesListItemTitle,
+issues-list-item #issuesListItemInfo {
+  margin-bottom: 10px;
+}
+
+issues-list-item #issuesListItemInfo label,
+issues-list-item #issuesListItemDescription label {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+issues-list-item #issuesListItemDescription {
+  height: 70px;
+}
+issues-list-item #issuesListItemDescription label {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+issues-list-item #issuesListItemEnter {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50px;
+  height: 100%;
+  background: rgb(0, 69, 148);
+  outline: none;
+}
+issues-list-item #issuesListItemEnter md-icon {
+  color: #FFFFFF;
+}
+
+issues-list-item .issueListItemThumbnail {
+  padding-right: 10px;
+}
+issues-list-item .issueListItemThumbnail img {
+  height: 120px;
+  position: absolute;
+  clip: rect(0px, 250px, 120px, 140px);
+}
+
+/** Issue Comp ********************************************************************************************************/
+issue-comp .issueCompItemContainer {
+  padding: 10px;
+}
+
+issue-comp #issueCompStatus {
+  margin: 0 0 10px;
+}
+
+issue-comp textarea {
+  min-height: 70px !important;
+}
+
+issue-comp .issueCompItemStatus {
+  margin-right: 5px;
+}
+
+issue-comp .issueCompThumbnail {
+  position: relative;
+  margin-bottom: 120px;
+  outline: none;
+}
+issue-comp .issueCompThumbnail:hover {
+  cursor: pointer;
+}
+issue-comp .issueCompThumbnail img {
+  position: absolute;
+  width: 365px;
+}
+
+issue-comp .issueCompIssueOwner {
+  margin-top: -30px;
+}
+
+issue-comp .issueCompCommentOwner {
+  margin-bottom: 10px;
+}
+
+issue-comp .issueCompIssueOwner label,
+issue-comp .issueCompCommentOwner label {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+issue-comp .issueCompCommentTitle {
+  margin: 10px 0 5px;
+}
+
+/** Issue Screen Shot  ************************************************************************************************/
+#issueScreenShotDialog {
+  width:80%;
+  height: calc(80% + 40px); /* 40px is the height of the dialog toolbar */
+  max-height: calc(80% + 40px);
+  overflow: hidden;
+}
+
+issues-screen-shot #issueScreenShotActions {
+  position: absolute;
+  bottom: 5px;
+  display: block;
+  width: 176px;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+
+issues-screen-shot #issueScreenShotFAIcon {
+  font-size: 24px;
+}
+
+issues-screen-shot #issueScreenShotContent {
+  overflow: hidden;
+}
+
+issues-screen-shot #scribbleCanvas {
+  position: absolute;
+  top: 0;
+}
+
+issues-screen-shot #issueScreenShotImage {
+  width: 100%;
+}
+
 login {
   position: absolute;
   top: 0;
@@ -1850,26 +2008,6 @@ panel-card #helpButton {
 panel-card .statusIcon {
   outline: none;
   width: 30px;
-}
-
-panel-card .cardInfo {
-  text-align: center;
-  padding: 15px;
-  background: rgba(0,69,148,.1);
-  margin: 15px;
-  border-radius: 4px;
-}
-panel-card .cardInfo p {
-  margin: 0;
-  color: rgba(0, 0, 0, 0.7);
-  word-wrap: break-word;
-}
-
-panel-card .cardInfo md-icon {
-  margin: 0;
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
 }
 
 /** Panel Card Filter ****************************************************************************************************/
