@@ -13,7 +13,7 @@ div(layout="row", layout-align="start center", flex)
 
 	.projectRight(layout="row", layout-align="start center")
 		.projectUploadInfo(ng-if="vm.project.uploading", layout="row", layout-align="start center")
-			p.projectUploadFilename {{vm.uploadedFile.file.name}}
+			p.projectUploadFilename {{vm.uploadFileName}}
 			p.projectUploadInfo(ng-if="vm.showFileUploadInfo") {{vm.fileUploadInfo}}
 			md-progress-circular.projectUploadIcon(md-mode="indeterminate", md-diameter="15", ng-if="vm.showUploading")
 

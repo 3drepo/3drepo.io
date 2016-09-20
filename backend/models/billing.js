@@ -21,7 +21,6 @@ var moment = require('moment');
 var fs = require('fs');
 var jade = require('jade');
 var phantom = require('phantom');
-var utils = require("../utils");
 var config = require('../config');
 var Subscriptions = require('./subscription');
 var systemLogger = require("../logger.js").systemLogger;
@@ -141,7 +140,8 @@ schema.methods.generatePDF = function(){
 
 	return new Promise((resolve, reject) => {
 		
-		jade.renderFile('./jade/invoice.jade', {billing : cleaned, baseURL: utils.getBaseURL()}, function(err, html){
+		let useNonPublicPort = true;
+		jade.renderFile('./jade/invoice.jade', {billing : cleaned, baseURL: config.getBaseURL(useNonPublicPort)}, function(err, html){
 			if(err){
 				reject(err);
 			} else {

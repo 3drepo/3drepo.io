@@ -461,7 +461,7 @@ function createFederatedProject(account, project, subProjects){
 		}
 
 		addSubProjects.push(ProjectSetting.findById({account, project: subProject.project}, subProject.project).then(setting => {
-			if(setting.federate){
+			if(setting && setting.federate){
 				return Promise.reject(responseCodes.FED_MODEL_IS_A_FED);
 
 			} else if(!federatedJSON.subProjects.find(o => o.database === subProject.database && o.project === subProject.project)) {
@@ -503,42 +503,52 @@ function getFullTree(account, project, branch, rev, username){
 	let revId, treeFileName;
 	let subTrees;
 	let status;
+	let history;
+	let getHistory;
 
-	return middlewares.hasReadAccessToProjectHelper(username, account, project).then(granted => {
+	if(rev && utils.isUUID(rev)){
 
-		if(granted && rev && utils.isUUID(rev)){
+		getHistory = History.findByUID({ account, project }, rev);
 
-			return History.findByUID({ account, project }, rev);
+	} else if (rev && !utils.isUUID(rev)) {
 
-		} else if (granted && rev && !utils.isUUID(rev)) {
+		getHistory = History.findByTag({ account, project }, rev);
 
-			return History.findByTag({ account, project }, rev);
+	} else if (branch) {
 
-		} else if (granted && branch) {
+		getHistory = History.findByBranch({ account, project }, branch);
+	}
 
-			return History.findByBranch({ account, project }, branch);
+	return getHistory.then(_history => {
 
-		} else {
-			status = 'NO_ACCESS';
-			return Promise.resolve();
-		}
+		history = _history;
+		return middlewares.hasReadAccessToProjectHelper(username, account, project);
 
-	}).then(history => {
+	}).then(granted => {
 
 		if(!history){
-			!status && (status = 'NOT_FOUND');
+
+			status = 'NOT_FOUND';
 			return Promise.resolve([]);
+
+		} else if (!granted) {
+
+			status = 'NO_ACCESS';
+			return Promise.resolve([]);
+		
+		} else {
+
+			revId = utils.uuidToString(history._id);
+			treeFileName = `/${account}/${project}/revision/${revId}/fulltree.json`;
+
+			let filter = {
+				type: "ref",
+				_id: { $in: history.current }
+			};
+
+			return Ref.find({ account, project }, filter);
+
 		}
-
-		revId = utils.uuidToString(history._id);
-		treeFileName = `/${account}/${project}/revision/${revId}/fulltree.json`;
-
-		let filter = {
-			type: "ref",
-			_id: { $in: history.current }
-		};
-
-		return Ref.find({ account, project }, filter);
 
 	}).then(refs => {
 

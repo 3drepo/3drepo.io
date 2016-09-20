@@ -5501,6 +5501,7 @@ var ViewerManager = {};
 				promise = UtilsService.doPut(vm.newFederationData, vm.account + "/" + vm.newFederationData.project);
 				promise.then(function (response) {
 					console.log(response);
+					vm.federationOriginalData.subProjects = vm.newFederationData.subProjects;
 					vm.closeDialog();
 				});
 			}
@@ -5586,21 +5587,24 @@ var ViewerManager = {};
 		 * @param projectIndex
 		 */
 		function setupEditFederation (event, projectIndex) {
-			var i, j, k, iLength, jLength, kLength;
+			var i, j, iLength, jLength;
 
 			vm.showRemoveWarning = false;
 
 			vm.userAccount = angular.copy(userAccount);
 			vm.federationOriginalData = vm.accountsToUse[0].fedProjects[projectIndex];
 			vm.newFederationData = angular.copy(vm.federationOriginalData);
+			if (!vm.newFederationData.hasOwnProperty("subProjects")) {
+				vm.newFederationData.subProjects = [];
+			}
 
 			// Disable projects in the projects list that are federated
-			for (j = 0, jLength = vm.userAccount.projects.length; j < jLength; j += 1) {
-				vm.userAccount.projects[j].federated = false;
+			for (i = 0, iLength = vm.userAccount.projects.length; i < iLength; i += 1) {
+				vm.userAccount.projects[i].federated = false;
 				if (vm.federationOriginalData.hasOwnProperty("subProjects")) {
-					for (k = 0, kLength = vm.federationOriginalData.subProjects.length; k < kLength; k += 1) {
-						if (vm.federationOriginalData.subProjects[k].project === vm.userAccount.projects[j].project) {
-							vm.userAccount.projects[j].federated = true;
+					for (j = 0, jLength = vm.federationOriginalData.subProjects.length; j < jLength; j += 1) {
+						if (vm.federationOriginalData.subProjects[j].project === vm.userAccount.projects[i].project) {
+							vm.userAccount.projects[i].federated = true;
 						}
 					}
 				}
@@ -6170,6 +6174,7 @@ var ViewerManager = {};
 					break;
 
 				case "upload":
+					vm.uploadErrorMessage = null;
 					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true);
 					//vm.uploadFile();
 					break;
@@ -6211,9 +6216,6 @@ var ViewerManager = {};
 			UtilsService.closeDialog();
 		};
 
-		vm.file;
-
-
 		/**
 		 * When users click select file
 		 */
@@ -6233,8 +6235,27 @@ var ViewerManager = {};
 		 */
 		vm.uploadFile = function () {
 			//vm.onUploadFile({project: vm.project});
-			vm.uploadedFile = {project: vm.project, file: vm.file.files[0], tag: vm.tag, desc: vm.desc};
-			vm.closeDialog();
+			
+			vm.uploadErrorMessage = null;
+
+			if(RevisionsService.isTagFormatInValid(vm.tag)){
+				vm.uploadErrorMessage = 'Invalid revision name';
+			} else {
+				getRevision().then(function(revisions){
+
+					revisions.forEach(function(rev){
+						if(rev.tag === vm.tag){
+							vm.uploadErrorMessage = 'Revision name already exists';
+						}
+					});
+
+					if(!vm.uploadErrorMessage){
+						vm.uploadedFile = {project: vm.project, file: vm.file.files[0], tag: vm.tag, desc: vm.desc};
+						vm.closeDialog();
+					}
+				});
+			}
+
 
 		};
 
@@ -6258,7 +6279,6 @@ var ViewerManager = {};
 			// Check the quota
 			promise = UtilsService.doGet(vm.account + ".json");
 			promise.then(function (response) {
-				console.log(response);
 				if (file.size > response.data.accounts[0].quota.spaceLimit) {
 					// Show the over quota dialog
 					UtilsService.showDialog("overQuotaDialog.html", $scope, null, true);
@@ -6280,6 +6300,8 @@ var ViewerManager = {};
 						});
 					}
 					else {
+
+						vm.uploadFileName = file.name;
 
 						formData = new FormData();
 						formData.append("file", file);
@@ -6391,9 +6413,12 @@ var ViewerManager = {};
 
 		function getRevision(){
 			if(!vm.revisions){
-				RevisionsService.listAll(vm.account, vm.project.name).then(function(revisions){
+				return RevisionsService.listAll(vm.account, vm.project.name).then(function(revisions){
 					vm.revisions = revisions;
+					return Promise.resolve(revisions);
 				});
+			} else {
+				return Promise.resolve(vm.revisions);
 			}
 		}
 
@@ -6440,9 +6465,9 @@ var ViewerManager = {};
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService"];
 
-	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService) {
+	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService) {
 		var vm = this,
 			// existingProjectToUpload,
 			// existingProjectFileUploader,
@@ -6493,6 +6518,9 @@ var ViewerManager = {};
 					vm.accounts[i].name = vm.accounts[i].account;
 					vm.accounts[i].showProjects = true;
 					vm.accounts[i].showProjectsIcon = "folder_open";
+					// Always show user account
+					// Don't show account if it doesn't have any projects - possible when user is a team member of a federation but not a member of a project in that federation!
+					vm.accounts[i].showAccount = ((i === 0) || (vm.accounts[i].projects.length !== 0));
 				}
 			}
 		});
@@ -6586,6 +6614,13 @@ var ViewerManager = {};
 			}
 
 			if (doSave) {
+
+				if(RevisionsService.isTagFormatInValid(vm.tag)){
+					vm.showNewProjectErrorMessage = true;
+					vm.newProjectErrorMessage = 'Invalid revision name';
+					return;
+				}
+
 				promise = AccountService.newProject(vm.newProjectData);
 				promise.then(function (response) {
 					console.log(response);
@@ -12176,7 +12211,8 @@ angular.module('3drepo')
 			selectedObjectId = null,
 			pickedPos = null,
 			pickedNorm = null,
-			pinHighlightColour = [1.0000, 0.7, 0.0];
+			pinHighlightColour = [1.0000, 0.7, 0.0],
+			issueViewerMoveComplete = false;
 
 		/*
 		 * Init
@@ -12193,6 +12229,7 @@ angular.module('3drepo')
 		vm.canAdd = true;
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
 		vm.savingIssue = false;
+		EventService.send(EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK, {callback: viewerMove});
 
 		/*
 		 * Get all the Issues
@@ -12693,8 +12730,10 @@ angular.module('3drepo')
 			}
 
 			// Wait for camera to stop before showing a scribble
+			issueViewerMoveComplete = false;
 			$timeout(function () {
 				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, issue: vm.selectedIssue});
+				issueViewerMoveComplete = true;
 			}, 1100);
 		};
 
@@ -12964,6 +13003,15 @@ angular.module('3drepo')
 			$timeout(function () {
 				($element[0].querySelector("#issueAddTitle")).select();
 			});
+		}
+
+		/**
+		 * If the issue has a scribble deselect it if the user moves the camera
+		 */
+		function viewerMove () {
+			if ((vm.selectedIssue !== null) && (vm.selectedIssue.scribble !== null) && issueViewerMoveComplete) {
+				vm.hideItem = true;
+			}
 		}
 	}
 }());
@@ -16711,7 +16759,14 @@ var Oculus = {};
 			});
 		}
 
-		return { listAll: listAll};
+		function isTagFormatInValid(tag){
+			return tag && !tag.match(server_config.tagRegExp);
+		}
+
+		return { 
+			listAll: listAll,
+			isTagFormatInValid: isTagFormatInValid
+		};
 	}
 }());
 
@@ -17339,6 +17394,7 @@ var Oculus = {};
 		 */
 		vm.expand = function (_id) {
 			var i, length,
+				j, jLength,
 				numChildren = 0,
 				index = -1,
 				endOfSplice = false,
@@ -17403,13 +17459,16 @@ var Oculus = {};
 								}
 							}
 
-							// Determine if child node has children
+							// A child node only "hasChildren", i.e. expandable, if any of it's children have a name
 							vm.nodesToShow[index].children[i].level = vm.nodesToShow[index].level + 1;
-							if("children" in vm.nodesToShow[index].children[i]) {
-								vm.nodesToShow[index].children[i].hasChildren = vm.nodesToShow[index].children[i].children.length > 0;
-							}
-							else {
-								vm.nodesToShow[index].children[i].hasChildren = false;
+							vm.nodesToShow[index].children[i].hasChildren = false;
+							if (("children" in vm.nodesToShow[index].children[i]) && (vm.nodesToShow[index].children[i].children.length > 0)) {
+								for (j = 0, jLength = vm.nodesToShow[index].children[i].children.length; j < jLength; j++) {
+									if (vm.nodesToShow[index].children[i].children[j].hasOwnProperty("name")) {
+										vm.nodesToShow[index].children[i].hasChildren = true;
+										break;
+									}
+								}
 							}
 
 							vm.nodesToShow.splice(index + i + 1, 0, vm.nodesToShow[index].children[i]);
@@ -17739,7 +17798,6 @@ var Oculus = {};
 		 */
 		vm.selectNode = function (node) {
 			// Remove highlight from the current selection and highlight this node if not the same
-			console.log(currentSelectedNode);
 			if (currentSelectedNode !== null) {
 				currentSelectedNode.selected = false;
 				if (currentSelectedNode._id === node._id) {
@@ -17872,7 +17930,6 @@ var Oculus = {};
 			else {
 				delete clickedShown[node._id];
 			}
-			console.log(clickedShown);
 		}
 
 		/**
