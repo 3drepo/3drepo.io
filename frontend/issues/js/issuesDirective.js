@@ -64,7 +64,7 @@
 			pickedPos = null,
 			pickedNorm = null,
 			pinHighlightColour = [1.0000, 0.7, 0.0],
-			issueViewerMoveComplete = false;
+			issueViewerMoveComplete = false,
 			selectedIssue = null,
 			selectedIssueIndex = null;
 
