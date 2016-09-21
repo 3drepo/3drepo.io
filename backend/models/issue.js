@@ -563,13 +563,13 @@ schema.statics.createIssue = function(dbColOptions, data){
 			issue.viewpoints.push(data.viewpoint);
 		}
 		
-		issue.scale = data.scale;
-		issue.position = data.position;
-		issue.norm = data.norm;
-		issue.creator_role = data.creator_role;
-		issue.assigned_roles = data.assigned_roles;
+		issue.scale = data.scale || issue.scale;
+		issue.position =  data.position || issue.position;
+		issue.norm = data.norm || issue.norm;
+		issue.creator_role = data.creator_role || issue.creator_role;
+		issue.assigned_roles = data.assigned_roles || issue.assigned_roles;
 
-		return issue.save().then(() => {
+		return issue.save().then(issue => {
 
 			if(group){
 				group.issue_id = issue._id;
@@ -1385,7 +1385,7 @@ schema.statics.importBCF = function(account, project, zipPath){
 							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Y[0]._')),
 							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Z[0]._'))
 						],
-						vp.fov = parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._'))
+						vp.fov = parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._'));
 					}
 
 					issue.viewpoints.push(vp);
