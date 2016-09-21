@@ -701,13 +701,7 @@ schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeig
 };
 
 schema.methods.updateAttr = function(attr, value){
-
-	if(this.isClosed()){
-		throw responseCodes.ISSUE_CLOSED_ALREADY;
-	} else {
-		this[attr] = value;
-	}
-	
+	this[attr] = value;
 };
 
 schema.methods.updateComment = function(commentIndex, data){
@@ -839,11 +833,7 @@ schema.methods.changeStatus = function(status){
 schema.methods.changePriority = function(priority){
 	'use strict';
 
-	if(this.isClosed()){
-
-		throw responseCodes.ISSUE_CLOSED_ALREADY;
-
-	} else if (priorityEnum.indexOf(priority) === -1){
+	if (priorityEnum.indexOf(priority) === -1){
 
 		throw responseCodes.ISSUE_INVALID_PRIORITY;
 
