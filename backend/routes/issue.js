@@ -97,19 +97,7 @@ function updateIssue(req, res, next){
 			return Promise.reject({ resCode: responseCodes.ISSUE_NOT_FOUND });
 		}
 
-		if(data.hasOwnProperty('topic_type')){
-			action = issue.updateAttr('topic_type', data.topic_type);
-
-		} else if(data.hasOwnProperty('desc')){
-			action = issue.updateAttr('desc', data.desc);
-
-		} else if(data.hasOwnProperty('priority')){
-			action = issue.changePriority(data.priority);
-
-		} else if(data.hasOwnProperty('status')){
-			action = issue.changeStatus(data.status);
-
-		} else if(data.hasOwnProperty('comment') && data.edit){
+		if(data.hasOwnProperty('comment') && data.edit){
 			action = issue.updateComment(data.commentIndex, data);
 
 		} else if(data.sealed) {
@@ -132,7 +120,13 @@ function updateIssue(req, res, next){
 			action = issue.save();
 
 		} else {
-			return Promise.reject({ 'message': 'unknown action' });
+			
+			data.hasOwnProperty('topic_type') && issue.updateAttr('topic_type', data.topic_type);
+			data.hasOwnProperty('desc') && issue.updateAttr('desc', data.desc);
+			data.hasOwnProperty('priority') && issue.changePriority(data.priority);
+			data.hasOwnProperty('status') && issue.changeStatus(data.status);
+			
+			action = issue.save();
 		}
 
 		return action;

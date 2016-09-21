@@ -703,11 +703,11 @@ schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeig
 schema.methods.updateAttr = function(attr, value){
 
 	if(this.isClosed()){
-		return Promise.reject(responseCodes.ISSUE_CLOSED_ALREADY);
+		throw responseCodes.ISSUE_CLOSED_ALREADY;
+	} else {
+		this[attr] = value;
 	}
-
-	this[attr] = value;
-	return this.save();
+	
 };
 
 schema.methods.updateComment = function(commentIndex, data){
@@ -825,34 +825,33 @@ schema.methods.isClosed = function(){
 schema.methods.changeStatus = function(status){
 	'use strict';
 
-	if(status === this.status){
-		return Promise.reject({ resCode: responseCodes.ISSUE_SAME_STATUS });
-	} else if (statusEnum.indexOf(status) === -1){
-		return Promise.reject({ resCode: responseCodes.ISSUE_INVALID_STATUS });
-	}
+	if (statusEnum.indexOf(status) === -1){
+
+		throw responseCodes.ISSUE_INVALID_STATUS;
+
+	} else if (status !== this.status) {
 		
-	this.status_last_changed = (new Date()).getTime();
-	this.status = status;
-	return this.save();
+		this.status_last_changed = (new Date()).getTime();
+		this.status = status;
+	}
 };
 
 schema.methods.changePriority = function(priority){
 	'use strict';
 
 	if(this.isClosed()){
-		return Promise.reject(responseCodes.ISSUE_CLOSED_ALREADY);
-	}
 
-	if(priority === this.priority){
-		return Promise.reject({ resCode: responseCodes.ISSUE_SAME_PRIORITY });
+		throw responseCodes.ISSUE_CLOSED_ALREADY;
+
 	} else if (priorityEnum.indexOf(priority) === -1){
-		return Promise.reject({ resCode: responseCodes.ISSUE_INVALID_PRIORITY });
-	}
-	
-	this.priority_last_changed = (new Date()).getTime();
-	this.priority = priority;
-	return this.save();
 
+		throw responseCodes.ISSUE_INVALID_PRIORITY;
+
+	} else if(priority !== this.priority) {
+
+		this.priority_last_changed = (new Date()).getTime();
+		this.priority = priority;
+	}
 };
 
 // schema.methods.closeIssue = function(){

@@ -755,19 +755,6 @@ describe('Creating an issue', function () {
 			});
 		});
 
-		it('should fail if closing again', function(done){
-
-			let close = {  status: 'closed'  };
-
-			agent.put(`/${username}/${project}/issues/${issueId}.json`)
-			.send(close)
-			.expect(400 , function(err, res){
-
-				expect(res.body.value).to.equal(responseCodes.ISSUE_SAME_STATUS.value);
-				done(err);
-
-			});
-		});
 
 		it('should succee if reopening', function(done){
 
