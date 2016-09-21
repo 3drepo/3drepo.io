@@ -34,21 +34,24 @@
 					onEditIssue: "&",
 					nonListSelect: "<",
 					keysDown: "<",
-					contentHeight: "&"
+					contentHeight: "&",
+					menuOption: "<"
 				}
 			}
 		);
 
-	IssuesListCtrl.$inject = ["$filter", "UtilsService", "IssuesService", "EventService"];
+	IssuesListCtrl.$inject = ["$filter", "$window", "UtilsService", "IssuesService", "EventService", "serverConfig"];
 
-	function IssuesListCtrl ($filter, UtilsService, IssuesService, EventService) {
+	function IssuesListCtrl ($filter, $window, UtilsService, IssuesService, EventService, serverConfig) {
 		var self = this,
 			i, length,
 			selectedIssue = null,
 			selectedIssueIndex = null,
 			issuesListItemHeight = 150,
 			infoHeight = 81,
-			issuesToShowWithPinsIDs;
+			issuesToShowWithPinsIDs,
+			sortOldestFirst = true,
+			showClosed = false;
 
 		// Init
 		this.UtilsService = UtilsService;
@@ -126,6 +129,23 @@
 				if (this.event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
 					pinClicked(this.event.value.id);
 				}
+			}
+
+			// Menu option
+			if (changes.hasOwnProperty("menuOption") && this.menuOption) {
+				console.log(this.menuOption);
+				if (this.menuOption.value === "sortByDate") {
+					sortOldestFirst = !sortOldestFirst;
+				}
+				else if (this.menuOption.value === "showClosed") {
+					showClosed = !showClosed;
+				}
+				else if (this.menuOption.value === "print") {
+					$window.open(serverConfig.apiUrl(serverConfig.GET_API, this.account + "/" + this.project + "/issues.html"), "_blank");
+				}
+				setupIssuesToShow();
+				self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
+				showPins();
 			}
 		};
 
@@ -268,10 +288,7 @@
 		 */
 		function setupIssuesToShow () {
 			var i = 0, j = 0, length = 0,
-				roleAssigned,
-				sortedIssuesLength,
-				sortOldestFirst	 = true,
-				showClosed = true;
+				sortedIssuesLength;
 
 			self.issuesToShow = [];
 			issuesToShowWithPinsIDs = {};
@@ -337,33 +354,7 @@
 
 						return show;
 					}));
-
-					//{title : self.filterText} || {comments: { comment : self.filterText }} ));
 				}
-
-				// Don't show issues assigned to certain roles
-				/*
-				if (rolesToFilter.length > 0) {
-					i = 0;
-					while(i < self.issuesToShow.length) {
-						roleAssigned = false;
-
-						if (self.issuesToShow[i].hasOwnProperty("assigned_roles")) {
-							for (j = 0, length = self.issuesToShow[i].assigned_roles.length; j < length; j += 1) {
-								if (rolesToFilter.indexOf(self.issuesToShow[i].assigned_roles[j]) !== -1) {
-									roleAssigned = true;
-								}
-							}
-						}
-
-						if (roleAssigned) {
-							self.issuesToShow.splice(i, 1);
-						} else {
-							i += 1;
-						}
-					}
-				}
-				*/
 
 				// Closed
 				for (i = (self.issuesToShow.length - 1); i >= 0; i -= 1) {

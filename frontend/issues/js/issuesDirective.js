@@ -230,6 +230,7 @@
 		/*
 		 * Selecting a menu option
 		 */
+		/*
 		$scope.$watch("vm.selectedMenuOption", function (newValue) {
 			var role, roleIndex;
 			if (angular.isDefined(newValue)) {
@@ -257,6 +258,7 @@
 				vm.showPins();
 			}
 		});
+		*/
 
 		/**
 		 * Toggle the closed status of an issue
