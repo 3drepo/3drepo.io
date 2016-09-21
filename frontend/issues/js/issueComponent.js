@@ -32,7 +32,9 @@
 					exit: "&",
 					sendEvent: "&",
 					event: "<",
-					issueCreated: "&"
+					issueCreated: "&",
+					issueUpdated: "&",
+					contentHeight: "&"
 				}
 			}
 		);
@@ -43,7 +45,8 @@
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
-			currentActionIndex = null;
+			currentActionIndex = null,
+			issueMinHeight = 485;
 
 		/*
 		 * Init
@@ -74,6 +77,7 @@
 			{icon: "place", action: "pin", label: "Pin", color: "", disabled: this.data},
 			{icon: "view_comfy", action: "multi", label: "Multi", color: "", disabled: this.data}
 		];
+		self.contentHeight({height: issueMinHeight});
 
 		/**
 		 * Monitor changes to parameters

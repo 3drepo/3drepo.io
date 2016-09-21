@@ -9,18 +9,11 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 			md-button.md-primary(ng-click="vm.closeAddAlert()") OK
 
 #issuesAddButton(ng-if="vm.showAddButton", layout-margin)
-	md-button.md-accent.md-fab(aria-label="Add" ng-click="vm.editIssue()")
+	md-button.md-accent.md-fab.md-mini(aria-label="Add" ng-click="vm.editIssue()")
 		md-icon.angular-material-icons add
 
 #issuesContent(ng-switch="vm.toShow")
 	// Issues list
-	//div(ng-switch-when="showIssues", tabindex="0", tdr-focus="true")
-		issues-list-item(
-		ng-repeat="issue in vm.issuesToShow"
-		data="issue"
-		on-edit-issue="vm.editIssue(issue)"
-		select="vm.selectIssue"
-		on-select="vm.issueSelect(issue)")
 	issues-list(
 	ng-switch-when="showIssues"
 	account="vm.account"
@@ -34,7 +27,8 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 	keys-down="vm.keysDown"
 	non-list-select="vm.selectIssue"
 	content-height="vm.setContentHeight(height)"
-	menu-option="vm.selectedMenuOption")
+	menu-option="vm.selectedMenuOption"
+	updated-issue="vm.updatedIssue")
 
 	// Issue
 	issue-comp(
@@ -46,9 +40,7 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 	exit="vm.editIssueExit(issue)"
 	send-event="vm.sendEvent(type, value)"
 	event="vm.event"
-	issue-created="vm.issueCreated(issue)")
-
-	// Info
-	//.cardInfo(ng-switch-when="showInfo")
-		p {{vm.issuesInfo}}
+	issue-created="vm.issueCreated(issue)"
+	issue-updated="vm.issueUpdated(issue)"
+	content-height="vm.setContentHeight(height)")
 

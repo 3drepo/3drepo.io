@@ -35,7 +35,8 @@
 					nonListSelect: "<",
 					keysDown: "<",
 					contentHeight: "&",
-					menuOption: "<"
+					menuOption: "<",
+					updatedIssue: "<"
 				}
 			}
 		);
@@ -44,7 +45,6 @@
 
 	function IssuesListCtrl ($filter, $window, UtilsService, IssuesService, EventService, serverConfig) {
 		var self = this,
-			i, length,
 			selectedIssue = null,
 			selectedIssueIndex = null,
 			issuesListItemHeight = 150,
@@ -62,7 +62,8 @@
 		 * @param {Object} changes
 		 */
 		this.$onChanges = function (changes) {
-			var upArrow = 38,
+			var i, length,
+				upArrow = 38,
 				downArrow = 40,
 				rightArrow = 39,
 				keysDown,
@@ -147,6 +148,19 @@
 				self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
 				showPins();
 			}
+
+			// Updated issue
+			/*
+			if (changes.hasOwnProperty("updatedIssue") && this.updatedIssue) {
+				for (i = 0, length = this.allIssues.length; i < length; i += 1) {
+					if (this.updatedIssue._id === this.allIssues[i]._id) {
+						this.allIssues.splice()
+						break;
+					}
+				}
+
+			}
+			*/
 		};
 
 		/**
@@ -358,7 +372,7 @@
 
 				// Closed
 				for (i = (self.issuesToShow.length - 1); i >= 0; i -= 1) {
-					if (!showClosed && self.issuesToShow[i].hasOwnProperty("closed") && self.issuesToShow[i].closed) {
+					if (!showClosed && (self.issuesToShow[i].status === "closed")) {
 						self.issuesToShow.splice(i, 1);
 					}
 				}

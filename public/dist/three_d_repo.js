@@ -11811,7 +11811,9 @@ angular.module('3drepo')
 					exit: "&",
 					sendEvent: "&",
 					event: "<",
-					issueCreated: "&"
+					issueCreated: "&",
+					issueUpdated: "&",
+					contentHeight: "&"
 				}
 			}
 		);
@@ -11822,7 +11824,8 @@ angular.module('3drepo')
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
-			currentActionIndex = null;
+			currentActionIndex = null,
+			issueMinHeight = 485;
 
 		/*
 		 * Init
@@ -11853,6 +11856,7 @@ angular.module('3drepo')
 			{icon: "place", action: "pin", label: "Pin", color: "", disabled: this.data},
 			{icon: "view_comfy", action: "multi", label: "Multi", color: "", disabled: this.data}
 		];
+		self.contentHeight({height: issueMinHeight});
 
 		/**
 		 * Monitor changes to parameters
@@ -13428,6 +13432,14 @@ angular.module('3drepo')
 		};
 
 		/**
+		 * Issue updated so inform issues list
+		 * @param issue
+		 */
+		vm.issueCreated = function (issue) {
+			vm.updatedIssue = issue;
+		};
+
+		/**
 		 * Remove the temporary pin used for adding an issue
 		 */
 		function removeAddPin () {
@@ -13528,7 +13540,8 @@ angular.module('3drepo')
 					nonListSelect: "<",
 					keysDown: "<",
 					contentHeight: "&",
-					menuOption: "<"
+					menuOption: "<",
+					updatedIssue: "<"
 				}
 			}
 		);
@@ -13537,7 +13550,6 @@ angular.module('3drepo')
 
 	function IssuesListCtrl ($filter, $window, UtilsService, IssuesService, EventService, serverConfig) {
 		var self = this,
-			i, length,
 			selectedIssue = null,
 			selectedIssueIndex = null,
 			issuesListItemHeight = 150,
@@ -13555,7 +13567,8 @@ angular.module('3drepo')
 		 * @param {Object} changes
 		 */
 		this.$onChanges = function (changes) {
-			var upArrow = 38,
+			var i, length,
+				upArrow = 38,
 				downArrow = 40,
 				rightArrow = 39,
 				keysDown,
@@ -13640,6 +13653,19 @@ angular.module('3drepo')
 				self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
 				showPins();
 			}
+
+			// Updated issue
+			/*
+			if (changes.hasOwnProperty("updatedIssue") && this.updatedIssue) {
+				for (i = 0, length = this.allIssues.length; i < length; i += 1) {
+					if (this.updatedIssue._id === this.allIssues[i]._id) {
+						this.allIssues.splice()
+						break;
+					}
+				}
+
+			}
+			*/
 		};
 
 		/**
@@ -13851,7 +13877,7 @@ angular.module('3drepo')
 
 				// Closed
 				for (i = (self.issuesToShow.length - 1); i >= 0; i -= 1) {
-					if (!showClosed && self.issuesToShow[i].hasOwnProperty("closed") && self.issuesToShow[i].closed) {
+					if (!showClosed && (self.issuesToShow[i].status === "closed")) {
 						self.issuesToShow.splice(i, 1);
 					}
 				}

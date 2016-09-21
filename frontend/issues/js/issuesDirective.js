@@ -482,6 +482,14 @@
 		};
 
 		/**
+		 * Issue updated so inform issues list
+		 * @param issue
+		 */
+		vm.issueCreated = function (issue) {
+			vm.updatedIssue = issue;
+		};
+
+		/**
 		 * Remove the temporary pin used for adding an issue
 		 */
 		function removeAddPin () {

@@ -1,9 +1,3 @@
-//issues-list-item(
-	ng-repeat="issue in vm.issuesToShow"
-	data="issue"
-	on-edit-issue="vm.editIssue(issue)"
-	select="vm.selectIssue"
-	on-select="vm.issueSelect(issue)")
 div(ng-switch="$ctrl.toShow")
 	// List
 	div(ng-switch-when="list")

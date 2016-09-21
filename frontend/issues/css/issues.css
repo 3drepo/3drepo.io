@@ -309,6 +309,10 @@ issues-list .issueListItemThumbnail {
 }
 
 /** Issue Comp ********************************************************************************************************/
+issue-comp div:first-child {
+  outline: none;
+}
+
 issue-comp .issueCompItemContainer {
   padding: 10px;
 }
@@ -330,7 +334,7 @@ issue-comp .issueCompItemStatus {
 
 issue-comp .issueCompThumbnail {
   position: relative;
-  margin-bottom: 120px;
+  margin-bottom: 175px;
   outline: none;
 }
 issue-comp .issueCompThumbnail:hover {
