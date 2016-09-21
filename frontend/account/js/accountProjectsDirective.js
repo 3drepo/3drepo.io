@@ -38,9 +38,9 @@
 		};
 	}
 
-	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService"];
+	AccountProjectsCtrl.$inject = ["$scope", "$location", "$element", "$timeout", "AccountService", "UtilsService", "RevisionsService"];
 
-	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService) {
+	function AccountProjectsCtrl($scope, $location, $element, $timeout, AccountService, UtilsService, RevisionsService) {
 		var vm = this,
 			// existingProjectToUpload,
 			// existingProjectFileUploader,
@@ -91,6 +91,9 @@
 					vm.accounts[i].name = vm.accounts[i].account;
 					vm.accounts[i].showProjects = true;
 					vm.accounts[i].showProjectsIcon = "folder_open";
+					// Always show user account
+					// Don't show account if it doesn't have any projects - possible when user is a team member of a federation but not a member of a project in that federation!
+					vm.accounts[i].showAccount = ((i === 0) || (vm.accounts[i].projects.length !== 0));
 				}
 			}
 		});
@@ -184,6 +187,13 @@
 			}
 
 			if (doSave) {
+
+				if(RevisionsService.isTagFormatInValid(vm.tag)){
+					vm.showNewProjectErrorMessage = true;
+					vm.newProjectErrorMessage = 'Invalid revision name';
+					return;
+				}
+
 				promise = AccountService.newProject(vm.newProjectData);
 				promise.then(function (response) {
 					console.log(response);

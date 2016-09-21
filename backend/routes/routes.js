@@ -29,7 +29,7 @@ function hasWriteAccessToProject(req, account, project, callback)
 
 	var username = null;
 
-	if (req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
+if (req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
 		username = req.session[C.REPO_SESSION_USER].username;
 	}
 

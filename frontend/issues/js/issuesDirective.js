@@ -158,44 +158,39 @@
 			if ((event.type === EventService.EVENT.VIEWER.PICK_POINT) && (vm.toShow === "showAdd"))
 			{
 				/*
-				if (event.value.hasOwnProperty("id"))
-				{
-					if (vm.type === "pin") {
-						// Remove pin from last position if it exists
-						removeAddPin();
-
-						selectedObjectId = event.value.id;
-
-						// Convert data to arrays
-						angular.forEach(event.value.position, function(value) {
-							pickedPos = event.value.position;
-							position.push(value);
-						});
-						angular.forEach(event.value.normal, function(value) {
-							pickedNorm = event.value.normal;
-							normal.push(value);
-						});
-
-
-						// Add pin
-						IssuesService.addPin(
-							{
-								id: IssuesService.newPinId,
-								position: position,
-								norm: normal,
-								account: vm.account,
-								project: vm.project
-							},
-							IssuesService.hexToRgb(IssuesService.getRoleColor(vm.projectUserRoles[0]))
-						);
-					}
-					else if (vm.type === "multi") {
-
-					}
-				} else {
-					removeAddPin();
-				}
-				*/
+				 if (event.value.hasOwnProperty("id"))
+				 {
+				 if (vm.type === "pin") {
+				 // Remove pin from last position if it exists
+				 removeAddPin();
+				 selectedObjectId = event.value.id;
+				 // Convert data to arrays
+				 angular.forEach(event.value.position, function(value) {
+				 pickedPos = event.value.position;
+				 position.push(value);
+				 });
+				 angular.forEach(event.value.normal, function(value) {
+				 pickedNorm = event.value.normal;
+				 normal.push(value);
+				 });
+				 // Add pin
+				 IssuesService.addPin(
+				 {
+				 id: IssuesService.newPinId,
+				 position: position,
+				 norm: normal,
+				 account: vm.account,
+				 project: vm.project
+				 },
+				 IssuesService.hexToRgb(IssuesService.getRoleColor(vm.projectUserRoles[0]))
+				 );
+				 }
+				 else if (vm.type === "multi") {
+				 }
+				 } else {
+				 removeAddPin();
+				 }
+				 */
 			} else if ((event.type === EventService.EVENT.VIEWER.CLICK_PIN) && vm.show) {
 				//pinClicked(event.value.id);
 			} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_ADD) {
@@ -231,40 +226,41 @@
 		 * Selecting a menu option
 		 */
 		/*
-		$scope.$watch("vm.selectedMenuOption", function (newValue) {
-			var role, roleIndex;
-			if (angular.isDefined(newValue)) {
-				if (newValue.value === "sortByDate") {
-					sortOldestFirst = !sortOldestFirst;
-				}
-				else if (newValue.value === "showClosed") {
-					showClosed = !showClosed;
-				}
-				else if (newValue.value.indexOf("filterRole") !== -1) {
-					role = newValue.value.split("_")[1];
-					roleIndex = rolesToFilter.indexOf(role);
-					if (roleIndex !== -1) {
-						rolesToFilter.splice(roleIndex, 1);
-					}
-					else {
-						rolesToFilter.push(role);
-					}
-				}
-				else if (newValue.value === "print") {
-					$window.open(serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.project + "/issues.html"), "_blank");
-				}
-				//setupIssuesToShow();
-				vm.setContentHeight();
-				vm.showPins();
-			}
-		});
-		*/
+		 $scope.$watch("vm.selectedMenuOption", function (newValue) {
+		 var role, roleIndex;
+		 if (angular.isDefined(newValue)) {
+		 if (newValue.value === "sortByDate") {
+		 sortOldestFirst = !sortOldestFirst;
+		 }
+		 else if (newValue.value === "showClosed") {
+		 showClosed = !showClosed;
+		 }
+		 else if (newValue.value.indexOf("filterRole") !== -1) {
+		 role = newValue.value.split("_")[1];
+		 roleIndex = rolesToFilter.indexOf(role);
+		 if (roleIndex !== -1) {
+		 rolesToFilter.splice(roleIndex, 1);
+		 }
+		 else {
+		 rolesToFilter.push(role);
+		 }
+		 }
+		 else if (newValue.value === "print") {
+		 $window.open(serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.project + "/issues.html"), "_blank");
+		 }
+		 //setupIssuesToShow();
+		 vm.setContentHeight();
+		 vm.showPins();
+		 }
+		 });
+		 */
 
 		/**
 		 * Toggle the closed status of an issue
 		 *
 		 * @param {Object} issue
 		 */
+		/*
 		vm.toggleCloseIssue = function (issue) {
 			var i = 0,
 				length = 0;
@@ -298,6 +294,7 @@
 				}
 			});
 		};
+		*/
 
 		/**
 		 * Show an issue alert
@@ -348,63 +345,57 @@
 		 * Set the content height
 		 */
 		/*
-		function setContentHeight () {
-			var i,
-				length,
-				height = 0,
-				issueMinHeight = 56,
-				maxStringLength = 32,
-				lineHeight = 18,
-				footerHeight,
-				addHeight = 510,
-				commentHeight = 80,
-				headerHeight = 53,
-				openIssueFooterHeight = 180,
-				closedIssueFooterHeight = 60,
-				infoHeight = 81,
-				issuesMinHeight = 435,
-				issueListItemHeight = 150,
-				addButtonHeight = 75;
-
-			switch (vm.toShow) {
-				case "showIssues":
-					issuesHeight = 0;
-					for (i = 0, length = vm.issuesToShow.length; (i < length); i += 1) {
-						issuesHeight += issueMinHeight;
-						if (vm.issuesToShow[i].title.length > maxStringLength) {
-							issuesHeight += lineHeight * Math.floor((vm.issuesToShow[i].title.length - maxStringLength) / maxStringLength);
-						}
-					}
-					height = issuesHeight;
-					height = (height < issuesMinHeight) ? issuesMinHeight : issuesHeight;
-					height = (vm.issuesToShow.length * issueListItemHeight);
-					break;
-
-				case "showIssue":
-					if (vm.selectedIssue.closed) {
-						footerHeight = closedIssueFooterHeight;
-					}
-					else {
-						footerHeight = openIssueFooterHeight;
-					}
-
-					var numberComments = vm.selectedIssue.hasOwnProperty("comments") ? vm.selectedIssue.comments.length : 0;
-					height = headerHeight + (numberComments * commentHeight) + footerHeight;
-					height = issuesMinHeight;
-					break;
-
-				case "showAdd":
-					height = addHeight;
-					break;
-
-				case "showInfo":
-					height = infoHeight;
-					break;
-			}
-
-			vm.onContentHeightRequest({height: height});
-		}
-		*/
+		 function setContentHeight () {
+		 var i,
+		 length,
+		 height = 0,
+		 issueMinHeight = 56,
+		 maxStringLength = 32,
+		 lineHeight = 18,
+		 footerHeight,
+		 addHeight = 510,
+		 commentHeight = 80,
+		 headerHeight = 53,
+		 openIssueFooterHeight = 180,
+		 closedIssueFooterHeight = 60,
+		 infoHeight = 81,
+		 issuesMinHeight = 435,
+		 issueListItemHeight = 150,
+		 addButtonHeight = 75;
+		 switch (vm.toShow) {
+		 case "showIssues":
+		 issuesHeight = 0;
+		 for (i = 0, length = vm.issuesToShow.length; (i < length); i += 1) {
+		 issuesHeight += issueMinHeight;
+		 if (vm.issuesToShow[i].title.length > maxStringLength) {
+		 issuesHeight += lineHeight * Math.floor((vm.issuesToShow[i].title.length - maxStringLength) / maxStringLength);
+		 }
+		 }
+		 height = issuesHeight;
+		 height = (height < issuesMinHeight) ? issuesMinHeight : issuesHeight;
+		 height = (vm.issuesToShow.length * issueListItemHeight);
+		 break;
+		 case "showIssue":
+		 if (vm.selectedIssue.closed) {
+		 footerHeight = closedIssueFooterHeight;
+		 }
+		 else {
+		 footerHeight = openIssueFooterHeight;
+		 }
+		 var numberComments = vm.selectedIssue.hasOwnProperty("comments") ? vm.selectedIssue.comments.length : 0;
+		 height = headerHeight + (numberComments * commentHeight) + footerHeight;
+		 height = issuesMinHeight;
+		 break;
+		 case "showAdd":
+		 height = addHeight;
+		 break;
+		 case "showInfo":
+		 height = infoHeight;
+		 break;
+		 }
+		 vm.onContentHeightRequest({height: height});
+		 }
+		 */
 
 		/**
 		 * Set the content height

@@ -200,5 +200,26 @@
 	config.uploadSizeLimit = coalesce(config.uploadSizeLimit, 209715200);
 	config.version = VERSION;
 
+	//get frontend base url
+	config.getBaseURL = function(useNonPublicPort){
+
+		let frontEndServerConfig = config.servers.find(server => server.service === 'frontend');
+
+		let port = '';
+
+		if(useNonPublicPort){
+			//use non public port, for html templates generated for phamtom to generate pdf
+			port = ':' + (config.using_ssl ? default_https_port : default_http_port);
+
+		} else if (config.using_ssl && frontEndServerConfig.public_port !== 443 || !config.using_ssl && frontEndServerConfig.public_port !== 80){
+			//do not show :port in url if port is 80 for http or 443 for https to make the url in email looks pretty
+			port = ':' + frontEndServerConfig.public_port;
+		}
+
+		let baseUrl = (config.using_ssl ? 'https://' : 'http://') + config.host + port;
+
+		return baseUrl;
+	};
+
 	module.exports = config;
 })();

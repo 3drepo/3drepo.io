@@ -118,6 +118,7 @@
 					break;
 
 				case "upload":
+					vm.uploadErrorMessage = null;
 					UtilsService.showDialog("uploadProjectDialog.html", $scope, event, true);
 					//vm.uploadFile();
 					break;
@@ -159,9 +160,6 @@
 			UtilsService.closeDialog();
 		};
 
-		vm.file;
-
-
 		/**
 		 * When users click select file
 		 */
@@ -181,8 +179,27 @@
 		 */
 		vm.uploadFile = function () {
 			//vm.onUploadFile({project: vm.project});
-			vm.uploadedFile = {project: vm.project, file: vm.file.files[0], tag: vm.tag, desc: vm.desc};
-			vm.closeDialog();
+			
+			vm.uploadErrorMessage = null;
+
+			if(RevisionsService.isTagFormatInValid(vm.tag)){
+				vm.uploadErrorMessage = 'Invalid revision name';
+			} else {
+				getRevision().then(function(revisions){
+
+					revisions.forEach(function(rev){
+						if(rev.tag === vm.tag){
+							vm.uploadErrorMessage = 'Revision name already exists';
+						}
+					});
+
+					if(!vm.uploadErrorMessage){
+						vm.uploadedFile = {project: vm.project, file: vm.file.files[0], tag: vm.tag, desc: vm.desc};
+						vm.closeDialog();
+					}
+				});
+			}
+
 
 		};
 
@@ -206,7 +223,6 @@
 			// Check the quota
 			promise = UtilsService.doGet(vm.account + ".json");
 			promise.then(function (response) {
-				console.log(response);
 				if (file.size > response.data.accounts[0].quota.spaceLimit) {
 					// Show the over quota dialog
 					UtilsService.showDialog("overQuotaDialog.html", $scope, null, true);
@@ -228,6 +244,8 @@
 						});
 					}
 					else {
+
+						vm.uploadFileName = file.name;
 
 						formData = new FormData();
 						formData.append("file", file);
@@ -339,9 +357,12 @@
 
 		function getRevision(){
 			if(!vm.revisions){
-				RevisionsService.listAll(vm.account, vm.project.name).then(function(revisions){
+				return RevisionsService.listAll(vm.account, vm.project.name).then(function(revisions){
 					vm.revisions = revisions;
+					return Promise.resolve(revisions);
 				});
+			} else {
+				return Promise.resolve(vm.revisions);
 			}
 		}
 

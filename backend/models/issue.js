@@ -563,13 +563,13 @@ schema.statics.createIssue = function(dbColOptions, data){
 			issue.viewpoints.push(data.viewpoint);
 		}
 		
-		issue.scale = data.scale;
-		issue.position = data.position;
-		issue.norm = data.norm;
-		issue.creator_role = data.creator_role;
-		issue.assigned_roles = data.assigned_roles;
+		issue.scale = data.scale || issue.scale;
+		issue.position =  data.position || issue.position;
+		issue.norm = data.norm || issue.norm;
+		issue.creator_role = data.creator_role || issue.creator_role;
+		issue.assigned_roles = data.assigned_roles || issue.assigned_roles;
 
-		return issue.save().then(() => {
+		return issue.save().then(issue => {
 
 			if(group){
 				group.issue_id = issue._id;
@@ -703,11 +703,11 @@ schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeig
 schema.methods.updateAttr = function(attr, value){
 
 	if(this.isClosed()){
-		return Promise.reject(responseCodes.ISSUE_CLOSED_ALREADY);
+		throw responseCodes.ISSUE_CLOSED_ALREADY;
+	} else {
+		this[attr] = value;
 	}
-
-	this[attr] = value;
-	return this.save();
+	
 };
 
 schema.methods.updateComment = function(commentIndex, data){
@@ -825,34 +825,33 @@ schema.methods.isClosed = function(){
 schema.methods.changeStatus = function(status){
 	'use strict';
 
-	if(status === this.status){
-		return Promise.reject({ resCode: responseCodes.ISSUE_SAME_STATUS });
-	} else if (statusEnum.indexOf(status) === -1){
-		return Promise.reject({ resCode: responseCodes.ISSUE_INVALID_STATUS });
-	}
+	if (statusEnum.indexOf(status) === -1){
+
+		throw responseCodes.ISSUE_INVALID_STATUS;
+
+	} else if (status !== this.status) {
 		
-	this.status_last_changed = (new Date()).getTime();
-	this.status = status;
-	return this.save();
+		this.status_last_changed = (new Date()).getTime();
+		this.status = status;
+	}
 };
 
 schema.methods.changePriority = function(priority){
 	'use strict';
 
 	if(this.isClosed()){
-		return Promise.reject(responseCodes.ISSUE_CLOSED_ALREADY);
-	}
 
-	if(priority === this.priority){
-		return Promise.reject({ resCode: responseCodes.ISSUE_SAME_PRIORITY });
+		throw responseCodes.ISSUE_CLOSED_ALREADY;
+
 	} else if (priorityEnum.indexOf(priority) === -1){
-		return Promise.reject({ resCode: responseCodes.ISSUE_INVALID_PRIORITY });
-	}
-	
-	this.priority_last_changed = (new Date()).getTime();
-	this.priority = priority;
-	return this.save();
 
+		throw responseCodes.ISSUE_INVALID_PRIORITY;
+
+	} else if(priority !== this.priority) {
+
+		this.priority_last_changed = (new Date()).getTime();
+		this.priority = priority;
+	}
 };
 
 // schema.methods.closeIssue = function(){
@@ -1178,6 +1177,9 @@ schema.statics.getProjectBCF = function(projectId){
 
 schema.statics.importBCF = function(account, project, zipPath){
 	'use strict';
+
+	let self = this;
+
 	return new Promise((resolve, reject) => {
 
 		let files = {};
@@ -1191,6 +1193,8 @@ schema.statics.importBCF = function(account, project, zipPath){
 			zipfile.readEntry();
 
 			zipfile.on('entry', entry => handleEntry(zipfile, entry));
+
+			zipfile.on('error', err => reject(err));
 
 			zipfile.on('end', () => {
 
@@ -1317,6 +1321,8 @@ schema.statics.importBCF = function(account, project, zipPath){
 
 			}).then(viewpoints => {
 
+				let thumbnailGenerated;
+
 				Object.keys(viewpoints).forEach(guid => {
 
 					if(!viewpoints[guid].viewpointXml){
@@ -1344,28 +1350,44 @@ schema.statics.importBCF = function(account, project, zipPath){
 						content: viewpoints[guid].snapshot,
 					} : undefined;
 
-					issue.viewpoints.push({
+					//take the first screenshot as thumbnail
+					if(!thumbnailGenerated && screenshotObj){
+
+						issue.thumbnail = {
+							flag: 1,
+							content: self.resizeAndCropScreenshot(viewpoints[guid].snapshot, 120, 120, true)
+						};
+
+						thumbnailGenerated = true;
+					}
+
+					let vp = {
 						guid: utils.stringToUUID(guid),
 						extras: extras,
-						screenshot: screenshotObj,
-						up: [
+						screenshot: screenshotObj
+
+					};
+
+					if(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0]')){
+						vp.up = [
 							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].X[0]._')),
 							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Y[0]._')),
 							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Z[0]._'))
 						],
-						view_dir: [
+						vp.view_dir = [
 							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].X[0]._')),
 							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Y[0]._')),
 							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraDirection[0].Z[0]._'))
 						],
-						look_at:[
+						vp.look_at = [
 							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].X[0]._')),
 							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Y[0]._')),
 							parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].CameraViewPoint[0].Z[0]._'))
 						],
-						fov: parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._'))
+						vp.fov = parseFloat(_.get(vpXML, 'VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._'));
+					}
 
-					});
+					issue.viewpoints.push(vp);
 				});
 
 				return issue.save();
@@ -1378,6 +1400,7 @@ schema.statics.importBCF = function(account, project, zipPath){
 		function handleEntry(zipfile, entry) {
 
 			let paths = entry.fileName.split('/');
+			console.log(paths);
 			let guid = paths[0] && utils.isUUID(paths[0]) && paths[0];
 
 			if(guid && !files[guid]){
