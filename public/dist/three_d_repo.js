@@ -11775,7 +11775,8 @@ angular.module('3drepo')
 					keysDown: "<",
 					exit: "&",
 					sendEvent: "&",
-					event: "<"
+					event: "<",
+					issueCreated: "&"
 				}
 			}
 		);
@@ -12063,9 +12064,12 @@ angular.module('3drepo')
 			}
 			IssuesService.saveIssue(issue)
 				.then(function (response) {
+					console.log(response);
 					self.data = response.data; // So that new changes are registered as updates
 					self.issueData = response.data;
+					self.issueData.name = IssuesService.generateTitle(self.issueData); // Change name to title for display purposes
 					self.descriptionThumbnail = UtilsService.getServerUrl(self.issueData.viewpoint.screenshotSmall);
+					self.issueCreated({issue: self.issueData});
 			});
 		}
 
@@ -12962,7 +12966,7 @@ angular.module('3drepo')
 			rolesPromise,
 			projectUserRolesPromise,
 			sortedIssuesLength,
-			sortOldestFirst = true,
+			sortOldestFirst	 = true,
 			showClosed = false,
 			issue,
 			rolesToFilter = [],
@@ -12972,7 +12976,8 @@ angular.module('3drepo')
 			pickedNorm = null,
 			pinHighlightColour = [1.0000, 0.7, 0.0],
 			selectedIssue = null,
-			selectedIssueIndex = null;
+			selectedIssueIndex = null,
+			infoHeight = 81;
 
 		/*
 		 * Init
@@ -12989,6 +12994,7 @@ angular.module('3drepo')
 		vm.canAdd = true;
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
 		vm.savingIssue = false;
+		vm.toShow = "showIssues";
 
 		/*
 		 * Get all the Issues
@@ -12998,6 +13004,7 @@ angular.module('3drepo')
 			var i, length;
 			vm.showProgress = false;
 			vm.issues = (data === "") ? [] : data;
+			/*
 			if (vm.issues.length > 0) {
 				vm.toShow = "showIssues";
 				for (i = 0, length = vm.issues.length; i < length; i += 1) {
@@ -13011,8 +13018,9 @@ angular.module('3drepo')
 			else {
 				vm.toShow = "showInfo";
 				vm.issuesInfo = "There are currently no open issues";
+				vm.setContentHeight(infoHeight);
 			}
-			setContentHeight();
+			*/
 		});
 
 		/*
@@ -13059,16 +13067,6 @@ angular.module('3drepo')
 		projectUserRolesPromise = IssuesService.getUserRolesForProject(vm.account, vm.project, Auth.username);
 		projectUserRolesPromise.then(function (data) {
 			vm.projectUserRoles = data;
-		});
-
-		/*
-		 * Handle showing of adding a new issue
-		 */
-		$scope.$watch("vm.showAdd", function (newValue) {
-			if (angular.isDefined(newValue) && newValue) {
-				setupAdd();
-				//EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, type: "scribble"});
-			}
 		});
 
 		/*
@@ -13132,7 +13130,7 @@ angular.module('3drepo')
 			} else if (event.type === EventService.EVENT.TOGGLE_ISSUE_ADD) {
 				if (event.value.on) {
 					vm.show = true;
-					setupAdd();
+					//setupAdd();
 					// This is done to override the default mode ("scribble") set in the vm.showAdd watch above ToDo improve!
 					$timeout(function () {
 						EventService.send(EventService.EVENT.SET_ISSUE_AREA_MODE, event.value.type);
@@ -13360,7 +13358,7 @@ angular.module('3drepo')
 					$window.open(serverConfig.apiUrl(serverConfig.GET_API, vm.account + "/" + vm.project + "/issues.html"), "_blank");
 				}
 				setupIssuesToShow();
-				setContentHeight();
+				vm.setContentHeight();
 				vm.showPins();
 			}
 		});
@@ -13368,6 +13366,7 @@ angular.module('3drepo')
 		/*
 		 * Handle changes to the filter input
 		 */
+		/*
 		$scope.$watch("vm.filterText", function (newValue) {
 			if (angular.isDefined(newValue)) {
 				setupIssuesToShow();
@@ -13380,48 +13379,7 @@ angular.module('3drepo')
 				else {
 					vm.toShow = "showIssues";
 				}
-				setContentHeight();
-			}
-		});
-
-		/*
-		 * Handle parent notice to hide a selected issue or add issue
-		 */
-		/*
-		$scope.$watch("vm.hideItem", function (newValue) {
-			if (angular.isDefined(newValue) && newValue) {
-				vm.autoSaveComment = true; // Auto save a comment if needed
-
-				$timeout(function () {
-					if (vm.toShow === "showAdd") {
-						removeAddPin();
-						EventService.send(EventService.EVENT.TOGGLE_ISSUE_ADD, {on: false});
-					}
-					vm.showAdd = false; // So that showing add works
-					vm.canAdd = true;
-					vm.showEdit = false; // So that closing edit works
-
-					// Reset the add type
-					if (angular.isDefined(vm.type)) {
-						delete vm.type;
-					}
-
-					// Set the content height
-					setupIssuesToShow();
-					setContentHeight();
-
-					// Deselect any selected pin
-					setPinToAssignedRoleColours(vm.selectedIssue);
-
-					// No selected issue
-					vm.selectedIssue = null;
-
-					// Clear anything do to with multi mode
-					vm.clearMulti = true;
-
-					// Hide issue area
-					EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
-				});
+				vm.setContentHeight();
 			}
 		});
 		*/
@@ -13459,7 +13417,7 @@ angular.module('3drepo')
 			vm.onShowItem();
 
 			// Set the content height
-			setContentHeight();
+			vm.setContentHeight();
 
 			// Highlight pin, move camera and setup clipping plane
 			if (!pinSelect) {
@@ -13484,71 +13442,6 @@ angular.module('3drepo')
 			$timeout(function () {
 				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, issue: vm.selectedIssue});
 			}, 1100);
-		};
-
-		/**
-		 * Save an issue
-		 */
-		vm.saveIssue = function () {
-			if (vm.projectUserRoles.length === 0) {
-				vm.showAlert("You do not have permission to save an issue");
-			}
-			else {
-				if (angular.isDefined(vm.title) && (vm.title !== "")) {
-					vm.savingIssue = true;
-					var issueAreaPngPromise = $q.defer();
-					EventService.send(EventService.EVENT.GET_ISSUE_AREA_PNG, {promise: issueAreaPngPromise});
-					issueAreaPngPromise.promise.then(function (png) {
-						issue = {
-							name: vm.title,
-							objectId: null,
-							pickedPos: null,
-							pickedNorm: null,
-							creator_role: vm.projectUserRoles[0],
-							account: vm.account,
-							project: vm.project,
-							scribble: png,
-						};
-
-						if(vm.revision){
-							issue.rev_id = vm.revision;
-						}
-
-						if (selectedObjectId !== null) {
-							issue.objectId = selectedObjectId;
-							issue.pickedPos = pickedPos;
-							issue.pickedNorm = pickedNorm;
-						}
-						promise = IssuesService.saveIssue(issue);
-						promise.then(function (data) {
-							// Set the role colour
-							data.assignedRolesColors = [];
-							data.assignedRolesColors.push(IssuesService.getRoleColor(vm.projectUserRoles[0]));
-							vm.issues.push(data);
-
-							// Init
-							vm.title = "";
-							selectedObjectId = null;
-							pickedPos = null;
-							pickedNorm = null;
-
-							// Save issue with a comment
-							if (angular.isDefined(vm.comment) && (vm.comment !== "")) {
-								saveCommentWithIssue(data, vm.comment);
-								vm.comment = "";
-							}
-
-							// Get out of add mode and show issues
-							vm.hideItem = true;
-
-							vm.savingIssue = false;
-							setupIssuesToShow();
-							setContentHeight();
-							vm.showPins();
-						});
-					});
-				}
-			}
 		};
 
 		/**
@@ -13580,19 +13473,19 @@ angular.module('3drepo')
 				// Remain in issue unless closing when showing closed issues is off
 				if (data.issue.closed) {
 					if (showClosed) {
-						setContentHeight();
+						vm.setContentHeight();
 					}
 					else {
 						vm.toShow = "showIssues";
 						setupIssuesToShow();
 						vm.showPins();
-						setContentHeight();
+						vm.setContentHeight();
 						vm.canAdd = true;
 						EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
 					}
 				}
 				else {
-					setContentHeight();
+					vm.setContentHeight();
 				}
 			});
 		};
@@ -13638,7 +13531,7 @@ angular.module('3drepo')
 		 * A comment has been saved
 		 */
 		vm.commentSaved = function () {
-			setContentHeight();
+			vm.setContentHeight();
 		};
 
 		/**
@@ -13664,6 +13557,7 @@ angular.module('3drepo')
 		/**
 		 * Set the content height
 		 */
+		/*
 		function setContentHeight () {
 			var i,
 				length,
@@ -13684,7 +13578,6 @@ angular.module('3drepo')
 
 			switch (vm.toShow) {
 				case "showIssues":
-					/*
 					issuesHeight = 0;
 					for (i = 0, length = vm.issuesToShow.length; (i < length); i += 1) {
 						issuesHeight += issueMinHeight;
@@ -13694,12 +13587,10 @@ angular.module('3drepo')
 					}
 					height = issuesHeight;
 					height = (height < issuesMinHeight) ? issuesMinHeight : issuesHeight;
-					*/
 					height = (vm.issuesToShow.length * issueListItemHeight);
 					break;
 
 				case "showIssue":
-					/*
 					if (vm.selectedIssue.closed) {
 						footerHeight = closedIssueFooterHeight;
 					}
@@ -13709,7 +13600,6 @@ angular.module('3drepo')
 
 					var numberComments = vm.selectedIssue.hasOwnProperty("comments") ? vm.selectedIssue.comments.length : 0;
 					height = headerHeight + (numberComments * commentHeight) + footerHeight;
-					*/
 					height = issuesMinHeight;
 					break;
 
@@ -13724,6 +13614,14 @@ angular.module('3drepo')
 
 			vm.onContentHeightRequest({height: height});
 		}
+		*/
+
+		/**
+		 * Set the content height
+		 */
+		vm.setContentHeight = function (height) {
+			vm.onContentHeightRequest({height: height});
+		};
 
 		function setPinToAssignedRoleColours (issue) {
 			var i, length, pinColours = [], roleColour;
@@ -13741,35 +13639,6 @@ angular.module('3drepo')
 			}
 		}
 
-		/**
-		 * Set up adding an issue
-		 */
-		function setupAdd () {
-			vm.toShow = "showAdd";
-			vm.canAdd = false;
-			vm.clearMulti = false;
-			vm.onShowItem();
-			setContentHeight();
-
-			/*
-			if (vm.toShow === "showIssue") {
-				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: false});
-			}
-			vm.toShow = "showAdd";
-			vm.onShowItem();
-			vm.showAdd = true;
-			vm.canAdd = false;
-			setContentHeight();
-			setPinToAssignedRoleColours(vm.selectedIssue);
-
-			// Set default issue title and select it
-			vm.title = "Issue " + (vm.issues.length + 1);
-			$timeout(function () {
-				($element[0].querySelector("#issueAddTitle")).select();
-			});
-			*/
-		}
-
 		/* New Stuff **************************************************************************************************/
 
 		/*
@@ -13779,7 +13648,7 @@ angular.module('3drepo')
 			console.log(newValue);
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showIssues";
-				setContentHeight();
+				vm.setContentHeight();
 			}
 		});
 
@@ -13808,13 +13677,11 @@ angular.module('3drepo')
 		vm.editIssue = function (issue) {
 			vm.issueToEdit = issue;
 			vm.toShow = "showIssue";
-			/*
-			setContentHeight();
+			vm.setContentHeight();
 			vm.onShowItem();
 			if (angular.isUndefined(issue) && (selectedIssue !== null)) {
 				deselectPin(selectedIssue._id);
 			}
-			*/
 		};
 
 		/**
@@ -13823,6 +13690,14 @@ angular.module('3drepo')
 		 */
 		vm.editIssueExit = function (issue) {
 			vm.hideItem = true;
+		};
+
+		/**
+		 * New issue created so inform issues list
+		 * @param issue
+		 */
+		vm.issueCreated = function (issue) {
+			vm.issues.unshift(issue);
 		};
 
 		/**
@@ -14021,35 +13896,32 @@ angular.module('3drepo')
 				bindings: {
 					account: "<",
 					project: "<",
-					issuesToShow: "<",
+					allIssues: "<",
+					filterText: "<",
 					sendEvent: "&",
 					event: "<",
 					onEditIssue: "&",
 					nonListSelect: "<",
-					keysDown: "<"
+					keysDown: "<",
+					contentHeight: "&"
 				}
 			}
 		);
 
-	IssuesListCtrl.$inject = ["UtilsService", "IssuesService", "EventService"];
+	IssuesListCtrl.$inject = ["$filter", "UtilsService", "IssuesService", "EventService"];
 
-	function IssuesListCtrl (UtilsService, IssuesService, EventService) {
+	function IssuesListCtrl ($filter, UtilsService, IssuesService, EventService) {
 		var self = this,
 			i, length,
 			selectedIssue = null,
-			selectedIssueIndex = null;
+			selectedIssueIndex = null,
+			issuesListItemHeight = 150,
+			infoHeight = 81,
+			issuesToShowWithPinsIDs;
 
 		// Init
 		this.UtilsService = UtilsService;
 		this.IssuesService = IssuesService;
-		// Get a possible selected issue
-		for (i = 0, length = this.issuesToShow.length; i < length; i += 1) {
-			if (this.issuesToShow[i].selected) {
-				selectedIssue = this.issuesToShow[i];
-				setSelectedIssueIndex(selectedIssue);
-				break;
-			}
-		}
 
 		/**
 		 * Monitor changes to parameters
@@ -14062,6 +13934,36 @@ angular.module('3drepo')
 				keysDown,
 				event = {type: "click"};
 
+			// All issues
+			if (changes.hasOwnProperty("allIssues") && this.allIssues) {
+				if (this.allIssues.length > 0) {
+					self.toShow = "list";
+					setupIssuesToShow();
+					// Get a possible selected issue
+					for (i = 0, length = this.issuesToShow.length; i < length; i += 1) {
+						if (this.issuesToShow[i].selected) {
+							selectedIssue = this.issuesToShow[i];
+							setSelectedIssueIndex(selectedIssue);
+							break;
+						}
+					}
+					self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
+					showPins();
+				}
+				else {
+					self.toShow = "info";
+					self.info = "There are currently no open issues";
+					self.contentHeight({height: infoHeight});
+				}
+			}
+
+			// Filter text
+			if (changes.hasOwnProperty("filterText") && (typeof this.filterText !== "undefined")) {
+				setupIssuesToShow();
+				showPins();
+			}
+
+			// Keys down
 			if (changes.hasOwnProperty("keysDown") && (this.keysDown.length > 0) && (selectedIssueIndex !== null)) {
 				if ((self.keysDown[0] === downArrow) || (self.keysDown[0] === upArrow)) {
 					if ((self.keysDown[0] === downArrow) && (selectedIssueIndex !== (this.issuesToShow.length - 1))) {
@@ -14083,10 +13985,12 @@ angular.module('3drepo')
 				}
 			}
 
+			// Non list select
 			if (changes.hasOwnProperty("nonListSelect") && this.nonListSelect) {
 				this.select(event, this.nonListSelect);
 			}
 
+			// Event
 			if (changes.hasOwnProperty("event") && this.event) {
 				if (this.event.type === EventService.EVENT.VIEWER.CLICK_PIN) {
 					pinClicked(this.event.value.id);
@@ -14227,83 +14131,170 @@ angular.module('3drepo')
 				}
 			}
 		}
-	}
-}());
-/**
- *	Copyright (C) 2016 3D Repo Ltd
- *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the issuesListItem of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
- *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
- *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
-(function () {
-	"use strict";
+		/**
+		 * Setup the issues to show
+		 */
+		function setupIssuesToShow () {
+			var i = 0, j = 0, length = 0,
+				roleAssigned,
+				sortedIssuesLength,
+				sortOldestFirst	 = true,
+				showClosed = true;
 
-	angular.module("3drepo")
-		.component(
-			"issuesListItem",
-			{
-				controller: IssuesListItemCtrl,
-				templateUrl: "issuesListItem.html",
-				bindings: {
-					data: "<",
-					select: "<",
-					onSelect: "&",
-					onEditIssue: "&",
-					keysDown: "<"
+			self.issuesToShow = [];
+			issuesToShowWithPinsIDs = {};
+
+			if (self.allIssues.length > 0) {
+				// Sort
+				self.issuesToShow = [self.allIssues[0]];
+				for (i = 1, length = self.allIssues.length; i < length; i += 1) {
+					for (j = 0, sortedIssuesLength = self.issuesToShow.length; j < sortedIssuesLength; j += 1) {
+						if (((self.allIssues[i].created > self.issuesToShow[j].created) && (sortOldestFirst)) ||
+							((self.allIssues[i].created < self.issuesToShow[j].created) && (!sortOldestFirst))) {
+							self.issuesToShow.splice(j, 0, self.allIssues[i]);
+							break;
+						}
+						else if (j === (self.issuesToShow.length - 1)) {
+							self.issuesToShow.push(self.allIssues[i]);
+						}
+					}
+				}
+
+				// Filter text
+				if (angular.isDefined(self.filterText) && self.filterText !== "") {
+
+					// Helper function for searching strings
+					var stringSearch = function(superString, subString)
+					{
+						return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
+					};
+
+					self.issuesToShow = ($filter('filter')(self.issuesToShow, function(issue) {
+						// Required custom filter due to the fact that Angular
+						// does not allow compound OR filters
+						var i;
+
+						// Search the title
+						var show = stringSearch(issue.title, self.filterText);
+						show = show || stringSearch(issue.timeStamp, self.filterText);
+						show = show || stringSearch(issue.owner, self.filterText);
+
+						// Search the list of assigned issues
+						if (!show && issue.hasOwnProperty("assigned_roles"))
+						{
+							i = 0;
+							while(!show && (i < issue.assigned_roles.length))
+							{
+								show = show || stringSearch(issue.assigned_roles[i], self.filterText);
+								i += 1;
+							}
+						}
+
+						// Search the comments
+						if (!show && issue.hasOwnProperty("comments"))
+						{
+							i = 0;
+
+							while(!show && (i < issue.comments.length))
+							{
+								show = show || stringSearch(issue.comments[i].comment, self.filterText);
+								show = show || stringSearch(issue.comments[i].owner, self.filterText);
+								i += 1;
+							}
+						}
+
+						return show;
+					}));
+
+					//{title : self.filterText} || {comments: { comment : self.filterText }} ));
+				}
+
+				// Don't show issues assigned to certain roles
+				/*
+				if (rolesToFilter.length > 0) {
+					i = 0;
+					while(i < self.issuesToShow.length) {
+						roleAssigned = false;
+
+						if (self.issuesToShow[i].hasOwnProperty("assigned_roles")) {
+							for (j = 0, length = self.issuesToShow[i].assigned_roles.length; j < length; j += 1) {
+								if (rolesToFilter.indexOf(self.issuesToShow[i].assigned_roles[j]) !== -1) {
+									roleAssigned = true;
+								}
+							}
+						}
+
+						if (roleAssigned) {
+							self.issuesToShow.splice(i, 1);
+						} else {
+							i += 1;
+						}
+					}
+				}
+				*/
+
+				// Closed
+				for (i = (self.issuesToShow.length - 1); i >= 0; i -= 1) {
+					if (!showClosed && self.issuesToShow[i].hasOwnProperty("closed") && self.issuesToShow[i].closed) {
+						self.issuesToShow.splice(i, 1);
+					}
 				}
 			}
-		);
 
-	IssuesListItemCtrl.$inject = ["UtilsService", "IssuesService"];
-
-	function IssuesListItemCtrl (UtilsService, IssuesService) {
-		/*
-		 * Init
-		 */
-		this.UtilsService = UtilsService;
-		this.selected = false;
-		this.data.title = IssuesService.generateTitle(this.data);
-		this.statusIcon = IssuesService.getStatusIcon(this.data);
-
-		/**
-		 * Monitor changes to parameters
-		 * @param {Object} changes
-		 */
-		this.$onChanges = function (changes) {
-			if (changes.hasOwnProperty("select") &&
-				angular.isDefined(changes.select.currentValue) &&
-				(this.select.issue._id === this.data._id)) {
-				this.selected = this.select.selected;
+			// Create list of issues to show with pins
+			for (i = 0, length = self.issuesToShow.length; i < length; i += 1) {
+				if (self.issuesToShow[i].position.length > 0) {
+					issuesToShowWithPinsIDs[self.issuesToShow[i]._id] = true;
+				}
 			}
-		};
 
-		/**
-		 * Toggle selected state. Ignore key press.
-		 * @param {Object} event
-		 */
-		this.toggleSelected = function (event) {
-			if (event.type === "click") {
-				this.onSelect({issueId: this.data._id});
+			// Setup what to show
+			if (self.issuesToShow.length > 0) {
+				self.toShow = "list";
+				self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
 			}
-		};
+			else {
+				self.toShow = "info";
+				self.info = "No issues to show";
+				self.contentHeight({height: infoHeight});
+			}
+		}
 
 		/**
-		 * Set up editing of issue
+		 * Add issue pins to the viewer
 		 */
-		this.editIssue = function () {
-			this.onEditIssue({issue: this.data});
-		};
+		function showPins () {
+			var pin,
+				pinData;
+
+			// Go through all issues with pins
+			for (i = 0, length = self.allIssues.length; i < length; i += 1) {
+				if (self.allIssues[i].position.length > 0) {
+					pin = angular.element(document.getElementById(self.allIssues[i]._id));
+					if (pin.length > 0) {
+						// Existing pin
+						if (issuesToShowWithPinsIDs[self.allIssues[i]._id]) {
+							pin[0].setAttribute("render", "true");
+						}
+						else {
+							pin[0].setAttribute("render", "false");
+						}
+					}
+					else {
+						// Create new pin
+						pinData = {
+							id: self.allIssues[i]._id,
+							position: self.allIssues[i].position,
+							norm: self.allIssues[i].norm,
+							account: self.account,
+							project: self.project
+						};
+						IssuesService.addPin(pinData, [[0.78, 0, 0]], self.allIssues[i].viewpoint);
+					}
+				}
+			}
+		}
 	}
 }());
 /**
@@ -14513,6 +14504,7 @@ angular.module('3drepo')
 						deferred.resolve(data.data);
 						for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
 							data.data[i].timeStamp = self.getPrettyTime(data.data[i].created);
+							data.data[i].title = self.generateTitle(data.data[i]);
 
 							if (data.data[i].hasOwnProperty("comments")) {
 								for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {

@@ -26,12 +26,14 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 	account="vm.account"
 	project="vm.project"
 	tabindex="0"
-	issues-to-show="vm.issuesToShow"
+	all-issues="vm.issues"
+	filter-text="vm.filterText"
 	send-event="vm.sendEvent(type, value)"
 	event="vm.event"
 	on-edit-issue="vm.editIssue(issue)"
 	keys-down="vm.keysDown"
-	non-list-select="vm.selectIssue")
+	non-list-select="vm.selectIssue"
+	content-height="vm.setContentHeight(height)")
 
 	// Issue
 	issue-comp(
@@ -43,9 +45,9 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 	exit="vm.editIssueExit(issue)"
 	send-event="vm.sendEvent(type, value)"
 	event="vm.event"
-	pin-clicked="vm.pinClicked({issueId: issueId})")
+	issue-created="vm.issueCreated(issue)")
 
 	// Info
-	.cardInfo(ng-switch-when="showInfo")
+	//.cardInfo(ng-switch-when="showInfo")
 		p {{vm.issuesInfo}}
 

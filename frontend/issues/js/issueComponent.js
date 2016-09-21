@@ -31,7 +31,8 @@
 					keysDown: "<",
 					exit: "&",
 					sendEvent: "&",
-					event: "<"
+					event: "<",
+					issueCreated: "&"
 				}
 			}
 		);
@@ -319,9 +320,12 @@
 			}
 			IssuesService.saveIssue(issue)
 				.then(function (response) {
+					console.log(response);
 					self.data = response.data; // So that new changes are registered as updates
 					self.issueData = response.data;
+					self.issueData.name = IssuesService.generateTitle(self.issueData); // Change name to title for display purposes
 					self.descriptionThumbnail = UtilsService.getServerUrl(self.issueData.viewpoint.screenshotSmall);
+					self.issueCreated({issue: self.issueData});
 			});
 		}
 
