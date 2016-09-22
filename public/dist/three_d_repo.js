@@ -5172,7 +5172,6 @@ var ViewerManager = {};
 							UtilsService.showDialog("paypalDialog.html", $scope);
 							promise = UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute");
 							promise.then(function (response) {
-								console.log("payment/paypal/execute ", response);
 								if (response.status === 200) {
 								}
 								vm.payPalInfo = "PayPal has finished processing. Thank you.";
@@ -5219,7 +5218,6 @@ var ViewerManager = {};
 		 * @param callingPage
 		 */
 		vm.showPage = function (page, callingPage) {
-			console.log(page, callingPage);
 			vm.itemToShow = page;
 			$location.search("page", page);
 			vm.callingPage = callingPage;
@@ -5250,19 +5248,16 @@ var ViewerManager = {};
 
 			billingsPromise = UtilsService.doGet(vm.account + "/billings");
 			billingsPromise.then(function (response) {
-				console.log("**billings** ", response);
 				vm.billings = response.data;
 			});
 
 			subscriptionsPromise = UtilsService.doGet(vm.account + "/subscriptions");
 			subscriptionsPromise.then(function (response) {
-				console.log("**subscriptions** ", response);
 				vm.subscriptions = response.data;
 			});
 
 			plansPromise = UtilsService.doGet("plans");
 			plansPromise.then(function (response) {
-				console.log("**plans** ", response);
 				if (response.status === 200) {
 					vm.plans = response.data;
 				}
@@ -5275,7 +5270,6 @@ var ViewerManager = {};
 			userInfoPromise = AccountService.getUserInfo(vm.account);
 			userInfoPromise.then(function (response) {
 				var i, length;
-				console.log("**userInfo** ", response);
 				vm.accounts = response.data.accounts;
 				vm.username = vm.account;
 				vm.firstName = response.data.firstName;
@@ -11833,6 +11827,7 @@ angular.module('3drepo')
 		this.submitDisabled = true;
 		this.pinData = null;
 		this.multiData = null;
+		this.showAdditional = false;
 		this.priorities = [
 			{value: "none", label: "None"},
 			{value: "low", label: "Low"},
@@ -11995,6 +11990,7 @@ angular.module('3drepo')
 
 			switch (this.actions[currentActionIndex].action) {
 				case "screen_shot":
+					delete this.screenShot; // Remove any clicked on screen shot
 					$mdDialog.show({
 						controller: ScreenShotDialogController,
 						controllerAs: "vm",
@@ -12018,6 +12014,14 @@ angular.module('3drepo')
 		 */
 		this.setMulti = function (multiData) {
 			self.multiData = multiData.data;
+		};
+
+		/**
+		 * Toggle showing of extra inputs
+		 */
+		this.toggleShowAdditional = function () {
+			this.showAdditional = !this.showAdditional;
+			setContentHeight();
 		};
 
 		/**
@@ -12124,7 +12128,12 @@ angular.module('3drepo')
 		 * Update an existing issue and notify parent
 		 */
 		function updateIssue () {
-			IssuesService.updateIssue(self.issueData, self.issueData.priority, self.issueData.status)
+			var data = {
+				priority: self.issueData.priority,
+				status: self.issueData.status,
+				topic_type: self.issueData.topic_type
+			};
+			IssuesService.updateIssue(self.issueData, data)
 				.then(function (data) {
 					console.log(data);
 					IssuesService.updatedIssue = self.issueData;
@@ -12218,14 +12227,19 @@ angular.module('3drepo')
 
 		function setContentHeight() {
 			var i, length,
-				newIssueHeight = 470,
+				newIssueHeight = 435,
 				issueMinHeight = 672,
 				descriptionTextHeight = 80,
 				commentTextHeight = 80,
 				commentImageHeight = 170,
+				additionalInfoHeight = 70,
 				height = issueMinHeight;
 
 			if (self.data) {
+				if (self.showAdditional) {
+					height += additionalInfoHeight;
+				}
+
 				if (self.issueData.hasOwnProperty("desc")) {
 					height += descriptionTextHeight;
 				}
@@ -12239,6 +12253,9 @@ angular.module('3drepo')
 			}
 			else {
 				height = newIssueHeight;
+				if (self.showAdditional) {
+					height += additionalInfoHeight;
+				}
 			}
 
 			self.contentHeight({height: height});
@@ -12750,9 +12767,9 @@ angular.module('3drepo')
 			}
 		);
 
-	IssuesScreenShotCtrl.$inject = ["$q", "$timeout", "UtilsService", "EventService"];
+	IssuesScreenShotCtrl.$inject = ["$q", "$timeout", "$element", "UtilsService", "EventService"];
 
-	function IssuesScreenShotCtrl ($q, $timeout, UtilsService, EventService) {
+	function IssuesScreenShotCtrl ($q, $timeout, $element, UtilsService, EventService) {
 		var self = this,
 			currentActionIndex = null,
 			highlightBackground = "#FF9800",
@@ -12769,8 +12786,8 @@ angular.module('3drepo')
 			mouse_button = 0,
 			mouse_dragging = false,
 			pen_col = "#DD0000",
-			penIndicatorSize = 8,
-			penToIndicatorRatio = 0.8,
+			penIndicatorSize = 16,
+			penToIndicatorRatio = 0.5,
 			pen_size = penIndicatorSize * penToIndicatorRatio,
 			hasDrawnOnCanvas = false;
 
@@ -12791,6 +12808,13 @@ angular.module('3drepo')
 				initCanvas(scribbleCanvas);
 				setupScribble();
 
+				// Pen indicator
+				self.showPenIndicator = false;
+				penIndicator = angular.element($element[0].querySelector("#issueScreenShotPenIndicator"));
+				penIndicator.css("font-size", penIndicatorSize + "px");
+
+				self.actionsPointerEvents = "auto";
+
 				// Get the screen shot
 				self.sendEvent({type:EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
 				screenShotPromise.promise.then(function (screenShot) {
@@ -12799,9 +12823,10 @@ angular.module('3drepo')
 
 				// Set up action buttons
 				self.actions = [
-					{icon: "border_color", action: "draw", label: "Draw", color: ""},
+					{icon: "border_color", action: "draw", label: "Draw", color: highlightBackground},
 					{icon: "fa fa-eraser", action: "erase", label: "Erase", color: ""}
 				];
+				currentActionIndex = 0;
 			});
 		}
 
@@ -12828,7 +12853,7 @@ angular.module('3drepo')
 				evt.returnValue = false;
 
 				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: true});
-				// vm.pointerEvents = "none";
+				self.actionsPointerEvents = "none";
 			}, false);
 
 			canvas.addEventListener('mouseup', function (evt) {
@@ -12844,7 +12869,7 @@ angular.module('3drepo')
 				evt.returnValue = false;
 
 				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
-				// vm.pointerEvents = "auto";
+				self.actionsPointerEvents = "auto";
 			}, false);
 
 			canvas.addEventListener('mouseout', function (evt) {
@@ -12860,7 +12885,7 @@ angular.module('3drepo')
 				evt.returnValue = false;
 
 				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
-				// vm.pointerEvents = "auto";
+				self.actionsPointerEvents = "auto";
 			}, false);
 
 			canvas.addEventListener('mousemove', function (evt) {
@@ -12883,7 +12908,7 @@ angular.module('3drepo')
 				evt.preventDefault();
 				evt.stopPropagation();
 				evt.returnValue = false;
-				//setPenIndicatorPosition(evt.layerX, evt.layerY);
+				setPenIndicatorPosition(evt.layerX, evt.layerY);
 			}, false);
 		}
 
@@ -12936,7 +12961,7 @@ angular.module('3drepo')
 		function setupScribble () {
 			scribbleCanvasContext.globalCompositeOperation = "source-over";
 			pen_col = "#FF0000";
-			pen_size = penIndicatorSize;
+			//pen_size = penIndicatorSize;
 			// vm.canvasPointerEvents = "auto";
 		}
 
@@ -12987,6 +13012,18 @@ angular.module('3drepo')
 
 			this.closeDialog();
 		};
+
+		/**
+		 * Move the pen indicator
+		 * @param x
+		 * @param y
+		 */
+		function setPenIndicatorPosition (x, y) {
+			var positionFactorX = 10.0,
+				positionFactorY = 30.0;
+			penIndicator.css("left", (x - positionFactorX) + "px");
+			penIndicator.css("top", (y + positionFactorY) + "px");
+		}
 	}
 }());
 /**
@@ -14243,15 +14280,11 @@ angular.module('3drepo')
 		/**
 		 * Update issue
 		 * @param issue
-		 * @param priority
-		 * @param status
+		 * @param data
 		 * @returns {*}
 		 */
-		obj.updateIssue = function (issue, priority, status) {
-			return doPut(issue, {
-				priority: priority,
-				status: status
-			});
+		obj.updateIssue = function (issue, data) {
+			return doPut(issue, data);
 		};
 
 		/**
@@ -17152,7 +17185,6 @@ var Oculus = {};
 
 			$http.get(url).then(function(res){
 				var data = res.data;
-				console.log('getProjectInfo data', data);
 				deferred.resolve({
 					account     : account,
 					project		: project,

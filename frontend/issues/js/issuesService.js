@@ -158,15 +158,11 @@
 		/**
 		 * Update issue
 		 * @param issue
-		 * @param priority
-		 * @param status
+		 * @param data
 		 * @returns {*}
 		 */
-		obj.updateIssue = function (issue, priority, status) {
-			return doPut(issue, {
-				priority: priority,
-				status: status
-			});
+		obj.updateIssue = function (issue, data) {
+			return doPut(issue, data);
 		};
 
 		/**

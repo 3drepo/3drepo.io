@@ -54,6 +54,7 @@
 		this.submitDisabled = true;
 		this.pinData = null;
 		this.multiData = null;
+		this.showAdditional = false;
 		this.priorities = [
 			{value: "none", label: "None"},
 			{value: "low", label: "Low"},
@@ -216,6 +217,7 @@
 
 			switch (this.actions[currentActionIndex].action) {
 				case "screen_shot":
+					delete this.screenShot; // Remove any clicked on screen shot
 					$mdDialog.show({
 						controller: ScreenShotDialogController,
 						controllerAs: "vm",
@@ -239,6 +241,14 @@
 		 */
 		this.setMulti = function (multiData) {
 			self.multiData = multiData.data;
+		};
+
+		/**
+		 * Toggle showing of extra inputs
+		 */
+		this.toggleShowAdditional = function () {
+			this.showAdditional = !this.showAdditional;
+			setContentHeight();
 		};
 
 		/**
@@ -345,7 +355,12 @@
 		 * Update an existing issue and notify parent
 		 */
 		function updateIssue () {
-			IssuesService.updateIssue(self.issueData, self.issueData.priority, self.issueData.status)
+			var data = {
+				priority: self.issueData.priority,
+				status: self.issueData.status,
+				topic_type: self.issueData.topic_type
+			};
+			IssuesService.updateIssue(self.issueData, data)
 				.then(function (data) {
 					console.log(data);
 					IssuesService.updatedIssue = self.issueData;
@@ -439,14 +454,19 @@
 
 		function setContentHeight() {
 			var i, length,
-				newIssueHeight = 470,
+				newIssueHeight = 435,
 				issueMinHeight = 672,
 				descriptionTextHeight = 80,
 				commentTextHeight = 80,
 				commentImageHeight = 170,
+				additionalInfoHeight = 70,
 				height = issueMinHeight;
 
 			if (self.data) {
+				if (self.showAdditional) {
+					height += additionalInfoHeight;
+				}
+
 				if (self.issueData.hasOwnProperty("desc")) {
 					height += descriptionTextHeight;
 				}
@@ -460,6 +480,9 @@
 			}
 			else {
 				height = newIssueHeight;
+				if (self.showAdditional) {
+					height += additionalInfoHeight;
+				}
 			}
 
 			self.contentHeight({height: height});
