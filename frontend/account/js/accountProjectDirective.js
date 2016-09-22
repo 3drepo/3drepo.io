@@ -160,16 +160,18 @@
 			
 			vm.uploadErrorMessage = null;
 
-			if(RevisionsService.isTagFormatInValid(vm.tag)){
+			if(vm.tag && RevisionsService.isTagFormatInValid(vm.tag)){
 				vm.uploadErrorMessage = 'Invalid revision name';
 			} else {
 				getRevision().then(function(revisions){
 
-					revisions.forEach(function(rev){
-						if(rev.tag === vm.tag){
-							vm.uploadErrorMessage = 'Revision name already exists';
-						}
-					});
+					if(vm.tag){
+						revisions.forEach(function(rev){
+							if(rev.tag === vm.tag){
+								vm.uploadErrorMessage = 'Revision name already exists';
+							}
+						});
+					}
 
 					if(!vm.uploadErrorMessage){
 						vm.uploadedFile = {project: vm.project, file: vm.file.files[0], tag: vm.tag, desc: vm.desc};
