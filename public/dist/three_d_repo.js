@@ -11812,7 +11812,6 @@ angular.module('3drepo')
 					sendEvent: "&",
 					event: "<",
 					issueCreated: "&",
-					issueUpdated: "&",
 					contentHeight: "&"
 				}
 			}
@@ -11824,8 +11823,7 @@ angular.module('3drepo')
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
-			currentActionIndex = null,
-			issueMinHeight = 485;
+			currentActionIndex = null;
 
 		/*
 		 * Init
@@ -11856,7 +11854,6 @@ angular.module('3drepo')
 			{icon: "place", action: "pin", label: "Pin", color: "", disabled: this.data},
 			{icon: "view_comfy", action: "multi", label: "Multi", color: "", disabled: this.data}
 		];
-		self.contentHeight({height: issueMinHeight});
 
 		/**
 		 * Monitor changes to parameters
@@ -11878,7 +11875,9 @@ angular.module('3drepo')
 					this.issueData = angular.copy(this.data);
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
-					this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshotSmall);
+					if (this.issueData.viewpoint.hasOwnProperty("screenshotSmall")) {
+						this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshotSmall);
+					}
 					this.canUpdate = (this.account === this.issueData.owner);
 				}
 				else {
@@ -11892,6 +11891,7 @@ angular.module('3drepo')
 				}
 				this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 			}
+			setContentHeight();
 		};
 
 		/**
@@ -12106,18 +12106,29 @@ angular.module('3drepo')
 					console.log(response);
 					self.data = response.data; // So that new changes are registered as updates
 					self.issueData = response.data;
-					self.issueData.name = IssuesService.generateTitle(self.issueData); // Change name to title for display purposes
+					self.issueData.title = IssuesService.generateTitle(self.issueData);
 					self.descriptionThumbnail = UtilsService.getServerUrl(self.issueData.viewpoint.screenshotSmall);
+					self.issueData.timeStamp = IssuesService.getPrettyTime(self.issueData.created);
+
+					// Hide the description input if no description
+					self.hideDescription = !self.issueData.hasOwnProperty("desc");
+
+					// Notify parent of new issue
 					self.issueCreated({issue: self.issueData});
+
+					setContentHeight();
 			});
 		}
 
 		/**
-		 * Update an existing issue
+		 * Update an existing issue and notify parent
 		 */
 		function updateIssue () {
 			IssuesService.updateIssue(self.issueData, self.issueData.priority, self.issueData.status)
-				.then(function (data) {console.log(data);});
+				.then(function (data) {
+					console.log(data);
+					IssuesService.updatedIssue = self.issueData;
+				});
 		}
 
 		/**
@@ -12172,6 +12183,8 @@ angular.module('3drepo')
 			});
 			delete self.comment;
 			delete self.commentThumbnail;
+			IssuesService.updatedIssue = self.issueData;
+			setContentHeight();
 		}
 
 		/**
@@ -12201,6 +12214,34 @@ angular.module('3drepo')
 				self.actions[currentActionIndex].color = "";
 				currentActionIndex = null;
 			};
+		}
+
+		function setContentHeight() {
+			var i, length,
+				newIssueHeight = 470,
+				issueMinHeight = 672,
+				descriptionTextHeight = 80,
+				commentTextHeight = 80,
+				commentImageHeight = 170,
+				height = issueMinHeight;
+
+			if (self.data) {
+				if (self.issueData.hasOwnProperty("desc")) {
+					height += descriptionTextHeight;
+				}
+
+				for (i = 0, length = self.issueData.comments.length; i < length; i += 1) {
+					height += commentTextHeight;
+					if (self.issueData.comments[i].viewpoint.hasOwnProperty("screenshot")) {
+						height += commentImageHeight;
+					}
+				}
+			}
+			else {
+				height = newIssueHeight;
+			}
+
+			self.contentHeight({height: height});
 		}
 	}
 }());
@@ -13432,14 +13473,6 @@ angular.module('3drepo')
 		};
 
 		/**
-		 * Issue updated so inform issues list
-		 * @param issue
-		 */
-		vm.issueCreated = function (issue) {
-			vm.updatedIssue = issue;
-		};
-
-		/**
 		 * Remove the temporary pin used for adding an issue
 		 */
 		function removeAddPin () {
@@ -13540,8 +13573,7 @@ angular.module('3drepo')
 					nonListSelect: "<",
 					keysDown: "<",
 					contentHeight: "&",
-					menuOption: "<",
-					updatedIssue: "<"
+					menuOption: "<"
 				}
 			}
 		);
@@ -13572,19 +13604,24 @@ angular.module('3drepo')
 				downArrow = 40,
 				rightArrow = 39,
 				keysDown,
-				event = {type: "click"};
+				event = {type: "click"},
+				updatedIssue = IssuesService.updatedIssue;
 
 			// All issues
 			if (changes.hasOwnProperty("allIssues") && this.allIssues) {
 				if (this.allIssues.length > 0) {
 					self.toShow = "list";
 					setupIssuesToShow();
-					// Get a possible selected issue
+					// Process issues
 					for (i = 0, length = this.issuesToShow.length; i < length; i += 1) {
+						// Check for updated issue
+						if ((updatedIssue !== null) && (updatedIssue._id === this.issuesToShow[i]._id)) {
+							this.issuesToShow[i] = updatedIssue;
+						}
+						// Get a possible selected issue
 						if (this.issuesToShow[i].selected) {
 							selectedIssue = this.issuesToShow[i];
 							setSelectedIssueIndex(selectedIssue);
-							break;
 						}
 					}
 					self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
@@ -13655,17 +13692,16 @@ angular.module('3drepo')
 			}
 
 			// Updated issue
-			/*
 			if (changes.hasOwnProperty("updatedIssue") && this.updatedIssue) {
+				console.log(this.updatedIssue);
 				for (i = 0, length = this.allIssues.length; i < length; i += 1) {
 					if (this.updatedIssue._id === this.allIssues[i]._id) {
-						this.allIssues.splice()
+						this.allIssues[i] = this.updatedIssue;
 						break;
 					}
 				}
 
 			}
-			*/
 		};
 
 		/**
@@ -13906,7 +13942,8 @@ angular.module('3drepo')
 		 * Add issue pins to the viewer
 		 */
 		function showPins () {
-			var pin,
+			var i, length,
+				pin,
 				pinData;
 
 			// Go through all issues with pins
@@ -14082,7 +14119,8 @@ angular.module('3drepo')
 			availableRoles = [],
 			userRoles = [],
 			obj = {},
-			newPinId = "newPinId";
+			newPinId = "newPinId",
+			updatedIssue = null;
 
 		// TODO: Internationalise and make globally accessible
 		obj.getPrettyTime = function(time) {
@@ -14437,12 +14475,33 @@ angular.module('3drepo')
 			return statusIcon;
 		};
 
-
 		Object.defineProperty(
 			obj,
 			"newPinId",
 			{
 				get: function () {return newPinId;}
+			}
+		);
+
+		// Getter setter for updatedIssue
+		Object.defineProperty(
+			obj,
+			"updatedIssue",
+			{
+				get: function () {
+					var tmpUpdatedIssue;
+					if (updatedIssue === null) {
+						return null;
+					}
+					else {
+						tmpUpdatedIssue = updatedIssue;
+						updatedIssue = null;
+						return tmpUpdatedIssue;
+					}
+				},
+				set: function(issue) {
+					updatedIssue = issue;
+				}
 			}
 		);
 

@@ -33,7 +33,6 @@
 					sendEvent: "&",
 					event: "<",
 					issueCreated: "&",
-					issueUpdated: "&",
 					contentHeight: "&"
 				}
 			}
@@ -45,8 +44,7 @@
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
-			currentActionIndex = null,
-			issueMinHeight = 485;
+			currentActionIndex = null;
 
 		/*
 		 * Init
@@ -77,7 +75,6 @@
 			{icon: "place", action: "pin", label: "Pin", color: "", disabled: this.data},
 			{icon: "view_comfy", action: "multi", label: "Multi", color: "", disabled: this.data}
 		];
-		self.contentHeight({height: issueMinHeight});
 
 		/**
 		 * Monitor changes to parameters
@@ -99,7 +96,9 @@
 					this.issueData = angular.copy(this.data);
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
-					this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshotSmall);
+					if (this.issueData.viewpoint.hasOwnProperty("screenshotSmall")) {
+						this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshotSmall);
+					}
 					this.canUpdate = (this.account === this.issueData.owner);
 				}
 				else {
@@ -113,6 +112,7 @@
 				}
 				this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 			}
+			setContentHeight();
 		};
 
 		/**
@@ -327,18 +327,29 @@
 					console.log(response);
 					self.data = response.data; // So that new changes are registered as updates
 					self.issueData = response.data;
-					self.issueData.name = IssuesService.generateTitle(self.issueData); // Change name to title for display purposes
+					self.issueData.title = IssuesService.generateTitle(self.issueData);
 					self.descriptionThumbnail = UtilsService.getServerUrl(self.issueData.viewpoint.screenshotSmall);
+					self.issueData.timeStamp = IssuesService.getPrettyTime(self.issueData.created);
+
+					// Hide the description input if no description
+					self.hideDescription = !self.issueData.hasOwnProperty("desc");
+
+					// Notify parent of new issue
 					self.issueCreated({issue: self.issueData});
+
+					setContentHeight();
 			});
 		}
 
 		/**
-		 * Update an existing issue
+		 * Update an existing issue and notify parent
 		 */
 		function updateIssue () {
 			IssuesService.updateIssue(self.issueData, self.issueData.priority, self.issueData.status)
-				.then(function (data) {console.log(data);});
+				.then(function (data) {
+					console.log(data);
+					IssuesService.updatedIssue = self.issueData;
+				});
 		}
 
 		/**
@@ -393,6 +404,8 @@
 			});
 			delete self.comment;
 			delete self.commentThumbnail;
+			IssuesService.updatedIssue = self.issueData;
+			setContentHeight();
 		}
 
 		/**
@@ -422,6 +435,34 @@
 				self.actions[currentActionIndex].color = "";
 				currentActionIndex = null;
 			};
+		}
+
+		function setContentHeight() {
+			var i, length,
+				newIssueHeight = 470,
+				issueMinHeight = 672,
+				descriptionTextHeight = 80,
+				commentTextHeight = 80,
+				commentImageHeight = 170,
+				height = issueMinHeight;
+
+			if (self.data) {
+				if (self.issueData.hasOwnProperty("desc")) {
+					height += descriptionTextHeight;
+				}
+
+				for (i = 0, length = self.issueData.comments.length; i < length; i += 1) {
+					height += commentTextHeight;
+					if (self.issueData.comments[i].viewpoint.hasOwnProperty("screenshot")) {
+						height += commentImageHeight;
+					}
+				}
+			}
+			else {
+				height = newIssueHeight;
+			}
+
+			self.contentHeight({height: height});
 		}
 	}
 }());

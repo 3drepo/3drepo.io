@@ -34,7 +34,8 @@
 			availableRoles = [],
 			userRoles = [],
 			obj = {},
-			newPinId = "newPinId";
+			newPinId = "newPinId",
+			updatedIssue = null;
 
 		// TODO: Internationalise and make globally accessible
 		obj.getPrettyTime = function(time) {
@@ -389,12 +390,33 @@
 			return statusIcon;
 		};
 
-
 		Object.defineProperty(
 			obj,
 			"newPinId",
 			{
 				get: function () {return newPinId;}
+			}
+		);
+
+		// Getter setter for updatedIssue
+		Object.defineProperty(
+			obj,
+			"updatedIssue",
+			{
+				get: function () {
+					var tmpUpdatedIssue;
+					if (updatedIssue === null) {
+						return null;
+					}
+					else {
+						tmpUpdatedIssue = updatedIssue;
+						updatedIssue = null;
+						return tmpUpdatedIssue;
+					}
+				},
+				set: function(issue) {
+					updatedIssue = issue;
+				}
 			}
 		);
 

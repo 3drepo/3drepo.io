@@ -3,7 +3,7 @@ div(ng-switch="$ctrl.toShow")
 	div(ng-switch-when="list")
 		.issueListItem(ng-repeat="issue in $ctrl.issuesToShow", layout="column", ng-click="$ctrl.select($event, issue)")
 			#issuesListItemContent(layout='row')
-				.issueListItemThumbnail(flex="40", layout="column", layout-align="center center")
+				.issueListItemThumbnail(flex="40", layout="column", layout-align="center center", ng-if="issue.thumbnail")
 					img(ng-src="{{$ctrl.UtilsService.getServerUrl(issue.thumbnail)}}")
 				div(flex, layout="column")
 					label#issuesListItemTitle(flex="none") {{issue.title}}

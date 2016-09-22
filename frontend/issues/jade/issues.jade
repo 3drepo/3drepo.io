@@ -27,8 +27,7 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 	keys-down="vm.keysDown"
 	non-list-select="vm.selectIssue"
 	content-height="vm.setContentHeight(height)"
-	menu-option="vm.selectedMenuOption"
-	updated-issue="vm.updatedIssue")
+	menu-option="vm.selectedMenuOption")
 
 	// Issue
 	issue-comp(
@@ -41,6 +40,5 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 	send-event="vm.sendEvent(type, value)"
 	event="vm.event"
 	issue-created="vm.issueCreated(issue)"
-	issue-updated="vm.issueUpdated(issue)"
 	content-height="vm.setContentHeight(height)")
 

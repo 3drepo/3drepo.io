@@ -334,15 +334,13 @@ issue-comp .issueCompItemStatus {
 
 issue-comp .issueCompThumbnail {
   position: relative;
-  margin-bottom: 175px;
-  outline: none;
+  display: inline-block;
 }
 issue-comp .issueCompThumbnail:hover {
   cursor: pointer;
 }
 issue-comp .issueCompThumbnail img {
-  position: absolute;
-  width: 365px;
+  width: 100%;
 }
 
 issue-comp .issueCompIssueOwner {

@@ -35,8 +35,7 @@
 					nonListSelect: "<",
 					keysDown: "<",
 					contentHeight: "&",
-					menuOption: "<",
-					updatedIssue: "<"
+					menuOption: "<"
 				}
 			}
 		);
@@ -67,19 +66,24 @@
 				downArrow = 40,
 				rightArrow = 39,
 				keysDown,
-				event = {type: "click"};
+				event = {type: "click"},
+				updatedIssue = IssuesService.updatedIssue;
 
 			// All issues
 			if (changes.hasOwnProperty("allIssues") && this.allIssues) {
 				if (this.allIssues.length > 0) {
 					self.toShow = "list";
 					setupIssuesToShow();
-					// Get a possible selected issue
+					// Process issues
 					for (i = 0, length = this.issuesToShow.length; i < length; i += 1) {
+						// Check for updated issue
+						if ((updatedIssue !== null) && (updatedIssue._id === this.issuesToShow[i]._id)) {
+							this.issuesToShow[i] = updatedIssue;
+						}
+						// Get a possible selected issue
 						if (this.issuesToShow[i].selected) {
 							selectedIssue = this.issuesToShow[i];
 							setSelectedIssueIndex(selectedIssue);
-							break;
 						}
 					}
 					self.contentHeight({height: self.issuesToShow.length * issuesListItemHeight});
@@ -150,17 +154,16 @@
 			}
 
 			// Updated issue
-			/*
 			if (changes.hasOwnProperty("updatedIssue") && this.updatedIssue) {
+				console.log(this.updatedIssue);
 				for (i = 0, length = this.allIssues.length; i < length; i += 1) {
 					if (this.updatedIssue._id === this.allIssues[i]._id) {
-						this.allIssues.splice()
+						this.allIssues[i] = this.updatedIssue;
 						break;
 					}
 				}
 
 			}
-			*/
 		};
 
 		/**
@@ -401,7 +404,8 @@
 		 * Add issue pins to the viewer
 		 */
 		function showPins () {
-			var pin,
+			var i, length,
+				pin,
 				pinData;
 
 			// Go through all issues with pins

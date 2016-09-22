@@ -49,7 +49,7 @@ div(layout="column", tabindex="0", tdr-focus="true", flex)
 				img(ng-src="{{$ctrl.descriptionThumbnail}}")
 
 	// Comments
-	.issueCompItemContainer(layout="column", layout-align="start", flex)
+	.issueCompItemContainer(layout="column", layout-align="start", flex, ng-if="$ctrl.issueData.comments.length>0")
 		div(
 		ng-repeat="comment in $ctrl.issueData.comments"
 		layout="column"
@@ -64,7 +64,8 @@ div(layout="column", tabindex="0", tdr-focus="true", flex)
 			.issueCompThumbnail(
 			layout="row"
 			layout-align="center"
-			ng-if="comment.viewpoint.screenshot")
+			ng-if="comment.viewpoint.screenshot"
+			flex)
 				img(ng-src="{{$ctrl.UtilsService.getServerUrl(comment.viewpoint.screenshot)}}")
 
 	// New comment
