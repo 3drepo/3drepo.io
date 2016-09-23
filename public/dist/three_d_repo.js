@@ -12261,6 +12261,7 @@ angular.module('3drepo')
 		 * @param index
 		 */
 		this.toggleEditComment = function(event, index) {
+			event.stopPropagation();
 			editingCommentIndex = (editingCommentIndex === null) ? index : null;
 			this.editCommentColor = (editingCommentIndex === null) ? "" : highlightBackground;
 			if (editingCommentIndex === null) {
