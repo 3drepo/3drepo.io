@@ -34,7 +34,8 @@
 			availableRoles = [],
 			userRoles = [],
 			obj = {},
-			newPinId = "newPinId";
+			newPinId = "newPinId",
+			updatedIssue = null;
 
 		// TODO: Internationalise and make globally accessible
 		obj.getPrettyTime = function(time) {
@@ -97,6 +98,7 @@
 						deferred.resolve(data.data);
 						for (i = 0, numIssues = data.data.length; i < numIssues; i += 1) {
 							data.data[i].timeStamp = self.getPrettyTime(data.data[i].created);
+							data.data[i].title = self.generateTitle(data.data[i]);
 
 							if (data.data[i].hasOwnProperty("comments")) {
 								for (j = 0, numComments = data.data[i].comments.length; j < numComments; j += 1) {
@@ -136,7 +138,6 @@
 
 			$http.post(url, issue, config)
 				.then(function successCallback(response) {
-					console.log(response);
 					/*
 					response.data.issue._id = response.data.issue_id;
 					response.data.issue.account = issue.account;
@@ -148,10 +149,20 @@
 					response.data.issue.title = generateTitle(response.data.issue);
 					self.removePin();
 					*/
-					deferred.resolve(response.data.issue);
+					deferred.resolve(response);
 				});
 
 			return deferred.promise;
+		};
+
+		/**
+		 * Update issue
+		 * @param issue
+		 * @param data
+		 * @returns {*}
+		 */
+		obj.updateIssue = function (issue, data) {
+			return doPut(issue, data);
 		};
 
 		/**
@@ -174,7 +185,7 @@
 
 			$http.put(url, data, config)
 				.then(function (response) {
-					deferred.resolve(response.data);
+					deferred.resolve(response);
 				});
 			return deferred.promise;
 		}
@@ -375,12 +386,33 @@
 			return statusIcon;
 		};
 
-
 		Object.defineProperty(
 			obj,
 			"newPinId",
 			{
 				get: function () {return newPinId;}
+			}
+		);
+
+		// Getter setter for updatedIssue
+		Object.defineProperty(
+			obj,
+			"updatedIssue",
+			{
+				get: function () {
+					var tmpUpdatedIssue;
+					if (updatedIssue === null) {
+						return null;
+					}
+					else {
+						tmpUpdatedIssue = updatedIssue;
+						updatedIssue = null;
+						return tmpUpdatedIssue;
+					}
+				},
+				set: function(issue) {
+					updatedIssue = issue;
+				}
 			}
 		);
 

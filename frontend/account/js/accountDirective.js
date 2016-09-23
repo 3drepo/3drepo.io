@@ -81,7 +81,6 @@
 							UtilsService.showDialog("paypalDialog.html", $scope);
 							promise = UtilsService.doPost({token: ($location.search()).token}, "payment/paypal/execute");
 							promise.then(function (response) {
-								console.log("payment/paypal/execute ", response);
 								if (response.status === 200) {
 								}
 								vm.payPalInfo = "PayPal has finished processing. Thank you.";
@@ -128,7 +127,6 @@
 		 * @param callingPage
 		 */
 		vm.showPage = function (page, callingPage) {
-			console.log(page, callingPage);
 			vm.itemToShow = page;
 			$location.search("page", page);
 			vm.callingPage = callingPage;
@@ -159,19 +157,16 @@
 
 			billingsPromise = UtilsService.doGet(vm.account + "/billings");
 			billingsPromise.then(function (response) {
-				console.log("**billings** ", response);
 				vm.billings = response.data;
 			});
 
 			subscriptionsPromise = UtilsService.doGet(vm.account + "/subscriptions");
 			subscriptionsPromise.then(function (response) {
-				console.log("**subscriptions** ", response);
 				vm.subscriptions = response.data;
 			});
 
 			plansPromise = UtilsService.doGet("plans");
 			plansPromise.then(function (response) {
-				console.log("**plans** ", response);
 				if (response.status === 200) {
 					vm.plans = response.data;
 				}
@@ -184,7 +179,6 @@
 			userInfoPromise = AccountService.getUserInfo(vm.account);
 			userInfoPromise.then(function (response) {
 				var i, length;
-				console.log("**userInfo** ", response);
 				vm.accounts = response.data.accounts;
 				vm.username = vm.account;
 				vm.firstName = response.data.firstName;

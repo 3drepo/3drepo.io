@@ -30,7 +30,8 @@
 					keysDown: "<",
 					clear: "<",
 					sendEvent: "&",
-					event: "<"
+					event: "<",
+					setMulti: "&"
 				}
 			}
 		);
@@ -38,12 +39,16 @@
 	IssuesMultiCtrl.$inject = ["EventService"];
 
 	function IssuesMultiCtrl (EventService) {
-		var objectIndex,
+		var self = this,
+			objectIndex,
 			selectedObjectIDs = [],
 			cmdKey = 91,
 			ctrlKey = 17,
 			isMac = (navigator.platform.indexOf("Mac") !== -1),
 			multiMode = false;
+
+		// Init
+		this.setMulti({data: null});
 
 		/**
 		 * Handle component input changes
@@ -61,19 +66,6 @@
 				}
 				*/
 			}
-			/*
-			else if (changes.hasOwnProperty("selectedObject") && multiMode) {
-				objectIndex = selectedObjectIDs.indexOf(this.selectedObject.id);
-				if (objectIndex === -1) {
-					selectedObjectIDs.push(this.selectedObject.id);
-				}
-				else {
-					selectedObjectIDs.splice(objectIndex, 1);
-				}
-				//console.log(selectedObjectIDs);
-				this.displaySelectedObjects(selectedObjectIDs);
-			}
-			*/
 			else if (changes.hasOwnProperty("clear") && this.clear) {
 				this.displaySelectedObjects([]);
 			}
@@ -88,6 +80,13 @@
 						selectedObjectIDs.splice(objectIndex, 1);
 					}
 					this.displaySelectedObjects(selectedObjectIDs);
+
+					if (selectedObjectIDs.length > 0) {
+						self.setMulti({data: selectedObjectIDs});
+					}
+					else {
+						self.setMulti({data: null});
+					}
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 					//removePin();

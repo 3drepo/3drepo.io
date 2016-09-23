@@ -31,7 +31,9 @@
 					keysDown: "<",
 					exit: "&",
 					sendEvent: "&",
-					event: "<"
+					event: "<",
+					issueCreated: "&",
+					contentHeight: "&"
 				}
 			}
 		);
@@ -50,6 +52,9 @@
 		this.UtilsService = UtilsService;
 		this.hideDescription = false;
 		this.submitDisabled = true;
+		this.pinData = null;
+		this.multiData = null;
+		this.showAdditional = false;
 		this.priorities = [
 			{value: "none", label: "None"},
 			{value: "low", label: "Low"},
@@ -88,11 +93,14 @@
 			*/
 
 			if (changes.hasOwnProperty("data")) {
-				if (typeof changes.data.currentValue === "object") {
+				if (this.data) {
 					this.issueData = angular.copy(this.data);
 					this.issueData.name = IssuesService.generateTitle(this.issueData); // Change name to title for display purposes
 					this.hideDescription = !this.issueData.hasOwnProperty("desc");
-					this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshot);
+					if (this.issueData.viewpoint.hasOwnProperty("screenshotSmall")) {
+						this.descriptionThumbnail = UtilsService.getServerUrl(this.issueData.viewpoint.screenshotSmall);
+					}
+					this.canUpdate = (this.account === this.issueData.owner);
 				}
 				else {
 					this.issueData = {
@@ -101,9 +109,11 @@
 						topic_type: "for_information",
 						viewpoint: {}
 					};
+					this.canUpdate = true;
 				}
 				this.statusIcon = IssuesService.getStatusIcon(this.issueData);
 			}
+			setContentHeight();
 		};
 
 		/**
@@ -117,56 +127,78 @@
 		 * Disable the save button when commenting on an issue if there is no comment
 		 */
 		this.commentChange = function () {
-			this.submitDisabled = ((typeof this.data === "object") && (typeof this.comment === "undefined"));
+			this.submitDisabled = (this.data && (typeof this.comment === "undefined"));
 		};
 
 		/**
-		 * Set the status icon style and colour
+		 * Handle status change
 		 */
-		this.setStatusIcon = function () {
+		this.statusChange = function () {
 			this.statusIcon = IssuesService.getStatusIcon(this.issueData);
+			// Update
+			if (this.data) {
+				this.submitDisabled = (this.data.priority === this.issueData.priority) && (this.data.status === this.issueData.status);
+			}
 		};
 
 		/**
-		 * Submit - new issue or comment
+		 * Submit - new issue or comment or update issue
 		 */
 		this.submit = function () {
-			var viewpointPromise = $q.defer(),
-				screenShotPromise = $q.defer();
-
-			// Viewpoint
-			this.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
-			viewpointPromise.promise.then(function (viewpoint) {
-				if (typeof self.data === "undefined") {
-					if (savedScreenShot !== null) {
-						saveIssue(viewpoint, savedScreenShot);
+			if (self.data) {
+				if (self.data.owner === self.account) {
+					if ((this.data.priority !== this.issueData.priority) ||
+						(this.data.status !== this.issueData.status)) {
+						updateIssue();
+						if (typeof this.comment !== "undefined") {
+							saveComment();
+						}
 					}
 					else {
-						self.sendEvent({type: EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
-						screenShotPromise.promise.then(function (screenShot) {
-							saveIssue(viewpoint, screenShot);
-						});
+						saveComment();
 					}
 				}
 				else {
-					saveComment(viewpoint);
+					saveComment();
 				}
-			});
+			}
+			else {
+				saveIssue();
+			}
 		};
 
-		this.showScreenShot = function (screenShot) {
-			self.screenShot = UtilsService.getServerUrl(screenShot);
-			$mdDialog.show({
-				controller: function () {
-					this.dialogCaller = self;
-				},
-				controllerAs: "vm",
-				templateUrl: "issueScreenShotDialog.html"
-			});
+		/**
+		 * Show viewpoint and screen shot if there is one
+		 * @param viewpoint
+		 */
+		this.showViewpointAndScreenShot = function (viewpoint) {
+			var data;
+			if (angular.isDefined(viewpoint.screenshot)) {
+				// Viewpoint
+				data = {
+					position : viewpoint.position,
+					view_dir : viewpoint.view_dir,
+					up: viewpoint.up
+				};
+				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CAMERA, value: data});
+
+				// Screen shot
+				self.screenShot = UtilsService.getServerUrl(viewpoint.screenshot);
+				$mdDialog.show({
+					controller: function () {
+						this.dialogCaller = self;
+					},
+					controllerAs: "vm",
+					templateUrl: "issueScreenShotDialog.html"
+				});
+			}
 		};
 
+		/**
+		 * Do an action
+		 * @param index
+		 */
 		this.doAction = function (index) {
-			console.log(this.actions[index].action);
 			if (currentActionIndex === null) {
 				currentActionIndex = index;
 				this.actions[currentActionIndex].color = highlightBackground;
@@ -185,17 +217,12 @@
 
 			switch (this.actions[currentActionIndex].action) {
 				case "screen_shot":
+					delete this.screenShot; // Remove any clicked on screen shot
 					$mdDialog.show({
 						controller: ScreenShotDialogController,
 						controllerAs: "vm",
 						templateUrl: "issueScreenShotDialog.html"
 					});
-					break;
-
-				case "pin":
-					break;
-
-				case "multi":
 					break;
 			}
 		};
@@ -209,13 +236,71 @@
 		};
 
 		/**
-		 * Save new issue
+		 * Set the current add pin data
+		 * @param multiData
+		 */
+		this.setMulti = function (multiData) {
+			self.multiData = multiData.data;
+		};
+
+		/**
+		 * Toggle showing of extra inputs
+		 */
+		this.toggleShowAdditional = function () {
+			this.showAdditional = !this.showAdditional;
+			setContentHeight();
+		};
+
+		/**
+		 * Save issue
+		 */
+		function saveIssue () {
+			var viewpointPromise = $q.defer(),
+				screenShotPromise = $q.defer(),
+				data;
+
+			// Get the viewpoint
+			self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
+			viewpointPromise.promise.then(function (viewpoint) {
+				if (savedScreenShot !== null) {
+					if (self.multiData !== null) {
+						// Create a group of selected objects
+						data = {name: self.issueData.name, color: [255, 0, 0], parents: self.multiData};
+						UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
+							doSaveIssue(viewpoint, savedScreenShot, response.data._id);
+						});
+					}
+					else {
+						doSaveIssue(viewpoint, savedScreenShot);
+					}
+				}
+				else {
+					// Get a screen shot if not already created
+					self.sendEvent({type: EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
+					screenShotPromise.promise.then(function (screenShot) {
+						if (self.multiData !== null) {
+							// Create a group of selected objects
+							data = {name: self.issueData.name, color: [255, 0, 0], parents: self.multiData};
+							UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
+								doSaveIssue(viewpoint, screenShot, response.data._id);
+							});
+						}
+						else {
+							doSaveIssue(viewpoint, screenShot);
+						}
+					});
+				}
+			});
+		}
+
+		/**
+		 * Send new issue data to server
 		 * @param viewpoint
 		 * @param screenShot
+		 * @param groupId
 		 */
-		function saveIssue (viewpoint, screenShot) {
-			var	savePromise,
-				issue;
+		function doSaveIssue (viewpoint, screenShot, groupId) {
+			var	issue;
 
 			// Remove base64 header text from screenShot and add to viewpoint
 			screenShot = screenShot.substring(screenShot.indexOf(",") + 1);
@@ -243,39 +328,99 @@
 				issue.pickedPos = self.pinData.pickedPos;
 				issue.pickedNorm = self.pinData.pickedNorm;
 			}
-			savePromise = IssuesService.saveIssue(issue);
-			savePromise.then(function (data) {
-				console.log(data);
+			// Group data
+			if (angular.isDefined(groupId)) {
+				issue.group_id = groupId;
+			}
+			IssuesService.saveIssue(issue)
+				.then(function (response) {
+					console.log(response);
+					self.data = response.data; // So that new changes are registered as updates
+					self.issueData = response.data;
+					self.issueData.title = IssuesService.generateTitle(self.issueData);
+					self.descriptionThumbnail = UtilsService.getServerUrl(self.issueData.viewpoint.screenshotSmall);
+					self.issueData.timeStamp = IssuesService.getPrettyTime(self.issueData.created);
+
+					// Hide the description input if no description
+					self.hideDescription = !self.issueData.hasOwnProperty("desc");
+
+					// Notify parent of new issue
+					self.issueCreated({issue: self.issueData});
+
+					setContentHeight();
 			});
 		}
 
 		/**
-		 * Add comment to issue
-		 * @param viewpoint
+		 * Update an existing issue and notify parent
 		 */
-		function saveComment (viewpoint) {
-			var	savePromise,
-				screenShot,
-				viewpointToUse;
+		function updateIssue () {
+			var data = {
+				priority: self.issueData.priority,
+				status: self.issueData.status,
+				topic_type: self.issueData.topic_type
+			};
+			IssuesService.updateIssue(self.issueData, data)
+				.then(function (data) {
+					console.log(data);
+					IssuesService.updatedIssue = self.issueData;
+				});
+		}
+
+		/**
+		 * Add comment to issue
+		 */
+		function saveComment () {
+			var	screenShot,
+				issueViewpoint,
+				viewpointPromise = $q.defer();
 
 			// If there is a saved screen shot use the current viewpoint, else the issue viewpoint
 			// Remove base64 header text from screen shot and add to viewpoint
 			if (angular.isDefined(self.commentThumbnail)) {
-				viewpointToUse = viewpoint;
-				screenShot = savedScreenShot.substring(savedScreenShot.indexOf(",") + 1);
-				viewpoint.screenshot = screenShot;
+				// Get the viewpoint
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
+				viewpointPromise.promise.then(function (viewpoint) {
+					screenShot = savedScreenShot.substring(savedScreenShot.indexOf(",") + 1);
+					viewpoint.screenshot = screenShot;
+					// Save
+					IssuesService.saveComment(self.issueData, self.comment, viewpoint)
+						.then(function (response) {
+							console.log(response);
+							addNewCommentToIssue(response.data.issue);
+						});
+				});
 			}
 			else {
-				viewpointToUse = self.issueData.viewpoint;
-				if (viewpointToUse.hasOwnProperty("screenshot")) {
-					delete viewpointToUse.screenshot;
+				// Use issue viewpoint and delete any screen shot
+				issueViewpoint = angular.copy(self.issueData.viewpoint);
+				if (issueViewpoint.hasOwnProperty("screenshot")) {
+					delete issueViewpoint.screenshot;
 				}
+				// Save
+				IssuesService.saveComment(self.issueData, self.comment, issueViewpoint)
+					.then(function (response) {
+						console.log(response);
+						addNewCommentToIssue(response.data.issue);
+					});
 			}
+		}
 
-			savePromise = IssuesService.saveComment(self.issueData, self.comment, viewpointToUse);
-			savePromise.then(function (data) {
-				console.log(data);
+		/**
+		 * Add newly created comment to current issue
+		 * @param comment
+		 */
+		function addNewCommentToIssue (comment) {
+			self.issueData.comments.push({
+				comment: comment.comment,
+				owner: comment.owner,
+				timeStamp: IssuesService.getPrettyTime(comment.created),
+				viewpoint: comment.viewpoint
 			});
+			delete self.comment;
+			delete self.commentThumbnail;
+			IssuesService.updatedIssue = self.issueData;
+			setContentHeight();
 		}
 
 		/**
@@ -305,6 +450,42 @@
 				self.actions[currentActionIndex].color = "";
 				currentActionIndex = null;
 			};
+		}
+
+		function setContentHeight() {
+			var i, length,
+				newIssueHeight = 435,
+				issueMinHeight = 672,
+				descriptionTextHeight = 80,
+				commentTextHeight = 80,
+				commentImageHeight = 170,
+				additionalInfoHeight = 70,
+				height = issueMinHeight;
+
+			if (self.data) {
+				if (self.showAdditional) {
+					height += additionalInfoHeight;
+				}
+
+				if (self.issueData.hasOwnProperty("desc")) {
+					height += descriptionTextHeight;
+				}
+
+				for (i = 0, length = self.issueData.comments.length; i < length; i += 1) {
+					height += commentTextHeight;
+					if (self.issueData.comments[i].viewpoint.hasOwnProperty("screenshot")) {
+						height += commentImageHeight;
+					}
+				}
+			}
+			else {
+				height = newIssueHeight;
+				if (self.showAdditional) {
+					height += additionalInfoHeight;
+				}
+			}
+
+			self.contentHeight({height: height});
 		}
 	}
 }());

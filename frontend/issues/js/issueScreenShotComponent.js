@@ -33,9 +33,9 @@
 			}
 		);
 
-	IssuesScreenShotCtrl.$inject = ["$q", "$timeout", "UtilsService", "EventService"];
+	IssuesScreenShotCtrl.$inject = ["$q", "$timeout", "$element", "UtilsService", "EventService"];
 
-	function IssuesScreenShotCtrl ($q, $timeout, UtilsService, EventService) {
+	function IssuesScreenShotCtrl ($q, $timeout, $element, UtilsService, EventService) {
 		var self = this,
 			currentActionIndex = null,
 			highlightBackground = "#FF9800",
@@ -52,8 +52,8 @@
 			mouse_button = 0,
 			mouse_dragging = false,
 			pen_col = "#DD0000",
-			penIndicatorSize = 8,
-			penToIndicatorRatio = 0.8,
+			penIndicatorSize = 16,
+			penToIndicatorRatio = 0.5,
 			pen_size = penIndicatorSize * penToIndicatorRatio,
 			hasDrawnOnCanvas = false;
 
@@ -74,6 +74,13 @@
 				initCanvas(scribbleCanvas);
 				setupScribble();
 
+				// Pen indicator
+				self.showPenIndicator = false;
+				penIndicator = angular.element($element[0].querySelector("#issueScreenShotPenIndicator"));
+				penIndicator.css("font-size", penIndicatorSize + "px");
+
+				self.actionsPointerEvents = "auto";
+
 				// Get the screen shot
 				self.sendEvent({type:EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
 				screenShotPromise.promise.then(function (screenShot) {
@@ -82,9 +89,10 @@
 
 				// Set up action buttons
 				self.actions = [
-					{icon: "border_color", action: "draw", label: "Draw", color: ""},
+					{icon: "border_color", action: "draw", label: "Draw", color: highlightBackground},
 					{icon: "fa fa-eraser", action: "erase", label: "Erase", color: ""}
 				];
+				currentActionIndex = 0;
 			});
 		}
 
@@ -111,7 +119,7 @@
 				evt.returnValue = false;
 
 				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: true});
-				// vm.pointerEvents = "none";
+				self.actionsPointerEvents = "none";
 			}, false);
 
 			canvas.addEventListener('mouseup', function (evt) {
@@ -127,7 +135,7 @@
 				evt.returnValue = false;
 
 				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
-				// vm.pointerEvents = "auto";
+				self.actionsPointerEvents = "auto";
 			}, false);
 
 			canvas.addEventListener('mouseout', function (evt) {
@@ -143,7 +151,7 @@
 				evt.returnValue = false;
 
 				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING, {on: false});
-				// vm.pointerEvents = "auto";
+				self.actionsPointerEvents = "auto";
 			}, false);
 
 			canvas.addEventListener('mousemove', function (evt) {
@@ -166,7 +174,7 @@
 				evt.preventDefault();
 				evt.stopPropagation();
 				evt.returnValue = false;
-				//setPenIndicatorPosition(evt.layerX, evt.layerY);
+				setPenIndicatorPosition(evt.layerX, evt.layerY);
 			}, false);
 		}
 
@@ -219,7 +227,7 @@
 		function setupScribble () {
 			scribbleCanvasContext.globalCompositeOperation = "source-over";
 			pen_col = "#FF0000";
-			pen_size = penIndicatorSize;
+			//pen_size = penIndicatorSize;
 			// vm.canvasPointerEvents = "auto";
 		}
 
@@ -270,5 +278,17 @@
 
 			this.closeDialog();
 		};
+
+		/**
+		 * Move the pen indicator
+		 * @param x
+		 * @param y
+		 */
+		function setPenIndicatorPosition (x, y) {
+			var positionFactorX = 10.0,
+				positionFactorY = 30.0;
+			penIndicator.css("left", (x - positionFactorX) + "px");
+			penIndicator.css("top", (y + positionFactorY) + "px");
+		}
 	}
 }());

@@ -1,0 +1,26 @@
+div(ng-switch="$ctrl.toShow")
+	// List
+	div(ng-switch-when="list")
+		.issueListItem(ng-repeat="issue in $ctrl.issuesToShow", layout="column", ng-click="$ctrl.select($event, issue)")
+			#issuesListItemContent(layout='row')
+				.issueListItemThumbnail(flex="40", layout="column", layout-align="center center", ng-if="issue.thumbnail")
+					img(ng-src="{{$ctrl.UtilsService.getServerUrl(issue.thumbnail)}}")
+				div(flex, layout="column")
+					label#issuesListItemTitle(flex="none") {{issue.title}}
+					#issuesListItemInfo(layout="row", layout-align="start center", flex="none")
+						div(flex="15")
+							md-icon.angular-material-icons#issueCompStatus(
+							style="color:{{$ctrl.IssuesService.getStatusIcon(issue).colour}}") {{$ctrl.IssuesService.getStatusIcon(issue).icon}}
+						label(flex) {{issue.owner}}
+						div(layout="row", layout-align="end", flex="30")
+							label {{issue.timeStamp}}
+					#issuesListItemDescription
+						label {{issue.desc}}
+			md-divider
+
+			#issuesListItemEnter(ng-if="issue.selected", ng-click="$ctrl.editIssue(issue)", layout="column", layout-align="center center")
+				md-icon.angular-material-icons arrow_forward
+
+	// Info
+	.cardInfo(ng-switch-when="info")
+		p {{$ctrl.info}}
