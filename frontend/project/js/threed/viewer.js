@@ -1644,6 +1644,19 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			event.orientation = newOrient;
 		};
 
+		/**
+		 * Multi select mode
+		 * @param on
+		 */
+		this.multiSelectMode = function (on) {
+			var element = document.getElementById("x3dom-default-canvas");
+			if (on) {
+				element.style.cursor = "crosshair";
+			} else {
+				element.style.cursor = "-webkit-grab";
+			}
+		};
+
 		/****************************************************************************
 		 * Clipping planes
 		 ****************************************************************************/

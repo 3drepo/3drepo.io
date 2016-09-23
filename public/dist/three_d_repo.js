@@ -4459,6 +4459,19 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			event.orientation = newOrient;
 		};
 
+		/**
+		 * Multi select mode
+		 * @param on
+		 */
+		this.multiSelectMode = function (on) {
+			var element = document.getElementById("x3dom-default-canvas");
+			if (on) {
+				element.style.cursor = "crosshair";
+			} else {
+				element.style.cursor = "-webkit-grab";
+			}
+		};
+
 		/****************************************************************************
 		 * Clipping planes
 		 ****************************************************************************/
@@ -11856,14 +11869,14 @@ angular.module('3drepo')
 		 */
 		this.$onChanges = function (changes) {
 			/*
-			var leftArrow = 37;
-			if (changes.hasOwnProperty("keysDown") &&
-				angular.isDefined(changes.keysDown.previousValue)) {
-				if (changes.keysDown.previousValue[0] === leftArrow) {
-					this.exit({issue: this.data});
-				}
-			}
-			*/
+			 var leftArrow = 37;
+			 if (changes.hasOwnProperty("keysDown") &&
+			 angular.isDefined(changes.keysDown.previousValue)) {
+			 if (changes.keysDown.previousValue[0] === leftArrow) {
+			 this.exit({issue: this.data});
+			 }
+			 }
+			 */
 
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
@@ -11890,17 +11903,27 @@ angular.module('3drepo')
 		};
 
 		/**
+		 * Save a comment if one was being typed before close
+		 */
+		this.$onDestroy = function () {
+			if (this.comment) {
+				IssuesService.updatedIssue = self.issueData; // So that issues list is notified
+				saveComment();
+			}
+		};
+
+		/**
 		 * Disable the save button for a new issue if there is no name
 		 */
 		this.nameChange = function () {
-			this.submitDisabled = (typeof this.issueData.name === "undefined");
+			this.submitDisabled = !this.issueData.name;
 		};
 
 		/**
 		 * Disable the save button when commenting on an issue if there is no comment
 		 */
 		this.commentChange = function () {
-			this.submitDisabled = (this.data && (typeof this.comment === "undefined"));
+			this.submitDisabled = (this.data && !this.comment);
 		};
 
 		/**
@@ -11986,17 +12009,22 @@ angular.module('3drepo')
 				this.actions[currentActionIndex].color = highlightBackground;
 			}
 
-			self.action = this.actions[currentActionIndex].action;
+			if (currentActionIndex === null) {
+				self.action = null;
+			}
+			else {
+				self.action = this.actions[currentActionIndex].action;
 
-			switch (this.actions[currentActionIndex].action) {
-				case "screen_shot":
-					delete this.screenShot; // Remove any clicked on screen shot
-					$mdDialog.show({
-						controller: ScreenShotDialogController,
-						controllerAs: "vm",
-						templateUrl: "issueScreenShotDialog.html"
-					});
-					break;
+				switch (this.actions[currentActionIndex].action) {
+					case "screen_shot":
+						delete this.screenShot; // Remove any clicked on screen shot
+						$mdDialog.show({
+							controller: ScreenShotDialogController,
+							controllerAs: "vm",
+							templateUrl: "issueScreenShotDialog.html"
+						});
+						break;
+				}
 			}
 		};
 
@@ -13454,7 +13482,6 @@ angular.module('3drepo')
 		 * Go back to issues list
 		 */
 		$scope.$watch("vm.hideItem", function (newValue) {
-			console.log(newValue);
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showIssues";
 				vm.setContentHeight();
@@ -13677,24 +13704,28 @@ angular.module('3drepo')
 				showPins();
 			}
 
-			// Keys down
-			if (changes.hasOwnProperty("keysDown") && (this.keysDown.length > 0) && (selectedIssueIndex !== null)) {
-				if ((self.keysDown[0] === downArrow) || (self.keysDown[0] === upArrow)) {
-					if ((self.keysDown[0] === downArrow) && (selectedIssueIndex !== (this.issuesToShow.length - 1))) {
+			// Keys down - check for down followed by up
+			if (changes.hasOwnProperty("keysDown") &&
+				(changes.keysDown.currentValue.length === 0) &&
+				(changes.keysDown.previousValue.length === 1) &&
+				(selectedIssueIndex !== null)) {
+
+				if ((changes.keysDown.previousValue[0] === downArrow) || (changes.keysDown.previousValue[0] === upArrow)) {
+					if ((changes.keysDown.previousValue[0] === downArrow) && (selectedIssueIndex !== (this.issuesToShow.length - 1))) {
 						selectedIssue.selected = false;
 						selectedIssueIndex += 1;
 					}
-					else if ((self.keysDown[0] === upArrow) && (selectedIssueIndex !== 0)) {
+					else if ((changes.keysDown.previousValue[0] === upArrow) && (selectedIssueIndex !== 0)) {
 						selectedIssue.selected = false;
 						selectedIssueIndex -= 1;
 					}
 					deselectPin(selectedIssue);
 					selectedIssue = this.issuesToShow[selectedIssueIndex];
 					selectedIssue.selected = true;
-					setSelectedIssueIndex(selectedIssue);
 					showIssue(selectedIssue);
+					setSelectedIssueIndex(selectedIssue);
 				}
-				else if (self.keysDown[0] === rightArrow) {
+				else if (changes.keysDown.previousValue[0] === rightArrow) {
 					self.editIssue(selectedIssue);
 				}
 			}
@@ -13713,7 +13744,6 @@ angular.module('3drepo')
 
 			// Menu option
 			if (changes.hasOwnProperty("menuOption") && this.menuOption) {
-				console.log(this.menuOption);
 				if (this.menuOption.value === "sortByDate") {
 					sortOldestFirst = !sortOldestFirst;
 				}
@@ -13730,7 +13760,6 @@ angular.module('3drepo')
 
 			// Updated issue
 			if (changes.hasOwnProperty("updatedIssue") && this.updatedIssue) {
-				console.log(this.updatedIssue);
 				for (i = 0, length = this.allIssues.length; i < length; i += 1) {
 					if (this.updatedIssue._id === this.allIssues[i]._id) {
 						this.allIssues[i] = this.updatedIssue;
@@ -14063,12 +14092,12 @@ angular.module('3drepo')
 
 		// Init
 		this.setMulti({data: null});
+		this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: true});
 
 		/**
 		 * Handle component input changes
 		 */
 		this.$onChanges = function (changes) {
-			console.log(changes);
 			if (changes.hasOwnProperty("keysDown") && angular.isDefined(this.keysDown)) {
 				multiMode = ((isMac && this.keysDown.indexOf(cmdKey) !== -1) || (!isMac && this.keysDown.indexOf(ctrlKey) !== -1));
 				if (multiMode) {
@@ -14108,13 +14137,19 @@ angular.module('3drepo')
 			}
 		};
 
+		/**
+		 * Handle remove
+		 */
+		this.$onDestroy = function () {
+			this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: false});
+		};
+
 		this.displaySelectedObjects = function (selectedObjects) {
 			var data = {
 				source: "tree",
 				account: this.account,
 				project: this.project,
-				ids: selectedObjects,
-				colour: "1.0 0.0 0.0"
+				ids: selectedObjects
 			};
 			this.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, value: data});
 		};
@@ -16716,8 +16751,9 @@ var Oculus = {};
 			FULL_SCREEN_ENTER: "EVENT_FULL_SCREEN_ENTER",
 			GET_ISSUE_AREA_PNG: "EVENT_GET_ISSUE_AREA_PNG",
 			GLOBAL_CLICK: "EVENT_GLOBAL_CLICK",
-			MEASURE_MODE: "EVENT_MEASURE_MODE",
 			ISSUE_AREA_PNG: "EVENT_ISSUE_AREA_PNG",
+			MEASURE_MODE: "EVENT_MEASURE_MODE",
+			MULTI_SELECT_MODE: "EVENT_MULTI_SELECT_MODE",
 			OBJECT_SELECTED: "EVENT_OBJECT_SELECTED",
 			PIN_SELECTED: "EVENT_PIN_SELECTED",
 			PANEL_CONTENT_CLICK: "EVENT_LEFT_PANEL_CONTENT_CLICK",
@@ -16725,6 +16761,7 @@ var Oculus = {};
 			PANEL_CARD_EDIT_MODE: "EVENT_PANEL_CARD_EDIT_MODE",
 			PANEL_CONTENT_SETUP: "EVENT_PANEL_CONTENT_SETUP",
 			PANEL_CONTENT_TOGGLED: "EVENT_PANEL_CONTENT_TOGGLED",
+			SET_CLIPPING_PLANES: "EVENT_SET_CLIPPING_PLANES",
 			SET_ISSUE_AREA_MODE: "EVENT_SET_ISSUE_AREA_MODE",
 			SHOW_PROJECTS: "EVENT_SHOW_PROJECTS",
 			SHOW_QR_CODE_READER: "EVENT_SHOW_QR_CODE_READER",
@@ -16734,7 +16771,6 @@ var Oculus = {};
 			TOGGLE_ISSUE_AREA: "EVENT_TOGGLE_ISSUE_AREA",
 			TOGGLE_ISSUE_AREA_DRAWING: "EVENT_TOGGLE_ISSUE_AREA_DRAWING",
 			WINDOW_HEIGHT_CHANGE: "EVENT_WINDOW_HEIGHT_CHANGE",
-			SET_CLIPPING_PLANES: "EVENT_SET_CLIPPING_PLANES",
 
 			// Events to control the viewer manager
 			CREATE_VIEWER: "EVENT_CREATE_VIEWER",
@@ -17034,6 +17070,7 @@ var Oculus = {};
 		{
 			if (angular.isDefined(vm.account) && angular.isDefined(vm.project)) {
 				// Add filtering options for the Issues card menu
+				/*
 				ProjectService.getRoles(vm.account, vm.project).then(function (data) {
 					for (i = 0, length = data.length; i < length; i += 1) {
 						panelCard.left[issuesCardIndex].menu.push(
@@ -17048,9 +17085,10 @@ var Oculus = {};
 						);
 					}
 				});
+				*/
 
 				ProjectService.getProjectInfo(vm.account, vm.project).then(function (data) {
-					vm.settings = data.settings
+					vm.settings = data.settings;
 					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
 						account: data.account,
 						project: data.project,
@@ -17580,6 +17618,9 @@ var Oculus = {};
 								view: event.value.view,
 								up: event.value.up
 							});
+						} else if (event.type === EventService.EVENT.MULTI_SELECT_MODE) {
+							console.log(666);
+							v.viewer.multiSelectMode(event.value);
 						}
 					});
 				}
@@ -17863,7 +17904,11 @@ var Oculus = {};
 		});
 
 		$scope.$watch("vm.revisions", function () {
-			
+
+			if(!vm.revisions || !vm.revisions[0]){
+				return;
+			}
+
 			if(!vm.revision){
 				vm.revName = vm.revisions[0].tag || $filter('revisionDate')(vm.revisions[0].timestamp);
 				vm.revisions[0].current = true;

@@ -83,14 +83,14 @@
 		 */
 		this.$onChanges = function (changes) {
 			/*
-			var leftArrow = 37;
-			if (changes.hasOwnProperty("keysDown") &&
-				angular.isDefined(changes.keysDown.previousValue)) {
-				if (changes.keysDown.previousValue[0] === leftArrow) {
-					this.exit({issue: this.data});
-				}
-			}
-			*/
+			 var leftArrow = 37;
+			 if (changes.hasOwnProperty("keysDown") &&
+			 angular.isDefined(changes.keysDown.previousValue)) {
+			 if (changes.keysDown.previousValue[0] === leftArrow) {
+			 this.exit({issue: this.data});
+			 }
+			 }
+			 */
 
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
@@ -117,17 +117,27 @@
 		};
 
 		/**
+		 * Save a comment if one was being typed before close
+		 */
+		this.$onDestroy = function () {
+			if (this.comment) {
+				IssuesService.updatedIssue = self.issueData; // So that issues list is notified
+				saveComment();
+			}
+		};
+
+		/**
 		 * Disable the save button for a new issue if there is no name
 		 */
 		this.nameChange = function () {
-			this.submitDisabled = (typeof this.issueData.name === "undefined");
+			this.submitDisabled = !this.issueData.name;
 		};
 
 		/**
 		 * Disable the save button when commenting on an issue if there is no comment
 		 */
 		this.commentChange = function () {
-			this.submitDisabled = (this.data && (typeof this.comment === "undefined"));
+			this.submitDisabled = (this.data && !this.comment);
 		};
 
 		/**
@@ -213,17 +223,22 @@
 				this.actions[currentActionIndex].color = highlightBackground;
 			}
 
-			self.action = this.actions[currentActionIndex].action;
+			if (currentActionIndex === null) {
+				self.action = null;
+			}
+			else {
+				self.action = this.actions[currentActionIndex].action;
 
-			switch (this.actions[currentActionIndex].action) {
-				case "screen_shot":
-					delete this.screenShot; // Remove any clicked on screen shot
-					$mdDialog.show({
-						controller: ScreenShotDialogController,
-						controllerAs: "vm",
-						templateUrl: "issueScreenShotDialog.html"
-					});
-					break;
+				switch (this.actions[currentActionIndex].action) {
+					case "screen_shot":
+						delete this.screenShot; // Remove any clicked on screen shot
+						$mdDialog.show({
+							controller: ScreenShotDialogController,
+							controllerAs: "vm",
+							templateUrl: "issueScreenShotDialog.html"
+						});
+						break;
+				}
 			}
 		};
 

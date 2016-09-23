@@ -187,6 +187,7 @@
 		{
 			if (angular.isDefined(vm.account) && angular.isDefined(vm.project)) {
 				// Add filtering options for the Issues card menu
+				/*
 				ProjectService.getRoles(vm.account, vm.project).then(function (data) {
 					for (i = 0, length = data.length; i < length; i += 1) {
 						panelCard.left[issuesCardIndex].menu.push(
@@ -201,9 +202,10 @@
 						);
 					}
 				});
+				*/
 
 				ProjectService.getProjectInfo(vm.account, vm.project).then(function (data) {
-					vm.settings = data.settings
+					vm.settings = data.settings;
 					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
 						account: data.account,
 						project: data.project,

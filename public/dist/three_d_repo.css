@@ -1685,6 +1685,9 @@ issues-list .issueListItem:hover {
   background: rgba(0,69,148,.1);
   cursor: pointer;
 }
+issues-list .issueListItem *:hover {
+  cursor: inherit;
+}
 
 issues-list .issueListItem div:first-child {
   outline: none;

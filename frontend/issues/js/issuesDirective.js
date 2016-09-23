@@ -426,7 +426,6 @@
 		 * Go back to issues list
 		 */
 		$scope.$watch("vm.hideItem", function (newValue) {
-			console.log(newValue);
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showIssues";
 				vm.setContentHeight();
