@@ -42,7 +42,8 @@
 			promise,
 			docTypeHeight = 50,
 			allDocTypesHeight,
-			currentOpenDocTypes = [];
+			currentOpenDocTypes = [],
+			autoMetaData;
 
 		/*
 		 * Init
@@ -55,7 +56,7 @@
 		 */
 		$scope.$watch(EventService.currentEvent, function (event) {
 			var item, i, length;
-			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+			if (autoMetaData && (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
 				// Get any documents associated with an object
 				var object = event.value;
 				promise = DocsService.getDocs(object.account, object.project, object.id);
@@ -98,6 +99,9 @@
 			}
 			else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 				vm.show = false;
+			}
+			else if (event.type === EventService.EVENT.AUTO_META_DATA) {
+				autoMetaData = event.value;
 			}
 		});
 

@@ -9555,7 +9555,8 @@ var ViewerManager = {};
 			promise,
 			docTypeHeight = 50,
 			allDocTypesHeight,
-			currentOpenDocTypes = [];
+			currentOpenDocTypes = [],
+			autoMetaData;
 
 		/*
 		 * Init
@@ -9568,7 +9569,7 @@ var ViewerManager = {};
 		 */
 		$scope.$watch(EventService.currentEvent, function (event) {
 			var item, i, length;
-			if (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+			if (autoMetaData && (event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
 				// Get any documents associated with an object
 				var object = event.value;
 				promise = DocsService.getDocs(object.account, object.project, object.id);
@@ -9611,6 +9612,9 @@ var ViewerManager = {};
 			}
 			else if (event.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
 				vm.show = false;
+			}
+			else if (event.type === EventService.EVENT.AUTO_META_DATA) {
+				autoMetaData = event.value;
 			}
 		});
 
@@ -15561,6 +15565,7 @@ var Oculus = {};
 
 	function EventService ($timeout) {
 		var EVENT = {
+			AUTO_META_DATA: "EVENT_AUTO_META_DATA",
 			FILTER: "EVENT_FILTER",
 			FULL_SCREEN_ENTER: "EVENT_FULL_SCREEN_ENTER",
 			GET_ISSUE_AREA_PNG: "EVENT_GET_ISSUE_AREA_PNG",
@@ -16806,12 +16811,13 @@ var Oculus = {};
         };
     }
 
-    RightPanelCtrl.$inject = ["$scope", "EventService"];
+    RightPanelCtrl.$inject = ["$scope", "$timeout", "EventService"];
 
-    function RightPanelCtrl ($scope, EventService) {
+    function RightPanelCtrl ($scope, $timeout, EventService) {
         var vm = this,
             addIssueMode = null,
             measureMode = false,
+            autoMetaData = true,
             highlightBackground = "#FF9800";
 
         /*
@@ -16836,6 +16842,10 @@ var Oculus = {};
             }
         };
         vm.measureBackground = "";
+        vm.metaBackground = highlightBackground;
+        $timeout(function () {
+            EventService.send(EventService.EVENT.AUTO_META_DATA, autoMetaData);
+        });
 
         /*
          * Setup event watch
@@ -16889,6 +16899,9 @@ var Oculus = {};
             }
         };
 
+        /**
+         * Toggle measuring tool
+         */
         vm.toggleMeasure = function () {
             // Turn off issue mode
             if (addIssueMode !== null) {
@@ -16898,6 +16911,15 @@ var Oculus = {};
             measureMode = !measureMode;
             vm.measureBackground = measureMode ? highlightBackground : "";
             EventService.send(EventService.EVENT.MEASURE_MODE, measureMode);
+        };
+
+        /**
+         * Toggle meta data auto display
+         */
+        vm.toggleAutoMetaData = function () {
+            autoMetaData = !autoMetaData;
+            vm.metaBackground = autoMetaData ? highlightBackground : "";
+            EventService.send(EventService.EVENT.AUTO_META_DATA, autoMetaData);
         };
     }
 }());
