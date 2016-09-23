@@ -44,7 +44,8 @@
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
-			currentActionIndex = null;
+			currentActionIndex = null,
+			editingCommentIndex = null;
 
 		/*
 		 * Init
@@ -156,20 +157,25 @@
 		 */
 		this.submit = function () {
 			if (self.data) {
-				if (self.data.owner === self.account) {
-					if ((this.data.priority !== this.issueData.priority) ||
-						(this.data.status !== this.issueData.status)) {
-						updateIssue();
-						if (typeof this.comment !== "undefined") {
+				if (editingCommentIndex !== null) {
+					updateComment();
+				}
+				else {
+					if (self.data.owner === self.account) {
+						if ((this.data.priority !== this.issueData.priority) ||
+							(this.data.status !== this.issueData.status)) {
+							updateIssue();
+							if (typeof this.comment !== "undefined") {
+								saveComment();
+							}
+						}
+						else {
 							saveComment();
 						}
 					}
 					else {
 						saveComment();
 					}
-				}
-				else {
-					saveComment();
 				}
 			}
 			else {
@@ -402,7 +408,7 @@
 					IssuesService.saveComment(self.issueData, self.comment, viewpoint)
 						.then(function (response) {
 							console.log(response);
-							addNewCommentToIssue(response.data.issue);
+							afterNewComment(response.data.issue);
 						});
 				});
 			}
@@ -416,26 +422,80 @@
 				IssuesService.saveComment(self.issueData, self.comment, issueViewpoint)
 					.then(function (response) {
 						console.log(response);
-						addNewCommentToIssue(response.data.issue);
+						afterNewComment(response.data.issue);
 					});
 			}
 		}
 
 		/**
-		 * Add newly created comment to current issue
+		 * Process after new comment saved
 		 * @param comment
 		 */
-		function addNewCommentToIssue (comment) {
+		function afterNewComment (comment) {
+			// Add new comment to issue
 			self.issueData.comments.push({
 				comment: comment.comment,
 				owner: comment.owner,
 				timeStamp: IssuesService.getPrettyTime(comment.created),
 				viewpoint: comment.viewpoint
 			});
+
+			// Mark any previous comment as 'sealed' - no longer deletable or editable
+			if (self.issueData.comments.length > 1) {
+				IssuesService.sealComment(self.issueData, (self.issueData.comments.length - 2))
+					.then(function(response) {
+						console.log(response);
+						self.issueData.comments[self.issueData.comments.length - 2].sealed = true;
+					});
+			}
+
 			delete self.comment;
 			delete self.commentThumbnail;
 			IssuesService.updatedIssue = self.issueData;
 			setContentHeight();
+		}
+
+		/**
+		 * Delete a comment
+		 * @param event
+		 * @param index
+		 */
+		this.deleteComment = function(event, index) {
+			event.stopPropagation();
+			IssuesService.deleteComment(self.issueData, index)
+				.then(function(response) {
+					self.issueData.comments.splice(index, 1);
+				});
+			setContentHeight();
+		};
+
+		/**
+		 * Toggle the editing of a comment
+		 * @param event
+		 * @param index
+		 */
+		this.toggleEditComment = function(event, index) {
+			editingCommentIndex = (editingCommentIndex === null) ? index : null;
+			this.editCommentColor = (editingCommentIndex === null) ? "" : highlightBackground;
+			if (editingCommentIndex === null) {
+				this.comment = "";
+			} else {
+				this.comment = this.issueData.comments[this.issueData.comments.length - 1].comment;
+			}
+		};
+
+		/**
+		 * Update a comment
+		 */
+		function updateComment () {
+			IssuesService.editComment(self.issueData, self.comment, editingCommentIndex)
+				.then(function(response) {
+					self.issueData.comments[editingCommentIndex].comment = self.comment;
+					self.issueData.comments[editingCommentIndex].timeStamp = IssuesService.getPrettyTime(response.data.created);
+					self.comment = "";
+					editingCommentIndex = null;
+					this.editCommentColor = "";
+				});
 		}
 
 		/**
@@ -446,6 +506,7 @@
 			savedScreenShot = data.screenShot;
 			if (typeof self.data === "object") {
 				self.commentThumbnail = data.screenShot;
+				setContentHeight();
 			}
 			else {
 				self.descriptionThumbnail = data.screenShot;
@@ -475,17 +536,23 @@
 				commentTextHeight = 80,
 				commentImageHeight = 170,
 				additionalInfoHeight = 70,
+				thumbnailHeight = 170,
 				height = issueMinHeight;
 
 			if (self.data) {
+				// Additional info
 				if (self.showAdditional) {
 					height += additionalInfoHeight;
 				}
-
+				// Description text
 				if (self.issueData.hasOwnProperty("desc")) {
 					height += descriptionTextHeight;
 				}
-
+				// New comment thumbnail
+				if (self.commentThumbnail) {
+					height += thumbnailHeight;
+				}
+				// Comments
 				for (i = 0, length = self.issueData.comments.length; i < length; i += 1) {
 					height += commentTextHeight;
 					if (self.issueData.comments[i].viewpoint.hasOwnProperty("screenshot")) {
