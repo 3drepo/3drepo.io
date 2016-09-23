@@ -549,10 +549,22 @@ schema.statics.createIssue = function(dbColOptions, data){
 					flag: 1
 				};
 
-				issue.thumbnail = {
-					flag: 1,
-					content: this.resizeAndCropScreenshot(data.viewpoint.screenshot.content, 120, 120, true)
-				};
+				let content = this.resizeAndCropScreenshot(data.viewpoint.screenshot.content, 120, 120, true);
+
+				if(content){
+					issue.thumbnail = {
+						flag: 1,
+						content: this.resizeAndCropScreenshot(data.viewpoint.screenshot.content, 120, 120, true)
+					};
+				} else {
+					systemLogger.logError('Resize failed as screenshot is not a valid png, no thumbnail will be generated',{
+						account: dbColOptions.account, 
+						project: dbColOptions.project, 
+						issueId: utils.uuidToString(issue._id), 
+						viewpointId: utils.uuidToString(data.viewpoint.guid)
+					});
+				}
+
 			}
 
 			data.viewpoint.scribble && (data.viewpoint.scribble = {
@@ -658,8 +670,6 @@ schema.statics.resizeAndCropScreenshot = function(pngBuffer, destWidth, destHeig
 
 	let img = gd.createFromPngPtr(pngBuffer);
 	let sourceX, sourceY, sourceWidth, sourceHeight;
-
-	console.log(destWidth, img.width);
 
 	if(!img){
 
@@ -1333,8 +1343,6 @@ schema.statics.importBCF = function(account, project, zipPath){
 					extras.Index = viewpoints[guid].Viewpoint;
 					extras.Snapshot = viewpoints[guid].Snapshot;
 
-					console.log(viewpoints[guid]);
-
 					let screenshotObj = viewpoints[guid].snapshot ? {
 						flag: 1,
 						content: viewpoints[guid].snapshot,
@@ -1343,12 +1351,25 @@ schema.statics.importBCF = function(account, project, zipPath){
 					//take the first screenshot as thumbnail
 					if(!thumbnailGenerated && screenshotObj){
 
-						issue.thumbnail = {
-							flag: 1,
-							content: self.resizeAndCropScreenshot(viewpoints[guid].snapshot, 120, 120, true)
-						};
+						let content = self.resizeAndCropScreenshot(viewpoints[guid].snapshot, 120, 120, true);
 
-						thumbnailGenerated = true;
+						if(content){
+
+							issue.thumbnail = {
+								flag: 1,
+								content: self.resizeAndCropScreenshot(viewpoints[guid].snapshot, 120, 120, true)
+							};
+
+							thumbnailGenerated = true;
+
+						} else {
+							systemLogger.logError('Resize failed as screenshot is not a valid png, no thumbnail will be generated',{
+								account, 
+								project, 
+								issueId: utils.uuidToString(issue._id), 
+								viewpointId: guid
+							});
+						}
 					}
 
 					let vp = {
@@ -1389,8 +1410,15 @@ schema.statics.importBCF = function(account, project, zipPath){
 		// read each item zip file, put them in files object
 		function handleEntry(zipfile, entry) {
 
-			let paths = entry.fileName.split('/');
-			console.log(paths);
+			let paths;
+
+			if(entry.fileName.indexOf('\\') !== -1){
+				//give tolerance to file path using \ instead of /
+				paths = entry.fileName.split('\\');
+			} else {
+				paths = entry.fileName.split('/');
+			}
+
 			let guid = paths[0] && utils.isUUID(paths[0]) && paths[0];
 
 			if(guid && !files[guid]){
@@ -1398,7 +1426,7 @@ schema.statics.importBCF = function(account, project, zipPath){
 			}
 
 			// if entry is a file and start with guid
-			if(!entry.fileName.endsWith('/') && guid){
+			if(!entry.fileName.endsWith('/') && !entry.fileName.endsWith('\\') && guid){
 
 				promises.push(new Promise( (resolve, reject) => {
 					zipfile.openReadStream(entry, (err, rs) => {
@@ -1412,7 +1440,7 @@ schema.statics.importBCF = function(account, project, zipPath){
 
 							rs.on('end', () => {
 								let buf = Buffer.concat(bufs);
-								files[guid][entry.fileName] = buf;
+								files[guid][paths.join('/')] = buf;
 								resolve();
 							});
 
