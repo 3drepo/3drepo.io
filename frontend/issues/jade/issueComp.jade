@@ -1,7 +1,6 @@
 #issueCompAll(layout="column", tabindex="0", tdr-focus="true", flex)
 	// Title
 	.issueCompItemContainer(layout="column", layout-align="start", flex)
-		md-icon.angular-material-icons#issueCompStatus(style="color:{{$ctrl.statusIcon.colour}}") {{$ctrl.statusIcon.icon}}
 		md-input-container.issueComp(flex)
 			label Title
 			input(
@@ -12,14 +11,16 @@
 			aria-label="Title"
 			tdr-focus="true"
 			required)
-		.issueCompIssueOwner(ng-if="$ctrl.data", layout="row", layout-align="space-between", flex)
-			label {{$ctrl.data.owner}}
-			label {{$ctrl.data.timeStamp}}
+		div(layout="row", layout-align="start center", flex="none")
+			div(flex="10")
+				md-icon.angular-material-icons#issueCompStatus(style="color:{{$ctrl.statusIcon.colour}}") {{$ctrl.statusIcon.icon}}
+			.issueCompIssueOwner(ng-if="$ctrl.data", layout="row", layout-align="space-between", flex)
+				label {{$ctrl.data.owner}}
+				label {{$ctrl.data.timeStamp}}
 
 	// Status
 	.issueCompItemContainer(layout="column")
 		div(layout="row", layout-align="start center")
-			lable Additional information
 			md-button.md-icon-button(aria-label="Status Toggle", ng-click="$ctrl.toggleShowAdditional()")
 				md-icon.angular-material-icons(ng-if="!$ctrl.showAdditional") keyboard_arrow_right
 				md-icon.angular-material-icons(ng-if="$ctrl.showAdditional") keyboard_arrow_down
@@ -61,7 +62,6 @@
 		layout="column"
 		layout-align="start"
 		flex
-		ng-class="{issueCommentWithScreenShot: comment.viewpoint.screenshot}"
 		ng-click="$ctrl.showViewpointAndScreenShot(comment.viewpoint)")
 			// Text and actions
 			div(layout='row', layout-align="space-between", flex)
@@ -112,16 +112,16 @@
 
 	// Multi and Pin
 	div(ng-switch="$ctrl.action")
-		issues-multi(
-		ng-switch-when="multi"
-		account="$ctrl.account"
-		project="$ctrl.project"
-		selected-object="$ctrl.selectedObject"
-		keys-down="$ctrl.keysDown"
-		clear="vm.clearMulti"
-		send-event="$ctrl.sendEvent({type: type, value: value})"
-		event="$ctrl.event"
-		set-multi="$ctrl.setMulti({data: data})")
+		//issues-multi(
+			ng-switch-when="multi"
+			account="$ctrl.account"
+			project="$ctrl.project"
+			selected-object="$ctrl.selectedObject"
+			keys-down="$ctrl.keysDown"
+			clear="vm.clearMulti"
+			send-event="$ctrl.sendEvent({type: type, value: value})"
+			event="$ctrl.event"
+			set-multi="$ctrl.setMulti({data: data})")
 
 		issues-pin(
 		ng-switch-when="pin"

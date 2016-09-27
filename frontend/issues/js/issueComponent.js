@@ -45,7 +45,8 @@
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
 			currentActionIndex = null,
-			editingCommentIndex = null;
+			editingCommentIndex = null,
+			commentViewpoint;
 
 		/*
 		 * Init
@@ -55,7 +56,7 @@
 		this.submitDisabled = true;
 		this.pinData = null;
 		this.multiData = null;
-		this.showAdditional = false;
+		this.showAdditional = true;
 		this.priorities = [
 			{value: "none", label: "None"},
 			{value: "low", label: "Low"},
@@ -189,16 +190,17 @@
 		 */
 		this.showViewpointAndScreenShot = function (viewpoint) {
 			var data;
-			if (angular.isDefined(viewpoint.screenshot)) {
-				// Viewpoint
-				data = {
-					position : viewpoint.position,
-					view_dir : viewpoint.view_dir,
-					up: viewpoint.up
-				};
-				self.sendEvent({type: EventService.EVENT.VIEWER.SET_CAMERA, value: data});
 
-				// Screen shot
+			// Viewpoint
+			data = {
+				position : viewpoint.position,
+				view_dir : viewpoint.view_dir,
+				up: viewpoint.up
+			};
+			self.sendEvent({type: EventService.EVENT.VIEWER.SET_CAMERA, value: data});
+
+			// Screen shot
+			if (angular.isDefined(viewpoint.screenshot)) {
 				self.screenShot = UtilsService.getServerUrl(viewpoint.screenshot);
 				$mdDialog.show({
 					controller: function () {
@@ -368,6 +370,7 @@
 					// Notify parent of new issue
 					self.issueCreated({issue: self.issueData});
 
+					self.submitDisabled = true;
 					setContentHeight();
 			});
 		}
@@ -390,40 +393,28 @@
 
 		/**
 		 * Add comment to issue
+		 * Save screen shot viewpoint or current viewpoint
 		 */
 		function saveComment () {
 			var	screenShot,
-				issueViewpoint,
 				viewpointPromise = $q.defer();
 
-			// If there is a saved screen shot use the current viewpoint, else the issue viewpoint
-			// Remove base64 header text from screen shot and add to viewpoint
 			if (angular.isDefined(self.commentThumbnail)) {
-				// Get the viewpoint
+				IssuesService.saveComment(self.issueData, self.comment, commentViewpoint)
+					.then(function (response) {
+						console.log(response);
+						afterNewComment(response.data.issue);
+					});
+			}
+			else {
 				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
 				viewpointPromise.promise.then(function (viewpoint) {
-					screenShot = savedScreenShot.substring(savedScreenShot.indexOf(",") + 1);
-					viewpoint.screenshot = screenShot;
-					// Save
 					IssuesService.saveComment(self.issueData, self.comment, viewpoint)
 						.then(function (response) {
 							console.log(response);
 							afterNewComment(response.data.issue);
 						});
 				});
-			}
-			else {
-				// Use issue viewpoint and delete any screen shot
-				issueViewpoint = angular.copy(self.issueData.viewpoint);
-				if (issueViewpoint.hasOwnProperty("screenshot")) {
-					delete issueViewpoint.screenshot;
-				}
-				// Save
-				IssuesService.saveComment(self.issueData, self.comment, issueViewpoint)
-					.then(function (response) {
-						console.log(response);
-						afterNewComment(response.data.issue);
-					});
 			}
 		}
 
@@ -452,6 +443,7 @@
 			delete self.comment;
 			delete self.commentThumbnail;
 			IssuesService.updatedIssue = self.issueData;
+			self.submitDisabled = true;
 			setContentHeight();
 		}
 
@@ -504,12 +496,25 @@
 		 * @param data
 		 */
 		this.screenShotSave = function (data) {
+			var viewpointPromise = $q.defer();
+
 			savedScreenShot = data.screenShot;
 			if (typeof self.data === "object") {
+				// Comment
 				self.commentThumbnail = data.screenShot;
+
+				// Get the viewpoint and add the screen shot to it
+				// Remove base64 header text from screen shot
+				self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
+				viewpointPromise.promise.then(function (viewpoint) {
+					commentViewpoint = viewpoint;
+					commentViewpoint.screenshot = data.screenShot.substring(data.screenShot.indexOf(",") + 1);
+				});
+
 				setContentHeight();
 			}
 			else {
+				// Description
 				self.descriptionThumbnail = data.screenShot;
 			}
 		};

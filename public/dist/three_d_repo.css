@@ -1777,7 +1777,7 @@ issue-comp .issueCompThumbnail img {
 }
 
 issue-comp .issueCompIssueOwner {
-  margin-top: -30px;
+  margin-top: -10px;
 }
 
 issue-comp .issueCompCommentOwner {
@@ -1801,13 +1801,13 @@ issue-comp .issueCompCommentActions {
   z-index: 2;
 }
 
-issue-comp .issueCommentWithScreenShot:hover,
+issue-comp .issueCompComment:hover,
 issue-comp .issueDescriptionWithScreenShot:hover {
   background: rgba(0,69,148,.1);
   cursor: pointer;
   outline: solid 1px rgba(0, 0, 0, 0.2);
 }
-issue-comp .issueCommentWithScreenShot *:hover,
+issue-comp .issueCompComment *:hover,
 issue-comp .issueDescriptionWithScreenShot *:hover {
   cursor: pointer;
 }

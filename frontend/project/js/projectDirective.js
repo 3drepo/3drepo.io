@@ -237,6 +237,8 @@
 			var parent = angular.element($element[0].querySelector("#project")),
 				element;
 
+			vm.event = event;
+
 			if (event.type === EventService.EVENT.TOGGLE_ISSUE_AREA) {
 				if (event.value.on) {
 					issueArea = angular.element("<issue-area></issue-area>");
@@ -302,6 +304,23 @@
 					}
 				}
 			}
+		};
+
+		/**
+		 * Get the current multi selection
+		 * @param data
+		 */
+		vm.setMulti = function (data) {
+			vm.multiData = data;
+		};
+
+		/**
+		 * Send event
+		 * @param type
+		 * @param value
+		 */
+		vm.sendEvent = function (type, value) {
+			EventService.send(type, value);
 		};
 	}
 }());

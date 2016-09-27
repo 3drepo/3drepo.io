@@ -2,7 +2,7 @@
  *	Copyright (C) 2016 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
- *	it under the issuesMulti of the GNU Affero General Public License as
+ *	it under the multiSelect of the GNU Affero General Public License as
  *	published by the Free Software Foundation, either version 3 of the
  *	License, or (at your option) any later version.
  *
@@ -20,15 +20,13 @@
 
 	angular.module("3drepo")
 		.component(
-			"issuesMulti",
+			"multiSelect",
 			{
-				controller: IssuesMultiCtrl,
+				controller: MultiSelectCtrl,
 				bindings: {
 					account: "<",
 					project: "<",
-					selectedObject: "<",
 					keysDown: "<",
-					clear: "<",
 					sendEvent: "&",
 					event: "<",
 					setMulti: "&"
@@ -36,9 +34,9 @@
 			}
 		);
 
-	IssuesMultiCtrl.$inject = ["EventService"];
+	MultiSelectCtrl.$inject = ["EventService"];
 
-	function IssuesMultiCtrl (EventService) {
+	function MultiSelectCtrl (EventService) {
 		var self = this,
 			objectIndex,
 			selectedObjectIDs = [],
@@ -54,7 +52,7 @@
 		 * Handle component input changes
 		 */
 		this.$onChanges = function (changes) {
-			if (changes.hasOwnProperty("keysDown") && angular.isDefined(this.keysDown)) {
+			if (changes.hasOwnProperty("keysDown") && changes.keysDown.currentValue) {
 				multiMode = ((isMac && this.keysDown.indexOf(cmdKey) !== -1) || (!isMac && this.keysDown.indexOf(ctrlKey) !== -1));
 				this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: multiMode});
 				if (multiMode) {
@@ -66,11 +64,8 @@
 				}
 				*/
 			}
-			else if (changes.hasOwnProperty("clear") && this.clear) {
-				this.displaySelectedObjects([]);
-			}
 
-			if (changes.hasOwnProperty("event")) {
+			if (changes.hasOwnProperty("event") && changes.event.currentValue) {
 				if (multiMode && (changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
 					objectIndex = selectedObjectIDs.indexOf(changes.event.currentValue.value.id);
 					if (objectIndex === -1) {
