@@ -281,8 +281,7 @@
 								up: event.value.up
 							});
 						} else if (event.type === EventService.EVENT.MULTI_SELECT_MODE) {
-							console.log(666);
-							v.viewer.multiSelectMode(event.value);
+							v.viewer.setMultiSelectMode(event.value);
 						}
 					});
 				}

@@ -2882,6 +2882,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		this.inline = null;
 		this.runtime = null;
 		this.fullscreen = false;
+		this.multiSelectMode = false;
 
 		this.clickingEnabled = false;
 
@@ -3491,17 +3492,40 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				}
 			}
 
-			if (self.oldPart) {
-				for (i = 0; i < self.oldPart.length; i++) {
-					self.oldPart[i].resetColor();
+			// Don't unhighlight previous selection when in multi select mode
+			if (!this.multiSelectMode) {
+				if (self.oldPart) {
+					for (i = 0; i < self.oldPart.length; i++) {
+						self.oldPart[i].resetColor();
+					}
 				}
 			}
 
+			// Either toggle object or select new object(s)
+			if (self.oldPart &&
+				(self.oldPart[0].ids.length === 1) &&
+				(part[0].ids.length === 1) &&
+				(self.oldPart[0].ids[0] === part[0].ids[0])) {
+				// Toggle single selection
+				self.oldPart[0].resetColor();
+				delete self.oldPart;
+			}
+			else {
+				// Store current selection
+				self.oldPart = part;
+
+				for (i = 0; i < part.length; i++) {
+					part[i].setEmissiveColor(colour, "both");
+				}
+			}
+
+			/*
 			self.oldPart = part;
 
 			for (i = 0; i < part.length; i++) {
 				part[i].setEmissiveColor(colour, "both");
 			}
+			 */
 		};
 
 		this.clickObject = function(objEvent) {
@@ -4463,8 +4487,9 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 * Multi select mode
 		 * @param on
 		 */
-		this.multiSelectMode = function (on) {
+		this.setMultiSelectMode = function (on) {
 			var element = document.getElementById("x3dom-default-canvas");
+			this.multiSelectMode = on;
 			if (on) {
 				element.style.cursor = "crosshair";
 			} else {
@@ -14160,7 +14185,6 @@ angular.module('3drepo')
 
 		// Init
 		this.setMulti({data: null});
-		this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: true});
 
 		/**
 		 * Handle component input changes
@@ -14168,6 +14192,7 @@ angular.module('3drepo')
 		this.$onChanges = function (changes) {
 			if (changes.hasOwnProperty("keysDown") && angular.isDefined(this.keysDown)) {
 				multiMode = ((isMac && this.keysDown.indexOf(cmdKey) !== -1) || (!isMac && this.keysDown.indexOf(ctrlKey) !== -1));
+				this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: multiMode});
 				if (multiMode) {
 					this.displaySelectedObjects(selectedObjectIDs);
 				}
@@ -14182,7 +14207,7 @@ angular.module('3drepo')
 			}
 
 			if (changes.hasOwnProperty("event")) {
-				if (changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+				if (multiMode && (changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
 					objectIndex = selectedObjectIDs.indexOf(changes.event.currentValue.value.id);
 					if (objectIndex === -1) {
 						selectedObjectIDs.push(changes.event.currentValue.value.id);
@@ -16878,7 +16903,7 @@ var Oculus = {};
 				{
 					console.trace("UNDEFINED EVENT TYPE");
 				} else {
-					//console.log("SEND: " + type + " : " + JSON.stringify(value));
+					console.log("SEND: " + type + " : " + JSON.stringify(value));
 					currentEvent = {type: type, value: value};
 				}
 			});
@@ -17687,8 +17712,7 @@ var Oculus = {};
 								up: event.value.up
 							});
 						} else if (event.type === EventService.EVENT.MULTI_SELECT_MODE) {
-							console.log(666);
-							v.viewer.multiSelectMode(event.value);
+							v.viewer.setMultiSelectMode(event.value);
 						}
 					});
 				}
@@ -17750,7 +17774,7 @@ var Oculus = {};
 
 		var send = function (type, value) {
 			sendInternal(type, value);
-			nextEventService.send(type, value);
+			//nextEventService.send(type, value);
 		};
 
 		var sendErrorInternal = function(type, value) {
@@ -17761,7 +17785,7 @@ var Oculus = {};
 
 		var sendError = function(type, value) {
 			sendErrorInternal(type, value);
-			nextEventService.sendError(type, value);
+			//nextEventService.sendError(type, value);
 		};
 
 		return {

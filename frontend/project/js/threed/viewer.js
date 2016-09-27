@@ -67,6 +67,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		this.inline = null;
 		this.runtime = null;
 		this.fullscreen = false;
+		this.multiSelectMode = false;
 
 		this.clickingEnabled = false;
 
@@ -676,17 +677,40 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				}
 			}
 
-			if (self.oldPart) {
-				for (i = 0; i < self.oldPart.length; i++) {
-					self.oldPart[i].resetColor();
+			// Don't unhighlight previous selection when in multi select mode
+			if (!this.multiSelectMode) {
+				if (self.oldPart) {
+					for (i = 0; i < self.oldPart.length; i++) {
+						self.oldPart[i].resetColor();
+					}
 				}
 			}
 
+			// Either toggle object or select new object(s)
+			if (self.oldPart &&
+				(self.oldPart[0].ids.length === 1) &&
+				(part[0].ids.length === 1) &&
+				(self.oldPart[0].ids[0] === part[0].ids[0])) {
+				// Toggle single selection
+				self.oldPart[0].resetColor();
+				delete self.oldPart;
+			}
+			else {
+				// Store current selection
+				self.oldPart = part;
+
+				for (i = 0; i < part.length; i++) {
+					part[i].setEmissiveColor(colour, "both");
+				}
+			}
+
+			/*
 			self.oldPart = part;
 
 			for (i = 0; i < part.length; i++) {
 				part[i].setEmissiveColor(colour, "both");
 			}
+			 */
 		};
 
 		this.clickObject = function(objEvent) {
@@ -1648,8 +1672,9 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		 * Multi select mode
 		 * @param on
 		 */
-		this.multiSelectMode = function (on) {
+		this.setMultiSelectMode = function (on) {
 			var element = document.getElementById("x3dom-default-canvas");
+			this.multiSelectMode = on;
 			if (on) {
 				element.style.cursor = "crosshair";
 			} else {
