@@ -393,7 +393,7 @@ function removeCollaborator(username, email, account, project, role){
 
 
 	}).then(_user => {
-		
+
 		user = _user;
 
 		if(!user){
@@ -456,6 +456,45 @@ function createFederatedProject(account, project, subProjects){
 	});
 }
 
+function getModelProperties(account, project, branch, username){
+	'use strict';
+
+	let revId, modelPropertiesFileName;
+	let status;
+
+	return middlewares.hasReadAccessToProjectHelper(username, account, project).then(granted => {
+
+		if(granted){
+			return History.findByBranch({ account, project }, branch);
+		} else {
+			status = 'NO_ACCESS';
+			return Promise.resolve();
+		}
+
+	}).then(history => {
+
+		if(!history){
+			!status && (status = 'NOT_FOUND');
+			return Promise.resolve({});
+		}
+
+		revId = utils.uuidToString(history._id);
+		modelPropertiesFileName = `/${account}/${project}/revision/${revId}/modelProperties.json`;
+		console.log("FILENAME: " + modelPropertiesFileName);
+		return stash.findStashByFilename({ account, project }, 'json_mpc', modelPropertiesFileName);
+	}).then(buf => {
+
+		let tree;
+
+		if (buf) {
+			tree = JSON.parse(buf);
+		} else {
+			tree = {};
+		}
+
+		return Promise.resolve({tree, status});
+	});
+}
 
 function getFullTree(account, project, branch, username){
 	'use strict';
@@ -494,7 +533,7 @@ function getFullTree(account, project, branch, username){
 
 		//for all refs get their tree
 		let getTrees = [];
-		
+
 		refs.forEach(ref => {
 			getTrees.push(
 				getFullTree(ref.owner, ref.project, uuidToString(ref._rid), username).then(obj => {
@@ -525,7 +564,7 @@ function getFullTree(account, project, branch, username){
 
 		let resetPath = function(node, parentPath){
 			node.children && node.children.forEach(child => {
-				child.path = parentPath + '__' + child.path; 
+				child.path = parentPath + '__' + child.path;
 				child.children && resetPath(child.children, child.path);
 			});
 		};
@@ -544,11 +583,11 @@ function getFullTree(account, project, branch, username){
 					}
 
 					(!subTree || !subTree.tree || !subTree.tree.nodes) && (targetChild.status = subTree.status);
-				} 
+				}
 
 			});
 		});
-		
+
 		return Promise.resolve({tree, status});
 
 	});
@@ -580,7 +619,7 @@ function listSubProjects(account, project, branch){
 		});
 
 		return Promise.resolve(subProjects);
-	
+
 	});
 }
 
@@ -592,5 +631,6 @@ module.exports = {
 	removeCollaborator,
 	createFederatedProject,
 	listSubProjects,
-	getFullTree
+	getFullTree,
+	getModelProperties
 };
