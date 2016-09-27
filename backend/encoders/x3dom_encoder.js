@@ -289,9 +289,8 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
 			}
 
 			globalCoordPromise.promise.then((globalCoordOffset) => {
-				var adjustedOffset = vecSub(child.coordOffset, globalCoordOffset);
 				var federateTransformNode = xmlDoc.createElement("Transform");
-				federateTransformNode.setAttribute("translation", adjustedOffset.join(" "));
+               			federateTransformNode.setAttribute("translation", child.coordOffset.join(" "));
 
 				var inlineNode = xmlDoc.createElement("Inline");
 
@@ -927,7 +926,19 @@ function render(dbInterface, account, project, subFormat, branch, revision, call
 		var globalCoordOffset = null;
 		var globalCoordPromise = deferred();
 
-		X3D_AddChildren(xmlDoc, sceneRoot.root, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, subFormat, dbInterface.logger);
+        globalCoordOffset = X3D_AddChildren(xmlDoc, sceneRoot.root, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, subFormat, dbInterface.logger);
+
+        if (globalCoordOffset) {
+            var offsetTransform = xmlDoc.createElement("Transform");
+			var fedOffsetTrans = [-globalCoordOffset[0], -globalCoordOffset[1], -globalCoordOffset[2]];
+            offsetTransform.setAttribute("translation", fedOffsetTrans.join(" "));
+
+            for (var i = 0; i < sceneRoot.root.childNodes.length; ++i) {
+                offsetTransform.appendChild(sceneRoot.root.childNodes[i]);
+            }
+            sceneRoot.root.childNodes = [];
+            sceneRoot.root.appendChild(offsetTransform);
+        }
 
 		/*
 		// Compute the scene bounding box.
