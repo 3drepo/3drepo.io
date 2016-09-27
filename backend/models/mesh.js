@@ -20,6 +20,8 @@ var _ = require('lodash');
 var repoBase = require('./base/repo');
 var mongoose = require('mongoose');
 var ModelFactory = require('./factory/modelFactory');
+var utils = require('../utils');
+var responseCode = require('../response_codes');
 
 var Schema = mongoose.Schema;
 
@@ -40,13 +42,56 @@ var meshSchema = Schema(
 
 		uv_channels: Object,
 		uv_channels_count: Number,
-		uv_channels_byte_count: Number
+		uv_channels_byte_count: Number,
+
+		groups: [],
 
 	})
 );
 
 // extend statics method
 _.extend(meshSchema.statics, repoBase.statics);
+
+meshSchema.statics.addGroup = function(account, project, id, gid){
+	'use strict';
+
+	return this.findById({account, project}, utils.stringToUUID(id), {groups: 1}).then(mesh => {
+		if(!mesh){
+			return Promise.reject(responseCode.MESH_NOT_FOUND);
+		} else {
+			mesh.groups.addToSet(utils.stringToUUID(gid));
+			return mesh.save();
+		}
+	});
+};
+
+meshSchema.statics.removeGroup = function(account, project, id, gid){
+	'use strict';
+
+	return this.findById({account, project}, utils.stringToUUID(id), {groups: 1}).then(mesh => {
+		
+
+		if(!mesh){
+			return Promise.reject(responseCode.MESH_NOT_FOUND);
+		} else {
+
+			let index = -1;
+
+			mesh.groups.forEach((val, i) => {
+				if (utils.uuidToString(val) === gid){
+					index = i;
+				}
+			});
+
+			if(index === -1){
+				return Promise.reject(responseCode.GROUP_ID_NOT_FOUND_IN_MESH);
+			}
+
+			mesh.groups.splice(index ,1);
+			return mesh.save();			
+		}
+	});
+};
 
 var Mesh = ModelFactory.createClass(
 	'Mesh', 
