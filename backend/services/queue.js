@@ -180,7 +180,7 @@ ImportQueue.prototype._dispatchWork = function(corID, msg){
     }).then( () => {
 
         this.logger.logInfo(
-            'Sent work to queue: ' + msg.toString() + ' with corr id: ' + corID.toString() + ' reply queue: ' + this.callbackQName,
+            'Sent work to queue[' + this.workerQName + ']: ' + msg.toString() + ' with corr id: ' + corID.toString() + ' reply queue: ' + this.callbackQName,
             {
                 corID: corID.toString()
             }
@@ -214,10 +214,11 @@ ImportQueue.prototype._consumeCallbackQueue = function(){
 
     let self = this;
 
-	var ex = this.channel.assertExchange(this.callbackQName, 'direct', { durable: true });
+	this.channel.assertExchange(this.callbackQName, 'direct', { durable: true });
 
-    return this.channel.assertQueue(this.callbackQName+"."+this.uid, { durable: true }).then((q) => {
+    return this.channel.assertQueue('', { exclusive: true }).then((q) => {
 		var queue = q.queue;
+		console.log("QUEUE : " + q.queue);
 
 		return this.channel.bindQueue(queue, this.callbackQName, this.uid).then(() => {
 			return this.channel.consume(queue, function(rep) {
