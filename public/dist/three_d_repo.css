@@ -1685,6 +1685,9 @@ issues-list .issueListItem:hover {
   background: rgba(0,69,148,.1);
   cursor: pointer;
 }
+issues-list .issueListItem *:hover {
+  cursor: inherit;
+}
 
 issues-list .issueListItem div:first-child {
   outline: none;
@@ -1786,8 +1789,16 @@ issue-comp .issueCompCommentOwner label {
   color: rgba(0, 0, 0, 0.5);
 }
 
+issue-comp .issueCompComment {
+  margin: 10px 0;
+}
+
 issue-comp .issueCompCommentTitle {
-  margin: 10px 0 5px;
+  margin: 10px 0;
+}
+
+issue-comp .issueCompCommentActions {
+  z-index: 2;
 }
 
 issue-comp .issueCommentWithScreenShot:hover,

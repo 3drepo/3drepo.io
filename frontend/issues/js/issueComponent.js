@@ -44,7 +44,8 @@
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
-			currentActionIndex = null;
+			currentActionIndex = null,
+			editingCommentIndex = null;
 
 		/*
 		 * Init
@@ -83,14 +84,14 @@
 		 */
 		this.$onChanges = function (changes) {
 			/*
-			var leftArrow = 37;
-			if (changes.hasOwnProperty("keysDown") &&
-				angular.isDefined(changes.keysDown.previousValue)) {
-				if (changes.keysDown.previousValue[0] === leftArrow) {
-					this.exit({issue: this.data});
-				}
-			}
-			*/
+			 var leftArrow = 37;
+			 if (changes.hasOwnProperty("keysDown") &&
+			 angular.isDefined(changes.keysDown.previousValue)) {
+			 if (changes.keysDown.previousValue[0] === leftArrow) {
+			 this.exit({issue: this.data});
+			 }
+			 }
+			 */
 
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
@@ -117,17 +118,27 @@
 		};
 
 		/**
+		 * Save a comment if one was being typed before close
+		 */
+		this.$onDestroy = function () {
+			if (this.comment) {
+				IssuesService.updatedIssue = self.issueData; // So that issues list is notified
+				saveComment();
+			}
+		};
+
+		/**
 		 * Disable the save button for a new issue if there is no name
 		 */
 		this.nameChange = function () {
-			this.submitDisabled = (typeof this.issueData.name === "undefined");
+			this.submitDisabled = !this.issueData.name;
 		};
 
 		/**
 		 * Disable the save button when commenting on an issue if there is no comment
 		 */
 		this.commentChange = function () {
-			this.submitDisabled = (this.data && (typeof this.comment === "undefined"));
+			this.submitDisabled = (this.data && !this.comment);
 		};
 
 		/**
@@ -146,20 +157,25 @@
 		 */
 		this.submit = function () {
 			if (self.data) {
-				if (self.data.owner === self.account) {
-					if ((this.data.priority !== this.issueData.priority) ||
-						(this.data.status !== this.issueData.status)) {
-						updateIssue();
-						if (typeof this.comment !== "undefined") {
+				if (editingCommentIndex !== null) {
+					updateComment();
+				}
+				else {
+					if (self.data.owner === self.account) {
+						if ((this.data.priority !== this.issueData.priority) ||
+							(this.data.status !== this.issueData.status)) {
+							updateIssue();
+							if (typeof this.comment !== "undefined") {
+								saveComment();
+							}
+						}
+						else {
 							saveComment();
 						}
 					}
 					else {
 						saveComment();
 					}
-				}
-				else {
-					saveComment();
 				}
 			}
 			else {
@@ -213,17 +229,22 @@
 				this.actions[currentActionIndex].color = highlightBackground;
 			}
 
-			self.action = this.actions[currentActionIndex].action;
+			if (currentActionIndex === null) {
+				self.action = null;
+			}
+			else {
+				self.action = this.actions[currentActionIndex].action;
 
-			switch (this.actions[currentActionIndex].action) {
-				case "screen_shot":
-					delete this.screenShot; // Remove any clicked on screen shot
-					$mdDialog.show({
-						controller: ScreenShotDialogController,
-						controllerAs: "vm",
-						templateUrl: "issueScreenShotDialog.html"
-					});
-					break;
+				switch (this.actions[currentActionIndex].action) {
+					case "screen_shot":
+						delete this.screenShot; // Remove any clicked on screen shot
+						$mdDialog.show({
+							controller: ScreenShotDialogController,
+							controllerAs: "vm",
+							templateUrl: "issueScreenShotDialog.html"
+						});
+						break;
+				}
 			}
 		};
 
@@ -387,7 +408,7 @@
 					IssuesService.saveComment(self.issueData, self.comment, viewpoint)
 						.then(function (response) {
 							console.log(response);
-							addNewCommentToIssue(response.data.issue);
+							afterNewComment(response.data.issue);
 						});
 				});
 			}
@@ -401,26 +422,81 @@
 				IssuesService.saveComment(self.issueData, self.comment, issueViewpoint)
 					.then(function (response) {
 						console.log(response);
-						addNewCommentToIssue(response.data.issue);
+						afterNewComment(response.data.issue);
 					});
 			}
 		}
 
 		/**
-		 * Add newly created comment to current issue
+		 * Process after new comment saved
 		 * @param comment
 		 */
-		function addNewCommentToIssue (comment) {
+		function afterNewComment (comment) {
+			// Add new comment to issue
 			self.issueData.comments.push({
 				comment: comment.comment,
 				owner: comment.owner,
 				timeStamp: IssuesService.getPrettyTime(comment.created),
 				viewpoint: comment.viewpoint
 			});
+
+			// Mark any previous comment as 'sealed' - no longer deletable or editable
+			if (self.issueData.comments.length > 1) {
+				IssuesService.sealComment(self.issueData, (self.issueData.comments.length - 2))
+					.then(function(response) {
+						console.log(response);
+						self.issueData.comments[self.issueData.comments.length - 2].sealed = true;
+					});
+			}
+
 			delete self.comment;
 			delete self.commentThumbnail;
 			IssuesService.updatedIssue = self.issueData;
 			setContentHeight();
+		}
+
+		/**
+		 * Delete a comment
+		 * @param event
+		 * @param index
+		 */
+		this.deleteComment = function(event, index) {
+			event.stopPropagation();
+			IssuesService.deleteComment(self.issueData, index)
+				.then(function(response) {
+					self.issueData.comments.splice(index, 1);
+				});
+			setContentHeight();
+		};
+
+		/**
+		 * Toggle the editing of a comment
+		 * @param event
+		 * @param index
+		 */
+		this.toggleEditComment = function(event, index) {
+			event.stopPropagation();
+			editingCommentIndex = (editingCommentIndex === null) ? index : null;
+			this.editCommentColor = (editingCommentIndex === null) ? "" : highlightBackground;
+			if (editingCommentIndex === null) {
+				this.comment = "";
+			} else {
+				this.comment = this.issueData.comments[this.issueData.comments.length - 1].comment;
+			}
+		};
+
+		/**
+		 * Update a comment
+		 */
+		function updateComment () {
+			IssuesService.editComment(self.issueData, self.comment, editingCommentIndex)
+				.then(function(response) {
+					self.issueData.comments[editingCommentIndex].comment = self.comment;
+					self.issueData.comments[editingCommentIndex].timeStamp = IssuesService.getPrettyTime(response.data.created);
+					self.comment = "";
+					editingCommentIndex = null;
+					this.editCommentColor = "";
+				});
 		}
 
 		/**
@@ -431,6 +507,7 @@
 			savedScreenShot = data.screenShot;
 			if (typeof self.data === "object") {
 				self.commentThumbnail = data.screenShot;
+				setContentHeight();
 			}
 			else {
 				self.descriptionThumbnail = data.screenShot;
@@ -460,17 +537,23 @@
 				commentTextHeight = 80,
 				commentImageHeight = 170,
 				additionalInfoHeight = 70,
+				thumbnailHeight = 170,
 				height = issueMinHeight;
 
 			if (self.data) {
+				// Additional info
 				if (self.showAdditional) {
 					height += additionalInfoHeight;
 				}
-
+				// Description text
 				if (self.issueData.hasOwnProperty("desc")) {
 					height += descriptionTextHeight;
 				}
-
+				// New comment thumbnail
+				if (self.commentThumbnail) {
+					height += thumbnailHeight;
+				}
+				// Comments
 				for (i = 0, length = self.issueData.comments.length; i < length; i += 1) {
 					height += commentTextHeight;
 					if (self.issueData.comments[i].viewpoint.hasOwnProperty("screenshot")) {

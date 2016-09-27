@@ -237,7 +237,7 @@
 			});
 		};
 
-		obj.setComment = function(issue, commentIndex) {
+		obj.sealComment = function(issue, commentIndex) {
 			return doPut(issue, {
 				comment: "",
 				number: issue.number,

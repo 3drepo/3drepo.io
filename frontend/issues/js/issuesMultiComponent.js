@@ -54,9 +54,9 @@
 		 * Handle component input changes
 		 */
 		this.$onChanges = function (changes) {
-			console.log(changes);
 			if (changes.hasOwnProperty("keysDown") && angular.isDefined(this.keysDown)) {
 				multiMode = ((isMac && this.keysDown.indexOf(cmdKey) !== -1) || (!isMac && this.keysDown.indexOf(ctrlKey) !== -1));
+				this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: multiMode});
 				if (multiMode) {
 					this.displaySelectedObjects(selectedObjectIDs);
 				}
@@ -71,7 +71,7 @@
 			}
 
 			if (changes.hasOwnProperty("event")) {
-				if (changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+				if (multiMode && (changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
 					objectIndex = selectedObjectIDs.indexOf(changes.event.currentValue.value.id);
 					if (objectIndex === -1) {
 						selectedObjectIDs.push(changes.event.currentValue.value.id);
@@ -94,13 +94,19 @@
 			}
 		};
 
+		/**
+		 * Handle remove
+		 */
+		this.$onDestroy = function () {
+			this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: false});
+		};
+
 		this.displaySelectedObjects = function (selectedObjects) {
 			var data = {
 				source: "tree",
 				account: this.account,
 				project: this.project,
-				ids: selectedObjects,
-				colour: "1.0 0.0 0.0"
+				ids: selectedObjects
 			};
 			this.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, value: data});
 		};

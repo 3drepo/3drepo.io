@@ -56,17 +56,29 @@
 
 	// Comments
 	.issueCompItemContainer(layout="column", layout-align="start", flex, ng-if="$ctrl.issueData.comments.length>0")
-		div(
+		.issueCompComment(
 		ng-repeat="comment in $ctrl.issueData.comments"
 		layout="column"
 		layout-align="start"
 		flex
 		ng-class="{issueCommentWithScreenShot: comment.viewpoint.screenshot}"
 		ng-click="$ctrl.showViewpointAndScreenShot(comment.viewpoint)")
-			label.issueCompCommentTitle {{comment.comment}}
+			// Text and actions
+			div(layout='row', layout-align="space-between", flex)
+				label.issueCompCommentTitle {{comment.comment}}
+				.issueCompCommentActions(layout="row", ng-if="!comment.sealed")
+					md-button.md-icon-button.md-accent(aria-label="Edit Comment", ng-click="$ctrl.toggleEditComment($event, $index)")
+						md-tooltip(md-direction="bottom") edit
+						md-icon.angular-material-icons(style="color:{{$ctrl.editCommentColor}}") mode_edit
+					md-button.md-icon-button.md-accent(aria-label="Delete Comment", ng-click="$ctrl.deleteComment($event, $index)")
+						md-tooltip(md-direction="bottom") delete
+						md-icon.angular-material-icons close
+			// Info
 			.issueCompCommentOwner(ng-if="$ctrl.data", layout="row", layout-align="space-between", flex)
 				label {{comment.owner}}
 				label {{comment.timeStamp}}
+
+			// Thumbnail
 			.issueCompThumbnail(
 			layout="row"
 			layout-align="center"

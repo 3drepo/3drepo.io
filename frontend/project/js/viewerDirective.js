@@ -280,6 +280,8 @@
 								view: event.value.view,
 								up: event.value.up
 							});
+						} else if (event.type === EventService.EVENT.MULTI_SELECT_MODE) {
+							v.viewer.setMultiSelectMode(event.value);
 						}
 					});
 				}

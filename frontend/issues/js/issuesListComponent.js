@@ -102,24 +102,28 @@
 				showPins();
 			}
 
-			// Keys down
-			if (changes.hasOwnProperty("keysDown") && (this.keysDown.length > 0) && (selectedIssueIndex !== null)) {
-				if ((self.keysDown[0] === downArrow) || (self.keysDown[0] === upArrow)) {
-					if ((self.keysDown[0] === downArrow) && (selectedIssueIndex !== (this.issuesToShow.length - 1))) {
+			// Keys down - check for down followed by up
+			if (changes.hasOwnProperty("keysDown") &&
+				(changes.keysDown.currentValue.length === 0) &&
+				(changes.keysDown.previousValue.length === 1) &&
+				(selectedIssueIndex !== null)) {
+
+				if ((changes.keysDown.previousValue[0] === downArrow) || (changes.keysDown.previousValue[0] === upArrow)) {
+					if ((changes.keysDown.previousValue[0] === downArrow) && (selectedIssueIndex !== (this.issuesToShow.length - 1))) {
 						selectedIssue.selected = false;
 						selectedIssueIndex += 1;
 					}
-					else if ((self.keysDown[0] === upArrow) && (selectedIssueIndex !== 0)) {
+					else if ((changes.keysDown.previousValue[0] === upArrow) && (selectedIssueIndex !== 0)) {
 						selectedIssue.selected = false;
 						selectedIssueIndex -= 1;
 					}
 					deselectPin(selectedIssue);
 					selectedIssue = this.issuesToShow[selectedIssueIndex];
 					selectedIssue.selected = true;
-					setSelectedIssueIndex(selectedIssue);
 					showIssue(selectedIssue);
+					setSelectedIssueIndex(selectedIssue);
 				}
-				else if (self.keysDown[0] === rightArrow) {
+				else if (changes.keysDown.previousValue[0] === rightArrow) {
 					self.editIssue(selectedIssue);
 				}
 			}
@@ -138,7 +142,6 @@
 
 			// Menu option
 			if (changes.hasOwnProperty("menuOption") && this.menuOption) {
-				console.log(this.menuOption);
 				if (this.menuOption.value === "sortByDate") {
 					sortOldestFirst = !sortOldestFirst;
 				}
@@ -155,7 +158,6 @@
 
 			// Updated issue
 			if (changes.hasOwnProperty("updatedIssue") && this.updatedIssue) {
-				console.log(this.updatedIssue);
 				for (i = 0, length = this.allIssues.length; i < length; i += 1) {
 					if (this.updatedIssue._id === this.allIssues[i]._id) {
 						this.allIssues[i] = this.updatedIssue;

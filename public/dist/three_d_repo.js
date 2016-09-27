@@ -2882,6 +2882,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 		this.inline = null;
 		this.runtime = null;
 		this.fullscreen = false;
+		this.multiSelectMode = false;
 
 		this.clickingEnabled = false;
 
@@ -3491,17 +3492,40 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				}
 			}
 
-			if (self.oldPart) {
-				for (i = 0; i < self.oldPart.length; i++) {
-					self.oldPart[i].resetColor();
+			// Don't unhighlight previous selection when in multi select mode
+			if (!this.multiSelectMode) {
+				if (self.oldPart) {
+					for (i = 0; i < self.oldPart.length; i++) {
+						self.oldPart[i].resetColor();
+					}
 				}
 			}
 
+			// Either toggle object or select new object(s)
+			if (self.oldPart &&
+				(self.oldPart[0].ids.length === 1) &&
+				(part[0].ids.length === 1) &&
+				(self.oldPart[0].ids[0] === part[0].ids[0])) {
+				// Toggle single selection
+				self.oldPart[0].resetColor();
+				delete self.oldPart;
+			}
+			else {
+				// Store current selection
+				self.oldPart = part;
+
+				for (i = 0; i < part.length; i++) {
+					part[i].setEmissiveColor(colour, "both");
+				}
+			}
+
+			/*
 			self.oldPart = part;
 
 			for (i = 0; i < part.length; i++) {
 				part[i].setEmissiveColor(colour, "both");
 			}
+			 */
 		};
 
 		this.clickObject = function(objEvent) {
@@ -4457,6 +4481,20 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 			event.position = newPos;
 			event.orientation = newOrient;
+		};
+
+		/**
+		 * Multi select mode
+		 * @param on
+		 */
+		this.setMultiSelectMode = function (on) {
+			var element = document.getElementById("x3dom-default-canvas");
+			this.multiSelectMode = on;
+			if (on) {
+				element.style.cursor = "crosshair";
+			} else {
+				element.style.cursor = "-webkit-grab";
+			}
 		};
 
 		/****************************************************************************
@@ -11819,7 +11857,8 @@ angular.module('3drepo')
 		var self = this,
 			savedScreenShot = null,
 			highlightBackground = "#FF9800",
-			currentActionIndex = null;
+			currentActionIndex = null,
+			editingCommentIndex = null;
 
 		/*
 		 * Init
@@ -11858,14 +11897,14 @@ angular.module('3drepo')
 		 */
 		this.$onChanges = function (changes) {
 			/*
-			var leftArrow = 37;
-			if (changes.hasOwnProperty("keysDown") &&
-				angular.isDefined(changes.keysDown.previousValue)) {
-				if (changes.keysDown.previousValue[0] === leftArrow) {
-					this.exit({issue: this.data});
-				}
-			}
-			*/
+			 var leftArrow = 37;
+			 if (changes.hasOwnProperty("keysDown") &&
+			 angular.isDefined(changes.keysDown.previousValue)) {
+			 if (changes.keysDown.previousValue[0] === leftArrow) {
+			 this.exit({issue: this.data});
+			 }
+			 }
+			 */
 
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
@@ -11892,17 +11931,27 @@ angular.module('3drepo')
 		};
 
 		/**
+		 * Save a comment if one was being typed before close
+		 */
+		this.$onDestroy = function () {
+			if (this.comment) {
+				IssuesService.updatedIssue = self.issueData; // So that issues list is notified
+				saveComment();
+			}
+		};
+
+		/**
 		 * Disable the save button for a new issue if there is no name
 		 */
 		this.nameChange = function () {
-			this.submitDisabled = (typeof this.issueData.name === "undefined");
+			this.submitDisabled = !this.issueData.name;
 		};
 
 		/**
 		 * Disable the save button when commenting on an issue if there is no comment
 		 */
 		this.commentChange = function () {
-			this.submitDisabled = (this.data && (typeof this.comment === "undefined"));
+			this.submitDisabled = (this.data && !this.comment);
 		};
 
 		/**
@@ -11921,20 +11970,25 @@ angular.module('3drepo')
 		 */
 		this.submit = function () {
 			if (self.data) {
-				if (self.data.owner === self.account) {
-					if ((this.data.priority !== this.issueData.priority) ||
-						(this.data.status !== this.issueData.status)) {
-						updateIssue();
-						if (typeof this.comment !== "undefined") {
+				if (editingCommentIndex !== null) {
+					updateComment();
+				}
+				else {
+					if (self.data.owner === self.account) {
+						if ((this.data.priority !== this.issueData.priority) ||
+							(this.data.status !== this.issueData.status)) {
+							updateIssue();
+							if (typeof this.comment !== "undefined") {
+								saveComment();
+							}
+						}
+						else {
 							saveComment();
 						}
 					}
 					else {
 						saveComment();
 					}
-				}
-				else {
-					saveComment();
 				}
 			}
 			else {
@@ -11988,17 +12042,22 @@ angular.module('3drepo')
 				this.actions[currentActionIndex].color = highlightBackground;
 			}
 
-			self.action = this.actions[currentActionIndex].action;
+			if (currentActionIndex === null) {
+				self.action = null;
+			}
+			else {
+				self.action = this.actions[currentActionIndex].action;
 
-			switch (this.actions[currentActionIndex].action) {
-				case "screen_shot":
-					delete this.screenShot; // Remove any clicked on screen shot
-					$mdDialog.show({
-						controller: ScreenShotDialogController,
-						controllerAs: "vm",
-						templateUrl: "issueScreenShotDialog.html"
-					});
-					break;
+				switch (this.actions[currentActionIndex].action) {
+					case "screen_shot":
+						delete this.screenShot; // Remove any clicked on screen shot
+						$mdDialog.show({
+							controller: ScreenShotDialogController,
+							controllerAs: "vm",
+							templateUrl: "issueScreenShotDialog.html"
+						});
+						break;
+				}
 			}
 		};
 
@@ -12162,7 +12221,7 @@ angular.module('3drepo')
 					IssuesService.saveComment(self.issueData, self.comment, viewpoint)
 						.then(function (response) {
 							console.log(response);
-							addNewCommentToIssue(response.data.issue);
+							afterNewComment(response.data.issue);
 						});
 				});
 			}
@@ -12176,26 +12235,81 @@ angular.module('3drepo')
 				IssuesService.saveComment(self.issueData, self.comment, issueViewpoint)
 					.then(function (response) {
 						console.log(response);
-						addNewCommentToIssue(response.data.issue);
+						afterNewComment(response.data.issue);
 					});
 			}
 		}
 
 		/**
-		 * Add newly created comment to current issue
+		 * Process after new comment saved
 		 * @param comment
 		 */
-		function addNewCommentToIssue (comment) {
+		function afterNewComment (comment) {
+			// Add new comment to issue
 			self.issueData.comments.push({
 				comment: comment.comment,
 				owner: comment.owner,
 				timeStamp: IssuesService.getPrettyTime(comment.created),
 				viewpoint: comment.viewpoint
 			});
+
+			// Mark any previous comment as 'sealed' - no longer deletable or editable
+			if (self.issueData.comments.length > 1) {
+				IssuesService.sealComment(self.issueData, (self.issueData.comments.length - 2))
+					.then(function(response) {
+						console.log(response);
+						self.issueData.comments[self.issueData.comments.length - 2].sealed = true;
+					});
+			}
+
 			delete self.comment;
 			delete self.commentThumbnail;
 			IssuesService.updatedIssue = self.issueData;
 			setContentHeight();
+		}
+
+		/**
+		 * Delete a comment
+		 * @param event
+		 * @param index
+		 */
+		this.deleteComment = function(event, index) {
+			event.stopPropagation();
+			IssuesService.deleteComment(self.issueData, index)
+				.then(function(response) {
+					self.issueData.comments.splice(index, 1);
+				});
+			setContentHeight();
+		};
+
+		/**
+		 * Toggle the editing of a comment
+		 * @param event
+		 * @param index
+		 */
+		this.toggleEditComment = function(event, index) {
+			event.stopPropagation();
+			editingCommentIndex = (editingCommentIndex === null) ? index : null;
+			this.editCommentColor = (editingCommentIndex === null) ? "" : highlightBackground;
+			if (editingCommentIndex === null) {
+				this.comment = "";
+			} else {
+				this.comment = this.issueData.comments[this.issueData.comments.length - 1].comment;
+			}
+		};
+
+		/**
+		 * Update a comment
+		 */
+		function updateComment () {
+			IssuesService.editComment(self.issueData, self.comment, editingCommentIndex)
+				.then(function(response) {
+					self.issueData.comments[editingCommentIndex].comment = self.comment;
+					self.issueData.comments[editingCommentIndex].timeStamp = IssuesService.getPrettyTime(response.data.created);
+					self.comment = "";
+					editingCommentIndex = null;
+					this.editCommentColor = "";
+				});
 		}
 
 		/**
@@ -12206,6 +12320,7 @@ angular.module('3drepo')
 			savedScreenShot = data.screenShot;
 			if (typeof self.data === "object") {
 				self.commentThumbnail = data.screenShot;
+				setContentHeight();
 			}
 			else {
 				self.descriptionThumbnail = data.screenShot;
@@ -12235,17 +12350,23 @@ angular.module('3drepo')
 				commentTextHeight = 80,
 				commentImageHeight = 170,
 				additionalInfoHeight = 70,
+				thumbnailHeight = 170,
 				height = issueMinHeight;
 
 			if (self.data) {
+				// Additional info
 				if (self.showAdditional) {
 					height += additionalInfoHeight;
 				}
-
+				// Description text
 				if (self.issueData.hasOwnProperty("desc")) {
 					height += descriptionTextHeight;
 				}
-
+				// New comment thumbnail
+				if (self.commentThumbnail) {
+					height += thumbnailHeight;
+				}
+				// Comments
 				for (i = 0, length = self.issueData.comments.length; i < length; i += 1) {
 					height += commentTextHeight;
 					if (self.issueData.comments[i].viewpoint.hasOwnProperty("screenshot")) {
@@ -13456,7 +13577,6 @@ angular.module('3drepo')
 		 * Go back to issues list
 		 */
 		$scope.$watch("vm.hideItem", function (newValue) {
-			console.log(newValue);
 			if (angular.isDefined(newValue) && newValue) {
 				vm.toShow = "showIssues";
 				vm.setContentHeight();
@@ -13679,24 +13799,28 @@ angular.module('3drepo')
 				showPins();
 			}
 
-			// Keys down
-			if (changes.hasOwnProperty("keysDown") && (this.keysDown.length > 0) && (selectedIssueIndex !== null)) {
-				if ((self.keysDown[0] === downArrow) || (self.keysDown[0] === upArrow)) {
-					if ((self.keysDown[0] === downArrow) && (selectedIssueIndex !== (this.issuesToShow.length - 1))) {
+			// Keys down - check for down followed by up
+			if (changes.hasOwnProperty("keysDown") &&
+				(changes.keysDown.currentValue.length === 0) &&
+				(changes.keysDown.previousValue.length === 1) &&
+				(selectedIssueIndex !== null)) {
+
+				if ((changes.keysDown.previousValue[0] === downArrow) || (changes.keysDown.previousValue[0] === upArrow)) {
+					if ((changes.keysDown.previousValue[0] === downArrow) && (selectedIssueIndex !== (this.issuesToShow.length - 1))) {
 						selectedIssue.selected = false;
 						selectedIssueIndex += 1;
 					}
-					else if ((self.keysDown[0] === upArrow) && (selectedIssueIndex !== 0)) {
+					else if ((changes.keysDown.previousValue[0] === upArrow) && (selectedIssueIndex !== 0)) {
 						selectedIssue.selected = false;
 						selectedIssueIndex -= 1;
 					}
 					deselectPin(selectedIssue);
 					selectedIssue = this.issuesToShow[selectedIssueIndex];
 					selectedIssue.selected = true;
-					setSelectedIssueIndex(selectedIssue);
 					showIssue(selectedIssue);
+					setSelectedIssueIndex(selectedIssue);
 				}
-				else if (self.keysDown[0] === rightArrow) {
+				else if (changes.keysDown.previousValue[0] === rightArrow) {
 					self.editIssue(selectedIssue);
 				}
 			}
@@ -13715,7 +13839,6 @@ angular.module('3drepo')
 
 			// Menu option
 			if (changes.hasOwnProperty("menuOption") && this.menuOption) {
-				console.log(this.menuOption);
 				if (this.menuOption.value === "sortByDate") {
 					sortOldestFirst = !sortOldestFirst;
 				}
@@ -13732,7 +13855,6 @@ angular.module('3drepo')
 
 			// Updated issue
 			if (changes.hasOwnProperty("updatedIssue") && this.updatedIssue) {
-				console.log(this.updatedIssue);
 				for (i = 0, length = this.allIssues.length; i < length; i += 1) {
 					if (this.updatedIssue._id === this.allIssues[i]._id) {
 						this.allIssues[i] = this.updatedIssue;
@@ -14070,9 +14192,9 @@ angular.module('3drepo')
 		 * Handle component input changes
 		 */
 		this.$onChanges = function (changes) {
-			console.log(changes);
 			if (changes.hasOwnProperty("keysDown") && angular.isDefined(this.keysDown)) {
 				multiMode = ((isMac && this.keysDown.indexOf(cmdKey) !== -1) || (!isMac && this.keysDown.indexOf(ctrlKey) !== -1));
+				this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: multiMode});
 				if (multiMode) {
 					this.displaySelectedObjects(selectedObjectIDs);
 				}
@@ -14087,7 +14209,7 @@ angular.module('3drepo')
 			}
 
 			if (changes.hasOwnProperty("event")) {
-				if (changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) {
+				if (multiMode && (changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
 					objectIndex = selectedObjectIDs.indexOf(changes.event.currentValue.value.id);
 					if (objectIndex === -1) {
 						selectedObjectIDs.push(changes.event.currentValue.value.id);
@@ -14110,13 +14232,19 @@ angular.module('3drepo')
 			}
 		};
 
+		/**
+		 * Handle remove
+		 */
+		this.$onDestroy = function () {
+			this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: false});
+		};
+
 		this.displaySelectedObjects = function (selectedObjects) {
 			var data = {
 				source: "tree",
 				account: this.account,
 				project: this.project,
-				ids: selectedObjects,
-				colour: "1.0 0.0 0.0"
+				ids: selectedObjects
 			};
 			this.sendEvent({type: EventService.EVENT.VIEWER.HIGHLIGHT_OBJECTS, value: data});
 		};
@@ -14361,7 +14489,7 @@ angular.module('3drepo')
 			});
 		};
 
-		obj.setComment = function(issue, commentIndex) {
+		obj.sealComment = function(issue, commentIndex) {
 			return doPut(issue, {
 				comment: "",
 				number: issue.number,
@@ -16718,8 +16846,9 @@ var Oculus = {};
 			FULL_SCREEN_ENTER: "EVENT_FULL_SCREEN_ENTER",
 			GET_ISSUE_AREA_PNG: "EVENT_GET_ISSUE_AREA_PNG",
 			GLOBAL_CLICK: "EVENT_GLOBAL_CLICK",
-			MEASURE_MODE: "EVENT_MEASURE_MODE",
 			ISSUE_AREA_PNG: "EVENT_ISSUE_AREA_PNG",
+			MEASURE_MODE: "EVENT_MEASURE_MODE",
+			MULTI_SELECT_MODE: "EVENT_MULTI_SELECT_MODE",
 			OBJECT_SELECTED: "EVENT_OBJECT_SELECTED",
 			PIN_SELECTED: "EVENT_PIN_SELECTED",
 			PANEL_CONTENT_CLICK: "EVENT_LEFT_PANEL_CONTENT_CLICK",
@@ -16727,6 +16856,7 @@ var Oculus = {};
 			PANEL_CARD_EDIT_MODE: "EVENT_PANEL_CARD_EDIT_MODE",
 			PANEL_CONTENT_SETUP: "EVENT_PANEL_CONTENT_SETUP",
 			PANEL_CONTENT_TOGGLED: "EVENT_PANEL_CONTENT_TOGGLED",
+			SET_CLIPPING_PLANES: "EVENT_SET_CLIPPING_PLANES",
 			SET_ISSUE_AREA_MODE: "EVENT_SET_ISSUE_AREA_MODE",
 			SHOW_PROJECTS: "EVENT_SHOW_PROJECTS",
 			SHOW_QR_CODE_READER: "EVENT_SHOW_QR_CODE_READER",
@@ -16736,7 +16866,6 @@ var Oculus = {};
 			TOGGLE_ISSUE_AREA: "EVENT_TOGGLE_ISSUE_AREA",
 			TOGGLE_ISSUE_AREA_DRAWING: "EVENT_TOGGLE_ISSUE_AREA_DRAWING",
 			WINDOW_HEIGHT_CHANGE: "EVENT_WINDOW_HEIGHT_CHANGE",
-			SET_CLIPPING_PLANES: "EVENT_SET_CLIPPING_PLANES",
 
 			// Events to control the viewer manager
 			CREATE_VIEWER: "EVENT_CREATE_VIEWER",
@@ -17036,6 +17165,7 @@ var Oculus = {};
 		{
 			if (angular.isDefined(vm.account) && angular.isDefined(vm.project)) {
 				// Add filtering options for the Issues card menu
+				/*
 				ProjectService.getRoles(vm.account, vm.project).then(function (data) {
 					for (i = 0, length = data.length; i < length; i += 1) {
 						panelCard.left[issuesCardIndex].menu.push(
@@ -17050,9 +17180,10 @@ var Oculus = {};
 						);
 					}
 				});
+				*/
 
 				ProjectService.getProjectInfo(vm.account, vm.project).then(function (data) {
-					vm.settings = data.settings
+					vm.settings = data.settings;
 					EventService.send(EventService.EVENT.PROJECT_SETTINGS_READY, {
 						account: data.account,
 						project: data.project,
@@ -17582,6 +17713,8 @@ var Oculus = {};
 								view: event.value.view,
 								up: event.value.up
 							});
+						} else if (event.type === EventService.EVENT.MULTI_SELECT_MODE) {
+							v.viewer.setMultiSelectMode(event.value);
 						}
 					});
 				}
@@ -17643,7 +17776,7 @@ var Oculus = {};
 
 		var send = function (type, value) {
 			sendInternal(type, value);
-			nextEventService.send(type, value);
+			//nextEventService.send(type, value);
 		};
 
 		var sendErrorInternal = function(type, value) {
@@ -17654,7 +17787,7 @@ var Oculus = {};
 
 		var sendError = function(type, value) {
 			sendErrorInternal(type, value);
-			nextEventService.sendError(type, value);
+			//nextEventService.sendError(type, value);
 		};
 
 		return {
@@ -17865,7 +17998,11 @@ var Oculus = {};
 		});
 
 		$scope.$watch("vm.revisions", function () {
-			
+
+			if(!vm.revisions || !vm.revisions[0]){
+				return;
+			}
+
 			if(!vm.revision){
 				vm.revName = vm.revisions[0].tag || $filter('revisionDate')(vm.revisions[0].timestamp);
 				vm.revisions[0].current = true;
