@@ -31,7 +31,9 @@
 				branch:   "=",
 				revision: "=",				
                 position: "@",
-				keysDown: "="
+				keysDown: "=",
+				selectedObjects: "=",
+				setInitialSelectedObjects: "&"
             },
             controller: PanelCtrl,
             controllerAs: "vm",

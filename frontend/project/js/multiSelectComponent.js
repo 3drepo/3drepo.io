@@ -29,7 +29,8 @@
 					keysDown: "<",
 					sendEvent: "&",
 					event: "<",
-					setMulti: "&"
+					setSelectedObjects: "&",
+					initialSelectedObjects: "<"
 				}
 			}
 		);
@@ -39,14 +40,14 @@
 	function MultiSelectCtrl (EventService) {
 		var self = this,
 			objectIndex,
-			selectedObjectIDs = [],
+			selectedObjects = [],
 			cmdKey = 91,
 			ctrlKey = 17,
 			isMac = (navigator.platform.indexOf("Mac") !== -1),
 			multiMode = false;
 
 		// Init
-		this.setMulti({data: null});
+		this.setSelectedObjects({selectedObjects: null});
 
 		/**
 		 * Handle component input changes
@@ -55,10 +56,10 @@
 			if (changes.hasOwnProperty("keysDown") && changes.keysDown.currentValue) {
 				multiMode = ((isMac && this.keysDown.indexOf(cmdKey) !== -1) || (!isMac && this.keysDown.indexOf(ctrlKey) !== -1));
 				this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: multiMode});
-				if (multiMode) {
-					this.displaySelectedObjects(selectedObjectIDs);
-				}
 				/*
+				if (multiMode) {
+					this.displaySelectedObjects(selectedObjects);
+				}
 				else {
 					this.displaySelectedObjects([]);
 				}
@@ -67,25 +68,31 @@
 
 			if (changes.hasOwnProperty("event") && changes.event.currentValue) {
 				if (multiMode && (changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
-					objectIndex = selectedObjectIDs.indexOf(changes.event.currentValue.value.id);
+					objectIndex = selectedObjects.indexOf(changes.event.currentValue.value.id);
 					if (objectIndex === -1) {
-						selectedObjectIDs.push(changes.event.currentValue.value.id);
+						selectedObjects.push(changes.event.currentValue.value.id);
 					}
 					else {
-						selectedObjectIDs.splice(objectIndex, 1);
+						selectedObjects.splice(objectIndex, 1);
 					}
-					this.displaySelectedObjects(selectedObjectIDs);
+					this.displaySelectedObjects(selectedObjects);
 
-					if (selectedObjectIDs.length > 0) {
-						self.setMulti({data: selectedObjectIDs});
+					if (selectedObjects.length > 0) {
+						self.setSelectedObjects({selectedObjects: selectedObjects});
 					}
 					else {
-						self.setMulti({data: null});
+						self.setSelectedObjects({selectedObjects: null});
 					}
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
-					//removePin();
+					selectedObjects = [];
+					self.setSelectedObjects({selectedObjects: null});
 				}
+			}
+
+			if (changes.hasOwnProperty("initialSelectedObjects") && this.initialSelectedObjects) {
+				selectedObjects = this.initialSelectedObjects;
+				this.displaySelectedObjects(selectedObjects);
 			}
 		};
 

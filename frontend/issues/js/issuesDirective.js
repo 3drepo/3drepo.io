@@ -39,7 +39,9 @@
 				onContentHeightRequest: "&",
 				onShowItem : "&",
 				hideItem: "=",
-				keysDown: "="
+				keysDown: "=",
+				selectedObjects: "=",
+				setInitialSelectedObjects: "&"
 			},
 			controller: IssuesCtrl,
 			controllerAs: 'vm',

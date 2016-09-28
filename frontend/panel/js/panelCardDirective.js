@@ -34,8 +34,10 @@
                 contentData: "=",
 				onHeightRequest: "&",
 				onShowFilter: "&",
-				keysDown: "="
-            },
+				keysDown: "=",
+				selectedObjects: "=",
+				setInitialSelectedObjects: "&"
+			},
             controller: PanelCardCtrl,
             controllerAs: "vm",
             bindToController: true
@@ -178,7 +180,9 @@
 				"project='vm.project' " +
 				"branch='vm.branch' " +
 				"revision='vm.revision' " +
-				"keys-down='vm.keysDown' ";
+				"keys-down='vm.keysDown' " +
+				"selected-objects='vm.selectedObjects' " +
+				"set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'";
 
 			// Only add attributes when needed
 			if (vm.contentData.hasOwnProperty("options")) {

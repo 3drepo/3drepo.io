@@ -11851,7 +11851,9 @@ angular.module('3drepo')
 					sendEvent: "&",
 					event: "<",
 					issueCreated: "&",
-					contentHeight: "&"
+					contentHeight: "&",
+					selectedObjects: "<",
+					setInitialSelectedObjects: "&"
 				}
 			}
 		);
@@ -11864,7 +11866,8 @@ angular.module('3drepo')
 			highlightBackground = "#FF9800",
 			currentActionIndex = null,
 			editingCommentIndex = null,
-			commentViewpoint;
+			commentViewpoint,
+			issueSelectedObjects = null;
 
 		/*
 		 * Init
@@ -11873,7 +11876,6 @@ angular.module('3drepo')
 		this.hideDescription = false;
 		this.submitDisabled = true;
 		this.pinData = null;
-		this.multiData = null;
 		this.showAdditional = true;
 		this.priorities = [
 			{value: "none", label: "None"},
@@ -11902,16 +11904,7 @@ angular.module('3drepo')
 		 * @param {Object} changes
 		 */
 		this.$onChanges = function (changes) {
-			/*
-			 var leftArrow = 37;
-			 if (changes.hasOwnProperty("keysDown") &&
-			 angular.isDefined(changes.keysDown.previousValue)) {
-			 if (changes.keysDown.previousValue[0] === leftArrow) {
-			 this.exit({issue: this.data});
-			 }
-			 }
-			 */
-
+			// Data
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
 					this.issueData = angular.copy(this.data);
@@ -11932,8 +11925,24 @@ angular.module('3drepo')
 					this.canUpdate = true;
 				}
 				this.statusIcon = IssuesService.getStatusIcon(this.issueData);
+				setContentHeight();
 			}
-			setContentHeight();
+
+			// Selected objects
+			if ((changes.hasOwnProperty("selectedObjects") && this.selectedObjects)) {
+				issueSelectedObjects = this.selectedObjects;
+			}
+
+			// Event
+			if ((changes.hasOwnProperty("event") && this.event)) {
+				// After a pin has been placed highlight any saved selected objects
+				if (((this.event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) ||
+					 (this.event.type === EventService.EVENT.VIEWER.ADD_PIN)) &&
+					(this.actions[currentActionIndex].action === "pin") &&
+					(issueSelectedObjects !== null)) {
+					this.setInitialSelectedObjects({selectedObjects: issueSelectedObjects});
+				}
+			}
 		};
 
 		/**
@@ -12051,6 +12060,7 @@ angular.module('3drepo')
 
 			if (currentActionIndex === null) {
 				self.action = null;
+				issueSelectedObjects = null;
 			}
 			else {
 				self.action = this.actions[currentActionIndex].action;
@@ -12064,6 +12074,15 @@ angular.module('3drepo')
 							templateUrl: "issueScreenShotDialog.html"
 						});
 						break;
+
+					case "multi":
+						if (issueSelectedObjects !== null) {
+							this.setInitialSelectedObjects({selectedObjects: issueSelectedObjects});
+						}
+						else {
+							issueSelectedObjects = this.selectedObjects;
+						}
+						break;
 				}
 			}
 		};
@@ -12074,14 +12093,6 @@ angular.module('3drepo')
 		 */
 		this.setPin = function (pinData) {
 			self.pinData = pinData.data;
-		};
-
-		/**
-		 * Set the current add pin data
-		 * @param multiData
-		 */
-		this.setMulti = function (multiData) {
-			self.multiData = multiData.data;
 		};
 
 		/**
@@ -12104,9 +12115,9 @@ angular.module('3drepo')
 			self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
 			viewpointPromise.promise.then(function (viewpoint) {
 				if (savedScreenShot !== null) {
-					if (self.multiData !== null) {
+					if (issueSelectedObjects !== null) {
 						// Create a group of selected objects
-						data = {name: self.issueData.name, color: [255, 0, 0], parents: self.multiData};
+						data = {name: self.issueData.name, color: [255, 0, 0], parents: issueSelectedObjects};
 						UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
 							doSaveIssue(viewpoint, savedScreenShot, response.data._id);
 						});
@@ -12119,9 +12130,9 @@ angular.module('3drepo')
 					// Get a screen shot if not already created
 					self.sendEvent({type: EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
 					screenShotPromise.promise.then(function (screenShot) {
-						if (self.multiData !== null) {
+						if (issueSelectedObjects !== null) {
 							// Create a group of selected objects
-							data = {name: self.issueData.name, color: [255, 0, 0], parents: self.multiData};
+							data = {name: self.issueData.name, color: [255, 0, 0], parents: issueSelectedObjects};
 							UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
 								doSaveIssue(viewpoint, screenShot, response.data._id);
 							});
@@ -13200,7 +13211,9 @@ angular.module('3drepo')
 				onContentHeightRequest: "&",
 				onShowItem : "&",
 				hideItem: "=",
-				keysDown: "="
+				keysDown: "=",
+				selectedObjects: "=",
+				setInitialSelectedObjects: "&"
 			},
 			controller: IssuesCtrl,
 			controllerAs: 'vm',
@@ -15222,8 +15235,10 @@ var Oculus = {};
                 contentData: "=",
 				onHeightRequest: "&",
 				onShowFilter: "&",
-				keysDown: "="
-            },
+				keysDown: "=",
+				selectedObjects: "=",
+				setInitialSelectedObjects: "&"
+			},
             controller: PanelCardCtrl,
             controllerAs: "vm",
             bindToController: true
@@ -15366,7 +15381,9 @@ var Oculus = {};
 				"project='vm.project' " +
 				"branch='vm.branch' " +
 				"revision='vm.revision' " +
-				"keys-down='vm.keysDown' ";
+				"keys-down='vm.keysDown' " +
+				"selected-objects='vm.selectedObjects' " +
+				"set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'";
 
 			// Only add attributes when needed
 			if (vm.contentData.hasOwnProperty("options")) {
@@ -16106,7 +16123,9 @@ var Oculus = {};
 				branch:   "=",
 				revision: "=",				
                 position: "@",
-				keysDown: "="
+				keysDown: "=",
+				selectedObjects: "=",
+				setInitialSelectedObjects: "&"
             },
             controller: PanelCtrl,
             controllerAs: "vm",
@@ -16801,7 +16820,7 @@ var Oculus = {};
 				{
 					console.trace("UNDEFINED EVENT TYPE");
 				} else {
-					//console.log("SEND: " + type + " : " + JSON.stringify(value));
+					console.log("SEND: " + type + " : " + JSON.stringify(value));
 					currentEvent = {type: type, value: value};
 				}
 			});
@@ -16903,7 +16922,8 @@ var Oculus = {};
 					keysDown: "<",
 					sendEvent: "&",
 					event: "<",
-					setMulti: "&"
+					setSelectedObjects: "&",
+					initialSelectedObjects: "<"
 				}
 			}
 		);
@@ -16913,14 +16933,14 @@ var Oculus = {};
 	function MultiSelectCtrl (EventService) {
 		var self = this,
 			objectIndex,
-			selectedObjectIDs = [],
+			selectedObjects = [],
 			cmdKey = 91,
 			ctrlKey = 17,
 			isMac = (navigator.platform.indexOf("Mac") !== -1),
 			multiMode = false;
 
 		// Init
-		this.setMulti({data: null});
+		this.setSelectedObjects({selectedObjects: null});
 
 		/**
 		 * Handle component input changes
@@ -16929,10 +16949,10 @@ var Oculus = {};
 			if (changes.hasOwnProperty("keysDown") && changes.keysDown.currentValue) {
 				multiMode = ((isMac && this.keysDown.indexOf(cmdKey) !== -1) || (!isMac && this.keysDown.indexOf(ctrlKey) !== -1));
 				this.sendEvent({type: EventService.EVENT.MULTI_SELECT_MODE, value: multiMode});
-				if (multiMode) {
-					this.displaySelectedObjects(selectedObjectIDs);
-				}
 				/*
+				if (multiMode) {
+					this.displaySelectedObjects(selectedObjects);
+				}
 				else {
 					this.displaySelectedObjects([]);
 				}
@@ -16941,25 +16961,31 @@ var Oculus = {};
 
 			if (changes.hasOwnProperty("event") && changes.event.currentValue) {
 				if (multiMode && (changes.event.currentValue.type === EventService.EVENT.VIEWER.OBJECT_SELECTED)) {
-					objectIndex = selectedObjectIDs.indexOf(changes.event.currentValue.value.id);
+					objectIndex = selectedObjects.indexOf(changes.event.currentValue.value.id);
 					if (objectIndex === -1) {
-						selectedObjectIDs.push(changes.event.currentValue.value.id);
+						selectedObjects.push(changes.event.currentValue.value.id);
 					}
 					else {
-						selectedObjectIDs.splice(objectIndex, 1);
+						selectedObjects.splice(objectIndex, 1);
 					}
-					this.displaySelectedObjects(selectedObjectIDs);
+					this.displaySelectedObjects(selectedObjects);
 
-					if (selectedObjectIDs.length > 0) {
-						self.setMulti({data: selectedObjectIDs});
+					if (selectedObjects.length > 0) {
+						self.setSelectedObjects({selectedObjects: selectedObjects});
 					}
 					else {
-						self.setMulti({data: null});
+						self.setSelectedObjects({selectedObjects: null});
 					}
 				}
 				else if (changes.event.currentValue.type === EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
-					//removePin();
+					selectedObjects = [];
+					self.setSelectedObjects({selectedObjects: null});
 				}
+			}
+
+			if (changes.hasOwnProperty("initialSelectedObjects") && this.initialSelectedObjects) {
+				selectedObjects = this.initialSelectedObjects;
+				this.displaySelectedObjects(selectedObjects);
 			}
 		};
 
@@ -17291,10 +17317,22 @@ var Oculus = {};
 
 		/**
 		 * Get the current multi selection
+		 * @param selectedObjects
+		 */
+		vm.setSelectedObjects = function (selectedObjects) {
+			vm.selectedObjects = selectedObjects;
+		};
+
+		/**
+		 * Initalise the list of selected objects
 		 * @param data
 		 */
-		vm.setMulti = function (data) {
-			vm.multiData = data;
+		vm.setInitialSelectedObjects = function (data) {
+			vm.initialSelectedObjects = data.selectedObjects;
+			// Set the value to null so that it will be registered again
+			$timeout(function () {
+				vm.initialSelectedObjects = null;
+			});
 		};
 
 		/**

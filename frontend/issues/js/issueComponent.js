@@ -33,7 +33,9 @@
 					sendEvent: "&",
 					event: "<",
 					issueCreated: "&",
-					contentHeight: "&"
+					contentHeight: "&",
+					selectedObjects: "<",
+					setInitialSelectedObjects: "&"
 				}
 			}
 		);
@@ -46,7 +48,8 @@
 			highlightBackground = "#FF9800",
 			currentActionIndex = null,
 			editingCommentIndex = null,
-			commentViewpoint;
+			commentViewpoint,
+			issueSelectedObjects = null;
 
 		/*
 		 * Init
@@ -55,7 +58,6 @@
 		this.hideDescription = false;
 		this.submitDisabled = true;
 		this.pinData = null;
-		this.multiData = null;
 		this.showAdditional = true;
 		this.priorities = [
 			{value: "none", label: "None"},
@@ -84,16 +86,7 @@
 		 * @param {Object} changes
 		 */
 		this.$onChanges = function (changes) {
-			/*
-			 var leftArrow = 37;
-			 if (changes.hasOwnProperty("keysDown") &&
-			 angular.isDefined(changes.keysDown.previousValue)) {
-			 if (changes.keysDown.previousValue[0] === leftArrow) {
-			 this.exit({issue: this.data});
-			 }
-			 }
-			 */
-
+			// Data
 			if (changes.hasOwnProperty("data")) {
 				if (this.data) {
 					this.issueData = angular.copy(this.data);
@@ -114,8 +107,24 @@
 					this.canUpdate = true;
 				}
 				this.statusIcon = IssuesService.getStatusIcon(this.issueData);
+				setContentHeight();
 			}
-			setContentHeight();
+
+			// Selected objects
+			if ((changes.hasOwnProperty("selectedObjects") && this.selectedObjects)) {
+				issueSelectedObjects = this.selectedObjects;
+			}
+
+			// Event
+			if ((changes.hasOwnProperty("event") && this.event)) {
+				// After a pin has been placed highlight any saved selected objects
+				if (((this.event.type === EventService.EVENT.VIEWER.OBJECT_SELECTED) ||
+					 (this.event.type === EventService.EVENT.VIEWER.ADD_PIN)) &&
+					(this.actions[currentActionIndex].action === "pin") &&
+					(issueSelectedObjects !== null)) {
+					this.setInitialSelectedObjects({selectedObjects: issueSelectedObjects});
+				}
+			}
 		};
 
 		/**
@@ -233,6 +242,7 @@
 
 			if (currentActionIndex === null) {
 				self.action = null;
+				issueSelectedObjects = null;
 			}
 			else {
 				self.action = this.actions[currentActionIndex].action;
@@ -246,6 +256,15 @@
 							templateUrl: "issueScreenShotDialog.html"
 						});
 						break;
+
+					case "multi":
+						if (issueSelectedObjects !== null) {
+							this.setInitialSelectedObjects({selectedObjects: issueSelectedObjects});
+						}
+						else {
+							issueSelectedObjects = this.selectedObjects;
+						}
+						break;
 				}
 			}
 		};
@@ -256,14 +275,6 @@
 		 */
 		this.setPin = function (pinData) {
 			self.pinData = pinData.data;
-		};
-
-		/**
-		 * Set the current add pin data
-		 * @param multiData
-		 */
-		this.setMulti = function (multiData) {
-			self.multiData = multiData.data;
 		};
 
 		/**
@@ -286,9 +297,9 @@
 			self.sendEvent({type: EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT, value: {promise: viewpointPromise}});
 			viewpointPromise.promise.then(function (viewpoint) {
 				if (savedScreenShot !== null) {
-					if (self.multiData !== null) {
+					if (issueSelectedObjects !== null) {
 						// Create a group of selected objects
-						data = {name: self.issueData.name, color: [255, 0, 0], parents: self.multiData};
+						data = {name: self.issueData.name, color: [255, 0, 0], parents: issueSelectedObjects};
 						UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
 							doSaveIssue(viewpoint, savedScreenShot, response.data._id);
 						});
@@ -301,9 +312,9 @@
 					// Get a screen shot if not already created
 					self.sendEvent({type: EventService.EVENT.VIEWER.GET_SCREENSHOT, value: {promise: screenShotPromise}});
 					screenShotPromise.promise.then(function (screenShot) {
-						if (self.multiData !== null) {
+						if (issueSelectedObjects !== null) {
 							// Create a group of selected objects
-							data = {name: self.issueData.name, color: [255, 0, 0], parents: self.multiData};
+							data = {name: self.issueData.name, color: [255, 0, 0], parents: issueSelectedObjects};
 							UtilsService.doPost(data, self.account + "/" + self.project + "/groups").then(function (response) {
 								doSaveIssue(viewpoint, screenShot, response.data._id);
 							});

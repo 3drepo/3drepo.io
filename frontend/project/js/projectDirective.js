@@ -308,10 +308,22 @@
 
 		/**
 		 * Get the current multi selection
+		 * @param selectedObjects
+		 */
+		vm.setSelectedObjects = function (selectedObjects) {
+			vm.selectedObjects = selectedObjects;
+		};
+
+		/**
+		 * Initalise the list of selected objects
 		 * @param data
 		 */
-		vm.setMulti = function (data) {
-			vm.multiData = data;
+		vm.setInitialSelectedObjects = function (data) {
+			vm.initialSelectedObjects = data.selectedObjects;
+			// Set the value to null so that it will be registered again
+			$timeout(function () {
+				vm.initialSelectedObjects = null;
+			});
 		};
 
 		/**

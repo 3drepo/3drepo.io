@@ -40,5 +40,7 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 	send-event="vm.sendEvent(type, value)"
 	event="vm.event"
 	issue-created="vm.issueCreated(issue)"
-	content-height="vm.setContentHeight(height)")
+	content-height="vm.setContentHeight(height)"
+	selected-objects="vm.selectedObjects"
+	set-initial-selected-objects="vm.setInitialSelectedObjects({selectedObjects: selectedObjects})")
 
