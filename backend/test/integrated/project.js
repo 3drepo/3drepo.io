@@ -221,7 +221,7 @@ describe('Project', function () {
 		it('should success and get the latest file', function(done){
 			agent.get(`/${username}/${project}/download/latest`).expect(200, function(err, res){
 
-				expect(res.headers['content-disposition']).to.equal('attachment;filename=6f1744b1-0d20-4f64-ac76-51c31b53c55a3DrepoBIM.obj');
+				expect(res.headers['content-disposition']).to.equal('attachment;filename=3DrepoBIM.obj');
 				
 				done(err);
 			});
