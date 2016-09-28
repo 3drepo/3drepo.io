@@ -230,6 +230,8 @@ ImportQueue.prototype.createFederatedProject = function(account, defObj){
 ImportQueue.prototype._moveFileToSharedSpace = function(corID, orgFilePath, newFileName, copy) {
     'use strict';
 
+    newFileName = newFileName.replace(/ /g, '_');
+    
     let newFileDir = this.sharedSpacePath + "/" + corID + "/";
     let filePath = newFileDir + newFileName;
     

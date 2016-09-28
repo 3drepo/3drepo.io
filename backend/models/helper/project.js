@@ -763,7 +763,7 @@ function downloadLatest(account, project){
 			ext = '.' + filename.pop();
 		}
 
-		file.filename = filename.join('_') + ext;
+		file.filename = filename.join('_').substr(36) + ext;
 
 		return Promise.resolve({
 			readStream: bucket.openDownloadStream(file._id),
