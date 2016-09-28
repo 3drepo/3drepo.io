@@ -475,7 +475,7 @@
 				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
 			}
 
-			res.render("invoice.jade", {billing : billing.clean(), baseURL: utils.getBaseURL()});
+			res.render("invoice.jade", {billing : billing.clean(), baseURL: config.getBaseURL()});
 			
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
