@@ -2566,10 +2566,7 @@ DBInterface.prototype.getScene = function(dbName, project, branch, revision, ful
 				return callback(err);
 			}
 
-			self.getCoordOffset(dbName, project, branch, revision, function(err, coordOffset){
-				callback(responseCodes.OK, repoGraphScene(self.logger).decode(coll), coordOffset);
-			}
-			);
+			callback(responseCodes.OK, repoGraphScene(self.logger).decode(coll));
 		});
 	});
 };
