@@ -902,7 +902,7 @@ function X3D_AddGroundPlane(xmlDoc, bbox)
 function render(dbInterface, account, project, subFormat, branch, revision, callback) {
 	var full = (subFormat == "x3d");
 
-	dbInterface.getScene(account, project, branch, revision, full, function(err, doc) {
+	dbInterface.getScene(account, project, branch, revision, full, function(err, doc, offset) {
 		if(err.value) return callback(err);
 
 		var xmlDoc = X3D_Header();
@@ -925,20 +925,48 @@ function render(dbInterface, account, project, subFormat, branch, revision, call
 		var mat = mathjs.eye(4);
 		var globalCoordOffset = null;
 		var globalCoordPromise = deferred();
+				
+		var inlineNode = xmlDoc.createElement("Inline");
+		inlineNode.setAttribute("nameSpaceName", account + "__" + project);
 
-        globalCoordOffset = X3D_AddChildren(xmlDoc, sceneRoot.root, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, subFormat, dbInterface.logger);
+		var startNode = inlineNode;
+		if(offset)
+		{
+           	var offsetTransform = xmlDoc.createElement("Transform");
+	        offsetTransform.setAttribute("translation", offset.join(" "));
+			inlineNode.appendChild(offsetTransform);
+			startNode = offsetTransform;
+		}
+
+        globalCoordOffset = X3D_AddChildren(xmlDoc, startNode, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, subFormat, dbInterface.logger);
 
         if (globalCoordOffset) {
             var offsetTransform = xmlDoc.createElement("Transform");
 			var fedOffsetTrans = [-globalCoordOffset[0], -globalCoordOffset[1], -globalCoordOffset[2]];
             offsetTransform.setAttribute("translation", fedOffsetTrans.join(" "));
 
-            for (var i = 0; i < sceneRoot.root.childNodes.length; ++i) {
-                offsetTransform.appendChild(sceneRoot.root.childNodes[i]);
-            }
-            sceneRoot.root.childNodes = [];
+			offsetTransform.appendChild(inlineNode);
             sceneRoot.root.appendChild(offsetTransform);
         }
+		else
+		{
+			//If it doesn't have a global offset, it is either legacy project or 
+			//Not a federation
+			if(offset)
+			{
+            	var offsetTransform = xmlDoc.createElement("Transform");
+				var offsetTrans = [-offset[0], -offset[1], -offset[2]];
+	            offsetTransform.setAttribute("translation", offsetTrans.join(" "));
+				offsetTransform.appendChild(inlineNode);
+	            sceneRoot.root.appendChild(offsetTransform);
+				
+			}
+			else
+			{
+				sceneRoot.root.appendChild(inlineNode);
+			}
+
+		}
 
 		/*
 		// Compute the scene bounding box.
