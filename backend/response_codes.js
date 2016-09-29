@@ -199,7 +199,7 @@ var responseCodes = {
 		//other error
 		return {
 			value: 1000,
-			message: mongoErr.message,
+			message: 'System error. Please try again later.',
 			dbErr: mongoErr,
 			status: 500
 		};
@@ -210,7 +210,8 @@ var responseCodes = {
 
 		return {
 			value: 2000,
-			message: JSON.stringify(message),
+			message: 'System error. Please try again later.',
+			system_message: JSON.stringify(message),
 			status: 500
 		};
 	},
