@@ -569,7 +569,9 @@
 					position : vm.selectedIssue.viewpoint.position,
 					view_dir : vm.selectedIssue.viewpoint.view_dir,
 					//look_at: vm.selectedIssue.viewpoint.look_at,
-					up: vm.selectedIssue.viewpoint.up
+					up: vm.selectedIssue.viewpoint.up,
+					account: vm.selectedIssue.account, 
+					project: vm.selectedIssue.project
 				});
 
 				EventService.send(EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, {

@@ -107,11 +107,12 @@ var ViewerUtilMyListeners = {};
 	};
 
 	ViewerUtil.prototype.getAxisAngle = function(from, at, up) {
+		up = ViewerUtil.normalize(up);
 		var x3dfrom = new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
 		var x3dat = new x3dom.fields.SFVec3f(at[0], at[1], at[2]);
 		var x3dup = new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
 
-		var viewMat = x3dom.fields.SFMatrix4f.lookAt(x3dfrom, x3dat, x3dup).inverse();
+		var viewMat = x3dom.fields.SFMatrix4f.lookAt(x3dfrom, x3dat, x3dup);
 
 		var q = new x3dom.fields.Quaternion(0.0, 0.0, 0.0, 1.0);
 		q.setValue(viewMat);

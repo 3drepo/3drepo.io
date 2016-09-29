@@ -259,7 +259,9 @@
 								event.value.up,
 								event.value.look_at,
 								angular.isDefined(event.value.animate) ? event.value.animate : true,
-								event.value.rollerCoasterMode
+								event.value.rollerCoasterMode,
+								event.value.account,
+								event.value.project
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT) {
 							if (angular.isDefined(event.value.promise)) {

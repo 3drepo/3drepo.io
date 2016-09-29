@@ -107,11 +107,12 @@ var ViewerUtilMyListeners = {};
 	};
 
 	ViewerUtil.prototype.getAxisAngle = function(from, at, up) {
+		up = ViewerUtil.normalize(up);
 		var x3dfrom = new x3dom.fields.SFVec3f(from[0], from[1], from[2]);
 		var x3dat = new x3dom.fields.SFVec3f(at[0], at[1], at[2]);
 		var x3dup = new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
 
-		var viewMat = x3dom.fields.SFMatrix4f.lookAt(x3dfrom, x3dat, x3dup).inverse();
+		var viewMat = x3dom.fields.SFMatrix4f.lookAt(x3dfrom, x3dat, x3dup);
 
 		var q = new x3dom.fields.Quaternion(0.0, 0.0, 0.0, 1.0);
 		q.setValue(viewMat);
@@ -3740,19 +3741,58 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		this.loadViewpoint = null;
 
-		this.createViewpoint = function(name, from, at, up) {
+		this.createViewpoint = function(name, from, at, up, parentGroup) {
 			var groupName = self.getViewpointGroupAndName(name);
-
 			if (!(self.viewpoints[groupName.group] && self.viewpoints[groupName.group][groupName.name])) {
 				var newViewPoint = document.createElement("viewpoint");
 				newViewPoint.setAttribute("id", name);
 				newViewPoint.setAttribute("def", name);
-				self.scene.appendChild(newViewPoint);
+				if(parentGroup)
+				{
+
+					var groups = document.getElementsByTagName("Group");
+					var found = false;
+					var fullParentGroupName = self.account + "__"+ self.project + "__" + parentGroup;
+					for(var gIdx = 0; gIdx < groups.length; ++gIdx)
+					{
+						if(groups[gIdx].hasAttribute("id") && groups[gIdx].id == fullParentGroupName)
+						{
+							found = true;
+							groups[gIdx].appendChild(newViewPoint);
+							break;
+						}
+						
+					}
+
+					if(!found)
+					{
+
+						self.scene.appendChild(newViewPoint);
+						console.log("Failed to find parent group: " + parentGroup);
+					}
+
+				}
+				else
+					self.scene.appendChild(newViewPoint);
 
 				if (from && at && up) {
-					var q = self.getAxisAngle(from, at, up);
+					var q = ViewerUtil.getAxisAngle(from, at, up);
 					newViewPoint.setAttribute("orientation", q.join(","));
 				}
+
+				if(from)
+				{
+					newViewPoint.setAttribute("position", from.join(","));
+
+				}
+
+				if(from && at)
+				{
+					var centre = [from[0] + at[0], from[1] + at[1], from[2] + at[2]];
+					newViewPoint.setAttribute("centerofrotation", centre.join(","));
+
+				}
+
 
 				if (!self.viewpoints[groupName.group]) {
 					self.viewpoints[groupName.group] = {};
@@ -3763,6 +3803,28 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 			} else {
 				console.error("Tried to create viewpoint with duplicate name: " + name);
+				if (Object.keys(self.viewpointsNames).indexOf(name) !== -1) {
+					var newViewPoint = self.viewpointsNames[name];
+					if (from && at && up) {
+						var q = ViewerUtil.getAxisAngle(from, at, up);
+						newViewPoint.setAttribute("orientation", q.join(","));
+					}
+
+					if(from)
+					{
+						newViewPoint.setAttribute("position", from.join(","));
+					}	
+
+					if(from && at)
+					{
+						var centre = [from[0] + at[0], from[1] + at[1], from[2] + at[2]];
+						newViewPoint.setAttribute("centerofrotation", centre.join(","));
+
+					}
+
+					console.log(newViewPoint.outerHTML);
+
+				}
 			}
 		};
 
@@ -3805,6 +3867,10 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				}
 
 				return;
+			}
+			else
+			{
+				console.log("Could not find viewpoint." + id);
 			}
 
 			self.loadViewpoint = id;
@@ -4064,80 +4130,96 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 			self.updateCamera(currentPos, upDir, viewDir, centerOfRotation);
 		};
 
-		this.setCamera = function(pos, viewDir, upDir, centerOfRotation, animate, rollerCoasterMode) {
-			self.updateCamera(pos, upDir, viewDir, centerOfRotation, animate, rollerCoasterMode);
+		this.setCamera = function(pos, viewDir, upDir, centerOfRotation, animate, rollerCoasterMode, account, project) {
+			self.updateCamera(pos, upDir, viewDir, centerOfRotation, animate, rollerCoasterMode, account, project);
 		};
 
-		this.updateCamera = function(pos, up, viewDir, centerOfRotation, animate, rollerCoasterMode) {
-			if (!viewDir)
+		this.updateCamera = function(pos, up, viewDir, centerOfRotation, animate, rollerCoasterMode, account, project) {
+			if(account && project)
 			{
-				viewDir = self.getCurrentViewpointInfo().view_dir;
+				var vpname = account + "__"+ project + "_issueViewpoint";
+				var groupName = self.getViewpointGroupAndName(name);
+				console.log("done");
+				var at = [pos[0] + viewDir[0], pos[1] + viewDir[1], pos[2] + viewDir[2]];
+				self.createViewpoint(vpname, pos, at, up, account + "__" + project);
+				self.setCurrentViewpoint(vpname);
 			}
-
-			if (!up)
+			else
 			{
-				up = self.getCurrentViewpointInfo().up;
-			}
-			up = ViewerUtil.normalize(up);
-
-			var x3domView = new x3dom.fields.SFVec3f(viewDir[0], viewDir[1], viewDir[2]);
-			var x3domUp   = new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
-			var x3domFrom = new x3dom.fields.SFVec3f(pos[0], pos[1], pos[2]);
-			var x3domAt   = x3domFrom.add(x3domView.normalize());
-
-			var viewMatrix = x3dom.fields.SFMatrix4f.lookAt(x3domFrom, x3domAt, x3domUp);
-
-			var currViewpointNode = self.getCurrentViewpoint();
-			var currViewpoint = currViewpointNode._x3domNode;
-
-			if (self.currentNavMode === self.NAV_MODES.HELICOPTER) {
-				self.nav._x3domNode._vf.typeParams[0] = Math.asin(x3domView.y);
-				self.nav._x3domNode._vf.typeParams[1] = x3domFrom.y;
-			}
-
-			var oldViewMatrixCopy = currViewpoint._viewMatrix.toGL();
-
-			if (!animate && rollerCoasterMode)
-			{
-				self.rollerCoasterMatrix = viewMatrix;
-			} else {
-				currViewpoint._viewMatrix.setValues(viewMatrix.inverse());
-			}
-
-			var x3domCenter = null;
-
-			if (!centerOfRotation)
-			{
-				var canvasWidth  = self.getViewArea()._doc.canvas.width;
-				var canvasHeight = self.getViewArea()._doc.canvas.height;
-
-				self.pickPoint(canvasWidth / 2, canvasHeight / 2);
-
-				if (self.pickObject.pickPos)
+				if (!viewDir)
 				{
-					x3domCenter = self.pickObject.pickPos;
-
-				} else {
-					var ry = new x3dom.fields.Ray(x3domFrom, x3domView);
-					var bbox = self.getScene()._x3domNode.getVolume();
-
-					if(ry.intersect(bbox.min, bbox.max))
-					{
-						x3domCenter = x3domAt.add(x3domView.multiply(((1.0 / (GOLDEN_RATIO + 1.0)) * ry.exit)));
-					} else {
-						x3domCenter = x3domAt;
-					}
+					viewDir = self.getCurrentViewpointInfo().view_dir;
 				}
-			} else {
-				x3domCenter = new x3dom.fields.SFVec3f(centerOfRotation[0], centerOfRotation[1], centerOfRotation[2]);
+
+				if (!up)
+				{
+					up = self.getCurrentViewpointInfo().up;
+				}
+				up = ViewerUtil.normalize(up);
+
+				var x3domView = new x3dom.fields.SFVec3f(viewDir[0], viewDir[1], viewDir[2]);
+				var x3domUp   = new x3dom.fields.SFVec3f(up[0], up[1], up[2]);
+				var x3domFrom = new x3dom.fields.SFVec3f(pos[0], pos[1], pos[2]);
+				var x3domAt   = x3domFrom.add(x3domView.normalize());
+
+				var viewMatrix = x3dom.fields.SFMatrix4f.lookAt(x3domFrom, x3domAt, x3domUp);
+
+				var currViewpointNode = self.getCurrentViewpoint();
+				var currViewpoint = currViewpointNode._x3domNode;
+
+				if (self.currentNavMode === self.NAV_MODES.HELICOPTER) {
+					self.nav._x3domNode._vf.typeParams[0] = Math.asin(x3domView.y);
+					self.nav._x3domNode._vf.typeParams[1] = x3domFrom.y;
+				}
+
+				var oldViewMatrixCopy = currViewpoint._viewMatrix.toGL();
+
+				if (!animate && rollerCoasterMode)
+				{
+					self.rollerCoasterMatrix = viewMatrix;
+				} else {
+					currViewpoint._viewMatrix.setValues(viewMatrix.inverse());
+				}
+
+				var x3domCenter = null;
+
+				if (!centerOfRotation)
+				{
+					var canvasWidth  = self.getViewArea()._doc.canvas.width;
+					var canvasHeight = self.getViewArea()._doc.canvas.height;
+
+					self.pickPoint(canvasWidth / 2, canvasHeight / 2);
+
+					if (self.pickObject.pickPos)
+					{
+						x3domCenter = self.pickObject.pickPos;
+	
+					} else {
+						var ry = new x3dom.fields.Ray(x3domFrom, x3domView);
+						var bbox = self.getScene()._x3domNode.getVolume();
+
+						if(ry.intersect(bbox.min, bbox.max))
+						{
+							x3domCenter = x3domAt.add(x3domView.multiply(((1.0 / (GOLDEN_RATIO + 1.0)) * ry.exit)));
+						} else {
+							x3domCenter = x3domAt;
+						}
+					}
+				} else {
+					x3domCenter = new x3dom.fields.SFVec3f(centerOfRotation[0], centerOfRotation[1], centerOfRotation[2]);
+				}
+
+				if (animate) {
+					currViewpoint._viewMatrix.setFromArray(oldViewMatrixCopy);
+					self.getViewArea().animateTo(viewMatrix.inverse(), currViewpoint);
+				}
+	
+				currViewpointNode.setAttribute("centerofrotation", x3domCenter.toGL().join(","));
+
 			}
 
-			if (animate) {
-				currViewpoint._viewMatrix.setFromArray(oldViewMatrixCopy);
-				self.getViewArea().animateTo(viewMatrix.inverse(), currViewpoint);
-			}
 
-			currViewpointNode.setAttribute("centerofrotation", x3domCenter.toGL().join(","));
+
 
 			self.setNavMode(self.currentNavMode);
 			self.getViewArea()._doc.needRender = true;
@@ -12125,7 +12207,9 @@ angular.module('3drepo')
 					position : vm.selectedIssue.viewpoint.position,
 					view_dir : vm.selectedIssue.viewpoint.view_dir,
 					//look_at: vm.selectedIssue.viewpoint.look_at,
-					up: vm.selectedIssue.viewpoint.up
+					up: vm.selectedIssue.viewpoint.up,
+					account: vm.selectedIssue.account, 
+					project: vm.selectedIssue.project
 				});
 
 				EventService.send(EventService.EVENT.VIEWER.SET_CLIPPING_PLANES, {
@@ -15766,7 +15850,9 @@ var Oculus = {};
 								event.value.up,
 								event.value.look_at,
 								angular.isDefined(event.value.animate) ? event.value.animate : true,
-								event.value.rollerCoasterMode
+								event.value.rollerCoasterMode,
+								event.value.account,
+								event.value.project
 							);
 						} else if (event.type === EventService.EVENT.VIEWER.GET_CURRENT_VIEWPOINT) {
 							if (angular.isDefined(event.value.promise)) {
