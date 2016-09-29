@@ -80,7 +80,7 @@ function createAndAssignRole(project, account, username, desc, type, unit, subPr
 	'use strict';
 
 
-	if(!project.match(/^[a-zA-Z0-9_-]{3,20}$/)){
+	if(!project.match(projectNameRegExp)){
 		return Promise.reject({ resCode: responseCodes.INVALID_PROJECT_NAME });
 	}
 
@@ -773,6 +773,9 @@ function downloadLatest(account, project){
 	});
 }
 
+var fileNameRegExp = /[ *."\/\\[\]:;|=,<>]/g;
+var projectNameRegExp = /^[a-zA-Z0-9_-]{3,20}$/;
+
 module.exports = {
 	createAndAssignRole,
 	importToyProject,
@@ -783,5 +786,7 @@ module.exports = {
 	listSubProjects,
 	getFullTree,
 	searchTree,
-	downloadLatest
+	downloadLatest,
+	fileNameRegExp,
+	projectNameRegExp
 };
