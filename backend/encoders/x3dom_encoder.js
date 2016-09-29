@@ -290,7 +290,7 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
 
 			globalCoordPromise.promise.then((globalCoordOffset) => {
 				var federateTransformNode = xmlDoc.createElement("Transform");
-               			federateTransformNode.setAttribute("translation", child.coordOffset.join(" "));
+               	federateTransformNode.setAttribute("translation", child.coordOffset.join(" "));
 
 				var inlineNode = xmlDoc.createElement("Inline");
 
@@ -316,7 +316,11 @@ function X3D_AddChildren(xmlDoc, xmlNode, node, matrix, globalCoordOffset, globa
 				}
 
 				federateTransformNode.appendChild(inlineNode);
-				xmlNode.appendChild(federateTransformNode);
+
+				var groupNode = xmlDoc.createElement("Group");
+				groupNode.setAttribute("id", account + "__"+child.project);
+				groupNode.appendChild(federateTransformNode);
+				xmlNode.appendChild(groupNode);
 
 				var childGlobalCoordPromise = deferred();
 
@@ -932,41 +936,45 @@ function render(dbInterface, account, project, subFormat, branch, revision, call
 		var projOffset = null;
 		dbInterface.getCoordOffset(account, project, branch, full, function(err, offs) {
 			console.log("here!");
-			if(!err)
+			if(err.value == 0)
 				projOffset = offs;
 
 			var inlineNode = xmlDoc.createElement("Group");
-			inlineNode.setAttribute("nameSpaceName", account + "__" + project);
+			inlineNode.setAttribute("id", account + "__" + project);
 	
+			if(projOffset)
+			{
+    	       	var offsetTransform = xmlDoc.createElement("Transform");
+				var offsetTrans = [-projOffset[0], -projOffset[1], -projOffset[2]];
+	            offsetTransform.setAttribute("translation", offsetTrans.join(" "));
 
-    	    globalCoordOffset = X3D_AddChildren(xmlDoc, inlineNode, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, subFormat, dbInterface.logger);
 
-	        if (globalCoordOffset) {
-            	var offsetTransform = xmlDoc.createElement("Transform");
-				var fedOffsetTrans = [-globalCoordOffset[0], -globalCoordOffset[1], -globalCoordOffset[2]];
-    	        offsetTransform.setAttribute("translation", fedOffsetTrans.join(" "));
+    	       	var offsetTransform2 = xmlDoc.createElement("Transform");
+	            offsetTransform2.setAttribute("translation", projOffset.join(" "));
 
+    	    	globalCoordOffset = X3D_AddChildren(xmlDoc, offsetTransform2, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, subFormat, dbInterface.logger);
+    	        inlineNode.appendChild(offsetTransform2);
 				offsetTransform.appendChild(inlineNode);
-	    	    sceneRoot.root.appendChild(offsetTransform);
-        	}
+				sceneRoot.root.appendChild(offsetTransform);
+				
+			}
 			else
 			{
-				//If it doesn't have a global offset, it is either legacy project or 
-				//Not a federation
-				if(projOffset)
-				{
-    	        	var offsetTransform = xmlDoc.createElement("Transform");
-					var offsetTrans = [-projOffset[0], -projOffset[1], -projOffset[2]];
-	            	offsetTransform.setAttribute("translation", offsetTrans.join(" "));
+
+    	    	globalCoordOffset = X3D_AddChildren(xmlDoc, inlineNode, dummyRoot, mat, globalCoordOffset, globalCoordPromise, dbInterface, account, project, subFormat, dbInterface.logger);
+	
+				//A scene with offset should never have a reference node, hence there shoudln't be a global offset otherwise
+				if (globalCoordOffset) {
+	            	var offsetTransform = xmlDoc.createElement("Transform");
+					var fedOffsetTrans = [-globalCoordOffset[0], -globalCoordOffset[1], -globalCoordOffset[2]];
+    		        offsetTransform.setAttribute("translation", fedOffsetTrans.join(" "));
+
 					offsetTransform.appendChild(inlineNode);
-	    	        sceneRoot.root.appendChild(offsetTransform);
-				
-				}
-				else
-				{
-					sceneRoot.root.appendChild(inlineNode);
-				}
+	    	    	sceneRoot.root.appendChild(offsetTransform);
+	        	}
 			}
+
+
 
 
 			/*
