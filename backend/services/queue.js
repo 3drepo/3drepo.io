@@ -24,7 +24,7 @@
 var amqp = require('amqplib');
 var fs = require('fs.extra');
 var uuid = require('node-uuid');
-var ProjectHelper = require('../models/helper/project');
+
 
 function ImportQueue() {}
 
@@ -231,6 +231,8 @@ ImportQueue.prototype.createFederatedProject = function(account, defObj){
 ImportQueue.prototype._moveFileToSharedSpace = function(corID, orgFilePath, newFileName, copy) {
     'use strict';
 
+    var ProjectHelper = require('../models/helper/project');
+    
     newFileName = newFileName.replace(ProjectHelper.fileNameRegExp, '_');
 
     let newFileDir = this.sharedSpacePath + "/" + corID + "/";
