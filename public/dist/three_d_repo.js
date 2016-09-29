@@ -3497,36 +3497,6 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 					self.oldPart[i].resetColor();
 				}
 			}
-			// Don't unhighlight previous selection when in multi select mode
-			/*
-			if (!this.multiSelectMode) {
-				if (self.oldPart) {
-					for (i = 0; i < self.oldPart.length; i++) {
-						self.oldPart[i].resetColor();
-					}
-				}
-			}
-
-			// Either toggle object or select new object(s)
-			if (self.oldPart &&
-				(self.oldPart.length === 1) &&
-				(self.oldPart[0].ids.length === 1) &&
-				(part.length === 1) &&
-				(part[0].ids.length === 1) &&
-				(self.oldPart[0].ids[0] === part[0].ids[0])) {
-				// Toggle single selection
-				self.oldPart[0].resetColor();
-				delete self.oldPart;
-			}
-			else {
-				// Store current selection
-				self.oldPart = part;
-
-				for (i = 0; i < part.length; i++) {
-					part[i].setEmissiveColor(colour, "both");
-				}
-			}
-		 	*/
 
 			self.oldPart = part;
 
@@ -17831,24 +17801,30 @@ var Oculus = {};
 		var currentError = {};
 
 		var sendInternal = function(type, value) {
+			/*
 			$timeout(function() {
 				currentEvent = {type:type, value: value};
 			});
+			*/
+			currentEvent = {type:type, value: value};
 		};
 
 		var send = function (type, value) {
-			sendInternal(type, value);
+			//sendInternal(type, value);
 			nextEventService.send(type, value);
 		};
 
 		var sendErrorInternal = function(type, value) {
+			/*
 			$timeout(function() {
 				currentError = {type: type, value: value};
 			});
+			*/
+			currentError = {type: type, value: value};
 		};
 
 		var sendError = function(type, value) {
-			sendErrorInternal(type, value);
+			//sendErrorInternal(type, value);
 			nextEventService.sendError(type, value);
 		};
 
