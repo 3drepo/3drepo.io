@@ -928,7 +928,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 
 		this.loadViewpoint = null;
 
-		this.createViewpoint = function(name, from, at, up, parentGroup) {
+		this.createViewpoint = function(name, from, at, up, parentGroup, modifyIfExist) {
 			var groupName = self.getViewpointGroupAndName(name);
 			if (!(self.viewpoints[groupName.group] && self.viewpoints[groupName.group][groupName.name])) {
 				var newViewPoint = document.createElement("viewpoint");
@@ -989,8 +989,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				self.viewpointsNames[name] = newViewPoint;
 
 			} else {
-				console.error("Tried to create viewpoint with duplicate name: " + name);
-				if (Object.keys(self.viewpointsNames).indexOf(name) !== -1) {
+				if (modifyIfExist && Object.keys(self.viewpointsNames).indexOf(name) !== -1) {
 					var newViewPoint = self.viewpointsNames[name];
 					if (from && at && up) {
 						var q = ViewerUtil.getAxisAngle(from, at, up);
@@ -1008,9 +1007,12 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 						newViewPoint.setAttribute("centerofrotation", centre.join(","));
 
 					}
-
-					console.log(newViewPoint.outerHTML);
-
+					
+				}
+				else
+				{
+					
+					console.error("Tried to create viewpoint with duplicate name: " + name);
 				}
 			}
 		};
@@ -1328,7 +1330,7 @@ var GOLDEN_RATIO = (1.0 + Math.sqrt(5)) / 2.0;
 				var groupName = self.getViewpointGroupAndName(name);
 				console.log("done");
 				var at = [pos[0] + viewDir[0], pos[1] + viewDir[1], pos[2] + viewDir[2]];
-				self.createViewpoint(vpname, pos, at, up, account + "__" + project);
+				self.createViewpoint(vpname, pos, at, up, account + "__" + project, true);
 				self.setCurrentViewpoint(vpname);
 			}
 			else
