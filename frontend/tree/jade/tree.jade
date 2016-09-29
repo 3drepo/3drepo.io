@@ -6,7 +6,14 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 	md-virtual-repeat-container.vertical-container(md-top-index="vm.topIndex", ng-if="vm.showNodes")
 		// .treeNodes(md-virtual-repeat="item in vm.infiniteItemsTree" md-on-demand="" class="repeated-item")
 		.treeNodes.repeated-item(md-virtual-repeat="item in vm.nodesToShow")
-			.treeNode(style="margin-left:{{item.level * 20}}px", ng-if="item.name", layout="row", layout-align="start center", flex)
+			.treeNode(
+			style="margin-left:{{item.level * 20}}px"
+			ng-if="item.name"
+			layout="row"
+			layout-align="start center"
+			flex
+			ng-class="{treeNodeSelected: item.selected}"
+			ng-click="vm.selectNode(item)")
 				// Expand/collapse
 				md-button.md-icon-button.md-primary.expandButton(aria-label="Toggle Expand", ng-click="vm.expand(item._id)", ng-if="!item.status")
 					md-icon.angular-material-icons(ng-if="!item.expanded && item.hasChildren") add_box
@@ -18,7 +25,7 @@ tdr-progress(ng-if="vm.showProgress", info="vm.progressInfo")
 					md-icon.angular-material-icons(ng-if="item.status==='NOT_FOUND'") error_outline
 				// Name
 				div(flex, layout="row", layout-align="start center")
-					p(ng-click="vm.selectNode(item)" ng-class="{treeNodeSelected: item.selected}", ng-if="!item.status") {{item.name}}
+					p(ng-if="!item.status") {{item.name}}
 					p.noAccessName(ng-if="item.status") Name {{item.name}}
 				// Toggle visibility
 				md-button.md-icon-button.md-primary.toggleButton(aria-label="Toggle Visible", ng-click="vm.toggleTreeNode(item)", ng-if="!item.status")
