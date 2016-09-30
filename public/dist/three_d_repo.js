@@ -18929,11 +18929,11 @@ var Oculus = {};
 				expandToSelection(path, (level + 1));
 			} else if (level === (path.length - 2)) {
 				vm.topIndex = selectedIndex - 2;
+				setContentHeight(vm.nodesToShow);
 				// Redraw the tree
 				$timeout(function () {
 					vm.showNodes = true;
 				});
-				setContentHeight(vm.nodesToShow);
 			}
 		}
 
