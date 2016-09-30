@@ -773,7 +773,7 @@ function downloadLatest(account, project){
 	});
 }
 
-var fileNameRegExp = /[ *."\/\\[\]:;|=,<>]/g;
+var fileNameRegExp = /[ *"\/\\[\]:;|=,<>$]/g;
 var projectNameRegExp = /^[a-zA-Z0-9_-]{3,20}$/;
 
 module.exports = {
