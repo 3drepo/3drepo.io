@@ -5978,7 +5978,6 @@ var ViewerManager = {};
 			// Check the quota
 			promise = UtilsService.doGet(vm.account.name + ".json");
 			promise.then(function (response) {
-				console.log(response);
 				if (file.size > response.data.accounts[0].quota.spaceLimit) {
 					// Show the over quota dialog
 					UtilsService.showDialog("overQuotaDialog.html", $scope, null, true);
@@ -6000,6 +5999,7 @@ var ViewerManager = {};
 						});
 					}
 					else {
+						vm.uploadFileName = file.name;
 						formData = new FormData();
 						formData.append("file", file);
 						promise = UtilsService.doPost(formData, vm.account.name + "/" + vm.project.name + "/upload", {'Content-Type': undefined});
@@ -11734,7 +11734,8 @@ angular.module('3drepo')
 			selectedObjectId = null,
 			pickedPos = null,
 			pickedNorm = null,
-			pinHighlightColour = [1.0000, 0.7, 0.0];
+			pinHighlightColour = [1.0000, 0.7, 0.0],
+			issueViewerMoveComplete = false;
 
 		/*
 		 * Init
@@ -11751,6 +11752,7 @@ angular.module('3drepo')
 		vm.canAdd = true;
 		vm.onContentHeightRequest({height: 70}); // To show the loading progress
 		vm.savingIssue = false;
+		EventService.send(EventService.EVENT.VIEWER.REGISTER_VIEWPOINT_CALLBACK, {callback: viewerMove});
 
 		/*
 		 * Get all the Issues
@@ -12252,8 +12254,10 @@ angular.module('3drepo')
 			}
 
 			// Wait for camera to stop before showing a scribble
+			issueViewerMoveComplete = false;
 			$timeout(function () {
 				EventService.send(EventService.EVENT.TOGGLE_ISSUE_AREA, {on: true, issue: vm.selectedIssue});
+				issueViewerMoveComplete = true;
 			}, 1100);
 		};
 
@@ -12518,6 +12522,15 @@ angular.module('3drepo')
 			$timeout(function () {
 				($element[0].querySelector("#issueAddTitle")).select();
 			});
+		}
+
+		/**
+		 * If the issue has a scribble deselect it if the user moves the camera
+		 */
+		function viewerMove () {
+			if ((vm.selectedIssue !== null) && (vm.selectedIssue.scribble !== null) && issueViewerMoveComplete) {
+				vm.hideItem = true;
+			}
 		}
 	}
 }());

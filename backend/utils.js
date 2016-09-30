@@ -271,20 +271,6 @@ function Utils() {
         return `${req.method} ${req._parsedUrl.pathname}`;
     };
 
-
-    this.getBaseURL = function(){
-
-        let config = require('./config');
-        let apiServerConfig = config.servers.find(server => server.service === 'api');
-        let port = '';
-        if(config.using_ssl && apiServerConfig.public_port !== 443 || !config.using_ssl && apiServerConfig.public_port !== 80){
-            port = ':' + apiServerConfig.public_port;
-        }
-
-        let baseUrl = (config.using_ssl ? 'https://' : 'http://') + config.host + port;
-
-        return baseUrl;
-    };
 }
 
 module.exports = new Utils();
